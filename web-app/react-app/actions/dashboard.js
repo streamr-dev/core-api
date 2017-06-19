@@ -29,6 +29,9 @@ export const GET_MY_DASHBOARD_PERMISSIONS_REQUEST = 'GET_MY_DASHBOARD_PERMISSION
 export const GET_MY_DASHBOARD_PERMISSIONS_SUCCESS = 'GET_MY_DASHBOARD_PERMISSIONS_SUCCESS'
 export const GET_MY_DASHBOARD_PERMISSIONS_FAILURE = 'GET_MY_DASHBOARD_PERMISSIONS_FAILURE'
 
+export const LOCK_DASHBOARD_EDITING = 'LOCK_DASHBOARD_EDITING'
+export const UNLOCK_DASHBOARD_EDITING = 'UNLOCK_DASHBOARD_EDITING'
+
 const apiUrl = 'api/v1/dashboards'
 
 declare var Streamr: any
@@ -180,6 +183,16 @@ export const newDashboard = (id: Dashboard.id) => createDashboard({
 
 export const openDashboard = (id: Dashboard.id) => ({
     type: OPEN_DASHBOARD,
+    id
+})
+
+export const lockDashboardEditing = (id: Dashboard.id) => ({
+    type: LOCK_DASHBOARD_EDITING,
+    id
+})
+
+export const unlockDashboardEditing = (id: Dashboard.id) => ({
+    type: UNLOCK_DASHBOARD_EDITING,
     id
 })
 

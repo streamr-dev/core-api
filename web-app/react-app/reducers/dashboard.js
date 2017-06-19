@@ -18,7 +18,9 @@ import {
     GET_MY_DASHBOARD_PERMISSIONS_FAILURE,
     OPEN_DASHBOARD,
     CREATE_DASHBOARD,
-    UPDATE_DASHBOARD
+    UPDATE_DASHBOARD,
+    LOCK_DASHBOARD_EDITING,
+    UNLOCK_DASHBOARD_EDITING
 } from '../actions/dashboard.js'
 
 declare var _: any
@@ -161,6 +163,16 @@ const dashboard = function(state: State = initialState, action: Action) : State 
                 ...state,
                 fetching: false,
                 error: action.error
+            }
+        case LOCK_DASHBOARD_EDITING:
+            return {
+                ...state,
+                editingLocked: true
+            }
+        case UNLOCK_DASHBOARD_EDITING:
+            return {
+                ...state,
+                editingLocked: false
             }
         default:
             return state

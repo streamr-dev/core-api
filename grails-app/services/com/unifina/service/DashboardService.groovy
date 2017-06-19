@@ -53,7 +53,30 @@ class DashboardService {
 		dashboard.delete()
 	}
 
-	private saveDashboardAndItems(Dashboard dashboard, items) {
+	/**
+	 * Create or update Dashboard by command, and authorize that user is permitted to do so.
+	 *
+	 * @param validCommand a save command that has been validated before
+	 * @param user current user
+	 * @return updated dashboard
+	 * @throws NotFoundException when dashboard was not found.
+	 * @throws NotPermittedException when dashboard was found but user not permitted to update it
+	 */
+	Dashboard createOrUpdate(SaveDashboardCommand validCommand, SecUser user) throws NotFoundException, NotPermittedException {
+		Dashboard dashboard
+		if (validCommand.id && authorizedGetById(validCommand.id, user, Permission.Operation.WRITE)) {
+			dashboard = authorizedGetById(validCommand.id, user, Permission.Operation.WRITE)
+		} else {
+			dashboard = new Dashboard(validCommand.toMap() << [user: user])
+		}
+		dashboard.name = validCommand.name
+		if (validCommand.items != null) {
+			def items = validCommand.items.clone()
+			dashboard.items.clear()
+			items.each { DashboardItem item ->
+				dashboard.addToItems(item)
+			}
+		}
 		dashboard.save(failOnError: true)
 
 		items.each { item ->
@@ -99,18 +122,9 @@ class DashboardService {
 	 * @param user
 	 * @return
 	 */
-	Dashboard update(Map json, SecUser user) {
-		Dashboard dashboard = authorizedGetById(json.id, user, Permission.Operation.WRITE)
-		dashboard.name = json.name
-		dashboard.layout = json.layout
-
-		def items = []
-		if (json.items != null) {
-			items = json.items.clone()
-			json.items.clear()
-		}
-
-		return saveDashboardAndItems(dashboard, items)
+	Dashboard update(Long id, SaveDashboardCommand validCommand, SecUser user) {
+		validCommand.id = id
+		createOrUpdate(validCommand, user)
 	}
 
 	/**
