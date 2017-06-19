@@ -1,0 +1,64 @@
+.streamr-dropdown {
+  text-align: center;
+  position: relative;
+
+  a.dropdown-toggle,
+  span.dropdown-toggle {
+    cursor: pointer;
+    font-size: 20px;
+  }
+
+  a.dropdown-toggle:hover,
+  span.dropdown-toggle:hover {
+    color: #000000;
+  }
+
+  ul.dropdown-menu > li {
+    > a,
+    > span {
+      font-size: 14px;
+      cursor: pointer;
+      margin: 0 -2px;
+      padding: 5px 18px;
+      display: block;
+      &:hover {
+        background-color: @primary-color;
+        color: #FFFFFF;
+      }
+    }
+  }
+
+  ul.dropdown-menu > li.disabled {
+    cursor: not-allowed;
+
+    > a,
+    > span {
+      color: #999;
+
+      &:hover {
+        background: none;
+      }
+    }
+  }
+}
+
+.breadcrumb .streamr-dropdown {
+
+  display: inline-block;
+  margin-left: 17px;
+
+  // Have to override the default breadcrumb styles
+  li,
+  li a{
+    color: initial;
+    font-size: initial;
+    line-height: initial;
+    height: initial;
+  }
+  li + li:before {
+    content: none;
+  }
+  .dropdown-toggle {
+    margin-top: -1.5px;
+  }
+}

@@ -1,0 +1,25 @@
+
+.name-editor {
+  input.name-input {
+    height: 22px;
+    font-size: 12px;
+    padding-left: 3px;
+    padding-right: 0;
+    margin-left: -4px;
+    margin-top: -1px;
+  }
+  &.editing {
+    .name {
+      display:none;
+    }
+  }
+  &:not(.editing) {
+    input {
+      display: none;
+    }
+  }
+
+  .canvas-name {
+    cursor: text;
+  }
+}

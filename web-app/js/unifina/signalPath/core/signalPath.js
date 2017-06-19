@@ -293,7 +293,7 @@ var SignalPath = (function () {
 		}
 		
 		// Generate an internal index for the module and store a reference in a table
-		if (data.hash==null) {
+		if (data.hash == null) {
 			data.hash = moduleHashGenerator++
 		}
 		// Else check that the moduleHashGenerator keeps up
@@ -390,6 +390,15 @@ var SignalPath = (function () {
 		return dirty
 	}
 	pub.isDirty = isDirty
+    
+    function saveName(name, callback, errorCallback) {
+        setName(name)
+        _update(toJSON(), function(e) {
+            callback(e)
+            Streamr.showSuccess('Canvas renamed successfully')
+        }, errorCallback)
+    }
+    pub.saveName = saveName
 
 	function saveAs(name, callback) {
 		setName(name)
@@ -449,7 +458,7 @@ var SignalPath = (function () {
 		})
 	}
 
-	function _update(json, callback) {
+	function _update(json, callback, errorCallback) {
 		$.ajax({
 			type: 'PUT',
 			url: options.apiUrl + "/canvases/"+json.id,
@@ -469,11 +478,13 @@ var SignalPath = (function () {
 					var apiError = jqXHR.responseJSON;
 					if (apiError && apiError.message) {
 						handleError(apiError.message)
-						return;
+                        errorCallback && errorCallback(apiError)
+						return
 					}
 
 				}
 				handleError(errorThrown)
+                errorCallback && errorCallback(errorThrown)
 			}
 		})
 	}

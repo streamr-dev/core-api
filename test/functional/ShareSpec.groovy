@@ -16,6 +16,19 @@ class ShareSpec extends LoginTester1Spec {
 		this.class.metaClass.mixin(ListPageMixin)
 	}
 
+	def clickShareButton(name = "ShareSpec") {
+		scrollToRow(name)
+		clickShareButton(name)
+	}
+
+	def clickDropdownShareButton() {
+		menuToggle.click()
+		waitFor {
+			shareButton.displayed
+		}
+		shareButton.click()
+	}
+
 	def save() {
 		$(".sharing-dialog .save-button").click()
 		waitFor { !$(".sharing-dialog") && !$(".modal-backdrop") }
@@ -69,6 +82,7 @@ class ShareSpec extends LoginTester1Spec {
 	// We still don't know why it's so hard to type text into the input,
 	// just "$('.new-user-field') << text" won't work.
 	// That's why this hack.
+	// The same is used also in ShareMixin.groovy
 	def feedTextInput(String text) {
 		waitFor {
 			$('.new-user-field').displayed
@@ -331,7 +345,7 @@ class ShareSpec extends LoginTester1Spec {
 		waitFor { shareButton.displayed && !shareButton.getAttribute("disabled") }
 
 		when:
-		shareButton.click()
+		clickDropdownShareButton()
 		then: "check that the saved row is still there"
 		waitFor { $(".sharing-dialog") }
 		waitFor { $(".new-user-field").displayed }
@@ -348,7 +362,7 @@ class ShareSpec extends LoginTester1Spec {
 		!$(".ui-pnotify")
 
 		when: "re-open"
-		shareButton.click()
+		clickDropdownShareButton()
 		then: "check that row hasn't been deleted"
 		waitFor { $(".sharing-dialog") }
 		waitFor { $(".new-user-field").displayed }
@@ -367,7 +381,7 @@ class ShareSpec extends LoginTester1Spec {
 
 		when: "re-open"
 		closeNotifications()
-		shareButton.click()
+		clickDropdownShareButton()
 		then: "...to double-check it's gone"
 		waitFor { $(".sharing-dialog") }
 		waitFor { $(".new-user-field").displayed }
@@ -471,7 +485,7 @@ class ShareSpec extends LoginTester1Spec {
 		waitFor { shareButton.displayed && !shareButton.getAttribute("disabled") }
 
 		when:
-		shareButton.click()
+		clickDropdownShareButton()
 		then: "check that the saved row is still there"
 		waitFor { $(".sharing-dialog") }
 		waitFor { $(".new-user-field").displayed }
@@ -488,7 +502,7 @@ class ShareSpec extends LoginTester1Spec {
 		!$(".ui-pnotify")
 
 		when: "re-open"
-		shareButton.click()
+		clickDropdownShareButton()
 		then: "check that row hasn't been deleted"
 		waitFor { $(".sharing-dialog") }
 		waitFor { $(".new-user-field").displayed }
@@ -507,7 +521,7 @@ class ShareSpec extends LoginTester1Spec {
 
 		when: "re-open"
 		closeNotifications()
-		shareButton.click()
+		clickDropdownShareButton()
 		then: "...to double-check it's gone"
 		waitFor { $(".sharing-dialog") }
 		waitFor { $(".new-user-field").displayed }
@@ -767,7 +781,7 @@ class ShareSpec extends LoginTester1Spec {
 		saveDashboard()
 
 		// Share to tester2
-		shareButton.click()
+		clickDropdownShareButton()
 		waitForShareDialog()
 		shareTo("tester2@streamr.com")
 		closeNotifications()
