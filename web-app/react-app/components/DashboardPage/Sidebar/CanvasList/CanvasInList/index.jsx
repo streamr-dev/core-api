@@ -28,7 +28,7 @@ export default class CanvasInList extends Component {
         const {canvas} = this.props
         return (
             <li className={`canvas mm-dropdown mm-dropdown-root ${this.state.open ? 'open' : ''}`}>
-                <a className="canvas-title" title={canvas.state} onClick={() => {
+                <a className={styles.canvasInListLink} title={canvas.state} onClick={() => {
                     this.setState({
                         open: !this.state.open
                     })

@@ -17,11 +17,11 @@ class Notifier extends Component {
     createNotification({title, message, delay, type}) {
         switch (type) {
             case 'success':
-                return Streamr.showSuccess(title, message, delay)
+                return Streamr.showSuccess(message, title, delay)
             case 'info':
-                return Streamr.showSuccess(title, message, delay)
+                return Streamr.showSuccess(message, title, delay)
             case 'error':
-                return Streamr.showError(title, message, delay)
+                return Streamr.showError(message, title, delay)
         }
     }
     

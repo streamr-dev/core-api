@@ -499,7 +499,8 @@ describe('Dashboard actions', () => {
                         id,
                         name: 'Untitled Dashboard',
                         items: [],
-                        layout: {}
+                        layout: {},
+                        editingLocked: false
                     }
                 })
             })

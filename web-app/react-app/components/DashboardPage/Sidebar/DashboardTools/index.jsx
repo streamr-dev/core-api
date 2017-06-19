@@ -64,6 +64,7 @@ class DashboardTools extends Component {
                     title="Save dashboard"
                     bsStyle="primary"
                     onClick={this.onSave}
+                    disabled={!this.props.canWrite && !this.props.dashboard.new}
                 >
                     Save
                 </Button>

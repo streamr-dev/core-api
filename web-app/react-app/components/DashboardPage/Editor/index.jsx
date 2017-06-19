@@ -13,7 +13,7 @@ import 'react-resizable/css/styles.css'
 import DashboardItem from './DashboardItem'
 import ShareDialog from '../../ShareDialog'
 
-import {updateDashboard, deleteDashboard} from '../../../actions/dashboard'
+import {updateDashboard, deleteDashboard, lockDashboardEditing, unlockDashboardEditing} from '../../../actions/dashboard'
 
 import styles from './editor.pcss'
 
@@ -34,12 +34,16 @@ class Editor extends Component {
     generateLayout: Function
     onResize: Function
     onBeforeUnload: Function
+    onMenuToggle: Function
     props: {
         dashboard: Dashboard,
         canShare: boolean,
         canWrite: boolean,
         delete: Function,
-        update: Function
+        update: Function,
+        editorLocked: Function,
+        lockEditing: Function,
+        unlockEditing: Function
     }
     state: {
         breakpoints: {},
@@ -74,14 +78,23 @@ class Editor extends Component {
         this.generateLayout = this.generateLayout.bind(this)
         this.onResize = this.onResize.bind(this)
         this.onBeforeUnload = this.onBeforeUnload.bind(this)
+        this.onMenuToggle = this.onMenuToggle.bind(this)
     }
     
     componentDidMount() {
         window.addEventListener('beforeunload', this.onBeforeUnload)
+        
+        const menuToggle = document.getElementById('main-menu-toggle')
+        menuToggle && menuToggle.addEventListener('click', this.onMenuToggle)
     }
     
-    componentWillUnmount() {
-        window.removeEventListener('beforeunload', this.onBeforeUnload)
+    onMenuToggle() {
+        const menuIsOpen = document.body && document.body.classList && document.body.classList.contains('mmc')
+        if (menuIsOpen) {
+            this.props.unlockEditing()
+        } else {
+            this.props.lockEditing()
+        }
     }
     
     onLayoutChange(layout, allLayouts) {
@@ -161,11 +174,6 @@ class Editor extends Component {
                                 </ShareDialog>
                             )}
                             {this.props.canWrite && (
-                                <MenuItem>
-                                    <FontAwesome name="pencil"/> Rename
-                                </MenuItem>
-                            )}
-                            {this.props.canWrite && (
                                 <ConfirmButton
                                     buttonProps={{
                                         componentClass: MenuItem,
@@ -191,6 +199,8 @@ class Editor extends Component {
                     onLayoutChange={this.onLayoutChange}
                     onResize={this.onResize}
                     onResizeEnd={this.onResize}
+                    isDraggable={!this.props.editorLocked}
+                    isResizable={!this.props.editorLocked}
                 >
                     {items.map(dbItem => (
                         <div key={dbItem.id.toString()}>
@@ -206,10 +216,13 @@ class Editor extends Component {
 
 const mapStateToProps = ({dashboard}) => {
     const db = dashboard.dashboardsById[dashboard.openDashboard.id] || {}
+    const canShare = db.new !== true && (db.ownPermissions && db.ownPermissions.includes('share'))
+    const canWrite = db.new !== true && (db.ownPermissions && db.ownPermissions.includes('write'))
     return {
         dashboard: db,
-        canShare: db.new !== true && (db.ownPermissions && db.ownPermissions.includes('share')),
-        canWrite: db.new !== true && (db.ownPermissions && db.ownPermissions.includes('write'))
+        canShare,
+        canWrite,
+        editorLocked: db.editingLocked ? true : !canWrite
     }
 }
 
@@ -218,7 +231,13 @@ const mapDispatchToProps = (dispatch, ownProps) => ({
     update: (changes) => dispatch(updateDashboard({
         ...ownProps.dashboard,
         ...changes
-    }))
+    })),
+    lockEditing() {
+        dispatch(lockDashboardEditing(ownProps.dashboard.id))
+    },
+    unlockEditing() {
+        dispatch(unlockDashboardEditing(ownProps.dashboard.id))
+    }
 })
 
 export default connect(mapStateToProps, mapDispatchToProps)(Editor)

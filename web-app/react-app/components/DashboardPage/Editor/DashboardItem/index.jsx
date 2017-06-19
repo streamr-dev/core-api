@@ -3,6 +3,7 @@
 import React, {Component} from 'react'
 import {connect} from 'react-redux'
 import path from 'path'
+import {showError} from '../../../../actions/notification'
 
 import TitleRow from './DashboardItemTitleRow'
 
@@ -20,7 +21,8 @@ class DashboardItem extends Component {
         dashboard: Dashboard,
         layout?: DBItem.layout,
         dragCancelClassName?: string,
-        currentLayout: ?{}
+        currentLayout: ?{},
+        showError: Function
     }
     
     constructor() {
@@ -30,7 +32,13 @@ class DashboardItem extends Component {
     
     componentDidMount() {
         // TODO: why not work?
-        setTimeout(() => this.onResize(), 500)
+        //setTimeout(() => this.onResize(), 500)
+        
+        this.webcomponent.addEventListener('error', this.props.showError)
+    }
+    
+    componentWillUnmount() {
+        this.webcomponent.removeEventListener('error', this.props.showError)
     }
 
     componentWillReceiveProps(props) {
@@ -69,4 +77,15 @@ class DashboardItem extends Component {
     }
 }
 
-export default connect()(DashboardItem)
+const mapStateToProps = () => ({})
+
+const mapDispatchToProps = (dispatch) => ({
+    showError({detail}) {
+        dispatch(showError({
+            title: 'Error!',
+            message: detail.message
+        }))
+    }
+})
+
+export default connect(mapStateToProps, mapDispatchToProps)(DashboardItem)

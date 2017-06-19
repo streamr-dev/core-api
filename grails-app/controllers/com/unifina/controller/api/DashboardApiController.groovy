@@ -1,5 +1,6 @@
 package com.unifina.controller.api
 
+import com.unifina.api.SaveDashboardCommand
 import com.unifina.domain.dashboard.Dashboard
 import com.unifina.domain.security.Permission
 import com.unifina.domain.security.SecUser

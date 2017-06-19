@@ -15,7 +15,8 @@ class NameEditor extends Component {
     
     props: {
         dashboard: Dashboard,
-        dispatch: Function
+        update: Function,
+        isDisabled: ?boolean
     }
     
     constructor() {
@@ -24,10 +25,10 @@ class NameEditor extends Component {
     }
     
     onChange({target}) {
-        this.props.dispatch(updateDashboard({
+        this.props.update({
             ...this.props.dashboard,
             name: target.value
-        }))
+        })
     }
     
     render() {
@@ -42,14 +43,28 @@ class NameEditor extends Component {
                     name="dashboard-name"
                     value={this.props.dashboard && this.props.dashboard.name || ''}
                     onChange={this.onChange}
+                    disabled={this.props.isDisabled}
                 />
             </div>
         )
     }
 }
 
-const mapStateToProps = ({dashboard}) => ({
-    dashboard: dashboard.dashboardsById[dashboard.openDashboard.id]
+const mapStateToProps = ({dashboard}) => {
+    const db = dashboard.dashboardsById[dashboard.openDashboard.id] || {}
+    return {
+        dashboard: db,
+        isDisabled: !db.new && (!db.ownPermissions || !db.ownPermissions.includes('write'))
+    }
+}
+
+const mapDispatchToProps = (dispatch, ownProps) => ({
+    update(newData) {
+        return dispatch(updateDashboard({
+            ...ownProps.dashboard,
+            ...newData
+        }))
+    }
 })
 
-export default connect(mapStateToProps)(NameEditor)
+export default connect(mapStateToProps, mapDispatchToProps)(NameEditor)

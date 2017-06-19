@@ -10,12 +10,12 @@ class SaveDashboardCommand {
 	String id
 
 	String name
-	SortedSet<DashboardItem> items
+	SortedSet<Map> items
 	String layout
 
 	static constraints = {
 		name(blank: false)
-		layout(blank:false)
+		layout(blank: false)
 	}
 
 	Map toMap() {

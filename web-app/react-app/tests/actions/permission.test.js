@@ -10,7 +10,8 @@ const middlewares = [ thunk ]
 const mockStore = configureMockStore(middlewares)
 
 global.Streamr = {
-    createLink: ({uri}) => uri
+    createLink: ({uri}) => uri,
+    user: 'test'
 }
 
 moxios.promiseWait = () => new Promise(resolve => moxios.wait(resolve))
@@ -582,7 +583,7 @@ describe('Permission actions', () => {
     describe('setResourceHighestOperationForUser', () => {
         const resourceType = 'DASHBOARD'
         const resourceId = 'asdfasdfasasd'
-        const user = 'test'
+        const user = global.Streamr.user
         describe('giving higher operation adds permissions', () => {
             it('must add read, write and share if called with share', () => {
                 const permissions = [{
@@ -610,7 +611,7 @@ describe('Permission actions', () => {
                     resourceId,
                     permission
                 }))
-                store.dispatch(actions.setResourceHighestOperationForUser(resourceType, resourceId, 'share', user))
+                store.dispatch(actions.setResourceHighestOperationForUser(resourceType, resourceId, user, 'share'))
                 assert.deepStrictEqual(store.getActions(), expectedActions)
             })
         })
@@ -641,7 +642,7 @@ describe('Permission actions', () => {
                     resourceId,
                     permission
                 }))
-                store.dispatch(actions.setResourceHighestOperationForUser(resourceType, resourceId, 'read', user))
+                store.dispatch(actions.setResourceHighestOperationForUser(resourceType, resourceId, user, 'read'))
                 assert.deepStrictEqual(store.getActions(), expectedActions)
             })
         })

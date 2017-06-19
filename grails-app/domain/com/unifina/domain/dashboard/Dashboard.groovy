@@ -25,7 +25,7 @@ class Dashboard {
 	}
 
 	static mapping = {
-		items cascade: 'all-delete-orphan'
+		items cascade: 'merge'
 		id generator: 'assigned'
 	}
 

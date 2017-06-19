@@ -2,7 +2,6 @@ package com.unifina.service
 
 import com.unifina.api.NotFoundException
 import com.unifina.api.NotPermittedException
-import com.unifina.api.SaveDashboardCommand
 import com.unifina.api.SaveDashboardItemCommand
 import com.unifina.api.ValidationException
 import com.unifina.domain.dashboard.Dashboard
@@ -53,78 +52,64 @@ class DashboardService {
 		dashboard.delete()
 	}
 
-	/**
-	 * Create or update Dashboard by command, and authorize that user is permitted to do so.
-	 *
-	 * @param validCommand a save command that has been validated before
-	 * @param user current user
-	 * @return updated dashboard
-	 * @throws NotFoundException when dashboard was not found.
-	 * @throws NotPermittedException when dashboard was found but user not permitted to update it
-	 */
-	Dashboard createOrUpdate(SaveDashboardCommand validCommand, SecUser user) throws NotFoundException, NotPermittedException {
-		Dashboard dashboard
-		if (validCommand.id && authorizedGetById(validCommand.id, user, Permission.Operation.WRITE)) {
-			dashboard = authorizedGetById(validCommand.id, user, Permission.Operation.WRITE)
-		} else {
-			dashboard = new Dashboard(validCommand.toMap() << [user: user])
-		}
-		dashboard.name = validCommand.name
-		if (validCommand.items != null) {
-			def items = validCommand.items.clone()
-			dashboard.items.clear()
-			items.each { DashboardItem item ->
-				dashboard.addToItems(item)
-			}
-		}
-		dashboard.save(failOnError: true)
+	private static Dashboard addOrUpdateItems(Dashboard savedDashboard, items) {
+		for (int i = 0; i < items.size(); i++) {
+			def item = items[i]
+			DashboardItem dashboardItem = DashboardItem.findOrCreateById(item.id)
+			dashboardItem.setProperties(item)
 
-		items.each { item ->
-			item.dashboard = null
-			DashboardItem dashboardItem = new DashboardItem(item)
+			// These must be manually set
 			dashboardItem.id = item.id
-			dashboard.addToItems(dashboardItem)
-		}
+			dashboardItem.dashboard = savedDashboard
 
-		dashboard
+			dashboardItem.save(failOnError: true)
+		}
 	}
 
 	/**
 	 * Create Dashboard by command, and authorize that user is permitted to do so.
 	 *
-	 * @param id (unused)
-	 * @param validCommand
+	 * @param data
 	 * @param user
 	 * @return
 	 */
-	Dashboard create(Map json, SecUser user) {
-		def items = []
-		if (json.items != null) {
-			items = json.items.clone()
-			json.items.clear()
+	Dashboard create(Map data, SecUser user) {
+		def items = data.items
+		data.remove("items")
+
+		Dashboard dashboard = new Dashboard(data << [user: user])
+		dashboard.id = data.id
+		dashboard.save(failOnError: true)
+
+		if (items) {
+			addOrUpdateItems(dashboard, items)
 		}
 
-		Map dbMap = json as Map
-		dbMap << [user: user]
-		def id = dbMap.id
-		dbMap.remove("id")
-		Dashboard dashboard = new Dashboard(dbMap)
-		dashboard.id = id
-
-		return saveDashboardAndItems(dashboard, items)
+		return dashboard
 	}
 
 	/**
 	 * Update Dashboard by command, and authorize that user is permitted to do so.
 	 *
-	 * @param id (unused)
-	 * @param validCommand
+	 * @param data
 	 * @param user
+	 * @throws NotFoundException when dashboard was not found.
+	 * @throws NotPermittedException when dashboard was found but user not permitted to update it
 	 * @return
 	 */
-	Dashboard update(Long id, SaveDashboardCommand validCommand, SecUser user) {
-		validCommand.id = id
-		createOrUpdate(validCommand, user)
+	Dashboard update(Map data, SecUser user) throws NotFoundException, NotPermittedException {
+		def items = data.items
+		Dashboard dashboard = authorizedGetById(data.id, user, Permission.Operation.WRITE)
+
+		dashboard.name = data.name
+		dashboard.layout = data.layout
+		dashboard.save(failOnError: true)
+
+		if (items) {
+			addOrUpdateItems(dashboard, items)
+		}
+
+		return dashboard
 	}
 
 	/**

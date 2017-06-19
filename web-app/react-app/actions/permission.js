@@ -53,7 +53,7 @@ export const getResourcePermissions = (resourceType: Permission.resourceType, re
         })
 }
 
-export const setResourceHighestOperationForUser = (resourceType: Permission.resourceType, resourceId: Permission.resourceId, operation: Permission.operation, user: User.email) => (dispatch: Function, getState: Function) => {
+export const setResourceHighestOperationForUser = (resourceType: Permission.resourceType, resourceId: Permission.resourceId, user: User.email, operation: Permission.operation) => (dispatch: Function, getState: Function) => {
     const state = getState()
     const currentPermissions = (state.permission.byTypeAndId[resourceType] && state.permission.byTypeAndId[resourceType][resourceId] || []).filter(p => p.user === user)
     const operationsInOrder = ['read', 'write', 'share']
