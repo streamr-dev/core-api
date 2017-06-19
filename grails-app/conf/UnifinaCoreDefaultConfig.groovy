@@ -318,10 +318,10 @@ environments {
 /**
  * Serialization config
  */
-unifina.serialization.intervalInMillis = 5 * 60 * 1000
+streamr.serialization.intervalInMillis = System.getProperty("streamr.serialization.intervalInMillis") ? Long.parseLong(System.getProperty("streamr.serialization.intervalInMillis")) : 5 * 60 * 1000
 environments {
 	test {
-		unifina.serialization.intervalInMillis = 1000
+		streamr.serialization.intervalInMillis = 1000
 	}
 }
 

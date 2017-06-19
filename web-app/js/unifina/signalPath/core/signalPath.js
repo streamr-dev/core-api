@@ -776,7 +776,11 @@ var SignalPath = (function () {
 							_.each(endpoints, function (endpoint) {
 								var displayedValue = endpoint.value ?
 									JSON.stringify(endpoint.value).slice(0, pub.DEBUG_STRING_MAX_LENGTH) : "NULL";
-								$("#" + endpoint.id).data("spObject").updateState(displayedValue);
+
+								var endpointObject = $("#" + endpoint.id).data("spObject")
+								if (endpointObject) {
+									endpointObject.updateState(displayedValue);
+								}
 							})
 
 						}

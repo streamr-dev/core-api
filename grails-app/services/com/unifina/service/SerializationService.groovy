@@ -12,7 +12,7 @@ import org.springframework.util.Assert
 @CompileStatic
 class SerializationService {
 
-	final static String INTERVAL_CONFIG_KEY = "unifina.serialization.intervalInMillis"
+	final static String INTERVAL_CONFIG_KEY = "streamr.serialization.intervalInMillis"
 
 	GrailsApplication grailsApplication
 	Serializer serializer = new SerializerImpl()
