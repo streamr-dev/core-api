@@ -244,7 +244,7 @@ environments {
 /**
  * Aid IP address discovery by defining acceptable IP address prefixes (or empty if anything goes)
  */
-streamr.ip.address.prefixes = System.getProperty("streamr.ip.address.prefixes") ? Arrays.asList(System.getProperty("streamr.ip.address.prefixes").split(",")) : ["192.168.10.", "192.168.", "10."]
+streamr.ip.address.prefixes = System.getProperty("streamr.ip.address.prefixes") ? Arrays.asList(System.getProperty("streamr.ip.address.prefixes").split(",")) : ["192.168.10.", "192.168.", "10.", "172.18."]
 environments {
 	production {
 		streamr.ip.address.prefixes = []
@@ -254,7 +254,7 @@ environments {
 /**
  * UI update server address
  */
-streamr.ui.server = System.getProperty("streamr.ui.server") ?: "ws://dev.streamr/api/v1/ws"
+streamr.ui.server = System.getProperty("streamr.ui.server") ?: "ws://127.0.0.1:8890/api/v1/ws"
 environments {
 	production {
 		streamr.ui.server = System.getProperty("streamr.ui.server") ?: "${prodBaseUrl.replaceFirst("http", "ws")}/api/v1/ws"
@@ -264,7 +264,7 @@ environments {
 /**
  * HTTP API server address
  */
-streamr.http.api.server = System.getProperty("streamr.http.api.server") ?: "http://dev.streamr/api/v1"
+streamr.http.api.server = System.getProperty("streamr.http.api.server") ?: "http://127.0.0.1:8890/api/v1"
 environments {
 	production {
 		streamr.http.api.server = System.getProperty("streamr.ui.server") ?: "${prodBaseUrl}/api/v1"
@@ -285,8 +285,7 @@ streamr.ethereum.key = System.getProperty("streamr.ethereum.key") ?: ""
 /**
  * Kafka config
  */
-streamr.kafka.bootstrap.servers = System.getProperty("streamr.kafka.bootstrap.servers") ?: "192.168.10.21:9093"
-streamr.kafka.zookeeper.connect = System.getProperty("streamr.kafka.zookeeper.connect") ?: "192.168.10.21:2182"
+streamr.kafka.bootstrap.servers = System.getProperty("streamr.kafka.bootstrap.servers") ?: "127.0.0.1:9092"
 streamr.kafka.producer.type = "async"
 streamr.kafka.queue.buffering.max.ms = "100"
 streamr.kafka.retry.backoff.ms = "500"
@@ -307,18 +306,19 @@ environments {
 /**
  * Redis config
  */
-streamr.redis.hosts = (System.getProperty("streamr.redis.hosts") ? Arrays.asList(System.getProperty("streamr.redis.hosts").split(",")) : ["dev.streamr"])
-streamr.redis.password = "AFuPxeVMwBKHV5Hm5SK3PkRZA"
+streamr.redis.hosts = (System.getProperty("streamr.redis.hosts") ? Arrays.asList(System.getProperty("streamr.redis.hosts").split(",")) : ["127.0.0.1"])
+streamr.redis.password = ""
 environments {
 	production {
 		streamr.redis.hosts = (System.getProperty("streamr.redis.hosts") ? Arrays.asList(System.getProperty("streamr.redis.hosts").split(",")) : ["redis1"])
+		streamr.redis.password = "AFuPxeVMwBKHV5Hm5SK3PkRZA"
 	}
 }
 
 /**
  * Cassandra config
  */
-streamr.cassandra.hosts = (System.getProperty("streamr.cassandra.hosts") ? Arrays.asList(System.getProperty("streamr.cassandra.hosts").split(",")) : ["dev.streamr"])
+streamr.cassandra.hosts = (System.getProperty("streamr.cassandra.hosts") ? Arrays.asList(System.getProperty("streamr.cassandra.hosts").split(",")) : ["127.0.0.1"])
 streamr.cassandra.keySpace = System.getProperty("streamr.cassandra.keySpace") ?: "streamr_dev"
 
 environments {

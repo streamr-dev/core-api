@@ -15439,7 +15439,6 @@ textarea.comment {
   user-select: text;
 }
 .event-table-module .event-table-module-content {
-  display: block;
   max-height: 400px;
   overflow: auto;
 }
