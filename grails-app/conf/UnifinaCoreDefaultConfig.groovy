@@ -386,6 +386,33 @@ unifina.email.forgotPassword.subject = "Streamr Password Reset"
 unifina.email.shareInvite.subject = "%USER% shared a document with you in Streamr"
 
 /**
+ * Recaptcha config
+ */
+
+recaptcha.verifyUrl = "https://www.google.com/recaptcha/api/siteverify"
+
+environments {
+	production {
+		recaptchav2.sitekey = "6Le3vAkTAAAAAEo4ubtEnosXISPd8_0snV4KEZSe"
+		recaptchainvisible.sitekey = "6Lfish8UAAAAAF-w-HYi_TN_xcbWrFjGNef2Pgdp"
+		recaptchav2.secret = "6Le3vAkTAAAAADZEop2Jdlm8ZrsTX-4-nn2XqC7Z"
+		recaptchainvisible.secret = "6Lfish8UAAAAAE9XaXpFEDX7OjO4rKGFe1HdrSql"
+	}
+	development {
+		recaptchav2.sitekey = "6Le9vAkTAAAAALFIbNo2ftfteJ2aQPgfP-npkZXS"
+		recaptchav2.secret = "6Le9vAkTAAAAADoOwlVedDR15a-uy4mUbudvsg63"
+		recaptchainvisible.sitekey = "6LcNxB4UAAAAAO01yHgAVL6qxwWfOM8PxaKmP9LP"
+		recaptchainvisible.secret = "6LcNxB4UAAAAAMXCPU3sABq20HIbcIJCtMaIFn9o"
+	}
+	test {
+		recaptchav2.sitekey = "6LeIxAcTAAAAAJcZVRqyHh71UMIEGNQ_MXjiZKhI"
+		recaptchav2.secret = "6LeIxAcTAAAAAGG-vFI1TnRWxMZNFuojJ4WifJWe"
+		recaptchainvisible.sitekey = "6LeIxAcTAAAAAJcZVRqyHh71UMIEGNQ_MXjiZKhI"
+		recaptchainvisible.secret = "6LeIxAcTAAAAAGG-vFI1TnRWxMZNFuojJ4WifJWe"
+	}
+}
+
+/**
  * Signup Configs
  */
 streamr.signup.requireInvite = (System.getProperty("streamr.signup.requireInvite") ? Boolean.parseBoolean(System.getProperty("streamr.signup.requireInvite")) : false)
