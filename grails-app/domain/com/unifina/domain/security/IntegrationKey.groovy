@@ -32,7 +32,7 @@ class IntegrationKey {
 	Map toMap() {
 		return [
 				id  : id,
-				user: user.id,
+				user: user,
 				name: name,
 				type: service.toString(),
 				json: (JSONObject) JSON.parse(json)

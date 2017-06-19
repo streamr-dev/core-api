@@ -8,9 +8,9 @@ import groovy.transform.CompileStatic
 @Validateable
 class SaveDashboardItemCommand {
 	String title
-	String canvas
+	Canvas canvas
 	Integer module
-	//String webcomponent TODO: inferred
+	String webcomponent
 	int ord
 	String size
 
@@ -18,18 +18,14 @@ class SaveDashboardItemCommand {
 		title(blank: false)
 		canvas(blank: false)
 		module(nullable: false)
-		ord(min: 0)
-		size(inList: ["small", "medium", "large"])
 	}
 
 	@CompileStatic
 	DashboardItem toDashboardItem() {
 		def item = new DashboardItem(
 			title: title,
-			canvas: Canvas.get(canvas),
-			module: module,
-			ord: ord,
-			size: size
+			canvas: canvas,
+			module: module
 		)
 		item.updateWebcomponent()
 		return item
@@ -38,10 +34,8 @@ class SaveDashboardItemCommand {
 	@CompileStatic
 	void copyValuesTo(DashboardItem dashboardItem) {
 		dashboardItem.title = title
-		dashboardItem.canvas = Canvas.get(canvas)
+		dashboardItem.canvas = canvas
 		dashboardItem.module = module
-		dashboardItem.ord = ord
-		dashboardItem.size = size
 		dashboardItem.updateWebcomponent()
 	}
 }

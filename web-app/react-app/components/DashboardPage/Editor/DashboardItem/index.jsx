@@ -54,7 +54,7 @@ class DashboardItem extends Component {
                     <TitleRow dashboard={this.props.dashboard} item={item} dragCancelClassName={this.props.dragCancelClassName}/>
                 </div>
                 <div className={`${styles.body} ${this.props.dragCancelClassName || ''}`}>
-                    <div className={styles.wrapper}>
+                    <div className={`${styles.wrapper} ${styles[item.webcomponent] || item.webcomponent}`}>
                         <WebComponent
                             ref={item => this.webcomponent = item}
                             className="streamr-widget non-draggable"

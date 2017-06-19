@@ -33,12 +33,13 @@ class Editor extends Component {
     onLayoutChange: Function
     generateLayout: Function
     onResize: Function
-    onDelete: Function
+    onBeforeUnload: Function
     props: {
         dashboard: Dashboard,
-        dispatch: Function,
         canShare: boolean,
-        canWrite: boolean
+        canWrite: boolean,
+        delete: Function,
+        update: Function
     }
     state: {
         breakpoints: {},
@@ -62,8 +63,8 @@ class Editor extends Component {
                 xs: 480
             },
             cols: {
-                lg: 12,
-                md: 8,
+                lg: 16,
+                md: 10,
                 sm: 4,
                 xs: 2,
             },
@@ -72,15 +73,22 @@ class Editor extends Component {
         this.onLayoutChange = this.onLayoutChange.bind(this)
         this.generateLayout = this.generateLayout.bind(this)
         this.onResize = this.onResize.bind(this)
-        this.onDelete = this.onDelete.bind(this)
+        this.onBeforeUnload = this.onBeforeUnload.bind(this)
+    }
+    
+    componentDidMount() {
+        window.addEventListener('beforeunload', this.onBeforeUnload)
+    }
+    
+    componentWillUnmount() {
+        window.removeEventListener('beforeunload', this.onBeforeUnload)
     }
     
     onLayoutChange(layout, allLayouts) {
         this.onResize(layout)
-        this.props.dispatch(updateDashboard({
-            ...this.props.dashboard,
+        this.props.update({
             layout: allLayouts
-        }))
+        })
     }
     
     generateLayout() {
@@ -88,15 +96,20 @@ class Editor extends Component {
         const db = this.props.dashboard
         return _.zipObject(sizes, _.map(sizes, size => {
             return db.items.map(item => {
-                const layout = db.layout && db.layout[size] && db.layout[size].find(layout => layout.i === item.id)
+                const layout = db.layout && db.layout[size] && db.layout[size].find(layout => layout.i === item.id) || {}
                 const defaultLayout = {
                     i: item.id,
                     x: 0,
                     y: 0,
                     h: 2,
-                    w: 3
+                    w: 4,
+                    minH: 2,
+                    minW: 3
                 }
-                return layout || defaultLayout
+                return {
+                    ...defaultLayout,
+                    ...layout
+                }
             })
         }))
     }
@@ -110,8 +123,10 @@ class Editor extends Component {
         })
     }
     
-    onDelete() {
-    
+    onBeforeUnload() {
+        if (!this.props.dashboard.saved) {
+            return 'You have unsaved changes in your Dashboard. Are you sure you want to leave?'
+        }
     }
 
     render() {
@@ -169,7 +184,7 @@ class Editor extends Component {
                 <ResponsiveReactGridLayout
                     className={styles.dashboard}
                     layouts={layout}
-                    rowHeight={100}
+                    rowHeight={60}
                     breakpoints={this.state.breakpoints}
                     cols={this.state.cols}
                     draggableCancel={`.${dragCancelClassName}`}
@@ -199,7 +214,11 @@ const mapStateToProps = ({dashboard}) => {
 }
 
 const mapDispatchToProps = (dispatch, ownProps) => ({
-    deleteDashboard: () => dispatch(deleteDashboard(ownProps.dashboard.id))
+    delete: () => dispatch(deleteDashboard(ownProps.dashboard.id)),
+    update: (changes) => dispatch(updateDashboard({
+        ...ownProps.dashboard,
+        ...changes
+    }))
 })
 
 export default connect(mapStateToProps, mapDispatchToProps)(Editor)

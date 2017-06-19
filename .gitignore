@@ -7,7 +7,6 @@ target
 node_modules
 lib/grails-rt.jar
 .idea/*
-!.idea/runConfigurations/
 unifina-core*.iml
 .slcache/
 out/

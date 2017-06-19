@@ -30,9 +30,9 @@ class DashboardServiceSpec extends Specification {
 		(1..3).each {
 			def d = new Dashboard(name: "my-dashboard-$it", user: user).save(failOnError: true)
 			if (it == 3) {
-				d.addToItems(new DashboardItem(title: "item1", ord: 1, size: "large").save(validate: false, failOnError: true))
-				d.addToItems(new DashboardItem(title: "item2", ord: 0, size: "medium").save(validate: false, failOnError: true))
-				d.addToItems(new DashboardItem(title: "item3", ord: 2, size: "large").save(validate: false, failOnError: true))
+				d.addToItems(new DashboardItem(title: "item1").save(validate: false, failOnError: true))
+				d.addToItems(new DashboardItem(title: "item2").save(validate: false, failOnError: true))
+				d.addToItems(new DashboardItem(title: "item3").save(validate: false, failOnError: true))
 			}
 		}
 
@@ -101,8 +101,8 @@ class DashboardServiceSpec extends Specification {
 	def "create() creates a new dashboard and returns it"() {
 		setup:
 		SortedSet<DashboardItem> items = new TreeSet<DashboardItem>()
-		items.add(new DashboardItem(title: "test1", ord: new Integer(0), canvas: new Canvas(), module: 0, size: "b", webcomponent: "b"))
-		items.add(new DashboardItem(title: "test2", ord: new Integer(1), canvas: new Canvas(), module: 0, size: "b", webcomponent: "b"))
+		items.add(new DashboardItem(title: "test1", canvas: new Canvas(), module: 0, webcomponent: "b"))
+		items.add(new DashboardItem(title: "test2", canvas: new Canvas(), module: 0, webcomponent: "b"))
 		def user = new SecUser(name: "tester").save(validate: false)
 		when:
 		SaveDashboardCommand command = new SaveDashboardCommand([
@@ -178,9 +178,7 @@ class DashboardServiceSpec extends Specification {
 		def command = new SaveDashboardItemCommand(
 			title: "added-item",
 			canvas: canvas.id,
-			module: 1,
-			ord: 666,
-			size: "large"
+			module: 1
 		)
 
 		when:
@@ -195,9 +193,7 @@ class DashboardServiceSpec extends Specification {
 		def command = new SaveDashboardItemCommand(
 			title: "added-item",
 			canvas: canvas.id,
-			module: 1,
-			ord: 666,
-			size: "large"
+			module: 1
 		)
 
 		when:
@@ -226,9 +222,7 @@ class DashboardServiceSpec extends Specification {
 		def command = new SaveDashboardItemCommand(
 			title: "added-item",
 			canvas: canvas.id,
-			module: 1,
-			ord: 666,
-			size: "large"
+			module: 1
 		)
 
 		when:
@@ -241,8 +235,6 @@ class DashboardServiceSpec extends Specification {
 		item.canvas.id == "1"
 		item.module == 1
 		item.webcomponent == "streamr-chart"
-		item.ord == 666
-		item.size == "large"
 
 		and:
 		Dashboard.get(2L).items*.id == [item.id]
@@ -263,9 +255,7 @@ class DashboardServiceSpec extends Specification {
 		def command = new SaveDashboardItemCommand(
 			title: "updated-item",
 			canvas: canvas.id,
-			module: 1,
-			ord: 42,
-			size: "small"
+			module: 1
 		)
 
 		when:
@@ -286,9 +276,7 @@ class DashboardServiceSpec extends Specification {
 		def command = new SaveDashboardItemCommand(
 			title: "updated-item",
 			canvas: canvas.id,
-			module: 1,
-			ord: 42,
-			size: "small"
+			module: 1
 		)
 
 		when:
@@ -309,9 +297,7 @@ class DashboardServiceSpec extends Specification {
 		def command = new SaveDashboardItemCommand(
 			title: "updated-item",
 			canvas: canvas.id,
-			module: 1,
-			ord: 42,
-			size: "small"
+			module: 1
 		)
 
 		when:
@@ -339,9 +325,7 @@ class DashboardServiceSpec extends Specification {
 		def command = new SaveDashboardItemCommand(
 			title: "updated-item",
 			canvas: canvas.id,
-			module: 1,
-			ord: 42,
-			size: "small"
+			module: 1
 		)
 
 		def dashboardId = 3L
@@ -359,9 +343,7 @@ class DashboardServiceSpec extends Specification {
 		    title: "updated-item",
 			canvas: canvas.id,
 			module: 1,
-			webcomponent: "streamr-chart",
-			ord: 42,
-			size: "small",
+			webcomponent: "streamr-chart"
 		]
 	}
 

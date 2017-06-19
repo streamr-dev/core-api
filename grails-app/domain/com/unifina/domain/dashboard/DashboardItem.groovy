@@ -11,9 +11,6 @@ class DashboardItem implements Comparable {
 	Integer module
 	String webcomponent
 
-	Integer ord
-	String size
-
 	static belongsTo = [dashboard: Dashboard, canvas: Canvas]
 
 	static constraints = {
@@ -21,10 +18,7 @@ class DashboardItem implements Comparable {
 	}
 
 	int compareTo(obj) {
-		int cmp = ord.compareTo(obj.ord)
-		return cmp != 0 ? cmp :
-				id != null && obj.id != null ? id.compareTo(obj.id) :
-						title.compareTo(obj.title)
+		return id != null ? id.compareTo(obj.id) : title.compareTo(obj.title)
 	}
 
 	static mapping = {
@@ -36,8 +30,6 @@ class DashboardItem implements Comparable {
 				id          : id,
 				dashboard   : dashboard.id,
 				title       : title,
-				ord         : ord,
-				size        : size,
 				canvas      : canvas.id,
 				module      : module,
 				webcomponent: webcomponent
