@@ -53,7 +53,7 @@ public class CreateStream extends AbstractSignalPathModule {
 		createdStreams.clear();
 	}
 
-	protected Map<String, Object> buildParams() {
+	private Map<String, Object> buildParams() {
 		Map<String, Object> params = new HashMap<>();
 		params.put("name", nameInput.getValue());
 		params.put("description", description.getValue());
