@@ -98,7 +98,7 @@ log4j = {
 		 grails.resources.mappers.uglifyjs.excludes = ['**/*.*']
 	 }
 	 production {
-		 grails.resources.mappers.uglifyjs.excludes = ['**/*.min.js', '**/*-min.js']
+		 grails.resources.mappers.uglifyjs.excludes = ['**/*.min.js', '**/*-min.js', '**/*.bundle.js', '**/*-compressed.js']
 	 }
  }
 

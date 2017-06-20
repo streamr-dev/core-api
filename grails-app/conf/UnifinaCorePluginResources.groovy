@@ -31,7 +31,7 @@ modules = {
 		resource url:[dir:'js/tablesorter', file:'jquery.tablesorter.min.js', plugin: 'unifina-core']
 	}
 	highstock {
-		resource url:[dir:'js/highstock-2.0.3', file:'highstock.js', plugin: 'unifina-core']
+		resource url:[dir:'js/highstock-2.0.3', file:'highstock.min.js', plugin: 'unifina-core']
 		resource url:[dir:'js/highstock-2.0.3', file:'highcharts-more.js', plugin: 'unifina-core']
 	}
 	bootstrap {
