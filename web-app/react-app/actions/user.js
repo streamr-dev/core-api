@@ -22,7 +22,7 @@ import type {Err} from './utils/parseError'
 
 export const getCurrentUser = () => (dispatch: Function) => {
     dispatch(getCurrentUserRequest())
-    return axios.delete(Streamr.createLink({
+    return axios.get(Streamr.createLink({
         uri: `${apiUrl}/me`
     }))
         .then(({data}) => dispatch(getCurrentUserSuccess(data)))

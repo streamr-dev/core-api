@@ -14,7 +14,9 @@ class ProfileSettings extends Component {
     
     props: {
         user: User,
-        dispatch: Function
+        getCurrentUser: Function,
+        updateCurrentUserName: Function,
+        updateCurrentUserTimezone: Function
     }
     onNameChange: Function
     onTimezoneChange: Function
@@ -25,13 +27,13 @@ class ProfileSettings extends Component {
         this.onTimezoneChange = this.onTimezoneChange.bind(this)
     }
     componentDidMount() {
-        this.props.dispatch(getCurrentUser())
+        this.props.getCurrentUser()
     }
     onNameChange({target}) {
-        this.props.dispatch(updateCurrentUserName(target.value))
+        this.props.updateCurrentUserName(target.value)
     }
     onTimezoneChange({target}) {
-        this.props.dispatch(updateCurrentUserTimezone(target.value))
+        this.props.updateCurrentUserTimezone(target.value)
     }
     render() {
         const options = moment.tz.names().map(tz => ({
@@ -85,7 +87,19 @@ class ProfileSettings extends Component {
 }
 
 const mapStateToProps = ({user}) => ({
-    user: user.currentUser
+    user: user.currentUser || {}
 })
 
-export default connect(mapStateToProps)(ProfileSettings)
+const mapDispatchToProps = (dispatch) => ({
+    getCurrentUser() {
+        dispatch(getCurrentUser())
+    },
+    updateCurrentUserName(name) {
+        dispatch(updateCurrentUserName(name))
+    },
+    updateCurrentUserTimezone(tz) {
+        dispatch(updateCurrentUserTimezone(tz))
+    }
+})
+
+export default connect(mapStateToProps, mapDispatchToProps)(ProfileSettings)
