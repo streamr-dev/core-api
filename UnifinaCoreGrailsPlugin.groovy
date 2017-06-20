@@ -46,7 +46,6 @@ class UnifinaCoreGrailsPlugin {
 //    def scm = [ url: "http://svn.codehaus.org/grails-plugins/" ]
 
     def doWithWebDescriptor = { xml ->
-		// TODO
 	}
 
     def doWithSpring = {
