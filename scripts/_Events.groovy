@@ -30,7 +30,7 @@ eventPackagingEnd = { args ->
 	Runtime runtime = Runtime.getRuntime()
 	String command
 	if (Environment.getCurrent() == Environment.PRODUCTION) {
-		command = "npm install && npm run build"
+		command = "npm run build"
 	} else {
 		command = "npm run build-dev"
 	}
@@ -38,6 +38,12 @@ eventPackagingEnd = { args ->
 	Process process = runtime.exec(command)
 	StreamGobbler outputGobbler = new StreamGobbler(process.getInputStream());
 	outputGobbler.start()
+
+	// Wait for npm to exit before continuing
+	int exitValue = process.waitFor()
+	if (exitValue > 0) {
+		throw new RuntimeException("Webpack failed!")
+	}
 }
 
 // https://stackoverflow.com/questions/1732455/redirect-process-output-to-stdout
