@@ -267,7 +267,7 @@ environments {
 streamr.http.api.server = System.getProperty("streamr.http.api.server") ?: "http://127.0.0.1:8890/api/v1"
 environments {
 	production {
-		streamr.http.api.server = System.getProperty("streamr.ui.server") ?: "${prodBaseUrl}/api/v1"
+		streamr.http.api.server = System.getProperty("streamr.http.api.server") ?: "${prodBaseUrl}/api/v1"
 	}
 }
 
