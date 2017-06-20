@@ -2,7 +2,7 @@
 
 import React from 'react'
 
-import { FormGroup, Button } from 'react-bootstrap'
+import { FormGroup } from 'react-bootstrap'
 
 import styles from './integrationKeyHandlerTableRow.pcss'
 

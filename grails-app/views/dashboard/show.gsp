@@ -41,7 +41,9 @@
 				var shareName
 				$(".share-button").click(function(e) {
 					e.preventDefault()
-					if ($(this).data('url')) {
+					var shareUrl = $(this).data('url')
+					var shareName = $(this).data('name')
+					if (shareUrl) {
 						sharePopup(shareUrl, shareName)
 					}
 				})

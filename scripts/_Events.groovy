@@ -30,7 +30,7 @@ eventPackagingEnd = { args ->
 	Runtime runtime = Runtime.getRuntime()
 	String command
 	if (Environment.getCurrent() == Environment.PRODUCTION) {
-		command = "npm run build"
+		command = "npm install && npm run build"
 	} else {
 		command = "npm run build-dev"
 	}

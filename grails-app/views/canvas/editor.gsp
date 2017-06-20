@@ -357,11 +357,11 @@ $(function() {
 		}))
 	})
 
-	var shareUrl
-	var shareName
 	$(".share-button").click(function(e) {
 	    e.preventDefault()
-	    if ($(this).data('url')) {
+		var shareUrl = $(this).data('url')
+		var shareName = $(this).data('name')
+	    if (shareUrl) {
 			sharePopup(shareUrl, shareName)
 		}
 	})
@@ -376,6 +376,7 @@ $(function() {
 			    })
 				if (enabled.indexOf('share') >= 0) {
 					$("#share-button").data("url", canvasUrl).removeAttr("disabled")
+					$("#share-button").data("name", SignalPath.getName()).removeAttr("disabled")
 				} else {
 					$("#share-button").addClass("forbidden")
 				}
