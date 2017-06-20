@@ -4,6 +4,7 @@ import axios from 'axios'
 import path from 'path'
 import settle from 'promise-settle'
 import parseError from './utils/parseError'
+import createLink from '../createLink'
 
 import {showError, showSuccess} from './notification'
 
@@ -31,20 +32,13 @@ const getApiUrl = (resourceType, resourceId) => {
     return path.resolve('/api/v1', urlPartsByResourceType[resourceType], resourceId)
 }
 
-declare var Streamr: {
-    createLink: Function
-}
-
 import type { ApiError } from '../flowtype/common-types'
 import type { Permission } from '../flowtype/permission-types'
 import type { User } from '../flowtype/user-types'
 
 export const getResourcePermissions = (resourceType: Permission.resourceType, resourceId: Permission.resourceId) => (dispatch: Function) => {
     dispatch(getResourcePermissionsRequest())
-    const uri = `${getApiUrl(resourceType, resourceId)}/permissions`
-    return axios.get(Streamr.createLink({
-        uri
-    }))
+    return axios.get(createLink(`${getApiUrl(resourceType, resourceId)}/permissions`))
         .then(({data}) => dispatch(getResourcePermissionsSuccess(resourceType, resourceId, data)))
         .catch(res => {
             const e = parseError(res)
@@ -110,9 +104,7 @@ export const saveUpdatedResourcePermissions = (resourceType: Permission.resource
     const addPermissions = new Promise(resolve => {
         settle(addedPermissions.map(permission => {
             dispatch(saveAddedResourcePermissionRequest(resourceType, resourceId, permission))
-            return axios.post(Streamr.createLink({
-                uri: `${getApiUrl(resourceType, resourceId)}/permissions`
-            }), permission)
+            return axios.post(createLink(`${getApiUrl(resourceType, resourceId)}/permissions`), permission)
         }))
             .then(results => {
                 results.forEach((res, i) => {
@@ -134,9 +126,7 @@ export const saveUpdatedResourcePermissions = (resourceType: Permission.resource
     const removePermissions = new Promise(resolve => {
         settle(removedPermissions.map(permission => {
             dispatch(saveRemovedResourcePermissionRequest(resourceType, resourceId, permission))
-            return axios.delete(Streamr.createLink({
-                uri: `${getApiUrl(resourceType, resourceId)}/permissions/${permission.id}`
-            }), permission)
+            return axios.delete(createLink(`${getApiUrl(resourceType, resourceId)}/permissions/${permission.id}`), permission)
         }))
             .then(results => {
                 results.forEach((res, i) => {

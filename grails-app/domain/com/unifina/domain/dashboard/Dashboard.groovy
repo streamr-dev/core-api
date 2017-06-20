@@ -20,7 +20,7 @@ class Dashboard {
 	static hasMany = [items: DashboardItem]
 
 	static constraints = {
-		name(nullable: true)
+		name(nullable: true, blank: false)
 		layout(nullable: true)
 	}
 

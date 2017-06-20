@@ -2,6 +2,7 @@
 
 import axios from 'axios'
 import parseError from './utils/parseError'
+import createLink from '../createLink'
 import {showError, showSuccess} from './notification'
 
 export const GET_AND_REPLACE_INTEGRATION_KEYS_REQUEST = 'GET_ALL_INTEGRATION_KEYS_REQUEST'
@@ -22,16 +23,12 @@ export const DELETE_INTEGRATION_KEY_FAILURE = 'DELETE_INTEGRATION_KEY_FAILURE'
 
 const apiUrl = 'api/v1/integrationkeys'
 
-declare var Streamr: any
-
 import type {IntegrationKey} from '../flowtype/integration-key-types.js'
 import type {ApiError as Err} from '../flowtype/common-types.js'
 
 export const getAndReplaceIntegrationKeys = () => (dispatch: Function) => {
     dispatch(getAndReplaceIntegrationKeysRequest())
-    return axios.get(Streamr.createLink({
-        uri: apiUrl
-    }))
+    return axios.get(createLink(apiUrl))
         .then(({data}) => {
             dispatch(getAndReplaceIntegrationKeysSuccess(data))
             dispatch(showSuccess({
@@ -50,9 +47,7 @@ export const getAndReplaceIntegrationKeys = () => (dispatch: Function) => {
 
 export const getIntegrationKeysByService = (service: string) => (dispatch: Function) => {
     dispatch(getIntegrationKeysByServiceRequest(service))
-    return axios.get(Streamr.createLink({
-        uri: apiUrl
-    }), {
+    return axios.get(createLink(apiUrl), {
         params: {
             service
         }
@@ -70,9 +65,7 @@ export const getIntegrationKeysByService = (service: string) => (dispatch: Funct
 
 export const createIntegrationKey = (integrationKey: IntegrationKey) => (dispatch: Function) => {
     dispatch(createIntegrationKeyRequest())
-    return axios.post(Streamr.createLink({
-        uri: apiUrl
-    }), integrationKey)
+    return axios.post(createLink(apiUrl), integrationKey)
         .then(({data}) => dispatch(createIntegrationKeySuccess(data)))
         .catch(res => {
             const e = parseError(res)
@@ -86,9 +79,7 @@ export const createIntegrationKey = (integrationKey: IntegrationKey) => (dispatc
 
 export const deleteIntegrationKey = (id: string) => (dispatch: Function) => {
     dispatch(deleteIntegrationKeyRequest(id))
-    return axios.delete(Streamr.createLink({
-        uri: `${apiUrl}/${id}`
-    }))
+    return axios.delete(createLink(`${apiUrl}/${id}`))
         .then(() => dispatch(deleteIntegrationKeySuccess(id)))
         .catch(res => {
             const e = parseError(res)

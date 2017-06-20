@@ -3,16 +3,16 @@
 import React, {Component} from 'react'
 import {connect} from 'react-redux'
 import path from 'path'
+import createLink from '../../../../createLink'
 import {showError} from '../../../../actions/notification'
 
 import TitleRow from './DashboardItemTitleRow'
+import WebComponent from '../../../WebComponent'
 
 import styles from './dashboardItem.pcss'
 import './webcomponentStyles.css'
 
 import type {Dashboard, DashboardItem as DBItem} from '../../../../flowtype/dashboard-types'
-
-declare var Streamr: {}
 
 class DashboardItem extends Component {
     
@@ -32,13 +32,7 @@ class DashboardItem extends Component {
     
     componentDidMount() {
         // TODO: why not work?
-        //setTimeout(() => this.onResize(), 500)
-        
-        this.webcomponent.addEventListener('error', this.props.showError)
-    }
-    
-    componentWillUnmount() {
-        this.webcomponent.removeEventListener('error', this.props.showError)
+        setTimeout(() => this.onResize(), 500)
     }
 
     componentWillReceiveProps(props) {
@@ -50,26 +44,29 @@ class DashboardItem extends Component {
     onResize() {
         const event = new Event('Event')
         event.initEvent('resize', false, true)
-        this.webcomponent.dispatchEvent(event)
+        if (this.webcomponent) {
+            this.webcomponent.dispatchEvent(event)
+        }
     }
 
     render() {
-        const item = this.props.item || {}
-        const WebComponent = item.webcomponent || 'div'
+        const dbItem = this.props.item || {}
         return (
             <div className={styles.dashboardItem}>
                 <div className={styles.header}>
-                    <TitleRow dashboard={this.props.dashboard} item={item} dragCancelClassName={this.props.dragCancelClassName}/>
+                    <TitleRow dashboard={this.props.dashboard} item={dbItem} dragCancelClassName={this.props.dragCancelClassName}/>
                 </div>
                 <div className={`${styles.body} ${this.props.dragCancelClassName || ''}`}>
-                    <div className={`${styles.wrapper} ${styles[item.webcomponent] || item.webcomponent}`}>
-                        <WebComponent
-                            ref={item => this.webcomponent = item}
-                            className="streamr-widget non-draggable"
-                            url={Streamr.createLink({
-                                uri: path.resolve('/api/v1/dashboards', item.dashboard.toString(), 'canvases', item.canvas.toString(), 'modules', item.module.toString())
-                            })}
-                        />
+                    <div className={`${styles.wrapper} ${styles[dbItem.webcomponent] || dbItem.webcomponent}`}>
+                        {dbItem.webcomponent && (
+                            <WebComponent
+                                ref={i => this.a = i}
+                                type={dbItem.webcomponent}
+                                onError={this.props.showError}
+                                webComponentRef={item => this.webcomponent = item}
+                                url={createLink(path.resolve('/api/v1/dashboards', dbItem.dashboard.toString(), 'canvases', dbItem.canvas.toString(), 'modules', dbItem.module.toString()))}
+                            />
+                        )}
                     </div>
                 </div>
             </div>

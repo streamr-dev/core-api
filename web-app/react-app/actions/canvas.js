@@ -2,6 +2,7 @@
 
 import axios from 'axios'
 import parseError from './utils/parseError'
+import createLink from '../createLink'
 
 export const GET_RUNNING_CANVASES_REQUEST = 'GET_RUNNING_CANVASES_REQUEST'
 export const GET_RUNNING_CANVASES_SUCCESS = 'GET_RUNNING_CANVASES_SUCCESS'
@@ -9,18 +10,12 @@ export const GET_RUNNING_CANVASES_FAILURE = 'GET_RUNNING_CANVASES_FAILURE'
 
 const apiUrl = 'api/v1/canvases'
 
-declare var Streamr: {
-    createLink: Function
-}
-
 import type { ApiError } from '../flowtype/common-types'
 import type { Canvas } from '../flowtype/canvas-types'
 
 export const getRunningCanvases = () => (dispatch: Function) => {
     dispatch(getCanvasesRequest())
-    return axios.get(Streamr.createLink({
-        uri: apiUrl
-    }), {
+    return axios.get(createLink(apiUrl), {
         params: {
             state: 'running',
             adhoc: false,

@@ -7,6 +7,7 @@ import org.json.JSONObject
 
 @Validateable
 class SaveDashboardCommand {
+
 	String id
 
 	String name
@@ -14,11 +15,12 @@ class SaveDashboardCommand {
 	String layout
 
 	static constraints = {
-		name(blank: false)
+		name(blank: false, validator: { "validation.emptyName" })
 		layout(blank: false)
 	}
 
 	Map toMap() {
 		[id: id, name: name, items: items, layout: layout]
 	}
+
 }

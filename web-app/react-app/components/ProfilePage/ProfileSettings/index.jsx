@@ -1,12 +1,26 @@
-/* global Streamr */
+// @flow
 
 import React, {Component} from 'react'
 import moment from 'moment-timezone'
 import axios from 'axios'
 import Select from 'react-select'
 import 'react-select/dist/react-select.css'
+import createLink from '../../../createLink'
+
+declare var Streamr: {
+    user: string
+}
 
 export default class ProfileSettings extends Component {
+    onNameChange: Function
+    onTimezoneChange: Function
+    state: {
+        user: {
+            username: string,
+            name: string,
+            timezone: string
+        }
+    }
     constructor() {
         super()
         this.state = {
@@ -20,15 +34,17 @@ export default class ProfileSettings extends Component {
         this.onTimezoneChange = this.onTimezoneChange.bind(this)
     }
     componentDidMount() {
-        axios.get(Streamr.createLink({
-            uri: 'api/v1/users/me'
-        })).then(({data}) => {
+        axios.get(createLink('api/v1/users/me')).then(({data}) => {
             this.setState({
                 user: data
             })
         })
     }
-    onNameChange(e) {
+    onNameChange(e: {
+        target: {
+            value: string
+        }
+    }) {
         this.setState({
             user: {
                 ...this.state.user,
@@ -36,7 +52,9 @@ export default class ProfileSettings extends Component {
             }
         })
     }
-    onTimezoneChange(selected) {
+    onTimezoneChange(selected: {
+        value: string
+    }) {
         this.setState({
             user: {
                 ...this.state.user,

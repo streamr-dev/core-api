@@ -6,6 +6,7 @@ import {Provider} from 'react-redux'
 import { Router, Route, useRouterHistory } from 'react-router'
 import { createHistory } from 'history'
 import uuid from 'uuid'
+import createLink from './createLink'
 
 import {getDashboard, getMyDashboardPermissions, newDashboard, openDashboard} from './actions/dashboard'
 import {getRunningCanvases} from './actions/canvas'
@@ -15,11 +16,7 @@ import DashboardPage from './components/DashboardPage'
 
 import store from './stores/dashboardPageStore.js'
 
-declare var Streamr: any
-
-const basename = Streamr.createLink({
-    uri: '/dashboard/editor'
-}).replace(window.location.origin, '')
+const basename = createLink('/dashboard/editor').replace(window.location.origin, '')
 
 const history = useRouterHistory(createHistory)({
     basename

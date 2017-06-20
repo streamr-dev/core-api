@@ -5,6 +5,7 @@ import {connect} from 'react-redux'
 import {StreamrBreadcrumb} from '../../Breadcrumb'
 import {MenuItem} from 'react-bootstrap'
 import FontAwesome from 'react-fontawesome'
+import createLink from '../../../createLink'
 
 import {Responsive, WidthProvider} from 'react-grid-layout'
 import 'react-grid-layout/css/styles.css'
@@ -16,10 +17,6 @@ import ShareDialog from '../../ShareDialog'
 import {updateDashboard, deleteDashboard, lockDashboardEditing, unlockDashboardEditing} from '../../../actions/dashboard'
 
 import styles from './editor.pcss'
-
-declare var Streamr: {
-    createLink: Function
-}
 
 declare var _: any
 
@@ -152,7 +149,7 @@ class Editor extends Component {
                 height: '100%'
             }}>
                 <StreamrBreadcrumb className="breadcrumb-page">
-                    <StreamrBreadcrumb.Item href={Streamr.createLink('dashboard', 'list')}>
+                    <StreamrBreadcrumb.Item href={createLink('dashboard/list')}>
                         Dashboards
                     </StreamrBreadcrumb.Item>
                     <StreamrBreadcrumb.Item active={true}>

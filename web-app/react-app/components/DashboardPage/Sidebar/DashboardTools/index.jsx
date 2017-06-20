@@ -5,6 +5,7 @@ import {any} from 'prop-types'
 import {connect} from 'react-redux'
 import {Button} from 'react-bootstrap'
 import FontAwesome from 'react-fontawesome'
+import createLink from '../../../../createLink'
 
 import ConfirmButton from '../../../ConfirmButton'
 import ShareDialog from '../../../ShareDialog'
@@ -12,8 +13,6 @@ import ShareDialog from '../../../ShareDialog'
 import {updateAndSaveDashboard, deleteDashboard} from '../../../../actions/dashboard'
 
 import type { Dashboard } from '../../../../flowtype/dashboard-types'
-
-declare var Streamr: any
 
 class DashboardTools extends Component {
     
@@ -50,9 +49,7 @@ class DashboardTools extends Component {
     
     onDelete() {
         this.props.dispatch(deleteDashboard(this.props.dashboard.id))
-            .then(() => window.location = Streamr.createLink({
-                uri: '/dashboards/list'
-            }))
+            .then(() => window.location = createLink('/dashboards/list'))
     }
     
     render() {

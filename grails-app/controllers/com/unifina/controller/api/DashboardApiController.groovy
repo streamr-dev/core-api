@@ -1,23 +1,27 @@
 package com.unifina.controller.api
 
 import com.unifina.api.SaveDashboardCommand
+import com.unifina.api.ValidationException
 import com.unifina.domain.dashboard.Dashboard
 import com.unifina.domain.security.Permission
 import com.unifina.domain.security.SecUser
 import com.unifina.security.AuthLevel
 import com.unifina.security.StreamrApi
+import com.unifina.service.ApiService
 import com.unifina.service.DashboardService
+import com.unifina.service.PermissionService
 import com.unifina.service.SignalPathService
 import grails.converters.JSON
 import grails.plugin.springsecurity.annotation.Secured
+import org.json.JSONObject
 
 @Secured(["IS_AUTHENTICATED_ANONYMOUSLY"])
 class DashboardApiController {
 
 	DashboardService dashboardService
 	SignalPathService signalPathService
-	def permissionService
-	def apiService
+	PermissionService permissionService
+	ApiService apiService
 
 	@StreamrApi
 	def index() {
@@ -65,4 +69,5 @@ class DashboardApiController {
 		log.info("request: responding with $response")
 		render response as JSON
 	}
+
 }

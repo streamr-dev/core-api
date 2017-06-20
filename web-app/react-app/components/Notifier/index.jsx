@@ -3,9 +3,12 @@
 import {Component} from 'react'
 import {connect} from 'react-redux'
 
-declare var Streamr: any
-
 import type {Notification} from '../../flowtype/notification-types.js'
+
+declare var Streamr: {
+    showSuccess: (message: ?string, title: string, delay: number) => void,
+    showError: (message: ?string, title: string, delay: number) => void
+}
 
 class Notifier extends Component {
     props: {
