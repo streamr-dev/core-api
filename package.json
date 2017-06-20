@@ -10,7 +10,8 @@
     "test": "npm run test-old; npm run test-new",
     "test-old": "mocha web-app/js/unifina/test --recursive",
     "test-new": "node ./node_modules/.bin/jest ./web-app/react-app/tests",
-    "build": "./node_modules/.bin/webpack",
+    "build": "NODE_ENV=production ./node_modules/.bin/webpack",
+    "build-dev": "./node_modules/.bin/webpack",
     "dev": "./node_modules/.bin/webpack-dev-server",
     "flow": "./node_modules/.bin/flow"
   },

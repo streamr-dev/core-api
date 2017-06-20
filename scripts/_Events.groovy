@@ -1,4 +1,6 @@
-eventConfigureTomcat = {tomcat ->
+import grails.util.Environment
+
+eventConfigureTomcat = { tomcat ->
 	
 	// Enable compression, from http://www.slideshare.net/gr8conf/gr8conf-2011-tuning-grails-applications-by-peter-ledbrook
 	tomcat.connector.setAttribute("compression","on")
@@ -26,7 +28,14 @@ eventTestPhaseStart = { args ->
 eventPackagingEnd = { args ->
 	println "Running webpack build"
 	Runtime runtime = Runtime.getRuntime()
-	Process process = runtime.exec("npm run build")
+	String command
+	if (Environment.getCurrent() == Environment.PRODUCTION) {
+		command = "npm run build"
+	} else {
+		command = "npm run build-dev"
+	}
+	println "Running $command"
+	Process process = runtime.exec(command)
 	StreamGobbler outputGobbler = new StreamGobbler(process.getInputStream());
 	outputGobbler.start()
 }
