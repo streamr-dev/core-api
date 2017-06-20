@@ -40,11 +40,6 @@ class ProfileSettings extends Component {
             value: tz,
             label: tz
         }))
-        const user = this.props && this.props.user && this.props.user.currentUser || {
-            name: '',
-            username: '',
-            timezone: ''
-        }
         return (
             <div className="panel ">
                 <form method="POST" action="update">
@@ -54,7 +49,7 @@ class ProfileSettings extends Component {
                     <div className="panel-body">
                         <div className="form-group ">
                             <label className="control-label">Email</label>
-                            <div>{user.username}</div>
+                            <div>{this.props.user.username}</div>
                         </div>
             
                         <div className="form-group">
@@ -66,7 +61,7 @@ class ProfileSettings extends Component {
             
                         <div className="form-group ">
                             <label className="control-label">Full Name</label>
-                            <input name="name" type="text" className="form-control" value={user.name} onChange={this.onNameChange} required />
+                            <input name="name" type="text" className="form-control" value={this.props.user.name || ''} onChange={this.onNameChange} required />
                         </div>
                 
                         <div className="form-group ">
@@ -74,7 +69,7 @@ class ProfileSettings extends Component {
                             <Select
                                 placeholder="Select timezone"
                                 options={options}
-                                value={user.timezone}
+                                value={this.props.user.timezone}
                                 name="timezone"
                                 onChange={this.onTimezoneChange}
                                 required={true}
