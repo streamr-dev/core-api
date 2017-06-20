@@ -243,7 +243,7 @@ environments {
 /**
  * Aid IP address discovery by defining acceptable IP address prefixes (or empty if anything goes)
  */
-streamr.ip.address.prefixes = System.getProperty("streamr.ip.address.prefixes") ? Arrays.asList(System.getProperty("streamr.ip.address.prefixes").split(",")) : ["192.168.10.", "192.168.", "10."]
+streamr.ip.address.prefixes = System.getProperty("streamr.ip.address.prefixes") ? Arrays.asList(System.getProperty("streamr.ip.address.prefixes").split(",")) : ["192.168.10.", "192.168.", "10.", "172.18."]
 environments {
 	production {
 		streamr.ip.address.prefixes = []
@@ -253,7 +253,7 @@ environments {
 /**
  * UI update server address
  */
-streamr.ui.server = System.getProperty("streamr.ui.server") ?: "ws://dev.streamr/api/v1/ws"
+streamr.ui.server = System.getProperty("streamr.ui.server") ?: "ws://127.0.0.1:8890/api/v1/ws"
 environments {
 	production {
 		streamr.ui.server = System.getProperty("streamr.ui.server") ?: "${prodBaseUrl.replaceFirst("http", "ws")}/api/v1/ws"
@@ -263,7 +263,7 @@ environments {
 /**
  * HTTP API server address
  */
-streamr.http.api.server = System.getProperty("streamr.http.api.server") ?: "http://dev.streamr/api/v1"
+streamr.http.api.server = System.getProperty("streamr.http.api.server") ?: "http://127.0.0.1:8890/api/v1"
 environments {
 	production {
 		streamr.http.api.server = System.getProperty("streamr.ui.server") ?: "${prodBaseUrl}/api/v1"
@@ -273,8 +273,7 @@ environments {
 /**
  * Kafka config
  */
-streamr.kafka.bootstrap.servers = System.getProperty("streamr.kafka.bootstrap.servers") ?: "192.168.10.21:9093"
-streamr.kafka.zookeeper.connect = System.getProperty("streamr.kafka.zookeeper.connect") ?: "192.168.10.21:2182"
+streamr.kafka.bootstrap.servers = System.getProperty("streamr.kafka.bootstrap.servers") ?: "127.0.0.1:9092"
 streamr.kafka.producer.type = "async"
 streamr.kafka.queue.buffering.max.ms = "100"
 streamr.kafka.retry.backoff.ms = "500"
@@ -295,18 +294,19 @@ environments {
 /**
  * Redis config
  */
-streamr.redis.hosts = (System.getProperty("streamr.redis.hosts") ? Arrays.asList(System.getProperty("streamr.redis.hosts").split(",")) : ["dev.streamr"])
-streamr.redis.password = "AFuPxeVMwBKHV5Hm5SK3PkRZA"
+streamr.redis.hosts = (System.getProperty("streamr.redis.hosts") ? Arrays.asList(System.getProperty("streamr.redis.hosts").split(",")) : ["127.0.0.1"])
+streamr.redis.password = ""
 environments {
 	production {
 		streamr.redis.hosts = (System.getProperty("streamr.redis.hosts") ? Arrays.asList(System.getProperty("streamr.redis.hosts").split(",")) : ["redis1"])
+		streamr.redis.password = "AFuPxeVMwBKHV5Hm5SK3PkRZA"
 	}
 }
 
 /**
  * Cassandra config
  */
-streamr.cassandra.hosts = (System.getProperty("streamr.cassandra.hosts") ? Arrays.asList(System.getProperty("streamr.cassandra.hosts").split(",")) : ["dev.streamr"])
+streamr.cassandra.hosts = (System.getProperty("streamr.cassandra.hosts") ? Arrays.asList(System.getProperty("streamr.cassandra.hosts").split(",")) : ["127.0.0.1"])
 streamr.cassandra.keySpace = System.getProperty("streamr.cassandra.keySpace") ?: "streamr_dev"
 
 environments {
@@ -384,6 +384,33 @@ unifina.email.welcome.subject = "Welcome to Streamr"
 unifina.email.feedback.recipient = "contact@streamr.com"
 unifina.email.forgotPassword.subject = "Streamr Password Reset"
 unifina.email.shareInvite.subject = "%USER% shared a document with you in Streamr"
+
+/**
+ * Recaptcha config
+ */
+
+recaptcha.verifyUrl = "https://www.google.com/recaptcha/api/siteverify"
+
+environments {
+	production {
+		recaptchav2.sitekey = "6Le3vAkTAAAAAEo4ubtEnosXISPd8_0snV4KEZSe"
+		recaptchainvisible.sitekey = "6Lfish8UAAAAAF-w-HYi_TN_xcbWrFjGNef2Pgdp"
+		recaptchav2.secret = "6Le3vAkTAAAAADZEop2Jdlm8ZrsTX-4-nn2XqC7Z"
+		recaptchainvisible.secret = "6Lfish8UAAAAAE9XaXpFEDX7OjO4rKGFe1HdrSql"
+	}
+	development {
+		recaptchav2.sitekey = "6Le9vAkTAAAAALFIbNo2ftfteJ2aQPgfP-npkZXS"
+		recaptchav2.secret = "6Le9vAkTAAAAADoOwlVedDR15a-uy4mUbudvsg63"
+		recaptchainvisible.sitekey = "6LcNxB4UAAAAAO01yHgAVL6qxwWfOM8PxaKmP9LP"
+		recaptchainvisible.secret = "6LcNxB4UAAAAAMXCPU3sABq20HIbcIJCtMaIFn9o"
+	}
+	test {
+		recaptchav2.sitekey = "6LeIxAcTAAAAAJcZVRqyHh71UMIEGNQ_MXjiZKhI"
+		recaptchav2.secret = "6LeIxAcTAAAAAGG-vFI1TnRWxMZNFuojJ4WifJWe"
+		recaptchainvisible.sitekey = "6LeIxAcTAAAAAJcZVRqyHh71UMIEGNQ_MXjiZKhI"
+		recaptchainvisible.secret = "6LeIxAcTAAAAAGG-vFI1TnRWxMZNFuojJ4WifJWe"
+	}
+}
 
 /**
  * Signup Configs

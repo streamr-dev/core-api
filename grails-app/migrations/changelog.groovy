@@ -67,6 +67,4 @@ databaseChangeLog = {
 	include file: 'core/2017-02-15-update-map-module.groovy'
 	include file: 'core/2017-02-15-add-image-map-module.groovy'
 	include file: 'core/2017-05-15-getorcreatestream-module.groovy'
-	include file: 'core/2017-03-10-string-to-number-module.groovy'
-	include file: 'core/2017-05-30-mqtt-module.groovy'
 }
