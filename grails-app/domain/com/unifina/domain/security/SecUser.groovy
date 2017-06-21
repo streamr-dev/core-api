@@ -39,4 +39,22 @@ class SecUser {
 			timezone       : timezone,
 		]
 	}
+
+	@Override
+	boolean equals(Object obj) {
+		if (!obj instanceof SecUser) {
+			return false
+		}
+
+		if (obj.id == null || this.id == null) {
+			return this.is(obj)
+		} else {
+			return obj.id == this.id
+		}
+	}
+
+	@Override
+	int hashCode() {
+		return this.id?.hashCode() ?: super.hashCode()
+	}
 }
