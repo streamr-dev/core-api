@@ -15274,9 +15274,6 @@ button.arrow:after {
   max-width: 100px;
   white-space: pre-wrap;
 }
-.streamr-canvas .module .modulebody .leaflet-container {
-  width: 100%;
-}
 .streamr-canvas .module .modulefooter {
   width: 100%;
   margin-top: 3px;
