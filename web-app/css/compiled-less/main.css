@@ -15171,6 +15171,11 @@ button.arrow:after {
   width: 100%;
   height: 18px;
   margin-bottom: 5px;
+  display: -webkit-flex;
+  display: -moz-flex;
+  display: -ms-flexbox;
+  display: -o-flex;
+  display: flex;
   -webkit-flex: 0 0 auto;
   -moz-flex: 0 0 auto;
   -ms-flex: 0 0 auto;
@@ -15180,6 +15185,11 @@ button.arrow:after {
 .streamr-canvas .module .moduleheader .modulename {
   font-weight: bold;
   font-size: 12px;
+  -webkit-flex: 1 0 auto;
+  -moz-flex: 1 0 auto;
+  -ms-flex: 1 0 auto;
+  -o-flex: 1 0 auto;
+  flex: 1 0 auto;
 }
 .streamr-canvas .module .moduleheader .modulebutton {
   width: 16px;
@@ -15425,8 +15435,6 @@ textarea.comment {
 .event-table-module .table-module-container {
   -webkit-user-select: text;
   user-select: text;
-}
-.event-table-module .event-table-module-content {
   max-height: 400px;
   overflow: auto;
 }
