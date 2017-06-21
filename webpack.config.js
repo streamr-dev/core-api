@@ -9,8 +9,7 @@ const postcssConfig = require('./postcss.config.js')
 
 const root = path.resolve(__dirname)
 
-// TODO: CORE-959 webpacked resources fail in production, so temporarily disabled that mode
-const inProduction = false // process.env.NODE_ENV === 'production'
+const inProduction = process.env.NODE_ENV === 'production'
 
 module.exports = {
     entry: {
