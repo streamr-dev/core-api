@@ -4,6 +4,8 @@ import com.unifina.domain.data.Stream;
 import com.unifina.service.FeedService;
 import com.unifina.service.StreamService;
 import com.unifina.signalpath.*;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Configurable;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -17,14 +19,11 @@ public class SearchStream extends AbstractSignalPathModule {
 	private final MapOutput fields = new MapOutput(this, "fields");
 	private final BooleanOutput found = new BooleanOutput(this, "found");
 
+	@Autowired
 	private transient StreamService streamService;
 
 	@Override
 	public void sendOutput() {
-		if (streamService == null) {
-			streamService = getGlobals().getBean(StreamService.class);
-		}
-
 		Stream stream = streamService.findByName(searchName.getValue());
 		if (stream == null) {
 			found.send(false);

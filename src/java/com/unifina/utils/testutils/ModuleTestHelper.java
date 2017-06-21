@@ -12,6 +12,7 @@ import groovy.lang.Closure;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.lang.reflect.Field;
 import java.util.*;
 
 
@@ -166,6 +167,25 @@ public class ModuleTestHelper {
 		}
 
 		/**
+		 * Dependency inject objects, e.g., services
+		 */
+		public Builder injectDependency(String fieldName, Object service) {
+			if (testHelper.dependencyInjector == null) {
+				testHelper.dependencyInjector = new DependencyInjector<>(testHelper.module.getClass());
+			}
+			testHelper.dependencyInjector.addMapping(fieldName, service);
+			return this;
+		}
+
+		/**
+		 * Dependency inject objects, e.g., services
+		 */
+		public Builder injectDependency(DependencyInjector<? extends AbstractSignalPathModule> dependencyInjector) {
+			testHelper.dependencyInjector = dependencyInjector;
+			return this;
+		}
+
+		/**
 		 * Build the <code>ModuleTestHelper</code>. Throws <code>RuntimeException</code> if test setting has been
 		 * configured inappropriately.
 		 */
@@ -203,7 +223,6 @@ public class ModuleTestHelper {
 		}
 	}
 
-
 	private AbstractSignalPathModule module;
 	private Map<String, List<Object>> inputValuesByName;
 	private Map<String, List<Object>> outputValuesByName;
@@ -218,6 +237,7 @@ public class ModuleTestHelper {
 	private Closure<?> beforeEachTestCase = Closure.IDENTITY;
 	private Closure<?> afterEachTestCase = Closure.IDENTITY;
 	private Closure<?> moduleInstanceChanged = Closure.IDENTITY;
+	private DependencyInjector<? extends AbstractSignalPathModule> dependencyInjector;
 
 	private int inputValueCount;
 	private int outputValueCount;
@@ -456,6 +476,9 @@ public class ModuleTestHelper {
 			if (serializationMode == SerializationMode.SERIALIZE_DESERIALIZE) {
 				ByteArrayInputStream in = new ByteArrayInputStream(out.toByteArray());
 				module = (AbstractSignalPathModule) serializer.deserialize(in);
+				if (dependencyInjector != null) {
+					dependencyInjector.inject(module);
+				}
 				module.setGlobals(globalsTempHolder);
 				if (module.getParentSignalPath() != null) {
 					module.getParentSignalPath().setGlobals(globalsTempHolder);
@@ -509,6 +532,9 @@ public class ModuleTestHelper {
 		falsifyNoRepeats(module);
 		initAndAttachOutputsToModuleInputs();
 		connectCollectorsToModule(module);
+		if (dependencyInjector != null) {
+			dependencyInjector.inject(module);
+		}
 		setUpGlobals(module);
 		module.connectionsReady();
 	}
@@ -611,5 +637,50 @@ public class ModuleTestHelper {
 
 		@Override
 		public void clearState() { }
+	}
+
+	public static class DependencyInjector<T extends AbstractSignalPathModule> {
+		private final Map<List<Field>, Object> dependencyInjections = new HashMap<>();
+		private final Class<T> moduleClass;
+
+		public DependencyInjector(Class<T> moduleClass) {
+			this.moduleClass = moduleClass;
+		}
+
+		public DependencyInjector<T> addMapping(String fieldName, Object service) {
+			List<Field> fields = searchForFieldsThroughClassHierarchy(moduleClass, fieldName);
+			if (fields.isEmpty()) {
+				throw new RuntimeException("Field " + fieldName + " not found / accessible on module.");
+			}
+			for (Field f : fields) {
+				f.setAccessible(true);
+			}
+			dependencyInjections.put(fields, service);
+			return this;
+		}
+
+		public void inject(AbstractSignalPathModule module) {
+			for (Map.Entry<List<Field>, Object> mapping : dependencyInjections.entrySet()) {
+				try {
+					for (Field field : mapping.getKey()) {
+						field.set(module, mapping.getValue());
+					}
+				} catch (IllegalAccessException e) {
+					String s = "Field " + mapping.getKey().get(0).getName() + " could not be set: " + e.getMessage();
+					throw new RuntimeException(s);
+				}
+			}
+		}
+
+		private static List<Field> searchForFieldsThroughClassHierarchy(Class<?> clazz, String fieldName) {
+			List<Field> fields = new ArrayList<>();
+			do {
+				try {
+					fields.add(clazz.getDeclaredField(fieldName));
+				} catch (NoSuchFieldException e) {}
+				clazz = clazz.getSuperclass();
+			} while (!clazz.equals(AbstractSignalPathModule.class));
+			return fields;
+		}
 	}
 }

@@ -22,12 +22,20 @@ import java.util.concurrent.FutureTask;
 
 /**
  * The usual init procedure:
+ *
  * - Construct the module
+ * - Dependency injection
  * - Call module.init()
  * - Call module.setGlobals(globals)
  * - Call module.setName()
  * - Call module.setConfiguration()
  * - Call module.connectionsReady() -> module.initialize()
+ *
+ * The de-serialization procedure:
+ *  - Module de-serialized
+ *  - Dependency injection
+ *  - module.afterDeserialization()
+ *  - module.setGlobals(globals)
  */
 public abstract class AbstractSignalPathModule implements IEventRecipient, IDayListener, Serializable {
 

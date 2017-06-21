@@ -2,7 +2,6 @@ package com.unifina.signalpath.streams
 
 import com.unifina.domain.data.Stream
 import com.unifina.service.StreamService
-import com.unifina.utils.Globals
 import com.unifina.utils.testutils.ModuleTestHelper
 import grails.test.mixin.Mock
 import spock.lang.Specification
@@ -11,14 +10,10 @@ import spock.lang.Specification
 class SearchStreamSpec extends Specification {
 
 	SearchStream module
-	Globals globals
 
 	def setup() {
 		module = new SearchStream()
 		module.init()
-
-		globals = Mock(Globals)
-		globals.getBean(StreamService.class) >> new StreamService()
 
 		Stream stream = new Stream(name: "exists")
 		stream.id = "666-666-666-999"
@@ -43,7 +38,7 @@ class SearchStreamSpec extends Specification {
 
 		then:
 		new ModuleTestHelper.Builder(module, inputValues, outputValues)
-			.overrideGlobals { globals }
+			.injectDependency("streamService", new StreamService())
 			.test()
 	}
 }

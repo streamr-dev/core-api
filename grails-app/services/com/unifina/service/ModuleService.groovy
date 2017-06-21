@@ -9,12 +9,15 @@ import com.unifina.utils.Globals
 
 class ModuleService {
 
+	DependencyInjectionService dependencyInjectionService
+
 	@CompileStatic
 	AbstractSignalPathModule getModuleInstance(Module mod, Map config, SignalPath parent, Globals globals) {
 		// TODO: check that the owning user has the privileges to access this module
 
 		ClassLoader cl = this.getClass().getClassLoader()
 		AbstractSignalPathModule m = (AbstractSignalPathModule) cl.loadClass(mod.implementingClass).newInstance()
+		dependencyInjectionService.autowire(m)
 		m.globals = globals
 		m.init()
 		m.setDomainObject(mod)
