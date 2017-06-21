@@ -281,7 +281,9 @@ modules = {
 		resource url:[dir:'js/unifina/webpack-bundles', file:'commons.bundle.js']
 	}
 	'profile-page-webpack-bundle' {
-		dependsOn 'webpack-commons-bundle, confirm-button'
+// 		TODO: Comment back when there are more bundles than just one
+//		dependsOn 'webpack-commons-bundle'
+		dependsOn 'confirm-button'
 		resource url: [dir: 'js/unifina/webpack-bundles', file: 'profilePage.bundle.js', plugin: 'unifina-core']
 		resource url: [dir: 'js/unifina/webpack-bundles', file: 'profilePage.bundle.css', plugin: 'unifina-core']
 	}

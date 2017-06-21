@@ -102,7 +102,8 @@ module.exports = {
         new webpack.NoEmitOnErrorsPlugin(),
         new WebpackNotifierPlugin(),
         new WriteFilePlugin(),
-        new webpack.optimize.CommonsChunkPlugin('commons')
+        // TODO: Comment back when there are more bundles than just one
+        //new webpack.optimize.CommonsChunkPlugin('commons')
     ]),
     devtool: !inProduction && 'eval-source-map',
     resolve: {
