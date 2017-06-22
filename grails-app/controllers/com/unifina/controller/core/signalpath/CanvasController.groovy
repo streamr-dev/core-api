@@ -6,7 +6,6 @@ import com.unifina.domain.signalpath.Canvas
 import grails.converters.JSON
 import grails.plugin.springsecurity.SpringSecurityService
 import grails.plugin.springsecurity.annotation.Secured
-import org.atmosphere.cpr.BroadcasterFactory
 import org.codehaus.groovy.grails.commons.GrailsApplication
 import org.springframework.util.FileCopyUtils
 
@@ -101,7 +100,7 @@ class CanvasController {
 	
 	@Secured(["ROLE_ADMIN"])
 	def debug() {
-		return [runners: servletContext["signalPathRunners"], returnChannels: servletContext["returnChannels"], broadcasters: BroadcasterFactory.getDefault().lookupAll()]
+		return [runners: servletContext["signalPathRunners"], returnChannels: servletContext["returnChannels"]]
 	}
 
 	def loadBrowser() {

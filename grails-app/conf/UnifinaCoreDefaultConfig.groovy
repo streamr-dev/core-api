@@ -191,7 +191,7 @@ environments {
 /**
  * API & CORS config
  */
-cors.url.pattern = '/api/*'
+cors.url.pattern = ['/api/*', '/contact/send']
 cors.headers = ['Access-Control-Allow-Origin': '*']
 streamr.apiKey.revokeNotificationStream = "revoked-api-keys"
 
@@ -351,7 +351,6 @@ grails.plugin.springsecurity.adh.errorPage = null
 grails.plugin.springsecurity.securityConfigType = 'Annotation'
 
 grails.plugin.springsecurity.controllerAnnotations.staticRules = [
-	'/atmosphere/**': 		 ['ROLE_USER'],
 	'/user/**':            ['ROLE_ADMIN'],
 	'/register/**':				 ['IS_AUTHENTICATED_ANONYMOUSLY'],
 	'/webcomponents/*':				 ['IS_AUTHENTICATED_ANONYMOUSLY'],

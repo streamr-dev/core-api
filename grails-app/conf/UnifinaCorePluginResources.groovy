@@ -87,10 +87,6 @@ modules = {
 		resource url:[dir:'js/jsTree/themes/classic', file:'style.css', plugin: 'unifina-core']
 		resource url:[dir:'css/signalPath/widgets', file:'jstree-overrides.css', plugin: 'unifina-core']
 	}
-	atmosphere {
-		dependsOn 'jquery, jquery-migrate'
-		resource url:[dir:'js/atmosphere', file:'jquery.atmosphere.js', plugin: 'unifina-core']
-	}
 	hotkeys {
 		dependsOn 'jquery'
 		resource url:[dir:'js/hotkeys', file:'jquery.hotkeys.js', plugin: 'unifina-core']
