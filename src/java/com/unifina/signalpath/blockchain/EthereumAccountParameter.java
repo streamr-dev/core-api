@@ -25,7 +25,9 @@ class EthereumAccountParameter extends Parameter<IntegrationKey> {
 
 	String getAddress() {
 		if (hasValue()) {
-			checkPermission();
+			if (getOwner().getGlobals().isRunContext()) {
+				checkPermission();
+			}
 			return (String) ((Map) getValue().toMap().get("json")).get("address");
 		}
 		return null;
@@ -42,7 +44,7 @@ class EthereumAccountParameter extends Parameter<IntegrationKey> {
 	private void checkPermission() {
 		SecUser loggedInUser = getOwner().getGlobals().getUser();
 		SecUser integrationKeyUser = getValue().getUser();
-		if (getOwner().getGlobals().isRunContext() && !integrationKeyUser.equals(loggedInUser)) {
+		if (!integrationKeyUser.equals(loggedInUser)) {
 			throw new NotPermittedException("Not permitted to use integration key " + getValue().getId());
 		}
 	}
