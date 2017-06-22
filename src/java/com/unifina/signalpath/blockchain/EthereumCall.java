@@ -5,7 +5,6 @@ import com.unifina.signalpath.*;
 import com.unifina.signalpath.blockchain.templates.EthereumModuleOptions;
 import com.unifina.signalpath.remote.AbstractHttpModule;
 import com.unifina.utils.MapTraversal;
-import grails.util.Holders;
 import org.apache.http.HttpEntity;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.methods.HttpRequestBase;
@@ -25,8 +24,9 @@ import java.util.Map;
  */
 public class EthereumCall extends AbstractHttpModule {
 
-	EthereumModuleOptions ethereumOptions = new EthereumModuleOptions();
+	private EthereumModuleOptions ethereumOptions = new EthereumModuleOptions();
 
+	private final EthereumAccountParameter ethereumAccount = new EthereumAccountParameter(this, "ethAccount");
 	private EthereumContractInput contract = new EthereumContractInput(this, "contract");
 
 	private ListOutput errors = new ListOutput(this, "errors");
@@ -59,6 +59,7 @@ public class EthereumCall extends AbstractHttpModule {
 
 	@Override
 	public void init() {
+		addInput(ethereumAccount);
 		addInput(contract);
 		contract.setDrivingInput(false);
 		contract.canToggleDrivingInput = false;
@@ -217,9 +218,9 @@ public class EthereumCall extends AbstractHttpModule {
 		if (c.getAddress() == null) { throw new RuntimeException("Contract must be deployed before calling"); }
 
 		Map args = new HashMap<>();
-
-		args.put("source", ethereumOptions.getAddress());
-		args.put("key", ethereumOptions.getPrivateKey());
+		args.put("source", ethereumAccount.getAddress());
+		args.put("key", ethereumAccount.getPrivateKey());
+		args.put("gasprice", ethereumOptions.getGasPriceWei());
 		args.put("target", c.getAddress());
 
 		HttpPost request = null;

@@ -11,7 +11,9 @@ databaseChangeLog = {
 				constraints(nullable: "false")
 			}
 
-			column(name: "name", type: "VARCHAR(255)")
+			column(name: "name", type: "VARCHAR(255)") {
+				constraints(nullable: "false")
+			}
 
 			column(name: "date_created", type: "DATETIME") {
 				constraints(nullable: "false")
@@ -21,7 +23,7 @@ databaseChangeLog = {
 				constraints(nullable: "false")
 			}
 
-			column(name: "json", type: "VARCHAR(3000)")
+			column(name: "json", type: "LONGTEXT")
 
 			column(name: "user_id", type: "BIGINT") {
 				constraints(nullable: "false")

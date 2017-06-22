@@ -408,7 +408,7 @@
             this.titleInput = this.$el.find("input.dashboard-name.title-input")
             this.list = this.$el.find("#rsp-list")
             this.saveButton = this.$el.find("#saveButton")
-            this.shareButton = this.$el.find("#share-button")
+            this.shareButton = $(".share-button")
             this.deleteButton = this.$el.find("#deleteDashboardButton")
             _.each(this.canvases.models, function(canvas) {
                 var canvasView = new CanvasView({
@@ -454,6 +454,8 @@
                 })
                 if (_.contains(permissions, "share")) {
                     _this.shareButton.removeAttr("disabled")
+                    _this.shareButton.data('url', Streamr.createLink({uri: "api/v1/dashboards/" + _this.dashboard.get('id')}))
+                    _this.shareButton.data('name', _this.dashboard.get('name'))
                 } else {
                     _this.shareButton.addClass("forbidden")
                 }

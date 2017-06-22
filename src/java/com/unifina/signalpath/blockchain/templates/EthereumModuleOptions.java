@@ -11,20 +11,30 @@ import java.util.Map;
 public class EthereumModuleOptions implements Serializable {
 
 	private String network;
-	private String address;
-	private String privateKey;
+
+	//private Long gasPriceWei = 20_000_000_000L;		// Long.MAX_VALUE wei == 9 ETH
+	private double gasPriceWei = 20e9; // 20 Gwei
 
 	public EthereumModuleOptions() {
 		// default values
 		network = MapTraversal.getString(Holders.getConfig(), "streamr.ethereum.defaultNetwork");
-		address = "0x0";
-		privateKey = "0x0";
 	}
 
 	public void writeTo(ModuleOptions options) {
 		writeNetworkOption(options);
-		options.add(new ModuleOption("address", address, "string"));
-		options.add(new ModuleOption("privateKey", privateKey, "string"));
+		options.add(new ModuleOption("gasPriceGWei", gasPriceWei/1e9, "double"));
+	}
+
+	public static EthereumModuleOptions readFrom(ModuleOptions options) {
+		EthereumModuleOptions ethOpts = new EthereumModuleOptions();
+
+		ethOpts.readNetworkOption(options);
+
+		if (options.getOption("gasPriceGWei") != null) {
+			ethOpts.setGasPriceWei(options.getOption("gasPriceGWei").getDouble() * 1e9);
+		}
+
+		return ethOpts;
 	}
 
 	public void writeNetworkOption(ModuleOptions options) {
@@ -48,21 +58,6 @@ public class EthereumModuleOptions implements Serializable {
 		}
 	}
 
-	public static EthereumModuleOptions readFrom(ModuleOptions options) {
-		EthereumModuleOptions ethOpts = new EthereumModuleOptions();
-
-		ethOpts.readNetworkOption(options);
-
-		if (options.getOption("address") != null) {
-			ethOpts.setAddress(options.getOption("address").getString());
-		}
-		if (options.getOption("privateKey") != null) {
-			ethOpts.setPrivateKey(options.getOption("privateKey").getString());
-		}
-
-		return ethOpts;
-	}
-
 	public String getNetwork() {
 		return network;
 	}
@@ -71,20 +66,12 @@ public class EthereumModuleOptions implements Serializable {
 		this.network = network;
 	}
 
-	public String getAddress() {
-		return address;
+	public double getGasPriceWei() {
+		return gasPriceWei;
 	}
 
-	public void setAddress(String address) {
-		this.address = address;
-	}
-
-	public String getPrivateKey() {
-		return privateKey;
-	}
-
-	public void setPrivateKey(String privateKey) {
-		this.privateKey = privateKey;
+	public void setGasPriceWei(double gasPriceWei) {
+		this.gasPriceWei = gasPriceWei;
 	}
 
 	public String getServer() {

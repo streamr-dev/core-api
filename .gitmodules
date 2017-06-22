@@ -1,7 +1,3 @@
-[submodule "web-app/js/unifina/streamr-client"]
-	path = web-app/js/unifina/streamr-client
-	url = git@github.com:streamr-dev/streamr-client.git
-	branch = master
 [submodule "test/functional/core"]
 	path = test/functional/core
 	url = git@github.com:streamr-dev/core-functest-common.git
@@ -14,3 +10,6 @@
 [submodule "web-app/js/draggabilly"]
 	path = web-app/js/draggabilly
 	url = git@github.com:streamr-dev/draggabilly.git
+[submodule "web-app/js/unifina/streamr-client"]
+	path = web-app/js/unifina/streamr-client
+	url = git@github.com:streamr-dev/streamr-client

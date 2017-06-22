@@ -36,6 +36,9 @@ module.exports = {
                 }, {
                     loader: 'flowtype-loader'
                 }]
+                }, !inProduction ? {
+                    loader: 'flowtype-loader'
+                } : undefined].filter(i => i) // remove possible undefined
             },
             {
                 test: /.jsx?$/,
@@ -103,10 +106,7 @@ module.exports = {
         new webpack.NoEmitOnErrorsPlugin(),
         new WebpackNotifierPlugin(),
         new WriteFilePlugin(),
-        new webpack.optimize.CommonsChunkPlugin({
-            name: 'commons',
-            minChunks: 2
-        })
+        new webpack.optimize.CommonsChunkPlugin('commons')
     ]),
     devtool: !inProduction && 'eval-source-map',
     resolve: {

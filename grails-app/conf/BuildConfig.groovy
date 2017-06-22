@@ -17,6 +17,7 @@ grails.project.source.level = 1.7
 grails.project.class.dir = "target/classes"
 grails.project.test.class.dir = "target/test-classes"
 grails.project.test.reports.dir = "target/test-reports"
+grails.project.war.file = "target/ROOT.war"
 
 def gebVersion = "0.9.3"
 def seleniumVersion = "2.48.2"

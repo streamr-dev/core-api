@@ -5,18 +5,11 @@ import React from 'react'
 import IntegrationKeyHandlerTableRow from './IntegrationKeyHandlerTableRow'
 import {Table} from 'react-bootstrap'
 
-const unCamelCase = (str: string) => str
-    .replace(/([a-z])([A-Z])/g, '$1 $2')
-    .replace(/\b([A-Z]+)([A-Z])([a-z])/, '$1 $2$3')
-    .replace(/^./, s => s.toUpperCase())
+import {titleCase} from 'change-case'
 
 import styles from './integrationKeyHandlerTable.pcss'
 
-type IntegrationKey = {
-    id: string,
-    name: string,
-    json: {}
-}
+import type {IntegrationKey} from '../../../../types/user-types.js'
 
 export default class IntegrationKeyHandlerTable extends React.Component {
     
@@ -35,7 +28,7 @@ export default class IntegrationKeyHandlerTable extends React.Component {
                         <th className={styles.nameHeader}>Name</th>
                         {this.props.fields.map(f => (
                             <th key={f}>
-                                {unCamelCase(f)}
+                                {titleCase(f)}
                             </th>
                         ))}
                         <th className={styles.actionHeader}/>

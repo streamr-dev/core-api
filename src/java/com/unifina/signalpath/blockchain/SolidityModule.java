@@ -9,11 +9,11 @@ import com.mashape.unirest.http.Unirest;
 import com.unifina.signalpath.*;
 import com.unifina.signalpath.blockchain.templates.EthereumModuleOptions;
 import com.unifina.utils.MapTraversal;
-import grails.util.Holders;
 import org.apache.commons.lang.exception.ExceptionUtils;
 import org.apache.log4j.Logger;
 
 import java.math.BigDecimal;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Stack;
@@ -23,12 +23,19 @@ public class SolidityModule extends ModuleWithUI implements Pullable<EthereumCon
 	private static final Logger log = Logger.getLogger(SolidityModule.class);
 	protected static final String ADDRESS_PLACEHOLDER = "{{ADDRESS}}";
 
+	private final EthereumAccountParameter ethereumAccount = new EthereumAccountParameter(this, "ethAccount");
 	private Output<EthereumContract> contractOutput = null;
 
 	private EthereumModuleOptions ethereumOptions = new EthereumModuleOptions();
 	private String code = null;
 	private EthereumContract contract = null;
 	private DoubleParameter sendEtherParam = new DoubleParameter(this, "initial ETH", 0.0);
+
+	@Override
+	public void init() {
+		super.init();
+		ethereumAccount.setUpdateOnChange(true);
+	}
 
 	@Override
 	public void sendOutput() {
@@ -63,13 +70,11 @@ public class SolidityModule extends ModuleWithUI implements Pullable<EthereumCon
 	@Override
 	protected void onConfiguration(Map<String, Object> config) {
 		super.onConfiguration(config);
-		boolean compileRequested = config.containsKey("compile");
 
 		if (config.containsKey("code")) {
 			code = config.get("code").toString();
 		} else {
 			code = getCodeTemplate();
-			compileRequested = true;
 		}
 
 		if (config.containsKey("contract")) {
@@ -80,27 +85,35 @@ public class SolidityModule extends ModuleWithUI implements Pullable<EthereumCon
 		ethereumOptions = EthereumModuleOptions.readFrom(options);
 
 		try {
-			if (compileRequested && code != null) {
+			if (config.containsKey("compile") || (code != null && !code.trim().isEmpty() && ethereumAccount.getAddress() != null && (contract == null || !contract.isDeployed()))) {
 				contract = compile(code);
-			} else if (config.containsKey("deploy") && !contract.isDeployed()) {
-				EthereumABI.Function constructor = contract.getABI().getConstructor();
-				String sendWei = "0";
-				Stack<Object> args = new Stack<>();
-
-				if (constructor != null) {
-					List<Map> params = (List)config.get("params");
-					for (Map param : params) {
-						args.push(param.get("value"));
-					}
-					// for payable constructors, sendEtherParam is added in params after the ordinary function arguments
-					if (constructor.payable) {
-						BigDecimal valueWei = BigDecimal.valueOf(sendEtherParam.getValue()).multiply(BigDecimal.TEN.pow(18));
-						sendWei = valueWei.toBigInteger().toString();
-						args.pop();
-					}
+			}
+			if (config.containsKey("deploy")) {
+				// Make sure the contract is compiled
+				if (contract == null) {
+					contract = compile(code);
 				}
 
-				contract = deploy(code, args, sendWei);
+				if (!contract.isDeployed()) {
+					EthereumABI.Function constructor = contract.getABI().getConstructor();
+					String sendWei = "0";
+					Stack<Object> args = new Stack<>();
+
+					if (constructor != null) {
+						List<Map> params = (List) config.get("params");
+						for (Map param : params) {
+							args.push(param.get("value"));
+						}
+						// for payable constructors, sendEtherParam is added in params after the ordinary function arguments
+						if (constructor.payable) {
+							BigDecimal valueWei = BigDecimal.valueOf(sendEtherParam.getValue()).multiply(BigDecimal.TEN.pow(18));
+							sendWei = valueWei.toBigInteger().toString();
+							args.pop();
+						}
+					}
+
+					contract = deploy(code, args, sendWei);
+				}
 			}
 		} catch (Exception e) {
 			// TODO: currently I got no notification when URL was incorrect
@@ -141,7 +154,10 @@ public class SolidityModule extends ModuleWithUI implements Pullable<EthereumCon
 	}
 
 	private String replaceDynamicFields(String code) {
-		return code.replace(ADDRESS_PLACEHOLDER, ethereumOptions.getAddress());
+		if (ethereumAccount.getAddress() == null) {
+			throw new RuntimeException("No Ethereum account is selected. Please select the account you want to use, or if there are none, go to the user profile page to create one.");
+		}
+		return code.replace(ADDRESS_PLACEHOLDER, ethereumAccount.getAddress());
 	}
 
 	/** @returns EthereumContract with isDeployed() false */
@@ -189,13 +205,14 @@ public class SolidityModule extends ModuleWithUI implements Pullable<EthereumCon
 	private EthereumContract deploy(String code, List<Object> args, String sendWei) throws Exception {
 		code = replaceDynamicFields(code);
 
-		String bodyJson = new Gson().toJson(ImmutableMap.of(
-			"source", ethereumOptions.getAddress(),
-			"key", ethereumOptions.getPrivateKey(),
-			"code", code,
-			"args", args,
-			"value", sendWei
-		)).toString();
+		Map body = new HashMap<>();
+		body.put("source", ethereumAccount.getAddress());
+		body.put("key", ethereumAccount.getPrivateKey());
+		body.put("gasprice", ethereumOptions.getGasPriceWei());
+		body.put("code", code);
+		body.put("args", args);
+		body.put("value", sendWei);
+		String bodyJson = new Gson().toJson(body);
 
 		Unirest.setTimeouts(10*1000, 10*60*1000); // wait patiently for the next mined block, up to 10 minutes
 
