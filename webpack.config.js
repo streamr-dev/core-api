@@ -33,9 +33,6 @@ module.exports = {
                     options: {
                         configFile: path.resolve(root, '.eslintrc.js')
                     }
-                }, {
-                    loader: 'flowtype-loader'
-                }]
                 }, !inProduction ? {
                     loader: 'flowtype-loader'
                 } : undefined].filter(i => i) // remove possible undefined
