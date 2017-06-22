@@ -82,8 +82,12 @@ public class HistoricalEventQueue extends DataSourceEventQueue {
 			globals.time = firstDate;
 		}
 
-		queue.add(new PlaceholderFeedEvent(globals.getStartDate()));
-		queue.add(new PlaceholderFeedEvent(globals.getEndDate()));
+		/**
+		 * Queue events at lower and upper bounds of selected playback range to ensure that MasterClock ticks through
+		 * range even in the absence of feed data.
+		 */
+		queue.add(PlaybackMessage.newStartEvent(globals.getStartDate()));
+		queue.add(PlaybackMessage.newEndEvent(globals.getEndDate()));
 		
 		/**
 		 * Initialize some values
@@ -178,7 +182,7 @@ public class HistoricalEventQueue extends DataSourceEventQueue {
 		}
 
 		// Handle event
-		event.deliverToRecipient();
+		event.deliver();
 		return true;
 	}
 	

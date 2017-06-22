@@ -94,9 +94,7 @@ public class RealtimeEventQueue extends DataSourceEventQueue implements IEventRe
 				globals.time = event.timestamp;
 			}
 
-			if (event.recipient != null) {
-				event.deliverToRecipient();
-			}
+			event.deliver();
 
 			return true;
 
