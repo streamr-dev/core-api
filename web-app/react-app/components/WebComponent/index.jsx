@@ -1,8 +1,13 @@
 // @flow
 
 import React, {Component} from 'react'
+import path from 'path'
+import createLink from '../../createLink'
 
 type type = 'streamr-chart' | 'streamr-table' | 'streamr-label' | 'streamr-map'
+
+import type {Dashboard} from '../../flowtype/dashboard-types.js'
+import type {Canvas, CanvasModule} from '../../flowtype/canvas-types.js'
 
 export default class WebComponent extends Component {
     webcomponent: HTMLElement
@@ -12,7 +17,10 @@ export default class WebComponent extends Component {
         url: string,
         type: type,
         webComponentRef: Function,
-        onError: Function
+        onError: Function,
+        dashboardId: Dashboard.id,
+        canvasId: Canvas.id,
+        moduleId: CanvasModule.id
     }
     static defaultProps = {
         webComponentRef: () => {},
@@ -41,7 +49,7 @@ export default class WebComponent extends Component {
     }
     
     render() {
-        const Type = this.props.type
+        const {type: Type, dashboardId, canvasId, moduleId} = this.props
         return (
             <Type
                 ref={item => {
@@ -49,7 +57,7 @@ export default class WebComponent extends Component {
                     this.props.webComponentRef(item)
                 }}
                 className="streamr-widget non-draggable"
-                url={this.props.url}
+                url={createLink(path.resolve('/api/v1/dashboards', dashboardId, 'canvases', canvasId, 'modules', moduleId))}
             />
         )
     }

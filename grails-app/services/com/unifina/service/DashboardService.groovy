@@ -2,6 +2,7 @@ package com.unifina.service
 
 import com.unifina.api.NotFoundException
 import com.unifina.api.NotPermittedException
+import com.unifina.api.SaveDashboardCommand
 import com.unifina.api.SaveDashboardItemCommand
 import com.unifina.api.ValidationException
 import com.unifina.domain.dashboard.Dashboard
@@ -13,6 +14,7 @@ import com.unifina.domain.signalpath.Canvas
 import com.unifina.signalpath.RuntimeRequest
 import grails.converters.JSON
 import groovy.transform.CompileStatic
+import org.codehaus.groovy.grails.web.json.JSONArray
 
 class DashboardService {
 
@@ -52,39 +54,30 @@ class DashboardService {
 		dashboard.delete()
 	}
 
-	private static Dashboard addOrUpdateItems(Dashboard savedDashboard, items) {
-		for (int i = 0; i < items.size(); i++) {
-			def item = items[i]
-			DashboardItem dashboardItem = DashboardItem.findOrCreateById(item.id)
-			dashboardItem.setProperties(item)
-
-			// These must be manually set
-			dashboardItem.id = item.id
-			dashboardItem.dashboard = savedDashboard
-
-			dashboardItem.save(failOnError: true)
-		}
-	}
-
 	/**
-	 * Create Dashboard by command, and authorize that user is permitted to do so.
+	 * Create Dashboard by command.
 	 *
 	 * @param data
 	 * @param user
 	 * @return
 	 */
-	Dashboard create(Map data, SecUser user) {
-		def items = data.items
-		data.remove("items")
+	Dashboard create(SaveDashboardCommand validCommand, SecUser user) {
+		List<DashboardItem> items = validCommand.items.clone()
 
-		Dashboard dashboard = new Dashboard(data << [user: user])
-		dashboard.id = data.id
+		validCommand.items = []
+		Dashboard dashboard = new Dashboard(validCommand.properties)
+		dashboard.user = user
 		dashboard.save(failOnError: true)
 
-		if (items) {
-			addOrUpdateItems(dashboard, items)
+		items.items.each {
+			if (!it.validate()) {
+				throw new ValidationException(it.errors)
+			}
+			DashboardItem item = new DashboardItem(it.properties)
+			dashboard.addToItems(it)
+			it.save(failOnError: true)
 		}
-
+		dashboard.save(failOnError: true)
 		return dashboard
 	}
 
@@ -97,19 +90,44 @@ class DashboardService {
 	 * @throws NotPermittedException when dashboard was found but user not permitted to update it
 	 * @return
 	 */
-	Dashboard update(Map data, SecUser user) throws NotFoundException, NotPermittedException {
-		def items = data.items
-		Dashboard dashboard = authorizedGetById(data.id, user, Permission.Operation.WRITE)
+	Dashboard update(SaveDashboardCommand validCommand, SecUser user) throws NotFoundException, NotPermittedException {
+		Dashboard dashboard = authorizedGetById(validCommand.id, user, Operation.WRITE)
 
-		dashboard.name = data.name
-		dashboard.layout = data.layout
-		dashboard.save(failOnError: true)
+		def properties = validCommand.properties.subMap(["name", "layout"])
+		dashboard.setProperties(properties)
 
-		if (items) {
-			addOrUpdateItems(dashboard, items)
+		Set<String> ids = dashboard.items.collect { it.id } as Set
+
+		validCommand.items.each {
+			if (!it.validate()) {
+				throw new ValidationException(it.errors)
+			}
+			DashboardItem item
+			if (ids.contains(it.id)) {
+				item = DashboardItem.findByDashboardAndId(dashboard, it.id)
+				item.setProperties(it.properties)
+				ids.remove(it.id)
+			} else {
+				item = new DashboardItem(it.properties)
+				dashboard.addToItems(item)
+			}
+			item.save(failOnError: true)
 		}
 
-		return dashboard
+		ids.collect {
+			DashboardItem item = DashboardItem.findByDashboardAndId(dashboard, it)
+			dashboard.removeFromItems(item)
+			item.delete()
+		}
+
+		if (!dashboard.validate()) {
+			throw new ValidationException(dashboard.errors)
+		}
+
+		dashboard.save(failOnError: true)
+
+
+		return Dashboard.findById(validCommand.id)
 	}
 
 	/**
@@ -123,7 +141,7 @@ class DashboardService {
 	 * @throws NotPermittedException not permitted to read dashboard
 	 */
 	@CompileStatic
-	DashboardItem findDashboardItem(String dashboardId, Long itemId, SecUser user)
+	DashboardItem findDashboardItem(String dashboardId, String itemId, SecUser user)
 		throws NotFoundException, NotPermittedException {
 		return authorizedGetDashboardItem(dashboardId, itemId, user, Permission.Operation.READ)
 	}
@@ -181,21 +199,21 @@ class DashboardService {
 	 * @throws ValidationException when command object is not valid
 	 */
 	@CompileStatic
-	DashboardItem updateDashboardItem(String dashboardId, Long itemId, SaveDashboardItemCommand command, SecUser user)
+	DashboardItem updateDashboardItem(String dashboardId, String itemId, SaveDashboardItemCommand command, SecUser user)
 		throws NotFoundException, NotPermittedException, ValidationException {
 		if (!command.validate()) {
 			throw new ValidationException(command.errors)
 		}
 
 		def item = authorizedGetDashboardItem(dashboardId, itemId, user, Operation.WRITE)
-		command.copyValuesTo(item)
+		item.setProperties(command.properties)
 		item.save(failOnError: true)
 
 		return item
 	}
 
 	@CompileStatic
-	DashboardItem authorizedGetDashboardItem(String dashboardId, Long itemId, SecUser user, Operation operation) {
+	DashboardItem authorizedGetDashboardItem(String dashboardId, String itemId, SecUser user, Operation operation) {
 		def dashboard = authorizedGetById(dashboardId, user, operation)
 		def dashboardItem = dashboard.items?.find { DashboardItem item -> item.id == itemId }
 		if (dashboardItem == null) {

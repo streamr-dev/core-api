@@ -3,7 +3,7 @@
 import React from 'react'
 
 import { connect } from 'react-redux'
-import { getIntegrationKeysByService, createIntegrationKey, deleteIntegrationKey } from '../../../../actions/integrationKeys'
+import { getIntegrationKeysByService, createIntegrationKey, deleteIntegrationKey } from '../../../../actions/integrationKey'
 
 import {Col, ControlLabel} from 'react-bootstrap'
 

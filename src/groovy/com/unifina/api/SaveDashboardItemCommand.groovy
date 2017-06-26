@@ -7,14 +7,14 @@ import groovy.transform.CompileStatic
 
 @Validateable
 class SaveDashboardItemCommand {
+	String id
 	String title
 	Canvas canvas
 	Integer module
 	String webcomponent
-	int ord
-	String size
 
 	static constraints = {
+		id(nullable: false)
 		title(blank: false)
 		canvas(blank: false)
 		module(nullable: false)
@@ -29,13 +29,5 @@ class SaveDashboardItemCommand {
 		)
 		item.updateWebcomponent()
 		return item
-	}
-
-	@CompileStatic
-	void copyValuesTo(DashboardItem dashboardItem) {
-		dashboardItem.title = title
-		dashboardItem.canvas = canvas
-		dashboardItem.module = module
-		dashboardItem.updateWebcomponent()
 	}
 }

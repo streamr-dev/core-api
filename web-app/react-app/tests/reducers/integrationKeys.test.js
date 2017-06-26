@@ -1,6 +1,6 @@
 
-import reducer from '../../reducers/integrationKeys'
-import * as actions from '../../actions/integrationKeys'
+import reducer from '../../reducers/integrationKey'
+import * as actions from '../../actions/integrationKey'
 import expect from 'expect'
 
 global._ = require('lodash')

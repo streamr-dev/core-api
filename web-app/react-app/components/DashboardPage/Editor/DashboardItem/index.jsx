@@ -2,8 +2,6 @@
 
 import React, {Component} from 'react'
 import {connect} from 'react-redux'
-import path from 'path'
-import createLink from '../../../../createLink'
 import {showError} from '../../../../actions/notification'
 
 import TitleRow from './DashboardItemTitleRow'
@@ -23,6 +21,10 @@ class DashboardItem extends Component {
         dragCancelClassName?: string,
         currentLayout: ?{},
         showError: Function
+    }
+    static defaultProps = {
+        item: {},
+        dashboard: {}
     }
     
     constructor() {
@@ -50,21 +52,23 @@ class DashboardItem extends Component {
     }
 
     render() {
-        const dbItem = this.props.item || {}
+        const {item, dashboard} = this.props
         return (
             <div className={styles.dashboardItem}>
                 <div className={styles.header}>
-                    <TitleRow dashboard={this.props.dashboard} item={dbItem} dragCancelClassName={this.props.dragCancelClassName}/>
+                    <TitleRow dashboard={this.props.dashboard} item={item} dragCancelClassName={this.props.dragCancelClassName}/>
                 </div>
                 <div className={`${styles.body} ${this.props.dragCancelClassName || ''}`}>
-                    <div className={`${styles.wrapper} ${styles[dbItem.webcomponent] || dbItem.webcomponent}`}>
-                        {dbItem.webcomponent && (
+                    <div className={`${styles.wrapper} ${styles[item.webcomponent] || item.webcomponent}`}>
+                        {item.webcomponent && (
                             <WebComponent
                                 ref={i => this.a = i}
-                                type={dbItem.webcomponent}
+                                type={item.webcomponent}
                                 onError={this.props.showError}
                                 webComponentRef={item => this.webcomponent = item}
-                                url={createLink(path.resolve('/api/v1/dashboards', dbItem.dashboard.toString(), 'canvases', dbItem.canvas.toString(), 'modules', dbItem.module.toString()))}
+                                dashboardId={dashboard.id}
+                                canvasId={item.canvas}
+                                moduleId={item.module.toString()}
                             />
                         )}
                     </div>

@@ -32,6 +32,7 @@
     "babel-preset-stage-0": "^6.24.1",
     "backbone": "file:web-app/js/backbone",
     "backbone-associations": "file:web-app/js/backbone-associations",
+    "change-case": "^3.0.1",
     "css-loader": "^0.28.1",
     "css-mqpacker": "^6.0.0",
     "draggabilly": "^2.1.1",

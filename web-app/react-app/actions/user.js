@@ -3,7 +3,8 @@
 import axios from 'axios'
 import parseError from './utils/parseError'
 
-import type {User} from '../types/user-types'
+import type {ApiError} from '../flowtype/common-types'
+import type {User} from '../flowtype/user-types'
 
 export const GET_CURRENT_USER_REQUEST = 'GET_CURRENT_USER_REQUEST'
 export const GET_CURRENT_USER_SUCCESS = 'GET_CURRENT_USER_SUCCESS'
@@ -18,7 +19,6 @@ declare var Streamr: {
     createLink: Function
 }
 
-import type {Err} from './utils/parseError'
 
 export const getCurrentUser = () => (dispatch: Function) => {
     dispatch(getCurrentUserRequest())
@@ -52,7 +52,7 @@ const getCurrentUserSuccess = (user: User) => ({
     user
 })
 
-const getCurrentUserFailure = (error: Err) => ({
+const getCurrentUserFailure = (error: ApiError) => ({
     type: GET_CURRENT_USER_FAILURE,
     error
 })

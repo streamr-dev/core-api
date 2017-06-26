@@ -1,6 +1,7 @@
 package com.unifina.domain.dashboard
 
 import com.unifina.domain.security.SecUser
+import com.unifina.utils.AssignedIdGenerator
 import groovy.transform.CompileStatic
 
 class Dashboard {
@@ -20,13 +21,14 @@ class Dashboard {
 	static hasMany = [items: DashboardItem]
 
 	static constraints = {
-		name(nullable: true, blank: false)
-		layout(nullable: true)
+		name nullable: true, blank: false
+		layout nullable: true
+		id bindable: true
 	}
 
 	static mapping = {
-		items cascade: 'merge'
-		id generator: 'assigned'
+		items cascade: "merge"
+		id generator: "assigned"
 	}
 
 	@CompileStatic
