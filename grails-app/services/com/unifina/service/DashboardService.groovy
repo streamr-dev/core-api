@@ -57,7 +57,7 @@ class DashboardService {
 	/**
 	 * Create Dashboard by command.
 	 *
-	 * @param data
+	 * @param validCommand
 	 * @param user
 	 * @return
 	 */
@@ -81,7 +81,7 @@ class DashboardService {
 	/**
 	 * Update Dashboard by command, and authorize that user is permitted to do so.
 	 *
-	 * @param data
+	 * @param validCommand
 	 * @param user
 	 * @throws NotFoundException when dashboard was not found.
 	 * @throws NotPermittedException when dashboard was found but user not permitted to update it

@@ -4,9 +4,9 @@ import {
     GET_AND_REPLACE_INTEGRATION_KEYS_REQUEST,
     GET_AND_REPLACE_INTEGRATION_KEYS_SUCCESS,
     GET_AND_REPLACE_INTEGRATION_KEYS_FAILURE,
-    GET_INTEGRATION_KEYS_BY_TYPE_REQUEST,
-    GET_INTEGRATION_KEYS_BY_TYPE_SUCCESS,
-    GET_INTEGRATION_KEYS_BY_TYPE_FAILURE,
+    GET_INTEGRATION_KEYS_BY_SERVICE_REQUEST,
+    GET_INTEGRATION_KEYS_BY_SERVICE_SUCCESS,
+    GET_INTEGRATION_KEYS_BY_SERVICE_FAILURE,
     CREATE_INTEGRATION_KEY_REQUEST,
     CREATE_INTEGRATION_KEY_SUCCESS,
     CREATE_INTEGRATION_KEY_FAILURE,
@@ -25,11 +25,11 @@ const initialState = {
     fetching: false
 }
 
-const integrationKey = function(state: State = initialState, action: Action) : State {
+export default function(state: State = initialState, action: Action) : State {
     
     switch (action.type) {
         case GET_AND_REPLACE_INTEGRATION_KEYS_REQUEST:
-        case GET_INTEGRATION_KEYS_BY_TYPE_REQUEST:
+        case GET_INTEGRATION_KEYS_BY_SERVICE_REQUEST:
         case CREATE_INTEGRATION_KEY_REQUEST:
         case DELETE_INTEGRATION_KEY_REQUEST:
             return {
@@ -39,13 +39,13 @@ const integrationKey = function(state: State = initialState, action: Action) : S
         case GET_AND_REPLACE_INTEGRATION_KEYS_SUCCESS:
             return {
                 ...state,
-                listsByService: _.groupBy(action.integrationKeys, integrationKey => integrationKey.type),
+                listsByService: _.groupBy(action.integrationKeys, integrationKey => integrationKey.service),
                 fetching: false,
                 error: null
             }
-        case GET_INTEGRATION_KEYS_BY_TYPE_SUCCESS: {
+        case GET_INTEGRATION_KEYS_BY_SERVICE_SUCCESS: {
             if (!action.service) {
-                throw new Error(`${GET_INTEGRATION_KEYS_BY_TYPE_SUCCESS} requires action.service`)
+                throw new Error(`${GET_INTEGRATION_KEYS_BY_SERVICE_SUCCESS} requires action.service`)
             }
             return {
                 ...state,
@@ -58,18 +58,18 @@ const integrationKey = function(state: State = initialState, action: Action) : S
             }
         }
         case CREATE_INTEGRATION_KEY_SUCCESS: {
-            if (!action.integrationKey || !action.integrationKey.type) {
-                throw new Error(`${GET_INTEGRATION_KEYS_BY_TYPE_SUCCESS} requires action.integrationKey and action.integrationKey.type`)
+            if (!action.integrationKey || !action.integrationKey.service) {
+                throw new Error(`${GET_INTEGRATION_KEYS_BY_SERVICE_SUCCESS} requires action.integrationKey and action.integrationKey.service`)
             }
             // These are just to make sure that flow is happy
             const listsByService = state.listsByService || {}
-            const existing = listsByService[action.integrationKey.type] || []
+            const existing = listsByService[action.integrationKey.service] || []
             
             return {
                 ...state,
                 listsByService: {
                     ...listsByService,
-                    [action.integrationKey.type]: [
+                    [action.integrationKey.service]: [
                         ...existing,
                         action.integrationKey
                     ]
@@ -87,7 +87,7 @@ const integrationKey = function(state: State = initialState, action: Action) : S
             }
         }
         case GET_AND_REPLACE_INTEGRATION_KEYS_FAILURE:
-        case GET_INTEGRATION_KEYS_BY_TYPE_FAILURE:
+        case GET_INTEGRATION_KEYS_BY_SERVICE_FAILURE:
         case CREATE_INTEGRATION_KEY_FAILURE:
         case DELETE_INTEGRATION_KEY_FAILURE:
             return {
@@ -99,5 +99,3 @@ const integrationKey = function(state: State = initialState, action: Action) : S
             return state
     }
 }
-
-export default integrationKey

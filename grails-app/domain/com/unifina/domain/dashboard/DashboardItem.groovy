@@ -8,7 +8,7 @@ class DashboardItem implements Comparable {
 	String id
 	String title
 	Canvas canvas
-//	Dashboard dashboard
+	Dashboard dashboard
 	Integer module
 	String webcomponent
 
@@ -32,7 +32,7 @@ class DashboardItem implements Comparable {
 	Map toMap() {
 		return [
 				id          : id,
-//				dashboard   : dashboard?.id,
+				dashboard   : dashboard?.id,
 				title       : title,
 				canvas      : canvas?.id,
 				module      : module,

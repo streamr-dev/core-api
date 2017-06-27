@@ -23,8 +23,6 @@ class DashboardController {
 
 
 	def editor() {
-		return [
-			config: grailsApplication.config
-		]
+		return [:]
 	}
 }

@@ -83,7 +83,7 @@ describe('IntegrationKey reducer', () => {
     it('should handle GET_AND_REPLACE_INTEGRATION_KEYS', () => {
         expect(
             reducer({}, {
-                type: actions.GET_INTEGRATION_KEYS_BY_TYPE_REQUEST
+                type: actions.GET_INTEGRATION_KEYS_BY_SERVICE_REQUEST
             })
         ).toEqual({
             fetching: true
@@ -91,7 +91,7 @@ describe('IntegrationKey reducer', () => {
         
         expect(
             reducer({}, {
-                type: actions.GET_INTEGRATION_KEYS_BY_TYPE_SUCCESS,
+                type: actions.GET_INTEGRATION_KEYS_BY_SERVICE_SUCCESS,
                 service: 'B',
                 integrationKeys: [{
                     id: 1
@@ -119,7 +119,7 @@ describe('IntegrationKey reducer', () => {
             reducer({
                 list: ['test']
             }, {
-                type: actions.GET_INTEGRATION_KEYS_BY_TYPE_FAILURE,
+                type: actions.GET_INTEGRATION_KEYS_BY_SERVICE_FAILURE,
                 error: 'test-error'
             })
         ).toEqual({

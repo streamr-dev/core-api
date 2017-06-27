@@ -1,7 +1,7 @@
 
 export type IntegrationKey = {
     name: string,
-    type: string,
+    service: string,
     json: {}
 }
 
