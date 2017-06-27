@@ -1,6 +1,8 @@
 package com.unifina.signalpath.blockchain
 
 import com.unifina.api.NotPermittedException
+import com.unifina.datasource.DataSource
+import com.unifina.datasource.RealtimeDataSource
 import com.unifina.domain.security.IntegrationKey
 import com.unifina.domain.security.SecUser
 import com.unifina.service.EthereumIntegrationKeyService
@@ -88,7 +90,7 @@ class EthereumAccountParameterSpec extends Specification {
 		parameter.getAddress() == "0xffff"
 	}
 
-	void "getAddress() throws exception, after configuration, if not logged in as user"() {
+	void "getAddress() return values from json, after configuration, if not logged in as user and canvas not running"() {
 		setup:
 		SecUser user = new SecUser(name: "name", username: "name@name.com", password: "pass").save(failOnError: true, validate: false, flush: true)
 		IntegrationKey key = new IntegrationKey(name: "key", service: IntegrationKey.Service.ETHEREUM, user: user)
@@ -101,6 +103,27 @@ class EthereumAccountParameterSpec extends Specification {
 		parameter.setConfiguration([value: "account-1"])
 		parameter.getOwner().setGlobals(new Globals())
 		parameter.getOwner().getGlobals().setUser(new SecUser())
+
+		then:
+		parameter.getAddress() == "0xffff"
+	}
+
+	void "getAddress() throws exception, after configuration, if not logged in as user and canvas running"() {
+		setup:
+		SecUser user = new SecUser(name: "name", username: "name@name.com", password: "pass").save(failOnError: true, validate: false, flush: true)
+		IntegrationKey key = new IntegrationKey(name: "key", service: IntegrationKey.Service.ETHEREUM, user: user)
+
+		key.id = "account-1"
+		key.json = '{ "privateKey": "0x0000", "address": "0xffff"}'
+		key.save(failOnError: true, validate: true)
+
+		Globals globals = new Globals()
+		globals.setUser(new SecUser())
+		globals.setDataSource(new RealtimeDataSource(globals))
+
+		when:
+		parameter.setConfiguration([value: "account-1"])
+		parameter.getOwner().setGlobals(globals)
 
 		parameter.getAddress() == "0xffff"
 
