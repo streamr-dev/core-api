@@ -62,20 +62,17 @@ class DashboardService {
 	 * @return
 	 */
 	Dashboard create(SaveDashboardCommand validCommand, SecUser user) {
-		List<DashboardItem> items = validCommand.items.clone()
-
-		validCommand.items = []
-		Dashboard dashboard = new Dashboard(validCommand.properties)
+		Dashboard dashboard = new Dashboard(validCommand.properties.subMap(["id", "name", "layout"]))
 		dashboard.user = user
 		dashboard.save(failOnError: true)
 
-		items.items.each {
+		validCommand.items.each {
 			if (!it.validate()) {
 				throw new ValidationException(it.errors)
 			}
 			DashboardItem item = new DashboardItem(it.properties)
-			dashboard.addToItems(it)
-			it.save(failOnError: true)
+			dashboard.addToItems(item)
+			item.save(failOnError: true)
 		}
 		dashboard.save(failOnError: true)
 		return dashboard

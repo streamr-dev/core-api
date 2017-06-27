@@ -1,7 +1,6 @@
 package com.unifina.domain.dashboard
 
 import com.unifina.domain.security.SecUser
-import com.unifina.utils.AssignedIdGenerator
 import groovy.transform.CompileStatic
 
 class Dashboard {

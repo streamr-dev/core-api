@@ -78,7 +78,12 @@ class DashboardItem extends Component {
     }
 }
 
-const mapStateToProps = () => ({})
+const mapStateToProps = ({dashboard: {dashboardsById, openDashboard}}) => {
+    const dashboard = dashboardsById[openDashboard.id]
+    return {
+        dashboard
+    }
+}
 
 const mapDispatchToProps = (dispatch) => ({
     showError({detail}) {

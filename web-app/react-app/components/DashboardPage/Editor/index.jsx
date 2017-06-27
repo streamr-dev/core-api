@@ -201,8 +201,7 @@ class Editor extends Component {
                 >
                     {items.map(dbItem => (
                         <div key={dbItem.id.toString()}>
-                            <DashboardItem currentLayout={this.state.layoutsByItemId[dbItem.id]} item={dbItem}
-                                           dashboard={dashboard} dragCancelClassName={dragCancelClassName}/>
+                            <DashboardItem item={dbItem} currentLayout={this.state.layoutsByItemId[dbItem.id]} dragCancelClassName={dragCancelClassName}/>
                         </div>
                     ))}
                 </ResponsiveReactGridLayout>
@@ -219,7 +218,7 @@ const mapStateToProps = ({dashboard}) => {
         dashboard: db,
         canShare,
         canWrite,
-        editorLocked: db.editingLocked ? true : !canWrite
+        editorLocked: db.editingLocked || (!db.new && !canWrite)
     }
 }
 
