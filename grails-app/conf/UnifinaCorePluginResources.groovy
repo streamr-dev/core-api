@@ -282,12 +282,12 @@ modules = {
 		resource url:[dir:'js/unifina/webpack-bundles', file:'commons.bundle.css']
 	}
 	'profile-page-webpack-bundle' {
-		dependsOn 'webpack-commons-bundle, confirm-button'
+		dependsOn 'webpack-commons-bundle'
 		resource url: [dir: 'js/unifina/webpack-bundles', file: 'profilePage.bundle.js', plugin: 'unifina-core']
 		resource url: [dir: 'js/unifina/webpack-bundles', file: 'profilePage.bundle.css', plugin: 'unifina-core']
 	}
 	'dashboard-page-webpack-bundle' {
-		dependsOn 'webpack-commons-bundle, confirm-button'
+		dependsOn 'webpack-commons-bundle'
 		resource url: [dir: 'js/unifina/webpack-bundles', file: 'dashboardPage.bundle.js', plugin: 'unifina-core']
 		resource url: [dir: 'js/unifina/webpack-bundles', file: 'dashboardPage.bundle.css', plugin: 'unifina-core']
 	}
