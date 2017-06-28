@@ -12,9 +12,9 @@ import com.unifina.domain.security.Permission.Operation
 import com.unifina.domain.security.SecUser
 import com.unifina.domain.signalpath.Canvas
 import com.unifina.signalpath.RuntimeRequest
+import com.unifina.utils.IdGenerator
 import grails.converters.JSON
 import groovy.transform.CompileStatic
-import org.codehaus.groovy.grails.web.json.JSONArray
 
 class DashboardService {
 
@@ -63,6 +63,9 @@ class DashboardService {
 	 */
 	Dashboard create(SaveDashboardCommand validCommand, SecUser user) {
 		Dashboard dashboard = new Dashboard(validCommand.properties.subMap(["id", "name", "layout"]))
+		if (!dashboard.id) {
+			dashboard.id = IdGenerator.get()
+		}
 		dashboard.user = user
 		dashboard.save(failOnError: true)
 
@@ -151,7 +154,7 @@ class DashboardService {
 	 * @throws NotFoundException when dashboard or dashboard item was not found.
 	 * @throws NotPermittedException when dashboard was found but user not permitted to update it
 	 */
-	void deleteDashboardItem(String dashboardId, Long itemId, SecUser user)
+	void deleteDashboardItem(String dashboardId, String itemId, SecUser user)
 		throws NotFoundException, NotPermittedException {
 		def dashboard = authorizedGetById(dashboardId, user, Permission.Operation.WRITE)
 		def dashboardItem = dashboard.items.find { DashboardItem item -> item.id == itemId }
@@ -178,7 +181,11 @@ class DashboardService {
 			throw new ValidationException(command.errors)
 		}
 		def dashboard = authorizedGetById(dashboardId, user, Operation.WRITE)
-		def item = command.toDashboardItem()
+		def item = new DashboardItem(command.properties)
+
+		if (!item.webcomponent) {
+			item.webcomponent = (JSON.parse(command.canvas.json).find { it.hash == command.module }).webcomponent
+		}
 		dashboard.addToItems(item)
 		dashboard.save(failOnError: true)
 		return item

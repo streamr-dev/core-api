@@ -327,8 +327,7 @@ class StreamServiceSpec extends Specification {
 			title: "dashboardItem",
 			canvas: canvas,
 			module: 3,
-			webcomponent: "webcomponent",
-			ord: 1
+			webcomponent: "webcomponent"
 		)
 		dashboard.addToItems(dashboardItem)
 		dashboard.save(failOnError: true, validate: false)
