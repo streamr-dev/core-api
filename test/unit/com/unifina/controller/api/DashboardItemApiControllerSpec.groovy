@@ -51,28 +51,24 @@ class DashboardItemApiControllerSpec extends Specification {
 		then:
 		response.status == 200
 		response.json == [
-			[
-				id: 3,
-				dashboard: dashboards[2].id,
-				title: "dashboard-3-item-2",
-				size: "x-large",
-				canvas: "1",
-				module: 3,
-				webcomponent: "streamr-chart",
-				ord: 0,
-			],
-			[
-				id: 2,
-				dashboard: dashboards[2].id,
-				title: "dashboard-3-item-1",
-				size: "small",
-				canvas: "1",
-				module: 2,
-				webcomponent: "streamr-table",
-				ord: 1,
-			],
+				[
+						id          : "2",
+						dashboard   : dashboards[2].id.toString(),
+						title       : "dashboard-3-item",
+						canvas      : "1",
+						module      : 2,
+						webcomponent: "streamr-component",
+				],
+				[
+						id          : "3",
+						dashboard   : dashboards[2].id.toString(),
+						title       : "dashboard-3-item",
+						canvas      : "1",
+						module      : 3,
+						webcomponent: "streamr-component",
+				]
 		]
-		1 * dashboardService.findById(3L, me) >> dashboards[2]
+		1 * dashboardService.findById("3", me) >> dashboards[2]
 		0 * dashboardService._
 	}
 
@@ -89,16 +85,14 @@ class DashboardItemApiControllerSpec extends Specification {
 		then:
 		response.status == 200
 		response.json == [
-			id: 2,
-			dashboard: dashboards[2].id,
-			title: "dashboard-3-item-1",
-			size: "small",
-			canvas: "1",
-			module: 2,
-			webcomponent: "streamr-table",
-			ord: 1,
+				id          : "2",
+				dashboard   : dashboards[2].id.toString(),
+				title       : "dashboard-3-item",
+				canvas      : "1",
+				module      : 2,
+				webcomponent: "streamr-component"
 		]
-		1 * dashboardService.findDashboardItem(3L, 2L, me) >> dashboards[2].items[1]
+		1 * dashboardService.findDashboardItem("3", "2", me) >> dashboards[2].items[0]
 		0 * dashboardService._
 	}
 
@@ -106,11 +100,9 @@ class DashboardItemApiControllerSpec extends Specification {
 		when:
 		params.dashboardId = 3
 		request.JSON = [
-			title: "new-dashboard-item",
-			canvas: "canvas",
-			module: 1,
-			ord: 3,
-			size: "small",
+				title : "new-dashboard-item",
+				canvas: "canvas",
+				module: 1
 		]
 		request.addHeader("Authorization", "Token myApiKey")
 		request.requestURI = "/api/v1/dashboards/3/items/"
@@ -121,21 +113,17 @@ class DashboardItemApiControllerSpec extends Specification {
 		then:
 		response.status == 200
 		response.json == [
-			id: 32,
-			dashboard: 3,
-			title: "new-dashboard-item",
-			ord: 3,
-			canvas: "canvas",
-			module: 1,
-			webcomponent: "streamr-chart",
-			size: "small",
+				id          : "32",
+				dashboard   : "3",
+				title       : "new-dashboard-item",
+				canvas      : "canvas",
+				module      : 1,
+				webcomponent: "streamr-chart",
 		]
-		1 * dashboardService.addDashboardItem(3, _, me) >> { Long dashboardId,
-															 SaveDashboardItemCommand command,
-															 SecUser user ->
-			def item = command.toDashboardItem()
+		1 * dashboardService.addDashboardItem("3", _, me) >> { String dashboardId, SaveDashboardItemCommand command, SecUser user ->
+			def item = new DashboardItem(command.properties)
 			item.dashboard = dashboards[2]
-			item.id = 32
+			item.id = "32"
 			return item
 		}
 		0 * dashboardService._
@@ -143,17 +131,15 @@ class DashboardItemApiControllerSpec extends Specification {
 
 	def "update() delegates to dashboardService.updateDashboardItem()"() {
 		when:
-		params.dashboardId = 2
-		params.id = 1
+		params.dashboardId = 3
+		params.id = 2
 		request.JSON = [
-			title	: "updated-dashboard-item",
-			canvas	: "canvas",
-			module	: 1,
-			ord		: 9,
-			size	: "large",
+				title : "updated-dashboard-item",
+				canvas: "canvas",
+				module: 1
 		]
 		request.addHeader("Authorization", "Token myApiKey")
-		request.requestURI = "/api/v1/dashboards/3/items/1"
+		request.requestURI = "/api/v1/dashboards/3/items/2"
 		withFilters(action: "update") {
 			controller.update()
 		}
@@ -161,21 +147,16 @@ class DashboardItemApiControllerSpec extends Specification {
 		then:
 		response.status == 200
 		response.json == [
-			id           : 1,
-			dashboard	 : 2,
-			title        : "updated-dashboard-item",
-			ord          : 9,
-			canvas       : "canvas",
-			module       : 1,
-			webcomponent : "streamr-chart",
-			size         : "large",
+				id          : "2",
+				dashboard   : "3",
+				title       : "updated-dashboard-item",
+				canvas      : "canvas",
+				module      : 1,
+				webcomponent: "streamr-chart"
 		]
-		1 * dashboardService.updateDashboardItem(2, 1, _, me) >> { Long dashboardId,
-																   Long itemId,
-																   SaveDashboardItemCommand command,
-																   SecUser user ->
+		1 * dashboardService.updateDashboardItem("3", "2", _, me) >> { String dashboardId, String itemId, SaveDashboardItemCommand command, SecUser user ->
 			def item = DashboardItem.get(itemId)
-			command.copyValuesTo(item)
+			item.setProperties(command.properties)
 			return item
 		}
 		0 * dashboardService._
@@ -193,7 +174,7 @@ class DashboardItemApiControllerSpec extends Specification {
 
 		then:
 		response.status == 204
-		1 * dashboardService.deleteDashboardItem(3, 2, me)
+		1 * dashboardService.deleteDashboardItem("3", "2", me)
 		0 * dashboardService._
 	}
 }
