@@ -52,6 +52,9 @@ class DashboardApiController {
 
 	@StreamrApi
 	def update(SaveDashboardCommand command) {
+		if (!command.validate()) {
+			throw new ValidationException(command.errors)
+		}
 		def dashboard = dashboardService.update(command, request.apiUser)
 		render(dashboard.toMap() as JSON)
 	}
