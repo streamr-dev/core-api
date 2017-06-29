@@ -48,9 +48,9 @@
             }
         )
 
-        .step('Under <b>Visualizations</b>, find the <code>Map</code> module and drag and drop it to the canvas.',
+        .step('Under <b>Visualizations</b>, find the <code>Map (geo)</code> module and drag and drop it to the canvas.',
             '#moduleTree',
-            tour.waitForModuleAdded('Map')
+            tour.waitForModuleAdded('Map (geo)')
         )
 
         .step("Let's make a connection!<br/><br/>"+
@@ -61,11 +61,11 @@
         )
 
         .step("Drop the connection on the first input of the Map, called <code>id</code>.",
-            '.tourMap1',
+            '.tourMap_geo1',
             { placement: 'top' },
             function(cb) {
-                tour.highlightInputUntilConnected("tourMap1.id")(function() {
-                    tour.waitForConnection(['tourStream1.veh', 'tourMap1.id'])(cb)
+                tour.highlightInputUntilConnected("tourMap_geo1.id")(function() {
+                    tour.waitForConnection(['tourStream1.veh', 'tourMap_geo1.id'])(cb)
                 })
             }
         )
@@ -76,7 +76,7 @@
             '.tourStream1',
             { placement: 'bottom' },
             function(cb) {
-                tour.waitForConnections([['tourStream1.lat', 'tourMap1.latitude'], ['tourStream1.long', 'tourMap1.longitude']])(cb)
+                tour.waitForConnections([['tourStream1.lat', 'tourMap_geo1.latitude'], ['tourStream1.long', 'tourMap_geo1.longitude']])(cb)
             }
         )
 
