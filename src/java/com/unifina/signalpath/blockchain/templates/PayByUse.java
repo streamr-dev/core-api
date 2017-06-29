@@ -31,8 +31,6 @@ public class PayByUse extends SolidityModule {
 				"            if (recipient.send(sendAmount)) {\n" +
 				"                unpaidWei -= sendAmount;\n" +
 				"                Paid(sendAmount);\n" +
-				"            } else {\n" +
-				"                unpaidWei += sendAmount;\n" +
 				"            }\n" +
 				"        }\n" +
 				"        if (this.balance == 0) {\n" +
