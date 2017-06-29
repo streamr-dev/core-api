@@ -48,10 +48,10 @@ class PermissionServiceSpec extends Specification {
 		invite = new SignupInvite(username: "him", code: "sikritCode", sent: true, used: false).save(validate:false)
 
 		// Dashboards
-		dashAllowed = new Dashboard(name:"allowed", user:anotherUser).save(validate:false)
-		dashRestricted = new Dashboard(name:"restricted", user:anotherUser).save(validate:false)
-		dashOwned = new Dashboard(name:"owned", user:me).save(validate:false)
-		dashPublic = new Dashboard(name:"public", user:anotherUser).save(validate:false)
+		dashAllowed = new Dashboard(id: "allowed", name:"allowed", user: anotherUser).save(validate:false)
+		dashRestricted = new Dashboard(id: "restricted", name:"restricted", user: anotherUser).save(validate:false)
+		dashOwned = new Dashboard(id: "owned", name:"owned", user: me).save(validate:false)
+		dashPublic = new Dashboard(id: "public", name:"public", user: anotherUser).save(validate:false)
 
 		new Canvas(user: anotherUser).save(validate: false)
 

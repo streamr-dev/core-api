@@ -183,9 +183,6 @@ class DashboardService {
 		def dashboard = authorizedGetById(dashboardId, user, Operation.WRITE)
 		def item = new DashboardItem(command.properties)
 
-		if (!item.webcomponent) {
-			item.webcomponent = (JSON.parse(command.canvas.json).find { it.hash == command.module }).webcomponent
-		}
 		dashboard.addToItems(item)
 		dashboard.save(failOnError: true)
 		return item
@@ -210,7 +207,7 @@ class DashboardService {
 		}
 
 		def item = authorizedGetDashboardItem(dashboardId, itemId, user, Operation.WRITE)
-		item.setProperties(command.properties)
+		item.setProperties(command.getProperties())
 		item.save(failOnError: true)
 
 		return item

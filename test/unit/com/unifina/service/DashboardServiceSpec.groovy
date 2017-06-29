@@ -298,15 +298,14 @@ class DashboardServiceSpec extends Specification {
 		def canvas = new Canvas(json: json).save(failOnError: true, validate: false)
 
 		def command = new SaveDashboardItemCommand(
-				id: "test",
+				id: "item-1-3",
 				title: "added-item",
 				canvas: canvas,
 				module: 1
 		)
-		service.addDashboardItem("my-dashboard-1", command, user)
 
 		when:
-		service.updateDashboardItem("my-dashboard-2", "test", command, user)
+		service.updateDashboardItem("my-dashboard-2", "item-1-3", command, user)
 		then:
 		thrown(NotFoundException)
 	}
@@ -327,15 +326,15 @@ class DashboardServiceSpec extends Specification {
 
 		def canvas = new Canvas(json: json).save(failOnError: true, validate: false)
 
+		def dashboardId = "my-dashboard-3"
+		def itemToUpdateId = "item-1-3"
+
 		def command = new SaveDashboardItemCommand(
-				id: "test",
+				id: itemToUpdateId,
 				title: "updated-item",
 				canvas: canvas,
 				module: 1
 		)
-
-		def dashboardId = "my-dashboard-1"
-		def itemToUpdateId = "test"
 
 		assert DashboardItem.findById(itemToUpdateId) != null
 
@@ -344,7 +343,7 @@ class DashboardServiceSpec extends Specification {
 		then:
 		DashboardItem.findById(itemToUpdateId).properties == updatedItem.properties
 		updatedItem.toMap() == [
-				id          : "test",
+				id          : itemToUpdateId,
 				dashboard   : dashboardId,
 				title       : "updated-item",
 				canvas      : canvas.id,
@@ -367,7 +366,7 @@ class DashboardServiceSpec extends Specification {
 		thrown(NotPermittedException)
 	}
 
-	def "deleteDashboardItem() can delete non-existent dashboard item"() {
+	def "deleteDashboardItem() cannot delete non-existent dashboard item"() {
 		when:
 		service.deleteDashboardItem("my-dashboard-2", "nonexistent", user)
 		then:
@@ -379,12 +378,12 @@ class DashboardServiceSpec extends Specification {
 		def itemToRemoveId = "item-1-3"
 
 		assert DashboardItem.findById(itemToRemoveId) != null
-		assert Dashboard.get(dashboardId).items*.id == ["item-1-1", "item-1-2", "item-1-3"]
+		assert Dashboard.get(dashboardId).items*.id == ["item-1-3", "item-2-3", "item-3-3"]
 
 		when:
 		service.deleteDashboardItem(dashboardId, itemToRemoveId, user)
 		then:
 		DashboardItem.findById(itemToRemoveId) == null
-		Dashboard.get(dashboardId).items*.id == ["item-1-1", "item-1-2"]
+		Dashboard.get(dashboardId).items*.id == ["item-2-3", "item-3-3"]
 	}
 }
