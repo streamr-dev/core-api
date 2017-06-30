@@ -308,7 +308,6 @@ class StreamServiceSpec extends Specification {
 	void "getReadAuthorizedStream invokes callback if permitted to read (ui channel) stream indirectly through Dashboard"() {
 		def cb = Mock(Closure)
 		service.permissionService = Mock(PermissionService)
-		service.dashboardService = dashboardService
 
 		Canvas canvas = new Canvas(name: "canvas").save(failOnError: true, validate: false)
 
@@ -346,7 +345,6 @@ class StreamServiceSpec extends Specification {
 	void "getReadAuthorizedStream throws NotPermittedException and does not invoke callback, if not permitted to read (ui channel) stream indirectly through Dashboard"() {
 		def cb = Mock(Closure)
 		service.permissionService = Mock(PermissionService)
-		service.dashboardService = dashboardService
 
 		Canvas canvas = new Canvas(name: "canvas").save(failOnError: true, validate: false)
 
