@@ -51,7 +51,7 @@ public abstract class AbstractCustomModule extends ModuleWithUI implements ITime
 		readyInputs = null;
 	}
 
-	void copyStateFromWrapper(StoredCustomModuleState customModuleState, Globals globals) {
+	void copyStateFromWrapper(StoredCustomModuleState customModuleState) {
 		this.parentSignalPath = customModuleState.getParentSignalPath();
 		this.inputs = customModuleState.getInputs();
 		this.inputsByName = customModuleState.getInputsByName();
@@ -59,7 +59,6 @@ public abstract class AbstractCustomModule extends ModuleWithUI implements ITime
 		this.outputsByName = customModuleState.getOutputsByName();
 		this.drivingInputs = customModuleState.getDrivingInputs();
 		this.readyInputs = customModuleState.getReadyInputs();
-		this.setGlobals(globals);
 	}
 
 	void setParentWrapper(AbstractJavaCodeWrapper parentWrapper) {

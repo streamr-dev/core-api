@@ -9,6 +9,7 @@ import com.unifina.serialization.AnonymousInnerClassDetector;
 import com.unifina.serialization.HiddenFieldDetector;
 import com.unifina.service.SerializationService;
 import com.unifina.signalpath.*;
+import com.unifina.utils.Globals;
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 
@@ -68,6 +69,14 @@ public abstract class AbstractJavaCodeWrapper extends ModuleWithUI implements IT
 	public void clearState() {
 		if (instance != null) {
 			instance.clear();
+		}
+	}
+
+	@Override
+	public void setGlobals(Globals globals) {
+		super.setGlobals(globals);
+		if (instance != null) {
+			instance.setGlobals(globals);
 		}
 	}
 
@@ -290,7 +299,7 @@ public abstract class AbstractJavaCodeWrapper extends ModuleWithUI implements IT
 	 * instance.
 	 */
 	private void restoreInstanceAfterSerialization() {
-		instance.copyStateFromWrapper(storedCustomModuleState, getGlobals());
+		instance.copyStateFromWrapper(storedCustomModuleState);
 		storedEndpointFields.restoreFields(instance);
 		storedEndpointFields = null;
 		storedCustomModuleState = null;
