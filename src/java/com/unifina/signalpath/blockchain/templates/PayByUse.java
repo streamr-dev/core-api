@@ -7,13 +7,12 @@ import grails.util.Holders;
 public class PayByUse extends SolidityModule {
 	@Override
 	public String getCodeTemplate() {
-		// TODO: should unitCost/recipient be public?
 		//   + These are supplied to constructor, so they show up on canvas already
 		//   - When manipulating from CLI it would be useful (for demo not so important)
 		return  "pragma solidity ^0.4.0;\n" +
 				"contract PayByUse {\n" +
-				"    address recipient;\n" +
-				"    uint unitPriceWei;\n" +
+				"    address public recipient;\n" +
+				"    uint public unitPriceWei;\n" +
 				"    uint public unpaidWei;\n" +
 				"    \n" +
 				"    event OutOfFunds(uint debt);\n" +
@@ -29,11 +28,9 @@ public class PayByUse extends SolidityModule {
 				"    function payOut() {\n" +
 				"        var sendAmount = min(unpaidWei, this.balance);\n" +
 				"        if (sendAmount > 0) {\n" +
-				"            unpaidWei -= sendAmount;\n" +
 				"            if (recipient.send(sendAmount)) {\n" +
+				"                unpaidWei -= sendAmount;\n" +
 				"                Paid(sendAmount);\n" +
-				"            } else {\n" +
-				"                unpaidWei += sendAmount;\n" +
 				"            }\n" +
 				"        }\n" +
 				"        if (this.balance == 0) {\n" +
