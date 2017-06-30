@@ -8,7 +8,6 @@ import com.mashape.unirest.http.exceptions.UnirestException;
 import com.unifina.signalpath.AbstractSignalPathModule;
 import com.unifina.signalpath.ModuleOptions;
 import com.unifina.signalpath.StringParameter;
-import com.unifina.signalpath.blockchain.templates.EthereumModuleOptions;
 import com.unifina.utils.MapTraversal;
 import grails.util.Holders;
 

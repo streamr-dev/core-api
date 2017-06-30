@@ -7,7 +7,6 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.mashape.unirest.http.Unirest;
 import com.unifina.signalpath.*;
-import com.unifina.signalpath.blockchain.templates.EthereumModuleOptions;
 import com.unifina.utils.MapTraversal;
 import org.apache.commons.lang.exception.ExceptionUtils;
 import org.apache.log4j.Logger;
