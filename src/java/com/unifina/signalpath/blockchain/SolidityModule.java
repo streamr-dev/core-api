@@ -101,7 +101,8 @@ public class SolidityModule extends ModuleWithUI implements Pullable<EthereumCon
 
 					if (constructor != null) {
 						List<Map> params = (List) config.get("params");
-						for (Map param : params) {
+						// skip first parameter (ethAccount, not constructor parameter)
+						for (Map param : params.subList(1, params.size())) {
 							args.push(param.get("value"));
 						}
 						// for payable constructors, sendEtherParam is added in params after the ordinary function arguments
