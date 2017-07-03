@@ -6,12 +6,12 @@ import {Button, Col} from 'react-bootstrap'
 import Select from 'react-select'
 import FontAwesome from 'react-fontawesome'
 
-import {setResourceHighestOperationForUser, removeAllResourcePermissionsByUser} from '../../../../actions/permission'
+import {setResourceHighestOperationForUser, removeAllResourcePermissionsByUser} from '../../../../../actions/permission'
 
 import 'react-select/dist/react-select.css'
 import styles from './shareDialogPermission.pcss'
 
-import type {Permission} from '../../../../flowtype/permission-types'
+import type {Permission} from '../../../../../flowtype/permission-types'
 
 const operationsInOrder = ['read', 'write', 'share']
 

@@ -2,15 +2,17 @@
 
 import React, {Component} from 'react'
 import {connect} from 'react-redux'
-import {Modal, Button} from 'react-bootstrap'
+import {Modal} from 'react-bootstrap'
+import ShareDialogHeader from './ShareDialogHeader'
 import ShareDialogContent from './ShareDialogContent'
+import ShareDialogFooter from './ShareDialogFooter'
 
 import {saveUpdatedResourcePermissions} from '../../actions/permission'
 
 import type {ReactChildren} from 'react-flow-types'
 import type {Permission} from '../../flowtype/permission-types'
 
-class ShareDialog extends Component {
+export class ShareDialog extends Component {
     openModal: Function
     closeModal: Function
     save: Function
@@ -71,26 +73,9 @@ class ShareDialog extends Component {
                 onHide={this.closeModal}
                 backdrop="static"
             >
-                <Modal.Header closeButton>
-                    <Modal.Title>Share {this.props.resourceTitle}</Modal.Title>
-                </Modal.Header>
-                <Modal.Body>
-                    <ShareDialogContent resourceTitle={this.props.resourceTitle} resourceType={this.props.resourceType} resourceId={this.props.resourceId} />
-                </Modal.Body>
-                <Modal.Footer>
-                    <Button
-                        bsStyle="primary"
-                        onClick={this.save}
-                    >
-                        Save
-                    </Button>
-                    <Button
-                        bsStyle="default"
-                        onClick={this.closeModal}
-                    >
-                        Close
-                    </Button>
-                </Modal.Footer>
+                <ShareDialogHeader resourceTitle={this.props.resourceTitle} />
+                <ShareDialogContent resourceTitle={this.props.resourceTitle} resourceType={this.props.resourceType} resourceId={this.props.resourceId} />
+                <ShareDialogFooter save={this.save} closeModal={this.closeModal} />
             </Modal>
         )
         return React.cloneElement(Child, {
