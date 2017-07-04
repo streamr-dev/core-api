@@ -97,6 +97,7 @@ class CanvasService {
 		try {
 			signalPathService.startLocal(canvas, signalPathContext)
 		} catch (SerializationException ex) {
+			log.error("De-serialization failure caused by (BELOW)", ex.cause)
 			String msg = "Could not load (deserialize) previous state of canvas $canvas.id."
 			throw new ApiException(500, "LOADING_PREVIOUS_STATE_FAILED", msg)
 		}
