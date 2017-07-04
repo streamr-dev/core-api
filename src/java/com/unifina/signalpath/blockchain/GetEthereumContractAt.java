@@ -9,7 +9,6 @@ import com.unifina.signalpath.AbstractSignalPathModule;
 import com.unifina.signalpath.ModuleOptions;
 import com.unifina.signalpath.StringParameter;
 import com.unifina.utils.MapTraversal;
-import grails.util.Holders;
 
 import java.util.Map;
 
