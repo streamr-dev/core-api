@@ -13,6 +13,7 @@ import com.unifina.service.ApiService
 import com.unifina.service.DashboardService
 import com.unifina.service.PermissionService
 import com.unifina.service.UserService
+import com.unifina.utils.Webcomponent
 import grails.converters.JSON
 import grails.orm.HibernateCriteriaBuilder
 import grails.plugin.springsecurity.SpringSecurityService
@@ -63,7 +64,7 @@ class DashboardApiControllerSpec extends Specification {
 					title: "dashboard-3-item",
 					canvas: canvas,
 					module: it,
-					webcomponent: "streamr-component",
+					webcomponent: Webcomponent.STREAMR_CHART,
 					dashboard: dashboards[2]
 			)
 			item.id = it.toString()
@@ -125,7 +126,7 @@ class DashboardApiControllerSpec extends Specification {
 				id    : "1",
 				items : [],
 				name  : "dashboard-1",
-				layout: "{}"
+				layout: [:]
 		]
 
 		1 * dashboardService.findById("1", me) >> dashboards[0]
@@ -152,7 +153,7 @@ class DashboardApiControllerSpec extends Specification {
 								title       : "dashboard-3-item",
 								canvas      : "1",
 								module      : 2,
-								webcomponent: "streamr-component"
+								webcomponent: "streamr-chart"
 						],
 						[
 								id          : "3",
@@ -160,10 +161,10 @@ class DashboardApiControllerSpec extends Specification {
 								title       : "dashboard-3-item",
 								canvas      : "1",
 								module      : 3,
-								webcomponent: "streamr-component"
+								webcomponent: "streamr-chart"
 						],
 				],
-				layout: "{}",
+				layout: [:],
 				name  : "dashboard-3"
 		]
 		1 * dashboardService.findById("3", me) >> dashboards[2]
@@ -188,7 +189,7 @@ class DashboardApiControllerSpec extends Specification {
 	def "save() calls dashboardService.create()"() {
 		setup:
 
-		SortedSet<DashboardItem> items = new TreeSet<DashboardItem>()
+		List<DashboardItem> items = new ArrayList<DashboardItem>()
 		items.add(new DashboardItem(id: "1", title: "test1"))
 		items.add(new DashboardItem(id: "2", title: "test2"))
 
@@ -237,7 +238,7 @@ class DashboardApiControllerSpec extends Specification {
 
 	def "update() delegates to dashboardService.update and returns new dashboard as result"() {
 		setup:
-		SortedSet<DashboardItem> items = new TreeSet<DashboardItem>()
+		List<DashboardItem> items = new ArrayList<DashboardItem>()
 		items.add(new DashboardItem(id: "1", title: "test1"))
 		items.add(new DashboardItem(id: "2", title: "test2"))
 

@@ -1,6 +1,8 @@
 package com.unifina.api
 
+import com.unifina.domain.dashboard.DashboardItem
 import com.unifina.domain.signalpath.Canvas
+import com.unifina.utils.Webcomponent
 import grails.converters.JSON
 import grails.validation.Validateable
 
@@ -19,7 +21,15 @@ class SaveDashboardItemCommand {
 		module(nullable: false)
 	}
 
-	def getWebcomponent() {
-		webcomponent ?: JSON.parse(canvas.json)?.modules?.find { it.hash == module }?.uiChannel?.webcomponent
+	def getProperties() {
+		[
+				id          : id,
+				title       : title,
+				canvas      : canvas,
+				module      : module,
+				webcomponent: Webcomponent.getByName(webcomponent ?: JSON.parse(canvas.json)?.modules?.find {
+					it.hash == module
+				}?.uiChannel?.webcomponent)
+		]
 	}
 }

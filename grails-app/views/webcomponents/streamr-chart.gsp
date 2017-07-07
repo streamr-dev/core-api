@@ -19,9 +19,6 @@
 				var _this = this
 				this.bindEvents(this.$["streamr-widget-container"])
 
-				this.$["streamr-widget-container"].style.width = '100%'
-				this.$["streamr-widget-container"].style.height = '100%'
-
 				this.getModuleJson(function(json) {
 					var options = _this.getModuleOptionsWithOverrides(json)
 

@@ -2,15 +2,16 @@ package com.unifina.domain.dashboard
 
 import com.unifina.domain.signalpath.Canvas
 import com.unifina.utils.IdGenerator
+import com.unifina.utils.Webcomponent
 
-class DashboardItem implements Comparable {
+class DashboardItem {
 
 	String id
 	String title
 	Canvas canvas
 	Dashboard dashboard
 	Integer module
-	String webcomponent
+	Webcomponent webcomponent
 
 	static belongsTo = [dashboard: Dashboard, canvas: Canvas]
 
@@ -18,11 +19,6 @@ class DashboardItem implements Comparable {
 		title nullable: true, blank: false
 		id bindable: true
 	}
-
-	int compareTo(obj) {
-		return id != null ? id.compareTo(obj.id) : title.compareTo(obj.title)
-	}
-
 	static mapping = {
 		id generator: "assigned"
 		dashboard column: "dashboard_id"
@@ -36,12 +32,16 @@ class DashboardItem implements Comparable {
 				title       : title,
 				canvas      : canvas?.id,
 				module      : module,
-				webcomponent: webcomponent
+				webcomponent: webcomponent.toString()
 		]
+	}
+
+	void setWebcomponent(String s) {
+		webcomponent = Webcomponent.getByName(s)
 	}
 
 	void updateWebcomponent() {
 		def module = canvas.toMap().modules.find { it.hash == module }
-		webcomponent = module?.uiChannel?.webcomponent
+		setWebcomponent(module?.uiChannel?.webcomponent)
 	}
 }

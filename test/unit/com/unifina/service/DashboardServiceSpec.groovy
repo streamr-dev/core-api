@@ -106,8 +106,8 @@ class DashboardServiceSpec extends Specification {
 				id   : "1",
 				name : "test-create",
 				items: [
-						new SaveDashboardItemCommand(id: "1", title: "test1", canvas: new Canvas(), module: 0, webcomponent: "b"),
-						new SaveDashboardItemCommand(id: "2", title: "test2", canvas: new Canvas(), module: 0, webcomponent: "b")
+						new SaveDashboardItemCommand(id: "1", title: "test1", canvas: new Canvas(), module: 0, webcomponent: "streamr-chart"),
+						new SaveDashboardItemCommand(id: "2", title: "test2", canvas: new Canvas(), module: 0, webcomponent: "streamr-chart")
 				]
 		])
 		service.create(command, user)
@@ -119,6 +119,27 @@ class DashboardServiceSpec extends Specification {
 		Dashboard.findByName("test-create").getItems().first().title == "test1"
 		Dashboard.findByName("test-create").getItems().last().title == "test2"
 		Dashboard.findByName("test-create").getUser().getName() == "tester"
+	}
+
+	def "create() doesn't allow to save on top of an other dashboard"() {
+		setup:
+		def user = new SecUser(name: "tester").save(validate: false)
+		SaveDashboardCommand command = new SaveDashboardCommand([
+				id   : "1",
+				name : "test-create",
+				items: [
+						new SaveDashboardItemCommand(id: "1", title: "test1", canvas: new Canvas(), module: 0, webcomponent: "streamr-chart"),
+						new SaveDashboardItemCommand(id: "2", title: "test2", canvas: new Canvas(), module: 0, webcomponent: "streamr-chart")
+				]
+		])
+		service.create(command, user)
+
+		when:
+		service.create(command, user)
+
+		then:
+		// 6 created in setup and this one
+		thrown ApiException
 	}
 
 	def "update() cannot update non-existent dashboard"() {
@@ -234,7 +255,7 @@ class DashboardServiceSpec extends Specification {
 		item.title == "added-item"
 		item.canvas.id == "1"
 		item.module == 1
-		item.webcomponent == "streamr-chart"
+		item.webcomponent.getName() == "streamr-chart"
 
 		and:
 		Dashboard.get("my-dashboard-2").items*.id == [item.id]

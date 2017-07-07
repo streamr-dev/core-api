@@ -1,6 +1,7 @@
 package com.unifina.domain.dashboard
 
 import com.unifina.domain.security.SecUser
+import grails.converters.JSON
 import groovy.transform.CompileStatic
 
 class Dashboard {
@@ -13,7 +14,7 @@ class Dashboard {
 	Date dateCreated
 	Date lastUpdated
 
-	SortedSet<DashboardItem> items
+	List<DashboardItem> items
 
 	String layout = "{}" // JSON
 
@@ -26,7 +27,7 @@ class Dashboard {
 	}
 
 	static mapping = {
-		items cascade: "merge"
+		items cascade: "all-delete-orphan"
 		id generator: "assigned"
 	}
 
@@ -45,7 +46,7 @@ class Dashboard {
 				id    : id,
 				name  : name,
 				items : items == null ? [] : items.collect { DashboardItem it -> it.toMap() },
-				layout: layout
+				layout: layout ? JSON.parse(layout) : layout
 		]
 	}
 }
