@@ -7,7 +7,6 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.mashape.unirest.http.Unirest;
 import com.unifina.signalpath.*;
-import com.unifina.signalpath.blockchain.templates.EthereumModuleOptions;
 import com.unifina.utils.MapTraversal;
 import org.apache.commons.lang.exception.ExceptionUtils;
 import org.apache.log4j.Logger;
@@ -101,7 +100,8 @@ public class SolidityModule extends ModuleWithUI implements Pullable<EthereumCon
 
 					if (constructor != null) {
 						List<Map> params = (List) config.get("params");
-						for (Map param : params) {
+						// skip first parameter (ethAccount, not constructor parameter)
+						for (Map param : params.subList(1, params.size())) {
 							args.push(param.get("value"));
 						}
 						// for payable constructors, sendEtherParam is added in params after the ordinary function arguments

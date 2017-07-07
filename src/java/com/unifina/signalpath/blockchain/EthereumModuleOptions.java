@@ -1,4 +1,4 @@
-package com.unifina.signalpath.blockchain.templates;
+package com.unifina.signalpath.blockchain;
 
 import com.unifina.signalpath.ModuleOption;
 import com.unifina.signalpath.ModuleOptions;
