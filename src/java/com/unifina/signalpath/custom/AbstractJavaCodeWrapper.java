@@ -106,8 +106,10 @@ public abstract class AbstractJavaCodeWrapper extends ModuleWithUI implements IT
 			"javax.imageio.ImageIO",
 			"java.awt.*",
 			"java.io.InputStream",
+			"java.io.OutputStream",
 			"java.io.IOException",
 			"java.io.ByteArrayInputStream",
+			"java.io.ByteArrayOutputStream",
 			"java.security.MessageDigest",
 			"com.google.common.io.ByteStreams",
 			"java.security.spec.*"
