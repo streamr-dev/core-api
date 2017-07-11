@@ -125,7 +125,7 @@ class DashboardApiControllerSpec extends Specification {
 				id    : "1",
 				items : [],
 				name  : "dashboard-1",
-				layout: "{}"
+				layout: [:]
 		]
 
 		1 * dashboardService.findById("1", me) >> dashboards[0]
@@ -163,7 +163,7 @@ class DashboardApiControllerSpec extends Specification {
 								webcomponent: "streamr-component"
 						],
 				],
-				layout: "{}",
+				layout: [:],
 				name  : "dashboard-3"
 		]
 		1 * dashboardService.findById("3", me) >> dashboards[2]
@@ -260,8 +260,10 @@ class DashboardApiControllerSpec extends Specification {
 
 		then:
 		response.status == 200
-		1 * dashboardService.update(_, me) >> {
-			dashboard
+		1 * dashboardService.update(_, me) >> {String id, SaveDashboardCommand command, SecUser user ->
+			def d = dashboards[2]
+			d.name = command.name
+			return d
 		}
 		1 * dashboard.toMap() >> {
 			[:]

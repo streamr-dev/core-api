@@ -2,7 +2,7 @@
 
 import axios from 'axios'
 import parseError from './utils/parseError'
-import createLink from '../createLink'
+import createLink from '../helpers/createLink'
 
 import {showSuccess, showError} from './notification'
 
@@ -130,7 +130,7 @@ export const deleteDashboard = (id: Dashboard.id) => (dispatch: Function) => {
 
 export const getMyDashboardPermissions = (id: Dashboard.id) => (dispatch: Function) => {
     dispatch(getMyDashboardPermissionsRequest(id))
-    return axios.delete(createLink(`${apiUrl}/${id}/permissions/me`))
+    return axios.get(createLink(`${apiUrl}/${id}/permissions/me`))
         .then(res => dispatch(getMyDashboardPermissionsSuccess(id, res.data.filter(item => item.user === Streamr.user).map(item => item.operation))))
         .catch(res => {
             const e = parseError(res)

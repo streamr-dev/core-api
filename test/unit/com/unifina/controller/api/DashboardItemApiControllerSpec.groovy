@@ -53,7 +53,7 @@ class DashboardItemApiControllerSpec extends Specification {
 		response.json == [
 				[
 						id          : "2",
-						dashboard   : dashboards[2].id.toString(),
+						dashboard   : dashboards[2].id,
 						title       : "dashboard-3-item",
 						canvas      : "1",
 						module      : 2,
@@ -61,7 +61,7 @@ class DashboardItemApiControllerSpec extends Specification {
 				],
 				[
 						id          : "3",
-						dashboard   : dashboards[2].id.toString(),
+						dashboard   : dashboards[2].id,
 						title       : "dashboard-3-item",
 						canvas      : "1",
 						module      : 3,
@@ -86,7 +86,7 @@ class DashboardItemApiControllerSpec extends Specification {
 		response.status == 200
 		response.json == [
 				id          : "2",
-				dashboard   : dashboards[2].id.toString(),
+				dashboard   : dashboards[2].id,
 				title       : "dashboard-3-item",
 				canvas      : "1",
 				module      : 2,

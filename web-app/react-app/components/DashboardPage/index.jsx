@@ -10,20 +10,14 @@ import Editor from './Editor/index'
 
 import type { Dashboard } from '../../flowtype/dashboard-types'
 import type { Canvas } from '../../flowtype/canvas-types'
-
+import type {ReactChildren} from 'react-flow-types'
 
 class DashboardPage extends Component {
     
     props: {
         dashboard: Dashboard,
         canvases: Array<Canvas>,
-        dispatch: Function,
-        error: {
-            message: string
-        },
-        fetching: boolean,
-        params: any,
-        children: any
+        children: ReactChildren
     }
     
     render() {
@@ -35,24 +29,16 @@ class DashboardPage extends Component {
                     <title>{this.props.dashboard && this.props.dashboard.name || 'New Dashboard'}</title>
                 </Helmet>
                 <Notifier/>
-                <Sidebar dashboard={this.props.dashboard}/>
-                <Editor dashboard={this.props.dashboard}/>
+                <Sidebar/>
+                <Editor/>
                 {this.props.children}
             </div>
         )
     }
 }
 
-const mapStateToProps = ({dashboard}) => {
-    const db = dashboard.dashboardsById[dashboard.openDashboard.id]
-    return {
-        dashboard: db && {
-            ...db,
-            items: db.items
-        },
-        fetching: dashboard.fetching,
-        error: dashboard.error
-    }
-}
+const mapStateToProps = ({dashboard}) => ({
+    dashboard: dashboard.dashboardsById[dashboard.openDashboard.id]
+})
 
 export default connect(mapStateToProps, null)(DashboardPage)

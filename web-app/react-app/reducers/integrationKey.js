@@ -15,7 +15,7 @@ import {
     DELETE_INTEGRATION_KEY_FAILURE
 } from '../actions/integrationKey.js'
 
-declare var _: any
+import _ from 'lodash'
 
 import type {State, Action} from '../flowtype/integration-key-types.js'
 

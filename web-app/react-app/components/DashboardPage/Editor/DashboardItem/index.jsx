@@ -1,4 +1,4 @@
-// @flux
+// @flow
 
 import React, {Component} from 'react'
 import {connect} from 'react-redux'
@@ -13,7 +13,8 @@ import './webcomponentStyles.css'
 import type {Dashboard, DashboardItem as DBItem} from '../../../../flowtype/dashboard-types'
 
 class DashboardItem extends Component {
-    
+    webcomponent: HTMLElement
+    onResize: Function
     props: {
         item: DBItem,
         dashboard: Dashboard,
@@ -33,7 +34,7 @@ class DashboardItem extends Component {
     }
     
     componentDidMount() {
-        // TODO: why not work?
+        // TODO: why it does not work without this?
         setTimeout(() => this.onResize(), 500)
     }
 
@@ -44,8 +45,10 @@ class DashboardItem extends Component {
     }
     
     onResize() {
-        const event = new Event('Event')
-        event.initEvent('resize', false, true)
+        const event = new Event('resize', {
+            bubbles: false,
+            cancelable: true
+        })
         if (this.webcomponent) {
             this.webcomponent.dispatchEvent(event)
         }
@@ -56,16 +59,15 @@ class DashboardItem extends Component {
         return (
             <div className={styles.dashboardItem}>
                 <div className={styles.header}>
-                    <TitleRow dashboard={this.props.dashboard} item={item} dragCancelClassName={this.props.dragCancelClassName}/>
+                    <TitleRow item={item} dragCancelClassName={this.props.dragCancelClassName}/>
                 </div>
                 <div className={`${styles.body} ${this.props.dragCancelClassName || ''}`}>
                     <div className={`${styles.wrapper} ${styles[item.webcomponent] || item.webcomponent}`}>
                         {item.webcomponent && (
                             <WebComponent
-                                ref={i => this.a = i}
                                 type={item.webcomponent}
                                 onError={this.props.showError}
-                                webComponentRef={item => this.webcomponent = item}
+                                webComponentRef={(item: HTMLElement) => this.webcomponent = item}
                                 dashboardId={dashboard.id}
                                 canvasId={item.canvas}
                                 moduleId={item.module.toString()}

@@ -2,7 +2,7 @@
 
 import axios from 'axios'
 import parseError from './utils/parseError'
-import createLink from '../createLink'
+import createLink from '../helpers/createLink'
 import {showError, showSuccess} from './notification'
 
 export const GET_AND_REPLACE_INTEGRATION_KEYS_REQUEST = 'GET_AND_REPLACE_INTEGRATION_KEYS_REQUEST'

@@ -2,10 +2,13 @@
 
 import React, {Component} from 'react'
 import {connect} from 'react-redux'
-import {StreamrBreadcrumb} from '../../Breadcrumb'
+import {StreamrBreadcrumb, StreamrBreadcrumbItem, StreamrBreadcrumbDropdownButton} from '../../Breadcrumb'
 import {MenuItem} from 'react-bootstrap'
 import FontAwesome from 'react-fontawesome'
-import createLink from '../../../createLink'
+import _ from 'lodash'
+
+import {parseDashboard} from '../../../helpers/parseState'
+import createLink from '../../../helpers/createLink'
 
 import {Responsive, WidthProvider} from 'react-grid-layout'
 import 'react-grid-layout/css/styles.css'
@@ -15,10 +18,6 @@ import DashboardItem from './DashboardItem'
 import ShareDialog from '../../ShareDialog'
 
 import {updateDashboard, deleteDashboard, lockDashboardEditing, unlockDashboardEditing} from '../../../actions/dashboard'
-
-import styles from './editor.pcss'
-
-declare var _: any
 
 import type {Dashboard} from '../../../flowtype/dashboard-types'
 import ConfirmButton from '../../ConfirmButton/index'
@@ -133,9 +132,13 @@ class Editor extends Component {
         })
     }
     
-    onBeforeUnload() {
+    onBeforeUnload(e: {
+        returnValue: any
+    }) {
         if (!this.props.dashboard.saved) {
-            return 'You have unsaved changes in your Dashboard. Are you sure you want to leave?'
+            const message = 'You have unsaved changes in your Dashboard. Are you sure you want to leave?'
+            e.returnValue = message
+            return message
         }
     }
     
@@ -153,16 +156,16 @@ class Editor extends Component {
                 height: '100%'
             }}>
                 <StreamrBreadcrumb className="breadcrumb-page">
-                    <StreamrBreadcrumb.Item href={createLink('dashboard/list')}>
+                    <StreamrBreadcrumbItem href={createLink('dashboard/list')}>
                         Dashboards
-                    </StreamrBreadcrumb.Item>
-                    <StreamrBreadcrumb.Item active={true}>
+                    </StreamrBreadcrumbItem>
+                    <StreamrBreadcrumbItem active={true}>
                         {dashboard && dashboard.name || 'New Dashboard'}
-                    </StreamrBreadcrumb.Item>
+                    </StreamrBreadcrumbItem>
                     {(this.props.canShare || this.props.canWrite) && (
-                        <StreamrBreadcrumb.DropdownButton title={(
+                        <StreamrBreadcrumbDropdownButton title={(
                             <FontAwesome name="cog"/>
-                        )} className={styles.streamrDropdownButton}>
+                        )}>
                             {this.props.canShare && (
                                 <ShareDialog
                                     resourceType="DASHBOARD"
@@ -186,11 +189,10 @@ class Editor extends Component {
                                     <FontAwesome name="trash-o"/> Delete
                                 </ConfirmButton>
                             )}
-                        </StreamrBreadcrumb.DropdownButton>
+                        </StreamrBreadcrumbDropdownButton>
                     )}
                 </StreamrBreadcrumb>
                 <ResponsiveReactGridLayout
-                    className={styles.dashboard}
                     layouts={layout}
                     rowHeight={60}
                     breakpoints={this.state.breakpoints}
@@ -213,15 +215,11 @@ class Editor extends Component {
     }
 }
 
-const mapStateToProps = ({dashboard}) => {
-    const db = dashboard.dashboardsById[dashboard.openDashboard.id] || {}
-    const canShare = db.new !== true && (db.ownPermissions && db.ownPermissions.includes('share'))
-    const canWrite = db.new !== true && (db.ownPermissions && db.ownPermissions.includes('write'))
+const mapStateToProps = (state) => {
+    const baseState = parseDashboard(state)
     return {
-        dashboard: db,
-        canShare,
-        canWrite,
-        editorLocked: db.editingLocked || (!db.new && !canWrite)
+        ...baseState,
+        editorLocked: baseState.dashboard.editingLocked || (!baseState.dashboard.new && !baseState.canWrite)
     }
 }
 

@@ -1,7 +1,7 @@
 // @flow
 
 import React, {Component} from 'react'
-import createLink from '../../createLink'
+import createLink from '../../helpers/createLink'
 
 declare var StreamrCredentialsControl: any
 declare var Streamr: {

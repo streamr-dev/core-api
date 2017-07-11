@@ -3,6 +3,7 @@
 import React, {Component} from 'react'
 import {connect} from 'react-redux'
 import serialize from 'form-serialize'
+import _ from 'lodash'
 
 import {Row, Col, FormGroup, InputGroup, FormControl, Button} from 'react-bootstrap'
 import FontAwesome from 'react-fontawesome'
@@ -13,8 +14,6 @@ import ShareDialogPermission from './ShareDialogPermission'
 import styles from './shareDialogContent.pcss'
 import type {Permission} from '../../../flowtype/permission-types'
 import {getResourcePermissions, addResourcePermission, removeResourcePermission} from '../../../actions/permission'
-
-declare var _: any
 
 class ShareDialogContent extends Component {
     form: HTMLFormElement

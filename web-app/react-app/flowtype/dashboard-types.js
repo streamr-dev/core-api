@@ -14,12 +14,12 @@ export type DashboardReducerState = {
         [Dashboard.id]: Dashboard
     },
     openDashboard: {
-        id: ?Dashboard.id,
-        saved: boolean,
-        new: boolean
+        id: ?Dashboard.id
     },
     error?: ?string,
     fetching?: boolean,
+    saved: boolean,
+    new: boolean
 }
 
 export type DashboardReducerAction = {

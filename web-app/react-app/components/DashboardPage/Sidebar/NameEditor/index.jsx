@@ -2,8 +2,8 @@
 
 import React, {Component} from 'react'
 import {connect} from 'react-redux'
-
 import {FormControl} from 'react-bootstrap'
+import {parseDashboard} from '../../../../helpers/parseState'
 
 import {updateDashboard} from '../../../../actions/dashboard'
 
@@ -16,7 +16,7 @@ class NameEditor extends Component {
     props: {
         dashboard: Dashboard,
         update: Function,
-        isDisabled: ?boolean
+        canWrite?: boolean
     }
     
     constructor() {
@@ -43,25 +43,18 @@ class NameEditor extends Component {
                     name="dashboard-name"
                     value={this.props.dashboard && this.props.dashboard.name || ''}
                     onChange={this.onChange}
-                    disabled={this.props.isDisabled}
+                    disabled={!this.props.canWrite}
                 />
             </div>
         )
     }
 }
 
-const mapStateToProps = ({dashboard}) => {
-    const db = dashboard.dashboardsById[dashboard.openDashboard.id] || {}
-    return {
-        dashboard: db,
-        isDisabled: !db.new && (!db.ownPermissions || !db.ownPermissions.includes('write'))
-    }
-}
+const mapStateToProps = (state) => parseDashboard(state)
 
-const mapDispatchToProps = (dispatch, ownProps) => ({
+const mapDispatchToProps = (dispatch) => ({
     update(newData) {
         return dispatch(updateDashboard({
-            ...ownProps.dashboard,
             ...newData
         }))
     }

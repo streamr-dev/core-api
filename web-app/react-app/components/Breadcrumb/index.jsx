@@ -1,13 +1,15 @@
-// @flux
+// @flow
 
 import React, {Component} from 'react'
 import {Breadcrumb, DropdownButton} from 'react-bootstrap'
+
+import type {ReactChildren} from 'react-flow-types'
 
 import styles from './breadcrumb.pcss'
 
 export class StreamrBreadcrumb extends Component {
     props: {
-        children?: Array<any>
+        children?: ReactChildren
     }
     render() {
         return (
@@ -18,11 +20,11 @@ export class StreamrBreadcrumb extends Component {
     }
 }
 
-StreamrBreadcrumb.Item = class StreamrBreadcrumbItem extends Component {
+export class StreamrBreadcrumbItem extends Component {
     props: {
         href?: string,
         active?: boolean,
-        children: string
+        children?: ReactChildren
     }
     render() {
         return (
@@ -33,11 +35,10 @@ StreamrBreadcrumb.Item = class StreamrBreadcrumbItem extends Component {
     }
 }
 
-StreamrBreadcrumb.DropdownButton = class StreamrBreadcrumbDropdown extends Component {
+export class StreamrBreadcrumbDropdownButton extends Component {
     props: {
-        className: string,
-        children: any,
-        title: any
+        className?: string,
+        children?: ReactChildren
     }
     render() {
         return (

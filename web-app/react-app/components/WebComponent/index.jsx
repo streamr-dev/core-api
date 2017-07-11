@@ -2,7 +2,7 @@
 
 import React, {Component} from 'react'
 import path from 'path'
-import createLink from '../../createLink'
+import createLink from '../../helpers/createLink'
 
 type type = 'streamr-chart' | 'streamr-table' | 'streamr-label' | 'streamr-map'
 
@@ -14,7 +14,6 @@ export default class WebComponent extends Component {
     bindError: Function
     unbindError: Function
     props: {
-        url: string,
         type: type,
         webComponentRef: Function,
         onError: Function,
@@ -23,7 +22,6 @@ export default class WebComponent extends Component {
         moduleId: CanvasModule.id
     }
     static defaultProps = {
-        webComponentRef: () => {},
         onError: () => {}
     }
     constructor() {
@@ -49,12 +47,14 @@ export default class WebComponent extends Component {
     }
     
     render() {
-        const {type: Type, dashboardId, canvasId, moduleId} = this.props
+        const {type: WebcomponentType, dashboardId, canvasId, moduleId} = this.props
         return (
-            <Type
+            <WebcomponentType
                 ref={item => {
                     this.webcomponent = item
-                    this.props.webComponentRef(item)
+                    if (this.props.webComponentRef) {
+                        this.props.webComponentRef(item)
+                    }
                 }}
                 className="streamr-widget non-draggable"
                 url={createLink(path.resolve('/api/v1/dashboards', dashboardId, 'canvases', canvasId, 'modules', moduleId))}

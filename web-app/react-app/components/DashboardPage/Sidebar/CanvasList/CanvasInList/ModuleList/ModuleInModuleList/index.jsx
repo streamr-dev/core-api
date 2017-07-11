@@ -51,7 +51,7 @@ class ModuleInModuleList extends Component {
     render() {
         const {module, checked} = this.props
         return (
-            <li key={module.id} className="module" onClick={this.onClick}>
+            <li className="module" onClick={this.onClick}>
                 <a href="#" className={`${styles.module} ${checked ? styles.checked : ''}`}>
                     <FontAwesome name={checked ? 'check-square' : 'square'} className={styles.checkIcon}/>
                     {module.name}

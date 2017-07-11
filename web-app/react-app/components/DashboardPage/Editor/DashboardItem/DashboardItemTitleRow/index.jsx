@@ -68,7 +68,7 @@ class DashboardItemTitleRow extends Component {
                             type="text"
                             placeholder="Title"
                             name="dashboard-item-name"
-                            value={this.props.item.title}
+                            value={item.title}
                             onChange={this.saveName}
                             onBlur={this.toggleEdit}
                         />

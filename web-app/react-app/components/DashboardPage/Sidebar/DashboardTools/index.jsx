@@ -5,7 +5,9 @@ import {any} from 'prop-types'
 import {connect} from 'react-redux'
 import {Button} from 'react-bootstrap'
 import FontAwesome from 'react-fontawesome'
-import createLink from '../../../../createLink'
+
+import {parseDashboard} from '../../../../helpers/parseState'
+import createLink from '../../../../helpers/createLink'
 
 import ConfirmButton from '../../../ConfirmButton'
 import ShareDialog from '../../../ShareDialog'
@@ -94,13 +96,6 @@ class DashboardTools extends Component {
     }
 }
 
-const mapStateToProps = ({dashboard}) => {
-    const db = dashboard.dashboardsById[dashboard.openDashboard.id] || {}
-    return {
-        dashboard: db,
-        canShare: db.new !== true && (db.ownPermissions && db.ownPermissions.includes('share')),
-        canWrite: db.new !== true && (db.ownPermissions && db.ownPermissions.includes('write'))
-    }
-}
+const mapStateToProps = (state) => parseDashboard(state)
 
 export default connect(mapStateToProps)(DashboardTools)

@@ -24,7 +24,7 @@ import {
     CHANGE_DASHBOARD_ID,
 } from '../actions/dashboard.js'
 
-declare var _: any
+import _ from 'lodash'
 
 import type {
     DashboardReducerState as State,
@@ -70,9 +70,6 @@ const dashboard = function(state: State = initialState, action: Action) : State 
             }
             
         case CREATE_DASHBOARD: {
-            if (!action.dashboard || !action.dashboard.id) {
-                return state
-            }
             return {
                 ...state,
                 dashboardsById: {
@@ -89,9 +86,6 @@ const dashboard = function(state: State = initialState, action: Action) : State 
         }
         
         case UPDATE_DASHBOARD: {
-            if (!action.dashboard || !action.dashboard.id) {
-                return state
-            }
             return {
                 ...state,
                 dashboardsById: {
@@ -109,9 +103,6 @@ const dashboard = function(state: State = initialState, action: Action) : State 
         
         case GET_DASHBOARD_SUCCESS:
         case UPDATE_AND_SAVE_DASHBOARD_SUCCESS: {
-            if (!action.dashboard || !action.dashboard.id) {
-                return state
-            }
             return {
                 ...state,
                 dashboardsById: {
@@ -129,9 +120,6 @@ const dashboard = function(state: State = initialState, action: Action) : State 
         }
         
         case DELETE_DASHBOARD_SUCCESS: {
-            if (!action.id) {
-                return state
-            }
             const dbById = {
                 ...state.dashboardsById
             }
@@ -145,9 +133,6 @@ const dashboard = function(state: State = initialState, action: Action) : State 
         }
         
         case GET_MY_DASHBOARD_PERMISSIONS_SUCCESS: {
-            if (!action.id) {
-                return state
-            }
             return {
                 ...state,
                 dashboardsById: {

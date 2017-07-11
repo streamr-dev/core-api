@@ -54,6 +54,7 @@ class ShareDialog extends Component {
             })
     }
     
+    // render() takes the child of the component, renders it as the root, injects Modal to its child and binds onclick
     render() {
         const Child = React.Children.only(this.props.children)
         let i = 0

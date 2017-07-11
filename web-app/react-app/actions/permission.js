@@ -4,7 +4,7 @@ import axios from 'axios'
 import path from 'path'
 import settle from 'promise-settle'
 import parseError from './utils/parseError'
-import createLink from '../createLink'
+import createLink from '../helpers/createLink'
 
 import {showError, showSuccess} from './notification'
 
@@ -23,18 +23,22 @@ export const SAVE_REMOVED_RESOURCE_PERMISSION_REQUEST = 'SAVE_REMOVED_RESOURCE_P
 export const SAVE_REMOVED_RESOURCE_PERMISSION_SUCCESS = 'SAVE_REMOVED_RESOURCE_PERMISSIONS_SUCCESS'
 export const SAVE_REMOVED_RESOURCE_PERMISSION_FAILURE = 'SAVE_REMOVED_RESOURCE_PERMISSIONS_FAILURE'
 
-const getApiUrl = (resourceType, resourceId) => {
+import type {ApiError} from '../flowtype/common-types'
+import type {Permission} from '../flowtype/permission-types'
+import type {User} from '../flowtype/user-types'
+
+const getApiUrl = (resourceType: Permission.resourceType, resourceId: Permission.resourceId) => {
     const urlPartsByResourceType = {
         DASHBOARD: 'dashboards',
         CANVAS: 'canvases',
         STREAM: 'streams'
     }
-    return path.resolve('/api/v1', urlPartsByResourceType[resourceType], resourceId)
+    const urlPart = urlPartsByResourceType[resourceType]
+    if (!urlPart) {
+        throw new Error(`Invalid resource type: ${resourceType}`)
+    }
+    return path.resolve('/api/v1', urlPart, resourceId)
 }
-
-import type { ApiError } from '../flowtype/common-types'
-import type { Permission } from '../flowtype/permission-types'
-import type { User } from '../flowtype/user-types'
 
 export const getResourcePermissions = (resourceType: Permission.resourceType, resourceId: Permission.resourceId) => (dispatch: Function) => {
     dispatch(getResourcePermissionsRequest())
@@ -47,7 +51,12 @@ export const getResourcePermissions = (resourceType: Permission.resourceType, re
         })
 }
 
-export const setResourceHighestOperationForUser = (resourceType: Permission.resourceType, resourceId: Permission.resourceId, user: User.email, operation: Permission.operation) => (dispatch: Function, getState: Function) => {
+export const setResourceHighestOperationForUser = (
+    resourceType: Permission.resourceType,
+    resourceId: Permission.resourceId,
+    user: User.email,
+    operation: Permission.operation
+) => (dispatch: Function, getState: Function) => {
     const state = getState()
     const currentPermissions = (state.permission.byTypeAndId[resourceType] && state.permission.byTypeAndId[resourceType][resourceId] || []).filter(p => p.user === user)
     const operationsInOrder = ['read', 'write', 'share']
@@ -99,7 +108,7 @@ export const removeAllResourcePermissionsByUser = (resourceType: Permission.reso
 export const saveUpdatedResourcePermissions = (resourceType: Permission.resourceType, resourceId: Permission.resourceId) => (dispatch: Function, getState: Function) => {
     const state = getState()
     const permissions = state.permission.byTypeAndId[resourceType] && state.permission.byTypeAndId[resourceType][resourceId] || []
-
+    
     const addedPermissions = permissions.filter(p => p.new)
     const addPermissions = new Promise(resolve => {
         settle(addedPermissions.map(permission => {
@@ -121,7 +130,7 @@ export const saveUpdatedResourcePermissions = (resourceType: Permission.resource
                 resolve(results)
             })
     })
-
+    
     const removedPermissions = permissions.filter(p => p.removed)
     const removePermissions = new Promise(resolve => {
         settle(removedPermissions.map(permission => {

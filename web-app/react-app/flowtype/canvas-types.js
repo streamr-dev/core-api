@@ -20,16 +20,12 @@ export type Canvas = {
 export type CanvasModule = {
     id: number,
     type: string,
+    hash: number,
     params: Array<CanvasModuleParam>,
     inputs: Array<CanvasModuleInput>,
     outputs: Array<CanvasModuleOutput>,
     uiChannel: UiChannel,
-    layout: {
-        position: {
-            left: string,
-            top: string
-        }
-    }
+    checked?: boolean
 }
 
 type CanvasModuleParam = {
