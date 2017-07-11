@@ -20,7 +20,8 @@ import {
     CREATE_DASHBOARD,
     UPDATE_DASHBOARD,
     LOCK_DASHBOARD_EDITING,
-    UNLOCK_DASHBOARD_EDITING
+    UNLOCK_DASHBOARD_EDITING,
+    CHANGE_DASHBOARD_ID,
 } from '../actions/dashboard.js'
 
 declare var _: any
@@ -195,7 +196,22 @@ const dashboard = function(state: State = initialState, action: Action) : State 
                     }
                 }
             }
+    
+        case CHANGE_DASHBOARD_ID: {
+            const newDashboardsById = {
+                ...state.dashboardsByid,
+                [action.newId]: {
+                    ...(state.dashboardsById[action.oldId] || {})
+                }
+            }
+            delete newDashboardsById[action.oldId]
+            return {
+                ...state,
+                dashboardsById: newDashboardsById
+            }
             
+        }
+        
         default:
             return state
     }

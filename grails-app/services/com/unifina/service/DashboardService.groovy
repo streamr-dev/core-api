@@ -90,8 +90,8 @@ class DashboardService {
 	 * @throws NotPermittedException when dashboard was found but user not permitted to update it
 	 * @return
 	 */
-	Dashboard update(SaveDashboardCommand validCommand, SecUser user) throws NotFoundException, NotPermittedException {
-		Dashboard dashboard = authorizedGetById(validCommand.id, user, Operation.WRITE)
+	Dashboard update(String id, SaveDashboardCommand validCommand, SecUser user) throws NotFoundException, NotPermittedException {
+		Dashboard dashboard = authorizedGetById(id, user, Operation.WRITE)
 
 		def properties = validCommand.properties.subMap(["name", "layout"])
 		dashboard.setProperties(properties)
@@ -107,11 +107,11 @@ class DashboardService {
 				item = DashboardItem.findByDashboardAndId(dashboard, it.id)
 				item.setProperties(it.properties)
 				ids.remove(it.id)
+				item.save(failOnError: true)
 			} else {
-				item = new DashboardItem(it.properties)
+				item = new DashboardItem(it.properties << [dashboard: dashboard]).save(failOnError: true)
 				dashboard.addToItems(item)
 			}
-			item.save(failOnError: true)
 		}
 
 		ids.collect {
@@ -126,8 +126,7 @@ class DashboardService {
 
 		dashboard.save(failOnError: true)
 
-
-		return Dashboard.findById(validCommand.id)
+		return dashboard
 	}
 
 	/**

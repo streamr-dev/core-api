@@ -16,7 +16,6 @@ class DashboardItem implements Comparable {
 
 	static constraints = {
 		title nullable: true, blank: false
-		id bindable: true
 	}
 
 	int compareTo(obj) {
@@ -24,7 +23,7 @@ class DashboardItem implements Comparable {
 	}
 
 	static mapping = {
-		id generator: "assigned"
+		id generator: IdGenerator.name
 		dashboard column: "dashboard_id"
 		canvas column: "canvas_id"
 	}

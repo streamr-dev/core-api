@@ -33,6 +33,8 @@ export const GET_MY_DASHBOARD_PERMISSIONS_FAILURE = 'GET_MY_DASHBOARD_PERMISSION
 export const LOCK_DASHBOARD_EDITING = 'LOCK_DASHBOARD_EDITING'
 export const UNLOCK_DASHBOARD_EDITING = 'UNLOCK_DASHBOARD_EDITING'
 
+export const CHANGE_DASHBOARD_ID = 'CHANGE_DASHBOARD_ID'
+
 const apiUrl = 'api/v1/dashboards'
 
 import type { ApiError } from '../flowtype/common-types'
@@ -90,6 +92,10 @@ export const updateAndSaveDashboard = (dashboard: Dashboard) => (dispatch: Funct
             dispatch(showSuccess({
                 title: 'Dashboard saved succesfully!'
             }))
+            
+            if (createNew && dashboard.id !== data.id) {
+                dispatch(changeDashboardId(dashboard.id, data.id))
+            }
             
             return dispatch(updateAndSaveDashboardSuccess({
                 ...data,
@@ -189,6 +195,12 @@ export const lockDashboardEditing = (id: Dashboard.id) => ({
 export const unlockDashboardEditing = (id: Dashboard.id) => ({
     type: UNLOCK_DASHBOARD_EDITING,
     id
+})
+
+const changeDashboardId = (oldId: Dashboard.id, newId: Dashboard.id) => ({
+    type: CHANGE_DASHBOARD_ID,
+    oldId,
+    newId
 })
 
 const getAndReplaceDashboardsRequest = () => ({

@@ -13,7 +13,6 @@ class SaveDashboardItemCommand {
 	String webcomponent
 
 	static constraints = {
-		id(nullable: false)
 		title(blank: false)
 		canvas(blank: false)
 		module(nullable: false)

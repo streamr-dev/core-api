@@ -39,6 +39,28 @@ describe('Dashboard reducer', () => {
         })
     })
     
+    it('should handle CHANGE_DASHBOARD_ID', () => {
+        assert.deepStrictEqual(reducer({
+            ...initialState,
+            dashboardsById: {
+                test: {
+                    id: 'dashboard'
+                }
+            }
+        }, {
+            type: actions.CHANGE_DASHBOARD_ID,
+            oldId: 'test',
+            newId: 'test2'
+        }), {
+            ...initialState,
+            dashboardsById: {
+                test2: {
+                    id: 'dashboard'
+                }
+            }
+        })
+    })
+    
     describe('GET_AND_REPLACE_DASHBOARDS', () => {
         it('should handle GET_AND_REPLACE_DASHBOARDS_REQUEST', () => {
             assert.deepStrictEqual(reducer(initialState, {

@@ -106,9 +106,9 @@ class Editor extends Component {
         const db = this.props.dashboard
         return _.zipObject(sizes, _.map(sizes, size => {
             return db.items.map(item => {
-                const layout = db.layout && db.layout[size] && db.layout[size].find(layout => layout.i === item.id) || {}
+                const layout = db.layout && db.layout[size] && db.layout[size].find(layout => layout.i === Editor.generateItemId(item)) || {}
                 const defaultLayout = {
-                    i: item.id,
+                    i: Editor.generateItemId(item),
                     x: 0,
                     y: 0,
                     h: 2,
@@ -137,6 +137,10 @@ class Editor extends Component {
         if (!this.props.dashboard.saved) {
             return 'You have unsaved changes in your Dashboard. Are you sure you want to leave?'
         }
+    }
+    
+    static generateItemId(item: DashboardItem) {
+        return `${item.canvas}-${item.module}`
     }
 
     render() {
@@ -185,7 +189,6 @@ class Editor extends Component {
                         </StreamrBreadcrumb.DropdownButton>
                     )}
                 </StreamrBreadcrumb>
-                <streamr-client id="client" url="ws://dev.streamr/api/v1/ws" autoconnect="true" autodisconnect="false"/>
                 <ResponsiveReactGridLayout
                     className={styles.dashboard}
                     layouts={layout}
@@ -200,8 +203,8 @@ class Editor extends Component {
                     isResizable={!this.props.editorLocked}
                 >
                     {items.map(dbItem => (
-                        <div key={dbItem.id.toString()}>
-                            <DashboardItem item={dbItem} currentLayout={this.state.layoutsByItemId[dbItem.id]} dragCancelClassName={dragCancelClassName}/>
+                        <div key={Editor.generateItemId(dbItem)}>
+                            <DashboardItem item={dbItem} currentLayout={this.state.layoutsByItemId[Editor.generateItemId(dbItem)]} dragCancelClassName={dragCancelClassName}/>
                         </div>
                     ))}
                 </ResponsiveReactGridLayout>
