@@ -11,8 +11,8 @@ import grails.plugin.springsecurity.annotation.Secured
 @Secured(["IS_AUTHENTICATED_ANONYMOUSLY"])
 class IntegrationKeyApiController {
 
-	def apiService
-	def ethereumIntegrationKeyService
+	ApiService apiService
+	EthereumIntegrationKeyService ethereumIntegrationKeyService
 
 	@StreamrApi
 	def index() {
@@ -24,7 +24,7 @@ class IntegrationKeyApiController {
 			}
 		}
 		def criteria = apiService.createListCriteria(params, ["id"], {
-			//eq("user", request.apiUser)
+			eq("user", request.apiUser)
 
 			// Filter by exact id
 			if (params.id) {

@@ -18,8 +18,9 @@ class DashboardItem implements Comparable {
 		title nullable: true, blank: false
 	}
 
-	int compareTo(obj) {
-		return id != null ? id.compareTo(obj.id) : title.compareTo(obj.title)
+	int compareTo(Object obj) {
+		DashboardItem item = (DashboardItem) obj
+		return id != null ? id.compareTo(item.id) : title.compareTo(item.title)
 	}
 
 	static mapping = {
@@ -37,10 +38,5 @@ class DashboardItem implements Comparable {
 				module      : module,
 				webcomponent: webcomponent
 		]
-	}
-
-	void updateWebcomponent() {
-		def module = canvas.toMap().modules.find { it.hash == module }
-		webcomponent = module?.uiChannel?.webcomponent
 	}
 }

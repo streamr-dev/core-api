@@ -96,9 +96,9 @@ class DashboardService {
 		def properties = validCommand.properties.subMap(["name", "layout"])
 		dashboard.setProperties(properties)
 
-		Set<String> ids = dashboard.items.collect { it.id } as Set
+		Set<String> ids = dashboard.items?.collect { it.id } as Set
 
-		validCommand.items.each {
+		validCommand.items.each { SaveDashboardItemCommand it ->
 			if (!it.validate()) {
 				throw new ValidationException(it.errors)
 			}
