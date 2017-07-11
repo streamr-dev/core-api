@@ -1,11 +1,12 @@
 
 import type {Canvas} from './canvas-types'
+import type {Permission} from './permission-types'
 
 export type Dashboard = {
     id: string,
     name: string,
     items: Array<DashboardItem>,
-    permissions?: Array<string>,
+    ownPermissions?: Array<Permission.operation>,
     editingLocked?: boolean
 }
 
