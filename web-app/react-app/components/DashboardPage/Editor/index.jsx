@@ -123,11 +123,13 @@ class Editor extends Component {
         }))
     }
     
-    onResize(items) {
+    onResize(layout: Array<{
+        i: string
+    }>) {
         this.setState({
             layoutsByItemId: {
                 ...this.state.layoutsByItemId,
-                ...(_.groupBy(items, item => item.i))
+                ...(_.groupBy(layout, item => item.i))
             }
         })
     }
