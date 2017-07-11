@@ -16,11 +16,11 @@ import 'react-resizable/css/styles.css'
 
 import DashboardItem from './DashboardItem'
 import ShareDialog from '../../ShareDialog'
+import DeleteButton from '../DashboardDeleteButton'
 
 import {updateDashboard, deleteDashboard, lockDashboardEditing, unlockDashboardEditing} from '../../../actions/dashboard'
 
 import type {Dashboard} from '../../../flowtype/dashboard-types'
-import ConfirmButton from '../../ConfirmButton/index'
 
 const ResponsiveReactGridLayout = WidthProvider(Responsive)
 
@@ -137,7 +137,7 @@ class Editor extends Component {
     onBeforeUnload(e: {
         returnValue: any
     }) {
-        if (!this.props.dashboard.saved) {
+        if (this.props.dashboard.id && !this.props.dashboard.saved) {
             const message = 'You have unsaved changes in your Dashboard. Are you sure you want to leave?'
             e.returnValue = message
             return message
@@ -157,7 +157,7 @@ class Editor extends Component {
             <div id="content-wrapper" className="scrollable" style={{
                 height: '100%'
             }}>
-                <StreamrBreadcrumb className="breadcrumb-page">
+                <StreamrBreadcrumb>
                     <StreamrBreadcrumbItem href={createLink('dashboard/list')}>
                         Dashboards
                     </StreamrBreadcrumbItem>
@@ -180,16 +180,12 @@ class Editor extends Component {
                                 </ShareDialog>
                             )}
                             {this.props.canWrite && (
-                                <ConfirmButton
-                                    buttonProps={{
-                                        componentClass: MenuItem,
-                                        bsClass: ''
-                                    }}
-                                    confirmMessage={`Are you sure you want to delete Dashboard ${this.props.dashboard.name}?`}
-                                    confirmCallback={() => {
-                                    }}>
+                                <DeleteButton buttonProps={{
+                                    componentClass: MenuItem,
+                                    bsClass: ''
+                                }}>
                                     <FontAwesome name="trash-o"/> Delete
-                                </ConfirmButton>
+                                </DeleteButton>
                             )}
                         </StreamrBreadcrumbDropdownButton>
                     )}

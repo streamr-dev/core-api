@@ -7,19 +7,17 @@ import {Button} from 'react-bootstrap'
 import FontAwesome from 'react-fontawesome'
 
 import {parseDashboard} from '../../../../helpers/parseState'
-import createLink from '../../../../helpers/createLink'
 
-import ConfirmButton from '../../../ConfirmButton'
+import DeleteButton from '../../DashboardDeleteButton'
 import ShareDialog from '../../../ShareDialog'
 
-import {updateAndSaveDashboard, deleteDashboard} from '../../../../actions/dashboard'
+import {updateAndSaveDashboard} from '../../../../actions/dashboard'
 
 import type { Dashboard } from '../../../../flowtype/dashboard-types'
 
 class DashboardTools extends Component {
     
     onSave: Function
-    onDelete: Function
     props: {
         dashboard: Dashboard,
         openDashboard: {
@@ -39,7 +37,6 @@ class DashboardTools extends Component {
         super()
         
         this.onSave = this.onSave.bind(this)
-        this.onDelete = this.onDelete.bind(this)
     }
 
     onSave() {
@@ -47,11 +44,6 @@ class DashboardTools extends Component {
             .then(({dashboard}) => {
                 this.context.router.push(`/${dashboard.id}`)
             })
-    }
-    
-    onDelete() {
-        this.props.dispatch(deleteDashboard(this.props.dashboard.id))
-            .then(() => window.location = createLink('/dashboards/list'))
     }
     
     render() {
@@ -80,17 +72,11 @@ class DashboardTools extends Component {
                         <FontAwesome name="user" />  Share
                     </Button>
                 </ShareDialog>
-                <ConfirmButton
-                    buttonProps={{
-                        block: true,
-                        disabled: !this.props.canWrite
-                    }}
-                    confirmCallback={this.onDelete}
-                    confirmTitle="Are you sure?"
-                    confirmMessage={`Are you sure you want to remove dashboard ${this.props.dashboard.name}?`}
-                >
+                <DeleteButton buttonProps={{
+                    block: true
+                }}>
                     Delete
-                </ConfirmButton>
+                </DeleteButton>
             </div>
         )
     }
