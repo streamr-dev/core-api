@@ -2,10 +2,13 @@
 
 import React, {Component} from 'react'
 import {connect} from 'react-redux'
-import {StreamrBreadcrumb} from '../../Breadcrumb'
+import {StreamrBreadcrumb, StreamrBreadcrumbItem, StreamrBreadcrumbDropdownButton} from '../../Breadcrumb'
 import {MenuItem} from 'react-bootstrap'
 import FontAwesome from 'react-fontawesome'
-import createLink from '../../../createLink'
+import _ from 'lodash'
+
+import {parseDashboard} from '../../../helpers/parseState'
+import createLink from '../../../helpers/createLink'
 
 import {Responsive, WidthProvider} from 'react-grid-layout'
 import 'react-grid-layout/css/styles.css'
@@ -13,15 +16,11 @@ import 'react-resizable/css/styles.css'
 
 import DashboardItem from './DashboardItem'
 import ShareDialog from '../../ShareDialog'
+import DeleteButton from '../DashboardDeleteButton'
 
 import {updateDashboard, deleteDashboard, lockDashboardEditing, unlockDashboardEditing} from '../../../actions/dashboard'
 
-import styles from './editor.pcss'
-
-declare var _: any
-
 import type {Dashboard} from '../../../flowtype/dashboard-types'
-import ConfirmButton from '../../ConfirmButton/index'
 
 const ResponsiveReactGridLayout = WidthProvider(Responsive)
 
@@ -106,9 +105,9 @@ class Editor extends Component {
         const db = this.props.dashboard
         return _.zipObject(sizes, _.map(sizes, size => {
             return db.items.map(item => {
-                const layout = db.layout && db.layout[size] && db.layout[size].find(layout => layout.i === item.id) || {}
+                const layout = db.layout && db.layout[size] && db.layout[size].find(layout => layout.i === Editor.generateItemId(item)) || {}
                 const defaultLayout = {
-                    i: item.id,
+                    i: Editor.generateItemId(item),
                     x: 0,
                     y: 0,
                     h: 2,
@@ -124,19 +123,29 @@ class Editor extends Component {
         }))
     }
     
-    onResize(items) {
+    onResize(layout: Array<{
+        i: string
+    }>) {
         this.setState({
             layoutsByItemId: {
                 ...this.state.layoutsByItemId,
-                ...(_.groupBy(items, item => item.i))
+                ...(_.groupBy(layout, item => item.i))
             }
         })
     }
     
-    onBeforeUnload() {
-        if (!this.props.dashboard.saved) {
-            return 'You have unsaved changes in your Dashboard. Are you sure you want to leave?'
+    onBeforeUnload(e: {
+        returnValue: any
+    }) {
+        if (this.props.dashboard.id && !this.props.dashboard.saved) {
+            const message = 'You have unsaved changes in your Dashboard. Are you sure you want to leave?'
+            e.returnValue = message
+            return message
         }
+    }
+    
+    static generateItemId(item: DashboardItem) {
+        return `${item.canvas}-${item.module}`
     }
 
     render() {
@@ -148,17 +157,17 @@ class Editor extends Component {
             <div id="content-wrapper" className="scrollable" style={{
                 height: '100%'
             }}>
-                <StreamrBreadcrumb className="breadcrumb-page">
-                    <StreamrBreadcrumb.Item href={createLink('dashboard/list')}>
+                <StreamrBreadcrumb>
+                    <StreamrBreadcrumbItem href={createLink('dashboard/list')}>
                         Dashboards
-                    </StreamrBreadcrumb.Item>
-                    <StreamrBreadcrumb.Item active={true}>
+                    </StreamrBreadcrumbItem>
+                    <StreamrBreadcrumbItem active={true}>
                         {dashboard && dashboard.name || 'New Dashboard'}
-                    </StreamrBreadcrumb.Item>
+                    </StreamrBreadcrumbItem>
                     {(this.props.canShare || this.props.canWrite) && (
-                        <StreamrBreadcrumb.DropdownButton title={(
+                        <StreamrBreadcrumbDropdownButton title={(
                             <FontAwesome name="cog"/>
-                        )} className={styles.streamrDropdownButton}>
+                        )}>
                             {this.props.canShare && (
                                 <ShareDialog
                                     resourceType="DASHBOARD"
@@ -171,23 +180,17 @@ class Editor extends Component {
                                 </ShareDialog>
                             )}
                             {this.props.canWrite && (
-                                <ConfirmButton
-                                    buttonProps={{
-                                        componentClass: MenuItem,
-                                        bsClass: ''
-                                    }}
-                                    confirmMessage={`Are you sure you want to delete Dashboard ${this.props.dashboard.name}?`}
-                                    confirmCallback={() => {
-                                    }}>
+                                <DeleteButton buttonProps={{
+                                    componentClass: MenuItem,
+                                    bsClass: ''
+                                }}>
                                     <FontAwesome name="trash-o"/> Delete
-                                </ConfirmButton>
+                                </DeleteButton>
                             )}
-                        </StreamrBreadcrumb.DropdownButton>
+                        </StreamrBreadcrumbDropdownButton>
                     )}
                 </StreamrBreadcrumb>
-                <streamr-client id="client" url="ws://dev.streamr/api/v1/ws" autoconnect="true" autodisconnect="false"/>
                 <ResponsiveReactGridLayout
-                    className={styles.dashboard}
                     layouts={layout}
                     rowHeight={60}
                     breakpoints={this.state.breakpoints}
@@ -200,9 +203,8 @@ class Editor extends Component {
                     isResizable={!this.props.editorLocked}
                 >
                     {items.map(dbItem => (
-                        <div key={dbItem.id.toString()}>
-                            <DashboardItem currentLayout={this.state.layoutsByItemId[dbItem.id]} item={dbItem}
-                                           dashboard={dashboard} dragCancelClassName={dragCancelClassName}/>
+                        <div key={Editor.generateItemId(dbItem)}>
+                            <DashboardItem item={dbItem} currentLayout={this.state.layoutsByItemId[Editor.generateItemId(dbItem)]} dragCancelClassName={dragCancelClassName}/>
                         </div>
                     ))}
                 </ResponsiveReactGridLayout>
@@ -211,15 +213,11 @@ class Editor extends Component {
     }
 }
 
-const mapStateToProps = ({dashboard}) => {
-    const db = dashboard.dashboardsById[dashboard.openDashboard.id] || {}
-    const canShare = db.new !== true && (db.ownPermissions && db.ownPermissions.includes('share'))
-    const canWrite = db.new !== true && (db.ownPermissions && db.ownPermissions.includes('write'))
+const mapStateToProps = (state) => {
+    const baseState = parseDashboard(state)
     return {
-        dashboard: db,
-        canShare,
-        canWrite,
-        editorLocked: db.editingLocked ? true : !canWrite
+        ...baseState,
+        editorLocked: baseState.dashboard.editingLocked || (!baseState.dashboard.new && !baseState.canWrite)
     }
 }
 

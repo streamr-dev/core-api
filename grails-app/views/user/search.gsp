@@ -73,11 +73,11 @@ def queryParams = [username: username, enabled: enabled, accountExpired: account
 	<table>
 		<thead>
 		<tr>
-			<g:sortableColumn property="username" title="${message(code: 'user.username.label', default: 'Username')}" params="${queryParams}"/>
-			<g:sortableColumn property="enabled" title="${message(code: 'user.enabled.label', default: 'Enabled')}" params="${queryParams}"/>
-			<g:sortableColumn property="accountExpired" title="${message(code: 'user.accountExpired.label', default: 'IntegrationKey Expired')}" params="${queryParams}"/>
-			<g:sortableColumn property="accountLocked" title="${message(code: 'user.accountLocked.label', default: 'IntegrationKey Locked')}" params="${queryParams}"/>
-			<g:sortableColumn property="passwordExpired" title="${message(code: 'user.passwordExpired.label', default: 'Password Expired')}" params="${queryParams}"/>
+			<g:sortableColumn property="username" title="${message(code: 'secuser.username.label')}" params="${queryParams}"/>
+			<g:sortableColumn property="enabled" title="${message(code: 'secuser.enabled.label')}" params="${queryParams}"/>
+			<g:sortableColumn property="accountExpired" title="${message(code: 'secuser.accountExpired.label')}" params="${queryParams}"/>
+			<g:sortableColumn property="accountLocked" title="${message(code: 'secuser.accountLocked.label')}" params="${queryParams}"/>
+			<g:sortableColumn property="passwordExpired" title="${message(code: 'secuser.passwordExpired.label)}" params="${queryParams}"/>
 		</tr>
 		</thead>
 

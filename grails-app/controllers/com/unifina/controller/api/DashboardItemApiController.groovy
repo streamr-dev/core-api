@@ -20,7 +20,7 @@ class DashboardItemApiController {
 	}
 
 	@StreamrApi
-	def show(String dashboardId, Long id) {
+	def show(String dashboardId, String id) {
 		def item = dashboardService.findDashboardItem(dashboardId, id, (SecUser) request.apiUser)
 		render(item.toMap() as JSON)
 	}

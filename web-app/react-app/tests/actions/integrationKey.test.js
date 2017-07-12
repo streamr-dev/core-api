@@ -31,7 +31,7 @@ describe('IntegrationKey actions', () => {
     
     describe('getAndReplaceIntegrationKeys', () => {
         it('creates GET_ALL_INTEGRATION_KEYS_SUCCESS when fetching integrationKeys has succeeded', async () => {
-            moxios.stubRequest('api/v1/integrationkeys', {
+            moxios.stubRequest('api/v1/integration_keys', {
                 status: 200,
                 response: [{
                     name: 'test',
@@ -60,7 +60,7 @@ describe('IntegrationKey actions', () => {
         })
     
         it('creates GET_ALL_INTEGRATION_KEYS_FAILURE when fetching integration keys has failed', async () => {
-            moxios.stubRequest('api/v1/integrationkeys', {
+            moxios.stubRequest('api/v1/integration_keys', {
                 status: 500,
                 response: new Error('test-error')
             })

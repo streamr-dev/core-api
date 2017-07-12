@@ -1,7 +1,6 @@
-
 import reducer from '../../reducers/integrationKey'
 import * as actions from '../../actions/integrationKey'
-import expect from 'expect'
+import assert from 'assert-diff'
 import _ from 'lodash'
 
 
@@ -16,82 +15,76 @@ describe('IntegrationKey reducer', () => {
     })
     
     it('should return the initial state', () => {
-        expect(
-            reducer(undefined, {})
-        ).toEqual({
+        assert.deepStrictEqual(reducer(undefined, {}), {
             listsByService: {},
             error: null,
             fetching: false
         })
     })
     
-    it('should handle GET_AND_REPLACE_INTEGRATION_KEYS', () => {
-        expect(
-            reducer({}, {
+    describe('GET_AND_REPLACE_INTEGRATION_KEYS', () => {
+        it('should handle GET_AND_REPLACE_INTEGRATION_KEYS_REQUEST', () => {
+            assert.deepStrictEqual(reducer({}, {
                 type: actions.GET_AND_REPLACE_INTEGRATION_KEYS_REQUEST
+            }), {
+                fetching: true
             })
-        ).toEqual({
-            fetching: true
         })
-        
-        expect(
-            reducer({}, {
+        it('should handle GET_AND_REPLACE_INTEGRATION_KEYS_SUCCESS', () => {
+            assert.deepStrictEqual(reducer({}, {
                 type: actions.GET_AND_REPLACE_INTEGRATION_KEYS_SUCCESS,
                 integrationKeys: [{
                     id: 1,
-                    type: 'A'
+                    service: 'A'
                 }, {
                     id: 2,
-                    type: 'B'
+                    service: 'B'
                 }, {
                     id: 3,
-                    type: 'B'
+                    service: 'B'
                 }]
+            }), {
+                fetching: false,
+                listsByService: {
+                    A: [{
+                        id: 1,
+                        service: 'A'
+                    }],
+                    B: [{
+                        id: 2,
+                        service: 'B'
+                    }, {
+                        id: 3,
+                        service: 'B'
+                    }]
+                },
+                error: null
             })
-        ).toEqual({
-            fetching: false,
-            listsByService: {
-                A: [{
-                    id: 1,
-                    type: 'A'
-                }],
-                B: [{
-                    id: 2,
-                    type: 'B'
-                }, {
-                    id: 3,
-                    type: 'B'
-                }]
-            },
-            error: null
         })
-        
-        expect(
-            reducer({
+        it('should handle GET_AND_REPLACE_INTEGRATION_KEYS_FAILURE', () => {
+            assert.deepStrictEqual(reducer({
                 list: ['test']
             }, {
                 type: actions.GET_AND_REPLACE_INTEGRATION_KEYS_FAILURE,
                 error: 'test-error'
+            }), {
+                fetching: false,
+                list: ['test'],
+                error: 'test-error'
             })
-        ).toEqual({
-            fetching: false,
-            list: ['test'],
-            error: 'test-error'
         })
     })
-    
-    it('should handle GET_AND_REPLACE_INTEGRATION_KEYS', () => {
-        expect(
-            reducer({}, {
-                type: actions.GET_INTEGRATION_KEYS_BY_TYPE_REQUEST
+    describe('GET_INTEGRATION_KEYS_BY_SERVICE', () => {
+        it('should handle GET_INTEGRATION_KEYS_BY_SERVICE_REQUEST', () => {
+            assert.deepStrictEqual(reducer({}, {
+                type: actions.GET_INTEGRATION_KEYS_BY_SERVICE_REQUEST
+            }), {
+                fetching: true
             })
-        ).toEqual({
-            fetching: true
         })
-        
-        expect(
-            reducer({}, {
-                type: actions.GET_INTEGRATION_KEYS_BY_TYPE_SUCCESS,
+        it('should handle GET_INTEGRATION_KEYS_BY_SERVICE_SUCCESS', () => {
+            assert.deepStrictEqual(reducer({}, {
+                type: actions.GET_INTEGRATION_KEYS_BY_SERVICE_SUCCESS,
                 service: 'B',
                 integrationKeys: [{
                     id: 1
@@ -100,83 +93,80 @@ describe('IntegrationKey reducer', () => {
                 }, {
                     id: 3
                 }]
+            }), {
+                fetching: false,
+                listsByService: {
+                    B: [{
+                        id: 1
+                    }, {
+                        id: 2
+                    }, {
+                        id: 3
+                    }],
+                },
+                error: null
             })
-        ).toEqual({
-            fetching: false,
-            listsByService: {
-                B: [{
-                    id: 1
-                }, {
-                    id: 2
-                }, {
-                    id: 3
-                }],
-            },
-            error: null
         })
-        
-        expect(
-            reducer({
+        it('should handle GET_INTEGRATION_KEYS_BY_SERVICE_FAILURE', () => {
+            assert.deepStrictEqual(reducer({
                 list: ['test']
             }, {
-                type: actions.GET_INTEGRATION_KEYS_BY_TYPE_FAILURE,
+                type: actions.GET_INTEGRATION_KEYS_BY_SERVICE_FAILURE,
+                error: 'test-error'
+            }), {
+                fetching: false,
+                list: ['test'],
                 error: 'test-error'
             })
-        ).toEqual({
-            fetching: false,
-            list: ['test'],
-            error: 'test-error'
         })
     })
     
-    it('should handle CREATE_INTEGRATION_KEY', () => {
-        expect(
-            reducer({}, {
+    describe('CREATE_INTEGRATION_KEY', () => {
+        it('should handle CREATE_INTEGRATION_KEY_REQUEST', () => {
+            assert.deepStrictEqual(reducer({}, {
                 type: actions.CREATE_INTEGRATION_KEY_REQUEST
+            }), {
+                fetching: true
             })
-        ).toEqual({
-            fetching: true
         })
-        
-        expect(
-            reducer({
+        it('should handle CREATE_INTEGRATION_KEY_SUCCESS', () => {
+            assert.deepStrictEqual(reducer({
                 listsByService: {
                     A: [{
                         id: 1,
-                        type: 'A'
+                        service: 'A'
                     }],
                     B: [{
                         id: 2,
-                        type: 'B'
+                        service: 'B'
                     }]
                 }
             }, {
                 type: actions.CREATE_INTEGRATION_KEY_SUCCESS,
                 integrationKey: {
                     id: 3,
-                    type: 'A'
+                    service: 'A'
                 }
+            }), {
+                fetching: false,
+                listsByService: {
+                    A: [{
+                        id: 1,
+                        service: 'A'
+                    }, {
+                        id: 3,
+                        service: 'A'
+                    }],
+                    B: [{
+                        id: 2,
+                        service: 'B'
+                    }]
+                },
+                error: null
             })
-        ).toEqual({
-            fetching: false,
-            listsByService: {
-                A: [{
-                    id: 1,
-                    type: 'A'
-                }, {
-                    id: 3,
-                    type: 'A'
-                }],
-                B: [{
-                    id: 2,
-                    type: 'B'
-                }]
-            },
-            error: null
         })
-        
-        expect(
-            reducer({
+        it('should handle CREATE_INTEGRATION_KEY_FAILURE', () => {
+            assert.deepStrictEqual(reducer({
                 listsByService: {
                     A: [{
                         id: 1
@@ -189,33 +179,32 @@ describe('IntegrationKey reducer', () => {
             }, {
                 type: actions.CREATE_INTEGRATION_KEY_FAILURE,
                 error: 'test-error'
+            }), {
+                fetching: false,
+                listsByService: {
+                    A: [{
+                        id: 1
+                    }, {
+                        id: 2
+                    }, {
+                        id: 3
+                    }]
+                },
+                error: 'test-error'
             })
-        ).toEqual({
-            fetching: false,
-            listsByService: {
-                A: [{
-                    id: 1
-                }, {
-                    id: 2
-                }, {
-                    id: 3
-                }]
-            },
-            error: 'test-error'
         })
     })
     
-    it('should handle DELETE_INTEGRATION_KEY', () => {
-        expect(
-            reducer({}, {
+    describe('DELETE_INTEGRATION_KEY', () => {
+        it('should handle DELETE_INTEGRATION_KEY_REQUEST', () => {
+            assert.deepStrictEqual(reducer({}, {
                 type: actions.DELETE_INTEGRATION_KEY_REQUEST
+            }), {
+                fetching: true
             })
-        ).toEqual({
-            fetching: true
         })
-        
-        expect(
-            reducer({
+        it('should handle DELETE_INTEGRATION_KEY_SUCCESS', () => {
+            assert.deepStrictEqual(reducer({
                 listsByService: {
                     A: [{
                         id: 1
@@ -228,30 +217,29 @@ describe('IntegrationKey reducer', () => {
             }, {
                 type: actions.DELETE_INTEGRATION_KEY_SUCCESS,
                 id: 3
+            }), {
+                fetching: false,
+                listsByService: {
+                    A: [{
+                        id: 1
+                    }, {
+                        id: 2
+                    }]
+                },
+                error: null
             })
-        ).toEqual({
-            fetching: false,
-            listsByService: {
-                A: [{
-                    id: 1
-                }, {
-                    id: 2
-                }]
-            },
-            error: null
         })
-        
-        expect(
-            reducer({
+        it('should handle CREATE_INTEGRATION_KEY_FAILURE', () => {
+            assert.deepStrictEqual(reducer({
                 list: ['test']
             }, {
                 type: actions.CREATE_INTEGRATION_KEY_FAILURE,
                 error: 'test-error'
+            }), {
+                fetching: false,
+                list: ['test'],
+                error: 'test-error'
             })
-        ).toEqual({
-            fetching: false,
-            list: ['test'],
-            error: 'test-error'
         })
     })
 })

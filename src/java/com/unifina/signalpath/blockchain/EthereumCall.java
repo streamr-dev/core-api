@@ -2,7 +2,6 @@ package com.unifina.signalpath.blockchain;
 
 import com.google.gson.*;
 import com.unifina.signalpath.*;
-import com.unifina.signalpath.blockchain.templates.EthereumModuleOptions;
 import com.unifina.signalpath.remote.AbstractHttpModule;
 import com.unifina.utils.MapTraversal;
 import org.apache.http.HttpEntity;

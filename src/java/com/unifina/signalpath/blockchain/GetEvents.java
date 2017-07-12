@@ -5,7 +5,6 @@ import com.google.gson.*;
 import com.mashape.unirest.http.Unirest;
 import com.mashape.unirest.http.exceptions.UnirestException;
 import com.unifina.signalpath.*;
-import com.unifina.signalpath.blockchain.templates.EthereumModuleOptions;
 import com.unifina.signalpath.remote.AbstractHttpModule;
 import com.unifina.utils.MapTraversal;
 import grails.util.Holders;

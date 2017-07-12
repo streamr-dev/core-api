@@ -6,7 +6,7 @@ import {Provider} from 'react-redux'
 import { Router, Route, useRouterHistory } from 'react-router'
 import { createHistory } from 'history'
 import uuid from 'uuid'
-import createLink from './createLink'
+import createLink from './helpers/createLink'
 
 import {getDashboard, getMyDashboardPermissions, newDashboard, openDashboard} from './actions/dashboard'
 import {getRunningCanvases} from './actions/canvas'

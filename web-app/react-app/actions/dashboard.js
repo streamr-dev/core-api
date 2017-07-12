@@ -2,7 +2,7 @@
 
 import axios from 'axios'
 import parseError from './utils/parseError'
-import createLink from '../createLink'
+import createLink from '../helpers/createLink'
 
 import {showSuccess, showError} from './notification'
 
@@ -32,6 +32,8 @@ export const GET_MY_DASHBOARD_PERMISSIONS_FAILURE = 'GET_MY_DASHBOARD_PERMISSION
 
 export const LOCK_DASHBOARD_EDITING = 'LOCK_DASHBOARD_EDITING'
 export const UNLOCK_DASHBOARD_EDITING = 'UNLOCK_DASHBOARD_EDITING'
+
+export const CHANGE_DASHBOARD_ID = 'CHANGE_DASHBOARD_ID'
 
 const apiUrl = 'api/v1/dashboards'
 
@@ -91,6 +93,10 @@ export const updateAndSaveDashboard = (dashboard: Dashboard) => (dispatch: Funct
                 title: 'Dashboard saved succesfully!'
             }))
             
+            if (createNew && dashboard.id !== data.id) {
+                dispatch(changeDashboardId(dashboard.id, data.id))
+            }
+            
             return dispatch(updateAndSaveDashboardSuccess({
                 ...data,
                 layout: (typeof data.layout === 'string') ? JSON.parse(data.layout) : data.layout
@@ -124,7 +130,7 @@ export const deleteDashboard = (id: Dashboard.id) => (dispatch: Function) => {
 
 export const getMyDashboardPermissions = (id: Dashboard.id) => (dispatch: Function) => {
     dispatch(getMyDashboardPermissionsRequest(id))
-    return axios.delete(createLink(`${apiUrl}/${id}/permissions/me`))
+    return axios.get(createLink(`${apiUrl}/${id}/permissions/me`))
         .then(res => dispatch(getMyDashboardPermissionsSuccess(id, res.data.filter(item => item.user === Streamr.user).map(item => item.operation))))
         .catch(res => {
             const e = parseError(res)
@@ -189,6 +195,12 @@ export const lockDashboardEditing = (id: Dashboard.id) => ({
 export const unlockDashboardEditing = (id: Dashboard.id) => ({
     type: UNLOCK_DASHBOARD_EDITING,
     id
+})
+
+const changeDashboardId = (oldId: Dashboard.id, newId: Dashboard.id) => ({
+    type: CHANGE_DASHBOARD_ID,
+    oldId,
+    newId
 })
 
 const getAndReplaceDashboardsRequest = () => ({

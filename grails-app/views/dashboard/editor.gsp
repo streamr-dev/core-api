@@ -23,11 +23,13 @@
 	</head>
 
 	<body class="main-menu-fixed dashboard-show mme editing">
+		<streamr-client
+				id="client"
+				url="${config.streamr.ui.server}"
+				autoconnect="true"
+				autodisconnect="false"
+		></streamr-client>
 		<div id="dashboardPageRoot"></div>
-
-		<script>
-			const DASHBOARD_ID = '${id}'
-		</script>
 	</body>
 </html>
 

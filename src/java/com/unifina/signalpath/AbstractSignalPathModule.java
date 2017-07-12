@@ -654,7 +654,7 @@ public abstract class AbstractSignalPathModule implements IEventRecipient, IDayL
 				try {
 					recipient.handleRequest(request, response);
 				} catch (AccessControlException e) {
-					String error = "Unauthenticated request! Service: " + request.getType() + ", Msg: " + e.getMessage();
+					String error = "Unauthenticated request! Type: " + request.getType() + ", Msg: " + e.getMessage();
 					log.error(error);
 					response.setSuccess(false);
 					response.put("error", error);

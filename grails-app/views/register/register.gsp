@@ -149,7 +149,7 @@
 			</div>
 
 			<div class="form-actions">
-				<input id="loginButton" type="submit" value="${message(code:'springSecurity.register.button', default: 'Create IntegrationKey')}" class="btn btn-primary btn-block btn-lg">
+				<input id="loginButton" type="submit" value="${message(code:'springSecurity.register.button')}" class="btn btn-primary btn-block btn-lg">
 			</div>
 			
 			<div id="tc-content" style="display:none">

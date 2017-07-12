@@ -43,10 +43,10 @@
             '.tourStream1',
             function(cb) {
                 tour.waitForConnections([
-                    ['tourStream1.text', 'tourTable1.in1'],
-                    ['tourStream1.retweet_count', 'tourTable1.in2'],
-                    ['tourStream1.favorite_count', 'tourTable1.in3'],
-                    ['tourStream1.lang', 'tourTable1.in4']
+                    ['tourStream1.text', 'tourTable1.text'],
+                    ['tourStream1.retweet_count', 'tourTable1.retweet_count'],
+                    ['tourStream1.favorite_count', 'tourTable1.favorite_count'],
+                    ['tourStream1.lang', 'tourTable1.lang']
                 ])(cb)
             }
         )
@@ -177,7 +177,7 @@
 
         .step("Also connect <code>A>B</code> of GreaterThan to <code>in1</code> of Filter.",
             '.tourGreaterThan1',
-            tour.waitForConnection(['tourGreaterThan1.A>B', 'tourFilter1.in1'])
+            tour.waitForConnection(['tourGreaterThan1.A>B', 'tourFilter1.A&gt;B'])
         )
 
         .step("Add module <strong>Email</strong> to the canvas.",
@@ -192,9 +192,9 @@
             tour.waitForInput(".tourEmail1 .parameterInput:first-child", "alert")
         )
 
-        .step("Connect <code>out1</code> of Filter to <code>value1</code> of Email.",
+        .step("Connect output <code>A>B</code> of Filter to <code>value1</code> of Email.",
             '.tourFilter1',
-            tour.waitForConnection(['tourFilter1.out1', 'tourEmail1.value1'])
+            tour.waitForConnection(['tourFilter1.A&gt;B', 'tourEmail1.value1'])
         )
 
         .step("We have now set-up a system that sends us an email every time the number of Bitcoin related tweets within a minute exceeds a threshold.")
@@ -208,12 +208,12 @@
 
         .step("Connect <code>count</code> of Count to <code>in1</code> of Table.",
             '.tourCount1',
-            tour.waitForConnection(['tourCount1.count', 'tourTable4.in1'])
+            tour.waitForConnection(['tourCount1.count', 'tourTable4.count'])
         )
 
         .step("Connect <code>A>B</code> of GreaterThan to <code>in2</code> of Table.",
             '.tourGreaterThan1',
-            tour.waitForConnection(['tourGreaterThan1.A>B', 'tourTable4.in2'])
+            tour.waitForConnection(['tourGreaterThan1.A>B', 'tourTable4.A&gt;B'])
         )
 
         .step("Start the canvas.",

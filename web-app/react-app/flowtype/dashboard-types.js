@@ -1,11 +1,12 @@
 
 import type {Canvas} from './canvas-types'
+import type {Permission} from './permission-types'
 
 export type Dashboard = {
     id: string,
     name: string,
     items: Array<DashboardItem>,
-    permissions?: Array<string>,
+    ownPermissions?: Array<Permission.operation>,
     editingLocked?: boolean
 }
 
@@ -14,12 +15,12 @@ export type DashboardReducerState = {
         [Dashboard.id]: Dashboard
     },
     openDashboard: {
-        id: ?Dashboard.id,
-        saved: boolean,
-        new: boolean
+        id: ?Dashboard.id
     },
     error?: ?string,
     fetching?: boolean,
+    saved: boolean,
+    new: boolean
 }
 
 export type DashboardReducerAction = {

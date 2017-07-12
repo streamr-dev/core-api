@@ -1,7 +1,8 @@
 package com.unifina.domain.dashboard
 
 import com.unifina.domain.security.SecUser
-import com.unifina.utils.AssignedIdGenerator
+import com.unifina.utils.IdGenerator
+import grails.converters.JSON
 import groovy.transform.CompileStatic
 
 class Dashboard {
@@ -23,12 +24,11 @@ class Dashboard {
 	static constraints = {
 		name nullable: true, blank: false
 		layout nullable: true
-		id bindable: true
 	}
 
 	static mapping = {
-		items cascade: "merge"
-		id generator: "assigned"
+		items cascade: "all-delete-orphan"
+		id generator: IdGenerator.name
 	}
 
 	@CompileStatic
@@ -46,7 +46,7 @@ class Dashboard {
 				id    : id,
 				name  : name,
 				items : items == null ? [] : items.collect { DashboardItem it -> it.toMap() },
-				layout: layout
+				layout: layout ? JSON.parse(layout) : layout
 		]
 	}
 }

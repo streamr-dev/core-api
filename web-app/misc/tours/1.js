@@ -8,8 +8,8 @@
 
         .beforeStart(function(cb) {
             SignalPath.clear()
-            $('#beginDate').val('2016-04-11')
-            $('#endDate').val('2016-04-12')
+            $('#beginDate').val('2017-04-09')
+            $('#endDate').val('2017-04-10')
             cb()
         })
 
@@ -114,19 +114,19 @@
 
         .step("Then connect <code>lat</code> of Stream to <code>in1</code> of Filter.",
             '.tourStream1',
-            tour.waitForConnection(['tourStream1.lat', 'tourFilter1.in1'])
+            tour.waitForConnection(['tourStream1.lat', 'tourFilter1.lat'])
         )
 
         .step("Notice how a new input (<code>in2</code>) appeared on Filter.", '.tourFilter1')
 
         .step("Connect <code>long</code> of Stream to <code>in2</code> of Filter.",
             '.tourStream1',
-            tour.waitForConnection(['tourStream1.long', 'tourFilter1.in2'])
+            tour.waitForConnection(['tourStream1.long', 'tourFilter1.long'])
         )
 
         .step("Then connect <code>spd</code> of Stream to <code>in3</code> of Filter.",
             '.tourStream1',
-            tour.waitForConnection(['tourStream1.spd', 'tourFilter1.in3'])
+            tour.waitForConnection(['tourStream1.spd', 'tourFilter1.spd'])
         )
 
         .step("Let's add a <code>Table</code> to confirm that data is indeed flowing in and to see how the data looks " +
@@ -139,13 +139,13 @@
 
         .step("Feel free to move the Table into a more spacious area.", ".tourTable1")
 
-        .step("Connect <code>out1</code>, <code>out2</code>, and <code>out3</code> of Filter to Table (in that order.)",
+        .step("Connect outputs <code>lat</code>, <code>long</code>, and <code>spd</code> of Filter to Table (in that order.)",
             '.tourFilter1',
             function(cb) {
                 tour.waitForConnections([
-                    ['tourFilter1.out1', 'tourTable1.in1'],
-                    ['tourFilter1.out2', 'tourTable1.in2'],
-                    ['tourFilter1.out3', 'tourTable1.in3']
+                    ['tourFilter1.lat', 'tourTable1.lat'],
+                    ['tourFilter1.long', 'tourTable1.long'],
+                    ['tourFilter1.spd', 'tourTable1.spd']
                 ])(cb)
             }
         )
@@ -182,10 +182,10 @@
             }
         )
 
-        .step("Connect <code>out3</code> of <b>Filter</b> to the first input of <b>Chart</b>.",
+        .step("Connect output <code>spd</code> of <b>Filter</b> to the first input of <b>Chart</b>.",
             '.tourFilter1',
             function(cb) {
-                tour.waitForConnection(['tourFilter1.out3', 'tourChart1.in1'])(cb)
+                tour.waitForConnection(['tourFilter1.spd', 'tourChart1.in1'])(cb)
             }
         )
 
@@ -193,8 +193,8 @@
             '.tourChart1',
             { placement: 'left' })
 
-        .step("Currently we have routed <code>spd</code> of Stream to <code>in3</code> of Filter, which is passed along " +
-            "to the Chart via <code>out3</code> of Filter.", '.tourFilter1')
+        .step("Currently we have routed <code>spd</code> of Stream to input <code>spd</code> of Filter, which is passed along " +
+            "to the Chart via output <code>spd</code> of Filter.", '.tourFilter1')
 
         .step("<b>Run</b> the canvas.",
             '#run-historical-button',

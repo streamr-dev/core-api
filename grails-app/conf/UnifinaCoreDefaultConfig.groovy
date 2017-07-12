@@ -174,7 +174,7 @@ log4j = {
 /**
  * Tour config
  */
-streamr.tours.enabled = false // TODO: change back to true when landing ethereum
+streamr.tours.enabled = true
 
 /**
  * Migration config

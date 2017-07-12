@@ -8,7 +8,7 @@ class DashboardItem implements Comparable {
 	String id
 	String title
 	Canvas canvas
-//	Dashboard dashboard
+	Dashboard dashboard
 	Integer module
 	String webcomponent
 
@@ -16,15 +16,15 @@ class DashboardItem implements Comparable {
 
 	static constraints = {
 		title nullable: true, blank: false
-		id bindable: true
 	}
 
-	int compareTo(obj) {
-		return id != null ? id.compareTo(obj.id) : title.compareTo(obj.title)
+	int compareTo(Object obj) {
+		DashboardItem item = (DashboardItem) obj
+		return id != null ? id.compareTo(item.id) : title.compareTo(item.title)
 	}
 
 	static mapping = {
-		id generator: "assigned"
+		id generator: IdGenerator.name
 		dashboard column: "dashboard_id"
 		canvas column: "canvas_id"
 	}
@@ -32,16 +32,11 @@ class DashboardItem implements Comparable {
 	Map toMap() {
 		return [
 				id          : id,
-//				dashboard   : dashboard?.id,
+				dashboard   : dashboard?.id,
 				title       : title,
 				canvas      : canvas?.id,
 				module      : module,
 				webcomponent: webcomponent
 		]
-	}
-
-	void updateWebcomponent() {
-		def module = canvas.toMap().modules.find { it.hash == module }
-		webcomponent = module?.uiChannel?.webcomponent
 	}
 }

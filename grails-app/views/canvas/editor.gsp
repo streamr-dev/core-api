@@ -177,6 +177,7 @@ $(function() {
 			}
 			// Push the new state to the history
 			if (url !== window.location.href) {
+			    url += window.location.search || ''
 				window.history.pushState({
 					streamr: {
 						urlPath: url

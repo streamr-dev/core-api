@@ -125,7 +125,7 @@ class DashboardApiControllerSpec extends Specification {
 				id    : "1",
 				items : [],
 				name  : "dashboard-1",
-				layout: "{}"
+				layout: [:]
 		]
 
 		1 * dashboardService.findById("1", me) >> dashboards[0]
@@ -163,42 +163,45 @@ class DashboardApiControllerSpec extends Specification {
 								webcomponent: "streamr-component"
 						],
 				],
-				layout: "{}",
+				layout: [:],
 				name  : "dashboard-3"
 		]
 		1 * dashboardService.findById("3", me) >> dashboards[2]
 		0 * dashboardService._
 	}
 
-//	def "save() throws ValidationException given incomplete json"() {
-//		when:
-//		request.addHeader("Authorization", "Token myApiKey")
-//		request.JSON = [
-//				name: "",
-//		]
-//		request.requestURI = "/api/v1/dashboards"
-//		withFilters(action: "save") {
-//			controller.save()
-//		}
-//
-//		then:
-//		thrown(ValidationException)
-//	}
+	def "save() throws ValidationException given incomplete json"() {
+		when:
+		request.addHeader("Authorization", "Token myApiKey")
+		request.JSON = [
+				name: "",
+		]
+		request.requestURI = "/api/v1/dashboards"
+		withFilters(action: "save") {
+			controller.save()
+		}
+
+		then:
+		thrown(ValidationException)
+	}
 
 	def "save() calls dashboardService.create()"() {
 		setup:
+
 		SortedSet<DashboardItem> items = new TreeSet<DashboardItem>()
-		items.add(new DashboardItem(title: "test1", ord: new Integer(0)))
-		items.add(new DashboardItem(title: "test2", ord: new Integer(1)))
+		items.add(new DashboardItem(id: "1", title: "test1"))
+		items.add(new DashboardItem(id: "2", title: "test2"))
 
 		def dashboard = Mock(Dashboard)
 		def dashboardService = Mock(DashboardService)
+		controller.dashboardService = dashboardService
 
 		when:
 		request.addHeader("Authorization", "Token myApiKey")
 		request.JSON = [
-				id   : "4",
+				id   : "dashboard",
 				name : "new dashboard",
+				layout: "{}",
 				items: items
 		]
 		request.requestURI = "/api/v1/dashboards"
@@ -208,7 +211,7 @@ class DashboardApiControllerSpec extends Specification {
 
 		then:
 		response.status == 200
-		1 * dashboardService.create(json, me) >> {
+		1 * dashboardService.create(_, me) >> {
 			dashboard
 		}
 		1 * dashboard.toMap() >> {
@@ -216,47 +219,51 @@ class DashboardApiControllerSpec extends Specification {
 		}
 	}
 
-//	def "update() throws ValidationException given incomplete json"() {
-//		when:
-//		params.id = 1L
-//		request.addHeader("Authorization", "Token myApiKey")
-//		request.JSON = [
-//				name: "",
-//		]
-//		request.requestURI = "/api/v1/dashboards"
-//		withFilters(action: "update") {
-//			controller.update()
-//		}
-//
-//		then:
-//		thrown(ValidationException)
-//	}
+	def "update() throws ValidationException given incomplete json"() {
+		when:
+		params.id = 1L
+		request.addHeader("Authorization", "Token myApiKey")
+		request.JSON = [
+				name: "",
+		]
+		request.requestURI = "/api/v1/dashboards"
+		withFilters(action: "update") {
+			controller.update()
+		}
+
+		then:
+		thrown(ValidationException)
+	}
 
 	def "update() delegates to dashboardService.update and returns new dashboard as result"() {
 		setup:
 		SortedSet<DashboardItem> items = new TreeSet<DashboardItem>()
-		items.add(new DashboardItem(title: "test1", ord: new Integer(0)))
-		items.add(new DashboardItem(title: "test2", ord: new Integer(1)))
+		items.add(new DashboardItem(id: "1", title: "test1"))
+		items.add(new DashboardItem(id: "2", title: "test2"))
 
 		def dashboard = Mock(Dashboard)
 		def dashboardService = Mock(DashboardService)
+		controller.dashboardService = dashboardService
 
 		when:
 		request.addHeader("Authorization", "Token myApiKey")
 		request.JSON = [
 				id   : "4",
+				layout: "{}",
 				name : "new dashboard",
 				items: items
 		]
 		request.requestURI = "/api/v1/dashboards"
 		withFilters(action: "save") {
-			controller.save()
+			controller.update()
 		}
 
 		then:
 		response.status == 200
-		1 * dashboardService.update(_, me) >> {
-			dashboard
+		1 * dashboardService.update(_, me) >> {String id, SaveDashboardCommand command, SecUser user ->
+			def d = dashboards[2]
+			d.name = command.name
+			return d
 		}
 		1 * dashboard.toMap() >> {
 			[:]

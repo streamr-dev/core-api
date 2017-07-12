@@ -314,7 +314,7 @@ class StreamService {
 	}
 
 	private boolean isPermissionToStreamViaDashboard(SecUser user, Stream stream) {
-		def dashboardService = grailsApplication.mainContext.getBean(DashboardService) // Circular service dependency
+		def dashboardService = grailsApplication.mainContext.getBean(DashboardService) // Don't initialize normally, preventing circular service dependency loop
 		if (stream.uiChannel && stream.uiChannelCanvas != null && stream.uiChannelPath != null) {
 			Canvas canvas = stream.uiChannelCanvas
 			int moduleId = parseModuleId(stream.uiChannelPath)

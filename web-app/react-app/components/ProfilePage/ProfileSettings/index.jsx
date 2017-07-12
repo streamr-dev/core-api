@@ -29,10 +29,10 @@ export class ProfileSettings extends Component {
     componentDidMount() {
         this.props.getCurrentUser()
     }
-    onNameChange({target}: any) {
+    onNameChange({target}: {target: any}) {
         this.props.updateCurrentUserName(target.value)
     }
-    onTimezoneChange({target}: any) {
+    onTimezoneChange({target}: {target: any}) {
         this.props.updateCurrentUserTimezone(target.value)
     }
     render() {
