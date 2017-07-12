@@ -2,7 +2,11 @@
 import React from 'react'
 import {Modal} from 'react-bootstrap'
 
-export default function ShareDialogHeader(props) {
+import type {Permission} from '../../../flowtype/permission-types'
+
+export default function ShareDialogHeader(props: {
+    resourceTitle: Permission.resourceTitle
+}) {
     return (
         <Modal.Header closeButton>
             <Modal.Title>Share {props.resourceTitle}</Modal.Title>

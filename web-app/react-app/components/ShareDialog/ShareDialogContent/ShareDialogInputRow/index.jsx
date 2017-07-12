@@ -26,7 +26,7 @@ export class ShareDialogInputRow extends Component {
         this.onSubmit = this.onSubmit.bind(this)
     }
     
-    onSubmit(e) {
+    onSubmit(e: any) {
         e.preventDefault()
         const data = serialize(e.target, {
             hash: true
@@ -58,12 +58,10 @@ export class ShareDialogInputRow extends Component {
     }
 }
 
-const mapStateToProps = (state) => ({})
-
 const mapDispatchToProps = (dispatch, ownProps) => ({
     addPermission(permission) {
         dispatch(addResourcePermission(ownProps.resourceType, ownProps.resourceId, permission))
     }
 })
 
-export default connect(mapStateToProps, mapDispatchToProps)(ShareDialogInputRow)
+export default connect(null, mapDispatchToProps)(ShareDialogInputRow)

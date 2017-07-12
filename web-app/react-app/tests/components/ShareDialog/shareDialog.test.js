@@ -40,6 +40,7 @@ describe('ShareDialog', () => {
             )
             assert(!dialog.state().open)
             dialog.instance().openModal()
+            
             assert(dialog.state().open)
         })
     })
@@ -63,12 +64,6 @@ describe('ShareDialog', () => {
     describe('render', () => {
     
         describe('initial rendering', () => {
-            beforeEach(() => {
-                jest.mock('../../../components/ShareDialog/ShareDialogContent', () => () => null)
-            })
-            afterEach(() => {
-                jest.unmock('../../../components/ShareDialog/ShareDialogContent')
-            })
             it('should not render with more or less than one children', () => {
                 assert.throws(() => {
                     mount(
