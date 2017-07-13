@@ -363,7 +363,6 @@ grails.plugin.springsecurity.adh.errorPage = null
 grails.plugin.springsecurity.securityConfigType = 'Annotation'
 
 grails.plugin.springsecurity.controllerAnnotations.staticRules = [
-	'/atmosphere/**': 		 ['ROLE_USER'],
 	'/user/**':            ['ROLE_ADMIN'],
 	'/register/**':				 ['IS_AUTHENTICATED_ANONYMOUSLY'],
 	'/webcomponents/*':				 ['IS_AUTHENTICATED_ANONYMOUSLY'],
