@@ -3,7 +3,7 @@
 import React from 'react'
 
 import { FormGroup } from 'react-bootstrap'
-import ConfirmButton from '../../../../ConfirmButton'
+import ConfirmButton from '../../../../../ConfirmButton'
 
 import styles from './integrationKeyHandlerTableRow.pcss'
 

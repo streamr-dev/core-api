@@ -9,7 +9,7 @@ import {titleCase} from 'change-case'
 
 import styles from './integrationKeyHandlerTable.pcss'
 
-import type {IntegrationKey} from '../../../../types/user-types.js'
+import type {IntegrationKey} from '../../../../../types/user-types.js'
 
 export default class IntegrationKeyHandlerTable extends React.Component {
     

@@ -3,137 +3,55 @@ import {shallow, mount} from 'enzyme'
 import assert from 'assert-diff'
 import sinon from 'sinon'
 
-import {IntegrationKeyHandlerSegment} from '../../../../../components/ProfilePage/IntegrationKeyHandler/IntegrationKeyHandlerSegment'
+import IntegrationKeyHandlerTable from '../../../../../../components/ProfilePage/IntegrationKeyHandler/IntegrationKeyHandlerSegment/IntegrationKeyHandlerTable/index'
 
-describe('IntegrationKeyHandler', () => {
-    describe('componentDidMount', () => {
-        it('calls props.getIntegrationKeyByService', () => {
-            const spy = sinon.spy()
-            mount(
-                <IntegrationKeyHandlerSegment
-                    tableFields={[]}
-                    inputFields={[]}
-                    integrationKeys={[]}
-                    service="testService"
-                    name="testName"
-                    className=""
-                    getIntegrationKeysByService={spy}
-                    createIntegrationKey={() => {
-                    }}
-                    deleteIntegrationKey={() => {
-                    }}
-                />
-            )
-            assert(spy.calledWith('testService'))
-        })
-    })
-    
-    describe('onNew', () => {
-        it('must call props.createIntegrationKey', () => {
-            const spy = sinon.spy()
-            const el = mount(
-                <IntegrationKeyHandlerSegment
-                    tableFields={[]}
-                    inputFields={[]}
-                    integrationKeys={[]}
-                    service="testService"
-                    name="testName"
-                    className=""
-                    getIntegrationKeysByService={() => {
-                    }}
-                    createIntegrationKey={spy}
-                    deleteIntegrationKey={() => {
-                    }}
-                />
-            )
-            el.instance().onNew({
-                just: 'testing',
-                name: 'name'
-            })
-            assert(spy.calledWith({
-                name: 'name',
-                service: 'testService',
-                json: {
-                    just: 'testing'
-                }
-            }))
-        })
-    })
-    
-    describe('onDelete', () => {
-        it('must call props.deleteIntegrationKey', () => {
-            const spy = sinon.spy()
-            const el = mount(
-                <IntegrationKeyHandlerSegment
-                    tableFields={[]}
-                    inputFields={[]}
-                    integrationKeys={[]}
-                    service="testService"
-                    name="testName"
-                    className=""
-                    getIntegrationKeysByService={() => {
-                    }}
-                    createIntegrationKey={() => {
-                    }}
-                    deleteIntegrationKey={spy}
-                />
-            )
-            el.instance().onDelete('testId')
-            assert(spy.calledWith('testId'))
-        })
-    })
+describe('IntegrationKeyHandlerTable', () => {
     
     describe('render', () => {
-        it('renders ControlLabel correctly', () => {
-            const el = mount(<IntegrationKeyHandlerSegment
-                tableFields={[]}
-                inputFields={[]}
-                integrationKeys={[]}
-                service=""
-                name="test"
-                getIntegrationKeysByService={() => {}}
-                createIntegrationKey={() => {}}
-                deleteIntegrationKey={() => {}}
-            />)
-            const label = el.childAt(0).childAt(0)
-            assert(label.is('ControlLabel'))
-            assert.equal(label.text(), 'test')
-        })
-        it('renders IntegrationKeyHandlerTable correctly', () => {
-            const el = shallow(<IntegrationKeyHandlerSegment
-                tableFields={[1,2,3]}
-                inputFields=""
-                integrationKeys={[3,2,1]}
-                service=""
-                name="test"
-                getIntegrationKeysByService=""
-                createIntegrationKey=""
-                deleteIntegrationKey=""
-            />)
-            const table = el.childAt(0).childAt(1)
-            assert(table.is('IntegrationKeyHandlerTable'))
-            assert.deepStrictEqual(table.props(), {
-                fields: [1,2,3],
-                integrationKeys: [3,2,1],
-                onDelete: el.instance().onDelete
+        describe('thead', () => {
+            it('renders header correctly', () => {
+                const el = shallow(<IntegrationKeyHandlerTable
+                    fields={['Test']}
+                    integrationKeys={[]}
+                    onDelete={() => {
+                    }}
+                />)
+                assert(el.is('.integrationKeyTable'))
+                const thead = el.childAt(0)
+                const tr = thead.childAt(0)
+                assert.equal(tr.find('th').length, 3)
+                assert.equal(tr.find('th').at(0).text(), 'Name')
+                assert(tr.find('th').at(0).is('.nameHeader'))
+                assert.equal(tr.find('th').at(1).text(), 'Test')
+                assert.equal(tr.find('th').at(2).text(), '')
+                assert(tr.find('th').at(2).is('.actionHeader'))
+            })
+            it('renders fields in title case', () => {
+                const el = shallow(<IntegrationKeyHandlerTable
+                    fields={['firstCamelCase', 'secondCamelCase']}
+                    integrationKeys={[]}
+                    onDelete={() => {
+                    }}
+                />)
+                const thead = el.childAt(0)
+                const tr = thead.childAt(0)
+                assert.equal(tr.find('th').at(1).text(), 'First Camel Case')
+                assert.equal(tr.find('th').at(2).text(), 'Second Camel Case')
             })
         })
-        it('renders IntegrationKeyHandlerInput correctly', () => {
-            const el = shallow(<IntegrationKeyHandlerSegment
-                tableFields={[]}
-                inputFields={[1,2,3]}
-                integrationKeys={[3,2,1]}
-                service=""
-                name="test"
-                getIntegrationKeysByService=""
-                createIntegrationKey=""
-                deleteIntegrationKey=""
-            />)
-            const input = el.childAt(0).childAt(2)
-            assert(input.is('IntegrationKeyHandlerInput'))
-            assert.deepStrictEqual(input.props(), {
-                fields: [1,2,3],
-                onNew: el.instance().onNew
+        
+        describe('tbody', () => {
+            it('must render IntegrationKeyHandlerTableRow fro every item', () => {
+                const el = shallow(<IntegrationKeyHandlerTable
+                    fields={['firstCamelCase', 'secondCamelCase']}
+                    integrationKeys={[]}
+                    onDelete={() => {
+                    }}
+                />)
+                const thead = el.childAt(0)
+                const tr = thead.childAt(0)
+                assert.equal(tr.find('th').at(1).text(), 'First Camel Case')
+                assert.equal(tr.find('th').at(2).text(), 'Second Camel Case')
             })
         })
     })
