@@ -15,6 +15,7 @@ class SerializationService {
 	final static String INTERVAL_CONFIG_KEY = "streamr.serialization.intervalInMillis"
 
 	GrailsApplication grailsApplication
+	DependencyInjectionService dependencyInjectionService
 	Serializer serializer = new SerializerImpl()
 
 	byte[] serialize(AbstractSignalPathModule module) throws SerializationException {
@@ -26,12 +27,14 @@ class SerializationService {
 
 	AbstractSignalPathModule deserialize(byte[] data) throws SerializationException {
 		AbstractSignalPathModule module = (AbstractSignalPathModule) serializer.deserializeFromByteArray(data)
+		dependencyInjectionService.autowire(module)
 		module.afterDeserialization(this)
 		return module
 	}
 
 	AbstractSignalPathModule deserialize(byte[] data, ClassLoader classLoader) throws SerializationException {
 		AbstractSignalPathModule module = (AbstractSignalPathModule) new SerializerImpl(classLoader).deserializeFromByteArray(data)
+		dependencyInjectionService.autowire(module)
 		module.afterDeserialization(this)
 		return module
 	}
