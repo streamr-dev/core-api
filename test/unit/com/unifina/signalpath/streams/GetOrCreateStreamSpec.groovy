@@ -1,66 +1,79 @@
 package com.unifina.signalpath.streams
 
-import com.unifina.domain.data.Feed
+import com.unifina.ModuleTestingSpecification
 import com.unifina.domain.data.Stream
-import com.unifina.domain.security.SecUser
-import com.unifina.feed.NoOpStreamListener
 import com.unifina.service.StreamService
-import com.unifina.utils.Globals
 import com.unifina.utils.testutils.ModuleTestHelper
-import grails.test.mixin.Mock
-import spock.lang.Specification
 
-@Mock([Stream, Feed])
-class GetOrCreateStreamSpec extends Specification {
+class GetOrCreateStreamSpec extends ModuleTestingSpecification {
 
 	GetOrCreateStream module
-
-	Globals globals = Stub(Globals)
+	StreamService streamService
+	Stream stream
+	Stream stream2
 
 	def setup() {
-		module = new GetOrCreateStream()
-		module.init()
-
-		globals.getBean(StreamService.class) >> new StreamService() {
-			@Override
-			Stream createStream(Map params, SecUser user) {
-				Stream s = new Stream()
-				s.id = params.name
-				return s
-			}
-		}
-		globals.getUser() >> null
-
-		Feed feed = new Feed(streamListenerClass: NoOpStreamListener.canonicalName)
-		feed.id = 7
-		feed.save(failOnError: true, validate: false)
-
-		Stream stream = new Stream(name: "exists")
+		stream = new Stream(name: "exists")
 		stream.id = "666-666-666-999"
-		stream.save(failOnError: true, validate: false)
 
-		Stream stream2 = new Stream(name: "exists-with-fields")
+		stream2 = new Stream(name: "exists-with-fields")
 		stream2.id = "111-333-111"
 		stream2.config = "{'fields': [{'name': 'x', 'type': 'number'}, {'name': 'y', 'type': 'string'}]}"
-		stream2.save(failOnError: true, validate: false)
+
+		streamService = Mock(StreamService)
+
+		streamService.createStream(_, _) >> {params, user ->
+			Stream s = new Stream()
+			s.id = params.name
+			return s
+		}
+		streamService.findByName("exists") >> stream
+		streamService.findByName("exists-with-fields") >> stream2
+
+		mockBean(StreamService, streamService)
+
+		module = setupModule(new GetOrCreateStream())
+	}
+
+	def cleanup() {
+		cleanupMockBeans()
 	}
 
 	void "GetOrCreateStreamSpec works as expected"() {
-		when:
 		Map inputValues = [
-			name: ["doesnotexist", "exists", "doesnotexist2", "exists-with-fields"],
-			description: ["test-stream"] * 4,
-			fields: [[a: "boolean", b: "string"]] * 4
+			name: ["doesnotexist", "exists", "doesnotexist2", "exists-with-fields", "doesnotexist"],
+			description: ["test-stream"] * 5,
+			fields: [[a: "boolean", b: "string"]] * 5
 		]
 		Map outputValues = [
-			"stream": ["doesnotexist", "666-666-666-999", "doesnotexist2", "111-333-111"],
-			"created": [true, false, true, false]
+			"stream": ["doesnotexist", "666-666-666-999", "doesnotexist2", "111-333-111", "doesnotexist"],
+			"created": [true, false, true, false, false]
 //			"fields": [fields, [:], fields, [x: "number", y: "string"]]
 		]
 
+		expect:
+		new ModuleTestHelper.Builder(module, inputValues, outputValues).test()
+	}
+
+	void "found streams are cached"() {
+		Map inputValues = [
+				name: ["exists", "exists"],
+				description: ["test-stream"] * 2,
+				fields: [[a: "boolean", b: "string"]] * 2
+		]
+		Map outputValues = [
+				"stream": ["666-666-666-999", "666-666-666-999"],
+				"created": [false, false]
+		]
+
+		when:
+		boolean pass = new ModuleTestHelper.Builder(module, inputValues, outputValues)
+				.serializationModes([ModuleTestHelper.SerializationMode.NONE].toSet())
+				.test()
+
 		then:
-		new ModuleTestHelper.Builder(module, inputValues, outputValues)
-			.overrideGlobals { globals }
-			.test()
+		pass
+		1 * streamService.findByName("exists") >> stream
+		0 * streamService.createStream(_, _)
 	}
 }

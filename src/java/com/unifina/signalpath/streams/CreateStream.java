@@ -16,7 +16,7 @@ public class CreateStream extends AbstractSignalPathModule {
 	private final StringOutput stream = new StringOutput(this, "stream");
 	private final BooleanOutput created = new BooleanOutput(this, "created");
 
-	private final Set<String> createdStreams = new HashSet<>();
+	protected final HashMap<String, String> cachedStreamIdsByName = new HashMap<>();
 	private transient StreamService streamService;
 
 	@Override
@@ -34,15 +34,15 @@ public class CreateStream extends AbstractSignalPathModule {
 			streamService = getGlobals().getBean(StreamService.class);
 		}
 
-		if (createdStreams.contains(nameInput.getValue())) {
+		if (cachedStreamIdsByName.containsKey(nameInput.getValue())) {
 			sendOutputs(false, null);
 			return;
 		}
 
 		try {
 			Stream s = streamService.createStream(buildParams(), getGlobals().getUser());
-			sendOutputs(true, s);
-			createdStreams.add(nameInput.getValue());
+			sendOutputs(true, s.getId());
+			cachedStreamIdsByName.put(nameInput.getValue(), s.getId());
 		} catch (ValidationException ex) {
 			sendOutputs(false, null);
 		}
@@ -50,7 +50,7 @@ public class CreateStream extends AbstractSignalPathModule {
 
 	@Override
 	public void clearState() {
-		createdStreams.clear();
+		cachedStreamIdsByName.clear();
 	}
 
 	private Map<String, Object> buildParams() {
@@ -67,9 +67,11 @@ public class CreateStream extends AbstractSignalPathModule {
 		return nameInput.getValue();
 	}
 
-	protected void sendOutputs(boolean createdValue, Stream streamValue) {
+	protected void sendOutputs(boolean createdValue, String streamId) {
 		created.send(createdValue);
-		if (streamValue != null) stream.send(streamValue.getId());
+		if (streamId != null) {
+			stream.send(streamId);
+		}
 	}
 
 	private static List<Map<String, String>> mapToListOfFieldConfigs(Map<String, String> map) {

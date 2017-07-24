@@ -224,7 +224,7 @@ public class ModuleTestHelper {
 	private boolean clearStateCalled = false;
 
 	public enum SerializationMode {
-		NONE, SERIALIZE, SERIALIZE_DESERIALIZE
+		NONE, CLEAR, SERIALIZE, SERIALIZE_DESERIALIZE
 	}
 	private SerializationMode serializationMode = SerializationMode.NONE;
 	private SerializationService dummySerializationService = new SerializationService();
@@ -244,7 +244,9 @@ public class ModuleTestHelper {
 				if (!runTestCase()) {        // Clean slate test
 					pass = false;
 				}
+			}
 
+			if (selectedSerializationModes.contains(SerializationMode.CLEAR)) {
 				clearModuleAndCollectorsAndChannels();
 				clearStateCalled = true;
 				if (!runTestCase()) {        // Test that clearState() works

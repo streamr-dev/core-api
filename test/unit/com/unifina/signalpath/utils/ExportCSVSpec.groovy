@@ -40,7 +40,7 @@ class ExportCSVSpec extends UiChannelMockingSpecification {
 			.timeToFurtherPerIteration(60 * 1000)
 			.uiChannelMessages(channelMessages, getSentMessagesByStreamId())
 			// Don't test deserialization, since resuming to write the same csv file will not be possible
-			.serializationModes(new HashSet<>([ModuleTestHelper.SerializationMode.NONE, ModuleTestHelper.SerializationMode.SERIALIZE]))
+			.serializationModes(new HashSet<>([ModuleTestHelper.SerializationMode.NONE, ModuleTestHelper.SerializationMode.CLEAR, ModuleTestHelper.SerializationMode.SERIALIZE]))
 			.overrideGlobals { Globals globals ->
 				globals.setUserTimeZone(TimeZone.getTimeZone("EST"))
 				return globals
