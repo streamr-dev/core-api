@@ -32,8 +32,6 @@ SignalPath.ChartModule = function(data,canvas,prot) {
                 prot.body.trigger("resize")
 			}
 		});
-        prot.body.width(prot.jsonData.layout ? prot.jsonData.layout.width : 500)
-        prot.body.height(prot.jsonData.layout ? prot.jsonData.layout.height : 300)
 	}
 	prot.createDiv = createDiv;	
 	
