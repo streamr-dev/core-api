@@ -1,33 +1,40 @@
 package com.unifina.signalpath.streams
 
+import com.unifina.ModuleTestingSpecification
 import com.unifina.domain.data.Stream
-import com.unifina.service.StreamService
+import com.unifina.service.PermissionService
 import com.unifina.utils.Globals
 import com.unifina.utils.testutils.ModuleTestHelper
-import grails.test.mixin.Mock
-import spock.lang.Specification
 
-@Mock(Stream)
-class SearchStreamSpec extends Specification {
+class SearchStreamSpec extends ModuleTestingSpecification {
 
 	SearchStream module
-	Globals globals
+	PermissionService permissionService
 
 	def setup() {
-		module = new SearchStream()
-		module.init()
+		module = setupModule(new SearchStream())
 
-		globals = Mock(Globals)
-		globals.getBean(StreamService.class) >> new StreamService()
+		Stream streamExists = new Stream(name: "exists")
+		streamExists.id = "666-666-666-999"
 
-		Stream stream = new Stream(name: "exists")
-		stream.id = "666-666-666-999"
-		stream.save(failOnError: true, validate: false)
+		Stream streamExistsWithFields = new Stream(name: "exists-with-fields")
+		streamExistsWithFields.id = "111-333-111"
+		streamExistsWithFields.config = "{'fields': [{'name': 'a', 'type': 'number'}, {'name': 'b', 'type': 'string'}]}"
 
-		Stream stream2 = new Stream(name: "exists-with-fields")
-		stream2.id = "111-333-111"
-		stream2.config = "{'fields': [{'name': 'a', 'type': 'number'}, {'name': 'b', 'type': 'string'}]}"
-		stream2.save(failOnError: true, validate: false)
+		permissionService = mockBean(PermissionService.class, Mock(PermissionService))
+		permissionService.get(_, _, _, _, _) >> { clazz, user, ops, includeAnonymous, SearchStream.NameFilteringClosure filter ->
+			if (filter.getName() == "exists") {
+				return [streamExists]
+			} else if (filter.getName() == "exists-with-fields") {
+				return [streamExistsWithFields]
+			} else {
+				return []
+			}
+		}
+	}
+
+	def cleanup() {
+		cleanupMockBeans()
 	}
 
 	void "searchStream works as expected"() {
@@ -43,7 +50,6 @@ class SearchStreamSpec extends Specification {
 
 		then:
 		new ModuleTestHelper.Builder(module, inputValues, outputValues)
-			.overrideGlobals { globals }
 			.test()
 	}
 }
