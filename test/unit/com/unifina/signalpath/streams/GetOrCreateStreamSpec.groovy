@@ -2,35 +2,46 @@ package com.unifina.signalpath.streams
 
 import com.unifina.ModuleTestingSpecification
 import com.unifina.domain.data.Stream
+import com.unifina.service.PermissionService
 import com.unifina.service.StreamService
+import com.unifina.signalpath.streams.GetOrCreateStream.NameFilteringClosure
 import com.unifina.utils.testutils.ModuleTestHelper
 
 class GetOrCreateStreamSpec extends ModuleTestingSpecification {
 
 	GetOrCreateStream module
 	StreamService streamService
-	Stream stream
-	Stream stream2
+	PermissionService permissionService
+	Stream streamExists
+	Stream streamExistsWithFields
 
 	def setup() {
-		stream = new Stream(name: "exists")
-		stream.id = "666-666-666-999"
+		streamExists = new Stream(name: "exists")
+		streamExists.id = "666-666-666-999"
 
-		stream2 = new Stream(name: "exists-with-fields")
-		stream2.id = "111-333-111"
-		stream2.config = "{'fields': [{'name': 'x', 'type': 'number'}, {'name': 'y', 'type': 'string'}]}"
+		streamExistsWithFields = new Stream(name: "exists-with-fields")
+		streamExistsWithFields.id = "111-333-111"
+		streamExistsWithFields.config = "{'fields': [{'name': 'x', 'type': 'number'}, {'name': 'y', 'type': 'string'}]}"
 
 		streamService = Mock(StreamService)
-
 		streamService.createStream(_, _) >> {params, user ->
 			Stream s = new Stream()
 			s.id = params.name
 			return s
 		}
-		streamService.findByName("exists") >> stream
-		streamService.findByName("exists-with-fields") >> stream2
-
 		mockBean(StreamService, streamService)
+
+		permissionService = Mock(PermissionService)
+		permissionService.get(_, _, _, _, _) >> {clazz, user, ops, includeAnonymous, NameFilteringClosure filter ->
+			if (filter.getName() == "exists") {
+				return [streamExists]
+			} else if (filter.getName() == "exists-with-fields") {
+				return [streamExistsWithFields]
+			} else {
+				return []
+			}
+		}
+		mockBean(PermissionService, permissionService)
 
 		module = setupModule(new GetOrCreateStream())
 	}
@@ -73,7 +84,9 @@ class GetOrCreateStreamSpec extends ModuleTestingSpecification {
 
 		then:
 		pass
-		1 * streamService.findByName("exists") >> stream
+		1 * permissionService.get(_, _, _, _, _) >> {
+			return [streamExists]
+		}
 		0 * streamService.createStream(_, _)
 	}
 }
