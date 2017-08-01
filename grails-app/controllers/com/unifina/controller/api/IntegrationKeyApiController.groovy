@@ -24,7 +24,7 @@ class IntegrationKeyApiController {
 			}
 		}
 		def criteria = apiService.createListCriteria(params, ["id"], {
-			eq "user", request.apiUser
+			eq("user", request.apiUser)
 
 			// Filter by exact id
 			if (params.id) {

@@ -159,7 +159,6 @@
 					if (authKey) {
 						headers['Authorization'] = 'token ' + authKey
 					}
-
 					$.ajax({
 						type: 'POST',
 						url: _this.url + '/request',

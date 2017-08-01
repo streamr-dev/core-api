@@ -119,6 +119,10 @@ public class RuntimeRequest extends LinkedHashMap<String, Object> implements ITi
 			return Integer.parseInt(readString(tokenName));
 		}
 
+		public String readDashboardId() {
+			return readString("dashboards");
+		}
+
 		public String readCanvasId() {
 			return readString("canvases");
 		}

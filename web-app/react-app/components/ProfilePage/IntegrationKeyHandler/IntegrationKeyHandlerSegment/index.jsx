@@ -3,7 +3,7 @@
 import React from 'react'
 
 import { connect } from 'react-redux'
-import { getIntegrationKeysByService, createIntegrationKey, deleteIntegrationKey } from '../../../../actions/integrationKeys'
+import { getIntegrationKeysByService, createIntegrationKey, deleteIntegrationKey } from '../../../../actions/integrationKey'
 
 import {Col, ControlLabel} from 'react-bootstrap'
 
@@ -52,8 +52,6 @@ class IntegrationKeyHandlerSegment extends React.Component {
             service,
             json: integrationKey
         }))
-            .then(() => Streamr.showSuccess('IntegrationKey created successfully!'))
-            .catch(e => Streamr.showError('Error!', e.message))
     }
     
     onDelete(id) {

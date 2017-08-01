@@ -1,25 +1,27 @@
 package com.unifina.controller.api
 
 import com.unifina.api.SaveDashboardCommand
-import com.unifina.api.StreamrApiHelper
 import com.unifina.api.ValidationException
 import com.unifina.domain.dashboard.Dashboard
 import com.unifina.domain.security.Permission
 import com.unifina.domain.security.SecUser
 import com.unifina.security.AuthLevel
 import com.unifina.security.StreamrApi
+import com.unifina.service.ApiService
 import com.unifina.service.DashboardService
+import com.unifina.service.PermissionService
 import com.unifina.service.SignalPathService
 import grails.converters.JSON
 import grails.plugin.springsecurity.annotation.Secured
+import org.json.JSONObject
 
 @Secured(["IS_AUTHENTICATED_ANONYMOUSLY"])
 class DashboardApiController {
 
 	DashboardService dashboardService
 	SignalPathService signalPathService
-	def permissionService
-	def apiService
+	PermissionService permissionService
+	ApiService apiService
 
 	@StreamrApi
 	def index() {
@@ -34,7 +36,7 @@ class DashboardApiController {
 	}
 
 	@StreamrApi
-	def show(Long id) {
+	def show(String id) {
 		def dashboard = dashboardService.findById(id, (SecUser) request.apiUser)
 		render(dashboard.toMap() as JSON)
 	}
@@ -44,21 +46,21 @@ class DashboardApiController {
 		if (!command.validate()) {
 			throw new ValidationException(command.errors)
 		}
-		def dashboard = dashboardService.createOrUpdate(command, request.apiUser)
+		def dashboard = dashboardService.create(command, request.apiUser)
 		render(dashboard.toMap() as JSON)
 	}
 
 	@StreamrApi
-	def update(SaveDashboardCommand command) {
+	def update(String id, SaveDashboardCommand command) {
 		if (!command.validate()) {
 			throw new ValidationException(command.errors)
 		}
-		def dashboard = dashboardService.createOrUpdate(command, request.apiUser)
+		def dashboard = dashboardService.update(id, command, request.apiUser)
 		render(dashboard.toMap() as JSON)
 	}
 
 	@StreamrApi
-	def delete(Long id) {
+	def delete(String id) {
 		dashboardService.deleteById(id, (SecUser) request.apiUser)
 		render(status: 204)
 	}
@@ -73,4 +75,5 @@ class DashboardApiController {
 		log.info("request: responding with $response")
 		render response as JSON
 	}
+
 }

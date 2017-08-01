@@ -13,7 +13,8 @@ const inProduction = process.env.NODE_ENV === 'production'
 
 module.exports = {
     entry: {
-        profilePage: path.resolve(root, 'web-app', 'react-app', 'profilePageMain.js')
+        profilePage: path.resolve(root, 'web-app', 'react-app', 'profilePageMain.js'),
+        dashboardPage: path.resolve(root, 'web-app', 'react-app', 'dashboardPageMain.js')
     },
     output: {
         path: path.resolve(root, 'web-app', 'js', 'unifina', 'webpack-bundles'),
@@ -25,6 +26,7 @@ module.exports = {
             {
                 test: /\.jsx?$/,
                 include: path.resolve(root),
+                exclude: /node_modules/,
                 enforce: 'pre',
                 use: [{
                     loader: 'eslint-loader',
@@ -101,8 +103,7 @@ module.exports = {
         new webpack.NoEmitOnErrorsPlugin(),
         new WebpackNotifierPlugin(),
         new WriteFilePlugin(),
-        // TODO: Comment back when there are more bundles than just one
-        //new webpack.optimize.CommonsChunkPlugin('commons')
+        new webpack.optimize.CommonsChunkPlugin('commons')
     ]),
     devtool: !inProduction && 'eval-source-map',
     resolve: {

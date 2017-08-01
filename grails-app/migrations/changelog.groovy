@@ -68,7 +68,6 @@ databaseChangeLog = {
 	include file: 'core/2017-02-15-add-image-map-module.groovy'
 	include file: 'core/2017-05-15-getorcreatestream-module.groovy'
 	include file: 'core/2017-03-10-string-to-number-module.groovy'
-	include file: 'core/2017-05-30-mqtt-module.groovy'
 	include file: 'core/2017-01-20-ethereum-call-module.groovy'
 	include file: 'core/2017-02-08-ethereum-contract-template-paybyuse.groovy'
 	include file: 'core/2017-02-16-ethereum-contract-constant-module.groovy'
@@ -77,4 +76,9 @@ databaseChangeLog = {
 	include file: 'core/2017-04-20-verify-signature-module.groovy'
 	include file: 'core/2017-05-11-create-table-integration-key.groovy'
 	include file: 'core/2017-05-30-migrate-eth-accounts-as-integration-keys.groovy'
+	include file: 'core/2017-05-30-mqtt-module.groovy'
+	include file: 'core/2017-05-31-dashboard-layout-field.groovy'
+	include file: 'core/2017-06-01-dashboard-id-to-string.groovy'
+	include file: 'core/2017-06-16-dashboard-item-field-update.groovy'
+	include file: 'core/2017-07-11-dashboard-layout-field-type-change.groovy'
 }

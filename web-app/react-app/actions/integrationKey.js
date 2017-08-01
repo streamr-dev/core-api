@@ -2,6 +2,8 @@
 
 import axios from 'axios'
 import parseError from './utils/parseError'
+import createLink from '../helpers/createLink'
+import {showError, showSuccess} from './notification'
 
 export const GET_AND_REPLACE_INTEGRATION_KEYS_REQUEST = 'GET_AND_REPLACE_INTEGRATION_KEYS_REQUEST'
 export const GET_AND_REPLACE_INTEGRATION_KEYS_SUCCESS = 'GET_AND_REPLACE_INTEGRATION_KEYS_SUCCESS'
@@ -21,32 +23,31 @@ export const DELETE_INTEGRATION_KEY_FAILURE = 'DELETE_INTEGRATION_KEY_FAILURE'
 
 const apiUrl = 'api/v1/integration_keys'
 
-declare var Streamr: {
-    createLink: Function
-}
-
-import type {IntegrationKey} from '../types/user-types.js'
-
-import type {Err} from './utils/parseError'
+import type {IntegrationKey} from '../flowtype/integration-key-types.js'
+import type {ApiError as Err} from '../flowtype/common-types.js'
 
 export const getAndReplaceIntegrationKeys = () => (dispatch: Function) => {
     dispatch(getAndReplaceIntegrationKeysRequest())
-    return axios.get(Streamr.createLink({
-        uri: apiUrl
-    }))
-        .then(({data}) => dispatch(getAndReplaceIntegrationKeysSuccess(data)))
+    return axios.get(createLink(apiUrl))
+        .then(({data}) => {
+            dispatch(getAndReplaceIntegrationKeysSuccess(data))
+            dispatch(showSuccess({
+                message: 'IntegrationKey created successfully!'
+            }))
+        })
         .catch(res => {
             const e = parseError(res)
             dispatch(getAndReplaceIntegrationKeysFailure(e))
+            dispatch(showError({
+                title: e.message
+            }))
             throw e
         })
 }
 
 export const getIntegrationKeysByService = (service: string) => (dispatch: Function) => {
     dispatch(getIntegrationKeysByServiceRequest(service))
-    return axios.get(Streamr.createLink({
-        uri: apiUrl
-    }), {
+    return axios.get(createLink(apiUrl), {
         params: {
             service
         }
@@ -55,32 +56,37 @@ export const getIntegrationKeysByService = (service: string) => (dispatch: Funct
         .catch(res => {
             const e = parseError(res)
             dispatch(getIntegrationKeysByServiceFailure(service, e))
+            dispatch(showError({
+                title: e.message
+            }))
             throw e
         })
 }
 
 export const createIntegrationKey = (integrationKey: IntegrationKey) => (dispatch: Function) => {
     dispatch(createIntegrationKeyRequest())
-    return axios.post(Streamr.createLink({
-        uri: apiUrl
-    }), integrationKey)
+    return axios.post(createLink(apiUrl), integrationKey)
         .then(({data}) => dispatch(createIntegrationKeySuccess(data)))
         .catch(res => {
             const e = parseError(res)
             dispatch(createIntegrationKeyFailure(e))
+            dispatch(showError({
+                title: e.message
+            }))
             throw e
         })
 }
 
 export const deleteIntegrationKey = (id: string) => (dispatch: Function) => {
     dispatch(deleteIntegrationKeyRequest(id))
-    return axios.delete(Streamr.createLink({
-        uri: `${apiUrl}/${id}`
-    }))
+    return axios.delete(createLink(`${apiUrl}/${id}`))
         .then(() => dispatch(deleteIntegrationKeySuccess(id)))
         .catch(res => {
             const e = parseError(res)
             dispatch(deleteIntegrationKeyFailure(e))
+            dispatch(showError({
+                title: e.message
+            }))
             throw e
         })
 }

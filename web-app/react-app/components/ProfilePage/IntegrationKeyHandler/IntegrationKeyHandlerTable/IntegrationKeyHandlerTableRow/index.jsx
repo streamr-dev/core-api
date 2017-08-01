@@ -3,10 +3,10 @@
 import React from 'react'
 
 import { FormGroup } from 'react-bootstrap'
+import ConfirmButton from '../../../../ConfirmButton'
 
 import styles from './integrationKeyHandlerTableRow.pcss'
 
-declare var ConfirmButton: any
 
 export default class IntegrationKeyHandlerTableRow extends React.Component {
     
@@ -18,19 +18,6 @@ export default class IntegrationKeyHandlerTableRow extends React.Component {
             name: string,
             json: {}
         }
-    }
-    
-    removeButton: HTMLButtonElement
-    
-    componentDidMount() {
-        new ConfirmButton(this.removeButton, {
-            title: 'Are you sure?',
-            message: `Are you sure you want to remove integration key ${this.props.item.name}?`
-        }, res => {
-            if (res) {
-                this.props.onDelete(this.props.item.id)
-            }
-        })
     }
     
     render() {
@@ -47,13 +34,18 @@ export default class IntegrationKeyHandlerTableRow extends React.Component {
                 ))}
                 <td>
                     <FormGroup className="pull-right">
-                        <button
-                            ref={el => this.removeButton = el}
-                            type="button"
-                            className={`btn btn-danger ${styles.deleteButton}`}
-                            title="Delete key">
+                        <ConfirmButton
+                            confirmCallback={() => this.props.onDelete(this.props.item.id)}
+                            buttonProps={{
+                                bsStyle: 'danger',
+                                type: 'button',
+                                title: 'Delete key'
+                            }}
+                            confirmTitle="Are you sure?"
+                            confirmMessage={`Are you sure you want to remove integration key ${this.props.item.name}?`}
+                            className={styles.deleteButton}>
                             <span className="icon fa fa-trash-o"/>
-                        </button>
+                        </ConfirmButton>
                     </FormGroup>
                 </td>
             </tr>

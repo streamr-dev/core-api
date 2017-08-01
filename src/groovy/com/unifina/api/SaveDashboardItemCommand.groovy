@@ -1,47 +1,36 @@
 package com.unifina.api
 
-import com.unifina.domain.dashboard.DashboardItem
+import com.unifina.domain.dashboard.Dashboard
 import com.unifina.domain.signalpath.Canvas
+import com.unifina.utils.Webcomponent
+import grails.converters.JSON
 import grails.validation.Validateable
-import groovy.transform.CompileStatic
 
 @Validateable
 class SaveDashboardItemCommand {
+	String id
 	String title
-	String canvas
+	Dashboard dashboard
+	Canvas canvas
 	Integer module
-	//String webcomponent TODO: inferred
-	int ord
-	String size
+	String webcomponent
 
 	static constraints = {
 		title(blank: false)
 		canvas(blank: false)
 		module(nullable: false)
-		ord(min: 0)
-		size(inList: ["small", "medium", "large"])
+		webcomponent validator: { val ->
+			if (Webcomponent.getByName(val) == null) {
+				return false
+			}
+		}
 	}
 
-	@CompileStatic
-	DashboardItem toDashboardItem() {
-		def item = new DashboardItem(
-			title: title,
-			canvas: Canvas.get(canvas),
-			module: module,
-			ord: ord,
-			size: size
-		)
-		item.updateWebcomponent()
-		return item
+	def getWebcomponent() {
+		webcomponent ?: JSON.parse(canvas.json)?.modules?.find { it.hash == module }?.uiChannel?.webcomponent
 	}
 
-	@CompileStatic
-	void copyValuesTo(DashboardItem dashboardItem) {
-		dashboardItem.title = title
-		dashboardItem.canvas = Canvas.get(canvas)
-		dashboardItem.module = module
-		dashboardItem.ord = ord
-		dashboardItem.size = size
-		dashboardItem.updateWebcomponent()
+	Map toMap() {
+		return getProperties().subMap(["id", "title", "dashboard", "canvas", "module", "webcomponent"])
 	}
 }

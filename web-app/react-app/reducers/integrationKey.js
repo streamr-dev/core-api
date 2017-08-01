@@ -13,28 +13,11 @@ import {
     DELETE_INTEGRATION_KEY_REQUEST,
     DELETE_INTEGRATION_KEY_SUCCESS,
     DELETE_INTEGRATION_KEY_FAILURE
-} from '../actions/integrationKeys.js'
+} from '../actions/integrationKey.js'
 
-declare var _: any
+import _ from 'lodash'
 
-import type {IntegrationKey} from '../types/user-types.js'
-
-type State = {
-    listsByService?: {
-        [string]: Array<IntegrationKey>
-    },
-    error?: ?string,
-    fetching?: boolean
-}
-
-type Action = {
-    type: string,
-    service?: string,
-    integrationKey?: IntegrationKey,
-    integrationKeys?: Array<IntegrationKey>,
-    error?: string,
-    id: string
-}
+import type {State, Action} from '../flowtype/integration-key-types.js'
 
 const initialState = {
     listsByService: {},
