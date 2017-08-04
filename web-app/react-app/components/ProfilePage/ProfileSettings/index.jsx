@@ -10,6 +10,8 @@ import {getCurrentUser, updateCurrentUserName, updateCurrentUserTimezone} from '
 
 import type {User} from '../../../types/user-types'
 
+declare var Streamr: any
+
 class ProfileSettings extends Component {
     
     props: {
@@ -55,7 +57,7 @@ class ProfileSettings extends Component {
                         <div className="form-group">
                             <label className="control-label">Password</label>
                             <div>
-                                <a href="/unifina-core/profile/changePwd">Change Password</a>
+                                <a href={Streamr.createLink('profile', 'changePwd')}>Change Password</a>
                             </div>
                         </div>
             
