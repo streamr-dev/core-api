@@ -4,10 +4,12 @@ import com.unifina.data.FeedEvent;
 import com.unifina.data.IEventRecipient;
 import com.unifina.datasource.IDayListener;
 import com.unifina.domain.signalpath.Module;
+import com.unifina.service.PermissionService;
 import com.unifina.service.SerializationService;
 import com.unifina.utils.Globals;
 import com.unifina.utils.HibernateHelper;
 import com.unifina.utils.MapTraversal;
+import grails.util.Holders;
 import org.apache.log4j.Logger;
 import org.codehaus.groovy.runtime.InvokerHelper;
 
@@ -728,6 +730,11 @@ public abstract class AbstractSignalPathModule implements IEventRecipient, IDayL
 
 				if (!request.isAuthenticated()) {
 					throw new AccessControlException("Unauthenticated parameter change request!");
+				}
+
+				PermissionService permissionService = Holders.getApplicationContext().getBean(PermissionService.class);
+				if (!permissionService.canWrite(request.getUser(), request.getCanvas())) {
+					throw new AccessControlException("Unauthenticated parameter change request. Cannot write!");
 				}
 
 				Object value = param.parseValue(request.get("value").toString());
