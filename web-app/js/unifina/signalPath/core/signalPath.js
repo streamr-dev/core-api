@@ -183,7 +183,7 @@ var SignalPath = (function () {
 	}
 	pub.loadJSON = loadJSON;
 	
-	pub.updateModule = function(module,callback) {
+	pub.updateModule = function(module, callback) {
 		
 		$.ajax({
 			type: 'POST',
@@ -210,7 +210,12 @@ var SignalPath = (function () {
 							getModuleById(data.moduleErrors[i].hash).handleError(data.moduleErrors[i].payload);
 						}
 					}
+
 					handleError(data.message)
+
+					if (callback) {
+						callback(data, data.message)
+					}
 				}
 			},
 			error: function(jqXHR,textStatus,errorThrown) {
@@ -390,15 +395,6 @@ var SignalPath = (function () {
 		return dirty
 	}
 	pub.isDirty = isDirty
-    
-    function saveName(name, callback, errorCallback) {
-        setName(name)
-        _update(toJSON(), function(e) {
-            callback(e)
-            Streamr.showSuccess('Canvas renamed successfully')
-        }, errorCallback)
-    }
-    pub.saveName = saveName
 
 	function saveAs(name, callback) {
 		setName(name)

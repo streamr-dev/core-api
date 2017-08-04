@@ -6,12 +6,14 @@ import com.unifina.datasource.IStopListener;
 import com.unifina.feed.ITimestamped;
 import com.unifina.signalpath.*;
 import com.unifina.utils.MapTraversal;
+import org.apache.http.HttpHeaders;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.config.RequestConfig;
 import org.apache.http.client.methods.*;
 import org.apache.http.concurrent.FutureCallback;
 import org.apache.http.conn.ssl.SSLContexts;
 import org.apache.http.conn.ssl.TrustSelfSignedStrategy;
+import org.apache.http.conn.ssl.TrustStrategy;
 import org.apache.http.impl.nio.client.CloseableHttpAsyncClient;
 import org.apache.http.impl.nio.client.HttpAsyncClients;
 import org.apache.http.nio.client.HttpAsyncClient;
@@ -20,15 +22,19 @@ import javax.net.ssl.SSLContext;
 import java.security.KeyManagementException;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
+import java.security.cert.CertificateException;
+import java.security.cert.X509Certificate;
 import java.util.*;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
 /**
- * Functionality that is common to HTTP modules:
+ * Functionality that is common to modules that make a HTTP request:
  *  - sync/async requests
  *  - body formatting
  *  - SSL
+ *
+ * Crucial benefit over simply doing Unirest.post: not blocking the whole canvas (Streamr thread) while request is pending
  */
 public abstract class AbstractHttpModule extends ModuleWithSideEffects implements IEventRecipient, IStopListener {
 
@@ -48,20 +54,29 @@ public abstract class AbstractHttpModule extends ModuleWithSideEffects implement
 	private transient Propagator asyncPropagator;
 	private transient CloseableHttpAsyncClient cachedHttpClient;
 
+	private static class DontVerifyStrategy implements TrustStrategy {
+		public boolean isTrusted(X509Certificate[] var1, String var2) throws CertificateException {
+			return true;
+		}
+	}
+
 	/** This function is overridden so that the tests can inject a mock HttpAsyncClient */
 	protected HttpAsyncClient getHttpClient() {
 		if (cachedHttpClient == null) {
 			if (trustSelfSigned) {
-				SSLContext sslContext = getSelfSignedSslContext();
-				if (sslContext == null) {
-					trustSelfSigned = false;
-					// TODO: notify user that self-signed certificates aren't supported
-				} else {
+				try {
+					SSLContext sslContext = SSLContexts
+							.custom()
+							.loadTrustMaterial(null, new DontVerifyStrategy())
+							.build();
 					cachedHttpClient = HttpAsyncClients.custom()
 							.setMaxConnTotal(MAX_CONNECTIONS)
 							.setMaxConnPerRoute(MAX_CONNECTIONS)
 							.setSSLContext(sslContext)
 							.build();
+				} catch (NoSuchAlgorithmException | KeyStoreException | KeyManagementException e) {
+					trustSelfSigned = false;
+					// TODO: notify user that self-signed certificates aren't supported
 				}
 			}
 			if (!trustSelfSigned) {
@@ -139,12 +154,16 @@ public abstract class AbstractHttpModule extends ModuleWithSideEffects implement
 	}
 
 	@Override
-	public void onConfiguration(Map<String, Object> config) {
+	protected void onConfiguration(Map<String, Object> config) {
 		super.onConfiguration(config);
 		bodyContentType = MapTraversal.getString(config, "options.bodyContentType.value", AbstractHttpModule.BODY_FORMAT_JSON);
 		trustSelfSigned = MapTraversal.getBoolean(config, "options.trustSelfSigned.value");
 		isAsync = MapTraversal.getString(config, "options.syncMode.value", "async").equals("async");
-		timeoutMillis = 1000 * MapTraversal.getInt(config, "options.timeoutSeconds.value", DEFAULT_TIMEOUT_SECONDS);
+
+		Integer timeoutSeconds = MapTraversal.getInteger(config, "options.timeoutSeconds.value");
+		if (timeoutSeconds != null) {
+			timeoutMillis = 1000 * timeoutSeconds;
+		}
 
 		if (trustSelfSigned && getSelfSignedSslContext() == null) {
 			trustSelfSigned = false;
@@ -176,6 +195,10 @@ public abstract class AbstractHttpModule extends ModuleWithSideEffects implement
 			sendOutput(response);
 			return;
 		}
+		if (request instanceof HttpEntityEnclosingRequestBase && BODY_FORMAT_JSON.equals(bodyContentType)) {
+			request.setHeader(HttpHeaders.ACCEPT, "application/json");
+			request.setHeader(HttpHeaders.CONTENT_TYPE, "application/json");
+		}	// FORMDATA headers are correct already if the entity is UrlEncodedFormEntity
 		RequestConfig requestConfig = RequestConfig.custom()
 				.setConnectTimeout(timeoutMillis)
 				.setConnectionRequestTimeout(timeoutMillis)

@@ -31,7 +31,7 @@ modules = {
 		resource url:[dir:'js/tablesorter', file:'jquery.tablesorter.min.js', plugin: 'unifina-core']
 	}
 	highstock {
-		resource url:[dir:'js/highstock-2.0.3', file:'highstock.js', plugin: 'unifina-core']
+		resource url:[dir:'js/highstock-2.0.3', file:'highstock.min.js', plugin: 'unifina-core']
 		resource url:[dir:'js/highstock-2.0.3', file:'highcharts-more.js', plugin: 'unifina-core']
 	}
 	bootstrap {
@@ -156,6 +156,10 @@ modules = {
 	clipboardjs {
 		resource url:[dir:'js/clipboardjs', file:'clipboard.js', plugin:'unifina-core']
 	}
+	react {
+		resource url:[dir:'js/react', file:'react.min.js']
+		resource url:[dir:'js/react', file:'react-dom.min.js']
+	}
 
 	/**
 	 * In-house widgets and resources
@@ -269,6 +273,16 @@ modules = {
 	'confirm-button' {
 		resource url:[dir:'js/unifina/confirm-button', file:'confirm-button.js', plugin: 'unifina-core']
 	}
+	'webpack-commons-bundle' {
+		resource url:[dir:'js/unifina/webpack-bundles', file:'commons.bundle.js']
+	}
+	'profile-page-webpack-bundle' {
+// 		TODO: Comment back when there are more bundles than just one
+//		dependsOn 'webpack-commons-bundle'
+		dependsOn 'confirm-button'
+		resource url: [dir: 'js/unifina/webpack-bundles', file: 'profilePage.bundle.js', plugin: 'unifina-core']
+		resource url: [dir: 'js/unifina/webpack-bundles', file: 'profilePage.bundle.css', plugin: 'unifina-core']
+	}
 	'signalpath-core' {
 		// Easier to merge if dependencies are one-per-row instead of comma-separated list
 		dependsOn 'streamr'
@@ -315,6 +329,8 @@ modules = {
 		resource url:[dir:'js/unifina/signalPath/specific', file:'inputModule.js', plugin: 'unifina-core']
 		resource url:[dir:'js/unifina/signalPath/specific', file:'gaugeModule.js', plugin: 'unifina-core']
 		resource url:[dir:'js/unifina/signalPath/specific', file:'customModule.js', plugin: 'unifina-core']
+		resource url:[dir:'js/unifina/signalPath/specific', file:'solidityModule.js', plugin: 'unifina-core']
+		resource url:[dir:'js/unifina/signalPath/specific', file:'ethereumContractInput.js', plugin: 'unifina-core']
 		resource url:[dir:'js/unifina/signalPath/specific', file:'tableModule.js', plugin: 'unifina-core']
 		resource url:[dir:'js/unifina/signalPath/specific', file:'commentModule.js', plugin: 'unifina-core']
 		resource url:[dir:'js/unifina/signalPath/specific', file:'labelModule.js', plugin: 'unifina-core']

@@ -1,14 +1,3 @@
-SignalPath.CustomModuleOptions = {
-	codeMirrorOptions: {
-		lineNumbers: true,
-		matchBrackets: true,
-		mode: "text/x-groovy",
-		theme: "default",
-		viewportMargin: Infinity,
-		gutters: ["CodeMirror-linenumbers", "breakpoints"]
-	}
-};
-
 SignalPath.CustomModule = function(data,canvas,prot) {
 	prot = prot || {};
 	var pub = SignalPath.UIChannelModule(data,canvas,prot)
@@ -17,9 +6,6 @@ SignalPath.CustomModule = function(data,canvas,prot) {
 	var debug = null;
 	var debugTextArea = null;
 	var editor = null;
-	
-	createEditCodeButton();
-	$(prot).on('updated', createEditCodeButton)
 	
 	var codeWindow = ''
     +   '<div class="code-editor-dialog" style="width:600px; height:400px">'
@@ -65,9 +51,7 @@ SignalPath.CustomModule = function(data,canvas,prot) {
 			})
 			
 			dialog.find(".apply-btn").click(function() {
-				editor.clearGutter("breakpoints");
-				updateJson();
-				SignalPath.updateModule(pub);
+				prot.compile()
 			})
 			dialog.find(".close-btn").click(function(){
 				dialog.hide()
@@ -78,9 +62,8 @@ SignalPath.CustomModule = function(data,canvas,prot) {
 
 			$(SignalPath).on("started", clearDebug);
 			
-			editor = CodeMirror(dialog.find(".modal-body")[0], $.extend({},SignalPath.CustomModuleOptions.codeMirrorOptions,{
-				value: prot.jsonData.code,
-				mode:  "groovy"
+			editor = CodeMirror(dialog.find(".modal-body")[0], $.extend({}, prot.getEditorOptions(), {
+				value: prot.jsonData.code || "\n\n\n\n\n\n\n\n\n\n"
 			}));
 
 			dialog.resizable({
@@ -144,11 +127,34 @@ SignalPath.CustomModule = function(data,canvas,prot) {
 			})
 		} else debug.show()
 	}
-	
-	function createEditCodeButton() {
-		var editButton = $("<button class='btn btn-primary btn-sm'>Edit code</button>");
+
+	prot.getEditorOptions = function() {
+		return {
+			lineNumbers: true,
+			matchBrackets: true,
+			indentUnit: 4,
+			mode: "text/x-groovy",
+			theme: "default",
+			viewportMargin: Infinity,
+			gutters: ["CodeMirror-linenumbers", "breakpoints"]
+		}
+	}
+
+	prot.compile = function(callback) {
+		editor.clearGutter("breakpoints");
+		updateJson();
+		SignalPath.updateModule(pub, callback);
+	}
+
+	var super_createModuleFooter = prot.createModuleFooter
+	prot.createModuleFooter = function() {
+		var footer = super_createModuleFooter()
+
+		var editButton = $("<button class='btn btn-block btn-default btn-sm'>Edit code</button>");
 		editButton.click(createCodeWindow);
-		pub.getDiv().find(".modulefooter").prepend(editButton);
+		footer.append(editButton);
+
+		return footer
 	}
 	
 	function updateJson() {

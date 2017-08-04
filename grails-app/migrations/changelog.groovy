@@ -69,4 +69,12 @@ databaseChangeLog = {
 	include file: 'core/2017-05-15-getorcreatestream-module.groovy'
 	include file: 'core/2017-03-10-string-to-number-module.groovy'
 	include file: 'core/2017-05-30-mqtt-module.groovy'
+	include file: 'core/2017-01-20-ethereum-call-module.groovy'
+	include file: 'core/2017-02-08-ethereum-contract-template-paybyuse.groovy'
+	include file: 'core/2017-02-16-ethereum-contract-constant-module.groovy'
+	include file: 'core/2017-03-16-ethereum-contract-template-binarybetting.groovy'
+	include file: 'core/2017-03-28-ethereum-get-events-module.groovy'
+	include file: 'core/2017-04-20-verify-signature-module.groovy'
+	include file: 'core/2017-05-11-create-table-integration-key.groovy'
+	include file: 'core/2017-05-30-migrate-eth-accounts-as-integration-keys.groovy'
 }

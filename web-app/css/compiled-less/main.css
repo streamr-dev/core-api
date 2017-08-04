@@ -15181,6 +15181,11 @@ button.arrow:after {
   -ms-flex: 0 0 auto;
   -o-flex: 0 0 auto;
   flex: 0 0 auto;
+  display: -webkit-flex;
+  display: -moz-flex;
+  display: -ms-flexbox;
+  display: -o-flex;
+  display: flex;
 }
 .streamr-canvas .module .moduleheader .modulename {
   font-weight: bold;
@@ -15197,6 +15202,11 @@ button.arrow:after {
   display: inline;
   vertical-align: top;
   cursor: pointer;
+  -webkit-flex: 0 0 auto;
+  -moz-flex: 0 0 auto;
+  -ms-flex: 0 0 auto;
+  -o-flex: 0 0 auto;
+  flex: 0 0 auto;
 }
 .streamr-canvas .module .modulebody {
   padding: 5px;
@@ -15329,9 +15339,6 @@ button.arrow:after {
 }
 .component .modulebody .button-module-button {
   margin-top: 5px;
-}
-#canvas .module.chart {
-  z-index: 4;
 }
 #canvas .module.chart .modulebody {
   width: 600px;
@@ -16282,25 +16289,23 @@ div.table.clickable-table.table-bordered .tbody > .tr > .td:not(:first-child) {
   border-top-left-radius: 0;
   border-bottom-left-radius: 0;
 }
-.credentials-control .auth-key-button-row {
-  margin-right: -15px;
-}
-.credentials-control .auth-key-table td,
-.credentials-control .auth-key-table th {
+.credentials-control .table td,
+.credentials-control .table th {
   padding-top: 10px;
 }
-.credentials-control .auth-key-table td:not(:last-child),
-.credentials-control .auth-key-table th:not(:last-child) {
+.credentials-control .table td:not(:last-child),
+.credentials-control .table th:not(:last-child) {
   padding-right: 10px;
 }
-.credentials-control .auth-key-table .show-key {
+.credentials-control .table .show-key {
   cursor: pointer;
 }
-.credentials-control .auth-key-table td.name-field {
+.credentials-control .table td.name-field {
   max-width: 90px;
   word-wrap: break-word;
 }
-.credentials-control .auth-key-table .auth-key-delete-button {
+.credentials-control .table .auth-key-delete-button {
+  margin-right: -8px;
   margin-left: 5px;
 }
 @media (min-width: 768px) {

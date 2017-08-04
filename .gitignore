@@ -13,3 +13,5 @@ out/
 plugin.xml
 hs_err_pid*
 grailsMarkdown-inplacePlugin.iml
+web-app/js/unifina/webpack-bundles/*
+tomcat.8081

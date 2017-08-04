@@ -1,3 +1,4 @@
+import com.google.gson.Gson
 import com.unifina.data.KafkaPartitioner
 
 /*****
@@ -97,7 +98,7 @@ log4j = {
 		 grails.resources.mappers.uglifyjs.excludes = ['**/*.*']
 	 }
 	 production {
-		 grails.resources.mappers.uglifyjs.excludes = ['**/*.min.js', '**/*-min.js']
+		 grails.resources.mappers.uglifyjs.excludes = ['**/*.min.js', '**/*-min.js', '**/*.bundle.js', '**/*-compressed.js']
 	 }
  }
 
@@ -266,9 +267,20 @@ environments {
 streamr.http.api.server = System.getProperty("streamr.http.api.server") ?: "http://127.0.0.1:8890/api/v1"
 environments {
 	production {
-		streamr.http.api.server = System.getProperty("streamr.ui.server") ?: "${prodBaseUrl}/api/v1"
+		streamr.http.api.server = System.getProperty("streamr.http.api.server") ?: "${prodBaseUrl}/api/v1"
 	}
 }
+
+/**
+ * Streamr-web3 Ethereum bridge address
+ */
+streamr.ethereum.defaultNetwork = "rinkeby"
+streamr.ethereum.networks = System.getProperty("streamr.ethereum.networks") ? new Gson().fromJson(System.getProperty("streamr.ethereum.networks")) : [
+		ropsten: "http://localhost:3000",
+		rinkeby: "http://localhost:3001"
+]
+streamr.ethereum.address = System.getProperty("streamr.ethereum.address") ?: ""
+streamr.ethereum.key = System.getProperty("streamr.ethereum.key") ?: ""
 
 /**
  * Kafka config

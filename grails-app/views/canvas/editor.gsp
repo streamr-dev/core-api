@@ -177,6 +177,7 @@ $(function() {
 			}
 			// Push the new state to the history
 			if (url !== window.location.href) {
+			    url += window.location.search || ''
 				window.history.pushState({
 					streamr: {
 						urlPath: url
@@ -324,20 +325,7 @@ $(function() {
 		signalPath: SignalPath,
 		opener: $(".rename-canvas-button"),
 		name: SignalPath.getName()
-	}).on('changed', function(name) {
-	    var oldName = SignalPath.getName()
-	    if (!SignalPath.isSaved()) {
-			SignalPath.saveAs(name)
-	    } else {
-			SignalPath.saveName(name, function() {}, function() {
-				console.log("error")
-				// calling silent to prevent event loop
-				nameEditor.setName(oldName, {
-					silent: true
-				})
-			})
-	    }
-	})
+	}).on('changed', SignalPath.setName)
 
 	$(".streamr-dropdown li.disabled").click(function(e) {
 		e.preventDefault()
@@ -370,11 +358,11 @@ $(function() {
 		}))
 	})
 
-	var shareUrl
-	var shareName
 	$(".share-button").click(function(e) {
 	    e.preventDefault()
-	    if ($(this).data('url')) {
+		var shareUrl = $(this).data('url')
+		var shareName = $(this).data('name')
+	    if (shareUrl) {
 			sharePopup(shareUrl, shareName)
 		}
 	})
@@ -389,6 +377,7 @@ $(function() {
 			    })
 				if (enabled.indexOf('share') >= 0) {
 					$("#share-button").data("url", canvasUrl).removeAttr("disabled")
+					$("#share-button").data("name", SignalPath.getName()).removeAttr("disabled")
 				} else {
 					$("#share-button").addClass("forbidden")
 				}
@@ -404,9 +393,12 @@ $(function() {
 	<g:if test="${id}">
 		SignalPath.load('${id}');
 	</g:if>
-	<g:elseif test="${json}">
+	<g:elseif test="${ json && json != "{}" }">
 		SignalPath.loadJSON(${raw(json)})
 	</g:elseif>
+	<g:else>
+		$(SignalPath).trigger('new') // For event listeners
+	</g:else>
 
     $(document).unload(function () {
         SignalPath.unload()
@@ -430,7 +422,6 @@ $(function() {
 		}
 	})
 
-	$(SignalPath).trigger('new') // For event listeners
 })
 
 </r:script>

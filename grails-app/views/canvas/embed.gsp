@@ -4,7 +4,6 @@
 
     <title>Canvas</title>
 
-    <r:require module='jquery-ui'/>
     <r:require module="bootbox"/>
     <r:require module="bootstrap-contextmenu"/>
     <r:require module="bootstrap-datepicker"/>
@@ -49,7 +48,7 @@ $(document).ready(function() {
 
 <body class="canvas-editor-page main-menu-fixed embedded">
 
-<div id="canvas" class="scrollable embeddable"></div>
+<div id="canvas" class="streamr-canvas scrollable embeddable"></div>
 
 </body>
 </html>

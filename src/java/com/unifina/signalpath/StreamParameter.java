@@ -4,6 +4,7 @@ import com.unifina.domain.data.Feed;
 import com.unifina.domain.data.Stream;
 import com.unifina.feed.StreamNotFoundException;
 import com.unifina.service.FeedService;
+import grails.util.Holders;
 
 import java.util.Map;
 
@@ -84,7 +85,7 @@ public class StreamParameter extends Parameter<Stream> {
 	}
 
 	private FeedService getFeedService() {
-		return getOwner().getGlobals().getBean(FeedService.class);
+		return Holders.getApplicationContext().getBean(FeedService.class);
 	}
 
 	public boolean getCheckModuleId() {
