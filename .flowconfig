@@ -1,5 +1,5 @@
 [ignore]
-./node_modules/react-
+.*/node_modules/react-resizable/build/ResizableBox.js
 [include]
 
 [libs]
