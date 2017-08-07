@@ -2,12 +2,12 @@ package com.unifina.security.permission;
 
 import java.security.Permission;
 
-public class UserPermission extends Permission {
+public class DataSourcePermission extends Permission {
 
 	private static final long serialVersionUID = 3902064687942902085L;
 
-	public UserPermission() {
-		super("UserPermission");
+	public DataSourcePermission() {
+		super("DataSourcePermission");
 	}
 	
 	@Override
@@ -17,12 +17,12 @@ public class UserPermission extends Permission {
 
 	@Override
 	public boolean equals(Object obj) {
-		return obj instanceof UserPermission;
+		return obj instanceof DataSourcePermission;
 	}
 
 	@Override
 	public int hashCode() {
-		return "UserPermission".hashCode();
+		return "DataSourcePermission".hashCode();
 	}
 
 	@Override

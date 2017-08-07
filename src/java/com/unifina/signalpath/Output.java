@@ -1,5 +1,8 @@
 package com.unifina.signalpath;
 
+import com.unifina.security.permission.ConnectionTraversalPermission;
+
+import java.security.AccessController;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -27,6 +30,9 @@ public class Output<T> extends Endpoint<T> {
 	}
 
 	public Input<T>[] getTargets() {
+		if (System.getSecurityManager() != null) {
+			AccessController.checkPermission(new ConnectionTraversalPermission());
+		}
 		return cachedTargets;
 	}
 	

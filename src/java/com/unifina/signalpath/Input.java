@@ -1,5 +1,9 @@
 package com.unifina.signalpath;
 
+import com.unifina.security.permission.ConnectionTraversalPermission;
+import com.unifina.security.permission.GrailsApplicationPermission;
+
+import java.security.AccessController;
 import java.util.ArrayList;
 import java.util.Map;
 
@@ -129,6 +133,9 @@ public class Input<T> extends Endpoint<T> {
 	}
 
 	public Output<T> getSource() {
+		if (System.getSecurityManager() != null) {
+			AccessController.checkPermission(new ConnectionTraversalPermission());
+		}
 		return source;
 	}
 
