@@ -7,6 +7,7 @@ import com.unifina.service.EthereumIntegrationKeyService;
 import com.unifina.signalpath.AbstractSignalPathModule;
 import com.unifina.signalpath.Parameter;
 import com.unifina.signalpath.PossibleValue;
+import grails.util.Holders;
 import org.codehaus.groovy.runtime.InvokerHelper;
 
 import java.util.*;
@@ -56,7 +57,7 @@ class EthereumAccountParameter extends Parameter<IntegrationKey> {
 
 	@Override
 	protected List<PossibleValue> getPossibleValues() {
-		EthereumIntegrationKeyService service = getOwner().getGlobals().getBean(EthereumIntegrationKeyService.class);
+		EthereumIntegrationKeyService service = Holders.getApplicationContext().getBean(EthereumIntegrationKeyService.class);
 		Set<IntegrationKey> integrationKeys = new LinkedHashSet<>(service.getAllKeysForUser(getOwner().getGlobals().getUser()));
 		if (hasValue()) {
 			integrationKeys.add(getValue());
