@@ -2,6 +2,7 @@ package com.unifina.utils;
 
 import com.unifina.datasource.DataSource;
 import com.unifina.domain.security.SecUser;
+import com.unifina.security.permission.DataSourcePermission;
 import com.unifina.security.permission.GrailsApplicationPermission;
 import com.unifina.security.permission.UserPermission;
 import com.unifina.signalpath.AbstractSignalPathModule;
@@ -55,11 +56,12 @@ public class Globals {
 	}
 	
 	public Globals(Map signalPathContext, GrailsApplication grailsApplication, SecUser user) {
-		if (signalPathContext==null)
+		if (signalPathContext == null) {
 			throw new NullPointerException("signalPathContext can not be null!");
-			
-		if (grailsApplication==null)
+		}
+		if (grailsApplication == null) {
 			throw new NullPointerException("grailsApplication can not be null!");
+		}
 		
 		this.signalPathContext = signalPathContext;
 		this.grailsApplication = grailsApplication;
@@ -82,9 +84,9 @@ public class Globals {
 	
 	// TODO: risky to keep these here, should be out of sight of user code
 	public GrailsApplication getGrailsApplication() {
-		if (System.getSecurityManager()!=null)
+		if (System.getSecurityManager() != null) {
 			AccessController.checkPermission(new GrailsApplicationPermission());
-		
+		}
 		return grailsApplication;
 	}
 
@@ -94,15 +96,17 @@ public class Globals {
 	 * Returns the SecUser for this Globals instance, or null if the user is anonymous/unknown.
      */
 	public SecUser getUser() {
-		if (System.getSecurityManager()!=null)
+		if (System.getSecurityManager() != null) {
 			AccessController.checkPermission(new UserPermission());
+		}
 		return user;
 	}
 	
 	// TODO: risky to keep these here, should be out of sight of user code
 	public void setUser(SecUser user) {
-		if (System.getSecurityManager()!=null)
+		if (System.getSecurityManager() != null) {
 			AccessController.checkPermission(new UserPermission());
+		}
 		this.user = user;
 	}
 
@@ -212,14 +216,23 @@ public class Globals {
 	}
 	
 	public DataSource getDataSource() {
+		if (System.getSecurityManager() != null) {
+			AccessController.checkPermission(new DataSourcePermission());
+		}
 		return dataSource;
 	}
 	
 	public void setDataSource(DataSource dataSource) {
+		if (System.getSecurityManager() != null) {
+			AccessController.checkPermission(new DataSourcePermission());
+		}
 		this.dataSource = dataSource;
 	}
 
 	public void setGrailsApplication(GrailsApplication grailsApplication) {
+		if (System.getSecurityManager() != null) {
+			AccessController.checkPermission(new GrailsApplicationPermission());
+		}
 		this.grailsApplication = grailsApplication;
 	}
 
