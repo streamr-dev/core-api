@@ -317,7 +317,6 @@ public abstract class AbstractSignalPathModule implements IEventRecipient, IDayL
 
 		// Only report the initialization of this module once
 		if (!initialized) {
-			getGlobals().onModuleInitialized(this);
 			initialized = true;
 		}
 	}
