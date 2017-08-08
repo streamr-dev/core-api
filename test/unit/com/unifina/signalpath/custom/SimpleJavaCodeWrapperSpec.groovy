@@ -23,6 +23,24 @@ class SimpleJavaCodeWrapperSpec extends Specification {
 
 	SimpleJavaCodeWrapper module
 	Globals globals
+
+	static Policy originalPolicy
+	static SecurityManager originalSecurityManager
+
+	def setupSpec() {
+		if (!System.securityManager) {
+			originalPolicy = Policy.getPolicy()
+			originalSecurityManager = System.securityManager
+			Security.setProperty("package.access", PackageAccessHelper.getRestrictedPackages().join(","))
+			Policy.setPolicy(new MyPolicy())
+			System.securityManager = new MySecurityManager()
+		}
+	}
+
+	def cleanupSpec() {
+		Policy.setPolicy(originalPolicy)
+		System.securityManager = originalSecurityManager
+	}
 	
     def setup() {
 		defineBeans {
@@ -35,12 +53,6 @@ class SimpleJavaCodeWrapperSpec extends Specification {
 		module.hash = 666
 		module.configure(module.getConfiguration())
 		module.connectionsReady()
-
-		if (!System.securityManager) {
-			Security.setProperty("package.access", PackageAccessHelper.getRestrictedPackages().join(","))
-			Policy.setPolicy(new MyPolicy())
-			System.securityManager = new MySecurityManager()
-		}
     }
 
 	void "simpleJavaCodeWrapper gives correct answer"() {
@@ -285,44 +297,6 @@ class SimpleJavaCodeWrapperSpec extends Specification {
 				"@Override\n" +
 				"public void sendOutput() {\n" +
 				"Object user = getGlobals().getGrailsApplication();\n" +
-				"sum += in.value;\n" +
-				"out.send(sum);\n" +
-				"}\n" +
-				"\n" +
-				"@Override\n" +
-				"public void clearState() {\n" +
-				"sum = 0D;\n" +
-				"}\n"
-		])
-
-		when:
-		Map inputValues = [
-			in: [0,1,2,3,4,5,6,7,8,9,10].collect {it?.doubleValue()},
-		]
-		Map outputValues = [
-			out: [0,1,3,6,10,15,21,28,36,45,55].collect {it?.doubleValue()},
-		]
-
-		new ModuleTestHelper.Builder(module, inputValues, outputValues)
-			.overrideGlobals { globals }
-			.test()
-		then:
-		def e = thrown(TestHelperException)
-		e.cause.getClass() == AccessControlException
-		e.cause.getMessage().contains("GrailsApplicationPermission")
-	}
-
-	void "it throws AccessDeniedException if trying to set grails application"() {
-		setup:
-		module.configure([
-			code: "\n" +
-				"TimeSeriesInput in = new TimeSeriesInput(this,\"in\");\n" +
-				"TimeSeriesOutput out = new TimeSeriesOutput(this,\"out\");\n" +
-				"private double sum = 0D;\n" +
-				"\n" +
-				"@Override\n" +
-				"public void sendOutput() {\n" +
-				"getGlobals().setGrailsApplication(null);\n" +
 				"sum += in.value;\n" +
 				"out.send(sum);\n" +
 				"}\n" +
