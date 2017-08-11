@@ -42,7 +42,7 @@ public class SignalPath extends ModuleWithUI {
 
 	public SignalPath() {
 		super();
-		initPriority = 10;
+		setInitPriority(10);
 		canRefresh = true;
 	}
 
@@ -56,7 +56,7 @@ public class SignalPath extends ModuleWithUI {
 		super();
 		this.root = isRoot;
 		this.setGlobals(globals);
-		initPriority = 10;
+		setInitPriority(10);
 		canRefresh = true;
 
 		// Backwards compatibility, TODO: remove this constructor eventually

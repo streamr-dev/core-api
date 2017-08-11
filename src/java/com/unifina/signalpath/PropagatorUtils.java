@@ -27,7 +27,7 @@ public class PropagatorUtils {
 				reachableSet.add(module);
 
 				// Recurse to the owner if it's not an originatingModule
-				if (!module.propagationSink) {
+				if (!module.isPropagationSink()) {
 					for (Output o : module.getOutputs()) {
 						Collections.addAll(stack, o.getTargets());
 					}

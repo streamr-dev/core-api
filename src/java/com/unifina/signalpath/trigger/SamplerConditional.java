@@ -25,7 +25,7 @@ public class SamplerConditional extends AbstractSignalPathModule {
 	
 	@Override
 	public void sendOutput() {
-		if (drivingInputs.contains(trigger) && trigger.getValue()) {
+		if (getDrivingInputs().contains(trigger) && trigger.getValue()) {
 			out.send(value.value);
 		}
 	}

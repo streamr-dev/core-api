@@ -42,7 +42,7 @@ public class ButtonModule extends InputModule {
 
 	@Override
 	public void sendOutput() {
-		if (drivingInputs.contains(buttonName)) {
+		if (getDrivingInputs().contains(buttonName)) {
 			Map<String,Object> msg = new HashMap<String,Object>();
 			msg.put("buttonName", buttonName.getValue());
 			pushToUiChannel(msg);

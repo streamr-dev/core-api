@@ -44,7 +44,7 @@ public class Barify extends AbstractSignalPathModule implements ITimeListener {
 	
 	@Override
 	public void init() {
-		propagationSink = true;
+		setPropagationSink(true);
 		
 		addInput(barLength);
 		

@@ -102,7 +102,7 @@ public class SendToStream extends ModuleWithSideEffects {
 
 	private Map<String, Object> inputValuesToMap() {
 		Map msg = new LinkedHashMap<>();
-		Iterable<Input> inputs = sendOnlyNewValues ? drivingInputs : fieldInputs;
+		Iterable<Input> inputs = sendOnlyNewValues ? getDrivingInputs() : fieldInputs;
 		for (Input i : inputs) {
 			msg.put(i.getName(), i.getValue());
 		}
