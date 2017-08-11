@@ -82,7 +82,7 @@ public class TimeSeriesChart extends Chart {
 	
 	@Override
 	protected void record() {
-		for (Input i : drivingInputs) {
+		for (Input i : getDrivingInputs()) {
 			TimeSeriesChartInput input = (TimeSeriesChartInput) i;
 			if (!Double.isNaN(input.value)
 					&& (!barify || getGlobals().time.getTime() - input.previousTime >= 60000L)) {

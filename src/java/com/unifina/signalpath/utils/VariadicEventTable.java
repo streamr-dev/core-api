@@ -48,7 +48,7 @@ public class VariadicEventTable extends ModuleWithUI {
 		nr.add(getGlobals().formatDateTime(getGlobals().time));
 
 		for (Input<Object> i : ins.getEndpoints()) {
-			if (i.hasValue() && (!showOnlyNewValues || drivingInputs.contains(i))) {
+			if (i.hasValue() && (!showOnlyNewValues || getDrivingInputs().contains(i))) {
 				nr.add(i.getValue().toString());
 			} else {
 				nr.add(null);

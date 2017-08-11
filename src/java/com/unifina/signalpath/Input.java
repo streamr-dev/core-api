@@ -47,7 +47,7 @@ public class Input<T> extends Endpoint<T> {
 		}
 		
 		if (drivingInput) {
-			owner.drivingInputs.add(this);
+			owner.getDrivingInputs().add(this);
 			owner.setSendPending(true);
 		}
 

@@ -27,7 +27,7 @@ class VariadicInputSpec extends Specification {
 	}
 
 	def "can getValues() of non-placeholder input"() {
-		module.drivingInputs = [] // Prevent NullPointerException during receive()
+		module.setDrivingInputs([] as HashSet) // Prevent NullPointerException during receive()
 
 		variadicInput.addEndpoint("new-input-1")
 		variadicInput.addEndpoint("new-input-2")

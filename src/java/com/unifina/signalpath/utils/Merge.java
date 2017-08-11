@@ -56,9 +56,9 @@ public class Merge extends AbstractSignalPathModule {
 
 	@Override
 	public void sendOutput() {
-		if (drivingInputs.contains(inB))
+		if (getDrivingInputs().contains(inB))
 			out.send(inB.value);
-		if (drivingInputs.contains(inA))
+		if (getDrivingInputs().contains(inA))
 			out.send(inA.value);
 	}
 
