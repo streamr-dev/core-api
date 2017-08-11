@@ -36,7 +36,7 @@ public class Mqtt extends AbstractSignalPathModule implements MqttCallback, IEve
 		topic.setCanConnect(false);
 
 		// sends output when messages arrive (though shouldn't receive inputs anyway...)
-		propagationSink = true;
+		setPropagationSink(true);
 	}
 
 	@Override

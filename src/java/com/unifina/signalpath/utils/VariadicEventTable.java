@@ -45,10 +45,10 @@ public class VariadicEventTable extends ModuleWithUI {
 		HashMap<String, Object> msg = new HashMap<String, Object>();
 		ArrayList<Object> nr = new ArrayList<>(2);
 		msg.put("nr", nr);
-		nr.add(getGlobals().dateTimeFormat.format(getGlobals().time));
+		nr.add(getGlobals().formatDateTime(getGlobals().time));
 
 		for (Input<Object> i : ins.getEndpoints()) {
-			if (i.hasValue() && (!showOnlyNewValues || drivingInputs.contains(i))) {
+			if (i.hasValue() && (!showOnlyNewValues || getDrivingInputs().contains(i))) {
 				nr.add(i.getValue().toString());
 			} else {
 				nr.add(null);

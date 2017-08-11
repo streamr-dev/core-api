@@ -172,7 +172,7 @@ public abstract class AbstractHttpModule extends ModuleWithSideEffects implement
 
 		// HTTP module in async mode won't send outputs on SendOutput(),
 		// 	but only in receive() where it creates its own Propagator
-		propagationSink = isAsync;
+		setPropagationSink(isAsync);
 	}
 
 	/**

@@ -4,6 +4,8 @@ import com.unifina.data.FeedEvent;
 import com.unifina.data.IEventRecipient;
 import com.unifina.datasource.IDayListener;
 import com.unifina.domain.signalpath.Module;
+import com.unifina.security.permission.ConnectionTraversalPermission;
+import com.unifina.security.permission.UserPermission;
 import com.unifina.service.PermissionService;
 import com.unifina.service.SerializationService;
 import com.unifina.utils.Globals;
@@ -33,28 +35,27 @@ import java.util.concurrent.FutureTask;
  */
 public abstract class AbstractSignalPathModule implements IEventRecipient, IDayListener, Serializable {
 
-	protected SignalPath parentSignalPath;
-	transient private SignalPath cachedTopParentSignalPath;
-	protected Integer initPriority = 50;
+	private SignalPath parentSignalPath;
+	private Integer initPriority = 50;
 
-	protected ArrayList<Input> inputs = new ArrayList<Input>();
-	protected Map<String, Input> inputsByName = new HashMap<String, Input>();
+	private ArrayList<Input> inputs = new ArrayList<Input>();
+	private Map<String, Input> inputsByName = new HashMap<String, Input>();
 
-	protected ArrayList<Output> outputs = new ArrayList<Output>();
-	protected Map<String, Output> outputsByName = new HashMap<String, Output>();
+	private ArrayList<Output> outputs = new ArrayList<Output>();
+	private Map<String, Output> outputsByName = new HashMap<String, Output>();
 
 	private boolean wasReady = false;
 
-	protected Set<Input> readyInputs = new HashSet<>();
+	private Set<Input> readyInputs = new HashSet<>();
 
-	boolean sendPending = false;
+	private boolean sendPending = false;
 
 	// If this is set to true, this module will be a leaf in all Propagator trees
-	protected boolean propagationSink = false;
+	private boolean propagationSink = false;
 
-	Module domainObject;
+	private Module domainObject;
 
-	protected HashSet<Input> drivingInputs = new HashSet<Input>();
+	private HashSet<Input> drivingInputs = new HashSet<Input>();
 
 	// Controls whether the refresh button is shown in the UI. Clicking it recreates the module.
 	protected boolean canRefresh = false;
@@ -78,7 +79,7 @@ public abstract class AbstractSignalPathModule implements IEventRecipient, IDayL
 	 * a Parameter is marked as driving and then the Parameter is changed
 	 * at runtime.
 	 */
-	transient protected Propagator uiEventPropagator = null;
+	transient private Propagator uiEventPropagator = null;
 
 	public AbstractSignalPathModule() {
 
@@ -231,26 +232,38 @@ public abstract class AbstractSignalPathModule implements IEventRecipient, IDayL
 	}
 
 	public Input[] getInputs() {
+		if (System.getSecurityManager() != null) { // Ensure cannot be accessed by CustomModule
+			AccessController.checkPermission(new ConnectionTraversalPermission());
+		}
 		return inputs.toArray(new Input[inputs.size()]);
 	}
 
 	public Output[] getOutputs() {
+		if (System.getSecurityManager() != null) { // Ensure cannot be accessed by CustomModule
+			AccessController.checkPermission(new ConnectionTraversalPermission());
+		}
 		return outputs.toArray(new Output[outputs.size()]);
 	}
 
 	public Input getInput(String name) {
+		if (System.getSecurityManager() != null) { // Ensure cannot be accessed by CustomModule
+			AccessController.checkPermission(new ConnectionTraversalPermission());
+		}
 		return inputsByName.get(name);
 	}
 
 	public Output getOutput(String name) {
+		if (System.getSecurityManager() != null) { // Ensure cannot be accessed by CustomModule
+			AccessController.checkPermission(new ConnectionTraversalPermission());
+		}
 		return outputsByName.get(name);
 	}
 
-	public void markReady(Input input) {
+	void markReady(Input input) {
 		readyInputs.add(input);
 	}
 
-	public void cancelReady(Input input) {
+	void cancelReady(Input input) {
 		readyInputs.remove(input);
 	}
 
@@ -317,89 +330,7 @@ public abstract class AbstractSignalPathModule implements IEventRecipient, IDayL
 
 		// Only report the initialization of this module once
 		if (!initialized) {
-			getGlobals().onModuleInitialized(this);
 			initialized = true;
-		}
-	}
-
-	/**
-	 * By default creates one Propagator containing all outputs of the module.
-	 */
-	protected Output[][] getSpecialPropagatorDefinitions() {
-		return new Output[][]{};
-	}
-
-	private void findFeedbackConnections() {
-		ArrayList<AbstractSignalPathModule> traversedModules = new ArrayList<AbstractSignalPathModule>();
-		ArrayList<Input> traversedInputs = new ArrayList<Input>();
-		traversedModules.add(this);
-		for (Output o : getOutputs()) {
-			recurseFeedbackConnections(o, traversedModules, traversedInputs);
-		}
-	}
-
-	private void recurseFeedbackConnections(Output output,
-											ArrayList<AbstractSignalPathModule> traversedModules, ArrayList<Input> traversedInputs) {
-
-		Input[] inputs = output.getTargets();
-		HashSet<AbstractSignalPathModule> newModules = new HashSet<AbstractSignalPathModule>();
-		for (Input i : inputs) {
-			// Never traverse feedback connections any further
-			if (i.isFeedbackConnection()) {
-				continue;
-			}
-
-			AbstractSignalPathModule module = i.getOwner();
-			// Mark as feedback if traversed contains the input owner
-			if (traversedModules.contains(module)) {
-				i.setFeedbackConnection(true);
-				System.out.println("Found feedback connection: " + traversedModules + " -> " + output + " -> " + i);
-
-				// TODO: remove this exception if an automatic algorithm can be made to work
-				throw new IllegalStateException("Infinite cycle found! You must mark some input(s) as feedback! " + traversedModules + " -> " + output + " -> " + i);
-
-				// TODO: The previous one was not a sufficient algorithm. One possibility is to keep track of
-				// the whole traversal tree and mark as feedback connections all connections that connect
-				// to any ancestor element. Another possibility is that no unambiguous solution exists
-				// and the fb connections must be marked by hand.
-
-//				int pos = traversedInputs.size()-1;
-//				
-//				while (pos>=0) {
-//					Input parentInput = traversedInputs.get(pos);
-//					int count = 0;
-//					for (Input potential : parentInput.getOwner().getInputs()) {
-//						// Depends on starting point?
-//						if (potential.dependsOn(traversedModules.get(0)))
-//							count++;
-//					}
-//					if (count > 1) {
-//						parentInput.setFeedbackConnection(true);
-//						System.out.println("Found dependant feedback connection: "+parentInput.getSource() + " -> " + parentInput);
-//						pos--;
-//					}
-//					else break;
-//				}
-			} else {
-				// Collect modules traversed in this step. Several of these inputs could be in the same module.
-				boolean notYetTraversed = newModules.add(module);
-				if (notYetTraversed) {
-					for (Output o : module.getOutputs()) {
-						// Make a copy of traversed
-						ArrayList<AbstractSignalPathModule> newTraversedModules = new ArrayList<AbstractSignalPathModule>();
-						newTraversedModules.addAll(traversedModules);
-						// Add this module to the set
-						newTraversedModules.add(module);
-
-						ArrayList<Input> newTraversedInputs = new ArrayList<Input>();
-						newTraversedInputs.addAll(traversedInputs);
-						newTraversedInputs.add(i);
-
-						recurseFeedbackConnections(o, newTraversedModules, newTraversedInputs);
-					}
-				}
-			}
-
 		}
 	}
 
@@ -582,10 +513,16 @@ public abstract class AbstractSignalPathModule implements IEventRecipient, IDayL
 	}
 
 	public Module getDomainObject() {
+		if (System.getSecurityManager() != null) { // Ensure cannot be accessed by CustomModule
+			AccessController.checkPermission(new ConnectionTraversalPermission());
+		}
 		return domainObject;
 	}
 
 	public void setDomainObject(Module domainObject) {
+		if (System.getSecurityManager() != null) { // Ensure cannot be accessed by CustomModule
+			AccessController.checkPermission(new ConnectionTraversalPermission());
+		}
 		this.domainObject = domainObject;
 		if (name==null) {
 			setName(domainObject.getName());
@@ -611,6 +548,7 @@ public abstract class AbstractSignalPathModule implements IEventRecipient, IDayL
 	 * Returns the topmost SignalPath in the hierarchy where this module is contained.
      */
 	public SignalPath getRootSignalPath() {
+		SignalPath parentSignalPath = getParentSignalPath();
 		if (parentSignalPath != null) {
 			return parentSignalPath.getRootSignalPath();
 		} else {
@@ -619,15 +557,25 @@ public abstract class AbstractSignalPathModule implements IEventRecipient, IDayL
 	}
 
 	public SignalPath getParentSignalPath() {
+		if (System.getSecurityManager() != null) { // Ensure cannot be accessed by CustomModule
+			AccessController.checkPermission(new ConnectionTraversalPermission());
+		}
 		return parentSignalPath;
 	}
 
 	public void setParentSignalPath(SignalPath parentSignalPath) {
+		if (System.getSecurityManager() != null) { // Ensure cannot be accessed by CustomModule
+			AccessController.checkPermission(new ConnectionTraversalPermission());
+		}
 		this.parentSignalPath = parentSignalPath;
 	}
 
-	public Integer getInitPriority() {
+	protected Integer getInitPriority() {
 		return initPriority;
+	}
+
+	protected void setInitPriority(Integer initPriority) {
+		this.initPriority = initPriority;
 	}
 
 	/**
@@ -688,8 +636,8 @@ public abstract class AbstractSignalPathModule implements IEventRecipient, IDayL
 	}
 
 	protected RuntimeRequest.PathWriter getRuntimePath(RuntimeRequest.PathWriter writer) {
-		if (getParentSignalPath()!=null) {
-			return getParentSignalPath().getRuntimePath(writer).writeModuleId(getHash());
+		if (parentSignalPath!=null) {
+			return parentSignalPath.getRuntimePath(writer).writeModuleId(getHash());
 		} else {
 			return writer;
 		}
@@ -753,7 +701,7 @@ public abstract class AbstractSignalPathModule implements IEventRecipient, IDayL
 				response.setSuccess(true);
 			} catch (Exception e) {
 				log.error("Error making runtime parameter change!", e);
-				parentSignalPath.pushToUiChannel(new ErrorMessage("Parameter change failed!"));
+				getParentSignalPath().pushToUiChannel(new ErrorMessage("Parameter change failed!"));
 			}
 		}
 		else if (request.getType().equals("json")) {
@@ -824,5 +772,91 @@ public abstract class AbstractSignalPathModule implements IEventRecipient, IDayL
 
 	public String getEffectiveName() {
 		return getDisplayName() != null ? getDisplayName() : getName();
+	}
+
+	protected void setInputs(ArrayList<Input> inputs) {
+		if (System.getSecurityManager() != null) { // Ensure cannot be accessed by CustomModule
+			AccessController.checkPermission(new ConnectionTraversalPermission());
+		}
+		this.inputs = inputs;
+	}
+
+	protected Map<String, Input> getInputsByName() {
+		if (System.getSecurityManager() != null) { // Ensure cannot be accessed by CustomModule
+			AccessController.checkPermission(new ConnectionTraversalPermission());
+		}
+		return inputsByName;
+	}
+
+	protected void setInputsByName(Map<String, Input> inputsByName) {
+		if (System.getSecurityManager() != null) { // Ensure cannot be accessed by CustomModule
+			AccessController.checkPermission(new ConnectionTraversalPermission());
+		}
+		this.inputsByName = inputsByName;
+	}
+
+	protected void setOutputs(ArrayList<Output> outputs) {
+		if (System.getSecurityManager() != null) { // Ensure cannot be accessed by CustomModule
+			AccessController.checkPermission(new ConnectionTraversalPermission());
+		}
+		this.outputs = outputs;
+	}
+
+	protected Map<String, Output> getOutputsByName() {
+		if (System.getSecurityManager() != null) { // Ensure cannot be accessed by CustomModule
+			AccessController.checkPermission(new ConnectionTraversalPermission());
+		}
+		return outputsByName;
+	}
+
+	protected void setOutputsByName(Map<String, Output> outputsByName) {
+		if (System.getSecurityManager() != null) { // Ensure cannot be accessed by CustomModule
+			AccessController.checkPermission(new ConnectionTraversalPermission());
+		}
+		this.outputsByName = outputsByName;
+	}
+
+	protected Set<Input> getReadyInputs() {
+		if (System.getSecurityManager() != null) { // Ensure cannot be accessed by CustomModule
+			AccessController.checkPermission(new ConnectionTraversalPermission());
+		}
+		return readyInputs;
+	}
+
+	protected void setReadyInputs(Set<Input> readyInputs) {
+		if (System.getSecurityManager() != null) { // Ensure cannot be accessed by CustomModule
+			AccessController.checkPermission(new ConnectionTraversalPermission());
+		}
+		this.readyInputs = readyInputs;
+	}
+
+	public HashSet<Input> getDrivingInputs() {
+		return drivingInputs;
+	}
+
+	public void setDrivingInputs(HashSet<Input> drivingInputs) {
+		this.drivingInputs = drivingInputs;
+	}
+
+	protected Propagator getUiEventPropagator() {
+		if (System.getSecurityManager() != null) { // Ensure cannot be accessed by CustomModule
+			AccessController.checkPermission(new ConnectionTraversalPermission());
+		}
+		return uiEventPropagator;
+	}
+
+	protected void setUiEventPropagator(Propagator uiEventPropagator) {
+		if (System.getSecurityManager() != null) { // Ensure cannot be accessed by CustomModule
+			AccessController.checkPermission(new ConnectionTraversalPermission());
+		}
+		this.uiEventPropagator = uiEventPropagator;
+	}
+
+	public boolean isPropagationSink() {
+		return propagationSink;
+	}
+
+	protected void setPropagationSink(boolean propagationSink) {
+		this.propagationSink = propagationSink;
 	}
 }

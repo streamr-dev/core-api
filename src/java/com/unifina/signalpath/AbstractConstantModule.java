@@ -16,7 +16,7 @@ public abstract class AbstractConstantModule<ValueType> extends AbstractSignalPa
 
 	public AbstractConstantModule() {
 		super();
-		initPriority = 40;
+		setInitPriority(40);
 		constant = createConstantParameter();
 		out = createOutput();
 	}

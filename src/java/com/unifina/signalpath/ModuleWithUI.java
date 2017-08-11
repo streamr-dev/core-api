@@ -3,6 +3,8 @@ package com.unifina.signalpath;
 import com.unifina.datasource.IStartListener;
 import com.unifina.datasource.IStopListener;
 import com.unifina.domain.data.Stream;
+import com.unifina.domain.signalpath.Module;
+import com.unifina.security.permission.UserPermission;
 import com.unifina.service.PermissionService;
 import com.unifina.service.StreamService;
 import com.unifina.utils.IdGenerator;
@@ -11,6 +13,7 @@ import grails.util.Holders;
 
 import java.io.Serializable;
 import java.security.AccessControlException;
+import java.security.AccessController;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -84,6 +87,7 @@ public abstract class ModuleWithUI extends AbstractSignalPathModule {
 	 * @return The name of the webcomponent.
 	 */
 	public String getWebcomponentName() {
+		Module domainObject = getDomainObject();
 		if (domainObject == null) {
 			return null;
 		} else {

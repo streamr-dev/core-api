@@ -27,7 +27,7 @@ public class Sampler extends AbstractSignalPathModule {
 	
 	@Override
 	public void sendOutput() {
-		if (drivingInputs.contains(trigger)) {
+		if (getDrivingInputs().contains(trigger)) {
 			out.send(value.value);
 		}
 	}
