@@ -8,12 +8,14 @@ import com.mashape.unirest.http.Unirest;
 import com.mashape.unirest.http.exceptions.UnirestException;
 import com.unifina.datasource.ITimeListener;
 import com.unifina.signalpath.*;
-import com.unifina.utils.Globals;
+import org.apache.commons.io.IOUtils;
 import org.apache.log4j.Logger;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.json.JSONArray;
 
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.*;
 
 /**
@@ -21,6 +23,7 @@ import java.util.*;
  */
 public class GetEvents extends AbstractSignalPathModule implements ITimeListener {
 	private EthereumContractInput contract = new EthereumContractInput(this, "contract");
+	private ListOutput errors = new ListOutput(this, "errors");
 
 	// event -> [output for each event argument]
 	private Map<EthereumABI.Event, List<Output<Object>>> events;
@@ -35,16 +38,14 @@ public class GetEvents extends AbstractSignalPathModule implements ITimeListener
 
 	public String gethFilterId;
 
-	// TODO: incorporate event argument parsing from web3j
-	public StringOutput data = new StringOutput(this, "data");
-	public ListOutput topics = new ListOutput(this, "topics");
-
 	@Override
 	public void initialize() {
 		if (getGlobals().isRunContext()) {
 			EthereumContract c = contract.getValue();
 			if (c != null) {
 				gethFilterId = startListeningContractEvents(c.getAddress());
+			} else {
+				log.error("Contract input has no value in it");
 			}
 		}
 	}
@@ -52,6 +53,8 @@ public class GetEvents extends AbstractSignalPathModule implements ITimeListener
 	@Override
 	public void init() {
 		propagationSink = true;
+		addInput(contract);
+		addOutput(errors);
 	}
 
 	/**
@@ -64,24 +67,66 @@ public class GetEvents extends AbstractSignalPathModule implements ITimeListener
 		// bad state; no need to spam logs, error was probably reported in initialize() already
 		if (gethFilterId == null) { return; }
 
+		EthereumContract c = contract.getValue();
+		if (c == null) { return; }
+
 		JSONArray events = pollContractEvents(gethFilterId, (int)(time.getTime() % 0xfffffff));
 
-		try {
-			// TODO: parse event data&topics using stuff from web3j
-//			for (int i = 0; i < events.length(); i++) {
-//				JSONObject event = events.getJSONObject(i);
-//			}
-			if (events != null && events.length() > 0) {
-				JSONArray topicsRaw = events.getJSONObject(0).getJSONArray("topics");
-				List<String> topicsValues = new ArrayList<>();
-				for (int i = 0; i < topicsRaw.length(); i++) {
-					topicsValues.add(topicsRaw.getString(i));
-				}
-				topics.send(topicsValues);
-				data.send(events.getJSONObject(0).getString("data"));
+		// event appeared: now ask streamr-web3 to decode it
+		// TODO: web3j should do the decoding; i.e. change to Java 8, or backport org.web3j.abi.FunctionReturnDecoder
+		if (events != null && events.length() > 0) {
+			try {
+				String txHash = events.getJSONObject(0).getString("transactionHash");
+				String url = ethereumOptions.getServer() + "/events";
+				HttpResponse<JsonNode> response = Unirest.post(url).body(new Gson().toJson(ImmutableMap.of(
+						"abi", c.getABI().toString(),
+						"address", c.getAddress(),
+						"txHash", txHash
+				))).asJson();
+				sendOutputs(response.getRawBody());
+			} catch (JSONException e) {
+				log.error("Error while parsing " + events.toString(), e);
+			} catch (UnirestException e) {
+				log.error("Error while decoding event (HTTP -> streamr-web3)", e);
 			}
-		} catch (JSONException e) {
+		}
+	}
 
+	private void sendOutputs(InputStream eventJsonStream) {
+		// TODO: accumulate errors from earlier too
+		List<String> errorList = new ArrayList<>();
+
+		try {
+			String responseString = IOUtils.toString(eventJsonStream, "UTF-8");
+			JsonObject responseJson = new JsonParser().parse(responseString).getAsJsonObject();
+			if (responseJson.get("error") != null) {
+				throw new RuntimeException(responseJson.get("error").toString());
+			}
+
+			EthereumContract c = contract.getValue();
+			for (EthereumABI.Event ev : c.getABI().getEvents()) {
+				JsonArray args = responseJson.getAsJsonArray(ev.name);
+				List<Output<Object>> evOutputs = events.get(ev);
+				if (args != null) {
+					if (ev.inputs.size() > 0) {
+						int n = Math.min(evOutputs.size(), args.size());
+						for (int i = 0; i < n; i++) {
+							String value = args.get(i).getAsString();
+							Output output = evOutputs.get(i);
+							EthereumCall.convertAndSend(output, value);
+						}
+					} else {
+						evOutputs.get(0).send(Boolean.TRUE);
+					}
+				}
+			}
+		} catch (IOException e) {
+			errorList.add(e.getMessage());
+			log.error(e);
+		}
+
+		if (errorList.size() > 0) {
+			errors.send(errorList);
 		}
 	}
 
@@ -99,7 +144,6 @@ public class GetEvents extends AbstractSignalPathModule implements ITimeListener
 	protected void onConfiguration(Map<String, Object> config) {
 		super.onConfiguration(config);
 
-		/*
 		EthereumContract c = contract.getValue();
 		events = new HashMap<>();
 		if (c != null) {
@@ -122,7 +166,6 @@ public class GetEvents extends AbstractSignalPathModule implements ITimeListener
 				events.put(ev, evOutputs);
 			}
 		}
-		*/
 
 		ModuleOptions options = ModuleOptions.get(config);
 		ethereumOptions = EthereumModuleOptions.readFrom(options);
