@@ -4,6 +4,7 @@ import com.unifina.api.ValidationException;
 import com.unifina.domain.data.Stream;
 import com.unifina.service.StreamService;
 import com.unifina.signalpath.*;
+import grails.util.Holders;
 
 import java.util.*;
 
@@ -31,7 +32,7 @@ public class CreateStream extends AbstractSignalPathModule {
 	@Override
 	public void sendOutput() {
 		if (streamService == null) {
-			streamService = getGlobals().getBean(StreamService.class);
+			streamService = Holders.getApplicationContext().getBean(StreamService.class);
 		}
 
 		if (cachedStreamIdsByName.containsKey(nameInput.getValue())) {
