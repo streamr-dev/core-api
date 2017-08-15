@@ -223,10 +223,6 @@ public class Globals {
 		this.grailsApplication = grailsApplication;
 	}
 
-	public <T> T getBean(Class<T> requiredType) {
-		return grailsApplication.getMainContext().getBean(requiredType);
-	}
-
 	public IdGenerator getIdGenerator() {
 		return idGenerator;
 	}

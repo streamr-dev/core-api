@@ -1,7 +1,7 @@
 package com.unifina.signalpath.blockchain
 
+import com.unifina.BeanMockingSpecification
 import com.unifina.api.NotPermittedException
-import com.unifina.datasource.DataSource
 import com.unifina.datasource.RealtimeDataSource
 import com.unifina.domain.security.IntegrationKey
 import com.unifina.domain.security.SecUser
@@ -10,18 +10,16 @@ import com.unifina.signalpath.PossibleValue
 import com.unifina.signalpath.simplemath.Multiply
 import com.unifina.utils.Globals
 import grails.test.mixin.Mock
-import spock.lang.Specification
 
 @Mock([IntegrationKey, SecUser])
-class EthereumAccountParameterSpec extends Specification {
+class EthereumAccountParameterSpec extends BeanMockingSpecification {
 
 	EthereumAccountParameter parameter
 
 	void setup() {
 		def module = new Multiply()
-		module.globals = Stub(Globals) {
-			getBean(_) >> new EthereumIntegrationKeyService()
-		}
+		mockBean(EthereumIntegrationKeyService, new EthereumIntegrationKeyService())
+		module.globals = new Globals()
 		parameter = new EthereumAccountParameter(module, "ethAccount")
 	}
 
@@ -177,7 +175,6 @@ class EthereumAccountParameterSpec extends Specification {
 
 		when:
 		parameter.getOwner().globals = Stub(Globals) {
-			getBean(_) >> new EthereumIntegrationKeyService()
 			getUser() >> me
 		}
 
@@ -203,7 +200,6 @@ class EthereumAccountParameterSpec extends Specification {
 
 		when: "logged in as owner of selected key"
 		parameter.getOwner().globals = Stub(Globals) {
-			getBean(_) >> new EthereumIntegrationKeyService()
 			getUser() >> other
 		}
 
@@ -216,7 +212,6 @@ class EthereumAccountParameterSpec extends Specification {
 
 		when: "logged in as non-owner of selected key"
 		parameter.getOwner().globals = Stub(Globals) {
-			getBean(_) >> new EthereumIntegrationKeyService()
 			getUser() >> me
 		}
 

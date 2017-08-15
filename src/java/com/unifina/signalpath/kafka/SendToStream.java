@@ -11,6 +11,7 @@ import com.unifina.service.StreamService;
 import com.unifina.signalpath.*;
 import com.unifina.utils.Globals;
 import grails.converters.JSON;
+import grails.util.Holders;
 import org.codehaus.groovy.grails.web.json.JSONArray;
 import org.codehaus.groovy.grails.web.json.JSONObject;
 
@@ -55,10 +56,10 @@ public class SendToStream extends ModuleWithSideEffects {
 	private void ensureServices() {
 		// will be null after deserialization
 		if (streamService == null) {
-			streamService = getGlobals().getBean(StreamService.class);
+			streamService = Holders.getApplicationContext().getBean(StreamService.class);
 		}
 		if (permissionService == null) {
-			permissionService = getGlobals().getBean(PermissionService.class);
+			permissionService = Holders.getApplicationContext().getBean(PermissionService.class);
 		}
 	}
 
@@ -188,7 +189,7 @@ public class SendToStream extends ModuleWithSideEffects {
 		// Only check write access in run context to avoid exception when eg. loading and reconstructing canvas
 		if (getGlobals().isRunContext() && !stream.getId().equals(lastStreamId) ) {
 			if (permissionService == null) {
-				permissionService = getGlobals().getBean(PermissionService.class);
+				permissionService = Holders.getApplicationContext().getBean(PermissionService.class);
 			}
 
 			if (permissionService.canWrite(getGlobals().getUser(), stream)) {

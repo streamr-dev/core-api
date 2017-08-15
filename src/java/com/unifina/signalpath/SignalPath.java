@@ -10,6 +10,7 @@ import com.unifina.service.ModuleService;
 import com.unifina.service.SerializationService;
 import com.unifina.utils.Globals;
 import grails.converters.JSON;
+import grails.util.Holders;
 import org.apache.log4j.Logger;
 import org.codehaus.groovy.grails.web.json.JSONObject;
 
@@ -92,7 +93,7 @@ public class SignalPath extends ModuleWithUI {
 			return;
 		}
 
-		ModuleService moduleService = getGlobals().getBean(ModuleService.class);
+		ModuleService moduleService = Holders.getApplicationContext().getBean(ModuleService.class);
 
 		HashMap<Long, Module> moduleDomainById = new HashMap<>();
 		for (Module m : moduleService.getModuleDomainObjects(modulesJSON)) {
@@ -251,7 +252,8 @@ public class SignalPath extends ModuleWithUI {
 			 * as subcanvases, as all the instances would produce to same uiChannels.
 			 */
 			Map json = (JSONObject) JSON.parse(signalPathParameter.getCanvas().getJson());
-			getGlobals().getBean(CanvasService.class).resetUiChannels(json);
+			CanvasService canvasService = Holders.getApplicationContext().getBean(CanvasService.class);
+			canvasService.resetUiChannels(json);
 			initFromRepresentation(json);
 		} else {
 			initFromRepresentation(config);
