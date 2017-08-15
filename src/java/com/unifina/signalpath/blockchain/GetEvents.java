@@ -2,14 +2,9 @@ package com.unifina.signalpath.blockchain;
 
 import com.google.common.collect.ImmutableMap;
 import com.google.gson.*;
-import com.mashape.unirest.http.Unirest;
-import com.mashape.unirest.http.exceptions.UnirestException;
 import com.unifina.signalpath.*;
 import com.unifina.signalpath.remote.AbstractHttpModule;
-import com.unifina.utils.MapTraversal;
-import grails.util.Holders;
 import org.apache.http.HttpEntity;
-import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.methods.HttpRequestBase;
 import org.apache.http.entity.StringEntity;
