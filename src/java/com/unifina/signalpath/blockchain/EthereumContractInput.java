@@ -10,8 +10,8 @@ public class EthereumContractInput extends Input<EthereumContract> {
 	public EthereumContractInput(AbstractSignalPathModule owner, String name) {
 		super(owner, name, "EthereumContract");
 		setDrivingInput(false);
-		canToggleDrivingInput = false;
-		canBeFeedback = false;
+		setCanToggleDrivingInput(false);
+		setCanBeFeedback(false);
 		setJsClass("EthereumContractInput");
 	}
 

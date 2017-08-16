@@ -161,7 +161,7 @@ public class SendToStream extends ModuleWithSideEffects {
 			// TODO: add other types
 			if (type.equalsIgnoreCase("number")) {
 				input = new TimeSeriesInput(this, name);
-				((TimeSeriesInput) input).canHaveInitialValue = false;
+				((TimeSeriesInput) input).setCanHaveInitialValue(false);
 			} else if (type.equalsIgnoreCase("boolean")) {
 				input = new BooleanInput(this, name);
 			} else if (type.equalsIgnoreCase("string")) {
@@ -173,9 +173,9 @@ public class SendToStream extends ModuleWithSideEffects {
 			}
 
 			if (input != null) {
-				input.canToggleDrivingInput = false;
-				input.canBeFeedback = false;
-				input.requiresConnection = false;
+				input.setCanToggleDrivingInput(false);
+				input.setCanBeFeedback(false);
+				input.setRequiresConnection(false);
 				addInput(input);
 				fieldInputs.add(input);
 			}

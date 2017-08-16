@@ -56,9 +56,9 @@ public class EventTable extends ModuleWithUI {
 		Input<Object> conn = new Input<Object>(this,name,"Object");
 
 		conn.setDrivingInput(true);
-		conn.canToggleDrivingInput = false;
-		conn.canBeFeedback = false;
-		conn.requiresConnection = false;
+		conn.setCanToggleDrivingInput(false);
+		conn.setCanBeFeedback(false);
+		conn.setRequiresConnection(false);
 		
 		// Add the input
 		if (getInput(name)==null)

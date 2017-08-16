@@ -19,17 +19,17 @@ public class Heatmap extends ModuleWithUI {
 		super.init();
 		this.canClearState = false;
 		latitude.setDrivingInput(true);
-		latitude.canToggleDrivingInput = false;
-		latitude.canHaveInitialValue = false;
-		latitude.canBeFeedback = false;
+		latitude.setCanToggleDrivingInput(false);
+		latitude.setCanHaveInitialValue(false);
+		latitude.setCanBeFeedback(false);
 		longitude.setDrivingInput(true);
-		longitude.canToggleDrivingInput = false;
-		longitude.canHaveInitialValue = false;
-		longitude.canBeFeedback = false;
+		longitude.setCanToggleDrivingInput(false);
+		longitude.setCanHaveInitialValue(false);
+		longitude.setCanBeFeedback(false);
 		value.setDrivingInput(true);
-		value.canToggleDrivingInput = false;
-		value.canHaveInitialValue = false;
-		value.canBeFeedback = false;
+		value.setCanToggleDrivingInput(false);
+		value.setCanHaveInitialValue(false);
+		value.setCanBeFeedback(false);
 
 		resendAll = false;
 		resendLast = 0;

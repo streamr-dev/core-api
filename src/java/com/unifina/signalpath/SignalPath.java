@@ -189,15 +189,15 @@ public class SignalPath extends ModuleWithUI {
 				it.setExport(false);
 				// Id needs to be regenerated to avoid clashes with other instances of the same canvas-as-a-module
 				it.regenerateId();
-				if (getInput(it.name) == null) {
+				if (getInput(it.getName()) == null) {
 					addInput(it);
 				}
 				else {
 					int counter = 2;
-					while (getInput(it.name + counter) != null) {
+					while (getInput(it.getName() + counter) != null) {
 						counter++;
 					}
-					it.name = it.name + counter;
+					it.setName(it.getName() + counter);
 					addInput(it);
 				}
 			}
@@ -208,15 +208,15 @@ public class SignalPath extends ModuleWithUI {
 				it.setExport(false);
 				// Id needs to be regenerated to avoid clashes with other instances of the same canvas-as-a-module
 				it.regenerateId();
-				if (getOutput(it.name) == null) {
+				if (getOutput(it.getName()) == null) {
 					addOutput(it);
 				}
 				else {
 					int counter = 2;
-					while (getOutput(it.name + counter) != null) {
+					while (getOutput(it.getName() + counter) != null) {
 						counter++;
 					}
-					it.name = it.name + counter;
+					it.setName(it.getName() + counter);
 					addOutput(it);
 				}
 			}

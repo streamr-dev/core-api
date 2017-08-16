@@ -27,7 +27,7 @@ public abstract class AbstractConstantModule<ValueType> extends AbstractSignalPa
 	@Override
 	public void init() {
 		super.init();
-		constant.canToggleDrivingInput = false;
+		constant.setCanToggleDrivingInput(false);
 		constant.setDrivingInput(true);
 	}
 

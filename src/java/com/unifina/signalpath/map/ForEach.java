@@ -282,8 +282,8 @@ public class ForEach extends AbstractSignalPathModule {
 
 		@Override
 		public void receive(Object value) {
-			owner.setSendPending(true);
-			owner.getInput("key").receive(key);
+			getOwner().setSendPending(true);
+			getOwner().getInput("key").receive(key);
 			cachedOutputValues.put(outputName, value);
 		}
 

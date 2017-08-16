@@ -17,11 +17,11 @@ public class Merge extends AbstractSignalPathModule {
 	public void init() {
 		addInput(inA);
 		inA.setDrivingInput(true);
-		inA.canToggleDrivingInput = false;
+		inA.setCanToggleDrivingInput(false);
 		inA.setReadyHack();
 		addInput(inB);
 		inB.setDrivingInput(true);
-		inB.canToggleDrivingInput = false;
+		inB.setCanToggleDrivingInput(false);
 		inB.setReadyHack();
 		addOutput(out);
 	}
@@ -51,7 +51,7 @@ public class Merge extends AbstractSignalPathModule {
 	}
 
 	private boolean allEndpointsAreConnected() {
-		return inA.isConnected() && inB.isConnected() && out.getTargets().length > 0;
+		return inA.isConnected() && inB.isConnected() && out.getTargets().size() > 0;
 	}
 
 	@Override

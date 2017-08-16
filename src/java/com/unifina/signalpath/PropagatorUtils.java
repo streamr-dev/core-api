@@ -7,7 +7,7 @@ public class PropagatorUtils {
 	public static Set<AbstractSignalPathModule> findReachableSetFromOutputs(List<Output> outputs) {
 		List<Input> inputs = new ArrayList<>();
 		for (Output o : outputs) {
-			Collections.addAll(inputs, o.getTargets());
+			inputs.addAll(o.getTargets());
 		}
 		return findReachableSetFromInputs(inputs);
 	}
@@ -29,7 +29,7 @@ public class PropagatorUtils {
 				// Recurse to the owner if it's not an originatingModule
 				if (!module.isPropagationSink()) {
 					for (Output o : module.getOutputs()) {
-						Collections.addAll(stack, o.getTargets());
+						stack.addAll(o.getTargets());
 					}
 				}
 			}

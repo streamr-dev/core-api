@@ -24,9 +24,9 @@ public class TwitterModule extends AbstractStreamSourceModule {
 		addOutput(language);
 		
 		addOutput(followers);
-		followers.noRepeat = false;
+		followers.setNoRepeat(false);
 		addOutput(isRetweet);
-		isRetweet.noRepeat = false;
+		isRetweet.setNoRepeat(false);
 
 		addOutput(keywords);
 	}

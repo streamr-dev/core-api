@@ -147,9 +147,9 @@ public class VariadicEventTable extends ModuleWithUI {
 		public Input<Object> instantiate(AbstractSignalPathModule module, String endpointName) {
 			Input<Object> input = new Input<>(module, endpointName, "Object");
 			input.setDrivingInput(true);
-			input.canToggleDrivingInput = false;
-			input.canBeFeedback = false;
-			input.requiresConnection = false;
+			input.setCanToggleDrivingInput(false);
+			input.setCanBeFeedback(false);
+			input.setRequiresConnection(false);
 			return input;
 		}
 	}

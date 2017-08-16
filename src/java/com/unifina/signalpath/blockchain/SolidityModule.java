@@ -143,8 +143,8 @@ public class SolidityModule extends ModuleWithUI implements Pullable<EthereumCon
 				String name = input.name.replace("_", " ");
 				Parameter p = EthereumToStreamrTypes.asParameter(input.type, name, this);
 				p.setCanConnect(false);
-				p.canToggleDrivingInput = false;
-				p.canBeFeedback = false;
+				p.setCanToggleDrivingInput(false);
+				p.setCanBeFeedback(false);
 				addInput(p);
 			}
 			if (constructor.payable) {

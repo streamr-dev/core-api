@@ -23,8 +23,8 @@ public class ButtonModule extends InputModule {
 
 		buttonName.setDrivingInput(true);
 
-		out.noRepeat = false;
-		out.canBeNoRepeat = false;
+		out.setNoRepeat(false);
+		out.setCanBeNoRepeat(false);
 
 	}
 
