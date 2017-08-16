@@ -232,30 +232,18 @@ public abstract class AbstractSignalPathModule implements IEventRecipient, IDayL
 	}
 
 	public Input[] getInputs() {
-		if (System.getSecurityManager() != null) { // Ensure cannot be accessed by CustomModule
-			AccessController.checkPermission(new ConnectionTraversalPermission());
-		}
 		return inputs.toArray(new Input[inputs.size()]);
 	}
 
 	public Output[] getOutputs() {
-		if (System.getSecurityManager() != null) { // Ensure cannot be accessed by CustomModule
-			AccessController.checkPermission(new ConnectionTraversalPermission());
-		}
 		return outputs.toArray(new Output[outputs.size()]);
 	}
 
 	public Input getInput(String name) {
-		if (System.getSecurityManager() != null) { // Ensure cannot be accessed by CustomModule
-			AccessController.checkPermission(new ConnectionTraversalPermission());
-		}
 		return inputsByName.get(name);
 	}
 
 	public Output getOutput(String name) {
-		if (System.getSecurityManager() != null) { // Ensure cannot be accessed by CustomModule
-			AccessController.checkPermission(new ConnectionTraversalPermission());
-		}
 		return outputsByName.get(name);
 	}
 
@@ -775,58 +763,34 @@ public abstract class AbstractSignalPathModule implements IEventRecipient, IDayL
 	}
 
 	protected void setInputs(ArrayList<Input> inputs) {
-		if (System.getSecurityManager() != null) { // Ensure cannot be accessed by CustomModule
-			AccessController.checkPermission(new ConnectionTraversalPermission());
-		}
 		this.inputs = inputs;
 	}
 
 	protected Map<String, Input> getInputsByName() {
-		if (System.getSecurityManager() != null) { // Ensure cannot be accessed by CustomModule
-			AccessController.checkPermission(new ConnectionTraversalPermission());
-		}
 		return inputsByName;
 	}
 
 	protected void setInputsByName(Map<String, Input> inputsByName) {
-		if (System.getSecurityManager() != null) { // Ensure cannot be accessed by CustomModule
-			AccessController.checkPermission(new ConnectionTraversalPermission());
-		}
 		this.inputsByName = inputsByName;
 	}
 
 	protected void setOutputs(ArrayList<Output> outputs) {
-		if (System.getSecurityManager() != null) { // Ensure cannot be accessed by CustomModule
-			AccessController.checkPermission(new ConnectionTraversalPermission());
-		}
 		this.outputs = outputs;
 	}
 
 	protected Map<String, Output> getOutputsByName() {
-		if (System.getSecurityManager() != null) { // Ensure cannot be accessed by CustomModule
-			AccessController.checkPermission(new ConnectionTraversalPermission());
-		}
 		return outputsByName;
 	}
 
 	protected void setOutputsByName(Map<String, Output> outputsByName) {
-		if (System.getSecurityManager() != null) { // Ensure cannot be accessed by CustomModule
-			AccessController.checkPermission(new ConnectionTraversalPermission());
-		}
 		this.outputsByName = outputsByName;
 	}
 
 	protected Set<Input> getReadyInputs() {
-		if (System.getSecurityManager() != null) { // Ensure cannot be accessed by CustomModule
-			AccessController.checkPermission(new ConnectionTraversalPermission());
-		}
 		return readyInputs;
 	}
 
 	protected void setReadyInputs(Set<Input> readyInputs) {
-		if (System.getSecurityManager() != null) { // Ensure cannot be accessed by CustomModule
-			AccessController.checkPermission(new ConnectionTraversalPermission());
-		}
 		this.readyInputs = readyInputs;
 	}
 
