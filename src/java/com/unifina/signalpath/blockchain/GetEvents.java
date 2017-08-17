@@ -78,11 +78,16 @@ public class GetEvents extends AbstractSignalPathModule implements ITimeListener
 			try {
 				String txHash = events.getJSONObject(0).getString("transactionHash");
 				String url = ethereumOptions.getServer() + "/events";
-				HttpResponse<JsonNode> response = Unirest.post(url).body(new Gson().toJson(ImmutableMap.of(
-						"abi", c.getABI().toString(),
-						"address", c.getAddress(),
-						"txHash", txHash
-				))).asJson();
+				String body = new Gson().toJson(ImmutableMap.of(
+					"abi", c.getABI().toString(),
+					"address", c.getAddress(),
+					"txHash", txHash
+				));
+				HttpResponse<JsonNode> response = Unirest.post(url)
+					.header("Accept", "application/json")
+					.header("Content-Type", "application/json")
+					.body(body)
+					.asJson();
 				sendOutputs(response.getRawBody());
 			} catch (JSONException e) {
 				log.error("Error while parsing " + events.toString(), e);
