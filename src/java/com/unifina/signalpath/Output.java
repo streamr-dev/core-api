@@ -4,15 +4,18 @@ import com.unifina.security.permission.ConnectionTraversalPermission;
 
 import java.security.AccessController;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 
 public class Output<T> extends Endpoint<T> {
-	
-	private final List<Input<T>> targets = new ArrayList<>();
+
+	// Array for loop efficiency
+	private Input<T>[] targets = new Input[0];
 
 	// Used to flag the Propagators that contain this Output that a value has been sent
-	private transient ArrayList<Propagator> propagators;
+	// Array for loop efficiency
+	private transient Propagator[] propagators;
 	
 	private T previousValue = null;
 
@@ -26,7 +29,7 @@ public class Output<T> extends Endpoint<T> {
 		if (System.getSecurityManager() != null) {
 			AccessController.checkPermission(new ConnectionTraversalPermission());
 		}
-		return targets;
+		return Arrays.asList(targets);
 	}
 	
 	public void send(T value) {
@@ -38,13 +41,13 @@ public class Output<T> extends Endpoint<T> {
 		
 		if (isConnected()) {
 			if (propagators != null) {
-				for (Propagator propagator : propagators) {
-					propagator.sendPending = true;
+				for (int i=0; i < propagators.length; ++i) {
+					propagators[i].sendPending = true;
 				}
 			}
 
-			for (Input<T> target : targets) {
-				target.receive(value);
+			for (int i=0; i < targets.length; ++i) {
+				targets[i].receive(value);
 			}
 		}
 
@@ -60,15 +63,22 @@ public class Output<T> extends Endpoint<T> {
 
 	public void addPropagator(Propagator p) {
 		if (propagators == null) { // after de-serialization
-			propagators = new ArrayList<>();
+			propagators = new Propagator[0];
 		}
-		if (!propagators.contains(p)) {
-			propagators.add(p);
+
+		for (int i=0; i < propagators.length; ++i) {
+			if (propagators[i].equals(p)) {
+				return;
+			}
 		}
+
+		propagators = Arrays.copyOf(propagators, propagators.length + 1);
+		propagators[propagators.length - 1] = p;
 	}
 	
 	public void connect(Input<T> input) {
-		targets.add(input);
+		targets = Arrays.copyOf(targets, targets.length + 1);
+		targets[targets.length - 1] = input;
 		input.setSource(this);
 	}
 
@@ -76,7 +86,7 @@ public class Output<T> extends Endpoint<T> {
 		for (Input input : targets) {
 			input.disconnect();
 		}
-		targets.clear();
+		targets = new Input[0];
 	}
 
 	public void addProxiedOutput(Output<T> output) {
@@ -89,7 +99,7 @@ public class Output<T> extends Endpoint<T> {
 	}
 	
 	public boolean isConnected() {
-		return !targets.isEmpty();
+		return targets.length != 0;
 	}
 
 	@Override
