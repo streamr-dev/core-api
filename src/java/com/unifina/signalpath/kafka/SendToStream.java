@@ -174,7 +174,6 @@ public class SendToStream extends ModuleWithSideEffects {
 
 			if (input != null) {
 				input.setCanToggleDrivingInput(false);
-				input.setCanBeFeedback(false);
 				input.setRequiresConnection(false);
 				addInput(input);
 				fieldInputs.add(input);

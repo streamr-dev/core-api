@@ -21,15 +21,12 @@ public class Heatmap extends ModuleWithUI {
 		latitude.setDrivingInput(true);
 		latitude.setCanToggleDrivingInput(false);
 		latitude.setCanHaveInitialValue(false);
-		latitude.setCanBeFeedback(false);
 		longitude.setDrivingInput(true);
 		longitude.setCanToggleDrivingInput(false);
 		longitude.setCanHaveInitialValue(false);
-		longitude.setCanBeFeedback(false);
 		value.setDrivingInput(true);
 		value.setCanToggleDrivingInput(false);
 		value.setCanHaveInitialValue(false);
-		value.setCanBeFeedback(false);
 
 		resendAll = false;
 		resendLast = 0;

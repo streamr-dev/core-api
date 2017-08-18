@@ -16,7 +16,6 @@ public class Sampler extends AbstractSignalPathModule {
 		addInput(trigger);
 		trigger.setDrivingInput(true);
 		trigger.setCanToggleDrivingInput(false);
-		trigger.setCanBeFeedback(false);
 		
 		addInput(value);
 		value.setDrivingInput(false);

@@ -33,7 +33,7 @@ class InputSpec extends Specification {
 	def "toString gives textual representation of object"() {
 		input.receive(64)
 		expect:
-		input.toString() == "(in) owner.input, value: 64 "
+		input.toString() == "(in) owner.input, value: 64"
 	}
 
 	def "calling receive changes value, ready flags, and invokes markReady() on owner"() {

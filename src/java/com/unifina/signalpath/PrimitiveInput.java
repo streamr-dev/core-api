@@ -13,10 +13,11 @@ public abstract class PrimitiveInput<T> extends Input<T> {
 
 	@Override
 	public void clear() {
-		if (initialValue!=null || isFeedbackConnection()) {
+		if (initialValue != null) {
 			value = initialValue;
+		} else {
+			super.clear();
 		}
-		else super.clear();
 	}
 
 	public T getInitialValue() {
@@ -44,9 +45,6 @@ public abstract class PrimitiveInput<T> extends Input<T> {
 			config.put("initialValue", initialValue);
 		}
 
-		config.put("feedback", isFeedbackConnection());
-		config.put("canBeFeedback", isCanBeFeedback());
-
 		return config;
 	}
 
@@ -54,11 +52,9 @@ public abstract class PrimitiveInput<T> extends Input<T> {
 	public void setConfiguration(Map<String,Object> config) {
 		super.setConfiguration(config);
 
-		if (config.containsKey("feedback"))
-			setFeedbackConnection(Boolean.parseBoolean(config.get("feedback").toString()));
-
-		if (config.containsKey("initialValue"))
-			setInitialValue(config.get("initialValue")==null || config.get("initialValue").toString().equals("null") ? null : parseInitialValue(config.get("initialValue").toString()));
+		if (config.containsKey("initialValue")) {
+			setInitialValue(config.get("initialValue") == null || config.get("initialValue").toString().equals("null") ? null : parseInitialValue(config.get("initialValue").toString()));
+		}
 	}
 
 	protected abstract T parseInitialValue(String initialValue);

@@ -148,7 +148,6 @@ public class VariadicEventTable extends ModuleWithUI {
 			Input<Object> input = new Input<>(module, endpointName, "Object");
 			input.setDrivingInput(true);
 			input.setCanToggleDrivingInput(false);
-			input.setCanBeFeedback(false);
 			input.setRequiresConnection(false);
 			return input;
 		}

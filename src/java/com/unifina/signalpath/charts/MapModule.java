@@ -67,17 +67,12 @@ abstract class MapModule extends ModuleWithUI implements ITimeListener {
 		this.resendLast = 0;
 		yInput.setDrivingInput(true);
 		yInput.setCanHaveInitialValue(false);
-		yInput.setCanBeFeedback(false);
 		xInput.setDrivingInput(true);
 		xInput.setCanHaveInitialValue(false);
-		xInput.setCanBeFeedback(false);
 		id.setDrivingInput(true);
-		id.setCanBeFeedback(false);
 		id.setRequiresConnection(false);
 		label.setDrivingInput(false);
-		label.setCanBeFeedback(false);
 		heading.setRequiresConnection(false);
-		heading.setCanBeFeedback(false);
 	}
 
 	@Override

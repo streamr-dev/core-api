@@ -11,7 +11,6 @@ public class EthereumContractInput extends Input<EthereumContract> {
 		super(owner, name, "EthereumContract");
 		setDrivingInput(false);
 		setCanToggleDrivingInput(false);
-		setCanBeFeedback(false);
 		setJsClass("EthereumContractInput");
 	}
 

@@ -69,7 +69,6 @@ public class TimeSeriesChart extends Chart {
 		conn.setDrivingInput(true);
 		conn.setCanToggleDrivingInput(false);
 		conn.setCanHaveInitialValue(false);
-		conn.setCanBeFeedback(false);
 		conn.setRequiresConnection(false);
 		
 		// Add the input

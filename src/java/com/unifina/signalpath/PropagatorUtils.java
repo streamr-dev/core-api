@@ -22,8 +22,7 @@ public class PropagatorUtils {
 			Input input = stack.pop();
 			AbstractSignalPathModule module = input.getOwner();
 
-			// Skip feedback connections, we don't want infinite dependency loops!
-			if (!input.isFeedbackConnection() && !reachableSet.contains(module)) {
+			if (!reachableSet.contains(module)) {
 				reachableSet.add(module);
 
 				// Recurse to the owner if it's not an originatingModule

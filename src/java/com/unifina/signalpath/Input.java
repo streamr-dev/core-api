@@ -20,8 +20,6 @@ public class Input<T> extends Endpoint<T> {
 	/**
 	 * Input parameters
 	 */
-	private boolean feedbackConnection = false;
-	private boolean canBeFeedback = true;
 	private boolean requiresConnection = true;
 	private boolean drivingInput = true;
 	private boolean canToggleDrivingInput = true;
@@ -159,28 +157,12 @@ public class Input<T> extends Endpoint<T> {
 		return wasReady;
 	}
 
-	protected boolean isFeedbackConnection() {
-		return feedbackConnection;
-	}
-
-	protected void setFeedbackConnection(boolean feedbackConnection) {
-		this.feedbackConnection = feedbackConnection;
-	}
-
 	public boolean isDrivingInput() {
 		return drivingInput;
 	}
 
 	public void setDrivingInput(boolean drivingInput) {
 		this.drivingInput = drivingInput;
-	}
-
-	public boolean isCanBeFeedback() {
-		return canBeFeedback;
-	}
-
-	public void setCanBeFeedback(boolean canBeFeedback) {
-		this.canBeFeedback = canBeFeedback;
 	}
 
 	public boolean isCanToggleDrivingInput() {
@@ -201,6 +183,6 @@ public class Input<T> extends Endpoint<T> {
 	
 	@Override
 	public String toString() {
-		return "(in) "+super.toString()+", value: "+value+" "+(feedbackConnection ? " (feedback)" : "");
+		return "(in) " + super.toString() + ", value: " + value;
 	}
 }
