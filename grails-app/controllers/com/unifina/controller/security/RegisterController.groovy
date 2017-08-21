@@ -55,7 +55,8 @@ class RegisterController {
             return render(view: 'register', model: [user: [username: invite.username], invite: invite.code])
         }
 
-        def user
+		// First create a not-saved and not-validated user to give to the page if an error occurs while really creating the user
+        def user = new SecUser(name: cmd.name, username: cmd.username, timezone: cmd.timezone, password: "password")
 
         cmd.username = invite.username
 
@@ -68,21 +69,21 @@ class RegisterController {
             user = userService.createUser(cmd.properties)
         } catch (UserCreationFailedException e) {
             flash.message = e.getMessage()
-            return render(view: 'register', model: [ user: user, invite: invite.code ])
+            return render(view: 'register', model: [user: user, invite: invite.code])
         }
 
         invite.used = true
         if (!invite.save(flush: true)) {
             log.warn("Failed to save invite: "+invite.errors)
             flash.message = "Failed to save invite"
-            return render(view: 'register', model: [ user: user, invite: invite.code ])
+            return render(view: 'register', model: [user: user, invite: invite.code])
         }
 
         mailService.sendMail {
             from grailsApplication.config.unifina.email.sender
             to user.username
             subject grailsApplication.config.unifina.email.welcome.subject
-            html g.render(template:"email_welcome", model:[user: user], plugin:'unifina-core')
+            html g.render(template:"email_welcome", model: [user: user], plugin:'unifina-core')
         }
 
         log.info("Logging in "+user.username+" after registering")
