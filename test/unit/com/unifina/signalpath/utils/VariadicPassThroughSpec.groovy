@@ -1,14 +1,15 @@
 package com.unifina.signalpath.utils
 
+import com.unifina.ModuleTestingSpecification
 import com.unifina.utils.testutils.ModuleTestHelper
-import spock.lang.Specification
 
-class VariadicPassThroughSpec extends Specification {
+class VariadicPassThroughSpec extends ModuleTestingSpecification {
 
 	VariadicPassThrough module
 
 	def setup() {
 		module = new VariadicPassThrough()
+		// Ensure variadic endpoints before configuring module
 		module.getInput("input-a")
 		module.getInput("input-b")
 		module.getInput("input-c")
@@ -17,8 +18,7 @@ class VariadicPassThroughSpec extends Specification {
 		module.getOutput("output-b")
 		module.getOutput("output-c")
 		module.getOutput("output-d")
-		module.init()
-		module.configure([:])
+		setupModule(module)
 	}
 
 	void "passThrough gives the right answer"() {

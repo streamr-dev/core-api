@@ -16,7 +16,10 @@ import java.text.SimpleDateFormat;
 import java.util.*;
 
 public class ExportCSV extends ModuleWithUI {
+
 	public static final long MIN_MS_BETWEEN_UI_UPDATES = 1000;
+
+	private static final Logger log = Logger.getLogger(ExportCSV.class);
 
 	private final VariadicInput<Object> ins = new VariadicInput<>(this, new InputInstantiator.SimpleObject());
 
@@ -35,6 +38,7 @@ public class ExportCSV extends ModuleWithUI {
 
 	ExportCSV(Context context) {
 		this.context = context;
+		resendLast = 1;
 	}
 
 	@Override
@@ -74,17 +78,26 @@ public class ExportCSV extends ModuleWithUI {
 		super.destroy();
 
 		try {
-			csvWriter.close();
+			if (csvWriter != null && context != null) {
+				csvWriter.close();
+
+				Map<String, Object> msg = new LinkedHashMap<>();
+				msg.put("type", "csvUpdate");
+				msg.put("file", context.getFileName());
+				msg.put("rows", csvWriter.getNumOfRowsWritten());
+				msg.put("kilobytes", context.getFileSizeInKilobytes());
+				pushToUiChannel(msg);
+			} else {
+				Map<String, Object> msg = new LinkedHashMap<>();
+				msg.put("type", "csvUpdate");
+				msg.put("rows", 0L);
+				msg.put("kilobytes", 0L);
+				pushToUiChannel(msg);
+				log.warn("destroy: csvWriter or context is null, no filename can be pushed to UI");
+			}
 		} catch (IOException e) {
 			throw new RuntimeException(e);
 		}
-
-		Map<String, Object> msg = new LinkedHashMap<>();
-		msg.put("type", "csvUpdate");
-		msg.put("file", context.getFileName());
-		msg.put("rows", csvWriter.getNumOfRowsWritten());
-		msg.put("kilobytes", context.getFileSizeInKilobytes());
-		pushToUiChannel(msg);
 	}
 
 	/**

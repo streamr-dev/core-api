@@ -47,4 +47,8 @@ public class FakeExportCSVContext extends ExportCSV.Context {
 		currentTimeInvocationNo = 0;
 		return s;
 	}
+
+	public boolean isFileOpened() {
+		return stringWriter != null;
+	}
 }

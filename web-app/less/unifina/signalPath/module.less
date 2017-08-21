@@ -1,0 +1,179 @@
+
+.streamr-canvas {
+
+  .module {
+    min-width: 150px;
+
+    ._display-flex;
+    ._flex-column;
+
+    .dragging-handle {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      border-radius: inherit;
+      color: transparent;
+      z-index: 10;
+    }
+
+    .moduleheader {
+      width: 100%;
+      height: 18px;
+      margin-bottom: 5px;
+      ._display-flex;
+      ._flex-0;
+      ._display-flex;
+
+      .modulename {
+        font-weight: bold;
+        font-size: 12px;
+        ._flex-1;
+      }
+
+      .modulebutton {
+        width: 16px;
+        text-align: right;
+        display: inline;
+        vertical-align: top;
+        cursor: pointer;
+        ._flex-0;
+      }
+    }
+
+    .modulebody {
+      padding: 5px;
+      ._flex-1;
+      ._display-flex;
+      ._flex-column;
+
+      .table th {
+        padding-left: 3px;
+        padding-right: 3px;
+      }
+
+      table.paramTable {
+        width: 100%;
+        padding: 0px;
+        border: none;
+
+        td {
+          padding-right: 5px;
+
+          input {
+            width: 50px;
+          }
+        }
+      }
+
+      table.ioTable {
+        border: none;
+        width: 100%;
+        padding: 0;
+        ._flex-0;
+
+        td {
+          padding-right: 5px;
+
+          &.input {
+            text-align: right;
+          }
+
+          &.output {
+            text-align: left;
+            padding-left: 10px;
+          }
+        }
+      }
+
+      div.endpoint {
+        &.input {
+          cursor: pointer;
+
+          .switchContainer {
+            float: left;
+          }
+        }
+
+        &.output {
+          cursor: pointer;
+
+        }
+
+        .switchContainer {
+          float: right;
+
+          .ioSwitch {
+            display: inline-block;
+            font-size: 7px;
+            vertical-align: text-bottom;
+            text-align: center;
+            width: 13px;
+            height: 13px;
+            cursor: pointer;
+          }
+        }
+      }
+
+      div.content {
+        ._flex-1;
+      }
+
+      div.ioname {
+        display: inline-block;
+        max-width: 100px;
+        white-space: pre-wrap;
+      }
+    }
+
+    .modulefooter {
+      width: 100%;
+      margin-top: 3px;
+
+      ._flex-0;
+
+      .moduleSwitchContainer {
+        float: right;
+        margin-bottom: -3px;
+
+        .moduleSwitch {
+          font-size: 7px;
+          text-align: center;
+          cursor: pointer;
+          padding: 2px;
+        }
+      }
+    }
+
+    &.ui-resizable .modulefooter .moduleSwitchContainer {
+        padding-right: 20px;
+    }
+
+    .csvDownload {
+      display: block;
+
+      img {
+        vertical-align: middle;
+      }
+    }
+
+    .showOnHover {
+      opacity: 0.0;
+
+      &:hover {
+        opacity: 1.0;
+      }
+    }
+    .drag-exclude {
+      cursor: initial;
+    }
+  }
+
+}
+.ui-widget-content.module-help-tooltip {
+  background: #333;
+}
+.module-resize-helper {
+  border: 2px dotted black;
+}

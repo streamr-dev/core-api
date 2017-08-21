@@ -31,36 +31,16 @@ hibernate {
 environments {
     development {
         dataSource {
-			// if grails.dev.database not defined, throw an exception
-			def dbDefaultName = 'core_dev'
-			def dbName = System.getProperty('grails.dev.database') ?: dbDefaultName
-
-			println "Using database: $dbName"
-
-			if (!System.getProperty('grails.dev.database'))
-				throw new RuntimeException("Please run scripts/copy-dev-db.sh YOURNAME to make a personal copy of the dev db, then run grails with this command line argument: -Dgrails.dev.database=${dbDefaultName}_YOURNAME")
-
-			username = "unifina-dev"
-			password = "2PpJA2vJ"
-            url = "jdbc:mysql://192.168.10.21:3306/${dbName}?useLegacyDatetimeCode=false"
+			username = System.getProperty('streamr.database.user', 'root')
+			password = System.getProperty('streamr.database.password', 'password')
+			url = "jdbc:mysql://${System.getProperty('streamr.database.host', '127.0.0.1:3306')}/${System.getProperty('streamr.database.name', 'core_dev')}?useLegacyDatetimeCode=false"
         }
     }
     test {
         dataSource {
-			// If not in jenkins and if grails.test.database not defined, throw an exception
-			def dbDefaultName = 'core_test'
-			def dbName = System.getProperty('grails.test.database') ?: dbDefaultName
-			def testPhase = System.getProperty('grails.test.phase')
-
-			println "Using database: $dbName"
-			println "Test phase: $testPhase"
-
-			if (System.getenv()['BUILD_NUMBER']==null && !System.getProperty('grails.test.database') && testPhase!=null && testPhase!="unit")
-				throw new RuntimeException("Please run scripts/copy-test-db.sh YOURNAME to make a personal copy of the test db, then run grails with this command line argument: -Dgrails.test.database=${dbDefaultName}_YOURNAME")
-			
-			username = "unifina-test"
-			password = "HqTQK9kB"
-            url = "jdbc:mysql://192.168.10.21:3306/${dbName}?useLegacyDatetimeCode=false"
+			username = System.getProperty('streamr.database.user', 'root')
+			password = System.getProperty('streamr.database.password', 'password')
+			url = "jdbc:mysql://${System.getProperty('streamr.database.host', '127.0.0.1:3306')}/${System.getProperty('streamr.database.name', 'core_test')}?useLegacyDatetimeCode=false"
         }
     }
     production {
@@ -69,7 +49,7 @@ environments {
 		dataSource {
 			username = System.getProperty('streamr.database.user') ?: "streamr-prod"
 			password = System.getProperty('streamr.database.password') ?: "Trez2tuV"
-			url = "jdbc:mysql://${System.getProperty('streamr.database.host')}/${System.getProperty('streamr.database.name')}?useLegacyDatetimeCode=false"
+			url = "jdbc:mysql://${System.getProperty('streamr.database.host') ?: "mysql"}/${System.getProperty('streamr.database.name', 'streamr_prod')}?useLegacyDatetimeCode=false"
 		}
     }
 }

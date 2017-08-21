@@ -16,7 +16,7 @@ public class SwitcherModule extends InputModule {
 	public void init() {
 		super.init();
 		canClearState = false;
-		out.canBeNoRepeat = false;
+		out.setCanBeNoRepeat(false);
 	}
 
 	@Override
@@ -68,11 +68,9 @@ public class SwitcherModule extends InputModule {
 	}
 
 	private void updateUiState() {
-		if (getGlobals().getUiChannel()!=null) {
-			Map<String,Object> msg = new HashMap<String,Object>();
-			msg.put("switcherValue", value);
-			getGlobals().getUiChannel().push(msg, uiChannelId);
-		}
+		Map<String,Object> msg = new HashMap<String,Object>();
+		msg.put("switcherValue", value);
+		pushToUiChannel(msg);
 	}
 
 	@Override

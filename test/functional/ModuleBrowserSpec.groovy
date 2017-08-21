@@ -4,7 +4,7 @@ import org.openqa.selenium.Dimension
 
 class ModuleBrowserSpec extends LoginTester1Spec {
 
-	void "module browser can be opened via help menu"() {
+	void "module browser table of contents works"() {
 		// necessary to make sure table of contents column is shown
 		if (driver.manage().window().size.width < 1000) {
 			driver.manage().window().size = new Dimension(1000, 800)
@@ -19,16 +19,37 @@ class ModuleBrowserSpec extends LoginTester1Spec {
 		$("#navModuleReferenceLink").click()
 		then:
 		waitFor { at ModuleBrowserPage }
+	}
 
-		when: "click on last top-level title of user guide"
+	void "module browser can be opened via help menu"() {
+		when: "click on last top-level title"
 		def link = tableOfContents.children().last().children("a")
 
 		// Wait for JavaScript logic to finish
 		waitFor { !link.text().empty }
+		def text = link.text()
 		link.click()
 
 		then: "the corresponding header should be visible"
-		$("h2", text:link.text()).displayed
+		$("h2", text: text).displayed
+	}
+
+	void "module loads when title clicked"() {
+		setup:
+		def link = tableOfContents.children().last().children("a")
+		waitFor { !link.text().empty }
+		link.click()
+		waitFor {
+			$("span", text:'CreateStream').displayed
+		}
+
+		when: "title clicked"
+		$(".panel .panel-heading span", text:'CreateStream').click()
+
+		then: "help is shown"
+		waitFor {
+			$("div.help-text p", text:'Create a new stream.').displayed
+		}
 	}
 
 }

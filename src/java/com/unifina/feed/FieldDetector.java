@@ -25,8 +25,16 @@ public abstract class FieldDetector {
 		this.flattenMap = flattenMap;
 	}
 
+	/**
+	 * Returns a list of fields in a MapMessage by fetching an example message from the Stream.
+	 * May return null if the example message couldn't be fetched (Stream is empty for example).
+     */
 	public List<Map<String, String>> detectFields(Stream stream) {
 		MapMessage mapMessage = fetchExampleMessage(stream);
+		if (mapMessage == null) {
+			return null;
+		}
+
 		Map map = mapMessage.payload;
 
 		if (flattenMap) {

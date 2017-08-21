@@ -116,7 +116,7 @@ class ForEachItemSpec extends Specification {
 		def canvas = canvasService.createNew(command, user)
 
 		when:
-		module.getInput("canvas").receive(canvas)
+		module.getInput("canvas").receive(canvas.id)
 		module.configure(module.getConfiguration())
 
 		then:
@@ -128,7 +128,7 @@ class ForEachItemSpec extends Specification {
 		def command = new SaveCanvasCommand(name: "sub-canvas", modules: modulesJson)
 		def canvas = canvasService.createNew(command, user)
 
-		module.getInput("canvas").receive(canvas)
+		module.getInput("canvas").receive(canvas.id)
 		module.configure(module.getConfiguration())
 
 		when:
@@ -155,7 +155,7 @@ class ForEachItemSpec extends Specification {
 		def canvas = canvasService.createNew(command, user)
 
 		module.getInput("keepState").receive(true)
-		module.getInput("canvas").receive(canvas)
+		module.getInput("canvas").receive(canvas.id)
 		module.configure(module.getConfiguration())
 
 		when:

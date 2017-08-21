@@ -1,0 +1,81 @@
+#canvas .module.chart {
+  .modulebody {
+    width: 600px;
+    height: 400px;
+
+    min-width: 350px;
+    min-height: 250px;
+    ._flex-row;
+
+    .ioTable {
+      width: 23px;
+
+      div.endpoint:not(.connected) {
+        visibility: hidden;
+      }
+
+      td.input,
+      td.output {
+        padding: 0;
+      }
+    }
+
+    .content {
+      ._flex-1;
+      ._display-flex;
+      ._flex-column;
+      // Hack needed because of chart's resizing
+      width: ~"calc(100% - 23px)";
+
+      .chart-toolbar {
+        display: inline-block;
+        padding-right: 15px;
+        padding-bottom: 5px;
+        padding-top: 5px;
+        height: 37px;
+
+        ._flex-0;
+
+        .inner > * {
+          display: inline-block;
+          margin-bottom: 6px;
+        }
+      }
+
+      .chartDrawArea {
+        width: 100%;
+        // Hack needed because of chart's resizing
+        height: ~"calc(100% - 37px)";
+        ._flex-1;
+      }
+    }
+  }
+
+  .chart-range-selector {
+      width: auto;
+      height: 25px;
+      line-height: 25px;
+      padding: 2px 8px;
+      margin-bottom: 3px;
+      margin-right: 5px;
+  }
+
+  .chart-show-on-run {
+      display:none;
+  }
+
+  table {
+    width: auto;
+  }
+
+  .seriesLink {
+    margin-left: 10px;
+  }
+
+  .y-axis-number {
+    display:none;
+  }
+}
+
+
+

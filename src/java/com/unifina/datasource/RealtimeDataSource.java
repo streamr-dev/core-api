@@ -15,6 +15,7 @@ import com.unifina.serialization.SerializationRequest;
 import com.unifina.service.SerializationService;
 import com.unifina.signalpath.SignalPath;
 import com.unifina.signalpath.StopRequest;
+import grails.util.Holders;
 import org.apache.log4j.Logger;
 
 import com.unifina.data.FeedEvent;
@@ -99,15 +100,17 @@ public class RealtimeDataSource extends DataSource {
 				1000);   // Repeat every second
 
 			// Serialization
-			SerializationService serializationService = globals.getBean(SerializationService.class);
+			SerializationService serializationService = Holders.getApplicationContext().getBean(SerializationService.class);
 
-			for (final SignalPath signalPath : getSerializableSignalPaths()) {
+			if (serializationService.serializationIntervalInMillis() > 0) {
+				for (final SignalPath signalPath : getSerializableSignalPaths()) {
 					secTimer.scheduleAtFixedRate(new TimerTask() {
 						@Override
 						public void run() {
 							eventQueue.enqueue(SerializationRequest.makeFeedEvent(signalPath));
 						}
-					}, 0, serializationService.serializationIntervalInMillis());
+					}, serializationService.serializationIntervalInMillis(), serializationService.serializationIntervalInMillis());
+				}
 			}
 
 			// This will block indefinitely until the feed is stopped!

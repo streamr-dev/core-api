@@ -1,8 +1,12 @@
 package com.unifina.signalpath.remote;
 
 import com.unifina.signalpath.*;
+import com.unifina.utils.MapTraversal;
+import grails.util.Holders;
 import org.apache.log4j.Logger;
 
+import java.net.InetAddress;
+import java.net.UnknownHostException;
 import java.sql.*;
 import java.util.*;
 
@@ -68,6 +72,8 @@ public class Sql extends ModuleWithSideEffects {
 			}
 		} catch (SQLException e) {
 			err.add(e.toString());
+		} catch (HostNotAllowedException e) {
+			err.add("Host not allowed");
 		} finally {
 			if (cursor != null) {
 				try {
@@ -98,6 +104,7 @@ public class Sql extends ModuleWithSideEffects {
 	// separated method so it can be mocked in a test
 	protected Statement createStatement() throws SQLException {
 		if (db == null || !db.isValid(1)) {
+			ensureHostNotGrailsDatabaseHost();
 			db = DriverManager.getConnection(getConnectionURL(), loginUser.getValue(), loginPassword.getValue());
 		}
 		return db.createStatement();
@@ -110,6 +117,23 @@ public class Sql extends ModuleWithSideEffects {
 		}
 		return url;
 	}
+
+	private void ensureHostNotGrailsDatabaseHost() {
+		String host = loginUrl.getValue();
+		String dbHost = MapTraversal.getString(Holders.getGrailsApplication().getConfig(), "streamr.database.host");
+
+		try {
+			InetAddress hostAddress = InetAddress.getByName(host);
+			InetAddress dbAddress = InetAddress.getByName(dbHost);
+			if (hostAddress.equals(dbAddress)) {
+				throw new HostNotAllowedException();
+			}
+		} catch (UnknownHostException e) {
+			throw new RuntimeException(e);
+		}
+	}
+
+	private static class HostNotAllowedException extends RuntimeException {}
 
 	@Override
 	public void clearState() { }

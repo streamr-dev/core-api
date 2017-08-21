@@ -1,26 +1,24 @@
 package com.unifina.signalpath.charts
 
-import com.unifina.utils.Globals
+import com.unifina.UiChannelMockingSpecification
 import com.unifina.utils.testutils.ModuleTestHelper
 import grails.test.mixin.TestMixin
 import grails.test.mixin.support.GrailsUnitTestMixin
-import spock.lang.Specification
 
 @TestMixin(GrailsUnitTestMixin)
-class TimeSeriesChartSpec extends Specification {
+class TimeSeriesChartSpec extends UiChannelMockingSpecification {
 
 	TimeSeriesChart module
 
 	def setup() {
-		module = new TimeSeriesChart()
-		module.globals = new Globals()
-		module.configure([
-			uiChannel: [id: "timeSeries"],
-			options: [
-			    inputs: [value: 3],
-				overnightBreak: [value: false]
-			],
-			barify: false
+		mockServicesForUiChannels()
+		module = setupModule(new TimeSeriesChart(), [
+				uiChannel: [id: "timeSeries"],
+				options: [
+						inputs: [value: 3],
+						overnightBreak: [value: false]
+				],
+				barify: false
 		])
 	}
 
@@ -58,12 +56,7 @@ class TimeSeriesChartSpec extends Specification {
 		then:
 		new ModuleTestHelper.Builder(module, inputValues, outputValues)
 			.timeToFurtherPerIteration(1000)
-			.uiChannelMessages(channelMessages)
-			.overrideGlobals { g ->
-				g.init()
-				g.time = new Date(0)
-				g
-			}
+			.uiChannelMessages(channelMessages, getSentMessagesByStreamId())
 			.test()
 	}
 }

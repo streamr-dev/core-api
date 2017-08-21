@@ -6,29 +6,79 @@
 		<title>Canvas</title>
 
 		<r:require module='jstree'/>
-		<r:require module='jquery-ui'/>
 		<r:require module="bootbox"/>
 		<r:require module="bootstrap-contextmenu"/>
-		<r:require module="bootstrap-datepicker"/>
 		<r:require module="slimscroll"/>
 		<r:require module="streamr-search"/>
 		<r:require module="signalpath-browser"/>
 		<r:require module="signalpath-theme"/>
 		<r:require module="hotkeys"/>
 		<r:require module="touchpunch"/>
+		<r:require module="sharing-dialog"/>
 		<r:require module="canvas-controls"/>
+		<r:require module="bootstrap-datepicker"/>
 
 		<r:script>
 
 // Make the loadBrowser global to allow apps that use this plugin to extend it by adding tabs
-var loadBrowser
+	var loadBrowser
+	var saveAndAskName
 
-$('#moduleTree').bind('loaded.jstree', function() {
-	Tour.startableTours([0])
-	Tour.autoStart()
-})
+$(function() {
+	$('#moduleTree').bind('loaded.jstree', function() {
+		Tour.startableTours([0])
+		Tour.autoStart()
+	})
+	saveAsAndAskName = function() {
+		bootbox.prompt({
+			title: 'Save As..',
+			callback: function(saveAsName) {
+				if (!saveAsName)
+					return;
 
-$(document).ready(function() {
+				SignalPath.saveAs(saveAsName)
+			},
+			value: SignalPath.getName(),
+			className: 'save-as-name-dialog'
+		})
+	}
+	$("body").keydown(function(e) {
+		// ctrl + shift + s || cmd + shift + s
+		if (e.shiftKey && (e.ctrlKey || e.metaKey)) {
+			if (String.fromCharCode(e.which).toLowerCase() == 's') {
+				e.preventDefault()
+				saveAsAndAskName()
+			}
+		}
+		// ctrl || cmd
+		else if (e.ctrlKey || e.metaKey) {
+			switch (String.fromCharCode(e.which).toLowerCase()) {
+				case 's':
+					e.preventDefault()
+					if (!SignalPath.isSaved()) {
+						saveAsAndAskName()
+					} else {
+						SignalPath.save()
+					}
+					break;
+				case 'o':
+					e.preventDefault()
+					loadBrowser.modal()
+					break;
+			}
+		}
+		// alt + r
+		else if (e.altKey) {
+			if (String.fromCharCode(e.which).toLowerCase() == 'r') {
+				e.preventDefault()
+				if (!SignalPath.isRunning()) {
+					SignalPath.start();
+				} else {
+					SignalPath.stop()
+				}
+			}
+		}
+	})
 
 	function settings() {
 		return {
@@ -55,7 +105,9 @@ $(document).ready(function() {
 			Streamr.showInfo(data.msg)
 		},
 		connectionOptions: {
-			server: "${grailsApplication.config.streamr.ui.server}",
+			url: "${grailsApplication.config.streamr.ui.server}",
+			path: "${grailsApplication.config.streamr.ui.serverPath}",
+			authKey: "${key.id}",
 			autoConnect: true,
 			autoDisconnect: true
 		}
@@ -113,10 +165,6 @@ $(document).ready(function() {
 		setAddressbarUrl(Streamr.createLink({controller: "canvas", action: "editor", id: savedJson.id}))
 	})
 
-	$(SignalPath).on("new", function(event) {
-		setAddressbarUrl(Streamr.createLink({controller: "canvas", action: "editor"}))
-	})
-
 	function setAddressbarUrl(url) {
 		if (window.history && window.history.pushState && window.history.replaceState) {
 			// If we haven't set the current url into history, replace the current state so we know to reload the page on back
@@ -129,6 +177,7 @@ $(document).ready(function() {
 			}
 			// Push the new state to the history
 			if (url !== window.location.href) {
+			    url += window.location.search || ''
 				window.history.pushState({
 					streamr: {
 						urlPath: url
@@ -271,43 +320,108 @@ $(document).ready(function() {
 		Streamr.showSuccess('${message(code:"canvas.clearAndStarted")}: '.replace('{0}', SignalPath.getName()))
 	})
 
-	new CanvasNameEditor({
-		el: $("#canvas-name-editor"),
-		signalPath: SignalPath
+	var nameEditor = new StreamrNameEditor({
+		el: $(".name-editor"),
+		signalPath: SignalPath,
+		opener: $(".rename-canvas-button"),
+		name: SignalPath.getName()
+	}).on('changed', SignalPath.setName)
+
+	$(".streamr-dropdown li.disabled").click(function(e) {
+		e.preventDefault()
 	})
 
-	$(SignalPath).on('new', function(e, json) {
-		$("#share-button").attr("disabled", "disabled")
+	function streamrDropDownSetEnabled(buttons) {
+	    var buttonReference = {
+	        'share': '.share-button',
+	        'rename': '.rename-canvas-button',
+	        'delete': '.delete-canvas-button'
+	    }
+	    var list = Array.isArray(buttons) ? buttons : buttons.split(/[ ,]/)
+		for (var btn in buttonReference) {
+	        if (list.indexOf(btn) < 0) {
+	            $(buttonReference[btn]).addClass('disabled').addClass('forbidden').attr('disabled', 'disabled')
+	        } else {
+	            $(buttonReference[btn]).removeClass('disabled').removeClass('forbidden').removeAttr('disabled')
+	        }
+		}
+	}
+
+	$(SignalPath).on('new', function() {
+	    streamrDropDownSetEnabled('rename')
+	    nameEditor.setName(SignalPath.getName(), {
+	        silent: true
+	    })
+		setAddressbarUrl(Streamr.createLink({
+		    controller: "canvas",
+		    action: "editor"
+		}))
+	})
+
+	$(".share-button").click(function(e) {
+	    e.preventDefault()
+		var shareUrl = $(this).data('url')
+		var shareName = $(this).data('name')
+	    if (shareUrl) {
+			sharePopup(shareUrl, shareName)
+		}
 	})
 
 	$(SignalPath).on('loaded saved', function(e, json) {
-		var canvasUrl = Streamr.createLink({uri: "api/v1/canvases/" + json.id})
-		$.getJSON(canvasUrl + "/permissions/me", function(perm) {
-			var permissions = []
-			_.each(perm, function(permission) {
-				if (permission.id = "${id}") {
-					permissions.push(permission.operation)
+		nameEditor.update(json)
+		if (!SignalPath.isReadOnly()) {
+			var canvasUrl = Streamr.createLink({uri: "api/v1/canvases/" + json.id})
+			$.getJSON(canvasUrl + "/permissions/me", function(perm) {
+			    var enabled = _.map(perm, function(p) {
+			        return p.operation
+			    })
+				if (enabled.indexOf('share') >= 0) {
+					$("#share-button").data("url", canvasUrl).removeAttr("disabled")
+					$("#share-button").data("name", SignalPath.getName()).removeAttr("disabled")
+				} else {
+					$("#share-button").addClass("forbidden")
 				}
+				if (enabled.indexOf('write') >= 0) {
+					enabled.push('delete')
+					enabled.push('rename')
+				}
+                streamrDropDownSetEnabled(enabled)
 			})
-			if (_.contains(permissions, "share")) {
-				$("#share-button").data("url", canvasUrl)
-				$("#share-button").removeAttr("disabled")
-			} else {
-				$("#share-button").addClass("forbidden")
-			}
-		})
+		}
 	})
 
 	<g:if test="${id}">
 		SignalPath.load('${id}');
 	</g:if>
-	<g:elseif test="${json}">
+	<g:elseif test="${ json && json != "{}" }">
 		SignalPath.loadJSON(${raw(json)})
 	</g:elseif>
-})
+	<g:else>
+		$(SignalPath).trigger('new') // For event listeners
+	</g:else>
 
-$(document).unload(function () {
-	SignalPath.unload()
+    $(document).unload(function () {
+        SignalPath.unload()
+    })
+
+	new ConfirmButton("#delete-canvas-button", {
+		title: "${ message(code: 'canvas.delete.title') }",
+		message: "${ message(code: 'canvas.delete.confirm') }"
+	}, function(result) {
+		if (result) {
+			$.ajax("${ createLink(uri:"/api/v1/canvases", absolute: true)}" + '/' + SignalPath.getId(), {
+				method: 'DELETE',
+				success: function() {
+					Streamr.showSuccess("${ message(code: 'canvas.delete.success') }")
+					SignalPath.clear()
+				},
+				error: function(e, t, msg) {
+					Streamr.showError("${ message(code: 'canvas.delete.error') }", "${ message(code: 'canvas.delete.error.title') }")
+				}
+			})
+		}
+	})
+
 })
 
 </r:script>
@@ -333,7 +447,7 @@ $(document).unload(function () {
 					<button id="loadSignalPath" title="Load Canvas" class="btn btn-default">
 						<i class="fa fa-folder-open"></i>
 					</button>
-		
+
 					<sp:saveButtonDropdown/>
 				</div>
 			</div>
@@ -342,9 +456,13 @@ $(document).unload(function () {
 
 				<ul class="nav nav-tabs nav-justified nav-tabs-xs run-mode-tabs">
 					<li class="active">
+						<div class="nav-tab-white-background nav-tab-background"></div>
+						<div class="nav-tab-orange-background nav-tab-background"></div>
 						<a href="#tab-historical" role="tab" data-toggle="tab">Historical</a>
 					</li>
 					<li class="">
+						<div class="nav-tab-white-background nav-tab-background"></div>
+						<div class="nav-tab-orange-background nav-tab-background"></div>
 						<a href="#tab-realtime" id="open-realtime-tab-link" role="tab" data-toggle="tab">Realtime</a>
 					</li>
 				</ul>
@@ -384,11 +502,13 @@ $(document).unload(function () {
 					<!-- Realtime run controls -->
 					<div role="tabpanel" class="tab-pane" id="tab-realtime">
 						<div class="menu-content-header">
-							<!--<label>Realtime Run Options</label>-->
-							<a href="#" id="realtime-options-button" class="btn btn-primary btn-outline dark btn-xs pull-right" title="Realtime Run Options" data-toggle="modal" data-target="#realtimeOptionsModal">
-								<i class="fa fa-cog"></i>
-								Options
-							</a>
+							%{--Uncomment and remove &nbsp; when gets content--}%
+							&nbsp;
+							%{--<!--<label>Realtime Run Options</label>-->--}%
+							%{--<a href="#" id="realtime-options-button" class="btn btn-primary btn-outline dark btn-xs pull-right" title="Realtime Run Options" data-toggle="modal" data-target="#realtimeOptionsModal">--}%
+								%{--<i class="fa fa-cog"></i>--}%
+								%{--Options--}%
+							%{--</a>--}%
 						</div>
 						<div class="btn-group btn-block run-group">
 							<button id="run-realtime-button" class="btn btn-primary col-xs-10 run-button">
@@ -422,24 +542,55 @@ $(document).unload(function () {
 
 				<sp:moduleAddButton buttonId="addModule" browserId="moduleTree" class="btn-block">
 					<i class="fa fa-plus"></i>
-					<g:message code="signalPath.addModule.label" default="Add Module" />
+					<g:message code="canvas.addModule.label" />
 				</sp:moduleAddButton>
 			</div>
 
 			<div class="menu-content">
-				<ui:shareButton id="share-button" class="btn-block" getName="SignalPath.getName()" disabled="disabled"> Share </ui:shareButton>
+				<button id="share-button" class="btn share-button btn-block">
+					<i class='fa fa-user'></i> Share
+				</button>
 			</div>
 
 		</div> <!-- / #main-menu-inner -->
 	</div> <!-- / #main-menu -->
 
+
 	<div id="content-wrapper">
 		<ui:breadcrumb>
-			<li class="active">
-				<span id="canvas-name-editor"></span>
+			<li>
+				<g:link controller="canvas" action="list">
+					<g:message code="canvas.list.label"/>
+				</g:link>
 			</li>
+			<li class="active">
+				<span class="name-editor"></span>
+			</li>
+			<div class="streamr-dropdown">
+				<button class="canvas-menu-toggle dropdown-toggle btn btn-xs btn-outline" data-toggle="dropdown">
+					<i class="fa fa-cog"></i> <i class="navbar-icon fa fa-caret-down"></i>
+				</button>
+				<ul class="dropdown-menu">
+					<li class="share-canvas-button share-button">
+						<a id="share-canvas-button">
+							<i class='fa fa-user'></i> Share
+						</a>
+					</li>
+					<li class="rename-canvas-button">
+						<a id="rename-canvas-button">
+							<i class="fa fa-pencil"></i> Rename
+						</a>
+					</li>
+					<li class="delete-canvas-button">
+						<a id="delete-canvas-button">
+							<i class="fa fa-trash-o"></i> Delete
+						</a>
+					</li>
+				</ul>
+			</div>
 		</ui:breadcrumb>
-		<div id="canvas" class="scrollable embeddable"></div>
+
+		<div id="canvas" class="streamr-canvas scrollable embeddable"></div>
 	</div>
 
 	<div id="main-menu-bg"></div>
@@ -477,25 +628,27 @@ $(document).unload(function () {
 	  </div><!-- /.modal-dialog -->
 	</div><!-- /.modal -->
 
-	<div id="realtimeOptionsModal" class="modal fade">
-		<div class="modal-dialog">
-			<div class="modal-content">
-				<div class="modal-header">
-					<button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
-					<h4 class="modal-title">Realtime Run Options</h4>
-				</div>
-				<div class="modal-body">
+	%{--Uncomment when gets content--}%
 
-				</div>
-				<div class="modal-footer">
-					<button type="button" class="btn btn-primary" data-dismiss="modal">OK</button>
-				</div>
-			</div><!-- /.modal-content -->
-		</div><!-- /.modal-dialog -->
-	</div><!-- /.modal -->
+	%{--<div id="realtimeOptionsModal" class="modal fade">--}%
+		%{--<div class="modal-dialog">--}%
+			%{--<div class="modal-content">--}%
+				%{--<div class="modal-header">--}%
+					%{--<button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>--}%
+					%{--<h4 class="modal-title">Realtime Run Options</h4>--}%
+				%{--</div>--}%
+				%{--<div class="modal-body">--}%
+
+				%{--</div>--}%
+				%{--<div class="modal-footer">--}%
+					%{--<button type="button" class="btn btn-primary" data-dismiss="modal">OK</button>--}%
+				%{--</div>--}%
+			%{--</div><!-- /.modal-content -->--}%
+		%{--</div><!-- /.modal-dialog -->--}%
+	%{--</div><!-- /.modal -->--}%
 
 	<ul id="save-dropdown-menu" class="dropdown-menu" role="menu">
-		<li class="disabled"><a href="#" id="saveButton">Save</a></li>
+		<li><a href="#" id="saveButton">Save</a></li>
 		<li><a href="#" id="saveAsButton">Save as..</a></li>
 	</ul>
 	
