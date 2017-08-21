@@ -18,7 +18,7 @@ public class ListToEvents extends AbstractSignalPathModule implements IEventReci
 	@Override
 	public void init() {
 		super.init();
-		this.propagationSink = true;
+		setPropagationSink(true);
 	}
 
 	@Override

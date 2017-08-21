@@ -15,26 +15,16 @@ import java.util.Map;
  */
 public abstract class Parameter<T> extends Input<T> {
 
-	protected T defaultValue;
-	
-	public boolean canBeEmpty = true;
+	private T defaultValue;
+	private boolean canBeEmpty = true;
 	private boolean updateOnChange = false;
 	
 	public Parameter(AbstractSignalPathModule owner, String name, T defaultValue, String typeName) {
 		super(owner, name, typeName);
-		
+		setDrivingInput(false);
+		setRequiresConnection(false);
 		this.defaultValue = defaultValue;
-		drivingInput = false;
-		requiresConnection = false;
 	}
-	
-	@Override
-	public void receive(Object value) {
-		super.receive(value);
-		onValue(getValue());
-	}
-	
-	protected void onValue(T value) {}
 	
 	/**
 	 * Returns the value of this parameter. If there is a current value,
@@ -43,12 +33,13 @@ public abstract class Parameter<T> extends Input<T> {
 	 * default value.
 	 * @return
 	 */
+	@Override
 	public T getValue() {
 		if (value != null) {
 			return value;
 		} else {
-			if (isConnected() && source.owner instanceof Pullable<?>) {
-				Object pulledObject = ((Pullable<?>) source.owner).pullValue(source);
+			if (isConnected() && getSource().getOwner() instanceof Pullable<?>) {
+				Object pulledObject = ((Pullable<?>) getSource().getOwner()).pullValue(getSource());
 				value = handlePulledObject(pulledObject);
 				checkEmpty(value);
 				return value;
@@ -59,11 +50,12 @@ public abstract class Parameter<T> extends Input<T> {
 		}
 	}
 	
-	protected void checkEmpty(T v) {
+	private void checkEmpty(T v) {
 		// Also check the existence of a DataSource, because an empty
 		// but required parameter is only a problem when actually running
 		// the path (not when creating, loading or saving)
-		if (!canBeEmpty && owner.getGlobals() !=null && owner.getGlobals().getDataSource()!=null && isEmpty(v)) {
+		AbstractSignalPathModule owner = getOwner();
+		if (!canBeEmpty && owner.getGlobals() != null && owner.getGlobals().isRunContext() && isEmpty(v)) {
 			owner.getParentSignalPath().pushToUiChannel(new ModuleWarningMessage("Parameter "+getDisplayName()+" does not have a value!", owner.hash));
 			throw new IllegalArgumentException("Parameter "+(getOwner()!=null ? getOwner().getName()+"." : "")+(getDisplayName()==null ? getName() : getDisplayName())+" does not have a value!");
 		}
@@ -87,8 +79,9 @@ public abstract class Parameter<T> extends Input<T> {
 	@Override
 	public void clear() {
 		// Parameters cannot be cleared - with the exception of connected Parameters, which behave like ordinary Inputs
-		if (isConnected())
+		if (isConnected()) {
 			super.clear();
+		}
 	}
 	
 	@Override
@@ -100,7 +93,7 @@ public abstract class Parameter<T> extends Input<T> {
 			config.put("possibleValues", range);
 		}
 
-		config.put("defaultValue",formatValue(defaultValue));
+		config.put("defaultValue", formatValue(defaultValue));
 
 		if (value != null) {
 			config.put("value", formatValue(value));
@@ -166,20 +159,17 @@ public abstract class Parameter<T> extends Input<T> {
 	 * @return
 	 */
 	public abstract T parseValue(String s);
+
+	/**
+	 * Defines how to format value when writing config
+	 */
 	public Object formatValue(T value) {
 		return value;
 	}
 
 	@Override
 	public boolean hasValue() {
-		// Parameters should always (look like they) have a value
-		if (defaultValue!=null)
-			return true;
-		else return super.hasValue();
-	}
-	
-	public boolean getUpdateOnChange() {
-		return updateOnChange;
+		return defaultValue != null || super.hasValue();
 	}
 
 	public void setUpdateOnChange(boolean updateOnChange) {

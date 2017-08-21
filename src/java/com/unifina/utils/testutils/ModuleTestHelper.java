@@ -359,7 +359,7 @@ public class ModuleTestHelper {
 	private void validateOutput(int outputIndex, int i) {
 		for (Map.Entry<String, List<Object>> entry : outputValuesByName.entrySet()) {
 
-			Object actual = getOutputByEffectiveName(entry.getKey()).getTargets()[0].getValue();
+			Object actual = ((List<Input>) getOutputByEffectiveName(entry.getKey()).getTargets()).get(0).getValue();
 			Object expected = entry.getValue().get(outputIndex);
 
 			if (expected instanceof Double) {
@@ -540,7 +540,7 @@ public class ModuleTestHelper {
 	private static void falsifyNoRepeats(AbstractSignalPathModule module) {
 		for (Output output : module.getOutputs()) {
 			if (output instanceof TimeSeriesOutput) {
-				((TimeSeriesOutput) output).noRepeat = false;
+				((TimeSeriesOutput) output).setNoRepeat(false);
 			}
 		}
 	}

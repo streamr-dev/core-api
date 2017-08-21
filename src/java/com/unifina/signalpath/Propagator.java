@@ -89,7 +89,7 @@ public class Propagator implements Serializable {
 			// Resolve 1st order forward dependencies by reachable outputs
 			Set<AbstractSignalPathModule> fwdDepSet = new HashSet<>();
 			for (Output o : module.getOutputs()) {
-				for (Input i : o.getTargets()) {
+				for (Input i : (List<Input>) o.getTargets()) {
 					// Also we can't traverse inputs that are not in the reachable set (the input might have been excluded in the DFS step).
 					// Note that module targets can't be in the independentOriginSet by definition, so that doesn't need to be checked
 					if (reachable.contains(i.getOwner())) {

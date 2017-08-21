@@ -245,7 +245,7 @@ public abstract class AbstractJavaCodeWrapper extends ModuleWithUI implements IT
 		// Inject stuff into the module
 		instance.setGlobals(getGlobals());
 		instance.setHash(hash);
-		instance.setParentSignalPath(parentSignalPath);
+		instance.setParentSignalPath(getParentSignalPath());
 		instance.configure(config);
 		instance.setParentWrapper(this);
 

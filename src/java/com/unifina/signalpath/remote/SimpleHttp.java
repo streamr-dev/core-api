@@ -50,7 +50,7 @@ public class SimpleHttp extends AbstractHttpModule {
 	public void init() {
 		addInput(verb);
 		addInput(URL);
-		trigger.canToggleDrivingInput = false;
+		trigger.setCanToggleDrivingInput(false);
 		trigger.setDrivingInput(true);
 		addOutput(errors);
 	}
@@ -91,7 +91,7 @@ public class SimpleHttp extends AbstractHttpModule {
 		headers = new ArrayList<>(headerCount);
 		for (int i = 0; i < headerCount; i++) {
 			StringParameter header = new StringParameter(this, "header"+(i+1), "");
-			header.canToggleDrivingInput = false;
+			header.setCanToggleDrivingInput(false);
 			header.setDrivingInput(false);
 			addInput(header);
 			headers.add(header);

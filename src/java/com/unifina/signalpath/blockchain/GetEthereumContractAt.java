@@ -33,7 +33,7 @@ public class GetEthereumContractAt extends AbstractSignalPathModule {
 		abiParam.setUpdateOnChange(true);
 		abiParam.setCanConnect(false);
 		addressParam.setDrivingInput(true);
-		addressParam.canToggleDrivingInput = false;
+		addressParam.setCanToggleDrivingInput(false);
 	}
 
 	@Override

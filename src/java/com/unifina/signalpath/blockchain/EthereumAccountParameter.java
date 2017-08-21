@@ -51,7 +51,7 @@ class EthereumAccountParameter extends Parameter<IntegrationKey> {
 	}
 
 	@Override
-	public Object formatValue(IntegrationKey value) {
+	public String formatValue(IntegrationKey value) {
 		return value == null ? null : value.getId();
 	}
 
