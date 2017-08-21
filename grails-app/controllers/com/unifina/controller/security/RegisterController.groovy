@@ -55,8 +55,7 @@ class RegisterController {
             return render(view: 'register', model: [user: [username: invite.username], invite: invite.code])
         }
 
-		// First create a not-saved and not-validated user to give to the page if an error occurs while really creating the user
-        def user = new SecUser(name: cmd.name, username: cmd.username, timezone: cmd.timezone, password: "password")
+        def user
 
         cmd.username = invite.username
 
@@ -69,7 +68,7 @@ class RegisterController {
             user = userService.createUser(cmd.properties)
         } catch (UserCreationFailedException e) {
             flash.message = e.getMessage()
-            return render(view: 'register', model: [user: user, invite: invite.code])
+            return render(view: 'register', model: [user: cmd, invite: invite.code])
         }
 
         invite.used = true
