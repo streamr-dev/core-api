@@ -11,10 +11,10 @@ public class Filter extends PassThrough {
 	public void init() {
 		addInput(pass);
 		pass.setDrivingInput(false);
-		pass.canToggleDrivingInput = false;
+		pass.setCanToggleDrivingInput(false);
 		addInput(input);
 		input.setDrivingInput(true);
-		pass.canToggleDrivingInput = true;
+		pass.setCanToggleDrivingInput(true);
 		addOutput(output);
 	}
 	

@@ -10,6 +10,7 @@ import com.unifina.serialization.HiddenFieldDetector;
 import com.unifina.service.SerializationService;
 import com.unifina.signalpath.*;
 import com.unifina.utils.Globals;
+import grails.util.Holders;
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 
@@ -244,7 +245,7 @@ public abstract class AbstractJavaCodeWrapper extends ModuleWithUI implements IT
 		// Inject stuff into the module
 		instance.setGlobals(getGlobals());
 		instance.setHash(hash);
-		instance.setParentSignalPath(parentSignalPath);
+		instance.setParentSignalPath(getParentSignalPath());
 		instance.configure(config);
 		instance.setParentWrapper(this);
 
@@ -318,6 +319,6 @@ public abstract class AbstractJavaCodeWrapper extends ModuleWithUI implements IT
 	}
 
 	private SerializationService serializationService() {
-		return getGlobals().getBean(SerializationService.class);
+		return Holders.getApplicationContext().getBean(SerializationService.class);
 	}
 }

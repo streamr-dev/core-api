@@ -9,8 +9,8 @@ import java.util.Map;
  */
 public class PrimitiveOutput<T> extends Output<T> {
 
-	public boolean noRepeat = false;
-	public boolean canBeNoRepeat = true;
+	private boolean noRepeat = false;
+	private boolean canBeNoRepeat = true;
 
 	public PrimitiveOutput(AbstractSignalPathModule owner, String name, String type) {
 		super(owner, name, type);
@@ -18,7 +18,7 @@ public class PrimitiveOutput<T> extends Output<T> {
 
 	@Override
 	public void send(T value) {
-		if (!noRepeat || previousValue == null || !value.equals(previousValue)) {
+		if (!noRepeat || getValue() == null || !value.equals(getValue())) {
 			super.send(value);
 		}
 	}
@@ -26,8 +26,8 @@ public class PrimitiveOutput<T> extends Output<T> {
 	@Override
 	public Map<String,Object> getConfiguration() {
 		Map<String,Object> config = super.getConfiguration();
-		config.put("noRepeat",noRepeat);
-		config.put("canBeNoRepeat",canBeNoRepeat);
+		config.put("noRepeat", noRepeat);
+		config.put("canBeNoRepeat", canBeNoRepeat);
 		return config;
 	}
 
@@ -38,5 +38,21 @@ public class PrimitiveOutput<T> extends Output<T> {
 		if (config.containsKey("noRepeat")) {
 			noRepeat = Boolean.parseBoolean(config.get("noRepeat").toString());
 		}
+	}
+
+	public boolean isNoRepeat() {
+		return noRepeat;
+	}
+
+	public void setNoRepeat(boolean noRepeat) {
+		this.noRepeat = noRepeat;
+	}
+
+	public boolean isCanBeNoRepeat() {
+		return canBeNoRepeat;
+	}
+
+	public void setCanBeNoRepeat(boolean canBeNoRepeat) {
+		this.canBeNoRepeat = canBeNoRepeat;
 	}
 }

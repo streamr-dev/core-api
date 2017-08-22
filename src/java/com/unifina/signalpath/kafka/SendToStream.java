@@ -11,6 +11,7 @@ import com.unifina.service.StreamService;
 import com.unifina.signalpath.*;
 import com.unifina.utils.Globals;
 import grails.converters.JSON;
+import grails.util.Holders;
 import org.codehaus.groovy.grails.web.json.JSONArray;
 import org.codehaus.groovy.grails.web.json.JSONObject;
 
@@ -55,10 +56,10 @@ public class SendToStream extends ModuleWithSideEffects {
 	private void ensureServices() {
 		// will be null after deserialization
 		if (streamService == null) {
-			streamService = getGlobals().getBean(StreamService.class);
+			streamService = Holders.getApplicationContext().getBean(StreamService.class);
 		}
 		if (permissionService == null) {
-			permissionService = getGlobals().getBean(PermissionService.class);
+			permissionService = Holders.getApplicationContext().getBean(PermissionService.class);
 		}
 	}
 
@@ -102,7 +103,7 @@ public class SendToStream extends ModuleWithSideEffects {
 
 	private Map<String, Object> inputValuesToMap() {
 		Map msg = new LinkedHashMap<>();
-		Iterable<Input> inputs = sendOnlyNewValues ? drivingInputs : fieldInputs;
+		Iterable<Input> inputs = sendOnlyNewValues ? getDrivingInputs() : fieldInputs;
 		for (Input i : inputs) {
 			msg.put(i.getName(), i.getValue());
 		}
@@ -160,7 +161,7 @@ public class SendToStream extends ModuleWithSideEffects {
 			// TODO: add other types
 			if (type.equalsIgnoreCase("number")) {
 				input = new TimeSeriesInput(this, name);
-				((TimeSeriesInput) input).canHaveInitialValue = false;
+				((TimeSeriesInput) input).setCanHaveInitialValue(false);
 			} else if (type.equalsIgnoreCase("boolean")) {
 				input = new BooleanInput(this, name);
 			} else if (type.equalsIgnoreCase("string")) {
@@ -172,9 +173,8 @@ public class SendToStream extends ModuleWithSideEffects {
 			}
 
 			if (input != null) {
-				input.canToggleDrivingInput = false;
-				input.canBeFeedback = false;
-				input.requiresConnection = false;
+				input.setCanToggleDrivingInput(false);
+				input.setRequiresConnection(false);
 				addInput(input);
 				fieldInputs.add(input);
 			}
@@ -188,7 +188,7 @@ public class SendToStream extends ModuleWithSideEffects {
 		// Only check write access in run context to avoid exception when eg. loading and reconstructing canvas
 		if (getGlobals().isRunContext() && !stream.getId().equals(lastStreamId) ) {
 			if (permissionService == null) {
-				permissionService = getGlobals().getBean(PermissionService.class);
+				permissionService = Holders.getApplicationContext().getBean(PermissionService.class);
 			}
 
 			if (permissionService.canWrite(getGlobals().getUser(), stream)) {

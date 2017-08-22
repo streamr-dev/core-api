@@ -67,10 +67,9 @@ public class TimeSeriesChart extends Chart {
 		conn.yAxis = 0;
 
 		conn.setDrivingInput(true);
-		conn.canToggleDrivingInput = false;
-		conn.canHaveInitialValue = false;
-		conn.canBeFeedback = false;
-		conn.requiresConnection = false;
+		conn.setCanToggleDrivingInput(false);
+		conn.setCanHaveInitialValue(false);
+		conn.setRequiresConnection(false);
 		
 		// Add the input
 		if (getInput(name) == null) {
@@ -82,7 +81,7 @@ public class TimeSeriesChart extends Chart {
 	
 	@Override
 	protected void record() {
-		for (Input i : drivingInputs) {
+		for (Input i : getDrivingInputs()) {
 			TimeSeriesChartInput input = (TimeSeriesChartInput) i;
 			if (!Double.isNaN(input.value)
 					&& (!barify || getGlobals().time.getTime() - input.previousTime >= 60000L)) {

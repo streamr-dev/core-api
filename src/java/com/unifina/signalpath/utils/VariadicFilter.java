@@ -10,7 +10,7 @@ public class VariadicFilter extends VariadicPassThrough {
 	public void init() {
 		addInput(pass);
 		pass.setDrivingInput(false);
-		pass.canToggleDrivingInput = false;
+		pass.setCanToggleDrivingInput(false);
 		super.init();
 	}
 
