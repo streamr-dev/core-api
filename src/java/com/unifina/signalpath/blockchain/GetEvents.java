@@ -52,7 +52,7 @@ public class GetEvents extends AbstractSignalPathModule implements ITimeListener
 
 	@Override
 	public void init() {
-		propagationSink = true;
+		setPropagationSink(true);
 		addInput(contract);
 		addOutput(errors);
 	}
