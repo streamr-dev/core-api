@@ -42,11 +42,10 @@ public class GetEvents extends AbstractSignalPathModule implements ITimeListener
 	@Override
 	public void initialize() {
 		if (getGlobals().isRunContext()) {
-			EthereumContract c = contract.getValue();
-			if (c != null) {
-				gethFilterId = startListeningContractEvents(c.getAddress());
+			if (contract.hasValue()) {
+				gethFilterId = startListeningContractEvents(contract.getValue().getAddress());
 			} else {
-				log.error("Contract input has no value in it");
+				throw new RuntimeException("Contract input has no value in it");
 			}
 		}
 	}
