@@ -1,7 +1,10 @@
 package com.unifina.signalpath.blockchain;
 
 import com.google.common.collect.ImmutableMap;
-import com.google.gson.*;
+import com.google.gson.Gson;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 import com.mashape.unirest.http.HttpResponse;
 import com.mashape.unirest.http.JsonNode;
 import com.mashape.unirest.http.Unirest;
@@ -10,9 +13,9 @@ import com.unifina.datasource.ITimeListener;
 import com.unifina.signalpath.*;
 import org.apache.commons.io.IOUtils;
 import org.apache.log4j.Logger;
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-import org.json.JSONArray;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -22,28 +25,22 @@ import java.util.*;
  * Get events sent out by given contract in the given transaction
  */
 public class GetEvents extends AbstractSignalPathModule implements ITimeListener {
-	private static final int PLACEHOLDER_CALL_ID = 123;
-	private EthereumContractInput contract = new EthereumContractInput(this, "contract");
-	private ListOutput errors = new ListOutput(this, "errors");
-
-	// event -> [output for each event argument]
-	private Map<EthereumABI.Event, List<Output<Object>>> events;
-
 	private static final Logger log = Logger.getLogger(GetEvents.class);
 
-	private transient Gson gson;
+	private static final int PLACEHOLDER_CALL_ID = 123;
+
+	private final EthereumContractInput contract = new EthereumContractInput(this, "contract");
+	private final ListOutput errors = new ListOutput(this, "errors");
 
 	private EthereumModuleOptions ethereumOptions = new EthereumModuleOptions();
-
-	public static String GETH_URL = "http://localhost:8545";
-
-	public String gethFilterId;
+	private Map<EthereumABI.Event, List<Output<Object>>> events; // event -> [output for each event argument]
+	private String gethFilterId;
 
 	@Override
 	public void initialize() {
 		if (getGlobals().isRunContext()) {
 			if (contract.hasValue()) {
-				gethFilterId = startListeningContractEvents(contract.getValue().getAddress());
+				gethFilterId = startListeningContractEvents(ethereumOptions.getRpcUrl(), contract.getValue().getAddress());
 			} else {
 				throw new RuntimeException("Contract input has no value in it");
 			}
@@ -70,7 +67,7 @@ public class GetEvents extends AbstractSignalPathModule implements ITimeListener
 		EthereumContract c = contract.getValue();
 		if (c == null) { return; }
 
-		JSONArray events = pollContractEvents(gethFilterId, (int)(time.getTime() % 0xfffffff));
+		JSONArray events = pollContractEvents(ethereumOptions.getRpcUrl(), gethFilterId, (int)(time.getTime() % 0xfffffff));
 
 		// event appeared: now ask streamr-web3 to decode it
 		// TODO: web3j should do the decoding; i.e. change to Java 8, or backport org.web3j.abi.FunctionReturnDecoder
@@ -188,47 +185,8 @@ public class GetEvents extends AbstractSignalPathModule implements ITimeListener
 	public void destroy() {
 		super.destroy();
 		if (gethFilterId != null) {
-			stopListeningContractEvents(gethFilterId);
+			stopListeningContractEvents(ethereumOptions.getRpcUrl(), gethFilterId);
 		}
-	}
-
-	/**
-	 * Send RPC call to geth
-	 * @see "https://github.com/ethereum/wiki/wiki/JSON-RPC"
-	 * @param params RPC params
-	 * @return RPC return value
-	 * @throws UnirestException if HTTP post fails
-     */
-	private static JSONObject rpcCall(String method, List params, Integer callId) throws UnirestException {
-		HttpResponse<JsonNode> response = Unirest.post(GETH_URL).body(new Gson().toJson(ImmutableMap.of(
-				"id", callId,
-				"jsonrpc", "2.0",
-				"method", method,
-				"params", params
-		))).asJson();
-		return response.getBody().getObject();
-	}
-
-	private static String stringFromRpcCall(String method, List params) throws UnirestException, JSONException {
-		return rpcCall(method, params, PLACEHOLDER_CALL_ID).getString("result");
-	}
-	private static Boolean booleanFromRpcCall(String method, List params) throws UnirestException, JSONException {
-		return rpcCall(method, params, PLACEHOLDER_CALL_ID).getBoolean("result");
-	}
-	private static JSONArray arrayFromRpcCall(String method, List params) throws UnirestException, JSONException {
-		return rpcCall(method, params, PLACEHOLDER_CALL_ID).getJSONArray("result");
-	}
-	private static JSONObject objectFromRpcCall(String method, List params) throws UnirestException, JSONException {
-		return rpcCall(method, params, PLACEHOLDER_CALL_ID).getJSONObject("result");
-	}
-	private static String stringFromRpcCall(String method, List params, Integer callId) throws UnirestException, JSONException {
-		return rpcCall(method, params, callId).getString("result");
-	}
-	private static JSONArray arrayFromRpcCall(String method, List params, Integer callId) throws UnirestException, JSONException {
-		return rpcCall(method, params, callId).getJSONArray("result");
-	}
-	private static JSONObject objectFromRpcCall(String method, List params, Integer callId) throws UnirestException, JSONException {
-		return rpcCall(method, params, callId).getJSONObject("result");
 	}
 
 	/**
@@ -236,12 +194,12 @@ public class GetEvents extends AbstractSignalPathModule implements ITimeListener
 	 * @see "https://github.com/ethereum/wiki/wiki/JSON-RPC#eth_newfilter"
 	 * @param address of contract to listen
 	 * @return filterId
-     */
-	public static String startListeningContractEvents(String address) {
+	 */
+	private static String startListeningContractEvents(String rpcUrl, String address) {
 		String response = null;
 		try {
-			response = stringFromRpcCall("eth_newFilter", Arrays.asList(ImmutableMap.of(
-					"address", address
+			response = stringFromRpcCall(rpcUrl,"eth_newFilter", Arrays.asList(ImmutableMap.of(
+				"address", address
 			)));
 		} catch (Exception e) {
 			log.error("Error while initializing / subscribing to geth", e);
@@ -250,10 +208,10 @@ public class GetEvents extends AbstractSignalPathModule implements ITimeListener
 		return response;
 	}
 
-	public static boolean stopListeningContractEvents(String filterId) {
+	private static boolean stopListeningContractEvents(String rpcUrl, String filterId) {
 		Boolean response = null;
 		try {
-			response = booleanFromRpcCall("eth_uninstallFilter", Arrays.asList(filterId));
+			response = booleanFromRpcCall(rpcUrl,"eth_uninstallFilter", Arrays.asList(filterId));
 		} catch (Exception e) {
 			log.error("Error while initializing / subscribing to geth", e);
 		}
@@ -261,14 +219,53 @@ public class GetEvents extends AbstractSignalPathModule implements ITimeListener
 		return response;
 	}
 
-	public static JSONArray pollContractEvents(String filterId, Integer callId) {
+	private static JSONArray pollContractEvents(String rpcUrl, String filterId, Integer callId) {
 		JSONArray response = null;
 		try {
-			response = arrayFromRpcCall("eth_getFilterChanges", Arrays.asList(filterId), callId);
+			response = arrayFromRpcCall(rpcUrl,"eth_getFilterChanges", Arrays.asList(filterId), callId);
 		} catch (Exception e) {
 			log.error("Error while initializing / subscribing to geth", e);
 		}
 
 		return response;
+	}
+
+	private static String stringFromRpcCall(String rpcUrl, String method, List params) throws UnirestException, JSONException {
+		return rpcCall(rpcUrl, method, params, PLACEHOLDER_CALL_ID).getString("result");
+	}
+	private static Boolean booleanFromRpcCall(String rpcUrl, String method, List params) throws UnirestException, JSONException {
+		return rpcCall(rpcUrl, method, params, PLACEHOLDER_CALL_ID).getBoolean("result");
+	}
+	private static JSONArray arrayFromRpcCall(String rpcUrl, String method, List params) throws UnirestException, JSONException {
+		return rpcCall(rpcUrl, method, params, PLACEHOLDER_CALL_ID).getJSONArray("result");
+	}
+	private static JSONObject objectFromRpcCall(String rpcUrl, String method, List params) throws UnirestException, JSONException {
+		return rpcCall(rpcUrl, method, params, PLACEHOLDER_CALL_ID).getJSONObject("result");
+	}
+	private static String stringFromRpcCall(String rpcUrl, String method, List params, Integer callId) throws UnirestException, JSONException {
+		return rpcCall(rpcUrl, method, params, callId).getString("result");
+	}
+	private static JSONArray arrayFromRpcCall(String rpcUrl, String method, List params, Integer callId) throws UnirestException, JSONException {
+		return rpcCall(rpcUrl, method, params, callId).getJSONArray("result");
+	}
+	private static JSONObject objectFromRpcCall(String rpcUrl, String method, List params, Integer callId) throws UnirestException, JSONException {
+		return rpcCall(rpcUrl, method, params, callId).getJSONObject("result");
+	}
+
+	/**
+	 * Send RPC call to geth
+	 * @see "https://github.com/ethereum/wiki/wiki/JSON-RPC"
+	 * @param params RPC params
+	 * @return RPC return value
+	 * @throws UnirestException if HTTP post fails
+	 */
+	private static JSONObject rpcCall(String rpcUrl, String method, List params, Integer callId) throws UnirestException {
+		HttpResponse<JsonNode> response = Unirest.post(rpcUrl).body(new Gson().toJson(ImmutableMap.of(
+			"id", callId,
+			"jsonrpc", "2.0",
+			"method", method,
+			"params", params
+		))).asJson();
+		return response.getBody().getObject();
 	}
 }
