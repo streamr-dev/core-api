@@ -22,6 +22,7 @@ import java.util.*;
  * Get events sent out by given contract in the given transaction
  */
 public class GetEvents extends AbstractSignalPathModule implements ITimeListener {
+	private static final int PLACEHOLDER_CALL_ID = 123;
 	private EthereumContractInput contract = new EthereumContractInput(this, "contract");
 	private ListOutput errors = new ListOutput(this, "errors");
 
@@ -202,16 +203,16 @@ public class GetEvents extends AbstractSignalPathModule implements ITimeListener
 	}
 
 	private static String stringFromRpcCall(String method, List params) throws UnirestException, JSONException {
-		return rpcCall(method, params, 123).getString("result");
+		return rpcCall(method, params, PLACEHOLDER_CALL_ID).getString("result");
 	}
 	private static Boolean booleanFromRpcCall(String method, List params) throws UnirestException, JSONException {
-		return rpcCall(method, params, 123).getBoolean("result");
+		return rpcCall(method, params, PLACEHOLDER_CALL_ID).getBoolean("result");
 	}
 	private static JSONArray arrayFromRpcCall(String method, List params) throws UnirestException, JSONException {
-		return rpcCall(method, params, 123).getJSONArray("result");
+		return rpcCall(method, params, PLACEHOLDER_CALL_ID).getJSONArray("result");
 	}
 	private static JSONObject objectFromRpcCall(String method, List params) throws UnirestException, JSONException {
-		return rpcCall(method, params, 123).getJSONObject("result");
+		return rpcCall(method, params, PLACEHOLDER_CALL_ID).getJSONObject("result");
 	}
 	private static String stringFromRpcCall(String method, List params, Integer callId) throws UnirestException, JSONException {
 		return rpcCall(method, params, callId).getString("result");
