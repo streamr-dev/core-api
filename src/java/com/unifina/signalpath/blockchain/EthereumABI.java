@@ -110,21 +110,6 @@ public class EthereumABI implements Serializable {
 	public static class Event implements Serializable {
 		public String name = null;
 		public List<Slot> inputs = Collections.emptyList();	 // "inputs" that receive value from Solidity contract
-
-		@Override
-		public boolean equals(Object o) {
-			if (this == o) return true;
-			if (o == null || getClass() != o.getClass()) return false;
-
-			Event event = (Event) o;
-
-			return name != null ? name.equals(event.name) : event.name == null;
-		}
-
-		@Override
-		public int hashCode() {
-			return name != null ? name.hashCode() : 0;
-		}
 	}
 
 }
