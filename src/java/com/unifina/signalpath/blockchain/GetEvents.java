@@ -177,14 +177,11 @@ public class GetEvents extends AbstractSignalPathModule implements ITimeListener
 	}
 
 	@Override
-	public void sendOutput() {
-
-	}
+	public void sendOutput() {}
 
 	@Override
 	public void clearState() {
 		gethFilterId = null;
-		events = new HashMap<>();
 	}
 
 	/**
