@@ -184,6 +184,14 @@ public class GetEvents extends AbstractSignalPathModule implements ITimeListener
 		gethFilterId = null;
 	}
 
+	@Override
+	public void destroy() {
+		super.destroy();
+		if (gethFilterId != null) {
+			stopListeningContractEvents(gethFilterId);
+		}
+	}
+
 	/**
 	 * Send RPC call to geth
 	 * @see "https://github.com/ethereum/wiki/wiki/JSON-RPC"
