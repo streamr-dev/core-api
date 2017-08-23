@@ -335,7 +335,7 @@ public class EthereumCall extends AbstractHttpModule {
 		}
 	}
 
-	public static void convertAndSend(Output output, String value) {
+	static void convertAndSend(Output output, String value) {
 		if (output instanceof StringOutput) {
 			output.send(value);
 		} else if (output instanceof BooleanOutput) {

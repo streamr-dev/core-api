@@ -1,7 +1,10 @@
 package com.unifina.signalpath.blockchain;
 
 import com.google.common.collect.ImmutableMap;
-import com.google.gson.*;
+import com.google.gson.Gson;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 import com.mashape.unirest.http.Unirest;
 import com.mashape.unirest.http.exceptions.UnirestException;
 import com.unifina.datasource.ITimeListener;
@@ -23,24 +26,10 @@ public class GetEvents extends AbstractSignalPathModule implements ITimeListener
 
 	private final EthereumContractInput contract = new EthereumContractInput(this, "contract");
 	private final ListOutput errors = new ListOutput(this, "errors");
+	private Map<String, List<Output>> outputsByEvent; // event name -> [output for each event argument]
 
 	private EthereumModuleOptions ethereumOptions = new EthereumModuleOptions();
-	private Map<String, List<Output>> outputsByEvent; // event name -> [output for each event argument]
 	private transient ContractEventPoller contractEventPoller;
-
-	@Override
-	public void initialize() {
-		if (getGlobals().isRunContext()) {
-			if (contract.hasValue()) {
-				contractEventPoller = new ContractEventPoller(
-					ethereumOptions.getRpcUrl(),
-					contract.getValue().getAddress()
-				);
-			} else {
-				throw new RuntimeException("Contract input has no value in it.");
-			}
-		}
-	}
 
 	@Override
 	public void init() {
@@ -49,18 +38,26 @@ public class GetEvents extends AbstractSignalPathModule implements ITimeListener
 		addOutput(errors);
 	}
 
-	/**
-	 * Poll the geth filter
-	 * @see "https://github.com/ethereum/wiki/wiki/JSON-RPC#eth_getfilterchanges"
-	 * @param time used as callId to RPC
-     */
+	@Override
+	public void initialize() {
+		if (getGlobals().isRunContext()) {
+			if (contract.hasValue()) {
+				String rpcUrl = ethereumOptions.getRpcUrl();
+				String contractAddress = contract.getValue().getAddress();
+				contractEventPoller = new ContractEventPoller(rpcUrl, contractAddress);
+			} else {
+				throw new RuntimeException("Contract input must have a value.");
+			}
+		}
+	}
+
 	@Override
 	public void setTime(Date time) {
 		List<String> errorList = new ArrayList<>();
 		try {
 			JSONArray events = contractEventPoller.poll((int) (time.getTime() % 0xfffffff));
 
-			// Event appeared now ask Streamr-Web3 to decode it and then send values to outputs
+			// Event appeared: now ask Streamr-Web3 to decode it and then send values to outputs
 			if (events != null && events.length() > 0) {
 				String txHash = events.getJSONObject(0).getString("transactionHash");
 				JsonObject decodedEvent = fetchDecodedEvent(txHash);

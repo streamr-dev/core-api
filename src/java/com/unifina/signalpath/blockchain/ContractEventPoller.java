@@ -1,13 +1,14 @@
 package com.unifina.signalpath.blockchain;
 
-import com.google.common.collect.ImmutableMap;
 import org.apache.log4j.Logger;
 import org.json.JSONArray;
 import org.json.JSONException;
 
 import java.io.Closeable;
+import java.util.List;
 
 import static java.util.Collections.singletonList;
+import static java.util.Collections.singletonMap;
 
 /**
  * Poll Ethereum events of a contract via JSON RPC (https://github.com/ethereum/wiki/wiki/JSON-RPC) using filters.
@@ -37,10 +38,11 @@ class ContractEventPoller implements Closeable {
 
 		log.info(String.format("Polling filter '%s'.", filterId));
 		try {
-			return rpc.ethGetFilterChanges(singletonList(filterId), callId);
-		} catch (EthereumJsonRpc.Error e) {
-			if (Integer.valueOf(-32000).equals(e.getCode())) {
-				filterId = null; // TODO: should try to uninstall?
+			return rpc.rpcCall("eth_getFilterChanges", singletonList(filterId), callId)
+				.getJSONArray("result");
+		} catch (EthereumJsonRpc.ErrorObjectError e) {
+			if (e.getCode() == -32000) { // TODO: this code is not documented, might change?
+				filterId = null;
 				newFilter();
 				return null;
 			}
@@ -59,12 +61,13 @@ class ContractEventPoller implements Closeable {
 	 * https://github.com/ethereum/wiki/wiki/JSON-RPC#eth_newfilter
 	 */
 	private void newFilter() {
+		List params = singletonList(singletonMap("address", contractAddress));
 		try {
-			filterId = rpc.ethNewFilter(singletonList(ImmutableMap.of("address", contractAddress)), SOME_CALL_ID);
-			log.info(String.format("Filter '%s' created.", filterId));
+			filterId = rpc.rpcCall("eth_newFilter", params, SOME_CALL_ID).getString("result");
 		} catch (JSONException e) {
 			throw new RuntimeException(e);
 		}
+		log.info(String.format("Filter '%s' created.", filterId));
 	}
 
 	/**
@@ -74,7 +77,8 @@ class ContractEventPoller implements Closeable {
 		boolean result;
 
 		try {
-			result = rpc.ethUninstallFilter(singletonList(filterId), SOME_CALL_ID);
+			result = rpc.rpcCall("eth_uninstallFilter", singletonList(filterId), SOME_CALL_ID)
+				.getBoolean("result");
 		} catch (JSONException e) {
 			throw new RuntimeException(e);
 		}
@@ -83,7 +87,7 @@ class ContractEventPoller implements Closeable {
 			log.info(String.format("Filter '%s' uninstalled.", filterId));
 			filterId = null;
 		} else {
-			throw new RuntimeException("JSON RPC server was unable to install filter " + filterId);
+			throw new RuntimeException("Unable to install filter " + filterId);
 		}
 	}
 }

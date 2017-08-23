@@ -6,8 +6,6 @@ import com.mashape.unirest.http.HttpResponse;
 import com.mashape.unirest.http.JsonNode;
 import com.mashape.unirest.http.Unirest;
 import com.mashape.unirest.http.exceptions.UnirestException;
-import org.json.JSONArray;
-import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.List;
@@ -19,42 +17,25 @@ class EthereumJsonRpc {
 		this.url = url;
 	}
 
-	// Convenience method
-	JSONArray ethGetFilterChanges(List params, int callId) throws Error, JSONException {
-		JSONObject response = rpcCall("eth_getFilterChanges", params, callId);
-		return response.getJSONArray("result");
-	}
-
-	// Convenience method
-	String ethNewFilter(List params, int callId) throws Error, JSONException {
-		JSONObject response = rpcCall("eth_newFilter", params, callId);
-		return response.getString("result");
-	}
-
-	// Convenience method
-	boolean ethUninstallFilter(List params, int callId) throws Error, JSONException {
-		JSONObject response = rpcCall("eth_uninstallFilter", params, callId);
-		return response.getBoolean("result");
-	}
-
-	JSONObject rpcCall(String method, List params, int callId) throws Error {
+	JSONObject rpcCall(String method, List params, int callId) throws UnirestError, HttpStatusError, ErrorObjectError {
 		try {
-			HttpResponse<JsonNode> response = Unirest.post(url)
+			HttpResponse<JsonNode> response = Unirest
+				.post(url)
 				.body(formRequestBody(method, params, callId))
 				.asJson();
 
 			if (statusCodeIsNot2XX(response.getCode())) {
-				throw new Error(response.getCode(), response.getBody());
+				throw new HttpStatusError(response.getCode(), response.getBody());
 			}
 
 			JSONObject responseJson = response.getBody().getObject();
 			if (responseJson.opt("error") != null) {
-				throw new Error(responseJson.optJSONObject("error"));
+				throw new ErrorObjectError(responseJson.optJSONObject("error"));
 			}
 
 			return responseJson;
 		} catch (UnirestException e) {
-			throw new Error(e);
+			throw new UnirestError(e);
 		}
 	}
 
@@ -72,29 +53,34 @@ class EthereumJsonRpc {
 		return code / 100 != 2;
 	}
 
-	class Error extends RuntimeException {
-		private JSONObject errorObject;
-
-		private Error(UnirestException e) {
-			super(String.format("JSON RPC communication failure with server '%s'", url), e);
+	abstract class Error extends RuntimeException {
+		private Error(String message) {
+			super(String.format("JSON RPC error with server '%s': %s", url, message));
 		}
+	}
 
-		private Error(int statusCode, JsonNode body) {
-			super(String.format("JSON RPC server '%s' returned unexpected status code %d with content %s",
-				url, statusCode, body));
+	class UnirestError extends Error {
+		private UnirestError(UnirestException e) {
+			super(e.getMessage());
 		}
+	}
 
-		private Error(JSONObject errorObject) {
-			super(String.format("JSON RPC server '%s' returned domain error '%s'", url, errorObject));
+	class HttpStatusError extends Error {
+		private HttpStatusError(int statusCode, JsonNode body) {
+			super(String.format("unexpected status code %d with content %s", statusCode, body));
+		}
+	}
+
+	class ErrorObjectError extends Error {
+		private final JSONObject errorObject;
+
+		private ErrorObjectError(JSONObject errorObject) {
+			super("response contained error object " + errorObject);
 			this.errorObject = errorObject;
 		}
 
-		public String getErrorMessage() {
-			return errorObject == null ? null : errorObject.optString("message");
-		}
-
-		public Integer getCode() {
-			return errorObject == null ? null : errorObject.optInt("code");
+		public int getCode() {
+			return errorObject.optInt("code");
 		}
 	}
 }
