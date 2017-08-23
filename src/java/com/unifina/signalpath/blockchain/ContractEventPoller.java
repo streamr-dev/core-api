@@ -109,8 +109,8 @@ class ContractEventPoller implements Closeable, Runnable {
 			log.info(String.format("Filter '%s' uninstalled.", filterId));
 			filterId = null;
 		} else {
-			listener.onError("Unable to install filter " + filterId);
-			throw new RuntimeException("Unable to install filter " + filterId);
+			listener.onError("Unable to uninstall filter " + filterId);
+			throw new RuntimeException("Unable to uninstall filter " + filterId);
 		}
 	}
 
