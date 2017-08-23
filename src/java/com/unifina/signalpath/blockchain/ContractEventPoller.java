@@ -3,6 +3,7 @@ package com.unifina.signalpath.blockchain;
 import org.apache.log4j.Logger;
 import org.json.JSONArray;
 import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.io.Closeable;
 import java.util.List;
@@ -13,40 +14,37 @@ import static java.util.Collections.singletonMap;
 /**
  * Poll Ethereum events of a contract via JSON RPC (https://github.com/ethereum/wiki/wiki/JSON-RPC) using filters.
  */
-class ContractEventPoller implements Closeable {
+class ContractEventPoller implements Closeable, Runnable {
 	private static final Logger log = Logger.getLogger(ContractEventPoller.class);
-
+	private static final int POLL_INTERVAL_IN_MS = 3000;
 	private static final int SOME_CALL_ID = 123;
 
 	private final EthereumJsonRpc rpc;
 	private final String contractAddress;
+	private final Listener listener;
 	private String filterId;
 
-	ContractEventPoller(String rpcUrl, String contractAddress) {
-		this.rpc = new EthereumJsonRpc(rpcUrl);
-		this.contractAddress = contractAddress;
-		newFilter();
+	interface Listener {
+		void onEvent(JSONArray events);
+		void onError(String message);
 	}
 
-	/**
-	 * https://github.com/ethereum/wiki/wiki/JSON-RPC#eth_getfilterchanges
-	 */
-	JSONArray poll(Integer callId) throws JSONException {
-		if (filterId == null) {
-			throw new RuntimeException("Filter not installed. Perhaps poller has been closed already?");
-		}
+	ContractEventPoller(String rpcUrl, String contractAddress, Listener listener) {
+		this.rpc = new EthereumJsonRpc(rpcUrl);
+		this.contractAddress = contractAddress;
+		this.listener = listener;
+	}
 
-		log.info(String.format("Polling filter '%s'.", filterId));
-		try {
-			return rpc.rpcCall("eth_getFilterChanges", singletonList(filterId), callId)
-				.getJSONArray("result");
-		} catch (EthereumJsonRpc.ErrorObjectError e) {
-			if (e.getCode() == -32000) { // TODO: this code is not documented, might change?
-				filterId = null;
-				newFilter();
-				return null;
+	@Override
+	public void run() {
+		newFilter();
+		while (filterId != null) {
+			pollChanges((int) (System.currentTimeMillis() % 0xfffffff));
+			try {
+				Thread.sleep(POLL_INTERVAL_IN_MS);
+			} catch (InterruptedException e) {
+				e.printStackTrace();
 			}
-			throw e;
 		}
 	}
 
@@ -71,6 +69,30 @@ class ContractEventPoller implements Closeable {
 	}
 
 	/**
+	 * https://github.com/ethereum/wiki/wiki/JSON-RPC#eth_getfilterchanges
+	 */
+	private synchronized void pollChanges(Integer callId) {
+		log.info(String.format("Polling filter '%s'.", filterId));
+		try {
+			JSONObject response = rpc.rpcCall("eth_getFilterChanges", singletonList(filterId), callId);
+			JSONArray jsonArray = response.getJSONArray("result");
+			if (jsonArray.length() != 0) {
+				listener.onEvent(jsonArray);
+			}
+		} catch (EthereumJsonRpc.ErrorObjectError e) {
+			if (filterDoesNotExist(e.getCode())) {
+				log.info("Resetting filter...");
+				filterId = null;
+				newFilter();
+			} else {
+				listener.onError(e.getMessage());
+			}
+		} catch (EthereumJsonRpc.Error | JSONException e) {
+			listener.onError(e.getMessage());
+		}
+	}
+
+	/**
 	 * https://github.com/ethereum/wiki/wiki/JSON-RPC#eth_uninstallfilter
 	 */
 	private void uninstallFilter() {
@@ -87,7 +109,12 @@ class ContractEventPoller implements Closeable {
 			log.info(String.format("Filter '%s' uninstalled.", filterId));
 			filterId = null;
 		} else {
+			listener.onError("Unable to install filter " + filterId);
 			throw new RuntimeException("Unable to install filter " + filterId);
 		}
+	}
+
+	private static boolean filterDoesNotExist(int code) {
+		return code == -32000;
 	}
 }

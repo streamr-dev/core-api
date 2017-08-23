@@ -6,6 +6,7 @@ import com.mashape.unirest.http.HttpResponse;
 import com.mashape.unirest.http.JsonNode;
 import com.mashape.unirest.http.Unirest;
 import com.mashape.unirest.http.exceptions.UnirestException;
+import com.mashape.unirest.request.body.RequestBodyEntity;
 import org.json.JSONObject;
 
 import java.util.List;
@@ -19,10 +20,7 @@ class EthereumJsonRpc {
 
 	JSONObject rpcCall(String method, List params, int callId) throws UnirestError, HttpStatusError, ErrorObjectError {
 		try {
-			HttpResponse<JsonNode> response = Unirest
-				.post(url)
-				.body(formRequestBody(method, params, callId))
-				.asJson();
+			HttpResponse<JsonNode> response = formRequest(method, params, callId).asJson();
 
 			if (statusCodeIsNot2XX(response.getCode())) {
 				throw new HttpStatusError(response.getCode(), response.getBody());
@@ -39,15 +37,14 @@ class EthereumJsonRpc {
 		}
 	}
 
-	private static String formRequestBody(String method, List params, int callId) {
-		return new Gson().toJson(ImmutableMap.of(
+	private RequestBodyEntity formRequest(String method, List params, int callId) {
+		return Unirest.post(url).body(new Gson().toJson(ImmutableMap.of(
 			"id", callId,
 			"jsonrpc", "2.0",
 			"method", method,
 			"params", params
-		));
+		)));
 	}
-
 
 	private static boolean statusCodeIsNot2XX(int code) {
 		return code / 100 != 2;

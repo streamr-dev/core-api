@@ -7,10 +7,11 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.mashape.unirest.http.Unirest;
 import com.mashape.unirest.http.exceptions.UnirestException;
-import com.unifina.datasource.ITimeListener;
+import com.unifina.datasource.IStartListener;
+import com.unifina.datasource.IStopListener;
+import com.unifina.service.SerializationService;
 import com.unifina.signalpath.*;
 import org.apache.commons.io.IOUtils;
-import org.apache.log4j.Logger;
 import org.json.JSONArray;
 import org.json.JSONException;
 
@@ -21,15 +22,16 @@ import java.util.*;
 /**
  * Get events sent out by given contract in the given transaction
  */
-public class GetEvents extends AbstractSignalPathModule implements ITimeListener {
-	private static final Logger log = Logger.getLogger(GetEvents.class);
+public class GetEvents extends AbstractSignalPathModule implements ContractEventPoller.Listener, IStartListener, IStopListener {
 
 	private final EthereumContractInput contract = new EthereumContractInput(this, "contract");
 	private final ListOutput errors = new ListOutput(this, "errors");
 	private Map<String, List<Output>> outputsByEvent; // event name -> [output for each event argument]
 
 	private EthereumModuleOptions ethereumOptions = new EthereumModuleOptions();
+
 	private transient ContractEventPoller contractEventPoller;
+	private transient Propagator asyncPropagator;
 
 	@Override
 	public void init() {
@@ -40,51 +42,96 @@ public class GetEvents extends AbstractSignalPathModule implements ITimeListener
 
 	@Override
 	public void initialize() {
+		super.initialize();
 		if (getGlobals().isRunContext()) {
-			if (contract.hasValue()) {
-				String rpcUrl = ethereumOptions.getRpcUrl();
-				String contractAddress = contract.getValue().getAddress();
-				contractEventPoller = new ContractEventPoller(rpcUrl, contractAddress);
-			} else {
+			if (!contract.hasValue()) {
 				throw new RuntimeException("Contract input must have a value.");
 			}
+
+			asyncPropagator = new Propagator(this);
+			getGlobals().getDataSource().addStartListener(this);
+			getGlobals().getDataSource().addStopListener(this);
 		}
 	}
 
 	@Override
-	public void setTime(Date time) {
-		List<String> errorList = new ArrayList<>();
+	public void onStart() {
+		String rpcUrl = ethereumOptions.getRpcUrl();
+		String contractAddress = contract.getValue().getAddress();
+		contractEventPoller = new ContractEventPoller(rpcUrl, contractAddress, this);
+		new Thread(contractEventPoller, "ContractEventPoller-Thread").start();
+	}
+
+	@Override
+	public void onStop() {
+		contractEventPoller.close();
+	}
+
+
+	@Override
+	public void sendOutput() {}
+
+	@Override
+	public void clearState() {}
+
+	@Override
+	public void onEvent(JSONArray events) {
 		try {
-			JSONArray events = contractEventPoller.poll((int) (time.getTime() % 0xfffffff));
-
-			// Event appeared: now ask Streamr-Web3 to decode it and then send values to outputs
-			if (events != null && events.length() > 0) {
-				String txHash = events.getJSONObject(0).getString("transactionHash");
-				JsonObject decodedEvent = fetchDecodedEvent(txHash);
-
-				if (decodedEvent.get("error") != null) {
-					errorList.add(decodedEvent.get("error").toString());
-				} else {
-					sendEventOutputs(decodedEvent);
-				}
+			String txHash = events.getJSONObject(0).getString("transactionHash");
+			JsonObject decodedEvent = fetchDecodedEvent(txHash);
+			if (decodedEvent.get("error") != null) {
+				onError(decodedEvent.get("error").toString());
+			} else {
+				sendEventOutputs(decodedEvent);
 			}
-		} catch (JSONException e) {
-			errorList.add("JSON error: " + e);
-			log.error("JSON error: " + e);
-		} catch (UnirestException e) {
-			errorList.add("Error while decoding event (HTTP -> streamr-web3): " + e);
-			log.error("Error while decoding event (HTTP -> streamr-web3)", e);
-		} catch (IOException e) {
-			errorList.add("Error parsing response " + e);
-			log.error("Error parsing response", e);
-		} catch (EthereumJsonRpc.Error e) {
-			errorList.add(e.getMessage());
-			log.error(e.getMessage());
+		} catch (JSONException | UnirestException | IOException e) {
+			onError(e.getMessage());
+		}
+	}
+
+	@Override
+	public void onError(String message) {
+		errors.send(Collections.singletonList(message));
+		asyncPropagator.propagate();
+	}
+
+	@Override
+	protected void onConfiguration(Map<String, Object> config) {
+		super.onConfiguration(config);
+
+		outputsByEvent = new HashMap<>();
+
+		if (contract.hasValue()) {
+			EthereumABI abi = contract.getValue().getABI();
+			for (EthereumABI.Event abiEvent : abi.getEvents()) {
+				List<Output> eventOutputs = new ArrayList<>();
+				if (abiEvent.inputs.size() > 0) {
+					for (EthereumABI.Slot arg : abiEvent.inputs) {
+						String displayName = abiEvent.name + "." + (arg.name.length() > 0 ? arg.name : "(" + arg.type + ")");
+						Output output = EthereumToStreamrTypes.asOutput(arg.type, displayName, this);
+						eventOutputs.add(output);
+						addOutput(output);
+					}
+				} else {
+					// event without parameters/arguments/inputs
+					Output output = new BooleanOutput(this, abiEvent.name);
+					eventOutputs.add(output);
+					addOutput(output);
+				}
+				outputsByEvent.put(abiEvent.name, eventOutputs);
+			}
 		}
 
-		if (!errorList.isEmpty()) {
-			errors.send(errorList);
-		}
+		ModuleOptions options = ModuleOptions.get(config);
+		ethereumOptions = EthereumModuleOptions.readFrom(options);
+	}
+
+	@Override
+	public Map<String, Object> getConfiguration() {
+		Map<String, Object> config = super.getConfiguration();
+		ModuleOptions options = ModuleOptions.get(config);
+		ethereumOptions.writeNetworkOption(options);
+		return config;
 	}
 
 	// TODO: web3j should do the decoding; i.e. change to Java 8, or backport org.web3j.abi.FunctionReturnDecoder
@@ -123,58 +170,6 @@ public class GetEvents extends AbstractSignalPathModule implements ITimeListener
 				}
 			}
 		}
-	}
-
-	@Override
-	public Map<String, Object> getConfiguration() {
-		Map<String, Object> config = super.getConfiguration();
-
-		ModuleOptions options = ModuleOptions.get(config);
-		ethereumOptions.writeNetworkOption(options);
-
-		return config;
-	}
-
-	@Override
-	protected void onConfiguration(Map<String, Object> config) {
-		super.onConfiguration(config);
-
-		outputsByEvent = new HashMap<>();
-
-		if (contract.hasValue()) {
-			EthereumABI abi = contract.getValue().getABI();
-			for (EthereumABI.Event abiEvent : abi.getEvents()) {
-				List<Output> eventOutputs = new ArrayList<>();
-				if (abiEvent.inputs.size() > 0) {
-					for (EthereumABI.Slot arg : abiEvent.inputs) {
-						String displayName = abiEvent.name + "." + (arg.name.length() > 0 ? arg.name : "(" + arg.type + ")");
-						Output output = EthereumToStreamrTypes.asOutput(arg.type, displayName, this);
-						eventOutputs.add(output);
-						addOutput(output);
-					}
-				} else {
-					// event without parameters/arguments/inputs
-					Output output = new BooleanOutput(this, abiEvent.name);
-					eventOutputs.add(output);
-					addOutput(output);
-				}
-				outputsByEvent.put(abiEvent.name, eventOutputs);
-			}
-		}
-
-		ModuleOptions options = ModuleOptions.get(config);
-		ethereumOptions = EthereumModuleOptions.readFrom(options);
-	}
-
-	@Override
-	public void sendOutput() {}
-
-	@Override
-	public void clearState() {}
-
-	@Override
-	public void destroy() {
-		super.destroy();
-		contractEventPoller.close();
+		asyncPropagator.propagate();
 	}
 }
