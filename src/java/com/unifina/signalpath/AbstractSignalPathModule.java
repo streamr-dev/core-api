@@ -5,7 +5,6 @@ import com.unifina.data.IEventRecipient;
 import com.unifina.datasource.IDayListener;
 import com.unifina.domain.signalpath.Module;
 import com.unifina.security.permission.ConnectionTraversalPermission;
-import com.unifina.security.permission.UserPermission;
 import com.unifina.service.PermissionService;
 import com.unifina.service.SerializationService;
 import com.unifina.utils.Globals;
@@ -601,7 +600,7 @@ public abstract class AbstractSignalPathModule implements IEventRecipient, IDayL
 		}, response);
 		request.setFuture(future);
 
-		getGlobals().getDataSource().getEventQueue().enqueue(fe);
+		getGlobals().getDataSource().enqueueEvent(fe);
 		return future;
 	}
 

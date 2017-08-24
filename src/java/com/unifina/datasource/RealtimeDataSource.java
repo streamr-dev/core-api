@@ -1,48 +1,38 @@
 package com.unifina.datasource;
 
 
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.PriorityQueue;
-import java.util.Queue;
-import java.util.Timer;
-import java.util.TimerTask;
-
-import com.unifina.data.IEventRecipient;
-import com.unifina.domain.signalpath.Canvas;
-import com.unifina.serialization.SerializationRequest;
-import com.unifina.service.SerializationService;
-import com.unifina.signalpath.SignalPath;
-import com.unifina.signalpath.StopRequest;
-import grails.util.Holders;
-import org.apache.log4j.Logger;
-
 import com.unifina.data.FeedEvent;
 import com.unifina.data.RealtimeEventQueue;
 import com.unifina.feed.AbstractFeed;
 import com.unifina.feed.ICatchupFeed;
+import com.unifina.serialization.SerializationRequest;
+import com.unifina.service.SerializationService;
+import com.unifina.signalpath.SignalPath;
+import com.unifina.signalpath.StopRequest;
 import com.unifina.utils.Globals;
+import grails.util.Holders;
+import org.apache.log4j.Logger;
+
+import java.util.*;
 
 public class RealtimeDataSource extends DataSource {
-
-	Timer secTimer = new Timer();
-
-	private PriorityQueue<FeedEvent> catchupQueue = new PriorityQueue<>();
-
-	//	private long catchupQueueTicket = 0;
-	private boolean abort = false;
-
 	private static final Logger log = Logger.getLogger(RealtimeDataSource.class);
+
+	private final Timer secTimer = new Timer();
+	private final PriorityQueue<FeedEvent> catchupQueue = new PriorityQueue<>();
+	private boolean abort = false;
 
 	public RealtimeDataSource(Globals globals) {
 		super(false, globals);
 	}
 
 	@Override
-	protected DataSourceEventQueue initEventQueue() {
+	protected DataSourceEventQueue initEventQueue(Globals globals) {
 		return new RealtimeEventQueue(globals, this);
 	}
+
+	@Override
+	protected void onSubscribedToFeed(AbstractFeed feed) {}
 
 	@Override
 	protected void doStartFeed() throws Exception {
@@ -101,15 +91,16 @@ public class RealtimeDataSource extends DataSource {
 
 			// Serialization
 			SerializationService serializationService = Holders.getApplicationContext().getBean(SerializationService.class);
+			long serializationIntervalInMs = serializationService.serializationIntervalInMillis();
 
-			if (serializationService.serializationIntervalInMillis() > 0) {
+			if (serializationIntervalInMs > 0) {
 				for (final SignalPath signalPath : getSerializableSignalPaths()) {
 					secTimer.scheduleAtFixedRate(new TimerTask() {
 						@Override
 						public void run() {
 							eventQueue.enqueue(SerializationRequest.makeFeedEvent(signalPath));
 						}
-					}, serializationService.serializationIntervalInMillis(), serializationService.serializationIntervalInMillis());
+					}, serializationIntervalInMs, serializationIntervalInMs);
 				}
 			}
 

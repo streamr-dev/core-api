@@ -79,10 +79,8 @@ class SimpleHttpSpec extends Specification {
 	/** Mocked event queue. Works manually in tests, please call module.receive(queuedEvent) */
 	def mockGlobals = Stub(Globals) {
 		getDataSource() >> Stub(DataSource) {
-			getEventQueue() >> Stub(DataSourceEventQueue) {
-				enqueue(_) >> { feedEventList ->
-					transaction = feedEventList[0].content
-				}
+			enqueueEvent(_) >> { feedEventList ->
+				transaction = feedEventList[0].content
 			}
 		}
 		isRealtime() >> true

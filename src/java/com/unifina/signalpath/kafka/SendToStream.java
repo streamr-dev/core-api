@@ -92,7 +92,7 @@ public class SendToStream extends ModuleWithSideEffects {
 
 		if (eventRecipient != null) {
 			FeedEvent event = new FeedEvent(msg, globals.time, eventRecipient);
-			getGlobals().getDataSource().getEventQueue().enqueue(event);
+			getGlobals().getDataSource().enqueueEvent(event);
 		}
 	}
 
