@@ -17,7 +17,6 @@ import static java.util.Collections.singletonMap;
 class ContractEventPoller implements Closeable, Runnable {
 	private static final Logger log = Logger.getLogger(ContractEventPoller.class);
 	private static final int POLL_INTERVAL_IN_MS = 3000;
-	private static final int SOME_CALL_ID = 123;
 
 	private final EthereumJsonRpc rpc;
 	private final String contractAddress;
@@ -39,7 +38,7 @@ class ContractEventPoller implements Closeable, Runnable {
 	public void run() {
 		newFilter();
 		while (filterId != null) {
-			pollChanges((int) (System.currentTimeMillis() % 0xfffffff));
+			pollChanges();
 			try {
 				Thread.sleep(POLL_INTERVAL_IN_MS);
 			} catch (InterruptedException e) {
@@ -61,7 +60,7 @@ class ContractEventPoller implements Closeable, Runnable {
 	private void newFilter() {
 		List params = singletonList(singletonMap("address", contractAddress));
 		try {
-			filterId = rpc.rpcCall("eth_newFilter", params, SOME_CALL_ID).getString("result");
+			filterId = rpc.rpcCall("eth_newFilter", params).getString("result");
 		} catch (JSONException e) {
 			throw new RuntimeException(e);
 		}
@@ -71,10 +70,10 @@ class ContractEventPoller implements Closeable, Runnable {
 	/**
 	 * https://github.com/ethereum/wiki/wiki/JSON-RPC#eth_getfilterchanges
 	 */
-	private synchronized void pollChanges(Integer callId) {
+	private synchronized void pollChanges() {
 		log.info(String.format("Polling filter '%s'.", filterId));
 		try {
-			JSONObject response = rpc.rpcCall("eth_getFilterChanges", singletonList(filterId), callId);
+			JSONObject response = rpc.rpcCall("eth_getFilterChanges", singletonList(filterId));
 			JSONArray jsonArray = response.getJSONArray("result");
 			if (jsonArray.length() != 0) {
 				listener.onEvent(jsonArray);
@@ -99,8 +98,7 @@ class ContractEventPoller implements Closeable, Runnable {
 		boolean result;
 
 		try {
-			result = rpc.rpcCall("eth_uninstallFilter", singletonList(filterId), SOME_CALL_ID)
-				.getBoolean("result");
+			result = rpc.rpcCall("eth_uninstallFilter", singletonList(filterId)).getBoolean("result");
 		} catch (JSONException e) {
 			throw new RuntimeException(e);
 		}

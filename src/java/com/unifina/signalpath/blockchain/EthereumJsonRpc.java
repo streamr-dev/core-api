@@ -12,15 +12,16 @@ import org.json.JSONObject;
 import java.util.List;
 
 class EthereumJsonRpc {
+	private static final int CALL_ID = 123;
 	private final String url;
 
 	EthereumJsonRpc(String url) {
 		this.url = url;
 	}
 
-	JSONObject rpcCall(String method, List params, int callId) throws UnirestError, HttpStatusError, ErrorObjectError {
+	JSONObject rpcCall(String method, List params) throws UnirestError, HttpStatusError, ErrorObjectError {
 		try {
-			HttpResponse<JsonNode> response = formRequest(method, params, callId).asJson();
+			HttpResponse<JsonNode> response = formRequest(method, params, CALL_ID).asJson();
 
 			if (statusCodeIsNot2XX(response.getCode())) {
 				throw new HttpStatusError(response.getCode(), response.getBody());
