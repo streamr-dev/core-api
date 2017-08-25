@@ -68,8 +68,6 @@ public abstract class AbstractSignalPathModule implements IEventRecipient, IDayL
 
 	private transient Globals globals;
 
-	private boolean initialized;
-
 	private static final Logger log = Logger.getLogger(AbstractSignalPathModule.class);
 
 	/**
@@ -148,9 +146,7 @@ public abstract class AbstractSignalPathModule implements IEventRecipient, IDayL
 	 * gets called after the module is set up, ie. after the connections
 	 * have been made. The default implementation does nothing.
 	 */
-	public void initialize() {
-
-	}
+	public void initialize() { }
 
 	public void addInput(Input input) {
 		addInput(input, input.getName());
@@ -312,13 +308,7 @@ public abstract class AbstractSignalPathModule implements IEventRecipient, IDayL
 	 * the module exists in!
 	 */
 	public void connectionsReady() {
-
 		initialize();
-
-		// Only report the initialization of this module once
-		if (!initialized) {
-			initialized = true;
-		}
 	}
 
 	public void trySendOutput() {
