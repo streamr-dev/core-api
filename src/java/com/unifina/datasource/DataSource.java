@@ -29,11 +29,11 @@ public abstract class DataSource {
 	private final List<IStartListener> startListeners = new ArrayList<>();
 	private final List<IStopListener> stopListeners = new ArrayList<>();
 	private final Map<Long, AbstractFeed> feedById = new HashMap<>();
+	private final DataSourceEventQueue eventQueue;
 	private boolean isHistoricalFeed = true;
 	private boolean started = false;
 	private Globals globals;
 
-	DataSourceEventQueue eventQueue;
 
 	public DataSource(boolean isHistoricalFeed, Globals globals) {
 		this.isHistoricalFeed = isHistoricalFeed;
@@ -173,14 +173,9 @@ public abstract class DataSource {
 		// Feed implementation already instantiated?
 		AbstractFeed feed = feedById.get(domain.getId());
 		if (feed == null) {
-			// Create the instance
 			log.debug("createFeed: Instantiating new feed described by domain object "+domain+(isHistoricalFeed ? " in historical mode" : " in realtime mode"));
 
 			FeedService feedService = Holders.getApplicationContext().getBean(FeedService.class);
-			if (feedService == null) {
-				feedService = new FeedService();
-			}
-
 			feed = feedService.instantiateFeed(domain, isHistoricalFeed, globals);
 			feed.setEventQueue(eventQueue);
 			feedById.put(domain.getId(), feed);

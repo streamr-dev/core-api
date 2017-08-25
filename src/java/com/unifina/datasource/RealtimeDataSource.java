@@ -21,6 +21,7 @@ public class RealtimeDataSource extends DataSource {
 	private final Timer secTimer = new Timer();
 	private final PriorityQueue<FeedEvent> catchupQueue = new PriorityQueue<>();
 	private boolean abort = false;
+	private RealtimeEventQueue eventQueue;
 
 	public RealtimeDataSource(Globals globals) {
 		super(false, globals);
@@ -28,7 +29,7 @@ public class RealtimeDataSource extends DataSource {
 
 	@Override
 	protected DataSourceEventQueue initEventQueue(Globals globals) {
-		return new RealtimeEventQueue(globals, this);
+		return eventQueue = new RealtimeEventQueue(globals, this);
 	}
 
 	@Override
@@ -82,7 +83,7 @@ public class RealtimeDataSource extends DataSource {
 					 	if (eventQueue.isEmpty()) {
 						 	FeedEvent timeEvent = new FeedEvent();
 						 	timeEvent.timestamp = new Date();
-						 	eventQueue.enqueue(timeEvent);
+						 	enqueueEvent(timeEvent);
 					 	}
 					}
 			 	},
@@ -98,7 +99,7 @@ public class RealtimeDataSource extends DataSource {
 					secTimer.scheduleAtFixedRate(new TimerTask() {
 						@Override
 						public void run() {
-							eventQueue.enqueue(SerializationRequest.makeFeedEvent(signalPath));
+							enqueueEvent(SerializationRequest.makeFeedEvent(signalPath));
 						}
 					}, serializationIntervalInMs, serializationIntervalInMs);
 				}
@@ -118,7 +119,7 @@ public class RealtimeDataSource extends DataSource {
 			FeedEvent[] events = feed.getNextEvents();
 			if (events != null) {
 				for (FeedEvent it : events) {
-					eventQueue.enqueue(it);
+					enqueueEvent(it);
 				}
 			}
 		}
@@ -131,7 +132,7 @@ public class RealtimeDataSource extends DataSource {
 				FeedEvent[] events = ((ICatchupFeed) event.feed).getNextEvents();
 				if (events != null) {
 					for (FeedEvent it : events) {
-						eventQueue.enqueue(it);
+						enqueueEvent(it);
 					}
 				}
 			}
@@ -155,12 +156,12 @@ public class RealtimeDataSource extends DataSource {
 
 		// Final serialization requests
 		for (SignalPath signalPath : getSerializableSignalPaths()) {
-			eventQueue.enqueue(SerializationRequest.makeFeedEvent(signalPath));
+			enqueueEvent(SerializationRequest.makeFeedEvent(signalPath));
 		}
 
 		// Stop request
 		Date date = new Date();
-		eventQueue.enqueue(new FeedEvent(new StopRequest(date), date, (RealtimeEventQueue) eventQueue));
+		enqueueEvent(new FeedEvent<>(new StopRequest(date), date, eventQueue));
 	}
 
 

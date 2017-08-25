@@ -4,8 +4,6 @@ import com.unifina.data.HistoricalEventQueue;
 import com.unifina.feed.AbstractFeed;
 import com.unifina.utils.Globals;
 
-import java.util.Map;
-
 public class HistoricalDataSource extends DataSource {
 
 	private HistoricalEventQueue eventQueue;
