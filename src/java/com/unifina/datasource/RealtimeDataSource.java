@@ -50,8 +50,8 @@ public class RealtimeDataSource extends DataSource {
 		}
 
 		// While catching up, any events added to the realtime eventQueue must be added to the catchupQueue instead!
-		Queue<FeedEvent> originalQueue = eventQueue.queue;
-		eventQueue.queue = catchupQueue;
+		Queue<FeedEvent> originalQueue = eventQueue.getQueue();
+		eventQueue.setQueue(catchupQueue);
 
 		processCatchups(catchupFeeds);
 
@@ -64,7 +64,7 @@ public class RealtimeDataSource extends DataSource {
 			}
 		}
 
-		eventQueue.queue = originalQueue;
+		eventQueue.setQueue(originalQueue);
 
 		if (catchupFeeds.size() > 0) {
 			log.info("Catchup complete.");
