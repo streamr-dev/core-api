@@ -85,6 +85,7 @@ $(function() {
 			beginDate: $("#beginDate").val(),
 			endDate: $("#endDate").val(),
 			speed: $("#speed").val(),
+			serializationEnabled: $("#serializationEnabled").val(),
 			timeOfDayFilter: {
 				timeOfDayStart: $("#timeOfDayStart").val(),
 				timeOfDayEnd: $("#timeOfDayEnd").val(),
@@ -133,6 +134,7 @@ $(function() {
 		}
 
 		$("#speed").val(settings.speed!=null ? settings.speed : 0).trigger("change")
+		$("#serializationEnabled").val(settings.serializationEnabled != null ? settings.serializationEnabled : 0).trigger("change")
 
 		if (settings.editorState && settings.editorState.runTab)
 			$("a[href="+settings.editorState.runTab+"]").tab('show')
@@ -501,14 +503,13 @@ $(function() {
 
 					<!-- Realtime run controls -->
 					<div role="tabpanel" class="tab-pane" id="tab-realtime">
-						<div class="menu-content-header">
-							%{--Uncomment and remove &nbsp; when gets content--}%
-							&nbsp;
-							%{--<!--<label>Realtime Run Options</label>-->--}%
-							%{--<a href="#" id="realtime-options-button" class="btn btn-primary btn-outline dark btn-xs pull-right" title="Realtime Run Options" data-toggle="modal" data-target="#realtimeOptionsModal">--}%
-								%{--<i class="fa fa-cog"></i>--}%
-								%{--Options--}%
-							%{--</a>--}%
+						<div class="form-group form-group-period">
+							<div class="menu-content-header">
+								<a href="#" id="realtime-options-button" class="btn btn-primary btn-outline dark btn-xs pull-right" title="Realtime Run Options" data-toggle="modal" data-target="#realtimeOptionsModal">
+									<i class="fa fa-cog"></i>
+									Options
+								</a>
+							</div>
 						</div>
 						<div class="btn-group btn-block run-group">
 							<button id="run-realtime-button" class="btn btn-primary col-xs-10 run-button">
@@ -628,24 +629,28 @@ $(function() {
 	  </div><!-- /.modal-dialog -->
 	</div><!-- /.modal -->
 
-	%{--Uncomment when gets content--}%
-
-	%{--<div id="realtimeOptionsModal" class="modal fade">--}%
-		%{--<div class="modal-dialog">--}%
-			%{--<div class="modal-content">--}%
-				%{--<div class="modal-header">--}%
-					%{--<button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>--}%
-					%{--<h4 class="modal-title">Realtime Run Options</h4>--}%
-				%{--</div>--}%
-				%{--<div class="modal-body">--}%
-
-				%{--</div>--}%
-				%{--<div class="modal-footer">--}%
-					%{--<button type="button" class="btn btn-primary" data-dismiss="modal">OK</button>--}%
-				%{--</div>--}%
-			%{--</div><!-- /.modal-content -->--}%
-		%{--</div><!-- /.modal-dialog -->--}%
-	%{--</div><!-- /.modal -->--}%
+	<div id="realtimeOptionsModal" class="modal fade">
+		<div class="modal-dialog">
+			<div class="modal-content">
+				<div class="modal-header">
+					<button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+					<h4 class="modal-title">Realtime Run Options</h4>
+				</div>
+				<div class="modal-body">
+					<div class="form-group">
+						<label>Serialize state</label>
+						<select id="serializationEnabled" class="form-control">
+							<option value="false">No</option>
+							<option value="true">Yes</option>
+						</select>
+					</div>
+				</div>
+				<div class="modal-footer">
+					<button type="button" class="btn btn-primary" data-dismiss="modal">OK</button>
+				</div>
+			</div><!-- /.modal-content -->
+		</div><!-- /.modal-dialog -->
+	</div><!-- /.modal -->
 
 	<ul id="save-dropdown-menu" class="dropdown-menu" role="menu">
 		<li><a href="#" id="saveButton">Save</a></li>
