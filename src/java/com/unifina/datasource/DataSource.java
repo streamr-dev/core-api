@@ -29,7 +29,6 @@ public abstract class DataSource {
 	private final List<IStartListener> startListeners = new ArrayList<>();
 	private final List<IStopListener> stopListeners = new ArrayList<>();
 	private final Map<Long, AbstractFeed> feedById = new HashMap<>();
-	private final DataSourceEventQueue eventQueue;
 	private boolean isHistoricalFeed = true;
 	private boolean started = false;
 	private Globals globals;
@@ -38,7 +37,6 @@ public abstract class DataSource {
 	public DataSource(boolean isHistoricalFeed, Globals globals) {
 		this.isHistoricalFeed = isHistoricalFeed;
 		this.globals = globals;
-		eventQueue = initEventQueue(globals);
 	}
 
 	/**
@@ -65,10 +63,10 @@ public abstract class DataSource {
 		}
 
 		if (o instanceof ITimeListener) {
-			eventQueue.addTimeListener((ITimeListener) o);
+			getEventQueue().addTimeListener((ITimeListener) o);
 		}
 		if (o instanceof IDayListener) {
-			eventQueue.addDayListener((IDayListener) o);
+			getEventQueue().addDayListener((IDayListener) o);
 		}
 	}
 
@@ -129,14 +127,14 @@ public abstract class DataSource {
 	 * Enqueue an event into event queue
 	 */
 	public void enqueueEvent(FeedEvent feedEvent) {
-		eventQueue.enqueue(feedEvent);
+		getEventQueue().enqueue(feedEvent);
 	}
 
 	public AbstractFeed getFeedById(Long id) {
 		return feedById.get(id);
 	}
 
-	protected abstract DataSourceEventQueue initEventQueue(Globals globals);
+	protected abstract DataSourceEventQueue getEventQueue();
 
 	protected abstract void onSubscribedToFeed(AbstractFeed feed);
 
@@ -177,7 +175,7 @@ public abstract class DataSource {
 
 			FeedService feedService = Holders.getApplicationContext().getBean(FeedService.class);
 			feed = feedService.instantiateFeed(domain, isHistoricalFeed, globals);
-			feed.setEventQueue(eventQueue);
+			feed.setEventQueue(getEventQueue());
 			feedById.put(domain.getId(), feed);
 		} else {
 			log.debug("createFeed: Feed " + feed + " exists, using that instance.");

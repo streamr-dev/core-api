@@ -16,7 +16,7 @@ public abstract class DataSourceEventQueue {
 	private final List<IDayListener> dayListeners = new ArrayList<>();
 	private final Object syncLock;
 	private Queue<FeedEvent> queue;
-	protected Globals globals;
+	protected final Globals globals;
 	private boolean abort = false;
 	private long lastHandledTime = 0;
 	private DateTime nextDay;
