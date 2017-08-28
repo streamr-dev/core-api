@@ -1,5 +1,6 @@
 package com.unifina.signalpath.blockchain;
 
+import com.unifina.signalpath.AbstractSignalPathModule;
 import org.apache.log4j.Logger;
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -71,7 +72,7 @@ class ContractEventPoller implements Closeable, Runnable {
 	 * https://github.com/ethereum/wiki/wiki/JSON-RPC#eth_getfilterchanges
 	 */
 	private synchronized void pollChanges() {
-		log.info(String.format("Polling filter '%s'.", filterId));
+		log.info(formatPollingMessage());
 		try {
 			JSONObject response = rpc.rpcCall("eth_getFilterChanges", singletonList(filterId));
 			JSONArray jsonArray = response.getJSONArray("result");
@@ -110,6 +111,13 @@ class ContractEventPoller implements Closeable, Runnable {
 			listener.onError("Unable to uninstall filter " + filterId);
 			throw new RuntimeException("Unable to uninstall filter " + filterId);
 		}
+	}
+
+	private String formatPollingMessage() {
+		String id = listener instanceof AbstractSignalPathModule ?
+			((AbstractSignalPathModule) listener).getParentSignalPath().getCanvas().getId() : null;
+		return String.format("Polling filter '%s' for contract address '%s'.%s", filterId, contractAddress,
+			id == null ? '\0' : " (canvasId=" + id + ")");
 	}
 
 	private static boolean filterDoesNotExist(int code) {
