@@ -280,8 +280,8 @@ streamr.ethereum.networks = System.getProperty("streamr.ethereum.networks") ? ne
 		rinkeby: "http://localhost:3001"
 ]
 streamr.ethereum.rpcUrls = System.getProperty("streamr.ethereum.rpcUrls") ? new Gson().fromJson(System.getProperty("streamr.ethereum.rpcUrls")) : [
-	ropsten: "http://localhost:8544",
-	rinkeby: "http://localhost:8545"
+	ropsten: "http://localhost:8545",
+	rinkeby: "http://localhost:8546"
 ]
 streamr.ethereum.address = System.getProperty("streamr.ethereum.address") ?: ""
 streamr.ethereum.key = System.getProperty("streamr.ethereum.key") ?: ""
