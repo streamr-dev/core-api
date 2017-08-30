@@ -1,11 +1,7 @@
 package com.unifina.signalpath.custom;
 
-import java.util.*;
-
-import javax.tools.Diagnostic;
-
 import com.unifina.datasource.ITimeListener;
-import com.unifina.serialization.AnonymousInnerClassDetector;
+import com.unifina.security.UserJavaClassLoader;
 import com.unifina.serialization.HiddenFieldDetector;
 import com.unifina.service.SerializationService;
 import com.unifina.signalpath.*;
@@ -14,7 +10,8 @@ import grails.util.Holders;
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 
-import com.unifina.security.UserJavaClassLoader;
+import javax.tools.Diagnostic;
+import java.util.*;
 
 public abstract class AbstractJavaCodeWrapper extends ModuleWithUI {
 
@@ -243,16 +240,6 @@ public abstract class AbstractJavaCodeWrapper extends ModuleWithUI {
 		instance.setParentSignalPath(getParentSignalPath());
 		instance.configure(config);
 		instance.setParentWrapper(this);
-
-		// Validate that anonymous inner classes are not present since they cannot be serialized
-		AnonymousInnerClassDetector anonymousInnerClassDetector = new AnonymousInnerClassDetector();
-		if (anonymousInnerClassDetector.detect(instance)) {
-			String msg = "Anonymous inner classes are not allowed.";
-			CompilationErrorMessage compilationErrorMsg = new CompilationErrorMessage();
-			compilationErrorMsg.addError(0, msg);
-			throw new ModuleException(msg, null, Arrays.asList(new ModuleExceptionMessage(hash, compilationErrorMsg)));
-		}
-
 		return instance;
 	}
 
