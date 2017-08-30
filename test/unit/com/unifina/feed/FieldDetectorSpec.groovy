@@ -12,7 +12,7 @@ class FieldDetectorSpec extends Specification {
 
 	def setup() {
 		stream = new Stream()
-		detector = new FieldDetector(null) {
+		detector = new FieldDetector() {
 			@Override
 			protected MapMessage fetchExampleMessage(Stream stream) {
 				return new MapMessage(null, null, mapToReturn)

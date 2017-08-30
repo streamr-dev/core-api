@@ -10,16 +10,11 @@ import com.unifina.domain.data.Stream;
 import com.unifina.feed.FieldDetector;
 import com.unifina.feed.map.MapMessage;
 import org.bson.Document;
-import org.codehaus.groovy.grails.commons.GrailsApplication;
 
 import java.util.Date;
 
 @SuppressWarnings("unused")
 public class MongoFieldDetector extends FieldDetector {
-
-	public MongoFieldDetector(GrailsApplication grailsApplication) {
-		super(grailsApplication);
-	}
 
 	@Override
 	protected MapMessage fetchExampleMessage(Stream stream) {
