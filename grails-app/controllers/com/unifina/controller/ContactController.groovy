@@ -12,7 +12,7 @@ class ContactController {
 	@Secured("IS_AUTHENTICATED_ANONYMOUSLY")
 	def send() {
 		String verificationUrl = grailsApplication.config.recaptcha.verifyUrl
-		String secretParam = grailsApplication.config.recaptchav2.secret
+		String secretParam = grailsApplication.config.recaptchainvisible.secret
 		String responseParam = params."g-recaptcha-response"
 
 		def response = Unirest.post(verificationUrl)
