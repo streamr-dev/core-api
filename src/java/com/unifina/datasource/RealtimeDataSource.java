@@ -82,9 +82,7 @@ public class RealtimeDataSource extends DataSource {
 				 	@Override
 				 	public void run() {
 					 	if (eventQueue.isEmpty()) {
-						 	FeedEvent timeEvent = new FeedEvent();
-						 	timeEvent.timestamp = new Date();
-						 	eventQueue.enqueue(timeEvent);
+							eventQueue.enqueue(new FeedEvent<>(null, new Date(), null));
 					 	}
 					}
 			 	},
