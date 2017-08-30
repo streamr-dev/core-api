@@ -1,5 +1,6 @@
 package com.unifina.signalpath.blockchain;
 
+import com.unifina.domain.signalpath.Canvas;
 import com.unifina.signalpath.AbstractSignalPathModule;
 import org.apache.log4j.Logger;
 import org.json.JSONArray;
@@ -65,14 +66,24 @@ class ContractEventPoller implements Closeable, Runnable {
 		} catch (JSONException e) {
 			throw new RuntimeException(e);
 		}
-		log.info(String.format("Filter '%s' created.", filterId));
+
+		// Logging
+		String id = null;
+		if (listener instanceof AbstractSignalPathModule) {
+			Canvas canvas = ((AbstractSignalPathModule) listener).getParentSignalPath().getCanvas();
+			if (canvas != null) {
+				id = canvas.getId();
+			}
+		}
+		log.info(String.format("Filter '%s' created. Listening to contract '%s' on canvas '%s'.",
+			filterId, contractAddress, id));
 	}
 
 	/**
 	 * https://github.com/ethereum/wiki/wiki/JSON-RPC#eth_getfilterchanges
 	 */
 	private synchronized void pollChanges() {
-		log.info(formatPollingMessage());
+		log.info(String.format("Polling filter '%s'.", filterId));
 		try {
 			JSONObject response = rpc.rpcCall("eth_getFilterChanges", singletonList(filterId));
 			JSONArray jsonArray = response.getJSONArray("result");
@@ -111,13 +122,6 @@ class ContractEventPoller implements Closeable, Runnable {
 			listener.onError("Unable to uninstall filter " + filterId);
 			throw new RuntimeException("Unable to uninstall filter " + filterId);
 		}
-	}
-
-	private String formatPollingMessage() {
-		String id = listener instanceof AbstractSignalPathModule ?
-			((AbstractSignalPathModule) listener).getParentSignalPath().getCanvas().getId() : null;
-		return String.format("Polling filter '%s' for contract address '%s'.%s", filterId, contractAddress,
-			id == null ? '\0' : " (canvasId=" + id + ")");
 	}
 
 	private static boolean filterDoesNotExist(int code) {

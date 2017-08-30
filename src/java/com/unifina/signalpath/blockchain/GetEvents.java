@@ -12,6 +12,7 @@ import com.unifina.datasource.IStopListener;
 import com.unifina.service.SerializationService;
 import com.unifina.signalpath.*;
 import org.apache.commons.io.IOUtils;
+import org.apache.log4j.Logger;
 import org.json.JSONArray;
 import org.json.JSONException;
 
@@ -23,6 +24,7 @@ import java.util.*;
  * Get events sent out by given contract in the given transaction
  */
 public class GetEvents extends AbstractSignalPathModule implements ContractEventPoller.Listener, IStartListener, IStopListener {
+	private static final Logger log = Logger.getLogger(GetEvents.class);
 
 	private final EthereumContractInput contract = new EthereumContractInput(this, "contract");
 	private final ListOutput errors = new ListOutput(this, "errors");
@@ -78,7 +80,9 @@ public class GetEvents extends AbstractSignalPathModule implements ContractEvent
 	public void onEvent(JSONArray events) {
 		try {
 			String txHash = events.getJSONObject(0).getString("transactionHash");
+			log.info(String.format("Received event '%s'", txHash));
 			JsonObject decodedEvent = fetchDecodedEvent(txHash);
+			log.info(String.format("Decoded event '%s': '%s'", txHash, decodedEvent));
 			if (decodedEvent.get("error") != null) {
 				onError(decodedEvent.get("error").toString());
 			} else {
