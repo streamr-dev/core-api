@@ -240,7 +240,7 @@ class StreamService {
 	public AbstractStreamListener instantiateListener(Stream stream) {
 		Assert.notNull(stream.feed.streamListenerClass, "feed's streamListenerClass is unexpectedly null")
 		Class clazz = getClass().getClassLoader().loadClass(stream.feed.streamListenerClass)
-		return clazz.newInstance(grailsApplication)
+		return clazz.newInstance()
 	}
 
 	// TODO: move to FeedService
