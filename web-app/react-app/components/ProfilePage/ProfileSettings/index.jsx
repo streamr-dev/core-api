@@ -34,8 +34,8 @@ class ProfileSettings extends Component {
     onNameChange({target}) {
         this.props.updateCurrentUserName(target.value)
     }
-    onTimezoneChange({target}) {
-        this.props.updateCurrentUserTimezone(target.value)
+    onTimezoneChange(value) {
+        this.props.updateCurrentUserTimezone(value)
     }
     render() {
         const options = moment.tz.names().map(tz => ({
