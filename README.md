@@ -20,6 +20,7 @@ The easiest way to get these running is to get them in a Docker image we provide
 
 - You need to have Grails 2.3.11 and node.js installed.
 - Clone the repo
+- `git submodule update --init --recursive`
 - `npm install`
 - `npm run build`
 - `grails run-app`
