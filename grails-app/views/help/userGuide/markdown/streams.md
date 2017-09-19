@@ -64,9 +64,13 @@ A click takes you to a dialog where you’ll fill in the stream name and an opti
 
 A new stream is created when you click the **Next** button.  You’ll be shown a stream view that includes the stream details (the name and description), API credentials, configured fields (there won’t be any yet), and a summary of stream history (there will be none yet). 
 
-<r:img plugin="unifina-core" dir="images/user-guide" file="my-first-stream-view.png" class="img-responsive center-block" />
+<r:img plugin="unifina-core" id="stream-view-image" dir="images/user-guide" file="my-first-stream-view.png" class="img-responsive center-block" />
 
 If you want to delete a stream, first click on its name, and then click on the **Delete stream** button. You’ll be asked to confirm that you really want to go ahead. You can also delete a stream using the <g:link controller="help" action="api">stream API</g:link>.
+
+In order to read the stream from external applications using the HTTP API, you need to create <strong>Anonymous keys</strong> not bound to specific Streamr user. This way you can grant (and revoke) external applications and users the access to your stream. Choose a descriptive <strong>Key name</strong> (e.g. name of the external application, client, or customer you want to grant the access), select <strong>can read</strong> from the dropdown, and hit <strong>+</strong>. Copy the key to clipboard by clicking the copy icon. Revoke the access by clicking the trash bin icon.
+
+In order to push data into the stream from external sources using the HTTP API, or let external application push data into your data stream, you need to create an anonymous key with <i>write permissions</i>. Choose a descriptive <strong>Key name</strong> (e.g. name of the external data producer), select <strong>can write</strong> from the dropdown, and hit <strong>+</strong>. For details on how to implement the data sender, see <a href="#pushing-events-section">Pushing events to a stream</a>.
 
 ## Editing stream details
 
@@ -133,30 +137,28 @@ Data types can be freely mixed in one event. And you can freely add new fields t
 
 There is no theoretical limitation as to the format or type of data in Streamr. Anything which can be expressed in digital form is fair game. It is perfectly possible to create streams which contain digital images, streaming video, or other domain-specific data. If your use case takes you beyond the built-in data types, come and talk to us about what you have in mind.
 
+<a id="pushing-events-section"></a>
 ## Pushing events to a stream
 
 Streamr has a simple API which allows you to push events in JSON format to a stream.  The events are immediately processed by any canvas which subscribes to the stream.  The events are also available for historical playback as soon as they are received by Streamr.
 
-You can push events to a stream from any programming language.  This is the HTTP endpoint for the JSON API:
+You can push events to a stream from any programming language.  This is the HTTPS endpoint for the JSON API you would use:
 
-    http://data.streamr.com/json
+    POST https://www.streamr.com/api/v1/streams/STREAM_ID/data
 
-If you want to send the data via an encrypted connection, use HTTPS instead of HTTP.  
-
-The authentication information is in the request headers, and the actual data payload is in the request body.  These are the possible headers:
-
-Header    | Required | Description
-:-------- | :------- | :----------
-Stream    | Yes      | The stream ID
-Auth      | Yes      | The stream authorisation key
-Timestamp | No       | Java/Javascript time
+API credentials must be provided in the <strong>Authorization</strong> request header. Authorization header should contain the word <strong>token</strong> and a key with write permissions to the stream. Create this key on the <a href="#stream-view-image">stream's configuration page</a>.
 
 The event timestamp is optional.  If omitted, the current timestamp on the receiving server is used.  If you want to include an explicit timestamp, it should be given in milliseconds since January 1, 1970 UTC.  In any case, any explicit timestamp only affects the playback.  Each event is processed as soon as it is received.
 
+The actual data payload is sent in the POST request body, encoded in JSON.
+
+Here's an example HTTP request for pushing a data event into a stream:
+
+    POST https://www.streamr.com/api/v1/streams/z2IwFcsJSzOxx9nt0nhc7g/data
+
 Here’s an example of request headers:
 
-    Stream: z2IwFcsJSzOxx9nt0nhc7g
-    Auth: cZhdnH7OQpK9ip07rttKSQ
+    Authorization: mejriQ8FSimIbUlOvSpcIwDL0htzeQR-e1N0plTfcZzg
     Timestamp: 1441227869000
 
 And here’s an example of a request body.
@@ -175,11 +177,9 @@ A fully-formed request example using `jquery` looks like the following:
 
     $.ajax({
         type: "POST",
-        url: "http://data.streamr.com/json",
+        url: "https://www.streamr.com/api/v1/streams/z2IwFcsJSzOxx9nt0nhc7g/data",
         headers: {
-            Stream: "z2IwFcsJSzOxx9nt0nhc7g",
-            Auth: "cZhdnH7OQpK9ip07rttKSQ",
-            Timestamp: Date.now()
+            Authorization: "token mejriQ8FSimIbUlOvSpcIwDL0htzeQR-e1N0plTfcZzg"
         },
         data: JSON.stringify(msg)
     });
@@ -187,8 +187,8 @@ A fully-formed request example using `jquery` looks like the following:
 
 The same example using `curl` looks like this.
 
-    curl -i -X POST -H "Stream: z2IwFcsJSzOxx9nt0nhc7g" -H "Auth: cZhdnH7OQpK9ip07rttKSQ" \
-    -d "{\"foo\":\"hello\",\"bar\":24.5}" http://data.streamr.com/json
+    curl -i -X POST -H "Authorization: token mejriQ8FSimIbUlOvSpcIwDL0htzeQR-e1N0plTfcZzg" \
+    -d "{\"foo\":\"hello\",\"bar\":24.5}" https://www.streamr.com/api/v1/streams/z2IwFcsJSzOxx9nt0nhc7g/data
 
 If the call is successful, the data API returns the code 204 (i.e. “no content”).  These are the possible return codes:
 
