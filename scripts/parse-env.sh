@@ -9,8 +9,8 @@ else
 fi
 
 DSCONFIG=$WORKSPACE/grails-app/conf/DataSource.groovy
-DBHOST="dev.unifina"
-MYSQL_PW=Trez2tuV
+DBHOST="127.0.0.1"
+MYSQL_PW=password
 DBSOURCE=core_test
 DBNAME=`echo $DBSOURCE'_'$BRANCHNAME | cut -c1-64 | sed 's/[-.]/_/g'` # max db name length is 64 chars
 

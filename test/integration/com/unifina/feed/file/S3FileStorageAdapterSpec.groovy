@@ -10,10 +10,6 @@ class S3FileStorageAdapterSpec extends IntegrationSpec {
 	S3FileStorageAdapter s3
 
 	def setup() {
-		grailsApplication.config.unifina.feed.s3FileStorageAdapter.accessKey = "AKIAJ5FFWRZLSQB6ASIQ"
-		grailsApplication.config.unifina.feed.s3FileStorageAdapter.secretKey = "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"
-		grailsApplication.config.unifina.feed.s3FileStorageAdapter.bucket = "trading-data-us"
-
 		s3 = new S3FileStorageAdapter(grailsApplication.config)
 	}
 
