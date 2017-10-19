@@ -1,5 +1,6 @@
 package com.unifina.service
 
+import com.unifina.api.ApiException
 import com.unifina.api.NotFoundException
 import com.unifina.api.NotPermittedException
 import com.unifina.api.SaveDashboardCommand
@@ -13,7 +14,6 @@ import com.unifina.domain.security.SecUser
 import com.unifina.domain.signalpath.Canvas
 import com.unifina.signalpath.RuntimeRequest
 import com.unifina.utils.IdGenerator
-import grails.converters.JSON
 import groovy.transform.CompileStatic
 
 class DashboardService {
@@ -64,6 +64,10 @@ class DashboardService {
 		Dashboard dashboard = new Dashboard(validCommand.properties.subMap(["id", "name", "layout"]))
 		if (!dashboard.id) {
 			dashboard.id = IdGenerator.get()
+		} else {
+			if (Dashboard.findById(dashboard.id)) {
+				throw new ApiException(409, "DUPLICATE_ENTRY", "Dashboard with id ${dashboard.id} already exists")
+			}
 		}
 		dashboard.user = user
 		dashboard.save(failOnError: true)
@@ -205,7 +209,7 @@ class DashboardService {
 		}
 
 		def item = authorizedGetDashboardItem(dashboardId, itemId, user, Operation.WRITE)
-		item.setProperties(command.getProperties())
+		item.setProperties(command.properties)
 		item.save(failOnError: true)
 
 		return item

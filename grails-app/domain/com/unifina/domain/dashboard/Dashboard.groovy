@@ -15,7 +15,7 @@ class Dashboard {
 	Date dateCreated
 	Date lastUpdated
 
-	SortedSet<DashboardItem> items
+	List<DashboardItem> items
 
 	String layout = "{}" // JSON
 
