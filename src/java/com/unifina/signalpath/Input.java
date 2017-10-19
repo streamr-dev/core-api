@@ -1,6 +1,10 @@
 package com.unifina.signalpath;
 
+import com.unifina.security.permission.ConnectionTraversalPermission;
+
+import java.security.AccessController;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 
 
@@ -8,23 +12,19 @@ public class Input<T> extends Endpoint<T> {
 
 	public T value;
 	
-	boolean ready = false;
-	boolean wasReady = false;
+	private boolean ready = false;
+	private boolean wasReady = false;
 	
-	public Output<T> source;
+	private Output<T> source;
 	
 	/**
 	 * Input parameters
 	 */
-	boolean feedbackConnection = false;
-	public boolean canBeFeedback = true;
-	public boolean requiresConnection = true;
-	
-	boolean drivingInput = true;
-	public boolean canToggleDrivingInput = true;
+	private boolean requiresConnection = true;
+	private boolean drivingInput = true;
+	private boolean canToggleDrivingInput = true;
 
-	protected boolean proxying = false;
-	ArrayList<Input<T>> proxiedInputs = new ArrayList<>();
+	private List<Input<T>> proxiedInputs = new ArrayList<>();
 	
 	public Input(AbstractSignalPathModule owner, String name, String typeName) {
 		super(owner, name, typeName);
@@ -39,17 +39,16 @@ public class Input<T> extends Endpoint<T> {
 		if (!ready) {
 			ready = true;
 			wasReady = true;
-			owner.markReady(this);
+			getOwner().markReady(this);
 		}
 		
 		if (drivingInput) {
-			owner.drivingInputs.add(this);
-			owner.setSendPending(true);
+			getOwner().getDrivingInputs().add(this);
+			getOwner().setSendPending(true);
 		}
 
-		if (proxying) {
-			for (Input<T> p : proxiedInputs)
-				p.receive(value);
+		for (Input<T> p : proxiedInputs) {
+			p.receive(value);
 		}
 	}
 
@@ -57,7 +56,7 @@ public class Input<T> extends Endpoint<T> {
 	public void setReadyHack() {
 		ready = true;
 		wasReady = true;
-		owner.markReady(this);
+		getOwner().markReady(this);
 	}
 
 	@Override
@@ -88,9 +87,10 @@ public class Input<T> extends Endpoint<T> {
 	@Override
 	public void setConfiguration(Map<String,Object> config) {
 		super.setConfiguration(config);
-		
-		if (config.containsKey("drivingInput"))
+
+		if (config.containsKey("drivingInput")) {
 			drivingInput = Boolean.parseBoolean(config.get("drivingInput").toString());
+		}
 	}
 	
 	/**
@@ -101,7 +101,6 @@ public class Input<T> extends Endpoint<T> {
 	 * @param input
 	 */
 	public void addProxiedInput(Input<T> input) {
-		proxying = true;
 		proxiedInputs.add(input);
 		
 		if (hasValue()) {
@@ -120,42 +119,29 @@ public class Input<T> extends Endpoint<T> {
 		// TODO: might be necessary to mark owner as originatingmodule and mark it dirty, fix it when generalizing from subclasses
 	}
 
-	public boolean isDrivingInput() {
-		return drivingInput;
-	}
-
-	public void setDrivingInput(boolean drivingInput) {
-		this.drivingInput = drivingInput;
-	}
-
 	public Output<T> getSource() {
+		if (System.getSecurityManager() != null) {
+			AccessController.checkPermission(new ConnectionTraversalPermission());
+		}
 		return source;
 	}
 
 	public void setSource(Output<T> source) {
 		this.source = source;
 		if (!isReady()) {
-			owner.cancelReady(this);
+			getOwner().cancelReady(this);
 		}
 	}
 
 	public void disconnect() {
 		this.source = null;
-		owner.cancelReady(this);
+		getOwner().cancelReady(this);
 	}
 
 	@Override
 	public void clear() {
 		value = null;
 		ready = false;
-	}
-
-	public boolean isFeedbackConnection() {
-		return feedbackConnection;
-	}
-
-	public void setFeedbackConnection(boolean feedbackConnection) {
-		this.feedbackConnection = feedbackConnection;
 	}
 	
 	@Override
@@ -170,35 +156,33 @@ public class Input<T> extends Endpoint<T> {
 	public boolean wasReady() {
 		return wasReady;
 	}
+
+	public boolean isDrivingInput() {
+		return drivingInput;
+	}
+
+	public void setDrivingInput(boolean drivingInput) {
+		this.drivingInput = drivingInput;
+	}
+
+	public boolean isCanToggleDrivingInput() {
+		return canToggleDrivingInput;
+	}
+
+	public void setCanToggleDrivingInput(boolean canToggleDrivingInput) {
+		this.canToggleDrivingInput = canToggleDrivingInput;
+	}
+
+	public boolean isRequiresConnection() {
+		return requiresConnection;
+	}
+
+	public void setRequiresConnection(boolean requiresConnection) {
+		this.requiresConnection = requiresConnection;
+	}
 	
 	@Override
 	public String toString() {
-		return "(in) "+super.toString()+", value: "+value+" "+(feedbackConnection ? " (feedback)" : "");
+		return "(in) " + super.toString() + ", value: " + value;
 	}
-	
-	@SuppressWarnings("rawtypes")
-	public boolean dependsOn(AbstractSignalPathModule origin) {
-		return dependsOn(origin,new ArrayList<Input>());
-	}
-	
-	@SuppressWarnings({ "rawtypes", "unchecked" })
-	public boolean dependsOn(AbstractSignalPathModule origin, ArrayList<Input> visited) {
-		if (source==null) return false;
-		else if (origin==source.getOwner()) return true;
-		else {
-			for (Input i : source.getOwner().getInputs()) {
-				// Don't get into an infinite loop
-				if (visited.contains(i))
-					return false;
-				
-				visited.add(i);
-				if (i.dependsOn(origin,visited)) {
-					return true;
-				}
-				visited.remove(i);
-			}
-			return false;
-		}
-	}
-
 }

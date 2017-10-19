@@ -224,7 +224,7 @@ public class ModuleTestHelper {
 	private boolean clearStateCalled = false;
 
 	public enum SerializationMode {
-		NONE, SERIALIZE, SERIALIZE_DESERIALIZE
+		NONE, CLEAR, SERIALIZE, SERIALIZE_DESERIALIZE
 	}
 	private SerializationMode serializationMode = SerializationMode.NONE;
 	private SerializationService dummySerializationService = new SerializationService();
@@ -244,7 +244,9 @@ public class ModuleTestHelper {
 				if (!runTestCase()) {        // Clean slate test
 					pass = false;
 				}
+			}
 
+			if (selectedSerializationModes.contains(SerializationMode.CLEAR)) {
 				clearModuleAndCollectorsAndChannels();
 				clearStateCalled = true;
 				if (!runTestCase()) {        // Test that clearState() works
@@ -357,7 +359,7 @@ public class ModuleTestHelper {
 	private void validateOutput(int outputIndex, int i) {
 		for (Map.Entry<String, List<Object>> entry : outputValuesByName.entrySet()) {
 
-			Object actual = getOutputByEffectiveName(entry.getKey()).getTargets()[0].getValue();
+			Object actual = ((List<Input>) getOutputByEffectiveName(entry.getKey()).getTargets()).get(0).getValue();
 			Object expected = entry.getValue().get(outputIndex);
 
 			if (expected instanceof Double) {
@@ -538,7 +540,7 @@ public class ModuleTestHelper {
 	private static void falsifyNoRepeats(AbstractSignalPathModule module) {
 		for (Output output : module.getOutputs()) {
 			if (output instanceof TimeSeriesOutput) {
-				((TimeSeriesOutput) output).noRepeat = false;
+				((TimeSeriesOutput) output).setNoRepeat(false);
 			}
 		}
 	}

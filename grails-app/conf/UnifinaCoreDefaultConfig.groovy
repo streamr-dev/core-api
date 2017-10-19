@@ -279,6 +279,10 @@ streamr.ethereum.networks = System.getProperty("streamr.ethereum.networks") ? ne
 		ropsten: "http://localhost:3000",
 		rinkeby: "http://localhost:3001"
 ]
+streamr.ethereum.rpcUrls = System.getProperty("streamr.ethereum.rpcUrls") ? new Gson().fromJson(System.getProperty("streamr.ethereum.rpcUrls")) : [
+	ropsten: "http://localhost:8545",
+	rinkeby: "http://localhost:8546"
+]
 streamr.ethereum.address = System.getProperty("streamr.ethereum.address") ?: ""
 streamr.ethereum.key = System.getProperty("streamr.ethereum.key") ?: ""
 
@@ -331,6 +335,7 @@ environments {
  * Serialization config
  */
 streamr.serialization.intervalInMillis = System.getProperty("streamr.serialization.intervalInMillis") ? Long.parseLong(System.getProperty("streamr.serialization.intervalInMillis")) : 5 * 60 * 1000
+streamr.serialization.maxBytes = System.getProperty("streamr.serialization.maxBytes") ? Long.parseLong(System.getProperty("streamr.serialization.maxBytes")) : 1024 * 1024 * 8
 environments {
 	test {
 		streamr.serialization.intervalInMillis = 1000
@@ -363,7 +368,6 @@ grails.plugin.springsecurity.adh.errorPage = null
 grails.plugin.springsecurity.securityConfigType = 'Annotation'
 
 grails.plugin.springsecurity.controllerAnnotations.staticRules = [
-	'/atmosphere/**': 		 ['ROLE_USER'],
 	'/user/**':            ['ROLE_ADMIN'],
 	'/register/**':				 ['IS_AUTHENTICATED_ANONYMOUSLY'],
 	'/webcomponents/*':				 ['IS_AUTHENTICATED_ANONYMOUSLY'],

@@ -4,6 +4,7 @@ import com.mongodb.util.JSON;
 import com.unifina.domain.signalpath.Canvas;
 import com.unifina.service.SignalPathService;
 import com.unifina.signalpath.*;
+import grails.util.Holders;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -43,7 +44,7 @@ public class ForEachItem extends AbstractSignalPathModule {
 
 		// Construct signal path
 		Map signalPathMap = (Map) JSON.parse(canvas.getJson());
-		SignalPathService signalPathService = getGlobals().getBean(SignalPathService.class);
+		SignalPathService signalPathService = Holders.getApplicationContext().getBean(SignalPathService.class);
 		subCanvas = signalPathService.mapToSignalPath(signalPathMap, true, getGlobals(), new SignalPath(false));
 
 		// Find and validate exported endpoints

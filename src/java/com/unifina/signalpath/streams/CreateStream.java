@@ -4,6 +4,7 @@ import com.unifina.api.ValidationException;
 import com.unifina.domain.data.Stream;
 import com.unifina.service.StreamService;
 import com.unifina.signalpath.*;
+import grails.util.Holders;
 
 import java.util.*;
 
@@ -16,9 +17,8 @@ public class CreateStream extends AbstractSignalPathModule {
 	private final StringOutput stream = new StringOutput(this, "stream");
 	private final BooleanOutput created = new BooleanOutput(this, "created");
 
-	private final Set<String> createdStreams = new HashSet<>();
+	protected final HashMap<String, String> cachedStreamIdsByName = new HashMap<>();
 	private transient StreamService streamService;
-
 
 	@Override
 	public void init() {
@@ -32,27 +32,26 @@ public class CreateStream extends AbstractSignalPathModule {
 	@Override
 	public void sendOutput() {
 		if (streamService == null) {
-			streamService = getGlobals().getBean(StreamService.class);
+			streamService = Holders.getApplicationContext().getBean(StreamService.class);
 		}
 
-		if (createdStreams.contains(nameInput.getValue())) {
-			created.send(false);
+		if (cachedStreamIdsByName.containsKey(nameInput.getValue())) {
+			sendOutputs(false, null);
 			return;
 		}
 
 		try {
 			Stream s = streamService.createStream(buildParams(), getGlobals().getUser());
-			created.send(true);
-			stream.send(s.getId());
-			createdStreams.add(nameInput.getValue());
+			sendOutputs(true, s.getId());
+			cachedStreamIdsByName.put(nameInput.getValue(), s.getId());
 		} catch (ValidationException ex) {
-			created.send(false);
+			sendOutputs(false, null);
 		}
 	}
 
 	@Override
 	public void clearState() {
-		createdStreams.clear();
+		cachedStreamIdsByName.clear();
 	}
 
 	private Map<String, Object> buildParams() {
@@ -63,6 +62,17 @@ public class CreateStream extends AbstractSignalPathModule {
 		config.put("fields", mapToListOfFieldConfigs(fields.getValue()));
 		params.put("config", config);
 		return params;
+	}
+
+	protected String getStreamName() {
+		return nameInput.getValue();
+	}
+
+	protected void sendOutputs(boolean createdValue, String streamId) {
+		created.send(createdValue);
+		if (streamId != null) {
+			stream.send(streamId);
+		}
 	}
 
 	private static List<Map<String, String>> mapToListOfFieldConfigs(Map<String, String> map) {

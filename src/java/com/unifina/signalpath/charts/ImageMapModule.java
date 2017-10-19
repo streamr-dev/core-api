@@ -2,6 +2,7 @@ package com.unifina.signalpath.charts;
 
 import com.unifina.signalpath.ModuleOption;
 import com.unifina.signalpath.ModuleOptions;
+import grails.util.Holders;
 import org.codehaus.groovy.grails.web.mapping.LinkGenerator;
 
 import java.util.Map;
@@ -48,7 +49,9 @@ public class ImageMapModule extends MapModule {
 
 	@Override
 	protected void onConfiguration(Map<String, Object> config) {
-		customImageUrl = getGlobals().getBean(LinkGenerator.class).link(singletonMap("uri", DEFAULT_IMAGE_URL));
+		customImageUrl = Holders.getApplicationContext()
+			.getBean(LinkGenerator.class)
+			.link(singletonMap("uri", DEFAULT_IMAGE_URL));
 
 		super.onConfiguration(config);
 		ModuleOptions options = ModuleOptions.get(config);

@@ -1,20 +1,20 @@
 // @flow
 
-import React, {Component} from 'react'
-import createLink from '../../helpers/createLink'
-
+declare var Streamr: any
 declare var StreamrCredentialsControl: any
-declare var Streamr: {
-    user: string
-}
+
+import React, {Component} from 'react'
 
 export default class APICredentials extends Component {
-    apiHandlerEl: HTMLDivElement
+    
+    apiHandlerEl: HTMLDivElement // Typechecking may not work correctly but without this line it does not work at all
     
     componentDidMount() {
         new StreamrCredentialsControl({
             el: this.apiHandlerEl,
-            url: createLink('api/v1/users/me/keys'),
+            url: Streamr.createLink({
+                uri: 'api/v1/users/me/keys'
+            }),
             username: Streamr.user
         })
     }

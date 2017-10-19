@@ -15341,6 +15341,8 @@ button.arrow:after {
   margin-top: 5px;
 }
 #canvas .module.chart .modulebody {
+  width: 600px;
+  height: 400px;
   min-width: 350px;
   min-height: 250px;
   -webkit-flex-direction: row;
@@ -15348,7 +15350,6 @@ button.arrow:after {
   -ms-flex-direction: row;
   -o-flex-direction: row;
   flex-direction: row;
-  width: calc(100% - 23px);
 }
 #canvas .module.chart .modulebody .ioTable {
   width: 23px;

@@ -48,20 +48,6 @@ SignalPath.Input = function(json, parentDiv, module, type, pub) {
 			return;
 		}
 
-		// Feedback connection. Default false. Switchable for TimeSeries types.
-		if (data.type=="Double" && (data.canBeFeedback==null || data.canBeFeedback)) {
-			var feedback = new SignalPath.IOSwitch(switchDiv, "ioSwitch feedback", {
-				getValue: (function(d){
-					return function() { return d.feedback; };
-				})(data),
-				setValue: (function(d){
-					return function(value) { return d.feedback = value; };
-				})(data),
-				buttonText: function() { return "FB"; },
-				tooltip: 'Feedback connection'
-			});
-		}
-
 		// Initial value. Default null/off. Only valid for TimeSeries type
 		if (data.canHaveInitialValue) {
 			var iv = new SignalPath.IOSwitch(switchDiv, "ioSwitch initialValue", {

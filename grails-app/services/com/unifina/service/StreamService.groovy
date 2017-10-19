@@ -56,10 +56,6 @@ class StreamService {
 		return Stream.findByUiChannelPath(uiChannelPath)
 	}
 
-	Stream findByName(String name) {
-		return Stream.findByName(name)
-	}
-
 	Stream createStream(Map params, SecUser user, String id = IdGenerator.getShort()) {
 		Stream stream = new Stream(params)
 		stream.id = id

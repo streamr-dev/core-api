@@ -73,7 +73,7 @@ public class Http extends AbstractHttpModule {
 
 			// trigger should be driving and non-togglable
 			if (!verb.hasBody()) { body.setDrivingInput(true); }
-			body.canToggleDrivingInput = verb.hasBody();
+			body.setCanToggleDrivingInput(verb.hasBody());
 		}
 	}
 

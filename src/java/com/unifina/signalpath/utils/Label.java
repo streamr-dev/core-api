@@ -14,7 +14,7 @@ public class Label extends ModuleWithUI {
 	public void init() {
 		addInput(label);
 		label.setDrivingInput(true);
-		label.canToggleDrivingInput = false;
+		label.setCanToggleDrivingInput(false);
 		
 		canClearState = false;
 

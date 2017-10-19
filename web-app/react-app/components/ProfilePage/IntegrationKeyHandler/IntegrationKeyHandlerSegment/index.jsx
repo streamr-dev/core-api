@@ -52,6 +52,8 @@ class IntegrationKeyHandlerSegment extends React.Component {
             service,
             json: integrationKey
         }))
+            .then(() => Streamr.showSuccess('IntegrationKey created successfully!'))
+            .catch(e => Streamr.showError('Error!', e.message))
     }
     
     onDelete(id) {

@@ -44,23 +44,23 @@ public class Barify extends AbstractSignalPathModule implements ITimeListener {
 	
 	@Override
 	public void init() {
-		propagationSink = true;
+		setPropagationSink(true);
 		
 		addInput(barLength);
 		
 		addInput(input);
 		
-		open.noRepeat = false;
+		open.setNoRepeat(false);
 		addOutput(open);
-		high.noRepeat = false;
+		high.setNoRepeat(false);
 		addOutput(high);
-		low.noRepeat = false;
+		low.setNoRepeat(false);
 		addOutput(low);
-		close.noRepeat = false;
+		close.setNoRepeat(false);
 		addOutput(close);
-		avg.noRepeat = false;
+		avg.setNoRepeat(false);
 		addOutput(avg);
-		sum.noRepeat = false;
+		sum.setNoRepeat(false);
 		addOutput(sum);
 	}
 	

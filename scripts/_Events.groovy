@@ -1,7 +1,4 @@
-
-import grails.util.Environment
-
-eventConfigureTomcat = { tomcat ->
+import grails.util.EnvironmenteventConfigureTomcat = {tomcat ->
 	
 	// Enable compression, from http://www.slideshare.net/gr8conf/gr8conf-2011-tuning-grails-applications-by-peter-ledbrook
 	tomcat.connector.setAttribute("compression","on")
