@@ -7,7 +7,8 @@ export type Dashboard = {
     name: string,
     items: Array<DashboardItem>,
     ownPermissions?: Array<Permission.operation>,
-    editingLocked?: boolean
+    editingLocked?: boolean,
+    new?: boolean
 }
 
 export type DashboardReducerState = {

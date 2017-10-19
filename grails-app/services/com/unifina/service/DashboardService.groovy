@@ -259,11 +259,11 @@ class DashboardService {
 		if (dashboard) {
 			canvas = Canvas.get(pathReader.readCanvasId())
 			Integer moduleId = pathReader.readModuleId()
-			item = (DashboardItem) DashboardItem.withCriteria(uniqueResult: true) {
-				eq("dashboard", dashboard)
-				eq("canvas", canvas)
-				eq("module", moduleId)
-			}
+//			item = (DashboardItem) DashboardItem.withCriteria(uniqueResult: true) {
+//				eq("dashboard", dashboard)
+//				eq("canvas", canvas)
+//				eq("module", moduleId)
+//			}
 		}
 
 		if (item) {

@@ -12,7 +12,6 @@ import createLink from '../../../helpers/createLink'
 
 import {Responsive, WidthProvider} from 'react-grid-layout'
 import 'react-grid-layout/css/styles.css'
-import 'react-resizable/css/styles.css'
 
 import DashboardItem from './DashboardItem'
 import ShareDialog from '../../ShareDialog'

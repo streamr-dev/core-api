@@ -17,9 +17,13 @@ export default class ModuleList extends Component {
         const {modules, canvasId} = this.props
         return (
             <ul className="mmc-dropdown-delay animated fadeInLeft">
-                {modules.sort((a, b) => a.name.localeCompare(b.name)).map(module => (
-                    <ModuleInModuleList key={module.hash} module={module} canvasId={canvasId} />
-                ))}
+                {modules
+                    .filter((m) => m.uiChannel)
+                    .sort((a, b) => a.name.localeCompare(b.name))
+                    .map(module => (
+                        <ModuleInModuleList key={module.hash} module={module} canvasId={canvasId} />
+                    ))
+                }
             </ul>
         )
     }
