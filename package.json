@@ -17,6 +17,22 @@
   },
   "author": "",
   "license": "Unifina",
+  "devDependencies": {
+    "babel-jest": "^20.0.3",
+    "babel-preset-es2015": "^6.24.1",
+    "babel-preset-react": "^6.24.1",
+    "backbone": "file:web-app/js/backbone",
+    "backbone-associations": "file:web-app/js/backbone-associations",
+    "empty": "^0.10.1",
+    "jest": "^20.0.3",
+    "jquery": "1.11.1",
+    "jquery-ui": "*",
+    "jsdom": "8.1.0",
+    "mocha": "^3.4.2",
+    "mustache": "*",
+    "underscore": "*",
+    "write-file-webpack-plugin": "^4.0.2"
+  },
   "dependencies": {
     "assert-diff": "^1.2.0",
     "autoprefixer": "^7.0.1",
