@@ -31,8 +31,9 @@ class ModuleInModuleList extends Component {
     }
     
     onClick() {
+        const id = uuid.v4()
         const dbItem: DashboardItem = {
-            id: uuid.v4(),
+            id,
             dashboard: this.props.dashboard.id,
             module: this.props.module.hash,
             canvas: this.props.canvasId,
@@ -62,7 +63,8 @@ class ModuleInModuleList extends Component {
 }
 
 const mapStateToProps = ({dashboard}, ownProps) => {
-    const db = dashboard.dashboardsById[dashboard.openDashboard.id] || {}
+    const dbState = dashboard
+    const db = dbState.dashboardsById[dbState.openDashboard.id] || {}
     return {
         dashboard: db,
         checked: db && db.items ? db.items.find(item => item.canvas === ownProps.canvasId && item.module === ownProps.module.hash) !== undefined : false

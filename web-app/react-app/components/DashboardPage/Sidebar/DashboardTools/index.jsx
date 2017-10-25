@@ -1,7 +1,6 @@
 // @flow
 
 import React, {Component} from 'react'
-import {any} from 'prop-types'
 import {connect} from 'react-redux'
 import {Button} from 'react-bootstrap'
 import FontAwesome from 'react-fontawesome'
@@ -26,11 +25,8 @@ class DashboardTools extends Component {
         dispatch: Function,
         router: any,
         canShare: boolean,
-        canWrite: boolean
-    }
-    
-    static contextTypes = {
-        router: any
+        canWrite: boolean,
+        updateAndSaveDashboard: Function
     }
     
     constructor() {
@@ -40,10 +36,7 @@ class DashboardTools extends Component {
     }
 
     onSave() {
-        this.props.dispatch(updateAndSaveDashboard(this.props.dashboard))
-            .then(({dashboard}) => {
-                this.context.router.push(`/${dashboard.id}`)
-            })
+        this.props.updateAndSaveDashboard(this.props.dashboard)
     }
     
     render() {
@@ -84,4 +77,10 @@ class DashboardTools extends Component {
 
 const mapStateToProps = (state) => parseDashboard(state)
 
-export default connect(mapStateToProps)(DashboardTools)
+const mapDispatchToProps = (dispatch) => ({
+    updateAndSaveDashboard(db) {
+        return dispatch(updateAndSaveDashboard(db))
+    }
+})
+
+export default connect(mapStateToProps, mapDispatchToProps)(DashboardTools)

@@ -17,7 +17,6 @@ class SaveDashboardCommand {
 	// Groovy's .getProperties() sometimes leaves some of the properties out of the map
 	def getProperties() {
 		return [
-				id: id,
 				name: name,
 				items: items,
 				layout: layout

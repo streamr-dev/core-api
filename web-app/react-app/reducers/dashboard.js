@@ -186,13 +186,18 @@ const dashboard = function(state: State = initialState, action: Action) : State 
             const newDashboardsById = {
                 ...state.dashboardsByid,
                 [action.newId]: {
-                    ...(state.dashboardsById[action.oldId] || {})
+                    ...(state.dashboardsById[action.oldId] || {}),
+                    id: action.newId
                 }
             }
             delete newDashboardsById[action.oldId]
             return {
                 ...state,
-                dashboardsById: newDashboardsById
+                dashboardsById: newDashboardsById,
+                openDashboard: {
+                    ...state.openDashboard,
+                    id: state.openDashboard.id === action.oldId ? action.newId : state.openDashboard.id
+                }
             }
             
         }

@@ -80,6 +80,7 @@ export const getDashboard = (id: Dashboard.id) => (dispatch: Function) => {
 export const updateAndSaveDashboard = (dashboard: Dashboard) => (dispatch: Function) => {
     dispatch(updateAndSaveDashboardRequest())
     const createNew = dashboard.new
+    
     return axios({
         method: createNew ? 'POST' : 'PUT',
         url: createLink(createNew ? apiUrl : `${apiUrl}/${dashboard.id}`),
@@ -90,16 +91,17 @@ export const updateAndSaveDashboard = (dashboard: Dashboard) => (dispatch: Funct
     })
         .then(({data}) => {
             dispatch(showSuccess({
-                title: 'Dashboard saved succesfully!'
+                title: 'Dashboard saved successfully!'
             }))
             
             if (createNew && dashboard.id !== data.id) {
                 dispatch(changeDashboardId(dashboard.id, data.id))
             }
             
-            return dispatch(updateAndSaveDashboardSuccess({
+            dispatch(updateAndSaveDashboardSuccess({
                 ...data,
-                layout: (typeof data.layout === 'string') ? JSON.parse(data.layout) : data.layout
+                layout: (typeof data.layout === 'string') ? JSON.parse(data.layout) : data.layout,
+                ownPermissions: [...(dashboard.ownPermissions || []), ...(createNew ? ['read', 'write', 'share'] : [])]
             }))
         })
         .catch(res => {
@@ -141,6 +143,15 @@ export const getMyDashboardPermissions = (id: Dashboard.id) => (dispatch: Functi
             }))
             throw e
         })
+}
+
+export const updateDashboardChanges = (id: Dashboard.id, changes: {}) => (dispatch: Function, getState: Function) => {
+    const state = getState()
+    const dashboard = state.dashboard.dashboardsById[id]
+    dispatch(updateDashboard({
+        ...dashboard,
+        ...changes
+    }))
 }
 
 export const updateDashboard = (dashboard: Dashboard) => ({

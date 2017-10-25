@@ -60,15 +60,10 @@ class DashboardService {
 	 * @param user
 	 * @return
 	 */
-	Dashboard create(SaveDashboardCommand validCommand, SecUser user) {
-		Dashboard dashboard = new Dashboard(validCommand.properties.subMap(["id", "name", "layout"]))
-		if (!dashboard.id) {
-			dashboard.id = IdGenerator.get()
-		} else {
-			if (Dashboard.findById(dashboard.id)) {
-				throw new ApiException(409, "DUPLICATE_ENTRY", "Dashboard with id ${dashboard.id} already exists")
-			}
-		}
+	Dashboard create(SaveDashboardCommand validCommand, SecUser user, String id = IdGenerator.getShort()) {
+		Dashboard dashboard = new Dashboard(validCommand.properties.subMap(["name", "layout"]))
+
+		dashboard.id = id
 		dashboard.user = user
 		dashboard.save(failOnError: true)
 
@@ -77,6 +72,9 @@ class DashboardService {
 				throw new ValidationException(it.errors)
 			}
 			DashboardItem item = new DashboardItem(it.properties)
+
+			item.id = IdGenerator.getShort()
+
 			dashboard.addToItems(item)
 			item.save(failOnError: true)
 		}
@@ -110,11 +108,12 @@ class DashboardService {
 				item = DashboardItem.findByDashboardAndId(dashboard, it.id)
 				item.setProperties(it.properties)
 				ids.remove(it.id)
-				item.save(failOnError: true)
 			} else {
-				item = new DashboardItem(it.properties << [dashboard: dashboard]).save(failOnError: true)
+				item = new DashboardItem(it.properties)
+				item.id = IdGenerator.getShort()
 				dashboard.addToItems(item)
 			}
+			item.save(failOnError: true)
 		}
 
 		ids.collect {

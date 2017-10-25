@@ -1,6 +1,7 @@
 // @flow
 
 import React, {Component} from 'react'
+import {any} from 'prop-types'
 import {connect} from 'react-redux'
 import {StreamrBreadcrumb, StreamrBreadcrumbItem, StreamrBreadcrumbDropdownButton} from '../../Breadcrumb'
 import {MenuItem} from 'react-bootstrap'
@@ -17,7 +18,7 @@ import DashboardItem from './DashboardItem'
 import ShareDialog from '../../ShareDialog'
 import DeleteButton from '../DashboardDeleteButton'
 
-import {updateDashboard, deleteDashboard, lockDashboardEditing, unlockDashboardEditing} from '../../../actions/dashboard'
+import {updateDashboardChanges, deleteDashboard, lockDashboardEditing, unlockDashboardEditing} from '../../../actions/dashboard'
 
 import type {Dashboard} from '../../../flowtype/dashboard-types'
 
@@ -44,7 +45,13 @@ class Editor extends Component {
         breakpoints: {},
         cols: {},
         layoutsByItemId: {}
+    
     }
+    
+    static contextTypes = {
+        router: any
+    }
+    
     static defaultProps = {
         dashboard: {
             name: '',
@@ -83,18 +90,24 @@ class Editor extends Component {
         menuToggle && menuToggle.addEventListener('click', this.onMenuToggle)
     }
     
+    componentWillReceiveProps(nextProps) {
+        if (this.props.dashboard.id !== nextProps.dashboard.id) {
+            this.context.router.push(`/${nextProps.dashboard.id}`)
+        }
+    }
+    
     onMenuToggle() {
         const menuIsOpen = document.body && document.body.classList && document.body.classList.contains('mmc')
         if (menuIsOpen) {
-            this.props.unlockEditing()
+            this.props.unlockEditing(this.props.dashboard.id)
         } else {
-            this.props.lockEditing()
+            this.props.lockEditing(this.props.dashboard.id)
         }
     }
     
     onLayoutChange(layout, allLayouts) {
         this.onResize(layout)
-        this.props.update({
+        this.props.update(this.props.dashboard.id, {
             layout: allLayouts
         })
     }
@@ -136,7 +149,7 @@ class Editor extends Component {
     onBeforeUnload(e: {
         returnValue: any
     }) {
-        if (this.props.dashboard.id && !this.props.dashboard.saved) {
+        if (!this.props.dashboard.saved) {
             const message = 'You have unsaved changes in your Dashboard. Are you sure you want to leave?'
             e.returnValue = message
             return message
@@ -150,7 +163,7 @@ class Editor extends Component {
     render() {
         const {dashboard} = this.props
         const layout = dashboard.items && this.generateLayout()
-        const items = dashboard.items || []
+        const items = dashboard.items ? _.sortBy(dashboard.items, ['canvas', 'module']) : []
         const dragCancelClassName = 'cancelDragging' + Date.now()
         return (
             <div id="content-wrapper" className="scrollable" style={{
@@ -221,16 +234,17 @@ const mapStateToProps = (state) => {
 }
 
 const mapDispatchToProps = (dispatch, ownProps) => ({
-    delete: () => dispatch(deleteDashboard(ownProps.dashboard.id)),
-    update: (changes) => dispatch(updateDashboard({
-        ...ownProps.dashboard,
-        ...changes
-    })),
-    lockEditing() {
-        dispatch(lockDashboardEditing(ownProps.dashboard.id))
+    delete() {
+        return dispatch(deleteDashboard(ownProps.dashboard.id))
     },
-    unlockEditing() {
-        dispatch(unlockDashboardEditing(ownProps.dashboard.id))
+    update(id, changes) {
+        return dispatch(updateDashboardChanges(id, changes))
+    },
+    lockEditing(id) {
+        return dispatch(lockDashboardEditing(id))
+    },
+    unlockEditing(id) {
+        return dispatch(unlockDashboardEditing(id))
     }
 })
 

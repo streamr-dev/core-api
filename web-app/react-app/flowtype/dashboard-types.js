@@ -33,8 +33,7 @@ export type DashboardReducerAction = {
 }
 
 export type DashboardItem = {
-    id: ?number,
-    tempId?: number,
+    id: ?string,
     title: string,
     dashboard: Dashboard.id,
     module: number,

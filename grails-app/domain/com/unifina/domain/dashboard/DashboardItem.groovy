@@ -25,7 +25,7 @@ class DashboardItem {
 	}
 
 	static mapping = {
-		id generator: IdGenerator.name
+		id generator: 'assigned'
 		dashboard column: "dashboard_id"
 		canvas column: "canvas_id"
 	}
@@ -39,10 +39,6 @@ class DashboardItem {
 				module      : module,
 				webcomponent: webcomponent.toString()
 		]
-	}
-
-	void setWebcomponent(String s) {
-		webcomponent = Webcomponent.getByName(s)
 	}
 
 	void updateWebcomponent() {

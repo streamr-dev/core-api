@@ -15171,11 +15171,6 @@ button.arrow:after {
   width: 100%;
   height: 18px;
   margin-bottom: 5px;
-  display: -webkit-flex;
-  display: -moz-flex;
-  display: -ms-flexbox;
-  display: -o-flex;
-  display: flex;
   -webkit-flex: 0 0 auto;
   -moz-flex: 0 0 auto;
   -ms-flex: 0 0 auto;
@@ -15646,6 +15641,9 @@ dl dd {
 }
 #content-wrapper {
   height: 100%;
+}
+#content-wrapper:focus {
+  outline: none;
 }
 .tt-cursor {
   background-color: #ccc;

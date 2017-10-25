@@ -11,7 +11,6 @@ import grails.validation.Validateable
 class SaveDashboardItemCommand {
 	String id
 	String title
-	Dashboard dashboard
 	Canvas canvas
 	Integer module
 	String webcomponent
@@ -40,6 +39,6 @@ class SaveDashboardItemCommand {
 	}
 
 	Map toMap() {
-		return getProperties().subMap(["id", "title", "dashboard", "canvas", "module", "webcomponent"])
+		return getProperties().subMap(["id", "title", "canvas", "module", "webcomponent"])
 	}
 }
