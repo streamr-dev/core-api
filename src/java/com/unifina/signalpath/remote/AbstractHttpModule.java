@@ -19,6 +19,7 @@ import org.apache.http.impl.nio.client.HttpAsyncClients;
 import org.apache.http.nio.client.HttpAsyncClient;
 
 import javax.net.ssl.SSLContext;
+import java.net.*;
 import java.security.KeyManagementException;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
@@ -193,6 +194,10 @@ public abstract class AbstractHttpModule extends ModuleWithSideEffects implement
 			response.errors.add("Constructing HTTP request failed");
 			response.errors.add(e.getMessage());
 			sendOutput(response);
+			// propagate manually immediately, otherwise error won't ever be sent
+			if (isAsync) {
+				getPropagator().propagate();
+			}
 			return;
 		}
 
@@ -207,6 +212,10 @@ public abstract class AbstractHttpModule extends ModuleWithSideEffects implement
 		} catch (UnknownHostException | SocketException | RuntimeException e) {
 			response.errors.add("Bad target address: " + e.getMessage());
 			sendOutput(response);
+			// propagate manually immediately, otherwise error won't ever be sent
+			if (isAsync) {
+				getPropagator().propagate();
+			}
 			return;
 		}
 
