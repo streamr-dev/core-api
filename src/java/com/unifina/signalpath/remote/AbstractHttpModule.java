@@ -195,6 +195,21 @@ public abstract class AbstractHttpModule extends ModuleWithSideEffects implement
 			sendOutput(response);
 			return;
 		}
+
+		// SECURITY: check request is not sent to localhost (CORE-1008)
+		//   TODO: larger blacklist; e.g. other Streamr machines?
+		// @see https://stackoverflow.com/questions/2406341/how-to-check-if-an-ip-address-is-the-local-host-on-a-multi-homed-system
+		try {
+			InetAddress targetIP = InetAddress.getByName(request.getURI().getHost());
+			if (targetIP.isAnyLocalAddress() || targetIP.isLoopbackAddress() || NetworkInterface.getByInetAddress(targetIP) != null) {
+				throw new RuntimeException("Local HTTP calls not allowed");
+			}
+		} catch (UnknownHostException | SocketException | RuntimeException e) {
+			response.errors.add("Bad target address: " + e.getMessage());
+			sendOutput(response);
+			return;
+		}
+
 		if (request instanceof HttpEntityEnclosingRequestBase && BODY_FORMAT_JSON.equals(bodyContentType)) {
 			request.setHeader(HttpHeaders.ACCEPT, "application/json");
 			request.setHeader(HttpHeaders.CONTENT_TYPE, "application/json");
