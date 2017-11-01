@@ -202,21 +202,23 @@ public abstract class AbstractHttpModule extends ModuleWithSideEffects implement
 		}
 
 		// SECURITY: check request is not sent to localhost (CORE-1008)
-		//   TODO: larger blacklist; e.g. other Streamr machines?
 		// @see https://stackoverflow.com/questions/2406341/how-to-check-if-an-ip-address-is-the-local-host-on-a-multi-homed-system
-		try {
-			InetAddress targetIP = InetAddress.getByName(request.getURI().getHost());
-			if (targetIP.isAnyLocalAddress() || targetIP.isLoopbackAddress() || NetworkInterface.getByInetAddress(targetIP) != null) {
-				throw new RuntimeException("Local HTTP calls not allowed");
+		// TODO: larger blacklist; maybe all private ranges? https://stackoverflow.com/questions/22479214/detect-if-an-ip-is-local-or-public
+		if (!localAddressesAreAllowed()) {
+			try {
+				InetAddress targetIP = InetAddress.getByName(request.getURI().getHost());
+				if (targetIP.isAnyLocalAddress() || targetIP.isLoopbackAddress() || NetworkInterface.getByInetAddress(targetIP) != null) {
+					throw new RuntimeException("Local HTTP calls not allowed");
+				}
+			} catch (UnknownHostException | SocketException | RuntimeException e) {
+				response.errors.add("Bad target address: " + e.getMessage());
+				sendOutput(response);
+				// propagate manually immediately, otherwise error won't ever be sent
+				if (isAsync) {
+					getPropagator().propagate();
+				}
+				return;
 			}
-		} catch (UnknownHostException | SocketException | RuntimeException e) {
-			response.errors.add("Bad target address: " + e.getMessage());
-			sendOutput(response);
-			// propagate manually immediately, otherwise error won't ever be sent
-			if (isAsync) {
-				getPropagator().propagate();
-			}
-			return;
 		}
 
 		if (request instanceof HttpEntityEnclosingRequestBase && BODY_FORMAT_JSON.equals(bodyContentType)) {
@@ -282,6 +284,10 @@ public abstract class AbstractHttpModule extends ModuleWithSideEffects implement
 	@Override
 	protected String getNotificationAboutActivatingWithoutSideEffects() {
 		return getName() + ": Requests are not being made in historical mode by default. This can be changed in module options.";
+	}
+
+	protected boolean localAddressesAreAllowed() {
+		return false;
 	}
 
 	/**
