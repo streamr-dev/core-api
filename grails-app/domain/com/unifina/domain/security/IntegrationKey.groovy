@@ -35,8 +35,17 @@ class IntegrationKey implements Serializable {
 				user: user.id,
 				name: name,
 				service: service.toString(),
-				json: (JSONObject) JSON.parse(json)
+				json: jsonMap()
 		]
+	}
+
+	@CompileStatic
+	private Map jsonMap() {
+		if (service == Service.ETHEREUM) {
+			return [address: ((JSONObject) JSON.parse(json)).get("address")]
+		} else {
+			return [:]
+		}
 	}
 
 }

@@ -5,6 +5,7 @@ import com.unifina.api.NotPermittedException
 import com.unifina.datasource.RealtimeDataSource
 import com.unifina.domain.security.IntegrationKey
 import com.unifina.domain.security.SecUser
+import com.unifina.security.StringEncryptor
 import com.unifina.service.EthereumIntegrationKeyService
 import com.unifina.signalpath.PossibleValue
 import com.unifina.signalpath.simplemath.Multiply
@@ -14,11 +15,14 @@ import grails.test.mixin.Mock
 @Mock([IntegrationKey, SecUser])
 class EthereumAccountParameterSpec extends BeanMockingSpecification {
 
+	StringEncryptor encryptor
 	EthereumAccountParameter parameter
 
 	void setup() {
 		def module = new Multiply()
-		mockBean(EthereumIntegrationKeyService, new EthereumIntegrationKeyService())
+		def keyService = new EthereumIntegrationKeyService()
+		keyService.encryptor = encryptor = new StringEncryptor("pasword")
+		mockBean(EthereumIntegrationKeyService, keyService)
 		module.globals = new Globals()
 		parameter = new EthereumAccountParameter(module, "ethAccount")
 	}
@@ -75,7 +79,7 @@ class EthereumAccountParameterSpec extends BeanMockingSpecification {
 		IntegrationKey key = new IntegrationKey(name: "key", service: IntegrationKey.Service.ETHEREUM, user: user)
 
 		key.id = "account-1"
-		key.json = '{ "privateKey": "0x0000", "address": "0xffff"}'
+		key.json = '{ "privateKey": "' + encryptor.encrypt("0000", user.id.byteValue()) + '", "address": "0xffff"}'
 		key.save(failOnError: true, validate: true)
 
 		when:
@@ -84,7 +88,7 @@ class EthereumAccountParameterSpec extends BeanMockingSpecification {
 		parameter.getOwner().getGlobals().setUser(user)
 
 		then:
-		parameter.getPrivateKey() == "0x0000"
+		parameter.getPrivateKey() == "0000"
 		parameter.getAddress() == "0xffff"
 	}
 

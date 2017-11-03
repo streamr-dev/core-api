@@ -343,6 +343,12 @@ environments {
 }
 
 /**
+ * Encryption settings
+ */
+streamr.encryption.password = System.getProperty("streamr.encryption.password")
+
+
+/**
  * Spring security config
  */
 
