@@ -47,6 +47,7 @@ export const getResourcePermissions = (resourceType: Permission.resourceType, re
         .catch(res => {
             const e = parseError(res)
             dispatch(getResourcePermissionsFailure(e))
+            dispatch(showError(e.error))
             throw e
         })
 }

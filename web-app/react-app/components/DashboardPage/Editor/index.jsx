@@ -18,7 +18,7 @@ import DashboardItem from './DashboardItem'
 import ShareDialog from '../../ShareDialog'
 import DeleteButton from '../DashboardDeleteButton'
 
-import {updateDashboardChanges, deleteDashboard, lockDashboardEditing, unlockDashboardEditing} from '../../../actions/dashboard'
+import {updateDashboardChanges, lockDashboardEditing, unlockDashboardEditing, updateDashboardLayout} from '../../../actions/dashboard'
 
 import type {Dashboard} from '../../../flowtype/dashboard-types'
 
@@ -39,13 +39,13 @@ class Editor extends Component {
         update: Function,
         editorLocked: Function,
         lockEditing: Function,
-        unlockEditing: Function
+        unlockEditing: Function,
+        updateDashboardLayout: Function
     }
     state: {
         breakpoints: {},
         cols: {},
         layoutsByItemId: {}
-    
     }
     
     static contextTypes = {
@@ -92,7 +92,7 @@ class Editor extends Component {
     
     componentWillReceiveProps(nextProps) {
         if (this.props.dashboard.id !== nextProps.dashboard.id) {
-            this.context.router.push(`/${nextProps.dashboard.id}`)
+            this.context.router.push(`/${nextProps.dashboard.id || ''}`)
         }
     }
     
@@ -107,9 +107,7 @@ class Editor extends Component {
     
     onLayoutChange(layout, allLayouts) {
         this.onResize(layout)
-        this.props.update(this.props.dashboard.id, {
-            layout: allLayouts
-        })
+        this.props.updateDashboardLayout(this.props.dashboard.id, allLayouts)
     }
     
     generateLayout() {
@@ -233,10 +231,7 @@ const mapStateToProps = (state) => {
     }
 }
 
-const mapDispatchToProps = (dispatch, ownProps) => ({
-    delete() {
-        return dispatch(deleteDashboard(ownProps.dashboard.id))
-    },
+const mapDispatchToProps = (dispatch) => ({
     update(id, changes) {
         return dispatch(updateDashboardChanges(id, changes))
     },
@@ -245,6 +240,9 @@ const mapDispatchToProps = (dispatch, ownProps) => ({
     },
     unlockEditing(id) {
         return dispatch(unlockDashboardEditing(id))
+    },
+    updateDashboardLayout(id, layout) {
+        return dispatch(updateDashboardLayout(id, layout))
     }
 })
 

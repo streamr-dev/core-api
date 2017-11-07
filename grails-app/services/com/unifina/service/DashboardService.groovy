@@ -242,35 +242,26 @@ class DashboardService {
 
 		String dashboardId = pathReader.readDashboardId()
 
-		Dashboard dashboard
-		DashboardItem item
-		Canvas canvas
-
-		try {
-			dashboard = authorizedGetById(dashboardId, user, Operation.READ)
-		} catch (NotFoundException ignored) {}
-
-
 		// Does this Dashboard have an item that corresponds to the given canvas and module?
 		// If yes, then the user is authenticated to view that widget by having access to the Dashboard.
 		// Otherwise, the user must have access to the Canvas itself.
-
-		if (dashboard) {
-			canvas = Canvas.get(pathReader.readCanvasId())
+		try {
+			Dashboard dashboard = authorizedGetById(dashboardId, user, Operation.READ)
+			Canvas canvas = Canvas.get(pathReader.readCanvasId())
 			Integer moduleId = pathReader.readModuleId()
-//			item = (DashboardItem) DashboardItem.withCriteria(uniqueResult: true) {
-//				eq("dashboard", dashboard)
-//				eq("canvas", canvas)
-//				eq("module", moduleId)
-//			}
-		}
-
-		if (item) {
+			DashboardItem item = (DashboardItem) DashboardItem.withCriteria(uniqueResult: true) {
+				eq("dashboard", dashboard)
+				eq("canvas", canvas)
+				eq("module", moduleId)
+			}
+			if (!item) {
+				throw new NotFoundException("Item not found!")
+			}
 			Set<Operation> checkedOperations = new HashSet<>()
 			checkedOperations.add(Operation.READ)
 			RuntimeRequest request = new RuntimeRequest(msg, user, canvas, path.replace("dashboards/$dashboard.id/", ""), path, checkedOperations)
 			return request
-		} else {
+		} catch (NotFoundException ignored) {
 			return signalPathService.buildRuntimeRequest(msg, path.replace("dashboards/$dashboardId/", ""), path, user)
 		}
 	}

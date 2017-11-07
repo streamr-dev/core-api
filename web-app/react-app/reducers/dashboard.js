@@ -77,7 +77,7 @@ const dashboard = function(state: State = initialState, action: Action) : State 
                     [action.dashboard.id]: {
                         ...action.dashboard,
                         new: true,
-                        saved: false
+                        saved: true
                     }
                 },
                 error: null,

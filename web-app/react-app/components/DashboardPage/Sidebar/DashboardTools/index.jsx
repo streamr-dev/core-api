@@ -15,7 +15,9 @@ import {updateAndSaveDashboard} from '../../../../actions/dashboard'
 import type { Dashboard } from '../../../../flowtype/dashboard-types'
 
 class DashboardTools extends Component {
-    
+    state: {
+        shareDialogIsOpen: boolean
+    }
     onSave: Function
     props: {
         dashboard: Dashboard,
@@ -31,7 +33,9 @@ class DashboardTools extends Component {
     
     constructor() {
         super()
-        
+        this.state = {
+            shareDialogIsOpen: false
+        }
         this.onSave = this.onSave.bind(this)
     }
 
@@ -52,19 +56,29 @@ class DashboardTools extends Component {
                 >
                     Save
                 </Button>
+                <Button
+                    block
+                    className="share-button"
+                    disabled={!this.props.canShare}
+                    onClick={() => {
+                        this.setState({
+                            shareDialogIsOpen: true
+                        })
+                    }}
+                >
+                    <FontAwesome name="user" />  Share
+                </Button>
                 <ShareDialog
                     resourceType="DASHBOARD"
                     resourceId={this.props.dashboard.id}
                     resourceTitle={`Dashboard ${this.props.dashboard.name}`}
-                >
-                    <Button
-                        block
-                        className="share-button"
-                        disabled={!this.props.canShare}
-                    >
-                        <FontAwesome name="user" />  Share
-                    </Button>
-                </ShareDialog>
+                    isOpen={this.state.shareDialogIsOpen}
+                    onClose={() => {
+                        this.setState({
+                            shareDialogIsOpen: false
+                        })
+                    }}
+                />
                 <DeleteButton buttonProps={{
                     block: true
                 }}>

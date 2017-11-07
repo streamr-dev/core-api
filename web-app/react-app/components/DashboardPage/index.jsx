@@ -27,9 +27,10 @@ const keymap = {
 const shortcutManager = new ShortcutManager(keymap)
 
 class DashboardPage extends Component {
-    _handleShortcuts = (action) => {
+    _handleShortcuts = (action, event) => {
         switch (action) {
             case 'SAVE': {
+                event.preventDefault()
                 store.dispatch(updateAndSaveDashboard(this.props.dashboard))
                 break
             }
@@ -54,18 +55,14 @@ class DashboardPage extends Component {
     
     render() {
         return (
-            <Shortcuts name="MAIN" handler={this._handleShortcuts} className={styles.shortcutHandler} preventDefaultgp>
-                <div style={{
-                    height: '100%'
-                }}>
-                    <Helmet>
-                        <title>{this.props.dashboard && this.props.dashboard.name || 'New Dashboard'}</title>
-                    </Helmet>
-                    <Notifier/>
-                    <Sidebar/>
-                    <Editor/>
-                    {this.props.children}
-                </div>
+            <Shortcuts name="MAIN" handler={this._handleShortcuts} className={styles.shortcutHandler}>
+                <Helmet>
+                    <title>{this.props.dashboard && this.props.dashboard.name || 'New Dashboard'}</title>
+                </Helmet>
+                <Notifier/>
+                <Sidebar/>
+                <Editor/>
+                {this.props.children}
             </Shortcuts>
         )
     }

@@ -11,7 +11,6 @@ import createLink from './helpers/createLink'
 import {getDashboard, getMyDashboardPermissions, newDashboard, openDashboard} from './actions/dashboard'
 import {getRunningCanvases} from './actions/canvas'
 
-import ShareDialog from './components/ShareDialog'
 import DashboardPage from './components/DashboardPage'
 
 import store from './stores/dashboardPageStore.js'
@@ -37,9 +36,7 @@ render(
                 }
                 store.dispatch(getRunningCanvases())
                 store.dispatch(openDashboard(id))
-            }}>
-                <Route path="share" component={ShareDialog} />
-            </Route>
+            }}/>
         </Router>
     </Provider>,
     document.getElementById('dashboardPageRoot')

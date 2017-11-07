@@ -36,8 +36,9 @@
 				var _this = this
 
 				this.getModuleJson(function(moduleJson) {
-					if (!moduleJson.uiChannel)
+					if (!moduleJson.uiChannel) {
 						throw "Module JSON does not have an UI channel: "+JSON.stringify(moduleJson)
+					}
 
 					options = options || _this.getResendOptions(moduleJson)
 					options.stream = moduleJson.uiChannel.id

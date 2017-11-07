@@ -3,6 +3,7 @@
 import axios from 'axios'
 import parseError from './utils/parseError'
 import createLink from '../helpers/createLink'
+import _ from 'lodash'
 
 import {showSuccess, showError} from './notification'
 
@@ -166,6 +167,63 @@ export const addDashboardItem = (dashboard: Dashboard, item: DashboardItem) => u
         item
     ]
 })
+
+type LayoutItem = {
+    i: string | number,
+    h: number,
+    isDraggable: ?number,
+    isResizable: ?number,
+    maxH: ?number,
+    maxW: ?number,
+    minH: number,
+    minW: number,
+    moved: boolean,
+    static: boolean,
+    w: number,
+    x: number,
+    y: number
+}
+type Layout = {
+    xs?: Array<LayoutItem>,
+    sm?: Array<LayoutItem>,
+    md?: Array<LayoutItem>,
+    lg?: Array<LayoutItem>
+}
+export const updateDashboardLayout = (dashboardId: Dashboard.id, layout: Layout) => (dispatch: Function, getState: Function) => {
+    const state = getState().dashboard
+    const dashboard = state.dashboardsById[state.openDashboard.id]
+    const normalizeLayoutItem = (item: LayoutItem) => ({
+        i: item.i || 0,
+        h: item.h || 0,
+        isDraggable: item.isDraggable,
+        isResizable: item.isResizable,
+        maxH: item.maxH,
+        maxW: item.maxW,
+        minH: item.minH || 0,
+        minW: item.minW || 0,
+        moved: item.moved || false,
+        static: item.static || false,
+        w: item.w || 0,
+        x: item.x || 0,
+        y: item.y || 0
+    })
+    const normalizeItemList = (itemList: ?Array<LayoutItem>) => itemList ? _.chain(itemList)
+        .sortBy('i')
+        .map(normalizeLayoutItem)
+        .value() : []
+    const normalizeLayout = (layout: Layout): Layout => ({
+        xs: normalizeItemList(layout.xs),
+        sm: normalizeItemList(layout.sm),
+        md: normalizeItemList(layout.md),
+        lg: normalizeItemList(layout.lg),
+    })
+    if (!_.isEqual(normalizeLayout(layout), normalizeLayout(dashboard.layout))) {
+        dispatch(updateDashboard({
+            ...dashboard,
+            layout
+        }))
+    }
+}
 
 export const updateDashboardItem = (dashboard: Dashboard, item: DashboardItem) => updateDashboard({
     ...dashboard,
