@@ -75,7 +75,7 @@
 				}
 
 				// Can be overridden by tag attributes
-				if (this.resendAll || this.resendLast!=null) {
+				if (this.resendAll || this.resendLast != null) {
 					resendOptions = {}
 
 					if (this.resendAll !== undefined) {
