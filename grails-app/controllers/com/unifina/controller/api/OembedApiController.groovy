@@ -32,7 +32,7 @@ class OembedApiController {
 						"width=\"${df.format(width)}\" " +
 						"height=\"${df.format(height)}\" " +
 						"src=\"${url}\"" +
-					"/>",
+					"></iframe>",
 				type: "rich",
 				version: "1.0",
 				provider_name: "Streamr",
