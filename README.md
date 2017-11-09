@@ -22,7 +22,7 @@ Also:
     - `sudo apt-get install zip unzip`
     - `curl -s "https://get.sdkman.io" | bash` (as in [SDKMAN install instructions](http://sdkman.io/install.html))
     - `source "$HOME/.sdkman/bin/sdkman-init.sh"`
-    - `sdk install grails`
+    - `sdk install grails 2.3.11`
 
 ## Building and running
 
