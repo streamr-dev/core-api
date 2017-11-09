@@ -23,7 +23,7 @@ class OembedApiControllerSpec extends Specification {
 		response.json.provider_url == "https://www.streamr.com"
 		response.json.type == "rich"
 		response.json.version == "1.0"
-		response.json.html.matches(/\s*<iframe.*\/>\s*/)
+		response.json.html.matches(/\s*<iframe.*>\s*/)
 		response.json.html.find(/width="400"/)
 		response.json.html.find(/height="300"/)
 		response.json.html.find(/src="${url}\"/)
