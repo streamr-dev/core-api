@@ -170,12 +170,12 @@
 						success: callback,
 						error: function (xhr) {
 							console.log("Error while communicating with widget: %s", xhr.responseText)
-							if (xhr.responseJSON)
+							if (xhr.responseJSON) {
 								_this.fire('error', xhr.responseJSON, undefined, false)
-							else
-								_this.fire('error', xhr.responseText, undefined, false)
+							} else {
+							    _this.fire('error', xhr.responseText, undefined, false)
+							}
 						}
-
 					});
 				})
 			},

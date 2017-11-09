@@ -155,7 +155,7 @@ class Editor extends Component {
     }
     
     static generateItemId(item: DashboardItem) {
-        return `${item.canvas}-${item.module}`
+        return `${item.canvas.id}-${item.module}`
     }
 
     render() {
