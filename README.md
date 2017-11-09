@@ -16,6 +16,14 @@ Running this app requires some helper infrastructure to be running:
 
 The easiest way to get these running is to get them in a Docker image we provide. (TODO: add instructions).
 
+Also:
+- Grails
+  - Install instructions for Ubuntu:
+    - `sudo apt-get install zip unzip`
+    - `curl -s "https://get.sdkman.io" | bash` (as in [SDKMAN install instructions](http://sdkman.io/install.html))
+    - `source "$HOME/.sdkman/bin/sdkman-init.sh"`
+    - `sdk install grails`
+
 ## Building and running
 
 - You need to have Grails 2.3.11 and node.js installed.
