@@ -1,6 +1,6 @@
 // @flow
 
-import React from 'react'
+import React, {Component} from 'react'
 
 import IntegrationKeyHandlerTableRow from './IntegrationKeyHandlerTableRow'
 import {Table} from 'react-bootstrap'
@@ -9,9 +9,9 @@ import {titleCase} from 'change-case'
 
 import styles from './integrationKeyHandlerTable.pcss'
 
-import type {IntegrationKey} from '../../../../flowtype/integration-key-types.js'
+import type {IntegrationKey} from '../../../../../flowtype/integration-key-types.js'
 
-export default class IntegrationKeyHandlerTable extends React.Component {
+export default class IntegrationKeyHandlerTable extends Component {
     
     props: {
         fields: Array<string>,

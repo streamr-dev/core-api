@@ -1,20 +1,20 @@
 // @flow
 
-import React from 'react'
+import React, {Component} from 'react'
 
 import { connect } from 'react-redux'
 import { getIntegrationKeysByService, createIntegrationKey, deleteIntegrationKey } from '../../../../actions/integrationKey'
 
 import {Col, ControlLabel} from 'react-bootstrap'
 
-import IntegrationKeyHandlerInput from '../IntegrationKeyHandlerInput'
-import IntegrationKeyHandlerTable from '../IntegrationKeyHandlerTable'
+import IntegrationKeyHandlerInput from './IntegrationKeyHandlerInput'
+import IntegrationKeyHandlerTable from './IntegrationKeyHandlerTable'
 
 import styles from './integrationKeyHandlerSegment.pcss'
 
 import type {IntegrationKey} from '../../../../flowtype/integration-key-types'
 
-export class IntegrationKeyHandlerSegment extends React.Component {
+export class IntegrationKeyHandlerSegment extends Component {
     
     onNew: Function
     onDelete: Function
@@ -55,7 +55,7 @@ export class IntegrationKeyHandlerSegment extends React.Component {
             name,
             service,
             json: integrationKey
-        }))
+        })
     }
     
     onDelete(id: IntegrationKey.id) {
