@@ -15,8 +15,6 @@ class Dashboard {
 	Date dateCreated
 	Date lastUpdated
 
-	SortedSet<DashboardItem> items
-
 	String layout = "{}" // JSON
 
 	static hasMany = [items: DashboardItem]
@@ -28,7 +26,7 @@ class Dashboard {
 
 	static mapping = {
 		items cascade: "all-delete-orphan"
-		id generator: IdGenerator.name
+		id generator: 'assigned'
 	}
 
 	@CompileStatic

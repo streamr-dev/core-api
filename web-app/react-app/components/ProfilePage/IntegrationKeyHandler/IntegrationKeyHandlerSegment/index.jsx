@@ -55,7 +55,7 @@ export class IntegrationKeyHandlerSegment extends React.Component {
             name,
             service,
             json: integrationKey
-        })
+        }))
     }
     
     onDelete(id: IntegrationKey.id) {

@@ -6,8 +6,7 @@ import grails.util.Holders
 import spock.lang.Specification
 
 /**
- * Insert any instance you like as a spring bean, use mockBean(name, instance) in your setup() method.
- * Then in cleanup(), call cleanupMockBeans().
+ * Insert any instance you like as a spring bean by using mockBean(name, instance) in your setup() method.
  */
 @TestMixin(GrailsUnitTestMixin)
 class BeanMockingSpecification extends Specification {

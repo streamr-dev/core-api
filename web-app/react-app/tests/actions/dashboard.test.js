@@ -177,7 +177,8 @@ describe('Dashboard actions', () => {
                 name: 'test',
                 layout: {
                     test: true
-                }
+                },
+                ownPermissions: []
             }
             moxios.stubRequest(`api/v1/dashboards/${id}`, {
                 status: 200,
@@ -479,6 +480,27 @@ describe('Dashboard actions', () => {
         })
     })
     
+    describe('updateDashboardChanges', async () => {
+        store.dispatch(actions.createDashboard({
+            id: 'test',
+            name: 'test',
+            name2: 'test2'
+        }))
+        const expectedActions = [{
+            type: actions.UPDATE_DASHBOARD,
+            dashboard: {
+                id: 'test',
+                name: 'test3',
+                name2: 'test2'
+            }
+        }]
+    
+        await store.dispatch(actions.updateDashboardChanges('test', {
+            name: 'test3'
+        }))
+        assert.deepStrictEqual(store.getActions(), expectedActions)
+    })
+    
     describe('createDashboard', () => {
         it('must return correct action', () => {
             assert.deepStrictEqual(actions.createDashboard({
@@ -516,4 +538,19 @@ describe('Dashboard actions', () => {
             })
         })
     })
+    
+    describe('lockDashboardEditing', () => {
+        assert.deepStrictEqual(actions.lockDashboardEditing('test'), {
+            type: actions.LOCK_DASHBOARD_EDITING,
+            id: 'test'
+        })
+    })
+    
+    describe('unlockDashboardEditing', () => {
+        assert.deepStrictEqual(actions.unlockDashboardEditing('test'), {
+            type: actions.UNLOCK_DASHBOARD_EDITING,
+            id: 'test'
+        })
+    })
+    
 })

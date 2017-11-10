@@ -61,14 +61,14 @@ public class EthereumCall extends AbstractHttpModule {
 		addInput(ethereumAccount);
 		addInput(contract);
 		contract.setDrivingInput(false);
-		contract.canToggleDrivingInput = false;
+		contract.setCanToggleDrivingInput(false);
 
 		function.setUpdateOnChange(true);		// update argument inputs
 
-		trigger.canToggleDrivingInput = false;
+		trigger.setCanToggleDrivingInput(false);
 		trigger.setDrivingInput(true);
-		trigger.requiresConnection = false;
-		ether.requiresConnection = false;
+		trigger.setRequiresConnection(false);
+		ether.setRequiresConnection(false);
 
 		addOutput(errors);
 
@@ -335,7 +335,7 @@ public class EthereumCall extends AbstractHttpModule {
 		}
 	}
 
-	public static void convertAndSend(Output output, String value) {
+	static void convertAndSend(Output output, String value) {
 		if (output instanceof StringOutput) {
 			output.send(value);
 		} else if (output instanceof BooleanOutput) {

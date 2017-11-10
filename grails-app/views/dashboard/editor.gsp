@@ -28,6 +28,7 @@
 				url="${config.streamr.ui.server}"
 				autoconnect="true"
 				autodisconnect="false"
+				authkey="${key.id}"
 		></streamr-client>
 		<div id="dashboardPageRoot"></div>
 	</body>

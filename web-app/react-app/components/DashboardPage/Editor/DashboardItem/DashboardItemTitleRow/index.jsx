@@ -17,9 +17,9 @@ class DashboardItemTitleRow extends Component {
     saveName: Function
     props: {
         item: DashboardItem,
+        dashboard: Dashboard,
         update: Function,
         remove: Function,
-        dashboard: Dashboard,
         className?: string,
         dragCancelClassName?: string,
         editingLocked: boolean
@@ -42,7 +42,7 @@ class DashboardItemTitleRow extends Component {
     }
     
     onRemove() {
-        this.props.remove()
+        this.props.remove(this.props.dashboard, this.props.item)
     }
     
     toggleEdit() {
@@ -52,7 +52,7 @@ class DashboardItemTitleRow extends Component {
     }
     
     saveName({target}) {
-        this.props.update({
+        this.props.update(this.props.dashboard, this.props.item, {
             title: target.value
         })
     }
@@ -113,15 +113,15 @@ const mapStateToProps = ({dashboard: {dashboardsById, openDashboard}}) => {
     }
 }
 
-const mapDispatchToProps = (dispatch, ownProps) => ({
-    update(newData) {
-        return dispatch(updateDashboardItem(ownProps.dashboard, {
-            ...ownProps.item,
+const mapDispatchToProps = (dispatch) => ({
+    update(db: Dashboard, item: DashboardItem, newData) {
+        return dispatch(updateDashboardItem(db, {
+            ...item,
             ...newData
         }))
     },
-    remove() {
-        return dispatch(removeDashboardItem(ownProps.dashboard, ownProps.item))
+    remove(db: Dashboard, item: DashboardItem) {
+        return dispatch(removeDashboardItem(db, item))
     }
 })
 

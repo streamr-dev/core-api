@@ -4,7 +4,7 @@ databaseChangeLog = {
 	changeSet(author: "haanpuu", id: "2017-06-01-dashboard-id-to-string-1") {
 		sql(
 /* 1. First ask the name of the foreign key in table 'dashboard' referencing table 'dashboard_item', and store in to variable @name */
-				"""SET @name = (
+"""SET @name = (
 	SELECT DISTINCT CONSTRAINT_NAME
 	FROM INFORMATION_SCHEMA.KEY_COLUMN_USAGE
 	WHERE REFERENCED_TABLE_NAME = 'dashboard' 
@@ -14,11 +14,11 @@ databaseChangeLog = {
 	TABLE_SCHEMA = (SELECT DATABASE())
 );""" +
 /* 2. Drop the foreign key (must be done like this because of the variable) */
-						"""				
+						"""
 SET @query = CONCAT('
 ALTER TABLE dashboard_item DROP FOREIGN KEY ', @name);
 PREPARE stmt FROM @query;
-EXECUTE stmt; 
+EXECUTE stmt;
 DEALLOCATE PREPARE stmt;""" +
 /* 3. Drop the index */
 						"""

@@ -13,75 +13,41 @@ import type {ReactChildren} from 'react-flow-types'
 import type {Permission} from '../../flowtype/permission-types'
 
 export class ShareDialog extends Component {
-    openModal: Function
-    closeModal: Function
     save: Function
-    state: {
-        open: boolean
-    }
     props: {
         resourceId: Permission.resourceId,
         resourceType: Permission.resourceType,
         resourceTitle: string,
         children?: ReactChildren,
-        save: Function
+        save: Function,
+        isOpen: boolean,
+        onClose: () => void
     }
     
     constructor() {
         super()
-        this.state = {
-            open: false
-        }
-        this.openModal = this.openModal.bind(this)
-        this.closeModal = this.closeModal.bind(this)
         this.save = this.save.bind(this)
-    }
-    
-    openModal() {
-        this.setState({
-            open: true
-        })
-    }
-    
-    closeModal() {
-        this.setState({
-            open: false
-        })
     }
     
     save() {
         this.props.save()
             .then(() => {
-                this.closeModal()
+                this.props.onClose()
             })
     }
     
-    // render() takes the child of the component, renders it as the root, injects Modal to its child and binds onclick
     render() {
-        const Child = React.Children.only(this.props.children)
-        let i = 0
-        let childsChildren = React.Children.map(Child.props.children, c => {
-            const el = React.isValidElement(c) ? React.cloneElement(c, {
-                key: i
-            }) : c
-            i++
-            return el
-        }) || []
-        childsChildren.push(
+        return (
             <Modal
-                key={i}
-                show={this.state.open}
-                onHide={this.closeModal}
+                show={this.props.isOpen}
+                onHide={this.props.onClose}
                 backdrop="static"
             >
                 <ShareDialogHeader resourceTitle={this.props.resourceTitle} />
                 <ShareDialogContent resourceTitle={this.props.resourceTitle} resourceType={this.props.resourceType} resourceId={this.props.resourceId} />
-                <ShareDialogFooter save={this.save} closeModal={this.closeModal} />
+                <ShareDialogFooter save={this.save} closeModal={this.props.onClose} />
             </Modal>
         )
-        return React.cloneElement(Child, {
-            onClick: this.openModal
-        }, childsChildren)
     }
 }
 

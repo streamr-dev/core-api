@@ -1,5 +1,6 @@
 package com.unifina.service
 
+import com.unifina.api.ApiException
 import com.unifina.api.NotFoundException
 import com.unifina.api.NotPermittedException
 import com.unifina.api.SaveDashboardCommand
@@ -13,7 +14,6 @@ import com.unifina.domain.security.SecUser
 import com.unifina.domain.signalpath.Canvas
 import com.unifina.signalpath.RuntimeRequest
 import com.unifina.utils.IdGenerator
-import grails.converters.JSON
 import groovy.transform.CompileStatic
 
 class DashboardService {
@@ -60,11 +60,10 @@ class DashboardService {
 	 * @param user
 	 * @return
 	 */
-	Dashboard create(SaveDashboardCommand validCommand, SecUser user) {
-		Dashboard dashboard = new Dashboard(validCommand.properties.subMap(["id", "name", "layout"]))
-		if (!dashboard.id) {
-			dashboard.id = IdGenerator.get()
-		}
+	Dashboard create(SaveDashboardCommand validCommand, SecUser user, String id = IdGenerator.getShort()) {
+		Dashboard dashboard = new Dashboard(validCommand.properties.subMap(["name", "layout"]))
+
+		dashboard.id = id
 		dashboard.user = user
 		dashboard.save(failOnError: true)
 
@@ -73,6 +72,9 @@ class DashboardService {
 				throw new ValidationException(it.errors)
 			}
 			DashboardItem item = new DashboardItem(it.properties)
+
+			item.id = IdGenerator.getShort()
+
 			dashboard.addToItems(item)
 			item.save(failOnError: true)
 		}
@@ -106,11 +108,12 @@ class DashboardService {
 				item = DashboardItem.findByDashboardAndId(dashboard, it.id)
 				item.setProperties(it.properties)
 				ids.remove(it.id)
-				item.save(failOnError: true)
 			} else {
-				item = new DashboardItem(it.properties << [dashboard: dashboard]).save(failOnError: true)
+				item = new DashboardItem(it.properties)
+				item.id = IdGenerator.getShort()
 				dashboard.addToItems(item)
 			}
+			item.save(failOnError: true)
 		}
 
 		ids.collect {
@@ -205,7 +208,7 @@ class DashboardService {
 		}
 
 		def item = authorizedGetDashboardItem(dashboardId, itemId, user, Operation.WRITE)
-		item.setProperties(command.getProperties())
+		item.setProperties(command.properties)
 		item.save(failOnError: true)
 
 		return item
@@ -237,29 +240,17 @@ class DashboardService {
 	RuntimeRequest buildRuntimeRequest(Map msg, String path, String originalPath = path, SecUser user) {
 		RuntimeRequest.PathReader pathReader = RuntimeRequest.getPathReader(path)
 
-		String dashboardId = pathReader.readDashboardId()
-
-		Dashboard dashboard
-		DashboardItem item
-		Canvas canvas
-
-		try {
-			dashboard = authorizedGetById(dashboardId, user, Operation.READ)
-		} catch (NotFoundException ignored) {}
-
+		Dashboard dashboard = authorizedGetById(pathReader.readDashboardId(), user, Operation.READ)
+		Canvas canvas = Canvas.get(pathReader.readCanvasId())
+		Integer moduleId = pathReader.readModuleId()
 
 		// Does this Dashboard have an item that corresponds to the given canvas and module?
 		// If yes, then the user is authenticated to view that widget by having access to the Dashboard.
 		// Otherwise, the user must have access to the Canvas itself.
-
-		if (dashboard) {
-			canvas = Canvas.get(pathReader.readCanvasId())
-			Integer moduleId = pathReader.readModuleId()
-			item = (DashboardItem) DashboardItem.withCriteria(uniqueResult: true) {
-				eq("dashboard", dashboard)
-				eq("canvas", canvas)
-				eq("module", moduleId)
-			}
+		DashboardItem item = (DashboardItem) DashboardItem.withCriteria(uniqueResult: true) {
+			eq "dashboard", dashboard
+			eq "canvas", canvas
+			eq "module", moduleId
 		}
 
 		if (item) {
@@ -268,7 +259,7 @@ class DashboardService {
 			RuntimeRequest request = new RuntimeRequest(msg, user, canvas, path.replace("dashboards/$dashboard.id/", ""), path, checkedOperations)
 			return request
 		} else {
-			return signalPathService.buildRuntimeRequest(msg, path.replace("dashboards/$dashboardId/", ""), path, user)
+			return signalPathService.buildRuntimeRequest(msg, path.replace("dashboards/$dashboard.id/", ""), path, user)
 		}
 	}
 }

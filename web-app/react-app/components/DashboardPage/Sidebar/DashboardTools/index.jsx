@@ -1,7 +1,6 @@
 // @flow
 
 import React, {Component} from 'react'
-import {any} from 'prop-types'
 import {connect} from 'react-redux'
 import {Button} from 'react-bootstrap'
 import FontAwesome from 'react-fontawesome'
@@ -16,7 +15,9 @@ import {updateAndSaveDashboard} from '../../../../actions/dashboard'
 import type { Dashboard } from '../../../../flowtype/dashboard-types'
 
 class DashboardTools extends Component {
-    
+    state: {
+        shareDialogIsOpen: boolean
+    }
     onSave: Function
     props: {
         dashboard: Dashboard,
@@ -26,24 +27,20 @@ class DashboardTools extends Component {
         dispatch: Function,
         router: any,
         canShare: boolean,
-        canWrite: boolean
-    }
-    
-    static contextTypes = {
-        router: any
+        canWrite: boolean,
+        updateAndSaveDashboard: Function
     }
     
     constructor() {
         super()
-        
+        this.state = {
+            shareDialogIsOpen: false
+        }
         this.onSave = this.onSave.bind(this)
     }
 
     onSave() {
-        this.props.dispatch(updateAndSaveDashboard(this.props.dashboard))
-            .then(({dashboard}) => {
-                this.context.router.push(`/${dashboard.id}`)
-            })
+        this.props.updateAndSaveDashboard(this.props.dashboard)
     }
     
     render() {
@@ -59,19 +56,29 @@ class DashboardTools extends Component {
                 >
                     Save
                 </Button>
+                <Button
+                    block
+                    className="share-button"
+                    disabled={!this.props.canShare}
+                    onClick={() => {
+                        this.setState({
+                            shareDialogIsOpen: true
+                        })
+                    }}
+                >
+                    <FontAwesome name="user" />  Share
+                </Button>
                 <ShareDialog
                     resourceType="DASHBOARD"
                     resourceId={this.props.dashboard.id}
                     resourceTitle={`Dashboard ${this.props.dashboard.name}`}
-                >
-                    <Button
-                        block
-                        className="share-button"
-                        disabled={!this.props.canShare}
-                    >
-                        <FontAwesome name="user" />  Share
-                    </Button>
-                </ShareDialog>
+                    isOpen={this.state.shareDialogIsOpen}
+                    onClose={() => {
+                        this.setState({
+                            shareDialogIsOpen: false
+                        })
+                    }}
+                />
                 <DeleteButton buttonProps={{
                     block: true
                 }}>
@@ -84,4 +91,10 @@ class DashboardTools extends Component {
 
 const mapStateToProps = (state) => parseDashboard(state)
 
-export default connect(mapStateToProps)(DashboardTools)
+const mapDispatchToProps = (dispatch) => ({
+    updateAndSaveDashboard(db) {
+        return dispatch(updateAndSaveDashboard(db))
+    }
+})
+
+export default connect(mapStateToProps, mapDispatchToProps)(DashboardTools)

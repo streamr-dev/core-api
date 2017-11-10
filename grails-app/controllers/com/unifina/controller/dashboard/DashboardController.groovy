@@ -29,7 +29,8 @@ class DashboardController {
 
 	def editor() {
 		return [
-				config: grailsApplication.config
+				config: grailsApplication.config,
+				key: springSecurityService.currentUser?.keys?.iterator()?.next()
 		]
 	}
 }

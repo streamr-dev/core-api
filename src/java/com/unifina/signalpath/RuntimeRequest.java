@@ -27,8 +27,9 @@ public class RuntimeRequest extends LinkedHashMap<String, Object> implements ITi
 		this.path = path;
 		this.originalPath = originalPath;
 
-		if (msg.get("type")==null)
+		if (msg.get("type") == null) {
 			throw new IllegalArgumentException("RuntimeRequests must contain the key 'type', with a String value identifying the type of request.");
+		}
 
 		for (String key : msg.keySet()) {
 			this.put(key, msg.get(key));

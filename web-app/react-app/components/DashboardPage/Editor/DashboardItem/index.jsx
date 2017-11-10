@@ -3,6 +3,8 @@
 import React, {Component} from 'react'
 import {connect} from 'react-redux'
 import {showError} from '../../../../actions/notification'
+import path from 'path'
+import createLink from '../../../../helpers/createLink'
 
 import TitleRow from './DashboardItemTitleRow'
 import WebComponent from '../../../WebComponent'
@@ -15,6 +17,7 @@ import type {Dashboard, DashboardItem as DBItem} from '../../../../flowtype/dash
 class DashboardItem extends Component {
     webcomponent: HTMLElement
     onResize: Function
+    createWebcomponentUrl: Function
     props: {
         item: DBItem,
         dashboard: Dashboard,
@@ -31,6 +34,7 @@ class DashboardItem extends Component {
     constructor() {
         super()
         this.onResize = this.onResize.bind(this)
+        this.createWebcomponentUrl = this.createWebcomponentUrl.bind(this)
     }
     
     componentDidMount() {
@@ -53,9 +57,24 @@ class DashboardItem extends Component {
             this.webcomponent.dispatchEvent(event)
         }
     }
+    
+    createWebcomponentUrl() {
+        const {dashboard, item: {canvas, module: itemModule}} = this.props
+        // If the db is new the user must have the ownership of the canvas so use url /api/v1/canvases/<canvasId>/modules/<module>
+        // Else use the url /api/v1/dashboards/<dashboardId>/canvases/<canvasId>/modules/<module>
+        return createLink(path.resolve(
+            '/api/v1',
+            !dashboard.new ? 'dashboards' : '',
+            !dashboard.new ? dashboard.id.toString() : '',
+            'canvases',
+            canvas.toString(),
+            'modules',
+            itemModule.toString()
+        ))
+    }
 
     render() {
-        const {item, dashboard} = this.props
+        const {item} = this.props
         return (
             <div className={styles.dashboardItem}>
                 <div className={styles.header}>
@@ -68,9 +87,7 @@ class DashboardItem extends Component {
                                 type={item.webcomponent}
                                 onError={this.props.showError}
                                 webComponentRef={(item: HTMLElement) => this.webcomponent = item}
-                                dashboardId={dashboard.id}
-                                canvasId={item.canvas}
-                                moduleId={item.module.toString()}
+                                url={this.createWebcomponentUrl()}
                             />
                         )}
                     </div>

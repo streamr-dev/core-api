@@ -8,7 +8,7 @@ import 'react-select/dist/react-select.css'
 
 import {getCurrentUser, updateCurrentUserName, updateCurrentUserTimezone} from '../../../actions/user'
 
-import type {User} from '../../../types/user-types'
+import type {User} from '../../../flowtype/user-types'
 
 export class ProfileSettings extends Component {
     

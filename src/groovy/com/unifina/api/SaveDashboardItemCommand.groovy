@@ -1,6 +1,7 @@
 package com.unifina.api
 
 import com.unifina.domain.dashboard.Dashboard
+import com.unifina.domain.dashboard.DashboardItem
 import com.unifina.domain.signalpath.Canvas
 import com.unifina.utils.Webcomponent
 import grails.converters.JSON
@@ -10,7 +11,6 @@ import grails.validation.Validateable
 class SaveDashboardItemCommand {
 	String id
 	String title
-	Dashboard dashboard
 	Canvas canvas
 	Integer module
 	String webcomponent
@@ -26,11 +26,19 @@ class SaveDashboardItemCommand {
 		}
 	}
 
-	def getWebcomponent() {
-		webcomponent ?: JSON.parse(canvas.json)?.modules?.find { it.hash == module }?.uiChannel?.webcomponent
+	def getProperties() {
+		[
+				id          : id,
+				title       : title,
+				canvas      : canvas,
+				module      : module,
+				webcomponent: Webcomponent.getByName(webcomponent ?: JSON.parse(canvas.json)?.modules?.find {
+					it.hash == module
+				}?.uiChannel?.webcomponent)
+		]
 	}
 
 	Map toMap() {
-		return getProperties().subMap(["id", "title", "dashboard", "canvas", "module", "webcomponent"])
+		return getProperties().subMap(["id", "title", "canvas", "module", "webcomponent"])
 	}
 }

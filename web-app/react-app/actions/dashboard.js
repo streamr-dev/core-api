@@ -3,6 +3,7 @@
 import axios from 'axios'
 import parseError from './utils/parseError'
 import createLink from '../helpers/createLink'
+import _ from 'lodash'
 
 import {showSuccess, showError} from './notification'
 
@@ -80,6 +81,7 @@ export const getDashboard = (id: Dashboard.id) => (dispatch: Function) => {
 export const updateAndSaveDashboard = (dashboard: Dashboard) => (dispatch: Function) => {
     dispatch(updateAndSaveDashboardRequest())
     const createNew = dashboard.new
+    
     return axios({
         method: createNew ? 'POST' : 'PUT',
         url: createLink(createNew ? apiUrl : `${apiUrl}/${dashboard.id}`),
@@ -90,16 +92,17 @@ export const updateAndSaveDashboard = (dashboard: Dashboard) => (dispatch: Funct
     })
         .then(({data}) => {
             dispatch(showSuccess({
-                title: 'Dashboard saved succesfully!'
+                title: 'Dashboard saved successfully!'
             }))
             
             if (createNew && dashboard.id !== data.id) {
                 dispatch(changeDashboardId(dashboard.id, data.id))
             }
             
-            return dispatch(updateAndSaveDashboardSuccess({
+            dispatch(updateAndSaveDashboardSuccess({
                 ...data,
-                layout: (typeof data.layout === 'string') ? JSON.parse(data.layout) : data.layout
+                layout: (typeof data.layout === 'string') ? JSON.parse(data.layout) : data.layout,
+                ownPermissions: [...(dashboard.ownPermissions || []), ...(createNew ? ['read', 'write', 'share'] : [])]
             }))
         })
         .catch(res => {
@@ -143,6 +146,15 @@ export const getMyDashboardPermissions = (id: Dashboard.id) => (dispatch: Functi
         })
 }
 
+export const updateDashboardChanges = (id: Dashboard.id, changes: {}) => (dispatch: Function, getState: Function) => {
+    const state = getState()
+    const dashboard = state.dashboard.dashboardsById[id]
+    dispatch(updateDashboard({
+        ...dashboard,
+        ...changes
+    }))
+}
+
 export const updateDashboard = (dashboard: Dashboard) => ({
     type: UPDATE_DASHBOARD,
     dashboard
@@ -156,17 +168,74 @@ export const addDashboardItem = (dashboard: Dashboard, item: DashboardItem) => u
     ]
 })
 
+type LayoutItem = {
+    i: string | number,
+    h: number,
+    isDraggable: ?number,
+    isResizable: ?number,
+    maxH: ?number,
+    maxW: ?number,
+    minH: number,
+    minW: number,
+    moved: boolean,
+    static: boolean,
+    w: number,
+    x: number,
+    y: number
+}
+type Layout = {
+    xs?: Array<LayoutItem>,
+    sm?: Array<LayoutItem>,
+    md?: Array<LayoutItem>,
+    lg?: Array<LayoutItem>
+}
+export const updateDashboardLayout = (dashboardId: Dashboard.id, layout: Layout) => (dispatch: Function, getState: Function) => {
+    const state = getState().dashboard
+    const dashboard = state.dashboardsById[state.openDashboard.id]
+    const normalizeLayoutItem = (item: LayoutItem) => ({
+        i: item.i || 0,
+        h: item.h || 0,
+        isDraggable: item.isDraggable,
+        isResizable: item.isResizable,
+        maxH: item.maxH,
+        maxW: item.maxW,
+        minH: item.minH || 0,
+        minW: item.minW || 0,
+        moved: item.moved || false,
+        static: item.static || false,
+        w: item.w || 0,
+        x: item.x || 0,
+        y: item.y || 0
+    })
+    const normalizeItemList = (itemList: ?Array<LayoutItem>) => itemList ? _.chain(itemList)
+        .sortBy('i')
+        .map(normalizeLayoutItem)
+        .value() : []
+    const normalizeLayout = (layout: Layout): Layout => ({
+        xs: normalizeItemList(layout.xs),
+        sm: normalizeItemList(layout.sm),
+        md: normalizeItemList(layout.md),
+        lg: normalizeItemList(layout.lg),
+    })
+    if (!_.isEqual(normalizeLayout(layout), normalizeLayout(dashboard.layout))) {
+        dispatch(updateDashboard({
+            ...dashboard,
+            layout
+        }))
+    }
+}
+
 export const updateDashboardItem = (dashboard: Dashboard, item: DashboardItem) => updateDashboard({
     ...dashboard,
     items: [
-        ...(dashboard.items.filter(it => it.canvas !== item.canvas || it.module !== item.module)),
+        ...(dashboard.items.filter(it => it.canvas.id !== item.canvas.id || it.module !== item.module)),
         item
     ]
 })
 
 export const removeDashboardItem = (dashboard: Dashboard, item: DashboardItem) => updateDashboard({
     ...dashboard,
-    items: dashboard.items.filter(it => it.canvas !== item.canvas || it.module !== item.module)
+    items: dashboard.items.filter(it => it.canvas.id !== item.canvas.id || it.module !== item.module)
 })
 
 export const createDashboard = (dashboard: Dashboard) => ({

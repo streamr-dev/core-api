@@ -14,11 +14,12 @@
 	$(document).ready(function() {
 		$('#name').focus()
 
+		var currentTz
 		<g:if test="${user.timezone}">
-			var currentTz = "${user.timezone}"
+			currentTz = "${user.timezone}"
 		</g:if>
 		<g:else>
-			var currentTz = moment.tz.guess()
+			currentTz = moment.tz.guess()
 		</g:else>
 		
 		$('span.timezone').text(currentTz)
@@ -29,7 +30,10 @@
 
     	var $tzSelect = $('#timezone')
 		var tzOpts = moment.tz.names().map(function(tz) {
-			return $('<option '+(tz === currentTz ? 'selected': '')+' value="'+tz+'">'+tz+'</option>')
+			return $('<option/>', {
+			    selected: tz === currentTz ? 'selected' : 'false',
+			    value: tz
+			})
 		})
 
 		$tzSelect.append(tzOpts)

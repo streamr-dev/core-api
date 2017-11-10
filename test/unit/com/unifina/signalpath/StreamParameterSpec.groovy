@@ -1,14 +1,14 @@
 package com.unifina.signalpath
 
+import com.unifina.BeanMockingSpecification
 import com.unifina.domain.data.Feed
 import com.unifina.domain.data.Stream
 import com.unifina.service.FeedService
 import com.unifina.utils.Globals
 import grails.test.mixin.Mock
-import spock.lang.Specification
 
 @Mock([Feed, Stream])
-class StreamParameterSpec extends Specification {
+class StreamParameterSpec extends BeanMockingSpecification {
 
 	AbstractSignalPathModule ownerModule
 	StreamParameter streamParameter
@@ -29,7 +29,7 @@ class StreamParameterSpec extends Specification {
 		streamParameter = new StreamParameter(ownerModule, "name")
 		Globals globals = Mock(Globals)
 		ownerModule.getGlobals() >> globals
-		globals.getBean(FeedService) >> new FeedService()
+		mockBean(FeedService, new FeedService())
 	}
 
 	def "has typeName of 'Stream'"() {

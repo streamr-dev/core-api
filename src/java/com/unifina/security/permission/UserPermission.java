@@ -17,7 +17,7 @@ public class UserPermission extends Permission {
 
 	@Override
 	public boolean equals(Object obj) {
-		return obj instanceof GrailsApplicationPermission;
+		return obj instanceof UserPermission;
 	}
 
 	@Override

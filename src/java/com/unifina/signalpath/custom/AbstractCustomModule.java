@@ -42,23 +42,23 @@ public abstract class AbstractCustomModule extends ModuleWithUI implements ITime
 	@Override
 	public void beforeSerialization() {
 		super.beforeSerialization();
-		parentSignalPath = null;
-		inputs = null;
-		inputsByName = null;
-		outputs = null;
-		outputsByName = null;
-		drivingInputs = null;
-		readyInputs = null;
+		setParentSignalPath(null);
+		setInputs(null);
+		setInputsByName(null);
+		setOutputs(null);
+		setOutputsByName(null);
+		setDrivingInputs(null);
+		setReadyInputs(null);
 	}
 
 	void copyStateFromWrapper(StoredCustomModuleState customModuleState) {
-		this.parentSignalPath = customModuleState.getParentSignalPath();
-		this.inputs = customModuleState.getInputs();
-		this.inputsByName = customModuleState.getInputsByName();
-		this.outputs = customModuleState.getOutputs();
-		this.outputsByName = customModuleState.getOutputsByName();
-		this.drivingInputs = customModuleState.getDrivingInputs();
-		this.readyInputs = customModuleState.getReadyInputs();
+		setParentSignalPath(customModuleState.getParentSignalPath());
+		setInputs(customModuleState.getInputs());
+		setInputsByName(customModuleState.getInputsByName());
+		setOutputs(customModuleState.getOutputs());
+		setOutputsByName(customModuleState.getOutputsByName());
+		setDrivingInputs(customModuleState.getDrivingInputs());
+		setReadyInputs(customModuleState.getReadyInputs());
 	}
 
 	void setParentWrapper(AbstractJavaCodeWrapper parentWrapper) {
@@ -66,6 +66,13 @@ public abstract class AbstractCustomModule extends ModuleWithUI implements ITime
 	}
 
 	StoredCustomModuleState getStoredState() {
-		return new StoredCustomModuleState(parentSignalPath, inputs, inputsByName, outputs, outputsByName, drivingInputs, readyInputs);
+		return new StoredCustomModuleState(getParentSignalPath(),
+			new ArrayList<>(Arrays.asList(getInputs())),
+			getInputsByName(),
+			new ArrayList<>(Arrays.asList(getOutputs())),
+			getOutputsByName(),
+			getDrivingInputs(),
+			getReadyInputs()
+		);
 	}
 }

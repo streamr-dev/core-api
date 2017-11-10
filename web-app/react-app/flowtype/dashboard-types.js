@@ -7,7 +7,8 @@ export type Dashboard = {
     name: string,
     items: Array<DashboardItem>,
     ownPermissions?: Array<Permission.operation>,
-    editingLocked?: boolean
+    editingLocked?: boolean,
+    new?: boolean
 }
 
 export type DashboardReducerState = {
@@ -32,12 +33,11 @@ export type DashboardReducerAction = {
 }
 
 export type DashboardItem = {
-    id: ?number,
-    tempId?: number,
+    id: ?string,
     title: string,
     dashboard: Dashboard.id,
     module: number,
-    canvas: Canvas.id,
+    canvas: Canvas,
     size: string,
     ord: number,
     layout?: {

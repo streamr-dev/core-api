@@ -450,19 +450,31 @@ class SignalPathService {
 		Canvas canvas = Canvas.get(sp.canvas.id)
 
 		try {
-			boolean isFirst = canvas.serialization == null
-			def serialization = isFirst ? new Serialization(canvas: canvas) : canvas.serialization
+			boolean isFirst = (canvas.serialization == null)
+			Serialization serialization = isFirst ? new Serialization(canvas: canvas) : canvas.serialization
 
-			serialization.bytes = serializationService.serialize(sp)
-			serialization.date = sp.globals.time
-			serialization.save(failOnError: true, flush: true)
-			canvas.serialization = serialization
+			// Serialize
+			byte[] bytes = serializationService.serialize(sp)
+			boolean notTooBig = bytes.length <= serializationService.serializationMaxBytes()
 
-			if (isFirst) {
-				Canvas.executeUpdate("update Canvas c set c.serialization = ? where c.id = ?", [serialization, canvas.id])
+			if (notTooBig) {
+                serialization.bytes = serializationService.serialize(sp)
+                serialization.date = sp.globals.time
+                serialization.save(failOnError: true, flush: true)
+                canvas.serialization = serialization
+
+                if (isFirst) {
+                    Canvas.executeUpdate("update Canvas c set c.serialization = ? where c.id = ?", [serialization, canvas.id])
+                }
 			}
+
 			long timeTaken = System.currentTimeMillis() - startTime
-			log.info("Canvas " + canvas.id + " serialized (size: ${serialization.bytes.length} bytes, processing time: ${timeTaken} ms)")
+			String stats = "(size: ${bytes.length} bytes, processing time: ${timeTaken} ms)"
+			if (notTooBig) {
+				log.info("Canvas " + canvas.id + " serialized " + stats)
+			} else {
+				log.info("Canvas " + canvas.id + " serialization skipped because too large " + stats)
+			}
 		} catch (SerializationException ex) {
 			log.error("Serialization of canvas " + canvas.id + " failed.")
 			throw ex

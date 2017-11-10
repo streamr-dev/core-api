@@ -11,15 +11,15 @@ class ContactController {
 
 	@Secured("IS_AUTHENTICATED_ANONYMOUSLY")
 	def send() {
-		String verificationUrl = grailsApplication.config.recaptcha.verifyUrl
-		String secretParam = grailsApplication.config.recaptchav2.secret
-		String responseParam = params."g-recaptcha-response"
+//		String verificationUrl = grailsApplication.config.recaptcha.verifyUrl
+//		String secretParam = grailsApplication.config.recaptchainvisible.secret
+//		String responseParam = params."g-recaptcha-response"
 
-		def response = Unirest.post(verificationUrl)
-			.field("secret", secretParam)
-			.field("response", responseParam)
-			.asJson()
-		if (response.body.jsonObject.success == true) {
+//		def response = Unirest.post(verificationUrl)
+//			.field("secret", secretParam)
+//			.field("response", responseParam)
+//			.asJson()
+//		if (response.body.jsonObject.success == true) {
 			mailService.sendMail {
 				from grailsApplication.config.unifina.email.sender
 				to grailsApplication.config.unifina.email.sender
@@ -27,8 +27,8 @@ class ContactController {
 				body "Name: $params.contactName\nEmail: $params.contactEmail\nMessage: $params.contactMessage"
 			}
 			render ""
-		} else {
-			render (success:false, status:403) as JSON
-		}
+//		} else {
+//			render (success:false, status:403) as JSON
+//		}
 	}
 }

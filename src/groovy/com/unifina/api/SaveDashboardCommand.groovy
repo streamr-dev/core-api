@@ -11,5 +11,15 @@ class SaveDashboardCommand {
 
 	static constraints = {
 		name(blank: false)
+		layout()
+	}
+
+	// Groovy's .getProperties() sometimes leaves some of the properties out of the map
+	def getProperties() {
+		return [
+				name: name,
+				items: items,
+				layout: layout
+		]
 	}
 }

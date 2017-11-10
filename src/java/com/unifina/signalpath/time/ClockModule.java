@@ -18,9 +18,9 @@ public class ClockModule extends AbstractSignalPathModule implements ITimeListen
 	private SimpleDateFormat df = null;
 
 	public ClockModule() {
-		format.canToggleDrivingInput = false;
-		tickUnit.canToggleDrivingInput = false;
-		tickRate.canToggleDrivingInput = false;
+		format.setCanToggleDrivingInput(false);
+		tickUnit.setCanToggleDrivingInput(false);
+		tickRate.setCanToggleDrivingInput(false);
 	}
 
 	@Override

@@ -36,8 +36,9 @@
 				var _this = this
 
 				this.getModuleJson(function(moduleJson) {
-					if (!moduleJson.uiChannel)
+					if (!moduleJson.uiChannel) {
 						throw "Module JSON does not have an UI channel: "+JSON.stringify(moduleJson)
+					}
 
 					options = options || _this.getResendOptions(moduleJson)
 					options.stream = moduleJson.uiChannel.id
@@ -75,7 +76,7 @@
 				}
 
 				// Can be overridden by tag attributes
-				if (this.resendAll || this.resendLast!=null) {
+				if (this.resendAll || this.resendLast != null) {
 					resendOptions = {}
 
 					if (this.resendAll !== undefined) {
@@ -169,12 +170,12 @@
 						success: callback,
 						error: function (xhr) {
 							console.log("Error while communicating with widget: %s", xhr.responseText)
-							if (xhr.responseJSON)
+							if (xhr.responseJSON) {
 								_this.fire('error', xhr.responseJSON, undefined, false)
-							else
-								_this.fire('error', xhr.responseText, undefined, false)
+							} else {
+							    _this.fire('error', xhr.responseText, undefined, false)
+							}
 						}
-
 					});
 				})
 			},

@@ -15,14 +15,6 @@ describe('Dashboard reducer', () => {
         fetching: false
     }
     
-    beforeEach(() => {
-        global._ = _
-    })
-    
-    afterEach(() => {
-        delete global._
-    })
-    
     it('should return the initial state', () => {
         assert.deepStrictEqual(reducer(undefined, {}), initialState)
     })
@@ -44,7 +36,7 @@ describe('Dashboard reducer', () => {
             ...initialState,
             dashboardsById: {
                 test: {
-                    id: 'dashboard'
+                    id: 'test'
                 }
             }
         }, {
@@ -55,7 +47,7 @@ describe('Dashboard reducer', () => {
             ...initialState,
             dashboardsById: {
                 test2: {
-                    id: 'dashboard'
+                    id: 'test2'
                 }
             }
         })
@@ -363,7 +355,7 @@ describe('Dashboard reducer', () => {
                 test: {
                     id: 'test',
                     a: 2,
-                    saved: false,
+                    saved: true,
                     new: true
                 }
             },
@@ -372,6 +364,63 @@ describe('Dashboard reducer', () => {
             },
             error: null,
             fetching: false
+        })
+    })
+    
+    it('should handle LOCK_DASHBOARD_EDITING', () => {
+        assert.deepStrictEqual(reducer({
+            ...initialState,
+            dashboardsById: {
+                test: {
+                    id: 'test'
+                },
+                test2: {
+                    id: 'test2'
+                }
+            }
+        }, {
+            type: actions.LOCK_DASHBOARD_EDITING,
+            id: 'test'
+        }), {
+            ...initialState,
+            dashboardsById: {
+                test: {
+                    id: 'test',
+                    editingLocked: true
+                },
+                test2: {
+                    id: 'test2'
+                }
+            }
+        })
+    })
+    
+    it('should handle UNLOCK_DASHBOARD_EDITING', () => {
+        assert.deepStrictEqual(reducer({
+            ...initialState,
+            dashboardsById: {
+                test: {
+                    id: 'test',
+                    editingLocked: true
+                },
+                test2: {
+                    id: 'test2'
+                }
+            }
+        }, {
+            type: actions.UNLOCK_DASHBOARD_EDITING,
+            id: 'test'
+        }), {
+            ...initialState,
+            dashboardsById: {
+                test: {
+                    id: 'test',
+                    editingLocked: false
+                },
+                test2: {
+                    id: 'test2'
+                }
+            }
         })
     })
 })

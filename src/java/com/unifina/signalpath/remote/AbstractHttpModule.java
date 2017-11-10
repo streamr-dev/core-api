@@ -2,6 +2,7 @@ package com.unifina.signalpath.remote;
 
 import com.unifina.data.FeedEvent;
 import com.unifina.data.IEventRecipient;
+import com.unifina.datasource.IStopListener;
 import com.unifina.feed.ITimestamped;
 import com.unifina.signalpath.*;
 import com.unifina.utils.MapTraversal;
@@ -35,7 +36,7 @@ import java.util.concurrent.TimeUnit;
  *
  * Crucial benefit over simply doing Unirest.post: not blocking the whole canvas (Streamr thread) while request is pending
  */
-public abstract class AbstractHttpModule extends ModuleWithSideEffects implements IEventRecipient {
+public abstract class AbstractHttpModule extends ModuleWithSideEffects implements IEventRecipient, IStopListener {
 
 	protected static final String BODY_FORMAT_JSON = "application/json";
 	protected static final String BODY_FORMAT_FORMDATA = "application/x-www-form-urlencoded";
@@ -64,14 +65,14 @@ public abstract class AbstractHttpModule extends ModuleWithSideEffects implement
 		if (cachedHttpClient == null) {
 			if (trustSelfSigned) {
 				try {
-					SSLContext sslcontext = SSLContexts
+					SSLContext sslContext = SSLContexts
 							.custom()
 							.loadTrustMaterial(null, new DontVerifyStrategy())
 							.build();
 					cachedHttpClient = HttpAsyncClients.custom()
 							.setMaxConnTotal(MAX_CONNECTIONS)
 							.setMaxConnPerRoute(MAX_CONNECTIONS)
-							.setSSLContext(sslcontext)
+							.setSSLContext(sslContext)
 							.build();
 				} catch (NoSuchAlgorithmException | KeyStoreException | KeyManagementException e) {
 					trustSelfSigned = false;
@@ -87,6 +88,48 @@ public abstract class AbstractHttpModule extends ModuleWithSideEffects implement
 			cachedHttpClient.start();
 		}
 		return cachedHttpClient;
+	}
+
+	private void stopClient() {
+		try {
+			if (cachedHttpClient != null) {
+				cachedHttpClient.close();
+			}
+		} catch (Exception e) {
+			throw new RuntimeException("Closing HTTP client failed", e);
+		}
+	}
+
+	@Override
+	public void onStop() {
+		stopClient();
+	}
+
+	@Override
+	public void finalize() {
+		stopClient();
+	}
+
+	@Override
+	public void initialize() {
+		super.initialize();
+		// copied from ModuleWithUI
+		if (getGlobals().isRunContext()) {
+			getGlobals().getDataSource().addStopListener(this);
+		}
+	}
+
+	private SSLContext getSelfSignedSslContext() {
+		SSLContext sslContext;
+		try {
+			sslContext = SSLContexts
+					.custom()
+					.loadTrustMaterial(null, new TrustSelfSignedStrategy())
+					.build();
+		} catch (NoSuchAlgorithmException | KeyStoreException | KeyManagementException e) {
+			sslContext = null;
+		}
+		return sslContext;
 	}
 
 	@Override
@@ -122,12 +165,14 @@ public abstract class AbstractHttpModule extends ModuleWithSideEffects implement
 			timeoutMillis = 1000 * timeoutSeconds;
 		}
 
+		if (trustSelfSigned && getSelfSignedSslContext() == null) {
+			trustSelfSigned = false;
+			// TODO: notify user that self-signed certificates aren't supported
+		}
+
 		// HTTP module in async mode won't send outputs on SendOutput(),
 		// 	but only in receive() where it creates its own Propagator
-		propagationSink = isAsync;
-
-		// try getting HTTP client, resets trustSelfSigned if such SSL client can't be created
-		getHttpClient();
+		setPropagationSink(isAsync);
 	}
 
 	/**
