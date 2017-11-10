@@ -34,9 +34,4 @@ class CanvasTestHelper {
 	static def modules(CanvasService canvasService, Canvas canvas) {
 		canvasService.signalPathService.servletContext["signalPathRunners"][canvas.runner].signalPaths[0].mods
 	}
-
-	static def globals(CanvasService canvasService, Canvas canvas) {
-		canvasService.signalPathService.servletContext["signalPathRunners"][canvas.runner].globals
-	}
-
 }
