@@ -10,7 +10,6 @@ import TitleRow from './DashboardItemTitleRow'
 import WebComponent from '../../../WebComponent'
 
 import styles from './dashboardItem.pcss'
-import './webcomponentStyles.css'
 
 import type {Dashboard, DashboardItem as DBItem} from '../../../../flowtype/dashboard-types'
 
