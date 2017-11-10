@@ -85,7 +85,7 @@ describe('IntegrationKeyHandler', () => {
     
     describe('render', () => {
         it('renders ControlLabel correctly', () => {
-            const el = mount(<IntegrationKeyHandlerSegment
+            const el = shallow(<IntegrationKeyHandlerSegment
                 tableFields={[]}
                 inputFields={[]}
                 integrationKeys={[]}
@@ -97,7 +97,7 @@ describe('IntegrationKeyHandler', () => {
             />)
             const label = el.childAt(0).childAt(0)
             assert(label.is('ControlLabel'))
-            assert.equal(label.text(), 'test')
+            assert.equal(label.childAt(0).text(), 'test')
         })
         it('renders IntegrationKeyHandlerTable correctly', () => {
             const el = shallow(<IntegrationKeyHandlerSegment
@@ -106,7 +106,7 @@ describe('IntegrationKeyHandler', () => {
                 integrationKeys={[3,2,1]}
                 service=""
                 name="test"
-                getIntegrationKeysByService=""
+                getIntegrationKeysByService={() => {}}
                 createIntegrationKey=""
                 deleteIntegrationKey=""
             />)
@@ -125,7 +125,7 @@ describe('IntegrationKeyHandler', () => {
                 integrationKeys={[3,2,1]}
                 service=""
                 name="test"
-                getIntegrationKeysByService=""
+                getIntegrationKeysByService={() => {}}
                 createIntegrationKey=""
                 deleteIntegrationKey=""
             />)

@@ -1,4 +1,3 @@
-
 import assert from 'assert-diff'
 import thunk from 'redux-thunk'
 import configureMockStore from 'redux-mock-store'
@@ -6,7 +5,7 @@ import moxios from 'moxios'
 
 import * as actions from '../../actions/permission'
 
-const middlewares = [ thunk ]
+const middlewares = [thunk]
 const mockStore = configureMockStore(middlewares)
 
 global.Streamr = {
@@ -18,7 +17,7 @@ moxios.promiseWait = () => new Promise(resolve => moxios.wait(resolve))
 
 describe('Permission actions', () => {
     let store
-
+    
     beforeEach(() => {
         moxios.install()
         store = mockStore({
@@ -83,7 +82,7 @@ describe('Permission actions', () => {
                 status: 200,
                 response: permissions
             })
-        
+            
             const expectedActions = [{
                 type: actions.GET_RESOURCE_PERMISSIONS_REQUEST,
             }, {
@@ -92,7 +91,7 @@ describe('Permission actions', () => {
                 resourceId,
                 permissions
             }]
-        
+            
             await store.dispatch(actions.getResourcePermissions(resourceType, resourceId))
             assert.deepStrictEqual(store.getActions(), expectedActions)
         })
@@ -103,18 +102,20 @@ describe('Permission actions', () => {
                 status: 500,
                 response: new Error('test')
             })
-        
+            
             const expectedActions = [{
                 type: actions.GET_RESOURCE_PERMISSIONS_REQUEST,
             }, {
                 type: actions.GET_RESOURCE_PERMISSIONS_FAILURE,
                 error: new Error('test')
             }]
-        
+            
             try {
                 await store.dispatch(actions.getResourcePermissions(resourceType, resourceId))
             } catch (e) {
-                assert.deepStrictEqual(store.getActions(), expectedActions)
+                assert.deepStrictEqual(store.getActions().slice(0, 2), expectedActions)
+                assert.deepStrictEqual(store.getActions()[2].type, 'CREATE_NOTIFICATION')
+                assert.deepStrictEqual(store.getActions()[2].notification.type, 'error')
             }
         })
     })
@@ -230,7 +231,7 @@ describe('Permission actions', () => {
                         response: permissions[1]
                     })
                 })
-    
+                
                 const expectedActions = [{
                     type: actions.SAVE_ADDED_RESOURCE_PERMISSION_REQUEST,
                     resourceType,
@@ -252,7 +253,7 @@ describe('Permission actions', () => {
                     resourceId,
                     permission: permissions[1]
                 }]
-    
+                
                 await store.dispatch(actions.saveUpdatedResourcePermissions(resourceType, resourceId))
                 assert.deepStrictEqual(store.getActions().slice(0, 4), expectedActions)
             })
@@ -275,7 +276,7 @@ describe('Permission actions', () => {
                     operation: 'test3',
                     new: false
                 }]
-    
+                
                 store = mockStore({
                     permission: {
                         byTypeAndId: {
@@ -297,7 +298,7 @@ describe('Permission actions', () => {
                         response: new Error()
                     })
                 })
-    
+                
                 const expectedActions = [{
                     type: actions.SAVE_ADDED_RESOURCE_PERMISSION_REQUEST,
                     resourceType,
@@ -325,11 +326,11 @@ describe('Permission actions', () => {
                         error: new Error()
                     }
                 }]
-    
+                
                 try {
                     await store.dispatch(actions.saveUpdatedResourcePermissions(resourceType, resourceId))
                 } catch (e) {
-                    assert.deepStrictEqual(store.getActions().slice(0,4), expectedActions)
+                    assert.deepStrictEqual(store.getActions().slice(0, 4), expectedActions)
                 }
             })
         })
@@ -352,7 +353,7 @@ describe('Permission actions', () => {
                     operation: 'test3',
                     removed: true
                 }]
-    
+                
                 store = mockStore({
                     permission: {
                         byTypeAndId: {
@@ -390,7 +391,7 @@ describe('Permission actions', () => {
                     operation: 'test3',
                     removed: true
                 }]
-    
+                
                 store = mockStore({
                     permission: {
                         byTypeAndId: {
@@ -410,7 +411,7 @@ describe('Permission actions', () => {
                         status: 200
                     })
                 })
-        
+                
                 const expectedActions = [{
                     type: actions.SAVE_REMOVED_RESOURCE_PERMISSION_REQUEST,
                     resourceType,
@@ -432,7 +433,7 @@ describe('Permission actions', () => {
                     resourceId,
                     permission: permissions[2]
                 }]
-        
+                
                 await store.dispatch(actions.saveUpdatedResourcePermissions(resourceType, resourceId))
                 assert.deepStrictEqual(store.getActions().slice(0, 4), expectedActions)
             })
@@ -454,7 +455,7 @@ describe('Permission actions', () => {
                     operation: 'test3',
                     removed: true
                 }]
-    
+                
                 store = mockStore({
                     permission: {
                         byTypeAndId: {
@@ -476,7 +477,7 @@ describe('Permission actions', () => {
                         response: new Error()
                     })
                 })
-        
+                
                 const expectedActions = [{
                     type: actions.SAVE_REMOVED_RESOURCE_PERMISSION_REQUEST,
                     resourceType,
@@ -508,7 +509,7 @@ describe('Permission actions', () => {
                 try {
                     await store.dispatch(actions.saveUpdatedResourcePermissions(resourceType, resourceId))
                 } catch (e) {
-                    assert.deepStrictEqual(store.getActions().slice(0,4), expectedActions)
+                    assert.deepStrictEqual(store.getActions().slice(0, 4), expectedActions)
                 }
             })
         })
@@ -574,7 +575,7 @@ describe('Permission actions', () => {
                     operation: 'share'
                 }
             }]
-    
+            
             store.dispatch(actions.removeAllResourcePermissionsByUser(resourceType, resourceId, user))
             assert.deepStrictEqual(store.getActions(), expectedActions)
         })
@@ -636,7 +637,7 @@ describe('Permission actions', () => {
                         }
                     }
                 })
-                const expectedActions = currentPermissions.slice(1,3).map(permission => ({
+                const expectedActions = currentPermissions.slice(1, 3).map(permission => ({
                     type: actions.REMOVE_RESOURCE_PERMISSION,
                     resourceType,
                     resourceId,

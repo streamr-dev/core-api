@@ -25,19 +25,19 @@ describe('ShareDialogFooter', () => {
             const footer = mount(
                 <ShareDialogFooter save={() => {}} closeModal={() => {}} />
             )
-            const saveButton = footer.childAt(0)
+            const saveButton = footer.find('.btn').at(0)
             assert.equal(saveButton.text(), 'Save')
             assert(saveButton.props().onClick === footer.props().save)
-            assert.equal(saveButton.props().bsStyle, 'primary')
+            assert(saveButton.props().className.indexOf('primary') >= 0)
         })
         it('contains cancel button', () => {
             const footer = mount(
                 <ShareDialogFooter save={() => {}} closeModal={() => {}} />
             )
-            const cancelButton = footer.childAt(1)
+            const cancelButton = footer.find('.btn').at(1)
             assert.equal(cancelButton.text(), 'Close')
             assert(cancelButton.props().onClick === footer.props().closeModal)
-            assert.equal(cancelButton.props().bsStyle, 'default')
+            assert(cancelButton.props().className.indexOf('default') >= 0)
         })
     })
 })

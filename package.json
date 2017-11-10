@@ -20,7 +20,10 @@
     "moduleNameMapper": {
       "\\.(jpg|jpeg|png|gif|eot|otf|webp|svg|ttf|woff|woff2|mp4|webm|wav|mp3|m4a|aac|oga)$": "<rootDir>/__mocks__/fileMock.js",
       "\\.(css|pcss)$": "identity-obj-proxy"
-    }
+    },
+    "setupFiles": [
+      "./web-app/react-app/tests/setup-tests.js"
+    ]
   },
   "author": "",
   "license": "Unifina",
@@ -44,7 +47,8 @@
     "css-mqpacker": "^6.0.0",
     "draggabilly": "^2.1.1",
     "empty": "^0.10.1",
-    "enzyme": "^2.9.1",
+    "enzyme": "^3.1.1",
+    "enzyme-adapter-react-16": "^1.0.4",
     "eslint": "^3.19.0",
     "eslint-loader": "^1.7.1",
     "eslint-plugin-flowtype": "^2.33.0",
@@ -79,6 +83,7 @@
     "promise-settle": "^0.3.0",
     "prop-types": "^15.5.8",
     "react": "latest",
+    "react-addons-test-utils": "^15.6.2",
     "react-bootstrap": "^0.31.0",
     "react-dom": "^16.0.0",
     "react-flow-types": "^0.1.1",

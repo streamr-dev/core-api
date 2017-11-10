@@ -43,9 +43,18 @@ export class ShareDialog extends Component {
                 onHide={this.props.onClose}
                 backdrop="static"
             >
-                <ShareDialogHeader resourceTitle={this.props.resourceTitle} />
-                <ShareDialogContent resourceTitle={this.props.resourceTitle} resourceType={this.props.resourceType} resourceId={this.props.resourceId} />
-                <ShareDialogFooter save={this.save} closeModal={this.props.onClose} />
+                <ShareDialogHeader
+                    resourceTitle={this.props.resourceTitle}
+                />
+                <ShareDialogContent
+                    resourceTitle={this.props.resourceTitle}
+                    resourceType={this.props.resourceType}
+                    resourceId={this.props.resourceId}
+                />
+                <ShareDialogFooter
+                    save={this.save}
+                    closeModal={this.props.onClose}
+                />
             </Modal>
         )
     }
