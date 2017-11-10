@@ -55,5 +55,7 @@ class UnifinaCorePluginUrlMappings {
 
 		// Mappings for pages using React Router (the root for the router)
 		"/dashboard/editor/$id**?"(controller: "dashboard", action: "editor")
+
+		"/api/v1/oembed"(controller: "oembedApi", action: "index")
 	}
 }
