@@ -10,7 +10,7 @@ declare var Streamr: {
     showError: (message: ?string, title: string, delay: number) => void
 }
 
-class Notifier extends Component {
+export class Notifier extends Component {
     props: {
         notifications: {
             [Notification.id]: Notification
@@ -30,8 +30,7 @@ class Notifier extends Component {
     
     componentWillReceiveProps({notifications}) {
         if (notifications) {
-            for (const id in notifications) {
-                const notification = notifications[id]
+            for (const notification of Object.values(notifications)) {
                 if (notification && !this.props.notifications[notification.id]) {
                     this.createNotification(notification)
                 }
@@ -44,7 +43,7 @@ class Notifier extends Component {
     }
 }
 
-const mapStateToProps = ({notifications: {byId}}) => ({
+export const mapStateToProps = ({notifications: {byId}}) => ({
     notifications: byId
 })
 
