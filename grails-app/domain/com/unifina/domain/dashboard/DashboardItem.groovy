@@ -2,44 +2,47 @@ package com.unifina.domain.dashboard
 
 import com.unifina.domain.signalpath.Canvas
 import com.unifina.utils.IdGenerator
+import com.unifina.utils.Webcomponent
 
-class DashboardItem implements Comparable {
+class DashboardItem {
 
+	String id
 	String title
 	Canvas canvas
+	Dashboard dashboard
 	Integer module
-	String webcomponent
-	Integer ord
-	String size
-	
+	Webcomponent webcomponent
+
 	static belongsTo = [dashboard: Dashboard, canvas: Canvas]
 
 	static constraints = {
-		title(nullable:true)
+		title nullable: true, blank: false
 	}
 
-	int compareTo(obj) {
-		int cmp = ord.compareTo(obj.ord)
-		return cmp != 0 ? cmp :
-			   id != null && obj.id != null ? id.compareTo(obj.id) :
-		       title.compareTo(obj.title)
+	int compareTo(Object obj) {
+		DashboardItem item = (DashboardItem) obj
+		return id != null ? id.compareTo(item.id) : title.compareTo(item.title)
+	}
+
+	static mapping = {
+		id generator: 'assigned'
+		dashboard column: "dashboard_id"
+		canvas column: "canvas_id"
 	}
 
 	Map toMap() {
 		return [
-				id: id,
-				dashboard: dashboard.id,
-				title: title,
-				ord: ord,
-				size: size,
-				canvas:  canvas.id,
-				module: module,
-				webcomponent: webcomponent
+				id          : id,
+				dashboard   : dashboard?.id,
+				title       : title,
+				canvas      : canvas?.id,
+				module      : module,
+				webcomponent: webcomponent.toString()
 		]
 	}
 
 	void updateWebcomponent() {
-		def module = canvas.toMap().modules.find { it.hash ==  module }
-		webcomponent = module?.uiChannel?.webcomponent
+		def module = canvas.toMap().modules.find { it.hash == module }
+		setWebcomponent(module?.uiChannel?.webcomponent)
 	}
 }

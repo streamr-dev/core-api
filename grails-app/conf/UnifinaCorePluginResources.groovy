@@ -172,10 +172,6 @@ modules = {
 		dependsOn 'hopscotch, streamr'
 		resource url:[dir:'js/unifina/tour', file:'tour.js', plugin: 'unifina-core']
 	}
-	'dashboard-editor' {
-		dependsOn 'backbone, backbone-associations, jquery-ui, streamr, confirm-button, bootstrap, name-editor'
-		resource url:[dir:'js/unifina/dashboard', file:'dashboard-editor.js', plugin: 'unifina-core']
-	}
 	'webcomponent-resources' {
 		dependsOn 'streamr-client, streamr-chart, streamr-heatmap, streamr-table, streamr-button, streamr-switcher, streamr-text-field, streamr-map'
 	}
@@ -257,7 +253,7 @@ modules = {
 		resource url:[dir:'js/unifina/streamr-table', file:'streamr-table.js', plugin: 'unifina-core']
 	}
 	'streamr-credentials-control' {
-		dependsOn 'backbone, streamr, clipboardjs, bootbox'
+		dependsOn 'backbone, streamr, clipboardjs, bootbox, confirm-button'
 		resource url:[dir:'js/unifina/streamr-credentials-control', file:'streamr-credentials-control.js', plugin:'unifina-core']
 	}
 	'scrollspy-helper' {
@@ -275,13 +271,17 @@ modules = {
 	}
 	'webpack-commons-bundle' {
 		resource url:[dir:'js/unifina/webpack-bundles', file:'commons.bundle.js']
+		resource url:[dir:'js/unifina/webpack-bundles', file:'commons.bundle.css']
 	}
 	'profile-page-webpack-bundle' {
-// 		TODO: Comment back when there are more bundles than just one
-//		dependsOn 'webpack-commons-bundle'
-		dependsOn 'confirm-button'
+		dependsOn 'webpack-commons-bundle'
 		resource url: [dir: 'js/unifina/webpack-bundles', file: 'profilePage.bundle.js', plugin: 'unifina-core']
 		resource url: [dir: 'js/unifina/webpack-bundles', file: 'profilePage.bundle.css', plugin: 'unifina-core']
+	}
+	'dashboard-page-webpack-bundle' {
+		dependsOn 'webpack-commons-bundle'
+		resource url: [dir: 'js/unifina/webpack-bundles', file: 'dashboardPage.bundle.js', plugin: 'unifina-core']
+		resource url: [dir: 'js/unifina/webpack-bundles', file: 'dashboardPage.bundle.css', plugin: 'unifina-core']
 	}
 	'signalpath-core' {
 		// Easier to merge if dependencies are one-per-row instead of comma-separated list

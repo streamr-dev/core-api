@@ -36,8 +36,9 @@
 				var _this = this
 
 				this.getModuleJson(function(moduleJson) {
-					if (!moduleJson.uiChannel)
+					if (!moduleJson.uiChannel) {
 						throw "Module JSON does not have an UI channel: "+JSON.stringify(moduleJson)
+					}
 
 					options = options || _this.getResendOptions(moduleJson)
 					options.stream = moduleJson.uiChannel.id
@@ -159,7 +160,6 @@
 					if (authKey) {
 						headers['Authorization'] = 'token ' + authKey
 					}
-
 					$.ajax({
 						type: 'POST',
 						url: _this.url + '/request',
@@ -170,12 +170,12 @@
 						success: callback,
 						error: function (xhr) {
 							console.log("Error while communicating with widget: %s", xhr.responseText)
-							if (xhr.responseJSON)
+							if (xhr.responseJSON) {
 								_this.fire('error', xhr.responseJSON, undefined, false)
-							else
-								_this.fire('error', xhr.responseText, undefined, false)
+							} else {
+							    _this.fire('error', xhr.responseText, undefined, false)
+							}
 						}
-
 					});
 				})
 			},

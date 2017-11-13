@@ -74,13 +74,13 @@ class DashboardSpec extends LoginTester1Spec {
 		// Create a dashboard
 		when: "clicked to create new dashboard"
 		createButton.click()
-		then: "go to the dashboard show page"
+		then: "go to the dashboard editor page"
 		waitFor { at DashboardShowPage }
 
 		when: "changed the name and saved"
 		setDashboardName(name)
 		saveButton.click()
-		then: "go to dashboard show page"
+		then: "go to dashboard editor page"
 		waitFor {
 			findSuccessNotification()
 		}
@@ -202,7 +202,7 @@ class DashboardSpec extends LoginTester1Spec {
 		
 		when: "clicked 'cancel'"
 			$(".modal-footer button", text:"Cancel").click()
-		then: "back to show-page"
+		then: "back to editor-page"
 			waitFor { at DashboardShowPage }
 			then: "confirmation is not visible anymore"
 			waitFor { !($(".modal-content .bootbox-body", text:contains("delete")).displayed) }
@@ -259,21 +259,21 @@ class DashboardSpec extends LoginTester1Spec {
 
 	def "not shared dashboard cannot be opened"() {
 		when: "try to upload an existing dashboard without permission"
-			go "dashboard/show/456456"
+			go "dashboard/editor/456456"
 		then: "error shown"
 			waitForErrorNotification()
 	}
 
 	def "non-existing dashboard cannot be opened"() {
 		when: "try to upload a non-existing dashboard"
-			go "dashboard/show/asdfasfasdfsadfasfar"
+			go "dashboard/editor/asdfasfasdfsadfasfar"
 		then: "error shown"
 			waitForErrorNotification()
 	}
 
 	def "a dashboard with no share-permission doesn't show share button enabled"() {
 		when: "try to upload a non-existing dashboard"
-		go "dashboard/show/567567"
+		go "dashboard/editor/567567"
 		then: "share button is disabled"
 		waitFor {
 			at DashboardShowPage
@@ -283,9 +283,9 @@ class DashboardSpec extends LoginTester1Spec {
 		dropdownShareButton.hasClass("disabled")
 	}
 
-	def "a dashboard with no write-permission doesn't show save and delete buttons enabled"() {
+	def "a dashboard with no write-permission doesn't editor save and delete buttons enabled"() {
 		when: "try to upload a non-existing dashboard"
-		go "dashboard/show/678678"
+		go "dashboard/editor/678678"
 		then: "no save and delete buttons are disabled"
 		waitFor {
 			at DashboardShowPage

@@ -8,22 +8,7 @@ import {
     UPDATE_CURRENT_USER_TIMEZONE
 } from '../actions/user.js'
 
-import type {User} from '../types/user-types.js'
-
-type State = {
-    currentUser: User,
-    error?: ?string,
-    fetching?: boolean
-}
-
-type Action = {
-    type: string,
-    user: User,
-    error?: string,
-    timezone?: string,
-    name?: string,
-    id: string
-}
+import type {State, Action} from '../flowtype/user-types.js'
 
 const initialState = {
     currentUser: {},

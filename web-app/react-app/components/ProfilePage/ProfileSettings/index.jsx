@@ -8,11 +8,9 @@ import 'react-select/dist/react-select.css'
 
 import {getCurrentUser, updateCurrentUserName, updateCurrentUserTimezone} from '../../../actions/user'
 
-import type {User} from '../../../types/user-types'
+import type {User} from '../../../flowtype/user-types'
 
-declare var Streamr: any
-
-class ProfileSettings extends Component {
+export class ProfileSettings extends Component {
     
     props: {
         user: User,
@@ -23,19 +21,19 @@ class ProfileSettings extends Component {
     onNameChange: Function
     onTimezoneChange: Function
     
-    constructor(props) {
-        super(props)
+    constructor() {
+        super()
         this.onNameChange = this.onNameChange.bind(this)
         this.onTimezoneChange = this.onTimezoneChange.bind(this)
     }
     componentDidMount() {
         this.props.getCurrentUser()
     }
-    onNameChange({target}) {
+    onNameChange({target}: {target: any}) {
         this.props.updateCurrentUserName(target.value)
     }
-    onTimezoneChange(value) {
-        this.props.updateCurrentUserTimezone(value)
+    onTimezoneChange({target}: {target: any}) {
+        this.props.updateCurrentUserTimezone(target.value)
     }
     render() {
         const options = moment.tz.names().map(tz => ({
@@ -57,7 +55,7 @@ class ProfileSettings extends Component {
                         <div className="form-group">
                             <label className="control-label">Password</label>
                             <div>
-                                <a href={Streamr.createLink('profile', 'changePwd')}>Change Password</a>
+                                <a href="/unifina-core/profile/changePwd">Change Password</a>
                             </div>
                         </div>
             

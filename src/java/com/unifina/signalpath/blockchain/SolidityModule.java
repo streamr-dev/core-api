@@ -143,7 +143,6 @@ public class SolidityModule extends ModuleWithUI implements Pullable<EthereumCon
 				String name = input.name.replace("_", " ");
 				Parameter p = EthereumToStreamrTypes.asParameter(input.type, name, this);
 				p.setCanConnect(false);
-				p.setCanToggleDrivingInput(false);
 				addInput(p);
 			}
 			if (constructor.payable) {
@@ -187,16 +186,10 @@ public class SolidityModule extends ModuleWithUI implements Pullable<EthereumCon
 		log.info("compile response: "+responseJson);
 
 		if (returned.contracts != null && returned.contracts.size() > 0) {
-			// If several contracts were returned, pick the one with longest bytecode; that's most probably the "main" contract
-			ContractMetadata mainContract = returned.contracts.get(0);
-			for (int i = 1; i < returned.contracts.size(); i++) {
-				ContractMetadata c = returned.contracts.get(i);
-				if (c.bytecode.length() > mainContract.bytecode.length()) {
-					mainContract = c;
-				}
-			}
 			// TODO: bring returned.errors to UI somehow? They're warnings probably since compilation was successful
-			return new EthereumContract(mainContract.address, new EthereumABI(mainContract.abi));
+			// TODO: handle several contracts returned?
+			ContractMetadata c = returned.contracts.get(0);
+			return new EthereumContract(c.address, new EthereumABI(c.abi));
 		} else {
 			// TODO java 8: String.join
 			throw new RuntimeException(new Gson().toJson(returned.errors));

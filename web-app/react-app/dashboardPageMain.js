@@ -1,0 +1,43 @@
+// @flow
+
+import React from 'react'
+import {render} from 'react-dom'
+import {Provider} from 'react-redux'
+import { Router, Route, useRouterHistory } from 'react-router'
+import { createHistory } from 'history'
+import uuid from 'uuid'
+import createLink from './helpers/createLink'
+
+import {getDashboard, getMyDashboardPermissions, newDashboard, openDashboard} from './actions/dashboard'
+import {getRunningCanvases} from './actions/canvas'
+
+import DashboardPage from './components/DashboardPage'
+
+import store from './stores/dashboardPageStore.js'
+
+const basename = createLink('/dashboard/editor').replace(window.location.origin, '')
+
+const history = useRouterHistory(createHistory)({
+    basename
+})
+
+render(
+    <Provider store={store}>
+        <Router history={history}>
+            <Route path="/(:id)" component={DashboardPage} onEnter={({params}) => {
+                let id
+                if (params.id !== undefined) {
+                    id = params.id
+                    store.dispatch(getDashboard(id))
+                    store.dispatch(getMyDashboardPermissions(id))
+                } else {
+                    id = uuid.v4()
+                    store.dispatch(newDashboard(id))
+                }
+                store.dispatch(getRunningCanvases())
+                store.dispatch(openDashboard(id))
+            }}/>
+        </Router>
+    </Provider>,
+    document.getElementById('dashboardPageRoot')
+)
