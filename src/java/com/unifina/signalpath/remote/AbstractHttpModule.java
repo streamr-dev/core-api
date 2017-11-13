@@ -57,6 +57,8 @@ public abstract class AbstractHttpModule extends ModuleWithSideEffects implement
 	private transient Propagator asyncPropagator;
 	private transient CloseableHttpAsyncClient cachedHttpClient;
 
+	private boolean hasDebugLogged = false; // TODO: remove
+
 	private static class DontVerifyStrategy implements TrustStrategy {
 		public boolean isTrusted(X509Certificate[] var1, String var2) throws CertificateException {
 			return true;
@@ -192,6 +194,7 @@ public abstract class AbstractHttpModule extends ModuleWithSideEffects implement
 		HttpRequestBase request = null;
 		try {
 			request = createRequest();
+			log.info("HTTP request " + request.toString() + " from canvas " + getRootSignalPath().getCanvas().getId());
 		} catch (Exception e) {
 			response.errors.add("Constructing HTTP request failed");
 			response.errors.add(e.getMessage());
@@ -244,6 +247,19 @@ public abstract class AbstractHttpModule extends ModuleWithSideEffects implement
 				}
 			}
 		});
+
+		// TODO: remove
+		if (!hasDebugLogged) {
+			hasDebugLogged = true;
+			log.info("Created HttpClient from canvas " + getRootSignalPath().getCanvas().getId());
+			Set<Thread> threads = Thread.getAllStackTraces().keySet();
+			for (Thread t : threads) {
+				if (t.getName().startsWith("I/O dispatcher")) {
+					log.info(t.getName());
+				}
+			}
+			log.info("end of threads.");
+		}
 
 		if (!isAsync) {
 			try {
