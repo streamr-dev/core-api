@@ -17,6 +17,7 @@ import org.apache.http.conn.ssl.TrustStrategy;
 import org.apache.http.impl.nio.client.CloseableHttpAsyncClient;
 import org.apache.http.impl.nio.client.HttpAsyncClients;
 import org.apache.http.nio.client.HttpAsyncClient;
+import org.apache.log4j.Logger;
 
 import javax.net.ssl.SSLContext;
 import java.security.KeyManagementException;
@@ -37,6 +38,8 @@ import java.util.concurrent.TimeUnit;
  * Crucial benefit over simply doing Unirest.post: not blocking the whole canvas (Streamr thread) while request is pending
  */
 public abstract class AbstractHttpModule extends ModuleWithSideEffects implements IEventRecipient, IStopListener {
+
+	private static final Logger log = Logger.getLogger(AbstractHttpModule.class);
 
 	protected static final String BODY_FORMAT_JSON = "application/json";
 	protected static final String BODY_FORMAT_FORMDATA = "application/x-www-form-urlencoded";
@@ -96,7 +99,7 @@ public abstract class AbstractHttpModule extends ModuleWithSideEffects implement
 				cachedHttpClient.close();
 			}
 		} catch (Exception e) {
-			throw new RuntimeException("Closing HTTP client failed", e);
+			log.error("Closing HTTP client failed", e);
 		}
 	}
 
