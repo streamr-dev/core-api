@@ -1,6 +1,3 @@
-[submodule "test/functional/core"]
-	path = test/functional/core
-	url = git@github.com:streamr-dev/core-functest-common.git
 [submodule "web-app/js/swagger-ui"]
 	path = web-app/js/swagger-ui
 	url = git@github.com:streamr-dev/swagger-ui
