@@ -58,7 +58,7 @@ export class ShareDialogInputRow extends Component {
     }
 }
 
-const mapDispatchToProps = (dispatch, ownProps) => ({
+export const mapDispatchToProps = (dispatch, ownProps) => ({
     addPermission(permission) {
         dispatch(addResourcePermission(ownProps.resourceType, ownProps.resourceId, permission))
     }

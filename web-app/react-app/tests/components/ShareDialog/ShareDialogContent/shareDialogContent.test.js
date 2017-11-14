@@ -1,14 +1,16 @@
 
 import React from 'react'
-import {shallow, mount} from 'enzyme'
+import {shallow} from 'enzyme'
 import assert from 'assert-diff'
 import sinon from 'sinon'
 
-import {ShareDialogContent} from '../../../../components/ShareDialog/ShareDialogContent'
+import * as permissionActions from '../../../../actions/permission.js'
+
+import {ShareDialogContent, mapDispatchToProps} from '../../../../components/ShareDialog/ShareDialogContent'
 
 describe('ShareDialogContent', () => {
     describe('componentWillMount', () => {
-        it('calls props.getResoucePermissions', () => {
+        it('calls props.getResourcePermissions', () => {
             const getResourcePermissions = sinon.spy()
             const content = shallow(
                 <ShareDialogContent
@@ -23,7 +25,7 @@ describe('ShareDialogContent', () => {
                 />
             )
             content.instance().componentWillMount()
-            assert(getResourcePermissions.called)
+            assert(getResourcePermissions.calledOnce)
         })
     })
     
@@ -31,7 +33,11 @@ describe('ShareDialogContent', () => {
         let content
         beforeEach(() => {
             content = shallow(
-                <ShareDialogContent resourceType="testType" resourceId="testId" getResourcePermissions={() => {}} />
+                <ShareDialogContent
+                    resourceType="testType"
+                    resourceId="testId"
+                    getResourcePermissions={() => {}}
+                />
             )
         })
         it('should contain ShareDialogOwnerRow', () => {
@@ -53,6 +59,29 @@ describe('ShareDialogContent', () => {
             assert.deepStrictEqual(ownerRow.props(), {
                 resourceType: 'testType',
                 resourceId: 'testId'
+            })
+        })
+    })
+    
+    describe('mapDispatchToProps', () => {
+        it('should return right kind of object with right kind of attrs', () => {
+            assert.equal(typeof mapDispatchToProps(), 'object')
+            assert.equal(typeof mapDispatchToProps().getResourcePermissions, 'function')
+        })
+        
+        describe('getResourcePermissions', () => {
+            it('should dispatch getResourcePermission with right attrs', () => {
+                const dispatchSpy = sinon.spy()
+                const getStub = sinon.stub(permissionActions, 'getResourcePermissions', (type, id,) => {
+                    return `${type}-${id}`
+                })
+                mapDispatchToProps(dispatchSpy, {
+                    resourceType: 'myType',
+                    resourceId: 'myId'
+                })
+                assert(dispatchSpy.calledOnce)
+                assert(getStub.calledOnce)
+                assert(dispatchSpy.calledWith('myType-myId'))
             })
         })
     })

@@ -3,11 +3,30 @@ import React from 'react'
 import {shallow} from 'enzyme'
 import assert from 'assert-diff'
 import sinon from 'sinon'
+import * as permissionActions from '../../../../../actions/permission.js'
 
-import {ShareDialogInputRow} from '../../../../../components/ShareDialog/ShareDialogContent/ShareDialogInputRow'
+import {ShareDialogInputRow, mapDispatchToProps} from '../../../../../components/ShareDialog/ShareDialogContent/ShareDialogInputRow'
 
 describe('ShareDialogInputRow', () => {
     describe('onSubmit', () => {
+        it('should call event.preventDefault', () => {
+            const pdSpy = sinon.spy()
+            const inputRow = shallow(
+                <ShareDialogInputRow
+                    resourceType=""
+                    resourceId=""
+                    addPermission={() => {}}
+                />
+            )
+            inputRow.instance().onSubmit({
+                preventDefault: pdSpy,
+                target: {
+                    email: 'test',
+                    reset: () => {}
+                }
+            })
+            assert(pdSpy.calledOnce)
+        })
         it('should serialize the form', () => {
             const addPermission = sinon.spy()
             const inputRow = shallow(
@@ -24,11 +43,11 @@ describe('ShareDialogInputRow', () => {
                     email: 'test'
                 }
             })
-            assert.equal(addPermission.callCount, 1)
-            assert.deepStrictEqual(addPermission.args[0][0], {
+            assert(addPermission.calledOnce)
+            assert(addPermission.calledWith({
                 user: 'test',
                 operation: 'read'
-            })
+            }))
         })
         it('should call form.reset', () => {
             const inputRow = shallow(
@@ -38,15 +57,15 @@ describe('ShareDialogInputRow', () => {
                     addPermission={() => {}}
                 />
             )
-            const reset = sinon.spy()
+            const resetSpy = sinon.spy()
             inputRow.instance().onSubmit({
                 preventDefault: () => {},
                 target: {
                     email: 'test',
-                    reset
+                    resetSpy
                 }
             })
-            assert(reset.called)
+            assert(resetSpy.calledOnce)
         })
     })
     
@@ -78,7 +97,9 @@ describe('ShareDialogInputRow', () => {
                     addPermission={() => {}}
                 />
             )
-            const inputGroup = inputRow.childAt(0).childAt(0).childAt(0)
+            const inputGroup = inputRow.childAt(0)
+                .childAt(0)
+                .childAt(0)
             const input = inputGroup.childAt(0)
             assert.equal(input.props().type, 'email')
             assert.equal(input.props().placeholder, 'Enter email address')
@@ -92,7 +113,9 @@ describe('ShareDialogInputRow', () => {
                     addPermission={() => {}}
                 />
             )
-            const inputGroup = inputRow.childAt(0).childAt(0).childAt(0)
+            const inputGroup = inputRow.childAt(0)
+                .childAt(0)
+                .childAt(0)
             const inputGroupButton = inputGroup.childAt(1)
             const button = inputGroupButton.childAt(0)
             assert.equal(button.props().className, 'addButton')
@@ -100,6 +123,30 @@ describe('ShareDialogInputRow', () => {
             
             const fa = button.childAt(0)
             assert.equal(fa.props().name, 'plus')
+        })
+    })
+    
+    describe('mapDispatchToProps', () => {
+        it('should return an object with the right kind of props', () => {
+            assert.deepStrictEqual(typeof mapDispatchToProps(), 'object')
+            assert.deepStrictEqual(typeof mapDispatchToProps().addPermission, 'function')
+        })
+        describe('addPermission', () => {
+            it('should return addResourcePermission and call it with right attrs', () => {
+                const dispatchSpy = sinon.spy()
+                const addStub = sinon.stub(permissionActions, 'addResourcePermission', (type, id, permission) => {
+                    return `${type}-${id}-${permission.id}`
+                })
+                mapDispatchToProps(dispatchSpy, {
+                    resourceType: 'myType',
+                    resourceId: 'myId'
+                }).addPermission({
+                    id: 'test'
+                })
+                assert(dispatchSpy.calledOnce)
+                assert(dispatchSpy.calledWith('myType-myId-test'))
+                assert(addStub.calledOnce)
+            })
         })
     })
 })

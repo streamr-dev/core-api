@@ -8,7 +8,7 @@ import ShareDialogPermission from './ShareDialogPermission'
 
 import styles from './shareDialogPermissionRow.pcss'
 import type {Permission} from '../../../../flowtype/permission-types'
-import {Col} from 'react-bootstrap'
+import {Row, Col} from 'react-bootstrap'
 
 export class ShareDialogPermissionRow extends Component {
     
@@ -20,26 +20,28 @@ export class ShareDialogPermissionRow extends Component {
     
     render() {
         return (
-            <Col xs={12} className={styles.permissionRow}>
-                {_.chain(this.props.permissions)
-                    .groupBy(p => p.user) // Arrays of permissions with users as keys
-                    .mapValues(permissions => (
-                        <ShareDialogPermission
-                            resourceType={this.props.resourceType}
-                            resourceId={this.props.resourceId}
-                            key={`${permissions[0].user}`}
-                            permissions={permissions}
-                        />
-                    ))
-                    .values() // Take only the components
-                    .value()
-                }
-            </Col>
+            <Row>
+                <Col xs={12} className={styles.permissionRow}>
+                    {_.chain(this.props.permissions)
+                        .groupBy(p => p.user) // Arrays of permissions with users as keys
+                        .mapValues(permissions => (
+                            <ShareDialogPermission
+                                resourceType={this.props.resourceType}
+                                resourceId={this.props.resourceId}
+                                key={`${permissions[0].user}`}
+                                permissions={permissions}
+                            />
+                        ))
+                        .values() // Take only the components
+                        .value()
+                    }
+                </Col>
+            </Row>
         )
     }
 }
 
-const mapStateToProps = ({permission: {byTypeAndId}}, ownProps) => {
+export const mapStateToProps = ({permission: {byTypeAndId}}, ownProps) => {
     const byType = byTypeAndId[ownProps.resourceType] || {}
     const permissions = (byType[ownProps.resourceId] || []).filter(p => !p.removed)
     return {

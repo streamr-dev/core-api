@@ -55,7 +55,7 @@ export class ShareDialogOwnerRow extends Component {
     }
 }
 
-const mapStateToProps = ({permission: {byTypeAndId}}, ownProps) => {
+export const mapStateToProps = ({permission: {byTypeAndId}}, ownProps) => {
     const byType = byTypeAndId[ownProps.resourceType] || {}
     const permissions = (byType[ownProps.resourceId] || []).filter(p => !p.removed)
     const ownerPermission = permissions.find(it => it.id === null && !it.new) || {}
@@ -66,7 +66,7 @@ const mapStateToProps = ({permission: {byTypeAndId}}, ownProps) => {
     }
 }
 
-const mapDispatchToProps = (dispatch, ownProps) => ({
+export const mapDispatchToProps = (dispatch, ownProps) => ({
     addPublicPermission() {
         dispatch(addResourcePermission(ownProps.resourceType, ownProps.resourceId, {
             anonymous: true,

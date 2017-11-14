@@ -3,7 +3,7 @@ import React from 'react'
 import {shallow} from 'enzyme'
 import assert from 'assert-diff'
 
-import {ShareDialogPermissionRow} from '../../../../../components/ShareDialog/ShareDialogContent/ShareDialogPermissionRow'
+import {ShareDialogPermissionRow, mapStateToProps} from '../../../../../components/ShareDialog/ShareDialogContent/ShareDialogPermissionRow'
 
 describe('ShareDialogPermissionRow', () => {
     
@@ -74,4 +74,161 @@ describe('ShareDialogPermissionRow', () => {
             })
         })
     })
+    
+    describe('mapStateToProps', () => {
+        describe('when permissions found', () => {
+            it('should find the permissions by type and id', () => {
+                const byTypeAndId = {
+                    type: {
+                        id: [{
+                            id: 'asdfasdf'
+                        }, {
+                            id: null,
+                            user: 'test2',
+                            new: true
+                        }]
+                    }
+                }
+                assert.deepStrictEqual(mapStateToProps({
+                    permission: {
+                        byTypeAndId
+                    }
+                }, {
+                    resourceType: 'type',
+                    resourceId: 'id'
+                }).permissions, [{
+                    id: 'asdfasdf'
+                }, {
+                    id: null,
+                    user: 'test2',
+                    new: true
+                }])
+            })
+            it('should filter out removed permissions', () => {
+                const byTypeAndId = {
+                    type: {
+                        id: [{
+                            id: 'asdfasdf',
+                            removed: true
+                        }, {
+                            id: null,
+                            user: 'test2',
+                            new: true
+                        }, {
+                            id: 'aapeli'
+                        }]
+                    }
+                }
+                assert.deepStrictEqual(mapStateToProps({
+                    permission: {
+                        byTypeAndId
+                    }
+                }, {
+                    resourceType: 'type',
+                    resourceId: 'id'
+                }).permissions, [{
+                    id: null,
+                    user: 'test2',
+                    new: true
+                }, {
+                    id: 'aapeli'
+                }])
+            })
+            it('should filter out anonymous permissions', () => {
+                const byTypeAndId = {
+                    type: {
+                        id: [{
+                            id: 'asdfasdf',
+                            anonymous: true
+                        }, {
+                            id: null,
+                            user: 'test2',
+                            new: true
+                        }, {
+                            id: 'aapeli'
+                        }]
+                    }
+                }
+                assert.deepStrictEqual(mapStateToProps({
+                    permission: {
+                        byTypeAndId
+                    }
+                }, {
+                    resourceType: 'type',
+                    resourceId: 'id'
+                }).permissions, [{
+                    id: null,
+                    user: 'test2',
+                    new: true
+                }, {
+                    id: 'aapeli'
+                }])
+            })
+            it('should filter out permissions with id: null and new: false', () => {
+                const byTypeAndId = {
+                    type: {
+                        id: [{
+                            id: 'asdfasdf',
+                            anonymous: false
+                        }, {
+                            id: null,
+                            new: false
+                        }, {
+                            id: 'aapeli'
+                        }]
+                    }
+                }
+                assert.deepStrictEqual(mapStateToProps({
+                    permission: {
+                        byTypeAndId
+                    }
+                }, {
+                    resourceType: 'type',
+                    resourceId: 'id'
+                }).permissions, [{
+                    id: 'asdfasdf',
+                    anonymous: false
+                }, {
+                    id: 'aapeli'
+                }])
+            })
+        })
+        describe('when no permissions found', () => {
+            it('should return empty array if invalid id', () => {
+                const byTypeAndId = {
+                    type: {
+                        id: []
+                    }
+                }
+                assert.deepStrictEqual(mapStateToProps({
+                    permission: {
+                        byTypeAndId
+                    }
+                }, {
+                    resourceType: 'type',
+                    resourceId: 'anotherId'
+                }), {
+                    permissions: []
+                })
+            })
+            it('should return empty array if invalid type', () => {
+                const byTypeAndId = {
+                    type: {
+                        id: []
+                    }
+                }
+                assert.deepStrictEqual(mapStateToProps({
+                    permission: {
+                        byTypeAndId
+                    }
+                }, {
+                    resourceType: 'anotherType',
+                    resourceId: 'anotherId'
+                }), {
+                    permissions: []
+                })
+            })
+        })
+    })
+    
 })

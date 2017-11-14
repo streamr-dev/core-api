@@ -32,12 +32,10 @@ export class ShareDialogContent extends Component {
                         resourceType={this.props.resourceType}
                         resourceId={this.props.resourceId}
                     />
-                    <Row>
-                        <ShareDialogPermissionRow
-                            resourceType={this.props.resourceType}
-                            resourceId={this.props.resourceId}
-                        />
-                    </Row>
+                    <ShareDialogPermissionRow
+                        resourceType={this.props.resourceType}
+                        resourceId={this.props.resourceId}
+                    />
                     <ShareDialogInputRow
                         resourceType={this.props.resourceType}
                         resourceId={this.props.resourceId}
@@ -48,7 +46,7 @@ export class ShareDialogContent extends Component {
     }
 }
 
-const mapDispatchToProps = (dispatch, ownProps) => ({
+export const mapDispatchToProps = (dispatch, ownProps) => ({
     getResourcePermissions() {
         dispatch(getResourcePermissions(ownProps.resourceType, ownProps.resourceId))
     }
