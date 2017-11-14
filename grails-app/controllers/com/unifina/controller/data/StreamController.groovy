@@ -91,9 +91,9 @@ class StreamController {
 
 	def show() {
 		getAuthorizedStream(params.id) { stream, user ->
-			boolean writetable = permissionService.canWrite(user, stream)
+			boolean writeable = permissionService.canWrite(user, stream)
 			boolean shareable = permissionService.canShare(user, stream)
-			[stream: stream, writable: writetable, shareable: shareable]
+			[stream: stream, writable: writeable, shareable: shareable]
 		}
 	}
 
