@@ -63,6 +63,11 @@
 			'</span>' +
 		'</div>'
 
+	var unauthenticatedTemplate = '' +
+		'<div class="col-xs-12">' +
+			'Viewing and editing the keys require <b>share</b> permission to the stream.' +
+		'</div>'
+
 	var CredentialsControl = Backbone.View.extend({
 		template: _.template(listTemplate),
 		initialize: function (opts) {
@@ -85,11 +90,22 @@
 					_this.render()
 				})
 				.fail(function (e) {
-					Streamr.showError(e.message || e.responseJSON.message)
+					if (e.status === 403) {
+						_this.unauthenticatedMessage = unauthenticatedTemplate
+						_this.render()
+					} else {
+						Streamr.showError(e.message || e.responseJSON.message)
+					}
 				})
 		},
 		render: function () {
 			var _this = this
+
+			// no share permissions => don't show or edit keys
+			if (this.unauthenticatedMessage) {
+				this.$el.append(this.unauthenticatedMessage)
+				return
+			}
 
 			this.$el.append(this.template({
 				showPermissions: this.showPermissions
