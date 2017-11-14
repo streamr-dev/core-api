@@ -44,7 +44,9 @@ class CanvasMixin {
 		waitFor {
 			moduleTree.find('a.jstree-clicked', text: contains(name))
 		}
-		addModuleButton.click()
+		// TODO: revert to previous version (clicking add module button) once CORE-1033 is fixed.
+		def listItem = moduleTree.find('a.jstree-clicked', text: contains(name))
+		interact { doubleClick(listItem) }
 	}
 
 	void addAndWaitModule(name) {
