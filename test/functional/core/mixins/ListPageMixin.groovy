@@ -23,7 +23,7 @@ class ListPageMixin {
 
 	def findDeleteButton(String name) {
 		clickDropdownButton(name)
-		findRow(name).find(".delete-button")
+		findRow(name).find(".delete-canvas-link")
 	}
 
 	def clickDeleteButton(String name) {
