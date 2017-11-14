@@ -264,7 +264,7 @@ describe('ShareDialogOwnerRow', () => {
         describe('addPublicPermission', () => {
             it('should dispatch addResourcePermission and call it with right attrs', () => {
                 const dispatchSpy = sinon.spy()
-                const addStub = sinon.stub(permissionActions, 'addResourcePermission', (type, id, opt) => {
+                const addStub = sinon.stub(permissionActions, 'addResourcePermission').callsFake((type, id, opt) => {
                     assert(opt.anonymous)
                     assert.equal(opt.operation, 'read')
                     return `${type}-${id}`
@@ -282,7 +282,7 @@ describe('ShareDialogOwnerRow', () => {
         describe('revokePublicPermission', () => {
             it('should dispatch removeResourcePermission and call it with right attrs', () => {
                 const dispatchSpy = sinon.spy()
-                const revokeStub = sinon.stub(permissionActions, 'removeResourcePermission', (type, id, ap) => {
+                const revokeStub = sinon.stub(permissionActions, 'removeResourcePermission').callsFake((type, id, ap) => {
                     return `${type}-${id}-${ap.id}`
                 })
                 mapDispatchToProps(dispatchSpy, {

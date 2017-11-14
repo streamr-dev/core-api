@@ -157,7 +157,7 @@ describe('ShareDialogPermission', () => {
         describe('setResourceHighestOperation', () => {
             it('should dispatch setResourceHighestOperationForUser and call it with right attrs', () => {
                 const dispatchSpy = sinon.spy()
-                const addStub = sinon.stub(permissionActions, 'setResourceHighestOperationForUser', (type, id, user, value) => {
+                const addStub = sinon.stub(permissionActions, 'setResourceHighestOperationForUser').callsFake((type, id, user, value) => {
                     return `${type}-${id}-${user}-${value}`
                 })
                 mapDispatchToProps(dispatchSpy, {
@@ -175,7 +175,7 @@ describe('ShareDialogPermission', () => {
         describe('removeAllResourcePermissionsByUser', () => {
             it('should dispatch setResourceHighestOperationForUser and call it with right attrs', () => {
                 const dispatchSpy = sinon.spy()
-                const addStub = sinon.stub(permissionActions, 'removeAllResourcePermissionsByUser', (type, id, user, value) => {
+                const addStub = sinon.stub(permissionActions, 'removeAllResourcePermissionsByUser').callsFake((type, id, user, value) => {
                     return `${type}-${id}-${user}`
                 })
                 mapDispatchToProps(dispatchSpy, {

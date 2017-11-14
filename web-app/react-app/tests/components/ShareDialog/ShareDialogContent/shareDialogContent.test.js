@@ -72,7 +72,7 @@ describe('ShareDialogContent', () => {
         describe('getResourcePermissions', () => {
             it('should dispatch getResourcePermission with right attrs', () => {
                 const dispatchSpy = sinon.spy()
-                const getStub = sinon.stub(permissionActions, 'getResourcePermissions', (type, id,) => {
+                const getStub = sinon.stub(permissionActions, 'getResourcePermissions').callsFake((type, id,) => {
                     return `${type}-${id}`
                 })
                 mapDispatchToProps(dispatchSpy, {

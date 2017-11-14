@@ -144,7 +144,7 @@ describe('ShareDialog', () => {
         describe('save', () => {
             it('should return saveUpdatedResourcePermissions and call it with right attrs', () => {
                 const dispatchSpy = sinon.spy()
-                const saveStub = sinon.stub(permissionActions, 'saveUpdatedResourcePermissions', (type, id) => {
+                const saveStub = sinon.stub(permissionActions, 'saveUpdatedResourcePermissions').callsFake((type, id) => {
                     return `${type}-${id}`
                 })
                 mapDispatchToProps(dispatchSpy, {

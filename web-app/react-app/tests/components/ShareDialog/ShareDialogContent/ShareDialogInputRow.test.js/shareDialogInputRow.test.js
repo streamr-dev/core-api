@@ -134,9 +134,10 @@ describe('ShareDialogInputRow', () => {
         describe('addPermission', () => {
             it('should return addResourcePermission and call it with right attrs', () => {
                 const dispatchSpy = sinon.spy()
-                const addStub = sinon.stub(permissionActions, 'addResourcePermission', (type, id, permission) => {
-                    return `${type}-${id}-${permission.id}`
-                })
+                const addStub = sinon.stub(permissionActions, 'addResourcePermission')
+                    .callsFake((type, id, permission) => {
+                        return `${type}-${id}-${permission.id}`
+                    })
                 mapDispatchToProps(dispatchSpy, {
                     resourceType: 'myType',
                     resourceId: 'myId'
