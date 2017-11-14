@@ -426,20 +426,6 @@ class CanvasSpec extends LoginTester1Spec {
 			}
 	}
 
-	void "Canvas can be saved by renaming it with name editor" () {
-		setup:
-			addAndWaitModule "Add"
-		when: "name changed"
-			nameEditorLabel.click()
-			nameEditorInput << "newName" + System.currentTimeMillis()
-			findModuleOnCanvas('Add').click()
-		then: "canvas is saved"
-			waitFor {
-				!driver.currentUrl.endsWith("/canvas/editor")
-				nameEditorLabel.text().startsWith("newName")
-			}
-	}
-
 	void "Canvas can be renamed with name editor" () {
 		def canvasName = 'NewCanvas' + System.currentTimeMillis()
 		setup:
