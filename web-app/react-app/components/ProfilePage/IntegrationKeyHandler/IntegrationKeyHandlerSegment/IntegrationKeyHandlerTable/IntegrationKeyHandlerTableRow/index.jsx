@@ -4,9 +4,9 @@ import React from 'react'
 
 import { FormGroup } from 'react-bootstrap'
 import ConfirmButton from '../../../../../ConfirmButton'
+import FontAwesome from 'react-fontawesome'
 
 import styles from './integrationKeyHandlerTableRow.pcss'
-
 
 export default class IntegrationKeyHandlerTableRow extends React.Component {
     
@@ -21,13 +21,13 @@ export default class IntegrationKeyHandlerTableRow extends React.Component {
     }
     
     render() {
-        const item = this.props.item
+        const {item, onDelete, fields} = this.props
         return (
             <tr key={item.id}>
                 <td>
                     {item.name}
                 </td>
-                {this.props.fields.map(f => (
+                {fields.map(f => (
                     <td key={f}>
                         <span className={styles.publicKey}>{item.json[f]}</span>
                     </td>
@@ -35,16 +35,16 @@ export default class IntegrationKeyHandlerTableRow extends React.Component {
                 <td>
                     <FormGroup className="pull-right">
                         <ConfirmButton
-                            confirmCallback={() => this.props.onDelete(this.props.item.id)}
+                            confirmCallback={() => onDelete(item.id)}
                             buttonProps={{
                                 bsStyle: 'danger',
                                 type: 'button',
                                 title: 'Delete key'
                             }}
                             confirmTitle="Are you sure?"
-                            confirmMessage={`Are you sure you want to remove integration key ${this.props.item.name}?`}
+                            confirmMessage={`Are you sure you want to remove integration key ${item.name}?`}
                             className={styles.deleteButton}>
-                            <span className="icon fa fa-trash-o"/>
+                            <FontAwesome name="trash-o" className="icon"/>
                         </ConfirmButton>
                     </FormGroup>
                 </td>

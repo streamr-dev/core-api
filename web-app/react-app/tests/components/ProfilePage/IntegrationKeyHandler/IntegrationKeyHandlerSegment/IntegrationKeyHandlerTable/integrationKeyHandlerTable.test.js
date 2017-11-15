@@ -9,11 +9,12 @@ describe('IntegrationKeyHandlerTable', () => {
     
     describe('render', () => {
         describe('thead', () => {
-            it('renders headers correctly', () => {
+            it('renders header correctly', () => {
                 const el = shallow(<IntegrationKeyHandlerTable
                     fields={['Test']}
                     integrationKeys={[]}
-                    onDelete={() => {}}
+                    onDelete={() => {
+                    }}
                 />)
                 assert(el.is('.integrationKeyTable'))
                 const thead = el.childAt(0)
@@ -63,8 +64,12 @@ describe('IntegrationKeyHandlerTable', () => {
                 />)
                 const thead = el.childAt(0)
                 const tr = thead.childAt(0)
-                assert.equal(tr.find('th').at(1).text(), 'First Camel Case')
-                assert.equal(tr.find('th').at(2).text(), 'Second Camel Case')
+                assert.equal(tr.find('th')
+                    .at(1)
+                    .text(), 'First Camel Case')
+                assert.equal(tr.find('th')
+                    .at(2)
+                    .text(), 'Second Camel Case')
             })
         })
     })
