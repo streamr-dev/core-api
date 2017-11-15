@@ -92,7 +92,7 @@ SignalPath.MapModule = function (data, canvas, prot) {
                 value: v
             }
         })
-        $.extend(true, prot.jsonData.options, json)
+        $.extend(true, json, prot.jsonData.options)
         return prot.jsonData
     }
     
