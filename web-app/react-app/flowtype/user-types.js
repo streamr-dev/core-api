@@ -10,7 +10,8 @@ export type User = {
 type State = {
     currentUser: User,
     error?: ?string,
-    fetching?: boolean
+    fetching?: boolean,
+    saved: boolean
 }
 
 type Action = {

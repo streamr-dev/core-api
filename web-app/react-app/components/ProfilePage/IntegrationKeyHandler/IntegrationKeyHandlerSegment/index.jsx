@@ -84,19 +84,21 @@ export class IntegrationKeyHandlerSegment extends Component {
     }
 }
 
-export const mapStateToProps = ({integrationKey: {listsByService, error}}, props) => ({
+export const mapStateToProps = ({integrationKey: {listsByService, error}}: {integrationKey: IntegrationKey}, props: {
+    service: IntegrationKey.service
+}) => ({
     integrationKeys: listsByService[props.service] || [],
     error
 })
 
 export const mapDispatchToProps = (dispatch: Function) => ({
-    deleteIntegrationKey(id) {
+    deleteIntegrationKey(id: IntegrationKey.id) {
         dispatch(deleteIntegrationKey(id))
     },
-    createIntegrationKey(key) {
+    createIntegrationKey(key: IntegrationKey) {
         dispatch(createIntegrationKey(key))
     },
-    getIntegrationKeysByService(service) {
+    getIntegrationKeysByService(service: IntegrationKey.service) {
         dispatch(getIntegrationKeysByService(service))
     }
 })

@@ -3,7 +3,7 @@
 import {Component} from 'react'
 import {connect} from 'react-redux'
 
-import type {Notification} from '../../flowtype/notification-types.js'
+import type {Notification, State} from '../../flowtype/notification-types.js'
 
 declare var Streamr: {
     showSuccess: (message: ?string, title: string, delay: number) => void,
@@ -17,7 +17,8 @@ export class Notifier extends Component {
         }
     }
     
-    createNotification({title, message, delay, type}) {
+    createNotification(notification: Notification) {
+        const {title, message, delay, type}: {title: string, message: string, delay: number, type: string} = notification
         switch (type) {
             case 'success':
                 return Streamr.showSuccess(message, title, delay)
@@ -28,9 +29,9 @@ export class Notifier extends Component {
         }
     }
     
-    componentWillReceiveProps({notifications}) {
+    componentWillReceiveProps({notifications}: {notifications: State.byId}) {
         if (notifications) {
-            for (const notification of Object.values(notifications)) {
+            for (const notification: Notification of Object.values(notifications)) {
                 if (notification && !this.props.notifications[notification.id]) {
                     this.createNotification(notification)
                 }
@@ -43,7 +44,7 @@ export class Notifier extends Component {
     }
 }
 
-export const mapStateToProps = ({notifications: {byId}}) => ({
+export const mapStateToProps = ({notifications: {byId}}: State) => ({
     notifications: byId
 })
 

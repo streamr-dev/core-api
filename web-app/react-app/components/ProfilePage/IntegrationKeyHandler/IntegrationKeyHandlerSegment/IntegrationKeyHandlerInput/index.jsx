@@ -23,9 +23,12 @@ export default class IntegrationKeyHandlerInput extends React.Component {
         this.onSubmit = this.onSubmit.bind(this)
     }
     
-    onSubmit(e: Event) {
+    onSubmit(e: {
+        preventDefault: Function,
+        target: HTMLFormElement
+    }) {
         e.preventDefault()
-        const form = e.target
+        const form: HTMLFormElement = e.target
         const data = serialize(form, {
             hash: true
         })
