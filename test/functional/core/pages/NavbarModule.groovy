@@ -12,6 +12,7 @@ class NavbarModule extends Module {
 		navSettingsLink { $("#navSettingsLink") }
 		navProfileLink { $("#navProfileLink") }
 		navLogoutLink { $("#navLogoutLink") }
+		navModuleReferenceLink { $("#navModuleReferenceLink")}
 	}
 
 }
