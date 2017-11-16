@@ -24,9 +24,9 @@ class ShareSpec extends LoginTester1Spec {
 	def clickDropdownShareButton() {
 		menuToggle.click()
 		waitFor {
-			shareButton.displayed
+			dropdownShareButton.displayed
 		}
-		shareButton.click()
+		dropdownShareButton.click()
 	}
 
 	def save() {
@@ -804,8 +804,8 @@ class ShareSpec extends LoginTester1Spec {
 
 		then:
 		waitFor {
-			findDashboardItem("Table").find(".event-table-module-content tbody tr").size() > 0
-			!findErrorNotification().displayed
+			$(".dashboarditem").size() == 2
+			$(".breadcrumb .name-editor").text() == name
 		}
 
 	}
