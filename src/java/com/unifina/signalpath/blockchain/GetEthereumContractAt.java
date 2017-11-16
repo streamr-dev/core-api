@@ -8,16 +8,17 @@ import com.mashape.unirest.http.exceptions.UnirestException;
 import com.unifina.signalpath.AbstractSignalPathModule;
 import com.unifina.signalpath.ModuleOptions;
 import com.unifina.signalpath.StringParameter;
-import com.unifina.utils.MapTraversal;
-import grails.util.Holders;
 
+import java.util.List;
 import java.util.Map;
+import java.util.regex.Pattern;
 
 /**
  * Get Ethereum contract at given address
  */
 public class GetEthereumContractAt extends AbstractSignalPathModule {
 
+	public static final String DUMMY_ABI_STRING = "[{\"type\":\"fallback\",\"payable\":true}]";
 	private StringParameter addressParam = new StringParameter(this, "address", "0x");
 	private StringParameter abiParam = new StringParameter(this, "ABI", "[]");
 	private EthereumContractOutput out = new EthereumContractOutput(this, "contract");
@@ -39,23 +40,25 @@ public class GetEthereumContractAt extends AbstractSignalPathModule {
 	@Override
 	protected void onConfiguration(Map<String, Object> config) {
 		String address = addressParam.getValue();
-		String oldAddress = (String) config.get("oldAddress");
-		String abiString = MapTraversal.getString(config, "params[1].value");
+		String oldAddress = (String)config.get("oldAddress");
 
 		ModuleOptions options = ModuleOptions.get(config);
 		ethereumOptions = EthereumModuleOptions.readFrom(options);
 
 		// TODO: check address is valid?
-		if (address.length() > 2) {
+		if (address.length() == 42) {
 			addInput(abiParam);
 			addOutput(out);
+			List<Map<String, String>> paramsList = (List)config.get("params");
 
 			// if address didn't change, ABI must've changed so onConfiguration is fired
 			if (address.equals(oldAddress)) {
+				String abiString = paramsList.size() > 1 ? paramsList.get(1).get("value") : DUMMY_ABI_STRING;
 				abi = new EthereumABI(abiString);
 			} else {
 				// ABI param not yet added to UI => query streamr-web3 for known ABI
 				try {
+					String abiString = "[]";
 					String responseString = Unirest.get(ethereumOptions.getServer() +
 							"/contract?at=" + address +
 							"&network=" + ethereumOptions.getNetwork()
@@ -64,7 +67,13 @@ public class GetEthereumContractAt extends AbstractSignalPathModule {
 					if (response.has("abi")) {
 						JsonArray abiArray = response.getAsJsonArray("abi");
 						abi = new EthereumABI(abiArray);
-						abiParam.receive(abiArray.toString());
+						abiString = abiArray.toString();
+					}
+
+					if (paramsList.size() > 1) {
+						paramsList.get(1).put("value", abiString);
+					} else {
+						abiParam.receive(abiString);
 					}
 				} catch (UnirestException e) {
 					throw new RuntimeException(e);
@@ -73,7 +82,7 @@ public class GetEthereumContractAt extends AbstractSignalPathModule {
 
 			// parsing failed, ABI is empty or invalid, or etherscan didn't return anything
 			if (abi == null || abi.getFunctions().size() < 1) {
-				abi = new EthereumABI("[{\"type\":\"fallback\",\"payable\":true}]");
+				abi = new EthereumABI(DUMMY_ABI_STRING);
 			}
 
 			contract = new EthereumContract(address, abi);
