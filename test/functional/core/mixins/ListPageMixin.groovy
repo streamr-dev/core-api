@@ -45,8 +45,7 @@ class ListPageMixin {
 				return jQuery(this).text().trim() === "$name"
 			}).eq(0)
 			var siteHeaderHeightInPx = 40
-			if (element)
-				jQuery("body").scrollTop(element.offset().top - siteHeaderHeightInPx)
+			window.scrollTo(0, element.offset().top - siteHeaderHeightInPx)
 		""")
 		waitFor {
 			findRow(name, false).displayed

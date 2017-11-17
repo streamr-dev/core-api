@@ -53,6 +53,7 @@ class CanvasPage extends Page {
 		endDate { $("#endDate") }
 
 		menuToggle { $(".canvas-menu-toggle") }
+		dropdownShareButton { $(".share-canvas-button") }
 		canvasName { $(".breadcrumb .name-editor") }
 		canvasNameLabel { $(".breadcrumb .name-editor span") }
 		canvasNameInput { $(".breadcrumb .name-editor input") }
