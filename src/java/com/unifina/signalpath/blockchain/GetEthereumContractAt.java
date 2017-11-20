@@ -1,8 +1,10 @@
 package com.unifina.signalpath.blockchain;
 
+import com.amazonaws.services.simpleworkflow.model.Run;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
+import com.google.gson.JsonSyntaxException;
 import com.mashape.unirest.http.Unirest;
 import com.mashape.unirest.http.exceptions.UnirestException;
 import com.unifina.signalpath.AbstractSignalPathModule;
@@ -37,6 +39,13 @@ public class GetEthereumContractAt extends AbstractSignalPathModule {
 		addressParam.setCanToggleDrivingInput(false);
 	}
 
+	// from https://github.com/web3j/web3j/pull/134/files
+	// TODO: move to EthereumContract?
+	private static final Pattern ignoreCaseAddrPattern = Pattern.compile("(?i)^(0x)?[0-9a-f]{40}$");
+	public static boolean isValidAddress(String address) {
+		return ignoreCaseAddrPattern.matcher(address).find();
+	}
+
 	@Override
 	protected void onConfiguration(Map<String, Object> config) {
 		String address = addressParam.getValue();
@@ -45,49 +54,65 @@ public class GetEthereumContractAt extends AbstractSignalPathModule {
 		ModuleOptions options = ModuleOptions.get(config);
 		ethereumOptions = EthereumModuleOptions.readFrom(options);
 
-		// TODO: check address is valid?
-		if (address.length() == 42) {
-			addInput(abiParam);
-			addOutput(out);
-			List<Map<String, String>> paramsList = (List)config.get("params");
+		if (!isValidAddress(address)) {
+			contract = null;
+			return;
+		}
 
-			// if address didn't change, ABI must've changed so onConfiguration is fired
-			if (address.equals(oldAddress)) {
-				String abiString = paramsList.size() > 1 ? paramsList.get(1).get("value") : DUMMY_ABI_STRING;
-				abi = new EthereumABI(abiString);
-			} else {
-				// ABI param not yet added to UI => query streamr-web3 for known ABI
+		addInput(abiParam);
+		addOutput(out);
+		List<Map<String, String>> paramsList = (List)config.get("params");
+		RuntimeException abiError = null;
+
+		// if address didn't change, ABI must've changed so that onConfiguration gets fired in the first place
+		if (address.equals(oldAddress)) {
+			if (paramsList.size() > 1) {
 				try {
-					String abiString = "[]";
-					String responseString = Unirest.get(ethereumOptions.getServer() +
-							"/contract?at=" + address +
-							"&network=" + ethereumOptions.getNetwork()
-					).asString().getBody();
-					JsonObject response = new JsonParser().parse(responseString).getAsJsonObject();
-					if (response.has("abi")) {
-						JsonArray abiArray = response.getAsJsonArray("abi");
-						abi = new EthereumABI(abiArray);
-						abiString = abiArray.toString();
-					}
-
-					if (paramsList.size() > 1) {
-						paramsList.get(1).put("value", abiString);
-					} else {
-						abiParam.receive(abiString);
-					}
-				} catch (UnirestException e) {
-					throw new RuntimeException(e);
+					String abiString = paramsList.get(1).get("value");
+					abi = new EthereumABI(abiString);
+				} catch (RuntimeException e) {
+					abi = null;
+					abiError = e;
 				}
 			}
-
-			// parsing failed, ABI is empty or invalid, or etherscan didn't return anything
-			if (abi == null || abi.getFunctions().size() < 1) {
-				abi = new EthereumABI(DUMMY_ABI_STRING);
-			}
-
-			contract = new EthereumContract(address, abi);
 		} else {
-			contract = null;
+			// Address changed => query streamr-web3 for known ABI
+			try {
+				String abiString = "[]";
+				String responseString = Unirest.get(ethereumOptions.getServer() +
+						"/contract?at=" + address +
+						"&network=" + ethereumOptions.getNetwork()
+				).asString().getBody();
+				JsonObject response = new JsonParser().parse(responseString).getAsJsonObject();
+				if (response.has("abi")) {
+					JsonArray abiArray = response.getAsJsonArray("abi");
+					abi = new EthereumABI(abiArray);
+					abiString = abiArray.toString();
+				} else {
+					abi = null;5
+				}
+
+				// change ABI in the UI; check if ABI parameter was shown yet
+				if (paramsList.size() > 1) {
+					paramsList.get(1).put("value", abiString);
+				} else {
+					abiParam.receive(abiString);
+				}
+			} catch (UnirestException e) {
+				abi = null;
+				abiError = new RuntimeException(e);
+			}
+		}
+
+		// parsing failed, ABI is empty or invalid, or etherscan didn't return anything
+		if (abi == null || abi.getFunctions().size() < 1) {
+			abi = new EthereumABI(DUMMY_ABI_STRING);
+		}
+
+		contract = new EthereumContract(address, abi);
+
+		if (abiError != null) {
+			throw abiError;
 		}
 	}
 
