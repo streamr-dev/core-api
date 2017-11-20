@@ -17,6 +17,7 @@ import org.apache.http.conn.ssl.TrustStrategy;
 import org.apache.http.impl.nio.client.CloseableHttpAsyncClient;
 import org.apache.http.impl.nio.client.HttpAsyncClients;
 import org.apache.http.nio.client.HttpAsyncClient;
+import org.apache.log4j.Logger;
 
 import javax.net.ssl.SSLContext;
 import java.security.KeyManagementException;
@@ -38,6 +39,8 @@ import java.util.concurrent.TimeUnit;
  */
 public abstract class AbstractHttpModule extends ModuleWithSideEffects implements IEventRecipient, IStopListener {
 
+	private static final Logger log = Logger.getLogger(AbstractHttpModule.class);
+
 	protected static final String BODY_FORMAT_JSON = "application/json";
 	protected static final String BODY_FORMAT_FORMDATA = "application/x-www-form-urlencoded";
 	protected static final String BODY_FORMAT_PLAIN = "text/plain";
@@ -53,6 +56,8 @@ public abstract class AbstractHttpModule extends ModuleWithSideEffects implement
 
 	private transient Propagator asyncPropagator;
 	private transient CloseableHttpAsyncClient cachedHttpClient;
+
+	private boolean hasDebugLogged = false; // TODO: remove
 
 	private static class DontVerifyStrategy implements TrustStrategy {
 		public boolean isTrusted(X509Certificate[] var1, String var2) throws CertificateException {
@@ -96,7 +101,7 @@ public abstract class AbstractHttpModule extends ModuleWithSideEffects implement
 				cachedHttpClient.close();
 			}
 		} catch (Exception e) {
-			throw new RuntimeException("Closing HTTP client failed", e);
+			log.error("Closing HTTP client failed", e);
 		}
 	}
 
@@ -189,6 +194,7 @@ public abstract class AbstractHttpModule extends ModuleWithSideEffects implement
 		HttpRequestBase request = null;
 		try {
 			request = createRequest();
+			log.info("HTTP request " + request.toString() + " from canvas " + getRootSignalPath().getCanvas().getId());
 		} catch (Exception e) {
 			response.errors.add("Constructing HTTP request failed");
 			response.errors.add(e.getMessage());
@@ -241,6 +247,19 @@ public abstract class AbstractHttpModule extends ModuleWithSideEffects implement
 				}
 			}
 		});
+
+		// TODO: remove
+		if (!hasDebugLogged) {
+			hasDebugLogged = true;
+			log.info("Created HttpClient from canvas " + getRootSignalPath().getCanvas().getId());
+			Set<Thread> threads = Thread.getAllStackTraces().keySet();
+			for (Thread t : threads) {
+				if (t.getName().startsWith("I/O dispatcher")) {
+					log.info(t.getName());
+				}
+			}
+			log.info("end of threads.");
+		}
 
 		if (!isAsync) {
 			try {
