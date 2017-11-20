@@ -89,7 +89,7 @@ public class GetEthereumContractAt extends AbstractSignalPathModule {
 					abi = new EthereumABI(abiArray);
 					abiString = abiArray.toString();
 				} else {
-					abi = null;5
+					abi = null;
 				}
 
 				// change ABI in the UI; check if ABI parameter was shown yet
