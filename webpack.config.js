@@ -105,7 +105,7 @@ module.exports = {
         new WriteFilePlugin(),
         new webpack.optimize.CommonsChunkPlugin('commons')
     ]),
-    devtool: !inProduction && 'eval-source-map',
+    devtool: !inProduction && ' source-map',
     resolve: {
         extensions: ['.js', '.jsx', '.json']
     }

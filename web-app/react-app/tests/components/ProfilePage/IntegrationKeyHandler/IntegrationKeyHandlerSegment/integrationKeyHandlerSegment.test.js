@@ -8,6 +8,15 @@ import * as integrationKeyActions from '../../../../../actions/integrationKey.js
 import {IntegrationKeyHandlerSegment, mapStateToProps, mapDispatchToProps} from '../../../../../components/ProfilePage/IntegrationKeyHandler/IntegrationKeyHandlerSegment'
 
 describe('IntegrationKeyHandler', () => {
+    let sandbox
+    
+    beforeEach(() => {
+        sandbox = sinon.sandbox.create()
+    })
+    
+    afterEach(() => {
+        sandbox.restore()
+    })
     
     describe('componentDidMount', () => {
         it('calls props.getIntegrationKeyByService', () => {
@@ -181,7 +190,8 @@ describe('IntegrationKeyHandler', () => {
         describe('deleteIntegrationKey', () => {
             it('must dispatch deleteIntegrationKey', () => {
                 const dispatchSpy = sinon.spy()
-                const deleteStub = sinon.stub(integrationKeyActions, 'deleteIntegrationKey').callsFake((id) => id)
+                const deleteStub = sandbox.stub(integrationKeyActions, 'deleteIntegrationKey')
+                    .callsFake((id) => id)
                 mapDispatchToProps(dispatchSpy).deleteIntegrationKey('test')
                 assert(dispatchSpy.calledOnce)
                 assert(deleteStub.calledOnce)
@@ -192,7 +202,8 @@ describe('IntegrationKeyHandler', () => {
         describe('createIntegrationKey', () => {
             it('must dispatch createIntegrationKey', () => {
                 const dispatchSpy = sinon.spy()
-                const deleteStub = sinon.stub(integrationKeyActions, 'createIntegrationKey').callsFake((key) => key)
+                const deleteStub = sandbox.stub(integrationKeyActions, 'createIntegrationKey')
+                    .callsFake((key) => key)
                 mapDispatchToProps(dispatchSpy).createIntegrationKey('test')
                 assert(dispatchSpy.calledOnce)
                 assert(deleteStub.calledOnce)
@@ -203,7 +214,8 @@ describe('IntegrationKeyHandler', () => {
         describe('getIntegrationKeysByService', () => {
             it('must dispatch getIntegrationKeysByService', () => {
                 const dispatchSpy = sinon.spy()
-                const deleteStub = sinon.stub(integrationKeyActions, 'getIntegrationKeysByService').callsFake((service) => service)
+                const deleteStub = sandbox.stub(integrationKeyActions, 'getIntegrationKeysByService')
+                    .callsFake((service) => service)
                 mapDispatchToProps(dispatchSpy).getIntegrationKeysByService('test')
                 assert(dispatchSpy.calledOnce)
                 assert(deleteStub.calledOnce)

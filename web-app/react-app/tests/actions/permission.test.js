@@ -2,16 +2,17 @@ import assert from 'assert-diff'
 import thunk from 'redux-thunk'
 import configureMockStore from 'redux-mock-store'
 import moxios from 'moxios'
+import sinon from 'sinon'
+
+import * as helpers from '../../helpers/createLink'
 
 import * as actions from '../../actions/permission'
 
 const middlewares = [thunk]
 const mockStore = configureMockStore(middlewares)
 
-global.Streamr = {
-    createLink: ({uri}) => uri,
-    user: 'test'
-}
+sinon.stub(helpers, 'default')
+    .callsFake((uri) => uri.replace(/^\//, ''))
 
 moxios.promiseWait = () => new Promise(resolve => moxios.wait(resolve))
 
@@ -78,7 +79,7 @@ describe('Permission actions', () => {
                 user: 'test',
                 operation: 'test'
             }]
-            moxios.stubRequest(`/api/v1/dashboards/${resourceId}/permissions`, {
+            moxios.stubRequest(`api/v1/dashboards/${resourceId}/permissions`, {
                 status: 200,
                 response: permissions
             })
@@ -98,7 +99,7 @@ describe('Permission actions', () => {
         it('creates GET_RESOURCE_PERMISSIONS_FAILURE with the error when fetching permissions failed', async () => {
             const resourceType = 'DASHBOARD'
             const resourceId = 'asdfasdfasasd'
-            moxios.stubRequest(`/api/v1/dashboards/${resourceId}/permissions`, {
+            moxios.stubRequest(`api/v1/dashboards/${resourceId}/permissions`, {
                 status: 500,
                 response: new Error('test')
             })
@@ -335,7 +336,7 @@ describe('Permission actions', () => {
             })
         })
         describe('removed permissions', () => {
-            it('should call DELETE on every removed permissions', async done => {
+            it('should call DELETE on every removed permissions', async () => {
                 const resourceType = 'DASHBOARD'
                 const resourceId = 'asdfasdfasasd'
                 const permissions = [{
@@ -369,9 +370,8 @@ describe('Permission actions', () => {
                 const requests = moxios.requests
                 assert.equal(requests.at(0).config.method, 'delete')
                 assert.equal(requests.at(1).config.method, 'delete')
-                assert.equal(requests.at(0).url, `/api/v1/dashboards/${resourceId}/permissions/2`)
-                assert.equal(requests.at(1).url, `/api/v1/dashboards/${resourceId}/permissions/3`)
-                done()
+                assert.equal(requests.at(0).url, `api/v1/dashboards/${resourceId}/permissions/2`)
+                assert.equal(requests.at(1).url, `api/v1/dashboards/${resourceId}/permissions/3`)
             })
             it('should create SAVE_REMOVED_RESOURCE_PERMISSION_SUCCESS for succeeded permissions', async () => {
                 const resourceType = 'DASHBOARD'
@@ -584,7 +584,7 @@ describe('Permission actions', () => {
     describe('setResourceHighestOperationForUser', () => {
         const resourceType = 'DASHBOARD'
         const resourceId = 'asdfasdfasasd'
-        const user = global.Streamr.user
+        const user = 'test'
         describe('giving higher operation adds permissions', () => {
             it('must add read, write and share if called with share', () => {
                 const permissions = [{

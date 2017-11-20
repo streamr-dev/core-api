@@ -27,11 +27,11 @@ describe('Notifier', () => {
         showSuccessSpy.reset()
         showErrorSpy.reset()
     })
-    
+
     it('should render null', () => {
         assert.deepStrictEqual(new Notifier().render(), null)
     })
-    
+
     describe('createNotification', () => {
         describe('calling different functions by message.type', () => {
             it('should call showSuccess if message.type is success', () => {
@@ -81,7 +81,7 @@ describe('Notifier', () => {
             })
         })
     })
-    
+
     describe('componentWillReceiveProps', () => {
         let notifier
         let createNotificationSpy = sinon.spy()
@@ -104,7 +104,7 @@ describe('Notifier', () => {
                     title: 'test2title'
                 }
             }
-            
+
             notifier.setProps({
                 notifications
             })
@@ -136,18 +136,18 @@ describe('Notifier', () => {
                 }
             })
             createNotificationSpy.reset()
-            
+
             notifier.setProps({
                 notifications
             })
             assert(createNotificationSpy.calledTwice)
             assert(createNotificationSpy.calledWith(notifications.test1))
             assert(createNotificationSpy.calledWith(notifications.test3))
-            
+
             assert(createNotificationSpy.neverCalledWith(notifications.test2))
         })
     })
-    
+
     describe('connected notifier', () => {
         describe('mapStateToProps', () => {
             it('should map the state to props correctly', () => {

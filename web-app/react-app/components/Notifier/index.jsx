@@ -31,7 +31,7 @@ export class Notifier extends Component {
     
     componentWillReceiveProps({notifications}: {notifications: State.byId}) {
         if (notifications) {
-            for (const notification: Notification of Object.values(notifications)) {
+            for (const notification: Notification of notifications) {
                 if (notification && !this.props.notifications[notification.id]) {
                     this.createNotification(notification)
                 }

@@ -29,21 +29,26 @@ export class ProfileSettings extends Component {
         super()
         this.onNameChange = this.onNameChange.bind(this)
         this.onTimezoneChange = this.onTimezoneChange.bind(this)
-        //this.onSubmit = this.onSubmit.bind(this)
+        this.onSubmit = this.onSubmit.bind(this)
     }
     componentDidMount() {
+        // TODO: move to (yet nonexistent) router
         this.props.getCurrentUser()
     }
-    onNameChange({target}: {target: any}) {
+    onNameChange({target}: { target: {
+        value: string
+    }}) {
         this.props.updateCurrentUserName(target.value)
     }
-    onTimezoneChange({target}: {target: any}) {
+    onTimezoneChange({target}: { target: {
+        value: string
+    }}) {
         this.props.updateCurrentUserTimezone(target.value)
     }
-    //onSubmit(e: Event) {
-    //    e.preventDefault()
-    //    this.props.saveCurrentUser(this.props.user)
-    //}
+    onSubmit(e: Event) {
+        e.preventDefault()
+        this.props.saveCurrentUser(this.props.user)
+    }
     render() {
         const options = moment.tz.names().map(tz => ({
             value: tz,
@@ -51,7 +56,7 @@ export class ProfileSettings extends Component {
         }))
         return (
             <Panel header="Profile Settings">
-                <Form method="POST" action="update">
+                <Form onSubmit={this.onSubmit}>
                     <FormGroup>
                         <ControlLabel>
                             Email
@@ -76,7 +81,6 @@ export class ProfileSettings extends Component {
                         </ControlLabel>
                         <FormControl
                             name="name"
-                            className="form-control"
                             value={this.props.user.name || ''}
                             onChange={this.onNameChange}
                             required
@@ -84,7 +88,7 @@ export class ProfileSettings extends Component {
                     </FormGroup>
             
                     <FormGroup>
-                        <ControlLabel htmlFor="timezone">
+                        <ControlLabel>
                             Timezone
                         </ControlLabel>
                         <Select
@@ -116,21 +120,21 @@ export class ProfileSettings extends Component {
     }
 }
 
-const mapStateToProps = ({user}) => ({
+export const mapStateToProps = ({user}: {user: User}) => ({
     user: user.currentUser || {}
 })
 
-const mapDispatchToProps = (dispatch) => ({
+export const mapDispatchToProps = (dispatch: Function) => ({
     getCurrentUser() {
         dispatch(getCurrentUser())
     },
-    updateCurrentUserName(name) {
+    updateCurrentUserName(name: User.name) {
         dispatch(updateCurrentUserName(name))
     },
-    updateCurrentUserTimezone(tz) {
+    updateCurrentUserTimezone(tz: User.timezone) {
         dispatch(updateCurrentUserTimezone(tz))
     },
-    saveCurrentUser(user) {
+    saveCurrentUser(user: User) {
         dispatch(saveCurrentUser(user))
     }
 })
