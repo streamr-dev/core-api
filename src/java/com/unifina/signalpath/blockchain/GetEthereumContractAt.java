@@ -56,6 +56,8 @@ public class GetEthereumContractAt extends AbstractSignalPathModule {
 
 		if (!isValidAddress(address)) {
 			contract = null;
+			// TODO: problem with throwing is ABI param isn't hidden because params aren't updated (because second AbstractSignalPathModule:setIOConfiguration doesn't get called)
+			//throw new RuntimeException("Invalid Ethereum address");
 			return;
 		}
 
