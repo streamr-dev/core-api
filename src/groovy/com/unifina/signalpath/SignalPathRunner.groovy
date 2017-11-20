@@ -134,6 +134,9 @@ public class SignalPathRunner extends Thread {
 
 		signalPaths.each { SignalPath sp ->
 			sp.pushToUiChannel(new DoneMessage())
+			if (sp.getGlobals().isAdhoc()) {
+				sp.pushToUiChannel(new ByeMessage())
+			}
 		}
 
 		// Cleanup
