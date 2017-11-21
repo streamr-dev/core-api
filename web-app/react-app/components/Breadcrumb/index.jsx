@@ -2,6 +2,7 @@
 
 import React, {Component} from 'react'
 import {Breadcrumb, DropdownButton} from 'react-bootstrap'
+import FontAwesome from 'react-fontawesome'
 
 import type {ReactChildren} from 'react-flow-types'
 
@@ -13,7 +14,7 @@ export class StreamrBreadcrumb extends Component {
     }
     render() {
         return (
-            <Breadcrumb className="breadcrumb-page">
+            <Breadcrumb className={`${styles.breadcrumb} breadcrumb-page`}>
                 {this.props.children}
             </Breadcrumb>
         )
@@ -46,6 +47,33 @@ export class StreamrBreadcrumbDropdownButton extends Component {
                 <DropdownButton id={`streamrDropdownButton-${Date.now()}`} {...this.props} bsSize="xs" className={`${this.props.className || ''} ${styles.streamrDropdownButton}`}>
                     {this.props.children}
                 </DropdownButton>
+            </div>
+        )
+    }
+}
+
+export class StreamrBreadcrumbToolbar extends Component {
+    props: {
+        children?: ReactChildren
+    }
+    render() {
+        return (
+            <div className={styles.toolbar}>
+                {this.props.children}
+            </div>
+        )
+    }
+}
+
+export class StreamrBreadcrumbToolbarButton extends Component {
+    props: {
+        iconName: string,
+        onClick: Function
+    }
+    render() {
+        return (
+            <div className={styles.button} onClick={this.props.onClick}>
+                <FontAwesome name={this.props.iconName}/>
             </div>
         )
     }

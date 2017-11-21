@@ -1,4 +1,8 @@
 
+.breadcrumb {
+  position: relative;
+}
+
 .streamrDropdownButton + ul {
   > li {
     height: 34px;
@@ -23,4 +27,22 @@
 .streamrDropdownContainer {
   display: inline-block;
   padding-left: 10px;
+}
+
+.toolbar {
+  position: absolute;
+  right: 0;
+  top: 0;
+  padding-top: 6px;
+  padding-right: 15px;
+
+  .button {
+    width: 10px;
+    cursor: pointer;
+    color: #333;
+
+    &:hover {
+      color: #888;
+    }
+  }
 }
