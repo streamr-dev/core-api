@@ -43,7 +43,7 @@ class CanvasSpec extends LoginTester1Spec {
 	}
 	def "drag and dropping a module to canvas should add it"() {
 		when: "Barify is added via drag and drop"
-			dragAndDropModule 'Barify'
+			dragAndDropModule('Barify', 200, -400)
 		then: "module should appear on canvas"
 			moduleShouldAppearOnCanvas 'Barify'
 	}
