@@ -7,15 +7,15 @@ import path from 'path'
 import createLink from '../../../../helpers/createLink'
 
 import TitleRow from './DashboardItemTitleRow'
-import WebComponent from '../../../WebComponent'
 
 import styles from './dashboardItem.pcss'
 import './webcomponentStyles.css'
 
 import type {Dashboard, DashboardItem as DBItem} from '../../../../flowtype/dashboard-types'
+import StreamrLabel from '../../../WebComponents/StreamrLabel/index'
 
 class DashboardItem extends Component {
-    webcomponent: HTMLElement
+    wrapper: HTMLElement
     onResize: Function
     createWebcomponentUrl: Function
     props: {
@@ -26,6 +26,9 @@ class DashboardItem extends Component {
         currentLayout: ?{},
         showError: Function
     }
+    state: {
+        height: ?number
+    }
     static defaultProps = {
         item: {},
         dashboard: {}
@@ -33,6 +36,9 @@ class DashboardItem extends Component {
     
     constructor() {
         super()
+        this.state = {
+            height: null
+        }
         this.onResize = this.onResize.bind(this)
         this.createWebcomponentUrl = this.createWebcomponentUrl.bind(this)
     }
@@ -41,7 +47,7 @@ class DashboardItem extends Component {
         // TODO: why it does not work without this?
         setTimeout(() => this.onResize(), 500)
     }
-
+    
     componentWillReceiveProps(props) {
         if (props.currentLayout) {
             this.onResize()
@@ -49,13 +55,9 @@ class DashboardItem extends Component {
     }
     
     onResize() {
-        const event = new Event('resize', {
-            bubbles: false,
-            cancelable: true
+        this.setState({
+            height: this.wrapper && this.wrapper.offsetHeight
         })
-        if (this.webcomponent) {
-            this.webcomponent.dispatchEvent(event)
-        }
     }
     
     createWebcomponentUrl() {
@@ -72,24 +74,37 @@ class DashboardItem extends Component {
             itemModule.toString()
         ))
     }
-
+    
     render() {
         const {item} = this.props
+        
+        const CustomComponent = {
+            'streamr-label': StreamrLabel
+        }[item.webcomponent]
+        
+        const additionalProps = {}
+        //if (item.webcomponent === 'streamr-label' && this.state.height) {
+        //    additionalProps['fontSize'] = this.state.height - 20
+        //}
         return (
             <div className={styles.dashboardItem}>
                 <div className={styles.header}>
                     <TitleRow item={item} dragCancelClassName={this.props.dragCancelClassName}/>
                 </div>
                 <div className={`${styles.body} ${this.props.dragCancelClassName || ''}`}>
-                    <div className={`${styles.wrapper} ${styles[item.webcomponent] || item.webcomponent}`}>
-                        {item.webcomponent && (
-                            <WebComponent
-                                type={item.webcomponent}
-                                onError={this.props.showError}
-                                webComponentRef={(item: HTMLElement) => this.webcomponent = item}
-                                url={this.createWebcomponentUrl()}
-                            />
-                        )}
+                    <div className={`${styles.wrapper} ${styles[item.webcomponent] || item.webcomponent}`} ref={wrapper => this.wrapper = wrapper}>
+                        {/*{item.webcomponent && (*/}
+                        {/*<WebComponent*/}
+                        {/*type={item.webcomponent}*/}
+                        {/*onError={this.props.showError}*/}
+                        {/*webComponentRef={(item: HTMLElement) => this.webcomponent = item}*/}
+                        {/*url={this.createWebcomponentUrl()}*/}
+                        {/*/>*/}
+                        {/*)}*/}
+                        <CustomComponent
+                            url={this.createWebcomponentUrl()}
+                            {...additionalProps}
+                        />
                     </div>
                 </div>
             </div>

@@ -86,6 +86,7 @@
     "redux-logger": "^3.0.6",
     "redux-mock-store": "^1.2.3",
     "redux-thunk": "^2.2.0",
+    "streamr-client": "^0.9.3",
     "style-loader": "^0.17.0",
     "underscore": "*",
     "uuid": "latest",

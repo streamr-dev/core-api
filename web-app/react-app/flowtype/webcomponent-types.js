@@ -1,4 +1,5 @@
 
+
 export type Webcomponent = {
     type: 'streamr-button' |
         'streamr-chart' |

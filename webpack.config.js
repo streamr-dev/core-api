@@ -107,7 +107,10 @@ module.exports = {
     ]),
     devtool: !inProduction && 'eval-source-map',
     resolve: {
-        extensions: ['.js', '.jsx', '.json']
+        extensions: ['.js', '.jsx', '.json'],
+        alias: {
+            'ws': 'empty/functionThatReturnsTrue'
+        }
     }
 }
 
