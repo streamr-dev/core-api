@@ -9,6 +9,7 @@ import createLink from '../../../../helpers/createLink'
 import TitleRow from './DashboardItemTitleRow'
 import StreamrLabel from '../../../WebComponents/StreamrLabel'
 import StreamrButton from '../../../WebComponents/StreamrButton'
+import StreamrTextField from '../../../WebComponents/StreamrTextField'
 
 import styles from './dashboardItem.pcss'
 import './webcomponentStyles.css'
@@ -75,8 +76,10 @@ class DashboardItem extends Component {
                 props: {}
             },
             'streamr-button': {
-                component: StreamrButton,
-                props: {}
+                component: StreamrButton
+            },
+            'streamr-text-field': {
+                component: StreamrTextField
             }
         }
         
