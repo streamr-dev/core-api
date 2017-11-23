@@ -7,12 +7,13 @@ import path from 'path'
 import createLink from '../../../../helpers/createLink'
 
 import TitleRow from './DashboardItemTitleRow'
+import StreamrLabel from '../../../WebComponents/StreamrLabel'
+import StreamrButton from '../../../WebComponents/StreamrButton'
 
 import styles from './dashboardItem.pcss'
 import './webcomponentStyles.css'
 
 import type {Dashboard, DashboardItem as DBItem} from '../../../../flowtype/dashboard-types'
-import StreamrLabel from '../../../WebComponents/StreamrLabel/index'
 
 class DashboardItem extends Component {
     wrapper: HTMLElement
@@ -71,6 +72,10 @@ class DashboardItem extends Component {
         const componentsAndProps = {
             'streamr-label': {
                 component: StreamrLabel,
+                props: {}
+            },
+            'streamr-button': {
+                component: StreamrButton,
                 props: {}
             }
         }

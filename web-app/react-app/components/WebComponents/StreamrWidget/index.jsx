@@ -15,7 +15,6 @@ import type {ReactChildren} from 'react-flow-types'
 type Props = {
     children?: ReactChildren,
     subscriptionOptions: SubscriptionOptions,
-    onReceiveModuleJson?: (any) => void,
     url: string,
     onError: (string) => void,
     onMessage: (any) => void,
@@ -28,6 +27,9 @@ type Props = {
     onNoResend?: () => void,
 }
 export default class StreamrWidget extends Component {
+    getModuleJson: Function
+    getHeaders: Function
+    sendRequest: Function
     subscription: ?Subscription
     stream: StreamId
     props: Props
@@ -37,18 +39,20 @@ export default class StreamrWidget extends Component {
     
     constructor(props: Props) {
         super(props)
+        this.getModuleJson = this.getModuleJson.bind(this)
+        this.getHeaders = this.getHeaders.bind(this)
+        this.sendRequest = this.sendRequest.bind(this)
+    }
+    
+    getHeaders() {
+        return this.context.client.options.authKey ? {
+            'Authorization': `Token ${this.context.client.options.authKey}`
+        } : {}
     }
     
     getModuleJson(callback: (any) => void) {
-        const authHeader = this.context.client.options.authKey ? {
-            'Authorization': `Token ${this.context.client.options.authKey}`
-        } : {}
-        axios.post(`${this.props.url}/request`, {
+        this.sendRequest({
             type: 'json'
-        }, {
-            headers: {
-                ...authHeader
-            }
         })
             .then((res: {
                 data: {
@@ -119,8 +123,12 @@ export default class StreamrWidget extends Component {
         }
     }
     
-    sendRequest(msg: {}, callback: (any) => void) {
-    
+    sendRequest(msg: {}): Promise<any> {
+        return axios.post(`${this.props.url}/request`, msg, {
+            headers: {
+                ...this.getHeaders()
+            }
+        })
     }
     
     componentWillReceiveProps(newProps: Props) {

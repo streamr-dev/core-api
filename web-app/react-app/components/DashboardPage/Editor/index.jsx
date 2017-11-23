@@ -191,7 +191,7 @@ class Editor extends Component {
     }
     
     static generateItemId(item: DashboardItem) {
-        return `${item.canvas.id}-${item.module}`
+        return `${item.canvas}-${item.module}`
     }
     
     render() {
@@ -265,10 +265,11 @@ class Editor extends Component {
                             >
                                 {items.map(dbItem => (
                                     <div key={Editor.generateItemId(dbItem)}>
-                                        <DashboardItem item={dbItem}
-                                                       currentLayout={this.state.layoutsByItemId[Editor.generateItemId(dbItem)]}
-                                                       dragCancelClassName={dragCancelClassName}
-                                                       isLocked={locked}
+                                        <DashboardItem
+                                            item={dbItem}
+                                            currentLayout={this.state.layoutsByItemId[Editor.generateItemId(dbItem)]}
+                                            dragCancelClassName={dragCancelClassName}
+                                            isLocked={locked}
                                         />
                                     </div>
                                 ))}

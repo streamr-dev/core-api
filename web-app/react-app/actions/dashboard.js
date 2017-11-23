@@ -228,14 +228,14 @@ export const updateDashboardLayout = (dashboardId: Dashboard.id, layout: Layout)
 export const updateDashboardItem = (dashboard: Dashboard, item: DashboardItem) => updateDashboard({
     ...dashboard,
     items: [
-        ...(dashboard.items.filter(it => it.canvas.id !== item.canvas.id || it.module !== item.module)),
+        ...(dashboard.items.filter(it => it.canvas !== item.canvas || it.module !== item.module)),
         item
     ]
 })
 
 export const removeDashboardItem = (dashboard: Dashboard, item: DashboardItem) => updateDashboard({
     ...dashboard,
-    items: dashboard.items.filter(it => it.canvas.id !== item.canvas.id || it.module !== item.module)
+    items: dashboard.items.filter(it => it.canvas !== item.canvas || it.module !== item.module)
 })
 
 export const createDashboard = (dashboard: Dashboard) => ({
