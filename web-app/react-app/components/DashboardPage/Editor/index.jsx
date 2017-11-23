@@ -199,6 +199,7 @@ class Editor extends Component {
         const layout = dashboard.items && this.generateLayout()
         const items = dashboard.items ? _.sortBy(dashboard.items, ['canvas', 'module']) : []
         const dragCancelClassName = 'cancelDragging' + Date.now()
+        const locked = this.props.editorLocked || this.state.isFullscreen
         return (
             <div id="content-wrapper" className="scrollable" style={{
                 height: '100%'
@@ -207,64 +208,73 @@ class Editor extends Component {
                     enabled={this.state.isFullscreen}
                     onChange={(value: boolean) => this.onFullscreenToggle(value)}
                 >
-                    <StreamrBreadcrumb>
-                        <StreamrBreadcrumbItem href={createLink('dashboard/list')}>
-                            Dashboards
-                        </StreamrBreadcrumbItem>
-                        <StreamrBreadcrumbItem active={true}>
-                            {dashboard && dashboard.name || 'New Dashboard'}
-                        </StreamrBreadcrumbItem>
-                        {(this.props.canShare || this.props.canWrite) && (
-                            <StreamrBreadcrumbDropdownButton title={(
-                                <FontAwesome name="cog"/>
-                            )}>
-                                {this.props.canShare && (
-                                    <ShareDialog
-                                        resourceType="DASHBOARD"
-                                        resourceId={this.props.dashboard.id}
-                                        resourceTitle={`Dashboard ${this.props.dashboard.name}`}
-                                    >
-                                        <MenuItem>
-                                            <FontAwesome name="user"/> Share
-                                        </MenuItem>
-                                    </ShareDialog>
-                                )}
-                                {this.props.canWrite && (
-                                    <DeleteButton buttonProps={{
-                                        componentClass: MenuItem,
-                                        bsClass: ''
-                                    }}>
-                                        <FontAwesome name="trash-o"/> Delete
-                                    </DeleteButton>
-                                )}
-                            </StreamrBreadcrumbDropdownButton>
-                        )}
-                        <StreamrBreadcrumbToolbar>
-                            <StreamrBreadcrumbToolbarButton iconName="expand" onClick={this.onFullscreenToggle}/>
-                        </StreamrBreadcrumbToolbar>
-                    </StreamrBreadcrumb>
-                    <StreamrClientProvider client={client}>
-                        <ResponsiveReactGridLayout
-                            layouts={layout}
-                            rowHeight={60}
-                            breakpoints={this.state.breakpoints}
-                            cols={this.state.cols}
-                            draggableCancel={`.${dragCancelClassName}`}
-                            onLayoutChange={this.onLayoutChange}
-                            onResize={this.onResize}
-                            onResizeEnd={this.onResize}
-                            isDraggable={!this.props.editorLocked}
-                            isResizable={!this.props.editorLocked}
-                        >
-                            {items.map(dbItem => (
-                                <div key={Editor.generateItemId(dbItem)}>
-                                    <DashboardItem item={dbItem}
-                                                   currentLayout={this.state.layoutsByItemId[Editor.generateItemId(dbItem)]}
-                                                   dragCancelClassName={dragCancelClassName}/>
-                                </div>
-                            ))}
-                        </ResponsiveReactGridLayout>
-                    </StreamrClientProvider>
+                    <div style={{
+                        backgroundColor: '#f6f6f6',
+                        height: '100%'
+                    }}>
+                        <StreamrBreadcrumb>
+                            <StreamrBreadcrumbItem href={createLink('dashboard/list')}>
+                                Dashboards
+                            </StreamrBreadcrumbItem>
+                            <StreamrBreadcrumbItem active={true}>
+                                {dashboard && dashboard.name || 'New Dashboard'}
+                            </StreamrBreadcrumbItem>
+                            {(this.props.canShare || this.props.canWrite) && (
+                                <StreamrBreadcrumbDropdownButton title={(
+                                    <FontAwesome name="cog"/>
+                                )}>
+                                    {this.props.canShare && (
+                                        <ShareDialog
+                                            resourceType="DASHBOARD"
+                                            resourceId={this.props.dashboard.id}
+                                            resourceTitle={`Dashboard ${this.props.dashboard.name}`}
+                                        >
+                                            <MenuItem>
+                                                <FontAwesome name="user"/> Share
+                                            </MenuItem>
+                                        </ShareDialog>
+                                    )}
+                                    {this.props.canWrite && (
+                                        <DeleteButton buttonProps={{
+                                            componentClass: MenuItem,
+                                            bsClass: ''
+                                        }}>
+                                            <FontAwesome name="trash-o"/> Delete
+                                        </DeleteButton>
+                                    )}
+                                </StreamrBreadcrumbDropdownButton>
+                            )}
+                            <StreamrBreadcrumbToolbar>
+                                <StreamrBreadcrumbToolbarButton iconName="expand"
+                                                                onClick={() => this.onFullscreenToggle()}/>
+                            </StreamrBreadcrumbToolbar>
+                        </StreamrBreadcrumb>
+                        <StreamrClientProvider client={client}>
+                            <ResponsiveReactGridLayout
+                                layouts={layout}
+                                rowHeight={60}
+                                breakpoints={this.state.breakpoints}
+                                cols={this.state.cols}
+                                draggableCancel={`.${dragCancelClassName}`}
+                                onLayoutChange={this.onLayoutChange}
+                                //onResize={this.onResize}
+                                onResizeEnd={this.onResize}
+                                isDraggable={!locked}
+                                isResizable={!locked}
+                                containerPadding={[18, 0]}
+                            >
+                                {items.map(dbItem => (
+                                    <div key={Editor.generateItemId(dbItem)}>
+                                        <DashboardItem item={dbItem}
+                                                       currentLayout={this.state.layoutsByItemId[Editor.generateItemId(dbItem)]}
+                                                       dragCancelClassName={dragCancelClassName}
+                                                       isLocked={locked}
+                                        />
+                                    </div>
+                                ))}
+                            </ResponsiveReactGridLayout>
+                        </StreamrClientProvider>
+                    </div>
                 </Fullscreen>
             </div>
         )
@@ -275,7 +285,7 @@ const mapStateToProps = (state) => {
     const baseState = parseDashboard(state)
     return {
         ...baseState,
-        editorLocked: !baseState.dashboard.new && !baseState.canWrite
+        editorLocked: baseState.dashboard.editingLocked || (!baseState.dashboard.new && !baseState.canWrite)
     }
 }
 

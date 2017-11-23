@@ -14,7 +14,7 @@ export class StreamrBreadcrumb extends Component {
     }
     render() {
         return (
-            <Breadcrumb className={`${styles.breadcrumb} breadcrumb-page`}>
+            <Breadcrumb className={styles.breadcrumb}>
                 {this.props.children}
             </Breadcrumb>
         )

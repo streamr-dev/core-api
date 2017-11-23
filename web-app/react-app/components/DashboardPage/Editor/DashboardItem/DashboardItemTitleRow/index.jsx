@@ -22,7 +22,7 @@ class DashboardItemTitleRow extends Component {
         remove: Function,
         className?: string,
         dragCancelClassName?: string,
-        editingLocked: boolean
+        isLocked: boolean
     }
     state: {
         editing: boolean
@@ -78,7 +78,7 @@ class DashboardItemTitleRow extends Component {
                         </span>
                     )}
                 </div>
-                {!this.props.editingLocked && (
+                {!this.props.isLocked && (
                     <div className={styles.controlContainer}>
                         <div className={`${styles.controls} ${dragCancelClassName || ''}`}>
                             <Button
@@ -105,13 +105,9 @@ class DashboardItemTitleRow extends Component {
     }
 }
 
-const mapStateToProps = ({dashboard: {dashboardsById, openDashboard}}) => {
-    const dashboard = dashboardsById[openDashboard.id]
-    return {
-        dashboard,
-        editingLocked: dashboard.editingLocked || (!dashboard.new && (!(dashboard.ownPermissions || []).includes('write')))
-    }
-}
+const mapStateToProps = ({dashboard: {dashboardsById, openDashboard}}) => ({
+    dashboard: dashboardsById[openDashboard.id]
+})
 
 const mapDispatchToProps = (dispatch) => ({
     update(db: Dashboard, item: DashboardItem, newData) {

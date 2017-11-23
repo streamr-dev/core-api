@@ -24,10 +24,12 @@ class DashboardItem extends Component {
         layout?: DBItem.layout,
         dragCancelClassName?: string,
         currentLayout: ?{},
-        showError: Function
+        showError: Function,
+        isLocked: boolean
     }
     state: {
-        height: ?number
+        height: ?number,
+        width: ?number
     }
     static defaultProps = {
         item: {},
@@ -37,26 +39,17 @@ class DashboardItem extends Component {
     constructor() {
         super()
         this.state = {
-            height: null
+            height: null,
+            width: null
         }
         this.onResize = this.onResize.bind(this)
         this.createWebcomponentUrl = this.createWebcomponentUrl.bind(this)
     }
     
-    componentDidMount() {
-        // TODO: why it does not work without this?
-        setTimeout(() => this.onResize(), 500)
-    }
-    
-    componentWillReceiveProps(props) {
-        if (props.currentLayout) {
-            this.onResize()
-        }
-    }
-    
     onResize() {
         this.setState({
-            height: this.wrapper && this.wrapper.offsetHeight
+            height: this.wrapper && this.wrapper.offsetHeight,
+            width: this.wrapper && this.wrapper.offsetWidth,
         })
     }
     
@@ -66,45 +59,58 @@ class DashboardItem extends Component {
         // Else use the url /api/v1/dashboards/<dashboardId>/canvases/<canvasId>/modules/<module>
         return createLink(path.resolve(
             '/api/v1',
-            !dashboard.new ? 'dashboards' : '',
-            !dashboard.new ? dashboard.id.toString() : '',
-            'canvases',
-            canvas.toString(),
-            'modules',
-            itemModule.toString()
+            !dashboard.new ? `dashboards/${dashboard.id}` : '',
+            `canvases/${canvas}`,
+            `modules/${itemModule}`
         ))
+    }
+    
+    createCustomComponent() {
+        const {item} = this.props
+        
+        const componentsAndProps = {
+            'streamr-label': {
+                component: StreamrLabel,
+                props: {}
+            }
+        }
+        
+        const {component, props} = componentsAndProps[item.webcomponent] || {}
+        
+        const CustomComponent = component || (() => (
+            <div style={{
+                color: 'red',
+                textAlign: 'center'
+            }}>
+                Sorry, unknown component:(
+            </div>
+        ))
+        
+        const customProps = props || {}
+        
+        return CustomComponent ? (
+            <CustomComponent
+                url={this.createWebcomponentUrl()}
+                height={this.state.height}
+                width={this.state.width}
+                {...customProps}
+            />
+        ) : null
     }
     
     render() {
         const {item} = this.props
-        
-        const CustomComponent = {
-            'streamr-label': StreamrLabel
-        }[item.webcomponent]
-        
-        const additionalProps = {}
-        //if (item.webcomponent === 'streamr-label' && this.state.height) {
-        //    additionalProps['fontSize'] = this.state.height - 20
-        //}
         return (
             <div className={styles.dashboardItem}>
                 <div className={styles.header}>
-                    <TitleRow item={item} dragCancelClassName={this.props.dragCancelClassName}/>
+                    <TitleRow item={item} dragCancelClassName={this.props.dragCancelClassName} isLocked={this.props.isLocked}/>
                 </div>
                 <div className={`${styles.body} ${this.props.dragCancelClassName || ''}`}>
-                    <div className={`${styles.wrapper} ${styles[item.webcomponent] || item.webcomponent}`} ref={wrapper => this.wrapper = wrapper}>
-                        {/*{item.webcomponent && (*/}
-                        {/*<WebComponent*/}
-                        {/*type={item.webcomponent}*/}
-                        {/*onError={this.props.showError}*/}
-                        {/*webComponentRef={(item: HTMLElement) => this.webcomponent = item}*/}
-                        {/*url={this.createWebcomponentUrl()}*/}
-                        {/*/>*/}
-                        {/*)}*/}
-                        <CustomComponent
-                            url={this.createWebcomponentUrl()}
-                            {...additionalProps}
-                        />
+                    <div
+                        className={`${styles.wrapper} ${styles[item.webcomponent] || item.webcomponent}`}
+                        ref={wrapper => this.wrapper = wrapper}
+                    >
+                        {this.createCustomComponent()}
                     </div>
                 </div>
             </div>
@@ -112,18 +118,15 @@ class DashboardItem extends Component {
     }
 }
 
-const mapStateToProps = ({dashboard: {dashboardsById, openDashboard}}) => {
-    const dashboard = dashboardsById[openDashboard.id]
-    return {
-        dashboard
-    }
-}
+const mapStateToProps = ({dashboard: {dashboardsById, openDashboard}}) => ({
+    dashboard: dashboardsById[openDashboard.id]
+})
 
 const mapDispatchToProps = (dispatch) => ({
-    showError({detail}) {
+    showError(message) {
         dispatch(showError({
             title: 'Error!',
-            message: detail.message
+            message
         }))
     }
 })

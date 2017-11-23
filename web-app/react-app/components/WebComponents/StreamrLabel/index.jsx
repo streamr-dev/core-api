@@ -7,7 +7,10 @@ import type {StreamId} from '../../../flowtype/streamr-client-types'
 
 import styles from './streamr-label.pcss'
 
+import type {AnyReactElement} from 'react-flow-types'
+
 export default class StreamrLabel extends Component {
+    widget: AnyReactElement
     onMessage: Function
     state: {
         value: number | string
@@ -16,7 +19,12 @@ export default class StreamrLabel extends Component {
         url: string,
         stream?: StreamId,
         onError?: Function,
-        fontSize?: number
+        width: ?number,
+        height: ?number,
+        style: {}
+    }
+    static defaultProps = {
+        style: {}
     }
     constructor() {
         super()
@@ -27,9 +35,11 @@ export default class StreamrLabel extends Component {
         this.onMessage = this.onMessage.bind(this)
     }
     onMessage({value}: { value: number | string }) {
-        this.setState({
-            value
-        })
+        if (this.widget) {
+            this.setState({
+                value
+            })
+        }
     }
     render() {
         return (
@@ -41,9 +51,10 @@ export default class StreamrLabel extends Component {
                 url={this.props.url}
                 onMessage={this.onMessage}
                 onError={this.props.onError}
+                ref={w => this.widget = w}
             >
                 <span className={styles.label} style={{
-                    fontSize: this.props.fontSize
+                    ...this.props.style
                 }}>
                     {this.state.value}
                 </span>
