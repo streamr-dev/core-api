@@ -17,7 +17,6 @@ import org.codehaus.groovy.grails.web.json.JSONObject
 import spock.lang.Specification
 
 @TestFor(KeyApiController)
-@Mixin(FiltersUnitTestMixin)
 @Mock([Key, Permission, SecUser, Stream, UnifinaCoreAPIFilters, SpringSecurityService, UserService, PermissionService])
 class KeyApiControllerSpec extends Specification {
 

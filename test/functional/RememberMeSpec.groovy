@@ -1,9 +1,9 @@
+import core.pages.CanvasPage
+import core.pages.LoginPage
+import core.pages.ProfileEditPage
 import geb.spock.GebReportingSpec
-
 import org.openqa.selenium.Cookie
-
 import spock.lang.Shared
-import core.pages.*
 
 class RememberMeSpec extends GebReportingSpec {
 	

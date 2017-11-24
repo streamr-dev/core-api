@@ -7,8 +7,7 @@ import core.pages.LoginPage
 /**
  * Basic features in the backtest views
  */
-@Mixin(ConfirmationMixin)
-class AccessControlCoreSpec extends LoginTester2Spec {
+class AccessControlCoreSpec extends LoginTester2Spec implements ConfirmationMixin {
 
 	void checkDenied(String url) {
 		go url

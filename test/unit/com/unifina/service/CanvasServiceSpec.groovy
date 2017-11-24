@@ -19,9 +19,12 @@ import grails.converters.JSON
 import grails.plugin.springsecurity.SpringSecurityService
 import grails.test.mixin.Mock
 import grails.test.mixin.TestFor
+import grails.test.mixin.TestMixin
+import grails.test.mixin.web.ControllerUnitTestMixin
 import groovy.json.JsonBuilder
 import spock.lang.Specification
 
+@TestMixin(ControllerUnitTestMixin) // "as JSON" converter
 @TestFor(CanvasService)
 @Mock([SecUser, Canvas, Module, ModuleService, SpringSecurityService, SignalPathService, PermissionService, Permission, Serialization, Dashboard, DashboardItem])
 class CanvasServiceSpec extends Specification {

@@ -4,7 +4,7 @@ import spock.lang.Stepwise
 
 // The order of the tests is important
 @Stepwise
-public class UserEditAdminSpec extends LoginTesterAdminSpec {
+class UserEditAdminSpec extends LoginTesterAdminSpec {
 
 	String specUserName = "user-edit-admin-spec@streamr.com"
 	String specUserPwd = "user-edit-admin-spec"

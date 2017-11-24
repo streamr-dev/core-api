@@ -1,8 +1,10 @@
-import spock.lang.*
 import core.LoginTester1Spec
-import core.pages.*
+import core.pages.CanvasPage
+import core.pages.ChangePasswordPage
+import core.pages.LoginPage
+import core.pages.ProfileEditPage
 
-public class ProfileEditCoreSpec extends LoginTester1Spec {
+class ProfileEditCoreSpec extends LoginTester1Spec {
 
 	def "changing password works correctly"() {
 		when: "profile edit page is clicked to open"

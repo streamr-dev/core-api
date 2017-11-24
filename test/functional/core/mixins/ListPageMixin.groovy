@@ -1,6 +1,6 @@
 package core.mixins
 
-class ListPageMixin {
+trait ListPageMixin {
 
 	def findRow(String name, boolean scroll = true) {
 		if (scroll) {

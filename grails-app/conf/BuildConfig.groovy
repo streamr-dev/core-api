@@ -19,8 +19,8 @@ grails.project.test.class.dir = "target/test-classes"
 grails.project.test.reports.dir = "target/test-reports"
 grails.project.war.file = "target/ROOT.war"
 
-def gebVersion = "0.9.3"
-def seleniumVersion = "2.48.2"
+def gebVersion = "0.13.1"
+def seleniumVersion = "2.53.0"
 
 grails.project.dependency.resolver = "maven" // or ivy
 
@@ -114,9 +114,7 @@ grails.project.dependency.resolution = {
     plugins {
         // plugins for the build system only
 		
-        build(":tomcat:7.0.42",
-			 ":release:3.0.1"//,
-            /*":rest-client-builder:2.0.1"*/) {
+        build(":tomcat:7.0.52.1") {
             export = false
         }
         
@@ -138,5 +136,6 @@ grails.project.dependency.resolution = {
 		
         test ":plastic-criteria:1.5"
         test ":geb:$gebVersion"
+		test ":rest-client-builder:2.0.1"
     }
 }

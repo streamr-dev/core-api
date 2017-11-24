@@ -1,12 +1,10 @@
 package core.mixins
 
-
 import core.pages.DashboardListPage
 import core.pages.DashboardShowPage
 import org.openqa.selenium.Keys
 
-
-class DashboardMixin {
+trait DashboardMixin {
 
 	def findCanvas(String name) {
 		return $("#main-menu .navigation .canvas .mm-text", text: name).closest(".canvas")

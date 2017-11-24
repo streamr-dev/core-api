@@ -1,13 +1,7 @@
 import core.LoginTester1Spec
 import core.mixins.CanvasMixin
-import org.openqa.selenium.Keys
 
-class ModuleBuildSpec extends LoginTester1Spec {
-
-	def setupSpec() {
-		// @Mixin is buggy, use runtime mixins instead
-		ModuleBuildSpec.metaClass.mixin(CanvasMixin)
-	}
+class ModuleBuildSpec extends LoginTester1Spec implements CanvasMixin {
 	
 	def "cloning a module should produce a duplicate"() {
 		when: "Barify is added via module browser"
@@ -302,7 +296,7 @@ class ModuleBuildSpec extends LoginTester1Spec {
 			def ob = findModuleOnCanvas "Stream"
 			ob.find(".streamName").click()
 		then: "an input must be shown"
-			ob.find(".streamSearch").displayed
+			ob.find(".streamSearch")[0].displayed
 			
 		when: "search term is changed to 'xyzzy'"
 			ob.find(".streamSearch.streamr-search-input").firstElement().clear()

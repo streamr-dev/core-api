@@ -1,13 +1,12 @@
 package core.mixins
 
 import com.unifina.domain.signalpath.Canvas
-import core.pages.CanvasPage
 import geb.navigator.Navigator
 import org.openqa.selenium.Keys
 
 import java.util.concurrent.TimeUnit
 
-class CanvasMixin {
+trait CanvasMixin {
 	
 	void selectModuleInModuleBrowser(name, clickMethod = "click") {
 		js.exec """
@@ -202,7 +201,7 @@ class CanvasMixin {
 		if (ioElem.empty) {
 			ioElem = module.find(".ioname", text: contains(endpointLabel))
 		}
-		ioElem.click()
+		ioElem[0].click()
 		waitFor { $("#contextMenu").displayed }
 	}
 

@@ -1,6 +1,4 @@
-import core.LoginTester1Spec;
-import geb.spock.GebReportingSpec
-import spock.lang.*
+import core.LoginTester1Spec
 import pages.*
 
 class LoginAjaxSpec extends LoginTester1Spec {

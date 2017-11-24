@@ -5,14 +5,15 @@ import com.unifina.domain.security.SecUser;
 import com.unifina.security.permission.DataSourcePermission;
 import com.unifina.security.permission.GrailsApplicationPermission;
 import com.unifina.security.permission.UserPermission;
-import com.unifina.signalpath.AbstractSignalPathModule;
-import groovy.lang.GroovySystem;
 import org.apache.log4j.Logger;
 import org.codehaus.groovy.grails.commons.GrailsApplication;
 
 import java.security.AccessController;
 import java.text.SimpleDateFormat;
-import java.util.*;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.TimeZone;
 
 
 public class Globals {

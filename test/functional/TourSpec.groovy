@@ -1,17 +1,10 @@
-import core.mixins.TourMixin
-import spock.lang.*
 import core.LoginTester1Spec
 import core.mixins.CanvasMixin
 import core.mixins.ConfirmationMixin
-import core.pages.*
+import core.mixins.TourMixin
+import core.pages.CanvasPage
 
-class TourSpec extends LoginTester1Spec {
-
-	def setupSpec() {
-		this.class.metaClass.mixin(CanvasMixin)
-		this.class.metaClass.mixin(ConfirmationMixin)
-		this.class.metaClass.mixin(TourMixin)
-	}
+class TourSpec extends LoginTester1Spec implements CanvasMixin, ConfirmationMixin, TourMixin {
 
 	def setup() {
 		at CanvasPage

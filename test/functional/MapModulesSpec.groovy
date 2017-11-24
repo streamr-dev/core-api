@@ -11,18 +11,13 @@ import java.text.DecimalFormat
 import java.text.DecimalFormatSymbols
 import java.util.regex.Pattern
 
-class MapModulesSpec extends LoginTester1Spec {
+class MapModulesSpec extends LoginTester1Spec implements CanvasMixin, ConfirmationMixin, StreamMixin {
 
 	@Shared Logger log = Logger.getLogger(MapModulesSpec)
 	@Shared Stream testStream
 	@Shared StreamService streamService
 
 	def setupSpec() {
-		// @Mixin is buggy, use runtime mixins instead
-		this.class.metaClass.mixin(CanvasMixin)
-		this.class.metaClass.mixin(ConfirmationMixin)
-		this.class.metaClass.mixin(StreamMixin)
-
 		testStream = new Stream()
 		testStream.id = "pltRMd8rCfkij4mlZsQkJB"
 		streamService = createStreamService()
