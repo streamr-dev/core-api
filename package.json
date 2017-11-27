@@ -12,6 +12,8 @@
     "test-new": "node ./node_modules/.bin/jest ./web-app/react-app/tests",
     "build": "NODE_ENV=production ./node_modules/.bin/webpack",
     "build-dev": "./node_modules/.bin/webpack",
+    "clean": "rm -rf node_modules",
+    "clean-install": "npm run clean && npm install",
     "dev": "./node_modules/.bin/webpack-dev-server",
     "flow": "./node_modules/.bin/flow"
   },
