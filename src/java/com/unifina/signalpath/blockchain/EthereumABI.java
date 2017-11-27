@@ -43,7 +43,7 @@ public class EthereumABI implements Serializable {
 
 		for (JsonElement element : jsonArray) {
 			JsonObject functionOrEvent = element.getAsJsonObject();
-			String type = functionOrEvent.get("type").getAsString();
+			String type = functionOrEvent.has("type") ? functionOrEvent.get("type").getAsString() : null;
 
 			// from https://github.com/ethereum/wiki/wiki/Ethereum-Contract-ABI#json: "type can be omitted, defaulting to function"
 			if (type == null) {
@@ -66,7 +66,7 @@ public class EthereumABI implements Serializable {
 				log.debug("Found event " + e.name);
 				events.add(e);
 			} else {
-				throw new RuntimeException("Whoa! Found unknown item type in ABI: "+type);
+				throw new RuntimeException("Found unknown item type in ABI: "+type);
 			}
 		}
 	}
