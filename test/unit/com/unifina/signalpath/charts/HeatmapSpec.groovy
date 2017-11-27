@@ -14,10 +14,7 @@ class HeatmapSpec extends UiChannelMockingSpecification {
 	def setup() {
 		mockServicesForUiChannels()
 
-		module = new Heatmap()
-		module.globals = GlobalsFactory.createInstance([:], grailsApplication, new SecUser())
-		module.init()
-		module.configure([
+		module = setupModule(new Heatmap(), [
 			uiChannel: [id: "heatmap"],
 		])
 	}

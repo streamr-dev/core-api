@@ -2,34 +2,44 @@ package com.unifina.signalpath.remote;
 
 import com.unifina.data.FeedEvent;
 import com.unifina.data.IEventRecipient;
+import com.unifina.datasource.IStopListener;
 import com.unifina.feed.ITimestamped;
 import com.unifina.signalpath.*;
 import com.unifina.utils.MapTraversal;
+import org.apache.http.HttpHeaders;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.config.RequestConfig;
 import org.apache.http.client.methods.*;
 import org.apache.http.concurrent.FutureCallback;
 import org.apache.http.conn.ssl.SSLContexts;
 import org.apache.http.conn.ssl.TrustSelfSignedStrategy;
+import org.apache.http.conn.ssl.TrustStrategy;
 import org.apache.http.impl.nio.client.CloseableHttpAsyncClient;
 import org.apache.http.impl.nio.client.HttpAsyncClients;
 import org.apache.http.nio.client.HttpAsyncClient;
+import org.apache.log4j.Logger;
 
 import javax.net.ssl.SSLContext;
 import java.security.KeyManagementException;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
+import java.security.cert.CertificateException;
+import java.security.cert.X509Certificate;
 import java.util.*;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
 /**
- * Functionality that is common to HTTP modules:
+ * Functionality that is common to modules that make a HTTP request:
  *  - sync/async requests
  *  - body formatting
  *  - SSL
+ *
+ * Crucial benefit over simply doing Unirest.post: not blocking the whole canvas (Streamr thread) while request is pending
  */
-public abstract class AbstractHttpModule extends ModuleWithSideEffects implements IEventRecipient {
+public abstract class AbstractHttpModule extends ModuleWithSideEffects implements IEventRecipient, IStopListener {
+
+	private static final Logger log = Logger.getLogger(AbstractHttpModule.class);
 
 	protected static final String BODY_FORMAT_JSON = "application/json";
 	protected static final String BODY_FORMAT_FORMDATA = "application/x-www-form-urlencoded";
@@ -47,19 +57,27 @@ public abstract class AbstractHttpModule extends ModuleWithSideEffects implement
 	private transient Propagator asyncPropagator;
 	private transient CloseableHttpAsyncClient cachedHttpClient;
 
+	private boolean hasDebugLogged = false; // TODO: remove
+
+	private static class DontVerifyStrategy implements TrustStrategy {
+		public boolean isTrusted(X509Certificate[] var1, String var2) throws CertificateException {
+			return true;
+		}
+	}
+
 	/** This function is overridden so that the tests can inject a mock HttpAsyncClient */
 	protected HttpAsyncClient getHttpClient() {
 		if (cachedHttpClient == null) {
 			if (trustSelfSigned) {
 				try {
-					SSLContext sslcontext = SSLContexts
+					SSLContext sslContext = SSLContexts
 							.custom()
-							.loadTrustMaterial(null, new TrustSelfSignedStrategy())
+							.loadTrustMaterial(null, new DontVerifyStrategy())
 							.build();
 					cachedHttpClient = HttpAsyncClients.custom()
 							.setMaxConnTotal(MAX_CONNECTIONS)
 							.setMaxConnPerRoute(MAX_CONNECTIONS)
-							.setSSLContext(sslcontext)
+							.setSSLContext(sslContext)
 							.build();
 				} catch (NoSuchAlgorithmException | KeyStoreException | KeyManagementException e) {
 					trustSelfSigned = false;
@@ -75,6 +93,48 @@ public abstract class AbstractHttpModule extends ModuleWithSideEffects implement
 			cachedHttpClient.start();
 		}
 		return cachedHttpClient;
+	}
+
+	private void stopClient() {
+		try {
+			if (cachedHttpClient != null) {
+				cachedHttpClient.close();
+			}
+		} catch (Exception e) {
+			log.error("Closing HTTP client failed", e);
+		}
+	}
+
+	@Override
+	public void onStop() {
+		stopClient();
+	}
+
+	@Override
+	public void finalize() {
+		stopClient();
+	}
+
+	@Override
+	public void initialize() {
+		super.initialize();
+		// copied from ModuleWithUI
+		if (getGlobals().isRunContext()) {
+			getGlobals().getDataSource().addStopListener(this);
+		}
+	}
+
+	private SSLContext getSelfSignedSslContext() {
+		SSLContext sslContext;
+		try {
+			sslContext = SSLContexts
+					.custom()
+					.loadTrustMaterial(null, new TrustSelfSignedStrategy())
+					.build();
+		} catch (NoSuchAlgorithmException | KeyStoreException | KeyManagementException e) {
+			sslContext = null;
+		}
+		return sslContext;
 	}
 
 	@Override
@@ -99,19 +159,25 @@ public abstract class AbstractHttpModule extends ModuleWithSideEffects implement
 	}
 
 	@Override
-	public void onConfiguration(Map<String, Object> config) {
+	protected void onConfiguration(Map<String, Object> config) {
 		super.onConfiguration(config);
 		bodyContentType = MapTraversal.getString(config, "options.bodyContentType.value", AbstractHttpModule.BODY_FORMAT_JSON);
 		trustSelfSigned = MapTraversal.getBoolean(config, "options.trustSelfSigned.value");
 		isAsync = MapTraversal.getString(config, "options.syncMode.value", "async").equals("async");
-		timeoutMillis = 1000 * MapTraversal.getInt(config, "options.timeoutSeconds.value", DEFAULT_TIMEOUT_SECONDS);
+
+		Integer timeoutSeconds = MapTraversal.getInteger(config, "options.timeoutSeconds.value");
+		if (timeoutSeconds != null) {
+			timeoutMillis = 1000 * timeoutSeconds;
+		}
+
+		if (trustSelfSigned && getSelfSignedSslContext() == null) {
+			trustSelfSigned = false;
+			// TODO: notify user that self-signed certificates aren't supported
+		}
 
 		// HTTP module in async mode won't send outputs on SendOutput(),
 		// 	but only in receive() where it creates its own Propagator
-		propagationSink = isAsync;
-
-		// try getting HTTP client, resets trustSelfSigned if such SSL client can't be created
-		getHttpClient();
+		setPropagationSink(isAsync);
 	}
 
 	/**
@@ -128,12 +194,17 @@ public abstract class AbstractHttpModule extends ModuleWithSideEffects implement
 		HttpRequestBase request = null;
 		try {
 			request = createRequest();
+			log.info("HTTP request " + request.toString() + " from canvas " + getRootSignalPath().getCanvas().getId());
 		} catch (Exception e) {
 			response.errors.add("Constructing HTTP request failed");
 			response.errors.add(e.getMessage());
 			sendOutput(response);
 			return;
 		}
+		if (request instanceof HttpEntityEnclosingRequestBase && BODY_FORMAT_JSON.equals(bodyContentType)) {
+			request.setHeader(HttpHeaders.ACCEPT, "application/json");
+			request.setHeader(HttpHeaders.CONTENT_TYPE, "application/json");
+		}	// FORMDATA headers are correct already if the entity is UrlEncodedFormEntity
 		RequestConfig requestConfig = RequestConfig.custom()
 				.setConnectTimeout(timeoutMillis)
 				.setConnectionRequestTimeout(timeoutMillis)
@@ -176,6 +247,19 @@ public abstract class AbstractHttpModule extends ModuleWithSideEffects implement
 				}
 			}
 		});
+
+		// TODO: remove
+		if (!hasDebugLogged) {
+			hasDebugLogged = true;
+			log.info("Created HttpClient from canvas " + getRootSignalPath().getCanvas().getId());
+			Set<Thread> threads = Thread.getAllStackTraces().keySet();
+			for (Thread t : threads) {
+				if (t.getName().startsWith("I/O dispatcher")) {
+					log.info(t.getName());
+				}
+			}
+			log.info("end of threads.");
+		}
 
 		if (!isAsync) {
 			try {

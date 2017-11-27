@@ -1,4 +1,33 @@
 
-.map-container .streamr-map-icon {
-    color: #E95B15;
+.map-container {
+    flex: 1;
+}
+
+.map-container .invisible-container {
+    background: none;
+    border: none;
+}
+.map-container .invisible-container .streamr-map-icon {
+    position: absolute;
+    margin-left: 50%;
+    margin-top: 50%;
+    height: auto;
+    padding: 0;
+    line-height: 100%;
+}
+
+.map-container .streamr-map-icon.position-middle {
+    transform: translate(-50%, -50%);
+}
+
+.map-container .streamr-map-icon.position-top {
+    transform: translate(-50%, -100%);
+}
+
+.map-container .streamr-map-icon.position-bottom {
+    transform: translate(-50%, 0);
+}
+
+.map-container .streamr-map-icon.position-middle.fa-location-arrow {
+    transform: translate(-50%, -50%) rotate(-45deg);
 }

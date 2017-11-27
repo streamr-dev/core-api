@@ -35,34 +35,20 @@ function StreamrChart(parent, options) {
 	this.maxTime = null;
 	this.lastTime = null;
 	this.lastValue = null;
-
-	// Show/Hide all series buttons
-	if (this.options.showHideButtons) {
-		this.$parent.append('<div class="chart-series-buttons chart-show-on-run pull-right btn-group">' +
-			'<button class="btn btn-default btn-sm show-all-series" '+
-				'title="Show all series"><i class="fa fa-plus-circle"></i></button>'+
-			'<button class="btn btn-default btn-sm hide-all-series" '+
-				'title="Hide all series"><i class="fa fa-minus-circle"></i></button>'+
-		'</div>')
-
-		var showHide = function(doShow) {
-			return function() {
-				if (!_this.chart)
-					return;
-
-				_this.seriesMeta.forEach(function(series) {
-					series.impl.setVisible(doShow, false)
-				})
-				_this.chart.redraw()
-			}
-		}
-		$('button.hide-all-series', this.$parent).click(showHide(false))
-		$('button.show-all-series', this.$parent).click(showHide(true))
-	}
+    
+    this.toolbar = $("<div/>", {
+        class: 'chart-toolbar'
+    })
+    this.toolbarInner = $("<div/>", {
+        class: "inner pull-right"
+    })
+    this.toolbar.append(this.toolbarInner)
+    this.$parent.append(this.toolbar)
 
 	// Range dropdown
 	if (this.options.rangeDropdown) {
-		var $rangeDiv = $("<select class='chart-range-selector chart-show-on-run form-control pull-right' title='Range'></select>");
+		var $rangeDiv = $("<div></div>");
+        var $rangeSelect = $("<select class='chart-range-selector chart-show-on-run form-control' title='Range'></select>")
 		var rangeConfig = [
 			{name:"All",range:""},
 			{name:"month",range:30*24*60*60*1000},
@@ -82,10 +68,10 @@ function StreamrChart(parent, options) {
 		
 		rangeConfig.forEach(function(c) {
 			var $option =  $("<option value='"+c.range+"'>"+c.name+"</option>")
-			$rangeDiv.append($option)
+            $rangeSelect.append($option)
 		})
-		
-		$rangeDiv.on('change', function() {
+        
+        $rangeSelect.on('change', function() {
 			var r = $(this).val()
 			if (r) {
 				r = parseInt(r)
@@ -97,9 +83,34 @@ function StreamrChart(parent, options) {
 				_this.redraw()
 		})
 
-		this.$parent.append($rangeDiv);
+        $rangeDiv.append($rangeSelect)
+		this.toolbarInner.append($rangeDiv);
 	}
-
+    
+    // Show/Hide all series buttons
+    if (this.options.showHideButtons) {
+        this.toolbarInner.append('<div class="chart-series-buttons chart-show-on-run btn-group">' +
+            '<button class="btn btn-default btn-sm show-all-series" '+
+            'title="Show all series"><i class="fa fa-plus-circle"></i></button>'+
+            '<button class="btn btn-default btn-sm hide-all-series" '+
+            'title="Hide all series"><i class="fa fa-minus-circle"></i></button>'+
+            '</div>')
+        
+        var showHide = function(doShow) {
+            return function() {
+                if (!_this.chart)
+                    return;
+                
+                _this.seriesMeta.forEach(function(series) {
+                    series.impl.setVisible(doShow, false)
+                })
+                _this.chart.redraw()
+            }
+        }
+        $('button.hide-all-series', this.$parent).click(showHide(false))
+        $('button.show-all-series', this.$parent).click(showHide(true))
+    }
+    
 	$(this).on("initialized", function() {
 		_this.$parent.find(".chart-show-on-run").show()
 		_this.redraw()
@@ -122,9 +133,8 @@ function StreamrChart(parent, options) {
 	
 	// Create the chart area
 	var areaId = "chartArea_"+(new Date()).getTime()
-	area = $("<div id='"+areaId+"' class='chartDrawArea'></div>")
-	this.$parent.append(area)
-	this.$area = area
+	this.$area = $("<div id='"+areaId+"' class='chartDrawArea'></div>")
+	this.$parent.append(this.$area)
 
 	// An init message can be included in the options
 	if (this.options.init) {
@@ -304,23 +314,13 @@ StreamrChart.prototype.redraw = function() {
 	}
 }
 
-StreamrChart.prototype.resize = function(moduleWidth, moduleHeight) {
+StreamrChart.prototype.resize = function() {
 	if (!this.$area)
 		return;
-
-	if (moduleWidth && moduleHeight) {
-		var w = moduleWidth - 100
-		var h = moduleHeight - 110
-
-		this.$area.css('width', w)
-		this.$area.css('height', h)
-
-		if (this.chart)
-			this.chart.setSize(w, h, false)
-	}
-	else if (this.chart) {
-		this.chart.setSize(this.$area.width(), this.$area.height(), false)
-	}
+    
+    if (this.chart) {
+        this.chart.setSize(this.$area.innerWidth(), this.$area.innerHeight())
+    }
 }
 
 StreamrChart.prototype.getSeriesMetaData = function() {

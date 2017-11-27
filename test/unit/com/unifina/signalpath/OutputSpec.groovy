@@ -3,10 +3,12 @@ package com.unifina.signalpath
 import spock.lang.Specification
 
 class OutputSpec extends Specification {
-	def owner = Mock(AbstractSignalPathModule)
+	def owner = Stub(AbstractSignalPathModule) {
+		getDrivingInputs(_) >> new HashSet<Input>()
+	}
 	def output = new Output<Integer>(owner, "output", "Integer");
-	def in1 = new Input<Integer>(Mock(AbstractSignalPathModule), "in1", "Integer")
-	def in2 = new Input<Integer>(Mock(AbstractSignalPathModule), "in2", "Integer")
+	def in1 = new Input<Integer>(owner, "in1", "Integer")
+	def in2 = new Input<Integer>(owner, "in2", "Integer")
 
 	def setup() {
 		in1.owner.drivingInputs = new HashSet<>()

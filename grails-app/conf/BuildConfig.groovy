@@ -17,6 +17,7 @@ grails.project.source.level = 1.7
 grails.project.class.dir = "target/classes"
 grails.project.test.class.dir = "target/test-classes"
 grails.project.test.reports.dir = "target/test-reports"
+grails.project.war.file = "target/ROOT.war"
 
 def gebVersion = "0.9.3"
 def seleniumVersion = "2.48.2"
@@ -45,12 +46,13 @@ grails.project.dependency.resolution = {
         // Fast local repos first
         grailsHome()
         mavenLocal()
-		
-        // Unifina Nexus server
-        mavenRepo "http://192.168.10.21:8081/content/repositories/central/"
-        mavenRepo "http://192.168.10.21:8081/content/repositories/releases/"
-        mavenRepo "http://192.168.10.21:8081/content/repositories/snapshots/"
-		
+
+		// Maven central
+		mavenRepo "http://repo1.maven.org/maven2/"
+
+		// Ethereum Repository
+		mavenRepo "https://dl.bintray.com/ethereum/maven/"
+
         // Remote Grails repos
         grailsPlugins()
         grailsCentral()
@@ -62,19 +64,20 @@ grails.project.dependency.resolution = {
         // specify dependencies here under either 'build', 'compile', 'runtime', 'test' or 'provided' scopes eg.
 
         compile('log4j:log4j:1.2.16')
-		
+
         runtime('commons-net:commons-net:3.3')
         runtime('org.apache.commons:commons-math3:3.2')
         runtime('commons-codec:commons-codec:1.6')
         runtime('com.opencsv:opencsv:3.3')
         runtime('de.ruedigermoeller:fst:2.43')
-		
-        compile('org.atmosphere:atmosphere-runtime:1.0.0.beta5')
+
 		runtime('joda-time:joda-time:2.9.3')
-		compile('com.udojava:EvalEx:1.3')
+		compile('com.udojava:EvalEx:1.6')
 
 		compile('org.apache.kafka:kafka-clients:0.9.0.1')
         compile('com.mashape.unirest:unirest-java:1.3.3')
+
+		compile group: 'org.eclipse.paho', name: 'org.eclipse.paho.client.mqttv3', version: '1.1.1'
 
 		// http://www.stringtemplate.org/
 		// http://mvnrepository.com/artifact/org.antlr/ST4
@@ -100,6 +103,12 @@ grails.project.dependency.resolution = {
 		compile 'org.mongodb:mongodb-driver:3.2.1'
 		compile('biz.paluch.redis:lettuce:3.5.0.Final')
 		compile('com.datastax.cassandra:cassandra-driver-core:3.1.0')
+		compile('org.ethereum:ethereumj-core:1.4.3-RELEASE') {
+			excludes 'ch.qos.logback:logback-classic:*'
+			excludes 'org.springframework:spring-core:*'
+			excludes 'org.springframework:spring-context:*'
+			excludes 'org.springframework:spring-orm:*'
+		}
     }
 
     plugins {
@@ -120,8 +129,6 @@ grails.project.dependency.resolution = {
 		compile ":cache-headers:1.1.7"
 		runtime ':database-migration:1.4.0'
         runtime ":spring-security-core:2.0-RC4"
-        runtime ":jquery:1.11.1"
-        runtime ":jquery-ui:1.10.3"
         runtime ":resources:1.2.14"
         runtime ":cached-resources:1.0"
         runtime ":zipped-resources:1.0"

@@ -3,6 +3,7 @@ package com.unifina.signalpath.map;
 import com.mongodb.util.JSON;
 import com.unifina.domain.signalpath.Canvas;
 import com.unifina.service.CanvasService;
+import com.unifina.service.SerializationService;
 import com.unifina.service.SignalPathService;
 import com.unifina.signalpath.*;
 import com.unifina.utils.Globals;
@@ -53,7 +54,7 @@ public class ForEach extends AbstractSignalPathModule {
 		// Construct temporary signal path so that endpoints can be analyzed
 		// Note that the same map instance must not be reused for many instances, it will produce hell if many modules share the same config map instance
 		Map signalPathMap = (Map) JSON.parse(canvas.getJson());
-		SignalPathService signalPathService = getGlobals().getBean(SignalPathService.class);
+		SignalPathService signalPathService = Holders.getApplicationContext().getBean(SignalPathService.class);
 
 		// Create a non-run-context Globals for instantiating the temporary SignalPath
 		Globals tempGlobals = GlobalsFactory.createInstance(Collections.emptyMap(), getGlobals().getGrailsApplication(), getGlobals().getUser());
@@ -151,8 +152,8 @@ public class ForEach extends AbstractSignalPathModule {
 	}
 
 	private SubSignalPath makeSubSignalPath(String key) {
-		SignalPathService signalPathService = getGlobals().getBean(SignalPathService.class);
-		CanvasService canvasService = getGlobals().getBean(CanvasService.class);
+		SignalPathService signalPathService = Holders.getApplicationContext().getBean(SignalPathService.class);
+		CanvasService canvasService = Holders.getApplicationContext().getBean(CanvasService.class);
 
 		// Note that the same map instance must not be reused for many instances, it will produce hell if many modules share the same config map instance
 		// Re-parsing is used here instead of deep-copying an already-parsed map, as that's not easily available
@@ -219,6 +220,30 @@ public class ForEach extends AbstractSignalPathModule {
 		}
 	}
 
+	@Override
+	public void beforeSerialization() {
+		super.beforeSerialization();
+		for (SubSignalPath subSignalPath : keyToSignalPath.values()) {
+			subSignalPath.getSignalPath().beforeSerialization();
+		}
+	}
+
+	@Override
+	public void afterSerialization() {
+		super.afterSerialization();
+		for (SubSignalPath subSignalPath : keyToSignalPath.values()) {
+			subSignalPath.getSignalPath().afterSerialization();
+		}
+	}
+
+	@Override
+	public void afterDeserialization(SerializationService serializationService) {
+		super.afterDeserialization(serializationService);
+		for (SubSignalPath subSignalPath : keyToSignalPath.values()) {
+			subSignalPath.getSignalPath().afterDeserialization(serializationService);
+		}
+	}
+
 	/**
 	 * Solely used to keep track of inputs that received values (as opposed to having existing value).
 	 */
@@ -257,8 +282,8 @@ public class ForEach extends AbstractSignalPathModule {
 
 		@Override
 		public void receive(Object value) {
-			owner.setSendPending(true);
-			owner.getInput("key").receive(key);
+			getOwner().setSendPending(true);
+			getOwner().getInput("key").receive(key);
 			cachedOutputValues.put(outputName, value);
 		}
 

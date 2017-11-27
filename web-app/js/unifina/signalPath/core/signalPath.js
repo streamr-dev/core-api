@@ -209,7 +209,7 @@ var SignalPath = (function () {
 		jsPlumb.setSuspendDrawing(false,true);
 	}
 	
-	pub.updateModule = function(module,callback) {
+	pub.updateModule = function(module, callback) {
 		$.ajax({
 			type: 'POST',
 			url: options.getModuleUrl, 
@@ -236,6 +236,10 @@ var SignalPath = (function () {
 						}
 					}
 					_handleError(data.message)
+                    
+                    if (callback) {
+						callback(data, data.message)
+					}
 				}
 			},
 			error: function(jqXHR,textStatus,errorThrown) {
@@ -279,8 +283,7 @@ var SignalPath = (function () {
 					jsPlumb.setSuspendDrawing(false,true);
 					if (callback)
 						callback(module);
-				}
-				else {
+				} else {
 					_handleError(data.message)
 				}
 			},
@@ -293,11 +296,11 @@ var SignalPath = (function () {
     pub.createModuleFromJSON = function(data) {
 		if (data.error) {
 			_handleError(data.message)
-			return undefined;
+			return
 		}
 		
 		// Generate an internal index for the module and store a reference in a table
-		if (data.hash==null) {
+		if (data.hash == null) {
 			data.hash = moduleHashGenerator++
 		}
 		// Else check that the moduleHashGenerator keeps up
@@ -319,8 +322,10 @@ var SignalPath = (function () {
 			// Remove hash entry
 			var hash = mod.getHash();
 			_deleteModuleById(hash)
-			if (oldClose)
-				oldClose();
+   
+			if (oldClose) {
+                oldClose()
+			}
 		}
 		
 		return mod;
@@ -416,10 +421,43 @@ var SignalPath = (function () {
     pub.clear = function(isSilent) {
 		pub.unsubscribe()
 
-		if (pub.isRunning() && runningJson.adhoc)
-            pub.stop();
+	function _update(json, callback, errorCallback) {
+		$.ajax({
+			type: 'PUT',
+			url: options.apiUrl + "/canvases/"+json.id,
+			data: JSON.stringify(json),
+			contentType: 'application/json',
+			dataType: 'json',
+			success: function(response) {
+				if (!response.error) {
+					callback(json)
+				}
+				else {
+					handleError(response.error)
+				}
+			},
+			error: function(jqXHR,textStatus,errorThrown) {
+				if (jqXHR.responseJSON) {
+					var apiError = jqXHR.responseJSON;
+					if (apiError && apiError.message) {
+						handleError(apiError.message)
+                        errorCallback && errorCallback(apiError)
+						return
+					}
 
-        pub.getModules().forEach(function(module) {
+				}
+				handleError(errorThrown)
+			}
+		})
+	}
+	
+	function clear(isSilent) {
+		unsubscribe()
+
+		if (isRunning() && runningJson.adhoc)
+			stop();
+		
+		getModules().forEach(function(module) {
 			module.close()
 		})
 		
@@ -553,12 +591,11 @@ var SignalPath = (function () {
     pub.subscribe = function() {
 		if (pub.isRunning() && runningJson.uiChannel) {
 			subscription = connection.subscribe(
-				runningJson.uiChannel.id,
-				_processMessage,
-				{
-					resend_all: (runningJson.adhoc ? true : undefined),
-					canvas: runningJson.id
-				}
+ 				{
+					stream: runningJson.uiChannel.id,
+					resend_all: (runningJson.adhoc ? true : undefined)
+				},
+				_processMessage
 			)
 		}
 	}
@@ -677,7 +714,11 @@ var SignalPath = (function () {
 							_.each(endpoints, function (endpoint) {
 								var displayedValue = endpoint.value ?
 									JSON.stringify(endpoint.value).slice(0, pub.DEBUG_STRING_MAX_LENGTH) : "NULL";
-								$("#" + endpoint.id).data("spObject").updateState(displayedValue);
+
+								var endpointObject = $("#" + endpoint.id).data("spObject")
+								if (endpointObject) {
+									endpointObject.updateState(displayedValue);
+								}
 							})
 
 						}
@@ -788,5 +829,5 @@ var SignalPath = (function () {
         options.errorHandler({msg:message})
     }
     
-	return pub; 
+	return pub;
 }());

@@ -15,13 +15,12 @@ public class ClockModule extends AbstractSignalPathModule implements ITimeListen
 	private final StringOutput date = new StringOutput(this, "date");
 	private final TimeSeriesOutput ts = new TimeSeriesOutput(this,"timestamp");
 
-	private int secondCounter = 0;
 	private SimpleDateFormat df = null;
 
 	public ClockModule() {
-		format.canToggleDrivingInput = false;
-		tickUnit.canToggleDrivingInput = false;
-		tickRate.canToggleDrivingInput = false;
+		format.setCanToggleDrivingInput(false);
+		tickUnit.setCanToggleDrivingInput(false);
+		tickRate.setCanToggleDrivingInput(false);
 	}
 
 	@Override
@@ -29,17 +28,14 @@ public class ClockModule extends AbstractSignalPathModule implements ITimeListen
 	
 	@Override
 	public void clearState() {
-		secondCounter = 0;
 	}
 	
 	@Override
-	public void setTime(Date timestamp) {
-		if (tickUnit.getValue().isActivationTime(tickRate.getValue(), secondCounter++)) {
-			if (date.isConnected() && format.hasValue()) {
-				updateDateFormatIfNecessary(format.getValue());
-				date.send(df.format(timestamp));
-			}
-			ts.send(timestamp.getTime());
+	public void setTime(Date time) {
+		if (tickUnit.getValue().isActivationTime(tickRate.getValue(), time)) {
+			updateDateFormatIfNecessary(format.getValue());
+			date.send(df.format(time));
+			ts.send(time.getTime());
 		}
 	}
 
@@ -69,24 +65,28 @@ public class ClockModule extends AbstractSignalPathModule implements ITimeListen
 	}
 
 	enum TimeUnit {
-		SECOND(1),
-		MINUTE(60),
-		HOUR(60 * 60),
-		DAY(60 * 60 * 24);
-
+		SECOND(1000),
+		MINUTE(60 * 1000),
+		HOUR(60 * 60 * 1000),
+		DAY(60 * 60 * 24 * 1000);
 		private final int baseRate;
 
 		TimeUnit(int baseRate) {
 			this.baseRate = baseRate;
 		}
 
-		boolean isActivationTime(long tickRate, long currentTime) {
-			return currentTime % (tickRate * baseRate) == 0;
+		boolean isActivationTime(long tickRate, Date date) {
+			long ts = date.getTime() - (date.getTime() % 1000); // Reduce milliseconds just to be sure the modulo works right
+			return ts % (tickRate * getBaseRate()) == 0;
 		}
 
 		@Override
 		public String toString() {
 			return name().toLowerCase();
+		}
+
+		public int getBaseRate() {
+			return baseRate;
 		}
 	}
 

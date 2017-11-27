@@ -116,7 +116,9 @@ Tour.loadTour = function(tourNumber, cb) {
 
 	//Use jQuery instead of appending script tag to head due to caching issues
 	Tour.list(function(tours) {
-		$.getScript(tours[tourNumber].url)
+		if (tours[tourNumber]) {
+			$.getScript(tours[tourNumber].url)
+		}
 	})
 
 }
@@ -277,7 +279,13 @@ Tour.prototype.bindModule = function(moduleName, div) {
 	if (!this._modules[moduleName])
 		this._modules[moduleName] = 1
 
-	div.addClass('tour' + moduleName + this._modules[moduleName]++)
+	div.addClass('tour' +
+		moduleName
+			.replace(/\(/g, '')
+			.replace(/\)/g, '')
+			.replace(/\s/g, '_') +
+		this._modules[moduleName]++
+	)
 }
 
 Tour.prototype._getSpObject = function(name) {

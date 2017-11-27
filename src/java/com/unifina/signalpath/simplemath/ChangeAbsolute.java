@@ -36,8 +36,8 @@ public class ChangeAbsolute extends AbstractSignalPathModule {
 	}
 	
 	public void sendOutput() {
-		if (prev==null && input.initialValue!=null)
-			prev = input.initialValue;
+		if (prev==null && input.getInitialValue() != null)
+			prev = input.getInitialValue();
 		
 		if (prev != null)
 			out.send(input.value-prev); 

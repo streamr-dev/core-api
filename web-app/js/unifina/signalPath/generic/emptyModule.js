@@ -16,7 +16,7 @@ SignalPath.EmptyModule = function(data, canvas, prot) {
 	prot.jsonData = data;
 	prot.hash = prot.jsonData.hash;
 	prot.type = prot.jsonData.type;
-	prot.id = "module_"+prot.hash;
+	prot.id = "module_" + prot.hash;
 
 	prot.moduleClosed = false
 
@@ -26,18 +26,15 @@ SignalPath.EmptyModule = function(data, canvas, prot) {
 	prot.warnings = []
 
 	prot.dragOptions = {
-		drag: function(e, ui) {
-			var cpos = canvas.offset()
-			var x = ui.offset.left + canvas.scrollLeft()
-			var y = ui.offset.top + canvas.scrollTop()
-			
-			if (x < cpos.left - 100 || y < cpos.top - 50) {
-				return false
-			}
-			$(prot).add(pub).trigger("drag")
-		}
+        containment: true,
+        ignoreContainmentDirection: {
+            bottom: true,
+            right: true
+        },
+        // Easiest way to exclude custom module element from dragging is to add class 'drag-exclude' for it
+        exclude: 'input, textarea, select, button, a, .ui-resizable-handle, .chart-resize-helper, .drag-exclude'
 	}
-	
+    
 	pub.getDragOptions = function() {
 		return prot.dragOptions;
 	}
@@ -45,21 +42,11 @@ SignalPath.EmptyModule = function(data, canvas, prot) {
 	function createDiv() {
 		var buttons = []
 
-		prot.div = $("<div id='"+prot.id+"' class='component context-menu "+prot.type+"'></div>");
+		prot.div = $("<div id='"+prot.id+"' class='component module context-menu "+prot.type+"'></div>");
 		prot.div.data("spObject",prot);
 		
 		// Set absolute position
 		prot.div.css("position","absolute");
-		
-		// Read position and width/height if saved
-		if (prot.jsonData.layout) {
-			loadPosition();
-		} 
-		// Else add to default position in viewport
-		else {
-			prot.div.css('top',canvas.scrollTop() + 20);
-			prot.div.css('left',canvas.scrollLeft() + 70);
-		}
 		
 		// Module header
 		prot.header = $("<div class='moduleheader'></div>");
@@ -69,18 +56,60 @@ SignalPath.EmptyModule = function(data, canvas, prot) {
 		var moduleName = prot.jsonData.displayName || prot.jsonData.name
 		prot.title = $("<span class='modulename'>" + moduleName + "</span>");
 		prot.header.append(prot.title);
-	
-		// Close button
-		var deleteLink = createModuleButton("delete fa-times")
-		deleteLink.click(function() {
-			pub.close();
-		});
-
-		buttons.push(deleteLink);
+        
+        // If there are options, create options editor
+        if (prot.jsonData.options) {
+            var editOptions = createModuleButton("options fa-wrench");
+            
+            editOptions.click(function() {
+                var $optionEditor = $("<div class='optionEditor'></div>");
+                
+                // Create and sort options by key
+                var keys = Object.keys(prot.jsonData.options)
+                keys.sort()
+                
+                // Create options
+                keys.forEach(function(key) {
+                    // Create the option div
+                    var div = prot.createOption(key, prot.jsonData.options[key]);
+                    $optionEditor.append(div);
+                    // Store reference to the JSON option
+                    $(div).data("option", prot.jsonData.options[key]);
+                })
+                
+                bootbox.dialog({
+                    animate: false,
+                    title: 'Options: '+prot.title.text(),
+                    message: $optionEditor,
+                    onEscape: function() { return true },
+                    buttons: {
+                        'Cancel': function() {},
+                        'OK': function() {
+                            $optionEditor.find(".option").each(function(i, div) {
+                                // Get reference to the JSON option
+                                prot.updateOption($(div).data("option"), div)
+                            })
+                            
+                            prot.onOptionsUpdated()
+                        }
+                    }
+                })
+            })
+            buttons.push(editOptions)
+        }
+        
+        if (prot.jsonData.canRefresh) {
+            // If the module can refresh, add a refresh button
+            var refresh = createModuleButton("refresh fa-refresh");
+            
+            refresh.click(function() {
+                SignalPath.updateModule(pub);
+            });
+            buttons.push(refresh);
+        }
 
 		// Help button shows normal help on hover and "extended" help in a dialog on click
 		var helpLink = createModuleButton("help fa-question");
-
 		var tooltipOptions = {
 			animation: false,
 			trigger: 'manual',
@@ -93,12 +122,11 @@ SignalPath.EmptyModule = function(data, canvas, prot) {
 			placement: 'auto top',
 			template: '<div class="tooltip" role="tooltip"><div class="tooltip-arrow"></div><div class="tooltip-inner modulehelp-tooltip"></div></div>'
 		}
-		
 		var delay=500, tooltipDelayTimer
 		helpLink.mouseenter(function() {
 			tooltipDelayTimer = setTimeout(function() {
-	 			prot.getHelp(false, function(htext) {
-	 				tooltipOptions.title = htext
+				prot.getHelp(false, function(htext) {
+					tooltipOptions.title = htext
 					// show tooltip after help text is loaded
 					helpLink.tooltip(tooltipOptions)
 
@@ -113,19 +141,18 @@ SignalPath.EmptyModule = function(data, canvas, prot) {
 								helpLink.tooltip("show")
 							}
 							MathJax.Hub.Queue(["Typeset",MathJax.Hub,$tt[0]]);
-							MathJax.Hub.Queue(function(){
+							MathJax.Hub.Queue(function() {
 								$tt.find(".math-tex").addClass("math-jax-ready")
 							})
 						}
 					})
 					helpLink.tooltip('show')
-	 			})
+				})
 			}, delay)
 		}).mouseleave(function() {
 			clearTimeout(tooltipDelayTimer)
 			helpLink.tooltip('destroy')
 		})
-
 		helpLink.click(function() {
 			prot.getHelp(true, function(helptext) {
 				var bb = bootbox.dialog({
@@ -145,72 +172,51 @@ SignalPath.EmptyModule = function(data, canvas, prot) {
 				bb.modal("show")
 			})
 		})
-
 		buttons.push(helpLink);
+	
+		// Close button
+		var deleteLink = createModuleButton("delete fa-times")
+		deleteLink.click(function() {
+			pub.close();
+		})
+		buttons.push(deleteLink)
 
 		prot.body = $("<div class='modulebody'></div>");
 		prot.div.append(prot.body);
-		
-		// If there are options, create options editor
-		if (prot.jsonData.options) {
-			var editOptions = createModuleButton("options fa-wrench");
-			
-			editOptions.click(function() {
-				var $optionEditor = $("<div class='optionEditor'></div>");
-				
-				// Create and sort options by key
-				var keys = Object.keys(prot.jsonData.options)
-				keys.sort()
+        
+        // Read position and width/height if saved
+        var layout = prot.jsonData.layout || {
+            position: {
+                top: canvas.scrollTop() + 60,
+                left: canvas.scrollLeft() + 70
+            }
+        }
+        loadPosition(layout);
 
-				// Create options
-				keys.forEach(function(key) {
-					// Create the option div
-					var div = prot.createOption(key, prot.jsonData.options[key]);
-					$optionEditor.append(div);
-					// Store reference to the JSON option
-					$(div).data("option",prot.jsonData.options[key]);
-				})
-				
-				bootbox.dialog({
-					animate: false,
-					title: 'Options: '+prot.title.text(),
-					message: $optionEditor,
-					onEscape: function() { return true },
-					buttons: {
-						'Cancel': function() {},
-						'OK': function() {
-							$optionEditor.find(".option").each(function(i, div) {
-								// Get reference to the JSON option
-								prot.updateOption($(div).data("option"), div)
-							})
+		prot.header.append(buttons)
 
-							prot.onOptionsUpdated()
-						}
-					}
-				})
-			})
-
-			buttons.push(editOptions)
-		}
-		
-		if (prot.jsonData.canRefresh) {
-			// If the module can refresh, add a refresh button
-			var refresh = createModuleButton("refresh fa-refresh");
-		
-			refresh.click(function() {
-				SignalPath.updateModule(pub);
-			});
-			buttons.push(refresh);
-		}
-
-		prot.header.append(buttons.reverse())
-		
 		// Must add to canvas before setting draggable
 		canvas.append(prot.div);
 		prot.div.addClass("draggable")
-		prot.div.draggable(prot.dragOptions);
+		prot.div.draggabilly(prot.dragOptions)
+        
+        prot.div.on("dragMove", function() {
+            var position = {
+                top: $(this).position().top,
+                bottom: $(this).position().top + prot.div.height(),
+                left: $(this).position().left,
+                right: $(this).position().left + prot.div.width()
+            }
+            var offset = 20
+            if (position.right + offset > canvas.width()) {
+                $("#canvas")[0].scrollLeft += (canvas.width() - position.right + offset)
+            }
+            if (position.bottom + offset > canvas.height()) {
+                $("#canvas")[0].scrollTop += (canvas.height() - position.bottom + offset)
+            }
+        })
 		
-		prot.div.on("click dragstart", function(event) {
+		prot.div.on("click dragStart", function(event) {
 			$(".component.focus").each(function(i,c) {
 				var ob = $(c).data("spObject");
 				if (ob !== prot)
@@ -218,12 +224,16 @@ SignalPath.EmptyModule = function(data, canvas, prot) {
 			});
 			prot.addFocus(true);
 			event.stopPropagation();
-		});
+		})
+        
+        prot.div.on("dragEnd", function() {
+            prot.redraw()
+        })
 
 		prot.div.hover(function() {
 			if (!prot.div.hasClass("focus")) {
-				prot.addFocus(false);
-			}
+                prot.addFocus(false);
+            }
 		}, function() {
 			if (!prot.div.hasClass("holdFocus")) {
 				prot.removeFocus();
@@ -249,16 +259,16 @@ SignalPath.EmptyModule = function(data, canvas, prot) {
 	}
 	prot.writePosition = writePosition;
 	
-	function loadPosition() {
-		var item = prot.jsonData.layout;
+	function loadPosition(layout) {
+		var item = layout || prot.jsonData.layout;
 
 		if (item.width)
-			prot.div.css('width',item.width);
+			prot.body.css('width', item.width);
 		if (item.height)
-			prot.div.css('height',item.height);
+			prot.body.css('height', item.height);
 
-		prot.div.css('top',item.position.top);
-		prot.div.css('left',item.position.left);
+		prot.div.css('top', item.position.top);
+		prot.div.css('left', item.position.left);
 	}
 	prot.loadPosition = loadPosition;
 	
@@ -318,13 +328,26 @@ SignalPath.EmptyModule = function(data, canvas, prot) {
 	}
 	
 	function initResizable(options, element) {
+        var update = function(e, ui) {
+            prot.redraw()
+        }
+        var optionsStop = options.stop
+        delete options.stop
 		var defaultOptions = {
-			helper: "chart-resize-helper"
+			helper: "module-resize-helper",
+            minWidth: 200,
+            minHeight: 100,
+            stop: function(e, ui) {
+                optionsStop && optionsStop(e, ui)
+                update(e, ui)
+            }
 		}
-		options = $.extend({},defaultOptions,options || {});
-		element = element || prot.div
-		element.resizable(options);
+		options.stop = undefined
+		options = $.extend({}, defaultOptions, options || {});
+		element = element || prot.body
 		prot.resizable = true;
+        
+		element.resizable(options);
 	}
 	prot.initResizable = initResizable;
 	
@@ -380,6 +403,7 @@ SignalPath.EmptyModule = function(data, canvas, prot) {
 		var div = $("<div class='option'></div>");
 		var title = $("<span class='optionTitle'>" + key + "</span>").appendTo(div);
 		var value = $("<span class='optionValue'></span>").appendTo(div);
+		var input
 
 		if (option.possibleValues) {
 			var $select = $("<select>");
@@ -394,11 +418,20 @@ SignalPath.EmptyModule = function(data, canvas, prot) {
 			});
 			value.append($select);
 		} else if (option.type == "int" || option.type == "double" || option.type == "string") {
-			var input = $("<input type='text'>");
+			input = $("<input type='text'>").appendTo(value);
 			input.attr("value", option.value);
-			value.append(input);
 		} else if (option.type == "boolean") {
 			value.append("<select><option value='true' " + (option.value ? "selected='selected'" : "") + ">true</option><option value='false' " + (!option.value ? "selected='selected'" : "") + ">false</option></select>");
+		} else if (option.type == "color") {
+			input = $("<input type='text' class='parameterInput colorInput form-control'/>").appendTo(value)
+			input.spectrum({
+				preferredFormat: "rgb",
+				showInput: true,
+				showButtons: false
+			})
+			if (option.value) {
+				input.spectrum("set", option.value)
+			}
 		}
 		return div;
 	}
@@ -416,6 +449,8 @@ SignalPath.EmptyModule = function(data, canvas, prot) {
 			option.value = inputText;
 		} else if (option.type == "boolean") {
 			option.value = (inputText == "true");
+		} else if (option.type == "color") {
+			option.value = inputText
 		}
 	}
 	prot.updateOption = updateOption;
@@ -468,8 +503,8 @@ SignalPath.EmptyModule = function(data, canvas, prot) {
 	function toJSON() {
 		writePosition();
 		if (prot.resizable) {
-			prot.jsonData.layout.width = prot.div.css('width');
-			prot.jsonData.layout.height = prot.div.css('height');	
+			prot.jsonData.layout.width = prot.body.css('width');
+			prot.jsonData.layout.height = prot.body.css('height');	
 		}
 		return prot.jsonData;
 	}

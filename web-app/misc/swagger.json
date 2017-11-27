@@ -1,6 +1,7 @@
 {
   "swagger": "2.0",
   "info": {
+    "title": "Streamr API",
     "version": "1.0.0"
   },
   "host": "www.streamr.com",
@@ -26,7 +27,7 @@
   "tags": [
     {
       "name": "streams",
-      "description": "Manage your Streams, and insert or read data from them"
+      "description": "Manage Streams, and insert or read data from them"
     },
     {
       "name": "canvases",
@@ -34,11 +35,19 @@
     },
     {
       "name": "permissions",
-      "description": "Read, write and share rights"
+      "description": "Read, write, and share rights"
     },
     {
       "name": "dashboards",
       "description": "Dashboards and their items"
+    },
+    {
+      "name": "keys",
+      "description": "Keys for authenticating users and resources"
+    },
+    {
+      "name": "users",
+      "description": "User management"
     }
   ],
   "paths": {
@@ -320,10 +329,10 @@
         }
       }
     },
-    "/streams/{id}/data/{partition}/last/{count}": {
+    "/streams/{id}/data/partitions/{partition}/last": {
       "get": {
-        "summary": "Get most recent events from stream",
-        "description": "Get the N most recent events from a stream",
+        "summary": "Get most recent events from a stream",
+        "description": "Get the N most recent events from a stream.",
         "parameters": [
           {
             "in": "path",
@@ -341,10 +350,10 @@
             "default": 0
           },
           {
-            "in": "path",
+            "in": "query",
             "name": "count",
             "description": "Number of messages to fetch",
-            "required": true,
+            "required": false,
             "type": "integer",
             "default": 1
           }
@@ -356,6 +365,9 @@
           "200": {
             "description": "A list of events"
           },
+          "400": {
+            "description": "Malformed request"
+          },
           "401": {
             "description": "Permission denied"
           },
@@ -371,10 +383,10 @@
         }
       }
     },
-    "/streams/{id}/data/{partition}/fromTimestamp/{fromTimestamp}": {
+    "/streams/{id}/data/partitions/{partition}/range": {
       "get": {
-        "summary": "Get events since a timestamp from the stream",
-        "description": "Get events since a timestamp from the stream",
+        "summary": "Get events between a range from the stream",
+        "description": "Get events between a range from the stream. The range can be defined in terms of offsets or timestamps, but not both at the same time (fromOffset must be used with toOffset, and fromTimestamp with toTimestamp). In the absence of an upper bound, range will span until latest message. Lower bound is always required, i.e., either fromOffset or fromTimestamp must be present in request.",
         "parameters": [
           {
             "in": "path",
@@ -392,67 +404,31 @@
             "default": 0
           },
           {
-            "in": "path",
-            "name": "fromTimestamp",
-            "description": "Timestamp in milliseconds since Jan 1st 1970 UTC",
-            "required": true,
-            "type": "integer"
-          }
-        ],
-        "tags": [
-          "streams"
-        ],
-        "responses": {
-          "200": {
-            "description": "A list of events"
-          },
-          "401": {
-            "description": "Permission denied"
-          },
-          "403": {
-            "description": "Authentication failed"
-          },
-          "404": {
-            "description": "Stream not found"
-          },
-          "500": {
-            "description": "Unexpected error"
-          }
-        }
-      }
-    },
-    "/streams/{id}/data/{partition}/fromTimestamp/{fromTimestamp}/toTimestamp/{toTimestamp}": {
-      "get": {
-        "summary": "Get events since a timestamp from the stream",
-        "description": "Get events since a timestamp from the stream",
-        "parameters": [
-          {
-            "in": "path",
-            "name": "id",
-            "description": "ID of the stream",
-            "required": true,
-            "type": "string"
-          },
-          {
-            "in": "path",
-            "name": "partition",
-            "description": "Partition number",
-            "required": true,
-            "type": "integer",
-            "default": 0
-          },
-          {
-            "in": "path",
-            "name": "fromTimestamp",
-            "description": "Begin timestamp in milliseconds since Jan 1st 1970 UTC",
-            "required": true,
+            "in": "query",
+            "name": "fromOffset",
+            "description": "Event offset lower bound",
+            "required": false,
             "type": "integer"
           },
           {
-            "in": "path",
+            "in": "query",
+            "name": "toOffset",
+            "description": "Event offset upper bound",
+            "required": false,
+            "type": "integer"
+          },
+          {
+            "in": "query",
+            "name": "fromTimestamp",
+            "description": "Timestamp lower bound in milliseconds since Jan 1st 1970 UTC",
+            "required": false,
+            "type": "integer"
+          },
+          {
+            "in": "query",
             "name": "toTimestamp",
-            "description": "End timestamp in milliseconds since Jan 1st 1970 UTC",
-            "required": true,
+            "description": "Timestamp upper bound in milliseconds since Jan 1st 1970 UTC",
+            "required": false,
             "type": "integer"
           }
         ],
@@ -462,6 +438,9 @@
         "responses": {
           "200": {
             "description": "A list of events"
+          },
+          "400": {
+            "description": "Malformed request"
           },
           "401": {
             "description": "Permission denied"
@@ -550,6 +529,137 @@
             "schema": {
               "$ref": "#/definitions/Permission"
             }
+          },
+          "403": {
+            "description": "No sharing rights to the stream",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          },
+          "404": {
+            "description": "Stream wasn't found",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          }
+        }
+      }
+    },
+    "/streams/{id}/keys": {
+      "get": {
+        "summary": "List keys",
+        "description": "List the keys for a given Stream.\n Requires 'share' permission or ownership.",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "description": "ID of the stream",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "tags": [
+          "streams",
+          "keys"
+        ],
+        "responses": {
+          "200": {
+            "description": "List of keys",
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/ResourceKey"
+              }
+            }
+          },
+          "403": {
+            "description": "No sharing rights to the stream",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          },
+          "404": {
+            "description": "Stream wasn't found",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          }
+        }
+      },
+      "post": {
+        "summary": "Create a key",
+        "description": "Creates an API key for the given Stream.\n Requires 'share' permission or ownership.",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "description": "ID of the stream",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "description": "Key to be created",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/ResourceKeyCreateRequest"
+            }
+          }
+        ],
+        "tags": [
+          "streams",
+          "keys"
+        ],
+        "responses": {
+          "200": {
+            "description": "The newly created key",
+            "schema": {
+              "$ref": "#/definitions/ResourceKey"
+            }
+          },
+          "403": {
+            "description": "No sharing rights to the stream",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          },
+          "404": {
+            "description": "Stream wasn't found",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          }
+        }
+      }
+    },
+    "/streams/{streamId}/keys/{id}": {
+      "delete": {
+        "summary": "Delete a key",
+        "description": "Deletes an API key from the given Stream.\n Requires 'share' permission or ownership.",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "streamId",
+            "description": "ID of the stream",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "in": "path",
+            "name": "id",
+            "description": "ID of the key",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "tags": [
+          "streams",
+          "keys"
+        ],
+        "responses": {
+          "204": {
+            "description": "Success (no content)"
           },
           "403": {
             "description": "No sharing rights to the stream",
@@ -1604,6 +1714,112 @@
           }
         }
       }
+    },
+    "/users/me": {
+      "get": {
+        "summary": "Get the authenticated user",
+        "description": "Returns information on the authenticated user.",
+        "parameters": [],
+        "tags": [
+          "users"
+        ],
+        "responses": {
+          "200": {
+            "description": "User details",
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/User"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/users/me/keys": {
+      "get": {
+        "summary": "List user's API keys",
+        "description": "List the API keys for the authenticated user.",
+        "parameters": [],
+        "tags": [
+          "users",
+          "keys"
+        ],
+        "responses": {
+          "200": {
+            "description": "List of keys",
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/UserKey"
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "summary": "Create a new user API key",
+        "description": "Creates a key that can be used for authenticating the user.",
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "description": "Key to be created",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/UserKeyCreateRequest"
+            }
+          }
+        ],
+        "tags": [
+          "users",
+          "keys"
+        ],
+        "responses": {
+          "200": {
+            "description": "Newly created user key",
+            "schema": {
+              "$ref": "#/definitions/UserKey"
+            }
+          }
+        }
+      }
+    },
+    "/users/me/keys/{id}": {
+      "delete": {
+        "summary": "Delete user API key",
+        "description": "Revoke and delete a user API key. Can only be called by the user.",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "description": "ID of the key",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "tags": [
+          "streams",
+          "keys"
+        ],
+        "responses": {
+          "204": {
+            "description": "Success (no content)"
+          },
+          "403": {
+            "description": "No sharing rights to the stream",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          },
+          "404": {
+            "description": "Stream wasn't found",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          }
+        }
+      }
     }
   },
   "definitions": {
@@ -1683,7 +1899,7 @@
       "properties": {
         "name": {
           "type": "string",
-          "description": "name of the fieldf"
+          "description": "name of the field"
         },
         "type": {
           "type": "string",
@@ -1960,6 +2176,96 @@
         "operation": {
           "type": "string",
           "description": "User rights that this permission enables, e.g. 'read', 'write', 'share'",
+          "example": "read"
+        }
+      }
+    },
+    "User": {
+      "type": "object",
+      "required": ["name", "username", "timezone"],
+      "properties": {
+        "name": {
+          "type": "string",
+          "description": "User's real name",
+          "example": "John Smith"
+        },
+        "username": {
+          "type": "string",
+          "description": "The username (email address)",
+          "example": "someone@somewhere.com"
+        },
+        "timezone": {
+          "type": "string",
+          "description": "User's timezone setting.",
+          "example": "Europe/Helsinki"
+        }
+      }
+    },
+    "UserKeyCreateRequest": {
+      "type": "object",
+      "required": ["name"],
+      "properties": {
+        "name": {
+          "type": "string",
+          "description": "Human-readable name",
+          "example": "Matti's key"
+        }
+      }
+    },
+    "UserKey": {
+      "type": "object",
+      "required": ["id", "name"],
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier of this Key",
+          "example": "FX2vYkh8kNAM"
+        },
+        "name": {
+          "type": "string",
+          "description": "Human-readable name",
+          "example": "My app backend key"
+        },
+        "user": {
+          "type": "string",
+          "description": "Username which the key authenticates if user-linked key. Null otherwise.",
+          "example": "some.user@streamr.com"
+        }
+      }
+    },
+    "ResourceKeyCreateRequest": {
+      "type": "object",
+      "required": ["name"],
+      "properties": {
+        "name": {
+          "type": "string",
+          "description": "Human-readable name",
+          "example": "Key for my app"
+        },
+        "permission": {
+          "type": "string",
+          "description": "Operation permitted by this key to the resource in question.",
+          "example": "read"
+        }
+      }
+    },
+    "ResourceKey": {
+      "type": "object",
+      "required": ["id", "name"],
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier of this Key",
+          "example": "FX2vYkh8kNAM"
+        },
+        "name": {
+          "type": "string",
+          "description": "Human-readable name",
+          "example": "Key for my public web app"
+        },
+        "permission": {
+          "type": "string",
+          "description": "Operation permitted by this key to the resource in question.",
           "example": "read"
         }
       }

@@ -44,9 +44,12 @@ SignalPath.GenericModule = function(data, canvas, prot) {
 			}
 		});
 	}
-	
-	// PROTECTED FUNCTIONS
-	
+
+	function getContract() {
+		return prot.jsonData.contract
+	}
+	pub.getContract = getContract
+
 	var superUpdateFrom = pub.updateFrom;
 	function updateFrom(data) {
 		// Guard against updating after module has been closed
@@ -116,13 +119,13 @@ SignalPath.GenericModule = function(data, canvas, prot) {
 
 		prot.createModuleFooter()
 		
-		prot.div.on("dragstart", function(event, ui) {
+		prot.div.on("dragStart", function(event, ui) {
 			jsPlumb.recalculateOffsets(prot.div.attr('id'));
 			_cachedEndpoints = prot.div.find(".endpoint")
 		});
 		
 		// Update endpoint positions explicitly. You could replace this with jsPlumb drag handling, but weird things may happen!
-		prot.div.on("drag", function(event, ui) {
+		prot.div.on("dragMove", function(event, ui) {
 			if (_cachedEndpoints.length)
 				jsPlumb.repaint(_cachedEndpoints)
 		});
@@ -145,6 +148,8 @@ SignalPath.GenericModule = function(data, canvas, prot) {
 	
 	var superClose = pub.close;
 	function close() {
+		// TODO: below line was added to fix disconnecting variadics when updating module options, but lead to other problems
+		// prot.moduleClosed = true
 		disconnect();
 
 		$(prot.div).find("div.input").each(function(i,div) {
@@ -159,6 +164,8 @@ SignalPath.GenericModule = function(data, canvas, prot) {
 		});
 		
 		superClose();
+		// TODO: below line was added to fix disconnecting variadics when updating module options, but lead to other problems
+		// prot.moduleClosed = false
 	}
 	pub.close = close;
 	
@@ -461,10 +468,12 @@ SignalPath.GenericModule = function(data, canvas, prot) {
 		
 		jsPlumb.recalculateOffsets(prot.div.attr('id'));
 		
-		if ($(prot.div).find("div.input").length>0)
-			jsPlumb.repaint($(prot.div).find("div.input"));
-		if ($(prot.div).find("div.output").length>0)
-			jsPlumb.repaint($(prot.div).find("div.output"));
+        var inputs = prot.div.find("div.input")
+		if (inputs.length > 0)
+			jsPlumb.repaint(inputs);
+        var outputs = prot.div.find("div.output")
+		if (outputs.length > 0)
+			jsPlumb.repaint(outputs);
 	}
 	
 	var superToJSON = pub.toJSON;
@@ -473,13 +482,13 @@ SignalPath.GenericModule = function(data, canvas, prot) {
 
 		// Get parameter JSON
 		prot.jsonData.params = [];
-		$(prot.params).each(function(i,endpoint) {
+		$(prot.params).each(function(i, endpoint) {
 			prot.jsonData.params.push(endpoint.toJSON());
 		});
 
 		// Get input JSON
 		prot.jsonData.inputs = [];
-		$(prot.inputs).each(function(i,endpoint) {
+		$(prot.inputs).each(function(i, endpoint) {
 			prot.jsonData.inputs.push(endpoint.toJSON());
 		});
 		
@@ -495,7 +504,7 @@ SignalPath.GenericModule = function(data, canvas, prot) {
 	
 	// Everything added to the public interface can be accessed from the
 	// private interface too
-	$.extend(prot,pub);
+	$.extend(prot, pub);
 
 	$(SignalPath).on("_signalPathLoadModulesReady", prot.refreshConnections);
 	$(prot).on('closed', function() {

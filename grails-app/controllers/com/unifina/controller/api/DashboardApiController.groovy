@@ -6,6 +6,7 @@ import com.unifina.api.ValidationException
 import com.unifina.domain.dashboard.Dashboard
 import com.unifina.domain.security.Permission
 import com.unifina.domain.security.SecUser
+import com.unifina.security.AuthLevel
 import com.unifina.security.StreamrApi
 import com.unifina.service.DashboardService
 import com.unifina.service.SignalPathService
@@ -43,20 +44,16 @@ class DashboardApiController {
 		if (!command.validate()) {
 			throw new ValidationException(command.errors)
 		}
-		def dashboard = new Dashboard(
-			name: command.name,
-			user: request.apiUser
-		)
-		dashboard.save(failOnError: true, validate: true)
+		def dashboard = dashboardService.createOrUpdate(command, request.apiUser)
 		render(dashboard.toMap() as JSON)
 	}
 
 	@StreamrApi
-	def update(Long id, SaveDashboardCommand command) {
+	def update(SaveDashboardCommand command) {
 		if (!command.validate()) {
 			throw new ValidationException(command.errors)
 		}
-		def dashboard = dashboardService.update(id, command, (SecUser) request.apiUser)
+		def dashboard = dashboardService.createOrUpdate(command, request.apiUser)
 		render(dashboard.toMap() as JSON)
 	}
 
@@ -69,7 +66,7 @@ class DashboardApiController {
 	/**
 	 * Handles a runtime requests from dashboard view
 	 */
-	@StreamrApi(requiresAuthentication = false)
+	@StreamrApi(authenticationLevel = AuthLevel.NONE)
 	def runtimeRequest(String path, Boolean local) {
 		def msg = request.JSON
 		Map response = signalPathService.runtimeRequest(dashboardService.buildRuntimeRequest(msg, "dashboards/$path", request.apiUser), local ? true : false)

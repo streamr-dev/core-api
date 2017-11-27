@@ -17,27 +17,23 @@ public class Gradient extends AbstractSignalPathModule {
 
 	Output<StreamrColor> out = new Output<>(this, "color", "Color");
 
-	float[] minHSB;
-	float[] maxHSB;
+	private float[] minHSB;
+	private float[] maxHSB;
 
 	@Override
 	public void init() {
-		addInput(minValue);
-		addInput(maxValue);
-		addInput(minColor);
-		addInput(maxColor);
-		addInput(in);
+		addInputs(minValue, maxValue, minColor, maxColor, in);
 		addOutput(out);
 	}
 
 	@Override
 	public void sendOutput() {
-		double ymx = 1d;
-		double ymn = 0d;
-		double xmx = maxValue.getValue();
-		double xmn = minValue.getValue();
-		double S = (ymx - ymn)/(xmx - xmn);
-		double D = ymx - S * xmx;
+		double yMax = 1d;
+		double yMin = 0d;
+		double xMax = maxValue.getValue();
+		double xMin = minValue.getValue();
+		double S = (yMax - yMin)/(xMax - xMin);
+		double D = yMax - S * xMax;
 		float ratio = (float)(in.value * S + D);
 		ratio = (float) Math.min(Math.max(ratio, 0d), 1d);
 
@@ -56,8 +52,11 @@ public class Gradient extends AbstractSignalPathModule {
 		float maxB = maxHSB[2];
 		float newB = calculateBetweenValues(minB, maxB, ratio);
 
-		out.send(new StreamrColor(new Color(Color.HSBtoRGB(newH, newS, newB))));
+		double minA = minColor.getValue().getAlpha();
+		double maxA = maxColor.getValue().getAlpha();
+		double newA = calculateBetweenValues(minA, maxA, ratio);
 
+		out.send(new StreamrColor(new Color(Color.HSBtoRGB(newH, newS, newB)), newA));
 	}
 	
 	@Override
@@ -75,5 +74,9 @@ public class Gradient extends AbstractSignalPathModule {
 
 	private float calculateBetweenValues(float min, float max, float ratio) {
 		return min * (1.0f - ratio) + max * ratio;
+	}
+
+	private double calculateBetweenValues(double min, double max, double ratio) {
+		return (double) calculateBetweenValues((float) min, (float) max, (float) ratio);
 	}
 }

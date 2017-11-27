@@ -28,10 +28,10 @@ public class SamplerDouble extends AbstractSignalPathModule {
 	
 	@Override
 	public void sendOutput() {
-		if (drivingInputs.contains(triggerA)) {
+		if (getDrivingInputs().contains(triggerA)) {
 			out.send(valueA.value);
 		}
-		if (drivingInputs.contains(triggerB)) {
+		if (getDrivingInputs().contains(triggerB)) {
 			out.send(valueB.value);
 		}
 	}

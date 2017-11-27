@@ -1,12 +1,9 @@
 package com.unifina.utils.testutils;
 
 import com.unifina.datasource.ITimeListener;
-import com.unifina.serialization.AnonymousInnerClassDetector;
-import com.unifina.serialization.HiddenFieldDetector;
 import com.unifina.serialization.Serializer;
 import com.unifina.serialization.SerializerImpl;
 import com.unifina.service.SerializationService;
-import com.unifina.service.StreamService;
 import com.unifina.signalpath.*;
 import com.unifina.utils.DU;
 import com.unifina.utils.Globals;
@@ -227,7 +224,7 @@ public class ModuleTestHelper {
 	private boolean clearStateCalled = false;
 
 	public enum SerializationMode {
-		NONE, SERIALIZE, SERIALIZE_DESERIALIZE
+		NONE, CLEAR, SERIALIZE, SERIALIZE_DESERIALIZE
 	}
 	private SerializationMode serializationMode = SerializationMode.NONE;
 	private SerializationService dummySerializationService = new SerializationService();
@@ -247,7 +244,9 @@ public class ModuleTestHelper {
 				if (!runTestCase()) {        // Clean slate test
 					pass = false;
 				}
+			}
 
+			if (selectedSerializationModes.contains(SerializationMode.CLEAR)) {
 				clearModuleAndCollectorsAndChannels();
 				clearStateCalled = true;
 				if (!runTestCase()) {        // Test that clearState() works
@@ -297,8 +296,6 @@ public class ModuleTestHelper {
 			if (i < inputValueCount) {
 				serializeAndDeserializeModule();
 				feedInputs(i);
-			} else {
-				module.setSendPending(true); // TODO: hack, isn't concern of user of module!
 			}
 
 			// Activate module
@@ -362,7 +359,7 @@ public class ModuleTestHelper {
 	private void validateOutput(int outputIndex, int i) {
 		for (Map.Entry<String, List<Object>> entry : outputValuesByName.entrySet()) {
 
-			Object actual = getOutputByEffectiveName(entry.getKey()).getTargets()[0].getValue();
+			Object actual = ((List<Input>) getOutputByEffectiveName(entry.getKey()).getTargets()).get(0).getValue();
 			Object expected = entry.getValue().get(outputIndex);
 
 			if (expected instanceof Double) {
@@ -450,8 +447,6 @@ public class ModuleTestHelper {
 
 	private void serializeAndDeserializeModule() throws IOException, ClassNotFoundException {
 		if (serializationMode != SerializationMode.NONE) {
-			validateThatModuleDoesNotHaveKnownSerializationIssues();
-
 			// Globals is transient, we need to restore it after deserialization
 			Globals globalsTempHolder = module.getGlobals();
 
@@ -507,21 +502,6 @@ public class ModuleTestHelper {
 		}
 	}
 
-	private void validateThatModuleDoesNotHaveKnownSerializationIssues() {
-		// Field hiding not allowed
-		HiddenFieldDetector hiddenFieldDetector = new HiddenFieldDetector(module.getClass());
-		if (hiddenFieldDetector.anyHiddenFields()) {
-			throw new TestHelperException(hiddenFieldDetector);
-		}
-
-		// Anonymous inner classes not allowed
-		AnonymousInnerClassDetector anonymousInnerClassDetector = new AnonymousInnerClassDetector();
-		if (anonymousInnerClassDetector.detect(module)) {
-			throw new TestHelperException("Anonymous inner class detected. Not allowed when serializing.", this);
-		}
-	}
-
-
 	// Initialization steps below
 
 	private void initializeAndValidate() {
@@ -560,7 +540,7 @@ public class ModuleTestHelper {
 	private static void falsifyNoRepeats(AbstractSignalPathModule module) {
 		for (Output output : module.getOutputs()) {
 			if (output instanceof TimeSeriesOutput) {
-				((TimeSeriesOutput) output).noRepeat = false;
+				((TimeSeriesOutput) output).setNoRepeat(false);
 			}
 		}
 	}
@@ -613,10 +593,10 @@ public class ModuleTestHelper {
 			}
 			Collector collector = new Collector();
 			collector.init();
-			collector.attachToModule(output);
+			collector.attachToOutput(output);
 		}
 	}
-	private static class Collector extends AbstractSignalPathModule {
+	public static class Collector extends AbstractSignalPathModule {
 		Input<Object> input = new Input<>(this, "input", "Object");
 
 		@Override
@@ -624,7 +604,7 @@ public class ModuleTestHelper {
 			addInput(input);
 		}
 
-		public void attachToModule(Output<Object> externalOutput) {
+		public void attachToOutput(Output<Object> externalOutput) {
 			externalOutput.connect(input);
 		}
 
