@@ -95,13 +95,11 @@ class InputModuleLiveSpec extends LoginTester1Spec {
 		def switcherTable = { findModuleByHash(3).find("table.event-table-module-content tbody") }
 		def textFieldTable = { findModuleByHash(4).find("table.event-table-module-content tbody") }
 
-		then: "the modules load their states and the tables have rows"
+		then: "the modules load their states"
 		waitFor(20) {
 			$(".switcher.checked").size() == 1
 			textField().getAttribute("value") == "test"
 			button().text() == "test"
-			switcherTable().find("tr").size() == 1
-			textFieldTable().find("tr").size() == 1
 		}
 
 		when: "the live canvas is cleared and resumed"
@@ -114,7 +112,6 @@ class InputModuleLiveSpec extends LoginTester1Spec {
 			$(".switcher.checked").size() == 0
 			textField().text() == ""
 			button().text() == "button"
-			$(".event-table-module table.event-table-module-content tbody tr").size() == 0
 		}
 	}
 

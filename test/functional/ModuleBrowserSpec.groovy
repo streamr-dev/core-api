@@ -22,21 +22,23 @@ class ModuleBrowserSpec extends LoginTester1Spec {
 	}
 
 	void "module browser can be opened via help menu"() {
-		when: "click on last top-level title"
-		def link = tableOfContents.children().last().children("a")
+		when: "clicked on 'Module Browser' navigation link"
+		navbar.navHelpLink.click()
+		def link = navbar.navModuleReferenceLink
 
 		// Wait for JavaScript logic to finish
 		waitFor { !link.text().empty }
 		def text = link.text()
 		link.click()
 
-		then: "the corresponding header should be visible"
-		$("h2", text: text).displayed
+		then: "breadcrumb contains 'All modules by category'"
+		$(".breadcrumb").text() == "All modules by category"
 	}
 
 	void "module loads when title clicked"() {
 		setup:
-		def link = tableOfContents.children().last().children("a")
+		navbar.navHelpLink.click()
+		def link = navbar.navModuleReferenceLink
 		waitFor { !link.text().empty }
 		link.click()
 		waitFor {
