@@ -22,14 +22,16 @@ export default function(state: State = initialState, action: Action) : State {
                     [action.notification.id]: action.notification
                 }
             }
-        case REMOVE_NOTIFICATION:
+        case REMOVE_NOTIFICATION: {
+            const newById = {
+                ...state.byId
+            }
+            delete newById[action.id]
             return {
                 ...state,
-                byId: {
-                    ...state.byId,
-                    [action.id]: undefined
-                }
+                byId: newById
             }
+        }
         default:
             return state
     }

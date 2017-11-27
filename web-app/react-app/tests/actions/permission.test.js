@@ -4,6 +4,7 @@ import configureMockStore from 'redux-mock-store'
 import moxios from 'moxios'
 
 import * as actions from '../../actions/permission'
+import * as notificationActions from '../../actions/notification'
 
 const middlewares = [thunk]
 const mockStore = configureMockStore(middlewares)
@@ -95,7 +96,7 @@ describe('Permission actions', () => {
             await store.dispatch(actions.getResourcePermissions(resourceType, resourceId))
             assert.deepStrictEqual(store.getActions(), expectedActions)
         })
-        it('creates GET_RESOURCE_PERMISSIONS_FAILURE with the error when fetching permissions failed', async () => {
+        it('creates GET_RESOURCE_PERMISSIONS_FAILURE with the error when fetching permissions failed', async (done) => {
             const resourceType = 'DASHBOARD'
             const resourceId = 'asdfasdfasasd'
             moxios.stubRequest(`/api/v1/dashboards/${resourceId}/permissions`, {
@@ -113,9 +114,10 @@ describe('Permission actions', () => {
             try {
                 await store.dispatch(actions.getResourcePermissions(resourceType, resourceId))
             } catch (e) {
-                assert.deepStrictEqual(store.getActions().slice(0, 2), expectedActions)
-                assert.deepStrictEqual(store.getActions()[2].type, 'CREATE_NOTIFICATION')
-                assert.deepStrictEqual(store.getActions()[2].notification.type, 'error')
+                assert.deepStrictEqual(store.getActions().slice(0,2), expectedActions)
+                assert.equal(store.getActions()[2].type, notificationActions.CREATE_NOTIFICATION)
+                assert.equal(store.getActions()[2].notification.type, 'error')
+                done()
             }
         })
     })
@@ -257,7 +259,7 @@ describe('Permission actions', () => {
                 await store.dispatch(actions.saveUpdatedResourcePermissions(resourceType, resourceId))
                 assert.deepStrictEqual(store.getActions().slice(0, 4), expectedActions)
             })
-            it('should create SAVE_ADDED_RESOURCE_PERMISSION_FAILURE for failed permissions', async () => {
+            it('should create SAVE_ADDED_RESOURCE_PERMISSION_FAILURE for failed permissions', async (done) => {
                 const resourceType = 'DASHBOARD'
                 const resourceId = 'asdfasdfasasd'
                 const permissions = [{
@@ -331,6 +333,7 @@ describe('Permission actions', () => {
                     await store.dispatch(actions.saveUpdatedResourcePermissions(resourceType, resourceId))
                 } catch (e) {
                     assert.deepStrictEqual(store.getActions().slice(0, 4), expectedActions)
+                    done()
                 }
             })
         })
@@ -437,7 +440,7 @@ describe('Permission actions', () => {
                 await store.dispatch(actions.saveUpdatedResourcePermissions(resourceType, resourceId))
                 assert.deepStrictEqual(store.getActions().slice(0, 4), expectedActions)
             })
-            it('should create SAVE_REMOVED_RESOURCE_PERMISSION_FAILURE for failed permissions', async () => {
+            it('should create SAVE_REMOVED_RESOURCE_PERMISSION_FAILURE for failed permissions', async (done) => {
                 const resourceType = 'DASHBOARD'
                 const resourceId = 'asdfasdfasasd'
                 const permissions = [{
@@ -510,6 +513,7 @@ describe('Permission actions', () => {
                     await store.dispatch(actions.saveUpdatedResourcePermissions(resourceType, resourceId))
                 } catch (e) {
                     assert.deepStrictEqual(store.getActions().slice(0, 4), expectedActions)
+                    done()
                 }
             })
         })

@@ -11,9 +11,7 @@ export type Canvas = {
     adhoc: boolean,
     state: 'RUNNING' | 'STOPPED',
     modules: Array<CanvasModule>,
-    settings: {
-    
-    },
+    settings: {},
     uiChannel: UiChannel
 }
 
