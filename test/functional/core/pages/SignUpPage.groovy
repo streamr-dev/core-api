@@ -11,7 +11,7 @@ class SignUpPage extends GrailsPage {
 
 	static content = {
             email    { $("#username") }
-            signUpButton { $("#loginButton") }
+            signUpButton { $("#signUpButton") }
             signUpOk { $("#signup-ok") }
 	}
 

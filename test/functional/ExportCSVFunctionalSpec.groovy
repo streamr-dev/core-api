@@ -31,7 +31,8 @@ class ExportCSVFunctionalSpec extends LoginTester1Spec {
 
 	void "ExportCSV module produces a file"() {
 		setup: "create stream"
-		createStream("ExportCSVFunctionalSpec" + System.currentTimeMillis())
+		def streamName = "ExportCSVFunctionalSpec" + System.currentTimeMillis()
+		createStream(streamName)
 
 		and: "produce data to stream"
 		String topicId = streamId.text()

@@ -83,6 +83,16 @@ SignalPath.MapModule = function (data, canvas, prot) {
         super_redraw()
         updateSize()
     }
+
+    pub.onUpdateOption = function(key, value) {
+        if (key === 'centerLat') {
+            pub.getMap().setCenter(value, pub.getMap().getCenterAndZoom().centerLng)
+        } else if (key === 'centerLng') {
+            pub.getMap().setCenter(pub.getMap().getCenterAndZoom().centerLat, value)
+        } else if (key === 'zoom') {
+            pub.getMap().map.setZoom(value)
+        }
+    }
     
     var superToJSON = pub.toJSON;
     pub.toJSON      = function () {
