@@ -16,7 +16,7 @@ grails.project.test.class.dir = "target/test-classes"
 grails.project.test.reports.dir = "target/test-reports"
 grails.project.war.file = "target/ROOT.war"
 
-def gebVersion = "0.13.1"
+def gebVersion = "1.0"
 def seleniumVersion = "2.53.0"
 
 grails.project.fork = [
