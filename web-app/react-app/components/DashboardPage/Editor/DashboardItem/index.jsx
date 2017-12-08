@@ -11,6 +11,7 @@ import StreamrLabel from '../../../WebComponents/StreamrLabel'
 import StreamrButton from '../../../WebComponents/StreamrButton'
 import StreamrTextField from '../../../WebComponents/StreamrTextField'
 import StreamrSwitcher from '../../../WebComponents/StreamrSwitcher'
+import StreamrMap from '../../../WebComponents/StreamrMap'
 
 import styles from './dashboardItem.pcss'
 import './webcomponentStyles.css'
@@ -84,6 +85,9 @@ class DashboardItem extends Component {
             },
             'streamr-switcher': {
                 component: StreamrSwitcher
+            },
+            'streamr-map': {
+                component: StreamrMap
             }
         }
         

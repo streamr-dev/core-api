@@ -23,15 +23,6 @@ export default class StreamrInput extends Component {
         super()
     }
     
-    componentDidMount() {
-        if (!this.alreadyAsked) {
-            this.widget.sendRequest({
-                type: 'getState'
-            })
-                .then(({data}) => this.props.onModuleJson(data))
-        }
-    }
-    
     render() {
         return (
             <StreamrWidget
@@ -42,6 +33,7 @@ export default class StreamrInput extends Component {
                 url={this.props.url}
                 onError={this.props.onError}
                 onMessage={this.props.onMessage}
+                onmodulejson={this.props.onModuleJson}
                 ref={(widget) => {
                     this.widget = widget
                     this.props.widgetRef && this.props.widgetRef(widget)

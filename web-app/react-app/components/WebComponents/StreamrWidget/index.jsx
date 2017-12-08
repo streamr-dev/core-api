@@ -8,7 +8,7 @@ import {any} from 'prop-types'
 
 //import type {Webcomponent} from '../../../flowtype/webcomponent-types.js'
 
-import type {StreamId, SubscriptionOptions, Subscription} from '../../../flowtype/streamr-client-types'
+import type {StreamId, SubscriptionOptions, Subscription, ModuleOptions} from '../../../flowtype/streamr-client-types'
 
 import type {ReactChildren} from 'react-flow-types'
 
@@ -17,7 +17,7 @@ type Props = {
     subscriptionOptions: SubscriptionOptions,
     url: string,
     onError: (string) => void,
-    onMessage: (any) => void,
+    onMessage: ({}) => void,
     onSubscribed?: (opt: ?{
         from?: number
     }) => void,
@@ -25,11 +25,15 @@ type Props = {
     onResending?: () => void,
     onResent?: () => void,
     onNoResend?: () => void,
+    onModuleJson?: (json: {
+        options: ModuleOptions
+    }) => void
 }
 export default class StreamrWidget extends Component {
     getModuleJson: Function
     getHeaders: Function
     sendRequest: Function
+    onMessage: Function
     subscription: ?Subscription
     stream: StreamId
     props: Props
@@ -37,11 +41,12 @@ export default class StreamrWidget extends Component {
         client: any
     }
     
-    constructor(props: Props) {
-        super(props)
+    constructor() {
+        super()
         this.getModuleJson = this.getModuleJson.bind(this)
         this.getHeaders = this.getHeaders.bind(this)
         this.sendRequest = this.sendRequest.bind(this)
+        this.onMessage = this.onMessage.bind(this)
     }
     
     getHeaders() {
@@ -85,35 +90,39 @@ export default class StreamrWidget extends Component {
             }
         }
         const {subscriptionOptions, onSubscribed, onUnsubscribed, onResending, onResent, onNoResend} = this.props
-        new Promise((resolve) => {
-            if (!this.props.subscriptionOptions.stream) {
-                this.getModuleJson((json) => {
-                    this.stream = json.uiChannel && json.uiChannel.id
-                    resolve()
-                })
-            } else {
-                resolve()
+        this.getModuleJson((json: {
+            uiChannel?: {
+                id: string
+            },
+            options: ModuleOptions
+        }) => {
+            this.props.onModuleJson && this.props.onModuleJson(json)
+            const options = json.options || {}
+            if (!subscriptionOptions.stream) {
+                this.stream = json.uiChannel && json.uiChannel.id
+            }
+            if (this.stream && !this.subscription) {
+                this.subscription = this.context.client.subscribe({
+                    stream: this.stream,
+                    authKey: subscriptionOptions.authKey,
+                    partition: subscriptionOptions.partition,
+                    resend_all: subscriptionOptions.resend_all || (options.uiResendAll || {}).value,
+                    resend_last: subscriptionOptions.resend_last || (options.uiResendLast || {}).value,
+                    resend_from: subscriptionOptions.resend_from,
+                    resend_from_time: subscriptionOptions.resend_from_time,
+                    resend_to: subscriptionOptions.resend_to,
+                }, this.onMessage)
+                safeBind(this.subscription, 'subscribed', onSubscribed)
+                safeBind(this.subscription, 'unsubscribed', onUnsubscribed)
+                safeBind(this.subscription, 'resending', onResending)
+                safeBind(this.subscription, 'resent', onResent)
+                safeBind(this.subscription, 'no_resend', onNoResend)
             }
         })
-            .then(() => {
-                if (this.stream && !this.subscription) {
-                    this.subscription = this.context.client.subscribe({
-                        stream: this.stream,
-                        authKey: subscriptionOptions.authKey,
-                        partition: subscriptionOptions.partition,
-                        resend_all: subscriptionOptions.resend_all,
-                        resend_last: subscriptionOptions.resend_last,
-                        resend_from: subscriptionOptions.resend_from,
-                        resend_from_time: subscriptionOptions.resend_from_time,
-                        resend_to: subscriptionOptions.resend_to,
-                    }, this.props.onMessage)
-                    safeBind(this.subscription, 'subscribed', onSubscribed)
-                    safeBind(this.subscription, 'unsubscribed', onUnsubscribed)
-                    safeBind(this.subscription, 'resending', onResending)
-                    safeBind(this.subscription, 'resent', onResent)
-                    safeBind(this.subscription, 'no_resend', onNoResend)
-                }
-            })
+    }
+    
+    onMessage(msg: {}) {
+        this.props.onMessage && this.props.onMessage(msg)
     }
     
     componentWillUnmount() {

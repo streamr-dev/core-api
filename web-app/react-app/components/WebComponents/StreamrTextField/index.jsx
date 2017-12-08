@@ -12,12 +12,12 @@ export default class StreamrTextField extends Component {
     onClick: Function
     onChange: Function
     state: {
-        value: ?string
+        value: string
     }
     constructor() {
         super()
         this.state = {
-            value: null
+            value: ''
         }
         this.onModuleJson = this.onModuleJson.bind(this)
         this.onClick = this.onClick.bind(this)
@@ -26,7 +26,7 @@ export default class StreamrTextField extends Component {
     onModuleJson({state}: {state: string}) {
         if (this.widget) {
             this.setState({
-                value: state
+                value: state || ''
             })
         }
     }

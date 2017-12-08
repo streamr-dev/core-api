@@ -4,6 +4,11 @@ export type Subscription = {
     unbind: Function
 }
 
+export type ModuleOptions = {
+    uiResendAll?: boolean,
+    uiResendLast?: number
+}
+
 export type StreamId = string
 
 export type SubscriptionOptions = {

@@ -5,17 +5,17 @@ import StreamrInput from '../StreamrInput'
 
 import styles from './streamrSwitcher.pcss'
 
-export default class StreamrTextField extends Component {
+export default class StreamrSwitcher extends Component {
     widget: any
     onModuleJson: Function
     onClick: Function
     state: {
-        value: ?boolean
+        value: boolean
     }
     constructor() {
         super()
         this.state = {
-            value: null
+            value: false
         }
         this.onModuleJson = this.onModuleJson.bind(this)
         this.onClick = this.onClick.bind(this)
