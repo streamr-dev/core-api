@@ -1,6 +1,5 @@
-import core.LoginTester1Spec
-import core.mixins.CanvasMixin
-import org.openqa.selenium.Keys
+import LoginTester1Spec
+import mixins.CanvasMixin
 
 class ModuleBuildSpec extends LoginTester1Spec {
 

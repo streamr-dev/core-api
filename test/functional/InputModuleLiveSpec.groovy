@@ -1,8 +1,8 @@
-import core.LoginTester1Spec
-import core.mixins.CanvasMixin
-import core.mixins.ConfirmationMixin
-import core.pages.CanvasListPage
-import core.pages.CanvasPage
+import LoginTester1Spec
+import mixins.CanvasMixin
+import mixins.ConfirmationMixin
+import pages.CanvasListPage
+import pages.CanvasPage
 
 class InputModuleLiveSpec extends LoginTester1Spec {
 

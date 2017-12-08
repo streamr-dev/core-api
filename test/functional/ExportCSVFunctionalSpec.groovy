@@ -1,14 +1,13 @@
 import com.unifina.controller.core.signalpath.CanvasController
 import com.unifina.domain.data.Stream
 import com.unifina.service.StreamService
-import core.LoginTester1Spec
-import core.mixins.CanvasMixin
-import core.mixins.ConfirmationMixin
-import core.mixins.StreamMixin
-import core.pages.CanvasPage
-import core.pages.StreamConfigurePage
-import core.pages.StreamCreatePage
-import core.pages.StreamShowPage
+import LoginTester1Spec
+import mixins.CanvasMixin
+import mixins.ConfirmationMixin
+import mixins.StreamMixin
+import pages.CanvasPage
+import pages.StreamConfigurePage
+import pages.StreamShowPage
 import grails.test.mixin.TestFor
 import spock.lang.Shared
 

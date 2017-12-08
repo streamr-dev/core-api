@@ -1,7 +1,6 @@
-import core.LoginTester1Spec
-import core.mixins.*
-import core.pages.*
-import geb.spock.GebReportingSpec
+import LoginTester1Spec
+import mixins.*
+import pages.*
 import org.openqa.selenium.Keys
 
 class ShareSpec extends LoginTester1Spec {
