@@ -1,7 +1,6 @@
-import core.LoginTester1Spec
-import core.mixins.*
-import core.pages.*
-import geb.spock.GebReportingSpec
+import LoginTester1Spec
+import mixins.*
+import pages.*
 import org.openqa.selenium.Keys
 
 class ShareSpec extends LoginTester1Spec {
@@ -16,7 +15,7 @@ class ShareSpec extends LoginTester1Spec {
 		this.class.metaClass.mixin(ListPageMixin)
 	}
 
-	def clickShareButton(name = "ShareSpec") {
+	def scrollToAndclickShareButton(name = "ShareSpec") {
 		scrollToRow(name)
 		clickShareButton(name)
 	}
@@ -24,9 +23,9 @@ class ShareSpec extends LoginTester1Spec {
 	def clickDropdownShareButton() {
 		menuToggle.click()
 		waitFor {
-			shareButton.displayed
+			dropdownShareButton.displayed
 		}
-		shareButton.click()
+		dropdownShareButton.click()
 	}
 
 	def save() {
@@ -42,7 +41,7 @@ class ShareSpec extends LoginTester1Spec {
 	/** Cleanup helper */
 	def removeStreamPermissions() {
 		to StreamListPage
-		clickShareButton("ShareSpec")
+		scrollToAndclickShareButton("ShareSpec")
 		waitFor { $(".new-user-field").displayed }
 		if ($(".user-delete-button").displayed) {
 			waitFor {
@@ -55,7 +54,7 @@ class ShareSpec extends LoginTester1Spec {
 	/** Cleanup helper */
 	def removeCanvasPermissions() {
 		to CanvasListPage
-		clickShareButton("ShareSpec")
+		scrollToAndclickShareButton("ShareSpec")
 		waitFor { $(".new-user-field").displayed }
 		if ($(".user-delete-button").displayed) {
 			waitFor {
@@ -68,7 +67,7 @@ class ShareSpec extends LoginTester1Spec {
 	/** Cleanup helper */
 	def removeDashboardPermissions() {
 		to DashboardListPage
-		clickShareButton("ShareSpec")
+		scrollToAndclickShareButton("ShareSpec")
 		waitFor { $(".new-user-field").displayed }
 		if ($(".user-delete-button").displayed) {
 			waitFor {
@@ -107,7 +106,7 @@ class ShareSpec extends LoginTester1Spec {
 		!$(".sharing-dialog")
 
 		when: "open sharing dialog"
-		clickShareButton("ShareSpec")
+		scrollToAndclickShareButton("ShareSpec")
 		then:
 		waitFor { $(".sharing-dialog") }
 		waitFor { $(".new-user-field").displayed }
@@ -146,7 +145,7 @@ class ShareSpec extends LoginTester1Spec {
 
 		when: "re-open"
 		waitFor { !$(".modal-backdrop") }
-		clickShareButton("ShareSpec")
+		scrollToAndclickShareButton("ShareSpec")
 		then: "access row from last time was discarded"
 		waitFor { $(".sharing-dialog") }
 		waitFor { $(".new-user-field").displayed }
@@ -168,7 +167,7 @@ class ShareSpec extends LoginTester1Spec {
 		waitFor { !$(".sharing-dialog") }
 
 		when: "re-open once more"
-		clickShareButton("ShareSpec")
+		scrollToAndclickShareButton("ShareSpec")
 		closeNotifications()	// the second pnotify would cover the share button
 		then: "check that the saved row is still there"
 		waitFor { $(".sharing-dialog") }
@@ -266,7 +265,7 @@ class ShareSpec extends LoginTester1Spec {
 		waitFor { findRow("ShareSpec").displayed }
 
 		when: "open 'ShareSpec' Canvas"
-		clickShareButton("ShareSpec")
+		scrollToAndclickShareButton("ShareSpec")
 		then:
 		waitFor { $(".sharing-dialog") }
 		waitFor { $(".new-user-field").displayed }
@@ -303,7 +302,7 @@ class ShareSpec extends LoginTester1Spec {
 		// ADD PERMISSION
 
 		when: "re-open"
-		clickShareButton("ShareSpec")
+		scrollToAndclickShareButton("ShareSpec")
 		then: "access row from last time was discarded"
 		waitFor { $(".sharing-dialog") }
 		waitFor { $(".new-user-field").displayed }
@@ -325,7 +324,7 @@ class ShareSpec extends LoginTester1Spec {
 
 		when: "re-open once more"
 		closeNotifications() // the second pnotify would cover the share button
-		clickShareButton("ShareSpec")
+		scrollToAndclickShareButton("ShareSpec")
 		then: "check that the saved row is still there"
 		waitFor { $(".sharing-dialog") }
 		waitFor { $(".new-user-field").displayed }
@@ -406,7 +405,7 @@ class ShareSpec extends LoginTester1Spec {
 		waitFor { findRow("ShareSpec").displayed }
 
 		when: "open 'ShareSpec' Dashboard"
-		clickShareButton("ShareSpec")
+		scrollToAndclickShareButton("ShareSpec")
 		then:
 		waitFor { $(".sharing-dialog") }
 		waitFor { $(".new-user-field").displayed }
@@ -443,7 +442,7 @@ class ShareSpec extends LoginTester1Spec {
 		// ADD PERMISSION
 
 		when: "re-open"
-		clickShareButton("ShareSpec")
+		scrollToAndclickShareButton("ShareSpec")
 		then: "access row from last time was discarded"
 		waitFor { $(".sharing-dialog") }
 		waitFor { $(".new-user-field").displayed }
@@ -465,7 +464,7 @@ class ShareSpec extends LoginTester1Spec {
 
 		when: "re-open once more"
 		closeNotifications()	// the second pnotify would cover the share button
-		clickShareButton("ShareSpec")
+		scrollToAndclickShareButton("ShareSpec")
 		then: "check that the saved row is still there"
 		waitFor { $(".sharing-dialog") }
 		waitFor { $(".new-user-field").displayed }
@@ -540,7 +539,7 @@ class ShareSpec extends LoginTester1Spec {
 	void "read permission allows opening but doesn't show share buttons"() {
 		when: "give tester2 read permission to stream"
 		to StreamListPage
-		clickShareButton("ShareSpec")
+		scrollToAndclickShareButton("ShareSpec")
 		feedTextInput("tester2@streamr.com")
 		$(".new-user-button").click()
 		then: "got the access-row; also it's the only one so we're not mixing things up"
@@ -555,7 +554,7 @@ class ShareSpec extends LoginTester1Spec {
 
 		when: "give tester2 read permission to canvas"
 		to CanvasListPage
-		clickShareButton("ShareSpec")
+		scrollToAndclickShareButton("ShareSpec")
 		feedTextInput("tester2@streamr.com")
 		$(".new-user-button").click()
 		then: "got the access-row; also it's the only one so we're not mixing things up"
@@ -570,7 +569,7 @@ class ShareSpec extends LoginTester1Spec {
 
 		when: "give tester2 read permission to dashboard"
 		to DashboardListPage
-		clickShareButton("ShareSpec")
+		scrollToAndclickShareButton("ShareSpec")
 		feedTextInput("tester2@streamr.com")
 		$(".new-user-button").click()
 		then: "got the access-row; also it's the only one so we're not mixing things up"
@@ -632,7 +631,7 @@ class ShareSpec extends LoginTester1Spec {
 	void "write rights show stream menu but no share button"() {
 		when: "give tester2 write permission to stream"
 		to StreamListPage
-		clickShareButton("ShareSpec")
+		scrollToAndclickShareButton("ShareSpec")
 		feedTextInput("tester2@streamr.com")
 		$(".new-user-button").click()
 		then: "got the access-row"
@@ -682,7 +681,7 @@ class ShareSpec extends LoginTester1Spec {
 	void "shared stream is shown in search box"() {
 		when:
 		to StreamListPage
-		clickShareButton("ShareSpec")
+		scrollToAndclickShareButton("ShareSpec")
 		waitFor { $(".new-user-field").displayed }
 		feedTextInput("tester2@streamr.com")
 		$(".new-user-button").click()
@@ -716,7 +715,7 @@ class ShareSpec extends LoginTester1Spec {
 	void "public stream is visible in search and can be inspected, but won't be shown in list"() {
 		when: "publish it if not public (defensive, but we aren't testing that DB state is correct...)"
 		to StreamListPage
-		clickShareButton("ShareSpec")
+		scrollToAndclickShareButton("ShareSpec")
 		waitFor { $(".modal-body .owner-row .switcher").displayed }
 		if (!$(".anonymous-switcher").attr("checked")) {
 			$(".modal-body .owner-row .switcher").click()
@@ -753,7 +752,7 @@ class ShareSpec extends LoginTester1Spec {
 		loginTester1()
 
 		to StreamListPage
-		clickShareButton("ShareSpec")
+		scrollToAndclickShareButton("ShareSpec")
 		waitFor { $(".modal-body .owner-row .switcher").displayed }
 		if ($(".anonymous-switcher").attr("checked")) {
 			$(".modal-body .owner-row .switcher").click()
@@ -804,8 +803,8 @@ class ShareSpec extends LoginTester1Spec {
 
 		then:
 		waitFor {
-			findDashboardItem("Table").find(".event-table-module-content tbody tr").size() > 0
-			!findErrorNotification().displayed
+			$(".dashboarditem").size() == 2
+			$(".breadcrumb .name-editor").text() == name
 		}
 
 	}

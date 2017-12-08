@@ -1,5 +1,5 @@
-import core.LoginTester1Spec
-import core.pages.UserGuidePage
+import LoginTester1Spec
+import pages.UserGuidePage
 import org.openqa.selenium.Dimension
 
 class UserGuideSpec extends LoginTester1Spec {
