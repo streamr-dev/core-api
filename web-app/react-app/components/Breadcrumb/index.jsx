@@ -4,14 +4,15 @@ import React, {Component} from 'react'
 import {Breadcrumb, DropdownButton} from 'react-bootstrap'
 import FontAwesome from 'react-fontawesome'
 
-import type {ReactChildren} from 'react-flow-types'
+import type {Node} from 'react'
+
+type Children = string | Node | Array<Node>
 
 import styles from './breadcrumb.pcss'
 
-export class StreamrBreadcrumb extends Component {
-    props: {
-        children?: ReactChildren
-    }
+export class StreamrBreadcrumb extends Component<{
+    children?: Children
+}> {
     render() {
         return (
             <Breadcrumb className={styles.breadcrumb}>
@@ -21,12 +22,11 @@ export class StreamrBreadcrumb extends Component {
     }
 }
 
-export class StreamrBreadcrumbItem extends Component {
-    props: {
-        href?: string,
-        active?: boolean,
-        children?: ReactChildren
-    }
+export class StreamrBreadcrumbItem extends Component<{
+    href?: string,
+    active?: boolean,
+    children?: Children
+}> {
     render() {
         return (
             <Breadcrumb.Item {...this.props} href={!this.props.active ? this.props.href : undefined}>
@@ -36,11 +36,10 @@ export class StreamrBreadcrumbItem extends Component {
     }
 }
 
-export class StreamrBreadcrumbDropdownButton extends Component {
-    props: {
-        className?: string,
-        children?: ReactChildren
-    }
+export class StreamrBreadcrumbDropdownButton extends Component<{
+    className?: string,
+        children?: Children
+}> {
     render() {
         return (
             <div className={styles.streamrDropdownContainer}>
@@ -52,10 +51,9 @@ export class StreamrBreadcrumbDropdownButton extends Component {
     }
 }
 
-export class StreamrBreadcrumbToolbar extends Component {
-    props: {
-        children?: ReactChildren
-    }
+export class StreamrBreadcrumbToolbar extends Component<{
+    children?: Children
+}> {
     render() {
         return (
             <div className={styles.toolbar}>
@@ -65,11 +63,10 @@ export class StreamrBreadcrumbToolbar extends Component {
     }
 }
 
-export class StreamrBreadcrumbToolbarButton extends Component {
-    props: {
-        iconName: string,
-        onClick: Function
-    }
+export class StreamrBreadcrumbToolbarButton extends Component<{
+    iconName: string,
+    onClick: Function
+}> {
     render() {
         return (
             <div className={styles.button} onClick={this.props.onClick}>

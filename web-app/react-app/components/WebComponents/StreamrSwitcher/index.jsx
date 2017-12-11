@@ -2,32 +2,36 @@
 
 import React, {Component} from 'react'
 import StreamrInput from '../StreamrInput'
+import StreamrWidget from '../StreamrWidget'
 
 import styles from './streamrSwitcher.pcss'
 
-export default class StreamrSwitcher extends Component {
-    widget: any
-    onModuleJson: Function
-    onClick: Function
-    state: {
-        value: boolean
+import type {WebcomponentProps} from '../../../flowtype/webcomponent-types'
+
+type State = {
+    value: boolean
+}
+
+export default class StreamrSwitcher extends Component<WebcomponentProps, State> {
+    widget: StreamrWidget
+    //onModuleJson: Function
+    //onClick: Function
+    state = {
+        value: false
     }
-    constructor() {
-        super()
-        this.state = {
-            value: false
-        }
-        this.onModuleJson = this.onModuleJson.bind(this)
-        this.onClick = this.onClick.bind(this)
-    }
-    onModuleJson({state}: {state: boolean}) {
+    //constructor() {
+    //    super()
+    //    this.onModuleJson = this.onModuleJson.bind(this)
+    //    this.onClick = this.onClick.bind(this)
+    //}
+    onModuleJson = ({state}: {state: boolean}) => {
         if (this.widget) {
             this.setState({
                 value: state
             })
         }
     }
-    onClick() {
+    onClick = () => {
         const newValue = !this.state.value
         this.setState({
             value: newValue

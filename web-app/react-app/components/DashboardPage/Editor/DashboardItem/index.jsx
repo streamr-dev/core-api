@@ -18,46 +18,40 @@ import './webcomponentStyles.css'
 
 import type {Dashboard, DashboardItem as DBItem} from '../../../../flowtype/dashboard-types'
 
-class DashboardItem extends Component {
-    wrapper: HTMLElement
-    onResize: Function
-    createWebcomponentUrl: Function
-    props: {
-        item: DBItem,
-        dashboard: Dashboard,
-        layout?: DBItem.layout,
-        dragCancelClassName?: string,
-        currentLayout: ?{},
-        showError: Function,
-        isLocked: boolean
-    }
-    state: {
-        height: ?number,
-        width: ?number
-    }
+type Props = {
+    item: DBItem,
+    dashboard: Dashboard,
+    layout?: DBItem.layout,
+    dragCancelClassName?: string,
+    currentLayout: ?{},
+    showError: Function,
+    isLocked: boolean
+}
+
+type State = {
+    height: ?number,
+    width: ?number
+}
+
+class DashboardItem extends Component<Props, State> {
+    wrapper: ?HTMLElement
     static defaultProps = {
         item: {},
         dashboard: {}
     }
-    
-    constructor() {
-        super()
-        this.state = {
-            height: null,
-            width: null
-        }
-        this.onResize = this.onResize.bind(this)
-        this.createWebcomponentUrl = this.createWebcomponentUrl.bind(this)
+    state = {
+        height: null,
+        width: null
     }
     
-    onResize() {
+    onResize = () => {
         this.setState({
             height: this.wrapper && this.wrapper.offsetHeight,
             width: this.wrapper && this.wrapper.offsetWidth,
         })
     }
     
-    createWebcomponentUrl() {
+    createWebcomponentUrl = () => {
         const {dashboard, item: {canvas, module: itemModule}} = this.props
         // If the db is new the user must have the ownership of the canvas so use url /api/v1/canvases/<canvasId>/modules/<module>
         // Else use the url /api/v1/dashboards/<dashboardId>/canvases/<canvasId>/modules/<module>
@@ -69,7 +63,18 @@ class DashboardItem extends Component {
         ))
     }
     
-    createCustomComponent() {
+    onError = (err: {
+        message: string,
+        stack: string
+    }) => {
+        const inProd = process.env.NODE_ENV === 'production'
+        this.props.showError(inProd ? 'Something went wrong!' : err)
+        if (!inProd) {
+            console.error(err.stack)
+        }
+    }
+    
+    createCustomComponent = () => {
         const {item} = this.props
         
         const componentsAndProps = {
@@ -109,6 +114,7 @@ class DashboardItem extends Component {
                 url={this.createWebcomponentUrl()}
                 height={this.state.height}
                 width={this.state.width}
+                onError={this.onError}
                 {...customProps}
             />
         ) : null

@@ -1,8 +1,8 @@
 // @flow
 
 import React, {Component} from 'react'
-import {any} from 'prop-types'
 import {connect} from 'react-redux'
+import {withRouter} from 'react-router-dom'
 import {
     StreamrBreadcrumb,
     StreamrBreadcrumbItem,
@@ -53,36 +53,29 @@ const client = new StreamrClient({
     autoDisconnect: false
 })
 
-class Editor extends Component {
-    
-    onLayoutChange: Function
-    generateLayout: Function
-    onResize: Function
-    onBeforeUnload: Function
-    onMenuToggle: Function
-    onFullscreenToggle: Function
-    
-    props: {
-        dashboard: Dashboard,
-        canShare: boolean,
-        canWrite: boolean,
-        delete: Function,
-        update: Function,
-        editorLocked: Function,
-        lockEditing: Function,
-        unlockEditing: Function,
-        updateDashboardLayout: Function
+type Props = {
+    dashboard: Dashboard,
+    canShare: boolean,
+    canWrite: boolean,
+    delete: Function,
+    update: Function,
+    editorLocked: Function,
+    lockEditing: Function,
+    unlockEditing: Function,
+    updateDashboardLayout: Function,
+    history: {
+        push: Function
     }
-    state: {
-        breakpoints: {},
-        cols: {},
-        layoutsByItemId: {},
-        isFullscreen: boolean
-    }
-    
-    static contextTypes = {
-        router: any
-    }
+}
+
+type State = {
+    breakpoints: {},
+    cols: {},
+    layoutsByItemId: {},
+    isFullscreen: boolean
+}
+
+class Editor extends Component<Props, State> {
     
     static defaultProps = {
         dashboard: {
@@ -91,30 +84,21 @@ class Editor extends Component {
         }
     }
     
-    constructor(props) {
-        super(props)
-        this.state = {
-            breakpoints: {
-                lg: 1200,
-                md: 996,
-                sm: 768,
-                xs: 480
-            },
-            cols: {
-                lg: 16,
-                md: 10,
-                sm: 4,
-                xs: 2,
-            },
-            layoutsByItemId: {},
-            isFullscreen: false
-        }
-        this.onLayoutChange = this.onLayoutChange.bind(this)
-        this.generateLayout = this.generateLayout.bind(this)
-        this.onResize = this.onResize.bind(this)
-        this.onBeforeUnload = this.onBeforeUnload.bind(this)
-        this.onMenuToggle = this.onMenuToggle.bind(this)
-        this.onFullscreenToggle = this.onFullscreenToggle.bind(this)
+    state = {
+        breakpoints: {
+            lg: 1200,
+            md: 996,
+            sm: 768,
+            xs: 480
+        },
+        cols: {
+            lg: 16,
+            md: 10,
+            sm: 4,
+            xs: 2,
+        },
+        layoutsByItemId: {},
+        isFullscreen: false
     }
     
     componentDidMount() {
@@ -126,11 +110,11 @@ class Editor extends Component {
     
     componentWillReceiveProps(nextProps) {
         if (this.props.dashboard.id !== nextProps.dashboard.id) {
-            this.context.router.push(`/${nextProps.dashboard.id || ''}`)
+            this.props.history.push(`/${nextProps.dashboard.id || ''}`)
         }
     }
     
-    onMenuToggle() {
+    onMenuToggle = () => {
         const menuIsOpen = document.body && document.body.classList && document.body.classList.contains('mmc')
         if (menuIsOpen) {
             this.props.unlockEditing(this.props.dashboard.id)
@@ -139,31 +123,41 @@ class Editor extends Component {
         }
     }
     
-    onLayoutChange(layout, allLayouts) {
+    onLayoutChange = (layout, allLayouts) => {
         this.onResize(layout)
         this.props.updateDashboardLayout(this.props.dashboard.id, allLayouts)
     }
     
-    onFullscreenToggle(value?: boolean) {
+    onFullscreenToggle = (value?: boolean) => {
         this.setState({
             isFullscreen: value !== undefined ? value : !this.state.isFullscreen
         })
     }
     
-    generateLayout() {
+    generateLayout = () => {
         const sizes = ['lg', 'md', 'sm', 'xs']
         const db = this.props.dashboard
         return _.zipObject(sizes, _.map(sizes, size => {
             return db.items.map(item => {
                 const layout = db.layout && db.layout[size] && db.layout[size].find(layout => layout.i === Editor.generateItemId(item)) || {}
+                const defaultWidthsByType = {
+                    'streamr-button': 2,
+                    'streamr-switcher': 2,
+                    'streamr-label': 2,
+                    'streamr-text-field': 2,
+                }
+                const defaultHeightsByType = {
+                    'streamr-map': 6,
+                    'streamr-text-field': 3
+                }
                 const defaultLayout = {
                     i: Editor.generateItemId(item),
                     x: 0,
                     y: 0,
-                    h: 2,
-                    w: 4,
+                    h: defaultHeightsByType[item.webcomponent] || 2,
+                    w: defaultWidthsByType[item.webcomponent] || 4,
                     minH: 2,
-                    minW: 3
+                    minW: 2
                 }
                 return {
                     ...defaultLayout,
@@ -173,7 +167,7 @@ class Editor extends Component {
         }))
     }
     
-    onResize(layout: Layout) {
+    onResize = (layout: Layout) => {
         this.setState({
             layoutsByItemId: {
                 ...this.state.layoutsByItemId,
@@ -182,7 +176,7 @@ class Editor extends Component {
         })
     }
     
-    onBeforeUnload(e: BeforeUnloadEvent) {
+    onBeforeUnload = (e: BeforeUnloadEvent) => {
         if (!this.props.dashboard.saved) {
             const message = 'You have unsaved changes in your Dashboard. Are you sure you want to leave?'
             e.returnValue = message
@@ -245,8 +239,7 @@ class Editor extends Component {
                                 </StreamrBreadcrumbDropdownButton>
                             )}
                             <StreamrBreadcrumbToolbar>
-                                <StreamrBreadcrumbToolbarButton iconName="expand"
-                                                                onClick={() => this.onFullscreenToggle()}/>
+                                <StreamrBreadcrumbToolbarButton iconName="expand" onClick={() => this.onFullscreenToggle()}/>
                             </StreamrBreadcrumbToolbar>
                         </StreamrBreadcrumb>
                         <StreamrClientProvider client={client}>
@@ -305,4 +298,4 @@ const mapDispatchToProps = (dispatch) => ({
     }
 })
 
-export default connect(mapStateToProps, mapDispatchToProps)(Editor)
+export default connect(mapStateToProps, mapDispatchToProps)(withRouter(Editor))

@@ -3,26 +3,19 @@
 import React, {Component} from 'react'
 import StreamrWidget from '../StreamrWidget'
 
-import type {SubscriptionOptions, StreamId} from '../../../flowtype/streamr-client-types'
-import type {ReactChildren} from 'react-flow-types'
+import type {WebcomponentProps} from '../../../flowtype/webcomponent-types'
+import type {Node} from 'react'
 
-export default class StreamrInput extends Component {
-    widget: StreamrWidget
-    alreadyAsked: ?boolean
-    props: {
-        stream: StreamId,
-        subscriptionOptions: SubscriptionOptions,
-        url: string,
-        onError: Function,
-        onMessage: Function,
-        onModuleJson: Function,
-        children: ReactChildren,
-        widgetRef?: Function
-    }
-    constructor() {
-        super()
-    }
-    
+type Props = WebcomponentProps & {
+    onMessage: Function,
+    onModuleJson: Function,
+    children: Node,
+    widgetRef?: (widget: ?StreamrWidget) => void
+}
+
+export default class StreamrInput extends Component<Props> {
+    widget: ?StreamrWidget
+
     render() {
         return (
             <StreamrWidget

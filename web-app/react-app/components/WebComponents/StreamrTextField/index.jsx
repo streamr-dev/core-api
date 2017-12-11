@@ -6,31 +6,34 @@ import StreamrInput from '../StreamrInput'
 
 import styles from './streamrTextField.pcss'
 
-export default class StreamrTextField extends Component {
+import type {WebcomponentProps} from '../../../flowtype/webcomponent-types'
+
+type State = {
+    value: string
+}
+
+export default class StreamrTextField extends Component<WebcomponentProps, State> {
     widget: any
-    onModuleJson: Function
-    onClick: Function
-    onChange: Function
-    state: {
-        value: string
+    //onModuleJson: Function
+    //onClick: Function
+    //onChange: Function
+    state = {
+        value: ''
     }
-    constructor() {
-        super()
-        this.state = {
-            value: ''
-        }
-        this.onModuleJson = this.onModuleJson.bind(this)
-        this.onClick = this.onClick.bind(this)
-        this.onChange = this.onChange.bind(this)
-    }
-    onModuleJson({state}: {state: string}) {
+    //constructor() {
+    //    super()
+    //this.onModuleJson = this.onModuleJson.bind(this)
+    //this.onClick = this.onClick.bind(this)
+    //this.onChange = this.onChange.bind(this)
+    //}
+    onModuleJson = ({state}: { state: string }) => {
         if (this.widget) {
             this.setState({
                 value: state || ''
             })
         }
     }
-    onClick() {
+    onClick = () => {
         if (this.widget) {
             this.widget.sendRequest({
                 type: 'uiEvent',
@@ -38,17 +41,18 @@ export default class StreamrTextField extends Component {
             })
         }
     }
-    onChange(e: {
+    onChange = (e: {
         preventDefault: () => void,
         target: {
             value: string
         }
-    }) {
+    }) => {
         e.preventDefault()
         this.setState({
             value: e.target.value
         })
     }
+    
     render() {
         return (
             <StreamrInput

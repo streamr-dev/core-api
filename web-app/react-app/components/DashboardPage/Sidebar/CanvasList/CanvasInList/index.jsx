@@ -7,21 +7,18 @@ import ModuleList from './ModuleList/index'
 
 import styles from './canvasInList.pcss'
 
-export default class CanvasInList extends Component {
+type Props = {
+    canvas: Canvas
+}
+
+type State = {
+    open: boolean
+}
+
+export default class CanvasInList extends Component<Props, State> {
     
-    props: {
-        canvas: Canvas
-    }
-    
-    state: {
-        open: boolean
-    }
-    
-    constructor() {
-        super()
-        this.state = {
-            open: false
-        }
+    state = {
+        open: false
     }
     
     render() {

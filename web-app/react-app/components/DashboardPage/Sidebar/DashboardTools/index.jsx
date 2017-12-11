@@ -14,32 +14,29 @@ import {updateAndSaveDashboard} from '../../../../actions/dashboard'
 
 import type { Dashboard } from '../../../../flowtype/dashboard-types'
 
-class DashboardTools extends Component {
-    state: {
-        shareDialogIsOpen: boolean
-    }
-    onSave: Function
-    props: {
-        dashboard: Dashboard,
-        openDashboard: {
-            new: boolean
-        },
-        dispatch: Function,
-        router: any,
-        canShare: boolean,
-        canWrite: boolean,
-        updateAndSaveDashboard: Function
+type Props = {
+    dashboard: Dashboard,
+    openDashboard: {
+        new: boolean
+    },
+    dispatch: Function,
+    router: any,
+    canShare: boolean,
+    canWrite: boolean,
+    updateAndSaveDashboard: Function
+}
+
+type State = {
+    shareDialogIsOpen: boolean
+}
+
+class DashboardTools extends Component<Props, State> {
+
+    state = {
+        shareDialogIsOpen: false
     }
     
-    constructor() {
-        super()
-        this.state = {
-            shareDialogIsOpen: false
-        }
-        this.onSave = this.onSave.bind(this)
-    }
-
-    onSave() {
+    onSave = () => {
         this.props.updateAndSaveDashboard(this.props.dashboard)
     }
     

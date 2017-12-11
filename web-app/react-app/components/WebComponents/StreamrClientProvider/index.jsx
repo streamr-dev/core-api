@@ -5,11 +5,11 @@ import React, {Component} from 'react'
 import {any} from 'prop-types'
 
 import type {StreamrClient} from '../../../flowtype/streamr-client-types'
-import type {ReactChildren} from 'react-flow-types'
+import type {Node} from 'react'
 
 type Props = {
     client: StreamrClient,
-    children?: ReactChildren
+    children?: Node
 }
 
 let didWarnAboutChangingClient = false
@@ -24,9 +24,8 @@ function warnAboutChangingClient() {
     )
 }
 
-export default class StreamrClientProvider extends Component {
+export default class StreamrClientProvider extends Component<Props> {
     client: StreamrClient
-    props: Props
     static childContextTypes = {
         client: any
     }

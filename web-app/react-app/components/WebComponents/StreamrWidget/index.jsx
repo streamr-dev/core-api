@@ -6,18 +6,15 @@ import _ from 'lodash'
 
 import {any} from 'prop-types'
 
-//import type {Webcomponent} from '../../../flowtype/webcomponent-types.js'
+import type {WebcomponentProps} from '../../../flowtype/webcomponent-types.js'
 
-import type {StreamId, SubscriptionOptions, Subscription, ModuleOptions} from '../../../flowtype/streamr-client-types'
+import type {Node} from 'react'
 
-import type {ReactChildren} from 'react-flow-types'
+import type {StreamId, Subscription, ModuleOptions} from '../../../flowtype/streamr-client-types'
 
-type Props = {
-    children?: ReactChildren,
-    subscriptionOptions: SubscriptionOptions,
-    url: string,
-    onError: (string) => void,
-    onMessage: ({}) => void,
+type Props = WebcomponentProps & {
+    children?: Node,
+    onMessage: (any) => void,
     onSubscribed?: (opt: ?{
         from?: number
     }) => void,
@@ -29,61 +26,19 @@ type Props = {
         options: ModuleOptions
     }) => void
 }
-export default class StreamrWidget extends Component {
-    getModuleJson: Function
-    getHeaders: Function
-    sendRequest: Function
-    onMessage: Function
+
+export default class StreamrWidget extends Component<Props> {
     subscription: ?Subscription
+    alreadyFetchedAndSubscribed: ?boolean
     stream: StreamId
-    props: Props
     static contextTypes = {
         client: any
     }
-    
-    constructor() {
-        super()
-        this.getModuleJson = this.getModuleJson.bind(this)
-        this.getHeaders = this.getHeaders.bind(this)
-        this.sendRequest = this.sendRequest.bind(this)
-        this.onMessage = this.onMessage.bind(this)
-    }
-    
-    getHeaders() {
-        return this.context.client.options.authKey ? {
-            'Authorization': `Token ${this.context.client.options.authKey}`
-        } : {}
-    }
-    
-    getModuleJson(callback: (any) => void) {
-        this.sendRequest({
-            type: 'json'
-        })
-            .then((res: {
-                data: {
-                    json: {
-                        uiChannel: {
-                            id: string
-                        }
-                    }
-                }
-            }) => {
-                callback(res.data.json)
-            })
-            .catch((res) => {
-                if (process.env.NODE_ENV === 'production') {
-                    console.error('Error while communicating with widget')
-                } else {
-                    console.error('Error while communicating with widget')
-                    console.error(JSON.stringify(res))
-                }
-                if (this.props.onError) {
-                    this.props.onError(res)
-                }
-            })
-    }
-    
     componentDidMount() {
+        if (this.alreadyFetchedAndSubscribed) {
+            return
+        }
+        this.alreadyFetchedAndSubscribed = true
         const safeBind = (sub: ?Subscription, event: string, callback: ?Function) => {
             if (sub && callback && event) {
                 sub.bind(event, callback)
@@ -106,7 +61,7 @@ export default class StreamrWidget extends Component {
                     stream: this.stream,
                     authKey: subscriptionOptions.authKey,
                     partition: subscriptionOptions.partition,
-                    resend_all: subscriptionOptions.resend_all || (options.uiResendAll || {}).value,
+                    resend_all: Boolean(subscriptionOptions.resend_all || (options.uiResendAll || {}).value),
                     resend_last: subscriptionOptions.resend_last || (options.uiResendLast || {}).value,
                     resend_from: subscriptionOptions.resend_from,
                     resend_from_time: subscriptionOptions.resend_from_time,
@@ -121,8 +76,10 @@ export default class StreamrWidget extends Component {
         })
     }
     
-    onMessage(msg: {}) {
-        this.props.onMessage && this.props.onMessage(msg)
+    componentWillReceiveProps(newProps: Props) {
+        if (newProps.subscriptionOptions !== undefined && !_.isEqual(this.props.subscriptionOptions, newProps.subscriptionOptions)) {
+            console.warn('Updating stream subscriptionOptions on the fly is not (yet) possible')
+        }
     }
     
     componentWillUnmount() {
@@ -132,18 +89,44 @@ export default class StreamrWidget extends Component {
         }
     }
     
-    sendRequest(msg: {}): Promise<any> {
+    onMessage = (msg: {}) => {
+        this.props.onMessage && this.props.onMessage(msg)
+    }
+    
+    getHeaders = () => {
+        return this.context.client.options.authKey ? {
+            'Authorization': `Token ${this.context.client.options.authKey}`
+        } : {}
+    }
+    
+    getModuleJson = (callback: (any) => void) => {
+        this.sendRequest({
+            type: 'json'
+        })
+            .then((res: {
+                data: {
+                    json: {
+                        uiChannel: {
+                            id: string
+                        }
+                    }
+                }
+            }) => {
+                callback(res.data.json)
+            })
+            .catch((res) => {
+                if (this.props.onError) {
+                    this.props.onError(res)
+                }
+            })
+    }
+    
+    sendRequest = (msg: {}): Promise<any> => {
         return axios.post(`${this.props.url}/request`, msg, {
             headers: {
                 ...this.getHeaders()
             }
         })
-    }
-    
-    componentWillReceiveProps(newProps: Props) {
-        if (newProps.subscriptionOptions !== undefined && !_.isEqual(this.props.subscriptionOptions, newProps.subscriptionOptions)) {
-            console.warn('Updating stream subscriptionOptions on the fly is not (yet) possible')
-        }
     }
     
     render() {

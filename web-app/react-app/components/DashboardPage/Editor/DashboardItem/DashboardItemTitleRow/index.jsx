@@ -11,47 +11,41 @@ import styles from './dashboardItemTitleRow.pcss'
 
 import type {Dashboard, DashboardItem} from '../../../../../flowtype/dashboard-types'
 
-class DashboardItemTitleRow extends Component {
-    onRemove: Function
-    toggleEdit: Function
-    saveName: Function
-    props: {
-        item: DashboardItem,
-        dashboard: Dashboard,
-        update: Function,
-        remove: Function,
-        className?: string,
-        dragCancelClassName?: string,
-        isLocked: boolean
-    }
-    state: {
-        editing: boolean
-    }
+type Props = {
+    item: DashboardItem,
+    dashboard: Dashboard,
+    update: Function,
+    remove: Function,
+    className?: string,
+    dragCancelClassName?: string,
+    isLocked: boolean
+}
+
+type State = {
+    editing: boolean
+}
+
+class DashboardItemTitleRow extends Component<Props, State> {
+    
     static defaultProps = {
         editingLocked: false
     }
     
-    constructor() {
-        super()
-        this.state = {
-            editing: false
-        }
-        this.onRemove = this.onRemove.bind(this)
-        this.toggleEdit = this.toggleEdit.bind(this)
-        this.saveName = this.saveName.bind(this)
+    state = {
+        editing: false
     }
     
-    onRemove() {
+    onRemove = () => {
         this.props.remove(this.props.dashboard, this.props.item)
     }
     
-    toggleEdit() {
+    toggleEdit = () => {
         this.setState({
             editing: !this.state.editing
         })
     }
     
-    saveName({target}) {
+    saveName = ({target}) => {
         this.props.update(this.props.dashboard, this.props.item, {
             title: target.value
         })

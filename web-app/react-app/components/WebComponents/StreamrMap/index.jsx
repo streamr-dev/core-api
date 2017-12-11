@@ -1,11 +1,12 @@
 // @flow
 
 import React, {Component} from 'react'
-import StreamrWidget from '../StreamrWidget'
+import ComplexStreamrWidget from '../ComplexStreamrWidget'
 
 declare var StreamrMap: Function
 
-import type {StreamId, ModuleOptions} from '../../../flowtype/streamr-client-types'
+import type {WebcomponentProps} from '../../../flowtype/webcomponent-types'
+import type {ModuleOptions} from '../../../flowtype/streamr-client-types'
 
 type Options = ModuleOptions | {
     centerLat?: number,
@@ -22,66 +23,47 @@ type Options = ModuleOptions | {
     customImageUrl?: string
 }
 
-type Props = {
-    url: string,
-    stream?: StreamId,
-    onError?: Function,
-    width: number,
-    height: number
+type Props = WebcomponentProps & {}
+
+type State = {
+    options: Options
 }
 
-export default class StreamrMapComponent extends Component {
-    props: Props
-    root: HTMLDivElement
-    onMessage: Function
-    widget: StreamrWidget
-    map: ?any
-    
-    state: {
-        options: Options
-    }
-    
-    constructor() {
-        super()
-        this.state = {
-            options: {}
-        }
-        this.onMessage = this.onMessage.bind(this)
-    }
-    
-    onModuleJson({options}: { options: Options }) {
-        this.setState({
-            options
-        })
-        this.map = new StreamrMap(this.root, options)
+export default class StreamrMapComponent extends Component<Props, State> {
+    map: ?StreamrMap
+    state = {
+        options: {}
     }
     
     componentWillReceiveProps(newProps: Props) {
-        const changed = (key) => newProps[key] !== undefined && newProps[key] !== this.props[key]
+        const changed = (key) => newProps[key] != undefined && newProps[key] !== this.props[key]
         
         if (changed('width') || changed('height')) {
             this.map && this.map.redraw()
         }
     }
     
-    onMessage(msg: {}) {
+    renderWidget = (root: HTMLDivElement, options: Options) => {
+        if (root) {
+            this.map = new StreamrMap(root, options)
+        }
+    }
+    
+    onMessage = (msg: {}) => {
         this.map && this.map.handleMessage(msg)
     }
     
     render() {
         return (
-            <StreamrWidget
-                subscriptionOptions={{
-                    stream: this.props.stream
-                }}
-                onModuleJson={this.onModuleJson}
+            <ComplexStreamrWidget
+                stream={this.props.stream}
                 url={this.props.url}
-                onMessage={this.onMessage}
                 onError={this.props.onError}
-                ref={(w) => this.widget = w}
-            >
-                <div ref={root => this.root = root}/>
-            </StreamrWidget>
+                width={this.props.width}
+                height={this.props.height}
+                onMessage={this.onMessage}
+                renderWidget={this.renderWidget}
+            />
         )
     }
 }

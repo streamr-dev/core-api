@@ -1,6 +1,6 @@
 // @flow
 
-import React from 'react'
+import React, {Component} from 'react'
 
 import { connect } from 'react-redux'
 import { getIntegrationKeysByService, createIntegrationKey, deleteIntegrationKey } from '../../../../actions/integrationKey'
@@ -14,36 +14,27 @@ import styles from './integrationKeyHandlerSegment.pcss'
 
 declare var Streamr: any
 
-class IntegrationKeyHandlerSegment extends React.Component {
-    
-    props: {
-        tableFields: Array<string>,
-        inputFields: Array<string>,
-        integrationKeys: Array<{
-            id: string,
-            name: string,
-            json: {}
-        }>,
-        service: string,
+type Props = {
+    tableFields: Array<string>,
+    inputFields: Array<string>,
+    integrationKeys: Array<{
+        id: string,
         name: string,
-        className: string,
-        dispatch: Function
-    }
+        json: {}
+    }>,
+    service: string,
+    name: string,
+    className: string,
+    dispatch: Function
+}
+
+class IntegrationKeyHandlerSegment extends Component<Props> {
     
-    onNew: Function
-    onDelete: Function
-    
-    constructor(props) {
-        super(props)
-        
-        this.onNew = this.onNew.bind(this)
-        this.onDelete = this.onDelete.bind(this)
-    }
     componentDidMount() {
         this.props.dispatch(getIntegrationKeysByService(this.props.service))
     }
     
-    onNew(integrationKey) {
+    onNew = (integrationKey) => {
         const name = integrationKey.name
         const service = this.props.service
         delete integrationKey.name
@@ -56,7 +47,7 @@ class IntegrationKeyHandlerSegment extends React.Component {
             .catch(e => Streamr.showError('Error!', e.message))
     }
     
-    onDelete(id) {
+    onDelete = (id) => {
         this.props.dispatch(deleteIntegrationKey(id))
             .then(() => Streamr.showSuccess('IntegrationKey removed successfully!'))
     }

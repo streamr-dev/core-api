@@ -3,38 +3,36 @@
 import React, {Component} from 'react'
 import StreamrWidget from '../StreamrWidget'
 
-import type {StreamId} from '../../../flowtype/streamr-client-types'
-
 import styles from './streamr-label.pcss'
 
-import type {AnyReactElement} from 'react-flow-types'
+import type {StreamId} from '../../../flowtype/streamr-client-types'
+//import type {WebcomponentProps} from '../../../flowtype/webcomponent-types'
 
-export default class StreamrLabel extends Component {
-    widget: AnyReactElement
-    onMessage: Function
-    state: {
-        value: number | string
-    }
-    props: {
-        url: string,
-        stream?: StreamId,
-        onError?: Function,
-        width: ?number,
-        height: ?number,
-        style: {}
-    }
+// TODO: Why just importing WebcomponentProps does not work?
+
+type Props = {
+    url: string,
+    stream?: StreamId,
+    height: ?number,
+    width: ?number,
+    onError: ?Function
+} & {
+    style: {}
+}
+
+type State = {
+    value: number | string
+}
+
+export default class StreamrLabel extends Component<Props, State> {
+    widget: ?StreamrWidget
     static defaultProps = {
         style: {}
     }
-    constructor() {
-        super()
-        
-        this.state = {
-            value: ''
-        }
-        this.onMessage = this.onMessage.bind(this)
+    state = {
+        value: ''
     }
-    onMessage({value}: { value: number | string }) {
+    onMessage = ({value}: { value: number | string }) => {
         if (this.widget) {
             this.setState({
                 value
@@ -53,9 +51,12 @@ export default class StreamrLabel extends Component {
                 onError={this.props.onError}
                 ref={w => this.widget = w}
             >
-                <span className={styles.label} style={{
-                    ...this.props.style
-                }}>
+                <span
+                    className={styles.label}
+                    style={{
+                        ...this.props.style
+                    }}
+                >
                     {this.state.value}
                 </span>
             </StreamrWidget>

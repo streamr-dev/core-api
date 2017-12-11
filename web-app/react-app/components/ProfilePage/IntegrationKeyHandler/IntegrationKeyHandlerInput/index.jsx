@@ -1,6 +1,6 @@
 // @flow
 
-import React from 'react'
+import React, {Component} from 'react'
 import {FormControl, InputGroup, FormGroup, Button} from 'react-bootstrap'
 import serialize from 'form-serialize'
 
@@ -8,27 +8,21 @@ import styles from './integrationKeyHandlerInput.pcss'
 
 import {titleCase} from 'change-case'
 
-export default class IntegrationKeyHandlerInput extends React.Component {
+type Props = {
+    fields: Array<string>,
+    onNew: Function
+}
+
+export default class IntegrationKeyHandlerInput extends Component<Props> {
+    form: ?HTMLFormElement
     
-    form: HTMLFormElement
-    onSubmit: Function
-    props: {
-        fields: Array<string>,
-        onNew: Function
-    }
-    
-    constructor() {
-        super()
-        this.onSubmit = this.onSubmit.bind(this)
-    }
-    
-    onSubmit(e: Event) {
+    onSubmit = (e: Event) => {
         e.preventDefault()
         const data = serialize(this.form, {
             hash: true
         })
         this.props.onNew(data)
-        this.form.reset()
+        this.form && this.form.reset()
     }
     
     render() {

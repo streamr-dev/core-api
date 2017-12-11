@@ -78,6 +78,12 @@ export const getDashboard = (id: Dashboard.id) => (dispatch: Function) => {
         })
 }
 
+export const updateAndSaveCurrentDashboard = () => (dispatch: Function, getState: Function) => {
+    const state = getState().dashboard
+    const dashboard = state.dashboardsById[state.openDashboard.id]
+    dispatch(updateAndSaveDashboard(dashboard))
+}
+
 export const updateAndSaveDashboard = (dashboard: Dashboard) => (dispatch: Function) => {
     dispatch(updateAndSaveDashboardRequest())
     const createNew = dashboard.new

@@ -6,12 +6,12 @@ import ModuleInModuleList from './ModuleInModuleList'
 
 import type { Canvas, CanvasModule } from '../../../../../../flowtype/canvas-types'
 
-export default class ModuleList extends Component {
-    
-    props: {
+type Props = {
         modules: Array<CanvasModule>,
         canvasId: Canvas.id
     }
+
+export default class ModuleList extends Component<Props> {
     
     render() {
         const {modules, canvasId} = this.props

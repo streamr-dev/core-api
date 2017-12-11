@@ -15,32 +15,25 @@ import styles from './shareDialogContent.pcss'
 import type {Permission} from '../../../flowtype/permission-types'
 import {getResourcePermissions, addResourcePermission, removeResourcePermission} from '../../../actions/permission'
 
-class ShareDialogContent extends Component {
-    form: HTMLFormElement
-    onAnonymousAccessChange: Function
-    onSubmit: Function
-    props: {
-        permissions: Array<Permission>,
-        resourceType: Permission.resourceType,
-        resourceId: Permission.resourceId,
-        anonymousPermission: ?Permission,
-        owner: ?string,
-        getResourcePermissions: () => {},
-        addPermission: (permission: Permission) => {},
-        removePermission: (permission: Permission) => {}
-    }
+type Props = {
+    permissions: Array<Permission>,
+    resourceType: Permission.resourceType,
+    resourceId: Permission.resourceId,
+    anonymousPermission: ?Permission,
+    owner: ?string,
+    getResourcePermissions: () => {},
+    addPermission: (permission: Permission) => {},
+    removePermission: (permission: Permission) => {}
+}
+
+class ShareDialogContent extends Component<Props> {
+    form: ?HTMLFormElement
     
     componentWillMount() {
         this.props.getResourcePermissions()
     }
     
-    constructor() {
-        super()
-        
-        this.onAnonymousAccessChange = this.onAnonymousAccessChange.bind(this)
-        this.onSubmit = this.onSubmit.bind(this)
-    }
-    onAnonymousAccessChange() {
+    onAnonymousAccessChange = () => {
         const permission = this.props.anonymousPermission || {
             anonymous: true,
             operation: 'read'
@@ -51,7 +44,7 @@ class ShareDialogContent extends Component {
             this.props.addPermission(permission)
         }
     }
-    onSubmit(e) {
+    onSubmit = (e) => {
         e.preventDefault()
         const data = serialize(this.form, {
             hash: true
@@ -60,7 +53,7 @@ class ShareDialogContent extends Component {
             user: data.email,
             operation: 'read'
         })
-        this.form.reset()
+        this.form && this.form.reset()
     }
     render() {
         return (
