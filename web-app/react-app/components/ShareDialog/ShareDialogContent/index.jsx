@@ -2,6 +2,7 @@
 
 import React, {Component} from 'react'
 import {connect} from 'react-redux'
+import serialize from 'form-serialize'
 
 import {Row, Modal} from 'react-bootstrap'
 
@@ -23,7 +24,7 @@ type Props = {
     removePermission: (permission: Permission) => {}
 }
 
-class ShareDialogContent extends Component<Props> {
+export class ShareDialogContent extends Component<Props> {
     form: ?HTMLFormElement
     
     componentWillMount() {
@@ -76,7 +77,7 @@ class ShareDialogContent extends Component<Props> {
     }
 }
 
-const mapDispatchToProps = (dispatch, ownProps) => ({
+export const mapDispatchToProps = (dispatch, ownProps) => ({
     getResourcePermissions() {
         dispatch(getResourcePermissions(ownProps.resourceType, ownProps.resourceId))
     }

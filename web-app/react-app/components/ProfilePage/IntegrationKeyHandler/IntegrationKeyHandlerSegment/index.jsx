@@ -24,10 +24,13 @@ type Props = {
     }>,
     service: string,
     name: string,
-    className: string
+    className: string,
+    deleteIntegrationKey: (id: IntegrationKey.id) => void,
+    createIntegrationKey: (key: IntegrationKey) => void,
+    getIntegrationKeysByService: (service: IntegrationKey.service) => void
 }
 
-class IntegrationKeyHandlerSegment extends Component<Props> {
+export class IntegrationKeyHandlerSegment extends Component<Props> {
     
     componentDidMount() {
         // TODO: Move to (yet non-existent) router
@@ -71,19 +74,19 @@ class IntegrationKeyHandlerSegment extends Component<Props> {
     }
 }
 
-const mapStateToProps = ({integrationKey: {listsByService, error}}, props) => ({
+export const mapStateToProps = ({integrationKey: {listsByService, error}}, props) => ({
     integrationKeys: listsByService[props.service] || [],
     error
 })
 
-const mapDispatchToProps = (dispatch: Function) => ({
-    deleteIntegrationKey(id) {
+export const mapDispatchToProps = (dispatch: Function) => ({
+    deleteIntegrationKey(id: IntegrationKey.id) {
         dispatch(deleteIntegrationKey(id))
     },
-    createIntegrationKey(key) {
+    createIntegrationKey(key: IntegrationKey) {
         dispatch(createIntegrationKey(key))
     },
-    getIntegrationKeysByService(service) {
+    getIntegrationKeysByService(service: IntegrationKey.service) {
         dispatch(getIntegrationKeysByService(service))
     }
 })

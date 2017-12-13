@@ -10,24 +10,18 @@ import {addResourcePermission, removeResourcePermission} from '../../../../actio
 
 import styles from './shareDialogOwnerRow.pcss'
 
-export class ShareDialogOwnerRow extends Component {
-    onAnonymousAccessChange: Function
-    props: {
-        resourceType: Permission.resourceType,
-        resourceId: Permission.resourceId,
-        anonymousPermission: ?Permission,
-        owner: ?string,
-        addPublicPermission: (permission: Permission) => {},
-        revokePublicPermission: (permission: Permission) => {}
-    }
+type Props = {
+    resourceType: Permission.resourceType,
+    resourceId: Permission.resourceId,
+    anonymousPermission: ?Permission,
+    owner: ?string,
+    addPublicPermission: (permission: Permission) => {},
+    revokePublicPermission: (permission: Permission) => {}
+}
+
+export class ShareDialogOwnerRow extends Component<Props> {
     
-    constructor() {
-        super()
-        
-        this.onAnonymousAccessChange = this.onAnonymousAccessChange.bind(this)
-    }
-    
-    onAnonymousAccessChange() {
+    onAnonymousAccessChange = () => {
         if (!this.props.anonymousPermission) {
             this.props.addPublicPermission()
         } else {
@@ -55,7 +49,7 @@ export class ShareDialogOwnerRow extends Component {
     }
 }
 
-const mapStateToProps = ({permission: {byTypeAndId}}, ownProps) => {
+export const mapStateToProps = ({permission: {byTypeAndId}}, ownProps) => {
     const byType = byTypeAndId[ownProps.resourceType] || {}
     const permissions = (byType[ownProps.resourceId] || []).filter(p => !p.removed)
     const ownerPermission = permissions.find(it => it.id === null && !it.new) || {}
@@ -66,7 +60,7 @@ const mapStateToProps = ({permission: {byTypeAndId}}, ownProps) => {
     }
 }
 
-const mapDispatchToProps = (dispatch, ownProps) => ({
+export const mapDispatchToProps = (dispatch, ownProps) => ({
     addPublicPermission() {
         dispatch(addResourcePermission(ownProps.resourceType, ownProps.resourceId, {
             anonymous: true,

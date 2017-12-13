@@ -22,7 +22,7 @@ type Props = {
     onClose: () => void
 }
 
-class ShareDialog extends Component<Props> {
+export class ShareDialog extends Component<Props> {
     
     save = () => {
         this.props.save()
@@ -55,11 +55,11 @@ class ShareDialog extends Component<Props> {
     }
 }
 
-const mapStateToProps = ({permission}, ownProps) => ({
+export const mapStateToProps = ({permission}, ownProps) => ({
     permissions: permission.byTypeAndId[ownProps.resourceType] && permission.byTypeAndId[ownProps.resourceType][ownProps.resourceId] || []
 })
 
-const mapDispatchToProps = (dispatch, ownProps) => ({
+export const mapDispatchToProps = (dispatch, ownProps) => ({
     save() {
         return dispatch(saveUpdatedResourcePermissions(ownProps.resourceType, ownProps.resourceId))
     }

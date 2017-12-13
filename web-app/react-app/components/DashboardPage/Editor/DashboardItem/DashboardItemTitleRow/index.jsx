@@ -25,7 +25,7 @@ type State = {
     editing: boolean
 }
 
-class DashboardItemTitleRow extends Component<Props, State> {
+export class DashboardItemTitleRow extends Component<Props, State> {
     
     static defaultProps = {
         editingLocked: false
@@ -99,11 +99,11 @@ class DashboardItemTitleRow extends Component<Props, State> {
     }
 }
 
-const mapStateToProps = ({dashboard: {dashboardsById, openDashboard}}) => ({
+export const mapStateToProps = ({dashboard: {dashboardsById, openDashboard}}) => ({
     dashboard: dashboardsById[openDashboard.id]
 })
 
-const mapDispatchToProps = (dispatch) => ({
+export const mapDispatchToProps = (dispatch) => ({
     update(db: Dashboard, item: DashboardItem, newData) {
         return dispatch(updateDashboardItem(db, {
             ...item,

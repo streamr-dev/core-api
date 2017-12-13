@@ -9,7 +9,7 @@ import {titleCase} from 'change-case'
 
 import styles from './integrationKeyHandlerTable.pcss'
 
-import type {IntegrationKey} from '../../../../flowtype/integration-key-types.js'
+import type {IntegrationKey} from '../../../../../flowtype/integration-key-types.js'
 
 type Props = {
     fields: Array<string>,

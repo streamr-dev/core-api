@@ -29,7 +29,7 @@ type State = {
     width: ?number
 }
 
-class DashboardItem extends Component<Props, State> {
+export class DashboardItem extends Component<Props, State> {
     wrapper: ?HTMLElement
     static defaultProps = {
         item: {},
@@ -47,7 +47,7 @@ class DashboardItem extends Component<Props, State> {
         })
     }
     
-    componentWillReceiveProps = (newProps: Props) => {
+    componentWillReceiveProps = () => {
         this.onResize()
     }
     
@@ -121,11 +121,11 @@ class DashboardItem extends Component<Props, State> {
     }
 }
 
-const mapStateToProps = ({dashboard: {dashboardsById, openDashboard}}) => ({
+export const mapStateToProps = ({dashboard: {dashboardsById, openDashboard}}) => ({
     dashboard: dashboardsById[openDashboard.id]
 })
 
-const mapDispatchToProps = (dispatch) => ({
+export const mapDispatchToProps = (dispatch) => ({
     showError(message) {
         dispatch(showError({
             title: 'Error!',

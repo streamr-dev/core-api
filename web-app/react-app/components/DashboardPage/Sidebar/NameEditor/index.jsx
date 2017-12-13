@@ -15,7 +15,7 @@ type Props = {
     canWrite?: boolean
 }
 
-class NameEditor extends Component<Props> {
+export class NameEditor extends Component<Props> {
     
     onChange = ({target}) => {
         this.props.update({
@@ -43,9 +43,9 @@ class NameEditor extends Component<Props> {
     }
 }
 
-const mapStateToProps = (state) => parseDashboard(state)
+export const mapStateToProps = (state) => parseDashboard(state)
 
-const mapDispatchToProps = (dispatch) => ({
+export const mapDispatchToProps = (dispatch) => ({
     update(newData) {
         return dispatch(updateDashboard({
             ...newData

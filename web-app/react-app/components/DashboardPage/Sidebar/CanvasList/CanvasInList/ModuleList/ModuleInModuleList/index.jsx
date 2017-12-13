@@ -21,7 +21,7 @@ type Props = {
     id: Dashboard.id
 }
 
-class ModuleInModuleList extends Component<Props> {
+export class ModuleInModuleList extends Component<Props> {
     
     onClick = () => {
         const id = uuid.v4()
@@ -55,7 +55,7 @@ class ModuleInModuleList extends Component<Props> {
     }
 }
 
-const mapStateToProps = ({dashboard}, ownProps) => {
+export const mapStateToProps = ({dashboard}, ownProps) => {
     const dbState = dashboard
     const db = dbState.dashboardsById[dbState.openDashboard.id] || {}
     return {

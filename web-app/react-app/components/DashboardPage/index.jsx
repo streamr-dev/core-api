@@ -34,7 +34,7 @@ type Props = {
     }
 }
 
-class DashboardPage extends Component<Props> {
+export class DashboardPage extends Component<Props> {
     
     componentWillMount() {
         let id = this.props.match.params.id
@@ -64,11 +64,11 @@ class DashboardPage extends Component<Props> {
     }
 }
 
-const mapStateToProps = ({dashboard: {dashboardsById, openDashboard}}) => ({
+export const mapStateToProps = ({dashboard: {dashboardsById, openDashboard}}) => ({
     dashboard: dashboardsById[openDashboard.id]
 })
 
-const mapDispatchToProps = (dispatch: Function) => ({
+export const mapDispatchToProps = (dispatch: Function) => ({
     getDashboard(id: string) {
         dispatch(getDashboard(id))
     },

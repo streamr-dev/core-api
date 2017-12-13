@@ -30,7 +30,7 @@ type State = {
     shareDialogIsOpen: boolean
 }
 
-class DashboardTools extends Component<Props, State> {
+export class DashboardTools extends Component<Props, State> {
 
     state = {
         shareDialogIsOpen: false
@@ -86,9 +86,9 @@ class DashboardTools extends Component<Props, State> {
     }
 }
 
-const mapStateToProps = (state) => parseDashboard(state)
+export const mapStateToProps = (state) => parseDashboard(state)
 
-const mapDispatchToProps = (dispatch) => ({
+export const mapDispatchToProps = (dispatch) => ({
     updateAndSaveDashboard(db) {
         return dispatch(updateAndSaveDashboard(db))
     }

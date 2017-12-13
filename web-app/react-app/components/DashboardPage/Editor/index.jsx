@@ -77,7 +77,7 @@ type State = {
     isFullscreen: boolean
 }
 
-class Editor extends Component<Props, State> {
+export class Editor extends Component<Props, State> {
     
     static defaultProps = {
         dashboard: {
@@ -254,7 +254,7 @@ class Editor extends Component<Props, State> {
     }
 }
 
-const mapStateToProps = (state) => {
+export const mapStateToProps = (state) => {
     const baseState = parseDashboard(state)
     return {
         ...baseState,
@@ -262,7 +262,7 @@ const mapStateToProps = (state) => {
     }
 }
 
-const mapDispatchToProps = (dispatch) => ({
+export const mapDispatchToProps = (dispatch) => ({
     update(id, changes) {
         return dispatch(updateDashboardChanges(id, changes))
     },

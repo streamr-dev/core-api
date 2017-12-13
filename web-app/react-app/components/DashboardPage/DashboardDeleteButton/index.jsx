@@ -19,7 +19,7 @@ type Props = {
     deleteDashboard: (id: Dashboard.id) => Promise<any>
 }
 
-class DashboardDeleteButton extends Component<Props> {
+export class DashboardDeleteButton extends Component<Props> {
     
     static defaultProps = {
         buttonProps: {}
@@ -49,9 +49,9 @@ class DashboardDeleteButton extends Component<Props> {
     }
 }
 
-const mapStateToProps = (state) => parseDashboard(state)
+export const mapStateToProps = (state) => parseDashboard(state)
 
-const mapDispatchToProps = (dispatch) => ({
+export const mapDispatchToProps = (dispatch) => ({
     deleteDashboard(id: Dashboard.id) {
         return dispatch(deleteDashboard(id))
     }

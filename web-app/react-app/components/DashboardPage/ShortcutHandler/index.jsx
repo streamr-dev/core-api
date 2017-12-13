@@ -24,7 +24,7 @@ type Props = {
     children: Node
 }
 
-class ShortcutHandler extends Component<Props> {
+export class ShortcutHandler extends Component<Props> {
     static childContextTypes = {
         shortcuts: object
     }
@@ -54,7 +54,7 @@ class ShortcutHandler extends Component<Props> {
     }
 }
 
-const mapDispatchToProps = (dispatch) => ({
+export const mapDispatchToProps = (dispatch) => ({
     updateAndSaveCurrentDashboard() {
         dispatch(updateAndSaveCurrentDashboard())
     }

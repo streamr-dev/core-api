@@ -13,7 +13,7 @@ type Props = {
     showCanvases: boolean,
 }
 
-class CanvasList extends Component<Props> {
+export class CanvasList extends Component<Props> {
     
     render() {
         return this.props.showCanvases ? (
@@ -29,7 +29,7 @@ class CanvasList extends Component<Props> {
     }
 }
 
-const mapStateToProps = ({canvas, dashboard}) => {
+export const mapStateToProps = ({canvas, dashboard}) => {
     const dbState = dashboard
     const db = dbState.dashboardsById[dbState.openDashboard.id] || {}
     const canWrite = db.ownPermissions && db.ownPermissions.includes('write')

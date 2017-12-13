@@ -79,11 +79,11 @@ export class ProfileSettings extends Component<Props> {
     }
 }
 
-const mapStateToProps = ({user}) => ({
+export const mapStateToProps = ({user}) => ({
     user: user.currentUser || {}
 })
 
-const mapDispatchToProps = (dispatch) => ({
+export const mapDispatchToProps = (dispatch) => ({
     getCurrentUser() {
         dispatch(getCurrentUser())
     },
