@@ -11,26 +11,21 @@ import {parseDashboard} from '../../../helpers/parseState'
 import type {ReactChildren} from 'react-flow-types'
 import type {Dashboard} from '../../../flowtype/dashboard-types'
 
-class DeleteButton extends Component {
-    onDelete: Function
-    props: {
-        dashboard: Dashboard,
-        canWrite: boolean,
-        buttonProps: {},
-        children?: ReactChildren,
-        deleteDashboard: () => Promise<any>
-    }
+type Props = {
+    dashboard: Dashboard,
+    canWrite: boolean,
+    buttonProps: {},
+    children?: ReactChildren,
+    deleteDashboard: (id: Dashboard.id) => Promise<any>
+}
+
+class DashboardDeleteButton extends Component<Props> {
+    
     static defaultProps = {
         buttonProps: {}
     }
     
-    constructor() {
-        super()
-        
-        this.onDelete = this.onDelete.bind(this)
-    }
-    
-    onDelete() {
+    onDelete = () => {
         this.props.deleteDashboard(this.props.dashboard.id)
             .then(() => {
                 window.location = createLink('/dashboard/list')
@@ -62,4 +57,4 @@ const mapDispatchToProps = (dispatch) => ({
     }
 })
 
-export default connect(mapStateToProps, mapDispatchToProps)(DeleteButton)
+export default connect(mapStateToProps, mapDispatchToProps)(DashboardDeleteButton)

@@ -12,25 +12,18 @@ import uuid from 'uuid'
 import type { Dashboard, DashboardItem } from '../../../../../../../flowtype/dashboard-types'
 import type { Canvas, CanvasModule } from '../../../../../../../flowtype/canvas-types'
 
-class ModuleInModuleList extends Component {
+type Props = {
+    dashboard: Dashboard,
+    module: CanvasModule,
+    canvasId: Canvas.id,
+    checked: boolean,
+    dispatch: Function,
+    id: Dashboard.id
+}
+
+class ModuleInModuleList extends Component<Props> {
     
-    onClick: Function
-    
-    props: {
-        dashboard: Dashboard,
-        module: CanvasModule,
-        canvasId: Canvas.id,
-        checked: boolean,
-        dispatch: Function,
-        id: Dashboard.id
-    }
-    
-    constructor() {
-        super()
-        this.onClick = this.onClick.bind(this)
-    }
-    
-    onClick() {
+    onClick = () => {
         const id = uuid.v4()
         const dbItem: DashboardItem = {
             id,

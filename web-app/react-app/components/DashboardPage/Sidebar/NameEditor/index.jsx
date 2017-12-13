@@ -9,22 +9,15 @@ import {updateDashboard} from '../../../../actions/dashboard'
 
 import type {Dashboard} from '../../../../flowtype/dashboard-types'
 
-class NameEditor extends Component {
+type Props = {
+    dashboard: Dashboard,
+    update: Function,
+    canWrite?: boolean
+}
+
+class NameEditor extends Component<Props> {
     
-    onChange: Function
-    
-    props: {
-        dashboard: Dashboard,
-        update: Function,
-        canWrite?: boolean
-    }
-    
-    constructor() {
-        super()
-        this.onChange = this.onChange.bind(this)
-    }
-    
-    onChange({target}) {
+    onChange = ({target}) => {
         this.props.update({
             ...this.props.dashboard,
             name: target.value

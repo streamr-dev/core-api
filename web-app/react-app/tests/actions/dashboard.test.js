@@ -390,16 +390,12 @@ describe('Dashboard actions', () => {
                 assert.deepStrictEqual(actions.addDashboardItem({
                     id: 'test',
                     items: [{
-                        canvas: {
-                            id: 'a'
-                        },
+                        canvas: 'a',
                         module: 0,
                         thirdField: 'a'
                     }]
                 }, {
-                    canvas: {
-                        id: 'b'
-                    },
+                    canvas: 'b',
                     module: 0,
                     thirdField: 'test'
                 }), {
@@ -407,15 +403,11 @@ describe('Dashboard actions', () => {
                     dashboard: {
                         id: 'test',
                         items: [{
-                            canvas: {
-                                id: 'a'
-                            },
+                            canvas: 'a',
                             module: 0,
                             thirdField: 'a'
                         }, {
-                            canvas: {
-                                id: 'b'
-                            },
+                            canvas: 'b',
                             module: 0,
                             thirdField: 'test'
                         }]
@@ -429,22 +421,16 @@ describe('Dashboard actions', () => {
                 assert.deepStrictEqual(actions.updateDashboardItem({
                     id: 'test',
                     items: [{
-                        canvas: {
-                            id: 'a'
-                        },
+                        canvas: 'a',
                         module: 0,
                         thirdField: 'a'
                     }, {
-                        canvas: {
-                            id: 'b'
-                        },
+                        canvas: 'b',
                         module: 0,
                         thirdField: 'a'
                     }]
                 }, {
-                    canvas: {
-                        id: 'b'
-                    },
+                    canvas: 'b',
                     module: 0,
                     thirdField: 'test'
                 }), {
@@ -452,15 +438,11 @@ describe('Dashboard actions', () => {
                     dashboard: {
                         id: 'test',
                         items: [{
-                            canvas: {
-                                id: 'a'
-                            },
+                            canvas: 'a',
                             module: 0,
                             thirdField: 'a'
                         }, {
-                            canvas: {
-                                id: 'b'
-                            },
+                            canvas: 'b',
                             module: 0,
                             thirdField: 'test'
                         }]
@@ -474,22 +456,16 @@ describe('Dashboard actions', () => {
                 assert.deepStrictEqual(actions.removeDashboardItem({
                     id: 'test',
                     items: [{
-                        canvas: {
-                            id: 'a'
-                        },
+                        canvas: 'a',
                         module: 0,
                         thirdField: 'a'
                     }, {
-                        canvas: {
-                            id: 'b'
-                        },
+                        canvas: 'b',
                         module: 0,
                         thirdField: 'a'
                     }]
                 }, {
-                    canvas: {
-                        id: 'b'
-                    },
+                    canvas: 'b',
                     module: 0,
                     thirdField: 'test'
                 }), {
@@ -497,9 +473,7 @@ describe('Dashboard actions', () => {
                     dashboard: {
                         id: 'test',
                         items: [{
-                            canvas: {
-                                id: 'a'
-                            },
+                            canvas: 'a',
                             module: 0,
                             thirdField: 'a'
                         }]

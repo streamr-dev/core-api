@@ -1,6 +1,5 @@
-import spock.lang.*
-import core.LoginTester1Spec
-import core.pages.*
+import LoginTester1Spec
+import pages.*
 
 public class ProfileEditCoreSpec extends LoginTester1Spec {
 

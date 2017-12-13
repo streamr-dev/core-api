@@ -30,7 +30,7 @@ SignalPath.HeatmapModule = function(data,canvas,prot) {
 		if (heatMapOptions.centerLat!==undefined && heatMapOptions.centerLng!==undefined)
 			heatMapOptions.center = [heatMapOptions.centerLat, heatMapOptions.centerLng]
 
-		heatmap = new StreamrHeatMap(container, heatMapOptions)
+		heatmap = new StreamrHeatmap(container, heatMapOptions)
 
 		$(heatmap).on("move", function(e, data) {
 			$.each(data, function(k, v) {

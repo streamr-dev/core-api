@@ -1,6 +1,5 @@
 import geb.spock.GebReportingSpec
-import core.pages.*
-import spock.lang.*
+import pages.*
 
 class LoginRedirectSpec extends GebReportingSpec {
 	def "test redirect after login"() {

@@ -1,6 +1,5 @@
-import core.mixins.LoginMixin
 import grails.util.Environment
-import core.pages.*
+import pages.*
 import spock.lang.*
 import geb.spock.GebReportingSpec
 

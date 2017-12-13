@@ -10,29 +10,22 @@ import {getCurrentUser, updateCurrentUserName, updateCurrentUserTimezone} from '
 
 import type {User} from '../../../flowtype/user-types'
 
-export class ProfileSettings extends Component {
+type Props = {
+    user: User,
+    getCurrentUser: Function,
+    updateCurrentUserName: Function,
+    updateCurrentUserTimezone: Function
+}
+
+export class ProfileSettings extends Component<Props> {
     
-    props: {
-        user: User,
-        getCurrentUser: Function,
-        updateCurrentUserName: Function,
-        updateCurrentUserTimezone: Function
-    }
-    onNameChange: Function
-    onTimezoneChange: Function
-    
-    constructor() {
-        super()
-        this.onNameChange = this.onNameChange.bind(this)
-        this.onTimezoneChange = this.onTimezoneChange.bind(this)
-    }
     componentDidMount() {
         this.props.getCurrentUser()
     }
-    onNameChange({target}: {target: any}) {
+    onNameChange = ({target}: {target: any}) => {
         this.props.updateCurrentUserName(target.value)
     }
-    onTimezoneChange({target}: {target: any}) {
+    onTimezoneChange = ({target}: {target: any}) => {
         this.props.updateCurrentUserTimezone(target.value)
     }
     render() {

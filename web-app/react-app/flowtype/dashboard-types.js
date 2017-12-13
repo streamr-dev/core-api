@@ -16,7 +16,8 @@ export type DashboardReducerState = {
         [Dashboard.id]: Dashboard
     },
     openDashboard: {
-        id: ?Dashboard.id
+        id: ?Dashboard.id,
+        isFullScreen: boolean
     },
     error?: ?string,
     fetching?: boolean,

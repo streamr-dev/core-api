@@ -6,6 +6,7 @@
 
 import org.openqa.selenium.Dimension
 import org.openqa.selenium.chrome.ChromeDriver
+import org.openqa.selenium.chrome.ChromeOptions
 import org.openqa.selenium.firefox.FirefoxDriver
 import org.openqa.selenium.remote.DesiredCapabilities
 import org.openqa.selenium.remote.RemoteWebDriver
@@ -21,10 +22,13 @@ println('Geb baseUrl '+baseUrl)
 
 driver = {
 	def dr
-	if (inJenkins)
+	if (inJenkins) {
 		dr = new RemoteWebDriver(new URL("http://dev.unifina:4444/wd/hub"), DesiredCapabilities.chrome())
-	else
-		dr = new ChromeDriver()
+	} else {
+		def options = new ChromeOptions()
+//		options.addArguments("headless", "disable-gpu", "remote-debugging-port=9222")
+		dr = new ChromeDriver(options)
+	}
 	// Resolution where everything should be visible
 	dr.manage().window().setSize(new Dimension(1280,1024));
 	return dr
