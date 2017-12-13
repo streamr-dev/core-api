@@ -9,15 +9,15 @@ import {titleCase} from 'change-case'
 
 import styles from './integrationKeyHandlerTable.pcss'
 
-import type {IntegrationKey} from '../../../../../flowtype/integration-key-types.js'
+import type {IntegrationKey} from '../../../../flowtype/integration-key-types.js'
 
-export default class IntegrationKeyHandlerTable extends Component {
-    
-    props: {
-        fields: Array<string>,
-        integrationKeys: Array<IntegrationKey>,
-        onDelete: Function
-    }
+type Props = {
+    fields: Array<string>,
+    integrationKeys: Array<IntegrationKey>,
+    onDelete: Function
+}
+
+export default class IntegrationKeyHandlerTable extends Component<Props> {
     
     render() {
         const items = this.props.integrationKeys || []

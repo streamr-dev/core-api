@@ -5,58 +5,48 @@ import {Button, Modal} from 'react-bootstrap'
 
 import type {Element, ReactChildren} from 'react-flow-types'
 
-export default class ConfirmButton extends Component {
-    openModal: Function
-    closeModal: Function
-    closeAndExecuteFunction: Function
-    state: {
-        open: boolean
-    }
-    
-    props: {
-        confirmCallback: Function,
-        cancelCallback?: Function,
-        buttonRef?: Function,
-        confirmTitle?: string | Element<any>,
-        confirmMessage: string | Element<any>,
-        children?: ReactChildren,
-        modalProps?: {},
-        buttonProps?: {},
-        className?: string
-    }
+type Props = {
+    confirmCallback: (any) => void,
+    cancelCallback?: (any) => void,
+    buttonRef?: Function,
+    confirmTitle?: string | Element<any>,
+    confirmMessage: string | Element<any>,
+    children?: ReactChildren,
+    modalProps?: {},
+    buttonProps?: {},
+    className?: string
+}
+
+type State = {
+    open: boolean
+}
+
+export default class ConfirmButton extends Component<Props, State> {
     
     static defaultProps = {
         confirmTitle: 'Are you sure?',
         cancelCallback: () => {}
     }
     
-    constructor() {
-        super()
-        
-        this.state = {
-            open: false
-        }
-        
-        this.openModal = this.openModal.bind(this)
-        this.closeModal = this.closeModal.bind(this)
-        this.closeAndExecuteFunction = this.closeAndExecuteFunction.bind(this)
+    state = {
+        open: false
     }
     
-    openModal() {
+    openModal = () => {
         this.setState({
             open: true
         })
     }
     
-    closeModal() {
+    closeModal = () => {
         this.setState({
             open: false
         })
     }
     
-    closeAndExecuteFunction(func: () => void) {
-        return () => {
-            this.closeModal()
+    closeAndExecuteFunction = (func?: (any) => void) => {
+        this.closeModal()
+        if (func) {
             func()
         }
     }
@@ -75,10 +65,10 @@ export default class ConfirmButton extends Component {
                         {this.props.confirmMessage}
                     </Modal.Body>
                     <Modal.Footer>
-                        <Button onClick={this.closeAndExecuteFunction(this.props.cancelCallback)}>
+                        <Button onClick={() => this.closeAndExecuteFunction(this.props.cancelCallback)}>
                             Cancel
                         </Button>
-                        <Button onClick={this.closeAndExecuteFunction(this.props.confirmCallback)} bsStyle="primary">
+                        <Button onClick={() => this.closeAndExecuteFunction(this.props.confirmCallback)} bsStyle="primary">
                             OK
                         </Button>
                     </Modal.Footer>

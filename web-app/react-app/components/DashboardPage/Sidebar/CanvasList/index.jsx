@@ -8,12 +8,12 @@ import styles from './canvasList.pcss'
 
 import type {Canvas} from '../../../../flowtype/canvas-types'
 
-class CanvasList extends Component {
-    
-    props: {
-        canvases: Array<Canvas>,
-        showCanvases: boolean,
-    }
+type Props = {
+    canvases: Array<Canvas>,
+    showCanvases: boolean,
+}
+
+class CanvasList extends Component<Props> {
     
     render() {
         return this.props.showCanvases ? (

@@ -14,40 +14,27 @@ import styles from './integrationKeyHandlerSegment.pcss'
 
 import type {IntegrationKey} from '../../../../flowtype/integration-key-types'
 
-export class IntegrationKeyHandlerSegment extends Component {
-    
-    onNew: Function
-    onDelete: Function
-    
-    props: {
-        tableFields: Array<string>,
-        inputFields: Array<string>,
-        integrationKeys: Array<{
-            id: string,
-            name: string,
-            json: {}
-        }>,
-        service: string,
+type Props = {
+    tableFields: Array<string>,
+    inputFields: Array<string>,
+    integrationKeys: Array<{
+        id: string,
         name: string,
-        className?: string,
-        getIntegrationKeysByService: () => void,
-        createIntegrationKey: () => void,
-        deleteIntegrationKey: () => void
-    }
-    
-    constructor() {
-        super()
-        
-        this.onNew = this.onNew.bind(this)
-        this.onDelete = this.onDelete.bind(this)
-    }
+        json: {}
+    }>,
+    service: string,
+    name: string,
+    className: string
+}
+
+class IntegrationKeyHandlerSegment extends Component<Props> {
     
     componentDidMount() {
         // TODO: Move to (yet non-existent) router
         this.props.getIntegrationKeysByService(this.props.service)
     }
     
-    onNew(integrationKey: IntegrationKey) {
+    onNew = (integrationKey: IntegrationKey) => {
         const name = integrationKey.name
         const service = this.props.service
         delete integrationKey.name
@@ -58,7 +45,7 @@ export class IntegrationKeyHandlerSegment extends Component {
         })
     }
     
-    onDelete(id: IntegrationKey.id) {
+    onDelete = (id: IntegrationKey.id) => {
         this.props.deleteIntegrationKey(id)
     }
     

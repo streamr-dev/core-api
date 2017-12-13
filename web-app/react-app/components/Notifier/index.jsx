@@ -10,12 +10,13 @@ declare var Streamr: {
     showError: (message: ?string, title: string, delay: number) => void
 }
 
-export class Notifier extends Component {
-    props: {
-        notifications: {
-            [Notification.id]: Notification
-        }
+type Props = {
+    notifications: {
+        [Notification.id]: Notification
     }
+}
+
+class Notifier extends Component<Props> {
     
     createNotification({title, message, delay, type}) {
         switch (type) {

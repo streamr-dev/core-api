@@ -12,24 +12,19 @@ import {saveUpdatedResourcePermissions} from '../../actions/permission'
 import type {ReactChildren} from 'react-flow-types'
 import type {Permission} from '../../flowtype/permission-types'
 
-export class ShareDialog extends Component {
-    save: Function
-    props: {
-        resourceId: Permission.resourceId,
-        resourceType: Permission.resourceType,
-        resourceTitle: string,
-        children?: ReactChildren,
-        save: Function,
-        isOpen: boolean,
-        onClose: () => void
-    }
+type Props = {
+    resourceId: Permission.resourceId,
+    resourceType: Permission.resourceType,
+    resourceTitle: string,
+    children?: ReactChildren,
+    save: Function,
+    isOpen: boolean,
+    onClose: () => void
+}
+
+class ShareDialog extends Component<Props> {
     
-    constructor() {
-        super()
-        this.save = this.save.bind(this)
-    }
-    
-    save() {
+    save = () => {
         this.props.save()
             .then(() => {
                 this.props.onClose()

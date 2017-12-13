@@ -24,7 +24,7 @@
 
 				this.getModuleJson(function(json) {
 					var options = _this.getModuleOptionsWithOverrides(json)
-					_this.map = new StreamrHeatMap(_this.$["streamr-widget-container"], options)
+					_this.map = new StreamrHeatmap(_this.$["streamr-widget-container"], options)
 
 					_this.subscribe(function(message) {
 						_this.map.handleMessage(message)

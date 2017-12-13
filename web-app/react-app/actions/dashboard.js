@@ -78,6 +78,12 @@ export const getDashboard = (id: Dashboard.id) => (dispatch: Function) => {
         })
 }
 
+export const updateAndSaveCurrentDashboard = () => (dispatch: Function, getState: Function) => {
+    const state = getState().dashboard
+    const dashboard = state.dashboardsById[state.openDashboard.id]
+    dispatch(updateAndSaveDashboard(dashboard))
+}
+
 export const updateAndSaveDashboard = (dashboard: Dashboard) => (dispatch: Function) => {
     dispatch(updateAndSaveDashboardRequest())
     const createNew = dashboard.new
@@ -228,14 +234,14 @@ export const updateDashboardLayout = (dashboardId: Dashboard.id, layout: Layout)
 export const updateDashboardItem = (dashboard: Dashboard, item: DashboardItem) => updateDashboard({
     ...dashboard,
     items: [
-        ...(dashboard.items.filter(it => it.canvas.id !== item.canvas.id || it.module !== item.module)),
+        ...(dashboard.items.filter(it => it.canvas !== item.canvas || it.module !== item.module)),
         item
     ]
 })
 
 export const removeDashboardItem = (dashboard: Dashboard, item: DashboardItem) => updateDashboard({
     ...dashboard,
-    items: dashboard.items.filter(it => it.canvas.id !== item.canvas.id || it.module !== item.module)
+    items: dashboard.items.filter(it => it.canvas !== item.canvas || it.module !== item.module)
 })
 
 export const createDashboard = (dashboard: Dashboard) => ({

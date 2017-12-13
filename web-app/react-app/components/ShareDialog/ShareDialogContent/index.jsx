@@ -12,18 +12,46 @@ import ShareDialogOwnerRow from './ShareDialogOwnerRow'
 import type {Permission} from '../../../flowtype/permission-types'
 import {getResourcePermissions} from '../../../actions/permission'
 
-export class ShareDialogContent extends Component {
-    
-    props: {
-        resourceType: Permission.resourceType,
-        resourceId: Permission.resourceId,
-        getResourcePermissions: Function
-    }
+type Props = {
+    permissions: Array<Permission>,
+    resourceType: Permission.resourceType,
+    resourceId: Permission.resourceId,
+    anonymousPermission: ?Permission,
+    owner: ?string,
+    getResourcePermissions: () => {},
+    addPermission: (permission: Permission) => {},
+    removePermission: (permission: Permission) => {}
+}
+
+class ShareDialogContent extends Component<Props> {
+    form: ?HTMLFormElement
     
     componentWillMount() {
         this.props.getResourcePermissions()
     }
     
+    onAnonymousAccessChange = () => {
+        const permission = this.props.anonymousPermission || {
+            anonymous: true,
+            operation: 'read'
+        }
+        if (this.props.anonymousPermission) {
+            this.props.removePermission(permission)
+        } else {
+            this.props.addPermission(permission)
+        }
+    }
+    onSubmit = (e) => {
+        e.preventDefault()
+        const data = serialize(this.form, {
+            hash: true
+        })
+        this.props.addPermission({
+            user: data.email,
+            operation: 'read'
+        })
+        this.form && this.form.reset()
+    }
     render() {
         return (
             <Modal.Body>

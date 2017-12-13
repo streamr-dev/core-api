@@ -115,7 +115,7 @@ function StreamrChart(parent, options) {
 		_this.$parent.find(".chart-show-on-run").show()
 		_this.redraw()
 	})
-
+ 
 	this.$parent.on('resize', function() {
 		_this.resize()
 	})
@@ -133,14 +133,16 @@ function StreamrChart(parent, options) {
 	
 	// Create the chart area
 	var areaId = "chartArea_"+(new Date()).getTime()
-	this.$area = $("<div id='"+areaId+"' class='chartDrawArea'></div>")
+    this.$area = $('<div/>', {
+        id: areaId,
+        class: 'chartDrawArea'
+    })
 	this.$parent.append(this.$area)
 
 	// An init message can be included in the options
 	if (this.options.init) {
 		this.initMetaData(this.options.init)
 	}
-
 }
 
 StreamrChart.prototype.createHighstocksInstance = function(title, series, yAxis) {
@@ -284,6 +286,8 @@ StreamrChart.prototype.createHighstocksInstance = function(title, series, yAxis)
 	})
 	
 	$(this).trigger("initialized")
+    
+    this.resize()
 }
 
 StreamrChart.prototype.redraw = function() {
@@ -320,6 +324,7 @@ StreamrChart.prototype.resize = function() {
     
     if (this.chart) {
         this.chart.setSize(this.$area.innerWidth(), this.$area.innerHeight())
+        console.log(this.$area.innerWidth(), this.$area.innerHeight())
     }
 }
 
