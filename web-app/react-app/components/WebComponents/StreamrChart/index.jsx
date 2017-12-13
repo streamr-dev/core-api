@@ -3,24 +3,18 @@
 import React, {Component} from 'react'
 import ComplexStreamrWidget from '../ComplexStreamrWidget'
 
-declare var StreamrMap: Function
+declare var StreamrChart: Function
 
 import type {WebcomponentProps} from '../../../flowtype/webcomponent-types'
 import type {ModuleOptions} from '../../../flowtype/streamr-client-types'
 
+import styles from './streamrChartComponent.pcss'
+
 type Options = ModuleOptions | {
-    centerLat?: number,
-    centerLng?: number,
-    zoom?: number,
-    minZoom?: number,
-    maxZoom?: number,
-    traceWidth?: number,
-    drawTrace?: boolean,
-    skin?: 'default' | 'cartoDark' | 'esriDark',
-    directionalMarkers?: boolean,
-    directionalMarkerIcon?: 'arrow' | 'arrowhead' | 'longArrow',
-    markerIcon?: 'pin' | 'circle',
-    customImageUrl?: string
+    rangeDropdown: boolean,
+    showHideButtons: boolean,
+    displayTitle: boolean,
+    init: ?boolean
 }
 
 type Props = WebcomponentProps & {}
@@ -29,37 +23,44 @@ type State = {
     options: Options
 }
 
-export default class StreamrMapComponent extends Component<Props, State> {
-    map: ?StreamrMap
+export default class StreamrChartComponent extends Component<Props, State> {
+    chart: ?StreamrChart
     state = {
-        options: {}
+        options: {
+            rangeDropdown: false,
+            showHideButton: false
+        }
     }
     
     componentWillReceiveProps(newProps: Props) {
         const changed = (key) => newProps[key] != undefined && newProps[key] !== this.props[key]
         
         if (changed('width') || changed('height')) {
-            this.map && this.map.redraw()
+            this.chart && this.chart.redraw()
         }
     }
     
     renderWidget = (root: ?HTMLDivElement, options: Options) => {
         if (root) {
-            this.map = new StreamrMap(root, options)
+            this.chart = new StreamrChart(root, {
+                ...this.state.options,
+                ...options
+            })
         }
     }
     
     onMessage = (msg: {}) => {
-        this.map && this.map.handleMessage(msg)
+        this.chart && this.chart.handleMessage(msg)
     }
     
     onResize = () => {
-        this.map && this.map.redraw()
+        this.chart && this.chart.resize()
     }
     
     render() {
         return (
             <ComplexStreamrWidget
+                className={styles.streamrChartComponent}
                 stream={this.props.stream}
                 url={this.props.url}
                 onError={this.props.onError}

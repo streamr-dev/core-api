@@ -27,6 +27,8 @@ import ShareDialog from '../../ShareDialog'
 import DeleteButton from '../DashboardDeleteButton'
 import StreamrClientProvider from '../../WebComponents/StreamrClientProvider'
 
+const config = require('../dashboardConfig')
+
 import {
     updateDashboardChanges,
     lockDashboardEditing,
@@ -85,18 +87,8 @@ class Editor extends Component<Props, State> {
     }
     
     state = {
-        breakpoints: {
-            lg: 1200,
-            md: 996,
-            sm: 768,
-            xs: 480
-        },
-        cols: {
-            lg: 16,
-            md: 10,
-            sm: 4,
-            xs: 2,
-        },
+        breakpoints: config.layout.breakpoints,
+        cols: config.layout.cols,
         layoutsByItemId: {},
         isFullscreen: false
     }
@@ -135,33 +127,15 @@ class Editor extends Component<Props, State> {
     }
     
     generateLayout = () => {
-        const sizes = ['lg', 'md', 'sm', 'xs']
         const db = this.props.dashboard
-        return _.zipObject(sizes, _.map(sizes, size => {
+        return _.zipObject(config.layout.sizes, _.map(config.layout.sizes, size => {
             return db.items.map(item => {
-                const layout = db.layout && db.layout[size] && db.layout[size].find(layout => layout.i === Editor.generateItemId(item)) || {}
-                const defaultWidthsByType = {
-                    'streamr-button': 2,
-                    'streamr-switcher': 2,
-                    'streamr-label': 2,
-                    'streamr-text-field': 2,
-                }
-                const defaultHeightsByType = {
-                    'streamr-map': 6,
-                    'streamr-text-field': 3
-                }
-                const defaultLayout = {
-                    i: Editor.generateItemId(item),
-                    x: 0,
-                    y: 0,
-                    h: defaultHeightsByType[item.webcomponent] || 2,
-                    w: defaultWidthsByType[item.webcomponent] || 4,
-                    minH: 2,
-                    minW: 2
-                }
+                const id = Editor.generateItemId(item)
+                const layout = db.layout && db.layout[size] && db.layout[size].find(layout => layout.i === id)
                 return {
-                    ...defaultLayout,
-                    ...layout
+                    ...config.layout.layoutsBySizeAndModule[size][item.webcomponent],
+                    ...(layout || {}),
+                    i: id
                 }
             })
         }))
@@ -169,10 +143,10 @@ class Editor extends Component<Props, State> {
     
     onResize = (layout: Layout) => {
         this.setState({
-            layoutsByItemId: {
-                ...this.state.layoutsByItemId,
-                ...(_.groupBy(layout, item => item.i))
-            }
+            layoutsByItemId: layout.reduce((result, item) => {
+                result[item.i] = item
+                return result
+            }, {})
         })
     }
     
@@ -239,7 +213,10 @@ class Editor extends Component<Props, State> {
                                 </StreamrBreadcrumbDropdownButton>
                             )}
                             <StreamrBreadcrumbToolbar>
-                                <StreamrBreadcrumbToolbarButton iconName="expand" onClick={() => this.onFullscreenToggle()}/>
+                                <StreamrBreadcrumbToolbarButton
+                                    iconName="expand"
+                                    onClick={() => this.onFullscreenToggle()}
+                                />
                             </StreamrBreadcrumbToolbar>
                         </StreamrBreadcrumb>
                         <StreamrClientProvider client={client}>
@@ -250,22 +227,24 @@ class Editor extends Component<Props, State> {
                                 cols={this.state.cols}
                                 draggableCancel={`.${dragCancelClassName}`}
                                 onLayoutChange={this.onLayoutChange}
-                                //onResize={this.onResize}
-                                onResizeEnd={this.onResize}
+                                onResize={this.onResize}
                                 isDraggable={!locked}
                                 isResizable={!locked}
                                 containerPadding={[18, 0]}
                             >
-                                {items.map(dbItem => (
-                                    <div key={Editor.generateItemId(dbItem)}>
-                                        <DashboardItem
-                                            item={dbItem}
-                                            currentLayout={this.state.layoutsByItemId[Editor.generateItemId(dbItem)]}
-                                            dragCancelClassName={dragCancelClassName}
-                                            isLocked={locked}
-                                        />
-                                    </div>
-                                ))}
+                                {items.map(dbItem => {
+                                    const id = Editor.generateItemId(dbItem)
+                                    return (
+                                        <div key={id}>
+                                            <DashboardItem
+                                                item={dbItem}
+                                                currentLayout={this.state.layoutsByItemId[id]}
+                                                dragCancelClassName={dragCancelClassName}
+                                                isLocked={locked}
+                                            />
+                                        </div>
+                                    )
+                                })}
                             </ResponsiveReactGridLayout>
                         </StreamrClientProvider>
                     </div>

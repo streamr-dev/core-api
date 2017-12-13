@@ -4,6 +4,7 @@
 
 		<title>Dashboard</title>
 
+		<r:require module="streamr-chart"/>
 		<r:require module="streamr-map"/>
 		<r:require module="streamr-heatmap"/>
 		<r:require module="streamr-table"/>

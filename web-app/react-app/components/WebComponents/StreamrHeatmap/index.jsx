@@ -3,24 +3,29 @@
 import React, {Component} from 'react'
 import ComplexStreamrWidget from '../ComplexStreamrWidget'
 
-declare var StreamrMap: Function
+declare var StreamrHeatmap: Function
 
 import type {WebcomponentProps} from '../../../flowtype/webcomponent-types'
 import type {ModuleOptions} from '../../../flowtype/streamr-client-types'
 
 type Options = ModuleOptions | {
-    centerLat?: number,
-    centerLng?: number,
-    zoom?: number,
-    minZoom?: number,
-    maxZoom?: number,
-    traceWidth?: number,
-    drawTrace?: boolean,
-    skin?: 'default' | 'cartoDark' | 'esriDark',
-    directionalMarkers?: boolean,
-    directionalMarkerIcon?: 'arrow' | 'arrowhead' | 'longArrow',
-    markerIcon?: 'pin' | 'circle',
-    customImageUrl?: string
+    min: number,
+    max: number,
+    centerLat: number,
+    centerLng: number,
+    zoom: number,
+    minZoom: number,
+    maxZoom: number,
+    radius: number,
+    maxOpacity: number,
+    scaleRadius: boolean,
+    useLocalExtrema: boolean,
+    latField: string,
+    lngField: string,
+    valueField: string,
+    lifeTime: number,
+    fadeInTime: number,
+    fadeOutTime: number,
 }
 
 type Props = WebcomponentProps & {}
@@ -29,8 +34,8 @@ type State = {
     options: Options
 }
 
-export default class StreamrMapComponent extends Component<Props, State> {
-    map: ?StreamrMap
+export default class StreamrHeatmapComponent extends Component<Props, State> {
+    map: ?StreamrHeatmap
     state = {
         options: {}
     }
@@ -45,7 +50,7 @@ export default class StreamrMapComponent extends Component<Props, State> {
     
     renderWidget = (root: ?HTMLDivElement, options: Options) => {
         if (root) {
-            this.map = new StreamrMap(root, options)
+            this.map = new StreamrHeatmap(root, options)
         }
     }
     

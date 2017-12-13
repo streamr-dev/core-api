@@ -16,10 +16,11 @@ type Props = {
     stream?: StreamId,
     height: ?number,
     width: ?number,
-    onError: ?Function
-} & {
-    renderWidget: (HTMLDivElement, ModuleOptions) => void,
-    onMessage: (any) => void
+    onError: ?Function,
+    renderWidget: (root: ?HTMLDivElement, ModuleOptions) => void,
+    onMessage: (any) => void,
+    className: string,
+    onResize?: (width: ?number, height: ?number) => void
 }
 
 type State = {
@@ -29,17 +30,23 @@ type State = {
 export default class ComplexStreamrWidget extends Component<Props, State> {
     root: ?HTMLDivElement
     widget: ?StreamrWidget
-    map: ?any
  
     state = {
         options: {}
+    }
+    
+    static defaultProps = {
+        className: ''
     }
 
     onModuleJson = ({options}: { options: ModuleOptions }) => {
         const opt = _.mapValues(options, 'value')
         if (this.root) {
             this.setState({
-                options: opt
+                options: {
+                    ...this.state.options,
+                    ...(opt || {})
+                }
             })
             this.props.renderWidget(this.root, opt)
         }
@@ -49,7 +56,7 @@ export default class ComplexStreamrWidget extends Component<Props, State> {
         const changed = (key) => newProps[key] != undefined && newProps[key] !== this.props[key]
         
         if (changed('width') || changed('height')) {
-            this.map && this.map.redraw()
+            this.props.onResize && this.props.onResize(newProps['width'], newProps['height'])
         }
     }
     
@@ -65,7 +72,10 @@ export default class ComplexStreamrWidget extends Component<Props, State> {
                 onError={this.props.onError}
                 ref={(w) => this.widget = w}
             >
-                <div ref={root => this.root = root} className={styles.root}/>
+                <div
+                    ref={root => this.root = root}
+                    className={`${styles.root} ${this.props.className}`}
+                />
             </StreamrWidget>
         )
     }

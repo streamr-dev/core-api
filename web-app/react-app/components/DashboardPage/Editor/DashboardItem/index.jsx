@@ -7,16 +7,13 @@ import path from 'path'
 import createLink from '../../../../helpers/createLink'
 
 import TitleRow from './DashboardItemTitleRow'
-import StreamrLabel from '../../../WebComponents/StreamrLabel'
-import StreamrButton from '../../../WebComponents/StreamrButton'
-import StreamrTextField from '../../../WebComponents/StreamrTextField'
-import StreamrSwitcher from '../../../WebComponents/StreamrSwitcher'
-import StreamrMap from '../../../WebComponents/StreamrMap'
 
 import styles from './dashboardItem.pcss'
 import './webcomponentStyles.css'
 
 import type {Dashboard, DashboardItem as DBItem} from '../../../../flowtype/dashboard-types'
+
+const config = require('../../dashboardConfig')
 
 type Props = {
     item: DBItem,
@@ -51,6 +48,10 @@ class DashboardItem extends Component<Props, State> {
         })
     }
     
+    componentWillReceiveProps = (newProps: Props) => {
+        this.onResize()
+    }
+    
     createWebcomponentUrl = () => {
         const {dashboard, item: {canvas, module: itemModule}} = this.props
         // If the db is new the user must have the ownership of the canvas so use url /api/v1/canvases/<canvasId>/modules/<module>
@@ -77,26 +78,7 @@ class DashboardItem extends Component<Props, State> {
     createCustomComponent = () => {
         const {item} = this.props
         
-        const componentsAndProps = {
-            'streamr-label': {
-                component: StreamrLabel,
-                props: {}
-            },
-            'streamr-button': {
-                component: StreamrButton
-            },
-            'streamr-text-field': {
-                component: StreamrTextField
-            },
-            'streamr-switcher': {
-                component: StreamrSwitcher
-            },
-            'streamr-map': {
-                component: StreamrMap
-            }
-        }
-        
-        const {component, props} = componentsAndProps[item.webcomponent] || {}
+        const {component, props} = config.components[item.webcomponent] || {}
         
         const CustomComponent = component || (() => (
             <div style={{
