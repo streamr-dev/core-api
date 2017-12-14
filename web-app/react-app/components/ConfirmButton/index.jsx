@@ -3,15 +3,15 @@
 import React, {Component} from 'react'
 import {Button, Modal} from 'react-bootstrap'
 
-import type {Element, ReactChildren} from 'react-flow-types'
+import type {Node} from 'react'
 
 type Props = {
     confirmCallback: (any) => void,
     cancelCallback?: (any) => void,
     buttonRef?: Function,
-    confirmTitle?: string | Element<any>,
-    confirmMessage: string | Element<any>,
-    children?: ReactChildren,
+    confirmTitle?: string | Component<any>,
+    confirmMessage: string | Component<any>,
+    children?: Node,
     modalProps?: {},
     buttonProps?: {},
     className?: string

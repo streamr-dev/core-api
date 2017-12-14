@@ -36,15 +36,7 @@ import {
     updateDashboardLayout
 } from '../../../actions/dashboard'
 
-import type {Dashboard} from '../../../flowtype/dashboard-types'
-
-type BeforeUnloadEvent = {
-    returnValue: any
-}
-
-type Layout = Array<{
-    i: string
-}>
+import type {Dashboard, DashboardReducerState as DashboardState, Layout} from '../../../flowtype/dashboard-types'
 
 const ResponsiveReactGridLayout = WidthProvider(Responsive)
 
@@ -71,9 +63,21 @@ type Props = {
 }
 
 type State = {
-    breakpoints: {},
-    cols: {},
-    layoutsByItemId: {},
+    breakpoints: {
+        lg: number,
+        md: number,
+        sm: number,
+        xs: number
+    },
+    cols: {
+        lg: number,
+        md: number,
+        sm: number,
+        xs: number
+    },
+    layoutsByItemId: {
+        [DashboardItem.id]: DashboardItem.layout
+    },
     isFullscreen: boolean
 }
 
@@ -100,7 +104,7 @@ export class Editor extends Component<Props, State> {
         menuToggle && menuToggle.addEventListener('click', this.onMenuToggle)
     }
     
-    componentWillReceiveProps(nextProps) {
+    componentWillReceiveProps(nextProps: Props) {
         if (this.props.dashboard.id !== nextProps.dashboard.id) {
             this.props.history.push(`/${nextProps.dashboard.id || ''}`)
         }
@@ -115,7 +119,7 @@ export class Editor extends Component<Props, State> {
         }
     }
     
-    onLayoutChange = (layout, allLayouts) => {
+    onLayoutChange = (layout: DashboardItem.layout, allLayouts: Layout) => {
         this.onResize(layout)
         this.props.updateDashboardLayout(this.props.dashboard.id, allLayouts)
     }
@@ -126,7 +130,7 @@ export class Editor extends Component<Props, State> {
         })
     }
     
-    generateLayout = () => {
+    generateLayout = (): Layout => {
         const db = this.props.dashboard
         return _.zipObject(config.layout.sizes, _.map(config.layout.sizes, size => {
             return db.items.map(item => {
@@ -141,7 +145,7 @@ export class Editor extends Component<Props, State> {
         }))
     }
     
-    onResize = (layout: Layout) => {
+    onResize = (layout: DashboardItem.layout) => {
         this.setState({
             layoutsByItemId: layout.reduce((result, item) => {
                 result[item.i] = item
@@ -150,7 +154,9 @@ export class Editor extends Component<Props, State> {
         })
     }
     
-    onBeforeUnload = (e: BeforeUnloadEvent) => {
+    onBeforeUnload = (e: Event & {
+        returnValue: string
+    }): ?string => {
         if (!this.props.dashboard.saved) {
             const message = 'You have unsaved changes in your Dashboard. Are you sure you want to leave?'
             e.returnValue = message
@@ -158,7 +164,7 @@ export class Editor extends Component<Props, State> {
         }
     }
     
-    static generateItemId(item: DashboardItem) {
+    static generateItemId(item: DashboardItem): string {
         return `${item.canvas}-${item.module}`
     }
     
@@ -254,7 +260,7 @@ export class Editor extends Component<Props, State> {
     }
 }
 
-export const mapStateToProps = (state) => {
+export const mapStateToProps = (state: {dashboard: DashboardState}) => {
     const baseState = parseDashboard(state)
     return {
         ...baseState,
@@ -262,17 +268,17 @@ export const mapStateToProps = (state) => {
     }
 }
 
-export const mapDispatchToProps = (dispatch) => ({
-    update(id, changes) {
+export const mapDispatchToProps = (dispatch: Function) => ({
+    update(id: Dashboard.id, changes: {}) {
         return dispatch(updateDashboardChanges(id, changes))
     },
-    lockEditing(id) {
+    lockEditing(id: Dashboard.id) {
         return dispatch(lockDashboardEditing(id))
     },
-    unlockEditing(id) {
+    unlockEditing(id: Dashboard.id) {
         return dispatch(unlockDashboardEditing(id))
     },
-    updateDashboardLayout(id, layout) {
+    updateDashboardLayout(id: Dashboard.id, layout: Layout) {
         return dispatch(updateDashboardLayout(id, layout))
     }
 })

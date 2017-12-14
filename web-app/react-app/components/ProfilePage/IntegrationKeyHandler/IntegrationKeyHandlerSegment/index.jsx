@@ -12,18 +12,14 @@ import IntegrationKeyHandlerTable from './IntegrationKeyHandlerTable'
 
 import styles from './integrationKeyHandlerSegment.pcss'
 
-import type {IntegrationKey} from '../../../../flowtype/integration-key-types'
+import type {IntegrationKey, State as IntegrationKeyState} from '../../../../flowtype/integration-key-types'
 
 type Props = {
     tableFields: Array<string>,
     inputFields: Array<string>,
-    integrationKeys: Array<{
-        id: string,
-        name: string,
-        json: {}
-    }>,
-    service: string,
-    name: string,
+    integrationKeys: Array<IntegrationKey>,
+    service: IntegrationKey.service,
+    name: IntegrationKey.name,
     className: string,
     deleteIntegrationKey: (id: IntegrationKey.id) => void,
     createIntegrationKey: (key: IntegrationKey) => void,
@@ -74,7 +70,7 @@ export class IntegrationKeyHandlerSegment extends Component<Props> {
     }
 }
 
-export const mapStateToProps = ({integrationKey: {listsByService, error}}, props) => ({
+export const mapStateToProps = ({integrationKey: {listsByService, error}}: {integrationKey: IntegrationKeyState}, props: Props) => ({
     integrationKeys: listsByService[props.service] || [],
     error
 })

@@ -8,14 +8,14 @@ import createLink from '../../../helpers/createLink'
 import {deleteDashboard} from '../../../actions/dashboard'
 import {parseDashboard} from '../../../helpers/parseState'
 
-import type {ReactChildren} from 'react-flow-types'
-import type {Dashboard} from '../../../flowtype/dashboard-types'
+import type {Node} from 'react'
+import type {Dashboard, DashboardReducerState as DashboardState} from '../../../flowtype/dashboard-types'
 
 type Props = {
     dashboard: Dashboard,
     canWrite: boolean,
     buttonProps: {},
-    children?: ReactChildren,
+    children?: Node | Array<Node>,
     deleteDashboard: (id: Dashboard.id) => Promise<any>
 }
 
@@ -28,7 +28,8 @@ export class DashboardDeleteButton extends Component<Props> {
     onDelete = () => {
         this.props.deleteDashboard(this.props.dashboard.id)
             .then(() => {
-                window.location = createLink('/dashboard/list')
+                // TODO: change to be handled with react-router
+                window.location.assign(createLink('/dashboard/list'))
             })
     }
     
@@ -49,9 +50,9 @@ export class DashboardDeleteButton extends Component<Props> {
     }
 }
 
-export const mapStateToProps = (state) => parseDashboard(state)
+export const mapStateToProps = (state: {dashboard: DashboardState}) => parseDashboard(state)
 
-export const mapDispatchToProps = (dispatch) => ({
+export const mapDispatchToProps = (dispatch: Function) => ({
     deleteDashboard(id: Dashboard.id) {
         return dispatch(deleteDashboard(id))
     }

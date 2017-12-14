@@ -2,8 +2,9 @@ import assert from 'assert-diff'
 import thunk from 'redux-thunk'
 import configureMockStore from 'redux-mock-store'
 import moxios from 'moxios'
+import sinon from 'sinon'
 
-import * as actions from '../../actions/dashboard'
+import * as originalActions from '../../actions/dashboard'
 import * as notificationActions from '../../actions/notification'
 
 const middlewares = [ thunk ]
@@ -15,6 +16,7 @@ global.Streamr = {
 
 describe('Dashboard actions', () => {
     let store
+    let actions
     
     beforeEach(() => {
         moxios.install()
@@ -25,6 +27,7 @@ describe('Dashboard actions', () => {
             },
             error: null
         })
+        actions = originalActions
     })
     
     

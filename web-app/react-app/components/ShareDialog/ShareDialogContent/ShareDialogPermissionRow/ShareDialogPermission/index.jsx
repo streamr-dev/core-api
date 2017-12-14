@@ -25,7 +25,7 @@ const operationsInOrder = ['read', 'write', 'share']
 
 export class ShareDialogPermission extends Component<Props> {
     
-    onSelect = ({value}) => {
+    onSelect = ({value}: {value: Permission.operation}) => {
         this.props.setResourceHighestOperation(value)
     }
     
@@ -66,7 +66,7 @@ export class ShareDialogPermission extends Component<Props> {
     }
 }
 
-export const mapDispatchToProps = (dispatch, ownProps) => ({
+export const mapDispatchToProps = (dispatch: Function, ownProps: Props) => ({
     setResourceHighestOperation(value: Permission.operation) {
         dispatch(setResourceHighestOperationForUser(ownProps.resourceType, ownProps.resourceId, ownProps.permissions[0].user, value))
     },

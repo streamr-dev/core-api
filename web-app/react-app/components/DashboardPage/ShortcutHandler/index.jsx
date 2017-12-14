@@ -35,7 +35,7 @@ export class ShortcutHandler extends Component<Props> {
         }
     }
     
-    _handleShortcuts = (action, event) => {
+    _handleShortcuts = (action: 'SAVE', event: Event) => {
         switch (action) {
             case 'SAVE': {
                 event.preventDefault()
@@ -54,7 +54,7 @@ export class ShortcutHandler extends Component<Props> {
     }
 }
 
-export const mapDispatchToProps = (dispatch) => ({
+export const mapDispatchToProps = (dispatch: Function) => ({
     updateAndSaveCurrentDashboard() {
         dispatch(updateAndSaveCurrentDashboard())
     }

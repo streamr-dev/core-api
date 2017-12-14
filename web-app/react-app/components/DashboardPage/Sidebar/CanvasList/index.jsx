@@ -6,7 +6,8 @@ import CanvasInList from './CanvasInList'
 
 import styles from './canvasList.pcss'
 
-import type {Canvas} from '../../../../flowtype/canvas-types'
+import type {Canvas, State as CanvasState} from '../../../../flowtype/canvas-types'
+import type {DashboardReducerState as DashboardState} from '../../../../flowtype/dashboard-types'
 
 type Props = {
     canvases: Array<Canvas>,
@@ -29,7 +30,7 @@ export class CanvasList extends Component<Props> {
     }
 }
 
-export const mapStateToProps = ({canvas, dashboard}) => {
+export const mapStateToProps = ({canvas, dashboard}: {canvas: CanvasState, dashboard: DashboardState}) => {
     const dbState = dashboard
     const db = dbState.dashboardsById[dbState.openDashboard.id] || {}
     const canWrite = db.ownPermissions && db.ownPermissions.includes('write')

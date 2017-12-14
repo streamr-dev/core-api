@@ -9,7 +9,7 @@ import {addDashboardItem, removeDashboardItem} from '../../../../../../../action
 import styles from './moduleInModuleList.pcss'
 import uuid from 'uuid'
 
-import type { Dashboard, DashboardItem } from '../../../../../../../flowtype/dashboard-types'
+import type { Dashboard, DashboardItem, DashboardState } from '../../../../../../../flowtype/dashboard-types'
 import type { Canvas, CanvasModule } from '../../../../../../../flowtype/canvas-types'
 
 type Props = {
@@ -55,7 +55,7 @@ export class ModuleInModuleList extends Component<Props> {
     }
 }
 
-export const mapStateToProps = ({dashboard}, ownProps) => {
+export const mapStateToProps = ({dashboard}: {dashboard: DashboardState}, ownProps: Props) => {
     const dbState = dashboard
     const db = dbState.dashboardsById[dbState.openDashboard.id] || {}
     return {

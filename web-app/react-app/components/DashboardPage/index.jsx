@@ -12,16 +12,16 @@ import {getDashboard, getMyDashboardPermissions, newDashboard, openDashboard} fr
 import {getRunningCanvases} from '../../actions/canvas'
 
 
-import type { Dashboard } from '../../flowtype/dashboard-types'
+import type { Dashboard, State as DashboardState } from '../../flowtype/dashboard-types'
 import type { Canvas } from '../../flowtype/canvas-types'
-import type {ReactChildren} from 'react-flow-types'
+import type {Node} from 'react'
 
 import styles from './dashboardPage.pcss'
 
 type Props = {
     dashboard: Dashboard,
     canvases: Array<Canvas>,
-    children: ReactChildren,
+    children: Node,
     getDashboard: (id: string) => void,
     getMyDashboardPermissions: (id: string) => void,
     newDashboard: (id: string) => void,
@@ -64,7 +64,7 @@ export class DashboardPage extends Component<Props> {
     }
 }
 
-export const mapStateToProps = ({dashboard: {dashboardsById, openDashboard}}) => ({
+export const mapStateToProps = ({dashboard: {dashboardsById, openDashboard}}: {dashboard: DashboardState}) => ({
     dashboard: dashboardsById[openDashboard.id]
 })
 

@@ -2,7 +2,6 @@
 
 import React, {Component} from 'react'
 import {connect} from 'react-redux'
-import serialize from 'form-serialize'
 
 import {Row, Modal} from 'react-bootstrap'
 
@@ -25,34 +24,11 @@ type Props = {
 }
 
 export class ShareDialogContent extends Component<Props> {
-    form: ?HTMLFormElement
     
     componentWillMount() {
         this.props.getResourcePermissions()
     }
     
-    onAnonymousAccessChange = () => {
-        const permission = this.props.anonymousPermission || {
-            anonymous: true,
-            operation: 'read'
-        }
-        if (this.props.anonymousPermission) {
-            this.props.removePermission(permission)
-        } else {
-            this.props.addPermission(permission)
-        }
-    }
-    onSubmit = (e) => {
-        e.preventDefault()
-        const data = serialize(this.form, {
-            hash: true
-        })
-        this.props.addPermission({
-            user: data.email,
-            operation: 'read'
-        })
-        this.form && this.form.reset()
-    }
     render() {
         return (
             <Modal.Body>
@@ -77,7 +53,7 @@ export class ShareDialogContent extends Component<Props> {
     }
 }
 
-export const mapDispatchToProps = (dispatch, ownProps) => ({
+export const mapDispatchToProps = (dispatch: Function, ownProps: Props) => ({
     getResourcePermissions() {
         dispatch(getResourcePermissions(ownProps.resourceType, ownProps.resourceId))
     }

@@ -20,9 +20,16 @@ type Props = {
 export class ShareDialogInputRow extends Component<Props> {
     form: HTMLFormElement
     
-    onSubmit = (e: any) => {
+    onSubmit = (e: {
+        preventDefault: () => void,
+        target: {
+            reset: () => void
+        }
+    }) => {
         e.preventDefault()
-        const data = serialize(e.target, {
+        const data: {
+            email: string
+        } = serialize(e.target, {
             hash: true
         })
         this.props.addPermission({
@@ -52,8 +59,8 @@ export class ShareDialogInputRow extends Component<Props> {
     }
 }
 
-export const mapDispatchToProps = (dispatch, ownProps) => ({
-    addPermission(permission) {
+export const mapDispatchToProps = (dispatch: Function, ownProps: Props) => ({
+    addPermission(permission: Permission) {
         dispatch(addResourcePermission(ownProps.resourceType, ownProps.resourceId, permission))
     }
 })

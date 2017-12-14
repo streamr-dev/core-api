@@ -10,7 +10,7 @@ import TitleRow from './DashboardItemTitleRow'
 
 import styles from './dashboardItem.pcss'
 
-import type {Dashboard, DashboardItem as DBItem} from '../../../../flowtype/dashboard-types'
+import type {Dashboard, DashboardItem as DBItem, DashboardReducerState as DashboardState} from '../../../../flowtype/dashboard-types'
 
 const config = require('../../dashboardConfig')
 
@@ -121,12 +121,12 @@ export class DashboardItem extends Component<Props, State> {
     }
 }
 
-export const mapStateToProps = ({dashboard: {dashboardsById, openDashboard}}) => ({
+export const mapStateToProps = ({dashboard: {dashboardsById, openDashboard}}: {dashboard: DashboardState}) => ({
     dashboard: dashboardsById[openDashboard.id]
 })
 
-export const mapDispatchToProps = (dispatch) => ({
-    showError(message) {
+export const mapDispatchToProps = (dispatch: Function) => ({
+    showError(message: string) {
         dispatch(showError({
             title: 'Error!',
             message

@@ -7,7 +7,7 @@ import {parseDashboard} from '../../../../helpers/parseState'
 
 import {updateDashboard} from '../../../../actions/dashboard'
 
-import type {Dashboard} from '../../../../flowtype/dashboard-types'
+import type {Dashboard, DashboardReducerState as DashboardState} from '../../../../flowtype/dashboard-types'
 
 type Props = {
     dashboard: Dashboard,
@@ -17,7 +17,7 @@ type Props = {
 
 export class NameEditor extends Component<Props> {
     
-    onChange = ({target}) => {
+    onChange = ({target}: {target: {value: string}}) => {
         this.props.update({
             ...this.props.dashboard,
             name: target.value
@@ -43,13 +43,11 @@ export class NameEditor extends Component<Props> {
     }
 }
 
-export const mapStateToProps = (state) => parseDashboard(state)
+export const mapStateToProps = (state: {dashboard: DashboardState}) => parseDashboard(state)
 
-export const mapDispatchToProps = (dispatch) => ({
-    update(newData) {
-        return dispatch(updateDashboard({
-            ...newData
-        }))
+export const mapDispatchToProps = (dispatch: Function) => ({
+    update(dashboard: Dashboard) {
+        return dispatch(updateDashboard(dashboard))
     }
 })
 

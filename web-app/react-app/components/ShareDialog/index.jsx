@@ -9,14 +9,14 @@ import ShareDialogFooter from './ShareDialogFooter'
 
 import {saveUpdatedResourcePermissions} from '../../actions/permission'
 
-import type {ReactChildren} from 'react-flow-types'
-import type {Permission} from '../../flowtype/permission-types'
+import type {Node} from 'react'
+import type {Permission, State as PermissionState} from '../../flowtype/permission-types'
 
 type Props = {
     resourceId: Permission.resourceId,
     resourceType: Permission.resourceType,
     resourceTitle: string,
-    children?: ReactChildren,
+    children?: Node,
     save: Function,
     isOpen: boolean,
     onClose: () => void
@@ -55,11 +55,11 @@ export class ShareDialog extends Component<Props> {
     }
 }
 
-export const mapStateToProps = ({permission}, ownProps) => ({
+export const mapStateToProps = ({permission}: {permission: PermissionState}, ownProps: Props) => ({
     permissions: permission.byTypeAndId[ownProps.resourceType] && permission.byTypeAndId[ownProps.resourceType][ownProps.resourceId] || []
 })
 
-export const mapDispatchToProps = (dispatch, ownProps) => ({
+export const mapDispatchToProps = (dispatch: Function, ownProps: Props) => ({
     save() {
         return dispatch(saveUpdatedResourcePermissions(ownProps.resourceType, ownProps.resourceId))
     }
