@@ -28,7 +28,7 @@ type State = {
 export class DashboardItemTitleRow extends Component<Props, State> {
     
     static defaultProps = {
-        editingLocked: false
+        isLocked: false
     }
     
     state = {
@@ -84,13 +84,15 @@ export class DashboardItemTitleRow extends Component<Props, State> {
                             >
                                 <FontAwesome name={this.state.editing ? 'check' : 'edit'}/>
                             </Button>
-                            <button
-                                className="delete-btn btn btn-xs btn-outline dark"
+                            <Button
+                                bsSize="xs"
+                                bsStyle="default"
+                                className="btn-outline dark"
                                 title="Remove"
                                 onClick={this.onRemove}
                             >
-                                <i className="fa fa-times"/>
-                            </button>
+                                <FontAwesome name="times"/>
+                            </Button>
                         </div>
                     </div>
                 )}
@@ -104,10 +106,10 @@ export const mapStateToProps = ({dashboard: {dashboardsById, openDashboard}}: {d
 })
 
 export const mapDispatchToProps = (dispatch: Function) => ({
-    update(db: Dashboard, item: DashboardItem, newData?: {}) {
+    update(db: Dashboard, item: DashboardItem, newData: {} = {}) {
         return dispatch(updateDashboardItem(db, {
             ...item,
-            ...(newData || {})
+            ...newData
         }))
     },
     remove(db: Dashboard, item: DashboardItem) {
