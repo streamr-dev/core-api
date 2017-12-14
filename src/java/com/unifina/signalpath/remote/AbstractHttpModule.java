@@ -194,7 +194,11 @@ public abstract class AbstractHttpModule extends ModuleWithSideEffects implement
 		HttpRequestBase request = null;
 		try {
 			request = createRequest();
-			log.info("HTTP request " + request.toString() + " from canvas " + getRootSignalPath().getCanvas().getId());
+			String canvasId = null;
+			if (getRootSignalPath() != null && getRootSignalPath().getCanvas() != null) {
+				canvasId = getRootSignalPath().getCanvas().getId();
+			}
+			log.info("HTTP request " + request.toString() + " from canvas " + canvasId);
 		} catch (Exception e) {
 			response.errors.add("Constructing HTTP request failed");
 			response.errors.add(e.getMessage());
@@ -249,7 +253,7 @@ public abstract class AbstractHttpModule extends ModuleWithSideEffects implement
 		});
 
 		// TODO: remove
-		if (!hasDebugLogged) {
+		if (!hasDebugLogged && getRootSignalPath() != null && getRootSignalPath().getCanvas() != null) {
 			hasDebugLogged = true;
 			log.info("Created HttpClient from canvas " + getRootSignalPath().getCanvas().getId());
 			Set<Thread> threads = Thread.getAllStackTraces().keySet();
