@@ -110,4 +110,27 @@ public class ModuleOption extends LinkedHashMap<String, Object> {
 	public static ModuleOption createColor(String key, StreamrColor value) {
 		return new ModuleOption(key, value.toString(), OPTION_COLOR);
 	}
+
+	public static boolean validate(Object option) {
+		if (option == null && !(option instanceof ModuleOption)) {
+			return false;
+		}
+		ModuleOption opt = (ModuleOption) option;
+		switch ((String) opt.get("type")) {
+			case OPTION_STRING: {
+				List<Map<String, String>> possibleValues = (List<Map<String, String>>) opt.get("possibleValues");
+				boolean found = false;
+				for (Map<String, String> value : possibleValues) {
+					if (value.get("value") == opt.get("value") || value.get("value").equals(opt.get("value"))) {
+						found = true;
+						break;
+					}
+				}
+				if (!found) {
+					return false;
+				}
+			}
+		}
+		return true;
+	}
 }

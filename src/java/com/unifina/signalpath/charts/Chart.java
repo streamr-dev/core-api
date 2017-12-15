@@ -87,8 +87,8 @@ public abstract class Chart extends ModuleWithUI {
 			todUtil = new TimeOfDayUtil(begin,end, getGlobals().getUserTimeZone());
 		}
 
-		if (options.getOption("dataGrouping") != null) {
-			dataGrouping = options.getOption("dataGrouping").toString();
+		if (ModuleOption.validate(options.getOption("dataGrouping"))) {
+			dataGrouping = options.getOption("dataGrouping").getString();
 		}
 	}
 }
