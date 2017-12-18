@@ -40,9 +40,11 @@ import type {Dashboard, DashboardReducerState as DashboardState, Layout} from '.
 
 const ResponsiveReactGridLayout = WidthProvider(Responsive)
 
+declare var keyId: string
+
 const client = new StreamrClient({
     url: 'ws://127.0.0.1:8890/api/v1/ws',
-    authKey: 'tester1-api-key', //TODO: CHANGE!!!!!!!
+    authKey: keyId,
     autoconnect: true,
     autoDisconnect: false
 })

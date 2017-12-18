@@ -17,6 +17,7 @@ type Props = {
 }
 
 export class ShortcutHandler extends Component<Props> {
+    shortcutManager: ShortcutManager
     
     static keymap = {
         'MAIN': {

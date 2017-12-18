@@ -21,7 +21,10 @@ type Props = {
     dragCancelClassName?: string,
     currentLayout: ?{},
     showError: Function,
-    isLocked: boolean
+    isLocked: boolean,
+    config: {
+        components: {}
+    }
 }
 
 type State = {
@@ -75,9 +78,9 @@ export class DashboardItem extends Component<Props, State> {
     }
     
     createCustomComponent = () => {
-        const {item} = this.props
+        const {item, config: conf} = this.props
         
-        const {component, props} = config.components[item.webcomponent] || {}
+        const {component, props} = conf.components[item.webcomponent] || {}
         
         const CustomComponent = component || (() => (
             <div style={{
@@ -122,7 +125,8 @@ export class DashboardItem extends Component<Props, State> {
 }
 
 export const mapStateToProps = ({dashboard: {dashboardsById, openDashboard}}: {dashboard: DashboardState}) => ({
-    dashboard: dashboardsById[openDashboard.id]
+    dashboard: dashboardsById[openDashboard.id],
+    config: config
 })
 
 export const mapDispatchToProps = (dispatch: Function) => ({
