@@ -37,8 +37,4 @@ class SaveDashboardItemCommand {
 				}?.uiChannel?.webcomponent)
 		]
 	}
-
-	Map toMap() {
-		return getProperties().subMap(["id", "title", "canvas", "module", "webcomponent"])
-	}
 }
