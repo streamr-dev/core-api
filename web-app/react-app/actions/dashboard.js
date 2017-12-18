@@ -66,7 +66,7 @@ export const getDashboard = (id: Dashboard.id) => (dispatch: Function) => {
     return axios.get(createLink(`${apiUrl}/${id}`))
         .then(({data}) => dispatch(getDashboardSuccess({
             ...data,
-            layout: data.layout && ((typeof data.layout === 'string') ? JSON.parse(data.layout) : data.layout)
+            layout: data.layout
         })))
         .catch(res => {
             const e = parseError(res)
@@ -100,11 +100,7 @@ export const updateAndSaveDashboard = (dashboard: Dashboard) => (dispatch: Funct
             dispatch(showSuccess({
                 title: 'Dashboard saved successfully!'
             }))
-            
-            if (createNew && dashboard.id !== data.id) {
-                dispatch(changeDashboardId(dashboard.id, data.id))
-            }
-            
+            dispatch(changeDashboardId(dashboard.id, data.id))
             dispatch(updateAndSaveDashboardSuccess({
                 ...data,
                 layout: (typeof data.layout === 'string') ? JSON.parse(data.layout) : data.layout,

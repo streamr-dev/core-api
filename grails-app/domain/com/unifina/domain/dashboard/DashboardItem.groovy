@@ -19,11 +19,6 @@ class DashboardItem {
 		title nullable: true, blank: false
 	}
 
-	int compareTo(Object obj) {
-		DashboardItem item = (DashboardItem) obj
-		return id != null ? id.compareTo(item.id) : title.compareTo(item.title)
-	}
-
 	static mapping = {
 		id generator: 'assigned'
 		dashboard column: "dashboard_id"

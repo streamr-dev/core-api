@@ -123,7 +123,6 @@ class DashboardServiceSpec extends Specification {
 		setup:
 		def user = new SecUser(name: "tester").save(validate: false)
 		SaveDashboardCommand command = new SaveDashboardCommand([
-				id   : "1",
 				name : "test-create",
 				items: [
 						new SaveDashboardItemCommand(id: "1", title: "test1", canvas: new Canvas(), module: 0, webcomponent: "streamr-chart"),

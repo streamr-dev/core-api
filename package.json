@@ -6,6 +6,7 @@
   "directories": {
     "test": "test"
   },
+  "repository": "https://github.com/streamr-dev/engine-and-editor",
   "scripts": {
     "test": "npm run test-old; npm run test-new",
     "test-old": "mocha web-app/js/unifina/test --recursive",
@@ -27,7 +28,8 @@
     ]
   },
   "author": "",
-  "license": "Unifina",
+  "license": "UNLICENSED",
+  "private": true,
   "dependencies": {
     "assert-diff": "^1.2.0",
     "autoprefixer": "^7.0.1",

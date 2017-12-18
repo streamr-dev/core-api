@@ -236,7 +236,7 @@ class DashboardApiControllerSpec extends Specification {
 		thrown(ValidationException)
 	}
 
-	def "update() delegates to dashboardService.update and returns new dashboard as result"() {
+	def "update() delegates to dashboardService.update"() {
 		setup:
 		List<DashboardItem> items = new ArrayList<DashboardItem>()
 		items.add(new DashboardItem(id: "1", title: "test1"))

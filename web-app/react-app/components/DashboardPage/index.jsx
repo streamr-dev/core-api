@@ -21,7 +21,7 @@ import styles from './dashboardPage.pcss'
 type Props = {
     dashboard: Dashboard,
     canvases: Array<Canvas>,
-    children: Node,
+    children: Node | Array<Node>,
     getDashboard: (id: string) => void,
     getMyDashboardPermissions: (id: string) => void,
     newDashboard: (id: string) => void,
