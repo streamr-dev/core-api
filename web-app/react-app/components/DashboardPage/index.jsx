@@ -14,14 +14,14 @@ import {getRunningCanvases} from '../../actions/canvas'
 
 import type { Dashboard } from '../../flowtype/dashboard-types'
 import type { Canvas } from '../../flowtype/canvas-types'
-import type {ReactChildren} from 'react-flow-types'
+import type {Node} from 'react'
 
 import styles from './dashboardPage.pcss'
 
 type Props = {
     dashboard: Dashboard,
     canvases: Array<Canvas>,
-    children: ReactChildren,
+    children: Node | Array<Node>,
     getDashboard: (id: string) => void,
     getMyDashboardPermissions: (id: string) => void,
     newDashboard: (id: string) => void,

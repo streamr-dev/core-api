@@ -48,7 +48,7 @@ class DashboardItem extends Component<Props, State> {
         })
     }
     
-    componentWillReceiveProps = (newProps: Props) => {
+    componentWillReceiveProps = () => {
         this.onResize()
     }
     

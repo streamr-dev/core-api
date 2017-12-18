@@ -7,14 +7,14 @@ import ShareDialogContent from './ShareDialogContent'
 
 import {saveUpdatedResourcePermissions} from '../../actions/permission'
 
-import type {ReactChildren} from 'react-flow-types'
+import type {Node} from 'react'
 import type {Permission} from '../../flowtype/permission-types'
 
 type Props = {
     resourceId: Permission.resourceId,
     resourceType: Permission.resourceType,
     resourceTitle: string,
-    children?: ReactChildren,
+    children?: Node | Array<Node>,
     save: Function,
     isOpen: boolean,
     onClose: () => void

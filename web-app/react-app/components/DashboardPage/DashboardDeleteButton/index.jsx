@@ -8,14 +8,14 @@ import createLink from '../../../helpers/createLink'
 import {deleteDashboard} from '../../../actions/dashboard'
 import {parseDashboard} from '../../../helpers/parseState'
 
-import type {ReactChildren} from 'react-flow-types'
+import type {Node} from 'react'
 import type {Dashboard} from '../../../flowtype/dashboard-types'
 
 type Props = {
     dashboard: Dashboard,
     canWrite: boolean,
     buttonProps: {},
-    children?: ReactChildren,
+    children?: Node | Array<Node>,
     deleteDashboard: (id: Dashboard.id) => Promise<any>
 }
 
