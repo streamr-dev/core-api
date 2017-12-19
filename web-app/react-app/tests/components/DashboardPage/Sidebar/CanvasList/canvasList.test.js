@@ -3,7 +3,7 @@ import {shallow} from 'enzyme'
 import assert from 'assert-diff'
 import sinon from 'sinon'
 
-describe('CanvasList', () => {
+describe('DashboardItem', () => {
     let sandbox
     
     beforeEach(() => {

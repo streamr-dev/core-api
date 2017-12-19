@@ -2,19 +2,9 @@
 import React from 'react'
 import {shallow} from 'enzyme'
 import assert from 'assert-diff'
-import sinon from 'sinon'
 import ModuleList from '../../../../../../../components/DashboardPage/Sidebar/CanvasList/CanvasInList/ModuleList'
 
 describe('ModuleList', () => {
-    let sandbox
-    
-    beforeEach(() => {
-        sandbox = sinon.sandbox.create()
-    })
-    
-    afterEach(() => {
-        sandbox.restore()
-    })
     
     describe('render', () => {
         it('must render only modules with uiChannel', () => {
