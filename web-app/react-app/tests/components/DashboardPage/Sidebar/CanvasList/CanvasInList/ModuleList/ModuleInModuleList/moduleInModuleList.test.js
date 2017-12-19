@@ -129,8 +129,8 @@ describe('ModuleInModuleList', () => {
             }
             const dashboard2 = {
                 items: [{
-                    canvas: 'canvas1',
-                    module: 'module1'
+                    canvas: 'canvas2',
+                    module: 'module2'
                 }]
             }
             assert.deepStrictEqual(mapStateToProps({
