@@ -25,15 +25,17 @@ public class SolidityModule extends ModuleWithUI implements Pullable<EthereumCon
 	private final EthereumAccountParameter ethereumAccount = new EthereumAccountParameter(this, "ethAccount");
 	private Output<EthereumContract> contractOutput = null;
 
-	private EthereumModuleOptions ethereumOptions = new EthereumModuleOptions();
 	private String code = null;
 	private EthereumContract contract = null;
 	private DoubleParameter sendEtherParam = new DoubleParameter(this, "initial ETH", 0.0);
+
+	StreamrWeb3Interface web3 = new StreamrWeb3Interface();
 
 	@Override
 	public void init() {
 		addInput(ethereumAccount);
 		ethereumAccount.setUpdateOnChange(true);
+		web3.ethereumAccount = ethereumAccount;
 	}
 
 	@Override
@@ -56,7 +58,7 @@ public class SolidityModule extends ModuleWithUI implements Pullable<EthereumCon
 		Map<String, Object> config = super.getConfiguration();
 
 		ModuleOptions options = ModuleOptions.get(config);
-		ethereumOptions.writeTo(options);
+		web3.ethereumOptions.writeTo(options);
 
 		config.put("code", code);
 		if (contract != null) {
@@ -81,16 +83,16 @@ public class SolidityModule extends ModuleWithUI implements Pullable<EthereumCon
 		}
 
 		ModuleOptions options = ModuleOptions.get(config);
-		ethereumOptions = EthereumModuleOptions.readFrom(options);
+		web3.ethereumOptions = EthereumModuleOptions.readFrom(options);
 
 		try {
 			if (config.containsKey("compile") || (code != null && !code.trim().isEmpty() && ethereumAccount.getAddress() != null && (contract == null || !contract.isDeployed()))) {
-				contract = compile(code);
+				contract = web3.compile(code);
 			}
 			if (config.containsKey("deploy")) {
 				// Make sure the contract is compiled
 				if (contract == null) {
-					contract = compile(code);
+					contract = web3.compile(code);
 				}
 
 				if (!contract.isDeployed()) {
@@ -112,7 +114,7 @@ public class SolidityModule extends ModuleWithUI implements Pullable<EthereumCon
 						}
 					}
 
-					contract = deploy(code, args, sendWei);
+					contract = web3.deploy(code, args, sendWei);
 				}
 			}
 		} catch (Exception e) {
@@ -152,109 +154,116 @@ public class SolidityModule extends ModuleWithUI implements Pullable<EthereumCon
 		}
 	}
 
-	private String replaceDynamicFields(String code) {
-		if (ethereumAccount.getAddress() == null) {
-			throw new RuntimeException("No Ethereum account is selected. Please select the account you want to use, or if there are none, go to the user profile page to create one.");
-		}
-		return code.replace(ADDRESS_PLACEHOLDER, ethereumAccount.getAddress());
-	}
+	/** Grails side of the streamr-web3 node.js Ethereum bridge */
+	public static class StreamrWeb3Interface {
 
-	/** @returns EthereumContract with isDeployed() false */
-	private EthereumContract compile(String code) throws Exception {
-		code = replaceDynamicFields(code);
+		public EthereumModuleOptions ethereumOptions = new EthereumModuleOptions();
+		public EthereumAccountParameter ethereumAccount;
 
-		String bodyJson = new Gson().toJson(ImmutableMap.of(
-			"code", code
-		)).toString();
-
-		log.info("compile request: "+bodyJson);
-
-		String responseJson = Unirest.post(ethereumOptions.getServer() + "/compile")
-				.header("Accept", "application/json")
-				.header("Content-Type", "application/json")
-				.body(bodyJson)
-				.asString()
-				.getBody();
-
-		CompileResponse returned;
-		try {
-			returned = new Gson().fromJson(responseJson, CompileResponse.class);
-		} catch (Exception e) {
-			log.error("Error parsing JSON response from Ethereum backend. Response was: \n "+ responseJson, e);
-			throw e;
-		}
-
-		log.info("compile response: "+responseJson);
-
-		if (returned.contracts != null && returned.contracts.size() > 0) {
-			// If several contracts were returned, pick the one with longest bytecode; that's most probably the "main" contract
-			ContractMetadata mainContract = returned.contracts.get(0);
-			for (int i = 1; i < returned.contracts.size(); i++) {
-				ContractMetadata c = returned.contracts.get(i);
-				if (c.bytecode.length() > mainContract.bytecode.length()) {
-					mainContract = c;
-				}
+		private String replaceDynamicFields(String code) {
+			if (ethereumAccount.getAddress() == null) {
+				throw new RuntimeException("No Ethereum account is selected. Please select the account you want to use, or if there are none, go to the user profile page to create one.");
 			}
-			// TODO: bring returned.errors to UI somehow? They're warnings probably since compilation was successful
-			return new EthereumContract(mainContract.address, new EthereumABI(mainContract.abi));
-		} else {
-			// TODO java 8: String.join
-			throw new RuntimeException(new Gson().toJson(returned.errors));
+			return code.replace(ADDRESS_PLACEHOLDER, ethereumAccount.getAddress());
 		}
-	}
 
-	/**
-	 * @param sendWei String representation of decimal value of wei to send
-	 * @returns EthereumContract that isDeployed()
-	 **/
-	private EthereumContract deploy(String code, List<Object> args, String sendWei) throws Exception {
-		code = replaceDynamicFields(code);
+		/** @returns EthereumContract with isDeployed() false */
+		public EthereumContract compile(String code) throws Exception {
+			code = replaceDynamicFields(code);
 
-		Map body = new HashMap<>();
-		body.put("source", ethereumAccount.getAddress());
-		body.put("key", ethereumAccount.getPrivateKey());
-		body.put("gasprice", ethereumOptions.getGasPriceWei());
-		body.put("code", code);
-		body.put("args", args);
-		body.put("value", sendWei);
-		String bodyJson = new Gson().toJson(body);
+			String bodyJson = new Gson().toJson(ImmutableMap.of(
+					"code", code
+			)).toString();
 
-		Unirest.setTimeouts(10*1000, 10*60*1000); // wait patiently for the next mined block, up to 10 minutes
+			log.info("compile request: "+bodyJson);
 
-		log.info("deploy request: "+bodyJson);
+			String responseJson = Unirest.post(ethereumOptions.getServer() + "/compile")
+					.header("Accept", "application/json")
+					.header("Content-Type", "application/json")
+					.body(bodyJson)
+					.asString()
+					.getBody();
 
-		String responseJson = Unirest.post(ethereumOptions.getServer() + "/deploy")
-				.header("Accept", "application/json")
-				.header("Content-Type", "application/json")
-				.body(bodyJson)
-				.asString()
-				.getBody();
-
-		log.info("deploy response: "+responseJson);
-
-		CompileResponse returned;
-		try {
-			returned = new Gson().fromJson(responseJson, CompileResponse.class);
-		} catch (Exception e) {
-			log.error("Error parsing JSON response from Ethereum backend. Response was: \n "+ responseJson, e);
-			JsonObject response = new JsonParser().parse(responseJson).getAsJsonObject();
-			if (response.get("error") != null) {
-				throw new RuntimeException(response.get("error").toString());
-			} else if (response.get("errors") != null) {
-				throw new RuntimeException(response.get("errors").toString());
-			} else {
+			CompileResponse returned;
+			try {
+				returned = new Gson().fromJson(responseJson, CompileResponse.class);
+			} catch (Exception e) {
+				log.error("Error parsing JSON response from Ethereum backend. Response was: \n "+ responseJson, e);
 				throw e;
 			}
+
+			log.info("compile response: "+responseJson);
+
+			if (returned.contracts != null && returned.contracts.size() > 0) {
+				// If several contracts were returned, pick the one with longest bytecode; that's most probably the "main" contract
+				ContractMetadata mainContract = returned.contracts.get(0);
+				for (int i = 1; i < returned.contracts.size(); i++) {
+					ContractMetadata c = returned.contracts.get(i);
+					if (c.bytecode.length() > mainContract.bytecode.length()) {
+						mainContract = c;
+					}
+				}
+				// TODO: bring returned.errors to UI somehow? They're warnings probably since compilation was successful
+				return new EthereumContract(mainContract.address, new EthereumABI(mainContract.abi));
+			} else {
+				// TODO java 8: String.join
+				throw new RuntimeException(new Gson().toJson(returned.errors));
+			}
 		}
 
-		if (returned.contracts != null && returned.contracts.size() > 0) {
-			// TODO: bring returned.errors to UI somehow? They're warnings probably since compilation was successful
-			// TODO: handle several contracts returned?
-			ContractMetadata c = returned.contracts.get(0);
-			return new EthereumContract(c.address, new EthereumABI(c.abi));
-		} else {
-			// TODO java 8: String.join
-			throw new RuntimeException(new Gson().toJson(returned.errors));
+		/**
+		 * @param sendWei String representation of decimal value of wei to send
+		 * @returns EthereumContract that isDeployed()
+		 **/
+		public EthereumContract deploy(String code, List<Object> args, String sendWei) throws Exception {
+			code = replaceDynamicFields(code);
+
+			Map body = new HashMap<>();
+			body.put("source", ethereumAccount.getAddress());
+			body.put("key", ethereumAccount.getPrivateKey());
+			body.put("gasprice", ethereumOptions.getGasPriceWei());
+			body.put("code", code);
+			body.put("args", args);
+			body.put("value", sendWei);
+			String bodyJson = new Gson().toJson(body);
+
+			Unirest.setTimeouts(10*1000, 10*60*1000); // wait patiently for the next mined block, up to 10 minutes
+
+			log.info("deploy request: "+bodyJson);
+
+			String responseJson = Unirest.post(ethereumOptions.getServer() + "/deploy")
+					.header("Accept", "application/json")
+					.header("Content-Type", "application/json")
+					.body(bodyJson)
+					.asString()
+					.getBody();
+
+			log.info("deploy response: "+responseJson);
+
+			CompileResponse returned;
+			try {
+				returned = new Gson().fromJson(responseJson, CompileResponse.class);
+			} catch (Exception e) {
+				log.error("Error parsing JSON response from Ethereum backend. Response was: \n "+ responseJson, e);
+				JsonObject response = new JsonParser().parse(responseJson).getAsJsonObject();
+				if (response.get("error") != null) {
+					throw new RuntimeException(response.get("error").toString());
+				} else if (response.get("errors") != null) {
+					throw new RuntimeException(response.get("errors").toString());
+				} else {
+					throw e;
+				}
+			}
+
+			if (returned.contracts != null && returned.contracts.size() > 0) {
+				// TODO: bring returned.errors to UI somehow? They're warnings probably since compilation was successful
+				// TODO: handle several contracts returned?
+				ContractMetadata c = returned.contracts.get(0);
+				return new EthereumContract(c.address, new EthereumABI(c.abi));
+			} else {
+				// TODO java 8: String.join
+				throw new RuntimeException(new Gson().toJson(returned.errors));
+			}
 		}
 	}
 
