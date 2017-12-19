@@ -48,6 +48,7 @@ type LayoutItem = {
     x: number,
     y: number
 }
+
 type Layout = {
     xs?: Array<LayoutItem>,
     sm?: Array<LayoutItem>,
