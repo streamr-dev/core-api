@@ -172,6 +172,17 @@ log4j = {
  }
 
 /**
+ * Streamr cluster config
+ */
+streamr.cluster.internalPort = System.getProperty("streamr.cluster.internalPort") ? Integer.parseInt(System.getProperty("streamr.cluster.internalPort")) : 8081
+streamr.cluster.internalProtocol = System.getProperty("streamr.cluster.internalProtocol") ?: "http"
+environments {
+	production {
+		streamr.cluster.internalPort = System.getProperty("streamr.cluster.internalPort") ? Integer.parseInt(System.getProperty("streamr.cluster.internalPort")) : 8080
+	}
+}
+
+/**
  * Tour config
  */
 streamr.tours.enabled = true
