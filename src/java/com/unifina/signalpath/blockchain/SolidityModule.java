@@ -32,7 +32,7 @@ public class SolidityModule extends ModuleWithUI implements Pullable<EthereumCon
 
 	@Override
 	public void init() {
-		super.init();
+		addInput(ethereumAccount);
 		ethereumAccount.setUpdateOnChange(true);
 	}
 
