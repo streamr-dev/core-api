@@ -9,6 +9,8 @@ import sinon from 'sinon'
 
 import {DashboardDeleteButton, mapStateToProps, mapDispatchToProps} from '../../../../components/DashboardPage/DashboardDeleteButton'
 
+sinon.stub(createLink, 'default').callsFake(url => url)
+
 describe('DashboardDeleteButton', () => {
     let dashboardDeleteButton
     let dashboard
@@ -16,7 +18,6 @@ describe('DashboardDeleteButton', () => {
     
     beforeEach(() => {
         sandbox = sinon.sandbox.create()
-        sandbox.stub(createLink, 'default').callsFake(url => url)
         global.window = {}
         dashboard = {
             name: 'test'

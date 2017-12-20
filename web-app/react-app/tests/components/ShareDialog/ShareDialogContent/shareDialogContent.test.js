@@ -12,7 +12,7 @@ describe('ShareDialogContent', () => {
     describe('componentWillMount', () => {
         it('calls props.getResourcePermissions', () => {
             const getResourcePermissions = sinon.spy()
-            const content = shallow(
+            shallow(
                 <ShareDialogContent
                     permissions={[]}
                     resourceType=""
@@ -24,7 +24,6 @@ describe('ShareDialogContent', () => {
                     removePermission={() => {}}
                 />
             )
-            content.instance().componentWillMount()
             assert(getResourcePermissions.calledOnce)
         })
     })
@@ -70,7 +69,7 @@ describe('ShareDialogContent', () => {
         })
         
         describe('getResourcePermissions', () => {
-            it('should dispatch getResourcePermission with right attrs', () => {
+            it('should dispatch getResourcePermission with right attrs when called getResourcePermissions', () => {
                 const dispatchSpy = sinon.spy()
                 const getStub = sinon.stub(permissionActions, 'getResourcePermissions').callsFake((type, id,) => {
                     return `${type}-${id}`
@@ -78,7 +77,7 @@ describe('ShareDialogContent', () => {
                 mapDispatchToProps(dispatchSpy, {
                     resourceType: 'myType',
                     resourceId: 'myId'
-                })
+                }).getResourcePermissions()
                 assert(dispatchSpy.calledOnce)
                 assert(getStub.calledOnce)
                 assert(dispatchSpy.calledWith('myType-myId'))

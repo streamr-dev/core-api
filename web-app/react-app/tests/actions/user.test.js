@@ -35,7 +35,6 @@ describe('User actions', () => {
     afterEach(() => {
         moxios.uninstall()
         store.clearActions()
-        sinon
     })
     
     describe('getCurrentUser', () => {
@@ -85,7 +84,7 @@ describe('User actions', () => {
     describe('saveCurrentUser', () => {
         it('should post the user to the api', async () => {
             const user = {
-                id: 1,
+                id: '1',
                 name: 'tester',
                 email: 'test@tester.test'
             }
@@ -98,7 +97,11 @@ describe('User actions', () => {
             await moxios.promiseWait()
             const requests = moxios.requests
             assert.equal(requests.at(0).config.method, 'post')
-            assert.deepStrictEqual(JSON.parse(requests.at(0).config.data), user)
+            assert.deepStrictEqual({
+                id: requests.at(0).config.data.get('id'),
+                name: requests.at(0).config.data.get('name'),
+                email: requests.at(0).config.data.get('email')
+            }, user)
         })
         it('should post the user to the api as FormData if sendAsForm=true', async () => {
             const user = {

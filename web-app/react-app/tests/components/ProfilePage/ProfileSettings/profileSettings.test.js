@@ -96,7 +96,7 @@ describe('ProfileSettings', () => {
             })
             assert(spy.calledOnce)
         })
-        it('must call props.saveCurrentUser with the value and true', () => {
+        it('must call props.saveCurrentUser with the value', () => {
             const spy = sinon.spy()
             const user = {
                 moi: 'hei'
@@ -113,7 +113,7 @@ describe('ProfileSettings', () => {
                 target: {}
             })
             assert(spy.calledOnce)
-            assert(spy.calledWith(user, true))
+            assert(spy.calledWith(user))
         })
     })
     

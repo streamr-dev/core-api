@@ -35,9 +35,9 @@ describe('ShareDialogPermissionRow', () => {
                     resourceId="testId"
                 />
             )
-            
-            assert.equal(permissionRow.children().length, 3)
-            assert.deepStrictEqual(permissionRow.childAt(0).props(), {
+            const row = permissionRow.childAt(0)
+            assert.equal(row.children().length, 3)
+            assert.deepStrictEqual(row.childAt(0).props(), {
                 permissions: [{
                     field: 1,
                     user: 'A'
@@ -52,7 +52,7 @@ describe('ShareDialogPermissionRow', () => {
                 resourceId: 'testId'
             })
             
-            assert.deepStrictEqual(permissionRow.childAt(1).props(), {
+            assert.deepStrictEqual(row.childAt(1).props(), {
                 permissions: [{
                     field: 2,
                     user: 'B'
@@ -64,7 +64,7 @@ describe('ShareDialogPermissionRow', () => {
                 resourceId: 'testId'
             })
             
-            assert.deepStrictEqual(permissionRow.childAt(2).props(), {
+            assert.deepStrictEqual(row.childAt(2).props(), {
                 permissions: [{
                     field: 3,
                     user: 'C'

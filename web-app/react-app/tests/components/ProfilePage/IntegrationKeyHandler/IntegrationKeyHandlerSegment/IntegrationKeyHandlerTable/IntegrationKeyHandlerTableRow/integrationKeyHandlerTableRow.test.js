@@ -32,13 +32,12 @@ describe('IntegrationKeyHandlerTableRow', () => {
             assert(el.is('tr'))
         })
         it('must have correct amount of tds', () => {
-            const tds = el.find('> td')
-            assert.equal(tds.length, 5)
+            const tds = el.find('td')
+            assert.equal(tds.length, 4)
             
             assert.equal(tds.at(0).text(), 'testName')
             
             const td = tds.at(1)
-            assert(td.is('td'))
             const span = td.childAt(0)
             assert.equal(span.props().className, 'publicKey')
             assert.equal(span.text(), 'field')

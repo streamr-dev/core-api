@@ -207,12 +207,8 @@ describe('DashboardItem', () => {
                     openDashboard: {
                         id: 'test'
                     }
-                },
-                config: 'moimoi'
-            }), {
-                dashboard: 'aapeli',
-                config: 'moimoi'
-            })
+                }
+            }).dashboard, 'aapeli')
         })
     })
     

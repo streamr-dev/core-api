@@ -2,7 +2,6 @@ import assert from 'assert-diff'
 import thunk from 'redux-thunk'
 import configureMockStore from 'redux-mock-store'
 import moxios from 'moxios'
-import sinon from 'sinon'
 
 import * as originalActions from '../../actions/dashboard'
 import * as notificationActions from '../../actions/notification'
@@ -29,7 +28,6 @@ describe('Dashboard actions', () => {
         })
         actions = originalActions
     })
-    
     
     afterEach(() => {
         moxios.uninstall()
@@ -119,36 +117,6 @@ describe('Dashboard actions', () => {
             assert.deepStrictEqual(store.getActions(), expectedActions)
             
         })
-        it('also accepts layout as a string', async () => {
-            const id = 'asdfasdfasasd'
-            moxios.stubRequest(`api/v1/dashboards/${id}`, {
-                status: 200,
-                response: {
-                    id: 'test',
-                    name: 'test',
-                    layout: JSON.stringify({
-                        testing: true
-                    })
-                }
-            })
-            
-            const expectedActions = [{
-                type: actions.GET_DASHBOARD_REQUEST,
-                id
-            }, {
-                type: actions.GET_DASHBOARD_SUCCESS,
-                dashboard: {
-                    id: 'test',
-                    name: 'test',
-                    layout: {
-                        testing: true
-                    }
-                }
-            }]
-            
-            await store.dispatch(actions.getDashboard(id))
-            assert.deepStrictEqual(store.getActions(), expectedActions)
-        })
         
         it('creates GET_ALL_INTEGRATION_KEYS_FAILURE when fetching integration keys has failed', async (done) => {
             moxios.stubRequest('api/v1/dashboards', {
@@ -195,6 +163,10 @@ describe('Dashboard actions', () => {
                 notification: {
                     type: 'success'
                 }
+            }, {
+                type: actions.CHANGE_DASHBOARD_ID,
+                oldId: 'test',
+                newId: 'test'
             }, {
                 type: actions.UPDATE_AND_SAVE_DASHBOARD_SUCCESS,
                 dashboard: db
@@ -253,7 +225,7 @@ describe('Dashboard actions', () => {
                     response: request.config.data
                 })
             })
-            store.dispatch(actions.updateAndSaveDashboard({
+            store.dispatch(originalActions.updateAndSaveDashboard({
                 id: 'test',
                 layout: 'test',
                 new: true
@@ -271,7 +243,7 @@ describe('Dashboard actions', () => {
                     response: request.config.data
                 })
             })
-            store.dispatch(actions.updateAndSaveDashboard({
+            store.dispatch(originalActions.updateAndSaveDashboard({
                 id,
                 layout: 'test',
                 new: false
@@ -280,7 +252,7 @@ describe('Dashboard actions', () => {
     })
     
     describe('deleteDashboard', () => {
-        it('creates DELETE_DASHBOARD_SUCCESS when deleting dashboard has succeeded', () => {
+        it('creates DELETE_DASHBOARD_SUCCESS when deleting dashboard has succeeded', async () => {
             moxios.wait(() => {
                 let request = moxios.requests.mostRecent()
                 assert.equal(request.config.method, 'delete')
@@ -290,14 +262,15 @@ describe('Dashboard actions', () => {
             })
             
             const expectedActions = [{
-                type: actions.DELETE_DASHBOARD_REQUEST,
+                type: originalActions.DELETE_DASHBOARD_REQUEST,
                 id: 'test'
             }, {
-                type: actions.DELETE_DASHBOARD_SUCCESS,
+                type: originalActions.DELETE_DASHBOARD_SUCCESS,
                 id: 'test'
             }]
             
-            return store.dispatch(actions.deleteDashboard('test'))
+            await store.dispatch(originalActions.deleteDashboard('test'))
+            assert.deepStrictEqual(store.getActions(), expectedActions)
         })
         
         it('creates DELETE_DASHBOARD_FAILURE when deleting dashboard has failed', async (done) => {
@@ -311,15 +284,15 @@ describe('Dashboard actions', () => {
             })
             
             const expectedActions = [{
-                type: actions.DELETE_DASHBOARD_REQUEST,
+                type: originalActions.DELETE_DASHBOARD_REQUEST,
                 id: 'test'
             }, {
-                type: actions.DELETE_DASHBOARD_FAILURE,
+                type: originalActions.DELETE_DASHBOARD_FAILURE,
                 error: new Error('test')
             }]
             
             try {
-                await store.dispatch(actions.deleteDashboard('test'))
+                await store.dispatch(originalActions.deleteDashboard('test'))
             } catch (e) {
                 assert.deepStrictEqual(store.getActions().slice(0, 2), expectedActions)
                 done()
@@ -341,14 +314,14 @@ describe('Dashboard actions', () => {
             
             const expectedActions = [{
                 id,
-                type: actions.GET_MY_DASHBOARD_PERMISSIONS_REQUEST
+                type: originalActions.GET_MY_DASHBOARD_PERMISSIONS_REQUEST
             }, {
                 id,
-                type: actions.GET_MY_DASHBOARD_PERMISSIONS_SUCCESS,
+                type: originalActions.GET_MY_DASHBOARD_PERMISSIONS_SUCCESS,
                 permissions: ['test', 'test2']
             }]
             
-            await store.dispatch(actions.getMyDashboardPermissions(id))
+            await store.dispatch(originalActions.getMyDashboardPermissions(id))
             assert.deepStrictEqual(store.getActions(), expectedActions)
         })
         it('creates GET_MY_DASHBOARD_PERMISSIONS_FAILURE when fetching permissions has failed', async (done) => {
@@ -360,15 +333,15 @@ describe('Dashboard actions', () => {
             
             const expectedActions = [{
                 id,
-                type: actions.GET_MY_DASHBOARD_PERMISSIONS_REQUEST
+                type: originalActions.GET_MY_DASHBOARD_PERMISSIONS_REQUEST
             }, {
                 id,
-                type: actions.GET_MY_DASHBOARD_PERMISSIONS_FAILURE,
+                type: originalActions.GET_MY_DASHBOARD_PERMISSIONS_FAILURE,
                 error: new Error('test-error')
             }]
             
             try {
-                await store.dispatch(actions.getMyDashboardPermissions(id))
+                await store.dispatch(originalActions.getMyDashboardPermissions(id))
             } catch (e) {
                 assert.deepStrictEqual(store.getActions().slice(0, 2), expectedActions)
                 done()
@@ -378,10 +351,10 @@ describe('Dashboard actions', () => {
     
     describe('updateDashboard', () => {
         it('must return correct action', () => {
-            assert.deepStrictEqual(actions.updateDashboard({
+            assert.deepStrictEqual(originalActions.updateDashboard({
                 id: 'test'
             }), {
-                type: actions.UPDATE_DASHBOARD,
+                type: originalActions.UPDATE_DASHBOARD,
                 dashboard: {
                     id: 'test'
                 }
@@ -398,12 +371,12 @@ describe('Dashboard actions', () => {
                         thirdField: 'a'
                     }]
                 }
-                assert.deepStrictEqual(actions.addDashboardItem(db, {
+                assert.deepStrictEqual(originalActions.addDashboardItem(db, {
                     canvas: 'b',
                     module: 0,
                     thirdField: 'test'
                 }), {
-                    type: actions.UPDATE_DASHBOARD,
+                    type: originalActions.UPDATE_DASHBOARD,
                     dashboard: {
                         id: 'test',
                         items: [{
@@ -434,12 +407,12 @@ describe('Dashboard actions', () => {
                         thirdField: 'a'
                     }]
                 }
-                assert.deepStrictEqual(actions.updateDashboardItem(db, {
+                assert.deepStrictEqual(originalActions.updateDashboardItem(db, {
                     canvas: 'b',
                     module: 0,
                     thirdField: 'test'
                 }), {
-                    type: actions.UPDATE_DASHBOARD,
+                    type: originalActions.UPDATE_DASHBOARD,
                     dashboard: {
                         id: 'test',
                         items: [{
@@ -458,7 +431,7 @@ describe('Dashboard actions', () => {
         
         describe('removeDashboardItem', () => {
             it('must return correct action', () => {
-                assert.deepStrictEqual(actions.removeDashboardItem({
+                assert.deepStrictEqual(originalActions.removeDashboardItem({
                     id: 'test',
                     items: [{
                         canvas: 'a',
@@ -474,7 +447,7 @@ describe('Dashboard actions', () => {
                     module: 0,
                     thirdField: 'test'
                 }), {
-                    type: actions.UPDATE_DASHBOARD,
+                    type: originalActions.UPDATE_DASHBOARD,
                     dashboard: {
                         id: 'test',
                         items: [{
@@ -489,13 +462,13 @@ describe('Dashboard actions', () => {
     })
     
     describe('updateDashboardChanges', async () => {
-        store.dispatch(actions.createDashboard({
+        store.dispatch(originalActions.createDashboard({
             id: 'test',
             name: 'test',
             name2: 'test2'
         }))
         const expectedActions = [{
-            type: actions.UPDATE_DASHBOARD,
+            type: originalActions.UPDATE_DASHBOARD,
             dashboard: {
                 id: 'test',
                 name: 'test3',
@@ -503,7 +476,7 @@ describe('Dashboard actions', () => {
             }
         }]
         
-        await store.dispatch(actions.updateDashboardChanges('test', {
+        await store.dispatch(originalActions.updateDashboardChanges('test', {
             name: 'test3'
         }))
         assert.deepStrictEqual(store.getActions(), expectedActions)
@@ -511,10 +484,10 @@ describe('Dashboard actions', () => {
     
     describe('createDashboard', () => {
         it('must return correct action', () => {
-            assert.deepStrictEqual(actions.createDashboard({
+            assert.deepStrictEqual(originalActions.createDashboard({
                 id: 'test'
             }), {
-                type: actions.CREATE_DASHBOARD,
+                type: originalActions.CREATE_DASHBOARD,
                 dashboard: {
                     id: 'test'
                 }
@@ -523,8 +496,8 @@ describe('Dashboard actions', () => {
         describe('createDashboard', () => {
             const id = 'test'
             it('must return correct action', () => {
-                assert.deepStrictEqual(actions.newDashboard(id), {
-                    type: actions.CREATE_DASHBOARD,
+                assert.deepStrictEqual(originalActions.newDashboard(id), {
+                    type: originalActions.CREATE_DASHBOARD,
                     dashboard: {
                         id,
                         name: 'Untitled Dashboard',
@@ -540,23 +513,23 @@ describe('Dashboard actions', () => {
     describe('openDashboard', () => {
         const id = 'test'
         it('must return correct action', () => {
-            assert.deepStrictEqual(actions.openDashboard(id), {
-                type: actions.OPEN_DASHBOARD,
+            assert.deepStrictEqual(originalActions.openDashboard(id), {
+                type: originalActions.OPEN_DASHBOARD,
                 id
             })
         })
     })
     
     describe('lockDashboardEditing', () => {
-        assert.deepStrictEqual(actions.lockDashboardEditing('test'), {
-            type: actions.LOCK_DASHBOARD_EDITING,
+        assert.deepStrictEqual(originalActions.lockDashboardEditing('test'), {
+            type: originalActions.LOCK_DASHBOARD_EDITING,
             id: 'test'
         })
     })
     
     describe('unlockDashboardEditing', () => {
-        assert.deepStrictEqual(actions.unlockDashboardEditing('test'), {
-            type: actions.UNLOCK_DASHBOARD_EDITING,
+        assert.deepStrictEqual(originalActions.unlockDashboardEditing('test'), {
+            type: originalActions.UNLOCK_DASHBOARD_EDITING,
             id: 'test'
         })
     })

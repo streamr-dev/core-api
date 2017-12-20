@@ -56,13 +56,10 @@ describe('Editor', () => {
                 }}
             />)
         })
-        afterEach(() => {
-            spy.restore()
-        })
         it('must change the url if dashboard changed', () => {
             el.instance().componentWillReceiveProps({
                 dashboard: {
-                    if: 'test2'
+                    id: 'test2'
                 }
             })
             assert(spy.calledOnce)
@@ -71,15 +68,15 @@ describe('Editor', () => {
         it('must not change the url if dashboard not changed', () => {
             el.instance().componentWillReceiveProps({
                 dashboard: {
-                    if: 'test1'
+                    id: 'test1'
                 }
             })
-            assert(!spy.notCalled)
+            assert(spy.notCalled)
         })
         it('must not remove the id from url if new id is null', () => {
             el.instance().componentWillReceiveProps({
                 dashboard: {
-                    if: null
+                    id: null
                 }
             })
             assert(spy.calledOnce)

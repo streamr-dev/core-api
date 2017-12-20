@@ -62,7 +62,7 @@ describe('ShareDialogInputRow', () => {
                 preventDefault: () => {},
                 target: {
                     email: 'test',
-                    resetSpy
+                    reset: resetSpy
                 }
             })
             assert(resetSpy.calledOnce)
