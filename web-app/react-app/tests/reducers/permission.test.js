@@ -1,17 +1,8 @@
 import reducer from '../../reducers/permission'
 import * as actions from '../../actions/permission'
 import assert from 'assert-diff'
-import _ from 'lodash'
 
 describe('Permission reducer', () => {
-    
-    beforeEach(() => {
-        global._ = _
-    })
-    
-    afterEach(() => {
-        delete global._
-    })
     
     it('should return the initial state', () => {
         assert.deepStrictEqual(reducer(undefined, {}), {

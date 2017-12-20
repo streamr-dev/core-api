@@ -19,8 +19,8 @@ type Props = {
     checked: boolean,
     dispatch: Function,
     id: Dashboard.id,
-    addDashboardItem: (item: DashboardItem) => void,
-    removeDashboardItem: (item: DashboardItem) => void
+    addDashboardItem: (dashboard: Dashboard, item: DashboardItem) => void,
+    removeDashboardItem: (dashboard: Dashboard, item: DashboardItem) => void
 }
 
 export class ModuleInModuleList extends Component<Props> {
@@ -65,11 +65,11 @@ export const mapStateToProps = ({dashboard}: {dashboard: DashboardState}, ownPro
 }
 
 export const mapDispatchToProps = (dispatch: Function) => ({
-    addDashboardItem(item: DashboardItem) {
-        dispatch(addDashboardItem(item))
+    addDashboardItem(dashboard: Dashboard, item: DashboardItem) {
+        dispatch(addDashboardItem(dashboard, item))
     },
-    removeDashboardItem(item: DashboardItem) {
-        dispatch(removeDashboardItem(item))
+    removeDashboardItem(dashboard: Dashboard, item: DashboardItem) {
+        dispatch(removeDashboardItem(dashboard, item))
     }
 })
 
