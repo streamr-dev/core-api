@@ -6,12 +6,12 @@ import {Button, Col} from 'react-bootstrap'
 import Select from 'react-select'
 import FontAwesome from 'react-fontawesome'
 
-import {setResourceHighestOperationForUser, removeAllResourcePermissionsByUser} from '../../../../actions/permission'
+import {setResourceHighestOperationForUser, removeAllResourcePermissionsByUser} from '../../../../../actions/permission'
 
 import 'react-select/dist/react-select.css'
 import styles from './shareDialogPermission.pcss'
 
-import type {Permission} from '../../../../flowtype/permission-types'
+import type {Permission} from '../../../../../flowtype/permission-types'
 
 type Props = {
     resourceType: Permission.resourceType,
@@ -23,9 +23,9 @@ type Props = {
 
 const operationsInOrder = ['read', 'write', 'share']
 
-class ShareDialogPermission extends Component<Props> {
+export class ShareDialogPermission extends Component<Props> {
     
-    onSelect = ({value}) => {
+    onSelect = ({value}: {value: Permission.operation}) => {
         this.props.setResourceHighestOperation(value)
     }
     
@@ -44,7 +44,7 @@ class ShareDialogPermission extends Component<Props> {
                     </div>
                 ) : null}
                 <span className={styles.userLabel}>
-                    {this.props.permissions[0].user}
+                    {this.props.permissions[0] && this.props.permissions[0].user}
                 </span>
                 <Select
                     className={styles.select}
@@ -66,7 +66,7 @@ class ShareDialogPermission extends Component<Props> {
     }
 }
 
-const mapDispatchToProps = (dispatch, ownProps) => ({
+export const mapDispatchToProps = (dispatch: Function, ownProps: Props) => ({
     setResourceHighestOperation(value: Permission.operation) {
         dispatch(setResourceHighestOperationForUser(ownProps.resourceType, ownProps.resourceId, ownProps.permissions[0].user, value))
     },

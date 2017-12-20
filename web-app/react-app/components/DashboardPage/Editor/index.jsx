@@ -36,24 +36,11 @@ import {
     updateDashboardLayout
 } from '../../../actions/dashboard'
 
-import type {Dashboard} from '../../../flowtype/dashboard-types'
-
-type BeforeUnloadEvent = {
-    returnValue: any
-}
-
-type Layout = Array<{
-    i: string
-}>
+import type {Dashboard, DashboardReducerState as DashboardState, Layout, LayoutItem} from '../../../flowtype/dashboard-types'
 
 const ResponsiveReactGridLayout = WidthProvider(Responsive)
 
-const client = new StreamrClient({
-    url: 'ws://127.0.0.1:8890/api/v1/ws',
-    authKey: 'tester1-api-key', //TODO: CHANGE!!!!!!!
-    autoconnect: true,
-    autoDisconnect: false
-})
+declare var keyId: string
 
 type Props = {
     dashboard: Dashboard,
@@ -71,13 +58,26 @@ type Props = {
 }
 
 type State = {
-    breakpoints: {},
-    cols: {},
-    layoutsByItemId: {},
+    breakpoints: {
+        lg: number,
+        md: number,
+        sm: number,
+        xs: number
+    },
+    cols: {
+        lg: number,
+        md: number,
+        sm: number,
+        xs: number
+    },
+    layoutsByItemId: {
+        [DashboardItem.id]: DashboardItem.layout
+    },
     isFullscreen: boolean
 }
 
-class Editor extends Component<Props, State> {
+export class Editor extends Component<Props, State> {
+    client: StreamrClient
     
     static defaultProps = {
         dashboard: {
@@ -93,6 +93,16 @@ class Editor extends Component<Props, State> {
         isFullscreen: false
     }
     
+    constructor() {
+        super()
+        this.client = new StreamrClient({
+            url: 'ws://127.0.0.1:8890/api/v1/ws',
+            authKey: keyId,
+            autoconnect: true,
+            autoDisconnect: false
+        })
+    }
+    
     componentDidMount() {
         window.addEventListener('beforeunload', this.onBeforeUnload)
         
@@ -100,7 +110,7 @@ class Editor extends Component<Props, State> {
         menuToggle && menuToggle.addEventListener('click', this.onMenuToggle)
     }
     
-    componentWillReceiveProps(nextProps) {
+    componentWillReceiveProps(nextProps: Props) {
         if (this.props.dashboard.id !== nextProps.dashboard.id) {
             this.props.history.push(`/${nextProps.dashboard.id || ''}`)
         }
@@ -115,7 +125,7 @@ class Editor extends Component<Props, State> {
         }
     }
     
-    onLayoutChange = (layout, allLayouts) => {
+    onLayoutChange = (layout: DashboardItem.layout, allLayouts: Layout) => {
         this.onResize(layout)
         this.props.updateDashboardLayout(this.props.dashboard.id, allLayouts)
     }
@@ -126,9 +136,9 @@ class Editor extends Component<Props, State> {
         })
     }
     
-    generateLayout = () => {
+    generateLayout = (): Layout => {
         const db = this.props.dashboard
-        return _.zipObject(config.layout.sizes, _.map(config.layout.sizes, size => {
+        const layout = _.zipObject(config.layout.sizes, _.map(config.layout.sizes, (size: 'lg' | 'md' | 'sm' | 'xs') => {
             return db.items.map(item => {
                 const id = Editor.generateItemId(item)
                 const layout = db.layout && db.layout[size] && db.layout[size].find(layout => layout.i === id)
@@ -139,9 +149,10 @@ class Editor extends Component<Props, State> {
                 }
             })
         }))
+        return layout
     }
     
-    onResize = (layout: Layout) => {
+    onResize = (layout: Array<LayoutItem>) => {
         this.setState({
             layoutsByItemId: layout.reduce((result, item) => {
                 result[item.i] = item
@@ -150,7 +161,7 @@ class Editor extends Component<Props, State> {
         })
     }
     
-    onBeforeUnload = (e: BeforeUnloadEvent) => {
+    onBeforeUnload = (e: Event & { returnValue: ?string }): ?string => {
         if (!this.props.dashboard.saved) {
             const message = 'You have unsaved changes in your Dashboard. Are you sure you want to leave?'
             e.returnValue = message
@@ -158,7 +169,7 @@ class Editor extends Component<Props, State> {
         }
     }
     
-    static generateItemId(item: DashboardItem) {
+    static generateItemId(item: DashboardItem): string {
         return `${item.canvas}-${item.module}`
     }
     
@@ -174,7 +185,7 @@ class Editor extends Component<Props, State> {
             }}>
                 <Fullscreen
                     enabled={this.state.isFullscreen}
-                    onChange={(value: boolean) => this.onFullscreenToggle(value)}
+                    onChange={this.onFullscreenToggle}
                 >
                     <div style={{
                         backgroundColor: '#f6f6f6',
@@ -219,7 +230,7 @@ class Editor extends Component<Props, State> {
                                 />
                             </StreamrBreadcrumbToolbar>
                         </StreamrBreadcrumb>
-                        <StreamrClientProvider client={client}>
+                        <StreamrClientProvider client={this.client}>
                             <ResponsiveReactGridLayout
                                 layouts={layout}
                                 rowHeight={60}
@@ -254,7 +265,7 @@ class Editor extends Component<Props, State> {
     }
 }
 
-const mapStateToProps = (state) => {
+export const mapStateToProps = (state: {dashboard: DashboardState}) => {
     const baseState = parseDashboard(state)
     return {
         ...baseState,
@@ -262,17 +273,17 @@ const mapStateToProps = (state) => {
     }
 }
 
-const mapDispatchToProps = (dispatch) => ({
-    update(id, changes) {
+export const mapDispatchToProps = (dispatch: Function) => ({
+    update(id: Dashboard.id, changes: {}) {
         return dispatch(updateDashboardChanges(id, changes))
     },
-    lockEditing(id) {
+    lockEditing(id: Dashboard.id) {
         return dispatch(lockDashboardEditing(id))
     },
-    unlockEditing(id) {
+    unlockEditing(id: Dashboard.id) {
         return dispatch(unlockDashboardEditing(id))
     },
-    updateDashboardLayout(id, layout) {
+    updateDashboardLayout(id: Dashboard.id, layout: Layout) {
         return dispatch(updateDashboardLayout(id, layout))
     }
 })

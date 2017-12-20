@@ -2,11 +2,12 @@ import assert from 'assert-diff'
 import thunk from 'redux-thunk'
 import configureMockStore from 'redux-mock-store'
 import moxios from 'moxios'
+import sinon from 'sinon'
 
-import * as actions from '../../actions/dashboard'
+import * as originalActions from '../../actions/dashboard'
 import * as notificationActions from '../../actions/notification'
 
-const middlewares = [thunk]
+const middlewares = [ thunk ]
 const mockStore = configureMockStore(middlewares)
 
 global.Streamr = {
@@ -15,6 +16,7 @@ global.Streamr = {
 
 describe('Dashboard actions', () => {
     let store
+    let actions
     
     beforeEach(() => {
         moxios.install()
@@ -25,6 +27,7 @@ describe('Dashboard actions', () => {
             },
             error: null
         })
+        actions = originalActions
     })
     
     
@@ -387,14 +390,15 @@ describe('Dashboard actions', () => {
         
         describe('addDashboardItem', () => {
             it('must return correct action', () => {
-                assert.deepStrictEqual(actions.addDashboardItem({
+                const db = {
                     id: 'test',
                     items: [{
                         canvas: 'a',
                         module: 0,
                         thirdField: 'a'
                     }]
-                }, {
+                }
+                assert.deepStrictEqual(actions.addDashboardItem(db, {
                     canvas: 'b',
                     module: 0,
                     thirdField: 'test'
@@ -418,7 +422,7 @@ describe('Dashboard actions', () => {
         
         describe('updateDashboardItem', () => {
             it('must return correct action', () => {
-                assert.deepStrictEqual(actions.updateDashboardItem({
+                const db = {
                     id: 'test',
                     items: [{
                         canvas: 'a',
@@ -429,7 +433,8 @@ describe('Dashboard actions', () => {
                         module: 0,
                         thirdField: 'a'
                     }]
-                }, {
+                }
+                assert.deepStrictEqual(actions.updateDashboardItem(db, {
                     canvas: 'b',
                     module: 0,
                     thirdField: 'test'

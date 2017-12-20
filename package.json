@@ -18,6 +18,15 @@
     "dev": "./node_modules/.bin/webpack-dev-server",
     "flow": "./node_modules/.bin/flow"
   },
+  "jest": {
+     "moduleNameMapper": {
+      "\\.(jpg|jpeg|png|gif|eot|otf|webp|svg|ttf|woff|woff2|mp4|webm|wav|mp3|m4a|aac|oga)$": "<rootDir>/__mocks__/fileMock.js",
+      "\\.(css|pcss)$": "identity-obj-proxy"
+    },
+    "setupFiles": [
+      "./web-app/react-app/tests/setup-tests.js"
+    ]
+  },
   "author": "",
   "license": "UNLICENSED",
   "private": true,
@@ -31,6 +40,7 @@
     "babel-jest": "^20.0.3",
     "babel-loader": "^7.0.0",
     "babel-preset-env": "^1.6.1",
+    "babel-preset-flow": "^6.23.0",
     "babel-preset-react": "^6.24.1",
     "babel-preset-stage-2": "^6.24.1",
     "backbone": "file:web-app/js/backbone",
@@ -40,6 +50,8 @@
     "css-mqpacker": "^6.0.0",
     "draggabilly": "^2.1.1",
     "empty": "^0.10.1",
+    "enzyme": "^3.1.1",
+    "enzyme-adapter-react-16": "^1.0.4",
     "eslint": "^4.13.0",
     "eslint-loader": "^1.7.1",
     "eslint-plugin-flowtype": "^2.40.1",
@@ -52,6 +64,8 @@
     "flowtype-loader": "^0.2.2",
     "form-serialize": "^0.7.1",
     "fuse.js": "^3.0.3",
+    "history": "^3.3.0",
+    "identity-obj-proxy": "^3.0.0",
     "jest": "^20.0.3",
     "jquery": "1.11.1",
     "jquery-ui": "*",
@@ -72,6 +86,7 @@
     "promise-settle": "^0.3.0",
     "prop-types": "^15.5.8",
     "react": "^16.1.1",
+    "react-addons-test-utils": "^15.6.2",
     "react-bootstrap": "^0.31.0",
     "react-dom": "^16.1.1",
     "react-fontawesome": "^1.6.1",
@@ -83,10 +98,12 @@
     "react-select": "^1.0.0-rc.4",
     "react-shortcuts": "^2.0.0",
     "react-switcher": "^1.0.2",
+    "react-test-renderer": "^15.6.1",
     "redux": "^3.6.0",
     "redux-logger": "^3.0.6",
     "redux-mock-store": "^1.2.3",
     "redux-thunk": "^2.2.0",
+    "sinon": "^2.3.6",
     "streamr-client": "^0.9.3",
     "style-loader": "^0.17.0",
     "underscore": "*",

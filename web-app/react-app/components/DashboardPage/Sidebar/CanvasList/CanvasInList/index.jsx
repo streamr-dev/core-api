@@ -21,15 +21,17 @@ export default class CanvasInList extends Component<Props, State> {
         open: false
     }
     
+    onClick = () => {
+        this.setState({
+            open: !this.state.open
+        })
+    }
+    
     render() {
         const {canvas} = this.props
         return (
             <li className={`canvas mm-dropdown mm-dropdown-root ${this.state.open ? 'open' : ''}`}>
-                <a className={styles.canvasInListLink} title={canvas.state} onClick={() => {
-                    this.setState({
-                        open: !this.state.open
-                    })
-                }}>
+                <a className={styles.canvasInListLink} title={canvas.state} onClick={this.onClick}>
                     <span className={`mm-text mmc-dropdown-delay animated fadeIn ${styles.canvasTitle} ${canvas.state === 'STOPPED' ? styles.stopped : ''}`}>
                         {canvas.name}
                     </span>

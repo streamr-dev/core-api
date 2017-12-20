@@ -2,31 +2,31 @@
 
 import React, {Component} from 'react'
 import {connect} from 'react-redux'
-import {Modal, Button} from 'react-bootstrap'
+import {Modal} from 'react-bootstrap'
+import ShareDialogHeader from './ShareDialogHeader'
 import ShareDialogContent from './ShareDialogContent'
+import ShareDialogFooter from './ShareDialogFooter'
 
 import {saveUpdatedResourcePermissions} from '../../actions/permission'
 
 import type {Node} from 'react'
-import type {Permission} from '../../flowtype/permission-types'
+import type {Permission, State as PermissionState} from '../../flowtype/permission-types'
 
 type Props = {
     resourceId: Permission.resourceId,
     resourceType: Permission.resourceType,
     resourceTitle: string,
-    children?: Node | Array<Node>,
+    children?: Node,
     save: Function,
     isOpen: boolean,
     onClose: () => void
 }
 
-class ShareDialog extends Component<Props> {
+export class ShareDialog extends Component<Props> {
     
     save = () => {
         this.props.save()
-            .then(() => {
-                this.props.onClose()
-            })
+            .then(() => this.props.onClose())
     }
     
     render() {
@@ -36,36 +36,28 @@ class ShareDialog extends Component<Props> {
                 onHide={this.props.onClose}
                 backdrop="static"
             >
-                <Modal.Header closeButton>
-                    <Modal.Title>Share {this.props.resourceTitle}</Modal.Title>
-                </Modal.Header>
-                <Modal.Body>
-                    <ShareDialogContent resourceTitle={this.props.resourceTitle} resourceType={this.props.resourceType} resourceId={this.props.resourceId} />
-                </Modal.Body>
-                <Modal.Footer>
-                    <Button
-                        bsStyle="primary"
-                        onClick={this.save}
-                    >
-                        Save
-                    </Button>
-                    <Button
-                        bsStyle="default"
-                        onClick={this.props.onClose}
-                    >
-                        Close
-                    </Button>
-                </Modal.Footer>
+                <ShareDialogHeader
+                    resourceTitle={this.props.resourceTitle}
+                />
+                <ShareDialogContent
+                    resourceTitle={this.props.resourceTitle}
+                    resourceType={this.props.resourceType}
+                    resourceId={this.props.resourceId}
+                />
+                <ShareDialogFooter
+                    save={this.save}
+                    closeModal={this.props.onClose}
+                />
             </Modal>
         )
     }
 }
 
-const mapStateToProps = ({permission}, ownProps) => ({
+export const mapStateToProps = ({permission}: {permission: PermissionState}, ownProps: Props) => ({
     permissions: permission.byTypeAndId[ownProps.resourceType] && permission.byTypeAndId[ownProps.resourceType][ownProps.resourceId] || []
 })
 
-const mapDispatchToProps = (dispatch, ownProps) => ({
+export const mapDispatchToProps = (dispatch: Function, ownProps: Props) => ({
     save() {
         return dispatch(saveUpdatedResourcePermissions(ownProps.resourceType, ownProps.resourceId))
     }

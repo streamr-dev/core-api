@@ -77,9 +77,9 @@ module.exports = {
         },
         layoutsBySizeAndModule: _.zipObject(sizes, _.map(sizes, size => _.zipObject(modules, _.map(modules, module => ({
             ...defaultLayout,
-            ...(overridesBySize[size] || {}),
-            ...(overridesByModule[module] || {}),
-            ...(overridesBySizeAndModule[size] && overridesBySizeAndModule[size][module] || {})
+            ...(size && overridesBySize[size] || {}),
+            ...(module && overridesByModule[module] || {}),
+            ...(size && module && overridesBySizeAndModule[size] && overridesBySizeAndModule[size][module] || {})
         })))))
     },
     components: {

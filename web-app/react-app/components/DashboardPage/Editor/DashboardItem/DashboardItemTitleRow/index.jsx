@@ -9,7 +9,7 @@ import {removeDashboardItem, updateDashboardItem} from '../../../../../actions/d
 
 import styles from './dashboardItemTitleRow.pcss'
 
-import type {Dashboard, DashboardItem} from '../../../../../flowtype/dashboard-types'
+import type {Dashboard, DashboardItem, DashboardReducerState as DashboardState} from '../../../../../flowtype/dashboard-types'
 
 type Props = {
     item: DashboardItem,
@@ -25,10 +25,10 @@ type State = {
     editing: boolean
 }
 
-class DashboardItemTitleRow extends Component<Props, State> {
+export class DashboardItemTitleRow extends Component<Props, State> {
     
     static defaultProps = {
-        editingLocked: false
+        isLocked: false
     }
     
     state = {
@@ -45,7 +45,7 @@ class DashboardItemTitleRow extends Component<Props, State> {
         })
     }
     
-    saveName = ({target}) => {
+    saveName = ({target}: {target: {value: string}}) => {
         this.props.update(this.props.dashboard, this.props.item, {
             title: target.value
         })
@@ -84,13 +84,15 @@ class DashboardItemTitleRow extends Component<Props, State> {
                             >
                                 <FontAwesome name={this.state.editing ? 'check' : 'edit'}/>
                             </Button>
-                            <button
-                                className="delete-btn btn btn-xs btn-outline dark"
+                            <Button
+                                bsSize="xs"
+                                bsStyle="default"
+                                className="btn-outline dark"
                                 title="Remove"
                                 onClick={this.onRemove}
                             >
-                                <i className="fa fa-times"/>
-                            </button>
+                                <FontAwesome name="times"/>
+                            </Button>
                         </div>
                     </div>
                 )}
@@ -99,12 +101,12 @@ class DashboardItemTitleRow extends Component<Props, State> {
     }
 }
 
-const mapStateToProps = ({dashboard: {dashboardsById, openDashboard}}) => ({
+export const mapStateToProps = ({dashboard: {dashboardsById, openDashboard}}: {dashboard: DashboardState}) => ({
     dashboard: dashboardsById[openDashboard.id]
 })
 
-const mapDispatchToProps = (dispatch) => ({
-    update(db: Dashboard, item: DashboardItem, newData) {
+export const mapDispatchToProps = (dispatch: Function) => ({
+    update(db: Dashboard, item: DashboardItem, newData: {} = {}) {
         return dispatch(updateDashboardItem(db, {
             ...item,
             ...newData

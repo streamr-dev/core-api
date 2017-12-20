@@ -12,17 +12,19 @@ export const showNotification = (notif: Notification) => (dispatch: Function) =>
     if (!notif.delay && notif.delay !== 0) {
         notif.delay = 4000
     }
-    dispatch({
-        type: CREATE_NOTIFICATION,
-        notification: {
-            ...notif,
-            id
-        }
-    })
+    dispatch(createNotification(id, notif))
     if (notif.delay) {
         setTimeout(() => dispatch(removeNotification(id)), notif.delay)
     }
 }
+
+const createNotification = (id: Notification.id, notif: Notification) => ({
+    type: CREATE_NOTIFICATION,
+    notification: {
+        ...notif,
+        id
+    }
+})
 
 export const showSuccess = (notif: Notification) => showNotification({
     ...notif,

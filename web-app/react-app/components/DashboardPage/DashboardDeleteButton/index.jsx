@@ -9,7 +9,7 @@ import {deleteDashboard} from '../../../actions/dashboard'
 import {parseDashboard} from '../../../helpers/parseState'
 
 import type {Node} from 'react'
-import type {Dashboard} from '../../../flowtype/dashboard-types'
+import type {Dashboard, DashboardReducerState as DashboardState} from '../../../flowtype/dashboard-types'
 
 type Props = {
     dashboard: Dashboard,
@@ -19,7 +19,7 @@ type Props = {
     deleteDashboard: (id: Dashboard.id) => Promise<any>
 }
 
-class DashboardDeleteButton extends Component<Props> {
+export class DashboardDeleteButton extends Component<Props> {
     
     static defaultProps = {
         buttonProps: {}
@@ -28,7 +28,8 @@ class DashboardDeleteButton extends Component<Props> {
     onDelete = () => {
         this.props.deleteDashboard(this.props.dashboard.id)
             .then(() => {
-                window.location = createLink('/dashboard/list')
+                // TODO: change to be handled with react-router
+                window.location.assign(createLink('/dashboard/list'))
             })
     }
     
@@ -49,9 +50,9 @@ class DashboardDeleteButton extends Component<Props> {
     }
 }
 
-const mapStateToProps = (state) => parseDashboard(state)
+export const mapStateToProps = (state: {dashboard: DashboardState}) => parseDashboard(state)
 
-const mapDispatchToProps = (dispatch) => ({
+export const mapDispatchToProps = (dispatch: Function) => ({
     deleteDashboard(id: Dashboard.id) {
         return dispatch(deleteDashboard(id))
     }

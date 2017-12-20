@@ -2,6 +2,7 @@
 
 import React, {Component} from 'react'
 import {FormControl, InputGroup, FormGroup, Button} from 'react-bootstrap'
+import FontAwesome from 'react-fontawesome'
 import serialize from 'form-serialize'
 
 import styles from './integrationKeyHandlerInput.pcss'
@@ -16,18 +17,22 @@ type Props = {
 export default class IntegrationKeyHandlerInput extends Component<Props> {
     form: ?HTMLFormElement
     
-    onSubmit = (e: Event) => {
+    onSubmit = (e: {
+        preventDefault: Function,
+        target: HTMLFormElement
+    }) => {
         e.preventDefault()
-        const data = serialize(this.form, {
+        const form: HTMLFormElement = e.target
+        const data = serialize(form, {
             hash: true
         })
         this.props.onNew(data)
-        this.form && this.form.reset()
+        form.reset()
     }
     
     render() {
         return (
-            <form className={styles.integrationKeyInputForm} ref={i => this.form = i} onSubmit={this.onSubmit}>
+            <form className={styles.integrationKeyInputForm} onSubmit={this.onSubmit}>
                 <FormGroup>
                     <InputGroup className={styles.integrationKeyInputGroup}>
                         {['name', ...this.props.fields].map(field => (
@@ -41,7 +46,7 @@ export default class IntegrationKeyHandlerInput extends Component<Props> {
                         ))}
                         <InputGroup.Button className={styles.buttonContainer}>
                             <Button bsStyle="default" type="submit">
-                                <i className="icon fa fa-plus"/>
+                                <FontAwesome name="plus" className="icon"/>
                             </Button>
                         </InputGroup.Button>
                     </InputGroup>

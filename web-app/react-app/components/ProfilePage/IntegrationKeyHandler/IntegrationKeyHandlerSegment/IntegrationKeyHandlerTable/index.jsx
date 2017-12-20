@@ -9,7 +9,7 @@ import {titleCase} from 'change-case'
 
 import styles from './integrationKeyHandlerTable.pcss'
 
-import type {IntegrationKey} from '../../../../flowtype/integration-key-types.js'
+import type {IntegrationKey} from '../../../../../flowtype/integration-key-types.js'
 
 type Props = {
     fields: Array<string>,
@@ -20,13 +20,13 @@ type Props = {
 export default class IntegrationKeyHandlerTable extends Component<Props> {
     
     render() {
-        const items = this.props.integrationKeys || []
+        const {integrationKeys, fields, onDelete} = this.props
         return (
             <Table className={styles.integrationKeyTable}>
                 <thead>
                     <tr>
                         <th className={styles.nameHeader}>Name</th>
-                        {this.props.fields.map(f => (
+                        {fields.map(f => (
                             <th key={f}>
                                 {titleCase(f)}
                             </th>
@@ -35,8 +35,13 @@ export default class IntegrationKeyHandlerTable extends Component<Props> {
                     </tr>
                 </thead>
                 <tbody>
-                    {items.map(item => (
-                        <IntegrationKeyHandlerTableRow item={item} key={item.id} fields={this.props.fields} onDelete={this.props.onDelete}/>
+                    {integrationKeys.map(item => (
+                        <IntegrationKeyHandlerTableRow
+                            item={item}
+                            key={item.id}
+                            fields={fields}
+                            onDelete={onDelete}
+                        />
                     ))}
                 </tbody>
             </Table>

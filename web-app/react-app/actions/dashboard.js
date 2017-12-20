@@ -39,7 +39,7 @@ export const CHANGE_DASHBOARD_ID = 'CHANGE_DASHBOARD_ID'
 const apiUrl = 'api/v1/dashboards'
 
 import type { ApiError } from '../flowtype/common-types'
-import type { Dashboard, DashboardItem } from '../flowtype/dashboard-types'
+import type { Dashboard, DashboardItem, Layout} from '../flowtype/dashboard-types'
 
 declare var Streamr: {
     user: string
@@ -170,31 +170,10 @@ export const addDashboardItem = (dashboard: Dashboard, item: DashboardItem) => u
     ]
 })
 
-type LayoutItem = {
-    i: string | number,
-    h: number,
-    isDraggable: ?number,
-    isResizable: ?number,
-    maxH: ?number,
-    maxW: ?number,
-    minH: number,
-    minW: number,
-    moved: boolean,
-    static: boolean,
-    w: number,
-    x: number,
-    y: number
-}
-type Layout = {
-    xs?: Array<LayoutItem>,
-    sm?: Array<LayoutItem>,
-    md?: Array<LayoutItem>,
-    lg?: Array<LayoutItem>
-}
 export const updateDashboardLayout = (dashboardId: Dashboard.id, layout: Layout) => (dispatch: Function, getState: Function) => {
     const state = getState().dashboard
     const dashboard = state.dashboardsById[state.openDashboard.id]
-    const normalizeLayoutItem = (item: LayoutItem) => ({
+    const normalizeLayoutItem = (item: DashboardItem.layout) => ({
         i: item.i || 0,
         h: item.h || 0,
         isDraggable: item.isDraggable,
@@ -209,7 +188,7 @@ export const updateDashboardLayout = (dashboardId: Dashboard.id, layout: Layout)
         x: item.x || 0,
         y: item.y || 0
     })
-    const normalizeItemList = (itemList: ?Array<LayoutItem>) => itemList ? _.chain(itemList)
+    const normalizeItemList = (itemList: ?Array<DashboardItem.layout>) => itemList ? _.chain(itemList)
         .sortBy('i')
         .map(normalizeLayoutItem)
         .value() : []

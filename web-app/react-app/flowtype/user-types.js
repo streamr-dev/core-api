@@ -7,13 +7,14 @@ export type User = {
     timezone: string
 }
 
-type State = {
+export type State = {
     currentUser: User,
     error?: ?string,
-    fetching?: boolean
+    fetching?: boolean,
+    saved: boolean
 }
 
-type Action = {
+export type Action = {
     type: string,
     user: User,
     error?: string,

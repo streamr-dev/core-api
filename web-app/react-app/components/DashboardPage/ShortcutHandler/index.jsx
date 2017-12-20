@@ -3,7 +3,6 @@
 import React, {Component} from 'react'
 import {connect} from 'react-redux'
 import { ShortcutManager, Shortcuts } from 'react-shortcuts'
-import store from '../../../stores/dashboardPageStore'
 
 import {updateAndSaveCurrentDashboard} from '../../../actions/dashboard'
 
@@ -12,34 +11,36 @@ import styles from './shortcutHandler.pcss'
 import {object} from 'prop-types'
 import type {Node} from 'react'
 
-const keymap = {
-    'MAIN': {
-        'SAVE': ['ctrl+s', 'command+s']
-    }
-}
-
-const shortcutManager = new ShortcutManager(keymap)
-
 type Props = {
+    updateAndSaveCurrentDashboard: () => void,
     children: Node
 }
 
-class ShortcutHandler extends Component<Props> {
+export class ShortcutHandler extends Component<Props> {
+    shortcutManager: ShortcutManager
+    
+    static keymap = {
+        'MAIN': {
+            'SAVE': ['ctrl+s', 'command+s']
+        }
+    }
+    
     static childContextTypes = {
         shortcuts: object
     }
     
     getChildContext() {
+        this.shortcutManager = this.shortcutManager || new ShortcutManager(ShortcutHandler.keymap)
         return {
-            shortcuts: shortcutManager
+            shortcuts: this.shortcutManager
         }
     }
     
-    _handleShortcuts = (action, event) => {
+    handleShortcuts = (action: 'SAVE', event: Event) => {
         switch (action) {
             case 'SAVE': {
                 event.preventDefault()
-                store.dispatch(updateAndSaveCurrentDashboard())
+                this.props.updateAndSaveCurrentDashboard()
                 break
             }
         }
@@ -47,14 +48,14 @@ class ShortcutHandler extends Component<Props> {
     
     render() {
         return (
-            <Shortcuts name="MAIN" handler={this._handleShortcuts} className={styles.shortcutHandler}>
+            <Shortcuts name="MAIN" handler={this.handleShortcuts} className={styles.shortcutHandler}>
                 {this.props.children}
             </Shortcuts>
         )
     }
 }
 
-const mapDispatchToProps = (dispatch) => ({
+export const mapDispatchToProps = (dispatch: Function) => ({
     updateAndSaveCurrentDashboard() {
         dispatch(updateAndSaveCurrentDashboard())
     }

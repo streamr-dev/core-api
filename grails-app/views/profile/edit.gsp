@@ -5,8 +5,6 @@
 		<g:message code="profile.edit.label"/>
 	</title>
 
-	<r:require module="confirm-button"/>
-	<r:require module="moment-timezone"/>
 	<r:require module="streamr-credentials-control"/>
 
 	<r:require module="profile-page-webpack-bundle"/>

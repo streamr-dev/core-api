@@ -9,9 +9,8 @@ import createLink from '../../../../helpers/createLink'
 import TitleRow from './DashboardItemTitleRow'
 
 import styles from './dashboardItem.pcss'
-import './webcomponentStyles.css'
 
-import type {Dashboard, DashboardItem as DBItem} from '../../../../flowtype/dashboard-types'
+import type {Dashboard, DashboardItem as DBItem, DashboardReducerState as DashboardState} from '../../../../flowtype/dashboard-types'
 
 const config = require('../../dashboardConfig')
 
@@ -22,7 +21,10 @@ type Props = {
     dragCancelClassName?: string,
     currentLayout: ?{},
     showError: Function,
-    isLocked: boolean
+    isLocked: boolean,
+    config: {
+        components: {}
+    }
 }
 
 type State = {
@@ -30,7 +32,7 @@ type State = {
     width: ?number
 }
 
-class DashboardItem extends Component<Props, State> {
+export class DashboardItem extends Component<Props, State> {
     wrapper: ?HTMLElement
     static defaultProps = {
         item: {},
@@ -76,9 +78,9 @@ class DashboardItem extends Component<Props, State> {
     }
     
     createCustomComponent = () => {
-        const {item} = this.props
+        const {item, config: conf} = this.props
         
-        const {component, props} = config.components[item.webcomponent] || {}
+        const {component, props} = conf.components[item.webcomponent] || {}
         
         const CustomComponent = component || (() => (
             <div style={{
@@ -122,12 +124,13 @@ class DashboardItem extends Component<Props, State> {
     }
 }
 
-const mapStateToProps = ({dashboard: {dashboardsById, openDashboard}}) => ({
-    dashboard: dashboardsById[openDashboard.id]
+export const mapStateToProps = ({dashboard: {dashboardsById, openDashboard}}: {dashboard: DashboardState}) => ({
+    dashboard: dashboardsById[openDashboard.id],
+    config: config
 })
 
-const mapDispatchToProps = (dispatch) => ({
-    showError(message) {
+export const mapDispatchToProps = (dispatch: Function) => ({
+    showError(message: string) {
         dispatch(showError({
             title: 'Error!',
             message
