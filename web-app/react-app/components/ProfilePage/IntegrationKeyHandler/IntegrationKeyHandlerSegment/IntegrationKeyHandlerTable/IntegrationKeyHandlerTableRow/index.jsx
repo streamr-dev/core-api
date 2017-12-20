@@ -1,6 +1,6 @@
 // @flow
 
-import React from 'react'
+import React, {Component} from 'react'
 
 import { FormGroup } from 'react-bootstrap'
 import ConfirmButton from '../../../../../ConfirmButton'
@@ -8,17 +8,17 @@ import FontAwesome from 'react-fontawesome'
 
 import styles from './integrationKeyHandlerTableRow.pcss'
 
-export default class IntegrationKeyHandlerTableRow extends React.Component {
-    
-    props: {
-        fields: Array<string>,
-        onDelete: Function,
-        item: {
-            id: string,
-            name: string,
-            json: {}
-        }
+type Props = {
+    fields: Array<string>,
+    onDelete: Function,
+    item: {
+        id: string,
+        name: string,
+        json: {}
     }
+}
+
+export default class IntegrationKeyHandlerTableRow extends Component<Props> {
     
     render() {
         const {item, onDelete, fields} = this.props

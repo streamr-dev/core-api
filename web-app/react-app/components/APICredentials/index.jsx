@@ -6,9 +6,9 @@ declare var StreamrCredentialsControl: any
 import React, {Component} from 'react'
 import {Panel} from 'react-bootstrap'
 
-export default class APICredentials extends Component {
+export default class APICredentials extends Component<{}> {
     
-    apiHandlerEl: HTMLDivElement // Typechecking may not work correctly but without this line it does not work at all
+    apiHandlerEl: ?HTMLDivElement // Typechecking may not work correctly but without this line it does not work at all
     
     componentDidMount() {
         new StreamrCredentialsControl({

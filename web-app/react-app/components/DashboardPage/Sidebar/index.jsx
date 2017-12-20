@@ -8,7 +8,7 @@ import DashboardTools from './DashboardTools'
 
 import styles from './sidebar.pcss'
 
-export default class Sidebar extends Component {
+export default class Sidebar extends Component<{}> {
     
     render() {
         return (

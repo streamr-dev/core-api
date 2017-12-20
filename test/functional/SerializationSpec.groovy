@@ -2,10 +2,10 @@ import com.unifina.domain.data.Stream
 import com.unifina.service.SerializationService
 import com.unifina.service.StreamService
 import com.unifina.utils.MapTraversal
-import core.LoginTester1Spec
-import core.mixins.CanvasMixin
-import core.mixins.ConfirmationMixin
-import core.mixins.StreamMixin
+import LoginTester1Spec
+import mixins.CanvasMixin
+import mixins.ConfirmationMixin
+import mixins.StreamMixin
 import grails.util.Holders
 import spock.lang.Shared
 

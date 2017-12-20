@@ -10,42 +10,33 @@ import 'react-select/dist/react-select.css'
 
 import {getCurrentUser, updateCurrentUserName, updateCurrentUserTimezone, saveCurrentUser} from '../../../actions/user'
 
-import type {User} from '../../../flowtype/user-types'
+import type {User, State as UserState} from '../../../flowtype/user-types'
 
-export class ProfileSettings extends Component {
+type Props = {
+    user: User,
+    getCurrentUser: () => void,
+    updateCurrentUserName: (name: User.name) => void,
+    updateCurrentUserTimezone: (timezone: User.timezone) => void,
+    saveCurrentUser: Function
+}
+
+export class ProfileSettings extends Component<Props> {
     
-    props: {
-        user: User,
-        getCurrentUser: Function,
-        updateCurrentUserName: Function,
-        updateCurrentUserTimezone: Function,
-        saveCurrentUser: Function
-    }
-    onSubmit: Function
-    onNameChange: Function
-    onTimezoneChange: Function
-    
-    constructor() {
-        super()
-        this.onNameChange = this.onNameChange.bind(this)
-        this.onTimezoneChange = this.onTimezoneChange.bind(this)
-        this.onSubmit = this.onSubmit.bind(this)
-    }
     componentDidMount() {
         // TODO: move to (yet nonexistent) router
         this.props.getCurrentUser()
     }
-    onNameChange({target}: { target: {
-        value: string
-    }}) {
+    onNameChange = ({target}: {target: {
+        value: User.name
+    }}) => {
         this.props.updateCurrentUserName(target.value)
     }
-    onTimezoneChange({target}: { target: {
-        value: string
-    }}) {
+    onTimezoneChange = ({target}: {target: {
+        value: User.timezone
+    }}) => {
         this.props.updateCurrentUserTimezone(target.value)
     }
-    onSubmit(e: Event) {
+    onSubmit = (e: Event) => {
         e.preventDefault()
         this.props.saveCurrentUser(this.props.user)
     }
@@ -120,7 +111,7 @@ export class ProfileSettings extends Component {
     }
 }
 
-export const mapStateToProps = ({user}: {user: User}) => ({
+export const mapStateToProps = ({user}: UserState) => ({
     user: user.currentUser || {}
 })
 

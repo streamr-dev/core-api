@@ -37,7 +37,7 @@
 
 		 %{--reCaptcha v2--}%
 		<div class="g-recaptcha" data-sitekey="${grailsApplication.config.recaptchav2.sitekey}" style="margin: 10px 0;"></div>
-		<button class="btn btn-primary btn-block btn-lg">
+		<button id="signUpButton" class="btn btn-primary btn-block btn-lg">
 			<g:message code="springSecurity.register.button" />
 		</button>
 	</g:form>

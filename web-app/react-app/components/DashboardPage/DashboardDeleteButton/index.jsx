@@ -8,32 +8,28 @@ import createLink from '../../../helpers/createLink'
 import {deleteDashboard} from '../../../actions/dashboard'
 import {parseDashboard} from '../../../helpers/parseState'
 
-import type {ReactChildren} from 'react-flow-types'
-import type {Dashboard} from '../../../flowtype/dashboard-types'
+import type {Node} from 'react'
+import type {Dashboard, DashboardReducerState as DashboardState} from '../../../flowtype/dashboard-types'
 
-class DeleteButton extends Component {
-    onDelete: Function
-    props: {
-        dashboard: Dashboard,
-        canWrite: boolean,
-        buttonProps: {},
-        children?: ReactChildren,
-        deleteDashboard: () => Promise<any>
-    }
+type Props = {
+    dashboard: Dashboard,
+    canWrite: boolean,
+    buttonProps: {},
+    children?: Node | Array<Node>,
+    deleteDashboard: (id: Dashboard.id) => Promise<any>
+}
+
+export class DashboardDeleteButton extends Component<Props> {
+    
     static defaultProps = {
         buttonProps: {}
     }
     
-    constructor() {
-        super()
-        
-        this.onDelete = this.onDelete.bind(this)
-    }
-    
-    onDelete() {
+    onDelete = () => {
         this.props.deleteDashboard(this.props.dashboard.id)
             .then(() => {
-                window.location = createLink('/dashboard/list')
+                // TODO: change to be handled with react-router
+                window.location.assign(createLink('/dashboard/list'))
             })
     }
     
@@ -54,12 +50,12 @@ class DeleteButton extends Component {
     }
 }
 
-const mapStateToProps = (state) => parseDashboard(state)
+export const mapStateToProps = (state: {dashboard: DashboardState}) => parseDashboard(state)
 
-const mapDispatchToProps = (dispatch) => ({
+export const mapDispatchToProps = (dispatch: Function) => ({
     deleteDashboard(id: Dashboard.id) {
         return dispatch(deleteDashboard(id))
     }
 })
 
-export default connect(mapStateToProps, mapDispatchToProps)(DeleteButton)
+export default connect(mapStateToProps, mapDispatchToProps)(DashboardDeleteButton)

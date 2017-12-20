@@ -1,10 +1,10 @@
-
 import assert from 'assert-diff'
 import thunk from 'redux-thunk'
 import configureMockStore from 'redux-mock-store'
 import moxios from 'moxios'
+import sinon from 'sinon'
 
-import * as actions from '../../actions/dashboard'
+import * as originalActions from '../../actions/dashboard'
 import * as notificationActions from '../../actions/notification'
 
 const middlewares = [ thunk ]
@@ -16,6 +16,7 @@ global.Streamr = {
 
 describe('Dashboard actions', () => {
     let store
+    let actions
     
     beforeEach(() => {
         moxios.install()
@@ -26,6 +27,7 @@ describe('Dashboard actions', () => {
             },
             error: null
         })
+        actions = originalActions
     })
     
     
@@ -41,7 +43,7 @@ describe('Dashboard actions', () => {
                 response: [{
                     id: 'test',
                     name: 'test'
-                },{
+                }, {
                     id: 'test2',
                     name: 'test2'
                 }]
@@ -54,7 +56,7 @@ describe('Dashboard actions', () => {
                 dashboards: [{
                     id: 'test',
                     name: 'test'
-                },{
+                }, {
                     id: 'test2',
                     name: 'test2'
                 }]
@@ -63,24 +65,24 @@ describe('Dashboard actions', () => {
             await store.dispatch(actions.getAndReplaceDashboards())
             assert.deepStrictEqual(store.getActions(), expectedActions)
         })
-        it('creates GET_ALL_INTEGRATION_KEYS_FAILURE when fetching integration keys has failed', async () => {
+        it('creates GET_ALL_INTEGRATION_KEYS_FAILURE when fetching integration keys has failed', async (done) => {
             moxios.stubRequest('api/v1/dashboards', {
                 status: 500,
                 response: new Error('test-error')
             })
-        
+            
             const expectedActions = [{
                 type: actions.GET_AND_REPLACE_DASHBOARDS_REQUEST
             }, {
                 type: actions.GET_AND_REPLACE_DASHBOARDS_FAILURE,
                 error: new Error('test-error')
             }]
-
+            
             try {
                 await store.dispatch(actions.getAndReplaceDashboards())
             } catch (e) {
-                
                 assert.deepStrictEqual(store.getActions().slice(0, 2), expectedActions)
+                done()
             }
         })
     })
@@ -98,7 +100,7 @@ describe('Dashboard actions', () => {
                     }
                 }
             })
-        
+            
             const expectedActions = [{
                 type: actions.GET_DASHBOARD_REQUEST,
                 id
@@ -112,7 +114,7 @@ describe('Dashboard actions', () => {
                     }
                 }
             }]
-        
+            
             await store.dispatch(actions.getDashboard(id))
             assert.deepStrictEqual(store.getActions(), expectedActions)
             
@@ -129,7 +131,7 @@ describe('Dashboard actions', () => {
                     })
                 }
             })
-        
+            
             const expectedActions = [{
                 type: actions.GET_DASHBOARD_REQUEST,
                 id
@@ -143,28 +145,29 @@ describe('Dashboard actions', () => {
                     }
                 }
             }]
-        
+            
             await store.dispatch(actions.getDashboard(id))
             assert.deepStrictEqual(store.getActions(), expectedActions)
         })
-    
-        it('creates GET_ALL_INTEGRATION_KEYS_FAILURE when fetching integration keys has failed', async () => {
+        
+        it('creates GET_ALL_INTEGRATION_KEYS_FAILURE when fetching integration keys has failed', async (done) => {
             moxios.stubRequest('api/v1/dashboards', {
                 status: 500,
                 response: new Error('test-error')
             })
-        
+            
             const expectedActions = [{
                 type: actions.GET_AND_REPLACE_DASHBOARDS_REQUEST
             }, {
                 type: actions.GET_AND_REPLACE_DASHBOARDS_FAILURE,
                 error: new Error('test-error')
             }]
-        
+            
             try {
                 await store.dispatch(actions.getAndReplaceDashboards())
             } catch (e) {
                 assert.deepStrictEqual(store.getActions().slice(0, 2), expectedActions)
+                done()
             }
         })
     })
@@ -184,7 +187,7 @@ describe('Dashboard actions', () => {
                 status: 200,
                 response: db
             })
-        
+            
             const expectedActions = [{
                 type: actions.UPDATE_AND_SAVE_DASHBOARD_REQUEST
             }, {
@@ -196,14 +199,14 @@ describe('Dashboard actions', () => {
                 type: actions.UPDATE_AND_SAVE_DASHBOARD_SUCCESS,
                 dashboard: db
             }]
-        
+            
             await store.dispatch(actions.updateAndSaveDashboard(db))
             assert.deepStrictEqual(store.getActions()[0], expectedActions[0])
             assert.equal(store.getActions()[1].type, expectedActions[1].type)
             assert.equal(store.getActions()[1].notification.type, expectedActions[1].notification.type)
             assert.deepStrictEqual(store.getActions()[2], expectedActions[2])
         })
-        it('creates UPDATE_AND_SAVE_DASHBOARD_FAILURE and CREATE_NOTIFICATION when fetching a dashboard has succeeded', async () => {
+        it('creates UPDATE_AND_SAVE_DASHBOARD_FAILURE and CREATE_NOTIFICATION when fetching a dashboard has succeeded', async (done) => {
             const id = 'test'
             const db = {
                 id,
@@ -216,7 +219,7 @@ describe('Dashboard actions', () => {
                 status: 500,
                 response: new Error('test')
             })
-        
+            
             const expectedActions = [{
                 type: actions.UPDATE_AND_SAVE_DASHBOARD_REQUEST
             }, {
@@ -228,7 +231,7 @@ describe('Dashboard actions', () => {
                 type: actions.UPDATE_AND_SAVE_DASHBOARD_FAILURE,
                 error: new Error('test')
             }]
-        
+            
             try {
                 await store.dispatch(actions.updateAndSaveDashboard(db))
             } catch (e) {
@@ -236,6 +239,7 @@ describe('Dashboard actions', () => {
                 assert.equal(store.getActions()[1].type, expectedActions[1].type)
                 assert.equal(store.getActions()[1].notification.type, expectedActions[1].notification.type)
                 assert.deepStrictEqual(store.getActions()[2], expectedActions[2])
+                done()
             }
         })
         it('uses POST request if dashboard.new = true', done => {
@@ -296,7 +300,7 @@ describe('Dashboard actions', () => {
             return store.dispatch(actions.deleteDashboard('test'))
         })
         
-        it('creates DELETE_DASHBOARD_FAILURE when deleting dashboard has failed', async () => {
+        it('creates DELETE_DASHBOARD_FAILURE when deleting dashboard has failed', async (done) => {
             moxios.wait(() => {
                 let request = moxios.requests.mostRecent()
                 assert.equal(request.config.method, 'delete')
@@ -318,6 +322,7 @@ describe('Dashboard actions', () => {
                 await store.dispatch(actions.deleteDashboard('test'))
             } catch (e) {
                 assert.deepStrictEqual(store.getActions().slice(0, 2), expectedActions)
+                done()
             }
         })
     })
@@ -333,7 +338,7 @@ describe('Dashboard actions', () => {
                     operation: 'test2'
                 }]
             })
-        
+            
             const expectedActions = [{
                 id,
                 type: actions.GET_MY_DASHBOARD_PERMISSIONS_REQUEST
@@ -342,17 +347,17 @@ describe('Dashboard actions', () => {
                 type: actions.GET_MY_DASHBOARD_PERMISSIONS_SUCCESS,
                 permissions: ['test', 'test2']
             }]
-        
+            
             await store.dispatch(actions.getMyDashboardPermissions(id))
             assert.deepStrictEqual(store.getActions(), expectedActions)
         })
-        it('creates GET_MY_DASHBOARD_PERMISSIONS_FAILURE when fetching permissions has failed', async () => {
+        it('creates GET_MY_DASHBOARD_PERMISSIONS_FAILURE when fetching permissions has failed', async (done) => {
             const id = 'asdfasdfasasd'
             moxios.stubRequest(`api/v1/dashboards/${id}/permissions/me`, {
                 status: 500,
                 response: new Error('test-error')
             })
-        
+            
             const expectedActions = [{
                 id,
                 type: actions.GET_MY_DASHBOARD_PERMISSIONS_REQUEST
@@ -361,11 +366,12 @@ describe('Dashboard actions', () => {
                 type: actions.GET_MY_DASHBOARD_PERMISSIONS_FAILURE,
                 error: new Error('test-error')
             }]
-        
+            
             try {
                 await store.dispatch(actions.getMyDashboardPermissions(id))
             } catch (e) {
                 assert.deepStrictEqual(store.getActions().slice(0, 2), expectedActions)
+                done()
             }
         })
     })
@@ -381,7 +387,7 @@ describe('Dashboard actions', () => {
                 }
             })
         })
-    
+        
         describe('addDashboardItem', () => {
             it('must return correct action', () => {
                 const db = {
@@ -404,7 +410,7 @@ describe('Dashboard actions', () => {
                             canvas: 'a',
                             module: 0,
                             thirdField: 'a'
-                        },{
+                        }, {
                             canvas: 'b',
                             module: 0,
                             thirdField: 'test'
@@ -413,29 +419,23 @@ describe('Dashboard actions', () => {
                 })
             })
         })
-    
+        
         describe('updateDashboardItem', () => {
             it('must return correct action', () => {
                 const db = {
                     id: 'test',
                     items: [{
-                        canvas: {
-                            id: 'a'
-                        },
+                        canvas: 'a',
                         module: 0,
                         thirdField: 'a'
-                    },{
-                        canvas: {
-                            id: 'b'
-                        },
+                    }, {
+                        canvas: 'b',
                         module: 0,
                         thirdField: 'a'
                     }]
                 }
                 assert.deepStrictEqual(actions.updateDashboardItem(db, {
-                    canvas: {
-                        id: 'b'
-                    },
+                    canvas: 'b',
                     module: 0,
                     thirdField: 'test'
                 }), {
@@ -443,15 +443,11 @@ describe('Dashboard actions', () => {
                     dashboard: {
                         id: 'test',
                         items: [{
-                            canvas: {
-                                id: 'a'
-                            },
+                            canvas: 'a',
                             module: 0,
                             thirdField: 'a'
-                        },{
-                            canvas: {
-                                id: 'b'
-                            },
+                        }, {
+                            canvas: 'b',
                             module: 0,
                             thirdField: 'test'
                         }]
@@ -459,28 +455,22 @@ describe('Dashboard actions', () => {
                 })
             })
         })
-    
+        
         describe('removeDashboardItem', () => {
             it('must return correct action', () => {
                 assert.deepStrictEqual(actions.removeDashboardItem({
                     id: 'test',
                     items: [{
-                        canvas: {
-                            id: 'a'
-                        },
+                        canvas: 'a',
                         module: 0,
                         thirdField: 'a'
-                    },{
-                        canvas: {
-                            id: 'b'
-                        },
+                    }, {
+                        canvas: 'b',
                         module: 0,
                         thirdField: 'a'
                     }]
                 }, {
-                    canvas: {
-                        id: 'b'
-                    },
+                    canvas: 'b',
                     module: 0,
                     thirdField: 'test'
                 }), {
@@ -488,9 +478,7 @@ describe('Dashboard actions', () => {
                     dashboard: {
                         id: 'test',
                         items: [{
-                            canvas: {
-                                id: 'a'
-                            },
+                            canvas: 'a',
                             module: 0,
                             thirdField: 'a'
                         }]
@@ -514,7 +502,7 @@ describe('Dashboard actions', () => {
                 name2: 'test2'
             }
         }]
-    
+        
         await store.dispatch(actions.updateDashboardChanges('test', {
             name: 'test3'
         }))

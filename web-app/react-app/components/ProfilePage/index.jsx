@@ -9,7 +9,7 @@ import APICredentials from '../APICredentials'
 import IntegrationKeyHandler from './IntegrationKeyHandler'
 import Notifier from '../Notifier'
 
-export default class ProfilePage extends Component {
+export default class ProfilePage extends Component<{}> {
     render() {
         return (
             <Row>

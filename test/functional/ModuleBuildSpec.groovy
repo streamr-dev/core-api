@@ -1,6 +1,5 @@
-import core.LoginTester1Spec
-import core.mixins.CanvasMixin
-import org.openqa.selenium.Keys
+import LoginTester1Spec
+import mixins.CanvasMixin
 
 class ModuleBuildSpec extends LoginTester1Spec {
 
@@ -54,14 +53,14 @@ class ModuleBuildSpec extends LoginTester1Spec {
 	
 	def "module options button functionality"() {
 		when: "the Map module is added via module browser"
-			addModule 'Map'
+			addModule 'Map (geo)'
 		then: "module should appear on canvas"
-			moduleShouldAppearOnCanvas 'Map'
+			moduleShouldAppearOnCanvas 'Map (geo)'
 		then: "module zoom level != 12"
 			mapZoomLevel() != 12
 			
 		when: "options button is clicked"
-			findModuleOnCanvas("Map").find(".modulebutton .options").click()
+			findModuleOnCanvas("Map (geo)").find(".modulebutton .options").click()
 		then: "options modal is shown"
 			waitFor { $(".modal-dialog .optionEditor").displayed }
 			
@@ -72,7 +71,7 @@ class ModuleBuildSpec extends LoginTester1Spec {
 			waitFor { !$(".modal-dialog .optionEditor") }
 		
 		when: "options button is clicked"
-			findModuleOnCanvas("Map").find(".modulebutton .options").click()
+			findModuleOnCanvas("Map (geo)").find(".modulebutton .options").click()
 		then: "options modal is shown"
 			waitFor { $(".modal-dialog .optionEditor").displayed }
 			

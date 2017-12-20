@@ -105,9 +105,15 @@ module.exports = {
         new WriteFilePlugin(),
         new webpack.optimize.CommonsChunkPlugin('commons')
     ]),
-    devtool: !inProduction && ' source-map',
+    devtool: !inProduction && 'eval-source-map',
+    devServer: {
+        port: 56789 // Some random number because the port is not used
+    },
     resolve: {
-        extensions: ['.js', '.jsx', '.json']
+        extensions: ['.js', '.jsx', '.json'],
+        alias: {
+            'ws': 'empty/functionThatReturnsTrue'
+        }
     }
 }
 
