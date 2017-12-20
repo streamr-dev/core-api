@@ -26,9 +26,7 @@ export class ShareDialog extends Component<Props> {
     
     save = () => {
         this.props.save()
-            .then(() => {
-                this.props.onClose()
-            })
+            .then(() => this.props.onClose())
     }
     
     render() {

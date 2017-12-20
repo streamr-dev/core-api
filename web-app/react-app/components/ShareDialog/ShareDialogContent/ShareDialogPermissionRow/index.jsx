@@ -8,7 +8,7 @@ import ShareDialogPermission from './ShareDialogPermission'
 
 import styles from './shareDialogPermissionRow.pcss'
 import type {Permission, State as PermissionState} from '../../../../flowtype/permission-types'
-import {Col} from 'react-bootstrap'
+import {Row, Col} from 'react-bootstrap'
 
 type Props = {
     permissions: Array<Permission>,
@@ -20,21 +20,23 @@ export class ShareDialogPermissionRow extends Component<Props> {
     
     render() {
         return (
-            <Col xs={12} className={styles.permissionRow}>
-                {_.chain(this.props.permissions)
-                    .groupBy(p => p.user) // Arrays of permissions with users as keys
-                    .mapValues(permissions => (
-                        <ShareDialogPermission
-                            resourceType={this.props.resourceType}
-                            resourceId={this.props.resourceId}
-                            key={`${permissions[0].user}`}
-                            permissions={permissions}
-                        />
-                    ))
-                    .values() // Take only the components
-                    .value()
-                }
-            </Col>
+            <Row>
+                <Col xs={12} className={styles.permissionRow}>
+                    {_.chain(this.props.permissions)
+                        .groupBy(p => p.user) // Arrays of permissions with users as keys
+                        .mapValues(permissions => (
+                            <ShareDialogPermission
+                                resourceType={this.props.resourceType}
+                                resourceId={this.props.resourceId}
+                                key={`${permissions[0].user}`}
+                                permissions={permissions}
+                            />
+                        ))
+                        .values() // Take only the components
+                        .value()
+                    }
+                </Col>
+            </Row>
         )
     }
 }

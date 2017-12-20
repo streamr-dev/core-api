@@ -37,12 +37,10 @@ export class ShareDialogContent extends Component<Props> {
                         resourceType={this.props.resourceType}
                         resourceId={this.props.resourceId}
                     />
-                    <Row>
-                        <ShareDialogPermissionRow
-                            resourceType={this.props.resourceType}
-                            resourceId={this.props.resourceId}
-                        />
-                    </Row>
+                    <ShareDialogPermissionRow
+                        resourceType={this.props.resourceType}
+                        resourceId={this.props.resourceId}
+                    />
                     <ShareDialogInputRow
                         resourceType={this.props.resourceType}
                         resourceId={this.props.resourceId}

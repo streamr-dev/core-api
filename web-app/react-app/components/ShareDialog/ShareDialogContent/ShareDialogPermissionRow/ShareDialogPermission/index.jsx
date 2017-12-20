@@ -44,7 +44,7 @@ export class ShareDialogPermission extends Component<Props> {
                     </div>
                 ) : null}
                 <span className={styles.userLabel}>
-                    {this.props.permissions[0].user}
+                    {this.props.permissions[0] && this.props.permissions[0].user}
                 </span>
                 <Select
                     className={styles.select}
