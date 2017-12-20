@@ -11,11 +11,10 @@ import type {DashboardReducerState as DashboardState} from '../../../../flowtype
 
 type Props = {
     canvases: Array<Canvas>,
-    showCanvases: boolean,
+    showCanvases: boolean
 }
 
 export class CanvasList extends Component<Props> {
-    
     render() {
         return this.props.showCanvases ? (
             <ul className="navigation">
@@ -31,8 +30,7 @@ export class CanvasList extends Component<Props> {
 }
 
 export const mapStateToProps = ({canvas, dashboard}: {canvas: CanvasState, dashboard: DashboardState}) => {
-    const dbState = dashboard
-    const db = dbState.dashboardsById[dbState.openDashboard.id] || {}
+    const db = dashboard.dashboardsById[dashboard.openDashboard.id] || {}
     const canWrite = db.ownPermissions && db.ownPermissions.includes('write')
     return {
         canvases: canvas.list || [],
