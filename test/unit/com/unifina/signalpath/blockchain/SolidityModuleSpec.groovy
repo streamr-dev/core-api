@@ -11,6 +11,9 @@ import spock.lang.Specification
 class SolidityModuleSpec extends Specification {
 	SolidityModule module
 
+	def deployArgs
+	def sentWei
+
 	def setup() {
 		module = new SolidityModule()
 		module.init()
@@ -19,7 +22,13 @@ class SolidityModuleSpec extends Specification {
 
 		module.web3 = Stub(SolidityModule.StreamrWeb3Interface) {
 			compile(_) >> { EthereumContract.fromMap(applyConfig.contract) }
-			deploy(_) >> { EthereumContract.fromMap(applyConfig.contract) }
+			deploy(_, _, _) >> { code, args, wei ->
+				deployArgs = args
+				sentWei = wei
+				def contract = EthereumContract.fromMap(applyConfig.contract)
+				contract.address = "0x60f78aa68266c87fecec6dcb27672455111bb347"
+				return contract
+			}
 		}
 
 		// mock the key for ethereum account
@@ -50,11 +59,34 @@ class SolidityModuleSpec extends Specification {
 		module.inputs*.name == ["ethAccount", "value", "addr", "initial ETH"]
 	}
 
+	void "Values are sent correctly to deploy function with non-payable constructor"() {
+		when:
+		applyConfig.contract.abi[2].payable = false
+		applyConfig << [deploy: true]
+		module.onConfiguration(applyConfig)
+
+		then:
+		deployArgs == [3, "0x6e6adf6e579d83f8f1bc388a392c1a130b8f8d0cae6250612eb2aab4e945b1f0"]
+		sentWei == "0"
+	}
+
+	void "Values are sent correctly to deploy function with payable constructor"() {
+		when:
+		applyConfig.contract.abi[2].payable = true
+		applyConfig.params << initialEthInputConfig
+		applyConfig << [deploy: true]
+		module.onConfiguration(applyConfig)
+
+		then:
+		deployArgs == [3, "0x6e6adf6e579d83f8f1bc388a392c1a130b8f8d0cae6250612eb2aab4e945b1f0"]
+		sentWei == "12000000000000000000"
+	}
+
+
 	Map applyConfig = new JsonSlurper().parseText('''
 {
     "contract":
     {
-        "address": "0x60f78aa68266c87fecec6dcb27672455111bb347",
         "abi": [
         {
             "constant": true,
@@ -242,4 +274,21 @@ class SolidityModuleSpec extends Specification {
     }
 }
 	''')
+
+	Map initialEthInputConfig = new JsonSlurper().parseText('''{
+		"canConnect": true,
+		"export": false,
+		"connected": false,
+		"type": "Double",
+		"requiresConnection": false,
+		"canToggleDrivingInput": true,
+		"id": "ep_VcrH83D7Rci0vSgs_oJA-Q",
+		"name": "initial ETH",
+		"drivingInput": false,
+		"longName": "PayByUse.initial ETH",
+		"value": 12,
+		"defaultValue": 0,
+		"acceptedTypes": ["Double"]
+	}''')
+
 }
