@@ -53,8 +53,11 @@ class CanvasApiController {
 		}
 		else {
 			Map result = canvasService.reconstruct(canvas, request.apiUser)
+			// Need to discard this change below to prevent auto-update
 			canvas.json = result as JSON
 			render canvas.toMap() as JSON
+			// Prevent auto-update of the canvas
+			canvas.discard()
 		}
 	}
 

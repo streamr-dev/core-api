@@ -172,6 +172,17 @@ log4j = {
  }
 
 /**
+ * Streamr cluster config
+ */
+streamr.cluster.internalPort = System.getProperty("streamr.cluster.internalPort") ? Integer.parseInt(System.getProperty("streamr.cluster.internalPort")) : 8081
+streamr.cluster.internalProtocol = System.getProperty("streamr.cluster.internalProtocol") ?: "http"
+environments {
+	production {
+		streamr.cluster.internalPort = System.getProperty("streamr.cluster.internalPort") ? Integer.parseInt(System.getProperty("streamr.cluster.internalPort")) : 8080
+	}
+}
+
+/**
  * Tour config
  */
 streamr.tours.enabled = true
@@ -276,12 +287,12 @@ environments {
  */
 streamr.ethereum.defaultNetwork = "rinkeby"
 streamr.ethereum.networks = System.getProperty("streamr.ethereum.networks") ? new Gson().fromJson(System.getProperty("streamr.ethereum.networks")) : [
-		ropsten: "http://localhost:3000",
-		rinkeby: "http://localhost:3001"
+		ropsten: "http://ropsten:3000",
+		rinkeby: "http://rinkeby:3001"
 ]
 streamr.ethereum.rpcUrls = System.getProperty("streamr.ethereum.rpcUrls") ? new Gson().fromJson(System.getProperty("streamr.ethereum.rpcUrls")) : [
-	ropsten: "http://localhost:8545",
-	rinkeby: "http://localhost:8546"
+	ropsten: "http://ropsten:8545",
+	rinkeby: "http://rinkeby:8546"
 ]
 streamr.ethereum.address = System.getProperty("streamr.ethereum.address") ?: ""
 streamr.ethereum.key = System.getProperty("streamr.ethereum.key") ?: ""

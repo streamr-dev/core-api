@@ -23,6 +23,7 @@ import com.unifina.utils.NetworkInterfaceUtils
 import grails.converters.JSON
 import grails.transaction.NotTransactional
 import grails.transaction.Transactional
+import grails.util.Holders
 import groovy.transform.CompileStatic
 import org.apache.log4j.Logger
 
@@ -210,13 +211,12 @@ class SignalPathService {
 		String runnerId = runner.runnerId
 		canvas.runner = runnerId
 
-		// Use the link generator to get the protocol and port, but use network IP address
-		//   as the host to get the address of this individual server
-		String root = grailsLinkGenerator.link(uri:"/", absolute: true)
-		URL url = new URL(root)
-
+		def port = Holders.getConfig().streamr.cluster.internalPort
+		def protocol = Holders.getConfig().streamr.cluster.internalProtocol
 		canvas.server = NetworkInterfaceUtils.getIPAddress(grailsApplication.config.streamr.ip.address.prefixes ?: []).getHostAddress()
-		canvas.requestUrl = url.protocol+"://"+canvas.server+":"+(url.port>0 ? url.port : url.defaultPort)+grailsLinkGenerator.link(uri:"/api/v1/canvases/$canvas.id", absolute: false)
+
+		// Form an internal url that Streamr nodes will use to directly address this machine and the canvas that runs on it
+		canvas.requestUrl = protocol + "://" + canvas.server + ":" + port + grailsLinkGenerator.link(uri: "/api/v1/canvases/$canvas.id", absolute: false)
 		canvas.state = Canvas.State.RUNNING
 
 		canvas.save()
