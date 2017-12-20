@@ -2,7 +2,6 @@ package com.unifina.signalpath.blockchain
 
 import com.unifina.domain.security.IntegrationKey
 import com.unifina.domain.security.SecUser
-import com.unifina.service.EthereumIntegrationKeyService
 import com.unifina.utils.Globals
 import grails.test.mixin.Mock
 import groovy.json.JsonSlurper
