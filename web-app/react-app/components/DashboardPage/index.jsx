@@ -1,61 +1,57 @@
 // @flow
 
 import React, {Component} from 'react'
-import {object} from 'prop-types'
 import {connect} from 'react-redux'
 import {Helmet} from 'react-helmet'
-import { ShortcutManager, Shortcuts } from 'react-shortcuts'
 import Notifier from '../Notifier'
 import Sidebar from './Sidebar/index'
 import Editor from './Editor/index'
-import {updateAndSaveDashboard} from '../../actions/dashboard'
+import uuid from 'uuid'
 
-import store from '../../stores/dashboardPageStore'
+import {getDashboard, getMyDashboardPermissions, newDashboard, openDashboard} from '../../actions/dashboard'
+import {getRunningCanvases} from '../../actions/canvas'
 
-import type { Dashboard } from '../../flowtype/dashboard-types'
+
+import type { Dashboard, State as DashboardState } from '../../flowtype/dashboard-types'
 import type { Canvas } from '../../flowtype/canvas-types'
-import type {ReactChildren} from 'react-flow-types'
+import type {Node} from 'react'
 
 import styles from './dashboardPage.pcss'
 
-const keymap = {
-    'MAIN': {
-        'SAVE': ['ctrl+s', 'command+s']
+type Props = {
+    dashboard: Dashboard,
+    canvases: Array<Canvas>,
+    children: Node | Array<Node>,
+    getDashboard: (id: string) => void,
+    getMyDashboardPermissions: (id: string) => void,
+    newDashboard: (id: string) => void,
+    getRunningCanvases: () => void,
+    openDashboard: (id: string) => void,
+    match: {
+        params: {
+            id?: string
+        }
     }
 }
 
-const shortcutManager = new ShortcutManager(keymap)
-
-class DashboardPage extends Component {
-    _handleShortcuts = (action, event) => {
-        switch (action) {
-            case 'SAVE': {
-                event.preventDefault()
-                store.dispatch(updateAndSaveDashboard(this.props.dashboard))
-                break
-            }
+export class DashboardPage extends Component<Props> {
+    
+    componentWillMount() {
+        let id = this.props.match.params.id
+        if (id !== undefined) {
+            this.props.getDashboard(id)
+            this.props.getMyDashboardPermissions(id)
+        } else {
+            id = uuid.v4()
+            this.props.newDashboard(id)
         }
-    }
-    
-    static childContextTypes = {
-        shortcuts: object
-    }
-    
-    getChildContext() {
-        return {
-            shortcuts: shortcutManager
-        }
-    }
-    
-    props: {
-        dashboard: Dashboard,
-        canvases: Array<Canvas>,
-        children: ReactChildren
+        this.props.getRunningCanvases()
+        this.props.openDashboard(id)
     }
     
     render() {
         return (
-            <Shortcuts name="MAIN" handler={this._handleShortcuts} className={styles.shortcutHandler}>
+            <div className={styles.dashboardPage}>
                 <Helmet>
                     <title>{this.props.dashboard && this.props.dashboard.name || 'New Dashboard'}</title>
                 </Helmet>
@@ -63,13 +59,31 @@ class DashboardPage extends Component {
                 <Sidebar/>
                 <Editor/>
                 {this.props.children}
-            </Shortcuts>
+            </div>
         )
     }
 }
 
-const mapStateToProps = ({dashboard: {dashboardsById, openDashboard}}) => ({
+export const mapStateToProps = ({dashboard: {dashboardsById, openDashboard}}: {dashboard: DashboardState}) => ({
     dashboard: dashboardsById[openDashboard.id]
 })
 
-export default connect(mapStateToProps, null)(DashboardPage)
+export const mapDispatchToProps = (dispatch: Function) => ({
+    getDashboard(id: string) {
+        dispatch(getDashboard(id))
+    },
+    getMyDashboardPermissions(id: string) {
+        dispatch(getMyDashboardPermissions(id))
+    },
+    newDashboard(id: string) {
+        dispatch(newDashboard(id))
+    },
+    getRunningCanvases() {
+        dispatch(getRunningCanvases())
+    },
+    openDashboard(id: string) {
+        dispatch(openDashboard(id))
+    }
+})
+
+export default connect(mapStateToProps, mapDispatchToProps)(DashboardPage)

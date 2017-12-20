@@ -12,13 +12,18 @@ import ShareDialogOwnerRow from './ShareDialogOwnerRow'
 import type {Permission} from '../../../flowtype/permission-types'
 import {getResourcePermissions} from '../../../actions/permission'
 
-export class ShareDialogContent extends Component {
-    
-    props: {
-        resourceType: Permission.resourceType,
-        resourceId: Permission.resourceId,
-        getResourcePermissions: Function
-    }
+type Props = {
+    permissions: Array<Permission>,
+    resourceType: Permission.resourceType,
+    resourceId: Permission.resourceId,
+    anonymousPermission: ?Permission,
+    owner: ?string,
+    getResourcePermissions: () => {},
+    addPermission: (permission: Permission) => {},
+    removePermission: (permission: Permission) => {}
+}
+
+export class ShareDialogContent extends Component<Props> {
     
     componentWillMount() {
         this.props.getResourcePermissions()
@@ -48,7 +53,7 @@ export class ShareDialogContent extends Component {
     }
 }
 
-const mapDispatchToProps = (dispatch, ownProps) => ({
+export const mapDispatchToProps = (dispatch: Function, ownProps: Props) => ({
     getResourcePermissions() {
         dispatch(getResourcePermissions(ownProps.resourceType, ownProps.resourceId))
     }

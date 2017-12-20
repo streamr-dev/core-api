@@ -12,42 +12,28 @@ import IntegrationKeyHandlerTable from './IntegrationKeyHandlerTable'
 
 import styles from './integrationKeyHandlerSegment.pcss'
 
-import type {IntegrationKey} from '../../../../flowtype/integration-key-types'
+import type {IntegrationKey, State as IntegrationKeyState} from '../../../../flowtype/integration-key-types'
 
-export class IntegrationKeyHandlerSegment extends Component {
-    
-    onNew: Function
-    onDelete: Function
-    
-    props: {
-        tableFields: Array<string>,
-        inputFields: Array<string>,
-        integrationKeys: Array<{
-            id: string,
-            name: string,
-            json: {}
-        }>,
-        service: string,
-        name: string,
-        className?: string,
-        getIntegrationKeysByService: () => void,
-        createIntegrationKey: () => void,
-        deleteIntegrationKey: () => void
-    }
-    
-    constructor() {
-        super()
-        
-        this.onNew = this.onNew.bind(this)
-        this.onDelete = this.onDelete.bind(this)
-    }
+type Props = {
+    tableFields: Array<string>,
+    inputFields: Array<string>,
+    integrationKeys: Array<IntegrationKey>,
+    service: IntegrationKey.service,
+    name: IntegrationKey.name,
+    className: string,
+    deleteIntegrationKey: (id: IntegrationKey.id) => void,
+    createIntegrationKey: (key: IntegrationKey) => void,
+    getIntegrationKeysByService: (service: IntegrationKey.service) => void
+}
+
+export class IntegrationKeyHandlerSegment extends Component<Props> {
     
     componentDidMount() {
         // TODO: Move to (yet non-existent) router
         this.props.getIntegrationKeysByService(this.props.service)
     }
     
-    onNew(integrationKey: IntegrationKey) {
+    onNew = (integrationKey: IntegrationKey) => {
         const name = integrationKey.name
         const service = this.props.service
         delete integrationKey.name
@@ -58,7 +44,7 @@ export class IntegrationKeyHandlerSegment extends Component {
         })
     }
     
-    onDelete(id: IntegrationKey.id) {
+    onDelete = (id: IntegrationKey.id) => {
         this.props.deleteIntegrationKey(id)
     }
     
@@ -84,19 +70,19 @@ export class IntegrationKeyHandlerSegment extends Component {
     }
 }
 
-const mapStateToProps = ({integrationKey: {listsByService, error}}, props) => ({
+export const mapStateToProps = ({integrationKey: {listsByService, error}}: {integrationKey: IntegrationKeyState}, props: Props) => ({
     integrationKeys: listsByService[props.service] || [],
     error
 })
 
-const mapDispatchToProps = (dispatch: Function) => ({
-    deleteIntegrationKey(id) {
+export const mapDispatchToProps = (dispatch: Function) => ({
+    deleteIntegrationKey(id: IntegrationKey.id) {
         dispatch(deleteIntegrationKey(id))
     },
-    createIntegrationKey(key) {
+    createIntegrationKey(key: IntegrationKey) {
         dispatch(createIntegrationKey(key))
     },
-    getIntegrationKeysByService(service) {
+    getIntegrationKeysByService(service: IntegrationKey.service) {
         dispatch(getIntegrationKeysByService(service))
     }
 })

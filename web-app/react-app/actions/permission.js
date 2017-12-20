@@ -106,7 +106,7 @@ export const removeAllResourcePermissionsByUser = (resourceType: Permission.reso
     
 }
 
-export const saveUpdatedResourcePermissions = (resourceType: Permission.resourceType, resourceId: Permission.resourceId) => (dispatch: Function, getState: Function) => {
+export const saveUpdatedResourcePermissions = (resourceType: Permission.resourceType, resourceId: Permission.resourceId): any => (dispatch: Function, getState: Function): Promise<void> => {
     const state = getState()
     const permissions = state.permission.byTypeAndId[resourceType] && state.permission.byTypeAndId[resourceType][resourceId] || []
     

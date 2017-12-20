@@ -60,10 +60,10 @@ class DashboardService {
 	 * @param user
 	 * @return
 	 */
-	Dashboard create(SaveDashboardCommand validCommand, SecUser user, String id = IdGenerator.getShort()) {
+	Dashboard create(SaveDashboardCommand validCommand, SecUser user) {
 		Dashboard dashboard = new Dashboard(validCommand.properties.subMap(["name", "layout"]))
 
-		dashboard.id = id
+		dashboard.id = IdGenerator.getShort()
 		dashboard.user = user
 		dashboard.save(failOnError: true)
 

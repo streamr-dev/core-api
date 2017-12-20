@@ -12,34 +12,26 @@ import ShareDialog from '../../../ShareDialog'
 
 import {updateAndSaveDashboard} from '../../../../actions/dashboard'
 
-import type { Dashboard } from '../../../../flowtype/dashboard-types'
+import type { Dashboard, DashboardReducerState as DashboardState } from '../../../../flowtype/dashboard-types'
 
-class DashboardTools extends Component {
-    state: {
-        shareDialogIsOpen: boolean
-    }
-    onSave: Function
-    props: {
-        dashboard: Dashboard,
-        openDashboard: {
-            new: boolean
-        },
-        dispatch: Function,
-        router: any,
-        canShare: boolean,
-        canWrite: boolean,
-        updateAndSaveDashboard: Function
+type Props = {
+    dashboard: Dashboard,
+    canShare: boolean,
+    canWrite: boolean,
+    updateAndSaveDashboard: Function
+}
+
+type State = {
+    shareDialogIsOpen: boolean
+}
+
+export class DashboardTools extends Component<Props, State> {
+
+    state = {
+        shareDialogIsOpen: false
     }
     
-    constructor() {
-        super()
-        this.state = {
-            shareDialogIsOpen: false
-        }
-        this.onSave = this.onSave.bind(this)
-    }
-
-    onSave() {
+    onSave = () => {
         this.props.updateAndSaveDashboard(this.props.dashboard)
     }
     
@@ -89,10 +81,10 @@ class DashboardTools extends Component {
     }
 }
 
-const mapStateToProps = (state) => parseDashboard(state)
+export const mapStateToProps = (state: {dashboard: DashboardState}) => parseDashboard(state)
 
-const mapDispatchToProps = (dispatch) => ({
-    updateAndSaveDashboard(db) {
+export const mapDispatchToProps = (dispatch: Function) => ({
+    updateAndSaveDashboard(db: Dashboard) {
         return dispatch(updateAndSaveDashboard(db))
     }
 })

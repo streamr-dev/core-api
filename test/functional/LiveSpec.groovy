@@ -1,11 +1,11 @@
 import com.unifina.domain.data.Stream
 import com.unifina.service.StreamService
-import core.LoginTester1Spec
-import core.mixins.CanvasMixin
-import core.mixins.ConfirmationMixin
-import core.mixins.StreamMixin
-import core.pages.CanvasListPage
-import core.pages.CanvasPage
+import LoginTester1Spec
+import mixins.CanvasMixin
+import mixins.ConfirmationMixin
+import mixins.StreamMixin
+import pages.CanvasListPage
+import pages.CanvasPage
 import spock.lang.Shared
 
 public class LiveSpec extends LoginTester1Spec {
@@ -122,7 +122,7 @@ public class LiveSpec extends LoginTester1Spec {
 			$(".table .td", text:"LiveSpec dead").click()
 		then: "navigate to show page that shows an error"
 			waitFor {at CanvasPage}
-			waitFor {$(".alert.alert-danger").displayed}
+			waitFor(20) {$(".alert.alert-danger").displayed}
 	}
 	
 	def "don't subscribe to stopped SignalPath channels"() {
@@ -144,7 +144,7 @@ public class LiveSpec extends LoginTester1Spec {
 		when: "selecting a dead canvas"
 			$(".table .td", text:"LiveSpec dead").click()
 		then: "navigate to editor page with correct run button state"
-			waitFor {
+			waitFor(20) {
 				at CanvasPage
 				runRealtimeButton.text().contains("Stop")
 			}
@@ -158,7 +158,7 @@ public class LiveSpec extends LoginTester1Spec {
 		when: "confirmation accepted"
 			acceptConfirmation(".stop-confirmation-dialog")
 		then: "must show alert and start button"
-			waitFor {
+			waitFor(20) {
 				$(".alert.alert-danger").displayed
 				runRealtimeButton.text().contains("Start")
 			}

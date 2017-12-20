@@ -452,16 +452,6 @@ public class SignalPath extends ModuleWithUI {
 	}
 
 	@Override
-	protected void onStop() {
-		super.onStop();
-		if (getGlobals().isAdhoc()) {
-			Map<String, Object> byeMsg = new HashMap<>();
-			byeMsg.put("_bye", true);
-			pushToUiChannel(byeMsg);
-		}
-	}
-
-	@Override
 	public SignalPath getRootSignalPath() {
 		if (cachedRootSignalPath == null) {
 			if (this.isRoot()) {

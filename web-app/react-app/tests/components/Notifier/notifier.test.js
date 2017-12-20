@@ -88,7 +88,6 @@ describe('Notifier', () => {
         beforeEach(() => {
             notifier = mount(<Notifier notifications={{}} />)
             notifier.instance().createNotification = createNotificationSpy
-            //notifier.instance().prototype.createNotification = createNotificationSpy
         })
         afterEach(() => {
             createNotificationSpy.reset()

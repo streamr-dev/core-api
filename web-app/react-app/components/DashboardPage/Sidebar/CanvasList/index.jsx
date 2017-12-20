@@ -6,15 +6,15 @@ import CanvasInList from './CanvasInList'
 
 import styles from './canvasList.pcss'
 
-import type {Canvas} from '../../../../flowtype/canvas-types'
+import type {Canvas, State as CanvasState} from '../../../../flowtype/canvas-types'
+import type {DashboardReducerState as DashboardState} from '../../../../flowtype/dashboard-types'
 
-class CanvasList extends Component {
-    
-    props: {
-        canvases: Array<Canvas>,
-        showCanvases: boolean,
-    }
-    
+type Props = {
+    canvases: Array<Canvas>,
+    showCanvases: boolean
+}
+
+export class CanvasList extends Component<Props> {
     render() {
         return this.props.showCanvases ? (
             <ul className="navigation">
@@ -29,9 +29,8 @@ class CanvasList extends Component {
     }
 }
 
-const mapStateToProps = ({canvas, dashboard}) => {
-    const dbState = dashboard
-    const db = dbState.dashboardsById[dbState.openDashboard.id] || {}
+export const mapStateToProps = ({canvas, dashboard}: {canvas: CanvasState, dashboard: DashboardState}) => {
+    const db = dashboard.dashboardsById[dashboard.openDashboard.id] || {}
     const canWrite = db.ownPermissions && db.ownPermissions.includes('write')
     return {
         canvases: canvas.list || [],

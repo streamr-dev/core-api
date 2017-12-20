@@ -9,28 +9,23 @@ import {addDashboardItem, removeDashboardItem} from '../../../../../../../action
 import styles from './moduleInModuleList.pcss'
 import uuid from 'uuid'
 
-import type { Dashboard, DashboardItem } from '../../../../../../../flowtype/dashboard-types'
+import type { Dashboard, DashboardItem, DashboardState } from '../../../../../../../flowtype/dashboard-types'
 import type { Canvas, CanvasModule } from '../../../../../../../flowtype/canvas-types'
 
-class ModuleInModuleList extends Component {
+type Props = {
+    dashboard: Dashboard,
+    module: CanvasModule,
+    canvasId: Canvas.id,
+    checked: boolean,
+    dispatch: Function,
+    id: Dashboard.id,
+    addDashboardItem: (item: DashboardItem) => void,
+    removeDashboardItem: (item: DashboardItem) => void
+}
+
+export class ModuleInModuleList extends Component<Props> {
     
-    onClick: Function
-    
-    props: {
-        dashboard: Dashboard,
-        module: CanvasModule,
-        canvasId: Canvas.id,
-        checked: boolean,
-        dispatch: Function,
-        id: Dashboard.id
-    }
-    
-    constructor() {
-        super()
-        this.onClick = this.onClick.bind(this)
-    }
-    
-    onClick() {
+    onClick = () => {
         const id = uuid.v4()
         const dbItem: DashboardItem = {
             id,
@@ -38,14 +33,12 @@ class ModuleInModuleList extends Component {
             module: this.props.module.hash,
             canvas: this.props.canvasId,
             webcomponent: this.props.module.uiChannel.webcomponent,
-            size: 'small',
-            ord: 0,
             title: this.props.module.name
         }
         if (this.props.checked) {
-            this.props.dispatch(removeDashboardItem(this.props.dashboard, dbItem))
+            this.props.removeDashboardItem(this.props.dashboard, dbItem)
         } else {
-            this.props.dispatch(addDashboardItem(this.props.dashboard, dbItem))
+            this.props.addDashboardItem(this.props.dashboard, dbItem)
         }
     }
     
@@ -62,7 +55,7 @@ class ModuleInModuleList extends Component {
     }
 }
 
-const mapStateToProps = ({dashboard}, ownProps) => {
+export const mapStateToProps = ({dashboard}: {dashboard: DashboardState}, ownProps: Props) => {
     const dbState = dashboard
     const db = dbState.dashboardsById[dbState.openDashboard.id] || {}
     return {
@@ -71,4 +64,13 @@ const mapStateToProps = ({dashboard}, ownProps) => {
     }
 }
 
-export default connect(mapStateToProps)(ModuleInModuleList)
+export const mapDispatchToProps = (dispatch: Function) => ({
+    addDashboardItem(item: DashboardItem) {
+        dispatch(addDashboardItem(item))
+    },
+    removeDashboardItem(item: DashboardItem) {
+        dispatch(removeDashboardItem(item))
+    }
+})
+
+export default connect(mapStateToProps, mapDispatchToProps)(ModuleInModuleList)

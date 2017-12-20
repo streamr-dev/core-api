@@ -2,8 +2,9 @@ import assert from 'assert-diff'
 import thunk from 'redux-thunk'
 import configureMockStore from 'redux-mock-store'
 import moxios from 'moxios'
+import sinon from 'sinon'
 
-import * as actions from '../../actions/dashboard'
+import * as originalActions from '../../actions/dashboard'
 import * as notificationActions from '../../actions/notification'
 
 const middlewares = [ thunk ]
@@ -15,6 +16,7 @@ global.Streamr = {
 
 describe('Dashboard actions', () => {
     let store
+    let actions
     
     beforeEach(() => {
         moxios.install()
@@ -25,6 +27,7 @@ describe('Dashboard actions', () => {
             },
             error: null
         })
+        actions = originalActions
     })
     
     
@@ -390,17 +393,13 @@ describe('Dashboard actions', () => {
                 const db = {
                     id: 'test',
                     items: [{
-                        canvas: {
-                            id: 'a'
-                        },
+                        canvas: 'a',
                         module: 0,
                         thirdField: 'a'
                     }]
                 }
                 assert.deepStrictEqual(actions.addDashboardItem(db, {
-                    canvas: {
-                        id: 'b'
-                    },
+                    canvas: 'b',
                     module: 0,
                     thirdField: 'test'
                 }), {
@@ -408,15 +407,11 @@ describe('Dashboard actions', () => {
                     dashboard: {
                         id: 'test',
                         items: [{
-                            canvas: {
-                                id: 'a'
-                            },
+                            canvas: 'a',
                             module: 0,
                             thirdField: 'a'
                         }, {
-                            canvas: {
-                                id: 'b'
-                            },
+                            canvas: 'b',
                             module: 0,
                             thirdField: 'test'
                         }]
@@ -430,23 +425,17 @@ describe('Dashboard actions', () => {
                 const db = {
                     id: 'test',
                     items: [{
-                        canvas: {
-                            id: 'a'
-                        },
+                        canvas: 'a',
                         module: 0,
                         thirdField: 'a'
                     }, {
-                        canvas: {
-                            id: 'b'
-                        },
+                        canvas: 'b',
                         module: 0,
                         thirdField: 'a'
                     }]
                 }
                 assert.deepStrictEqual(actions.updateDashboardItem(db, {
-                    canvas: {
-                        id: 'b'
-                    },
+                    canvas: 'b',
                     module: 0,
                     thirdField: 'test'
                 }), {
@@ -454,15 +443,11 @@ describe('Dashboard actions', () => {
                     dashboard: {
                         id: 'test',
                         items: [{
-                            canvas: {
-                                id: 'a'
-                            },
+                            canvas: 'a',
                             module: 0,
                             thirdField: 'a'
                         }, {
-                            canvas: {
-                                id: 'b'
-                            },
+                            canvas: 'b',
                             module: 0,
                             thirdField: 'test'
                         }]
@@ -476,22 +461,16 @@ describe('Dashboard actions', () => {
                 assert.deepStrictEqual(actions.removeDashboardItem({
                     id: 'test',
                     items: [{
-                        canvas: {
-                            id: 'a'
-                        },
+                        canvas: 'a',
                         module: 0,
                         thirdField: 'a'
                     }, {
-                        canvas: {
-                            id: 'b'
-                        },
+                        canvas: 'b',
                         module: 0,
                         thirdField: 'a'
                     }]
                 }, {
-                    canvas: {
-                        id: 'b'
-                    },
+                    canvas: 'b',
                     module: 0,
                     thirdField: 'test'
                 }), {
@@ -499,9 +478,7 @@ describe('Dashboard actions', () => {
                     dashboard: {
                         id: 'test',
                         items: [{
-                            canvas: {
-                                id: 'a'
-                            },
+                            canvas: 'a',
                             module: 0,
                             thirdField: 'a'
                         }]

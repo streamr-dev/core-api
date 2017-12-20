@@ -7,16 +7,16 @@ import _ from 'lodash'
 import ShareDialogPermission from './ShareDialogPermission'
 
 import styles from './shareDialogPermissionRow.pcss'
-import type {Permission} from '../../../../flowtype/permission-types'
+import type {Permission, State as PermissionState} from '../../../../flowtype/permission-types'
 import {Col} from 'react-bootstrap'
 
-export class ShareDialogPermissionRow extends Component {
-    
-    props: {
-        permissions: Array<Permission>,
-        resourceType: Permission.resourceType,
-        resourceId: Permission.resourceId
-    }
+type Props = {
+    permissions: Array<Permission>,
+    resourceType: Permission.resourceType,
+    resourceId: Permission.resourceId
+}
+
+export class ShareDialogPermissionRow extends Component<Props> {
     
     render() {
         return (
@@ -39,7 +39,7 @@ export class ShareDialogPermissionRow extends Component {
     }
 }
 
-const mapStateToProps = ({permission: {byTypeAndId}}, ownProps) => {
+export const mapStateToProps = ({permission: {byTypeAndId}}: {permission: PermissionState}, ownProps: Props) => {
     const byType = byTypeAndId[ownProps.resourceType] || {}
     const permissions = (byType[ownProps.resourceId] || []).filter(p => !p.removed)
     return {

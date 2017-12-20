@@ -7,88 +7,116 @@ import path from 'path'
 import createLink from '../../../../helpers/createLink'
 
 import TitleRow from './DashboardItemTitleRow'
-import WebComponent from '../../../WebComponent'
 
 import styles from './dashboardItem.pcss'
 
-import type {Dashboard, DashboardItem as DBItem} from '../../../../flowtype/dashboard-types'
+import type {Dashboard, DashboardItem as DBItem, DashboardReducerState as DashboardState} from '../../../../flowtype/dashboard-types'
 
-class DashboardItem extends Component {
-    webcomponent: HTMLElement
-    onResize: Function
-    createWebcomponentUrl: Function
-    props: {
-        item: DBItem,
-        dashboard: Dashboard,
-        layout?: DBItem.layout,
-        dragCancelClassName?: string,
-        currentLayout: ?{},
-        showError: Function
+const config = require('../../dashboardConfig')
+
+type Props = {
+    item: DBItem,
+    dashboard: Dashboard,
+    layout?: DBItem.layout,
+    dragCancelClassName?: string,
+    currentLayout: ?{},
+    showError: Function,
+    isLocked: boolean,
+    config: {
+        components: {}
     }
+}
+
+type State = {
+    height: ?number,
+    width: ?number
+}
+
+export class DashboardItem extends Component<Props, State> {
+    wrapper: ?HTMLElement
     static defaultProps = {
         item: {},
         dashboard: {}
     }
-    
-    constructor() {
-        super()
-        this.onResize = this.onResize.bind(this)
-        this.createWebcomponentUrl = this.createWebcomponentUrl.bind(this)
+    state = {
+        height: null,
+        width: null
     }
     
-    componentDidMount() {
-        // TODO: why it does not work without this?
-        setTimeout(() => this.onResize(), 500)
-    }
-
-    componentWillReceiveProps(props) {
-        if (props.currentLayout) {
-            this.onResize()
-        }
-    }
-    
-    onResize() {
-        const event = new Event('resize', {
-            bubbles: false,
-            cancelable: true
+    onResize = () => {
+        this.setState({
+            height: this.wrapper && this.wrapper.offsetHeight,
+            width: this.wrapper && this.wrapper.offsetWidth,
         })
-        if (this.webcomponent) {
-            this.webcomponent.dispatchEvent(event)
-        }
     }
     
-    createWebcomponentUrl() {
+    componentWillReceiveProps = () => {
+        this.onResize()
+    }
+    
+    createWebcomponentUrl = () => {
         const {dashboard, item: {canvas, module: itemModule}} = this.props
         // If the db is new the user must have the ownership of the canvas so use url /api/v1/canvases/<canvasId>/modules/<module>
         // Else use the url /api/v1/dashboards/<dashboardId>/canvases/<canvasId>/modules/<module>
         return createLink(path.resolve(
             '/api/v1',
-            !dashboard.new ? 'dashboards' : '',
-            !dashboard.new ? dashboard.id.toString() : '',
-            'canvases',
-            canvas.toString(),
-            'modules',
-            itemModule.toString()
+            !dashboard.new ? `dashboards/${dashboard.id}` : '',
+            `canvases/${canvas}`,
+            `modules/${itemModule}`
         ))
     }
-
+    
+    onError = (err: {
+        message: string,
+        stack: string
+    }) => {
+        const inProd = process.env.NODE_ENV === 'production'
+        this.props.showError(inProd ? 'Something went wrong!' : err)
+        if (!inProd) {
+            console.error(err.stack)
+        }
+    }
+    
+    createCustomComponent = () => {
+        const {item, config: conf} = this.props
+        
+        const {component, props} = conf.components[item.webcomponent] || {}
+        
+        const CustomComponent = component || (() => (
+            <div style={{
+                color: 'red',
+                textAlign: 'center'
+            }}>
+                Sorry, unknown component:(
+            </div>
+        ))
+        
+        const customProps = props || {}
+        
+        return CustomComponent ? (
+            <CustomComponent
+                url={this.createWebcomponentUrl()}
+                height={this.state.height}
+                width={this.state.width}
+                onError={this.onError}
+                {...customProps}
+            />
+        ) : null
+    }
+    
     render() {
         const {item} = this.props
         return (
             <div className={styles.dashboardItem}>
                 <div className={styles.header}>
-                    <TitleRow item={item} dragCancelClassName={this.props.dragCancelClassName}/>
+                    <TitleRow item={item} dragCancelClassName={this.props.dragCancelClassName} isLocked={this.props.isLocked}/>
                 </div>
                 <div className={`${styles.body} ${this.props.dragCancelClassName || ''}`}>
-                    <div className={`${styles.wrapper} ${styles[item.webcomponent] || item.webcomponent}`}>
-                        {item.webcomponent && (
-                            <WebComponent
-                                type={item.webcomponent}
-                                onError={this.props.showError}
-                                webComponentRef={(item: HTMLElement) => this.webcomponent = item}
-                                url={this.createWebcomponentUrl()}
-                            />
-                        )}
+                    <div
+                        className={`${styles.wrapper} ${styles[item.webcomponent] || item.webcomponent}`}
+                        ref={wrapper => this.wrapper = wrapper}
+                    >
+                        {this.createCustomComponent()}
                     </div>
                 </div>
             </div>
@@ -96,18 +124,16 @@ class DashboardItem extends Component {
     }
 }
 
-const mapStateToProps = ({dashboard: {dashboardsById, openDashboard}}) => {
-    const dashboard = dashboardsById[openDashboard.id]
-    return {
-        dashboard
-    }
-}
+export const mapStateToProps = ({dashboard: {dashboardsById, openDashboard}}: {dashboard: DashboardState}) => ({
+    dashboard: dashboardsById[openDashboard.id],
+    config: config
+})
 
-const mapDispatchToProps = (dispatch) => ({
-    showError({detail}) {
+export const mapDispatchToProps = (dispatch: Function) => ({
+    showError(message: string) {
         dispatch(showError({
             title: 'Error!',
-            message: detail.message
+            message
         }))
     }
 })

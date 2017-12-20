@@ -7,32 +7,31 @@ import ModuleList from './ModuleList/index'
 
 import styles from './canvasInList.pcss'
 
-export default class CanvasInList extends Component {
+type Props = {
+    canvas: Canvas
+}
+
+type State = {
+    open: boolean
+}
+
+export default class CanvasInList extends Component<Props, State> {
     
-    props: {
-        canvas: Canvas
+    state = {
+        open: false
     }
     
-    state: {
-        open: boolean
-    }
-    
-    constructor() {
-        super()
-        this.state = {
-            open: false
-        }
+    onClick = () => {
+        this.setState({
+            open: !this.state.open
+        })
     }
     
     render() {
         const {canvas} = this.props
         return (
             <li className={`canvas mm-dropdown mm-dropdown-root ${this.state.open ? 'open' : ''}`}>
-                <a className={styles.canvasInListLink} title={canvas.state} onClick={() => {
-                    this.setState({
-                        open: !this.state.open
-                    })
-                }}>
+                <a className={styles.canvasInListLink} title={canvas.state} onClick={this.onClick}>
                     <span className={`mm-text mmc-dropdown-delay animated fadeIn ${styles.canvasTitle} ${canvas.state === 'STOPPED' ? styles.stopped : ''}`}>
                         {canvas.name}
                     </span>
