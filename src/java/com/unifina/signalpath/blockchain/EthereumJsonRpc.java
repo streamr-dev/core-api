@@ -23,8 +23,8 @@ class EthereumJsonRpc {
 		try {
 			HttpResponse<JsonNode> response = formRequest(method, params, CALL_ID).asJson();
 
-			if (statusCodeIsNot2XX(response.getCode())) {
-				throw new HttpStatusError(response.getCode(), response.getBody());
+			if (statusCodeIsNot2XX(response.getStatus())) {
+				throw new HttpStatusError(response.getStatus(), response.getBody());
 			}
 
 			JSONObject responseJson = response.getBody().getObject();

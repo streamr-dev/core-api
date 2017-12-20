@@ -13,30 +13,23 @@ import styles from './shareDialogPermission.pcss'
 
 import type {Permission} from '../../../../../flowtype/permission-types'
 
+type Props = {
+    resourceType: Permission.resourceType,
+    resourceId: Permission.resourceId,
+    permissions: Array<Permission>,
+    setResourceHighestOperation: (value: Permission.operation) => {},
+    remove: () => {}
+}
+
 const operationsInOrder = ['read', 'write', 'share']
 
-export class ShareDialogPermission extends Component {
-    onSelect: Function
-    onRemove: Function
-    props: {
-        resourceType: Permission.resourceType,
-        resourceId: Permission.resourceId,
-        permissions: Array<Permission>,
-        setResourceHighestOperation: () => {},
-        remove: () => {}
-    }
+export class ShareDialogPermission extends Component<Props> {
     
-    constructor() {
-        super()
-        this.onSelect = this.onSelect.bind(this)
-        this.onRemove = this.onRemove.bind(this)
-    }
-    
-    onSelect({value}) {
+    onSelect = ({value}: {value: Permission.operation}) => {
         this.props.setResourceHighestOperation(value)
     }
     
-    onRemove() {
+    onRemove = () => {
         this.props.remove()
     }
     
@@ -73,8 +66,8 @@ export class ShareDialogPermission extends Component {
     }
 }
 
-export const mapDispatchToProps = (dispatch, ownProps) => ({
-    setResourceHighestOperation(value) {
+export const mapDispatchToProps = (dispatch: Function, ownProps: Props) => ({
+    setResourceHighestOperation(value: Permission.operation) {
         dispatch(setResourceHighestOperationForUser(ownProps.resourceType, ownProps.resourceId, ownProps.permissions[0].user, value))
     },
     remove() {

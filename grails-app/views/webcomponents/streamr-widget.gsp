@@ -68,7 +68,7 @@
 				}
 
 				// Can be overridden by module options
-				if (json.options && (json.options.uiResendAll.value || json.options.uiResendLast.value!=null)) {
+				if (json.options && (json.options.uiResendAll.value || json.options.uiResendLast.value != null)) {
 					resendOptions = {
 						resend_all: (json.options && json.options.uiResendAll ? json.options.uiResendAll.value : undefined),
 						resend_last: (json.options && (!json.options.uiResendAll || !json.options.uiResendAll.value) && json.options.uiResendLast ? json.options.uiResendLast.value : undefined)

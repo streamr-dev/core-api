@@ -30,7 +30,6 @@ Also:
 - Clone the repo
 - `git submodule update --init --recursive`
 - `npm install`
-- `npm run build`
 - `grails run-app`
 
 ## React and Redux components

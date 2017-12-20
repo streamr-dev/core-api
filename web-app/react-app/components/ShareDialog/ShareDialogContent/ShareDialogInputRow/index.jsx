@@ -11,24 +11,25 @@ import styles from './shareDialogInputRow.pcss'
 
 import type {Permission} from '../../../../flowtype/permission-types'
 
-export class ShareDialogInputRow extends Component {
+type Props = {
+    resourceType: Permission.resourceType,
+    resourceId: Permission.resourceId,
+    addPermission: (permission: Permission) => {},
+}
+
+export class ShareDialogInputRow extends Component<Props> {
     form: HTMLFormElement
-    onSubmit: Function
     
-    props: {
-        resourceType: Permission.resourceType,
-        resourceId: Permission.resourceId,
-        addPermission: (permission: Permission) => {},
-    }
-    
-    constructor() {
-        super()
-        this.onSubmit = this.onSubmit.bind(this)
-    }
-    
-    onSubmit(e: any) {
+    onSubmit = (e: {
+        preventDefault: () => void,
+        target: {
+            reset: () => void
+        }
+    }) => {
         e.preventDefault()
-        const data = serialize(e.target, {
+        const data: {
+            email: string
+        } = serialize(e.target, {
             hash: true
         })
         this.props.addPermission({
@@ -58,8 +59,8 @@ export class ShareDialogInputRow extends Component {
     }
 }
 
-export const mapDispatchToProps = (dispatch, ownProps) => ({
-    addPermission(permission) {
+export const mapDispatchToProps = (dispatch: Function, ownProps: Props) => ({
+    addPermission(permission: Permission) {
         dispatch(addResourcePermission(ownProps.resourceType, ownProps.resourceId, permission))
     }
 })

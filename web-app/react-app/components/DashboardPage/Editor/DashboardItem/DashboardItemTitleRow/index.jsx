@@ -9,49 +9,43 @@ import {removeDashboardItem, updateDashboardItem} from '../../../../../actions/d
 
 import styles from './dashboardItemTitleRow.pcss'
 
-import type {Dashboard, DashboardItem} from '../../../../../flowtype/dashboard-types'
+import type {Dashboard, DashboardItem, DashboardReducerState as DashboardState} from '../../../../../flowtype/dashboard-types'
 
-class DashboardItemTitleRow extends Component {
-    onRemove: Function
-    toggleEdit: Function
-    saveName: Function
-    props: {
-        item: DashboardItem,
-        dashboard: Dashboard,
-        update: Function,
-        remove: Function,
-        className?: string,
-        dragCancelClassName?: string,
-        editingLocked: boolean
-    }
-    state: {
-        editing: boolean
-    }
+type Props = {
+    item: DashboardItem,
+    dashboard: Dashboard,
+    update: Function,
+    remove: Function,
+    className?: string,
+    dragCancelClassName?: string,
+    isLocked: boolean
+}
+
+type State = {
+    editing: boolean
+}
+
+export class DashboardItemTitleRow extends Component<Props, State> {
+    
     static defaultProps = {
-        editingLocked: false
+        isLocked: false
     }
     
-    constructor() {
-        super()
-        this.state = {
-            editing: false
-        }
-        this.onRemove = this.onRemove.bind(this)
-        this.toggleEdit = this.toggleEdit.bind(this)
-        this.saveName = this.saveName.bind(this)
+    state = {
+        editing: false
     }
     
-    onRemove() {
+    onRemove = () => {
         this.props.remove(this.props.dashboard, this.props.item)
     }
     
-    toggleEdit() {
+    toggleEdit = () => {
         this.setState({
             editing: !this.state.editing
         })
     }
     
-    saveName({target}) {
+    saveName = ({target}: {target: {value: string}}) => {
         this.props.update(this.props.dashboard, this.props.item, {
             title: target.value
         })
@@ -78,7 +72,7 @@ class DashboardItemTitleRow extends Component {
                         </span>
                     )}
                 </div>
-                {!this.props.editingLocked && (
+                {!this.props.isLocked && (
                     <div className={styles.controlContainer}>
                         <div className={`${styles.controls} ${dragCancelClassName || ''}`}>
                             <Button
@@ -90,13 +84,15 @@ class DashboardItemTitleRow extends Component {
                             >
                                 <FontAwesome name={this.state.editing ? 'check' : 'edit'}/>
                             </Button>
-                            <button
-                                className="delete-btn btn btn-xs btn-outline dark"
+                            <Button
+                                bsSize="xs"
+                                bsStyle="default"
+                                className="btn-outline dark"
                                 title="Remove"
                                 onClick={this.onRemove}
                             >
-                                <i className="fa fa-times"/>
-                            </button>
+                                <FontAwesome name="times"/>
+                            </Button>
                         </div>
                     </div>
                 )}
@@ -105,16 +101,12 @@ class DashboardItemTitleRow extends Component {
     }
 }
 
-const mapStateToProps = ({dashboard: {dashboardsById, openDashboard}}) => {
-    const dashboard = dashboardsById[openDashboard.id]
-    return {
-        dashboard,
-        editingLocked: dashboard.editingLocked || (!dashboard.new && (!(dashboard.ownPermissions || []).includes('write')))
-    }
-}
+export const mapStateToProps = ({dashboard: {dashboardsById, openDashboard}}: {dashboard: DashboardState}) => ({
+    dashboard: dashboardsById[openDashboard.id]
+})
 
-const mapDispatchToProps = (dispatch) => ({
-    update(db: Dashboard, item: DashboardItem, newData) {
+export const mapDispatchToProps = (dispatch: Function) => ({
+    update(db: Dashboard, item: DashboardItem, newData: {} = {}) {
         return dispatch(updateDashboardItem(db, {
             ...item,
             ...newData

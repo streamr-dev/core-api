@@ -4,7 +4,7 @@ import { Panel, Row } from 'react-bootstrap'
 
 import IntegrationKeyHandlerSegment from './IntegrationKeyHandlerSegment'
 
-export default class IntegrationKeyHandler extends Component {
+export default class IntegrationKeyHandler extends Component<{}> {
     
     render() {
         return (

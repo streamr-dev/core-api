@@ -6,12 +6,12 @@ import ModuleInModuleList from './ModuleInModuleList'
 
 import type { Canvas, CanvasModule } from '../../../../../../flowtype/canvas-types'
 
-export default class ModuleList extends Component {
-    
-    props: {
-        modules: Array<CanvasModule>,
-        canvasId: Canvas.id
-    }
+type Props = {
+    modules: Array<CanvasModule>,
+    canvasId: Canvas.id
+}
+
+export default class ModuleList extends Component<Props> {
     
     render() {
         const {modules, canvasId} = this.props
@@ -19,7 +19,7 @@ export default class ModuleList extends Component {
             <ul className="mmc-dropdown-delay animated fadeInLeft">
                 {modules
                     .filter((m) => m.uiChannel)
-                    .sort((a, b) => a.name.localeCompare(b.name))
+                    .sort((a, b) => a.name && a.name.localeCompare(b.name))
                     .map(module => (
                         <ModuleInModuleList key={module.hash} module={module} canvasId={canvasId} />
                     ))

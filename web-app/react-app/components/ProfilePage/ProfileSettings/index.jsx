@@ -8,31 +8,28 @@ import 'react-select/dist/react-select.css'
 
 import {getCurrentUser, updateCurrentUserName, updateCurrentUserTimezone} from '../../../actions/user'
 
-import type {User} from '../../../flowtype/user-types'
+import type {User, State as UserState} from '../../../flowtype/user-types'
 
-export class ProfileSettings extends Component {
+type Props = {
+    user: User,
+    getCurrentUser: () => void,
+    updateCurrentUserName: (name: User.name) => void,
+    updateCurrentUserTimezone: (timezone: User.timezone) => void
+}
+
+export class ProfileSettings extends Component<Props> {
     
-    props: {
-        user: User,
-        getCurrentUser: Function,
-        updateCurrentUserName: Function,
-        updateCurrentUserTimezone: Function
-    }
-    onNameChange: Function
-    onTimezoneChange: Function
-    
-    constructor() {
-        super()
-        this.onNameChange = this.onNameChange.bind(this)
-        this.onTimezoneChange = this.onTimezoneChange.bind(this)
-    }
     componentDidMount() {
         this.props.getCurrentUser()
     }
-    onNameChange({target}: {target: any}) {
+    onNameChange = ({target}: {target: {
+        value: User.name
+    }}) => {
         this.props.updateCurrentUserName(target.value)
     }
-    onTimezoneChange({target}: {target: any}) {
+    onTimezoneChange = ({target}: {target: {
+        value: User.timezone
+    }}) => {
         this.props.updateCurrentUserTimezone(target.value)
     }
     render() {
@@ -86,18 +83,18 @@ export class ProfileSettings extends Component {
     }
 }
 
-const mapStateToProps = ({user}) => ({
+export const mapStateToProps = ({user}: UserState) => ({
     user: user.currentUser || {}
 })
 
-const mapDispatchToProps = (dispatch) => ({
+export const mapDispatchToProps = (dispatch: Function) => ({
     getCurrentUser() {
         dispatch(getCurrentUser())
     },
-    updateCurrentUserName(name) {
+    updateCurrentUserName(name: User.name) {
         dispatch(updateCurrentUserName(name))
     },
-    updateCurrentUserTimezone(tz) {
+    updateCurrentUserTimezone(tz: User.timezone) {
         dispatch(updateCurrentUserTimezone(tz))
     }
 })

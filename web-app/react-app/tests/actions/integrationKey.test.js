@@ -59,7 +59,7 @@ describe('IntegrationKey actions', () => {
             assert.deepStrictEqual(store.getActions().slice(0, 2), expectedActions)
         })
     
-        it('creates GET_ALL_INTEGRATION_KEYS_FAILURE when fetching integration keys has failed', async () => {
+        it('creates GET_ALL_INTEGRATION_KEYS_FAILURE when fetching integration keys has failed', async (done) => {
             moxios.stubRequest('api/v1/integration_keys', {
                 status: 500,
                 response: new Error('test-error')
@@ -76,6 +76,7 @@ describe('IntegrationKey actions', () => {
                 await store.dispatch(actions.getAndReplaceIntegrationKeys())
             } catch (e) {
                 assert.deepStrictEqual(store.getActions().slice(0, 2), expectedActions)
+                done()
             }
         })
     })
@@ -108,7 +109,7 @@ describe('IntegrationKey actions', () => {
             assert.deepStrictEqual(store.getActions(), expectedActions)
         })
     
-        it('creates CREATE_INTEGRATION_KEY_FAILURE when creating integration key has failed', async () => {
+        it('creates CREATE_INTEGRATION_KEY_FAILURE when creating integration key has failed', async (done) => {
             moxios.wait(() => {
                 const request = moxios.requests.mostRecent()
                 assert.equal(request.config.method, 'post')
@@ -132,6 +133,7 @@ describe('IntegrationKey actions', () => {
                 }))
             } catch (e) {
                 assert.deepStrictEqual(store.getActions().slice(0, 2), expectedActions)
+                done()
             }
         })
     })
@@ -158,7 +160,7 @@ describe('IntegrationKey actions', () => {
             assert.deepStrictEqual(store.getActions(), expectedActions)
         })
     
-        it('creates DELETE_INTEGRATION_KEY_FAILURE when deleting integration key has failed', async () => {
+        it('creates DELETE_INTEGRATION_KEY_FAILURE when deleting integration key has failed', async (done) => {
             moxios.wait(() => {
                 const request = moxios.requests.mostRecent()
                 assert.equal(request.config.method, 'delete')
@@ -180,6 +182,7 @@ describe('IntegrationKey actions', () => {
                 await store.dispatch(actions.deleteIntegrationKey('test'))
             } catch (e) {
                 assert.deepStrictEqual(store.getActions().slice(0, 2), expectedActions)
+                done()
             }
         })
     })

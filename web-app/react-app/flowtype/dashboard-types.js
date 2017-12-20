@@ -16,7 +16,8 @@ export type DashboardReducerState = {
         [Dashboard.id]: Dashboard
     },
     openDashboard: {
-        id: ?Dashboard.id
+        id: ?Dashboard.id,
+        isFullScreen: boolean
     },
     error?: ?string,
     fetching?: boolean,
@@ -32,6 +33,29 @@ export type DashboardReducerAction = {
     error?: string
 }
 
+type LayoutItem = {
+    i: string | number,
+    h: number,
+    isDraggable: ?number,
+    isResizable: ?number,
+    maxH: ?number,
+    maxW: ?number,
+    minH: number,
+    minW: number,
+    moved: boolean,
+    static: boolean,
+    w: number,
+    x: number,
+    y: number
+}
+
+type Layout = {
+    xs?: Array<LayoutItem>,
+    sm?: Array<LayoutItem>,
+    md?: Array<LayoutItem>,
+    lg?: Array<LayoutItem>
+}
+
 export type DashboardItem = {
     id: ?string,
     title: string,
@@ -40,13 +64,5 @@ export type DashboardItem = {
     canvas: Canvas,
     size: string,
     ord: number,
-    layout?: {
-        x: number,
-        y: number,
-        w: number,
-        h: number,
-        static?: boolean,
-        minW?: number,
-        minH?: number
-    }
+    layout?: Layout
 }

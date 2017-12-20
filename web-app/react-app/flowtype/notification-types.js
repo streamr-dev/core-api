@@ -4,7 +4,7 @@ export type Notification = {
     title: string,
     message: string,
     delay: number,
-    type?: 'success' | 'info' | 'error'
+    type: 'success' | 'info' | 'error'
 }
 
 export type State = {

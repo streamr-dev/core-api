@@ -3,21 +3,22 @@
 import {Component} from 'react'
 import {connect} from 'react-redux'
 
-import type {Notification} from '../../flowtype/notification-types.js'
+import type {Notification, State as NotificationState} from '../../flowtype/notification-types.js'
 
 declare var Streamr: {
     showSuccess: (message: ?string, title: string, delay: number) => void,
     showError: (message: ?string, title: string, delay: number) => void
 }
 
-export class Notifier extends Component {
-    props: {
-        notifications: {
-            [Notification.id]: Notification
-        }
+type Props = {
+    notifications: {
+        [Notification.id]: Notification
     }
+}
+
+export class Notifier extends Component<Props> {
     
-    createNotification({title, message, delay, type}) {
+    createNotification = ({title, message, delay, type}: Notification) => {
         switch (type) {
             case 'success':
                 return Streamr.showSuccess(message, title, delay)
@@ -28,13 +29,13 @@ export class Notifier extends Component {
         }
     }
     
-    componentWillReceiveProps({notifications}) {
+    componentWillReceiveProps({notifications}: Props) {
         if (notifications) {
-            for (const notification of Object.values(notifications)) {
-                if (notification && !this.props.notifications[notification.id]) {
+            Object.values(notifications).forEach((notification: Notification) => {
+                if (notification.id && !this.props.notifications[notification.id]) {
                     this.createNotification(notification)
                 }
-            }
+            })
         }
     }
     
@@ -43,8 +44,8 @@ export class Notifier extends Component {
     }
 }
 
-export const mapStateToProps = ({notifications: {byId}}) => ({
-    notifications: byId
+export const mapStateToProps = ({notifications}: NotificationState) => ({
+    notifications: notifications.byId
 })
 
 export default connect(mapStateToProps)(Notifier)
