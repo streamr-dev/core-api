@@ -16,8 +16,8 @@ import spock.lang.Specification
 @Mock([Canvas, Dashboard, DashboardItem, Permission, SecUser])
 class DashboardServiceSpec extends Specification {
 
-	SecUser user = new SecUser(username: "e@e.com", name: "user")
-	SecUser otherUser = new SecUser(username: "a@a.com", name: "someoneElse")
+	SecUser user = new SecUser(username: "first@user.com", name: "user")
+	SecUser otherUser = new SecUser(username: "second@user.com", name: "someoneElse")
 
 	def setup() {
 		PermissionService permissionService = service.permissionService = new PermissionService()
@@ -68,10 +68,10 @@ class DashboardServiceSpec extends Specification {
 	def "findById() can fetch readable dashboard"() {
 		when:
 		def dashboard2 = service.findById("2", user)
-		def dashboard3 = service.findById("3", user)
+		def dashboard3 = service.findById("5", user)
 		then:
 		dashboard2.id == "2"
-		dashboard3.id == "3"
+		dashboard3.id == "5"
 	}
 
 	def "deleteById() cannot delete non-existent dashboard"() {
@@ -117,26 +117,6 @@ class DashboardServiceSpec extends Specification {
 		Dashboard.findByName("test-create").getItems().first().title == "test1"
 		Dashboard.findByName("test-create").getItems().last().title == "test2"
 		Dashboard.findByName("test-create").getUser().getName() == "tester"
-	}
-
-	def "create() doesn't allow to save on top of an other dashboard"() {
-		setup:
-		def user = new SecUser(name: "tester").save(validate: false)
-		SaveDashboardCommand command = new SaveDashboardCommand([
-				name : "test-create",
-				items: [
-						new SaveDashboardItemCommand(id: "1", title: "test1", canvas: new Canvas(), module: 0, webcomponent: "streamr-chart"),
-						new SaveDashboardItemCommand(id: "2", title: "test2", canvas: new Canvas(), module: 0, webcomponent: "streamr-chart")
-				]
-		])
-		service.create(command, user)
-
-		when:
-		service.create(command, user)
-
-		then:
-		// 6 created in setup and this one
-		thrown ApiException
 	}
 
 	def "update() cannot update non-existent dashboard"() {
@@ -195,7 +175,8 @@ class DashboardServiceSpec extends Specification {
 		def command = new SaveDashboardItemCommand(
 				title: "added-item",
 				canvas: new Canvas(),
-				module: 1
+				module: 1,
+				webcomponent: "streamr-chart"
 		)
 
 		when:
@@ -208,7 +189,8 @@ class DashboardServiceSpec extends Specification {
 		def command = new SaveDashboardItemCommand(
 				title: "added-item",
 				canvas: new Canvas(),
-				module: 1
+				module: 1,
+				webcomponent: "streamr-chart"
 		)
 
 		when:
@@ -237,7 +219,8 @@ class DashboardServiceSpec extends Specification {
 		def command = new SaveDashboardItemCommand(
 				title: "added-item",
 				canvas: canvas,
-				module: 1
+				module: 1,
+				webcomponent: "streamr-chart"
 		)
 
 		when:
@@ -269,7 +252,8 @@ class DashboardServiceSpec extends Specification {
 		def command = new SaveDashboardItemCommand(
 				title: "added-item",
 				canvas: canvas,
-				module: 1
+				module: 1,
+				webcomponent: "streamr-chart"
 		)
 
 		when:
@@ -291,7 +275,8 @@ class DashboardServiceSpec extends Specification {
 		def command = new SaveDashboardItemCommand(
 				title: "added-item",
 				canvas: canvas,
-				module: 1
+				module: 1,
+				webcomponent: "streamr-chart"
 		)
 
 		when:
@@ -313,7 +298,8 @@ class DashboardServiceSpec extends Specification {
 		def command = new SaveDashboardItemCommand(
 				title: "added-item",
 				canvas: canvas,
-				module: 1
+				module: 1,
+				webcomponent: "streamr-chart"
 		)
 
 		when:
@@ -344,7 +330,8 @@ class DashboardServiceSpec extends Specification {
 		def command = new SaveDashboardItemCommand(
 				title: "updated-item",
 				canvas: canvas,
-				module: 1
+				module: 1,
+				webcomponent: "streamr-chart"
 		)
 
 		assert DashboardItem.findById(itemToUpdateId) != null

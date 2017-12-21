@@ -20,7 +20,7 @@ class DashboardItem {
 	}
 
 	static mapping = {
-		id generator: 'assigned'
+		id generator: IdGenerator.name
 		dashboard column: "dashboard_id"
 		canvas column: "canvas_id"
 	}
