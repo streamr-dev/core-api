@@ -41,7 +41,6 @@ class RegisterControllerSpec extends Specification {
 		controller.springSecurityService = springSecurityService
 		controller.signupCodeService = new SignupCodeService()
 		def permissionService = new PermissionService()
-		permissionService.grailsApplication = grailsApplication
 		controller.userService = new UserService()
 		controller.userService.springSecurityService = springSecurityService
 		controller.userService.grailsApplication = grailsApplication

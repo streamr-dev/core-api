@@ -21,7 +21,6 @@ class DashboardServiceSpec extends Specification {
 
 	def setup() {
 		PermissionService permissionService = service.permissionService = new PermissionService()
-		permissionService.grailsApplication = grailsApplication
 
 
 		user.save(failOnError: true, validate: false)

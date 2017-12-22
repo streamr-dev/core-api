@@ -1,5 +1,11 @@
 package com.unifina.domain.security
 
+import com.unifina.domain.dashboard.Dashboard
+import com.unifina.domain.data.Feed
+import com.unifina.domain.data.Stream
+import com.unifina.domain.signalpath.Canvas
+import com.unifina.domain.signalpath.ModulePackage
+
 /**
  * Access Control List (ACL) item, grants a user a specific type of access to a resource (e.g. X can read Dashboard 1)
  */
@@ -13,14 +19,14 @@ class Permission {
 	Key key
 	SignupInvite invite
 
-	/** full class name of the resource, e.g. "com.unifina.domain.dashboard.Dashboard" */
-	String clazz
+	/** Permission is given to one of the resources below */
+	Canvas canvas
+	Dashboard dashboard
+	Feed feed
+	ModulePackage modulePackage
+	Stream stream
 
-	/** either stringId (UUID) or longId (autoincrement or similar) is used to refer to a resource, depending on resource type */
-	String stringId
-	Long longId
-
-	/** type of operation that this ACL item allows e.g. "read" */
+	/** Type of operation that this ACL item allows e.g. "read" */
 	enum Operation {
 		READ("read"),
 		WRITE("write"),
@@ -32,18 +38,24 @@ class Permission {
 			this.id = id
 		}
 
-		public static fromString(String operationId) {
+		static fromString(String operationId) {
 			return Operation.enumConstants.find { it.id == operationId }
 		}
 	}
 	Operation operation = Operation.READ
 
 	static constraints = {
-		stringId(nullable: true)
-		longId(nullable: true)
 		user(nullable: true)
 		key(nullable: true)
 		invite(nullable: true)
+		canvas(nullable: true)
+		dashboard(nullable: true)
+		feed(nullable: true)
+		modulePackage(nullable: true)
+		stream(nullable: true)
+		canvas(validator: { val, obj ->
+			[obj.canvas, obj.dashboard, obj.feed, obj.modulePackage, obj.stream].count { it != null } == 1
+		})
 	}
 
 	/**
@@ -51,7 +63,7 @@ class Permission {
 	 * Resource type/id is not indicated because API caller will have it in the URL
 	 * @return map to be shown to the API callers
      */
-	public Map toMap() {
+	Map toMap() {
 		if (anonymous) {
 			return [
 					id: id,

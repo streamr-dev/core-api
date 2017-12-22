@@ -1,6 +1,8 @@
 package com.unifina.domain.security
 
-class SecUser {
+import com.unifina.security.Userish
+
+class SecUser implements Userish {
 	
 	String username
 	String password
@@ -56,5 +58,15 @@ class SecUser {
 	@Override
 	int hashCode() {
 		return this.id?.hashCode() ?: super.hashCode()
+	}
+
+	@Override
+	Userish resolveToUserish() {
+		return this
+	}
+
+	@Override
+	SecUser resolveToSecUser() {
+		return this
 	}
 }

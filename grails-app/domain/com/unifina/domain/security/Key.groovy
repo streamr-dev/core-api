@@ -1,5 +1,6 @@
 package com.unifina.domain.security
 
+import com.unifina.security.Userish
 import com.unifina.utils.IdGenerator
 import groovy.transform.CompileStatic
 
@@ -8,7 +9,7 @@ import groovy.transform.CompileStatic
  * 	(1) authenticates a <code>SecUser</code> or
  * 	(2) acts as an 'anonymous' key that has permissions of its own
  */
-class Key {
+class Key implements Userish {
 	String id
 	String name
 	SecUser user
@@ -29,5 +30,15 @@ class Key {
 			name: name,
 			user: user?.username
 		]
+	}
+
+	@Override
+	Userish resolveToUserish() {
+		return resolveToSecUser() ?: this
+	}
+
+	@Override
+	SecUser resolveToSecUser() {
+		return user
 	}
 }

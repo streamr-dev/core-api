@@ -22,8 +22,9 @@ class KeyApiController {
 	 * @param action Closure that takes up to one argument: the specified resource
 	 */
 	private useResource(Class resourceClass, resourceId, boolean requireSharePermission=true, Closure action) {
-		if (!resourceClass) { throw new IllegalArgumentException("Missing resource class") }
-		if (!grailsApplication.isDomainClass(resourceClass)) { throw new IllegalArgumentException("${resourceClass.simpleName} is not a domain class!") }
+		if (!grailsApplication.isDomainClass(resourceClass)) {
+			throw new IllegalArgumentException("${resourceClass.simpleName} is not a domain class!")
+		}
 
 		// SecUser operations are always on self
 		if (resourceClass == SecUser) {
