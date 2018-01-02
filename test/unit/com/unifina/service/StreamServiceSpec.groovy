@@ -322,9 +322,8 @@ class StreamServiceSpec extends Specification {
 		user.save(failOnError: true, validate: false)
 
 
-		Dashboard dashboard = new Dashboard(id: "dashboard", name: "dashboard", user: user).save(failOnError: true, validate: false)
+		Dashboard dashboard = new Dashboard(name: "dashboard", user: user).save(failOnError: true, validate: false)
 		DashboardItem dashboardItem = new DashboardItem(
-				id: "item",
 				title: "dashboardItem",
 				canvas: canvas,
 				module: 3,
@@ -338,7 +337,7 @@ class StreamServiceSpec extends Specification {
 		then:
 		1 * service.permissionService.canRead(user, stream) >> false
 		1 * service.permissionService.canRead(user, canvas) >> false
-		1 * dashboardService.authorizedGetDashboardItem("dashboard", "item", user, Permission.Operation.READ) >> dashboardItem
+		1 * dashboardService.authorizedGetDashboardItem(dashboard.id, dashboardItem.id, user, Permission.Operation.READ) >> dashboardItem
 		1 * cb.call(stream)
 	}
 
@@ -358,15 +357,12 @@ class StreamServiceSpec extends Specification {
 		SecUser user = new SecUser(username: "username")
 		user.save(failOnError: true, validate: false)
 
-
-		Dashboard dashboard = new Dashboard(id: "dashboard", name: "dashboard").save(failOnError: true, validate: false)
+		Dashboard dashboard = new Dashboard( name: "dashboard").save(failOnError: true, validate: false)
 		DashboardItem dashboardItem = new DashboardItem(
-				id: "item",
 				title: "dashboardItem",
 				canvas: canvas,
 				module: 3,
-				webcomponent: "webcomponent",
-				ord: 1
+				webcomponent: "webcomponent"
 		)
 		dashboard.addToItems(dashboardItem)
 		dashboard.save(failOnError: true, validate: false)
@@ -377,7 +373,7 @@ class StreamServiceSpec extends Specification {
 		thrown(NotPermittedException)
 		1 * service.permissionService.canRead(user, stream) >> false
 		1 * service.permissionService.canRead(user, canvas) >> false
-		1 * dashboardService.authorizedGetDashboardItem("dashboard", "item", user, Permission.Operation.READ) >> null
+		1 * dashboardService.authorizedGetDashboardItem(dashboard.id, dashboardItem.id, user, Permission.Operation.READ) >> null
 		0 * cb._
 	}
 }

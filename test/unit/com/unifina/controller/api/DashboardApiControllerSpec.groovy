@@ -239,17 +239,21 @@ class DashboardApiControllerSpec extends Specification {
 	def "update() delegates to dashboardService.update"() {
 		setup:
 		List<DashboardItem> items = new ArrayList<DashboardItem>()
-		items.add(new DashboardItem(id: "1", title: "test1"))
-		items.add(new DashboardItem(id: "2", title: "test2"))
+		DashboardItem item1 = new DashboardItem(title: "test1")
+		item1.id = "1"
+		DashboardItem item2 = new DashboardItem(title: "test2")
+		item2.id = "2"
+		items.add(item1)
+		items.add(item2)
 
 		def dashboard = Mock(Dashboard)
 		def dashboardService = Mock(DashboardService)
 		controller.dashboardService = dashboardService
 
 		when:
+		params.id = "4"
 		request.addHeader("Authorization", "Token myApiKey")
 		request.JSON = [
-				id   : "4",
 				layout: "{}",
 				name : "new dashboard",
 				items: items
@@ -261,14 +265,12 @@ class DashboardApiControllerSpec extends Specification {
 
 		then:
 		response.status == 200
-		1 * dashboardService.update(_, me) >> {String id, SaveDashboardCommand command, SecUser user ->
-			def d = dashboards[2]
-			d.name = command.name
-			return d
+		response.json.a == 1
+		1 * dashboardService.update("4", _, me) >> { String id, SaveDashboardCommand command, SecUser user ->
+			command.name == "new dashboard"
+			return dashboard
 		}
-		1 * dashboard.toMap() >> {
-			[:]
-		}
+		1 * dashboard.toMap() >> [a:1]
 	}
 
 	def "delete() delegates to dashboardService.deleteById(String, SecUser)"() {

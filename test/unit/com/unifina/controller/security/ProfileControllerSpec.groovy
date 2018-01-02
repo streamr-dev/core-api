@@ -115,8 +115,9 @@ class ProfileControllerSpec extends Specification {
 			controller.update()
 		then: "values must be updated and show update message"
 			SecUser.get(1).name == "Changed Name"
+			response.json.name == "Changed Name"
 			SecUser.get(1).timezone == "Europe/Helsinki"
-			flash.message != null
+			response.json.timezone == "Europe/Helsinki"
 	}
 
 	void "regenerating api key removes old user-linked keys"() {

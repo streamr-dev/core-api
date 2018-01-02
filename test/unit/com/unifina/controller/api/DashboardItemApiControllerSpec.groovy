@@ -57,7 +57,7 @@ class DashboardItemApiControllerSpec extends Specification {
 						title       : "dashboard-3-item",
 						canvas      : "1",
 						module      : 2,
-						webcomponent: "streamr-component",
+						webcomponent: "streamr-chart",
 				],
 				[
 						id          : "3",
@@ -65,7 +65,7 @@ class DashboardItemApiControllerSpec extends Specification {
 						title       : "dashboard-3-item",
 						canvas      : "1",
 						module      : 3,
-						webcomponent: "streamr-component",
+						webcomponent: "streamr-chart",
 				]
 		]
 		1 * dashboardService.findById("3", me) >> dashboards[2]
@@ -90,7 +90,7 @@ class DashboardItemApiControllerSpec extends Specification {
 				title       : "dashboard-3-item",
 				canvas      : "1",
 				module      : 2,
-				webcomponent: "streamr-component"
+				webcomponent: "streamr-chart"
 		]
 		1 * dashboardService.findDashboardItem("3", "2", me) >> dashboards[2].items[0]
 		0 * dashboardService._
