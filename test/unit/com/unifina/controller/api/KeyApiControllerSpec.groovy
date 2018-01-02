@@ -40,6 +40,30 @@ class KeyApiControllerSpec extends Specification {
 		controller.permissionService = permissionService = grailsApplication.mainContext.getBean(PermissionService)
 	}
 
+	// CORE-708: User with read permission to stream should not see stream write key in api
+	void "index() does not authorize if only up to READ permission"() {
+		Stream s = new Stream(name: "stream")
+		s.id = "streamId"
+		s.save(failOnError: true, validate: false)
+		permissionService.systemGrant(loggedInUser, s, Permission.Operation.READ)
+
+		when:
+		request.addHeader("Authorization", "Token apiKey")
+		request.method = "GET"
+		request.requestURI = "/api/v1/streams/streamId/keys"
+
+		params.resourceClass = Stream
+		params.resourceId = "streamId"
+
+		withFilters([action: 'index']) {
+			controller.index()
+		}
+
+
+		then:
+		thrown(NotPermittedException)
+	}
+
 	void "save() creates user-linked for logged in user"() {
 		when:
 		request.addHeader("Authorization", "Token apiKey")

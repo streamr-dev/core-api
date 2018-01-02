@@ -125,7 +125,7 @@
 												</g:if>
 												<g:if test="${writableCanvases.contains(canvas)}">
 													<li>
-														<span data-id="${canvas.id}" class="delete-canvas-link" data-confirm="true">
+														<span data-id="${canvas.id}" class="delete-canvas-link delete-button" data-confirm="true">
 															<i class="fa fa-trash-o"></i> Delete canvas
 														</span>
 													</li>

@@ -43,7 +43,7 @@ class CanvasSpec extends LoginTester1Spec {
 	}
 	def "drag and dropping a module to canvas should add it"() {
 		when: "Barify is added via drag and drop"
-			dragAndDropModule 'Barify'
+			dragAndDropModule('Barify', 200, -400)
 		then: "module should appear on canvas"
 			moduleShouldAppearOnCanvas 'Barify'
 	}
@@ -423,20 +423,6 @@ class CanvasSpec extends LoginTester1Spec {
 			waitFor {
 				$(".tooltip").displayed
 				$(".tooltip .tooltip-inner strong").text() == "off"
-			}
-	}
-
-	void "Canvas can be saved by renaming it with name editor" () {
-		setup:
-			addAndWaitModule "Add"
-		when: "name changed"
-			nameEditorLabel.click()
-			nameEditorInput << "newName" + System.currentTimeMillis()
-			findModuleOnCanvas('Add').click()
-		then: "canvas is saved"
-			waitFor {
-				!driver.currentUrl.endsWith("/canvas/editor")
-				nameEditorLabel.text().startsWith("newName")
 			}
 	}
 

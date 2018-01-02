@@ -68,7 +68,7 @@
 											</g:if>
 											<g:if test="${writable.contains(stream)}">
 												<li>
-													<span data-id="${stream.id}" class="delete-stream-link confirm">
+													<span data-id="${stream.id}" class="delete-stream-link delete-button confirm">
 														<i class="fa fa-trash-o"></i> Delete
 													</span>
 												</li>

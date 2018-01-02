@@ -116,9 +116,9 @@ class MapModulesSpec extends LoginTester1Spec {
 		sleep(500)
 
 		connectEndpoints(findOutput("Stream", "value"), findInput("ForEach", "A"))
-		connectEndpoints(findOutput("Stream", "value"), findInput("ForEach", "in"))
-		connectEndpoints(findOutput("ForEach", "out"), findInput("Label", "label", 0))
-		connectEndpoints(findOutput("ForEach", "out2"), findInput("Label", "label", 1))
+		connectEndpoints(findOutput("Stream", "value"), findInputByDisplayName("ForEach", "in"))
+		connectEndpoints(findOutputByDisplayName("ForEach", "out"), findInput("Label", "label", 0))
+		connectEndpoints(findOutputByDisplayName("ForEach", "out2"), findInput("Label", "label", 1))
 
 		and: "run canvas in realtime"
 		ensureRealtimeTabDisplayed()
