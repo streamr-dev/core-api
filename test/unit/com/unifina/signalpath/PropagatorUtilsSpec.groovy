@@ -157,4 +157,21 @@ class PropagatorUtilsSpec extends Specification {
 			exponentialMovingAverageModule, standardDeviationModule, movingAverageModule, countModule, labelModule
 		] as Set
 	}
+
+	def "findDependentModules doesn't get stuck on feedback connections"() {
+		def mod1 = new Divide()
+		mod1.setName("mod1")
+		def mod2 = new Divide()
+		mod2.setName("mod2")
+		def mod3 = new Divide()
+		mod3.setName("mod3")
+		[mod1, mod2, mod3]*.init()
+
+		mod2.getOutput("A/B").connect(mod3.getInput("A"))
+		mod3.getOutput("A/B").connect(mod2.getInput("A"))
+
+		expect:
+		findDependentModules([mod3] as Set, [mod1] as Set) == [] as Set
+	}
+
 }
