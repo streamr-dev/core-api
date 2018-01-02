@@ -1,6 +1,7 @@
 package core
 
 import com.unifina.security.StringEncryptor
+import grails.util.Holders
 import groovy.json.JsonBuilder
 import groovy.json.JsonSlurper
 
@@ -8,7 +9,7 @@ databaseChangeLog = {
 	changeSet(author: "eric", id: "encrypt-private-keys") {
 		grailsChange {
 			change {
-				def encryptor = new StringEncryptor(System.getProperty("streamr.encryption.password"))
+				def encryptor = new StringEncryptor(Holders.config.streamr.encryption.password)
 
 				sql.eachRow('SELECT id, user_id, json FROM integration_key WHERE service = "ETHEREUM"') { row ->
 					String keyId = row['id']

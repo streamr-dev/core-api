@@ -345,8 +345,12 @@ environments {
 /**
  * Encryption settings
  */
-streamr.encryption.password = System.getProperty("streamr.encryption.password")
-
+streamr.encryption.password = System.getProperty("streamr.encryption.password") ?: "password" // dev and test environments have a default password
+environments {
+	production {
+		streamr.encryption.password = System.getProperty("streamr.encryption.password") // in production, the system property must be set
+	}
+}
 
 /**
  * Spring security config
