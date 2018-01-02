@@ -177,15 +177,19 @@ class SignalPathService {
 		Globals globals = GlobalsFactory.createInstance(signalPathContext, grailsApplication, canvas.user)
 
 		SignalPathRunner runner
-		// Create the runner thread
+		SignalPath sp
+
+		// Instantiate the SignalPath
 		if (canvas.serialization == null || canvas.adhoc) {
-			runner = new SignalPathRunner([JSON.parse(canvas.json)], globals, canvas.adhoc)
 			log.info("Creating new signalPath connections (canvasId=$canvas.id)")
+			sp = mapToSignalPath(JSON.parse(canvas.json), false, globals, new SignalPath(true))
 		} else {
-			SignalPath sp = serializationService.deserialize(canvas.serialization.bytes)
-			runner = new SignalPathRunner(sp, globals, canvas.adhoc)
 			log.info("De-serializing existing signalPath (canvasId=$canvas.id)")
+			sp = serializationService.deserialize(canvas.serialization.bytes)
 		}
+
+		// Create the runner thread
+		runner = new SignalPathRunner(sp, globals, canvas.adhoc)
 
 		runner.addStartListener(new IStartListener() {
 			@Override
