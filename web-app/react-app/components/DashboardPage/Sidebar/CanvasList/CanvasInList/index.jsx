@@ -30,7 +30,7 @@ export default class CanvasInList extends Component<Props, State> {
     render() {
         const {canvas} = this.props
         return (
-            <li className={`canvas mm-dropdown mm-dropdown-root ${this.state.open ? 'open' : ''}`}>
+            <li className={`mm-dropdown mm-dropdown-root ${this.state.open ? 'open' : ''} ${styles.canvasInList}`}>
                 <a className={styles.canvasInListLink} title={canvas.state} onClick={this.onClick}>
                     <span className={`mm-text mmc-dropdown-delay animated fadeIn ${styles.canvasTitle} ${canvas.state === 'STOPPED' ? styles.stopped : ''}`}>
                         {canvas.name}

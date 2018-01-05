@@ -162,7 +162,7 @@ export class Editor extends Component<Props, State> {
     }
     
     onBeforeUnload = (e: Event & { returnValue: ?string }): ?string => {
-        if (!this.props.dashboard.saved) {
+        if (this.props.dashboard.id && !this.props.dashboard.saved) {
             const message = 'You have unsaved changes in your Dashboard. Are you sure you want to leave?'
             e.returnValue = message
             return message

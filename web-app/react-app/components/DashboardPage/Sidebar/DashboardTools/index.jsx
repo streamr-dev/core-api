@@ -14,6 +14,8 @@ import {updateAndSaveDashboard} from '../../../../actions/dashboard'
 
 import type { Dashboard, DashboardReducerState as DashboardState } from '../../../../flowtype/dashboard-types'
 
+import styles from './dashboardTools.pcss'
+
 type Props = {
     dashboard: Dashboard,
     canShare: boolean,
@@ -37,20 +39,20 @@ export class DashboardTools extends Component<Props, State> {
     
     render() {
         return (
-            <div className="menu-content">
+            <div className={`menu-content ${styles.dashboardTools}`}>
                 <Button
                     block
-                    className="save-button"
+                    className={styles.saveButton}
                     title="Save dashboard"
                     bsStyle="primary"
                     onClick={this.onSave}
                     disabled={!this.props.canWrite && !this.props.dashboard.new}
                 >
-                    Save
+                    <FontAwesome name="floppy-o" />  Save
                 </Button>
                 <Button
                     block
-                    className="share-button"
+                    className={styles.shareButton}
                     disabled={!this.props.canShare}
                     onClick={() => {
                         this.setState({
@@ -71,10 +73,13 @@ export class DashboardTools extends Component<Props, State> {
                         })
                     }}
                 />
-                <DeleteButton buttonProps={{
-                    block: true
-                }}>
-                    Delete
+                <DeleteButton
+                    className={styles.deleteButton}
+                    buttonProps={{
+                        block: true
+                    }}
+                >
+                    <FontAwesome name="trash-o" />  Delete
                 </DeleteButton>
             </div>
         )

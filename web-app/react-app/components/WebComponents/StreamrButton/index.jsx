@@ -3,7 +3,6 @@
 import React, {Component} from 'react'
 import {Button} from 'react-bootstrap'
 import StreamrInput from '../StreamrInput'
-import StreamrWidget from '../StreamrWidget'
 
 import type {WebcomponentProps as Props} from '../../../flowtype/webcomponent-types'
 
@@ -12,42 +11,31 @@ type State = {
 }
 
 export default class StreamrButton extends Component<Props, State> {
-    widget: ?StreamrWidget
+    widget: ?StreamrInput
     state = {
         name: 'Button'
     }
     
-    onModuleJson = ({state}: { state: string }) => {
+    onMessage = ({state: buttonName}: { state?: string }) => {
         if (this.widget) {
-            this.setState({
-                name: state
-            })
-        }
-    }
-    
-    onMessage = ({buttonName}: { buttonName?: string }) => {
-        if (this.widget) {
-            this.setState({
-                name: buttonName != undefined ? buttonName : this.state.name
-            })
+            if (buttonName) {
+                this.setState({
+                    name: buttonName
+                })
+            }
         }
     }
     
     onClick = () => {
-        if (this.widget) {
-            this.widget.sendRequest({
-                type: 'uiEvent'
-            })
-        }
+        this.widget && this.widget.sendValue()
     }
     
     render() {
         return (
             <StreamrInput
                 {...this.props}
-                onModuleJson={this.onModuleJson}
                 onMessage={this.onMessage}
-                widgetRef={(widget) => this.widget = widget}
+                ref={(widget) => this.widget = widget}
             >
                 <Button
                     onClick={this.onClick}

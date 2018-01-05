@@ -39,9 +39,15 @@ export class DashboardItemTitleRow extends Component<Props, State> {
         this.props.remove(this.props.dashboard, this.props.item)
     }
     
-    toggleEdit = () => {
+    startEdit = () => {
         this.setState({
-            editing: !this.state.editing
+            editing: true
+        })
+    }
+    
+    endEdit = () => {
+        this.setState({
+            editing: false
         })
     }
     
@@ -64,7 +70,7 @@ export class DashboardItemTitleRow extends Component<Props, State> {
                             name="dashboard-item-name"
                             value={item.title}
                             onChange={this.saveName}
-                            onBlur={this.toggleEdit}
+                            onBlur={this.endEdit}
                         />
                     ) : (
                         <span className={dragCancelClassName}>
@@ -75,19 +81,32 @@ export class DashboardItemTitleRow extends Component<Props, State> {
                 {!this.props.isLocked && (
                     <div className={styles.controlContainer}>
                         <div className={`${styles.controls} ${dragCancelClassName || ''}`}>
+                            {this.state.editing ? (
+                                <Button
+                                    bsSize="xs"
+                                    bsStyle="default"
+                                    className={`btn-outline dark ${styles.endEditButton}`}
+                                    title="Ready"
+                                    onClick={this.endEdit}
+                                >
+                                    <FontAwesome name="check"/>
+                                </Button>
+                            ) : (
+                                <Button
+                                    bsSize="xs"
+                                    bsStyle="default"
+                                    className={`btn-outline dark ${styles.startEditButton}`}
+                                    title="Edit title"
+                                    onClick={this.startEdit}
+                                >
+                                    <FontAwesome name="edit"/>
+                                </Button>
+                            )}
+                            
                             <Button
                                 bsSize="xs"
                                 bsStyle="default"
-                                className="btn-outline dark"
-                                title={this.state.editing ? 'Ready' : 'Edit title'}
-                                onClick={this.toggleEdit}
-                            >
-                                <FontAwesome name={this.state.editing ? 'check' : 'edit'}/>
-                            </Button>
-                            <Button
-                                bsSize="xs"
-                                bsStyle="default"
-                                className="btn-outline dark"
+                                className={`btn-outline dark ${styles.deleteButton}`}
                                 title="Remove"
                                 onClick={this.onRemove}
                             >

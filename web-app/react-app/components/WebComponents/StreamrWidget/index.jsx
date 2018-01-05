@@ -14,7 +14,7 @@ import type {StreamId, Subscription, ModuleOptions} from '../../../flowtype/stre
 
 type Props = WebcomponentProps & {
     children?: Node,
-    onMessage: (any) => void,
+    onMessage?: ?(any) => void,
     onSubscribed?: (opt: ?{
         from?: number
     }) => void,

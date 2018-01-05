@@ -480,7 +480,7 @@ class ShareSpec extends LoginTester1Spec {
 		when: "Move to Dashboard editor page, revoke permission"
 		clickRow("ShareSpec")
 		then:
-		waitFor { at DashboardShowPage }
+		waitFor { at DashboardEditorPage }
 		waitFor { shareButton.displayed && !shareButton.getAttribute("disabled") }
 
 		when:
@@ -616,7 +616,7 @@ class ShareSpec extends LoginTester1Spec {
 		when:
 		clickRow("ShareSpec")
 		then: "only read rights given"
-		waitFor { at DashboardShowPage }
+		waitFor { at DashboardEditorPage }
 		waitFor { shareButton.hasClass("forbidden") }
 
 		cleanup: "remove all access to ShareSpec resources"
@@ -799,7 +799,7 @@ class ShareSpec extends LoginTester1Spec {
 		loginTester2()
 		to DashboardListPage
 		clickRow(name)
-		waitFor { at DashboardShowPage }
+		waitFor { at DashboardEditorPage }
 
 		then:
 		waitFor {

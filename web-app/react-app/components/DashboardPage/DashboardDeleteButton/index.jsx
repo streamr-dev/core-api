@@ -16,13 +16,15 @@ type Props = {
     canWrite: boolean,
     buttonProps: {},
     children?: Node | Array<Node>,
-    deleteDashboard: (id: Dashboard.id) => Promise<any>
+    deleteDashboard: (id: Dashboard.id) => Promise<any>,
+    className: string
 }
 
 export class DashboardDeleteButton extends Component<Props> {
     
     static defaultProps = {
-        buttonProps: {}
+        buttonProps: {},
+        className: ''
     }
     
     onDelete = () => {
@@ -37,9 +39,10 @@ export class DashboardDeleteButton extends Component<Props> {
         return (
             <ConfirmButton
                 buttonProps={{
-                    disabled: !this.props.canWrite,
+                    disabled: !this.props.canWrite || this.props.dashboard.new,
                     ...this.props.buttonProps
                 }}
+                className={this.props.className}
                 confirmCallback={this.onDelete}
                 confirmTitle="Are you sure?"
                 confirmMessage={`Are you sure you want to remove dashboard ${this.props.dashboard.name}?`}

@@ -43,7 +43,12 @@ export class StreamrBreadcrumbDropdownButton extends Component<{
     render() {
         return (
             <div className={styles.streamrDropdownContainer}>
-                <DropdownButton id={`streamrDropdownButton-${Date.now()}`} {...this.props} bsSize="xs" className={`${this.props.className || ''} ${styles.streamrDropdownButton}`}>
+                <DropdownButton
+                    id={`streamrDropdownButton-${Date.now()}`}
+                    {...this.props}
+                    bsSize="xs"
+                    className={`${this.props.className || ''} ${styles.streamrDropdownButton}`}
+                >
                     {this.props.children}
                 </DropdownButton>
             </div>

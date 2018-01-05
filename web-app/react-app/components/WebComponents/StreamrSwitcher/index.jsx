@@ -2,7 +2,6 @@
 
 import React, {Component} from 'react'
 import StreamrInput from '../StreamrInput'
-import StreamrWidget from '../StreamrWidget'
 
 import styles from './streamrSwitcher.pcss'
 
@@ -13,40 +12,33 @@ type State = {
 }
 
 export default class StreamrSwitcher extends Component<WebcomponentProps, State> {
-    widget: StreamrWidget
-    //onModuleJson: Function
-    //onClick: Function
+    input: ?StreamrInput
     state = {
         value: false
     }
-    //constructor() {
-    //    super()
-    //    this.onModuleJson = this.onModuleJson.bind(this)
-    //    this.onClick = this.onClick.bind(this)
-    //}
-    onModuleJson = ({state}: {state: boolean}) => {
-        if (this.widget) {
+    
+    onModuleJson = ({switcherValue}: {switcherValue: boolean}) => {
+        if (this.input) {
             this.setState({
-                value: state
+                value: switcherValue
             })
         }
     }
+    
     onClick = () => {
         const newValue = !this.state.value
         this.setState({
             value: newValue
         })
-        this.widget.sendRequest({
-            type: 'uiEvent',
-            value: newValue
-        })
+        this.input && this.input.sendValue(newValue)
     }
+    
     render() {
         return (
             <StreamrInput
                 {...this.props}
                 onModuleJson={this.onModuleJson}
-                widgetRef={(widget) => this.widget = widget}
+                ref={(input) => this.input = input}
             >
                 <div className={styles.streamrSwitcher}>
                     <div className={`${styles.switcher} ${this.state.value ? styles.on : styles.off}`} onClick={this.onClick}>

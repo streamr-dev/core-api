@@ -198,7 +198,7 @@ export const updateDashboardLayout = (dashboardId: Dashboard.id, layout: Layout)
         md: normalizeItemList(layout.md),
         lg: normalizeItemList(layout.lg),
     })
-    if (!_.isEqual(normalizeLayout(layout), normalizeLayout(dashboard.layout))) {
+    if (dashboard && !_.isEqual(normalizeLayout(layout), normalizeLayout(dashboard.layout))) {
         dispatch(updateDashboard({
             ...dashboard,
             layout

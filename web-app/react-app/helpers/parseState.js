@@ -10,7 +10,7 @@ export const parseDashboard = ({dashboard: {dashboardsById, openDashboard}}: {da
     const db = dashboardsById[openDashboard.id] || {}
     return {
         dashboard: db,
-        canShare: db.new !== true && (db.ownPermissions && db.ownPermissions.includes('share')),
-        canWrite: db.new !== true && (db.ownPermissions && db.ownPermissions.includes('write'))
+        canShare: db.new !== true && (db.ownPermissions || []).includes('share'),
+        canWrite: db.new === true || (db.ownPermissions || []).includes('write')
     }
 }

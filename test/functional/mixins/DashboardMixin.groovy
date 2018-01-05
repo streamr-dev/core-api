@@ -2,14 +2,14 @@ package mixins
 
 
 import pages.DashboardListPage
-import pages.DashboardShowPage
+import pages.DashboardEditorPage
 import org.openqa.selenium.Keys
 
 
 class DashboardMixin {
 
 	def findCanvas(String name) {
-		return $("#main-menu .navigation .canvas .mm-text", text: name).closest(".canvas")
+		return $(".canvasInList_canvasTitle", text: name).parent().parent()
 	}
 
 	def expandCanvas(String name) {
@@ -20,21 +20,21 @@ class DashboardMixin {
 	}
 
 	def findModule(String canvasName, String moduleName) {
-		return findCanvas(canvasName)?.find(".module-title", text:contains(moduleName))
+		return findCanvas(canvasName)?.find(".moduleInModuleList_module", text:contains(moduleName))
 	}
 
 	def findDashboardItem(String name) {
-		return $("#dashboard-view .dashboarditem .title", text:contains(name)).parents(".dashboarditem")
+		return $("#content-wrapper .dashboardItem_dashboardItem .dashboardItemTitleRow_title", text:contains(name)).parents(".dashboardItem_dashboardItem")
 	}
 
 	def findTitleInput(String title) {
-		return $("#dashboard-view .dashboarditem input", value: title)
+		return $("#content-wrapper .dashboardItem_dashboardItem input", value: title)
 	}
 
 	def createDashboard(String name) {
 		to DashboardListPage
 		createButton.click()
-		waitFor { at DashboardShowPage }
+		waitFor { at DashboardEditorPage }
 		setDashboardName(name)
 		saveDashboard()
 	}
@@ -44,24 +44,12 @@ class DashboardMixin {
 		waitFor { at DashboardListPage }
 		$(".table .td", text: dashboardName).click()
 		waitFor {
-			at DashboardShowPage
-		}
-		if ($("body.editing").size() == 0) {
-			$("#main-menu-toggle").click()
-			waitFor {
-				saveButton.displayed
-			}
-		}
-		menuToggle.click()
-		waitFor {
-			deleteButton.displayed
+			at DashboardEditorPage
 		}
 		deleteButton.click()
 		waitForConfirmation()
 		acceptConfirmation()
 		waitFor { at DashboardListPage }
-		$(".alert", text:contains("Dashboard " +dashboardName+ "deleted")).displayed
-		!($(".table .td", text:dashboardName).displayed)
 	}
 
 	def addDashboardItem(String canvasName, String dashboardItemName) {
@@ -78,6 +66,7 @@ class DashboardMixin {
 	def setDashboardName(String name) {
 		dashboardNameLabel.click()
 		waitFor { dashboardNameInput.displayed }
+		dashboardNameInput.firstElement().clear()
 		dashboardNameInput << name
 		dashboardNameInput << Keys.ENTER
 		waitFor { dashboardNameLabel.displayed }
@@ -85,11 +74,11 @@ class DashboardMixin {
 
 	def saveDashboard() {
 		saveButton.click()
-		waitFor { $(".ui-pnotify .ui-pnotify-title", text:"Saved!").displayed }
+		waitFor { findSuccessNotification() }
 	}
 
 	void dragDashboardItem(name, x, y) {
-		def item = findDashboardItem(name).find(".title")
+		def item = findDashboardItem(name).find(".dashboardItem_header")
 
 		interact {
 			clickAndHold(item)

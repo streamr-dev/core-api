@@ -9,6 +9,8 @@ import {updateDashboard} from '../../../../actions/dashboard'
 
 import type {Dashboard, DashboardReducerState as DashboardState} from '../../../../flowtype/dashboard-types'
 
+import styles from './nameEditor.pcss'
+
 type Props = {
     dashboard: Dashboard,
     update: Function,
@@ -26,7 +28,7 @@ export class NameEditor extends Component<Props> {
     
     render() {
         return (
-            <div className="menu-content">
+            <div className={`menu-content ${styles.nameEditor}`}>
                 <label>
                     Dashboard Name
                 </label>

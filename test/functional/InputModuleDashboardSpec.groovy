@@ -3,6 +3,7 @@ import mixins.ListPageMixin
 import mixins.CanvasMixin
 import mixins.ConfirmationMixin
 import mixins.DashboardMixin
+import mixins.NotificationMixin
 import pages.*
 
 class InputModuleDashboardSpec extends LoginTester1Spec {
@@ -15,6 +16,7 @@ class InputModuleDashboardSpec extends LoginTester1Spec {
 		// @Mixin is buggy, use runtime mixins instead
 		this.class.metaClass.mixin(ListPageMixin)
 		this.class.metaClass.mixin(ConfirmationMixin)
+		this.class.metaClass.mixin(NotificationMixin)
 		this.class.metaClass.mixin(DashboardMixin)
 		this.class.metaClass.mixin(CanvasMixin)
 
@@ -40,7 +42,7 @@ class InputModuleDashboardSpec extends LoginTester1Spec {
 		saveDashboard()
 
 		waitFor {
-			!$(".ui-pnotify").displayed
+			!($(".ui-pnotify").displayed)
 		}
 
 		navbar.navSettingsLink.click()
@@ -53,15 +55,9 @@ class InputModuleDashboardSpec extends LoginTester1Spec {
 
 	def openDashboard() {
 		to DashboardListPage
-		$(".clickable-table a span", text: dashboardName).click()
+		clickRow(dashboardName)
 		waitFor {
-			at DashboardShowPage
-		}
-		if ($("body.editing").size() == 0) {
-			$("#main-menu-toggle").click()
-			waitFor {
-				saveButton.displayed
-			}
+			at DashboardEditorPage
 		}
 	}
 
@@ -94,7 +90,7 @@ class InputModuleDashboardSpec extends LoginTester1Spec {
 		def button
 		when: "Button added"
 		addDashboardItem(canvasName, "Button")
-		button = findDashboardItem("Button").find("button.button-module-button")
+		button = findDashboardItem("Button").find(".streamr-button .btn")
 		then: "The name of the button is buttonTest"
 		button.text() == "buttonTest"
 
@@ -113,11 +109,11 @@ class InputModuleDashboardSpec extends LoginTester1Spec {
 		when: "TextField added"
 		addDashboardItem(canvasName, "TextField")
 		textField = findDashboardItem("TextField").find("textarea")
-		sendBtn = findDashboardItem("TextField").find(".btn.send-btn")
+		sendBtn = findDashboardItem("TextField").find(".streamrTextField_buttonContainer .btn")
 		then: "The text in the textField is textFieldTest"
 		// Geb's own .text() didn't work for some reason
 		waitFor {
-			js.exec("return \$('streamr-text-field textarea').val()") == "textFieldTest"
+			js.exec("return document.querySelector('.streamrTextField_streamrTextField textarea').value") == "textFieldTest"
 		}
 
 		when: "Text changed and sendButton clicked"
@@ -132,7 +128,7 @@ class InputModuleDashboardSpec extends LoginTester1Spec {
 	void "the switcher works"() {
 		def switcher
 		addDashboardItem(canvasName, "Switcher")
-		switcher = findDashboardItem("Switcher").find("div.switcher div.switcher-inner")
+		switcher = findDashboardItem("Switcher").find(".streamrSwitcher_switcherInner")
 
 		when: "Switcher clicked"
 		switcher.click()
@@ -154,7 +150,7 @@ class InputModuleDashboardSpec extends LoginTester1Spec {
 
 		then: "Switcher remembers its state"
 		waitFor {
-			$(".switcher.checked").size() == 1
+			$(".streamrSwitcher_switcher.streamrSwitcher_on").size() == 1
 		}
 	}
 }

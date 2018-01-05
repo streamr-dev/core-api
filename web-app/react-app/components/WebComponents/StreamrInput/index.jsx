@@ -7,14 +7,28 @@ import type {WebcomponentProps} from '../../../flowtype/webcomponent-types'
 import type {Node} from 'react'
 
 type Props = WebcomponentProps & {
-    onMessage: Function,
-    onModuleJson: Function,
+    onMessage?: ?Function,
+    onModuleJson?: ?Function,
     children: Node,
     widgetRef?: (widget: ?StreamrWidget) => void
 }
 
 export default class StreamrInput extends Component<Props> {
     widget: ?StreamrWidget
+    
+    componentDidMount = () => {
+        this.widget && this.widget.sendRequest({
+            type: 'getState'
+        })
+            .then(({data}) => this.props.onMessage && this.props.onMessage(data))
+    }
+    
+    sendValue = (value: ?any) => {
+        this.widget && this.widget.sendRequest({
+            type: 'uiEvent',
+            value
+        })
+    }
 
     render() {
         return (
@@ -26,7 +40,7 @@ export default class StreamrInput extends Component<Props> {
                 url={this.props.url}
                 onError={this.props.onError}
                 onMessage={this.props.onMessage}
-                onmodulejson={this.props.onModuleJson}
+                onModuleJson={this.props.onModuleJson}
                 ref={(widget) => {
                     this.widget = widget
                     this.props.widgetRef && this.props.widgetRef(widget)

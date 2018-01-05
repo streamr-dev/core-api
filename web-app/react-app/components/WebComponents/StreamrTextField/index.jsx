@@ -14,25 +14,20 @@ type State = {
 
 export default class StreamrTextField extends Component<WebcomponentProps, State> {
     widget: any
-    //onModuleJson: Function
-    //onClick: Function
-    //onChange: Function
     state = {
         value: ''
     }
-    //constructor() {
-    //    super()
-    //this.onModuleJson = this.onModuleJson.bind(this)
-    //this.onClick = this.onClick.bind(this)
-    //this.onChange = this.onChange.bind(this)
-    //}
-    onModuleJson = ({state}: { state: string }) => {
+
+    onMessage = ({state: textFieldValue}: { state: string }) => {
         if (this.widget) {
-            this.setState({
-                value: state || ''
-            })
+            if (textFieldValue) {
+                this.setState({
+                    value: textFieldValue
+                })
+            }
         }
     }
+    
     onClick = () => {
         if (this.widget) {
             this.widget.sendRequest({
@@ -41,6 +36,7 @@ export default class StreamrTextField extends Component<WebcomponentProps, State
             })
         }
     }
+    
     onChange = (e: {
         preventDefault: () => void,
         target: {
@@ -57,7 +53,7 @@ export default class StreamrTextField extends Component<WebcomponentProps, State
         return (
             <StreamrInput
                 {...this.props}
-                onModuleJson={this.onModuleJson}
+                onMessage={this.onMessage}
                 widgetRef={(widget) => this.widget = widget}
             >
                 <div className={styles.streamrTextField}>
