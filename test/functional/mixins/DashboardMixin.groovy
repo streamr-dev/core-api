@@ -72,6 +72,14 @@ class DashboardMixin {
 		waitFor { dashboardNameLabel.displayed }
 	}
 
+	def clickDropdownShareButton() {
+		menuToggle.click()
+		waitFor {
+			dropdownShareButton.displayed
+		}
+		dropdownShareButton.click()
+	}
+
 	def saveDashboard() {
 		saveButton.click()
 		waitFor { findSuccessNotification() }

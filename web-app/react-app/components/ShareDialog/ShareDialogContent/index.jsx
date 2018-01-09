@@ -20,7 +20,8 @@ type Props = {
     owner: ?string,
     getResourcePermissions: () => {},
     addPermission: (permission: Permission) => {},
-    removePermission: (permission: Permission) => {}
+    removePermission: (permission: Permission) => {},
+    onClose: () => {}
 }
 
 export class ShareDialogContent extends Component<Props> {
@@ -44,6 +45,7 @@ export class ShareDialogContent extends Component<Props> {
                     <ShareDialogInputRow
                         resourceType={this.props.resourceType}
                         resourceId={this.props.resourceId}
+                        onClose={this.props.onClose}
                     />
                 </Row>
             </Modal.Body>

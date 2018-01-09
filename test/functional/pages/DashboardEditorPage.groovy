@@ -20,11 +20,12 @@ class DashboardEditorPage extends GrailsPage {
 		saveButton { $(".dashboardTools_saveButton") }
 		runningCanvasesLabel { $(".canvasList_canvasListTitle label") }
 		shareButton { $(".dashboardTools_shareButton") }
-//		dropdownShareButton { $(".share-dashboard-button") }
+		menuToggle { $(".breadcrumb_streamrDropdownButton") }
+		dropdownShareButton { $(".editor_dropdownShareButton") }
+		dropdownDeleteButton { $(".editor_dropdownDeleteButton") }
 		deleteButton { $(".dashboardTools_deleteButton") }
 		dashboardNameLabel { $(".nameEditor_nameEditor label")}
 		dashboardNameInput { $(".nameEditor_nameEditor input")}
-		menuToggle { $(".breadCrumb_streamrDropdownButton") }
 	}
 }
 

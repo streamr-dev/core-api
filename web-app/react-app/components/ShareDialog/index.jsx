@@ -43,6 +43,7 @@ export class ShareDialog extends Component<Props> {
                     resourceTitle={this.props.resourceTitle}
                     resourceType={this.props.resourceType}
                     resourceId={this.props.resourceId}
+                    onClose={this.save}
                 />
                 <ShareDialogFooter
                     save={this.save}

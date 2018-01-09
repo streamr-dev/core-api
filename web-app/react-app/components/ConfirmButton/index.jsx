@@ -53,10 +53,18 @@ export default class ConfirmButton extends Component<Props, State> {
     
     render() {
         return (
-            <div className="btn-block">
-                <Button {...this.props.buttonProps} onClick={this.openModal} ref={this.props.buttonRef} className={this.props.className}>
-                    {this.props.children}
-                </Button>
+            <Button
+                {...this.props.buttonProps}
+                onClick={(e) => {
+                    // An ugly fix to prevent clicking the modal from firing this
+                    if (e.target === e.currentTarget) {
+                        this.openModal()
+                    }
+                }}
+                ref={this.props.buttonRef}
+                className={this.props.className}
+            >
+                {this.props.children}
                 <Modal {...this.props.modalProps} show={this.state.open}>
                     <Modal.Header>
                         <Modal.Title>
@@ -75,7 +83,7 @@ export default class ConfirmButton extends Component<Props, State> {
                         </Button>
                     </Modal.Footer>
                 </Modal>
-            </div>
+            </Button>
         )
     }
 }

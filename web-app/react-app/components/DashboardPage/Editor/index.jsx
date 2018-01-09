@@ -42,6 +42,8 @@ const ResponsiveReactGridLayout = WidthProvider(Responsive)
 
 declare var keyId: string
 
+import styles from './editor.pcss'
+
 type Props = {
     dashboard: Dashboard,
     canShare: boolean,
@@ -73,7 +75,8 @@ type State = {
     layoutsByItemId: {
         [DashboardItem.id]: DashboardItem.layout
     },
-    isFullscreen: boolean
+    isFullscreen: boolean,
+    sharingDialogIsOpen: boolean
 }
 
 export class Editor extends Component<Props, State> {
@@ -90,7 +93,8 @@ export class Editor extends Component<Props, State> {
         breakpoints: config.layout.breakpoints,
         cols: config.layout.cols,
         layoutsByItemId: {},
-        isFullscreen: false
+        isFullscreen: false,
+        sharingDialogIsOpen: false
     }
     
     constructor() {
@@ -180,9 +184,10 @@ export class Editor extends Component<Props, State> {
         const dragCancelClassName = 'cancelDragging' + Date.now()
         const locked = this.props.editorLocked || this.state.isFullscreen
         return (
-            <div id="content-wrapper" className="scrollable" style={{
-                height: '100%'
-            }}>
+            <div
+                id="content-wrapper"
+                className={`scrollable ${styles.editor}`}
+            >
                 <Fullscreen
                     enabled={this.state.isFullscreen}
                     onChange={this.onFullscreenToggle}
@@ -203,24 +208,34 @@ export class Editor extends Component<Props, State> {
                                     <FontAwesome name="cog"/>
                                 )}>
                                     {this.props.canShare && (
-                                        <ShareDialog
-                                            resourceType="DASHBOARD"
-                                            resourceId={this.props.dashboard.id}
-                                            resourceTitle={`Dashboard ${this.props.dashboard.name}`}
+                                        <MenuItem
+                                            onClick={() => this.setState({
+                                                sharingDialogIsOpen: true
+                                            })}
+                                            className={styles.dropdownShareButton}
                                         >
-                                            <MenuItem>
-                                                <FontAwesome name="user"/> Share
-                                            </MenuItem>
-                                        </ShareDialog>
+                                            <FontAwesome name="user"/> Share
+                                        </MenuItem>
                                     )}
                                     {this.props.canWrite && (
-                                        <DeleteButton buttonProps={{
-                                            componentClass: MenuItem,
-                                            bsClass: ''
-                                        }}>
+                                        <DeleteButton
+                                            buttonProps={{
+                                                componentClass: MenuItem,
+                                                bsClass: styles.dropdownDeleteButton
+                                            }}
+                                        >
                                             <FontAwesome name="trash-o"/> Delete
                                         </DeleteButton>
                                     )}
+                                    <ShareDialog
+                                        isOpen={this.state.sharingDialogIsOpen}
+                                        onClose={() => this.setState({
+                                            sharingDialogIsOpen: false
+                                        })}
+                                        resourceType="DASHBOARD"
+                                        resourceId={this.props.dashboard.id}
+                                        resourceTitle={`Dashboard ${this.props.dashboard.name}`}
+                                    />
                                 </StreamrBreadcrumbDropdownButton>
                             )}
                             <StreamrBreadcrumbToolbar>

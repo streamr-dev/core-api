@@ -15,6 +15,7 @@ type Props = {
     resourceType: Permission.resourceType,
     resourceId: Permission.resourceId,
     addPermission: (permission: Permission) => {},
+    onClose: () => {}
 }
 
 export class ShareDialogInputRow extends Component<Props> {
@@ -32,11 +33,15 @@ export class ShareDialogInputRow extends Component<Props> {
         } = serialize(e.target, {
             hash: true
         })
-        this.props.addPermission({
-            user: data.email,
-            operation: 'read'
-        })
-        e.target.reset()
+        if (data.email) {
+            this.props.addPermission({
+                user: data.email,
+                operation: 'read'
+            })
+            e.target.reset()
+        } else {
+            this.props.onClose()
+        }
     }
     
     render() {
