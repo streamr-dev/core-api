@@ -177,7 +177,8 @@ public abstract class AbstractHttpModule extends ModuleWithSideEffects implement
 
 	@Override
 	public void activateWithoutSideEffects() {
-		getParentSignalPath().showNotification(getDummyNotificationMessage());
+		String msg = "Real-time action by '" + getEffectiveName() + "' ignored in historical mode:\n\n" + getDummyNotificationMessage();
+		getParentSignalPath().showNotification(msg);
 	}
 
 	/**
