@@ -1,11 +1,11 @@
 import com.unifina.domain.data.Stream
 import com.unifina.service.StreamService
-import core.LoginTester1Spec
-import core.mixins.CanvasMixin
-import core.mixins.ListPageMixin
-import core.mixins.StreamMixin
-import core.pages.CanvasListPage
-import core.pages.CanvasPage
+import LoginTester1Spec
+import mixins.CanvasMixin
+import mixins.ListPageMixin
+import mixins.StreamMixin
+import pages.CanvasListPage
+import pages.CanvasPage
 import spock.lang.Shared
 
 import java.text.SimpleDateFormat
