@@ -108,7 +108,7 @@ class MapModulesSpec extends LoginTester1Spec implements CanvasMixin, Confirmati
 		moveModuleBy("Label", 650, 75, 1)
 
 		chooseDropdownParameterForModule("ForEach", "canvas", subCanvasName)
-		sleep(500)
+		sleep(2000)
 
 		connectEndpoints(findOutput("Stream", "value"), findInput("ForEach", "A"))
 		connectEndpoints(findOutput("Stream", "value"), findInputByDisplayName("ForEach", "in"))

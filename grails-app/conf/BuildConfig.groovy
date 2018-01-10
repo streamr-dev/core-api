@@ -1,6 +1,3 @@
-import grails.util.Environment
-
-
 def env = System.getenv()
 
 def sutHost = env['SUT_HOST'] ?: 'localhost'
@@ -8,7 +5,7 @@ def sutPort = env['SUT_PORT'] ?: '8081'
 
 grails.server.port.http = sutPort
 
-rails.servlet.version = "3.0"
+grails.servlet.version = "3.0" // Change depending on target container compliance (2.5 or 3.0)
 grails.tomcat.nio = true
 
 grails.project.target.level = 1.7
@@ -19,21 +16,15 @@ grails.project.test.class.dir = "target/test-classes"
 grails.project.test.reports.dir = "target/test-reports"
 grails.project.war.file = "target/ROOT.war"
 
-def gebVersion = "0.13.1"
+def gebVersion = "1.0"
 def seleniumVersion = "2.53.0"
 
-grails.project.dependency.resolver = "maven" // or ivy
-
-// grails.project.fork.run = false
-//grails.project.fork = [
-//	run: [maxMemory: 768, minMemory: 64, debug: false, maxPerm: 256, forkReserve:false],
-//	test: false
-//]
 grails.project.fork = [
     run: [maxMemory: System.getProperty("maxMemory") ? Integer.parseInt(System.getProperty("maxMemory")) : 4196, minMemory: 256, debug: false, maxPerm: 512, forkReserve:false],
     test: [maxMemory: System.getProperty("maxMemory") ? Integer.parseInt(System.getProperty("maxMemory")) : 4196, minMemory: 256, debug: false, maxPerm: 512, forkReserve:false, daemon:true, jvmArgs: ["-Dwebdriver.chrome.driver="+env["CHROMEDRIVER"]]]
 ]
 
+grails.project.dependency.resolver = "maven" // or ivy
 grails.project.dependency.resolution = {
     // inherit Grails' default dependencies
     inherits("global") {
@@ -41,7 +32,8 @@ grails.project.dependency.resolution = {
         // excludes 'ehcache'
     }
     log "warn" // log level of Ivy resolver, either 'error', 'warn', 'info', 'debug' or 'verbose'
-    //    legacyResolve false // whether to do a secondary resolve on plugin installation, not advised and here for backwards compatibility
+	checksums true // Whether to verify checksums on resolve
+	legacyResolve false // whether to do a secondary resolve on plugin installation, not advised and here for backwards compatibility
     repositories {
         // Fast local repos first
         grailsHome()
@@ -114,14 +106,14 @@ grails.project.dependency.resolution = {
     plugins {
         // plugins for the build system only
 		
-        build(":tomcat:7.0.52.1") {
+        build(":tomcat:7.0.70") { // or ":tomcat:8.0.22"
             export = false
         }
         
         compile ":mail:1.0.7"
 
 	    // plugins needed at runtime but not for compilation
-		runtime ':hibernate:3.6.10.19'
+		runtime ':hibernate:3.6.10.19' // or :hibernate4:4.3.10
 			  
 		// Required by cached-resources but transitive dependency declaration is missing	  
 		compile ":cache-headers:1.1.7"
@@ -136,6 +128,6 @@ grails.project.dependency.resolution = {
 		
         test ":plastic-criteria:1.5"
         test ":geb:$gebVersion"
-		test ":rest-client-builder:2.0.1"
+		test ":rest-client-builder:2.1.1"
     }
 }

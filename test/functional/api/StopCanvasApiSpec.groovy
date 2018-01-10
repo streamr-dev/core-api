@@ -2,7 +2,6 @@ package api
 
 import com.unifina.domain.signalpath.Canvas
 import geb.spock.GebReportingSpec
-import grails.plugins.rest.client.ErrorResponse
 import grails.plugins.rest.client.RestBuilder
 import grails.plugins.rest.client.RestResponse
 import org.springframework.http.HttpStatus
@@ -12,7 +11,7 @@ class StopCanvasApiSpec extends GebReportingSpec {
 
 	def "stopping dead canvas should change state to STOPPED"() {
 		when:
-		ErrorResponse response = authenticatedPost(baseUrl + "/api/v1/canvases/$canvasId/stop")
+		RestResponse response = authenticatedPost(baseUrl + "/api/v1/canvases/$canvasId/stop")
 
 		then:
 		response.statusCode == HttpStatus.INTERNAL_SERVER_ERROR
@@ -32,7 +31,7 @@ class StopCanvasApiSpec extends GebReportingSpec {
 		}
 	}
 
-	def authenticatedGet(String url) {
+	RestResponse authenticatedGet(String url) {
 		new RestBuilder().get(url) {
 			header("Authorization", "token tester1-api-key")
 		}
