@@ -68,9 +68,6 @@ public class HistoricalEventQueue extends DataSourceEventQueue {
 			}
 		}
 		
-		if (queue.isEmpty())
-			return;
-		
 		// Init global time if it has not already been initialized
 		if (globals.time == null) {
 			Date firstDate;
@@ -84,6 +81,13 @@ public class HistoricalEventQueue extends DataSourceEventQueue {
 			
 			globals.time = firstDate;
 		}
+
+		/**
+		 * Queue events at lower and upper bounds of selected playback range to ensure that MasterClock ticks through
+		 * range even in the absence of feed data.
+		 */
+		queue.add(PlaybackMessage.newStartEvent(globals.getStartDate()));
+		queue.add(PlaybackMessage.newEndEvent(globals.getEndDate()));
 		
 		/**
 		 * Initialize some values
@@ -111,9 +115,9 @@ public class HistoricalEventQueue extends DataSourceEventQueue {
 		
 		while (!queue.isEmpty() && !abort) {
 			FeedEvent event = queue.poll();
-			
+
 			time = event.timestamp.getTime();
-			
+
 			// Check if a delay is needed
 			if (speed != 0 && time > todBegin && time < todEnd) {
 				realTimeElapsed = System.currentTimeMillis() - realTimeStart;
@@ -178,7 +182,7 @@ public class HistoricalEventQueue extends DataSourceEventQueue {
 		}
 
 		// Handle event
-		event.recipient.receive(event);
+		event.deliver();
 		return true;
 	}
 	
