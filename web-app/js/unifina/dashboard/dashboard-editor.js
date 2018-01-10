@@ -408,7 +408,7 @@
             this.titleInput = this.$el.find("input.dashboard-name.title-input")
             this.list = this.$el.find("#rsp-list")
             this.saveButton = this.$el.find("#saveButton")
-            this.shareButton = this.$el.find("#share-button")
+            this.shareButton = $(".share-button")
             this.deleteButton = this.$el.find("#deleteDashboardButton")
             _.each(this.canvases.models, function(canvas) {
                 var canvasView = new CanvasView({
@@ -443,12 +443,19 @@
         
         checkPermissions: function() {
             var _this = this
-            $.getJSON(this.baseUrl + "api/v1/dashboards/" + this.dashboard.id + "/permissions/me", function(permissions) {
+            if (this.dashboard && this.dashboard.id) {
+                $.getJSON(this.baseUrl + "api/v1/dashboards/" + this.dashboard.id + "/permissions/me", callback)
+            } else {
+                callback([])
+            }
+            function callback(permissions) {
                 permissions = _.map(permissions, function(p) {
                     return p.operation
                 })
                 if (_.contains(permissions, "share")) {
                     _this.shareButton.removeAttr("disabled")
+                    _this.shareButton.data('url', Streamr.createLink({uri: "api/v1/dashboards/" + _this.dashboard.get('id')}))
+                    _this.shareButton.data('name', _this.dashboard.get('name'))
                 } else {
                     _this.shareButton.addClass("forbidden")
                 }
@@ -459,7 +466,7 @@
                     _this.saveButton.addClass("forbidden")
                     _this.deleteButton.addClass("forbidden")
                 }
-            })
+            }
         },
         
         setEditMode: function(active) {
@@ -503,14 +510,8 @@
             }
         },
         
-        updateTitle: function(e) {
-            var a = this.titleInput.val()
-            this.dashboard.set({name: a})
-        },
-        
         save: function() {
             var _this = this
-            this.updateTitle()
             
             this.dashboard.save({}, {
                 success: function() {

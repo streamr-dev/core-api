@@ -72,7 +72,9 @@ class CanvasService {
      */
 	@Transactional
 	public void deleteCanvas(Canvas canvas, SecUser user, boolean delayed = false) {
-		if (delayed) {
+		if (canvas.state == Canvas.State.RUNNING) {
+			throw new ApiException(409, "CANNOT_DELETE_RUNNING", "Cannot delete running canvas.")
+		} else if (delayed) {
 			taskService.createTask(CanvasDeleteTask, CanvasDeleteTask.getConfig(canvas), "delete-canvas", user, 30 * 60 * 1000)
 		} else {
 			Collection<Stream> uiChannels = Stream.findAllByUiChannelCanvas(canvas)
@@ -97,6 +99,7 @@ class CanvasService {
 		try {
 			signalPathService.startLocal(canvas, signalPathContext)
 		} catch (SerializationException ex) {
+			log.error("De-serialization failure caused by (BELOW)", ex.cause)
 			String msg = "Could not load (deserialize) previous state of canvas $canvas.id."
 			throw new ApiException(500, "LOADING_PREVIOUS_STATE_FAILED", msg)
 		}

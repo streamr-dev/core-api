@@ -38,4 +38,10 @@ public class FeedEvent<MessageClass extends ITimestamped, EventRecipientClass ex
 	public String toString() {
 		return timestamp + " - " + "iterator: " + iterator + ", content: " + content;
 	}
+
+	void deliver() {
+		if (recipient != null) {
+			recipient.receive(this);
+		}
+	}
 }

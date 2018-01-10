@@ -1,6 +1,8 @@
 package com.unifina.controller.security
 
+import com.mashape.unirest.http.Unirest
 import com.unifina.domain.security.RegistrationCode
+import grails.converters.JSON
 import grails.util.Environment
 import grails.plugin.springsecurity.SpringSecurityUtils
 import grails.plugin.springsecurity.annotation.Secured
@@ -66,21 +68,21 @@ class RegisterController {
             user = userService.createUser(cmd.properties)
         } catch (UserCreationFailedException e) {
             flash.message = e.getMessage()
-            return render(view: 'register', model: [ user: user, invite: invite.code ])
+            return render(view: 'register', model: [user: cmd, invite: invite.code])
         }
 
         invite.used = true
         if (!invite.save(flush: true)) {
             log.warn("Failed to save invite: "+invite.errors)
             flash.message = "Failed to save invite"
-            return render(view: 'register', model: [ user: user, invite: invite.code ])
+            return render(view: 'register', model: [user: user, invite: invite.code])
         }
 
         mailService.sendMail {
             from grailsApplication.config.unifina.email.sender
             to user.username
             subject grailsApplication.config.unifina.email.welcome.subject
-            html g.render(template:"email_welcome", model:[user: user], plugin:'unifina-core')
+            html g.render(template:"email_welcome", model: [user: user], plugin:'unifina-core')
         }
 
         log.info("Logging in "+user.username+" after registering")
@@ -98,6 +100,16 @@ class RegisterController {
             render view: 'signup', model: [ user: cmd ]
             return
         }
+
+		def response = Unirest.post(grailsApplication.config.recaptcha.verifyUrl)
+				.field("secret", (String) grailsApplication.config.recaptchav2.secret)
+				.field("response",(String) params."g-recaptcha-response")
+				.asJson()
+		if (response.body.jsonObject.success != true) {
+			flash.error = "Confirming reCaptcha failed for some reason. Please refresh page and refill form."
+			render view: 'signup', model: [ user: cmd ]
+			return
+		}
 
 		SignupInvite invite
 		if (Environment.current == Environment.TEST) {

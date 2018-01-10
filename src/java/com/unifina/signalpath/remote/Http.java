@@ -60,7 +60,7 @@ public class Http extends AbstractHttpModule {
 
 	/** For bodyless verbs, "body" is only a "trigger" */
 	@Override
-	public void onConfiguration(Map<String, Object> config) {
+	protected void onConfiguration(Map<String, Object> config) {
 		super.onConfiguration(config);
 
 		if (config.containsKey("inputs")) {
@@ -73,7 +73,7 @@ public class Http extends AbstractHttpModule {
 
 			// trigger should be driving and non-togglable
 			if (!verb.hasBody()) { body.setDrivingInput(true); }
-			body.canToggleDrivingInput = verb.hasBody();
+			body.setCanToggleDrivingInput(verb.hasBody());
 		}
 	}
 

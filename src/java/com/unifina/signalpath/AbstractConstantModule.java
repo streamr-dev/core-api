@@ -16,7 +16,7 @@ public abstract class AbstractConstantModule<ValueType> extends AbstractSignalPa
 
 	public AbstractConstantModule() {
 		super();
-		initPriority = 40;
+		setInitPriority(40);
 		constant = createConstantParameter();
 		out = createOutput();
 	}
@@ -27,7 +27,7 @@ public abstract class AbstractConstantModule<ValueType> extends AbstractSignalPa
 	@Override
 	public void init() {
 		super.init();
-		constant.canToggleDrivingInput = false;
+		constant.setCanToggleDrivingInput(false);
 		constant.setDrivingInput(true);
 	}
 

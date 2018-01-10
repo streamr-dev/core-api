@@ -1,5 +1,6 @@
 package com.unifina.signalpath.streams
 
+import com.unifina.BeanMockingSpecification
 import com.unifina.api.ValidationException
 import com.unifina.domain.data.Feed
 import com.unifina.domain.data.Stream
@@ -14,7 +15,7 @@ import spock.lang.Specification
 
 @TestMixin(ControllerUnitTestMixin) // to get JSON converter
 @Mock([Stream, Feed])
-class CreateStreamSpec extends Specification {
+class CreateStreamSpec extends BeanMockingSpecification {
 
 	CreateStream module
 	Globals globals = Stub(Globals)
@@ -24,7 +25,7 @@ class CreateStreamSpec extends Specification {
 		module = new CreateStream()
 		module.init()
 
-		globals.getBean(StreamService.class) >> streamService
+		mockBean(StreamService, streamService)
 		globals.getUser() >> null
 
 		Feed feed = new Feed(streamListenerClass: NoOpStreamListener.canonicalName)

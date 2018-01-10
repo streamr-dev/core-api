@@ -15176,10 +15176,20 @@ button.arrow:after {
   -ms-flex: 0 0 auto;
   -o-flex: 0 0 auto;
   flex: 0 0 auto;
+  display: -webkit-flex;
+  display: -moz-flex;
+  display: -ms-flexbox;
+  display: -o-flex;
+  display: flex;
 }
 .streamr-canvas .module .moduleheader .modulename {
   font-weight: bold;
   font-size: 12px;
+  -webkit-flex: 1 0 auto;
+  -moz-flex: 1 0 auto;
+  -ms-flex: 1 0 auto;
+  -o-flex: 1 0 auto;
+  flex: 1 0 auto;
 }
 .streamr-canvas .module .moduleheader .modulebutton {
   width: 16px;
@@ -15187,6 +15197,11 @@ button.arrow:after {
   display: inline;
   vertical-align: top;
   cursor: pointer;
+  -webkit-flex: 0 0 auto;
+  -moz-flex: 0 0 auto;
+  -ms-flex: 0 0 auto;
+  -o-flex: 0 0 auto;
+  flex: 0 0 auto;
 }
 .streamr-canvas .module .modulebody {
   padding: 5px;
@@ -15271,11 +15286,10 @@ button.arrow:after {
 }
 .streamr-canvas .module .modulebody div.ioname {
   display: inline-block;
-  max-width: 100px;
-  white-space: pre-wrap;
-}
-.streamr-canvas .module .modulebody .leaflet-container {
-  width: 100%;
+  max-width: 140px;
+  white-space: normal;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 .streamr-canvas .module .modulefooter {
   width: 100%;
@@ -15323,10 +15337,9 @@ button.arrow:after {
 .component .modulebody .button-module-button {
   margin-top: 5px;
 }
-#canvas .module.chart {
-  z-index: 4;
-}
 #canvas .module.chart .modulebody {
+  width: 600px;
+  height: 400px;
   min-width: 350px;
   min-height: 250px;
   -webkit-flex-direction: row;
@@ -15334,7 +15347,6 @@ button.arrow:after {
   -ms-flex-direction: row;
   -o-flex-direction: row;
   flex-direction: row;
-  width: calc(100% - 23px);
 }
 #canvas .module.chart .modulebody .ioTable {
   width: 23px;
@@ -15425,9 +15437,6 @@ textarea.comment {
 .event-table-module .table-module-container {
   -webkit-user-select: text;
   user-select: text;
-}
-.event-table-module .event-table-module-content {
-  display: block;
   max-height: 400px;
   overflow: auto;
 }
@@ -16277,25 +16286,23 @@ div.table.clickable-table.table-bordered .tbody > .tr > .td:not(:first-child) {
   border-top-left-radius: 0;
   border-bottom-left-radius: 0;
 }
-.credentials-control .auth-key-button-row {
-  margin-right: -15px;
-}
-.credentials-control .auth-key-table td,
-.credentials-control .auth-key-table th {
+.credentials-control .table td,
+.credentials-control .table th {
   padding-top: 10px;
 }
-.credentials-control .auth-key-table td:not(:last-child),
-.credentials-control .auth-key-table th:not(:last-child) {
+.credentials-control .table td:not(:last-child),
+.credentials-control .table th:not(:last-child) {
   padding-right: 10px;
 }
-.credentials-control .auth-key-table .show-key {
+.credentials-control .table .show-key {
   cursor: pointer;
 }
-.credentials-control .auth-key-table td.name-field {
+.credentials-control .table td.name-field {
   max-width: 90px;
   word-wrap: break-word;
 }
-.credentials-control .auth-key-table .auth-key-delete-button {
+.credentials-control .table .auth-key-delete-button {
+  margin-right: -8px;
   margin-left: 5px;
 }
 @media (min-width: 768px) {

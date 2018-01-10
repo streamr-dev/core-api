@@ -70,7 +70,7 @@ public class ConfigurableStreamModule extends AbstractStreamSourceModule impleme
 
 			if (output != null) {
 				if (output instanceof PrimitiveOutput) {
-					((PrimitiveOutput) output).noRepeat = false;
+					((PrimitiveOutput) output).setNoRepeat(false);
 				}
 				addOutput(output);
 			}

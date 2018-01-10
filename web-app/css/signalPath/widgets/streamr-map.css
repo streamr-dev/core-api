@@ -1,4 +1,8 @@
 
+.map-container {
+    flex: 1;
+}
+
 .map-container .invisible-container {
     background: none;
     border: none;

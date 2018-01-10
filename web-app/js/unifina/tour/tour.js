@@ -279,7 +279,13 @@ Tour.prototype.bindModule = function(moduleName, div) {
 	if (!this._modules[moduleName])
 		this._modules[moduleName] = 1
 
-	div.addClass('tour' + moduleName + this._modules[moduleName]++)
+	div.addClass('tour' +
+		moduleName
+			.replace(/\(/g, '')
+			.replace(/\)/g, '')
+			.replace(/\s/g, '_') +
+		this._modules[moduleName]++
+	)
 }
 
 Tour.prototype._getSpObject = function(name) {

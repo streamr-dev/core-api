@@ -1,11 +1,11 @@
 import com.unifina.domain.data.Stream
 import com.unifina.service.StreamService
-import core.LoginTester1Spec
-import core.mixins.CanvasMixin
-import core.mixins.ListPageMixin
-import core.mixins.StreamMixin
-import core.pages.CanvasListPage
-import core.pages.CanvasPage
+import LoginTester1Spec
+import mixins.CanvasMixin
+import mixins.ListPageMixin
+import mixins.StreamMixin
+import pages.CanvasListPage
+import pages.CanvasPage
 import spock.lang.Shared
 
 import java.text.SimpleDateFormat
@@ -43,7 +43,7 @@ class CanvasSpec extends LoginTester1Spec {
 	}
 	def "drag and dropping a module to canvas should add it"() {
 		when: "Barify is added via drag and drop"
-			dragAndDropModule 'Barify'
+			dragAndDropModule('Barify', 200, -400)
 		then: "module should appear on canvas"
 			moduleShouldAppearOnCanvas 'Barify'
 	}
@@ -423,20 +423,6 @@ class CanvasSpec extends LoginTester1Spec {
 			waitFor {
 				$(".tooltip").displayed
 				$(".tooltip .tooltip-inner strong").text() == "off"
-			}
-	}
-
-	void "Canvas can be saved by renaming it with name editor" () {
-		setup:
-			addAndWaitModule "Add"
-		when: "name changed"
-			nameEditorLabel.click()
-			nameEditorInput << "newName" + System.currentTimeMillis()
-			findModuleOnCanvas('Add').click()
-		then: "canvas is saved"
-			waitFor {
-				!driver.currentUrl.endsWith("/canvas/editor")
-				nameEditorLabel.text().startsWith("newName")
 			}
 	}
 

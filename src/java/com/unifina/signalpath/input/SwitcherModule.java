@@ -16,7 +16,7 @@ public class SwitcherModule extends InputModule {
 	public void init() {
 		super.init();
 		canClearState = false;
-		out.canBeNoRepeat = false;
+		out.setCanBeNoRepeat(false);
 	}
 
 	@Override

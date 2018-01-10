@@ -8,12 +8,14 @@ SignalPath.Input = function(json, parentDiv, module, type, pub) {
 
 		div.bind("spConnect", (function(me) {
 			return function(event, output) {
+				me.source = output
 				me.json.sourceId = output.getId();
 			}
 		})(pub));
 		
 		div.bind("spDisconnect", (function(me) {
 			return function(event, output) {
+				delete me.source
 				delete me.json.sourceId;
 			}
 		})(pub));
@@ -44,20 +46,6 @@ SignalPath.Input = function(json, parentDiv, module, type, pub) {
 
 		if (data.canConnect === false) {
 			return;
-		}
-
-		// Feedback connection. Default false. Switchable for TimeSeries types.
-		if (data.type=="Double" && (data.canBeFeedback==null || data.canBeFeedback)) {
-			var feedback = new SignalPath.IOSwitch(switchDiv, "ioSwitch feedback", {
-				getValue: (function(d){
-					return function() { return d.feedback; };
-				})(data),
-				setValue: (function(d){
-					return function(value) { return d.feedback = value; };
-				})(data),
-				buttonText: function() { return "FB"; },
-				tooltip: 'Feedback connection'
-			});
 		}
 
 		// Initial value. Default null/off. Only valid for TimeSeries type
@@ -178,6 +166,10 @@ SignalPath.Input = function(json, parentDiv, module, type, pub) {
 				console.log("Warning: input "+pub.getId()+" should be connected to "+pub.json.sourceId+", but is connected to "+connectedEndpoints[0].getId()+" instead!");
 			}
 		}
+	}
+
+	pub.getSource = function() {
+		return pub.source
 	}
 	
 	return pub;

@@ -33,14 +33,14 @@ environments {
         dataSource {
 			username = System.getProperty('streamr.database.user', 'root')
 			password = System.getProperty('streamr.database.password', 'password')
-            url = "jdbc:mysql://${System.getProperty('streamr.database.host', '127.0.0.1:3306')}/core_dev?useLegacyDatetimeCode=false"
+			url = "jdbc:mysql://${System.getProperty('streamr.database.host', '127.0.0.1:3306')}/${System.getProperty('streamr.database.name', 'core_dev')}?useLegacyDatetimeCode=false"
         }
     }
     test {
         dataSource {
 			username = System.getProperty('streamr.database.user', 'root')
 			password = System.getProperty('streamr.database.password', 'password')
-			url = "jdbc:mysql://${System.getProperty('streamr.database.host', '127.0.0.1:3306')}/core_test?useLegacyDatetimeCode=false"
+			url = "jdbc:mysql://${System.getProperty('streamr.database.host', '127.0.0.1:3306')}/${System.getProperty('streamr.database.name', 'core_test')}?useLegacyDatetimeCode=false"
         }
     }
     production {
@@ -49,7 +49,7 @@ environments {
 		dataSource {
 			username = System.getProperty('streamr.database.user') ?: "streamr-prod"
 			password = System.getProperty('streamr.database.password') ?: "Trez2tuV"
-			url = "jdbc:mysql://${System.getProperty('streamr.database.host') ?: "mysql"}/${System.getProperty('streamr.database.name')}?useLegacyDatetimeCode=false"
+			url = "jdbc:mysql://${System.getProperty('streamr.database.host') ?: "mysql"}/${System.getProperty('streamr.database.name', 'streamr_prod')}?useLegacyDatetimeCode=false"
 		}
     }
 }

@@ -10,7 +10,7 @@ public class TimeOfEvent extends AbstractSignalPathModule {
 
 	@Override
 	public void init() {
-		trigger.canToggleDrivingInput = false;
+		trigger.setCanToggleDrivingInput(false);
 		addInput(trigger);
 		addOutput(timestamp);
 	}

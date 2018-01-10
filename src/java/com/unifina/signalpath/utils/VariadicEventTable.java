@@ -45,10 +45,10 @@ public class VariadicEventTable extends ModuleWithUI {
 		HashMap<String, Object> msg = new HashMap<String, Object>();
 		ArrayList<Object> nr = new ArrayList<>(2);
 		msg.put("nr", nr);
-		nr.add(getGlobals().dateTimeFormat.format(getGlobals().time));
+		nr.add(getGlobals().formatDateTime(getGlobals().time));
 
 		for (Input<Object> i : ins.getEndpoints()) {
-			if (i.hasValue() && (!showOnlyNewValues || drivingInputs.contains(i))) {
+			if (i.hasValue() && (!showOnlyNewValues || getDrivingInputs().contains(i))) {
 				nr.add(i.getValue().toString());
 			} else {
 				nr.add(null);
@@ -147,9 +147,8 @@ public class VariadicEventTable extends ModuleWithUI {
 		public Input<Object> instantiate(AbstractSignalPathModule module, String endpointName) {
 			Input<Object> input = new Input<>(module, endpointName, "Object");
 			input.setDrivingInput(true);
-			input.canToggleDrivingInput = false;
-			input.canBeFeedback = false;
-			input.requiresConnection = false;
+			input.setCanToggleDrivingInput(false);
+			input.setRequiresConnection(false);
 			return input;
 		}
 	}

@@ -35,28 +35,22 @@
 					}
 				}
 
-				var nameEditor = new StreamrNameEditor({
-					el: $(".name-editor"),
-					opener: $(".rename-dashboard-button")
-				}).on("changed", function(name) {
-					if (dashboard) {
-						dashboard.set("name", name)
-					}
-				})
+				var nameEditor
 
 				var shareUrl
 				var shareName
 				$(".share-button").click(function(e) {
 					e.preventDefault()
-					if ($(this).data('url')) {
-						sharePopup(shareUrl, shareName)
+					var url = shareUrl || $(this).data('url')
+					var name = shareName || $(this).data('name')
+					if (url) {
+						sharePopup(url, name)
 					}
 				})
 
 				function createDashboard(dbJson) {
 				    streamrDropDownSetEnabled('rename')
 					document.title = dbJson.name
-					nameEditor.setName(dbJson.name)
 					dashboard = new Dashboard(dbJson)
 					// urlRoot needs to be set for saving to work
 					dashboard.urlRoot = baseUrl + "api/v1/dashboards/"
@@ -115,6 +109,16 @@
 							})
 						}
 					})
+					nameEditor = new StreamrNameEditor({
+						el: $(".name-editor"),
+						opener: $(".rename-dashboard-button")
+					}).on("changed", function(name) {
+						if (dashboard) {
+							dashboard.set("name", name)
+						}
+					})
+
+					nameEditor.setName(dbJson.name)
 				}
 
 				function checkPermissions() {
@@ -162,7 +166,7 @@
 					// ctrl + s || cmd + s
 					if ((e.ctrlKey || e.metaKey) && String.fromCharCode(e.which).toLowerCase() == 's') {
 						e.preventDefault()
-						sidebar.save()
+						dashboard && dashboard.save()
 					}
 				})
 			})

@@ -1,13 +1,19 @@
 package com.unifina.signalpath.variadic
 
 import com.unifina.signalpath.AbstractSignalPathModule
+import com.unifina.signalpath.Input
 import spock.lang.Specification
 
 class VariadicInputSpec extends Specification {
-	def module = Mock(AbstractSignalPathModule)
+	def module = Stub(AbstractSignalPathModule) {
+		module.getDrivingInputs(_) >> new HashSet<Input>()
+	}
 	def variadicInput = new VariadicInput<Object>(module, new InputInstantiator.SimpleObject())
 
 	def "attachToModule() attaches endpoint (Input) to module"() {
+		module = Mock(AbstractSignalPathModule)
+		variadicInput = new VariadicInput<Object>(module, new InputInstantiator.SimpleObject())
+
 		when:
 		variadicInput.addEndpoint("new-input-1")
 		variadicInput.addEndpoint("new-input-2")
@@ -27,8 +33,6 @@ class VariadicInputSpec extends Specification {
 	}
 
 	def "can getValues() of non-placeholder input"() {
-		module.drivingInputs = [] // Prevent NullPointerException during receive()
-
 		variadicInput.addEndpoint("new-input-1")
 		variadicInput.addEndpoint("new-input-2")
 		variadicInput.addEndpoint("new-input-3")

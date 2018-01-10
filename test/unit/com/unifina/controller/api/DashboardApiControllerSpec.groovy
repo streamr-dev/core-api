@@ -216,7 +216,7 @@ class DashboardApiControllerSpec extends Specification {
 
 		then:
 		response.status == 200
-		1 * dashboardService.create(_, me) >> {
+		1 * dashboardService.createOrUpdate(_, me) >> {
 			dashboard
 		}
 		1 * dashboard.toMap()
@@ -240,9 +240,9 @@ class DashboardApiControllerSpec extends Specification {
 
 	def "update() delegates to dashboardService.update and returns new dashboard as result"() {
 		when:
-		params.id = 3L
 		request.addHeader("Authorization", "Token myApiKey")
 		request.JSON = [
+			id: 3L,
 			name: "dashboard-update-3",
 		]
 		request.requestURI = "/api/v1/dashboards"
@@ -278,7 +278,8 @@ class DashboardApiControllerSpec extends Specification {
 				],
 			]
 		]
-		1 * dashboardService.update(3L, _, me) >> { Long id, SaveDashboardCommand command, SecUser user ->
+		1 * dashboardService.createOrUpdate(_, me) >> { SaveDashboardCommand command, SecUser user ->
+			assert command.id == 3L
 			def d = dashboards[2]
 			d.name = command.name
 			return d

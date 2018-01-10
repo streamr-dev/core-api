@@ -1,3 +1,4 @@
+import com.google.gson.Gson
 import com.unifina.data.KafkaPartitioner
 
 /*****
@@ -97,7 +98,7 @@ log4j = {
 		 grails.resources.mappers.uglifyjs.excludes = ['**/*.*']
 	 }
 	 production {
-		 grails.resources.mappers.uglifyjs.excludes = ['**/*.min.js', '**/*-min.js']
+		 grails.resources.mappers.uglifyjs.excludes = ['**/*.min.js', '**/*-min.js', '**/*.bundle.js', '**/*-compressed.js']
 	 }
  }
 
@@ -171,6 +172,17 @@ log4j = {
  }
 
 /**
+ * Streamr cluster config
+ */
+streamr.cluster.internalPort = System.getProperty("streamr.cluster.internalPort") ? Integer.parseInt(System.getProperty("streamr.cluster.internalPort")) : 8081
+streamr.cluster.internalProtocol = System.getProperty("streamr.cluster.internalProtocol") ?: "http"
+environments {
+	production {
+		streamr.cluster.internalPort = System.getProperty("streamr.cluster.internalPort") ? Integer.parseInt(System.getProperty("streamr.cluster.internalPort")) : 8080
+	}
+}
+
+/**
  * Tour config
  */
 streamr.tours.enabled = true
@@ -191,7 +203,7 @@ environments {
 /**
  * API & CORS config
  */
-cors.url.pattern = '/api/*'
+cors.url.pattern = ['/api/*', '/contact/send']
 cors.headers = ['Access-Control-Allow-Origin': '*']
 streamr.apiKey.revokeNotificationStream = "revoked-api-keys"
 
@@ -266,9 +278,24 @@ environments {
 streamr.http.api.server = System.getProperty("streamr.http.api.server") ?: "http://127.0.0.1:8890/api/v1"
 environments {
 	production {
-		streamr.http.api.server = System.getProperty("streamr.ui.server") ?: "${prodBaseUrl}/api/v1"
+		streamr.http.api.server = System.getProperty("streamr.http.api.server") ?: "${prodBaseUrl}/api/v1"
 	}
 }
+
+/**
+ * Streamr-web3 Ethereum bridge address
+ */
+streamr.ethereum.defaultNetwork = "rinkeby"
+streamr.ethereum.networks = System.getProperty("streamr.ethereum.networks") ? new Gson().fromJson(System.getProperty("streamr.ethereum.networks")) : [
+		ropsten: "http://ropsten:3000",
+		rinkeby: "http://rinkeby:3001"
+]
+streamr.ethereum.rpcUrls = System.getProperty("streamr.ethereum.rpcUrls") ? new Gson().fromJson(System.getProperty("streamr.ethereum.rpcUrls")) : [
+	ropsten: "http://ropsten:8545",
+	rinkeby: "http://rinkeby:8546"
+]
+streamr.ethereum.address = System.getProperty("streamr.ethereum.address") ?: ""
+streamr.ethereum.key = System.getProperty("streamr.ethereum.key") ?: ""
 
 /**
  * Kafka config
@@ -319,9 +346,20 @@ environments {
  * Serialization config
  */
 streamr.serialization.intervalInMillis = System.getProperty("streamr.serialization.intervalInMillis") ? Long.parseLong(System.getProperty("streamr.serialization.intervalInMillis")) : 5 * 60 * 1000
+streamr.serialization.maxBytes = System.getProperty("streamr.serialization.maxBytes") ? Long.parseLong(System.getProperty("streamr.serialization.maxBytes")) : 1024 * 1024 * 8
 environments {
 	test {
 		streamr.serialization.intervalInMillis = 1000
+	}
+}
+
+/**
+ * Encryption settings
+ */
+streamr.encryption.password = System.getProperty("streamr.encryption.password") ?: "password" // dev and test environments have a default password
+environments {
+	production {
+		streamr.encryption.password = System.getProperty("streamr.encryption.password") // in production, the system property must be set
 	}
 }
 
@@ -351,7 +389,6 @@ grails.plugin.springsecurity.adh.errorPage = null
 grails.plugin.springsecurity.securityConfigType = 'Annotation'
 
 grails.plugin.springsecurity.controllerAnnotations.staticRules = [
-	'/atmosphere/**': 		 ['ROLE_USER'],
 	'/user/**':            ['ROLE_ADMIN'],
 	'/register/**':				 ['IS_AUTHENTICATED_ANONYMOUSLY'],
 	'/webcomponents/*':				 ['IS_AUTHENTICATED_ANONYMOUSLY'],
@@ -384,6 +421,33 @@ unifina.email.welcome.subject = "Welcome to Streamr"
 unifina.email.feedback.recipient = "contact@streamr.com"
 unifina.email.forgotPassword.subject = "Streamr Password Reset"
 unifina.email.shareInvite.subject = "%USER% shared a document with you in Streamr"
+
+/**
+ * Recaptcha config
+ */
+
+recaptcha.verifyUrl = "https://www.google.com/recaptcha/api/siteverify"
+
+environments {
+	production {
+		recaptchav2.sitekey = "6Le3vAkTAAAAAEo4ubtEnosXISPd8_0snV4KEZSe"
+		recaptchainvisible.sitekey = "6Lfish8UAAAAAF-w-HYi_TN_xcbWrFjGNef2Pgdp"
+		recaptchav2.secret = "6Le3vAkTAAAAADZEop2Jdlm8ZrsTX-4-nn2XqC7Z"
+		recaptchainvisible.secret = "6Lfish8UAAAAAE9XaXpFEDX7OjO4rKGFe1HdrSql"
+	}
+	development {
+		recaptchav2.sitekey = "6Le9vAkTAAAAALFIbNo2ftfteJ2aQPgfP-npkZXS"
+		recaptchav2.secret = "6Le9vAkTAAAAADoOwlVedDR15a-uy4mUbudvsg63"
+		recaptchainvisible.sitekey = "6LcNxB4UAAAAAO01yHgAVL6qxwWfOM8PxaKmP9LP"
+		recaptchainvisible.secret = "6LcNxB4UAAAAAMXCPU3sABq20HIbcIJCtMaIFn9o"
+	}
+	test {
+		recaptchav2.sitekey = "6LeIxAcTAAAAAJcZVRqyHh71UMIEGNQ_MXjiZKhI"
+		recaptchav2.secret = "6LeIxAcTAAAAAGG-vFI1TnRWxMZNFuojJ4WifJWe"
+		recaptchainvisible.sitekey = "6LeIxAcTAAAAAJcZVRqyHh71UMIEGNQ_MXjiZKhI"
+		recaptchainvisible.secret = "6LeIxAcTAAAAAGG-vFI1TnRWxMZNFuojJ4WifJWe"
+	}
+}
 
 /**
  * Signup Configs

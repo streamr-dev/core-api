@@ -40,7 +40,7 @@ public class MapTraversal {
 				try {
 					int index = Integer.parseInt(listParts[j].substring(0, len - 1));
 					i = ((List)i).get(index);
-				} catch (NumberFormatException | IndexOutOfBoundsException e) {
+				} catch (Exception e) {
 					return null;
 				}
 			}
