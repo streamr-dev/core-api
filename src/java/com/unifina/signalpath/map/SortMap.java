@@ -18,15 +18,8 @@ public class SortMap extends AbstractSignalPathModule {
 			new ValueSortedMap(order.isDescending()) :
 			new TreeMap<>(order.isDescending() ? Collections.reverseOrder() : null);
 
-		try {
-			target.putAll(source);
-		} catch (ClassCastException e) {
-			return;
-		}
-
-		if (target != null) {
-			out.send(target);
-		}
+		target.putAll(source);
+		out.send(target);
 	}
 
 	@Override
