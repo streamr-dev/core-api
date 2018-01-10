@@ -6,17 +6,21 @@
   "directories": {
     "test": "test"
   },
+  "repository": "https://github.com/streamr-dev/engine-and-editor",
   "scripts": {
     "test": "npm run test-old; npm run test-new",
     "test-old": "mocha web-app/js/unifina/test --recursive",
     "test-new": "node ./node_modules/.bin/jest ./web-app/react-app/tests",
     "build": "NODE_ENV=production ./node_modules/.bin/webpack",
     "build-dev": "./node_modules/.bin/webpack",
+    "clean": "rm -rf node_modules",
+    "clean-install": "npm run clean && npm install",
     "dev": "./node_modules/.bin/webpack-dev-server",
     "flow": "./node_modules/.bin/flow"
   },
   "author": "",
-  "license": "Unifina",
+  "license": "UNLICENSED",
+  "private": true,
   "devDependencies": {
     "babel-jest": "^20.0.3",
     "babel-preset-es2015": "^6.24.1",

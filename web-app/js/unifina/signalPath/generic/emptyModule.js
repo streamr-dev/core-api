@@ -75,6 +75,7 @@ SignalPath.EmptyModule = function(data, canvas, prot) {
                     $optionEditor.append(div);
                     // Store reference to the JSON option
                     $(div).data("option", prot.jsonData.options[key]);
+                    $(div).data("name", key)
                 })
                 
                 bootbox.dialog({
@@ -452,9 +453,10 @@ SignalPath.EmptyModule = function(data, canvas, prot) {
 		} else if (option.type == "color") {
 			option.value = inputText
 		}
+		pub.onUpdateOption($(div).data("name"), option.value)
 	}
 	prot.updateOption = updateOption;
-	
+
 	/**
 	 * Called when options are updated
 	 */
@@ -463,6 +465,8 @@ SignalPath.EmptyModule = function(data, canvas, prot) {
 		SignalPath.updateModule(pub);
 	}
 	prot.onOptionsUpdated = onOptionsUpdated;
+
+	pub.onUpdateOption = function(key, value) {}
 	
 	function getHash() {
 		return prot.hash;

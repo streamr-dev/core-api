@@ -35,9 +35,10 @@ class EthereumAccountParameter extends Parameter<IntegrationKey> {
 	}
 
 	String getPrivateKey() {
+		EthereumIntegrationKeyService keyService = Holders.getApplicationContext().getBean(EthereumIntegrationKeyService.class);
 		if (hasValue()) {
 			checkPermission();
-			return (String) ((Map) getValue().toMap().get("json")).get("privateKey");
+			return keyService.decryptPrivateKey(getValue());
 		}
 		return null;
 	}

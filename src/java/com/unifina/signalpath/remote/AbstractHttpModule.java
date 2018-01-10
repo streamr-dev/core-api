@@ -17,8 +17,10 @@ import org.apache.http.conn.ssl.TrustStrategy;
 import org.apache.http.impl.nio.client.CloseableHttpAsyncClient;
 import org.apache.http.impl.nio.client.HttpAsyncClients;
 import org.apache.http.nio.client.HttpAsyncClient;
+import org.apache.log4j.Logger;
 
 import javax.net.ssl.SSLContext;
+import java.net.*;
 import java.security.KeyManagementException;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
@@ -38,6 +40,8 @@ import java.util.concurrent.TimeUnit;
  */
 public abstract class AbstractHttpModule extends ModuleWithSideEffects implements IEventRecipient, IStopListener {
 
+	private static final Logger log = Logger.getLogger(AbstractHttpModule.class);
+
 	protected static final String BODY_FORMAT_JSON = "application/json";
 	protected static final String BODY_FORMAT_FORMDATA = "application/x-www-form-urlencoded";
 	protected static final String BODY_FORMAT_PLAIN = "text/plain";
@@ -53,6 +57,8 @@ public abstract class AbstractHttpModule extends ModuleWithSideEffects implement
 
 	private transient Propagator asyncPropagator;
 	private transient CloseableHttpAsyncClient cachedHttpClient;
+
+	private boolean hasDebugLogged = false; // TODO: remove
 
 	private static class DontVerifyStrategy implements TrustStrategy {
 		public boolean isTrusted(X509Certificate[] var1, String var2) throws CertificateException {
@@ -96,7 +102,7 @@ public abstract class AbstractHttpModule extends ModuleWithSideEffects implement
 				cachedHttpClient.close();
 			}
 		} catch (Exception e) {
-			throw new RuntimeException("Closing HTTP client failed", e);
+			log.error("Closing HTTP client failed", e);
 		}
 	}
 
@@ -203,12 +209,42 @@ public abstract class AbstractHttpModule extends ModuleWithSideEffects implement
 		HttpRequestBase request = null;
 		try {
 			request = createRequest();
+			String canvasId = null;
+			if (getRootSignalPath() != null && getRootSignalPath().getCanvas() != null) {
+				canvasId = getRootSignalPath().getCanvas().getId();
+			}
+			log.info("HTTP request " + request.toString() + " from canvas " + canvasId);
 		} catch (Exception e) {
 			response.errors.add("Constructing HTTP request failed");
 			response.errors.add(e.getMessage());
 			sendOutput(response);
+			// propagate manually immediately, otherwise error won't ever be sent
+			if (isAsync) {
+				getPropagator().propagate();
+			}
 			return;
 		}
+
+		// SECURITY: check request is not sent to localhost (CORE-1008)
+		// @see https://stackoverflow.com/questions/2406341/how-to-check-if-an-ip-address-is-the-local-host-on-a-multi-homed-system
+		// TODO: larger blacklist; maybe all private ranges? https://stackoverflow.com/questions/22479214/detect-if-an-ip-is-local-or-public
+		if (!localAddressesAreAllowed()) {
+			try {
+				InetAddress targetIP = InetAddress.getByName(request.getURI().getHost());
+				if (targetIP.isAnyLocalAddress() || targetIP.isLoopbackAddress() || NetworkInterface.getByInetAddress(targetIP) != null) {
+					throw new RuntimeException("Local HTTP calls not allowed");
+				}
+			} catch (UnknownHostException | SocketException | RuntimeException e) {
+				response.errors.add("Bad target address: " + e.getMessage());
+				sendOutput(response);
+				// propagate manually immediately, otherwise error won't ever be sent
+				if (isAsync) {
+					getPropagator().propagate();
+				}
+				return;
+			}
+		}
+
 		if (request instanceof HttpEntityEnclosingRequestBase && BODY_FORMAT_JSON.equals(bodyContentType)) {
 			request.setHeader(HttpHeaders.ACCEPT, "application/json");
 			request.setHeader(HttpHeaders.CONTENT_TYPE, "application/json");
@@ -256,6 +292,19 @@ public abstract class AbstractHttpModule extends ModuleWithSideEffects implement
 			}
 		});
 
+		// TODO: remove
+		if (!hasDebugLogged && getRootSignalPath() != null && getRootSignalPath().getCanvas() != null) {
+			hasDebugLogged = true;
+			log.info("Created HttpClient from canvas " + getRootSignalPath().getCanvas().getId());
+			Set<Thread> threads = Thread.getAllStackTraces().keySet();
+			for (Thread t : threads) {
+				if (t.getName().startsWith("I/O dispatcher")) {
+					log.info(t.getName());
+				}
+			}
+			log.info("end of threads.");
+		}
+
 		if (!isAsync) {
 			try {
 				boolean done = latch.await(timeoutMillis, TimeUnit.MILLISECONDS);
@@ -272,6 +321,10 @@ public abstract class AbstractHttpModule extends ModuleWithSideEffects implement
 	@Override
 	protected String getNotificationAboutActivatingWithoutSideEffects() {
 		return getName() + ": Requests are not being made in historical mode by default. This can be changed in module options.";
+	}
+
+	protected boolean localAddressesAreAllowed() {
+		return false;
 	}
 
 	/**
