@@ -82,4 +82,5 @@ databaseChangeLog = {
 	include file: 'core/2017-06-16-dashboard-item-field-update.groovy'
 	include file: 'core/2017-07-11-dashboard-layout-field-type-change.groovy'
 	include file: 'core/2017-11-10-fix-run-canvas-spec.groovy'
+	include file: 'core/2017-11-23-encrypt-private-keys.groovy'
 }

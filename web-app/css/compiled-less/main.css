@@ -15286,8 +15286,10 @@ button.arrow:after {
 }
 .streamr-canvas .module .modulebody div.ioname {
   display: inline-block;
-  max-width: 100px;
-  white-space: pre-wrap;
+  max-width: 140px;
+  white-space: normal;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 .streamr-canvas .module .modulefooter {
   width: 100%;

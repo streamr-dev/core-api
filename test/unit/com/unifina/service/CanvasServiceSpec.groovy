@@ -1,5 +1,6 @@
 package com.unifina.service
 
+import com.unifina.api.ApiException
 import com.unifina.api.InvalidStateException
 import com.unifina.api.NotFoundException
 import com.unifina.api.NotPermittedException
@@ -7,6 +8,7 @@ import com.unifina.api.SaveCanvasCommand
 import com.unifina.api.ValidationException
 import com.unifina.domain.dashboard.Dashboard
 import com.unifina.domain.dashboard.DashboardItem
+import com.unifina.domain.data.Stream
 import com.unifina.domain.security.Permission
 import com.unifina.domain.security.SecUser
 import com.unifina.domain.signalpath.Canvas
@@ -15,15 +17,19 @@ import com.unifina.domain.signalpath.Serialization
 import com.unifina.exceptions.CanvasUnreachableException
 import com.unifina.signalpath.UiChannelIterator
 import com.unifina.signalpath.charts.Heatmap
+import com.unifina.task.CanvasDeleteTask
 import grails.converters.JSON
 import grails.plugin.springsecurity.SpringSecurityService
 import grails.test.mixin.Mock
 import grails.test.mixin.TestFor
+import grails.test.mixin.TestMixin
+import grails.test.mixin.web.ControllerUnitTestMixin
 import groovy.json.JsonBuilder
 import spock.lang.Specification
 
+@TestMixin(ControllerUnitTestMixin) // "as JSON" support
 @TestFor(CanvasService)
-@Mock([SecUser, Canvas, Module, ModuleService, SpringSecurityService, SignalPathService, PermissionService, Permission, Serialization, Dashboard, DashboardItem])
+@Mock([SecUser, Canvas, Module, Stream, ModuleService, StreamService, SpringSecurityService, SignalPathService, PermissionService, Permission, Serialization, Dashboard, DashboardItem])
 class CanvasServiceSpec extends Specification {
 
 	SecUser me
@@ -389,6 +395,55 @@ class CanvasServiceSpec extends Specification {
 
 		then:
 		thrown(InvalidStateException)
+	}
+
+	def "deleteCanvas(,,false) deletes canvas"() {
+		setup:
+		assert Canvas.findById(myFirstCanvas.id) != null
+		when:
+		service.deleteCanvas(myFirstCanvas, me, false)
+		then:
+		Canvas.findById(myFirstCanvas.id) == null
+	}
+
+	def "deleteCanvas(,,false) deletes uiChannels of canvas"() {
+		setup:
+		Stream s = new Stream(
+			id: "666",
+			user: me,
+			name: "Notifications",
+			uiChannel: true,
+			uiChannelCanvas: myFirstCanvas,
+			uiChannelPath: "/canvas/1",
+		)
+		s.id = "666"
+		s.save(failOnError: true, validate: false, flush: true)
+
+		def streamService = service.streamService = Mock(StreamService)
+
+		when:
+		service.deleteCanvas(myFirstCanvas, me, false)
+		then:
+		1 * streamService.deleteStream(s)
+	}
+
+	def "deleteCanvas(,,true) creates a delete task"() {
+		def taskService = service.taskService = Mock(TaskService)
+		when:
+		service.deleteCanvas(myFirstCanvas, me, true)
+		then:
+		1 * taskService.createTask(CanvasDeleteTask, [canvasId: '1'], "delete-canvas", me, _)
+	}
+
+	def "deleteCanvas() throws ApiException if trying to delete running canvas"() {
+		when:
+		myFirstCanvas.state = Canvas.State.RUNNING
+		myFirstCanvas.save(failOnError: true, validate: true)
+
+		service.deleteCanvas(myFirstCanvas, me, false)
+		then:
+		def e = thrown(ApiException)
+		e.asApiError().statusCode == 409
 	}
 
 	def "authorizedGetById() checks access to canvases from PermissionService and returns the canvas if allowed"() {

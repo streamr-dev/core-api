@@ -73,7 +73,9 @@ class CanvasService {
      */
 	@Transactional
 	public void deleteCanvas(Canvas canvas, SecUser user, boolean delayed = false) {
-		if (delayed) {
+		if (canvas.state == Canvas.State.RUNNING) {
+			throw new ApiException(409, "CANNOT_DELETE_RUNNING", "Cannot delete running canvas.")
+		} else if (delayed) {
 			taskService.createTask(CanvasDeleteTask, CanvasDeleteTask.getConfig(canvas), "delete-canvas", user, 30 * 60 * 1000)
 		} else {
 			Collection<Stream> uiChannels = Stream.findAllByUiChannelCanvas(canvas)
