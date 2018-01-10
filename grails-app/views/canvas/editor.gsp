@@ -638,7 +638,7 @@ $(function() {
 				</div>
 				<div class="modal-body">
 					<div class="form-group">
-						<label>Serialize state</label>
+						<label>Save canvas state</label>
 						<select id="serializationEnabled" class="form-control">
 							<option value="false">No</option>
 							<option value="true">Yes</option>
