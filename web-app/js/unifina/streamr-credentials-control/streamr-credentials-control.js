@@ -2,24 +2,28 @@
 
 	var listTemplate = '' +
 		'<div class="col-xs-12">' +
-			'<table class="table">' +
-				'<thead>' +
-					'<th class="name-header">' +
-						'<span class="title">Name</span>' +
-					'</th>' +
-					'{[ if (typeof(showPermissions) !== "undefined" && showPermissions) { ]}' +
-						'<th class="permission-header">' +
-							'<span class="title">Permission</span>' +
+			'{[ if (forbidden) { ]}' +
+				'<i>Share permission is required to view anonymous keys.</i>' +
+			'{[ } else { ]}' +
+				'<table class="table">' +
+					'<thead>' +
+						'<th class="name-header">' +
+							'<span class="title">Name</span>' +
 						'</th>' +
-					'{[ } ]}' +
-					'<th class="key-header">' +
-						'<span class="title">Key</span>' +
-					'</th>' +
-					'<th class="action-header"></th>' +
-				'</thead>' +
-				'<tbody></tbody>' +
-			'</table>' +
-            '<div class="create-auth-key new-auth-key-row"></div>' +
+						'{[ if (typeof(showPermissions) !== "undefined" && showPermissions) { ]}' +
+							'<th class="permission-header">' +
+								'<span class="title">Permission</span>' +
+							'</th>' +
+						'{[ } ]}' +
+						'<th class="key-header">' +
+							'<span class="title">Key</span>' +
+						'</th>' +
+						'<th class="action-header"></th>' +
+					'</thead>' +
+					'<tbody></tbody>' +
+				'</table>' +
+				'<div class="create-auth-key new-auth-key-row"></div>' +
+			'{[ } ]}' +
 		'</div>'
 
 	var keyTemplate = '' +
@@ -72,6 +76,7 @@
 			this.streamId = opts.streamId
 			this.username = opts.username
 			this.url = opts.url
+			this.forbidden = false
 
 			if (this.username && this.streamId) {
 				throw new Error("Cannot give both streamId and username!")
@@ -85,14 +90,20 @@
 					_this.render()
 				})
 				.fail(function (e) {
-					Streamr.showError(e.message || e.responseJSON.message)
+					if (e.responseJSON && e.responseJSON.code === 'FORBIDDEN') {
+						_this.forbidden = true
+						_this.render()
+					} else {
+						Streamr.showError(e.message || e.responseJSON.message)
+					}
 				})
 		},
 		render: function () {
 			var _this = this
 
 			this.$el.append(this.template({
-				showPermissions: this.showPermissions
+				showPermissions: this.showPermissions,
+				forbidden: this.forbidden
 			}))
 			this.table = this.$el.find("table.table")
 			this.listEl = this.table.find("tbody")

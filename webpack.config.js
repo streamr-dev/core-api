@@ -105,6 +105,9 @@ module.exports = {
         //new webpack.optimize.CommonsChunkPlugin('commons')
     ]),
     devtool: !inProduction && 'eval-source-map',
+    devServer: {
+        port: 56789 // Some random number because the port is not used
+    },
     resolve: {
         extensions: ['.js', '.jsx', '.json']
     }

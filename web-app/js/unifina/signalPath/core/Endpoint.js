@@ -191,10 +191,10 @@ SignalPath.Endpoint = function(json, parentDiv, module, type, pub) {
 			callback: function(displayName) {
 				if (displayName != null) {
 					pub.setDisplayName(displayName)
+                    module.redraw()
 				}
 			}
 		});
-		module.redraw()
 	}
 
 	function setDisplayName(displayName) {

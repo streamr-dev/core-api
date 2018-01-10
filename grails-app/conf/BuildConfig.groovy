@@ -75,7 +75,7 @@ grails.project.dependency.resolution = {
 		compile('com.udojava:EvalEx:1.6')
 
 		compile('org.apache.kafka:kafka-clients:0.9.0.1')
-        compile('com.mashape.unirest:unirest-java:1.3.3')
+		compile('com.mashape.unirest:unirest-java:1.4.9')
 
 		compile group: 'org.eclipse.paho', name: 'org.eclipse.paho.client.mqttv3', version: '1.1.1'
 

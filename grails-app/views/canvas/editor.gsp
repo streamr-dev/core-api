@@ -376,8 +376,8 @@ $(function() {
 			        return p.operation
 			    })
 				if (enabled.indexOf('share') >= 0) {
-					$("#share-button").data("url", canvasUrl).removeAttr("disabled")
-					$("#share-button").data("name", SignalPath.getName()).removeAttr("disabled")
+					$(".share-button").data("url", canvasUrl).removeAttr("disabled")
+					$(".share-button").data("name", SignalPath.getName()).removeAttr("disabled")
 				} else {
 					$("#share-button").addClass("forbidden")
 				}

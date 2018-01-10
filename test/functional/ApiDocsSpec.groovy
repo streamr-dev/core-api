@@ -1,5 +1,5 @@
-import core.LoginTester1Spec
-import core.pages.ApiDocsPage
+import LoginTester1Spec
+import pages.ApiDocsPage
 import org.openqa.selenium.Dimension
 
 class ApiDocsSpec extends LoginTester1Spec {
