@@ -188,6 +188,11 @@ public abstract class AbstractModuleWithWindow<T> extends AbstractSignalPathModu
 		}
 	}
 
+	@Override
+	public int tickRateInSec() {
+		return selectedWindowType == WindowType.EVENTS ? 0 : 1;
+	}
+
 	/**
 	 * Determines if a window has enough values, controlled by minSamples, for the module
 	 * to activate. If supportsMinSamples is false, this method always returns true.
