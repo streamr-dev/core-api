@@ -231,6 +231,10 @@ public class SignalPath extends ModuleWithUI {
 		return exportedInputs.size() + exportedOutputs.size() > 0;
 	}
 
+	public boolean isSerializable() {
+		return !getGlobals().isAdhoc() && getGlobals().isSerializationEnabled();
+	}
+
 	@Override
 	public Map<String, Object> getConfiguration() {
 		Map<String, Object> config = super.getConfiguration();
@@ -449,16 +453,6 @@ public class SignalPath extends ModuleWithUI {
 	@Override
 	protected RuntimeRequest.PathWriter getRuntimePath(RuntimeRequest.PathWriter writer) {
 		return super.getRuntimePath(root ? writer.writeCanvasId(getCanvas().getId()) : writer);
-	}
-
-	@Override
-	protected void onStop() {
-		super.onStop();
-		if (getGlobals().isAdhoc()) {
-			Map<String, Object> byeMsg = new HashMap<>();
-			byeMsg.put("_bye", true);
-			pushToUiChannel(byeMsg);
-		}
 	}
 
 	@Override

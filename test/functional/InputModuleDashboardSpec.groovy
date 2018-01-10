@@ -1,9 +1,8 @@
-import core.LoginTester1Spec
-import core.mixins.ListPageMixin
-import core.mixins.CanvasMixin
-import core.mixins.ConfirmationMixin
-import core.mixins.DashboardMixin
-import core.pages.*
+import LoginTester1Spec
+import mixins.ListPageMixin
+import mixins.CanvasMixin
+import mixins.ConfirmationMixin
+import mixins.DashboardMixin
 import pages.*
 
 class InputModuleDashboardSpec extends LoginTester1Spec {

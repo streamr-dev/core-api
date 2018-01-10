@@ -1,9 +1,9 @@
 import com.unifina.domain.data.Stream
 import com.unifina.service.StreamService
-import core.LoginTester1Spec
-import core.mixins.CanvasMixin
-import core.mixins.ConfirmationMixin
-import core.mixins.StreamMixin
+import LoginTester1Spec
+import mixins.CanvasMixin
+import mixins.ConfirmationMixin
+import mixins.StreamMixin
 import org.apache.log4j.Logger
 import spock.lang.Shared
 
@@ -116,9 +116,9 @@ class MapModulesSpec extends LoginTester1Spec {
 		sleep(500)
 
 		connectEndpoints(findOutput("Stream", "value"), findInput("ForEach", "A"))
-		connectEndpoints(findOutput("Stream", "value"), findInput("ForEach", "in"))
-		connectEndpoints(findOutput("ForEach", "out"), findInput("Label", "label", 0))
-		connectEndpoints(findOutput("ForEach", "out2"), findInput("Label", "label", 1))
+		connectEndpoints(findOutput("Stream", "value"), findInputByDisplayName("ForEach", "in"))
+		connectEndpoints(findOutputByDisplayName("ForEach", "out"), findInput("Label", "label", 0))
+		connectEndpoints(findOutputByDisplayName("ForEach", "out2"), findInput("Label", "label", 1))
 
 		and: "run canvas in realtime"
 		ensureRealtimeTabDisplayed()

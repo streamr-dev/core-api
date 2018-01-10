@@ -377,4 +377,10 @@ public class EthereumCall extends AbstractHttpModule {
 			return null;
 		}
 	}
+
+	/** Streamr-web3 ethereum bridge can be running on a local machine */
+	@Override
+	protected boolean localAddressesAreAllowed() {
+		return true;
+	}
 }
