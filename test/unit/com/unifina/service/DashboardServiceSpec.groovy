@@ -99,12 +99,17 @@ class DashboardServiceSpec extends Specification {
 	def "create() creates a new dashboard and returns it"() {
 		setup:
 		def user = new SecUser(name: "tester").save(validate: false)
+		def canvas = new Canvas(json: new JsonBuilder([
+				modules: [
+						[hash: 1, uiChannel: [webcomponent: "streamr-chart"]]
+				]
+		]).toString()).save(failOnError: true, validate: false)
 		when:
 		SaveDashboardCommand command = new SaveDashboardCommand([
 				name : "test-create",
 				items: [
-						new SaveDashboardItemCommand(title: "test1", canvas: new Canvas(), module: 0),
-						new SaveDashboardItemCommand(title: "test2", canvas: new Canvas(), module: 0)
+						new SaveDashboardItemCommand(title: "test1", canvas: canvas, module: 1),
+						new SaveDashboardItemCommand(title: "test2", canvas: canvas, module: 1)
 				]
 		])
 		service.create(command, user)
@@ -173,7 +178,11 @@ class DashboardServiceSpec extends Specification {
 	def "addDashboardItem() cannot add item to non-existent dashboard"() {
 		def command = new SaveDashboardItemCommand(
 				title: "added-item",
-				canvas: new Canvas(),
+				canvas: new Canvas(json: new JsonBuilder([
+					modules: [
+						[hash: 1, uiChannel: [webcomponent: "streamr-chart"]]
+					]
+				]).toString()).save(failOnError: true, validate: false),
 				module: 1,
 				webcomponent: "streamr-chart"
 		)
@@ -187,7 +196,11 @@ class DashboardServiceSpec extends Specification {
 	def "addDashboardItem() cannot add item other user's non-writeable dashboard"() {
 		def command = new SaveDashboardItemCommand(
 				title: "added-item",
-				canvas: new Canvas(),
+				canvas: new Canvas(json: new JsonBuilder([
+					modules: [
+							[hash: 1, uiChannel: [webcomponent: "streamr-chart"]]
+					]
+				]).toString()).save(failOnError: true, validate: false),
 				module: 1,
 				webcomponent: "streamr-chart"
 		)
