@@ -16,14 +16,9 @@ class SaveDashboardItemCommand {
 	String webcomponent
 
 	static constraints = {
-		title(blank: false)
-		canvas(blank: false)
-		module(nullable: false)
-		webcomponent validator: { val ->
-			if (Webcomponent.getByName(val) == null) {
-				return false
-			}
-		}
+		title blank: false
+		canvas blank: false
+		module nullable: false
 	}
 
 	def getProperties() {
@@ -32,9 +27,7 @@ class SaveDashboardItemCommand {
 				title       : title,
 				canvas      : canvas,
 				module      : module,
-				webcomponent: Webcomponent.getByName(webcomponent ?: JSON.parse(canvas.json)?.modules?.find {
-					it.hash == module
-				}?.uiChannel?.webcomponent)
+				webcomponent: Webcomponent.getByName(canvas?.json ? JSON.parse(canvas.json)?.modules?.find { it.hash == module }?.uiChannel?.webcomponent : null)
 		]
 	}
 }

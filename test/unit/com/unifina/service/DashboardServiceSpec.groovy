@@ -23,12 +23,11 @@ class DashboardServiceSpec extends Specification {
 		PermissionService permissionService = service.permissionService = new PermissionService()
 		permissionService.grailsApplication = grailsApplication
 
-
 		user.save(failOnError: true, validate: false)
 		otherUser.save(failOnError: true, validate: false)
 
 		(1..3).each {
-			def d = new Dashboard(name: "$it", user: user).save(failOnError: true)
+			def d = new Dashboard(name: "my-dashboard-$it", user: user).save(failOnError: true)
 			if (it == 3) {
 				d.addToItems(new DashboardItem(title: "item1").save(validate: false, failOnError: true))
 				d.addToItems(new DashboardItem(title: "item2").save(validate: false, failOnError: true))
@@ -37,7 +36,7 @@ class DashboardServiceSpec extends Specification {
 		}
 
 		(1..3).each {
-			def d = new Dashboard(name: "${it + 3}", user: otherUser).save(failOnError: true)
+			def d = new Dashboard(name: "not-my-dashboard-$it", user: otherUser).save(failOnError: true)
 			if (it == 2) {
 				permissionService.grant(otherUser, d, user, Permission.Operation.READ)
 			}
@@ -48,7 +47,7 @@ class DashboardServiceSpec extends Specification {
 		when:
 		def dashboards = service.findAllDashboards(user)
 		then:
-		dashboards*.name == ["1", "2", "3", "5"]
+		dashboards*.name == ["my-dashboard-1", "my-dashboard-2", "my-dashboard-3", "not-my-dashboard-2"]
 	}
 
 	def "findById() cannot fetch non-existent dashboard"() {
@@ -104,8 +103,8 @@ class DashboardServiceSpec extends Specification {
 		SaveDashboardCommand command = new SaveDashboardCommand([
 				name : "test-create",
 				items: [
-						new SaveDashboardItemCommand(title: "test1", canvas: new Canvas(), module: 0, webcomponent: "streamr-chart"),
-						new SaveDashboardItemCommand(title: "test2", canvas: new Canvas(), module: 0, webcomponent: "streamr-chart")
+						new SaveDashboardItemCommand(title: "test1", canvas: new Canvas(), module: 0),
+						new SaveDashboardItemCommand(title: "test2", canvas: new Canvas(), module: 0)
 				]
 		])
 		service.create(command, user)
@@ -330,8 +329,7 @@ class DashboardServiceSpec extends Specification {
 		def command = new SaveDashboardItemCommand(
 				title: "updated-item",
 				canvas: canvas,
-				module: 1,
-				webcomponent: "streamr-chart"
+				module: 1
 		)
 
 		assert DashboardItem.findById(itemToUpdateId) != null

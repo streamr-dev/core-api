@@ -62,7 +62,5 @@ export type DashboardItem = {
     dashboard: Dashboard.id,
     module: number,
     canvas: Canvas,
-    size: string,
-    ord: number,
     layout?: Layout
 }

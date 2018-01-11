@@ -129,6 +129,10 @@ export class Editor extends Component<Props, State> {
         }
     }
     
+    onDragStop = (layout: DashboardItem.layout) => {
+    
+    }
+    
     onLayoutChange = (layout: DashboardItem.layout, allLayouts: Layout) => {
         this.onResize(layout)
         this.props.updateDashboardLayout(this.props.dashboard.id, allLayouts)
@@ -253,6 +257,7 @@ export class Editor extends Component<Props, State> {
                                 cols={this.state.cols}
                                 draggableCancel={`.${dragCancelClassName}`}
                                 onLayoutChange={this.onLayoutChange}
+                                onDragStop={this.onDragStop}
                                 onResize={this.onResize}
                                 isDraggable={!locked}
                                 isResizable={!locked}

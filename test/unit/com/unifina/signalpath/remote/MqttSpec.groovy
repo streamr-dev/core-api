@@ -22,7 +22,6 @@ class MqttSpec extends Specification {
 	}
 
 	def cleanup() {
-		println "moimoimoimoi"
 		TestableMqtt.mqttClient = null
 		TestableMqtt.startingException = null
 	}

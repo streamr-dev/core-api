@@ -190,8 +190,8 @@ class DashboardApiControllerSpec extends Specification {
 		setup:
 
 		List<DashboardItem> items = new ArrayList<DashboardItem>()
-		items.add(new DashboardItem(id: "1", title: "test1"))
-		items.add(new DashboardItem(id: "2", title: "test2"))
+		items.add(new DashboardItem(title: "test1"))
+		items.add(new DashboardItem(title: "test2"))
 
 		def dashboard = Mock(Dashboard)
 		def dashboardService = Mock(DashboardService)
