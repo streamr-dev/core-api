@@ -9,7 +9,7 @@ import com.unifina.datasource.ITimeListener;
 import com.unifina.signalpath.*;
 import com.unifina.utils.Globals;
 
-public abstract class AbstractCustomModule extends ModuleWithUI implements ITimeListener {
+public abstract class AbstractCustomModule extends ModuleWithUI {
 
 	protected transient SimpleDateFormat df = null;
 	private transient AbstractJavaCodeWrapper parentWrapper;
@@ -35,9 +35,6 @@ public abstract class AbstractCustomModule extends ModuleWithUI implements ITime
 			}
 		});
 	}
-
-	@Override
-	public void setTime(Date time) {}
 
 	@Override
 	public void beforeSerialization() {
