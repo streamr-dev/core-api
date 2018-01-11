@@ -1,8 +1,8 @@
-import core.LoginTester1Spec
-import core.mixins.CanvasMixin
-import core.mixins.ConfirmationMixin
-import core.mixins.TourMixin
-import core.pages.CanvasPage
+import LoginTester1Spec
+import mixins.CanvasMixin
+import mixins.ConfirmationMixin
+import mixins.TourMixin
+import pages.CanvasPage
 
 class TourSpec extends LoginTester1Spec implements CanvasMixin, ConfirmationMixin, TourMixin {
 

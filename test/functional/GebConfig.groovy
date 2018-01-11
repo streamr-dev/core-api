@@ -24,7 +24,7 @@ driver = {
 		dr = new RemoteWebDriver(new URL("http://dev.unifina:4444/wd/hub"), DesiredCapabilities.chrome())
 	} else {
 		def options = new ChromeOptions()
-		//options.addArguments("headless", "disable-gpu")
+//		options.addArguments("headless", "disable-gpu", "remote-debugging-port=9222")
 		dr = new ChromeDriver(options)
 	}
 	// Resolution where everything should be visible

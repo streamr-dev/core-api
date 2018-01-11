@@ -1,5 +1,5 @@
-import core.LoginTester1Spec
-import core.pages.ModuleBrowserPage
+import LoginTester1Spec
+import pages.ModuleBrowserPage
 import org.openqa.selenium.Dimension
 
 class ModuleBrowserSpec extends LoginTester1Spec {

@@ -1,9 +1,9 @@
 import com.unifina.domain.data.Stream
 import com.unifina.service.StreamService
-import core.LoginTester1Spec
-import core.mixins.CanvasMixin
-import core.mixins.ConfirmationMixin
-import core.mixins.StreamMixin
+import LoginTester1Spec
+import mixins.CanvasMixin
+import mixins.ConfirmationMixin
+import mixins.StreamMixin
 import spock.lang.Shared
 
 class VariadicEndpointsSpec extends LoginTester1Spec implements CanvasMixin, ConfirmationMixin, StreamMixin {

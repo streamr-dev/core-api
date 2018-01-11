@@ -1,6 +1,7 @@
 package com.unifina.utils.testutils;
 
 import com.unifina.datasource.ITimeListener;
+import com.unifina.feed.MasterClock;
 import com.unifina.serialization.Serializer;
 import com.unifina.serialization.SerializerImpl;
 import com.unifina.service.SerializationService;
@@ -13,6 +14,8 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.*;
+
+import static com.unifina.feed.MasterClock.isTimeToTick;
 
 
 /**
@@ -288,8 +291,11 @@ public class ModuleTestHelper {
 
 			// Time is set at start of event
 			if (isTimedMode() && ticks.containsKey(i)) {
-				((ITimeListener)module).setTime(ticks.get(i));
-				module.getGlobals().time = ticks.get(i);
+				Date time = ticks.get(i);
+				if (isTimeToTick(time.getTime() / 1000, ((ITimeListener) module).tickRateInSec())) {
+					((ITimeListener)module).setTime(time);
+				}
+				module.getGlobals().time = time;
 			}
 
 			// Set input values

@@ -1,10 +1,10 @@
 import com.unifina.domain.data.Stream
 import com.unifina.feed.mongodb.MongoDbConfig
 import com.unifina.service.StreamService
-import core.LoginTester1Spec
-import core.mixins.ConfirmationMixin
-import core.mixins.StreamMixin
-import core.pages.*
+import LoginTester1Spec
+import mixins.ConfirmationMixin
+import mixins.StreamMixin
+import pages.*
 import org.bson.Document
 import spock.lang.Shared
 

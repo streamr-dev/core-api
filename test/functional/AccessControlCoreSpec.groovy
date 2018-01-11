@@ -1,8 +1,8 @@
-import core.LoginTester2Spec
-import core.mixins.ConfirmationMixin
-import core.pages.AccessDeniedPage
-import core.pages.CanvasPage
-import core.pages.LoginPage
+import LoginTester2Spec
+import mixins.ConfirmationMixin
+import pages.AccessDeniedPage
+import pages.CanvasPage
+import pages.LoginPage
 
 /**
  * Basic features in the backtest views

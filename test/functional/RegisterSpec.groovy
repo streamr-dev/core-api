@@ -1,4 +1,4 @@
-import core.pages.*
+import pages.*
 import geb.spock.GebReportingSpec
 import grails.util.Environment
 import spock.lang.Shared

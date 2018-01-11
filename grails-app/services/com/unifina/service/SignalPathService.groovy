@@ -1,5 +1,6 @@
 package com.unifina.service
 
+import com.google.gson.Gson
 import com.unifina.api.CanvasCommunicationException
 import com.unifina.datasource.DataSource
 import com.unifina.datasource.HistoricalDataSource
@@ -20,9 +21,9 @@ import com.unifina.signalpath.SignalPathRunner
 import com.unifina.utils.Globals
 import com.unifina.utils.GlobalsFactory
 import com.unifina.utils.NetworkInterfaceUtils
-import grails.converters.JSON
 import grails.transaction.NotTransactional
 import grails.transaction.Transactional
+import grails.util.Holders
 import groovy.transform.CompileStatic
 import org.apache.log4j.Logger
 
@@ -176,15 +177,19 @@ class SignalPathService {
 		Globals globals = GlobalsFactory.createInstance(signalPathContext, grailsApplication, canvas.user)
 
 		SignalPathRunner runner
-		// Create the runner thread
+		SignalPath sp
+
+		// Instantiate the SignalPath
 		if (canvas.serialization == null || canvas.adhoc) {
-			runner = new SignalPathRunner([JSON.parse(canvas.json)], globals, canvas.adhoc)
 			log.info("Creating new signalPath connections (canvasId=$canvas.id)")
+			sp = mapToSignalPath(new Gson().fromJson(canvas.json, Map.class), false, globals, new SignalPath(true))
 		} else {
-			SignalPath sp = serializationService.deserialize(canvas.serialization.bytes)
-			runner = new SignalPathRunner(sp, globals, canvas.adhoc)
 			log.info("De-serializing existing signalPath (canvasId=$canvas.id)")
+			sp = serializationService.deserialize(canvas.serialization.bytes)
 		}
+
+		// Create the runner thread
+		runner = new SignalPathRunner(sp, globals, canvas.adhoc)
 
 		runner.addStartListener(new IStartListener() {
 			@Override
@@ -210,13 +215,12 @@ class SignalPathService {
 		String runnerId = runner.runnerId
 		canvas.runner = runnerId
 
-		// Use the link generator to get the protocol and port, but use network IP address
-		//   as the host to get the address of this individual server
-		String root = grailsLinkGenerator.link(uri:"/", absolute: true)
-		URL url = new URL(root)
-
+		def port = Holders.getConfig().streamr.cluster.internalPort
+		def protocol = Holders.getConfig().streamr.cluster.internalProtocol
 		canvas.server = NetworkInterfaceUtils.getIPAddress(grailsApplication.config.streamr.ip.address.prefixes ?: []).getHostAddress()
-		canvas.requestUrl = url.protocol+"://"+canvas.server+":"+(url.port>0 ? url.port : url.defaultPort)+grailsLinkGenerator.link(uri:"/api/v1/canvases/$canvas.id", absolute: false)
+
+		// Form an internal url that Streamr nodes will use to directly address this machine and the canvas that runs on it
+		canvas.requestUrl = protocol + "://" + canvas.server + ":" + port + grailsLinkGenerator.link(uri: "/api/v1/canvases/$canvas.id", absolute: false)
 		canvas.state = Canvas.State.RUNNING
 
 		canvas.save()

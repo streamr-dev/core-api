@@ -1,9 +1,9 @@
-import core.LoginTester1Spec
-import core.mixins.CanvasMixin
-import core.mixins.StreamMixin
-import core.pages.StreamConfirmPage
-import core.pages.StreamListPage
-import core.pages.StreamShowPage
+import LoginTester1Spec
+import mixins.CanvasMixin
+import mixins.StreamMixin
+import pages.StreamConfirmPage
+import pages.StreamListPage
+import pages.StreamShowPage
 
 import java.nio.file.Paths
 

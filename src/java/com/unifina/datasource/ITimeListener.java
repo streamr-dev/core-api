@@ -3,5 +3,10 @@ package com.unifina.datasource;
 import java.util.Date;
 
 public interface ITimeListener {
-	public void setTime(Date time);
+	void setTime(Date time);
+
+	/**
+	 * How often to invoke setTime(Date) in seconds. Special case 0 = never.
+	 */
+	int tickRateInSec();
 }

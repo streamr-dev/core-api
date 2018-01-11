@@ -1,5 +1,5 @@
-import core.LoginTesterAdminSpec
-import core.pages.*
+import LoginTesterAdminSpec
+import pages.*
 import spock.lang.Stepwise
 
 // The order of the tests is important

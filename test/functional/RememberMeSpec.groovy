@@ -1,6 +1,6 @@
-import core.pages.CanvasPage
-import core.pages.LoginPage
-import core.pages.ProfileEditPage
+import pages.CanvasPage
+import pages.LoginPage
+import pages.ProfileEditPage
 import geb.spock.GebReportingSpec
 import org.openqa.selenium.Cookie
 import spock.lang.Shared

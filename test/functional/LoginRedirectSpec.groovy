@@ -1,5 +1,5 @@
-import core.pages.DashboardListPage
-import core.pages.LoginPage
+import pages.DashboardListPage
+import pages.LoginPage
 import geb.spock.GebReportingSpec
 
 class LoginRedirectSpec extends GebReportingSpec {

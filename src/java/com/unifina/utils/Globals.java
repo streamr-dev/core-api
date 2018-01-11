@@ -185,6 +185,10 @@ public class Globals {
 	public boolean isAdhoc() {
 		return !isRealtime();
 	}
+
+	public boolean isSerializationEnabled() {
+		return MapTraversal.getBoolean(signalPathContext, "serializationEnabled");
+	}
 	
 	public DataSource getDataSource() {
 		if (System.getSecurityManager() != null) {

@@ -1,6 +1,6 @@
-import core.LoginTester1Spec
-import core.mixins.CanvasMixin
-import core.mixins.ConfirmationMixin
+import LoginTester1Spec
+import mixins.CanvasMixin
+import mixins.ConfirmationMixin
 
 class SubCanvasSpec extends LoginTester1Spec implements CanvasMixin, ConfirmationMixin {
 

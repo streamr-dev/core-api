@@ -46,20 +46,18 @@ public class SignalPathRunner extends Thread {
 		globals.init()
 	}
 
-	public SignalPathRunner(List<Map> signalPathMaps, Globals globals, boolean adhoc = true) {
-		this(globals, adhoc)
-
-		// Instantiate SignalPaths from JSON
-		for (int i = 0; i < signalPathMaps.size(); i++) {
-			SignalPath signalPath = signalPathService.mapToSignalPath(signalPathMaps[i], false, globals, new SignalPath(true))
-			signalPaths.add(signalPath)
-		}
-	}
 
 	public SignalPathRunner(SignalPath signalPath, Globals globals, boolean adhoc = true) {
+		this(Collections.singleton(signalPath), globals, adhoc)
+	}
+
+	public SignalPathRunner(Collection<SignalPath> signalPaths, Globals globals, boolean adhoc = true) {
 		this(globals, adhoc)
-		signalPath.setGlobals(globals)
-		signalPaths.add(signalPath)
+
+		for (SignalPath sp : signalPaths) {
+			sp.setGlobals(globals)
+			this.signalPaths.add(sp)
+		}
 	}
 
 	public List<SignalPath> getSignalPaths() {
@@ -95,7 +93,16 @@ public class SignalPathRunner extends Thread {
 	@Override
 	public void run() {
 		Throwable reportException = null
-		setName("SignalPathRunner");
+
+		StringBuilder nameBuilder = new StringBuilder("SignalPathRunner [")
+		for (int i=0; i<signalPaths.size(); i++) {
+			if (i > 0) {
+				nameBuilder.append(", ")
+			}
+			nameBuilder.append(signalPaths.get(i).getCanvas() != null ? signalPaths.get(i).getCanvas().getId() : "(canvas is null)");
+		}
+		nameBuilder.append("]")
+		setName(nameBuilder.toString())
 
 		try {
 			for (SignalPath it : signalPaths) {

@@ -64,7 +64,6 @@ class ClockModuleSpec extends Specification {
 			unit: [null, null, null, "MINUTE"] + (1..496).collect { null },
 			rate: (1..120).collect { null } + [6] + (1..379).collect { null }
 		]
-		def s = 1000d
 		Map outputValues = [
 			date:
 				["00:00:00", "00:00:01", "00:00:02"] +

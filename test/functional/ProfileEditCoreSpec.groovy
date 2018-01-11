@@ -1,8 +1,8 @@
-import core.LoginTester1Spec
-import core.pages.CanvasPage
-import core.pages.ChangePasswordPage
-import core.pages.LoginPage
-import core.pages.ProfileEditPage
+import LoginTester1Spec
+import pages.CanvasPage
+import pages.ChangePasswordPage
+import pages.LoginPage
+import pages.ProfileEditPage
 
 class ProfileEditCoreSpec extends LoginTester1Spec {
 

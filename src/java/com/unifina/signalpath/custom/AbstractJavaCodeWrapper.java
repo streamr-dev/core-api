@@ -16,7 +16,7 @@ import org.apache.log4j.Logger;
 
 import com.unifina.security.UserJavaClassLoader;
 
-public abstract class AbstractJavaCodeWrapper extends ModuleWithUI implements ITimeListener {
+public abstract class AbstractJavaCodeWrapper extends ModuleWithUI {
 
 	transient AbstractCustomModule instance = null;
 	byte[] serializedInstance = null;
@@ -59,11 +59,6 @@ public abstract class AbstractJavaCodeWrapper extends ModuleWithUI implements IT
 	@Override
 	public void sendOutput() {
 		instance.sendOutput();
-	}
-
-	@Override
-	public void setTime(Date time) {
-		instance.setTime(time);
 	}
 
 	@Override

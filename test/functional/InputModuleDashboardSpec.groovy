@@ -1,12 +1,12 @@
-import core.LoginTester1Spec
-import core.mixins.CanvasMixin
-import core.mixins.ConfirmationMixin
-import core.mixins.DashboardMixin
-import core.mixins.ListPageMixin
-import core.pages.CanvasListPage
-import core.pages.CanvasPage
-import core.pages.DashboardListPage
-import core.pages.DashboardShowPage
+import LoginTester1Spec
+import mixins.CanvasMixin
+import mixins.ConfirmationMixin
+import mixins.DashboardMixin
+import mixins.ListPageMixin
+import pages.CanvasListPage
+import pages.CanvasPage
+import pages.DashboardListPage
+import pages.DashboardShowPage
 import pages.*
 
 class InputModuleDashboardSpec extends LoginTester1Spec implements CanvasMixin, ConfirmationMixin, DashboardMixin, ListPageMixin {
