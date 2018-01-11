@@ -11,7 +11,7 @@ import java.io.Serializable;
 import java.util.List;
 import java.util.Map;
 
-public class PassCompleteThrough extends AbstractSignalPathModule {
+public class RequireAll extends AbstractSignalPathModule {
 	private final VariadicInputOutputPair<Object> inputOutputPairs = new VariadicInputOutputPair<>(this,
 		new AlwaysDrivingInputInstantiator(),
 		new OutputInstantiator.SimpleObject(),
@@ -20,7 +20,7 @@ public class PassCompleteThrough extends AbstractSignalPathModule {
 	@Override
 	public void sendOutput() {
 		List<Object> values = inputOutputPairs.getInputValues();
-		if (drivingInputs.size() == values.size()) {
+		if (getDrivingInputs().size() == values.size()) {
 			inputOutputPairs.sendValuesToOutputs(values);
 		}
 	}
@@ -33,7 +33,7 @@ public class PassCompleteThrough extends AbstractSignalPathModule {
 		public Input<Object> instantiate(AbstractSignalPathModule owner, String inputName) {
 			Input<Object> in = new Input<>(owner, inputName, "Object");
 			in.setDrivingInput(true);
-			in.canToggleDrivingInput = false;
+			in.setCanToggleDrivingInput(false);
 			return in;
 		}
 	}

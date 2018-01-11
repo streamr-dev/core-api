@@ -3,12 +3,12 @@ package com.unifina.signalpath.utils
 import com.unifina.utils.testutils.ModuleTestHelper
 import spock.lang.Specification
 
-class PassCompleteThroughSpec extends Specification {
+class RequireAllSpec extends Specification {
 
-	PassCompleteThrough module
+	RequireAll module
 
 	def setup() {
-		module = new PassCompleteThrough()
+		module = new RequireAll()
 		module.getInput("input-a")
 		module.getInput("input-b")
 		module.getInput("input-c")
