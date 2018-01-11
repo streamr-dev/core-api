@@ -27,16 +27,18 @@ public class ClockModule extends AbstractSignalPathModule implements ITimeListen
 	public void sendOutput() {}
 	
 	@Override
-	public void clearState() {
-	}
+	public void clearState() {}
 	
 	@Override
-	public void setTime(Date time) {
-		if (tickUnit.getValue().isActivationTime(tickRate.getValue(), time)) {
-			updateDateFormatIfNecessary(format.getValue());
-			date.send(df.format(time));
-			ts.send(time.getTime());
-		}
+	public void setTime(Date timestamp) {
+		updateDateFormatIfNecessary(format.getValue());
+		date.send(df.format(timestamp));
+		ts.send(timestamp.getTime());
+	}
+
+	@Override
+	public int tickRateInSec() {
+		return tickUnit.getValue().tickRateInSec(tickRate.getValue());
 	}
 
 	private void updateDateFormatIfNecessary(String format) {
@@ -65,28 +67,24 @@ public class ClockModule extends AbstractSignalPathModule implements ITimeListen
 	}
 
 	enum TimeUnit {
-		SECOND(1000),
-		MINUTE(60 * 1000),
-		HOUR(60 * 60 * 1000),
-		DAY(60 * 60 * 24 * 1000);
+		SECOND(1),
+		MINUTE(60),
+		HOUR(60 * 60),
+		DAY(60 * 60 * 24);
+
 		private final int baseRate;
 
 		TimeUnit(int baseRate) {
 			this.baseRate = baseRate;
 		}
 
-		boolean isActivationTime(long tickRate, Date date) {
-			long ts = date.getTime() - (date.getTime() % 1000); // Reduce milliseconds just to be sure the modulo works right
-			return ts % (tickRate * getBaseRate()) == 0;
+		int tickRateInSec(int tickRate) {
+			return tickRate * baseRate;
 		}
 
 		@Override
 		public String toString() {
 			return name().toLowerCase();
-		}
-
-		public int getBaseRate() {
-			return baseRate;
 		}
 	}
 

@@ -174,4 +174,9 @@ public class Http extends AbstractHttpModule {
 		ContentType contentType = ContentType.get(entity);
 		return contentType != null && contentType.getMimeType().equals(ContentType.APPLICATION_OCTET_STREAM.getMimeType());
 	}
+
+	@Override
+	protected String getDummyNotificationMessage() {
+		return "HTTP " + verb.getValue() + " request sent to " + URL.getValue();
+	}
 }

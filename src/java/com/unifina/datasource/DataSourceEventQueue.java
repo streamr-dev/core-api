@@ -49,8 +49,6 @@ public abstract class DataSourceEventQueue implements IEventQueue {
 	@Override
 	public void addTimeListener(ITimeListener timeListener) {
 		masterClock.register(timeListener);
-//		if (!timeListeners.contains(timeListener))
-//			timeListeners.add(timeListener);
 	}
 
 	@Override

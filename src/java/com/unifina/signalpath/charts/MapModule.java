@@ -261,6 +261,11 @@ abstract class MapModule extends ModuleWithUI implements ITimeListener {
 		}
 	}
 
+	@Override
+	public int tickRateInSec() {
+		return expiringTimeOfMarkerInSecs > 0 || expiringTimeOfTraceInSecs > 0 ? 1 : 0;
+	}
+
 	/**
 	 * Marker point
 	 */

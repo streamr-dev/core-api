@@ -231,6 +231,10 @@ public class SignalPath extends ModuleWithUI {
 		return exportedInputs.size() + exportedOutputs.size() > 0;
 	}
 
+	public boolean isSerializable() {
+		return !getGlobals().isAdhoc() && getGlobals().isSerializationEnabled();
+	}
+
 	@Override
 	public Map<String, Object> getConfiguration() {
 		Map<String, Object> config = super.getConfiguration();

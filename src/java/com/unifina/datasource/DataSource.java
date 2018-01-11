@@ -198,8 +198,7 @@ public abstract class DataSource {
 	protected Iterable<SignalPath> getSerializableSignalPaths() {
 		List<SignalPath> serializableSps = new ArrayList<>();
 		for (SignalPath sp : signalPaths) {
-			Canvas canvas = sp.getCanvas();
-			if (canvas != null && !canvas.getAdhoc()) {
+			if (sp.isSerializable()) {
 				serializableSps.add(sp);
 			}
 		}

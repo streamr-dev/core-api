@@ -92,7 +92,7 @@ StreamrTable.prototype.receiveResponse = function (d) {
 	    // New map
 		this.tableBody.empty();
 		for (var key in d.nm) {
-			this.addRow([key, d.nm[key]], "row-" + key);
+			this.addRow([key, d.nm[key]], "row-" + key, "append");
 		}
 	} else if (d.e != null && d.id) {
 	    // Edit cell message: d.id=row id, d.e=cell index, d.c=cell content

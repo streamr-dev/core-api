@@ -1,5 +1,6 @@
 package com.unifina.service
 
+import com.google.gson.Gson
 import com.unifina.api.CanvasCommunicationException
 import com.unifina.datasource.DataSource
 import com.unifina.datasource.HistoricalDataSource
@@ -20,7 +21,6 @@ import com.unifina.signalpath.SignalPathRunner
 import com.unifina.utils.Globals
 import com.unifina.utils.GlobalsFactory
 import com.unifina.utils.NetworkInterfaceUtils
-import grails.converters.JSON
 import grails.transaction.NotTransactional
 import grails.transaction.Transactional
 import grails.util.Holders
@@ -182,7 +182,7 @@ class SignalPathService {
 		// Instantiate the SignalPath
 		if (canvas.serialization == null || canvas.adhoc) {
 			log.info("Creating new signalPath connections (canvasId=$canvas.id)")
-			sp = mapToSignalPath(JSON.parse(canvas.json), false, globals, new SignalPath(true))
+			sp = mapToSignalPath(new Gson().fromJson(canvas.json, Map.class), false, globals, new SignalPath(true))
 		} else {
 			log.info("De-serializing existing signalPath (canvasId=$canvas.id)")
 			sp = serializationService.deserialize(canvas.serialization.bytes)
