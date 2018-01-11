@@ -16528,6 +16528,15 @@ div.table.clickable-table.table-bordered .tbody > .tr > .td:not(:first-child) {
   position: absolute;
   display: none;
 }
+.streamr-floating-search-bar {
+  position: absolute;
+  display: inline-block;
+  border-radius: 5px;
+  transform: translate(-50%, -120%);
+  -webkit-box-shadow: 0 0 10px 0 #000;
+  -moz-box-shadow: 0 0 10px 0 #000;
+  box-shadow: 0 0 10px 0 #000;
+}
 .streamr-sidebar {
   position: fixed;
 }
