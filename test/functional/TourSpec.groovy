@@ -1,16 +1,18 @@
-import core.mixins.TourMixin
-import spock.lang.*
-import core.LoginTester1Spec
-import core.mixins.CanvasMixin
-import core.mixins.ConfirmationMixin
-import core.pages.*
+import mixins.TourMixin
+import LoginTester1Spec
+import mixins.CanvasMixin
+import mixins.ConfirmationMixin
+import pages.*
 
-@Mixin(CanvasMixin)
-@Mixin(ConfirmationMixin)
-@Mixin(TourMixin)
 class TourSpec extends LoginTester1Spec {
 
-	def setup(){
+	def setupSpec() {
+		this.class.metaClass.mixin(CanvasMixin)
+		this.class.metaClass.mixin(ConfirmationMixin)
+		this.class.metaClass.mixin(TourMixin)
+	}
+
+	def setup() {
 		at CanvasPage
 	}
 
@@ -85,7 +87,7 @@ class TourSpec extends LoginTester1Spec {
 
 		advance { selectCategoryInModuleBrowser("Visualizations") }
 
-		advance { dragAndDropModule("Map", 500, -400) }
+		advance { dragAndDropModule("Map (geo)", 500, -400) }
 
 		advance {
 			// Start dragging
@@ -98,7 +100,7 @@ class TourSpec extends LoginTester1Spec {
 
 		advance {
 			// Drop on endpoint
-			def ep = getJSPlumbEndpoint(findInput("Map", "id"))
+			def ep = getJSPlumbEndpoint(findInput("Map (geo)", "id"))
 			interact {
 				moveToElement(ep)
 				release()
@@ -106,8 +108,8 @@ class TourSpec extends LoginTester1Spec {
 		}
 
 		advance {
-			connectEndpoints(findOutput("Stream", "lat"), findInput("Map", "latitude"))
-			connectEndpoints(findOutput("Stream", "long"), findInput("Map", "longitude"))
+			connectEndpoints(findOutput("Stream", "lat"), findInput("Map (geo)", "latitude"))
+			connectEndpoints(findOutput("Stream", "long"), findInput("Map (geo)", "longitude"))
 		}
 
 		advance {
@@ -209,9 +211,9 @@ class TourSpec extends LoginTester1Spec {
 		moveModuleBy("Table", 600, 150)
 
 		advance {
-			connectEndpoints(findOutputByDisplayName("Filter", "out1"), findInputByDisplayName("Table", "in1"))
-			connectEndpoints(findOutputByDisplayName("Filter", "out2"), findInputByDisplayName("Table", "in2"))
-			connectEndpoints(findOutputByDisplayName("Filter", "out3"), findInputByDisplayName("Table", "in3"))
+			connectEndpoints(findOutputByDisplayName("Filter", "lat"), findInputByDisplayName("Table", "in1"))
+			connectEndpoints(findOutputByDisplayName("Filter", "long"), findInputByDisplayName("Table", "in2"))
+			connectEndpoints(findOutputByDisplayName("Filter", "spd"), findInputByDisplayName("Table", "in3"))
 		}
 
 		advance {
@@ -239,7 +241,7 @@ class TourSpec extends LoginTester1Spec {
 		moveModuleBy("Chart", 600, 150)
 
 		advance {
-			connectEndpoints(findOutputByDisplayName("Filter", "out3"), findInputByDisplayName("Chart", "in1"))
+			connectEndpoints(findOutputByDisplayName("Filter", "spd"), findInputByDisplayName("Chart", "in1"))
 		}
 
 		advance {
@@ -369,7 +371,7 @@ class TourSpec extends LoginTester1Spec {
 		}
 
 		advance {
-			connectEndpoints(findOutputByDisplayName("Filter", "out1"), findInputByDisplayName("Email", "value1"))
+			connectEndpoints(findOutputByDisplayName("Filter", "A&gt;B"), findInputByDisplayName("Email", "value1"))
 		}
 
 		advance { searchAndClickContains("Table") }

@@ -2,6 +2,7 @@ package com.unifina.controller.api
 
 import com.unifina.api.NotPermittedException
 import com.unifina.api.SaveCanvasCommand
+import com.unifina.domain.security.Key
 import com.unifina.domain.security.Permission
 import com.unifina.domain.security.Permission.Operation
 import com.unifina.domain.security.SecUser
@@ -25,7 +26,7 @@ import spock.lang.Specification
 
 @TestFor(CanvasApiController)
 @Mixin(FiltersUnitTestMixin)
-@Mock([SecUser, Permission, Canvas, UnifinaCoreAPIFilters, UserService, SpringSecurityService, ApiService])
+@Mock([SecUser, Permission, Canvas, Key, UnifinaCoreAPIFilters, UserService, SpringSecurityService, ApiService])
 class CanvasApiControllerSpec extends Specification {
 
 	CanvasService canvasService
@@ -40,8 +41,16 @@ class CanvasApiControllerSpec extends Specification {
 		controller.permissionService = Mock(PermissionService)
 		controller.apiService = mainContext.getBean(ApiService)
 
-		me = new SecUser(id: 1, apiKey: "myApiKey").save(validate: false)
-		SecUser other = new SecUser(id: 2, apiKey: "otherApiKey").save(validate: false)
+		me = new SecUser(id: 1).save(validate: false)
+		SecUser other = new SecUser(id: 2).save(validate: false)
+
+		def k1 = new Key(name: "k1", user: me)
+		k1.id = "myApiKey"
+		k1.save(failOnError: true, validate: true)
+
+		def k2 = new Key(name: "k2", user: other)
+		k2.id = "otherApiKey"
+		k2.save(failOnError: true, validate: true)
 
 		canvas1 = new Canvas(
 			user: me,
@@ -75,7 +84,7 @@ class CanvasApiControllerSpec extends Specification {
 
 	void "index() renders authorized canvases as a list"() {
 		when:
-		request.addHeader("Authorization", "Token $me.apiKey")
+		request.addHeader("Authorization", "Token myApiKey")
 		request.requestURI = "/api/v1/canvases"
 		withFilters(action: "index") {
 			controller.index()
@@ -153,7 +162,7 @@ class CanvasApiControllerSpec extends Specification {
 	void "show() authorizes, reconstructs and renders the canvas as json"() {
 		when:
 		params.id = "1"
-		request.addHeader("Authorization", "Token $me.apiKey")
+		request.addHeader("Authorization", "Token myApiKey")
 		request.requestURI = "/api/v1/canvases/$params.id"
 		withFilters(action: "show") {
 			controller.show()
@@ -171,7 +180,7 @@ class CanvasApiControllerSpec extends Specification {
 		when:
 		params.id = canvas1.id
 		params.runtime = true
-		request.addHeader("Authorization", "Token $me.apiKey")
+		request.addHeader("Authorization", "Token myApiKey")
 		request.requestURI = "/api/v1/canvases/$params.id"
 		withFilters(action: "show") {
 			controller.show()
@@ -189,7 +198,7 @@ class CanvasApiControllerSpec extends Specification {
 		def newCanvasId
 
 		when:
-		request.addHeader("Authorization", "Token $me.apiKey")
+		request.addHeader("Authorization", "Token myApiKey")
 		request.JSON = [
 			name: "brand new Canvas",
 			modules: [],
@@ -214,7 +223,7 @@ class CanvasApiControllerSpec extends Specification {
 
 	void "update() authorizes, updates and renders the canvas as json"() {
 		when:
-		request.addHeader("Authorization", "Token $me.apiKey")
+		request.addHeader("Authorization", "Token myApiKey")
 		params.id = "1"
 		request.JSON = [
 			name: "updated, new name",
@@ -240,7 +249,7 @@ class CanvasApiControllerSpec extends Specification {
 		Map originalProperties = canvas2.properties
 
 		when:
-		request.addHeader("Authorization", "Token $me.apiKey")
+		request.addHeader("Authorization", "Token myApiKey")
 		params.id = canvas2.id
 		request.JSON = [
 			name: "me me me",
@@ -262,7 +271,7 @@ class CanvasApiControllerSpec extends Specification {
 
 	void "delete() must authorize and delete the canvas"() {
 		when:
-		request.addHeader("Authorization", "Token $me.apiKey")
+		request.addHeader("Authorization", "Token myApiKey")
 		params.id = "1"
 		request.method = "DELETE"
 		request.requestURI = "/api/v1/canvases/$params.id"
@@ -273,12 +282,12 @@ class CanvasApiControllerSpec extends Specification {
 		then:
 		response.status == 204
 		1 * canvasService.authorizedGetById("1", me, Permission.Operation.WRITE) >> canvas1
-		Canvas.get("1") == null
+		1 * canvasService.deleteCanvas(canvas1, me)
 	}
 
 	void "delete() must not delete the canvas if authorization fails"() {
 		when:
-		request.addHeader("Authorization", "Token $me.apiKey")
+		request.addHeader("Authorization", "Token myApiKey")
 		params.id = "2"
 		request.method = "DELETE"
 		request.requestURI = "/api/v1/canvases/$params.id"
@@ -294,7 +303,7 @@ class CanvasApiControllerSpec extends Specification {
 
 	void "start() must authorize and start a canvas"() {
 		when:
-		request.addHeader("Authorization", "Token $me.apiKey")
+		request.addHeader("Authorization", "Token myApiKey")
 		params.id = "1"
 		request.method = "POST"
 		request.requestURI = "/api/v1/canvases/$params.id/start"
@@ -306,12 +315,12 @@ class CanvasApiControllerSpec extends Specification {
 		response.status == 200
 		response.json?.size() > 0
 		1 * canvasService.authorizedGetById("1", me, Permission.Operation.WRITE) >> canvas1
-		1 * canvasService.start(canvas1, false, null)
+		1 * canvasService.start(canvas1, false)
 	}
 
 	void "start() must authorize and be able to start a Canvas with clearing enabled"() {
 		when:
-		request.addHeader("Authorization", "Token $me.apiKey")
+		request.addHeader("Authorization", "Token myApiKey")
 		params.id = "1"
 		request.JSON = [clearState: true]
 		request.method = "POST"
@@ -324,14 +333,14 @@ class CanvasApiControllerSpec extends Specification {
 		response.status == 200
 		response.json?.size() > 0
 		1 * canvasService.authorizedGetById("1", me, Permission.Operation.WRITE) >> canvas1
-		1 * canvasService.start(canvas1, true, null)
+		1 * canvasService.start(canvas1, true)
 	}
 
 	void "start() must not start a canvas if authorization fails"() {
 		Map originalProperties = canvas2.properties
 
 		when:
-		request.addHeader("Authorization", "Token $me.apiKey")
+		request.addHeader("Authorization", "Token myApiKey")
 		params.id = canvas2.id
 		request.method = "POST"
 		request.requestURI = "/api/v1/canvases/$params.id/start"
@@ -349,7 +358,7 @@ class CanvasApiControllerSpec extends Specification {
 
 	void "stop() must authorize and stop a canvas"() {
 		when:
-		request.addHeader("Authorization", "Token $me.apiKey")
+		request.addHeader("Authorization", "Token myApiKey")
 		params.id = "1"
 		request.method = "POST"
 		request.requestURI = "/api/v1/canvases/$params.id/stop"
@@ -368,7 +377,7 @@ class CanvasApiControllerSpec extends Specification {
 		canvas1.adhoc = true
 
 		when:
-		request.addHeader("Authorization", "Token $me.apiKey")
+		request.addHeader("Authorization", "Token myApiKey")
 		params.id = "1"
 		request.method = "POST"
 		request.requestURI = "/api/v1/canvases/$params.id/stop"
@@ -386,7 +395,7 @@ class CanvasApiControllerSpec extends Specification {
 		Map originalProperties = canvas2.properties
 
 		when:
-		request.addHeader("Authorization", "Token $me.apiKey")
+		request.addHeader("Authorization", "Token myApiKey")
 		params.id = canvas2.id
 		request.method = "POST"
 		request.requestURI = "/api/v1/canvases/$params.id/stop"
@@ -404,7 +413,7 @@ class CanvasApiControllerSpec extends Specification {
 
 	void "stop() must throw an exception if the canvas can't be reached"() {
 		when:
-		request.addHeader("Authorization", "Token $me.apiKey")
+		request.addHeader("Authorization", "Token myApiKey")
 		params.id = "1"
 		request.method = "POST"
 		request.requestURI = "/api/v1/canvases/$params.id/stop"
@@ -423,7 +432,7 @@ class CanvasApiControllerSpec extends Specification {
 		def result = JSON.parse(canvas1.json).modules.find {it.hash == 1}
 
 		when:
-		request.addHeader("Authorization", "Token $me.apiKey")
+		request.addHeader("Authorization", "Token myApiKey")
 		params.canvasId = "1"
 		params.moduleId = 1
 		params.dashboard = 2
@@ -443,7 +452,7 @@ class CanvasApiControllerSpec extends Specification {
 		def result = JSON.parse(canvas1.json).modules.find {it.hash == 1}
 
 		when:
-		request.addHeader("Authorization", "Token $me.apiKey")
+		request.addHeader("Authorization", "Token myApiKey")
 		params.canvasId = "1"
 		params.moduleId = 1
 		params.dashboard = 2
@@ -464,7 +473,7 @@ class CanvasApiControllerSpec extends Specification {
 		def runtimeResponse = [foo: 'bar']
 
 		when:
-		request.addHeader("Authorization", "Token $me.apiKey")
+		request.addHeader("Authorization", "Token myApiKey")
 		params.id = canvas1.id
 		params.path = canvas1.id
 		request.JSON = [bar: 'foo']
@@ -485,7 +494,7 @@ class CanvasApiControllerSpec extends Specification {
 		def runtimeResponse = [foo: 'bar']
 
 		when:
-		request.addHeader("Authorization", "Token $me.apiKey")
+		request.addHeader("Authorization", "Token myApiKey")
 		params.id = canvas1.id
 		params.path = canvas1.id
 		params.local = "true"

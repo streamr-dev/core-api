@@ -2,8 +2,6 @@ SignalPath.SchedulerModule = function(data,canvas,prot) {
 	prot = prot || {};
 	var pub = SignalPath.UIChannelModule(data,canvas,prot)
 
-	var pendingMessage
-
 	/**
 	 * Initialization
 	 */
@@ -38,14 +36,7 @@ SignalPath.SchedulerModule = function(data,canvas,prot) {
 	prot.createDiv = createDiv;
 
 	prot.receiveResponse = function(payload) {
-		// If the scheduler is not ready yet, keep the latest message in memory
-		// and handle it on scheduler ready event
-		if (!prot.scheduler.ready)
-			pendingMessage = payload
-		else {
-			var activeRules = payload.activeRules
-			prot.scheduler.highlightActives(activeRules)
-		}
+		prot.scheduler.highlightActives(payload.activeRules)
 	}
 
 	prot.getUIChannelOptions = function() {

@@ -69,7 +69,6 @@ class TwitterFeedSpec extends Specification {
 				name: "TesterDude",
 				language: "Und",
 				followers: 3,
-				isRetweet: false,
 				streamConfig: Stub(TwitterStreamConfig) {
 					getStreamId() >> streamId
 				}

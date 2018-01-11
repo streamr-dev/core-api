@@ -1,9 +1,9 @@
 package com.unifina.service
 
-import com.amazonaws.services.simpleworkflow.model.Run
 import com.unifina.domain.security.Permission
 import com.unifina.domain.security.SecUser
 import com.unifina.domain.signalpath.Canvas
+import com.unifina.domain.signalpath.Serialization
 import com.unifina.exceptions.CanvasUnreachableException
 import com.unifina.signalpath.RuntimeRequest
 import com.unifina.signalpath.SignalPath
@@ -13,7 +13,7 @@ import grails.test.mixin.TestFor
 import spock.lang.Specification
 
 @TestFor(SignalPathService)
-@Mock([SecUser, Canvas])
+@Mock([SecUser, Canvas, Serialization])
 class SignalPathServiceSpec extends Specification {
 
 	Canvas c1
@@ -26,10 +26,11 @@ class SignalPathServiceSpec extends Specification {
 				name: "canvas-1",
 				user: me,
 				json: "{}",
-				serialized: new byte[512],
-				serializationTime: new Date(),
+				serialization: new Serialization(bytes: new byte[512], date: new Date()),
 				runner: "runnerId"
-		).save(failOnError: true)
+		)
+		c1.save(failOnError: true)
+		assert c1.serialization.id != null
 
 		service.canvasService = Mock(CanvasService)
 	}
@@ -39,8 +40,7 @@ class SignalPathServiceSpec extends Specification {
 		service.clearState(c1)
 
 		then:
-		Canvas.findById(c1.id).serialized == null
-		Canvas.findById(c1.id).serializationTime == null
+		Canvas.findById(c1.id).serialization == null
 	}
 
 	def "stopLocalRunner() sets state to STOPPED if runner is not found"() {

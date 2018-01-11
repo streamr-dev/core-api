@@ -10,27 +10,23 @@ import com.unifina.utils.Globals
 class ModuleService {
 
 	@CompileStatic
-	public AbstractSignalPathModule getModuleInstance(Module mod, Map config, SignalPath parent, Globals globals) {
+	AbstractSignalPathModule getModuleInstance(Module mod, Map config, SignalPath parent, Globals globals) {
 		// TODO: check that the owning user has the privileges to access this module
 
 		ClassLoader cl = this.getClass().getClassLoader()
 		AbstractSignalPathModule m = (AbstractSignalPathModule) cl.loadClass(mod.implementingClass).newInstance()
 		m.globals = globals
 		m.init()
-		m.setName(mod.name)
-		m.setDomainObject(mod);
-		if (parent != null) { m.parentSignalPath = parent }
+		m.setDomainObject(mod)
 
-		// Make sure the config contains up-to-date info about the Module
+		if (parent != null) {
+			m.setParentSignalPath(parent)
+		}
+
 		if (config != null) {
-			config["id"] = mod.id
-			config["jsModule"] = mod.jsModule
-			config["name"] = mod.name
-			config["type"] = mod.type
 			m.configure(config)
 		}
 
-		globals?.onModuleCreated(m)
 		return m
 	}
 

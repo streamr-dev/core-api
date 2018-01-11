@@ -73,6 +73,7 @@ var SignalPath = (function () {
 	pub.options = options;
 
 	var isBeingReloaded = false
+	var debugLoopInterval = null
 	
     // TODO: remove if not needed anymore!
     pub.replacedIds = {};
@@ -182,7 +183,7 @@ var SignalPath = (function () {
 	}
 	pub.loadJSON = loadJSON;
 	
-	pub.updateModule = function(module,callback) {
+	pub.updateModule = function(module, callback) {
 		
 		$.ajax({
 			type: 'POST',
@@ -191,13 +192,17 @@ var SignalPath = (function () {
 			dataType: 'json',
 			success: function(data) {
 				if (!data.error) {
-					module.updateFrom(data);
-					
-					var div = module.getDiv();					
-					setModuleById(module.getHash(), module);
-					module.redraw(); // Just in case
-					if (callback)
-						callback();
+					// Guard against the situation where module has been closed while the update was in flight
+					if (!module.isClosed()) {
+						module.updateFrom(data);
+
+						var div = module.getDiv();
+						setModuleById(module.getHash(), module);
+						module.redraw(); // Just in case
+						if (callback) {
+							callback(data);
+						}
+					}
 				}
 				else {
 					if (data.moduleErrors) {
@@ -205,7 +210,12 @@ var SignalPath = (function () {
 							getModuleById(data.moduleErrors[i].hash).handleError(data.moduleErrors[i].payload);
 						}
 					}
+
 					handleError(data.message)
+
+					if (callback) {
+						callback(data, data.message)
+					}
 				}
 			},
 			error: function(jqXHR,textStatus,errorThrown) {
@@ -288,7 +298,7 @@ var SignalPath = (function () {
 		}
 		
 		// Generate an internal index for the module and store a reference in a table
-		if (data.hash==null) {
+		if (data.hash == null) {
 			data.hash = moduleHashGenerator++
 		}
 		// Else check that the moduleHashGenerator keeps up
@@ -389,6 +399,7 @@ var SignalPath = (function () {
 	function saveAs(name, callback) {
 		setName(name)
 		save(function(json) {
+			pub.clear()
 			load(json, function() {
 				setTimeout(callback, 0)
 			})
@@ -443,7 +454,7 @@ var SignalPath = (function () {
 		})
 	}
 
-	function _update(json, callback) {
+	function _update(json, callback, errorCallback) {
 		$.ajax({
 			type: 'PUT',
 			url: options.apiUrl + "/canvases/"+json.id,
@@ -463,11 +474,13 @@ var SignalPath = (function () {
 					var apiError = jqXHR.responseJSON;
 					if (apiError && apiError.message) {
 						handleError(apiError.message)
-						return;
+                        errorCallback && errorCallback(apiError)
+						return
 					}
 
 				}
 				handleError(errorThrown)
+                errorCallback && errorCallback(errorThrown)
 			}
 		})
 	}
@@ -616,12 +629,11 @@ var SignalPath = (function () {
 	function subscribe() {
 		if (isRunning() && runningJson.uiChannel) {
 			subscription = connection.subscribe(
-				runningJson.uiChannel.id,
-				processMessage,
 				{
-					resend_all: (runningJson.adhoc ? true : undefined),
-					canvas: runningJson.id
-				}
+					stream: runningJson.uiChannel.id,
+					resend_all: (runningJson.adhoc ? true : undefined)
+				},
+				processMessage
 			)
 		}
 	}
@@ -740,6 +752,50 @@ var SignalPath = (function () {
 
 	pub.isLoading = function() {
 		return SignalPath.isBeingReloaded;
+	}
+
+	// Whether canvas represents something that cannot be edited but only viewed, e.g., a running sub-canvas.
+	pub.isReadOnly = function() {
+		return runningJson && runningJson.readOnly;
+    }
+
+	pub.DEBUG_STRING_MAX_LENGTH = 30;
+	pub.toggleDebugMode = function(intervalInMs) {
+		if (debugLoopInterval) {
+			clearInterval(debugLoopInterval)
+			debugLoopInterval = null
+			return false
+		} else {
+			debugLoopInterval = setInterval(function () {
+				if (SignalPath.isRunning() && !SignalPath.isLoading()) {
+					$.ajax({
+						type: 'POST',
+						url: pub.getURL() + "/request",
+						data: JSON.stringify({type: "json"}),
+						contentType: "application/json",
+						dataType: "json",
+						success: function (response) {
+							console.log(response)
+							var outputs = _.pluck(response.json.modules, "outputs")
+							var inputs = _.pluck(response.json.modules, "inputs")
+							var params = _.pluck(response.json.modules, "params")
+							var endpoints = _.flatten(outputs.concat(inputs, params))
+							_.each(endpoints, function (endpoint) {
+								var displayedValue = endpoint.value ?
+									JSON.stringify(endpoint.value).slice(0, pub.DEBUG_STRING_MAX_LENGTH) : "NULL";
+
+								var endpointObject = $("#" + endpoint.id).data("spObject")
+								if (endpointObject) {
+									endpointObject.updateState(displayedValue);
+								}
+							})
+
+						}
+					})
+				}
+			}, intervalInMs || 10000)
+			return true
+		}
 	}
 
 	return pub; 

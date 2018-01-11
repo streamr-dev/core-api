@@ -1,13 +1,17 @@
 package com.unifina.signalpath;
 
+import com.unifina.domain.data.Stream;
+import com.unifina.domain.signalpath.Module;
+import com.unifina.utils.StreamrColor;
+
 import java.util.*;
 
 public class ModuleOption extends LinkedHashMap<String, Object> {
-
 	public static final String OPTION_STRING = "string";
 	public static final String OPTION_INTEGER = "int";
 	public static final String OPTION_BOOLEAN = "boolean";
 	public static final String OPTION_DOUBLE = "double";
+	public static final String OPTION_COLOR = "color";
 
 	private String key;
 
@@ -25,7 +29,7 @@ public class ModuleOption extends LinkedHashMap<String, Object> {
 	@SuppressWarnings("unused")
 	public ModuleOption() {}
 	
-	ModuleOption(String key, Map<String, Object> map) {
+	private ModuleOption(String key, Map<String, Object> map) {
 		this.key = key;
 		this.putAll(map);
 	}
@@ -42,7 +46,7 @@ public class ModuleOption extends LinkedHashMap<String, Object> {
 	 * @param value written into canvas JSON and sent back from UI
      */
 	public ModuleOption addPossibleValue(String description, String value) {
-		List<Map<String, String>> choices = (List<Map<String, String>>)this.get("possibleValues");
+		List<Map<String, String>> choices = (List<Map<String, String>>) this.get("possibleValues");
 		if (choices == null) {
 			choices = new LinkedList<>();
 			this.put("possibleValues", choices);
@@ -52,10 +56,6 @@ public class ModuleOption extends LinkedHashMap<String, Object> {
 		choice.put("value", value);
 		choices.add(choice);
 		return this;
-	}
-
-	public void addTo(Map<String,Object> options) {
-		options.put(key, this);
 	}
 	
 	public String getKey() {
@@ -73,7 +73,13 @@ public class ModuleOption extends LinkedHashMap<String, Object> {
 	
 	public Integer getInt() {
 		Object o = getValue();
-		return (o instanceof Integer) ? (Integer) o : Integer.parseInt(getString());
+		if (o instanceof Integer) {
+			return (Integer) o;
+		} else if (o instanceof Double) {
+			return getDouble().intValue();
+		} else {
+			return Integer.parseInt(getString());
+		}
 	}
 	
 	public Double getDouble() {
@@ -86,6 +92,11 @@ public class ModuleOption extends LinkedHashMap<String, Object> {
 		return (o instanceof Boolean) ? (Boolean) o : Boolean.parseBoolean(getString());
 	}
 
+	public StreamrColor getColor() {
+		Object o = getValue();
+		return (o instanceof StreamrColor) ? (StreamrColor) o : StreamrColor.parseRGBString(getString());
+	}
+
 	public static ModuleOption createBoolean(String key, Boolean value) {
 		return new ModuleOption(key, value, OPTION_BOOLEAN);
 	}
@@ -94,7 +105,38 @@ public class ModuleOption extends LinkedHashMap<String, Object> {
 		return new ModuleOption(key, value, OPTION_INTEGER);
 	}
 
+	public static ModuleOption createDouble(String key, Double value) {
+		return new ModuleOption(key, value, OPTION_DOUBLE);
+	}
+
 	public static ModuleOption createString(String key, String value) {
 		return new ModuleOption(key, value, OPTION_STRING);
+	}
+
+	public static ModuleOption createColor(String key, StreamrColor value) {
+		return new ModuleOption(key, value.toString(), OPTION_COLOR);
+	}
+
+	public static boolean validate(Object option) {
+		if (option == null && !(option instanceof ModuleOption)) {
+			return false;
+		}
+		ModuleOption opt = (ModuleOption) option;
+		switch ((String) opt.get("type")) {
+			case OPTION_STRING: {
+				List<Map<String, String>> possibleValues = (List<Map<String, String>>) opt.get("possibleValues");
+				boolean found = false;
+				for (Map<String, String> value : possibleValues) {
+					if (value.get("value") == opt.get("value") || value.get("value").equals(opt.get("value"))) {
+						found = true;
+						break;
+					}
+				}
+				if (!found) {
+					return false;
+				}
+			}
+		}
+		return true;
 	}
 }

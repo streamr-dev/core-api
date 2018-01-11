@@ -1,13 +1,7 @@
 package com.unifina.utils.testutils;
 
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.util.*;
-
 import com.unifina.datasource.ITimeListener;
-import com.unifina.serialization.AnonymousInnerClassDetector;
-import com.unifina.serialization.HiddenFieldDetector;
+import com.unifina.feed.MasterClock;
 import com.unifina.serialization.Serializer;
 import com.unifina.serialization.SerializerImpl;
 import com.unifina.service.SerializationService;
@@ -15,6 +9,13 @@ import com.unifina.signalpath.*;
 import com.unifina.utils.DU;
 import com.unifina.utils.Globals;
 import groovy.lang.Closure;
+
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.util.*;
+
+import static com.unifina.feed.MasterClock.isTimeToTick;
 
 
 /**
@@ -66,8 +67,8 @@ public class ModuleTestHelper {
 		 * Set expected messages that should've been pushed to ui channel at end of input list. (optional)
 		 * Notice that previously set <code>module</code> must be an instance of <code>ModuleWithUI</code>.
 		 */
-		public Builder uiChannelMessages(Map<String, List<Object>> uiChannelMessages) {
-			testHelper.turnOnUiChannelMode(uiChannelMessages);
+		public Builder uiChannelMessages(Map<String, List<Map>> expectedUiChannelMessages, Map<String, List<Map>> sentUiChannelMessages) {
+			testHelper.turnOnUiChannelMode(expectedUiChannelMessages, sentUiChannelMessages);
 			return this;
 		}
 
@@ -159,6 +160,15 @@ public class ModuleTestHelper {
 		}
 
 		/**
+		 * By default, test all SerializationModes (NONE, SERIALIZE and SERIALIZE_DESERIALIZE).
+		 * This can be changed by calling this method with a subset of those SerializationModes.
+         */
+		public Builder serializationModes(Set<SerializationMode> serializationModes) {
+			testHelper.selectedSerializationModes = serializationModes;
+			return this;
+		}
+
+		/**
 		 * Build the <code>ModuleTestHelper</code>. Throws <code>RuntimeException</code> if test setting has been
 		 * configured inappropriately.
 		 */
@@ -200,7 +210,8 @@ public class ModuleTestHelper {
 	private AbstractSignalPathModule module;
 	private Map<String, List<Object>> inputValuesByName;
 	private Map<String, List<Object>> outputValuesByName;
-	private Map<String, List<Object>> uiChannelMessages;
+	private Map<String, List<Map>> expectedUiChannelMessages;
+	private Map<String, List<Map>> sentUiChannelMessages;
 	private Map<Integer, Date> ticks;
 	private int extraIterationsAfterInput = 0;
 	private int skip = 0;
@@ -216,7 +227,7 @@ public class ModuleTestHelper {
 	private boolean clearStateCalled = false;
 
 	public enum SerializationMode {
-		NONE, SERIALIZE, SERIALIZE_DESERIALIZE
+		NONE, CLEAR, SERIALIZE, SERIALIZE_DESERIALIZE
 	}
 	private SerializationMode serializationMode = SerializationMode.NONE;
 	private SerializationService dummySerializationService = new SerializationService();
@@ -225,23 +236,44 @@ public class ModuleTestHelper {
 
 	private ModuleTestHelper() {}
 
+	// By default, test all serialization modes
+	private Set<SerializationMode> selectedSerializationModes = new HashSet<>(Arrays.asList(SerializationMode.values()));
+
 	public boolean test() throws IOException, ClassNotFoundException {
 		try {
-			boolean a = runTestCase();        // Clean slate test
+			boolean pass = true;
 
-			clearModuleAndCollectorsAndChannels();
-			clearStateCalled = true;
-			boolean b = runTestCase();      // Test that clearState() works
+			if (selectedSerializationModes.contains(SerializationMode.NONE)) {
+				if (!runTestCase()) {        // Clean slate test
+					pass = false;
+				}
+			}
 
-			clearModuleAndCollectorsAndChannels();
-			serializationMode = SerializationMode.SERIALIZE;
-			boolean c = runTestCase();       // Test that serialization works and has no side effects
+			if (selectedSerializationModes.contains(SerializationMode.CLEAR)) {
+				clearModuleAndCollectorsAndChannels();
+				clearStateCalled = true;
+				if (!runTestCase()) {        // Test that clearState() works
+					pass = false;
+				}
+			}
 
-			clearModuleAndCollectorsAndChannels();
-			serializationMode = SerializationMode.SERIALIZE_DESERIALIZE;
-			boolean d = runTestCase();       // Test that serialization + deserialization works
+			if (selectedSerializationModes.contains(SerializationMode.SERIALIZE)) {
+				clearModuleAndCollectorsAndChannels();
+				serializationMode = SerializationMode.SERIALIZE;
+				if (!runTestCase()) {       // Test that serialization works and has no side effects
+					pass = false;
+				}
+			}
 
-			return a && b && c && d;
+			if (selectedSerializationModes.contains(SerializationMode.SERIALIZE_DESERIALIZE)) {
+				clearModuleAndCollectorsAndChannels();
+				serializationMode = SerializationMode.SERIALIZE_DESERIALIZE;
+				if (!runTestCase()) {       // Test that serialization + deserialization works
+					pass = false;
+				}
+			}
+
+			return pass;
 		} catch (TestHelperException ex) {
 			throw ex;
 		} catch (Exception ex) {
@@ -259,16 +291,17 @@ public class ModuleTestHelper {
 
 			// Time is set at start of event
 			if (isTimedMode() && ticks.containsKey(i)) {
-				((ITimeListener)module).setTime(ticks.get(i));
-				module.getGlobals().time = ticks.get(i);
+				Date time = ticks.get(i);
+				if (isTimeToTick(time.getTime() / 1000, ((ITimeListener) module).tickRateInSec())) {
+					((ITimeListener)module).setTime(time);
+				}
+				module.getGlobals().time = time;
 			}
 
 			// Set input values
 			if (i < inputValueCount) {
 				serializeAndDeserializeModule();
 				feedInputs(i);
-			} else {
-				module.setSendPending(true); // TODO: hack, isn't concern of user of module!
 			}
 
 			// Activate module
@@ -285,6 +318,9 @@ public class ModuleTestHelper {
 			// Further global time
 			furtherTime(i);
 		}
+
+		// End of data feed, destroy module
+		module.destroy();
 
 		// Test ui channel messages
 		if (isUiChannelMode()) {
@@ -329,7 +365,7 @@ public class ModuleTestHelper {
 	private void validateOutput(int outputIndex, int i) {
 		for (Map.Entry<String, List<Object>> entry : outputValuesByName.entrySet()) {
 
-			Object actual = getOutputByEffectiveName(entry.getKey()).getTargets()[0].getValue();
+			Object actual = ((List<Input>) getOutputByEffectiveName(entry.getKey()).getTargets()).get(0).getValue();
 			Object expected = entry.getValue().get(outputIndex);
 
 			if (expected instanceof Double) {
@@ -366,21 +402,16 @@ public class ModuleTestHelper {
 	}
 
 	private void validateUiChannelMessages() {
-		FakePushChannel uiChannel = (FakePushChannel) module.getGlobals().getUiChannel();
-		if (uiChannel == null) {
-			throw new TestHelperException("uiChannel: module.globals.uiChannel unexpectedly null", this);
-		}
-
-		for (Map.Entry<String, List<Object>> expectedEntry : uiChannelMessages.entrySet()) {
+		for (Map.Entry<String, List<Map>> expectedEntry : expectedUiChannelMessages.entrySet()) {
 			String channel = expectedEntry.getKey();
-			List<Object> expectedMessages = expectedEntry.getValue();
+			List<Map> expectedMessages = expectedEntry.getValue();
 
-			if (!uiChannel.receivedContentByChannel.containsKey(channel)) {
+			if (!sentUiChannelMessages.containsKey(channel)) {
 				throw new TestHelperException(String.format("uiChannel: channel '%s' was never pushed to", channel),
 						this);
 			}
 
-			List<Object> actualMessages = uiChannel.receivedContentByChannel.get(channel);
+			List<Map> actualMessages = sentUiChannelMessages.get(channel);
 			for (int i = 0; i < Math.max(expectedMessages.size(), actualMessages.size()); ++i) {
 
 				if (actualMessages.size() <= i) {
@@ -407,11 +438,13 @@ public class ModuleTestHelper {
 					throw new TestHelperException(String.format(msg, i, actual, expected), this);
 				}
 			}
+
+			sentUiChannelMessages.clear();
 		}
 	}
 
 	private boolean isUiChannelMode() {
-		return uiChannelMessages != null;
+		return expectedUiChannelMessages != null;
 	}
 
 	private boolean isTimedMode() {
@@ -420,8 +453,6 @@ public class ModuleTestHelper {
 
 	private void serializeAndDeserializeModule() throws IOException, ClassNotFoundException {
 		if (serializationMode != SerializationMode.NONE) {
-			validateThatModuleDoesNotHaveKnownSerializationIssues();
-
 			// Globals is transient, we need to restore it after deserialization
 			Globals globalsTempHolder = module.getGlobals();
 
@@ -434,6 +465,9 @@ public class ModuleTestHelper {
 				ByteArrayInputStream in = new ByteArrayInputStream(out.toByteArray());
 				module = (AbstractSignalPathModule) serializer.deserialize(in);
 				module.setGlobals(globalsTempHolder);
+				if (module.getParentSignalPath() != null) {
+					module.getParentSignalPath().setGlobals(globalsTempHolder);
+				}
 				module.afterDeserialization(dummySerializationService);
 				moduleInstanceChanged.call(module);
 			}
@@ -455,9 +489,11 @@ public class ModuleTestHelper {
 		module.connectionsReady();
 	}
 
-	private void turnOnUiChannelMode(Map<String, List<Object>> uiChannelMessages) {
+	private void turnOnUiChannelMode(Map<String, List<Map>> expectedMessages, Map<String, List<Map>> sentUiChannelMessages) {
 		if (module instanceof ModuleWithUI) {
-			this.uiChannelMessages = new HashMap<>(uiChannelMessages);
+			this.expectedUiChannelMessages = new HashMap<>(expectedMessages);
+			// Save reference, as the map doesn't hold anything yet
+			this.sentUiChannelMessages = sentUiChannelMessages;
 		} else {
 			throw new RuntimeException("Module does not extend ModuleWithUI");
 		}
@@ -471,21 +507,6 @@ public class ModuleTestHelper {
 			throw new RuntimeException("Module does not implement ITimeListener interface");
 		}
 	}
-
-	private void validateThatModuleDoesNotHaveKnownSerializationIssues() {
-		// Field hiding not allowed
-		HiddenFieldDetector hiddenFieldDetector = new HiddenFieldDetector(module.getClass());
-		if (hiddenFieldDetector.anyHiddenFields()) {
-			throw new TestHelperException(hiddenFieldDetector);
-		}
-
-		// Anonymous inner classes not allowed
-		AnonymousInnerClassDetector anonymousInnerClassDetector = new AnonymousInnerClassDetector();
-		if (anonymousInnerClassDetector.detect(module)) {
-			throw new TestHelperException("Anonymous inner class detected. Not allowed when serializing.", this);
-		}
-	}
-
 
 	// Initialization steps below
 
@@ -501,7 +522,7 @@ public class ModuleTestHelper {
 	}
 
 	private void validateThatListSizesMatch() {
-		if (skip >= inputValueCount && extraIterationsAfterInput == 0) {
+		if (skip > 0 && skip >= inputValueCount && extraIterationsAfterInput == 0) {
 			throw new IllegalArgumentException("All values would be skipped and not a single output tested.");
 		}
 		for (List<Object> inputValues : inputValuesByName.values()) {
@@ -525,15 +546,16 @@ public class ModuleTestHelper {
 	private static void falsifyNoRepeats(AbstractSignalPathModule module) {
 		for (Output output : module.getOutputs()) {
 			if (output instanceof TimeSeriesOutput) {
-				((TimeSeriesOutput) output).noRepeat = false;
+				((TimeSeriesOutput) output).setNoRepeat(false);
 			}
 		}
 	}
 
 	private void setUpGlobals(AbstractSignalPathModule module) {
-		module.setGlobals(new Globals());
+		if (module.getGlobals() == null) {
+			module.setGlobals(new Globals());
+		}
 		module.getGlobals().time = new Date(0);
-		module.getGlobals().setUiChannel(new FakePushChannel());
 		module.setGlobals(overrideGlobalsClosure.call(module.getGlobals()));
 	}
 
@@ -577,10 +599,10 @@ public class ModuleTestHelper {
 			}
 			Collector collector = new Collector();
 			collector.init();
-			collector.attachToModule(output);
+			collector.attachToOutput(output);
 		}
 	}
-	private static class Collector extends AbstractSignalPathModule {
+	public static class Collector extends AbstractSignalPathModule {
 		Input<Object> input = new Input<>(this, "input", "Object");
 
 		@Override
@@ -588,7 +610,7 @@ public class ModuleTestHelper {
 			addInput(input);
 		}
 
-		public void attachToModule(Output<Object> externalOutput) {
+		public void attachToOutput(Output<Object> externalOutput) {
 			externalOutput.connect(input);
 		}
 

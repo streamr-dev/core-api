@@ -1,9 +1,15 @@
-import core.LoginTester1Spec
-import core.pages.ApiDocsPage
+import LoginTester1Spec
+import pages.ApiDocsPage
+import org.openqa.selenium.Dimension
 
 class ApiDocsSpec extends LoginTester1Spec {
 
 	void "api docs can be opened via help menu"() {
+		// necessary to make sure table of contents column is shown
+		if (driver.manage().window().size.width < 1000) {
+			driver.manage().window().size = new Dimension(1000, 800)
+		}
+
 		when:
 		$("#navHelpLink").click()
 		then:

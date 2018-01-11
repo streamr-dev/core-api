@@ -1,7 +1,6 @@
-import pages.*
 import spock.lang.*
-import core.LoginTester2Spec
-import core.mixins.CanvasMixin
+import LoginTester2Spec
+import mixins.CanvasMixin
 
 @Mixin(CanvasMixin)
 // Examples are commented out

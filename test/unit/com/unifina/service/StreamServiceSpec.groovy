@@ -1,36 +1,56 @@
 package com.unifina.service
 
+import com.unifina.api.NotFoundException
+import com.unifina.api.NotPermittedException
 import com.unifina.api.ValidationException
+import com.unifina.domain.dashboard.Dashboard
+import com.unifina.domain.dashboard.DashboardItem
 import com.unifina.domain.data.Feed
 import com.unifina.domain.data.FeedFile
 import com.unifina.domain.data.Stream
+import com.unifina.domain.security.Key
+import com.unifina.domain.security.Permission
 import com.unifina.domain.security.SecUser
+import com.unifina.domain.signalpath.Canvas
 import com.unifina.feed.AbstractStreamListener
-import com.unifina.feed.DataRange
 import com.unifina.feed.NoOpStreamListener
-import com.unifina.feed.kafka.KafkaDataRangeProvider
-import com.unifina.feed.kafka.KafkaStreamListener
 import grails.test.mixin.Mock
 import grails.test.mixin.TestFor
-import grails.test.mixin.TestMixin
-import grails.test.mixin.web.ControllerUnitTestMixin
+import org.codehaus.groovy.grails.commons.DefaultGrailsApplication
+import org.springframework.context.ApplicationContext
 import spock.lang.Specification
 
 /**
  * See the API for {@link grails.test.mixin.support.GrailsUnitTestMixin} for usage instructions
  */
-@TestMixin(ControllerUnitTestMixin) // JSON support
 @TestFor(StreamService)
-@Mock([Stream, Feed, FeedFile, SecUser, KafkaService, FeedFileService])
+@Mock([Canvas, Dashboard, DashboardItem, Stream, Feed, FeedFile, SecUser, Key])
 class StreamServiceSpec extends Specification {
 
+	StreamService service
 	Feed feed
+	KafkaService kafkaService = Stub(KafkaService)
+	FeedFileService feedFileService = new FeedFileService()
+	DashboardService dashboardService = Mock(DashboardService)
 
 	def setup() {
 		feed = new Feed(
-			streamListenerClass: NoOpStreamListener.name,
-			dataRangeProviderClass: KafkaDataRangeProvider.name
+			streamListenerClass: NoOpStreamListener.name
 		).save(validate: false)
+
+		// Setup application context
+		def applicationContext = Stub(ApplicationContext) {
+			getBean(KafkaService) >> kafkaService
+			getBean(FeedFileService) >> feedFileService
+			getBean(DashboardService) >> dashboardService
+		}
+
+		// Setup grailsApplication
+		def grailsApplication = new DefaultGrailsApplication()
+		grailsApplication.setMainContext(applicationContext)
+
+		service = new StreamService()
+		service.grailsApplication = grailsApplication
 	}
 
 	void "createStream throws ValidationException input incomplete"() {
@@ -56,15 +76,15 @@ class StreamServiceSpec extends Specification {
 		def feed = new Feed(id: 0, streamListenerClass: "com.unifina.feed.kafka.KafkaStreamListener").save(validate: false)
 		when:
 		def params = [
-				name: "Test stream",
-				description: "Test stream",
-				feed: feed,
-				config: [
-						fields: [
-								[name: "profit", type: "number"],
-								[name: "keyword", type: "string"]
-						]
+			name       : "Test stream",
+			description: "Test stream",
+			feed       : feed,
+			config     : [
+				fields: [
+					[name: "profit", type: "number"],
+					[name: "keyword", type: "string"]
 				]
+			]
 		]
 		service.createStream(params, new SecUser(username: "me").save(validate: false))
 		then:
@@ -83,14 +103,14 @@ class StreamServiceSpec extends Specification {
 		feed.save(validate: false)
 		when:
 		def params = [
-				name: "Test stream",
-				description: "Test stream",
-				config: [
-						fields: [
-								[name: "profit", type: "number"],
-								[name: "keyword", type: "string"]
-						]
+			name       : "Test stream",
+			description: "Test stream",
+			config     : [
+				fields: [
+					[name: "profit", type: "number"],
+					[name: "keyword", type: "string"]
 				]
+			]
 		]
 		service.createStream(params, new SecUser(username: "me").save(validate: false))
 		then:
@@ -104,15 +124,15 @@ class StreamServiceSpec extends Specification {
 		def service = Spy(StreamService)
 		def streamListener = Mock(AbstractStreamListener)
 		def params = [
-				name: "Test stream",
-				description: "Test stream",
-				feed: feed,
-				config: [
-						fields: [
-								[name: "profit", type: "number"],
-								[name: "keyword", type: "string"]
-						]
+			name       : "Test stream",
+			description: "Test stream",
+			feed       : feed,
+			config     : [
+				fields: [
+					[name: "profit", type: "number"],
+					[name: "keyword", type: "string"]
 				]
+			]
 		]
 		when:
 
@@ -125,56 +145,238 @@ class StreamServiceSpec extends Specification {
 	void "createStream throws exception if feed has no streamListenerClass"() {
 		when:
 		def params = [
-				name: "Test stream",
-				description: "Test stream",
-				feed: new Feed().save(validate: false),
-				config: [
-						fields: [
-								[name: "profit", type: "number"],
-								[name: "keyword", type: "string"]
-						]
+			name       : "Test stream",
+			description: "Test stream",
+			feed       : new Feed().save(validate: false),
+			config     : [
+				fields: [
+					[name: "profit", type: "number"],
+					[name: "keyword", type: "string"]
 				]
+			]
 		]
 		service.createStream(params, new SecUser(username: "me").save(validate: false))
 		then:
 		thrown IllegalArgumentException
 	}
 
-	void "getDataRange gives correct values"() {
-		DataRange dataRange
-		Stream stream
-
-		setup:
-		SecUser user = new SecUser(id: 1, username: "user@user.com", password: "pwd", name:"name", enabled:true, timezone: "Europe/Helsinki")
-		user.save()
-		stream = service.createStream([name: "streamName", feed: feed], user)
-		FeedFile startFile = new FeedFile(name:"start", feed:feed, stream: stream, day: new Date(1440000000000), beginDate: new Date(1440000000000), endDate: new Date(1440000000000))
-		FeedFile endFile = new FeedFile(name:"end", feed:feed, stream: stream, day: new Date(1450000000000), beginDate: new Date(1450000000000), endDate: new Date(1450000000000))
-		startFile.save()
-		endFile.save()
-
-		when: "asked for the dataRange"
-		dataRange = service.getDataRange(stream)
-
-		then: "the dates are correct"
-		dataRange != null
-		dataRange.beginDate == new Date(1440000000000)
-		dataRange.endDate == new Date(1450000000000)
+	void "getReadAuthorizedStream throws NotFoundException and does not invoke callback, if streamId doesn't exist"() {
+		def cb = Mock(Closure)
+		when:
+		service.getReadAuthorizedStream("streamId", null, null, cb)
+		then:
+		thrown(NotFoundException)
+		0 * cb._
 	}
 
-	void "getDataRange gives empty values if there are no feedFiles"(){
-		DataRange dataRange
-		Stream stream
+	void "getReadAuthorizedStream throws NotPermittedException and does not invoke callback, if not permitted to read stream through user"() {
+		def cb = Mock(Closure)
+		service.permissionService = Mock(PermissionService)
 
-		setup:
-		SecUser user = new SecUser(id: 1, username: "user@user.com", password: "pwd", name:"name", enabled:true, timezone: "Europe/Helsinki")
-		user.save()
-		stream = service.createStream([name: "streamName", feed: feed], user)
+		Stream stream = new Stream(name: "name")
+		stream.id = "streamId"
+		stream.save(failOnError: true, validate: false)
 
-		when: "asked for the dataRange"
-		dataRange = service.getDataRange(stream)
+		SecUser user = new SecUser(username: "username")
+		user.save(failOnError: true, validate: false)
 
-		then: "null is returned"
-		dataRange == null
+		when:
+		service.getReadAuthorizedStream("streamId", user, null, cb)
+		then:
+		thrown(NotPermittedException)
+		1 * service.permissionService.canRead(user, stream) >> false
+		0 * cb._
+	}
+
+	void "getReadAuthorizedStream throws NotPermittedException and does not invoke callback, if not permitted to read stream through key"() {
+		def cb = Mock(Closure)
+		service.permissionService = Mock(PermissionService)
+
+		Stream stream = new Stream(name: "name")
+		stream.id = "streamId"
+		stream.save(failOnError: true, validate: false)
+
+		Key key = new Key(name: "name")
+		key.save(failOnError: true, validate: false)
+
+		when:
+		service.getReadAuthorizedStream("streamId", null, key, cb)
+		then:
+		thrown(NotPermittedException)
+		1 * service.permissionService.canRead(key, stream) >> false
+		0 * cb._
+	}
+
+	void "getReadAuthorizedStream invokes callback if permitted to read stream through key"() {
+		def cb = Mock(Closure)
+		service.permissionService = Mock(PermissionService)
+
+		Stream stream = new Stream(name: "name")
+		stream.id = "streamId"
+		stream.save(failOnError: true, validate: false)
+
+		Key key = new Key(name: "name")
+		key.save(failOnError: true, validate: false)
+
+		when:
+		service.getReadAuthorizedStream("streamId", null, key, cb)
+		then:
+		1 * service.permissionService.canRead(key, stream) >> true
+		1 * cb.call(stream)
+	}
+
+	void "getReadAuthorizedStream invokes callback if permitted to read stream through user"() {
+		def cb = Mock(Closure)
+		service.permissionService = Mock(PermissionService)
+
+		Stream stream = new Stream(name: "name")
+		stream.id = "streamId"
+		stream.save(failOnError: true, validate: false)
+
+		SecUser user = new SecUser(username: "username")
+		user.save(failOnError: true, validate: false)
+
+		when:
+		service.getReadAuthorizedStream("streamId", user, null, cb)
+		then:
+		1 * service.permissionService.canRead(user, stream) >> true
+		1 * cb.call(stream)
+	}
+
+	void "getReadAuthorizedStream invokes callback if permitted to read stream anonymously (for public streams)"() {
+		def cb = Mock(Closure)
+		service.permissionService = Mock(PermissionService)
+
+		Stream stream = new Stream(name: "name")
+		stream.id = "streamId"
+		stream.save(failOnError: true, validate: false)
+
+		when:
+		service.getReadAuthorizedStream("streamId", null, null, cb)
+		then:
+		1 * service.permissionService.canRead(null, stream) >> true
+		1 * cb.call(stream)
+	}
+
+	void "getReadAuthorizedStream invokes callback if permitted to read (ui channel) stream indirectly through Canvas"() {
+		def cb = Mock(Closure)
+		service.permissionService = Mock(PermissionService)
+
+		Canvas canvas = new Canvas(name: "canvas").save(failOnError: true, validate: false)
+
+		Stream stream = new Stream(name: "name")
+		stream.id = "streamId"
+		stream.uiChannel = true
+		stream.uiChannelCanvas = canvas
+		stream.save(failOnError: true, validate: false)
+
+		SecUser user = new SecUser(username: "username")
+		user.save(failOnError: true, validate: false)
+
+		when:
+		service.getReadAuthorizedStream("streamId", user, null, cb)
+		then:
+		1 * service.permissionService.canRead(user, stream) >> false
+		1 * service.permissionService.canRead(user, canvas) >> true
+		1 * cb.call(stream)
+	}
+
+	void "getReadAuthorizedStream throws NotPermittedException and does not invoke callback, if not permitted to read (ui channel) stream indirectly through Canvas"() {
+		def cb = Mock(Closure)
+		service.permissionService = Mock(PermissionService)
+
+		Canvas canvas = new Canvas(name: "canvas").save(failOnError: true, validate: false)
+
+		Stream stream = new Stream(name: "name")
+		stream.id = "streamId"
+		stream.uiChannel = true
+		stream.uiChannelCanvas = canvas
+		stream.save(failOnError: true, validate: false)
+
+		SecUser user = new SecUser(username: "username")
+		user.save(failOnError: true, validate: false)
+
+		when:
+		service.getReadAuthorizedStream("streamId", user, null, cb)
+		then:
+		thrown(NotPermittedException)
+		1 * service.permissionService.canRead(user, stream) >> false
+		1 * service.permissionService.canRead(user, canvas) >> false
+		0 * cb._
+	}
+
+	void "getReadAuthorizedStream invokes callback if permitted to read (ui channel) stream indirectly through Dashboard"() {
+		def cb = Mock(Closure)
+		service.permissionService = Mock(PermissionService)
+
+		Canvas canvas = new Canvas(name: "canvas").save(failOnError: true, validate: false)
+
+		Stream stream = new Stream(name: "name")
+		stream.id = "streamId"
+		stream.uiChannel = true
+		stream.uiChannelCanvas = canvas
+		stream.uiChannelPath = "/canvases/notUsedId/modules/3"
+		stream.save(failOnError: true, validate: false)
+
+		SecUser user = new SecUser(username: "username")
+		user.save(failOnError: true, validate: false)
+
+
+		Dashboard dashboard = new Dashboard(name: "dashboard").save(failOnError: true, validate: false)
+		DashboardItem dashboardItem = new DashboardItem(
+			title: "dashboardItem",
+			canvas: canvas,
+			module: 3,
+			webcomponent: "webcomponent",
+			ord: 1
+		)
+		dashboard.addToItems(dashboardItem)
+		dashboard.save(failOnError: true, validate: false)
+
+		when:
+		service.getReadAuthorizedStream("streamId", user, null, cb)
+		then:
+		1 * service.permissionService.canRead(user, stream) >> false
+		1 * service.permissionService.canRead(user, canvas) >> false
+		1 * dashboardService.authorizedGetDashboardItem(1, 1, user, Permission.Operation.READ) >> dashboardItem
+		1 * cb.call(stream)
+	}
+
+	void "getReadAuthorizedStream throws NotPermittedException and does not invoke callback, if not permitted to read (ui channel) stream indirectly through Dashboard"() {
+		def cb = Mock(Closure)
+		service.permissionService = Mock(PermissionService)
+
+		Canvas canvas = new Canvas(name: "canvas").save(failOnError: true, validate: false)
+
+		Stream stream = new Stream(name: "name")
+		stream.id = "streamId"
+		stream.uiChannel = true
+		stream.uiChannelCanvas = canvas
+		stream.uiChannelPath = "/canvases/notUsedId/modules/3"
+		stream.save(failOnError: true, validate: false)
+
+		SecUser user = new SecUser(username: "username")
+		user.save(failOnError: true, validate: false)
+
+
+		Dashboard dashboard = new Dashboard(name: "dashboard").save(failOnError: true, validate: false)
+		DashboardItem dashboardItem = new DashboardItem(
+			title: "dashboardItem",
+			canvas: canvas,
+			module: 3,
+			webcomponent: "webcomponent",
+			ord: 1
+		)
+		dashboard.addToItems(dashboardItem)
+		dashboard.save(failOnError: true, validate: false)
+
+		when:
+		service.getReadAuthorizedStream("streamId", user, null, cb)
+		then:
+		thrown(NotPermittedException)
+		1 * service.permissionService.canRead(user, stream) >> false
+		1 * service.permissionService.canRead(user, canvas) >> false
+		1 * dashboardService.authorizedGetDashboardItem(1, 1, user, Permission.Operation.READ) >> null
+		0 * cb._
 	}
 }

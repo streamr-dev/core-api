@@ -1,0 +1,8 @@
+[ignore]
+.*/node_modules/react-resizable/build/ResizableBox.js
+[include]
+
+[libs]
+
+[options]
+module.name_mapper='.*\(.p?css\)' -> 'empty/object'

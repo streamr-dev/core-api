@@ -1,28 +1,21 @@
 
 package com.unifina.controller.security
 
+import com.unifina.domain.data.Feed
+import com.unifina.domain.security.*
+import com.unifina.domain.signalpath.Module
+import com.unifina.domain.signalpath.ModulePackage
 import com.unifina.feed.NoOpStreamListener
+import com.unifina.service.PermissionService
+import com.unifina.service.SignupCodeService
+import com.unifina.service.UserService
 import com.unifina.signalpath.messaging.MockMailService
-import com.unifina.domain.security.Permission
 import grails.test.mixin.Mock
 import grails.test.mixin.TestFor
 import spock.lang.Specification
 
-import com.unifina.domain.data.Feed
-import com.unifina.domain.security.RegistrationCode
-import com.unifina.domain.security.SecRole
-import com.unifina.domain.security.SecUser
-import com.unifina.domain.security.SecUserSecRole
-import com.unifina.domain.security.SignupInvite
-import com.unifina.domain.signalpath.Module
-import com.unifina.domain.signalpath.ModulePackage
-import com.unifina.service.BootService
-import com.unifina.service.SignupCodeService
-import com.unifina.service.PermissionService
-import com.unifina.service.UserService
-
 @TestFor(RegisterController)
-@Mock([SignupInvite, SignupCodeService, RegistrationCode, SecUser, SecRole, SecUserSecRole,
+@Mock([SignupInvite, SignupCodeService, RegistrationCode, SecUser, Key, SecRole, SecUserSecRole,
 		Feed, ModulePackage, PermissionService, Permission, UserService])
 class RegisterControllerSpec extends Specification {
 

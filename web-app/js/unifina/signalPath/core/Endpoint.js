@@ -5,7 +5,8 @@ SignalPath.Endpoint = function(json, parentDiv, module, type, pub) {
 	pub.parentDiv = parentDiv;
 	pub.module = module;
 	pub.type = type;
-	
+	pub.iostate = null;
+
 	function createDiv() {
 		
 		// Create connection div
@@ -25,10 +26,14 @@ SignalPath.Endpoint = function(json, parentDiv, module, type, pub) {
 		div.attr("id",pub.json.id);
 		
 		// Name holder
-		var ioname = $("<div class='ioname'></span>");
+		var ioname = $("<div class='ioname'></div>");
 		ioname.append(pub.getDisplayName())
 		div.append(ioname);
-		
+
+		// State holder
+		pub.iostate = $("<div class='iostate'></div>")
+		div.append(pub.iostate)
+
 		// Add to parent
 		pub.parentDiv.append(div);
 
@@ -185,20 +190,26 @@ SignalPath.Endpoint = function(json, parentDiv, module, type, pub) {
 			className: 'rename-endpoint-dialog',
 			callback: function(displayName) {
 				if (displayName != null) {
-					if (displayName != "" && displayName != data.name) {
-						data.displayName = displayName;
-					} else {
-						delete data.displayName;
-						displayName = data.name;
-					}
-					$(iodiv).find(".ioname").html(displayName);
+					pub.setDisplayName(displayName)
+                    module.redraw()
 				}
 			}
 		});
-		module.redraw()
 	}
-	
-	function getContextMenu(div) {
+
+	function setDisplayName(displayName) {
+		var data = pub.json;
+        if (displayName != "" && displayName != data.name) {
+            data.displayName = displayName;
+        } else {
+            delete data.displayName;
+            displayName = data.name;
+        }
+        $(pub.div).find(".ioname").html(displayName);
+	}
+	pub.setDisplayName = setDisplayName
+
+    function getContextMenu(div) {
 		var menu = pub.module.getContextMenu(div);
 		
 		menu.push({title: "Rename", cmd: "rename"});
@@ -228,6 +239,11 @@ SignalPath.Endpoint = function(json, parentDiv, module, type, pub) {
 		return (pub.json.displayName ? pub.json.displayName : pub.json.name);
 	}
 	pub.getDisplayName = getDisplayName;
+
+	function updateState(stateString) {
+		pub.iostate.text(stateString)
+	}
+	pub.updateState = updateState;
 	
 	function checkTypeArrays(arr1, arr2) {
 		for(var i = 0; i<arr1.length; i++)

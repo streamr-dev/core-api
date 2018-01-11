@@ -70,6 +70,11 @@ public class TimeOfDay extends AbstractSignalPathModule implements ITimeListener
 		}
 	}
 
+	@Override
+	public int tickRateInSec() {
+		return 1;
+	}
+
 	private void initUtilIfNeeded() {
 		if (util == null) {
 			util = new TimeOfDayUtil(lastStartTime, lastEndTime, getGlobals().getUserTimeZone());

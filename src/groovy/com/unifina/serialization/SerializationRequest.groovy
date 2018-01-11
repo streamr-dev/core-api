@@ -4,21 +4,22 @@ import com.unifina.data.FeedEvent
 import com.unifina.feed.ITimestamped
 import com.unifina.service.SignalPathService
 import com.unifina.signalpath.SignalPath
+import grails.util.Holders
 
-public class SerializationRequest implements ITimestamped {
+class SerializationRequest implements ITimestamped {
 
 	Date timestamp
 
-	public SerializationRequest(Date timestamp) {
+	SerializationRequest(Date timestamp) {
 		this.timestamp = timestamp
 	}
 
-	public void serialize(SignalPath sp) {
-		SignalPathService service = sp.globals.getBean(SignalPathService)
+	void serialize(SignalPath sp) {
+		SignalPathService service = Holders.getApplicationContext().getBean(SignalPathService)
 		service.saveState(sp)
 	}
 
-	public static FeedEvent makeFeedEvent(SignalPath signalPath) {
+	static FeedEvent makeFeedEvent(SignalPath signalPath) {
 		Date timestamp = new Date()
 		return new FeedEvent(new SerializationRequest(timestamp), timestamp, signalPath)
 	}

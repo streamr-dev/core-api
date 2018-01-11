@@ -1,9 +1,9 @@
 
         <h1 class="c2"><a name="h.vlyy5rs1uw66"></a><span class="c1">Website&rsquo;s Terms and Conditions of Use</span></h1>
-        <p class="c3">Using the web site of Streamr Oy (the <strong>Company</strong>) requires the user to abide by these terms and conditions (the <strong>Terms</strong>). Read these Terms carefully before you start using the Company&rsquo;s web site. In addition to these Terms, different services (the <strong>Services</strong>) may be subject to these or separately applicable special terms and conditions. Services used by means of access codes or mobile certificates are furthermore subject to the terms and conditions applicable to the codes or certificates.</p>
+        <p class="c3">Using the web site of Streamr Network AG (the <strong>Company</strong>) requires the user to abide by these terms and conditions (the <strong>Terms</strong>). Read these Terms carefully before you start using the Company&rsquo;s web site. In addition to these Terms, different services (the <strong>Services</strong>) may be subject to these or separately applicable special terms and conditions. Services used by means of access codes or mobile certificates are furthermore subject to the terms and conditions applicable to the codes or certificates.</p>
         <p class="c3">By accessing the Company&rsquo;s web site, located at www.streamr.com (the <strong>Site</strong>), you agree to abide by these terms and conditions.</p>
         <h1 class="c2"><a name="h.hz0mlua7ft21"></a><span class="c1">Website service provider</span></h1>
-        <p class="c3"><span>The primary service provider of the Site is Streamr Oy, address: P.B. 84, 00701 Helsinki, Finland.</span></p>
+        <p class="c3"><span>The primary service provider of the Site is Streamr Network AG, post address: c/o Sielva Management SA, Gubelstrasse 11, 6300 Zug, Switzerland.</span></p>
         <h1 class="c2"><a name="h.r7l9x1b5xtin"></a><span class="c1">Purpose and use of the site</span></h1>
         <p class="c3"><span>The purpose of the Site is to provide access to or information regarding a tool and platform for real-time data handling, data modeling within the Service, and for the use of this data to create visualizations and automated actions.</span></p>
         <p class="c3"><span>For the above purpose, the Company may grant you a non-exclusive and non-transferable limited right and license to access the Site or the Service for your personal use provided that you agree with and comply fully with these Terms or any other </span><span>required agreements determined by the Company.</span></p>
@@ -42,6 +42,6 @@
         <h1 class="c2"><a name="h.ki72z23msaj5"></a><span class="c1">Changes and Amendments</span></h1>
         <p class="c3"><span>The Company has the right at any time, without prior notice, to change these Terms, and the Site&rsquo;s and the Services&rsquo; appearance, content, availability, and any other features of the Site or the Services&rsquo;, or to discontinue the Site and/or Service. The Company has the right to interrupt the provision of the Site and the Services during maintenance and updating procedures.</span></p>
         <h1 class="c2"><a name="h.o92gbnwtc9l7"></a><span class="c1">Applicable law</span></h1>
-        <p class="c3"><span>These Terms as well as any possible disputes arising from the Site, Services or the Company&rsquo;s other web sites and the content thereof are governed by Finnish law. Any possible disputes are settled in the District Court of Helsinki.</span></p>
+        <p class="c3"><span>These Terms as well as any possible disputes arising from the Site, Services or the Company&rsquo;s other web sites and the content thereof are governed by Swiss law. Any possible disputes are settled in the Cantonal Court of Zug, Switzerland.</span></p>
         <p class="c3 c8"><span></span></p>
-        <p class="c3"><span>Last revised: 15 April 2015</span></p>
+        <p class="c3"><span>Last revised: 14 November 2017</span></p>

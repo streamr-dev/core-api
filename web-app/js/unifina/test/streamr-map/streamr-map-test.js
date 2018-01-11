@@ -308,10 +308,10 @@ describe('streamr-map', function() {
 
 	describe('addMarker', function() {
 		beforeEach(function() {
-			map = new StreamrMap($parent)
-			map.createMarker = function(){}
-			map.moveMarker = function(){}
-			map.addLinePoint = function(){}
+			map               = new StreamrMap($parent)
+			map.createMarker  = function(){}
+			map.moveMarker    = function(){}
+			map.addTracePoint = function(){}
 		})
 		it('must call setAutoZoom if options.autoZoom == true && untouched == true', function(done) {
 			map.setAutoZoom = function(lat, lng) {
@@ -352,8 +352,8 @@ describe('streamr-map', function() {
 				lng: 2
 			})
 		})
-		it('must call addLinePoint if options.drawTrace == true', function() {
-			map.addLinePoint = function() {
+		it('must call addTracePoint if options.drawTrace == true', function() {
+			map.addTracePoint = function() {
 				done()
 			}
 			map.addMarker({
@@ -630,7 +630,7 @@ describe('streamr-map', function() {
 		})
 	})
 
-	describe('addLinePoint', function() {
+	describe('addTracePoint', function() {
 		beforeEach(function() {
 			map = new StreamrMap($parent)
 		})
@@ -640,13 +640,13 @@ describe('streamr-map', function() {
 				assert.equal(b, 1)
 				done()
 			}
-			map.addLinePoint("a", 0, 1, "b")
+			map.addTracePoint("a", 0, 1, "b")
 		})
 		it('must push correct update object to pendingLineUpdates and allLineUpdates', function() {
 			global.L.latLng = function() {
 				return "test"
 			}
-			map.addLinePoint("a", 0, 1, "b")
+			map.addTracePoint("a", 0, 1, "b")
 			assert.equal(map.pendingLineUpdates[0].latlng, "test")
 			assert.equal(map.pendingLineUpdates[0].color, "b")
 			assert.equal(map.allLineUpdates[0].latlng, "test")
@@ -678,20 +678,22 @@ describe('streamr-map', function() {
 		})
 	})
 
-	describe('resize', function() {
-		it('must set parent width and height correctly', function() {
-			map = new StreamrMap($parent)
-			map.map.invalidateSize = function(){}
-			map.resize(200, 200)
-			assert.equal(map.parent.css("width"), "200px")
-			assert.equal(map.parent.css("height"), "200px")
-		})
+	describe('redraw', function() {
 		it('must call map.invalidateSize', function(done) {
 			map = new StreamrMap($parent)
 			map.map.invalidateSize = function() {
 				done()
 			}
-			map.resize(200, 200)
+			map.redraw()
+		})
+		it('must call lineLayer.redraw()', function (done) {
+			map = new StreamrMap($parent)
+			map.map.invalidateSize = function(){}
+			map.lineLayer = {}
+			map.lineLayer.redraw = function() {
+				done()
+			}
+			map.redraw()
 		})
 	})
 

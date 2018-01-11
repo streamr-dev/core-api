@@ -1,8 +1,11 @@
-import core.LoginTester1Spec
-import core.mixins.CanvasMixin
-import core.mixins.ConfirmationMixin
+import LoginTester1Spec
+import mixins.CanvasMixin
+import mixins.ConfirmationMixin
 
 public class SubCanvasSpec extends LoginTester1Spec {
+
+	private final static String topCanvasName = "SubCanvasSpec-top"
+	private final static String subCanvasName = "SubCanvasSpec-sub"
 
 	def setupSpec() {
 		// For some reason the annotations don't work so need the below.
@@ -10,18 +13,24 @@ public class SubCanvasSpec extends LoginTester1Spec {
 		SubCanvasSpec.metaClass.mixin(ConfirmationMixin)
 	}
 
-	def "Subcanvas is loadable on Canvas module and ui modules work"() {
-		String unique = "test" + new Date().getTime()
-
-		loadSignalPath("SubCanvasSpec-top")
-		moduleShouldAppearOnCanvas("SubCanvasSpec-sub")
+	def setup() {
+		loadSignalPath(topCanvasName)
 		ensureRealtimeTabDisplayed()
 		stopCanvasIfRunning()
 		resetAndStartCanvas(true)
 		noNotificationsVisible()
+	}
+
+	def cleanup() {
+		loadSignalPath(topCanvasName)
+		stopCanvasIfRunning()
+	}
+
+	def "Subcanvas is loadable on Canvas module and ui modules work"() {
+		String unique = "test" + new Date().getTime()
 
 		expect: "View Canvas button is displayed on Canvas module"
-		waitFor { findModuleOnCanvas("SubCanvasSpec-sub").find(".view-canvas-button").displayed }
+		waitFor { findModuleOnCanvas(subCanvasName).find(".view-canvas-button").displayed }
 
 		when: "The string is sent to the Canvas module"
 		findModuleOnCanvas("TextField").find("textarea").firstElement().clear()
@@ -32,7 +41,8 @@ public class SubCanvasSpec extends LoginTester1Spec {
 		waitFor { findModuleOnCanvas("Table").text().contains(unique) }
 
 		when: "View Canvas button is clicked"
-		findModuleOnCanvas("SubCanvasSpec-sub").find(".view-canvas-button").click()
+		Thread.sleep(1000) // allow time for message to be sent to stream
+		findModuleOnCanvas(subCanvasName).find(".view-canvas-button").click()
 
 		then: "The subcanvas should be shown"
 		moduleShouldAppearOnCanvas("Label")
@@ -46,8 +56,8 @@ public class SubCanvasSpec extends LoginTester1Spec {
 		/**
 		 * Check that the subcanvas is not using the original saved Canvas' uiChannels
 		 */
-		when: "Load and start subcanvas to subscribe the uiChannels"
-		loadSignalPath("SubCanvasSpec-sub")
+		when: "Load and  subcanvas to subscribe the uiChannels"
+		loadSignalPath(subCanvasName)
 		ensureRealtimeTabDisplayed()
 		stopCanvasIfRunning()
 		resetAndStartCanvas(true)
@@ -60,13 +70,6 @@ public class SubCanvasSpec extends LoginTester1Spec {
 
 	def "Subcanvas is loadable on ForEach module and ui modules work"() {
 		String unique = "test" + new Date().getTime()
-
-		loadSignalPath("SubCanvasSpec-top")
-		moduleShouldAppearOnCanvas("ForEach")
-		ensureRealtimeTabDisplayed()
-		stopCanvasIfRunning()
-		resetAndStartCanvas(true)
-		noNotificationsVisible()
 
 		when: "The string is sent to the ForEach module"
 		findModuleOnCanvas("TextField").find("textarea").firstElement().clear()

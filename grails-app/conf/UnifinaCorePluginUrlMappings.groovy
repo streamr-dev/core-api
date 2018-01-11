@@ -1,7 +1,7 @@
-import com.unifina.api.ApiException
 import com.unifina.domain.dashboard.Dashboard
-import com.unifina.domain.signalpath.Canvas
 import com.unifina.domain.data.Stream
+import com.unifina.domain.security.SecUser
+import com.unifina.domain.signalpath.Canvas
 
 class UnifinaCorePluginUrlMappings {
 	static mappings = {
@@ -35,6 +35,7 @@ class UnifinaCorePluginUrlMappings {
 		"/api/v1/streams/$resourceId/permissions/me"(controller: "permissionApi", action: "getOwnPermissions") { resourceClass = Stream }
 		"/api/v1/streams/$id/detectFields"(controller: "streamApi", action: "detectFields")
 		"/api/v1/streams/$id/range"(controller: "streamApi", action: "range")
+		"/api/v1/streams/$resourceId/keys"(resources: "keyApi", excludes: ["create", "edit", "update"]) { resourceClass = Stream }
 
 		"/api/v1/dashboards"(resources: "dashboardApi", excludes: ["create", "edit"])
 		"/api/v1/dashboards/$dashboardId/items"(resources: "dashboardItemApi", excludes: ["create", "edit"])
@@ -45,8 +46,13 @@ class UnifinaCorePluginUrlMappings {
 		"/api/v1/modules/$id/help"(controller: "moduleApi", action: "help")
 
 		"/api/v1/users/me"(controller: "userApi", action: "getUserInfo")
+		"/api/v1/users/me/keys"(resources: "keyApi", excludes: ["create", "edit", "update"]) { resourceClass = SecUser }
+
+		"/api/v1/integration_keys"(resources: "integrationKeyApi")
 
 		"/api/v1/canvases/($path**)/request"(controller: "canvasApi", action: "runtimeRequest") // for internal use, runtime requests to canvases
 		"/api/v1/dashboards/($path**)/request"(controller: "dashboardApi", action: "runtimeRequest") // for internal use, runtime requests to canvases via dashboards
+
+		"/api/v1/oembed"(controller: "oembedApi", action: "index")
 	}
 }

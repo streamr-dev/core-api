@@ -1,72 +1,62 @@
 package com.unifina.signalpath.kafka
 
+import com.unifina.BeanMockingSpecification
 import com.unifina.data.FeedEvent
 import com.unifina.datasource.HistoricalDataSource
 import com.unifina.datasource.RealtimeDataSource
 import com.unifina.domain.data.Feed
 import com.unifina.domain.data.Stream
 import com.unifina.domain.security.SecUser
-import com.unifina.feed.kafka.KafkaHistoricalFeed
-import com.unifina.feed.kafka.KafkaKeyProvider
+import com.unifina.feed.NoOpStreamListener
+import com.unifina.feed.StreamrBinaryMessageKeyProvider
+import com.unifina.feed.cassandra.CassandraHistoricalFeed
 import com.unifina.feed.map.MapMessageEventRecipient
 import com.unifina.service.FeedService
-import com.unifina.service.KafkaService
 import com.unifina.service.PermissionService
+import com.unifina.service.StreamService
 import com.unifina.signalpath.SignalPath
 import com.unifina.signalpath.utils.ConfigurableStreamModule
 import com.unifina.utils.Globals
-import com.unifina.utils.testutils.FakePushChannel
+import com.unifina.utils.testutils.FakeStreamService
 import com.unifina.utils.testutils.ModuleTestHelper
 import grails.test.mixin.Mock
 import grails.test.mixin.TestMixin
-import grails.test.mixin.support.GrailsUnitTestMixin
-import spock.lang.Specification
+import grails.test.mixin.web.ControllerUnitTestMixin
 
 import java.security.AccessControlException
 
-@TestMixin(GrailsUnitTestMixin)
+@TestMixin(ControllerUnitTestMixin) // to get JSON converter
 @Mock([SecUser, Stream, Feed])
-class SendToStreamSpec extends Specification {
+class SendToStreamSpec extends BeanMockingSpecification {
 
 	static class AllPermissionService extends PermissionService {
-		@Override boolean canRead(SecUser user, resource) { return true }
-		@Override boolean canWrite(SecUser user, resource) { return true }
-		@Override boolean canShare(SecUser user, resource) { return true }
+		@Override boolean canRead(user, resource) { return true }
+		@Override boolean canWrite(user, resource) { return true }
+		@Override boolean canShare(user, resource) { return true }
 	}
 
 	static class ReadPermissionService extends PermissionService {
-		@Override boolean canRead(SecUser user, resource) { return true }
-		@Override boolean canWrite(SecUser user, resource) { return false }
-		@Override boolean canShare(SecUser user, resource) { return false }
+		@Override boolean canRead(user, resource) { return true }
+		@Override boolean canWrite(user, resource) { return false }
+		@Override boolean canShare(user, resource) { return false }
 	}
 
 	static class WritePermissionService extends PermissionService {
-		@Override boolean canRead(SecUser user, resource) { return true }
-		@Override boolean canWrite(SecUser user, resource) { return true }
-		@Override boolean canShare(SecUser user, resource) { return false }
-	}
-
-	static class FakeKafkaService extends KafkaService {
-		def receivedMessages = [:]
-
-		@Override
-		void sendMessage(Stream stream, Object key, Map message) {
-			if (!receivedMessages.containsKey(stream.id)) {
-				receivedMessages[stream.id] = []
-			}
-			receivedMessages[stream.id] << message
-		}
+		@Override boolean canRead(user, resource) { return true }
+		@Override boolean canWrite(user, resource) { return true }
+		@Override boolean canShare(user, resource) { return false }
 	}
 
 	SecUser user
-	FakeKafkaService fakeKafkaService
+	FakeStreamService mockStreamService
+	StreamService streamService
 	Globals globals
 	SendToStream module
 	Stream stream
 
     def setup() {
 		defineBeans {
-			kafkaService(FakeKafkaService)
+			streamService(FakeStreamService)
 			feedService(FeedService)
 			permissionService(AllPermissionService)
 		}
@@ -76,9 +66,10 @@ class SendToStreamSpec extends Specification {
 
 		def feed = new Feed()
 		feed.id = Feed.KAFKA_ID
-		feed.backtestFeed = KafkaHistoricalFeed.getName()
+		feed.backtestFeed = CassandraHistoricalFeed.getName()
 		feed.eventRecipientClass = MapMessageEventRecipient.getName()
-		feed.keyProviderClass = KafkaKeyProvider.getName()
+		feed.keyProviderClass = StreamrBinaryMessageKeyProvider.getName()
+		feed.streamListenerClass = NoOpStreamListener.getName()
 		feed.timezone = "UTC"
 		feed.save(validate: false, failOnError: true)
 
@@ -92,17 +83,24 @@ class SendToStreamSpec extends Specification {
 		]]
 		stream.save(validate: false, failOnError: true)
 
-		fakeKafkaService = (FakeKafkaService) grailsApplication.getMainContext().getBean("kafkaService")
+		Stream uiChannel = new Stream()
+		uiChannel.feed = feed
+		uiChannel.id = uiChannel.name = "uiChannel"
+		uiChannel.user = user
+		uiChannel.save(validate: false, failOnError: true)
+
+		mockStreamService = (FakeStreamService) grailsApplication.getMainContext().getBean("streamService")
 		globals = Spy(Globals, constructorArgs: [[:], grailsApplication, user])
 		globals.realtime = true
-		globals.uiChannel = new FakePushChannel()
 		globals.dataSource = new RealtimeDataSource()
     }
 
 	private void createModule(options = [:]) {
 		module = new SendToStream()
 		module.globals = globals
-		module.parentSignalPath = new SignalPath()
+		module.parentSignalPath = new SignalPath(true)
+		module.parentSignalPath.setGlobals(globals)
+		module.parentSignalPath.configure([uiChannel: [id: "uiChannel"]])
 		module.init()
 		module.configure([
 				params: [
@@ -115,18 +113,21 @@ class SendToStreamSpec extends Specification {
 	void "SendToStream sends correct data to Kafka"() {
 		createModule()
 
-		when:
+
 		Map inputValues = [
 			strIn: ["a", "b", "c", "d"],
 			numIn: [1, 2, 3, 4].collect {it?.doubleValue()},
 		]
 		Map outputValues = [:]
+
+		when:
+		true
 		
 		then:
 		new ModuleTestHelper.Builder(module, inputValues, outputValues)
 			.overrideGlobals { globals }
 			.afterEachTestCase {
-				assert fakeKafkaService.receivedMessages == [
+				assert mockStreamService.sentMessagesByChannel == [
 					"stream-0": [
 						[strIn:"a", numIn:1.0],
 						[strIn:"b", numIn:2.0],
@@ -134,7 +135,7 @@ class SendToStreamSpec extends Specification {
 						[strIn:"d", numIn:4.0]
 					]
 				]
-				fakeKafkaService.receivedMessages = [:]
+				mockStreamService.sentMessagesByChannel = [:]
 			}.test()
 	}
 
@@ -196,7 +197,7 @@ class SendToStreamSpec extends Specification {
 		new ModuleTestHelper.Builder(module, inputValues, outputValues)
 			.overrideGlobals { globals }
 			.afterEachTestCase {
-				assert fakeKafkaService.receivedMessages == [
+				assert mockStreamService.sentMessagesByChannel == [
 					"stream-0": [
 						[strIn:"a", numIn:1.0],
 						[strIn:"b", numIn:2.0],
@@ -206,7 +207,7 @@ class SendToStreamSpec extends Specification {
 						[strIn:"d", numIn:4.0],
 					]
 				]
-				fakeKafkaService.receivedMessages = [:]
+				mockStreamService.sentMessagesByChannel = [:]
 			}.test()
 	}
 
@@ -224,7 +225,7 @@ class SendToStreamSpec extends Specification {
 		new ModuleTestHelper.Builder(module, inputValues, outputValues)
 			.overrideGlobals { globals }
 			.afterEachTestCase {
-			assert fakeKafkaService.receivedMessages == [
+			assert mockStreamService.sentMessagesByChannel == [
 				"stream-0": [
 					[strIn: "a", numIn: 1.0],
 					[strIn: "a", numIn: 2.0],
@@ -233,7 +234,7 @@ class SendToStreamSpec extends Specification {
 					[strIn: "f", numIn: 6.0]
 				]
 			]
-			fakeKafkaService.receivedMessages = [:]
+			mockStreamService.sentMessagesByChannel = [:]
 		}.test()
 	}
 
@@ -251,7 +252,7 @@ class SendToStreamSpec extends Specification {
 		new ModuleTestHelper.Builder(module, inputValues, outputValues)
 			.overrideGlobals { globals }
 			.afterEachTestCase {
-			assert fakeKafkaService.receivedMessages == [
+			assert mockStreamService.sentMessagesByChannel == [
 				"stream-0": [
 					[strIn: "a", numIn: 1.0],
 					[numIn: 2.0],
@@ -260,7 +261,7 @@ class SendToStreamSpec extends Specification {
 					[strIn: "f", numIn: 6.0]
 				]
 			]
-			fakeKafkaService.receivedMessages = [:]
+			mockStreamService.sentMessagesByChannel = [:]
 		}.test()
 	}
 
@@ -288,8 +289,10 @@ class SendToStreamSpec extends Specification {
 				.beforeEachTestCase {
 					globals.time = new Date()
 				}.afterEachTestCase {
-					// No messages have really been sent to Kafka
-					assert fakeKafkaService.receivedMessages.isEmpty()
+					// No messages have really been sent to the stream
+					assert mockStreamService.sentMessagesByChannel[stream.id] == null
+					// One notification has been sent to the parentSignalPath ui channel
+					assert mockStreamService.sentMessagesByChannel[module.parentSignalPath.uiChannel.id].size() == 1
 
 					// Correct events have been inserted to event queue
 					for (int i=0; i<inputValues.strIn.size(); i++) {
@@ -306,6 +309,8 @@ class SendToStreamSpec extends Specification {
 
 					// No other events have been inserted
 					assert globals.getDataSource().getEventQueue().isEmpty()
+
+					mockStreamService.sentMessagesByChannel = [:]
 				}.test()
 
 	}

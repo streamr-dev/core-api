@@ -2,9 +2,11 @@ package com.unifina.controller.api
 
 import com.unifina.api.ApiError
 import com.unifina.api.ApiException
+import com.unifina.api.CanvasCommunicationException
 import com.unifina.api.InvalidStateException
 import com.unifina.api.ValidationException
 import com.unifina.exceptions.CanvasUnreachableException
+import com.unifina.security.AuthLevel
 import com.unifina.security.StreamrApi
 import grails.converters.JSON
 import groovy.transform.CompileStatic
@@ -15,9 +17,10 @@ class ErrorController {
 		InvalidStateException: { InvalidStateException e -> new ApiError(500, "STATE_NOT_ALLOWED", e.message) },
 		ValidationException: { ValidationException e -> new ApiError(422, "VALIDATION_ERROR", e.message) },
 		CanvasUnreachableException: { CanvasUnreachableException e -> new ApiError(500, "CANVAS_UNREACHABLE", e.message) },
+		CanvasCommunicationException: { CanvasCommunicationException e -> new ApiError(503, "CANVAS_COMMUNICATION_ERROR", e.message)}
 	]
 
-	@StreamrApi(requiresAuthentication = false)
+	@StreamrApi(authenticationLevel = AuthLevel.NONE)
 	def index() {
 		try {
 			Exception exception = request.exception.cause ?: request.exception

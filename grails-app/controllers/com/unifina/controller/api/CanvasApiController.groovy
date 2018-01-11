@@ -3,6 +3,7 @@ package com.unifina.controller.api
 import com.unifina.api.SaveCanvasCommand
 import com.unifina.domain.security.Permission.Operation
 import com.unifina.domain.signalpath.Canvas
+import com.unifina.security.AuthLevel
 import com.unifina.security.StreamrApi
 import grails.converters.JSON
 import grails.plugin.springsecurity.annotation.Secured
@@ -41,7 +42,7 @@ class CanvasApiController {
 		render(canvases*.toMap() as JSON)
 	}
 
-	@StreamrApi(requiresAuthentication = false)
+	@StreamrApi(authenticationLevel = AuthLevel.NONE)
 	def show(String id, Boolean runtime) {
 		Canvas canvas = canvasService.authorizedGetById(id, request.apiUser, Operation.READ)
 		if (runtime) {
@@ -52,8 +53,11 @@ class CanvasApiController {
 		}
 		else {
 			Map result = canvasService.reconstruct(canvas, request.apiUser)
+			// Need to discard this change below to prevent auto-update
 			canvas.json = result as JSON
 			render canvas.toMap() as JSON
+			// Prevent auto-update of the canvas
+			canvas.discard()
 		}
 	}
 
@@ -73,7 +77,7 @@ class CanvasApiController {
 	@StreamrApi
 	def delete(String id) {
 		Canvas canvas = canvasService.authorizedGetById(id, request.apiUser, Operation.WRITE)
-		canvas.delete(flush: true)
+		canvasService.deleteCanvas(canvas, request.apiUser)
 		response.status = 204
 		render ""
 	}
@@ -81,7 +85,7 @@ class CanvasApiController {
 	@StreamrApi
 	def start(String id) {
 		Canvas canvas = canvasService.authorizedGetById(id, request.apiUser, Operation.WRITE)
-		canvasService.start(canvas, request.JSON?.clearState ?: false, request.JSON?.csvOptions)
+		canvasService.start(canvas, request.JSON?.clearState ?: false)
 		render canvas.toMap() as JSON
 	}
 
@@ -103,7 +107,7 @@ class CanvasApiController {
 	/**
 	 * Gets the json of a single module on a canvas
 	 */
-	@StreamrApi(requiresAuthentication = false)
+	@StreamrApi(authenticationLevel = AuthLevel.NONE)
 	def module(String canvasId, Integer moduleId, Long dashboard, Boolean runtime) {
 		if (runtime) {
 			render signalPathService.runtimeRequest(signalPathService.buildRuntimeRequest([type: 'json'], "canvases/$canvasId/modules/$moduleId", request.apiUser), false).json as JSON
@@ -117,11 +121,11 @@ class CanvasApiController {
 	/**
 	 * Sends a runtime request to a running canvas or module
      */
-	@StreamrApi(requiresAuthentication = false)
+	@StreamrApi(authenticationLevel = AuthLevel.NONE)
 	def runtimeRequest(String path, Boolean local) {
 		def msg = request.JSON
 		Map response = signalPathService.runtimeRequest(signalPathService.buildRuntimeRequest(msg, "canvases/$path", request.apiUser), local ? true : false)
-		log.info("request: responding with $response")
+		log.debug("request: responding with $response")
 		render response as JSON
 	}
 

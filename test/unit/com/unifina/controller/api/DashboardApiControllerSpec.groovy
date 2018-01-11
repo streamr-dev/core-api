@@ -4,6 +4,7 @@ import com.unifina.api.SaveDashboardCommand
 import com.unifina.api.ValidationException
 import com.unifina.domain.dashboard.Dashboard
 import com.unifina.domain.dashboard.DashboardItem
+import com.unifina.domain.security.Key
 import com.unifina.domain.security.Permission
 import com.unifina.domain.security.SecUser
 import com.unifina.domain.signalpath.Canvas
@@ -21,7 +22,7 @@ import spock.lang.Specification
 
 @TestFor(DashboardApiController)
 @Mixin(FiltersUnitTestMixin)
-@Mock([Canvas, Dashboard, DashboardItem, SecUser, UnifinaCoreAPIFilters, SpringSecurityService, UserService, ApiService])
+@Mock([Canvas, Dashboard, DashboardItem, Key, SecUser, UnifinaCoreAPIFilters, SpringSecurityService, UserService, ApiService])
 class DashboardApiControllerSpec extends Specification {
 
 	DashboardService dashboardService
@@ -33,8 +34,12 @@ class DashboardApiControllerSpec extends Specification {
 		controller.permissionService = Mock(PermissionService)
 		controller.apiService = mainContext.getBean(ApiService)
 
-		me = new SecUser(apiKey: "myApiKey").save(failOnError: true, validate: false)
+		me = new SecUser().save(failOnError: true, validate: false)
 		dashboards = initDashboards(me)
+
+		def key = new Key(user: me, name: "my key")
+		key.id = "myApiKey"
+		key.save(failOnError: true, validate: true)
 	}
 
 	public static List<Dashboard> initDashboards(SecUser me) {
@@ -81,7 +86,7 @@ class DashboardApiControllerSpec extends Specification {
 
 	void "index() renders authorized dashboards as a list"() {
 		when:
-		request.addHeader("Authorization", "Token $me.apiKey")
+		request.addHeader("Authorization", "Token myApiKey")
 		request.requestURI = "/api/v1/dashboards"
 		withFilters(action: "index") {
 			controller.index()
@@ -98,7 +103,7 @@ class DashboardApiControllerSpec extends Specification {
 
 		when:
 		params.name = "Foo"
-		request.addHeader("Authorization", "Token $me.apiKey")
+		request.addHeader("Authorization", "Token myApiKey")
 		request.requestURI = "/api/v1/dashboards"
 		withFilters(action: "index") {
 			controller.index()
@@ -117,7 +122,7 @@ class DashboardApiControllerSpec extends Specification {
 	def "show() shows dashboard with 0 items"() {
 		when:
 		params.id = 1L
-		request.addHeader("Authorization", "Token $me.apiKey")
+		request.addHeader("Authorization", "Token myApiKey")
 		request.requestURI = "/api/v1/dashboards"
 		withFilters(action: "show") {
 			controller.show()
@@ -137,7 +142,7 @@ class DashboardApiControllerSpec extends Specification {
 	def "show() shows dashboard with many items"() {
 		when:
 		params.id = 3L
-		request.addHeader("Authorization", "Token $me.apiKey")
+		request.addHeader("Authorization", "Token myApiKey")
 		request.requestURI = "/api/v1/dashboards"
 		withFilters(action: "show") {
 			controller.show()
@@ -177,7 +182,7 @@ class DashboardApiControllerSpec extends Specification {
 
 	def "save() throws ValidationException given incomplete json"() {
 		when:
-		request.addHeader("Authorization", "Token $me.apiKey")
+		request.addHeader("Authorization", "Token myApiKey")
 		request.JSON = [
 			name: "",
 		]
@@ -190,14 +195,19 @@ class DashboardApiControllerSpec extends Specification {
 		thrown(ValidationException)
 	}
 
-	def "save() creates dashboard"() {
+	def "save() calls dashboardService.create()"() {
+		setup:
+		SortedSet<DashboardItem> items = new TreeSet<DashboardItem>()
+		items.add(new DashboardItem(title: "test1", ord: new Integer(0)))
+		items.add(new DashboardItem(title: "test2", ord: new Integer(1)))
 
-		Long nextId = dashboards.last().id + 1
+		def dashboard = Mock(Dashboard)
 
 		when:
-		request.addHeader("Authorization", "Token $me.apiKey")
+		request.addHeader("Authorization", "Token myApiKey")
 		request.JSON = [
 			name: "new dashboard",
+			items: items
 		]
 		request.requestURI = "/api/v1/dashboards"
 		withFilters(action: "save") {
@@ -206,18 +216,16 @@ class DashboardApiControllerSpec extends Specification {
 
 		then:
 		response.status == 200
-		response.json == [
-			id: nextId,
-			name: "new dashboard",
-			items: []
-		]
-		Dashboard.findById(nextId) != null
+		1 * dashboardService.createOrUpdate(_, me) >> {
+			dashboard
+		}
+		1 * dashboard.toMap()
 	}
 
 	def "update() throws ValidationException given incomplete json"() {
 		when:
 		params.id = 1L
-		request.addHeader("Authorization", "Token $me.apiKey")
+		request.addHeader("Authorization", "Token myApiKey")
 		request.JSON = [
 			name: "",
 		]
@@ -232,9 +240,9 @@ class DashboardApiControllerSpec extends Specification {
 
 	def "update() delegates to dashboardService.update and returns new dashboard as result"() {
 		when:
-		params.id = 3L
-		request.addHeader("Authorization", "Token $me.apiKey")
+		request.addHeader("Authorization", "Token myApiKey")
 		request.JSON = [
+			id: 3L,
 			name: "dashboard-update-3",
 		]
 		request.requestURI = "/api/v1/dashboards"
@@ -270,7 +278,8 @@ class DashboardApiControllerSpec extends Specification {
 				],
 			]
 		]
-		1 * dashboardService.update(3L, _, me) >> { Long id, SaveDashboardCommand command, SecUser user ->
+		1 * dashboardService.createOrUpdate(_, me) >> { SaveDashboardCommand command, SecUser user ->
+			assert command.id == 3L
 			def d = dashboards[2]
 			d.name = command.name
 			return d
@@ -281,7 +290,7 @@ class DashboardApiControllerSpec extends Specification {
 	def "delete() delegates to dashboardService.deleteById(Long, SecUser)"() {
 		when:
 		params.id = 3L
-		request.addHeader("Authorization", "Token $me.apiKey")
+		request.addHeader("Authorization", "Token myApiKey")
 		request.requestURI = "/api/v1/dashboards/"
 		withFilters(action: "delete") {
 			controller.delete()

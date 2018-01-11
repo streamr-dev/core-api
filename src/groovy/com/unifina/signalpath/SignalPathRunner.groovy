@@ -3,10 +3,11 @@ package com.unifina.signalpath
 import com.unifina.datasource.IStartListener
 import com.unifina.datasource.IStopListener
 import com.unifina.domain.signalpath.Canvas
-import com.unifina.push.IHasPushChannel
 import com.unifina.service.SignalPathService
 import com.unifina.utils.Globals
+import com.unifina.utils.IdGenerator
 import grails.util.GrailsUtil
+import groovy.transform.CompileStatic
 import org.apache.log4j.Logger
 
 /**
@@ -14,6 +15,7 @@ import org.apache.log4j.Logger
  * Identified by a runnerId, by which this runner can be looked up from the
  * servletContext["signalPathRunners"] map.
  */
+@CompileStatic
 public class SignalPathRunner extends Thread {
 	private final List<SignalPath> signalPaths = Collections.synchronizedList([])
 	private boolean adhoc
@@ -31,10 +33,10 @@ public class SignalPathRunner extends Thread {
 
 	private SignalPathRunner(Globals globals, boolean adhoc) {
 		this.globals = globals
-		this.signalPathService = globals.grailsApplication.mainContext.getBean("signalPathService")
+		this.signalPathService = globals.grailsApplication.mainContext.getBean(SignalPathService)
 		this.adhoc = adhoc
 
-		runnerId = "s-" + new Date().getTime()
+		runnerId = IdGenerator.get()
 
 		/**
 		 * Instantiate the SignalPaths
@@ -42,40 +44,24 @@ public class SignalPathRunner extends Thread {
 		globals.dataSource = signalPathService.createDataSource(adhoc, globals)
 		globals.realtime = !adhoc
 		globals.init()
-
-		if (globals.signalPathContext.csv) {
-			globals.signalPathContext.speed = 0
-		}
 	}
 
-	public SignalPathRunner(List<Map> signalPathMaps, Globals globals, boolean adhoc = true) {
-		this(globals, adhoc)
-
-		// Instantiate SignalPaths from JSON
-		for (int i = 0; i < signalPathMaps.size(); i++) {
-			SignalPath signalPath = signalPathService.mapToSignalPath(signalPathMaps[i], false, globals, true)
-			signalPaths.add(signalPath)
-		}
-	}
 
 	public SignalPathRunner(SignalPath signalPath, Globals globals, boolean adhoc = true) {
+		this(Collections.singleton(signalPath), globals, adhoc)
+	}
+
+	public SignalPathRunner(Collection<SignalPath> signalPaths, Globals globals, boolean adhoc = true) {
 		this(globals, adhoc)
-		signalPath.setGlobals(globals)
-		signalPaths.add(signalPath)
+
+		for (SignalPath sp : signalPaths) {
+			sp.setGlobals(globals)
+			this.signalPaths.add(sp)
+		}
 	}
 
 	public List<SignalPath> getSignalPaths() {
 		return signalPaths
-	}
-
-	public Map getModuleChannelMap(int signalPathIndex) {
-		Map result = [:]
-		signalPaths[signalPathIndex].modules.each {
-			if (it instanceof IHasPushChannel) {
-				result.put(it.hash.toString(), it.uiChannelId)
-			}
-		}
-		return result
 	}
 
 	public synchronized void setRunning(boolean running) {
@@ -107,7 +93,16 @@ public class SignalPathRunner extends Thread {
 	@Override
 	public void run() {
 		Throwable reportException = null
-		setName("SignalPathRunner");
+
+		StringBuilder nameBuilder = new StringBuilder("SignalPathRunner [")
+		for (int i=0; i<signalPaths.size(); i++) {
+			if (i > 0) {
+				nameBuilder.append(", ")
+			}
+			nameBuilder.append(signalPaths.get(i).getCanvas() != null ? signalPaths.get(i).getCanvas().getId() : "(canvas is null)");
+		}
+		nameBuilder.append("]")
+		setName(nameBuilder.toString())
 
 		try {
 			for (SignalPath it : signalPaths) {
@@ -126,7 +121,7 @@ public class SignalPathRunner extends Thread {
 			}
 		} catch (Throwable e) {
 			e = GrailsUtil.deepSanitize(e)
-			log.error("Error while running SignalPaths: "+signalPaths.collect {it.getCanvas()?.id}, e)
+			log.error("Error while running SignalPaths: "+signalPaths.collect {SignalPath it -> it.getCanvas()?.id}, e)
 			reportException = e
 		}
 
@@ -139,19 +134,22 @@ public class SignalPathRunner extends Thread {
 				sb.append(reportException.message)
 			}
 			signalPaths.each { SignalPath sp ->
-				globals?.uiChannel?.push(new ErrorMessage(sb.toString()), sp.uiChannelId)
+				sp.pushToUiChannel(new ErrorMessage(sb.toString()))
 			}
 
 		}
 
 		signalPaths.each { SignalPath sp ->
-			globals?.uiChannel?.push(new DoneMessage(), sp.uiChannelId)
+			sp.pushToUiChannel(new DoneMessage())
+			if (sp.getGlobals().isAdhoc()) {
+				sp.pushToUiChannel(new ByeMessage())
+			}
 		}
 
 		// Cleanup
 		try {
 			destroy()
-		} catch (Exception e) {
+		} catch (Throwable e) {
 			e = GrailsUtil.deepSanitize(e)
 			log.error("Error while destroying SignalPathRunner!", e)
 		}
@@ -164,11 +162,15 @@ public class SignalPathRunner extends Thread {
 	 * Aborts the data feed and releases all resources
 	 */
 	public void destroy() {
-		signalPaths.each { it.destroy() }
+		signalPaths.each { SignalPath it -> it.destroy() }
 		globals.destroy()
 
-		if (adhoc)
-			signalPathService.deleteRunningSignalPathReferences(this)
+		if (adhoc) {
+			for (SignalPath sp : getSignalPaths()) {
+				// Delayed-delete the references to allow UI to catch up
+				signalPathService.deleteReferences(sp, true)
+			}
+		}
 		else signalPathService.updateState(getRunnerId(), Canvas.State.STOPPED)
 	}
 

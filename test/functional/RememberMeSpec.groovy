@@ -3,7 +3,7 @@ import geb.spock.GebReportingSpec
 import org.openqa.selenium.Cookie
 
 import spock.lang.Shared
-import core.pages.*
+import pages.*
 
 class RememberMeSpec extends GebReportingSpec {
 	

@@ -1,7 +1,5 @@
 package com.unifina.domain.security
 
-import com.unifina.utils.IdGenerator;
-
 class SecUser {
 	
 	String username
@@ -11,23 +9,22 @@ class SecUser {
 	boolean accountLocked
 	boolean passwordExpired
 	
-	String apiKey = generateApiKey()
-	
 	String name
 	String timezone
 
-	static hasMany = [permissions: Permission]
+	Set<Key> keys
+	Set<Permission> permissions
+
+	static hasMany = [permissions: Permission, keys: Key]
 	
 	static constraints = {
 		username blank: false, unique: true, email: true
 		password blank: false
 		name blank: false
-		apiKey nullable:true, unique: true
 	}
 
 	static mapping = {
 		password column: '`password`'
-		apiKey index: 'apiKey_index'
 		permissions cascade: 'all-delete-orphan'
 	}
 
@@ -35,16 +32,29 @@ class SecUser {
 		SecUserSecRole.findAllBySecUser(this).collect { it.secRole } as Set
 	}
 
-	public Map toMap() {
+	Map toMap() {
 		return [
 			name           : name,
 			username       : username,
-			apiKey         : apiKey,
 			timezone       : timezone,
 		]
 	}
 
-	public static String generateApiKey() {
-		return IdGenerator.get() + IdGenerator.get()
+	@Override
+	boolean equals(Object obj) {
+		if (!obj instanceof SecUser) {
+			return false
+		}
+
+		if (obj.id == null || this.id == null) {
+			return this.is(obj)
+		} else {
+			return obj.id == this.id
+		}
+	}
+
+	@Override
+	int hashCode() {
+		return this.id?.hashCode() ?: super.hashCode()
 	}
 }

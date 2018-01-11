@@ -36,8 +36,8 @@ public abstract class ModuleWithSideEffects extends AbstractSignalPathModule {
 			// Show one-time-notification unless it's already been shown
 			if (!oneTimeNotificationShown) {
 				String notification = getNotificationAboutActivatingWithoutSideEffects();
-				if (notification != null && parentSignalPath != null) {
-					parentSignalPath.showNotification(notification);
+				if (notification != null && getParentSignalPath() != null) {
+					getParentSignalPath().showNotification(notification);
 				}
 				oneTimeNotificationShown = true;
 			}
@@ -93,4 +93,9 @@ public abstract class ModuleWithSideEffects extends AbstractSignalPathModule {
 		}
 	}
 
+	@Override
+	public void clear() {
+		super.clear();
+		oneTimeNotificationShown = false;
+	}
 }

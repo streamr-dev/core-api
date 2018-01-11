@@ -53,6 +53,13 @@
 
 						$.get('${createLink(controller: "streamApi", action: "detectFields", params: [id: stream.id])}', function(stream) {
 							updateWithNewStreamData(stream)
+						}).fail(function(e) {
+							var message = e.responseJSON && e.responseJSON.message ? e.responseJSON.message : 'error'
+							Streamr.showError(message, 'Error')
+							setTimeout(function(){ // Timeout is for visual effect
+								autodetecting = false
+								$("#autodetect").removeAttr("disabled").html("Autodetect")
+							}, 250)
 						})
         			}
         		})

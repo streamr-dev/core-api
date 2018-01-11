@@ -1,15 +1,18 @@
 package com.unifina.signalpath.utils
 
+import com.unifina.UiChannelMockingSpecification
+import com.unifina.domain.security.SecUser
+import com.unifina.utils.GlobalsFactory
 import com.unifina.utils.testutils.ModuleTestHelper
-import spock.lang.Specification
+import grails.test.mixin.support.GrailsUnitTestMixin
 
-class MapAsTableSpec extends Specification {
+@Mixin(GrailsUnitTestMixin)
+class MapAsTableSpec extends UiChannelMockingSpecification {
 	MapAsTable module
 
 	def setup() {
-		module = new MapAsTable()
-		module.init()
-		module.configure([
+		mockServicesForUiChannels()
+		module = setupModule(new MapAsTable(), [
 			uiChannel: [id: "table"],
 		])
 	}
@@ -35,7 +38,7 @@ class MapAsTableSpec extends Specification {
 
 		then:
 		new ModuleTestHelper.Builder(module, inputValues, outputValues)
-			.uiChannelMessages(channelMessages)
+			.uiChannelMessages(channelMessages, getSentMessagesByStreamId())
 			.test()
 	}
 

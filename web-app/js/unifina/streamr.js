@@ -28,8 +28,9 @@ Streamr.createLink = function(optsOrController, action, id) {
 		}
 	}
 
-	if (opts.uri)
+	if (opts.uri) {
 		return Streamr.projectWebroot + opts.uri
+    }
 
 	var ctrl = opts.controller[0].toLowerCase() + opts.controller.slice(1)
 	var url = Streamr.projectWebroot + ctrl
