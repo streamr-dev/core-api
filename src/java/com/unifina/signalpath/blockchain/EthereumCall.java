@@ -378,6 +378,17 @@ public class EthereumCall extends AbstractHttpModule {
 		}
 	}
 
+	/** Message to show in UI in historical/side-effect-free mode */
+	@Override
+	protected String getDummyNotificationMessage() {
+		String recipient = contract.getValue().getAddress();
+		if (chosenFunction.name.length() > 0) {
+			return chosenFunction.name + " called on " + recipient;
+		} else {
+			return ether.getValue() + " ETH sent to " + recipient;
+		}
+    }
+
 	/** Streamr-web3 ethereum bridge can be running on a local machine */
 	@Override
 	protected boolean localAddressesAreAllowed() {

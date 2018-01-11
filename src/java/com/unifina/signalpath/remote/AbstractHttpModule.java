@@ -181,6 +181,20 @@ public abstract class AbstractHttpModule extends ModuleWithSideEffects implement
 		setPropagationSink(isAsync);
 	}
 
+	@Override
+	public void activateWithoutSideEffects() {
+		String msg = "Real-time action by '" + getEffectiveName() + "' ignored in historical mode:\n\n" + getDummyNotificationMessage();
+		getParentSignalPath().showNotification(msg);
+	}
+
+	/**
+	 * In historical/side-effect-free mode a message is shown in the UI to notify that module was activated
+	 * @return Message to show in UI
+	 */
+	protected String getDummyNotificationMessage() {
+		return "HTTP request sent";
+	}
+
 	/**
 	 * Prepare HTTP request based on module inputs
 	 * @return HTTP request that will be sent to server
