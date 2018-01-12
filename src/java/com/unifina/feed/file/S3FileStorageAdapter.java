@@ -18,19 +18,17 @@ import com.amazonaws.services.s3.model.S3Object;
 import com.unifina.utils.MapTraversal;
 
 public class S3FileStorageAdapter extends FileStorageAdapter {
-
-	private AWSCredentials myCredentials;
-	private AmazonS3 s3Client;
-	private String bucketName;
+	private final AmazonS3 s3Client;
+	private final String bucketName;
 	
 	private static final Logger log = Logger.getLogger(S3FileStorageAdapter.class);
 	
 	public S3FileStorageAdapter(Map<String, Object> config) {
 		super(config);
-		
-		myCredentials = new BasicAWSCredentials(
-				MapTraversal.getString(config, "unifina.feed.s3FileStorageAdapter.accessKey"),
-				MapTraversal.getString(config, "unifina.feed.s3FileStorageAdapter.secretKey"));
+
+		AWSCredentials myCredentials = new BasicAWSCredentials(
+			MapTraversal.getString(config, "unifina.feed.s3FileStorageAdapter.accessKey"),
+			MapTraversal.getString(config, "unifina.feed.s3FileStorageAdapter.secretKey"));
 			
 		s3Client = new AmazonS3Client(myCredentials);
 		bucketName = MapTraversal.getString(config, "unifina.feed.s3FileStorageAdapter.bucket");
