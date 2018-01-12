@@ -4,7 +4,6 @@ import com.unifina.data.FeedEvent;
 import com.unifina.data.IFeedRequirement;
 import com.unifina.data.IStreamRequirement;
 import com.unifina.domain.data.Feed;
-import com.unifina.domain.signalpath.Canvas;
 import com.unifina.feed.AbstractFeed;
 import com.unifina.service.FeedService;
 import com.unifina.signalpath.AbstractSignalPathModule;
@@ -29,9 +28,9 @@ public abstract class DataSource {
 	private final List<IStartListener> startListeners = new ArrayList<>();
 	private final List<IStopListener> stopListeners = new ArrayList<>();
 	private final Map<Long, AbstractFeed> feedById = new HashMap<>();
-	private boolean isHistoricalFeed = true;
+	private final Globals globals;
+	private final boolean isHistoricalFeed;
 	private boolean started = false;
-	private Globals globals;
 
 
 	public DataSource(boolean isHistoricalFeed, Globals globals) {
