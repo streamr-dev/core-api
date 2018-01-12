@@ -5,7 +5,7 @@ import com.unifina.domain.security.Key
 import com.unifina.domain.security.SecRole
 import com.unifina.domain.security.SecUser
 import com.unifina.domain.signalpath.ModulePackage
-import com.unifina.user.UserCreationFailedException
+import com.unifina.exceptions.UserCreationFailedException
 import org.springframework.validation.FieldError
 
 class UserService {

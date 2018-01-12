@@ -9,7 +9,6 @@ import com.unifina.domain.security.SecUserSecRole
 import com.unifina.domain.signalpath.ModulePackage
 import com.unifina.domain.signalpath.Module
 import com.unifina.feed.NoOpStreamListener
-import com.unifina.user.UserCreationFailedException
 import grails.plugin.springsecurity.SpringSecurityService
 import grails.test.mixin.Mock
 import grails.test.mixin.TestFor
