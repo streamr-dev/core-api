@@ -64,8 +64,8 @@ public class HistoricalEventQueue extends DataSourceEventQueue {
 		 * Queue events at lower and upper bounds of selected playback range to ensure that MasterClock ticks through
 		 * range even in the absence of feed data.
 		 */
-		queue.add(PlaybackMessage.newStartEvent(globals.getStartDate()));
-		queue.add(PlaybackMessage.newEndEvent(globals.getEndDate()));
+		addWithoutUpdatingTicket(PlaybackMessage.newStartEvent(globals.getStartDate()));
+		addWithoutUpdatingTicket(PlaybackMessage.newEndEvent(globals.getEndDate()));
 
 		/**
 		 * Initialize some values
