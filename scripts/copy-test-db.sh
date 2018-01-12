@@ -13,11 +13,11 @@ then
 	WORKSPACE="."
 fi
 
-DBHOST="dev.streamr"
-MYSQL_PW=Trez2tuV
+DBHOST="127.0.0.1"
+MYSQL_PW=pass
 DBSOURCE=core_test
 DBNAME=`echo $DBSOURCE'_'$1 | cut -c1-64 | sed 's/[-.]/_/g'` # max db name length is 64 chars
-DBUSER="unifina-test"
+DBUSER="user"
 
 mysql=`which mysql`
 mysql="$mysql --host=$DBHOST -u root --password=$MYSQL_PW"
