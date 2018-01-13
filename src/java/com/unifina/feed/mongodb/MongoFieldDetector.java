@@ -37,7 +37,7 @@ public class MongoFieldDetector extends FieldDetector {
 				Date timestamp = config.getTimestamp(document);
 				// Timestamps are implicit, so remove it from the document before field detection
 				document.remove(config.getTimestampKey());
-				return new MapMessage(timestamp, timestamp, new DocumentFromStream(document, stream));
+				return new MapMessage(timestamp, new DocumentFromStream(document, stream));
 			} else {
 				String msg = String.format("No data found %s@%s", collection.getNamespace(), mongoClient.getConnectPoint());
 				throw new MongoException(msg);
