@@ -30,7 +30,7 @@ public class MapMessageEventRecipient extends StreamEventRecipient<AbstractSigna
 	private void initCacheMap() {
 		outputsByName = new LinkedHashMap<>();
 		
-		for (AbstractSignalPathModule m : modules) {
+		for (AbstractSignalPathModule m : getModules()) {
 			for (Output o : m.getOutputs()) {
 				if (!outputsByName.containsKey(o.getName())) {
 					outputsByName.put(o.getName(), new ArrayList<Output>());

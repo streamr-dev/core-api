@@ -16,7 +16,7 @@ public class TwitterEventRecipient extends StreamEventRecipient<TwitterModule, T
 
 	@Override
 	protected void sendOutputFromModules(FeedEvent<TwitterMessage, ? extends IEventRecipient> event) {
-		for (TwitterModule m : modules) {
+		for (TwitterModule m : getModules()) {
 			m.forward(event.content);
 		}
 	}
