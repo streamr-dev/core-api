@@ -15,8 +15,8 @@ import java.util.Set;
  */
 public abstract class StreamEventRecipient<ModuleClass, MessageClass extends ITimestamped> extends AbstractEventRecipient<ModuleClass, MessageClass> {
 
-	private Stream stream;
-	private Set<Integer> partitions;
+	private final Stream stream;
+	private final Set<Integer> partitions;
 
 	public StreamEventRecipient(Globals globals, Stream stream, Set<Integer> partitions) {
 		super(globals);
