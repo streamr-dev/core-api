@@ -7,7 +7,7 @@ import com.unifina.domain.data.Feed
 import com.unifina.domain.data.Stream
 import com.unifina.feed.AbstractFeed
 import com.unifina.feed.FeedNotFoundException
-import com.unifina.feed.StreamNotFoundException
+import com.unifina.exceptions.StreamNotFoundException
 import com.unifina.signalpath.AbstractSignalPathModule
 import com.unifina.utils.Globals
 
