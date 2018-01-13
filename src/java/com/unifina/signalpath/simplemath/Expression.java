@@ -2,11 +2,11 @@ package com.unifina.signalpath.simplemath;
 
 import com.unifina.service.SerializationService;
 import com.unifina.signalpath.*;
+import org.apache.log4j.Logger;
 
 import java.math.MathContext;
-import java.util.*;
-
-import static org.apache.commons.lang3.math.NumberUtils.isNumber;
+import java.util.HashSet;
+import java.util.Map;
 
 public class Expression extends AbstractSignalPathModule {
 	private final StringParameter expressionParam = new StringParameter(this, "expression", "x+y");
@@ -16,6 +16,8 @@ public class Expression extends AbstractSignalPathModule {
 	transient private com.udojava.evalex.Expression expression;
 	private String expressionAsString;
 	private Iterable<String> variables;
+
+	private static final Logger log = Logger.getLogger(Expression.class);
 
 	@Override
 	public void init() {
@@ -49,7 +51,9 @@ public class Expression extends AbstractSignalPathModule {
 			double value = expression.eval().doubleValue();
 			out.send(value);
 		} catch (RuntimeException e) {
-			error.send(e.getMessage());
+			log.error("Exception while evaluating expression! Param: "+expressionParam+", Variables: "+variables+", Expression: "+expression);
+			// Null-safe error sending
+			error.send(e.getMessage() != null ? e.getMessage() : e.toString());
 		}
 	}
 
