@@ -61,8 +61,7 @@ public class MongoMessageSource extends PollingMessageSource<MapMessage, Stream>
 				for (Document document : iterable) {
 					Date timestamp = config.getTimestamp(document);
 					MapMessage mapMsg = new MapMessage(timestamp, new Date(), new DocumentFromStream(document, stream));
-					Message<MapMessage, Stream> msg = new Message<>(stream, counter++, mapMsg);
-					msg.checkCounter = false;
+					Message<MapMessage, Stream> msg = new Message<>(stream, counter++, mapMsg, false);
 					list.add(msg);
 					lastDate = timestamp;
 				}

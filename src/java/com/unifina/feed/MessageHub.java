@@ -67,8 +67,7 @@ public class MessageHub<RawMessageClass, MessageClass, KeyClass> extends Thread 
 			ParsedMessage<MessageClass, KeyClass> parsedMessage = null;
 			try {
 				// Preprocess here to avoid repeating something in each feed proxy
-				parsedMessage = new ParsedMessage(m.counter, parser.parse((RawMessageClass) m.message));
-				parsedMessage.checkCounter = m.checkCounter; 				// TODO: make cleaner
+				parsedMessage = new ParsedMessage<>(m.counter, parser.parse((RawMessageClass) m.message), m.checkCounter);
 			} catch (Exception e) {
 				log.error("Failed to parse message " + m.message.toString(), e);
 			}

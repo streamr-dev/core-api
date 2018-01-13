@@ -7,6 +7,7 @@ import com.lambdaworks.redis.pubsub.RedisPubSubConnection;
 import com.lambdaworks.redis.pubsub.RedisPubSubListener;
 import com.unifina.domain.data.Feed;
 import com.unifina.feed.AbstractMessageSource;
+import com.unifina.feed.Message;
 import org.apache.log4j.Logger;
 
 import java.io.IOException;
@@ -39,7 +40,7 @@ public class RedisMessageSource extends AbstractMessageSource<StreamrBinaryMessa
 			public void message(byte[] channel, byte[] messageBytes) {
 				String streamId = new String(channel, utf8);
 				StreamrBinaryMessageWithKafkaMetadata msg = new StreamrBinaryMessageWithKafkaMetadata(ByteBuffer.wrap(messageBytes));
-				forward(msg, streamId, msg.getOffset(), false);
+				forward(new Message<>(streamId, msg.getOffset(), msg, false));
 			}
 			@Override
 			public void subscribed(byte[] channel, long count) {

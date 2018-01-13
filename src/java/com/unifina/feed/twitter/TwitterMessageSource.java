@@ -5,6 +5,7 @@ import com.unifina.domain.data.Feed;
 import com.unifina.domain.data.Stream;
 import com.unifina.feed.AbstractMessageSource;
 
+import com.unifina.feed.Message;
 import groovy.transform.CompileStatic;
 import org.apache.commons.lang.StringUtils;
 import org.codehaus.groovy.runtime.InvokerHelper;
@@ -56,7 +57,7 @@ public class TwitterMessageSource extends AbstractMessageSource<TwitterMessage, 
 					TwitterMessage msg = TwitterMessage.fromStatus(status);
 					msg.streamConfig = conf;
 					msg.matchedKeywords = matches;
-					messageSource.forward(msg, conf.getStreamId(), counter++, false);
+					messageSource.forward(new Message<>(conf.getStreamId(), counter++, msg, false));
 				}
 			}
 		}
