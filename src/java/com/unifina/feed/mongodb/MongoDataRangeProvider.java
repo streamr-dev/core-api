@@ -7,28 +7,22 @@ import com.mongodb.client.MongoCursor;
 import com.mongodb.client.MongoDatabase;
 import com.mongodb.client.model.Sorts;
 import com.unifina.domain.data.Stream;
-import com.unifina.feed.AbstractDataRangeProvider;
+import com.unifina.feed.DataRangeProvider;
 import com.unifina.feed.DataRange;
 import org.bson.Document;
-import org.codehaus.groovy.grails.commons.GrailsApplication;
 
 /**
  * Created by henripihkala on 25/02/16.
  */
-public class MongoDataRangeProvider extends AbstractDataRangeProvider {
-
-	public MongoDataRangeProvider(GrailsApplication grailsApplication) {
-		super(grailsApplication);
-	}
+public class MongoDataRangeProvider implements DataRangeProvider {
 
 	@Override
 	public DataRange getDataRange(Stream stream) {
 		DataRange range = null;
 
 		MongoDbConfig config = MongoDbConfig.readFromStream(stream);
-		MongoClient mongoClient = config.createMongoClient();
 
-		try {
+		try (MongoClient mongoClient = config.createMongoClient()) {
 			MongoDatabase db = mongoClient.getDatabase(config.getDatabase());
 			MongoCollection collection = db.getCollection(config.getCollection());
 
@@ -43,8 +37,6 @@ public class MongoDataRangeProvider extends AbstractDataRangeProvider {
 				range = new DataRange(config.getTimestamp(firstIterator.next()), config.getTimestamp(lastIterator.next()));
 			}
 			return range;
-		} finally {
-			mongoClient.close();
 		}
 	}
 }

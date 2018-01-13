@@ -1,6 +1,6 @@
 package com.unifina.service
 
-import com.unifina.domain.security.SecUser
+import com.unifina.feed.DataRangeProvider
 import groovy.transform.CompileStatic
 
 import com.unifina.domain.data.Feed
@@ -36,6 +36,15 @@ class FeedService {
 			throw new StreamNotFoundException(id)
 		}
 		return result
+	}
+
+	DataRangeProvider instantiateDataRangeProvider(Feed feed) {
+		if (feed?.dataRangeProviderClass == null) {
+			return null
+		} else {
+			Class clazz = getClass().getClassLoader().loadClass(feed.dataRangeProviderClass)
+			return clazz.newInstance()
+		}
 	}
 	
 	Stream getStreamByFeedAndLocalId(Feed feed, String localId) {
