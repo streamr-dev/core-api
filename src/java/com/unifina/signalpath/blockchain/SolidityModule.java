@@ -20,7 +20,6 @@ import java.util.Stack;
 public class SolidityModule extends ModuleWithUI implements Pullable<EthereumContract> {
 
 	private static final Logger log = Logger.getLogger(SolidityModule.class);
-	protected static final String ADDRESS_PLACEHOLDER = "{{ADDRESS}}";
 
 	private final EthereumAccountParameter ethereumAccount = new EthereumAccountParameter(this, "ethAccount");
 	private Output<EthereumContract> contractOutput = null;
@@ -109,8 +108,8 @@ public class SolidityModule extends ModuleWithUI implements Pullable<EthereumCon
 						// for payable constructors, sendEtherParam is added in params after the ordinary function arguments
 						// value can't be read from sendEtherParam.getValue because it's not added to the module until createParameters is called (so it exists in config but not in module object)
 						if (constructor.payable) {
-							long sendEtherParamValue = Long.parseLong(args.pop().toString());
-							BigDecimal valueWei = BigDecimal.valueOf(sendEtherParamValue).multiply(BigDecimal.TEN.pow(18));
+							BigDecimal sendEtherParamValue = new BigDecimal(args.pop().toString());
+							BigDecimal valueWei = sendEtherParamValue.multiply(BigDecimal.TEN.pow(18));
 							sendWei = valueWei.toBigInteger().toString();
 						}
 					}
