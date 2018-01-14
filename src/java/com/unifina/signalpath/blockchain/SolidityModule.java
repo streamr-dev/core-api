@@ -20,7 +20,6 @@ import java.util.Stack;
 public class SolidityModule extends ModuleWithUI implements Pullable<EthereumContract> {
 
 	private static final Logger log = Logger.getLogger(SolidityModule.class);
-	protected static final String ADDRESS_PLACEHOLDER = "{{ADDRESS}}";
 
 	private final EthereumAccountParameter ethereumAccount = new EthereumAccountParameter(this, "ethAccount");
 	private Output<EthereumContract> contractOutput = null;
