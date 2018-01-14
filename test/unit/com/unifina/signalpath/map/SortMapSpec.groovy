@@ -81,16 +81,18 @@ class SortMapSpec extends Specification {
 		new ModuleTestHelper.Builder(module, inputValues, outputValues).test()
 	}
 
-	def "sortMap() does not crash given given uncomparable values"() {
+	def "sortMap() returns map unmodified if given given uncomparable values"() {
 		module.getInput("by").receive(SortMap.ByParameter.VALUE)
 		module.getInput("order").receive(SortMap.OrderParameter.ASCENDING)
 
+		Map map = [a: [], b: [], d: []]
+
 		Map inputValues = [
-			in: [[a: new Object(), b: new Object(), d: new Object()]]
+			in: [map]
 		]
 
 		Map outputValues = [
-			out: [null]
+			out: [map]
 		]
 
 		expect:

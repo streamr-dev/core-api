@@ -15,4 +15,9 @@ class TestableSimpleHttp extends SimpleHttp {
 	protected HttpAsyncClient getHttpClient() {
 		return httpClient;
 	}
+
+	@Override
+	protected boolean localAddressesAreAllowed() {
+		return true;
+	}
 }
