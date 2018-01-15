@@ -93,7 +93,8 @@ class SolidityModuleSpec extends ModuleTestingSpecification {
 		module.onConfiguration(applyConfig)
 
 		then:
-		thrown(RuntimeException)
+		def e = thrown(RuntimeException)
+		e.message.contains("Access denied to Ethereum private key")
 	}
 
 	void "Contract can be pulled after serialisation/deserialisation"() {

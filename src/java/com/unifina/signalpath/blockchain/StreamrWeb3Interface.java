@@ -1,6 +1,5 @@
 package com.unifina.signalpath.blockchain;
 
-import com.google.common.collect.ImmutableMap;
 import com.google.gson.Gson;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
@@ -9,6 +8,7 @@ import com.mashape.unirest.http.Unirest;
 import org.apache.log4j.Logger;
 
 import java.io.Serializable;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -17,9 +17,8 @@ import java.util.Map;
 public class StreamrWeb3Interface implements Serializable {
 
 	private static final Logger log = Logger.getLogger(StreamrWeb3Interface.class);
+	private final String server;
 	private final Double gasPriceWei;
-
-	private String server;
 
 	public StreamrWeb3Interface(String server, Double gasPriceWei) {
 		this.server = server;
@@ -28,9 +27,7 @@ public class StreamrWeb3Interface implements Serializable {
 
 	/** @returns EthereumContract with isDeployed() false */
 	public EthereumContract compile(String code) throws Exception {
-		String bodyJson = new Gson().toJson(ImmutableMap.of(
-				"code", code
-		)).toString();
+		String bodyJson = new Gson().toJson(Collections.singletonMap("code", code));
 
 		log.info("compile request: "+bodyJson);
 
@@ -73,7 +70,7 @@ public class StreamrWeb3Interface implements Serializable {
 	 * @returns EthereumContract that isDeployed()
 	 **/
 	public EthereumContract deploy(String code, List<Object> args, String sendWei, String address, String privateKey) throws Exception {
-		Map body = new HashMap<>();
+		Map<String, Object> body = new HashMap<>();
 		body.put("source", address);
 		body.put("key", privateKey);
 		body.put("gasprice", gasPriceWei);
@@ -82,6 +79,7 @@ public class StreamrWeb3Interface implements Serializable {
 		body.put("value", sendWei);
 		String bodyJson = new Gson().toJson(body);
 
+		// TODO: won't this affect globally? Shouldn't probably have static method invocation here.
 		Unirest.setTimeouts(10*1000, 10*60*1000); // wait patiently for the next mined block, up to 10 minutes
 
 		log.info("deploy request: "+bodyJson);
@@ -125,16 +123,12 @@ public class StreamrWeb3Interface implements Serializable {
 		return server;
 	}
 
-	public void setServer(String server) {
-		this.server = server;
-	}
-
-	public static class CompileResponse {
+	private static class CompileResponse {
 		List<ContractMetadata> contracts;
 		List<String> errors;
 	}
 
-	public static class ContractMetadata {
+	private static class ContractMetadata {
 		String name;
 		String bytecode;
 		JsonArray abi;
