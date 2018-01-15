@@ -1,41 +1,33 @@
 package com.unifina.signalpath.blockchain
 
+import com.unifina.ModuleTestingSpecification
+import com.unifina.api.NotPermittedException
 import com.unifina.domain.security.IntegrationKey
 import com.unifina.domain.security.SecUser
-import com.unifina.utils.Globals
+import com.unifina.serialization.SerializerImpl
+import com.unifina.service.EthereumIntegrationKeyService
+import com.unifina.service.SerializationService
 import grails.test.mixin.Mock
 import groovy.json.JsonSlurper
-import spock.lang.Specification
 
 @Mock([IntegrationKey, SecUser])
-class SolidityModuleSpec extends Specification {
+class SolidityModuleSpec extends ModuleTestingSpecification {
 	SolidityModule module
 
-	def deployArgs
-	def sentWei
-
 	def setup() {
-		module = new SolidityModule()
-		module.init()
-
-		module.globals = new Globals()
-
-		module.web3 = Stub(SolidityModule.StreamrWeb3Interface) {
-			compile(_) >> { EthereumContract.fromMap(applyConfig.contract) }
-			deploy(_, _, _) >> { code, args, wei ->
-				deployArgs = args
-				sentWei = wei
-				def contract = EthereumContract.fromMap(applyConfig.contract)
-				contract.address = "0x60f78aa68266c87fecec6dcb27672455111bb347"
-				return contract
-			}
-		}
-
 		// mock the key for ethereum account
-		SecUser user = new SecUser(name: "name", username: "name@name.com", password: "pass").save(failOnError: true, validate: false)
+		SecUser user = new SecUser(name: "name", username: "name@name.com", password: "pass", timezone: "UTC").save(failOnError: true, validate: false)
 		IntegrationKey key = new IntegrationKey(service: IntegrationKey.Service.ETHEREUM, name: "test key", json: '{"privateKey":"lol","address":"0x1234"}', user: user)
 		key.id = "sgKjr1eHQpqTmwz3vK3DqwUK1wFlrfRJa9mnf_xTeFJQ"
 		key.save(failOnError: true, validate: true)
+
+		mockBean(EthereumIntegrationKeyService.class, Stub(EthereumIntegrationKeyService) {
+			getAllKeysForUser(user) >> [key]
+		})
+
+		module = new SolidityModuleWithMockedWeb3(applyConfig.contract)
+		module.globals = mockGlobals([:], user)
+		module.init()
 
 		// set ethereum account
 		module.inputs[0].setConfiguration(applyConfig.params[0])
@@ -59,6 +51,15 @@ class SolidityModuleSpec extends Specification {
 		module.inputs*.name == ["ethAccount", "value", "addr", "initial ETH"]
 	}
 
+	void "After configuration the contract can be pulled"() {
+		when:
+		applyConfig.contract.abi[2].payable = true
+		module.onConfiguration(applyConfig)
+
+		then:
+		module.pullValue(module.getOutput("contract")) != null
+	}
+
 	void "Values are sent correctly to deploy function with non-payable constructor"() {
 		when:
 		applyConfig.contract.abi[2].payable = false
@@ -66,8 +67,8 @@ class SolidityModuleSpec extends Specification {
 		module.onConfiguration(applyConfig)
 
 		then:
-		deployArgs == [3, "0x6e6adf6e579d83f8f1bc388a392c1a130b8f8d0cae6250612eb2aab4e945b1f0"]
-		sentWei == "0"
+		module.deployArgs == [3, "0x6e6adf6e579d83f8f1bc388a392c1a130b8f8d0cae6250612eb2aab4e945b1f0"]
+		module.sentWei == "0"
 	}
 
 	void "Values are sent correctly to deploy function with payable constructor"() {
@@ -78,12 +79,39 @@ class SolidityModuleSpec extends Specification {
 		module.onConfiguration(applyConfig)
 
 		then:
-		deployArgs == [3, "0x6e6adf6e579d83f8f1bc388a392c1a130b8f8d0cae6250612eb2aab4e945b1f0"]
-		sentWei == "100000000000000000"
+		module.deployArgs == [3, "0x6e6adf6e579d83f8f1bc388a392c1a130b8f8d0cae6250612eb2aab4e945b1f0"]
+		module.sentWei == "100000000000000000"
 	}
 
+	void "attacker can't use another user's key to deploy"() {
+		module.getGlobals().setUser(new SecUser(name: "attacker", username: "attacker", password: "pass").save(failOnError: true, validate: false))
 
-	Map applyConfig = new JsonSlurper().parseText('''
+		when:
+		applyConfig.contract.abi[2].payable = true
+		applyConfig.params << initialEthInputConfig
+		applyConfig << [deploy: true]
+		module.onConfiguration(applyConfig)
+
+		then:
+		thrown(RuntimeException)
+	}
+
+	void "Contract can be pulled after serialisation/deserialisation"() {
+		def serializationService = new SerializationService()
+		// Use the classloader of this class, otherwise the deserializer won't find SolidityModuleWithMockedWeb3
+		serializationService.serializer = new SerializerImpl(this.getClass().getClassLoader())
+
+		when:
+		applyConfig.contract.abi[2].payable = true
+		module.onConfiguration(applyConfig)
+		byte[] bytes = serializationService.serialize(module)
+		module = serializationService.deserialize(bytes)
+
+		then:
+		module.pullValue(module.getOutput("contract")) != null
+	}
+
+	static Map applyConfig = new JsonSlurper().parseText('''
 {
     "contract":
     {
@@ -275,7 +303,7 @@ class SolidityModuleSpec extends Specification {
 }
 	''')
 
-	Map initialEthInputConfig = new JsonSlurper().parseText('''{
+	static Map initialEthInputConfig = new JsonSlurper().parseText('''{
 		"canConnect": true,
 		"export": false,
 		"connected": false,

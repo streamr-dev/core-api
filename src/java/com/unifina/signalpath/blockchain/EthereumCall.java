@@ -110,6 +110,9 @@ public class EthereumCall extends AbstractHttpModule {
 			}
 			updateFunction();
 		}
+
+		// Try accessing the private key - fail fast if access will be denied
+		ethereumAccount.getPrivateKey();
 	}
 
 	private void updateInterface() {
