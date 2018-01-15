@@ -260,13 +260,11 @@ class RegisterControllerSpec extends Specification {
 			def modulePackage = new ModulePackage()
 			modulePackage.id = new Long(1)
 			modulePackage.name = "test"
-			modulePackage.user = new SecUser()
 			modulePackage.save()
 
 			def modulePackage2 = new ModulePackage()
 			modulePackage2.id = new Long(2)
 			modulePackage2.name = "test2"
-			modulePackage2.user = new SecUser()
 			modulePackage2.save()
 
 			// The roles created
