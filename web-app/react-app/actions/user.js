@@ -94,6 +94,20 @@ const getCurrentUserFailure = (error: ApiError) => ({
     error
 })
 
+const getCurrentUserRequest = () => ({
+    type: GET_CURRENT_USER_REQUEST,
+})
+
+const getCurrentUserSuccess = (user: User) => ({
+    type: GET_CURRENT_USER_SUCCESS,
+    user
+})
+
+const getCurrentUserFailure = (error: ApiError) => ({
+    type: GET_CURRENT_USER_FAILURE,
+    error
+})
+
 const saveCurrentUserRequest = () => ({
     type: SAVE_CURRENT_USER_REQUEST,
 })

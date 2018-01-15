@@ -83,7 +83,7 @@
 			} else if (!this.username && !this.streamId) {
 				throw new Error("Must give either streamId or username!")
 			}
-
+   
 			$.getJSON(this.url)
 				.then(function (keys) {
 					_this.keys = keys
