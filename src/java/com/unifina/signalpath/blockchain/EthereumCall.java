@@ -111,8 +111,10 @@ public class EthereumCall extends AbstractHttpModule {
 			updateFunction();
 		}
 
-		// Try accessing the private key - fail fast if access will be denied
-		ethereumAccount.getPrivateKey();
+		// When running, try accessing the private key - fail fast if access is denied
+		if (getGlobals().isRunContext()) {
+			ethereumAccount.getPrivateKey();
+		}
 	}
 
 	private void updateInterface() {
