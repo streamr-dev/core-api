@@ -28,7 +28,7 @@ class DashboardItemApiControllerSpec extends Specification {
 	def setup() {
 		dashboardService = controller.dashboardService = Mock(DashboardService)
 		me = new SecUser().save(failOnError: true, validate: false)
-		dashboards = DashboardApiControllerSpec.initDashboards(me)
+		dashboards = DashboardApiControllerSpec.initDashboards()
 
 		Key key = new Key(name: "key", user: me)
 		key.id = "myApiKey"

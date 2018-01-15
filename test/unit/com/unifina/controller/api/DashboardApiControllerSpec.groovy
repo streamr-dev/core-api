@@ -35,18 +35,18 @@ class DashboardApiControllerSpec extends Specification {
 		controller.apiService = mainContext.getBean(ApiService)
 
 		me = new SecUser().save(failOnError: true, validate: false)
-		dashboards = initDashboards(me)
+		dashboards = initDashboards()
 
 		def key = new Key(user: me, name: "my key")
 		key.id = "myApiKey"
 		key.save(failOnError: true, validate: true)
 	}
 
-	public static List<Dashboard> initDashboards(SecUser me) {
+	static List<Dashboard> initDashboards() {
 		List<Dashboard> dashboards = []
-		dashboards.add(new Dashboard(name: "dashboard-1", user: me))
-		dashboards.add(new Dashboard(name: "dashboard-2", user: me))
-		dashboards.add(new Dashboard(name: "dashboard-3", user: me))
+		dashboards.add(new Dashboard(name: "dashboard-1"))
+		dashboards.add(new Dashboard(name: "dashboard-2"))
+		dashboards.add(new Dashboard(name: "dashboard-3"))
 
 		Canvas canvas = new Canvas()
 		canvas.save(failOnError: true, validate: false)

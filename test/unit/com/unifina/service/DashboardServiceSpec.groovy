@@ -13,30 +13,32 @@ import groovy.json.JsonBuilder
 import spock.lang.Specification
 
 @TestFor(DashboardService)
-@Mock([Canvas, Dashboard, DashboardItem, Permission, SecUser])
+@Mock([Canvas, Dashboard, DashboardItem, Permission, SecUser, PermissionService])
 class DashboardServiceSpec extends Specification {
 
 	SecUser user = new SecUser(username: "e@e.com", name: "user")
 	SecUser otherUser = new SecUser(username: "a@a.com", name: "someoneElse")
 
 	def setup() {
-		PermissionService permissionService = service.permissionService = new PermissionService()
+		PermissionService permissionService = service.permissionService
 
 
 		user.save(failOnError: true, validate: false)
 		otherUser.save(failOnError: true, validate: false)
 
 		(1..3).each {
-			def d = new Dashboard(name: "my-dashboard-$it", user: user).save(failOnError: true)
+			def d = new Dashboard(name: "my-dashboard-$it").save(failOnError: true)
 			if (it == 3) {
 				d.addToItems(new DashboardItem(title: "item1", ord: 1, size: "large").save(validate: false, failOnError: true))
 				d.addToItems(new DashboardItem(title: "item2", ord: 0, size: "medium").save(validate: false, failOnError: true))
 				d.addToItems(new DashboardItem(title: "item3", ord: 2, size: "large").save(validate: false, failOnError: true))
 			}
+			permissionService.systemGrantAll(user, d)
 		}
 
 		(1..3).each {
-			def d = new Dashboard(name: "not-my-dashboard-$it", user: otherUser).save(failOnError: true)
+			def d = new Dashboard(name: "not-my-dashboard-$it").save(failOnError: true)
+			permissionService.systemGrantAll(otherUser, d)
 			if (it == 2) {
 				println("Object is " + d)
 				permissionService.grant(otherUser, d, user, Permission.Operation.READ)
@@ -116,8 +118,27 @@ class DashboardServiceSpec extends Specification {
 		Dashboard.findByName("test-create").getName() == "test-create"
 		Dashboard.findByName("test-create").getItems().first().title == "test1"
 		Dashboard.findByName("test-create").getItems().last().title == "test2"
-		Dashboard.findByName("test-create").getUser().getName() =="tester"
+	}
 
+	def "create() also creates all permissions for new dashboard"() {
+		setup:
+		SortedSet<DashboardItem> items = new TreeSet<DashboardItem>()
+		items.add(new DashboardItem(title: "test1", ord: new Integer(0), canvas: new Canvas(), module: 0, size: "b", webcomponent: "b"))
+		items.add(new DashboardItem(title: "test2", ord: new Integer(1), canvas: new Canvas(), module: 0, size: "b", webcomponent: "b"))
+		def user = new SecUser(username: "tester").save(validate: false, failOnError: true)
+		when:
+		SaveDashboardCommand command = new SaveDashboardCommand([
+			name: "test-create",
+			items: items
+		])
+		def dashboard = service.create(command, user)
+
+		then:
+		Permission.findAllByDashboard(dashboard)*.toMap() == [
+			[id: 20, user: "tester", operation: "read"],
+			[id: 21, user: "tester", operation: "write"],
+			[id: 22, user: "tester", operation: "share"],
+		]
 	}
 
 	def "update() cannot update non-existent dashboard"() {
@@ -141,6 +162,15 @@ class DashboardServiceSpec extends Specification {
 		dashboard != null
 		dashboard.name == "newName"
 		Dashboard.findById(2L).name == "newName"
+	}
+
+	def "update() does not create new permissions"() {
+		when:
+		assert Permission.countByDashboard(Dashboard.get(2)) == 3
+		def dashboard = service.update(2L, new SaveDashboardCommand(name: "newName"), user)
+
+		then:
+		Permission.countByDashboard(Dashboard.get(2)) == 3
 	}
 
 	def "findDashboardItem() cannot fetch non-existent dashboard"() {

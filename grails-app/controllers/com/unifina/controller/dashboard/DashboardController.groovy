@@ -29,8 +29,8 @@ class DashboardController {
 	def save() {
 		Dashboard dashboard = new Dashboard()
 		dashboard.name = params.name
-		dashboard.user = springSecurityService.currentUser
 		dashboard.save(flush: true, failOnError: true)
+		permissionService.systemGrantAll((SecUser) springSecurityService.currentUser, dashboard)
 		redirect(action: "show", id: dashboard.id)
 	}
 

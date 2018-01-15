@@ -61,10 +61,13 @@ class DashboardService {
 	 */
 	Dashboard createOrUpdate(SaveDashboardCommand validCommand, SecUser user) throws NotFoundException, NotPermittedException {
 		Dashboard dashboard
+		boolean creatingNew
 		if (validCommand.id && authorizedGetById(validCommand.id, user, Permission.Operation.WRITE)) {
 			dashboard = authorizedGetById(validCommand.id, user, Permission.Operation.WRITE)
+			creatingNew = false
 		} else {
-			dashboard = new Dashboard(validCommand.toMap() << [user: user])
+			dashboard = new Dashboard(validCommand.toMap())
+			creatingNew = true
 		}
 		dashboard.name = validCommand.name
 		if (validCommand.items != null) {
@@ -75,6 +78,10 @@ class DashboardService {
 			}
 		}
 		dashboard.save(failOnError: true)
+		if (creatingNew) {
+			permissionService.systemGrantAll(user, dashboard)
+		}
+		return dashboard
 	}
 
 	/**
@@ -84,6 +91,7 @@ class DashboardService {
 	 * @param user
 	 * @return
 	 */
+	@CompileStatic
 	Dashboard create(SaveDashboardCommand validCommand, SecUser user) {
 		createOrUpdate(validCommand, user)
 	}
@@ -97,6 +105,7 @@ class DashboardService {
 	 * @param user
 	 * @return
 	 */
+	@CompileStatic
 	Dashboard update(Long id, SaveDashboardCommand validCommand, SecUser user) {
 		validCommand.id = id
 		createOrUpdate(validCommand, user)

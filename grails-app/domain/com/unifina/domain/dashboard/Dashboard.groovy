@@ -4,9 +4,6 @@ import com.unifina.domain.security.Permission
 import groovy.transform.CompileStatic
 
 class Dashboard {
-
-	SecUser user
-
 	String name
 
 	Date dateCreated
