@@ -77,7 +77,6 @@ class SendToStreamSpec extends BeanMockingSpecification {
 		stream = new Stream()
 		stream.feed = feed
 		stream.id = stream.name = "stream-0"
-		stream.user = user
 		stream.config = [fields: [
 			[name: "strIn", type: "string"],
 			[name: "numIn", type: "number"],
@@ -87,7 +86,6 @@ class SendToStreamSpec extends BeanMockingSpecification {
 		Stream uiChannel = new Stream()
 		uiChannel.feed = feed
 		uiChannel.id = uiChannel.name = "uiChannel"
-		uiChannel.user = user
 		uiChannel.save(validate: false, failOnError: true)
 
 		mockStreamService = (FakeStreamService) grailsApplication.getMainContext().getBean("streamService")
@@ -183,7 +181,6 @@ class SendToStreamSpec extends BeanMockingSpecification {
 		s2.feed = Feed.load(Feed.KAFKA_ID)
 		s2.id = s2.name = "stream-1"
 		s2.config = Stream.load("stream-0").config
-		s2.user = user
 		s2.save(validate: false, failOnError: true)
 
 		when:

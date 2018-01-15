@@ -56,7 +56,7 @@ class PermissionApiControllerSpec extends Specification {
 		canvasPublic = newCanvas("public", other)
 
 		def newStream = { String id, SecUser owner ->
-			def c = new Stream(user: owner)
+			def c = new Stream()
 			c.id = id
 			return c.save(validate: false)
 		}

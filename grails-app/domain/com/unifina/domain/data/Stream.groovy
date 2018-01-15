@@ -1,7 +1,6 @@
 package com.unifina.domain.data
 
 import com.unifina.domain.security.Permission
-import com.unifina.domain.security.SecUser
 import com.unifina.domain.signalpath.Canvas
 import grails.converters.JSON
 import groovy.transform.CompileStatic
@@ -9,7 +8,6 @@ import groovy.transform.CompileStatic
 class Stream implements Comparable {
 	String id
 	Integer partitions = 1
-	SecUser user
 
 	String name
 	Feed feed
@@ -34,7 +32,6 @@ class Stream implements Comparable {
 		description(nullable:true)
 		firstHistoricalDay(nullable:true)
 		lastHistoricalDay(nullable:true)
-		user(nullable:true)
 		uiChannelPath(nullable:true)
 		uiChannelCanvas(nullable:true)
 	}

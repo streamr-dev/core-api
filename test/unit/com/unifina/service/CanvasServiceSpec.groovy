@@ -410,7 +410,6 @@ class CanvasServiceSpec extends Specification {
 		setup:
 		Stream s = new Stream(
 			id: "666",
-			user: me,
 			name: "Notifications",
 			uiChannel: true,
 			uiChannelCanvas: myFirstCanvas,

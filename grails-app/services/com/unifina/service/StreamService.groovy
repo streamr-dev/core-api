@@ -59,7 +59,6 @@ class StreamService {
 	Stream createStream(Map params, SecUser user, String id = IdGenerator.getShort()) {
 		Stream stream = new Stream(params)
 		stream.id = id
-		stream.user = user
 		stream.config = params.config
 
 		// If no feed given, API feed is used
@@ -79,6 +78,8 @@ class StreamService {
 		}
 
 		stream.save(failOnError: true)
+		permissionService.systemGrantAll(user, stream)
+
 		if (streamListener) {
 			streamListener.afterStreamSaved(stream)
 		}

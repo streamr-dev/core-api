@@ -24,14 +24,15 @@ import spock.lang.Specification
  * See the API for {@link grails.test.mixin.support.GrailsUnitTestMixin} for usage instructions
  */
 @TestFor(StreamService)
-@Mock([Canvas, Dashboard, DashboardItem, Stream, Feed, FeedFile, SecUser, Key])
+@Mock([Canvas, Dashboard, DashboardItem, Stream, Feed, FeedFile, SecUser, Key, Permission, PermissionService])
 class StreamServiceSpec extends Specification {
 
-	StreamService service
 	Feed feed
 	KafkaService kafkaService = Stub(KafkaService)
 	FeedFileService feedFileService = new FeedFileService()
 	DashboardService dashboardService = Mock(DashboardService)
+
+	SecUser me = new SecUser(username: "me")
 
 	def setup() {
 		feed = new Feed(
@@ -49,14 +50,14 @@ class StreamServiceSpec extends Specification {
 		def grailsApplication = new DefaultGrailsApplication()
 		grailsApplication.setMainContext(applicationContext)
 
-		service = new StreamService()
 		service.grailsApplication = grailsApplication
+		me.save(validate: false, failOnError: true)
 	}
 
 	void "createStream throws ValidationException input incomplete"() {
 
 		when:
-		service.createStream([feed: feed], null)
+		service.createStream([feed: feed], me)
 
 		then:
 		thrown(ValidationException)
@@ -64,11 +65,23 @@ class StreamServiceSpec extends Specification {
 
 	void "createStream results in persisted Stream"() {
 		when:
-		service.createStream([name: "name", feed: feed], null)
+		service.createStream([name: "name", feed: feed], me)
 
 		then:
 		Stream.count() == 1
 		Stream.list().first().name == "name"
+	}
+
+	void "createStream results in all permissions for Stream"() {
+		when:
+		def stream = service.createStream([name: "name", feed: feed], me)
+
+		then:
+		Permission.findAllByStream(stream)*.toMap() == [
+			[id: 1, user: "me", operation: "read"],
+			[id: 2, user: "me", operation: "write"],
+			[id: 3, user: "me", operation: "share"],
+		]
 	}
 
 	void "createStream uses its params"() {
@@ -86,14 +99,14 @@ class StreamServiceSpec extends Specification {
 				]
 			]
 		]
-		service.createStream(params, new SecUser(username: "me").save(validate: false))
-		then:
+		service.createStream(params, me)
+
+		then: "stream is created"
 		Stream.count() == 1
 		def stream = Stream.findAll().get(0)
 		stream.name == "Test stream"
 		stream.description == "Test stream"
 		stream.feed == feed
-		stream.user.username == "me"
 	}
 
 	void "createStream uses Feed.KAFKA_ID as default value for feed"() {
@@ -122,6 +135,7 @@ class StreamServiceSpec extends Specification {
 	void "createStream initializes streamListener"() {
 		setup:
 		def service = Spy(StreamService)
+		service.permissionService = Stub(PermissionService)
 		def streamListener = Mock(AbstractStreamListener)
 		def params = [
 			name       : "Test stream",
