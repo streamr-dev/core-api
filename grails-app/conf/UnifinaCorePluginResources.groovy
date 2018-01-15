@@ -315,6 +315,8 @@ modules = {
 		dependsOn 'confirm-button'
 		dependsOn 'name-editor'
 		dependsOn 'draggabilly'
+		dependsOn 'streamr-search'
+		dependsOn 'streamr-floating-search'
 		resource url:[dir:'js/unifina/signalPath/core', file:'signalPath.js', plugin: 'unifina-core']
 		resource url:[dir:'js/unifina/signalPath/generic', file:'emptyModule.js', plugin: 'unifina-core']
 		resource url:[dir:'js/unifina/signalPath/generic', file:'genericModule.js', plugin: 'unifina-core']
