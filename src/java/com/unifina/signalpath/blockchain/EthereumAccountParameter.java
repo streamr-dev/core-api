@@ -47,7 +47,7 @@ class EthereumAccountParameter extends Parameter<IntegrationKey> {
 		SecUser loggedInUser = getOwner().getGlobals().getUser();
 		SecUser integrationKeyUser = getValue().getUser();
 		if (!integrationKeyUser.equals(loggedInUser)) {
-			throw new NotPermittedException("Not permitted to use integration key " + getValue().getId());
+			throw new NotPermittedException("Access denied to Ethereum private key (id " + getValue().getId()+"). Only the owner can use it.");
 		}
 	}
 
