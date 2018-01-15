@@ -43,8 +43,8 @@ class SerializationService {
 		return v
 	}
 
-	int serializationMaxBytes() {
-		Integer v = MapTraversal.getLong(grailsApplication.getConfig(), MAX_BYTES_CONFIG_KEY)
+	long serializationMaxBytes() {
+		Long v = MapTraversal.getLong(grailsApplication.getConfig(), MAX_BYTES_CONFIG_KEY)
 		Assert.notNull(v, "Missing key \"" + MAX_BYTES_CONFIG_KEY + "\" from grailsApplication configuration")
 		return v
 	}

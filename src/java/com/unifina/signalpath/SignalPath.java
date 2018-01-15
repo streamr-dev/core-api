@@ -232,7 +232,7 @@ public class SignalPath extends ModuleWithUI {
 	}
 
 	public boolean isSerializable() {
-		return !getGlobals().isAdhoc() && getGlobals().isSerializationEnabled();
+		return !getGlobals().isAdhoc() && getGlobals().isSerializationEnabled() && isRoot();
 	}
 
 	@Override

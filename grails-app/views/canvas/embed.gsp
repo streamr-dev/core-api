@@ -7,7 +7,6 @@
     <r:require module="bootbox"/>
     <r:require module="bootstrap-contextmenu"/>
     <r:require module="bootstrap-datepicker"/>
-	<r:require module="streamr-search"/>
     <r:require module="signalpath-theme"/>
     <r:require module="touchpunch"/>
 
@@ -29,7 +28,8 @@ $(document).ready(function() {
 			path: "${grailsApplication.config.streamr.ui.serverPath}",
 			autoConnect: true,
 			autoDisconnect: true
-		}
+		},
+		embedMode: true
 	});
 	<g:if test="${id}">
 		SignalPath.load('${id}')

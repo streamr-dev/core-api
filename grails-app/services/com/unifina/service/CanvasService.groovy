@@ -86,7 +86,7 @@ class CanvasService {
 		}
 	}
 
-	public void start(Canvas canvas, boolean clearSerialization) {
+	public void start(Canvas canvas, boolean clearSerialization, SecUser asUser) {
 		if (canvas.state == Canvas.State.RUNNING) {
 			throw new InvalidStateException("Cannot run canvas $canvas.id because it's already running. Stop it first.")
 		}
@@ -98,7 +98,7 @@ class CanvasService {
 		Map signalPathContext = canvas.toMap().settings
 
 		try {
-			signalPathService.startLocal(canvas, signalPathContext)
+			signalPathService.startLocal(canvas, signalPathContext, asUser)
 		} catch (SerializationException ex) {
 			log.error("De-serialization failure caused by (BELOW)", ex.cause)
 			String msg = "Could not load (deserialize) previous state of canvas $canvas.id."

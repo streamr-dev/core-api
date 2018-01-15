@@ -69,9 +69,9 @@ public class SimpleHttp extends AbstractHttpModule {
 	protected void onConfiguration(Map<String, Object> config) {
 		super.onConfiguration(config);
 
-		int inputCount = MapTraversal.getInt(config, "options.inputCount.value", 0);
-		int outputCount = MapTraversal.getInt(config, "options.outputCount.value", 0);
-		int headerCount = MapTraversal.getInt(config, "options.headerCount.value", 0);
+		int inputCount = MapTraversal.getInteger(config, "options.inputCount.value", 0);
+		int outputCount = MapTraversal.getInteger(config, "options.outputCount.value", 0);
+		int headerCount = MapTraversal.getInteger(config, "options.headerCount.value", 0);
 
 		httpInputs = new ArrayList<>(inputCount);
 		for (int i = 0; i < inputCount; i++) {

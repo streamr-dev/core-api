@@ -60,31 +60,18 @@ public class MapTraversal {
 
 	public static Integer getInteger(Map map, String name) {
 		Object raw = getProperty(map,name);
-		if (raw==null) return null;
-		else if (raw instanceof Integer)
-			return (Integer)raw;
-		else return Integer.parseInt(raw.toString());
-	}
-
-	/**
-	 * @throws NumberFormatException if value wasn't parseable to integer (e.g. "foo", 3.5)
-	 * @throws NullPointerException if value wasn't found
-     */
-	public static int getInt(Map map, String name) throws NumberFormatException, NullPointerException {
-		Object raw = getProperty(map, name);
-		if (raw instanceof Number) {
+		if (raw==null) {
+			return null;
+		} else if (raw instanceof Number) {
 			return ((Number)raw).intValue();
 		} else {
-			return Integer.parseInt(raw.toString());
+			return (int) Double.parseDouble(raw.toString()); // accept doubles, cast to int
 		}
 	}
 
-	public static int getInt(Map map, String name, int defaultValue) {
-		try {
-			return getInt(map, name);
-		} catch (NumberFormatException | NullPointerException e) {
-			return defaultValue;
-		}
+	public static Integer getInteger(Map map, String name, Integer defaultValue) {
+		Integer i = getInteger(map, name);
+		return (i == null ? defaultValue : i);
 	}
 
 	public static Long getLong(Map map, String name) {

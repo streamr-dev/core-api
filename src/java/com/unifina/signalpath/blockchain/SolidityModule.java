@@ -20,7 +20,6 @@ import java.util.Stack;
 public class SolidityModule extends ModuleWithUI implements Pullable<EthereumContract> {
 
 	private static final Logger log = Logger.getLogger(SolidityModule.class);
-	protected static final String ADDRESS_PLACEHOLDER = "{{ADDRESS}}";
 
 	private final EthereumAccountParameter ethereumAccount = new EthereumAccountParameter(this, "ethAccount");
 	private Output<EthereumContract> contractOutput = null;
@@ -109,8 +108,8 @@ public class SolidityModule extends ModuleWithUI implements Pullable<EthereumCon
 						// for payable constructors, sendEtherParam is added in params after the ordinary function arguments
 						// value can't be read from sendEtherParam.getValue because it's not added to the module until createParameters is called (so it exists in config but not in module object)
 						if (constructor.payable) {
-							long sendEtherParamValue = Long.parseLong(args.pop().toString());
-							BigDecimal valueWei = BigDecimal.valueOf(sendEtherParamValue).multiply(BigDecimal.TEN.pow(18));
+							BigDecimal sendEtherParamValue = new BigDecimal(args.pop().toString());
+							BigDecimal valueWei = sendEtherParamValue.multiply(BigDecimal.TEN.pow(18));
 							sendWei = valueWei.toBigInteger().toString();
 						}
 					}
@@ -161,17 +160,8 @@ public class SolidityModule extends ModuleWithUI implements Pullable<EthereumCon
 		public EthereumModuleOptions ethereumOptions = new EthereumModuleOptions();
 		public EthereumAccountParameter ethereumAccount;
 
-		private String replaceDynamicFields(String code) {
-			if (ethereumAccount.getAddress() == null) {
-				throw new RuntimeException("No Ethereum account is selected. Please select the account you want to use, or if there are none, go to the user profile page to create one.");
-			}
-			return code.replace(ADDRESS_PLACEHOLDER, ethereumAccount.getAddress());
-		}
-
 		/** @returns EthereumContract with isDeployed() false */
 		public EthereumContract compile(String code) throws Exception {
-			code = replaceDynamicFields(code);
-
 			String bodyJson = new Gson().toJson(ImmutableMap.of(
 					"code", code
 			)).toString();
@@ -217,8 +207,6 @@ public class SolidityModule extends ModuleWithUI implements Pullable<EthereumCon
 		 * @returns EthereumContract that isDeployed()
 		 **/
 		public EthereumContract deploy(String code, List<Object> args, String sendWei) throws Exception {
-			code = replaceDynamicFields(code);
-
 			Map body = new HashMap<>();
 			body.put("source", ethereumAccount.getAddress());
 			body.put("key", ethereumAccount.getPrivateKey());

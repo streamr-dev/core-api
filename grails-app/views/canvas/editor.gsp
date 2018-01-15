@@ -9,7 +9,6 @@
 		<r:require module="bootbox"/>
 		<r:require module="bootstrap-contextmenu"/>
 		<r:require module="slimscroll"/>
-		<r:require module="streamr-search"/>
 		<r:require module="signalpath-browser"/>
 		<r:require module="signalpath-theme"/>
 		<r:require module="hotkeys"/>

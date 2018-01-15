@@ -183,6 +183,10 @@ modules = {
 		dependsOn 'typeahead'
 		resource url:[dir:'js/unifina/streamr-search', file:'streamr-search.js', plugin: 'unifina-core']
 	}
+	'streamr-floating-search' {
+		dependsOn 'streamr-search'
+		resource url:[dir:'js/unifina/streamr-search', file:'streamr-floating-search.js', plugin: 'unifina-core']
+	}
 	'remote-tabs' {
 		dependsOn 'bootbox, mustache'
 		resource url:[dir:'js/unifina/remote-tabs', file:'remote-tabs.js', plugin: 'unifina-core']
@@ -311,6 +315,8 @@ modules = {
 		dependsOn 'confirm-button'
 		dependsOn 'name-editor'
 		dependsOn 'draggabilly'
+		dependsOn 'streamr-search'
+		dependsOn 'streamr-floating-search'
 		resource url:[dir:'js/unifina/signalPath/core', file:'signalPath.js', plugin: 'unifina-core']
 		resource url:[dir:'js/unifina/signalPath/generic', file:'emptyModule.js', plugin: 'unifina-core']
 		resource url:[dir:'js/unifina/signalPath/generic', file:'genericModule.js', plugin: 'unifina-core']

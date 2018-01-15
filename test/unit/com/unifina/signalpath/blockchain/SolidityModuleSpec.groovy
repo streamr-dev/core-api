@@ -79,7 +79,7 @@ class SolidityModuleSpec extends Specification {
 
 		then:
 		deployArgs == [3, "0x6e6adf6e579d83f8f1bc388a392c1a130b8f8d0cae6250612eb2aab4e945b1f0"]
-		sentWei == "12000000000000000000"
+		sentWei == "100000000000000000"
 	}
 
 
@@ -286,7 +286,7 @@ class SolidityModuleSpec extends Specification {
 		"name": "initial ETH",
 		"drivingInput": false,
 		"longName": "PayByUse.initial ETH",
-		"value": 12,
+		"value": 0.1,
 		"defaultValue": 0,
 		"acceptedTypes": ["Double"]
 	}''')
