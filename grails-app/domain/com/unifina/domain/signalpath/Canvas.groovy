@@ -2,7 +2,6 @@ package com.unifina.domain.signalpath
 
 import com.unifina.domain.dashboard.DashboardItem
 import com.unifina.domain.security.Permission
-import com.unifina.domain.security.SecUser
 import com.unifina.utils.IdGenerator
 import grails.converters.JSON
 import groovy.transform.CompileStatic
@@ -30,7 +29,6 @@ class Canvas {
 	}
 
 	String id
-	SecUser user
 	Date dateCreated
 	Date lastUpdated
 

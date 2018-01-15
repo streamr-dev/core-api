@@ -1,6 +1,7 @@
 package com.unifina.signalpath.list
 
 import com.unifina.api.SaveCanvasCommand
+import com.unifina.domain.security.Permission
 import com.unifina.domain.security.SecUser
 import com.unifina.domain.signalpath.Canvas
 import com.unifina.domain.signalpath.Module
@@ -16,11 +17,11 @@ import com.unifina.utils.testutils.ModuleTestHelper
 import grails.plugin.springsecurity.SpringSecurityService
 import grails.test.mixin.Mock
 import grails.test.mixin.TestMixin
-import grails.test.mixin.support.GrailsUnitTestMixin
+import grails.test.mixin.web.ControllerUnitTestMixin
 import spock.lang.Specification
 
-@TestMixin(GrailsUnitTestMixin)
-@Mock([Canvas, Module, SecUser, ModuleService, SpringSecurityService, SignalPathService, CanvasService, PermissionService])
+@TestMixin(ControllerUnitTestMixin) // "as JSON" support
+@Mock([Canvas, Module, SecUser, ModuleService, Permission, SpringSecurityService, SignalPathService, CanvasService, PermissionService])
 class ForEachItemSpec extends Specification {
 
 	CanvasService canvasService

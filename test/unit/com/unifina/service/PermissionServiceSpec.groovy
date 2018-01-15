@@ -58,7 +58,8 @@ class PermissionServiceSpec extends Specification {
 		service.systemGrantAll(anotherUser, dashRestricted)
 		service.systemGrantAll(anotherUser, dashPublic)
 
-		new Canvas(user: anotherUser).save(validate: false)
+		Canvas canvas = new Canvas().save(validate: false)
+		service.systemGrantAll(anotherUser, canvas)
 
 		// Set up the Permissions to the allowed resources
 		dashReadPermission = service.grant(anotherUser, dashAllowed, me, Operation.READ)
@@ -73,7 +74,8 @@ class PermissionServiceSpec extends Specification {
 		SecUser.count() == 3
 		Key.count() == 3
 		Dashboard.count() == 4
-		Permission.count() == 15
+		Canvas.count() == 1
+		Permission.count() == 18
 
 		and: "anotherUser has an invitation"
 		invite.username == anotherUser.username

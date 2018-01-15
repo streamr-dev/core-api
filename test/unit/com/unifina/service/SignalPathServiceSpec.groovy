@@ -16,15 +16,15 @@ import spock.lang.Specification
 @Mock([SecUser, Canvas, Serialization])
 class SignalPathServiceSpec extends Specification {
 
+	SecUser me
 	Canvas c1
 
 	def setup() {
-		SecUser me = new SecUser(username: "a@a.com", password: "pw", name: "name", timezone: "Europe/Helsinki")
+		me = new SecUser(username: "a@a.com", password: "pw", name: "name", timezone: "Europe/Helsinki")
 		me.save(failOnError: true)
 
 		c1 = new Canvas(
 				name: "canvas-1",
-				user: me,
 				json: "{}",
 				serialization: new Serialization(bytes: new byte[512], date: new Date()),
 				runner: "runnerId"
@@ -96,33 +96,33 @@ class SignalPathServiceSpec extends Specification {
 		service.servletContext.signalPathRunners[c1.runner] = runner
 
 		when:
-		service.runtimeRequest(new RuntimeRequest([type: 'stopRequest'], c1.user, c1, "canvases/$c1.id", "canvases/$c1.id", new HashSet<>()))
+		service.runtimeRequest(new RuntimeRequest([type: 'stopRequest'], me, c1, "canvases/$c1.id", "canvases/$c1.id", new HashSet<>()))
 
 		then:
 		1 * runner.getSignalPaths() >> [sp]
 		1 * sp.getCanvas() >> c1
-		1 * service.permissionService.canWrite(c1.user, c1) >> true
+		1 * service.permissionService.canWrite(me, c1) >> true
 		1 * service.stopLocal(c1) >> false
 		thrown(CanvasUnreachableException)
 	}
 
 	def "buildRuntimeRequest() must authorize and return a RuntimeRequest"() {
 		when:
-		RuntimeRequest req = service.buildRuntimeRequest([type: 'test'], "canvases/$c1.id", c1.user)
+		RuntimeRequest req = service.buildRuntimeRequest([type: 'test'], "canvases/$c1.id", me)
 
 		then:
-		1 * service.canvasService.authorizedGetById(c1.id, c1.user, Permission.Operation.READ) >> c1
+		1 * service.canvasService.authorizedGetById(c1.id, me, Permission.Operation.READ) >> c1
 		req.getType() == 'test'
 		req.get("type") == 'test'
 		req.getCheckedOperations().contains(Permission.Operation.READ)
 		req.getPath() == "canvases/$c1.id"
 		req.getOriginalPath() == req.getPath()
-		req.getUser() == c1.user
+		req.getUser() == me
 	}
 
 	def "buildRuntimeRequest() must throw if the path is malformed"() {
 		when:
-		RuntimeRequest req = service.buildRuntimeRequest([type: 'test'], "foobar/$c1.id", c1.user)
+		service.buildRuntimeRequest([type: 'test'], "foobar/$c1.id", me)
 
 		then:
 		thrown(IllegalArgumentException)

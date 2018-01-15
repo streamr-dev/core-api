@@ -37,9 +37,10 @@ class CanvasService {
 	}
 
 	@CompileStatic
-	public Canvas createNew(SaveCanvasCommand command, SecUser user) {
-		Canvas canvas = new Canvas(user: user)
+	Canvas createNew(SaveCanvasCommand command, SecUser user) {
+		Canvas canvas = new Canvas()
 		updateExisting(canvas, command, user, true)
+		permissionService.systemGrantAll(user, canvas)
 		return canvas
 	}
 
