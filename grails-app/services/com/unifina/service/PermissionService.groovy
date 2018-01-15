@@ -3,8 +3,11 @@ package com.unifina.service
 import com.unifina.domain.dashboard.Dashboard
 import com.unifina.domain.data.Feed
 import com.unifina.domain.data.Stream
-import com.unifina.domain.security.*
+import com.unifina.domain.security.Key
+import com.unifina.domain.security.Permission
 import com.unifina.domain.security.Permission.Operation
+import com.unifina.domain.security.SecUser
+import com.unifina.domain.security.SignupInvite
 import com.unifina.domain.signalpath.Canvas
 import com.unifina.domain.signalpath.ModulePackage
 import com.unifina.security.Userish
@@ -16,9 +19,6 @@ import java.security.AccessControlException
  * get, check, grant and revoke functions that query and control the Access Control Lists (ACLs) to resources
  *
  * Complexities handled by PermissionService:
- * 		- in addition to Permissions, "resource owner" (i.e. resource.user if exists) has all access to that resource
- * 			-> there doesn't always exist a Permission object in database for each "access right"
- * 			=> generate dummy Permission objects with id == null
  * 		- anonymous Permissions: checked, and listed for resource, but permitted resources not listed for user
  * 		- Permission owners and grant/revoke targets can be SecUsers or SignupInvites
  * 			=> getUserPropertyName
@@ -60,7 +60,7 @@ class PermissionService {
 	 * Check whether user is allowed to perform given operation on a resource
 	 */
 	boolean check(Userish userish, resource, Operation op) {
-		return resource?.id != null && (isOwner(userish, resource) || hasPermission(userish, resource, op))
+		return resource?.id != null && hasPermission(userish, resource, op)
 	}
 
 	/**
@@ -68,8 +68,7 @@ class PermissionService {
 	 */
 	List<Permission> getPermissionsTo(resource) {
 		String resourceProp = getResourcePropertyName(resource)
-		List<Permission> permissions = Permission.findAllWhere([(resourceProp): resource])
-		return permissions + generateDummyOwnerPermissions(resource)
+		return Permission.findAllWhere([(resourceProp): resource])
 	}
 
 	/**
@@ -80,7 +79,7 @@ class PermissionService {
 		userish = userish?.resolveToUserish()
 		String resourceProp = getResourcePropertyName(resource)
 
-		List<Permission> permissions = Permission.withCriteria {
+		return Permission.withCriteria {
 			eq(resourceProp, resource)
 			or {
 				eq("anonymous", true)
@@ -90,12 +89,6 @@ class PermissionService {
 				}
 			}
 		}.toList()
-
-		// Generate non-saved "dummy permissions" for owner
-		if (isOwner(userish, resource)) {
-			permissions.addAll(generateDummyOwnerPermissions(resource))
-		}
-		return permissions
 	}
 
 	/** Overload to allow leaving out the anonymous-include-flag but including the filter */
@@ -135,44 +128,23 @@ class PermissionService {
 		}
 
 		userish = userish?.resolveToUserish()
-		String resourceProp = getResourcePropertyNameFromClass(resourceClass)
+		boolean isUser = isNotNullAndIdNotNull(userish)
+		String userProp = isUser ? getUserPropertyName(userish) : null
 
-		// two queries needed because type system has been violated
-		//   in SQL, you could Permission p JOIN ResourceClass r ON p.(idProp)=r.id
-		def permissions = Permission.withCriteria {
-			isNotNull(resourceProp)
-			eq("operation", op)
-			or {
-				if (includeAnonymous) {
-					eq("anonymous", true)
-				}
-				if (isNotNullAndIdNotNull(userish)) {
-					String userProp = getUserPropertyName(userish)
-					eq(userProp, userish)
-				}
-			}
-		}
-
-		// or-clause in criteria query should become false, and nothing should be returned
-		boolean hasOwner = resourceClass.properties["declaredFields"].any { it.name == "user" }
-		if (!hasOwner && permissions.isEmpty()) {
-			return []
-		} else {
-			return resourceClass.withCriteria {
+		return resourceClass.withCriteria {
+			permissions {
+				eq("operation", op)
 				or {
-					SecUser user = userish?.resolveToSecUser()
-					// resources that specify an "owner" automatically give that user all access rights
-					if (hasOwner && user) {
-						eq "user", user
+					if (includeAnonymous) {
+						eq("anonymous", true)
 					}
-					// empty in-list will work with Mock but fail with SQL
-					if (!permissions.isEmpty()) {
-						"in" "id", permissions.collect { it[resourceProp].id }
+					if (isUser) {
+						eq(userProp, userish)
 					}
 				}
-				resourceFilter.delegate = delegate
-				resourceFilter()
 			}
+			resourceFilter.delegate = delegate
+			resourceFilter()
 		}
 	}
 
@@ -183,7 +155,6 @@ class PermissionService {
 	 * @param target Userish to be given permission to
 	 * @return Permission if permission was successfully granted
 	 * @throws AccessControlException if grantor doesn't have 'share' permission on resource
-	 * @throws IllegalArgumentException if trying to give resource owner "more" access permissions
      */
 	@CompileStatic
 	Permission grant(SecUser grantor,
@@ -191,17 +162,24 @@ class PermissionService {
 					 Userish target,
 					 Operation operation=Operation.READ,
 					 boolean logIfDenied=true) throws AccessControlException, IllegalArgumentException {
-		// Owner already has all access (can't give "more" access)
-		if (isOwner(target, resource)) {
-			throw new IllegalArgumentException("Can't grant permissions for owner of $resource.")
-		}
-
 		// TODO CORE-498: check grantor himself has the right he's granting? (e.g. "write")
 		if (!canShare(grantor, resource)) {
 			throwAccessControlException(grantor, resource, logIfDenied)
 		}
-
 		return systemGrant(target, resource, operation)
+	}
+
+	/**
+	 * Grant all Permissions (READ, WRITE, SHARTE) to a Userish (as sudo/system)
+	 * @param target Userish that will receive the access
+	 * @param resource to be given permission on
+	 * @return granted permissions
+	 */
+	@CompileStatic
+	List<Permission> systemGrantAll(Userish target, resource) {
+		Operation.values().collect { Operation op ->
+			systemGrant(target, resource, op)
+		}
 	}
 
 	/**
@@ -257,14 +235,9 @@ class PermissionService {
 							Userish target,
 							Operation operation=Operation.READ,
 							boolean logIfDenied=true) throws AccessControlException {
-		if (isOwner(target, resource)) {
-			throw new AccessControlException("Can't revoke owner's access to $resource!")
-		}
-
 		if (!canShare(revoker, resource)) {
 			throwAccessControlException(revoker, resource, logIfDenied)
 		}
-
 		return systemRevoke(target, resource, operation)
 	}
 
@@ -378,52 +351,16 @@ class PermissionService {
 		return revoked
 	}
 
-	private throwAccessControlException(SecUser violator, resource, loggingEnabled) {
+	private void throwAccessControlException(SecUser violator, resource, boolean loggingEnabled) {
 		if (loggingEnabled) {
 			log.warn("${violator?.username}(id ${violator?.id}) tried to modify sharing of $resource without SHARE Permission!")
-			if (resource?.hasProperty("user")) {
-				log.warn("||-> $resource is owned by ${resource.user.username} (id ${resource.user.id})")
-			}
 		}
 		throw new AccessControlException("${violator?.username}(id ${violator?.id}) has no 'share' permission to $resource!")
-	}
-
-	private static List<Permission> generateDummyOwnerPermissions(resource) {
-		String resourceProp = getResourcePropertyName(resource)
-		if (hasOwner(resource)) {
-			return Operation.enumConstants.collect {
-				new Permission(
-					id: null,
-					user: resource.user,
-					operation: it,
-					(resourceProp): resource
-				)
-			}
-		} else {
-			return []
-		}
 	}
 
 	@CompileStatic
 	private static Object getResourceFromPermission(Permission p) {
 		return p.canvas ?: p.dashboard ?: p.feed ?: p.modulePackage ?: p.stream
-	}
-
-	@CompileStatic
-	private static String getResourcePropertyNameFromClass(Class<?> clazz) {
-		if (clazz == Canvas.class) {
-			return "canvas"
-		} else if (clazz == Dashboard.class) {
-			return "dashboard"
-		} else if (clazz == Feed.class) {
-			return "feed"
-		} else if (clazz == ModulePackage) {
-			return "modulePackage"
-		} else if (clazz == Stream) {
-			return "stream"
-		} else {
-			throw new IllegalArgumentException("Unexpected resource class: " + clazz)
-		}
 	}
 
 	@CompileStatic
@@ -462,15 +399,5 @@ class PermissionService {
 	/** null is often a valid value (but not a valid user), and means "anonymous Permissions only" */
 	private static boolean isNotNullAndIdNotNull(userish) {
 		return userish != null && userish.id != null
-	}
-
-	/** ownership (if applicable) is stored in each Resource as "user" attribute */
-	private static boolean isOwner(Userish userish, resource) {
-		SecUser secUser = userish?.resolveToSecUser()
-		return secUser && hasOwner(resource) && resource.user.id == secUser.id
-	}
-
-	private static boolean hasOwner(resource) {
-		return resource?.hasProperty("user") && resource?.user?.id != null
 	}
 }

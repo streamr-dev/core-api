@@ -19,9 +19,4 @@ class SignupInvite implements Userish {
 	Userish resolveToUserish() {
 		return this
 	}
-
-	@Override
-	SecUser resolveToSecUser() {
-		return null
-	}
 }

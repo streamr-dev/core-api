@@ -44,14 +44,16 @@ class SecUser implements Userish {
 
 	@Override
 	boolean equals(Object obj) {
-		if (!obj instanceof SecUser) {
-			return false
-		}
-
-		if (obj.id == null || this.id == null) {
-			return this.is(obj)
+		if (obj instanceof SecUser) {
+			if (obj.id == null || this.id == null) {
+				return this.is(obj)
+			} else {
+				return obj.id == this.id
+			}
+		} else if (obj instanceof Long) {
+			return obj == this.id
 		} else {
-			return obj.id == this.id
+			return false
 		}
 	}
 
@@ -62,11 +64,6 @@ class SecUser implements Userish {
 
 	@Override
 	Userish resolveToUserish() {
-		return this
-	}
-
-	@Override
-	SecUser resolveToSecUser() {
 		return this
 	}
 }

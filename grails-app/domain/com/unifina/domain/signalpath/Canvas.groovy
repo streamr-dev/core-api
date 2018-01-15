@@ -1,6 +1,7 @@
 package com.unifina.domain.signalpath
 
 import com.unifina.domain.dashboard.DashboardItem
+import com.unifina.domain.security.Permission
 import com.unifina.domain.security.SecUser
 import com.unifina.utils.IdGenerator
 import grails.converters.JSON
@@ -47,7 +48,10 @@ class Canvas {
 
 	Serialization serialization
 
-	static hasMany = [dashboardItems: DashboardItem]
+	static hasMany = [
+		dashboardItems: DashboardItem,
+		permissions: Permission
+	]
 
 	static constraints = {
 		runner(nullable: true)

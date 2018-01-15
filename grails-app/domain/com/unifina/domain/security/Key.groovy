@@ -23,6 +23,23 @@ class Key implements Userish {
 		id generator: IdGenerator.name // Note: doesn't apply in unit tests
 	}
 
+	static hasMany = [permissions: Permission]
+
+	@Override
+	boolean equals(Object obj) {
+		if (obj instanceof Key) {
+			if (obj.id == null || this.id == null) {
+				return this.is(obj)
+			} else {
+				return obj.id == this.id
+			}
+		} else if (obj instanceof String) {
+			return obj == this.id
+		} else {
+			return false
+		}
+	}
+
 	@CompileStatic
 	Map toMap() {
 		return [
@@ -34,11 +51,6 @@ class Key implements Userish {
 
 	@Override
 	Userish resolveToUserish() {
-		return resolveToSecUser() ?: this
-	}
-
-	@Override
-	SecUser resolveToSecUser() {
-		return user
+		return user ?: this
 	}
 }

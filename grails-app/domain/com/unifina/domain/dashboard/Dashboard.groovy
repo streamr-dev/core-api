@@ -1,6 +1,6 @@
 package com.unifina.domain.dashboard
 
-import com.unifina.domain.security.SecUser
+import com.unifina.domain.security.Permission
 import groovy.transform.CompileStatic
 
 class Dashboard {
@@ -14,7 +14,10 @@ class Dashboard {
 
 	SortedSet<DashboardItem> items
 
-	static hasMany = [items: DashboardItem]
+	static hasMany = [
+		items: DashboardItem,
+		permissions: Permission
+	]
 
 	static constraints = {
 		name(nullable:true)

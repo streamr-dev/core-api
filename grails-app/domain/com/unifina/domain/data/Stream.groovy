@@ -1,5 +1,6 @@
 package com.unifina.domain.data
 
+import com.unifina.domain.security.Permission
 import com.unifina.domain.security.SecUser
 import com.unifina.domain.signalpath.Canvas
 import grails.converters.JSON
@@ -24,6 +25,8 @@ class Stream implements Comparable {
 	Boolean uiChannel = false
 	String uiChannelPath
 	Canvas uiChannelCanvas
+
+	static hasMany = [permissions: Permission]
 
 	static constraints = {
 		name(blank:false)
