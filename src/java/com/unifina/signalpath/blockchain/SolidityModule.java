@@ -160,17 +160,8 @@ public class SolidityModule extends ModuleWithUI implements Pullable<EthereumCon
 		public EthereumModuleOptions ethereumOptions = new EthereumModuleOptions();
 		public EthereumAccountParameter ethereumAccount;
 
-		private String replaceDynamicFields(String code) {
-			if (ethereumAccount.getAddress() == null) {
-				throw new RuntimeException("No Ethereum account is selected. Please select the account you want to use, or if there are none, go to the user profile page to create one.");
-			}
-			return code.replace(ADDRESS_PLACEHOLDER, ethereumAccount.getAddress());
-		}
-
 		/** @returns EthereumContract with isDeployed() false */
 		public EthereumContract compile(String code) throws Exception {
-			code = replaceDynamicFields(code);
-
 			String bodyJson = new Gson().toJson(ImmutableMap.of(
 					"code", code
 			)).toString();
@@ -216,8 +207,6 @@ public class SolidityModule extends ModuleWithUI implements Pullable<EthereumCon
 		 * @returns EthereumContract that isDeployed()
 		 **/
 		public EthereumContract deploy(String code, List<Object> args, String sendWei) throws Exception {
-			code = replaceDynamicFields(code);
-
 			Map body = new HashMap<>();
 			body.put("source", ethereumAccount.getAddress());
 			body.put("key", ethereumAccount.getPrivateKey());
