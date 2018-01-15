@@ -27,7 +27,8 @@ import ShareDialog from '../../ShareDialog'
 import DeleteButton from '../DashboardDeleteButton'
 import StreamrClientProvider from '../../WebComponents/StreamrClientProvider'
 
-const config = require('../dashboardConfig')
+const dashboardConfig = require('../dashboardConfig')
+const config = require('../../../config')
 
 import {
     updateDashboardChanges,
@@ -90,8 +91,8 @@ export class Editor extends Component<Props, State> {
     }
     
     state = {
-        breakpoints: config.layout.breakpoints,
-        cols: config.layout.cols,
+        breakpoints: dashboardConfig.layout.breakpoints,
+        cols: dashboardConfig.layout.cols,
         layoutsByItemId: {},
         isFullscreen: false,
         sharingDialogIsOpen: false
@@ -100,7 +101,7 @@ export class Editor extends Component<Props, State> {
     constructor() {
         super()
         this.client = new StreamrClient({
-            url: 'ws://127.0.0.1:8890/api/v1/ws',
+            url: config.wsUrl,
             authKey: keyId,
             autoconnect: true,
             autoDisconnect: false
@@ -146,12 +147,12 @@ export class Editor extends Component<Props, State> {
     
     generateLayout = (): Layout => {
         const db = this.props.dashboard
-        const layout = _.zipObject(config.layout.sizes, _.map(config.layout.sizes, (size: 'lg' | 'md' | 'sm' | 'xs') => {
+        const layout = _.zipObject(dashboardConfig.layout.sizes, _.map(dashboardConfig.layout.sizes, (size: 'lg' | 'md' | 'sm' | 'xs') => {
             return db.items.map(item => {
                 const id = Editor.generateItemId(item)
                 const layout = db.layout && db.layout[size] && db.layout[size].find(layout => layout.i === id)
                 return {
-                    ...config.layout.layoutsBySizeAndModule[size][item.webcomponent],
+                    ...dashboardConfig.layout.layoutsBySizeAndModule[size][item.webcomponent],
                     ...(layout || {}),
                     i: id
                 }
