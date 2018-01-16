@@ -2,11 +2,10 @@
 
 import axios from 'axios'
 import path from 'path'
-import settle from 'promise-settle'
 import parseError from './utils/parseError'
 import createLink from '../helpers/createLink'
 
-import {showError, showSuccess} from './notification'
+import {showError} from './notification'
 
 export const GET_RESOURCE_KEYS_REQUEST = 'GET_RESOURCE_KEYS_REQUEST'
 export const GET_RESOURCE_KEYS_SUCCESS = 'GET_RESOURCE_KEYS_SUCCESS'
@@ -20,8 +19,7 @@ export const REMOVE_RESOURCE_KEY_REQUEST = 'REMOVE_RESOURCE_KEY_REQUEST'
 export const REMOVE_RESOURCE_KEY_SUCCESS = 'REMOVE_RESOURCE_KEY_SUCCESS'
 export const REMOVE_RESOURCE_KEY_FAILURE = 'REMOVE_RESOURCE_KEY_FAILURE'
 
-import type {ApiError} from '../flowtype/common-types'
-import type {Key, ResourceType, ResourceId, State as ReducerState} from '../flowtype/key-types'
+import type {Key, ResourceType, ResourceId} from '../flowtype/key-types'
 
 export const getResourceKeys = (resourceType: ResourceType, resourceId: ResourceId) => (dispatch: Function) => {
     dispatch(getResourceKeysRequest())
@@ -29,8 +27,10 @@ export const getResourceKeys = (resourceType: ResourceType, resourceId: Resource
         .then(({data}) => dispatch(getResourceKeysSuccess(resourceType, resourceId, data)))
         .catch(res => {
             const e = parseError(res)
-            dispatch(getResourceKeysFailure(e))
-            dispatch(showError(e.error))
+            dispatch(getResourceKeysFailure(e.message))
+            dispatch(showError({
+                message: e.message
+            }))
             throw e
         })
 }
@@ -41,12 +41,13 @@ export const addResourceKey = (resourceType: ResourceType, resourceId: ResourceI
         .then(({data}) => dispatch(addResourceKeySuccess(resourceType, resourceId, data)))
         .catch(res => {
             const e = parseError(res)
-            dispatch(addResourceKeyFailure(e))
-            dispatch(showError(e.error))
+            dispatch(addResourceKeyFailure(e.message))
+            dispatch(showError({
+                message: e.message
+            }))
             throw e
         })
 }
-
 
 export const removeResourceKey = (resourceType: ResourceType, resourceId: ResourceId, keyId: Key.id) => (dispatch: Function) => {
     dispatch(removeResourceKeyRequest())
@@ -54,8 +55,10 @@ export const removeResourceKey = (resourceType: ResourceType, resourceId: Resour
         .then(() => dispatch(removeResourceKeySuccess(resourceType, resourceId, keyId)))
         .catch(res => {
             const e = parseError(res)
-            dispatch(removeResourceKeyFailure(e))
-            dispatch(showError(e.error))
+            dispatch(removeResourceKeyFailure(e.message))
+            dispatch(showError({
+                message: e.message
+            }))
             throw e
         })
 }

@@ -18,3 +18,13 @@ export type State = {
     error?: ?string,
     fetching: boolean
 }
+
+export type Action = {
+    type: string,
+    resourceType?: ResourceType,
+    resourceId?: ResourceId,
+    keys?: Array<Key>,
+    key?: Key,
+    keyId?: Key.id,
+    error?: string
+}
