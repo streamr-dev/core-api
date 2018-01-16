@@ -16,7 +16,7 @@ import groovy.transform.CompileStatic
 import java.security.AccessControlException
 
 /**
- * get, check, grant and revoke functions that query and control the Access Control Lists (ACLs) to resources
+ * Check, get, grant, and revoke permissions. Maintains an Access Control Lists (ACLs) to resources.
  *
  * Complexities handled by PermissionService:
  * 		- anonymous Permissions: checked, and listed for resource, but permitted resources not listed for user
@@ -29,7 +29,7 @@ import java.security.AccessControlException
  */
 class PermissionService {
 	// Cascade revocations to "higher" rights to ensure meaningful combinations (e.g. WRITE without READ makes no sense)
-	private static final ALSO_REVOKE = [read: [Operation.WRITE, Operation.SHARE]]
+	private static final Map<String, List<Operation>> ALSO_REVOKE = [read: [Operation.WRITE, Operation.SHARE]]
 
 	/**
 	 * Check whether user is allowed to read a resource
@@ -57,7 +57,7 @@ class PermissionService {
 	}
 
 	/**
-	 * Check whether user is allowed to perform given operation on a resource
+	 * Check whether user is allowed to perform specified operation on a resource
 	 */
 	boolean check(Userish userish, resource, Operation op) {
 		return resource?.id != null && hasPermission(userish, resource, op)
@@ -72,8 +72,7 @@ class PermissionService {
 	}
 
 	/**
-	 * List all Permissions granted to a Userish on a resource
-	 * @param userish is a SecUser, Key, SignupInvite or null (anonymous)
+	 * List all Permissions granted on a resource to a Userish
 	 */
 	List<Permission> getPermissionsTo(resource, Userish userish) {
 		userish = userish?.resolveToUserish()
@@ -118,16 +117,14 @@ class PermissionService {
 	/**
 	 * Get all resources of given type that the user has specified permission for
 	 */
-	def <T> List<T> get(Class<T> resourceClass,
-						Userish userish,
-						Operation op,
-						boolean includeAnonymous,
+	def <T> List<T> get(Class<T> resourceClass, Userish userish, Operation op, boolean includeAnonymous,
 						Closure resourceFilter = {}) {
+		userish = userish?.resolveToUserish()
+
 		if (!includeAnonymous && !userish?.id) {
 			return []
 		}
 
-		userish = userish?.resolveToUserish()
 		boolean isUser = isNotNullAndIdNotNull(userish)
 		String userProp = isUser ? getUserPropertyName(userish) : null
 
@@ -149,12 +146,16 @@ class PermissionService {
 	}
 
 	/**
-	 * As a SecUser, attempt to grant Permission to another Userish to access a resource
-	 * @param grantor user attempting to grant Permission (needs SHARE permission or must be owner)
+	 * As a SecUser, attempt to grant Permission to another Userish on resource
+	 *
+	 * @param grantor user attempting to grant Permission (needs SHARE permission)
 	 * @param resource to be given permission on
 	 * @param target Userish to be given permission to
-	 * @return Permission if permission was successfully granted
-	 * @throws AccessControlException if grantor doesn't have 'share' permission on resource
+	 *
+	 * @return Permission if successfully granted
+	 *
+	 * @throws AccessControlException if grantor doesn't have SHARE permission on resource
+	 * @throws IllegalArgumentException if given invalid resource or target
      */
 	@CompileStatic
 	Permission grant(SecUser grantor,
@@ -170,10 +171,12 @@ class PermissionService {
 	}
 
 	/**
-	 * Grant all Permissions (READ, WRITE, SHARTE) to a Userish (as sudo/system)
+	 * Grants all Permissions (READ, WRITE, SHARE) to a Userish (as sudo/system)
+	 *
 	 * @param target Userish that will receive the access
 	 * @param resource to be given permission on
-	 * @return granted permissions
+	 *
+	 * @return granted permissions (size == 3)
 	 */
 	@CompileStatic
 	List<Permission> systemGrantAll(Userish target, resource) {
@@ -184,11 +187,12 @@ class PermissionService {
 
 	/**
 	 * Grant Permission to a Userish (as sudo/system)
+	 *
 	 * @param target Userish that will receive the access
 	 * @param resource to be given permission on
+	 *
      * @return granted permission
      */
-	@CompileStatic
 	Permission systemGrant(Userish target, resource, Operation operation=Operation.READ) {
 		target = target.resolveToUserish()
 		String userProp = getUserPropertyName(target)
@@ -201,6 +205,18 @@ class PermissionService {
 		).save(flush: true, failOnError: true)
 	}
 
+	/**
+	 *
+	 * Grant anonymous (public) Permission on a resource so that anyone can access it
+	 *
+	 * @param grantor user attempting to grant Permission (needs SHARE permission)
+	 * @param resource resource to be given public access to
+	 *
+	 * @return Permission if successfully granted
+	 *
+	 * @throws AccessControlException if grantor doesn't have SHARE permission on resource
+	 * @throws IllegalArgumentException if given invalid resource
+	 */
 	@CompileStatic
 	Permission grantAnonymousAccess(SecUser grantor,
 									resource,
@@ -212,6 +228,13 @@ class PermissionService {
 		return systemGrantAnonymousAccess(resource, operation)
 	}
 
+	/**
+	 * Grant anonymous (public) Permission on a resource (as sudo/system) so that anyone can access it
+	 *
+	 * @param resource to be given permission on
+	 *
+	 * @return granted permission
+	 */
 	Permission systemGrantAnonymousAccess(resource, Operation operation=Operation.READ) {
 		String resourceProp = getResourcePropertyName(resource)
 		return new Permission(
@@ -223,11 +246,15 @@ class PermissionService {
 
 	/**
 	 * As a SecUser, revoke a Permission from a Userish
-	 * @param revoker user attempting to revoke permission (needs SHARE permission or must be owner)
+	 *
+	 * @param revoker user attempting to revoke permission (needs SHARE permission)
 	 * @param resource to be revoked from target
 	 * @param target Userish user whose Permission is revoked
-	 * @param operation or access level to be revoked (cascade to "higher" operations, e.g. READ also revokes SHARE)
+	 * @param operation or access level to be revoked (cascades to "higher" operations, e.g. READ also revokes SHARE)
+	 *
 	 * @returns Permissions that were deleted
+	 *
+	 * @throws AccessControlException if revoker doesn't have SHARE permission on resource
      */
 	@CompileStatic
 	List<Permission> revoke(SecUser revoker,
@@ -243,9 +270,11 @@ class PermissionService {
 
 	/**
 	 * Revoke a Permission from a Userish (as sudo/system)
+	 *
 	 * @param target Userish whose Permission is revoked
 	 * @param resource to be revoked from target
-	 * @param operation or access level to be revoked (cascade to "higher" operations, e.g. READ also revokes SHARE)
+	 * @param operation or access level to be revoked (cascades to "higher" operations, e.g. READ also revokes SHARE)
+	 *
      * @return Permissions that were deleted
      */
 	@CompileStatic
@@ -255,9 +284,17 @@ class PermissionService {
 
 	/**
 	 * As a SecUser, revoke a Permission.
-     */
+	 *
+	 * @param revoker user attempting to revoke permission (needs SHARE permission)
+	 * @param permission to be revoked
+	 *
+	 * @return Permissions that were deleted
+	 *
+	 * @throws AccessControlException if revoker doesn't have SHARE permission on resource
+	 */
 	@CompileStatic
-	List<Permission> revoke(SecUser revoker, Permission permission, boolean logIfDenied=true) {
+	List<Permission> revoke(SecUser revoker, Permission permission, boolean logIfDenied=true)
+			throws AccessControlException {
 		Object resource = getResourceFromPermission(permission)
 		if (!canShare(revoker, resource)) {
 			throwAccessControlException(revoker, resource, logIfDenied)
@@ -267,7 +304,10 @@ class PermissionService {
 
 	/**
 	 * Revoke a Permission (as sudo/system)
+	 *
+	 * @return Permissions that were deleted
 	 */
+	@CompileStatic
 	List<Permission> systemRevoke(Permission permission) {
 		return performRevoke(
 			permission.anonymous,
@@ -277,7 +317,8 @@ class PermissionService {
 	}
 
 	/**
-	 * Transfer all Permissions created for a SignupInvite to corresponding SecUser (based on email)
+	 * Transfer all Permissions created for a SignupInvite to the corresponding SecUser (based on email)
+	 *
 	 * @param user to transfer to
      * @return List of Permissions transferred from SignupInvite to SecUser
      */
@@ -312,7 +353,9 @@ class PermissionService {
 		return !p.empty
 	}
 
-	/** find Permissions that will be revoked, and cascade according to alsoRevoke map */
+	/**
+	 * Find Permissions that will be revoked, and cascade according to alsoRevoke map
+	 */
 	private List<Permission> performRevoke(boolean anonymous, Userish target, resource, Operation operation) {
 		target = target?.resolveToUserish()
 		String resourceProp = getResourcePropertyName(resource)
@@ -325,13 +368,15 @@ class PermissionService {
 				String userProp = getUserPropertyName(target)
 				eq(userProp, target)
 			}
-		}
+		}.toList()
 
 		log.info("performRevoke: Found permissions for $resource: $permissionList")
 
 		List<Permission> revoked = []
 		def revokeOp = { Operation op ->
-			permissionList.findAll { it.operation == op }.each { Permission perm ->
+			permissionList.findAll { Permission perm ->
+				perm.operation == op
+			}.each { Permission perm ->
 				revoked.add(perm)
 				try {
 					log.info("performRevoke: Trying to delete permission $perm.id")
