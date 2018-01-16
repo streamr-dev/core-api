@@ -1,11 +1,10 @@
-package com.unifina.controller.security
 
-import com.unifina.domain.signalpath.Canvas
 import LoginTesterAdminSpec
+import com.unifina.domain.signalpath.Canvas
 import mixins.CanvasMixin
 import mixins.ConfirmationMixin
 import pages.CanvasPage
-import core.pages.TaskWorkerPage
+import pages.TaskWorkerPage
 
 import java.util.concurrent.TimeUnit
 
