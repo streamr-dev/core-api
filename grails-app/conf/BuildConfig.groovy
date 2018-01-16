@@ -12,14 +12,14 @@ grails.project.test.reports.dir = "target/test-reports"
 grails.project.war.file = "target/ROOT.war" // "target/${appName}-${appVersion}.war"
 
 grails.project.fork = [
-    run: [
+	run: [
 		maxMemory: System.getProperty("maxMemory") ? Integer.parseInt(System.getProperty("maxMemory")) : 4196,
 		minMemory: 256,
 		debug: false,
 		maxPerm: 512,
 		forkReserve:false
 	],
-    test: [
+	test: [
 		maxMemory: System.getProperty("maxMemory") ? Integer.parseInt(System.getProperty("maxMemory")) : 4196,
 		minMemory: 256,
 		debug: false,
@@ -35,18 +35,18 @@ grails.project.dependency.resolver = "maven" // or ivy
 grails.project.dependency.resolution = {
 
 	// inherit Grails' default dependencies
-    inherits("global") {
+	inherits("global") {
 		// specify dependency exclusions here; for example, uncomment this to disable ehcache:
 		// excludes 'ehcache'
-    }
-    log "warn" // log level of Ivy resolver, either 'error', 'warn', 'info', 'debug' or 'verbose'
+	}
+	log "warn" // log level of Ivy resolver, either 'error', 'warn', 'info', 'debug' or 'verbose'
 	checksums true // Whether to verify checksums on resolve
 	legacyResolve false // whether to do a secondary resolve on plugin installation, not advised and here for backwards compatibility
 
 	repositories {
-        // Fast local repos first
-        grailsHome()
-        mavenLocal()
+		// Fast local repos first
+		grailsHome()
+		mavenLocal()
 
 		// Maven central
 		mavenRepo "http://repo1.maven.org/maven2/"
@@ -54,13 +54,13 @@ grails.project.dependency.resolution = {
 		// Ethereum Repository
 		mavenRepo "https://dl.bintray.com/ethereum/maven/"
 
-        // Remote Grails repos
-        grailsPlugins()
-        grailsCentral()
+		// Remote Grails repos
+		grailsPlugins()
+		grailsCentral()
 
-        // New Grails repo
-        mavenRepo "https://repo.grails.org/grails/plugins"
-    }
+		// New Grails repo
+		mavenRepo "https://repo.grails.org/grails/plugins"
+	}
 
 	def gebVersion = "1.0"
 	def seleniumVersion = "2.53.0"
