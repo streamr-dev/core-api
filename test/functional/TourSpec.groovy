@@ -1,16 +1,10 @@
-import mixins.TourMixin
 import LoginTester1Spec
 import mixins.CanvasMixin
 import mixins.ConfirmationMixin
-import pages.*
+import mixins.TourMixin
+import pages.CanvasPage
 
-class TourSpec extends LoginTester1Spec {
-
-	def setupSpec() {
-		this.class.metaClass.mixin(CanvasMixin)
-		this.class.metaClass.mixin(ConfirmationMixin)
-		this.class.metaClass.mixin(TourMixin)
-	}
+class TourSpec extends LoginTester1Spec implements CanvasMixin, ConfirmationMixin, TourMixin {
 
 	def setup() {
 		at CanvasPage

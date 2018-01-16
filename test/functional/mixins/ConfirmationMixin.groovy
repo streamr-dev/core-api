@@ -1,6 +1,6 @@
 package mixins
 
-class ConfirmationMixin {
+trait ConfirmationMixin {
 	def waitForConfirmation(String dialogClass = ".modal-dialog") {
 		waitFor { $(dialogClass).displayed }
 	}
