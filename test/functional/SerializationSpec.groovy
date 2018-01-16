@@ -55,6 +55,7 @@ class SerializationSpec extends LoginTester1Spec {
 			connectEndpoints(findOutput("Add", "sum"), findInput("Label", "label"))
 
 			ensureRealtimeTabDisplayed()
+			turnOnSerialization()
 			setCanvasName(canvasName)
 			startCanvas(true)
 

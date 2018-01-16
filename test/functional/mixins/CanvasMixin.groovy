@@ -374,4 +374,12 @@ class CanvasMixin {
 		""")
 		return Canvas.State.fromValue(stateString)
 	}
+
+	void turnOnSerialization() {
+		realtimeOptionsButton.click()
+		waitFor { realtimeOptionsModal.displayed }
+		serializationEnabled.click()
+		serializationEnabled.find("option").find { it.value() == "true" }.click()
+		acceptConfirmation()
+	}
 }
