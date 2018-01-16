@@ -39,14 +39,14 @@ public class CanvasStartTask extends AbstractTask {
 				if (!canvas) {
 					throw new RuntimeException("Canvas "+config.id+" could not be found anymore!")
 				}
-				canvasService.start(canvas, config.forceReset)
+				canvasService.start(canvas, config.forceReset, canvas.user)
 			}
 		} catch (Exception e) {
 			if (!config.forceReset && config.resetOnFail) {
 				log.error("Failed to start canvas $canvas.id, trying again by clearing serialization...", e)
 				Canvas.withTransaction {
 					canvas = Canvas.get(config.id)
-					canvasService.start(canvas, true)
+					canvasService.start(canvas, true, canvas.user)
 				}
 			} else {
 				log.error("Failed to start canvas $canvas.id", e)

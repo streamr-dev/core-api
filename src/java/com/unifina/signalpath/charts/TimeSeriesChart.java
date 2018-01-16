@@ -121,19 +121,6 @@ public class TimeSeriesChart extends Chart {
 		if (options.getOption("inputs")!=null)
 			tsInputCount = options.getOption("inputs").getInt();
 		
-		// Backwards compatibility
-		if (config.containsKey("params")) {
-			List params = (List) config.get("params");
-			Map inputConfig = null;
-			for (Object p : params) {
-				if (((Map)p).get("name").equals("inputs")) {
-					inputConfig = (Map)p;
-				}
-			}
-			if (inputConfig != null)
-				tsInputCount = Integer.parseInt(inputConfig.get("value").toString());
-		}
-		
 		for (int i=1;i<=tsInputCount;i++) {
 			getInputConnection("in"+i);
 		}

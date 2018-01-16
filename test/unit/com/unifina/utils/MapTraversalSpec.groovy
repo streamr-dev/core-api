@@ -21,8 +21,8 @@ class MapTraversalSpec extends Specification {
 				 cast: [pals: [[name: "Jake", species: "Dog", selected: true], [name: "Finn", species: "Human"]], type: "bff"]]
 
 		expect: "typed getters"
-		MapTraversal.getInt(m, "episodes") == 10
-		MapTraversal.getInt(m, "foo", 123) == 123
+		MapTraversal.getInteger(m, "episodes") == 10
+		MapTraversal.getInteger(m, "foo", 123) == 123
 		MapTraversal.getString(m, "cast.type") == "bff"
 		MapTraversal.getString(m, "cast.pals[0].species") == "Dog"
 		MapTraversal.getBoolean(m, "cast.pals[0].selected")

@@ -69,10 +69,11 @@ class HttpSpec extends Specification {
 		module.setParentSignalPath(signalPath)
 	}
 
-	private boolean test() {
+	private boolean test(boolean localAddressesAreAllowed = true) {
 		// TestableHttp is Http module wrapped so that we can inject our own mock HttpClient
 		// Separate class is needed in same path as Http.java; anonymous class won't work with de-serializer
 		TestableHttp.httpClient = mockClient
+		TestableHttp.localAddressesAreAllowed = localAddressesAreAllowed
 		return new ModuleTestHelper.Builder(module, inputs, outputs)
 			.overrideGlobals { mockGlobals }
 			.onModuleInstanceChange { newInstance -> module = newInstance }
@@ -255,9 +256,34 @@ class HttpSpec extends Specification {
 				module.sendOutput(transaction)
 			}
 		}
-		outputs.data = [null, null, null];
-		outputs.statusCode = [204d, 204d, 204d];
+		outputs.data = [null, null, null]
+		outputs.statusCode = [204d, 204d, 204d]
 		expect:
 		test()
+	}
+
+	void "outputs errors and not data nor status nor headers if local addresses are not allowed"() {
+		outputs.errors = [
+			["Bad target address: Local HTTP calls not allowed"],
+			["Bad target address: Local HTTP calls not allowed"],
+			["Bad target address: Local HTTP calls not allowed"]
+		]
+		outputs.statusCode = [
+			null,
+			null,
+			null
+		]
+		outputs.data = [
+			null,
+			null,
+			null
+		]
+		outputs.headers = [
+			null,
+			null,
+			null
+		]
+		expect:
+		test(false)
 	}
 }
