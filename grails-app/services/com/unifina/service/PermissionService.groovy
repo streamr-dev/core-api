@@ -370,6 +370,11 @@ class PermissionService {
 			}
 		}.toList()
 
+		// Prevent revocation of only/last share permission to prevent inaccessible resources
+		if (hasOneOrLessSharePermissionsLeft(resource) && Operation.SHARE in permissionList*.operation) {
+			throw new AccessControlException("Cannot revoke only SHARE permission of ${resource}")
+		}
+
 		log.info("performRevoke: Found permissions for $resource: $permissionList")
 
 		List<Permission> revoked = []
@@ -394,6 +399,16 @@ class PermissionService {
 		revokeOp(operation)
 		ALSO_REVOKE.get(operation.id).each(revokeOp)
 		return revoked
+	}
+
+	private static boolean hasOneOrLessSharePermissionsLeft(resource) {
+		String resourceProp = getResourcePropertyName(resource)
+		def criteria = Permission.createCriteria()
+		def n = criteria.count {
+			eq(resourceProp, resource)
+			eq("operation", Operation.SHARE)
+		}
+		return n <= 1
 	}
 
 	private void throwAccessControlException(SecUser violator, resource, boolean loggingEnabled) {

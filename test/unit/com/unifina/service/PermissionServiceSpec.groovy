@@ -297,6 +297,42 @@ class PermissionServiceSpec extends Specification {
 		thrown AccessControlException
 	}
 
+	void "cannot revoke only share permission"() {
+		setup: "transfer effective 'ownership'"
+		service.systemGrantAll(anotherUser, dashOwned)
+		service.systemRevoke(me, dashOwned, Operation.SHARE)
+
+		when:
+		service.systemRevoke(anotherUser, dashOwned, Operation.SHARE)
+		then:
+		def e = thrown(AccessControlException)
+		e.message == "Cannot revoke only SHARE permission of ${dashOwned}"
+	}
+
+	void "cannot revoke only share permission (via cascading READ)"() {
+		setup: "transfer effective 'ownership'"
+		service.systemGrantAll(anotherUser, dashOwned)
+		service.systemRevoke(me, dashOwned, Operation.SHARE)
+
+		when:
+		service.systemRevoke(anotherUser, dashOwned, Operation.READ)
+		then:
+		def e = thrown(AccessControlException)
+		e.message == "Cannot revoke only SHARE permission of ${dashOwned}"
+	}
+
+	void "cannot revoke only share permission (via cascading WRITE)"() {
+		setup: "transfer effective 'ownership'"
+		service.systemGrantAll(anotherUser, dashOwned)
+		service.systemRevoke(me, dashOwned, Operation.SHARE)
+
+		when:
+		service.systemRevoke(anotherUser, dashOwned, Operation.WRITE)
+		then:
+		def e = thrown(AccessControlException)
+		e.message == "Cannot revoke only SHARE permission of ${dashOwned}"
+	}
+
 	void "sharing read rights to others"() {
 		when:
 		service.grant(me, dashOwned, stranger, Operation.READ)
