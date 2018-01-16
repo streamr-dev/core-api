@@ -243,7 +243,8 @@ class SignalPathService {
 	 */
 	@CompileStatic
 	Map<String, SecUser> getUsersOfRunningCanvases() {
-		Map<String, SignalPathRunner> signalPathRunnerMap = servletContext["signalPathRunners"] as Map<String, SignalPathRunner>
+		Map<String, SignalPathRunner> signalPathRunnerMap =
+			(servletContext["signalPathRunners"] ?: [:]) as Map<String, SignalPathRunner>
 		Map<String, SecUser> canvasIdToUser = [:]
 		signalPathRunnerMap.values().each { SignalPathRunner runner ->
 			SecUser user = runner.globals.user

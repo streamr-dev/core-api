@@ -8,6 +8,7 @@ import com.unifina.exceptions.CanvasUnreachableException
 import com.unifina.signalpath.RuntimeRequest
 import com.unifina.signalpath.SignalPath
 import com.unifina.signalpath.SignalPathRunner
+import com.unifina.utils.Globals
 import grails.test.mixin.Mock
 import grails.test.mixin.TestFor
 import spock.lang.Specification
@@ -20,7 +21,7 @@ class SignalPathServiceSpec extends Specification {
 	Canvas c1
 
 	def setup() {
-		me = new SecUser(username: "a@a.com", password: "pw", name: "name", timezone: "Europe/Helsinki")
+		me = new SecUser(username: "me@streamr.com", password: "pw", name: "name", timezone: "Europe/Helsinki")
 		me.save(failOnError: true)
 
 		c1 = new Canvas(
@@ -33,6 +34,7 @@ class SignalPathServiceSpec extends Specification {
 		assert c1.serialization.id != null
 
 		service.canvasService = Mock(CanvasService)
+		service.servletContext = [:]
 	}
 
 	def "clearState() clears serialized state"() {
@@ -126,6 +128,48 @@ class SignalPathServiceSpec extends Specification {
 
 		then:
 		thrown(IllegalArgumentException)
+	}
+
+	void "getUsersOfRunningCanvases() returns empty map if no canvases running"() {
+		expect:
+		service.getUsersOfRunningCanvases() == [:]
+	}
+
+	void "getUsersOfRunningCanvases() returns canvasId -> user mapping of running canvases"() {
+		SecUser someoneElse = new SecUser(
+			username: "someoneElse@streamr.com",
+			timezone: "Europe/Helsinki"
+		).save(validate: false, failOnError: true)
+
+		setup: "stub running canvases"
+		Canvas c1 = new Canvas()
+		Canvas c2 = new Canvas()
+		Canvas c3 = new Canvas()
+
+		c1.id = "canvas-1"
+		c2.id = "canvas-2"
+		c3.id = "canvas-3"
+
+		SignalPath sp1 = new SignalPath()
+		SignalPath sp2 = new SignalPath()
+		SignalPath sp3 = new SignalPath()
+
+		sp1.setCanvas(c1)
+		sp2.setCanvas(c2)
+		sp3.setCanvas(c3)
+
+		service.servletContext["signalPathRunners"] = [
+		    "runner-id-1": new SignalPathRunner(sp1, new Globals([:], grailsApplication, someoneElse)),
+			"runner-id-2": new SignalPathRunner(sp2, new Globals([:], grailsApplication, me)),
+			"runner-id-3": new SignalPathRunner(sp3, new Globals([:], grailsApplication, someoneElse)),
+		]
+
+		expect:
+		service.getUsersOfRunningCanvases() == [
+		    "canvas-1": someoneElse,
+			"canvas-2": me,
+			"canvas-3": someoneElse
+		]
 	}
 
 }
