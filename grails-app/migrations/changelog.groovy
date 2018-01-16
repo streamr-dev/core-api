@@ -81,4 +81,5 @@ databaseChangeLog = {
 	include file: 'core/2017-11-23-encrypt-private-keys.groovy'
 	include file: 'core/2018-01-11-require-all-module.groovy'
 	include file: 'core/2017-12-21-domain-fields-for-permissions.groovy'
+	include file: 'core/2018-01-16-remove-user-from-domain-objects.groovy'
 }
