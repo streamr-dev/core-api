@@ -61,7 +61,7 @@ grails.project.dependency.resolution = {
         runtime('org.apache.commons:commons-math3:3.2')
         runtime('commons-codec:commons-codec:1.6')
         runtime('com.opencsv:opencsv:3.3')
-        runtime('de.ruedigermoeller:fst:2.43')
+        runtime('de.ruedigermoeller:fst:2.56')
 
 		runtime('joda-time:joda-time:2.9.3')
 		compile('com.udojava:EvalEx:1.6')
