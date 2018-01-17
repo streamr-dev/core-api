@@ -75,8 +75,7 @@ describe('User actions', () => {
                 await store.dispatch(actions.getCurrentUser())
             } catch (e) {
                 assert.deepStrictEqual(store.getActions().slice(0, 2), expectedActions)
-                assert.deepStrictEqual(store.getActions()[2].type, 'CREATE_NOTIFICATION')
-                assert.deepStrictEqual(store.getActions()[2].notification.type, 'error')
+                assert.deepStrictEqual(store.getActions()[2].level, 'error')
             }
         })
     })
@@ -159,8 +158,7 @@ describe('User actions', () => {
             
             await store.dispatch(actions.saveCurrentUser(user, true))
             assert.deepStrictEqual(store.getActions().slice(0, 2), expectedActions)
-            assert.deepStrictEqual(store.getActions()[2].type, 'CREATE_NOTIFICATION')
-            assert.deepStrictEqual(store.getActions()[2].notification.type, 'success')
+            assert.deepStrictEqual(store.getActions()[2].level, 'success')
         })
         it('creates SAVE_CURRENT_USER_FAILURE when saving user failed', async () => {
             const user = {
@@ -183,7 +181,7 @@ describe('User actions', () => {
                 }, user)
                 requests.at(0).respondWith({
                     status: 500,
-                    response: new Error('test')
+                    response: 'test'
                 })
             })
             
@@ -191,13 +189,15 @@ describe('User actions', () => {
                 type: actions.SAVE_CURRENT_USER_REQUEST
             }, {
                 type: actions.SAVE_CURRENT_USER_FAILURE,
-                error: new Error('test')
+                error: 'test'
             }]
             
-            await store.dispatch(actions.saveCurrentUser(user, true))
-            assert.deepStrictEqual(store.getActions().slice(0, 2), expectedActions)
-            assert.deepStrictEqual(store.getActions()[2].type, 'CREATE_NOTIFICATION')
-            assert.deepStrictEqual(store.getActions()[2].notification.type, 'error')
+            try {
+                await store.dispatch(actions.saveCurrentUser(user, true))
+            } catch (e) {
+                assert.deepStrictEqual(store.getActions().slice(0, 2), expectedActions)
+                assert.deepStrictEqual(store.getActions()[2].level, 'error')
+            }
         })
     })
     
