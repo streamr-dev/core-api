@@ -1,6 +1,6 @@
 
 
-public class LoginTester1Spec extends LoginTesterSpec {
+class LoginTester1Spec extends LoginTesterSpec {
 
 	public static String testerUsername = "tester1@streamr.com"
 	public static String testerPassword = "tester1TESTER1"
@@ -11,7 +11,7 @@ public class LoginTester1Spec extends LoginTesterSpec {
 	}
 
 	@Override
-	public String getTesterPassword() {
+	String getTesterPassword() {
 		return testerPassword
 	}
 }

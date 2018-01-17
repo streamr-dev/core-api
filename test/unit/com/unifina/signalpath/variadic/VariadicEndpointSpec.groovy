@@ -11,13 +11,11 @@ class VariadicEndpointSpec extends Specification {
 	def attachToModuleEndpoints = []
 	def variadicEndpoint = new VariadicEndpoint(module, new InputInstantiator.SimpleObject(), 5) {
 
-		@Override
 		def void attachToModule(AbstractSignalPathModule owner, Endpoint endpoint) {
 			assert owner == module
 			attachToModuleEndpoints << endpoint
 		}
 
-		@Override
 		def void furtherConfigurePlaceholder(Endpoint placeholder) {}
 
 		@Override

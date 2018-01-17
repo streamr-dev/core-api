@@ -18,7 +18,6 @@ import grails.test.mixin.web.FiltersUnitTestMixin
 import spock.lang.Specification
 
 @TestFor(PermissionApiController)
-@Mixin(FiltersUnitTestMixin)
 @Mock([Permission, Key, Stream, SecUser, Canvas, UnifinaCoreAPIFilters, UserService])
 class PermissionApiControllerSpec extends Specification {
 	def permissionService

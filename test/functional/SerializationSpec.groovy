@@ -9,18 +9,13 @@ import mixins.StreamMixin
 import grails.util.Holders
 import spock.lang.Shared
 
-class SerializationSpec extends LoginTester1Spec {
+class SerializationSpec extends LoginTester1Spec implements CanvasMixin, ConfirmationMixin, StreamMixin {
 
 	@Shared long serializationIntervalInMillis
 	@Shared Stream testStream
 	@Shared StreamService streamService
 
 	def setupSpec() {
-		// For some reason the annotations don't work so need the below.
-		SerializationSpec.metaClass.mixin(CanvasMixin)
-		SerializationSpec.metaClass.mixin(ConfirmationMixin)
-		SerializationSpec.metaClass.mixin(StreamMixin)
-
 		serializationIntervalInMillis = MapTraversal.getLong(Holders.config, SerializationService.INTERVAL_CONFIG_KEY)
 		streamService = createStreamService()
 
@@ -55,6 +50,7 @@ class SerializationSpec extends LoginTester1Spec {
 			connectEndpoints(findOutput("Add", "sum"), findInput("Label", "label"))
 
 			ensureRealtimeTabDisplayed()
+			turnOnSerialization()
 			setCanvasName(canvasName)
 			startCanvas(true)
 

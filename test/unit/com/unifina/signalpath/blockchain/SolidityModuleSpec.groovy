@@ -1,14 +1,13 @@
 package com.unifina.signalpath.blockchain
 
+import com.google.gson.Gson
 import com.unifina.ModuleTestingSpecification
-import com.unifina.api.NotPermittedException
 import com.unifina.domain.security.IntegrationKey
 import com.unifina.domain.security.SecUser
 import com.unifina.serialization.SerializerImpl
 import com.unifina.service.EthereumIntegrationKeyService
 import com.unifina.service.SerializationService
 import grails.test.mixin.Mock
-import groovy.json.JsonSlurper
 
 @Mock([IntegrationKey, SecUser])
 class SolidityModuleSpec extends ModuleTestingSpecification {
@@ -112,7 +111,7 @@ class SolidityModuleSpec extends ModuleTestingSpecification {
 		module.pullValue(module.getOutput("contract")) != null
 	}
 
-	static Map applyConfig = new JsonSlurper().parseText('''
+	static Map applyConfig = new Gson().fromJson('''
 {
     "contract":
     {
@@ -302,9 +301,9 @@ class SolidityModuleSpec extends ModuleTestingSpecification {
         }
     }
 }
-	''')
+	''', Map.class)
 
-	static Map initialEthInputConfig = new JsonSlurper().parseText('''{
+	static Map initialEthInputConfig = new Gson().fromJson('''{
 		"canConnect": true,
 		"export": false,
 		"connected": false,
@@ -318,6 +317,6 @@ class SolidityModuleSpec extends ModuleTestingSpecification {
 		"value": 0.1,
 		"defaultValue": 0,
 		"acceptedTypes": ["Double"]
-	}''')
+	}''', Map.class)
 
 }

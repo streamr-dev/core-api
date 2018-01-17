@@ -427,44 +427,6 @@ class SignalPathService {
 	SignalPathRunner getLiveRunner(String sessionId) {
 		return servletContext[sessionId]
 	}
-	
-	List getUpdateableParameters(Map signalPathData, Closure c=null) {
-		List parameters = []
-		signalPathData.modules.each {module->
-			module.params.each {
-				String key = "${module.hash}_${module.id}_${it.name}_${it.value}"
-				if (!it.connected) {
-					it.parameterUpdateKey = key
-					
-					if (c) 
-						c(module,it)
-					
-					parameters << it
-				}
-			}
-		}
-		return parameters
-	}
-	
-	/**
-	 * 
-	 * @param paramMap
-	 * @param signalPathData
-	 * @return true if any parameter was changed
-	 */
-	boolean updateParameters(Map paramMap, Map signalPathData) {
-		boolean changed = false
-		signalPathData.modules.each {module->
-			module.params.each {
-				String key = "${module.hash}_${module.id}_${it.name}_${it.value}"
-				if (!it.connected && paramMap[key]!=null && it.value.toString()!=paramMap[key].toString()) {
-					it.value = paramMap[key]
-					changed = true
-				}
-			}
-		}
-		return changed
-	}
 
 	@Transactional
 	def saveState(SignalPath sp) {

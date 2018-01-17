@@ -27,7 +27,7 @@ import grails.test.mixin.web.ControllerUnitTestMixin
 import groovy.json.JsonBuilder
 import spock.lang.Specification
 
-@TestMixin(ControllerUnitTestMixin) // "as JSON" support
+@TestMixin(ControllerUnitTestMixin) // "as JSON" converter
 @TestFor(CanvasService)
 @Mock([SecUser, Canvas, Module, Stream, ModuleService, StreamService, SpringSecurityService, SignalPathService, PermissionService, Permission, Serialization, Dashboard, DashboardItem])
 class CanvasServiceSpec extends Specification {

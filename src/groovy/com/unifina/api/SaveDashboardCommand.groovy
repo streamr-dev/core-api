@@ -10,7 +10,9 @@ class SaveDashboardCommand {
 	SortedSet<DashboardItem> items
 
 	static constraints = {
+		id(nullable: true, blank: false)
 		name(blank: false)
+		items(nullable: true)
 	}
 
 	Map toMap() {

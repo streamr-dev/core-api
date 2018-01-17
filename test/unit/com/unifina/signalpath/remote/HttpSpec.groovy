@@ -2,8 +2,11 @@ package com.unifina.signalpath.remote
 
 import com.unifina.datasource.DataSource
 import com.unifina.datasource.DataSourceEventQueue
+import com.unifina.domain.signalpath.Canvas
+import com.unifina.signalpath.SignalPath
 import com.unifina.utils.Globals
 import com.unifina.utils.testutils.ModuleTestHelper
+import grails.test.mixin.Mock
 import groovy.json.JsonBuilder
 import org.apache.http.Header
 import org.apache.http.HttpResponse
@@ -16,6 +19,7 @@ import org.apache.http.entity.StringEntity
 import org.apache.http.nio.client.HttpAsyncClient
 import spock.lang.Specification
 
+@Mock(Canvas)
 class HttpSpec extends Specification {
 	Http module
 	boolean isAsync = true
@@ -60,6 +64,9 @@ class HttpSpec extends Specification {
 				[name: "verb", value: "GET"],
 			]
 		])
+		def signalPath = new SignalPath(true)
+		signalPath.setCanvas(new Canvas())
+		module.setParentSignalPath(signalPath)
 	}
 
 	private boolean test(boolean localAddressesAreAllowed = true) {

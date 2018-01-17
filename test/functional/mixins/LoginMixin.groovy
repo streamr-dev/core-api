@@ -9,7 +9,7 @@ import pages.LoginPage
 /**
  * Handle login / logout
  */
-class LoginMixin {
+trait LoginMixin {
 
 	def loginTester1() {
 		login(LoginTester1Spec.testerUsername, LoginTester1Spec.testerPassword)
