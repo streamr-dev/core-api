@@ -130,7 +130,7 @@ export class Editor extends Component<Props, State> {
         }
     }
     
-    onDragStop = (layout: DashboardItem.layout) => {
+    onDragStop = () => {
     
     }
     
