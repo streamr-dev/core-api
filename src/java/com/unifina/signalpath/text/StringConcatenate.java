@@ -11,23 +11,23 @@ import java.util.Map;
 
 public class StringConcatenate extends AbstractSignalPathModule {
 
-	StringInput inA = new StringInput(this,"A");
-	StringInput inB = new StringInput(this,"B");
+	StringInput in1 = new StringInput(this, "in1");
+	StringInput in2 = new StringInput(this, "in2");
 	VariadicInput<String> inX = new VariadicInput<>(this, new InputInstantiator.Strings(), 3);
-	StringOutput out = new StringOutput(this,"AB");
+	StringOutput out = new StringOutput(this, "out");
 	
 	@Override
 	public void init() {
-		addInput(inA);
-		addInput(inB);
+		addInput(in1);
+		addInput(in2);
 		addOutput(out);
 	}
 
 	@Override
 	public void sendOutput() {
 		StringBuffer buffer = new StringBuffer();
-		buffer.append(inA.getValue());
-		buffer.append(inB.getValue());
+		buffer.append(in1.getValue());
+		buffer.append(in2.getValue());
 		for (String val : inX.getValues()) {
 			buffer.append(val);
 		}
