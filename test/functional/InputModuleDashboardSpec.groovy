@@ -4,19 +4,22 @@ import mixins.CanvasMixin
 import mixins.ConfirmationMixin
 import mixins.DashboardMixin
 import mixins.NotificationMixin
-import mixins.ListPageMixin
-import pages.CanvasListPage
-import pages.CanvasPage
-import pages.DashboardListPage
-import pages.DashboardEditorPage
+import pages.*
 
-class InputModuleDashboardSpec extends LoginTester1Spec implements CanvasMixin, ConfirmationMixin, DashboardMixin, ListPageMixin, NotificationMixin {
+class InputModuleDashboardSpec extends LoginTester1Spec {
 
 	static String canvasTemplate = "InputModuleDashboardSpec"
-	static String specCanvasName = canvasTemplate + System.currentTimeMillis()
-	static String dashboardSpecName = "InputModuleDashboardSpec" + System.currentTimeMillis()
+	static String canvasName = canvasTemplate + System.currentTimeMillis()
+	static String dashboardName = "InputModuleDashboardSpec" + System.currentTimeMillis()
 
 	def setupSpec() {
+		// @Mixin is buggy, use runtime mixins instead
+		this.class.metaClass.mixin(ListPageMixin)
+		this.class.metaClass.mixin(ConfirmationMixin)
+		this.class.metaClass.mixin(NotificationMixin)
+		this.class.metaClass.mixin(DashboardMixin)
+		this.class.metaClass.mixin(CanvasMixin)
+
 		super.login()
 		waitFor { at CanvasPage }
 
@@ -27,14 +30,14 @@ class InputModuleDashboardSpec extends LoginTester1Spec implements CanvasMixin, 
 		waitFor { at CanvasPage }
 
 		// Create a copy of the canvas unique for this test
-		saveCanvasAs(specCanvasName)
+		saveCanvasAs(canvasName)
 
 		ensureRealtimeTabDisplayed()
 		resetAndStartCanvas(true)
 
-		createDashboard(dashboardSpecName)
+		createDashboard(dashboardName)
 
-		addDashboardItem(specCanvasName, "Table")
+		addDashboardItem(canvasName, "Table")
 
 		saveDashboard()
 
@@ -52,7 +55,7 @@ class InputModuleDashboardSpec extends LoginTester1Spec implements CanvasMixin, 
 
 	def openDashboard() {
 		to DashboardListPage
-		clickRow(dashboardSpecName)
+		clickRow(dashboardName)
 		waitFor {
 			at DashboardEditorPage
 		}
@@ -62,19 +65,19 @@ class InputModuleDashboardSpec extends LoginTester1Spec implements CanvasMixin, 
 	def cleanupSpec() {
 		// Delete the dashboard
 		super.login()
-		deleteDashboard(dashboardSpecName)
+		deleteDashboard(dashboardName)
 
 		// Stop the canvas
 		to CanvasListPage
 		waitFor { at CanvasListPage }
-		clickRow(specCanvasName)
+		clickRow(canvasName)
 		waitFor { at CanvasPage }
 		stopCanvasIfRunning()
 
 		// Delete the canvas
 		to CanvasListPage
 		waitFor { at CanvasListPage }
-		clickDeleteButton(specCanvasName)
+		clickDeleteButton(canvasName)
 		waitForConfirmation()
 		acceptConfirmation()
 	}
@@ -86,7 +89,7 @@ class InputModuleDashboardSpec extends LoginTester1Spec implements CanvasMixin, 
 	void "the button works"() {
 		def button
 		when: "Button added"
-		addDashboardItem(specCanvasName, "Button")
+		addDashboardItem(canvasName, "Button")
 		button = findDashboardItem("Button").find(".streamr-button .btn")
 		then: "The name of the button is buttonTest"
 		button.text() == "buttonTest"
@@ -104,7 +107,7 @@ class InputModuleDashboardSpec extends LoginTester1Spec implements CanvasMixin, 
 		def textField
 		def sendBtn
 		when: "TextField added"
-		addDashboardItem(specCanvasName, "TextField")
+		addDashboardItem(canvasName, "TextField")
 		textField = findDashboardItem("TextField").find("textarea")
 		sendBtn = findDashboardItem("TextField").find(".streamrTextField_buttonContainer .btn")
 		then: "The text in the textField is textFieldTest"
@@ -124,7 +127,7 @@ class InputModuleDashboardSpec extends LoginTester1Spec implements CanvasMixin, 
 
 	void "the switcher works"() {
 		def switcher
-		addDashboardItem(specCanvasName, "Switcher")
+		addDashboardItem(canvasName, "Switcher")
 		switcher = findDashboardItem("Switcher").find(".streamrSwitcher_switcherInner")
 
 		when: "Switcher clicked"

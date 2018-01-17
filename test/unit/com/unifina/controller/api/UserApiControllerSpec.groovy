@@ -11,6 +11,7 @@ import com.unifina.filters.UnifinaCoreAPIFilters
 import spock.lang.Specification
 
 @TestFor(UserApiController)
+@Mixin(FiltersUnitTestMixin)
 @Mock([SecUser, Key, UnifinaCoreAPIFilters, UserService, SpringSecurityService])
 class UserApiControllerSpec extends Specification {
 

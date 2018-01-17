@@ -25,20 +25,13 @@ import org.json.JSONObject
 import spock.lang.Specification
 
 @TestFor(DashboardApiController)
-@Mock([Canvas, Dashboard, DashboardItem, Key, SecUser, UnifinaCoreAPIFilters])
+@Mixin(FiltersUnitTestMixin)
+@Mock([Canvas, Dashboard, DashboardItem, Key, SecUser, UnifinaCoreAPIFilters, SpringSecurityService, UserService, ApiService])
 class DashboardApiControllerSpec extends Specification {
 
 	DashboardService dashboardService
 	SecUser me
 	List<Dashboard> dashboards
-
-	// This gets the real services injected into the filters
-	// From https://github.com/grails/grails-core/issues/9191
-	static doWithSpring = {
-		apiService(ApiService)
-		springSecurityService(SpringSecurityService)
-		userService(UserService)
-	}
 
 	def setup() {
 		dashboardService = controller.dashboardService = Mock(DashboardService)

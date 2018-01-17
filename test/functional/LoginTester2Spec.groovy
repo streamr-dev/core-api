@@ -1,17 +1,17 @@
 
 
-class LoginTester2Spec extends LoginTesterSpec {
+public class LoginTester2Spec extends LoginTesterSpec {
 
 	public static String testerUsername = "tester2@streamr.com"
 	public static String testerPassword = "tester2"
 
 	@Override
-	String getTesterUsername() {
+	public String getTesterUsername() {
 		return testerUsername
 	}
 
 	@Override
-	String getTesterPassword() {
+	public String getTesterPassword() {
 		return testerPassword
 	}
 }

@@ -6,12 +6,20 @@ import mixins.ConfirmationMixin
 import mixins.StreamMixin
 import spock.lang.Shared
 
-class VariadicEndpointsSpec extends LoginTester1Spec implements CanvasMixin, ConfirmationMixin, StreamMixin {
+@Mixin(CanvasMixin)
+@Mixin(ConfirmationMixin)
+@Mixin(StreamMixin)
+class VariadicEndpointsSpec extends LoginTester1Spec {
 
 	@Shared Stream testStream = new Stream()
 	@Shared StreamService streamService
 
 	def setupSpec() {
+		// @Mixin is buggy, use runtime mixins instead
+		this.class.metaClass.mixin(CanvasMixin)
+		this.class.metaClass.mixin(ConfirmationMixin)
+		this.class.metaClass.mixin(StreamMixin)
+
 		streamService = createStreamService()
 		testStream.id = "pltRMd8rCfkij4mlZsQkJB"
 	}

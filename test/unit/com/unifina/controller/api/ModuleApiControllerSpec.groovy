@@ -15,6 +15,7 @@ import grails.test.mixin.web.FiltersUnitTestMixin
 import spock.lang.Specification
 
 @TestFor(ModuleApiController)
+@Mixin(FiltersUnitTestMixin)
 @Mock([SecUser, Module, Key, ModulePackage, UnifinaCoreAPIFilters, UserService])
 class ModuleApiControllerSpec extends Specification {
 

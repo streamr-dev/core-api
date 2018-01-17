@@ -3,7 +3,7 @@ package mixins
 /**
  * Useful mixin for tables created with <ui:table> tags
  */
-trait TableMixin {
+class TableMixin {
 	
 	def getTableRows(table) {
 		return table.find(".tbody .tr")

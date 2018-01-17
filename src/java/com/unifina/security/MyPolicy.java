@@ -43,7 +43,7 @@ public class MyPolicy extends Policy {
 			groovy.add(new ReflectPermission("suppressAccessChecks"));
 			groovy.add(new RuntimePermission("getClassLoader"));
 		}
-
+		
 		groovy.setReadOnly();
 	}
 

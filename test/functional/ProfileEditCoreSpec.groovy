@@ -1,10 +1,7 @@
 import LoginTester1Spec
-import pages.CanvasPage
-import pages.ChangePasswordPage
-import pages.LoginPage
-import pages.ProfileEditPage
+import pages.*
 
-class ProfileEditCoreSpec extends LoginTester1Spec {
+public class ProfileEditCoreSpec extends LoginTester1Spec {
 
 	def "changing password works correctly"() {
 		when: "profile edit page is clicked to open"

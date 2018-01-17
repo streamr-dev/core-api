@@ -38,7 +38,6 @@ export class DashboardPage extends Component<Props> {
     
     componentWillMount() {
         let id = this.props.match.params.id
-        debugger
         if (id !== undefined) {
             this.props.getDashboard(id)
             this.props.getMyDashboardPermissions(id)

@@ -13,9 +13,11 @@ import grails.plugin.springsecurity.SpringSecurityService
 import grails.test.mixin.Mock
 import grails.test.mixin.TestFor
 import grails.test.mixin.web.FiltersUnitTestMixin
+import org.codehaus.groovy.grails.web.json.JSONObject
 import spock.lang.Specification
 
 @TestFor(KeyApiController)
+@Mixin(FiltersUnitTestMixin)
 @Mock([Key, Permission, SecUser, Stream, UnifinaCoreAPIFilters, SpringSecurityService, UserService, PermissionService])
 class KeyApiControllerSpec extends Specification {
 
@@ -157,7 +159,7 @@ class KeyApiControllerSpec extends Specification {
 			id: "1",
 			name: "key name",
 			permission: "read",
-			user: null
+			user: JSONObject.NULL
 		]
 
 		and:
@@ -194,7 +196,7 @@ class KeyApiControllerSpec extends Specification {
 				id: "1",
 				name: "key name",
 				permission: "write",
-				user: null
+				user: JSONObject.NULL
 		]
 
 		and:

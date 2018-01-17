@@ -5,7 +5,7 @@ import java.util.concurrent.TimeUnit
 /**
  * Helper methods for functional testing tours.
  */
-trait TourMixin {
+class TourMixin {
 
 	def advance(Closure c, waitingTime = 10) {
 		def oldState = getState()

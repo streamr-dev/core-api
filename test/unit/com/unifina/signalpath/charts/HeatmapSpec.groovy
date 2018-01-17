@@ -6,6 +6,7 @@ import com.unifina.utils.GlobalsFactory
 import com.unifina.utils.testutils.ModuleTestHelper
 import grails.test.mixin.support.GrailsUnitTestMixin
 
+@Mixin(GrailsUnitTestMixin)
 class HeatmapSpec extends UiChannelMockingSpecification {
 
 	Heatmap module

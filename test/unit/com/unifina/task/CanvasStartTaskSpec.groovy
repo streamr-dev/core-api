@@ -4,12 +4,13 @@ import com.unifina.domain.signalpath.Canvas
 import com.unifina.domain.task.Task
 import com.unifina.service.CanvasService
 import grails.test.mixin.Mock
+import grails.test.mixin.support.GrailsUnitTestMixin
 import spock.lang.Specification
 
+@Mixin(GrailsUnitTestMixin) // for grailsApplication
 @Mock([Canvas])
 class CanvasStartTaskSpec extends Specification {
 
-	def grailsApplication
 	Canvas canvas
 	CanvasService canvasService
 

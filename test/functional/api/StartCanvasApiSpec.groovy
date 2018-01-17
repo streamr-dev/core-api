@@ -1,8 +1,8 @@
 package api
 
 import geb.spock.GebReportingSpec
+import grails.plugins.rest.client.ErrorResponse
 import grails.plugins.rest.client.RestBuilder
-import grails.plugins.rest.client.RestResponse
 import org.springframework.http.HttpStatus
 
 
@@ -17,14 +17,14 @@ class StartCanvasApiSpec extends GebReportingSpec {
 		authenticatedPost(baseUrl + "/api/v1/canvases/$canvasId/stop")
 
 		when:
-		RestResponse response = authenticatedPost(baseUrl + "/api/v1/canvases/$canvasId/start")
+		ErrorResponse response = (ErrorResponse) authenticatedPost(baseUrl + "/api/v1/canvases/$canvasId/start")
 
 		then:
 		response.statusCode == HttpStatus.INTERNAL_SERVER_ERROR
 		response.json.code == "LOADING_PREVIOUS_STATE_FAILED"
 	}
 
-	RestResponse authenticatedPost(String url) {
+	def authenticatedPost(String url) {
 		new RestBuilder().post(url) {
 			header("Authorization", "token tester1-api-key")
 		}

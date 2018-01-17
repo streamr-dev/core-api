@@ -8,13 +8,18 @@ import pages.CanvasListPage
 import pages.CanvasPage
 import spock.lang.Shared
 
-class LiveSpec extends LoginTester1Spec implements CanvasMixin, ConfirmationMixin, StreamMixin {
+public class LiveSpec extends LoginTester1Spec {
 
 	static Timer timer
 
 	@Shared StreamService streamService
 
 	def setupSpec() {
+		// For some reason the annotations don't work so need the below.
+		LiveSpec.metaClass.mixin(CanvasMixin)
+		LiveSpec.metaClass.mixin(ConfirmationMixin)
+		LiveSpec.metaClass.mixin(StreamMixin)
+
 		final Stream testStream = new Stream()
 		testStream.id = "RUj6iJggS3iEKsUx5C07Ig"
 
@@ -29,6 +34,12 @@ class LiveSpec extends LoginTester1Spec implements CanvasMixin, ConfirmationMixi
 		// Produce to a live feed
 		timer = new Timer()
 		timer.schedule(task, 1000L, 1000L)
+	}
+
+	def setup() {
+		// For some reason the annotations don't work so need the below.
+		LiveSpec.metaClass.mixin(CanvasMixin)
+		LiveSpec.metaClass.mixin(ConfirmationMixin)
 	}
 
 	def cleanupSpec() {

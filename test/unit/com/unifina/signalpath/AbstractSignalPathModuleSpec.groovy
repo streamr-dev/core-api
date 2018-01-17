@@ -15,7 +15,7 @@ import spock.lang.Specification
 
 import java.util.concurrent.TimeUnit
 
-
+@Mixin(GrailsUnitTestMixin)
 class AbstractSignalPathModuleSpec extends BeanMockingSpecification {
 	static class Module extends AbstractSignalPathModule {
 		def param = new IntegerParameter(this, "param", 666)

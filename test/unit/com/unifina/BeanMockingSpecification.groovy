@@ -28,6 +28,12 @@ class BeanMockingSpecification extends Specification {
 	 */
 	def doCleanup() {}
 
+	def cleanupSpec() {
+		// TODO: Hack for fixing bug where GrailsUnitTestMixin#shutdownApplicationContext is invoked two times resulting
+		// in a NullPointerException. Maybe future Grails version will fix this?
+		applicationContext = new GrailsWebApplicationContext()
+	}
+
 	protected <T> T getBean(Class<T> clazz) {
 		Holders.getApplicationContext().getBean(clazz)
 	}

@@ -12,7 +12,8 @@ class Module implements Comparable {
 	ModulePackage modulePackage
 	String jsonHelp
 	String webcomponent
-
+	
+	SortedSet params
 	static belongsTo = [category: ModuleCategory]
 	
     static constraints = {

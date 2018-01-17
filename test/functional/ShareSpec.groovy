@@ -3,9 +3,17 @@ import mixins.*
 import pages.*
 import org.openqa.selenium.Keys
 
-class ShareSpec extends LoginTester1Spec implements CanvasMixin, DashboardMixin, ListPageMixin, LoginMixin, NotificationMixin, ShareMixin {
+class ShareSpec extends LoginTester1Spec {
 
 	def setupSpec() {
+		// @Mixin is buggy, use runtime mixins instead
+		this.class.metaClass.mixin(LoginMixin)
+		this.class.metaClass.mixin(ShareMixin)
+		this.class.metaClass.mixin(NotificationMixin)
+		this.class.metaClass.mixin(CanvasMixin)
+		this.class.metaClass.mixin(DashboardMixin)
+		this.class.metaClass.mixin(ListPageMixin)
+
 		loginTester1()
 		removeCanvasPermissions()
 		removeDashboardPermissions()

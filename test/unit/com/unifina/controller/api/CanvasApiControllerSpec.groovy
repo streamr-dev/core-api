@@ -25,7 +25,8 @@ import groovy.json.JsonBuilder
 import spock.lang.Specification
 
 @TestFor(CanvasApiController)
-@Mock([SecUser, Permission, Canvas, Key, UnifinaCoreAPIFilters])
+@Mixin(FiltersUnitTestMixin)
+@Mock([SecUser, Permission, Canvas, Key, UnifinaCoreAPIFilters, UserService, SpringSecurityService, ApiService])
 class CanvasApiControllerSpec extends Specification {
 
 	CanvasService canvasService
@@ -34,18 +35,11 @@ class CanvasApiControllerSpec extends Specification {
 	Canvas canvas2
 	Canvas canvas3
 
-	// This gets the real services injected into the filters
-	// From https://github.com/grails/grails-core/issues/9191
-	static doWithSpring = {
-		apiService(ApiService)
-		springSecurityService(SpringSecurityService)
-		userService(UserService)
-	}
-
 	void setup() {
 		controller.canvasService = canvasService = Mock(CanvasService)
 		controller.signalPathService = Mock(SignalPathService)
 		controller.permissionService = Mock(PermissionService)
+		controller.apiService = mainContext.getBean(ApiService)
 
 		me = new SecUser(id: 1).save(validate: false)
 		SecUser other = new SecUser(id: 2).save(validate: false)

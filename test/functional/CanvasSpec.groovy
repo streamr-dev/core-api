@@ -10,12 +10,16 @@ import spock.lang.Shared
 
 import java.text.SimpleDateFormat
 
-class CanvasSpec extends LoginTester1Spec implements CanvasMixin, ListPageMixin, StreamMixin {
+class CanvasSpec extends LoginTester1Spec {
 
 	@Shared StreamService streamService
 	@Shared Stream testStream
 
 	def setupSpec() {
+		this.class.metaClass.mixin(CanvasMixin)
+		this.class.metaClass.mixin(ListPageMixin)
+		this.class.metaClass.mixin(StreamMixin)
+
 		streamService = createStreamService()
 		testStream = new Stream()
 		testStream.id = "c1_fiG6PTxmtnCYGU-mKuQ"
@@ -332,7 +336,7 @@ class CanvasSpec extends LoginTester1Spec implements CanvasMixin, ListPageMixin,
 				$(".tooltip .modulehelp-tooltip p", 1).text().contains("Adds together")
 			}
 		when: "mouse moved away"
-			def menu = $(".menu-content")[0]
+			def menu = $(".menu-content")
 			interact {
 				moveToElement(menu)
 			}
@@ -346,7 +350,7 @@ class CanvasSpec extends LoginTester1Spec implements CanvasMixin, ListPageMixin,
 		setup:
 			addAndWaitModule 'Add'
 		when: "input ioSwitch is hovered"
-			def el = $("td.input .ioSwitch.drivingInput")[0]
+			def el = $("td.input .ioSwitch.drivingInput")
 			interact {
 				moveToElement(el)
 			}
@@ -356,7 +360,7 @@ class CanvasSpec extends LoginTester1Spec implements CanvasMixin, ListPageMixin,
 				$(".tooltip .tooltip-inner").text().contains("Driving input")
 			}
 		when: "mouse moved away"
-			def menu = $(".menu-content")[0]
+			def menu = $(".menu-content")
 			interact {
 				moveToElement(menu)
 			}
@@ -376,7 +380,7 @@ class CanvasSpec extends LoginTester1Spec implements CanvasMixin, ListPageMixin,
 				$(".tooltip .tooltip-inner").text().contains("No repeat")
 			}
 		when: "mouse moved away"
-			menu = $(".menu-content")[0]
+			menu = $(".menu-content")
 			interact {
 				moveToElement(menu)
 			}
@@ -393,7 +397,7 @@ class CanvasSpec extends LoginTester1Spec implements CanvasMixin, ListPageMixin,
 			addAndWaitModule 'Add'
 		then: "ioSwitches are visible by default"
 			waitFor {
-				$("td.input .ioSwitch.drivingInput")*.displayed
+				$("td.input .ioSwitch.drivingInput").displayed
 			}
 
 		when: "input ioSwitch is hovered"
@@ -407,7 +411,7 @@ class CanvasSpec extends LoginTester1Spec implements CanvasMixin, ListPageMixin,
 				$(".tooltip .tooltip-inner strong").text() == "on"
 			}
 		when: "tooltip is hidden, switch is clicked and tooltip is shown again"
-			def menu = $(".menu-content")[0]
+			def menu = $(".menu-content")
 			interact {
 				moveToElement(menu)
 			}

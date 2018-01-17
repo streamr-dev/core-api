@@ -2,10 +2,16 @@ import LoginTester1Spec
 import mixins.CanvasMixin
 import mixins.ConfirmationMixin
 
-class SubCanvasSpec extends LoginTester1Spec implements CanvasMixin, ConfirmationMixin {
+public class SubCanvasSpec extends LoginTester1Spec {
 
 	private final static String topCanvasName = "SubCanvasSpec-top"
 	private final static String subCanvasName = "SubCanvasSpec-sub"
+
+	def setupSpec() {
+		// For some reason the annotations don't work so need the below.
+		SubCanvasSpec.metaClass.mixin(CanvasMixin)
+		SubCanvasSpec.metaClass.mixin(ConfirmationMixin)
+	}
 
 	def setup() {
 		loadSignalPath(topCanvasName)

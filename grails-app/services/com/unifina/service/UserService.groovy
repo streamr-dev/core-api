@@ -109,7 +109,7 @@ class UserService {
 	 * @return
 	 */
 	List checkErrors(List<FieldError> errorList) {
-		List<String> blackList = (List<String>) grailsApplication?.config?.grails?.exceptionresolver?.params?.exclude
+		List<String> blackList = (List<String>) grailsApplication.config.grails.exceptionresolver.params.exclude
 		if (blackList == null) {
 			blackList = Collections.emptyList();
 		}

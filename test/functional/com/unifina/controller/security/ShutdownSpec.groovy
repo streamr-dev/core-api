@@ -1,14 +1,20 @@
+package com.unifina.controller.security
 
-import LoginTesterAdminSpec
 import com.unifina.domain.signalpath.Canvas
+import LoginTesterAdminSpec
 import mixins.CanvasMixin
 import mixins.ConfirmationMixin
-import pages.CanvasPage
-import pages.TaskWorkerPage
+import pages.*
 
 import java.util.concurrent.TimeUnit
 
-class ShutdownSpec extends LoginTesterAdminSpec implements CanvasMixin, ConfirmationMixin {
+public class ShutdownSpec extends LoginTesterAdminSpec {
+
+	def setupSpec() {
+		// @Mixin is buggy, use runtime mixins instead
+		this.class.metaClass.mixin(CanvasMixin)
+		this.class.metaClass.mixin(ConfirmationMixin)
+	}
 
 	void shutdown() {
 		// Async callback signaling done is passed as last argument by executeAsyncScript

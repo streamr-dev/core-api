@@ -47,7 +47,7 @@ class DashboardServiceSpec extends Specification {
 		when:
 		def dashboards = service.findAllDashboards(user)
 		then:
-		dashboards*.name as Set == ["my-dashboard-1", "my-dashboard-2", "my-dashboard-3", "not-my-dashboard-2"] as Set
+		dashboards*.name == ["my-dashboard-1", "my-dashboard-2", "my-dashboard-3", "not-my-dashboard-2"]
 	}
 
 	def "findById() cannot fetch non-existent dashboard"() {

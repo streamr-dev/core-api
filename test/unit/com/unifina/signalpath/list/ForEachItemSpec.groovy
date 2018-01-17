@@ -17,10 +17,9 @@ import grails.plugin.springsecurity.SpringSecurityService
 import grails.test.mixin.Mock
 import grails.test.mixin.TestMixin
 import grails.test.mixin.support.GrailsUnitTestMixin
-import grails.test.mixin.web.ControllerUnitTestMixin
 import spock.lang.Specification
 
-@TestMixin(ControllerUnitTestMixin) // "as JSON" converter
+@TestMixin(GrailsUnitTestMixin)
 @Mock([Canvas, Module, SecUser, ModuleService, SpringSecurityService, SignalPathService, CanvasService, PermissionService])
 class ForEachItemSpec extends Specification {
 

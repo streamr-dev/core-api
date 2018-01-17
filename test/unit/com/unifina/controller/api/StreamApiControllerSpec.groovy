@@ -23,6 +23,7 @@ import grails.test.mixin.web.FiltersUnitTestMixin
 import spock.lang.Specification
 
 @TestFor(StreamApiController)
+@Mixin(FiltersUnitTestMixin)
 @Mock([SecUser, Stream, Key, Permission, Feed, UnifinaCoreAPIFilters, UserService, PermissionService, SpringSecurityService, StreamService, ApiService, DashboardService])
 class StreamApiControllerSpec extends Specification {
 

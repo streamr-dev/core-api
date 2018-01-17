@@ -11,8 +11,12 @@ import pages.StreamShowPage
 import grails.test.mixin.TestFor
 import spock.lang.Shared
 
+@Mixin(CanvasMixin)
+@Mixin(ConfirmationMixin)
+@Mixin(StreamMixin)
 @TestFor(CanvasController) // for JSON conversion to work
-class ExportCSVFunctionalSpec extends LoginTester1Spec implements CanvasMixin, ConfirmationMixin, StreamMixin {
+
+class ExportCSVFunctionalSpec extends LoginTester1Spec {
 
 	@Shared StreamService streamService
 

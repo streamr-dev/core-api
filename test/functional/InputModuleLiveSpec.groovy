@@ -4,7 +4,13 @@ import mixins.ConfirmationMixin
 import pages.CanvasListPage
 import pages.CanvasPage
 
-class InputModuleLiveSpec extends LoginTester1Spec implements CanvasMixin, ConfirmationMixin {
+class InputModuleLiveSpec extends LoginTester1Spec {
+
+	def setupSpec() {
+		// @Mixin is buggy, use runtime mixins instead
+		this.class.metaClass.mixin(CanvasMixin)
+		this.class.metaClass.mixin(ConfirmationMixin)
+	}
 
 	def setup() {
 		loadCanvas()
