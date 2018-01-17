@@ -7,18 +7,25 @@ import com.unifina.signalpath.NotificationMessage
 import com.unifina.signalpath.SignalPath
 import com.unifina.utils.Globals
 import com.unifina.utils.GlobalsFactory
-import com.unifina.utils.testutils.FakeStreamService
 import com.unifina.utils.testutils.ModuleTestHelper
+import grails.plugin.springsecurity.SpringSecurityService
 import grails.test.mixin.TestMixin
 import grails.test.mixin.support.GrailsUnitTestMixin
+import grails.test.runtime.FreshRuntime
+import org.codehaus.groovy.grails.commons.InstanceFactoryBean
 
+@FreshRuntime
 @TestMixin(GrailsUnitTestMixin)
-public class EmailModuleSpec extends UiChannelMockingSpecification {
+class EmailModuleSpec extends UiChannelMockingSpecification {
 
 	EmailModule module
 	MockMailService ms
 
 	Globals globals
+
+	def doWithSpring = {
+		springSecurityService(InstanceFactoryBean, null, SpringSecurityService)
+	}
 
 	void setup() {
 		mockServicesForUiChannels()
