@@ -33,7 +33,7 @@ class ProfileControllerSpec extends Specification {
 		controller.springSecurityService = springSecurityService
 		controller.streamService = Mock(StreamService)
 		user = new SecUser(id:1, 
-			username:"test@test.test", 
+			username:"test@test.com",
 			name: "Test User",
 			password:springSecurityService.encodePassword("foobar123!"), 
 			timezone: "Europe/Helsinki")
@@ -109,6 +109,8 @@ class ProfileControllerSpec extends Specification {
 	}
 
 	void "changing user settings must change them"() {
+		controller.userService = new UserService()
+		controller.userService.grailsApplication = grailsApplication
 		when: "new settings are submitted"
 			params.name = "Changed Name"
 			params.timezone = "Europe/Helsinki"

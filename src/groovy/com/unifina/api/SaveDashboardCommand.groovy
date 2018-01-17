@@ -11,6 +11,7 @@ class SaveDashboardCommand {
 
 	static constraints = {
 		name(blank: false)
+		items(nullable: true)
 		layout()
 	}
 

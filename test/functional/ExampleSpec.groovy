@@ -1,12 +1,12 @@
 import spock.lang.*
 import LoginTester2Spec
 import mixins.CanvasMixin
+import pages.*
 
-@Mixin(CanvasMixin)
 // Examples are commented out
 // https://github.com/streamr-dev/unifina-core/commit/9ba0a477358336750546f1350578d1272c59467c
 @Ignore
-class ExampleSpec extends LoginTester2Spec {
+class ExampleSpec extends LoginTester2Spec implements CanvasMixin {
 
 	def "examples tabs must be shown in the load browser"() {
 		when: "load button is clicked"
