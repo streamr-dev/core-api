@@ -15,12 +15,30 @@ class StringConcatenateSpec extends Specification {
 	void "stringConcatenate gives the right answer"() {
 		when:
 		Map inputValues = [
-			A: ["hello", "C", "con"],
-			B: [" world", "++", "catenate"],
-
+			in1: ["hello", "C", "con"],
+			in2: [" world", "++", "catenate"]
 		]
 		Map outputValues = [
-			AB: ["hello world", "C++", "concatenate"]
+			out: ["hello world", "C++", "concatenate"]
+		]
+
+		then:
+		new ModuleTestHelper.Builder(module, inputValues, outputValues).test()
+	}
+
+	void "stringConcatenate also works with variadic inputs"() {
+		when:
+		module.getInput("in3")
+		module.getInput("in4")
+		module.configure([:])
+		Map inputValues = [
+				in1: ["hello", "C", "con"],
+				in2: [" world", "++", "catenate"],
+				in3: ["!", "--", "d"],
+				in4: ["", "", ""]
+		]
+		Map outputValues = [
+				out: ["hello world!", "C++--", "concatenated"]
 		]
 
 		then:
