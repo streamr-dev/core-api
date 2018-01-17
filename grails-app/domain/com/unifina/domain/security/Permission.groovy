@@ -44,6 +44,8 @@ class Permission {
 	}
 	Operation operation = Operation.READ
 
+	static belongsTo = [Canvas, Dashboard, Feed, ModulePackage, Stream]
+
 	static constraints = {
 		user(nullable: true)
 		key(nullable: true)
