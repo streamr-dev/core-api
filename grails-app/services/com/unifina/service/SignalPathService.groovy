@@ -138,7 +138,7 @@ class SignalPathService {
 	}
 
 	@Transactional
-	public void deleteReferences(SignalPath signalPath, boolean delayed = false) {
+	void deleteReferences(SignalPath signalPath, boolean delayed) {
 		canvasService.deleteCanvas(signalPath.canvas, signalPath.getGlobals().getUser(), delayed)
 	}
 	
