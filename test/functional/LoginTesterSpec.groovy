@@ -4,7 +4,7 @@ import pages.CanvasPage
 import pages.LoginPage
 import geb.spock.GebReportingSpec
 
-public abstract class LoginTesterSpec extends GebReportingSpec {
+abstract class LoginTesterSpec extends GebReportingSpec {
 	
 	def setup() {
 		this.login()

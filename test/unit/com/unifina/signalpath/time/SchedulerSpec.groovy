@@ -9,7 +9,6 @@ import grails.test.mixin.support.GrailsUnitTestMixin
 
 import java.text.SimpleDateFormat
 
-@Mixin(GrailsUnitTestMixin)
 class SchedulerSpec extends UiChannelMockingSpecification {
 	Scheduler module
 	SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss")

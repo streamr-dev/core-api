@@ -1,28 +1,22 @@
 import LoginTester1Spec
+import geb.module.FormElement
 import mixins.*
 import pages.*
 import org.openqa.selenium.Keys
 
-class ShareSpec extends LoginTester1Spec {
-
-	def setupSpec() {
-		// @Mixin is buggy, use runtime mixins instead
-		this.class.metaClass.mixin(LoginMixin)
-		this.class.metaClass.mixin(ShareMixin)
-		this.class.metaClass.mixin(NotificationMixin)
-		this.class.metaClass.mixin(CanvasMixin)
-		this.class.metaClass.mixin(DashboardMixin)
-		this.class.metaClass.mixin(ListPageMixin)
-
-		loginTester1()
-		removeCanvasPermissions()
-		removeDashboardPermissions()
-		removeStreamPermissions()
-	}
+class ShareSpec extends LoginTester1Spec implements CanvasMixin, DashboardMixin, ListPageMixin, LoginMixin, NotificationMixin, ShareMixin {
 
 	def scrollToAndClickShareButton(name = "ShareSpec") {
 		scrollToRow(name)
 		clickShareButton(name)
+	}
+
+	def clickDropdownShareButton() {
+		menuToggle.click()
+		waitFor {
+			dropdownShareButton.displayed
+		}
+		dropdownShareButton.click()
 	}
 
 	def save() {
@@ -639,7 +633,7 @@ class ShareSpec extends LoginTester1Spec {
 		clickRow("ShareSpec")
 		then: "only read rights given"
 		waitFor { at DashboardEditorPage }
-		waitFor { shareButton.isDisabled() }
+		waitFor { shareButton.module(FormElement).disabled }
 
 		cleanup: "remove all access to ShareSpec resources"
 		to StreamListPage

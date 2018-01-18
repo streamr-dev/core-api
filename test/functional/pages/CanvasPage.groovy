@@ -52,6 +52,9 @@ class CanvasPage extends Page {
 		beginDate { $("#beginDate") }
 		endDate { $("#endDate") }
 
+		// Real-time modal
+		serializationEnabled { $("#serializationEnabled") }
+
 		menuToggle { $(".canvas-menu-toggle") }
 		dropdownShareButton { $(".share-canvas-button") }
 		canvasName { $(".breadcrumb .name-editor") }

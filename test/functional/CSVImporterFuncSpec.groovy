@@ -7,9 +7,7 @@ import pages.StreamShowPage
 
 import java.nio.file.Paths
 
-@Mixin(StreamMixin)
-@Mixin(CanvasMixin)
-class CSVImporterFuncSpec extends LoginTester1Spec {
+class CSVImporterFuncSpec extends LoginTester1Spec implements CanvasMixin, StreamMixin {
 
 	private File getFile(String filename) {
 		// The test csv files must be available in the local filesystem of the machine where the browser is running.
@@ -50,8 +48,8 @@ class CSVImporterFuncSpec extends LoginTester1Spec {
 		then: "The data is uploaded"
 		waitFor { at StreamShowPage }
 		waitFor { $(".history .control-label", text:"Range").displayed }
-		waitFor { $(".history div", text:contains("2015-04-30")).displayed }
-		waitFor { $(".history div", text:contains("2015-05-03")).displayed }
+		waitFor { $(".history div", text:contains("2015-04-30"))[0].displayed }
+		waitFor { $(".history div", text:contains("2015-05-03"))[0].displayed }
 
 		emptyStream("CSVImporterFuncSpec")
 	}
@@ -68,8 +66,8 @@ class CSVImporterFuncSpec extends LoginTester1Spec {
 		fileInput = getFile("test-upload-file.csv")
 		then: "the correct data is uploaded"
 		waitFor(30) { $(".history .control-label", text:"Range").displayed }
-		waitFor { $(".history div", text:contains("2015-02-23")).displayed }
-		waitFor { $(".history div", text:contains("2015-02-25")).displayed }
+		waitFor { $(".history div", text:contains("2015-02-23"))[0].displayed }
+		waitFor { $(".history div", text:contains("2015-02-25"))[0].displayed }
 	}
 	
 	void "the data of the stream can now be used e.g. in canvas"() {
