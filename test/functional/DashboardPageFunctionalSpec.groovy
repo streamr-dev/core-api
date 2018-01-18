@@ -82,7 +82,7 @@ class DashboardPageFunctionalSpec extends LoginTester1Spec implements CanvasMixi
 		when: "canvas clicked to open"
 		findCanvas("DashboardSpec").click()
 		then: "module list opens"
-		waitFor { findCanvas("DashboardSpec").find(".moduleInModuleList_module").displayed }
+		waitFor { findCanvas("DashboardSpec").find(".moduleInModuleList_module")[0].displayed }
 
 		// Add some modules
 		when: "Label added"

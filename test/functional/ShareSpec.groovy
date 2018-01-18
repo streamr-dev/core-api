@@ -1,4 +1,5 @@
 import LoginTester1Spec
+import geb.module.FormElement
 import mixins.*
 import pages.*
 import org.openqa.selenium.Keys
@@ -632,7 +633,7 @@ class ShareSpec extends LoginTester1Spec implements CanvasMixin, DashboardMixin,
 		clickRow("ShareSpec")
 		then: "only read rights given"
 		waitFor { at DashboardEditorPage }
-		waitFor { shareButton.isDisabled() }
+		waitFor { shareButton.module(FormElement).disabled }
 
 		cleanup: "remove all access to ShareSpec resources"
 		to StreamListPage
