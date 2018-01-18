@@ -9,7 +9,7 @@ import spock.lang.Shared
 import spock.lang.Stepwise
 
 @Stepwise
-class DashboardPageFunctionalSpec extends LoginTester1Spec {
+class DashboardPageFunctionalSpec extends LoginTester1Spec implements CanvasMixin, ConfirmationMixin, DashboardMixin, NotificationMixin, ListPageMixin {
 
 	@Shared
 	String name
@@ -19,12 +19,6 @@ class DashboardPageFunctionalSpec extends LoginTester1Spec {
 	def setupSpec() {
 		name = "test" + new Date().getTime()
 		name2 = name + "2"
-		// @Mixin is buggy, use runtime mixins instead
-		this.class.metaClass.mixin(CanvasMixin)
-		this.class.metaClass.mixin(ConfirmationMixin)
-		this.class.metaClass.mixin(DashboardMixin)
-		this.class.metaClass.mixin(NotificationMixin)
-		this.class.metaClass.mixin(ListPageMixin)
 
 		super.login()
 		waitFor { at CanvasPage }

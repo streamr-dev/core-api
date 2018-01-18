@@ -44,7 +44,7 @@ class InputModuleDashboardSpec extends LoginTester1Spec implements CanvasMixin, 
 
 	def openDashboard() {
 		to DashboardListPage
-		clickRow(dashboardName)
+		clickRow(dashboardSpecName)
 		waitFor {
 			at DashboardEditorPage
 		}

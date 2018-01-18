@@ -8,12 +8,14 @@ import grails.validation.Validateable
 @Validateable
 class SaveDashboardItemCommand {
 
+	String id
 	String title
 	Canvas canvas
 	Integer module
 	String webcomponent
 
 	static constraints = {
+		id nullable: true
 		title blank: false
 		canvas blank: false
 		module nullable: false
@@ -21,6 +23,7 @@ class SaveDashboardItemCommand {
 
 	def getProperties() {
 		[
+				id			: id,
 				title       : title,
 				canvas      : canvas,
 				module      : module,

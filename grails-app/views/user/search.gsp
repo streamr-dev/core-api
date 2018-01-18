@@ -77,7 +77,7 @@ def queryParams = [username: username, enabled: enabled, accountExpired: account
 			<g:sortableColumn property="enabled" title="${message(code: 'secuser.enabled.label')}" params="${queryParams}"/>
 			<g:sortableColumn property="accountExpired" title="${message(code: 'secuser.accountExpired.label')}" params="${queryParams}"/>
 			<g:sortableColumn property="accountLocked" title="${message(code: 'secuser.accountLocked.label')}" params="${queryParams}"/>
-			<g:sortableColumn property="passwordExpired" title="${message(code: 'secuser.passwordExpired.label)}" params="${queryParams}"/>
+			<g:sortableColumn property="passwordExpired" title="${message(code: 'secuser.passwordExpired.label')}" params="${queryParams}"/>
 		</tr>
 		</thead>
 
