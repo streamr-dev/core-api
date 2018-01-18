@@ -10,7 +10,7 @@ import spock.lang.Shared
 
 import java.nio.file.Paths
 
-class StreamSpec extends LoginTester1Spec {
+class StreamSpec extends LoginTester1Spec implements ConfirmationMixin, StreamMixin {
 
 	@Shared def mongoDbConfig = new MongoDbConfig([
 		host: "dev.streamr",
@@ -24,10 +24,6 @@ class StreamSpec extends LoginTester1Spec {
 	@Shared StreamService streamService
 
 	def setupSpec() {
-		// @Mixin is buggy, don't use it
-		StreamSpec.metaClass.mixin(StreamMixin)
-		StreamSpec.metaClass.mixin(ConfirmationMixin)
-
 		streamService = createStreamService()
 
 		def client = mongoDbConfig.createMongoClient()
@@ -83,7 +79,7 @@ class StreamSpec extends LoginTester1Spec {
 			$("button.save").click()
 		then: "Go to StreamShowPage, no configured fields"
 			waitFor { at StreamShowPage }
-			waitFor { $("div.alert.alert-info").displayed }
+			waitFor { $("div.alert.alert-info")[0].displayed }
 	}
 	
 	void "creating streams and autodetecting fields"() {

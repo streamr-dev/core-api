@@ -1,6 +1,6 @@
-import geb.spock.GebReportingSpec
 import pages.CanvasPage
 import pages.LoginPage
+import geb.spock.GebReportingSpec
 
 class LoginSpec extends GebReportingSpec {
 	
