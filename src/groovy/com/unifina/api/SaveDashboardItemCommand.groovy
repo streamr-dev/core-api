@@ -1,7 +1,5 @@
 package com.unifina.api
 
-import com.unifina.domain.dashboard.Dashboard
-import com.unifina.domain.dashboard.DashboardItem
 import com.unifina.domain.signalpath.Canvas
 import com.unifina.utils.Webcomponent
 import grails.converters.JSON
@@ -9,7 +7,7 @@ import grails.validation.Validateable
 
 @Validateable
 class SaveDashboardItemCommand {
-	String id
+
 	String title
 	Canvas canvas
 	Integer module
@@ -23,7 +21,6 @@ class SaveDashboardItemCommand {
 
 	def getProperties() {
 		[
-				id          : id,
 				title       : title,
 				canvas      : canvas,
 				module      : module,

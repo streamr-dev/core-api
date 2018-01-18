@@ -1,12 +1,10 @@
 package mixins
 
-
 import pages.DashboardListPage
 import pages.DashboardEditorPage
 import org.openqa.selenium.Keys
 
-
-class DashboardMixin {
+trait DashboardMixin {
 
 	def findCanvas(String name) {
 		return $(".canvasInList_canvasTitle", text: name).parent().parent()

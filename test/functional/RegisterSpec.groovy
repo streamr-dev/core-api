@@ -1,7 +1,8 @@
-import grails.util.Environment
 import pages.*
-import spock.lang.*
 import geb.spock.GebReportingSpec
+import grails.util.Environment
+import spock.lang.Shared
+import spock.lang.Stepwise
 
 @Stepwise
 class RegisterSpec extends GebReportingSpec {

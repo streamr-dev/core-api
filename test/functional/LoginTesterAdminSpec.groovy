@@ -1,17 +1,17 @@
 
 
-public class LoginTesterAdminSpec extends LoginTesterSpec {
+class LoginTesterAdminSpec extends LoginTesterSpec {
 
 	public static String testerUsername = "tester-admin@streamr.com"
 	public static String testerPassword = "tester-adminTESTER-ADMIN"
 
 	@Override
-	public String getTesterUsername() {
+	String getTesterUsername() {
 		return testerUsername
 	}
 
 	@Override
-	public String getTesterPassword() {
+	String getTesterPassword() {
 		return testerPassword
 	}
 }

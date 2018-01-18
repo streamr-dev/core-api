@@ -4,7 +4,9 @@ import com.unifina.domain.config.HostConfig
 import com.unifina.domain.security.SecRole
 import com.unifina.utils.NetworkInterfaceUtils
 import grails.util.Environment
+import grails.util.Holders
 import org.apache.log4j.Logger
+import org.codehaus.groovy.grails.plugins.GrailsPluginManager
 
 /**
  * The onInit and onDestroy methods should be triggered from conf/BootStrap.groovy of the app.
@@ -32,7 +34,7 @@ class BootService {
 		 * for example the domainClass plugin. When modifying any non-domain groovy
 		 * classes in the core plugin, an exception will be thrown.
 		 */
-		def pm = org.codehaus.groovy.grails.plugins.PluginManagerHolder.pluginManager;
+		GrailsPluginManager pm = Holders.pluginManager
 		for ( plugin in pm.getAllPlugins() ) {
 			for ( wp in plugin.getWatchedResourcePatterns() ) {
 				if ( "plugins" == wp.getDirectory()?.getName() && "groovy" == wp.getExtension() )

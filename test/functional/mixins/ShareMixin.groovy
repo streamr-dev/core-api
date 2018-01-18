@@ -5,8 +5,7 @@ import com.unifina.domain.security.Permission
 /**
  * For handling sharing dialog
  */
-@Mixin(NotificationMixin)
-class ShareMixin {
+trait ShareMixin implements NotificationMixin {
 
 	// We still don't know why it's so hard to type text into the input,
 	// just "$('.new-user-field') << text" won't work.
