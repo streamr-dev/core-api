@@ -10,20 +10,14 @@ import 'react-select/dist/react-select.css'
 
 import {getCurrentUser, updateCurrentUserName, updateCurrentUserTimezone, saveCurrentUser} from '../../../actions/user'
 
-import type {Notification} from '../../../flowtype/notification-types'
 import type {User, State as UserState} from '../../../flowtype/user-types'
-
-import {success, error, info} from 'react-notification-system-redux'
 
 type Props = {
     user: User,
     getCurrentUser: () => void,
     updateCurrentUserName: (name: User.name) => void,
     updateCurrentUserTimezone: (timezone: User.timezone) => void,
-    saveCurrentUser: Function,
-    success: (notification: Notification) => void,
-    error: (notification: Notification) => void,
-    info: (notification: Notification) => void
+    saveCurrentUser: Function
 }
 
 export class ProfileSettings extends Component<Props> {
@@ -112,33 +106,6 @@ export class ProfileSettings extends Component<Props> {
                         </InputGroup>
                     </FormGroup>
                 </Form>
-                <Button
-                    bsStyle="success"
-                    onClick={() => this.props.success({
-                        message: 'moi',
-                        title: 'success'
-                    })}
-                >
-                    Success
-                </Button>
-                <Button
-                    bsStyle="info"
-                    onClick={() => this.props.info({
-                        message: 'hei',
-                        title: 'info'
-                    })}
-                >
-                    Info
-                </Button>
-                <Button
-                    bsStyle="danger"
-                    onClick={() => this.props.error({
-                        message: 'moi',
-                        title: 'error'
-                    })}
-                >
-                    Error
-                </Button>
             </Panel>
         )
     }
@@ -160,15 +127,6 @@ export const mapDispatchToProps = (dispatch: Function) => ({
     },
     saveCurrentUser(user: User) {
         dispatch(saveCurrentUser(user))
-    },
-    success(notif: Notification) {
-        dispatch(success(notif))
-    },
-    error(notif: Notification) {
-        dispatch(error(notif))
-    },
-    info(notif: Notification) {
-        dispatch(info(notif))
     }
 })
 
