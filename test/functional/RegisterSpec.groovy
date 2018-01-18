@@ -9,7 +9,7 @@ class RegisterSpec extends GebReportingSpec {
         
         // Not a real email
         @Shared
-        def emailAddress = "testingemail@streamr.com"
+        def emailAddress = "testingemail${System.currentTimeMillis()}@streamr.com"
         @Shared
         def code = emailAddress.replaceAll("@", "_")
         // Just a random password
