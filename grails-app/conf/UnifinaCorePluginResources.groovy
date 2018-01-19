@@ -316,11 +316,6 @@ modules = {
 		dependsOn 'draggabilly'
 		dependsOn 'streamr-search'
 		dependsOn 'streamr-floating-search'
-		resource url:[dir:'css/signalPath/modules', file:'buttonModule.css', plugin: 'unifina-core']
-		resource url:[dir:'css/signalPath/modules', file:'chartModule.css', plugin: 'unifina-core']
-		resource url:[dir:'css/signalPath/modules', file:'commentModule.css', plugin: 'unifina-core']
-		resource url:[dir:'css/signalPath/modules', file:'eventTable.css', plugin: 'unifina-core']
-		resource url:[dir:'css/signalPath/modules', file:'switcherModule.css', plugin: 'unifina-core']
 		resource url:[dir:'js/unifina/signalPath/core', file:'signalPath.js', plugin: 'unifina-core']
 		resource url:[dir:'js/unifina/signalPath/generic', file:'emptyModule.js', plugin: 'unifina-core']
 		resource url:[dir:'js/unifina/signalPath/generic', file:'genericModule.js', plugin: 'unifina-core']

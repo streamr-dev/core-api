@@ -85,7 +85,7 @@ function StreamrChart(parent, options) {
 			if (_this.chart)
 				_this.redraw()
 		})
-        $rangeDiv.val(this.options.range)
+        $rangeSelect.val(this.options.range)
 
         $rangeDiv.append($rangeSelect)
 		this.toolbarInner.append($rangeDiv);

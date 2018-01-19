@@ -118,8 +118,8 @@ public class TimeSeriesChart extends Chart {
 		if (config.containsKey("barify"))
 			barify = Boolean.parseBoolean(config.get("barify").toString());
 
-		if (config.containsKey("range") && !config.get("range").toString().equals("null"))
-			range = Integer.parseInt(config.get("range").toString());
+		if (config.containsKey("range") && config.get("range") != null)
+			range = (int) Double.parseDouble(config.get("range").toString());
 
 		ModuleOptions options = ModuleOptions.get(config);
 		
