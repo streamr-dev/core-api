@@ -288,70 +288,70 @@ modules = {
 	}
 	'signalpath-core' {
 		// Easier to merge if dependencies are one-per-row instead of comma-separated list
-		dependsOn 'bootstrap-contextmenu'
-		dependsOn 'codemirror'
-		dependsOn 'confirm-button'
-		dependsOn 'draggabilly'
-		dependsOn 'highstock'
-		dependsOn 'jsplumb'
-		dependsOn 'jstree'
-		dependsOn 'key-value-editor'
-		dependsOn 'list-editor'
-		dependsOn 'lodash'
-		dependsOn 'mathjax'
-		dependsOn 'name-editor'
-		dependsOn 'raf-polyfill'
-		dependsOn 'signalpath-widgets'
-		dependsOn 'spectrum'
-		dependsOn 'streamr-button'
-		dependsOn 'streamr-chart'
+		dependsOn 'streamr'
 		dependsOn 'streamr-client'
-		dependsOn 'streamr-floating-search'
+		dependsOn 'streamr-chart'
+		dependsOn 'streamr-table'
 		dependsOn 'streamr-heatmap'
 		dependsOn 'streamr-map'
-		dependsOn 'streamr-search'
+		dependsOn 'streamr-button'
 		dependsOn 'streamr-switcher'
-		dependsOn 'streamr-table'
 		dependsOn 'streamr-text-field'
-		dependsOn 'streamr'
+		dependsOn 'jsplumb'
+		dependsOn 'jstree'
+		dependsOn 'highstock'
+		dependsOn 'codemirror'
 		dependsOn 'tablesorter'
+		dependsOn 'bootstrap-contextmenu'
 		dependsOn 'typeahead'
+		dependsOn 'raf-polyfill'
+		dependsOn 'signalpath-widgets'
+		dependsOn 'mathjax'
+		dependsOn 'spectrum'
+		dependsOn 'lodash'
+		dependsOn 'key-value-editor'
+		dependsOn 'list-editor'
+		dependsOn 'confirm-button'
+		dependsOn 'name-editor'
+		dependsOn 'draggabilly'
+		dependsOn 'streamr-search'
+		dependsOn 'streamr-floating-search'
 		resource url:[dir:'css/signalPath/modules', file:'buttonModule.css', plugin: 'unifina-core']
 		resource url:[dir:'css/signalPath/modules', file:'chartModule.css', plugin: 'unifina-core']
 		resource url:[dir:'css/signalPath/modules', file:'commentModule.css', plugin: 'unifina-core']
 		resource url:[dir:'css/signalPath/modules', file:'eventTable.css', plugin: 'unifina-core']
 		resource url:[dir:'css/signalPath/modules', file:'switcherModule.css', plugin: 'unifina-core']
-		resource url:[dir:'js/unifina/signalPath/core', file:'Endpoint.js', plugin: 'unifina-core']
-		resource url:[dir:'js/unifina/signalPath/core', file:'Input.js', plugin: 'unifina-core']
-		resource url:[dir:'js/unifina/signalPath/core', file:'IOSwitch.js', plugin: 'unifina-core']
-		resource url:[dir:'js/unifina/signalPath/core', file:'Output.js', plugin: 'unifina-core']
-		resource url:[dir:'js/unifina/signalPath/core', file:'Parameter.js', plugin: 'unifina-core']
 		resource url:[dir:'js/unifina/signalPath/core', file:'signalPath.js', plugin: 'unifina-core']
-		resource url:[dir:'js/unifina/signalPath/core', file:'VariadicInput.js', plugin: 'unifina-core']
-		resource url:[dir:'js/unifina/signalPath/core', file:'VariadicOutput.js', plugin: 'unifina-core']
 		resource url:[dir:'js/unifina/signalPath/generic', file:'emptyModule.js', plugin: 'unifina-core']
 		resource url:[dir:'js/unifina/signalPath/generic', file:'genericModule.js', plugin: 'unifina-core']
-		resource url:[dir:'js/unifina/signalPath/generic', file:'subCanvasModule.js', plugin: 'unifina-core']
 		resource url:[dir:'js/unifina/signalPath/generic', file:'uiChannelModule.js', plugin: 'unifina-core']
-		resource url:[dir:'js/unifina/signalPath/specific', file:'canvasModule.js', plugin: 'unifina-core']
+		resource url:[dir:'js/unifina/signalPath/core', file:'IOSwitch.js', plugin: 'unifina-core']
+		resource url:[dir:'js/unifina/signalPath/core', file:'Endpoint.js', plugin: 'unifina-core']
+		resource url:[dir:'js/unifina/signalPath/core', file:'Input.js', plugin: 'unifina-core']
+		resource url:[dir:'js/unifina/signalPath/core', file:'VariadicInput.js', plugin: 'unifina-core']
+		resource url:[dir:'js/unifina/signalPath/core', file:'VariadicOutput.js', plugin: 'unifina-core']
+		resource url:[dir:'js/unifina/signalPath/core', file:'Parameter.js', plugin: 'unifina-core']
+		resource url:[dir:'js/unifina/signalPath/core', file:'Output.js', plugin: 'unifina-core']
 		resource url:[dir:'js/unifina/signalPath/specific', file:'chartModule.js', plugin: 'unifina-core']
-		resource url:[dir:'js/unifina/signalPath/specific', file:'commentModule.js', plugin: 'unifina-core']
-		resource url:[dir:'js/unifina/signalPath/specific', file:'customModule.js', plugin: 'unifina-core']
-		resource url:[dir:'js/unifina/signalPath/specific', file:'ethereumContractInput.js', plugin: 'unifina-core']
-		resource url:[dir:'js/unifina/signalPath/specific', file:'exportCSVModule.js', plugin: 'unifina-core']
-		resource url:[dir:'js/unifina/signalPath/specific', file:'filterModule.js', plugin: 'unifina-core']
-		resource url:[dir:'js/unifina/signalPath/specific', file:'forEachModule.js', plugin: 'unifina-core']
-		resource url:[dir:'js/unifina/signalPath/specific', file:'gaugeModule.js', plugin: 'unifina-core']
 		resource url:[dir:'js/unifina/signalPath/specific', file:'heatmapModule.js', plugin: 'unifina-core']
+		resource url:[dir:'js/unifina/signalPath/specific', file:'mapModule.js', plugin: 'unifina-core']
 		resource url:[dir:'js/unifina/signalPath/specific', file:'imageMapModule.js', plugin: 'unifina-core']
 		resource url:[dir:'js/unifina/signalPath/specific', file:'inputModule.js', plugin: 'unifina-core']
-		resource url:[dir:'js/unifina/signalPath/specific', file:'labelModule.js', plugin: 'unifina-core']
-		resource url:[dir:'js/unifina/signalPath/specific', file:'mapModule.js', plugin: 'unifina-core']
-		resource url:[dir:'js/unifina/signalPath/specific', file:'scheduler.js', plugin: 'unifina-core']
-		resource url:[dir:'js/unifina/signalPath/specific', file:'schedulerModule.js', plugin: 'unifina-core']
+		resource url:[dir:'js/unifina/signalPath/specific', file:'gaugeModule.js', plugin: 'unifina-core']
+		resource url:[dir:'js/unifina/signalPath/specific', file:'customModule.js', plugin: 'unifina-core']
 		resource url:[dir:'js/unifina/signalPath/specific', file:'solidityModule.js', plugin: 'unifina-core']
-		resource url:[dir:'js/unifina/signalPath/specific', file:'streamModule.js', plugin: 'unifina-core']
+		resource url:[dir:'js/unifina/signalPath/specific', file:'ethereumContractInput.js', plugin: 'unifina-core']
 		resource url:[dir:'js/unifina/signalPath/specific', file:'tableModule.js', plugin: 'unifina-core']
+		resource url:[dir:'js/unifina/signalPath/specific', file:'commentModule.js', plugin: 'unifina-core']
+		resource url:[dir:'js/unifina/signalPath/specific', file:'labelModule.js', plugin: 'unifina-core']
+		resource url:[dir:'js/unifina/signalPath/specific', file:'schedulerModule.js', plugin: 'unifina-core']
+		resource url:[dir:'js/unifina/signalPath/specific', file:'scheduler.js', plugin: 'unifina-core']
+		resource url:[dir:'js/unifina/signalPath/specific', file:'streamModule.js', plugin: 'unifina-core']
+		resource url:[dir:'js/unifina/signalPath/specific', file:'filterModule.js', plugin: 'unifina-core']
+		resource url:[dir:'js/unifina/signalPath/generic', file:'subCanvasModule.js', plugin: 'unifina-core']
+		resource url:[dir:'js/unifina/signalPath/specific', file:'canvasModule.js', plugin: 'unifina-core']
+		resource url:[dir:'js/unifina/signalPath/specific', file:'forEachModule.js', plugin: 'unifina-core']
+		resource url:[dir:'js/unifina/signalPath/specific', file:'exportCSVModule.js', plugin: 'unifina-core']
 	}
 	'signalpath-theme' {
 		dependsOn 'signalpath-core'
