@@ -8,7 +8,7 @@ import grails.test.mixin.Mock
 import grails.test.mixin.support.GrailsUnitTestMixin
 import spock.lang.Specification
 
-@Mock([Canvas, SecUser])
+@Mock([Canvas, SecUser, Task])
 class CanvasStartTaskSpec extends Specification {
 
 	Canvas canvas
