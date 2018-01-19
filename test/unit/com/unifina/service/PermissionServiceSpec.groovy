@@ -50,7 +50,7 @@ class PermissionServiceSpec extends Specification {
 		// Dashboards
 		dashAllowed = new Dashboard(name:"allowed").save(validate:false)
 		dashRestricted = new Dashboard(name:"restricted").save(validate:false)
-		dashOwned = new Dashboard(name:"owned").save(validate:false) // TODO: refactor not owned anymore
+		dashOwned = new Dashboard(name:"owned").save(validate:false)
 		dashPublic = new Dashboard(name:"public").save(validate:false)
 
 		service.systemGrantAll(anotherUser, dashAllowed)
@@ -65,8 +65,6 @@ class PermissionServiceSpec extends Specification {
 		dashReadPermission = service.grant(anotherUser, dashAllowed, me, Operation.READ)
 		dashAnonymousReadPermission = service.grantAnonymousAccess(anotherUser, dashPublic)
 		service.grant(anotherUser, dashAllowed, anonymousKey)
-
-		//mockCriteria([Dashboard])
     }
 
 	void "test setup"() {
@@ -230,13 +228,6 @@ class PermissionServiceSpec extends Specification {
 		service.getAll(Dashboard, null) == [dashPublic]
 	}
 
-	void "get closure filtering works as expected"() {
-		expect:
-		service.get(Dashboard, me) { like("name", "%ll%") } == [dashAllowed]
-		//service.get(Dashboard, me, Operation.SHARE) == [dashOwned] TODO: GORM mocking bug. Possibly fixed by CORE-630
-		// service.get(Dashboard, me, Operation.SHARE) { like("name", "%ll%") } == [] TODO: GORM mocking bug. Possibly fixed by CORE-630
-	}
-
 	void "granting and revoking read rights"() {
 		when:
 		service.grant(me, dashOwned, stranger)
@@ -331,46 +322,6 @@ class PermissionServiceSpec extends Specification {
 		then:
 		def e = thrown(AccessControlException)
 		e.message == "Cannot revoke only SHARE permission of ${dashOwned}"
-	}
-
-	void "sharing read rights to others"() {
-		when:
-		service.grant(me, dashOwned, stranger, Operation.READ)
-		service.grant(me, dashOwned, stranger, Operation.SHARE)
-		then:
-		service.get(Dashboard, stranger) == [dashOwned]
-		service.get(Dashboard, stranger, Operation.SHARE) == [dashOwned]
-
-		expect:
-		!(dashOwned in service.get(Dashboard, anotherUser))
-
-		when: "stranger shares read access"
-		service.grant(stranger, dashOwned, anotherUser)
-		then:
-		dashOwned in service.get(Dashboard, anotherUser)
-		// !(dashOwned in service.get(Dashboard, anotherUser, Operation.SHARE)) TODO: GORM mocking bug. Possibly fixed by CORE-630
-
-		when:
-		service.revoke(stranger, dashOwned, anotherUser)
-		then:
-		!(dashOwned in service.get(Dashboard, anotherUser))
-
-		when: "of course, it's silly to revoke 'share' access since it might already been re-shared..."
-		service.revoke(me, dashOwned, stranger)
-		service.grant(stranger, dashOwned, anotherUser)
-		then:
-		thrown AccessControlException
-	}
-
-	void "revocation is granular"() {
-		setup:
-		service.grant(me, dashOwned, stranger, Operation.READ)
-		service.grant(me, dashOwned, stranger, Operation.SHARE)
-		when:
-		service.revoke(me, dashOwned, stranger, Operation.SHARE)
-		then: "only 'share' access is revoked"
-		service.get(Dashboard, stranger) == [dashOwned]
-		//service.get(Dashboard, stranger, Operation.SHARE) == [] TODO: GORM mocking bug. Possibly fixed by CORE-630
 	}
 
 	void "default revocation is all access"() {
