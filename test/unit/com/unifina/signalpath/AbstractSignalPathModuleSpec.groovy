@@ -1,9 +1,12 @@
 package com.unifina.signalpath
 
+import com.unifina.BeanMockingSpecification
 import com.unifina.datasource.RealtimeDataSource
 import com.unifina.domain.security.SecUser
+import com.unifina.service.PermissionService
 import com.unifina.utils.Globals
-import com.unifina.utils.testutils.FakePushChannel
+import com.unifina.utils.testutils.FakeStreamService
+import grails.test.mixin.support.GrailsUnitTestMixin
 import groovy.transform.CompileStatic
 import org.apache.log4j.Level
 import org.apache.log4j.Logger
@@ -12,7 +15,8 @@ import spock.lang.Specification
 
 import java.util.concurrent.TimeUnit
 
-class AbstractSignalPathModuleSpec extends Specification {
+
+class AbstractSignalPathModuleSpec extends BeanMockingSpecification {
 	static class Module extends AbstractSignalPathModule {
 		def param = new IntegerParameter(this, "param", 666)
 		def a = new Input<Object>(this, "in2", "Object")
@@ -28,7 +32,8 @@ class AbstractSignalPathModuleSpec extends Specification {
 
 	Module module
 	Globals globals
-	FakePushChannel uiChannel
+	SignalPath mockSignalPath
+	PermissionService mockedPermissionService
 
 	@Shared Level oldGlobalsLoggingLevel
 	@Shared Level oldAbstractSignalPathModuleLoggingLevel
@@ -43,6 +48,12 @@ class AbstractSignalPathModuleSpec extends Specification {
 	def cleanupSpec() {
 		Logger.getLogger(Globals).setLevel(oldGlobalsLoggingLevel)
 		Logger.getLogger(AbstractSignalPathModule).setLevel(oldAbstractSignalPathModuleLoggingLevel)
+	}
+
+	def setup() {
+		mockSignalPath = Mock(SignalPath)
+		mockedPermissionService = Mock(PermissionService)
+		mockBean(PermissionService, mockedPermissionService)
 	}
 
 	void "init() adds endpoints to class"() {
@@ -79,11 +90,8 @@ class AbstractSignalPathModuleSpec extends Specification {
 
 	@CompileStatic
 	private void setUpModuleWithRuntimeRequestEnv() {
-		uiChannel = new FakePushChannel()
-
 		globals = new Globals()
 		globals.setDataSource(new RealtimeDataSource(globals))
-		globals.setUiChannel(uiChannel)
 		globals.init()
 
 		module = new Module()
@@ -91,12 +99,11 @@ class AbstractSignalPathModuleSpec extends Specification {
 		module.setGlobals(globals)
 		module.setName("MyModule")
 		module.setDisplayName("MyModuleDisplayName")
-		module.setParentSignalPath(new SignalPath())
+		module.setParentSignalPath(mockSignalPath)
 	}
 
 	@CompileStatic
-	private RuntimeResponse sendRuntimeRequest(LinkedHashMap<String, Object> msg, boolean authenticated = false) {
-		SecUser user = authenticated ? new SecUser() : null
+	private RuntimeResponse sendRuntimeRequest(LinkedHashMap<String, Object> msg, SecUser user) {
 		def request = new RuntimeRequest(msg, user, null, "request/1", "request/1", [] as Set)
 		def future = module.onRequest(request, request.getPathReader())
 		globals.getDataSource().getEventQueue().process(globals.getDataSource().getEventQueue().poll())
@@ -108,7 +115,7 @@ class AbstractSignalPathModuleSpec extends Specification {
 
 		when:
 		Map msg = [type: "ping"]
-		def response = sendRuntimeRequest(msg)
+		def response = sendRuntimeRequest(msg, null)
 
 		then:
 		response == new RuntimeResponse(true, [request: msg])
@@ -123,12 +130,13 @@ class AbstractSignalPathModuleSpec extends Specification {
 			param: "param",
 			value: -123
 		]
-		def response = sendRuntimeRequest(msg, true)
+		def response = sendRuntimeRequest(msg, new SecUser())
 
 		then:
 		response == new RuntimeResponse(true, [request: msg])
 		module.param.value == -123
-		uiChannel.receivedContentByChannel == [:]
+		1 * mockedPermissionService.canWrite(_, _) >> true
+		0 * module.parentSignalPath.pushToUiChannel(_)
 	}
 
 	void "'paramChange' pushes error to uiChannel if not permitted"() {
@@ -140,12 +148,12 @@ class AbstractSignalPathModuleSpec extends Specification {
 			param: "param",
 			value: -123
 		]
-		def response = sendRuntimeRequest(msg)
+		def response = sendRuntimeRequest(msg, null)
 
 		then:
 		response == new RuntimeResponse([request: msg])
 		module.param.value == 666
-		uiChannel.receivedContentByChannel.values().flatten() == [new ErrorMessage("Parameter change failed!")]
+		1 * module.parentSignalPath.pushToUiChannel(new ErrorMessage("Parameter change failed!"))
 	}
 
 	void "supports 'json' runtime requests"() {
@@ -153,9 +161,27 @@ class AbstractSignalPathModuleSpec extends Specification {
 
 		when:
 		Map msg = [type: "json"]
-		def response = sendRuntimeRequest([type: "json"], true)
+		def response = sendRuntimeRequest([type: "json"], new SecUser())
 
 		then:
 		response == new RuntimeResponse(true, [request: msg, json: module.configuration])
+	}
+
+	void "getRootSignalPath() returns null for module with no parent"() {
+		module = new Module()
+
+		expect:
+		module.getRootSignalPath() == null
+	}
+
+	void "getRootSignalPath() returns root reported by parent if it has a parent"() {
+		module = new Module()
+		module.setParentSignalPath(mockSignalPath)
+
+		when:
+		SignalPath root = module.getRootSignalPath()
+		then:
+		1 * module.getParentSignalPath().getRootSignalPath() >> mockSignalPath
+		root == mockSignalPath
 	}
 }

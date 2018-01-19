@@ -1,19 +1,18 @@
 package com.unifina.signalpath.utils
 
+import com.unifina.UiChannelMockingSpecification
 import com.unifina.signalpath.RuntimeRequest
 import com.unifina.signalpath.RuntimeResponse
 import com.unifina.utils.testutils.ModuleTestHelper
-import spock.lang.Specification
 
-class ListAsTableSpec extends Specification {
+class ListAsTableSpec extends UiChannelMockingSpecification {
 	ListAsTable module
 
 	RuntimeResponse initResponse = new RuntimeResponse()
 
 	def setup() {
-		module = new ListAsTable()
-		module.init()
-		module.configure([
+		mockServicesForUiChannels()
+		module = setupModule(new ListAsTable(), [
 			uiChannel: [id: "table"],
 		])
 	}
@@ -55,7 +54,7 @@ class ListAsTableSpec extends Specification {
 
 		then:
 		new ModuleTestHelper.Builder(module, inputValues, outputValues)
-			.uiChannelMessages(channelMessages)
+			.uiChannelMessages(channelMessages, getSentMessagesByStreamId())
 			.test()
 	}
 
@@ -87,7 +86,7 @@ class ListAsTableSpec extends Specification {
 
 		then:
 		new ModuleTestHelper.Builder(module, inputValues, outputValues)
-			.uiChannelMessages(channelMessages)
+			.uiChannelMessages(channelMessages, getSentMessagesByStreamId())
 			.test()
 	}
 
@@ -116,7 +115,7 @@ class ListAsTableSpec extends Specification {
 
 		then:
 		new ModuleTestHelper.Builder(module, inputValues, outputValues)
-			.uiChannelMessages(channelMessages)
+			.uiChannelMessages(channelMessages, getSentMessagesByStreamId())
 			.test()
 	}
 }

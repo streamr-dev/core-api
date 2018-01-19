@@ -1,15 +1,16 @@
 package com.unifina.signalpath;
 
 import com.unifina.data.FeedEvent;
+import com.unifina.domain.data.Stream;
 import com.unifina.domain.signalpath.Canvas;
 import com.unifina.domain.signalpath.Module;
-import com.unifina.push.PushChannel;
 import com.unifina.serialization.SerializationRequest;
 import com.unifina.service.CanvasService;
 import com.unifina.service.ModuleService;
 import com.unifina.service.SerializationService;
 import com.unifina.utils.Globals;
 import grails.converters.JSON;
+import grails.util.Holders;
 import org.apache.log4j.Logger;
 import org.codehaus.groovy.grails.web.json.JSONObject;
 
@@ -38,10 +39,11 @@ public class SignalPath extends ModuleWithUI {
 	private Map<Integer, AbstractSignalPathModule> modulesByHash = new HashMap<>();
 
 	private boolean root = false;
+	private SignalPath cachedRootSignalPath = null;
 
 	public SignalPath() {
 		super();
-		initPriority = 10;
+		setInitPriority(10);
 		canRefresh = true;
 	}
 
@@ -55,11 +57,15 @@ public class SignalPath extends ModuleWithUI {
 		super();
 		this.root = isRoot;
 		this.setGlobals(globals);
-		initPriority = 10;
+		setInitPriority(10);
 		canRefresh = true;
 
 		// Backwards compatibility, TODO: remove this constructor eventually
 		initFromRepresentation(iData);
+	}
+
+	public boolean isRoot() {
+		return root;
 	}
 
 	// TODO: remove backwards compatibility eventually
@@ -83,7 +89,11 @@ public class SignalPath extends ModuleWithUI {
 			modulesJSON = new ArrayList<>(0);
 		}
 
-		ModuleService moduleService = getGlobals().getBean(ModuleService.class);
+		if (modulesJSON.isEmpty()) {
+			return;
+		}
+
+		ModuleService moduleService = Holders.getApplicationContext().getBean(ModuleService.class);
 
 		HashMap<Long, Module> moduleDomainById = new HashMap<>();
 		for (Module m : moduleService.getModuleDomainObjects(modulesJSON)) {
@@ -165,7 +175,7 @@ public class SignalPath extends ModuleWithUI {
 			if (o != null) {
 				o.connect(ic.input);
 			} else {
-				log.warn("Input " + ic.input.getName() + " could not be connected, because source was not found. SP: " + ic.input.getOwner().getParentSignalPath() + ", TOP: " + ic.input.getOwner().getTopParentSignalPath());
+				log.warn("Input " + ic.input.getName() + " could not be connected, because source was not found. SP: " + ic.input.getOwner().getParentSignalPath() + ", TOP: " + ic.input.getOwner().getRootSignalPath());
 			}
 		}
 
@@ -179,15 +189,15 @@ public class SignalPath extends ModuleWithUI {
 				it.setExport(false);
 				// Id needs to be regenerated to avoid clashes with other instances of the same canvas-as-a-module
 				it.regenerateId();
-				if (getInput(it.name) == null) {
+				if (getInput(it.getName()) == null) {
 					addInput(it);
 				}
 				else {
 					int counter = 2;
-					while (getInput(it.name + counter) != null) {
+					while (getInput(it.getName() + counter) != null) {
 						counter++;
 					}
-					it.name = it.name + counter;
+					it.setName(it.getName() + counter);
 					addInput(it);
 				}
 			}
@@ -198,15 +208,15 @@ public class SignalPath extends ModuleWithUI {
 				it.setExport(false);
 				// Id needs to be regenerated to avoid clashes with other instances of the same canvas-as-a-module
 				it.regenerateId();
-				if (getOutput(it.name) == null) {
+				if (getOutput(it.getName()) == null) {
 					addOutput(it);
 				}
 				else {
 					int counter = 2;
-					while (getOutput(it.name + counter) != null) {
+					while (getOutput(it.getName() + counter) != null) {
 						counter++;
 					}
-					it.name = it.name + counter;
+					it.setName(it.getName() + counter);
 					addOutput(it);
 				}
 			}
@@ -219,6 +229,10 @@ public class SignalPath extends ModuleWithUI {
 
 	public boolean hasExports() {
 		return exportedInputs.size() + exportedOutputs.size() > 0;
+	}
+
+	public boolean isSerializable() {
+		return !getGlobals().isAdhoc() && getGlobals().isSerializationEnabled() && isRoot();
 	}
 
 	@Override
@@ -242,7 +256,8 @@ public class SignalPath extends ModuleWithUI {
 			 * as subcanvases, as all the instances would produce to same uiChannels.
 			 */
 			Map json = (JSONObject) JSON.parse(signalPathParameter.getCanvas().getJson());
-			getGlobals().getBean(CanvasService.class).resetUiChannels(json);
+			CanvasService canvasService = Holders.getApplicationContext().getBean(CanvasService.class);
+			canvasService.resetUiChannels(json);
 			initFromRepresentation(json);
 		} else {
 			initFromRepresentation(config);
@@ -325,10 +340,7 @@ public class SignalPath extends ModuleWithUI {
 						if (!input.wasReady()) {
 							notReady.append(input.toString());
 							notReady.append("\n");
-
-							if (getGlobals().getUiChannel() != null) {
-								getGlobals().getUiChannel().push(new ModuleWarningMessage("Input was never ready: " + input.getEffectiveName(), input.getOwner().getHash()), uiChannelId);
-							}
+							pushToUiChannel(new ModuleWarningMessage("Input was never ready: " + input.getEffectiveName(), input.getOwner().getHash()));
 						}
 					}
 					log.debug("Module had non-ready inputs: " + notReady);
@@ -350,10 +362,7 @@ public class SignalPath extends ModuleWithUI {
 	 * Sends a notification to this SignalPath's UI channel.
      */
 	public void showNotification(@NotNull String notification) {
-		PushChannel pushChannel = getGlobals().getUiChannel();
-		if (pushChannel != null) {
-			pushChannel.push(new NotificationMessage(notification), getUiChannelId());
-		}
+		pushToUiChannel(new NotificationMessage(notification));
 	}
 
 	@Override
@@ -439,5 +448,25 @@ public class SignalPath extends ModuleWithUI {
 				return module.resolveRuntimeRequestRecipient(request, path);
 			}
 		}
+	}
+
+	@Override
+	protected RuntimeRequest.PathWriter getRuntimePath(RuntimeRequest.PathWriter writer) {
+		return super.getRuntimePath(root ? writer.writeCanvasId(getCanvas().getId()) : writer);
+	}
+
+	@Override
+	public SignalPath getRootSignalPath() {
+		if (cachedRootSignalPath == null) {
+			if (this.isRoot()) {
+				cachedRootSignalPath = this;
+			} else if (getParentSignalPath() != null) {
+				cachedRootSignalPath = getParentSignalPath().getRootSignalPath();
+			} else {
+				throw new IllegalStateException("SignalPath is not root, but doesn't have a parent!");
+			}
+		}
+
+		return cachedRootSignalPath;
 	}
 }

@@ -49,7 +49,7 @@ class DashboardServiceSpec extends Specification {
 		when:
 		def dashboards = service.findAllDashboards(user)
 		then:
-		dashboards*.name == ["my-dashboard-1", "my-dashboard-2", "my-dashboard-3", "not-my-dashboard-2"]
+		dashboards*.name as Set == ["my-dashboard-1", "my-dashboard-2", "my-dashboard-3", "not-my-dashboard-2"] as Set
 	}
 
 	def "findById() cannot fetch non-existent dashboard"() {
@@ -96,6 +96,29 @@ class DashboardServiceSpec extends Specification {
 		service.deleteById(2L, user)
 		then:
 		Dashboard.findById(2L) == null
+	}
+
+	def "create() creates a new dashboard and returns it"() {
+		setup:
+		SortedSet<DashboardItem> items = new TreeSet<DashboardItem>()
+		items.add(new DashboardItem(title: "test1", ord: new Integer(0), canvas: new Canvas(), module: 0, size: "b", webcomponent: "b"))
+		items.add(new DashboardItem(title: "test2", ord: new Integer(1), canvas: new Canvas(), module: 0, size: "b", webcomponent: "b"))
+		def user = new SecUser(name: "tester").save(validate: false)
+		when:
+		SaveDashboardCommand command = new SaveDashboardCommand([
+		        name: "test-create",
+				items: items
+		])
+		service.create(command, user)
+
+		then:
+		// 6 created in setup and this one
+		Dashboard.count() == 7
+		Dashboard.findByName("test-create").getName() == "test-create"
+		Dashboard.findByName("test-create").getItems().first().title == "test1"
+		Dashboard.findByName("test-create").getItems().last().title == "test2"
+		Dashboard.findByName("test-create").getUser().getName() =="tester"
+
 	}
 
 	def "update() cannot update non-existent dashboard"() {

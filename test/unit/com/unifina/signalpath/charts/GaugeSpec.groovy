@@ -1,16 +1,21 @@
 package com.unifina.signalpath.charts
 
+import com.unifina.UiChannelMockingSpecification
+import com.unifina.domain.security.SecUser
+import com.unifina.utils.GlobalsFactory
 import com.unifina.utils.testutils.ModuleTestHelper
-import spock.lang.Specification
+import grails.test.mixin.TestMixin
+import grails.test.mixin.support.GrailsUnitTestMixin
 
-class GaugeSpec extends Specification {
+@TestMixin(GrailsUnitTestMixin) // for grailsApplication
+class GaugeSpec extends UiChannelMockingSpecification {
 	
 	Gauge module
 	
     def setup() {
-		module = new Gauge()
-		module.init()
-		module.configure([
+		mockServicesForUiChannels()
+
+		module = setupModule(new Gauge(), [
 			uiChannel: [id: "gauge"],
 			params: [
 				[name: "min", value: -1],
@@ -29,7 +34,7 @@ class GaugeSpec extends Specification {
 		]
 		Map outputValues = [:]
 		Map channelMessages = [
-			gauge: [
+				gauge: [
 				[min: -1.0D, v: 0.0D, title: "Gauge", max: 1.0D, type: "init"],
 				[v: 0.2D, type: "u"],
 				[v: 0.9D, type: "u"],
@@ -43,7 +48,7 @@ class GaugeSpec extends Specification {
 		
 		then:
 		new ModuleTestHelper.Builder(module, inputValues, outputValues)
-			.uiChannelMessages(channelMessages)
+			.uiChannelMessages(channelMessages, getSentMessagesByStreamId())
 			.test()
 	}
 }

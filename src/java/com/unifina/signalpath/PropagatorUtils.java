@@ -7,7 +7,7 @@ public class PropagatorUtils {
 	public static Set<AbstractSignalPathModule> findReachableSetFromOutputs(List<Output> outputs) {
 		List<Input> inputs = new ArrayList<>();
 		for (Output o : outputs) {
-			Collections.addAll(inputs, o.getTargets());
+			inputs.addAll(o.getTargets());
 		}
 		return findReachableSetFromInputs(inputs);
 	}
@@ -22,14 +22,13 @@ public class PropagatorUtils {
 			Input input = stack.pop();
 			AbstractSignalPathModule module = input.getOwner();
 
-			// Skip feedback connections, we don't want infinite dependency loops!
-			if (!input.isFeedbackConnection() && !reachableSet.contains(module)) {
+			if (!reachableSet.contains(module)) {
 				reachableSet.add(module);
 
 				// Recurse to the owner if it's not an originatingModule
-				if (!module.propagationSink) {
+				if (!module.isPropagationSink()) {
 					for (Output o : module.getOutputs()) {
-						Collections.addAll(stack, o.getTargets());
+						stack.addAll(o.getTargets());
 					}
 				}
 			}
@@ -49,28 +48,36 @@ public class PropagatorUtils {
 		for (AbstractSignalPathModule targetModule : targets) {
 			Queue<AbstractSignalPathModule> queue = new ArrayDeque<>();
 			queue.add(targetModule);
-			boolean found = false;
 
-			while (!found && !queue.isEmpty()) {
-				AbstractSignalPathModule source = queue.remove();
-				for (Input i : source.getInputs()) {
+			// Keep track of visited modules to improve efficiency and break infinite loops
+			Set<AbstractSignalPathModule> visited = new HashSet<>();
+
+			// Use a named loop to be able to break out of the nested loop
+			backwardsSourceSearch:
+			while (!queue.isEmpty()) {
+				AbstractSignalPathModule currentModule = queue.remove();
+				visited.add(currentModule);
+
+				for (Input i : currentModule.getInputs()) {
 					if (i.isConnected()) {
+						// Traverse "backwards" via the current input to the module that connects to it
 						AbstractSignalPathModule outputOwner = i.getSource().getOwner();
+
+						// Is that a source module?
 						if (sources.contains(outputOwner)) {
-							found = true;
-							break;
-						} else {
+							// The current target depends on one of the source modules!
+							result.add(targetModule);
+							break backwardsSourceSearch;
+						} else if (!visited.contains(outputOwner)) {
+							// No dependency found yet, queue
 							queue.add(outputOwner);
 						}
 					}
 				}
 			}
-
-			if (found) {
-				result.add(targetModule);
-			}
 		}
 
 		return result;
 	}
+
 }

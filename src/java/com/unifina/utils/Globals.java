@@ -2,50 +2,40 @@ package com.unifina.utils;
 
 import com.unifina.datasource.DataSource;
 import com.unifina.domain.security.SecUser;
-import com.unifina.push.PushChannel;
+import com.unifina.security.permission.DataSourcePermission;
 import com.unifina.security.permission.GrailsApplicationPermission;
 import com.unifina.security.permission.UserPermission;
-import com.unifina.signalpath.AbstractSignalPathModule;
-import groovy.lang.GroovySystem;
 import org.apache.log4j.Logger;
 import org.codehaus.groovy.grails.commons.GrailsApplication;
 
 import java.security.AccessController;
 import java.text.SimpleDateFormat;
-import java.util.*;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.TimeZone;
 
 
 public class Globals {
-
 	private static final Logger log = Logger.getLogger(Globals.class);
 
-	public SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
-	public SimpleDateFormat dateFormatUTC = new SimpleDateFormat("yyyy-MM-dd");
-	public SimpleDateFormat timeFormat = new SimpleDateFormat("HH:mm:ss.SSS");
-	public SimpleDateFormat dateTimeFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS");
+	private final SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
+	private final SimpleDateFormat dateFormatUTC = new SimpleDateFormat("yyyy-MM-dd");
+	private final SimpleDateFormat timeFormat = new SimpleDateFormat("HH:mm:ss.SSS");
+	private final SimpleDateFormat dateTimeFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS");
 	
-	protected GrailsApplication grailsApplication;
-	
-	// TODO: remove, parse everything to real fields
-	protected Map signalPathContext = null;
-	
-	public Date time;
-	public HashMap<Object,AbstractSignalPathModule> sharedInstances = new HashMap<>();
-	
+	private GrailsApplication grailsApplication;
+	private Map signalPathContext = null;
 	private TimeZone userTimeZone;
 	private SecUser user;
-	
 	private TimezoneConverter tzConverter;
-	
-	protected DataSource dataSource = null;
-	
-	private List<Class> dynamicClasses = new ArrayList<>();
-	
-	protected Date startDate = null;
-	protected Date endDate = null;
-	
-	protected PushChannel uiChannel = null;
-	protected boolean realtime = false;
+	private DataSource dataSource = null;
+	private Date startDate = null;
+	private Date endDate = null;
+	private boolean realtime = false;
+	private IdGenerator idGenerator = new IdGenerator();
+
+	public Date time;
 
 	/**
 	 * Construct fake environment, e.g., for testing.
@@ -55,11 +45,12 @@ public class Globals {
 	}
 	
 	public Globals(Map signalPathContext, GrailsApplication grailsApplication, SecUser user) {
-		if (signalPathContext==null)
+		if (signalPathContext == null) {
 			throw new NullPointerException("signalPathContext can not be null!");
-			
-		if (grailsApplication==null)
+		}
+		if (grailsApplication == null) {
 			throw new NullPointerException("grailsApplication can not be null!");
+		}
 		
 		this.signalPathContext = signalPathContext;
 		this.grailsApplication = grailsApplication;
@@ -68,45 +59,39 @@ public class Globals {
 		dateFormatUTC.setTimeZone(TimeZone.getTimeZone("UTC"));
 	}
 	
-	public void onModuleCreated(AbstractSignalPathModule module) {
-
-	}
-	
-	public void onModuleInitialized(AbstractSignalPathModule module) {
-
-	}
-	
 	public Map getSignalPathContext() {
 		return signalPathContext;
 	}
-	
-	// TODO: risky to keep these here, should be out of sight of user code
+
 	public GrailsApplication getGrailsApplication() {
-		if (System.getSecurityManager()!=null)
+		if (System.getSecurityManager() != null) { // Ensure cannot be accessed by CustomModule
 			AccessController.checkPermission(new GrailsApplicationPermission());
-		
+		}
 		return grailsApplication;
 	}
 
-
-	// TODO: risky to keep these here, should be out of sight of user code
 	/**
 	 * Returns the SecUser for this Globals instance, or null if the user is anonymous/unknown.
      */
 	public SecUser getUser() {
-		if (System.getSecurityManager()!=null)
+		if (System.getSecurityManager() != null) { // Ensure cannot be accessed by CustomModule
 			AccessController.checkPermission(new UserPermission());
+		}
 		return user;
 	}
-	
-	// TODO: risky to keep these here, should be out of sight of user code
+
 	public void setUser(SecUser user) {
-		if (System.getSecurityManager()!=null)
+		if (System.getSecurityManager() != null) { // Ensure cannot be accessed by CustomModule
 			AccessController.checkPermission(new UserPermission());
+		}
 		this.user = user;
 	}
+
+	public Date getTime() {
+		return time;
+	}
 	
-	protected String detectTimeZone() {
+	private String detectTimeZone() {
 		String tzString;
 		
 		if (user!=null)
@@ -119,7 +104,7 @@ public class Globals {
 		return tzString;
 	}
 	
-	protected void initTimeZone(String tzString) {
+	private void initTimeZone(String tzString) {
 		TimeZone tz = TimeZone.getTimeZone(tzString);
 		
 		dateFormat.setTimeZone(tz);
@@ -140,23 +125,19 @@ public class Globals {
 			// Use UTC timezone for beginDate and endDate
 			startDate = MapTraversal.getDate(signalPathContext, "beginDate", dateFormatUTC);
 
-			// Set time to midnight UTC of the current date if nothing specified
-			if (startDate==null) {
-				Calendar cal = new GregorianCalendar();
-				cal.setTime(new Date());
-				cal.set(Calendar.HOUR_OF_DAY,0);
-				cal.set(Calendar.MINUTE,0);
-				cal.set(Calendar.SECOND,0);
-				cal.set(Calendar.MILLISECOND,0);
-				time = cal.getTime();
-			} else {
+			if (isRealtime()) {
+				time = new Date();
+			} else if (startDate!=null) {
 				time = startDate;
+			} else {
+				// As a fallback, set time to midnight today
+				time = TimeOfDayUtil.getMidnight(new Date());
 			}
 
 			// Interpret endDate as one millisecond to the next midnight
 			// Change this if the possibility to enter a time range is added
 			endDate = MapTraversal.getDate(signalPathContext, "endDate", dateFormatUTC);
-			if (endDate!=null) {
+			if (endDate != null) {
 				endDate = new Date(TimeOfDayUtil.getMidnight(endDate).getTime() + 24 * 60 * 60 * 1000 - 1);
 			}
 		}
@@ -178,6 +159,9 @@ public class Globals {
 	}
 	
 	public TimeZone getUserTimeZone() {
+		if (userTimeZone == null) {
+			userTimeZone = TimeZone.getTimeZone(user.getTimezone());
+		}
 		return userTimeZone;
 	}
 	
@@ -186,16 +170,8 @@ public class Globals {
 		timeFormat.setTimeZone(tz);
 	}
 	
-	public void registerDynamicClass(Class c) {
-		dynamicClasses.add(c);
-	}
-	
 	public void destroy() {
-		for (Class c : dynamicClasses) {
-			GroovySystem.getMetaClassRegistry().removeMetaClass(c);
-		}
-		if (uiChannel!=null)
-			uiChannel.destroy();
+		// TODO: anything needed here?
 	}
 
 	public void setRealtime(boolean realtime) {
@@ -205,29 +181,35 @@ public class Globals {
 	public boolean isRealtime() {
 		return realtime;
 	}
+
+	public boolean isAdhoc() {
+		return !isRealtime();
+	}
+
+	public boolean isSerializationEnabled() {
+		return MapTraversal.getBoolean(signalPathContext, "serializationEnabled");
+	}
 	
 	public DataSource getDataSource() {
+		if (System.getSecurityManager() != null) {
+			AccessController.checkPermission(new DataSourcePermission());
+		}
 		return dataSource;
 	}
 	
 	public void setDataSource(DataSource dataSource) {
+		if (System.getSecurityManager() != null) {
+			AccessController.checkPermission(new DataSourcePermission());
+		}
 		this.dataSource = dataSource;
 	}
 
-	public PushChannel getUiChannel() {
-		return uiChannel;
+	public IdGenerator getIdGenerator() {
+		return idGenerator;
 	}
 
-	public void setUiChannel(PushChannel uiChannel) {
-		this.uiChannel = uiChannel;
-	}
-
-	public void setGrailsApplication(GrailsApplication grailsApplication) {
-		this.grailsApplication = grailsApplication;
-	}
-
-	public <T> T getBean(Class<T> requiredType) {
-		return grailsApplication.getMainContext().getBean(requiredType);
+	public void setIdGenerator(IdGenerator idGenerator) {
+		this.idGenerator = idGenerator;
 	}
 
 	/**
@@ -236,5 +218,9 @@ public class Globals {
      */
 	public boolean isRunContext() {
 		return getDataSource() != null;
+	}
+
+	public String formatDateTime(Date date) {
+		return dateTimeFormat.format(date);
 	}
 }

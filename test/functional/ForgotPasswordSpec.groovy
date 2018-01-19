@@ -1,5 +1,5 @@
 import geb.spock.GebReportingSpec
-import core.pages.*
+import pages.*
 
 class ForgotPasswordSpec extends GebReportingSpec {
 	

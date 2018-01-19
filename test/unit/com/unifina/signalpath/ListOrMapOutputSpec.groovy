@@ -13,7 +13,7 @@ class ListOrMapOutputSpec extends Specification {
 		when:
 		output.send(["a", "b", null, null, "c", "d"])
 		then:
-		output.previousValue == ["a", "b", "c", "d"]
+		output.value == ["a", "b", "c", "d"]
 	}
 
 	def "sends map with null entries removed, if linked input previously received map"() {
@@ -22,6 +22,6 @@ class ListOrMapOutputSpec extends Specification {
 		when:
 		output.send([1, 2, 3, null, 5, null])
 		then:
-		output.previousValue == [e: 5, b: 2, c: 3, a: 1]
+		output.value == [e: 5, b: 2, c: 3, a: 1]
 	}
 }

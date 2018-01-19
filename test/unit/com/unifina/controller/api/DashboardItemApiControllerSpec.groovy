@@ -3,6 +3,7 @@ package com.unifina.controller.api
 import com.unifina.api.SaveDashboardItemCommand
 import com.unifina.domain.dashboard.Dashboard
 import com.unifina.domain.dashboard.DashboardItem
+import com.unifina.domain.security.Key
 import com.unifina.domain.security.SecUser
 import com.unifina.domain.signalpath.Canvas
 import com.unifina.filters.UnifinaCoreAPIFilters
@@ -16,8 +17,7 @@ import groovy.json.JsonBuilder
 import spock.lang.Specification
 
 @TestFor(DashboardItemApiController)
-@Mixin(FiltersUnitTestMixin)
-@Mock([Canvas, Dashboard, DashboardItem, SecUser, UnifinaCoreAPIFilters, UserService, SpringSecurityService])
+@Mock([Canvas, Dashboard, DashboardItem, Key, SecUser, UnifinaCoreAPIFilters, UserService, SpringSecurityService])
 class DashboardItemApiControllerSpec extends Specification {
 
 	DashboardService dashboardService
@@ -26,8 +26,12 @@ class DashboardItemApiControllerSpec extends Specification {
 
 	def setup() {
 		dashboardService = controller.dashboardService = Mock(DashboardService)
-		me = new SecUser(apiKey: "myApiKey").save(failOnError: true, validate: false)
+		me = new SecUser().save(failOnError: true, validate: false)
 		dashboards = DashboardApiControllerSpec.initDashboards(me)
+
+		Key key = new Key(name: "key", user: me)
+		key.id = "myApiKey"
+		key.save(failOnError: true, validate: true)
 
 		Canvas c = new Canvas(json: '{"modules": [{"hash": 1, "uiChannel": {"webcomponent": "streamr-chart"}}]}')
 		c.id = "canvas"

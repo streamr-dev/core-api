@@ -1,16 +1,15 @@
 package com.unifina.signalpath.utils
 
+import com.unifina.UiChannelMockingSpecification
 import com.unifina.utils.testutils.ModuleTestHelper
-import spock.lang.Specification
 
-class LabelSpec extends Specification {
+class LabelSpec extends UiChannelMockingSpecification {
 
 	Label module
 
 	def setup() {
-		module = new Label()
-		module.init()
-		module.configure([uiChannel: [id: "labelChannel"]])
+		mockServicesForUiChannels()
+		module = setupModule(new Label(), [uiChannel: [id: "labelChannel"]])
 	}
 
 	void "label sends correct data to uiChannel"() {
@@ -31,7 +30,7 @@ class LabelSpec extends Specification {
 
 		then:
 		new ModuleTestHelper.Builder(module, inputValues, outputValues)
-			.uiChannelMessages(channelMessages)
+			.uiChannelMessages(channelMessages, getSentMessagesByStreamId())
 			.test()
 	}
 }

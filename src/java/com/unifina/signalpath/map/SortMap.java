@@ -13,24 +13,32 @@ public class SortMap extends AbstractSignalPathModule {
 
 	@Override
 	public void sendOutput() {
-		Map source = in.getValue();
-		Map target = by.isByValue() ?
-			new ValueSortedMap(order.isDescending()) :
-			new TreeMap<>(order.isDescending() ? Collections.reverseOrder() : null);
-
-		try {
-			target.putAll(source);
-		} catch (ClassCastException e) {
-			return;
-		}
-
-		if (target != null) {
-			out.send(target);
-		}
+		out.send(performSort(in.getValue(), by.isByValue(), order.isDescending()));
 	}
 
 	@Override
 	public void clearState() {}
+
+	private static Map performSort(Map source, boolean sortByValue, boolean descending) {
+		Map target;
+
+		if (sortByValue) {
+			if (areValuesComparable(source)) {
+				target = new ValueSortedMap(descending);
+			} else {
+				return source; // Special case: if values are not sortable return map untouched
+			}
+		} else {
+			target = new TreeMap<>(descending ? Collections.reverseOrder() : null);
+		}
+
+		target.putAll(source);
+		return target;
+	}
+
+	private static boolean areValuesComparable(Map source) {
+		return source.isEmpty() || source.values().iterator().next() instanceof Comparable;
+	}
 
 	public static class OrderParameter extends StringParameter {
 

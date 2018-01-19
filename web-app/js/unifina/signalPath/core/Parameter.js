@@ -35,8 +35,9 @@
 				option.attr("value",val.value);
 				option.append(val.name);
 
-				if (_this.data.value && _this.data.value.toString() == val.value)
-					option.attr("selected","selected");
+				if (_this.data.value != null && _this.data.value.toString() == val.value) {
+					option.attr("selected", "selected")
+				}
 
 				select.append(option);
 			});
@@ -160,7 +161,7 @@
 			inBody: true
 		}, onSel)
 
-		$(this.parameter.module).on("drag", function() {
+		$(this.parameter.module).on("dragMove", function() {
 			_this.streamrSearch.redrawMenu()
 		})
 
@@ -221,11 +222,12 @@
 			preferredFormat: "rgb",
 			showInput: true,
 			showButtons: false,
-			hide: function() {
+            showAlpha: true,
+			hide: function(color) {
 				var oldValue = _this.data.value
-				_this.data.value = _this.getValue()
+                _this.data.value = color.toRgbString()
 				if (oldValue !== _this.data.value) {
-					$(_this).trigger('change')
+                    $(_this).trigger('change')
 				}
 			}
 		})

@@ -1,5 +1,8 @@
 // This file should only contain imports!
 
+// Streamr's own variables/mixins
+@import "unifina/variables.less";
+
 // Import base Bootstrap styling (pixel-admin theme)
 @import "pixel-admin/pixel-admin.less";
 @import "pixel-admin/pixel-admin-less/themes/default/default.less";
@@ -10,34 +13,21 @@
 
 // Unifina signalPath styles
 @import "unifina/signalPath/signalPath.less";
+@import "unifina/signalPath/module.less";
 
 //Module styles
-@import "unifina/signalPath/modules/schedulerModule.less";
+@import "unifina/signalPath/modules/*.less";
 
 // Dashboard styles
 @import "unifina/dashboard/streamr-label.less";
 
 // Unifina common & page styles
 @import "common.less";
-@import "unifina/pages/canvas-editor.less";
-@import "unifina/pages/login.less";
-@import "unifina/pages/live-show.less";
-@import "unifina/pages/stream-show.less";
-@import "unifina/pages/module-list.less";
-@import "unifina/pages/canvas-list.less";
-@import "unifina/pages/help-page.less";
+@import "unifina/pages/*.less";
 
 // Unifina widgets
-@import "unifina/widgets/clickable-table.less";
-@import "unifina/widgets/code-editor.less";
-@import "unifina/widgets/remote-tabs.less";
-@import "unifina/widgets/modal-spinner.less";
-@import "unifina/widgets/streamr-sidebar.less";
-@import "unifina/widgets/scrollspy-list.less";
+@import "unifina/widgets/*.less";
 @import "unifina/dashboard/dashboard-editor.less";
-@import "unifina/widgets/sharing-dialog.less";
-@import "unifina/widgets/streamr-search.less";
-@import "unifina/widgets/list-search.less";
 
 // pixel-admin widgets
 @import "pixel-admin/pixel-admin-less/widgets/notifications.less";

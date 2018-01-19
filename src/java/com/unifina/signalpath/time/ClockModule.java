@@ -15,32 +15,30 @@ public class ClockModule extends AbstractSignalPathModule implements ITimeListen
 	private final StringOutput date = new StringOutput(this, "date");
 	private final TimeSeriesOutput ts = new TimeSeriesOutput(this,"timestamp");
 
-	private int secondCounter = 0;
 	private SimpleDateFormat df = null;
 
 	public ClockModule() {
-		format.canToggleDrivingInput = false;
-		tickUnit.canToggleDrivingInput = false;
-		tickRate.canToggleDrivingInput = false;
+		format.setCanToggleDrivingInput(false);
+		tickUnit.setCanToggleDrivingInput(false);
+		tickRate.setCanToggleDrivingInput(false);
 	}
 
 	@Override
 	public void sendOutput() {}
 	
 	@Override
-	public void clearState() {
-		secondCounter = 0;
-	}
+	public void clearState() {}
 	
 	@Override
 	public void setTime(Date timestamp) {
-		if (tickUnit.getValue().isActivationTime(tickRate.getValue(), secondCounter++)) {
-			if (date.isConnected() && format.hasValue()) {
-				updateDateFormatIfNecessary(format.getValue());
-				date.send(df.format(timestamp));
-			}
-			ts.send(timestamp.getTime());
-		}
+		updateDateFormatIfNecessary(format.getValue());
+		date.send(df.format(timestamp));
+		ts.send(timestamp.getTime());
+	}
+
+	@Override
+	public int tickRateInSec() {
+		return tickUnit.getValue().tickRateInSec(tickRate.getValue());
 	}
 
 	private void updateDateFormatIfNecessary(String format) {
@@ -80,8 +78,8 @@ public class ClockModule extends AbstractSignalPathModule implements ITimeListen
 			this.baseRate = baseRate;
 		}
 
-		boolean isActivationTime(long tickRate, long currentTime) {
-			return currentTime % (tickRate * baseRate) == 0;
+		int tickRateInSec(int tickRate) {
+			return tickRate * baseRate;
 		}
 
 		@Override

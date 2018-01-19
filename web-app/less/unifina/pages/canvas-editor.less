@@ -26,9 +26,66 @@ body.canvas-editor-page {
 	}
 
 	.nav-tabs.run-mode-tabs {
-		& > li > a:hover,
-		& > li > a:active {
+		> li > a:hover,
+		> li > a:active {
 			color: #999;
+		}
+		> li {
+			float: left;
+			width: 50%;
+			&:first-child {
+				> .nav-tab-orange-background {
+					right: 0;
+				}
+				> .nav-tab-white-background {
+					left: 0;
+				}
+			}
+			&:last-child {
+				> .nav-tab-orange-background {
+					left: 0;
+				}
+				> .nav-tab-white-background {
+					right: 0;
+				}
+			}
+			> .nav-tab-background {
+				position: absolute;
+				width: 0;
+				bottom: 0;
+				height: 100%;
+				border-bottom: 2px solid;
+				transition: width 0.2s ease-in;
+
+				+ a {
+					border-radius: 0;
+					border: none;
+					margin-bottom: 2px;
+				}
+			}
+			> .nav-tab-orange-background {
+				border-bottom-color: @primary-color;
+				width: 0;
+				background-color: #181b1f;
+			}
+			> .nav-tab-white-background {
+				border-bottom-color: #FFFFFF;
+				width: 100%;
+			}
+			&.active {
+				> .nav-tab-orange-background {
+					width: 100%;
+				}
+				> .nav-tab-white-background {
+					width: 0;
+				}
+			}
+		}
+	}
+	#main-menu {
+		// There was problems with overriding Bootstrap's styles and I didn't want to put the whole closure above under #main-menu tag
+		.nav-tabs.run-mode-tabs li.active > .nav-tab-background + a {
+			background: none;
 		}
 	}
 
@@ -46,10 +103,7 @@ body.canvas-editor-page {
 	}
 
 	#content-wrapper {
-		padding-top: @main-navbar-height;
-		padding-left: 0px;
-		padding-right: 0px;
-		padding-bottom: 0px;
+		padding: @main-navbar-height 0 0;
 	}
 
 	#moduleTree {
@@ -60,26 +114,10 @@ body.canvas-editor-page {
 	#main-menu .twitter-typeahead {
 		width: 100%;
 	}
-	
-	#canvas-name-editor {
-		&.editing {
-			.canvas-name {
-				display:none;
-			}
-		}
-		&:not(.editing) {
-			input, button {
-				display: none;
-			}
-		}
-
-		.canvas-name {
-			cursor: pointer;
-		}
-	}
 
 	.breadcrumb {
-		margin-bottom: 0px;
+		margin-bottom: 0;
+		margin-left: 0;
 	}
 
 

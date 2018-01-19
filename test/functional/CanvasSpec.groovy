@@ -1,22 +1,28 @@
-import core.mixins.KafkaMixin
-import core.mixins.ListPageMixin
-import core.pages.CanvasListPage
-import core.pages.CanvasPage
-import org.openqa.selenium.Keys
+import com.unifina.domain.data.Stream
+import com.unifina.service.StreamService
+import LoginTester1Spec
+import mixins.CanvasMixin
+import mixins.ListPageMixin
+import mixins.StreamMixin
+import pages.CanvasListPage
+import pages.CanvasPage
+import spock.lang.Shared
 
 import java.text.SimpleDateFormat
 
-import com.unifina.kafkaclient.UnifinaKafkaProducer
+class CanvasSpec extends LoginTester1Spec implements CanvasMixin, ListPageMixin, StreamMixin {
 
-import core.LoginTester1Spec
-import core.mixins.CanvasMixin
+	@Shared StreamService streamService
+	@Shared Stream testStream
 
-class CanvasSpec extends LoginTester1Spec {
-	
-	def setupSpec(){
-		CanvasSpec.metaClass.mixin(CanvasMixin)
-		CanvasSpec.metaClass.mixin(ListPageMixin)
-		CanvasSpec.metaClass.mixin(KafkaMixin)
+	def setupSpec() {
+		streamService = createStreamService()
+		testStream = new Stream()
+		testStream.id = "c1_fiG6PTxmtnCYGU-mKuQ"
+	}
+
+	def cleanupSpec() {
+		cleanupStreamService(streamService)
 	}
 
 	def "clicking module close button in canvas should remove it"() {
@@ -33,7 +39,7 @@ class CanvasSpec extends LoginTester1Spec {
 	}
 	def "drag and dropping a module to canvas should add it"() {
 		when: "Barify is added via drag and drop"
-			dragAndDropModule 'Barify'
+			dragAndDropModule('Barify', 200, -400)
 		then: "module should appear on canvas"
 			moduleShouldAppearOnCanvas 'Barify'
 	}
@@ -290,7 +296,12 @@ class CanvasSpec extends LoginTester1Spec {
 		}
 	}
 
-	def "running a SignalPath should produce output"() {
+	def "running a SignalPath in historical mode should produce output"() {
+		String uniqueText = "test-"+System.currentTimeMillis()
+		SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS")
+		Date date = df.parse("2015-02-23 18:30:00.011")
+		streamService.saveMessage(testStream, null, date.getTime(), [temperature: 24, rpm: 100, text: uniqueText], 30, 0, null)
+
 		when: "SignalPath is loaded"
 			loadSignalPath 'test-run-canvas'
 		then: "signalpath content must be loaded"
@@ -299,58 +310,12 @@ class CanvasSpec extends LoginTester1Spec {
 		when: "run button is clicked"
 			runHistoricalButton.click()
 		then: "output should be produced"
-			waitFor(30) {
-				runHistoricalButton.text().contains("Abort")
-				$('.modulebody .table td', text: "2015-02-23 18:30:00.011")
+			waitFor(10) {
+				$('.modulebody .table td', text: contains(uniqueText))
 			}
-
-		when: "abort button is clicked"
-			runHistoricalButton.click()
-			sleepForNSeconds(2) // Allow some time for server-side stuff to clean up
-		then: "button must change back to run"
-			waitFor {
+			waitFor(10) {
 				runHistoricalButton.text().contains("Run")
 			}
-	}
-
-	def "running a SignalPath on current day should read from Kafka"() {
-		SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS")
-		Date now = new Date()
-		String sNow = df.format(now)
-
-		when: "SignalPath is loaded"
-			loadSignalPath 'test-run-canvas'
-		then: "signalpath content must be loaded"
-			moduleShouldAppearOnCanvas('Table')
-
-		when: "Run options button is clicked"
-			historicalOptionsButton.click()
-		then: "Speed option must be shown"
-			waitFor { speed.displayed }
-
-		when: "The Full speed option is selected and modal is dismissed"
-			speed.click()
-			speed.find("option").find{ it.value() == "0" }.click()
-			historicalOptionsModal.find(".btn-primary").click()
-		then: "Modal must disappear"
-			waitFor { !historicalOptionsModal.displayed }
-
-		when: "data is produced and signalpath is run on current date"
-			UnifinaKafkaProducer kafka = makeKafkaProducer()
-			// Procuce to the stream that test-run-canvas reads from
-			kafka.sendJSON("c1_fiG6PTxmtnCYGU-mKuQ", "", now.getTime(), '{"temperature": '+Math.random()+'}')
-			beginDate.click()
-			beginDate = "2015-02-27"
-			beginDate << Keys.TAB
-			endDate.click()
-			endDate = df.format(new Date())
-			endDate << Keys.TAB
-			runHistoricalButton.click()
-		then: "output should be produced and there should be more rows than what exists for 2015-02-27"
-			waitFor(30) {
-				$('.modulebody .table tr').size() > 554
-			}
-
 	}
 
 	void "module help shows and hides tooltip"() {
@@ -367,7 +332,7 @@ class CanvasSpec extends LoginTester1Spec {
 				$(".tooltip .modulehelp-tooltip p", 1).text().contains("Adds together")
 			}
 		when: "mouse moved away"
-			def menu = $(".menu-content")
+			def menu = $(".menu-content")[0]
 			interact {
 				moveToElement(menu)
 			}
@@ -381,7 +346,7 @@ class CanvasSpec extends LoginTester1Spec {
 		setup:
 			addAndWaitModule 'Add'
 		when: "input ioSwitch is hovered"
-			def el = $("td.input .ioSwitch.drivingInput")
+			def el = $("td.input .ioSwitch.drivingInput")[0]
 			interact {
 				moveToElement(el)
 			}
@@ -391,7 +356,7 @@ class CanvasSpec extends LoginTester1Spec {
 				$(".tooltip .tooltip-inner").text().contains("Driving input")
 			}
 		when: "mouse moved away"
-			def menu = $(".menu-content")
+			def menu = $(".menu-content")[0]
 			interact {
 				moveToElement(menu)
 			}
@@ -411,7 +376,7 @@ class CanvasSpec extends LoginTester1Spec {
 				$(".tooltip .tooltip-inner").text().contains("No repeat")
 			}
 		when: "mouse moved away"
-			menu = $(".menu-content")
+			menu = $(".menu-content")[0]
 			interact {
 				moveToElement(menu)
 			}
@@ -428,7 +393,7 @@ class CanvasSpec extends LoginTester1Spec {
 			addAndWaitModule 'Add'
 		then: "ioSwitches are visible by default"
 			waitFor {
-				$("td.input .ioSwitch.drivingInput").displayed
+				$("td.input .ioSwitch.drivingInput")*.displayed
 			}
 
 		when: "input ioSwitch is hovered"
@@ -442,7 +407,7 @@ class CanvasSpec extends LoginTester1Spec {
 				$(".tooltip .tooltip-inner strong").text() == "on"
 			}
 		when: "tooltip is hidden, switch is clicked and tooltip is shown again"
-			def menu = $(".menu-content")
+			def menu = $(".menu-content")[0]
 			interact {
 				moveToElement(menu)
 			}
@@ -455,6 +420,39 @@ class CanvasSpec extends LoginTester1Spec {
 				$(".tooltip").displayed
 				$(".tooltip .tooltip-inner strong").text() == "off"
 			}
+	}
+
+	void "Canvas can be renamed with name editor" () {
+		def canvasName = 'NewCanvas' + System.currentTimeMillis()
+		setup:
+			addAndWaitModule "Add"
+			saveCanvasAs canvasName
+		when: "name changed and reloaded"
+			nameEditorLabel.click()
+			nameEditorInput << canvasName + "-2"
+			findModuleOnCanvas('Add').click()
+			saveCanvas()
+			driver.navigate().refresh()
+		then: "canvas is saved"
+			waitFor {
+				at CanvasPage
+			}
+			findModuleOnCanvas "Add"
+			nameEditorLabel.text() == canvasName + "-2"
+			println($("title").text())
+		when: "name changed back"
+			nameEditorLabel.click()
+			nameEditorInput << canvasName
+			findModuleOnCanvas('Add').click()
+			saveCanvas()
+			driver.navigate().refresh()
+		then: "canvas is saved"
+			waitFor {
+				at CanvasPage
+			}
+			findModuleOnCanvas "Add"
+			nameEditorLabel.text() == canvasName
+			println($("title").text())
 	}
 
 }

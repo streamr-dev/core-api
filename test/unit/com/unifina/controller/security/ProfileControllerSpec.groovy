@@ -1,15 +1,15 @@
 package com.unifina.controller.security
 
-import com.unifina.service.KafkaService
+import com.unifina.domain.security.Key
+import com.unifina.domain.security.SecUser
+import com.unifina.service.StreamService
+import com.unifina.service.UserService
 import grails.test.mixin.Mock
 import grails.test.mixin.TestFor
 import spock.lang.Specification
 
-import com.unifina.domain.security.SecUser
-import com.unifina.service.UserService
-
 @TestFor(ProfileController)
-@Mock([SecUser])
+@Mock([Key, SecUser])
 class ProfileControllerSpec extends Specification {
 
 	SecUser user
@@ -31,9 +31,9 @@ class ProfileControllerSpec extends Specification {
 
 	void setup() {
 		controller.springSecurityService = springSecurityService
-		controller.kafkaService = Mock(KafkaService)
+		controller.streamService = Mock(StreamService)
 		user = new SecUser(id:1, 
-			username:"test@test.test", 
+			username:"test@test.com",
 			name: "Test User",
 			password:springSecurityService.encodePassword("foobar123!"), 
 			timezone: "Europe/Helsinki")
@@ -109,6 +109,8 @@ class ProfileControllerSpec extends Specification {
 	}
 
 	void "changing user settings must change them"() {
+		controller.userService = new UserService()
+		controller.userService.grailsApplication = grailsApplication
 		when: "new settings are submitted"
 			params.name = "Changed Name"
 			params.timezone = "Europe/Helsinki"
@@ -119,28 +121,48 @@ class ProfileControllerSpec extends Specification {
 			flash.message != null
 	}
 
-	void "regenerating api key changes the key"() {
-		setup: "change the api key manually"
-			user.apiKey = "test"
-		when: "regenerated the api key"
-			request.method = "POST"
-			controller.regenerateApiKey()
-		then: "the key has changed"
-			user.apiKey != "test"
+	void "regenerating api key removes old user-linked keys"() {
+		setup:
+		Key key = new Key(name: "key", user: user).save(failOnError: true, validate: true)
+		String keyId = key.id
+
+		when:
+		request.method = "POST"
+		controller.regenerateApiKey()
+
+		then:
+		Key.get(keyId) == null
 	}
 
-	void "regenerating the api key send message to kafka"() {
-		setup: "change the api key manually"
-			user.apiKey = "test"
-		when: "regenerated the api key"
-			request.method = "POST"
-			controller.regenerateApiKey()
-		then: "the key has changed"
-			1 * controller.kafkaService.sendMessage("revoked-api-keys", "", [
-			        action: "revoked",
-					user: 1,
-					key: "test"
-			])
+	void "regenerating api key creates a new user-linked key"() {
+		setup:
+		Key key = new Key(name: "key", user: user).save(failOnError: true, validate: true)
+		String keyId = key.id
+
+		when:
+		request.method = "POST"
+		controller.regenerateApiKey()
+
+		then:
+		Key.findByUser(user) != null
+		Key.findByUser(user).id != keyId
+	}
+
+	void "regenerating the api key sends message to Kafka"() {
+		setup:
+		Key key = new Key(name: "key", user: user).save(failOnError: true, validate: true)
+		String keyId = key.id
+
+		when:
+		request.method = "POST"
+		controller.regenerateApiKey()
+
+		then:
+		1 * controller.streamService.sendMessage(_, [
+				action: "revoked",
+				user: 1,
+				key: keyId
+		], _)
 	}
 	
 }

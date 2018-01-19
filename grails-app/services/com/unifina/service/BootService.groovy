@@ -1,15 +1,12 @@
 package com.unifina.service
 
-import grails.util.Environment
-
-import org.apache.log4j.Logger
-import org.codehaus.groovy.grails.commons.GrailsApplication
-
 import com.unifina.domain.config.HostConfig
 import com.unifina.domain.security.SecRole
-import com.unifina.task.TaskMessageListener
-import com.unifina.task.TaskWorker
 import com.unifina.utils.NetworkInterfaceUtils
+import grails.util.Environment
+import grails.util.Holders
+import org.apache.log4j.Logger
+import org.codehaus.groovy.grails.plugins.GrailsPluginManager
 
 /**
  * The onInit and onDestroy methods should be triggered from conf/BootStrap.groovy of the app.
@@ -37,7 +34,7 @@ class BootService {
 		 * for example the domainClass plugin. When modifying any non-domain groovy
 		 * classes in the core plugin, an exception will be thrown.
 		 */
-		def pm = org.codehaus.groovy.grails.plugins.PluginManagerHolder.pluginManager;
+		GrailsPluginManager pm = Holders.pluginManager
 		for ( plugin in pm.getAllPlugins() ) {
 			for ( wp in plugin.getWatchedResourcePatterns() ) {
 				if ( "plugins" == wp.getDirectory()?.getName() && "groovy" == wp.getExtension() )
@@ -82,10 +79,6 @@ class BootService {
 				taskService.startTaskWorker()
 			}
 			log.info("onInit: started $workerCount task workers")
-			
-			// Start a listener for Task-related events
-			servletContext["taskMessageListener"] = new TaskMessageListener(grailsApplication, taskService.getTaskWorkers())
-			log.info("onInit: started TaskMessageListener")
 		}
 		else {
 			log.info("onInit: Task workers and listeners not started due to reduced environment: "+Environment.getCurrent()+", grails.test.phase: "+System.getProperty("grails.test.phase"))
@@ -97,7 +90,6 @@ class BootService {
 
 		if (servletContext) {
 			servletContext["signalPathRunners"]?.values().each {it.abort()}
-			servletContext["taskMessageListener"]?.quit()
 			servletContext["realtimeDataSource"]?.stopFeed()
 		}
 	}

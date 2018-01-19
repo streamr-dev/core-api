@@ -1,39 +1,39 @@
-import core.LoginTester1Spec
-import core.mixins.ListPageMixin
-import core.mixins.CanvasMixin
-import core.mixins.ConfirmationMixin
-import core.mixins.DashboardMixin
-import core.pages.*
+import LoginTester1Spec
+import mixins.CanvasMixin
+import mixins.ConfirmationMixin
+import mixins.DashboardMixin
+import mixins.ListPageMixin
+import pages.CanvasListPage
+import pages.CanvasPage
+import pages.DashboardListPage
+import pages.DashboardShowPage
 import pages.*
 
-class InputModuleDashboardSpec extends LoginTester1Spec {
+class InputModuleDashboardSpec extends LoginTester1Spec implements CanvasMixin, ConfirmationMixin, DashboardMixin, ListPageMixin {
 
-	static String liveCanvasName = "InputModuleDashboardSpec"
-	static String dashboardName = "test" + new Date().getTime()
+	static String canvasTemplate = "InputModuleDashboardSpec"
+	static String specCanvasName = canvasTemplate + System.currentTimeMillis()
+	static String dashboardSpecName = "InputModuleDashboardSpec" + System.currentTimeMillis()
 
 	def setupSpec() {
-		// @Mixin is buggy, use runtime mixins instead
-		this.class.metaClass.mixin(ListPageMixin)
-		this.class.metaClass.mixin(ConfirmationMixin)
-		this.class.metaClass.mixin(DashboardMixin)
-		this.class.metaClass.mixin(CanvasMixin)
-
 		super.login()
 		waitFor { at CanvasPage }
 
 		// Go start the RunningSignalPath related to this spec
 		to CanvasListPage
 		waitFor { at CanvasListPage }
-		clickRow(liveCanvasName)
+		clickRow(canvasTemplate)
 		waitFor { at CanvasPage }
 
+		// Create a copy of the canvas unique for this test
+		saveCanvasAs(specCanvasName)
+
 		ensureRealtimeTabDisplayed()
-		stopCanvasIfRunning()
 		resetAndStartCanvas(true)
 
-		createDashboard(dashboardName)
+		createDashboard(dashboardSpecName)
 
-		addDashboardItem(liveCanvasName, "Table")
+		addDashboardItem(specCanvasName, "Table")
 
 		saveDashboard()
 
@@ -51,7 +51,7 @@ class InputModuleDashboardSpec extends LoginTester1Spec {
 
 	def openDashboard() {
 		to DashboardListPage
-		$(".clickable-table a span", text: dashboardName).click()
+		$(".clickable-table a span", text: dashboardSpecName).click()
 		waitFor {
 			at DashboardShowPage
 		}
@@ -67,13 +67,21 @@ class InputModuleDashboardSpec extends LoginTester1Spec {
 	def cleanupSpec() {
 		// Delete the dashboard
 		super.login()
-		deleteDashboard(dashboardName)
+		deleteDashboard(dashboardSpecName)
 
+		// Stop the canvas
 		to CanvasListPage
 		waitFor { at CanvasListPage }
-		clickRow(liveCanvasName)
+		clickRow(specCanvasName)
 		waitFor { at CanvasPage }
 		stopCanvasIfRunning()
+
+		// Delete the canvas
+		to CanvasListPage
+		waitFor { at CanvasListPage }
+		clickDeleteButton(specCanvasName)
+		waitForConfirmation()
+		acceptConfirmation()
 	}
 
 	def cleanup() {
@@ -83,7 +91,7 @@ class InputModuleDashboardSpec extends LoginTester1Spec {
 	void "the button works"() {
 		def button
 		when: "Button added"
-		addDashboardItem(liveCanvasName, "Button")
+		addDashboardItem(specCanvasName, "Button")
 		button = findDashboardItem("Button").find("button.button-module-button")
 		then: "The name of the button is buttonTest"
 		button.text() == "buttonTest"
@@ -101,12 +109,14 @@ class InputModuleDashboardSpec extends LoginTester1Spec {
 		def textField
 		def sendBtn
 		when: "TextField added"
-		addDashboardItem(liveCanvasName, "TextField")
+		addDashboardItem(specCanvasName, "TextField")
 		textField = findDashboardItem("TextField").find("textarea")
 		sendBtn = findDashboardItem("TextField").find(".btn.send-btn")
 		then: "The text in the textField is textFieldTest"
 		// Geb's own .text() didn't work for some reason
-		js.exec("return \$('streamr-text-field textarea').val()") == "textFieldTest"
+		waitFor {
+			js.exec("return \$('streamr-text-field textarea').val()") == "textFieldTest"
+		}
 
 		when: "Text changed and sendButton clicked"
 		textField << "2"
@@ -119,7 +129,7 @@ class InputModuleDashboardSpec extends LoginTester1Spec {
 
 	void "the switcher works"() {
 		def switcher
-		addDashboardItem(liveCanvasName, "Switcher")
+		addDashboardItem(specCanvasName, "Switcher")
 		switcher = findDashboardItem("Switcher").find("div.switcher div.switcher-inner")
 
 		when: "Switcher clicked"

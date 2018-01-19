@@ -2,10 +2,11 @@ package com.unifina.signalpath.simplemath;
 
 import com.unifina.service.SerializationService;
 import com.unifina.signalpath.*;
+import org.apache.log4j.Logger;
 
-import java.util.*;
-
-import static org.apache.commons.lang3.math.NumberUtils.isNumber;
+import java.math.MathContext;
+import java.util.HashSet;
+import java.util.Map;
 
 public class Expression extends AbstractSignalPathModule {
 	private final StringParameter expressionParam = new StringParameter(this, "expression", "x+y");
@@ -15,6 +16,8 @@ public class Expression extends AbstractSignalPathModule {
 	transient private com.udojava.evalex.Expression expression;
 	private String expressionAsString;
 	private Iterable<String> variables;
+
+	private static final Logger log = Logger.getLogger(Expression.class);
 
 	@Override
 	public void init() {
@@ -48,7 +51,9 @@ public class Expression extends AbstractSignalPathModule {
 			double value = expression.eval().doubleValue();
 			out.send(value);
 		} catch (RuntimeException e) {
-			error.send(e.getMessage());
+			log.error("Exception while evaluating expression! Param: "+expressionParam+", Variables: "+variables+", Expression: "+expression);
+			// Null-safe error sending
+			error.send(e.getMessage() != null ? e.getMessage() : e.toString());
 		}
 	}
 
@@ -62,25 +67,7 @@ public class Expression extends AbstractSignalPathModule {
 	}
 
 	private void initExpressionAndVariables() throws com.udojava.evalex.Expression.ExpressionException {
-		expression = new com.udojava.evalex.Expression(expressionAsString);
-		variables = determineVariables(expression);
-	}
-
-	// TODO: Replace with com.udojava.evalex.Expression#getUsedVariables() when new release of EvalEx is released.
-	private static Iterable<String> determineVariables(com.udojava.evalex.Expression expression) {
-		Set<String> vars = new LinkedHashSet<>();
-		Iterator<String> iterator = expression.getExpressionTokenizer();
-		while (iterator.hasNext()) {
-			String token = iterator.next();
-			if (expression.getDeclaredFunctions().contains(token) ||
-				expression.getDeclaredOperators().contains(token) ||
-				expression.getDeclaredVariables().contains(token)
-				|| token.equals("(") || token.equals(")")
-				|| token.equals(",") || isNumber(token)) {
-				continue;
-			}
-			vars.add(token);
-		}
-		return vars;
+		expression = new com.udojava.evalex.Expression(expressionAsString, MathContext.DECIMAL64);
+		variables = new HashSet<>(expression.getUsedVariables());
 	}
 }

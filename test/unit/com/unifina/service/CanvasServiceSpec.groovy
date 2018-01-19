@@ -1,5 +1,6 @@
 package com.unifina.service
 
+import com.unifina.api.ApiException
 import com.unifina.api.InvalidStateException
 import com.unifina.api.NotFoundException
 import com.unifina.api.NotPermittedException
@@ -7,22 +8,28 @@ import com.unifina.api.SaveCanvasCommand
 import com.unifina.api.ValidationException
 import com.unifina.domain.dashboard.Dashboard
 import com.unifina.domain.dashboard.DashboardItem
+import com.unifina.domain.data.Stream
 import com.unifina.domain.security.Permission
 import com.unifina.domain.security.SecUser
 import com.unifina.domain.signalpath.Canvas
 import com.unifina.domain.signalpath.Module
+import com.unifina.domain.signalpath.Serialization
 import com.unifina.exceptions.CanvasUnreachableException
 import com.unifina.signalpath.UiChannelIterator
 import com.unifina.signalpath.charts.Heatmap
+import com.unifina.task.CanvasDeleteTask
 import grails.converters.JSON
 import grails.plugin.springsecurity.SpringSecurityService
 import grails.test.mixin.Mock
 import grails.test.mixin.TestFor
+import grails.test.mixin.TestMixin
+import grails.test.mixin.web.ControllerUnitTestMixin
 import groovy.json.JsonBuilder
 import spock.lang.Specification
 
+@TestMixin(ControllerUnitTestMixin) // "as JSON" converter
 @TestFor(CanvasService)
-@Mock([SecUser, Canvas, Module, ModuleService, SpringSecurityService, SignalPathService, PermissionService, Permission, Dashboard, DashboardItem])
+@Mock([SecUser, Canvas, Module, Stream, ModuleService, StreamService, SpringSecurityService, SignalPathService, PermissionService, Permission, Serialization, Dashboard, DashboardItem])
 class CanvasServiceSpec extends Specification {
 
 	SecUser me
@@ -38,7 +45,7 @@ class CanvasServiceSpec extends Specification {
 
 		moduleWithUi = new Module(implementingClass: Heatmap.name).save(validate: false)
 
-		me = new SecUser(username: "me@me.com", apiKey: "myKey").save(validate: false)
+		me = new SecUser(username: "me@me.com").save(validate: false)
 
 		myFirstCanvas = new Canvas(
 			name: "my_canvas_1",
@@ -102,7 +109,7 @@ class CanvasServiceSpec extends Specification {
 			state: Canvas.State.STOPPED
 		).save(failOnError: true)
 
-		someoneElse = new SecUser(username: "someone@someone.com", apiKey: "otherKey").save(validate: false)
+		someoneElse = new SecUser(username: "someone@someone.com").save(validate: false)
 
 		canvases << new Canvas(
 			name: "someoneElses_canvas_1",
@@ -155,8 +162,7 @@ class CanvasServiceSpec extends Specification {
 		c.server == null
 		c.requestUrl == null
 		!c.adhoc
-		c.serialized == null
-		c.serializationTime == null
+		c.serialization == null
 
 		List uiChannelIds = uiChannelIdsFromMap(c.toMap())
 		uiChannelIds.size() == 1
@@ -229,8 +235,10 @@ class CanvasServiceSpec extends Specification {
 
 	def "updateExisting clears serialization"() {
 		setup:
-		myFirstCanvas.serialized = "{}"
-		myFirstCanvas.serializationTime = new Date()
+		myFirstCanvas.serialization = new Serialization(date: new Date(), bytes: new byte[12])
+		myFirstCanvas.save(failOnError: true)
+		def serializationId = myFirstCanvas.serialization.id
+		assert serializationId != null
 
 		when:
 		def command = new SaveCanvasCommand(
@@ -242,8 +250,11 @@ class CanvasServiceSpec extends Specification {
 
 		then:
 		Canvas c = Canvas.findById(myFirstCanvas.id)
-		c.serialized == null
-		c.serializationTime == null
+		c.serialization == null
+
+		and:
+		Serialization s = Serialization.findById(serializationId)
+		s == null
 
 	}
 
@@ -296,10 +307,10 @@ class CanvasServiceSpec extends Specification {
 		service.signalPathService = signalPathService
 
 		when:
-		service.start(myFirstCanvas, false)
+		service.start(myFirstCanvas, false, me)
 
 		then:
-		1 * signalPathService.startLocal(myFirstCanvas, [speed: 0, beginDate: "2016-01-25", endDate: "2016-01-26"])
+		1 * signalPathService.startLocal(myFirstCanvas, [speed: 0, beginDate: "2016-01-25", endDate: "2016-01-26"], me)
 		0 * signalPathService._
 	}
 
@@ -308,11 +319,11 @@ class CanvasServiceSpec extends Specification {
 		service.signalPathService = signalPathService
 
 		when:
-		service.start(myFirstCanvas, true)
+		service.start(myFirstCanvas, true, me)
 
 		then:
 		1 * signalPathService.clearState(myFirstCanvas)
-		1 * signalPathService.startLocal(myFirstCanvas, [speed: 0, beginDate: "2016-01-25", endDate: "2016-01-26"])
+		1 * signalPathService.startLocal(myFirstCanvas, [speed: 0, beginDate: "2016-01-25", endDate: "2016-01-26"], me)
 		0 * signalPathService._
 	}
 
@@ -323,7 +334,7 @@ class CanvasServiceSpec extends Specification {
 		myFirstCanvas.save(failOnError: true)
 
 		when:
-		service.start(myFirstCanvas, false)
+		service.start(myFirstCanvas, false, me)
 
 		then:
 		thrown(InvalidStateException)
@@ -332,12 +343,11 @@ class CanvasServiceSpec extends Specification {
 	def "start() raises ApiException about serialization if deserializing canvas fails"() {
 		def signalPathService = Mock(SignalPathService)
 		service.signalPathService = signalPathService
-		myFirstCanvas.serialized = "serialized_content_be_here"
-		myFirstCanvas.serializationTime = new Date()
+		myFirstCanvas.serialization = new Serialization(date: new Date(), bytes: "invalid_content_be_here".bytes)
 		myFirstCanvas.save(failOnError: true)
 
 		when:
-		service.start(myFirstCanvas, false)
+		service.start(myFirstCanvas, false, me)
 
 		then:
 		true
@@ -385,6 +395,55 @@ class CanvasServiceSpec extends Specification {
 
 		then:
 		thrown(InvalidStateException)
+	}
+
+	def "deleteCanvas(,,false) deletes canvas"() {
+		setup:
+		assert Canvas.findById(myFirstCanvas.id) != null
+		when:
+		service.deleteCanvas(myFirstCanvas, me, false)
+		then:
+		Canvas.findById(myFirstCanvas.id) == null
+	}
+
+	def "deleteCanvas(,,false) deletes uiChannels of canvas"() {
+		setup:
+		Stream s = new Stream(
+			id: "666",
+			user: me,
+			name: "Notifications",
+			uiChannel: true,
+			uiChannelCanvas: myFirstCanvas,
+			uiChannelPath: "/canvas/1",
+		)
+		s.id = "666"
+		s.save(failOnError: true, validate: false, flush: true)
+
+		def streamService = service.streamService = Mock(StreamService)
+
+		when:
+		service.deleteCanvas(myFirstCanvas, me, false)
+		then:
+		1 * streamService.deleteStream(s)
+	}
+
+	def "deleteCanvas(,,true) creates a delete task"() {
+		def taskService = service.taskService = Mock(TaskService)
+		when:
+		service.deleteCanvas(myFirstCanvas, me, true)
+		then:
+		1 * taskService.createTask(CanvasDeleteTask, [canvasId: '1'], "delete-canvas", me, _)
+	}
+
+	def "deleteCanvas() throws ApiException if trying to delete running canvas"() {
+		when:
+		myFirstCanvas.state = Canvas.State.RUNNING
+		myFirstCanvas.save(failOnError: true, validate: true)
+
+		service.deleteCanvas(myFirstCanvas, me, false)
+		then:
+		def e = thrown(ApiException)
+		e.asApiError().statusCode == 409
 	}
 
 	def "authorizedGetById() checks access to canvases from PermissionService and returns the canvas if allowed"() {

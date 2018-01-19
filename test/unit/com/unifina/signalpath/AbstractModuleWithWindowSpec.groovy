@@ -1,5 +1,6 @@
 package com.unifina.signalpath
 
+import com.unifina.domain.security.SecUser
 import com.unifina.utils.GlobalsFactory
 import com.unifina.utils.window.WindowListener
 import grails.test.mixin.TestMixin
@@ -16,7 +17,7 @@ class AbstractModuleWithWindowSpec extends Specification {
 		}
 
 		WindowingModule m = new WindowingModule(minSamples, dimensions, windowListeners, Mock(AbstractModuleWithWindow))
-		m.globals = GlobalsFactory.createInstance([:], grailsApplication)
+		m.globals = GlobalsFactory.createInstance([:], grailsApplication, new SecUser())
 		m.globals.time = new Date(0)
 		m.init()
 		m.configure(config)

@@ -1,6 +1,7 @@
 package com.unifina.controller.security
 
 import com.unifina.api.ApiException
+import com.unifina.domain.security.SecUser
 import com.unifina.domain.signalpath.Canvas
 import com.unifina.service.CanvasService
 import com.unifina.service.SignalPathService
@@ -12,6 +13,12 @@ import spock.lang.Specification
 @TestFor(HostController)
 @Mock(Canvas)
 class HostControllerSpec extends Specification {
+
+	SecUser user
+
+	def setup() {
+		user = new SecUser()
+	}
 
 	void "shutdown throws ApiException for wrong http verb"() {
 		when:
@@ -25,8 +32,8 @@ class HostControllerSpec extends Specification {
 
 	void "shutdown must stop all TaskWorkers, stop local Canvases and start them remotely"() {
 		def canvases = [
-				new Canvas(state: Canvas.State.RUNNING, json: "{}"),
-				new Canvas(state: Canvas.State.RUNNING, json: "{}")
+				new Canvas(state: Canvas.State.RUNNING, json: "{}", user: user),
+				new Canvas(state: Canvas.State.RUNNING, json: "{}", user: user)
 		]
 		canvases*.save(validate:false)
 
@@ -44,8 +51,8 @@ class HostControllerSpec extends Specification {
 			canvases*.state = Canvas.State.STOPPED
 			return canvases
 		}
-		1 * controller.canvasService.startRemote(canvases[0], false, true)
-		1 * controller.canvasService.startRemote(canvases[1], false, true)
+		1 * controller.canvasService.startRemote(canvases[0], user, false, true)
+		1 * controller.canvasService.startRemote(canvases[1], user, false, true)
 		response.json.size() == 2
 		response.json[0].id == "1"
 		response.json[1].id == "2"
@@ -53,9 +60,9 @@ class HostControllerSpec extends Specification {
 
 	void "shutdown must not create start tasks for adhoc canvases"() {
 		def canvases = [
-				new Canvas(state: Canvas.State.RUNNING, json: "{}"),
-				new Canvas(state: Canvas.State.RUNNING, json: "{}"),
-				new Canvas(state: Canvas.State.RUNNING, json: "{}", adhoc: true)
+				new Canvas(state: Canvas.State.RUNNING, json: "{}", user: user),
+				new Canvas(state: Canvas.State.RUNNING, json: "{}", user: user),
+				new Canvas(state: Canvas.State.RUNNING, json: "{}", adhoc: true, user: user)
 		]
 		canvases*.save(validate:false)
 
@@ -72,9 +79,9 @@ class HostControllerSpec extends Specification {
 			canvases*.state = Canvas.State.STOPPED
 			return canvases
 		}
-		1 * controller.canvasService.startRemote(canvases[0], false, true)
-		1 * controller.canvasService.startRemote(canvases[1], false, true)
-		0 * controller.canvasService.startRemote(canvases[2], false, true)
+		1 * controller.canvasService.startRemote(canvases[0], user, false, true)
+		1 * controller.canvasService.startRemote(canvases[1], user, false, true)
+		0 * controller.canvasService.startRemote(canvases[2], user, false, true)
 		response.json.size() == 2
 	}
 	

@@ -23,7 +23,7 @@ public abstract class AbstractTask {
 
 	public abstract boolean run();
 	public abstract void onComplete(boolean taskGroupComplete);
-	
+
 	/**
 	 * Attempts to abort the task. Implementation is optional.
 	 * The default implementation logs a warning.

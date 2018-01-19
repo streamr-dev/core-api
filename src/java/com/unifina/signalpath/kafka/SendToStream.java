@@ -5,12 +5,13 @@ import com.unifina.data.IEventRecipient;
 import com.unifina.domain.data.Feed;
 import com.unifina.domain.data.Stream;
 import com.unifina.feed.AbstractFeed;
-import com.unifina.feed.kafka.KafkaMessage;
-import com.unifina.service.KafkaService;
+import com.unifina.feed.StreamrMessage;
 import com.unifina.service.PermissionService;
+import com.unifina.service.StreamService;
 import com.unifina.signalpath.*;
 import com.unifina.utils.Globals;
 import grails.converters.JSON;
+import grails.util.Holders;
 import org.codehaus.groovy.grails.web.json.JSONArray;
 import org.codehaus.groovy.grails.web.json.JSONObject;
 
@@ -22,6 +23,8 @@ import java.util.Map;
 
 /**
  * This module (only) supports sending messages to Kafka/json streams (feed id 7)
+ *
+ * // TODO: partitioning key
  */
 public class SendToStream extends ModuleWithSideEffects {
 
@@ -29,7 +32,7 @@ public class SendToStream extends ModuleWithSideEffects {
 	transient protected JSONObject streamConfig = null;
 
 	transient protected PermissionService permissionService = null;
-	transient protected KafkaService kafkaService = null;
+	transient protected StreamService streamService = null;
 
 	protected boolean historicalWarningShown = false;
 	private String lastStreamId = null;
@@ -39,17 +42,25 @@ public class SendToStream extends ModuleWithSideEffects {
 	@Override
 	public void init() {
 		// Pre-fetch services for more predictable performance
-		permissionService = getGlobals().getBean(PermissionService.class);
-		kafkaService = getGlobals().getBean(KafkaService.class);
-
+		ensureServices();
+		
 		addInput(streamParameter);
-
 		streamParameter.setUpdateOnChange(true);
 
 		// TODO: don't rely on static ids
 		Feed feedFilter = new Feed();
 		feedFilter.setId(7L);
 		streamParameter.setFeedFilter(feedFilter);
+	}
+
+	private void ensureServices() {
+		// will be null after deserialization
+		if (streamService == null) {
+			streamService = Holders.getApplicationContext().getBean(StreamService.class);
+		}
+		if (permissionService == null) {
+			permissionService = Holders.getApplicationContext().getBean(PermissionService.class);
+		}
 	}
 
 	@Override
@@ -60,12 +71,10 @@ public class SendToStream extends ModuleWithSideEffects {
 
 	@Override
 	public void activateWithSideEffects() {
-		if (kafkaService == null) { // null after de-serialization
-			kafkaService = getGlobals().getBean(KafkaService.class);
-		}
+		ensureServices();
 		Stream stream = streamParameter.getValue();
 		authenticateStream(stream);
-		kafkaService.sendMessage(stream, "", inputValuesToMap());
+		streamService.sendMessage(stream, inputValuesToMap());
 	}
 
 	@Override
@@ -73,16 +82,18 @@ public class SendToStream extends ModuleWithSideEffects {
 		Globals globals = getGlobals();
 
 		// Create the message locally and route it to the stream locally, without actually producing to the stream
-		KafkaMessage kafkaMessage = new KafkaMessage(streamParameter.getValue().getId(), globals.time, globals.time, inputValuesToMap());
+		StreamrMessage msg = new StreamrMessage(streamParameter.getValue().getId(), 0, globals.time, globals.time, inputValuesToMap()); // TODO: fix hard-coded partition
 
 		// Find the Feed implementation for the target Stream
 		AbstractFeed feed = getGlobals().getDataSource().getFeedById(streamParameter.getValue().getFeed().getId());
 
 		// Find the IEventRecipient for this message
-		IEventRecipient eventRecipient = feed.getEventRecipientForMessage(kafkaMessage);
+		IEventRecipient eventRecipient = feed.getEventRecipientForMessage(msg);
 
-		FeedEvent event = new FeedEvent(kafkaMessage, globals.time, eventRecipient);
-		getGlobals().getDataSource().getEventQueue().enqueue(event);
+		if (eventRecipient != null) {
+			FeedEvent event = new FeedEvent(msg, globals.time, eventRecipient);
+			getGlobals().getDataSource().getEventQueue().enqueue(event);
+		}
 	}
 
 	@Override
@@ -92,7 +103,7 @@ public class SendToStream extends ModuleWithSideEffects {
 
 	private Map<String, Object> inputValuesToMap() {
 		Map msg = new LinkedHashMap<>();
-		Iterable<Input> inputs = sendOnlyNewValues ? drivingInputs : fieldInputs;
+		Iterable<Input> inputs = sendOnlyNewValues ? getDrivingInputs() : fieldInputs;
 		for (Input i : inputs) {
 			msg.put(i.getName(), i.getValue());
 		}
@@ -150,7 +161,7 @@ public class SendToStream extends ModuleWithSideEffects {
 			// TODO: add other types
 			if (type.equalsIgnoreCase("number")) {
 				input = new TimeSeriesInput(this, name);
-				((TimeSeriesInput) input).canHaveInitialValue = false;
+				((TimeSeriesInput) input).setCanHaveInitialValue(false);
 			} else if (type.equalsIgnoreCase("boolean")) {
 				input = new BooleanInput(this, name);
 			} else if (type.equalsIgnoreCase("string")) {
@@ -162,9 +173,8 @@ public class SendToStream extends ModuleWithSideEffects {
 			}
 
 			if (input != null) {
-				input.canToggleDrivingInput = false;
-				input.canBeFeedback = false;
-				input.requiresConnection = false;
+				input.setCanToggleDrivingInput(false);
+				input.setRequiresConnection(false);
 				addInput(input);
 				fieldInputs.add(input);
 			}
@@ -178,7 +188,7 @@ public class SendToStream extends ModuleWithSideEffects {
 		// Only check write access in run context to avoid exception when eg. loading and reconstructing canvas
 		if (getGlobals().isRunContext() && !stream.getId().equals(lastStreamId) ) {
 			if (permissionService == null) {
-				permissionService = getGlobals().getBean(PermissionService.class);
+				permissionService = Holders.getApplicationContext().getBean(PermissionService.class);
 			}
 
 			if (permissionService.canWrite(getGlobals().getUser(), stream)) {

@@ -1,16 +1,19 @@
 package com.unifina.signalpath.charts
 
+import com.unifina.UiChannelMockingSpecification
+import com.unifina.domain.security.SecUser
+import com.unifina.utils.GlobalsFactory
 import com.unifina.utils.testutils.ModuleTestHelper
-import spock.lang.Specification
+import grails.test.mixin.support.GrailsUnitTestMixin
 
-class HeatmapSpec extends Specification {
+class HeatmapSpec extends UiChannelMockingSpecification {
 
 	Heatmap module
 
 	def setup() {
-		module = new Heatmap()
-		module.init()
-		module.configure([
+		mockServicesForUiChannels()
+
+		module = setupModule(new Heatmap(), [
 			uiChannel: [id: "heatmap"],
 		])
 	}
@@ -34,7 +37,7 @@ class HeatmapSpec extends Specification {
 
 		then:
 		new ModuleTestHelper.Builder(module, inputValues, outputValues)
-			.uiChannelMessages(channelMessages)
+			.uiChannelMessages(channelMessages, getSentMessagesByStreamId())
 			.test()
 	}
 }

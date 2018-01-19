@@ -36,7 +36,7 @@ public class VariadicInput<T> extends VariadicEndpoint<Input<T>, T> {
 
 	@Override
 	void furtherConfigurePlaceholder(Input<T> placeholder) {
-		placeholder.requiresConnection = false;
+		placeholder.setRequiresConnection(false);
 	}
 
 	@Override

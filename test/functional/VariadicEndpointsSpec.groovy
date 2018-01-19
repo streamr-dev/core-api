@@ -1,38 +1,23 @@
-import com.unifina.kafkaclient.UnifinaKafkaProducer
-import com.unifina.utils.MapTraversal
-import core.LoginTester1Spec
-import core.mixins.CanvasMixin
-import core.mixins.ConfirmationMixin
-import grails.util.Holders
+import com.unifina.domain.data.Stream
+import com.unifina.service.StreamService
+import LoginTester1Spec
+import mixins.CanvasMixin
+import mixins.ConfirmationMixin
+import mixins.StreamMixin
+import spock.lang.Shared
 
-@Mixin(CanvasMixin)
-@Mixin(ConfirmationMixin)
-class VariadicEndpointsSpec extends LoginTester1Spec {
-	UnifinaKafkaProducer kafka
+class VariadicEndpointsSpec extends LoginTester1Spec implements CanvasMixin, ConfirmationMixin, StreamMixin {
+
+	@Shared Stream testStream = new Stream()
+	@Shared StreamService streamService
 
 	def setupSpec() {
-		// @Mixin is buggy, use runtime mixins instead
-		this.class.metaClass.mixin(CanvasMixin)
-		this.class.metaClass.mixin(ConfirmationMixin)
+		streamService = createStreamService()
+		testStream.id = "pltRMd8rCfkij4mlZsQkJB"
 	}
 
-	def setup() {
-		kafka = new UnifinaKafkaProducer(makeKafkaConfiguration())
-	}
-
-	def cleanup() {
-		synchronized(kafka) {
-			kafka.close()
-		}
-	}
-
-	private def makeKafkaConfiguration() {
-		Map<String,Object> kafkaConfig = MapTraversal.flatten((Map) MapTraversal.getMap(Holders.config, "unifina.kafka"));
-		Properties properties = new Properties();
-		for (String s : kafkaConfig.keySet()) {
-			properties.setProperty(s, kafkaConfig.get(s).toString());
-		}
-		return properties;
+	def cleanupSpec() {
+		cleanupStreamService(streamService)
 	}
 
 	def "variadic inputs works as expected"() {
@@ -44,6 +29,9 @@ class VariadicEndpointsSpec extends LoginTester1Spec {
 
 		(1..20).each {
 			connectEndpoints(findOutput("Stream", "value"), findInputByDisplayName("Add", "in$it"))
+			if (it > 2) {
+				renameEndpoint("Add", "value", "in$it") // Rename after auto-rename
+			}
 		}
 
 		[3, 5, 7, 9, 11, 12, 13, 14, 15, 19].each {
@@ -69,7 +57,7 @@ class VariadicEndpointsSpec extends LoginTester1Spec {
 
 
 		and: "data produced to Kafka"
-		produceAllDataToKafka()
+		produceAllDataToStream()
 
 		then:
 		waitFor(30) { $(".modulelabel").text().toDouble() == (33 * 10 + 100 * 2).toDouble() }
@@ -135,7 +123,7 @@ class VariadicEndpointsSpec extends LoginTester1Spec {
 
 
 		and: "data produced to Kafka"
-		produceAllDataToKafka()
+		produceAllDataToStream()
 
  		then:
 		waitFor(30) { $(".modulelabel")[3].text().toDouble() == 0d }
@@ -170,11 +158,17 @@ class VariadicEndpointsSpec extends LoginTester1Spec {
 		connectEndpoints(findOutput("GreaterThan", "A&gt;B"), findInput("Filter", "pass"))
 
 		connectEndpoints(findOutput("Stream", "value"), findInputByDisplayName("Filter", "in1"))
+		renameEndpoint("Filter", "value", "in1") // Rename after auto-rename
+		renameEndpoint("Filter", "value", "out1") // Rename after auto-rename
 
 		connectEndpoints(findOutput("Stream", "key"), findInput("TextLength", "text"))
 		connectEndpoints(findOutput("TextLength", "length"), findInputByDisplayName("Filter", "in2"))
+		renameEndpoint("Filter", "length", "in2") // Rename after auto-rename
+		renameEndpoint("Filter", "length", "out2") // Rename after auto-rename
 
 		connectEndpoints(findOutput("Stream", "value"), findInputByDisplayName("Filter", "in3"))
+		renameEndpoint("Filter", "value", "in3") // Rename after auto-rename
+		renameEndpoint("Filter", "value", "out3") // Rename after auto-rename
 
 		addAndWaitModule("Label")
 		moveModuleBy("Label", 0, 500, 0, true)
@@ -200,8 +194,16 @@ class VariadicEndpointsSpec extends LoginTester1Spec {
 		disconnectEndpoint(findInputByDisplayName("Filter", "in2"))
 
 		connectEndpoints(findOutputByDisplayName("TextLength", "length"), findInputByDisplayName("Filter", "in4"))
+		renameEndpoint("Filter", "length", "in4") // Rename after auto-rename
+		renameEndpoint("Filter", "length", "out4") // Rename after auto-rename
+
 		connectEndpoints(findOutputByDisplayName("Stream", "value"), findInputByDisplayName("Filter", "in5"))
+		renameEndpoint("Filter", "value", "in5") // Rename after auto-rename
+		renameEndpoint("Filter", "value", "out5") // Rename after auto-rename
+
 		connectEndpoints(findOutputByDisplayName("Stream", "value"), findInputByDisplayName("Filter", "in6"))
+		renameEndpoint("Filter", "value", "in6") // Rename after auto-rename
+		renameEndpoint("Filter", "value", "out6") // Rename after auto-rename
 
 		connectEndpoints(findOutputByDisplayName("Filter", "out5"), findInput("Label", "label", 0))
 		connectEndpoints(findOutputByDisplayName("Filter", "out6"), findInput("Label", "label", 1))
@@ -213,7 +215,7 @@ class VariadicEndpointsSpec extends LoginTester1Spec {
 
 
 		and: "data produced to Kafka"
-		produceAllDataToKafka()
+		produceAllDataToStream()
 
 		then:
 		waitFor(30) { $(".modulelabel")[0].text().toDouble() == 33d }
@@ -225,20 +227,19 @@ class VariadicEndpointsSpec extends LoginTester1Spec {
 		stopCanvasIfRunning()
 	}
 
-	private void produceAllDataToKafka() {
-		produceToKafka("key-1", 30)
-		produceToKafka("key-1", 40)
-		produceToKafka("key-2", -50)
-		produceToKafka("key-3", 115)
-		produceToKafka("key-4", 0)
-		produceToKafka("key-2", -15)
-		produceToKafka("key-4", 1)
-		produceToKafka("key-5", 0)
-		produceToKafka("key-4", 33)
+	private void produceAllDataToStream() {
+		produceToStream("key-1", 30)
+		produceToStream("key-1", 40)
+		produceToStream("key-2", -50)
+		produceToStream("key-3", 115)
+		produceToStream("key-4", 0)
+		produceToStream("key-2", -15)
+		produceToStream("key-4", 1)
+		produceToStream("key-5", 0)
+		produceToStream("key-4", 33)
 	}
 
-	private void produceToKafka(String key, Double value) {
-		kafka.sendJSON("pltRMd8rCfkij4mlZsQkJB", "", System.currentTimeMillis(),
-			'{"key":' + key + ', "value": ' + value  + '}')
+	private void produceToStream(String key, Double value) {
+		streamService.sendMessage(testStream, [key: key, value: value], 30)
 	}
 }

@@ -3,6 +3,7 @@ package com.unifina.controller.api
 import com.unifina.api.NotPermittedException
 import com.unifina.api.InvalidArgumentsException
 import com.unifina.domain.data.Stream
+import com.unifina.domain.security.Key
 import com.unifina.domain.security.Permission
 import com.unifina.domain.security.Permission.Operation
 import com.unifina.domain.security.SecUser
@@ -17,8 +18,7 @@ import grails.test.mixin.web.FiltersUnitTestMixin
 import spock.lang.Specification
 
 @TestFor(PermissionApiController)
-@Mixin(FiltersUnitTestMixin)
-@Mock([Permission, Stream, SecUser, Canvas, UnifinaCoreAPIFilters, UserService])
+@Mock([Permission, Key, Stream, SecUser, Canvas, UnifinaCoreAPIFilters, UserService])
 class PermissionApiControllerSpec extends Specification {
 	def permissionService
 
@@ -33,8 +33,16 @@ class PermissionApiControllerSpec extends Specification {
 	def setup() {
 		controller.permissionService = permissionService = Mock(PermissionService)
 
-		me = new SecUser(id: 1, username: "me", apiKey: "myApiKey").save(validate: false)
-		other = new SecUser(id: 2, username: "other", apiKey: "otherApiKey").save(validate: false)
+		me = new SecUser(id: 1, username: "me").save(validate: false)
+		other = new SecUser(id: 2, username: "other").save(validate: false)
+
+		def meKey = new Key(name: "meKey", user: me)
+		meKey.id = "myApiKey"
+		meKey.save(failOnError: true, validate: true)
+
+		def otherKey = new Key(name: "otherKey", user: me)
+		otherKey.id = "otherApiKey"
+		otherKey.save(failOnError: true, validate: true)
 
 		def newCanvas = { String id, SecUser owner ->
 			def c = new Canvas(user: owner)
@@ -248,7 +256,7 @@ class PermissionApiControllerSpec extends Specification {
 		response.status == 200
 		response.json*.operation == ownerPermissions*.toMap()*.operation
 
-		1 * permissionService.getSingleUserPermissionsTo(_, me) >> [*ownerPermissions]
+		1 * permissionService.getPermissionsTo(_, me) >> [*ownerPermissions]
 		0 * permissionService._
 	}
 
@@ -265,7 +273,7 @@ class PermissionApiControllerSpec extends Specification {
 		response.status == 200
 		response.json == [[id: 1, operation: "share", user: "me"]]
 
-		1 * permissionService.getSingleUserPermissionsTo(_, me) >> [canvasPermission]
+		1 * permissionService.getPermissionsTo(_, me) >> [canvasPermission]
 		0 * permissionService._
 	}
 }

@@ -1,17 +1,10 @@
 package com.unifina.signalpath.charts;
 
+import com.unifina.signalpath.*;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-
-import com.unifina.signalpath.Input;
-import com.unifina.signalpath.ModuleOption;
-import com.unifina.signalpath.ModuleOptions;
-import com.unifina.signalpath.RuntimeRequest;
-import com.unifina.signalpath.RuntimeResponse;
-import com.unifina.signalpath.TimeSeriesChartInput;
-import com.unifina.signalpath.TimeSeriesInput;
-import com.unifina.utils.MapTraversal;
 
 public class TimeSeriesChart extends Chart {
 	
@@ -49,8 +42,9 @@ public class TimeSeriesChart extends Chart {
 				it.seriesName = newName;
 			}
 		}
-
-		pushToUiChannel(getInitMessage());
+		if (getGlobals().isRunContext()) {
+			pushToUiChannel(getInitMessage());
+		}
 	}
 	
 	protected InitMessage getInitMessage() {
@@ -75,10 +69,9 @@ public class TimeSeriesChart extends Chart {
 		conn.yAxis = 0;
 
 		conn.setDrivingInput(true);
-		conn.canToggleDrivingInput = false;
-		conn.canHaveInitialValue = false;
-		conn.canBeFeedback = false;
-		conn.requiresConnection = false;
+		conn.setCanToggleDrivingInput(false);
+		conn.setCanHaveInitialValue(false);
+		conn.setRequiresConnection(false);
 		
 		// Add the input
 		if (getInput(name) == null) {
@@ -90,38 +83,21 @@ public class TimeSeriesChart extends Chart {
 	
 	@Override
 	protected void record() {
-		for (Input i : drivingInputs) {
+		for (Input i : getDrivingInputs()) {
 			TimeSeriesChartInput input = (TimeSeriesChartInput) i;
-			if (!Double.isNaN(input.value)
-					&& hasRc 
-					&& (!barify || getGlobals().time.getTime() - input.previousTime >= 60000L)) {
+			if (!Double.isNaN(input.value) && (!barify || getGlobals().time.getTime() - input.previousTime >= 60000L)) {
 				
 					PointMessage msg = new PointMessage(
 							input.seriesIndex, 
 							getGlobals().getTzConverter().getFakeLocalTime(getGlobals().time.getTime()),
 							input.value);
 					
-					getGlobals().getUiChannel().push(msg, uiChannelId);
-					
+					pushToUiChannel(msg);
 					input.previousTime = getGlobals().time.getTime();
 			}
 		}
 	}
-	
-	@Override
-	public void clearState() {
-		super.clearState();
-		
-		if (hasRc && overnightBreak) {
-			for (Input it : getInputs()) {
-				if (it instanceof TimeSeriesChartInput && it.isConnected()) {
-					// Send day break
-					getGlobals().getUiChannel().push(new BreakMessage(((TimeSeriesChartInput)it).seriesIndex), uiChannelId);
-				}
-			}
-		}
-	}
-	
+
 	@Override
 	public Map<String,Object> getConfiguration() {
 		Map<String,Object> config = super.getConfiguration();
@@ -131,7 +107,6 @@ public class TimeSeriesChart extends Chart {
 		
 		ModuleOptions options = ModuleOptions.get(config);
 		options.add(new ModuleOption("inputs", tsInputCount, ModuleOption.OPTION_INTEGER));
-		options.add(new ModuleOption("overnightBreak", overnightBreak, ModuleOption.OPTION_BOOLEAN));
 		
 		return config;
 	}
@@ -145,7 +120,7 @@ public class TimeSeriesChart extends Chart {
 
 		if (config.containsKey("range") && !config.get("range").toString().equals("null"))
 			range = Integer.parseInt(config.get("range").toString());
-		
+
 		ModuleOptions options = ModuleOptions.get(config);
 		
 		if (options.getOption("inputs") != null)

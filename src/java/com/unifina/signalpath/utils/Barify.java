@@ -44,23 +44,23 @@ public class Barify extends AbstractSignalPathModule implements ITimeListener {
 	
 	@Override
 	public void init() {
-		propagationSink = true;
+		setPropagationSink(true);
 		
 		addInput(barLength);
 		
 		addInput(input);
 		
-		open.noRepeat = false;
+		open.setNoRepeat(false);
 		addOutput(open);
-		high.noRepeat = false;
+		high.setNoRepeat(false);
 		addOutput(high);
-		low.noRepeat = false;
+		low.setNoRepeat(false);
 		addOutput(low);
-		close.noRepeat = false;
+		close.setNoRepeat(false);
 		addOutput(close);
-		avg.noRepeat = false;
+		avg.setNoRepeat(false);
 		addOutput(avg);
-		sum.noRepeat = false;
+		sum.setNoRepeat(false);
 		addOutput(sum);
 	}
 	
@@ -76,29 +76,30 @@ public class Barify extends AbstractSignalPathModule implements ITimeListener {
 	
 	@Override
 	public void setTime(Date time) {
-		// A bar can start or end at an exact division of the barLength
-		if (time.getTime() % (barLength.getValue()*1000) == 0) {
-
-			// First bar
-			if (currentBar.start==null) {
-				if (input.value!=null)
-					currentBar = new Bar(time, input.value, input.value, input.value, input.value, 0, 0);
-			}
-			// Bar ready, propagate
-			else  {
-				currentBar.close = input.value;
-				
-				open.send(currentBar.open);
-				high.send(currentBar.high);
-				low.send(currentBar.low);
-				close.send(currentBar.close);
-				sum.send(currentBar.sum);
-				avg.send(currentBar.count>0 ? currentBar.sum/currentBar.count : currentBar.close);
-				
-				previousBar = currentBar;
-				currentBar = new Bar(time, previousBar.close, previousBar.close, previousBar.close, previousBar.close, 0, 0);
-			}
+		// First bar
+		if (currentBar.start==null) {
+			if (input.value!=null)
+				currentBar = new Bar(time, input.value, input.value, input.value, input.value, 0, 0);
 		}
+		// Bar ready, propagate
+		else  {
+			currentBar.close = input.value;
+
+			open.send(currentBar.open);
+			high.send(currentBar.high);
+			low.send(currentBar.low);
+			close.send(currentBar.close);
+			sum.send(currentBar.sum);
+			avg.send(currentBar.count>0 ? currentBar.sum/currentBar.count : currentBar.close);
+
+			previousBar = currentBar;
+			currentBar = new Bar(time, previousBar.close, previousBar.close, previousBar.close, previousBar.close, 0, 0);
+		}
+	}
+
+	@Override
+	public int tickRateInSec() {
+		return barLength.getValue();
 	}
 
 	class Bar implements Serializable {

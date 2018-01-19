@@ -1,10 +1,6 @@
+import pages.CanvasPage
+import pages.LoginPage
 import geb.spock.GebReportingSpec
-
-import org.openqa.selenium.Cookie
-
-import spock.lang.Shared
-import core.pages.CanvasPage
-import core.pages.LoginPage
 
 class LoginSpec extends GebReportingSpec {
 	

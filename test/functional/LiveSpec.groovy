@@ -1,39 +1,28 @@
-import com.unifina.controller.core.signalpath.CanvasController
-import com.unifina.kafkaclient.UnifinaKafkaProducer
-import com.unifina.utils.MapTraversal
-import core.LoginTester1Spec
-import core.mixins.CanvasMixin
-import core.mixins.ConfirmationMixin
-import core.pages.CanvasListPage
-import core.pages.CanvasPage
-import grails.test.mixin.TestFor
+import com.unifina.domain.data.Stream
+import com.unifina.service.StreamService
+import LoginTester1Spec
+import mixins.CanvasMixin
+import mixins.ConfirmationMixin
+import mixins.StreamMixin
+import pages.CanvasListPage
+import pages.CanvasPage
+import spock.lang.Shared
 
-@Mixin(CanvasMixin)
-@Mixin(ConfirmationMixin)
-@TestFor(CanvasController) // This makes grailsApplication available
-public class LiveSpec extends LoginTester1Spec {
+class LiveSpec extends LoginTester1Spec implements CanvasMixin, ConfirmationMixin, StreamMixin {
 
 	static Timer timer
-	static UnifinaKafkaProducer kafka
-	
+
+	@Shared StreamService streamService
+
 	def setupSpec() {
+		final Stream testStream = new Stream()
+		testStream.id = "RUj6iJggS3iEKsUx5C07Ig"
 
-		// For some reason the annotations don't work so need the below.
-		LiveSpec.metaClass.mixin(CanvasMixin)
-		LiveSpec.metaClass.mixin(ConfirmationMixin)
+		final StreamService ss = streamService = createStreamService()
 
-		Map<String,Object> kafkaConfig = MapTraversal.flatten((Map) MapTraversal.getMap(grailsApplication.config, "unifina.kafka"));
-		Properties properties = new Properties();
-		for (String s : kafkaConfig.keySet())
-			properties.setProperty(s, kafkaConfig.get(s).toString());
-		
-		kafka = new UnifinaKafkaProducer(properties)
-		
 		final TimerTask task = new TimerTask() {
 			void run() {
-				synchronized(kafka) {
-					kafka.sendJSON("RUj6iJggS3iEKsUx5C07Ig", "", System.currentTimeMillis(), '{"rand":'+Math.random()+'}')
-				}
+				ss.sendMessage(testStream, [rand: Math.random()], 30)
 			}
 		}
 		
@@ -42,17 +31,9 @@ public class LiveSpec extends LoginTester1Spec {
 		timer.schedule(task, 1000L, 1000L)
 	}
 
-	def setup() {
-		// For some reason the annotations don't work so need the below.
-		LiveSpec.metaClass.mixin(CanvasMixin)
-		LiveSpec.metaClass.mixin(ConfirmationMixin)
-	}
-
 	def cleanupSpec() {
 		timer.cancel()
-		synchronized(kafka) {
-			kafka.close()
-		}
+		cleanupStreamService(streamService)
 	}
 	
 	def "launching, modifying and deleting live canvas works correctly"() {
@@ -130,7 +111,7 @@ public class LiveSpec extends LoginTester1Spec {
 			$(".table .td", text:"LiveSpec dead").click()
 		then: "navigate to show page that shows an error"
 			waitFor {at CanvasPage}
-			waitFor {$(".alert.alert-danger").displayed}
+			waitFor(20) {$(".alert.alert-danger").displayed}
 	}
 	
 	def "don't subscribe to stopped SignalPath channels"() {
@@ -152,7 +133,7 @@ public class LiveSpec extends LoginTester1Spec {
 		when: "selecting a dead canvas"
 			$(".table .td", text:"LiveSpec dead").click()
 		then: "navigate to editor page with correct run button state"
-			waitFor {
+			waitFor(20) {
 				at CanvasPage
 				runRealtimeButton.text().contains("Stop")
 			}
@@ -166,7 +147,7 @@ public class LiveSpec extends LoginTester1Spec {
 		when: "confirmation accepted"
 			acceptConfirmation(".stop-confirmation-dialog")
 		then: "must show alert and start button"
-			waitFor {
+			waitFor(20) {
 				$(".alert.alert-danger").displayed
 				runRealtimeButton.text().contains("Start")
 			}
@@ -176,6 +157,23 @@ public class LiveSpec extends LoginTester1Spec {
 			runRealtimeButton.click()
 		then: "info alert and stop button must be displayed"
 			waitFor { $(".alert.alert-success").displayed }
+	}
+
+	def "producing realtime data to other streams"() {
+		loadSignalPath("LiveSpec-SendToStream")
+		ensureRealtimeTabDisplayed()
+		stopCanvasIfRunning()
+
+		when:
+		resetAndStartCanvas(true)
+
+		then:
+		waitFor {
+			findModuleOnCanvas("Table", 0).find('.event-table-module-content tbody tr').size() > 0
+		}
+		waitFor {
+			findModuleOnCanvas("Table", 1).find('.event-table-module-content tbody tr').size() > 0
+		}
 	}
 
 }

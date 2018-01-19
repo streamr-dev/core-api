@@ -8,7 +8,11 @@ node_modules
 lib/grails-rt.jar
 .idea/
 unifina-core*.iml
+engine-and-editor*.iml
 .slcache/
 out/
 plugin.xml
 hs_err_pid*
+grailsMarkdown-inplacePlugin.iml
+web-app/js/unifina/webpack-bundles/*
+tomcat.8081
