@@ -100,7 +100,6 @@ modules = {
 	}
 	pnotify {
 		dependsOn 'jquery'
-//		resource url:[dir:'js/pnotify-1.2.0', file:'jquery.pnotify.min.js']
 		resource url:[dir:'js/pnotify-1.2.0', file:'jquery.pnotify.1.2.2-snapshot.js', plugin: 'unifina-core']
 		resource url:[dir:'js/pnotify-1.2.0', file:'jquery.pnotify.default.css', plugin: 'unifina-core']
 	}
