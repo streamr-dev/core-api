@@ -1,5 +1,3 @@
-import com.unifina.service.BootService
-
 class BootStrap {
 
 	def bootService
