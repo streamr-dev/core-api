@@ -6,7 +6,7 @@ import org.openqa.selenium.WebDriverException
 /**
  * Handle login / logout
  */
-class NotificationMixin {
+trait NotificationMixin {
 
 	def closeNotifications() {
 		waitFor {

@@ -372,7 +372,10 @@ public abstract class AbstractSignalPathModule implements IEventRecipient, IDayL
 			name = MapTraversal.getString(config, "name");
 		}
 		if (config.containsKey("hash")) {
-			hash = MapTraversal.getInt(config, "hash");
+			hash = MapTraversal.getInteger(config, "hash");
+			if (hash == null) {
+				throw new IllegalArgumentException("Module hash is null!");
+			}
 		}
 		// skip canClearState: read-only
 		// skip canRefresh: read-only

@@ -17,7 +17,6 @@ import groovy.json.JsonBuilder
 import spock.lang.Specification
 
 @TestFor(DashboardItemApiController)
-@Mixin(FiltersUnitTestMixin)
 @Mock([Canvas, Dashboard, DashboardItem, Key, SecUser, UnifinaCoreAPIFilters, UserService, SpringSecurityService])
 class DashboardItemApiControllerSpec extends Specification {
 

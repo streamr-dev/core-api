@@ -55,10 +55,6 @@ class StreamParameterSpec extends BeanMockingSpecification {
 	def "getConfiguration() has expected content after initialization"() {
 		expect:
 		streamParameter.getConfiguration().subMap("value", "streamName", "feed", "checkModuleId", "feedFilter") == [
-		    checkModuleId: null,
-			feed: null,
-			feedFilter: null,
-			streamName: null,
 			value: null
 		]
 	}
@@ -106,9 +102,7 @@ class StreamParameterSpec extends BeanMockingSpecification {
 
 		then:
 		streamParameter.getConfiguration().subMap("value", "streamName", "feed", "checkModuleId", "feedFilter") == [
-			checkModuleId: null,
 			feed: 6152,
-			feedFilter: null,
 			streamName: "stream-name",
 			value: "stream-id"
 		]

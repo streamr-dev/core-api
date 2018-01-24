@@ -15,7 +15,7 @@ public class VariadicEventTable extends ModuleWithUI {
 	private VariadicInput<Object> ins = new VariadicInput<>(this, new EventTableInputInstantiator());
 
 	int maxRows = 20;
-	private boolean showOnlyNewValues = false;
+	private boolean showOnlyNewValues = true;
 
 	@Override
 	public void init() {

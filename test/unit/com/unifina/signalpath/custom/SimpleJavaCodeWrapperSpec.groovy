@@ -99,7 +99,7 @@ class SimpleJavaCodeWrapperSpec extends Specification {
 		thrown(ModuleException)
 	}
 
-	void "it throws AccessDeniedException if trying to get user"() {
+	void "it throws ExceptionInInitializerError caused by AccessDeniedException if trying to get user"() {
 		setup:
 		module.configure([
 			code: "\n" +
@@ -132,12 +132,11 @@ class SimpleJavaCodeWrapperSpec extends Specification {
 			.overrideGlobals { globals }
 			.test()
 		then:
-		def e = thrown(TestHelperException)
+		def e = thrown(ExceptionInInitializerError)
 		e.cause.getClass() == AccessControlException
-		e.cause.getMessage().contains("UserPermission")
 	}
 
-	void "it throws AccessDeniedException if trying to set user"() {
+	void "it throws NoClassDefFoundError if trying to set user"() {
 		setup:
 		module.configure([
 			code: "\n" +
@@ -170,9 +169,8 @@ class SimpleJavaCodeWrapperSpec extends Specification {
 			.overrideGlobals { globals }
 			.test()
 		then:
-		def e = thrown(TestHelperException)
-		e.cause.getClass() == AccessControlException
-		e.cause.getMessage().contains("UserPermission")
+		def e = thrown(NoClassDefFoundError)
+		e.getMessage().contains("UserPermission")
 	}
 
 	void "it throws AccessDeniedException if trying to get data source"() {
@@ -251,7 +249,7 @@ class SimpleJavaCodeWrapperSpec extends Specification {
 		e.cause.getMessage().contains("DataSource")
 	}
 
-	void "it throws AccessDeniedException if trying to get grails application"() {
+	void "it throws ExceptionInInitializerError caused by AccessDeniedException if trying to get grails application"() {
 		setup:
 		module.configure([
 			code: "\n" +
@@ -284,9 +282,8 @@ class SimpleJavaCodeWrapperSpec extends Specification {
 			.overrideGlobals { globals }
 			.test()
 		then:
-		def e = thrown(TestHelperException)
+		def e = thrown(ExceptionInInitializerError)
 		e.cause.getClass() == AccessControlException
-		e.cause.getMessage().contains("GrailsApplicationPermission")
 	}
 
 	void "it throws AccessDeniedException if trying to get source of input"() {

@@ -9,7 +9,7 @@ import pages.StreamShowPage
 import org.codehaus.groovy.grails.commons.DefaultGrailsApplication
 import org.codehaus.groovy.grails.commons.GrailsApplication
 
-class StreamMixin {
+trait StreamMixin {
 
 	def createStream(streamName) {
 		to StreamCreatePage
@@ -62,7 +62,7 @@ class StreamMixin {
 	}
 	
 	def openStream(name){
-		$(".table .tbody .tr .td", text:contains(name)).click()
+		$(".table .tbody .tr .td", text:contains(name))[0].click()
 		waitFor { at StreamShowPage }
 	}
 	

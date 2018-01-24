@@ -1,6 +1,7 @@
 package com.unifina.signalpath.input;
 
 import com.unifina.signalpath.*;
+import com.unifina.utils.MapTraversal;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -37,11 +38,11 @@ public class TextFieldModule extends InputModule {
 		if (config.containsKey("textFieldValue")) {
 			value = (String) config.get("textFieldValue");
 		}
-		if(config.containsKey("textFieldWidth")) {
-			width = (Integer) config.get("textFieldWidth");
+		if (config.containsKey("textFieldWidth")) {
+			width = MapTraversal.getInteger(config, "textFieldWidth");
 		}
-		if(config.containsKey("textFieldHeight")) {
-			height = (Integer) config.get("textFieldHeight");
+		if (config.containsKey("textFieldHeight")) {
+			height = MapTraversal.getInteger(config, "textFieldHeight");
 		}
 	}
 
@@ -49,10 +50,12 @@ public class TextFieldModule extends InputModule {
 	public Map<String, Object> getConfiguration() {
 		Map<String, Object> config = super.getConfiguration();
 		config.put("textFieldValue", value);
-		if(width != null)
+		if (width != null) {
 			config.put("textFieldWidth", width);
-		if(height != null)
+		}
+		if (height != null) {
 			config.put("textFieldHeight", height);
+		}
 		return config;
 	}
 

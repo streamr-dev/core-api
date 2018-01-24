@@ -9,11 +9,12 @@ public class PayByUse extends SolidityModule {
 	public String getCodeTemplate() {
 		//   + These are supplied to constructor, so they show up on canvas already
 		//   - When manipulating from CLI it would be useful (for demo not so important)
-		return  "pragma solidity ^0.4.0;\n" +
+		return  "pragma solidity ^0.4.8;\n" +
 				"contract PayByUse {\n" +
 				"    address public recipient;\n" +
 				"    uint public unitPriceWei;\n" +
 				"    uint public unpaidWei;\n" +
+				"    address public owner;\n" +
 				"    \n" +
 				"    event OutOfFunds(uint debt);\n" +
 				"    event Paid(uint amount);\n" +
@@ -23,6 +24,7 @@ public class PayByUse extends SolidityModule {
 				"    function PayByUse(address recipientAddress, uint unitPrice_wei) payable {\n" +
 				"        unitPriceWei = unitPrice_wei;\n" +
 				"        recipient = recipientAddress;\n" +
+				"        owner = msg.sender;\n" +
 				"    }\n" +
 				"    \n" +
 				"    function payOut() {\n" +
@@ -40,17 +42,17 @@ public class PayByUse extends SolidityModule {
 				"        Recipient(recipient.balance);\n" +
 				"    }\n" +
 				"    \n" +
-				"    function update(uint addedUnits) canvasCommand {\n" +
+				"    function update(uint addedUnits) onlyOwner {\n" +
 				"        unpaidWei += addedUnits * unitPriceWei;\n" +
 				"        this.payOut();\n" +
 				"    }\n" +
 				"    \n" +
-				"    function kill() canvasCommand {\n" +
+				"    function kill() onlyOwner {\n" +
 				"        selfdestruct(msg.sender);\n" +
 				"    }\n" +
 				"    \n" +
-				"    modifier canvasCommand {\n" +
-				"        if (msg.sender != " + ADDRESS_PLACEHOLDER + ") { throw; }\n" +
+				"    modifier onlyOwner {\n" +
+				"        if (msg.sender != owner) { throw; }\n" +
 				"        _;\n" +
 				"    }\n" +
 				"    \n" +

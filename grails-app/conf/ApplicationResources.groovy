@@ -100,7 +100,6 @@ modules = {
 	}
 	pnotify {
 		dependsOn 'jquery'
-//		resource url:[dir:'js/pnotify-1.2.0', file:'jquery.pnotify.min.js']
 		resource url:[dir:'js/pnotify-1.2.0', file:'jquery.pnotify.1.2.2-snapshot.js', plugin: 'unifina-core']
 		resource url:[dir:'js/pnotify-1.2.0', file:'jquery.pnotify.default.css', plugin: 'unifina-core']
 	}
@@ -315,6 +314,8 @@ modules = {
 		dependsOn 'confirm-button'
 		dependsOn 'name-editor'
 		dependsOn 'draggabilly'
+		dependsOn 'streamr-search'
+		dependsOn 'streamr-floating-search'
 		resource url:[dir:'js/unifina/signalPath/core', file:'signalPath.js', plugin: 'unifina-core']
 		resource url:[dir:'js/unifina/signalPath/generic', file:'emptyModule.js', plugin: 'unifina-core']
 		resource url:[dir:'js/unifina/signalPath/generic', file:'genericModule.js', plugin: 'unifina-core']

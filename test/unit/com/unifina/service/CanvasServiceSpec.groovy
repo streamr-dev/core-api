@@ -27,7 +27,7 @@ import grails.test.mixin.web.ControllerUnitTestMixin
 import groovy.json.JsonBuilder
 import spock.lang.Specification
 
-@TestMixin(ControllerUnitTestMixin) // "as JSON" support
+@TestMixin(ControllerUnitTestMixin) // "as JSON" converter
 @TestFor(CanvasService)
 @Mock([SecUser, Canvas, Module, Stream, ModuleService, StreamService, SpringSecurityService, SignalPathService, PermissionService, Permission, Serialization, Dashboard, DashboardItem])
 class CanvasServiceSpec extends Specification {
@@ -307,10 +307,10 @@ class CanvasServiceSpec extends Specification {
 		service.signalPathService = signalPathService
 
 		when:
-		service.start(myFirstCanvas, false)
+		service.start(myFirstCanvas, false, me)
 
 		then:
-		1 * signalPathService.startLocal(myFirstCanvas, [speed: 0, beginDate: "2016-01-25", endDate: "2016-01-26"])
+		1 * signalPathService.startLocal(myFirstCanvas, [speed: 0, beginDate: "2016-01-25", endDate: "2016-01-26"], me)
 		0 * signalPathService._
 	}
 
@@ -319,11 +319,11 @@ class CanvasServiceSpec extends Specification {
 		service.signalPathService = signalPathService
 
 		when:
-		service.start(myFirstCanvas, true)
+		service.start(myFirstCanvas, true, me)
 
 		then:
 		1 * signalPathService.clearState(myFirstCanvas)
-		1 * signalPathService.startLocal(myFirstCanvas, [speed: 0, beginDate: "2016-01-25", endDate: "2016-01-26"])
+		1 * signalPathService.startLocal(myFirstCanvas, [speed: 0, beginDate: "2016-01-25", endDate: "2016-01-26"], me)
 		0 * signalPathService._
 	}
 
@@ -334,7 +334,7 @@ class CanvasServiceSpec extends Specification {
 		myFirstCanvas.save(failOnError: true)
 
 		when:
-		service.start(myFirstCanvas, false)
+		service.start(myFirstCanvas, false, me)
 
 		then:
 		thrown(InvalidStateException)
@@ -347,7 +347,7 @@ class CanvasServiceSpec extends Specification {
 		myFirstCanvas.save(failOnError: true)
 
 		when:
-		service.start(myFirstCanvas, false)
+		service.start(myFirstCanvas, false, me)
 
 		then:
 		true

@@ -16,7 +16,7 @@
 		Streamr.controller = '${controllerName}'
 		Streamr.action = '${actionName}'
 		<sec:ifLoggedIn>
-		Streamr.user = "<sec:username />"
+		Streamr.user = "${raw(grails.util.Holders.getApplicationContext().getBean("springSecurityService").getCurrentUser().getUsername())}"
 		</sec:ifLoggedIn>
     </script>
     

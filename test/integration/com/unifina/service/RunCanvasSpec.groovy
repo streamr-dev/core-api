@@ -37,7 +37,7 @@ class RunCanvasSpec extends IntegrationSpec {
 		Canvas canvas = Canvas.get("run-canvas-spec")
 
 		when:
-		canvasService.start(canvas, true)
+		canvasService.start(canvas, true, canvas.user)
 
 		Thread.sleep(2000)
 

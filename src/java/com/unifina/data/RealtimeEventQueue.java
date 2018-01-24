@@ -79,7 +79,7 @@ public class RealtimeEventQueue extends DataSourceEventQueue implements IEventRe
 
 		} catch (Exception e) {
 			// Catch any Exception to prevent crashing the whole thing
-			log.error("Exception while processing event!", e);
+			log.error("Exception while processing event: "+event.toString(), e);
 			return true;
 		}
 	}

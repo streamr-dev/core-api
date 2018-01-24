@@ -1,15 +1,8 @@
-import org.openqa.selenium.Keys
-
 import LoginTester1Spec
 import mixins.CanvasMixin
+import org.openqa.selenium.Keys
 
-
-class SearchModuleSpec extends LoginTester1Spec {
-
-	def setupSpec() {
-		// @Mixin is buggy, don't use it
-		SearchModuleSpec.metaClass.mixin(CanvasMixin)
-	}
+class SearchModuleSpec extends LoginTester1Spec implements CanvasMixin {
 	
 	void "must select the first result with enter"() {
 		when: "typed the partial name of a module in the search bar and pressed enter"

@@ -13,6 +13,7 @@ public class BinaryBetting extends SolidityModule {
 				"contract BinaryBetting {\n" +
 				"    uint8 public constant OUTCOME_COUNT = 2;\n" +
 				"    uint public constant MINIMUM_BET = 1 wei;\n" +
+				"    address public owner;\n" +
 				"\n" +
 				"    event Round(uint id);\n" +
 				"    event RoundStarted(uint closeTime);\n" +
@@ -42,6 +43,10 @@ public class BinaryBetting extends SolidityModule {
 				"        uint8 outcome;\n" +
 				"    }\n" +
 				"\n" +
+				"    function BinaryBetting() {\n" +
+				"        owner = msg.sender;\n" +
+				"    }\n" +
+				"    \n" +
 				"    function openRound(uint id, uint closeTime) admin {\n" +
 				"        if (roundIsActive[id]) { Error(\"Round already started\"); return; }\n" +
 				"        if (closeTime < now) { Error(\"closeTime must be in future\"); return; }\n" +
@@ -144,11 +149,11 @@ public class BinaryBetting extends SolidityModule {
 				"    }\n" +
 				"    \n" +
 				"    function kill() admin {\n" +
-				"        selfdestruct(" + ADDRESS_PLACEHOLDER + ");\n" +
+				"        selfdestruct(owner);\n" +
 				"    }\n" +
 				"\n" +
 				"    modifier admin {\n" +
-				"        if (msg.sender == " + ADDRESS_PLACEHOLDER + ") {\n" +
+				"        if (msg.sender == owner) {\n" +
 				"            _;\n" +
 				"        }\n" +
 				"    }\n" +

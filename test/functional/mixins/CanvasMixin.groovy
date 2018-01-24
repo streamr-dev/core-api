@@ -6,7 +6,7 @@ import org.openqa.selenium.Keys
 
 import java.util.concurrent.TimeUnit
 
-class CanvasMixin {
+trait CanvasMixin {
 	
 	void selectModuleInModuleBrowser(name, clickMethod = "click") {
 		js.exec """
@@ -201,7 +201,7 @@ class CanvasMixin {
 		if (ioElem.empty) {
 			ioElem = module.find(".ioname", text: contains(endpointLabel))
 		}
-		ioElem.click()
+		ioElem[0].click()
 		waitFor { $("#contextMenu").displayed }
 	}
 
@@ -373,5 +373,13 @@ class CanvasMixin {
 			})
 		""")
 		return Canvas.State.fromValue(stateString)
+	}
+
+	void turnOnSerialization() {
+		realtimeOptionsButton.click()
+		waitFor { realtimeOptionsModal.displayed }
+		serializationEnabled.click()
+		serializationEnabled.find("option").find { it.value() == "true" }.click()
+		acceptConfirmation()
 	}
 }

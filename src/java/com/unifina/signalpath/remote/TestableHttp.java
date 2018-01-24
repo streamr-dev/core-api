@@ -10,9 +10,15 @@ import org.apache.http.nio.client.HttpAsyncClient;
  */
 class TestableHttp extends Http {
 	public transient static HttpAsyncClient httpClient;
+	public transient static boolean localAddressesAreAllowed;
 
 	@Override
 	protected HttpAsyncClient getHttpClient() {
 		return httpClient;
+	}
+
+	@Override
+	protected boolean localAddressesAreAllowed() {
+		return localAddressesAreAllowed;
 	}
 }

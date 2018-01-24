@@ -1,7 +1,6 @@
 package com.unifina.utils.testutils;
 
 import com.unifina.datasource.ITimeListener;
-import com.unifina.feed.MasterClock;
 import com.unifina.serialization.Serializer;
 import com.unifina.serialization.SerializerImpl;
 import com.unifina.service.SerializationService;
@@ -568,6 +567,7 @@ public class ModuleTestHelper {
 			}
 			Output output = new Output(null, "outputFor" + inputName, input.getTypeName());
 			output.setDisplayName("outputFor" + inputName);
+			output.setOwner(new PlaceholderModule());
 			output.connect(input);
 		}
 	}
@@ -620,4 +620,13 @@ public class ModuleTestHelper {
 		@Override
 		public void clearState() { }
 	}
+
+	public static class PlaceholderModule extends AbstractSignalPathModule {
+		@Override
+		public void sendOutput() { }
+
+		@Override
+		public void clearState() { }
+	}
+
 }
