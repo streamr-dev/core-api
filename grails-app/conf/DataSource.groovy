@@ -23,6 +23,7 @@ hibernate {
 	cache.use_second_level_cache = true
 	cache.use_query_cache = true
 	cache.region.factory_class = 'org.hibernate.cache.SingletonEhCacheRegionFactory'
+	// cache.region.factory_class = 'org.hibernate.cache.ehcache.SingletonEhCacheRegionFactory' // Hibernate 4
 	// Prevent complex queries from taking a lot of memory
 	query.plan_cache_max_strong_references = 1 // default 128
 	query.plan_cache_max_soft_references = 2048 // default 2048
