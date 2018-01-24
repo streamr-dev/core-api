@@ -35,7 +35,7 @@ public abstract class ModuleWithUI extends AbstractSignalPathModule {
 		super.initialize();
 
 		if (getGlobals().isRunContext()) {
-			streamService = getGlobals().getGrailsApplication().getMainContext().getBean(StreamService.class);
+			streamService = Holders.getApplicationContext().getBean(StreamService.class);
 			getGlobals().getDataSource().addStartListener(new IStartListener() {
 				@Override
 				public void onStart() {
@@ -198,7 +198,8 @@ public abstract class ModuleWithUI extends AbstractSignalPathModule {
 			stream.setUiChannelCanvas(getRootSignalPath().getCanvas());
 
 			// User must have write permission to related Canvas in order to write to the UI channel
-			if (!getGlobals().getGrailsApplication().getMainContext().getBean(PermissionService.class).canWrite(getGlobals().getUser(), stream.getUiChannelCanvas())) {
+			PermissionService permissionService = Holders.getApplicationContext().getBean(PermissionService.class);
+			if (!permissionService.canWrite(getGlobals().getUser(), stream.getUiChannelCanvas())) {
 				throw new AccessControlException(ModuleWithUI.this.getName() + ": User " + getGlobals().getUser().getUsername() +
 						" does not have write access to UI Channel Stream " + stream.getId());
 			}

@@ -7,6 +7,7 @@ import com.unifina.service.SignalPathService
 import com.unifina.utils.Globals
 import com.unifina.utils.IdGenerator
 import grails.util.GrailsUtil
+import grails.util.Holders
 import groovy.transform.CompileStatic
 import org.apache.log4j.Logger
 
@@ -33,7 +34,7 @@ public class SignalPathRunner extends Thread {
 
 	private SignalPathRunner(Globals globals, boolean adhoc) {
 		this.globals = globals
-		this.signalPathService = globals.grailsApplication.mainContext.getBean(SignalPathService)
+		this.signalPathService = Holders.applicationContext.getBean(SignalPathService)
 		this.adhoc = adhoc
 
 		runnerId = IdGenerator.get()

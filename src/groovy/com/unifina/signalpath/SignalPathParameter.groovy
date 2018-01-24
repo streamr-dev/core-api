@@ -1,6 +1,8 @@
 package com.unifina.signalpath
 
 import com.unifina.domain.signalpath.Canvas
+import com.unifina.service.PermissionService
+import grails.util.Holders
 
 class SignalPathParameter extends StringParameter {
 
@@ -22,7 +24,7 @@ class SignalPathParameter extends StringParameter {
 			config.put("defaultValue", getValue())
 		}
 
-		def permissionService = owner.globals.grailsApplication.mainContext.getBean("permissionService")
+		def permissionService = Holders.applicationContext.getBean(PermissionService)
 		def user = owner.globals.getUser()
 		Collection signalPaths = permissionService.get(Canvas, user) {
 			projections {

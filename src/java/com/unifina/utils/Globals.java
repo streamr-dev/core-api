@@ -63,13 +63,6 @@ public class Globals {
 		return signalPathContext;
 	}
 
-	public GrailsApplication getGrailsApplication() {
-		if (System.getSecurityManager() != null) { // Ensure cannot be accessed by CustomModule
-			AccessController.checkPermission(new GrailsApplicationPermission());
-		}
-		return grailsApplication;
-	}
-
 	/**
 	 * Returns the SecUser for this Globals instance, or null if the user is anonymous/unknown.
      */

@@ -3,6 +3,7 @@ package com.unifina.datasource;
 import java.util.*;
 
 import com.unifina.domain.signalpath.Canvas;
+import grails.util.Holders;
 import org.apache.log4j.Logger;
 
 import com.unifina.data.IFeedRequirement;
@@ -109,7 +110,7 @@ public abstract class DataSource {
 	}
 	
 	public AbstractFeed createFeed(Feed domain) {
-		FeedService feedService = (FeedService) globals.getGrailsApplication().getMainContext().getBean("feedService");
+		FeedService feedService = Holders.getApplicationContext().getBean(FeedService.class);
 		if (feedService == null)
 			feedService = new FeedService();
 

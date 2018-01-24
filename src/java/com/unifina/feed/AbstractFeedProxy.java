@@ -4,6 +4,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
 import com.unifina.data.IEventRecipient;
+import grails.util.Holders;
 import org.apache.log4j.Logger;
 
 import com.unifina.data.FeedEvent;
@@ -54,7 +55,7 @@ public abstract class AbstractFeedProxy<ModuleClass, RawMessageClass, MessageCla
 	
 	protected MessageHub<RawMessageClass, MessageClass, KeyClass> getMessageHub() {
 		try {
-			return FeedFactory.getInstance(domainObject, globals.getGrailsApplication().getConfig());
+			return FeedFactory.getInstance(domainObject, Holders.getGrailsApplication().getConfig());
 		} catch (InstantiationException | ClassNotFoundException
 				| NoSuchMethodException | InvocationTargetException
 				| IllegalAccessException | IllegalArgumentException e) {

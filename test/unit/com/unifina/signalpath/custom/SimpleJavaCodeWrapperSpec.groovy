@@ -284,43 +284,6 @@ class SimpleJavaCodeWrapperSpec extends Specification {
 		e.cause.getMessage().contains("DataSource")
 	}
 
-	void "it throws ExceptionInInitializerError caused by AccessDeniedException if trying to get grails application"() {
-		setup:
-		module.configure([
-			code: "\n" +
-				"TimeSeriesInput in = new TimeSeriesInput(this,\"in\");\n" +
-				"TimeSeriesOutput out = new TimeSeriesOutput(this,\"out\");\n" +
-				"private double sum = 0D;\n" +
-				"\n" +
-				"@Override\n" +
-				"public void sendOutput() {\n" +
-				"Object user = getGlobals().getGrailsApplication();\n" +
-				"sum += in.value;\n" +
-				"out.send(sum);\n" +
-				"}\n" +
-				"\n" +
-				"@Override\n" +
-				"public void clearState() {\n" +
-				"sum = 0D;\n" +
-				"}\n"
-		])
-
-		when:
-		Map inputValues = [
-			in: [0,1,2,3,4,5,6,7,8,9,10].collect {it?.doubleValue()},
-		]
-		Map outputValues = [
-			out: [0,1,3,6,10,15,21,28,36,45,55].collect {it?.doubleValue()},
-		]
-
-		new ModuleTestHelper.Builder(module, inputValues, outputValues)
-			.overrideGlobals { globals }
-			.test()
-		then:
-		def e = thrown(ExceptionInInitializerError)
-		e.cause.getClass() == AccessControlException
-	}
-
 	void "it throws AccessDeniedException if trying to get source of input"() {
 		setup:
 		module.configure([
