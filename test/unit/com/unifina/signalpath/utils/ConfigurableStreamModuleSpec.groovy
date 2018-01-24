@@ -5,11 +5,8 @@ import com.unifina.service.FeedService
 import com.unifina.utils.Globals
 import com.unifina.utils.testutils.ModuleTestHelper
 import grails.test.mixin.Mock
-import grails.test.mixin.TestMixin
-import grails.test.mixin.support.GrailsUnitTestMixin
 import spock.lang.Specification
 
-@TestMixin(GrailsUnitTestMixin)
 @Mock(Stream)
 class ConfigurableStreamModuleSpec extends Specification {
 
@@ -31,7 +28,7 @@ class ConfigurableStreamModuleSpec extends Specification {
 		module = new ConfigurableStreamModule()
 		module.init()
 		module.name = "streamModule"
-		module.globals = globals = new Globals([:], grailsApplication, null)
+		module.globals = globals = new Globals([:], null)
 		module.configure([
 			params: [
 				[name: "stream", value: "stream-0"]

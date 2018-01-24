@@ -22,7 +22,7 @@ class TwitterFeedSpec extends Specification {
 	TestableTwitterFeed feed
 
 	def setup() {
-		def globals = GlobalsFactory.createInstance([:], grailsApplication, new SecUser())
+		def globals = GlobalsFactory.createInstance([:], new SecUser())
 		Feed twitterFeed = new Feed([
 			id: 9,
 			version: 0,

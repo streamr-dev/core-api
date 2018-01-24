@@ -174,7 +174,7 @@ class SignalPathService {
      */
 	void startLocal(Canvas canvas, Map signalPathContext, SecUser asUser) throws SerializationException {
 		// Create Globals
-		Globals globals = GlobalsFactory.createInstance(signalPathContext, grailsApplication, asUser)
+		Globals globals = GlobalsFactory.createInstance(signalPathContext, asUser)
 
 		SignalPathRunner runner
 		SignalPath sp

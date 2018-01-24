@@ -57,7 +57,7 @@ public class ForEach extends AbstractSignalPathModule {
 		SignalPathService signalPathService = Holders.getApplicationContext().getBean(SignalPathService.class);
 
 		// Create a non-run-context Globals for instantiating the temporary SignalPath
-		Globals tempGlobals = GlobalsFactory.createInstance(Collections.emptyMap(), Holders.getGrailsApplication(), getGlobals().getUser());
+		Globals tempGlobals = GlobalsFactory.createInstance(Collections.emptyMap(), getGlobals().getUser());
 		SignalPath tempSignalPath = signalPathService.mapToSignalPath(signalPathMap, true, tempGlobals, new SignalPath(false));
 
 		// Find and validate exported endpoints

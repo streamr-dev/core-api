@@ -1,18 +1,13 @@
 package com.unifina.signalpath.time
 
-import com.unifina.utils.testutils.ModuleTestHelper
-import grails.test.mixin.TestMixin
-import grails.test.mixin.support.GrailsUnitTestMixin
-
-import java.text.SimpleDateFormat
-
-import spock.lang.Specification
-
 import com.unifina.domain.security.SecUser
 import com.unifina.signalpath.Input
 import com.unifina.utils.Globals
+import com.unifina.utils.testutils.ModuleTestHelper
+import spock.lang.Specification
 
-@TestMixin(GrailsUnitTestMixin)
+import java.text.SimpleDateFormat
+
 class DateConversionSpec extends Specification {
 
 	def final static format = "yyyy-MM-dd HH:mm:ss";
@@ -30,7 +25,7 @@ class DateConversionSpec extends Specification {
 
 	private void initContextWithUser(SecUser user) {
 		module = new DateConversion()
-		globals = new Globals([:], grailsApplication, user)
+		globals = new Globals([:], user)
 		module.globals = globals
 		module.init()
 		module.connectionsReady()

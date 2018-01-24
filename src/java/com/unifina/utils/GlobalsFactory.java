@@ -23,13 +23,13 @@ public class GlobalsFactory {
 	/**
 	 * Instantiate a Globals object. If user == null attempt to fetch currently logged-in user.
 	 */
-	public static Globals createInstance(Map signalPathContext, GrailsApplication grailsApplication, SecUser user) {
+	public static Globals createInstance(Map signalPathContext, SecUser user) {
 		if (user == null) {
 			SpringSecurityService springSecurityService = Holders.getApplicationContext().getBean(SpringSecurityService.class);
 			if (springSecurityService != null) {
 				user = (SecUser) springSecurityService.getCurrentUser();
 			}
 		}
-		return new Globals(signalPathContext, grailsApplication, user);
+		return new Globals(signalPathContext, user);
 	}
 }

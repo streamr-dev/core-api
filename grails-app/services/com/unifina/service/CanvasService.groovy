@@ -9,7 +9,6 @@ import com.unifina.domain.security.SecUser
 import com.unifina.domain.signalpath.Canvas
 import com.unifina.exceptions.CanvasUnreachableException
 import com.unifina.serialization.SerializationException
-import com.unifina.signalpath.SignalPath
 import com.unifina.signalpath.UiChannelIterator
 import com.unifina.task.CanvasDeleteTask
 import com.unifina.task.CanvasStartTask
@@ -18,12 +17,10 @@ import com.unifina.utils.GlobalsFactory
 import grails.converters.JSON
 import grails.transaction.Transactional
 import groovy.transform.CompileStatic
-import org.codehaus.groovy.grails.commons.GrailsApplication
 import org.codehaus.groovy.grails.web.json.JSONObject
 
 class CanvasService {
 
-	GrailsApplication grailsApplication
 	SignalPathService signalPathService
 	TaskService taskService
 	PermissionService permissionService
@@ -213,7 +210,7 @@ class CanvasService {
 	 * Rebuild JSON to check it is ok and up-to-date
 	 */
 	private Map reconstructFrom(Map signalPathMap, SecUser user) {
-		Globals globals = GlobalsFactory.createInstance(signalPathMap.settings ?: [:], grailsApplication, user)
+		Globals globals = GlobalsFactory.createInstance(signalPathMap.settings ?: [:], user)
 		try {
 			return signalPathService.reconstruct(signalPathMap, globals)
 		} catch (Exception e) {

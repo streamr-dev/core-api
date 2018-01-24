@@ -16,7 +16,6 @@ import com.unifina.utils.testutils.ModuleTestHelper
 import grails.plugin.springsecurity.SpringSecurityService
 import grails.test.mixin.Mock
 import grails.test.mixin.TestMixin
-import grails.test.mixin.support.GrailsUnitTestMixin
 import grails.test.mixin.web.ControllerUnitTestMixin
 import spock.lang.Specification
 
@@ -36,7 +35,7 @@ class ForEachItemSpec extends Specification {
 		canvasService = mainContext.getBean(CanvasService)
 		canvasService.signalPathService = mainContext.getBean(SignalPathService)
 		module = new ForEachItem()
-		module.globals = globals = GlobalsFactory.createInstance([:], grailsApplication, user)
+		module.globals = globals = GlobalsFactory.createInstance([:], user)
 		module.init()
 		user = new SecUser().save(failOnError: true, validate: false)
 

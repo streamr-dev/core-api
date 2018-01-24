@@ -48,7 +48,7 @@ class SimpleJavaCodeWrapperSpec extends Specification {
 		}
 
 		module = new SimpleJavaCodeWrapper()
-		globals = module.globals = module.globals = GlobalsFactory.createInstance([:], grailsApplication, new SecUser())
+		globals = module.globals = module.globals = GlobalsFactory.createInstance([:], new SecUser())
 		module.init()
 		module.hash = 666
 		module.configure(module.getConfiguration())

@@ -11,14 +11,11 @@ import com.unifina.service.PermissionService
 import com.unifina.service.StreamService
 import com.unifina.utils.GlobalsFactory
 import grails.test.mixin.Mock
-import grails.test.mixin.TestMixin
-import grails.test.mixin.support.GrailsUnitTestMixin
 import grails.util.Holders
 import spock.lang.Specification
 
 import java.security.AccessControlException
 
-@TestMixin(GrailsUnitTestMixin)
 @Mock([Stream, Feed])
 class ModuleWithUISpec extends Specification {
 
@@ -80,7 +77,7 @@ class ModuleWithUISpec extends Specification {
 			}
 		}
 
-		module.globals = GlobalsFactory.createInstance([:], grailsApplication, user)
+		module.globals = GlobalsFactory.createInstance([:], user)
 		module.globals.setDataSource(Mock(DataSource))
 		module.parentSignalPath = Mock(SignalPath)
 		module.parentSignalPath.getRootSignalPath() >> module.parentSignalPath

@@ -23,8 +23,7 @@ public class Globals {
 	private final SimpleDateFormat dateFormatUTC = new SimpleDateFormat("yyyy-MM-dd");
 	private final SimpleDateFormat timeFormat = new SimpleDateFormat("HH:mm:ss.SSS");
 	private final SimpleDateFormat dateTimeFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS");
-	
-	private GrailsApplication grailsApplication;
+
 	private Map signalPathContext = null;
 	private TimeZone userTimeZone;
 	private SecUser user;
@@ -44,16 +43,12 @@ public class Globals {
 		signalPathContext = new HashMap();
 	}
 	
-	public Globals(Map signalPathContext, GrailsApplication grailsApplication, SecUser user) {
+	public Globals(Map signalPathContext, SecUser user) {
 		if (signalPathContext == null) {
 			throw new NullPointerException("signalPathContext can not be null!");
 		}
-		if (grailsApplication == null) {
-			throw new NullPointerException("grailsApplication can not be null!");
-		}
 		
 		this.signalPathContext = signalPathContext;
-		this.grailsApplication = grailsApplication;
 		this.user = user;
 		
 		dateFormatUTC.setTimeZone(TimeZone.getTimeZone("UTC"));

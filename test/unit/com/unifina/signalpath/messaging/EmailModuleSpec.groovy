@@ -42,7 +42,7 @@ class EmailModuleSpec extends UiChannelMockingSpecification {
 	}
 
 	private void initContext(Map context = [:], SecUser user = new SecUser(timezone:"Europe/Helsinki", username: "username")) {
-		globals = GlobalsFactory.createInstance(context, grailsApplication, user)
+		globals = GlobalsFactory.createInstance(context, user)
 		globals.time = new Date()
 
 		module.globals = globals
