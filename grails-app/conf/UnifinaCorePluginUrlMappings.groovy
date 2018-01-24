@@ -54,5 +54,7 @@ class UnifinaCorePluginUrlMappings {
 		"/api/v1/dashboards/($path**)/request"(controller: "dashboardApi", action: "runtimeRequest") // for internal use, runtime requests to canvases via dashboards
 
 		"/api/v1/oembed"(controller: "oembedApi", action: "index")
+
+		"/api/v1/login/$action"(controller: "challengeApi")
 	}
 }

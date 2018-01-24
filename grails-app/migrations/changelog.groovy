@@ -80,4 +80,5 @@ databaseChangeLog = {
 	include file: 'core/2017-11-10-fix-run-canvas-spec.groovy'
 	include file: 'core/2017-11-23-encrypt-private-keys.groovy'
 	include file: 'core/2018-01-11-require-all-module.groovy'
+	include file: 'core/2018-01-24-login-challenge.groovy'
 }
