@@ -25,7 +25,8 @@ class IntegrationKey implements Serializable {
 	}
 
 	enum Service {
-		ETHEREUM
+		ETHEREUM,
+		ETHEREUM_ID
 	}
 
 	@CompileStatic
@@ -41,7 +42,7 @@ class IntegrationKey implements Serializable {
 
 	@CompileStatic
 	private Map jsonMap() {
-		if (service == Service.ETHEREUM) {
+		if (service == Service.ETHEREUM || service == Service.ETHEREUM_ID) {
 			return [address: ((JSONObject) JSON.parse(json)).get("address")]
 		} else {
 			return [:]
