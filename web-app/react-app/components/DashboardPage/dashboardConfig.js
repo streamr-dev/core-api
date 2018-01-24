@@ -75,8 +75,8 @@ module.exports = {
             sm: 4,
             xs: 2,
         },
+        defaultLayout,
         layoutsBySizeAndModule: _.zipObject(sizes, _.map(sizes, size => _.zipObject(modules, _.map(modules, module => ({
-            ...defaultLayout,
             ...(size && overridesBySize[size] || {}),
             ...(module && overridesByModule[module] || {}),
             ...(size && module && overridesBySizeAndModule[size] && overridesBySizeAndModule[size][module] || {})

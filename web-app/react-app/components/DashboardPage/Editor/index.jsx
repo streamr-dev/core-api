@@ -152,6 +152,7 @@ export class Editor extends Component<Props, State> {
                 const id = Editor.generateItemId(item)
                 const layout = db.layout && db.layout[size] && db.layout[size].find(layout => layout.i === id)
                 return {
+                    ...dashboardConfig.layout.defaultLayout,
                     ...dashboardConfig.layout.layoutsBySizeAndModule[size][item.webcomponent],
                     ...(layout || {}),
                     i: id
