@@ -3,7 +3,7 @@ package com.unifina.signalpath.text
 import com.unifina.utils.testutils.ModuleTestHelper
 import spock.lang.Specification
 
-class JsonParserTest extends Specification {
+class JsonParserSpec extends Specification {
 	JsonParser module
 
 	void setup() {
