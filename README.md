@@ -32,6 +32,10 @@ Also:
 - `npm install`
 - `grails run-app`
 
+## React and Redux components
+
+Part of the plugins frontend is made with libraries like React and Redux. Those files must first be compiled into bundle file(s). This happens by running `npm run build` in the root directory.
+
 ## Testing
 
 - `grails test-app`

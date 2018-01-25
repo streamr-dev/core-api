@@ -441,7 +441,7 @@ class CanvasApiControllerSpec extends Specification {
 		request.addHeader("Authorization", "Token myApiKey")
 		params.canvasId = "1"
 		params.moduleId = 1
-		params.dashboard = 2
+		params.dashboardId = "2"
 		request.method = "GET"
 		request.requestURI = "/api/v1/canvases/$params.id/modules/"
 		withFilters(action: "module") {
@@ -451,7 +451,7 @@ class CanvasApiControllerSpec extends Specification {
 		then:
 		response.status == 200
 		response.json == result
-		1 * canvasService.authorizedGetModuleOnCanvas("1", 1, 2, me, Permission.Operation.READ) >> result
+		1 * canvasService.authorizedGetModuleOnCanvas("1", 1, "2", me, Permission.Operation.READ) >> result
 	}
 
 	void "module() supports runtime parameter"() {
@@ -461,7 +461,7 @@ class CanvasApiControllerSpec extends Specification {
 		request.addHeader("Authorization", "Token myApiKey")
 		params.canvasId = "1"
 		params.moduleId = 1
-		params.dashboard = 2
+		params.dashboardId = "2"
 		params.runtime = true
 		request.method = "GET"
 		request.requestURI = "/api/v1/canvases/$params.id/modules/$params.moduleId"

@@ -1,5 +1,7 @@
 [ignore]
 .*/node_modules/react-resizable/build/ResizableBox.js
+.*/node_modules/react-resizable/build/Resizable.js
+.*/node_modules/react-resizable/build/cloneElement.js
 [include]
 
 [libs]
