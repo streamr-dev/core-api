@@ -16,16 +16,15 @@ import groovy.transform.CompileStatic
 import java.security.AccessControlException
 
 /**
- * Check, get, grant, and revoke permissions. Maintains an Access Control Lists (ACLs) to resources.
+ * Check, get, grant, and revoke permissions. Maintains Access Control Lists (ACLs) to resources.
  *
  * Complexities handled by PermissionService:
  * 		- anonymous Permissions: checked, and listed for resource, but permitted resources not listed for user
  * 		- Permission owners and grant/revoke targets can be SecUsers or SignupInvites
  * 			=> getUserPropertyName
- * 			-> following is supported for both: grant, revoke, systemGrant, systemRevoke, getPermissionsTo
  * 		- combinations of read/write/share (RWS) should be restricted, e.g. to disallow write without read?
- * 			=> alsoRevoke, alsoGrant
- * 			TODO: discuss... current implementation with alsoRevoke but no alsoGrant is conservative but unsymmetric
+ * 			=> ALSO_REVOKE
+ * 			TODO: discuss... current implementation with ALSO_REVOKE but no ALSO_GRANT is conservative but unsymmetric
  */
 class PermissionService {
 	// Cascade revocations to "higher" rights to ensure meaningful combinations (e.g. WRITE without READ makes no sense)
@@ -96,7 +95,7 @@ class PermissionService {
 		return get(resourceClass, userish, op, false, resourceFilter)
 	}
 
-	/** Convenience overload, adding a flag for public resources may look cryptic */
+	/** Convenience overload: get all including public, adding a flag for public resources may look cryptic */
 	@CompileStatic
 	<T> List<T> getAll(Class<T> resourceClass, Userish userish, Operation op, Closure resourceFilter = {}) {
 		return get(resourceClass, userish, op, true, resourceFilter)
