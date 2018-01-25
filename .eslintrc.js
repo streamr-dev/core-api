@@ -35,7 +35,8 @@ module.exports = exports = {
     plugins: [
         'react',
         'mocha',
-        'flowtype'
+        'flowtype',
+        'async-await'
     ],
     
     rules: {
@@ -84,6 +85,8 @@ module.exports = exports = {
         }],
         'no-unexpected-multiline': ERROR,
         'wrap-iife': [ERROR, 'inside'],
-        'react/jsx-indent': [ERROR, 4]
+        'react/jsx-indent': [ERROR, 4],
+        "async-await/space-after-async": ERROR,
+        "async-await/space-after-await": ERROR
     }
 }
