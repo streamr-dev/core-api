@@ -90,7 +90,7 @@ public class Input<T> extends Endpoint<T> {
 	 * @return true if connected to Pullable
 	 */
 	protected boolean pullValueFromPullableIfConnected() {
-		if (isConnected() && source.getOwner() instanceof Pullable) {
+		if (isConnectedToPullable()) {
 			Object pulledObject = ((Pullable<?>) source.getOwner()).pullValue(source);
 			value = handlePulledObject(pulledObject);
 			return true;
@@ -175,7 +175,7 @@ public class Input<T> extends Endpoint<T> {
 
 	@Override
 	public void clear() {
-		if (!isConnected() || !(source.getOwner() instanceof Pullable)) {
+		if (!isConnectedToPullable()) {
 			value = null;
 			setReady(false);
 		}
@@ -221,5 +221,9 @@ public class Input<T> extends Endpoint<T> {
 	@Override
 	public String toString() {
 		return "(in) " + super.toString() + ", value: " + value;
+	}
+
+	private boolean isConnectedToPullable() {
+		return isConnected() && source.getOwner() instanceof Pullable;
 	}
 }
