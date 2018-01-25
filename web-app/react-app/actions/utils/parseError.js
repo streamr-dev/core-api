@@ -1,21 +1,12 @@
 // @flow
 
-export type Err = {
-    error: string,
-    code?: string
-}
+import type { ApiError } from '../../flowtype/common-types'
 
 export default (res: {
     response?: {
-        data: Err
+        data: ApiError
     },
     message?: string
-}) : Err => {
-    if (res.response) {
-        return res.response.data
-    } else {
-        return {
-            error: res.message || 'Something went wrong'
-        }
-    }
+}) : ApiError => (res.response || {}).data || res.message || {
+    error: 'Something went wrong'
 }

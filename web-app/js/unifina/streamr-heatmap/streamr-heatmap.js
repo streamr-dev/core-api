@@ -1,6 +1,6 @@
 (function(exports) {
     
-    function StreamrHeatMap(parent, options) {
+    function StreamrHeatmap(parent, options) {
         var _this = this
         this.parent = $(parent)
         
@@ -78,19 +78,19 @@
         
     }
     
-    StreamrHeatMap.prototype.getZoom = function() {
+    StreamrHeatmap.prototype.getZoom = function() {
         return this.map.getZoom()
     }
     
-    StreamrHeatMap.prototype.getCenter = function() {
+    StreamrHeatmap.prototype.getCenter = function() {
         return this.map.getCenter()
     }
     
-    StreamrHeatMap.prototype.setCenter = function(lat, lng) {
+    StreamrHeatmap.prototype.setCenter = function(lat, lng) {
         this.map.setView(new L.LatLng(lat, lng))
     }
     
-    StreamrHeatMap.prototype.requestUpdate = function() {
+    StreamrHeatmap.prototype.requestUpdate = function() {
         var _this = this
         var draw = function() {
             var dirty = _this.updateData()
@@ -117,7 +117,7 @@
         }
     }
     
-    StreamrHeatMap.prototype.updateData = function() {
+    StreamrHeatmap.prototype.updateData = function() {
         var now = Date.now()
         // Remove already-expired points
         var dirty = this.expireData(now)
@@ -160,7 +160,7 @@
     /**
      * Synchronizes the data in this.data to the heatmap layer
      */
-    StreamrHeatMap.prototype.syncData = function() {
+    StreamrHeatmap.prototype.syncData = function() {
         var d = {
             min: this.options.min,
             max: this.options.max,
@@ -174,17 +174,17 @@
         }
     }
     
-    StreamrHeatMap.prototype.createHeatmapLayer = function() {
+    StreamrHeatmap.prototype.createHeatmapLayer = function() {
         var layer = new HeatmapOverlay(this.options);
         this.map.addLayer(layer)
         return layer
     }
     
-    StreamrHeatMap.prototype.getMap = function() {
+    StreamrHeatmap.prototype.getMap = function() {
         return this.map
     }
     
-    StreamrHeatMap.prototype.expireData = function(t) {
+    StreamrHeatmap.prototype.expireData = function(t) {
         var i
         for (i = 0; i < this.data.length; i++) {
             if (this.data[i].expiresTime > t) {
@@ -199,7 +199,7 @@
         return false
     }
     
-    StreamrHeatMap.prototype.addData = function(data) {
+    StreamrHeatmap.prototype.addData = function(data) {
         var _this = this
         data.addedTime = Date.now()
         data.expiresTime = Date.now() + this.options.lifeTime
@@ -211,22 +211,22 @@
             this.requestUpdate()
     }
     
-    StreamrHeatMap.prototype.handleMessage = function(msg) {
+    StreamrHeatmap.prototype.handleMessage = function(msg) {
         // Data point message
         if (msg.t === "p" && msg.v > 0) {
             this.addData(msg)
         }
     }
     
-    StreamrHeatMap.prototype.clear = function() {
+    StreamrHeatmap.prototype.clear = function() {
         this.data = []
         this.syncData()
     }
     
-    StreamrHeatMap.prototype.redraw = function() {
+    StreamrHeatmap.prototype.redraw = function() {
         this.map.invalidateSize()
     }
     
-    exports.StreamrHeatMap = StreamrHeatMap
+    exports.StreamrHeatmap = StreamrHeatmap
     
 })(typeof exports !== 'undefined' ? exports : window)

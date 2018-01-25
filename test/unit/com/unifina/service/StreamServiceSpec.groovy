@@ -36,7 +36,7 @@ class StreamServiceSpec extends Specification {
 
 	def setup() {
 		feed = new Feed(
-			streamListenerClass: NoOpStreamListener.name
+				streamListenerClass: NoOpStreamListener.name
 		).save(validate: false)
 
 		// Setup application context
@@ -89,15 +89,15 @@ class StreamServiceSpec extends Specification {
 		def feed = new Feed(id: 0, streamListenerClass: "com.unifina.feed.kafka.KafkaStreamListener").save(validate: false)
 		when:
 		def params = [
-			name       : "Test stream",
-			description: "Test stream",
-			feed       : feed,
-			config     : [
-				fields: [
-					[name: "profit", type: "number"],
-					[name: "keyword", type: "string"]
+				name       : "Test stream",
+				description: "Test stream",
+				feed       : feed,
+				config     : [
+						fields: [
+								[name: "profit", type: "number"],
+								[name: "keyword", type: "string"]
+						]
 				]
-			]
 		]
 		service.createStream(params, me)
 
@@ -116,14 +116,14 @@ class StreamServiceSpec extends Specification {
 		feed.save(validate: false)
 		when:
 		def params = [
-			name       : "Test stream",
-			description: "Test stream",
-			config     : [
-				fields: [
-					[name: "profit", type: "number"],
-					[name: "keyword", type: "string"]
+				name       : "Test stream",
+				description: "Test stream",
+				config     : [
+						fields: [
+								[name: "profit", type: "number"],
+								[name: "keyword", type: "string"]
+						]
 				]
-			]
 		]
 		service.createStream(params, new SecUser(username: "me").save(validate: false))
 		then:
@@ -138,15 +138,15 @@ class StreamServiceSpec extends Specification {
 		service.permissionService = Stub(PermissionService)
 		def streamListener = Mock(AbstractStreamListener)
 		def params = [
-			name       : "Test stream",
-			description: "Test stream",
-			feed       : feed,
-			config     : [
-				fields: [
-					[name: "profit", type: "number"],
-					[name: "keyword", type: "string"]
+				name       : "Test stream",
+				description: "Test stream",
+				feed       : feed,
+				config     : [
+						fields: [
+								[name: "profit", type: "number"],
+								[name: "keyword", type: "string"]
+						]
 				]
-			]
 		]
 		when:
 
@@ -159,15 +159,15 @@ class StreamServiceSpec extends Specification {
 	void "createStream throws exception if feed has no streamListenerClass"() {
 		when:
 		def params = [
-			name       : "Test stream",
-			description: "Test stream",
-			feed       : new Feed().save(validate: false),
-			config     : [
-				fields: [
-					[name: "profit", type: "number"],
-					[name: "keyword", type: "string"]
+				name       : "Test stream",
+				description: "Test stream",
+				feed       : new Feed().save(validate: false),
+				config     : [
+						fields: [
+								[name: "profit", type: "number"],
+								[name: "keyword", type: "string"]
+						]
 				]
-			]
 		]
 		service.createStream(params, new SecUser(username: "me").save(validate: false))
 		then:
@@ -336,13 +336,12 @@ class StreamServiceSpec extends Specification {
 		user.save(failOnError: true, validate: false)
 
 
-		Dashboard dashboard = new Dashboard(name: "dashboard").save(failOnError: true, validate: false)
+		Dashboard dashboard = new Dashboard(name: "dashboard", user: user).save(failOnError: true, validate: false)
 		DashboardItem dashboardItem = new DashboardItem(
-			title: "dashboardItem",
-			canvas: canvas,
-			module: 3,
-			webcomponent: "webcomponent",
-			ord: 1
+				title: "dashboardItem",
+				canvas: canvas,
+				module: 3,
+				webcomponent: "webcomponent"
 		)
 		dashboard.addToItems(dashboardItem)
 		dashboard.save(failOnError: true, validate: false)
@@ -352,7 +351,7 @@ class StreamServiceSpec extends Specification {
 		then:
 		1 * service.permissionService.canRead(user, stream) >> false
 		1 * service.permissionService.canRead(user, canvas) >> false
-		1 * dashboardService.authorizedGetDashboardItem(1, 1, user, Permission.Operation.READ) >> dashboardItem
+		1 * dashboardService.authorizedGetDashboardItem(dashboard.id, dashboardItem.id, user, Permission.Operation.READ) >> dashboardItem
 		1 * cb.call(stream)
 	}
 
@@ -372,14 +371,12 @@ class StreamServiceSpec extends Specification {
 		SecUser user = new SecUser(username: "username")
 		user.save(failOnError: true, validate: false)
 
-
-		Dashboard dashboard = new Dashboard(name: "dashboard").save(failOnError: true, validate: false)
+		Dashboard dashboard = new Dashboard( name: "dashboard").save(failOnError: true, validate: false)
 		DashboardItem dashboardItem = new DashboardItem(
-			title: "dashboardItem",
-			canvas: canvas,
-			module: 3,
-			webcomponent: "webcomponent",
-			ord: 1
+				title: "dashboardItem",
+				canvas: canvas,
+				module: 3,
+				webcomponent: "webcomponent"
 		)
 		dashboard.addToItems(dashboardItem)
 		dashboard.save(failOnError: true, validate: false)
@@ -390,7 +387,7 @@ class StreamServiceSpec extends Specification {
 		thrown(NotPermittedException)
 		1 * service.permissionService.canRead(user, stream) >> false
 		1 * service.permissionService.canRead(user, canvas) >> false
-		1 * dashboardService.authorizedGetDashboardItem(1, 1, user, Permission.Operation.READ) >> null
+		1 * dashboardService.authorizedGetDashboardItem(dashboard.id, dashboardItem.id, user, Permission.Operation.READ) >> null
 		0 * cb._
 	}
 }

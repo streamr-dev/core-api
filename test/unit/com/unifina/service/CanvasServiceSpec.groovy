@@ -517,8 +517,8 @@ class CanvasServiceSpec extends Specification {
 	}
 
 	def "authorizedGetModuleOnCanvas() checks access to dashboard from PermissionService and returns the module if allowed"() {
-		Dashboard db = new Dashboard()
-		db.addToItems(new DashboardItem(canvas: myFirstCanvas, module: 1, ord: 0, title: "foo"))
+		Dashboard db = new Dashboard().save(validate: false, failOnError: true)
+		db.addToItems(new DashboardItem(canvas: myFirstCanvas, module: 1, title: "foo"))
 		db.save(validate: false)
 
 		when:
@@ -531,8 +531,8 @@ class CanvasServiceSpec extends Specification {
 	}
 
 	def "authorizedGetModuleOnCanvas() checks access to dashboard from PermissionService and throws exception if the canvas doesn't match the dashboard item"() {
-		Dashboard db = new Dashboard()
-		db.addToItems(new DashboardItem(canvas: canvases.find {it != myFirstCanvas}, module: 1, ord: 0, title: "foo"))
+		Dashboard db = new Dashboard().save(validate: false, failOnError: true)
+		db.addToItems(new DashboardItem(canvas: canvases.find {it != myFirstCanvas}, module: 1, title: "foo"))
 		db.save(validate: false)
 
 		when:
@@ -598,12 +598,12 @@ class CanvasServiceSpec extends Specification {
 
 	def "authorizedGetModuleOnCanvas() throws NotFoundException if no dashboard exists"() {
 		when:
-		service.authorizedGetModuleOnCanvas(myFirstCanvas.id, 1, 1, me, Permission.Operation.READ)
+		service.authorizedGetModuleOnCanvas(myFirstCanvas.id, 1, "1", me, Permission.Operation.READ)
 
 		then:
 		thrown(NotFoundException)
 		1 * service.permissionService.check(me, myFirstCanvas, Permission.Operation.READ) >> false
-		1 * service.dashboardService.authorizedGetById(1, me, Permission.Operation.READ) >> { throw new NotFoundException("thrown by mock") }
+		1 * service.dashboardService.authorizedGetById("1", me, Permission.Operation.READ) >> { throw new NotFoundException("thrown by mock") }
 	}
 
 	private uiChannelIdsFromMap(Map signalPathMap) {

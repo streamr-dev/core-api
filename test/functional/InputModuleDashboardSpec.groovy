@@ -1,15 +1,8 @@
 import LoginTester1Spec
-import mixins.CanvasMixin
-import mixins.ConfirmationMixin
-import mixins.DashboardMixin
-import mixins.ListPageMixin
-import pages.CanvasListPage
-import pages.CanvasPage
-import pages.DashboardListPage
-import pages.DashboardShowPage
+import mixins.*
 import pages.*
 
-class InputModuleDashboardSpec extends LoginTester1Spec implements CanvasMixin, ConfirmationMixin, DashboardMixin, ListPageMixin {
+class InputModuleDashboardSpec extends LoginTester1Spec implements CanvasMixin, ConfirmationMixin, DashboardMixin, ListPageMixin, NotificationMixin {
 
 	static String canvasTemplate = "InputModuleDashboardSpec"
 	static String specCanvasName = canvasTemplate + System.currentTimeMillis()
@@ -38,7 +31,7 @@ class InputModuleDashboardSpec extends LoginTester1Spec implements CanvasMixin, 
 		saveDashboard()
 
 		waitFor {
-			!$(".ui-pnotify").displayed
+			!($(".ui-pnotify").displayed)
 		}
 
 		navbar.navSettingsLink.click()
@@ -51,15 +44,9 @@ class InputModuleDashboardSpec extends LoginTester1Spec implements CanvasMixin, 
 
 	def openDashboard() {
 		to DashboardListPage
-		$(".clickable-table a span", text: dashboardSpecName).click()
+		clickRow(dashboardSpecName)
 		waitFor {
-			at DashboardShowPage
-		}
-		if ($("body.editing").size() == 0) {
-			$("#main-menu-toggle").click()
-			waitFor {
-				saveButton.displayed
-			}
+			at DashboardEditorPage
 		}
 	}
 
@@ -92,7 +79,7 @@ class InputModuleDashboardSpec extends LoginTester1Spec implements CanvasMixin, 
 		def button
 		when: "Button added"
 		addDashboardItem(specCanvasName, "Button")
-		button = findDashboardItem("Button").find("button.button-module-button")
+		button = findDashboardItem("Button").find(".streamr-button .btn")
 		then: "The name of the button is buttonTest"
 		button.text() == "buttonTest"
 
@@ -111,11 +98,11 @@ class InputModuleDashboardSpec extends LoginTester1Spec implements CanvasMixin, 
 		when: "TextField added"
 		addDashboardItem(specCanvasName, "TextField")
 		textField = findDashboardItem("TextField").find("textarea")
-		sendBtn = findDashboardItem("TextField").find(".btn.send-btn")
+		sendBtn = findDashboardItem("TextField").find(".streamrTextField_buttonContainer .btn")
 		then: "The text in the textField is textFieldTest"
 		// Geb's own .text() didn't work for some reason
 		waitFor {
-			js.exec("return \$('streamr-text-field textarea').val()") == "textFieldTest"
+			js.exec("return document.querySelector('.streamrTextField_streamrTextField textarea').value") == "textFieldTest"
 		}
 
 		when: "Text changed and sendButton clicked"
@@ -130,7 +117,7 @@ class InputModuleDashboardSpec extends LoginTester1Spec implements CanvasMixin, 
 	void "the switcher works"() {
 		def switcher
 		addDashboardItem(specCanvasName, "Switcher")
-		switcher = findDashboardItem("Switcher").find("div.switcher div.switcher-inner")
+		switcher = findDashboardItem("Switcher").find(".streamrSwitcher_switcherInner")
 
 		when: "Switcher clicked"
 		switcher.click()
@@ -152,7 +139,7 @@ class InputModuleDashboardSpec extends LoginTester1Spec implements CanvasMixin, 
 
 		then: "Switcher remembers its state"
 		waitFor {
-			$(".switcher.checked").size() == 1
+			$(".streamrSwitcher_switcher.streamrSwitcher_on").size() == 1
 		}
 	}
 }

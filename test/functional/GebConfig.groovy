@@ -10,7 +10,7 @@ import org.openqa.selenium.remote.DesiredCapabilities
 import org.openqa.selenium.remote.RemoteWebDriver
 
 def env = System.getenv()
-def inJenkins = (env['BUILD_NUMBER'] != null)
+def inJenkins = env['BUILD_NUMBER'] != null
 
 String sutHost = env['SUT_HOST'] ? env['SUT_HOST'] : 'localhost'
 String sutPort = env['SUT_PORT'] ? env['SUT_PORT'] : '8081'
