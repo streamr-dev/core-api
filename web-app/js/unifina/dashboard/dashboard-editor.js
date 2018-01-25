@@ -519,7 +519,7 @@
                     _this.dashboard.saved = true
                     document.title = _this.dashboard.get('name')
                     Streamr.showSuccess('Dashboard ' + _this.dashboard.get('name') + ' saved successfully', 'Saved!')
-                    window.history.replaceState({}, undefined, _this.baseUrl + 'dashboard/show/' + _this.dashboard.get('id'))
+                    window.history.replaceState({}, undefined, _this.baseUrl + 'dashboard/editor/' + _this.dashboard.get('id'))
                 },
                 error: function(model, response) {
                     Streamr.showError(response.responseText, 'Error while saving')

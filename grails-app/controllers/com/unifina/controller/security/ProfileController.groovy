@@ -28,15 +28,13 @@ class ProfileController {
 		SecUser user = SecUser.get(springSecurityService.currentUser.id)
 		user.properties = params
 		user.name = params.name // for some reason not updated by above row
-		
-		if (!user.save()) {
-			flash.error = "Profile not updated!"
-			log.warn("Update failed due to validation errors: "+userService.checkErrors(user.errors.getAllErrors()))
-			return render(view: 'edit', model: [user: user])
-		}
-		else {
-			flash.message = "Profile updated."
-			redirect(action:"edit")
+
+		user = user.save(failOnError: true)
+		if (user.hasErrors()) {
+			log.warn("Update failed due to validation errors: " + userService.checkErrors(user.errors.getAllErrors()))
+			response.setStatus(400)
+		} else {
+			return render(user.toMap() as JSON)
 		}
 	}
 

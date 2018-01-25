@@ -7,8 +7,9 @@ import { Row, Col } from 'react-bootstrap'
 import ProfileSettings from './ProfileSettings'
 import APICredentials from '../APICredentials'
 import IntegrationKeyHandler from './IntegrationKeyHandler'
+import Notifier from '../Notifier'
 
-export default class ProfilePage extends Component {
+export default class ProfilePage extends Component<{}> {
     render() {
         return (
             <Row>
@@ -21,6 +22,7 @@ export default class ProfilePage extends Component {
                 <Col xs={12} sm={6}>
                     <IntegrationKeyHandler />
                 </Col>
+                <Notifier/>
             </Row>
         )
     }

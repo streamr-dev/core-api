@@ -315,6 +315,7 @@ trait CanvasMixin {
 	}
 
 	void startCanvas(boolean saveIfNecessary = false, button = runRealtimeButton) {
+		stopCanvasIfRunning()
 		button.click()
 		sleep(1000)
 		if ($(".save-on-start-confirmation-dialog").displayed) {
