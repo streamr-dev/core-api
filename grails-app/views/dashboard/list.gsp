@@ -32,7 +32,7 @@
 	<ui:flashMessage/>
 
 	<div class="btn-group toolbar">
-		<a id="createButton" class="btn btn-primary" href="${createLink(action:'show')}">
+		<a id="createButton" class="btn btn-primary" href="${createLink(controller:'dashboard', action:'editor')}">
 			<i class="fa fa-plus"></i> Create Dashboard
 		</a>        	
 	</div>
@@ -55,7 +55,7 @@
 				    </ui:thead>
 				    <ui:tbody>
 					    <g:each in="${dashboards}" status="i" var="dashboard">
-					    	<ui:tr title="Show or edit dashboard" link="${createLink(action: 'show', id:dashboard.id) }" data-id="${dashboard.id}">
+					    	<ui:tr title="Show or edit dashboard" link="${createLink(action: 'editor', id:dashboard.id) }" data-id="${dashboard.id}">
 					            <ui:td>${dashboard.name}</ui:td>					        
 					            <ui:td class="hidden-xs"><g:formatDate date="${dashboard.lastUpdated}" formatName="default.date.format" timeZone="${user.timezone}" /></ui:td>
 								<ui:td class="button-column">

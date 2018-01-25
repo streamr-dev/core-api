@@ -4,38 +4,41 @@ import React, {Component} from 'react'
 import {connect} from 'react-redux'
 import moment from 'moment-timezone'
 import Select from 'react-select'
+import createLink from '../../../helpers/createLink'
+import {Panel, Form, FormControl, FormGroup, ControlLabel, InputGroup, Button} from 'react-bootstrap'
 import 'react-select/dist/react-select.css'
 
-import {getCurrentUser, updateCurrentUserName, updateCurrentUserTimezone} from '../../../actions/user'
+import {getCurrentUser, updateCurrentUserName, updateCurrentUserTimezone, saveCurrentUser} from '../../../actions/user'
 
-import type {User} from '../../../types/user-types'
+import type {User, State as UserState} from '../../../flowtype/user-types'
 
-declare var Streamr: any
+type Props = {
+    user: User,
+    getCurrentUser: () => void,
+    updateCurrentUserName: (name: User.name) => void,
+    updateCurrentUserTimezone: (timezone: User.timezone) => void,
+    saveCurrentUser: Function
+}
 
-class ProfileSettings extends Component {
+export class ProfileSettings extends Component<Props> {
     
-    props: {
-        user: User,
-        getCurrentUser: Function,
-        updateCurrentUserName: Function,
-        updateCurrentUserTimezone: Function
-    }
-    onNameChange: Function
-    onTimezoneChange: Function
-    
-    constructor(props) {
-        super(props)
-        this.onNameChange = this.onNameChange.bind(this)
-        this.onTimezoneChange = this.onTimezoneChange.bind(this)
-    }
     componentDidMount() {
+        // TODO: move to (yet nonexistent) router
         this.props.getCurrentUser()
     }
-    onNameChange({target}) {
+    onNameChange = ({target}: {target: {
+        value: User.name
+    }}) => {
         this.props.updateCurrentUserName(target.value)
     }
-    onTimezoneChange(value) {
-        this.props.updateCurrentUserTimezone(value)
+    onTimezoneChange = ({target}: {target: {
+        value: User.timezone
+    }}) => {
+        this.props.updateCurrentUserTimezone(target.value)
+    }
+    onSubmit = (e: Event) => {
+        e.preventDefault()
+        this.props.saveCurrentUser(this.props.user)
     }
     render() {
         const options = moment.tz.names().map(tz => ({
@@ -43,64 +46,87 @@ class ProfileSettings extends Component {
             label: tz
         }))
         return (
-            <div className="panel ">
-                <form method="POST" action="update">
-                    <div className="panel-heading">
-                        <span className="panel-title">Profile Settings</span>
-                    </div>
-                    <div className="panel-body">
-                        <div className="form-group ">
-                            <label className="control-label">Email</label>
-                            <div>{this.props.user.username}</div>
+            <Panel header="Profile Settings">
+                <Form onSubmit={this.onSubmit}>
+                    <FormGroup>
+                        <ControlLabel>
+                            Email
+                        </ControlLabel>
+                        <div>{this.props.user.username}</div>
+                    </FormGroup>
+        
+                    <FormGroup>
+                        <ControlLabel>
+                            Password
+                        </ControlLabel>
+                        <div>
+                            <a href={createLink('profile/changePwd')}>
+                                Change Password
+                            </a>
                         </div>
+                    </FormGroup>
+        
+                    <FormGroup>
+                        <ControlLabel>
+                            Full Name
+                        </ControlLabel>
+                        <FormControl
+                            name="name"
+                            value={this.props.user.name || ''}
+                            onChange={this.onNameChange}
+                            required
+                        />
+                    </FormGroup>
             
-                        <div className="form-group">
-                            <label className="control-label">Password</label>
-                            <div>
-                                <a href={Streamr.createLink('profile', 'changePwd')}>Change Password</a>
-                            </div>
-                        </div>
-            
-                        <div className="form-group ">
-                            <label className="control-label">Full Name</label>
-                            <input name="name" type="text" className="form-control" value={this.props.user.name || ''} onChange={this.onNameChange} required />
-                        </div>
-                
-                        <div className="form-group ">
-                            <label htmlFor="timezone" className="control-label">Timezone</label>
-                            <Select
-                                placeholder="Select timezone"
-                                options={options}
-                                value={this.props.user.timezone}
-                                name="timezone"
-                                onChange={this.onTimezoneChange}
-                                required={true}
-                                clearable={false}
-                            />
-                        </div>
-                        <div className="form-group">
-                            <input type="submit" name="submit" className="save btn btn-lg btn-primary" value="Save" id="submit" />
-                        </div>
-                    </div>
-                </form>
-            </div>
+                    <FormGroup>
+                        <ControlLabel>
+                            Timezone
+                        </ControlLabel>
+                        <Select
+                            placeholder="Select timezone"
+                            options={options}
+                            value={this.props.user.timezone}
+                            name="timezone"
+                            onChange={this.onTimezoneChange}
+                            required={true}
+                            clearable={false}
+                        />
+                    </FormGroup>
+                    
+                    <FormGroup>
+                        <InputGroup>
+                            <Button
+                                type="submit"
+                                name="submit"
+                                bsStyle="primary"
+                                bsSize="lg"
+                            >
+                                Save
+                            </Button>
+                        </InputGroup>
+                    </FormGroup>
+                </Form>
+            </Panel>
         )
     }
 }
 
-const mapStateToProps = ({user}) => ({
+export const mapStateToProps = ({user}: UserState) => ({
     user: user.currentUser || {}
 })
 
-const mapDispatchToProps = (dispatch) => ({
+export const mapDispatchToProps = (dispatch: Function) => ({
     getCurrentUser() {
         dispatch(getCurrentUser())
     },
-    updateCurrentUserName(name) {
+    updateCurrentUserName(name: User.name) {
         dispatch(updateCurrentUserName(name))
     },
-    updateCurrentUserTimezone(tz) {
+    updateCurrentUserTimezone(tz: User.timezone) {
         dispatch(updateCurrentUserTimezone(tz))
+    },
+    saveCurrentUser(user: User) {
+        dispatch(saveCurrentUser(user))
     }
 })
 

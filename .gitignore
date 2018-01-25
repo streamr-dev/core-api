@@ -6,7 +6,7 @@ target-eclipse
 target
 node_modules
 lib/grails-rt.jar
-.idea/
+.idea/*
 unifina-core*.iml
 engine-and-editor*.iml
 .slcache/
@@ -15,4 +15,5 @@ plugin.xml
 hs_err_pid*
 grailsMarkdown-inplacePlugin.iml
 web-app/js/unifina/webpack-bundles/*
+npm-debug.log*
 tomcat.8081

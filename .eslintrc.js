@@ -28,7 +28,8 @@ module.exports = exports = {
         es6: true,
         node: true,
         browser: true,
-        mocha: true
+        mocha: true,
+        jest: true
     },
     
     plugins: [
@@ -82,6 +83,7 @@ module.exports = exports = {
             'allowMultiplePropertiesPerLine': true
         }],
         'no-unexpected-multiline': ERROR,
-        'wrap-iife': [ERROR, 'inside']
+        'wrap-iife': [ERROR, 'inside'],
+        'react/jsx-indent': [ERROR, 4]
     }
 }
