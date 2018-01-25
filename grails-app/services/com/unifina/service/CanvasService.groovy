@@ -212,13 +212,7 @@ class CanvasService {
 	 */
 	private Map reconstructFrom(Map signalPathMap, SecUser user) {
 		Globals globals = GlobalsFactory.createInstance(signalPathMap.settings ?: [:], user)
-		try {
-			return signalPathService.reconstruct(signalPathMap, globals)
-		} catch (Exception e) {
-			throw e
-		} finally {
-			globals.destroy()
-		}
+		return signalPathService.reconstruct(signalPathMap, globals)
 	}
 
 }

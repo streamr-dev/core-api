@@ -164,7 +164,6 @@ public class SignalPathRunner extends Thread {
 	 */
 	public void destroy() {
 		signalPaths.each { SignalPath it -> it.destroy() }
-		globals.destroy()
 
 		if (adhoc) {
 			for (SignalPath sp : getSignalPaths()) {

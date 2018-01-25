@@ -16,7 +16,7 @@ import spock.lang.Specification
 
 import java.security.AccessControlException
 
-@Mock([Stream, Feed])
+@Mock([Stream, Feed, SecUser])
 class ModuleWithUISpec extends Specification {
 
 	Stream uiChannel
@@ -48,6 +48,9 @@ class ModuleWithUISpec extends Specification {
 		feed.id = Feed.KAFKA_ID
 		feed.streamListenerClass = NoOpStreamListener.getName()
 		feed.save(validate:false)
+
+		permittedUser.save(failOnError: true, validate: false)
+		nonPermitterUser.save(failOnError: true, validate: false)
 	}
 
 	def cleanup() {

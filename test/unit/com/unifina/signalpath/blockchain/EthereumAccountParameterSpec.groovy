@@ -84,8 +84,7 @@ class EthereumAccountParameterSpec extends BeanMockingSpecification {
 
 		when:
 		parameter.setConfiguration([value: "account-1"])
-		parameter.getOwner().setGlobals(new Globals())
-		parameter.getOwner().getGlobals().setUser(user)
+		parameter.getOwner().setGlobals(new Globals([:], user))
 
 		then:
 		parameter.getPrivateKey() == "0000"
@@ -103,8 +102,7 @@ class EthereumAccountParameterSpec extends BeanMockingSpecification {
 
 		when:
 		parameter.setConfiguration([value: "account-1"])
-		parameter.getOwner().setGlobals(new Globals())
-		parameter.getOwner().getGlobals().setUser(new SecUser())
+		parameter.getOwner().setGlobals(new Globals([:], new SecUser()))
 
 		then:
 		parameter.getAddress() == "0xffff"
@@ -119,8 +117,7 @@ class EthereumAccountParameterSpec extends BeanMockingSpecification {
 		key.json = '{ "privateKey": "0x0000", "address": "0xffff"}'
 		key.save(failOnError: true, validate: true)
 
-		Globals globals = new Globals()
-		globals.setUser(new SecUser())
+		Globals globals = new Globals([:], new SecUser())
 		globals.setDataSource(new RealtimeDataSource(globals))
 
 		when:
@@ -144,8 +141,7 @@ class EthereumAccountParameterSpec extends BeanMockingSpecification {
 
 		when:
 		parameter.setConfiguration([value: "account-1"])
-		parameter.getOwner().setGlobals(new Globals())
-		parameter.getOwner().getGlobals().setUser(new SecUser())
+		parameter.getOwner().setGlobals(new Globals([:], new SecUser()))
 
 		parameter.getPrivateKey() == "0xffff"
 
@@ -179,7 +175,7 @@ class EthereumAccountParameterSpec extends BeanMockingSpecification {
 
 		when:
 		parameter.getOwner().globals = Stub(Globals) {
-			getUser() >> me
+			getUserId() >> me.id
 		}
 
 		then:
@@ -204,7 +200,7 @@ class EthereumAccountParameterSpec extends BeanMockingSpecification {
 
 		when: "logged in as owner of selected key"
 		parameter.getOwner().globals = Stub(Globals) {
-			getUser() >> other
+			getUserId() >> other.id
 		}
 
 		then:
@@ -216,7 +212,7 @@ class EthereumAccountParameterSpec extends BeanMockingSpecification {
 
 		when: "logged in as non-owner of selected key"
 		parameter.getOwner().globals = Stub(Globals) {
-			getUser() >> me
+			getUserId() >> me.id
 		}
 
 		then:

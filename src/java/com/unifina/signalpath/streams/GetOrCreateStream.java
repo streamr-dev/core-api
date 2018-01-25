@@ -2,6 +2,7 @@ package com.unifina.signalpath.streams;
 
 import com.unifina.domain.data.Stream;
 import com.unifina.domain.security.Permission;
+import com.unifina.domain.security.SecUser;
 import com.unifina.service.PermissionService;
 import com.unifina.service.StreamService;
 import com.unifina.signalpath.BooleanOutput;
@@ -28,7 +29,12 @@ public class GetOrCreateStream extends CreateStream {
 		String streamId = cachedStreamIdsByName.get(getStreamName());
 
 		if (streamId == null) {
-			List<Stream> streams = permissionService.get(Stream.class, getGlobals().getUser(), Permission.Operation.READ, true, new NameFilteringClosure(this, getStreamName()));
+			List<Stream> streams = permissionService.get(Stream.class,
+				SecUser.loadViaJava(getGlobals().getUserId()),
+				Permission.Operation.READ,
+				true,
+				new NameFilteringClosure(this, getStreamName()));
+
 			if (!streams.isEmpty()) {
 				Stream stream = streams.get(0);
 				cachedStreamIdsByName.put(getStreamName(), stream.getId());

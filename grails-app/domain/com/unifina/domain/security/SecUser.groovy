@@ -1,7 +1,10 @@
 package com.unifina.domain.security
 
+import groovy.transform.CompileStatic
+
 class SecUser {
-	
+
+	Long id
 	String username
 	String password
 	boolean enabled
@@ -42,7 +45,7 @@ class SecUser {
 
 	@Override
 	boolean equals(Object obj) {
-		if (!obj instanceof SecUser) {
+		if (!(obj instanceof SecUser)) {
 			return false
 		}
 
@@ -56,5 +59,10 @@ class SecUser {
 	@Override
 	int hashCode() {
 		return this.id?.hashCode() ?: super.hashCode()
+	}
+
+	@CompileStatic
+	static SecUser loadViaJava(Long userId) {
+		SecUser.load(userId)
 	}
 }

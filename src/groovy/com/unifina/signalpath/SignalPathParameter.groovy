@@ -1,5 +1,6 @@
 package com.unifina.signalpath
 
+import com.unifina.domain.security.SecUser
 import com.unifina.domain.signalpath.Canvas
 import com.unifina.service.PermissionService
 import grails.util.Holders
@@ -25,7 +26,7 @@ class SignalPathParameter extends StringParameter {
 		}
 
 		def permissionService = Holders.applicationContext.getBean(PermissionService)
-		def user = owner.globals.getUser()
+		def user = SecUser.load(owner.globals.userId)
 		Collection signalPaths = permissionService.get(Canvas, user) {
 			projections {
 				property 'id', 'id'

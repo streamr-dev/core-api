@@ -173,9 +173,6 @@ class ModuleController {
 			Map r = [error:true, message:e.message, moduleErrors:moduleExceptions]
 			render r as JSON
 		}
-		finally {
-			globals.destroy()
-		}
 	}
 
 	def jsonSetModuleHelp() {

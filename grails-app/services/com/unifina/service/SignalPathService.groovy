@@ -139,7 +139,7 @@ class SignalPathService {
 
 	@Transactional
 	public void deleteReferences(SignalPath signalPath, boolean delayed = false) {
-		canvasService.deleteCanvas(signalPath.canvas, signalPath.getGlobals().getUser(), delayed)
+		canvasService.deleteCanvas(signalPath.canvas, SecUser.load(signalPath.globals.userId), delayed)
 	}
 	
     def runSignalPaths(List<SignalPath> signalPaths) {
