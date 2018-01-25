@@ -2,7 +2,7 @@
 
 import React, {Component} from 'react'
 import {connect} from 'react-redux'
-import {showError} from '../../../../actions/notification'
+import {error} from 'react-notification-system-redux'
 import path from 'path'
 import createLink from '../../../../helpers/createLink'
 
@@ -20,7 +20,7 @@ type Props = {
     layout?: DBItem.layout,
     dragCancelClassName?: string,
     currentLayout: ?{},
-    showError: Function,
+    error: Function,
     isLocked: boolean,
     config: {
         components: {}
@@ -71,7 +71,7 @@ export class DashboardItem extends Component<Props, State> {
         stack: string
     }) => {
         const inProd = process.env.NODE_ENV === 'production'
-        this.props.showError(inProd ? 'Something went wrong!' : err)
+        this.props.error(inProd ? 'Something went wrong!' : err)
         if (!inProd) {
             console.error(err.stack)
         }
@@ -130,8 +130,8 @@ export const mapStateToProps = ({dashboard: {dashboardsById, openDashboard}}: {d
 })
 
 export const mapDispatchToProps = (dispatch: Function) => ({
-    showError(message: string) {
-        dispatch(showError({
+    error(message: string) {
+        dispatch(error({
             title: 'Error!',
             message
         }))

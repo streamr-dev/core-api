@@ -4,7 +4,6 @@ import configureMockStore from 'redux-mock-store'
 import moxios from 'moxios'
 
 import * as originalActions from '../../actions/dashboard'
-import * as notificationActions from '../../actions/notification'
 
 const middlewares = [ thunk ]
 const mockStore = configureMockStore(middlewares)
@@ -141,7 +140,7 @@ describe('Dashboard actions', () => {
     })
     
     describe('updateAndSaveDashboard', () => {
-        it('creates UPDATE_AND_SAVE_DASHBOARD_SUCCESS and CREATE_NOTIFICATION when fetching a dashboard has succeeded', async () => {
+        it('creates UPDATE_AND_SAVE_DASHBOARD_SUCCESS and creates notification when fetching a dashboard has succeeded', async () => {
             const id = 'test'
             const db = {
                 id,
@@ -159,14 +158,7 @@ describe('Dashboard actions', () => {
             const expectedActions = [{
                 type: actions.UPDATE_AND_SAVE_DASHBOARD_REQUEST
             }, {
-                type: notificationActions.CREATE_NOTIFICATION,
-                notification: {
-                    type: 'success'
-                }
-            }, {
-                type: actions.CHANGE_DASHBOARD_ID,
-                oldId: 'test',
-                newId: 'test'
+                level: 'success'
             }, {
                 type: actions.UPDATE_AND_SAVE_DASHBOARD_SUCCESS,
                 dashboard: db
@@ -174,11 +166,46 @@ describe('Dashboard actions', () => {
             
             await store.dispatch(actions.updateAndSaveDashboard(db))
             assert.deepStrictEqual(store.getActions()[0], expectedActions[0])
-            assert.equal(store.getActions()[1].type, expectedActions[1].type)
-            assert.equal(store.getActions()[1].notification.type, expectedActions[1].notification.type)
+            assert.equal(store.getActions()[1].level, expectedActions[1].level)
             assert.deepStrictEqual(store.getActions()[2], expectedActions[2])
         })
-        it('creates UPDATE_AND_SAVE_DASHBOARD_FAILURE and CREATE_NOTIFICATION when fetching a dashboard has succeeded', async (done) => {
+        it('creates also CHANGE_ID if the id has changed', async () => {
+            const id = 'test'
+            const db = {
+                id,
+                name: 'test',
+                layout: {
+                    test: true
+                },
+                ownPermissions: []
+            }
+            moxios.stubRequest(`api/v1/dashboards/${id}`, {
+                status: 200,
+                response: {
+                    ...db,
+                    id: 'new_test'
+                }
+            })
+            
+            const expectedActions = [{
+                type: actions.UPDATE_AND_SAVE_DASHBOARD_REQUEST
+            }, {
+                level: 'success'
+            }, {
+                type: actions.CHANGE_DASHBOARD_ID,
+                oldId: 'test',
+                newId: 'new_test'
+            }, {
+                type: actions.UPDATE_AND_SAVE_DASHBOARD_SUCCESS,
+                dashboard: db
+            }]
+            
+            await store.dispatch(actions.updateAndSaveDashboard(db))
+            assert.deepStrictEqual(store.getActions()[0], expectedActions[0])
+            assert.equal(store.getActions()[1].level, expectedActions[1].level)
+            assert.deepStrictEqual(store.getActions()[2], expectedActions[2])
+        })
+        it('creates UPDATE_AND_SAVE_DASHBOARD_FAILURE and creates notification when fetching a dashboard has failed', async (done) => {
             const id = 'test'
             const db = {
                 id,
@@ -195,10 +222,7 @@ describe('Dashboard actions', () => {
             const expectedActions = [{
                 type: actions.UPDATE_AND_SAVE_DASHBOARD_REQUEST
             }, {
-                type: notificationActions.CREATE_NOTIFICATION,
-                notification: {
-                    type: 'error'
-                }
+                level: 'error'
             }, {
                 type: actions.UPDATE_AND_SAVE_DASHBOARD_FAILURE,
                 error: new Error('test')
@@ -208,8 +232,7 @@ describe('Dashboard actions', () => {
                 await store.dispatch(actions.updateAndSaveDashboard(db))
             } catch (e) {
                 assert.deepStrictEqual(store.getActions()[0], expectedActions[0])
-                assert.equal(store.getActions()[1].type, expectedActions[1].type)
-                assert.equal(store.getActions()[1].notification.type, expectedActions[1].notification.type)
+                assert.equal(store.getActions()[1].level, expectedActions[1].level)
                 assert.deepStrictEqual(store.getActions()[2], expectedActions[2])
                 done()
             }
