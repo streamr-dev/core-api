@@ -53,8 +53,11 @@ class CanvasApiController {
 		}
 		else {
 			Map result = canvasService.reconstruct(canvas, request.apiUser)
+			// Need to discard this change below to prevent auto-update
 			canvas.json = result as JSON
 			render canvas.toMap() as JSON
+			// Prevent auto-update of the canvas
+			canvas.discard()
 		}
 	}
 
@@ -82,7 +85,7 @@ class CanvasApiController {
 	@StreamrApi
 	def start(String id) {
 		Canvas canvas = canvasService.authorizedGetById(id, request.apiUser, Operation.WRITE)
-		canvasService.start(canvas, request.JSON?.clearState ?: false)
+		canvasService.start(canvas, request.JSON?.clearState ?: false, request.apiUser)
 		render canvas.toMap() as JSON
 	}
 
@@ -105,12 +108,11 @@ class CanvasApiController {
 	 * Gets the json of a single module on a canvas
 	 */
 	@StreamrApi(authenticationLevel = AuthLevel.NONE)
-	def module(String canvasId, Integer moduleId, Long dashboard, Boolean runtime) {
+	def module(String canvasId, Integer moduleId, String dashboardId, Boolean runtime) {
 		if (runtime) {
 			render signalPathService.runtimeRequest(signalPathService.buildRuntimeRequest([type: 'json'], "canvases/$canvasId/modules/$moduleId", request.apiUser), false).json as JSON
-		}
-		else {
-			Map moduleMap = canvasService.authorizedGetModuleOnCanvas(canvasId, moduleId, dashboard, request.apiUser, Operation.READ)
+		} else {
+			Map moduleMap = canvasService.authorizedGetModuleOnCanvas(canvasId, moduleId, dashboardId, request.apiUser, Operation.READ)
 			render moduleMap as JSON
 		}
 	}

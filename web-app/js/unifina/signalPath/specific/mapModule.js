@@ -29,9 +29,7 @@ SignalPath.MapModule = function (data, canvas, prot) {
         }
         
         container = $("<div/>", {
-            class: 'map-container',
-            width: width,
-            height: height
+            class: 'map-container'
         })
         prot.body.append(container)
         
@@ -84,6 +82,16 @@ SignalPath.MapModule = function (data, canvas, prot) {
     pub.redraw       = function () {
         super_redraw()
         updateSize()
+    }
+
+    pub.onUpdateOption = function(key, value) {
+        if (key === 'centerLat') {
+            pub.getMap().setCenter(value, pub.getMap().getCenterAndZoom().centerLng)
+        } else if (key === 'centerLng') {
+            pub.getMap().setCenter(pub.getMap().getCenterAndZoom().centerLat, value)
+        } else if (key === 'zoom') {
+            pub.getMap().map.setZoom(value)
+        }
     }
     
     var superToJSON = pub.toJSON;

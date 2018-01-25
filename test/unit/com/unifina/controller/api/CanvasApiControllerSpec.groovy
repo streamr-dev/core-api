@@ -25,8 +25,7 @@ import groovy.json.JsonBuilder
 import spock.lang.Specification
 
 @TestFor(CanvasApiController)
-@Mixin(FiltersUnitTestMixin)
-@Mock([SecUser, Permission, Canvas, Key, UnifinaCoreAPIFilters, UserService, SpringSecurityService, ApiService])
+@Mock([SecUser, Permission, Canvas, Key, UnifinaCoreAPIFilters])
 class CanvasApiControllerSpec extends Specification {
 
 	CanvasService canvasService
@@ -35,11 +34,18 @@ class CanvasApiControllerSpec extends Specification {
 	Canvas canvas2
 	Canvas canvas3
 
+	// This gets the real services injected into the filters
+	// From https://github.com/grails/grails-core/issues/9191
+	static doWithSpring = {
+		apiService(ApiService)
+		springSecurityService(SpringSecurityService)
+		userService(UserService)
+	}
+
 	void setup() {
 		controller.canvasService = canvasService = Mock(CanvasService)
 		controller.signalPathService = Mock(SignalPathService)
 		controller.permissionService = Mock(PermissionService)
-		controller.apiService = mainContext.getBean(ApiService)
 
 		me = new SecUser(id: 1).save(validate: false)
 		SecUser other = new SecUser(id: 2).save(validate: false)
@@ -315,7 +321,7 @@ class CanvasApiControllerSpec extends Specification {
 		response.status == 200
 		response.json?.size() > 0
 		1 * canvasService.authorizedGetById("1", me, Permission.Operation.WRITE) >> canvas1
-		1 * canvasService.start(canvas1, false)
+		1 * canvasService.start(canvas1, false, me)
 	}
 
 	void "start() must authorize and be able to start a Canvas with clearing enabled"() {
@@ -333,7 +339,7 @@ class CanvasApiControllerSpec extends Specification {
 		response.status == 200
 		response.json?.size() > 0
 		1 * canvasService.authorizedGetById("1", me, Permission.Operation.WRITE) >> canvas1
-		1 * canvasService.start(canvas1, true)
+		1 * canvasService.start(canvas1, true, me)
 	}
 
 	void "start() must not start a canvas if authorization fails"() {
@@ -435,7 +441,7 @@ class CanvasApiControllerSpec extends Specification {
 		request.addHeader("Authorization", "Token myApiKey")
 		params.canvasId = "1"
 		params.moduleId = 1
-		params.dashboard = 2
+		params.dashboardId = "2"
 		request.method = "GET"
 		request.requestURI = "/api/v1/canvases/$params.id/modules/"
 		withFilters(action: "module") {
@@ -445,7 +451,7 @@ class CanvasApiControllerSpec extends Specification {
 		then:
 		response.status == 200
 		response.json == result
-		1 * canvasService.authorizedGetModuleOnCanvas("1", 1, 2, me, Permission.Operation.READ) >> result
+		1 * canvasService.authorizedGetModuleOnCanvas("1", 1, "2", me, Permission.Operation.READ) >> result
 	}
 
 	void "module() supports runtime parameter"() {
@@ -455,7 +461,7 @@ class CanvasApiControllerSpec extends Specification {
 		request.addHeader("Authorization", "Token myApiKey")
 		params.canvasId = "1"
 		params.moduleId = 1
-		params.dashboard = 2
+		params.dashboardId = "2"
 		params.runtime = true
 		request.method = "GET"
 		request.requestURI = "/api/v1/canvases/$params.id/modules/$params.moduleId"

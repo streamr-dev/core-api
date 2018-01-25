@@ -14,6 +14,8 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.*;
 
+import static com.unifina.feed.MasterClock.isTimeToTick;
+
 
 /**
  * A utility class for unit testing subclasses that inherit from <code>AbstractSignalPathModule</code>.
@@ -224,7 +226,7 @@ public class ModuleTestHelper {
 	private boolean clearStateCalled = false;
 
 	public enum SerializationMode {
-		NONE, SERIALIZE, SERIALIZE_DESERIALIZE
+		NONE, CLEAR, SERIALIZE, SERIALIZE_DESERIALIZE
 	}
 	private SerializationMode serializationMode = SerializationMode.NONE;
 	private SerializationService dummySerializationService = new SerializationService();
@@ -244,7 +246,9 @@ public class ModuleTestHelper {
 				if (!runTestCase()) {        // Clean slate test
 					pass = false;
 				}
+			}
 
+			if (selectedSerializationModes.contains(SerializationMode.CLEAR)) {
 				clearModuleAndCollectorsAndChannels();
 				clearStateCalled = true;
 				if (!runTestCase()) {        // Test that clearState() works
@@ -286,8 +290,11 @@ public class ModuleTestHelper {
 
 			// Time is set at start of event
 			if (isTimedMode() && ticks.containsKey(i)) {
-				((ITimeListener)module).setTime(ticks.get(i));
-				module.getGlobals().time = ticks.get(i);
+				Date time = ticks.get(i);
+				if (isTimeToTick(time.getTime() / 1000, ((ITimeListener) module).tickRateInSec())) {
+					((ITimeListener)module).setTime(time);
+				}
+				module.getGlobals().time = time;
 			}
 
 			// Set input values
@@ -357,7 +364,7 @@ public class ModuleTestHelper {
 	private void validateOutput(int outputIndex, int i) {
 		for (Map.Entry<String, List<Object>> entry : outputValuesByName.entrySet()) {
 
-			Object actual = getOutputByEffectiveName(entry.getKey()).getTargets()[0].getValue();
+			Object actual = ((List<Input>) getOutputByEffectiveName(entry.getKey()).getTargets()).get(0).getValue();
 			Object expected = entry.getValue().get(outputIndex);
 
 			if (expected instanceof Double) {
@@ -538,7 +545,7 @@ public class ModuleTestHelper {
 	private static void falsifyNoRepeats(AbstractSignalPathModule module) {
 		for (Output output : module.getOutputs()) {
 			if (output instanceof TimeSeriesOutput) {
-				((TimeSeriesOutput) output).noRepeat = false;
+				((TimeSeriesOutput) output).setNoRepeat(false);
 			}
 		}
 	}
@@ -560,6 +567,7 @@ public class ModuleTestHelper {
 			}
 			Output output = new Output(null, "outputFor" + inputName, input.getTypeName());
 			output.setDisplayName("outputFor" + inputName);
+			output.setOwner(new PlaceholderModule());
 			output.connect(input);
 		}
 	}
@@ -612,4 +620,13 @@ public class ModuleTestHelper {
 		@Override
 		public void clearState() { }
 	}
+
+	public static class PlaceholderModule extends AbstractSignalPathModule {
+		@Override
+		public void sendOutput() { }
+
+		@Override
+		public void clearState() { }
+	}
+
 }

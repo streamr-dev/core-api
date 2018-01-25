@@ -2,8 +2,11 @@ package com.unifina.signalpath.remote
 
 import com.unifina.datasource.DataSource
 import com.unifina.datasource.DataSourceEventQueue
+import com.unifina.domain.signalpath.Canvas
+import com.unifina.signalpath.SignalPath
 import com.unifina.utils.Globals
 import com.unifina.utils.testutils.ModuleTestHelper
+import grails.test.mixin.Mock
 import groovy.json.JsonBuilder
 import org.apache.http.Header
 import org.apache.http.HttpResponse
@@ -16,6 +19,7 @@ import org.apache.http.entity.StringEntity
 import org.apache.http.nio.client.HttpAsyncClient
 import spock.lang.Specification
 
+@Mock(Canvas)
 class HttpSpec extends Specification {
 	Http module
 	boolean isAsync = true
@@ -60,12 +64,16 @@ class HttpSpec extends Specification {
 				[name: "verb", value: "GET"],
 			]
 		])
+		def signalPath = new SignalPath(true)
+		signalPath.setCanvas(new Canvas())
+		module.setParentSignalPath(signalPath)
 	}
 
-	private boolean test() {
+	private boolean test(boolean localAddressesAreAllowed = true) {
 		// TestableHttp is Http module wrapped so that we can inject our own mock HttpClient
 		// Separate class is needed in same path as Http.java; anonymous class won't work with de-serializer
 		TestableHttp.httpClient = mockClient
+		TestableHttp.localAddressesAreAllowed = localAddressesAreAllowed
 		return new ModuleTestHelper.Builder(module, inputs, outputs)
 			.overrideGlobals { mockGlobals }
 			.onModuleInstanceChange { newInstance -> module = newInstance }
@@ -248,9 +256,34 @@ class HttpSpec extends Specification {
 				module.sendOutput(transaction)
 			}
 		}
-		outputs.data = [null, null, null];
-		outputs.statusCode = [204d, 204d, 204d];
+		outputs.data = [null, null, null]
+		outputs.statusCode = [204d, 204d, 204d]
 		expect:
 		test()
+	}
+
+	void "outputs errors and not data nor status nor headers if local addresses are not allowed"() {
+		outputs.errors = [
+			["Bad target address: Local HTTP calls not allowed"],
+			["Bad target address: Local HTTP calls not allowed"],
+			["Bad target address: Local HTTP calls not allowed"]
+		]
+		outputs.statusCode = [
+			null,
+			null,
+			null
+		]
+		outputs.data = [
+			null,
+			null,
+			null
+		]
+		outputs.headers = [
+			null,
+			null,
+			null
+		]
+		expect:
+		test(false)
 	}
 }

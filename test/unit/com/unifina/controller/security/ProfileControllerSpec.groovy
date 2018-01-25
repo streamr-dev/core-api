@@ -33,7 +33,7 @@ class ProfileControllerSpec extends Specification {
 		controller.springSecurityService = springSecurityService
 		controller.streamService = Mock(StreamService)
 		user = new SecUser(id:1, 
-			username:"test@test.test", 
+			username:"test@test.com",
 			name: "Test User",
 			password:springSecurityService.encodePassword("foobar123!"), 
 			timezone: "Europe/Helsinki")
@@ -109,14 +109,17 @@ class ProfileControllerSpec extends Specification {
 	}
 
 	void "changing user settings must change them"() {
+		controller.userService = new UserService()
+		controller.userService.grailsApplication = grailsApplication
 		when: "new settings are submitted"
 			params.name = "Changed Name"
 			params.timezone = "Europe/Helsinki"
 			controller.update()
 		then: "values must be updated and show update message"
 			SecUser.get(1).name == "Changed Name"
+			response.json.name == "Changed Name"
 			SecUser.get(1).timezone == "Europe/Helsinki"
-			flash.message != null
+			response.json.timezone == "Europe/Helsinki"
 	}
 
 	void "regenerating api key removes old user-linked keys"() {

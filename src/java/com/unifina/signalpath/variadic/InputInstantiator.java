@@ -2,6 +2,7 @@ package com.unifina.signalpath.variadic;
 
 import com.unifina.signalpath.AbstractSignalPathModule;
 import com.unifina.signalpath.Input;
+import com.unifina.signalpath.StringInput;
 import com.unifina.signalpath.TimeSeriesInput;
 
 import java.io.Serializable;
@@ -15,6 +16,13 @@ public interface InputInstantiator<T> extends EndpointInstantiator<Input<T>> {
 		@Override
 		public Input<Double> instantiate(AbstractSignalPathModule owner, String inputName) {
 			return new TimeSeriesInput(owner, inputName);
+		}
+	}
+
+	class Strings implements InputInstantiator<String>, Serializable {
+		@Override
+		public Input<String> instantiate(AbstractSignalPathModule owner, String inputName) {
+			return new StringInput(owner, inputName);
 		}
 	}
 

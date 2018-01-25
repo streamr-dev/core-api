@@ -13,11 +13,9 @@ import grails.plugin.springsecurity.SpringSecurityService
 import grails.test.mixin.Mock
 import grails.test.mixin.TestFor
 import grails.test.mixin.web.FiltersUnitTestMixin
-import org.codehaus.groovy.grails.web.json.JSONObject
 import spock.lang.Specification
 
 @TestFor(KeyApiController)
-@Mixin(FiltersUnitTestMixin)
 @Mock([Key, Permission, SecUser, Stream, UnifinaCoreAPIFilters, SpringSecurityService, UserService, PermissionService])
 class KeyApiControllerSpec extends Specification {
 
@@ -38,6 +36,30 @@ class KeyApiControllerSpec extends Specification {
 		userLinkedKey.save(failOnError: true, validate: true)
 
 		controller.permissionService = permissionService = grailsApplication.mainContext.getBean(PermissionService)
+	}
+
+	// CORE-708: User with read permission to stream should not see stream write key in api
+	void "index() does not authorize if only up to READ permission"() {
+		Stream s = new Stream(name: "stream")
+		s.id = "streamId"
+		s.save(failOnError: true, validate: false)
+		permissionService.systemGrant(loggedInUser, s, Permission.Operation.READ)
+
+		when:
+		request.addHeader("Authorization", "Token apiKey")
+		request.method = "GET"
+		request.requestURI = "/api/v1/streams/streamId/keys"
+
+		params.resourceClass = Stream
+		params.resourceId = "streamId"
+
+		withFilters([action: 'index']) {
+			controller.index()
+		}
+
+
+		then:
+		thrown(NotPermittedException)
 	}
 
 	void "save() creates user-linked for logged in user"() {
@@ -135,7 +157,7 @@ class KeyApiControllerSpec extends Specification {
 			id: "1",
 			name: "key name",
 			permission: "read",
-			user: JSONObject.NULL
+			user: null
 		]
 
 		and:
@@ -172,7 +194,7 @@ class KeyApiControllerSpec extends Specification {
 				id: "1",
 				name: "key name",
 				permission: "write",
-				user: JSONObject.NULL
+				user: null
 		]
 
 		and:

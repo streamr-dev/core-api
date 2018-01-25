@@ -46,7 +46,7 @@ public class ModuleOption extends LinkedHashMap<String, Object> {
 	 * @param value written into canvas JSON and sent back from UI
      */
 	public ModuleOption addPossibleValue(String description, String value) {
-		List<Map<String, String>> choices = (List<Map<String, String>>)this.get("possibleValues");
+		List<Map<String, String>> choices = (List<Map<String, String>>) this.get("possibleValues");
 		if (choices == null) {
 			choices = new LinkedList<>();
 			this.put("possibleValues", choices);
@@ -73,7 +73,11 @@ public class ModuleOption extends LinkedHashMap<String, Object> {
 	
 	public Integer getInt() {
 		Object o = getValue();
-		return (o instanceof Integer) ? (Integer) o : Integer.parseInt(getString());
+		if (o instanceof Number) {
+			return ((Number) o).intValue();
+		} else {
+			return (int) Double.parseDouble(getString()); // accept doubles, cast to int
+		}
 	}
 	
 	public Double getDouble() {
@@ -109,5 +113,28 @@ public class ModuleOption extends LinkedHashMap<String, Object> {
 
 	public static ModuleOption createColor(String key, StreamrColor value) {
 		return new ModuleOption(key, value.toString(), OPTION_COLOR);
+	}
+
+	public static boolean validate(Object option) {
+		if (option == null && !(option instanceof ModuleOption)) {
+			return false;
+		}
+		ModuleOption opt = (ModuleOption) option;
+		switch ((String) opt.get("type")) {
+			case OPTION_STRING: {
+				List<Map<String, String>> possibleValues = (List<Map<String, String>>) opt.get("possibleValues");
+				boolean found = false;
+				for (Map<String, String> value : possibleValues) {
+					if (value.get("value") == opt.get("value") || value.get("value").equals(opt.get("value"))) {
+						found = true;
+						break;
+					}
+				}
+				if (!found) {
+					return false;
+				}
+			}
+		}
+		return true;
 	}
 }

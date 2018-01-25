@@ -1,5 +1,7 @@
 package com.unifina.signalpath;
 
+import com.unifina.utils.MapTraversal;
+
 import java.util.Map;
 
 public class TimeSeriesChartInput extends TimeSeriesInput {
@@ -25,8 +27,7 @@ public class TimeSeriesChartInput extends TimeSeriesInput {
 	@Override
 	public void setConfiguration(Map<String,Object> config) {
 		super.setConfiguration(config);
-		if (config.containsKey("yAxis"))
-			yAxis = Integer.parseInt(config.get("yAxis").toString());
+		yAxis = MapTraversal.getInteger(config, "yAxis", 0);
 	}
 
 }

@@ -36,7 +36,7 @@ public class EventTable extends ModuleWithUI {
 		HashMap<String, Object> msg = new HashMap<String, Object>();
 		ArrayList<Object> nr = new ArrayList<>(2);
 		msg.put("nr", nr);
-		nr.add(getGlobals().dateTimeFormat.format(getGlobals().time));
+		nr.add(getGlobals().formatDateTime(getGlobals().time));
 
 		for (Input i : getInputs()) {
 			if (i.hasValue())
@@ -56,9 +56,8 @@ public class EventTable extends ModuleWithUI {
 		Input<Object> conn = new Input<Object>(this,name,"Object");
 
 		conn.setDrivingInput(true);
-		conn.canToggleDrivingInput = false;
-		conn.canBeFeedback = false;
-		conn.requiresConnection = false;
+		conn.setCanToggleDrivingInput(false);
+		conn.setRequiresConnection(false);
 		
 		// Add the input
 		if (getInput(name)==null)

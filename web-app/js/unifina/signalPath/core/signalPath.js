@@ -50,7 +50,8 @@ var SignalPath = (function () {
 			autoConnect: true,
 			autoDisconnect: true
 		},
-		zoom: 1
+		zoom: 1,
+        embedMode: false // We can render some things in different ways depending on the mode we're in
     };
     
     var connection
@@ -107,6 +108,28 @@ var SignalPath = (function () {
 			if (isRunning())
 				subscribe()
 		})
+
+        if (!opts.embedMode) {
+            pub.floatingSearchBar = new FloatingSearchBar(parentElement, {}, function(item, position) {
+                var moduleId = item.id
+                var options = {
+                    layout: {
+                        position: {
+                            top: position.y,
+                            left: position.x
+                        }
+                    }
+                }
+                if (item.resultType == "stream") { // is stream, specifies module
+                    moduleId = item.feed.module
+                    options.params = [{
+                        name: 'stream',
+                        value: item.id
+                    }]
+                }
+                addModule(moduleId, options)
+            })
+        }
 	};
 	pub.unload = function() {
 		jsPlumb.reset();
@@ -183,7 +206,7 @@ var SignalPath = (function () {
 	}
 	pub.loadJSON = loadJSON;
 	
-	pub.updateModule = function(module,callback) {
+	pub.updateModule = function(module, callback) {
 		
 		$.ajax({
 			type: 'POST',
@@ -210,7 +233,12 @@ var SignalPath = (function () {
 							getModuleById(data.moduleErrors[i].hash).handleError(data.moduleErrors[i].payload);
 						}
 					}
+
 					handleError(data.message)
+
+					if (callback) {
+						callback(data, data.message)
+					}
 				}
 			},
 			error: function(jqXHR,textStatus,errorThrown) {
@@ -250,7 +278,7 @@ var SignalPath = (function () {
 			if ($("#"+it.elementId).length==0) {
 				console.log("WARN: deleting unexisting jsPlumb endpoint "+it.elementId+" to workaround jsPlumb bug")
 				jsPlumb.deleteEndpoint(it, true)
-			} 
+			}
 		})
 	}
 	
@@ -390,15 +418,6 @@ var SignalPath = (function () {
 		return dirty
 	}
 	pub.isDirty = isDirty
-    
-    function saveName(name, callback, errorCallback) {
-        setName(name)
-        _update(toJSON(), function(e) {
-            callback(e)
-            Streamr.showSuccess('Canvas renamed successfully')
-        }, errorCallback)
-    }
-    pub.saveName = saveName
 
 	function saveAs(name, callback) {
 		setName(name)
@@ -802,5 +821,5 @@ var SignalPath = (function () {
 		}
 	}
 
-	return pub; 
+	return pub;
 }());

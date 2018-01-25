@@ -56,10 +56,6 @@ class StreamService {
 		return Stream.findByUiChannelPath(uiChannelPath)
 	}
 
-	Stream findByName(String name) {
-		return Stream.findByName(name)
-	}
-
 	Stream createStream(Map params, SecUser user, String id = IdGenerator.getShort()) {
 		Stream stream = new Stream(params)
 		stream.id = id
@@ -302,7 +298,6 @@ class StreamService {
 		return permissionService.canRead(user, stream)
 	}
 
-
 	@CompileStatic
 	private boolean isDirectPermissionToStream(Key key, Stream stream) {
 		return permissionService.canRead(key, stream)
@@ -314,7 +309,7 @@ class StreamService {
 	}
 
 	private boolean isPermissionToStreamViaDashboard(SecUser user, Stream stream) {
-		def dashboardService = grailsApplication.mainContext.getBean(DashboardService) // Circular service dependency
+		def dashboardService = grailsApplication.mainContext.getBean(DashboardService) // Don't initialize normally, preventing circular service dependency loop
 		if (stream.uiChannel && stream.uiChannelCanvas != null && stream.uiChannelPath != null) {
 			Canvas canvas = stream.uiChannelCanvas
 			int moduleId = parseModuleId(stream.uiChannelPath)

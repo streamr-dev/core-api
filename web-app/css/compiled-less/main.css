@@ -15176,10 +15176,20 @@ button.arrow:after {
   -ms-flex: 0 0 auto;
   -o-flex: 0 0 auto;
   flex: 0 0 auto;
+  display: -webkit-flex;
+  display: -moz-flex;
+  display: -ms-flexbox;
+  display: -o-flex;
+  display: flex;
 }
 .streamr-canvas .module .moduleheader .modulename {
   font-weight: bold;
   font-size: 12px;
+  -webkit-flex: 1 0 auto;
+  -moz-flex: 1 0 auto;
+  -ms-flex: 1 0 auto;
+  -o-flex: 1 0 auto;
+  flex: 1 0 auto;
 }
 .streamr-canvas .module .moduleheader .modulebutton {
   width: 16px;
@@ -15187,6 +15197,11 @@ button.arrow:after {
   display: inline;
   vertical-align: top;
   cursor: pointer;
+  -webkit-flex: 0 0 auto;
+  -moz-flex: 0 0 auto;
+  -ms-flex: 0 0 auto;
+  -o-flex: 0 0 auto;
+  flex: 0 0 auto;
 }
 .streamr-canvas .module .modulebody {
   padding: 5px;
@@ -15271,11 +15286,10 @@ button.arrow:after {
 }
 .streamr-canvas .module .modulebody div.ioname {
   display: inline-block;
-  max-width: 100px;
-  white-space: pre-wrap;
-}
-.streamr-canvas .module .modulebody .leaflet-container {
-  width: 100%;
+  max-width: 140px;
+  white-space: normal;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 .streamr-canvas .module .modulefooter {
   width: 100%;
@@ -15323,10 +15337,9 @@ button.arrow:after {
 .component .modulebody .button-module-button {
   margin-top: 5px;
 }
-#canvas .module.chart {
-  z-index: 4;
-}
 #canvas .module.chart .modulebody {
+  width: 600px;
+  height: 400px;
   min-width: 350px;
   min-height: 250px;
   -webkit-flex-direction: row;
@@ -15334,7 +15347,6 @@ button.arrow:after {
   -ms-flex-direction: row;
   -o-flex-direction: row;
   flex-direction: row;
-  width: calc(100% - 23px);
 }
 #canvas .module.chart .modulebody .ioTable {
   width: 23px;
@@ -15383,6 +15395,7 @@ button.arrow:after {
 #canvas .module.chart .modulebody .content .chartDrawArea {
   width: 100%;
   height: calc(100% - 37px);
+  max-height: calc(100% - 37px);
   -webkit-flex: 1 0 auto;
   -moz-flex: 1 0 auto;
   -ms-flex: 1 0 auto;
@@ -15425,9 +15438,6 @@ textarea.comment {
 .event-table-module .table-module-container {
   -webkit-user-select: text;
   user-select: text;
-}
-.event-table-module .event-table-module-content {
-  display: block;
   max-height: 400px;
   overflow: auto;
 }
@@ -15634,6 +15644,9 @@ dl dd {
 }
 #content-wrapper {
   height: 100%;
+}
+#content-wrapper:focus {
+  outline: none;
 }
 .tt-cursor {
   background-color: #ccc;
@@ -16277,25 +16290,23 @@ div.table.clickable-table.table-bordered .tbody > .tr > .td:not(:first-child) {
   border-top-left-radius: 0;
   border-bottom-left-radius: 0;
 }
-.credentials-control .auth-key-button-row {
-  margin-right: -15px;
-}
-.credentials-control .auth-key-table td,
-.credentials-control .auth-key-table th {
+.credentials-control .table td,
+.credentials-control .table th {
   padding-top: 10px;
 }
-.credentials-control .auth-key-table td:not(:last-child),
-.credentials-control .auth-key-table th:not(:last-child) {
+.credentials-control .table td:not(:last-child),
+.credentials-control .table th:not(:last-child) {
   padding-right: 10px;
 }
-.credentials-control .auth-key-table .show-key {
+.credentials-control .table .show-key {
   cursor: pointer;
 }
-.credentials-control .auth-key-table td.name-field {
+.credentials-control .table td.name-field {
   max-width: 90px;
   word-wrap: break-word;
 }
-.credentials-control .auth-key-table .auth-key-delete-button {
+.credentials-control .table .auth-key-delete-button {
+  margin-right: -8px;
   margin-left: 5px;
 }
 @media (min-width: 768px) {
@@ -16521,6 +16532,15 @@ div.table.clickable-table.table-bordered .tbody > .tr > .td:not(:first-child) {
   position: absolute;
   display: none;
 }
+.streamr-floating-search-bar {
+  position: absolute;
+  display: inline-block;
+  border-radius: 5px;
+  transform: translate(-50%, -120%);
+  -webkit-box-shadow: 0 0 10px 0 #000;
+  -moz-box-shadow: 0 0 10px 0 #000;
+  box-shadow: 0 0 10px 0 #000;
+}
 .streamr-sidebar {
   position: fixed;
 }
@@ -16591,140 +16611,8 @@ div.table.clickable-table.table-bordered .tbody > .tr > .td:not(:first-child) {
 .streamr-sidebar ul.nav li.active > ul.nav {
   display: block;
 }
-body.dashboard-show {
-  height: 100%;
-}
-body.dashboard-show #dashboard-view {
-  overflow: auto;
-  height: 100%;
-  list-style-type: none;
-  padding: 0px 0px 70px;
-}
-body.dashboard-show #dashboard-view .dashboarditem.editing .titlebar,
-body.dashboard-show #dashboard-view .dashboarditem.editing .titlebar-clickable,
-body.dashboard-show #dashboard-view .dashboarditem.editing .edit-btn {
-  display: none;
-}
-body.dashboard-show #dashboard-view .dashboarditem.editing .titlebar-edit {
-  height: 20px;
-}
-body.dashboard-show #dashboard-view .dashboarditem:not(.editing) .titlebar-edit,
-body.dashboard-show #dashboard-view .dashboarditem:not(.editing) .close-edit {
-  display: none;
-}
-body.dashboard-show #dashboard-view .dashboarditem .title {
-  border-top-right-radius: 4px;
-  border-top-left-radius: 4px;
-}
-body.dashboard-show #dashboard-view .dashboarditem .widget-content {
-  border-bottom-left-radius: 4px;
-  border-bottom-right-radius: 4px;
-}
-body.dashboard-show #dashboard-view .dashboarditem .panel-heading-controls {
-  cursor: auto;
-}
-body.dashboard-show #dashboard-view .dashboarditem .panel-heading-controls label.btn.active {
-  color: #333333;
-}
-body.dashboard-show #dashboard-view .dashboarditem .panel-heading-controls .size-btn-group {
-  display: none;
-}
-body.dashboard-show #dashboard-view .dashboarditem .panel-heading-controls .btn-group {
-  padding-top: 0px;
-}
-body.dashboard-show #dashboard-view .dashboarditem .panel-heading-controls .dropdown-menu li:not(.checked) .fa {
-  opacity: 0;
-}
-body.dashboard-show #dashboard-view .dashboarditem .stat-panel {
-  overflow: visible;
-}
-body.dashboard-show #dashboard-view .dashboarditem streamr-table {
-  overflow: auto;
-  width: 100%;
-  height: 100%;
-  max-height: 400px;
-  padding: 0px 15px 15px;
-}
-body.dashboard-show #dashboard-view .dashboarditem streamr-table .table-module-container {
-  width: 100%;
-}
-body.dashboard-show #dashboard-view .dashboarditem streamr-table .table-module-container table.event-table-module-content {
-  margin-top: -20px;
-  margin-bottom: -10px;
-}
-body.dashboard-show #dashboard-view .dashboarditem streamr-table .table-module-container table.event-table-module-content thead th,
-body.dashboard-show #dashboard-view .dashboarditem streamr-table .table-module-container table.event-table-module-content tbody td {
-  padding-left: 20px;
-}
-body.dashboard-show #dashboard-view .dashboarditem streamr-chart .streamr-widget-container {
-  overflow: auto;
-  width: 100%;
-  max-height: 400px;
-  padding: 0px 15px;
-  margin-bottom: -20px;
-}
-body.dashboard-show #dashboard-view .dashboarditem streamr-chart .streamr-widget-container .chartDrawArea {
-  width: 100%;
-}
-body.dashboard-show #dashboard-view .dashboarditem streamr-button .streamr-widget-container {
-  margin: 10px 30px;
-}
-body.dashboard-show #dashboard-view .dashboarditem streamr-text-field .streamr-widget-container {
-  margin-left: 20px;
-  margin-right: 20px;
-}
-body.dashboard-show #dashboard-view .dashboarditem streamr-text-field .streamr-widget-container .form-inline {
-  margin: 0px;
-}
-body.dashboard-show #dashboard-view .dashboarditem streamr-text-field .streamr-widget-container .form-inline textarea.form-control {
-  width: 100%;
-  resize: vertical;
-}
-body.dashboard-show #dashboard-view .dashboarditem streamr-text-field .streamr-widget-container .form-inline .send-btn {
-  margin-top: 10px;
-}
-body.dashboard-show:not(.editing) .panel-heading-controls,
-body.dashboard-show:not(.editing) .titlebar-clickable {
-  display: none;
-}
-body.dashboard-show.editing {
-  overflow: auto;
-}
-body.dashboard-show.editing .stat-row .stat-cell {
-  overflow: visible;
-}
-body.dashboard-show.editing .stat-row .titlebar {
-  display: none;
-}
-body.dashboard-show.selected-theme #main-menu .navigation .module.checked a {
-  color: #e95b15;
-}
-body.dashboard-show #main-menu .navigation {
-  padding-top: 25px;
-}
-body.dashboard-show #main-menu .navigation .module.checked .menu-icon.fa-square,
-body.dashboard-show #main-menu .navigation .module:not(.checked) .menu-icon.fa-check-square {
-  display: none;
-}
-body.dashboard-show #main-menu .mm-dropdown > ul > li > a.ui-title {
-  padding-left: 30px;
-}
-body.dashboard-show #sidebar-view button.delete-button {
-  margin-top: 5px;
-  margin-bottom: 200px;
-}
-body.dashboard-show #sidebar-view .canvas.stopped .canvas-title {
-  color: #666;
-}
-body.dashboard-show #sidebar-view .canvas-title {
-  margin-left: 20px;
-  cursor: pointer;
-}
-body.dashboard-show #sidebar-view .canvas-title span {
-  word-break: break-all;
-}
-body.dashboard-show .titlebar-clickable {
-  cursor: pointer;
+body.dashboard-show #content-wrapper {
+  padding: 38px 0 0;
 }
 .widget-notifications .notification {
   position: relative;

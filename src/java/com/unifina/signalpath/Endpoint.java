@@ -8,10 +8,10 @@ import java.lang.reflect.ParameterizedType;
 import java.util.*;
 
 public abstract class Endpoint<T> implements Serializable {
-	public AbstractSignalPathModule owner;
-	protected String name;
-	protected String displayName;
-	protected String typeName;
+	private AbstractSignalPathModule owner;
+	private String name;
+	private String displayName;
+	private String typeName;
 	private String jsClass;
 	private String id = "ep_" + IdGenerator.getShort();
 	private Map<String, Object> variadicConfig;
@@ -19,7 +19,7 @@ public abstract class Endpoint<T> implements Serializable {
 	private boolean configured = false;
 	private boolean export = false;
 	private boolean canConnect = true;
-	protected List<String> aliases = null;
+	private List<String> aliases = null;
 	
 	public Endpoint(AbstractSignalPathModule owner, String name, String typeName) {
 		this.owner = owner;
@@ -89,6 +89,10 @@ public abstract class Endpoint<T> implements Serializable {
 
 	public void setCanConnect(boolean canConnect) {
 		this.canConnect = canConnect;
+	}
+
+	public boolean isCanConnect() {
+		return canConnect;
 	}
 
 	public void regenerateId() {
@@ -173,15 +177,18 @@ public abstract class Endpoint<T> implements Serializable {
 	 * @param name
 	 */
 	public void addAlias(String name) {
-		if (aliases==null)
+		if (aliases == null) {
 			aliases = new ArrayList<>(1);
+		}
 		aliases.add(name);
 	}
 	
 	public List<String> getAliases() {
-		if (aliases==null)
+		if (aliases == null) {
 			return new ArrayList<>(0);
-		else return aliases;
+		} else {
+			return aliases;
+		}
 	}
 
 	public void setJsClass(String jsClass) {

@@ -1,8 +1,8 @@
-import core.mixins.LoginMixin
-import grails.util.Environment
-import core.pages.*
-import spock.lang.*
+import pages.*
 import geb.spock.GebReportingSpec
+import grails.util.Environment
+import spock.lang.Shared
+import spock.lang.Stepwise
 
 @Stepwise
 class RegisterSpec extends GebReportingSpec {

@@ -1,9 +1,9 @@
 import com.unifina.domain.data.Stream
 import com.unifina.service.StreamService
-import core.LoginTester1Spec
-import core.mixins.CanvasMixin
-import core.mixins.ConfirmationMixin
-import core.mixins.StreamMixin
+import LoginTester1Spec
+import mixins.CanvasMixin
+import mixins.ConfirmationMixin
+import mixins.StreamMixin
 import org.apache.log4j.Logger
 import spock.lang.Shared
 
@@ -11,18 +11,13 @@ import java.text.DecimalFormat
 import java.text.DecimalFormatSymbols
 import java.util.regex.Pattern
 
-class MapModulesSpec extends LoginTester1Spec {
+class MapModulesSpec extends LoginTester1Spec implements CanvasMixin, ConfirmationMixin, StreamMixin {
 
 	@Shared Logger log = Logger.getLogger(MapModulesSpec)
 	@Shared Stream testStream
 	@Shared StreamService streamService
 
 	def setupSpec() {
-		// @Mixin is buggy, use runtime mixins instead
-		this.class.metaClass.mixin(CanvasMixin)
-		this.class.metaClass.mixin(ConfirmationMixin)
-		this.class.metaClass.mixin(StreamMixin)
-
 		testStream = new Stream()
 		testStream.id = "pltRMd8rCfkij4mlZsQkJB"
 		streamService = createStreamService()
@@ -113,12 +108,12 @@ class MapModulesSpec extends LoginTester1Spec {
 		moveModuleBy("Label", 650, 75, 1)
 
 		chooseDropdownParameterForModule("ForEach", "canvas", subCanvasName)
-		sleep(500)
+		sleep(2000)
 
 		connectEndpoints(findOutput("Stream", "value"), findInput("ForEach", "A"))
-		connectEndpoints(findOutput("Stream", "value"), findInput("ForEach", "in"))
-		connectEndpoints(findOutput("ForEach", "out"), findInput("Label", "label", 0))
-		connectEndpoints(findOutput("ForEach", "out2"), findInput("Label", "label", 1))
+		connectEndpoints(findOutput("Stream", "value"), findInputByDisplayName("ForEach", "in"))
+		connectEndpoints(findOutputByDisplayName("ForEach", "out"), findInput("Label", "label", 0))
+		connectEndpoints(findOutputByDisplayName("ForEach", "out2"), findInput("Label", "label", 1))
 
 		and: "run canvas in realtime"
 		ensureRealtimeTabDisplayed()

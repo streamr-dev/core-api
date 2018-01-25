@@ -1,5 +1,6 @@
 package com.unifina.service
 
+import com.unifina.api.ApiException
 import com.unifina.api.NotFoundException
 import com.unifina.api.NotPermittedException
 import com.unifina.api.SaveDashboardCommand
@@ -12,6 +13,7 @@ import com.unifina.domain.security.Permission.Operation
 import com.unifina.domain.security.SecUser
 import com.unifina.domain.signalpath.Canvas
 import com.unifina.signalpath.RuntimeRequest
+import com.unifina.utils.IdGenerator
 import groovy.transform.CompileStatic
 
 class DashboardService {
@@ -32,8 +34,9 @@ class DashboardService {
 	 * @throws NotPermittedException when dashboard was found but user not permitted to read it
 	 */
 	@CompileStatic
-	Dashboard findById(Long id, SecUser user) throws NotFoundException, NotPermittedException {
-		return authorizedGetById(id, user, Permission.Operation.READ)
+	Dashboard findById(String id, SecUser user) throws NotFoundException, NotPermittedException {
+		Dashboard dashboard = authorizedGetById(id, user, Permission.Operation.READ)
+		return dashboard
 	}
 
 	/**
@@ -45,60 +48,87 @@ class DashboardService {
 	 * @throws NotPermittedException when dashboard was found but user not permitted to delete it
 	 */
 	@CompileStatic
-	void deleteById(Long id, SecUser user) throws NotFoundException, NotPermittedException {
+	void deleteById(String id, SecUser user) throws NotFoundException, NotPermittedException {
 		def dashboard = authorizedGetById(id, user, Permission.Operation.WRITE)
 		dashboard.delete()
 	}
 
 	/**
-	 * Create or update Dashboard by command, and authorize that user is permitted to do so.
-	 * @param id dashboard id
-	 * @param validCommand a save command that has been validated before
-	 * @param user current user
-	 * @return updated dashboard
-	 * @throws NotFoundException when dashboard was not found.
-	 * @throws NotPermittedException when dashboard was found but user not permitted to update it
-	 */
-	Dashboard createOrUpdate( SaveDashboardCommand validCommand, SecUser user) throws NotFoundException, NotPermittedException {
-		Dashboard dashboard
-		if (validCommand.id && authorizedGetById(validCommand.id, user, Permission.Operation.WRITE)) {
-			dashboard = authorizedGetById(validCommand.id, user, Permission.Operation.WRITE)
-		} else {
-			dashboard = new Dashboard(validCommand.toMap() << [user: user])
-		}
-		dashboard.name = validCommand.name
-		if (validCommand.items != null) {
-			def items = validCommand.items.clone()
-			dashboard.items.clear()
-			items.each { DashboardItem item ->
-				dashboard.addToItems(item)
-			}
-		}
-		dashboard.save(failOnError: true)
-	}
-
-	/**
-	 * Just a mapper for constancy
+	 * Create Dashboard by command.
 	 *
 	 * @param validCommand
 	 * @param user
 	 * @return
 	 */
 	Dashboard create(SaveDashboardCommand validCommand, SecUser user) {
-		createOrUpdate(validCommand, user)
+		Dashboard dashboard = new Dashboard(validCommand.properties.subMap(["name", "layout"]))
+
+		dashboard.id = IdGenerator.getShort()
+		dashboard.user = user
+		dashboard.save(failOnError: true)
+
+		validCommand.items.each {
+			if (!it.validate()) {
+				throw new ValidationException(it.errors)
+			}
+			DashboardItem item = new DashboardItem(it.properties)
+
+			item.id = IdGenerator.getShort()
+
+			dashboard.addToItems(item)
+			item.save(failOnError: true)
+		}
+		dashboard.save(failOnError: true)
+		return dashboard
 	}
 
-
 	/**
-	 * Just a mapper for constancy
+	 * Update Dashboard by command, and authorize that user is permitted to do so.
 	 *
-	 * @param id (unused)
 	 * @param validCommand
 	 * @param user
+	 * @throws NotFoundException when dashboard was not found.
+	 * @throws NotPermittedException when dashboard was found but user not permitted to update it
 	 * @return
 	 */
-	Dashboard update(Long id, SaveDashboardCommand validCommand, SecUser user) {
-		createOrUpdate(validCommand, user)
+	Dashboard update(String id, SaveDashboardCommand validCommand, SecUser user) throws NotFoundException, NotPermittedException {
+		Dashboard dashboard = authorizedGetById(id, user, Operation.WRITE)
+
+		def properties = validCommand.properties.subMap(["name", "layout"])
+		dashboard.setProperties(properties)
+
+		Set<String> ids = dashboard.items?.collect { it.id } as Set
+
+		validCommand.items.each { SaveDashboardItemCommand it ->
+			if (!it.validate()) {
+				throw new ValidationException(it.errors)
+			}
+			DashboardItem item
+			if (ids.contains(it.id)) {
+				item = DashboardItem.findByDashboardAndId(dashboard, it.id)
+				item.setProperties(it.properties)
+				ids.remove(it.id)
+			} else {
+				item = new DashboardItem(it.properties)
+				item.id = IdGenerator.getShort()
+				dashboard.addToItems(item)
+			}
+			item.save(failOnError: true)
+		}
+
+		ids.collect {
+			DashboardItem item = DashboardItem.findByDashboardAndId(dashboard, it)
+			dashboard.removeFromItems(item)
+			item.delete()
+		}
+
+		if (!dashboard.validate()) {
+			throw new ValidationException(dashboard.errors)
+		}
+
+		dashboard.save(failOnError: true)
+
+		return dashboard
 	}
 
 	/**
@@ -112,7 +142,7 @@ class DashboardService {
 	 * @throws NotPermittedException not permitted to read dashboard
 	 */
 	@CompileStatic
-	DashboardItem findDashboardItem(Long dashboardId, Long itemId, SecUser user)
+	DashboardItem findDashboardItem(String dashboardId, String itemId, SecUser user)
 		throws NotFoundException, NotPermittedException {
 		return authorizedGetDashboardItem(dashboardId, itemId, user, Permission.Operation.READ)
 	}
@@ -125,7 +155,7 @@ class DashboardService {
 	 * @throws NotFoundException when dashboard or dashboard item was not found.
 	 * @throws NotPermittedException when dashboard was found but user not permitted to update it
 	 */
-	void deleteDashboardItem(Long dashboardId, Long itemId, SecUser user)
+	void deleteDashboardItem(String dashboardId, String itemId, SecUser user)
 		throws NotFoundException, NotPermittedException {
 		def dashboard = authorizedGetById(dashboardId, user, Permission.Operation.WRITE)
 		def dashboardItem = dashboard.items.find { DashboardItem item -> item.id == itemId }
@@ -146,13 +176,14 @@ class DashboardService {
 	 * @throws NotPermittedException when not permitted to add item to dashboard
 	 * @throws ValidationException when command object is not valid
 	 */
-	DashboardItem addDashboardItem(Long dashboardId, SaveDashboardItemCommand command, SecUser user)
+	DashboardItem addDashboardItem(String dashboardId, SaveDashboardItemCommand command, SecUser user)
 		throws NotFoundException, NotPermittedException, ValidationException {
 		if (!command.validate()) {
 			throw new ValidationException(command.errors)
 		}
 		def dashboard = authorizedGetById(dashboardId, user, Operation.WRITE)
-		def item = command.toDashboardItem()
+		def item = new DashboardItem(command.properties)
+
 		dashboard.addToItems(item)
 		dashboard.save(failOnError: true)
 		return item
@@ -170,21 +201,21 @@ class DashboardService {
 	 * @throws ValidationException when command object is not valid
 	 */
 	@CompileStatic
-	DashboardItem updateDashboardItem(Long dashboardId, Long itemId, SaveDashboardItemCommand command, SecUser user)
+	DashboardItem updateDashboardItem(String dashboardId, String itemId, SaveDashboardItemCommand command, SecUser user)
 		throws NotFoundException, NotPermittedException, ValidationException {
 		if (!command.validate()) {
 			throw new ValidationException(command.errors)
 		}
 
 		def item = authorizedGetDashboardItem(dashboardId, itemId, user, Operation.WRITE)
-		command.copyValuesTo(item)
+		item.setProperties(command.properties)
 		item.save(failOnError: true)
 
 		return item
 	}
 
 	@CompileStatic
-	DashboardItem authorizedGetDashboardItem(Long dashboardId, Long itemId, SecUser user, Operation operation) {
+	DashboardItem authorizedGetDashboardItem(String dashboardId, String itemId, SecUser user, Operation operation) {
 		def dashboard = authorizedGetById(dashboardId, user, operation)
 		def dashboardItem = dashboard.items?.find { DashboardItem item -> item.id == itemId }
 		if (dashboardItem == null) {
@@ -194,7 +225,7 @@ class DashboardService {
 	}
 
 	@CompileStatic
-	Dashboard authorizedGetById(Long id, SecUser user, Operation operation) {
+	Dashboard authorizedGetById(String id, SecUser user, Operation operation) {
 		def dashboard = Dashboard.get(id)
 		if (dashboard == null) {
 			throw new NotFoundException(Dashboard.simpleName, id.toString())
@@ -209,25 +240,26 @@ class DashboardService {
 	RuntimeRequest buildRuntimeRequest(Map msg, String path, String originalPath = path, SecUser user) {
 		RuntimeRequest.PathReader pathReader = RuntimeRequest.getPathReader(path)
 
-		Canvas canvas = Canvas.get(pathReader.readCanvasId());
-		Integer moduleId = pathReader.readModuleId();
+		Dashboard dashboard = authorizedGetById(pathReader.readDashboardId(), user, Operation.READ)
+		Canvas canvas = Canvas.get(pathReader.readCanvasId())
+		Integer moduleId = pathReader.readModuleId()
 
 		// Does this Dashboard have an item that corresponds to the given canvas and module?
 		// If yes, then the user is authenticated to view that widget by having access to the Dashboard.
 		// Otherwise, the user must have access to the Canvas itself.
 		DashboardItem item = (DashboardItem) DashboardItem.withCriteria(uniqueResult: true) {
-			eq("canvas", canvas)
-			eq("module", moduleId)
+			eq "dashboard", dashboard
+			eq "canvas", canvas
+			eq "module", moduleId
 		}
 
 		if (item) {
 			Set<Operation> checkedOperations = new HashSet<>()
 			checkedOperations.add(Operation.READ)
-			RuntimeRequest request = new RuntimeRequest(msg, user, canvas, path.replace(/dashboards\/.+\//, ""), path, checkedOperations)
+			RuntimeRequest request = new RuntimeRequest(msg, user, canvas, path.replace("dashboards/$dashboard.id/", ""), path, checkedOperations)
 			return request
-		}
-		else {
-			return signalPathService.buildRuntimeRequest(msg, path.replace(path.replace(/dashboards\/.+\//, ""), ""), path, user)
+		} else {
+			return signalPathService.buildRuntimeRequest(msg, path.replace("dashboards/$dashboard.id/", ""), path, user)
 		}
 	}
 }

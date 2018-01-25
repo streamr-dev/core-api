@@ -3,11 +3,11 @@ package com.unifina
 import grails.test.mixin.TestMixin
 import grails.test.mixin.support.GrailsUnitTestMixin
 import grails.util.Holders
+import org.codehaus.groovy.grails.commons.spring.GrailsWebApplicationContext
 import spock.lang.Specification
 
 /**
- * Insert any instance you like as a spring bean, use mockBean(name, instance) in your setup() method.
- * Then in cleanup(), call cleanupMockBeans().
+ * Insert any instance you like as a spring bean by using mockBean(name, instance) in your setup() method.
  */
 @TestMixin(GrailsUnitTestMixin)
 class BeanMockingSpecification extends Specification {

@@ -27,7 +27,6 @@ class ModuleService {
 			m.configure(config)
 		}
 
-		globals?.onModuleCreated(m)
 		return m
 	}
 

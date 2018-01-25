@@ -1,19 +1,29 @@
 package com.unifina.api
 
-import com.unifina.domain.dashboard.DashboardItem
 import grails.validation.Validateable
 
 @Validateable
 class SaveDashboardCommand {
-	Long id
+
+	String id
 	String name
-	SortedSet<DashboardItem> items
+	List<SaveDashboardItemCommand> items
+	String layout
 
 	static constraints = {
+		id(nullable: true)
 		name(blank: false)
+		layout()
+		items(nullable: true)
 	}
 
-	Map toMap() {
-		[name: name, items: items]
+	// Groovy's .getProperties() sometimes leaves some of the properties out of the map
+	def getProperties() {
+		return [
+				id: id,
+				name: name,
+				items: items,
+				layout: layout
+		]
 	}
 }

@@ -62,7 +62,7 @@ class RandomNumberSpec extends Specification {
 	 * Generate n uniform doubles within [-1,1]
 	 */
 	@CompileStatic
-	static List<Double> generateDoubles(int seed, int n) {
+	static List<BigDecimal> generateDoubles(int seed, int n) {
 		def r = new Random(seed)
 		(1..n).collect { (r.nextDouble() - 0.5) * 2 }
 	}

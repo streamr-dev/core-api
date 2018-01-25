@@ -5,15 +5,14 @@ import java.security.PrivilegedAction;
 import java.text.SimpleDateFormat;
 import java.util.*;
 
-import com.unifina.signalpath.Input;
-import com.unifina.signalpath.ModuleWithUI;
-import com.unifina.signalpath.Output;
-import com.unifina.signalpath.SignalPath;
+import com.unifina.datasource.ITimeListener;
+import com.unifina.signalpath.*;
 import com.unifina.utils.Globals;
 
 public abstract class AbstractCustomModule extends ModuleWithUI {
 
 	protected transient SimpleDateFormat df = null;
+	private transient AbstractJavaCodeWrapper parentWrapper;
 
 	protected void debug(Object s) {
 		if (df == null) {
@@ -31,7 +30,7 @@ public abstract class AbstractCustomModule extends ModuleWithUI {
 		AccessController.doPrivileged(new PrivilegedAction<Void>() {
 			@Override
 			public Void run() {
-				pushToUiChannel(msg);
+				parentWrapper.pushToUiChannel(msg);
 				return null;
 			}
 		});
@@ -40,30 +39,37 @@ public abstract class AbstractCustomModule extends ModuleWithUI {
 	@Override
 	public void beforeSerialization() {
 		super.beforeSerialization();
-		parentSignalPath = null;
-		inputs = null;
-		inputsByName = null;
-		outputs = null;
-		outputsByName = null;
-		drivingInputs = null;
-		readyInputs = null;
+		setParentSignalPath(null);
+		setInputs(null);
+		setInputsByName(null);
+		setOutputs(null);
+		setOutputsByName(null);
+		setDrivingInputs(null);
+		setReadyInputs(null);
 	}
 
-	public void copyStateFromWrapper(SignalPath parentSignalPath,
-									 ArrayList<Input> inputs,
-									 Map inputsByName,
-									 ArrayList<Output> outputs,
-									 Map outputsByName,
-									 HashSet<Input> drivingInputs,
-									 Set<Input> readyInputs,
-									 Globals globals) {
-		this.parentSignalPath = parentSignalPath;
-		this.inputs = new ArrayList<>(inputs);
-		this.inputsByName = new HashMap<>(inputsByName);
-		this.outputs = new ArrayList<>(outputs);
-		this.outputsByName = new HashMap<>(outputsByName);
-		this.drivingInputs = new HashSet<>(drivingInputs);
-		this.readyInputs = readyInputs;
-		this.setGlobals(globals);
+	void copyStateFromWrapper(StoredCustomModuleState customModuleState) {
+		setParentSignalPath(customModuleState.getParentSignalPath());
+		setInputs(customModuleState.getInputs());
+		setInputsByName(customModuleState.getInputsByName());
+		setOutputs(customModuleState.getOutputs());
+		setOutputsByName(customModuleState.getOutputsByName());
+		setDrivingInputs(customModuleState.getDrivingInputs());
+		setReadyInputs(customModuleState.getReadyInputs());
+	}
+
+	void setParentWrapper(AbstractJavaCodeWrapper parentWrapper) {
+		this.parentWrapper = parentWrapper;
+	}
+
+	StoredCustomModuleState getStoredState() {
+		return new StoredCustomModuleState(getParentSignalPath(),
+			new ArrayList<>(Arrays.asList(getInputs())),
+			getInputsByName(),
+			new ArrayList<>(Arrays.asList(getOutputs())),
+			getOutputsByName(),
+			getDrivingInputs(),
+			getReadyInputs()
+		);
 	}
 }

@@ -1,12 +1,11 @@
 #canvas .module.chart {
-	z-index: 4;
-
   .modulebody {
+    width: 600px;
+    height: 400px;
+
     min-width: 350px;
     min-height: 250px;
     ._flex-row;
-    // Hack needed because of chart's resizing
-    width: ~"calc(100% - 23px)";
 
     .ioTable {
       width: 23px;
@@ -47,6 +46,7 @@
         width: 100%;
         // Hack needed because of chart's resizing
         height: ~"calc(100% - 37px)";
+        max-height: ~"calc(100% - 37px)";
         ._flex-1;
       }
     }

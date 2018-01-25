@@ -1,15 +1,10 @@
 package com.unifina.signalpath.utils
 
 import com.unifina.UiChannelMockingSpecification
-import com.unifina.domain.security.SecUser
-import com.unifina.signalpath.AbstractSignalPathModule
 import com.unifina.utils.Globals
-import com.unifina.utils.GlobalsFactory
 import com.unifina.utils.testutils.FakeExportCSVContext
 import com.unifina.utils.testutils.ModuleTestHelper
-import grails.test.mixin.support.GrailsUnitTestMixin
 
-@Mixin(GrailsUnitTestMixin)
 class ExportCSVSpec extends UiChannelMockingSpecification {
 
 	FakeExportCSVContext fakeFileHolder = new FakeExportCSVContext()
@@ -40,7 +35,7 @@ class ExportCSVSpec extends UiChannelMockingSpecification {
 			.timeToFurtherPerIteration(60 * 1000)
 			.uiChannelMessages(channelMessages, getSentMessagesByStreamId())
 			// Don't test deserialization, since resuming to write the same csv file will not be possible
-			.serializationModes(new HashSet<>([ModuleTestHelper.SerializationMode.NONE, ModuleTestHelper.SerializationMode.SERIALIZE]))
+			.serializationModes(new HashSet<>([ModuleTestHelper.SerializationMode.NONE, ModuleTestHelper.SerializationMode.CLEAR, ModuleTestHelper.SerializationMode.SERIALIZE]))
 			.overrideGlobals { Globals globals ->
 				globals.setUserTimeZone(TimeZone.getTimeZone("EST"))
 				return globals

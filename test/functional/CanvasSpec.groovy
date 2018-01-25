@@ -1,25 +1,21 @@
 import com.unifina.domain.data.Stream
 import com.unifina.service.StreamService
-import core.LoginTester1Spec
-import core.mixins.CanvasMixin
-import core.mixins.ListPageMixin
-import core.mixins.StreamMixin
-import core.pages.CanvasListPage
-import core.pages.CanvasPage
+import LoginTester1Spec
+import mixins.CanvasMixin
+import mixins.ListPageMixin
+import mixins.StreamMixin
+import pages.CanvasListPage
+import pages.CanvasPage
 import spock.lang.Shared
 
 import java.text.SimpleDateFormat
 
-class CanvasSpec extends LoginTester1Spec {
+class CanvasSpec extends LoginTester1Spec implements CanvasMixin, ListPageMixin, StreamMixin {
 
 	@Shared StreamService streamService
 	@Shared Stream testStream
 
 	def setupSpec() {
-		this.class.metaClass.mixin(CanvasMixin)
-		this.class.metaClass.mixin(ListPageMixin)
-		this.class.metaClass.mixin(StreamMixin)
-
 		streamService = createStreamService()
 		testStream = new Stream()
 		testStream.id = "c1_fiG6PTxmtnCYGU-mKuQ"
@@ -43,7 +39,7 @@ class CanvasSpec extends LoginTester1Spec {
 	}
 	def "drag and dropping a module to canvas should add it"() {
 		when: "Barify is added via drag and drop"
-			dragAndDropModule 'Barify'
+			dragAndDropModule('Barify', 200, -400)
 		then: "module should appear on canvas"
 			moduleShouldAppearOnCanvas 'Barify'
 	}
@@ -336,7 +332,7 @@ class CanvasSpec extends LoginTester1Spec {
 				$(".tooltip .modulehelp-tooltip p", 1).text().contains("Adds together")
 			}
 		when: "mouse moved away"
-			def menu = $(".menu-content")
+			def menu = $(".menu-content")[0]
 			interact {
 				moveToElement(menu)
 			}
@@ -350,7 +346,7 @@ class CanvasSpec extends LoginTester1Spec {
 		setup:
 			addAndWaitModule 'Add'
 		when: "input ioSwitch is hovered"
-			def el = $("td.input .ioSwitch.drivingInput")
+			def el = $("td.input .ioSwitch.drivingInput")[0]
 			interact {
 				moveToElement(el)
 			}
@@ -360,7 +356,7 @@ class CanvasSpec extends LoginTester1Spec {
 				$(".tooltip .tooltip-inner").text().contains("Driving input")
 			}
 		when: "mouse moved away"
-			def menu = $(".menu-content")
+			def menu = $(".menu-content")[0]
 			interact {
 				moveToElement(menu)
 			}
@@ -380,7 +376,7 @@ class CanvasSpec extends LoginTester1Spec {
 				$(".tooltip .tooltip-inner").text().contains("No repeat")
 			}
 		when: "mouse moved away"
-			menu = $(".menu-content")
+			menu = $(".menu-content")[0]
 			interact {
 				moveToElement(menu)
 			}
@@ -397,7 +393,7 @@ class CanvasSpec extends LoginTester1Spec {
 			addAndWaitModule 'Add'
 		then: "ioSwitches are visible by default"
 			waitFor {
-				$("td.input .ioSwitch.drivingInput").displayed
+				$("td.input .ioSwitch.drivingInput")*.displayed
 			}
 
 		when: "input ioSwitch is hovered"
@@ -411,7 +407,7 @@ class CanvasSpec extends LoginTester1Spec {
 				$(".tooltip .tooltip-inner strong").text() == "on"
 			}
 		when: "tooltip is hidden, switch is clicked and tooltip is shown again"
-			def menu = $(".menu-content")
+			def menu = $(".menu-content")[0]
 			interact {
 				moveToElement(menu)
 			}
@@ -423,20 +419,6 @@ class CanvasSpec extends LoginTester1Spec {
 			waitFor {
 				$(".tooltip").displayed
 				$(".tooltip .tooltip-inner strong").text() == "off"
-			}
-	}
-
-	void "Canvas can be saved by renaming it with name editor" () {
-		setup:
-			addAndWaitModule "Add"
-		when: "name changed"
-			nameEditorLabel.click()
-			nameEditorInput << "newName" + System.currentTimeMillis()
-			findModuleOnCanvas('Add').click()
-		then: "canvas is saved"
-			waitFor {
-				!driver.currentUrl.endsWith("/canvas/editor")
-				nameEditorLabel.text().startsWith("newName")
 			}
 	}
 

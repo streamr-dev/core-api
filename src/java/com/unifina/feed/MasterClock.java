@@ -1,15 +1,13 @@
 package com.unifina.feed;
 
-import java.util.Date;
-
 import com.unifina.data.FeedEvent;
 import com.unifina.datasource.DataSource;
 import com.unifina.datasource.ITimeListener;
 import com.unifina.utils.Globals;
 
-public class MasterClock extends AbstractEventRecipient<ITimeListener, ITimestamped> {
-	int i;
+import java.util.Date;
 
+public class MasterClock extends AbstractEventRecipient<ITimeListener, ITimestamped> {
 	public MasterClock(Globals globals, DataSource dataSource) {
 		super(globals);
 		// globals.dataSource is not yet set
@@ -17,10 +15,19 @@ public class MasterClock extends AbstractEventRecipient<ITimeListener, ITimestam
 	}
 	
 	protected void sendOutputFromModules(FeedEvent event) {
-		Date d = event.timestamp;
+		Date date = event.timestamp;
+		long epochSec = date.getTime() / 1000;
 		
-		// Don't use iterators to prevent ConcurrentModificationException in case new timelisteners are added
-		for (i=0;i<moduleSize;i++)
-			modules.get(i).setTime(d);
+		// Iterate by index to avoid ConcurrentModificationException in case new modules are added.
+		for (int i=0; i < moduleSize; i++) {
+			ITimeListener module = modules.get(i);
+			if (isTimeToTick(epochSec, module.tickRateInSec())) {
+				module.setTime(date);
+			}
+		}
+	}
+
+	public static boolean isTimeToTick(long epochSec, int tickRateInSec) {
+		return tickRateInSec != 0 && epochSec % tickRateInSec == 0;
 	}
 }

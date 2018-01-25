@@ -4,11 +4,9 @@
 
     <title>Canvas</title>
 
-    <r:require module='jquery-ui'/>
     <r:require module="bootbox"/>
     <r:require module="bootstrap-contextmenu"/>
     <r:require module="bootstrap-datepicker"/>
-	<r:require module="streamr-search"/>
     <r:require module="signalpath-theme"/>
     <r:require module="touchpunch"/>
 
@@ -30,7 +28,8 @@ $(document).ready(function() {
 			path: "${grailsApplication.config.streamr.ui.serverPath}",
 			autoConnect: true,
 			autoDisconnect: true
-		}
+		},
+		embedMode: true
 	});
 	<g:if test="${id}">
 		SignalPath.load('${id}')
@@ -49,7 +48,7 @@ $(document).ready(function() {
 
 <body class="canvas-editor-page main-menu-fixed embedded">
 
-<div id="canvas" class="scrollable embeddable"></div>
+<div id="canvas" class="streamr-canvas scrollable embeddable"></div>
 
 </body>
 </html>

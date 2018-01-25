@@ -10,6 +10,8 @@ public class TimeSeriesChart extends Chart {
 	
 	private int tsInputCount = 10;
 	private boolean barify = false;
+	private boolean overnightBreak = true;
+	private Integer range = null;
 	
 	@Override
 	public void initialize() {
@@ -67,10 +69,9 @@ public class TimeSeriesChart extends Chart {
 		conn.yAxis = 0;
 
 		conn.setDrivingInput(true);
-		conn.canToggleDrivingInput = false;
-		conn.canHaveInitialValue = false;
-		conn.canBeFeedback = false;
-		conn.requiresConnection = false;
+		conn.setCanToggleDrivingInput(false);
+		conn.setCanHaveInitialValue(false);
+		conn.setRequiresConnection(false);
 		
 		// Add the input
 		if (getInput(name) == null) {
@@ -82,10 +83,9 @@ public class TimeSeriesChart extends Chart {
 	
 	@Override
 	protected void record() {
-		for (Input i : drivingInputs) {
+		for (Input i : getDrivingInputs()) {
 			TimeSeriesChartInput input = (TimeSeriesChartInput) i;
-			if (!Double.isNaN(input.value)
-					&& (!barify || getGlobals().time.getTime() - input.previousTime >= 60000L)) {
+			if (!Double.isNaN(input.value) && (!barify || getGlobals().time.getTime() - input.previousTime >= 60000L)) {
 				
 					PointMessage msg = new PointMessage(
 							input.seriesIndex, 
@@ -102,7 +102,8 @@ public class TimeSeriesChart extends Chart {
 	public Map<String,Object> getConfiguration() {
 		Map<String,Object> config = super.getConfiguration();
 
-		config.put("barify",barify);
+		config.put("barify", barify);
+		config.put("range", range);
 		
 		ModuleOptions options = ModuleOptions.get(config);
 		options.add(new ModuleOption("inputs", tsInputCount, ModuleOption.OPTION_INTEGER));
@@ -116,11 +117,16 @@ public class TimeSeriesChart extends Chart {
 		
 		if (config.containsKey("barify"))
 			barify = Boolean.parseBoolean(config.get("barify").toString());
-		
+
+		if (config.containsKey("range") && config.get("range") != null)
+			range = (int) Double.parseDouble(config.get("range").toString());
+
 		ModuleOptions options = ModuleOptions.get(config);
 		
-		if (options.getOption("inputs")!=null)
+		if (options.getOption("inputs") != null)
 			tsInputCount = options.getOption("inputs").getInt();
+		if (options.getOption("overnightBreak") != null)
+			overnightBreak = options.getOption("overnightBreak").getBoolean();
 		
 		// Backwards compatibility
 		if (config.containsKey("params")) {
@@ -135,7 +141,7 @@ public class TimeSeriesChart extends Chart {
 				tsInputCount = Integer.parseInt(inputConfig.get("value").toString());
 		}
 		
-		for (int i=1;i<=tsInputCount;i++) {
+		for (int i = 1; i <= tsInputCount; i++) {
 			getInputConnection("in"+i);
 		}
 	}

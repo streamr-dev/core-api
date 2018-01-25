@@ -1,25 +1,20 @@
 import com.unifina.domain.data.Stream
 import com.unifina.service.StreamService
-import core.LoginTester1Spec
-import core.mixins.CanvasMixin
-import core.mixins.ConfirmationMixin
-import core.mixins.StreamMixin
-import core.pages.CanvasListPage
-import core.pages.CanvasPage
+import LoginTester1Spec
+import mixins.CanvasMixin
+import mixins.ConfirmationMixin
+import mixins.StreamMixin
+import pages.CanvasListPage
+import pages.CanvasPage
 import spock.lang.Shared
 
-public class LiveSpec extends LoginTester1Spec {
+class LiveSpec extends LoginTester1Spec implements CanvasMixin, ConfirmationMixin, StreamMixin {
 
 	static Timer timer
 
 	@Shared StreamService streamService
 
 	def setupSpec() {
-		// For some reason the annotations don't work so need the below.
-		LiveSpec.metaClass.mixin(CanvasMixin)
-		LiveSpec.metaClass.mixin(ConfirmationMixin)
-		LiveSpec.metaClass.mixin(StreamMixin)
-
 		final Stream testStream = new Stream()
 		testStream.id = "RUj6iJggS3iEKsUx5C07Ig"
 
@@ -34,12 +29,6 @@ public class LiveSpec extends LoginTester1Spec {
 		// Produce to a live feed
 		timer = new Timer()
 		timer.schedule(task, 1000L, 1000L)
-	}
-
-	def setup() {
-		// For some reason the annotations don't work so need the below.
-		LiveSpec.metaClass.mixin(CanvasMixin)
-		LiveSpec.metaClass.mixin(ConfirmationMixin)
 	}
 
 	def cleanupSpec() {
@@ -122,7 +111,7 @@ public class LiveSpec extends LoginTester1Spec {
 			$(".table .td", text:"LiveSpec dead").click()
 		then: "navigate to show page that shows an error"
 			waitFor {at CanvasPage}
-			waitFor {$(".alert.alert-danger").displayed}
+			waitFor(20) {$(".alert.alert-danger").displayed}
 	}
 	
 	def "don't subscribe to stopped SignalPath channels"() {
@@ -144,7 +133,7 @@ public class LiveSpec extends LoginTester1Spec {
 		when: "selecting a dead canvas"
 			$(".table .td", text:"LiveSpec dead").click()
 		then: "navigate to editor page with correct run button state"
-			waitFor {
+			waitFor(20) {
 				at CanvasPage
 				runRealtimeButton.text().contains("Stop")
 			}
@@ -158,7 +147,7 @@ public class LiveSpec extends LoginTester1Spec {
 		when: "confirmation accepted"
 			acceptConfirmation(".stop-confirmation-dialog")
 		then: "must show alert and start button"
-			waitFor {
+			waitFor(20) {
 				$(".alert.alert-danger").displayed
 				runRealtimeButton.text().contains("Start")
 			}

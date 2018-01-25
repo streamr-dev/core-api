@@ -1,5 +1,6 @@
 package com.unifina.service
 
+import com.unifina.api.ApiException
 import com.unifina.api.InvalidStateException
 import com.unifina.api.NotFoundException
 import com.unifina.api.NotPermittedException
@@ -7,6 +8,7 @@ import com.unifina.api.SaveCanvasCommand
 import com.unifina.api.ValidationException
 import com.unifina.domain.dashboard.Dashboard
 import com.unifina.domain.dashboard.DashboardItem
+import com.unifina.domain.data.Stream
 import com.unifina.domain.security.Permission
 import com.unifina.domain.security.SecUser
 import com.unifina.domain.signalpath.Canvas
@@ -15,15 +17,19 @@ import com.unifina.domain.signalpath.Serialization
 import com.unifina.exceptions.CanvasUnreachableException
 import com.unifina.signalpath.UiChannelIterator
 import com.unifina.signalpath.charts.Heatmap
+import com.unifina.task.CanvasDeleteTask
 import grails.converters.JSON
 import grails.plugin.springsecurity.SpringSecurityService
 import grails.test.mixin.Mock
 import grails.test.mixin.TestFor
+import grails.test.mixin.TestMixin
+import grails.test.mixin.web.ControllerUnitTestMixin
 import groovy.json.JsonBuilder
 import spock.lang.Specification
 
+@TestMixin(ControllerUnitTestMixin) // "as JSON" converter
 @TestFor(CanvasService)
-@Mock([SecUser, Canvas, Module, ModuleService, SpringSecurityService, SignalPathService, PermissionService, Permission, Serialization, Dashboard, DashboardItem])
+@Mock([SecUser, Canvas, Module, Stream, ModuleService, StreamService, SpringSecurityService, SignalPathService, PermissionService, Permission, Serialization, Dashboard, DashboardItem])
 class CanvasServiceSpec extends Specification {
 
 	SecUser me
@@ -301,10 +307,10 @@ class CanvasServiceSpec extends Specification {
 		service.signalPathService = signalPathService
 
 		when:
-		service.start(myFirstCanvas, false)
+		service.start(myFirstCanvas, false, me)
 
 		then:
-		1 * signalPathService.startLocal(myFirstCanvas, [speed: 0, beginDate: "2016-01-25", endDate: "2016-01-26"])
+		1 * signalPathService.startLocal(myFirstCanvas, [speed: 0, beginDate: "2016-01-25", endDate: "2016-01-26"], me)
 		0 * signalPathService._
 	}
 
@@ -313,11 +319,11 @@ class CanvasServiceSpec extends Specification {
 		service.signalPathService = signalPathService
 
 		when:
-		service.start(myFirstCanvas, true)
+		service.start(myFirstCanvas, true, me)
 
 		then:
 		1 * signalPathService.clearState(myFirstCanvas)
-		1 * signalPathService.startLocal(myFirstCanvas, [speed: 0, beginDate: "2016-01-25", endDate: "2016-01-26"])
+		1 * signalPathService.startLocal(myFirstCanvas, [speed: 0, beginDate: "2016-01-25", endDate: "2016-01-26"], me)
 		0 * signalPathService._
 	}
 
@@ -328,7 +334,7 @@ class CanvasServiceSpec extends Specification {
 		myFirstCanvas.save(failOnError: true)
 
 		when:
-		service.start(myFirstCanvas, false)
+		service.start(myFirstCanvas, false, me)
 
 		then:
 		thrown(InvalidStateException)
@@ -341,7 +347,7 @@ class CanvasServiceSpec extends Specification {
 		myFirstCanvas.save(failOnError: true)
 
 		when:
-		service.start(myFirstCanvas, false)
+		service.start(myFirstCanvas, false, me)
 
 		then:
 		true
@@ -389,6 +395,55 @@ class CanvasServiceSpec extends Specification {
 
 		then:
 		thrown(InvalidStateException)
+	}
+
+	def "deleteCanvas(,,false) deletes canvas"() {
+		setup:
+		assert Canvas.findById(myFirstCanvas.id) != null
+		when:
+		service.deleteCanvas(myFirstCanvas, me, false)
+		then:
+		Canvas.findById(myFirstCanvas.id) == null
+	}
+
+	def "deleteCanvas(,,false) deletes uiChannels of canvas"() {
+		setup:
+		Stream s = new Stream(
+			id: "666",
+			user: me,
+			name: "Notifications",
+			uiChannel: true,
+			uiChannelCanvas: myFirstCanvas,
+			uiChannelPath: "/canvas/1",
+		)
+		s.id = "666"
+		s.save(failOnError: true, validate: false, flush: true)
+
+		def streamService = service.streamService = Mock(StreamService)
+
+		when:
+		service.deleteCanvas(myFirstCanvas, me, false)
+		then:
+		1 * streamService.deleteStream(s)
+	}
+
+	def "deleteCanvas(,,true) creates a delete task"() {
+		def taskService = service.taskService = Mock(TaskService)
+		when:
+		service.deleteCanvas(myFirstCanvas, me, true)
+		then:
+		1 * taskService.createTask(CanvasDeleteTask, [canvasId: '1'], "delete-canvas", me, _)
+	}
+
+	def "deleteCanvas() throws ApiException if trying to delete running canvas"() {
+		when:
+		myFirstCanvas.state = Canvas.State.RUNNING
+		myFirstCanvas.save(failOnError: true, validate: true)
+
+		service.deleteCanvas(myFirstCanvas, me, false)
+		then:
+		def e = thrown(ApiException)
+		e.asApiError().statusCode == 409
 	}
 
 	def "authorizedGetById() checks access to canvases from PermissionService and returns the canvas if allowed"() {
@@ -463,8 +518,8 @@ class CanvasServiceSpec extends Specification {
 	}
 
 	def "authorizedGetModuleOnCanvas() checks access to dashboard from PermissionService and returns the module if allowed"() {
-		Dashboard db = new Dashboard()
-		db.addToItems(new DashboardItem(canvas: myFirstCanvas, module: 1, ord: 0, title: "foo"))
+		Dashboard db = new Dashboard().save(validate: false, failOnError: true)
+		db.addToItems(new DashboardItem(canvas: myFirstCanvas, module: 1, title: "foo"))
 		db.save(validate: false)
 
 		when:
@@ -477,8 +532,8 @@ class CanvasServiceSpec extends Specification {
 	}
 
 	def "authorizedGetModuleOnCanvas() checks access to dashboard from PermissionService and throws exception if the canvas doesn't match the dashboard item"() {
-		Dashboard db = new Dashboard()
-		db.addToItems(new DashboardItem(canvas: canvases.find {it != myFirstCanvas}, module: 1, ord: 0, title: "foo"))
+		Dashboard db = new Dashboard().save(validate: false, failOnError: true)
+		db.addToItems(new DashboardItem(canvas: canvases.find {it != myFirstCanvas}, module: 1, title: "foo"))
 		db.save(validate: false)
 
 		when:
@@ -544,12 +599,12 @@ class CanvasServiceSpec extends Specification {
 
 	def "authorizedGetModuleOnCanvas() throws NotFoundException if no dashboard exists"() {
 		when:
-		service.authorizedGetModuleOnCanvas(myFirstCanvas.id, 1, 1, me, Permission.Operation.READ)
+		service.authorizedGetModuleOnCanvas(myFirstCanvas.id, 1, "1", me, Permission.Operation.READ)
 
 		then:
 		thrown(NotFoundException)
 		1 * service.permissionService.check(me, myFirstCanvas, Permission.Operation.READ) >> false
-		1 * service.dashboardService.authorizedGetById(1, me, Permission.Operation.READ) >> { throw new NotFoundException("thrown by mock") }
+		1 * service.dashboardService.authorizedGetById("1", me, Permission.Operation.READ) >> { throw new NotFoundException("thrown by mock") }
 	}
 
 	private uiChannelIdsFromMap(Map signalPathMap) {

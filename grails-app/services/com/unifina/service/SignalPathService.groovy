@@ -1,5 +1,6 @@
 package com.unifina.service
 
+import com.google.gson.Gson
 import com.unifina.api.CanvasCommunicationException
 import com.unifina.datasource.DataSource
 import com.unifina.datasource.HistoricalDataSource
@@ -20,9 +21,9 @@ import com.unifina.signalpath.SignalPathRunner
 import com.unifina.utils.Globals
 import com.unifina.utils.GlobalsFactory
 import com.unifina.utils.NetworkInterfaceUtils
-import grails.converters.JSON
 import grails.transaction.NotTransactional
 import grails.transaction.Transactional
+import grails.util.Holders
 import groovy.transform.CompileStatic
 import org.apache.log4j.Logger
 
@@ -171,20 +172,24 @@ class SignalPathService {
 	/**
 	 * @throws SerializationException if de-serialization fails when resuming from existing state
      */
-	void startLocal(Canvas canvas, Map signalPathContext) throws SerializationException {
+	void startLocal(Canvas canvas, Map signalPathContext, SecUser asUser) throws SerializationException {
 		// Create Globals
-		Globals globals = GlobalsFactory.createInstance(signalPathContext, grailsApplication, canvas.user)
+		Globals globals = GlobalsFactory.createInstance(signalPathContext, grailsApplication, asUser)
 
 		SignalPathRunner runner
-		// Create the runner thread
+		SignalPath sp
+
+		// Instantiate the SignalPath
 		if (canvas.serialization == null || canvas.adhoc) {
-			runner = new SignalPathRunner([JSON.parse(canvas.json)], globals, canvas.adhoc)
 			log.info("Creating new signalPath connections (canvasId=$canvas.id)")
+			sp = mapToSignalPath(new Gson().fromJson(canvas.json, Map.class), false, globals, new SignalPath(true))
 		} else {
-			SignalPath sp = serializationService.deserialize(canvas.serialization.bytes)
-			runner = new SignalPathRunner(sp, globals, canvas.adhoc)
 			log.info("De-serializing existing signalPath (canvasId=$canvas.id)")
+			sp = serializationService.deserialize(canvas.serialization.bytes)
 		}
+
+		// Create the runner thread
+		runner = new SignalPathRunner(sp, globals, canvas.adhoc)
 
 		runner.addStartListener(new IStartListener() {
 			@Override
@@ -210,13 +215,12 @@ class SignalPathService {
 		String runnerId = runner.runnerId
 		canvas.runner = runnerId
 
-		// Use the link generator to get the protocol and port, but use network IP address
-		//   as the host to get the address of this individual server
-		String root = grailsLinkGenerator.link(uri:"/", absolute: true)
-		URL url = new URL(root)
-
+		def port = Holders.getConfig().streamr.cluster.internalPort
+		def protocol = Holders.getConfig().streamr.cluster.internalProtocol
 		canvas.server = NetworkInterfaceUtils.getIPAddress(grailsApplication.config.streamr.ip.address.prefixes ?: []).getHostAddress()
-		canvas.requestUrl = url.protocol+"://"+canvas.server+":"+(url.port>0 ? url.port : url.defaultPort)+grailsLinkGenerator.link(uri:"/api/v1/canvases/$canvas.id", absolute: false)
+
+		// Form an internal url that Streamr nodes will use to directly address this machine and the canvas that runs on it
+		canvas.requestUrl = protocol + "://" + canvas.server + ":" + port + grailsLinkGenerator.link(uri: "/api/v1/canvases/$canvas.id", absolute: false)
 		canvas.state = Canvas.State.RUNNING
 
 		canvas.save()
@@ -405,44 +409,6 @@ class SignalPathService {
 	SignalPathRunner getLiveRunner(String sessionId) {
 		return servletContext[sessionId]
 	}
-	
-	List getUpdateableParameters(Map signalPathData, Closure c=null) {
-		List parameters = []
-		signalPathData.modules.each {module->
-			module.params.each {
-				String key = "${module.hash}_${module.id}_${it.name}_${it.value}"
-				if (!it.connected) {
-					it.parameterUpdateKey = key
-					
-					if (c) 
-						c(module,it)
-					
-					parameters << it
-				}
-			}
-		}
-		return parameters
-	}
-	
-	/**
-	 * 
-	 * @param paramMap
-	 * @param signalPathData
-	 * @return true if any parameter was changed
-	 */
-	boolean updateParameters(Map paramMap, Map signalPathData) {
-		boolean changed = false
-		signalPathData.modules.each {module->
-			module.params.each {
-				String key = "${module.hash}_${module.id}_${it.name}_${it.value}"
-				if (!it.connected && paramMap[key]!=null && it.value.toString()!=paramMap[key].toString()) {
-					it.value = paramMap[key]
-					changed = true
-				}
-			}
-		}
-		return changed
-	}
 
 	@Transactional
 	def saveState(SignalPath sp) {
@@ -450,19 +416,31 @@ class SignalPathService {
 		Canvas canvas = Canvas.get(sp.canvas.id)
 
 		try {
-			boolean isFirst = canvas.serialization == null
-			def serialization = isFirst ? new Serialization(canvas: canvas) : canvas.serialization
+			boolean isFirst = (canvas.serialization == null)
+			Serialization serialization = isFirst ? new Serialization(canvas: canvas) : canvas.serialization
 
-			serialization.bytes = serializationService.serialize(sp)
-			serialization.date = sp.globals.time
-			serialization.save(failOnError: true, flush: true)
-			canvas.serialization = serialization
+			// Serialize
+			byte[] bytes = serializationService.serialize(sp)
+			boolean notTooBig = bytes.length <= serializationService.serializationMaxBytes()
 
-			if (isFirst) {
-				Canvas.executeUpdate("update Canvas c set c.serialization = ? where c.id = ?", [serialization, canvas.id])
+			if (notTooBig) {
+                serialization.bytes = serializationService.serialize(sp)
+                serialization.date = sp.globals.time
+                serialization.save(failOnError: true, flush: true)
+                canvas.serialization = serialization
+
+                if (isFirst) {
+                    Canvas.executeUpdate("update Canvas c set c.serialization = ? where c.id = ?", [serialization, canvas.id])
+                }
 			}
+
 			long timeTaken = System.currentTimeMillis() - startTime
-			log.info("Canvas " + canvas.id + " serialized (size: ${serialization.bytes.length} bytes, processing time: ${timeTaken} ms)")
+			String stats = "(size: ${bytes.length} bytes, processing time: ${timeTaken} ms)"
+			if (notTooBig) {
+				log.info("Canvas " + canvas.id + " serialized " + stats)
+			} else {
+				log.info("Canvas " + canvas.id + " serialization skipped because too large " + stats)
+			}
 		} catch (SerializationException ex) {
 			log.error("Serialization of canvas " + canvas.id + " failed.")
 			throw ex

@@ -1,7 +1,9 @@
 package com.unifina.signalpath
 
+import com.unifina.BeanMockingSpecification
 import com.unifina.datasource.RealtimeDataSource
 import com.unifina.domain.security.SecUser
+import com.unifina.service.PermissionService
 import com.unifina.utils.Globals
 import com.unifina.utils.testutils.FakeStreamService
 import grails.test.mixin.support.GrailsUnitTestMixin
@@ -13,8 +15,8 @@ import spock.lang.Specification
 
 import java.util.concurrent.TimeUnit
 
-@Mixin(GrailsUnitTestMixin)
-class AbstractSignalPathModuleSpec extends Specification {
+
+class AbstractSignalPathModuleSpec extends BeanMockingSpecification {
 	static class Module extends AbstractSignalPathModule {
 		def param = new IntegerParameter(this, "param", 666)
 		def a = new Input<Object>(this, "in2", "Object")
@@ -31,6 +33,7 @@ class AbstractSignalPathModuleSpec extends Specification {
 	Module module
 	Globals globals
 	SignalPath mockSignalPath
+	PermissionService mockedPermissionService
 
 	@Shared Level oldGlobalsLoggingLevel
 	@Shared Level oldAbstractSignalPathModuleLoggingLevel
@@ -49,6 +52,8 @@ class AbstractSignalPathModuleSpec extends Specification {
 
 	def setup() {
 		mockSignalPath = Mock(SignalPath)
+		mockedPermissionService = Mock(PermissionService)
+		mockBean(PermissionService, mockedPermissionService)
 	}
 
 	void "init() adds endpoints to class"() {
@@ -98,8 +103,7 @@ class AbstractSignalPathModuleSpec extends Specification {
 	}
 
 	@CompileStatic
-	private RuntimeResponse sendRuntimeRequest(LinkedHashMap<String, Object> msg, boolean authenticated = false) {
-		SecUser user = authenticated ? new SecUser() : null
+	private RuntimeResponse sendRuntimeRequest(LinkedHashMap<String, Object> msg, SecUser user) {
 		def request = new RuntimeRequest(msg, user, null, "request/1", "request/1", [] as Set)
 		def future = module.onRequest(request, request.getPathReader())
 		globals.getDataSource().getEventQueue().process(globals.getDataSource().getEventQueue().poll())
@@ -111,7 +115,7 @@ class AbstractSignalPathModuleSpec extends Specification {
 
 		when:
 		Map msg = [type: "ping"]
-		def response = sendRuntimeRequest(msg)
+		def response = sendRuntimeRequest(msg, null)
 
 		then:
 		response == new RuntimeResponse(true, [request: msg])
@@ -126,11 +130,12 @@ class AbstractSignalPathModuleSpec extends Specification {
 			param: "param",
 			value: -123
 		]
-		def response = sendRuntimeRequest(msg, true)
+		def response = sendRuntimeRequest(msg, new SecUser())
 
 		then:
 		response == new RuntimeResponse(true, [request: msg])
 		module.param.value == -123
+		1 * mockedPermissionService.canWrite(_, _) >> true
 		0 * module.parentSignalPath.pushToUiChannel(_)
 	}
 
@@ -143,7 +148,7 @@ class AbstractSignalPathModuleSpec extends Specification {
 			param: "param",
 			value: -123
 		]
-		def response = sendRuntimeRequest(msg)
+		def response = sendRuntimeRequest(msg, null)
 
 		then:
 		response == new RuntimeResponse([request: msg])
@@ -156,7 +161,7 @@ class AbstractSignalPathModuleSpec extends Specification {
 
 		when:
 		Map msg = [type: "json"]
-		def response = sendRuntimeRequest([type: "json"], true)
+		def response = sendRuntimeRequest([type: "json"], new SecUser())
 
 		then:
 		response == new RuntimeResponse(true, [request: msg, json: module.configuration])

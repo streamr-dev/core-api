@@ -1,0 +1,51 @@
+
+.breadcrumb {
+  position: relative;
+  border-bottom: 1px solid #e9e9e9;
+  padding-bottom: 6px;
+  padding-top: 6px;
+}
+
+.streamrDropdownButton + ul {
+  > li {
+    height: 34px;
+
+    &:before {
+      content: none !important;
+    }
+
+    > a {
+      height: initial;
+      font-size: 14px;
+      padding: 8px 18px !important;
+      color: #333;
+
+      > span {
+        padding-right: 5px;
+      }
+    }
+  }
+}
+
+.streamrDropdownContainer {
+  display: inline-block;
+  padding-left: 10px;
+}
+
+.toolbar {
+  position: absolute;
+  right: 0;
+  top: 0;
+  padding-top: 6px;
+  padding-right: 15px;
+
+  .button {
+    width: 10px;
+    cursor: pointer;
+    color: #333;
+
+    &:hover {
+      color: #888;
+    }
+  }
+}

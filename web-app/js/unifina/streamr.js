@@ -18,7 +18,7 @@ _.templateSettings = {
 };
 
 Streamr.createLink = function(optsOrController, action, id) {
-	opts = optsOrController
+	var opts = optsOrController
 
 	if (action) {
 		opts = {
@@ -28,8 +28,9 @@ Streamr.createLink = function(optsOrController, action, id) {
 		}
 	}
 
-	if (opts.uri)
-		return Streamr.projectWebroot + opts.uri
+	if (opts.uri) {
+		return Streamr.projectWebroot + opts.uri.replace(/^\//, '')
+    }
 
 	var ctrl = opts.controller[0].toLowerCase() + opts.controller.slice(1)
 	var url = Streamr.projectWebroot + ctrl
@@ -45,13 +46,11 @@ Streamr.createLink = function(optsOrController, action, id) {
 }
 
 Streamr.showError = function(msg, title, delay) {
-	title = title || "Error"
-	delay = delay || 4000
 	$.pnotify({
 		type: 'error',
-		title: title,
+		title: title || 'Error',
 		text: msg,
-		delay: delay
+		delay: delay || 4000
 	})
 }
 
