@@ -64,9 +64,8 @@ public class Input<T> extends Endpoint<T> {
 
 	@Override
 	public T getValue() {
-		if (value == null && isConnected() && source.getOwner() instanceof Pullable) {
-			Object pulledObject = ((Pullable<?>) source.getOwner()).pullValue(source);
-			value = handlePulledObject(pulledObject);
+		if (value == null) {
+			pullValueFromPullableIfConnected();
 		}
 		return value;
 	}
@@ -84,6 +83,19 @@ public class Input<T> extends Endpoint<T> {
 	 */
 	protected T handlePulledObject(Object o) {
 		return (T) o;
+	}
+
+	/**
+	 * Pull value from owner if owner implements Pullable
+	 * @return true if connected to Pullable
+	 */
+	protected boolean pullValueFromPullableIfConnected() {
+		if (isConnected() && source.getOwner() instanceof Pullable) {
+			Object pulledObject = ((Pullable<?>) source.getOwner()).pullValue(source);
+			value = handlePulledObject(pulledObject);
+			return true;
+		}
+		return false;
 	}
 
 	@Override
