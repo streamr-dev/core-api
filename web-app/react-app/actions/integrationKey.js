@@ -1,7 +1,7 @@
 // @flow
 
 import axios from 'axios'
-import parseError from './utils/parseError'
+import {parseError} from './utils/parseApiResponse'
 import createLink from '../helpers/createLink'
 import {showError, showSuccess} from './notification'
 
@@ -24,7 +24,7 @@ export const DELETE_INTEGRATION_KEY_FAILURE = 'DELETE_INTEGRATION_KEY_FAILURE'
 const apiUrl = 'api/v1/integration_keys'
 
 import type {IntegrationKey} from '../flowtype/integration-key-types.js'
-import type {ApiError as Err} from '../flowtype/common-types.js'
+import type {ErrorInUi as Err} from '../flowtype/common-types.js'
 
 export const getAndReplaceIntegrationKeys = () => (dispatch: Function) => {
     dispatch(getAndReplaceIntegrationKeysRequest())

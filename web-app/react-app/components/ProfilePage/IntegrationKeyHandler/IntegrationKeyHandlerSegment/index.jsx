@@ -70,9 +70,8 @@ export class IntegrationKeyHandlerSegment extends Component<Props> {
     }
 }
 
-export const mapStateToProps = ({integrationKey: {listsByService, error}}: {integrationKey: IntegrationKeyState}, props: Props) => ({
-    integrationKeys: listsByService[props.service] || [],
-    error
+export const mapStateToProps = ({integrationKey: {listsByService}}: {integrationKey: IntegrationKeyState}, props: Props) => ({
+    integrationKeys: listsByService[props.service] || []
 })
 
 export const mapDispatchToProps = (dispatch: Function) => ({

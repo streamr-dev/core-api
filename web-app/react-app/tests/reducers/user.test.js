@@ -51,11 +51,17 @@ describe('User reducer', () => {
                     some: 'field'
                 }, {
                     type: actions.GET_CURRENT_USER_FAILURE,
-                    error: new Error('test-error')
+                    error: {
+                        message: 'test',
+                        code: 'TEST'
+                    }
                 }), {
                     some: 'field',
                     fetching: false,
-                    error: new Error('test-error')
+                    error: {
+                        message: 'test',
+                        code: 'TEST'
+                    }
                 })
         })
     })
@@ -98,11 +104,17 @@ describe('User reducer', () => {
                     some: 'field'
                 }, {
                     type: actions.SAVE_CURRENT_USER_FAILURE,
-                    error: new Error('test-error')
+                    error: {
+                        message: 'test',
+                        code: 'TEST'
+                    }
                 }), {
                     some: 'field',
                     fetching: false,
-                    error: new Error('test-error')
+                    error: {
+                        message: 'test',
+                        code: 'TEST'
+                    }
                 })
         })
     })

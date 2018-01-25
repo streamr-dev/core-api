@@ -1,7 +1,7 @@
 // @flow
 
 import axios from 'axios'
-import parseError from './utils/parseError'
+import {parseError} from './utils/parseApiResponse'
 import createLink from '../helpers/createLink'
 
 export const GET_RUNNING_CANVASES_REQUEST = 'GET_RUNNING_CANVASES_REQUEST'
@@ -10,7 +10,7 @@ export const GET_RUNNING_CANVASES_FAILURE = 'GET_RUNNING_CANVASES_FAILURE'
 
 const apiUrl = 'api/v1/canvases'
 
-import type { ApiError } from '../flowtype/common-types'
+import type { ErrorInUi } from '../flowtype/common-types'
 import type { Canvas } from '../flowtype/canvas-types'
 
 export const getRunningCanvases = () => (dispatch: Function) => {
@@ -42,7 +42,7 @@ const getCanvasesSuccess = (canvases: Array<Canvas>) => ({
     canvases
 })
 
-const getCanvasesFailure = (error: ApiError) => ({
+const getCanvasesFailure = (error: ErrorInUi) => ({
     type: GET_RUNNING_CANVASES_FAILURE,
     error
 })

@@ -82,7 +82,10 @@ describe('Canvas actions', () => {
             })
             request.respondWith({
                 status: 500,
-                response: new Error('test')
+                response: {
+                    message: 'test',
+                    code: 'TEST'
+                }
             })
         })
         
@@ -90,7 +93,10 @@ describe('Canvas actions', () => {
             type: actions.GET_RUNNING_CANVASES_REQUEST
         }, {
             type: actions.GET_RUNNING_CANVASES_FAILURE,
-            error: new Error('test')
+            error: {
+                message: 'test',
+                code: 'TEST'
+            }
         }]
         
         return store.dispatch(actions.getRunningCanvases())

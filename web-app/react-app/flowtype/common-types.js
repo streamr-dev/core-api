@@ -1,6 +1,12 @@
 
-export type ApiError = {
+export type ErrorFromApi = {
     error: string,
+    code?: string
+}
+
+export type ErrorInUi = {
+    message: string,
+    statusCode?: number,
     code?: string
 }
 

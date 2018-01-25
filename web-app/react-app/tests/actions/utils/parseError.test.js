@@ -1,6 +1,6 @@
 
 import expect from 'expect'
-import parseError from '../../../actions/utils/parseError'
+import {parseError} from '../../../actions/utils/parseApiResponse'
 
 describe('parseError', () => {
     it ('must first return res.response.data', () => {

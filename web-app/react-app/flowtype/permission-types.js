@@ -1,5 +1,5 @@
 
-import type {ApiError} from './common-types'
+import type {ErrorInUi} from './common-types'
 import type {User} from './user-types'
 
 type resourceType = 'DASHBOARD' | 'CANVAS' | 'STREAM'
@@ -14,7 +14,7 @@ export type Permission = {
     fetching?: boolean,
     new?: boolean,
     removed?: boolean,
-    error?: ApiError
+    error?: ErrorInUi
 }
 
 export type State = {
@@ -23,6 +23,6 @@ export type State = {
             [resourceId]: Array<Permission>
         }
     },
-    error: ?ApiError,
+    error: ?ErrorInUi,
     fetching: boolean
 }

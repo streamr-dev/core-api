@@ -1,5 +1,6 @@
 package com.unifina.controller.api
 
+import com.unifina.api.ApiException
 import com.unifina.api.SaveCanvasCommand
 import com.unifina.domain.security.Permission.Operation
 import com.unifina.domain.signalpath.Canvas
@@ -24,6 +25,7 @@ class CanvasApiController {
 
 	@StreamrApi
 	def index() {
+		throw new ApiException(500, "SOMETHING", "aoflksjdfsdflsdflkjsdflkj")
 		def criteria = apiService.createListCriteria(params, ["name"], {
 			// Filter by exact name
 			if (params.name) {

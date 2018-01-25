@@ -90,11 +90,17 @@ describe('Dashboard reducer', () => {
         it('should handle GET_AND_REPLACE_DASHBOARDS_FAILURE', () => {
             assert.deepStrictEqual(reducer(initialState, {
                 type: actions.GET_AND_REPLACE_DASHBOARDS_FAILURE,
-                error: new Error('test')
+                error: {
+                    message: 'test',
+                    code: 'TEST'
+                }
             }), {
                 ...initialState,
                 fetching: false,
-                error: new Error('test')
+                error: {
+                    message: 'test',
+                    code: 'TEST'
+                }
             })
         })
     })
@@ -147,7 +153,10 @@ describe('Dashboard reducer', () => {
             }), {
                 ...initialState,
                 fetching: false,
-                error: new Error('test')
+                error: {
+                    message: 'test',
+                    code: 'TEST'
+                }
             })
         })
     })
@@ -200,7 +209,10 @@ describe('Dashboard reducer', () => {
             }), {
                 ...initialState,
                 fetching: false,
-                error: new Error('test')
+                error: {
+                    message: 'test',
+                    code: 'TEST'
+                }
             })
         })
     })
@@ -242,11 +254,17 @@ describe('Dashboard reducer', () => {
         it('should handle DELETE_DASHBOARD_FAILURE', () => {
             assert.deepStrictEqual(reducer(initialState, {
                 type: actions.DELETE_DASHBOARD_FAILURE,
-                error: new Error('test')
+                error: {
+                    message: 'test',
+                    code: 'TEST'
+                }
             }), {
                 ...initialState,
                 fetching: false,
-                error: new Error('test')
+                error: {
+                    message: 'test',
+                    code: 'TEST'
+                }
             })
         })
     })
@@ -293,11 +311,17 @@ describe('Dashboard reducer', () => {
         it('should handle GET_MY_DASHBOARD_PERMISSIONS_FAILURE', () => {
             assert.deepStrictEqual(reducer(initialState, {
                 type: actions.GET_MY_DASHBOARD_PERMISSIONS_FAILURE,
-                error: new Error('test')
+                error: {
+                    message: 'test',
+                    code: 'TEST'
+                }
             }), {
                 ...initialState,
                 fetching: false,
-                error: new Error('test')
+                error: {
+                    message: 'test',
+                    code: 'TEST'
+                }
             })
         })
     })

@@ -1,7 +1,7 @@
 // @flow
 
 import axios from 'axios'
-import parseError from './utils/parseError'
+import {parseError} from './utils/parseApiResponse'
 import createLink from '../helpers/createLink'
 import _ from 'lodash'
 
@@ -38,7 +38,7 @@ export const CHANGE_DASHBOARD_ID = 'CHANGE_DASHBOARD_ID'
 
 const apiUrl = 'api/v1/dashboards'
 
-import type { ApiError } from '../flowtype/common-types'
+import type { ErrorInUi } from '../flowtype/common-types'
 import type { Dashboard, DashboardItem, Layout} from '../flowtype/dashboard-types'
 
 declare var Streamr: {
@@ -301,27 +301,27 @@ const getMyDashboardPermissionsSuccess = (id: Dashboard.id, permissions: Array<s
     permissions
 })
 
-const getAndReplaceDashboardsFailure = (error: ApiError) => ({
+const getAndReplaceDashboardsFailure = (error: ErrorInUi) => ({
     type: GET_AND_REPLACE_DASHBOARDS_FAILURE,
     error
 })
 
-const getDashboardFailure = (error: ApiError) => ({
+const getDashboardFailure = (error: ErrorInUi) => ({
     type: GET_DASHBOARD_FAILURE,
     error
 })
 
-const updateAndSaveDashboardFailure = (error: ApiError) => ({
+const updateAndSaveDashboardFailure = (error: ErrorInUi) => ({
     type: UPDATE_AND_SAVE_DASHBOARD_FAILURE,
     error
 })
 
-const deleteDashboardFailure = (error: ApiError) => ({
+const deleteDashboardFailure = (error: ErrorInUi) => ({
     type: DELETE_DASHBOARD_FAILURE,
     error
 })
 
-const getMyDashboardPermissionsFailure = (id: Dashboard.id, error: ApiError) => ({
+const getMyDashboardPermissionsFailure = (id: Dashboard.id, error: ErrorInUi) => ({
     type: GET_MY_DASHBOARD_PERMISSIONS_FAILURE,
     id,
     error

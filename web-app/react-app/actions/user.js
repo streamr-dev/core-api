@@ -1,12 +1,12 @@
 // @flow
 
 import axios from 'axios'
-import parseError from './utils/parseError'
+import {parseError} from './utils/parseApiResponse'
 import createLink from '../helpers/createLink'
 
 import {showSuccess, showError} from './notification'
 
-import type {ApiError} from '../flowtype/common-types'
+import type {ErrorInUi} from '../flowtype/common-types'
 import type {User} from '../flowtype/user-types'
 
 export const GET_CURRENT_USER_REQUEST = 'GET_CURRENT_USER_REQUEST'
@@ -26,9 +26,10 @@ export const getCurrentUser = () => (dispatch: Function) => {
     return axios.get(createLink(`${apiUrl}/me`))
         .then(({data}) => dispatch(getCurrentUserSuccess(data)))
         .catch(res => {
-            const error = parseError(res)
-            dispatch(getCurrentUserFailure(error))
-            dispatch(showError(error))
+            const e = parseError(res)
+            dispatch(getCurrentUserFailure(e))
+            dispatch(showError(e))
+            throw e
         })
 }
 
@@ -89,7 +90,7 @@ const getCurrentUserSuccess = (user: User) => ({
     user
 })
 
-const getCurrentUserFailure = (error: ApiError) => ({
+const getCurrentUserFailure = (error: ErrorInUi) => ({
     type: GET_CURRENT_USER_FAILURE,
     error
 })
@@ -103,7 +104,7 @@ const saveCurrentUserSuccess = (user: User) => ({
     user
 })
 
-const saveCurrentUserFailure = (error: ApiError) => ({
+const saveCurrentUserFailure = (error: ErrorInUi) => ({
     type: SAVE_CURRENT_USER_FAILURE,
     error
 })

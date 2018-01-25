@@ -102,14 +102,20 @@ describe('Permission actions', () => {
             const resourceId = 'asdfasdfasasd'
             moxios.stubRequest(`api/v1/dashboards/${resourceId}/permissions`, {
                 status: 500,
-                response: new Error('test')
+                response: {
+                    message: 'test',
+                    code: 'TEST'
+                }
             })
             
             const expectedActions = [{
                 type: actions.GET_RESOURCE_PERMISSIONS_REQUEST,
             }, {
                 type: actions.GET_RESOURCE_PERMISSIONS_FAILURE,
-                error: new Error('test')
+                error: {
+                    message: 'test',
+                    code: 'TEST'
+                }
             }]
             
             try {
@@ -294,11 +300,17 @@ describe('Permission actions', () => {
                     const requests = moxios.requests
                     requests.at(0).respondWith({
                         status: 500,
-                        response: new Error()
+                        response: {
+                            message: 'test',
+                            code: 'TEST'
+                        }
                     })
                     requests.at(1).respondWith({
                         status: 500,
-                        response: new Error()
+                        response: {
+                            message: 'test',
+                            code: 'TEST'
+                        }
                     })
                 })
                 
@@ -318,7 +330,10 @@ describe('Permission actions', () => {
                     resourceId,
                     permission: {
                         ...permissions[0],
-                        error: new Error()
+                        error: {
+                            message: 'test',
+                            code: 'TEST'
+                        }
                     }
                 }, {
                     type: actions.SAVE_ADDED_RESOURCE_PERMISSION_FAILURE,
@@ -326,7 +341,10 @@ describe('Permission actions', () => {
                     resourceId,
                     permission: {
                         ...permissions[1],
-                        error: new Error()
+                        error: {
+                            message: 'test',
+                            code: 'TEST'
+                        }
                     }
                 }]
                 
@@ -473,11 +491,17 @@ describe('Permission actions', () => {
                     const requests = moxios.requests
                     requests.at(0).respondWith({
                         status: 500,
-                        response: new Error()
+                        response: {
+                            message: 'test',
+                            code: 'TEST'
+                        }
                     })
                     requests.at(1).respondWith({
                         status: 500,
-                        response: new Error()
+                        response: {
+                            message: 'test',
+                            code: 'TEST'
+                        }
                     })
                 })
                 
@@ -497,7 +521,10 @@ describe('Permission actions', () => {
                     resourceId,
                     permission: {
                         ...permissions[1],
-                        error: new Error()
+                        error: {
+                            message: 'test',
+                            code: 'TEST'
+                        }
                     }
                 }, {
                     type: actions.SAVE_REMOVED_RESOURCE_PERMISSION_FAILURE,
@@ -505,7 +532,10 @@ describe('Permission actions', () => {
                     resourceId,
                     permission: {
                         ...permissions[2],
-                        error: new Error()
+                        error: {
+                            message: 'test',
+                            code: 'TEST'
+                        }
                     }
                 }]
                 

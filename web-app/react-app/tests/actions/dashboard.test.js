@@ -66,14 +66,20 @@ describe('Dashboard actions', () => {
         it('creates GET_ALL_INTEGRATION_KEYS_FAILURE when fetching integration keys has failed', async (done) => {
             moxios.stubRequest('api/v1/dashboards', {
                 status: 500,
-                response: new Error('test-error')
+                response: {
+                    message: 'test-error',
+                    code: 'TEST'
+                }
             })
             
             const expectedActions = [{
                 type: actions.GET_AND_REPLACE_DASHBOARDS_REQUEST
             }, {
                 type: actions.GET_AND_REPLACE_DASHBOARDS_FAILURE,
-                error: new Error('test-error')
+                error: {
+                    message: 'test-error',
+                    code: 'TEST'
+                }
             }]
             
             try {
@@ -121,7 +127,10 @@ describe('Dashboard actions', () => {
         it('creates GET_ALL_INTEGRATION_KEYS_FAILURE when fetching integration keys has failed', async (done) => {
             moxios.stubRequest('api/v1/dashboards', {
                 status: 500,
-                response: new Error('test-error')
+                response: {
+                    message: 'test-error',
+                    code: 'TEST'
+                }
             })
             
             const expectedActions = [{
@@ -189,7 +198,10 @@ describe('Dashboard actions', () => {
             }
             moxios.stubRequest(`api/v1/dashboards/${id}`, {
                 status: 500,
-                response: new Error('test')
+                response: {
+                    message: 'test',
+                    code: 'TEST'
+                }
             })
             
             const expectedActions = [{
@@ -201,7 +213,10 @@ describe('Dashboard actions', () => {
                 }
             }, {
                 type: actions.UPDATE_AND_SAVE_DASHBOARD_FAILURE,
-                error: new Error('test')
+                error: {
+                    message: 'test',
+                    code: 'TEST'
+                }
             }]
             
             try {
@@ -279,7 +294,10 @@ describe('Dashboard actions', () => {
                 assert.equal(request.config.method, 'delete')
                 request.respondWith({
                     status: 500,
-                    response: new Error('test')
+                    response: {
+                        message: 'test',
+                        code: 'TEST'
+                    }
                 })
             })
             
@@ -328,7 +346,10 @@ describe('Dashboard actions', () => {
             const id = 'asdfasdfasasd'
             moxios.stubRequest(`api/v1/dashboards/${id}/permissions/me`, {
                 status: 500,
-                response: new Error('test-error')
+                response: {
+                    message: 'test-error',
+                    code: 'TEST'
+                }
             })
             
             const expectedActions = [{
@@ -337,7 +358,10 @@ describe('Dashboard actions', () => {
             }, {
                 id,
                 type: originalActions.GET_MY_DASHBOARD_PERMISSIONS_FAILURE,
-                error: new Error('test-error')
+                error: {
+                    message: 'test-error',
+                    code: 'TEST'
+                }
             }]
             
             try {

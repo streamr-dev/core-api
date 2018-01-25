@@ -62,10 +62,16 @@ describe('Permission reducer', () => {
             assert.deepStrictEqual(
                 reducer({}, {
                     type: actions.GET_RESOURCE_PERMISSIONS_FAILURE,
-                    error: new Error('test-error')
+                    error: {
+                        message: 'test',
+                        code: 'TEST'
+                    }
                 }), {
                     fetching: false,
-                    error: new Error('test-error')
+                    error: {
+                        message: 'test',
+                        code: 'TEST'
+                    }
                 })
         })
     })
@@ -334,7 +340,10 @@ describe('Permission reducer', () => {
                     permission: {
                         operation: 'test',
                         user: 'test',
-                        error: new Error('test')
+                        error: {
+                            message: 'test',
+                            code: 'TEST'
+                        }
                     }
                 }), {
                     byTypeAndId: {
@@ -345,7 +354,10 @@ describe('Permission reducer', () => {
                                 new: false,
                                 removed: false,
                                 fetching: false,
-                                error: new Error('test')
+                                error: {
+                                    message: 'test',
+                                    code: 'TEST'
+                                }
                             }]
                         }
                     },
@@ -447,7 +459,10 @@ describe('Permission reducer', () => {
                     permission: {
                         operation: 'test',
                         user: 'test',
-                        error: new Error('test')
+                        error: {
+                            message: 'test',
+                            code: 'TEST'
+                        }
                     }
                 }), {
                     byTypeAndId: {
@@ -457,7 +472,10 @@ describe('Permission reducer', () => {
                                 user: 'test',
                                 new: true,
                                 fetching: false,
-                                error: new Error('test')
+                                error: {
+                                    message: 'test',
+                                    code: 'TEST'
+                                }
                             }]
                         }
                     },

@@ -1,7 +1,7 @@
 
 // These are not complete, but I don't need more right now. When we do, we'll fill these
 
-import type {UiChannel} from './common-types.js'
+import type {UiChannel, ErrorInUi} from './common-types.js'
 
 export type Canvas = {
     id: string,
@@ -53,7 +53,7 @@ type CanvasModuleOutput = {
 
 export type CanvasReducerState = {
     list: Array<Canvas>,
-    error?: ?string,
+    error: ?ErrorInUi,
     fetching?: boolean
 }
 
@@ -61,5 +61,5 @@ export type CanvasReducerAction = {
     type: string,
     id?: number,
     canvases?: Array<Canvas>,
-    error?: string
+    error?: ErrorInUi
 }

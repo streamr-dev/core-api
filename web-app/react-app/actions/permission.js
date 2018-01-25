@@ -3,7 +3,7 @@
 import axios from 'axios'
 import path from 'path'
 import settle from 'promise-settle'
-import parseError from './utils/parseError'
+import {parseError} from './utils/parseApiResponse'
 import createLink from '../helpers/createLink'
 
 import {showError, showSuccess} from './notification'
@@ -23,7 +23,7 @@ export const SAVE_REMOVED_RESOURCE_PERMISSION_REQUEST = 'SAVE_REMOVED_RESOURCE_P
 export const SAVE_REMOVED_RESOURCE_PERMISSION_SUCCESS = 'SAVE_REMOVED_RESOURCE_PERMISSIONS_SUCCESS'
 export const SAVE_REMOVED_RESOURCE_PERMISSION_FAILURE = 'SAVE_REMOVED_RESOURCE_PERMISSIONS_FAILURE'
 
-import type {ApiError} from '../flowtype/common-types'
+import type {ErrorInUi} from '../flowtype/common-types'
 import type {Permission} from '../flowtype/permission-types'
 import type {User} from '../flowtype/user-types'
 
@@ -191,7 +191,7 @@ const getResourcePermissionsSuccess = (resourceType: Permission.resourceType, re
     permissions
 })
 
-const getResourcePermissionsFailure = (error: ApiError) => ({
+const getResourcePermissionsFailure = (error: ErrorInUi) => ({
     type: GET_RESOURCE_PERMISSIONS_FAILURE,
     error
 })
