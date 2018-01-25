@@ -4,10 +4,11 @@ declare var Streamr: any
 declare var StreamrCredentialsControl: any
 
 import React, {Component} from 'react'
+import {Panel} from 'react-bootstrap'
 
-export default class APICredentials extends Component {
+export default class APICredentials extends Component<{}> {
     
-    apiHandlerEl: HTMLDivElement // Typechecking may not work correctly but without this line it does not work at all
+    apiHandlerEl: ?HTMLDivElement // Typechecking may not work correctly but without this line it does not work at all
     
     componentDidMount() {
         new StreamrCredentialsControl({
@@ -21,17 +22,9 @@ export default class APICredentials extends Component {
     
     render() {
         return (
-            <div className="panel">
-                <div className="panel-heading">
-                    <span className="panel-title">API Credentials</span>
-                    <div className="panel-heading-controls">
-                    
-                    </div>
-                </div>
-                <div className="panel-body">
-                    <div ref={item => this.apiHandlerEl = item} className="credentials-control row"/>
-                </div>
-            </div>
+            <Panel header="API Credentials">
+                <div ref={item => this.apiHandlerEl = item} className="credentials-control row"/>
+            </Panel>
         )
     }
 }

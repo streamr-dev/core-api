@@ -56,5 +56,8 @@ class UrlMappings {
 		"/api/v1/oembed"(controller: "oembedApi", action: "index")
 
 		"/api/v1/login/$action"(controller: "challengeApi")
+
+		// Mappings for pages using React Router (the root for the router)
+		"/dashboard/editor/$id**?"(controller: "dashboard", action: "editor")
 	}
 }

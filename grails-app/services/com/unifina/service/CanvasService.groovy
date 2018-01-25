@@ -16,6 +16,7 @@ import com.unifina.utils.Globals
 import com.unifina.utils.GlobalsFactory
 import grails.converters.JSON
 import grails.transaction.Transactional
+import groovy.json.JsonBuilder
 import groovy.transform.CompileStatic
 import org.codehaus.groovy.grails.web.json.JSONObject
 
@@ -53,7 +54,7 @@ class CanvasService {
 
 		canvas.name = newSignalPathMap.name
 		canvas.hasExports = newSignalPathMap.hasExports
-		canvas.json = newSignalPathMap as JSON
+		canvas.json = new JsonBuilder(newSignalPathMap).toPrettyString() // JsonBuilder is more stable than "as JSON"
 		canvas.state = Canvas.State.STOPPED
 		canvas.adhoc = command.isAdhoc()
 
@@ -149,7 +150,7 @@ class CanvasService {
 	 * Deprecated: runtime permission checking now much more comprehensive in SignalPathService
 	 */
 	@CompileStatic
-	Map authorizedGetModuleOnCanvas(String canvasId, Integer moduleId, Long dashboardId, SecUser user, Permission.Operation op) {
+	Map authorizedGetModuleOnCanvas(String canvasId, Integer moduleId, String dashboardId, SecUser user, Permission.Operation op) {
 		Canvas canvas = Canvas.get(canvasId)
 
 		if (!canvas) {
@@ -179,7 +180,7 @@ class CanvasService {
 		return op == Permission.Operation.READ && canvas.example || permissionService.check(user, canvas, op)
 	}
 
-	private boolean hasModulePermissionViaDashboard(Canvas canvas, Integer moduleId, Long dashboardId, SecUser user, Permission.Operation op) {
+	private boolean hasModulePermissionViaDashboard(Canvas canvas, Integer moduleId, String dashboardId, SecUser user, Permission.Operation op) {
 		if (!dashboardId) {
 			return false
 		}
@@ -193,7 +194,7 @@ class CanvasService {
 	}
 
 	private Map constructNewSignalPathMap(Canvas canvas, SaveCanvasCommand command, SecUser user, boolean resetUi) {
-		Map inputSignalPathMap = canvas.json != null ? JSON.parse(canvas.json) : [:]
+		Map inputSignalPathMap = JSON.parse(canvas.json != null ? canvas.json : "{}")
 
 		inputSignalPathMap.name = command.name
 		inputSignalPathMap.modules = command.modules

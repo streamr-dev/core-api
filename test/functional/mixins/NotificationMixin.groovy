@@ -27,13 +27,13 @@ trait NotificationMixin {
 
 	def waitForSuccessNotification() {
 		waitFor {
-			findSuccessNotification().displayed
+			findSuccessNotification()[0].displayed
 		}
 	}
 
 	def waitForErrorNotification() {
 		waitFor {
-			findErrorNotification().displayed
+			findErrorNotification()[0].displayed
 		}
 	}
 

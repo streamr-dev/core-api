@@ -1,69 +1,56 @@
 // @flow
 
-import React from 'react'
+import React, {Component} from 'react'
 
 import { connect } from 'react-redux'
-import { getIntegrationKeysByService, createIntegrationKey, deleteIntegrationKey } from '../../../../actions/integrationKeys'
+import { getIntegrationKeysByService, createIntegrationKey, deleteIntegrationKey } from '../../../../actions/integrationKey'
 
 import {Col, ControlLabel} from 'react-bootstrap'
 
-import IntegrationKeyHandlerInput from '../IntegrationKeyHandlerInput'
-import IntegrationKeyHandlerTable from '../IntegrationKeyHandlerTable'
+import IntegrationKeyHandlerInput from './IntegrationKeyHandlerInput'
+import IntegrationKeyHandlerTable from './IntegrationKeyHandlerTable'
 
 import styles from './integrationKeyHandlerSegment.pcss'
 
-declare var Streamr: any
+import type {IntegrationKey, State as IntegrationKeyState} from '../../../../flowtype/integration-key-types'
 
-class IntegrationKeyHandlerSegment extends React.Component {
+type Props = {
+    tableFields: Array<string>,
+    inputFields: Array<string>,
+    integrationKeys: Array<IntegrationKey>,
+    service: IntegrationKey.service,
+    name: IntegrationKey.name,
+    className: string,
+    deleteIntegrationKey: (id: IntegrationKey.id) => void,
+    createIntegrationKey: (key: IntegrationKey) => void,
+    getIntegrationKeysByService: (service: IntegrationKey.service) => void
+}
+
+export class IntegrationKeyHandlerSegment extends Component<Props> {
     
-    props: {
-        tableFields: Array<string>,
-        inputFields: Array<string>,
-        integrationKeys: Array<{
-            id: string,
-            name: string,
-            json: {}
-        }>,
-        service: string,
-        name: string,
-        className: string,
-        dispatch: Function
-    }
-    
-    onNew: Function
-    onDelete: Function
-    
-    constructor(props) {
-        super(props)
-        
-        this.onNew = this.onNew.bind(this)
-        this.onDelete = this.onDelete.bind(this)
-    }
     componentDidMount() {
-        this.props.dispatch(getIntegrationKeysByService(this.props.service))
+        // TODO: Move to (yet non-existent) router
+        this.props.getIntegrationKeysByService(this.props.service)
     }
     
-    onNew(integrationKey) {
+    onNew = (integrationKey: IntegrationKey) => {
         const name = integrationKey.name
         const service = this.props.service
         delete integrationKey.name
-        return this.props.dispatch(createIntegrationKey({
+        return this.props.createIntegrationKey({
             name,
             service,
             json: integrationKey
-        }))
-            .then(() => Streamr.showSuccess('IntegrationKey created successfully!'))
-            .catch(e => Streamr.showError('Error!', e.message))
+        })
     }
     
-    onDelete(id) {
-        this.props.dispatch(deleteIntegrationKey(id))
-            .then(() => Streamr.showSuccess('IntegrationKey removed successfully!'))
+    onDelete = (id: IntegrationKey.id) => {
+        this.props.deleteIntegrationKey(id)
     }
     
     render() {
         return (
-            <div className={this.props.className}>
+            <div className={this.props.className || ''}>
                 <Col xs={12}>
                     <ControlLabel className={styles.label}>
                         {this.props.name}
@@ -83,9 +70,21 @@ class IntegrationKeyHandlerSegment extends React.Component {
     }
 }
 
-const mapStateToProps = ({integrationKey}, props) => ({
-    integrationKeys: integrationKey.listsByService[props.service] || [],
-    error: integrationKey.error
+export const mapStateToProps = ({integrationKey: {listsByService, error}}: {integrationKey: IntegrationKeyState}, props: Props) => ({
+    integrationKeys: listsByService[props.service] || [],
+    error
 })
 
-export default connect(mapStateToProps)(IntegrationKeyHandlerSegment)
+export const mapDispatchToProps = (dispatch: Function) => ({
+    deleteIntegrationKey(id: IntegrationKey.id) {
+        dispatch(deleteIntegrationKey(id))
+    },
+    createIntegrationKey(key: IntegrationKey) {
+        dispatch(createIntegrationKey(key))
+    },
+    getIntegrationKeysByService(service: IntegrationKey.service) {
+        dispatch(getIntegrationKeysByService(service))
+    }
+})
+
+export default connect(mapStateToProps, mapDispatchToProps)(IntegrationKeyHandlerSegment)
