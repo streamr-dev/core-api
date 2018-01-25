@@ -22,6 +22,9 @@ out/
 .idea/compiler.xml
 .idea/copyright/*
 
+# Plugin files that may be noisy
+.idea/markdown-*
+
 # project files
 target
 node_modules
