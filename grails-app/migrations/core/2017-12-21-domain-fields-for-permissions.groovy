@@ -14,7 +14,7 @@ databaseChangeLog = {
 
 	changeSet(author: "eric", id: "domain-fields-for-permissions-2") {
 		addColumn(tableName: "permission") {
-			column(name: "dashboard_id", type: "bigint")
+			column(name: "dashboard_id", type: "varchar(255)")
 		}
 	}
 
@@ -146,7 +146,7 @@ databaseChangeLog = {
 					if (clazz == 'com.unifina.domain.signalpath.Canvas') {
 						updateValues.push([id, "canvas_id", stringId])
 					} else if (clazz == 'com.unifina.domain.dashboard.Dashboard') {
-						updateValues.push([id, "dashboard_id", longId])
+						updateValues.push([id, "dashboard_id", stringId])
 					} else if (clazz == 'com.unifina.domain.data.Feed') {
 						updateValues.push([id, "feed_id", longId])
 					} else if (clazz == 'com.unifina.domain.signalpath.ModulePackage') {

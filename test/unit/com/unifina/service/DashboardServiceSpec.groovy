@@ -125,10 +125,12 @@ class DashboardServiceSpec extends Specification {
 
 	def "create() also creates all permissions for new dashboard"() {
 		setup:
-		SortedSet<DashboardItem> items = new TreeSet<DashboardItem>()
-		items.add(new DashboardItem(title: "test1", ord: new Integer(0), canvas: new Canvas(), module: 0, size: "b", webcomponent: "b"))
-		items.add(new DashboardItem(title: "test2", ord: new Integer(1), canvas: new Canvas(), module: 0, size: "b", webcomponent: "b"))
+		def items = [
+			new SaveDashboardItemCommand(title: "test1", canvas: new Canvas(), module: 0, webcomponent: "b"),
+			new SaveDashboardItemCommand(title: "test2", canvas: new Canvas(), module: 0, webcomponent: "b")
+		]
 		def user = new SecUser(username: "tester").save(validate: false, failOnError: true)
+
 		when:
 		SaveDashboardCommand command = new SaveDashboardCommand([
 			name:"test-create",
@@ -138,8 +140,7 @@ class DashboardServiceSpec extends Specification {
 
 		then:
 		Permission.findAllByDashboard(dashboard)*.toMap() == [
-			[id: 20, user:"tester"
-, operation: "read"],
+			[id: 20, user:"tester", operation: "read"],
 			[id: 21, user: "tester", operation: "write"],
 			[id: 22, user: "tester", operation: "share"],
 		]
@@ -170,11 +171,11 @@ class DashboardServiceSpec extends Specification {
 
 	def "update() does not create new permissions"() {
 		when:
-		assert Permission.countByDashboard(Dashboard.get(2)) == 3
-		def dashboard = service.update(2L, new SaveDashboardCommand(name: "newName"), user)
+		assert Permission.countByDashboard(Dashboard.get("2")) == 3
+		service.update("2", new SaveDashboardCommand(name: "newName"), user)
 
 		then:
-		Permission.countByDashboard(Dashboard.get(2)) == 3
+		Permission.countByDashboard(Dashboard.get("2")) == 3
 	}
 
 	def "findDashboardItem() cannot fetch non-existent dashboard"() {
