@@ -25,7 +25,7 @@ export class ShareDialogOwnerRow extends Component<Props> {
         if (!this.props.anonymousPermission) {
             this.props.addPublicPermission()
         } else {
-            this.props.revokePublicPermission()
+            this.props.revokePublicPermission(this.props.anonymousPermission)
         }
     }
     
@@ -67,8 +67,8 @@ export const mapDispatchToProps = (dispatch: Function, ownProps: Props) => ({
             operation: 'read'
         }))
     },
-    revokePublicPermission() {
-        dispatch(removeResourcePermission(ownProps.resourceType, ownProps.resourceId, ownProps.anonymousPermission))
+    revokePublicPermission(anonymousPermission: Permission) {
+        dispatch(removeResourcePermission(ownProps.resourceType, ownProps.resourceId, anonymousPermission))
     }
 })
 
