@@ -116,7 +116,10 @@
     var accessListTemplate = _.template(
         '<div class="row">' +
             '<div class="owner-row col-xs-12">' +
-                '<div class="col-xs-12 col-sm-12">' +
+                '<div class="col-xs-5 col-sm-5 access-list-caption">' +
+                    'Access rights:' +
+                '</div>' +
+                '<div class="col-xs-7 col-sm-7">' +
                     '<div class="pull-right switcher-container">' +
                         '<input type="checkbox" class="anonymous-switcher pull-right" {{ checked ? "checked" : "" }} >' +
                     '</div>' +
@@ -148,7 +151,7 @@
                 on_state_content: '<i class="fa fa-check"></i>',
                 off_state_content: '<i class="fa fa-times"></i>',
             })
-            this.$(".switcher-toggler").html('<i class="fa fa-globe">')
+            this.$(".switcher-toggler").html('<i class="fa fa-globe anonymous-switcher-knob">')
 
             this.listenTo(accessList, 'add', this.createAccessView)
             this.listenTo(accessList, 'reset', this.addAll)
