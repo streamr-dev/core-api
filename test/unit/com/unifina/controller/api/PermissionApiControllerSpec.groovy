@@ -44,18 +44,18 @@ class PermissionApiControllerSpec extends Specification {
 		otherKey.id = "otherApiKey"
 		otherKey.save(failOnError: true, validate: true)
 
-		def newCanvas = { String id, SecUser owner ->
-			def c = new Canvas(user: owner)
+		def newCanvas = { String id ->
+			def c = new Canvas()
 			c.id = id
 			return c.save(validate: false)
 		}
-		canvasOwned = newCanvas("own", me)
-		canvasShared = newCanvas("shared", other)
-		canvasRestricted = newCanvas("restricted", other)
-		canvasPublic = newCanvas("public", other)
+		canvasOwned = newCanvas("own")
+		canvasShared = newCanvas("shared")
+		canvasRestricted = newCanvas("restricted")
+		canvasPublic = newCanvas("public")
 
 		def newStream = { String id, SecUser owner ->
-			def c = new Stream(user: owner)
+			def c = new Stream()
 			c.id = id
 			return c.save(validate: false)
 		}

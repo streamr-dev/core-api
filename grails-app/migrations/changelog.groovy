@@ -86,4 +86,6 @@ databaseChangeLog = {
 	include file: 'core/2017-06-16-dashboard-item-field-update.groovy'
 	include file: 'core/2018-01-24-set-webcomponent-of-existing-canvas-modules.groovy'
 	include file: 'core/2018-01-24-set-webcomponent-of-imagemap-module.groovy'
+	include file: 'core/2017-12-21-domain-fields-for-permissions.groovy'
+	include file: 'core/2018-01-16-remove-user-from-domain-objects.groovy'
 }

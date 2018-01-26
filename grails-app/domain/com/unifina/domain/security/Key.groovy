@@ -1,5 +1,6 @@
 package com.unifina.domain.security
 
+import com.unifina.security.Userish
 import com.unifina.utils.IdGenerator
 import groovy.transform.CompileStatic
 
@@ -8,7 +9,7 @@ import groovy.transform.CompileStatic
  * 	(1) authenticates a <code>SecUser</code> or
  * 	(2) acts as an 'anonymous' key that has permissions of its own
  */
-class Key {
+class Key implements Userish {
 	String id
 	String name
 	SecUser user
@@ -22,6 +23,23 @@ class Key {
 		id generator: IdGenerator.name // Note: doesn't apply in unit tests
 	}
 
+	static hasMany = [permissions: Permission]
+
+	@Override
+	boolean equals(Object obj) {
+		if (obj instanceof Key) {
+			if (obj.id == null || this.id == null) {
+				return this.is(obj)
+			} else {
+				return obj.id == this.id
+			}
+		} else if (obj instanceof String) {
+			return obj == this.id
+		} else {
+			return false
+		}
+	}
+
 	@CompileStatic
 	Map toMap() {
 		return [
@@ -29,5 +47,10 @@ class Key {
 			name: name,
 			user: user?.username
 		]
+	}
+
+	@Override
+	Userish resolveToUserish() {
+		return user ?: this
 	}
 }
