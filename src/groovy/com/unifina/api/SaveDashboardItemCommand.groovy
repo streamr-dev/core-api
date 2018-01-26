@@ -12,7 +12,7 @@ class SaveDashboardItemCommand {
 	String title
 	Canvas canvas
 	Integer module
-	String webcomponent
+	String webcomponent // TODO: can be removed?
 
 	static constraints = {
 		id nullable: true

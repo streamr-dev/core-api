@@ -6,6 +6,7 @@ import com.unifina.domain.dashboard.DashboardItem
 import com.unifina.domain.security.Permission
 import com.unifina.domain.security.SecUser
 import com.unifina.domain.signalpath.Canvas
+import com.unifina.utils.Webcomponent
 import grails.converters.JSON
 import grails.test.mixin.Mock
 import grails.test.mixin.TestFor
@@ -28,9 +29,9 @@ class DashboardServiceSpec extends Specification {
 		(1..3).each {
 			def d = new Dashboard(name: "my-dashboard-$it").save(failOnError: true)
 			if (it == 3) {
-				d.addToItems(new DashboardItem(title: "item1").save(validate: false, failOnError: true))
-				d.addToItems(new DashboardItem(title: "item2").save(validate: false, failOnError: true))
-				d.addToItems(new DashboardItem(title: "item3").save(validate: false, failOnError: true))
+				d.addToItems(new DashboardItem(title: "item1", webcomponent: Webcomponent.STREAMR_CHART).save(validate: false, failOnError: true))
+				d.addToItems(new DashboardItem(title: "item2", webcomponent: Webcomponent.STREAMR_HEATMAP).save(validate: false, failOnError: true))
+				d.addToItems(new DashboardItem(title: "item3", webcomponent: Webcomponent.STREAMR_MAP).save(validate: false, failOnError: true))
 			}
 			permissionService.systemGrantAll(user, d)
 		}
@@ -102,15 +103,16 @@ class DashboardServiceSpec extends Specification {
 		def user = new SecUser(name: "tester").save(validate: false)
 		def canvas = new Canvas(json: new JsonBuilder([
 				modules: [
-						[hash: 1, uiChannel: [webcomponent: "streamr-chart"]]
+						[hash: 1, uiChannel: [webcomponent: "streamr-client"]],
+						[hash: 3, uiChannel: [webcomponent: "streamr-switcher"]]
 				]
 		]).toString()).save(failOnError: true, validate: false)
 		when:
 		SaveDashboardCommand command = new SaveDashboardCommand([
 				name : "test-create",
 				items: [
-						new SaveDashboardItemCommand(title: "test1", canvas: canvas, module: 1),
-						new SaveDashboardItemCommand(title: "test2", canvas: canvas, module: 1)
+						new SaveDashboardItemCommand(title: "test1", canvas: canvas, module: 1, webcomponent: "streamr-client"),
+						new SaveDashboardItemCommand(title: "test2", canvas: canvas, module: 3, webcomponent: "streamr-switcher")
 				]
 		])
 		service.create(command, user)
@@ -125,11 +127,17 @@ class DashboardServiceSpec extends Specification {
 
 	def "create() also creates all permissions for new dashboard"() {
 		setup:
-		def items = [
-			new SaveDashboardItemCommand(title: "test1", canvas: new Canvas(), module: 0, webcomponent: "b"),
-			new SaveDashboardItemCommand(title: "test2", canvas: new Canvas(), module: 0, webcomponent: "b")
-		]
 		def user = new SecUser(username: "tester").save(validate: false, failOnError: true)
+		def canvas = new Canvas(json: new JsonBuilder([
+			modules: [
+				[hash: 1, uiChannel: [webcomponent: "streamr-chart"]],
+				[hash: 6, uiChannel: [webcomponent: "streamr-switcher"]]
+			]
+		]).toString()).save(failOnError: true, validate: false)
+		def items = [
+			new SaveDashboardItemCommand(title: "test1", canvas: canvas, module: 1, webcomponent: "streamr-chart"),
+			new SaveDashboardItemCommand(title: "test2", canvas: canvas, module: 6, webcomponent: "streamr-switcher")
+		]
 
 		when:
 		SaveDashboardCommand command = new SaveDashboardCommand([
@@ -372,9 +380,10 @@ class DashboardServiceSpec extends Specification {
 		def itemToUpdateId = "1"
 
 		def command = new SaveDashboardItemCommand(
-				title: "updated-item",
-				canvas: canvas,
-				module: 1
+			title: "updated-item",
+			canvas: canvas,
+			module: 1,
+			webcomponent: "streamr-map"
 		)
 
 		assert DashboardItem.findById(itemToUpdateId) != null
