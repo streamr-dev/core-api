@@ -1,6 +1,7 @@
 package com.unifina.controller.security
 
 import com.unifina.api.ApiException
+import com.unifina.domain.security.SecUser
 import com.unifina.domain.signalpath.Canvas
 import com.unifina.service.CanvasService
 import com.unifina.service.SignalPathService
@@ -20,6 +21,9 @@ class HostController {
 			// Shut down task workers
 			taskService.stopAllTaskWorkers()
 
+			// Get users of running canvases
+			Map<String, SecUser> canvasIdToUser = signalPathService.getUsersOfRunningCanvases()
+
 			// Stop all canvases
 			List<Canvas> stoppedCanvases = signalPathService.stopAllLocalCanvases()
 
@@ -28,7 +32,7 @@ class HostController {
 
 			// Create start tasks
 			stoppedCanvases.each {
-				canvasService.startRemote(it, it.user, false, true)
+				canvasService.startRemote(it, canvasIdToUser[it.id], false, true)
 			}
 
 			render(stoppedCanvases*.toMap() as JSON)

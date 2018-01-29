@@ -1,9 +1,7 @@
 package com.unifina.signalpath.blockchain;
 
-import com.amazonaws.util.json.JSONObject;
 import com.google.gson.JsonArray;
 import com.unifina.utils.MapTraversal;
-import grails.converters.JSON;
 
 import java.io.Serializable;
 import java.util.LinkedHashMap;

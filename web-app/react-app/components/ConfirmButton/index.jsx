@@ -53,7 +53,7 @@ export default class ConfirmButton extends Component<Props, State> {
     
     render() {
         return (
-            <Button key="2"
+            <Button
                 {...this.props.buttonProps}
                 style={{
                     padding: 0
@@ -71,7 +71,8 @@ export default class ConfirmButton extends Component<Props, State> {
                 >
                     {this.props.children}
                 </div>
-                <Modal key="3" {...this.props.modalProps} show={this.state.open}>
+                {this.props.children}
+                <Modal {...this.props.modalProps} show={this.state.open}>
                     <Modal.Header>
                         <Modal.Title>
                             {this.props.confirmTitle}

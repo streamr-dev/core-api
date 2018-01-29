@@ -26,7 +26,7 @@ type State = {
 }
 
 export class DashboardItemTitleRow extends Component<Props, State> {
-    
+    saveButton: ?HTMLElement
     static defaultProps = {
         isLocked: false
     }
@@ -43,6 +43,13 @@ export class DashboardItemTitleRow extends Component<Props, State> {
         this.setState({
             editing: true
         })
+    }
+    
+    onBlur = (e: { relatedTarget: HTMLElement }) => {
+        // This hack prevents clicking saveButton from first closing the editing and the starting it again
+        if (this.saveButton && this.saveButton !== e.relatedTarget && !this.saveButton.contains(e.relatedTarget)) {
+            this.endEdit()
+        }
     }
     
     endEdit = () => {
@@ -70,7 +77,7 @@ export class DashboardItemTitleRow extends Component<Props, State> {
                             name="dashboard-item-name"
                             value={item.title}
                             onChange={this.saveName}
-                            onBlur={this.endEdit}
+                            onBlur={this.onBlur}
                         />
                     ) : (
                         <span className={dragCancelClassName}>
@@ -88,6 +95,7 @@ export class DashboardItemTitleRow extends Component<Props, State> {
                                     className={`btn-outline dark ${styles.endEditButton}`}
                                     title="Ready"
                                     onClick={this.endEdit}
+                                    componentClass={(props) => <button {...props} ref={el => this.saveButton = el}/>}
                                 >
                                     <FontAwesome name="check"/>
                                 </Button>

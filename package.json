@@ -3,6 +3,10 @@
   "version": "0.0.1",
   "description": "",
   "main": "index.js",
+  "engines": {
+    "node": ">= 8.0.0",
+    "npm": ">= 5.0.0"
+  },
   "directories": {
     "test": "test"
   },
@@ -48,11 +52,11 @@
     "change-case": "^3.0.1",
     "css-loader": "^0.28.1",
     "css-mqpacker": "^6.0.0",
+    "eslint": "4.13.0",
     "draggabilly": "^2.1.1",
     "empty": "^0.10.1",
     "enzyme": "^3.1.1",
     "enzyme-adapter-react-16": "^1.0.4",
-    "eslint": "^4.13.0",
     "eslint-loader": "^1.7.1",
     "eslint-plugin-async-await": "0.0.0",
     "eslint-plugin-flowtype": "^2.40.1",

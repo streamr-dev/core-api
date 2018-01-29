@@ -79,9 +79,9 @@ StreamrTable.prototype.receiveResponse = function (d) {
 	if (d.nr) {
 		this.addRow(d.nr, d.id);
 		// Remove last row(s) if table full
-		if (this.options.maxRows) {
-            $(this.tableBody).children().slice(this.options.maxRows, Infinity);
-        }
+	    	while ($(this.tableBody).children().length > (this.options.maxRows || Infinity)) {
+			$(this.tableBody).children().last().remove()       
+		}
 	} else if (d.nc) {
 	    // New contents: 2d array that replaces existing contents
 		this.tableBody.empty();

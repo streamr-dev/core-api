@@ -207,6 +207,41 @@ describe('Permission reducer', () => {
                     fetching: false
                 })
         })
+        it('should remove anonymous permission on REMOVE_RESOURCE_PERMISSION', () => {
+            assert.deepStrictEqual(
+                reducer({
+                    byTypeAndId: {
+                        testResourceType: {
+                            testResourceId: [{
+                                anonymous: true,
+                                operation: 'test',
+                                removed: false
+                            }]
+                        }
+                    }
+                }, {
+                    type: actions.REMOVE_RESOURCE_PERMISSION,
+                    resourceId: 'testResourceId',
+                    resourceType: 'testResourceType',
+                    permission: {
+                        anonymous: true
+                    }
+                }), {
+                    byTypeAndId: {
+                        testResourceType: {
+                            testResourceId: [{
+                                anonymous: true,
+                                operation: 'test',
+                                fetching: false,
+                                removed: true,
+                                error: null
+                            }]
+                        }
+                    },
+                    error: null,
+                    fetching: false
+                })
+        })
     })
     
     describe('SAVE_REMOVED_RESOURCE_PERMISSION', () => {

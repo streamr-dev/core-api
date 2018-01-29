@@ -12,6 +12,8 @@ module.exports = exports = {
         'baseUrl': true
     },
     
+    global: true,
+    
     parser: 'babel-eslint',
     parserOptions: {
         ecmaVersion: 6,

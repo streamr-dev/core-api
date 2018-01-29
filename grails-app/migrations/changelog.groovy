@@ -83,4 +83,12 @@ databaseChangeLog = {
 	include file: 'core/2017-11-10-fix-run-canvas-spec.groovy'
 	include file: 'core/2017-11-23-encrypt-private-keys.groovy'
 	include file: 'core/2018-01-11-require-all-module.groovy'
+	include file: 'core/2018-01-24-login-challenge.groovy'
+	include file: 'core/2017-05-31-dashboard-layout-field.groovy'
+	include file: 'core/2017-06-01-dashboard-id-to-string.groovy'
+	include file: 'core/2017-06-16-dashboard-item-field-update.groovy'
+	include file: 'core/2018-01-24-set-webcomponent-of-existing-canvas-modules.groovy'
+	include file: 'core/2018-01-24-set-webcomponent-of-imagemap-module.groovy'
+	include file: 'core/2017-12-21-domain-fields-for-permissions.groovy'
+	include file: 'core/2018-01-16-remove-user-from-domain-objects.groovy'
 }
