@@ -247,21 +247,6 @@ class StreamApiControllerSpec extends Specification {
 		stream.config == null
 	}
 
-	void "updating Stream with invalid mongodb settings raises validation error"() {
-		when:
-		request.addHeader("Authorization", "Token apiKey")
-		params.id = streamOneId
-		request.method = "PUT"
-		request.json = '{name: "newName", description: "newDescription", config: {mongodb: {host: null}}}'
-		request.requestURI = "/api/v1/stream"
-		withFilters([action: "update"]) {
-			controller.update()
-		}
-
-		then:
-		thrown ValidationException
-	}
-
 	void "cannot update non-existent Stream"() {
 		when:
 		request.addHeader("Authorization", "Token apiKey")
