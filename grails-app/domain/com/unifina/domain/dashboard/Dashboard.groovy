@@ -1,13 +1,11 @@
 package com.unifina.domain.dashboard
 
-import com.unifina.domain.security.SecUser
 import com.unifina.utils.IdGenerator
 import grails.converters.JSON
+import com.unifina.domain.security.Permission
 import groovy.transform.CompileStatic
 
 class Dashboard {
-
-	SecUser user
 
 	String id
 	String name
@@ -17,7 +15,10 @@ class Dashboard {
 
 	String layout = "{}" // JSON
 
-	static hasMany = [items: DashboardItem]
+	static hasMany = [
+		items: DashboardItem,
+		permissions: Permission
+	]
 
 	static constraints = {
 		name nullable: true, blank: false

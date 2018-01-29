@@ -6,6 +6,7 @@ import com.unifina.domain.dashboard.DashboardItem
 import com.unifina.domain.security.Permission
 import com.unifina.domain.security.SecUser
 import com.unifina.domain.signalpath.Canvas
+import com.unifina.utils.Webcomponent
 import grails.converters.JSON
 import grails.test.mixin.Mock
 import grails.test.mixin.TestFor
@@ -13,30 +14,31 @@ import groovy.json.JsonBuilder
 import spock.lang.Specification
 
 @TestFor(DashboardService)
-@Mock([Canvas, Dashboard, DashboardItem, Permission, SecUser])
+@Mock([Canvas, Dashboard, DashboardItem, Permission, SecUser, PermissionService])
 class DashboardServiceSpec extends Specification {
 
 	SecUser user = new SecUser(username: "first@user.com", name: "user")
 	SecUser otherUser = new SecUser(username: "second@user.com", name: "someoneElse")
 
 	def setup() {
-		PermissionService permissionService = service.permissionService = new PermissionService()
-		permissionService.grailsApplication = grailsApplication
+		PermissionService permissionService = service.permissionService
 
 		user.save(failOnError: true, validate: false)
 		otherUser.save(failOnError: true, validate: false)
 
 		(1..3).each {
-			def d = new Dashboard(name: "my-dashboard-$it", user: user).save(failOnError: true)
+			def d = new Dashboard(name: "my-dashboard-$it").save(failOnError: true)
 			if (it == 3) {
-				d.addToItems(new DashboardItem(title: "item1").save(validate: false, failOnError: true))
-				d.addToItems(new DashboardItem(title: "item2").save(validate: false, failOnError: true))
-				d.addToItems(new DashboardItem(title: "item3").save(validate: false, failOnError: true))
+				d.addToItems(new DashboardItem(title: "item1", webcomponent: Webcomponent.STREAMR_CHART).save(validate: false, failOnError: true))
+				d.addToItems(new DashboardItem(title: "item2", webcomponent: Webcomponent.STREAMR_HEATMAP).save(validate: false, failOnError: true))
+				d.addToItems(new DashboardItem(title: "item3", webcomponent: Webcomponent.STREAMR_MAP).save(validate: false, failOnError: true))
 			}
+			permissionService.systemGrantAll(user, d)
 		}
 
 		(1..3).each {
-			def d = new Dashboard(name: "not-my-dashboard-$it", user: otherUser).save(failOnError: true)
+			def d = new Dashboard(name: "not-my-dashboard-$it").save(failOnError: true)
+			permissionService.systemGrantAll(otherUser, d)
 			if (it == 2) {
 				permissionService.grant(otherUser, d, user, Permission.Operation.READ)
 			}
@@ -101,15 +103,16 @@ class DashboardServiceSpec extends Specification {
 		def user = new SecUser(name: "tester").save(validate: false)
 		def canvas = new Canvas(json: new JsonBuilder([
 				modules: [
-						[hash: 1, uiChannel: [webcomponent: "streamr-chart"]]
+						[hash: 1, uiChannel: [webcomponent: "streamr-client"]],
+						[hash: 3, uiChannel: [webcomponent: "streamr-switcher"]]
 				]
 		]).toString()).save(failOnError: true, validate: false)
 		when:
 		SaveDashboardCommand command = new SaveDashboardCommand([
 				name : "test-create",
 				items: [
-						new SaveDashboardItemCommand(title: "test1", canvas: canvas, module: 1),
-						new SaveDashboardItemCommand(title: "test2", canvas: canvas, module: 1)
+						new SaveDashboardItemCommand(title: "test1", canvas: canvas, module: 1, webcomponent: "streamr-client"),
+						new SaveDashboardItemCommand(title: "test2", canvas: canvas, module: 3, webcomponent: "streamr-switcher")
 				]
 		])
 		service.create(command, user)
@@ -120,7 +123,35 @@ class DashboardServiceSpec extends Specification {
 		Dashboard.findByName("test-create").getName() == "test-create"
 		Dashboard.findByName("test-create").getItems().first().title == "test1"
 		Dashboard.findByName("test-create").getItems().last().title == "test2"
-		Dashboard.findByName("test-create").getUser().getName() == "tester"
+		}
+
+	def "create() also creates all permissions for new dashboard"() {
+		setup:
+		def user = new SecUser(username: "tester").save(validate: false, failOnError: true)
+		def canvas = new Canvas(json: new JsonBuilder([
+			modules: [
+				[hash: 1, uiChannel: [webcomponent: "streamr-chart"]],
+				[hash: 6, uiChannel: [webcomponent: "streamr-switcher"]]
+			]
+		]).toString()).save(failOnError: true, validate: false)
+		def items = [
+			new SaveDashboardItemCommand(title: "test1", canvas: canvas, module: 1, webcomponent: "streamr-chart"),
+			new SaveDashboardItemCommand(title: "test2", canvas: canvas, module: 6, webcomponent: "streamr-switcher")
+		]
+
+		when:
+		SaveDashboardCommand command = new SaveDashboardCommand([
+			name:"test-create",
+			items: items
+		])
+		def dashboard = service.create(command, user)
+
+		then:
+		Permission.findAllByDashboard(dashboard)*.toMap() == [
+			[id: 20, user:"tester", operation: "read"],
+			[id: 21, user: "tester", operation: "write"],
+			[id: 22, user: "tester", operation: "share"],
+		]
 	}
 
 	def "update() cannot update non-existent dashboard"() {
@@ -144,6 +175,15 @@ class DashboardServiceSpec extends Specification {
 		dashboard != null
 		dashboard.name == "newName"
 		Dashboard.findById("2").name == "newName"
+	}
+
+	def "update() does not create new permissions"() {
+		when:
+		assert Permission.countByDashboard(Dashboard.get("2")) == 3
+		service.update("2", new SaveDashboardCommand(name: "newName"), user)
+
+		then:
+		Permission.countByDashboard(Dashboard.get("2")) == 3
 	}
 
 	def "findDashboardItem() cannot fetch non-existent dashboard"() {
@@ -340,9 +380,10 @@ class DashboardServiceSpec extends Specification {
 		def itemToUpdateId = "1"
 
 		def command = new SaveDashboardItemCommand(
-				title: "updated-item",
-				canvas: canvas,
-				module: 1
+			title: "updated-item",
+			canvas: canvas,
+			module: 1,
+			webcomponent: "streamr-map"
 		)
 
 		assert DashboardItem.findById(itemToUpdateId) != null

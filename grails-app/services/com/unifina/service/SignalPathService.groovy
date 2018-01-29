@@ -237,6 +237,24 @@ class SignalPathService {
 		}
 	}
 
+	/**
+	 * Get a mapping of all running canvases' ids as keys and the users who started them as values.
+	 * @return canvasId => user
+	 */
+	@CompileStatic
+	Map<String, SecUser> getUsersOfRunningCanvases() {
+		Map<String, SignalPathRunner> signalPathRunnerMap =
+			(servletContext["signalPathRunners"] ?: [:]) as Map<String, SignalPathRunner>
+		Map<String, SecUser> canvasIdToUser = [:]
+		signalPathRunnerMap.values().each { SignalPathRunner runner ->
+			SecUser user = runner.globals.user
+			runner.signalPaths.each { SignalPath sp ->
+				canvasIdToUser[sp.canvas.id] = user
+			}
+		}
+		return canvasIdToUser
+	}
+
 	List<Canvas> stopAllLocalCanvases() {
 		// Copy list to prevent ConcurrentModificationException
 		Map runners = [:]

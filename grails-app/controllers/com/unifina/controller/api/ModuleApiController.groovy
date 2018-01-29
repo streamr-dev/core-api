@@ -24,12 +24,7 @@ class ModuleApiController {
 		if (!allowedPackages.isEmpty()) {
 			mods = Module.createCriteria().list {
 				isNull("hide")
-				or {
-					'in'("modulePackage", allowedPackages)
-					modulePackage {
-						eq("user", request.apiUser)
-					}
-				}
+				'in'("modulePackage", allowedPackages)
 			}
 		}
 

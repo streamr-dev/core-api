@@ -1,8 +1,9 @@
 package com.unifina.domain.security
 
+import com.unifina.security.Userish
 import groovy.transform.CompileStatic
 
-class SecUser {
+class SecUser implements Userish {
 
 	Long id
 	String username
@@ -45,20 +46,27 @@ class SecUser {
 
 	@Override
 	boolean equals(Object obj) {
-		if (!(obj instanceof SecUser)) {
-			return false
-		}
-
-		if (obj.id == null || this.id == null) {
-			return this.is(obj)
+		if (obj instanceof SecUser) {
+			if (obj.id == null || this.id == null) {
+				return this.is(obj)
+			} else {
+				return obj.id == this.id
+			}
+		} else if (obj instanceof Long) {
+			return obj == this.id
 		} else {
-			return obj.id == this.id
+			return false
 		}
 	}
 
 	@Override
 	int hashCode() {
 		return this.id?.hashCode() ?: super.hashCode()
+	}
+
+	@Override
+	Userish resolveToUserish() {
+		return this
 	}
 
 	@CompileStatic

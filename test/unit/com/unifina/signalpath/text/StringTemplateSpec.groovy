@@ -3,7 +3,7 @@ package com.unifina.signalpath.text
 import com.unifina.utils.testutils.ModuleTestHelper
 import spock.lang.Specification
 
-class StringTemplateTest extends Specification {
+class StringTemplateSpec extends Specification {
 
 	StringTemplate module
 

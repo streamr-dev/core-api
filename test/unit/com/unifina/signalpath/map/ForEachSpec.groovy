@@ -1,6 +1,7 @@
 package com.unifina.signalpath.map
 
 import com.unifina.api.SaveCanvasCommand
+import com.unifina.domain.security.Permission
 import com.unifina.domain.security.SecUser
 import com.unifina.domain.signalpath.Canvas
 import com.unifina.domain.signalpath.Module
@@ -22,7 +23,7 @@ import grails.test.mixin.web.ControllerUnitTestMixin
 import spock.lang.Specification
 
 @TestMixin(ControllerUnitTestMixin)
-@Mock([Canvas, Module, SecUser, ModuleService, SpringSecurityService, SignalPathService, CanvasService, PermissionService])
+@Mock([Canvas, Module, SecUser, ModuleService, Permission, SpringSecurityService, SignalPathService, CanvasService, PermissionService])
 class ForEachSpec extends Specification {
 
 	CanvasService canvasService

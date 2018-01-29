@@ -35,9 +35,4 @@ class DashboardItem {
 				webcomponent: webcomponent.toString()
 		]
 	}
-
-	void updateWebcomponent() {
-		def module = canvas.toMap().modules.find { it.hash == module }
-		setWebcomponent(module?.uiChannel?.webcomponent)
-	}
 }

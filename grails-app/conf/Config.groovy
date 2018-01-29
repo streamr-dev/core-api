@@ -235,21 +235,6 @@ environments {
 unifina.feed.useCache = false
 // Base dir for caching
 unifina.feed.cachedir = System.getProperty("java.io.tmpdir")
-// Default file storage adapter
-unifina.feed.fileStorageAdapter = "com.unifina.feed.file.S3FileStorageAdapter"
-
-/**
- * com.unifina.feed.file.S3FileStorageAdapter config
- */
-// The following are used with S3FileStorageAdapter
-unifina.feed.s3FileStorageAdapter.accessKey = "AKIAJ5FFWRZLSQB6ASIQ"
-unifina.feed.s3FileStorageAdapter.secretKey = "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"
-unifina.feed.s3FileStorageAdapter.bucket = "streamr-data-dev"
-environments {
-	production {
-		unifina.feed.s3FileStorageAdapter.bucket = "streamr-data-us"
-	}
-}
 
 
 /**

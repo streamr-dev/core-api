@@ -116,8 +116,10 @@
     var accessListTemplate = _.template(
         '<div class="row">' +
             '<div class="owner-row col-xs-12">' +
-                '<span class="col-xs-12 col-sm-5">Owner: <strong>{{ owner }}</strong></span>' +
-                '<div class="col-xs-12 col-sm-7">' +
+                '<div class="col-xs-5 col-sm-5 access-list-caption">' +
+                    'Access rights:' +
+                '</div>' +
+                '<div class="col-xs-7 col-sm-7">' +
                     '<div class="pull-right switcher-container">' +
                         '<input type="checkbox" class="anonymous-switcher pull-right" {{ checked ? "checked" : "" }} >' +
                     '</div>' +
@@ -139,10 +141,8 @@
     var AccessListView = Backbone.View.extend({
         initialize: function(args) {
             this.$el.html(accessListTemplate({
-                owner: args.owner,
                 checked: !!originalAnonPermission
             }))
-            this.$ownerLabel = this.$(".owner-label")
             this.$accessList = this.$(".access-list")
             this.$newUserField = this.$(".new-user-field")
             this.$anonymousCheckbox = this.$(".anonymous-switcher")
@@ -151,7 +151,7 @@
                 on_state_content: '<i class="fa fa-check"></i>',
                 off_state_content: '<i class="fa fa-times"></i>',
             })
-            this.$(".switcher-toggler").html('<i class="fa fa-globe">')
+            this.$(".switcher-toggler").html('<i class="fa fa-globe anonymous-switcher-knob">')
 
             this.listenTo(accessList, 'add', this.createAccessView)
             this.listenTo(accessList, 'reset', this.addAll)
@@ -234,7 +234,6 @@
     var listView;
     var resourceUrl;
     var originalPermissions = {};   // { username: { operation: Permission object } }
-    var originalOwner;
     var originalAnonPermission;
 
     /** Entry point */
@@ -245,7 +244,6 @@
 
         var originalPermissionList = []
         $.getJSON(resourceUrl + "/permissions").success(function(data) {
-            originalOwner = _(data).filter(function(p) { return p.operation === "share" && !p.id }).first().user
             originalPermissionList = _.filter(data, "id")
         }).always(function() {
             sharingDialog = bootbox.dialog({
@@ -289,8 +287,7 @@
 
             listView = new AccessListView({
                 el: ".bootbox .modal-body",
-                id: "access-list",
-                owner: originalOwner
+                id: "access-list"
             })
             accessList.reset(_.values(initialAccessMap))
 
