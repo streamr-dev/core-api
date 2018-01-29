@@ -204,7 +204,8 @@ describe('User actions', () => {
                 type: actions.SAVE_CURRENT_USER_FAILURE,
                 error: {
                     message: 'test',
-                    code: 'TEST'
+                    code: 'TEST',
+                    statusCode: 500
                 }
             }]
             

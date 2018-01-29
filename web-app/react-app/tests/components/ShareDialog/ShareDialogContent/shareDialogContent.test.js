@@ -30,12 +30,15 @@ describe('ShareDialogContent', () => {
     
     describe('render', () => {
         let content
+        let onClose
         beforeEach(() => {
+            onClose = () => {}
             content = shallow(
                 <ShareDialogContent
                     resourceType="testType"
                     resourceId="testId"
                     getResourcePermissions={() => {}}
+                    onClose={onClose}
                 />
             )
         })
@@ -55,10 +58,9 @@ describe('ShareDialogContent', () => {
         })
         it('should contain ShareDialogInputRow', () => {
             const ownerRow = content.find('Connect(ShareDialogInputRow)')
-            assert.deepStrictEqual(ownerRow.props(), {
-                resourceType: 'testType',
-                resourceId: 'testId'
-            })
+            assert.equal(ownerRow.props().resourceType, 'testType')
+            assert.equal(ownerRow.props().resourceId, 'testId')
+            assert.equal(ownerRow.props().onClose, onClose)
         })
     })
     

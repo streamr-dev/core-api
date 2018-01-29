@@ -285,13 +285,14 @@ describe('ShareDialogOwnerRow', () => {
                 const revokeStub = sinon.stub(permissionActions, 'removeResourcePermission').callsFake((type, id, ap) => {
                     return `${type}-${id}-${ap.id}`
                 })
+                const anonymousPermission = {
+                    id: 'hehehehe'
+                }
                 mapDispatchToProps(dispatchSpy, {
                     resourceType: 'myType',
                     resourceId: 'myId',
-                    anonymousPermission: {
-                        id: 'hehehehe'
-                    }
-                }).revokePublicPermission()
+                    anonymousPermission
+                }).revokePublicPermission(anonymousPermission)
                 assert(dispatchSpy.calledOnce)
                 assert(dispatchSpy.calledWith('myType-myId-hehehehe'))
                 assert(revokeStub.calledOnce)

@@ -97,13 +97,13 @@ export const updateAndSaveDashboard = (dashboard: Dashboard) => (dispatch: Funct
         }
     })
         .then(({data}) => {
-            dispatch(showSuccess({
-                title: 'Dashboard saved successfully!'
-            }))
             dashboard.id !== data.id && dispatch(changeDashboardId(dashboard.id, data.id))
             dispatch(updateAndSaveDashboardSuccess({
                 ...data,
                 ownPermissions: [...(dashboard.ownPermissions || []), ...(createNew ? ['read', 'write', 'share'] : [])]
+            }))
+            dispatch(showSuccess({
+                title: 'Dashboard saved successfully!'
             }))
         })
         .catch(res => {

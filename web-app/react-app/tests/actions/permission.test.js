@@ -114,7 +114,8 @@ describe('Permission actions', () => {
                 type: actions.GET_RESOURCE_PERMISSIONS_FAILURE,
                 error: {
                     message: 'test',
-                    code: 'TEST'
+                    code: 'TEST',
+                    statusCode: 500
                 }
             }]
             
@@ -332,7 +333,8 @@ describe('Permission actions', () => {
                         ...permissions[0],
                         error: {
                             message: 'test',
-                            code: 'TEST'
+                            code: 'TEST',
+                            statusCode: 500
                         }
                     }
                 }, {
@@ -343,7 +345,8 @@ describe('Permission actions', () => {
                         ...permissions[1],
                         error: {
                             message: 'test',
-                            code: 'TEST'
+                            code: 'TEST',
+                            statusCode: 500
                         }
                     }
                 }]
@@ -523,7 +526,8 @@ describe('Permission actions', () => {
                         ...permissions[1],
                         error: {
                             message: 'test',
-                            code: 'TEST'
+                            code: 'TEST',
+                            statusCode: 500
                         }
                     }
                 }, {
@@ -534,7 +538,8 @@ describe('Permission actions', () => {
                         ...permissions[2],
                         error: {
                             message: 'test',
-                            code: 'TEST'
+                            code: 'TEST',
+                            statusCode: 500
                         }
                     }
                 }]

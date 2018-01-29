@@ -78,7 +78,8 @@ describe('Dashboard actions', () => {
                 type: actions.GET_AND_REPLACE_DASHBOARDS_FAILURE,
                 error: {
                     message: 'test-error',
-                    code: 'TEST'
+                    code: 'TEST',
+                    statusCode: 500
                 }
             }]
             
@@ -137,7 +138,11 @@ describe('Dashboard actions', () => {
                 type: actions.GET_AND_REPLACE_DASHBOARDS_REQUEST
             }, {
                 type: actions.GET_AND_REPLACE_DASHBOARDS_FAILURE,
-                error: new Error('test-error')
+                error: {
+                    message: 'test-error',
+                    code: 'TEST',
+                    statusCode: 500
+                }
             }]
             
             try {
@@ -162,30 +167,35 @@ describe('Dashboard actions', () => {
             }
             moxios.stubRequest(`api/v1/dashboards/${id}`, {
                 status: 200,
-                response: db
+                response: {
+                    ...db,
+                    id: 'test2'
+                }
             })
             
             const expectedActions = [{
                 type: actions.UPDATE_AND_SAVE_DASHBOARD_REQUEST
             }, {
+                type: actions.CHANGE_DASHBOARD_ID,
+                oldId: 'test',
+                newId: 'test2'
+            }, {
+                type: actions.UPDATE_AND_SAVE_DASHBOARD_SUCCESS,
+                dashboard: {
+                    ...db,
+                    id: 'test2'
+                }
+            }, {
                 type: notificationActions.CREATE_NOTIFICATION,
                 notification: {
                     type: 'success'
                 }
-            }, {
-                type: actions.CHANGE_DASHBOARD_ID,
-                oldId: 'test',
-                newId: 'test'
-            }, {
-                type: actions.UPDATE_AND_SAVE_DASHBOARD_SUCCESS,
-                dashboard: db
             }]
             
             await store.dispatch(actions.updateAndSaveDashboard(db))
-            assert.deepStrictEqual(store.getActions()[0], expectedActions[0])
-            assert.equal(store.getActions()[1].type, expectedActions[1].type)
-            assert.equal(store.getActions()[1].notification.type, expectedActions[1].notification.type)
-            assert.deepStrictEqual(store.getActions()[2], expectedActions[2])
+            assert.deepStrictEqual(store.getActions().slice(0, 3), expectedActions.slice(0, 3))
+            assert.equal(store.getActions()[3].type, expectedActions[3].type)
+            assert.equal(store.getActions()[3].notification.type, expectedActions[3].notification.type)
         })
         it('creates UPDATE_AND_SAVE_DASHBOARD_FAILURE and CREATE_NOTIFICATION when fetching a dashboard has succeeded', async (done) => {
             const id = 'test'
@@ -215,7 +225,8 @@ describe('Dashboard actions', () => {
                 type: actions.UPDATE_AND_SAVE_DASHBOARD_FAILURE,
                 error: {
                     message: 'test',
-                    code: 'TEST'
+                    code: 'TEST',
+                    statusCode: 500
                 }
             }]
             
@@ -306,7 +317,11 @@ describe('Dashboard actions', () => {
                 id: 'test'
             }, {
                 type: originalActions.DELETE_DASHBOARD_FAILURE,
-                error: new Error('test')
+                error: {
+                    message: 'test',
+                    code: 'TEST',
+                    statusCode: 500
+                }
             }]
             
             try {
@@ -360,7 +375,8 @@ describe('Dashboard actions', () => {
                 type: originalActions.GET_MY_DASHBOARD_PERMISSIONS_FAILURE,
                 error: {
                     message: 'test-error',
-                    code: 'TEST'
+                    code: 'TEST',
+                    statusCode: 500
                 }
             }]
             
@@ -557,5 +573,4 @@ describe('Dashboard actions', () => {
             id: 'test'
         })
     })
-    
 })

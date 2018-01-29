@@ -4,22 +4,21 @@ import assert from 'assert-diff'
 import sinon from 'sinon'
 import moment from 'moment-timezone'
 
-const momentStub = sinon.stub(moment.tz, 'names')
-    .callsFake(() => ['a', 'b', 'c'])
-
 import * as userActions from '../../../../actions/user'
 import * as helpers from '../../../../helpers/createLink'
 
 import {ProfileSettings, mapStateToProps, mapDispatchToProps} from '../../../../components/ProfilePage/ProfileSettings'
 
-sinon.stub(helpers, 'default')
-    .callsFake((uri) => uri)
 
 describe('ProfileSettings', () => {
     let sandbox
     
     beforeEach(() => {
         sandbox = sinon.sandbox.create()
+        sandbox.stub(moment.tz, 'names')
+            .callsFake(() => ['a', 'b', 'c'])
+        sandbox.stub(helpers, 'default')
+            .callsFake((uri) => uri)
     })
     
     afterEach(() => {
@@ -118,17 +117,6 @@ describe('ProfileSettings', () => {
     })
     
     describe('render', () => {
-        it('must be a Panel with correct header', () => {
-            const el = shallow(<ProfileSettings
-                user={{}}
-                getCurrentUser={() => {}}
-                updateCurrentUserName={() => {}}
-                updateCurrentUserTimezone={() => {}}
-                saveCurrentUser={() => {}}
-            />)
-            assert(el.is('Panel'))
-            assert.equal(el.props().header, 'Profile Settings')
-        })
         it('must have a Form with correct onSubmit as a child', () => {
             const el = shallow(<ProfileSettings
                 user={{}}

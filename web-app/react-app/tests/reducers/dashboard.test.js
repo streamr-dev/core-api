@@ -92,14 +92,16 @@ describe('Dashboard reducer', () => {
                 type: actions.GET_AND_REPLACE_DASHBOARDS_FAILURE,
                 error: {
                     message: 'test',
-                    code: 'TEST'
+                    code: 'TEST',
+                    statusCode: 500
                 }
             }), {
                 ...initialState,
                 fetching: false,
                 error: {
                     message: 'test',
-                    code: 'TEST'
+                    code: 'TEST',
+                    statusCode: 500
                 }
             })
         })
@@ -149,13 +151,18 @@ describe('Dashboard reducer', () => {
         it('should handle GET_DASHBOARD_FAILURE', () => {
             assert.deepStrictEqual(reducer(initialState, {
                 type: actions.GET_DASHBOARD_FAILURE,
-                error: new Error('test')
+                error: {
+                    message: 'test',
+                    code: 'TEST',
+                    statusCode: 500
+                }
             }), {
                 ...initialState,
                 fetching: false,
                 error: {
                     message: 'test',
-                    code: 'TEST'
+                    code: 'TEST',
+                    statusCode: 500
                 }
             })
         })
@@ -205,13 +212,18 @@ describe('Dashboard reducer', () => {
         it('should handle UPDATE_AND_SAVE_DASHBOARD_FAILURE', () => {
             assert.deepStrictEqual(reducer(initialState, {
                 type: actions.UPDATE_AND_SAVE_DASHBOARD_FAILURE,
-                error: new Error('test')
+                error: {
+                    message: 'test',
+                    code: 'TEST',
+                    statusCode: 500
+                }
             }), {
                 ...initialState,
                 fetching: false,
                 error: {
                     message: 'test',
-                    code: 'TEST'
+                    code: 'TEST',
+                    statusCode: 500
                 }
             })
         })
@@ -256,14 +268,16 @@ describe('Dashboard reducer', () => {
                 type: actions.DELETE_DASHBOARD_FAILURE,
                 error: {
                     message: 'test',
-                    code: 'TEST'
+                    code: 'TEST',
+                    statusCode: 500
                 }
             }), {
                 ...initialState,
                 fetching: false,
                 error: {
                     message: 'test',
-                    code: 'TEST'
+                    code: 'TEST',
+                    statusCode: 500
                 }
             })
         })
@@ -313,14 +327,16 @@ describe('Dashboard reducer', () => {
                 type: actions.GET_MY_DASHBOARD_PERMISSIONS_FAILURE,
                 error: {
                     message: 'test',
-                    code: 'TEST'
+                    code: 'TEST',
+                    statusCode: 500
                 }
             }), {
                 ...initialState,
                 fetching: false,
                 error: {
                     message: 'test',
-                    code: 'TEST'
+                    code: 'TEST',
+                    statusCode: 500
                 }
             })
         })

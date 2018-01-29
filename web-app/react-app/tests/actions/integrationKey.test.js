@@ -74,7 +74,8 @@ describe('IntegrationKey actions', () => {
                 type: actions.GET_AND_REPLACE_INTEGRATION_KEYS_FAILURE,
                 error: {
                     message: 'test-error',
-                    code: 'TEST'
+                    code: 'TEST',
+                    statusCode: 500
                 }
             }]
         
@@ -132,7 +133,11 @@ describe('IntegrationKey actions', () => {
                 type: actions.CREATE_INTEGRATION_KEY_REQUEST
             }, {
                 type: actions.CREATE_INTEGRATION_KEY_FAILURE,
-                error: new Error('test')
+                error: {
+                    message: 'test',
+                    code: 'TEST',
+                    statusCode: 500
+                }
             }]
         
             try {
@@ -189,7 +194,8 @@ describe('IntegrationKey actions', () => {
                 type: actions.DELETE_INTEGRATION_KEY_FAILURE,
                 error: {
                     message: 'test',
-                    code: 'TEST'
+                    code: 'TEST',
+                    statusCode: 500
                 }
             }]
         
