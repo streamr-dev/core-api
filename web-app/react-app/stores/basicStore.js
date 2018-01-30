@@ -4,7 +4,7 @@ import thunk from 'redux-thunk'
 
 import {createStore, applyMiddleware, compose, combineReducers} from 'redux'
 
-import notificationReducer from '../reducers/notification'
+import {reducer as notificationReducer} from 'react-notification-system-redux'
 import userReducer from '../reducers/user'
 
 export default (reducers: {}) => {

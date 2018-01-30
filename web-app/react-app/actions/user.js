@@ -4,7 +4,7 @@ import axios from 'axios'
 import parseError from './utils/parseError'
 import createLink from '../helpers/createLink'
 
-import {showSuccess, showError} from './notification'
+import {success, error} from 'react-notification-system-redux'
 
 import type {ApiError} from '../flowtype/common-types'
 import type {User} from '../flowtype/user-types'
@@ -26,9 +26,13 @@ export const getCurrentUser = () => (dispatch: Function) => {
     return axios.get(createLink(`${apiUrl}/me`))
         .then(({data}) => dispatch(getCurrentUserSuccess(data)))
         .catch(res => {
-            const error = parseError(res)
-            dispatch(getCurrentUserFailure(error))
-            dispatch(showError(error))
+            const e = parseError(res)
+            dispatch(getCurrentUserFailure(e))
+            dispatch(error({
+                title: 'Error',
+                message: e
+            }))
+            throw e
         })
 }
 
@@ -45,15 +49,19 @@ export const saveCurrentUser = (user: User) => (dispatch: Function) => {
     })
         .then(({data}) => {
             dispatch(saveCurrentUserSuccess(data))
-            dispatch(showSuccess({
+            dispatch(success({
                 title: 'Success!',
                 message: 'Profile saved'
             }))
         })
         .catch(res => {
-            const error = parseError(res)
-            dispatch(saveCurrentUserFailure(error))
-            dispatch(showError(error))
+            const e = parseError(res)
+            dispatch(saveCurrentUserFailure(e))
+            dispatch(error({
+                title: 'Error',
+                message: e
+            }))
+            throw e
         })
 }
 
