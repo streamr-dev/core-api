@@ -41,7 +41,7 @@ public class ConfigurableStreamModule extends AbstractStreamSourceModule impleme
 	protected void onConfiguration(Map<String, Object> config) {
 		super.onConfiguration(config);
 		
-		Stream stream = streamParameter.getValue();
+		Stream stream = getStream();
 		if (stream.getConfig() == null) {
 			throw new IllegalStateException("Stream "+stream.getName()+" is not properly configured!");
 		}

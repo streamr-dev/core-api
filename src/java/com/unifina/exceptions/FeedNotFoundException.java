@@ -1,4 +1,4 @@
-package com.unifina.feed;
+package com.unifina.exceptions;
 
 public class FeedNotFoundException extends RuntimeException {
 	public FeedNotFoundException(String name) {

@@ -6,7 +6,6 @@ import com.unifina.domain.signalpath.Module;
 class Feed implements Serializable {
 
 	public static final long KAFKA_ID = 7L
-	public static final long MONGO_ID = 8L
 
 	Long id
 	String name

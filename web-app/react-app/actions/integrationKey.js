@@ -3,7 +3,7 @@
 import axios from 'axios'
 import {parseError} from './utils/parseApiResponse'
 import createLink from '../helpers/createLink'
-import {showError, showSuccess} from './notification'
+import {error, success} from 'react-notification-system-redux'
 
 export const GET_AND_REPLACE_INTEGRATION_KEYS_REQUEST = 'GET_AND_REPLACE_INTEGRATION_KEYS_REQUEST'
 export const GET_AND_REPLACE_INTEGRATION_KEYS_SUCCESS = 'GET_AND_REPLACE_INTEGRATION_KEYS_SUCCESS'
@@ -31,14 +31,14 @@ export const getAndReplaceIntegrationKeys = () => (dispatch: Function) => {
     return axios.get(createLink(apiUrl))
         .then(({data}) => {
             dispatch(getAndReplaceIntegrationKeysSuccess(data))
-            dispatch(showSuccess({
+            dispatch(success({
                 message: 'IntegrationKey created successfully!'
             }))
         })
         .catch(res => {
             const e = parseError(res)
             dispatch(getAndReplaceIntegrationKeysFailure(e))
-            dispatch(showError({
+            dispatch(error({
                 title: e.message
             }))
             throw e
@@ -56,7 +56,7 @@ export const getIntegrationKeysByService = (service: string) => (dispatch: Funct
         .catch(res => {
             const e = parseError(res)
             dispatch(getIntegrationKeysByServiceFailure(service, e))
-            dispatch(showError({
+            dispatch(error({
                 title: e.message
             }))
             throw e
@@ -70,7 +70,7 @@ export const createIntegrationKey = (integrationKey: IntegrationKey) => (dispatc
         .catch(res => {
             const e = parseError(res)
             dispatch(createIntegrationKeyFailure(e))
-            dispatch(showError({
+            dispatch(error({
                 title: e.message
             }))
             throw e
@@ -84,7 +84,7 @@ export const deleteIntegrationKey = (id: string) => (dispatch: Function) => {
         .catch(res => {
             const e = parseError(res)
             dispatch(deleteIntegrationKeyFailure(e))
-            dispatch(showError({
+            dispatch(error({
                 title: e.message
             }))
             throw e

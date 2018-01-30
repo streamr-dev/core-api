@@ -16,10 +16,7 @@ import java.util.*;
  * set on the MultipleRedisMessageSource instance.
  */
 public class MultipleRedisMessageSource extends AbstractMessageSource<StreamrBinaryMessageWithKafkaMetadata, String> {
-
-	private static final Logger log = Logger.getLogger(MultipleRedisMessageSource.class);
 	private final Map<String, RedisMessageSource> messageSourceByHost = new HashMap<>();
-	private final Set<String> subscriptions = new HashSet<>();
 
 	public MultipleRedisMessageSource(Feed feed, Map<String, Object> config) {
 		super(feed, config);
@@ -33,30 +30,18 @@ public class MultipleRedisMessageSource extends AbstractMessageSource<StreamrBin
 
 	private void addHost(String host, String password) {
 		Map<String, Object> singleRedisConfig = new HashMap<>();
-		singleRedisConfig.putAll(config);
+		singleRedisConfig.putAll(getConfig());
 		singleRedisConfig.put("host", host);
 		singleRedisConfig.put("password", password);
-		RedisMessageSource messageSource = new RedisMessageSource(feed, singleRedisConfig);
-		if (recipient != null) {
-			messageSource.setRecipient(recipient);
+		RedisMessageSource messageSource = new RedisMessageSource(getFeed(), singleRedisConfig);
+		if (getRecipient() != null) {
+			messageSource.setRecipient(getRecipient());
 		}
 		messageSourceByHost.put(host, messageSource);
 	}
 
-	private void removeHost(String host) {
-		RedisMessageSource messageSource = messageSourceByHost.remove(host);
-		if (messageSource != null) {
-			try {
-				messageSource.close();
-			} catch (IOException e) {
-				log.error("RedisMessageSource threw exception while closing", e);
-			}
-		}
-	}
-
 	@Override
 	public void subscribe(String key) {
-		subscriptions.add(key);
 		for (RedisMessageSource ms : messageSourceByHost.values()) {
 			ms.subscribe(key);
 		}
@@ -64,7 +49,6 @@ public class MultipleRedisMessageSource extends AbstractMessageSource<StreamrBin
 
 	@Override
 	public void unsubscribe(String key) {
-		subscriptions.remove(key);
 		for (RedisMessageSource ms : messageSourceByHost.values()) {
 			ms.unsubscribe(key);
 		}

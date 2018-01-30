@@ -2,6 +2,7 @@ package com.unifina.feed;
 
 import java.lang.reflect.ParameterizedType;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import com.unifina.data.FeedEvent;
@@ -22,19 +23,16 @@ import com.unifina.utils.Globals;
  */
 public abstract class AbstractEventRecipient<ModuleClass, MessageClass extends ITimestamped> implements IEventRecipient, IStartListener {
 
-	protected ArrayList<ModuleClass> modules = new ArrayList<>();
-	protected int moduleSize = 0;
-	
-	protected Propagator propagator = new Propagator();
-	
-	private Class<?> clazz;
-
-	protected Globals globals;
+	private final List<ModuleClass> modules = new ArrayList<>();
+	private final Propagator propagator = new Propagator();
+	private final Class<?> parameterizedClass;
 	
 	public AbstractEventRecipient(Globals globals) {
-		this.globals = globals;
-		if (globals!=null && globals.getDataSource()!=null)
+		if (globals != null && globals.getDataSource() != null) {
 			globals.getDataSource().addStartListener(this);
+		}
+		ParameterizedType pt = (ParameterizedType) this.getClass().getGenericSuperclass();
+		parameterizedClass = (Class<?>) pt.getActualTypeArguments()[0];
 	}
 	
 	@Override
@@ -42,21 +40,12 @@ public abstract class AbstractEventRecipient<ModuleClass, MessageClass extends I
 		propagator.initialize();
 	}
 	
-	public Class<?> getParameterizedClass() {
-		if(clazz == null) {
-			ParameterizedType pt = (ParameterizedType)this.getClass().getGenericSuperclass();
-			clazz = (Class<?>)pt.getActualTypeArguments()[0];
-		}
-		return clazz;
-	}
-	
 	public void register(ModuleClass module) {
-		if (!getParameterizedClass().isAssignableFrom(module.getClass()))
-			throw new IllegalArgumentException("Can not register module of type: "+module.getClass()+", required type: "+getParameterizedClass()+". Module: "+module);
-		else if (!modules.contains(module)) {
+		if (!parameterizedClass.isAssignableFrom(module.getClass())) {
+			throw new IllegalArgumentException("Can not register module of type: " + module.getClass() +
+				", required type: " + parameterizedClass + ". Module: " + module);
+		} else if (!modules.contains(module)) {
 			modules.add(module);
-			moduleSize = modules.size();
-			
 			if (module instanceof AbstractSignalPathModule) {
 				AbstractSignalPathModule m = (AbstractSignalPathModule) module;
 				propagator.addModule(m);
@@ -69,13 +58,9 @@ public abstract class AbstractEventRecipient<ModuleClass, MessageClass extends I
 		sendOutputFromModules(event);
 		propagator.propagate();
 	}
-
-	public Propagator getPropagator() {
-		return propagator;
-	}
 	
-	public List<ModuleClass> getModules() {
-		return modules;
+	protected List<ModuleClass> getModules() {
+		return Collections.unmodifiableList(modules);
 	}
 	
 	/**

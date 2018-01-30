@@ -7,7 +7,6 @@ import sinon from 'sinon'
 import * as helpers from '../../helpers/createLink'
 
 import * as actions from '../../actions/permission'
-import * as notificationActions from '../../actions/notification'
 
 const middlewares = [thunk]
 const mockStore = configureMockStore(middlewares)
@@ -123,8 +122,7 @@ describe('Permission actions', () => {
                 await store.dispatch(actions.getResourcePermissions(resourceType, resourceId))
             } catch (e) {
                 assert.deepStrictEqual(store.getActions().slice(0,2), expectedActions)
-                assert.equal(store.getActions()[2].type, notificationActions.CREATE_NOTIFICATION)
-                assert.equal(store.getActions()[2].notification.type, 'error')
+                assert.equal(store.getActions()[2].title, 'Error')
                 done()
             }
         })

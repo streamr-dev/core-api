@@ -33,10 +33,8 @@ class MqttSpec extends Specification {
 	/** Mocked event queue. Works manually in tests, please call module.receive(queuedEvent) */
 	def mockGlobals = Stub(Globals) {
 		getDataSource() >> Stub(DataSource) {
-			getEventQueue() >> Stub(DataSourceEventQueue) {
-				enqueue(_) >> { feedEventList ->
-					event = feedEventList[0]
-				}
+			enqueueEvent(_) >> { feedEvent ->
+				event = feedEvent[0]
 			}
 		}
 		isRealtime() >> true

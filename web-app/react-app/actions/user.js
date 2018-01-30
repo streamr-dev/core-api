@@ -4,7 +4,7 @@ import axios from 'axios'
 import {parseError} from './utils/parseApiResponse'
 import createLink from '../helpers/createLink'
 
-import {showSuccess, showError} from './notification'
+import {success, error} from 'react-notification-system-redux'
 
 import type {ErrorInUi} from '../flowtype/common-types'
 import type {User} from '../flowtype/user-types'
@@ -28,7 +28,10 @@ export const getCurrentUser = () => (dispatch: Function) => {
         .catch(res => {
             const e = parseError(res)
             dispatch(getCurrentUserFailure(e))
-            dispatch(showError(e))
+            dispatch(error({
+                title: 'Error',
+                message: e
+            }))
             throw e
         })
 }
@@ -46,15 +49,19 @@ export const saveCurrentUser = (user: User) => (dispatch: Function) => {
     })
         .then(({data}) => {
             dispatch(saveCurrentUserSuccess(data))
-            dispatch(showSuccess({
+            dispatch(success({
                 title: 'Success!',
                 message: 'Profile saved'
             }))
         })
         .catch(res => {
-            const error = parseError(res)
-            dispatch(saveCurrentUserFailure(error))
-            dispatch(showError(error))
+            const e = parseError(res)
+            dispatch(saveCurrentUserFailure(e))
+            dispatch(error({
+                title: 'Error',
+                message: e
+            }))
+            throw e
         })
 }
 

@@ -4,34 +4,23 @@ import com.datastax.driver.core.Session;
 import com.unifina.domain.data.Stream;
 import com.unifina.feed.AbstractStreamListener;
 import com.unifina.service.CassandraService;
-import org.codehaus.groovy.grails.commons.GrailsApplication;
+import grails.util.Holders;
 
 import java.util.Map;
 
 /**
  * Connects to the Cassandra cluster configured in Grails config and deletes data when the Stream is deleted.
  */
-public class CassandraDeletingStreamListener extends AbstractStreamListener {
-
-	GrailsApplication grails;
-
-	public CassandraDeletingStreamListener(GrailsApplication grailsApplication) {
-		super(grailsApplication);
-		this.grails = grailsApplication;
-	}
+public class CassandraDeletingStreamListener implements AbstractStreamListener {
 
 	@Override
-	public void addToConfiguration(Map configuration, Stream stream) {
-
-	}
+	public void addToConfiguration(Map configuration, Stream stream) {}
 
 	@Override
-	public void afterStreamSaved(Stream stream) {
-
-	}
+	public void afterStreamSaved(Stream stream) {}
 
 	protected Session getSession() {
-		return grails.getMainContext().getBean(CassandraService.class).getSession();
+		return Holders.getApplicationContext().getBean(CassandraService.class).getSession();
 	}
 
 	@Override

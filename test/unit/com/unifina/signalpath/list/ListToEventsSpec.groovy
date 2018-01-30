@@ -19,10 +19,8 @@ public class ListToEventsSpec extends Specification {
 	List actualQueue = []
 	def mockGlobals = Stub(Globals) {
 		getDataSource() >> Stub(DataSource) {
-			getEventQueue() >> Stub(DataSourceEventQueue) {
-				enqueue(_) >> { feedEventList ->
-					actualQueue.add(feedEventList[0].content.item)
-				}
+			enqueueEvent(_) >> { feedEvent ->
+				actualQueue.add(feedEvent.content[0].item)
 			}
 		}
 		isRealtime() >> true

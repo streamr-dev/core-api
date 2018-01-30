@@ -5,7 +5,7 @@ import {parseError} from './utils/parseApiResponse'
 import createLink from '../helpers/createLink'
 import _ from 'lodash'
 
-import {showSuccess, showError} from './notification'
+import {success, error} from 'react-notification-system-redux'
 
 export const CREATE_DASHBOARD = 'CREATE_DASHBOARD'
 export const OPEN_DASHBOARD = 'OPEN_DASHBOARD'
@@ -54,7 +54,7 @@ export const getAndReplaceDashboards = () => (dispatch: Function) => {
         .catch(res => {
             const e = parseError(res)
             dispatch(getAndReplaceDashboardsFailure(e))
-            dispatch(showError({
+            dispatch(error({
                 title: e.message
             }))
             throw e
@@ -71,7 +71,7 @@ export const getDashboard = (id: Dashboard.id) => (dispatch: Function) => {
         .catch(res => {
             const e = parseError(res)
             dispatch(getDashboardFailure(e))
-            dispatch(showError({
+            dispatch(error({
                 title: e.message
             }))
             throw e
@@ -102,14 +102,14 @@ export const updateAndSaveDashboard = (dashboard: Dashboard) => (dispatch: Funct
                 ...data,
                 ownPermissions: [...(dashboard.ownPermissions || []), ...(createNew ? ['read', 'write', 'share'] : [])]
             }))
-            dispatch(showSuccess({
+            dispatch(success({
                 title: 'Dashboard saved successfully!'
             }))
         })
         .catch(res => {
             const e = parseError(res)
             
-            dispatch(showError({
+            dispatch(error({
                 title: e.message
             }))
             dispatch(updateAndSaveDashboardFailure(e))
@@ -125,7 +125,7 @@ export const deleteDashboard = (id: Dashboard.id) => (dispatch: Function) => {
         .catch(res => {
             const e = parseError(res)
             dispatch(deleteDashboardFailure(e))
-            dispatch(showError({
+            dispatch(error({
                 title: e.message
             }))
             throw e
@@ -139,7 +139,7 @@ export const getMyDashboardPermissions = (id: Dashboard.id) => (dispatch: Functi
         .catch(res => {
             const e = parseError(res)
             dispatch(getMyDashboardPermissionsFailure(id, e))
-            dispatch(showError({
+            dispatch(error({
                 title: 'Error!',
                 message: e.message
             }))

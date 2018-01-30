@@ -6,7 +6,7 @@ import settle from 'promise-settle'
 import {parseError} from './utils/parseApiResponse'
 import createLink from '../helpers/createLink'
 
-import {showError, showSuccess} from './notification'
+import {error, success} from 'react-notification-system-redux'
 
 export const GET_RESOURCE_PERMISSIONS_REQUEST = 'GET_RESOURCE_PERMISSIONS_REQUEST'
 export const GET_RESOURCE_PERMISSIONS_SUCCESS = 'GET_RESOURCE_PERMISSIONS_SUCCESS'
@@ -47,7 +47,10 @@ export const getResourcePermissions = (resourceType: Permission.resourceType, re
         .catch(res => {
             const e = parseError(res)
             dispatch(getResourcePermissionsFailure(e))
-            dispatch(showError(e.error))
+            dispatch(error({
+                title: 'Error',
+                message: e.error
+            }))
             throw e
         })
 }
@@ -165,14 +168,14 @@ export const saveUpdatedResourcePermissions = (resourceType: Permission.resource
                 }
                 if (message) {
                     const e = new Error(message)
-                    dispatch(showError({
+                    dispatch(error({
                         title: 'Error!',
                         message
                     }))
                     reject(e)
                 } else {
                     resolve()
-                    dispatch(showSuccess({
+                    dispatch(success({
                         title: 'Permissions saved successfully!'
                     }))
                 }

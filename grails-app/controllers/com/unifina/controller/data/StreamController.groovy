@@ -5,8 +5,6 @@ import com.unifina.domain.security.Permission
 import com.unifina.domain.security.Permission.Operation
 import com.unifina.api.ApiException
 import com.unifina.feed.DataRange
-import com.unifina.feed.mongodb.MongoDbConfig
-import com.unifina.feed.twitter.TwitterStreamConfig
 import grails.converters.JSON
 import grails.plugin.springsecurity.annotation.Secured
 import groovy.transform.CompileStatic
@@ -22,7 +20,6 @@ import com.unifina.domain.data.Stream
 import com.unifina.domain.security.SecUser
 import com.unifina.domain.signalpath.Module
 import com.unifina.feed.DataRange
-import com.unifina.feed.mongodb.MongoDbConfig
 import com.unifina.utils.CSVImporter
 import com.unifina.utils.CSVImporter.Schema
 import grails.converters.JSON
@@ -123,39 +120,6 @@ class StreamController {
 	def edit() {
 		getAuthorizedStream(params.id, Operation.WRITE) { stream, user ->
 			[stream: stream, config: (stream.config ? JSON.parse(stream.config) : [:])]
-		}
-	}
-
-	def configureMongo() {
-		getAuthorizedStream(params.id, Operation.WRITE) { stream, user ->
-			[stream: stream, mongo: MongoDbConfig.readFromStreamOrElseEmptyObject(stream)]
-		}
-	}
-
-	// also callback from Sign in with Twitter
-	def configureTwitterStream() {
-		getAuthorizedStream(params.id, Operation.WRITE) { stream, user ->
-			TwitterStreamConfig twitter = TwitterStreamConfig.forStream(stream, session)
-			if (!twitter.accessToken && "oauth_verifier" in params) {
-				twitter.setOAuthVerifier(params.oauth_verifier)
-			}
-
-			if (twitter.accessToken && twitter.accessTokenSecret) {
-				return [stream: stream]
-			} else {
-				flash.message = "Twitter sign-in needs to be done before Twitter stream can be used!"
-				redirect(action: "show")
-			}
-		}
-	}
-
-	// form action from configureTwitterStream
-	def saveTwitterStream() {
-		getAuthorizedStream(params.id, Operation.WRITE) { stream, user ->
-			TwitterStreamConfig twitter = TwitterStreamConfig.forStream(stream, session)
-			twitter.setKeywords(params.keywords as String)
-			twitter.save()
-			redirect(action: "show", id: stream.id)
 		}
 	}
 
