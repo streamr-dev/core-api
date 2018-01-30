@@ -7,9 +7,9 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.TimeZone;
 
-import com.unifina.data.IEventQueue;
 import com.unifina.data.IEventRecipient;
 import com.unifina.data.IStreamRequirement;
+import com.unifina.datasource.DataSourceEventQueue;
 import com.unifina.domain.data.Feed;
 import com.unifina.domain.data.Stream;
 import com.unifina.utils.Globals;
@@ -24,7 +24,7 @@ import com.unifina.utils.Globals;
  */
 public abstract class AbstractFeed<ModuleClass, MessageClass extends ITimestamped, KeyClass, EventRecipientClass extends IEventRecipient> {
 
-	protected IEventQueue eventQueue;
+	protected DataSourceEventQueue eventQueue;
 	
 	protected Set<ModuleClass> subscribers = new HashSet<>();
 	
@@ -124,7 +124,7 @@ public abstract class AbstractFeed<ModuleClass, MessageClass extends ITimestampe
 		return true;
 	}
 
-	public void setEventQueue(IEventQueue queue) {
+	public void setEventQueue(DataSourceEventQueue queue) {
 		this.eventQueue = queue;
 	}
 

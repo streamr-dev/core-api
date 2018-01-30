@@ -5,7 +5,6 @@ import com.unifina.data.IEventRecipient;
 import com.unifina.datasource.IDayListener;
 import com.unifina.domain.signalpath.Module;
 import com.unifina.security.permission.ConnectionTraversalPermission;
-import com.unifina.security.permission.UserPermission;
 import com.unifina.service.PermissionService;
 import com.unifina.service.SerializationService;
 import com.unifina.utils.Globals;
@@ -68,8 +67,6 @@ public abstract class AbstractSignalPathModule implements IEventRecipient, IDayL
 	protected Map<String, Object> layout;
 
 	private transient Globals globals;
-
-	private boolean initialized;
 
 	private static final Logger log = Logger.getLogger(AbstractSignalPathModule.class);
 
@@ -149,9 +146,7 @@ public abstract class AbstractSignalPathModule implements IEventRecipient, IDayL
 	 * gets called after the module is set up, ie. after the connections
 	 * have been made. The default implementation does nothing.
 	 */
-	public void initialize() {
-
-	}
+	public void initialize() { }
 
 	public void addInput(Input input) {
 		addInput(input, input.getName());
@@ -313,13 +308,7 @@ public abstract class AbstractSignalPathModule implements IEventRecipient, IDayL
 	 * the module exists in!
 	 */
 	public void connectionsReady() {
-
 		initialize();
-
-		// Only report the initialization of this module once
-		if (!initialized) {
-			initialized = true;
-		}
 	}
 
 	public void trySendOutput() {
@@ -604,7 +593,7 @@ public abstract class AbstractSignalPathModule implements IEventRecipient, IDayL
 		}, response);
 		request.setFuture(future);
 
-		getGlobals().getDataSource().getEventQueue().enqueue(fe);
+		getGlobals().getDataSource().enqueueEvent(fe);
 		return future;
 	}
 

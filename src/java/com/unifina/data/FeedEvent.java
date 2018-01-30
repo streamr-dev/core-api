@@ -10,17 +10,13 @@ import com.unifina.feed.ITimestamped;
 public class FeedEvent<MessageClass extends ITimestamped, EventRecipientClass extends IEventRecipient>
 		implements Comparable<FeedEvent<MessageClass, EventRecipientClass>> {
 
-	public Date timestamp;
-	public MessageClass content;
-	public EventRecipientClass recipient;
+	public final Date timestamp;
+	public final MessageClass content;
+	public final EventRecipientClass recipient;
 	public AbstractFeed feed;
 	public FeedEventIterator<MessageClass, EventRecipientClass> iterator;
 
 	public long queueTicket = 0;
-
-	public FeedEvent() {
-
-	}
 
 	public FeedEvent(MessageClass content, Date timestamp, EventRecipientClass recipient) {
 		this.content = content;

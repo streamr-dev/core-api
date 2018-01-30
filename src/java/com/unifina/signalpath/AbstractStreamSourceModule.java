@@ -8,15 +8,10 @@ import java.util.Set;
 
 public abstract class AbstractStreamSourceModule extends AbstractSignalPathModule implements IStreamRequirement {
 
-	protected StreamParameter streamParameter;
-	
-	protected String getStreamParameterName() {
-		return "stream";
-	}
-	
+	private final StreamParameter streamParameter = new StreamParameter(this, "stream");
+
 	@Override
 	public void init() {
-		streamParameter = new StreamParameter(this, getStreamParameterName());
 		streamParameter.setCheckModuleId(true);
 		streamParameter.setUpdateOnChange(true);
 		streamParameter.setDrivingInput(false);

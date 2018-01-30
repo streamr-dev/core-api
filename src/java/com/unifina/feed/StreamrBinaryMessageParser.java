@@ -22,12 +22,12 @@ public class StreamrBinaryMessageParser implements MessageParser<StreamrBinaryMe
 
 	@Override
 	public StreamrMessage parse(StreamrBinaryMessage raw) {
-		if (raw.getContentType()==StreamrBinaryMessage.CONTENT_TYPE_JSON) {
+		if (raw.getContentType() == StreamrBinaryMessage.CONTENT_TYPE_JSON) {
 			String s = raw.toString();
 			LinkedHashMap<String, Object> json = gson.fromJson(s, type);
-			return new StreamrMessage(raw.getStreamId(), raw.getPartition(), new Date(raw.getTimestamp()), new Date(), json);
+			return new StreamrMessage(raw.getStreamId(), raw.getPartition(), new Date(raw.getTimestamp()), json);
 		}
-		else throw new RuntimeException("Unknown content type: "+raw.getContentType());
+		throw new RuntimeException("Unknown content type: " + raw.getContentType());
 	}
 
 }
