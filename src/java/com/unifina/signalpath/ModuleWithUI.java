@@ -182,7 +182,7 @@ public abstract class ModuleWithUI extends AbstractSignalPathModule {
 				}
 			}
 
-			SecUser user = SecUser.loadViaJava(getGlobals().getUserId());
+			SecUser user = (SecUser)SecUser.get(getGlobals().getUserId());
 
 			// Else create a new Stream object for this UI channel
 			if (stream == null) {
