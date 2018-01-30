@@ -247,7 +247,7 @@ class SignalPathService {
 			(servletContext["signalPathRunners"] ?: [:]) as Map<String, SignalPathRunner>
 		Map<String, SecUser> canvasIdToUser = [:]
 		signalPathRunnerMap.values().each { SignalPathRunner runner ->
-			SecUser user = runner.globals.user
+			SecUser user = SecUser.loadViaJava(runner.globals.userId)
 			runner.signalPaths.each { SignalPath sp ->
 				canvasIdToUser[sp.canvas.id] = user
 			}
