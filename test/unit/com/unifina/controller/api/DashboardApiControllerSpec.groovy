@@ -13,11 +13,15 @@ import com.unifina.service.ApiService
 import com.unifina.service.DashboardService
 import com.unifina.service.PermissionService
 import com.unifina.service.UserService
+import com.unifina.utils.Webcomponent
+import grails.converters.JSON
 import grails.orm.HibernateCriteriaBuilder
 import grails.plugin.springsecurity.SpringSecurityService
 import grails.test.mixin.Mock
 import grails.test.mixin.TestFor
 import grails.test.mixin.web.FiltersUnitTestMixin
+import groovy.json.JsonSlurper
+import org.json.JSONObject
 import spock.lang.Specification
 
 @TestFor(DashboardApiController)
@@ -42,52 +46,39 @@ class DashboardApiControllerSpec extends Specification {
 		controller.apiService = mainContext.getBean(ApiService)
 
 		me = new SecUser().save(failOnError: true, validate: false)
-		dashboards = initDashboards(me)
+		dashboards = initDashboards()
 
 		def key = new Key(user: me, name: "my key")
 		key.id = "myApiKey"
 		key.save(failOnError: true, validate: true)
 	}
 
-	public static List<Dashboard> initDashboards(SecUser me) {
+	static List<Dashboard> initDashboards() {
 		List<Dashboard> dashboards = []
-		dashboards.add(new Dashboard(name: "dashboard-1", user: me))
-		dashboards.add(new Dashboard(name: "dashboard-2", user: me))
-		dashboards.add(new Dashboard(name: "dashboard-3", user: me))
 
 		Canvas canvas = new Canvas()
 		canvas.save(failOnError: true, validate: false)
 
-		dashboards[1].addToItems(new DashboardItem(
-			title: "dashboard-2-item",
-			ord: 0,
-			size: "large",
-			canvas: canvas,
-			module: 1,
-			webcomponent: "streamr-component",
-			dashboard: dashboards[1]
-		).save(failOnError: true))
+		[1, 2, 3].each {
+			Dashboard dashboard = new Dashboard(name: "dashboard-${it}")
+			dashboard.id = it.toString()
+			dashboards.add(dashboard)
+			dashboard.save()
+		}
 
-		dashboards[2].addToItems(new DashboardItem(
-			title: "dashboard-3-item-1",
-			ord: 1,
-			size: "small",
-			canvas: canvas,
-			module: 2,
-			webcomponent: "streamr-table",
-			dashboard: dashboards[2]
-		).save(failOnError: true))
-		dashboards[2].addToItems(new DashboardItem(
-			title: "dashboard-3-item-2",
-			ord: 0,
-			size: "x-large",
-			canvas: canvas,
-			module: 3,
-			webcomponent: "streamr-chart",
-			dashboard: dashboards[2]
-		).save(failOnError: true))
+		[2, 3].each {
+			DashboardItem item = new DashboardItem(
+					title: "dashboard-3-item",
+					canvas: canvas,
+					module: it,
+					webcomponent: Webcomponent.STREAMR_CHART,
+					dashboard: dashboards[2]
+			)
+			item.id = it.toString()
+			item.save()
+			dashboards[2].addToItems(item)
+		}
 
-		dashboards*.save(failOnError: true)
 		return dashboards
 	}
 
@@ -128,7 +119,7 @@ class DashboardApiControllerSpec extends Specification {
 
 	def "show() shows dashboard with 0 items"() {
 		when:
-		params.id = 1L
+		params.id = "1"
 		request.addHeader("Authorization", "Token myApiKey")
 		request.requestURI = "/api/v1/dashboards"
 		withFilters(action: "show") {
@@ -137,18 +128,21 @@ class DashboardApiControllerSpec extends Specification {
 
 		then:
 		response.status == 200
+
 		response.json == [
-			id: 1,
-			name: "dashboard-1",
-			items: [],
+				id    : "1",
+				items : [],
+				name  : "dashboard-1",
+				layout: [:]
 		]
-		1 * dashboardService.findById(1L, me) >> dashboards[0]
+
+		1 * dashboardService.findById("1", me) >> dashboards[0]
 		0 * dashboardService._
 	}
 
 	def "show() shows dashboard with many items"() {
 		when:
-		params.id = 3L
+		params.id = "3"
 		request.addHeader("Authorization", "Token myApiKey")
 		request.requestURI = "/api/v1/dashboards"
 		withFilters(action: "show") {
@@ -158,32 +152,29 @@ class DashboardApiControllerSpec extends Specification {
 		then:
 		response.status == 200
 		response.json == [
-			id: 3,
-			name: "dashboard-3",
-			items: [
-			    [
-					id: 3,
-					dashboard: dashboards[2].id,
-					ord: 0,
-			        title: "dashboard-3-item-2",
-					size: "x-large",
-					canvas: "1",
-					module: 3,
-					webcomponent: "streamr-chart"
-			    ],
-				[
-					id: 2,
-					dashboard: dashboards[2].id,
-					ord: 1,
-					title: "dashboard-3-item-1",
-					size: "small",
-					canvas: "1",
-					module: 2,
-					webcomponent: "streamr-table"
+				id    : "3",
+				items : [
+						[
+								id          : "2",
+								dashboard   : dashboards[2].id,
+								title       : "dashboard-3-item",
+								canvas      : "1",
+								module      : 2,
+								webcomponent: "streamr-chart"
+						],
+						[
+								id          : "3",
+								dashboard   : dashboards[2].id,
+								title       : "dashboard-3-item",
+								canvas      : "1",
+								module      : 3,
+								webcomponent: "streamr-chart"
+						],
 				],
-			]
+				layout: [:],
+				name  : "dashboard-3"
 		]
-		1 * dashboardService.findById(3L, me) >> dashboards[2]
+		1 * dashboardService.findById("3", me) >> dashboards[2]
 		0 * dashboardService._
 	}
 
@@ -191,7 +182,7 @@ class DashboardApiControllerSpec extends Specification {
 		when:
 		request.addHeader("Authorization", "Token myApiKey")
 		request.JSON = [
-			name: "",
+				name: "",
 		]
 		request.requestURI = "/api/v1/dashboards"
 		withFilters(action: "save") {
@@ -204,17 +195,22 @@ class DashboardApiControllerSpec extends Specification {
 
 	def "save() calls dashboardService.create()"() {
 		setup:
-		SortedSet<DashboardItem> items = new TreeSet<DashboardItem>()
-		items.add(new DashboardItem(title: "test1", ord: new Integer(0)))
-		items.add(new DashboardItem(title: "test2", ord: new Integer(1)))
+
+		List<DashboardItem> items = new ArrayList<DashboardItem>()
+		items.add(new DashboardItem(title: "test1"))
+		items.add(new DashboardItem(title: "test2"))
 
 		def dashboard = Mock(Dashboard)
+		def dashboardService = Mock(DashboardService)
+		controller.dashboardService = dashboardService
 
 		when:
 		request.addHeader("Authorization", "Token myApiKey")
 		request.JSON = [
-			name: "new dashboard",
-			items: items
+				id   : "dashboard",
+				name : "new dashboard",
+				layout: "{}",
+				items: items
 		]
 		request.requestURI = "/api/v1/dashboards"
 		withFilters(action: "save") {
@@ -223,10 +219,12 @@ class DashboardApiControllerSpec extends Specification {
 
 		then:
 		response.status == 200
-		1 * dashboardService.createOrUpdate(_, me) >> {
+		1 * dashboardService.create(_, me) >> {
 			dashboard
 		}
-		1 * dashboard.toMap()
+		1 * dashboard.toMap() >> {
+			[:]
+		}
 	}
 
 	def "update() throws ValidationException given incomplete json"() {
@@ -234,7 +232,7 @@ class DashboardApiControllerSpec extends Specification {
 		params.id = 1L
 		request.addHeader("Authorization", "Token myApiKey")
 		request.JSON = [
-			name: "",
+				name: "",
 		]
 		request.requestURI = "/api/v1/dashboards"
 		withFilters(action: "update") {
@@ -245,58 +243,46 @@ class DashboardApiControllerSpec extends Specification {
 		thrown(ValidationException)
 	}
 
-	def "update() delegates to dashboardService.update and returns new dashboard as result"() {
+	def "update() delegates to dashboardService.update"() {
+		setup:
+		List<DashboardItem> items = new ArrayList<DashboardItem>()
+		DashboardItem item1 = new DashboardItem(title: "test1")
+		item1.id = "1"
+		DashboardItem item2 = new DashboardItem(title: "test2")
+		item2.id = "2"
+		items.add(item1)
+		items.add(item2)
+
+		def dashboard = Mock(Dashboard)
+		def dashboardService = Mock(DashboardService)
+		controller.dashboardService = dashboardService
+
 		when:
+		params.id = "4"
 		request.addHeader("Authorization", "Token myApiKey")
 		request.JSON = [
-			id: 3L,
-			name: "dashboard-update-3",
+				layout: "{}",
+				name : "new dashboard",
+				items: items
 		]
 		request.requestURI = "/api/v1/dashboards"
-		withFilters(action: "update") {
+		withFilters(action: "save") {
 			controller.update()
 		}
 
 		then:
 		response.status == 200
-		response.json == [
-			id: 3,
-			name: "dashboard-update-3",
-			items: [
-				[
-					id: 3,
-					dashboard: dashboards[2].id,
-					ord: 0,
-					title: "dashboard-3-item-2",
-					size: "x-large",
-					canvas: "1",
-					module: 3,
-					webcomponent: "streamr-chart"
-				],
-				[
-					id: 2,
-					dashboard: dashboards[2].id,
-					ord: 1,
-					title: "dashboard-3-item-1",
-					size: "small",
-					canvas: "1",
-					module: 2,
-					webcomponent: "streamr-table"
-				],
-			]
-		]
-		1 * dashboardService.createOrUpdate(_, me) >> { SaveDashboardCommand command, SecUser user ->
-			assert command.id == 3L
-			def d = dashboards[2]
-			d.name = command.name
-			return d
+		response.json.a == 1
+		1 * dashboardService.update("4", _, me) >> { String id, SaveDashboardCommand command, SecUser user ->
+			command.name == "new dashboard"
+			return dashboard
 		}
-		0 * dashboardService._
+		1 * dashboard.toMap() >> [a:1]
 	}
 
-	def "delete() delegates to dashboardService.deleteById(Long, SecUser)"() {
+	def "delete() delegates to dashboardService.deleteById(String, SecUser)"() {
 		when:
-		params.id = 3L
+		params.id = "3"
 		request.addHeader("Authorization", "Token myApiKey")
 		request.requestURI = "/api/v1/dashboards/"
 		withFilters(action: "delete") {
@@ -305,7 +291,7 @@ class DashboardApiControllerSpec extends Specification {
 
 		then:
 		response.status == 204
-		1 * dashboardService.deleteById(3, me)
+		1 * dashboardService.deleteById("3", me)
 		0 * dashboardService._
 	}
 }

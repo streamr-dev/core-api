@@ -13,32 +13,32 @@ class DashboardItemApiController {
 	DashboardService dashboardService
 
 	@StreamrApi
-	def index(Long dashboardId) {
+	def index(String dashboardId) {
 		def dashboard = dashboardService.findById(dashboardId, (SecUser) request.apiUser)
 		Iterable<DashboardItem> items = dashboard.items
 		render(items*.toMap() as JSON)
 	}
 
 	@StreamrApi
-	def show(Long dashboardId, Long id) {
+	def show(String dashboardId, String id) {
 		def item = dashboardService.findDashboardItem(dashboardId, id, (SecUser) request.apiUser)
 		render(item.toMap() as JSON)
 	}
 
 	@StreamrApi
-	def save(Long dashboardId, SaveDashboardItemCommand command) {
+	def save(String dashboardId, SaveDashboardItemCommand command) {
 		def item = dashboardService.addDashboardItem(dashboardId, command, (SecUser) request.apiUser)
 		render(item.toMap() as JSON)
 	}
 
 	@StreamrApi
-	def update(Long dashboardId, Long id, SaveDashboardItemCommand command) {
+	def update(String dashboardId, String id, SaveDashboardItemCommand command) {
 		def item = dashboardService.updateDashboardItem(dashboardId, id, command, (SecUser) request.apiUser)
 		render(item.toMap() as JSON)
 	}
 
 	@StreamrApi
-	def delete(Long dashboardId, Long id) {
+	def delete(String dashboardId, String id) {
 		dashboardService.deleteDashboardItem(dashboardId, id, (SecUser) request.apiUser)
 		render(status: 204)
 	}

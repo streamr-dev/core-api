@@ -16,7 +16,6 @@ import com.unifina.utils.testutils.ModuleTestHelper
 import grails.plugin.springsecurity.SpringSecurityService
 import grails.test.mixin.Mock
 import grails.test.mixin.TestMixin
-import grails.test.mixin.support.GrailsUnitTestMixin
 import grails.test.mixin.web.ControllerUnitTestMixin
 import spock.lang.Specification
 

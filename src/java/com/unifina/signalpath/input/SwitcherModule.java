@@ -22,8 +22,9 @@ public class SwitcherModule extends InputModule {
 	@Override
 	protected void onConfiguration(Map<String, Object> config) {
 		super.onConfiguration(config);
-		if (config.containsKey("switcherValue"))
+		if (config.containsKey("switcherValue")){
 			value = (boolean) config.get("switcherValue");
+		}
 	}
 
 	@Override

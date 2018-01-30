@@ -93,7 +93,6 @@ grails.project.dependency.resolution = {
 		runtime('com.opencsv:opencsv:3.3')
 		runtime('de.ruedigermoeller:fst:2.56')
 		runtime('joda-time:joda-time:2.9.3')
-		runtime('com.amazonaws:aws-java-sdk:1.7.5')
 		runtime('org.twitter4j:twitter4j-core:4.0.4')
 		runtime('org.twitter4j:twitter4j-stream:4.0.4')
 		runtime('com.twitter:hbc-core:2.2.0') {

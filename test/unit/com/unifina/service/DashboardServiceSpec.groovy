@@ -6,6 +6,7 @@ import com.unifina.domain.dashboard.DashboardItem
 import com.unifina.domain.security.Permission
 import com.unifina.domain.security.SecUser
 import com.unifina.domain.signalpath.Canvas
+import com.unifina.utils.Webcomponent
 import grails.converters.JSON
 import grails.test.mixin.Mock
 import grails.test.mixin.TestFor
@@ -13,33 +14,32 @@ import groovy.json.JsonBuilder
 import spock.lang.Specification
 
 @TestFor(DashboardService)
-@Mock([Canvas, Dashboard, DashboardItem, Permission, SecUser])
+@Mock([Canvas, Dashboard, DashboardItem, Permission, SecUser, PermissionService])
 class DashboardServiceSpec extends Specification {
 
-	SecUser user = new SecUser(username: "e@e.com", name: "user")
-	SecUser otherUser = new SecUser(username: "a@a.com", name: "someoneElse")
+	SecUser user = new SecUser(username: "first@user.com", name: "user")
+	SecUser otherUser = new SecUser(username: "second@user.com", name: "someoneElse")
 
 	def setup() {
-		PermissionService permissionService = service.permissionService = new PermissionService()
-		permissionService.grailsApplication = grailsApplication
-
+		PermissionService permissionService = service.permissionService
 
 		user.save(failOnError: true, validate: false)
 		otherUser.save(failOnError: true, validate: false)
 
 		(1..3).each {
-			def d = new Dashboard(name: "my-dashboard-$it", user: user).save(failOnError: true)
+			def d = new Dashboard(name: "my-dashboard-$it").save(failOnError: true)
 			if (it == 3) {
-				d.addToItems(new DashboardItem(title: "item1", ord: 1, size: "large").save(validate: false, failOnError: true))
-				d.addToItems(new DashboardItem(title: "item2", ord: 0, size: "medium").save(validate: false, failOnError: true))
-				d.addToItems(new DashboardItem(title: "item3", ord: 2, size: "large").save(validate: false, failOnError: true))
+				d.addToItems(new DashboardItem(title: "item1", webcomponent: Webcomponent.STREAMR_CHART).save(validate: false, failOnError: true))
+				d.addToItems(new DashboardItem(title: "item2", webcomponent: Webcomponent.STREAMR_HEATMAP).save(validate: false, failOnError: true))
+				d.addToItems(new DashboardItem(title: "item3", webcomponent: Webcomponent.STREAMR_MAP).save(validate: false, failOnError: true))
 			}
+			permissionService.systemGrantAll(user, d)
 		}
 
 		(1..3).each {
-			def d = new Dashboard(name: "not-my-dashboard-$it", user: otherUser).save(failOnError: true)
+			def d = new Dashboard(name: "not-my-dashboard-$it").save(failOnError: true)
+			permissionService.systemGrantAll(otherUser, d)
 			if (it == 2) {
-				println("Object is " + d)
 				permissionService.grant(otherUser, d, user, Permission.Operation.READ)
 			}
 		}
@@ -54,60 +54,66 @@ class DashboardServiceSpec extends Specification {
 
 	def "findById() cannot fetch non-existent dashboard"() {
 		when:
-		service.findById(666L, user)
+		service.findById("noexistent", user)
 		then:
 		thrown(NotFoundException)
 	}
 
 	def "findById() cannot fetch other user's non-readable dashboard"() {
 		when:
-		service.findById(4L, user)
+		service.findById("4", user)
 		then:
 		thrown(NotPermittedException)
 	}
 
 	def "findById() can fetch readable dashboard"() {
 		when:
-		def dashboard2 = service.findById(2L, user)
-		def dashboard5 = service.findById(5L, user)
+		def dashboard2 = service.findById("2", user)
+		def dashboard3 = service.findById("5", user)
 		then:
-		dashboard2.id == 2L
-		dashboard5.id == 5L
+		dashboard2.id == "2"
+		dashboard3.id == "5"
 	}
 
 	def "deleteById() cannot delete non-existent dashboard"() {
 		when:
-		service.deleteById(666L, user)
+		service.deleteById("nonexistent", user)
 		then:
 		thrown(NotFoundException)
 	}
 
 	def "deleteById() cannot delete other user's non-writeable dashboard"() {
 		when:
-		service.deleteById(5L, user)
+		service.deleteById("4", user)
 		then:
 		thrown(NotPermittedException)
 	}
 
 	def "deleteById() can delete writable dashboard"() {
-		assert Dashboard.findById(2L) != null
+		assert Dashboard.findById("2") != null
 
 		when:
-		service.deleteById(2L, user)
+		service.deleteById("2", user)
 		then:
-		Dashboard.findById(2L) == null
+		Dashboard.findById("2") == null
 	}
 
 	def "create() creates a new dashboard and returns it"() {
 		setup:
-		SortedSet<DashboardItem> items = new TreeSet<DashboardItem>()
-		items.add(new DashboardItem(title: "test1", ord: new Integer(0), canvas: new Canvas(), module: 0, size: "b", webcomponent: "b"))
-		items.add(new DashboardItem(title: "test2", ord: new Integer(1), canvas: new Canvas(), module: 0, size: "b", webcomponent: "b"))
 		def user = new SecUser(name: "tester").save(validate: false)
+		def canvas = new Canvas(json: new JsonBuilder([
+				modules: [
+						[hash: 1, uiChannel: [webcomponent: "streamr-client"]],
+						[hash: 3, uiChannel: [webcomponent: "streamr-switcher"]]
+				]
+		]).toString()).save(failOnError: true, validate: false)
 		when:
 		SaveDashboardCommand command = new SaveDashboardCommand([
-		        name: "test-create",
-				items: items
+				name : "test-create",
+				items: [
+						new SaveDashboardItemCommand(title: "test1", canvas: canvas, module: 1, webcomponent: "streamr-client"),
+						new SaveDashboardItemCommand(title: "test2", canvas: canvas, module: 3, webcomponent: "streamr-switcher")
+				]
 		])
 		service.create(command, user)
 
@@ -117,98 +123,137 @@ class DashboardServiceSpec extends Specification {
 		Dashboard.findByName("test-create").getName() == "test-create"
 		Dashboard.findByName("test-create").getItems().first().title == "test1"
 		Dashboard.findByName("test-create").getItems().last().title == "test2"
-		Dashboard.findByName("test-create").getUser().getName() =="tester"
+		}
 
+	def "create() also creates all permissions for new dashboard"() {
+		setup:
+		def user = new SecUser(username: "tester").save(validate: false, failOnError: true)
+		def canvas = new Canvas(json: new JsonBuilder([
+			modules: [
+				[hash: 1, uiChannel: [webcomponent: "streamr-chart"]],
+				[hash: 6, uiChannel: [webcomponent: "streamr-switcher"]]
+			]
+		]).toString()).save(failOnError: true, validate: false)
+		def items = [
+			new SaveDashboardItemCommand(title: "test1", canvas: canvas, module: 1, webcomponent: "streamr-chart"),
+			new SaveDashboardItemCommand(title: "test2", canvas: canvas, module: 6, webcomponent: "streamr-switcher")
+		]
+
+		when:
+		SaveDashboardCommand command = new SaveDashboardCommand([
+			name:"test-create",
+			items: items
+		])
+		def dashboard = service.create(command, user)
+
+		then:
+		Permission.findAllByDashboard(dashboard)*.toMap() == [
+			[id: 20, user:"tester", operation: "read"],
+			[id: 21, user: "tester", operation: "write"],
+			[id: 22, user: "tester", operation: "share"],
+		]
 	}
 
 	def "update() cannot update non-existent dashboard"() {
 		when:
-		service.update(666L, new SaveDashboardCommand(), user)
+		service.update("nonexistent", new SaveDashboardCommand(name: "newName"), user)
 		then:
 		thrown(NotFoundException)
 	}
 
 	def "update() cannot update other user's non-writeable dashboard"() {
 		when:
-		service.update(5L, new SaveDashboardCommand(), user)
+		service.update("4", new SaveDashboardCommand(name: "newName"), user)
 		then:
 		thrown(NotPermittedException)
 	}
 
 	def "update() can update writable dashboard"() {
 		when:
-		def dashboard = service.update(2L, new SaveDashboardCommand(name: "newName"), user)
+		def dashboard = service.update("2", new SaveDashboardCommand(name: "newName"), user)
 		then:
 		dashboard != null
 		dashboard.name == "newName"
-		Dashboard.findById(2L).name == "newName"
+		Dashboard.findById("2").name == "newName"
+	}
+
+	def "update() does not create new permissions"() {
+		when:
+		assert Permission.countByDashboard(Dashboard.get("2")) == 3
+		service.update("2", new SaveDashboardCommand(name: "newName"), user)
+
+		then:
+		Permission.countByDashboard(Dashboard.get("2")) == 3
 	}
 
 	def "findDashboardItem() cannot fetch non-existent dashboard"() {
 		when:
-		service.findDashboardItem(666L, 1L, user)
+		service.findDashboardItem("nonexistent", "nonexistent", user)
 		then:
 		thrown(NotFoundException)
 	}
 
 	def "findDashboardItem() cannot fetch non-existent dashboard item"() {
 		when:
-		service.findDashboardItem(3L, 4L, user)
+		service.findDashboardItem("1", "item-1-2", user)
 		then:
 		thrown(NotFoundException)
 	}
 
 	def "findDashboardItem() cannot fetch other user's non-readable dashboard"() {
 		when:
-		service.findDashboardItem(4L, 666L, user)
+		service.findDashboardItem("4", "nonexistent", user)
 		then:
 		thrown(NotPermittedException)
 	}
 
 	def "findDashboardItem() can fetch existing dashboard item from readable dashboard"() {
 		when:
-		def item = service.findDashboardItem(3L, 1L, user)
+		def item = service.findDashboardItem("3", "1", user)
 		then:
-		item.id == 1L
+		item != null
+		item.id == "1"
 	}
 
 	def "addDashboardItem() cannot add item to non-existent dashboard"() {
-		def canvas = new Canvas().save(failOnError: true, validate: false)
-
 		def command = new SaveDashboardItemCommand(
-			title: "added-item",
-			canvas: canvas.id,
-			module: 1,
-			ord: 666,
-			size: "large"
+				title: "added-item",
+				canvas: new Canvas(json: new JsonBuilder([
+					modules: [
+						[hash: 1, uiChannel: [webcomponent: "streamr-chart"]]
+					]
+				]).toString()).save(failOnError: true, validate: false),
+				module: 1,
+				webcomponent: "streamr-chart"
 		)
 
 		when:
-		service.addDashboardItem(666L, command, user)
+		service.addDashboardItem("nonexistent", command, user)
 		then:
 		thrown(NotFoundException)
 	}
 
 	def "addDashboardItem() cannot add item other user's non-writeable dashboard"() {
-		def canvas = new Canvas().save(failOnError: true, validate: false)
-
 		def command = new SaveDashboardItemCommand(
-			title: "added-item",
-			canvas: canvas.id,
-			module: 1,
-			ord: 666,
-			size: "large"
+				title: "added-item",
+				canvas: new Canvas(json: new JsonBuilder([
+					modules: [
+							[hash: 1, uiChannel: [webcomponent: "streamr-chart"]]
+					]
+				]).toString()).save(failOnError: true, validate: false),
+				module: 1,
+				webcomponent: "streamr-chart"
 		)
 
 		when:
-		service.addDashboardItem(5L, command, user)
+		service.addDashboardItem("4", command, user)
 		then:
 		thrown(NotPermittedException)
 	}
 
 	def "addDashboardItem() cannot add with item non-valid command object"() {
 		when:
-		service.addDashboardItem(2L, new SaveDashboardItemCommand(), user)
+		service.addDashboardItem("1", new SaveDashboardItemCommand(), user)
 		then:
 		thrown(ValidationException)
 	}
@@ -216,136 +261,130 @@ class DashboardServiceSpec extends Specification {
 	def "addDashboardItem() adds item to existing dashboard"() {
 		setup:
 		def json = new JsonBuilder([
-		    modules: [
-		        [hash: 1, uiChannel: [webcomponent: "streamr-chart"]]
-		    ]
+				modules: [
+						[hash: 1, uiChannel: [webcomponent: "streamr-chart"]]
+				]
 		]).toString()
 
 		def canvas = new Canvas(json: json).save(failOnError: true, validate: false)
 
 		def command = new SaveDashboardItemCommand(
-			title: "added-item",
-			canvas: canvas.id,
-			module: 1,
-			ord: 666,
-			size: "large"
+				title: "added-item",
+				canvas: canvas,
+				module: 1,
+				webcomponent: "streamr-chart"
 		)
 
 		when:
-		def item = service.addDashboardItem(2L, command, user)
+		def item = service.addDashboardItem("2", command, user)
 
 		then:
 		item instanceof DashboardItem
-		item.id != null
+		item.id == "4"
 		item.title == "added-item"
 		item.canvas.id == "1"
 		item.module == 1
-		item.webcomponent == "streamr-chart"
-		item.ord == 666
-		item.size == "large"
+		item.webcomponent.getName() == "streamr-chart"
 
 		and:
-		Dashboard.get(2L).items*.id == [item.id]
+		Dashboard.get("2").items*.id == [item.id]
 	}
 
 
-
-
 	def "updateDashboardItem() cannot update item from non-existent dashboard"() {
+		setup:
 		def json = new JsonBuilder([
-			modules: [
-				[hash: 1, uiChannel: [webcomponent: "streamr-chart"]]
-			]
+				modules: [
+						[hash: 1, uiChannel: [webcomponent: "streamr-chart"]]
+				]
 		]).toString()
 
 		def canvas = new Canvas(json: json).save(failOnError: true, validate: false)
 
 		def command = new SaveDashboardItemCommand(
-			title: "updated-item",
-			canvas: canvas.id,
-			module: 1,
-			ord: 42,
-			size: "small"
+				title: "added-item",
+				canvas: canvas,
+				module: 1,
+				webcomponent: "streamr-chart"
 		)
 
 		when:
-		service.updateDashboardItem(666L, 0L, command, user)
+		service.updateDashboardItem("nonexistent", "test", command, user)
 		then:
 		thrown(NotFoundException)
 	}
 
 	def "updateDashboardItem() cannot update item from other user's non-writeable dashboard"() {
+		setup:
 		def json = new JsonBuilder([
-			modules: [
-				[hash: 1, uiChannel: [webcomponent: "streamr-chart"]]
-			]
+				modules: [
+						[hash: 1, uiChannel: [webcomponent: "streamr-chart"]]
+				]
 		]).toString()
 
 		def canvas = new Canvas(json: json).save(failOnError: true, validate: false)
 
 		def command = new SaveDashboardItemCommand(
-			title: "updated-item",
-			canvas: canvas.id,
-			module: 1,
-			ord: 42,
-			size: "small"
+				title: "added-item",
+				canvas: canvas,
+				module: 1,
+				webcomponent: "streamr-chart"
 		)
 
 		when:
-		service.updateDashboardItem(5L, 0L, command, user)
+		service.updateDashboardItem("5", "test", command, user)
 		then:
 		thrown(NotPermittedException)
 	}
 
 	def "updateDashboardItem() cannot update non-existent dashboard - dashboard item -pair"() {
+		setup:
 		def json = new JsonBuilder([
-			modules: [
-				[hash: 1, uiChannel: [webcomponent: "streamr-chart"]]
-			]
+				modules: [
+						[hash: 1, uiChannel: [webcomponent: "streamr-chart"]]
+				]
 		]).toString()
 
 		def canvas = new Canvas(json: json).save(failOnError: true, validate: false)
 
 		def command = new SaveDashboardItemCommand(
-			title: "updated-item",
-			canvas: canvas.id,
-			module: 1,
-			ord: 42,
-			size: "small"
+				title: "added-item",
+				canvas: canvas,
+				module: 1,
+				webcomponent: "streamr-chart"
 		)
 
 		when:
-		service.updateDashboardItem(2L, 1L, command, user)
+		service.updateDashboardItem("2", "1", command, user)
 		then:
 		thrown(NotFoundException)
 	}
 
 	def "updateDashboardItem() throws ValidationException given non valid command object"() {
 		when:
-		service.updateDashboardItem(3L, 1L, new SaveDashboardItemCommand(), user)
+		service.updateDashboardItem("1", "test", new SaveDashboardItemCommand(), user)
 		then:
 		thrown(ValidationException)
 	}
 
 	def "updateDashboardItem() can update item on dashboard."() {
 		def json = new JsonBuilder([
-			modules: [
-				[hash: 1, uiChannel: [webcomponent: "streamr-chart"]]
-			]
+				modules: [
+						[hash: 1, uiChannel: [webcomponent: "streamr-chart"]]
+				]
 		]).toString()
 
 		def canvas = new Canvas(json: json).save(failOnError: true, validate: false)
 
+		def dashboardId = "3"
+		def itemToUpdateId = "1"
+
 		def command = new SaveDashboardItemCommand(
 			title: "updated-item",
-			canvas: canvas.id,
+			canvas: canvas,
 			module: 1,
-			ord: 42,
-			size: "small"
+			webcomponent: "streamr-map"
 		)
-
-		def dashboardId = 3L
-		def itemToUpdateId = 1L
 
 		assert DashboardItem.findById(itemToUpdateId) != null
 
@@ -354,49 +393,47 @@ class DashboardServiceSpec extends Specification {
 		then:
 		DashboardItem.findById(itemToUpdateId).properties == updatedItem.properties
 		updatedItem.toMap() == [
-			id: 1L,
-			dashboard: dashboardId,
-		    title: "updated-item",
-			canvas: canvas.id,
-			module: 1,
-			webcomponent: "streamr-chart",
-			ord: 42,
-			size: "small",
+				id          : itemToUpdateId,
+				dashboard   : dashboardId,
+				title       : "updated-item",
+				canvas      : canvas.id,
+				module      : 1,
+				webcomponent: "streamr-chart"
 		]
 	}
 
 	def "deleteDashboardItem() cannot delete item from non-existent dashboard"() {
 		when:
-		service.deleteDashboardItem(666L, 0L, user)
+		service.deleteDashboardItem("nonexistent", "nonexistent", user)
 		then:
 		thrown(NotFoundException)
 	}
 
-	def "deleteDashboardItem() cannot delete item from other user's non-writeable dashboard"() {
+	def "deleteDashboardItem() cannot delete item from other user's non-writable dashboard"() {
 		when:
-		service.deleteDashboardItem(5L, 0L, user)
+		service.deleteDashboardItem("4", "nonexistent", user)
 		then:
 		thrown(NotPermittedException)
 	}
 
-	def "deleteDashboardItem() can delete non-existent dashboard item"() {
+	def "deleteDashboardItem() cannot delete non-existent dashboard item"() {
 		when:
-		service.deleteDashboardItem(2L, 1L, user)
+		service.deleteDashboardItem("2", "nonexistent", user)
 		then:
 		thrown(NotFoundException)
 	}
 
 	def "deleteDashboardItem() can remove item from dashboard and delete it"() {
-		def dashboardId = 3L
-		def itemToRemoveId = 2L
+		def dashboardId = "3"
+		def itemToRemoveId = "1"
 
 		assert DashboardItem.findById(itemToRemoveId) != null
-		assert Dashboard.get(dashboardId).items*.id == [2L, 1L, 3L]
+		assert Dashboard.get(dashboardId).items*.id == ["1", "2", "3"]
 
 		when:
 		service.deleteDashboardItem(dashboardId, itemToRemoveId, user)
 		then:
 		DashboardItem.findById(itemToRemoveId) == null
-		Dashboard.get(dashboardId).items*.id == [1L, 3L]
+		Dashboard.get(dashboardId).items*.id == ["2", "3"]
 	}
 }
