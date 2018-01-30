@@ -159,9 +159,9 @@ class SignalPathServiceSpec extends Specification {
 		sp3.setCanvas(c3)
 
 		service.servletContext["signalPathRunners"] = [
-		    "runner-id-1": new SignalPathRunner(sp1, new Globals([:], grailsApplication, someoneElse)),
-			"runner-id-2": new SignalPathRunner(sp2, new Globals([:], grailsApplication, me)),
-			"runner-id-3": new SignalPathRunner(sp3, new Globals([:], grailsApplication, someoneElse)),
+		    "runner-id-1": new SignalPathRunner(sp1, new Globals([:], someoneElse)),
+			"runner-id-2": new SignalPathRunner(sp2, new Globals([:], me)),
+			"runner-id-3": new SignalPathRunner(sp3, new Globals([:], someoneElse)),
 		]
 
 		expect:

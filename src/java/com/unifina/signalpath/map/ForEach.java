@@ -1,6 +1,7 @@
 package com.unifina.signalpath.map;
 
 import com.google.gson.Gson;
+import com.unifina.domain.security.SecUser;
 import com.unifina.domain.signalpath.Canvas;
 import com.unifina.service.CanvasService;
 import com.unifina.service.SerializationService;
@@ -57,7 +58,7 @@ public class ForEach extends AbstractSignalPathModule {
 		SignalPathService signalPathService = Holders.getApplicationContext().getBean(SignalPathService.class);
 
 		// Create a non-run-context Globals for instantiating the temporary SignalPath
-		Globals tempGlobals = GlobalsFactory.createInstance(Collections.emptyMap(), getGlobals().getGrailsApplication(), getGlobals().getUser());
+		Globals tempGlobals = GlobalsFactory.createInstance(Collections.emptyMap(), SecUser.loadViaJava(getGlobals().getUserId()));
 		SignalPath tempSignalPath = signalPathService.mapToSignalPath(signalPathMap, true, tempGlobals, new SignalPath(false));
 
 		// Find and validate exported endpoints

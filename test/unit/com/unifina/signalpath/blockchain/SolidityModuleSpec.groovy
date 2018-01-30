@@ -7,6 +7,7 @@ import com.unifina.domain.security.SecUser
 import com.unifina.serialization.SerializerImpl
 import com.unifina.service.EthereumIntegrationKeyService
 import com.unifina.service.SerializationService
+import com.unifina.utils.Globals
 import grails.test.mixin.Mock
 
 @Mock([IntegrationKey, SecUser])
@@ -83,7 +84,13 @@ class SolidityModuleSpec extends ModuleTestingSpecification {
 	}
 
 	void "attacker can't use another user's key to deploy"() {
-		module.getGlobals().setUser(new SecUser(name: "attacker", username: "attacker", password: "pass").save(failOnError: true, validate: false))
+		def attacker = new SecUser(
+			name: "attacker",
+			username: "attacker",
+			password: "pass"
+		).save(failOnError: true, validate: false)
+
+		module.setGlobals(new Globals(module.globals.signalPathContext, attacker))
 
 		when:
 		applyConfig.contract.abi[2].payable = true

@@ -212,8 +212,6 @@ streamr.apiKey.revokeNotificationStream = "revoked-api-keys"
 /**
  * Application properties
  */
-//Which class to use as the SignalPath run context
-unifina.globals.className = "com.unifina.utils.Globals"
 // Where to send email reports
 unifina.reports.recipient = "henri.pihkala@streamr.com"
 

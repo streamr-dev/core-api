@@ -23,7 +23,7 @@ class ModuleTestingSpecification extends BeanMockingSpecification {
 	}
 
 	protected Globals mockGlobals(Map context=[:], SecUser user = new SecUser(timezone: "UTC")) {
-		Globals globals = GlobalsFactory.createInstance(context, grailsApplication, user)
+		Globals globals = GlobalsFactory.createInstance(context, user)
 		globals.setDataSource(Mock(DataSource))
 		globals.init()
 		globals.time = new Date(0)

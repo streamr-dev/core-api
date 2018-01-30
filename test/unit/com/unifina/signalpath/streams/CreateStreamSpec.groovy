@@ -26,7 +26,7 @@ class CreateStreamSpec extends BeanMockingSpecification {
 		module.init()
 
 		mockBean(StreamService, streamService)
-		globals.getUser() >> null
+		globals.getUserId() >> null
 
 		Feed feed = new Feed(streamListenerClass: NoOpStreamListener.canonicalName)
 		feed.id = 7
