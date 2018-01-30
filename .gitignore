@@ -2,7 +2,7 @@
 .DS_Store
 
 # IntelliJ IDEA
-.idea/**
+.idea
 
 ## File-based project format:
 *.iws
