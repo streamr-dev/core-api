@@ -4,17 +4,11 @@ import com.unifina.domain.data.Stream;
 import com.unifina.domain.security.Permission;
 import com.unifina.domain.security.SecUser;
 import com.unifina.service.PermissionService;
-import com.unifina.service.StreamService;
-import com.unifina.signalpath.BooleanOutput;
-import com.unifina.signalpath.Output;
 import grails.orm.HibernateCriteriaBuilder;
 import grails.util.Holders;
 import groovy.lang.Closure;
 
-import java.io.ObjectOutput;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 public class GetOrCreateStream extends CreateStream {
 

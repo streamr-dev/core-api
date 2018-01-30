@@ -3,15 +3,12 @@ package com.unifina.signalpath.streams;
 import com.unifina.domain.data.Stream;
 import com.unifina.domain.security.Permission;
 import com.unifina.domain.security.SecUser;
-import com.unifina.service.FeedService;
 import com.unifina.service.PermissionService;
-import com.unifina.service.StreamService;
 import com.unifina.signalpath.*;
 import grails.orm.HibernateCriteriaBuilder;
 import grails.util.Holders;
 import groovy.lang.Closure;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
