@@ -2,7 +2,9 @@
 .DS_Store
 
 # IntelliJ IDEA
-.idea
+.idea/workspace.xml
+.idea/tasks.xml
+.idea/dictionaries
 
 ## File-based project format:
 *.iws
