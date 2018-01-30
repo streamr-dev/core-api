@@ -1,39 +1,22 @@
 import com.unifina.domain.data.Stream
-import com.unifina.feed.mongodb.MongoDbConfig
 import com.unifina.service.StreamService
 import LoginTester1Spec
 import mixins.ConfirmationMixin
 import mixins.StreamMixin
 import pages.*
-import org.bson.Document
 import spock.lang.Shared
 
 import java.nio.file.Paths
 
 class StreamSpec extends LoginTester1Spec implements ConfirmationMixin, StreamMixin {
 
-	@Shared def mongoDbConfig = new MongoDbConfig([
-		host: "dev.streamr",
-		port: 27017,
-		database: "test",
-		collection: "streamSpec",
-		timestampKey: "time",
-		timestampType: MongoDbConfig.TimestampType.DATETIME
-	])
-
 	@Shared StreamService streamService
 
 	def setupSpec() {
 		streamService = createStreamService()
-
-		def client = mongoDbConfig.createMongoClient()
-		mongoDbConfig.openCollection().drop()
-		client.getDatabase("test").createCollection("streamSpec")
-		mongoDbConfig.openCollection().insertOne(new Document([a: "hello world", b: 10, c: new Date(0)]))
 	}
 
 	def cleanupSpec() {
-		mongoDbConfig.openCollection().drop()
 		cleanupStreamService(streamService)
 	}
 	
@@ -144,87 +127,6 @@ class StreamSpec extends LoginTester1Spec implements ConfirmationMixin, StreamMi
 		then: "must navigate to list page and show message"
 			waitFor { at StreamListPage }
 	}
-
-	void "creating a mongo stream and autodetecting its fields work"() {
-		setup:
-		def streamName = "StreamSpec_Mongo_"+System.currentTimeMillis()
-		to StreamListPage
-		waitFor { at StreamListPage }
-
-		when: "create stream button is clicked"
-		createButton.click()
-		then: "must go to stream create page"
-		waitFor { at StreamCreatePage }
-
-		when: "name, description are entered, mongo chosen from list, and then next button is clicked"
-		name << streamName
-		description << streamName + " description"
-		feed.click()
-		feed.find("option").find { it.value() == "8" }.click()
-		nextButton.click()
-
-		then: "must navigate to stream show page, showing info about non-configured stream"
-		waitFor { at StreamShowPage }
-		$(".alert-info", text: contains('configure'))
-
-		when: "mongodb edit button is clicked"
-		editMongoDbButton.click()
-		then: "arrive at mongodb configuration page"
-		waitFor { at ConfigureMongoPage }
-
-		when: "filling in configuration details"
-		host << "dev.streamr"
-		port.value("27017")
-		username << ""
-		password << ""
-		database << "test"
-		collection << "streamSpec"
-		timestampKey << "time"
-		pollIntervalMillis.value("5500")
-		query.value("{}")
-
-		and: "pressing submit"
-		submit.click()
-
-		then: "back at stream show page"
-		waitFor { at StreamShowPage }
-
-		and: "mongodb configurations visible"
-		mongoHost.text() == "dev.streamr"
-		mongoPort.text() == "27017"
-		mongoUsername.text().empty
-		mongoPassword.text().empty
-		mongoDatabase.text() == "test"
-		mongoCollection.text() == "streamSpec"
-		mongoTimestampKey.text() == "time (datetime)"
-		mongoPollIntervalMillis.text() == "5500"
-		mongoQuery.text() == "{}"
-
-		when: "Configure Fields button is clicked"
-		configureFieldsButton.click()
-		then: "Navigate to configure page"
-		waitFor { at StreamConfigurePage }
-
-		when: "Autodetect button is clicked"
-		autodetectButton.click()
-		then:
-		waitFor {
-			$("input", name: "field_name").size() == 4 && $("select", name: "field_type").size() == 4
-		}
-		$("input", name:"field_name").collect { it.value() } == ["_id", "a", "b", "c"]
-		$("select", name:"field_type").collect { it.value() } == ["string", "string", "number", "string"]
-
-		cleanup: "delete stream"
-		to(StreamListPage)
-		openStream(streamName)
-		streamMenuButton.click()
-		waitFor { deleteStreamButton.displayed }
-		deleteStreamButton.click()
-		waitFor { $(".modal-dialog").displayed }
-		$(".modal-dialog .btn-primary").click()
-		waitFor { at StreamListPage }
-	}
-	
 }
 
 
