@@ -10,7 +10,7 @@ import grails.plugin.springsecurity.authentication.dao.NullSaltSource
 import groovy.text.SimpleTemplateEngine
 import org.apache.log4j.Logger
 
-import com.unifina.user.UserCreationFailedException
+import com.unifina.exceptions.UserCreationFailedException
 import com.unifina.domain.security.SecUser
 import com.unifina.domain.security.SignupInvite
 

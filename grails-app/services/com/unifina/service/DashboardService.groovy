@@ -64,7 +64,6 @@ class DashboardService {
 		Dashboard dashboard = new Dashboard(validCommand.properties.subMap(["name", "layout"]))
 
 		dashboard.id = IdGenerator.getShort()
-		dashboard.user = user
 		dashboard.save(failOnError: true)
 
 		validCommand.items.each {
@@ -79,6 +78,7 @@ class DashboardService {
 			item.save(failOnError: true)
 		}
 		dashboard.save(failOnError: true)
+		permissionService.systemGrantAll(user, dashboard)
 		return dashboard
 	}
 

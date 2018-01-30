@@ -1,6 +1,8 @@
 package com.unifina.domain.security
 
-class SignupInvite {
+import com.unifina.security.Userish
+
+class SignupInvite implements Userish {
 	String code
 	String username
 	Boolean used
@@ -12,4 +14,9 @@ class SignupInvite {
 		code blank: false, unique: true
 		username blank: false, email: true
     }
+
+	@Override
+	Userish resolveToUserish() {
+		return this
+	}
 }

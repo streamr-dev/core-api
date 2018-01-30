@@ -5,6 +5,7 @@ import com.unifina.domain.tour.TourUser
 
 import grails.test.mixin.*
 import grails.test.mixin.support.*
+import spock.lang.Specification
 
 import java.nio.file.Files
 import java.nio.file.Path
@@ -13,10 +14,10 @@ import org.junit.*
 
 @TestFor(TourUserController)
 @Mock([TourUser, SecUser])
-class TourUserControllerTests {
+class TourUserControllerSpec extends Specification {
 
-	def u1 = new SecUser(id: 1, username: "test1", password: "test")
-	def u2 = new SecUser(id: 2, username: "test2", password: "test")
+	SecUser u1 = new SecUser(id: 1, username: "test1", password: "test")
+	SecUser u2 = new SecUser(id: 2, username: "test2", password: "test")
 
 	def springSecurityService = [
 		currentUser: u1,
@@ -25,28 +26,33 @@ class TourUserControllerTests {
 		}
 	]
 
-	void setUp() {
+	void setup() {
 		springSecurityService.currentUser.save(validate: false, failOnError: true)
 	}
 
-	void "test: it should return user's and only his completed tours"() {
+	void "should return user's and only his completed tours"() {
+		when:
 		params.tourNumber = 3
 		request.method = "POST"
 		controller.springSecurityService = springSecurityService
 		controller.completed()
-		assert response.status == 200
+		then:
+		response.status == 200
 
+		when:
 		params.tourNumber = 4
 		springSecurityService.currentUser = u2
 		request.method = "POST"
 		controller.springSecurityService = springSecurityService
 		controller.completed()
-		assert response.status == 200
+		then:
+		response.status == 200
 
+		when:
 		request.method = "GET"
 		controller.list()
-
-		assert response.status == 200
-		assert response.text == "[4]"
+		then:
+		response.status == 200
+		response.text == "[4]"
 	}
 }

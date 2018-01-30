@@ -64,7 +64,7 @@ public class MongoHistoricalIterator implements Iterator<MapMessage>, Closeable 
 	public MapMessage next() {
 		Document document = mongoCursor.next();
 		Date timestamp = config.getTimestamp(document);
-		return new MapMessage(timestamp, timestamp, new DocumentFromStream(document, stream));
+		return new MapMessage(timestamp, new DocumentFromStream(document, stream));
 	}
 
 	@Override

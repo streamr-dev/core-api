@@ -1,48 +1,40 @@
 package com.unifina.datasource;
 
 
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.PriorityQueue;
-import java.util.Queue;
-import java.util.Timer;
-import java.util.TimerTask;
-
-import com.unifina.data.IEventRecipient;
-import com.unifina.domain.signalpath.Canvas;
-import com.unifina.serialization.SerializationRequest;
-import com.unifina.service.SerializationService;
-import com.unifina.signalpath.SignalPath;
-import com.unifina.signalpath.StopRequest;
-import grails.util.Holders;
-import org.apache.log4j.Logger;
-
 import com.unifina.data.FeedEvent;
 import com.unifina.data.RealtimeEventQueue;
 import com.unifina.feed.AbstractFeed;
 import com.unifina.feed.ICatchupFeed;
+import com.unifina.serialization.SerializationRequest;
+import com.unifina.service.SerializationService;
+import com.unifina.signalpath.SignalPath;
+import com.unifina.signalpath.StopRequest;
 import com.unifina.utils.Globals;
+import grails.util.Holders;
+import org.apache.log4j.Logger;
+
+import java.util.*;
 
 public class RealtimeDataSource extends DataSource {
-
-	Timer secTimer = new Timer();
-
-	private PriorityQueue<FeedEvent> catchupQueue = new PriorityQueue<>();
-
-	//	private long catchupQueueTicket = 0;
-	private boolean abort = false;
-
 	private static final Logger log = Logger.getLogger(RealtimeDataSource.class);
+
+	private final Timer secTimer = new Timer();
+	private final PriorityQueue<FeedEvent> catchupQueue = new PriorityQueue<>();
+	private final RealtimeEventQueue eventQueue;
+	private boolean abort = false;
 
 	public RealtimeDataSource(Globals globals) {
 		super(false, globals);
+		eventQueue = new RealtimeEventQueue(globals, this);
 	}
 
 	@Override
-	protected DataSourceEventQueue initEventQueue() {
-		return new RealtimeEventQueue(globals, this);
+	protected DataSourceEventQueue getEventQueue() {
+		return eventQueue;
 	}
+
+	@Override
+	protected void onSubscribedToFeed(AbstractFeed feed) {}
 
 	@Override
 	protected void doStartFeed() throws Exception {
@@ -60,8 +52,8 @@ public class RealtimeDataSource extends DataSource {
 		}
 
 		// While catching up, any events added to the realtime eventQueue must be added to the catchupQueue instead!
-		Queue<FeedEvent> originalQueue = eventQueue.queue;
-		eventQueue.queue = catchupQueue;
+		Queue<FeedEvent> originalQueue = eventQueue.getQueue();
+		eventQueue.setQueue(catchupQueue);
 
 		processCatchups(catchupFeeds);
 
@@ -74,7 +66,7 @@ public class RealtimeDataSource extends DataSource {
 			}
 		}
 
-		eventQueue.queue = originalQueue;
+		eventQueue.setQueue(originalQueue);
 
 		if (catchupFeeds.size() > 0) {
 			log.info("Catchup complete.");
@@ -90,9 +82,7 @@ public class RealtimeDataSource extends DataSource {
 				 	@Override
 				 	public void run() {
 					 	if (eventQueue.isEmpty()) {
-						 	FeedEvent timeEvent = new FeedEvent();
-						 	timeEvent.timestamp = new Date();
-						 	eventQueue.enqueue(timeEvent);
+							eventQueue.enqueue(new FeedEvent<>(null, new Date(), null));
 					 	}
 					}
 			 	},
@@ -101,15 +91,16 @@ public class RealtimeDataSource extends DataSource {
 
 			// Serialization
 			SerializationService serializationService = Holders.getApplicationContext().getBean(SerializationService.class);
+			long serializationIntervalInMs = serializationService.serializationIntervalInMillis();
 
-			if (serializationService.serializationIntervalInMillis() > 0) {
+			if (serializationIntervalInMs > 0) {
 				for (final SignalPath signalPath : getSerializableSignalPaths()) {
 					secTimer.scheduleAtFixedRate(new TimerTask() {
 						@Override
 						public void run() {
 							eventQueue.enqueue(SerializationRequest.makeFeedEvent(signalPath));
 						}
-					}, serializationService.serializationIntervalInMillis(), serializationService.serializationIntervalInMillis());
+					}, serializationIntervalInMs, serializationIntervalInMs);
 				}
 			}
 
@@ -169,7 +160,7 @@ public class RealtimeDataSource extends DataSource {
 
 		// Stop request
 		Date date = new Date();
-		eventQueue.enqueue(new FeedEvent(new StopRequest(date), date, (RealtimeEventQueue) eventQueue));
+		eventQueue.enqueue(new FeedEvent<>(new StopRequest(date), date, eventQueue));
 	}
 
 

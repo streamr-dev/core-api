@@ -1,4 +1,4 @@
-package com.unifina.feed;
+package com.unifina.exceptions;
 
 public class StreamNotFoundException extends RuntimeException {
 	public StreamNotFoundException(String id) {

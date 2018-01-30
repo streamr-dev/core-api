@@ -6,13 +6,11 @@ import java.util.Date;
 import java.util.Map;
 
 public class MapMessage implements ITimestamped {
-	public Date timestamp;
-	public Date receiveTime;
-	public Map payload;
+	public final Date timestamp;
+	public final Map payload;
 	
-	public MapMessage(Date timestamp, Date receiveTime, Map payload) {
+	public MapMessage(Date timestamp, Map payload) {
 		this.timestamp = timestamp;
-		this.receiveTime = receiveTime;
 		this.payload = payload;
 	}
 

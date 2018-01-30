@@ -5,7 +5,7 @@ import spock.lang.Specification
 
 class MongoStreamListenerSpec extends Specification {
 	void "addToConfiguration inserts empty mongodb entry"() {
-		AbstractStreamListener listener = new MongoStreamListener(null)
+		AbstractStreamListener listener = new MongoStreamListener()
 		def map = [a: "a"]
 
 		when:

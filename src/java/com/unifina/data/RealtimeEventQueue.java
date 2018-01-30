@@ -1,32 +1,23 @@
 package com.unifina.data;
 
+import com.unifina.datasource.DataSource;
+import com.unifina.datasource.DataSourceEventQueue;
+import com.unifina.signalpath.StopRequest;
+import com.unifina.utils.Globals;
+import org.apache.log4j.Logger;
+
 import java.util.ArrayDeque;
 import java.util.Queue;
 
-import com.unifina.signalpath.StopRequest;
-import org.apache.log4j.Logger;
-
-import com.unifina.datasource.DataSource;
-import com.unifina.datasource.DataSourceEventQueue;
-import com.unifina.utils.Globals;
-
 public class RealtimeEventQueue extends DataSourceEventQueue implements IEventRecipient {
-
-	private long elapsedTime;
-	private int eventCounter;
-
-	boolean firstEvent = true;
-
-	/**
-	 * Write log every loggingInterval events; set to 0 for no logging
-	 */
-	private static final int loggingInterval = 10000;
 	private static final Logger log = Logger.getLogger(RealtimeEventQueue.class);
+	private static final int LOGGING_INTERVAL = 10000; // set to 0 for no logging
+
+	private boolean firstEvent = true;
 
 	public RealtimeEventQueue(Globals globals, DataSource dataSource) {
-		super(globals, dataSource);
+		super(true, globals, dataSource);
 	}
-
 
 	@Override
 	protected Queue<FeedEvent> initQueue() {
@@ -34,36 +25,26 @@ public class RealtimeEventQueue extends DataSourceEventQueue implements IEventRe
 	}
 
 	protected void doStart() throws Exception {
-
 		log.info("The realtime event queue is starting!");
-		sync = true;
 
-		while (!abort) {
-			FeedEvent event;
-			synchronized (queue) {
-				while (queue.isEmpty() && !abort) {
-					try {
-						queue.wait();
-					} catch (InterruptedException ignored) {
+		int eventCounter = 0;
+		long elapsedTime = 0;
 
-					}
-				}
-
-				if (abort) {
-					log.info("doStart: aborting");
-					return;
-				}
-
-				event = queue.poll();
+		while (!isAborted()) {
+			FeedEvent event = waitForAndPullFeedEvent();
+			if (event == null) {
+				log.info("doStart: aborting");
+				return;
 			}
 
 			long startTime = System.nanoTime();
 			process(event);
 
-			if (loggingInterval > 0) {
+			// Report processing
+			if (LOGGING_INTERVAL > 0) {
 				elapsedTime += System.nanoTime() - startTime;
 				eventCounter++;
-				if (eventCounter >= loggingInterval) {
+				if (eventCounter >= LOGGING_INTERVAL) {
 					double perEvent = (elapsedTime / eventCounter) / 1000.0;
 					log.info("Processed " + eventCounter + " events in " + elapsedTime + " nanoseconds. " +
 			 				 "That's " + perEvent + " microseconds per event.");
@@ -88,9 +69,7 @@ public class RealtimeEventQueue extends DataSourceEventQueue implements IEventRe
 		try {
 			// Never go backwards in time
 			if (globals.time == null || time > globals.time.getTime()) {
-				// Notify timelisteners
 				reportTime(time);
-				// Update global time
 				globals.time = event.timestamp;
 			}
 
@@ -106,10 +85,26 @@ public class RealtimeEventQueue extends DataSourceEventQueue implements IEventRe
 	}
 
 	@Override
+	protected void doStop() {}
+
+	@Override
 	public void receive(FeedEvent event) {
 		if (event.content instanceof StopRequest) {
 			log.info("Received abort request, aborting...");
 			abort();
+		} else {
+			log.warn("Unrecognized request " + event);
+		}
+	}
+
+	private FeedEvent waitForAndPullFeedEvent() {
+		synchronized (getSyncLock()) {
+			while (isEmpty() && !isAborted()) {
+				try {
+					getSyncLock().wait();
+				} catch (InterruptedException ignored) {}
+			}
+			return isAborted() ? null : poll();
 		}
 	}
 }

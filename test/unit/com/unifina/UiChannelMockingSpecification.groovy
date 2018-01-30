@@ -38,7 +38,6 @@ class UiChannelMockingSpecification extends ModuleTestingSpecification {
 		streamService.createStream(_, _, _) >> { Map params, SecUser user, String id->
 			Stream s = new Stream(params)
 			s.id = id
-			s.user = user
 			return s
 		}
 

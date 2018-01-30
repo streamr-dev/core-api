@@ -1,15 +1,10 @@
 package com.unifina.service
 
 import com.unifina.domain.data.Feed
-import com.unifina.domain.security.Key
-import com.unifina.domain.security.Permission
-import com.unifina.domain.security.SecRole
-import com.unifina.domain.security.SecUser
-import com.unifina.domain.security.SecUserSecRole
-import com.unifina.domain.signalpath.ModulePackage
+import com.unifina.domain.security.*
 import com.unifina.domain.signalpath.Module
+import com.unifina.domain.signalpath.ModulePackage
 import com.unifina.feed.NoOpStreamListener
-import com.unifina.user.UserCreationFailedException
 import grails.plugin.springsecurity.SpringSecurityService
 import grails.test.mixin.Mock
 import grails.test.mixin.TestFor
@@ -40,13 +35,11 @@ class UserServiceSpec extends Specification {
 		def modulePackage = new ModulePackage()
 		modulePackage.id = new Long(1)
 		modulePackage.name = "test"
-		modulePackage.user = new SecUser()
 		modulePackage.save()
 
 		def modulePackage2 = new ModulePackage()
 		modulePackage2.id = new Long(2)
 		modulePackage2.name = "test2"
-		modulePackage2.user = new SecUser()
 		modulePackage2.save()
 
 		// The roles created
@@ -69,7 +62,6 @@ class UserServiceSpec extends Specification {
 		grailsApplication.mainContext.getBean("springSecurityService").grailsApplication = grailsApplication
 		grailsApplication.mainContext.getBean("springSecurityService").passwordEncoder = grailsApplication.mainContext.getBean("passwordEncoder")
 		permissionService = mainContext.getBean(PermissionService)
-		permissionService.grailsApplication = grailsApplication
 	}
 
     def "the user is created when called, with default roles if none supplied"() {

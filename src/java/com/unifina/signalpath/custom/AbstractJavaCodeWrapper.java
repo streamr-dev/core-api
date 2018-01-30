@@ -1,12 +1,7 @@
 package com.unifina.signalpath.custom;
 
-import java.util.*;
-
-import javax.tools.Diagnostic;
-
 import com.unifina.datasource.ITimeListener;
-import com.unifina.serialization.AnonymousInnerClassDetector;
-import com.unifina.serialization.HiddenFieldDetector;
+import com.unifina.security.UserJavaClassLoader;
 import com.unifina.service.SerializationService;
 import com.unifina.signalpath.*;
 import com.unifina.utils.Globals;
@@ -14,7 +9,8 @@ import grails.util.Holders;
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 
-import com.unifina.security.UserJavaClassLoader;
+import javax.tools.Diagnostic;
+import java.util.*;
 
 public abstract class AbstractJavaCodeWrapper extends ModuleWithUI {
 
@@ -170,12 +166,6 @@ public abstract class AbstractJavaCodeWrapper extends ModuleWithUI {
 		classLoader = new UserJavaClassLoader(getClass().getClassLoader());
 		boolean success = classLoader.parseClass(className, fullCode);
 
-		HiddenFieldDetector detector = null;
-		if (success) {
-			detector = new HiddenFieldDetector(classLoader.loadClass(className));
-			success = !detector.anyHiddenFields();
-		}
-
 		if (!success) {
 			StringBuilder sb = new StringBuilder();
 			sb.append("Compilation errors:\n");
@@ -194,24 +184,6 @@ public abstract class AbstractJavaCodeWrapper extends ModuleWithUI {
 				CompilationErrorMessage msg = new CompilationErrorMessage();
 				msg.addError(line, d.getMessage(null));
 				msgs.add(new ModuleExceptionMessage(hash,msg));
-			}
-
-			if (detector != null) {
-				for (String fieldName : detector.hiddenFields().keySet()) {
-
-					String message = "Hiding of field '" + fieldName + "' not allowed. Declarations " +
-							"in inheritance chain by classes: " + detector.hiddenFields().get(fieldName);
-
-					sb.append("Line ");
-					sb.append(0);
-					sb.append(": ");
-					sb.append(message);
-					sb.append("\n");
-
-					CompilationErrorMessage msg = new CompilationErrorMessage();
-					msg.addError(0, message);
-					msgs.add(new ModuleExceptionMessage(hash, msg));
-				}
 			}
 
 			throw new ModuleException(sb.toString(),null,msgs);
@@ -243,16 +215,6 @@ public abstract class AbstractJavaCodeWrapper extends ModuleWithUI {
 		instance.setParentSignalPath(getParentSignalPath());
 		instance.configure(config);
 		instance.setParentWrapper(this);
-
-		// Validate that anonymous inner classes are not present since they cannot be serialized
-		AnonymousInnerClassDetector anonymousInnerClassDetector = new AnonymousInnerClassDetector();
-		if (anonymousInnerClassDetector.detect(instance)) {
-			String msg = "Anonymous inner classes are not allowed.";
-			CompilationErrorMessage compilationErrorMsg = new CompilationErrorMessage();
-			compilationErrorMsg.addError(0, msg);
-			throw new ModuleException(msg, null, Arrays.asList(new ModuleExceptionMessage(hash, compilationErrorMsg)));
-		}
-
 		return instance;
 	}
 

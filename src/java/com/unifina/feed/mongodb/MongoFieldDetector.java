@@ -10,16 +10,11 @@ import com.unifina.domain.data.Stream;
 import com.unifina.feed.FieldDetector;
 import com.unifina.feed.map.MapMessage;
 import org.bson.Document;
-import org.codehaus.groovy.grails.commons.GrailsApplication;
 
 import java.util.Date;
 
 @SuppressWarnings("unused")
 public class MongoFieldDetector extends FieldDetector {
-
-	public MongoFieldDetector(GrailsApplication grailsApplication) {
-		super(grailsApplication);
-	}
 
 	@Override
 	protected MapMessage fetchExampleMessage(Stream stream) {
@@ -42,7 +37,7 @@ public class MongoFieldDetector extends FieldDetector {
 				Date timestamp = config.getTimestamp(document);
 				// Timestamps are implicit, so remove it from the document before field detection
 				document.remove(config.getTimestampKey());
-				return new MapMessage(timestamp, timestamp, new DocumentFromStream(document, stream));
+				return new MapMessage(timestamp, new DocumentFromStream(document, stream));
 			} else {
 				String msg = String.format("No data found %s@%s", collection.getNamespace(), mongoClient.getConnectPoint());
 				throw new MongoException(msg);

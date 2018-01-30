@@ -25,22 +25,19 @@ class EthereumAccountParameter extends Parameter<IntegrationKey> {
 	}
 
 	String getAddress() {
-		if (hasValue()) {
-			if (getOwner().getGlobals().isRunContext()) {
-				checkPermission();
-			}
-			return (String) ((Map) getValue().toMap().get("json")).get("address");
+		if (!hasValue()) {
+			return null;
 		}
-		return null;
+		return (String) ((Map) getValue().toMap().get("json")).get("address");
 	}
 
 	String getPrivateKey() {
-		EthereumIntegrationKeyService keyService = Holders.getApplicationContext().getBean(EthereumIntegrationKeyService.class);
-		if (hasValue()) {
-			checkPermission();
-			return keyService.decryptPrivateKey(getValue());
+		if (!hasValue()) {
+			return null;
 		}
-		return null;
+		checkPermission();
+		EthereumIntegrationKeyService keyService = Holders.getApplicationContext().getBean(EthereumIntegrationKeyService.class);
+		return keyService.decryptPrivateKey(getValue());
 	}
 
 	private void checkPermission() {
@@ -63,7 +60,6 @@ class EthereumAccountParameter extends Parameter<IntegrationKey> {
 		if (hasValue()) {
 			integrationKeys.add(getValue());
 		}
-
 
 		List<PossibleValue> possibleValues = new ArrayList<>();
 		possibleValues.add(new PossibleValue("(none)", null));
