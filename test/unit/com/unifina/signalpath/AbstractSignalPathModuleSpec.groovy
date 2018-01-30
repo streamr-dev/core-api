@@ -1,11 +1,11 @@
 package com.unifina.signalpath
 
 import com.unifina.BeanMockingSpecification
+import com.unifina.data.FeedEvent
 import com.unifina.datasource.RealtimeDataSource
 import com.unifina.domain.security.SecUser
 import com.unifina.service.PermissionService
 import com.unifina.utils.Globals
-import com.unifina.utils.testutils.FakeStreamService
 import grails.test.mixin.support.GrailsUnitTestMixin
 import groovy.transform.CompileStatic
 import org.apache.log4j.Level
@@ -91,7 +91,14 @@ class AbstractSignalPathModuleSpec extends BeanMockingSpecification {
 	@CompileStatic
 	private void setUpModuleWithRuntimeRequestEnv() {
 		globals = new Globals()
-		globals.setDataSource(new RealtimeDataSource(globals))
+		globals.setDataSource(new RealtimeDataSource(globals) {
+			FeedEvent lastFeedEvent
+			@Override
+			void enqueueEvent(FeedEvent feedEvent) {
+				super.enqueueEvent(feedEvent)
+				lastFeedEvent = feedEvent
+			}
+		})
 		globals.init()
 
 		module = new Module()
@@ -102,11 +109,10 @@ class AbstractSignalPathModuleSpec extends BeanMockingSpecification {
 		module.setParentSignalPath(mockSignalPath)
 	}
 
-	@CompileStatic
 	private RuntimeResponse sendRuntimeRequest(LinkedHashMap<String, Object> msg, SecUser user) {
 		def request = new RuntimeRequest(msg, user, null, "request/1", "request/1", [] as Set)
 		def future = module.onRequest(request, request.getPathReader())
-		globals.getDataSource().getEventQueue().process(globals.getDataSource().getEventQueue().poll())
+		module.receive(globals.dataSource.lastFeedEvent)
 		return future.get(1, TimeUnit.SECONDS)
 	}
 

@@ -285,7 +285,7 @@ public abstract class AbstractHttpModule extends ModuleWithSideEffects implement
 				response.responseTime = System.currentTimeMillis() - startTime;
 				response.timestamp = getGlobals().isRealtime() ? new Date() : getGlobals().time;
 				if (async) {
-					getGlobals().getDataSource().getEventQueue().enqueue(new FeedEvent<>(response, response.timestamp, self));
+					getGlobals().getDataSource().enqueueEvent(new FeedEvent<>(response, response.timestamp, self));
 				} else {
 					latch.countDown();	// goto latch.await() below
 				}

@@ -29,7 +29,7 @@ public class ListToEvents extends AbstractSignalPathModule implements IEventReci
 		// enqueue the items, send out in receive() below
 		for (Object item : inList) {
 			QueuedItem queuedItem = new QueuedItem(item, getGlobals().time);
-			getGlobals().getDataSource().getEventQueue().enqueue(new FeedEvent<>(queuedItem, queuedItem.timestamp, this));
+			getGlobals().getDataSource().enqueueEvent(new FeedEvent<>(queuedItem, queuedItem.timestamp, this));
 		}
 	}
 

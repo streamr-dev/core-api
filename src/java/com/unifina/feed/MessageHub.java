@@ -1,12 +1,8 @@
 package com.unifina.feed;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.List;
+import java.util.*;
 import java.util.concurrent.ArrayBlockingQueue;
+import java.util.concurrent.BlockingQueue;
 
 import org.apache.log4j.Logger;
 
@@ -21,46 +17,39 @@ import org.apache.log4j.Logger;
  * @param <KeyClass>
  */
 public class MessageHub<RawMessageClass, MessageClass, KeyClass> extends Thread implements MessageRecipient {
+	private static final Logger log = Logger.getLogger(MessageHub.class);
 
-	protected MessageSource source;
-	protected MessageParser<RawMessageClass, MessageClass> parser;
-	protected IFeedCache cache;
-	
-	protected ArrayBlockingQueue<Message> queue = new ArrayBlockingQueue<>(1000*1000);
-	protected ArrayList<MessageRecipient> proxies = new ArrayList<>();
-	protected HashMap<KeyClass, List<MessageRecipient>> proxiesByKey = new HashMap<>();
-	
-	protected MessageRecipient[] proxiesByPriority = new MessageRecipient[0];
-	protected Comparator<MessageRecipient> proxyPriorityComparator = new Comparator<MessageRecipient>() {
+	private final MessageSource source;
+	private final MessageParser<RawMessageClass, MessageClass> parser;
+	private final IFeedCache cache;
+
+	private final BlockingQueue<Message> queue = new ArrayBlockingQueue<>(1000*1000);
+	private final List<MessageRecipient> proxies = new ArrayList<>();
+	private final List<MessageRecipient> proxiesByPriority = new ArrayList<>();
+	private final Map<KeyClass, List<MessageRecipient>> proxiesByKey = new HashMap<>();
+
+	private final Comparator<MessageRecipient> proxyPriorityComparator = new Comparator<MessageRecipient>() {
 		@Override
 		public int compare(MessageRecipient o1, MessageRecipient o2) {
 			return Integer.compare(o1.getReceivePriority(), o2.getReceivePriority());
 		}
 	};
-	
+
 	private boolean quit = false;
-	private static final Logger log = Logger.getLogger(MessageHub.class);
 
 	
-	protected MessageHub(MessageSource source, MessageParser<RawMessageClass, MessageClass> parser, IFeedCache cache) {
+	MessageHub(MessageSource source, MessageParser<RawMessageClass, MessageClass> parser, IFeedCache cache) {
 		this.source = source;
-		this.cache = cache;
 		this.parser = parser;
-		
+		this.cache = cache;
+
 		source.setRecipient(this);
-		if (cache!=null)
+		if (cache != null) {
 			addRecipient(cache);
+		}
 		
-		setName("MsgHub_"+source.getClass().getSimpleName());
-//		start(); not safe to start Thread in constructor! Started in FeedFactory
-	}
-	
-	public MessageParser<RawMessageClass, MessageClass> getParser() {
-		return parser;
-	}
-	
-	public void quit() {
-		quit = true;
+		setName("MsgHub_" + source.getClass().getSimpleName());
+		// not safe to start Thread in constructor! Started in FeedFactory
 	}
 	
 	@Override
@@ -75,30 +64,24 @@ public class MessageHub<RawMessageClass, MessageClass, KeyClass> extends Thread 
 				throw new RuntimeException(e);
 			}
 			
-			ParsedMessage<RawMessageClass, MessageClass, KeyClass> parsedMessage = null;
+			ParsedMessage<MessageClass, KeyClass> parsedMessage = null;
 			try {
 				// Preprocess here to avoid repeating something in each feed proxy
-				parsedMessage = new ParsedMessage(m.counter, parser.parse((RawMessageClass) m.message), m.message);
-				parsedMessage.checkCounter = m.checkCounter; 				// TODO: make cleaner
+				parsedMessage = new ParsedMessage<>(m.counter, parser.parse((RawMessageClass) m.message), m.checkCounter);
 			} catch (Exception e) {
-				log.error("Failed to parse message "+m.message.toString(),e);
+				log.error("Failed to parse message " + m.message.toString(), e);
 			}
-			
-			if (parsedMessage!=null) try {
-				// If the message contains a key, distribute to subscribers for that key only
-				if (m.key!=null) {
-					List<MessageRecipient> list = proxiesByKey.get(m.key);
-					for (MessageRecipient p : list)
-						p.receive(parsedMessage);
-				}
-				else {
-					// Distribute un-keyed messages to all recipients
-					for (MessageRecipient p : proxiesByPriority) {
+
+			if (parsedMessage != null) {
+				try {
+					// If the message contains a key, distribute to subscribers for that key only
+					List<MessageRecipient> proxyList = m.key != null ? proxiesByKey.get(m.key) : proxiesByPriority;
+					for (MessageRecipient p : proxyList) {
 						p.receive(parsedMessage);
 					}
+				} catch (Throwable e) {
+					log.error("Failed to handle message!", e);
 				}
-			} catch (Throwable e) {
-				log.error("Failed to handle message!",e);
 			}
 
 			synchronized (this) {
@@ -109,12 +92,9 @@ public class MessageHub<RawMessageClass, MessageClass, KeyClass> extends Thread 
 
 	@Override
 	public void receive(Message m) {
-		// TODO: check needed?
-		//	if (m.counter==expected) {
-
-		if (queue.remainingCapacity()==0)
+		if (queue.remainingCapacity() == 0) {
 			log.warn("WARNING: Hub queue is full, producer will block!");
-
+		}
 		try {
 			queue.put(m);
 		} catch (InterruptedException e) {
@@ -122,30 +102,21 @@ public class MessageHub<RawMessageClass, MessageClass, KeyClass> extends Thread 
 		}
 	}
 
-	@SuppressWarnings("unchecked")
 	public void addRecipient(MessageRecipient p) {
-		synchronized(proxies) {
+		synchronized (proxies) {
 			if (!proxies.contains(p)) {
 				proxies.add(p);
-				proxiesByPriority = proxies.toArray(new MessageRecipient[proxies.size()]);
-				Arrays.sort(proxiesByPriority, proxyPriorityComparator);
+				proxiesByPriority.add(p);
+				Collections.sort(proxiesByPriority, proxyPriorityComparator);
 			}
 		}
 	}
-	
-	@SuppressWarnings("unchecked")
-	public void removeRecipient(MessageRecipient p) {
-		synchronized(proxies) {
-			proxies.remove(p);
-			proxiesByPriority = proxies.toArray(new MessageRecipient[proxies.size()]);
-			Arrays.sort(proxiesByPriority, proxyPriorityComparator);
-		}
-	}
 
-	public void swapRecipient(MessageRecipient remove, MessageRecipient add) {
-		synchronized(proxies) {
-			removeRecipient(remove);
-			addRecipient(add);
+	public void removeRecipient(MessageRecipient p) {
+		synchronized (proxies) {
+			proxies.remove(p);
+			proxiesByPriority.remove(p);
+			Collections.sort(proxiesByPriority, proxyPriorityComparator);
 		}
 	}
 	
@@ -157,39 +128,43 @@ public class MessageHub<RawMessageClass, MessageClass, KeyClass> extends Thread 
 	 * @return
 	 */
 	public Catchup startCatchup(MessageRecipient proxy) {
-		if (cache!=null) {
+		if (cache != null) {
 			synchronized(proxies) {
 				Catchup catchup = cache.getCatchup();
 				addRecipient(proxy);
 				return catchup;
 			}
+		} else {
+			return null;
 		}
-		else return null;
-	}
-	
-	public IFeedCache getCache() {
-		return cache;
 	}
 
 	public MessageSource getSource() {
 		return source;
 	}
 
+	public MessageParser<RawMessageClass, MessageClass> getParser() {
+		return parser;
+	}
+
 	// Escalate session state to proxies
 	
 	public void sessionBroken() {
-		for (MessageRecipient p : proxiesByPriority)
+		for (MessageRecipient p : proxiesByPriority) {
 			p.sessionBroken();
+		}
 	}
 
 	public void sessionRestored() {
-		for (MessageRecipient p : proxiesByPriority)
+		for (MessageRecipient p : proxiesByPriority) {
 			p.sessionRestored();
+		}
 	}
 
 	public void sessionTerminated() {
-		for (MessageRecipient p : proxiesByPriority)
+		for (MessageRecipient p : proxiesByPriority) {
 			p.sessionTerminated();
+		}
 	}
 
 	@Override
@@ -205,37 +180,40 @@ public class MessageHub<RawMessageClass, MessageClass, KeyClass> extends Thread 
 	 * @param proxy
 	 */
 	public void subscribe(KeyClass key, MessageRecipient proxy) {
-		
-		synchronized(proxiesByKey) {
-			if (!proxiesByKey.containsKey(key))
+		synchronized (proxiesByKey) {
+			if (!proxiesByKey.containsKey(key)) {
 				proxiesByKey.put(key, new ArrayList<MessageRecipient>());
+			}
 		}
 		
 		List<MessageRecipient> list = proxiesByKey.get(key);
 		
-		synchronized(list) {
-			if (!list.contains(proxy))
+		synchronized (list) {
+			if (!list.contains(proxy)) {
 				list.add(proxy);
+			}
 			
 			Collections.sort(list, proxyPriorityComparator);
 			
 			source.subscribe(key);
 		}
-		
 	}
 	
 	public void unsubscribe(Object key, MessageRecipient proxy) {
 		List<MessageRecipient> list = proxiesByKey.get(key);
 		
-		if (list!=null) {
-			synchronized(list) {
+		if (list != null) {
+			synchronized (list) {
 				list.remove(proxy);
 				if (list.isEmpty()) {
-					log.info("unsubscribe: No more MessageRecipients for key "+key+", unsubscribing from source");
+					log.info("unsubscribe: No more MessageRecipients for key " + key + ", unsubscribing from source");
 					source.unsubscribe(key);
 				}
 			}
 		}
 	}
 
+	public void quit() {
+		quit = true;
+	}
 }

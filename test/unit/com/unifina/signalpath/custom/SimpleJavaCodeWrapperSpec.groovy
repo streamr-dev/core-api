@@ -99,41 +99,6 @@ class SimpleJavaCodeWrapperSpec extends Specification {
 		thrown(ModuleException)
 	}
 
-	void "it throws ModuleException if shadowing variables"() {
-		when:
-		module.configure([
-			code: "\n" +
-				"TimeSeriesInput in = new TimeSeriesInput(this,\"in\");\n" +
-				"TimeSeriesOutput out = new TimeSeriesOutput(this,\"out\");\n" +
-				"public double readyInputs = 0D;\n" +
-				"@Override\n" +
-				"public void sendOutput() {}\n" +
-				"@Override\n" +
-				"public void clearState() {}\n"
-		])
-
-		then:
-		ModuleException ex = thrown()
-		ex.message.contains("'readyInputs'")
-	}
-
-	void "it throws ModuleException if field contains reference to anonymous inner class"() {
-		when:
-		module.configure([
-			code: "\n" +
-				"TimeSeriesInput in = new TimeSeriesInput(this,\"in\") {};\n" +
-				"TimeSeriesOutput out = new TimeSeriesOutput(this,\"out\");\n" +
-				"@Override\n" +
-				"public void sendOutput() {}\n" +
-				"@Override\n" +
-				"public void clearState() {}\n"
-		])
-
-		then:
-		ModuleException ex = thrown()
-		ex.message == "Anonymous inner classes are not allowed."
-	}
-
 	void "it throws ExceptionInInitializerError caused by AccessDeniedException if trying to get user"() {
 		setup:
 		module.configure([

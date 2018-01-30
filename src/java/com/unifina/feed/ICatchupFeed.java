@@ -19,7 +19,7 @@ public interface ICatchupFeed {
 	 * 
 	 * @return true if catchup start succeeds, false otherwise. getNextEvents() should not be called if this returns false.
 	 */
-	public boolean startCatchup();
+	boolean startCatchup();
 	
 	/**
 	 * This method is used to poll the catchup events. Multiple events
@@ -28,10 +28,10 @@ public interface ICatchupFeed {
 	 * 
 	 * @return FeedEvents or null to signal the end of events
 	 */
-	public FeedEvent[] getNextEvents();
+	FeedEvent[] getNextEvents();
 	
 	/**
 	 * This method signals the end of catchup for this feed.
 	 */
-	public void endCatchup();
+	void endCatchup();
 }
