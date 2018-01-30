@@ -1,5 +1,5 @@
 <component name="ProjectRunConfigurationManager">
-  <configuration default="false" name="dev run-app" type="GrailsRunConfigurationType" factoryName="Grails" singleton="false">
+  <configuration default="false" name="dev run-app" type="GrailsRunConfigurationType" factoryName="Grails" singleton="true">
     <setting name="vmparams" value="" />
     <setting name="cmdLine" value="run-app --stacktrace" />
     <setting name="passParentEnv" value="true" />
