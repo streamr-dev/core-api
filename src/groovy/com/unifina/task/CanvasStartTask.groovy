@@ -33,23 +33,27 @@ public class CanvasStartTask extends AbstractTask {
 	public boolean run() {
 		Canvas canvas
 
-		try {
-			Canvas.withTransaction {
-				canvas = Canvas.get(config.id)
-				if (!canvas) {
-					throw new RuntimeException("Canvas "+config.id+" could not be found anymore!")
-				}
-				canvasService.start(canvas, config.forceReset, canvas.user)
-			}
-		} catch (Exception e) {
-			if (!config.forceReset && config.resetOnFail) {
-				log.error("Failed to start canvas $canvas.id, trying again by clearing serialization...", e)
+		Task.withTransaction {
+			task = task.attach()
+
+			try {
 				Canvas.withTransaction {
 					canvas = Canvas.get(config.id)
-					canvasService.start(canvas, true, canvas.user)
+					if (!canvas) {
+						throw new RuntimeException("Canvas " + config.id + " could not be found anymore!")
+					}
+					canvasService.start(canvas, config.forceReset, task.user)
 				}
-			} else {
-				log.error("Failed to start canvas $canvas.id", e)
+			} catch (Exception e) {
+				if (!config.forceReset && config.resetOnFail) {
+					log.error("Failed to start canvas $canvas.id, trying again by clearing serialization...", e)
+					Canvas.withTransaction {
+						canvas = Canvas.get(config.id)
+						canvasService.start(canvas, true, task.user)
+					}
+				} else {
+					log.error("Failed to start canvas $canvas.id", e)
+				}
 			}
 		}
 

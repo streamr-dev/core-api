@@ -211,7 +211,6 @@ class UserController {
 			authorityList: sortedRoles(),
 			roleMap: granted + notGranted,
 			userModulePackages: permissionService.get(ModulePackage, user),
-			ownedModulePackages: ModulePackage.findAllByUser(user),
 			userFeeds: permissionService.get(Feed, user)
 		]
 	}
