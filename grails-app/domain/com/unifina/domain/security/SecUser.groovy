@@ -73,4 +73,9 @@ class SecUser implements Userish {
 	static SecUser loadViaJava(Long userId) {
 		SecUser.load(userId)
 	}
+
+	@CompileStatic
+	static SecUser getViaJava(Long userId) {
+		SecUser.get(userId)
+	}
 }
