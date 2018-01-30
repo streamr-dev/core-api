@@ -7,7 +7,7 @@ import {Row, Modal} from 'react-bootstrap'
 
 import ShareDialogInputRow from './ShareDialogInputRow'
 import ShareDialogPermissionRow from './ShareDialogPermissionRow'
-import ShareDialogOwnerRow from './ShareDialogOwnerRow'
+import ShareDialogAnonymousAccessRow from './ShareDialogOwnerRow'
 
 import type {Permission} from '../../../flowtype/permission-types'
 import {getResourcePermissions} from '../../../actions/permission'
@@ -34,7 +34,7 @@ export class ShareDialogContent extends Component<Props> {
         return (
             <Modal.Body>
                 <Row>
-                    <ShareDialogOwnerRow
+                    <ShareDialogAnonymousAccessRow
                         resourceType={this.props.resourceType}
                         resourceId={this.props.resourceId}
                     />
