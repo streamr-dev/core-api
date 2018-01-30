@@ -14,16 +14,16 @@ import org.apache.log4j.Logger;
  * @author Henri
  */
 public abstract class FileStorageAdapter {
-	
-	protected Map<String,Object> config;
-	private int retries = 5;
-	
+	private final int retries;
+
 	private static final Logger log = Logger.getLogger(FileStorageAdapter.class);
-	
+
 	public FileStorageAdapter(Map<String,Object> config) {
-		this.config = config;
-		if (config.containsKey("retries"))
+		if (config.containsKey("retries")) {
 			retries = (int) config.get("retries");
+		} else {
+			retries = 5;
+		}
 	}
 	
 	/**
@@ -36,7 +36,7 @@ public abstract class FileStorageAdapter {
 	public InputStream retrieve(String location) {
 		Exception ex = null;
 		for (int i=1;i<=retries;i++) {
-			InputStream is = null;
+			InputStream is;
 			try {
 				is = tryRetrieve(location);
 				return is;

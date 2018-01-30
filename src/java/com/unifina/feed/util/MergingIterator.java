@@ -10,12 +10,10 @@ import java.util.Iterator;
 public class MergingIterator<T> implements Iterator<T>, Closeable {
 
 	private final Iterable<? extends Iterator<? extends T>> iterators;
-	private final Comparator<? super T> comparator;
 	private final Iterator<T> iterator;
 
 	public MergingIterator(Iterable<? extends Iterator<? extends T>> iterators, Comparator<? super T> comparator) {
 		this.iterators = iterators;
-		this.comparator = comparator;
 		iterator = Iterators.mergeSorted(iterators, comparator);
 	}
 

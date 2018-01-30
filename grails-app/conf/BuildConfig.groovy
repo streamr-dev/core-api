@@ -76,7 +76,6 @@ grails.project.dependency.resolution = {
 		compile('org.eclipse.paho:org.eclipse.paho.client.mqttv3:1.1.1')
 		compile('org.antlr:ST4:4.0.8')
 		compile('org.postgresql:postgresql:9.4.1208.jre7')
-		compile('org.mongodb:mongodb-driver:3.2.1')
 		compile('biz.paluch.redis:lettuce:3.5.0.Final')
 		compile('com.datastax.cassandra:cassandra-driver-core:3.1.0')
 		compile('org.ethereum:ethereumj-core:1.4.3-RELEASE') {
@@ -93,11 +92,6 @@ grails.project.dependency.resolution = {
 		runtime('com.opencsv:opencsv:3.3')
 		runtime('de.ruedigermoeller:fst:2.56')
 		runtime('joda-time:joda-time:2.9.3')
-		runtime('org.twitter4j:twitter4j-core:4.0.4')
-		runtime('org.twitter4j:twitter4j-stream:4.0.4')
-		runtime('com.twitter:hbc-core:2.2.0') {
-			excludes('com.google.guava:guava:14.0.1')
-		}
 
 		test("org.seleniumhq.selenium:selenium-firefox-driver:$seleniumVersion")
 		test("org.seleniumhq.selenium:selenium-chrome-driver:$seleniumVersion")

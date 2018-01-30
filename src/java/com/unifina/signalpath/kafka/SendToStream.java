@@ -83,7 +83,7 @@ public class SendToStream extends ModuleWithSideEffects {
 		Globals globals = getGlobals();
 
 		// Create the message locally and route it to the stream locally, without actually producing to the stream
-		StreamrMessage msg = new StreamrMessage(streamParameter.getValue().getId(), 0, globals.time, globals.time, inputValuesToMap()); // TODO: fix hard-coded partition
+		StreamrMessage msg = new StreamrMessage(streamParameter.getValue().getId(), 0, globals.time, inputValuesToMap()); // TODO: fix hard-coded partition
 
 		// Find the Feed implementation for the target Stream
 		AbstractFeed feed = getGlobals().getDataSource().getFeedById(streamParameter.getValue().getFeed().getId());
@@ -93,7 +93,7 @@ public class SendToStream extends ModuleWithSideEffects {
 
 		if (eventRecipient != null) {
 			FeedEvent event = new FeedEvent(msg, globals.time, eventRecipient);
-			getGlobals().getDataSource().getEventQueue().enqueue(event);
+			getGlobals().getDataSource().enqueueEvent(event);
 		}
 	}
 

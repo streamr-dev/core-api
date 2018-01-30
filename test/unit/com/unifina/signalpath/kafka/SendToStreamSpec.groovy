@@ -264,7 +264,14 @@ class SendToStreamSpec extends BeanMockingSpecification {
 	}
 
 	void "events should be produced to DataSource event queue in historical mode"() {
-		globals.dataSource = new HistoricalDataSource(globals)
+		List<FeedEvent> enqueuedEvents = []
+		globals.dataSource = new HistoricalDataSource(globals) {
+			@Override
+			void enqueueEvent(FeedEvent feedEvent) {
+				super.enqueueEvent(feedEvent)
+				enqueuedEvents.push(feedEvent)
+			}
+		}
 		globals.setRealtime(false)
 		createModule()
 
@@ -294,7 +301,7 @@ class SendToStreamSpec extends BeanMockingSpecification {
 
 					// Correct events have been inserted to event queue
 					for (int i=0; i<inputValues.strIn.size(); i++) {
-						FeedEvent e = globals.getDataSource().getEventQueue().poll()
+						FeedEvent e = enqueuedEvents.remove(0)
 						assert e != null
 
 						// Values are correct
@@ -306,7 +313,7 @@ class SendToStreamSpec extends BeanMockingSpecification {
 					}
 
 					// No other events have been inserted
-					assert globals.getDataSource().getEventQueue().isEmpty()
+					assert enqueuedEvents.isEmpty()
 
 					mockStreamService.sentMessagesByChannel = [:]
 				}.test()
