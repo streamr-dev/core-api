@@ -1,5 +1,5 @@
 <component name="ProjectRunConfigurationManager">
-  <configuration default="false" name="test run-app" type="GrailsRunConfigurationType" factoryName="Grails" singleton="false">
+  <configuration default="false" name="test run-app" type="GrailsRunConfigurationType" factoryName="Grails" singleton="true">
     <setting name="vmparams" value="" />
     <setting name="cmdLine" value="test run-app" />
     <setting name="passParentEnv" value="true" />
