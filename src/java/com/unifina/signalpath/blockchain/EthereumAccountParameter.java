@@ -41,7 +41,7 @@ class EthereumAccountParameter extends Parameter<IntegrationKey> {
 	}
 
 	private void checkPermission() {
-		SecUser loggedInUser = getOwner().getGlobals().getUser();
+		SecUser loggedInUser = SecUser.loadViaJava(getOwner().getGlobals().getUserId());
 		SecUser integrationKeyUser = getValue().getUser();
 		if (!integrationKeyUser.equals(loggedInUser)) {
 			throw new NotPermittedException("Access denied to Ethereum private key (id " + getValue().getId()+"). Only the owner can use it.");
@@ -56,7 +56,8 @@ class EthereumAccountParameter extends Parameter<IntegrationKey> {
 	@Override
 	protected List<PossibleValue> getPossibleValues() {
 		EthereumIntegrationKeyService service = Holders.getApplicationContext().getBean(EthereumIntegrationKeyService.class);
-		Set<IntegrationKey> integrationKeys = new LinkedHashSet<>(service.getAllKeysForUser(getOwner().getGlobals().getUser()));
+		SecUser user = SecUser.loadViaJava(getOwner().getGlobals().getUserId());
+		Set<IntegrationKey> integrationKeys = new LinkedHashSet<>(service.getAllKeysForUser(user));
 		if (hasValue()) {
 			integrationKeys.add(getValue());
 		}

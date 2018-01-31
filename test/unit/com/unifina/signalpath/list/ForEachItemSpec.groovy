@@ -35,7 +35,7 @@ class ForEachItemSpec extends Specification {
 		canvasService = mainContext.getBean(CanvasService)
 		canvasService.signalPathService = mainContext.getBean(SignalPathService)
 		module = new ForEachItem()
-		module.globals = globals = GlobalsFactory.createInstance([:], grailsApplication, user)
+		module.globals = globals = GlobalsFactory.createInstance([:], user)
 		module.init()
 		user = new SecUser().save(failOnError: true, validate: false)
 

@@ -1,7 +1,7 @@
 <component name="ProjectRunConfigurationManager">
   <configuration default="false" name="integration tests" type="GrailsRunConfigurationType" factoryName="Grails" singleton="false">
     <setting name="vmparams" value="" />
-    <setting name="cmdLine" value="test-app -integration" />
+    <setting name="cmdLine" value="test-app -integration --stacktrace" />
     <setting name="passParentEnv" value="true" />
     <setting name="grailsApplicationRoot" value="$PROJECT_DIR$" />
     <setting name="launchBrowser" value="false" />

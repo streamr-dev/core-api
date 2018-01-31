@@ -139,7 +139,7 @@ class SignalPathService {
 
 	@Transactional
 	public void deleteReferences(SignalPath signalPath, boolean delayed = false) {
-		canvasService.deleteCanvas(signalPath.canvas, signalPath.getGlobals().getUser(), delayed)
+		canvasService.deleteCanvas(signalPath.canvas, SecUser.load(signalPath.globals.userId), delayed)
 	}
 	
     def runSignalPaths(List<SignalPath> signalPaths) {
@@ -174,7 +174,7 @@ class SignalPathService {
      */
 	void startLocal(Canvas canvas, Map signalPathContext, SecUser asUser) throws SerializationException {
 		// Create Globals
-		Globals globals = GlobalsFactory.createInstance(signalPathContext, grailsApplication, asUser)
+		Globals globals = GlobalsFactory.createInstance(signalPathContext, asUser)
 
 		SignalPathRunner runner
 		SignalPath sp
@@ -247,7 +247,7 @@ class SignalPathService {
 			(servletContext["signalPathRunners"] ?: [:]) as Map<String, SignalPathRunner>
 		Map<String, SecUser> canvasIdToUser = [:]
 		signalPathRunnerMap.values().each { SignalPathRunner runner ->
-			SecUser user = runner.globals.user
+			SecUser user = SecUser.loadViaJava(runner.globals.userId)
 			runner.signalPaths.each { SignalPath sp ->
 				canvasIdToUser[sp.canvas.id] = user
 			}

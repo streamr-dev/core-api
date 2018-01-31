@@ -1,5 +1,8 @@
 package core
 databaseChangeLog = {
+	changeSet(author: "eric", id: "remove-mongodb-and-twitter-feeds-0") {
+		sql("DELETE FROM permission WHERE feed_id = 8 OR feed_id = 9")
+	}
 	changeSet(author: "eric", id: "remove-mongodb-and-twitter-feeds-1") {
 		sql("DELETE FROM feed_file WHERE feed_id = 8 OR feed_id = 9")
 	}

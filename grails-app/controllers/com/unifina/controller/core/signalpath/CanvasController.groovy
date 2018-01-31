@@ -1,26 +1,22 @@
 package com.unifina.controller.core.signalpath
 
-import com.unifina.domain.security.Key
 import com.unifina.domain.security.Permission.Operation
+import com.unifina.domain.security.SecUser
 import com.unifina.domain.signalpath.Canvas
+import com.unifina.service.PermissionService
+import com.unifina.service.SignalPathService
+import com.unifina.utils.Globals
+import com.unifina.utils.GlobalsFactory
 import grails.converters.JSON
 import grails.plugin.springsecurity.SpringSecurityService
 import grails.plugin.springsecurity.annotation.Secured
-import org.codehaus.groovy.grails.commons.GrailsApplication
 import org.springframework.util.FileCopyUtils
-
-import com.unifina.domain.security.SecUser
-import com.unifina.service.SignalPathService
-import com.unifina.service.PermissionService
-import com.unifina.utils.Globals
-import com.unifina.utils.GlobalsFactory
 
 @Secured(["ROLE_USER"])
 class CanvasController {
 
 	static allowedMethods = [save: "POST", update: "POST", delete: "POST"]
-	
-	GrailsApplication grailsApplication
+
 	SpringSecurityService springSecurityService
 	SignalPathService signalPathService
 	PermissionService permissionService
@@ -72,7 +68,7 @@ class CanvasController {
 	
 	def reconstruct() {
 		Map json = [signalPathContext: (params.signalPathContext ? JSON.parse(params.signalPathContext) : [:]), signalPathData: JSON.parse(params.signalPathData)]
-		Globals globals = GlobalsFactory.createInstance(json.signalPathContext, grailsApplication)
+		Globals globals = GlobalsFactory.createInstance(json.signalPathContext, null)
 		Map result = signalPathService.reconstruct(json, globals)
 		render result as JSON
 	}

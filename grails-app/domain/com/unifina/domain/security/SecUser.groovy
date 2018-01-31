@@ -1,9 +1,11 @@
 package com.unifina.domain.security
 
 import com.unifina.security.Userish
+import groovy.transform.CompileStatic
 
 class SecUser implements Userish {
-	
+
+	Long id
 	String username
 	String password
 	boolean enabled
@@ -65,5 +67,15 @@ class SecUser implements Userish {
 	@Override
 	Userish resolveToUserish() {
 		return this
+	}
+
+	@CompileStatic
+	static SecUser loadViaJava(Long userId) {
+		SecUser.load(userId)
+	}
+
+	@CompileStatic
+	static SecUser getViaJava(Long userId) {
+		SecUser.get(userId)
 	}
 }

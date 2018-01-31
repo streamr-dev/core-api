@@ -7,18 +7,27 @@ import com.unifina.signalpath.NotificationMessage
 import com.unifina.signalpath.SignalPath
 import com.unifina.utils.Globals
 import com.unifina.utils.GlobalsFactory
-import com.unifina.utils.testutils.FakeStreamService
 import com.unifina.utils.testutils.ModuleTestHelper
+import grails.plugin.springsecurity.SpringSecurityService
+import grails.test.mixin.Mock
 import grails.test.mixin.TestMixin
 import grails.test.mixin.support.GrailsUnitTestMixin
+import grails.test.runtime.FreshRuntime
+import org.codehaus.groovy.grails.commons.InstanceFactoryBean
 
+@FreshRuntime
 @TestMixin(GrailsUnitTestMixin)
-public class EmailModuleSpec extends UiChannelMockingSpecification {
+@Mock(SecUser)
+class EmailModuleSpec extends UiChannelMockingSpecification {
 
 	EmailModule module
 	MockMailService ms
 
 	Globals globals
+
+	def doWithSpring = {
+		springSecurityService(InstanceFactoryBean, null, SpringSecurityService)
+	}
 
 	void setup() {
 		mockServicesForUiChannels()
@@ -34,8 +43,8 @@ public class EmailModuleSpec extends UiChannelMockingSpecification {
 		module = new EmailModule()
 	}
 
-	private void initContext(Map context = [:], SecUser user = new SecUser(timezone:"Europe/Helsinki", username: "username")) {
-		globals = GlobalsFactory.createInstance(context, grailsApplication, user)
+	private void initContext(Map context = [:], SecUser user = new SecUser(timezone:"Europe/Helsinki", username: "username").save(failOnError: true, validate: false)) {
+		globals = GlobalsFactory.createInstance(context, user)
 		globals.time = new Date()
 
 		module.globals = globals
@@ -70,7 +79,7 @@ public class EmailModuleSpec extends UiChannelMockingSpecification {
 			.afterEachTestCase {
 				assert ms.mailSent
 				assert ms.from == grailsApplication.config.unifina.email.sender
-				assert ms.to == globals.user.username
+				assert ms.to == "username"
 				assert ms.subject == "Subject"
 				assert ms.body == "\nMessage:\nMessage\n\nEvent Timestamp:\n1970-01-01 02:00:00.000\n\nInput Values:\nvalue1: 1\nvalue2: abcd\n\n"
 				ms.clear()
@@ -93,7 +102,7 @@ public class EmailModuleSpec extends UiChannelMockingSpecification {
 		then: "sender is correct"
 			ms.from == grailsApplication.config.unifina.email.sender
 		then: "receiver must be correct"
-			ms.to == globals.getUser().getUsername()
+			ms.to == "username"
 		then: "subject must be correct"
 			ms.subject == "Test subject"
 		then: "body must be correct"

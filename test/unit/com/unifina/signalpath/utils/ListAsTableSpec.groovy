@@ -1,10 +1,13 @@
 package com.unifina.signalpath.utils
 
 import com.unifina.UiChannelMockingSpecification
+import com.unifina.domain.security.SecUser
 import com.unifina.signalpath.RuntimeRequest
 import com.unifina.signalpath.RuntimeResponse
 import com.unifina.utils.testutils.ModuleTestHelper
+import grails.test.mixin.Mock
 
+@Mock(SecUser)
 class ListAsTableSpec extends UiChannelMockingSpecification {
 	ListAsTable module
 

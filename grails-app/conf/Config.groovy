@@ -162,7 +162,8 @@ log4j.main = {
 		'org.codehaus.groovy.grails.orm.hibernate', // hibernate integration
 		'org.springframework',
 		'org.hibernate',
-		'net.sf.ehcache.hibernate'
+		'net.sf.ehcache.hibernate',
+		'org.grails.datastore.mapping.core.DatastoreUtils'
 
 	warn 'org.mortbay.log',
 		'org.apache.zookeeper',
@@ -212,8 +213,6 @@ streamr.apiKey.revokeNotificationStream = "revoked-api-keys"
 /**
  * Application properties
  */
-//Which class to use as the SignalPath run context
-unifina.globals.className = "com.unifina.utils.Globals"
 // Where to send email reports
 unifina.reports.recipient = "henri.pihkala@streamr.com"
 

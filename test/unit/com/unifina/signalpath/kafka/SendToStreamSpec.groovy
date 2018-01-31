@@ -22,11 +22,11 @@ import com.unifina.utils.testutils.FakeStreamService
 import com.unifina.utils.testutils.ModuleTestHelper
 import grails.test.mixin.Mock
 import grails.test.mixin.TestMixin
-import grails.test.mixin.web.ControllerUnitTestMixin
+import grails.test.mixin.support.GrailsUnitTestMixin
 
 import java.security.AccessControlException
 
-@TestMixin(ControllerUnitTestMixin) // to get JSON converter
+@TestMixin(GrailsUnitTestMixin)
 @Mock([SecUser, Stream, Feed])
 class SendToStreamSpec extends BeanMockingSpecification {
 
@@ -89,7 +89,7 @@ class SendToStreamSpec extends BeanMockingSpecification {
 		uiChannel.save(validate: false, failOnError: true)
 
 		mockStreamService = (FakeStreamService) grailsApplication.getMainContext().getBean("streamService")
-		globals = Spy(Globals, constructorArgs: [[:], grailsApplication, user])
+		globals = Spy(Globals, constructorArgs: [[:], user])
 		globals.realtime = true
 		globals.dataSource = new RealtimeDataSource()
     }

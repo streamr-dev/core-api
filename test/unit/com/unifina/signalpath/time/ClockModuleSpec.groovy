@@ -1,10 +1,8 @@
 package com.unifina.signalpath.time
 
 import com.unifina.domain.security.SecUser
-import com.unifina.signalpath.Input
 import com.unifina.utils.Globals
 import com.unifina.utils.testutils.ModuleTestHelper
-import spock.lang.Ignore
 import spock.lang.Specification
 
 import java.text.SimpleDateFormat
@@ -15,8 +13,7 @@ class ClockModuleSpec extends Specification {
 	ClockModule module
 	
     def setup() {
-		globals = new Globals()
-		globals.setUser(new SecUser(timezone:"UTC", username: "username"))
+		globals = new Globals([:], new SecUser(timezone:"UTC", username: "username"))
 		globals.time = new Date(0)
 		module = new ClockModule()
 		module.globals = globals
