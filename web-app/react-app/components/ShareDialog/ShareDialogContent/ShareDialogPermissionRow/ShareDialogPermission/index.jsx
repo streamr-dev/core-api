@@ -13,6 +13,8 @@ import styles from './shareDialogPermission.pcss'
 
 import type {Permission} from '../../../../../flowtype/permission-types'
 
+declare var Streamr: any
+
 type Props = {
     resourceType: Permission.resourceType,
     resourceId: Permission.resourceId,
@@ -36,6 +38,7 @@ export class ShareDialogPermission extends Component<Props> {
     render() {
         const errors = this.props.permissions.filter(p => p.error).map(p => p.error.message || p.error.error)
         const highestOperationIndex = Math.max(...(this.props.permissions.map(p => operationsInOrder.indexOf(p.operation))))
+        const user = this.props.permissions[0] && this.props.permissions[0].user
         return (
             <Col xs={12} className={styles.permissionRow}>
                 {errors.length ? (
@@ -43,9 +46,16 @@ export class ShareDialogPermission extends Component<Props> {
                         <FontAwesome name="exclamation-circle" className="text-danger"/>
                     </div>
                 ) : null}
-                <span className={styles.userLabel}>
-                    {this.props.permissions[0] && this.props.permissions[0].user}
-                </span>
+                {user === Streamr.user ? (
+                    <span className={styles.userLabel}>
+                        <strong className={styles.meLabel}>Me</strong>
+                        <span>({user})</span>
+                    </span>
+                ) : (
+                    <span className={styles.userLabel}>
+                        {user}
+                    </span>
+                )}
                 <Select
                     className={styles.select}
                     value={operationsInOrder[highestOperationIndex]}

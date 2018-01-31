@@ -32,12 +32,6 @@ export class ShareDialogOwnerRow extends Component<Props> {
     render() {
         return (
             <Col xs={12} className={styles.ownerRow}>
-                <div className={styles.ownerLabel}>
-                    Owner:
-                </div>
-                <div className={styles.owner}>
-                    <strong>{this.props.owner}</strong>
-                </div>
                 <div className={styles.readAccessLabel}>
                     Public read access
                 </div>
