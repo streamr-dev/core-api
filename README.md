@@ -26,15 +26,19 @@ Also:
 
 ## Building and running
 
-- You need to have Grails 2.3.11 and node.js installed.
+- You need to have Grails 2.5.6 and Node.js ^8.0.0 installed.
 - Clone the repo
 - `git submodule update --init --recursive`
 - `npm install`
 - `grails run-app`
 
-## React and Redux components
+## Developing
 
-Part of the plugins frontend is made with libraries like React and Redux. Those files must first be compiled into bundle file(s). This happens by running `npm run build` in the root directory.
+### React and Redux components
+
+Part of the UI is implemented with libraries like React and Redux. Those files must first be compiled into bundle file(s). This happens by running `npm run build` in the root directory. 
+
+You can also run the development server with `npm run dev`.
 
 ## Testing
 

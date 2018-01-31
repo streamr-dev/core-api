@@ -1,0 +1,9 @@
+<component name="ProjectRunConfigurationManager">
+  <configuration default="false" name="all jest tests" type="JavaScriptTestRunnerJest" factoryName="Jest">
+    <node-interpreter value="project" />
+    <working-dir value="$PROJECT_DIR$/web-app/react-app/tests" />
+    <envs />
+    <scope-kind value="ALL" />
+    <method />
+  </configuration>
+</component>
