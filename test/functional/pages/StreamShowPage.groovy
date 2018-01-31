@@ -23,17 +23,5 @@ class StreamShowPage extends GrailsPage {
 		historyDeleteButton(required:false) { $("#history-delete-button") }
 		noHistoryMessage(required:false) { $("#no-history-message") }
 		shareButton(required: false) { $(".share-button") }
-
-		// MongoDB-specific content
-		editMongoDbButton { $("#edit-mongodb-button") }
-		mongoHost { $(".mongo-host div") }
-		mongoPort { $(".mongo-port div") }
-		mongoUsername { $(".mongo-username div") }
-		mongoPassword { $(".mongo-password div") }
-		mongoDatabase { $(".mongo-database div") }
-		mongoCollection { $(".mongo-collection div") }
-		mongoTimestampKey { $(".mongo-timestampKey div") }
-		mongoPollIntervalMillis { $(".mongo-pollIntervalMillis div") }
-		mongoQuery { $(".mongo-query div") }
 	}
 }

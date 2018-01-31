@@ -21,6 +21,11 @@ class MqttSpec extends Specification {
 		module.init()
 	}
 
+	def cleanup() {
+		TestableMqtt.mqttClient = null
+		TestableMqtt.startingException = null
+	}
+
 	def mockClient = Stub(MqttClient) {
 
 	}
@@ -28,10 +33,8 @@ class MqttSpec extends Specification {
 	/** Mocked event queue. Works manually in tests, please call module.receive(queuedEvent) */
 	def mockGlobals = Stub(Globals) {
 		getDataSource() >> Stub(DataSource) {
-			getEventQueue() >> Stub(DataSourceEventQueue) {
-				enqueue(_) >> { feedEventList ->
-					event = feedEventList[0]
-				}
+			enqueueEvent(_) >> { feedEvent ->
+				event = feedEvent[0]
 			}
 		}
 		isRealtime() >> true
@@ -62,13 +65,15 @@ class MqttSpec extends Specification {
 
 	void "module re-throws a mqtt starting error"() {
 		TestableMqtt.startingException = new MqttException(new Exception("Testing"))
+		module.setGlobals(mockGlobals)
 
 		when:
 		module.initialize()
 		module.onStart()
 
 		then:
-		thrown RuntimeException
+		def e = thrown(RuntimeException)
+		e.message.contains("Starting MQTT client failed")
 	}
 
 	void "test mqtt protocol is changed to tcp"() {

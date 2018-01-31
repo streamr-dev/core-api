@@ -1,43 +1,34 @@
 package com.unifina.signalpath.time
 
-import com.unifina.utils.testutils.ModuleTestHelper
-import grails.test.mixin.TestMixin
-import grails.test.mixin.support.GrailsUnitTestMixin
-
-import java.text.SimpleDateFormat
-
-import spock.lang.Specification
-
 import com.unifina.domain.security.SecUser
 import com.unifina.signalpath.Input
 import com.unifina.utils.Globals
+import com.unifina.utils.testutils.ModuleTestHelper
+import grails.test.mixin.Mock
+import spock.lang.Specification
 
-@TestMixin(GrailsUnitTestMixin)
+import java.text.SimpleDateFormat
+
+@Mock(SecUser)
 class DateConversionSpec extends Specification {
 
-	def final static format = "yyyy-MM-dd HH:mm:ss";
+	def final static format = "yyyy-MM-dd HH:mm:ss"
 
-	Globals globals
 	DateConversion module
 
-    def setup() {
-		initContext()
-    }
-
-	private void initContext(String timezone="UTC") {
-		initContextWithUser(new SecUser(timezone:timezone, username:"username"))
+	private void initContext(String timezone="UTC", String username="username") {
+		initContextWithUser(new SecUser(timezone:timezone, username: username).save(failOnError: true, validate: false))
 	}
 
 	private void initContextWithUser(SecUser user) {
 		module = new DateConversion()
-		globals = new Globals([:], grailsApplication, user)
-		module.globals = globals
+		module.globals = new Globals([:], user)
 		module.init()
 		module.connectionsReady()
 	}
 
 	void "dateConversion gives the right answer"() {
-		initContext(TimeZone.getDefault().ID) // to/from system timezone
+		initContext(TimeZone.getDefault().ID, "username2") // to/from system timezone
 		when:
 		module.getInput("format").receive("yyyy-MM-dd HH:mm:ss")
 		Map inputValues = [
@@ -49,8 +40,8 @@ class DateConversionSpec extends Specification {
 		]
 		Map outputValues = [
 			date: [
-				new Date(2015 - 1900, 9, 15, 10, 35, 10).format(format),
-				new Date(2000 - 1900, 0, 1, 12, 45, 55).format(format),
+				"2015-10-15 10:35:10",
+				"2000-01-01 12:45:55",
 				new Date(1000 * 60 * 15).format(format),
 			],
 			ts: [
@@ -71,12 +62,12 @@ class DateConversionSpec extends Specification {
 			milliseconds: [0, 0, 0].collect { it?.doubleValue() }
 		]
 		then:
-		new ModuleTestHelper.Builder(module, inputValues, outputValues)
-			.overrideGlobals { globals }
-			.test()
+		new ModuleTestHelper.Builder(module, inputValues, outputValues).test()
 	}
 
 	void "timestamp output must be correct from date input"() {
+		initContext()
+
 		when: "time is set and asked"
 		Date date = new Date()
 		module.getInput("date").receive(date);
@@ -88,6 +79,8 @@ class DateConversionSpec extends Specification {
 	}
 	
 	void "timestamp output must be correct from ts input"() {
+		initContext()
+
 		when: "time is set and asked"
 		Date date = new Date()
 		module.getInput("date").receive((Double)date.getTime());
@@ -99,6 +92,8 @@ class DateConversionSpec extends Specification {
 	}
 	
 	void "timestamp output must be correct from string input (daylight saving)"() {
+		initContext()
+
 		SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss")
 		df.setTimeZone(TimeZone.getTimeZone("Europe/Helsinki"))
 		when: "time is set and asked"
@@ -112,6 +107,8 @@ class DateConversionSpec extends Specification {
 	}
 	
 	void "timestamp output must be correct from string input (no daylight saving)"() {
+		initContext()
+
 		SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss")
 		df.setTimeZone(TimeZone.getTimeZone("Europe/Helsinki"))
 		when: "time is set and asked"
@@ -134,6 +131,8 @@ class DateConversionSpec extends Specification {
 	}
 	
 	void "must throw exception when the given string is not in right format"() {
+		initContext()
+
 		when: "time is set and asked"
 		module.getInput("format").receive("yyyy-MM-dd HH:mm:ss")
 		module.getInput("date").receive("15/07/2015 09:32:00")
@@ -142,6 +141,8 @@ class DateConversionSpec extends Specification {
 	}
 	
 	void "string output must be correct from date input (daylight saving)"() {
+		initContext()
+
 		SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss")
 		df.setTimeZone(TimeZone.getTimeZone("Europe/Helsinki"))
 		when: "time is set and asked without giving a format"
@@ -164,6 +165,8 @@ class DateConversionSpec extends Specification {
 	}
 	
 	void "string output must be correct from date input (no daylight saving)"() {
+		initContext()
+
 		SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss")
 		df.setTimeZone(TimeZone.getTimeZone("Europe/Helsinki"))
 		when: "time is set and asked without giving a format"
@@ -186,6 +189,8 @@ class DateConversionSpec extends Specification {
 	}
 	
 	void "string output must be correct from ts input (daylight saving)"() {
+		initContext()
+
 		SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss")
 		df.setTimeZone(TimeZone.getTimeZone("Europe/Helsinki"))
 		when: "time is set and asked without giving a format"
@@ -208,6 +213,8 @@ class DateConversionSpec extends Specification {
 	}
 	
 	void "string output must be correct from ts input (no daylight saving)"() {
+		initContext()
+
 		SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss")
 		df.setTimeZone(TimeZone.getTimeZone("Europe/Helsinki"))
 		when: "time is set and asked without giving a format"
@@ -230,6 +237,8 @@ class DateConversionSpec extends Specification {
 	}
 	
 	void "years, months etc. outputs must work correctly from date input (daylight saving)"() {
+		initContext()
+
 		SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS")
 		df.setTimeZone(TimeZone.getTimeZone("Europe/Helsinki"))
 		when: "time is set and asked"
@@ -249,6 +258,8 @@ class DateConversionSpec extends Specification {
 	}
 	
 	void "years, months etc. outputs must work correctly from date input (no daylight saving)"() {
+		initContext()
+
 		SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss")
 		df.setTimeZone(TimeZone.getTimeZone("Europe/Helsinki"))
 		when: "time is set and asked"
@@ -261,6 +272,8 @@ class DateConversionSpec extends Specification {
 	}
 	
 	void "years, months etc. outputs must work correctly from ts input with a different timezone (daylight saving)"() {
+		initContext()
+
 		SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss")
 		df.setTimeZone(TimeZone.getTimeZone("Europe/Helsinki"))
 		when: "time is set and asked"
@@ -274,6 +287,8 @@ class DateConversionSpec extends Specification {
 	}
 	
 	void "years, months etc. outputs must work correctly from ts input with a different timezone (no daylight saving)"() {
+		initContext()
+
 		SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss")
 		df.setTimeZone(TimeZone.getTimeZone("Europe/Helsinki"))
 		when: "time is set and asked"

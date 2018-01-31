@@ -1,6 +1,8 @@
 package com.unifina.signalpath.messaging
 
+import com.unifina.domain.security.SecUser
 import com.unifina.signalpath.*
+import grails.util.Holders
 
 import java.text.SimpleDateFormat
 
@@ -24,7 +26,7 @@ class EmailModule extends ModuleWithSideEffects {
 	public void init() {
 		addInput(sub)
 		addInput(message)
-		sender = globals.grailsApplication.config.unifina.email.sender
+		sender = Holders.grailsApplication.config.unifina.email.sender
 		initDf()
 		emailSent = true
 	}
@@ -34,8 +36,8 @@ class EmailModule extends ModuleWithSideEffects {
 		if (isNotTooOften(emailInterval, globals.time.getTime(), prevTime)) {
 			prevTime = globals.time.getTime()
 			emailSent = true
-			String messageTo = globals.getUser().getUsername()
-			def mailService = globals.grailsApplication.getMainContext().getBean("mailService")
+			String messageTo = SecUser.get(globals.userId).username
+			def mailService = Holders.grailsApplication.getMainContext().getBean("mailService")
 			String messageBody = getMessageBody()
 			mailService.sendMail {
 				from sender
@@ -136,8 +138,9 @@ class EmailModule extends ModuleWithSideEffects {
 	private def initDf() {
 		if (df == null) {
 			df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS")
-			if (globals.getUser()!=null)
-				df.setTimeZone(TimeZone.getTimeZone(globals.getUser().getTimezone()))
+			if (globals.userId != null) {
+				df.setTimeZone(globals.userTimeZone)
+			}
 		}
 	}
 

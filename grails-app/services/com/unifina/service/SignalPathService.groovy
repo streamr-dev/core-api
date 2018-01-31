@@ -139,7 +139,7 @@ class SignalPathService {
 
 	@Transactional
 	void deleteReferences(SignalPath signalPath, boolean delayed) {
-		canvasService.deleteCanvas(signalPath.canvas, signalPath.getGlobals().getUser(), delayed)
+		canvasService.deleteCanvas(signalPath.canvas, SecUser.load(signalPath.globals.userId), delayed)
 	}
 	
     def runSignalPaths(List<SignalPath> signalPaths) {
@@ -174,7 +174,7 @@ class SignalPathService {
      */
 	void startLocal(Canvas canvas, Map signalPathContext, SecUser asUser) throws SerializationException {
 		// Create Globals
-		Globals globals = GlobalsFactory.createInstance(signalPathContext, grailsApplication, asUser)
+		Globals globals = GlobalsFactory.createInstance(signalPathContext, asUser)
 
 		SignalPathRunner runner
 		SignalPath sp
@@ -235,6 +235,24 @@ class SignalPathService {
 			def msg = "Timed out while waiting for canvas $canvas.id to start."
 			throw new CanvasCommunicationException(msg)
 		}
+	}
+
+	/**
+	 * Get a mapping of all running canvases' ids as keys and the users who started them as values.
+	 * @return canvasId => user
+	 */
+	@CompileStatic
+	Map<String, SecUser> getUsersOfRunningCanvases() {
+		Map<String, SignalPathRunner> signalPathRunnerMap =
+			(servletContext["signalPathRunners"] ?: [:]) as Map<String, SignalPathRunner>
+		Map<String, SecUser> canvasIdToUser = [:]
+		signalPathRunnerMap.values().each { SignalPathRunner runner ->
+			SecUser user = SecUser.loadViaJava(runner.globals.userId)
+			runner.signalPaths.each { SignalPath sp ->
+				canvasIdToUser[sp.canvas.id] = user
+			}
+		}
+		return canvasIdToUser
 	}
 
 	List<Canvas> stopAllLocalCanvases() {

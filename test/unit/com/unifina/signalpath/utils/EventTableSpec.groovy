@@ -1,10 +1,13 @@
 package com.unifina.signalpath.utils
 
 import com.unifina.UiChannelMockingSpecification
+import com.unifina.domain.security.SecUser
 import com.unifina.utils.testutils.ModuleTestHelper
+import grails.test.mixin.Mock
 
 import java.text.SimpleDateFormat
 
+@Mock(SecUser)
 class EventTableSpec extends UiChannelMockingSpecification {
 
 	SimpleDateFormat dateFormat

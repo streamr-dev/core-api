@@ -3,10 +3,6 @@ package com.unifina.utils;
 import com.unifina.datasource.DataSource;
 import com.unifina.domain.security.SecUser;
 import com.unifina.security.permission.DataSourcePermission;
-import com.unifina.security.permission.GrailsApplicationPermission;
-import com.unifina.security.permission.UserPermission;
-import org.apache.log4j.Logger;
-import org.codehaus.groovy.grails.commons.GrailsApplication;
 
 import java.security.AccessController;
 import java.text.SimpleDateFormat;
@@ -17,18 +13,13 @@ import java.util.TimeZone;
 
 
 public class Globals {
-	private static final Logger log = Logger.getLogger(Globals.class);
-
-	private final SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
 	private final SimpleDateFormat dateFormatUTC = new SimpleDateFormat("yyyy-MM-dd");
-	private final SimpleDateFormat timeFormat = new SimpleDateFormat("HH:mm:ss.SSS");
 	private final SimpleDateFormat dateTimeFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS");
-	
-	private GrailsApplication grailsApplication;
-	private Map signalPathContext = null;
-	private TimeZone userTimeZone;
-	private SecUser user;
-	private TimezoneConverter tzConverter;
+
+	private final Map signalPathContext;
+	private final Long userId;
+	private final TimeZone userTimeZone;
+	private final TimezoneConverter tzConverter;
 	private DataSource dataSource = null;
 	private Date startDate = null;
 	private Date endDate = null;
@@ -41,79 +32,34 @@ public class Globals {
 	 * Construct fake environment, e.g., for testing.
 	 */
 	public Globals() {
-		signalPathContext = new HashMap();
+		this(new HashMap(), null);
 	}
 	
-	public Globals(Map signalPathContext, GrailsApplication grailsApplication, SecUser user) {
+	public Globals(Map signalPathContext, SecUser user) {
 		if (signalPathContext == null) {
 			throw new NullPointerException("signalPathContext can not be null!");
 		}
-		if (grailsApplication == null) {
-			throw new NullPointerException("grailsApplication can not be null!");
-		}
 		
 		this.signalPathContext = signalPathContext;
-		this.grailsApplication = grailsApplication;
-		this.user = user;
+		this.userId = user != null ? user.getId() : null;
 		
-		dateFormatUTC.setTimeZone(TimeZone.getTimeZone("UTC"));
+		String tzString = resolveTimezoneString(user);
+		this.userTimeZone = TimeZone.getTimeZone(tzString);
+		this.tzConverter = new TimezoneConverter(tzString);
+		this.dateTimeFormat.setTimeZone(this.userTimeZone);
+		this.dateFormatUTC.setTimeZone(TimeZone.getTimeZone("UTC"));
 	}
-	
+
 	public Map getSignalPathContext() {
 		return signalPathContext;
 	}
 
-	public GrailsApplication getGrailsApplication() {
-		if (System.getSecurityManager() != null) { // Ensure cannot be accessed by CustomModule
-			AccessController.checkPermission(new GrailsApplicationPermission());
-		}
-		return grailsApplication;
-	}
-
-	/**
-	 * Returns the SecUser for this Globals instance, or null if the user is anonymous/unknown.
-     */
-	public SecUser getUser() {
-		if (System.getSecurityManager() != null) { // Ensure cannot be accessed by CustomModule
-			AccessController.checkPermission(new UserPermission());
-		}
-		return user;
-	}
-
-	public void setUser(SecUser user) {
-		if (System.getSecurityManager() != null) { // Ensure cannot be accessed by CustomModule
-			AccessController.checkPermission(new UserPermission());
-		}
-		this.user = user;
+	public Long getUserId() {
+		return userId;
 	}
 
 	public Date getTime() {
 		return time;
-	}
-	
-	private String detectTimeZone() {
-		String tzString;
-		
-		if (user!=null)
-			tzString = user.getTimezone();
-		else {
-			log.info("User not found, setting time zone to UTC");
-			tzString = "UTC";
-		}
-
-		return tzString;
-	}
-	
-	private void initTimeZone(String tzString) {
-		TimeZone tz = TimeZone.getTimeZone(tzString);
-		
-		dateFormat.setTimeZone(tz);
-		timeFormat.setTimeZone(tz);
-		dateTimeFormat.setTimeZone(tz);
-		
-		this.userTimeZone = tz;
-		
-		tzConverter = new TimezoneConverter(tzString);
 	}
 	
 	public void init() {
@@ -141,9 +87,6 @@ public class Globals {
 				endDate = new Date(TimeOfDayUtil.getMidnight(endDate).getTime() + 24 * 60 * 60 * 1000 - 1);
 			}
 		}
-
-		String tzString = detectTimeZone();
-		initTimeZone(tzString);
 	}
 	
 	public Date getStartDate() {
@@ -159,19 +102,7 @@ public class Globals {
 	}
 	
 	public TimeZone getUserTimeZone() {
-		if (userTimeZone == null) {
-			userTimeZone = TimeZone.getTimeZone(user.getTimezone());
-		}
 		return userTimeZone;
-	}
-	
-	public void setUserTimeZone(TimeZone tz) {
-		this.userTimeZone = tz;
-		timeFormat.setTimeZone(tz);
-	}
-	
-	public void destroy() {
-		// TODO: anything needed here?
 	}
 
 	public void setRealtime(boolean realtime) {
@@ -222,5 +153,9 @@ public class Globals {
 
 	public String formatDateTime(Date date) {
 		return dateTimeFormat.format(date);
+	}
+
+	private static String resolveTimezoneString(SecUser user) {
+		return user != null && user.getTimezone() != null ? user.getTimezone() : "UTC";
 	}
 }

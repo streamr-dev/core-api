@@ -407,6 +407,7 @@ class CanvasSpec extends LoginTester1Spec implements CanvasMixin, ListPageMixin,
 				$(".tooltip .tooltip-inner strong").text() == "on"
 			}
 		when: "tooltip is hidden, switch is clicked and tooltip is shown again"
+			sleep(100)
 			def menu = $(".menu-content")[0]
 			interact {
 				moveToElement(menu)

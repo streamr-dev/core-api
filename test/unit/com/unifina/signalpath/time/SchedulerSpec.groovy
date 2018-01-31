@@ -5,10 +5,12 @@ import com.unifina.domain.security.SecUser
 import com.unifina.utils.Globals
 import com.unifina.utils.GlobalsFactory
 import com.unifina.utils.testutils.ModuleTestHelper
+import grails.test.mixin.Mock
 import grails.test.mixin.support.GrailsUnitTestMixin
 
 import java.text.SimpleDateFormat
 
+@Mock(SecUser)
 class SchedulerSpec extends UiChannelMockingSpecification {
 	Scheduler module
 	SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss")
@@ -59,10 +61,6 @@ class SchedulerSpec extends UiChannelMockingSpecification {
 		then:
 		new ModuleTestHelper.Builder(module, inputValues, outputValues)
 			.uiChannelMessages(channelMessages, getSentMessagesByStreamId())
-			.overrideGlobals { Globals g ->
-				g.setUserTimeZone(UTC)
-				return g
-			}
 			.ticks(ticks)
 			.extraIterationsAfterInput(6)
 			.test()

@@ -1,127 +1,62 @@
 package com.unifina.datasource;
 
-import java.util.*;
-
 import com.unifina.data.FeedEvent;
-import com.unifina.data.IEventQueue;
 import com.unifina.feed.MasterClock;
-import com.unifina.signalpath.AbstractSignalPathModule;
-import com.unifina.signalpath.StopRequest;
 import com.unifina.utils.Globals;
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
 
-public abstract class DataSourceEventQueue implements IEventQueue {
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+import java.util.Queue;
 
-	protected Queue<FeedEvent> queue;
-	protected Globals globals;
-	protected boolean abort = false;
-
-	private MasterClock masterClock;
-	//	private ArrayList<ITimeListener> timeListeners = new ArrayList<>();
-	private ArrayList<IDayListener> dayListeners = new ArrayList<>();
-
-	private long lastReportedSec = 0;
+public abstract class DataSourceEventQueue {
+	private final MasterClock masterClock;
+	private final List<IDayListener> dayListeners = new ArrayList<>();
+	private final Object syncLock;
+	private Queue<FeedEvent> queue;
+	protected final Globals globals;
+	private boolean abort = false;
+	private long lastHandledTime = 0;
 	private DateTime nextDay;
-
-	protected long timeSpentProcessing = 0;
-	protected long eventCounter = 0;
-
-	protected long queueTicket = 0;
-
-	private int dlCount;
-	//	private int tlCount;
-	private int i;
+	private long queueTicket = 0;
 
 	/**
 	 * Must be set to true if events are enqueued from multiple threads
 	 */
-	protected boolean sync = false;
 
-	public DataSourceEventQueue(Globals globals, DataSource dataSource) {
+	public DataSourceEventQueue(boolean sync, Globals globals, DataSource dataSource) {
+		this.syncLock = sync ? new Object() : null;
 		this.globals = globals;
 		masterClock = new MasterClock(globals, dataSource);
 		queue = initQueue();
 	}
 
-	protected abstract Queue<FeedEvent> initQueue();
-
-	@Override
 	public void addTimeListener(ITimeListener timeListener) {
 		masterClock.register(timeListener);
 	}
 
-	@Override
 	public void addDayListener(IDayListener dayListener) {
 		if (!dayListeners.contains(dayListener)) {
 			dayListeners.add(dayListener);
 		}
 	}
 
-	@Override
-	public boolean isEmpty() {
-		return queue.isEmpty();
-	}
-
 	/**
 	 * The call to this method should block until the queue is aborted or all events have been processed.
 	 */
-	@Override
 	public void start() throws Exception {
 		abort = false;
 		doStart();
 	}
 
-	protected abstract void doStart() throws Exception;
-
-	protected void initTimeReporting(long firstTime) {
-		if (lastReportedSec == 0) {
-			lastReportedSec = firstTime;
-		}
-	}
-
-	protected void reportTime(long time) {
-		/**
-		 * With event-based clock in backtest, the time between events can be multiple seconds.
-		 * However each second should be reported. New events may appear in the queue between
-		 * reporting each second, we must check for this!
-		 */
-		int initialQueueSize = queue.size();
-
-		if (nextDay == null) {
-			DateTime now = new DateTime(lastReportedSec, DateTimeZone.UTC);
-			nextDay = now.minusMillis(now.getMillisOfDay()).plusDays(1);
-		}
-
-		while (lastReportedSec + 1000 <= time && queue.size() == initialQueueSize) {
-			lastReportedSec += 1000;
-			Date d = new Date(lastReportedSec);
-			globals.time = d;
-
-			if (lastReportedSec > nextDay.getMillis()) {
-				dlCount = dayListeners.size();
-
-				// Report the new day
-				for (i = 0; i < dlCount; i++) {
-					dayListeners.get(i).onDay(d);
-				}
-
-				nextDay = nextDay.plusDays(1);
-			}
-
-			FeedEvent timeEvent = new FeedEvent();
-			timeEvent.timestamp = d;
-			masterClock.receive(timeEvent);
-		}
-	}
-
-	@Override
 	public void enqueue(FeedEvent event) {
-		if (sync) {
-			synchronized (queue) {
+		if (syncLock != null) {
+			synchronized (syncLock) {
 				event.queueTicket = queueTicket++;
 				queue.add(event);
-				queue.notify(); // Notify the SignalPathRunner thread
+				syncLock.notify(); // Notify the SignalPathRunner thread
 			}
 		} else {
 			event.queueTicket = queueTicket++;
@@ -129,33 +64,93 @@ public abstract class DataSourceEventQueue implements IEventQueue {
 		}
 	}
 
+	public void abort() {
+		abort = true;
+		if (syncLock != null) {
+			synchronized (syncLock) {
+				syncLock.notify(); // Notify the SignalPathRunner thread
+			}
+			doStop();
+		}
+	}
+
+	protected abstract Queue<FeedEvent> initQueue();
+
+	protected abstract void doStart() throws Exception;
+
 	/**
-	 * @param event
 	 * @return True if the event was processed, false if it was not (then it should be returned to the queue).
 	 */
 	public abstract boolean process(FeedEvent event);
 
-	@Override
-	public void abort() {
-		abort = true;
-		synchronized (queue) {
-			queue.notify(); // Notify the SignalPathRunner thread
+	protected abstract void doStop();
+
+	protected boolean isAborted() {
+		return abort;
+	}
+
+	protected void initTimeReporting(long firstTime) {
+		if (lastHandledTime == 0) {
+			lastHandledTime = firstTime;
+			DateTime now = new DateTime(firstTime, DateTimeZone.UTC);
+			nextDay = now.minusMillis(now.getMillisOfDay()).plusDays(1);
 		}
 	}
 
-	public Queue<FeedEvent> getQueue() {
+	protected void reportTime(long eventTime) {
+		/*
+		 * With event-based clock in historical mode, the time between events can be multiple seconds.
+		 * However each second should be reported. New events may appear in the queue between
+		 * reporting each second, we must check for this!
+		 */
+		int initialQueueSize = queue.size();
+
+		while (lastHandledTime + 1000 <= eventTime && queue.size() == initialQueueSize) {
+			lastHandledTime += 1000;
+			Date d = new Date(lastHandledTime);
+			globals.time = d;
+
+			// Handle possible day turn
+			if (lastHandledTime > nextDay.getMillis()) {
+				int dlCount = dayListeners.size();
+
+				// Report the new day
+				for (int i = 0; i < dlCount; i++) {
+					dayListeners.get(i).onDay(d);
+				}
+
+				nextDay = nextDay.plusDays(1);
+			}
+
+			masterClock.receive(new FeedEvent<>(null, d, null));
+		}
+	}
+
+	protected Object getSyncLock() {
+		return syncLock;
+	}
+
+	protected boolean isEmpty() {
+		return queue.isEmpty();
+	}
+
+	protected Queue<FeedEvent> getQueue() {
 		return queue;
 	}
 
-	public void setQueue(Queue<FeedEvent> queue) {
+	protected void setQueue(Queue<FeedEvent> queue) {
 		this.queue = queue;
 	}
 
-	public FeedEvent peek() {
+	protected void addWithoutUpdatingTicket(FeedEvent feedEvent) {
+		queue.add(feedEvent);
+	}
+
+	protected FeedEvent peek() {
 		return queue.peek();
 	}
 
-	public FeedEvent poll() {
+	protected FeedEvent poll() {
 		return queue.poll();
 	}
 }

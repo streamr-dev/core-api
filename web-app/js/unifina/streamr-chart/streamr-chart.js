@@ -16,7 +16,8 @@ function StreamrChart(parent, options) {
 		rangeDropdown: true,
 		showHideButtons: true,
 		displayTitle: false,
-		init: undefined
+		init: undefined,
+        range: "all"
 	}, options || {})
 
 	this.metaDataInitialized = false
@@ -30,7 +31,9 @@ function StreamrChart(parent, options) {
 
 	this.navigatorSeries = null
 	this.latestNavigatorTimestamp = null
-	this.range = {}
+	this.range = {
+        value: this.options.range
+    }
 	this.minTime = null;
 	this.maxTime = null;
 	this.lastTime = null;
@@ -50,20 +53,20 @@ function StreamrChart(parent, options) {
 		var $rangeDiv = $("<div></div>");
         var $rangeSelect = $("<select class='chart-range-selector chart-show-on-run form-control' title='Range'></select>")
 		var rangeConfig = [
-			{name:"All",range:""},
-			{name:"month",range:30*24*60*60*1000},
-			{name:"week",range:7*24*60*60*1000},
-			{name:"day",range:24*60*60*1000},
-			{name:"12 h",range:12*60*60*1000},
-			{name:"8 h",range:8*60*60*1000},
-			{name:"4 h",range:4*60*60*1000},
-			{name:"2 h",range:2*60*60*1000},
-			{name:"1 h",range:60*60*1000},
-			{name:"30 min",range:30*60*1000},
-			{name:"15 min",range:15*60*1000},
-			{name:"1 min",range:60*1000},
-			{name:"15 sec",range:15*1000},
-			{name:"1 sec",range:1*1000},
+			{name: "All", range: ""},
+			{name: "month", range: 30*24*60*60*1000},
+			{name: "week", range: 7*24*60*60*1000},
+			{name: "day", range: 24*60*60*1000},
+			{name: "12 h", range: 12*60*60*1000},
+			{name: "8 h", range: 8*60*60*1000},
+			{name: "4 h", range: 4*60*60*1000},
+			{name: "2 h", range: 2*60*60*1000},
+			{name: "1 h", range: 60*60*1000},
+			{name: "30 min", range: 30*60*1000},
+			{name: "15 min", range: 15*60*1000},
+			{name: "1 min", range: 60*1000},
+			{name: "15 sec", range: 15*1000},
+			{name: "1 sec", range: 1000},
 		]
 		
 		rangeConfig.forEach(function(c) {
@@ -82,6 +85,7 @@ function StreamrChart(parent, options) {
 			if (_this.chart)
 				_this.redraw()
 		})
+        $rangeSelect.val(this.options.range)
 
         $rangeDiv.append($rangeSelect)
 		this.toolbarInner.append($rangeDiv);
@@ -115,7 +119,7 @@ function StreamrChart(parent, options) {
 		_this.$parent.find(".chart-show-on-run").show()
 		_this.redraw()
 	})
-
+ 
 	this.$parent.on('resize', function() {
 		_this.resize()
 	})
@@ -133,14 +137,16 @@ function StreamrChart(parent, options) {
 	
 	// Create the chart area
 	var areaId = "chartArea_"+(new Date()).getTime()
-	this.$area = $("<div id='"+areaId+"' class='chartDrawArea'></div>")
+    this.$area = $('<div/>', {
+        id: areaId,
+        class: 'chartDrawArea'
+    })
 	this.$parent.append(this.$area)
 
 	// An init message can be included in the options
 	if (this.options.init) {
 		this.initMetaData(this.options.init)
 	}
-
 }
 
 StreamrChart.prototype.createHighstocksInstance = function(title, series, yAxis) {
@@ -284,6 +290,8 @@ StreamrChart.prototype.createHighstocksInstance = function(title, series, yAxis)
 	})
 	
 	$(this).trigger("initialized")
+    
+    this.resize()
 }
 
 StreamrChart.prototype.redraw = function() {
@@ -320,6 +328,7 @@ StreamrChart.prototype.resize = function() {
     
     if (this.chart) {
         this.chart.setSize(this.$area.innerWidth(), this.$area.innerHeight())
+        console.log(this.$area.innerWidth(), this.$area.innerHeight())
     }
 }
 

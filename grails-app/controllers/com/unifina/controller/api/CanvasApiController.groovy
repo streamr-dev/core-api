@@ -108,12 +108,11 @@ class CanvasApiController {
 	 * Gets the json of a single module on a canvas
 	 */
 	@StreamrApi(authenticationLevel = AuthLevel.NONE)
-	def module(String canvasId, Integer moduleId, Long dashboard, Boolean runtime) {
+	def module(String canvasId, Integer moduleId, String dashboardId, Boolean runtime) {
 		if (runtime) {
 			render signalPathService.runtimeRequest(signalPathService.buildRuntimeRequest([type: 'json'], "canvases/$canvasId/modules/$moduleId", request.apiUser), false).json as JSON
-		}
-		else {
-			Map moduleMap = canvasService.authorizedGetModuleOnCanvas(canvasId, moduleId, dashboard, request.apiUser, Operation.READ)
+		} else {
+			Map moduleMap = canvasService.authorizedGetModuleOnCanvas(canvasId, moduleId, dashboardId, request.apiUser, Operation.READ)
 			render moduleMap as JSON
 		}
 	}

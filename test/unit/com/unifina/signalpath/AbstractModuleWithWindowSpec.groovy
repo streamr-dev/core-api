@@ -3,11 +3,8 @@ package com.unifina.signalpath
 import com.unifina.domain.security.SecUser
 import com.unifina.utils.GlobalsFactory
 import com.unifina.utils.window.WindowListener
-import grails.test.mixin.TestMixin
-import grails.test.mixin.support.GrailsUnitTestMixin
 import spock.lang.Specification
 
-@TestMixin(GrailsUnitTestMixin) // provides grailsApplication
 class AbstractModuleWithWindowSpec extends Specification {
 
 	private WindowingModule makeModule(boolean minSamples = true, Map config = [:], int dimensions = 1) {
@@ -17,7 +14,7 @@ class AbstractModuleWithWindowSpec extends Specification {
 		}
 
 		WindowingModule m = new WindowingModule(minSamples, dimensions, windowListeners, Mock(AbstractModuleWithWindow))
-		m.globals = GlobalsFactory.createInstance([:], grailsApplication, new SecUser())
+		m.globals = GlobalsFactory.createInstance([:], new SecUser())
 		m.globals.time = new Date(0)
 		m.init()
 		m.configure(config)
