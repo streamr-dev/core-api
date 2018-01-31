@@ -10,14 +10,15 @@ import TitleRow from './DashboardItemTitleRow'
 
 import styles from './dashboardItem.pcss'
 
-import type {Dashboard, DashboardItem as DBItem, DashboardReducerState as DashboardState} from '../../../../flowtype/dashboard-types'
+import type {DashboardState} from '../../../../flowtype/states/dashboard-state'
+import type {Dashboard, DashboardItem as DashboardItemType} from '../../../../flowtype/dashboard-types'
 
 const config = require('../../dashboardConfig')
 
 type Props = {
-    item: DBItem,
+    item: DashboardItemType,
     dashboard: Dashboard,
-    layout?: DBItem.layout,
+    layout?: $ElementType<DashboardItemType, 'layout'>,
     dragCancelClassName?: string,
     currentLayout: ?{},
     error: Function,
@@ -80,7 +81,7 @@ export class DashboardItem extends Component<Props, State> {
     createCustomComponent = () => {
         const {item, config: conf} = this.props
         
-        const {component, props} = conf.components[item.webcomponent] || {}
+        const {component, props} = item && conf.components[item.webcomponent] || {}
         
         const CustomComponent = component || (() => (
             <div style={{
@@ -113,7 +114,7 @@ export class DashboardItem extends Component<Props, State> {
                 </div>
                 <div className={`${styles.body} ${this.props.dragCancelClassName || ''}`}>
                     <div
-                        className={`${styles.wrapper} ${styles[item.webcomponent] || item.webcomponent}`}
+                        className={`${styles.wrapper} ${item.webcomponent && styles[item.webcomponent] || item.webcomponent}`}
                         ref={wrapper => this.wrapper = wrapper}
                     >
                         {this.createCustomComponent()}
@@ -125,7 +126,7 @@ export class DashboardItem extends Component<Props, State> {
 }
 
 export const mapStateToProps = ({dashboard: {dashboardsById, openDashboard}}: {dashboard: DashboardState}) => ({
-    dashboard: dashboardsById[openDashboard.id],
+    dashboard: openDashboard.id && dashboardsById[openDashboard.id],
     config: config
 })
 

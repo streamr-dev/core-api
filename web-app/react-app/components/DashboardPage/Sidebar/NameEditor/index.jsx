@@ -7,7 +7,8 @@ import {parseDashboard} from '../../../../helpers/parseState'
 
 import {updateDashboard} from '../../../../actions/dashboard'
 
-import type {Dashboard, DashboardReducerState as DashboardState} from '../../../../flowtype/dashboard-types'
+import type {DashboardState} from '../../../../flowtype/states/dashboard-state'
+import type {Dashboard} from '../../../../flowtype/dashboard-types'
 
 import styles from './nameEditor.pcss'
 

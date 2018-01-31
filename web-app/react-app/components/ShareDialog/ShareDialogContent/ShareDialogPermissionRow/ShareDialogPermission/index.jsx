@@ -13,13 +13,20 @@ import styles from './shareDialogPermission.pcss'
 
 import type {Permission} from '../../../../../flowtype/permission-types'
 
-type Props = {
+type StateProps = {}
+
+type DispatchProps = {
+    setResourceHighestOperation: (value: Permission.operation) => void,
+    remove: () => void
+}
+
+type GivenProps = {
     resourceType: Permission.resourceType,
     resourceId: Permission.resourceId,
-    permissions: Array<Permission>,
-    setResourceHighestOperation: (value: Permission.operation) => {},
-    remove: () => {}
+    permissions: Array<Permission>
 }
+
+type Props = StateProps & DispatchProps & GivenProps
 
 const operationsInOrder = ['read', 'write', 'share']
 
@@ -66,7 +73,7 @@ export class ShareDialogPermission extends Component<Props> {
     }
 }
 
-export const mapDispatchToProps = (dispatch: Function, ownProps: Props) => ({
+export const mapDispatchToProps = (dispatch: Function, ownProps: GivenProps): DispatchProps => ({
     setResourceHighestOperation(value: Permission.operation) {
         dispatch(setResourceHighestOperationForUser(ownProps.resourceType, ownProps.resourceId, ownProps.permissions[0].user, value))
     },

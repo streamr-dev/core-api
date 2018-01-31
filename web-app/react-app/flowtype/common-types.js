@@ -1,3 +1,4 @@
+// @flow
 
 export type ApiError = {
     error: string,

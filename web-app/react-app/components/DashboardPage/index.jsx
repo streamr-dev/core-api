@@ -12,7 +12,8 @@ import {getDashboard, getMyDashboardPermissions, newDashboard, openDashboard} fr
 import {getRunningCanvases} from '../../actions/canvas'
 
 
-import type { Dashboard, State as DashboardState } from '../../flowtype/dashboard-types'
+import type { DashboardState } from '../../flowtype/states/dashboard-state'
+import type { Dashboard } from '../../flowtype/dashboard-types'
 import type { Canvas } from '../../flowtype/canvas-types'
 import type {Node} from 'react'
 
@@ -65,7 +66,7 @@ export class DashboardPage extends Component<Props> {
 }
 
 export const mapStateToProps = ({dashboard: {dashboardsById, openDashboard}}: {dashboard: DashboardState}) => ({
-    dashboard: dashboardsById[openDashboard.id]
+    dashboard: openDashboard.id && dashboardsById[openDashboard.id]
 })
 
 export const mapDispatchToProps = (dispatch: Function) => ({

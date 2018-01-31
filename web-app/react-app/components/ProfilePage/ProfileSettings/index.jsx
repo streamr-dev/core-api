@@ -10,7 +10,8 @@ import 'react-select/dist/react-select.css'
 
 import {getCurrentUser, updateCurrentUserName, updateCurrentUserTimezone, saveCurrentUser} from '../../../actions/user'
 
-import type {User, State as UserState} from '../../../flowtype/user-types'
+import type {UserState} from '../../../flowtype/states/user-state'
+import type {User} from '../../../flowtype/user-types'
 
 type Props = {
     user: User,
@@ -111,7 +112,7 @@ export class ProfileSettings extends Component<Props> {
     }
 }
 
-export const mapStateToProps = ({user}: UserState) => ({
+export const mapStateToProps = ({user}: {user: UserState}) => ({
     user: user.currentUser || {}
 })
 

@@ -69,21 +69,22 @@ module.exports = exports = {
             'ignoreChainWithDepth': 2
         }],
         'object-curly-newline': [ERROR, {
-            "ObjectExpression": {
-                "minProperties": 1
+            'ObjectExpression': {
+                'minProperties': 1
             },
-            "ObjectPattern": "never"
+            'ObjectPattern': 'never'
         }],
         'indent': [ERROR, 4, {
             'SwitchCase': WARN,
-            "MemberExpression": WARN,
-            "ObjectExpression": WARN
+            'MemberExpression': WARN,
+            'ObjectExpression': WARN
         }],
         'object-property-newline': [ERROR, {
             'allowMultiplePropertiesPerLine': true
         }],
         'no-unexpected-multiline': ERROR,
         'wrap-iife': [ERROR, 'inside'],
-        'react/jsx-indent': [ERROR, 4]
+        'react/jsx-indent': [ERROR, 4],
+        'flowtype/define-flow-type': ERROR
     }
 }

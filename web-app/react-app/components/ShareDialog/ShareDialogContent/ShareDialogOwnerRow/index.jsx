@@ -5,7 +5,8 @@ import {connect} from 'react-redux'
 import {Col} from 'react-bootstrap'
 import Switcher from 'react-switcher'
 
-import type {Permission, State as PermissionState} from '../../../../flowtype/permission-types'
+import type {PermissionState} from '../../../../flowtype/states/permission-state'
+import type {Permission} from '../../../../flowtype/permission-types'
 import {addResourcePermission, removeResourcePermission} from '../../../../actions/permission'
 
 import styles from './shareDialogOwnerRow.pcss'

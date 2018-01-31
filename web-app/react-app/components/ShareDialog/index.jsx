@@ -10,7 +10,8 @@ import ShareDialogFooter from './ShareDialogFooter'
 import {saveUpdatedResourcePermissions} from '../../actions/permission'
 
 import type {Node} from 'react'
-import type {Permission, State as PermissionState} from '../../flowtype/permission-types'
+import type {PermissionState} from '../../flowtype/states/permission-state'
+import type {Permission} from '../../flowtype/permission-types'
 
 type Props = {
     resourceId: Permission.resourceId,

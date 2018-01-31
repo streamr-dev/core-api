@@ -9,14 +9,15 @@ import {deleteDashboard} from '../../../actions/dashboard'
 import {parseDashboard} from '../../../helpers/parseState'
 
 import type {Node} from 'react'
-import type {Dashboard, DashboardReducerState as DashboardState} from '../../../flowtype/dashboard-types'
+import type {DashboardState} from '../../../flowtype/states/dashboard-state'
+import type {Dashboard} from '../../../flowtype/dashboard-types'
 
 type Props = {
     dashboard: Dashboard,
     canWrite: boolean,
     buttonProps: {},
     children?: Node | Array<Node>,
-    deleteDashboard: (id: Dashboard.id) => Promise<any>,
+    deleteDashboard: (id: $ElementType<Dashboard, 'id'>) => Promise<any>,
     className: string
 }
 
@@ -56,7 +57,7 @@ export class DashboardDeleteButton extends Component<Props> {
 export const mapStateToProps = (state: {dashboard: DashboardState}) => parseDashboard(state)
 
 export const mapDispatchToProps = (dispatch: Function) => ({
-    deleteDashboard(id: Dashboard.id) {
+    deleteDashboard(id: $ElementType<Dashboard, 'id'>) {
         return dispatch(deleteDashboard(id))
     }
 })

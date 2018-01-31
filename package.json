@@ -19,8 +19,7 @@
     "build-dev": "./node_modules/.bin/webpack",
     "clean": "rm -rf node_modules/",
     "clean-install": "npm run clean && npm install",
-    "dev": "./node_modules/.bin/webpack-dev-server",
-    "flow": "./node_modules/.bin/flow"
+    "dev": "./node_modules/.bin/webpack-dev-server"
   },
   "jest": {
     "moduleNameMapper": {
@@ -52,11 +51,11 @@
     "change-case": "^3.0.1",
     "css-loader": "^0.28.1",
     "css-mqpacker": "^6.0.0",
-    "eslint": "4.13.0",
     "draggabilly": "^2.1.1",
     "empty": "^0.10.1",
     "enzyme": "^3.1.1",
     "enzyme-adapter-react-16": "^1.0.4",
+    "eslint": "4.13.0",
     "eslint-loader": "^1.7.1",
     "eslint-plugin-flowtype": "^2.40.1",
     "eslint-plugin-mocha": "^4.9.0",
@@ -64,7 +63,7 @@
     "expect": "^1.20.2",
     "extract-text-webpack-plugin": "^2.1.2",
     "file-loader": "^0.11.1",
-    "flow-bin": "^0.61.0",
+    "flow-bin": "^0.64.0",
     "flowtype-loader": "^0.2.2",
     "form-serialize": "^0.7.1",
     "fuse.js": "^3.0.3",

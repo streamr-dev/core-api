@@ -21,6 +21,7 @@
       <configuration>
         <datasource-map>
           <unit-entry name="Gorm" />
+          <unit-entry name="sessionFactory" />
         </datasource-map>
         <naming-strategy-map />
       </configuration>

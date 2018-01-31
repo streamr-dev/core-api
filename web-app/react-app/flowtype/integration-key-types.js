@@ -5,14 +5,6 @@ export type IntegrationKey = {
     json: {}
 }
 
-export type State = {
-    listsByService?: {
-        [string]: Array<IntegrationKey>
-    },
-    error?: ?string,
-    fetching?: boolean
-}
-
 export type Action = {
     type: string,
     service?: string,
