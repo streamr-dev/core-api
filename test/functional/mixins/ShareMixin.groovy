@@ -11,13 +11,16 @@ trait ShareMixin implements NotificationMixin {
 	// just "$('.new-user-field') << text" won't work.
 	// That's why this hack.
 	// The same is used in ShareSpec.groovy
-	def feedTextInput(String text) {
+	def feedTextInput(String selector, String text) {
 		waitFor {
-			$('.new-user-field').displayed
-			$('.new-user-field').firstElement().clear()
-			$('.new-user-field') << text
-			$('.new-user-field').value().equals(text)
+			$(selector).displayed
+			$(selector).firstElement().clear()
+			$(selector) << text
+			$(selector).value().equals(text)
 		}
+	}
+	def feedTextInput(String text) {
+		feedTextInput('.new-user-field', text)
 	}
 
 	def getSharingDialog() {
@@ -42,7 +45,6 @@ trait ShareMixin implements NotificationMixin {
 
 	void acceptShareDialog() {
 		sharingDialog.find('.save-button').click()
-		waitFor { !sharingDialog.displayed }
 	}
 
 	void shareTo(String username, Permission.Operation op = Permission.Operation.READ) {
@@ -53,4 +55,15 @@ trait ShareMixin implements NotificationMixin {
 		waitForSuccessNotification()
 	}
 
+	void shareToInReact(String username, Permission.Operation op = Permission.Operation.READ) {
+		feedTextInput(".shareDialogInputRow_inputRow input", username)
+		$(".shareDialogInputRow_addButton").click()
+		def row = $(".modal-dialog").find(".shareDialogPermission_userLabel", text:contains(username))
+		row.find('.shareDialogPermission_select').click()
+		row.find(".shareDialogPermission_select .Select-option", "text": contains(op.id)).click()
+		acceptShareDialog()
+		$(".shareDialogFooter_saveButton").click()
+		waitForSuccessNotification()
+		waitFor { !$(".modal-dialog").displayed }
+	}
 }

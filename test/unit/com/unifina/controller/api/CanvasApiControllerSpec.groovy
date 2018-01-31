@@ -9,12 +9,7 @@ import com.unifina.domain.security.SecUser
 import com.unifina.domain.signalpath.Canvas
 import com.unifina.exceptions.CanvasUnreachableException
 import com.unifina.filters.UnifinaCoreAPIFilters
-import com.unifina.service.ApiService
-import com.unifina.service.CanvasService
-import com.unifina.service.PermissionService
-import com.unifina.service.SignalPathService
-import com.unifina.service.UserService
-import com.unifina.signalpath.RuntimeRequest
+import com.unifina.service.*
 import grails.converters.JSON
 import grails.orm.HibernateCriteriaBuilder
 import grails.plugin.springsecurity.SpringSecurityService
@@ -59,7 +54,6 @@ class CanvasApiControllerSpec extends Specification {
 		k2.save(failOnError: true, validate: true)
 
 		canvas1 = new Canvas(
-			user: me,
 			name: "mine",
 			json: new JsonBuilder([name: "mine", modules: [[hash: 1]], settings: [:]]).toString(),
 			state: Canvas.State.STOPPED,
@@ -68,7 +62,6 @@ class CanvasApiControllerSpec extends Specification {
 		canvas1.save(validate: true, failOnError: true)
 
 		canvas2 = new Canvas(
-			user: other,
 			name: "not mine",
 			json: '{name: "not mine", modules: []}',
 			state: Canvas.State.STOPPED,
@@ -76,7 +69,6 @@ class CanvasApiControllerSpec extends Specification {
 		).save(validate: true, failOnError: true)
 
 		canvas3 = new Canvas(
-			user: other,
 			name: "not mine but example",
 			json: '{name: "not mine but example", modules: []}',
 			state: Canvas.State.STOPPED,
@@ -441,7 +433,7 @@ class CanvasApiControllerSpec extends Specification {
 		request.addHeader("Authorization", "Token myApiKey")
 		params.canvasId = "1"
 		params.moduleId = 1
-		params.dashboard = 2
+		params.dashboardId = "2"
 		request.method = "GET"
 		request.requestURI = "/api/v1/canvases/$params.id/modules/"
 		withFilters(action: "module") {
@@ -451,7 +443,7 @@ class CanvasApiControllerSpec extends Specification {
 		then:
 		response.status == 200
 		response.json == result
-		1 * canvasService.authorizedGetModuleOnCanvas("1", 1, 2, me, Permission.Operation.READ) >> result
+		1 * canvasService.authorizedGetModuleOnCanvas("1", 1, "2", me, Permission.Operation.READ) >> result
 	}
 
 	void "module() supports runtime parameter"() {
@@ -461,7 +453,7 @@ class CanvasApiControllerSpec extends Specification {
 		request.addHeader("Authorization", "Token myApiKey")
 		params.canvasId = "1"
 		params.moduleId = 1
-		params.dashboard = 2
+		params.dashboardId = "2"
 		params.runtime = true
 		request.method = "GET"
 		request.requestURI = "/api/v1/canvases/$params.id/modules/$params.moduleId"

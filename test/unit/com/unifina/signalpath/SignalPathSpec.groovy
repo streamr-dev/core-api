@@ -6,10 +6,7 @@ import com.unifina.domain.signalpath.Canvas
 import com.unifina.service.ModuleService
 import com.unifina.utils.Globals
 import com.unifina.utils.GlobalsFactory
-import grails.test.mixin.TestMixin
-import grails.test.mixin.support.GrailsUnitTestMixin
 
-@TestMixin(GrailsUnitTestMixin)
 class SignalPathSpec extends BeanMockingSpecification {
 
 	def setup() {
@@ -19,7 +16,6 @@ class SignalPathSpec extends BeanMockingSpecification {
 	def "Runtime path is correctly formed"() {
 		Canvas topCanvas = new Canvas()
 		topCanvas.id = "canvasId"
-		Globals globals = GlobalsFactory.createInstance([:], grailsApplication, new SecUser())
 
 		SignalPath topSignalPath = new SignalPath(true)
 		topSignalPath.setCanvas(topCanvas)

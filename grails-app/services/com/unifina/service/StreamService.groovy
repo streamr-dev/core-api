@@ -15,7 +15,7 @@ import com.unifina.domain.security.Permission
 import com.unifina.domain.security.SecUser
 import com.unifina.domain.signalpath.Canvas
 import com.unifina.domain.task.Task
-import com.unifina.feed.AbstractDataRangeProvider
+import com.unifina.feed.DataRangeProvider
 import com.unifina.feed.AbstractStreamListener
 import com.unifina.feed.DataRange
 import com.unifina.feed.FieldDetector
@@ -34,6 +34,7 @@ import java.text.DateFormat
 class StreamService {
 
 	def grailsApplication
+	FeedService feedService
 	KafkaService kafkaService
 	CassandraService cassandraService
 	PermissionService permissionService
@@ -59,7 +60,6 @@ class StreamService {
 	Stream createStream(Map params, SecUser user, String id = IdGenerator.getShort()) {
 		Stream stream = new Stream(params)
 		stream.id = id
-		stream.user = user
 		stream.config = params.config
 
 		// If no feed given, API feed is used
@@ -79,6 +79,8 @@ class StreamService {
 		}
 
 		stream.save(failOnError: true)
+		permissionService.systemGrantAll(user, stream)
+
 		if (streamListener) {
 			streamListener.afterStreamSaved(stream)
 		}
@@ -240,7 +242,7 @@ class StreamService {
 	public AbstractStreamListener instantiateListener(Stream stream) {
 		Assert.notNull(stream.feed.streamListenerClass, "feed's streamListenerClass is unexpectedly null")
 		Class clazz = getClass().getClassLoader().loadClass(stream.feed.streamListenerClass)
-		return clazz.newInstance(grailsApplication)
+		return clazz.newInstance()
 	}
 
 	// TODO: move to FeedService
@@ -254,21 +256,10 @@ class StreamService {
 
 	}
 
-	// TODO: move to FeedService
-	private AbstractDataRangeProvider instantiateDataRangeProvider(Stream stream) {
-		if (stream.feed.dataRangeProviderClass == null) {
-			return null
-		} else {
-			Class clazz = getClass().getClassLoader().loadClass(stream.feed.dataRangeProviderClass)
-			return clazz.newInstance(grailsApplication)
-		}
-	}
-
+	@CompileStatic
 	DataRange getDataRange(Stream stream) {
-		AbstractDataRangeProvider provider = instantiateDataRangeProvider(stream)
-		if (provider)
-			return provider.getDataRange(stream)
-		else return null
+		DataRangeProvider provider = feedService.instantiateDataRangeProvider(stream.feed)
+		return provider?.getDataRange(stream)
 	}
 
 	@CompileStatic
@@ -298,7 +289,6 @@ class StreamService {
 		return permissionService.canRead(user, stream)
 	}
 
-
 	@CompileStatic
 	private boolean isDirectPermissionToStream(Key key, Stream stream) {
 		return permissionService.canRead(key, stream)
@@ -310,7 +300,7 @@ class StreamService {
 	}
 
 	private boolean isPermissionToStreamViaDashboard(SecUser user, Stream stream) {
-		def dashboardService = grailsApplication.mainContext.getBean(DashboardService) // Circular service dependency
+		def dashboardService = grailsApplication.mainContext.getBean(DashboardService) // Don't initialize normally, preventing circular service dependency loop
 		if (stream.uiChannel && stream.uiChannelCanvas != null && stream.uiChannelPath != null) {
 			Canvas canvas = stream.uiChannelCanvas
 			int moduleId = parseModuleId(stream.uiChannelPath)

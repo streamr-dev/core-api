@@ -56,6 +56,7 @@ class StreamApiControllerSpec extends Specification {
 
 		// First use real streamService to create the streams
 		streamService = mainContext.getBean(StreamService)
+		streamService.permissionService = permissionService
 		streamOneId = streamService.createStream([name: "stream", description: "description", feed: feed], user).id
 		streamTwoId = streamService.createStream([name: "ztream", feed: feed], user).id
 		streamThreeId = streamService.createStream([name: "atream", feed: feed], user).id
@@ -244,21 +245,6 @@ class StreamApiControllerSpec extends Specification {
 		stream.name == "newName"
 		stream.description == "newDescription"
 		stream.config == null
-	}
-
-	void "updating Stream with invalid mongodb settings raises validation error"() {
-		when:
-		request.addHeader("Authorization", "Token apiKey")
-		params.id = streamOneId
-		request.method = "PUT"
-		request.json = '{name: "newName", description: "newDescription", config: {mongodb: {host: null}}}'
-		request.requestURI = "/api/v1/stream"
-		withFilters([action: "update"]) {
-			controller.update()
-		}
-
-		then:
-		thrown ValidationException
 	}
 
 	void "cannot update non-existent Stream"() {

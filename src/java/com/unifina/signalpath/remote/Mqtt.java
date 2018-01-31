@@ -201,7 +201,7 @@ public class Mqtt extends AbstractSignalPathModule implements MqttCallback, IEve
 		final MqttMessageEvent event = new MqttMessageEvent(getGlobals().time);
 		event.message = mqttMessage;
 		// push mqtt message into FeedEvent queue; it will later call this.receive
-		getGlobals().getDataSource().getEventQueue().enqueue(new FeedEvent<>(event, event.timestamp, this));
+		getGlobals().getDataSource().enqueueEvent(new FeedEvent<>(event, event.timestamp, this));
 	}
 
 	@Override

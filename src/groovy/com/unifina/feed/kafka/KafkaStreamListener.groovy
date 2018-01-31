@@ -1,41 +1,27 @@
-package com.unifina.feed.kafka;
+package com.unifina.feed.kafka
 
-import com.unifina.domain.data.FeedFile;
-import com.unifina.domain.data.Stream;
-import com.unifina.feed.AbstractStreamListener;
-import com.unifina.service.FeedFileService;
-import com.unifina.service.KafkaService
-import groovy.transform.CompileStatic;
-import org.codehaus.groovy.grails.commons.GrailsApplication;
+import com.unifina.domain.data.FeedFile
+import com.unifina.domain.data.Stream
+import com.unifina.feed.AbstractStreamListener
+import com.unifina.service.FeedFileService
+import grails.util.Holders
+import groovy.transform.CompileStatic
 
-import java.util.Arrays;
-import java.util.Map;
-
-public class KafkaStreamListener extends AbstractStreamListener {
-
-	private final KafkaService kafkaService
-	private final FeedFileService feedFileService
-
-	public KafkaStreamListener(GrailsApplication grailsApplication) {
-		super(grailsApplication)
-		kafkaService = grailsApplication.getMainContext().getBean(KafkaService.class)
-		feedFileService = grailsApplication.getMainContext().getBean(FeedFileService.class)
-	}
+class KafkaStreamListener implements AbstractStreamListener {
 
 	@Override
 	@CompileStatic
-	public void addToConfiguration(Map configuration, Stream stream) {
+	void addToConfiguration(Map configuration, Stream stream) {
 		configuration["topic"] = stream.id
 	}
 
 	@Override
 	@CompileStatic
-	public void afterStreamSaved(Stream stream) {
-
-	}
+	void afterStreamSaved(Stream stream) {}
 
 	@Override
-	public void beforeDelete(Stream stream) {
+	void beforeDelete(Stream stream) {
+		FeedFileService feedFileService = Holders.getApplicationContext().getBean(FeedFileService.class)
 		def feedFiles = FeedFile.findAllByStream(stream, [sort:'beginDate'])
 		feedFiles.each {
 			feedFileService.deleteFile(it)

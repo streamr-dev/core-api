@@ -3,8 +3,8 @@ package com.unifina.signalpath;
 import com.unifina.datasource.IStartListener;
 import com.unifina.datasource.IStopListener;
 import com.unifina.domain.data.Stream;
+import com.unifina.domain.security.SecUser;
 import com.unifina.domain.signalpath.Module;
-import com.unifina.security.permission.UserPermission;
 import com.unifina.service.PermissionService;
 import com.unifina.service.StreamService;
 import com.unifina.utils.IdGenerator;
@@ -13,7 +13,6 @@ import grails.util.Holders;
 
 import java.io.Serializable;
 import java.security.AccessControlException;
-import java.security.AccessController;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -35,7 +34,7 @@ public abstract class ModuleWithUI extends AbstractSignalPathModule {
 		super.initialize();
 
 		if (getGlobals().isRunContext()) {
-			streamService = getGlobals().getGrailsApplication().getMainContext().getBean(StreamService.class);
+			streamService = Holders.getApplicationContext().getBean(StreamService.class);
 			getGlobals().getDataSource().addStartListener(new IStartListener() {
 				@Override
 				public void onStart() {
@@ -183,6 +182,8 @@ public abstract class ModuleWithUI extends AbstractSignalPathModule {
 				}
 			}
 
+			SecUser user = SecUser.getViaJava(getGlobals().getUserId());
+
 			// Else create a new Stream object for this UI channel
 			if (stream == null) {
 				// Initialize a new UI channel Stream
@@ -191,15 +192,16 @@ public abstract class ModuleWithUI extends AbstractSignalPathModule {
 				params.put("uiChannel", true);
 				params.put("uiChannelPath", getRuntimePath());
 				params.put("uiChannelCanvas", getRootSignalPath().getCanvas());
-				stream = getStreamService().createStream(params, getGlobals().getUser(), id);
+				stream = getStreamService().createStream(params, user, id);
 			}
 
 			// Fix for CORE-893: Guard against excessive memory use by setting stream.uiChannelCanvas to the instance already in memory
 			stream.setUiChannelCanvas(getRootSignalPath().getCanvas());
 
 			// User must have write permission to related Canvas in order to write to the UI channel
-			if (!getGlobals().getGrailsApplication().getMainContext().getBean(PermissionService.class).canWrite(getGlobals().getUser(), stream.getUiChannelCanvas())) {
-				throw new AccessControlException(ModuleWithUI.this.getName() + ": User " + getGlobals().getUser().getUsername() +
+			PermissionService permissionService = Holders.getApplicationContext().getBean(PermissionService.class);
+			if (!permissionService.canWrite(user, stream.getUiChannelCanvas())) {
+				throw new AccessControlException(ModuleWithUI.this.getName() + ": User " + user.getUsername() +
 						" does not have write access to UI Channel Stream " + stream.getId());
 			}
 

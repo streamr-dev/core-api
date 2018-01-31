@@ -49,7 +49,6 @@ class CanvasServiceSpec extends Specification {
 
 		myFirstCanvas = new Canvas(
 			name: "my_canvas_1",
-			user: me,
 			json: new JsonBuilder([
 			    name: "my_canvas_1",
 				hasExports: false,
@@ -73,13 +72,11 @@ class CanvasServiceSpec extends Specification {
 
 		canvases << new Canvas(
 			name: "my_canvas_2",
-			user: me,
 			json: "{}",
 		).save(failOnError: true)
 
 		canvases << new Canvas(
 			name: "my_canvas_3",
-			user: me,
 			json: "{}",
 			adhoc: false,
 			state: Canvas.State.RUNNING
@@ -87,7 +84,6 @@ class CanvasServiceSpec extends Specification {
 
 		canvases << new Canvas(
 			name: "my_canvas_4",
-			user: me,
 			json: "{}",
 			adhoc: true,
 			state: Canvas.State.RUNNING
@@ -95,7 +91,6 @@ class CanvasServiceSpec extends Specification {
 
 		canvases << new Canvas(
 			name: "my_canvas_5",
-			user: me,
 			json: "{}",
 			adhoc: true,
 			state: Canvas.State.STOPPED
@@ -103,7 +98,6 @@ class CanvasServiceSpec extends Specification {
 
 		canvases << new Canvas(
 			name: "my_canvas_6",
-			user: me,
 			json: "{}",
 			adhoc: false,
 			state: Canvas.State.STOPPED
@@ -113,7 +107,6 @@ class CanvasServiceSpec extends Specification {
 
 		canvases << new Canvas(
 			name: "someoneElses_canvas_1",
-			user: someoneElse,
 			json: "{}",
 			adhoc: false,
 			state: Canvas.State.STOPPED
@@ -121,7 +114,6 @@ class CanvasServiceSpec extends Specification {
 
 		canvases << new Canvas(
 			name: "someoneElses_canvas_2",
-			user: someoneElse,
 			json: "{}",
 		).save(failOnError: true)
 	}
@@ -151,7 +143,6 @@ class CanvasServiceSpec extends Specification {
 
 		then:
 		c.id != null
-		c.user == me
 		c.name == "my_new_canvas"
 		c.json != null // TODO: JSON Schema validation
 		c.state == Canvas.State.STOPPED
@@ -167,6 +158,16 @@ class CanvasServiceSpec extends Specification {
 		List uiChannelIds = uiChannelIdsFromMap(c.toMap())
 		uiChannelIds.size() == 1
 		uiChannelIds[0] != null
+	}
+
+	def "createNew() grants all permissions on Canvas for user via PermissionService"() {
+		def command = new SaveCanvasCommand(name: "my_new_canvas", modules: [])
+
+		when:
+		service.createNew(command, me)
+
+		then:
+		1 * service.permissionService.systemGrantAll(me, _ as Canvas)
 	}
 
 	def "createNew() creates a new adhoc Canvas when given adhoc setting"() {
@@ -192,7 +193,6 @@ class CanvasServiceSpec extends Specification {
 		Canvas c = Canvas.findById(myFirstCanvas.id)
 
 		then:
-		c.user == me
 		c.name == "my_updated_canvas"
 		c.json != null // TODO: JSON Schema validation
 
@@ -410,7 +410,6 @@ class CanvasServiceSpec extends Specification {
 		setup:
 		Stream s = new Stream(
 			id: "666",
-			user: me,
 			name: "Notifications",
 			uiChannel: true,
 			uiChannelCanvas: myFirstCanvas,
@@ -518,8 +517,8 @@ class CanvasServiceSpec extends Specification {
 	}
 
 	def "authorizedGetModuleOnCanvas() checks access to dashboard from PermissionService and returns the module if allowed"() {
-		Dashboard db = new Dashboard()
-		db.addToItems(new DashboardItem(canvas: myFirstCanvas, module: 1, ord: 0, title: "foo"))
+		Dashboard db = new Dashboard().save(validate: false, failOnError: true)
+		db.addToItems(new DashboardItem(canvas: myFirstCanvas, module: 1, title: "foo"))
 		db.save(validate: false)
 
 		when:
@@ -532,8 +531,8 @@ class CanvasServiceSpec extends Specification {
 	}
 
 	def "authorizedGetModuleOnCanvas() checks access to dashboard from PermissionService and throws exception if the canvas doesn't match the dashboard item"() {
-		Dashboard db = new Dashboard()
-		db.addToItems(new DashboardItem(canvas: canvases.find {it != myFirstCanvas}, module: 1, ord: 0, title: "foo"))
+		Dashboard db = new Dashboard().save(validate: false, failOnError: true)
+		db.addToItems(new DashboardItem(canvas: canvases.find {it != myFirstCanvas}, module: 1, title: "foo"))
 		db.save(validate: false)
 
 		when:
@@ -599,12 +598,12 @@ class CanvasServiceSpec extends Specification {
 
 	def "authorizedGetModuleOnCanvas() throws NotFoundException if no dashboard exists"() {
 		when:
-		service.authorizedGetModuleOnCanvas(myFirstCanvas.id, 1, 1, me, Permission.Operation.READ)
+		service.authorizedGetModuleOnCanvas(myFirstCanvas.id, 1, "1", me, Permission.Operation.READ)
 
 		then:
 		thrown(NotFoundException)
 		1 * service.permissionService.check(me, myFirstCanvas, Permission.Operation.READ) >> false
-		1 * service.dashboardService.authorizedGetById(1, me, Permission.Operation.READ) >> { throw new NotFoundException("thrown by mock") }
+		1 * service.dashboardService.authorizedGetById("1", me, Permission.Operation.READ) >> { throw new NotFoundException("thrown by mock") }
 	}
 
 	private uiChannelIdsFromMap(Map signalPathMap) {

@@ -11,7 +11,6 @@
 	<!-- Using shadow element doesn't work with CSS -->
 	<template>
 		<link rel="stylesheet" href="${r.resource(dir:'/js/leaflet', file:'leaflet.css', plugin:'unifina-core')}">
-		<streamr-client id="client"></streamr-client>
 		<div id="container"></div>
 	</template>
 	
@@ -25,7 +24,7 @@
 
 				this.getModuleJson(function(json) {
 					var options = _this.getModuleOptionsWithOverrides(json)
-					_this.map = new StreamrHeatMap(_this.$["streamr-widget-container"], options)
+					_this.map = new StreamrHeatmap(_this.$["streamr-widget-container"], options)
 
 					_this.subscribe(function(message) {
 						_this.map.handleMessage(message)

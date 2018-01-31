@@ -1,0 +1,50 @@
+
+:root {
+  --animationTime: 0.15s;
+}
+.streamrSwitcher {
+  display: flex;
+  width: 100%;
+  height: 100%;
+  justify-content: center;
+  align-items: center;
+
+  .switcher {
+    height: 39px;
+    width: 100%;
+    min-width: 80px;
+    max-width: 150px;
+    position: relative;
+    border-radius: 4px;
+    background-color: #dadada;
+    border: 1px solid #c5c5c5;
+    padding: 1px;
+    cursor: pointer;
+
+    .switcherInner {
+      width: 50%;
+      height: 100%;
+      border-radius: 4px;
+      border-color: #d25213;
+      border-bottom-color: #b64710;
+      background: #e95b15;
+      background-image: -webkit-linear-gradient(top, #ea5e19 0%, #d25213 100%);
+      background-image: linear-gradient(to bottom, #ea5e19 0%, #d25213 100%);
+      background-repeat: repeat-x;
+      transition: margin var(--animationTime) ease-in, filter var(--animationTime) ease-in;
+    }
+
+    &.on {
+      .switcherInner {
+        margin-left: 50%;
+      }
+    }
+
+    &.off {
+      .switcherInner {
+        margin-left: 0;
+        filter: grayscale(100%);
+      }
+    }
+  }
+}

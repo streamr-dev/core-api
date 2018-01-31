@@ -11,6 +11,7 @@ import com.unifina.feed.NoOpStreamListener
 import com.unifina.feed.StreamrBinaryMessageKeyProvider
 import com.unifina.feed.cassandra.CassandraHistoricalFeed
 import com.unifina.feed.map.MapMessageEventRecipient
+import com.unifina.security.Userish
 import com.unifina.service.FeedService
 import com.unifina.service.PermissionService
 import com.unifina.service.StreamService
@@ -21,30 +22,30 @@ import com.unifina.utils.testutils.FakeStreamService
 import com.unifina.utils.testutils.ModuleTestHelper
 import grails.test.mixin.Mock
 import grails.test.mixin.TestMixin
-import grails.test.mixin.web.ControllerUnitTestMixin
+import grails.test.mixin.support.GrailsUnitTestMixin
 
 import java.security.AccessControlException
 
-@TestMixin(ControllerUnitTestMixin) // to get JSON converter
+@TestMixin(GrailsUnitTestMixin)
 @Mock([SecUser, Stream, Feed])
 class SendToStreamSpec extends BeanMockingSpecification {
 
 	static class AllPermissionService extends PermissionService {
-		@Override boolean canRead(user, resource) { return true }
-		@Override boolean canWrite(user, resource) { return true }
-		@Override boolean canShare(user, resource) { return true }
+		@Override boolean canRead(Userish user, resource) { return true }
+		@Override boolean canWrite(Userish user, resource) { return true }
+		@Override boolean canShare(Userish user, resource) { return true }
 	}
 
 	static class ReadPermissionService extends PermissionService {
-		@Override boolean canRead(user, resource) { return true }
-		@Override boolean canWrite(user, resource) { return false }
-		@Override boolean canShare(user, resource) { return false }
+		@Override boolean canRead(Userish user, resource) { return true }
+		@Override boolean canWrite(Userish user, resource) { return false }
+		@Override boolean canShare(Userish user, resource) { return false }
 	}
 
 	static class WritePermissionService extends PermissionService {
-		@Override boolean canRead(user, resource) { return true }
-		@Override boolean canWrite(user, resource) { return true }
-		@Override boolean canShare(user, resource) { return false }
+		@Override boolean canRead(Userish user, resource) { return true }
+		@Override boolean canWrite(Userish user, resource) { return true }
+		@Override boolean canShare(Userish user, resource) { return false }
 	}
 
 	SecUser user
@@ -76,7 +77,6 @@ class SendToStreamSpec extends BeanMockingSpecification {
 		stream = new Stream()
 		stream.feed = feed
 		stream.id = stream.name = "stream-0"
-		stream.user = user
 		stream.config = [fields: [
 			[name: "strIn", type: "string"],
 			[name: "numIn", type: "number"],
@@ -86,11 +86,10 @@ class SendToStreamSpec extends BeanMockingSpecification {
 		Stream uiChannel = new Stream()
 		uiChannel.feed = feed
 		uiChannel.id = uiChannel.name = "uiChannel"
-		uiChannel.user = user
 		uiChannel.save(validate: false, failOnError: true)
 
 		mockStreamService = (FakeStreamService) grailsApplication.getMainContext().getBean("streamService")
-		globals = Spy(Globals, constructorArgs: [[:], grailsApplication, user])
+		globals = Spy(Globals, constructorArgs: [[:], user])
 		globals.realtime = true
 		globals.dataSource = new RealtimeDataSource()
     }
@@ -182,7 +181,6 @@ class SendToStreamSpec extends BeanMockingSpecification {
 		s2.feed = Feed.load(Feed.KAFKA_ID)
 		s2.id = s2.name = "stream-1"
 		s2.config = Stream.load("stream-0").config
-		s2.user = user
 		s2.save(validate: false, failOnError: true)
 
 		when:
@@ -266,7 +264,14 @@ class SendToStreamSpec extends BeanMockingSpecification {
 	}
 
 	void "events should be produced to DataSource event queue in historical mode"() {
-		globals.dataSource = new HistoricalDataSource(globals)
+		List<FeedEvent> enqueuedEvents = []
+		globals.dataSource = new HistoricalDataSource(globals) {
+			@Override
+			void enqueueEvent(FeedEvent feedEvent) {
+				super.enqueueEvent(feedEvent)
+				enqueuedEvents.push(feedEvent)
+			}
+		}
 		globals.setRealtime(false)
 		createModule()
 
@@ -296,7 +301,7 @@ class SendToStreamSpec extends BeanMockingSpecification {
 
 					// Correct events have been inserted to event queue
 					for (int i=0; i<inputValues.strIn.size(); i++) {
-						FeedEvent e = globals.getDataSource().getEventQueue().poll()
+						FeedEvent e = enqueuedEvents.remove(0)
 						assert e != null
 
 						// Values are correct
@@ -308,7 +313,7 @@ class SendToStreamSpec extends BeanMockingSpecification {
 					}
 
 					// No other events have been inserted
-					assert globals.getDataSource().getEventQueue().isEmpty()
+					assert enqueuedEvents.isEmpty()
 
 					mockStreamService.sentMessagesByChannel = [:]
 				}.test()

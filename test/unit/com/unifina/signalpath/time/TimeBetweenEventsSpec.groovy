@@ -1,21 +1,17 @@
 package com.unifina.signalpath.time
 
-import com.unifina.utils.testutils.ModuleTestHelper
-import grails.test.mixin.TestMixin
-import grails.test.mixin.support.GrailsUnitTestMixin
-import spock.lang.Specification
-
 import com.unifina.domain.security.SecUser
 import com.unifina.utils.Globals
+import com.unifina.utils.testutils.ModuleTestHelper
+import spock.lang.Specification
 
-@TestMixin(GrailsUnitTestMixin)
 class TimeBetweenEventsSpec extends Specification {
 	
 	Globals globals
 	TimeBetweenEvents module
 	
     def setup() {
-		globals = new Globals([:], grailsApplication, new SecUser(timezone:"Europe/Helsinki", username: "username"))
+		globals = new Globals([:], new SecUser(timezone:"Europe/Helsinki", username: "username"))
 		module = new TimeBetweenEvents()
 		module.globals = globals
 		module.init()

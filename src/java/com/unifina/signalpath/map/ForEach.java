@@ -1,6 +1,7 @@
 package com.unifina.signalpath.map;
 
-import com.mongodb.util.JSON;
+import com.google.gson.Gson;
+import com.unifina.domain.security.SecUser;
 import com.unifina.domain.signalpath.Canvas;
 import com.unifina.service.CanvasService;
 import com.unifina.service.SerializationService;
@@ -53,11 +54,11 @@ public class ForEach extends AbstractSignalPathModule {
 
 		// Construct temporary signal path so that endpoints can be analyzed
 		// Note that the same map instance must not be reused for many instances, it will produce hell if many modules share the same config map instance
-		Map signalPathMap = (Map) JSON.parse(canvas.getJson());
+		Map signalPathMap = new Gson().fromJson(canvas.getJson(), Map.class);
 		SignalPathService signalPathService = Holders.getApplicationContext().getBean(SignalPathService.class);
 
 		// Create a non-run-context Globals for instantiating the temporary SignalPath
-		Globals tempGlobals = GlobalsFactory.createInstance(Collections.emptyMap(), getGlobals().getGrailsApplication(), getGlobals().getUser());
+		Globals tempGlobals = GlobalsFactory.createInstance(Collections.emptyMap(), SecUser.loadViaJava(getGlobals().getUserId()));
 		SignalPath tempSignalPath = signalPathService.mapToSignalPath(signalPathMap, true, tempGlobals, new SignalPath(false));
 
 		// Find and validate exported endpoints
@@ -157,7 +158,7 @@ public class ForEach extends AbstractSignalPathModule {
 
 		// Note that the same map instance must not be reused for many instances, it will produce hell if many modules share the same config map instance
 		// Re-parsing is used here instead of deep-copying an already-parsed map, as that's not easily available
-		Map signalPathMap = (Map) JSON.parse(signalPathParameter.getCanvas().getJson());
+		Map signalPathMap = new Gson().fromJson(signalPathParameter.getCanvas().getJson(), Map.class);
 		canvasService.resetUiChannels(signalPathMap);
 		SignalPathInsideForEach signalPath = (SignalPathInsideForEach) signalPathService.mapToSignalPath(signalPathMap, false, getGlobals(), new SignalPathInsideForEach(false));
 		signalPath.setName(signalPath.getName() + " (" + key + ")");

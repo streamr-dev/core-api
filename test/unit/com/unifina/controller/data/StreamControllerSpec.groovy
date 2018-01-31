@@ -33,6 +33,7 @@ class StreamControllerSpec extends Specification {
 		mockSpringSecurityService(user)
 		controller.streamService = grailsApplication.mainContext.getBean("streamService")
 		controller.permissionService = Stub(PermissionService) { getAll(*_) >> [stream] }
+		controller.streamService.permissionService = controller.permissionService
 
 	}
 
@@ -55,7 +56,6 @@ class StreamControllerSpec extends Specification {
 		then:
         response.redirectedUrl == '/stream/show/' + Stream.list()[1].id
 		Stream.count() == 2
-		Stream.list()[1].user == user
 	}
 
 	void "searching for a stream returns correct module"() {

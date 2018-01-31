@@ -1,12 +1,9 @@
 package com.unifina.domain.signalpath
 
-import com.unifina.domain.security.SecUser
+import com.unifina.domain.security.Permission
 
 class ModulePackage {
 	String name
-	SecUser user
-	
-	static constraints = {
 
-	}
+	static hasMany = [permissions: Permission]
 }
