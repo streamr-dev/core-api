@@ -134,9 +134,9 @@ public class Mqtt extends AbstractSignalPathModule implements MqttCallback, IEve
 
 	private boolean hasCertificate(){
 		if (certType.getValue().equals(CertificateParameter.CRT)){
-			return false;
+			return true;
 		}
-		return true;
+		return false;
 	}
 
 	private MqttConnectOptions addGivenUsernamePassword(MqttConnectOptions connectOptions) {
