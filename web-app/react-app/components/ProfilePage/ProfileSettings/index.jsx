@@ -13,13 +13,18 @@ import {getCurrentUser, updateCurrentUserName, updateCurrentUserTimezone, saveCu
 import type {UserState} from '../../../flowtype/states/user-state'
 import type {User} from '../../../flowtype/user-types'
 
-type Props = {
-    user: User,
-    getCurrentUser: () => void,
-    updateCurrentUserName: (name: User.name) => void,
-    updateCurrentUserTimezone: (timezone: User.timezone) => void,
-    saveCurrentUser: Function
+type StateProps = {
+    user: User
 }
+
+type DispatchProps = {
+    getCurrentUser: () => void,
+    updateCurrentUserName: (name: $ElementType<User, 'name'>) => void,
+    updateCurrentUserTimezone: (timezone: $ElementType<User, 'timezone'>) => void,
+    saveCurrentUser: (user: User) => void
+}
+
+type Props = StateProps & DispatchProps
 
 export class ProfileSettings extends Component<Props> {
     
@@ -28,12 +33,12 @@ export class ProfileSettings extends Component<Props> {
         this.props.getCurrentUser()
     }
     onNameChange = ({target}: {target: {
-        value: User.name
+        value: $ElementType<User, 'name'>
     }}) => {
         this.props.updateCurrentUserName(target.value)
     }
     onTimezoneChange = ({target}: {target: {
-        value: User.timezone
+        value: $ElementType<User, 'timezone'>
     }}) => {
         this.props.updateCurrentUserTimezone(target.value)
     }
@@ -120,10 +125,10 @@ export const mapDispatchToProps = (dispatch: Function) => ({
     getCurrentUser() {
         dispatch(getCurrentUser())
     },
-    updateCurrentUserName(name: User.name) {
+    updateCurrentUserName(name: $ElementType<User, 'name'>) {
         dispatch(updateCurrentUserName(name))
     },
-    updateCurrentUserTimezone(tz: User.timezone) {
+    updateCurrentUserTimezone(tz: $ElementType<User, 'timezone'>) {
         dispatch(updateCurrentUserTimezone(tz))
     },
     saveCurrentUser(user: User) {

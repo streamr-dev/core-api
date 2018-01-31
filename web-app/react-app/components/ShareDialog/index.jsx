@@ -11,11 +11,11 @@ import {saveUpdatedResourcePermissions} from '../../actions/permission'
 
 import type {Node} from 'react'
 import type {PermissionState} from '../../flowtype/states/permission-state'
-import type {Permission} from '../../flowtype/permission-types'
+import type {ResourceType, ResourceId} from '../../flowtype/permission-types'
 
 type Props = {
-    resourceId: Permission.resourceId,
-    resourceType: Permission.resourceType,
+    resourceId: ResourceId,
+    resourceType: ResourceType,
     resourceTitle: string,
     children?: Node,
     save: Function,

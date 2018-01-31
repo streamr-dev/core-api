@@ -1,3 +1,4 @@
+// @flow
 
 export type User = {
     id?: number,
@@ -5,15 +6,4 @@ export type User = {
     name: string,
     username: string,
     timezone: string
-}
-
-
-
-export type Action = {
-    type: string,
-    user: User,
-    error?: string,
-    timezone?: string,
-    name?: string,
-    id: string
 }

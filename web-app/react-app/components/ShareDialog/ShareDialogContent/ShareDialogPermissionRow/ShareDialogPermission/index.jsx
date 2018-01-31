@@ -11,18 +11,18 @@ import {setResourceHighestOperationForUser, removeAllResourcePermissionsByUser} 
 import 'react-select/dist/react-select.css'
 import styles from './shareDialogPermission.pcss'
 
-import type {Permission} from '../../../../../flowtype/permission-types'
+import type {Permission, ResourceType, ResourceId} from '../../../../../flowtype/permission-types'
 
 type StateProps = {}
 
 type DispatchProps = {
-    setResourceHighestOperation: (value: Permission.operation) => void,
+    setResourceHighestOperation: (value: $ElementType<Permission, 'operation'>) => void,
     remove: () => void
 }
 
 type GivenProps = {
-    resourceType: Permission.resourceType,
-    resourceId: Permission.resourceId,
+    resourceType: ResourceType,
+    resourceId: ResourceId,
     permissions: Array<Permission>
 }
 
@@ -32,7 +32,7 @@ const operationsInOrder = ['read', 'write', 'share']
 
 export class ShareDialogPermission extends Component<Props> {
     
-    onSelect = ({value}: {value: Permission.operation}) => {
+    onSelect = ({value}: {value: $ElementType<Permission, 'operation'>}) => {
         this.props.setResourceHighestOperation(value)
     }
     
@@ -41,7 +41,7 @@ export class ShareDialogPermission extends Component<Props> {
     }
     
     render() {
-        const errors = this.props.permissions.filter(p => p.error).map(p => p.error.message || p.error.error)
+        const errors = this.props.permissions.filter(p => p.error).map(p => p.error && p.error.error)
         const highestOperationIndex = Math.max(...(this.props.permissions.map(p => operationsInOrder.indexOf(p.operation))))
         return (
             <Col xs={12} className={styles.permissionRow}>
@@ -74,11 +74,13 @@ export class ShareDialogPermission extends Component<Props> {
 }
 
 export const mapDispatchToProps = (dispatch: Function, ownProps: GivenProps): DispatchProps => ({
-    setResourceHighestOperation(value: Permission.operation) {
-        dispatch(setResourceHighestOperationForUser(ownProps.resourceType, ownProps.resourceId, ownProps.permissions[0].user, value))
+    setResourceHighestOperation(value: $ElementType<Permission, 'operation'>) {
+        const user = ownProps.permissions[0] && ownProps.permissions[0].user
+        user && dispatch(setResourceHighestOperationForUser(ownProps.resourceType, ownProps.resourceId, user, value))
     },
     remove() {
-        dispatch(removeAllResourcePermissionsByUser(ownProps.resourceType, ownProps.resourceId, ownProps.permissions[0].user))
+        const user = ownProps.permissions[0] && ownProps.permissions[0].user
+        user && dispatch(removeAllResourcePermissionsByUser(ownProps.resourceType, ownProps.resourceId, user))
     }
 })
 

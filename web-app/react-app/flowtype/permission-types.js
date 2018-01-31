@@ -1,3 +1,4 @@
+// @flow
 
 import type {ApiError} from './common-types'
 import type {User} from './user-types'
@@ -8,8 +9,10 @@ export type ResourceId = string
 export type Operation = 'read' | 'write' | 'share'
 
 export type Permission = {
+    id?: number,
     operation: Operation,
-    user: User.email,
+    user: ?$ElementType<User, 'email'>,
+    resourceTitle?: string,
     anonymous?: boolean,
     fetching?: boolean,
     new?: boolean,
