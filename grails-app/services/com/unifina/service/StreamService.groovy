@@ -251,7 +251,7 @@ class StreamService {
 			return null
 		} else {
 			Class clazz = getClass().getClassLoader().loadClass(stream.feed.fieldDetectorClass)
-			return clazz.newInstance(grailsApplication)
+			return clazz.newInstance()
 		}
 
 	}
