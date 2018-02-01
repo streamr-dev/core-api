@@ -89,4 +89,5 @@ databaseChangeLog = {
 	include file: 'core/2017-12-21-domain-fields-for-permissions.groovy'
 	include file: 'core/2018-01-16-remove-user-from-domain-objects.groovy'
 	include file: 'core/2018-01-29-remove-mongodb-and-twitter-feeds.groovy'
+	include file: 'core/2018-01-31-mqtt-help-text-update.groovy'
 }
