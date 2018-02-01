@@ -73,7 +73,7 @@ public class Mqtt extends AbstractSignalPathModule implements MqttCallback, IEve
 	protected void onConfiguration(Map<String, Object> config) {
 		super.onConfiguration(config);
 
-		if (certType.getValue().equals(CertificateParameter.CRT)) {
+		if (!certType.isNone()) {
 			addInput(certificate);
 		}
 	}
@@ -274,25 +274,6 @@ public class Mqtt extends AbstractSignalPathModule implements MqttCallback, IEve
 			return Arrays.asList(
 				new PossibleValue("none", NONE),
 				new PossibleValue(".crt", CRT)
-			);
-		}
-
-		public boolean isNone() { return getValue().equals(NONE);}
-	}
-
-	public static class LoginParameter extends StringParameter {
-		public static final String NONE = "none";
-		public static final String PASSWORD = "username/password";
-
-		public LoginParameter(AbstractSignalPathModule owner, String name, String defaultValue) {
-			super(owner, name, defaultValue);
-		}
-
-		@Override
-		protected List<PossibleValue> getPossibleValues() {
-			return Arrays.asList(
-					new PossibleValue("none", NONE),
-					new PossibleValue("username/password", PASSWORD)
 			);
 		}
 
