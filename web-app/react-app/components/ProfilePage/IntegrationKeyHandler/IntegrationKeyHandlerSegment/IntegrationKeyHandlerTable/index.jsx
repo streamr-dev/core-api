@@ -11,11 +11,13 @@ import styles from './integrationKeyHandlerTable.pcss'
 
 import type {IntegrationKey} from '../../../../../flowtype/integration-key-types.js'
 
-type Props = {
+type GivenProps = {
     fields: Array<string>,
     integrationKeys: Array<IntegrationKey>,
     onDelete: Function
 }
+
+type Props = GivenProps
 
 export default class IntegrationKeyHandlerTable extends Component<Props> {
     

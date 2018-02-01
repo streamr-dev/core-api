@@ -24,13 +24,13 @@ const initialState = {
     fetching: false
 }
 
-const permEquals = (p1: ?Permission, p2: ?Permission) : boolean => {
+const permEquals = (p1: ?Permission, p2: ?Permission): boolean => {
     return !!p1 && !!p2 && ((p1.id != null && p1.id === p2.id) ||
         (p1.anonymous === true && p2.anonymous === true) ||
         (p1.user !== undefined && p1.operation && p1.user === p2.user && p1.operation === p2.operation))
 }
 
-const modifyPermission = (byTypeAndId: $ElementType<PermissionState, 'byTypeAndId'>, resourceType: ResourceType, resourceId: ResourceId, permission: Permission, attributes: {}) : Array<Permission> => {
+const modifyPermission = (byTypeAndId: $ElementType<PermissionState, 'byTypeAndId'>, resourceType: ResourceType, resourceId: ResourceId, permission: Permission, attributes: {}): Array<Permission> => {
     const permissions = byTypeAndId[resourceType] && byTypeAndId[resourceType][resourceId] || []
     return [...permissions].map(p2 => {
         if (permEquals(p2, permission)) {
@@ -44,7 +44,7 @@ const modifyPermission = (byTypeAndId: $ElementType<PermissionState, 'byTypeAndI
     })
 }
 
-export default function(state: PermissionState = initialState, action: PermissionAction) : PermissionState {
+export default function(state: PermissionState = initialState, action: PermissionAction): PermissionState {
     switch (action.type) {
         case GET_RESOURCE_PERMISSIONS_REQUEST:
             return {
@@ -83,13 +83,13 @@ export default function(state: PermissionState = initialState, action: Permissio
             const perm = action.permission || null
             const byResourceType = state.byTypeAndId[action.resourceType] || {}
             const byResourceId = action.permission && byResourceType[action.resourceId] && byResourceType[action.resourceId].filter(permission => !perm || !permEquals(permission, perm))
-            return {
+            return perm ? {
                 ...state,
                 byTypeAndId: {
                     ...state.byTypeAndId,
                     [action.resourceType]: {
                         ...state.byTypeAndId[action.resourceType],
-                        [action.resourceId]: [...byResourceId, {
+                        [action.resourceId]: [...(byResourceId || []), {
                             ...action.permission,
                             new: true,
                             fetching: false,
@@ -100,7 +100,7 @@ export default function(state: PermissionState = initialState, action: Permissio
                 },
                 fetching: false,
                 error: null
-            }
+            } : state
         }
         
         case REMOVE_RESOURCE_PERMISSION:

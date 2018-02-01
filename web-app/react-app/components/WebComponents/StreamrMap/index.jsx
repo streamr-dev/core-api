@@ -5,8 +5,7 @@ import ComplexStreamrWidget from '../ComplexStreamrWidget'
 
 declare var StreamrMap: Function
 
-import type {WebcomponentProps} from '../../../flowtype/webcomponent-types'
-import type {ModuleOptions} from '../../../flowtype/streamr-client-types'
+import type {ModuleOptions, StreamId, SubscriptionOptions} from '../../../flowtype/streamr-client-types'
 
 type Options = ModuleOptions | {
     centerLat?: number,
@@ -23,7 +22,16 @@ type Options = ModuleOptions | {
     customImageUrl?: string
 }
 
-type Props = WebcomponentProps & {}
+type GivenProps = {
+    url: string,
+    subscriptionOptions?: SubscriptionOptions,
+    stream?: StreamId,
+    height?: ?number,
+    width?: ?number,
+    onError?: ?Function
+}
+
+type Props = GivenProps
 
 type State = {
     options: Options

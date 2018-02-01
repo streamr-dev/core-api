@@ -26,7 +26,7 @@ const initialState = {
     fetching: false
 }
 
-export default function(state: IntegrationKeyState = initialState, action: IntegrationKeyAction) : IntegrationKeyState {
+export default function(state: IntegrationKeyState = initialState, action: IntegrationKeyAction): IntegrationKeyState {
     
     switch (action.type) {
         case GET_AND_REPLACE_INTEGRATION_KEYS_REQUEST:

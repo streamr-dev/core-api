@@ -1,5 +1,7 @@
+// @flow
 
 export type IntegrationKey = {
+    id?: ?number,
     name: string,
     service: string,
     json: {}

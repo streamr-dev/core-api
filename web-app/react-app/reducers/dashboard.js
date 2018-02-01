@@ -39,7 +39,7 @@ const initialState = {
     fetching: false
 }
 
-const dashboard = function(state: DashboardState = initialState, action: DashboardAction) : DashboardState {
+const dashboard = function(state: DashboardState = initialState, action: DashboardAction): DashboardState {
     switch (action.type) {
         case OPEN_DASHBOARD:
             return {

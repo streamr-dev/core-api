@@ -297,15 +297,16 @@ export class Editor extends Component<Props, State> {
     }
 }
 
-export const mapStateToProps = (state: {dashboard: DashboardState}) => {
+export const mapStateToProps = (state: {dashboard: DashboardState}): StateProps => {
     const baseState = parseDashboard(state)
+    const {dashboard} = baseState
     return {
         ...baseState,
-        editorLocked: baseState.dashboard.editingLocked || (!baseState.dashboard.new && !baseState.canWrite)
+        editorLocked: !!dashboard && (dashboard.editingLocked || (!dashboard.new && !baseState.canWrite))
     }
 }
 
-export const mapDispatchToProps = (dispatch: Function) => ({
+export const mapDispatchToProps = (dispatch: Function): DispatchProps => ({
     update(id: $ElementType<Dashboard, 'id'>, changes: {}) {
         return dispatch(updateDashboardChanges(id, changes))
     },

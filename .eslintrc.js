@@ -1,16 +1,13 @@
 
-const OFF = 0, WARN = 1, ERROR = 2;
+const WARN = 1, ERROR = 2;
 
 module.exports = exports = {
     
     extends: [
         'eslint:recommended',
-        'plugin:react/recommended'
+        'plugin:react/recommended',
+        'plugin:flowtype/recommended'
     ],
-    
-    globals: {
-        'baseUrl': true
-    },
     
     parser: 'babel-eslint',
     parserOptions: {
@@ -38,6 +35,10 @@ module.exports = exports = {
         'flowtype'
     ],
     
+    settings: {
+        'onlyFilesWithFlowAnnotation': true
+    },
+    
     rules: {
         'no-debugger': WARN,
         'no-console': [
@@ -59,7 +60,7 @@ module.exports = exports = {
         'quotes': [ERROR, 'single'],
         'space-before-function-paren': [ERROR, 'never'],
         'space-before-blocks': [ERROR, 'always'],
-        'space-in-parens': ['error', 'never'],
+        'space-in-parens': [ERROR, 'never'],
         'space-unary-ops': [ERROR, {
             'words': true,
             'nonwords': false

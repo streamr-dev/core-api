@@ -17,12 +17,17 @@ import type { Dashboard } from '../../../../flowtype/dashboard-types'
 
 import styles from './dashboardTools.pcss'
 
-type Props = {
+type StateProps = {
     dashboard: Dashboard,
     canShare: boolean,
-    canWrite: boolean,
-    updateAndSaveDashboard: Function
+    canWrite: boolean
 }
+
+type DispatchProps = {
+    updateAndSaveDashboard: (db: Dashboard) => void
+}
+
+type Props = StateProps & DispatchProps
 
 type State = {
     shareDialogIsOpen: boolean

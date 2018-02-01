@@ -5,7 +5,7 @@ import {Button, Modal} from 'react-bootstrap'
 
 import type {Node} from 'react'
 
-type Props = {
+type GivenProps = {
     confirmCallback: (any) => void,
     cancelCallback?: (any) => void,
     buttonRef?: Function,
@@ -16,6 +16,8 @@ type Props = {
     buttonProps?: {},
     className?: string
 }
+
+type Props = GivenProps
 
 type State = {
     open: boolean

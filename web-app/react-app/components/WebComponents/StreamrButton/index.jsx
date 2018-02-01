@@ -4,7 +4,16 @@ import React, {Component} from 'react'
 import {Button} from 'react-bootstrap'
 import StreamrInput from '../StreamrInput'
 
-import type {WebcomponentProps as Props} from '../../../flowtype/webcomponent-types'
+import type {StreamId, SubscriptionOptions} from '../../../flowtype/streamr-client-types'
+
+type Props = {
+    url: string,
+    subscriptionOptions?: SubscriptionOptions,
+    stream?: StreamId,
+    height?: ?number,
+    width?: ?number,
+    onError?: ?Function
+}
 
 type State = {
     name: string
@@ -16,7 +25,7 @@ export default class StreamrButton extends Component<Props, State> {
         name: 'Button'
     }
     
-    onMessage = ({state: buttonName}: { state?: string }) => {
+    onMessage = ({state: buttonName}: { state: string }) => {
         if (this.widget) {
             if (buttonName) {
                 this.setState({
@@ -30,12 +39,16 @@ export default class StreamrButton extends Component<Props, State> {
         this.widget && this.widget.sendValue()
     }
     
+    inputRef = (widget: ?StreamrInput) => {
+        this.widget = widget
+    }
+    
     render() {
         return (
             <StreamrInput
                 {...this.props}
                 onMessage={this.onMessage}
-                ref={(widget) => this.widget = widget}
+                ref={this.inputRef}
             >
                 <Button
                     onClick={this.onClick}

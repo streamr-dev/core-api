@@ -19,21 +19,32 @@ import type {Node} from 'react'
 
 import styles from './dashboardPage.pcss'
 
-type Props = {
-    dashboard: Dashboard,
-    canvases: Array<Canvas>,
-    children: Node | Array<Node>,
+type StateProps = {
+    dashboard: ?Dashboard
+}
+
+type DispatchProps = {
     getDashboard: (id: string) => void,
     getMyDashboardPermissions: (id: string) => void,
     newDashboard: (id: string) => void,
     getRunningCanvases: () => void,
-    openDashboard: (id: string) => void,
+    openDashboard: (id: string) => void
+}
+
+type GivenProps = {
+    canvases: Array<Canvas>,
+    children: Node | Array<Node>
+}
+
+type RouterProps = {
     match: {
         params: {
             id?: string
         }
     }
 }
+
+type Props = StateProps & DispatchProps & GivenProps & RouterProps
 
 export class DashboardPage extends Component<Props> {
     
@@ -65,11 +76,11 @@ export class DashboardPage extends Component<Props> {
     }
 }
 
-export const mapStateToProps = ({dashboard: {dashboardsById, openDashboard}}: {dashboard: DashboardState}) => ({
-    dashboard: openDashboard.id && dashboardsById[openDashboard.id]
+export const mapStateToProps = ({dashboard: {dashboardsById, openDashboard}}: {dashboard: DashboardState}): StateProps => ({
+    dashboard: openDashboard.id ? dashboardsById[openDashboard.id] : null
 })
 
-export const mapDispatchToProps = (dispatch: Function) => ({
+export const mapDispatchToProps = (dispatch: Function): DispatchProps => ({
     getDashboard(id: string) {
         dispatch(getDashboard(id))
     },

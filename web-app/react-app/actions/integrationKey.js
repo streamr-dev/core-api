@@ -78,6 +78,9 @@ export const createIntegrationKey = (integrationKey: IntegrationKey) => (dispatc
 }
 
 export const deleteIntegrationKey = (id: $ElementType<IntegrationKey, 'id'>) => (dispatch: Function) => {
+    if (!id) {
+        throw new Error('No id!')
+    }
     dispatch(deleteIntegrationKeyRequest(id))
     return axios.delete(createLink(`${apiUrl}/${id}`))
         .then(() => dispatch(deleteIntegrationKeySuccess(id)))

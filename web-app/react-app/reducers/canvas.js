@@ -15,7 +15,7 @@ const initialState = {
     fetching: false
 }
 
-export default function(state: CanvasState = initialState, action: CanvasAction) : CanvasState {
+export default function(state: CanvasState = initialState, action: CanvasAction): CanvasState {
     switch (action.type) {
         case GET_RUNNING_CANVASES_REQUEST:
             return {

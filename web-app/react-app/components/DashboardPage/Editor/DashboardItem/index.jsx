@@ -5,28 +5,41 @@ import {connect} from 'react-redux'
 import {error} from 'react-notification-system-redux'
 import path from 'path'
 import createLink from '../../../../helpers/createLink'
-
 import TitleRow from './DashboardItemTitleRow'
 
 import styles from './dashboardItem.pcss'
 
 import type {DashboardState} from '../../../../flowtype/states/dashboard-state'
 import type {Dashboard, DashboardItem as DashboardItemType} from '../../../../flowtype/dashboard-types'
+import type {Webcomponent} from '../../../../flowtype/webcomponent-types'
 
 const config = require('../../dashboardConfig')
 
-type Props = {
+type StateProps = {
+    dashboard: ?Dashboard,
+    config: {
+        components: {
+           [$ElementType<Webcomponent, 'type'>]: {
+               component?: any,
+               props: {}
+           }
+        }
+    }
+}
+
+type DispatchProps = {
+    error: (message: string) => void
+}
+
+type GivenProps = {
     item: DashboardItemType,
-    dashboard: Dashboard,
     layout?: $ElementType<DashboardItemType, 'layout'>,
     dragCancelClassName?: string,
     currentLayout: ?{},
-    error: Function,
-    isLocked: boolean,
-    config: {
-        components: {}
-    }
+    isLocked: boolean
 }
+
+type Props = StateProps & DispatchProps & GivenProps
 
 type State = {
     height: ?number,
@@ -61,18 +74,15 @@ export class DashboardItem extends Component<Props, State> {
         // Else use the url /api/v1/dashboards/<dashboardId>/canvases/<canvasId>/modules/<module>
         return createLink(path.resolve(
             '/api/v1',
-            !dashboard.new ? `dashboards/${dashboard.id}` : '',
+            (dashboard && !dashboard.new) ? `dashboards/${dashboard.id}` : '',
             `canvases/${canvas}`,
             `modules/${itemModule}`
         ))
     }
     
-    onError = (err: {
-        message: string,
-        stack: string
-    }) => {
+    onError = (err: { message: string, stack: string }) => {
         const inProd = process.env.NODE_ENV === 'production'
-        this.props.error(inProd ? 'Something went wrong!' : err)
+        this.props.error(inProd ? 'Something went wrong!' : err.message)
         if (!inProd) {
             console.error(err.stack)
         }
@@ -81,18 +91,7 @@ export class DashboardItem extends Component<Props, State> {
     createCustomComponent = () => {
         const {item, config: conf} = this.props
         
-        const {component, props} = item && conf.components[item.webcomponent] || {}
-        
-        const CustomComponent = component || (() => (
-            <div style={{
-                color: 'red',
-                textAlign: 'center'
-            }}>
-                Sorry, unknown component:(
-            </div>
-        ))
-        
-        const customProps = props || {}
+        const {component: CustomComponent, props} = item && item.webcomponent && conf.components[item.webcomponent] || {}
         
         return CustomComponent ? (
             <CustomComponent
@@ -100,7 +99,7 @@ export class DashboardItem extends Component<Props, State> {
                 height={this.state.height}
                 width={this.state.width}
                 onError={this.onError}
-                {...customProps}
+                {...(props || {})}
             />
         ) : null
     }
@@ -114,10 +113,17 @@ export class DashboardItem extends Component<Props, State> {
                 </div>
                 <div className={`${styles.body} ${this.props.dragCancelClassName || ''}`}>
                     <div
-                        className={`${styles.wrapper} ${item.webcomponent && styles[item.webcomponent] || item.webcomponent}`}
+                        className={`${styles.wrapper} ${item && (item.webcomponent && styles[item.webcomponent] || item.webcomponent)}`}
                         ref={wrapper => this.wrapper = wrapper}
                     >
-                        {this.createCustomComponent()}
+                        {this.createCustomComponent() || (
+                            <div style={{
+                                color: 'red',
+                                textAlign: 'center'
+                            }}>
+                                Sorry, unknown component:(
+                            </div>
+                        )}
                     </div>
                 </div>
             </div>
@@ -125,12 +131,12 @@ export class DashboardItem extends Component<Props, State> {
     }
 }
 
-export const mapStateToProps = ({dashboard: {dashboardsById, openDashboard}}: {dashboard: DashboardState}) => ({
-    dashboard: openDashboard.id && dashboardsById[openDashboard.id],
+export const mapStateToProps = ({dashboard: {dashboardsById, openDashboard}}: {dashboard: DashboardState}): StateProps => ({
+    dashboard: openDashboard.id ? dashboardsById[openDashboard.id] : null,
     config: config
 })
 
-export const mapDispatchToProps = (dispatch: Function) => ({
+export const mapDispatchToProps = (dispatch: Function): DispatchProps => ({
     error(message: string) {
         dispatch(error({
             title: 'Error!',

@@ -40,7 +40,7 @@ export class ShareDialogPermissionRow extends Component<Props> {
                             />
                         ))
                         .values() // Take only the components
-                        .value()
+                        .value() // Output the array
                     }
                 </Col>
             </Row>

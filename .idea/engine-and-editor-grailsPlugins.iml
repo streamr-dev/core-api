@@ -111,14 +111,8 @@
           <root url="jar://$MAVEN_REPOSITORY$/io/netty/netty-common/4.0.37.Final/netty-common-4.0.37.Final.jar!/" />
           <root url="jar://$MAVEN_REPOSITORY$/io/reactivex/rxjava/1.1.6/rxjava-1.1.6.jar!/" />
           <root url="jar://$MAVEN_REPOSITORY$/biz/paluch/redis/lettuce/3.5.0.Final/lettuce-3.5.0.Final.jar!/" />
-          <root url="jar://$MAVEN_REPOSITORY$/org/mongodb/mongodb-driver-core/3.2.1/mongodb-driver-core-3.2.1.jar!/" />
-          <root url="jar://$MAVEN_REPOSITORY$/org/mongodb/bson/3.2.1/bson-3.2.1.jar!/" />
-          <root url="jar://$MAVEN_REPOSITORY$/org/mongodb/mongodb-driver/3.2.1/mongodb-driver-3.2.1.jar!/" />
           <root url="jar://$MAVEN_REPOSITORY$/org/postgresql/postgresql/9.4.1208.jre7/postgresql-9.4.1208.jre7.jar!/" />
-          <root url="jar://$USER_HOME$/.sdkman/candidates/grails/2.5.6/lib/com.google.code.findbugs/jsr305/jars/jsr305-1.3.9.jar!/" />
           <root url="jar://$MAVEN_REPOSITORY$/commons-io/commons-io/2.4/commons-io-2.4.jar!/" />
-          <root url="jar://$MAVEN_REPOSITORY$/com/fasterxml/jackson/core/jackson-annotations/2.1.1/jackson-annotations-2.1.1.jar!/" />
-          <root url="jar://$MAVEN_REPOSITORY$/commons-logging/commons-logging/1.1.1/commons-logging-1.1.1.jar!/" />
           <root url="jar://$MAVEN_REPOSITORY$/org/antlr/antlr-runtime/3.5.2/antlr-runtime-3.5.2.jar!/" />
           <root url="jar://$MAVEN_REPOSITORY$/org/antlr/ST4/4.0.8/ST4-4.0.8.jar!/" />
           <root url="jar://$MAVEN_REPOSITORY$/org/eclipse/paho/org.eclipse.paho.client.mqttv3/1.1.1/org.eclipse.paho.client.mqttv3-1.1.1.jar!/" />
@@ -217,8 +211,6 @@
           <root url="jar://$MAVEN_REPOSITORY$/com/googlecode/json-simple/json-simple/1.1.1/json-simple-1.1.1.jar!/" />
           <root url="jar://$MAVEN_REPOSITORY$/org/ow2/asm/asm/5.0.3/asm-5.0.3.jar!/" />
           <root url="jar://$MAVEN_REPOSITORY$/com/github/jnr/jffi/1.2.10/jffi-1.2.10.jar!/" />
-          <root url="jar://$MAVEN_REPOSITORY$/org/twitter4j/twitter4j-core/4.0.4/twitter4j-core-4.0.4.jar!/" />
-          <root url="jar://$MAVEN_REPOSITORY$/com/amazonaws/aws-java-sdk/1.7.5/aws-java-sdk-1.7.5.jar!/" />
           <root url="jar://$MAVEN_REPOSITORY$/joda-time/joda-time/2.9.3/joda-time-2.9.3.jar!/" />
           <root url="jar://$MAVEN_REPOSITORY$/org/objenesis/objenesis/2.5.1/objenesis-2.5.1.jar!/" />
           <root url="jar://$MAVEN_REPOSITORY$/de/ruedigermoeller/fst/2.56/fst-2.56.jar!/" />
@@ -256,9 +248,6 @@
           <root url="jar://$MAVEN_REPOSITORY$/com/sun/mail/javax.mail/1.5.1/javax.mail-1.5.1.jar!/" />
           <root url="jar://$MAVEN_REPOSITORY$/com/github/jnr/jffi/1.2.10/jffi-1.2.10-native.jar!/" />
           <root url="jar://$MAVEN_REPOSITORY$/mysql/mysql-connector-java/5.1.20/mysql-connector-java-5.1.20.jar!/" />
-          <root url="jar://$MAVEN_REPOSITORY$/com/twitter/joauth/6.0.2/joauth-6.0.2.jar!/" />
-          <root url="jar://$MAVEN_REPOSITORY$/com/twitter/hbc-core/2.2.0/hbc-core-2.2.0.jar!/" />
-          <root url="jar://$MAVEN_REPOSITORY$/org/twitter4j/twitter4j-stream/4.0.4/twitter4j-stream-4.0.4.jar!/" />
           <root url="jar://$USER_HOME$/.sdkman/candidates/grails/2.5.6/lib/org.hamcrest/hamcrest-core/jars/hamcrest-core-1.3.jar!/" />
           <root url="jar://$USER_HOME$/.sdkman/candidates/grails/2.5.6/lib/junit/junit/jars/junit-4.12.jar!/" />
           <root url="jar://$MAVEN_REPOSITORY$/cglib/cglib-nodep/2.2.2/cglib-nodep-2.2.2.jar!/" />
@@ -311,6 +300,12 @@
           <root url="jar://$USER_HOME$/.sdkman/candidates/grails/2.5.6/lib/org.apache.ant/ant-trax/jars/ant-trax-1.7.1.jar!/" />
           <root url="jar://$USER_HOME$/.sdkman/candidates/grails/2.5.6/lib/net.java.dev.jna/jna/jars/jna-4.0.0.jar!/" />
           <root url="jar://$USER_HOME$/.sdkman/candidates/grails/2.5.6/lib/org.apache.ant/ant-junit/jars/ant-junit-1.9.4.jar!/" />
+          <root url="jar://$MAVEN_REPOSITORY$/org/apache/commons/commons-lang3/3.4/commons-lang3-3.4.jar!/" />
+          <root url="jar://$MAVEN_REPOSITORY$/com/google/code/findbugs/jsr305/3.0.0/jsr305-3.0.0.jar!/" />
+          <root url="jar://$MAVEN_REPOSITORY$/com/fasterxml/jackson/core/jackson-annotations/2.5.0/jackson-annotations-2.5.0.jar!/" />
+          <root url="jar://$MAVEN_REPOSITORY$/com/fasterxml/jackson/core/jackson-databind/2.5.1/jackson-databind-2.5.1.jar!/" />
+          <root url="jar://$MAVEN_REPOSITORY$/commons-logging/commons-logging/1.2/commons-logging-1.2.jar!/" />
+          <root url="jar://$MAVEN_REPOSITORY$/org/javassist/javassist/3.15.0-GA/javassist-3.15.0-GA.jar!/" />
         </CLASSES>
         <JAVADOC />
         <SOURCES />

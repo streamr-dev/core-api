@@ -6,17 +6,15 @@ import _ from 'lodash'
 
 import styles from './complexStreamrWidget.pcss'
 
-import type {ModuleOptions, StreamId} from '../../../flowtype/streamr-client-types'
-//import type {WebcomponentProps} from '../../../flowtype/webcomponent-types'
-
-// TODO: Why just importing WebcomponentProps does not work?
+import type {ModuleOptions, StreamId, SubscriptionOptions} from '../../../flowtype/streamr-client-types'
 
 type Props = {
     url: string,
+    subscriptionOptions?: SubscriptionOptions,
     stream?: StreamId,
-    height: ?number,
-    width: ?number,
-    onError: ?Function,
+    height?: ?number,
+    width?: ?number,
+    onError?: ?Function,
     renderWidget: (root: ?HTMLDivElement, ModuleOptions) => void,
     onMessage: (any) => void,
     className: string,

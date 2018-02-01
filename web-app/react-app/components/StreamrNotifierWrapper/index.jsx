@@ -5,14 +5,18 @@ import {connect} from 'react-redux'
 
 import Notifications from 'react-notification-system-redux'
 
-type Props = {
+type StateProps = {
     notifications: any
 }
+
+type Props = StateProps
+
 const defaultColorOverrides = {
     success: '#468847',
     error: '#a94442',
     info: '#31708f'
 }
+
 const style = {
     NotificationItem: { // Override the notification item
         DefaultStyle: { // Applied to every notification, regardless of the notification level
@@ -67,7 +71,7 @@ export class StreamrNotifierWrapper extends Component<Props> {
     }
 }
 
-export const mapStateToProps = ({notifications}: {notifications: any}) => ({
+export const mapStateToProps = ({notifications}: {notifications: any}): StateProps => ({
     notifications
 })
 

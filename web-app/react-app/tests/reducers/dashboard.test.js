@@ -9,7 +9,8 @@ describe('Dashboard reducer', () => {
     const initialState = {
         dashboardsById: {},
         openDashboard: {
-            id: null
+            id: null,
+            isFullScreen: false
         },
         error: null,
         fetching: false
@@ -26,7 +27,8 @@ describe('Dashboard reducer', () => {
         }), {
             ...initialState,
             openDashboard: {
-                id: 'test'
+                id: 'test',
+                isFullScreen: false
             }
         })
     })
@@ -134,7 +136,8 @@ describe('Dashboard reducer', () => {
                     }
                 },
                 openDashboard: {
-                    id: null
+                    id: null,
+                    isFullScreen: false
                 },
                 error: null,
                 fetching: false
@@ -187,7 +190,8 @@ describe('Dashboard reducer', () => {
                     }
                 },
                 openDashboard: {
-                    id: null
+                    id: null,
+                    isFullScreen: false
                 },
                 error: null,
                 fetching: false
@@ -327,7 +331,8 @@ describe('Dashboard reducer', () => {
                 }
             },
             openDashboard: {
-                id: null
+                id: null,
+                isFullScreen: false
             },
             error: null,
             fetching: false
@@ -360,7 +365,8 @@ describe('Dashboard reducer', () => {
                 }
             },
             openDashboard: {
-                id: null
+                id: null,
+                isFullScreen: false
             },
             error: null,
             fetching: false

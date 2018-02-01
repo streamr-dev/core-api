@@ -2,10 +2,12 @@
 import React, {Component} from 'react'
 import {Button, Modal} from 'react-bootstrap'
 
-type Props = {
+type GivenProps = {
     save: Function,
     closeModal: Function
 }
+
+type Props = GivenProps
 
 import styles from './shareDialogFooter.pcss'
 

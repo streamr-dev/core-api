@@ -123,7 +123,7 @@ describe('DashboardItemTitleRow', () => {
                 })
                 const input = el.find('input')
                 assert.deepStrictEqual(input.props().onChange, el.instance().saveName)
-                assert.deepStrictEqual(input.props().onBlur, el.instance().endEdit)
+                assert.deepStrictEqual(input.props().onBlur, el.instance().onBlur)
             })
         })
         
