@@ -18,7 +18,7 @@ import type { Dashboard } from '../../../../flowtype/dashboard-types'
 import styles from './dashboardTools.pcss'
 
 type StateProps = {
-    dashboard: Dashboard,
+    dashboard: ?Dashboard,
     canShare: boolean,
     canWrite: boolean
 }
@@ -40,7 +40,7 @@ export class DashboardTools extends Component<Props, State> {
     }
     
     onSave = () => {
-        this.props.updateAndSaveDashboard(this.props.dashboard)
+        this.props.dashboard && this.props.updateAndSaveDashboard(this.props.dashboard)
     }
     
     render() {
@@ -52,7 +52,7 @@ export class DashboardTools extends Component<Props, State> {
                     title="Save dashboard"
                     bsStyle="primary"
                     onClick={this.onSave}
-                    disabled={!this.props.canWrite && !this.props.dashboard.new}
+                    disabled={!this.props.canWrite && (!this.props.dashboard || !this.props.dashboard.new)}
                 >
                     <FontAwesome name="floppy-o" />  Save
                 </Button>
@@ -70,8 +70,8 @@ export class DashboardTools extends Component<Props, State> {
                 </Button>
                 <ShareDialog
                     resourceType="DASHBOARD"
-                    resourceId={this.props.dashboard.id}
-                    resourceTitle={`Dashboard ${this.props.dashboard.name}`}
+                    resourceId={this.props.dashboard && this.props.dashboard.id}
+                    resourceTitle={`Dashboard ${this.props.dashboard ? this.props.dashboard.name : ''}`}
                     isOpen={this.state.shareDialogIsOpen}
                     onClose={() => {
                         this.setState({
@@ -92,9 +92,9 @@ export class DashboardTools extends Component<Props, State> {
     }
 }
 
-export const mapStateToProps = (state: {dashboard: DashboardState}) => parseDashboard(state)
+export const mapStateToProps = (state: {dashboard: DashboardState}): StateProps => parseDashboard(state)
 
-export const mapDispatchToProps = (dispatch: Function) => ({
+export const mapDispatchToProps = (dispatch: Function): DispatchProps => ({
     updateAndSaveDashboard(db: Dashboard) {
         return dispatch(updateAndSaveDashboard(db))
     }

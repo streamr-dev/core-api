@@ -51,9 +51,9 @@ export class NameEditor extends Component<Props> {
     }
 }
 
-export const mapStateToProps = (state: {dashboard: DashboardState}) => parseDashboard(state)
+export const mapStateToProps = (state: {dashboard: DashboardState}): StateProps => parseDashboard(state)
 
-export const mapDispatchToProps = (dispatch: Function) => ({
+export const mapDispatchToProps = (dispatch: Function): DispatchProps => ({
     update(dashboard: Dashboard) {
         return dispatch(updateDashboard(dashboard))
     }

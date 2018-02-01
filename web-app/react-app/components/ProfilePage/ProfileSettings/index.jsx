@@ -14,7 +14,7 @@ import type {UserState} from '../../../flowtype/states/user-state'
 import type {User} from '../../../flowtype/user-types'
 
 type StateProps = {
-    user: User
+    user: ?User
 }
 
 type DispatchProps = {
@@ -44,7 +44,7 @@ export class ProfileSettings extends Component<Props> {
     }
     onSubmit = (e: Event) => {
         e.preventDefault()
-        this.props.saveCurrentUser(this.props.user)
+        this.props.user && this.props.saveCurrentUser(this.props.user)
     }
     render() {
         const options = moment.tz.names().map(tz => ({
@@ -58,7 +58,7 @@ export class ProfileSettings extends Component<Props> {
                         <ControlLabel>
                             Email
                         </ControlLabel>
-                        <div>{this.props.user.username}</div>
+                        <div>{this.props.user && this.props.user.username}</div>
                     </FormGroup>
         
                     <FormGroup>
@@ -78,7 +78,7 @@ export class ProfileSettings extends Component<Props> {
                         </ControlLabel>
                         <FormControl
                             name="name"
-                            value={this.props.user.name || ''}
+                            value={this.props.user && this.props.user.name || ''}
                             onChange={this.onNameChange}
                             required
                         />
@@ -91,7 +91,7 @@ export class ProfileSettings extends Component<Props> {
                         <Select
                             placeholder="Select timezone"
                             options={options}
-                            value={this.props.user.timezone}
+                            value={this.props.user && this.props.user.timezone}
                             name="timezone"
                             onChange={this.onTimezoneChange}
                             required={true}
@@ -117,11 +117,11 @@ export class ProfileSettings extends Component<Props> {
     }
 }
 
-export const mapStateToProps = ({user}: {user: UserState}) => ({
-    user: user.currentUser || {}
+export const mapStateToProps = ({user}: {user: UserState}): StateProps => ({
+    user: user.currentUser
 })
 
-export const mapDispatchToProps = (dispatch: Function) => ({
+export const mapDispatchToProps = (dispatch: Function): DispatchProps => ({
     getCurrentUser() {
         dispatch(getCurrentUser())
     },
