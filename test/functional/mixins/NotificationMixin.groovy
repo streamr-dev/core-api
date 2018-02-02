@@ -9,20 +9,32 @@ import org.openqa.selenium.WebDriverException
 trait NotificationMixin {
 
 	def closeNotifications() {
+		$(".notification-dismiss").each {
+			try { it.click() } catch (StaleElementReferenceException | WebDriverException e) {}
+		}
 		waitFor {
 			!$(".ui-pnotify-closer").each {
 				try { it.click() } catch (StaleElementReferenceException | WebDriverException e) {}
 			}
 			!$(".ui-pnotify").displayed
+			!$(".notifications-wrapper .notification").displayed
 		}
 	}
 
 	def findSuccessNotification() {
-		$(".ui-pnotify .alert-success")
+		if ($(".ui-pnotify .alert-success")) {
+			return $(".ui-pnotify .alert-success")
+		} else {
+			return $(".notifications-wrapper .notification-success")
+		}
 	}
 
 	def findErrorNotification() {
-		$(".ui-pnotify .alert-danger")
+		if ($(".ui-pnotify .alert-danger")) {
+			return $(".ui-pnotify .alert-danger")
+		} else {
+			return $(".notifications-wrapper .notification-error")
+		}
 	}
 
 	def waitForSuccessNotification() {

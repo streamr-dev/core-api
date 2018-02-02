@@ -36,7 +36,6 @@ class AccessControlCoreSpec extends LoginTester2Spec implements ConfirmationMixi
 			!navbar.navAdminLink
 		
 		expect:
-		checkDenied "feedFile"
 		checkDenied "kafka/collect"
 		checkDenied "taskWorker/status"
 		checkDenied "securityManager"

@@ -31,7 +31,7 @@ class InputModuleDashboardSpec extends LoginTester1Spec implements CanvasMixin, 
 		saveDashboard()
 
 		waitFor {
-			!($(".ui-pnotify").displayed)
+			!($(".notifications-wrapper .notification").displayed)
 		}
 
 		navbar.navSettingsLink.click()
@@ -129,7 +129,7 @@ class InputModuleDashboardSpec extends LoginTester1Spec implements CanvasMixin, 
 		when: "Logged out and reloaded"
 		saveDashboard()
 		waitFor {
-			!$(".ui-pnotify").displayed
+			!$(".notifications-wrapper .notification").displayed
 		}
 
 		navbar.navSettingsLink.click()
