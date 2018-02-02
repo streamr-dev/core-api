@@ -25,11 +25,11 @@ class IntegrationKeyApiControllerSpec extends Specification {
 	SecUser me
 	void setup() {
 		ethereumIntegrationKeyService = controller.ethereumIntegrationKeyService = Mock(EthereumIntegrationKeyService)
+		me = new SecUser().save(failOnError: true, validate: false)
 		Key key = new Key(name: "key", user: me)
 		key.id = "myApiKey"
 		key.save(failOnError: true, validate: true)
 		challenge.save(failOnError: true, validate: true)
-		me = new SecUser().save(failOnError: true, validate: false)
 	}
 
 	def "create ethereum id"() {
