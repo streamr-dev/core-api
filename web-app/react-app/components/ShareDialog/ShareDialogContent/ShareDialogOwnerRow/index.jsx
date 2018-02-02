@@ -5,19 +5,28 @@ import {connect} from 'react-redux'
 import {Col} from 'react-bootstrap'
 import Switcher from 'react-switcher'
 
-import type {Permission, State as PermissionState} from '../../../../flowtype/permission-types'
+import type {PermissionState} from '../../../../flowtype/states/permission-state'
+import type {Permission, ResourceType, ResourceId} from '../../../../flowtype/permission-types'
 import {addResourcePermission, removeResourcePermission} from '../../../../actions/permission'
 
 import styles from './shareDialogOwnerRow.pcss'
 
-type Props = {
-    resourceType: Permission.resourceType,
-    resourceId: Permission.resourceId,
+type StateProps = {
     anonymousPermission: ?Permission,
-    owner: ?string,
-    addPublicPermission: (permission: Permission) => {},
-    revokePublicPermission: (permission: Permission) => {}
+    owner: ?string
 }
+
+type DispatchProps = {
+    addPublicPermission: () => void,
+    revokePublicPermission: (permission: Permission) => void
+}
+
+type GivenProps = {
+    resourceType: ResourceType,
+    resourceId: ResourceId
+}
+
+type Props = StateProps & DispatchProps & GivenProps
 
 export class ShareDialogOwnerRow extends Component<Props> {
     
@@ -43,7 +52,7 @@ export class ShareDialogOwnerRow extends Component<Props> {
     }
 }
 
-export const mapStateToProps = ({permission: {byTypeAndId}}: {permission: PermissionState}, ownProps: Props) => {
+export const mapStateToProps = ({permission: {byTypeAndId}}: {permission: PermissionState}, ownProps: Props): StateProps => {
     const byType = byTypeAndId[ownProps.resourceType] || {}
     const permissions = (byType[ownProps.resourceId] || []).filter(p => !p.removed)
     const ownerPermission = permissions.find(it => it.id === null && !it.new) || {}
@@ -54,9 +63,10 @@ export const mapStateToProps = ({permission: {byTypeAndId}}: {permission: Permis
     }
 }
 
-export const mapDispatchToProps = (dispatch: Function, ownProps: Props) => ({
+export const mapDispatchToProps = (dispatch: Function, ownProps: Props): DispatchProps => ({
     addPublicPermission() {
         dispatch(addResourcePermission(ownProps.resourceType, ownProps.resourceId, {
+            user: null,
             anonymous: true,
             operation: 'read'
         }))

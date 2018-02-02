@@ -4,14 +4,22 @@ import React, {Component} from 'react'
 import StreamrInput from '../StreamrInput'
 
 import styles from './streamrSwitcher.pcss'
-
-import type {WebcomponentProps} from '../../../flowtype/webcomponent-types'
+import type {StreamId, SubscriptionOptions} from '../../../flowtype/streamr-client-types'
 
 type State = {
     value: boolean
 }
 
-export default class StreamrSwitcher extends Component<WebcomponentProps, State> {
+type Props = {
+    url: string,
+    subscriptionOptions?: SubscriptionOptions,
+    stream?: StreamId,
+    height?: ?number,
+    width?: ?number,
+    onError?: ?Function
+}
+
+export default class StreamrSwitcher extends Component<Props, State> {
     input: ?StreamrInput
     state = {
         value: false

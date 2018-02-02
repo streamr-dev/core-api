@@ -9,16 +9,26 @@ import {deleteDashboard} from '../../../actions/dashboard'
 import {parseDashboard} from '../../../helpers/parseState'
 
 import type {Node} from 'react'
-import type {Dashboard, DashboardReducerState as DashboardState} from '../../../flowtype/dashboard-types'
+import type {DashboardState} from '../../../flowtype/states/dashboard-state'
+import type {Dashboard} from '../../../flowtype/dashboard-types'
 
-type Props = {
-    dashboard: Dashboard,
+type StateProps = {
+    dashboard: ?Dashboard,
     canWrite: boolean,
+    canShare: boolean
+}
+
+type DispatchProps = {
+    deleteDashboard: (id: $ElementType<Dashboard, 'id'>) => Promise<any>
+}
+
+type GivenProps = {
     buttonProps: {},
     children?: Node | Array<Node>,
-    deleteDashboard: (id: Dashboard.id) => Promise<any>,
     className: string
 }
+
+type Props = StateProps & DispatchProps & GivenProps
 
 export class DashboardDeleteButton extends Component<Props> {
     
@@ -28,7 +38,8 @@ export class DashboardDeleteButton extends Component<Props> {
     }
     
     onDelete = () => {
-        this.props.deleteDashboard(this.props.dashboard.id)
+        const {dashboard, deleteDashboard} = this.props
+        dashboard && deleteDashboard(dashboard.id)
             .then(() => {
                 // TODO: change to be handled with react-router
                 window.location.assign(createLink('/dashboard/list'))
@@ -39,13 +50,13 @@ export class DashboardDeleteButton extends Component<Props> {
         return (
             <ConfirmButton
                 buttonProps={{
-                    disabled: !this.props.canWrite || this.props.dashboard.new,
+                    disabled: this.props.dashboard && (!this.props.canWrite || this.props.dashboard.new),
                     ...this.props.buttonProps
                 }}
                 className={this.props.className}
                 confirmCallback={this.onDelete}
                 confirmTitle="Are you sure?"
-                confirmMessage={`Are you sure you want to remove dashboard ${this.props.dashboard.name}?`}
+                confirmMessage={`Are you sure you want to remove dashboard ${this.props.dashboard ? this.props.dashboard.name : ''}?`}
             >
                 {this.props.children}
             </ConfirmButton>
@@ -53,10 +64,10 @@ export class DashboardDeleteButton extends Component<Props> {
     }
 }
 
-export const mapStateToProps = (state: {dashboard: DashboardState}) => parseDashboard(state)
+export const mapStateToProps = (state: {dashboard: DashboardState}): StateProps => parseDashboard(state)
 
-export const mapDispatchToProps = (dispatch: Function) => ({
-    deleteDashboard(id: Dashboard.id) {
+export const mapDispatchToProps = (dispatch: Function): DispatchProps => ({
+    deleteDashboard(id: $ElementType<Dashboard, 'id'>) {
         return dispatch(deleteDashboard(id))
     }
 })

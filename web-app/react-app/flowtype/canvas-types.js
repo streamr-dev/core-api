@@ -1,3 +1,4 @@
+// @flow
 
 // These are not complete, but I don't need more right now. When we do, we'll fill these
 
@@ -17,6 +18,7 @@ export type Canvas = {
 
 export type CanvasModule = {
     id: number,
+    name: string,
     type: string,
     hash: number,
     params: Array<CanvasModuleParam>,
@@ -51,13 +53,7 @@ type CanvasModuleOutput = {
 
 }
 
-export type CanvasReducerState = {
-    list: Array<Canvas>,
-    error?: ?string,
-    fetching?: boolean
-}
-
-export type CanvasReducerAction = {
+export type CanvasAction = {
     type: string,
     id?: number,
     canvases?: Array<Canvas>,

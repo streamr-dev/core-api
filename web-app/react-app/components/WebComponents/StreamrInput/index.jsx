@@ -3,11 +3,17 @@
 import React, {Component} from 'react'
 import StreamrWidget from '../StreamrWidget'
 
-import type {WebcomponentProps} from '../../../flowtype/webcomponent-types'
 import type {Node} from 'react'
+import type {StreamId, SubscriptionOptions} from '../../../flowtype/streamr-client-types'
 
-type Props = WebcomponentProps & {
-    onMessage?: ?Function,
+type Props = {
+    url: string,
+    subscriptionOptions?: SubscriptionOptions,
+    stream?: StreamId,
+    height?: ?number,
+    width?: ?number,
+    onError?: ?Function,
+    onMessage?: ?({state: string}) => void,
     onModuleJson?: ?Function,
     children: Node,
     widgetRef?: (widget: ?StreamrWidget) => void

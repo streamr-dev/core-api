@@ -1,15 +1,17 @@
 // @flow
-import React from 'react'
+import React, {Component} from 'react'
 import {Modal} from 'react-bootstrap'
 
-import type {Permission} from '../../../flowtype/permission-types'
+type Props = {
+    resourceTitle: string
+}
 
-export default function ShareDialogHeader(props: {
-    resourceTitle: Permission.resourceTitle
-}) {
-    return (
-        <Modal.Header closeButton>
-            <Modal.Title>Share {props.resourceTitle}</Modal.Title>
-        </Modal.Header>
-    )
+export default class ShareDialogHeader extends Component<Props> {
+    render() {
+        return (
+            <Modal.Header closeButton>
+                <Modal.Title>Share {this.props.resourceTitle}</Modal.Title>
+            </Modal.Header>
+        )
+    }
 }

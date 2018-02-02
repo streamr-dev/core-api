@@ -14,7 +14,9 @@ import {
     SAVE_REMOVED_RESOURCE_PERMISSION_FAILURE
 } from '../actions/permission.js'
 
-import type {State, Action, Permission} from '../flowtype/permission-types'
+import type {Permission, ResourceType, ResourceId} from '../flowtype/permission-types'
+import type {PermissionState} from '../flowtype/states/permission-state'
+import type {PermissionAction} from '../flowtype/actions/permission-actions'
 
 const initialState = {
     byTypeAndId: {},
@@ -22,30 +24,27 @@ const initialState = {
     fetching: false
 }
 
-const permEquals = (p1: Permission, p2: Permission) : boolean => {
-    return (p1.id != null && p1.id === p2.id) ||
+const permEquals = (p1: ?Permission, p2: ?Permission): boolean => {
+    return !!p1 && !!p2 && ((p1.id != null && p1.id === p2.id) ||
         (p1.anonymous === true && p2.anonymous === true) ||
-        (p1.user && p1.operation && p1.user === p2.user && p1.operation === p2.operation)
+        (p1.user !== undefined && p1.operation && p1.user === p2.user && p1.operation === p2.operation))
 }
 
-const modifyPermission = (state, action, attributes) : Array<Permission> => {
-    const permissions = state.byTypeAndId[action.resourceType][action.resourceId]
-    if (!action.permission) {
-        return permissions
-    }
-    return [...permissions].map(permission => {
-        if (permEquals(permission, action.permission)) {
+const modifyPermission = (byTypeAndId: $ElementType<PermissionState, 'byTypeAndId'>, resourceType: ResourceType, resourceId: ResourceId, permission: Permission, attributes: {}): Array<Permission> => {
+    const permissions = byTypeAndId[resourceType] && byTypeAndId[resourceType][resourceId] || []
+    return [...permissions].map(p2 => {
+        if (permEquals(p2, permission)) {
             return {
-                ...permission,
+                ...p2,
                 ...attributes
             }
         } else {
-            return permission
+            return p2
         }
     })
 }
 
-export default function(state: State = initialState, action: Action) : State {
+export default function(state: PermissionState = initialState, action: PermissionAction): PermissionState {
     switch (action.type) {
         case GET_RESOURCE_PERMISSIONS_REQUEST:
             return {
@@ -81,15 +80,16 @@ export default function(state: State = initialState, action: Action) : State {
             }
     
         case ADD_RESOURCE_PERMISSION: {
+            const perm = action.permission || null
             const byResourceType = state.byTypeAndId[action.resourceType] || {}
-            const byResourceId = (byResourceType[action.resourceId] || []).filter(permission => !permEquals(permission, action.permission))
-            return {
+            const byResourceId = action.permission && byResourceType[action.resourceId] && byResourceType[action.resourceId].filter(permission => !perm || !permEquals(permission, perm))
+            return perm ? {
                 ...state,
                 byTypeAndId: {
                     ...state.byTypeAndId,
                     [action.resourceType]: {
                         ...state.byTypeAndId[action.resourceType],
-                        [action.resourceId]: [...byResourceId, {
+                        [action.resourceId]: [...(byResourceId || []), {
                             ...action.permission,
                             new: true,
                             fetching: false,
@@ -100,8 +100,7 @@ export default function(state: State = initialState, action: Action) : State {
                 },
                 fetching: false,
                 error: null
-            }
-            
+            } : state
         }
         
         case REMOVE_RESOURCE_PERMISSION:
@@ -111,7 +110,7 @@ export default function(state: State = initialState, action: Action) : State {
                     ...state.byTypeAndId,
                     [action.resourceType]: {
                         ...state.byTypeAndId[action.resourceType],
-                        [action.resourceId]: modifyPermission(state, action, {
+                        [action.resourceId]: modifyPermission(state.byTypeAndId, action.resourceType, action.resourceId, action.permission, {
                             removed: true,
                             fetching: false,
                             error: null
@@ -129,7 +128,7 @@ export default function(state: State = initialState, action: Action) : State {
                     ...state.byTypeAndId,
                     [action.resourceType]: {
                         ...state.byTypeAndId[action.resourceType],
-                        [action.resourceId]: modifyPermission(state, action, {
+                        [action.resourceId]: modifyPermission(state.byTypeAndId, action.resourceType, action.resourceId, action.permission, {
                             fetching: true
                         })
                     }
@@ -139,12 +138,13 @@ export default function(state: State = initialState, action: Action) : State {
             }
     
         case SAVE_REMOVED_RESOURCE_PERMISSION_SUCCESS: {
+            const perm = action.permission || null
             return {
                 ...state,
                 byTypeAndId: {
                     ...state.byTypeAndId,
                     [action.resourceType]: {
-                        [action.resourceId]: state.byTypeAndId[action.resourceType][action.resourceId].filter(permission => !permEquals(permission, action.permission))
+                        [action.resourceId]: state.byTypeAndId[action.resourceType][action.resourceId].filter(permission => !perm || !permEquals(permission, perm))
                     }
                 },
                 fetching: false,
@@ -159,7 +159,7 @@ export default function(state: State = initialState, action: Action) : State {
                     ...state.byTypeAndId,
                     [action.resourceType]: {
                         ...state.byTypeAndId[action.resourceType],
-                        [action.resourceId]: modifyPermission(state, action, {
+                        [action.resourceId]: modifyPermission(state.byTypeAndId, action.resourceType, action.resourceId, action.permission, {
                             removed: false,
                             new: false,
                             fetching: false,
@@ -178,7 +178,7 @@ export default function(state: State = initialState, action: Action) : State {
                     ...state.byTypeAndId,
                     [action.resourceType]: {
                         ...state.byTypeAndId[action.resourceType],
-                        [action.resourceId]: modifyPermission(state, action, {
+                        [action.resourceId]: modifyPermission(state.byTypeAndId, action.resourceType, action.resourceId, action.permission, {
                             fetching: true
                         })
                     }
@@ -194,7 +194,7 @@ export default function(state: State = initialState, action: Action) : State {
                     ...state.byTypeAndId,
                     [action.resourceType]: {
                         ...state.byTypeAndId[action.resourceType],
-                        [action.resourceId]: modifyPermission(state, action, {
+                        [action.resourceId]: modifyPermission(state.byTypeAndId, action.resourceType, action.resourceId, action.permission, {
                             fetching: false,
                             new: false
                         })
@@ -211,7 +211,7 @@ export default function(state: State = initialState, action: Action) : State {
                     ...state.byTypeAndId,
                     [action.resourceType]: {
                         ...state.byTypeAndId[action.resourceType],
-                        [action.resourceId]: modifyPermission(state, action, {
+                        [action.resourceId]: modifyPermission(state.byTypeAndId, action.resourceType, action.resourceId, action.permission, {
                             fetching: false,
                             error: action.permission.error
                         })

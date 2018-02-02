@@ -58,8 +58,6 @@ describe('ShareDialogOwnerRow', () => {
                     revokePublicPermission={() => {}}
                 />
             )
-            assert(ownerRow.is('.ownerRow'))
-            assert.equal(ownerRow.find('.owner').text(), 'test user')
             assert.equal(ownerRow.find('.readAccessLabel').text(), 'Public read access')
         })
         describe('Switcher', () => {
@@ -281,6 +279,9 @@ describe('ShareDialogOwnerRow', () => {
         
         describe('revokePublicPermission', () => {
             it('should dispatch removeResourcePermission and call it with right attrs', () => {
+                const anonymousPermission = {
+                    id: 'hehehehe'
+                }
                 const dispatchSpy = sinon.spy()
                 const revokeStub = sinon.stub(permissionActions, 'removeResourcePermission').callsFake((type, id, ap) => {
                     return `${type}-${id}-${ap.id}`
@@ -288,10 +289,8 @@ describe('ShareDialogOwnerRow', () => {
                 mapDispatchToProps(dispatchSpy, {
                     resourceType: 'myType',
                     resourceId: 'myId',
-                    anonymousPermission: {
-                        id: 'hehehehe'
-                    }
-                }).revokePublicPermission()
+                    anonymousPermission
+                }).revokePublicPermission(anonymousPermission)
                 assert(dispatchSpy.calledOnce)
                 assert(dispatchSpy.calledWith('myType-myId-hehehehe'))
                 assert(revokeStub.calledOnce)

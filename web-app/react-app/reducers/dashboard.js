@@ -26,21 +26,20 @@ import {
 
 import _ from 'lodash'
 
-import type {
-    DashboardReducerState as State,
-    DashboardReducerAction as Action
-} from '../flowtype/dashboard-types'
+import type {DashboardState} from '../flowtype/states/dashboard-state'
+import type {Action as DashboardAction} from '../flowtype/actions/dashboard-actions'
 
 const initialState = {
     dashboardsById: {},
     openDashboard: {
-        id: null
+        id: null,
+        isFullScreen: false
     },
     error: null,
     fetching: false
 }
 
-const dashboard = function(state: State = initialState, action: Action) : State {
+const dashboard = function(state: DashboardState = initialState, action: DashboardAction): DashboardState {
     switch (action.type) {
         case OPEN_DASHBOARD:
             return {
@@ -74,7 +73,7 @@ const dashboard = function(state: State = initialState, action: Action) : State 
                 ...state,
                 dashboardsById: {
                     ...state.dashboardsById,
-                    [action.dashboard.id]: {
+                    [action.dashboard && action.dashboard.id]: {
                         ...action.dashboard,
                         new: true,
                         saved: true
@@ -90,7 +89,7 @@ const dashboard = function(state: State = initialState, action: Action) : State 
                 ...state,
                 dashboardsById: {
                     ...state.dashboardsById,
-                    [action.dashboard.id]: {
+                    [action.dashboard && action.dashboard.id]: {
                         ...state.dashboardsById[action.dashboard.id],
                         ...action.dashboard,
                         saved: false
@@ -107,8 +106,8 @@ const dashboard = function(state: State = initialState, action: Action) : State 
                 ...state,
                 dashboardsById: {
                     ...state.dashboardsById,
-                    [action.dashboard.id]: {
-                        ...state.dashboardsById[action.dashboard.id],
+                    [action.dashboard && action.dashboard.id]: {
+                        ...state.dashboardsById[action.dashboard && action.dashboard.id],
                         ...action.dashboard,
                         new: false,
                         saved: true
@@ -123,7 +122,7 @@ const dashboard = function(state: State = initialState, action: Action) : State 
             const dbById = {
                 ...state.dashboardsById
             }
-            delete dbById[action.id]
+            action.id && delete dbById[action.id]
             return {
                 ...state,
                 dashboardsById: dbById,
@@ -184,7 +183,7 @@ const dashboard = function(state: State = initialState, action: Action) : State 
     
         case CHANGE_DASHBOARD_ID: {
             const newDashboardsById = {
-                ...state.dashboardsByid,
+                ...state.dashboardsById,
                 [action.newId]: {
                     ...(state.dashboardsById[action.oldId] || {}),
                     id: action.newId
