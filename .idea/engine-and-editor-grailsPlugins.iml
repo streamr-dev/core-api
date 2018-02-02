@@ -1,0 +1,315 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<module type="JAVA_MODULE" version="4">
+  <component name="FacetManager">
+    <facet type="Spring" name="Spring">
+      <configuration />
+    </facet>
+    <facet type="web" name="GrailsWeb">
+      <configuration>
+        <webroots>
+          <root url="file://$USER_HOME$/.grails/2.5.6/projects/streamr-core/plugins/mail-1.0.7/grails-app/views" relative="/" />
+          <root url="file://$USER_HOME$/.grails/2.5.6/projects/streamr-core/plugins/spring-security-core-2.0-RC4/grails-app/views" relative="/" />
+          <root url="file://$USER_HOME$/.grails/2.5.6/projects/streamr-core/plugins/resources-1.2.14/web-app" relative="/" />
+          <root url="file://$USER_HOME$/.grails/2.5.6/projects/streamr-core/plugins/zipped-resources-1.0/web-app" relative="/" />
+          <root url="file://$USER_HOME$/.grails/2.5.6/projects/streamr-core/plugins/zipped-resources-1.0/grails-app/views" relative="/" />
+          <root url="file://$USER_HOME$/.grails/2.5.6/projects/streamr-core/plugins/database-migration-1.4.0/grails-app/views" relative="/" />
+          <root url="file://$USER_HOME$/.grails/2.5.6/projects/streamr-core/plugins/cached-resources-1.0/web-app" relative="/" />
+          <root url="file://$USER_HOME$/.grails/2.5.6/projects/streamr-core/plugins/cached-resources-1.0/grails-app/views" relative="/" />
+        </webroots>
+        <sourceRoots />
+      </configuration>
+    </facet>
+    <facet type="hibernate" name="Hibernate">
+      <configuration>
+        <datasource-map>
+          <unit-entry name="sessionFactory" />
+        </datasource-map>
+        <naming-strategy-map />
+      </configuration>
+    </facet>
+  </component>
+  <component name="NewModuleRootManager" inherit-compiler-output="true">
+    <exclude-output />
+    <content url="file://$USER_HOME$/.grails/2.5.6/projects/streamr-core/plugins/cache-headers-1.1.7">
+      <sourceFolder url="file://$USER_HOME$/.grails/2.5.6/projects/streamr-core/plugins/cache-headers-1.1.7/grails-app/services" isTestSource="false" />
+    </content>
+    <content url="file://$USER_HOME$/.grails/2.5.6/projects/streamr-core/plugins/cached-resources-1.0">
+      <sourceFolder url="file://$USER_HOME$/.grails/2.5.6/projects/streamr-core/plugins/cached-resources-1.0/src/groovy" isTestSource="false" />
+      <sourceFolder url="file://$USER_HOME$/.grails/2.5.6/projects/streamr-core/plugins/cached-resources-1.0/grails-app/i18n" isTestSource="false" />
+    </content>
+    <content url="file://$USER_HOME$/.grails/2.5.6/projects/streamr-core/plugins/cors-1.1.8">
+      <sourceFolder url="file://$USER_HOME$/.grails/2.5.6/projects/streamr-core/plugins/cors-1.1.8/src/java" isTestSource="false" />
+    </content>
+    <content url="file://$USER_HOME$/.grails/2.5.6/projects/streamr-core/plugins/database-migration-1.4.0">
+      <sourceFolder url="file://$USER_HOME$/.grails/2.5.6/projects/streamr-core/plugins/database-migration-1.4.0/src/groovy" isTestSource="false" />
+      <sourceFolder url="file://$USER_HOME$/.grails/2.5.6/projects/streamr-core/plugins/database-migration-1.4.0/grails-app/controllers" isTestSource="false" />
+    </content>
+    <content url="file://$USER_HOME$/.grails/2.5.6/projects/streamr-core/plugins/geb-1.0" />
+    <content url="file://$USER_HOME$/.grails/2.5.6/projects/streamr-core/plugins/hibernate-3.6.10.19">
+      <sourceFolder url="file://$USER_HOME$/.grails/2.5.6/projects/streamr-core/plugins/hibernate-3.6.10.19/src/java" isTestSource="false" />
+    </content>
+    <content url="file://$USER_HOME$/.grails/2.5.6/projects/streamr-core/plugins/mail-1.0.7">
+      <sourceFolder url="file://$USER_HOME$/.grails/2.5.6/projects/streamr-core/plugins/mail-1.0.7/src/groovy" isTestSource="false" />
+      <sourceFolder url="file://$USER_HOME$/.grails/2.5.6/projects/streamr-core/plugins/mail-1.0.7/grails-app/i18n" isTestSource="false" />
+      <sourceFolder url="file://$USER_HOME$/.grails/2.5.6/projects/streamr-core/plugins/mail-1.0.7/grails-app/services" isTestSource="false" />
+      <sourceFolder url="file://$USER_HOME$/.grails/2.5.6/projects/streamr-core/plugins/mail-1.0.7/grails-app/taglib" isTestSource="false" />
+    </content>
+    <content url="file://$USER_HOME$/.grails/2.5.6/projects/streamr-core/plugins/plastic-criteria-1.5">
+      <sourceFolder url="file://$USER_HOME$/.grails/2.5.6/projects/streamr-core/plugins/plastic-criteria-1.5/src/groovy" isTestSource="false" />
+    </content>
+    <content url="file://$USER_HOME$/.grails/2.5.6/projects/streamr-core/plugins/resources-1.2.14">
+      <sourceFolder url="file://$USER_HOME$/.grails/2.5.6/projects/streamr-core/plugins/resources-1.2.14/src/java" isTestSource="false" />
+      <sourceFolder url="file://$USER_HOME$/.grails/2.5.6/projects/streamr-core/plugins/resources-1.2.14/src/groovy" isTestSource="false" />
+      <sourceFolder url="file://$USER_HOME$/.grails/2.5.6/projects/streamr-core/plugins/resources-1.2.14/grails-app/i18n" isTestSource="false" />
+      <sourceFolder url="file://$USER_HOME$/.grails/2.5.6/projects/streamr-core/plugins/resources-1.2.14/grails-app/taglib" isTestSource="false" />
+    </content>
+    <content url="file://$USER_HOME$/.grails/2.5.6/projects/streamr-core/plugins/rest-client-builder-2.1.1" />
+    <content url="file://$USER_HOME$/.grails/2.5.6/projects/streamr-core/plugins/spring-security-core-2.0-RC4">
+      <sourceFolder url="file://$USER_HOME$/.grails/2.5.6/projects/streamr-core/plugins/spring-security-core-2.0-RC4/src/java" isTestSource="false" />
+      <sourceFolder url="file://$USER_HOME$/.grails/2.5.6/projects/streamr-core/plugins/spring-security-core-2.0-RC4/src/groovy" isTestSource="false" />
+      <sourceFolder url="file://$USER_HOME$/.grails/2.5.6/projects/streamr-core/plugins/spring-security-core-2.0-RC4/grails-app/i18n" isTestSource="false" />
+      <sourceFolder url="file://$USER_HOME$/.grails/2.5.6/projects/streamr-core/plugins/spring-security-core-2.0-RC4/grails-app/controllers" isTestSource="false" />
+      <sourceFolder url="file://$USER_HOME$/.grails/2.5.6/projects/streamr-core/plugins/spring-security-core-2.0-RC4/grails-app/services" isTestSource="false" />
+      <sourceFolder url="file://$USER_HOME$/.grails/2.5.6/projects/streamr-core/plugins/spring-security-core-2.0-RC4/grails-app/taglib" isTestSource="false" />
+    </content>
+    <content url="file://$USER_HOME$/.grails/2.5.6/projects/streamr-core/plugins/tomcat-7.0.70">
+      <sourceFolder url="file://$USER_HOME$/.grails/2.5.6/projects/streamr-core/plugins/tomcat-7.0.70/src/java" isTestSource="false" />
+      <sourceFolder url="file://$USER_HOME$/.grails/2.5.6/projects/streamr-core/plugins/tomcat-7.0.70/src/groovy" isTestSource="false" />
+    </content>
+    <content url="file://$USER_HOME$/.grails/2.5.6/projects/streamr-core/plugins/uglify-js-minified-resources-0.1.1">
+      <sourceFolder url="file://$USER_HOME$/.grails/2.5.6/projects/streamr-core/plugins/uglify-js-minified-resources-0.1.1/src/groovy" isTestSource="false" />
+    </content>
+    <content url="file://$USER_HOME$/.grails/2.5.6/projects/streamr-core/plugins/webxml-1.4.1">
+      <sourceFolder url="file://$USER_HOME$/.grails/2.5.6/projects/streamr-core/plugins/webxml-1.4.1/src/groovy" isTestSource="false" />
+    </content>
+    <content url="file://$USER_HOME$/.grails/2.5.6/projects/streamr-core/plugins/zipped-resources-1.0">
+      <sourceFolder url="file://$USER_HOME$/.grails/2.5.6/projects/streamr-core/plugins/zipped-resources-1.0/grails-app/i18n" isTestSource="false" />
+    </content>
+    <orderEntry type="inheritedJdk" />
+    <orderEntry type="sourceFolder" forTests="false" />
+    <orderEntry type="module-library" exported="">
+      <library name="Grails User Library (engine-and-editor-grailsPlugins)">
+        <CLASSES>
+          <root url="jar://$MAVEN_REPOSITORY$/com/github/jnr/jnr-ffi/2.0.7/jnr-ffi-2.0.7.jar!/" />
+          <root url="jar://$MAVEN_REPOSITORY$/io/dropwizard/metrics/metrics-core/3.1.2/metrics-core-3.1.2.jar!/" />
+          <root url="jar://$MAVEN_REPOSITORY$/com/datastax/cassandra/cassandra-driver-core/3.1.0/cassandra-driver-core-3.1.0.jar!/" />
+          <root url="jar://$MAVEN_REPOSITORY$/com/google/guava/guava/17.0/guava-17.0.jar!/" />
+          <root url="jar://$MAVEN_REPOSITORY$/io/netty/netty-codec/4.0.37.Final/netty-codec-4.0.37.Final.jar!/" />
+          <root url="jar://$MAVEN_REPOSITORY$/io/netty/netty-handler/4.0.37.Final/netty-handler-4.0.37.Final.jar!/" />
+          <root url="jar://$MAVEN_REPOSITORY$/io/netty/netty-buffer/4.0.37.Final/netty-buffer-4.0.37.Final.jar!/" />
+          <root url="jar://$MAVEN_REPOSITORY$/io/netty/netty-transport/4.0.37.Final/netty-transport-4.0.37.Final.jar!/" />
+          <root url="jar://$MAVEN_REPOSITORY$/com/cedarsoftware/json-io/2.4.1/json-io-2.4.1.jar!/" />
+          <root url="jar://$MAVEN_REPOSITORY$/com/cedarsoftware/java-util/1.8.0/java-util-1.8.0.jar!/" />
+          <root url="jar://$MAVEN_REPOSITORY$/org/ethereum/ethereumj-core/1.4.3-RELEASE/ethereumj-core-1.4.3-RELEASE.jar!/" />
+          <root url="jar://$MAVEN_REPOSITORY$/com/github/jnr/jnr-constants/0.9.0/jnr-constants-0.9.0.jar!/" />
+          <root url="jar://$MAVEN_REPOSITORY$/com/github/jnr/jnr-posix/3.0.27/jnr-posix-3.0.27.jar!/" />
+          <root url="jar://$MAVEN_REPOSITORY$/com/github/jnr/jnr-x86asm/1.0.2/jnr-x86asm-1.0.2.jar!/" />
+          <root url="jar://$MAVEN_REPOSITORY$/org/ow2/asm/asm-util/5.0.3/asm-util-5.0.3.jar!/" />
+          <root url="jar://$MAVEN_REPOSITORY$/org/ow2/asm/asm-tree/5.0.3/asm-tree-5.0.3.jar!/" />
+          <root url="jar://$MAVEN_REPOSITORY$/org/ow2/asm/asm-analysis/5.0.3/asm-analysis-5.0.3.jar!/" />
+          <root url="jar://$MAVEN_REPOSITORY$/org/ow2/asm/asm-commons/5.0.3/asm-commons-5.0.3.jar!/" />
+          <root url="jar://$MAVEN_REPOSITORY$/io/netty/netty-common/4.0.37.Final/netty-common-4.0.37.Final.jar!/" />
+          <root url="jar://$MAVEN_REPOSITORY$/io/reactivex/rxjava/1.1.6/rxjava-1.1.6.jar!/" />
+          <root url="jar://$MAVEN_REPOSITORY$/biz/paluch/redis/lettuce/3.5.0.Final/lettuce-3.5.0.Final.jar!/" />
+          <root url="jar://$MAVEN_REPOSITORY$/org/postgresql/postgresql/9.4.1208.jre7/postgresql-9.4.1208.jre7.jar!/" />
+          <root url="jar://$MAVEN_REPOSITORY$/commons-io/commons-io/2.4/commons-io-2.4.jar!/" />
+          <root url="jar://$MAVEN_REPOSITORY$/org/antlr/antlr-runtime/3.5.2/antlr-runtime-3.5.2.jar!/" />
+          <root url="jar://$MAVEN_REPOSITORY$/org/antlr/ST4/4.0.8/ST4-4.0.8.jar!/" />
+          <root url="jar://$MAVEN_REPOSITORY$/org/eclipse/paho/org.eclipse.paho.client.mqttv3/1.1.1/org.eclipse.paho.client.mqttv3-1.1.1.jar!/" />
+          <root url="jar://$MAVEN_REPOSITORY$/org/json/json/20160212/json-20160212.jar!/" />
+          <root url="jar://$MAVEN_REPOSITORY$/org/apache/httpcomponents/httpmime/4.5.2/httpmime-4.5.2.jar!/" />
+          <root url="jar://$MAVEN_REPOSITORY$/org/apache/httpcomponents/httpcore-nio/4.4.4/httpcore-nio-4.4.4.jar!/" />
+          <root url="jar://$MAVEN_REPOSITORY$/org/apache/httpcomponents/httpasyncclient/4.1.1/httpasyncclient-4.1.1.jar!/" />
+          <root url="jar://$MAVEN_REPOSITORY$/org/apache/httpcomponents/httpcore/4.4.4/httpcore-4.4.4.jar!/" />
+          <root url="jar://$MAVEN_REPOSITORY$/org/apache/httpcomponents/httpclient/4.5.2/httpclient-4.5.2.jar!/" />
+          <root url="jar://$MAVEN_REPOSITORY$/com/mashape/unirest/unirest-java/1.4.9/unirest-java-1.4.9.jar!/" />
+          <root url="jar://$MAVEN_REPOSITORY$/net/jpountz/lz4/lz4/1.2.0/lz4-1.2.0.jar!/" />
+          <root url="jar://$MAVEN_REPOSITORY$/org/xerial/snappy/snappy-java/1.1.1.7/snappy-java-1.1.1.7.jar!/" />
+          <root url="jar://$MAVEN_REPOSITORY$/org/apache/kafka/kafka-clients/0.9.0.1/kafka-clients-0.9.0.1.jar!/" />
+          <root url="jar://$MAVEN_REPOSITORY$/com/udojava/EvalEx/1.6/EvalEx-1.6.jar!/" />
+          <root url="jar://$MAVEN_REPOSITORY$/com/fasterxml/jackson/core/jackson-core/2.8.8/jackson-core-2.8.8.jar!/" />
+          <root url="jar://$MAVEN_REPOSITORY$/log4j/log4j/1.2.16/log4j-1.2.16.jar!/" />
+          <root url="jar://$USER_HOME$/.sdkman/candidates/grails/2.5.6/dist/grails-plugin-converters-2.5.6.jar!/" />
+          <root url="jar://$USER_HOME$/.sdkman/candidates/grails/2.5.6/dist/grails-plugin-domain-class-2.5.6.jar!/" />
+          <root url="jar://$USER_HOME$/.sdkman/candidates/grails/2.5.6/dist/grails-plugin-mimetypes-2.5.6.jar!/" />
+          <root url="jar://$USER_HOME$/.sdkman/candidates/grails/2.5.6/lib/org.codehaus.jsr166-mirror/jsr166y/jars/jsr166y-1.7.0.jar!/" />
+          <root url="jar://$USER_HOME$/.sdkman/candidates/grails/2.5.6/lib/org.codehaus.gpars/gpars/jars/gpars-1.2.1.jar!/" />
+          <root url="jar://$USER_HOME$/.sdkman/candidates/grails/2.5.6/dist/grails-async-2.5.6.jar!/" />
+          <root url="jar://$USER_HOME$/.sdkman/candidates/grails/2.5.6/dist/grails-plugin-async-2.5.6.jar!/" />
+          <root url="jar://$USER_HOME$/.sdkman/candidates/grails/2.5.6/lib/commons-validator/commons-validator/jars/commons-validator-1.4.0.jar!/" />
+          <root url="jar://$USER_HOME$/.sdkman/candidates/grails/2.5.6/dist/grails-validation-2.5.6.jar!/" />
+          <root url="jar://$USER_HOME$/.sdkman/candidates/grails/2.5.6/lib/com.googlecode.concurrentlinkedhashmap/concurrentlinkedhashmap-lru/jars/concurrentlinkedhashmap-lru-1.4.jar!/" />
+          <root url="jar://$USER_HOME$/.sdkman/candidates/grails/2.5.6/dist/grails-plugin-url-mappings-2.5.6.jar!/" />
+          <root url="jar://$USER_HOME$/.sdkman/candidates/grails/2.5.6/dist/grails-plugin-servlets-2.5.6.jar!/" />
+          <root url="jar://$USER_HOME$/.sdkman/candidates/grails/2.5.6/lib/org.springframework/spring-tx/jars/spring-tx-4.1.9.RELEASE.jar!/" />
+          <root url="jar://$USER_HOME$/.sdkman/candidates/grails/2.5.6/dist/grails-plugin-services-2.5.6.jar!/" />
+          <root url="jar://$USER_HOME$/.sdkman/candidates/grails/2.5.6/lib/org.slf4j/jul-to-slf4j/jars/jul-to-slf4j-1.7.21.jar!/" />
+          <root url="jar://$USER_HOME$/.sdkman/candidates/grails/2.5.6/dist/grails-plugin-log4j-2.5.6.jar!/" />
+          <root url="jar://$USER_HOME$/.sdkman/candidates/grails/2.5.6/dist/grails-logging-2.5.6.jar!/" />
+          <root url="jar://$USER_HOME$/.sdkman/candidates/grails/2.5.6/lib/org.springframework/spring-web/jars/spring-web-4.1.9.RELEASE.jar!/" />
+          <root url="jar://$USER_HOME$/.sdkman/candidates/grails/2.5.6/dist/grails-encoder-2.5.6.jar!/" />
+          <root url="jar://$USER_HOME$/.sdkman/candidates/grails/2.5.6/dist/grails-plugin-codecs-2.5.6.jar!/" />
+          <root url="jar://$USER_HOME$/.sdkman/candidates/grails/2.5.6/dist/grails-web-gsp-taglib-2.5.6.jar!/" />
+          <root url="jar://$USER_HOME$/.sdkman/candidates/grails/2.5.6/dist/grails-plugin-gsp-2.5.6.jar!/" />
+          <root url="jar://$USER_HOME$/.sdkman/candidates/grails/2.5.6/dist/grails-plugin-filters-2.5.6.jar!/" />
+          <root url="jar://$USER_HOME$/.sdkman/candidates/grails/2.5.6/lib/commons-lang/commons-lang/jars/commons-lang-2.6.jar!/" />
+          <root url="jar://$USER_HOME$/.sdkman/candidates/grails/2.5.6/dist/grails-plugin-i18n-2.5.6.jar!/" />
+          <root url="jar://$USER_HOME$/.sdkman/candidates/grails/2.5.6/dist/grails-spring-2.5.6.jar!/" />
+          <root url="jar://$USER_HOME$/.sdkman/candidates/grails/2.5.6/lib/aopalliance/aopalliance/jars/aopalliance-1.0.jar!/" />
+          <root url="jar://$USER_HOME$/.sdkman/candidates/grails/2.5.6/lib/org.springframework/spring-beans/jars/spring-beans-4.1.9.RELEASE.jar!/" />
+          <root url="jar://$USER_HOME$/.sdkman/candidates/grails/2.5.6/dist/grails-bootstrap-2.5.6.jar!/" />
+          <root url="jar://$USER_HOME$/.sdkman/candidates/grails/2.5.6/lib/org.hibernate.javax.persistence/hibernate-jpa-2.1-api/jars/hibernate-jpa-2.1-api-1.0.0.Final.jar!/" />
+          <root url="jar://$USER_HOME$/.sdkman/candidates/grails/2.5.6/lib/org.springframework/spring-core/jars/spring-core-4.1.9.RELEASE.jar!/" />
+          <root url="jar://$USER_HOME$/.sdkman/candidates/grails/2.5.6/dist/grails-core-2.5.6.jar!/" />
+          <root url="jar://$USER_HOME$/.sdkman/candidates/grails/2.5.6/dist/grails-plugin-databinding-2.5.6.jar!/" />
+          <root url="jar://$USER_HOME$/.sdkman/candidates/grails/2.5.6/lib/com.google.code.gson/gson/jars/gson-2.2.4.jar!/" />
+          <root url="jar://$USER_HOME$/.sdkman/candidates/grails/2.5.6/lib/org.springframework/spring-aop/jars/spring-aop-4.1.9.RELEASE.jar!/" />
+          <root url="jar://$USER_HOME$/.sdkman/candidates/grails/2.5.6/lib/org.springframework/spring-context/jars/spring-context-4.1.9.RELEASE.jar!/" />
+          <root url="jar://$USER_HOME$/.sdkman/candidates/grails/2.5.6/lib/org.springframework/spring-jdbc/jars/spring-jdbc-4.1.9.RELEASE.jar!/" />
+          <root url="jar://$USER_HOME$/.sdkman/candidates/grails/2.5.6/lib/org.apache.tomcat/tomcat-juli/jars/tomcat-juli-7.0.70.jar!/" />
+          <root url="jar://$USER_HOME$/.sdkman/candidates/grails/2.5.6/lib/org.apache.tomcat/tomcat-jdbc/jars/tomcat-jdbc-7.0.70.jar!/" />
+          <root url="jar://$USER_HOME$/.sdkman/candidates/grails/2.5.6/dist/grails-plugin-datasource-2.5.6.jar!/" />
+          <root url="jar://$USER_HOME$/.sdkman/candidates/grails/2.5.6/dist/grails-plugin-validation-2.5.6.jar!/" />
+          <root url="jar://$USER_HOME$/.sdkman/candidates/grails/2.5.6/dist/grails-plugin-controllers-2.5.6.jar!/" />
+          <root url="jar://$USER_HOME$/.sdkman/candidates/grails/2.5.6/dist/grails-web-gsp-2.5.6.jar!/" />
+          <root url="jar://$USER_HOME$/.sdkman/candidates/grails/2.5.6/lib/commons-fileupload/commons-fileupload/jars/commons-fileupload-1.3.1.jar!/" />
+          <root url="jar://$USER_HOME$/.sdkman/candidates/grails/2.5.6/dist/grails-web-fileupload-2.5.6.jar!/" />
+          <root url="jar://$USER_HOME$/.sdkman/candidates/grails/2.5.6/dist/grails-web-jsp-2.5.6.jar!/" />
+          <root url="jar://$USER_HOME$/.sdkman/candidates/grails/2.5.6/lib/org.springframework/spring-context-support/jars/spring-context-support-4.1.9.RELEASE.jar!/" />
+          <root url="jar://$USER_HOME$/.sdkman/candidates/grails/2.5.6/lib/org.springframework/spring-webmvc/jars/spring-webmvc-4.1.9.RELEASE.jar!/" />
+          <root url="jar://$USER_HOME$/.sdkman/candidates/grails/2.5.6/dist/grails-web-common-2.5.6.jar!/" />
+          <root url="jar://$USER_HOME$/.sdkman/candidates/grails/2.5.6/dist/grails-web-mvc-2.5.6.jar!/" />
+          <root url="jar://$USER_HOME$/.sdkman/candidates/grails/2.5.6/dist/grails-web-url-mappings-2.5.6.jar!/" />
+          <root url="jar://$USER_HOME$/.sdkman/candidates/grails/2.5.6/lib/opensymphony/sitemesh/jars/sitemesh-2.4.jar!/" />
+          <root url="jar://$USER_HOME$/.sdkman/candidates/grails/2.5.6/dist/grails-web-sitemesh-2.5.6.jar!/" />
+          <root url="jar://$USER_HOME$/.sdkman/candidates/grails/2.5.6/dist/grails-databinding-2.5.6.jar!/" />
+          <root url="jar://$USER_HOME$/.sdkman/candidates/grails/2.5.6/dist/grails-web-databinding-2.5.6.jar!/" />
+          <root url="jar://$USER_HOME$/.sdkman/candidates/grails/2.5.6/dist/grails-web-2.5.6.jar!/" />
+          <root url="jar://$USER_HOME$/.sdkman/candidates/grails/2.5.6/lib/org.slf4j/jcl-over-slf4j/jars/jcl-over-slf4j-1.7.21.jar!/" />
+          <root url="jar://$USER_HOME$/.sdkman/candidates/grails/2.5.6/lib/org.slf4j/slf4j-api/jars/slf4j-api-1.7.21.jar!/" />
+          <root url="jar://$USER_HOME$/.sdkman/candidates/grails/2.5.6/dist/grails-plugin-rest-2.5.6.jar!/" />
+          <root url="jar://$USER_HOME$/.sdkman/candidates/grails/2.5.6/lib/org.codehaus.groovy/groovy-all/jars/groovy-all-2.4.10.jar!/" />
+          <root url="jar://$USER_HOME$/.sdkman/candidates/grails/2.5.6/lib/org.springframework/spring-expression/jars/spring-expression-4.1.9.RELEASE.jar!/" />
+          <root url="jar://$MAVEN_REPOSITORY$/org/grails/grails-datastore-simple/3.1.4.RELEASE/grails-datastore-simple-3.1.4.RELEASE.jar!/" />
+          <root url="jar://$MAVEN_REPOSITORY$/org/grails/grails-datastore-gorm/3.1.4.RELEASE/grails-datastore-gorm-3.1.4.RELEASE.jar!/" />
+          <root url="jar://$USER_HOME$/.sdkman/candidates/grails/2.5.6/lib/javax.transaction/jta/jars/jta-1.1.jar!/" />
+          <root url="jar://$MAVEN_REPOSITORY$/org/grails/grails-datastore-core/3.1.4.RELEASE/grails-datastore-core-3.1.4.RELEASE.jar!/" />
+          <root url="jar://$MAVEN_REPOSITORY$/javax/mail/javax.mail-api/1.5.1/javax.mail-api-1.5.1.jar!/" />
+          <root url="jar://$MAVEN_REPOSITORY$/javax/activation/activation/1.1/activation-1.1.jar!/" />
+          <root url="jar://$MAVEN_REPOSITORY$/org/mapdb/mapdb/2.0-beta12/mapdb-2.0-beta12.jar!/" />
+          <root url="jar://$MAVEN_REPOSITORY$/org/iq80/leveldb/leveldb-api/0.7/leveldb-api-0.7.jar!/" />
+          <root url="jar://$MAVEN_REPOSITORY$/org/iq80/leveldb/leveldb/0.7/leveldb-0.7.jar!/" />
+          <root url="jar://$MAVEN_REPOSITORY$/org/ethereum/solcJ-all/0.4.8/solcJ-all-0.4.8.jar!/" />
+          <root url="jar://$MAVEN_REPOSITORY$/org/ethereum/leveldbjni-all/1.18.3/leveldbjni-all-1.18.3.jar!/" />
+          <root url="jar://$MAVEN_REPOSITORY$/org/codehaus/jackson/jackson-core-asl/1.9.13/jackson-core-asl-1.9.13.jar!/" />
+          <root url="jar://$MAVEN_REPOSITORY$/org/codehaus/jackson/jackson-mapper-asl/1.9.13/jackson-mapper-asl-1.9.13.jar!/" />
+          <root url="jar://$MAVEN_REPOSITORY$/org/apache/commons/commons-collections4/4.0/commons-collections4-4.0.jar!/" />
+          <root url="jar://$MAVEN_REPOSITORY$/io/netty/netty-all/4.0.30.Final/netty-all-4.0.30.Final.jar!/" />
+          <root url="jar://$MAVEN_REPOSITORY$/com/typesafe/config/1.2.1/config-1.2.1.jar!/" />
+          <root url="jar://$MAVEN_REPOSITORY$/com/madgag/spongycastle/prov/1.53.0.0/prov-1.53.0.0.jar!/" />
+          <root url="jar://$MAVEN_REPOSITORY$/com/madgag/spongycastle/core/1.53.0.0/core-1.53.0.0.jar!/" />
+          <root url="jar://$MAVEN_REPOSITORY$/com/googlecode/json-simple/json-simple/1.1.1/json-simple-1.1.1.jar!/" />
+          <root url="jar://$MAVEN_REPOSITORY$/org/ow2/asm/asm/5.0.3/asm-5.0.3.jar!/" />
+          <root url="jar://$MAVEN_REPOSITORY$/com/github/jnr/jffi/1.2.10/jffi-1.2.10.jar!/" />
+          <root url="jar://$MAVEN_REPOSITORY$/joda-time/joda-time/2.9.3/joda-time-2.9.3.jar!/" />
+          <root url="jar://$MAVEN_REPOSITORY$/org/objenesis/objenesis/2.5.1/objenesis-2.5.1.jar!/" />
+          <root url="jar://$MAVEN_REPOSITORY$/de/ruedigermoeller/fst/2.56/fst-2.56.jar!/" />
+          <root url="jar://$MAVEN_REPOSITORY$/com/opencsv/opencsv/3.3/opencsv-3.3.jar!/" />
+          <root url="jar://$USER_HOME$/.sdkman/candidates/grails/2.5.6/lib/commons-codec/commons-codec/jars/commons-codec-1.6.jar!/" />
+          <root url="jar://$MAVEN_REPOSITORY$/org/apache/commons/commons-math3/3.2/commons-math3-3.2.jar!/" />
+          <root url="jar://$MAVEN_REPOSITORY$/commons-net/commons-net/3.3/commons-net-3.3.jar!/" />
+          <root url="jar://$USER_HOME$/.sdkman/candidates/grails/2.5.6/dist/grails-resources-2.5.6.jar!/" />
+          <root url="jar://$USER_HOME$/.sdkman/candidates/grails/2.5.6/lib/com.h2database/h2/jars/h2-1.3.176.jar!/" />
+          <root url="jar://$USER_HOME$/.sdkman/candidates/grails/2.5.6/lib/asm/asm/jars/asm-3.3.1.jar!/" />
+          <root url="jar://$USER_HOME$/.sdkman/candidates/grails/2.5.6/lib/cglib/cglib/jars/cglib-2.2.2.jar!/" />
+          <root url="jar://$USER_HOME$/.sdkman/candidates/grails/2.5.6/lib/xalan/serializer/jars/serializer-2.7.2.jar!/" />
+          <root url="jar://$USER_HOME$/.sdkman/candidates/grails/2.5.6/lib/org.apache.tomcat.embed/tomcat-embed-logging-log4j/jars/tomcat-embed-logging-log4j-7.0.70.jar!/" />
+          <root url="jar://$USER_HOME$/.sdkman/candidates/grails/2.5.6/lib/org.springframework/spring-aspects/jars/spring-aspects-4.1.9.RELEASE.jar!/" />
+          <root url="jar://$USER_HOME$/.sdkman/candidates/grails/2.5.6/lib/org.aspectj/aspectjrt/jars/aspectjrt-1.8.7.jar!/" />
+          <root url="jar://$USER_HOME$/.sdkman/candidates/grails/2.5.6/lib/org.aspectj/aspectjweaver/jars/aspectjweaver-1.8.7.jar!/" />
+          <root url="jar://$MAVEN_REPOSITORY$/org/mozilla/rhino/1.7R4/rhino-1.7R4.jar!/" />
+          <root url="jar://$MAVEN_REPOSITORY$/org/springframework/security/spring-security-web/3.2.3.RELEASE/spring-security-web-3.2.3.RELEASE.jar!/" />
+          <root url="jar://$MAVEN_REPOSITORY$/org/springframework/security/spring-security-core/3.2.3.RELEASE/spring-security-core-3.2.3.RELEASE.jar!/" />
+          <root url="jar://$MAVEN_REPOSITORY$/org/liquibase/liquibase-core/2.0.5/liquibase-core-2.0.5.jar!/" />
+          <root url="jar://$MAVEN_REPOSITORY$/org/hibernate/hibernate-commons-annotations/3.2.0.Final/hibernate-commons-annotations-3.2.0.Final.jar!/" />
+          <root url="jar://$MAVEN_REPOSITORY$/org/hibernate/hibernate-entitymanager/3.6.10.Final/hibernate-entitymanager-3.6.10.Final.jar!/" />
+          <root url="jar://$MAVEN_REPOSITORY$/org/hibernate/hibernate-validator/4.1.0.Final/hibernate-validator-4.1.0.Final.jar!/" />
+          <root url="jar://$MAVEN_REPOSITORY$/javax/validation/validation-api/1.0.0.GA/validation-api-1.0.0.GA.jar!/" />
+          <root url="jar://$MAVEN_REPOSITORY$/org/hibernate/hibernate-core/3.6.10.Final/hibernate-core-3.6.10.Final.jar!/" />
+          <root url="jar://$MAVEN_REPOSITORY$/commons-collections/commons-collections/3.2.1/commons-collections-3.2.1.jar!/" />
+          <root url="jar://$MAVEN_REPOSITORY$/org/grails/grails-datastore-gorm-plugin-support/3.1.4.RELEASE/grails-datastore-gorm-plugin-support-3.1.4.RELEASE.jar!/" />
+          <root url="jar://$MAVEN_REPOSITORY$/org/springframework/spring-orm/4.1.9.RELEASE/spring-orm-4.1.9.RELEASE.jar!/" />
+          <root url="jar://$MAVEN_REPOSITORY$/dom4j/dom4j/1.6.1/dom4j-1.6.1.jar!/" />
+          <root url="jar://$MAVEN_REPOSITORY$/antlr/antlr/2.7.7/antlr-2.7.7.jar!/" />
+          <root url="jar://$MAVEN_REPOSITORY$/org/grails/grails-datastore-gorm-hibernate-core/3.1.4.RELEASE/grails-datastore-gorm-hibernate-core-3.1.4.RELEASE.jar!/" />
+          <root url="jar://$MAVEN_REPOSITORY$/org/grails/grails-datastore-gorm-hibernate/3.1.4.RELEASE/grails-datastore-gorm-hibernate-3.1.4.RELEASE.jar!/" />
+          <root url="jar://$MAVEN_REPOSITORY$/net/sf/ehcache/ehcache/2.9.0/ehcache-2.9.0.jar!/" />
+          <root url="jar://$MAVEN_REPOSITORY$/org/hibernate/hibernate-ehcache/3.6.10.Final/hibernate-ehcache-3.6.10.Final.jar!/" />
+          <root url="jar://$MAVEN_REPOSITORY$/com/sun/mail/javax.mail/1.5.1/javax.mail-1.5.1.jar!/" />
+          <root url="jar://$MAVEN_REPOSITORY$/com/github/jnr/jffi/1.2.10/jffi-1.2.10-native.jar!/" />
+          <root url="jar://$MAVEN_REPOSITORY$/mysql/mysql-connector-java/5.1.20/mysql-connector-java-5.1.20.jar!/" />
+          <root url="jar://$USER_HOME$/.sdkman/candidates/grails/2.5.6/lib/org.hamcrest/hamcrest-core/jars/hamcrest-core-1.3.jar!/" />
+          <root url="jar://$USER_HOME$/.sdkman/candidates/grails/2.5.6/lib/junit/junit/jars/junit-4.12.jar!/" />
+          <root url="jar://$MAVEN_REPOSITORY$/cglib/cglib-nodep/2.2.2/cglib-nodep-2.2.2.jar!/" />
+          <root url="jar://$USER_HOME$/.sdkman/candidates/grails/2.5.6/lib/org.spockframework/spock-core/jars/spock-core-1.0-groovy-2.4.jar!/" />
+          <root url="jar://$USER_HOME$/.sdkman/candidates/grails/2.5.6/lib/org.apache.ant/ant-launcher/jars/ant-launcher-1.9.4.jar!/" />
+          <root url="jar://$USER_HOME$/.sdkman/candidates/grails/2.5.6/lib/org.apache.ant/ant/jars/ant-1.9.4.jar!/" />
+          <root url="jar://$USER_HOME$/.sdkman/candidates/grails/2.5.6/lib/org.codehaus.gant/gant_groovy1.8/jars/gant_groovy1.8-1.9.6.jar!/" />
+          <root url="jar://$USER_HOME$/.sdkman/candidates/grails/2.5.6/lib/org.fusesource.jansi/jansi/jars/jansi-1.11.jar!/" />
+          <root url="jar://$USER_HOME$/.sdkman/candidates/grails/2.5.6/lib/jline/jline/jars/jline-2.12.jar!/" />
+          <root url="jar://$USER_HOME$/.sdkman/candidates/grails/2.5.6/dist/grails-project-api-2.5.6.jar!/" />
+          <root url="jar://$USER_HOME$/.sdkman/candidates/grails/2.5.6/dist/grails-test-2.5.6.jar!/" />
+          <root url="jar://$USER_HOME$/.sdkman/candidates/grails/2.5.6/lib/org.springframework/spring-test/jars/spring-test-4.1.9.RELEASE.jar!/" />
+          <root url="jar://$USER_HOME$/.sdkman/candidates/grails/2.5.6/dist/grails-plugin-testing-2.5.6.jar!/" />
+          <root url="jar://$MAVEN_REPOSITORY$/org/gebish/geb-test-common/1.0/geb-test-common-1.0.jar!/" />
+          <root url="jar://$MAVEN_REPOSITORY$/org/jodd/jodd-log/3.7.1/jodd-log-3.7.1.jar!/" />
+          <root url="jar://$MAVEN_REPOSITORY$/org/jodd/jodd-core/3.7.1/jodd-core-3.7.1.jar!/" />
+          <root url="jar://$MAVEN_REPOSITORY$/org/jodd/jodd-lagarto/3.7.1/jodd-lagarto-3.7.1.jar!/" />
+          <root url="jar://$MAVEN_REPOSITORY$/org/gebish/geb-exceptions/1.0/geb-exceptions-1.0.jar!/" />
+          <root url="jar://$MAVEN_REPOSITORY$/org/gebish/geb-implicit-assertions/1.0/geb-implicit-assertions-1.0.jar!/" />
+          <root url="jar://$MAVEN_REPOSITORY$/org/gebish/geb-waiting/1.0/geb-waiting-1.0.jar!/" />
+          <root url="jar://$MAVEN_REPOSITORY$/org/gebish/geb-ast/1.0/geb-ast-1.0.jar!/" />
+          <root url="jar://$MAVEN_REPOSITORY$/org/gebish/geb-core/1.0/geb-core-1.0.jar!/" />
+          <root url="jar://$MAVEN_REPOSITORY$/org/gebish/geb-spock/1.0/geb-spock-1.0.jar!/" />
+          <root url="jar://$MAVEN_REPOSITORY$/org/seleniumhq/selenium/selenium-support/2.53.0/selenium-support-2.53.0.jar!/" />
+          <root url="jar://$MAVEN_REPOSITORY$/org/seleniumhq/selenium/selenium-chrome-driver/2.53.0/selenium-chrome-driver-2.53.0.jar!/" />
+          <root url="jar://$MAVEN_REPOSITORY$/org/apache/commons/commons-exec/1.3/commons-exec-1.3.jar!/" />
+          <root url="jar://$MAVEN_REPOSITORY$/net/java/dev/jna/jna-platform/4.1.0/jna-platform-4.1.0.jar!/" />
+          <root url="jar://$MAVEN_REPOSITORY$/net/java/dev/jna/jna/4.1.0/jna-4.1.0.jar!/" />
+          <root url="jar://$MAVEN_REPOSITORY$/org/seleniumhq/selenium/selenium-api/2.53.0/selenium-api-2.53.0.jar!/" />
+          <root url="jar://$MAVEN_REPOSITORY$/org/seleniumhq/selenium/selenium-remote-driver/2.53.0/selenium-remote-driver-2.53.0.jar!/" />
+          <root url="jar://$MAVEN_REPOSITORY$/org/seleniumhq/selenium/selenium-firefox-driver/2.53.0/selenium-firefox-driver-2.53.0.jar!/" />
+          <root url="jar://$USER_HOME$/.sdkman/candidates/grails/2.5.6/lib/javax.servlet/javax.servlet-api/jars/javax.servlet-api-3.0.1.jar!/" />
+          <root url="jar://$MAVEN_REPOSITORY$/org/grails/grails-datastore-rest-client/3.1.4.RELEASE/grails-datastore-rest-client-3.1.4.RELEASE.jar!/" />
+          <root url="jar://$MAVEN_REPOSITORY$/org/apache/tomcat/embed/tomcat-embed-core/7.0.70/tomcat-embed-core-7.0.70.jar!/" />
+          <root url="jar://$MAVEN_REPOSITORY$/org/eclipse/jdt/core/compiler/ecj/3.7.2/ecj-3.7.2.jar!/" />
+          <root url="jar://$MAVEN_REPOSITORY$/org/apache/tomcat/embed/tomcat-embed-websocket/7.0.70/tomcat-embed-websocket-7.0.70.jar!/" />
+          <root url="jar://$MAVEN_REPOSITORY$/org/apache/tomcat/embed/tomcat-embed-el/7.0.70/tomcat-embed-el-7.0.70.jar!/" />
+          <root url="jar://$MAVEN_REPOSITORY$/org/apache/tomcat/embed/tomcat-embed-jasper/7.0.70/tomcat-embed-jasper-7.0.70.jar!/" />
+          <root url="jar://$MAVEN_REPOSITORY$/org/apache/tomcat/tomcat-catalina-ant/7.0.70/tomcat-catalina-ant-7.0.70.jar!/" />
+          <root url="jar://$USER_HOME$/.sdkman/candidates/grails/2.5.6/lib/org.grails/grails-gdoc-engine/jars/grails-gdoc-engine-1.0.1.jar!/" />
+          <root url="jar://$USER_HOME$/.sdkman/candidates/grails/2.5.6/lib/org.yaml/snakeyaml/jars/snakeyaml-1.8.jar!/" />
+          <root url="jar://$USER_HOME$/.sdkman/candidates/grails/2.5.6/lib/org.xhtmlrenderer/core-renderer/jars/core-renderer-R8.jar!/" />
+          <root url="jar://$USER_HOME$/.sdkman/candidates/grails/2.5.6/lib/bouncycastle/bcprov-jdk14/jars/bcprov-jdk14-138.jar!/" />
+          <root url="jar://$USER_HOME$/.sdkman/candidates/grails/2.5.6/lib/bouncycastle/bcmail-jdk14/jars/bcmail-jdk14-138.jar!/" />
+          <root url="jar://$USER_HOME$/.sdkman/candidates/grails/2.5.6/lib/com.lowagie/itext/jars/itext-2.0.8.jar!/" />
+          <root url="jar://$USER_HOME$/.sdkman/candidates/grails/2.5.6/lib/org.jsoup/jsoup/jars/jsoup-1.7.3.jar!/" />
+          <root url="jar://$USER_HOME$/.sdkman/candidates/grails/2.5.6/dist/grails-docs-2.5.6.jar!/" />
+          <root url="jar://$USER_HOME$/.sdkman/candidates/grails/2.5.6/dist/grails-scripts-2.5.6.jar!/" />
+          <root url="jar://$USER_HOME$/.sdkman/candidates/grails/2.5.6/lib/org.apache.ivy/ivy/jars/ivy-2.3.0.jar!/" />
+          <root url="jar://$USER_HOME$/.sdkman/candidates/grails/2.5.6/lib/org.apache.ant/ant-trax/jars/ant-trax-1.7.1.jar!/" />
+          <root url="jar://$USER_HOME$/.sdkman/candidates/grails/2.5.6/lib/net.java.dev.jna/jna/jars/jna-4.0.0.jar!/" />
+          <root url="jar://$USER_HOME$/.sdkman/candidates/grails/2.5.6/lib/org.apache.ant/ant-junit/jars/ant-junit-1.9.4.jar!/" />
+          <root url="jar://$MAVEN_REPOSITORY$/org/apache/commons/commons-lang3/3.4/commons-lang3-3.4.jar!/" />
+          <root url="jar://$MAVEN_REPOSITORY$/com/google/code/findbugs/jsr305/3.0.0/jsr305-3.0.0.jar!/" />
+          <root url="jar://$MAVEN_REPOSITORY$/com/fasterxml/jackson/core/jackson-annotations/2.5.0/jackson-annotations-2.5.0.jar!/" />
+          <root url="jar://$MAVEN_REPOSITORY$/com/fasterxml/jackson/core/jackson-databind/2.5.1/jackson-databind-2.5.1.jar!/" />
+          <root url="jar://$MAVEN_REPOSITORY$/commons-logging/commons-logging/1.2/commons-logging-1.2.jar!/" />
+          <root url="jar://$MAVEN_REPOSITORY$/org/javassist/javassist/3.15.0-GA/javassist-3.15.0-GA.jar!/" />
+        </CLASSES>
+        <JAVADOC />
+        <SOURCES />
+      </library>
+    </orderEntry>
+  </component>
+</module>

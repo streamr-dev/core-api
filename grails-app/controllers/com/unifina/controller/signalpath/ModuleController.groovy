@@ -1,11 +1,5 @@
 package com.unifina.controller.signalpath
 
-import com.unifina.domain.signalpath.Canvas
-import grails.converters.JSON
-import grails.plugin.springsecurity.annotation.Secured
-import grails.util.GrailsUtil
-import org.apache.log4j.Logger
-
 import com.unifina.domain.signalpath.Module
 import com.unifina.domain.signalpath.ModuleCategory
 import com.unifina.domain.signalpath.ModulePackage
@@ -13,12 +7,15 @@ import com.unifina.signalpath.AbstractSignalPathModule
 import com.unifina.signalpath.ModuleException
 import com.unifina.utils.Globals
 import com.unifina.utils.GlobalsFactory
+import grails.converters.JSON
+import grails.plugin.springsecurity.annotation.Secured
+import grails.util.GrailsUtil
+import org.apache.log4j.Logger
 
 @Secured(["ROLE_USER"])
 class ModuleController {
 	
 	def moduleService
-	def grailsApplication
 	def springSecurityService
 	def permissionService
 	
@@ -134,7 +131,7 @@ class ModuleController {
 
 	def jsonGetModule() {
 		def user = springSecurityService.currentUser
-		Globals globals = GlobalsFactory.createInstance([:], grailsApplication, user)
+		Globals globals = GlobalsFactory.createInstance([:], user)
 		
 		try {
 			Module domainObject = Module.get(params.long("id"))
@@ -175,9 +172,6 @@ class ModuleController {
 			log.error("Exception while creating module!",e)
 			Map r = [error:true, message:e.message, moduleErrors:moduleExceptions]
 			render r as JSON
-		}
-		finally {
-			globals.destroy()
 		}
 	}
 

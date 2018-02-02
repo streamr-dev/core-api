@@ -162,7 +162,8 @@ log4j.main = {
 		'org.codehaus.groovy.grails.orm.hibernate', // hibernate integration
 		'org.springframework',
 		'org.hibernate',
-		'net.sf.ehcache.hibernate'
+		'net.sf.ehcache.hibernate',
+		'org.grails.datastore.mapping.core.DatastoreUtils'
 
 	warn 'org.mortbay.log',
 		'org.apache.zookeeper',
@@ -212,8 +213,6 @@ streamr.apiKey.revokeNotificationStream = "revoked-api-keys"
 /**
  * Application properties
  */
-//Which class to use as the SignalPath run context
-unifina.globals.className = "com.unifina.utils.Globals"
 // Where to send email reports
 unifina.reports.recipient = "henri.pihkala@streamr.com"
 
@@ -432,11 +431,12 @@ environments {
 		recaptchav2.secret = "6Le3vAkTAAAAADZEop2Jdlm8ZrsTX-4-nn2XqC7Z"
 		recaptchainvisible.secret = "6Lfish8UAAAAAE9XaXpFEDX7OjO4rKGFe1HdrSql"
 	}
+	// Same keys used for both dev and test
 	development {
-		recaptchav2.sitekey = "6Le9vAkTAAAAALFIbNo2ftfteJ2aQPgfP-npkZXS"
-		recaptchav2.secret = "6Le9vAkTAAAAADoOwlVedDR15a-uy4mUbudvsg63"
-		recaptchainvisible.sitekey = "6LcNxB4UAAAAAO01yHgAVL6qxwWfOM8PxaKmP9LP"
-		recaptchainvisible.secret = "6LcNxB4UAAAAAMXCPU3sABq20HIbcIJCtMaIFn9o"
+		recaptchav2.sitekey = "6LeIxAcTAAAAAJcZVRqyHh71UMIEGNQ_MXjiZKhI"
+		recaptchav2.secret = "6LeIxAcTAAAAAGG-vFI1TnRWxMZNFuojJ4WifJWe"
+		recaptchainvisible.sitekey = "6LeIxAcTAAAAAJcZVRqyHh71UMIEGNQ_MXjiZKhI"
+		recaptchainvisible.secret = "6LeIxAcTAAAAAGG-vFI1TnRWxMZNFuojJ4WifJWe"
 	}
 	test {
 		recaptchav2.sitekey = "6LeIxAcTAAAAAJcZVRqyHh71UMIEGNQ_MXjiZKhI"

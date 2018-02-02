@@ -1,6 +1,9 @@
 package com.unifina.signalpath
 
 import com.unifina.signalpath.simplemath.Multiply
+import com.unifina.signalpath.text.ConstantString
+import com.unifina.signalpath.text.StringConcatenate
+import com.unifina.utils.Globals
 import spock.lang.Specification
 
 class InputSpec extends Specification {
@@ -104,4 +107,30 @@ class InputSpec extends Specification {
 		input1.value == 64
 		input2.value == 64
 	}
+
+	def "Input can pull value from a Pullable even after clearing"() {
+		when:
+		def concatenateModule = new StringConcatenate()
+		concatenateModule.init()
+		concatenateModule.onConfiguration(concatenateModule.configuration)
+
+		def constantModule = new ConstantString()
+		constantModule.init()
+		constantModule.setGlobals(new Globals())
+		constantModule.onConfiguration(constantModule.configuration)
+		constantModule.getInput("str").receive("hello world")
+		constantModule.getOutput("out").connect(concatenateModule.getInput("A"))
+		constantModule.connectionsReady()
+
+		then:
+		concatenateModule.getInput("A").getValue() == "hello world"
+
+		when:
+		constantModule.clear()
+		concatenateModule.clear()
+
+		then:
+		concatenateModule.getInput("A").getValue() == "hello world"
+	}
+
 }

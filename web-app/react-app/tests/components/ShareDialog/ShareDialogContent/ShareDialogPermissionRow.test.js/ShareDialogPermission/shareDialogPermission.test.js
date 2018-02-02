@@ -10,6 +10,14 @@ import {ShareDialogPermission, mapDispatchToProps} from '../../../../../../compo
 
 describe('ShareDialogPermission', () => {
     
+    beforeEach(() => {
+        global.Streamr = {}
+    })
+    
+    afterEach(() => {
+        delete global.Streamr
+    })
+    
     describe('onSelect', () => {
         it('should call props.setResourceHighestOperation with the given value', () => {
             const spy = sinon.spy()
@@ -44,7 +52,23 @@ describe('ShareDialogPermission', () => {
     })
     
     describe('render', () => {
-        it('renders the userLabel correctly', () => {
+        it('renders the userLabel correctly if there is a user', () => {
+            global.Streamr.user = 'test@test.test'
+            const permissions = [{
+                user: 'test@test.test'
+            }]
+            const permissionRow = shallow(
+                <ShareDialogPermission
+                    permissions={permissions}
+                    resourceType=""
+                    resourceId=""
+                />
+            )
+            
+            assert(permissionRow.find('.userLabel'))
+            assert.equal(permissionRow.find('.userLabel').text(), 'Me(test@test.test)')
+        })
+        it('renders the userLabel correctly if there is no user', () => {
             const permissions = [{
                 user: 'A'
             }]
@@ -121,7 +145,7 @@ describe('ShareDialogPermission', () => {
                 user: 'A',
                 operation: 'read',
                 error: {
-                    message: 'moi'
+                    error: 'moi'
                 }
             }, {
                 user: 'B',

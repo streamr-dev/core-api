@@ -1,6 +1,6 @@
 package com.unifina.signalpath.list;
 
-import com.mongodb.util.JSON;
+import com.google.gson.Gson;
 import com.unifina.domain.signalpath.Canvas;
 import com.unifina.service.SignalPathService;
 import com.unifina.signalpath.*;
@@ -43,7 +43,7 @@ public class ForEachItem extends AbstractSignalPathModule {
 		}
 
 		// Construct signal path
-		Map signalPathMap = (Map) JSON.parse(canvas.getJson());
+		Map signalPathMap = new Gson().fromJson(canvas.getJson(), Map.class);
 		SignalPathService signalPathService = Holders.getApplicationContext().getBean(SignalPathService.class);
 		subCanvas = signalPathService.mapToSignalPath(signalPathMap, true, getGlobals(), new SignalPath(false));
 
@@ -106,10 +106,7 @@ public class ForEachItem extends AbstractSignalPathModule {
 
 	@Override
 	public void clearState() {
-		subCanvas.clearState();
-		for (AbstractSignalPathModule module : subCanvas.getModules()) {
-			module.clearState();
-		}
+		subCanvas.clear();
 	}
 
 	private int smallestReceivedListSize() {

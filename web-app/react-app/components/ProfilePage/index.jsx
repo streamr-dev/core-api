@@ -7,7 +7,7 @@ import { Row, Col } from 'react-bootstrap'
 import ProfileSettings from './ProfileSettings'
 import APICredentials from './APICredentials'
 import IntegrationKeyHandler from './IntegrationKeyHandler'
-import Notifier from '../Notifier'
+import Notifier from '../StreamrNotifierWrapper'
 
 export default class ProfilePage extends Component<{}> {
     render() {
@@ -23,7 +23,6 @@ export default class ProfilePage extends Component<{}> {
                 <Col xs={12} sm={6}>
                     <IntegrationKeyHandler />
                 </Col>
-                <Notifier/>
             </Row>
         )
     }

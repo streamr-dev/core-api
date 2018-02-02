@@ -7,6 +7,7 @@ import com.unifina.service.ApiService
 import com.unifina.service.EthereumIntegrationKeyService
 import grails.converters.JSON
 import grails.plugin.springsecurity.annotation.Secured
+import groovy.json.JsonSlurper
 
 @Secured(["IS_AUTHENTICATED_ANONYMOUSLY"])
 class IntegrationKeyApiController {
@@ -40,22 +41,31 @@ class IntegrationKeyApiController {
 	}
 
 	@StreamrApi
-	def save() {
-		IntegrationKey key
-		if (!request.JSON.name) {
-			throw new ApiException(400, "EMPTY_FIELD", "Name can't be empty!")
-		}
-		if (request.JSON.service as IntegrationKey.Service == IntegrationKey.Service.ETHEREUM) {
+	def save(SaveIntegrationKeyCommand cmd) {
+		if (cmd.service as IntegrationKey.Service == IntegrationKey.Service.ETHEREUM) {
+			IntegrationKey key
 			try {
-				key = ethereumIntegrationKeyService.createEthereumAccount(request.apiUser, request.JSON.name, (String) request.JSON.json.get("privateKey"))
+				key = ethereumIntegrationKeyService.createEthereumAccount(request.apiUser, cmd.name, (String) request.JSON.json.get("privateKey"))
 			} catch (IllegalArgumentException e) {
 				throw new ApiException(400, "INVALID_HEX_STRING", e.message)
 			}
+			render key.toMap() as JSON
+		} else if (cmd.service as IntegrationKey.Service == IntegrationKey.Service.ETHEREUM_ID) {
+			IntegrationKey key = ethereumIntegrationKeyService.createEthereumID(request.apiUser, cmd.name, cmd.challenge.id, cmd.challenge.challenge, cmd.signature)
+			response.status = 201
+			Map json = new JsonSlurper().parseText(key.json)
+			render([
+					name     : cmd.name,
+					challenge: [
+							id       : cmd.challenge.id,
+							challenge: cmd.challenge.challenge
+					],
+					signature: cmd.signature,
+					address  : json.address
+			] as JSON)
 		} else {
 			throw new ApiException(400, 'INVALID_SERVICE', "Invalid service: $request.JSON.service")
 		}
-
-		render key.toMap() as JSON
 	}
 
 	@StreamrApi

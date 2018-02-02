@@ -6,10 +6,8 @@ import {
     GET_RUNNING_CANVASES_FAILURE
 } from '../actions/canvas.js'
 
-import type {
-    CanvasReducerState as State,
-    CanvasReducerAction as Action
-} from '../flowtype/canvas-types'
+import type {CanvasState} from '../flowtype/states/canvas-state'
+import type {CanvasAction} from '../flowtype/actions/canvas-actions'
 
 const initialState = {
     list: [],
@@ -17,7 +15,7 @@ const initialState = {
     fetching: false
 }
 
-export default function(state: State = initialState, action: Action) : State {
+export default function(state: CanvasState = initialState, action: CanvasAction): CanvasState {
     switch (action.type) {
         case GET_RUNNING_CANVASES_REQUEST:
             return {

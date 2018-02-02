@@ -12,7 +12,20 @@ import org.eclipse.paho.client.mqttv3.*;
 import org.eclipse.paho.client.mqttv3.persist.MemoryPersistence;
 
 import org.apache.log4j.Logger;
+
+import javax.net.SocketFactory;
+import javax.net.ssl.SSLSocketFactory;
+import java.io.ByteArrayInputStream;
 import java.util.*;
+
+import javax.net.ssl.SSLContext;
+import javax.net.ssl.TrustManager;
+import javax.net.ssl.TrustManagerFactory;
+import java.security.KeyStore;
+import java.security.cert.X509Certificate;
+import java.security.cert.CertificateFactory;
+import java.io.InputStream;
+import java.security.cert.Certificate;
 
 /**
  * Eclipse MqttClient wrapper
@@ -23,6 +36,11 @@ public class Mqtt extends AbstractSignalPathModule implements MqttCallback, IEve
 
 	private StringParameter URL = new StringParameter(this, "URL", "");
 	private StringParameter topic = new StringParameter(this, "topic", "");
+	private StringParameter username = new StringParameter(this, "username", "");
+	private StringParameter password = new StringParameter(this, "password", "");
+	private CertificateParameter certType = new CertificateParameter(this, "certType",CertificateParameter.NONE);
+	private StringParameter certificate = new StringParameter(this, "certificate", "");
+
 	private StringOutput message = new StringOutput(this, "message");
 
 	private transient Propagator asyncPropagator;
@@ -31,12 +49,33 @@ public class Mqtt extends AbstractSignalPathModule implements MqttCallback, IEve
 
 	@Override
 	public void init() {
-		super.init();
+		addInput(URL);
+		addInput(topic);
+		addInput(username);
+		addInput(password);
+		addInput(certType);
+		addOutput(message);
+
 		URL.setCanConnect(false);
 		topic.setCanConnect(false);
+		username.setCanConnect(false);
+		password.setCanConnect(false);
+		certificate.setCanConnect(false);
+		certificate.setTextArea(true);
+
+		certType.setUpdateOnChange(true);
 
 		// sends output when messages arrive (though shouldn't receive inputs anyway...)
 		setPropagationSink(true);
+	}
+
+	@Override
+	protected void onConfiguration(Map<String, Object> config) {
+		super.onConfiguration(config);
+
+		if (!certType.isNone()) {
+			addInput(certificate);
+		}
 	}
 
 	@Override
@@ -75,8 +114,68 @@ public class Mqtt extends AbstractSignalPathModule implements MqttCallback, IEve
 		String clientId = IdGenerator.getShort();
 		MqttClient newClient = new MqttClient(brokerUrl, clientId, new MemoryPersistence());
 		newClient.setCallback(this);
-		newClient.connect();
+		MqttConnectOptions connectOptions = new MqttConnectOptions();
+		if (this.hasUsernameOrPassword()){
+			connectOptions = addGivenUsernamePassword(connectOptions);
+		}
+		if (this.hasCertificate()){
+			connectOptions = addGivenCertificate(connectOptions);
+		}
+		newClient.connect(connectOptions);
 		return newClient;
+	}
+
+	private boolean hasUsernameOrPassword(){
+		if (password.getValue().isEmpty() && username.getValue().isEmpty()){
+			return false;
+		}
+		return true;
+	}
+
+	private boolean hasCertificate(){
+		if (certType.getValue().equals(CertificateParameter.CRT)){
+			return true;
+		}
+		return false;
+	}
+
+	private MqttConnectOptions addGivenUsernamePassword(MqttConnectOptions connectOptions) {
+		connectOptions.setPassword(password.getValue().toCharArray());
+		connectOptions.setUserName(username.getValue());
+		return connectOptions;
+	}
+
+	private MqttConnectOptions addGivenCertificate(MqttConnectOptions connectOptions) {
+		try {
+			SSLContext context;
+			CertificateFactory cf = CertificateFactory.getInstance("X.509");
+			InputStream caInput = new ByteArrayInputStream(certificate.getValue().getBytes());
+			Certificate ca;
+
+			try {
+				ca = cf.generateCertificate(caInput);
+				String keyStoreType = KeyStore.getDefaultType();
+				KeyStore keyStore = KeyStore.getInstance(keyStoreType);
+				keyStore.load(null, null);
+				keyStore.setCertificateEntry("ca", ca);
+
+				String tmfAlgorithm = TrustManagerFactory.getDefaultAlgorithm();
+				TrustManagerFactory tmf = TrustManagerFactory.getInstance(tmfAlgorithm);
+				tmf.init(keyStore);
+
+				context =  SSLContext.getInstance("TLS");
+				context.init(null, tmf.getTrustManagers(), null);
+				SocketFactory factory = context.getSocketFactory();
+				connectOptions.setSocketFactory(factory);
+			} catch (Exception e){
+				throw new RuntimeException("Certificate generation for MQTT client failed", e);
+			}
+
+		} catch (Exception e){
+			throw new RuntimeException("SSL Context generation for MQTT client failed", e);
+		}
+
+		return connectOptions;
 	}
 
 	/**
@@ -102,7 +201,7 @@ public class Mqtt extends AbstractSignalPathModule implements MqttCallback, IEve
 		final MqttMessageEvent event = new MqttMessageEvent(getGlobals().time);
 		event.message = mqttMessage;
 		// push mqtt message into FeedEvent queue; it will later call this.receive
-		getGlobals().getDataSource().getEventQueue().enqueue(new FeedEvent<>(event, event.timestamp, this));
+		getGlobals().getDataSource().enqueueEvent(new FeedEvent<>(event, event.timestamp, this));
 	}
 
 	@Override
@@ -159,5 +258,25 @@ public class Mqtt extends AbstractSignalPathModule implements MqttCallback, IEve
 		public Date getTimestamp() {
 			return timestamp;
 		}
+	}
+
+	public static class CertificateParameter extends StringParameter {
+
+		public static final String NONE = "none";
+		public static final String CRT = ".crt";
+
+		public CertificateParameter(AbstractSignalPathModule owner, String name, String defaultValue) {
+			super(owner, name, defaultValue);
+		}
+
+		@Override
+		protected List<PossibleValue> getPossibleValues() {
+			return Arrays.asList(
+				new PossibleValue("none", NONE),
+				new PossibleValue(".crt", CRT)
+			);
+		}
+
+		public boolean isNone() { return getValue().equals(NONE);}
 	}
 }

@@ -1,14 +1,19 @@
 package com.unifina.signalpath.utils
 
 import com.unifina.UiChannelMockingSpecification
+import com.unifina.domain.security.SecUser
+import com.unifina.signalpath.SignalPath
 import com.unifina.utils.Globals
 import com.unifina.utils.testutils.FakeExportCSVContext
 import com.unifina.utils.testutils.ModuleTestHelper
+import grails.test.mixin.Mock
 
+@Mock(SecUser)
 class ExportCSVSpec extends UiChannelMockingSpecification {
 
 	FakeExportCSVContext fakeFileHolder = new FakeExportCSVContext()
 	ExportCSV module
+	Globals globals
 
 	def setup() {
 		mockServicesForUiChannels()
@@ -17,6 +22,7 @@ class ExportCSVSpec extends UiChannelMockingSpecification {
 		module.getInput("generated-input-1").setDisplayName("in1")
 		module.getInput("generated-input-2").setDisplayName("in2")
 		module.getInput("generated-input-3").setDisplayName("in3")
+		globals = new Globals([:], new SecUser(timezone: "EST").save(failOnError: true, validate: false))
 	}
 
 	private boolean testForFileContentAndUiMessages(String s, Map channelMessages) {
@@ -36,10 +42,6 @@ class ExportCSVSpec extends UiChannelMockingSpecification {
 			.uiChannelMessages(channelMessages, getSentMessagesByStreamId())
 			// Don't test deserialization, since resuming to write the same csv file will not be possible
 			.serializationModes(new HashSet<>([ModuleTestHelper.SerializationMode.NONE, ModuleTestHelper.SerializationMode.CLEAR, ModuleTestHelper.SerializationMode.SERIALIZE]))
-			.overrideGlobals { Globals globals ->
-				globals.setUserTimeZone(TimeZone.getTimeZone("EST"))
-				return globals
-			}
 			.afterEachTestCase {
 				if (s) {
 					String fileContents = fakeFileHolder.resolveStringsAndReset()
@@ -56,7 +58,7 @@ class ExportCSVSpec extends UiChannelMockingSpecification {
 		when:
 		setupModule(module, [
 			uiChannel: [id: "uiChannelId"]
-		])
+		], new SignalPath(true), globals)
 
 		then:
 		testForFileContentAndUiMessages(
@@ -76,7 +78,7 @@ class ExportCSVSpec extends UiChannelMockingSpecification {
 		when:
 		setupModule(module, [
 				uiChannel: [id: "uiChannelId"]
-		])
+		], new SignalPath(true), globals)
 
 		then:
 		testForFileContentAndUiMessages(
@@ -99,7 +101,7 @@ class ExportCSVSpec extends UiChannelMockingSpecification {
 			options: [
 				writeHeader: [value: false]
 			]
-		])
+		], new SignalPath(true), globals)
 
 		then:
 		testForFileContentAndUiMessages(
@@ -121,7 +123,7 @@ class ExportCSVSpec extends UiChannelMockingSpecification {
 			options: [
 				includeTimestamps: [value: false]
 			]
-		])
+		], new SignalPath(true), globals)
 
 		then:
 		testForFileContentAndUiMessages(
@@ -144,7 +146,7 @@ class ExportCSVSpec extends UiChannelMockingSpecification {
 			options: [
 			    timeFormat: [value: "MILLISECONDS_SINCE_EPOCH"]
 			]
-		])
+		], new SignalPath(true), globals)
 
 		then:
 		testForFileContentAndUiMessages(
@@ -167,7 +169,7 @@ class ExportCSVSpec extends UiChannelMockingSpecification {
 			options: [
 				timeFormat: [value: "ISO_8601_LOCAL"]
 			]
-		])
+		], new SignalPath(true), globals)
 
 		then:
 		testForFileContentAndUiMessages(

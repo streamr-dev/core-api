@@ -3,18 +3,15 @@ package com.unifina.signalpath.utils
 import com.unifina.domain.security.SecUser
 import com.unifina.utils.Globals
 import com.unifina.utils.testutils.ModuleTestHelper
-import grails.test.mixin.TestMixin
-import grails.test.mixin.support.GrailsUnitTestMixin
 import spock.lang.Specification
 
-@TestMixin(GrailsUnitTestMixin)
 class RateLimitSpec extends Specification {
 	
 	Globals globals
 	RateLimit module
 
     def setup() {
-		globals = new Globals([:], grailsApplication, new SecUser(timezone:"Europe/Helsinki", username: "username"))
+		globals = new Globals([:], new SecUser(timezone:"Europe/Helsinki", username: "username"))
 		module = new RateLimit()
 		module.globals = globals
 		module.init()

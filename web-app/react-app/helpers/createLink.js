@@ -1,8 +1,9 @@
+// @flow
 
 declare var Streamr: {
     createLink: Function
 }
 
-export default (uri) => Streamr.createLink({
+export default (uri: string) => Streamr.createLink({
     uri
 })

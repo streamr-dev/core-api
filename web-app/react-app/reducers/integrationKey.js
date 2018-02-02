@@ -17,7 +17,8 @@ import {
 
 import _ from 'lodash'
 
-import type {State, Action} from '../flowtype/integration-key-types.js'
+import type {IntegrationKeyState} from '../flowtype/states/integration-key-state'
+import type {IntegrationKeyAction} from '../flowtype/actions/integration-key-actions'
 
 const initialState = {
     listsByService: {},
@@ -25,7 +26,7 @@ const initialState = {
     fetching: false
 }
 
-export default function(state: State = initialState, action: Action) : State {
+export default function(state: IntegrationKeyState = initialState, action: IntegrationKeyAction): IntegrationKeyState {
     
     switch (action.type) {
         case GET_AND_REPLACE_INTEGRATION_KEYS_REQUEST:
@@ -57,35 +58,38 @@ export default function(state: State = initialState, action: Action) : State {
                 fetching: false
             }
         }
-        case CREATE_INTEGRATION_KEY_SUCCESS: {
-            if (!action.integrationKey || !action.integrationKey.service) {
-                throw new Error(`${GET_INTEGRATION_KEYS_BY_SERVICE_SUCCESS} requires action.integrationKey and action.integrationKey.service`)
-            }
-            // These are just to make sure that flow is happy
-            const listsByService = state.listsByService || {}
-            const existing = listsByService[action.integrationKey.service] || []
-            
+        case CREATE_INTEGRATION_KEY_SUCCESS:
             return {
                 ...state,
                 listsByService: {
-                    ...listsByService,
+                    ...(state.listsByService || {}),
                     [action.integrationKey.service]: [
-                        ...existing,
+                        ...(state.listsByService[action.integrationKey.service] || []),
                         action.integrationKey
                     ]
                 },
                 error: null,
                 fetching: false
             }
-        }
+        
         case DELETE_INTEGRATION_KEY_SUCCESS: {
+            // This is some hacking for keeping Flow happy
+            if (!action.id) {
+                return state
+            }
+            const newListsByService = {}
+            Object.keys(state.listsByService).forEach((key) => {
+                const keys = state.listsByService[key]
+                newListsByService[key] = keys.filter(integrationKey => action.id && action.id !== integrationKey.id)
+            })
             return {
                 ...state,
-                listsByService: _.mapValues(state.listsByService, list => _.reject(list, integrationKey => integrationKey.id === action.id)),
+                listsByService: newListsByService,
                 error: null,
                 fetching: false
             }
         }
+        
         case GET_AND_REPLACE_INTEGRATION_KEYS_FAILURE:
         case GET_INTEGRATION_KEYS_BY_SERVICE_FAILURE:
         case CREATE_INTEGRATION_KEY_FAILURE:

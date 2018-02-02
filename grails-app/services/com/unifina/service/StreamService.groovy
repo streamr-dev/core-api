@@ -15,7 +15,7 @@ import com.unifina.domain.security.Permission
 import com.unifina.domain.security.SecUser
 import com.unifina.domain.signalpath.Canvas
 import com.unifina.domain.task.Task
-import com.unifina.feed.AbstractDataRangeProvider
+import com.unifina.feed.DataRangeProvider
 import com.unifina.feed.AbstractStreamListener
 import com.unifina.feed.DataRange
 import com.unifina.feed.FieldDetector
@@ -34,6 +34,7 @@ import java.text.DateFormat
 class StreamService {
 
 	def grailsApplication
+	FeedService feedService
 	KafkaService kafkaService
 	CassandraService cassandraService
 	PermissionService permissionService
@@ -241,7 +242,7 @@ class StreamService {
 	public AbstractStreamListener instantiateListener(Stream stream) {
 		Assert.notNull(stream.feed.streamListenerClass, "feed's streamListenerClass is unexpectedly null")
 		Class clazz = getClass().getClassLoader().loadClass(stream.feed.streamListenerClass)
-		return clazz.newInstance(grailsApplication)
+		return clazz.newInstance()
 	}
 
 	// TODO: move to FeedService
@@ -250,26 +251,15 @@ class StreamService {
 			return null
 		} else {
 			Class clazz = getClass().getClassLoader().loadClass(stream.feed.fieldDetectorClass)
-			return clazz.newInstance(grailsApplication)
+			return clazz.newInstance()
 		}
 
 	}
 
-	// TODO: move to FeedService
-	private AbstractDataRangeProvider instantiateDataRangeProvider(Stream stream) {
-		if (stream.feed.dataRangeProviderClass == null) {
-			return null
-		} else {
-			Class clazz = getClass().getClassLoader().loadClass(stream.feed.dataRangeProviderClass)
-			return clazz.newInstance(grailsApplication)
-		}
-	}
-
+	@CompileStatic
 	DataRange getDataRange(Stream stream) {
-		AbstractDataRangeProvider provider = instantiateDataRangeProvider(stream)
-		if (provider)
-			return provider.getDataRange(stream)
-		else return null
+		DataRangeProvider provider = feedService.instantiateDataRangeProvider(stream.feed)
+		return provider?.getDataRange(stream)
 	}
 
 	@CompileStatic

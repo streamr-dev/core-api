@@ -9,17 +9,26 @@ import {removeDashboardItem, updateDashboardItem} from '../../../../../actions/d
 
 import styles from './dashboardItemTitleRow.pcss'
 
-import type {Dashboard, DashboardItem, DashboardReducerState as DashboardState} from '../../../../../flowtype/dashboard-types'
+import type {DashboardState} from '../../../../../flowtype/states/dashboard-state'
+import type {Dashboard, DashboardItem} from '../../../../../flowtype/dashboard-types'
 
-type Props = {
-    item: DashboardItem,
-    dashboard: Dashboard,
+type StateProps = {
+    dashboard: ?Dashboard
+}
+
+type DispatchProps = {
     update: Function,
-    remove: Function,
+    remove: Function
+}
+
+type GivenProps = {
+    item: DashboardItem,
     className?: string,
     dragCancelClassName?: string,
     isLocked: boolean
 }
+
+type Props = StateProps & DispatchProps & GivenProps
 
 type State = {
     editing: boolean
@@ -128,11 +137,11 @@ export class DashboardItemTitleRow extends Component<Props, State> {
     }
 }
 
-export const mapStateToProps = ({dashboard: {dashboardsById, openDashboard}}: {dashboard: DashboardState}) => ({
-    dashboard: dashboardsById[openDashboard.id]
+export const mapStateToProps = ({dashboard: {dashboardsById, openDashboard}}: {dashboard: DashboardState}): StateProps => ({
+    dashboard: openDashboard.id ? dashboardsById[openDashboard.id] : null
 })
 
-export const mapDispatchToProps = (dispatch: Function) => ({
+export const mapDispatchToProps = (dispatch: Function): DispatchProps => ({
     update(db: Dashboard, item: DashboardItem, newData: {} = {}) {
         return dispatch(updateDashboardItem(db, {
             ...item,

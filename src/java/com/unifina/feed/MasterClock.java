@@ -19,8 +19,8 @@ public class MasterClock extends AbstractEventRecipient<ITimeListener, ITimestam
 		long epochSec = date.getTime() / 1000;
 		
 		// Iterate by index to avoid ConcurrentModificationException in case new modules are added.
-		for (int i=0; i < moduleSize; i++) {
-			ITimeListener module = modules.get(i);
+		for (int i=0; i < getModules().size(); i++) {
+			ITimeListener module = getModules().get(i);
 			if (isTimeToTick(epochSec, module.tickRateInSec())) {
 				module.setTime(date);
 			}

@@ -5,7 +5,7 @@ import parseError from './utils/parseError'
 import createLink from '../helpers/createLink'
 import _ from 'lodash'
 
-import {showSuccess, showError} from './notification'
+import {success, error} from 'react-notification-system-redux'
 
 export const CREATE_DASHBOARD = 'CREATE_DASHBOARD'
 export const OPEN_DASHBOARD = 'OPEN_DASHBOARD'
@@ -39,7 +39,9 @@ export const CHANGE_DASHBOARD_ID = 'CHANGE_DASHBOARD_ID'
 const apiUrl = 'api/v1/dashboards'
 
 import type { ApiError } from '../flowtype/common-types'
-import type { Dashboard, DashboardItem, Layout} from '../flowtype/dashboard-types'
+import type { Dashboard, DashboardItem, Layout, LayoutItem} from '../flowtype/dashboard-types'
+
+const dashboardConfig = require('../components/DashboardPage/dashboardConfig')
 
 declare var Streamr: {
     user: string
@@ -54,14 +56,14 @@ export const getAndReplaceDashboards = () => (dispatch: Function) => {
         .catch(res => {
             const e = parseError(res)
             dispatch(getAndReplaceDashboardsFailure(e))
-            dispatch(showError({
-                title: e.message
+            dispatch(error({
+                title: e.error
             }))
             throw e
         })
 }
 
-export const getDashboard = (id: Dashboard.id) => (dispatch: Function) => {
+export const getDashboard = (id: $ElementType<Dashboard, 'id'>) => (dispatch: Function) => {
     dispatch(getDashboardRequest(id))
     return axios.get(createLink(`${apiUrl}/${id}`))
         .then(({data}) => dispatch(getDashboardSuccess({
@@ -71,8 +73,8 @@ export const getDashboard = (id: Dashboard.id) => (dispatch: Function) => {
         .catch(res => {
             const e = parseError(res)
             dispatch(getDashboardFailure(e))
-            dispatch(showError({
-                title: e.message
+            dispatch(error({
+                title: e.error
             }))
             throw e
         })
@@ -97,7 +99,7 @@ export const updateAndSaveDashboard = (dashboard: Dashboard) => (dispatch: Funct
         }
     })
         .then(({data}) => {
-            dispatch(showSuccess({
+            dispatch(success({
                 title: 'Dashboard saved successfully!'
             }))
             dashboard.id !== data.id && dispatch(changeDashboardId(dashboard.id, data.id))
@@ -109,8 +111,8 @@ export const updateAndSaveDashboard = (dashboard: Dashboard) => (dispatch: Funct
         .catch(res => {
             const e = parseError(res)
             
-            dispatch(showError({
-                title: e.message
+            dispatch(error({
+                title: e.error
             }))
             dispatch(updateAndSaveDashboardFailure(e))
             
@@ -118,36 +120,36 @@ export const updateAndSaveDashboard = (dashboard: Dashboard) => (dispatch: Funct
         })
 }
 
-export const deleteDashboard = (id: Dashboard.id) => (dispatch: Function) => {
+export const deleteDashboard = (id: $ElementType<Dashboard, 'id'>) => (dispatch: Function) => {
     dispatch(deleteDashboardRequest(id))
     return axios.delete(createLink(`${apiUrl}/${id}`))
         .then(() => dispatch(deleteDashboardSuccess(id)))
         .catch(res => {
             const e = parseError(res)
             dispatch(deleteDashboardFailure(e))
-            dispatch(showError({
-                title: e.message
+            dispatch(error({
+                title: e.error
             }))
             throw e
         })
 }
 
-export const getMyDashboardPermissions = (id: Dashboard.id) => (dispatch: Function) => {
+export const getMyDashboardPermissions = (id: $ElementType<Dashboard, 'id'>) => (dispatch: Function) => {
     dispatch(getMyDashboardPermissionsRequest(id))
     return axios.get(createLink(`${apiUrl}/${id}/permissions/me`))
         .then(res => dispatch(getMyDashboardPermissionsSuccess(id, res.data.filter(item => item.user === Streamr.user).map(item => item.operation))))
         .catch(res => {
             const e = parseError(res)
             dispatch(getMyDashboardPermissionsFailure(id, e))
-            dispatch(showError({
+            dispatch(error({
                 title: 'Error!',
-                message: e.message
+                message: e.error
             }))
             throw e
         })
 }
 
-export const updateDashboardChanges = (id: Dashboard.id, changes: {}) => (dispatch: Function, getState: Function) => {
+export const updateDashboardChanges = (id: $ElementType<Dashboard, 'id'>, changes: {}) => (dispatch: Function, getState: Function) => {
     const state = getState()
     const dashboard = state.dashboard.dashboardsById[id]
     dispatch(updateDashboard({
@@ -169,10 +171,10 @@ export const addDashboardItem = (dashboard: Dashboard, item: DashboardItem) => u
     ]
 })
 
-export const updateDashboardLayout = (dashboardId: Dashboard.id, layout: Layout) => (dispatch: Function, getState: Function) => {
+export const updateDashboardLayout = (dashboardId: $ElementType<Dashboard, 'id'>, layout: Layout) => (dispatch: Function, getState: Function) => {
     const state = getState().dashboard
     const dashboard = state.dashboardsById[state.openDashboard.id]
-    const normalizeLayoutItem = (item: DashboardItem.layout) => ({
+    const normalizeLayoutItem = (item: LayoutItem) => ({
         i: item.i || 0,
         h: item.h || 0,
         isDraggable: item.isDraggable,
@@ -187,16 +189,14 @@ export const updateDashboardLayout = (dashboardId: Dashboard.id, layout: Layout)
         x: item.x || 0,
         y: item.y || 0
     })
-    const normalizeItemList = (itemList: ?Array<DashboardItem.layout>) => itemList ? _.chain(itemList)
+    const normalizeItemList = (itemList: ?Array<LayoutItem>) => itemList ? _.chain(itemList)
         .sortBy('i')
         .map(normalizeLayoutItem)
         .value() : []
-    const normalizeLayout = (layout: Layout): Layout => ({
-        xs: normalizeItemList(layout.xs),
-        sm: normalizeItemList(layout.sm),
-        md: normalizeItemList(layout.md),
-        lg: normalizeItemList(layout.lg),
-    })
+    const normalizeLayout = (layout: Layout) => dashboardConfig.layout.sizes.reduce((obj, size) => {
+        obj[size] = (layout && layout[size]) ? normalizeItemList(layout[size]) : []
+        return obj
+    }, {})
     if (dashboard && !_.isEqual(normalizeLayout(layout), normalizeLayout(dashboard.layout))) {
         dispatch(updateDashboard({
             ...dashboard,
@@ -223,7 +223,7 @@ export const createDashboard = (dashboard: Dashboard) => ({
     dashboard
 })
 
-export const newDashboard = (id: Dashboard.id) => createDashboard({
+export const newDashboard = (id: $ElementType<Dashboard, 'id'>) => createDashboard({
     id,
     name: 'Untitled Dashboard',
     items: [],
@@ -231,22 +231,22 @@ export const newDashboard = (id: Dashboard.id) => createDashboard({
     editingLocked: false
 })
 
-export const openDashboard = (id: Dashboard.id) => ({
+export const openDashboard = (id: $ElementType<Dashboard, 'id'>) => ({
     type: OPEN_DASHBOARD,
     id
 })
 
-export const lockDashboardEditing = (id: Dashboard.id) => ({
+export const lockDashboardEditing = (id: $ElementType<Dashboard, 'id'>) => ({
     type: LOCK_DASHBOARD_EDITING,
     id
 })
 
-export const unlockDashboardEditing = (id: Dashboard.id) => ({
+export const unlockDashboardEditing = (id: $ElementType<Dashboard, 'id'>) => ({
     type: UNLOCK_DASHBOARD_EDITING,
     id
 })
 
-const changeDashboardId = (oldId: Dashboard.id, newId: Dashboard.id) => ({
+const changeDashboardId = (oldId: $ElementType<Dashboard, 'id'>, newId: $ElementType<Dashboard, 'id'>) => ({
     type: CHANGE_DASHBOARD_ID,
     oldId,
     newId
@@ -256,7 +256,7 @@ const getAndReplaceDashboardsRequest = () => ({
     type: GET_AND_REPLACE_DASHBOARDS_REQUEST,
 })
 
-const getDashboardRequest = (id: Dashboard.id) => ({
+const getDashboardRequest = (id: $ElementType<Dashboard, 'id'>) => ({
     type: GET_DASHBOARD_REQUEST,
     id
 })
@@ -265,12 +265,12 @@ const updateAndSaveDashboardRequest = () => ({
     type: UPDATE_AND_SAVE_DASHBOARD_REQUEST,
 })
 
-const deleteDashboardRequest = (id: Dashboard.id) => ({
+const deleteDashboardRequest = (id: $ElementType<Dashboard, 'id'>) => ({
     type: DELETE_DASHBOARD_REQUEST,
     id
 })
 
-const getMyDashboardPermissionsRequest = (id: Dashboard.id) => ({
+const getMyDashboardPermissionsRequest = (id: $ElementType<Dashboard, 'id'>) => ({
     type: GET_MY_DASHBOARD_PERMISSIONS_REQUEST,
     id
 })
@@ -290,12 +290,12 @@ const updateAndSaveDashboardSuccess = (dashboard: Dashboard) => ({
     dashboard
 })
 
-const deleteDashboardSuccess = (id: Dashboard.id) => ({
+const deleteDashboardSuccess = (id: $ElementType<Dashboard, 'id'>) => ({
     type: DELETE_DASHBOARD_SUCCESS,
     id
 })
 
-const getMyDashboardPermissionsSuccess = (id: Dashboard.id, permissions: Array<string>) => ({
+const getMyDashboardPermissionsSuccess = (id: $ElementType<Dashboard, 'id'>, permissions: Array<string>) => ({
     type: GET_MY_DASHBOARD_PERMISSIONS_SUCCESS,
     id,
     permissions
@@ -321,7 +321,7 @@ const deleteDashboardFailure = (error: ApiError) => ({
     error
 })
 
-const getMyDashboardPermissionsFailure = (id: Dashboard.id, error: ApiError) => ({
+const getMyDashboardPermissionsFailure = (id: $ElementType<Dashboard, 'id'>, error: ApiError) => ({
     type: GET_MY_DASHBOARD_PERMISSIONS_FAILURE,
     id,
     error

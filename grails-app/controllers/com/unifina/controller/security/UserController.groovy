@@ -7,7 +7,7 @@ import com.unifina.domain.security.SecRole
 import com.unifina.domain.security.SecUserSecRole
 import com.unifina.domain.security.SignupInvite
 import com.unifina.domain.signalpath.ModulePackage
-import com.unifina.user.UserCreationFailedException
+import com.unifina.exceptions.UserCreationFailedException
 import grails.converters.JSON
 import grails.plugin.springsecurity.SpringSecurityUtils
 import grails.plugin.springsecurity.annotation.Secured

@@ -33,8 +33,7 @@ public class FakeMessageSource implements MessageSource {
 	}
 
 	public void handleMessage(StreamrBinaryMessage rawMsg) {
-		Message msg = new Message(rawMsg.getStreamId()+"-"+rawMsg.getPartition(), offset++, rawMsg);
-		msg.checkCounter = false;
+		Message msg = new Message<>(rawMsg.getStreamId()+"-"+rawMsg.getPartition(), offset++, rawMsg, false);
 		recipient.receive(msg);
 	}
 

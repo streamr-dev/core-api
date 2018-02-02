@@ -37,7 +37,8 @@ import {
     updateDashboardLayout
 } from '../../../actions/dashboard'
 
-import type {Dashboard, DashboardReducerState as DashboardState, Layout, LayoutItem} from '../../../flowtype/dashboard-types'
+import type {DashboardState} from '../../../flowtype/states/dashboard-state'
+import type {Dashboard, Layout, LayoutItem} from '../../../flowtype/dashboard-types'
 
 const ResponsiveReactGridLayout = WidthProvider(Responsive)
 
@@ -45,20 +46,29 @@ declare var keyId: string
 
 import styles from './editor.pcss'
 
-type Props = {
-    dashboard: Dashboard,
+type StateProps = {
+    dashboard: ?Dashboard,
     canShare: boolean,
     canWrite: boolean,
-    delete: Function,
-    update: Function,
-    editorLocked: Function,
-    lockEditing: Function,
-    unlockEditing: Function,
-    updateDashboardLayout: Function,
+    editorLocked: boolean
+}
+
+type DispatchProps = {
+    update: (id: $ElementType<Dashboard, 'id'>, changes: {}) => Promise<Dashboard>,
+    lockEditing: (id: $ElementType<Dashboard, 'id'>) => void,
+    unlockEditing: (id: $ElementType<Dashboard, 'id'>) => void,
+    updateDashboardLayout: (id: $ElementType<Dashboard, 'id'>, layout: Layout) => void
+}
+
+type GivenProps = {}
+
+type RouterProps = {
     history: {
         push: Function
     }
 }
+
+type Props = StateProps & DispatchProps & GivenProps & RouterProps
 
 type State = {
     breakpoints: {
@@ -116,7 +126,7 @@ export class Editor extends Component<Props, State> {
     }
     
     componentWillReceiveProps(nextProps: Props) {
-        if (this.props.dashboard.id !== nextProps.dashboard.id) {
+        if (this.props.dashboard && nextProps.dashboard && this.props.dashboard.id !== nextProps.dashboard.id) {
             this.props.history.push(`/${nextProps.dashboard.id || ''}`)
         }
     }
@@ -124,9 +134,9 @@ export class Editor extends Component<Props, State> {
     onMenuToggle = () => {
         const menuIsOpen = document.body && document.body.classList && document.body.classList.contains('mmc')
         if (menuIsOpen) {
-            this.props.unlockEditing(this.props.dashboard.id)
+            this.props.dashboard && this.props.unlockEditing(this.props.dashboard.id)
         } else {
-            this.props.lockEditing(this.props.dashboard.id)
+            this.props.dashboard && this.props.lockEditing(this.props.dashboard.id)
         }
     }
     
@@ -136,7 +146,7 @@ export class Editor extends Component<Props, State> {
     
     onLayoutChange = (layout: DashboardItem.layout, allLayouts: Layout) => {
         this.onResize(layout)
-        this.props.updateDashboardLayout(this.props.dashboard.id, allLayouts)
+        this.props.dashboard && this.props.updateDashboardLayout(this.props.dashboard.id, allLayouts)
     }
     
     onFullscreenToggle = (value?: boolean) => {
@@ -145,18 +155,18 @@ export class Editor extends Component<Props, State> {
         })
     }
     
-    generateLayout = (): Layout => {
+    generateLayout = (): ?Layout => {
         const db = this.props.dashboard
-        const layout = _.zipObject(dashboardConfig.layout.sizes, _.map(dashboardConfig.layout.sizes, (size: 'lg' | 'md' | 'sm' | 'xs') => {
+        const layout = db && _.zipObject(dashboardConfig.layout.sizes, _.map(dashboardConfig.layout.sizes, (size: 'lg' | 'md' | 'sm' | 'xs') => {
             return db.items.map(item => {
                 const id = Editor.generateItemId(item)
                 const layout = db.layout && db.layout[size] && db.layout[size].find(layout => layout.i === id)
-                return {
+                return item.webcomponent ? {
                     ...dashboardConfig.layout.defaultLayout,
                     ...dashboardConfig.layout.layoutsBySizeAndModule[size][item.webcomponent],
                     ...(layout || {}),
                     i: id
-                }
+                } : {}
             })
         }))
         return layout
@@ -172,7 +182,7 @@ export class Editor extends Component<Props, State> {
     }
     
     onBeforeUnload = (e: Event & { returnValue: ?string }): ?string => {
-        if (this.props.dashboard.id && !this.props.dashboard.saved) {
+        if (this.props.dashboard && this.props.dashboard.id && !this.props.dashboard.saved) {
             const message = 'You have unsaved changes in your Dashboard. Are you sure you want to leave?'
             e.returnValue = message
             return message
@@ -185,11 +195,11 @@ export class Editor extends Component<Props, State> {
     
     render() {
         const {dashboard} = this.props
-        const layout = dashboard.items && this.generateLayout()
-        const items = dashboard.items ? _.sortBy(dashboard.items, ['canvas', 'module']) : []
+        const layout = dashboard && dashboard.items && this.generateLayout()
+        const items = dashboard && dashboard.items ? _.sortBy(dashboard.items, ['canvas', 'module']) : []
         const dragCancelClassName = 'cancelDragging' + Date.now()
         const locked = this.props.editorLocked || this.state.isFullscreen
-        return (
+        return dashboard ? (
             <div
                 id="content-wrapper"
                 className={`scrollable ${styles.editor}`}
@@ -239,8 +249,8 @@ export class Editor extends Component<Props, State> {
                                             sharingDialogIsOpen: false
                                         })}
                                         resourceType="DASHBOARD"
-                                        resourceId={this.props.dashboard.id}
-                                        resourceTitle={`Dashboard ${this.props.dashboard.name}`}
+                                        resourceId={this.props.dashboard && this.props.dashboard.id}
+                                        resourceTitle={`Dashboard ${this.props.dashboard ? this.props.dashboard.name : ''}`}
                                     />
                                 </StreamrBreadcrumbDropdownButton>
                             )}
@@ -283,30 +293,31 @@ export class Editor extends Component<Props, State> {
                     </div>
                 </Fullscreen>
             </div>
-        )
+        ) : null
     }
 }
 
-export const mapStateToProps = (state: {dashboard: DashboardState}) => {
+export const mapStateToProps = (state: {dashboard: DashboardState}): StateProps => {
     const baseState = parseDashboard(state)
+    const {dashboard} = baseState
     return {
         ...baseState,
-        editorLocked: baseState.dashboard.editingLocked || (!baseState.dashboard.new && !baseState.canWrite)
+        editorLocked: !!dashboard && (dashboard.editingLocked || (!dashboard.new && !baseState.canWrite))
     }
 }
 
-export const mapDispatchToProps = (dispatch: Function) => ({
-    update(id: Dashboard.id, changes: {}) {
+export const mapDispatchToProps = (dispatch: Function): DispatchProps => ({
+    update(id: $ElementType<Dashboard, 'id'>, changes: {}) {
         return dispatch(updateDashboardChanges(id, changes))
     },
-    lockEditing(id: Dashboard.id) {
-        return dispatch(lockDashboardEditing(id))
+    lockEditing(id: $ElementType<Dashboard, 'id'>) {
+        dispatch(lockDashboardEditing(id))
     },
-    unlockEditing(id: Dashboard.id) {
-        return dispatch(unlockDashboardEditing(id))
+    unlockEditing(id: $ElementType<Dashboard, 'id'>) {
+        dispatch(unlockDashboardEditing(id))
     },
-    updateDashboardLayout(id: Dashboard.id, layout: Layout) {
-        return dispatch(updateDashboardLayout(id, layout))
+    updateDashboardLayout(id: $ElementType<Dashboard, 'id'>, layout: Layout) {
+        dispatch(updateDashboardLayout(id, layout))
     }
 })
 

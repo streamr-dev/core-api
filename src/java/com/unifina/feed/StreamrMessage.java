@@ -10,9 +10,8 @@ public class StreamrMessage extends MapMessage {
 	private final int partition;
 	private final String streamId;
 
-	public StreamrMessage(String streamId, int partition, Date timestamp, Date receiveTime,
-						  Map content) {
-		super(timestamp,receiveTime,content);
+	public StreamrMessage(String streamId, int partition, Date timestamp, Map content) {
+		super(timestamp, content);
 		this.streamId = streamId;
 		this.partition = partition;
 	}

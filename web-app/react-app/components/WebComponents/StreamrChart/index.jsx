@@ -5,8 +5,7 @@ import ComplexStreamrWidget from '../ComplexStreamrWidget'
 
 declare var StreamrChart: Function
 
-import type {WebcomponentProps} from '../../../flowtype/webcomponent-types'
-import type {ModuleOptions} from '../../../flowtype/streamr-client-types'
+import type {ModuleOptions, StreamId, SubscriptionOptions} from '../../../flowtype/streamr-client-types'
 
 import styles from './streamrChartComponent.pcss'
 
@@ -17,7 +16,14 @@ type Options = ModuleOptions | {
     init: ?boolean
 }
 
-type Props = WebcomponentProps & {}
+type Props = {
+    url: string,
+    subscriptionOptions?: SubscriptionOptions,
+    stream?: StreamId,
+    height?: ?number,
+    width?: ?number,
+    onError?: ?Function
+}
 
 type State = {
     options: Options

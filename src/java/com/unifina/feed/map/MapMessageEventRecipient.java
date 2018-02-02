@@ -21,30 +21,17 @@ import com.unifina.utils.Globals;
  */
 public class MapMessageEventRecipient extends StreamEventRecipient<AbstractSignalPathModule, MapMessage> {
 
-	Map<String, List<Output>> outputsByName = null;
+	private Map<String, List<Output>> outputsByName = null;
 	
 	public MapMessageEventRecipient(Globals globals, Stream stream, Set<Integer> partitions) {
 		super(globals, stream, partitions);
 	}
-
-	private void initCacheMap() {
-		outputsByName = new LinkedHashMap<>();
-		
-		for (AbstractSignalPathModule m : modules) {
-			for (Output o : m.getOutputs()) {
-				if (!outputsByName.containsKey(o.getName())) {
-					outputsByName.put(o.getName(), new ArrayList<Output>());
-				}
-				
-				outputsByName.get(o.getName()).add(o);
-			}
-		}
-	}
 	
 	@Override
 	protected void sendOutputFromModules(FeedEvent<MapMessage, ? extends IEventRecipient> event) {
-		if (outputsByName==null)
+		if (outputsByName == null) {
 			initCacheMap();
+		}
 		
 		Map msg = event.content.payload;
 		
@@ -53,7 +40,7 @@ public class MapMessageEventRecipient extends StreamEventRecipient<AbstractSigna
 				Object val = msg.get(name);
 
 				// Null values are just not sent
-				if (val==null) {
+				if (val == null) {
 					continue;
 				}
 
@@ -61,11 +48,25 @@ public class MapMessageEventRecipient extends StreamEventRecipient<AbstractSigna
 					// Convert all numbers to doubles
 					if (o instanceof TimeSeriesOutput) {
 						o.send(((Number) val).doubleValue());
+					} else {
+						o.send(val);
 					}
-					else o.send(val);
 				}
 			}
 		}
 	}
 
+	private void initCacheMap() {
+		outputsByName = new LinkedHashMap<>();
+
+		for (AbstractSignalPathModule m : getModules()) {
+			for (Output o : m.getOutputs()) {
+				if (!outputsByName.containsKey(o.getName())) {
+					outputsByName.put(o.getName(), new ArrayList<Output>());
+				}
+
+				outputsByName.get(o.getName()).add(o);
+			}
+		}
+	}
 }

@@ -37,9 +37,7 @@ public class Input<T> extends Endpoint<T> {
 		this.value = (T) value;
 		
 		if (!ready) {
-			ready = true;
-			wasReady = true;
-			getOwner().markReady(this);
+			setReady(true);
 		}
 		
 		if (drivingInput) {
@@ -52,22 +50,54 @@ public class Input<T> extends Endpoint<T> {
 		}
 	}
 
-	// TODO: horrible hack for DNI project
-	public void setReadyHack() {
-		ready = true;
-		wasReady = true;
-		getOwner().markReady(this);
+	// TODO: should be private, but hacked public for Merge
+	public void setReady(boolean ready) {
+		if (ready) {
+			this.ready = true;
+			wasReady = true;
+			getOwner().markReady(this);
+		} else {
+			this.ready = false;
+			getOwner().cancelReady(this);
+		}
 	}
 
 	@Override
 	public T getValue() {
+		if (value == null) {
+			pullValueFromPullableIfConnected();
+		}
 		return value;
 	}
 	
 	public boolean hasValue() {
 		return getValue() != null;
 	}
-	
+
+	/**
+	 * If the pulled object is not necessarily an instance of T, this method
+	 * should be overridden in a subclass to handle that situation (for example,
+	 * an IntegerParameter might pull a Double from Constant).
+	 * @param o
+	 * @return
+	 */
+	protected T handlePulledObject(Object o) {
+		return (T) o;
+	}
+
+	/**
+	 * Pull value from owner if owner implements Pullable
+	 * @return true if connected to Pullable
+	 */
+	protected boolean pullValueFromPullableIfConnected() {
+		if (isConnectedToPullable()) {
+			Object pulledObject = ((Pullable<?>) source.getOwner()).pullValue(source);
+			value = handlePulledObject(pulledObject);
+			return true;
+		}
+		return false;
+	}
+
 	@Override
 	public Map<String,Object> getConfiguration() {
 		Map<String,Object> config = super.getConfiguration();
@@ -128,20 +158,27 @@ public class Input<T> extends Endpoint<T> {
 
 	public void setSource(Output<T> source) {
 		this.source = source;
-		if (!isReady()) {
-			getOwner().cancelReady(this);
+
+		if (source.getOwner() instanceof Pullable) {
+			setReady(true);
+		} else if (!isReady()) {
+			setReady(false);
 		}
 	}
 
 	public void disconnect() {
-		this.source = null;
-		getOwner().cancelReady(this);
+		if (isConnected()) {
+			this.source = null;
+			setReady(false);
+		}
 	}
 
 	@Override
 	public void clear() {
-		value = null;
-		ready = false;
+		if (!isConnectedToPullable()) {
+			value = null;
+			setReady(false);
+		}
 	}
 	
 	@Override
@@ -180,9 +217,13 @@ public class Input<T> extends Endpoint<T> {
 	public void setRequiresConnection(boolean requiresConnection) {
 		this.requiresConnection = requiresConnection;
 	}
-	
+
 	@Override
 	public String toString() {
 		return "(in) " + super.toString() + ", value: " + value;
+	}
+
+	private boolean isConnectedToPullable() {
+		return isConnected() && source.getOwner() instanceof Pullable;
 	}
 }

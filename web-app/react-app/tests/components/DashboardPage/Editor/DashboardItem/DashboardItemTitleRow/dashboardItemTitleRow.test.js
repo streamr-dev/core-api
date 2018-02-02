@@ -35,16 +35,29 @@ describe('DashboardItemTitleRow', () => {
         })
     })
     
-    describe('toggleEdit', () => {
+    describe('startEdit', () => {
         it('must set state.editing to !state.editing', () => {
             const el = shallow(<DashboardItemTitleRow
                 dashboard="testdb"
                 item="testitem"
             />)
             assert(!el.state().editing)
-            el.instance().toggleEdit()
+            el.instance().startEdit()
             assert(el.state().editing)
-            el.instance().toggleEdit()
+        })
+    })
+    
+    describe('endEdit', () => {
+        it('must set state.editing to !state.editing', () => {
+            const el = shallow(<DashboardItemTitleRow
+                dashboard="testdb"
+                item="testitem"
+            />)
+            el.setState({
+                editing: true
+            })
+            assert(el.state().editing)
+            el.instance().endEdit()
             assert(!el.state().editing)
         })
     })
@@ -110,7 +123,7 @@ describe('DashboardItemTitleRow', () => {
                 })
                 const input = el.find('input')
                 assert.deepStrictEqual(input.props().onChange, el.instance().saveName)
-                assert.deepStrictEqual(input.props().onBlur, el.instance().toggleEdit)
+                assert.deepStrictEqual(input.props().onBlur, el.instance().onBlur)
             })
         })
         
@@ -139,7 +152,7 @@ describe('DashboardItemTitleRow', () => {
                 assert.equal(el.find('Button')
                     .at(0)
                     .props()
-                    .onClick, el.instance().toggleEdit)
+                    .onClick, el.instance().startEdit)
                 assert.equal(el.find('Button')
                     .at(1)
                     .props()

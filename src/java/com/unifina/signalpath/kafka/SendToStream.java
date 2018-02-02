@@ -4,6 +4,7 @@ import com.unifina.data.FeedEvent;
 import com.unifina.data.IEventRecipient;
 import com.unifina.domain.data.Feed;
 import com.unifina.domain.data.Stream;
+import com.unifina.domain.security.SecUser;
 import com.unifina.feed.AbstractFeed;
 import com.unifina.feed.StreamrMessage;
 import com.unifina.service.PermissionService;
@@ -82,7 +83,7 @@ public class SendToStream extends ModuleWithSideEffects {
 		Globals globals = getGlobals();
 
 		// Create the message locally and route it to the stream locally, without actually producing to the stream
-		StreamrMessage msg = new StreamrMessage(streamParameter.getValue().getId(), 0, globals.time, globals.time, inputValuesToMap()); // TODO: fix hard-coded partition
+		StreamrMessage msg = new StreamrMessage(streamParameter.getValue().getId(), 0, globals.time, inputValuesToMap()); // TODO: fix hard-coded partition
 
 		// Find the Feed implementation for the target Stream
 		AbstractFeed feed = getGlobals().getDataSource().getFeedById(streamParameter.getValue().getFeed().getId());
@@ -92,7 +93,7 @@ public class SendToStream extends ModuleWithSideEffects {
 
 		if (eventRecipient != null) {
 			FeedEvent event = new FeedEvent(msg, globals.time, eventRecipient);
-			getGlobals().getDataSource().getEventQueue().enqueue(event);
+			getGlobals().getDataSource().enqueueEvent(event);
 		}
 	}
 
@@ -191,10 +192,11 @@ public class SendToStream extends ModuleWithSideEffects {
 				permissionService = Holders.getApplicationContext().getBean(PermissionService.class);
 			}
 
-			if (permissionService.canWrite(getGlobals().getUser(), stream)) {
+			SecUser user = SecUser.getViaJava(getGlobals().getUserId());
+			if (permissionService.canWrite(user, stream)) {
 				lastStreamId = stream.getId();
 			} else {
-				throw new AccessControlException(this.getName() + ": User " + getGlobals().getUser().getUsername() +
+				throw new AccessControlException(this.getName() + ": User " + user.getUsername() +
 					" does not have write access to Stream " + stream.getName());
 			}
 		}

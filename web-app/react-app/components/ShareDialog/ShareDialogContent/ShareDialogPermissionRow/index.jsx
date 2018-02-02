@@ -2,19 +2,26 @@
 
 import React, {Component} from 'react'
 import {connect} from 'react-redux'
+import {Row, Col} from 'react-bootstrap'
 import _ from 'lodash'
 
 import ShareDialogPermission from './ShareDialogPermission'
 
 import styles from './shareDialogPermissionRow.pcss'
-import type {Permission, State as PermissionState} from '../../../../flowtype/permission-types'
-import {Row, Col} from 'react-bootstrap'
 
-type Props = {
-    permissions: Array<Permission>,
-    resourceType: Permission.resourceType,
-    resourceId: Permission.resourceId
+import type {PermissionState} from '../../../../flowtype/states/permission-state'
+import type {Permission, ResourceType, ResourceId} from '../../../../flowtype/permission-types'
+
+type StateProps = {
+    permissions: Array<Permission>
 }
+
+type GivenProps = {
+    resourceType: ResourceType,
+    resourceId: ResourceId
+}
+
+type Props = StateProps & GivenProps
 
 export class ShareDialogPermissionRow extends Component<Props> {
     
@@ -33,7 +40,7 @@ export class ShareDialogPermissionRow extends Component<Props> {
                             />
                         ))
                         .values() // Take only the components
-                        .value()
+                        .value() // Output the array
                     }
                 </Col>
             </Row>
@@ -41,7 +48,7 @@ export class ShareDialogPermissionRow extends Component<Props> {
     }
 }
 
-export const mapStateToProps = ({permission: {byTypeAndId}}: {permission: PermissionState}, ownProps: Props) => {
+export const mapStateToProps = ({permission: {byTypeAndId}}: {permission: PermissionState}, ownProps: GivenProps): StateProps => {
     const byType = byTypeAndId[ownProps.resourceType] || {}
     const permissions = (byType[ownProps.resourceId] || []).filter(p => !p.removed)
     return {

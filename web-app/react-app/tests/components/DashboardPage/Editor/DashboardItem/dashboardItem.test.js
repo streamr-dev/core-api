@@ -2,7 +2,6 @@ import React from 'react'
 import {shallow} from 'enzyme'
 import assert from 'assert-diff'
 import * as createLink from '../../../../../helpers/createLink'
-import * as notificationActions from '../../../../../actions/notification'
 import sinon from 'sinon'
 
 import {
@@ -117,11 +116,11 @@ describe('DashboardItem', () => {
             delete process.env.NODE_ENV
         })
         it('must show the correct message in prod mode', () => {
-            const errorSpy = sandbox.spy(console, 'error')
-            const showErrorSpy = sandbox.spy()
+            const consoleErrorSpy = sandbox.spy(console, 'error')
+            const errorSpy = sandbox.spy()
             process.env.NODE_ENV = 'production'
             const el = shallow(<DashboardItem
-                showError={showErrorSpy}
+                error={errorSpy}
                 config={{
                     components: {
                         'test-component': {
@@ -138,15 +137,15 @@ describe('DashboardItem', () => {
                 message: 'testMsg',
                 stack: 'testStack'
             })
-            assert(showErrorSpy.calledOnce)
-            assert(showErrorSpy.calledWith('Something went wrong!'))
-            assert(errorSpy.notCalled)
+            assert(errorSpy.calledOnce)
+            assert(errorSpy.calledWith('Something went wrong!'))
+            assert(consoleErrorSpy.notCalled)
         })
         it('must show the correct message in dev mode', () => {
-            const errorStub = sandbox.stub(console, 'error')
-            const showErrorSpy = sandbox.spy()
+            const consoleErrorStub = sandbox.stub(console, 'error')
+            const errorSpy = sandbox.spy()
             const el = shallow(<DashboardItem
-                showError={showErrorSpy}
+                error={errorSpy}
                 config={{
                     components: {
                         'test-component': {
@@ -163,13 +162,10 @@ describe('DashboardItem', () => {
                 message: 'testMsg',
                 stack: 'testStack'
             })
-            assert(showErrorSpy.calledOnce)
-            assert(showErrorSpy.calledWith({
-                message: 'testMsg',
-                stack: 'testStack'
-            }))
-            assert(errorStub.calledOnce)
-            assert(errorStub.calledWith('testStack'))
+            assert(errorSpy.calledOnce)
+            assert(errorSpy.calledWith('testMsg'))
+            assert(consoleErrorStub.calledOnce)
+            assert(consoleErrorStub.calledWith('testStack'))
         })
     })
     
@@ -213,21 +209,14 @@ describe('DashboardItem', () => {
     })
     
     describe('mapDispatchToProps', () => {
-        it('must dispatch showError when called showError', () => {
+        it('must dispatch error when called error', () => {
             const dispatchSpy = sandbox.spy()
-            const showErrorStub = sandbox.stub(notificationActions, 'showError').callsFake((error) => error)
             const error = 'test'
-            mapDispatchToProps(dispatchSpy).showError(error)
-            assert(showErrorStub.calledOnce)
-            assert(showErrorStub.calledWith({
-                title: 'Error!',
-                message: 'test'
-            }))
+            mapDispatchToProps(dispatchSpy).error(error)
             assert(dispatchSpy.calledOnce)
-            assert(dispatchSpy.calledWith({
-                title: 'Error!',
-                message: 'test'
-            }))
+            assert.equal(dispatchSpy.getCall(0).args[0].level, 'error')
+            assert.equal(dispatchSpy.getCall(0).args[0].title, 'Error!')
+            assert.equal(dispatchSpy.getCall(0).args[0].message, 'test')
         })
     })
 })

@@ -3,7 +3,7 @@
 import React, {Component} from 'react'
 import {connect} from 'react-redux'
 import {Helmet} from 'react-helmet'
-import Notifier from '../Notifier'
+import Notifier from '../StreamrNotifierWrapper'
 import Sidebar from './Sidebar/index'
 import Editor from './Editor/index'
 import uuid from 'uuid'
@@ -12,27 +12,39 @@ import {getDashboard, getMyDashboardPermissions, newDashboard, openDashboard} fr
 import {getRunningCanvases} from '../../actions/canvas'
 
 
-import type { Dashboard, State as DashboardState } from '../../flowtype/dashboard-types'
+import type { DashboardState } from '../../flowtype/states/dashboard-state'
+import type { Dashboard } from '../../flowtype/dashboard-types'
 import type { Canvas } from '../../flowtype/canvas-types'
 import type {Node} from 'react'
 
 import styles from './dashboardPage.pcss'
 
-type Props = {
-    dashboard: Dashboard,
-    canvases: Array<Canvas>,
-    children: Node | Array<Node>,
+type StateProps = {
+    dashboard: ?Dashboard
+}
+
+type DispatchProps = {
     getDashboard: (id: string) => void,
     getMyDashboardPermissions: (id: string) => void,
     newDashboard: (id: string) => void,
     getRunningCanvases: () => void,
-    openDashboard: (id: string) => void,
+    openDashboard: (id: string) => void
+}
+
+type GivenProps = {
+    canvases: Array<Canvas>,
+    children: Node | Array<Node>
+}
+
+type RouterProps = {
     match: {
         params: {
             id?: string
         }
     }
 }
+
+type Props = StateProps & DispatchProps & GivenProps & RouterProps
 
 export class DashboardPage extends Component<Props> {
     
@@ -64,11 +76,11 @@ export class DashboardPage extends Component<Props> {
     }
 }
 
-export const mapStateToProps = ({dashboard: {dashboardsById, openDashboard}}: {dashboard: DashboardState}) => ({
-    dashboard: dashboardsById[openDashboard.id]
+export const mapStateToProps = ({dashboard: {dashboardsById, openDashboard}}: {dashboard: DashboardState}): StateProps => ({
+    dashboard: openDashboard.id ? dashboardsById[openDashboard.id] : null
 })
 
-export const mapDispatchToProps = (dispatch: Function) => ({
+export const mapDispatchToProps = (dispatch: Function): DispatchProps => ({
     getDashboard(id: string) {
         dispatch(getDashboard(id))
     },

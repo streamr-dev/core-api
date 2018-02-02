@@ -7,22 +7,27 @@ import {Row, Modal} from 'react-bootstrap'
 
 import ShareDialogInputRow from './ShareDialogInputRow'
 import ShareDialogPermissionRow from './ShareDialogPermissionRow'
-import ShareDialogOwnerRow from './ShareDialogOwnerRow'
+import ShareDialogAnonymousAccessRow from './ShareDialogOwnerRow'
 
-import type {Permission} from '../../../flowtype/permission-types'
+import type {Permission, ResourceType, ResourceId} from '../../../flowtype/permission-types'
 import {getResourcePermissions} from '../../../actions/permission'
 
-type Props = {
+type DispatchProps = {
+    getResourcePermissions: () => void
+}
+
+type GivenProps = {
     permissions: Array<Permission>,
-    resourceType: Permission.resourceType,
-    resourceId: Permission.resourceId,
+    resourceType: ResourceType,
+    resourceId: ResourceId,
     anonymousPermission: ?Permission,
     owner: ?string,
-    getResourcePermissions: () => {},
     addPermission: (permission: Permission) => {},
     removePermission: (permission: Permission) => {},
     onClose: () => {}
 }
+
+type Props = DispatchProps & GivenProps
 
 export class ShareDialogContent extends Component<Props> {
     
@@ -34,7 +39,7 @@ export class ShareDialogContent extends Component<Props> {
         return (
             <Modal.Body>
                 <Row>
-                    <ShareDialogOwnerRow
+                    <ShareDialogAnonymousAccessRow
                         resourceType={this.props.resourceType}
                         resourceId={this.props.resourceId}
                     />
@@ -53,7 +58,7 @@ export class ShareDialogContent extends Component<Props> {
     }
 }
 
-export const mapDispatchToProps = (dispatch: Function, ownProps: Props) => ({
+export const mapDispatchToProps = (dispatch: Function, ownProps: Props): DispatchProps => ({
     getResourcePermissions() {
         dispatch(getResourcePermissions(ownProps.resourceType, ownProps.resourceId))
     }

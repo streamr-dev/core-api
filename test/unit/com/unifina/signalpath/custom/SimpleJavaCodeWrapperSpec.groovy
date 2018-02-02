@@ -48,7 +48,7 @@ class SimpleJavaCodeWrapperSpec extends Specification {
 		}
 
 		module = new SimpleJavaCodeWrapper()
-		globals = module.globals = module.globals = GlobalsFactory.createInstance([:], grailsApplication, new SecUser())
+		globals = module.globals = module.globals = GlobalsFactory.createInstance([:], new SecUser())
 		module.init()
 		module.hash = 666
 		module.configure(module.getConfiguration())
@@ -97,115 +97,6 @@ class SimpleJavaCodeWrapperSpec extends Specification {
 
 		then:
 		thrown(ModuleException)
-	}
-
-	void "it throws ModuleException if shadowing variables"() {
-		when:
-		module.configure([
-			code: "\n" +
-				"TimeSeriesInput in = new TimeSeriesInput(this,\"in\");\n" +
-				"TimeSeriesOutput out = new TimeSeriesOutput(this,\"out\");\n" +
-				"public double readyInputs = 0D;\n" +
-				"@Override\n" +
-				"public void sendOutput() {}\n" +
-				"@Override\n" +
-				"public void clearState() {}\n"
-		])
-
-		then:
-		ModuleException ex = thrown()
-		ex.message.contains("'readyInputs'")
-	}
-
-	void "it throws ModuleException if field contains reference to anonymous inner class"() {
-		when:
-		module.configure([
-			code: "\n" +
-				"TimeSeriesInput in = new TimeSeriesInput(this,\"in\") {};\n" +
-				"TimeSeriesOutput out = new TimeSeriesOutput(this,\"out\");\n" +
-				"@Override\n" +
-				"public void sendOutput() {}\n" +
-				"@Override\n" +
-				"public void clearState() {}\n"
-		])
-
-		then:
-		ModuleException ex = thrown()
-		ex.message == "Anonymous inner classes are not allowed."
-	}
-
-	void "it throws ExceptionInInitializerError caused by AccessDeniedException if trying to get user"() {
-		setup:
-		module.configure([
-			code: "\n" +
-				"TimeSeriesInput in = new TimeSeriesInput(this,\"in\");\n" +
-				"TimeSeriesOutput out = new TimeSeriesOutput(this,\"out\");\n" +
-				"private double sum = 0D;\n" +
-				"\n" +
-				"@Override\n" +
-				"public void sendOutput() {\n" +
-				"Object user = getGlobals().getUser();\n" +
-				"sum += in.value;\n" +
-				"out.send(sum);\n" +
-				"}\n" +
-				"\n" +
-				"@Override\n" +
-				"public void clearState() {\n" +
-				"sum = 0D;\n" +
-				"}\n"
-		])
-
-		when:
-		Map inputValues = [
-			in: [0,1,2,3,4,5,6,7,8,9,10].collect {it?.doubleValue()},
-		]
-		Map outputValues = [
-			out: [0,1,3,6,10,15,21,28,36,45,55].collect {it?.doubleValue()},
-		]
-
-		new ModuleTestHelper.Builder(module, inputValues, outputValues)
-			.overrideGlobals { globals }
-			.test()
-		then:
-		def e = thrown(ExceptionInInitializerError)
-		e.cause.getClass() == AccessControlException
-	}
-
-	void "it throws NoClassDefFoundError if trying to set user"() {
-		setup:
-		module.configure([
-			code: "\n" +
-				"TimeSeriesInput in = new TimeSeriesInput(this,\"in\");\n" +
-				"TimeSeriesOutput out = new TimeSeriesOutput(this,\"out\");\n" +
-				"private double sum = 0D;\n" +
-				"\n" +
-				"@Override\n" +
-				"public void sendOutput() {\n" +
-				"getGlobals().setUser(null);\n" +
-				"sum += in.value;\n" +
-				"out.send(sum);\n" +
-				"}\n" +
-				"\n" +
-				"@Override\n" +
-				"public void clearState() {\n" +
-				"sum = 0D;\n" +
-				"}\n"
-		])
-
-		when:
-		Map inputValues = [
-			in: [0,1,2,3,4,5,6,7,8,9,10].collect {it?.doubleValue()},
-		]
-		Map outputValues = [
-			out: [0,1,3,6,10,15,21,28,36,45,55].collect {it?.doubleValue()},
-		]
-
-		new ModuleTestHelper.Builder(module, inputValues, outputValues)
-			.overrideGlobals { globals }
-			.test()
-		then:
-		def e = thrown(NoClassDefFoundError)
-		e.getMessage().contains("UserPermission")
 	}
 
 	void "it throws AccessDeniedException if trying to get data source"() {
@@ -282,43 +173,6 @@ class SimpleJavaCodeWrapperSpec extends Specification {
 		def e = thrown(TestHelperException)
 		e.cause.getClass() == AccessControlException
 		e.cause.getMessage().contains("DataSource")
-	}
-
-	void "it throws ExceptionInInitializerError caused by AccessDeniedException if trying to get grails application"() {
-		setup:
-		module.configure([
-			code: "\n" +
-				"TimeSeriesInput in = new TimeSeriesInput(this,\"in\");\n" +
-				"TimeSeriesOutput out = new TimeSeriesOutput(this,\"out\");\n" +
-				"private double sum = 0D;\n" +
-				"\n" +
-				"@Override\n" +
-				"public void sendOutput() {\n" +
-				"Object user = getGlobals().getGrailsApplication();\n" +
-				"sum += in.value;\n" +
-				"out.send(sum);\n" +
-				"}\n" +
-				"\n" +
-				"@Override\n" +
-				"public void clearState() {\n" +
-				"sum = 0D;\n" +
-				"}\n"
-		])
-
-		when:
-		Map inputValues = [
-			in: [0,1,2,3,4,5,6,7,8,9,10].collect {it?.doubleValue()},
-		]
-		Map outputValues = [
-			out: [0,1,3,6,10,15,21,28,36,45,55].collect {it?.doubleValue()},
-		]
-
-		new ModuleTestHelper.Builder(module, inputValues, outputValues)
-			.overrideGlobals { globals }
-			.test()
-		then:
-		def e = thrown(ExceptionInInitializerError)
-		e.cause.getClass() == AccessControlException
 	}
 
 	void "it throws AccessDeniedException if trying to get source of input"() {

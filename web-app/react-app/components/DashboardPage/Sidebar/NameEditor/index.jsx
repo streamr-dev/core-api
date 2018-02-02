@@ -7,15 +7,21 @@ import {parseDashboard} from '../../../../helpers/parseState'
 
 import {updateDashboard} from '../../../../actions/dashboard'
 
-import type {Dashboard, DashboardReducerState as DashboardState} from '../../../../flowtype/dashboard-types'
+import type {DashboardState} from '../../../../flowtype/states/dashboard-state'
+import type {Dashboard} from '../../../../flowtype/dashboard-types'
 
 import styles from './nameEditor.pcss'
 
-type Props = {
-    dashboard: Dashboard,
-    update: Function,
-    canWrite?: boolean
+type StateProps = {
+    dashboard: ?Dashboard,
+    canWrite: boolean
 }
+
+type DispatchProps = {
+    update: (db: Dashboard) => void
+}
+
+type Props = StateProps & DispatchProps
 
 export class NameEditor extends Component<Props> {
     
@@ -45,9 +51,9 @@ export class NameEditor extends Component<Props> {
     }
 }
 
-export const mapStateToProps = (state: {dashboard: DashboardState}) => parseDashboard(state)
+export const mapStateToProps = (state: {dashboard: DashboardState}): StateProps => parseDashboard(state)
 
-export const mapDispatchToProps = (dispatch: Function) => ({
+export const mapDispatchToProps = (dispatch: Function): DispatchProps => ({
     update(dashboard: Dashboard) {
         return dispatch(updateDashboard(dashboard))
     }
