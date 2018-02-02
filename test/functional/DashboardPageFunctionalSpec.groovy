@@ -167,7 +167,6 @@ class DashboardPageFunctionalSpec extends LoginTester1Spec implements CanvasMixi
 		waitFor {
 			at DashboardEditorPage
 		}
-
 		// Delete the dashboard items
 		when: "all dashboarditems are deleted"
 		findDashboardItem("Label2").find(".dashboardItemTitleRow_deleteButton").click()

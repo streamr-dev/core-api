@@ -106,10 +106,7 @@ public class ForEachItem extends AbstractSignalPathModule {
 
 	@Override
 	public void clearState() {
-		subCanvas.clearState();
-		for (AbstractSignalPathModule module : subCanvas.getModules()) {
-			module.clearState();
-		}
+		subCanvas.clear();
 	}
 
 	private int smallestReceivedListSize() {

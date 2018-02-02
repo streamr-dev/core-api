@@ -9,14 +9,19 @@ import {addResourcePermission} from '../../../../actions/permission'
 
 import styles from './shareDialogInputRow.pcss'
 
-import type {Permission} from '../../../../flowtype/permission-types'
+import type {Permission, ResourceType, ResourceId} from '../../../../flowtype/permission-types'
 
-type Props = {
-    resourceType: Permission.resourceType,
-    resourceId: Permission.resourceId,
-    addPermission: (permission: Permission) => {},
+type DispatchProps = {
+    addPermission: (permission: Permission) => void
+}
+
+type GivenProps = {
+    resourceType: ResourceType,
+    resourceId: ResourceId,
     onClose: () => {}
 }
+
+type Props = DispatchProps & GivenProps
 
 export class ShareDialogInputRow extends Component<Props> {
     form: HTMLFormElement
@@ -64,7 +69,7 @@ export class ShareDialogInputRow extends Component<Props> {
     }
 }
 
-export const mapDispatchToProps = (dispatch: Function, ownProps: Props) => ({
+export const mapDispatchToProps = (dispatch: Function, ownProps: GivenProps): DispatchProps => ({
     addPermission(permission: Permission) {
         dispatch(addResourcePermission(ownProps.resourceType, ownProps.resourceId, permission))
     }

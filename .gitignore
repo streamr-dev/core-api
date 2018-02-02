@@ -1,19 +1,22 @@
-.classpath
-.project
-.settings
+# macOS
 .DS_Store
-target-eclipse
+
+# IntelliJ IDEA
+.idea/workspace.xml
+.idea/tasks.xml
+.idea/dictionaries
+
+## File-based project format:
+*.iws
+out/
+
+# project files
 target
 node_modules
-lib/grails-rt.jar
-.idea/*
-unifina-core*.iml
-engine-and-editor*.iml
+
 .slcache/
-out/
 plugin.xml
 hs_err_pid*
-grailsMarkdown-inplacePlugin.iml
 web-app/js/unifina/webpack-bundles/*
 npm-debug.log*
 tomcat.8081

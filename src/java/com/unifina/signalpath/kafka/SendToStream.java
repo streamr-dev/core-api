@@ -4,6 +4,7 @@ import com.unifina.data.FeedEvent;
 import com.unifina.data.IEventRecipient;
 import com.unifina.domain.data.Feed;
 import com.unifina.domain.data.Stream;
+import com.unifina.domain.security.SecUser;
 import com.unifina.feed.AbstractFeed;
 import com.unifina.feed.StreamrMessage;
 import com.unifina.service.PermissionService;
@@ -191,10 +192,11 @@ public class SendToStream extends ModuleWithSideEffects {
 				permissionService = Holders.getApplicationContext().getBean(PermissionService.class);
 			}
 
-			if (permissionService.canWrite(getGlobals().getUser(), stream)) {
+			SecUser user = SecUser.getViaJava(getGlobals().getUserId());
+			if (permissionService.canWrite(user, stream)) {
 				lastStreamId = stream.getId();
 			} else {
-				throw new AccessControlException(this.getName() + ": User " + getGlobals().getUser().getUsername() +
+				throw new AccessControlException(this.getName() + ": User " + user.getUsername() +
 					" does not have write access to Stream " + stream.getName());
 			}
 		}

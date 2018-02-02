@@ -11,10 +11,15 @@ import styles from './shortcutHandler.pcss'
 import {object} from 'prop-types'
 import type {Node} from 'react'
 
-type Props = {
-    updateAndSaveCurrentDashboard: () => void,
+type DispatchProps = {
+    updateAndSaveCurrentDashboard: () => void
+}
+
+type GivenProps = {
     children: Node
 }
+
+type Props = DispatchProps & GivenProps
 
 export class ShortcutHandler extends Component<Props> {
     shortcutManager: ShortcutManager

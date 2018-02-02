@@ -32,7 +32,7 @@ class PollingMessageSourceSpec extends Specification {
 
 					@Override
 					long getPollInterval() {
-						return 100
+						return 10
 					}
 
 					@Override
@@ -67,7 +67,7 @@ class PollingMessageSourceSpec extends Specification {
 
 					@Override
 					long getPollInterval() {
-						return 100
+						return 10
 					}
 
 					@Override
@@ -141,9 +141,9 @@ class PollingMessageSourceSpec extends Specification {
 					@Override
 					long getPollInterval() {
 						if (subscriber=="foo")
-							return 100
+							return 10
 						else
-							return 200
+							return 20
 					}
 
 					@Override
@@ -200,7 +200,7 @@ class PollingMessageSourceSpec extends Specification {
 
 					@Override
 					long getPollInterval() {
-						return 100
+						return 10
 					}
 
 					@Override
@@ -222,7 +222,7 @@ class PollingMessageSourceSpec extends Specification {
 
 					@Override
 					long getPollInterval() {
-						return 200
+						return 20
 					}
 
 					@Override

@@ -5,6 +5,7 @@ import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
 import com.unifina.data.IEventRecipient;
+import grails.util.Holders;
 import org.apache.log4j.Logger;
 
 import com.unifina.data.FeedEvent;
@@ -50,7 +51,7 @@ public abstract class AbstractFeedProxy<ModuleClass, RawMessageClass, MessageCla
 		super(globals, domainObject);
 		hub = getMessageHub();
 	}
-	
+
 	@Override
 	public boolean subscribe(ModuleClass subscriber) {
 		for (KeyClass key : keyProvider.getSubscriberKeys(subscriber)) {
@@ -92,14 +93,14 @@ public abstract class AbstractFeedProxy<ModuleClass, RawMessageClass, MessageCla
 
 	private MessageHub<RawMessageClass, MessageClass, KeyClass> getMessageHub() {
 		try {
-			return FeedFactory.getInstance(domainObject, globals.getGrailsApplication().getConfig());
+			return FeedFactory.getInstance(domainObject, Holders.getGrailsApplication().getConfig());
 		} catch (InstantiationException | ClassNotFoundException
 			| NoSuchMethodException | InvocationTargetException
 			| IllegalAccessException | IllegalArgumentException e) {
 			throw new RuntimeException(e);
 		}
 	}
-	
+
 	/**
 	 * This method checks the wait queue and/or catchup stream for missing
 	 * messages. When this message returns, expected==counter must be true
@@ -256,7 +257,7 @@ public abstract class AbstractFeedProxy<ModuleClass, RawMessageClass, MessageCla
 		if (catchupState != CatchupState.CATCHUP) {
 			throw new IllegalStateException("Catchup is not started!");
 		}
-		
+
 		log.info("endCatchup called");
 		catchupState = CatchupState.CATCHUP_UNSYNC_READY;
 	}

@@ -8,14 +8,12 @@ import FontAwesome from 'react-fontawesome'
 
 import styles from './integrationKeyHandlerTableRow.pcss'
 
+import type {IntegrationKey} from '../../../../../../flowtype/integration-key-types'
+
 type Props = {
     fields: Array<string>,
     onDelete: Function,
-    item: {
-        id: string,
-        name: string,
-        json: {}
-    }
+    item: IntegrationKey
 }
 
 export default class IntegrationKeyHandlerTableRow extends Component<Props> {

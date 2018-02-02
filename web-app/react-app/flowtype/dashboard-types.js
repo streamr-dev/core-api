@@ -1,39 +1,20 @@
+// @flow
 
 import type {Canvas} from './canvas-types'
 import type {Permission} from './permission-types'
+import type {Webcomponent} from './webcomponent-types'
 
 export type Dashboard = {
     id: string,
     name: string,
     items: Array<DashboardItem>,
-    ownPermissions?: Array<Permission.operation>,
+    ownPermissions?: Array<$ElementType<Permission, 'operation'>>,
     editingLocked?: boolean,
+    layout: Layout,
     new?: boolean
 }
 
-export type DashboardReducerState = {
-    dashboardsById?: {
-        [Dashboard.id]: Dashboard
-    },
-    openDashboard: {
-        id: ?Dashboard.id,
-        isFullScreen: boolean
-    },
-    error?: ?string,
-    fetching?: boolean,
-    saved: boolean,
-    new: boolean
-}
-
-export type DashboardReducerAction = {
-    type: string,
-    id?: Dashboard.id,
-    dashboard?: Dashboard,
-    dashboards?: Array<Dashboard>,
-    error?: string
-}
-
-type LayoutItem = {
+export type LayoutItem = {
     i: string | number,
     h: number,
     isDraggable: ?number,
@@ -49,7 +30,7 @@ type LayoutItem = {
     y: number
 }
 
-type Layout = {
+export type Layout = {
     xs?: Array<LayoutItem>,
     sm?: Array<LayoutItem>,
     md?: Array<LayoutItem>,
@@ -59,8 +40,9 @@ type Layout = {
 export type DashboardItem = {
     id: ?string,
     title: string,
-    dashboard: Dashboard.id,
+    dashboard: ?$ElementType<Dashboard, 'id'>,
     module: number,
-    canvas: Canvas,
-    layout?: Layout
+    canvas: $ElementType<Canvas, 'id'>,
+    layout?: Layout,
+    webcomponent: $ElementType<Webcomponent, 'type'>
 }

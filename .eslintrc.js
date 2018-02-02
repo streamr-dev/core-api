@@ -1,16 +1,13 @@
 
-const OFF = 0, WARN = 1, ERROR = 2;
+const WARN = 1, ERROR = 2;
 
 module.exports = exports = {
     
     extends: [
         'eslint:recommended',
-        'plugin:react/recommended'
+        'plugin:react/recommended',
+        'plugin:flowtype/recommended'
     ],
-    
-    globals: {
-        'baseUrl': true
-    },
     
     parser: 'babel-eslint',
     parserOptions: {
@@ -38,6 +35,10 @@ module.exports = exports = {
         'flowtype'
     ],
     
+    settings: {
+        onlyFilesWithFlowAnnotation: true
+    },
+    
     rules: {
         'no-debugger': WARN,
         'no-console': [
@@ -53,37 +54,38 @@ module.exports = exports = {
         'no-unused-vars': WARN,
         'curly': [ERROR, 'all'],
         'keyword-spacing': [ERROR, {
-            'before': true,
-            'after': true
+            before: true,
+            after: true
         }],
         'quotes': [ERROR, 'single'],
         'space-before-function-paren': [ERROR, 'never'],
         'space-before-blocks': [ERROR, 'always'],
-        'space-in-parens': ['error', 'never'],
+        'space-in-parens': [ERROR, 'never'],
         'space-unary-ops': [ERROR, {
-            'words': true,
-            'nonwords': false
+            words: true,
+            nonwords: false
         }],
         'brace-style': [ERROR, '1tbs'],
         'newline-per-chained-call': [ERROR, {
-            'ignoreChainWithDepth': 2
+            ignoreChainWithDepth: 2
         }],
         'object-curly-newline': [ERROR, {
-            "ObjectExpression": {
-                "minProperties": 1
+            ObjectExpression: {
+                minProperties: 1
             },
-            "ObjectPattern": "never"
+            ObjectPattern: 'never'
         }],
         'indent': [ERROR, 4, {
-            'SwitchCase': WARN,
-            "MemberExpression": WARN,
-            "ObjectExpression": WARN
+            SwitchCase: WARN,
+            MemberExpression: WARN,
+            ObjectExpression: WARN
         }],
         'object-property-newline': [ERROR, {
-            'allowMultiplePropertiesPerLine': true
+            allowMultiplePropertiesPerLine: true
         }],
         'no-unexpected-multiline': ERROR,
         'wrap-iife': [ERROR, 'inside'],
-        'react/jsx-indent': [ERROR, 4]
+        'react/jsx-indent': [ERROR, 4],
+        'flowtype/define-flow-type': ERROR
     }
 }

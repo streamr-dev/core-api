@@ -24,7 +24,7 @@ export const DELETE_INTEGRATION_KEY_FAILURE = 'DELETE_INTEGRATION_KEY_FAILURE'
 const apiUrl = 'api/v1/integration_keys'
 
 import type {IntegrationKey} from '../flowtype/integration-key-types.js'
-import type {ErrorInUi as Err} from '../flowtype/common-types.js'
+import type {ErrorInUi} from '../flowtype/common-types.js'
 
 export const getAndReplaceIntegrationKeys = () => (dispatch: Function) => {
     dispatch(getAndReplaceIntegrationKeysRequest())
@@ -45,7 +45,7 @@ export const getAndReplaceIntegrationKeys = () => (dispatch: Function) => {
         })
 }
 
-export const getIntegrationKeysByService = (service: string) => (dispatch: Function) => {
+export const getIntegrationKeysByService = (service: $ElementType<IntegrationKey, 'service'>) => (dispatch: Function) => {
     dispatch(getIntegrationKeysByServiceRequest(service))
     return axios.get(createLink(apiUrl), {
         params: {
@@ -77,7 +77,10 @@ export const createIntegrationKey = (integrationKey: IntegrationKey) => (dispatc
         })
 }
 
-export const deleteIntegrationKey = (id: string) => (dispatch: Function) => {
+export const deleteIntegrationKey = (id: $ElementType<IntegrationKey, 'id'>) => (dispatch: Function) => {
+    if (!id) {
+        throw new Error('No id!')
+    }
     dispatch(deleteIntegrationKeyRequest(id))
     return axios.delete(createLink(`${apiUrl}/${id}`))
         .then(() => dispatch(deleteIntegrationKeySuccess(id)))
@@ -95,7 +98,7 @@ const getAndReplaceIntegrationKeysRequest = () => ({
     type: GET_AND_REPLACE_INTEGRATION_KEYS_REQUEST,
 })
 
-const getIntegrationKeysByServiceRequest = (service: string) => ({
+const getIntegrationKeysByServiceRequest = (service: $ElementType<IntegrationKey, 'service'>) => ({
     type: GET_INTEGRATION_KEYS_BY_SERVICE_REQUEST,
     service
 })
@@ -104,7 +107,7 @@ const createIntegrationKeyRequest = () => ({
     type: CREATE_INTEGRATION_KEY_REQUEST,
 })
 
-const deleteIntegrationKeyRequest = (id: string) => ({
+const deleteIntegrationKeyRequest = (id: $ElementType<IntegrationKey, 'id'>) => ({
     type: DELETE_INTEGRATION_KEY_REQUEST,
     id
 })
@@ -114,7 +117,7 @@ const getAndReplaceIntegrationKeysSuccess = (integrationKeys: Array<IntegrationK
     integrationKeys
 })
 
-const getIntegrationKeysByServiceSuccess = (service: string, integrationKeys: Array<IntegrationKey>) => ({
+const getIntegrationKeysByServiceSuccess = (service: $ElementType<IntegrationKey, 'service'>, integrationKeys: Array<IntegrationKey>) => ({
     type: GET_INTEGRATION_KEYS_BY_SERVICE_SUCCESS,
     integrationKeys,
     service
@@ -125,28 +128,28 @@ const createIntegrationKeySuccess = (integrationKey: IntegrationKey) => ({
     integrationKey
 })
 
-const deleteIntegrationKeySuccess = (id: string) => ({
+const deleteIntegrationKeySuccess = (id: $ElementType<IntegrationKey, 'id'>) => ({
     type: DELETE_INTEGRATION_KEY_SUCCESS,
     id
 })
 
-const getAndReplaceIntegrationKeysFailure = (error: Err) => ({
+const getAndReplaceIntegrationKeysFailure = (error: ErrorInUi) => ({
     type: GET_AND_REPLACE_INTEGRATION_KEYS_FAILURE,
     error
 })
 
-const getIntegrationKeysByServiceFailure = (service: string, error: Err) => ({
+const getIntegrationKeysByServiceFailure = (service: string, error: ErrorInUi) => ({
     type: GET_INTEGRATION_KEYS_BY_SERVICE_FAILURE,
     error,
     service
 })
 
-const createIntegrationKeyFailure = (error: Err) => ({
+const createIntegrationKeyFailure = (error: ErrorInUi) => ({
     type: CREATE_INTEGRATION_KEY_FAILURE,
     error
 })
 
-const deleteIntegrationKeyFailure = (error: Err) => ({
+const deleteIntegrationKeyFailure = (error: ErrorInUi) => ({
     type: DELETE_INTEGRATION_KEY_FAILURE,
     error
 })

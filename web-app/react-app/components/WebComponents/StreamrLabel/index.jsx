@@ -5,18 +5,15 @@ import StreamrWidget from '../StreamrWidget'
 
 import styles from './streamr-label.pcss'
 
-import type {StreamId} from '../../../flowtype/streamr-client-types'
-//import type {WebcomponentProps} from '../../../flowtype/webcomponent-types'
-
-// TODO: Why just importing WebcomponentProps does not work?
+import type {StreamId, SubscriptionOptions} from '../../../flowtype/streamr-client-types'
 
 type Props = {
     url: string,
+    subscriptionOptions?: SubscriptionOptions,
     stream?: StreamId,
-    height: ?number,
-    width: ?number,
-    onError: ?Function
-} & {
+    height?: ?number,
+    width?: ?number,
+    onError?: ?Function,
     style: {}
 }
 

@@ -1,3 +1,6 @@
+// @flow
+
+import type {Webcomponent} from './webcomponent-types'
 
 export type ErrorFromApi = {
     error: string,
@@ -12,7 +15,7 @@ export type ErrorInUi = {
 
 export type UiChannel = {
     id: string,
-    webcomponent: string,
+    webcomponent: $ElementType<Webcomponent, 'type'>,
     name: string
 }
 

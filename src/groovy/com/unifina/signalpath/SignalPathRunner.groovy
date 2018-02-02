@@ -34,7 +34,7 @@ public class SignalPathRunner extends Thread {
 
 	private SignalPathRunner(Globals globals, boolean adhoc) {
 		this.globals = globals
-		this.signalPathService = Holders.getApplicationContext().getBean(SignalPathService)
+		this.signalPathService = Holders.applicationContext.getBean(SignalPathService)
 		this.adhoc = adhoc
 
 		runnerId = IdGenerator.get()
@@ -164,7 +164,6 @@ public class SignalPathRunner extends Thread {
 	 */
 	public void destroy() {
 		signalPaths.each { SignalPath it -> it.destroy() }
-		globals.destroy()
 
 		if (adhoc) {
 			for (SignalPath sp : getSignalPaths()) {

@@ -392,7 +392,7 @@ class ShareSpec extends LoginTester1Spec implements CanvasMixin, DashboardMixin,
 		save()
 		then: "...but no changes, so no message displayed"
 		waitFor { !$(".sharing-dialog") }
-		!$(".ui-pnotify")
+		!$(".notifications-wrapper .notification-success")
 
 		cleanup:
 		removeCanvasPermissions()
@@ -532,7 +532,7 @@ class ShareSpec extends LoginTester1Spec implements CanvasMixin, DashboardMixin,
 		saveOnDashboard()
 		then: "message shown"
 		waitFor { !$(".modal-dialog") }
-		$(".ui-pnotify")
+		$(".notifications-wrapper .notification-success")
 
 		cleanup:
 		removeDashboardPermissions()

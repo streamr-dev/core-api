@@ -12,19 +12,28 @@ import IntegrationKeyHandlerTable from './IntegrationKeyHandlerTable'
 
 import styles from './integrationKeyHandlerSegment.pcss'
 
-import type {IntegrationKey, State as IntegrationKeyState} from '../../../../flowtype/integration-key-types'
+import type {IntegrationKeyState} from '../../../../flowtype/states/integration-key-state'
+import type {IntegrationKey} from '../../../../flowtype/integration-key-types'
 
-type Props = {
+type StateProps = {
+    integrationKeys: Array<IntegrationKey>
+}
+
+type DispatchProps = {
+    deleteIntegrationKey: (id: $ElementType<IntegrationKey, 'id'>) => void,
+    createIntegrationKey: (key: IntegrationKey) => void,
+    getIntegrationKeysByService: (service: $ElementType<IntegrationKey, 'service'>) => void
+}
+
+type GivenProps = {
     tableFields: Array<string>,
     inputFields: Array<string>,
-    integrationKeys: Array<IntegrationKey>,
-    service: IntegrationKey.service,
-    name: IntegrationKey.name,
-    className: string,
-    deleteIntegrationKey: (id: IntegrationKey.id) => void,
-    createIntegrationKey: (key: IntegrationKey) => void,
-    getIntegrationKeysByService: (service: IntegrationKey.service) => void
+    service: $ElementType<IntegrationKey, 'service'>,
+    name: $ElementType<IntegrationKey, 'name'>,
+    className: string
 }
+
+type Props = StateProps & DispatchProps & GivenProps
 
 export class IntegrationKeyHandlerSegment extends Component<Props> {
     
@@ -44,7 +53,7 @@ export class IntegrationKeyHandlerSegment extends Component<Props> {
         })
     }
     
-    onDelete = (id: IntegrationKey.id) => {
+    onDelete = (id: $ElementType<IntegrationKey, 'id'>) => {
         this.props.deleteIntegrationKey(id)
     }
     
@@ -70,18 +79,18 @@ export class IntegrationKeyHandlerSegment extends Component<Props> {
     }
 }
 
-export const mapStateToProps = ({integrationKey: {listsByService}}: {integrationKey: IntegrationKeyState}, props: Props) => ({
+export const mapStateToProps = ({integrationKey: {listsByService}}: {integrationKey: IntegrationKeyState}, props: Props): StateProps => ({
     integrationKeys: listsByService[props.service] || []
 })
 
-export const mapDispatchToProps = (dispatch: Function) => ({
-    deleteIntegrationKey(id: IntegrationKey.id) {
+export const mapDispatchToProps = (dispatch: Function): DispatchProps => ({
+    deleteIntegrationKey(id: $ElementType<IntegrationKey, 'id'>) {
         dispatch(deleteIntegrationKey(id))
     },
     createIntegrationKey(key: IntegrationKey) {
         dispatch(createIntegrationKey(key))
     },
-    getIntegrationKeysByService(service: IntegrationKey.service) {
+    getIntegrationKeysByService(service: $ElementType<IntegrationKey, 'service'>) {
         dispatch(getIntegrationKeysByService(service))
     }
 })

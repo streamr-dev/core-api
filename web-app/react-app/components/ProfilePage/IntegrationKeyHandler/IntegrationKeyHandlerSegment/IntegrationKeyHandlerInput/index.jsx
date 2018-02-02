@@ -9,10 +9,14 @@ import styles from './integrationKeyHandlerInput.pcss'
 
 import {titleCase} from 'change-case'
 
-type Props = {
+import type {IntegrationKey} from '../../../../../flowtype/integration-key-types'
+
+type GivenProps = {
     fields: Array<string>,
-    onNew: Function
+    onNew: (integrationKey: IntegrationKey) => void
 }
+
+type Props = GivenProps
 
 export default class IntegrationKeyHandlerInput extends Component<Props> {
     form: ?HTMLFormElement

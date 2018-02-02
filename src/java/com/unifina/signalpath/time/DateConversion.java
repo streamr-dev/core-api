@@ -7,6 +7,7 @@ import java.util.Date;
 import java.util.Locale;
 import java.util.TimeZone;
 
+import com.unifina.service.SerializationService;
 import com.unifina.signalpath.AbstractSignalPathModule;
 import com.unifina.signalpath.Input;
 import com.unifina.signalpath.StringOutput;
@@ -32,7 +33,6 @@ public class DateConversion extends AbstractSignalPathModule {
 	TimeSeriesOutput secondsOut = new TimeSeriesOutput(this, "seconds");
 	TimeSeriesOutput msOut = new TimeSeriesOutput(this, "milliseconds");
 
-	Date date = null;
 	transient Calendar cal = null;
 	transient SimpleDateFormat df = null;
 	
@@ -59,31 +59,28 @@ public class DateConversion extends AbstractSignalPathModule {
 	@Override
 	public void initialize() {
 		super.initialize();
-		if (getGlobals().getUser()!=null)
-			tz.receive(getGlobals().getUser().getTimezone());
+		if (getGlobals().getUserId() != null) {
+			tz.receive(getGlobals().getUserTimeZone().getID());
+		}
 	}
 	
 	@Override
 	public void sendOutput() {
-		ensureState();
 		if(pattern.getValue() != null && !df.toPattern().equals(pattern.getValue())){
 			df.applyPattern(pattern.getValue());
 		}
 
-		if(dateIn.getValue() instanceof Double){
-			date = new Date(Math.round((double)dateIn.getValue()));
-		} else if(dateIn.getValue() instanceof Date){
-			date = (Date)dateIn.getValue();
-		} else if(dateIn.getValue() instanceof String){
-			try {
-				date = df.parse((String)dateIn.getValue());
-			} catch (ParseException e) {
-				throw new RuntimeException("The input date is not in the given format!",e);
+		if (tz.getValue() != null) {
+			TimeZone timeZone = TimeZone.getTimeZone(tz.getValue());
+			if (timeZone != null) {
+				cal.setTimeZone(timeZone);
+				df.setTimeZone(timeZone);
 			}
 		}
+
+		Date date = dateFromValue(dateIn.getValue());
+
 		cal.setTime(date);
-		if(tz.getValue() != null)
-			cal.setTimeZone(TimeZone.getTimeZone(tz.getValue()));
 
 		tsOut.send((double)date.getTime());
 		wdOut.send(cal.getDisplayName(Calendar.DAY_OF_WEEK, Calendar.SHORT, Locale.US));
@@ -100,26 +97,44 @@ public class DateConversion extends AbstractSignalPathModule {
 		}
 	}
 
-	private void ensureState() {
-		if (cal == null) {
-			cal = Calendar.getInstance();
-
-			if (getGlobals().getUser()!=null)
-				cal.setTimeZone(TimeZone.getTimeZone(getGlobals().getUser().getTimezone()));
-		}
-
-		if (df == null) {
-			df = new SimpleDateFormat();
-
-			if (getGlobals().getUser()!=null)
-				df.setTimeZone(TimeZone.getTimeZone(getGlobals().getUser().getTimezone()));
-		}
-	}
-
 	@Override
 	public void clearState() {
 		df = null;
 		cal = null;
-		date = null;
+		ensureState();
+	}
+
+	@Override
+	public void afterDeserialization(SerializationService serializationService) {
+		super.afterDeserialization(serializationService);
+		ensureState();
+	}
+
+	private Date dateFromValue(Object value) {
+		Date date;
+		if (value instanceof Double) {
+			date = new Date(Math.round((double) value));
+		} else if (value instanceof Date) {
+			date = (Date) value;
+		} else if (value instanceof String) {
+			try {
+				date = df.parse((String) value);
+			} catch (ParseException e) {
+				throw new RuntimeException("The input date is not in the given format!", e);
+			}
+		} else {
+			throw new RuntimeException("Input date of unexpected type: " + value.getClass());
+		}
+		return date;
+	}
+
+	private void ensureState() {
+		if (cal == null) {
+			cal = Calendar.getInstance(getGlobals().getUserTimeZone());
+		}
+		if (df == null) {
+			df = new SimpleDateFormat();
+			df.setTimeZone(getGlobals().getUserTimeZone());
+		}
 	}
 }
