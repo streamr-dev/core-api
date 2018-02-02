@@ -199,7 +199,7 @@ export class Editor extends Component<Props, State> {
         const items = dashboard && dashboard.items ? _.sortBy(dashboard.items, ['canvas', 'module']) : []
         const dragCancelClassName = 'cancelDragging' + Date.now()
         const locked = this.props.editorLocked || this.state.isFullscreen
-        return (
+        return dashboard ? (
             <div
                 id="content-wrapper"
                 className={`scrollable ${styles.editor}`}
@@ -293,7 +293,7 @@ export class Editor extends Component<Props, State> {
                     </div>
                 </Fullscreen>
             </div>
-        )
+        ) : null
     }
 }
 

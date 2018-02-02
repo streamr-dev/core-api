@@ -41,6 +41,8 @@ const apiUrl = 'api/v1/dashboards'
 import type { ApiError } from '../flowtype/common-types'
 import type { Dashboard, DashboardItem, Layout, LayoutItem} from '../flowtype/dashboard-types'
 
+const dashboardConfig = require('../components/DashboardPage/dashboardConfig')
+
 declare var Streamr: {
     user: string
 }
@@ -191,12 +193,10 @@ export const updateDashboardLayout = (dashboardId: $ElementType<Dashboard, 'id'>
         .sortBy('i')
         .map(normalizeLayoutItem)
         .value() : []
-    const normalizeLayout = (layout: Layout): Layout => ({
-        xs: normalizeItemList(layout.xs),
-        sm: normalizeItemList(layout.sm),
-        md: normalizeItemList(layout.md),
-        lg: normalizeItemList(layout.lg),
-    })
+    const normalizeLayout = (layout: Layout) => dashboardConfig.layout.sizes.reduce((obj, size) => {
+        obj[size] = (layout && layout[size]) ? normalizeItemList(layout[size]) : []
+        return obj
+    }, {})
     if (dashboard && !_.isEqual(normalizeLayout(layout), normalizeLayout(dashboard.layout))) {
         dispatch(updateDashboard({
             ...dashboard,
