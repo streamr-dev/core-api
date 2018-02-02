@@ -10,7 +10,7 @@ import type {Node} from 'react'
 
 import type {StreamId, Subscription, ModuleOptions, SubscriptionOptions} from '../../../flowtype/streamr-client-types'
 
-type GivenProps = {
+type Props = {
     url: string,
     subscriptionOptions?: SubscriptionOptions,
     stream?: StreamId,
@@ -30,8 +30,6 @@ type GivenProps = {
         options: ModuleOptions
     }) => void
 }
-
-type Props = GivenProps
 
 export default class StreamrWidget extends Component<Props> {
     subscription: ?Subscription

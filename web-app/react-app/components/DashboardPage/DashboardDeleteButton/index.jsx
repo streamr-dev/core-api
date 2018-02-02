@@ -38,7 +38,8 @@ export class DashboardDeleteButton extends Component<Props> {
     }
     
     onDelete = () => {
-        this.props.dashboard && this.props.deleteDashboard(this.props.dashboard.id)
+        const {dashboard, deleteDashboard} = this.props
+        dashboard && deleteDashboard(dashboard.id)
             .then(() => {
                 // TODO: change to be handled with react-router
                 window.location.assign(createLink('/dashboard/list'))

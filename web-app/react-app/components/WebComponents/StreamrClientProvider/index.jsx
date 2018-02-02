@@ -7,12 +7,10 @@ import {any} from 'prop-types'
 import type {StreamrClient} from '../../../flowtype/streamr-client-types'
 import type {Node} from 'react'
 
-type GivenProps = {
+type Props = {
     client: StreamrClient,
     children?: Node
 }
-
-type Props = GivenProps
 
 let didWarnAboutChangingClient = false
 function warnAboutChangingClient() {

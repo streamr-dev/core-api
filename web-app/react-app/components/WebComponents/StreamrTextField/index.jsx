@@ -8,7 +8,7 @@ import StreamrWidget from '../StreamrWidget'
 import styles from './streamrTextField.pcss'
 import type {StreamId, SubscriptionOptions} from '../../../flowtype/streamr-client-types'
 
-type GivenProps = {
+type Props = {
     url: string,
     subscriptionOptions?: SubscriptionOptions,
     stream?: StreamId,
@@ -16,8 +16,6 @@ type GivenProps = {
     width?: ?number,
     onError?: ?Function
 }
-
-type Props = GivenProps
 
 type State = {
     value: string

@@ -10,13 +10,11 @@ import styles from './integrationKeyHandlerTableRow.pcss'
 
 import type {IntegrationKey} from '../../../../../../flowtype/integration-key-types'
 
-type GivenProps = {
+type Props = {
     fields: Array<string>,
     onDelete: Function,
     item: IntegrationKey
 }
-
-type Props = GivenProps
 
 export default class IntegrationKeyHandlerTableRow extends Component<Props> {
     

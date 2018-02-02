@@ -20,13 +20,13 @@ type State = {
 }
 
 export default class StreamrButton extends Component<Props, State> {
-    widget: ?StreamrInput
+    input: ?StreamrInput
     state = {
         name: 'Button'
     }
     
     onMessage = ({state: buttonName}: { state: string }) => {
-        if (this.widget) {
+        if (this.input) {
             if (buttonName) {
                 this.setState({
                     name: buttonName
@@ -36,11 +36,11 @@ export default class StreamrButton extends Component<Props, State> {
     }
     
     onClick = () => {
-        this.widget && this.widget.sendValue()
+        this.input && this.input.sendValue()
     }
     
-    inputRef = (widget: ?StreamrInput) => {
-        this.widget = widget
+    assignInputRef = (widget: ?StreamrInput) => {
+        this.input = widget
     }
     
     render() {
@@ -48,7 +48,7 @@ export default class StreamrButton extends Component<Props, State> {
             <StreamrInput
                 {...this.props}
                 onMessage={this.onMessage}
-                ref={this.inputRef}
+                ref={this.assignInputRef}
             >
                 <Button
                     onClick={this.onClick}

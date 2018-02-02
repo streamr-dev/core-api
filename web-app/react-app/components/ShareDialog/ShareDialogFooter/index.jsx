@@ -2,12 +2,10 @@
 import React, {Component} from 'react'
 import {Button, Modal} from 'react-bootstrap'
 
-type GivenProps = {
+type Props = {
     save: Function,
     closeModal: Function
 }
-
-type Props = GivenProps
 
 import styles from './shareDialogFooter.pcss'
 
@@ -31,6 +29,5 @@ export default class ShareDialogFooter extends Component<Props> {
                 </Button>
             </Modal.Footer>
         )
-        
     }
 }

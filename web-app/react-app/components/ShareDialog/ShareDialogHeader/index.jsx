@@ -2,11 +2,9 @@
 import React, {Component} from 'react'
 import {Modal} from 'react-bootstrap'
 
-type GivenProps = {
+type Props = {
     resourceTitle: string
 }
-
-type Props = GivenProps
 
 export default class ShareDialogHeader extends Component<Props> {
     render() {

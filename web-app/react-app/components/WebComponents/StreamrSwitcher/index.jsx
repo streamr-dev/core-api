@@ -10,7 +10,7 @@ type State = {
     value: boolean
 }
 
-type GivenProps = {
+type Props = {
     url: string,
     subscriptionOptions?: SubscriptionOptions,
     stream?: StreamId,
@@ -18,8 +18,6 @@ type GivenProps = {
     width?: ?number,
     onError?: ?Function
 }
-
-type Props = GivenProps
 
 export default class StreamrSwitcher extends Component<Props, State> {
     input: ?StreamrInput

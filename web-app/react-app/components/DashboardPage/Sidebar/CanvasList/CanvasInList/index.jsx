@@ -7,11 +7,9 @@ import ModuleList from './ModuleList/index'
 
 import styles from './canvasInList.pcss'
 
-type GivenProps = {
+type Props = {
     canvas: Canvas
 }
-
-type Props = GivenProps
 
 type State = {
     open: boolean

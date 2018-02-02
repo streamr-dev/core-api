@@ -9,7 +9,7 @@ import type {ModuleOptions, StreamId, SubscriptionOptions} from '../../../flowty
 
 type Options = ModuleOptions | {}
 
-type GivenProps = {
+type Props = {
     url: string,
     subscriptionOptions?: SubscriptionOptions,
     stream?: StreamId,
@@ -17,8 +17,6 @@ type GivenProps = {
     width?: ?number,
     onError?: ?Function
 }
-
-type Props = GivenProps
 
 type State = {
     options: Options

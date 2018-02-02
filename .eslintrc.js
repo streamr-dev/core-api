@@ -36,7 +36,7 @@ module.exports = exports = {
     ],
     
     settings: {
-        'onlyFilesWithFlowAnnotation': true
+        onlyFilesWithFlowAnnotation: true
     },
     
     rules: {
@@ -54,34 +54,34 @@ module.exports = exports = {
         'no-unused-vars': WARN,
         'curly': [ERROR, 'all'],
         'keyword-spacing': [ERROR, {
-            'before': true,
-            'after': true
+            before: true,
+            after: true
         }],
         'quotes': [ERROR, 'single'],
         'space-before-function-paren': [ERROR, 'never'],
         'space-before-blocks': [ERROR, 'always'],
         'space-in-parens': [ERROR, 'never'],
         'space-unary-ops': [ERROR, {
-            'words': true,
-            'nonwords': false
+            words: true,
+            nonwords: false
         }],
         'brace-style': [ERROR, '1tbs'],
         'newline-per-chained-call': [ERROR, {
-            'ignoreChainWithDepth': 2
+            ignoreChainWithDepth: 2
         }],
         'object-curly-newline': [ERROR, {
-            'ObjectExpression': {
-                'minProperties': 1
+            ObjectExpression: {
+                minProperties: 1
             },
-            'ObjectPattern': 'never'
+            ObjectPattern: 'never'
         }],
         'indent': [ERROR, 4, {
-            'SwitchCase': WARN,
-            'MemberExpression': WARN,
-            'ObjectExpression': WARN
+            SwitchCase: WARN,
+            MemberExpression: WARN,
+            ObjectExpression: WARN
         }],
         'object-property-newline': [ERROR, {
-            'allowMultiplePropertiesPerLine': true
+            allowMultiplePropertiesPerLine: true
         }],
         'no-unexpected-multiline': ERROR,
         'wrap-iife': [ERROR, 'inside'],
