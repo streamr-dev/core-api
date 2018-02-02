@@ -9,6 +9,7 @@ import ConfirmButton from '../ConfirmButton'
 import Select from 'react-select'
 
 import type {Key} from '../../flowtype/key-types'
+import type {OnSubmitEvent} from '../../flowtype/common-types'
 
 import styles from './credentialsControl.pcss'
 
@@ -48,12 +49,7 @@ export default class CredentialsControl extends Component<Props, State> {
         })
     }
     
-    onSubmit = (e: {
-        preventDefault: () => void,
-        target: {
-            reset: () => void
-        }
-    }) => {
+    onSubmit = (e: OnSubmitEvent) => {
         e.preventDefault()
         const data = serialize(e.target, {
             hash: true
