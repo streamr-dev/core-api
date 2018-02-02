@@ -37,16 +37,12 @@ public abstract class Parameter<T> extends Input<T> {
 	public T getValue() {
 		if (value != null) {
 			return value;
+		} else if (pullValueFromPullableIfConnected()) {
+			checkEmpty(value);
+			return value;
 		} else {
-			if (isConnected() && getSource().getOwner() instanceof Pullable<?>) {
-				Object pulledObject = ((Pullable<?>) getSource().getOwner()).pullValue(getSource());
-				value = handlePulledObject(pulledObject);
-				checkEmpty(value);
-				return value;
-			} else {
-				checkEmpty(defaultValue);
-				return defaultValue;
-			}
+			checkEmpty(defaultValue);
+			return defaultValue;
 		}
 	}
 	
@@ -63,17 +59,6 @@ public abstract class Parameter<T> extends Input<T> {
 	
 	protected boolean isEmpty(T value) {
 		return value == null;
-	}
-
-	/**
-	 * If the pulled object is not necessarily an instance of T, this method
-	 * should be overridden in a subclass to handle that situation (for example,
-	 * an IntegerParameter might pull a Double from Constant).
-	 * @param o
-	 * @return
-	 */
-	protected T handlePulledObject(Object o) {
-		return (T) o;
 	}
 	
 	@Override
