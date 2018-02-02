@@ -15,14 +15,13 @@ import styles from './credentialsControl.pcss'
 type Props = {
     keys: Array<Key>,
     addKey: (key: Key) => void,
-    removeKey: (id: Key.id) => void,
-    error?: ?string,
+    removeKey: (id: $ElementType<Key, 'id'>) => void,
     permissionTypeVisible: boolean
 }
 
 type State = {
     showKey: ?Key | false,
-    copied: Key.id | false,
+    copied: $ElementType<Key, 'id'> | false,
     permissionSelectorValue: string
 }
 
@@ -63,7 +62,7 @@ export default class CredentialsControl extends Component<Props, State> {
         e.target.reset()
     }
     
-    onCopy = (id: Key.id) => {
+    onCopy = (id: $ElementType<Key, 'id'>) => {
         this.setState({
             copied: id
         })

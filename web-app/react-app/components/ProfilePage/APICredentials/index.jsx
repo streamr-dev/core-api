@@ -6,15 +6,20 @@ import {Panel} from 'react-bootstrap'
 import CredentialsControl from '../../CredentialsControl'
 import {getResourceKeys, addResourceKey, removeResourceKey} from '../../../actions/key'
 
-import type {Key, State as KeyReducerState} from '../../../flowtype/key-types'
+import type {Key} from '../../../flowtype/key-types'
+import type {KeyState} from '../../../flowtype/states/key-state'
 
-type Props = {
-    keys: Array<Key>,
+type StateProps = {
+    keys: Array<Key>
+}
+
+type DispatchProps = {
     getKeys: () => void,
     addKey: (key: Key) => void,
-    removeKey: (keyId: Key.id) => void,
-    error: string
+    removeKey: (keyId: $ElementType<Key, 'id'>) => void
 }
+
+type Props = StateProps & DispatchProps
 
 export class APICredentials extends Component<Props> {
     
@@ -30,7 +35,6 @@ export class APICredentials extends Component<Props> {
                     keys={keys}
                     addKey={this.props.addKey}
                     removeKey={this.props.removeKey}
-                    error={this.props.error}
                     permissionTypeVisible={false}
                 />
             </Panel>
@@ -38,19 +42,21 @@ export class APICredentials extends Component<Props> {
     }
 }
 
-const mapStateToProps = ({key}: {key: KeyReducerState}) => ({
-    keys: (key.byTypeAndId['USER'] || {})['me'] || [],
-    error: key.error
-})
+const mapStateToProps = ({key}: {key: KeyState}): StateProps => {
+    const keys = (key.byTypeAndId.USER || {})['me'] || []
+    return {
+        keys
+    }
+}
 
-const mapDispatchToProps = (dispatch: Function) => ({
+const mapDispatchToProps = (dispatch: Function): DispatchProps => ({
     getKeys() {
         dispatch(getResourceKeys('USER', 'me'))
     },
     addKey(key: Key) {
         dispatch(addResourceKey('USER', 'me', key))
     },
-    removeKey(keyId: Key.id) {
+    removeKey(keyId: $ElementType<Key, 'id'>) {
         dispatch(removeResourceKey('USER', 'me', keyId))
     }
 })
