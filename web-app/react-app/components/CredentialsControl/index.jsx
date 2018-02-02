@@ -27,6 +27,8 @@ type State = {
 }
 
 export default class CredentialsControl extends Component<Props, State> {
+    copyTimeoutId: ?TimeoutID
+    
     static defaultProps = {
         permissionTypeVisible: false
     }
@@ -58,11 +60,16 @@ export default class CredentialsControl extends Component<Props, State> {
         e.target.reset()
     }
     
+    componentWillUnmount() {
+        this.copyTimeoutId && clearTimeout(this.copyTimeoutId)
+    }
+    
     onCopy = (id: $ElementType<Key, 'id'>) => {
         this.setState({
             copied: id
         })
-        setTimeout(() => {
+        this.copyTimeoutId && clearTimeout(this.copyTimeoutId)
+        this.copyTimeoutId = setTimeout(() => {
             this.setState({
                 copied: false
             })
