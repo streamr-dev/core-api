@@ -36,7 +36,7 @@ describe('DashboardItemTitleRow', () => {
     })
     
     describe('startEdit', () => {
-        it('must set state.editing to true', () => {
+        it('must set state.editing to !state.editing', () => {
             const el = shallow(<DashboardItemTitleRow
                 dashboard="testdb"
                 item="testitem"
@@ -48,7 +48,7 @@ describe('DashboardItemTitleRow', () => {
     })
     
     describe('endEdit', () => {
-        it('must set state.editing to false', () => {
+        it('must set state.editing to !state.editing', () => {
             const el = shallow(<DashboardItemTitleRow
                 dashboard="testdb"
                 item="testitem"

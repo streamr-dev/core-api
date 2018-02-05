@@ -14,9 +14,11 @@ import styles from './integrationKeyHandlerSegment.pcss'
 
 import type {IntegrationKeyState} from '../../../../flowtype/states/integration-key-state'
 import type {IntegrationKey} from '../../../../flowtype/integration-key-types'
+import type {ErrorInUi} from '../../../../flowtype/common-types'
 
 type StateProps = {
-    integrationKeys: Array<IntegrationKey>
+    integrationKeys: Array<IntegrationKey>,
+    error: ?ErrorInUi
 }
 
 type DispatchProps = {
@@ -28,6 +30,7 @@ type DispatchProps = {
 type GivenProps = {
     tableFields: Array<string>,
     inputFields: Array<string>,
+    integrationKeys: Array<IntegrationKey>,
     service: $ElementType<IntegrationKey, 'service'>,
     name: $ElementType<IntegrationKey, 'name'>,
     className: string
@@ -36,12 +39,12 @@ type GivenProps = {
 type Props = StateProps & DispatchProps & GivenProps
 
 export class IntegrationKeyHandlerSegment extends Component<Props> {
-    
+
     componentDidMount() {
         // TODO: Move to (yet non-existent) router
         this.props.getIntegrationKeysByService(this.props.service)
     }
-    
+
     onNew = (integrationKey: IntegrationKey) => {
         const name = integrationKey.name
         const service = this.props.service
@@ -52,11 +55,11 @@ export class IntegrationKeyHandlerSegment extends Component<Props> {
             json: integrationKey
         })
     }
-    
+
     onDelete = (id: $ElementType<IntegrationKey, 'id'>) => {
         this.props.deleteIntegrationKey(id)
     }
-    
+
     render() {
         return (
             <div className={this.props.className || ''}>
@@ -79,8 +82,9 @@ export class IntegrationKeyHandlerSegment extends Component<Props> {
     }
 }
 
-export const mapStateToProps = ({integrationKey: {listsByService}}: {integrationKey: IntegrationKeyState}, props: Props): StateProps => ({
-    integrationKeys: listsByService[props.service] || []
+export const mapStateToProps = ({integrationKey: {listsByService, error}}: {integrationKey: IntegrationKeyState}, props: Props): StateProps => ({
+    integrationKeys: listsByService[props.service] || [],
+    error
 })
 
 export const mapDispatchToProps = (dispatch: Function): DispatchProps => ({

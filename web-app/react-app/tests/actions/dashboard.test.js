@@ -65,21 +65,14 @@ describe('Dashboard actions', () => {
         it('creates GET_ALL_INTEGRATION_KEYS_FAILURE when fetching integration keys has failed', async (done) => {
             moxios.stubRequest('api/v1/dashboards', {
                 status: 500,
-                response: {
-                    message: 'test-error',
-                    code: 'TEST'
-                }
+                response: new Error('test-error')
             })
             
             const expectedActions = [{
                 type: actions.GET_AND_REPLACE_DASHBOARDS_REQUEST
             }, {
                 type: actions.GET_AND_REPLACE_DASHBOARDS_FAILURE,
-                error: {
-                    message: 'test-error',
-                    code: 'TEST',
-                    statusCode: 500
-                }
+                error: new Error('test-error')
             }]
             
             try {
@@ -127,21 +120,14 @@ describe('Dashboard actions', () => {
         it('creates GET_ALL_INTEGRATION_KEYS_FAILURE when fetching integration keys has failed', async (done) => {
             moxios.stubRequest('api/v1/dashboards', {
                 status: 500,
-                response: {
-                    message: 'test-error',
-                    code: 'TEST'
-                }
+                response: new Error('test-error')
             })
             
             const expectedActions = [{
                 type: actions.GET_AND_REPLACE_DASHBOARDS_REQUEST
             }, {
                 type: actions.GET_AND_REPLACE_DASHBOARDS_FAILURE,
-                error: {
-                    message: 'test-error',
-                    code: 'TEST',
-                    statusCode: 500
-                }
+                error: new Error('test-error')
             }]
             
             try {
@@ -166,10 +152,7 @@ describe('Dashboard actions', () => {
             }
             moxios.stubRequest(`api/v1/dashboards/${id}`, {
                 status: 200,
-                response: {
-                    ...db,
-                    id: 'test2'
-                }
+                response: db
             })
             
             const expectedActions = [{
@@ -214,21 +197,13 @@ describe('Dashboard actions', () => {
                 newId: 'new_test'
             }, {
                 type: actions.UPDATE_AND_SAVE_DASHBOARD_SUCCESS,
-                dashboard: {
-                    ...db,
-                    id: 'new_test'
-                }
-            }, {
-                type: notificationActions.CREATE_NOTIFICATION,
-                notification: {
-                    type: 'success'
-                }
+                dashboard: db
             }]
             
             await store.dispatch(actions.updateAndSaveDashboard(db))
-            assert.deepStrictEqual(store.getActions().slice(0, 3), expectedActions.slice(0, 3))
-            assert.equal(store.getActions()[3].type, expectedActions[3].type)
-            assert.equal(store.getActions()[3].notification.type, expectedActions[3].notification.type)
+            assert.deepStrictEqual(store.getActions()[0], expectedActions[0])
+            assert.equal(store.getActions()[1].level, expectedActions[1].level)
+            assert.deepStrictEqual(store.getActions()[2], expectedActions[2])
         })
         it('creates UPDATE_AND_SAVE_DASHBOARD_FAILURE and creates notification when fetching a dashboard has failed', async (done) => {
             const id = 'test'
@@ -241,10 +216,7 @@ describe('Dashboard actions', () => {
             }
             moxios.stubRequest(`api/v1/dashboards/${id}`, {
                 status: 500,
-                response: {
-                    message: 'test',
-                    code: 'TEST'
-                }
+                response: new Error('test')
             })
             
             const expectedActions = [{
@@ -253,11 +225,7 @@ describe('Dashboard actions', () => {
                 level: 'error'
             }, {
                 type: actions.UPDATE_AND_SAVE_DASHBOARD_FAILURE,
-                error: {
-                    message: 'test',
-                    code: 'TEST',
-                    statusCode: 500
-                }
+                error: new Error('test')
             }]
             
             try {
@@ -334,10 +302,7 @@ describe('Dashboard actions', () => {
                 assert.equal(request.config.method, 'delete')
                 request.respondWith({
                     status: 500,
-                    response: {
-                        message: 'test',
-                        code: 'TEST'
-                    }
+                    response: new Error('test')
                 })
             })
             
@@ -346,11 +311,7 @@ describe('Dashboard actions', () => {
                 id: 'test'
             }, {
                 type: originalActions.DELETE_DASHBOARD_FAILURE,
-                error: {
-                    message: 'test',
-                    code: 'TEST',
-                    statusCode: 500
-                }
+                error: new Error('test')
             }]
             
             try {
@@ -390,10 +351,7 @@ describe('Dashboard actions', () => {
             const id = 'asdfasdfasasd'
             moxios.stubRequest(`api/v1/dashboards/${id}/permissions/me`, {
                 status: 500,
-                response: {
-                    message: 'test-error',
-                    code: 'TEST'
-                }
+                response: new Error('test-error')
             })
             
             const expectedActions = [{
@@ -402,11 +360,7 @@ describe('Dashboard actions', () => {
             }, {
                 id,
                 type: originalActions.GET_MY_DASHBOARD_PERMISSIONS_FAILURE,
-                error: {
-                    message: 'test-error',
-                    code: 'TEST',
-                    statusCode: 500
-                }
+                error: new Error('test-error')
             }]
             
             try {
@@ -602,4 +556,5 @@ describe('Dashboard actions', () => {
             id: 'test'
         })
     })
+    
 })

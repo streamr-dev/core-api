@@ -67,18 +67,12 @@ describe('Canvas reducer', () => {
                 list: ['test']
             }, {
                 type: actions.GET_RUNNING_CANVASES_FAILURE,
-                error: {
-                    message: 'test',
-                    code: 'TEST'
-                }
+                error: new Error('test-error')
             })
         ).toEqual({
             fetching: false,
             list: ['test'],
-            error: {
-                message: 'test',
-                code: 'TEST'
-            }
+            error: new Error('test-error')
         })
     })
 })

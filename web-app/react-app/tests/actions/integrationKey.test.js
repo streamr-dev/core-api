@@ -62,21 +62,14 @@ describe('IntegrationKey actions', () => {
         it('creates GET_ALL_INTEGRATION_KEYS_FAILURE when fetching integration keys has failed', async (done) => {
             moxios.stubRequest('api/v1/integration_keys', {
                 status: 500,
-                response: {
-                    message: 'test-error',
-                    code: 'TEST'
-                }
+                response: new Error('test-error')
             })
         
             const expectedActions = [{
                 type: actions.GET_AND_REPLACE_INTEGRATION_KEYS_REQUEST
             }, {
                 type: actions.GET_AND_REPLACE_INTEGRATION_KEYS_FAILURE,
-                error: {
-                    message: 'test-error',
-                    code: 'TEST',
-                    statusCode: 500
-                }
+                error: new Error('test-error')
             }]
         
             try {
@@ -122,10 +115,7 @@ describe('IntegrationKey actions', () => {
                 assert.equal(request.config.method, 'post')
                 request.respondWith({
                     status: 500,
-                    response: {
-                        message: 'test',
-                        code: 'TEST'
-                    }
+                    response: new Error('test')
                 })
             })
         
@@ -133,11 +123,7 @@ describe('IntegrationKey actions', () => {
                 type: actions.CREATE_INTEGRATION_KEY_REQUEST
             }, {
                 type: actions.CREATE_INTEGRATION_KEY_FAILURE,
-                error: {
-                    message: 'test',
-                    code: 'TEST',
-                    statusCode: 500
-                }
+                error: new Error('test')
             }]
         
             try {
@@ -180,10 +166,7 @@ describe('IntegrationKey actions', () => {
                 assert.equal(request.config.method, 'delete')
                 request.respondWith({
                     status: 500,
-                    response: {
-                        message: 'test',
-                        code: 'TEST'
-                    }
+                    response: new Error('test')
                 })
             })
         
@@ -192,11 +175,7 @@ describe('IntegrationKey actions', () => {
                 id: 'test'
             }, {
                 type: actions.DELETE_INTEGRATION_KEY_FAILURE,
-                error: {
-                    message: 'test',
-                    code: 'TEST',
-                    statusCode: 500
-                }
+                error: new Error('test')
             }]
         
             try {
