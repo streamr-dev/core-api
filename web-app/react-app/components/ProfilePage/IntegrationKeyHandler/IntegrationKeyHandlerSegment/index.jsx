@@ -2,8 +2,12 @@
 
 import React, {Component} from 'react'
 
-import { connect } from 'react-redux'
-import { getIntegrationKeysByService, createIntegrationKey, deleteIntegrationKey } from '../../../../actions/integrationKey'
+import {connect} from 'react-redux'
+import {
+    createIntegrationKey,
+    deleteIntegrationKey,
+    getIntegrationKeysByService
+} from '../../../../actions/integrationKey'
 
 import {Col, ControlLabel} from 'react-bootstrap'
 
@@ -33,13 +37,13 @@ type GivenProps = {
     integrationKeys: Array<IntegrationKey>,
     service: $ElementType<IntegrationKey, 'service'>,
     name: $ElementType<IntegrationKey, 'name'>,
-    className: string
+    className: string,
+    onNew: (integrationKey: IntegrationKey) => void,
 }
 
 type Props = StateProps & DispatchProps & GivenProps
 
 export class IntegrationKeyHandlerSegment extends Component<Props> {
-
     componentDidMount() {
         // TODO: Move to (yet non-existent) router
         this.props.getIntegrationKeysByService(this.props.service)
@@ -74,7 +78,7 @@ export class IntegrationKeyHandlerSegment extends Component<Props> {
                     />
                     <IntegrationKeyHandlerInput
                         fields={this.props.inputFields}
-                        onNew={this.onNew}
+                        onNew={this.props.onNew || this.onNew}
                     />
                 </Col>
             </div>
