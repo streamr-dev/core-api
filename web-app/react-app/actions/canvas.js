@@ -3,7 +3,7 @@
 import axios from 'axios'
 import {parseError} from './utils/parseApiResponse'
 import createLink from '../helpers/createLink'
-import {showError} from '../actions/notification'
+import {error} from 'react-notification-system-redux'
 
 export const GET_RUNNING_CANVASES_REQUEST = 'GET_RUNNING_CANVASES_REQUEST'
 export const GET_RUNNING_CANVASES_SUCCESS = 'GET_RUNNING_CANVASES_SUCCESS'
@@ -30,7 +30,7 @@ export const getRunningCanvases = () => (dispatch: Function) => {
         .catch(res => {
             const e = parseError(res)
             dispatch(getCanvasesFailure(e))
-            dispatch(showError({
+            dispatch(error({
                 title: 'Error!',
                 message: e.message
             }))
