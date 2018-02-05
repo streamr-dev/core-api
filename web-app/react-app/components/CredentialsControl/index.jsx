@@ -7,6 +7,7 @@ import serialize from 'form-serialize'
 import FontAwesome from 'react-fontawesome'
 import ConfirmButton from '../ConfirmButton'
 import Select from 'react-select'
+import 'react-select/dist/react-select.css'
 
 import type {Key} from '../../flowtype/key-types'
 import type {OnSubmitEvent} from '../../flowtype/common-types'
