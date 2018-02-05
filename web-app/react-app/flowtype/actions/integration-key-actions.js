@@ -1,7 +1,7 @@
 // @flow
 
 import type {IntegrationKey} from '../integration-key-types'
-import type {ApiError} from '../common-types'
+import type {ErrorInUi} from '../common-types'
 
 import {
     GET_AND_REPLACE_INTEGRATION_KEYS_REQUEST,
@@ -42,9 +42,9 @@ export type IntegrationKeyAction = {
     type: typeof GET_AND_REPLACE_INTEGRATION_KEYS_FAILURE
         | typeof CREATE_INTEGRATION_KEY_FAILURE
         | typeof DELETE_INTEGRATION_KEY_FAILURE,
-    error: ApiError
+    error: ErrorInUi
 } | {
     type: typeof GET_INTEGRATION_KEYS_BY_SERVICE_FAILURE,
     service: $ElementType<IntegrationKey, 'service'>,
-    error: ApiError
+    error: ErrorInUi
 }

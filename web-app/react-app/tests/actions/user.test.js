@@ -19,7 +19,7 @@ moxios.promiseWait = () => new Promise(resolve => moxios.wait(resolve))
 
 describe('User actions', () => {
     let store
-    
+
     beforeEach(() => {
         moxios.install(axios)
         store = mockStore({
@@ -31,12 +31,12 @@ describe('User actions', () => {
             }
         })
     })
-    
+
     afterEach(() => {
         moxios.uninstall()
         store.clearActions()
     })
-    
+
     describe('getCurrentUser', () => {
         it('creates GET_CURRENT_USER_SUCCESS when fetching resources succeeded', async () => {
             const user = {
@@ -54,23 +54,30 @@ describe('User actions', () => {
                 type: actions.GET_CURRENT_USER_SUCCESS,
                 user
             }]
-            
+
             await store.dispatch(actions.getCurrentUser())
             assert.deepStrictEqual(store.getActions(), expectedActions)
         })
         it('creates GET_CURRENT_USER_SUCCESS when fetching resources succeeded', async () => {
             moxios.stubRequest('api/v1/users/me', {
                 status: 500,
-                response: new Error('test')
+                response: {
+                    error: 'test',
+                    code: 'TEST'
+                }
             })
-            
+
             const expectedActions = [{
                 type: actions.GET_CURRENT_USER_REQUEST,
             }, {
                 type: actions.GET_CURRENT_USER_FAILURE,
-                error: new Error('test')
+                error: {
+                    message: 'test',
+                    code: 'TEST',
+                    statusCode: 500
+                }
             }]
-    
+
             try {
                 await store.dispatch(actions.getCurrentUser())
             } catch (e) {
@@ -79,7 +86,7 @@ describe('User actions', () => {
             }
         })
     })
-    
+
     describe('saveCurrentUser', () => {
         it('should post the user to the api', async () => {
             const user = {
@@ -148,14 +155,14 @@ describe('User actions', () => {
                     response: user
                 })
             })
-            
+
             const expectedActions = [{
                 type: actions.SAVE_CURRENT_USER_REQUEST
             }, {
                 type: actions.SAVE_CURRENT_USER_SUCCESS,
                 user
             }]
-            
+
             await store.dispatch(actions.saveCurrentUser(user, true))
             assert.deepStrictEqual(store.getActions().slice(0, 2), expectedActions)
             assert.deepStrictEqual(store.getActions()[2].level, 'success')
@@ -181,17 +188,24 @@ describe('User actions', () => {
                 }, user)
                 requests.at(0).respondWith({
                     status: 500,
-                    response: 'test'
+                    response: {
+                        error: 'test',
+                        code: 'TEST'
+                    }
                 })
             })
-            
+
             const expectedActions = [{
                 type: actions.SAVE_CURRENT_USER_REQUEST
             }, {
                 type: actions.SAVE_CURRENT_USER_FAILURE,
-                error: 'test'
+                error: {
+                    message: 'test',
+                    code: 'TEST',
+                    statusCode: 500
+                }
             }]
-            
+
             try {
                 await store.dispatch(actions.saveCurrentUser(user, true))
             } catch (e) {
@@ -200,7 +214,7 @@ describe('User actions', () => {
             }
         })
     })
-    
+
     describe('updateCurrentUserName', () => {
         it('creates UPDATE_CURRENT_USER', async () => {
             const store = mockStore({
@@ -226,7 +240,7 @@ describe('User actions', () => {
             assert.deepStrictEqual(store.getActions(), expectedActions)
         })
     })
-    
+
     describe('updateCurrentUserTimezone', () => {
         it('creates UPDATE_CURRENT_USER', async () => {
             const store = mockStore({

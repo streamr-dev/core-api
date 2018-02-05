@@ -7,7 +7,6 @@ import sinon from 'sinon'
 import * as helpers from '../../helpers/createLink'
 
 import * as actions from '../../actions/key'
-import * as notificationActions from '../../actions/notification'
 
 const middlewares = [thunk]
 const mockStore = configureMockStore(middlewares)
@@ -19,7 +18,7 @@ moxios.promiseWait = () => new Promise(resolve => moxios.wait(resolve))
 
 describe('Key actions', () => {
     let store
-    
+
     beforeEach(() => {
         moxios.install()
         store = mockStore({
@@ -30,12 +29,12 @@ describe('Key actions', () => {
             }
         })
     })
-    
+
     afterEach(() => {
         moxios.uninstall()
         store.clearActions()
     })
-    
+
     describe('getApiUrl (tested indirectly)', () => {
         it('use correct url for stream', async done => {
             const resourceId = 'afasdfasdfasgsdfg'
@@ -84,7 +83,7 @@ describe('Key actions', () => {
             })
         })
     })
-    
+
     describe('getResourceKeys', () => {
         it('creates GET_RESOURCE_KEYS_SUCCESS when fetching resources succeeded', async () => {
             const resourceType = 'STREAM'
@@ -97,7 +96,7 @@ describe('Key actions', () => {
                 status: 200,
                 response: keys
             })
-            
+
             const expectedActions = [{
                 type: actions.GET_RESOURCE_KEYS_REQUEST,
             }, {
@@ -106,7 +105,7 @@ describe('Key actions', () => {
                 resourceId,
                 keys
             }]
-            
+
             await store.dispatch(actions.getResourceKeys(resourceType, resourceId))
             assert.deepStrictEqual(store.getActions(), expectedActions)
         })
@@ -115,27 +114,33 @@ describe('Key actions', () => {
             const resourceId = 'testId'
             moxios.stubRequest(`api/v1/streams/${resourceId}/keys`, {
                 status: 500,
-                response: 'test'
+                response: {
+                    error: 'test',
+                    code: 'TEST'
+                }
             })
-            
+
             const expectedActions = [{
                 type: actions.GET_RESOURCE_KEYS_REQUEST,
             }, {
                 type: actions.GET_RESOURCE_KEYS_FAILURE,
-                error: 'test'
+                error: {
+                    message: 'test',
+                    code: 'TEST',
+                    statusCode: 500
+                }
             }]
-            
+
             try {
                 await store.dispatch(actions.getResourceKeys(resourceType, resourceId))
             } catch (e) {
                 assert.deepStrictEqual(store.getActions().slice(0,2), expectedActions)
-                assert.equal(store.getActions()[2].type, notificationActions.CREATE_NOTIFICATION)
-                assert.equal(store.getActions()[2].notification.type, 'error')
+                assert.equal(store.getActions()[2].level, 'error')
                 done()
             }
         })
     })
-    
+
     describe('addResourceKey', () => {
         it('creates ADD_RESOURCE_KEY_SUCCESS for succeeded key addition', async () => {
             const resourceType = 'STREAM'
@@ -152,7 +157,7 @@ describe('Key actions', () => {
                     response: key
                 })
             })
-        
+
             const expectedActions = [{
                 type: actions.ADD_RESOURCE_KEY_REQUEST
             }, {
@@ -161,7 +166,7 @@ describe('Key actions', () => {
                 resourceId,
                 key
             }]
-        
+
             await store.dispatch(actions.addResourceKey(resourceType, resourceId, key))
             assert.deepStrictEqual(store.getActions(), expectedActions)
         })
@@ -177,28 +182,34 @@ describe('Key actions', () => {
                 assert.equal(request.config.method, 'post')
                 request.respondWith({
                     status: 500,
-                    response: 'test'
+                    response: {
+                        error: 'test',
+                        code: 'TEST'
+                    }
                 })
             })
-        
+
             const expectedActions = [{
                 type: actions.ADD_RESOURCE_KEY_REQUEST
             }, {
                 type: actions.ADD_RESOURCE_KEY_FAILURE,
-                error: 'test'
+                error: {
+                    message: 'test',
+                    code: 'TEST',
+                    statusCode: 500
+                }
             }]
-    
+
             try {
                 await store.dispatch(actions.addResourceKey(resourceType, resourceId, key))
             } catch (e) {
                 assert.deepStrictEqual(store.getActions().slice(0, 2), expectedActions)
-                assert.equal(store.getActions()[2].type, 'CREATE_NOTIFICATION')
-                assert.equal(store.getActions()[2].notification.type, 'error')
+                assert.equal(store.getActions()[2].level, 'error')
                 done()
             }
         })
     })
-    
+
     describe('removeResourceKey', () => {
         it('creates REMOVE_RESOURCE_KEY_SUCCESS for succeeded at key removal', async () => {
             const resourceType = 'STREAM'
@@ -211,7 +222,7 @@ describe('Key actions', () => {
                     status: 200
                 })
             })
-        
+
             const expectedActions = [{
                 type: actions.REMOVE_RESOURCE_KEY_REQUEST
             }, {
@@ -220,7 +231,7 @@ describe('Key actions', () => {
                 resourceId,
                 keyId
             }]
-        
+
             await store.dispatch(actions.removeResourceKey(resourceType, resourceId, keyId))
             assert.deepStrictEqual(store.getActions(), expectedActions)
         })
@@ -233,23 +244,29 @@ describe('Key actions', () => {
                 assert.equal(request.config.method, 'delete')
                 request.respondWith({
                     status: 500,
-                    response: 'test'
+                    response: {
+                        error: 'test',
+                        code: 'TEST'
+                    }
                 })
             })
-        
+
             const expectedActions = [{
                 type: actions.REMOVE_RESOURCE_KEY_REQUEST
             }, {
                 type: actions.REMOVE_RESOURCE_KEY_FAILURE,
-                error: 'test'
+                error: {
+                    message: 'test',
+                    code: 'TEST',
+                    statusCode: 500
+                }
             }]
-    
+
             try {
                 await store.dispatch(actions.removeResourceKey(resourceType, resourceId, keyId))
             } catch (e) {
                 assert.deepStrictEqual(store.getActions().slice(0, 2), expectedActions)
-                assert.equal(store.getActions()[2].type, 'CREATE_NOTIFICATION')
-                assert.equal(store.getActions()[2].notification.type, 'error')
+                assert.equal(store.getActions()[2].level, 'error')
                 done()
             }
         })

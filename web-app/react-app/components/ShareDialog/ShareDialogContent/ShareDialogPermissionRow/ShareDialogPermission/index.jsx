@@ -33,17 +33,17 @@ type Props = StateProps & DispatchProps & GivenProps
 const operationsInOrder = ['read', 'write', 'share']
 
 export class ShareDialogPermission extends Component<Props> {
-    
+
     onSelect = ({value}: {value: $ElementType<Permission, 'operation'>}) => {
         this.props.setResourceHighestOperation(value)
     }
-    
+
     onRemove = () => {
         this.props.remove()
     }
-    
+
     render() {
-        const errors = this.props.permissions.filter(p => p.error).map(p => p.error && p.error.error)
+        const errors = this.props.permissions.filter(p => p.error).map(p => p.error && p.error.message)
         const highestOperationIndex = Math.max(...(this.props.permissions.map(p => operationsInOrder.indexOf(p.operation))))
         const user = this.props.permissions[0] && this.props.permissions[0].user
         return (

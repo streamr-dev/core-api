@@ -3,7 +3,7 @@
 import axios from 'axios'
 import path from 'path'
 import settle from 'promise-settle'
-import parseError from './utils/parseError'
+import {parseError} from './utils/parseApiResponse'
 import createLink from '../helpers/createLink'
 
 import {error, success} from 'react-notification-system-redux'
@@ -23,7 +23,7 @@ export const SAVE_REMOVED_RESOURCE_PERMISSION_REQUEST = 'SAVE_REMOVED_RESOURCE_P
 export const SAVE_REMOVED_RESOURCE_PERMISSION_SUCCESS = 'SAVE_REMOVED_RESOURCE_PERMISSIONS_SUCCESS'
 export const SAVE_REMOVED_RESOURCE_PERMISSION_FAILURE = 'SAVE_REMOVED_RESOURCE_PERMISSIONS_FAILURE'
 
-import type {ApiError} from '../flowtype/common-types'
+import type {ErrorInUi} from '../flowtype/common-types'
 import type {Permission, ResourceType, ResourceId, Operation} from '../flowtype/permission-types'
 import type {User} from '../flowtype/user-types'
 
@@ -49,7 +49,7 @@ export const getResourcePermissions = (resourceType: ResourceType, resourceId: R
             dispatch(getResourcePermissionsFailure(e))
             dispatch(error({
                 title: 'Error',
-                message: e.error
+                message: e.message
             }))
             throw e
         })
@@ -111,7 +111,7 @@ export const removeAllResourcePermissionsByUser = (resourceType: ResourceType, r
 export const saveUpdatedResourcePermissions = (resourceType: ResourceType, resourceId: ResourceId): any => (dispatch: Function, getState: Function): Promise<void> => {
     const state = getState()
     const permissions = state.permission.byTypeAndId[resourceType] && state.permission.byTypeAndId[resourceType][resourceId] || []
-    
+
     const addedPermissions = permissions.filter(p => p.new)
     const addPermissions = new Promise(resolve => {
         settle(addedPermissions.map(permission => {
@@ -133,7 +133,7 @@ export const saveUpdatedResourcePermissions = (resourceType: ResourceType, resou
                 resolve(results)
             })
     })
-    
+
     const removedPermissions = permissions.filter(p => p.removed)
     const removePermissions = new Promise(resolve => {
         settle(removedPermissions.map(permission => {
@@ -155,7 +155,7 @@ export const saveUpdatedResourcePermissions = (resourceType: ResourceType, resou
                 resolve(results)
             })
     })
-    
+
     return new Promise((resolve, reject) => {
         Promise.all([addPermissions, removePermissions])
             .then(([added, removed]) => {
@@ -193,7 +193,7 @@ const getResourcePermissionsSuccess = (resourceType: ResourceType, resourceId: R
     permissions
 })
 
-const getResourcePermissionsFailure = (error: ApiError) => ({
+const getResourcePermissionsFailure = (error: ErrorInUi) => ({
     type: GET_RESOURCE_PERMISSIONS_FAILURE,
     error
 })

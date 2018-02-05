@@ -2,7 +2,7 @@
 
 import axios from 'axios'
 import path from 'path'
-import parseError from './utils/parseError'
+import {parseError} from './utils/parseApiResponse'
 import createLink from '../helpers/createLink'
 
 import {error} from 'react-notification-system-redux'
@@ -20,7 +20,7 @@ export const REMOVE_RESOURCE_KEY_SUCCESS = 'REMOVE_RESOURCE_KEY_SUCCESS'
 export const REMOVE_RESOURCE_KEY_FAILURE = 'REMOVE_RESOURCE_KEY_FAILURE'
 
 import type {Key, ResourceType, ResourceId} from '../flowtype/key-types'
-import type {ApiError} from '../flowtype/common-types'
+import type {ErrorInUi} from '../flowtype/common-types'
 
 export const getResourceKeys = (resourceType: ResourceType, resourceId: ResourceId) => (dispatch: Function) => {
     dispatch(getResourceKeysRequest())
@@ -31,7 +31,7 @@ export const getResourceKeys = (resourceType: ResourceType, resourceId: Resource
             dispatch(getResourceKeysFailure(e))
             dispatch(error({
                 title: 'Error!',
-                message: e.error
+                message: e.message
             }))
             throw e
         })
@@ -46,7 +46,7 @@ export const addResourceKey = (resourceType: ResourceType, resourceId: ResourceI
             dispatch(addResourceKeyFailure(e))
             dispatch(error({
                 title: 'Error!',
-                message: e.error
+                message: e.message
             }))
             throw e
         })
@@ -61,7 +61,7 @@ export const removeResourceKey = (resourceType: ResourceType, resourceId: Resour
             dispatch(removeResourceKeyFailure(e))
             dispatch(error({
                 title: 'Error!',
-                message: e.error
+                message: e.message
             }))
             throw e
         })
@@ -89,7 +89,7 @@ const getResourceKeysSuccess = (resourceType: ResourceType, resourceId: Resource
     keys
 })
 
-const getResourceKeysFailure = (error: ApiError) => ({
+const getResourceKeysFailure = (error: ErrorInUi) => ({
     type: GET_RESOURCE_KEYS_FAILURE,
     error
 })
@@ -105,7 +105,7 @@ const addResourceKeySuccess = (resourceType: ResourceType, resourceId: ResourceI
     key
 })
 
-const addResourceKeyFailure = (error: ApiError) => ({
+const addResourceKeyFailure = (error: ErrorInUi) => ({
     type: ADD_RESOURCE_KEY_FAILURE,
     error
 })
@@ -121,7 +121,7 @@ const removeResourceKeySuccess = (resourceType: ResourceType, resourceId: Resour
     keyId
 })
 
-const removeResourceKeyFailure = (error: ApiError) => ({
+const removeResourceKeyFailure = (error: ErrorInUi) => ({
     type: REMOVE_RESOURCE_KEY_FAILURE,
     error
 })

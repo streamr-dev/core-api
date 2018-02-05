@@ -1,7 +1,7 @@
 // @flow
 
 import type {Permission, ResourceType, ResourceId} from '../permission-types'
-import type {ApiError} from '../common-types'
+import type {ErrorInUi} from '../common-types'
 
 import {
     GET_RESOURCE_PERMISSIONS_REQUEST,
@@ -38,5 +38,5 @@ export type PermissionAction = {
     permissions: Array<Permission>
 } | {
     type: typeof GET_RESOURCE_PERMISSIONS_FAILURE,
-    error: ApiError
+    error: ErrorInUi
 }

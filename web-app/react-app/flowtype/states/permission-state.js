@@ -1,7 +1,7 @@
 // @flow
 
 import type {Permission, ResourceType, ResourceId} from '../permission-types.js'
-import type {ApiError} from '../common-types.js'
+import type {ErrorInUi} from '../common-types.js'
 
 export type PermissionState = {
     byTypeAndId: {
@@ -9,6 +9,6 @@ export type PermissionState = {
             [ResourceId]: Array<Permission>
         }
     },
-    error: ?ApiError,
+    error: ?ErrorInUi,
     fetching: boolean
 }

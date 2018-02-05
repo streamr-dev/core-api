@@ -1,7 +1,7 @@
 // @flow
 
 import axios from 'axios'
-import parseError from './utils/parseError'
+import {parseError} from './utils/parseApiResponse'
 import createLink from '../helpers/createLink'
 import {error, success} from 'react-notification-system-redux'
 
@@ -24,7 +24,7 @@ export const DELETE_INTEGRATION_KEY_FAILURE = 'DELETE_INTEGRATION_KEY_FAILURE'
 const apiUrl = 'api/v1/integration_keys'
 
 import type {IntegrationKey} from '../flowtype/integration-key-types.js'
-import type {ApiError} from '../flowtype/common-types.js'
+import type {ErrorInUi} from '../flowtype/common-types.js'
 
 export const getAndReplaceIntegrationKeys = () => (dispatch: Function) => {
     dispatch(getAndReplaceIntegrationKeysRequest())
@@ -39,7 +39,7 @@ export const getAndReplaceIntegrationKeys = () => (dispatch: Function) => {
             const e = parseError(res)
             dispatch(getAndReplaceIntegrationKeysFailure(e))
             dispatch(error({
-                title: e.error
+                title: e.message
             }))
             throw e
         })
@@ -57,7 +57,7 @@ export const getIntegrationKeysByService = (service: $ElementType<IntegrationKey
             const e = parseError(res)
             dispatch(getIntegrationKeysByServiceFailure(service, e))
             dispatch(error({
-                title: e.error
+                title: e.message
             }))
             throw e
         })
@@ -71,7 +71,7 @@ export const createIntegrationKey = (integrationKey: IntegrationKey) => (dispatc
             const e = parseError(res)
             dispatch(createIntegrationKeyFailure(e))
             dispatch(error({
-                title: e.error
+                title: e.message
             }))
             throw e
         })
@@ -88,7 +88,7 @@ export const deleteIntegrationKey = (id: $ElementType<IntegrationKey, 'id'>) => 
             const e = parseError(res)
             dispatch(deleteIntegrationKeyFailure(e))
             dispatch(error({
-                title: e.error
+                title: e.message
             }))
             throw e
         })
@@ -133,23 +133,23 @@ const deleteIntegrationKeySuccess = (id: $ElementType<IntegrationKey, 'id'>) => 
     id
 })
 
-const getAndReplaceIntegrationKeysFailure = (error: ApiError) => ({
+const getAndReplaceIntegrationKeysFailure = (error: ErrorInUi) => ({
     type: GET_AND_REPLACE_INTEGRATION_KEYS_FAILURE,
     error
 })
 
-const getIntegrationKeysByServiceFailure = (service: string, error: ApiError) => ({
+const getIntegrationKeysByServiceFailure = (service: string, error: ErrorInUi) => ({
     type: GET_INTEGRATION_KEYS_BY_SERVICE_FAILURE,
     error,
     service
 })
 
-const createIntegrationKeyFailure = (error: ApiError) => ({
+const createIntegrationKeyFailure = (error: ErrorInUi) => ({
     type: CREATE_INTEGRATION_KEY_FAILURE,
     error
 })
 
-const deleteIntegrationKeyFailure = (error: ApiError) => ({
+const deleteIntegrationKeyFailure = (error: ErrorInUi) => ({
     type: DELETE_INTEGRATION_KEY_FAILURE,
     error
 })

@@ -14,11 +14,11 @@ import styles from './integrationKeyHandlerSegment.pcss'
 
 import type {IntegrationKeyState} from '../../../../flowtype/states/integration-key-state'
 import type {IntegrationKey} from '../../../../flowtype/integration-key-types'
-import type {ApiError} from '../../../../flowtype/common-types'
+import type {ErrorInUi} from '../../../../flowtype/common-types'
 
 type StateProps = {
     integrationKeys: Array<IntegrationKey>,
-    error: ?ApiError
+    error: ?ErrorInUi
 }
 
 type DispatchProps = {
@@ -39,12 +39,12 @@ type GivenProps = {
 type Props = StateProps & DispatchProps & GivenProps
 
 export class IntegrationKeyHandlerSegment extends Component<Props> {
-    
+
     componentDidMount() {
         // TODO: Move to (yet non-existent) router
         this.props.getIntegrationKeysByService(this.props.service)
     }
-    
+
     onNew = (integrationKey: IntegrationKey) => {
         const name = integrationKey.name
         const service = this.props.service
@@ -55,11 +55,11 @@ export class IntegrationKeyHandlerSegment extends Component<Props> {
             json: integrationKey
         })
     }
-    
+
     onDelete = (id: $ElementType<IntegrationKey, 'id'>) => {
         this.props.deleteIntegrationKey(id)
     }
-    
+
     render() {
         return (
             <div className={this.props.className || ''}>
