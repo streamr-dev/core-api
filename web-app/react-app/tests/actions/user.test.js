@@ -58,17 +58,24 @@ describe('User actions', () => {
             await store.dispatch(actions.getCurrentUser())
             assert.deepStrictEqual(store.getActions(), expectedActions)
         })
-        it('creates GET_CURRENT_USER_SUCCESS when fetching resources succeeded', async () => {
+        it('creates GET_CURRENT_USER_SUCCESS when fetching resources succeeded', async (done) => {
             moxios.stubRequest('api/v1/users/me', {
                 status: 500,
-                response: new Error('test')
+                response: {
+                    code: 'TEST',
+                    message: 'test'
+                }
             })
             
             const expectedActions = [{
                 type: actions.GET_CURRENT_USER_REQUEST,
             }, {
                 type: actions.GET_CURRENT_USER_FAILURE,
-                error: new Error('test')
+                error: {
+                    message: 'test',
+                    code: 'TEST',
+                    statusCode: 500
+                }
             }]
     
             try {
@@ -76,6 +83,7 @@ describe('User actions', () => {
             } catch (e) {
                 assert.deepStrictEqual(store.getActions().slice(0, 2), expectedActions)
                 assert.deepStrictEqual(store.getActions()[2].level, 'error')
+                done()
             }
         })
     })
@@ -181,7 +189,10 @@ describe('User actions', () => {
                 }, user)
                 requests.at(0).respondWith({
                     status: 500,
-                    response: 'test'
+                    response: {
+                        message: 'test',
+                        code: 'TEST'
+                    }
                 })
             })
             
@@ -189,7 +200,11 @@ describe('User actions', () => {
                 type: actions.SAVE_CURRENT_USER_REQUEST
             }, {
                 type: actions.SAVE_CURRENT_USER_FAILURE,
-                error: 'test'
+                error: {
+                    message: 'test',
+                    code: 'TEST',
+                    statusCode: 500
+                }
             }]
             
             try {

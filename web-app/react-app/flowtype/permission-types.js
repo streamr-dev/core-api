@@ -1,6 +1,6 @@
 // @flow
 
-import type {ApiError} from './common-types'
+import type {ErrorInUi} from './common-types'
 import type {User} from './user-types'
 
 export type ResourceType = 'DASHBOARD' | 'CANVAS' | 'STREAM'
@@ -17,5 +17,5 @@ export type Permission = {
     fetching?: boolean,
     new?: boolean,
     removed?: boolean,
-    error?: ApiError
+    error?: ErrorInUi
 }

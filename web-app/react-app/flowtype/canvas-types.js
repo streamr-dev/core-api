@@ -52,10 +52,3 @@ type CanvasModuleInput = {
 type CanvasModuleOutput = {
 
 }
-
-export type CanvasAction = {
-    type: string,
-    id?: number,
-    canvases?: Array<Canvas>,
-    error?: string
-}
