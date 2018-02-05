@@ -2,14 +2,8 @@
 
 import type {Webcomponent} from './webcomponent-types'
 
-export type ErrorFromApi = {
+export type ApiError = {
     error: string,
-    code?: string
-}
-
-export type ErrorInUi = {
-    message: string,
-    statusCode?: number,
     code?: string
 }
 

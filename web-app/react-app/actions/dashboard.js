@@ -1,7 +1,7 @@
 // @flow
 
 import axios from 'axios'
-import {parseError} from './utils/parseApiResponse'
+import parseError from './utils/parseError'
 import createLink from '../helpers/createLink'
 import _ from 'lodash'
 
@@ -38,7 +38,7 @@ export const CHANGE_DASHBOARD_ID = 'CHANGE_DASHBOARD_ID'
 
 const apiUrl = 'api/v1/dashboards'
 
-import type { ErrorInUi } from '../flowtype/common-types'
+import type { ApiError } from '../flowtype/common-types'
 import type { Dashboard, DashboardItem, Layout, LayoutItem} from '../flowtype/dashboard-types'
 
 const dashboardConfig = require('../components/DashboardPage/dashboardConfig')
@@ -57,7 +57,7 @@ export const getAndReplaceDashboards = () => (dispatch: Function) => {
             const e = parseError(res)
             dispatch(getAndReplaceDashboardsFailure(e))
             dispatch(error({
-                title: e.message
+                title: e.error
             }))
             throw e
         })
@@ -74,7 +74,7 @@ export const getDashboard = (id: $ElementType<Dashboard, 'id'>) => (dispatch: Fu
             const e = parseError(res)
             dispatch(getDashboardFailure(e))
             dispatch(error({
-                title: e.message
+                title: e.error
             }))
             throw e
         })
@@ -99,20 +99,20 @@ export const updateAndSaveDashboard = (dashboard: Dashboard) => (dispatch: Funct
         }
     })
         .then(({data}) => {
+            dispatch(success({
+                title: 'Dashboard saved successfully!'
+            }))
             dashboard.id !== data.id && dispatch(changeDashboardId(dashboard.id, data.id))
             dispatch(updateAndSaveDashboardSuccess({
                 ...data,
                 ownPermissions: [...(dashboard.ownPermissions || []), ...(createNew ? ['read', 'write', 'share'] : [])]
-            }))
-            dispatch(success({
-                title: 'Dashboard saved successfully!'
             }))
         })
         .catch(res => {
             const e = parseError(res)
             
             dispatch(error({
-                title: e.message
+                title: e.error
             }))
             dispatch(updateAndSaveDashboardFailure(e))
             
@@ -128,7 +128,7 @@ export const deleteDashboard = (id: $ElementType<Dashboard, 'id'>) => (dispatch:
             const e = parseError(res)
             dispatch(deleteDashboardFailure(e))
             dispatch(error({
-                title: e.message
+                title: e.error
             }))
             throw e
         })
@@ -143,7 +143,7 @@ export const getMyDashboardPermissions = (id: $ElementType<Dashboard, 'id'>) => 
             dispatch(getMyDashboardPermissionsFailure(id, e))
             dispatch(error({
                 title: 'Error!',
-                message: e.message
+                message: e.error
             }))
             throw e
         })
@@ -301,27 +301,27 @@ const getMyDashboardPermissionsSuccess = (id: $ElementType<Dashboard, 'id'>, per
     permissions
 })
 
-const getAndReplaceDashboardsFailure = (error: ErrorInUi) => ({
+const getAndReplaceDashboardsFailure = (error: ApiError) => ({
     type: GET_AND_REPLACE_DASHBOARDS_FAILURE,
     error
 })
 
-const getDashboardFailure = (error: ErrorInUi) => ({
+const getDashboardFailure = (error: ApiError) => ({
     type: GET_DASHBOARD_FAILURE,
     error
 })
 
-const updateAndSaveDashboardFailure = (error: ErrorInUi) => ({
+const updateAndSaveDashboardFailure = (error: ApiError) => ({
     type: UPDATE_AND_SAVE_DASHBOARD_FAILURE,
     error
 })
 
-const deleteDashboardFailure = (error: ErrorInUi) => ({
+const deleteDashboardFailure = (error: ApiError) => ({
     type: DELETE_DASHBOARD_FAILURE,
     error
 })
 
-const getMyDashboardPermissionsFailure = (id: $ElementType<Dashboard, 'id'>, error: ErrorInUi) => ({
+const getMyDashboardPermissionsFailure = (id: $ElementType<Dashboard, 'id'>, error: ApiError) => ({
     type: GET_MY_DASHBOARD_PERMISSIONS_FAILURE,
     id,
     error

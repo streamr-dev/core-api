@@ -2,7 +2,7 @@
 import configureMockStore from 'redux-mock-store'
 import thunk from 'redux-thunk'
 import * as actions from '../../actions/canvas'
-import assert from 'assert-diff'
+import expect from 'expect'
 import moxios from 'moxios'
 
 const middlewares = [ thunk ]
@@ -29,7 +29,7 @@ describe('Canvas actions', () => {
         store.clearActions()
     })
     
-    it('creates GET_RUNNING_CANVASES_SUCCESS when fetching running canvases has succeeded', async () => {
+    it('creates GET_RUNNING_CANVASES_SUCCESS when fetching running canvases has succeeded', () => {
         moxios.wait(() => {
             const request = moxios.requests.mostRecent()
             expect(request.url).toMatch(/api\/v1\/canvases/)
@@ -64,11 +64,13 @@ describe('Canvas actions', () => {
             }]
         }]
         
-        await store.dispatch(actions.getRunningCanvases())
-        assert.deepStrictEqual(store.getActions(), expectedActions)
+        return store.dispatch(actions.getRunningCanvases())
+            .then(() => {
+                expect(store.getActions()).toEqual(expectedActions)
+            })
     })
     
-    it('creates GET_RUNNING_CANVASES_FAILURE when fetching running canvases has failed', async () => {
+    it('creates GET_RUNNING_CANVASES_FAILURE when fetching running canvases has failed', () => {
         moxios.wait(() => {
             const request = moxios.requests.mostRecent()
             expect(request.url).toMatch(/api\/v1\/canvases/)
@@ -80,10 +82,7 @@ describe('Canvas actions', () => {
             })
             request.respondWith({
                 status: 500,
-                response: {
-                    message: 'test',
-                    code: 'TEST'
-                }
+                response: new Error('test')
             })
         })
         
@@ -91,17 +90,12 @@ describe('Canvas actions', () => {
             type: actions.GET_RUNNING_CANVASES_REQUEST
         }, {
             type: actions.GET_RUNNING_CANVASES_FAILURE,
-            error: {
-                message: 'test',
-                code: 'TEST',
-                statusCode: 500
-            }
+            error: new Error('test')
         }]
         
-        try {
-            await store.dispatch(actions.getRunningCanvases())
-        } catch (e) {
-            assert.deepStrictEqual(store.getActions().slice(0, 2), expectedActions.slice(0, 2))
-        }
+        return store.dispatch(actions.getRunningCanvases())
+            .catch(() => {
+                expect(store.getActions()).toEqual(expectedActions)
+            })
     })
 })

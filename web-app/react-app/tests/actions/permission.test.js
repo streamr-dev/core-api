@@ -101,21 +101,14 @@ describe('Permission actions', () => {
             const resourceId = 'asdfasdfasasd'
             moxios.stubRequest(`api/v1/dashboards/${resourceId}/permissions`, {
                 status: 500,
-                response: {
-                    message: 'test',
-                    code: 'TEST'
-                }
+                response: new Error('test')
             })
             
             const expectedActions = [{
                 type: actions.GET_RESOURCE_PERMISSIONS_REQUEST,
             }, {
                 type: actions.GET_RESOURCE_PERMISSIONS_FAILURE,
-                error: {
-                    message: 'test',
-                    code: 'TEST',
-                    statusCode: 500
-                }
+                error: new Error('test')
             }]
             
             try {
@@ -299,17 +292,11 @@ describe('Permission actions', () => {
                     const requests = moxios.requests
                     requests.at(0).respondWith({
                         status: 500,
-                        response: {
-                            message: 'test',
-                            code: 'TEST'
-                        }
+                        response: new Error()
                     })
                     requests.at(1).respondWith({
                         status: 500,
-                        response: {
-                            message: 'test',
-                            code: 'TEST'
-                        }
+                        response: new Error()
                     })
                 })
                 
@@ -329,11 +316,7 @@ describe('Permission actions', () => {
                     resourceId,
                     permission: {
                         ...permissions[0],
-                        error: {
-                            message: 'test',
-                            code: 'TEST',
-                            statusCode: 500
-                        }
+                        error: new Error()
                     }
                 }, {
                     type: actions.SAVE_ADDED_RESOURCE_PERMISSION_FAILURE,
@@ -341,11 +324,7 @@ describe('Permission actions', () => {
                     resourceId,
                     permission: {
                         ...permissions[1],
-                        error: {
-                            message: 'test',
-                            code: 'TEST',
-                            statusCode: 500
-                        }
+                        error: new Error()
                     }
                 }]
                 
@@ -492,17 +471,11 @@ describe('Permission actions', () => {
                     const requests = moxios.requests
                     requests.at(0).respondWith({
                         status: 500,
-                        response: {
-                            message: 'test',
-                            code: 'TEST'
-                        }
+                        response: new Error()
                     })
                     requests.at(1).respondWith({
                         status: 500,
-                        response: {
-                            message: 'test',
-                            code: 'TEST'
-                        }
+                        response: new Error()
                     })
                 })
                 
@@ -522,11 +495,7 @@ describe('Permission actions', () => {
                     resourceId,
                     permission: {
                         ...permissions[1],
-                        error: {
-                            message: 'test',
-                            code: 'TEST',
-                            statusCode: 500
-                        }
+                        error: new Error()
                     }
                 }, {
                     type: actions.SAVE_REMOVED_RESOURCE_PERMISSION_FAILURE,
@@ -534,11 +503,7 @@ describe('Permission actions', () => {
                     resourceId,
                     permission: {
                         ...permissions[2],
-                        error: {
-                            message: 'test',
-                            code: 'TEST',
-                            statusCode: 500
-                        }
+                        error: new Error()
                     }
                 }]
                 

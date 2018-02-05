@@ -58,24 +58,17 @@ describe('User actions', () => {
             await store.dispatch(actions.getCurrentUser())
             assert.deepStrictEqual(store.getActions(), expectedActions)
         })
-        it('creates GET_CURRENT_USER_SUCCESS when fetching resources succeeded', async (done) => {
+        it('creates GET_CURRENT_USER_SUCCESS when fetching resources succeeded', async () => {
             moxios.stubRequest('api/v1/users/me', {
                 status: 500,
-                response: {
-                    code: 'TEST',
-                    message: 'test'
-                }
+                response: new Error('test')
             })
             
             const expectedActions = [{
                 type: actions.GET_CURRENT_USER_REQUEST,
             }, {
                 type: actions.GET_CURRENT_USER_FAILURE,
-                error: {
-                    message: 'test',
-                    code: 'TEST',
-                    statusCode: 500
-                }
+                error: new Error('test')
             }]
     
             try {
@@ -83,7 +76,6 @@ describe('User actions', () => {
             } catch (e) {
                 assert.deepStrictEqual(store.getActions().slice(0, 2), expectedActions)
                 assert.deepStrictEqual(store.getActions()[2].level, 'error')
-                done()
             }
         })
     })
@@ -189,10 +181,7 @@ describe('User actions', () => {
                 }, user)
                 requests.at(0).respondWith({
                     status: 500,
-                    response: {
-                        message: 'test',
-                        code: 'TEST'
-                    }
+                    response: 'test'
                 })
             })
             
@@ -200,11 +189,7 @@ describe('User actions', () => {
                 type: actions.SAVE_CURRENT_USER_REQUEST
             }, {
                 type: actions.SAVE_CURRENT_USER_FAILURE,
-                error: {
-                    message: 'test',
-                    code: 'TEST',
-                    statusCode: 500
-                }
+                error: 'test'
             }]
             
             try {

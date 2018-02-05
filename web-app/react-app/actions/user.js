@@ -1,12 +1,12 @@
 // @flow
 
 import axios from 'axios'
-import {parseError} from './utils/parseApiResponse'
+import parseError from './utils/parseError'
 import createLink from '../helpers/createLink'
 
 import {success, error} from 'react-notification-system-redux'
 
-import type {ErrorInUi} from '../flowtype/common-types'
+import type {ApiError} from '../flowtype/common-types'
 import type {User} from '../flowtype/user-types'
 
 export const GET_CURRENT_USER_REQUEST = 'GET_CURRENT_USER_REQUEST'
@@ -97,7 +97,7 @@ const getCurrentUserSuccess = (user: User) => ({
     user
 })
 
-const getCurrentUserFailure = (error: ErrorInUi) => ({
+const getCurrentUserFailure = (error: ApiError) => ({
     type: GET_CURRENT_USER_FAILURE,
     error
 })
@@ -111,7 +111,7 @@ const saveCurrentUserSuccess = (user: User) => ({
     user
 })
 
-const saveCurrentUserFailure = (error: ErrorInUi) => ({
+const saveCurrentUserFailure = (error: ApiError) => ({
     type: SAVE_CURRENT_USER_FAILURE,
     error
 })

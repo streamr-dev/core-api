@@ -7,7 +7,7 @@ import * as integrationKeyActions from '../../../../../actions/integrationKey.js
 
 import {IntegrationKeyHandlerSegment, mapStateToProps, mapDispatchToProps} from '../../../../../components/ProfilePage/IntegrationKeyHandler/IntegrationKeyHandlerSegment'
 
-describe('IntegrationKeyHandlerSegment', () => {
+describe('IntegrationKeyHandler', () => {
     let sandbox
     
     beforeEach(() => {
@@ -152,12 +152,14 @@ describe('IntegrationKeyHandlerSegment', () => {
                 integrationKey: {
                     listsByService: {
                         service: [1, 2, 3]
-                    }
+                    },
+                    error: 'testError'
                 }
             }, {
                 service: 'service'
             }), {
-                integrationKeys: [1, 2, 3]
+                integrationKeys: [1, 2, 3],
+                error: 'testError'
             })
         })
         it('must use empty array as integrationKeys in found none', () => {
@@ -165,12 +167,14 @@ describe('IntegrationKeyHandlerSegment', () => {
                 integrationKey: {
                     listsByService: {
                         service: [1, 2, 3]
-                    }
+                    },
+                    error: 'testError'
                 }
             }, {
                 service: 'wrongService'
             }), {
-                integrationKeys: []
+                integrationKeys: [],
+                error: 'testError'
             })
         })
     })

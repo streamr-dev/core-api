@@ -92,19 +92,11 @@ describe('Dashboard reducer', () => {
         it('should handle GET_AND_REPLACE_DASHBOARDS_FAILURE', () => {
             assert.deepStrictEqual(reducer(initialState, {
                 type: actions.GET_AND_REPLACE_DASHBOARDS_FAILURE,
-                error: {
-                    message: 'test',
-                    code: 'TEST',
-                    statusCode: 500
-                }
+                error: new Error('test')
             }), {
                 ...initialState,
                 fetching: false,
-                error: {
-                    message: 'test',
-                    code: 'TEST',
-                    statusCode: 500
-                }
+                error: new Error('test')
             })
         })
     })
@@ -154,19 +146,11 @@ describe('Dashboard reducer', () => {
         it('should handle GET_DASHBOARD_FAILURE', () => {
             assert.deepStrictEqual(reducer(initialState, {
                 type: actions.GET_DASHBOARD_FAILURE,
-                error: {
-                    message: 'test',
-                    code: 'TEST',
-                    statusCode: 500
-                }
+                error: new Error('test')
             }), {
                 ...initialState,
                 fetching: false,
-                error: {
-                    message: 'test',
-                    code: 'TEST',
-                    statusCode: 500
-                }
+                error: new Error('test')
             })
         })
     })
@@ -216,19 +200,11 @@ describe('Dashboard reducer', () => {
         it('should handle UPDATE_AND_SAVE_DASHBOARD_FAILURE', () => {
             assert.deepStrictEqual(reducer(initialState, {
                 type: actions.UPDATE_AND_SAVE_DASHBOARD_FAILURE,
-                error: {
-                    message: 'test',
-                    code: 'TEST',
-                    statusCode: 500
-                }
+                error: new Error('test')
             }), {
                 ...initialState,
                 fetching: false,
-                error: {
-                    message: 'test',
-                    code: 'TEST',
-                    statusCode: 500
-                }
+                error: new Error('test')
             })
         })
     })
@@ -270,19 +246,11 @@ describe('Dashboard reducer', () => {
         it('should handle DELETE_DASHBOARD_FAILURE', () => {
             assert.deepStrictEqual(reducer(initialState, {
                 type: actions.DELETE_DASHBOARD_FAILURE,
-                error: {
-                    message: 'test',
-                    code: 'TEST',
-                    statusCode: 500
-                }
+                error: new Error('test')
             }), {
                 ...initialState,
                 fetching: false,
-                error: {
-                    message: 'test',
-                    code: 'TEST',
-                    statusCode: 500
-                }
+                error: new Error('test')
             })
         })
     })
@@ -329,19 +297,11 @@ describe('Dashboard reducer', () => {
         it('should handle GET_MY_DASHBOARD_PERMISSIONS_FAILURE', () => {
             assert.deepStrictEqual(reducer(initialState, {
                 type: actions.GET_MY_DASHBOARD_PERMISSIONS_FAILURE,
-                error: {
-                    message: 'test',
-                    code: 'TEST',
-                    statusCode: 500
-                }
+                error: new Error('test')
             }), {
                 ...initialState,
                 fetching: false,
-                error: {
-                    message: 'test',
-                    code: 'TEST',
-                    statusCode: 500
-                }
+                error: new Error('test')
             })
         })
     })
