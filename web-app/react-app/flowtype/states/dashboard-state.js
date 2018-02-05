@@ -1,7 +1,7 @@
 // @flow
 
 import type {Dashboard} from '../dashboard-types.js'
-import type {ApiError} from '../common-types'
+import type {ErrorInUi} from '../common-types'
 
 export type DashboardState = {
     dashboardsById: {
@@ -11,6 +11,6 @@ export type DashboardState = {
         id: ?$ElementType<Dashboard, 'id'>,
         isFullScreen: boolean
     },
-    error: ?ApiError,
+    error: ?ErrorInUi,
     fetching: boolean
 }

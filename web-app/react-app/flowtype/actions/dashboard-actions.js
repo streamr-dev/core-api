@@ -1,7 +1,7 @@
 // @flow
 
 import type {Dashboard} from '../dashboard-types'
-import type {ApiError} from '../common-types'
+import type {ErrorInUi} from '../common-types'
 import {
     UPDATE_AND_SAVE_DASHBOARD_REQUEST,
     UPDATE_AND_SAVE_DASHBOARD_SUCCESS,
@@ -62,9 +62,9 @@ export type Action = {
         | typeof GET_DASHBOARD_FAILURE
         | typeof DELETE_DASHBOARD_FAILURE
         | typeof UPDATE_AND_SAVE_DASHBOARD_FAILURE,
-    error: ApiError
+    error: ErrorInUi
 } | {
     type: typeof GET_MY_DASHBOARD_PERMISSIONS_FAILURE,
     id: $ElementType<Dashboard, 'id'>,
-    error: ApiError
+    error: ErrorInUi
 }

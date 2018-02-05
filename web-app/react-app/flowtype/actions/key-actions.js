@@ -1,7 +1,7 @@
 // @flow
 
 import type {Key, ResourceType, ResourceId} from '../key-types'
-import type {ApiError} from '../common-types'
+import type {ErrorInUi} from '../common-types'
 
 import {
     GET_RESOURCE_KEYS_REQUEST,
@@ -38,5 +38,5 @@ export type KeyAction = {
     type: typeof GET_RESOURCE_KEYS_FAILURE
         | typeof ADD_RESOURCE_KEY_FAILURE
         | typeof REMOVE_RESOURCE_KEY_FAILURE,
-    error: ApiError
+    error: ErrorInUi
 }

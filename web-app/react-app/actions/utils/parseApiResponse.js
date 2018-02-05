@@ -7,8 +7,8 @@ export const parseError = ({response}: {
         data: ErrorFromApi,
         status: number
     }
-}) : ErrorInUi => ({
-    message: response.data.message || 'Something went wrong',
+}): ErrorInUi => ({
+    message: response.data.error || 'Something went wrong',
     code: response.data.code,
     statusCode: response.status
 })

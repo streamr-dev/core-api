@@ -1,7 +1,7 @@
 // @flow
 
 import type {Key, ResourceId, ResourceType} from '../key-types'
-import type {ApiError} from '../common-types'
+import type {ErrorInUi} from '../common-types'
 
 export type KeyState = {
     byTypeAndId: {
@@ -9,6 +9,6 @@ export type KeyState = {
             [ResourceId]: Array<Key>
         }
     },
-    error?: ?ApiError,
+    error?: ?ErrorInUi,
     fetching: boolean
 }
