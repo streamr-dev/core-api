@@ -297,7 +297,6 @@ environments {
  * Kafka config
  */
 streamr.kafka.bootstrap.servers = System.getProperty("streamr.kafka.bootstrap.servers") ?: "127.0.0.1:9092"
-streamr.kafka.zookeeper.connect = System.getProperty("streamr.kafka.zookeeper.connect") ?: "zk1:2181"
 streamr.kafka.producer.type = "async"
 streamr.kafka.queue.buffering.max.ms = "100"
 streamr.kafka.retry.backoff.ms = "500"
@@ -305,7 +304,7 @@ streamr.kafka.value.serializer = org.apache.kafka.common.serialization.ByteArray
 streamr.kafka.key.serializer = org.apache.kafka.common.serialization.StringSerializer.getName()
 streamr.kafka.partitioner.class = KafkaPartitioner.class.getName()
 streamr.kafka.request.required.acks = "0"
-streamr.kafka.dataTopic = System.getProperty("streamr.kafka.dataTopic") ?: "data-dev"
+streamr.kafka.dataTopic = "data-dev"
 
 environments {
 	production {
@@ -323,7 +322,7 @@ streamr.redis.password = System.getProperty("streamr.redis.password") ?: ""
 environments {
 	production {
 		streamr.redis.hosts = (System.getProperty("streamr.redis.hosts") ? Arrays.asList(System.getProperty("streamr.redis.hosts").split(",")) : ["redis1"])
-		streamr.redis.password = System.getProperty("streamr.redis.password") ?: "AFuPxeVMwBKHV5Hm5SK3PkRZA"
+		streamr.redis.password = System.getProperty("streamr.redis.password")
 	}
 }
 
@@ -398,10 +397,10 @@ grails.plugin.springsecurity.controllerAnnotations.staticRules = [
  */
 grails {
 	mail {
-		host = System.getProperty("grails.mail.host") ?: "email-smtp.us-east-1.amazonaws.com"
-		port = System.getProperty("grails.mail.port") ?: 465
-		username = System.getProperty("grails.mail.username") ?: "AKIAIV4PGPKXNAGNDFQQ"
-		password = System.getProperty("grails.mail.password") ?: "AqH4L/VferJlG0KExv0D8pEvJW6LR7LC6Q4VqzVZAbTS"
+		host = System.getProperty("grails.mail.host")
+		port = System.getProperty("grails.mail.port")
+		username = System.getProperty("grails.mail.username")
+		password = System.getProperty("grails.mail.password")
 		props = ["mail.smtp.auth":"true",
 				 "mail.smtp.socketFactory.port":"465",
 				 "mail.smtp.starttls.enable":"true",
@@ -426,12 +425,6 @@ unifina.email.shareInvite.subject = "%USER% shared a document with you in Stream
 recaptcha.verifyUrl = "https://www.google.com/recaptcha/api/siteverify"
 
 environments {
-	production {
-		recaptchav2.sitekey = System.getProperty("recaptchav2.sitekey") ?: "6Le3vAkTAAAAAEo4ubtEnosXISPd8_0snV4KEZSe"
-		recaptchainvisible.sitekey = System.getProperty("recaptchainvisible.sitekey") ?: "6Lfish8UAAAAAF-w-HYi_TN_xcbWrFjGNef2Pgdp"
-		recaptchav2.secret = System.getProperty("recaptchav2.secret") ?: "6Le3vAkTAAAAADZEop2Jdlm8ZrsTX-4-nn2XqC7Z"
-		recaptchainvisible.secret = System.getProperty("recaptchainvisible.secret") ?: "6Lfish8UAAAAAE9XaXpFEDX7OjO4rKGFe1HdrSql"
-	}
 	// Same keys used for both dev and test
 	development {
 		recaptchav2.sitekey = "6LeIxAcTAAAAAJcZVRqyHh71UMIEGNQ_MXjiZKhI"
@@ -444,6 +437,12 @@ environments {
 		recaptchav2.secret = "6LeIxAcTAAAAAGG-vFI1TnRWxMZNFuojJ4WifJWe"
 		recaptchainvisible.sitekey = "6LeIxAcTAAAAAJcZVRqyHh71UMIEGNQ_MXjiZKhI"
 		recaptchainvisible.secret = "6LeIxAcTAAAAAGG-vFI1TnRWxMZNFuojJ4WifJWe"
+	}
+	production {
+		recaptchav2.sitekey = System.getProperty("recaptchav2.sitekey")
+		recaptchainvisible.sitekey = System.getProperty("recaptchainvisible.sitekey")
+		recaptchav2.secret = System.getProperty("recaptchav2.secret")
+		recaptchainvisible.secret = System.getProperty("recaptchainvisible.secret")
 	}
 }
 

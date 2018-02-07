@@ -49,7 +49,7 @@ environments {
 		// The settings come from system properties.
 		dataSource {
 			username = System.getProperty('streamr.database.user') ?: "streamr-prod"
-			password = System.getProperty('streamr.database.password') ?: "Trez2tuV"
+			password = System.getProperty('streamr.database.password')
 			url = "jdbc:mysql://${System.getProperty('streamr.database.host') ?: "mysql"}/${System.getProperty('streamr.database.name', 'streamr_prod')}?useLegacyDatetimeCode=false"
 		}
     }
