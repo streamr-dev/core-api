@@ -9,15 +9,15 @@ import * as permissionActions from '../../../../../../actions/permission.js'
 import {ShareDialogPermission, mapDispatchToProps} from '../../../../../../components/ShareDialog/ShareDialogContent/ShareDialogPermissionRow/ShareDialogPermission'
 
 describe('ShareDialogPermission', () => {
-    
+
     beforeEach(() => {
         global.Streamr = {}
     })
-    
+
     afterEach(() => {
         delete global.Streamr
     })
-    
+
     describe('onSelect', () => {
         it('should call props.setResourceHighestOperation with the given value', () => {
             const spy = sinon.spy()
@@ -35,7 +35,7 @@ describe('ShareDialogPermission', () => {
             assert(spy.calledWith('test'))
         })
     })
-    
+
     describe('onRemove', () => {
         it('should call props.setResourceHighestOperation with the given value', () => {
             const spy = sinon.spy()
@@ -50,7 +50,7 @@ describe('ShareDialogPermission', () => {
             assert(spy.calledOnce)
         })
     })
-    
+
     describe('render', () => {
         it('renders the userLabel correctly if there is a user', () => {
             global.Streamr.user = 'test@test.test'
@@ -64,7 +64,7 @@ describe('ShareDialogPermission', () => {
                     resourceId=""
                 />
             )
-            
+
             assert(permissionRow.find('.userLabel'))
             assert.equal(permissionRow.find('.userLabel').text(), 'Me(test@test.test)')
         })
@@ -79,7 +79,7 @@ describe('ShareDialogPermission', () => {
                     resourceId=""
                 />
             )
-            
+
             assert(permissionRow.find('.userLabel'))
             assert.equal(permissionRow.find('.userLabel').text(), 'A')
         })
@@ -135,7 +135,7 @@ describe('ShareDialogPermission', () => {
             assert(button)
             assert.deepStrictEqual(button.props().bsStyle, 'danger')
             assert.deepStrictEqual(button.props().onClick, permission.instance().onRemove)
-            
+
             const fa = button.childAt(0)
             assert(fa.is('FontAwesome'))
             assert.equal(fa.props().name, 'trash-o')
@@ -145,13 +145,13 @@ describe('ShareDialogPermission', () => {
                 user: 'A',
                 operation: 'read',
                 error: {
-                    error: 'moi'
+                    message: 'moi'
                 }
             }, {
                 user: 'B',
                 operation: 'write',
                 error: {
-                    error: 'hei'
+                    message: 'hei'
                 }
             }]
             const permission = shallow(
@@ -164,14 +164,14 @@ describe('ShareDialogPermission', () => {
             const errorContainer = permission.find('.errorContainer')
             assert(errorContainer)
             assert.equal(errorContainer.props().title, 'moi\nhei')
-            
+
             const fa = errorContainer.childAt(0)
             assert(fa.is('FontAwesome'))
             assert.equal(fa.props().name, 'exclamation-circle')
             assert.equal(fa.props().className, 'text-danger')
         })
     })
-    
+
     describe('mapDispatchToProps', () => {
         it('should return an object with the right kind of props', () => {
             assert.deepStrictEqual(typeof mapDispatchToProps(), 'object')
@@ -215,5 +215,5 @@ describe('ShareDialogPermission', () => {
             })
         })
     })
-    
+
 })

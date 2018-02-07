@@ -89,7 +89,7 @@ export const updateAndSaveCurrentDashboard = () => (dispatch: Function, getState
 export const updateAndSaveDashboard = (dashboard: Dashboard) => (dispatch: Function) => {
     dispatch(updateAndSaveDashboardRequest())
     const createNew = dashboard.new
-    
+
     return axios({
         method: createNew ? 'POST' : 'PUT',
         url: createLink(createNew ? apiUrl : `${apiUrl}/${dashboard.id}`),
@@ -99,23 +99,23 @@ export const updateAndSaveDashboard = (dashboard: Dashboard) => (dispatch: Funct
         }
     })
         .then(({data}) => {
+            dispatch(success({
+                title: 'Dashboard saved successfully!'
+            }))
             dashboard.id !== data.id && dispatch(changeDashboardId(dashboard.id, data.id))
             dispatch(updateAndSaveDashboardSuccess({
                 ...data,
                 ownPermissions: [...(dashboard.ownPermissions || []), ...(createNew ? ['read', 'write', 'share'] : [])]
             }))
-            dispatch(success({
-                title: 'Dashboard saved successfully!'
-            }))
         })
         .catch(res => {
             const e = parseError(res)
-            
+
             dispatch(error({
                 title: e.message
             }))
             dispatch(updateAndSaveDashboardFailure(e))
-            
+
             throw e
         })
 }

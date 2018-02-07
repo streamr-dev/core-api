@@ -49,7 +49,7 @@ export const getResourcePermissions = (resourceType: ResourceType, resourceId: R
             dispatch(getResourcePermissionsFailure(e))
             dispatch(error({
                 title: 'Error',
-                message: e.error
+                message: e.message
             }))
             throw e
         })
@@ -111,7 +111,7 @@ export const removeAllResourcePermissionsByUser = (resourceType: ResourceType, r
 export const saveUpdatedResourcePermissions = (resourceType: ResourceType, resourceId: ResourceId): any => (dispatch: Function, getState: Function): Promise<void> => {
     const state = getState()
     const permissions = state.permission.byTypeAndId[resourceType] && state.permission.byTypeAndId[resourceType][resourceId] || []
-    
+
     const addedPermissions = permissions.filter(p => p.new)
     const addPermissions = new Promise(resolve => {
         settle(addedPermissions.map(permission => {
@@ -133,7 +133,7 @@ export const saveUpdatedResourcePermissions = (resourceType: ResourceType, resou
                 resolve(results)
             })
     })
-    
+
     const removedPermissions = permissions.filter(p => p.removed)
     const removePermissions = new Promise(resolve => {
         settle(removedPermissions.map(permission => {
@@ -155,7 +155,7 @@ export const saveUpdatedResourcePermissions = (resourceType: ResourceType, resou
                 resolve(results)
             })
     })
-    
+
     return new Promise((resolve, reject) => {
         Promise.all([addPermissions, removePermissions])
             .then(([added, removed]) => {

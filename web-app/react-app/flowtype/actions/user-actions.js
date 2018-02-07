@@ -1,7 +1,7 @@
 // @flow
 
 import type {User} from '../user-types'
-import type {ApiError} from '../common-types'
+import type {ErrorInUi} from '../common-types'
 
 import {
     GET_CURRENT_USER_REQUEST,
@@ -25,5 +25,5 @@ export type UserAction = {
     type: typeof GET_CURRENT_USER_FAILURE
         | typeof SAVE_CURRENT_USER_FAILURE
         | typeof SAVE_CURRENT_USER_FAILURE,
-    error: ApiError
+    error: ErrorInUi
 }

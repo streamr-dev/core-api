@@ -4,31 +4,34 @@ import {parseError} from '../../../actions/utils/parseApiResponse'
 
 describe('parseApiResponse', () => {
     describe('parseError', () => {
-        it('must return a right kind of object', () => {
-            assert.deepStrictEqual(parseError({
+        it ('must first return res.response.data', () => {
+            const res = {
                 response: {
-                    status: 313,
                     data: {
-                        message: 'testMessage',
+                        error: 'test',
                         code: 'TEST'
-                    }
+                    },
+                    status: 500
                 }
-            }), {
-                message: 'testMessage',
+            }
+            assert.deepStrictEqual(parseError(res), {
+                message: 'test',
                 code: 'TEST',
-                statusCode: 313
+                statusCode: 500
             })
         })
-        it('must use the default message if no message given', () => {
-            assert.deepStrictEqual(parseError({
+
+        it ('must first return res.response.data', () => {
+            const res = {
                 response: {
-                    status: 313,
-                    data: {}
+                    data: {},
+                    status: 500
                 }
-            }), {
+            }
+            assert.deepStrictEqual(parseError(res), {
                 message: 'Something went wrong',
                 code: undefined,
-                statusCode: 313
+                statusCode: 500
             })
         })
     })

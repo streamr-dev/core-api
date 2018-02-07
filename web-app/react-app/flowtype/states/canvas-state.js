@@ -1,10 +1,10 @@
 // @flow
 
 import type {Canvas} from '../canvas-types.js'
-import type {ApiError} from '../common-types'
+import type {ErrorInUi} from '../common-types'
 
 export type CanvasState = {
     list: Array<Canvas>,
-    error: ?ApiError,
+    error: ?ErrorInUi,
     fetching?: boolean
 }

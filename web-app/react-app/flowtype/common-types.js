@@ -22,3 +22,4 @@ export type UiChannel = {
 export type OnSubmitEvent = {
     target: HTMLFormElement
 } & Event
+
