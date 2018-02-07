@@ -2,7 +2,9 @@
 
 ## Overview
 
-This is a Grails web application containing and serving the Streamr Engine and Editor.
+This is a web application containing and serving the Streamr Engine and Editor. The Engine is an event processing system for real-time data. The Editor is a visual programming environment for creating processes (called Canvases) that run on the Engine. 
+
+The application runs on the Java VM and uses the Grails web framework. The current version uses the centralised (cloud) version of Streamr infrastructure, detailed below. 
 
 ## Dependencies
 
@@ -12,24 +14,17 @@ Running this app requires some helper infrastructure to be running:
 - Kafka
 - Zookeeper
 - Redis
-- `streamr-broker`
+- [Streamr Cloud Broker](https://github.com/streamr-dev/cloud-broker)
 
-The easiest way to get these running is to get them in a Docker image we provide. (TODO: add instructions).
-
-Also:
-- Grails
-  - Install instructions for Ubuntu:
-    - `sudo apt-get install zip unzip`
-    - `curl -s "https://get.sdkman.io" | bash` (as in [SDKMAN install instructions](http://sdkman.io/install.html))
-    - `source "$HOME/.sdkman/bin/sdkman-init.sh"`
-    - `sdk install grails 2.3.11`
+The easiest way to get these running is to use Docker and the [streamr-docker-dev](https://github.com/streamr-dev/streamr-docker-dev) tool we provide.
 
 ## Building and running
 
-- You need to have Grails 2.5.6 and Node.js ^8.0.0 installed.
+- You need to have Grails 2.5.6 and Node.js ^8.0.0 installed. (Easiest way is to install Grails via [SDKMAN](http://sdkman.io/install.html) and Node via [nvm](https://github.com/creationix/nvm).)
 - Clone the repo
 - `git submodule update --init --recursive`
 - `npm install`
+- Start the infrastructure with `streamr-docker-dev start 1`
 - `grails run-app`
 
 ## Developing
@@ -45,4 +40,8 @@ You can also run the development server with `npm run dev`.
 - `grails test-app`
 - `npm test`
 
-Functional tests use Geb with <a href="https://code.google.com/p/selenium/wiki/ChromeDriver">chromedriver</a> and Google Chrome. You need to place the `chromedriver` executeble in your `PATH`, and set an environment variable `CHROMEDRIVER` to point to the executable.
+Functional tests use Geb with [chromedriver](https://code.google.com/p/selenium/wiki/ChromeDriver) and Google Chrome. You need to place the `chromedriver` executeble in your `PATH`, and set an environment variable `CHROMEDRIVER` to point to the executable.
+
+## License
+
+This software is open source, and dual licensed under [AGPLv3](https://www.gnu.org/licenses/agpl.html) and an enterprise-friendly commercial license.
