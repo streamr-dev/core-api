@@ -318,11 +318,11 @@ environments {
  * Redis config
  */
 streamr.redis.hosts = (System.getProperty("streamr.redis.hosts") ? Arrays.asList(System.getProperty("streamr.redis.hosts").split(",")) : ["127.0.0.1"])
-streamr.redis.password = ""
+streamr.redis.password = System.getProperty("streamr.redis.password") ?: ""
 environments {
 	production {
 		streamr.redis.hosts = (System.getProperty("streamr.redis.hosts") ? Arrays.asList(System.getProperty("streamr.redis.hosts").split(",")) : ["redis1"])
-		streamr.redis.password = "AFuPxeVMwBKHV5Hm5SK3PkRZA"
+		streamr.redis.password = System.getProperty("streamr.redis.password")
 	}
 }
 
@@ -371,7 +371,7 @@ grails.plugin.springsecurity.authority.className = 'com.unifina.domain.security.
 
 grails.plugin.springsecurity.rememberMe.enabled = true
 grails.plugin.springsecurity.rememberMe.cookieName = 'streamr_remember_me'
-grails.plugin.springsecurity.rememberMe.key = 'IfYouCanDreamItYouCanStreamIt'
+grails.plugin.springsecurity.rememberMe.key = System.getProperty("grails.plugin.springsecurity.rememberMe.key") ?: 'IfYouCanDreamItYouCanStreamIt'
 grails.plugin.springsecurity.password.algorithm = 'bcrypt'
 grails.plugin.springsecurity.logout.postOnly = false
 grails.plugin.springsecurity.successHandler.defaultTargetUrl = '/canvas'
@@ -397,10 +397,10 @@ grails.plugin.springsecurity.controllerAnnotations.staticRules = [
  */
 grails {
 	mail {
-		host = "email-smtp.us-east-1.amazonaws.com"
-		port = 465
-		username = "AKIAIV4PGPKXNAGNDFQQ"
-		password = "AqH4L/VferJlG0KExv0D8pEvJW6LR7LC6Q4VqzVZAbTS"
+		host = System.getProperty("grails.mail.host")
+		port = System.getProperty("grails.mail.port")
+		username = System.getProperty("grails.mail.username")
+		password = System.getProperty("grails.mail.password")
 		props = ["mail.smtp.auth":"true",
 				 "mail.smtp.socketFactory.port":"465",
 				 "mail.smtp.starttls.enable":"true",
@@ -425,12 +425,6 @@ unifina.email.shareInvite.subject = "%USER% shared a document with you in Stream
 recaptcha.verifyUrl = "https://www.google.com/recaptcha/api/siteverify"
 
 environments {
-	production {
-		recaptchav2.sitekey = "6Le3vAkTAAAAAEo4ubtEnosXISPd8_0snV4KEZSe"
-		recaptchainvisible.sitekey = "6Lfish8UAAAAAF-w-HYi_TN_xcbWrFjGNef2Pgdp"
-		recaptchav2.secret = "6Le3vAkTAAAAADZEop2Jdlm8ZrsTX-4-nn2XqC7Z"
-		recaptchainvisible.secret = "6Lfish8UAAAAAE9XaXpFEDX7OjO4rKGFe1HdrSql"
-	}
 	// Same keys used for both dev and test
 	development {
 		recaptchav2.sitekey = "6LeIxAcTAAAAAJcZVRqyHh71UMIEGNQ_MXjiZKhI"
@@ -443,6 +437,12 @@ environments {
 		recaptchav2.secret = "6LeIxAcTAAAAAGG-vFI1TnRWxMZNFuojJ4WifJWe"
 		recaptchainvisible.sitekey = "6LeIxAcTAAAAAJcZVRqyHh71UMIEGNQ_MXjiZKhI"
 		recaptchainvisible.secret = "6LeIxAcTAAAAAGG-vFI1TnRWxMZNFuojJ4WifJWe"
+	}
+	production {
+		recaptchav2.sitekey = System.getProperty("recaptchav2.sitekey")
+		recaptchainvisible.sitekey = System.getProperty("recaptchainvisible.sitekey")
+		recaptchav2.secret = System.getProperty("recaptchav2.secret")
+		recaptchainvisible.secret = System.getProperty("recaptchainvisible.secret")
 	}
 }
 
