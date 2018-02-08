@@ -66,7 +66,7 @@ describe('Dashboard actions', () => {
             moxios.stubRequest('api/v1/dashboards', {
                 status: 500,
                 response: {
-                    error: 'test',
+                    message: 'test',
                     code: 'TEST'
                 }
             })
@@ -128,7 +128,7 @@ describe('Dashboard actions', () => {
             moxios.stubRequest('api/v1/dashboards', {
                 status: 500,
                 response: {
-                    error: 'test',
+                    message: 'test',
                     code: 'TEST'
                 }
             })
@@ -231,7 +231,7 @@ describe('Dashboard actions', () => {
             moxios.stubRequest(`api/v1/dashboards/${id}`, {
                 status: 500,
                 response: {
-                    error: 'test',
+                    message: 'test',
                     code: 'TEST'
                 }
             })
@@ -324,7 +324,7 @@ describe('Dashboard actions', () => {
                 request.respondWith({
                     status: 500,
                     response: {
-                        error: 'test',
+                        message: 'test',
                         code: 'TEST'
                     }
                 })
@@ -380,7 +380,7 @@ describe('Dashboard actions', () => {
             moxios.stubRequest(`api/v1/dashboards/${id}/permissions/me`, {
                 status: 500,
                 response: {
-                    error: 'test',
+                    message: 'test',
                     code: 'TEST'
                 }
             })

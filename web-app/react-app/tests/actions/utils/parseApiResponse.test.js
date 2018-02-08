@@ -8,7 +8,7 @@ describe('parseApiResponse', () => {
             const res = {
                 response: {
                     data: {
-                        error: 'test',
+                        message: 'test',
                         code: 'TEST'
                     },
                     status: 500

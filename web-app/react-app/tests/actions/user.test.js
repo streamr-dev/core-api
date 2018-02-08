@@ -62,7 +62,7 @@ describe('User actions', () => {
             moxios.stubRequest('api/v1/users/me', {
                 status: 500,
                 response: {
-                    error: 'test',
+                    message: 'test',
                     code: 'TEST'
                 }
             })
@@ -189,7 +189,7 @@ describe('User actions', () => {
                 requests.at(0).respondWith({
                     status: 500,
                     response: {
-                        error: 'test',
+                        message: 'test',
                         code: 'TEST'
                     }
                 })
