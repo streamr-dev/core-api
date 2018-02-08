@@ -10,7 +10,6 @@ class UserApiController {
 
 	@StreamrApi
 	def getUserInfo() {
-		throw new ApiException(400, "aflsdakfjsaldfk", "jlkjlkjlkjlkj")
 		render(request.apiUser?.toMap() as JSON)
 	}
 }
