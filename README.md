@@ -22,13 +22,26 @@ Additional services are required to run this web application. The easiest way to
 - Redis
 - [Streamr Cloud Broker](https://github.com/streamr-dev/cloud-broker)
 
-## Building
+## Building and running
 1. Ensure you have Grails 2.5.6 and node.js version 8.0.0 or newer installed.
+
 2. Clone this repo
-3. Fetch all git submodules `git submodule update --init --recursive`
-4. Install front-end dependencies with `npm install`
-5. If you are using the recommended tool `streamr-docker-dev` then run `streamr-docker-dev start 1`. Otherwise make sure all 3rd party services are running and the the web applications is properly configured with correct hostnames and username/password-combinations.
-6. Start the web applicatio nwith `grails run-app`
+
+3. Fetch all git submodules 
+```
+git submodule update --init --recursive
+````
+4. Install front-end dependencies
+```
+npm install
+````
+
+5. Run `streamr-docker-dev start 1` if you are using the recommended tool streamr-docker-dev. Otherwise make sure all services dependencies are running and the the web applications is properly configured to connect to them.
+
+6. Start the web application
+```
+grails run-app
+```
 
 ## Developing
 
