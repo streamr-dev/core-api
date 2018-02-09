@@ -1,14 +1,20 @@
 # Streamr Engine and Editor
 
-## Overview
+Web application containing and serving the Streamr Engine and Editor. Streamr Engine is an event processing system for real-time data. Streamr Editor is a visual programming environment for creating processes (called Canvases) that run on the Engine. 
 
-This is a web application containing and serving the Streamr Engine and Editor. The Engine is an event processing system for real-time data. The Editor is a visual programming environment for creating processes (called Canvases) that run on the Engine. 
-
-The application runs on the Java VM and uses the Grails web framework. The current version uses the centralised (cloud) version of Streamr infrastructure, detailed below. 
+The application is built on top of the Java VM and Grails web framework. The current implementation runs on the centralised (cloud) version of Streamr infrastructure, detailed in the section Dependencies (below). 
 
 ## Dependencies
 
-Running this app requires some helper infrastructure to be running:
+### Tools
+- Grails 2.5.6
+- node.js ^8.0.0
+
+A convenient way of installing and managing multiple versions of Grails is [SDKMAN!](http://sdkman.io/install.html). And for node.js there is [nvm](https://github.com/creationix/nvm).
+
+### Service dependencies
+
+Additional services are required to run this web application. The easiest way to get them running (for development purposes) is to use the [streamr-docker-dev](https://github.com/streamr-dev/streamr-docker-dev) tool we provide.
 
 - MySQL
 - Kafka
@@ -16,16 +22,13 @@ Running this app requires some helper infrastructure to be running:
 - Redis
 - [Streamr Cloud Broker](https://github.com/streamr-dev/cloud-broker)
 
-The easiest way to get these running is to use Docker and the [streamr-docker-dev](https://github.com/streamr-dev/streamr-docker-dev) tool we provide.
-
-## Building and running
-
-- You need to have Grails 2.5.6 and Node.js ^8.0.0 installed. (Easiest way is to install Grails via [SDKMAN](http://sdkman.io/install.html) and Node via [nvm](https://github.com/creationix/nvm).)
-- Clone the repo
-- `git submodule update --init --recursive`
-- `npm install`
-- Start the infrastructure with `streamr-docker-dev start 1`
-- `grails run-app`
+## Building
+1. Ensure you have Grails 2.5.6 and node.js version 8.0.0 or newer installed.
+2. Clone this repo
+3. Fetch all git submodules `git submodule update --init --recursive`
+4. Install front-end dependencies with `npm install`
+5. If you are using the recommended tool `streamr-docker-dev` then run `streamr-docker-dev start 1`. Otherwise make sure all 3rd party services are running and the the web applications is properly configured with correct hostnames and username/password-combinations.
+6. Start the web applicatio nwith `grails run-app`
 
 ## Developing
 
