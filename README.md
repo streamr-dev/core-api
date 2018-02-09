@@ -10,7 +10,7 @@ Streamr Engine and Editor is built on top of the Java VM and Grails web framewor
 - Grails 2.5.6
 - node.js ^8.0.0
 - npm
-- [Chrome Driver](https://code.google.com/p/selenium/wiki/ChromeDriver) and Google Chrome.
+- [Chrome Driver](https://code.google.com/p/selenium/wiki/ChromeDriver) and Google Chrome
 
 A convenient way of installing and managing multiple versions of Grails is [SDKMAN!](http://sdkman.io/install.html). And for node.js there is [nvm](https://github.com/creationix/nvm).
 
