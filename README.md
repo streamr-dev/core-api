@@ -2,7 +2,7 @@
 
 Web application containing and serving the Streamr Engine and Editor. Streamr Engine is an event processing system for real-time data. Streamr Editor is a visual programming environment for creating processes (called Canvases) that run on the Engine. 
 
-Streamr Engine-and-Editor is built on top of the Java VM and Grails web framework. The current implementation runs on the centralised (cloud) version of Streamr infrastructure, detailed in the section Dependencies (below). 
+Streamr Engine-and-Editor is built on top of the Java VM and Grails web framework. The current implementation runs on the centralised (cloud) version of Streamr infrastructure, detailed in the section *Dependencies* (below). 
 
 ## Dependencies
 
