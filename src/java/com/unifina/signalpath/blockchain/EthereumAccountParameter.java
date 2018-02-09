@@ -20,8 +20,10 @@ class EthereumAccountParameter extends Parameter<IntegrationKey> {
 
 	@Override
 	public IntegrationKey parseValue(String id) {
-		return (IntegrationKey) InvokerHelper.invokeStaticMethod(IntegrationKey.class, "findByIdAndService",
-			new Object[]{id, "ETHEREUM"});
+		IntegrationKey key = (IntegrationKey) InvokerHelper.invokeStaticMethod(IntegrationKey.class, "findByIdAndService",
+				new Object[]{id, "ETHEREUM"});
+		key.getJson();	// make a call to the method in order to force the initialization of object, to avoid leaking a GORM proxy object
+		return key;
 	}
 
 	String getAddress() {
