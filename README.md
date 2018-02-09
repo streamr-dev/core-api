@@ -16,7 +16,7 @@ A convenient way of installing and managing multiple versions of Grails is [SDKM
 
 ### Service dependencies
 
-Additional services are required to run this web application. The easiest way to get them running (for development purposes) is to use the [streamr-docker-dev](https://github.com/streamr-dev/streamr-docker-dev) tool we provide.
+Additional services are required to run this web application. The easiest way to get them up and running (for development purposes) is to use the [streamr-docker-dev](https://github.com/streamr-dev/streamr-docker-dev) tool we provide.
 
 - MySQL
 - Kafka
