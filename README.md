@@ -56,6 +56,18 @@ Currently project has no CI system configured nor are any .jar artifacts publish
 
 ## Developing
 
+We provide sensible default configurations for IntelliJ IDEA but project can be developed with other IDEs as well.
+
+### Testing
+
+- To run unit, integration, and end-to-end (functional) use `grails test-app`
+- To run front-end JavaScript tests use `npm test`
+- To run back-end unit tests only, use `grails test-app -unit`
+- To run back-end integration tests only, use `grails test-app -integration`
+- To run functional tests only, use `grails test-app -functional`
+
+These are also available as pre-shared run configurations if you use IntelliJ IDEA.
+
 ### Front-end
 
 The UI is increasingly implemented with JavaScript libraries React and Redux. The source files must first be transpiled and compiled into bundle file(s). This happens by running `npm run build` in the root directory.
@@ -64,11 +76,9 @@ You can also run the development server with `npm run dev` which updates bundle 
 
 ### Back-end
 
+The back-end consists of two logical parts. The Engine is written mostly in Java and is responsible for executing arbitrary user-defined Canvases that process, analyze and act upon real-time event data. The Editor, on the other hand, is responsible for API(s), rendered web pages and other front-facing functionality. It is mostly written in Groovy and utilizes facilities provided by the Grails framework.
 
-## Testing
-
-- To run unit, integration, and end-to-end (functional) tests: `grails test-app`
-- To run front-end JavaScript tests: `npm test`
+When you run the Engine+Editor web app with `grails run-app` or `grails test run-app`, most changes to source code files are automatically hot reloaded into the running JVM process.
 
 ## License
 
