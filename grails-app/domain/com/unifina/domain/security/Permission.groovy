@@ -3,6 +3,7 @@ package com.unifina.domain.security
 import com.unifina.domain.dashboard.Dashboard
 import com.unifina.domain.data.Feed
 import com.unifina.domain.data.Stream
+import com.unifina.domain.marketplace.Product
 import com.unifina.domain.signalpath.Canvas
 import com.unifina.domain.signalpath.ModulePackage
 
@@ -25,6 +26,7 @@ class Permission {
 	Feed feed
 	ModulePackage modulePackage
 	Stream stream
+	Product product
 
 	/** Type of operation that this ACL item allows e.g. "read" */
 	enum Operation {
@@ -55,8 +57,9 @@ class Permission {
 		feed(nullable: true)
 		modulePackage(nullable: true)
 		stream(nullable: true)
+		product(nullable: true)
 		canvas(validator: { val, obj ->
-			[obj.canvas, obj.dashboard, obj.feed, obj.modulePackage, obj.stream].count { it != null } == 1
+			[obj.canvas, obj.dashboard, obj.feed, obj.modulePackage, obj.stream, obj.product].count { it != null } == 1
 		})
 	}
 
