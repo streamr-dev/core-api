@@ -3,6 +3,7 @@ package com.unifina.service
 import com.unifina.domain.dashboard.Dashboard
 import com.unifina.domain.data.Feed
 import com.unifina.domain.data.Stream
+import com.unifina.domain.marketplace.Product
 import com.unifina.domain.security.Key
 import com.unifina.domain.security.Permission
 import com.unifina.domain.security.Permission.Operation
@@ -419,7 +420,7 @@ class PermissionService {
 
 	@CompileStatic
 	private static Object getResourceFromPermission(Permission p) {
-		return p.canvas ?: p.dashboard ?: p.feed ?: p.modulePackage ?: p.stream
+		return p.canvas ?: p.dashboard ?: p.feed ?: p.modulePackage ?: p.stream ?: p.product
 	}
 
 	@CompileStatic
@@ -434,6 +435,8 @@ class PermissionService {
 			return "modulePackage"
 		} else if (resource instanceof Stream) {
 			return "stream"
+		} else if (resource instanceof Product) {
+			return "product"
 		} else {
 			throw new IllegalArgumentException("Unexpected resource class: " + resource)
 		}
