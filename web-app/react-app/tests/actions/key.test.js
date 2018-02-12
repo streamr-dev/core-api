@@ -115,7 +115,7 @@ describe('Key actions', () => {
             moxios.stubRequest(`api/v1/streams/${resourceId}/keys`, {
                 status: 500,
                 response: {
-                    error: 'test',
+                    message: 'test',
                     code: 'TEST'
                 }
             })
@@ -183,7 +183,7 @@ describe('Key actions', () => {
                 request.respondWith({
                     status: 500,
                     response: {
-                        error: 'test',
+                        message: 'test',
                         code: 'TEST'
                     }
                 })
@@ -245,7 +245,7 @@ describe('Key actions', () => {
                 request.respondWith({
                     status: 500,
                     response: {
-                        error: 'test',
+                        message: 'test',
                         code: 'TEST'
                     }
                 })

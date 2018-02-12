@@ -30,7 +30,7 @@ export const getCurrentUser = () => (dispatch: Function) => {
             dispatch(getCurrentUserFailure(e))
             dispatch(error({
                 title: 'Error',
-                message: e
+                message: e.message
             }))
             throw e
         })
@@ -59,7 +59,7 @@ export const saveCurrentUser = (user: User) => (dispatch: Function) => {
             dispatch(saveCurrentUserFailure(e))
             dispatch(error({
                 title: 'Error',
-                message: e
+                message: e.message
             }))
             throw e
         })

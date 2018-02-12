@@ -83,7 +83,7 @@ describe('Canvas actions', () => {
             request.respondWith({
                 status: 500,
                 response: {
-                    error: 'test',
+                    message: 'test',
                     code: 'TEST'
                 }
             })

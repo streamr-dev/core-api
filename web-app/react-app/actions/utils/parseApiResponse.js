@@ -8,7 +8,7 @@ export const parseError = ({response}: {
         status: number
     }
 }): ErrorInUi => ({
-    message: response.data.error || 'Something went wrong',
+    message: response.data.message || 'Something went wrong',
     code: response.data.code,
     statusCode: response.status
 })
