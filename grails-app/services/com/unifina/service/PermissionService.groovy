@@ -1,16 +1,10 @@
 package com.unifina.service
 
-import com.unifina.domain.dashboard.Dashboard
-import com.unifina.domain.data.Feed
-import com.unifina.domain.data.Stream
-import com.unifina.domain.marketplace.Product
 import com.unifina.domain.security.Key
 import com.unifina.domain.security.Permission
 import com.unifina.domain.security.Permission.Operation
 import com.unifina.domain.security.SecUser
 import com.unifina.domain.security.SignupInvite
-import com.unifina.domain.signalpath.Canvas
-import com.unifina.domain.signalpath.ModulePackage
 import com.unifina.security.Userish
 import groovy.transform.CompileStatic
 
