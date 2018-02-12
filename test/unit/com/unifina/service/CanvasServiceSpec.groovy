@@ -434,7 +434,18 @@ class CanvasServiceSpec extends Specification {
 		1 * taskService.createTask(CanvasDeleteTask, [canvasId: '1'], "delete-canvas", me, _)
 	}
 
-	def "deleteCanvas() throws ApiException if trying to delete running canvas"() {
+	def "deleteCanvas(,,true) creates a delete task even if canvas running"() {
+		def taskService = service.taskService = Mock(TaskService)
+		myFirstCanvas.state = Canvas.State.RUNNING
+		myFirstCanvas.save(failOnError: true, validate: true)
+
+		when:
+		service.deleteCanvas(myFirstCanvas, me, true)
+		then:
+		1 * taskService.createTask(CanvasDeleteTask, [canvasId: '1'], "delete-canvas", me, _)
+	}
+
+	def "deleteCanvas() throws ApiException if trying to (immediately) delete running canvas"() {
 		when:
 		myFirstCanvas.state = Canvas.State.RUNNING
 		myFirstCanvas.save(failOnError: true, validate: true)

@@ -162,8 +162,9 @@ public class SignalPathRunner extends Thread {
 	/**
 	 * Aborts the data feed and releases all resources
 	 */
-	public void destroy() {
+	void destroy() {
 		signalPaths.each { SignalPath it -> it.destroy() }
+		signalPathService.updateState(getRunnerId(), Canvas.State.STOPPED)
 
 		if (adhoc) {
 			for (SignalPath sp : getSignalPaths()) {
@@ -171,11 +172,10 @@ public class SignalPathRunner extends Thread {
 				signalPathService.deleteReferences(sp, true)
 			}
 		}
-		else signalPathService.updateState(getRunnerId(), Canvas.State.STOPPED)
 	}
 
 	public void abort() {
-		log.info("Aborting SignalPathRunner..")
+		log.info("Aborting...")
 		globals.dataSource?.stopFeed()
 
 		// Will be called in run() before exiting
