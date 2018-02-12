@@ -5,9 +5,7 @@ class Category {
 	String name
 	String defaultImageUrl
 
-	static hasMany = [
-			products: Product
-	]
+	static hasMany = [products: Product]
 
 	static constraints = {
 		defaultImageUrl(nullable: true)
@@ -16,5 +14,6 @@ class Category {
 	static mapping = {
 		id generator: 'assigned'
 		defaultImageUrl length: 2048
+		version false
 	}
 }

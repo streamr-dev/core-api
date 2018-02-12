@@ -25,9 +25,7 @@ class Product {
 	Currency priceCurrency = Currency.DATA
 	Long minimumSubscriptionInSeconds = 0
 
-	static hasMany = [
-			streams: ProductStream
-	]
+	static hasMany = [streams: Stream]
 
 	enum State {
 		NEW("new"),
