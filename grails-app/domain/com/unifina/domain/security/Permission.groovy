@@ -60,6 +60,10 @@ class Permission {
 		})
 	}
 
+	static mapping = {
+		anonymous(index: 'anonymous_idx')
+	}
+
 	/**
 	 * Client-side representation of Permission object
 	 * Resource type/id is not indicated because API caller will have it in the URL
