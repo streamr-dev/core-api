@@ -20,13 +20,18 @@ class Permission {
 	Key key
 	SignupInvite invite
 
-	/** Permission is given to one of the resources below */
+	/**
+	 * Permission is given to one of the resources below. To add new types:
+	 * 1) Define the field: MUST use the camelCase version of the class name
+	 * 2) Add the field to the resourceFields list
+	 */
 	Canvas canvas
 	Dashboard dashboard
 	Feed feed
 	ModulePackage modulePackage
 	Stream stream
 	Product product
+	static List<String> resourceFields = ['canvas', 'dashboard', 'feed', 'modulePackage', 'stream', 'product']
 
 	/** Type of operation that this ACL item allows e.g. "read" */
 	enum Operation {

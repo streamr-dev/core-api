@@ -420,26 +420,14 @@ class PermissionService {
 
 	@CompileStatic
 	private static Object getResourceFromPermission(Permission p) {
-		return p.canvas ?: p.dashboard ?: p.feed ?: p.modulePackage ?: p.stream ?: p.product
+		return Permission.resourceFields.find { p[it] }
 	}
 
 	@CompileStatic
 	private static String getResourcePropertyName(Object resource) {
-		if (resource instanceof Canvas) {
-			return "canvas"
-		} else if (resource instanceof Dashboard) {
-			return "dashboard"
-		} else if (resource instanceof Feed) {
-			return "feed"
-		} else if (resource instanceof ModulePackage) {
-			return "modulePackage"
-		} else if (resource instanceof Stream) {
-			return "stream"
-		} else if (resource instanceof Product) {
-			return "product"
-		} else {
-			throw new IllegalArgumentException("Unexpected resource class: " + resource)
-		}
+		// Derive property name from class name by turning it into camelCase
+		String simpleName = resource.getClass().getSimpleName()
+		return simpleName.substring(0, 1).toLowerCase() + simpleName.substring(1)
 	}
 
 	/**
