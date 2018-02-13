@@ -153,9 +153,9 @@
             }
         )
 
-        .step("Set parameter <code>constant</code> of Constant to <strong>10</strong>",
+        .step("Set parameter <code>constant</code> of Constant to <strong>350</strong>",
             '.tourConstant1',
-            tour.waitForInput(".tourConstant1 .parameterInput", "10")
+            tour.waitForInput(".tourConstant1 .parameterInput", "350")
         )
 
         .step("Connect <code>out</code> of Constant to <code>B</code> of GreaterThan.",

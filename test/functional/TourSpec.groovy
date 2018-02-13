@@ -337,7 +337,7 @@ class TourSpec extends LoginTester1Spec implements CanvasMixin, ConfirmationMixi
 		moveModuleBy("Constant", 600, 25)
 
 		advance {
-			setParameterValueForModule("Constant", "constant", "10")
+			setParameterValueForModule("Constant", "constant", "350")
 		}
 
 		advance {
