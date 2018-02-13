@@ -1,5 +1,6 @@
 package com.unifina.domain.data
 
+import com.unifina.domain.marketplace.Product
 import com.unifina.domain.security.Permission
 import com.unifina.domain.signalpath.Canvas
 import grails.converters.JSON
@@ -24,7 +25,9 @@ class Stream implements Comparable {
 	String uiChannelPath
 	Canvas uiChannelCanvas
 
-	static hasMany = [permissions: Permission]
+	static hasMany = [permissions: Permission, products: Product]
+	static mappedBy = [products: 'streams'] // defines which field in Product maps back to Streams - need to define this explicitly because there is also previewStream
+	static belongsTo = Product
 
 	static constraints = {
 		name(blank:false)

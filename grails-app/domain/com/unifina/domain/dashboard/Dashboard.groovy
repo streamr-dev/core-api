@@ -28,6 +28,7 @@ class Dashboard {
 	static mapping = {
 		items cascade: "all-delete-orphan"
 		id generator: IdGenerator.name
+		layout type: "text"
 	}
 
 	@CompileStatic

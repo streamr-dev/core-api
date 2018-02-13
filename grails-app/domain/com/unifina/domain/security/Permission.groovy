@@ -3,6 +3,7 @@ package com.unifina.domain.security
 import com.unifina.domain.dashboard.Dashboard
 import com.unifina.domain.data.Feed
 import com.unifina.domain.data.Stream
+import com.unifina.domain.marketplace.Product
 import com.unifina.domain.signalpath.Canvas
 import com.unifina.domain.signalpath.ModulePackage
 
@@ -19,12 +20,18 @@ class Permission {
 	Key key
 	SignupInvite invite
 
-	/** Permission is given to one of the resources below */
+	/**
+	 * Permission is given to one of the resources below. To add new types:
+	 * 1) Define the field: MUST use the camelCase version of the class name
+	 * 2) Add the field to the resourceFields list
+	 */
 	Canvas canvas
 	Dashboard dashboard
 	Feed feed
 	ModulePackage modulePackage
 	Stream stream
+	Product product
+	static List<String> resourceFields = ['canvas', 'dashboard', 'feed', 'modulePackage', 'stream', 'product']
 
 	/** Type of operation that this ACL item allows e.g. "read" */
 	enum Operation {
@@ -55,8 +62,9 @@ class Permission {
 		feed(nullable: true)
 		modulePackage(nullable: true)
 		stream(nullable: true)
+		product(nullable: true)
 		canvas(validator: { val, obj ->
-			[obj.canvas, obj.dashboard, obj.feed, obj.modulePackage, obj.stream].count { it != null } == 1
+			[obj.canvas, obj.dashboard, obj.feed, obj.modulePackage, obj.stream, obj.product].count { it != null } == 1
 		})
 	}
 
