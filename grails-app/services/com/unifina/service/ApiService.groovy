@@ -14,6 +14,9 @@ import groovy.transform.CompileStatic
 import org.apache.log4j.Logger
 import org.codehaus.groovy.grails.web.converters.exceptions.ConverterException
 import org.codehaus.groovy.grails.web.json.JSONObject
+import org.codehaus.groovy.grails.web.mapping.LinkGenerator
+
+import javax.servlet.http.HttpServletResponse
 
 class ApiService {
 
@@ -22,6 +25,7 @@ class ApiService {
 	private static final Logger log = Logger.getLogger(ApiService)
 
 	PermissionService permissionService
+	LinkGenerator grailsLinkGenerator
 
 	/**
 	 * List/(search for) all domain objects readable by user that satisfy given conditions
@@ -36,6 +40,24 @@ class ApiService {
 	<T> List<T> list(Class<T> domainClass, ListParams listParams, SecUser apiUser) {
 		Closure searchCriteria = listParams.createListCriteria()
 		permissionService.get(domainClass, apiUser, Permission.Operation.READ, listParams.publicAccess, searchCriteria)
+	}
+
+	/**
+	 * Generate link to more results in API index() methods
+	 */
+	@GrailsCompileStatic
+	void addLinkHintToHeader(ListParams listParams, int numOfResults, Map params, HttpServletResponse response) {
+		if (numOfResults == listParams.max) {
+			Map paramMap = listParams.toMap() + [offset: listParams.offset + listParams.max]
+
+			String url = grailsLinkGenerator.link(
+				controller: params.controller,
+				action: params.action,
+				absolute: true,
+				params: paramMap.findAll { k, v -> v } // remove null valued entries
+			)
+			response.addHeader("Link", "<${url}>; rel=\"more\"")
+		}
 	}
 
 	@CompileStatic

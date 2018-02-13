@@ -42,9 +42,9 @@ class ListParamsSpec extends Specification {
 		params.toMap() == [
 			search: null,
 			sortBy: null,
-			order: "asc",
+			order: null,
 			max: 100,
-			offset: null,
+			offset: 0,
 			publicAccess: false
 		]
 	}
@@ -119,6 +119,7 @@ class ListParamsSpec extends Specification {
 		criteria()
 
 		then:
+		1 * builder.invokeMethod("firstResult", [0])
 		1 * builder.invokeMethod("maxResults", [100])
 		0 * builder._
 	}

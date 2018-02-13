@@ -31,6 +31,7 @@ class CanvasApiController {
 			listParams.publicAccess = params.boolean("public")
 		}
 		def results = apiService.list(Canvas, listParams, (SecUser) request.apiUser)
+		apiService.addLinkHintToHeader(listParams, results.size(), params, response)
 		render(results*.toMap() as JSON)
 	}
 

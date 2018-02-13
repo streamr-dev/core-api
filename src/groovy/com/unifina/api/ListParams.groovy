@@ -11,7 +11,7 @@ abstract class ListParams {
 	String sortBy
 	String order = "asc"
 	Integer max = MAX_LIMIT
-	Integer offset
+	Integer offset = 0
 	Boolean publicAccess = false
 
 	static constraints = {
@@ -19,7 +19,7 @@ abstract class ListParams {
 		sortBy(nullable: true, blank: false)
 		order(inList: ["asc", "desc"], nullable: false)
 		max(min: 1, max: MAX_LIMIT)
-		offset(min: 0, nullable: true)
+		offset(min: 0, nullable: false)
 		publicAccess(nullable: false)
 	}
 
@@ -38,9 +38,7 @@ abstract class ListParams {
 			if (sortBy) {
 				'order'(sortBy, order)
 			}
-			if (offset) {
-				firstResult(offset)
-			}
+			firstResult(offset)
 			maxResults(max)
 		} << additionalCriteria()
 	}
@@ -50,7 +48,7 @@ abstract class ListParams {
 		[
 		    search: search,
 			sortBy: sortBy,
-			order: order,
+			order: sortBy != null ? order : null,
 			max: max,
 			offset: offset,
 			publicAccess: publicAccess
