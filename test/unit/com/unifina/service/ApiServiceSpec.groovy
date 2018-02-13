@@ -1,12 +1,17 @@
 package com.unifina.service
 
+import com.unifina.api.DashboardListParams
+import com.unifina.api.ListParams
+import com.unifina.domain.dashboard.Dashboard
+import com.unifina.domain.security.SecUser
 import grails.orm.HibernateCriteriaBuilder
+import grails.test.mixin.Mock
 import grails.test.mixin.TestFor
 import spock.lang.Specification
 
 @TestFor(ApiService)
+@Mock([Dashboard, SecUser, PermissionService])
 class ApiServiceSpec extends Specification {
-	
 	HibernateCriteriaBuilder builder
 	Map params
 
@@ -33,7 +38,7 @@ class ApiServiceSpec extends Specification {
 		c()
 
 		then:
-		1 * builder.or(_) >> {Closure orParam ->
+		1 * builder.or(_) >> { Closure orParam ->
 			orParam.delegate = builder
 			orParam()
 			return null
@@ -120,7 +125,7 @@ class ApiServiceSpec extends Specification {
 		c()
 
 		then:
-		1 * builder.or(_) >> {Closure orParam ->
+		1 * builder.or(_) >> { Closure orParam ->
 			orParam.delegate = builder
 			orParam()
 			return null
@@ -135,12 +140,67 @@ class ApiServiceSpec extends Specification {
 		0 * builder._
 	}
 
-	void "isPublicFlagOn()"() {
-		expect:
-		!service.isPublicFlagOn([:])
-		service.isPublicFlagOn([public: "true"])
-		service.isPublicFlagOn([public: "TRUE"])
-		!service.isPublicFlagOn([public: "false"])
+	void "list() returns expected ListResult (1st page)"() {
+		SecUser me = new SecUser(username: "me@me.com").save(failOnError: true, validate: false)
+		setupDashboards(me)
+
+		when:
+		ListParams listParams = new DashboardListParams(max: 42)
+		ListResult listResult = service.list(Dashboard, listParams, me)
+
+		then:
+		listResult.toMap().keySet() == ["totalCount", "numOfItems", "offset", "nextOffset", "items"] as Set
+		listResult.toMap().subMap("totalCount", "numOfItems", "offset", "nextOffset") == [
+			totalCount: 100,
+			numOfItems: 42,
+			offset: 0,
+			nextOffset: 42
+		]
+		listResult.toMap().items*.name == (1..42).collect { "Dashboard ${it}"}
 	}
 
+	void "list() returns expected ListResult (2nd page)"() {
+		SecUser me = new SecUser(username: "me@me.com").save(failOnError: true, validate: false)
+		setupDashboards(me)
+
+		when:
+		ListParams listParams = new DashboardListParams(max: 42, offset: 42)
+		ListResult listResult = service.list(Dashboard, listParams, me)
+
+		then:
+		listResult.toMap().keySet() == ["totalCount", "numOfItems", "offset", "nextOffset", "items"] as Set
+		listResult.toMap().subMap("totalCount", "numOfItems", "offset", "nextOffset") == [
+			totalCount: 100,
+			numOfItems: 42,
+			offset: 42,
+			nextOffset: 84
+		]
+		listResult.toMap().items*.name == (43..84).collect { "Dashboard ${it}"}
+	}
+
+	void "list() returns expected ListResult (3rd page)"() {
+		SecUser me = new SecUser(username: "me@me.com").save(failOnError: true, validate: false)
+		setupDashboards(me)
+
+		when:
+		ListParams listParams = new DashboardListParams(max: 42, offset: 84)
+		ListResult listResult = service.list(Dashboard, listParams, me)
+
+		then:
+		listResult.toMap().keySet() == ["totalCount", "numOfItems", "offset", "nextOffset", "items"] as Set
+		listResult.toMap().subMap("totalCount", "numOfItems", "offset", "nextOffset") == [
+			totalCount: 100,
+			numOfItems: 16,
+			offset: 84,
+			nextOffset: null
+		]
+		listResult.toMap().items*.name == (85..100).collect { "Dashboard ${it}"}
+	}
+
+	void setupDashboards(SecUser me) {
+		(1..100).each {
+			def d = new Dashboard(name: "Dashboard ${it}").save(failOnError: true, validate: true)
+			service.permissionService.systemGrantAll(me, d)
+		}
+	}
 }

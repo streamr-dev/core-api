@@ -3,10 +3,13 @@ package com.unifina.service
 import com.mashape.unirest.http.HttpResponse
 import com.mashape.unirest.http.Unirest
 import com.unifina.api.ApiException
+import com.unifina.api.ListParams
 import com.unifina.domain.security.Key
+import com.unifina.domain.security.Permission
 import com.unifina.domain.security.SecUser
 import com.unifina.exceptions.UnexpectedApiResponseException
 import grails.converters.JSON
+import grails.gorm.PagedResultList
 import groovy.transform.CompileStatic
 import org.apache.log4j.Logger
 import org.codehaus.groovy.grails.web.converters.exceptions.ConverterException
@@ -17,6 +20,37 @@ class ApiService {
 	static transactional = false
 
 	private static final Logger log = Logger.getLogger(ApiService)
+
+	PermissionService permissionService
+
+	/**
+	 * List/(search for) all domain objects readable by user that satisfy given conditions
+	 *
+	 * @param domainClass Class of domain object
+	 * @param listParams conditions for listing
+	 * @param apiUser user for which listing is conducted (READ permission is checked)
+	 *
+	 * @return list of results with pagination information
+	 */
+	ListResult list(Class domainClass, ListParams listParams, SecUser apiUser) {
+		Closure searchCriteria = listParams.createListCriteria()
+		Closure userPermissionCriteria = permissionService.createUserPermissionCriteria(
+			apiUser,
+			Permission.Operation.READ,
+			listParams.publicAccess
+		)
+
+
+		def criteria = domainClass.createCriteria()
+		PagedResultList results = criteria.list(max: listParams.max, offset: listParams.offset) {
+			searchCriteria.delegate = delegate
+			userPermissionCriteria.delegate = delegate
+			userPermissionCriteria()
+			searchCriteria()
+		}
+
+		return new ListResult(results, listParams.offset)
+	}
 
 	/**
 	 * Transforms a set of query params to search criteria. Supports search, sort, and paging. Below
@@ -54,10 +88,6 @@ class ApiService {
 		}
 
 		return result << additionalCriteria
-	}
-
-	boolean isPublicFlagOn(params) {
-		return params.public != null && Boolean.parseBoolean(params.public)
 	}
 
 	@CompileStatic
