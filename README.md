@@ -35,11 +35,11 @@ Additional services are required to run this web application. The easiest way to
 4. Fetch all git submodules 
 ```
 git submodule update --init --recursive
-````
+```
 5. Install front-end dependencies
 ```
 npm install
-````
+```
 
 6. Run `streamr-docker-dev start 1` if you are using the recommended tool streamr-docker-dev. Otherwise make sure all services dependencies are running and the the web applications is properly configured to connect to them.
 
