@@ -11,7 +11,7 @@ import spock.lang.Specification
 @Mock([Category, UnifinaCoreAPIFilters, SpringSecurityService])
 class CategoryApiControllerSpec extends Specification {
 
-	void "should generate challenge"() {
+	void "lists categories"() {
 		Category c1 = new Category(name: "Traffic", defaultImageUrl: "traffic.png")
 		c1.id = "traffic"
 		c1.save(failOnError: true, validate: true)
