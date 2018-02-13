@@ -22,7 +22,7 @@ class Category {
 	@CompileStatic
 	Map toMap() {
 		return [
-		    id: id,
+			id: id,
 			name: name,
 			defaultImageUrl: defaultImageUrl
 		]
