@@ -17,7 +17,7 @@ class CanvasListParams extends ListParams {
 	}
 
 	@Override
-	protected String getSearchFields() {
+	protected List<String> getSearchFields() {
 		return ["name"]
 	}
 

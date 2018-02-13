@@ -30,8 +30,8 @@ class CanvasApiController {
 		if (params.public != null) {
 			listParams.publicAccess = params.boolean("public")
 		}
-		ListResult results = apiService.list(Canvas, listParams, (SecUser) request.apiUser)
-		render(results.toMap() as JSON)
+		def results = apiService.list(Canvas, listParams, (SecUser) request.apiUser)
+		render(results*.toMap() as JSON)
 	}
 
 	@StreamrApi(authenticationLevel = AuthLevel.NONE)

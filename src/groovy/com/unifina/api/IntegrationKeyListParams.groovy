@@ -13,7 +13,7 @@ class IntegrationKeyListParams extends ListParams {
 	}
 
 	@Override
-	protected String getSearchFields() {
+	protected List<String> getSearchFields() {
 		return []
 	}
 

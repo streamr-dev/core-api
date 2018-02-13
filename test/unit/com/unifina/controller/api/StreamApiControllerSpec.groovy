@@ -16,7 +16,7 @@ import grails.test.mixin.TestFor
 import spock.lang.Specification
 
 @TestFor(StreamApiController)
-@Mock([SecUser, Stream, Key, Permission, Feed, UnifinaCoreAPIFilters])
+@Mock([SecUser, Stream, Key, Permission, Feed, UnifinaCoreAPIFilters, UserService, PermissionService, SpringSecurityService, StreamService, ApiService, DashboardService])
 class StreamApiControllerSpec extends Specification {
 
 	Feed feed
@@ -30,20 +30,12 @@ class StreamApiControllerSpec extends Specification {
 	def streamThreeId
 	def streamFourId
 
-	static doWithSpring = {
-		permissionService(PermissionService)
-		userService(UserService)
-		springSecurtiyService(SpringSecurityService)
-		streamService(StreamService) { it.autowire = true }
-		apiService(ApiService) { it.autowire = true }
-		dashboardService(DashboardService)
-	}
-
 	def setup() {
 		permissionService = mainContext.getBean(PermissionService)
 
 		controller.permissionService = permissionService
 		controller.apiService = mainContext.getBean(ApiService)
+		controller.apiService.permissionService = permissionService
 
 		user = new SecUser(username: "me", password: "foo")
 		user.save(validate: false)
@@ -77,7 +69,7 @@ class StreamApiControllerSpec extends Specification {
 		}
 
 		then:
-		response.json.totalCount == 3
+		response.json.length() == 3
 	}
 
 	void "find streams by name of logged in user"() {
@@ -91,13 +83,13 @@ class StreamApiControllerSpec extends Specification {
 		}
 
 		then:
-		response.json.totalCount == 1
-		response.json.items[0].id.length() == 22
-		response.json.items[0].name == "stream"
-		response.json.items[0].config == [
+		response.json.length() == 1
+		response.json[0].id.length() == 22
+		response.json[0].name == "stream"
+		response.json[0].config == [
 			fields: []
 		]
-		response.json.items[0].description == "description"
+		response.json[0].description == "description"
 	}
 
 	void "index() adds name param to filter criteria"() {
@@ -111,7 +103,7 @@ class StreamApiControllerSpec extends Specification {
 		}
 
 		then:
-		response.json.items[0].name == name
+		response.json[0].name == name
 	}
 
 	void "creating stream fails given invalid token"() {

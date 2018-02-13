@@ -23,8 +23,8 @@ class DashboardApiController {
 		if (params.public != null) {
 			listParams.publicAccess = params.boolean("public")
 		}
-		ListResult results = apiService.list(Dashboard, listParams, (SecUser) request.apiUser)
-		render(results.toMap() as JSON)
+		def results = apiService.list(Dashboard, listParams, (SecUser) request.apiUser)
+		render(results*.toMap() as JSON)
 	}
 
 	@StreamrApi

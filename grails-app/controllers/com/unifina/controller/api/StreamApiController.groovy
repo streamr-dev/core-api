@@ -23,8 +23,8 @@ class StreamApiController {
 		if (params.public) {
 			listParams.publicAccess = params.boolean("public")
 		}
-		ListResult results = apiService.list(Stream, listParams, (SecUser) request.apiUser)
-		render(results.toMap() as JSON)
+		def results = apiService.list(Stream, listParams, (SecUser) request.apiUser)
+		render(results*.toMap() as JSON)
 	}
 
 	@StreamrApi
