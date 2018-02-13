@@ -23,24 +23,27 @@ import spock.lang.Specification
 @Mock([SecUser, Permission, Canvas, Key, UnifinaCoreAPIFilters])
 class CanvasApiControllerSpec extends Specification {
 
+	PermissionService permissionService
 	CanvasService canvasService
 	SecUser me
 	Canvas canvas1
 	Canvas canvas2
 	Canvas canvas3
+	Canvas canvas4
 
 	// This gets the real services injected into the filters
 	// From https://github.com/grails/grails-core/issues/9191
 	static doWithSpring = {
-		apiService(ApiService)
+		permissionService(PermissionService)
+		apiService(ApiService) { it.autowire = true }
 		springSecurityService(SpringSecurityService)
 		userService(UserService)
 	}
 
 	void setup() {
+		permissionService = mainContext.getBean(PermissionService)
 		controller.canvasService = canvasService = Mock(CanvasService)
 		controller.signalPathService = Mock(SignalPathService)
-		controller.permissionService = Mock(PermissionService)
 
 		me = new SecUser(id: 1).save(validate: false)
 		SecUser other = new SecUser(id: 2).save(validate: false)
@@ -56,7 +59,7 @@ class CanvasApiControllerSpec extends Specification {
 		canvas1 = new Canvas(
 			name: "mine",
 			json: new JsonBuilder([name: "mine", modules: [[hash: 1]], settings: [:]]).toString(),
-			state: Canvas.State.STOPPED,
+			state: Canvas.State.RUNNING,
 			hasExports: false
 		)
 		canvas1.save(validate: true, failOnError: true)
@@ -71,13 +74,27 @@ class CanvasApiControllerSpec extends Specification {
 		canvas3 = new Canvas(
 			name: "not mine but example",
 			json: '{name: "not mine but example", modules: []}',
-			state: Canvas.State.STOPPED,
+			state: Canvas.State.RUNNING,
 			example: true,
+			hasExports: false,
+			adhoc: true
+		).save(validate: true, failOnError: true)
+
+		canvas4 = new Canvas(
+			name: "Foo",
+			json: '{name: "a foo canvas", modules: []}',
+			state: Canvas.State.STOPPED,
+			example: false,
 			hasExports: false
 		).save(validate: true, failOnError: true)
 
+		permissionService.systemGrantAll(me, canvas1)
+		permissionService.systemGrantAll(me, canvas2)
+		permissionService.systemGrantAll(me, canvas3)
+		permissionService.systemGrantAll(me, canvas4)
+
 		assert SecUser.count() == 2
-		assert Canvas.count() == 3
+		assert Canvas.count() == 4
 	}
 
 	void "index() renders authorized canvases as a list"() {
@@ -90,13 +107,10 @@ class CanvasApiControllerSpec extends Specification {
 
 		then:
 		response.status == 200
-		response.json.size() == 3
-		1 * controller.permissionService.get(Canvas, me, Permission.Operation.READ, false, _) >> [canvas1, canvas2, canvas3]
+		response.json.totalCount == 4
 	}
 
-	void "index() adds name param to filter criteria"() {
-		def criteriaBuilderMock = Mock(HibernateCriteriaBuilder)
-
+	void "index() can filter by name"() {
 		when:
 		params.name = "Foo"
 		request.addHeader("Authorization", "Token myApiKey")
@@ -106,18 +120,11 @@ class CanvasApiControllerSpec extends Specification {
 		}
 
 		then:
-		1 * controller.permissionService.get(Canvas, me, Permission.Operation.READ, false, _) >> {Class resource, SecUser u, Operation op, boolean pub, Closure criteria ->
-			criteria.delegate = criteriaBuilderMock
-			criteria()
-			return []
-		}
-		and:
-		1 * criteriaBuilderMock.eq("name", "Foo")
+		response.status == 200
+		response.json.items*.id == ["4"]
 	}
 
-	void "index() adds adhoc param to filter criteria"() {
-		def criteriaBuilderMock = Mock(HibernateCriteriaBuilder)
-
+	void "index() can filter by adhoc"() {
 		when:
 		params.adhoc = "true"
 		request.addHeader("Authorization", "Token myApiKey")
@@ -127,20 +134,13 @@ class CanvasApiControllerSpec extends Specification {
 		}
 
 		then:
-		1 * controller.permissionService.get(Canvas, me, Permission.Operation.READ, false, _) >> {Class resource, SecUser u, Operation op, boolean pub, Closure criteria ->
-			criteria.delegate = criteriaBuilderMock
-			criteria()
-			return []
-		}
-		and:
-		1 * criteriaBuilderMock.eq("adhoc", true)
+		response.status == 200
+		response.json.items*.id == ["3"]
 	}
 
-	void "index() adds state param to filter criteria"() {
-		def criteriaBuilderMock = Mock(HibernateCriteriaBuilder)
-
+	void "index() can filter by state"() {
 		when:
-		params.state = "running"
+		params.state = "RUNNING"
 		request.addHeader("Authorization", "Token myApiKey")
 		request.requestURI = "/api/v1/canvases"
 		withFilters(action: "index") {
@@ -148,13 +148,8 @@ class CanvasApiControllerSpec extends Specification {
 		}
 
 		then:
-		1 * controller.permissionService.get(Canvas, me, Permission.Operation.READ, false, _) >> {Class resource, SecUser u, Operation op, boolean pub, Closure criteria ->
-			criteria.delegate = criteriaBuilderMock
-			criteria()
-			return []
-		}
-		and:
-		1 * criteriaBuilderMock.eq("state", Canvas.State.RUNNING)
+		response.status == 200
+		response.json.items*.id == ["1", "3"]
 	}
 
 	void "show() authorizes, reconstructs and renders the canvas as json"() {

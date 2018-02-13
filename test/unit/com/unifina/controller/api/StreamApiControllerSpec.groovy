@@ -2,7 +2,6 @@ package com.unifina.controller.api
 
 import com.unifina.api.NotFoundException
 import com.unifina.api.NotPermittedException
-import com.unifina.api.ValidationException
 import com.unifina.domain.data.Feed
 import com.unifina.domain.data.Stream
 import com.unifina.domain.security.Key
@@ -10,20 +9,14 @@ import com.unifina.domain.security.Permission
 import com.unifina.domain.security.SecUser
 import com.unifina.feed.NoOpStreamListener
 import com.unifina.filters.UnifinaCoreAPIFilters
-import com.unifina.service.ApiService
-import com.unifina.service.DashboardService
-import com.unifina.service.PermissionService
-import com.unifina.service.StreamService
-import com.unifina.service.UserService
-import grails.orm.HibernateCriteriaBuilder
+import com.unifina.service.*
 import grails.plugin.springsecurity.SpringSecurityService
 import grails.test.mixin.Mock
 import grails.test.mixin.TestFor
-import grails.test.mixin.web.FiltersUnitTestMixin
 import spock.lang.Specification
 
 @TestFor(StreamApiController)
-@Mock([SecUser, Stream, Key, Permission, Feed, UnifinaCoreAPIFilters, UserService, PermissionService, SpringSecurityService, StreamService, ApiService, DashboardService])
+@Mock([SecUser, Stream, Key, Permission, Feed, UnifinaCoreAPIFilters])
 class StreamApiControllerSpec extends Specification {
 
 	Feed feed
@@ -36,6 +29,15 @@ class StreamApiControllerSpec extends Specification {
 	def streamTwoId
 	def streamThreeId
 	def streamFourId
+
+	static doWithSpring = {
+		permissionService(PermissionService)
+		userService(UserService)
+		springSecurtiyService(SpringSecurityService)
+		streamService(StreamService) { it.autowire = true }
+		apiService(ApiService) { it.autowire = true }
+		dashboardService(DashboardService)
+	}
 
 	def setup() {
 		permissionService = mainContext.getBean(PermissionService)
@@ -75,7 +77,7 @@ class StreamApiControllerSpec extends Specification {
 		}
 
 		then:
-		response.json.length() == 3
+		response.json.totalCount == 3
 	}
 
 	void "find streams by name of logged in user"() {
@@ -89,13 +91,13 @@ class StreamApiControllerSpec extends Specification {
 		}
 
 		then:
-		response.json.length() == 1
-		response.json[0].id.length() == 22
-		response.json[0].name == "stream"
-		response.json[0].config == [
+		response.json.totalCount == 1
+		response.json.items[0].id.length() == 22
+		response.json.items[0].name == "stream"
+		response.json.items[0].config == [
 			fields: []
 		]
-		response.json[0].description == "description"
+		response.json.items[0].description == "description"
 	}
 
 	void "index() adds name param to filter criteria"() {
@@ -109,7 +111,7 @@ class StreamApiControllerSpec extends Specification {
 		}
 
 		then:
-		response.json[0].name == name
+		response.json.items[0].name == name
 	}
 
 	void "creating stream fails given invalid token"() {

@@ -1,15 +1,13 @@
 package com.unifina.controller.api
 
-import com.unifina.api.ApiException
-import com.unifina.api.NotFoundException
-import com.unifina.api.NotPermittedException
-import com.unifina.api.StreamrApiHelper
-import com.unifina.api.ValidationException
+import com.unifina.api.*
 import com.unifina.domain.data.Stream
 import com.unifina.domain.security.Permission.Operation
+import com.unifina.domain.security.SecUser
 import com.unifina.feed.DataRange
 import com.unifina.security.AuthLevel
 import com.unifina.security.StreamrApi
+import com.unifina.service.ListResult
 import grails.converters.JSON
 import grails.plugin.springsecurity.annotation.Secured
 
@@ -21,19 +19,12 @@ class StreamApiController {
 	def apiService
 
 	@StreamrApi
-	def index() {
-		def criteria = apiService.createListCriteria(params, ["name", "description"], {
-			// Filter by exact name
-			if (params.name) {
-				eq("name", params.name)
-			}
-			// Filter by UI channel
-			if (params.uiChannel) {
-				eq("uiChannel", params.boolean("uiChannel"))
-			}
-		})
-		def streams = permissionService.get(Stream, request.apiUser, Operation.READ, apiService.isPublicFlagOn(params), criteria)
-		render(streams*.toMap() as JSON)
+	def index(StreamListParams listParams) {
+		if (params.public) {
+			listParams.publicAccess = params.boolean("public")
+		}
+		ListResult results = apiService.list(Stream, listParams, (SecUser) request.apiUser)
+		render(results.toMap() as JSON)
 	}
 
 	@StreamrApi
