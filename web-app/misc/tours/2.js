@@ -153,9 +153,9 @@
             }
         )
 
-        .step("Set parameter <code>constant</code> of Constant to <strong>10</strong>",
+        .step("Set parameter <code>constant</code> of Constant to <strong>350</strong>",
             '.tourConstant1',
-            tour.waitForInput(".tourConstant1 .parameterInput", "10")
+            tour.waitForInput(".tourConstant1 .parameterInput", "350")
         )
 
         .step("Connect <code>out</code> of Constant to <code>B</code> of GreaterThan.",
@@ -196,6 +196,17 @@
             '.tourFilter1',
             tour.waitForConnection(['tourFilter1.A&gt;B', 'tourEmail1.value1'])
         )
+
+        .step("One last thing. Hover over the module GreaterThan. Then click the red NR (No Repeat) button just right of <code>A&gt;B</code> so it becomes green.",
+            '.tourGreaterThan1',
+            function(cb) {
+                $(".tourGreaterThan1 .ioSwitch.noRepeat.ioSwitchFalse").click(function() {
+                    tour.next()
+                })
+            }
+        )
+
+        .step("This makes sure the EmailModule does not activate multiple times in a row", ".tourGreaterThan1")
 
         .step("We have now set-up a system that sends us an email every time the number of Bitcoin related tweets within a minute exceeds a threshold.")
 

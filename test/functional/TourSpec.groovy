@@ -337,7 +337,7 @@ class TourSpec extends LoginTester1Spec implements CanvasMixin, ConfirmationMixi
 		moveModuleBy("Constant", 600, 25)
 
 		advance {
-			setParameterValueForModule("Constant", "constant", "10")
+			setParameterValueForModule("Constant", "constant", "350")
 		}
 
 		advance {
@@ -366,6 +366,10 @@ class TourSpec extends LoginTester1Spec implements CanvasMixin, ConfirmationMixi
 
 		advance {
 			connectEndpoints(findOutputByDisplayName("Filter", "A&gt;B"), findInputByDisplayName("Email", "value1"))
+		}
+
+		advance {
+			$(".tourGreaterThan1 .ioSwitch.noRepeat.ioSwitchFalse").click()
 		}
 
 		advance { searchAndClickContains("Table") }
