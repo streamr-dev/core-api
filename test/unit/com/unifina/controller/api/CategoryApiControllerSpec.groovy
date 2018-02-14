@@ -11,14 +11,18 @@ import spock.lang.Specification
 @Mock([Category, UnifinaCoreAPIFilters, SpringSecurityService])
 class CategoryApiControllerSpec extends Specification {
 
-	void "lists categories"() {
+	void "lists categories in alphabetical order"() {
 		Category c1 = new Category(name: "Traffic", defaultImageUrl: "traffic.png")
-		c1.id = "traffic"
+		c1.id = "id-1"
 		c1.save(failOnError: true, validate: true)
 
 		Category c2 = new Category(name: "Cryptocurrency")
-		c2.id = "crypto"
+		c2.id = "id-2"
 		c2.save(failOnError: true, validate: true)
+
+		Category c3 = new Category(name: "Automobile")
+		c3.id = "id-3"
+		c3.save(failOnError: true, validate: true)
 
 		when:
 		request.requestURI = "/api/v1/categories"
@@ -31,15 +35,20 @@ class CategoryApiControllerSpec extends Specification {
 		response.status == 200
 		response.json == [
 			[
-				id: "traffic",
+				id: "id-3",
+				name: "Automobile",
+				defaultImageUrl: null
+			],
+			[
+				id: "id-2",
+				name: "Cryptocurrency",
+				defaultImageUrl: null
+			],
+			[
+				id: "id-1",
 				name: "Traffic",
 				defaultImageUrl: "traffic.png"
 			],
-			[
-				id: "crypto",
-				name: "Cryptocurrency",
-				defaultImageUrl: null
-			]
 		]
 	}
 
