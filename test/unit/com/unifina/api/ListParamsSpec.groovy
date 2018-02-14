@@ -15,10 +15,10 @@ class ListParamsSpec extends Specification {
 
 	@Validateable
 	private static class ExampleParams extends ListParams {
-		Boolean additional
+		String additional
 
 		static constraints = {
-			additional(nullable: true)
+			additional(blank: false, nullable: true)
 		}
 
 		@Override
@@ -107,6 +107,7 @@ class ListParamsSpec extends Specification {
 		[max: 0]             | 1           | ["max"]
 		[max: 101]           | 1           | ["max"]
 		[offset: -1]         | 1           | ["offset"]
+		[additional: ""]     | 1           | ["additional"]
 	}
 
 
@@ -136,7 +137,7 @@ class ListParamsSpec extends Specification {
 			max: 50,
 			offset: 1337,
 			publicAccess: true,
-			additional: true
+			additional: "additional information here"
 		).createListCriteria()
 		criteria.delegate = builder
 		criteria()
@@ -150,7 +151,7 @@ class ListParamsSpec extends Specification {
 		1 * builder.order('createdAt', 'desc')
 		1 * builder.invokeMethod("maxResults", [50])
 		1 * builder.invokeMethod("firstResult", [1337])
-		1 * builder.eq('additional', true)
+		1 * builder.eq('additional', "additional information here")
 		0 * builder._
 
 		and:
@@ -178,6 +179,5 @@ class ListParamsSpec extends Specification {
 		Dashboard.withCriteria(p4.createListCriteria())*.id == (61..90)*.toString()
 		Dashboard.withCriteria(p5.createListCriteria())*.id == (91..100)*.toString()
 		Dashboard.withCriteria(p6.createListCriteria()).empty
-
 	}
 }
