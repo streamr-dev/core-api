@@ -131,6 +131,7 @@ class SignalPathServiceSpec extends Specification {
 	}
 
 	void "getUsersOfRunningCanvases() returns empty map if no canvases running"() {
+		service.servletContext["signalPathRunners"] = [:]
 		expect:
 		service.getUsersOfRunningCanvases() == [:]
 	}

@@ -131,7 +131,7 @@ class SignalPathService {
 		canvas.requestUrl = protocol + "://" + canvas.server + ":" + port + grailsLinkGenerator.link(uri: "/api/v1/canvases/$canvas.id", absolute: false)
 		canvas.state = Canvas.State.RUNNING
 
-		canvas.save()
+		canvas.save(flush: true)
 
 		// Start the runner thread
 		runner.start()
@@ -139,9 +139,13 @@ class SignalPathService {
 		// Wait for runner to be in running state
 		runner.waitRunning(true)
 		if (!runner.getRunning()) {
-			runner.abort()
-			def msg = "Timed out while waiting for canvas $canvas.id to start."
-			throw new CanvasCommunicationException(msg)
+			if (runner.thrownOnStartUp) { // failed because of error
+				throw runner.thrownOnStartUp
+			} else {					  // failed because of timeout
+				runner.abort()
+				def msg = "Timed out while waiting for canvas $canvas.id to start."
+				throw new CanvasCommunicationException(msg)
+			}
 		}
 	}
 

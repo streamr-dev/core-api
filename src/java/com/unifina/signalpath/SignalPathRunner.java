@@ -26,6 +26,7 @@ public class SignalPathRunner extends Thread {
 	private final Globals globals;
 	private final List<SignalPath> signalPaths;
 	private boolean running = false;
+	private Throwable thrownOnStartUp;
 
 	public SignalPathRunner(SignalPath signalPath, Globals globals, boolean adhoc) {
 		this(Collections.singleton(signalPath), globals, adhoc);
@@ -61,11 +62,19 @@ public class SignalPathRunner extends Thread {
 		return running;
 	}
 
+	public Throwable getThrownOnStartUp() {
+		return thrownOnStartUp;
+	}
+
 	public synchronized void waitRunning(boolean target) throws InterruptedException {
 		int i = 0;
 		while (getRunning() != target && i++ < 60) {
 			log.debug("Waiting for " + runnerId + " to start...");
-			this.wait(500);
+			if (target && thrownOnStartUp != null) {
+				log.info("Giving up on waiting because run threw exception.");
+			} else {
+				wait(500);
+			}
 		}
 	}
 
@@ -95,7 +104,7 @@ public class SignalPathRunner extends Thread {
 				runSignalPaths();
 			}
 		} catch (Throwable e) {
-			e = GrailsUtil.deepSanitize(e);
+			thrownOnStartUp = e = GrailsUtil.deepSanitize(e);
 			log.error("Error while running SignalPaths", e);
 			pushErrorToUiChannels(e, signalPaths);
 		}
@@ -127,7 +136,7 @@ public class SignalPathRunner extends Thread {
 	private synchronized void setRunning(boolean running) {
 		this.running = running;
 		log.debug("setRunning (" + runnerId + ": " + running);
-		this.notify();
+		notify();
 	}
 
 	private void runSignalPaths() {
