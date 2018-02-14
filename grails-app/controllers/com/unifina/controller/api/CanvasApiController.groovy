@@ -9,7 +9,6 @@ import com.unifina.security.AuthLevel
 import com.unifina.security.StreamrApi
 import com.unifina.service.ApiService
 import com.unifina.service.CanvasService
-import com.unifina.service.ListResult
 import com.unifina.service.SignalPathService
 import grails.converters.JSON
 import grails.plugin.springsecurity.annotation.Secured

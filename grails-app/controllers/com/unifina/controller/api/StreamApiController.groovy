@@ -7,7 +7,6 @@ import com.unifina.domain.security.SecUser
 import com.unifina.feed.DataRange
 import com.unifina.security.AuthLevel
 import com.unifina.security.StreamrApi
-import com.unifina.service.ListResult
 import grails.converters.JSON
 import grails.plugin.springsecurity.annotation.Secured
 
