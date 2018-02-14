@@ -368,6 +368,10 @@ class TourSpec extends LoginTester1Spec implements CanvasMixin, ConfirmationMixi
 			connectEndpoints(findOutputByDisplayName("Filter", "A&gt;B"), findInputByDisplayName("Email", "value1"))
 		}
 
+		advance {
+			$(".tourGreaterThan1 .ioSwitch.noRepeat.ioSwitchFalse").click()
+		}
+
 		advance { searchAndClickContains("Table") }
 
 		moveModuleBy("Table", 500, 500)
