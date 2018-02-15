@@ -5,7 +5,6 @@
 
 		<title>Canvas</title>
 
-		<r:require module='lodash'/>
 		<r:require module='jstree'/>
 		<r:require module="bootbox"/>
 		<r:require module="bootstrap-contextmenu"/>

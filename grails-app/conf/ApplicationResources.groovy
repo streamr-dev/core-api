@@ -176,6 +176,7 @@ modules = {
 	}
 	'streamr-search' {
 		dependsOn 'typeahead'
+		dependsOn 'lodash'
 		resource url:[dir:'js/unifina/streamr-search', file:'streamr-search.js', plugin: 'unifina-core']
 	}
 	'streamr-floating-search' {
