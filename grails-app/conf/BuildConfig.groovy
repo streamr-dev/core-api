@@ -26,7 +26,9 @@ grails.project.fork = [
 		maxPerm: 512,
 		forkReserve:false,
 		daemon:true,
-		jvmArgs: ["-Dwebdriver.chrome.driver="+env["CHROMEDRIVER"]
+		jvmArgs: [
+			"-Djava.awt.headless=true",
+			"-Dwebdriver.chrome.driver="+env["CHROMEDRIVER"]
 		]
 	]
 ]

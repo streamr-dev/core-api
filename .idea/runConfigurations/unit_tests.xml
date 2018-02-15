@@ -1,6 +1,6 @@
 <component name="ProjectRunConfigurationManager">
   <configuration default="false" name="unit tests" type="GrailsRunConfigurationType" factoryName="Grails" singleton="false">
-    <setting name="vmparams" value="" />
+    <setting name="vmparams" value="-Djava.awt.headless=true" />
     <setting name="cmdLine" value="test-app -unit --stacktrace" />
     <setting name="passParentEnv" value="true" />
     <setting name="grailsApplicationRoot" value="$PROJECT_DIR$" />
