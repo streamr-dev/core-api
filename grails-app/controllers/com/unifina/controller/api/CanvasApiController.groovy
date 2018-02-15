@@ -1,10 +1,15 @@
 package com.unifina.controller.api
 
+import com.unifina.api.CanvasListParams
 import com.unifina.api.SaveCanvasCommand
 import com.unifina.domain.security.Permission.Operation
+import com.unifina.domain.security.SecUser
 import com.unifina.domain.signalpath.Canvas
 import com.unifina.security.AuthLevel
 import com.unifina.security.StreamrApi
+import com.unifina.service.ApiService
+import com.unifina.service.CanvasService
+import com.unifina.service.SignalPathService
 import grails.converters.JSON
 import grails.plugin.springsecurity.annotation.Secured
 import grails.transaction.NotTransactional
@@ -13,33 +18,20 @@ import org.apache.log4j.Logger
 @Secured(["IS_AUTHENTICATED_ANONYMOUSLY"])
 class CanvasApiController {
 
-	def canvasService
-	def springSecurityService
-	def grailsApplication
-	def signalPathService
-	def permissionService
-	def apiService
+	CanvasService canvasService
+	SignalPathService signalPathService
+	ApiService apiService
 
 	private static final Logger log = Logger.getLogger(CanvasApiController)
 
 	@StreamrApi
-	def index() {
-		def criteria = apiService.createListCriteria(params, ["name"], {
-			// Filter by exact name
-			if (params.name) {
-				eq "name", params.name
-			}
-			// Filter by adhoc
-			if (params.adhoc) {
-				eq "adhoc", params.boolean("adhoc")
-			}
-			// Filter by state
-			if (params.state) {
-				eq "state", Canvas.State.fromValue(params.state)
-			}
-		})
-		def canvases = permissionService.get(Canvas, request.apiUser, Operation.READ, apiService.isPublicFlagOn(params), criteria)
-		render(canvases*.toMap() as JSON)
+	def index(CanvasListParams listParams) {
+		if (params.public != null) {
+			listParams.publicAccess = params.boolean("public")
+		}
+		def results = apiService.list(Canvas, listParams, (SecUser) request.apiUser)
+		apiService.addLinkHintToHeader(listParams, results.size(), params, response)
+		render(results*.toMap() as JSON)
 	}
 
 	@StreamrApi(authenticationLevel = AuthLevel.NONE)

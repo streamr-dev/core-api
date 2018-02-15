@@ -1,6 +1,7 @@
 package com.unifina.controller.api
 
 import com.unifina.api.ApiException
+import com.unifina.api.IntegrationKeyListParams
 import com.unifina.domain.security.IntegrationKey
 import com.unifina.security.StreamrApi
 import com.unifina.service.ApiService
@@ -8,36 +9,19 @@ import com.unifina.service.EthereumIntegrationKeyService
 import grails.converters.JSON
 import grails.plugin.springsecurity.annotation.Secured
 import groovy.json.JsonSlurper
+import org.grails.datastore.mapping.query.api.BuildableCriteria
 
 @Secured(["IS_AUTHENTICATED_ANONYMOUSLY"])
 class IntegrationKeyApiController {
-
-	ApiService apiService
 	EthereumIntegrationKeyService ethereumIntegrationKeyService
 
 	@StreamrApi
-	def index() {
-		if (params.service) {
-			try {
-				params.service as IntegrationKey.Service
-			} catch (IllegalArgumentException e) {
-				throw new ApiException(400, "INVALID_SERVICE", "Invalid service: $request.JSON.service")
-			}
+	def index(IntegrationKeyListParams listParams) {
+		def criteria = listParams.createListCriteria() << {
+			eq("user", request.apiUser)
 		}
-		def criteria = apiService.createListCriteria(params, ["id"], {
-			eq "user", request.apiUser
-
-			// Filter by exact id
-			if (params.id) {
-				eq "id", params.id
-			}
-			// Filter by exact service
-			if (params.service) {
-				eq "service", params.service
-			}
-		})
-		def integrationKeys = IntegrationKey.findAll(criteria)
-		render integrationKeys*.toMap() as JSON
+		def integrationKeys = IntegrationKey.withCriteria(criteria)
+		render(integrationKeys*.toMap() as JSON)
 	}
 
 	@StreamrApi

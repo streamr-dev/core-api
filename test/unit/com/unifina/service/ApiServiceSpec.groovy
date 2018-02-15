@@ -1,146 +1,83 @@
 package com.unifina.service
 
-import grails.orm.HibernateCriteriaBuilder
+import com.unifina.api.DashboardListParams
+import com.unifina.api.ListParams
+import com.unifina.api.ValidationException
+import com.unifina.domain.dashboard.Dashboard
+import com.unifina.domain.security.Permission
+import com.unifina.domain.security.SecUser
+import grails.test.mixin.Mock
 import grails.test.mixin.TestFor
+import grails.test.mixin.TestMixin
+import grails.test.mixin.web.ControllerUnitTestMixin
+import grails.web.CamelCaseUrlConverter
+import org.codehaus.groovy.grails.web.mapping.DefaultLinkGenerator
+import org.codehaus.groovy.grails.web.mapping.LinkGenerator
 import spock.lang.Specification
 
+import javax.servlet.http.HttpServletResponse
+
+@TestMixin(ControllerUnitTestMixin) // "as JSON" converter
 @TestFor(ApiService)
 class ApiServiceSpec extends Specification {
-	
-	HibernateCriteriaBuilder builder
-	Map params
 
-	void setup() {
-		builder = Mock(HibernateCriteriaBuilder)
-		params = [:]
-	}
+	void "list() delegates to permissionService#get"() {
+		def permissionService = service.permissionService = Mock(PermissionService)
 
-	void "createListCriteria() with empty params"() {
+		SecUser me = new SecUser(username: "me@me.com")
+		ListParams listParams = new DashboardListParams(publicAccess: true)
+
 		when:
-		def c = service.createListCriteria(params, [], {})
-		c.delegate = builder
-		c()
+		def list = service.list(Dashboard, listParams, me)
 
 		then:
-		0 * builder._
+		list.size() == 3
+		1 * permissionService.get(Dashboard, me, Permission.Operation.READ, true, _) >> [
+			new Dashboard(), new Dashboard(), new Dashboard()
+		]
 	}
 
-	void "createListCriteria() with search"() {
+	void "list() invokes listParams#validate and listParams#createListCriteria and passes returned closure to permissionService#get"() {
+		def permissionService = service.permissionService = Mock(PermissionService)
+
+		SecUser me = new SecUser(username: "me@me.com")
+		ListParams listParams = Mock(ListParams)
+
 		when:
-		params.search = "foo"
-		def c = service.createListCriteria(params, ["name", "description"], {})
-		c.delegate = builder
-		c()
+		service.list(Dashboard, listParams, me)
 
 		then:
-		1 * builder.or(_) >> {Closure orParam ->
-			orParam.delegate = builder
-			orParam()
-			return null
-		}
-		and:
-		1 * builder.like("name", "%foo%")
-		1 * builder.like("description", "%foo%")
-		0 * builder._
+		1 * permissionService.get(_, _, _, _, { it() == "see me?" })
+		1 * listParams.validate() >> true
+		1 * listParams.createListCriteria() >> { { a -> "see me?" } }
 	}
 
-	void "createListCriteria() with sort"() {
+	void "list() throws ValidationException if validation of listParams fails"() {
+		SecUser me = new SecUser(username: "me@me.com")
+		ListParams listParams = new DashboardListParams(order: null)
+
 		when:
-		params.sort = "name"
-		def c = service.createListCriteria(params, [], {})
-		c.delegate = builder
-		c()
-
+		service.list(Dashboard, listParams, me)
 		then:
-		1 * builder.order("name", "asc")
-		0 * builder._
+		thrown(ValidationException)
 	}
 
-	void "createListCriteria() with sort desc"() {
+	void "addLinkHintToHeader() does nothing if offset != max"() {
+		def response = Mock(HttpServletResponse)
 		when:
-		params.sort = "name"
-		params.order = "desc"
-		def c = service.createListCriteria(params, [], {})
-		c.delegate = builder
-		c()
-
+		service.addLinkHintToHeader(new DashboardListParams(), 99, [:], response)
 		then:
-		1 * builder.order("name", "desc")
-		0 * builder._
+		0 * response._
 	}
 
-	void "createListCriteria() with max"() {
+	void "addLinkHintToHeader() adds link header"() {
+		def response = Mock(HttpServletResponse)
+		def params = new DashboardListParams(offset: 150, name: "dashboard", publicAccess: true)
+
 		when:
-		params.max = "5"
-		def c = service.createListCriteria(params, [], {})
-		c.delegate = builder
-		c()
-
+		service.addLinkHintToHeader(params, 100, [action: "index", controller: "dashboardApi"], response)
 		then:
-		1 * builder.invokeMethod('maxResults', [5]) // dynamic invoke for some groovy reason
-		0 * builder._
-	}
-
-	void "createListCriteria() with offset"() {
-		when:
-		params.offset = "10"
-		def c = service.createListCriteria(params, [], {})
-		c.delegate = builder
-		c()
-
-		then:
-		1 * builder.invokeMethod('firstResult', [10]) // dynamic invoke for some groovy reason
-		0 * builder._
-	}
-
-	void "createListCriteria() with additional custom criteria"() {
-		when:
-		params.max = "10"
-		def c = service.createListCriteria(params, [], {
-			eq("foo", "bar")
-		})
-		c.delegate = builder
-		c()
-
-		then:
-		1 * builder.eq("foo", "bar")
-		1 * builder.invokeMethod('maxResults', [10]) // dynamic invoke for some groovy reason
-		0 * builder._
-	}
-
-	void "createListCriteria() with various options"() {
-		when:
-		params.search = "foo"
-		params.sort = "name"
-		params.order = "desc"
-		params.max = "5"
-		params.offset = "10"
-		def c = service.createListCriteria(params, ["name", "desc"], {})
-		c.delegate = builder
-		c()
-
-		then:
-		1 * builder.or(_) >> {Closure orParam ->
-			orParam.delegate = builder
-			orParam()
-			return null
-		}
-		1 * builder.order("name", "desc")
-		1 * builder.invokeMethod('maxResults', [5]) // dynamic invoke for some groovy reason
-		1 * builder.invokeMethod('firstResult', [10]) // dynamic invoke for some groovy reason
-
-		and:
-		1 * builder.like("name", "%foo%")
-		1 * builder.like("desc", "%foo%")
-		0 * builder._
-	}
-
-	void "isPublicFlagOn()"() {
-		expect:
-		!service.isPublicFlagOn([:])
-		service.isPublicFlagOn([public: "true"])
-		service.isPublicFlagOn([public: "TRUE"])
-		!service.isPublicFlagOn([public: "false"])
+		1 * response.addHeader("Link", '<http://localhost:8080/api/v1/dashboards?max=100&offset=250&publicAccess=true&name=dashboard>; rel="more"')
 	}
 
 }
