@@ -1,33 +1,29 @@
 package com.unifina.controller.api
 
+import com.unifina.api.DashboardListParams
+import com.unifina.api.ListParams
 import com.unifina.api.SaveDashboardCommand
 import com.unifina.api.ValidationException
 import com.unifina.domain.dashboard.Dashboard
 import com.unifina.domain.dashboard.DashboardItem
 import com.unifina.domain.security.Key
-import com.unifina.domain.security.Permission
 import com.unifina.domain.security.SecUser
 import com.unifina.domain.signalpath.Canvas
 import com.unifina.filters.UnifinaCoreAPIFilters
 import com.unifina.service.ApiService
 import com.unifina.service.DashboardService
-import com.unifina.service.PermissionService
 import com.unifina.service.UserService
 import com.unifina.utils.Webcomponent
-import grails.converters.JSON
-import grails.orm.HibernateCriteriaBuilder
 import grails.plugin.springsecurity.SpringSecurityService
 import grails.test.mixin.Mock
 import grails.test.mixin.TestFor
-import grails.test.mixin.web.FiltersUnitTestMixin
-import groovy.json.JsonSlurper
-import org.json.JSONObject
 import spock.lang.Specification
 
 @TestFor(DashboardApiController)
 @Mock([Canvas, Dashboard, DashboardItem, Key, SecUser, UnifinaCoreAPIFilters])
 class DashboardApiControllerSpec extends Specification {
 
+	ApiService apiService
 	DashboardService dashboardService
 	SecUser me
 	List<Dashboard> dashboards
@@ -35,15 +31,13 @@ class DashboardApiControllerSpec extends Specification {
 	// This gets the real services injected into the filters
 	// From https://github.com/grails/grails-core/issues/9191
 	static doWithSpring = {
-		apiService(ApiService)
 		springSecurityService(SpringSecurityService)
 		userService(UserService)
 	}
 
 	def setup() {
 		dashboardService = controller.dashboardService = Mock(DashboardService)
-		controller.permissionService = Mock(PermissionService)
-		controller.apiService = mainContext.getBean(ApiService)
+		controller.apiService = apiService = Mock(ApiService)
 
 		me = new SecUser().save(failOnError: true, validate: false)
 		dashboards = initDashboards()
@@ -92,13 +86,14 @@ class DashboardApiControllerSpec extends Specification {
 
 		then:
 		response.status == 200
-		response.json.size() == dashboards.size()
-		1 * controller.permissionService.get(Dashboard, me, Permission.Operation.READ, false, _) >> dashboards
+		response.json.size() == 3
+		1 * controller.apiService.list(Dashboard, _, me) >> { clazz, ListParams listParams, user ->
+			assert listParams.toMap() == new DashboardListParams().toMap()
+			dashboards
+		}
 	}
 
 	void "index() adds name param to filter criteria"() {
-		def criteriaBuilderMock = Mock(HibernateCriteriaBuilder)
-
 		when:
 		params.name = "Foo"
 		request.addHeader("Authorization", "Token myApiKey")
@@ -108,13 +103,12 @@ class DashboardApiControllerSpec extends Specification {
 		}
 
 		then:
-		1 * controller.permissionService.get(Dashboard, me, Permission.Operation.READ, false, _) >> { Class resource, SecUser u, Permission.Operation op, boolean pub, Closure criteria ->
-			criteria.delegate = criteriaBuilderMock
-			criteria()
-			return []
+		response.status == 200
+		response.json.size() == 0
+		1 * controller.apiService.list(Dashboard, _, me) >> { clazz, ListParams listParams, user ->
+			assert listParams.toMap() == new DashboardListParams(name: "Foo").toMap()
+			[]
 		}
-		and:
-		1 * criteriaBuilderMock.eq("name", "Foo")
 	}
 
 	def "show() shows dashboard with 0 items"() {

@@ -3,14 +3,21 @@ package com.unifina.service
 import com.mashape.unirest.http.HttpResponse
 import com.mashape.unirest.http.Unirest
 import com.unifina.api.ApiException
+import com.unifina.api.ListParams
+import com.unifina.api.ValidationException
 import com.unifina.domain.security.Key
+import com.unifina.domain.security.Permission
 import com.unifina.domain.security.SecUser
 import com.unifina.exceptions.UnexpectedApiResponseException
+import grails.compiler.GrailsCompileStatic
 import grails.converters.JSON
 import groovy.transform.CompileStatic
 import org.apache.log4j.Logger
 import org.codehaus.groovy.grails.web.converters.exceptions.ConverterException
 import org.codehaus.groovy.grails.web.json.JSONObject
+import org.codehaus.groovy.grails.web.mapping.LinkGenerator
+
+import javax.servlet.http.HttpServletResponse
 
 class ApiService {
 
@@ -18,46 +25,43 @@ class ApiService {
 
 	private static final Logger log = Logger.getLogger(ApiService)
 
-	/**
-	 * Transforms a set of query params to search criteria. Supports search, sort, and paging. Below
-	 * is a list of the parameter names and what they do.
-	 *
-	 * - search (string): only include results where at least one of the 'searchFields' contains this search string (case-insensitive)
-	 * - sort (string): string, name of a field to sort by
-	 * - order (string): sort direction, either "asc" or "desc"
-	 * - max (int): limits the number of results
-	 * - offset (int): start the result set from this index, ignoring the first results
-	 *
-	 * @param params HTTP query params object
-	 * @param searchFields Which String fields to search if the 'search' param is given
-	 * @param additionalCriteria Any additional criteria that will be added (AND-condition) to the criteria
-	 * @return
-	 */
-	Closure createListCriteria(params, List<String> searchFields, Closure additionalCriteria = {}) {
-		def result = {
-			if (params.search) {
-				or {
-					searchFields.each {
-						like it, "%${params.search}%"
-					}
-				}
-			}
-			if (params.sort) {
-				order params.sort, params.order ?: "asc"
-			}
-			if (params.max) {
-				maxResults Integer.parseInt(params.max)
-			}
-			if (params.offset) {
-				firstResult Integer.parseInt(params.offset)
-			}
-		}
+	PermissionService permissionService
+	LinkGenerator grailsLinkGenerator
 
-		return result << additionalCriteria
+	/**
+	 * List/(search for) all domain objects readable by user that satisfy given conditions. Also validates conditions.
+	 *
+	 * @param domainClass Class of domain object
+	 * @param listParams conditions for listing
+	 * @param apiUser user for which listing is conducted (READ permission is checked)
+	 * @return list of results with pagination information
+	 * @throws ValidationException if listParams does not pass validation
+	 */
+	@GrailsCompileStatic
+	<T> List<T> list(Class<T> domainClass, ListParams listParams, SecUser apiUser) throws ValidationException {
+		if (!listParams.validate()) {
+			throw new ValidationException(listParams.errors)
+		}
+		Closure searchCriteria = listParams.createListCriteria()
+		permissionService.get(domainClass, apiUser, Permission.Operation.READ, listParams.publicAccess, searchCriteria)
 	}
 
-	boolean isPublicFlagOn(params) {
-		return params.public != null && Boolean.parseBoolean(params.public)
+	/**
+	 * Generate link to more results in API index() methods
+	 */
+	@GrailsCompileStatic
+	void addLinkHintToHeader(ListParams listParams, int numOfResults, Map params, HttpServletResponse response) {
+		if (numOfResults == listParams.max) {
+			Map paramMap = listParams.toMap() + [offset: listParams.offset + listParams.max]
+
+			String url = grailsLinkGenerator.link(
+				controller: params.controller,
+				action: params.action,
+				absolute: true,
+				params: paramMap.findAll { k, v -> v } // remove null valued entries
+			)
+			response.addHeader("Link", "<${url}>; rel=\"more\"")
+		}
 	}
 
 	@CompileStatic

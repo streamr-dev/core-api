@@ -2,7 +2,6 @@ package com.unifina.controller.api
 
 import com.unifina.api.NotFoundException
 import com.unifina.api.NotPermittedException
-import com.unifina.api.ValidationException
 import com.unifina.domain.data.Feed
 import com.unifina.domain.data.Stream
 import com.unifina.domain.security.Key
@@ -10,16 +9,10 @@ import com.unifina.domain.security.Permission
 import com.unifina.domain.security.SecUser
 import com.unifina.feed.NoOpStreamListener
 import com.unifina.filters.UnifinaCoreAPIFilters
-import com.unifina.service.ApiService
-import com.unifina.service.DashboardService
-import com.unifina.service.PermissionService
-import com.unifina.service.StreamService
-import com.unifina.service.UserService
-import grails.orm.HibernateCriteriaBuilder
+import com.unifina.service.*
 import grails.plugin.springsecurity.SpringSecurityService
 import grails.test.mixin.Mock
 import grails.test.mixin.TestFor
-import grails.test.mixin.web.FiltersUnitTestMixin
 import spock.lang.Specification
 
 @TestFor(StreamApiController)
@@ -42,6 +35,7 @@ class StreamApiControllerSpec extends Specification {
 
 		controller.permissionService = permissionService
 		controller.apiService = mainContext.getBean(ApiService)
+		controller.apiService.permissionService = permissionService
 
 		user = new SecUser(username: "me", password: "foo")
 		user.save(validate: false)
