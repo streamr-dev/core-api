@@ -1,7 +1,10 @@
 package com.unifina.domain.marketplace
 
 import com.unifina.domain.data.Stream
+import com.unifina.domain.security.Permission
 import com.unifina.utils.IdGenerator
+import grails.compiler.GrailsCompileStatic
+import groovy.transform.CompileStatic
 
 class Product {
 	String id
@@ -25,7 +28,10 @@ class Product {
 	Currency priceCurrency = Currency.DATA
 	Long minimumSubscriptionInSeconds = 0
 
-	static hasMany = [streams: Stream]
+	static hasMany = [
+		permissions: Permission,
+		streams: Stream
+	]
 
 	enum State {
 		NEW("new"),
@@ -67,5 +73,27 @@ class Product {
 
 		ownerAddress index: "owner_address_idx"
 		beneficiaryAddress index: "beneficiary_address_idx"
+	}
+
+	@GrailsCompileStatic
+	Map toMap() {
+		[
+		    id: id,
+			name: name,
+			description: description,
+			imageUrl: imageUrl,
+			category: category.id,
+			state: state.toString(),
+			tx: tx,
+			previewStream: previewStream,
+			previewConfigJson: previewConfigJson,
+			dateCreated: dateCreated,
+			lastUpdated: lastUpdated,
+			ownerAddress: ownerAddress,
+			beneficiaryAddress: beneficiaryAddress,
+			pricePerSecond: pricePerSecond,
+			priceCurrency: priceCurrency.toString(),
+			minimumSubscriptionInSeconds: minimumSubscriptionInSeconds
+		]
 	}
 }
