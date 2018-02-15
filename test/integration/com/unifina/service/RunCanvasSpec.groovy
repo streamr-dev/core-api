@@ -21,10 +21,14 @@ class RunCanvasSpec extends IntegrationSpec {
 	SecUser user
 	Stream stream
 
+	def setupSpec() {
+		Canvas.metaClass.'static'.executeUpdate = { String query, List list -> println "Invoking Fake ExecuteUpdate" }
+	}
+
 	def setup() {
 		user = SecUser.load(1L)
 		stream = Stream.get("run-canvas-spec")
-		canvasService.signalPathService.servletContext = [:]
+		canvasService.signalPathService.servletContext = [signalPathRunners: [:]]
 	}
 
 	def cleanup() {

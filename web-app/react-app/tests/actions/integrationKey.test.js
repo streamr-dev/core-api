@@ -63,7 +63,7 @@ describe('IntegrationKey actions', () => {
             moxios.stubRequest('api/v1/integration_keys', {
                 status: 500,
                 response: {
-                    error: 'test',
+                    message: 'test',
                     code: 'TEST'
                 }
             })
@@ -123,7 +123,7 @@ describe('IntegrationKey actions', () => {
                 request.respondWith({
                     status: 500,
                     response: {
-                        error: 'test',
+                        message: 'test',
                         code: 'TEST'
                     }
                 })
@@ -181,7 +181,7 @@ describe('IntegrationKey actions', () => {
                 request.respondWith({
                     status: 500,
                     response: {
-                        error: 'test',
+                        message: 'test',
                         code: 'TEST'
                     }
                 })

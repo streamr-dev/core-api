@@ -2,22 +2,15 @@ package com.unifina.service
 
 import com.google.gson.Gson
 import com.unifina.api.CanvasCommunicationException
-import com.unifina.datasource.DataSource
-import com.unifina.datasource.HistoricalDataSource
 import com.unifina.datasource.IStartListener
 import com.unifina.datasource.IStopListener
-import com.unifina.datasource.RealtimeDataSource
 import com.unifina.domain.security.Permission
 import com.unifina.domain.security.SecUser
 import com.unifina.domain.signalpath.Canvas
 import com.unifina.domain.signalpath.Serialization
 import com.unifina.exceptions.CanvasUnreachableException
 import com.unifina.serialization.SerializationException
-import com.unifina.signalpath.AbstractSignalPathModule
-import com.unifina.signalpath.RuntimeRequest
-import com.unifina.signalpath.RuntimeResponse
-import com.unifina.signalpath.SignalPath
-import com.unifina.signalpath.SignalPathRunner
+import com.unifina.signalpath.*
 import com.unifina.utils.Globals
 import com.unifina.utils.GlobalsFactory
 import com.unifina.utils.NetworkInterfaceUtils
@@ -27,13 +20,10 @@ import grails.util.Holders
 import groovy.transform.CompileStatic
 import org.apache.log4j.Logger
 
-import java.nio.charset.StandardCharsets
 import java.security.AccessControlException
 import java.util.concurrent.Future
 import java.util.concurrent.TimeUnit
 import java.util.concurrent.TimeoutException
-import java.util.zip.GZIPInputStream
-import java.util.zip.GZIPOutputStream
 
 class SignalPathService {
 
@@ -58,7 +48,7 @@ class SignalPathService {
 	 * If connectionsReady==true, instance.connectionsReady() is called.
      */
 	@CompileStatic
-	public SignalPath mapToSignalPath(Map config, boolean connectionsReady, Globals globals, SignalPath instance = new SignalPath(true)) {
+	SignalPath mapToSignalPath(Map config, boolean connectionsReady, Globals globals, SignalPath instance = new SignalPath(true)) {
 		instance.globals = globals
 		instance.init()
 		instance.configure(config)
@@ -70,7 +60,7 @@ class SignalPathService {
 	}
 
 	@CompileStatic
-	public Map signalPathToMap(SignalPath sp) {
+	private static Map signalPathToMap(SignalPath sp) {
 		return  [
 			name: sp.name,
 			modules: sp.modules.collect { AbstractSignalPathModule it -> it.getConfiguration() },
@@ -85,98 +75,21 @@ class SignalPathService {
 	 * Potentially modifies the config given as parameter.
 	 */
 	@CompileStatic
-	public Map reconstruct(Map config, Globals globals) {
+	Map reconstruct(Map config, Globals globals) {
 		SignalPath sp = mapToSignalPath(config, true, globals, new SignalPath(true))
 		return signalPathToMap(sp)
 	}
-	
-	public byte[] compress(String s) {
-		byte[] stringBytes = s.getBytes(StandardCharsets.UTF_8)
-		return compressBytes(stringBytes)
-	}
-	
-	private byte[] compressBytes(byte[] uncompressed) {
-		ByteArrayOutputStream targetStream = new ByteArrayOutputStream()
-		GZIPOutputStream zipStream = new GZIPOutputStream(targetStream)
-		zipStream.write(uncompressed)
-		zipStream.close()
-		byte[] zipped = targetStream.toByteArray()
-		targetStream.close()
-		return zipped
-	}
-	
-	private byte[] uncompressBytes(byte[] gzipped) {
-		byte[] ungzipped = new byte[0];
-		final GZIPInputStream inputStream = new GZIPInputStream(new ByteArrayInputStream(gzipped));
-		ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream(gzipped.length);
-		final byte[] buffer = new byte[10240];
-		int bytesRead = 0;
-		while (bytesRead != -1) {
-			bytesRead = inputStream.read(buffer, 0, 10240);
-			if (bytesRead != -1) {
-				byteArrayOutputStream.write(buffer, 0, bytesRead);
-			}
-		}
-		ungzipped = byteArrayOutputStream.toByteArray();
-		inputStream.close();
-		byteArrayOutputStream.close();
-		return ungzipped;
-	}
-	
-	public String uncompress(byte[] zipped) {
-		byte[] unzipped = uncompressBytes(zipped)
-		return new String(unzipped,StandardCharsets.UTF_8)
-	}
-
-	@CompileStatic
-	public DataSource createDataSource(boolean adhoc, Globals globals) {
-		if (adhoc) {
-			return new HistoricalDataSource(globals)
-		} else {
-			return new RealtimeDataSource(globals)
-		}
-	}
 
 	@Transactional
-	public void deleteReferences(SignalPath signalPath, boolean delayed = false) {
+	void deleteReferences(SignalPath signalPath, boolean delayed) {
 		canvasService.deleteCanvas(signalPath.canvas, SecUser.load(signalPath.globals.userId), delayed)
-	}
-	
-    def runSignalPaths(List<SignalPath> signalPaths) {
-		// Check that all the SignalPaths share the same Globals object
-		Globals globals = null
-		for (SignalPath sp : signalPaths) {
-			if (globals==null)
-				globals = sp.globals
-			else if (globals!= sp.globals)
-				throw new RuntimeException("All SignalPaths don't share the same Globals!")
-		}
-		
-		// Check that a DataSource is created
-		if (globals.dataSource==null)
-			throw new RuntimeException("No DataSource created! First call createDataSource()!")
-			
-		// Start feed, blocks until feed is complete
-		globals.dataSource.startFeed()
-		
-		// Stop the feed, cleanup
-		globals.dataSource.stopFeed()
-    }
-	
-	@Deprecated
-	def stopSignalPath(SignalPath signalPath) {
-		// Stop feed
-		signalPath.globals.dataSource.stopFeed()
 	}
 
 	/**
 	 * @throws SerializationException if de-serialization fails when resuming from existing state
      */
 	void startLocal(Canvas canvas, Map signalPathContext, SecUser asUser) throws SerializationException {
-		// Create Globals
 		Globals globals = GlobalsFactory.createInstance(signalPathContext, asUser)
-
-		SignalPathRunner runner
 		SignalPath sp
 
 		// Instantiate the SignalPath
@@ -185,32 +98,27 @@ class SignalPathService {
 			sp = mapToSignalPath(new Gson().fromJson(canvas.json, Map.class), false, globals, new SignalPath(true))
 		} else {
 			log.info("De-serializing existing signalPath (canvasId=$canvas.id)")
-			sp = serializationService.deserialize(canvas.serialization.bytes)
+			sp = (SignalPath) serializationService.deserialize(canvas.serialization.bytes)
 		}
 
+		sp.canvas = canvas
+
 		// Create the runner thread
-		runner = new SignalPathRunner(sp, globals, canvas.adhoc)
+		SignalPathRunner runner = new SignalPathRunner(sp, globals, canvas.adhoc)
 
 		runner.addStartListener(new IStartListener() {
 			@Override
 			void onStart() {
-				if (!servletContext["signalPathRunners"]) {
-					servletContext["signalPathRunners"] = [:]
-				}
-				servletContext["signalPathRunners"].put(runner.runnerId, runner)
+				addRunner(runner)
 			}
 		})
 
 		runner.addStopListener(new IStopListener() {
 			@Override
 			void onStop() {
-				servletContext["signalPathRunners"].remove(runner.runnerId)
+				removeRunner(runner)
 			}
 		})
-
-		runner.signalPaths.each {
-			it.canvas = canvas
-		}
 
 		String runnerId = runner.runnerId
 		canvas.runner = runnerId
@@ -223,7 +131,7 @@ class SignalPathService {
 		canvas.requestUrl = protocol + "://" + canvas.server + ":" + port + grailsLinkGenerator.link(uri: "/api/v1/canvases/$canvas.id", absolute: false)
 		canvas.state = Canvas.State.RUNNING
 
-		canvas.save()
+		canvas.save(flush: true)
 
 		// Start the runner thread
 		runner.start()
@@ -231,9 +139,13 @@ class SignalPathService {
 		// Wait for runner to be in running state
 		runner.waitRunning(true)
 		if (!runner.getRunning()) {
-			runner.abort()
-			def msg = "Timed out while waiting for canvas $canvas.id to start."
-			throw new CanvasCommunicationException(msg)
+			if (runner.thrownOnStartUp) { // failed because of error
+				throw runner.thrownOnStartUp
+			} else {					  // failed because of timeout
+				runner.abort()
+				def msg = "Timed out while waiting for canvas $canvas.id to start."
+				throw new CanvasCommunicationException(msg)
+			}
 		}
 	}
 
@@ -243,10 +155,8 @@ class SignalPathService {
 	 */
 	@CompileStatic
 	Map<String, SecUser> getUsersOfRunningCanvases() {
-		Map<String, SignalPathRunner> signalPathRunnerMap =
-			(servletContext["signalPathRunners"] ?: [:]) as Map<String, SignalPathRunner>
 		Map<String, SecUser> canvasIdToUser = [:]
-		signalPathRunnerMap.values().each { SignalPathRunner runner ->
+		runners().values().each { SignalPathRunner runner ->
 			SecUser user = SecUser.loadViaJava(runner.globals.userId)
 			runner.signalPaths.each { SignalPath sp ->
 				canvasIdToUser[sp.canvas.id] = user
@@ -255,22 +165,23 @@ class SignalPathService {
 		return canvasIdToUser
 	}
 
+	@CompileStatic
 	List<Canvas> stopAllLocalCanvases() {
 		// Copy list to prevent ConcurrentModificationException
-		Map runners = [:]
-		runners.putAll(servletContext["signalPathRunners"])
+		Map<String, SignalPathRunner> copyOfRunners = [:]
+		copyOfRunners.putAll(runners())
 		List canvases = []
-		runners.each { String key, SignalPathRunner runner ->
+		copyOfRunners.each { String key, SignalPathRunner runner ->
 			if (stopLocalRunner(key)) {
-				canvases.addAll(runner.getSignalPaths().collect {it.getCanvas()})
+				canvases.addAll(runner.getSignalPaths()*.getCanvas())
 			}
 		}
 		return canvases
 	}
 
 	boolean stopLocalRunner(String runnerId) {
-		SignalPathRunner runner = servletContext["signalPathRunners"]?.get(runnerId)
-		if (runner!=null) {
+		SignalPathRunner runner = getRunner(runnerId)
+		if (runner != null) {
 			runner.abort()
 
 			// Wait for runner to be in stopped state
@@ -281,8 +192,7 @@ class SignalPathService {
 			} else {
 				return true
 			}
-		}
-		else {
+		} else {
 			log.error("stopLocal: could not find runner $runnerId!")
 			updateState(runnerId, Canvas.State.STOPPED)
 			return false
@@ -312,10 +222,6 @@ class SignalPathService {
 		return apiService.post(url, req, req.getUser().keys.iterator().next())
 	}
 
-	private SignalPathRunner getLocalRunner(Canvas canvas) {
-		return servletContext["signalPathRunners"]?.get(canvas.runner)
-	}
-
 	@CompileStatic
 	RuntimeRequest buildRuntimeRequest(Map msg, String path, String originalPath = path, SecUser user) {
 		RuntimeRequest.PathReader pathReader = RuntimeRequest.getPathReader(path)
@@ -325,13 +231,12 @@ class SignalPathService {
 		Set<Permission.Operation> checkedOperations = new HashSet<>()
 		checkedOperations.add(Permission.Operation.READ)
 
-		RuntimeRequest request = new RuntimeRequest(msg, user, canvas, path, originalPath, checkedOperations)
-		return request
+		return new RuntimeRequest(msg, user, canvas, path, originalPath, checkedOperations)
 	}
 
 	@CompileStatic
 	Map runtimeRequest(RuntimeRequest req, boolean localOnly = false) {
-		SignalPathRunner spr = getLocalRunner(req.getCanvas())
+		SignalPathRunner spr = getRunner(req.getCanvas().runner)
 		
 		log.info("runtimeRequest: $req, path: ${req.getPath()}, localOnly: $localOnly")
 		
@@ -405,28 +310,6 @@ class SignalPathService {
 	void updateState(String runnerId, Canvas.State state) {
 		Canvas.executeUpdate("update Canvas c set c.state = ? where c.runner = ?", [state, runnerId])
 	}
-	
-	@Deprecated
-	void setLiveRunner(SecUser user, SignalPathRunner runner) {
-		setLiveRunner("live-$user.id",runner)
-	}
-	
-	@Deprecated
-	void setLiveRunner(String sessionId, SignalPathRunner runner) {
-		if (runner==null)
-			servletContext.removeAttribute(sessionId)
-		else servletContext[sessionId] = runner
-	}
-	
-	@Deprecated
-	SignalPathRunner getLiveRunner(SecUser user) {
-		return getLiveRunner("live-$user.id")
-	}
-	
-	@Deprecated
-	SignalPathRunner getLiveRunner(String sessionId) {
-		return servletContext[sessionId]
-	}
 
 	@Transactional
 	def saveState(SignalPath sp) {
@@ -474,5 +357,25 @@ class SignalPathService {
 		canvas.serialization = null
 		canvas.save(failOnError: true)
 		log.info("Canvas $canvas.id serialized state cleared.")
+	}
+
+	@CompileStatic
+	private Map<String, SignalPathRunner> runners() {
+		(servletContext["signalPathRunners"]) as Map<String, SignalPathRunner>
+	}
+
+	@CompileStatic
+	private SignalPathRunner getRunner(String runnerId) {
+		runners().get(runnerId)
+	}
+
+	@CompileStatic
+	private void addRunner(SignalPathRunner runner) {
+		runners().put(runner.runnerId, runner)
+	}
+
+	@CompileStatic
+	private void removeRunner(SignalPathRunner runner) {
+		runners().remove(runner.runnerId)
 	}
 }

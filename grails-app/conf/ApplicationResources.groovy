@@ -155,10 +155,6 @@ modules = {
 	clipboardjs {
 		resource url:[dir:'js/clipboardjs', file:'clipboard.js', plugin:'unifina-core']
 	}
-	react {
-		resource url:[dir:'js/react', file:'react.min.js']
-		resource url:[dir:'js/react', file:'react-dom.min.js']
-	}
 
 	/**
 	 * In-house widgets and resources
@@ -180,6 +176,7 @@ modules = {
 	}
 	'streamr-search' {
 		dependsOn 'typeahead'
+		dependsOn 'lodash'
 		resource url:[dir:'js/unifina/streamr-search', file:'streamr-search.js', plugin: 'unifina-core']
 	}
 	'streamr-floating-search' {

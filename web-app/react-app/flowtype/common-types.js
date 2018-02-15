@@ -3,7 +3,7 @@
 import type {Webcomponent} from './webcomponent-types'
 
 export type ErrorFromApi = {
-    error: string,
+    message: string,
     code?: string
 }
 

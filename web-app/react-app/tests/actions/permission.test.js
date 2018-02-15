@@ -102,7 +102,7 @@ describe('Permission actions', () => {
             moxios.stubRequest(`api/v1/dashboards/${resourceId}/permissions`, {
                 status: 500,
                 response: {
-                    error: 'test',
+                    message: 'test',
                     code: 'TEST'
                 }
             })
@@ -300,14 +300,14 @@ describe('Permission actions', () => {
                     requests.at(0).respondWith({
                         status: 500,
                         response: {
-                            error: 'test',
+                            message: 'test',
                             code: 'TEST'
                         }
                     })
                     requests.at(1).respondWith({
                         status: 500,
                         response: {
-                            error: 'test2',
+                            message: 'test2',
                             code: 'TEST2'
                         }
                     })
@@ -493,14 +493,14 @@ describe('Permission actions', () => {
                     requests.at(0).respondWith({
                         status: 500,
                         response: {
-                            error: 'test',
+                            message: 'test',
                             code: 'TEST'
                         }
                     })
                     requests.at(1).respondWith({
                         status: 500,
                         response: {
-                            error: 'test2',
+                            message: 'test2',
                             code: 'TEST2'
                         }
                     })

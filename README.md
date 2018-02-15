@@ -35,11 +35,11 @@ Additional services are required to run this web application. The easiest way to
 4. Fetch all git submodules 
 ```
 git submodule update --init --recursive
-````
+```
 5. Install front-end dependencies
 ```
 npm install
-````
+```
 
 6. Run `streamr-docker-dev start 1` if you are using the recommended tool streamr-docker-dev. Otherwise make sure all services dependencies are running and the the web applications is properly configured to connect to them.
 
@@ -79,6 +79,13 @@ You can also run the development server with `npm run dev` which updates bundle 
 The back-end consists of two logical parts. The Engine is written mostly in Java and is responsible for executing arbitrary user-defined Canvases that process, analyze and act upon real-time event data. The Editor, on the other hand, is responsible for API(s), rendered web pages and other front-facing functionality. It is mostly written in Groovy and utilizes facilities provided by the Grails framework.
 
 When you run the Engine+Editor web app with `grails run-app` or `grails test run-app`, most changes to source code files are automatically hot reloaded into the running JVM process.
+
+
+#### Useful resources
+- [Grails 2.5.6 Framework Reference Documentation (single page)](https://grails.github.io/grails2-doc/2.5.6/guide/single.html)
+- [Spock Framework Reference Documentation (single page)](http://spockframework.org/spock/docs/1.1/all_in_one.html)
+- [Grails Database Migration Plugin Documentation (single page)](http://grails-plugins.github.io/grails-database-migration/1.4.0/guide/single.html)
+- [Spock Concurrency Tools](http://spockframework.org/spock/javadoc/1.1/spock/util/concurrent/package-summary.html)
 
 ## License
 

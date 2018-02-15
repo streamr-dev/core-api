@@ -40,6 +40,7 @@ const style = {
     },
     Title: {
         DefaultStyle: {
+            color: defaultColorOverrides.error,
             fontSize: '18px'
         }
     },

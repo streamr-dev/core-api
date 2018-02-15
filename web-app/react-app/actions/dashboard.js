@@ -57,7 +57,8 @@ export const getAndReplaceDashboards = () => (dispatch: Function) => {
             const e = parseError(res)
             dispatch(getAndReplaceDashboardsFailure(e))
             dispatch(error({
-                title: e.message
+                title: 'Error!',
+                message: e.message
             }))
             throw e
         })
@@ -74,7 +75,8 @@ export const getDashboard = (id: $ElementType<Dashboard, 'id'>) => (dispatch: Fu
             const e = parseError(res)
             dispatch(getDashboardFailure(e))
             dispatch(error({
-                title: e.message
+                title: 'Error!',
+                message: e.message
             }))
             throw e
         })
@@ -100,7 +102,8 @@ export const updateAndSaveDashboard = (dashboard: Dashboard) => (dispatch: Funct
     })
         .then(({data}) => {
             dispatch(success({
-                title: 'Dashboard saved successfully!'
+                title: 'Success!',
+                message: 'Dashboard saved successfully!'
             }))
             dashboard.id !== data.id && dispatch(changeDashboardId(dashboard.id, data.id))
             dispatch(updateAndSaveDashboardSuccess({
@@ -112,7 +115,8 @@ export const updateAndSaveDashboard = (dashboard: Dashboard) => (dispatch: Funct
             const e = parseError(res)
 
             dispatch(error({
-                title: e.message
+                title: 'Error!',
+                message: e.message
             }))
             dispatch(updateAndSaveDashboardFailure(e))
 
@@ -128,7 +132,8 @@ export const deleteDashboard = (id: $ElementType<Dashboard, 'id'>) => (dispatch:
             const e = parseError(res)
             dispatch(deleteDashboardFailure(e))
             dispatch(error({
-                title: e.message
+                title: 'Error!',
+                message: e.message
             }))
             throw e
         })

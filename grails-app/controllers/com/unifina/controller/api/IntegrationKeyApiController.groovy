@@ -45,7 +45,7 @@ class IntegrationKeyApiController {
 		if (cmd.service as IntegrationKey.Service == IntegrationKey.Service.ETHEREUM) {
 			IntegrationKey key
 			try {
-				key = ethereumIntegrationKeyService.createEthereumAccount(request.apiUser, cmd.name, (String) request.JSON.json.get("privateKey"))
+				key = ethereumIntegrationKeyService.createEthereumAccount(request.apiUser, cmd.name, cmd.json.privateKey)
 			} catch (IllegalArgumentException e) {
 				throw new ApiException(400, "INVALID_HEX_STRING", e.message)
 			}

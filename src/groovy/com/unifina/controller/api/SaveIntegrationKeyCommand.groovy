@@ -9,6 +9,7 @@ class SaveIntegrationKeyCommand {
 	ChallengeCommand challenge
 	String signature
 	String address
+	Map json
 	static constraints = {
 		name(blank: false)
 		service(blank: false)

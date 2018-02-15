@@ -406,6 +406,19 @@ grails {
 				 "mail.smtp.starttls.enable":"true",
 				 "mail.smtp.socketFactory.class":"javax.net.ssl.SSLSocketFactory",
 				 "mail.smtp.socketFactory.fallback":"false"]
+
+		environments {
+			development {
+				host = "127.0.0.1"
+				port = 25
+				props = []
+			}
+			test {
+				host = "127.0.0.1"
+				port = 25
+				props = []
+			}
+		}
 	}
 }
 
