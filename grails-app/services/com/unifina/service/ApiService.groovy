@@ -4,6 +4,7 @@ import com.mashape.unirest.http.HttpResponse
 import com.mashape.unirest.http.Unirest
 import com.unifina.api.ApiException
 import com.unifina.api.ListParams
+import com.unifina.api.ValidationException
 import com.unifina.domain.security.Key
 import com.unifina.domain.security.Permission
 import com.unifina.domain.security.SecUser
@@ -28,16 +29,19 @@ class ApiService {
 	LinkGenerator grailsLinkGenerator
 
 	/**
-	 * List/(search for) all domain objects readable by user that satisfy given conditions
+	 * List/(search for) all domain objects readable by user that satisfy given conditions. Also validates conditions.
 	 *
 	 * @param domainClass Class of domain object
 	 * @param listParams conditions for listing
 	 * @param apiUser user for which listing is conducted (READ permission is checked)
-	 *
 	 * @return list of results with pagination information
+	 * @throws ValidationException if listParams does not pass validation
 	 */
 	@GrailsCompileStatic
-	<T> List<T> list(Class<T> domainClass, ListParams listParams, SecUser apiUser) {
+	<T> List<T> list(Class<T> domainClass, ListParams listParams, SecUser apiUser) throws ValidationException {
+		if (!listParams.validate()) {
+			throw new ValidationException(listParams.errors)
+		}
 		Closure searchCriteria = listParams.createListCriteria()
 		permissionService.get(domainClass, apiUser, Permission.Operation.READ, listParams.publicAccess, searchCriteria)
 	}

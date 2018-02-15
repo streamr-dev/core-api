@@ -2,6 +2,7 @@ package com.unifina.service
 
 import com.unifina.api.DashboardListParams
 import com.unifina.api.ListParams
+import com.unifina.api.ValidationException
 import com.unifina.domain.dashboard.Dashboard
 import com.unifina.domain.security.Permission
 import com.unifina.domain.security.SecUser
@@ -36,7 +37,7 @@ class ApiServiceSpec extends Specification {
 		]
 	}
 
-	void "list() invokes listParams#createListCriteria and passes returned closure to permissionService#get"() {
+	void "list() invokes listParams#validate and listParams#createListCriteria and passes returned closure to permissionService#get"() {
 		def permissionService = service.permissionService = Mock(PermissionService)
 
 		SecUser me = new SecUser(username: "me@me.com")
@@ -47,7 +48,18 @@ class ApiServiceSpec extends Specification {
 
 		then:
 		1 * permissionService.get(_, _, _, _, { it() == "see me?" })
+		1 * listParams.validate() >> true
 		1 * listParams.createListCriteria() >> { { a -> "see me?" } }
+	}
+
+	void "list() throws ValidationException if validation of listParams fails"() {
+		SecUser me = new SecUser(username: "me@me.com")
+		ListParams listParams = new DashboardListParams(order: null)
+
+		when:
+		service.list(Dashboard, listParams, me)
+		then:
+		thrown(ValidationException)
 	}
 
 	void "addLinkHintToHeader() does nothing if offset != max"() {
