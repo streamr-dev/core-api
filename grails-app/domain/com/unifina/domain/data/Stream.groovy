@@ -25,7 +25,10 @@ class Stream implements Comparable {
 	String uiChannelPath
 	Canvas uiChannelCanvas
 
-	static hasMany = [permissions: Permission, products: Product]
+	static hasMany = [
+		permissions: Permission,
+		products: Product
+	]
 	static mappedBy = [products: 'streams'] // defines which field in Product maps back to Streams - need to define this explicitly because there is also previewStream
 	static belongsTo = Product
 
