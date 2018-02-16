@@ -1,5 +1,6 @@
 package com.unifina.service
 
+import com.unifina.api.NotPermittedException
 import com.unifina.domain.dashboard.Dashboard
 import com.unifina.domain.security.Key
 import com.unifina.domain.security.Permission
@@ -82,6 +83,7 @@ class PermissionServiceSpec extends Specification {
 	void "access granted to permitted Dashboard"() {
 		expect:
 		service.canRead(me, dashAllowed)
+		service.verifyRead(me, dashAllowed)
 	}
 
 	void "access denied to non-permitted Dashboard"() {
@@ -383,5 +385,20 @@ class PermissionServiceSpec extends Specification {
 		service.canRead(stranger, dashPublic)
 		!service.canWrite(stranger, dashPublic)
 		!service.canShare(stranger, dashPublic)
+	}
+
+	void "verify does not throw if permission exists"() {
+		when:
+		service.verify(stranger, dashPublic, Operation.READ)
+		then:
+		notThrown(NotPermittedException)
+	}
+
+	void "verify throws if permission does not exists"() {
+		when:
+		service.verify(stranger, dashPublic, Operation.WRITE)
+		then:
+		def e = thrown(NotPermittedException)
+		e.message == "stranger does not have permission to write Dashboard (id 4)"
 	}
 }

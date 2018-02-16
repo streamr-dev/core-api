@@ -75,9 +75,7 @@ class ApiService {
 		if (domainObject == null) {
 			throw new NotFoundException(domainClass.simpleName, id)
 		}
-		if (!permissionService.check(currentUser, domainObject, operation)) {
-			throw new NotPermittedException(currentUser?.username, domainClass.simpleName, id)
-		}
+		permissionService.verify(currentUser, domainObject, operation)
 		return domainObject
 	}
 

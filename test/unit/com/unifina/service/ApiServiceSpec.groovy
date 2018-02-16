@@ -103,23 +103,14 @@ class ApiServiceSpec extends Specification {
 		dashboard.id = "dashboard-id"
 		dashboard.save(failOnError: true)
 
-		service.permissionService = Stub(PermissionService) {
-			check(me, dashboard, Permission.Operation.WRITE) >> false
-		}
+		service.permissionService = new PermissionService()
 
 		when:
 		service.authorizedGetById(Dashboard, "dashboard-id", me, Permission.Operation.WRITE)
 
 		then:
 		def e = thrown(NotPermittedException)
-		e.asApiError().toMap() == [
-			id: "dashboard-id",
-			message: "me@me.com does not have permission to access Dashboard (id dashboard-id)",
-			resource: "Dashboard",
-			code: "FORBIDDEN",
-			fault: "id",
-			user: "me@me.com"
-		]
+		e.message == "me@me.com does not have permission to write Dashboard (id dashboard-id)"
 	}
 
 	void "authorizedGetById() returns domain object if it exists and user has required permission"() {
@@ -128,9 +119,7 @@ class ApiServiceSpec extends Specification {
 		dashboard.id = "dashboard-id"
 		dashboard.save(failOnError: true)
 
-		service.permissionService = Stub(PermissionService) {
-			check(me, dashboard, Permission.Operation.WRITE) >> true
-		}
+		service.permissionService = Stub(PermissionService) // replace verify() with nop method
 
 		when:
 		def result = service.authorizedGetById(Dashboard, "dashboard-id", me, Permission.Operation.WRITE)
