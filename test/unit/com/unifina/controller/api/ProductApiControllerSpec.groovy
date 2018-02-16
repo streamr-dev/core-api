@@ -37,7 +37,6 @@ class ProductApiControllerSpec extends Specification {
 		controller.apiService = new ApiService()
 		def productService = controller.productService = Mock(ProductService)
 
-		request.addHeader("Authorization", "token myApiKey")
 		when:
 		withFilters(action: "index") {
 			controller.index()
@@ -75,5 +74,32 @@ class ProductApiControllerSpec extends Specification {
 		response.json == [
 			product.toMap()
 		]
+	}
+
+	void "show() invokes productService#findById"() {
+		def productService = controller.productService = Mock(ProductService)
+
+		params.id = "product-id"
+		when:
+		withFilters(action: "index") {
+			controller.show()
+		}
+		then:
+		1 * productService.findById('product-id', _) >> product
+	}
+
+	void "show() returns 200 and renders a product"() {
+		controller.productService = Stub(ProductService) {
+			findById("product-id", _) >> product
+		}
+
+		params.id = "product-id"
+		when:
+		withFilters(action: "index") {
+			controller.show()
+		}
+		then:
+		response.status == 200
+		response.json == product.toMap()
 	}
 }
