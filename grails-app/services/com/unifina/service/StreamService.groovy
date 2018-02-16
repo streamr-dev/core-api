@@ -142,7 +142,6 @@ class StreamService {
 		sendMessage(stream, partitionKey, System.currentTimeMillis(), str.getBytes(utf8), StreamrBinaryMessage.CONTENT_TYPE_JSON, ttl);
 	}
 
-	@CompileStatic
 	void saveMessage(Stream stream, String partitionKey, long timestamp, Map message, int ttl, long messageNumber, Long previousMessageNumber) {
 		int streamPartition = partitioner.partition(stream, partitionKey)
 		String str = gson.toJson(message)
