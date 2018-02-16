@@ -116,8 +116,7 @@ class StreamService {
 	}
 
 	// Ref to Kafka will be abstracted out when Feed abstraction is reworked
-	@CompileStatic
-	void sendMessage(Stream stream, @Nullable String partitionKey, long timestamp, byte[] content, byte contentType, int ttl=0) {
+	void sendMessage(Stream stream, String partitionKey, long timestamp, byte[] content, byte contentType, int ttl=0) {
 		int streamPartition = partitioner.partition(stream, partitionKey)
 		StreamrBinaryMessage msg = new StreamrBinaryMessage(stream.id, streamPartition, timestamp, ttl, contentType, content)
 
