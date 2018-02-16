@@ -2,6 +2,7 @@ package com.unifina.service
 
 import com.unifina.api.ProductListParams
 import com.unifina.domain.marketplace.Product
+import com.unifina.domain.security.Permission
 import com.unifina.domain.security.SecUser
 import grails.test.mixin.TestFor
 import spock.lang.Specification
@@ -17,5 +18,16 @@ class ProductServiceSpec extends Specification {
 
 		then:
 		1 * apiService.list(Product, { it.toMap() == new ProductListParams(max: 5).toMap() }, me)
+	}
+
+	void "show() delegates to PermissionService#authorizedGetById"() {
+		def apiService = service.apiService = Mock(ApiService)
+		def me = new SecUser(username: "me@streamr.com")
+
+		when:
+		service.findById("product-id", me)
+
+		then:
+		1 * apiService.authorizedGetById(Product, "product-id", me, Permission.Operation.READ)
 	}
 }
