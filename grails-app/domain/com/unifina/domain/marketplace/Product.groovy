@@ -96,4 +96,8 @@ class Product {
 			minimumSubscriptionInSeconds: minimumSubscriptionInSeconds
 		]
 	}
+
+	static isEthereumAddress = { String value, object ->
+		value ==~ /^0x[a-fA-F0-9]{40}$/ ?: "validation.isEthereumAddress"
+	}
 }
