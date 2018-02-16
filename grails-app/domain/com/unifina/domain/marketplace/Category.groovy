@@ -5,17 +5,17 @@ import groovy.transform.CompileStatic
 class Category {
 	String id
 	String name
-	String defaultImageUrl
+	String imageUrl
 
 	static hasMany = [products: Product]
 
 	static constraints = {
-		defaultImageUrl(nullable: true)
+		imageUrl(nullable: true)
 	}
 
 	static mapping = {
 		id generator: 'assigned'
-		defaultImageUrl length: 2048
+		imageUrl length: 2048
 		version false
 	}
 
@@ -24,7 +24,7 @@ class Category {
 		return [
 			id: id,
 			name: name,
-			defaultImageUrl: defaultImageUrl
+			imageUrl: imageUrl
 		]
 	}
 }
