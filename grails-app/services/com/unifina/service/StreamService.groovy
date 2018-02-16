@@ -143,22 +143,7 @@ class StreamService {
 	}
 
 	@CompileStatic
-	void sendMessage(Stream stream, long timestamp, @Nullable String partitionKey, Map message, int ttl=0) {
-		String str = gson.toJson(message)
-		sendMessage(stream, partitionKey, timestamp, str.getBytes(utf8), StreamrBinaryMessage.CONTENT_TYPE_JSON, ttl);
-	}
-
-	// Ref to Cassandra will be abstracted out when Feed abstraction is reworked
-	@CompileStatic
-	void saveMessage(Stream stream, @Nullable String partitionKey, long timestamp, byte[] content, byte contentType, int ttl, long messageNumber, Long previousMessageNumber) {
-		int streamPartition = partitioner.partition(stream, partitionKey)
-		// Fake Kafka partition to be 0 (does not matter)
-		StreamrBinaryMessageWithKafkaMetadata msg = new StreamrBinaryMessageWithKafkaMetadata(stream.id, streamPartition, timestamp, ttl, contentType, content, 0, messageNumber, previousMessageNumber)
-		cassandraService.save(msg)
-	}
-
-	@CompileStatic
-	void saveMessage(Stream stream, @Nullable String partitionKey, long timestamp, Map message, int ttl, long messageNumber, Long previousMessageNumber) {
+	void saveMessage(Stream stream, String partitionKey, long timestamp, Map message, int ttl, long messageNumber, Long previousMessageNumber) {
 		int streamPartition = partitioner.partition(stream, partitionKey)
 		String str = gson.toJson(message)
 		// Fake Kafka partition to be 0 (does not matter)
