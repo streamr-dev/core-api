@@ -270,6 +270,7 @@ modules = {
 		resource url:[dir:'js/unifina/confirm-button', file:'confirm-button.js', plugin: 'unifina-core']
 	}
 	'webpack-commons-bundle' {
+		dependsOn('streamr')
 		resource url:[dir:'js/unifina/webpack-bundles', file:'commons.bundle.js']
 		resource url:[dir:'js/unifina/webpack-bundles', file:'commons.bundle.css']
 	}
