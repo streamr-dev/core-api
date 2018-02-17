@@ -1,8 +1,10 @@
 package com.unifina.controller.api
 
+import com.unifina.api.CreateProductCommand
 import com.unifina.api.ProductListParams
 import com.unifina.domain.marketplace.Category
 import com.unifina.domain.marketplace.Product
+import com.unifina.domain.security.SecUser
 import com.unifina.filters.UnifinaCoreAPIFilters
 import com.unifina.service.ApiService
 import com.unifina.service.ProductService
@@ -97,6 +99,37 @@ class ProductApiControllerSpec extends Specification {
 		when:
 		withFilters(action: "index") {
 			controller.show()
+		}
+		then:
+		response.status == 200
+		response.json == product.toMap()
+	}
+
+	void "save() invokes productService#create"() {
+		def productService = controller.productService = Mock(ProductService)
+
+		def user = request.apiUser = new SecUser()
+
+		request.JSON == [:]
+		when:
+		withFilters(action: "save") {
+			controller.save()
+		}
+		then:
+		1 * productService.create(_ as CreateProductCommand, user) >> product
+	}
+
+	void "save() returns 200 and renders a product"() {
+		controller.productService = Stub(ProductService) {
+			create(_, _) >> product
+		}
+
+		def user = request.apiUser = new SecUser()
+
+		request.JSON == [:]
+		when:
+		withFilters(action: "save") {
+			controller.save()
 		}
 		then:
 		response.status == 200

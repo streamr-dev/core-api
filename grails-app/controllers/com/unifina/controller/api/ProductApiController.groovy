@@ -1,5 +1,6 @@
 package com.unifina.controller.api
 
+import com.unifina.api.CreateProductCommand
 import com.unifina.api.ProductListParams
 import com.unifina.domain.marketplace.Product
 import com.unifina.domain.security.SecUser
@@ -28,6 +29,13 @@ class ProductApiController {
 	@StreamrApi(authenticationLevel = AuthLevel.NONE)
 	def show(String id) {
 		Product product = productService.findById(id, loggedInUser())
+		render(product.toMap() as JSON)
+	}
+
+	@GrailsCompileStatic
+	@StreamrApi(authenticationLevel = AuthLevel.USER)
+	def save(CreateProductCommand command) {
+		Product product = productService.create(command, loggedInUser())
 		render(product.toMap() as JSON)
 	}
 
