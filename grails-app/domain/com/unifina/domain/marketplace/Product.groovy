@@ -59,10 +59,17 @@ class Product {
 	}
 
 	static constraints = {
+		name(blank: false)
+		description(blank: false)
 		imageUrl(nullable: true)
 		tx(nullable: true)
+		streams(maxSize: 1000)
 		previewStream(nullable: true)
 		previewConfigJson(nullable: true)
+		ownerAddress(validator: isEthereumAddress)
+		beneficiaryAddress(validator: isEthereumAddress)
+		pricePerSecond(min: 0L)
+		minimumSubscriptionInSeconds(min: 0L)
 	}
 
 	static mapping = {
