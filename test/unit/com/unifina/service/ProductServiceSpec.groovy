@@ -1,9 +1,6 @@
 package com.unifina.service
 
-import com.unifina.api.CreateProductCommand
-import com.unifina.api.NotPermittedException
-import com.unifina.api.ProductListParams
-import com.unifina.api.ValidationException
+import com.unifina.api.*
 import com.unifina.domain.data.Stream
 import com.unifina.domain.marketplace.Category
 import com.unifina.domain.marketplace.Product
@@ -12,6 +9,7 @@ import com.unifina.domain.security.SecUser
 import grails.test.mixin.Mock
 import grails.test.mixin.TestFor
 import spock.lang.Specification
+import spock.lang.Unroll
 
 @TestFor(ProductService)
 @Mock([Category])
@@ -198,5 +196,54 @@ class ProductServiceSpec extends Specification {
 		then:
 		thrown(NotPermittedException)
 		Product.count() == 0
+	}
+
+	@Unroll
+	void "delete() throws InvalidStateTransitionException if Product.state == #state"(Product.State state) {
+		when:
+		service.delete(new Product(state: state), null)
+		then:
+		thrown(InvalidStateTransitionException)
+		where:
+		state << [Product.State.DEPLOYING, Product.State.NEW]
+	}
+
+	void "delete() throws NotPermittedException if user is not devops"() {
+		when:
+		service.delete(new Product(state: Product.State.DELETING), Stub(SecUser) {
+			isDevOps() >> false
+		})
+		then:
+		thrown(NotPermittedException)
+	}
+
+	@Unroll
+	void "delete() transitions Product from #state to DELETED"(Product.State state) {
+		service.permissionService = new PermissionService()
+		def product = new Product(state: state)
+
+		when:
+		service.delete(product, Stub(SecUser) {
+			isDevOps() >> true
+		})
+
+		then:
+		product.state == Product.State.DELETED
+
+		where:
+		state << [Product.State.DEPLOYED, Product.State.DELETING, Product.State.DELETED]
+	}
+
+	void "delete() invokes permissionService#systemRevokeAnonymousAccess"() {
+		def permissionService = service.permissionService = Mock(PermissionService)
+		def product = new Product(state: Product.State.DELETING)
+
+		when:
+		service.delete(product, Stub(SecUser) {
+			isDevOps() >> true
+		})
+
+		then:
+		1 * permissionService.systemRevokeAnonymousAccess(product)
 	}
 }

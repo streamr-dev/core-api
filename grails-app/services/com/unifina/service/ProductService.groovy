@@ -1,10 +1,6 @@
 package com.unifina.service
 
-import com.unifina.api.CreateProductCommand
-import com.unifina.api.NotFoundException
-import com.unifina.api.NotPermittedException
-import com.unifina.api.ProductListParams
-import com.unifina.api.ValidationException
+import com.unifina.api.*
 import com.unifina.domain.data.Stream
 import com.unifina.domain.marketplace.Product
 import com.unifina.domain.security.Permission
@@ -37,5 +33,17 @@ class ProductService {
 		product.save(failOnError: true)
 		permissionService.systemGrantAll(currentUser, product)
 		return product
+	}
+
+	void delete(Product product, SecUser currentUser) {
+		if (!(product.state in [Product.State.DEPLOYED, Product.State.DELETING, Product.State.DELETED])) {
+			throw new InvalidStateTransitionException(product.state, Product.State.DELETED)
+		}
+		if (!currentUser.isDevOps()) {
+			throw new NotPermittedException("DevOps role required")
+		}
+		permissionService.systemRevokeAnonymousAccess(product)
+		product.state = Product.State.DELETED
+		product.save()
 	}
 }
