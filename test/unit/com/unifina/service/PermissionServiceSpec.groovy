@@ -401,4 +401,16 @@ class PermissionServiceSpec extends Specification {
 		def e = thrown(NotPermittedException)
 		e.message == "stranger does not have permission to write Dashboard (id 4)"
 	}
+
+	void "systemRevokeAnonymousAccess() revokes anonymous access on a resource"() {
+		assert Permission.exists(dashAnonymousReadPermission.id)
+		assert service.canRead(null, dashPublic)
+
+		when:
+		service.systemRevokeAnonymousAccess(dashPublic)
+
+		then:
+		!Permission.exists(dashAnonymousReadPermission.id)
+		!service.canRead(null, dashPublic)
+	}
 }

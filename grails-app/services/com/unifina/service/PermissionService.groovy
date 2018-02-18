@@ -328,6 +328,18 @@ class PermissionService {
 	}
 
 	/**
+	 * Revoke anonymous (public) Permission to a resource (as sudo/system)
+	 *
+	 * @param resource to be revoked anonymous/public access to
+	 *
+	 * @return Permissions that were deleted
+	 */
+	@CompileStatic
+	List<Permission> systemRevokeAnonymousAccess(resource, Operation operation=Operation.READ) {
+		return performRevoke(true, null, resource, operation)
+	}
+
+	/**
 	 * As a SecUser, revoke a Permission.
 	 *
 	 * @param revoker user attempting to revoke permission (needs SHARE permission)
