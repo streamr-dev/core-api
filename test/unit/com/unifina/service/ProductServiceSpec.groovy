@@ -244,6 +244,41 @@ class ProductServiceSpec extends Specification {
 	}
 
 	@Unroll
+	void "transitionToDeleting() throws InvalidStateTransitionException if Product.state == #state"(Product.State state) {
+		def product = new Product(
+			name: "name",
+			description: "description",
+			ownerAddress: "0x0000000000000000000000000000000000000000",
+			beneficiaryAddress: "0x0000000000000000000000000000000000000000",
+			pricePerSecond: 10,
+			category: category,
+			state: state
+		)
+		when:
+		service.transitionToDeleting(product)
+		then:
+		thrown(InvalidStateTransitionException)
+		where:
+		state << [Product.State.DEPLOYING, Product.State.DELETING, Product.State.DELETED, Product.State.NEW]
+	}
+
+	void "transitionToDeleting() transitions Product from DEPLOYED to DELETING"() {
+		def product = new Product(
+			name: "name",
+			description: "description",
+			ownerAddress: "0x0000000000000000000000000000000000000000",
+			beneficiaryAddress: "0x0000000000000000000000000000000000000000",
+			pricePerSecond: 10,
+			category: category,
+			state: Product.State.DEPLOYED
+		)
+		when:
+		service.transitionToDeleting(product)
+		then:
+		product.state == Product.State.DELETING
+	}
+
+	@Unroll
 	void "delete() throws InvalidStateTransitionException if Product.state == #state"(Product.State state) {
 		def product = new Product(
 			name: "name",

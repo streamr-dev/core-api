@@ -45,6 +45,15 @@ class ProductService {
 		}
 	}
 
+	void transitionToDeleting(Product product) {
+		if (product.state == Product.State.DEPLOYED) {
+			product.state = Product.State.DELETING
+			product.save(failOnError: true)
+		} else {
+			throw new InvalidStateTransitionException(product.state, Product.State.DELETING)
+		}
+	}
+
 	void delete(Product product, SecUser currentUser) throws NotPermittedException {
 		if (!(product.state in [Product.State.DEPLOYED, Product.State.DELETING, Product.State.DELETED])) {
 			throw new InvalidStateTransitionException(product.state, Product.State.DELETED)
