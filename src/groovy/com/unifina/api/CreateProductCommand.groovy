@@ -28,7 +28,7 @@ class CreateProductCommand {
 		description(blank: false)
 		imageUrl(nullable: true)
 		streams(maxSize: 1000)
-		previewStream(nullable: true)
+		previewStream(nullable: true, validator: { Stream s, CreateProductCommand p -> s == null || s in p.streams }) // TODO: unit-test validation
 		previewConfigJson(nullable: true)
 		ownerAddress(validator: Product.isEthereumAddress)
 		beneficiaryAddress(validator: Product.isEthereumAddress)
