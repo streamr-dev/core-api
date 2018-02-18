@@ -80,6 +80,30 @@ class ApiServiceSpec extends Specification {
 		1 * response.addHeader("Link", '<http://localhost:8080/api/v1/dashboards?max=100&offset=250&publicAccess=true&name=dashboard>; rel="more"')
 	}
 
+	void "getByIdAndThrowIfNotFound() throws NotFoundException if domain object cannot be found"() {
+		when:
+		service.getByIdAndThrowIfNotFound(Dashboard, "dashboard-id")
+
+		then:
+		def e = thrown(NotFoundException)
+		e.asApiError().toMap() == [
+			id: "dashboard-id",
+			message: "Dashboard with id dashboard-id not found",
+			code: "NOT_FOUND",
+			fault: "id",
+			type: "Dashboard"
+		]
+	}
+
+	void "getByIdAndThrowIfNotFound() returns domain object if it exists"() {
+		Dashboard dashboard = new Dashboard(name: "dashboard")
+		dashboard.id = "dashboard-id"
+		dashboard.save(failOnError: true)
+
+		expect:
+		service.getByIdAndThrowIfNotFound(Dashboard, "dashboard-id") == dashboard
+	}
+
 	void "authorizedGetById() throws NotFoundException if domain object cannot be found"() {
 		SecUser me = new SecUser(username: "me@me.com")
 
@@ -127,5 +151,4 @@ class ApiServiceSpec extends Specification {
 		then:
 		result == dashboard
 	}
-
 }

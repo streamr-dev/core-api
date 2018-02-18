@@ -69,13 +69,22 @@ class ApiService {
 	/**
 	 * Fetch a domain object by id while authorizing that current user has required permission
 	 */
-	def <T> T authorizedGetById(Class<T> domainClass, String id, SecUser currentUser, Permission.Operation operation)
+	@GrailsCompileStatic
+	<T> T authorizedGetById(Class<T> domainClass, String id, SecUser currentUser, Permission.Operation operation)
 			throws NotFoundException, NotPermittedException {
+		T domainObject = getByIdAndThrowIfNotFound(domainClass, id)
+		permissionService.verify(currentUser, domainObject, operation)
+		return domainObject
+	}
+
+	/**
+	 * Fetch a domain object by id and throw NotFoundException if not found
+	 */
+	def <T> T getByIdAndThrowIfNotFound(Class<T> domainClass, String id) throws NotFoundException {
 		T domainObject = domainClass.get(id)
 		if (domainObject == null) {
 			throw new NotFoundException(domainClass.simpleName, id)
 		}
-		permissionService.verify(currentUser, domainObject, operation)
 		return domainObject
 	}
 
