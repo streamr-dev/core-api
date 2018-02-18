@@ -184,4 +184,42 @@ class ProductApiControllerSpec extends Specification {
 		then:
 		response.status == 204
 	}
+
+	void "setDeploying() invokes productService#findById() and productService#transitionToDeploying()"() {
+		def productService = controller.productService = Mock(ProductService)
+
+		def user = request.apiUser = new SecUser()
+
+		params.id = "product-id"
+		request.JSON = [
+		    tx: "0x0000000000FFFFFFFFFF0000000000FFFFFFFFFF0000000000FFFFFFFFFFAAAA"
+		]
+		when:
+		withFilters(action: "setDeploying") {
+			controller.setDeploying()
+		}
+		then:
+		1 * productService.findById("product-id", user) >> product
+		1 * productService.transitionToDeploying(product, "0x0000000000FFFFFFFFFF0000000000FFFFFFFFFF0000000000FFFFFFFFFFAAAA")
+	}
+
+	void "setDeploying() returns 200 and renders a product"() {
+		controller.productService = Stub(ProductService) {
+			findById("product-id", _ as SecUser) >> product
+		}
+
+		def user = request.apiUser = new SecUser()
+
+		params.id = "product-id"
+		request.JSON = [
+			tx: "0x0000000000FFFFFFFFFF0000000000FFFFFFFFFF0000000000FFFFFFFFFFAAAA"
+		]
+		when:
+		withFilters(action: "setDeploying") {
+			controller.setDeploying()
+		}
+		then:
+		response.status == 200
+		response.json == product.toMap()
+	}
 }

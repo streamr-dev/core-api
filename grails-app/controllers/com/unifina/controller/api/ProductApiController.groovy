@@ -2,6 +2,7 @@ package com.unifina.controller.api
 
 import com.unifina.api.CreateProductCommand
 import com.unifina.api.ProductListParams
+import com.unifina.api.SetDeployingCommand
 import com.unifina.domain.marketplace.Product
 import com.unifina.domain.security.SecUser
 import com.unifina.security.AuthLevel
@@ -45,6 +46,14 @@ class ProductApiController {
 		Product product = apiService.getByIdAndThrowIfNotFound(Product, id)
 		productService.delete(product, loggedInUser())
 		render(status: 204)
+	}
+
+	@GrailsCompileStatic
+	@StreamrApi(authenticationLevel = AuthLevel.USER)
+	def setDeploying(String id, SetDeployingCommand command) {
+		Product product = productService.findById(id, loggedInUser())
+		productService.transitionToDeploying(product, command.tx)
+		render(product.toMap() as JSON)
 	}
 
 	SecUser loggedInUser() {
