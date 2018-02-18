@@ -39,6 +39,14 @@ class ProductApiController {
 		render(product.toMap() as JSON)
 	}
 
+	@GrailsCompileStatic
+	@StreamrApi(authenticationLevel = AuthLevel.USER)
+	def delete(String id) {
+		Product product = apiService.getByIdAndThrowIfNotFound(Product, id)
+		productService.delete(product, loggedInUser())
+		render(status: 204)
+	}
+
 	SecUser loggedInUser() {
 		request.apiUser
 	}

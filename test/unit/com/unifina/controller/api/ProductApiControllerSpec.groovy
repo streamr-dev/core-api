@@ -135,4 +135,53 @@ class ProductApiControllerSpec extends Specification {
 		response.status == 200
 		response.json == product.toMap()
 	}
+
+	void "delete() invokes apiService#getByIdAndThrowIfNotFound"() {
+		def apiService = controller.apiService = Mock(ApiService)
+		controller.productService = Stub(ProductService)
+
+		def user = request.apiUser = new SecUser()
+
+		params.id = "product-id"
+		when:
+		withFilters(action: "delete") {
+			controller.delete()
+		}
+		then:
+		1 * apiService.getByIdAndThrowIfNotFound(Product, "product-id") >> product
+	}
+
+	void "delete() invokes productService#delete"() {
+		controller.apiService = Stub(ApiService) {
+			getByIdAndThrowIfNotFound(Product, "product-id") >> product
+		}
+		def productService = controller.productService = Mock(ProductService)
+
+		def user = request.apiUser = new SecUser()
+
+		params.id = "product-id"
+		when:
+		withFilters(action: "delete") {
+			controller.delete()
+		}
+		then:
+		1 * productService.delete(product, user)
+	}
+
+	void "delete() returns 204"() {
+		controller.apiService = Stub(ApiService) {
+			getByIdAndThrowIfNotFound(Product, "product-id") >> product
+		}
+		controller.productService = Stub(ProductService)
+
+		def user = request.apiUser = new SecUser()
+
+		params.id = "product-id"
+		when:
+		withFilters(action: "delete") {
+			controller.delete()
+		}
+		then:
+		response.status == 204
+	}
 }
