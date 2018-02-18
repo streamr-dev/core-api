@@ -35,7 +35,17 @@ class ProductService {
 		return product
 	}
 
-	void delete(Product product, SecUser currentUser) {
+	void transitionToDeploying(Product product, String tx) {
+		if (product.state == Product.State.NEW) {
+			product.tx = tx
+			product.state = Product.State.DEPLOYING
+			product.save(failOnError: true)
+		} else {
+			throw new InvalidStateTransitionException(product.state, Product.State.DEPLOYING)
+		}
+	}
+
+	void delete(Product product, SecUser currentUser) throws NotPermittedException {
 		if (!(product.state in [Product.State.DEPLOYED, Product.State.DELETING, Product.State.DELETED])) {
 			throw new InvalidStateTransitionException(product.state, Product.State.DELETED)
 		}
@@ -44,6 +54,6 @@ class ProductService {
 		}
 		permissionService.systemRevokeAnonymousAccess(product)
 		product.state = Product.State.DELETED
-		product.save()
+		product.save(failOnError: true)
 	}
 }

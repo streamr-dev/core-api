@@ -14,6 +14,15 @@ import spock.lang.Unroll
 @TestFor(ProductService)
 @Mock([Category])
 class ProductServiceSpec extends Specification {
+	Category category
+
+	void setup() {
+		mockForConstraintsTests(Product)
+		category = new Category(name: "Category")
+		category.id = "category-id"
+		category.save()
+	}
+
 	void "list() delegates to ApiService#list"() {
 		def apiService = service.apiService = Mock(ApiService)
 		def me = new SecUser(username: "me@streamr.com")
@@ -44,10 +53,6 @@ class ProductServiceSpec extends Specification {
 	}
 
 	void "create() creates and returns Product with correct info and NEW state"() {
-		def category = new Category(name: "Category")
-		category.id = "category-id"
-		category.save()
-
 		Stream s1 = new Stream(name: "stream-1")
 		Stream s2 = new Stream(name: "stream-2")
 		Stream s3 = new Stream(name: "stream-3")
@@ -99,10 +104,6 @@ class ProductServiceSpec extends Specification {
 	}
 
 	void "create() invokes permissionService#systemGrant"() {
-		def category = new Category(name: "Category")
-		category.id = "category-id"
-		category.save()
-
 		Stream s1 = new Stream(name: "stream-1")
 		Stream s2 = new Stream(name: "stream-2")
 		Stream s3 = new Stream(name: "stream-3")
@@ -131,10 +132,6 @@ class ProductServiceSpec extends Specification {
 	}
 
 	void "create() given streams are verified with permissionService#verifyShare"() {
-		def category = new Category(name: "Category")
-		category.id = "category-id"
-		category.save()
-
 		Stream s1 = new Stream(name: "stream-1")
 		Stream s2 = new Stream(name: "stream-2")
 		Stream s3 = new Stream(name: "stream-3")
@@ -165,10 +162,6 @@ class ProductServiceSpec extends Specification {
 	}
 
 	void "create() does not save if permissionService#verifyShare throws"() {
-		def category = new Category(name: "Category")
-		category.id = "category-id"
-		category.save()
-
 		Stream s1 = new Stream(name: "stream-1")
 		Stream s2 = new Stream(name: "stream-2")
 		Stream s3 = new Stream(name: "stream-3")
@@ -199,9 +192,70 @@ class ProductServiceSpec extends Specification {
 	}
 
 	@Unroll
-	void "delete() throws InvalidStateTransitionException if Product.state == #state"(Product.State state) {
+	void "transitionToDeploying() throws InvalidStateTransitionException if Product.state == #state"(Product.State state) {
+		def product = new Product(
+			name: "name",
+			description: "description",
+			ownerAddress: "0x0000000000000000000000000000000000000000",
+			beneficiaryAddress: "0x0000000000000000000000000000000000000000",
+			pricePerSecond: 10,
+			category: category,
+			state: state
+		)
 		when:
-		service.delete(new Product(state: state), null)
+		service.transitionToDeploying(product, "0xABCDEF")
+		then:
+		thrown(InvalidStateTransitionException)
+		where:
+		state << [Product.State.DEPLOYING, Product.State.DELETING, Product.State.DEPLOYED, Product.State.DELETED]
+	}
+
+	void "transitionToDeploying() throws ValidationException given invalid tx"() {
+		def product = new Product(
+			name: "name",
+			description: "description",
+			ownerAddress: "0x0000000000000000000000000000000000000000",
+			beneficiaryAddress: "0x0000000000000000000000000000000000000000",
+			pricePerSecond: 10,
+			category: category,
+			state: Product.State.NEW
+		)
+		when:
+		service.transitionToDeploying(product, "0x0")
+		then:
+		thrown(grails.validation.ValidationException)
+	}
+
+	void "transitionToDeploying() sets tx and transitions Product from NEW to DEPLOYING"() {
+		def product = new Product(
+			name: "name",
+			description: "description",
+			ownerAddress: "0x0000000000000000000000000000000000000000",
+			beneficiaryAddress: "0x0000000000000000000000000000000000000000",
+			pricePerSecond: 10,
+			category: category,
+			state: Product.State.NEW
+		)
+		when:
+		service.transitionToDeploying(product, "0x9e37846ea5238d0a630e8710249d3bf9668feabcf39360ea7c8778eec2cda1a2")
+		then:
+		product.state == Product.State.DEPLOYING
+		product.tx == "0x9e37846ea5238d0a630e8710249d3bf9668feabcf39360ea7c8778eec2cda1a2"
+	}
+
+	@Unroll
+	void "delete() throws InvalidStateTransitionException if Product.state == #state"(Product.State state) {
+		def product = new Product(
+			name: "name",
+			description: "description",
+			ownerAddress: "0x0000000000000000000000000000000000000000",
+			beneficiaryAddress: "0x0000000000000000000000000000000000000000",
+			pricePerSecond: 10,
+			category: category,
+			state: state
+		)
+		when:
+		service.delete(product, null)
 		then:
 		thrown(InvalidStateTransitionException)
 		where:
@@ -209,8 +263,17 @@ class ProductServiceSpec extends Specification {
 	}
 
 	void "delete() throws NotPermittedException if user is not devops"() {
+		def product = new Product(
+			name: "name",
+			description: "description",
+			ownerAddress: "0x0000000000000000000000000000000000000000",
+			beneficiaryAddress: "0x0000000000000000000000000000000000000000",
+			pricePerSecond: 10,
+			category: category,
+			state: Product.State.DELETING
+		)
 		when:
-		service.delete(new Product(state: Product.State.DELETING), Stub(SecUser) {
+		service.delete(product, Stub(SecUser) {
 			isDevOps() >> false
 		})
 		then:
@@ -219,8 +282,16 @@ class ProductServiceSpec extends Specification {
 
 	@Unroll
 	void "delete() transitions Product from #state to DELETED"(Product.State state) {
+		def product = new Product(
+			name: "name",
+			description: "description",
+			ownerAddress: "0x0000000000000000000000000000000000000000",
+			beneficiaryAddress: "0x0000000000000000000000000000000000000000",
+			pricePerSecond: 10,
+			category: category,
+			state: state
+		)
 		service.permissionService = new PermissionService()
-		def product = new Product(state: state)
 
 		when:
 		service.delete(product, Stub(SecUser) {
@@ -235,8 +306,16 @@ class ProductServiceSpec extends Specification {
 	}
 
 	void "delete() invokes permissionService#systemRevokeAnonymousAccess"() {
+		def product = new Product(
+			name: "name",
+			description: "description",
+			ownerAddress: "0x0000000000000000000000000000000000000000",
+			beneficiaryAddress: "0x0000000000000000000000000000000000000000",
+			pricePerSecond: 10,
+			category: category,
+			state: Product.State.DELETING
+		)
 		def permissionService = service.permissionService = Mock(PermissionService)
-		def product = new Product(state: Product.State.DELETING)
 
 		when:
 		service.delete(product, Stub(SecUser) {
