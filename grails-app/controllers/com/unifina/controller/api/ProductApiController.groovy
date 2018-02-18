@@ -15,6 +15,12 @@ import grails.plugin.springsecurity.annotation.Secured
 
 @Secured(["IS_AUTHENTICATED_ANONYMOUSLY"])
 class ProductApiController {
+
+	static allowedMethods = [
+		setDeploying: "POST",
+		setDeleting: "POST"
+	]
+
 	ApiService apiService
 	ProductService productService
 
@@ -53,6 +59,14 @@ class ProductApiController {
 	def setDeploying(String id, SetDeployingCommand command) {
 		Product product = productService.findById(id, loggedInUser())
 		productService.transitionToDeploying(product, command.tx)
+		render(product.toMap() as JSON)
+	}
+
+	@GrailsCompileStatic
+	@StreamrApi(authenticationLevel = AuthLevel.USER)
+	def setDeleting(String id) {
+		Product product = productService.findById(id, loggedInUser())
+		productService.transitionToDeleting(product)
 		render(product.toMap() as JSON)
 	}
 

@@ -194,6 +194,7 @@ class ProductApiControllerSpec extends Specification {
 		request.JSON = [
 		    tx: "0x0000000000FFFFFFFFFF0000000000FFFFFFFFFF0000000000FFFFFFFFFFAAAA"
 		]
+		request.method = "POST"
 		when:
 		withFilters(action: "setDeploying") {
 			controller.setDeploying()
@@ -214,9 +215,44 @@ class ProductApiControllerSpec extends Specification {
 		request.JSON = [
 			tx: "0x0000000000FFFFFFFFFF0000000000FFFFFFFFFF0000000000FFFFFFFFFFAAAA"
 		]
+		request.method = "POST"
 		when:
 		withFilters(action: "setDeploying") {
 			controller.setDeploying()
+		}
+		then:
+		response.status == 200
+		response.json == product.toMap()
+	}
+
+	void "setDeleting() invokes productService#findById() and productService#transitionToDeleting()"() {
+		def productService = controller.productService = Mock(ProductService)
+
+		def user = request.apiUser = new SecUser()
+
+		params.id = "product-id"
+		request.method = "POST"
+		when:
+		withFilters(action: "setDeleting") {
+			controller.setDeleting()
+		}
+		then:
+		1 * productService.findById("product-id", user) >> product
+		1 * productService.transitionToDeleting(product)
+	}
+
+	void "setDeleting() returns 200 and renders a product"() {
+		controller.productService = Stub(ProductService) {
+			findById("product-id", _ as SecUser) >> product
+		}
+
+		def user = request.apiUser = new SecUser()
+
+		params.id = "product-id"
+		request.method = "POST"
+		when:
+		withFilters(action: "setDeleting") {
+			controller.setDeleting()
 		}
 		then:
 		response.status == 200
