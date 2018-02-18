@@ -62,7 +62,7 @@ class Product {
 		name(blank: false)
 		description(blank: false)
 		imageUrl(nullable: true)
-		tx(nullable: true)
+		tx(nullable: true, validator: isEthereumTransaction)
 		streams(maxSize: 1000)
 		previewStream(nullable: true)
 		previewConfigJson(nullable: true)
@@ -107,5 +107,9 @@ class Product {
 
 	static isEthereumAddress = { String value, object ->
 		value ==~ /^0x[a-fA-F0-9]{40}$/ ?: "validation.isEthereumAddress"
+	}
+
+	static isEthereumTransaction = { String value, object ->
+		value == null ?: value ==~ /^0x[a-fA-F0-9]{64}$/ ?: "validation.isEthereumTransaction"
 	}
 }
