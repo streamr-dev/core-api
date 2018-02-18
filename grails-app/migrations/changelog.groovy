@@ -92,4 +92,5 @@ databaseChangeLog = {
 	include file: 'core/2018-01-31-mqtt-help-text-update.groovy'
 	include file: 'core/2018-02-12-add-anonymous-index-to-permission.groovy'
 	include file: 'core/2018-02-11-marketplace-domain-objects.groovy'
+	include file: 'core/2018-02-18-add-devops-role.groovy'
 }
