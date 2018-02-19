@@ -34,7 +34,7 @@ class ProductServiceSpec extends Specification {
 		[s1, s2, s3, s4]*.save(failOnError: true, validate: false)
 	}
 
-	private void setupProduct(Product.State state = Product.State.NEW) {
+	private void setupProduct(Product.State state = Product.State.NOT_DEPLOYED) {
 		product = new Product(
 				name: "name",
 				description: "description",
@@ -108,7 +108,7 @@ class ProductServiceSpec extends Specification {
 			imageUrl: "product.png",
 			category: "category-id",
 			streams: ["stream-1", "stream-2", "stream-3"],
-			state: "NEW",
+			state: "NOT_DEPLOYED",
 			tx: null,
 			previewStream: null,
 			previewConfigJson: null,
@@ -304,7 +304,7 @@ class ProductServiceSpec extends Specification {
 				imageUrl: "product.png",
 				category: "category2-id",
 				streams: ["stream-2", "stream-4"],
-				state: "NEW",
+				state: "NOT_DEPLOYED",
 				tx: null,
 				previewStream: null,
 				previewConfigJson: null,
@@ -327,19 +327,19 @@ class ProductServiceSpec extends Specification {
 		then:
 		thrown(InvalidStateTransitionException)
 		where:
-		state << [Product.State.DEPLOYING, Product.State.DELETING, Product.State.DEPLOYED, Product.State.DELETED]
+		state << [Product.State.DEPLOYING, Product.State.UNDEPLOYING, Product.State.DEPLOYED]
 	}
 
 	void "transitionToDeploying() throws ValidationException given invalid tx"() {
-		setupProduct(Product.State.NEW)
+		setupProduct(Product.State.NOT_DEPLOYED)
 		when:
 		service.transitionToDeploying(product, "0x0")
 		then:
 		thrown(grails.validation.ValidationException)
 	}
 
-	void "transitionToDeploying() sets tx and transitions Product from NEW to DEPLOYING"() {
-		setupProduct(Product.State.NEW)
+	void "transitionToDeploying() sets tx and transitions Product from NOT_DEPLOYED to DEPLOYING"() {
+		setupProduct(Product.State.NOT_DEPLOYED)
 		when:
 		service.transitionToDeploying(product, "0x9e37846ea5238d0a630e8710249d3bf9668feabcf39360ea7c8778eec2cda1a2")
 		then:
@@ -348,39 +348,39 @@ class ProductServiceSpec extends Specification {
 	}
 
 	@Unroll
-	void "transitionToDeleting() throws InvalidStateTransitionException if Product.state == #state"(Product.State state) {
+	void "transitionToUndeploying() throws InvalidStateTransitionException if Product.state == #state"(Product.State state) {
 		setupProduct(state)
 		when:
-		service.transitionToDeleting(product)
+		service.transitionToUndeploying(product)
 		then:
 		thrown(InvalidStateTransitionException)
 		where:
-		state << [Product.State.DEPLOYING, Product.State.DELETING, Product.State.DELETED, Product.State.NEW]
+		state << [Product.State.DEPLOYING, Product.State.UNDEPLOYING, Product.State.NOT_DEPLOYED]
 	}
 
-	void "transitionToDeleting() transitions Product from DEPLOYED to DELETING"() {
+	void "transitionToUndeploying() transitions Product from DEPLOYED to UNDEPLOYING"() {
 		setupProduct(Product.State.DEPLOYED)
 		when:
-		service.transitionToDeleting(product)
+		service.transitionToUndeploying(product)
 		then:
-		product.state == Product.State.DELETING
+		product.state == Product.State.UNDEPLOYING
 	}
 
 	@Unroll
-	void "delete() throws InvalidStateTransitionException if Product.state == #state"(Product.State state) {
+	void "undeployed() throws InvalidStateTransitionException if Product.state == #state"(Product.State state) {
 		setupProduct(state)
 		when:
-		service.delete(product, null)
+		service.undeployed(product, null)
 		then:
 		thrown(InvalidStateTransitionException)
 		where:
-		state << [Product.State.DEPLOYING, Product.State.NEW]
+		state << [Product.State.DEPLOYING, Product.State.NOT_DEPLOYED]
 	}
 
-	void "delete() throws NotPermittedException if user is not devops"() {
-		setupProduct(Product.State.DELETING)
+	void "undeployed() throws NotPermittedException if user is not devops"() {
+		setupProduct(Product.State.UNDEPLOYING)
 		when:
-		service.delete(product, Stub(SecUser) {
+		service.undeployed(product, Stub(SecUser) {
 			isDevOps() >> false
 		})
 		then:
@@ -388,28 +388,28 @@ class ProductServiceSpec extends Specification {
 	}
 
 	@Unroll
-	void "delete() transitions Product from #state to DELETED"(Product.State state) {
+	void "undeployed() transitions Product from #state to NOT_DEPLOYED"(Product.State state) {
 		setupProduct(state)
 		service.permissionService = new PermissionService()
 
 		when:
-		service.delete(product, Stub(SecUser) {
+		service.undeployed(product, Stub(SecUser) {
 			isDevOps() >> true
 		})
 
 		then:
-		product.state == Product.State.DELETED
+		product.state == Product.State.NOT_DEPLOYED
 
 		where:
-		state << [Product.State.DEPLOYED, Product.State.DELETING, Product.State.DELETED]
+		state << [Product.State.DEPLOYED, Product.State.UNDEPLOYING]
 	}
 
-	void "delete() invokes permissionService#systemRevokeAnonymousAccess"() {
-		setupProduct(Product.State.DELETING)
+	void "undeployed() invokes permissionService#systemRevokeAnonymousAccess"() {
+		setupProduct(Product.State.UNDEPLOYING)
 		def permissionService = service.permissionService = Mock(PermissionService)
 
 		when:
-		service.delete(product, Stub(SecUser) {
+		service.undeployed(product, Stub(SecUser) {
 			isDevOps() >> true
 		})
 

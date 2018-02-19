@@ -52,7 +52,7 @@ class ProductService {
 	}
 
 	void transitionToDeploying(Product product, String tx) {
-		if (product.state == Product.State.NEW) {
+		if (product.state == Product.State.NOT_DEPLOYED) {
 			product.tx = tx
 			product.state = Product.State.DEPLOYING
 			product.save(failOnError: true)
@@ -61,24 +61,24 @@ class ProductService {
 		}
 	}
 
-	void transitionToDeleting(Product product) {
+	void transitionToUndeploying(Product product) {
 		if (product.state == Product.State.DEPLOYED) {
-			product.state = Product.State.DELETING
+			product.state = Product.State.UNDEPLOYING
 			product.save(failOnError: true)
 		} else {
-			throw new InvalidStateTransitionException(product.state, Product.State.DELETING)
+			throw new InvalidStateTransitionException(product.state, Product.State.UNDEPLOYING)
 		}
 	}
 
-	void delete(Product product, SecUser currentUser) throws NotPermittedException {
-		if (!(product.state in [Product.State.DEPLOYED, Product.State.DELETING, Product.State.DELETED])) {
-			throw new InvalidStateTransitionException(product.state, Product.State.DELETED)
+	void undeployed(Product product, SecUser currentUser) throws NotPermittedException {
+		if (!(product.state in [Product.State.DEPLOYED, Product.State.UNDEPLOYING])) {
+			throw new InvalidStateTransitionException(product.state, Product.State.NOT_DEPLOYED)
 		}
 		if (!currentUser.isDevOps()) {
 			throw new NotPermittedException("DevOps role required")
 		}
 		permissionService.systemRevokeAnonymousAccess(product)
-		product.state = Product.State.DELETED
+		product.state = Product.State.NOT_DEPLOYED
 		product.save(failOnError: true)
 	}
 }

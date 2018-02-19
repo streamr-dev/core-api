@@ -186,7 +186,7 @@ class ProductApiControllerSpec extends Specification {
 		1 * apiService.getByIdAndThrowIfNotFound(Product, "product-id") >> product
 	}
 
-	void "delete() invokes productService#delete"() {
+	void "delete() invokes productService#undeployed"() {
 		controller.apiService = Stub(ApiService) {
 			getByIdAndThrowIfNotFound(Product, "product-id") >> product
 		}
@@ -200,7 +200,7 @@ class ProductApiControllerSpec extends Specification {
 			controller.delete()
 		}
 		then:
-		1 * productService.delete(product, user)
+		1 * productService.undeployed(product, user)
 	}
 
 	void "delete() returns 204"() {
@@ -260,7 +260,7 @@ class ProductApiControllerSpec extends Specification {
 		response.json == product.toMap()
 	}
 
-	void "setDeleting() invokes productService#findById() and productService#transitionToDeleting()"() {
+	void "setUndeploying() invokes productService#findById() and productService#transitionToUndeploying()"() {
 		def productService = controller.productService = Mock(ProductService)
 
 		def user = request.apiUser = new SecUser()
@@ -268,15 +268,15 @@ class ProductApiControllerSpec extends Specification {
 		params.id = "product-id"
 		request.method = "POST"
 		when:
-		withFilters(action: "setDeleting") {
-			controller.setDeleting()
+		withFilters(action: "setUndeploying") {
+			controller.setUndeploying()
 		}
 		then:
 		1 * productService.findById("product-id", user, Permission.Operation.WRITE) >> product
-		1 * productService.transitionToDeleting(product)
+		1 * productService.transitionToUndeploying(product)
 	}
 
-	void "setDeleting() returns 200 and renders a product"() {
+	void "setUndeploying() returns 200 and renders a product"() {
 		controller.productService = Stub(ProductService) {
 			findById("product-id", _ as SecUser, Permission.Operation.WRITE) >> product
 		}
@@ -286,8 +286,8 @@ class ProductApiControllerSpec extends Specification {
 		params.id = "product-id"
 		request.method = "POST"
 		when:
-		withFilters(action: "setDeleting") {
-			controller.setDeleting()
+		withFilters(action: "setUndeploying") {
+			controller.setUndeploying()
 		}
 		then:
 		response.status == 200

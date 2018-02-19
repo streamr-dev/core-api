@@ -4,7 +4,6 @@ import com.unifina.domain.data.Stream
 import com.unifina.domain.security.Permission
 import com.unifina.utils.IdGenerator
 import grails.compiler.GrailsCompileStatic
-import groovy.transform.CompileStatic
 
 class Product {
 	String id
@@ -13,7 +12,7 @@ class Product {
 	String imageUrl
 
 	Category category
-	State state = State.NEW
+	State state = State.NOT_DEPLOYED
 	String tx
 	Stream previewStream
 	String previewConfigJson
@@ -34,28 +33,15 @@ class Product {
 	]
 
 	enum State {
-		NEW("new"),
-		DEPLOYING("deploying"),
-		DEPLOYED("deployed"),
-		DELETING("deleting"),
-		DELETED("deleted")
-
-		String id
-
-		State(String id) {
-			this.id = id
-		}
+		NOT_DEPLOYED,
+		DEPLOYING,
+		DEPLOYED,
+		UNDEPLOYING
 	}
 
 	enum Currency {
-		DATA("DATA"),
-		USD("USD")
-
-		String id
-
-		Currency(String id) {
-			this.id = id
-		}
+		DATA,
+		USD
 	}
 
 	static constraints = {

@@ -59,7 +59,7 @@ class ProductApiController {
 	@StreamrApi(authenticationLevel = AuthLevel.USER)
 	def delete(String id) {
 		Product product = apiService.getByIdAndThrowIfNotFound(Product, id)
-		productService.delete(product, loggedInUser())
+		productService.undeployed(product, loggedInUser())
 		render(status: 204)
 	}
 
@@ -73,9 +73,9 @@ class ProductApiController {
 
 	@GrailsCompileStatic
 	@StreamrApi(authenticationLevel = AuthLevel.USER)
-	def setDeleting(String id) {
+	def setUndeploying(String id) {
 		Product product = productService.findById(id, loggedInUser(), Permission.Operation.WRITE)
-		productService.transitionToDeleting(product)
+		productService.transitionToUndeploying(product)
 		render(product.toMap() as JSON)
 	}
 

@@ -26,7 +26,7 @@ class ProductListParamsSpec extends Specification {
 			beneficiaryAddress: "0x0000000000000000000000000000000000000000",
 			category: c1,
 			pricePerSecond: 5,
-			state: Product.State.NEW
+			state: Product.State.NOT_DEPLOYED
 		)
 		Product p2 = new Product(
 			name: "Hello Product",
@@ -128,7 +128,7 @@ class ProductListParamsSpec extends Specification {
 
 	void "createListCriteria() with states returns criteria that filters products by state"() {
 		when:
-		def paramsList = new ProductListParams(states: [Product.State.NEW, Product.State.DEPLOYING])
+		def paramsList = new ProductListParams(states: [Product.State.NOT_DEPLOYED, Product.State.DEPLOYING])
 		then:
 		fetchProductIdsFor(paramsList) == ["product-1", "product-2"] as Set
 	}
