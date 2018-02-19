@@ -4,6 +4,7 @@ import com.unifina.api.CreateProductCommand
 import com.unifina.api.ProductListParams
 import com.unifina.domain.marketplace.Category
 import com.unifina.domain.marketplace.Product
+import com.unifina.domain.security.Permission
 import com.unifina.domain.security.SecUser
 import com.unifina.filters.UnifinaCoreAPIFilters
 import com.unifina.service.ApiService
@@ -87,12 +88,12 @@ class ProductApiControllerSpec extends Specification {
 			controller.show()
 		}
 		then:
-		1 * productService.findById('product-id', _) >> product
+		1 * productService.findById('product-id', _, Permission.Operation.READ) >> product
 	}
 
 	void "show() returns 200 and renders a product"() {
 		controller.productService = Stub(ProductService) {
-			findById("product-id", _) >> product
+			findById("product-id", _, Permission.Operation.READ) >> product
 		}
 
 		params.id = "product-id"
@@ -200,13 +201,13 @@ class ProductApiControllerSpec extends Specification {
 			controller.setDeploying()
 		}
 		then:
-		1 * productService.findById("product-id", user) >> product
+		1 * productService.findById("product-id", user, Permission.Operation.WRITE) >> product
 		1 * productService.transitionToDeploying(product, "0x0000000000FFFFFFFFFF0000000000FFFFFFFFFF0000000000FFFFFFFFFFAAAA")
 	}
 
 	void "setDeploying() returns 200 and renders a product"() {
 		controller.productService = Stub(ProductService) {
-			findById("product-id", _ as SecUser) >> product
+			findById("product-id", _ as SecUser, Permission.Operation.WRITE) >> product
 		}
 
 		def user = request.apiUser = new SecUser()
@@ -237,13 +238,13 @@ class ProductApiControllerSpec extends Specification {
 			controller.setDeleting()
 		}
 		then:
-		1 * productService.findById("product-id", user) >> product
+		1 * productService.findById("product-id", user, Permission.Operation.WRITE) >> product
 		1 * productService.transitionToDeleting(product)
 	}
 
 	void "setDeleting() returns 200 and renders a product"() {
 		controller.productService = Stub(ProductService) {
-			findById("product-id", _ as SecUser) >> product
+			findById("product-id", _ as SecUser, Permission.Operation.WRITE) >> product
 		}
 
 		def user = request.apiUser = new SecUser()

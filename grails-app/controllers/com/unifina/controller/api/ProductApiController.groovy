@@ -4,6 +4,7 @@ import com.unifina.api.CreateProductCommand
 import com.unifina.api.ProductListParams
 import com.unifina.api.SetDeployingCommand
 import com.unifina.domain.marketplace.Product
+import com.unifina.domain.security.Permission
 import com.unifina.domain.security.SecUser
 import com.unifina.security.AuthLevel
 import com.unifina.security.StreamrApi
@@ -35,7 +36,7 @@ class ProductApiController {
 	@GrailsCompileStatic
 	@StreamrApi(authenticationLevel = AuthLevel.NONE)
 	def show(String id) {
-		Product product = productService.findById(id, loggedInUser())
+		Product product = productService.findById(id, loggedInUser(), Permission.Operation.READ)
 		render(product.toMap() as JSON)
 	}
 
@@ -57,7 +58,7 @@ class ProductApiController {
 	@GrailsCompileStatic
 	@StreamrApi(authenticationLevel = AuthLevel.USER)
 	def setDeploying(String id, SetDeployingCommand command) {
-		Product product = productService.findById(id, loggedInUser())
+		Product product = productService.findById(id, loggedInUser(), Permission.Operation.WRITE)
 		productService.transitionToDeploying(product, command.tx)
 		render(product.toMap() as JSON)
 	}
@@ -65,7 +66,7 @@ class ProductApiController {
 	@GrailsCompileStatic
 	@StreamrApi(authenticationLevel = AuthLevel.USER)
 	def setDeleting(String id) {
-		Product product = productService.findById(id, loggedInUser())
+		Product product = productService.findById(id, loggedInUser(), Permission.Operation.WRITE)
 		productService.transitionToDeleting(product)
 		render(product.toMap() as JSON)
 	}

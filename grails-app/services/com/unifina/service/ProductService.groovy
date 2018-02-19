@@ -16,8 +16,9 @@ class ProductService {
 		apiService.list(Product, listParams, currentUser)
 	}
 
-	Product findById(String id, SecUser currentUser) throws NotFoundException, NotPermittedException {
-		apiService.authorizedGetById(Product, id, currentUser, Permission.Operation.READ)
+	Product findById(String id, SecUser currentUser, Permission.Operation op)
+			throws NotFoundException, NotPermittedException {
+		apiService.authorizedGetById(Product, id, currentUser, op)
 	}
 
 	Product create(CreateProductCommand command, SecUser currentUser) throws ValidationException {

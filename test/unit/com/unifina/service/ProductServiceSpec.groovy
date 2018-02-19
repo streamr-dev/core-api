@@ -39,7 +39,7 @@ class ProductServiceSpec extends Specification {
 		def me = new SecUser(username: "me@streamr.com")
 
 		when:
-		service.findById("product-id", me)
+		service.findById("product-id", me, Permission.Operation.READ)
 
 		then:
 		1 * apiService.authorizedGetById(Product, "product-id", me, Permission.Operation.READ)
