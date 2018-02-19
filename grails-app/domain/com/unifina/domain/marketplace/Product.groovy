@@ -64,7 +64,7 @@ class Product {
 		imageUrl(nullable: true)
 		tx(nullable: true, validator: isEthereumTransaction)
 		streams(maxSize: 1000)
-		previewStream(nullable: true, validator: { Stream s, p -> s == null || s in p.streams }) // TODO: unit-test validation
+		previewStream(nullable: true, validator: { Stream s, p -> s == null || s in p.streams })
 		previewConfigJson(nullable: true)
 		ownerAddress(validator: isEthereumAddress)
 		beneficiaryAddress(validator: isEthereumAddress)
