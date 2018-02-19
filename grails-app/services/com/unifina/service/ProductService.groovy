@@ -61,6 +61,20 @@ class ProductService {
 		}
 	}
 
+	Product deployed(Product product, ProductDeployedCommand command, SecUser currentUser) {
+		if (!command.validate()) {
+			throw new ValidationException(command.errors)
+		}
+		if (product.state == Product.State.UNDEPLOYING) {
+			throw new InvalidStateTransitionException(product.state, Product.State.DEPLOYED)
+		}
+		verifyDevops(currentUser)
+
+		product.setProperties(command.properties)
+		product.state = Product.State.DEPLOYED
+		product.save(failOnError: true)
+	}
+
 	void transitionToUndeploying(Product product) {
 		if (product.state == Product.State.DEPLOYED) {
 			product.state = Product.State.UNDEPLOYING
@@ -74,11 +88,16 @@ class ProductService {
 		if (!(product.state in [Product.State.DEPLOYED, Product.State.UNDEPLOYING])) {
 			throw new InvalidStateTransitionException(product.state, Product.State.NOT_DEPLOYED)
 		}
-		if (!currentUser.isDevOps()) {
-			throw new NotPermittedException("DevOps role required")
-		}
+		verifyDevops(currentUser)
+
 		permissionService.systemRevokeAnonymousAccess(product)
 		product.state = Product.State.NOT_DEPLOYED
 		product.save(failOnError: true)
+	}
+
+	private static void verifyDevops(SecUser currentUser) {
+		if (!currentUser.isDevOps()) {
+			throw new NotPermittedException("DevOps role required")
+		}
 	}
 }

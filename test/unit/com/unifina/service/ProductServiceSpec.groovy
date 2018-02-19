@@ -416,4 +416,91 @@ class ProductServiceSpec extends Specification {
 		then:
 		1 * permissionService.systemRevokeAnonymousAccess(product)
 	}
+
+	void "deployed() throws ValidationException if command object does not pass validation"() {
+		setupProduct()
+		when:
+		service.deployed(product, new ProductDeployedCommand(), new SecUser())
+		then:
+		thrown(ValidationException)
+	}
+
+	void "deployed() throws InvalidStateTransitionException if Product.state == UNDEPLOYING"() {
+		setupProduct(Product.State.UNDEPLOYING)
+
+		def command = new ProductDeployedCommand(
+				ownerAddress: "0xBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB",
+				beneficiaryAddress: "0xAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
+				pricePerSecond: 2,
+				priceCurrency: Product.Currency.USD,
+				minimumSubscriptionInSeconds: 600
+		)
+
+		when:
+		service.deployed(product, command, new SecUser())
+		then:
+		thrown(InvalidStateTransitionException)
+	}
+
+	void "deployed() throws NotPermittedException if user is not devops"() {
+		setupProduct()
+
+		def command = new ProductDeployedCommand(
+				ownerAddress: "0xBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB",
+				beneficiaryAddress: "0xAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
+				pricePerSecond: 2,
+				priceCurrency: Product.Currency.USD,
+				minimumSubscriptionInSeconds: 600
+		)
+
+		when:
+		service.deployed(product, command, Stub(SecUser) {
+			isDevOps() >> false
+		})
+		then:
+		thrown(NotPermittedException)
+	}
+
+	void "deployed() transitions Product to DEPLOYED and updates Blockchain-related information"() {
+		setupProduct()
+
+		def command = new ProductDeployedCommand(
+				ownerAddress: "0xBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB",
+				beneficiaryAddress: "0xAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
+				pricePerSecond: 2,
+				priceCurrency: Product.Currency.USD,
+				minimumSubscriptionInSeconds: 600
+		)
+
+		when:
+		def product = service.deployed(product, command, Stub(SecUser) {
+			isDevOps() >> true
+		})
+
+		then:
+		Product.findById("product-id").toMap() == product.toMap()
+
+		and:
+		product.toMap() == [
+				id: "product-id",
+				name: "name",
+				description: "description",
+				imageUrl: null,
+				category: "category-id",
+				streams: [],
+				tx: null,
+				previewStream: null,
+				previewConfigJson: null,
+				created: product.dateCreated,
+				updated: product.lastUpdated,
+
+				// changes below
+				state: "DEPLOYED",
+				ownerAddress: "0xBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB",
+				beneficiaryAddress: "0xAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
+				pricePerSecond: 2,
+				priceCurrency: "USD",
+				minimumSubscriptionInSeconds: 600
+		]
+	}
 }
