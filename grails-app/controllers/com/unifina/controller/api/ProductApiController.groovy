@@ -3,6 +3,7 @@ package com.unifina.controller.api
 import com.unifina.api.CreateProductCommand
 import com.unifina.api.ProductListParams
 import com.unifina.api.SetDeployingCommand
+import com.unifina.api.UpdateProductCommand
 import com.unifina.domain.marketplace.Product
 import com.unifina.domain.security.Permission
 import com.unifina.domain.security.SecUser
@@ -44,6 +45,13 @@ class ProductApiController {
 	@StreamrApi(authenticationLevel = AuthLevel.USER)
 	def save(CreateProductCommand command) {
 		Product product = productService.create(command, loggedInUser())
+		render(product.toMap() as JSON)
+	}
+
+	@GrailsCompileStatic
+	@StreamrApi(authenticationLevel = AuthLevel.USER)
+	def update(String id, UpdateProductCommand command) {
+		Product product = productService.update(id, command, loggedInUser())
 		render(product.toMap() as JSON)
 	}
 

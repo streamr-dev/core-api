@@ -2,6 +2,7 @@ package com.unifina.controller.api
 
 import com.unifina.api.CreateProductCommand
 import com.unifina.api.ProductListParams
+import com.unifina.api.UpdateProductCommand
 import com.unifina.domain.marketplace.Category
 import com.unifina.domain.marketplace.Product
 import com.unifina.domain.security.Permission
@@ -131,6 +132,39 @@ class ProductApiControllerSpec extends Specification {
 		when:
 		withFilters(action: "save") {
 			controller.save()
+		}
+		then:
+		response.status == 200
+		response.json == product.toMap()
+	}
+
+	void "update() invokes productService#update"() {
+		def productService = controller.productService = Mock(ProductService)
+
+		def user = request.apiUser = new SecUser()
+
+		params.id = "product-id"
+		request.JSON == [:]
+		when:
+		withFilters(action: "update") {
+			controller.update()
+		}
+		then:
+		1 * productService.update("product-id", _ as UpdateProductCommand, user) >> product
+	}
+
+	void "update() returns 200 and renders a product"() {
+		controller.productService = Stub(ProductService) {
+			update("product-id", _, _) >> product
+		}
+
+		def user = request.apiUser = new SecUser()
+
+		params.id = "product-id"
+		request.JSON == [:]
+		when:
+		withFilters(action: "update") {
+			controller.update()
 		}
 		then:
 		response.status == 200
