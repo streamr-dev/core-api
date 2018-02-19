@@ -21,7 +21,8 @@ class ProductService {
 		apiService.authorizedGetById(Product, id, currentUser, op)
 	}
 
-	Product create(CreateProductCommand command, SecUser currentUser) throws ValidationException {
+	Product create(CreateProductCommand command, SecUser currentUser)
+			throws ValidationException, NotPermittedException {
 		if (!command.validate()) {
 			throw new ValidationException(command.errors)
 		}
@@ -34,6 +35,20 @@ class ProductService {
 		product.save(failOnError: true)
 		permissionService.systemGrantAll(currentUser, product)
 		return product
+	}
+
+	Product update(String id, UpdateProductCommand command, SecUser currentUser) {
+		if (!command.validate()) {
+			throw new ValidationException(command.errors)
+		}
+
+		command.streams.each {
+			permissionService.verifyShare(currentUser, it)
+		}
+
+		Product product = findById(id, currentUser, Permission.Operation.WRITE)
+		product.setProperties(command.properties)
+		return product.save(failOnError: true)
 	}
 
 	void transitionToDeploying(Product product, String tx) {
