@@ -24,15 +24,6 @@ class CreateProductCommand {
 	Long minimumSubscriptionInSeconds = 0
 
 	static constraints = {
-		name(blank: false)
-		description(blank: false)
-		imageUrl(nullable: true)
-		streams(maxSize: 1000)
-		previewStream(nullable: true, validator: { Stream s, CreateProductCommand p -> s == null || s in p.streams }) // TODO: unit-test validation
-		previewConfigJson(nullable: true)
-		ownerAddress(validator: Product.isEthereumAddress)
-		beneficiaryAddress(validator: Product.isEthereumAddress)
-		pricePerSecond(min: 0L)
-		minimumSubscriptionInSeconds(min: 0L)
+		importFrom(Product)
 	}
 }
