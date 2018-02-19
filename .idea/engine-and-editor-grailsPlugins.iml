@@ -54,8 +54,8 @@
       <sourceFolder url="file://$USER_HOME$/.grails/2.5.6/projects/streamr-core/plugins/mail-1.0.7/grails-app/services" isTestSource="false" />
       <sourceFolder url="file://$USER_HOME$/.grails/2.5.6/projects/streamr-core/plugins/mail-1.0.7/grails-app/taglib" isTestSource="false" />
     </content>
-    <content url="file://$USER_HOME$/.grails/2.5.6/projects/streamr-core/plugins/plastic-criteria-1.5">
-      <sourceFolder url="file://$USER_HOME$/.grails/2.5.6/projects/streamr-core/plugins/plastic-criteria-1.5/src/groovy" isTestSource="false" />
+    <content url="file://$USER_HOME$/.grails/2.5.6/projects/streamr-core/plugins/plastic-criteria-1.6.5">
+      <sourceFolder url="file://$USER_HOME$/.grails/2.5.6/projects/streamr-core/plugins/plastic-criteria-1.6.5/src/groovy" isTestSource="false" />
     </content>
     <content url="file://$USER_HOME$/.grails/2.5.6/projects/streamr-core/plugins/resources-1.2.14">
       <sourceFolder url="file://$USER_HOME$/.grails/2.5.6/projects/streamr-core/plugins/resources-1.2.14/src/java" isTestSource="false" />

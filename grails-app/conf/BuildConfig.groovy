@@ -119,7 +119,7 @@ grails.project.dependency.resolution = {
 		runtime(":cached-resources:1.0")
 		runtime(":zipped-resources:1.0")
 
-		test(":plastic-criteria:1.5")
+		test(":plastic-criteria:1.6.5")
 		test(":geb:$gebVersion")
 		test(":rest-client-builder:2.1.1")
 	}
