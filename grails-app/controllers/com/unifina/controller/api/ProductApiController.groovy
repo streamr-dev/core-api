@@ -20,9 +20,10 @@ import grails.plugin.springsecurity.annotation.Secured
 class ProductApiController {
 
 	static allowedMethods = [
-		setDeployed: "POST",
 		setDeploying: "POST",
-		setUndeploying: "POST"
+		setDeployed: "POST",
+		setUndeploying: "POST",
+		setUndeployed: "POST"
 	]
 
 	ApiService apiService
@@ -59,10 +60,10 @@ class ProductApiController {
 
 	@GrailsCompileStatic
 	@StreamrApi(authenticationLevel = AuthLevel.USER)
-	def delete(String id) {
-		Product product = apiService.getByIdAndThrowIfNotFound(Product, id)
-		productService.markAsUndeployed(product, loggedInUser())
-		render(status: 204)
+	def setDeploying(String id, SetDeployingCommand command) {
+		Product product = productService.findById(id, loggedInUser(), Permission.Operation.WRITE)
+		productService.transitionToDeploying(product, command.tx)
+		render(product.toMap() as JSON)
 	}
 
 	@GrailsCompileStatic
@@ -75,18 +76,18 @@ class ProductApiController {
 
 	@GrailsCompileStatic
 	@StreamrApi(authenticationLevel = AuthLevel.USER)
-	def setDeploying(String id, SetDeployingCommand command) {
+	def setUndeploying(String id) {
 		Product product = productService.findById(id, loggedInUser(), Permission.Operation.WRITE)
-		productService.transitionToDeploying(product, command.tx)
+		productService.transitionToUndeploying(product)
 		render(product.toMap() as JSON)
 	}
 
 	@GrailsCompileStatic
 	@StreamrApi(authenticationLevel = AuthLevel.USER)
-	def setUndeploying(String id) {
-		Product product = productService.findById(id, loggedInUser(), Permission.Operation.WRITE)
-		productService.transitionToUndeploying(product)
-		render(product.toMap() as JSON)
+	def setUndeployed(String id) {
+		Product product = apiService.getByIdAndThrowIfNotFound(Product, id)
+		productService.markAsUndeployed(product, loggedInUser())
+		render(status: 204)
 	}
 
 	SecUser loggedInUser() {

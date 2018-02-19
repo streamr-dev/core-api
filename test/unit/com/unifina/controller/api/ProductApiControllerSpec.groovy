@@ -172,53 +172,44 @@ class ProductApiControllerSpec extends Specification {
 		response.json == product.toMap()
 	}
 
-	void "delete() invokes apiService#getByIdAndThrowIfNotFound"() {
-		def apiService = controller.apiService = Mock(ApiService)
-		controller.productService = Stub(ProductService)
-
-		def user = request.apiUser = new SecUser()
-
-		params.id = "product-id"
-		when:
-		withFilters(action: "delete") {
-			controller.delete()
-		}
-		then:
-		1 * apiService.getByIdAndThrowIfNotFound(Product, "product-id") >> product
-	}
-
-	void "delete() invokes productService#markAsUndeployed"() {
-		controller.apiService = Stub(ApiService) {
-			getByIdAndThrowIfNotFound(Product, "product-id") >> product
-		}
+	void "setDeploying() invokes productService#findById() and productService#transitionToDeploying()"() {
 		def productService = controller.productService = Mock(ProductService)
 
 		def user = request.apiUser = new SecUser()
 
 		params.id = "product-id"
+		request.JSON = [
+				tx: "0x0000000000FFFFFFFFFF0000000000FFFFFFFFFF0000000000FFFFFFFFFFAAAA"
+		]
+		request.method = "POST"
 		when:
-		withFilters(action: "delete") {
-			controller.delete()
+		withFilters(action: "setDeploying") {
+			controller.setDeploying()
 		}
 		then:
-		1 * productService.markAsUndeployed(product, user)
+		1 * productService.findById("product-id", user, Permission.Operation.WRITE) >> product
+		1 * productService.transitionToDeploying(product, "0x0000000000FFFFFFFFFF0000000000FFFFFFFFFF0000000000FFFFFFFFFFAAAA")
 	}
 
-	void "delete() returns 204"() {
-		controller.apiService = Stub(ApiService) {
-			getByIdAndThrowIfNotFound(Product, "product-id") >> product
+	void "setDeploying() returns 200 and renders a product"() {
+		controller.productService = Stub(ProductService) {
+			findById("product-id", _ as SecUser, Permission.Operation.WRITE) >> product
 		}
-		controller.productService = Stub(ProductService)
 
 		def user = request.apiUser = new SecUser()
 
 		params.id = "product-id"
+		request.JSON = [
+				tx: "0x0000000000FFFFFFFFFF0000000000FFFFFFFFFF0000000000FFFFFFFFFFAAAA"
+		]
+		request.method = "POST"
 		when:
-		withFilters(action: "delete") {
-			controller.delete()
+		withFilters(action: "setDeploying") {
+			controller.setDeploying()
 		}
 		then:
-		response.status == 204
+		response.status == 200
+		response.json == product.toMap()
 	}
 
 	void "setDeployed() invokes apiService#getByIdAndThrowIfNotFound"() {
@@ -277,46 +268,6 @@ class ProductApiControllerSpec extends Specification {
 		response.json == product.toMap()
 	}
 
-	void "setDeploying() invokes productService#findById() and productService#transitionToDeploying()"() {
-		def productService = controller.productService = Mock(ProductService)
-
-		def user = request.apiUser = new SecUser()
-
-		params.id = "product-id"
-		request.JSON = [
-		    tx: "0x0000000000FFFFFFFFFF0000000000FFFFFFFFFF0000000000FFFFFFFFFFAAAA"
-		]
-		request.method = "POST"
-		when:
-		withFilters(action: "setDeploying") {
-			controller.setDeploying()
-		}
-		then:
-		1 * productService.findById("product-id", user, Permission.Operation.WRITE) >> product
-		1 * productService.transitionToDeploying(product, "0x0000000000FFFFFFFFFF0000000000FFFFFFFFFF0000000000FFFFFFFFFFAAAA")
-	}
-
-	void "setDeploying() returns 200 and renders a product"() {
-		controller.productService = Stub(ProductService) {
-			findById("product-id", _ as SecUser, Permission.Operation.WRITE) >> product
-		}
-
-		def user = request.apiUser = new SecUser()
-
-		params.id = "product-id"
-		request.JSON = [
-			tx: "0x0000000000FFFFFFFFFF0000000000FFFFFFFFFF0000000000FFFFFFFFFFAAAA"
-		]
-		request.method = "POST"
-		when:
-		withFilters(action: "setDeploying") {
-			controller.setDeploying()
-		}
-		then:
-		response.status == 200
-		response.json == product.toMap()
-	}
-
 	void "setUndeploying() invokes productService#findById() and productService#transitionToUndeploying()"() {
 		def productService = controller.productService = Mock(ProductService)
 
@@ -349,5 +300,57 @@ class ProductApiControllerSpec extends Specification {
 		then:
 		response.status == 200
 		response.json == product.toMap()
+	}
+
+	void "setUndeployed() invokes apiService#getByIdAndThrowIfNotFound"() {
+		def apiService = controller.apiService = Mock(ApiService)
+		controller.productService = Stub(ProductService)
+
+		def user = request.apiUser = new SecUser()
+
+		params.id = "product-id"
+		request.method = "POST"
+		when:
+		withFilters(action: "setUndeployed") {
+			controller.setUndeployed()
+		}
+		then:
+		1 * apiService.getByIdAndThrowIfNotFound(Product, "product-id") >> product
+	}
+
+	void "setUndeployed() invokes productService#markAsUndeployed"() {
+		controller.apiService = Stub(ApiService) {
+			getByIdAndThrowIfNotFound(Product, "product-id") >> product
+		}
+		def productService = controller.productService = Mock(ProductService)
+
+		def user = request.apiUser = new SecUser()
+
+		params.id = "product-id"
+		request.method = "POST"
+		when:
+		withFilters(action: "setUndeployed") {
+			controller.setUndeployed()
+		}
+		then:
+		1 * productService.markAsUndeployed(product, user)
+	}
+
+	void "setUndeployed() returns 204"() {
+		controller.apiService = Stub(ApiService) {
+			getByIdAndThrowIfNotFound(Product, "product-id") >> product
+		}
+		controller.productService = Stub(ProductService)
+
+		def user = request.apiUser = new SecUser()
+
+		params.id = "product-id"
+		request.method = "POST"
+		when:
+		withFilters(action: "setUndeployed") {
+			controller.setUndeployed()
+		}
+		then:
+		response.status == 204
 	}
 }
