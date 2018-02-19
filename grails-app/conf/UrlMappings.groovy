@@ -59,10 +59,10 @@ class UrlMappings {
 
 		"/api/v1/categories"(resources: "categoryApi")
 		"/api/v1/products"(resources: "productApi")
-		"/api/v1/products/$id/setDeploying"(resource: "productApi", action: "setDeploying")
-		"/api/v1/products/$id/setDeployed"(resource: "productApi", action: "setDeployed")
-		"/api/v1/products/$id/setUndeploying"(resource: "productApi", action: "setUndeploying")
-		"/api/v1/products/$id/setUndeployed"(resource: "productApi", action: "setUndeployed")
+		"/api/v1/products/$id/setDeploying"(controller: "productApi", action: "setDeploying")
+		"/api/v1/products/$id/setDeployed"(controller: "productApi", action: "setDeployed")
+		"/api/v1/products/$id/setUndeploying"(controller: "productApi", action: "setUndeploying")
+		"/api/v1/products/$id/setUndeployed"(controller: "productApi", action: "setUndeployed")
 
 		// Mappings for pages using React Router (the root for the router)
 		"/dashboard/editor/$id**?"(controller: "dashboard", action: "editor")
