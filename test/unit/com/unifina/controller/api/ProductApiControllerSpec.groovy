@@ -186,7 +186,7 @@ class ProductApiControllerSpec extends Specification {
 		1 * apiService.getByIdAndThrowIfNotFound(Product, "product-id") >> product
 	}
 
-	void "delete() invokes productService#undeployed"() {
+	void "delete() invokes productService#markAsUndeployed"() {
 		controller.apiService = Stub(ApiService) {
 			getByIdAndThrowIfNotFound(Product, "product-id") >> product
 		}
@@ -200,7 +200,7 @@ class ProductApiControllerSpec extends Specification {
 			controller.delete()
 		}
 		then:
-		1 * productService.undeployed(product, user)
+		1 * productService.markAsUndeployed(product, user)
 	}
 
 	void "delete() returns 204"() {

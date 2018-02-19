@@ -367,20 +367,20 @@ class ProductServiceSpec extends Specification {
 	}
 
 	@Unroll
-	void "undeployed() throws InvalidStateTransitionException if Product.state == #state"(Product.State state) {
+	void "markAsUndeployed() throws InvalidStateTransitionException if Product.state == #state"(Product.State state) {
 		setupProduct(state)
 		when:
-		service.undeployed(product, null)
+		service.markAsUndeployed(product, null)
 		then:
 		thrown(InvalidStateTransitionException)
 		where:
 		state << [Product.State.DEPLOYING, Product.State.NOT_DEPLOYED]
 	}
 
-	void "undeployed() throws NotPermittedException if user is not devops"() {
+	void "markAsUndeployed() throws NotPermittedException if user is not devops"() {
 		setupProduct(Product.State.UNDEPLOYING)
 		when:
-		service.undeployed(product, Stub(SecUser) {
+		service.markAsUndeployed(product, Stub(SecUser) {
 			isDevOps() >> false
 		})
 		then:
@@ -388,12 +388,12 @@ class ProductServiceSpec extends Specification {
 	}
 
 	@Unroll
-	void "undeployed() transitions Product from #state to NOT_DEPLOYED"(Product.State state) {
+	void "markAsUndeployed() transitions Product from #state to NOT_DEPLOYED"(Product.State state) {
 		setupProduct(state)
 		service.permissionService = new PermissionService()
 
 		when:
-		service.undeployed(product, Stub(SecUser) {
+		service.markAsUndeployed(product, Stub(SecUser) {
 			isDevOps() >> true
 		})
 
@@ -404,12 +404,12 @@ class ProductServiceSpec extends Specification {
 		state << [Product.State.DEPLOYED, Product.State.UNDEPLOYING]
 	}
 
-	void "undeployed() invokes permissionService#systemRevokeAnonymousAccess"() {
+	void "markAsUndeployed() invokes permissionService#systemRevokeAnonymousAccess"() {
 		setupProduct(Product.State.UNDEPLOYING)
 		def permissionService = service.permissionService = Mock(PermissionService)
 
 		when:
-		service.undeployed(product, Stub(SecUser) {
+		service.markAsUndeployed(product, Stub(SecUser) {
 			isDevOps() >> true
 		})
 
@@ -417,15 +417,15 @@ class ProductServiceSpec extends Specification {
 		1 * permissionService.systemRevokeAnonymousAccess(product)
 	}
 
-	void "deployed() throws ValidationException if command object does not pass validation"() {
+	void "markAsDeployed() throws ValidationException if command object does not pass validation"() {
 		setupProduct()
 		when:
-		service.deployed(product, new ProductDeployedCommand(), new SecUser())
+		service.markAsDeployed(product, new ProductDeployedCommand(), new SecUser())
 		then:
 		thrown(ValidationException)
 	}
 
-	void "deployed() throws InvalidStateTransitionException if Product.state == UNDEPLOYING"() {
+	void "markAsDeployed() throws InvalidStateTransitionException if Product.state == UNDEPLOYING"() {
 		setupProduct(Product.State.UNDEPLOYING)
 
 		def command = new ProductDeployedCommand(
@@ -437,12 +437,12 @@ class ProductServiceSpec extends Specification {
 		)
 
 		when:
-		service.deployed(product, command, new SecUser())
+		service.markAsDeployed(product, command, new SecUser())
 		then:
 		thrown(InvalidStateTransitionException)
 	}
 
-	void "deployed() throws NotPermittedException if user is not devops"() {
+	void "markAsDeployed() throws NotPermittedException if user is not devops"() {
 		setupProduct()
 
 		def command = new ProductDeployedCommand(
@@ -454,14 +454,14 @@ class ProductServiceSpec extends Specification {
 		)
 
 		when:
-		service.deployed(product, command, Stub(SecUser) {
+		service.markAsDeployed(product, command, Stub(SecUser) {
 			isDevOps() >> false
 		})
 		then:
 		thrown(NotPermittedException)
 	}
 
-	void "deployed() transitions Product to DEPLOYED and updates Blockchain-related information"() {
+	void "markAsDeployed() transitions Product to DEPLOYED and updates Blockchain-related information"() {
 		setupProduct()
 
 		def command = new ProductDeployedCommand(
@@ -473,7 +473,7 @@ class ProductServiceSpec extends Specification {
 		)
 
 		when:
-		def product = service.deployed(product, command, Stub(SecUser) {
+		def product = service.markAsDeployed(product, command, Stub(SecUser) {
 			isDevOps() >> true
 		})
 

@@ -59,7 +59,7 @@ class ProductApiController {
 	@StreamrApi(authenticationLevel = AuthLevel.USER)
 	def delete(String id) {
 		Product product = apiService.getByIdAndThrowIfNotFound(Product, id)
-		productService.undeployed(product, loggedInUser())
+		productService.markAsUndeployed(product, loggedInUser())
 		render(status: 204)
 	}
 

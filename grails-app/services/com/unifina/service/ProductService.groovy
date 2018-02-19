@@ -61,7 +61,7 @@ class ProductService {
 		}
 	}
 
-	Product deployed(Product product, ProductDeployedCommand command, SecUser currentUser) {
+	Product markAsDeployed(Product product, ProductDeployedCommand command, SecUser currentUser) {
 		if (!command.validate()) {
 			throw new ValidationException(command.errors)
 		}
@@ -84,7 +84,7 @@ class ProductService {
 		}
 	}
 
-	void undeployed(Product product, SecUser currentUser) throws NotPermittedException {
+	void markAsUndeployed(Product product, SecUser currentUser) throws NotPermittedException {
 		if (!(product.state in [Product.State.DEPLOYED, Product.State.UNDEPLOYING])) {
 			throw new InvalidStateTransitionException(product.state, Product.State.NOT_DEPLOYED)
 		}
