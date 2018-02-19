@@ -319,6 +319,43 @@ class ProductServiceSpec extends Specification {
 		product.dateCreated < product.lastUpdated
 	}
 
+	void "addStreamToProduct() verifies Stream via PermissionService#verifyShare"() {
+		setupStreams()
+		setupProduct()
+		def permissionService = service.permissionService = Mock(PermissionService)
+		def user = new SecUser()
+		when:
+		service.addStreamToProduct(product, s4, user)
+		then:
+		1 * permissionService.verifyShare(user, s4)
+
+	}
+
+	void "addStreamToProduct() adds Stream to Product"() {
+		setupStreams()
+		setupProduct()
+		assert !product.streams.contains(s4)
+
+		service.permissionService = Stub(PermissionService)
+		def user = new SecUser()
+
+		when:
+		service.addStreamToProduct(product, s4, user)
+		then:
+		product.streams.contains(s4)
+	}
+
+	void "removeStreamFromProduct() removes Stream from Product"() {
+		setupStreams()
+		setupProduct()
+		assert product.streams.contains(s1)
+
+		when:
+		service.removeStreamFromProduct(product, s1)
+		then:
+		!product.streams.contains(s1)
+	}
+
 	@Unroll
 	void "transitionToDeploying() throws InvalidStateTransitionException if Product.state == #state"(Product.State state) {
 		setupProduct(state)

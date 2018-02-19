@@ -51,6 +51,18 @@ class ProductService {
 		return product.save(failOnError: true)
 	}
 
+	void addStreamToProduct(Product product, Stream stream, SecUser currentUser)
+			throws ValidationException, NotPermittedException {
+		permissionService.verifyShare(currentUser, stream)
+		product.streams.add(stream)
+		product.save(failOnError: true)
+	}
+
+	void removeStreamFromProduct(Product product, Stream stream) {
+		product.removeFromStreams(stream)
+		product.save(failOnError: true)
+	}
+
 	void transitionToDeploying(Product product, String tx) {
 		if (product.state == Product.State.NOT_DEPLOYED) {
 			product.tx = tx
