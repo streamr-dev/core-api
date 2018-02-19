@@ -59,6 +59,7 @@ class UrlMappings {
 
 		"/api/v1/categories"(resources: "categoryApi")
 		"/api/v1/products"(resources: "productApi")
+		"/api/v1/products/$id/setDeployed"(resource: "productApi", action: "setDeployed")
 		"/api/v1/products/$id/setDeploying"(resource: "productApi", action: "setDeploying")
 		"/api/v1/products/$id/setUndeploying"(resource: "productApi", action: "setDeleting")
 

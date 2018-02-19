@@ -1,6 +1,7 @@
 package com.unifina.controller.api
 
 import com.unifina.api.CreateProductCommand
+import com.unifina.api.ProductDeployedCommand
 import com.unifina.api.ProductListParams
 import com.unifina.api.UpdateProductCommand
 import com.unifina.domain.marketplace.Category
@@ -218,6 +219,62 @@ class ProductApiControllerSpec extends Specification {
 		}
 		then:
 		response.status == 204
+	}
+
+	void "setDeployed() invokes apiService#getByIdAndThrowIfNotFound"() {
+		def apiService = controller.apiService = Mock(ApiService)
+		controller.productService = Stub(ProductService)
+
+		request.apiUser = new SecUser()
+
+		params.id = "product-id"
+		request.JSON = [:]
+		request.method = "POST"
+		when:
+		withFilters(action: "setDeployed") {
+			controller.setDeployed()
+		}
+		then:
+		1 * apiService.getByIdAndThrowIfNotFound(Product, "product-id") >> product
+	}
+
+	void "setDeployed() invokes productService#markAsDeployed"() {
+		controller.apiService = Stub(ApiService) {
+			getByIdAndThrowIfNotFound(Product, "product-id") >> product
+		}
+		def productService = controller.productService = Mock(ProductService)
+
+		def user = request.apiUser = new SecUser()
+
+		params.id = "product-id"
+		request.JSON = [:]
+		request.method = "POST"
+		when:
+		withFilters(action: "setDeployed") {
+			controller.setDeployed()
+		}
+		then:
+		1 * productService.markAsDeployed(product, _ as ProductDeployedCommand, user) >> product
+	}
+
+	void "setDeployed() returns 200 and renders a product"() {
+		controller.apiService = Stub(ApiService) {
+			getByIdAndThrowIfNotFound(Product, "product-id") >> product
+		}
+		controller.productService = Stub(ProductService) {
+			markAsDeployed(_, _, _) >> product
+		}
+
+		params.id = "product-id"
+		request.JSON = [:]
+		request.method = "POST"
+		when:
+		withFilters(action: "setDeployed") {
+			controller.setDeployed()
+		}
+		then:
+		response.status == 200
+		response.json == product.toMap()
 	}
 
 	void "setDeploying() invokes productService#findById() and productService#transitionToDeploying()"() {

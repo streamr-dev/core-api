@@ -1,6 +1,7 @@
 package com.unifina.controller.api
 
 import com.unifina.api.CreateProductCommand
+import com.unifina.api.ProductDeployedCommand
 import com.unifina.api.ProductListParams
 import com.unifina.api.SetDeployingCommand
 import com.unifina.api.UpdateProductCommand
@@ -19,6 +20,7 @@ import grails.plugin.springsecurity.annotation.Secured
 class ProductApiController {
 
 	static allowedMethods = [
+		setDeployed: "POST",
 		setDeploying: "POST",
 		setUndeploying: "POST"
 	]
@@ -61,6 +63,14 @@ class ProductApiController {
 		Product product = apiService.getByIdAndThrowIfNotFound(Product, id)
 		productService.markAsUndeployed(product, loggedInUser())
 		render(status: 204)
+	}
+
+	@GrailsCompileStatic
+	@StreamrApi(authenticationLevel = AuthLevel.USER)
+	def setDeployed(String id, ProductDeployedCommand command) {
+		Product product = apiService.getByIdAndThrowIfNotFound(Product, id)
+		productService.markAsDeployed(product, command, loggedInUser())
+		render(product.toMap() as JSON)
 	}
 
 	@GrailsCompileStatic
