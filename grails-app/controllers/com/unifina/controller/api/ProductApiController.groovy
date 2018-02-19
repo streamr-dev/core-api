@@ -20,7 +20,7 @@ class ProductApiController {
 
 	static allowedMethods = [
 		setDeploying: "POST",
-		setDeleting: "POST"
+		setUndeploying: "POST"
 	]
 
 	ApiService apiService
