@@ -4,6 +4,7 @@ import com.unifina.api.CreateProductCommand
 import com.unifina.api.ProductDeployedCommand
 import com.unifina.api.ProductListParams
 import com.unifina.api.UpdateProductCommand
+import com.unifina.api.ValidationException
 import com.unifina.domain.marketplace.Category
 import com.unifina.domain.marketplace.Product
 import com.unifina.domain.security.Permission
@@ -170,6 +171,22 @@ class ProductApiControllerSpec extends Specification {
 		then:
 		response.status == 200
 		response.json == product.toMap()
+	}
+
+	void "setDeploying() throws ValidationException if request body does not pass validation()"() {
+		def user = request.apiUser = new SecUser()
+
+		params.id = "product-id"
+		request.JSON = [
+				tx: "0x0"
+		]
+		request.method = "POST"
+		when:
+		withFilters(action: "setDeploying") {
+			controller.setDeploying()
+		}
+		then:
+		thrown(ValidationException)
 	}
 
 	void "setDeploying() invokes productService#findById() and productService#transitionToDeploying()"() {
