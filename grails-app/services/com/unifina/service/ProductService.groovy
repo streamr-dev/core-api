@@ -85,6 +85,8 @@ class ProductService {
 		product.setProperties(command.properties)
 		product.state = Product.State.DEPLOYED
 		product.save(failOnError: true)
+		permissionService.systemGrantAnonymousAccess(product)
+		return product
 	}
 
 	void transitionToUndeploying(Product product) {

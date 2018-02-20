@@ -500,6 +500,7 @@ class ProductServiceSpec extends Specification {
 
 	void "markAsDeployed() transitions Product to DEPLOYED and updates Blockchain-related information"() {
 		setupProduct()
+		service.permissionService = Stub(PermissionService)
 
 		def command = new ProductDeployedCommand(
 				ownerAddress: "0xBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB",
@@ -539,5 +540,26 @@ class ProductServiceSpec extends Specification {
 				priceCurrency: "USD",
 				minimumSubscriptionInSeconds: 600
 		]
+	}
+
+	void "markAsDeployed() grants public access to Product via permissionService#systemGrantAnonymousAccess"() {
+		setupProduct()
+		def permissionService = service.permissionService = Mock(PermissionService)
+
+		def command = new ProductDeployedCommand(
+				ownerAddress: "0xBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB",
+				beneficiaryAddress: "0xAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
+				pricePerSecond: 2,
+				priceCurrency: Product.Currency.USD,
+				minimumSubscriptionInSeconds: 600
+		)
+
+		when:
+		def product = service.markAsDeployed(product, command, Stub(SecUser) {
+			isDevOps() >> true
+		})
+
+		then:
+		1 * permissionService.systemGrantAnonymousAccess(product)
 	}
 }
