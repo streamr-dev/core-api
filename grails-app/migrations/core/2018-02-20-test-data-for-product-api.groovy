@@ -85,7 +85,7 @@ databaseChangeLog = {
 		insert(tableName: "category") {
 			column(name: "id", value: "automobile-id")
 			column(name: "name", value: "Automobile")
-			column(name: "default_image_url", value: "auto.png")
+			column(name: "image_url", value: "auto.png")
 		}
 
 		insert(tableName: "category") {
@@ -96,13 +96,13 @@ databaseChangeLog = {
 		insert(tableName: "category") {
 			column(name: "id", value: "cryptocurrencies-id")
 			column(name: "name", value: "Cryptocurrency")
-			column(name: "default_image_url", value: "crypto.png")
+			column(name: "image_url", value: "crypto.png")
 		}
 
 		insert(tableName: "category") {
 			column(name: "id", value: "financial-id")
 			column(name: "name", value: "Financial")
-			column(name: "default_image_url", value: "finance.png")
+			column(name: "image_url", value: "finance.png")
 		}
 
 		insert(tableName: "category") {
@@ -113,7 +113,7 @@ databaseChangeLog = {
 		insert(tableName: "category") {
 			column(name: "id", value: "satellite-id")
 			column(name: "name", value: "Satellite")
-			column(name: "default_image_url", value: "satellites-in-space-680px.png")
+			column(name: "image_url", value: "satellites-in-space-680px.png")
 		}
 	}
 }

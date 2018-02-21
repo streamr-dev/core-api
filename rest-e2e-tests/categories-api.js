@@ -17,32 +17,32 @@ describe('Categories API', () => {
             {
                 'id': 'ad-id',
                 'name': 'Advertising',
-                'defaultImageUrl': null
+                'imageUrl': null
             },
             {
                 'id': 'automobile-id',
                 'name': 'Automobile',
-                'defaultImageUrl': 'auto.png'
+                'imageUrl': 'auto.png'
             },
             {
                 'id': 'cryptocurrencies-id',
                 'name': 'Cryptocurrency',
-                'defaultImageUrl': 'crypto.png'
+                'imageUrl': 'crypto.png'
             },
             {
                 'id': 'financial-id',
                 'name': 'Financial',
-                'defaultImageUrl': 'finance.png'
+                'imageUrl': 'finance.png'
             },
             {
                 'id': 'personal-id',
                 'name': 'Personal',
-                'defaultImageUrl': null
+                'imageUrl': null
             },
             {
                 'id': 'satellite-id',
                 'name': 'Satellite',
-                'defaultImageUrl': 'satellites-in-space-680px.png'
+                'imageUrl': 'satellites-in-space-680px.png'
             }
         ])
     })
