@@ -2,7 +2,7 @@ const assert = require('chai').assert
 const initStreamrApi = require('./streamr-api-clients')
 
 const URL = 'http://localhost:8081/streamr-core/api/v1/'
-const LOGGING_ENABLED = false
+const LOGGING_ENABLED = true
 
 const AUTH_TOKEN = 'product-api-tester-key'
 const AUTH_TOKEN_2 = 'product-api-tester2-key'
@@ -487,7 +487,7 @@ describe('Products API', () => {
             assert.equal(json.message, 'DevOps role required')
         })
 
-        context('given valid body, parameters and having write permission', () => {
+        context('given valid body, parameters and having DevOps permission', () => {
             let response
             let json
 
@@ -549,6 +549,286 @@ describe('Products API', () => {
             it('minimumSubscriptionInSeconds of Product is updated', () => {
                 assert.equal(json.minimumSubscriptionInSeconds, 15)
             })
+        })
+    })
+
+    describe('POST /api/v1/products/:id/setUndeploying', () => {
+
+        before(async () => {
+            createdProductId = await createProductAndReturnId(genericProductBody)
+        })
+
+        it('requires authentication', async () => {
+            const response = await Streamr.api.v1.products
+                .setUndeploying(createdProductId)
+                .call()
+            const json = await response.json()
+
+            assert.equal(response.status, 401)
+            assert.equal(json.code, 'NOT_AUTHENTICATED')
+        })
+
+        it('Product must exist', async () => {
+            const response = await Streamr.api.v1.products
+                .setUndeploying('non-existing-id')
+                .withAuthToken(AUTH_TOKEN)
+                .call()
+            const json = await response.json()
+
+            assert.equal(response.status, 404)
+            assert.equal(json.code, 'NOT_FOUND')
+        })
+
+        it('requires write permission', async () => {
+            const response = await Streamr.api.v1.products
+                .setUndeploying(createdProductId)
+                .withAuthToken(AUTH_TOKEN_2)
+                .call()
+            const json = await response.json()
+
+            assert.equal(response.status, 403)
+            assert.equal(json.code, 'FORBIDDEN')
+            assert.equal(json.operation, 'write')
+        })
+
+        it('Product state cannot be NOT_DEPLOYED', async () => {
+            const response = await Streamr.api.v1.products
+                .setUndeploying(createdProductId)
+                .withAuthToken(AUTH_TOKEN)
+                .call()
+            const json = await response.json()
+
+            assert.equal(response.status, 409)
+            assert.equal(json.code, 'INVALID_STATE_TRANSITION')
+            assert.equal(json.message, 'Invalid transition NOT_DEPLOYED -> UNDEPLOYING')
+        })
+
+        it('Product state cannot be DEPLOYING', async () => {
+            await Streamr.api.v1.products
+                .setDeploying(createdProductId, {
+                    tx: '0xf4e80713fe051fe1d1f3e21abac5ace99cea012e307406fc51b507121d864c0f'
+                })
+                .withAuthToken(AUTH_TOKEN)
+                .call()
+
+            const response = await Streamr.api.v1.products
+                .setUndeploying(createdProductId)
+                .withAuthToken(AUTH_TOKEN)
+                .call()
+            const json = await response.json()
+
+            assert.equal(response.status, 409)
+            assert.equal(json.code, 'INVALID_STATE_TRANSITION')
+            assert.equal(json.message, 'Invalid transition DEPLOYING -> UNDEPLOYING')
+        })
+
+        context('given Product in DEPLOYED state and having write permission', () => {
+            let response
+            let json
+
+            before(async () => {
+                await Streamr.api.v1.products
+                    .setDeployed(createdProductId, {
+                        ownerAddress: '0xAAAAAAAAAABBBBBBBBBBCCCCCCCCCCDDDDDDDDDD',
+                        beneficiaryAddress: '0x0000000000000000000011111111111111111111',
+                        pricePerSecond: 5,
+                        priceCurrency: 'USD',
+                        minimumSubscriptionInSeconds: 60
+                    })
+                    .withAuthToken(DEVOPS_USER_TOKEN)
+                    .call()
+
+                response = await Streamr.api.v1.products
+                    .setUndeploying(createdProductId)
+                    .withAuthToken(AUTH_TOKEN)
+                    .call()
+
+                json = await response.json()
+            })
+
+            it('responds with 200', () => {
+                assert.equal(response.status, 200)
+            })
+
+            it('responds with Product', () => {
+                assert.equal(json.id, createdProductId)
+                assert.hasAllKeys(json, [
+                    'id',
+                    'name',
+                    'description',
+                    'imageUrl',
+                    'category',
+                    'streams',
+                    'state',
+                    'tx',
+                    'previewStream',
+                    'previewConfigJson',
+                    'ownerAddress',
+                    'beneficiaryAddress',
+                    'pricePerSecond',
+                    'priceCurrency',
+                    'minimumSubscriptionInSeconds',
+                    'created',
+                    'updated'
+                ])
+            })
+
+            it('state of Product is UNDEPLOYING', () => {
+                assert.equal(json.state, 'UNDEPLOYING')
+            })
+        })
+    })
+
+    describe('POST /api/v1/products/:id/setUndeployed', () => {
+
+        before(async () => {
+            createdProductId = await createProductAndReturnId(genericProductBody)
+        })
+
+        it('requires authentication', async () => {
+            const response = await Streamr.api.v1.products
+                .setUndeployed(createdProductId)
+                .call()
+            const json = await response.json()
+
+            assert.equal(response.status, 401)
+            assert.equal(json.code, 'NOT_AUTHENTICATED')
+        })
+
+        it('Product must exist', async () => {
+            const response = await Streamr.api.v1.products
+                .setUndeployed('non-existing-id')
+                .withAuthToken(AUTH_TOKEN)
+                .call()
+            const json = await response.json()
+
+            assert.equal(response.status, 404)
+            assert.equal(json.code, 'NOT_FOUND')
+        })
+
+        it('Product state cannot be NOT_DEPLOYED', async () => {
+            const response = await Streamr.api.v1.products
+                .setUndeployed(createdProductId)
+                .withAuthToken(AUTH_TOKEN)
+                .call()
+            const json = await response.json()
+
+            assert.equal(response.status, 409)
+            assert.equal(json.code, 'INVALID_STATE_TRANSITION')
+            assert.equal(json.message, 'Invalid transition NOT_DEPLOYED -> NOT_DEPLOYED')
+        })
+
+        it('Product state cannot be DEPLOYING', async () => {
+            await Streamr.api.v1.products
+                .setDeploying(createdProductId, {
+                    tx: '0xf4e80713fe051fe1d1f3e21abac5ace99cea012e307406fc51b507121d864c0f'
+                })
+                .withAuthToken(AUTH_TOKEN)
+                .call()
+
+            const response = await Streamr.api.v1.products
+                .setUndeployed(createdProductId)
+                .withAuthToken(AUTH_TOKEN)
+                .call()
+            const json = await response.json()
+
+            assert.equal(response.status, 409)
+            assert.equal(json.code, 'INVALID_STATE_TRANSITION')
+            assert.equal(json.message, 'Invalid transition DEPLOYING -> NOT_DEPLOYED')
+        })
+
+
+        it('requires DevOps role', async () => {
+            await Streamr.api.v1.products
+                .setDeployed(createdProductId, {
+                    ownerAddress: '0xAAAAAAAAAABBBBBBBBBBCCCCCCCCCCDDDDDDDDDD',
+                    beneficiaryAddress: '0x0000000000000000000011111111111111111111',
+                    pricePerSecond: 5,
+                    priceCurrency: 'USD',
+                    minimumSubscriptionInSeconds: 60
+                })
+                .withAuthToken(DEVOPS_USER_TOKEN)
+                .call()
+
+            const response = await Streamr.api.v1.products
+                .setUndeployed(createdProductId)
+                .withAuthToken(AUTH_TOKEN)
+                .call()
+            const json = await response.json()
+
+            assert.equal(response.status, 403)
+            assert.equal(json.code, 'FORBIDDEN')
+            assert.equal(json.message, 'DevOps role required')
+        })
+
+        context('given Product in DEPLOYED state and having DevOps permission', () => {
+            let response
+            let json
+
+            before(async () => {
+                await Streamr.api.v1.products
+                    .setDeployed(createdProductId, {
+                        ownerAddress: '0xAAAAAAAAAABBBBBBBBBBCCCCCCCCCCDDDDDDDDDD',
+                        beneficiaryAddress: '0x0000000000000000000011111111111111111111',
+                        pricePerSecond: 5,
+                        priceCurrency: 'USD',
+                        minimumSubscriptionInSeconds: 60
+                    })
+                    .withAuthToken(DEVOPS_USER_TOKEN)
+                    .call()
+
+                response = await Streamr.api.v1.products
+                    .setUndeployed(createdProductId)
+                    .withAuthToken(DEVOPS_USER_TOKEN)
+                    .call()
+
+                json = await response.json()
+            })
+
+            it('responds with 200', () => {
+                assert.equal(response.status, 200)
+            })
+
+            it('responds with Product', () => {
+                assert.equal(json.id, createdProductId)
+                assert.hasAllKeys(json, [
+                    'id',
+                    'name',
+                    'description',
+                    'imageUrl',
+                    'category',
+                    'streams',
+                    'state',
+                    'tx',
+                    'previewStream',
+                    'previewConfigJson',
+                    'ownerAddress',
+                    'beneficiaryAddress',
+                    'pricePerSecond',
+                    'priceCurrency',
+                    'minimumSubscriptionInSeconds',
+                    'created',
+                    'updated'
+                ])
+            })
+
+            it('state of Product is NOT_DEPLOYED', () => {
+                assert.equal(json.state, 'NOT_DEPLOYED')
+            })
+        })
+    })
+
+    describe('GET /api/v1/products', () => {
+        it('lists public Products when not authenticated', async () => {
+            const response = await Streamr.api.v1.products
+                .list({
+                    publicAccess: true
+                })
+                .call()
+            const json = await response.json()
+
+            assert.equal(response.status, 200)
+            assert.deepEqual(json, {})
         })
     })
 

@@ -109,12 +109,14 @@ class Products {
             .withBody(body)
     }
 
-    setUndeploying() {
-
+    setUndeploying(id) {
+        return new StreamrApiRequest(this.options)
+            .methodAndPath('POST', `products/${id}/setUndeploying`)
     }
 
-    setUndeployed() {
-
+    setUndeployed(id) {
+        return new StreamrApiRequest(this.options)
+            .methodAndPath('POST', `products/${id}/setUndeployed`)
     }
 }
 

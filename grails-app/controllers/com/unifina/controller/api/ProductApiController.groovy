@@ -91,7 +91,7 @@ class ProductApiController {
 	def setUndeployed(String id) {
 		Product product = apiService.getByIdAndThrowIfNotFound(Product, id)
 		productService.markAsUndeployed(product, loggedInUser())
-		render(status: 204)
+		render(product.toMap() as JSON)
 	}
 
 	SecUser loggedInUser() {
