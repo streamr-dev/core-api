@@ -43,7 +43,9 @@ class ProductServiceSpec extends Specification {
 				streams: s1 != null ? [s1, s2, s3] : [],
 				pricePerSecond: 10,
 				category: category,
-				state: state
+				state: state,
+				blockNumber: 40000,
+				blockIndex: 30
 		)
 		product.id = "product-id"
 		product.save(failOnError: true, validate: true)
@@ -459,7 +461,9 @@ class ProductServiceSpec extends Specification {
 				beneficiaryAddress: "0xAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
 				pricePerSecond: 2,
 				priceCurrency: Product.Currency.USD,
-				minimumSubscriptionInSeconds: 600
+				minimumSubscriptionInSeconds: 600,
+				blockNumber: 50000,
+				blockIndex: 10
 		)
 
 		when:
@@ -476,7 +480,9 @@ class ProductServiceSpec extends Specification {
 				beneficiaryAddress: "0xAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
 				pricePerSecond: 2,
 				priceCurrency: Product.Currency.USD,
-				minimumSubscriptionInSeconds: 600
+				minimumSubscriptionInSeconds: 600,
+				blockNumber: 50000,
+				blockIndex: 10
 		)
 
 		when:
@@ -485,6 +491,99 @@ class ProductServiceSpec extends Specification {
 		})
 		then:
 		thrown(NotPermittedException)
+	}
+
+	void "markAsDeployed() returns false if command object is stale"() {
+		setupProduct()
+		service.permissionService = Stub(PermissionService)
+
+		def command = new ProductDeployedCommand(
+				ownerAddress: "0xBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB",
+				beneficiaryAddress: "0xAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
+				pricePerSecond: 2,
+				priceCurrency: Product.Currency.USD,
+				minimumSubscriptionInSeconds: 600,
+				blockNumber: 30000,
+				blockIndex: 10
+		)
+
+		when:
+		boolean result = service.markAsDeployed(product, command, Stub(SecUser) {
+			isDevOps() >> true
+		})
+
+		then:
+		!result
+	}
+
+	void "markAsDeployed() does not invoke permissionService#systemGrantAnonymousAccess if command object is stale"() {
+		setupProduct()
+		def permissionService = service.permissionService = Mock(PermissionService)
+
+		def command = new ProductDeployedCommand(
+				ownerAddress: "0xBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB",
+				beneficiaryAddress: "0xAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
+				pricePerSecond: 2,
+				priceCurrency: Product.Currency.USD,
+				minimumSubscriptionInSeconds: 600,
+				blockNumber: 30000,
+				blockIndex: 10
+		)
+
+		when:
+		boolean result = service.markAsDeployed(product, command, Stub(SecUser) {
+			isDevOps() >> true
+		})
+
+		then:
+		0 * permissionService.systemGrantAnonymousAccess(_)
+	}
+
+	void "markAsDeployed() does not update Product if command object is stale"() {
+		setupProduct()
+		service.permissionService = Stub(PermissionService)
+
+		def command = new ProductDeployedCommand(
+				ownerAddress: "0xBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB",
+				beneficiaryAddress: "0xAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
+				pricePerSecond: 2,
+				priceCurrency: Product.Currency.USD,
+				minimumSubscriptionInSeconds: 600,
+				blockNumber: 30000,
+				blockIndex: 10
+		)
+
+		when:
+		service.markAsDeployed(product, command, Stub(SecUser) {
+			isDevOps() >> true
+		})
+
+		then:
+		product.state == Product.State.NOT_DEPLOYED
+		product.ownerAddress == "0x0000000000000000000000000000000000000000"
+	}
+
+	void "markAsDeployed() returns true if command not stale"() {
+		setupProduct()
+		service.permissionService = Stub(PermissionService)
+
+		def command = new ProductDeployedCommand(
+				ownerAddress: "0xBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB",
+				beneficiaryAddress: "0xAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
+				pricePerSecond: 2,
+				priceCurrency: Product.Currency.USD,
+				minimumSubscriptionInSeconds: 600,
+				blockNumber: 50000,
+				blockIndex: 10
+		)
+
+		when:
+		boolean result = service.markAsDeployed(product, command, Stub(SecUser) {
+			isDevOps() >> true
+		})
+
+		then:
+		result
 	}
 
 	void "markAsDeployed() transitions Product to DEPLOYED and updates Blockchain-related information"() {
@@ -496,11 +595,13 @@ class ProductServiceSpec extends Specification {
 				beneficiaryAddress: "0xAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
 				pricePerSecond: 2,
 				priceCurrency: Product.Currency.USD,
-				minimumSubscriptionInSeconds: 600
+				minimumSubscriptionInSeconds: 600,
+				blockNumber: 50000,
+				blockIndex: 10
 		)
 
 		when:
-		def product = service.markAsDeployed(product, command, Stub(SecUser) {
+		service.markAsDeployed(product, command, Stub(SecUser) {
 			isDevOps() >> true
 		})
 
@@ -539,7 +640,9 @@ class ProductServiceSpec extends Specification {
 				beneficiaryAddress: "0xAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
 				pricePerSecond: 2,
 				priceCurrency: Product.Currency.USD,
-				minimumSubscriptionInSeconds: 600
+				minimumSubscriptionInSeconds: 600,
+				blockNumber: 50000,
+				blockIndex: 10
 		)
 
 		when:

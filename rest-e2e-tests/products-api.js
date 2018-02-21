@@ -400,7 +400,9 @@ describe('Products API', () => {
             beneficiaryAddress: '0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF',
             pricePerSecond: 10,
             priceCurrency: 'DATA',
-            minimumSubscriptionInSeconds: 15
+            minimumSubscriptionInSeconds: 15,
+            blockNumber: 35000,
+            blockIndex: 80
         }
 
         it('requires authentication', async () => {
@@ -509,6 +511,33 @@ describe('Products API', () => {
                 assert.equal(json.minimumSubscriptionInSeconds, 15)
             })
         })
+
+        it('is an idempotent operation', async () => {
+            const response1 = await Streamr.api.v1.products
+                .setDeployed(createdProductId, deployedBody)
+                .withAuthToken(DEVOPS_USER_TOKEN)
+                .call()
+            const json1 = await response1.json()
+
+            const response2 = await Streamr.api.v1.products
+                .setDeployed(createdProductId, deployedBody)
+                .withAuthToken(DEVOPS_USER_TOKEN)
+                .call()
+            const json2 = await response2.json()
+
+            const response3 = await Streamr.api.v1.products
+                .setDeployed(createdProductId, deployedBody)
+                .withAuthToken(DEVOPS_USER_TOKEN)
+                .call()
+            const json3 = await response3.json()
+
+            assert.equal(response1.status, 200)
+            assert.equal(response2.status, 200)
+            assert.equal(response3.status, 200)
+
+            assert.deepEqual(json1, json2)
+            assert.deepEqual(json2, json3)
+        })
     })
 
     describe('POST /api/v1/products/:id/setUndeploying', () => {
@@ -592,7 +621,9 @@ describe('Products API', () => {
                         beneficiaryAddress: '0x0000000000000000000011111111111111111111',
                         pricePerSecond: 5,
                         priceCurrency: 'USD',
-                        minimumSubscriptionInSeconds: 60
+                        minimumSubscriptionInSeconds: 60,
+                        blockNumber: 35000,
+                        blockIndex: 80
                     })
                     .withAuthToken(DEVOPS_USER_TOKEN)
                     .call()
@@ -703,7 +734,9 @@ describe('Products API', () => {
                     beneficiaryAddress: '0x0000000000000000000011111111111111111111',
                     pricePerSecond: 5,
                     priceCurrency: 'USD',
-                    minimumSubscriptionInSeconds: 60
+                    minimumSubscriptionInSeconds: 60,
+                    blockNumber: 35000,
+                    blockIndex: 80
                 })
                 .withAuthToken(DEVOPS_USER_TOKEN)
                 .call()
@@ -730,7 +763,9 @@ describe('Products API', () => {
                         beneficiaryAddress: '0x0000000000000000000011111111111111111111',
                         pricePerSecond: 5,
                         priceCurrency: 'USD',
-                        minimumSubscriptionInSeconds: 60
+                        minimumSubscriptionInSeconds: 60,
+                        blockNumber: 35000,
+                        blockIndex: 80
                     })
                     .withAuthToken(DEVOPS_USER_TOKEN)
                     .call()

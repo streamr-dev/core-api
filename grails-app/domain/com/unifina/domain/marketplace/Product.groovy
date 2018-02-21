@@ -25,6 +25,8 @@ class Product {
 	Long pricePerSecond
 	Currency priceCurrency = Currency.DATA
 	Long minimumSubscriptionInSeconds = 0
+	Long blockNumber = 0
+	Long blockIndex = 0
 
 	static hasMany = [
 		permissions: Permission,
@@ -54,6 +56,8 @@ class Product {
 		beneficiaryAddress(validator: isEthereumAddress)
 		pricePerSecond(min: 0L)
 		minimumSubscriptionInSeconds(min: 0L)
+		blockNumber(min: 0L)
+		blockIndex(min: 0L)
 	}
 
 	static mapping = {

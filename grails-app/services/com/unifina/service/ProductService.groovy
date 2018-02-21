@@ -72,9 +72,12 @@ class ProductService {
 		}
 	}
 
-	Product markAsDeployed(Product product, ProductDeployedCommand command, SecUser currentUser) {
+	boolean markAsDeployed(Product product, ProductDeployedCommand command, SecUser currentUser) {
 		if (!command.validate()) {
 			throw new ValidationException(command.errors)
+		}
+		if (command.isStale(product)) {
+			return false
 		}
 		if (product.state == Product.State.UNDEPLOYING) {
 			throw new InvalidStateTransitionException(product.state, Product.State.DEPLOYED)
@@ -85,7 +88,7 @@ class ProductService {
 		product.state = Product.State.DEPLOYED
 		product.save(failOnError: true)
 		permissionService.systemGrantAnonymousAccess(product)
-		return product
+		return true
 	}
 
 	void transitionToUndeploying(Product product) {
