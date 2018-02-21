@@ -353,7 +353,7 @@ class ProductApiControllerSpec extends Specification {
 		1 * productService.markAsUndeployed(product, user)
 	}
 
-	void "setUndeployed() returns 204"() {
+	void "setUndeployed() returns 200 and renders a product"() {
 		controller.apiService = Stub(ApiService) {
 			getByIdAndThrowIfNotFound(Product, "product-id") >> product
 		}
@@ -368,6 +368,7 @@ class ProductApiControllerSpec extends Specification {
 			controller.setUndeployed()
 		}
 		then:
-		response.status == 204
+		response.status == 200
+		response.json == product.toMap()
 	}
 }
