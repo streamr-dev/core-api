@@ -124,7 +124,6 @@ describe('Products API', () => {
                     category: 'satellite-id',
                     streams: [],
                     state: 'NOT_DEPLOYED',
-                    tx: null,
                     previewStream: null,
                     previewConfigJson: null,
                     ownerAddress: '0xAAAAAAAAAABBBBBBBBBBCCCCCCCCCCDDDDDDDDDD',
@@ -190,7 +189,6 @@ describe('Products API', () => {
                     'category',
                     'streams',
                     'state',
-                    'tx',
                     'previewStream',
                     'previewConfigJson',
                     'ownerAddress',
@@ -296,7 +294,6 @@ describe('Products API', () => {
                     // above are changes
 
                     state: 'NOT_DEPLOYED',
-                    tx: null,
                     previewStream: null,
                     previewConfigJson: null,
                     ownerAddress: '0xAAAAAAAAAABBBBBBBBBBCCCCCCCCCCDDDDDDDDDD',
@@ -317,7 +314,7 @@ describe('Products API', () => {
 
         it('requires authentication', async () => {
             const response = await Streamr.api.v1.products
-                .setDeploying('id', {})
+                .setDeploying('id')
                 .call()
             const json = await response.json()
 
@@ -325,37 +322,9 @@ describe('Products API', () => {
             assert.equal(json.code, 'NOT_AUTHENTICATED')
         })
 
-        it('requires parameter tx', async () => {
-            const response = await Streamr.api.v1.products
-                .setDeploying(createdProductId, {})
-                .withAuthToken(AUTH_TOKEN)
-                .call()
-            const json = await response.json()
-
-            assert.equal(response.status, 422)
-            assert.equal(json.code, 'VALIDATION_ERROR')
-            assert.include(json.message, 'nullable')
-        })
-
-        it('parameter tx is validated', async () => {
-            const response = await Streamr.api.v1.products
-                .setDeploying(createdProductId, {
-                    tx: '0x0'
-                })
-                .withAuthToken(AUTH_TOKEN)
-                .call()
-            const json = await response.json()
-
-            assert.equal(response.status, 422)
-            assert.equal(json.code, 'VALIDATION_ERROR')
-            assert.include(json.message, 'isEthereumTransaction')
-        })
-
         it('Product must exist', async () => {
             const response = await Streamr.api.v1.products
-                .setDeploying('non-existing-product-id', {
-                    tx: '0xf4e80713fe051fe1d1f3e21abac5ace99cea012e307406fc51b507121d864c0f'
-                })
+                .setDeploying('non-existing-product-id')
                 .withAuthToken(AUTH_TOKEN)
                 .call()
             const json = await response.json()
@@ -366,9 +335,7 @@ describe('Products API', () => {
 
         it('requires write permission', async () => {
             const response = await Streamr.api.v1.products
-                .setDeploying(createdProductId, {
-                    tx: '0xf4e80713fe051fe1d1f3e21abac5ace99cea012e307406fc51b507121d864c0f'
-                })
+                .setDeploying(createdProductId)
                 .withAuthToken(AUTH_TOKEN_2)
                 .call()
             const json = await response.json()
@@ -384,9 +351,7 @@ describe('Products API', () => {
 
             before(async () => {
                 response = await Streamr.api.v1.products
-                    .setDeploying(createdProductId, {
-                        tx: '0xf4e80713fe051fe1d1f3e21abac5ace99cea012e307406fc51b507121d864c0f'
-                    })
+                    .setDeploying(createdProductId)
                     .withAuthToken(AUTH_TOKEN)
                     .call()
                 json = await response.json()
@@ -406,7 +371,6 @@ describe('Products API', () => {
                     'category',
                     'streams',
                     'state',
-                    'tx',
                     'previewStream',
                     'previewConfigJson',
                     'ownerAddress',
@@ -421,10 +385,6 @@ describe('Products API', () => {
 
             it('state of Product is DEPLOYING', () => {
                 assert.equal(json.state, 'DEPLOYING')
-            })
-
-            it('tx has been attached to Product', () => {
-                assert.equal(json.tx, '0xf4e80713fe051fe1d1f3e21abac5ace99cea012e307406fc51b507121d864c0f')
             })
         })
     })
@@ -513,7 +473,6 @@ describe('Products API', () => {
                     'category',
                     'streams',
                     'state',
-                    'tx',
                     'previewStream',
                     'previewConfigJson',
                     'ownerAddress',
@@ -660,7 +619,6 @@ describe('Products API', () => {
                     'category',
                     'streams',
                     'state',
-                    'tx',
                     'previewStream',
                     'previewConfigJson',
                     'ownerAddress',
@@ -799,7 +757,6 @@ describe('Products API', () => {
                     'category',
                     'streams',
                     'state',
-                    'tx',
                     'previewStream',
                     'previewConfigJson',
                     'ownerAddress',

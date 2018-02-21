@@ -63,9 +63,8 @@ class ProductService {
 		product.save(failOnError: true)
 	}
 
-	void transitionToDeploying(Product product, String tx) {
+	void transitionToDeploying(Product product) {
 		if (product.state == Product.State.NOT_DEPLOYED) {
-			product.tx = tx
 			product.state = Product.State.DEPLOYING
 			product.save(failOnError: true)
 		} else {

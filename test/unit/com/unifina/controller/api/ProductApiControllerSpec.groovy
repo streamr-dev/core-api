@@ -173,31 +173,12 @@ class ProductApiControllerSpec extends Specification {
 		response.json == product.toMap()
 	}
 
-	void "setDeploying() throws ValidationException if request body does not pass validation()"() {
-		def user = request.apiUser = new SecUser()
-
-		params.id = "product-id"
-		request.JSON = [
-				tx: "0x0"
-		]
-		request.method = "POST"
-		when:
-		withFilters(action: "setDeploying") {
-			controller.setDeploying()
-		}
-		then:
-		thrown(ValidationException)
-	}
-
 	void "setDeploying() invokes productService#findById() and productService#transitionToDeploying()"() {
 		def productService = controller.productService = Mock(ProductService)
 
 		def user = request.apiUser = new SecUser()
 
 		params.id = "product-id"
-		request.JSON = [
-				tx: "0x0000000000FFFFFFFFFF0000000000FFFFFFFFFF0000000000FFFFFFFFFFAAAA"
-		]
 		request.method = "POST"
 		when:
 		withFilters(action: "setDeploying") {
@@ -205,7 +186,7 @@ class ProductApiControllerSpec extends Specification {
 		}
 		then:
 		1 * productService.findById("product-id", user, Permission.Operation.WRITE) >> product
-		1 * productService.transitionToDeploying(product, "0x0000000000FFFFFFFFFF0000000000FFFFFFFFFF0000000000FFFFFFFFFFAAAA")
+		1 * productService.transitionToDeploying(product)
 	}
 
 	void "setDeploying() returns 200 and renders a product"() {

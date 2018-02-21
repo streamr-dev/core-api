@@ -97,10 +97,9 @@ class Products {
             .withBody(body)
     }
 
-    setDeploying(id, body) {
+    setDeploying(id) {
         return new StreamrApiRequest(this.options)
             .methodAndPath('POST', `products/${id}/setDeploying`)
-            .withBody(body)
     }
 
     setDeployed(id, body) {

@@ -13,7 +13,6 @@ class Product {
 
 	Category category
 	State state = State.NOT_DEPLOYED
-	String tx
 	Stream previewStream
 	String previewConfigJson
 
@@ -48,7 +47,6 @@ class Product {
 		name(blank: false)
 		description(blank: false)
 		imageUrl(nullable: true)
-		tx(nullable: true, validator: isEthereumTransaction)
 		streams(maxSize: 1000)
 		previewStream(nullable: true, validator: { Stream s, p -> s == null || s in p.streams })
 		previewConfigJson(nullable: true)
@@ -78,7 +76,6 @@ class Product {
 			category: category.id,
 			streams: streams*.id,
 			state: state.toString(),
-			tx: tx,
 			previewStream: previewStream,
 			previewConfigJson: previewConfigJson,
 			created: dateCreated,
@@ -93,9 +90,5 @@ class Product {
 
 	static isEthereumAddress = { String value, object ->
 		value ==~ /^0x[a-fA-F0-9]{40}$/ ?: "validation.isEthereumAddress"
-	}
-
-	static isEthereumTransaction = { String value, object ->
-		value == null ?: value ==~ /^0x[a-fA-F0-9]{64}$/ ?: "validation.isEthereumTransaction"
 	}
 }

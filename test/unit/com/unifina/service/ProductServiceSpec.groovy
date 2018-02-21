@@ -109,7 +109,6 @@ class ProductServiceSpec extends Specification {
 			category: "category-id",
 			streams: ["stream-1", "stream-2", "stream-3"],
 			state: "NOT_DEPLOYED",
-			tx: null,
 			previewStream: null,
 			previewConfigJson: null,
 			created: product.dateCreated,
@@ -305,7 +304,6 @@ class ProductServiceSpec extends Specification {
 				category: "category2-id",
 				streams: ["stream-2", "stream-4"],
 				state: "NOT_DEPLOYED",
-				tx: null,
 				previewStream: null,
 				previewConfigJson: null,
 				created: product.dateCreated,
@@ -360,28 +358,19 @@ class ProductServiceSpec extends Specification {
 	void "transitionToDeploying() throws InvalidStateTransitionException if Product.state == #state"(Product.State state) {
 		setupProduct(state)
 		when:
-		service.transitionToDeploying(product, "0xABCDEF")
+		service.transitionToDeploying(product)
 		then:
 		thrown(InvalidStateTransitionException)
 		where:
 		state << [Product.State.DEPLOYING, Product.State.UNDEPLOYING, Product.State.DEPLOYED]
 	}
 
-	void "transitionToDeploying() throws ValidationException given invalid tx"() {
+	void "transitionToDeploying() transitions Product from NOT_DEPLOYED to DEPLOYING"() {
 		setupProduct(Product.State.NOT_DEPLOYED)
 		when:
-		service.transitionToDeploying(product, "0x0")
-		then:
-		thrown(grails.validation.ValidationException)
-	}
-
-	void "transitionToDeploying() sets tx and transitions Product from NOT_DEPLOYED to DEPLOYING"() {
-		setupProduct(Product.State.NOT_DEPLOYED)
-		when:
-		service.transitionToDeploying(product, "0x9e37846ea5238d0a630e8710249d3bf9668feabcf39360ea7c8778eec2cda1a2")
+		service.transitionToDeploying(product)
 		then:
 		product.state == Product.State.DEPLOYING
-		product.tx == "0x9e37846ea5238d0a630e8710249d3bf9668feabcf39360ea7c8778eec2cda1a2"
 	}
 
 	@Unroll
@@ -526,7 +515,6 @@ class ProductServiceSpec extends Specification {
 				imageUrl: null,
 				category: "category-id",
 				streams: [],
-				tx: null,
 				previewStream: null,
 				previewConfigJson: null,
 				created: product.dateCreated,

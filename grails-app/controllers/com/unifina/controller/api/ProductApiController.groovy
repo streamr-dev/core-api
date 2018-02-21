@@ -3,9 +3,7 @@ package com.unifina.controller.api
 import com.unifina.api.CreateProductCommand
 import com.unifina.api.ProductDeployedCommand
 import com.unifina.api.ProductListParams
-import com.unifina.api.SetDeployingCommand
 import com.unifina.api.UpdateProductCommand
-import com.unifina.api.ValidationException
 import com.unifina.domain.marketplace.Product
 import com.unifina.domain.security.Permission
 import com.unifina.domain.security.SecUser
@@ -61,12 +59,9 @@ class ProductApiController {
 
 	@GrailsCompileStatic
 	@StreamrApi(authenticationLevel = AuthLevel.USER)
-	def setDeploying(String id, SetDeployingCommand command) {
-		if (!command.validate()) {
-			throw new ValidationException(command.errors)
-		}
+	def setDeploying(String id) {
 		Product product = productService.findById(id, loggedInUser(), Permission.Operation.WRITE)
-		productService.transitionToDeploying(product, command.tx)
+		productService.transitionToDeploying(product)
 		render(product.toMap() as JSON)
 	}
 

@@ -74,8 +74,6 @@ databaseChangeLog = {
 			column(name: "state", type: "varchar(255)") {
 				constraints(nullable: "false")
 			}
-
-			column(name: "tx", type: "varchar(255)")
 		}
 	}
 
