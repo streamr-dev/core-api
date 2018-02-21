@@ -7,7 +7,7 @@ databaseChangeLog = {
 				constraints(nullable: "false", primaryKey: "true", primaryKeyName: "categoryPK")
 			}
 
-			column(name: "default_image_url", type: "varchar(2048)")
+			column(name: "image_url", type: "varchar(2048)")
 
 			column(name: "name", type: "varchar(255)") {
 				constraints(nullable: "false")
