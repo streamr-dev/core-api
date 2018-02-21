@@ -12,7 +12,7 @@ import spock.lang.Specification
 class CategoryApiControllerSpec extends Specification {
 
 	void "lists categories in alphabetical order"() {
-		Category c1 = new Category(name: "Traffic", defaultImageUrl: "traffic.png")
+		Category c1 = new Category(name: "Traffic", imageUrl: "traffic.png")
 		c1.id = "id-1"
 		c1.save(failOnError: true, validate: true)
 
@@ -37,17 +37,17 @@ class CategoryApiControllerSpec extends Specification {
 			[
 				id: "id-3",
 				name: "Automobile",
-				defaultImageUrl: null
+				imageUrl: null
 			],
 			[
 				id: "id-2",
 				name: "Cryptocurrency",
-				defaultImageUrl: null
+				imageUrl: null
 			],
 			[
 				id: "id-1",
 				name: "Traffic",
-				defaultImageUrl: "traffic.png"
+				imageUrl: "traffic.png"
 			],
 		]
 	}
