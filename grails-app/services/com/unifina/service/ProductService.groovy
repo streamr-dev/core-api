@@ -100,15 +100,23 @@ class ProductService {
 		}
 	}
 
-	void markAsUndeployed(Product product, SecUser currentUser) throws NotPermittedException {
-		if (!(product.state in [Product.State.DEPLOYED, Product.State.UNDEPLOYING])) {
+	boolean markAsUndeployed(Product product, ProductUndeployedCommand command, SecUser currentUser) {
+		if (!command.validate()) {
+			throw new ValidationException(command.errors)
+		}
+		if (command.isStale(product)) {
+			return false
+		}
+		if (product.state in [Product.State.DEPLOYING, Product.State.NOT_DEPLOYED]) {
 			throw new InvalidStateTransitionException(product.state, Product.State.NOT_DEPLOYED)
 		}
 		verifyDevops(currentUser)
 
-		permissionService.systemRevokeAnonymousAccess(product)
+		product.setProperties(command.properties)
 		product.state = Product.State.NOT_DEPLOYED
 		product.save(failOnError: true)
+		permissionService.systemRevokeAnonymousAccess(product)
+		return true
 	}
 
 	private static void verifyDevops(SecUser currentUser) {

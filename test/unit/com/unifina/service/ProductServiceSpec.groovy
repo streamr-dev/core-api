@@ -397,8 +397,9 @@ class ProductServiceSpec extends Specification {
 	@Unroll
 	void "markAsUndeployed() throws InvalidStateTransitionException if Product.state == #state"(Product.State state) {
 		setupProduct(state)
+		def command = new ProductUndeployedCommand(blockNumber: 50000, blockIndex: 15)
 		when:
-		service.markAsUndeployed(product, null)
+		service.markAsUndeployed(product, command, null)
 		then:
 		thrown(InvalidStateTransitionException)
 		where:
@@ -407,12 +408,74 @@ class ProductServiceSpec extends Specification {
 
 	void "markAsUndeployed() throws NotPermittedException if user is not devops"() {
 		setupProduct(Product.State.UNDEPLOYING)
+		def command = new ProductUndeployedCommand(blockNumber: 50000, blockIndex: 15)
+
 		when:
-		service.markAsUndeployed(product, Stub(SecUser) {
+		service.markAsUndeployed(product, command, Stub(SecUser) {
 			isDevOps() >> false
 		})
 		then:
 		thrown(NotPermittedException)
+	}
+
+	void "markAsUndeployed() returns false if command is stale"() {
+		setupProduct(Product.State.UNDEPLOYING)
+		service.permissionService = new PermissionService()
+
+		def command = new ProductUndeployedCommand(blockNumber: 30000, blockIndex: 15)
+
+		when:
+		boolean result = service.markAsUndeployed(product, command, Stub(SecUser) {
+			isDevOps() >> true
+		})
+
+		then:
+		!result
+	}
+
+	void "markAsUndeployed() does not invoke permissionService#systemRevokeAnonymousAccess if command is stale"() {
+		setupProduct(Product.State.DEPLOYED)
+		def permissionService = service.permissionService = Mock(PermissionService)
+
+		def command = new ProductUndeployedCommand(blockNumber: 30000, blockIndex: 15)
+
+		when:
+		service.markAsUndeployed(product, command, Stub(SecUser) {
+			isDevOps() >> true
+		})
+
+		then:
+		0 * permissionService.systemRevokeAnonymousAccess(_)
+	}
+
+	void "markAsUndeployed() does not transition Product to NOT_DEPLOYED if command is stale"() {
+		setupProduct(Product.State.DEPLOYED)
+		def permissionService = service.permissionService = Mock(PermissionService)
+
+		def command = new ProductUndeployedCommand(blockNumber: 30000, blockIndex: 15)
+
+		when:
+		service.markAsUndeployed(product, command, Stub(SecUser) {
+			isDevOps() >> true
+		})
+
+		then:
+		product.state != Product.State.NOT_DEPLOYED
+	}
+
+	void "markAsUndeployed() returns true if command not stale"() {
+		setupProduct(Product.State.UNDEPLOYING)
+		service.permissionService = new PermissionService()
+
+		def command = new ProductUndeployedCommand(blockNumber: 50000, blockIndex: 15)
+
+		when:
+		boolean result = service.markAsUndeployed(product, command, Stub(SecUser) {
+			isDevOps() >> true
+		})
+
+		then:
+		result
 	}
 
 	@Unroll
@@ -420,8 +483,10 @@ class ProductServiceSpec extends Specification {
 		setupProduct(state)
 		service.permissionService = new PermissionService()
 
+		def command = new ProductUndeployedCommand(blockNumber: 50000, blockIndex: 15)
+
 		when:
-		service.markAsUndeployed(product, Stub(SecUser) {
+		service.markAsUndeployed(product, command, Stub(SecUser) {
 			isDevOps() >> true
 		})
 
@@ -436,8 +501,10 @@ class ProductServiceSpec extends Specification {
 		setupProduct(Product.State.UNDEPLOYING)
 		def permissionService = service.permissionService = Mock(PermissionService)
 
+		def command = new ProductUndeployedCommand(blockNumber: 50000, blockIndex: 15)
+
 		when:
-		service.markAsUndeployed(product, Stub(SecUser) {
+		service.markAsUndeployed(product, command, Stub(SecUser) {
 			isDevOps() >> true
 		})
 

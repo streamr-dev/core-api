@@ -3,6 +3,7 @@ package com.unifina.controller.api
 import com.unifina.api.CreateProductCommand
 import com.unifina.api.ProductDeployedCommand
 import com.unifina.api.ProductListParams
+import com.unifina.api.ProductUndeployedCommand
 import com.unifina.api.UpdateProductCommand
 import com.unifina.api.ValidationException
 import com.unifina.domain.marketplace.Category
@@ -307,6 +308,7 @@ class ProductApiControllerSpec extends Specification {
 		def user = request.apiUser = new SecUser()
 
 		params.id = "product-id"
+		request.JSON = [:]
 		request.method = "POST"
 		when:
 		withFilters(action: "setUndeployed") {
@@ -325,13 +327,14 @@ class ProductApiControllerSpec extends Specification {
 		def user = request.apiUser = new SecUser()
 
 		params.id = "product-id"
+		request.JSON = [:]
 		request.method = "POST"
 		when:
 		withFilters(action: "setUndeployed") {
 			controller.setUndeployed()
 		}
 		then:
-		1 * productService.markAsUndeployed(product, user)
+		1 * productService.markAsUndeployed(product, _ as ProductUndeployedCommand, user)
 	}
 
 	void "setUndeployed() returns 200 and renders a product"() {
@@ -343,6 +346,7 @@ class ProductApiControllerSpec extends Specification {
 		def user = request.apiUser = new SecUser()
 
 		params.id = "product-id"
+		request.JSON = [:]
 		request.method = "POST"
 		when:
 		withFilters(action: "setUndeployed") {

@@ -3,6 +3,7 @@ package com.unifina.controller.api
 import com.unifina.api.CreateProductCommand
 import com.unifina.api.ProductDeployedCommand
 import com.unifina.api.ProductListParams
+import com.unifina.api.ProductUndeployedCommand
 import com.unifina.api.UpdateProductCommand
 import com.unifina.domain.marketplace.Product
 import com.unifina.domain.security.Permission
@@ -83,9 +84,9 @@ class ProductApiController {
 
 	@GrailsCompileStatic
 	@StreamrApi(authenticationLevel = AuthLevel.USER)
-	def setUndeployed(String id) {
+	def setUndeployed(String id, ProductUndeployedCommand command) {
 		Product product = apiService.getByIdAndThrowIfNotFound(Product, id)
-		productService.markAsUndeployed(product, loggedInUser())
+		productService.markAsUndeployed(product, command, loggedInUser())
 		render(product.toMap() as JSON)
 	}
 
