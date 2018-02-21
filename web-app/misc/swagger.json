@@ -48,6 +48,14 @@
     {
       "name": "users",
       "description": "User management"
+    },
+    {
+      "name": "categories",
+      "description": "Product categories"
+    },
+    {
+      "name": "products",
+      "description": "Products sold on a marketplace containing Streams"
     }
   ],
   "paths": {
@@ -2041,6 +2049,25 @@
         }
       }
     },
+    "Category": {
+      "type": "object",
+      "required": [
+        "id",
+        "name"
+      ],
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "unique identifier"
+        },
+        "name": {
+          "type": "string"
+        },
+        "imageUrl": {
+          "type": "string"
+        }
+      }
+    },
     "DashboardSaveRequest": {
       "type": "object",
       "properties": {
@@ -2195,6 +2222,112 @@
           "type": "string",
           "description": "User rights that this permission enables, e.g. 'read', 'write', 'share'",
           "example": "read"
+        }
+      }
+    },
+    "Product": {
+      "type": "object",
+      "required": [
+        "id",
+        "name",
+        "description",
+        "category",
+        "streams",
+        "state",
+        "created",
+        "updated",
+        "ownerAddress",
+        "beneficiaryAddress",
+        "pricePerSecond",
+        "priceCurrency",
+        "minimumSubscriptionInSeconds"
+      ],
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier",
+          "example": "7g65vkczQga-qK_dFvij1Qs0xtw196QTCul4Ys_mYVWQ"
+        },
+        "name": {
+          "type": "string",
+          "example": "USD/ETH exchange rate"
+        },
+        "description": {
+          "type": "string"
+        },
+        "imageUrl": {
+          "type": "string",
+        },
+        "category": {
+          "type": "string",
+          "description": "identifier of Category this Product belong to"
+        },
+        "streams": {
+          "type": "array",
+          "description": "List of Stream identifiers that belong to this Product",
+          "items": {
+            "type": "string"
+          }
+        },
+        "state": {
+          "type": "string",
+          "description": "State of Product",
+          "enum": [
+            "NOT_DEPLOYED",
+            "DEPLOYING",
+            "DEPLOYED",
+            "UNDEPLOYING"
+          ]
+        },
+        "tx": {
+          "type": "string",
+          "description": "Ethereum transaction hash of the deployment of this Product",
+          "example": "0xe7b53cfb5fb0840d411252ced142d020efb1ae65f7b727fcffbbcd9daa04f803"
+        },
+        "previewStream": {
+          "type": "string",
+          "description": "Identifier of Stream selected for preview"
+        },
+        "previewConfigJson": {
+          "type": "string",
+          "description": "Configuration of previewStream"
+        },
+        "created": {
+          "type": "string",
+          "description": "ISO-8601 datetime",
+          "example": "2018-02-21T12:26:18Z"
+        },
+        "updated": {
+          "type": "string",
+          "description": "ISO-8601 datetime",
+          "example": "2018-02-21T12:26:18Z"
+        },
+        "ownerAddress": {
+          "type": "string",
+          "description": "Ethereum address of owner",
+          "example": "0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF"
+        },
+        "beneficiaryAddress": {
+          "type": "string",
+          "description": "Ethereum address of beneficiary",
+          "example": "0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF"
+        },
+        "pricePerSecond": {
+          "type": "integer",
+          "description": "Unit cost per second",
+          "example": 5
+        },
+        "priceCurrency": {
+          "type": "string",
+          "description": "Unit currency",
+          "enum": [
+            "DATA",
+            "USD"
+          ]
+        },
+        "minimumSubscriptionInSeconds": {
+          "type": "integer",
+          "description": "Minimum subscription length (in seconds)"
         }
       }
     },
