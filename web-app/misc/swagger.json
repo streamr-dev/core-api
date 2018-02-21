@@ -26,16 +26,12 @@
   ],
   "tags": [
     {
-      "name": "streams",
-      "description": "Manage Streams, and insert or read data from them"
+      "name": "categories",
+      "description": "Product categories"
     },
     {
       "name": "canvases",
       "description": "Start, stop, and manage Canvases"
-    },
-    {
-      "name": "permissions",
-      "description": "Read, write, and share rights"
     },
     {
       "name": "dashboards",
@@ -46,19 +42,50 @@
       "description": "Keys for authenticating users and resources"
     },
     {
-      "name": "users",
-      "description": "User management"
-    },
-    {
-      "name": "categories",
-      "description": "Product categories"
+      "name": "permissions",
+      "description": "Read, write, and share rights"
     },
     {
       "name": "products",
       "description": "Products sold on a marketplace containing Streams"
+    },
+    {
+      "name": "streams",
+      "description": "Manage Streams, and insert or read data from them"
+    },
+    {
+      "name": "users",
+      "description": "User management"
     }
   ],
   "paths": {
+    "/categories": {
+      "get": {
+        "summary": "List categories",
+        "description": "Lists all categories in alphabetical order.",
+        "tags": [
+          "categories"
+        ],
+        "security": [],
+        "responses": {
+          "200": {
+            "description": "An array of categories",
+            "headers": {
+              "Link": {
+                "type": "string",
+                "description": "a RFC5988 Link containing a URL for fetching more results"
+              }
+            },
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/Category"
+              }
+            }
+          }
+        }
+      }
+    },
     "/streams": {
       "get": {
         "summary": "List streams",
