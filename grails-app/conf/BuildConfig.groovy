@@ -93,6 +93,7 @@ grails.project.dependency.resolution = {
 		runtime('de.ruedigermoeller:fst:2.56')
 		runtime('joda-time:joda-time:2.9.3')
 
+		test('cglib:cglib:3.2.6')
 		test("org.seleniumhq.selenium:selenium-firefox-driver:$seleniumVersion")
 		test("org.seleniumhq.selenium:selenium-chrome-driver:$seleniumVersion")
 		test("org.seleniumhq.selenium:selenium-support:$seleniumVersion")
