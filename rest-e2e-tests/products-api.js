@@ -1,14 +1,21 @@
 const assert = require('chai').assert
 const initStreamrApi = require('./streamr-api-clients')
+const SchemaValidator = require('./schema-validator')
 
 const URL = 'http://localhost:8081/streamr-core/api/v1/'
-const LOGGING_ENABLED = false
+const LOGGING_ENABLED = true
 
 const AUTH_TOKEN = 'product-api-tester-key'
 const AUTH_TOKEN_2 = 'product-api-tester2-key'
 const DEVOPS_USER_TOKEN = 'devops-user-key'
 
 const Streamr = initStreamrApi(URL, LOGGING_ENABLED)
+const schemaValidator = new SchemaValidator()
+
+function assertIsProduct(data) {
+    const errors = schemaValidator.validateProduct(data)
+    assert(errors.length === 0, schemaValidator.toMessages(errors))
+}
 
 async function assertResponseIsError(response, statusCode, programmaticCode, includeInMessage) {
     const json = await response.json()
@@ -17,6 +24,22 @@ async function assertResponseIsError(response, statusCode, programmaticCode, inc
     if (includeInMessage) {
         assert.include(json.message, includeInMessage)
     }
+}
+
+async function createProductAndReturnId(productBody) {
+    const json = await Streamr.api.v1.products
+        .create(productBody)
+        .withAuthToken(AUTH_TOKEN)
+        .execute()
+    return json.id
+}
+
+async function createStreamAndReturnId(streamBody, authToken) {
+    const json = await Streamr.api.v1.streams
+        .create(streamBody)
+        .withAuthToken(authToken)
+        .execute()
+    return json.id
 }
 
 describe('Products API', () => {
@@ -40,7 +63,7 @@ describe('Products API', () => {
         genericProductBody = {
             name: 'Product',
             description: 'Description of the product.',
-            imageUrl: 'product.png',
+            imageUrl: 'https://www.streamr.com/uploads/product.png',
             category: 'satellite-id',
             streams: [
                 streamId1,
@@ -151,7 +174,7 @@ describe('Products API', () => {
                 assert.deepEqual(json, {
                     name: 'Product',
                     description: 'Description of the product.',
-                    imageUrl: 'product.png',
+                    imageUrl: 'https://www.streamr.com/uploads/product.png',
                     category: 'satellite-id',
                     streams: [
                         streamId1,
@@ -213,25 +236,7 @@ describe('Products API', () => {
             })
 
             it('responds with found Product', () => {
-                assert.equal(json.id, createdProductId)
-                assert.hasAllKeys(json, [
-                    'id',
-                    'name',
-                    'description',
-                    'imageUrl',
-                    'category',
-                    'streams',
-                    'state',
-                    'previewStream',
-                    'previewConfigJson',
-                    'ownerAddress',
-                    'beneficiaryAddress',
-                    'pricePerSecond',
-                    'priceCurrency',
-                    'minimumSubscriptionInSeconds',
-                    'created',
-                    'updated'
-                ])
+                assertIsProduct(json)
             })
         })
     })
@@ -240,7 +245,7 @@ describe('Products API', () => {
         const newBody = {
             name: 'Product (updated)',
             description: 'Description of the product.',
-            imageUrl: 'product-2.png',
+            imageUrl: 'https://www.streamr.com/uploads/product-2.png',
             category: 'automobile-id',
             streams: []
         }
@@ -304,14 +309,17 @@ describe('Products API', () => {
             })
 
             it('responds with updated Product', () => {
+                assertIsProduct(json)
+
                 delete json.created
                 delete json.updated
+
 
                 assert.deepEqual(json, {
                     id: createdProductId,
                     name: 'Product (updated)',
                     description: 'Description of the product.',
-                    imageUrl: 'product-2.png',
+                    imageUrl: 'https://www.streamr.com/uploads/product-2.png',
                     category: 'automobile-id',
                     streams: [],
 
@@ -382,25 +390,7 @@ describe('Products API', () => {
             })
 
             it('responds with Product', () => {
-                assert.equal(json.id, createdProductId)
-                assert.hasAllKeys(json, [
-                    'id',
-                    'name',
-                    'description',
-                    'imageUrl',
-                    'category',
-                    'streams',
-                    'state',
-                    'previewStream',
-                    'previewConfigJson',
-                    'ownerAddress',
-                    'beneficiaryAddress',
-                    'pricePerSecond',
-                    'priceCurrency',
-                    'minimumSubscriptionInSeconds',
-                    'created',
-                    'updated'
-                ])
+                assertIsProduct(json)
             })
 
             it('state of Product is now DEPLOYING', () => {
@@ -499,25 +489,7 @@ describe('Products API', () => {
             })
 
             it('responds with Product', () => {
-                assert.equal(json.id, createdProductId)
-                assert.hasAllKeys(json, [
-                    'id',
-                    'name',
-                    'description',
-                    'imageUrl',
-                    'category',
-                    'streams',
-                    'state',
-                    'previewStream',
-                    'previewConfigJson',
-                    'ownerAddress',
-                    'beneficiaryAddress',
-                    'pricePerSecond',
-                    'priceCurrency',
-                    'minimumSubscriptionInSeconds',
-                    'created',
-                    'updated'
-                ])
+                assertIsProduct(json)
             })
 
             it('state of Product is now DEPLOYED', () => {
@@ -647,25 +619,7 @@ describe('Products API', () => {
             })
 
             it('responds with Product', () => {
-                assert.equal(json.id, createdProductId)
-                assert.hasAllKeys(json, [
-                    'id',
-                    'name',
-                    'description',
-                    'imageUrl',
-                    'category',
-                    'streams',
-                    'state',
-                    'previewStream',
-                    'previewConfigJson',
-                    'ownerAddress',
-                    'beneficiaryAddress',
-                    'pricePerSecond',
-                    'priceCurrency',
-                    'minimumSubscriptionInSeconds',
-                    'created',
-                    'updated'
-                ])
+                assertIsProduct(json)
             })
 
             it('state of Product is now UNDEPLOYING', () => {
@@ -762,25 +716,7 @@ describe('Products API', () => {
             })
 
             it('responds with Product', () => {
-                assert.equal(json.id, createdProductId)
-                assert.hasAllKeys(json, [
-                    'id',
-                    'name',
-                    'description',
-                    'imageUrl',
-                    'category',
-                    'streams',
-                    'state',
-                    'previewStream',
-                    'previewConfigJson',
-                    'ownerAddress',
-                    'beneficiaryAddress',
-                    'pricePerSecond',
-                    'priceCurrency',
-                    'minimumSubscriptionInSeconds',
-                    'created',
-                    'updated'
-                ])
+                assertIsProduct(json)
             })
 
             it('state of Product is NOT_DEPLOYED', () => {
@@ -828,20 +764,19 @@ describe('Products API', () => {
             })
         })
     })
+
+    describe('GET /api/v1/products', () => {
+        it('anonymous user can fetch public Products with publicAccess=true', async () => {
+            const response = await Streamr.api.v1.products
+                .list({
+                    publicAccess: true
+                })
+                .call()
+            const json = await response.json()
+
+            assert.equal(response.status, 200)
+            assert.isAtLeast(json.length, 4)
+            json.forEach(productData => assertIsProduct(productData))
+        })
+    })
 })
-
-async function createProductAndReturnId(productBody) {
-    const json = await Streamr.api.v1.products
-        .create(productBody)
-        .withAuthToken(AUTH_TOKEN)
-        .execute()
-    return json.id
-}
-
-async function createStreamAndReturnId(streamBody, authToken) {
-    const json = await Streamr.api.v1.streams
-        .create(streamBody)
-        .withAuthToken(authToken)
-        .execute()
-    return json.id
-}

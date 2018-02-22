@@ -1,11 +1,13 @@
 const assert = require('chai').assert
 const initStreamrApi = require('./streamr-api-clients')
+const SchemaValidator = require('./schema-validator')
+
 
 const URL = 'http://localhost:8081/streamr-core/api/v1/'
 const LOGGING_ENABLED = false
 
-
 const Streamr = initStreamrApi(URL, LOGGING_ENABLED)
+const schemaValidator = new SchemaValidator()
 
 describe('Categories API', () => {
     it('GET /api/v1/categories', async () => {
@@ -45,5 +47,10 @@ describe('Categories API', () => {
                 'imageUrl': 'satellites-in-space-680px.png'
             }
         ])
+
+        json.forEach((categoryData) => {
+            const errors = schemaValidator.validateCategory(categoryData)
+            assert(errors.length === 0, schemaValidator.toMessages(errors))
+        })
     })
 })

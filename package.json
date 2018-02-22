@@ -35,6 +35,7 @@
   "license": "UNLICENSED",
   "private": true,
   "dependencies": {
+    "ajv": "^6.1.1",
     "assert-diff": "^1.2.0",
     "autoprefixer": "^7.0.1",
     "axios": "^0.16.1",
@@ -82,6 +83,7 @@
     "moment-timezone": "^0.5.13",
     "moxios": "^0.4.0",
     "mustache": "*",
+    "node-fetch": "^2.0.0",
     "packery": "^2.1.1",
     "path": "^0.12.7",
     "postcss-color-function": "^3.0.0",

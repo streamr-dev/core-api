@@ -6,6 +6,7 @@ class StreamrApiRequest {
     constructor(options) {
         this.baseUrl = options.baseUrl || 'https://www.streamr.com/api/v1/'
         this.logging = options.logging || false
+        this.authToken = null
         this.queryParams = ''
     }
 
@@ -42,18 +43,32 @@ class StreamrApiRequest {
 
         const apiUrl = url.resolve(this.baseUrl, this.relativePath) + this.queryParams
 
+        const headers = {
+            'Accept': 'application/json'
+        }
+        if (this.body) {
+            headers['Content-type'] = 'application/json'
+        }
+        if (this.authToken) {
+            headers['Authorization'] = this.authToken
+        }
+
         if (this.logging) {
-            console.info(this.method, apiUrl, this.body ? '\n' + JSON.stringify(JSON.parse(this.body), null, 4) : '')
+            console.info(
+                this.method,
+                apiUrl,
+                '\n\n' + Object.keys(headers)
+                    .map(key => `${key}: ${headers[key]}`)
+                    .join('\n'),
+                this.body ? '\n\n' + JSON.stringify(JSON.parse(this.body), null, 4) : '',
+                '\n\n'
+            )
         }
 
         return fetch(apiUrl, {
             method: this.method,
             body: this.body,
-            headers: {
-                'Accept': 'application/json',
-                'Content-type': 'application/json',
-                'Authorization': this.authToken
-            }
+            headers: headers
         })
     }
 
