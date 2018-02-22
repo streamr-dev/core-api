@@ -312,6 +312,68 @@
         }
       }
     },
+    "/products/{id}/setDeploying": {
+      "post": {
+        "summary": "Transition Product to state DEPLOYING",
+        "description": "Inform engine-and-editor that a Product has moved from state `NOT_DEPLOYED` to `DEPLOYING`. Should be called after transaction to submit product to marketplace has been sent to Ethereum.",
+        "tags": [
+          "products"
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "description": "unique identifier of a Product",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Product with state=`DEPLOYING`",
+            "schema": {
+              "$ref": "#/definitions/Product"
+            }
+          },
+          "401": {
+            "description": "Not authenticated (code: `NOT_AUTHENTICATED`)",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            },
+            "examples": {
+              "application/json": {
+                "code": "NOT_AUTHENTICATED",
+                "message": "Not authenticated via token or cookie"
+              }
+            }
+          },
+          "404": {
+            "description": "Product not found (code: `NOT_FOUND`)",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            },
+            "examples": {
+              "application/json": {
+                "code": "NOT_FOUND",
+                "message": "Product with id 1kDWMNstSmW1NxhJPYFHsAYgkesh19QraMLtgfuDs4sA not found"
+              }
+            }
+          },
+          "403": {
+            "description": "Insufficient permission to write Product (code: `FORBIDDEN`)",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            },
+            "examples": {
+              "application/json": {
+                "code": "FORBIDDEN",
+                "message": "Non-authenticated user does not have permission to write Product (id aQAd59nDQHiCUpXnhm7-TwPLCh9ALaQH2TIxOengS1FQ)"
+              }
+            }
+          }
+        }
+      }
+    },
     "/streams": {
       "get": {
         "summary": "List streams",
