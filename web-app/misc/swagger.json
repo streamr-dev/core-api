@@ -117,6 +117,68 @@
             }
           }
         }
+      },
+      "post": {
+        "summary": "Create a Product",
+        "description": "Creates a new Product with state `NOT_DEPLOYED`.",
+        "tags": [
+          "products"
+        ],
+        "parameters": [
+          {
+            "name": "Body",
+            "in": "body",
+            "description": "Product object",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/CreateProduct"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Product created",
+            "schema": {
+              "$ref": "#/definitions/Product"
+            }
+          },
+          "401": {
+            "description": "Not authenticated (code: `NOT_AUTHENTICATED`)",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            },
+            "examples": {
+              "application/json": {
+                "code": "NOT_AUTHENTICATED",
+                "message": "Not authenticated via token or cookie"
+              }
+            }
+          },
+          "422": {
+            "description": "Body does not pass validation (code: `VALIDATION_ERROR`)",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            },
+            "examples": {
+              "application/json": {
+                "code": "VALIDATION_ERROR",
+                "message": "Validation failed for fields: category (typeMismatch)"
+              }
+            }
+          },
+          "403": {
+            "description": "Insufficient permission to a included `Stream` (code: `FORBIDDEN`)",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            },
+            "examples": {
+              "application/json": {
+                "code": "FORBIDDEN",
+                "message": "me@streamr.com does not have permission to share Stream (id bqO9tp3wQVCPbKh6elAFLw)"
+              }
+            }
+          }
+        }
       }
     },
     "/streams": {
@@ -2206,17 +2268,13 @@
         }
       }
     },
-    "Product": {
+    "CreateProduct": {
       "type": "object",
       "required": [
-        "id",
         "name",
         "description",
         "category",
         "streams",
-        "state",
-        "created",
-        "updated",
         "ownerAddress",
         "beneficiaryAddress",
         "pricePerSecond",
@@ -2224,59 +2282,43 @@
         "minimumSubscriptionInSeconds"
       ],
       "properties": {
-        "id": {
-          "type": "string",
-          "description": "Unique identifier",
-          "example": "7g65vkczQga-qK_dFvij1Qs0xtw196QTCul4Ys_mYVWQ"
-        },
         "name": {
           "type": "string",
           "example": "USD/ETH exchange rate"
         },
         "description": {
-          "type": "string"
+          "type": "string",
+          "example": "Real-time USD/ETH exchange rate data aggregated from several cryptocurrency exchanges."
         },
         "imageUrl": {
-          "type": "string"
+          "type": "string",
+          "example": "https://www.streamr.com/uploads/to-the-moon.png"
         },
         "category": {
           "type": "string",
-          "description": "identifier of Category this Product belong to"
+          "description": "identifier of Category this Product belong to",
+          "example": "cryptocurrencies-id"
         },
         "streams": {
           "type": "array",
           "description": "List of Stream identifiers that belong to this Product",
           "items": {
             "type": "string"
-          }
-        },
-        "state": {
-          "type": "string",
-          "description": "State of Product",
-          "enum": [
-            "NOT_DEPLOYED",
-            "DEPLOYING",
-            "DEPLOYED",
-            "UNDEPLOYING"
+          },
+          "example": [
+            "stream-1-id",
+            "stream-2-id",
+            "stream-3-id"
           ]
         },
         "previewStream": {
           "type": "string",
-          "description": "Identifier of Stream selected for preview"
+          "description": "Identifier of Stream selected for preview",
+          "example": "stream-2-id"
         },
         "previewConfigJson": {
           "type": "string",
           "description": "Configuration of previewStream"
-        },
-        "created": {
-          "type": "string",
-          "description": "ISO-8601 datetime",
-          "example": "2018-02-21T12:26:18Z"
-        },
-        "updated": {
-          "type": "string",
-          "description": "ISO-8601 datetime",
-          "example": "2018-02-21T12:26:18Z"
         },
         "ownerAddress": {
           "type": "string",
@@ -2306,6 +2348,47 @@
           "description": "Minimum subscription length (in seconds)"
         }
       }
+    },
+    "Product": {
+      "allOf": [
+        {
+          "type": "object",
+          "required": [
+            "id",
+            "state",
+            "created",
+            "updated"
+          ],
+          "properties": {
+            "id": {
+              "type": "string",
+              "description": "unique identifier",
+              "example": "11o6bc2HTs6W8oFRpMugmwTeodGTOxSzKQCIHeK_qDnA"
+            },
+            "state": {
+              "type": "string",
+              "description": "State of Product",
+              "enum": [
+                "NOT_DEPLOYED",
+                "DEPLOYING",
+                "DEPLOYED",
+                "UNDEPLOYING"
+              ]
+            },
+            "created": {
+              "type": "string",
+              "description": "ISO-8601 datetime",
+              "example": "2018-02-21T12:26:18Z"
+            },
+            "updated": {
+              "type": "string",
+              "description": "ISO-8601 datetime",
+              "example": "2018-02-21T12:26:18Z"
+            }
+          }
+        },
+        { "$ref": "#/definitions/CreateProduct" }
+      ]
     },
     "User": {
       "type": "object",
@@ -2405,7 +2488,7 @@
       "properties": {
         "code": {
           "type": "string",
-          "description": "Error code (e.g. \"NOT_FOUND\") for recognizing error type automatically."
+          "description": "Error code (e.g. \"NOT_FOUND\") for recognizing error type programmatically."
         },
         "message": {
           "type": "string",
