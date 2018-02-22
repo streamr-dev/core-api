@@ -2,13 +2,13 @@
 const WARN = 1, ERROR = 2;
 
 module.exports = exports = {
-    
+
     extends: [
         'eslint:recommended',
         'plugin:react/recommended',
         'plugin:flowtype/recommended'
     ],
-    
+
     parser: 'babel-eslint',
     parserOptions: {
         ecmaVersion: 6,
@@ -20,7 +20,7 @@ module.exports = exports = {
             destructuring: true
         }
     },
-    
+
     env: {
         es6: true,
         node: true,
@@ -28,18 +28,18 @@ module.exports = exports = {
         mocha: true,
         jest: true
     },
-    
+
     plugins: [
         'react',
         'mocha',
         'flowtype',
         'async-await'
     ],
-    
+
     settings: {
         onlyFilesWithFlowAnnotation: true
     },
-    
+
     rules: {
         'no-debugger': WARN,
         'no-console': [
@@ -59,7 +59,11 @@ module.exports = exports = {
             after: true
         }],
         'quotes': [ERROR, 'single'],
-        'space-before-function-paren': [ERROR, 'never'],
+        'space-before-function-paren': [ERROR, {
+            anonymous: 'never',
+            named: 'never',
+            asyncArrow: 'always'
+        }],
         'space-before-blocks': [ERROR, 'always'],
         'space-in-parens': [ERROR, 'never'],
         'space-unary-ops': [ERROR, {
