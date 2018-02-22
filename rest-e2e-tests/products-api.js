@@ -20,17 +20,39 @@ async function assertResponseIsError(response, statusCode, programmaticCode, inc
 }
 
 describe('Products API', () => {
-    const genericProductBody = {
-        name: 'Product',
-        description: 'Description of the product.',
-        imageUrl: 'product.png',
-        category: 'satellite-id',
-        ownerAddress: '0xAAAAAAAAAABBBBBBBBBBCCCCCCCCCCDDDDDDDDDD',
-        beneficiaryAddress: '0x0000000000000000000011111111111111111111',
-        pricePerSecond: 5,
-        priceCurrency: 'USD',
-        minimumSubscriptionInSeconds: 60
-    }
+    let genericProductBody
+
+    let streamId1
+    let streamId2
+    let streamId3
+
+    before(async () => {
+        streamId1 = await createStreamAndReturnId({
+            name: 'stream-1'
+        }, AUTH_TOKEN)
+        streamId2 = await createStreamAndReturnId({
+            name: 'stream-2'
+        }, AUTH_TOKEN)
+        streamId3 = await createStreamAndReturnId({
+            name: 'stream-3'
+        }, AUTH_TOKEN)
+
+        genericProductBody = {
+            name: 'Product',
+            description: 'Description of the product.',
+            imageUrl: 'product.png',
+            category: 'satellite-id',
+            streams: [
+                streamId1,
+                streamId2
+            ],
+            ownerAddress: '0xAAAAAAAAAABBBBBBBBBBCCCCCCCCCCDDDDDDDDDD',
+            beneficiaryAddress: '0x0000000000000000000011111111111111111111',
+            pricePerSecond: 5,
+            priceCurrency: 'USD',
+            minimumSubscriptionInSeconds: 60,
+        }
+    })
 
     describe('POST /api/v1/products', () => {
 
@@ -101,7 +123,7 @@ describe('Products API', () => {
             await assertResponseIsError(response, 403, 'FORBIDDEN')
         })
 
-        context('called with valid body', () => {
+        context('when called with valid params, body, headers, and permissions', () => {
             let response
 
             before(async () => {
@@ -131,7 +153,10 @@ describe('Products API', () => {
                     description: 'Description of the product.',
                     imageUrl: 'product.png',
                     category: 'satellite-id',
-                    streams: [],
+                    streams: [
+                        streamId1,
+                        streamId2
+                    ],
                     state: 'NOT_DEPLOYED',
                     previewStream: null,
                     previewConfigJson: null,
@@ -171,7 +196,7 @@ describe('Products API', () => {
             assert.equal(json.operation, 'read')
         })
 
-        context('given valid :id and having read permission', () => {
+        context('when called with valid params, body, headers, and permissions', () => {
             let response
             let json
 
@@ -187,7 +212,7 @@ describe('Products API', () => {
                 assert.equal(response.status, 200)
             })
 
-            it('responds with Product', () => {
+            it('responds with found Product', () => {
                 assert.equal(json.id, createdProductId)
                 assert.hasAllKeys(json, [
                     'id',
@@ -233,7 +258,7 @@ describe('Products API', () => {
             await assertResponseIsError(response, 401, 'NOT_AUTHENTICATED')
         })
 
-        it('requires a valid body', async () => {
+        it('validates body', async () => {
             const body = {}
             const response = await Streamr.api.v1.products
                 .update(createdProductId, body)
@@ -250,7 +275,7 @@ describe('Products API', () => {
             await assertResponseIsError(response, 404, 'NOT_FOUND')
         })
 
-        it('requires write permission', async () => {
+        it('requires write permission on Product', async () => {
             const response = await Streamr.api.v1.products
                 .update(createdProductId, newBody)
                 .withAuthToken(AUTH_TOKEN_2)
@@ -262,7 +287,7 @@ describe('Products API', () => {
             assert.equal(json.operation, 'write')
         })
 
-        context('given valid body and parameters', () => {
+        context('when called with valid params, body, headers, and permissions', () => {
             let response
             let json
 
@@ -328,7 +353,7 @@ describe('Products API', () => {
             await assertResponseIsError(response, 404, 'NOT_FOUND')
         })
 
-        it('requires write permission', async () => {
+        it('requires write permission on Product', async () => {
             const response = await Streamr.api.v1.products
                 .setDeploying(createdProductId)
                 .withAuthToken(AUTH_TOKEN_2)
@@ -340,7 +365,7 @@ describe('Products API', () => {
             assert.equal(json.operation, 'write')
         })
 
-        context('given valid parameters', () => {
+        context('when called with valid params, body, headers, and permissions', () => {
             let response
             let json
 
@@ -378,7 +403,7 @@ describe('Products API', () => {
                 ])
             })
 
-            it('state of Product is DEPLOYING', () => {
+            it('state of Product is now DEPLOYING', () => {
                 assert.equal(json.state, 'DEPLOYING')
             })
         })
@@ -408,7 +433,7 @@ describe('Products API', () => {
             await assertResponseIsError(response, 401, 'NOT_AUTHENTICATED')
         })
 
-        it('requires a valid body', async () => {
+        it('validates body', async () => {
             const response = await Streamr.api.v1.products
                 .setDeployed(createdProductId, {})
                 .withAuthToken(AUTH_TOKEN)
@@ -432,7 +457,32 @@ describe('Products API', () => {
             await assertResponseIsError(response, 403, 'FORBIDDEN', 'DevOps role required')
         })
 
-        context('given valid body, parameters and having DevOps permission', () => {
+
+        it('verifies legality of state transition', async () => {
+            const productId = await createProductAndReturnId(genericProductBody)
+
+            await Streamr.api.v1.products
+                .setDeployed(productId, deployedBody)
+                .withAuthToken(DEVOPS_USER_TOKEN)
+                .execute()
+
+            await Streamr.api.v1.products
+                .setUndeploying(productId)
+                .withAuthToken(AUTH_TOKEN)
+                .execute()
+
+            const response = await Streamr.api.v1.products
+                .setDeployed(productId, {
+                    ...deployedBody,
+                    blockNumber: 35005
+                })
+                .withAuthToken(DEVOPS_USER_TOKEN)
+                .call()
+
+            await assertResponseIsError(response, 409, 'INVALID_STATE_TRANSITION')
+        })
+
+        context('when called with valid params, body, headers, and permissions', () => {
             let response
             let json
 
@@ -470,7 +520,7 @@ describe('Products API', () => {
                 ])
             })
 
-            it('state of Product is DEPLOYED', () => {
+            it('state of Product is now DEPLOYED', () => {
                 assert.equal(json.state, 'DEPLOYED')
             })
 
@@ -493,33 +543,33 @@ describe('Products API', () => {
             it('minimumSubscriptionInSeconds of Product is updated', () => {
                 assert.equal(json.minimumSubscriptionInSeconds, 15)
             })
-        })
 
-        it('is an idempotent operation', async () => {
-            const response1 = await Streamr.api.v1.products
-                .setDeployed(createdProductId, deployedBody)
-                .withAuthToken(DEVOPS_USER_TOKEN)
-                .call()
-            const json1 = await response1.json()
+            it('is an idempotent operation', async () => {
+                const response1 = await Streamr.api.v1.products
+                    .setDeployed(createdProductId, deployedBody)
+                    .withAuthToken(DEVOPS_USER_TOKEN)
+                    .call()
+                const json1 = await response1.json()
 
-            const response2 = await Streamr.api.v1.products
-                .setDeployed(createdProductId, deployedBody)
-                .withAuthToken(DEVOPS_USER_TOKEN)
-                .call()
-            const json2 = await response2.json()
+                const response2 = await Streamr.api.v1.products
+                    .setDeployed(createdProductId, deployedBody)
+                    .withAuthToken(DEVOPS_USER_TOKEN)
+                    .call()
+                const json2 = await response2.json()
 
-            const response3 = await Streamr.api.v1.products
-                .setDeployed(createdProductId, deployedBody)
-                .withAuthToken(DEVOPS_USER_TOKEN)
-                .call()
-            const json3 = await response3.json()
+                const response3 = await Streamr.api.v1.products
+                    .setDeployed(createdProductId, deployedBody)
+                    .withAuthToken(DEVOPS_USER_TOKEN)
+                    .call()
+                const json3 = await response3.json()
 
-            assert.equal(response1.status, 200)
-            assert.equal(response2.status, 200)
-            assert.equal(response3.status, 200)
+                assert.equal(response1.status, 200)
+                assert.equal(response2.status, 200)
+                assert.equal(response3.status, 200)
 
-            assert.deepEqual(json1, json2)
-            assert.deepEqual(json2, json3)
+                assert.deepEqual(json1, json2)
+                assert.deepEqual(json2, json3)
+            })
         })
     })
 
@@ -546,7 +596,7 @@ describe('Products API', () => {
             await assertResponseIsError(response, 404, 'NOT_FOUND')
         })
 
-        it('requires write permission', async () => {
+        it('requires write permission on Product', async () => {
             const response = await Streamr.api.v1.products
                 .setUndeploying(createdProductId)
                 .withAuthToken(AUTH_TOKEN_2)
@@ -566,7 +616,7 @@ describe('Products API', () => {
             await assertResponseIsError(response, 409, 'INVALID_STATE_TRANSITION')
         })
 
-        context('given Product in DEPLOYED state', () => {
+        context('when called with valid params, body, headers, and permissions', () => {
             let response
             let json
 
@@ -618,7 +668,7 @@ describe('Products API', () => {
                 ])
             })
 
-            it('state of Product is UNDEPLOYING', () => {
+            it('state of Product is now UNDEPLOYING', () => {
                 assert.equal(json.state, 'UNDEPLOYING')
             })
         })
@@ -651,17 +701,10 @@ describe('Products API', () => {
             await assertResponseIsError(response, 404, 'NOT_FOUND')
         })
 
-        it('verifies legality of state transition', async () => {
-            const response = await Streamr.api.v1.products
-                .setUndeployed(createdProductId, undeployedBody)
-                .withAuthToken(AUTH_TOKEN)
-                .call()
-            await assertResponseIsError(response, 409, 'INVALID_STATE_TRANSITION')
-        })
-
         it('requires DevOps role', async () => {
+            const productId = await createProductAndReturnId(genericProductBody)
             await Streamr.api.v1.products
-                .setDeployed(createdProductId, {
+                .setDeployed(productId, {
                     ownerAddress: '0xAAAAAAAAAABBBBBBBBBBCCCCCCCCCCDDDDDDDDDD',
                     beneficiaryAddress: '0x0000000000000000000011111111111111111111',
                     pricePerSecond: 5,
@@ -674,10 +717,18 @@ describe('Products API', () => {
                 .call()
 
             const response = await Streamr.api.v1.products
-                .setUndeployed(createdProductId, undeployedBody)
+                .setUndeployed(productId, undeployedBody)
                 .withAuthToken(AUTH_TOKEN)
                 .call()
             await assertResponseIsError(response, 403, 'FORBIDDEN', 'DevOps role required')
+        })
+
+        it('verifies legality of state transition', async () => {
+            const response = await Streamr.api.v1.products
+                .setUndeployed(createdProductId, undeployedBody)
+                .withAuthToken(DEVOPS_USER_TOKEN)
+                .call()
+            await assertResponseIsError(response, 409, 'INVALID_STATE_TRANSITION')
         })
 
         context('given Product in DEPLOYED state and having DevOps permission', () => {
@@ -735,69 +786,62 @@ describe('Products API', () => {
             it('state of Product is NOT_DEPLOYED', () => {
                 assert.equal(json.state, 'NOT_DEPLOYED')
             })
-        })
 
-        it('is an idempotent operation', async () => {
-            await Streamr.api.v1.products
-                .setDeployed(createdProductId, {
-                    ownerAddress: '0xAAAAAAAAAABBBBBBBBBBCCCCCCCCCCDDDDDDDDDD',
-                    beneficiaryAddress: '0x0000000000000000000011111111111111111111',
-                    pricePerSecond: 5,
-                    priceCurrency: 'USD',
-                    minimumSubscriptionInSeconds: 60,
-                    blockNumber: 35000,
-                    blockIndex: 80
-                })
-                .withAuthToken(DEVOPS_USER_TOKEN)
-                .call()
+            it('is an idempotent operation', async () => {
+                await Streamr.api.v1.products
+                    .setDeployed(createdProductId, {
+                        ownerAddress: '0xAAAAAAAAAABBBBBBBBBBCCCCCCCCCCDDDDDDDDDD',
+                        beneficiaryAddress: '0x0000000000000000000011111111111111111111',
+                        pricePerSecond: 5,
+                        priceCurrency: 'USD',
+                        minimumSubscriptionInSeconds: 60,
+                        blockNumber: 35000,
+                        blockIndex: 80
+                    })
+                    .withAuthToken(DEVOPS_USER_TOKEN)
+                    .call()
 
-            const response1 = await Streamr.api.v1.products
-                .setUndeployed(createdProductId, undeployedBody)
-                .withAuthToken(DEVOPS_USER_TOKEN)
-                .call()
-            const json1 = await response1.json()
+                const response1 = await Streamr.api.v1.products
+                    .setUndeployed(createdProductId, undeployedBody)
+                    .withAuthToken(DEVOPS_USER_TOKEN)
+                    .call()
+                const json1 = await response1.json()
 
-            const response2 = await Streamr.api.v1.products
-                .setUndeployed(createdProductId, undeployedBody)
-                .withAuthToken(DEVOPS_USER_TOKEN)
-                .call()
-            const json2 = await response2.json()
+                const response2 = await Streamr.api.v1.products
+                    .setUndeployed(createdProductId, undeployedBody)
+                    .withAuthToken(DEVOPS_USER_TOKEN)
+                    .call()
+                const json2 = await response2.json()
 
-            const response3 = await Streamr.api.v1.products
-                .setUndeployed(createdProductId, undeployedBody)
-                .withAuthToken(DEVOPS_USER_TOKEN)
-                .call()
-            const json3 = await response3.json()
+                const response3 = await Streamr.api.v1.products
+                    .setUndeployed(createdProductId, undeployedBody)
+                    .withAuthToken(DEVOPS_USER_TOKEN)
+                    .call()
+                const json3 = await response3.json()
 
-            assert.equal(response1.status, 200)
-            assert.equal(response2.status, 200)
-            assert.equal(response3.status, 200)
+                assert.equal(response1.status, 200)
+                assert.equal(response2.status, 200)
+                assert.equal(response3.status, 200)
 
-            assert.deepEqual(json1, json2)
-            assert.deepEqual(json2, json3)
+                assert.deepEqual(json1, json2)
+                assert.deepEqual(json2, json3)
+            })
         })
     })
-
-    // TODO: WIP write more..
 })
 
 async function createProductAndReturnId(productBody) {
-    const response = await Streamr.api.v1.products
+    const json = await Streamr.api.v1.products
         .create(productBody)
         .withAuthToken(AUTH_TOKEN)
-        .call()
-    const json = await response.json()
+        .execute()
     return json.id
 }
 
 async function createStreamAndReturnId(streamBody, authToken) {
-    const response = await Streamr.api.v1.streams
+    const json = await Streamr.api.v1.streams
         .create(streamBody)
         .withAuthToken(authToken)
-        .call()
-    const json = await response.json()
-    if (response.status !== 200) {
-        throw 'Stream not created: ' + JSON.stringify(json)
-    }
+        .execute()
     return json.id
 }

@@ -56,6 +56,16 @@ class StreamrApiRequest {
             }
         })
     }
+
+    async execute() {
+        const response = await this.call()
+        const json = await response.json()
+        if (response.status / 100 != 2) {
+            const jsonAsString = JSON.stringify(json)
+            throw Error(`Failed to execute. HTTP status ${response.status}: ${jsonAsString}`)
+        }
+        return json
+    }
 }
 
 class Categories {
