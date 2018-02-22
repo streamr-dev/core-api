@@ -94,4 +94,5 @@ databaseChangeLog = {
 	include file: 'core/2018-02-11-marketplace-domain-objects.groovy'
 	include file: 'core/2018-02-18-add-devops-role.groovy'
 	include file: 'core/2018-02-20-test-data-for-product-api.groovy'
+	include file: 'core/2018-02-22-drop-class-column-from-stream.groovy'
 }
