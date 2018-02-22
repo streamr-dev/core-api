@@ -386,6 +386,89 @@
         }
       }
     },
+    "/products/{id}/setDeployed": {
+      "post": {
+        "summary": "Transition Product to state DEPLOYED",
+        "description": "Idempotent operation that informs engine-and-editor that a Product has moved from state `NOT_DEPLOYED` / `DEPLOYING` to `DEPLOYED`. Called by *Marketplace Watcher* after it notices that the Product has been deployed on the blockchain. Also updates Blockchain-specific information of the Product.",
+        "tags": [
+          "products"
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "description": "unique identifier of a Product",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "description": "Deployed Product",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/DeployedProduct"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Product with state=`DEPLOYED`",
+            "schema": {
+              "$ref": "#/definitions/Product"
+            }
+          },
+          "401": {
+            "description": "Not authenticated (code: `NOT_AUTHENTICATED`)",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            },
+            "examples": {
+              "application/json": {
+                "code": "NOT_AUTHENTICATED",
+                "message": "Not authenticated via token or cookie"
+              }
+            }
+          },
+          "404": {
+            "description": "Product not found (code: `NOT_FOUND`)",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            },
+            "examples": {
+              "application/json": {
+                "code": "NOT_FOUND",
+                "message": "Product with id 1kDWMNstSmW1NxhJPYFHsAYgkesh19QraMLtgfuDs4sA not found"
+              }
+            }
+          },
+          "403": {
+            "description": "Insufficient permission to write Product (code: `FORBIDDEN`)",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            },
+            "examples": {
+              "application/json": {
+                "code": "FORBIDDEN",
+                "message": "Non-authenticated user does not have permission to write Product (id aQAd59nDQHiCUpXnhm7-TwPLCh9ALaQH2TIxOengS1FQ)"
+              }
+            }
+          },
+          "409": {
+            "description": "Cannot move to this state from current state of Product (code: `INVALID_STATE_TRANSITION`)",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            },
+            "examples": {
+              "application/json": {
+                "code": "INVALID_STATE_TRANSITION",
+                "message": "Invalid transition UNDEPLOYING -> DEPLOYING"
+              }
+            }
+          }
+        }
+      }
+    },
     "/products/{id}/setUndeploying": {
       "post": {
         "summary": "Transition Product to state UNDEPLOYING",
@@ -2596,48 +2679,49 @@
         }
       }
     },
+    "ProductInBlockchain": {
+      "type": "object",
+      "required": [
+        "ownerAddress",
+        "beneficiaryAddress",
+        "pricePerSecond",
+        "priceCurrency",
+        "minimumSubscriptionInSeconds"
+      ],
+      "properties": {
+        "ownerAddress": {
+          "type": "string",
+          "description": "Ethereum address of owner",
+          "example": "0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF"
+        },
+        "beneficiaryAddress": {
+          "type": "string",
+          "description": "Ethereum address of beneficiary",
+          "example": "0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF"
+        },
+        "pricePerSecond": {
+          "type": "integer",
+          "description": "Unit cost per second",
+          "example": 5
+        },
+        "priceCurrency": {
+          "type": "string",
+          "description": "Unit currency",
+          "enum": [
+            "DATA",
+            "USD"
+          ]
+        },
+        "minimumSubscriptionInSeconds": {
+          "type": "integer",
+          "description": "Minimum subscription length (in seconds)"
+        }
+      }
+    },
     "CreateProduct": {
       "allOf": [
         { "$ref": "#/definitions/UpdateProduct" },
-        {
-          "type": "object",
-          "required": [
-            "ownerAddress",
-            "beneficiaryAddress",
-            "pricePerSecond",
-            "priceCurrency",
-            "minimumSubscriptionInSeconds"
-          ],
-          "properties": {
-            "ownerAddress": {
-              "type": "string",
-              "description": "Ethereum address of owner",
-              "example": "0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF"
-            },
-            "beneficiaryAddress": {
-              "type": "string",
-              "description": "Ethereum address of beneficiary",
-              "example": "0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF"
-            },
-            "pricePerSecond": {
-              "type": "integer",
-              "description": "Unit cost per second",
-              "example": 5
-            },
-            "priceCurrency": {
-              "type": "string",
-              "description": "Unit currency",
-              "enum": [
-                "DATA",
-                "USD"
-              ]
-            },
-            "minimumSubscriptionInSeconds": {
-              "type": "integer",
-              "description": "Minimum subscription length (in seconds)"
-            }
-          }
-        }
+        { "$ref": "#/definitions/ProductInBlockchain" }
       ]
     },
     "Product": {
@@ -2679,6 +2763,30 @@
           }
         },
         { "$ref": "#/definitions/CreateProduct" }
+      ]
+    },
+    "DeployedProduct": {
+      "allOf": [
+        {
+          "type": "object",
+          "required": [
+            "blockNumber",
+            "blockIndex"
+          ],
+          "properties": {
+            "blockNumber": {
+              "type": "integer",
+              "description": "Block number of associated Ethereum transaction",
+              "example": 5137054
+            },
+            "blockIndex": {
+              "type": "integer",
+              "description": "Index of associated Ethereum transaction in block",
+              "example": 5
+            }
+          }
+        },
+        { "$ref": "#/definitions/ProductInBlockchain" }
       ]
     },
     "User": {
