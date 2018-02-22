@@ -181,6 +181,137 @@
         }
       }
     },
+    "/products/{id}": {
+      "get": {
+        "summary": "Get a Product",
+        "description": "Get a Product by id",
+        "tags": [
+          "products"
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "description": "unique identifier of a Product",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Product found",
+            "schema": {
+              "$ref": "#/definitions/Product"
+            }
+          },
+          "404": {
+            "description": "Product not found (code: `NOT_FOUND`)",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            },
+            "examples": {
+              "application/json": {
+                "code": "NOT_FOUND",
+                "message": "Product with id 1kDWMNstSmW1NxhJPYFHsAYgkesh19QraMLtgfuDs4sA not found"
+              }
+            }
+          },
+          "403": {
+            "description": "Insufficient permission to read Product (code: `FORBIDDEN`)",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            },
+            "examples": {
+              "application/json": {
+                "code": "FORBIDDEN",
+                "message": "Non-authenticated user does not have permission to read Product (id aQAd59nDQHiCUpXnhm7-TwPLCh9ALaQH2TIxOengS1FQ)"
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "summary": "Update a Product",
+        "description": "Updates the non-Blockchain information of a Product.",
+        "tags": [
+          "products"
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "description": "unique identifier of a Product",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "description": "Updated Product",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/UpdateProduct"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Product updated",
+            "schema": {
+              "$ref": "#/definitions/Product"
+            }
+          },
+          "401": {
+            "description": "Not authenticated (code: `NOT_AUTHENTICATED`)",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            },
+            "examples": {
+              "application/json": {
+                "code": "NOT_AUTHENTICATED",
+                "message": "Not authenticated via token or cookie"
+              }
+            }
+          },
+          "404": {
+            "description": "Product not found (code: `NOT_FOUND`)",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            },
+            "examples": {
+              "application/json": {
+                "code": "NOT_FOUND",
+                "message": "Product with id 1kDWMNstSmW1NxhJPYFHsAYgkesh19QraMLtgfuDs4sA not found"
+              }
+            }
+          },
+          "403": {
+            "description": "Insufficient permission to write Product or include Stream (code: `FORBIDDEN`)",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            },
+            "examples": {
+              "application/json": {
+                "code": "FORBIDDEN",
+                "message": "Non-authenticated user does not have permission to write Product (id aQAd59nDQHiCUpXnhm7-TwPLCh9ALaQH2TIxOengS1FQ)"
+              }
+            }
+          },
+          "422": {
+            "description": "Body does not pass validation (code: `VALIDATION_ERROR`)",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            },
+            "examples": {
+              "application/json": {
+                "code": "VALIDATION_ERROR",
+                "message": "Validation failed for fields: category (typeMismatch)"
+              }
+            }
+          }
+        }
+      }
+    },
     "/streams": {
       "get": {
         "summary": "List streams",
@@ -2268,18 +2399,13 @@
         }
       }
     },
-    "CreateProduct": {
+    "UpdateProduct" : {
       "type": "object",
       "required": [
         "name",
         "description",
         "category",
-        "streams",
-        "ownerAddress",
-        "beneficiaryAddress",
-        "pricePerSecond",
-        "priceCurrency",
-        "minimumSubscriptionInSeconds"
+        "streams"
       ],
       "properties": {
         "name": {
@@ -2319,35 +2445,52 @@
         "previewConfigJson": {
           "type": "string",
           "description": "Configuration of previewStream"
-        },
-        "ownerAddress": {
-          "type": "string",
-          "description": "Ethereum address of owner",
-          "example": "0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF"
-        },
-        "beneficiaryAddress": {
-          "type": "string",
-          "description": "Ethereum address of beneficiary",
-          "example": "0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF"
-        },
-        "pricePerSecond": {
-          "type": "integer",
-          "description": "Unit cost per second",
-          "example": 5
-        },
-        "priceCurrency": {
-          "type": "string",
-          "description": "Unit currency",
-          "enum": [
-            "DATA",
-            "USD"
-          ]
-        },
-        "minimumSubscriptionInSeconds": {
-          "type": "integer",
-          "description": "Minimum subscription length (in seconds)"
         }
       }
+    },
+    "CreateProduct": {
+      "allOf": [
+        { "$ref": "#/definitions/UpdateProduct" },
+        {
+          "type": "object",
+          "required": [
+            "ownerAddress",
+            "beneficiaryAddress",
+            "pricePerSecond",
+            "priceCurrency",
+            "minimumSubscriptionInSeconds"
+          ],
+          "properties": {
+            "ownerAddress": {
+              "type": "string",
+              "description": "Ethereum address of owner",
+              "example": "0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF"
+            },
+            "beneficiaryAddress": {
+              "type": "string",
+              "description": "Ethereum address of beneficiary",
+              "example": "0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF"
+            },
+            "pricePerSecond": {
+              "type": "integer",
+              "description": "Unit cost per second",
+              "example": 5
+            },
+            "priceCurrency": {
+              "type": "string",
+              "description": "Unit currency",
+              "enum": [
+                "DATA",
+                "USD"
+              ]
+            },
+            "minimumSubscriptionInSeconds": {
+              "type": "integer",
+              "description": "Minimum subscription length (in seconds)"
+            }
+          }
+        }
+      ]
     },
     "Product": {
       "allOf": [
