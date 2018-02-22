@@ -2260,11 +2260,6 @@
             "UNDEPLOYING"
           ]
         },
-        "tx": {
-          "type": "string",
-          "description": "Ethereum transaction hash of the deployment of this Product",
-          "example": "0xe7b53cfb5fb0840d411252ced142d020efb1ae65f7b727fcffbbcd9daa04f803"
-        },
         "previewStream": {
           "type": "string",
           "description": "Identifier of Stream selected for preview"
