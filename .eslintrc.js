@@ -1,4 +1,4 @@
 
 module.exports = exports = {
-    extends: 'streamr'
+    extends: '@streamr/eslint-config-streamr'
 }
