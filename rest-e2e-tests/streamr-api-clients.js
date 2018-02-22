@@ -120,6 +120,18 @@ class Products {
     }
 }
 
+class Streams {
+    constructor(options) {
+        this.options = options
+    }
+
+    create(body) {
+        return new StreamrApiRequest(this.options)
+            .methodAndPath('POST', 'streams')
+            .withBody(body)
+    }
+}
+
 module.exports = (baseUrl, logging) => {
     const options = {
         baseUrl,
@@ -130,7 +142,8 @@ module.exports = (baseUrl, logging) => {
         api: {
             v1: {
                 categories: new Categories(options),
-                products: new Products(options)
+                products: new Products(options),
+                streams: new Streams(options)
             }
         }
     }
