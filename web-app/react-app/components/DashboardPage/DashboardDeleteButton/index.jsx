@@ -31,12 +31,12 @@ type GivenProps = {
 type Props = StateProps & DispatchProps & GivenProps
 
 export class DashboardDeleteButton extends Component<Props> {
-    
+
     static defaultProps = {
         buttonProps: {},
-        className: ''
+        className: '',
     }
-    
+
     onDelete = () => {
         const {dashboard, deleteDashboard} = this.props
         dashboard && deleteDashboard(dashboard.id)
@@ -45,13 +45,13 @@ export class DashboardDeleteButton extends Component<Props> {
                 window.location.assign(createLink('/dashboard/list'))
             })
     }
-    
+
     render() {
         return (
             <ConfirmButton
                 buttonProps={{
                     disabled: this.props.dashboard && (!this.props.canWrite || this.props.dashboard.new),
-                    ...this.props.buttonProps
+                    ...this.props.buttonProps,
                 }}
                 className={this.props.className}
                 confirmCallback={this.onDelete}
@@ -64,12 +64,12 @@ export class DashboardDeleteButton extends Component<Props> {
     }
 }
 
-export const mapStateToProps = (state: {dashboard: DashboardState}): StateProps => parseDashboard(state)
+export const mapStateToProps = (state: { dashboard: DashboardState }): StateProps => parseDashboard(state)
 
 export const mapDispatchToProps = (dispatch: Function): DispatchProps => ({
     deleteDashboard(id: $ElementType<Dashboard, 'id'>) {
         return dispatch(deleteDashboard(id))
-    }
+    },
 })
 
 export default connect(mapStateToProps, mapDispatchToProps)(DashboardDeleteButton)

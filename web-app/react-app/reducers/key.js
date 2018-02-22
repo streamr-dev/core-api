@@ -9,7 +9,7 @@ import {
     ADD_RESOURCE_KEY_FAILURE,
     REMOVE_RESOURCE_KEY_REQUEST,
     REMOVE_RESOURCE_KEY_SUCCESS,
-    REMOVE_RESOURCE_KEY_FAILURE
+    REMOVE_RESOURCE_KEY_FAILURE,
 } from '../actions/key.js'
 
 import type {KeyState} from '../flowtype/states/key-state'
@@ -18,7 +18,7 @@ import type {KeyAction} from '../flowtype/actions/key-actions'
 const initialState = {
     byTypeAndId: {},
     error: null,
-    fetching: false
+    fetching: false,
 }
 
 export default function(state: KeyState = initialState, action: KeyAction): KeyState {
@@ -28,9 +28,9 @@ export default function(state: KeyState = initialState, action: KeyAction): KeyS
         case REMOVE_RESOURCE_KEY_REQUEST:
             return {
                 ...state,
-                fetching: true
+                fetching: true,
             }
-            
+
         case GET_RESOURCE_KEYS_SUCCESS:
             return {
                 ...state,
@@ -38,13 +38,13 @@ export default function(state: KeyState = initialState, action: KeyAction): KeyS
                     ...state.byTypeAndId,
                     [action.resourceType]: {
                         ...(state.byTypeAndId[action.resourceType] || {}),
-                        [action.resourceId]: action.keys
-                    }
+                        [action.resourceId]: action.keys,
+                    },
                 },
                 fetching: false,
-                error: null
+                error: null,
             }
-            
+
         case ADD_RESOURCE_KEY_SUCCESS:
             return {
                 ...state,
@@ -54,14 +54,14 @@ export default function(state: KeyState = initialState, action: KeyAction): KeyS
                         ...(state.byTypeAndId[action.resourceType] || {}),
                         [action.resourceId]: [
                             ...((state.byTypeAndId[action.resourceType] || {})[action.resourceId] || []),
-                            action.key
-                        ]
-                    }
+                            action.key,
+                        ],
+                    },
                 },
                 fetching: false,
-                error: null
+                error: null,
             }
-            
+
         case REMOVE_RESOURCE_KEY_SUCCESS:
             if (!action.keyId) {
                 throw new Error('No keyId provided!')
@@ -72,22 +72,22 @@ export default function(state: KeyState = initialState, action: KeyAction): KeyS
                     ...state.byTypeAndId,
                     [action.resourceType]: {
                         ...(state.byTypeAndId[action.resourceType] || {}),
-                        [action.resourceId]: (state.byTypeAndId[action.resourceType][action.resourceId] || []).filter(key => !action.keyId || key.id !== action.keyId)
-                    }
+                        [action.resourceId]: (state.byTypeAndId[action.resourceType][action.resourceId] || []).filter(key => !action.keyId || key.id !== action.keyId),
+                    },
                 },
                 fetching: false,
-                error: null
+                error: null,
             }
-            
+
         case GET_RESOURCE_KEYS_FAILURE:
         case ADD_RESOURCE_KEY_FAILURE:
         case REMOVE_RESOURCE_KEY_FAILURE:
             return {
                 ...state,
                 fetching: false,
-                error: action.error
+                error: action.error,
             }
-            
+
         default:
             return state
     }

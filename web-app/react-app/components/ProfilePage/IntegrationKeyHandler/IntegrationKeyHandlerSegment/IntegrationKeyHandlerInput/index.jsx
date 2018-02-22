@@ -20,7 +20,7 @@ type Props = GivenProps
 
 export default class IntegrationKeyHandlerInput extends Component<Props> {
     form: ?HTMLFormElement
-    
+
     onSubmit = (e: {
         preventDefault: Function,
         target: HTMLFormElement
@@ -28,12 +28,12 @@ export default class IntegrationKeyHandlerInput extends Component<Props> {
         e.preventDefault()
         const form: HTMLFormElement = e.target
         const data = serialize(form, {
-            hash: true
+            hash: true,
         })
         this.props.onNew(data)
         form.reset()
     }
-    
+
     render() {
         return (
             <form className={styles.integrationKeyInputForm} onSubmit={this.onSubmit}>

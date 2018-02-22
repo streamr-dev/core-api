@@ -29,7 +29,7 @@ type GivenProps = {
 type Props = StateProps & DispatchProps & GivenProps
 
 export class ShareDialogOwnerRow extends Component<Props> {
-    
+
     onAnonymousAccessChange = () => {
         if (!this.props.anonymousPermission) {
             this.props.addPublicPermission()
@@ -37,7 +37,7 @@ export class ShareDialogOwnerRow extends Component<Props> {
             this.props.revokePublicPermission(this.props.anonymousPermission)
         }
     }
-    
+
     render() {
         return (
             <Col xs={12} className={styles.ownerRow}>
@@ -52,14 +52,14 @@ export class ShareDialogOwnerRow extends Component<Props> {
     }
 }
 
-export const mapStateToProps = ({permission: {byTypeAndId}}: {permission: PermissionState}, ownProps: Props): StateProps => {
+export const mapStateToProps = ({permission: {byTypeAndId}}: { permission: PermissionState }, ownProps: Props): StateProps => {
     const byType = byTypeAndId[ownProps.resourceType] || {}
     const permissions = (byType[ownProps.resourceId] || []).filter(p => !p.removed)
     const ownerPermission = permissions.find(it => it.id === null && !it.new) || {}
     const owner = ownerPermission.user
     return {
         anonymousPermission: permissions.find(p => p.anonymous),
-        owner
+        owner,
     }
 }
 
@@ -68,12 +68,12 @@ export const mapDispatchToProps = (dispatch: Function, ownProps: Props): Dispatc
         dispatch(addResourcePermission(ownProps.resourceType, ownProps.resourceId, {
             user: null,
             anonymous: true,
-            operation: 'read'
+            operation: 'read',
         }))
     },
     revokePublicPermission(anonymousPermission: Permission) {
         dispatch(removeResourcePermission(ownProps.resourceType, ownProps.resourceId, anonymousPermission))
-    }
+    },
 })
 
 export default connect(mapStateToProps, mapDispatchToProps)(ShareDialogOwnerRow)

@@ -33,10 +33,10 @@ const initialState = {
     dashboardsById: {},
     openDashboard: {
         id: null,
-        isFullScreen: false
+        isFullScreen: false,
     },
     error: null,
-    fetching: false
+    fetching: false,
 }
 
 const dashboard = function(state: DashboardState = initialState, action: DashboardAction): DashboardState {
@@ -46,10 +46,10 @@ const dashboard = function(state: DashboardState = initialState, action: Dashboa
                 ...state,
                 openDashboard: {
                     ...state.openDashboard,
-                    id: action.id
-                }
+                    id: action.id,
+                },
             }
-            
+
         case GET_AND_REPLACE_DASHBOARDS_REQUEST:
         case GET_DASHBOARD_REQUEST:
         case UPDATE_AND_SAVE_DASHBOARD_REQUEST:
@@ -57,17 +57,17 @@ const dashboard = function(state: DashboardState = initialState, action: Dashboa
         case GET_MY_DASHBOARD_PERMISSIONS_REQUEST:
             return {
                 ...state,
-                fetching: true
+                fetching: true,
             }
-            
+
         case GET_AND_REPLACE_DASHBOARDS_SUCCESS:
             return {
                 ...state,
                 dashboardsById: _.keyBy(action.dashboards, 'id'),
                 fetching: false,
-                error: null
+                error: null,
             }
-            
+
         case CREATE_DASHBOARD: {
             return {
                 ...state,
@@ -76,14 +76,14 @@ const dashboard = function(state: DashboardState = initialState, action: Dashboa
                     [action.dashboard && action.dashboard.id]: {
                         ...action.dashboard,
                         new: true,
-                        saved: true
-                    }
+                        saved: true,
+                    },
                 },
                 error: null,
-                fetching: false
+                fetching: false,
             }
         }
-        
+
         case UPDATE_DASHBOARD: {
             return {
                 ...state,
@@ -92,14 +92,14 @@ const dashboard = function(state: DashboardState = initialState, action: Dashboa
                     [action.dashboard && action.dashboard.id]: {
                         ...state.dashboardsById[action.dashboard.id],
                         ...action.dashboard,
-                        saved: false
-                    }
+                        saved: false,
+                    },
                 },
                 error: null,
-                fetching: false
+                fetching: false,
             }
         }
-        
+
         case GET_DASHBOARD_SUCCESS:
         case UPDATE_AND_SAVE_DASHBOARD_SUCCESS: {
             return {
@@ -110,27 +110,27 @@ const dashboard = function(state: DashboardState = initialState, action: Dashboa
                         ...state.dashboardsById[action.dashboard && action.dashboard.id],
                         ...action.dashboard,
                         new: false,
-                        saved: true
-                    }
+                        saved: true,
+                    },
                 },
                 error: null,
-                fetching: false
+                fetching: false,
             }
         }
-        
+
         case DELETE_DASHBOARD_SUCCESS: {
             const dbById = {
-                ...state.dashboardsById
+                ...state.dashboardsById,
             }
             action.id && delete dbById[action.id]
             return {
                 ...state,
                 dashboardsById: dbById,
                 error: null,
-                fetching: false
+                fetching: false,
             }
         }
-        
+
         case GET_MY_DASHBOARD_PERMISSIONS_SUCCESS: {
             return {
                 ...state,
@@ -138,14 +138,14 @@ const dashboard = function(state: DashboardState = initialState, action: Dashboa
                     ...state.dashboardsById,
                     [action.id]: {
                         ...state.dashboardsById[action.id],
-                        ownPermissions: action.permissions || []
-                    }
+                        ownPermissions: action.permissions || [],
+                    },
                 },
                 error: null,
-                fetching: false
+                fetching: false,
             }
         }
-        
+
         case GET_AND_REPLACE_DASHBOARDS_FAILURE:
         case GET_DASHBOARD_FAILURE:
         case UPDATE_AND_SAVE_DASHBOARD_FAILURE:
@@ -154,9 +154,9 @@ const dashboard = function(state: DashboardState = initialState, action: Dashboa
             return {
                 ...state,
                 fetching: false,
-                error: action.error
+                error: action.error,
             }
-            
+
         case LOCK_DASHBOARD_EDITING:
             return {
                 ...state,
@@ -164,11 +164,11 @@ const dashboard = function(state: DashboardState = initialState, action: Dashboa
                     ...state.dashboardsById,
                     [action.id]: {
                         ...(state.dashboardsById[action.id] || {}),
-                        editingLocked: true
-                    }
-                }
+                        editingLocked: true,
+                    },
+                },
             }
-            
+
         case UNLOCK_DASHBOARD_EDITING:
             return {
                 ...state,
@@ -176,18 +176,18 @@ const dashboard = function(state: DashboardState = initialState, action: Dashboa
                     ...state.dashboardsById,
                     [action.id]: {
                         ...(state.dashboardsById[action.id] || {}),
-                        editingLocked: false
-                    }
-                }
+                        editingLocked: false,
+                    },
+                },
             }
-    
+
         case CHANGE_DASHBOARD_ID: {
             const newDashboardsById = {
                 ...state.dashboardsById,
                 [action.newId]: {
                     ...(state.dashboardsById[action.oldId] || {}),
-                    id: action.newId
-                }
+                    id: action.newId,
+                },
             }
             delete newDashboardsById[action.oldId]
             return {
@@ -195,12 +195,12 @@ const dashboard = function(state: DashboardState = initialState, action: Dashboa
                 dashboardsById: newDashboardsById,
                 openDashboard: {
                     ...state.openDashboard,
-                    id: state.openDashboard.id === action.oldId ? action.newId : state.openDashboard.id
-                }
+                    id: state.openDashboard.id === action.oldId ? action.newId : state.openDashboard.id,
+                },
             }
-            
+
         }
-        
+
         default:
             return state
     }

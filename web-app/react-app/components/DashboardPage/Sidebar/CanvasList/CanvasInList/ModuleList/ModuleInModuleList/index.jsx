@@ -10,8 +10,8 @@ import styles from './moduleInModuleList.pcss'
 import uuid from 'uuid'
 
 import type {DashboardState} from '../../../../../../../flowtype/states/dashboard-state'
-import type { Dashboard, DashboardItem } from '../../../../../../../flowtype/dashboard-types'
-import type { Canvas, CanvasModule } from '../../../../../../../flowtype/canvas-types'
+import type {Dashboard, DashboardItem} from '../../../../../../../flowtype/dashboard-types'
+import type {Canvas, CanvasModule} from '../../../../../../../flowtype/canvas-types'
 
 type StateProps = {
     dashboard: ?Dashboard,
@@ -33,7 +33,7 @@ type GivenProps = {
 type Props = StateProps & DispatchProps & GivenProps
 
 export class ModuleInModuleList extends Component<Props> {
-    
+
     onClick = () => {
         const id = uuid.v4()
         const dbItem: DashboardItem = {
@@ -42,7 +42,7 @@ export class ModuleInModuleList extends Component<Props> {
             module: this.props.module.hash,
             canvas: this.props.canvasId,
             webcomponent: this.props.module.uiChannel.webcomponent,
-            title: this.props.module.name
+            title: this.props.module.name,
         }
         if (this.props.checked) {
             this.props.dashboard && this.props.removeDashboardItem(this.props.dashboard, dbItem)
@@ -50,7 +50,7 @@ export class ModuleInModuleList extends Component<Props> {
             this.props.dashboard && this.props.addDashboardItem(this.props.dashboard, dbItem)
         }
     }
-    
+
     render() {
         const {module, checked} = this.props
         return (
@@ -64,11 +64,11 @@ export class ModuleInModuleList extends Component<Props> {
     }
 }
 
-export const mapStateToProps = ({dashboard}: {dashboard: DashboardState}, ownProps: GivenProps): StateProps => {
+export const mapStateToProps = ({dashboard}: { dashboard: DashboardState }, ownProps: GivenProps): StateProps => {
     const db = dashboard.openDashboard.id && dashboard.dashboardsById[dashboard.openDashboard.id] || null
     return {
         dashboard: db,
-        checked: db && db.items ? db.items.find(item => item.canvas === ownProps.canvasId && item.module === ownProps.module.hash) !== undefined : false
+        checked: db && db.items ? db.items.find(item => item.canvas === ownProps.canvasId && item.module === ownProps.module.hash) !== undefined : false,
     }
 }
 
@@ -78,7 +78,7 @@ export const mapDispatchToProps = (dispatch: Function): DispatchProps => ({
     },
     removeDashboardItem(dashboard: Dashboard, item: DashboardItem) {
         dispatch(removeDashboardItem(dashboard, item))
-    }
+    },
 })
 
 export default connect(mapStateToProps, mapDispatchToProps)(ModuleInModuleList)

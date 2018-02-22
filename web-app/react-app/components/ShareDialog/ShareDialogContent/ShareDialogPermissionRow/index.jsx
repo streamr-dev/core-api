@@ -24,7 +24,7 @@ type GivenProps = {
 type Props = StateProps & GivenProps
 
 export class ShareDialogPermissionRow extends Component<Props> {
-    
+
     render() {
         return (
             <Row>
@@ -48,11 +48,11 @@ export class ShareDialogPermissionRow extends Component<Props> {
     }
 }
 
-export const mapStateToProps = ({permission: {byTypeAndId}}: {permission: PermissionState}, ownProps: GivenProps): StateProps => {
+export const mapStateToProps = ({permission: {byTypeAndId}}: { permission: PermissionState }, ownProps: GivenProps): StateProps => {
     const byType = byTypeAndId[ownProps.resourceType] || {}
     const permissions = (byType[ownProps.resourceId] || []).filter(p => !p.removed)
     return {
-        permissions: permissions.filter(p => !p.anonymous && (p.id || p.new))
+        permissions: permissions.filter(p => !p.anonymous && (p.id || p.new)),
     }
 }
 

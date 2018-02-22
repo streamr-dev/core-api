@@ -29,60 +29,60 @@ type State = {
 
 export default class CredentialsControl extends Component<Props, State> {
     copyTimeoutId: ?TimeoutID
-    
+
     static defaultProps = {
-        permissionTypeVisible: false
+        permissionTypeVisible: false,
     }
-    
+
     state = {
         showKey: null,
         copied: false,
-        permissionSelectorValue: 'read'
+        permissionSelectorValue: 'read',
     }
-    
+
     onShowKey = (key: Key) => {
         this.setState({
-            showKey: key
+            showKey: key,
         })
     }
-    
+
     onHideKey = () => {
         this.setState({
-            showKey: false
+            showKey: false,
         })
     }
-    
+
     onSubmit = (e: OnSubmitEvent) => {
         e.preventDefault()
         const data = serialize(e.target, {
-            hash: true
+            hash: true,
         })
         this.props.addKey(data)
         e.target.reset()
     }
-    
+
     componentWillUnmount() {
         this.copyTimeoutId && clearTimeout(this.copyTimeoutId)
     }
-    
+
     onCopy = (id: $ElementType<Key, 'id'>) => {
         this.setState({
-            copied: id
+            copied: id,
         })
         this.copyTimeoutId && clearTimeout(this.copyTimeoutId)
         this.copyTimeoutId = setTimeout(() => {
             this.setState({
-                copied: false
+                copied: false,
             })
         }, 3000)
     }
-    
+
     onPermissionSelect = (value: string) => {
         this.setState({
-            permissionSelectorValue: value
+            permissionSelectorValue: value,
         })
     }
-    
+
     renderKey = (key: Key) => {
         return (
             <tr key={key.id} className={styles.key}>
@@ -105,7 +105,7 @@ export default class CredentialsControl extends Component<Props, State> {
                             confirmMessage={`Are you sure you want to remove key ${key.name}?`}
                             confirmCallback={() => this.props.removeKey(key.id)}
                             buttonProps={{
-                                bsStyle: 'danger'
+                                bsStyle: 'danger',
                             }}
                         >
                             <FontAwesome name="trash-o"/>
@@ -115,7 +115,7 @@ export default class CredentialsControl extends Component<Props, State> {
             </tr>
         )
     }
-    
+
     render() {
         return (
             <form onSubmit={this.onSubmit} className={styles.credentialsControl}>
@@ -144,13 +144,13 @@ export default class CredentialsControl extends Component<Props, State> {
                                     name="permission"
                                     options={[{
                                         value: 'read',
-                                        label: 'Can Read'
+                                        label: 'Can Read',
                                     }, {
                                         value: 'write',
-                                        label: 'Can Write'
+                                        label: 'Can Write',
                                     }, {
                                         value: 'share',
-                                        label: 'Can Share'
+                                        label: 'Can Share',
                                     }]}
                                     value={this.state.permissionSelectorValue}
                                     onChange={this.onPermissionSelect}

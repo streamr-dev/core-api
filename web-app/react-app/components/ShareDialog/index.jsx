@@ -28,12 +28,12 @@ type GivenProps = {
 type Props = DispatchProps & GivenProps
 
 export class ShareDialog extends Component<Props> {
-    
+
     save = () => {
         this.props.save()
             .then(() => this.props.onClose())
     }
-    
+
     render() {
         return (
             <Modal
