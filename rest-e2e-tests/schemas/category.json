@@ -10,16 +10,16 @@
   ],
   "properties": {
     "id": {
-      "description": "Unique identifier for a product",
+      "description": "Unique identifier for a category",
       "$ref": "#/definitions/resourceIdentifier"
     },
     "name": {
-      "description": "Name of the product",
+      "description": "Name of the category",
       "type": "string",
       "maxLength": 255
     },
     "imageUrl": {
-      "description": "URL for product image",
+      "description": "URL for category image",
       "type": [
         "null",
         "string"

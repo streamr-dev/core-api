@@ -143,6 +143,21 @@ class Products {
             .methodAndPath('POST', `products/${id}/setUndeployed`)
             .withBody(body)
     }
+
+    listStreams(id) {
+        return new StreamrApiRequest(this.options)
+            .methodAndPath('GET', `products/${id}/streams`)
+    }
+
+    addStream(id, streamId) {
+        return new StreamrApiRequest(this.options)
+            .methodAndPath('PUT', `products/${id}/streams/${streamId}`)
+    }
+
+    removeStream(id, streamId) {
+        return new StreamrApiRequest(this.options)
+            .methodAndPath('DELETE', `products/${id}/streams/${streamId}`)
+    }
 }
 
 class Streams {

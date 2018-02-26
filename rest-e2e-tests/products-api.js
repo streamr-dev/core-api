@@ -3,7 +3,7 @@ const initStreamrApi = require('./streamr-api-clients')
 const SchemaValidator = require('./schema-validator')
 
 const URL = 'http://localhost:8081/streamr-core/api/v1/'
-const LOGGING_ENABLED = true
+const LOGGING_ENABLED = process.env.LOGGING_ENABLED || false
 
 const AUTH_TOKEN = 'product-api-tester-key'
 const AUTH_TOKEN_2 = 'product-api-tester2-key'
@@ -14,6 +14,11 @@ const schemaValidator = new SchemaValidator()
 
 function assertIsProduct(data) {
     const errors = schemaValidator.validateProduct(data)
+    assert(errors.length === 0, schemaValidator.toMessages(errors))
+}
+
+function assertIsStream(data) {
+    const errors = schemaValidator.validateStream(data)
     assert(errors.length === 0, schemaValidator.toMessages(errors))
 }
 
@@ -777,6 +782,208 @@ describe('Products API', () => {
             assert.equal(response.status, 200)
             assert.isAtLeast(json.length, 4)
             json.forEach(productData => assertIsProduct(productData))
+        })
+    })
+
+    describe('GET /api/v1/products/:id/streams', () => {
+        let createdProductId
+
+        before(async () => {
+            createdProductId = await createProductAndReturnId(genericProductBody)
+        })
+
+        it('requires existing Product', async () => {
+            const response = await Streamr.api.v1.products
+                .listStreams('non-existing-id')
+                .withAuthToken(AUTH_TOKEN)
+                .call()
+            await assertResponseIsError(response, 404, 'NOT_FOUND')
+        })
+
+        it('requires read permission on Product', async () => {
+            const response = await Streamr.api.v1.products
+                .listStreams(createdProductId)
+                .withAuthToken(AUTH_TOKEN_2)
+                .call()
+            const json = await response.json()
+
+            assert.equal(response.status, 403)
+            assert.equal(json.code, 'FORBIDDEN')
+            assert.equal(json.operation, 'read')
+        })
+
+        context('when called with valid params, body, headers, and permissions', () => {
+            let response
+            let json
+
+            before(async () => {
+                response = await Streamr.api.v1.products
+                    .listStreams(createdProductId)
+                    .withAuthToken(AUTH_TOKEN)
+                    .call()
+
+                json = await response.json()
+            })
+
+            it('responds with 200', () => {
+                assert.equal(response.status, 200)
+            })
+
+            it('Streams have expected ids', () => {
+                assert.sameMembers(json.map(stream => stream.id), [streamId1, streamId2])
+            })
+
+            it('Streams have expected names', () => {
+                assert.sameMembers(json.map(stream => stream.name), ['stream-1', 'stream-2'])
+            })
+
+            it('responds with list of Streams', () => {
+                json.forEach(stream => assertIsStream(stream))
+            })
+        })
+    })
+
+    describe('PUT /api/v1/products/:id/streams/:streamId', () => {
+        let createdProductId
+
+        before(async () => {
+            createdProductId = await createProductAndReturnId(genericProductBody)
+        })
+
+        it('requires existing Product', async () => {
+            const response = await Streamr.api.v1.products
+                .addStream('non-existing-id', streamId3)
+                .withAuthToken(AUTH_TOKEN)
+                .call()
+            await assertResponseIsError(response, 404, 'NOT_FOUND', 'Product')
+        })
+
+        it('requires write permission on Product', async () => {
+            const response = await Streamr.api.v1.products
+                .addStream(createdProductId, streamId3)
+                .withAuthToken(AUTH_TOKEN_2)
+                .call()
+            const json = await response.json()
+
+            assert.equal(response.status, 403)
+            assert.equal(json.code, 'FORBIDDEN')
+            assert.equal(json.operation, 'write')
+        })
+
+        it('requires existing Stream', async () => {
+            const response = await Streamr.api.v1.products
+                .addStream(createdProductId, 'non-existing-id')
+                .withAuthToken(AUTH_TOKEN)
+                .call()
+            await assertResponseIsError(response, 404, 'NOT_FOUND', 'Stream')
+        })
+
+        it('requires share permission on Stream', async () => {
+            const streamId4 = await createStreamAndReturnId({
+                name: 'stream-3'
+            }, AUTH_TOKEN_2)
+
+            const response = await Streamr.api.v1.products
+                .addStream(createdProductId, streamId4)
+                .withAuthToken(AUTH_TOKEN)
+                .call()
+            const json = await response.json()
+
+            assert.equal(response.status, 403)
+            assert.equal(json.code, 'FORBIDDEN')
+            assert.equal(json.operation, 'share')
+        })
+
+        context('when called with valid params, body, headers, and permissions', () => {
+            let response
+
+            before(async () => {
+                response = await Streamr.api.v1.products
+                    .addStream(createdProductId, streamId3)
+                    .withAuthToken(AUTH_TOKEN)
+                    .call()
+            })
+
+            it('responds with 204', () => {
+                assert.equal(response.status, 204)
+            })
+
+            it('adds stream to Product', async () => {
+                const response = await Streamr.api.v1.products
+                    .listStreams(createdProductId)
+                    .withAuthToken(AUTH_TOKEN)
+                    .call()
+                const json = await response.json()
+                assert.include(json.map(stream => stream.id), streamId3)
+            })
+        })
+    })
+
+    describe('DELETE /api/v1/products/:id/streams/:streamId', () => {
+        let createdProductId
+
+        before(async () => {
+            createdProductId = await createProductAndReturnId(genericProductBody)
+        })
+
+        it('requires existing Product', async () => {
+            const response = await Streamr.api.v1.products
+                .removeStream('non-existing-id', streamId3)
+                .withAuthToken(AUTH_TOKEN)
+                .call()
+            await assertResponseIsError(response, 404, 'NOT_FOUND', 'Product')
+        })
+
+        it('requires write permission on Product', async () => {
+            const response = await Streamr.api.v1.products
+                .removeStream(createdProductId, streamId3)
+                .withAuthToken(AUTH_TOKEN_2)
+                .call()
+            const json = await response.json()
+
+            assert.equal(response.status, 403)
+            assert.equal(json.code, 'FORBIDDEN')
+            assert.equal(json.operation, 'write')
+        })
+
+        it('requires existing Stream', async () => {
+            const response = await Streamr.api.v1.products
+                .removeStream(createdProductId, 'non-existing-id')
+                .withAuthToken(AUTH_TOKEN)
+                .call()
+            await assertResponseIsError(response, 404, 'NOT_FOUND', 'Stream')
+        })
+
+        context('when called with valid params, body, headers, and permissions', () => {
+            let response
+
+            before(async () => {
+                response = await Streamr.api.v1.products
+                    .removeStream(createdProductId, streamId1)
+                    .withAuthToken(AUTH_TOKEN)
+                    .call()
+            })
+
+            it('responds with 204', () => {
+                assert.equal(response.status, 204)
+            })
+
+            it('removes stream to Product', async () => {
+                const response = await Streamr.api.v1.products
+                    .listStreams(createdProductId)
+                    .withAuthToken(AUTH_TOKEN)
+                    .call()
+                const json = await response.json()
+                assert.deepEqual(json.map(stream => stream.id), [streamId2])
+            })
+        })
+
+        it('responds with 204 when removing stream that is not associated with Product', async () => {
+            const response = await Streamr.api.v1.products
+                .removeStream(createdProductId, streamId3)
+                .withAuthToken(AUTH_TOKEN)
+                .call()
+            assert.equal(response.status, 204)
         })
     })
 })
