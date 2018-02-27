@@ -75,7 +75,13 @@ databaseChangeLog = {
 				constraints(nullable: "false")
 			}
 
-			column(name: "tx", type: "varchar(255)")
+			column(name: "block_index", type: "bigint") {
+				constraints(nullable: "false")
+			}
+
+			column(name: "block_number", type: "bigint") {
+				constraints(nullable: "false")
+			}
 		}
 	}
 

@@ -4,6 +4,8 @@ import com.mashape.unirest.http.HttpResponse
 import com.mashape.unirest.http.Unirest
 import com.unifina.api.ApiException
 import com.unifina.api.ListParams
+import com.unifina.api.NotFoundException
+import com.unifina.api.NotPermittedException
 import com.unifina.api.ValidationException
 import com.unifina.domain.security.Key
 import com.unifina.domain.security.Permission
@@ -62,6 +64,28 @@ class ApiService {
 			)
 			response.addHeader("Link", "<${url}>; rel=\"more\"")
 		}
+	}
+
+	/**
+	 * Fetch a domain object by id while authorizing that current user has required permission
+	 */
+	@GrailsCompileStatic
+	<T> T authorizedGetById(Class<T> domainClass, String id, SecUser currentUser, Permission.Operation operation)
+			throws NotFoundException, NotPermittedException {
+		T domainObject = getByIdAndThrowIfNotFound(domainClass, id)
+		permissionService.verify(currentUser, domainObject, operation)
+		return domainObject
+	}
+
+	/**
+	 * Fetch a domain object by id and throw NotFoundException if not found
+	 */
+	def <T> T getByIdAndThrowIfNotFound(Class<T> domainClass, String id) throws NotFoundException {
+		T domainObject = domainClass.get(id)
+		if (domainObject == null) {
+			throw new NotFoundException(domainClass.simpleName, id)
+		}
+		return domainObject
 	}
 
 	@CompileStatic

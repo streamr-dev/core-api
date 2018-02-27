@@ -36,6 +36,10 @@ class SecUser implements Userish {
 		SecUserSecRole.findAllBySecUser(this).collect { it.secRole } as Set
 	}
 
+	boolean isDevOps() {
+		"ROLE_DEV_OPS" in authorities*.authority
+	}
+
 	Map toMap() {
 		return [
 			name           : name,

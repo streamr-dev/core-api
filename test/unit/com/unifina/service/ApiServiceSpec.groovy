@@ -2,6 +2,8 @@ package com.unifina.service
 
 import com.unifina.api.DashboardListParams
 import com.unifina.api.ListParams
+import com.unifina.api.NotFoundException
+import com.unifina.api.NotPermittedException
 import com.unifina.api.ValidationException
 import com.unifina.domain.dashboard.Dashboard
 import com.unifina.domain.security.Permission
@@ -10,15 +12,13 @@ import grails.test.mixin.Mock
 import grails.test.mixin.TestFor
 import grails.test.mixin.TestMixin
 import grails.test.mixin.web.ControllerUnitTestMixin
-import grails.web.CamelCaseUrlConverter
-import org.codehaus.groovy.grails.web.mapping.DefaultLinkGenerator
-import org.codehaus.groovy.grails.web.mapping.LinkGenerator
 import spock.lang.Specification
 
 import javax.servlet.http.HttpServletResponse
 
 @TestMixin(ControllerUnitTestMixin) // "as JSON" converter
 @TestFor(ApiService)
+@Mock(Dashboard)
 class ApiServiceSpec extends Specification {
 
 	void "list() delegates to permissionService#get"() {
@@ -80,4 +80,75 @@ class ApiServiceSpec extends Specification {
 		1 * response.addHeader("Link", '<http://localhost:8080/api/v1/dashboards?max=100&offset=250&publicAccess=true&name=dashboard>; rel="more"')
 	}
 
+	void "getByIdAndThrowIfNotFound() throws NotFoundException if domain object cannot be found"() {
+		when:
+		service.getByIdAndThrowIfNotFound(Dashboard, "dashboard-id")
+
+		then:
+		def e = thrown(NotFoundException)
+		e.asApiError().toMap() == [
+			id: "dashboard-id",
+			message: "Dashboard with id dashboard-id not found",
+			code: "NOT_FOUND",
+			fault: "id",
+			type: "Dashboard"
+		]
+	}
+
+	void "getByIdAndThrowIfNotFound() returns domain object if it exists"() {
+		Dashboard dashboard = new Dashboard(name: "dashboard")
+		dashboard.id = "dashboard-id"
+		dashboard.save(failOnError: true)
+
+		expect:
+		service.getByIdAndThrowIfNotFound(Dashboard, "dashboard-id") == dashboard
+	}
+
+	void "authorizedGetById() throws NotFoundException if domain object cannot be found"() {
+		SecUser me = new SecUser(username: "me@me.com")
+
+		when:
+		service.authorizedGetById(Dashboard, "dashboard-id", me, Permission.Operation.WRITE)
+
+		then:
+		def e = thrown(NotFoundException)
+		e.asApiError().toMap() == [
+		    id: "dashboard-id",
+			message: "Dashboard with id dashboard-id not found",
+			code: "NOT_FOUND",
+			fault: "id",
+			type: "Dashboard"
+		]
+	}
+
+	void "authorizedGetById() throws NotPermittedException if user does not have required permission"() {
+		SecUser me = new SecUser(username: "me@me.com")
+		Dashboard dashboard = new Dashboard(name: "dashboard")
+		dashboard.id = "dashboard-id"
+		dashboard.save(failOnError: true)
+
+		service.permissionService = new PermissionService()
+
+		when:
+		service.authorizedGetById(Dashboard, "dashboard-id", me, Permission.Operation.WRITE)
+
+		then:
+		def e = thrown(NotPermittedException)
+		e.message == "me@me.com does not have permission to write Dashboard (id dashboard-id)"
+	}
+
+	void "authorizedGetById() returns domain object if it exists and user has required permission"() {
+		SecUser me = new SecUser(username: "me@me.com")
+		Dashboard dashboard = new Dashboard(name: "dashboard")
+		dashboard.id = "dashboard-id"
+		dashboard.save(failOnError: true)
+
+		service.permissionService = Stub(PermissionService) // replace verify() with nop method
+
+		when:
+		def result = service.authorizedGetById(Dashboard, "dashboard-id", me, Permission.Operation.WRITE)
+
+		then:
+		result == dashboard
+	}
 }
