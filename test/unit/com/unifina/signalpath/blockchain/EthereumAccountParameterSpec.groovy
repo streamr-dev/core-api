@@ -64,7 +64,7 @@ class EthereumAccountParameterSpec extends BeanMockingSpecification {
 	void "parseValue() returns integration key given existing Ethereum-service key id"() {
 		setup:
 		SecUser user = new SecUser(name: "name", username: "name@name.com", password: "pass").save(failOnError: true, validate: false)
-		IntegrationKey key = new IntegrationKey(name: "key", service: IntegrationKey.Service.ETHEREUM, user: user)
+		IntegrationKey key = new IntegrationKey(name: "key", service: IntegrationKey.Service.ETHEREUM, user: user, idInService: "0x0")
 		key.id = "account-1"
 		key.json = "{}"
 		key.save(failOnError: true, validate: true)
@@ -76,7 +76,7 @@ class EthereumAccountParameterSpec extends BeanMockingSpecification {
 	void "getPrivateKey() and getAddress() return values from json, after configuration, if logged in as owner"() {
 		setup:
 		SecUser user = new SecUser(name: "name", username: "name@name.com", password: "pass").save(failOnError: true, validate: false, flush: true)
-		IntegrationKey key = new IntegrationKey(name: "key", service: IntegrationKey.Service.ETHEREUM, user: user)
+		IntegrationKey key = new IntegrationKey(name: "key", service: IntegrationKey.Service.ETHEREUM, user: user, idInService: "0xffff")
 
 		key.id = "account-1"
 		key.json = '{ "privateKey": "' + encryptor.encrypt("0000", user.id.byteValue()) + '", "address": "0xffff"}'
@@ -94,7 +94,7 @@ class EthereumAccountParameterSpec extends BeanMockingSpecification {
 	void "getAddress() return values from json, after configuration, even if not logged in as user"() {
 		setup:
 		SecUser user = new SecUser(name: "name", username: "name@name.com", password: "pass").save(failOnError: true, validate: false, flush: true)
-		IntegrationKey key = new IntegrationKey(name: "key", service: IntegrationKey.Service.ETHEREUM, user: user)
+		IntegrationKey key = new IntegrationKey(name: "key", service: IntegrationKey.Service.ETHEREUM, user: user, idInService: "0xffff")
 
 		key.id = "account-1"
 		key.json = '{ "privateKey": "0x0000", "address": "0xffff"}'
@@ -113,7 +113,7 @@ class EthereumAccountParameterSpec extends BeanMockingSpecification {
 	void "getPrivateKey() throws exception, after configuration, if not logged in as user"() {
 		setup:
 		SecUser user = new SecUser(name: "name", username: "name@name.com", password: "pass").save(failOnError: true, validate: false, flush: true)
-		IntegrationKey key = new IntegrationKey(name: "key", service: IntegrationKey.Service.ETHEREUM, user: user)
+		IntegrationKey key = new IntegrationKey(name: "key", service: IntegrationKey.Service.ETHEREUM, user: user, idInService: 0xffff)
 
 		key.id = "account-1"
 		key.json = '{ "privateKey": "0x0000", "address": "0xffff"}'

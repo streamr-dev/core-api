@@ -33,16 +33,17 @@ class EthereumIntegrationKeyService {
 		String encryptedPrivateKey = encryptor.encrypt(privateKey, user.id.byteValue())
 
 		try {
-			IntegrationKey key = new IntegrationKey()
-			key.setName(name)
-			key.setJson(([
-					privateKey: encryptedPrivateKey,
-					address   : "0x" + getPublicKey(privateKey)
-			] as JSON).toString())
-			key.setUser(user)
-			key.setService(IntegrationKey.Service.ETHEREUM)
-			key.save(flush: true, failOnError: true)
-			return key
+			String publicKey = "0x" + getPublicKey(privateKey)
+			return new IntegrationKey(
+					name: name,
+					user: user,
+					service: IntegrationKey.Service.ETHEREUM,
+					idInService: publicKey,
+					json: ([
+							privateKey: encryptedPrivateKey,
+							address   : publicKey
+					] as JSON).toString()
+			).save(flush: true, failOnError: true)
 		} catch (NumberFormatException e) {
 			throw new IllegalArgumentException("Private key must be a valid hex string!")
 		}
@@ -81,24 +82,23 @@ class EthereumIntegrationKeyService {
 		if (invalidChallenge) {
 			throw new ApiException(400, "INVALID_CHALLENGE", "challenge validation failed")
 		}
+
 		def message = challenge
-		byte[] address;
+		String address
 		try {
 			byte[] messageHash = ECRecover.calculateMessageHash(message)
 			address = ECRecover.recoverAddress(messageHash, signature)
 		} catch (SignatureException | DecoderException e) {
 			throw new ApiException(400, "ADDRESS_RECOVERY_ERROR", e.message)
 		}
-		IntegrationKey key = new IntegrationKey(
+		return new IntegrationKey(
 				name: name,
 				user: user,
+				service: IntegrationKey.Service.ETHEREUM_ID.toString(),
+				idInService: address,
 				json: ([
 						address: new String(address)
-				] as JSON).toString(),
-				service: IntegrationKey.Service.ETHEREUM_ID.toString()
-		)
-		key.save()
-		return key
+				] as JSON).toString()
+		).save()
 	}
-
 }
