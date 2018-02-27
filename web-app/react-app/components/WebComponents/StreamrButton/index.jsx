@@ -22,27 +22,27 @@ type State = {
 export default class StreamrButton extends Component<Props, State> {
     input: ?StreamrInput
     state = {
-        name: 'Button'
+        name: 'Button',
     }
-    
+
     onMessage = ({state: buttonName}: { state: string }) => {
         if (this.input) {
             if (buttonName) {
                 this.setState({
-                    name: buttonName
+                    name: buttonName,
                 })
             }
         }
     }
-    
+
     onClick = () => {
         this.input && this.input.sendValue()
     }
-    
+
     assignInputRef = (widget: ?StreamrInput) => {
         this.input = widget
     }
-    
+
     render() {
         return (
             <StreamrInput

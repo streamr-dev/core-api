@@ -2,7 +2,7 @@
 
 import React, {Component} from 'react'
 import {connect} from 'react-redux'
-import { ShortcutManager, Shortcuts } from 'react-shortcuts'
+import {ShortcutManager, Shortcuts} from 'react-shortcuts'
 
 import {updateAndSaveCurrentDashboard} from '../../../actions/dashboard'
 
@@ -23,24 +23,24 @@ type Props = DispatchProps & GivenProps
 
 export class ShortcutHandler extends Component<Props> {
     shortcutManager: ShortcutManager
-    
+
     static keymap = {
         'MAIN': {
-            'SAVE': ['ctrl+s', 'command+s']
-        }
+            'SAVE': ['ctrl+s', 'command+s'],
+        },
     }
-    
+
     static childContextTypes = {
-        shortcuts: object
+        shortcuts: object,
     }
-    
+
     getChildContext() {
         this.shortcutManager = this.shortcutManager || new ShortcutManager(ShortcutHandler.keymap)
         return {
-            shortcuts: this.shortcutManager
+            shortcuts: this.shortcutManager,
         }
     }
-    
+
     handleShortcuts = (action: 'SAVE', event: Event) => {
         switch (action) {
             case 'SAVE': {
@@ -50,7 +50,7 @@ export class ShortcutHandler extends Component<Props> {
             }
         }
     }
-    
+
     render() {
         return (
             <Shortcuts name="MAIN" handler={this.handleShortcuts} className={styles.shortcutHandler}>
@@ -63,7 +63,7 @@ export class ShortcutHandler extends Component<Props> {
 export const mapDispatchToProps = (dispatch: Function) => ({
     updateAndSaveCurrentDashboard() {
         dispatch(updateAndSaveCurrentDashboard())
-    }
+    },
 })
 
 export default connect(null, mapDispatchToProps)(ShortcutHandler)

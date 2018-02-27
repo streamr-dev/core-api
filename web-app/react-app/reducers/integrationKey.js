@@ -12,7 +12,7 @@ import {
     CREATE_INTEGRATION_KEY_FAILURE,
     DELETE_INTEGRATION_KEY_REQUEST,
     DELETE_INTEGRATION_KEY_SUCCESS,
-    DELETE_INTEGRATION_KEY_FAILURE
+    DELETE_INTEGRATION_KEY_FAILURE,
 } from '../actions/integrationKey.js'
 
 import _ from 'lodash'
@@ -23,11 +23,11 @@ import type {IntegrationKeyAction} from '../flowtype/actions/integration-key-act
 const initialState = {
     listsByService: {},
     error: null,
-    fetching: false
+    fetching: false,
 }
 
 export default function(state: IntegrationKeyState = initialState, action: IntegrationKeyAction): IntegrationKeyState {
-    
+
     switch (action.type) {
         case GET_AND_REPLACE_INTEGRATION_KEYS_REQUEST:
         case GET_INTEGRATION_KEYS_BY_SERVICE_REQUEST:
@@ -35,15 +35,17 @@ export default function(state: IntegrationKeyState = initialState, action: Integ
         case DELETE_INTEGRATION_KEY_REQUEST:
             return {
                 ...state,
-                fetching: true
+                fetching: true,
             }
+
         case GET_AND_REPLACE_INTEGRATION_KEYS_SUCCESS:
             return {
                 ...state,
                 listsByService: _.groupBy(action.integrationKeys, integrationKey => integrationKey.service),
                 fetching: false,
-                error: null
+                error: null,
             }
+
         case GET_INTEGRATION_KEYS_BY_SERVICE_SUCCESS: {
             if (!action.service) {
                 throw new Error(`${GET_INTEGRATION_KEYS_BY_SERVICE_SUCCESS} requires action.service`)
@@ -52,12 +54,13 @@ export default function(state: IntegrationKeyState = initialState, action: Integ
                 ...state,
                 listsByService: {
                     ...state.listsByService,
-                    [action.service]: action.integrationKeys
+                    [action.service]: action.integrationKeys,
                 },
                 error: null,
-                fetching: false
+                fetching: false,
             }
         }
+
         case CREATE_INTEGRATION_KEY_SUCCESS:
             return {
                 ...state,
@@ -65,13 +68,13 @@ export default function(state: IntegrationKeyState = initialState, action: Integ
                     ...(state.listsByService || {}),
                     [action.integrationKey.service]: [
                         ...(state.listsByService[action.integrationKey.service] || []),
-                        action.integrationKey
-                    ]
+                        action.integrationKey,
+                    ],
                 },
                 error: null,
-                fetching: false
+                fetching: false,
             }
-        
+
         case DELETE_INTEGRATION_KEY_SUCCESS: {
             // This is some hacking for keeping Flow happy
             if (!action.id) {
@@ -86,10 +89,10 @@ export default function(state: IntegrationKeyState = initialState, action: Integ
                 ...state,
                 listsByService: newListsByService,
                 error: null,
-                fetching: false
+                fetching: false,
             }
         }
-        
+
         case GET_AND_REPLACE_INTEGRATION_KEYS_FAILURE:
         case GET_INTEGRATION_KEYS_BY_SERVICE_FAILURE:
         case CREATE_INTEGRATION_KEY_FAILURE:
@@ -97,7 +100,7 @@ export default function(state: IntegrationKeyState = initialState, action: Integ
             return {
                 ...state,
                 fetching: false,
-                error: action.error
+                error: action.error,
             }
         default:
             return state

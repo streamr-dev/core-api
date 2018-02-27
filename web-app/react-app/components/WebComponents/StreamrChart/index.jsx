@@ -34,35 +34,35 @@ export default class StreamrChartComponent extends Component<Props, State> {
     state = {
         options: {
             rangeDropdown: false,
-            showHideButton: false
-        }
+            showHideButton: false,
+        },
     }
-    
+
     componentWillReceiveProps(newProps: Props) {
         const changed = (key) => newProps[key] != undefined && newProps[key] !== this.props[key]
-        
+
         if (changed('width') || changed('height')) {
             this.chart && this.chart.redraw()
         }
     }
-    
+
     renderWidget = (root: ?HTMLDivElement, options: Options) => {
         if (root) {
             this.chart = new StreamrChart(root, {
                 ...this.state.options,
-                ...options
+                ...options,
             })
         }
     }
-    
+
     onMessage = (msg: {}) => {
         this.chart && this.chart.handleMessage(msg)
     }
-    
+
     onResize = () => {
         this.chart && this.chart.resize()
     }
-    
+
     render() {
         return (
             <ComplexStreamrWidget

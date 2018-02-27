@@ -9,7 +9,7 @@ import DashboardTools from './DashboardTools'
 import styles from './sidebar.pcss'
 
 export default class Sidebar extends Component<{}> {
-    
+
     render() {
         return (
             <div id="main-menu" role="navigation" className={styles.sidebar}>

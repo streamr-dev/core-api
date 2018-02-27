@@ -13,7 +13,7 @@ type Props = {
     height?: ?number,
     width?: ?number,
     onError?: ?Function,
-    onMessage?: ?({state: string}) => void,
+    onMessage?: ?({ state: string }) => void,
     onModuleJson?: ?Function,
     children: Node,
     widgetRef?: (widget: ?StreamrWidget) => void
@@ -21,18 +21,18 @@ type Props = {
 
 export default class StreamrInput extends Component<Props> {
     widget: ?StreamrWidget
-    
+
     componentDidMount = () => {
         this.widget && this.widget.sendRequest({
-            type: 'getState'
+            type: 'getState',
         })
             .then(({data}) => this.props.onMessage && this.props.onMessage(data))
     }
-    
+
     sendValue = (value: ?any) => {
         this.widget && this.widget.sendRequest({
             type: 'uiEvent',
-            value
+            value,
         })
     }
 
@@ -41,7 +41,7 @@ export default class StreamrInput extends Component<Props> {
             <StreamrWidget
                 subscriptionOptions={{
                     stream: this.props.stream,
-                    resend_last: 1
+                    resend_last: 1,
                 }}
                 url={this.props.url}
                 onError={this.props.onError}

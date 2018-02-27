@@ -19,10 +19,10 @@ type StateProps = {
     dashboard: ?Dashboard,
     config: {
         components: {
-           [$ElementType<Webcomponent, 'type'>]: {
-               component?: any,
-               props: {}
-           }
+            [$ElementType<Webcomponent, 'type'>]: {
+                component?: any,
+                props: {}
+            }
         }
     }
 }
@@ -50,24 +50,24 @@ export class DashboardItem extends Component<Props, State> {
     wrapper: ?HTMLElement
     static defaultProps = {
         item: {},
-        dashboard: {}
+        dashboard: {},
     }
     state = {
         height: null,
-        width: null
+        width: null,
     }
-    
+
     onResize = () => {
         this.setState({
             height: this.wrapper && this.wrapper.offsetHeight,
             width: this.wrapper && this.wrapper.offsetWidth,
         })
     }
-    
+
     componentWillReceiveProps = () => {
         this.onResize()
     }
-    
+
     createWebcomponentUrl = () => {
         const {dashboard, item: {canvas, module: itemModule}} = this.props
         // If the db is new the user must have the ownership of the canvas so use url /api/v1/canvases/<canvasId>/modules/<module>
@@ -76,10 +76,10 @@ export class DashboardItem extends Component<Props, State> {
             '/api/v1',
             (dashboard && !dashboard.new) ? `dashboards/${dashboard.id}` : '',
             `canvases/${canvas}`,
-            `modules/${itemModule}`
+            `modules/${itemModule}`,
         ))
     }
-    
+
     onError = (err: { message: string, stack: string }) => {
         const inProd = process.env.NODE_ENV === 'production'
         this.props.error(inProd ? 'Something went wrong!' : err.message)
@@ -87,12 +87,12 @@ export class DashboardItem extends Component<Props, State> {
             console.error(err.stack)
         }
     }
-    
+
     createCustomComponent = () => {
         const {item, config: conf} = this.props
-        
+
         const {component: CustomComponent, props} = item && item.webcomponent && conf.components[item.webcomponent] || {}
-        
+
         return CustomComponent ? (
             <CustomComponent
                 url={this.createWebcomponentUrl()}
@@ -103,7 +103,7 @@ export class DashboardItem extends Component<Props, State> {
             />
         ) : null
     }
-    
+
     render() {
         const {item} = this.props
         return (
@@ -119,7 +119,7 @@ export class DashboardItem extends Component<Props, State> {
                         {this.createCustomComponent() || (
                             <div style={{
                                 color: 'red',
-                                textAlign: 'center'
+                                textAlign: 'center',
                             }}>
                                 Sorry, unknown component:(
                             </div>
@@ -131,18 +131,18 @@ export class DashboardItem extends Component<Props, State> {
     }
 }
 
-export const mapStateToProps = ({dashboard: {dashboardsById, openDashboard}}: {dashboard: DashboardState}): StateProps => ({
+export const mapStateToProps = ({dashboard: {dashboardsById, openDashboard}}: { dashboard: DashboardState }): StateProps => ({
     dashboard: openDashboard.id ? dashboardsById[openDashboard.id] : null,
-    config: config
+    config: config,
 })
 
 export const mapDispatchToProps = (dispatch: Function): DispatchProps => ({
     error(message: string) {
         dispatch(error({
             title: 'Error!',
-            message
+            message,
         }))
-    }
+    },
 })
 
 export default connect(mapStateToProps, mapDispatchToProps)(DashboardItem)

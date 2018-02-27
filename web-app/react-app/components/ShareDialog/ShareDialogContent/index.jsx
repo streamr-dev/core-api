@@ -30,11 +30,11 @@ type GivenProps = {
 type Props = DispatchProps & GivenProps
 
 export class ShareDialogContent extends Component<Props> {
-    
+
     componentWillMount() {
         this.props.getResourcePermissions()
     }
-    
+
     render() {
         return (
             <Modal.Body>
@@ -61,7 +61,7 @@ export class ShareDialogContent extends Component<Props> {
 export const mapDispatchToProps = (dispatch: Function, ownProps: Props): DispatchProps => ({
     getResourcePermissions() {
         dispatch(getResourcePermissions(ownProps.resourceType, ownProps.resourceId))
-    }
+    },
 })
 
 export default connect(null, mapDispatchToProps)(ShareDialogContent)
