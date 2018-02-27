@@ -27,8 +27,9 @@ databaseChangeLog = {
 	}
 
 	changeSet(author: "eric", id: "add-id-in-service-to-integration-key-3") {
-		createIndex(indexName: "id_in_service_idx", tableName: "integration_key") {
+		createIndex(indexName: "id_in_service_and_service_idx", tableName: "integration_key") {
 			column(name: "id_in_service")
+			column(name: "service")
 		}
 	}
 }

@@ -94,7 +94,7 @@ class EthereumIntegrationKeyService {
 		}
 
 		if (IntegrationKey.findByServiceAndIdInService(IntegrationKey.Service.ETHEREUM_ID, address) != null) {
-			throw new DuplicateNotAllowedException("Ethereum ID already taken.")
+			throw new DuplicateNotAllowedException("This Ethereum address is already associated with another Streamr user.")
 		}
 
 		return new IntegrationKey(
