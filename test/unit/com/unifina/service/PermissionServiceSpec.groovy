@@ -394,7 +394,7 @@ class PermissionServiceSpec extends Specification {
 		notThrown(NotPermittedException)
 	}
 
-	void "verify throws if permission does not exists"() {
+	void "verify throws if permission does not exist"() {
 		when:
 		service.verify(stranger, dashPublic, Operation.WRITE)
 		then:
