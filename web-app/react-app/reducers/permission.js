@@ -11,7 +11,7 @@ import {
     SAVE_ADDED_RESOURCE_PERMISSION_FAILURE,
     SAVE_REMOVED_RESOURCE_PERMISSION_REQUEST,
     SAVE_REMOVED_RESOURCE_PERMISSION_SUCCESS,
-    SAVE_REMOVED_RESOURCE_PERMISSION_FAILURE
+    SAVE_REMOVED_RESOURCE_PERMISSION_FAILURE,
 } from '../actions/permission.js'
 
 import type {Permission, ResourceType, ResourceId} from '../flowtype/permission-types'
@@ -21,7 +21,7 @@ import type {PermissionAction} from '../flowtype/actions/permission-actions'
 const initialState = {
     byTypeAndId: {},
     error: null,
-    fetching: false
+    fetching: false,
 }
 
 const permEquals = (p1: ?Permission, p2: ?Permission): boolean => {
@@ -36,7 +36,7 @@ const modifyPermission = (byTypeAndId: $ElementType<PermissionState, 'byTypeAndI
         if (permEquals(p2, permission)) {
             return {
                 ...p2,
-                ...attributes
+                ...attributes,
             }
         } else {
             return p2
@@ -49,9 +49,9 @@ export default function(state: PermissionState = initialState, action: Permissio
         case GET_RESOURCE_PERMISSIONS_REQUEST:
             return {
                 ...state,
-                fetching: true
+                fetching: true,
             }
-            
+
         case GET_RESOURCE_PERMISSIONS_SUCCESS:
             return {
                 ...state,
@@ -64,21 +64,21 @@ export default function(state: PermissionState = initialState, action: Permissio
                             new: false,
                             fetching: false,
                             removed: false,
-                            error: null
-                        }))
-                    }
+                            error: null,
+                        })),
+                    },
                 },
                 fetching: false,
-                error: null
+                error: null,
             }
-            
+
         case GET_RESOURCE_PERMISSIONS_FAILURE:
             return {
                 ...state,
                 fetching: false,
-                error: action.error
+                error: action.error,
             }
-    
+
         case ADD_RESOURCE_PERMISSION: {
             const perm = action.permission || null
             const byResourceType = state.byTypeAndId[action.resourceType] || {}
@@ -94,15 +94,15 @@ export default function(state: PermissionState = initialState, action: Permissio
                             new: true,
                             fetching: false,
                             removed: false,
-                            error: null
-                        }]
-                    }
+                            error: null,
+                        }],
+                    },
                 },
                 fetching: false,
-                error: null
+                error: null,
             } : state
         }
-        
+
         case REMOVE_RESOURCE_PERMISSION:
             return {
                 ...state,
@@ -113,14 +113,14 @@ export default function(state: PermissionState = initialState, action: Permissio
                         [action.resourceId]: modifyPermission(state.byTypeAndId, action.resourceType, action.resourceId, action.permission, {
                             removed: true,
                             fetching: false,
-                            error: null
-                        })
-                    }
+                            error: null,
+                        }),
+                    },
                 },
                 fetching: false,
-                error: null
+                error: null,
             }
-            
+
         case SAVE_REMOVED_RESOURCE_PERMISSION_REQUEST:
             return {
                 ...state,
@@ -129,14 +129,14 @@ export default function(state: PermissionState = initialState, action: Permissio
                     [action.resourceType]: {
                         ...state.byTypeAndId[action.resourceType],
                         [action.resourceId]: modifyPermission(state.byTypeAndId, action.resourceType, action.resourceId, action.permission, {
-                            fetching: true
-                        })
-                    }
+                            fetching: true,
+                        }),
+                    },
                 },
                 fetching: false,
-                error: null
+                error: null,
             }
-    
+
         case SAVE_REMOVED_RESOURCE_PERMISSION_SUCCESS: {
             const perm = action.permission || null
             return {
@@ -144,14 +144,14 @@ export default function(state: PermissionState = initialState, action: Permissio
                 byTypeAndId: {
                     ...state.byTypeAndId,
                     [action.resourceType]: {
-                        [action.resourceId]: state.byTypeAndId[action.resourceType][action.resourceId].filter(permission => !perm || !permEquals(permission, perm))
-                    }
+                        [action.resourceId]: state.byTypeAndId[action.resourceType][action.resourceId].filter(permission => !perm || !permEquals(permission, perm)),
+                    },
                 },
                 fetching: false,
-                error: null
+                error: null,
             }
         }
-    
+
         case SAVE_REMOVED_RESOURCE_PERMISSION_FAILURE:
             return {
                 ...state,
@@ -163,14 +163,14 @@ export default function(state: PermissionState = initialState, action: Permissio
                             removed: false,
                             new: false,
                             fetching: false,
-                            error: action.permission.error
-                        })
-                    }
+                            error: action.permission.error,
+                        }),
+                    },
                 },
                 fetching: false,
-                error: null
+                error: null,
             }
-        
+
         case SAVE_ADDED_RESOURCE_PERMISSION_REQUEST:
             return {
                 ...state,
@@ -179,14 +179,14 @@ export default function(state: PermissionState = initialState, action: Permissio
                     [action.resourceType]: {
                         ...state.byTypeAndId[action.resourceType],
                         [action.resourceId]: modifyPermission(state.byTypeAndId, action.resourceType, action.resourceId, action.permission, {
-                            fetching: true
-                        })
-                    }
+                            fetching: true,
+                        }),
+                    },
                 },
                 fetching: false,
-                error: null
+                error: null,
             }
-    
+
         case SAVE_ADDED_RESOURCE_PERMISSION_SUCCESS:
             return {
                 ...state,
@@ -196,14 +196,14 @@ export default function(state: PermissionState = initialState, action: Permissio
                         ...state.byTypeAndId[action.resourceType],
                         [action.resourceId]: modifyPermission(state.byTypeAndId, action.resourceType, action.resourceId, action.permission, {
                             fetching: false,
-                            new: false
-                        })
-                    }
+                            new: false,
+                        }),
+                    },
                 },
                 fetching: false,
-                error: null
+                error: null,
             }
-    
+
         case SAVE_ADDED_RESOURCE_PERMISSION_FAILURE:
             return {
                 ...state,
@@ -213,14 +213,14 @@ export default function(state: PermissionState = initialState, action: Permissio
                         ...state.byTypeAndId[action.resourceType],
                         [action.resourceId]: modifyPermission(state.byTypeAndId, action.resourceType, action.resourceId, action.permission, {
                             fetching: false,
-                            error: action.permission.error
-                        })
-                    }
+                            error: action.permission.error,
+                        }),
+                    },
                 },
                 fetching: false,
-                error: null
+                error: null,
             }
-            
+
         default:
             return state
     }

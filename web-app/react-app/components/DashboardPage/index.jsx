@@ -11,10 +11,9 @@ import uuid from 'uuid'
 import {getDashboard, getMyDashboardPermissions, newDashboard, openDashboard} from '../../actions/dashboard'
 import {getRunningCanvases} from '../../actions/canvas'
 
-
-import type { DashboardState } from '../../flowtype/states/dashboard-state'
-import type { Dashboard } from '../../flowtype/dashboard-types'
-import type { Canvas } from '../../flowtype/canvas-types'
+import type {DashboardState} from '../../flowtype/states/dashboard-state'
+import type {Dashboard} from '../../flowtype/dashboard-types'
+import type {Canvas} from '../../flowtype/canvas-types'
 import type {Node} from 'react'
 
 import styles from './dashboardPage.pcss'
@@ -47,7 +46,7 @@ type RouterProps = {
 type Props = StateProps & DispatchProps & GivenProps & RouterProps
 
 export class DashboardPage extends Component<Props> {
-    
+
     componentWillMount() {
         let id = this.props.match.params.id
         if (id !== undefined) {
@@ -60,7 +59,7 @@ export class DashboardPage extends Component<Props> {
         this.props.getRunningCanvases()
         this.props.openDashboard(id)
     }
-    
+
     render() {
         return (
             <div className={styles.dashboardPage}>
@@ -76,8 +75,8 @@ export class DashboardPage extends Component<Props> {
     }
 }
 
-export const mapStateToProps = ({dashboard: {dashboardsById, openDashboard}}: {dashboard: DashboardState}): StateProps => ({
-    dashboard: openDashboard.id ? dashboardsById[openDashboard.id] : null
+export const mapStateToProps = ({dashboard: {dashboardsById, openDashboard}}: { dashboard: DashboardState }): StateProps => ({
+    dashboard: openDashboard.id ? dashboardsById[openDashboard.id] : null,
 })
 
 export const mapDispatchToProps = (dispatch: Function): DispatchProps => ({
@@ -95,7 +94,7 @@ export const mapDispatchToProps = (dispatch: Function): DispatchProps => ({
     },
     openDashboard(id: string) {
         dispatch(openDashboard(id))
-    }
+    },
 })
 
 export default connect(mapStateToProps, mapDispatchToProps)(DashboardPage)

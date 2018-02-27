@@ -22,41 +22,42 @@ type State = {
 }
 
 export default class ConfirmButton extends Component<Props, State> {
-    
+
     static defaultProps = {
         confirmTitle: 'Are you sure?',
-        cancelCallback: () => {}
+        cancelCallback: () => {
+        },
     }
-    
+
     state = {
-        open: false
+        open: false,
     }
-    
+
     openModal = () => {
         this.setState({
-            open: true
+            open: true,
         })
     }
-    
+
     closeModal = () => {
         this.setState({
-            open: false
+            open: false,
         })
     }
-    
+
     closeAndExecuteFunction = (func?: (any) => void) => {
         this.closeModal()
         if (func) {
             func()
         }
     }
-    
+
     render() {
         return (
             <Button key="2"
                 {...this.props.buttonProps}
                 style={{
-                    padding: 0
+                    padding: 0,
                 }}
                 ref={this.props.buttonRef}
                 className={this.props.className}
@@ -66,7 +67,7 @@ export default class ConfirmButton extends Component<Props, State> {
                     style={{
                         padding: '7px 12px',
                         width: '100%',
-                        height: '100%'
+                        height: '100%',
                     }}
                 >
                     {this.props.children}

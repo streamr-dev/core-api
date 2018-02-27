@@ -13,36 +13,41 @@ type Props = {
 }
 
 let didWarnAboutChangingClient = false
+
 function warnAboutChangingClient() {
     if (didWarnAboutChangingClient) {
         return
     }
     didWarnAboutChangingClient = true
-    
+
     console.warn(
-        '<StreamrClientProvider> does not support changing `client` on the fly.'
+        '<StreamrClientProvider> does not support changing `client` on the fly.',
     )
 }
 
 export default class StreamrClientProvider extends Component<Props> {
     client: StreamrClient
     static childContextTypes = {
-        client: any
+        client: any,
     }
+
     getChildContext() {
         return {
-            client: this.client
+            client: this.client,
         }
     }
+
     constructor(props: Props) {
         super(props)
         this.client = props.client
     }
+
     componentWillReceiveProps(nextProps: Props) {
         if (nextProps.client !== this.props.client) {
             warnAboutChangingClient()
         }
     }
+
     render() {
         return React.Children.only(this.props.children)
     }

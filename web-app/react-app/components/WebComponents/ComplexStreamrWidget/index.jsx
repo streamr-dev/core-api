@@ -28,13 +28,13 @@ type State = {
 export default class ComplexStreamrWidget extends Component<Props, State> {
     root: ?HTMLDivElement
     widget: ?StreamrWidget
- 
+
     state = {
-        options: {}
+        options: {},
     }
-    
+
     static defaultProps = {
-        className: ''
+        className: '',
     }
 
     onModuleJson = ({options}: { options: ModuleOptions }) => {
@@ -43,26 +43,26 @@ export default class ComplexStreamrWidget extends Component<Props, State> {
             this.setState({
                 options: {
                     ...this.state.options,
-                    ...(opt || {})
-                }
+                    ...(opt || {}),
+                },
             })
             this.props.renderWidget(this.root, opt)
         }
     }
-    
+
     componentWillReceiveProps(newProps: Props) {
         const changed = (key) => newProps[key] != undefined && newProps[key] !== this.props[key]
-        
+
         if (changed('width') || changed('height')) {
             this.props.onResize && this.props.onResize(newProps['width'], newProps['height'])
         }
     }
-    
+
     render() {
         return (
             <StreamrWidget
                 subscriptionOptions={{
-                    stream: this.props.stream
+                    stream: this.props.stream,
                 }}
                 onModuleJson={this.onModuleJson}
                 url={this.props.url}

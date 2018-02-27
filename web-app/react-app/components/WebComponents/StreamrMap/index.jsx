@@ -38,31 +38,31 @@ type State = {
 export default class StreamrMapComponent extends Component<Props, State> {
     map: ?StreamrMap
     state = {
-        options: {}
+        options: {},
     }
-    
+
     componentWillReceiveProps(newProps: Props) {
         const changed = (key) => newProps[key] != undefined && newProps[key] !== this.props[key]
-        
+
         if (changed('width') || changed('height')) {
             this.map && this.map.redraw()
         }
     }
-    
+
     renderWidget = (root: ?HTMLDivElement, options: Options) => {
         if (root) {
             this.map = new StreamrMap(root, options)
         }
     }
-    
+
     onMessage = (msg: {}) => {
         this.map && this.map.handleMessage(msg)
     }
-    
+
     onResize = () => {
         this.map && this.map.redraw()
     }
-    
+
     render() {
         return (
             <ComplexStreamrWidget

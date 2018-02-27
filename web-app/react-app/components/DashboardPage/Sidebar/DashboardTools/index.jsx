@@ -12,8 +12,8 @@ import ShareDialog from '../../../ShareDialog'
 
 import {updateAndSaveDashboard} from '../../../../actions/dashboard'
 
-import type { DashboardState } from '../../../../flowtype/states/dashboard-state'
-import type { Dashboard } from '../../../../flowtype/dashboard-types'
+import type {DashboardState} from '../../../../flowtype/states/dashboard-state'
+import type {Dashboard} from '../../../../flowtype/dashboard-types'
 
 import styles from './dashboardTools.pcss'
 
@@ -36,13 +36,13 @@ type State = {
 export class DashboardTools extends Component<Props, State> {
 
     state = {
-        shareDialogIsOpen: false
+        shareDialogIsOpen: false,
     }
-    
+
     onSave = () => {
         this.props.dashboard && this.props.updateAndSaveDashboard(this.props.dashboard)
     }
-    
+
     render() {
         return (
             <div className={`menu-content ${styles.dashboardTools}`}>
@@ -54,7 +54,7 @@ export class DashboardTools extends Component<Props, State> {
                     onClick={this.onSave}
                     disabled={!this.props.canWrite && (!this.props.dashboard || !this.props.dashboard.new)}
                 >
-                    <FontAwesome name="floppy-o" />  Save
+                    <FontAwesome name="floppy-o"/> Save
                 </Button>
                 <Button
                     block
@@ -62,11 +62,11 @@ export class DashboardTools extends Component<Props, State> {
                     disabled={!this.props.canShare}
                     onClick={() => {
                         this.setState({
-                            shareDialogIsOpen: true
+                            shareDialogIsOpen: true,
                         })
                     }}
                 >
-                    <FontAwesome name="user" />  Share
+                    <FontAwesome name="user"/> Share
                 </Button>
                 <ShareDialog
                     resourceType="DASHBOARD"
@@ -75,29 +75,29 @@ export class DashboardTools extends Component<Props, State> {
                     isOpen={this.state.shareDialogIsOpen}
                     onClose={() => {
                         this.setState({
-                            shareDialogIsOpen: false
+                            shareDialogIsOpen: false,
                         })
                     }}
                 />
                 <DeleteButton
                     className={styles.deleteButton}
                     buttonProps={{
-                        block: true
+                        block: true,
                     }}
                 >
-                    <FontAwesome name="trash-o" />  Delete
+                    <FontAwesome name="trash-o"/> Delete
                 </DeleteButton>
             </div>
         )
     }
 }
 
-export const mapStateToProps = (state: {dashboard: DashboardState}): StateProps => parseDashboard(state)
+export const mapStateToProps = (state: { dashboard: DashboardState }): StateProps => parseDashboard(state)
 
 export const mapDispatchToProps = (dispatch: Function): DispatchProps => ({
     updateAndSaveDashboard(db: Dashboard) {
         return dispatch(updateAndSaveDashboard(db))
-    }
+    },
 })
 
 export default connect(mapStateToProps, mapDispatchToProps)(DashboardTools)
