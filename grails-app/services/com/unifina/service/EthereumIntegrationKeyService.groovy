@@ -1,6 +1,7 @@
 package com.unifina.service
 
 import com.unifina.api.ApiException
+import com.unifina.api.DuplicateNotAllowedException
 import com.unifina.crypto.ECRecover
 import com.unifina.domain.security.Challenge
 import com.unifina.domain.security.IntegrationKey
@@ -91,6 +92,11 @@ class EthereumIntegrationKeyService {
 		} catch (SignatureException | DecoderException e) {
 			throw new ApiException(400, "ADDRESS_RECOVERY_ERROR", e.message)
 		}
+
+		if (IntegrationKey.findByServiceAndIdInService(IntegrationKey.Service.ETHEREUM_ID, address) != null) {
+			throw new DuplicateNotAllowedException("Ethereum ID already taken.")
+		}
+
 		return new IntegrationKey(
 				name: name,
 				user: user,
