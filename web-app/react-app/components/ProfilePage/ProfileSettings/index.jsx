@@ -40,13 +40,13 @@ export class ProfileSettings extends Component<Props> {
     }) => {
         this.props.updateCurrentUserName(target.value)
     }
-    onTimezoneChange = ({target}: {
-        target: {
-            value: $ElementType<User, 'timezone'>
-        }
+
+    onTimezoneChange = ({value}: {
+        value: $ElementType<User, 'timezone'>
     }) => {
-        this.props.updateCurrentUserTimezone(target.value)
+        this.props.updateCurrentUserTimezone(value)
     }
+
     onSubmit = (e: Event) => {
         e.preventDefault()
         this.props.user && this.props.saveCurrentUser(this.props.user)
