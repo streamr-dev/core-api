@@ -1,38 +1,31 @@
 package com.unifina.controller.api
 
+import com.unifina.api.DashboardListParams
 import com.unifina.api.SaveDashboardCommand
 import com.unifina.api.ValidationException
 import com.unifina.domain.dashboard.Dashboard
-import com.unifina.domain.security.Permission
 import com.unifina.domain.security.SecUser
 import com.unifina.security.AuthLevel
 import com.unifina.security.StreamrApi
-import com.unifina.service.ApiService
-import com.unifina.service.DashboardService
-import com.unifina.service.PermissionService
-import com.unifina.service.SignalPathService
+import com.unifina.service.*
 import grails.converters.JSON
 import grails.plugin.springsecurity.annotation.Secured
-import org.json.JSONObject
 
 @Secured(["IS_AUTHENTICATED_ANONYMOUSLY"])
 class DashboardApiController {
 
 	DashboardService dashboardService
 	SignalPathService signalPathService
-	PermissionService permissionService
 	ApiService apiService
 
 	@StreamrApi
-	def index() {
-		def criteria = apiService.createListCriteria(params, ["name"], {
-			// Filter by exact name
-			if (params.name) {
-				eq "name", params.name
-			}
-		})
-		def dashboards = permissionService.get(Dashboard, request.apiUser, Permission.Operation.READ, apiService.isPublicFlagOn(params), criteria)
-		render(dashboards*.toSummaryMap() as JSON)
+	def index(DashboardListParams listParams) {
+		if (params.public != null) {
+			listParams.publicAccess = params.boolean("public")
+		}
+		def results = apiService.list(Dashboard, listParams, (SecUser) request.apiUser)
+		apiService.addLinkHintToHeader(listParams, results.size(), params, response)
+		render(results*.toMap() as JSON)
 	}
 
 	@StreamrApi

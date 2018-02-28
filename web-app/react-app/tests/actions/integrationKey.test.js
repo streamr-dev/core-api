@@ -14,7 +14,7 @@ global.Streamr = {
 
 describe('IntegrationKey actions', () => {
     let store
-    
+
     beforeEach(() => {
         moxios.install()
         store = mockStore({
@@ -23,12 +23,12 @@ describe('IntegrationKey actions', () => {
             fetching: false
         })
     })
-    
+
     afterEach(() => {
         moxios.uninstall()
         store.clearActions()
     })
-    
+
     describe('getAndReplaceIntegrationKeys', () => {
         it('creates GET_ALL_INTEGRATION_KEYS_SUCCESS when fetching integrationKeys has succeeded', async () => {
             moxios.stubRequest('api/v1/integration_keys', {
@@ -41,7 +41,7 @@ describe('IntegrationKey actions', () => {
                     json: '{"moitaas": "aihei"}'
                 }]
             })
-        
+
             const expectedActions = [{
                 type: actions.GET_AND_REPLACE_INTEGRATION_KEYS_REQUEST
             }, {
@@ -54,24 +54,31 @@ describe('IntegrationKey actions', () => {
                     json: '{"moitaas": "aihei"}'
                 }]
             }]
-        
+
             await store.dispatch(actions.getAndReplaceIntegrationKeys())
             assert.deepStrictEqual(store.getActions().slice(0, 2), expectedActions)
         })
-    
+
         it('creates GET_ALL_INTEGRATION_KEYS_FAILURE when fetching integration keys has failed', async (done) => {
             moxios.stubRequest('api/v1/integration_keys', {
                 status: 500,
-                response: new Error('test-error')
+                response: {
+                    message: 'test',
+                    code: 'TEST'
+                }
             })
-        
+
             const expectedActions = [{
                 type: actions.GET_AND_REPLACE_INTEGRATION_KEYS_REQUEST
             }, {
                 type: actions.GET_AND_REPLACE_INTEGRATION_KEYS_FAILURE,
-                error: new Error('test-error')
+                error: {
+                    message: 'test',
+                    code: 'TEST',
+                    statusCode: 500
+                }
             }]
-        
+
             try {
                 await store.dispatch(actions.getAndReplaceIntegrationKeys())
             } catch (e) {
@@ -80,7 +87,7 @@ describe('IntegrationKey actions', () => {
             }
         })
     })
-    
+
     describe('createIntegrationKey', () => {
         it('creates CREATE_INTEGRATION_KEY_SUCCESS when creating integration key has succeeded', async () => {
             moxios.wait(() => {
@@ -91,7 +98,7 @@ describe('IntegrationKey actions', () => {
                     response: request.config.data
                 })
             })
-        
+
             const expectedActions = [{
                 type: actions.CREATE_INTEGRATION_KEY_REQUEST
             }, {
@@ -101,31 +108,38 @@ describe('IntegrationKey actions', () => {
                     json: 'moi'
                 }
             }]
-        
+
             await store.dispatch(actions.createIntegrationKey({
                 name: 'test',
                 json: 'moi'
             }))
             assert.deepStrictEqual(store.getActions(), expectedActions)
         })
-    
+
         it('creates CREATE_INTEGRATION_KEY_FAILURE when creating integration key has failed', async (done) => {
             moxios.wait(() => {
                 const request = moxios.requests.mostRecent()
                 assert.equal(request.config.method, 'post')
                 request.respondWith({
                     status: 500,
-                    response: new Error('test')
+                    response: {
+                        message: 'test',
+                        code: 'TEST'
+                    }
                 })
             })
-        
+
             const expectedActions = [{
                 type: actions.CREATE_INTEGRATION_KEY_REQUEST
             }, {
                 type: actions.CREATE_INTEGRATION_KEY_FAILURE,
-                error: new Error('test')
+                error: {
+                    message: 'test',
+                    code: 'TEST',
+                    statusCode: 500
+                }
             }]
-        
+
             try {
                 await store.dispatch(actions.createIntegrationKey({
                     name: 'test',
@@ -137,7 +151,7 @@ describe('IntegrationKey actions', () => {
             }
         })
     })
-    
+
     describe('deleteIntegrationKey', () => {
         it('creates DELETE_INTEGRATION_KEY_SUCCESS when deleting integration key has succeeded', async () => {
             moxios.wait(() => {
@@ -147,7 +161,7 @@ describe('IntegrationKey actions', () => {
                     status: 200
                 })
             })
-        
+
             const expectedActions = [{
                 type: actions.DELETE_INTEGRATION_KEY_REQUEST,
                 id: 'test'
@@ -155,29 +169,36 @@ describe('IntegrationKey actions', () => {
                 type: actions.DELETE_INTEGRATION_KEY_SUCCESS,
                 id: 'test'
             }]
-        
+
             await store.dispatch(actions.deleteIntegrationKey('test'))
             assert.deepStrictEqual(store.getActions(), expectedActions)
         })
-    
+
         it('creates DELETE_INTEGRATION_KEY_FAILURE when deleting integration key has failed', async (done) => {
             moxios.wait(() => {
                 const request = moxios.requests.mostRecent()
                 assert.equal(request.config.method, 'delete')
                 request.respondWith({
                     status: 500,
-                    response: new Error('test')
+                    response: {
+                        message: 'test',
+                        code: 'TEST'
+                    }
                 })
             })
-        
+
             const expectedActions = [{
                 type: actions.DELETE_INTEGRATION_KEY_REQUEST,
                 id: 'test'
             }, {
                 type: actions.DELETE_INTEGRATION_KEY_FAILURE,
-                error: new Error('test')
+                error: {
+                    message: 'test',
+                    code: 'TEST',
+                    statusCode: 500
+                }
             }]
-        
+
             try {
                 await store.dispatch(actions.deleteIntegrationKey('test'))
             } catch (e) {

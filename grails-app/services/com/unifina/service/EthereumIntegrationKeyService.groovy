@@ -1,15 +1,20 @@
 package com.unifina.service
 
+import com.unifina.api.ApiException
+import com.unifina.crypto.ECRecover
+import com.unifina.domain.security.Challenge
 import com.unifina.domain.security.IntegrationKey
 import com.unifina.domain.security.SecUser
 import com.unifina.security.StringEncryptor
 import grails.converters.JSON
 import groovy.transform.CompileStatic
+import org.apache.commons.codec.DecoderException
 import org.apache.commons.codec.binary.Hex
 import org.ethereum.crypto.ECKey
 import org.springframework.util.Assert
 
 import javax.annotation.PostConstruct
+import java.security.SignatureException
 
 class EthereumIntegrationKeyService {
 
@@ -69,4 +74,31 @@ class EthereumIntegrationKeyService {
 
 		return publicKey
 	}
+
+	IntegrationKey createEthereumID(SecUser user, String name, String challengeID, String challenge, String signature) {
+		def dbChallenge = Challenge.get(challengeID)
+		def invalidChallenge = dbChallenge == null || challenge != dbChallenge.challenge
+		if (invalidChallenge) {
+			throw new ApiException(400, "INVALID_CHALLENGE", "challenge validation failed")
+		}
+		def message = challenge
+		byte[] address;
+		try {
+			byte[] messageHash = ECRecover.calculateMessageHash(message)
+			address = ECRecover.recoverAddress(messageHash, signature)
+		} catch (SignatureException | DecoderException e) {
+			throw new ApiException(400, "ADDRESS_RECOVERY_ERROR", e.message)
+		}
+		IntegrationKey key = new IntegrationKey(
+				name: name,
+				user: user,
+				json: ([
+						address: new String(address)
+				] as JSON).toString(),
+				service: IntegrationKey.Service.ETHEREUM_ID.toString()
+		)
+		key.save()
+		return key
+	}
+
 }

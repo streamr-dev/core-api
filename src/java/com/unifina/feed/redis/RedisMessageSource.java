@@ -1,6 +1,7 @@
 package com.unifina.feed.redis;
 
 import com.lambdaworks.redis.RedisClient;
+import com.lambdaworks.redis.RedisURI;
 import com.lambdaworks.redis.codec.ByteArrayCodec;
 import com.lambdaworks.redis.pubsub.RedisPubSubAdapter;
 import com.lambdaworks.redis.pubsub.RedisPubSubConnection;
@@ -32,7 +33,11 @@ public class RedisMessageSource extends AbstractMessageSource<StreamrBinaryMessa
 		}
 
 		host = config.get("host").toString();
-		client = RedisClient.create("redis://"+(config.containsKey("password") ? config.get("password")+"@" : "")+host);
+		RedisURI redisURI = RedisURI.create("redis://" + host);
+		if (config.containsKey("password")) {
+			redisURI.setPassword("" + config.get("password"));
+		}
+		client = RedisClient.create(redisURI);
 		connection = client.connectPubSub(new ByteArrayCodec());
 
 		connection.addListener(new RedisPubSubAdapter<byte[], byte[]>() {

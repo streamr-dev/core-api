@@ -14,7 +14,7 @@ global.Streamr = {
 
 describe('Canvas actions', () => {
     let store
-    
+
     beforeEach(() => {
         moxios.install()
         store = mockStore({
@@ -23,12 +23,12 @@ describe('Canvas actions', () => {
             fetching: false
         })
     })
-    
+
     afterEach(() => {
         moxios.uninstall()
         store.clearActions()
     })
-    
+
     it('creates GET_RUNNING_CANVASES_SUCCESS when fetching running canvases has succeeded', () => {
         moxios.wait(() => {
             const request = moxios.requests.mostRecent()
@@ -50,7 +50,7 @@ describe('Canvas actions', () => {
                 }]
             })
         })
-        
+
         const expectedActions = [{
             type: actions.GET_RUNNING_CANVASES_REQUEST
         }, {
@@ -63,13 +63,13 @@ describe('Canvas actions', () => {
                 name: 'test2'
             }]
         }]
-        
+
         return store.dispatch(actions.getRunningCanvases())
             .then(() => {
                 expect(store.getActions()).toEqual(expectedActions)
             })
     })
-    
+
     it('creates GET_RUNNING_CANVASES_FAILURE when fetching running canvases has failed', () => {
         moxios.wait(() => {
             const request = moxios.requests.mostRecent()
@@ -82,17 +82,24 @@ describe('Canvas actions', () => {
             })
             request.respondWith({
                 status: 500,
-                response: new Error('test')
+                response: {
+                    message: 'test',
+                    code: 'TEST'
+                }
             })
         })
-        
+
         const expectedActions = [{
             type: actions.GET_RUNNING_CANVASES_REQUEST
         }, {
             type: actions.GET_RUNNING_CANVASES_FAILURE,
-            error: new Error('test')
+            error: {
+                message: 'test',
+                code: 'TEST',
+                statusCode: 500
+            }
         }]
-        
+
         return store.dispatch(actions.getRunningCanvases())
             .catch(() => {
                 expect(store.getActions()).toEqual(expectedActions)

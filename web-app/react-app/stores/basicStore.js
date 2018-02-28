@@ -10,20 +10,19 @@ import userReducer from '../reducers/user'
 export default (reducers: {}) => {
     const middleware = [thunk]
     let toBeComposed = [applyMiddleware(...middleware)]
-    
+
     if (process.env.NODE_ENV !== 'production') {
         if (window.__REDUX_DEVTOOLS_EXTENSION__ && window.__REDUX_DEVTOOLS_EXTENSION__()) {
             toBeComposed.push(window.__REDUX_DEVTOOLS_EXTENSION__())
         }
     }
-    
+
     return createStore(
         combineReducers({
             notifications: notificationReducer,
             user: userReducer,
-            ...reducers
+            ...reducers,
         }),
-        compose.apply(null, toBeComposed)
+        compose.apply(null, toBeComposed),
     )
 }
-

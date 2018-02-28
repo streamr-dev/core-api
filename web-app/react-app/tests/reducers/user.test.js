@@ -6,7 +6,7 @@ describe('User reducer', () => {
     
     it('should return the initial state', () => {
         assert.deepStrictEqual(reducer(undefined, {}), {
-            currentUser: {},
+            currentUser: null,
             error: null,
             fetching: false,
             saved: true
@@ -107,27 +107,50 @@ describe('User reducer', () => {
         })
     })
     
-    it('should update the user on UPDATE_CURRENT_USER', () => {
-        assert.deepStrictEqual(reducer({
-            some: 'state',
-            currentUser: {
-                name: 'test',
-                email: 'test2'
-            }
-        }, {
-            type: actions.UPDATE_CURRENT_USER,
-            user: {
-                email: 'test3',
-                timezone: 'test4'
-            }
-        }), {
-            some: 'state',
-            saved: false,
-            currentUser: {
-                name: 'test',
-                email: 'test3',
-                timezone: 'test4'
-            }
+    describe('UPDATE_CURRENT_USER', () => {
+        it('should update the user on UPDATE_CURRENT_USER', () => {
+            assert.deepStrictEqual(reducer({
+                some: 'state',
+                currentUser: {
+                    name: 'test',
+                    email: 'test2'
+                }
+            }, {
+                type: actions.UPDATE_CURRENT_USER,
+                user: {
+                    email: 'test3',
+                    timezone: 'test4'
+                }
+            }), {
+                some: 'state',
+                saved: false,
+                currentUser: {
+                    name: 'test',
+                    email: 'test3',
+                    timezone: 'test4'
+                }
+            })
+        })
+        it('should add the user if currentUser === null', () => {
+            assert.deepStrictEqual(reducer({
+                some: 'state',
+                currentUser: null
+            }, {
+                type: actions.UPDATE_CURRENT_USER,
+                user: {
+                    name: 'test',
+                    email: 'test3',
+                    timezone: 'test4'
+                }
+            }), {
+                some: 'state',
+                saved: false,
+                currentUser: {
+                    name: 'test',
+                    email: 'test3',
+                    timezone: 'test4'
+                }
+            })
         })
     })
 })

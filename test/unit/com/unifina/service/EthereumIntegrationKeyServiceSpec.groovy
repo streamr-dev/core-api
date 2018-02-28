@@ -1,5 +1,7 @@
 package com.unifina.service
 
+import com.unifina.api.ApiException
+import com.unifina.domain.security.Challenge
 import com.unifina.domain.security.IntegrationKey
 import com.unifina.domain.security.SecUser
 import grails.test.mixin.Mock
@@ -12,7 +14,7 @@ import spock.lang.Specification
 
 @TestMixin(ControllerUnitTestMixin) // "as JSON" converter
 @TestFor(EthereumIntegrationKeyService)
-@Mock([IntegrationKey, SecUser])
+@Mock([IntegrationKey, SecUser, Challenge])
 class EthereumIntegrationKeyServiceSpec extends Specification {
 
 	@Shared String actualPassword
@@ -118,4 +120,27 @@ class EthereumIntegrationKeyServiceSpec extends Specification {
 		keys == [k1, k2]
 	}
 
+	void "createEthereumID() creates IntegrationKey with proper values"() {
+		def ch = new Challenge(challenge: "foobar")
+		ch.save(failOnError: true, validate: false)
+		final String signature = "0x50ba6f6df25ba593cb8188df29ca27ea0a7cd38fadc4d40ef9fad455117e190f2a7ec880a76b930071205fee19cf55eb415bd33b2f6cb5f7be36f79f740da6e81b"
+		final String address = "0x10705c0b408eb64860f67a81f5908b51b62a86fc"
+		final String name = "foobar"
+		when:
+		IntegrationKey key = service.createEthereumID(me, name, ch.id, ch.challenge, signature)
+		Map json = new JsonSlurper().parseText(key.json)
+		then:
+		key.name == name
+		json.containsKey("address")
+		json.address == address
+	}
+
+	void "createEthereumID() validates challenge"() {
+		final String signature = "0x50ba6f6df25ba593cb8188df29ca27ea0a7cd38fadc4d40ef9fad455117e190f2a7ec880a76b930071205fee19cf55eb415bd33b2f6cb5f7be36f79f740da6e81b"
+		when:
+		service.createEthereumID(me, "name", "", "", signature)
+		then:
+		def e = thrown(ApiException)
+		e.message == "challenge validation failed"
+	}
 }

@@ -9,17 +9,26 @@ import {removeDashboardItem, updateDashboardItem} from '../../../../../actions/d
 
 import styles from './dashboardItemTitleRow.pcss'
 
-import type {Dashboard, DashboardItem, DashboardReducerState as DashboardState} from '../../../../../flowtype/dashboard-types'
+import type {DashboardState} from '../../../../../flowtype/states/dashboard-state'
+import type {Dashboard, DashboardItem} from '../../../../../flowtype/dashboard-types'
 
-type Props = {
-    item: DashboardItem,
-    dashboard: Dashboard,
+type StateProps = {
+    dashboard: ?Dashboard
+}
+
+type DispatchProps = {
     update: Function,
-    remove: Function,
+    remove: Function
+}
+
+type GivenProps = {
+    item: DashboardItem,
     className?: string,
     dragCancelClassName?: string,
     isLocked: boolean
 }
+
+type Props = StateProps & DispatchProps & GivenProps
 
 type State = {
     editing: boolean
@@ -28,42 +37,42 @@ type State = {
 export class DashboardItemTitleRow extends Component<Props, State> {
     saveButton: ?HTMLElement
     static defaultProps = {
-        isLocked: false
+        isLocked: false,
     }
-    
+
     state = {
-        editing: false
+        editing: false,
     }
-    
+
     onRemove = () => {
         this.props.remove(this.props.dashboard, this.props.item)
     }
-    
+
     startEdit = () => {
         this.setState({
-            editing: true
+            editing: true,
         })
     }
-    
+
     onBlur = (e: { relatedTarget: HTMLElement }) => {
         // This hack prevents clicking saveButton from first closing the editing and the starting it again
         if (this.saveButton && this.saveButton !== e.relatedTarget && !this.saveButton.contains(e.relatedTarget)) {
             this.endEdit()
         }
     }
-    
+
     endEdit = () => {
         this.setState({
-            editing: false
+            editing: false,
         })
     }
-    
-    saveName = ({target}: {target: {value: string}}) => {
+
+    saveName = ({target}: { target: { value: string } }) => {
         this.props.update(this.props.dashboard, this.props.item, {
-            title: target.value
+            title: target.value,
         })
     }
-    
+
     render() {
         const {item, dragCancelClassName} = this.props
         return (
@@ -110,7 +119,7 @@ export class DashboardItemTitleRow extends Component<Props, State> {
                                     <FontAwesome name="edit"/>
                                 </Button>
                             )}
-                            
+
                             <Button
                                 bsSize="xs"
                                 bsStyle="default"
@@ -128,20 +137,20 @@ export class DashboardItemTitleRow extends Component<Props, State> {
     }
 }
 
-export const mapStateToProps = ({dashboard: {dashboardsById, openDashboard}}: {dashboard: DashboardState}) => ({
-    dashboard: dashboardsById[openDashboard.id]
+export const mapStateToProps = ({dashboard: {dashboardsById, openDashboard}}: { dashboard: DashboardState }): StateProps => ({
+    dashboard: openDashboard.id ? dashboardsById[openDashboard.id] : null,
 })
 
-export const mapDispatchToProps = (dispatch: Function) => ({
+export const mapDispatchToProps = (dispatch: Function): DispatchProps => ({
     update(db: Dashboard, item: DashboardItem, newData: {} = {}) {
         return dispatch(updateDashboardItem(db, {
             ...item,
-            ...newData
+            ...newData,
         }))
     },
     remove(db: Dashboard, item: DashboardItem) {
         return dispatch(removeDashboardItem(db, item))
-    }
+    },
 })
 
 export default connect(mapStateToProps, mapDispatchToProps)(DashboardItemTitleRow)

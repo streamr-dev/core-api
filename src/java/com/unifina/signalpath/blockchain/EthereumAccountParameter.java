@@ -8,6 +8,7 @@ import com.unifina.signalpath.AbstractSignalPathModule;
 import com.unifina.signalpath.Parameter;
 import com.unifina.signalpath.PossibleValue;
 import grails.util.Holders;
+import org.codehaus.groovy.grails.orm.hibernate.cfg.GrailsHibernateUtil;
 import org.codehaus.groovy.runtime.InvokerHelper;
 
 import java.util.*;
@@ -20,8 +21,11 @@ class EthereumAccountParameter extends Parameter<IntegrationKey> {
 
 	@Override
 	public IntegrationKey parseValue(String id) {
-		return (IntegrationKey) InvokerHelper.invokeStaticMethod(IntegrationKey.class, "findByIdAndService",
-			new Object[]{id, "ETHEREUM"});
+		IntegrationKey key = (IntegrationKey) InvokerHelper.invokeStaticMethod(IntegrationKey.class, "findByIdAndService",
+				new Object[]{id, "ETHEREUM"});
+		// Ensure the IntegrationKey is not a Hibernate proxy
+		key = (IntegrationKey) GrailsHibernateUtil.unwrapIfProxy(key);
+		return key;
 	}
 
 	String getAddress() {

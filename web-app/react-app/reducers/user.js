@@ -10,16 +10,17 @@ import {
     UPDATE_CURRENT_USER
 } from '../actions/user.js'
 
-import type {State, Action} from '../flowtype/user-types.js'
+import type {UserState} from '../flowtype/states/user-state'
+import type {UserAction} from '../flowtype/actions/user-actions'
 
 const initialState = {
-    currentUser: {},
+    currentUser: null,
     error: null,
     fetching: false,
     saved: true
 }
 
-export default function(state: State = initialState, action: Action) : State {
+export default function(state: UserState = initialState, action: UserAction): UserState {
     switch (action.type) {
         case GET_CURRENT_USER_REQUEST:
         case SAVE_CURRENT_USER_REQUEST:
@@ -48,7 +49,7 @@ export default function(state: State = initialState, action: Action) : State {
                 ...state,
                 saved: false,
                 currentUser: {
-                    ...state.currentUser,
+                    ...(state.currentUser || {}),
                     ...action.user
                 }
             }

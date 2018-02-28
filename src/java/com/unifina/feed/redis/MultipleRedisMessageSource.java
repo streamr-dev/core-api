@@ -6,6 +6,7 @@ import com.unifina.feed.MessageRecipient;
 import com.unifina.utils.MapTraversal;
 import grails.util.Holders;
 import org.apache.log4j.Logger;
+import org.springframework.util.Assert;
 
 import java.io.IOException;
 import java.util.*;
@@ -23,6 +24,11 @@ public class MultipleRedisMessageSource extends AbstractMessageSource<StreamrBin
 
 		List<String> hosts = MapTraversal.getList(Holders.getConfig(), "streamr.redis.hosts");
 		String password = MapTraversal.getString(Holders.getConfig(), "streamr.redis.password");
+
+		Assert.notNull(hosts, "streamr.redis.hosts is null!");
+		Assert.notEmpty(hosts, "streamr.redis.hosts is empty!");
+		Assert.notNull(password, "streamr.redis.password is null!");
+
 		for (String host : hosts) {
 			addHost(host, password);
 		}

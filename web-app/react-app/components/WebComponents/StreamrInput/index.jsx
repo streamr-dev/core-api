@@ -3,11 +3,17 @@
 import React, {Component} from 'react'
 import StreamrWidget from '../StreamrWidget'
 
-import type {WebcomponentProps} from '../../../flowtype/webcomponent-types'
 import type {Node} from 'react'
+import type {StreamId, SubscriptionOptions} from '../../../flowtype/streamr-client-types'
 
-type Props = WebcomponentProps & {
-    onMessage?: ?Function,
+type Props = {
+    url: string,
+    subscriptionOptions?: SubscriptionOptions,
+    stream?: StreamId,
+    height?: ?number,
+    width?: ?number,
+    onError?: ?Function,
+    onMessage?: ?({ state: string }) => void,
     onModuleJson?: ?Function,
     children: Node,
     widgetRef?: (widget: ?StreamrWidget) => void
@@ -15,18 +21,18 @@ type Props = WebcomponentProps & {
 
 export default class StreamrInput extends Component<Props> {
     widget: ?StreamrWidget
-    
+
     componentDidMount = () => {
         this.widget && this.widget.sendRequest({
-            type: 'getState'
+            type: 'getState',
         })
             .then(({data}) => this.props.onMessage && this.props.onMessage(data))
     }
-    
+
     sendValue = (value: ?any) => {
         this.widget && this.widget.sendRequest({
             type: 'uiEvent',
-            value
+            value,
         })
     }
 
@@ -35,7 +41,7 @@ export default class StreamrInput extends Component<Props> {
             <StreamrWidget
                 subscriptionOptions={{
                     stream: this.props.stream,
-                    resend_last: 1
+                    resend_last: 1,
                 }}
                 url={this.props.url}
                 onError={this.props.onError}

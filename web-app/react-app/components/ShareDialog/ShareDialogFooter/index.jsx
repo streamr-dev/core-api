@@ -29,6 +29,5 @@ export default class ShareDialogFooter extends Component<Props> {
                 </Button>
             </Modal.Footer>
         )
-        
     }
 }

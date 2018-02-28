@@ -1,16 +1,10 @@
+// @flow
 
 export type IntegrationKey = {
+    id?: ?number,
     name: string,
     service: string,
     json: {}
-}
-
-export type State = {
-    listsByService?: {
-        [string]: Array<IntegrationKey>
-    },
-    error?: ?string,
-    fetching?: boolean
 }
 
 export type Action = {

@@ -150,7 +150,7 @@ var StreamSearchModule = function (limit) {
     return {
         name: 'Streams',
         displayKey: 'name',
-        source: function (q, sync, async) {
+        source: _.debounce(function (q, sync, async) {
             $.get(Streamr.createLink({uri: "api/v1/streams"}) + '?' + $.param({public: true, search: q, uiChannel: false}), function(result) {
                 result.sort(function (a, b) {
                     return (getSortScore(a.name, q) - getSortScore(b.name, q))
@@ -162,7 +162,7 @@ var StreamSearchModule = function (limit) {
                 })
                 async(result)
             })
-        },
+        }, 250),
         templates: {
             header: '<p class="streamr-search-dataset-header">Streams</p>',
             suggestion: function(stream) {

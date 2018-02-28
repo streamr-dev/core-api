@@ -22,50 +22,57 @@ type State = {
 }
 
 export default class ConfirmButton extends Component<Props, State> {
-    
+
     static defaultProps = {
         confirmTitle: 'Are you sure?',
-        cancelCallback: () => {}
+        cancelCallback: () => {
+        },
     }
-    
+
     state = {
-        open: false
+        open: false,
     }
-    
+
     openModal = () => {
         this.setState({
-            open: true
+            open: true,
         })
     }
-    
+
     closeModal = () => {
         this.setState({
-            open: false
+            open: false,
         })
     }
-    
+
     closeAndExecuteFunction = (func?: (any) => void) => {
         this.closeModal()
         if (func) {
             func()
         }
     }
-    
+
     render() {
         return (
-            <Button
+            <Button key="2"
                 {...this.props.buttonProps}
-                onClick={(e) => {
-                    // An ugly fix to prevent clicking the modal from firing this
-                    if (e.target === e.currentTarget) {
-                        this.openModal()
-                    }
+                style={{
+                    padding: 0,
                 }}
                 ref={this.props.buttonRef}
                 className={this.props.className}
             >
-                {this.props.children}
-                <Modal {...this.props.modalProps} show={this.state.open}>
+                <div
+                    onClick={this.openModal}
+                    style={{
+                        padding: '7px 12px',
+                        width: '100%',
+                        height: '100%',
+                    }}
+                >
+                    {this.props.children}
+                </div>
+                <Modal key="3" {...this.props.modalProps} show={this.state.open}>
                     <Modal.Header>
                         <Modal.Title>
                             {this.props.confirmTitle}

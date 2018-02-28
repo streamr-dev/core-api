@@ -10,40 +10,52 @@ import 'react-select/dist/react-select.css'
 
 import {getCurrentUser, updateCurrentUserName, updateCurrentUserTimezone, saveCurrentUser} from '../../../actions/user'
 
-import type {User, State as UserState} from '../../../flowtype/user-types'
+import type {UserState} from '../../../flowtype/states/user-state'
+import type {User} from '../../../flowtype/user-types'
 
-type Props = {
-    user: User,
-    getCurrentUser: () => void,
-    updateCurrentUserName: (name: User.name) => void,
-    updateCurrentUserTimezone: (timezone: User.timezone) => void,
-    saveCurrentUser: Function
+type StateProps = {
+    user: ?User
 }
 
+type DispatchProps = {
+    getCurrentUser: () => void,
+    updateCurrentUserName: (name: $ElementType<User, 'name'>) => void,
+    updateCurrentUserTimezone: (timezone: $ElementType<User, 'timezone'>) => void,
+    saveCurrentUser: (user: User) => void
+}
+
+type Props = StateProps & DispatchProps
+
 export class ProfileSettings extends Component<Props> {
-    
+
     componentDidMount() {
         // TODO: move to (yet nonexistent) router
         this.props.getCurrentUser()
     }
-    onNameChange = ({target}: {target: {
-        value: User.name
-    }}) => {
+
+    onNameChange = ({target}: {
+        target: {
+            value: $ElementType<User, 'name'>
+        }
+    }) => {
         this.props.updateCurrentUserName(target.value)
     }
-    onTimezoneChange = ({target}: {target: {
-        value: User.timezone
-    }}) => {
+    onTimezoneChange = ({target}: {
+        target: {
+            value: $ElementType<User, 'timezone'>
+        }
+    }) => {
         this.props.updateCurrentUserTimezone(target.value)
     }
     onSubmit = (e: Event) => {
         e.preventDefault()
-        this.props.saveCurrentUser(this.props.user)
+        this.props.user && this.props.saveCurrentUser(this.props.user)
     }
+
     render() {
         const options = moment.tz.names().map(tz => ({
             value: tz,
-            label: tz
+            label: tz,
         }))
         return (
             <Panel header="Profile Settings">
@@ -52,9 +64,9 @@ export class ProfileSettings extends Component<Props> {
                         <ControlLabel>
                             Email
                         </ControlLabel>
-                        <div>{this.props.user.username}</div>
+                        <div>{this.props.user && this.props.user.username}</div>
                     </FormGroup>
-        
+
                     <FormGroup>
                         <ControlLabel>
                             Password
@@ -65,19 +77,19 @@ export class ProfileSettings extends Component<Props> {
                             </a>
                         </div>
                     </FormGroup>
-        
+
                     <FormGroup>
                         <ControlLabel>
                             Full Name
                         </ControlLabel>
                         <FormControl
                             name="name"
-                            value={this.props.user.name || ''}
+                            value={this.props.user && this.props.user.name || ''}
                             onChange={this.onNameChange}
                             required
                         />
                     </FormGroup>
-            
+
                     <FormGroup>
                         <ControlLabel>
                             Timezone
@@ -85,14 +97,14 @@ export class ProfileSettings extends Component<Props> {
                         <Select
                             placeholder="Select timezone"
                             options={options}
-                            value={this.props.user.timezone}
+                            value={this.props.user && this.props.user.timezone}
                             name="timezone"
                             onChange={this.onTimezoneChange}
                             required={true}
                             clearable={false}
                         />
                     </FormGroup>
-                    
+
                     <FormGroup>
                         <InputGroup>
                             <Button
@@ -111,23 +123,23 @@ export class ProfileSettings extends Component<Props> {
     }
 }
 
-export const mapStateToProps = ({user}: UserState) => ({
-    user: user.currentUser || {}
+export const mapStateToProps = ({user}: { user: UserState }): StateProps => ({
+    user: user.currentUser,
 })
 
-export const mapDispatchToProps = (dispatch: Function) => ({
+export const mapDispatchToProps = (dispatch: Function): DispatchProps => ({
     getCurrentUser() {
         dispatch(getCurrentUser())
     },
-    updateCurrentUserName(name: User.name) {
+    updateCurrentUserName(name: $ElementType<User, 'name'>) {
         dispatch(updateCurrentUserName(name))
     },
-    updateCurrentUserTimezone(tz: User.timezone) {
+    updateCurrentUserTimezone(tz: $ElementType<User, 'timezone'>) {
         dispatch(updateCurrentUserTimezone(tz))
     },
     saveCurrentUser(user: User) {
         dispatch(saveCurrentUser(user))
-    }
+    },
 })
 
 export default connect(mapStateToProps, mapDispatchToProps)(ProfileSettings)

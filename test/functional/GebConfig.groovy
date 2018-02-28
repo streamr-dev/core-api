@@ -20,16 +20,11 @@ String baseUrl = "http://${sutHost}:${sutPort}/streamr-core/"
 println("GebConfig ${baseUrl} (headless=${headless})")
 
 driver = {
-	def dr
-	if (inJenkins) {
-		dr = new RemoteWebDriver(new URL("http://dev.unifina:4444/wd/hub"), DesiredCapabilities.chrome())
-	} else {
-		def options = new ChromeOptions()
-		if (headless) {
-			options.addArguments("headless", "disable-gpu") //"remote-debugging-port=9222"
-		}
-		dr = new ChromeDriver(options)
+	def options = new ChromeOptions()
+	if (headless) {
+		options.addArguments("headless", "disable-gpu") //"remote-debugging-port=9222"
 	}
+	def dr = new ChromeDriver(options)
 	// Resolution where everything should be visible
 	dr.manage().window().setSize(new Dimension(1280,1024));
 	return dr

@@ -124,10 +124,28 @@ class PermissionService {
 			return []
 		}
 
+		Closure permissionCriteria = createUserPermissionCriteria(userish, op, includeAnonymous)
+
+		return resourceClass.withCriteria {
+			permissionCriteria.delegate = delegate
+			resourceFilter.delegate = delegate
+			permissionCriteria()
+			resourceFilter()
+		}
+	}
+
+	/**
+	 * Creates a criteria that can be included in the <code>BuildableCriteria</code> of a domain object
+	 * (Dashboard, Canvas, Stream etc.) to filter query results so that user has specified permission on
+	 * them.
+	 */
+	Closure createUserPermissionCriteria(Userish userish, Operation op, boolean includeAnonymous) {
+		userish = userish?.resolveToUserish()
+
 		boolean isUser = isNotNullAndIdNotNull(userish)
 		String userProp = isUser ? getUserPropertyName(userish) : null
 
-		return resourceClass.withCriteria {
+		return {
 			permissions {
 				eq("operation", op)
 				or {
@@ -139,8 +157,6 @@ class PermissionService {
 					}
 				}
 			}
-			resourceFilter.delegate = delegate
-			resourceFilter()
 		}
 	}
 

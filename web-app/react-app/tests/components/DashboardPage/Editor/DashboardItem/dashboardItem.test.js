@@ -163,10 +163,7 @@ describe('DashboardItem', () => {
                 stack: 'testStack'
             })
             assert(errorSpy.calledOnce)
-            assert(errorSpy.calledWith({
-                message: 'testMsg',
-                stack: 'testStack'
-            }))
+            assert(errorSpy.calledWith('testMsg'))
             assert(consoleErrorStub.calledOnce)
             assert(consoleErrorStub.calledWith('testStack'))
         })

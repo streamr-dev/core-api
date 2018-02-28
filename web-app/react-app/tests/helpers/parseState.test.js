@@ -31,7 +31,7 @@ describe('parseState', () => {
                         id: 2
                     }
                 }
-            }).dashboard, {})
+            }).dashboard, null)
         })
         describe('on unsaved dashboard', () => {
             it('must set canWrite to true', () => {

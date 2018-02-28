@@ -192,7 +192,7 @@ public class SendToStream extends ModuleWithSideEffects {
 				permissionService = Holders.getApplicationContext().getBean(PermissionService.class);
 			}
 
-			SecUser user = SecUser.loadViaJava(getGlobals().getUserId());
+			SecUser user = SecUser.getViaJava(getGlobals().getUserId());
 			if (permissionService.canWrite(user, stream)) {
 				lastStreamId = stream.getId();
 			} else {

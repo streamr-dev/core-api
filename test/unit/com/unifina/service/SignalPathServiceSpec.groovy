@@ -131,6 +131,7 @@ class SignalPathServiceSpec extends Specification {
 	}
 
 	void "getUsersOfRunningCanvases() returns empty map if no canvases running"() {
+		service.servletContext["signalPathRunners"] = [:]
 		expect:
 		service.getUsersOfRunningCanvases() == [:]
 	}
@@ -159,9 +160,9 @@ class SignalPathServiceSpec extends Specification {
 		sp3.setCanvas(c3)
 
 		service.servletContext["signalPathRunners"] = [
-		    "runner-id-1": new SignalPathRunner(sp1, new Globals([:], someoneElse)),
-			"runner-id-2": new SignalPathRunner(sp2, new Globals([:], me)),
-			"runner-id-3": new SignalPathRunner(sp3, new Globals([:], someoneElse)),
+		    "runner-id-1": new SignalPathRunner(sp1, new Globals([:], someoneElse), false),
+			"runner-id-2": new SignalPathRunner(sp2, new Globals([:], me), false),
+			"runner-id-3": new SignalPathRunner(sp3, new Globals([:], someoneElse), false),
 		]
 
 		expect:

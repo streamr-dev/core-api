@@ -26,7 +26,7 @@ class SignalPathParameter extends StringParameter {
 		}
 
 		def permissionService = Holders.applicationContext.getBean(PermissionService)
-		def user = SecUser.load(owner.globals.userId)
+		def user = SecUser.get(owner.globals.userId)
 		Collection signalPaths = permissionService.get(Canvas, user) {
 			projections {
 				property 'id', 'id'

@@ -5,7 +5,7 @@ import React, {Component} from 'react'
 import { Row, Col } from 'react-bootstrap'
 
 import ProfileSettings from './ProfileSettings'
-import APICredentials from '../APICredentials'
+import APICredentials from './APICredentials'
 import IntegrationKeyHandler from './IntegrationKeyHandler'
 import Notifier from '../StreamrNotifierWrapper'
 

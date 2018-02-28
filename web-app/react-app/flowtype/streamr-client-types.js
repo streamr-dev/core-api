@@ -1,3 +1,4 @@
+// @flow
 
 export type Subscription = {
     bind: Function,
@@ -5,8 +6,14 @@ export type Subscription = {
 }
 
 export type ModuleOptions = {
-    uiResendAll?: boolean,
-    uiResendLast?: number
+    uiResendAll?: {
+        type: 'boolean',
+        value: boolean
+    },
+    uiResendLast?: {
+        type: 'number',
+        value: number
+    }
 }
 
 export type StreamId = string

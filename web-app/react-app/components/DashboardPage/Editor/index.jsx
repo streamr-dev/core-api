@@ -8,7 +8,7 @@ import {
     StreamrBreadcrumbItem,
     StreamrBreadcrumbDropdownButton,
     StreamrBreadcrumbToolbar,
-    StreamrBreadcrumbToolbarButton
+    StreamrBreadcrumbToolbarButton,
 } from '../../Breadcrumb'
 import {MenuItem} from 'react-bootstrap'
 import FontAwesome from 'react-fontawesome'
@@ -34,10 +34,11 @@ import {
     updateDashboardChanges,
     lockDashboardEditing,
     unlockDashboardEditing,
-    updateDashboardLayout
+    updateDashboardLayout,
 } from '../../../actions/dashboard'
 
-import type {Dashboard, DashboardReducerState as DashboardState, Layout, LayoutItem} from '../../../flowtype/dashboard-types'
+import type {DashboardState} from '../../../flowtype/states/dashboard-state'
+import type {Dashboard, Layout, LayoutItem} from '../../../flowtype/dashboard-types'
 
 const ResponsiveReactGridLayout = WidthProvider(Responsive)
 
@@ -45,20 +46,29 @@ declare var keyId: string
 
 import styles from './editor.pcss'
 
-type Props = {
-    dashboard: Dashboard,
+type StateProps = {
+    dashboard: ?Dashboard,
     canShare: boolean,
     canWrite: boolean,
-    delete: Function,
-    update: Function,
-    editorLocked: Function,
-    lockEditing: Function,
-    unlockEditing: Function,
-    updateDashboardLayout: Function,
+    editorLocked: boolean
+}
+
+type DispatchProps = {
+    update: (id: $ElementType<Dashboard, 'id'>, changes: {}) => Promise<Dashboard>,
+    lockEditing: (id: $ElementType<Dashboard, 'id'>) => void,
+    unlockEditing: (id: $ElementType<Dashboard, 'id'>) => void,
+    updateDashboardLayout: (id: $ElementType<Dashboard, 'id'>, layout: Layout) => void
+}
+
+type GivenProps = {}
+
+type RouterProps = {
     history: {
         push: Function
     }
 }
+
+type Props = StateProps & DispatchProps & GivenProps & RouterProps
 
 type State = {
     breakpoints: {
@@ -82,114 +92,114 @@ type State = {
 
 export class Editor extends Component<Props, State> {
     client: StreamrClient
-    
+
     static defaultProps = {
         dashboard: {
             name: '',
-            items: []
-        }
+            items: [],
+        },
     }
-    
+
     state = {
         breakpoints: dashboardConfig.layout.breakpoints,
         cols: dashboardConfig.layout.cols,
         layoutsByItemId: {},
         isFullscreen: false,
-        sharingDialogIsOpen: false
+        sharingDialogIsOpen: false,
     }
-    
+
     constructor() {
         super()
         this.client = new StreamrClient({
             url: config.wsUrl,
             authKey: keyId,
             autoconnect: true,
-            autoDisconnect: false
+            autoDisconnect: false,
         })
     }
-    
+
     componentDidMount() {
         window.addEventListener('beforeunload', this.onBeforeUnload)
-        
+
         const menuToggle = document.getElementById('main-menu-toggle')
         menuToggle && menuToggle.addEventListener('click', this.onMenuToggle)
     }
-    
+
     componentWillReceiveProps(nextProps: Props) {
-        if (this.props.dashboard.id !== nextProps.dashboard.id) {
+        if (this.props.dashboard && nextProps.dashboard && this.props.dashboard.id !== nextProps.dashboard.id) {
             this.props.history.push(`/${nextProps.dashboard.id || ''}`)
         }
     }
-    
+
     onMenuToggle = () => {
         const menuIsOpen = document.body && document.body.classList && document.body.classList.contains('mmc')
         if (menuIsOpen) {
-            this.props.unlockEditing(this.props.dashboard.id)
+            this.props.dashboard && this.props.unlockEditing(this.props.dashboard.id)
         } else {
-            this.props.lockEditing(this.props.dashboard.id)
+            this.props.dashboard && this.props.lockEditing(this.props.dashboard.id)
         }
     }
-    
+
     onDragStop = () => {
-    
+
     }
-    
+
     onLayoutChange = (layout: DashboardItem.layout, allLayouts: Layout) => {
         this.onResize(layout)
-        this.props.updateDashboardLayout(this.props.dashboard.id, allLayouts)
+        this.props.dashboard && this.props.updateDashboardLayout(this.props.dashboard.id, allLayouts)
     }
-    
+
     onFullscreenToggle = (value?: boolean) => {
         this.setState({
-            isFullscreen: value !== undefined ? value : !this.state.isFullscreen
+            isFullscreen: value !== undefined ? value : !this.state.isFullscreen,
         })
     }
-    
-    generateLayout = (): Layout => {
+
+    generateLayout = (): ?Layout => {
         const db = this.props.dashboard
-        const layout = _.zipObject(dashboardConfig.layout.sizes, _.map(dashboardConfig.layout.sizes, (size: 'lg' | 'md' | 'sm' | 'xs') => {
+        const layout = db && _.zipObject(dashboardConfig.layout.sizes, _.map(dashboardConfig.layout.sizes, (size: 'lg' | 'md' | 'sm' | 'xs') => {
             return db.items.map(item => {
                 const id = Editor.generateItemId(item)
                 const layout = db.layout && db.layout[size] && db.layout[size].find(layout => layout.i === id)
-                return {
+                return item.webcomponent ? {
                     ...dashboardConfig.layout.defaultLayout,
                     ...dashboardConfig.layout.layoutsBySizeAndModule[size][item.webcomponent],
                     ...(layout || {}),
-                    i: id
-                }
+                    i: id,
+                } : {}
             })
         }))
         return layout
     }
-    
+
     onResize = (layout: Array<LayoutItem>) => {
         this.setState({
             layoutsByItemId: layout.reduce((result, item) => {
                 result[item.i] = item
                 return result
-            }, {})
+            }, {}),
         })
     }
-    
+
     onBeforeUnload = (e: Event & { returnValue: ?string }): ?string => {
-        if (this.props.dashboard.id && !this.props.dashboard.saved) {
+        if (this.props.dashboard && this.props.dashboard.id && !this.props.dashboard.saved) {
             const message = 'You have unsaved changes in your Dashboard. Are you sure you want to leave?'
             e.returnValue = message
             return message
         }
     }
-    
+
     static generateItemId(item: DashboardItem): string {
         return `${item.canvas}-${item.module}`
     }
-    
+
     render() {
         const {dashboard} = this.props
-        const layout = dashboard.items && this.generateLayout()
-        const items = dashboard.items ? _.sortBy(dashboard.items, ['canvas', 'module']) : []
+        const layout = dashboard && dashboard.items && this.generateLayout()
+        const items = dashboard && dashboard.items ? _.sortBy(dashboard.items, ['canvas', 'module']) : []
         const dragCancelClassName = 'cancelDragging' + Date.now()
         const locked = this.props.editorLocked || this.state.isFullscreen
-        return (
+        return dashboard ? (
             <div
                 id="content-wrapper"
                 className={`scrollable ${styles.editor}`}
@@ -200,7 +210,7 @@ export class Editor extends Component<Props, State> {
                 >
                     <div style={{
                         backgroundColor: '#f6f6f6',
-                        height: '100%'
+                        height: '100%',
                     }}>
                         <StreamrBreadcrumb>
                             <StreamrBreadcrumbItem href={createLink('dashboard/list')}>
@@ -216,7 +226,7 @@ export class Editor extends Component<Props, State> {
                                     {this.props.canShare && (
                                         <MenuItem
                                             onClick={() => this.setState({
-                                                sharingDialogIsOpen: true
+                                                sharingDialogIsOpen: true,
                                             })}
                                             className={styles.dropdownShareButton}
                                         >
@@ -227,7 +237,7 @@ export class Editor extends Component<Props, State> {
                                         <DeleteButton
                                             buttonProps={{
                                                 componentClass: MenuItem,
-                                                bsClass: styles.dropdownDeleteButton
+                                                bsClass: styles.dropdownDeleteButton,
                                             }}
                                         >
                                             <FontAwesome name="trash-o"/> Delete
@@ -236,11 +246,11 @@ export class Editor extends Component<Props, State> {
                                     <ShareDialog
                                         isOpen={this.state.sharingDialogIsOpen}
                                         onClose={() => this.setState({
-                                            sharingDialogIsOpen: false
+                                            sharingDialogIsOpen: false,
                                         })}
                                         resourceType="DASHBOARD"
-                                        resourceId={this.props.dashboard.id}
-                                        resourceTitle={`Dashboard ${this.props.dashboard.name}`}
+                                        resourceId={this.props.dashboard && this.props.dashboard.id}
+                                        resourceTitle={`Dashboard ${this.props.dashboard ? this.props.dashboard.name : ''}`}
                                     />
                                 </StreamrBreadcrumbDropdownButton>
                             )}
@@ -283,31 +293,32 @@ export class Editor extends Component<Props, State> {
                     </div>
                 </Fullscreen>
             </div>
-        )
+        ) : null
     }
 }
 
-export const mapStateToProps = (state: {dashboard: DashboardState}) => {
+export const mapStateToProps = (state: { dashboard: DashboardState }): StateProps => {
     const baseState = parseDashboard(state)
+    const {dashboard} = baseState
     return {
         ...baseState,
-        editorLocked: baseState.dashboard.editingLocked || (!baseState.dashboard.new && !baseState.canWrite)
+        editorLocked: !!dashboard && (dashboard.editingLocked || (!dashboard.new && !baseState.canWrite)),
     }
 }
 
-export const mapDispatchToProps = (dispatch: Function) => ({
-    update(id: Dashboard.id, changes: {}) {
+export const mapDispatchToProps = (dispatch: Function): DispatchProps => ({
+    update(id: $ElementType<Dashboard, 'id'>, changes: {}) {
         return dispatch(updateDashboardChanges(id, changes))
     },
-    lockEditing(id: Dashboard.id) {
-        return dispatch(lockDashboardEditing(id))
+    lockEditing(id: $ElementType<Dashboard, 'id'>) {
+        dispatch(lockDashboardEditing(id))
     },
-    unlockEditing(id: Dashboard.id) {
-        return dispatch(unlockDashboardEditing(id))
+    unlockEditing(id: $ElementType<Dashboard, 'id'>) {
+        dispatch(unlockDashboardEditing(id))
     },
-    updateDashboardLayout(id: Dashboard.id, layout: Layout) {
-        return dispatch(updateDashboardLayout(id, layout))
-    }
+    updateDashboardLayout(id: $ElementType<Dashboard, 'id'>, layout: Layout) {
+        dispatch(updateDashboardLayout(id, layout))
+    },
 })
 
 export default connect(mapStateToProps, mapDispatchToProps)(withRouter(Editor))
