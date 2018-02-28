@@ -167,6 +167,11 @@ public class ModuleTestHelper {
 			return this;
 		}
 
+		public Builder customEquality(Closure<Boolean> equalityCheck) {
+			testHelper.equalityCheck = equalityCheck;
+			return this;
+		}
+
 		/**
 		 * Build the <code>ModuleTestHelper</code>. Throws <code>RuntimeException</code> if test setting has been
 		 * configured inappropriately.
@@ -220,6 +225,13 @@ public class ModuleTestHelper {
 	private Closure<?> beforeEachTestCase = Closure.IDENTITY;
 	private Closure<?> afterEachTestCase = Closure.IDENTITY;
 	private Closure<?> moduleInstanceChanged = Closure.IDENTITY;
+	private Closure<Boolean> equalityCheck = new Closure<Boolean>(null) {
+		@Override
+		public Boolean call(Object... args) {
+			assert args.length == 2;
+			return args[0].equals(args[1]);
+		}
+	};
 
 	private int inputValueCount;
 	private int outputValueCount;
@@ -377,7 +389,7 @@ public class ModuleTestHelper {
 			// - Incorrect output value is produced
 			if ((expected == null && actual != null) ||
 					(expected != null && actual == null) ||
-					expected != null && !expected.equals(actual)) {
+					expected != null && !equalityCheck.call(expected, actual)) {
 				throwException(entry.getKey(), i, outputIndex, actual, expected);
 			}
 		}
