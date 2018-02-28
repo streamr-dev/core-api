@@ -1,6 +1,7 @@
 package com.unifina.service
 
 import com.unifina.api.ApiException
+import com.unifina.api.DuplicateNotAllowedException
 import com.unifina.domain.security.Challenge
 import com.unifina.domain.security.IntegrationKey
 import com.unifina.domain.security.SecUser
@@ -142,5 +143,19 @@ class EthereumIntegrationKeyServiceSpec extends Specification {
 		then:
 		def e = thrown(ApiException)
 		e.message == "challenge validation failed"
+	}
+
+	void "createEthereumID() checks for duplicate addresses"() {
+		def ch = new Challenge(challenge: "foobar")
+		ch.save(failOnError: true, validate: false)
+		String signature = "0x50ba6f6df25ba593cb8188df29ca27ea0a7cd38fadc4d40ef9fad455117e190f2a7ec880a76b930071205fee19cf55eb415bd33b2f6cb5f7be36f79f740da6e81b"
+		String name = "foobar"
+
+		service.createEthereumID(me, name, ch.id, ch.challenge, signature)
+
+		when:
+		service.createEthereumID(me, name, ch.id, ch.challenge, signature)
+		then:
+		thrown(DuplicateNotAllowedException)
 	}
 }
