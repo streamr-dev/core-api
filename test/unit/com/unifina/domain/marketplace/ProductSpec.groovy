@@ -1,10 +1,7 @@
-package com.unifina.domain
+package com.unifina.domain.marketplace
 
 import com.unifina.domain.data.Stream
-import com.unifina.domain.marketplace.Category
-import com.unifina.domain.marketplace.Product
 import grails.test.mixin.TestFor
-import grails.test.mixin.support.GrailsUnitTestMixin
 import spock.lang.Specification
 import spock.lang.Unroll
 
