@@ -10,15 +10,15 @@
 	<%-- Used by Geb GrailsPage abstraction --%>
     <meta name="pageId" content="${controllerName}.${actionName}" />
     
-    <script>
-    	Streamr = {}
+    <r:script disposition="head">
+    	Streamr = Streamr || {}
 		Streamr.projectWebroot = '${createLink(uri:"/", absolute:true)}'
 		Streamr.controller = '${controllerName}'
 		Streamr.action = '${actionName}'
 		<sec:ifLoggedIn>
 		Streamr.user = "${raw(grails.util.Holders.getApplicationContext().getBean("springSecurityService").getCurrentUser().getUsername())}"
 		</sec:ifLoggedIn>
-    </script>
+    </r:script>
     
     <r:require module="streamr"/>
     <r:require module="jquery"/>

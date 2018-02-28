@@ -7,7 +7,8 @@
 
 	<r:require module="streamr-credentials-control"/>
 
-	<r:require module="profile-page-webpack-bundle"/>
+	<webpack:cssBundle name="commons"/>
+	<webpack:cssBundle name="profilePage"/>
 
 </head>
 <body>
@@ -39,5 +40,9 @@
 			})
 		})
 	</r:script>
+
+	<webpack:jsBundle name="commons"/>
+	<webpack:jsBundle name="profilePage"/>
+
 </body>
 </html>
