@@ -98,7 +98,41 @@
           { "$ref": "#/parameters/order" },
           { "$ref": "#/parameters/max" },
           { "$ref": "#/parameters/offset" },
-          { "$ref": "#/parameters/publicAccess" }
+          { "$ref": "#/parameters/publicAccess" },
+          {
+            "name": "categories",
+            "type": "string",
+            "in": "query",
+            "description": "Filter products by category id(s)",
+            "required": false
+          },
+          {
+            "name": "states",
+            "type": "string",
+            "in": "query",
+            "description": "Filter products by state(s)",
+            "required": false,
+            "enum": [
+              "NOT_DEPLOYED",
+              "DEPLOYING",
+              "DEPLOYED",
+              "UNDEPLOYING"
+            ]
+          },
+          {
+            "name": "minPrice",
+            "type": "number",
+            "in": "query",
+            "description": "Minimum price (per second) of product",
+            "required": false
+          },
+          {
+            "name": "maxPrice",
+            "type": "number",
+            "in": "query",
+            "description": "Maximum price (per second) of product",
+            "required": false
+          },
         ],
         "responses": {
           "200": {
