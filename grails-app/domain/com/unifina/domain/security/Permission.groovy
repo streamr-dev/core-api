@@ -4,6 +4,7 @@ import com.unifina.domain.dashboard.Dashboard
 import com.unifina.domain.data.Feed
 import com.unifina.domain.data.Stream
 import com.unifina.domain.marketplace.Product
+import com.unifina.domain.marketplace.Subscription
 import com.unifina.domain.signalpath.Canvas
 import com.unifina.domain.signalpath.ModulePackage
 
@@ -51,7 +52,10 @@ class Permission {
 	}
 	Operation operation = Operation.READ
 
-	static belongsTo = [Canvas, Dashboard, Feed, ModulePackage, Stream]
+	/** Is this a Permission of a Subscription? **/
+	Subscription subscription
+
+	static belongsTo = [Canvas, Dashboard, Feed, ModulePackage, Stream, Subscription]
 
 	static constraints = {
 		user(nullable: true)
@@ -66,6 +70,7 @@ class Permission {
 		canvas(validator: { val, obj ->
 			[obj.canvas, obj.dashboard, obj.feed, obj.modulePackage, obj.stream, obj.product].count { it != null } == 1
 		})
+		subscription(nullable: true)
 	}
 
 	static mapping = {
