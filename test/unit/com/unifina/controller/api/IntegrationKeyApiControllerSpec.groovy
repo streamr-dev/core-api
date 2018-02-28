@@ -27,22 +27,25 @@ class IntegrationKeyApiControllerSpec extends Specification {
 		key.save(failOnError: true, validate: true)
 
 		new IntegrationKey(
-			name: "my-integration-key-1",
-			user: me,
-			service: IntegrationKey.Service.ETHEREUM,
-			json: "{ address: '0x0000000000000000000' }"
+				name: "my-integration-key-1",
+				user: me,
+				service: IntegrationKey.Service.ETHEREUM,
+				idInService: "0x0000000000000000000",
+				json: "{ address: '0x0000000000000000000' }"
 		).save(validate: true, failOnError: true)
 		new IntegrationKey(
-			name: "my-integration-key-2",
-			user: me,
-			service: IntegrationKey.Service.ETHEREUM_ID,
-			json: "{ address: '0x0000000000000000000' }"
+				name: "my-integration-key-2",
+				user: me,
+				service: IntegrationKey.Service.ETHEREUM_ID,
+				idInService: "0x0000000000000000000",
+				json: "{ address: '0x0000000000000000000' }"
 		).save(validate: true, failOnError: true)
 		new IntegrationKey(
-			name: "not-my-integration-key",
-			user: someoneElse,
-			service: IntegrationKey.Service.ETHEREUM,
-			json: "{ address: '0x0000000000000000000' }"
+				name: "not-my-integration-key",
+				user: someoneElse,
+				service: IntegrationKey.Service.ETHEREUM,
+				idInService: "0x0000000000000000000",
+				json: "{ address: '0x0000000000000000000' }"
 		).save(validate: true, failOnError: true)
 	}
 

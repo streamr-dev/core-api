@@ -12,6 +12,7 @@ class IntegrationKey implements Serializable {
 	String name
 	Service service
 	String json
+	String idInService
 
 	Date dateCreated
 	Date lastUpdated
@@ -19,6 +20,8 @@ class IntegrationKey implements Serializable {
 	static mapping = {
 		id generator: IdGenerator.name // Note: doesn't apply in unit tests
 		json type: 'text'
+		idInService(index: "id_in_service_and_service_idx")
+		service(index: "id_in_service_and_service_idx")
 	}
 
 	static constraints = {

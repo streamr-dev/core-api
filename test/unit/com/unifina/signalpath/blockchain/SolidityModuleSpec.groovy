@@ -17,7 +17,7 @@ class SolidityModuleSpec extends ModuleTestingSpecification {
 	def setup() {
 		// mock the key for ethereum account
 		SecUser user = new SecUser(name: "name", username: "name@name.com", password: "pass", timezone: "UTC").save(failOnError: true, validate: false)
-		IntegrationKey key = new IntegrationKey(service: IntegrationKey.Service.ETHEREUM, name: "test key", json: '{"privateKey":"lol","address":"0x1234"}', user: user)
+		IntegrationKey key = new IntegrationKey(service: IntegrationKey.Service.ETHEREUM, name: "test key", json: '{"privateKey":"lol","address":"0x1234"}', user: user, idInService: "0x1234")
 		key.id = "sgKjr1eHQpqTmwz3vK3DqwUK1wFlrfRJa9mnf_xTeFJQ"
 		key.save(failOnError: true, validate: true)
 
