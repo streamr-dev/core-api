@@ -1,5 +1,5 @@
 {
-  "name": "unifina-core",
+  "name": "streamr-core",
   "version": "0.0.1",
   "description": "",
   "main": "index.js",
@@ -52,6 +52,7 @@
     "backbone-associations": "file:web-app/js/backbone-associations",
     "chai": "^4.1.2",
     "change-case": "^3.0.1",
+    "clean-webpack-plugin": "^0.1.18",
     "css-loader": "^0.28.1",
     "css-mqpacker": "^6.0.0",
     "draggabilly": "^2.1.1",
