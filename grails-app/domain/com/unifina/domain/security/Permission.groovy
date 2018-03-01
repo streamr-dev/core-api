@@ -108,8 +108,8 @@ class Permission {
 
 	Map toInternalMap() {
 		Map map = [
-		        operation: operation.toString(),
-				subscription: subscription?.id
+			operation: operation.toString(),
+			subscription: subscription?.id
 		]
 		if (anonymous) {
 			map["anonymous"] = true
