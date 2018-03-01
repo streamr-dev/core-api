@@ -18,6 +18,6 @@ node_modules
 .slcache/
 plugin.xml
 hs_err_pid*
-web-app/js/unifina/webpack-bundles/*
+web-app/webpack-bundles/*
 npm-debug.log*
 tomcat.8081
