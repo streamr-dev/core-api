@@ -208,6 +208,8 @@ class ProductServiceSpec extends Specification {
 	void "update() verifies streams via permissionService#verifyShare"() {
 		setupStreams()
 		setupProduct()
+
+		service.subscriptionService = Stub(SubscriptionService)
 		service.apiService = Stub(ApiService) {
 			authorizedGetById(Product, _, _, _) >> product
 		}
@@ -252,6 +254,8 @@ class ProductServiceSpec extends Specification {
 
 	void "update() invokes ApiService#authorizedGetById"() {
 		setupProduct()
+
+		service.subscriptionService = Stub(SubscriptionService)
 		def apiService = service.apiService = Mock(ApiService)
 
 		def validCommand = new UpdateProductCommand(
@@ -270,6 +274,31 @@ class ProductServiceSpec extends Specification {
 		1 * apiService.authorizedGetById(Product, 'product-id', user, Permission.Operation.WRITE) >> product
 	}
 
+	void "update() invokes subscriptionService#afterProductUpdated after Product updated"() {
+		setupStreams()
+		setupProduct()
+
+		def subscriptionService = service.subscriptionService = Mock(SubscriptionService)
+		service.apiService = Stub(ApiService) {
+			authorizedGetById(Product, _, _, _) >> product
+		}
+		service.permissionService = Stub(PermissionService)
+
+		def validCommand = new UpdateProductCommand(
+			name: "updated name",
+			description: "updated description",
+			imageUrl: "product.png",
+			category: category,
+			streams: [s2, s4]
+		)
+		def user = new SecUser(username: "me@streamr.com")
+
+		when:
+		service.update("product-id", validCommand, user)
+		then:
+		1 * subscriptionService.afterProductUpdated(product)
+	}
+
 	void "update() updates and returns Product with correct info"() {
 		setupStreams()
 		setupProduct()
@@ -278,6 +307,7 @@ class ProductServiceSpec extends Specification {
 		category2.id = "category2-id"
 		category2.save()
 
+		service.subscriptionService = Stub(SubscriptionService)
 		service.apiService = Stub(ApiService) {
 			authorizedGetById(Product, _, _, _) >> product
 		}

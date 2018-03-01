@@ -11,6 +11,7 @@ import grails.compiler.GrailsCompileStatic
 class ProductService {
 	ApiService apiService
 	PermissionService permissionService
+	SubscriptionService subscriptionService
 
 	List<Product> list(ProductListParams listParams, SecUser currentUser) {
 		apiService.list(Product, listParams, currentUser)
@@ -48,7 +49,9 @@ class ProductService {
 
 		Product product = findById(id, currentUser, Permission.Operation.WRITE)
 		product.setProperties(command.properties)
-		return product.save(failOnError: true)
+		product.save(failOnError: true)
+		subscriptionService.afterProductUpdated(product)
+		return product
 	}
 
 	void addStreamToProduct(Product product, Stream stream, SecUser currentUser)
