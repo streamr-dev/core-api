@@ -7,6 +7,7 @@ import com.unifina.domain.security.Challenge
 import com.unifina.domain.security.IntegrationKey
 import com.unifina.domain.security.SecUser
 import com.unifina.security.StringEncryptor
+import grails.compiler.GrailsCompileStatic
 import grails.converters.JSON
 import groovy.transform.CompileStatic
 import org.apache.commons.codec.DecoderException
@@ -79,6 +80,12 @@ class EthereumIntegrationKeyService {
 				address: new String(address)
 			] as JSON).toString()
 		).save()
+	}
+
+	@GrailsCompileStatic
+	void delete(String integrationKeyId, SecUser currentUser) {
+		IntegrationKey account = IntegrationKey.findByIdAndUser(integrationKeyId, currentUser)
+		account?.delete(flush: true)
 	}
 
 	String decryptPrivateKey(IntegrationKey key) {

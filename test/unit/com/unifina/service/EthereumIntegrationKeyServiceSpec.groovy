@@ -158,4 +158,28 @@ class EthereumIntegrationKeyServiceSpec extends Specification {
 		then:
 		thrown(DuplicateNotAllowedException)
 	}
+
+	void "delete() deletes matching IntegrationKey"() {
+		def integrationKey = new IntegrationKey(user: me)
+		integrationKey.id = "integration-key"
+		integrationKey.save(failOnError: true, validate: false)
+
+		when:
+		service.delete("integration-key", me)
+		then:
+		IntegrationKey.count() == 0
+	}
+
+	void "delete() does not delete matching IntegrationKey if not owner"() {
+		def integrationKey = new IntegrationKey(user: me)
+		integrationKey.id = "integration-key"
+		integrationKey.save(failOnError: true, validate: false)
+
+		SecUser someoneElse = new SecUser(username: "someoneElse@streamr.com").save(failOnError: true, validate: false)
+
+		when:
+		service.delete("integration-key", someoneElse)
+		then:
+		IntegrationKey.count() == 1
+	}
 }
