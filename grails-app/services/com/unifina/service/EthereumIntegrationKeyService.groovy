@@ -22,6 +22,7 @@ class EthereumIntegrationKeyService {
 
 	def grailsApplication
 	StringEncryptor encryptor
+	SubscriptionService subscriptionService
 
 	@PostConstruct
 	void init() {
@@ -71,7 +72,7 @@ class EthereumIntegrationKeyService {
 			throw new DuplicateNotAllowedException("This Ethereum address is already associated with another Streamr user.")
 		}
 
-		return new IntegrationKey(
+		IntegrationKey integrationKey = new IntegrationKey(
 			name: name,
 			user: user,
 			service: IntegrationKey.Service.ETHEREUM_ID.toString(),
@@ -80,12 +81,18 @@ class EthereumIntegrationKeyService {
 				address: new String(address)
 			] as JSON).toString()
 		).save()
+
+		subscriptionService.afterIntegrationKeyCreated(integrationKey)
+		return integrationKey
 	}
 
 	@GrailsCompileStatic
 	void delete(String integrationKeyId, SecUser currentUser) {
 		IntegrationKey account = IntegrationKey.findByIdAndUser(integrationKeyId, currentUser)
-		account?.delete(flush: true)
+		if (account) {
+			subscriptionService.beforeIntegrationKeyRemoved(account)
+			account.delete(flush: true)
+		}
 	}
 
 	String decryptPrivateKey(IntegrationKey key) {

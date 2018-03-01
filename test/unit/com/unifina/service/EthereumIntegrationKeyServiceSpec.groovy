@@ -122,6 +122,8 @@ class EthereumIntegrationKeyServiceSpec extends Specification {
 	}
 
 	void "createEthereumID() creates IntegrationKey with proper values"() {
+		service.subscriptionService = Stub(SubscriptionService)
+
 		def ch = new Challenge(challenge: "foobar")
 		ch.save(failOnError: true, validate: false)
 		final String signature = "0x50ba6f6df25ba593cb8188df29ca27ea0a7cd38fadc4d40ef9fad455117e190f2a7ec880a76b930071205fee19cf55eb415bd33b2f6cb5f7be36f79f740da6e81b"
@@ -136,6 +138,21 @@ class EthereumIntegrationKeyServiceSpec extends Specification {
 		json.address == address
 	}
 
+	void "createEthereumID() invokes subscriptionService#afterIntegrationKeyCreated when integration key created"() {
+		def subscriptionService = service.subscriptionService = Mock(SubscriptionService)
+
+		def ch = new Challenge(challenge: "foobar")
+		ch.save(failOnError: true, validate: false)
+		final String signature = "0x50ba6f6df25ba593cb8188df29ca27ea0a7cd38fadc4d40ef9fad455117e190f2a7ec880a76b930071205fee19cf55eb415bd33b2f6cb5f7be36f79f740da6e81b"
+		final String address = "0x10705c0b408eb64860f67a81f5908b51b62a86fc"
+		final String name = "foobar"
+
+		when:
+		service.createEthereumID(me, name, ch.id, ch.challenge, signature)
+		then:
+		1 * subscriptionService.afterIntegrationKeyCreated({ it.id != null })
+	}
+
 	void "createEthereumID() validates challenge"() {
 		final String signature = "0x50ba6f6df25ba593cb8188df29ca27ea0a7cd38fadc4d40ef9fad455117e190f2a7ec880a76b930071205fee19cf55eb415bd33b2f6cb5f7be36f79f740da6e81b"
 		when:
@@ -146,6 +163,8 @@ class EthereumIntegrationKeyServiceSpec extends Specification {
 	}
 
 	void "createEthereumID() checks for duplicate addresses"() {
+		service.subscriptionService = Stub(SubscriptionService)
+
 		def ch = new Challenge(challenge: "foobar")
 		ch.save(failOnError: true, validate: false)
 		String signature = "0x50ba6f6df25ba593cb8188df29ca27ea0a7cd38fadc4d40ef9fad455117e190f2a7ec880a76b930071205fee19cf55eb415bd33b2f6cb5f7be36f79f740da6e81b"
@@ -160,6 +179,8 @@ class EthereumIntegrationKeyServiceSpec extends Specification {
 	}
 
 	void "delete() deletes matching IntegrationKey"() {
+		service.subscriptionService = Stub(SubscriptionService)
+
 		def integrationKey = new IntegrationKey(user: me)
 		integrationKey.id = "integration-key"
 		integrationKey.save(failOnError: true, validate: false)
@@ -168,6 +189,19 @@ class EthereumIntegrationKeyServiceSpec extends Specification {
 		service.delete("integration-key", me)
 		then:
 		IntegrationKey.count() == 0
+	}
+
+	void "delete() invokes subscriptionService#beforeIntegrationKeyRemoved"() {
+		def subscriptionService = service.subscriptionService = Mock(SubscriptionService)
+
+		def integrationKey = new IntegrationKey(user: me)
+		integrationKey.id = "integration-key"
+		integrationKey.save(failOnError: true, validate: false)
+
+		when:
+		service.delete("integration-key", me)
+		then:
+		1 * subscriptionService.beforeIntegrationKeyRemoved(integrationKey)
 	}
 
 	void "delete() does not delete matching IntegrationKey if not owner"() {
@@ -181,5 +215,29 @@ class EthereumIntegrationKeyServiceSpec extends Specification {
 		service.delete("integration-key", someoneElse)
 		then:
 		IntegrationKey.count() == 1
+	}
+
+	void "delete() does not invoke subscriptionService#beforeIntegrationKeyRemoved if not found"() {
+		def subscriptionService = service.subscriptionService = Mock(SubscriptionService)
+
+		when:
+		service.delete("integration-key", me)
+		then:
+		0 * subscriptionService._
+	}
+
+	void "delete() does not invoke subscriptionService#beforeIntegrationKeyRemoved if not owner"() {
+		def subscriptionService = service.subscriptionService = Mock(SubscriptionService)
+
+		def integrationKey = new IntegrationKey(user: me)
+		integrationKey.id = "integration-key"
+		integrationKey.save(failOnError: true, validate: false)
+
+		SecUser someoneElse = new SecUser(username: "someoneElse@streamr.com").save(failOnError: true, validate: false)
+
+		when:
+		service.delete("integration-key", someoneElse)
+		then:
+		0 * subscriptionService._
 	}
 }
