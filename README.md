@@ -70,9 +70,20 @@ These are also available as pre-shared run configurations if you use IntelliJ ID
 
 ### Front-end
 
-The UI is increasingly implemented with JavaScript libraries React and Redux. The source files must first be transpiled and compiled into bundle file(s). This happens by running `npm run build` in the root directory.
+#### Building
 
-You can also run the development server with `npm run dev` which updates bundle files on-the-fly as changes are detected in source files.
+The UI is increasingly implemented with JavaScript libraries React and Redux and compiled with Webpack. The source files must first be transpiled and compiled into bundle file(s). This happens by running `npm run build` in the root directory. Normally, when running the Grails app the build command is run automatically, and needs not to be cared of.
+
+#### Running the dev server
+
+When developing the UI, it's much more handy to run the development server in the background. This happens with `npm run dev`. 
+The dev server updates bundle files on-the-fly as changes are detected in source files.
+
+#### Extra
+
+Normally the bundles are always written into files, where Grails no to take them from. However, if you want to use the files straight from the memory of the Webpack dev server (for increased building speed), is that possible with the following commands:
+ 1) Run grails with `grails run-app -Dstreamr.webpack.bundle.location=http://localhost:9000` (9000 is the default port of the dev server)
+ 2) Run Webpack dev server with `NO_FILES=true npm run dev` to prevent it from writing the files 
 
 ### Back-end
 
