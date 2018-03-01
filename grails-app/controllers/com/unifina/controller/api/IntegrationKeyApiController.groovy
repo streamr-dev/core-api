@@ -4,12 +4,10 @@ import com.unifina.api.ApiException
 import com.unifina.api.IntegrationKeyListParams
 import com.unifina.domain.security.IntegrationKey
 import com.unifina.security.StreamrApi
-import com.unifina.service.ApiService
 import com.unifina.service.EthereumIntegrationKeyService
 import grails.converters.JSON
 import grails.plugin.springsecurity.annotation.Secured
 import groovy.json.JsonSlurper
-import org.grails.datastore.mapping.query.api.BuildableCriteria
 
 @Secured(["IS_AUTHENTICATED_ANONYMOUSLY"])
 class IntegrationKeyApiController {
@@ -39,6 +37,8 @@ class IntegrationKeyApiController {
 			response.status = 201
 			Map json = new JsonSlurper().parseText(key.json)
 			render([
+					service  : IntegrationKey.Service.ETHEREUM_ID.toString(),
+					id       : key.id,
 					name     : cmd.name,
 					challenge: [
 							id       : cmd.challenge.id,
