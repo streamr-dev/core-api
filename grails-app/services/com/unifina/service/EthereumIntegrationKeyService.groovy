@@ -50,6 +50,37 @@ class EthereumIntegrationKeyService {
 		}
 	}
 
+	IntegrationKey createEthereumID(SecUser user, String name, String challengeID, String challenge, String signature) {
+		def dbChallenge = Challenge.get(challengeID)
+		def invalidChallenge = dbChallenge == null || challenge != dbChallenge.challenge
+		if (invalidChallenge) {
+			throw new ApiException(400, "INVALID_CHALLENGE", "challenge validation failed")
+		}
+
+		def message = challenge
+		String address
+		try {
+			byte[] messageHash = ECRecover.calculateMessageHash(message)
+			address = ECRecover.recoverAddress(messageHash, signature)
+		} catch (SignatureException | DecoderException e) {
+			throw new ApiException(400, "ADDRESS_RECOVERY_ERROR", e.message)
+		}
+
+		if (IntegrationKey.findByServiceAndIdInService(IntegrationKey.Service.ETHEREUM_ID, address) != null) {
+			throw new DuplicateNotAllowedException("This Ethereum address is already associated with another Streamr user.")
+		}
+
+		return new IntegrationKey(
+			name: name,
+			user: user,
+			service: IntegrationKey.Service.ETHEREUM_ID.toString(),
+			idInService: address,
+			json: ([
+				address: new String(address)
+			] as JSON).toString()
+		).save()
+	}
+
 	String decryptPrivateKey(IntegrationKey key) {
 		Map json = JSON.parse(key.json)
 		return encryptor.decrypt((String) json.privateKey, key.user.id.byteValue())
@@ -75,36 +106,5 @@ class EthereumIntegrationKeyService {
 		String publicKey = Hex.encodeHexString(key.getAddress())
 
 		return publicKey
-	}
-
-	IntegrationKey createEthereumID(SecUser user, String name, String challengeID, String challenge, String signature) {
-		def dbChallenge = Challenge.get(challengeID)
-		def invalidChallenge = dbChallenge == null || challenge != dbChallenge.challenge
-		if (invalidChallenge) {
-			throw new ApiException(400, "INVALID_CHALLENGE", "challenge validation failed")
-		}
-
-		def message = challenge
-		String address
-		try {
-			byte[] messageHash = ECRecover.calculateMessageHash(message)
-			address = ECRecover.recoverAddress(messageHash, signature)
-		} catch (SignatureException | DecoderException e) {
-			throw new ApiException(400, "ADDRESS_RECOVERY_ERROR", e.message)
-		}
-
-		if (IntegrationKey.findByServiceAndIdInService(IntegrationKey.Service.ETHEREUM_ID, address) != null) {
-			throw new DuplicateNotAllowedException("This Ethereum address is already associated with another Streamr user.")
-		}
-
-		return new IntegrationKey(
-				name: name,
-				user: user,
-				service: IntegrationKey.Service.ETHEREUM_ID.toString(),
-				idInService: address,
-				json: ([
-						address: new String(address)
-				] as JSON).toString()
-		).save()
 	}
 }
