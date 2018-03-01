@@ -105,4 +105,42 @@ class Permission {
 			throw new IllegalStateException("Invalid Permission! Must relate to one of: anonymous, user, invite, key")
 		}
 	}
+
+	Map toInternalMap() {
+		Map map = [
+		        operation: operation.toString(),
+				subscription: subscription?.id
+		]
+		if (anonymous) {
+			map["anonymous"] = true
+		}
+		if (user) {
+			map["user"] = user.id
+		}
+		if (key) {
+			map["key"] = key.id
+		}
+		if (invite) {
+			map["invite"] = invite.id
+		}
+		if (canvas) {
+			map["canvas"] = canvas.id
+		}
+		if (dashboard) {
+			map["dashboard"] = dashboard.id
+		}
+		if (feed) {
+			map["feed"] = feed.id
+		}
+		if (modulePackage) {
+			map["modulePackage"] = modulePackage.id
+		}
+		if (stream) {
+			map["stream"] = stream.id
+		}
+		if (product) {
+			map["product"] = product.id
+		}
+		return map
+	}
 }
