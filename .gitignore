@@ -21,3 +21,7 @@ hs_err_pid*
 web-app/webpack-bundles/*
 npm-debug.log*
 tomcat.8081
+
+# test reports
+test-old-report.xml
+test-new-report.xml
