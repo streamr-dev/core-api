@@ -4,12 +4,14 @@ import com.unifina.UiChannelMockingSpecification
 import com.unifina.domain.security.SecUser
 import com.unifina.signalpath.SignalPath
 import com.unifina.utils.testutils.ModuleTestHelper
+import grails.test.mixin.Mock
 import grails.test.mixin.TestMixin
 import grails.test.mixin.support.GrailsUnitTestMixin
 
 import java.text.SimpleDateFormat
 
 @TestMixin(GrailsUnitTestMixin)
+@Mock(SecUser)
 class VariadicEventTableSpec extends UiChannelMockingSpecification {
 
 	SimpleDateFormat dateFormat
