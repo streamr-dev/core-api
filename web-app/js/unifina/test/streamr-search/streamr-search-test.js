@@ -1,5 +1,6 @@
 var assert = require('assert')
 var $ = require('jquery')(require("jsdom").jsdom().defaultView);
+var _ = require('underscore')
 var StreamrSearch = require('../../streamr-search/streamr-search').StreamrSearch
 
 
@@ -12,6 +13,7 @@ describe('streamr-search', function() {
 		global.Streamr.createLink = function(opt) {
 			return opt.uri
 		}
+		global._ = _
 	})
 
 	after(function() {

@@ -17,7 +17,7 @@ describe('streamr-table', function() {
 
 	beforeEach(function() {
 		$parent = $('<div></div>')
-		table = new StreamrTable($parent)
+		table = new StreamrTable($parent, {})
 		table.initTable()
 	})
 

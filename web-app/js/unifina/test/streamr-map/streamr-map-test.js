@@ -14,15 +14,61 @@ describe('streamr-map', function() {
 			}
 		}
 		global.L = {
-			tileLayer: function(){},
-			Map: function() {
+			tileLayer: function(){
+				var tileLayer = {
+					addTo: function(map) {
+						map.addLayer(tileLayer)
+						return tileLayer
+					}
+				}
+				return tileLayer
+			},
+			Map: function(parentEl, options) {
 				var _this = $('<div></div>')
 				_this._container = _this[0]
 				_this.once = _this.one
+				_this.addLayer = function() {}
+
+				var panes = {
+					tilePane: {
+						style: {
+							zIndex: 5
+						}
+					}
+				}
+				_this.getPanes = function() {
+					return panes
+				}
+
+				_this.getCenter = function() {
+					return {
+						lat: 0,
+						lng: 0
+					}
+				}
+
+				_this.getZoom = function() {
+					return options.zoom
+				}
+
+				_this.latLngToContainerPoint = function(latlng) {
+					return latlng
+				}
+
 				return _this
 			},
-			LatLng: function(){},
-			latLng: function(){},
+			LatLng: function(lat, lng) {
+				return {
+					lat: lat,
+					lng: lng
+				}
+			},
+			latLng: function(lat, lng) {
+				return {
+					lat: lat,
+					lng: lng
+				}
+			},
 			CanvasLayer: {
 				extend: function () {
 					this.addTo = function () {
@@ -30,7 +76,9 @@ describe('streamr-map', function() {
 					return this.extend
 				}
 			},
-			Util: {}
+			Util: {
+				requestAnimFrame: function() {}
+			}
 		}
 	})
 
@@ -51,7 +99,6 @@ describe('streamr-map', function() {
 			compare(map.markers, {})
 			compare(map.pendingMarkerUpdates, {})
 			compare(map.pendingLineUpdates, [])
-			compare(map.allLineUpdates, [])
 			compare(map.animationFrameRequested, false)
 		})
 
@@ -67,7 +114,7 @@ describe('streamr-map', function() {
 			assert.equal(map.options.zoom, 2)
 			assert.equal(map.options.minZoom, 2)
 			assert.equal(map.options.maxZoom, 18)
-			assert.equal(map.options.traceRadius, 2)
+			assert.equal(map.options.traceWidth, 2)
 			assert.equal(map.options.drawTrace, false)
 		})
 
@@ -75,7 +122,7 @@ describe('streamr-map', function() {
 			map = new StreamrMap($parent, {
 				centerLat: -45,
 				zoom: -45,
-				traceRadius: -45,
+				traceWidth: -45,
 				drawTrace: true,
 			})
 			assert.equal(map.options.centerLat, -45)
@@ -83,7 +130,7 @@ describe('streamr-map', function() {
 			assert.equal(map.options.zoom, -45)
 			assert.equal(map.options.minZoom, 2)
 			assert.equal(map.options.maxZoom, 18)
-			assert.equal(map.options.traceRadius, -45)
+			assert.equal(map.options.traceWidth, -45)
 			assert.equal(map.options.drawTrace, true)
 		})
 
@@ -128,7 +175,6 @@ describe('streamr-map', function() {
 				assert.equal(opt.zoom, 0)
 				assert.equal(opt.minZoom, 0)
 				assert.equal(opt.maxZoom, 0)
-				assert.equal(opt.layers, "test")
 				done()
 				return {
 					once: function(){},
@@ -156,26 +202,22 @@ describe('streamr-map', function() {
 			map.untouched = true
 		})
 
-		it('must call getCenterAndZoom and fire "move" event when moved', function(done) {
+		it('fires "move" event when moved', function(done) {
 			map = new StreamrMap($parent)
-			map.getCenterAndZoom = function(){
-				return "test"
-			}
 			$(map).on("move", function(e, data) {
-				assert.equal(data, "test")
 				done()
 			})
 			map.map.trigger('moveend')
 		})
 
-		it('must not call createLinePointLayer if !options.drawTrace', function(done) {
-			var superCreateLinePointLayer = StreamrMap.prototype.createLinePointLayer
-			StreamrMap.prototype.createLinePointLayer = function() {
+		it('calls createTraceLayer if options.drawTrace', function(done) {
+			var superCreateTraceLayer = StreamrMap.prototype.createTraceLayer
+			StreamrMap.prototype.createTraceLayer = function() {
 				
 			}
 			map = new StreamrMap($parent)
-			StreamrMap.prototype.createLinePointLayer = function() {
-				StreamrMap.prototype.createLinePointLayer = superCreateLinePointLayer
+			StreamrMap.prototype.createTraceLayer = function() {
+				StreamrMap.prototype.createTraceLayer = superCreateTraceLayer
 				done()
 			}
 			map = new StreamrMap($parent, {
@@ -184,7 +226,7 @@ describe('streamr-map', function() {
 		})
 	})
 
-	describe('createLinePointLayer', function() {
+	describe('createTraceLayer', function() {
 		beforeEach(function() {
 			global.L.CanvasLayer = {
 				extend: function(d) {
@@ -192,6 +234,8 @@ describe('streamr-map', function() {
 					this.getCanvas = function(){
 						this.getContext = function() {
 							return {
+								beginPath: function(){},
+								stroke: function(){},
 								clearRect: function(){}
 							}
 						}
@@ -205,6 +249,7 @@ describe('streamr-map', function() {
 						this.addTo = function() {
 							return _this
 						}
+						this.render = d.render.bind(_this)
 					}
 				}
 			}
@@ -223,27 +268,31 @@ describe('streamr-map', function() {
 				}
 			}
 			map = new StreamrMap($parent)
-			var layer = map.createLinePointLayer()
+			var layer = map.createTraceLayer()
 		})
 
 		it('must clear pendingLineUpdates after layer.render', function() {
 			map = new StreamrMap($parent)
-			var layer = map.createLinePointLayer()
+			var layer = map.createTraceLayer()
 			map.pendingLineUpdates.push("test", "test")
 			layer.render()
 			assert.equal(map.pendingLineUpdates.length, 0)
 		})
 
-		it('must call latLngToContainerPoint and renderCircle for all the updates', function(done) {
+		it('must call renderLines for all the updates', function(done) {
 			var i = 0
-			var list = [{
-				latlng: 0
+			var expectedList = [{
+				fromLatLng: {x: 0, y: 0},
+				toLatLng: {x: 0, y: 0}
 			},{
-				latlng: 1
+				fromLatLng: {x: 1, y: 1},
+				toLatLng: {x: 1, y: 1}
 			},{
-				latlng: 2
+				fromLatLng: {x: 2, y: 2},
+				toLatLng: {x: 2, y: 2}
 			},{
-				latlng: 3
+				fromLatLng: {x: 3, y: 3},
+				toLatLng: {x: 3, y: 3}
 			}]
 			global.L.CanvasLayer = {
 				extend: function(d) {
@@ -261,7 +310,7 @@ describe('streamr-map', function() {
 						}
 						return this
 					}
-					this._map = {
+					this.map = {
 						latLngToContainerPoint: function(latlng) {
 							return latlng
 						}
@@ -269,21 +318,20 @@ describe('streamr-map', function() {
 
 					return function() {
 						$.extend(_this, d)
-						_this.renderCircle = function(a, point) {
-							assert.equal(point, i)
-							i++
-							if(point == 3)
-								done()
+						_this.renderLines = function(canvas, ctx, updates) {
+							assert.deepEqual(updates, expectedList)
+							done()
 						}
 						this.addTo = function() {
 							return _this
 						}
+						this.render = d.render.bind(_this)
 					}
 				}
 			}
 			map = new StreamrMap($parent)
-			map.pendingLineUpdates = list
-			var layer = map.createLinePointLayer()
+			map.pendingLineUpdates = expectedList.slice()
+			var layer = map.createTraceLayer()
 			layer.render(true)
 		})
 	})
@@ -452,10 +500,11 @@ describe('streamr-map', function() {
 		it('must create marker with the right data', function(done) {
 			global.L.divIcon = function(attr) {
 				assert.deepEqual(attr, {
-					iconSize:     [19, 48],
-					iconAnchor:   [13.5, 43],
+					iconSize:     [0, 0],
+					iconAnchor:   [0, 0],
 					popupAnchor:  [0, -41],
-					className: 'streamr-map-icon fa fa-map-marker fa-4x'
+					className: 'invisible-container',
+					html: "<span class=\"fa fa-map-marker fa-4x position-top streamr-map-icon\" style=\"color:undefined\"></span>"
 				})
 				done()
 				return $("<div></div>")
@@ -466,7 +515,7 @@ describe('streamr-map', function() {
 			global.L.marker = function(latlng, attr) {
 				var _this = attr.icon
 				_this.bindPopup = function(content, opt) {
-					assert.equal(content, "<span style='text-align:center;width:100%'><span>test</span></span>")
+					assert.equal(content, "<span>test</span>")
 					assert.equal(opt.closeButton, false)
 					done()
 				}
@@ -530,13 +579,8 @@ describe('streamr-map', function() {
 			map.moveMarker("a", 0, 1)
 		})
 		it('must add the latLng to pendingMarkerUpdates', function() {
-			global.L.latLng = function(a, b) {
-				return {
-					value: "test"
-				}
-			}
 			map.moveMarker("a", 0, 1)
-			assert.equal(map.pendingMarkerUpdates.a.value, "test")
+			assert.deepEqual(map.pendingMarkerUpdates["a"], { latlng: { lat: 0, lng: 1}})
 		})
 		it('must requestUpdate', function(done) {
 			map.requestUpdate = function() {
@@ -646,11 +690,12 @@ describe('streamr-map', function() {
 			global.L.latLng = function() {
 				return "test"
 			}
+			map.createTraceLayer()
 			map.addTracePoint("a", 0, 1, "b")
-			assert.equal(map.pendingLineUpdates[0].latlng, "test")
+			map.addTracePoint("a", 0, 1, "b")
+			assert.equal(map.pendingLineUpdates[0].toLatLng, "test")
+			assert.equal(map.pendingLineUpdates[0].fromLatLng, "test")
 			assert.equal(map.pendingLineUpdates[0].color, "b")
-			assert.equal(map.allLineUpdates[0].latlng, "test")
-			assert.equal(map.allLineUpdates[0].color, "b")
 		})
 	})
 
@@ -686,11 +731,13 @@ describe('streamr-map', function() {
 			}
 			map.redraw()
 		})
-		it('must call lineLayer.redraw()', function (done) {
-			map = new StreamrMap($parent)
+		it('must call lineLayer.render() if options.drawTrace=true', function (done) {
+			map = new StreamrMap($parent, {
+				drawTrace: true
+			})
 			map.map.invalidateSize = function(){}
 			map.lineLayer = {}
-			map.lineLayer.redraw = function() {
+			map.lineLayer.render = function() {
 				done()
 			}
 			map.redraw()
@@ -748,28 +795,6 @@ describe('streamr-map', function() {
 			}
 			map.clear()
 		})
-		it('must empty circles (if exists)', function() {
-			map.circles = [{
-				clearRect: function(){},
-				canvas: {}
-			}]
-			map.clear()
-			assert.deepEqual(map.circles, [])
-		})
-		it('must call clearRect for circles[0]', function(done) {
-			map.circles = [{
-				clearRect: function(){
-					done()
-				},
-				canvas: {}
-			}, {
-				clearRect: function(){
-					assert(false)
-				},
-				canvas: {}
-			}]
-			map.clear()
-		})
 		it('must set bounds back to original', function() {
 			map.autoZoomBounds = "adfasdfasdf"
 			map.clear()
@@ -788,12 +813,10 @@ describe('streamr-map', function() {
 			map.markers.a = "stuff"
 			map.pendingMarkerUpdates.a = "stuff"
 			map.pendingLineUpdates.push("stuff")
-			map.allLineUpdates.push("stuff")
 			map.clear()
 			assert.deepEqual(map.markers, {})
 			assert.deepEqual(map.pendingMarkerUpdates, {})
 			assert.deepEqual(map.pendingLineUpdates, [])
-			assert.deepEqual(map.allLineUpdates, [])
 		})
 	})
 })
