@@ -3,10 +3,16 @@ package mixins
 trait ListPageMixin {
 
 	def findRow(String name, boolean scroll = true) {
+		def row = $(".table .td", text: name, 0).parents(".tr")
 		if (scroll) {
-			scrollToRow(name)
+			interact {
+				moveToElement(row)
+			}
+			waitFor {
+				row.displayed
+			}
 		}
-		return $(".table .td", text: name, 0).parents(".tr")
+		return row
 	}
 
 	def clickRow(String name) {
@@ -37,18 +43,5 @@ trait ListPageMixin {
 
 	def clickShareButton(String name) {
 		findShareButton(name).click()
-	}
-
-	def scrollToRow(String name) {
-		js.exec("""
-			var element = jQuery(".table .td").filter(function() {
-				return jQuery(this).text().trim() === "$name"
-			}).eq(0)
-			var siteHeaderHeightInPx = 40
-			window.scrollTo(0, element.offset().top - siteHeaderHeightInPx)
-		""")
-		waitFor {
-			findRow(name, false).displayed
-		}
 	}
 }

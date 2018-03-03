@@ -7,7 +7,7 @@ import org.openqa.selenium.Keys
 class ShareSpec extends LoginTester1Spec implements CanvasMixin, DashboardMixin, ListPageMixin, LoginMixin, NotificationMixin, ShareMixin {
 
 	def scrollToAndClickShareButton(name = "ShareSpec") {
-		scrollToRow(name)
+		findRow(name)
 		clickShareButton(name)
 	}
 
