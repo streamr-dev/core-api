@@ -34,6 +34,9 @@
 				})
 			})
 		</r:script>
+
+		<webpack:cssBundle name="commons"/>
+		<webpack:cssBundle name="streamPageDataPreview"/>
     </head>
     <body class="stream-show main-menu-fixed">
 		<ui:breadcrumb>
@@ -105,8 +108,16 @@
 			</div>
 
 			<g:include action="details" id="${stream.id}"/>
-
-
 		</div>
+
+		%{-- The data preview React app root is in grails-app/views/stream/_userStreamDetails.gsp --}%
+
+		<script>
+			const keyId = "${key.id}"
+			const streamId = "${stream.id}"
+		</script>
+
+		<webpack:jsBundle name="commons"/>
+		<webpack:jsBundle name="streamPageDataPreview"/>
     </body>
 </html>

@@ -1,0 +1,32 @@
+
+table.dataTable {
+
+  thead {
+    tr {
+      th:last-child {
+        width: 40px;
+        text-align: right;
+      }
+    }
+  }
+  tbody {
+    tr {
+      td.messageColumn {
+        overflow: hidden;
+
+        .messagePreview {
+          max-width: 250px;
+          white-space: nowrap;
+          overflow: hidden;
+          text-overflow: ellipsis;
+        }
+      }
+    }
+  }
+}
+
+.infoScreenModalTable {
+  .dataColumn {
+    white-space: pre;
+  }
+}

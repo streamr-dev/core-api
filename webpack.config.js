@@ -15,7 +15,9 @@ const inProduction = process.env.NODE_ENV === 'production'
 module.exports = {
     entry: {
         profilePage: path.resolve(root, 'web-app', 'react-app', 'profilePageMain.js'),
-        dashboardPage: path.resolve(root, 'web-app', 'react-app', 'dashboardPageMain.js')
+        dashboardPage: path.resolve(root, 'web-app', 'react-app', 'dashboardPageMain.js'),
+        // TODO: remove this when CORE-1075-reactify-stream-page is ready
+        streamPageDataPreview: path.resolve(root, 'web-app', 'react-app', 'streamPageDataPreviewMain.js')
     },
     output: {
         path: path.resolve(root, 'web-app', 'webpack-bundles'),
