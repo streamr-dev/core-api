@@ -31,7 +31,7 @@ const getApiUrl = (resourceType: ResourceType, resourceId: ResourceId) => {
     const urlPartsByResourceType = {
         DASHBOARD: 'dashboards',
         CANVAS: 'canvases',
-        STREAM: 'streams'
+        STREAM: 'streams',
     }
     const urlPart = urlPartsByResourceType[resourceType]
     if (!urlPart) {
@@ -49,18 +49,13 @@ export const getResourcePermissions = (resourceType: ResourceType, resourceId: R
             dispatch(getResourcePermissionsFailure(e))
             dispatch(error({
                 title: 'Error',
-                message: e.message
+                message: e.message,
             }))
             throw e
         })
 }
 
-export const setResourceHighestOperationForUser = (
-    resourceType: ResourceType,
-    resourceId: ResourceId,
-    user: $ElementType<User, 'email'>,
-    operation: Operation
-) => (dispatch: Function, getState: Function) => {
+export const setResourceHighestOperationForUser = (resourceType: ResourceType, resourceId: ResourceId, user: $ElementType<User, 'email'>, operation: Operation) => (dispatch: Function, getState: Function) => {
     const state = getState()
     const currentPermissions = (state.permission.byTypeAndId[resourceType] && state.permission.byTypeAndId[resourceType][resourceId] || []).filter(p => p.user === user)
     const operationsInOrder = ['read', 'write', 'share']
@@ -71,7 +66,7 @@ export const setResourceHighestOperationForUser = (
         if (!currentPermissions.find(item => item.operation === o)) {
             dispatch(addResourcePermission(resourceType, resourceId, {
                 user,
-                operation: o
+                operation: o,
             }))
         }
     })
@@ -89,21 +84,21 @@ export const addResourcePermission = (resourceType: ResourceType, resourceId: Re
     type: ADD_RESOURCE_PERMISSION,
     resourceType,
     resourceId,
-    permission
+    permission,
 })
 
 export const removeResourcePermission = (resourceType: ResourceType, resourceId: ResourceId, permission: Permission) => ({
     type: REMOVE_RESOURCE_PERMISSION,
     resourceType,
     resourceId,
-    permission
+    permission,
 })
 
 export const removeAllResourcePermissionsByUser = (resourceType: ResourceType, resourceId: ResourceId, user: $ElementType<User, 'email'>) => (dispatch: Function) => {
     ['read', 'write', 'share'].forEach(operation => {
         dispatch(removeResourcePermission(resourceType, resourceId, {
             user,
-            operation
+            operation,
         }))
     })
 }
@@ -124,7 +119,7 @@ export const saveUpdatedResourcePermissions = (resourceType: ResourceType, resou
                         const reason = res.reason()
                         dispatch(saveAddedResourcePermissionFailure(resourceType, resourceId, {
                             ...addedPermissions[i],
-                            error: parseError(reason)
+                            error: parseError(reason),
                         }))
                     } else {
                         dispatch(saveAddedResourcePermissionSuccess(resourceType, resourceId, addedPermissions[i]))
@@ -146,7 +141,7 @@ export const saveUpdatedResourcePermissions = (resourceType: ResourceType, resou
                         const reason = res.reason()
                         dispatch(saveRemovedResourcePermissionFailure(resourceType, resourceId, {
                             ...removedPermissions[i],
-                            error: parseError(reason)
+                            error: parseError(reason),
                         }))
                     } else {
                         dispatch(saveRemovedResourcePermissionSuccess(resourceType, resourceId, removedPermissions[i]))
@@ -169,13 +164,13 @@ export const saveUpdatedResourcePermissions = (resourceType: ResourceType, resou
                     const e = new Error(message)
                     dispatch(error({
                         title: 'Error!',
-                        message
+                        message,
                     }))
                     reject(e)
                 } else {
                     resolve()
                     dispatch(success({
-                        title: 'Permissions saved successfully!'
+                        title: 'Permissions saved successfully!',
                     }))
                 }
             })
@@ -183,59 +178,59 @@ export const saveUpdatedResourcePermissions = (resourceType: ResourceType, resou
 }
 
 const getResourcePermissionsRequest = () => ({
-    type: GET_RESOURCE_PERMISSIONS_REQUEST
+    type: GET_RESOURCE_PERMISSIONS_REQUEST,
 })
 
 const getResourcePermissionsSuccess = (resourceType: ResourceType, resourceId: ResourceId, permissions: Array<Permission>) => ({
     type: GET_RESOURCE_PERMISSIONS_SUCCESS,
     resourceType,
     resourceId,
-    permissions
+    permissions,
 })
 
 const getResourcePermissionsFailure = (error: ErrorInUi) => ({
     type: GET_RESOURCE_PERMISSIONS_FAILURE,
-    error
+    error,
 })
 
 const saveAddedResourcePermissionRequest = (resourceType: ResourceType, resourceId: ResourceId, permission: Permission) => ({
     type: SAVE_ADDED_RESOURCE_PERMISSION_REQUEST,
     resourceType,
     resourceId,
-    permission
+    permission,
 })
 
 const saveAddedResourcePermissionSuccess = (resourceType: ResourceType, resourceId: ResourceId, permission: Permission) => ({
     type: SAVE_ADDED_RESOURCE_PERMISSION_SUCCESS,
     resourceType,
     resourceId,
-    permission
+    permission,
 })
 
 const saveAddedResourcePermissionFailure = (resourceType: ResourceType, resourceId: ResourceId, permission: Permission) => ({
     type: SAVE_ADDED_RESOURCE_PERMISSION_FAILURE,
     resourceType,
     resourceId,
-    permission
+    permission,
 })
 
 const saveRemovedResourcePermissionRequest = (resourceType: ResourceType, resourceId: ResourceId, permission: Permission) => ({
     type: SAVE_REMOVED_RESOURCE_PERMISSION_REQUEST,
     resourceType,
     resourceId,
-    permission
+    permission,
 })
 
 const saveRemovedResourcePermissionSuccess = (resourceType: ResourceType, resourceId: ResourceId, permission: Permission) => ({
     type: SAVE_REMOVED_RESOURCE_PERMISSION_SUCCESS,
     resourceType,
     resourceId,
-    permission
+    permission,
 })
 
 const saveRemovedResourcePermissionFailure = (resourceType: ResourceType, resourceId: ResourceId, permission: Permission) => ({
     type: SAVE_REMOVED_RESOURCE_PERMISSION_FAILURE,
     resourceType,
     resourceId,
-    permission
+    permission,
 })

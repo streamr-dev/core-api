@@ -12,12 +12,14 @@ import com.unifina.utils.testutils.ModuleTestHelper
 import com.unifina.utils.testutils.TestHelperException
 import grails.test.mixin.TestMixin
 import grails.test.mixin.support.GrailsUnitTestMixin
+import spock.lang.Ignore
 import spock.lang.Specification
 
 import java.security.AccessControlException
 import java.security.Policy
 import java.security.Security
 
+@Ignore
 @TestMixin(GrailsUnitTestMixin)
 class SimpleJavaCodeWrapperSpec extends Specification {
 

@@ -36,8 +36,9 @@ export default class StreamrWidget extends Component<Props> {
     alreadyFetchedAndSubscribed: ?boolean
     stream: ?StreamId
     static contextTypes = {
-        client: any
+        client: any,
     }
+
     componentDidMount() {
         if (this.alreadyFetchedAndSubscribed) {
             return
@@ -79,33 +80,33 @@ export default class StreamrWidget extends Component<Props> {
             }
         })
     }
-    
+
     componentWillReceiveProps(newProps: Props) {
         if (newProps.subscriptionOptions !== undefined && !_.isEqual(this.props.subscriptionOptions, newProps.subscriptionOptions)) {
             console.warn('Updating stream subscriptionOptions on the fly is not (yet) possible')
         }
     }
-    
+
     componentWillUnmount() {
         if (this.subscription) {
             this.context.client.unsubscribe(this.subscription)
             this.subscription = undefined
         }
     }
-    
+
     onMessage = (msg: {}) => {
         this.props.onMessage && this.props.onMessage(msg)
     }
-    
+
     getHeaders = () => {
         return this.context.client.options.authKey ? {
-            'Authorization': `Token ${this.context.client.options.authKey}`
+            'Authorization': `Token ${this.context.client.options.authKey}`,
         } : {}
     }
-    
+
     getModuleJson = (callback: (any) => void) => {
         this.sendRequest({
-            type: 'json'
+            type: 'json',
         })
             .then((res: {
                 data: {
@@ -124,15 +125,15 @@ export default class StreamrWidget extends Component<Props> {
                 }
             })
     }
-    
+
     sendRequest = (msg: {}): Promise<any> => {
         return axios.post(`${this.props.url}/request`, msg, {
             headers: {
-                ...this.getHeaders()
-            }
+                ...this.getHeaders(),
+            },
         })
     }
-    
+
     render() {
         return React.Children.only(this.props.children)
     }

@@ -8,7 +8,7 @@ import {
     StreamrBreadcrumbItem,
     StreamrBreadcrumbDropdownButton,
     StreamrBreadcrumbToolbar,
-    StreamrBreadcrumbToolbarButton
+    StreamrBreadcrumbToolbarButton,
 } from '../../Breadcrumb'
 import {MenuItem} from 'react-bootstrap'
 import FontAwesome from 'react-fontawesome'
@@ -34,7 +34,7 @@ import {
     updateDashboardChanges,
     lockDashboardEditing,
     unlockDashboardEditing,
-    updateDashboardLayout
+    updateDashboardLayout,
 } from '../../../actions/dashboard'
 
 import type {DashboardState} from '../../../flowtype/states/dashboard-state'
@@ -92,45 +92,45 @@ type State = {
 
 export class Editor extends Component<Props, State> {
     client: StreamrClient
-    
+
     static defaultProps = {
         dashboard: {
             name: '',
-            items: []
-        }
+            items: [],
+        },
     }
-    
+
     state = {
         breakpoints: dashboardConfig.layout.breakpoints,
         cols: dashboardConfig.layout.cols,
         layoutsByItemId: {},
         isFullscreen: false,
-        sharingDialogIsOpen: false
+        sharingDialogIsOpen: false,
     }
-    
+
     constructor() {
         super()
         this.client = new StreamrClient({
             url: config.wsUrl,
             authKey: keyId,
             autoconnect: true,
-            autoDisconnect: false
+            autoDisconnect: false,
         })
     }
-    
+
     componentDidMount() {
         window.addEventListener('beforeunload', this.onBeforeUnload)
-        
+
         const menuToggle = document.getElementById('main-menu-toggle')
         menuToggle && menuToggle.addEventListener('click', this.onMenuToggle)
     }
-    
+
     componentWillReceiveProps(nextProps: Props) {
         if (this.props.dashboard && nextProps.dashboard && this.props.dashboard.id !== nextProps.dashboard.id) {
             this.props.history.push(`/${nextProps.dashboard.id || ''}`)
         }
     }
-    
+
     onMenuToggle = () => {
         const menuIsOpen = document.body && document.body.classList && document.body.classList.contains('mmc')
         if (menuIsOpen) {
@@ -139,22 +139,22 @@ export class Editor extends Component<Props, State> {
             this.props.dashboard && this.props.lockEditing(this.props.dashboard.id)
         }
     }
-    
+
     onDragStop = () => {
-    
+
     }
-    
+
     onLayoutChange = (layout: DashboardItem.layout, allLayouts: Layout) => {
         this.onResize(layout)
         this.props.dashboard && this.props.updateDashboardLayout(this.props.dashboard.id, allLayouts)
     }
-    
+
     onFullscreenToggle = (value?: boolean) => {
         this.setState({
-            isFullscreen: value !== undefined ? value : !this.state.isFullscreen
+            isFullscreen: value !== undefined ? value : !this.state.isFullscreen,
         })
     }
-    
+
     generateLayout = (): ?Layout => {
         const db = this.props.dashboard
         const layout = db && _.zipObject(dashboardConfig.layout.sizes, _.map(dashboardConfig.layout.sizes, (size: 'lg' | 'md' | 'sm' | 'xs') => {
@@ -165,22 +165,22 @@ export class Editor extends Component<Props, State> {
                     ...dashboardConfig.layout.defaultLayout,
                     ...dashboardConfig.layout.layoutsBySizeAndModule[size][item.webcomponent],
                     ...(layout || {}),
-                    i: id
+                    i: id,
                 } : {}
             })
         }))
         return layout
     }
-    
+
     onResize = (layout: Array<LayoutItem>) => {
         this.setState({
             layoutsByItemId: layout.reduce((result, item) => {
                 result[item.i] = item
                 return result
-            }, {})
+            }, {}),
         })
     }
-    
+
     onBeforeUnload = (e: Event & { returnValue: ?string }): ?string => {
         if (this.props.dashboard && this.props.dashboard.id && !this.props.dashboard.saved) {
             const message = 'You have unsaved changes in your Dashboard. Are you sure you want to leave?'
@@ -188,11 +188,11 @@ export class Editor extends Component<Props, State> {
             return message
         }
     }
-    
+
     static generateItemId(item: DashboardItem): string {
         return `${item.canvas}-${item.module}`
     }
-    
+
     render() {
         const {dashboard} = this.props
         const layout = dashboard && dashboard.items && this.generateLayout()
@@ -210,7 +210,7 @@ export class Editor extends Component<Props, State> {
                 >
                     <div style={{
                         backgroundColor: '#f6f6f6',
-                        height: '100%'
+                        height: '100%',
                     }}>
                         <StreamrBreadcrumb>
                             <StreamrBreadcrumbItem href={createLink('dashboard/list')}>
@@ -226,7 +226,7 @@ export class Editor extends Component<Props, State> {
                                     {this.props.canShare && (
                                         <MenuItem
                                             onClick={() => this.setState({
-                                                sharingDialogIsOpen: true
+                                                sharingDialogIsOpen: true,
                                             })}
                                             className={styles.dropdownShareButton}
                                         >
@@ -237,7 +237,7 @@ export class Editor extends Component<Props, State> {
                                         <DeleteButton
                                             buttonProps={{
                                                 componentClass: MenuItem,
-                                                bsClass: styles.dropdownDeleteButton
+                                                bsClass: styles.dropdownDeleteButton,
                                             }}
                                         >
                                             <FontAwesome name="trash-o"/> Delete
@@ -246,7 +246,7 @@ export class Editor extends Component<Props, State> {
                                     <ShareDialog
                                         isOpen={this.state.sharingDialogIsOpen}
                                         onClose={() => this.setState({
-                                            sharingDialogIsOpen: false
+                                            sharingDialogIsOpen: false,
                                         })}
                                         resourceType="DASHBOARD"
                                         resourceId={this.props.dashboard && this.props.dashboard.id}
@@ -297,12 +297,12 @@ export class Editor extends Component<Props, State> {
     }
 }
 
-export const mapStateToProps = (state: {dashboard: DashboardState}): StateProps => {
+export const mapStateToProps = (state: { dashboard: DashboardState }): StateProps => {
     const baseState = parseDashboard(state)
     const {dashboard} = baseState
     return {
         ...baseState,
-        editorLocked: !!dashboard && (dashboard.editingLocked || (!dashboard.new && !baseState.canWrite))
+        editorLocked: !!dashboard && (dashboard.editingLocked || (!dashboard.new && !baseState.canWrite)),
     }
 }
 
@@ -318,7 +318,7 @@ export const mapDispatchToProps = (dispatch: Function): DispatchProps => ({
     },
     updateDashboardLayout(id: $ElementType<Dashboard, 'id'>, layout: Layout) {
         dispatch(updateDashboardLayout(id, layout))
-    }
+    },
 })
 
 export default connect(mapStateToProps, mapDispatchToProps)(withRouter(Editor))

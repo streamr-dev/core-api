@@ -68,6 +68,11 @@ environments {
 	}
 }
 
+// See WebpackTagLib.groovy
+webpack.bundle.dir = '/webpack-bundles'
+webpack.jsFiles.metadataKey = 'webpack.jsFiles'
+webpack.cssFiles.metadataKey = 'webpack.cssFiles'
+
 environments {
 	test {
 		grails.reload.enabled = true
@@ -385,12 +390,12 @@ grails.plugin.springsecurity.adh.errorPage = null
 grails.plugin.springsecurity.securityConfigType = 'Annotation'
 
 grails.plugin.springsecurity.controllerAnnotations.staticRules = [
-	'/user/**':            ['ROLE_ADMIN'],
-	'/register/**':				 ['IS_AUTHENTICATED_ANONYMOUSLY'],
-	'/webcomponents/*':				 ['IS_AUTHENTICATED_ANONYMOUSLY'],
-	'/*':				 ['IS_AUTHENTICATED_ANONYMOUSLY']
+	'/user/**':           ['ROLE_ADMIN'],
+	'/register/**':       ['IS_AUTHENTICATED_ANONYMOUSLY'],
+	'/webcomponents/*':   ['IS_AUTHENTICATED_ANONYMOUSLY'],
+	'/webpack-bundles/*': ['IS_AUTHENTICATED_ANONYMOUSLY'],
+	'/*':                 ['IS_AUTHENTICATED_ANONYMOUSLY']
 ]
-
 
 /**
  * Email config

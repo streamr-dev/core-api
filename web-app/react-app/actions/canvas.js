@@ -17,7 +17,7 @@ export const getRunningCanvases = () => (dispatch: Function) => {
     dispatch(getCanvasesRequest())
     return axios.get(createLink(apiUrl), {
         params: {
-            state: 'running',
+            state: 'RUNNING',
             adhoc: false,
             sort: 'dateCreated',
             order: 'desc'

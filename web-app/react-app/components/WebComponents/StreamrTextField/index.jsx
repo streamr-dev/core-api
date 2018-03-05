@@ -24,28 +24,28 @@ type State = {
 export default class StreamrTextField extends Component<Props, State> {
     widget: ?StreamrWidget
     state = {
-        value: ''
+        value: '',
     }
 
     onMessage = ({state: textFieldValue}: { state: string }) => {
         if (this.widget) {
             if (textFieldValue) {
                 this.setState({
-                    value: textFieldValue
+                    value: textFieldValue,
                 })
             }
         }
     }
-    
+
     onClick = () => {
         if (this.widget) {
             this.widget.sendRequest({
                 type: 'uiEvent',
-                value: this.state.value
+                value: this.state.value,
             })
         }
     }
-    
+
     onChange = (e: {
         preventDefault: () => void,
         target: {
@@ -54,14 +54,14 @@ export default class StreamrTextField extends Component<Props, State> {
     }) => {
         e.preventDefault()
         this.setState({
-            value: e.target.value
+            value: e.target.value,
         })
     }
-    
+
     widgetRef = (widget: ?StreamrWidget) => {
         this.widget = widget
     }
-    
+
     render() {
         return (
             <StreamrInput

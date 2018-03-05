@@ -18,7 +18,7 @@ type Props = {
 }
 
 export default class IntegrationKeyHandlerTable extends Component<Props> {
-    
+
     render() {
         const {integrationKeys, fields, onDelete} = this.props
         return (

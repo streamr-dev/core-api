@@ -24,14 +24,14 @@ type DispatchProps = {
 type Props = StateProps & DispatchProps
 
 export class NameEditor extends Component<Props> {
-    
-    onChange = ({target}: {target: {value: string}}) => {
+
+    onChange = ({target}: { target: { value: string } }) => {
         this.props.update({
             ...this.props.dashboard,
-            name: target.value
+            name: target.value,
         })
     }
-    
+
     render() {
         return (
             <div className={`menu-content ${styles.nameEditor}`}>
@@ -51,12 +51,12 @@ export class NameEditor extends Component<Props> {
     }
 }
 
-export const mapStateToProps = (state: {dashboard: DashboardState}): StateProps => parseDashboard(state)
+export const mapStateToProps = (state: { dashboard: DashboardState }): StateProps => parseDashboard(state)
 
 export const mapDispatchToProps = (dispatch: Function): DispatchProps => ({
     update(dashboard: Dashboard) {
         return dispatch(updateDashboard(dashboard))
-    }
+    },
 })
 
 export default connect(mapStateToProps, mapDispatchToProps)(NameEditor)

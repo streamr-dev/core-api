@@ -9,7 +9,8 @@
 		<r:require module="streamr-heatmap"/>
 		<r:require module="streamr-table"/>
 
-		<r:require module="dashboard-page-webpack-bundle"/>
+		<webpack:cssBundle name="commons"/>
+		<webpack:cssBundle name="dashboardPage"/>
 
 		<style>
 			body, #dashboardPageRoot {
@@ -24,6 +25,9 @@
 			const keyId = "${key.id}"
 		</script>
 		<div id="dashboardPageRoot"></div>
-	</body>
-</html>
 
+		<webpack:jsBundle name="commons"/>
+		<webpack:jsBundle name="dashboardPage"/>
+	</body>
+
+</html>

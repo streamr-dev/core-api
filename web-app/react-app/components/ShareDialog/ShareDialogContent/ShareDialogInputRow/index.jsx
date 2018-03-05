@@ -25,7 +25,7 @@ type Props = DispatchProps & GivenProps
 
 export class ShareDialogInputRow extends Component<Props> {
     form: HTMLFormElement
-    
+
     onSubmit = (e: {
         preventDefault: () => void,
         target: {
@@ -36,29 +36,29 @@ export class ShareDialogInputRow extends Component<Props> {
         const data: {
             email: string
         } = serialize(e.target, {
-            hash: true
+            hash: true,
         })
         if (data.email) {
             this.props.addPermission({
                 user: data.email,
-                operation: 'read'
+                operation: 'read',
             })
             e.target.reset()
         } else {
             this.props.onClose()
         }
     }
-    
+
     render() {
         return (
             <Col xs={12} className={styles.inputRow}>
                 <form onSubmit={this.onSubmit}>
                     <FormGroup>
                         <InputGroup>
-                            <FormControl type="email" placeholder="Enter email address" name="email" />
+                            <FormControl type="email" placeholder="Enter email address" name="email"/>
                             <InputGroup.Button>
                                 <Button className={styles.addButton} type="submit">
-                                    <FontAwesome name="plus" />
+                                    <FontAwesome name="plus"/>
                                 </Button>
                             </InputGroup.Button>
                         </InputGroup>
@@ -72,7 +72,7 @@ export class ShareDialogInputRow extends Component<Props> {
 export const mapDispatchToProps = (dispatch: Function, ownProps: GivenProps): DispatchProps => ({
     addPermission(permission: Permission) {
         dispatch(addResourcePermission(ownProps.resourceType, ownProps.resourceId, permission))
-    }
+    },
 })
 
 export default connect(null, mapDispatchToProps)(ShareDialogInputRow)

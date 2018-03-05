@@ -100,7 +100,7 @@ modules = {
 	}
 	pnotify {
 		dependsOn 'jquery'
-		resource url:[dir:'js/pnotify-1.2.0', file:'jquery.pnotify.1.2.2-snapshot.js', plugin: 'unifina-core']
+		resource url:[dir:'js/pnotify-1.2.0', file:'jquery.pnotify.1.2.2-snapshot.js'], disposition: 'head' // streamr module depends on this and has disposition: head
 		resource url:[dir:'js/pnotify-1.2.0', file:'jquery.pnotify.default.css', plugin: 'unifina-core']
 	}
 	slimscroll {
@@ -114,7 +114,7 @@ modules = {
 		resource url:[dir:'js/webcomponentsjs', file:'webcomponents.min.js', plugin: 'unifina-core'], disposition:'head'
 	}
 	lodash {
-		resource url:[dir:'js/lodash-3.10.1', file:'lodash.min.js', plugin: 'unifina-core']
+		resource url:[dir:'js/lodash-3.10.1', file:'lodash.min.js'], disposition: 'head' // streamr module depends on this and has disposition: head
 	}
 	backbone {
 		dependsOn 'lodash,jquery'
@@ -161,7 +161,7 @@ modules = {
 	 */
 	streamr {
 		dependsOn 'pnotify, lodash'
-		resource url:[dir:'js/unifina', file:'streamr.js', plugin: 'unifina-core']
+		resource url:[dir:'js/unifina', file:'streamr.js'], disposition: 'head' // disposition: head because some react-based stuff outside grails resource management depend on this
 	}
 	tour {
 		dependsOn 'hopscotch, streamr'
@@ -268,21 +268,6 @@ modules = {
 	}
 	'confirm-button' {
 		resource url:[dir:'js/unifina/confirm-button', file:'confirm-button.js', plugin: 'unifina-core']
-	}
-	'webpack-commons-bundle' {
-		dependsOn('streamr')
-		resource url:[dir:'js/unifina/webpack-bundles', file:'commons.bundle.js']
-		resource url:[dir:'js/unifina/webpack-bundles', file:'commons.bundle.css']
-	}
-	'profile-page-webpack-bundle' {
-		dependsOn 'webpack-commons-bundle'
-		resource url: [dir: 'js/unifina/webpack-bundles', file: 'profilePage.bundle.js', plugin: 'unifina-core']
-		resource url: [dir: 'js/unifina/webpack-bundles', file: 'profilePage.bundle.css', plugin: 'unifina-core']
-	}
-	'dashboard-page-webpack-bundle' {
-		dependsOn 'webpack-commons-bundle'
-		resource url: [dir: 'js/unifina/webpack-bundles', file: 'dashboardPage.bundle.js', plugin: 'unifina-core']
-		resource url: [dir: 'js/unifina/webpack-bundles', file: 'dashboardPage.bundle.css', plugin: 'unifina-core']
 	}
 	'signalpath-core' {
 		// Easier to merge if dependencies are one-per-row instead of comma-separated list

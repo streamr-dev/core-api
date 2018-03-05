@@ -25,20 +25,20 @@ type State = {
 export default class StreamrTableComponent extends Component<Props, State> {
     table: ?StreamrTable
     state = {
-        options: {}
+        options: {},
     }
-    
+
     renderWidget = (root: ?HTMLDivElement, options: Options) => {
         if (root) {
             this.table = new StreamrTable(root, options)
             this.table.initTable()
         }
     }
-    
+
     onMessage = (msg: {}) => {
         this.table && this.table.receiveResponse(msg)
     }
-    
+
     render() {
         return (
             <ComplexStreamrWidget
