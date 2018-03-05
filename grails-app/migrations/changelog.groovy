@@ -92,4 +92,5 @@ databaseChangeLog = {
 	include file: 'core/2018-01-31-mqtt-help-text-update.groovy'
 	include file: 'core/2018-02-12-add-anonymous-index-to-permission.groovy'
 	include file: 'core/2018-02-27-add-id-in-service-to-integration-key.groovy'
+	include file: 'core/2018-03-05-fix-canvas-spec.groovy'
 }
