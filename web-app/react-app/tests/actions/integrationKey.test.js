@@ -1,7 +1,7 @@
-
 import configureMockStore from 'redux-mock-store'
 import thunk from 'redux-thunk'
 import * as actions from '../../actions/integrationKey'
+import * as idActions from '../../actions/identity'
 import assert from 'assert-diff'
 import moxios from 'moxios'
 
@@ -81,6 +81,83 @@ describe('IntegrationKey actions', () => {
 
             try {
                 await store.dispatch(actions.getAndReplaceIntegrationKeys())
+            } catch (e) {
+                assert.deepStrictEqual(store.getActions().slice(0, 2), expectedActions)
+                done()
+            }
+        })
+    })
+
+    describe('createIdentity', () => {
+        it('creates CREATE_IDENTITY_SUCCESS when creating identity has succeeded', async () => {
+            moxios.wait(() => {
+                const request = moxios.requests.mostRecent()
+                assert.equal(request.config.method, 'post')
+                request.respondWith({
+                    status: 200,
+                    response: request.config.data
+                })
+            })
+
+            const expectedActions = [{
+                type: idActions.CREATE_IDENTITY_REQUEST
+            }, {
+                type: idActions.CREATE_IDENTITY_SUCCESS,
+                integrationKey: {
+                    name: 'test',
+                    signature: '',
+                    address: '',
+                    challenge: {
+                        id: '123',
+                        challenge: 'data',
+                    },
+                    json: 'moi',
+                }
+            }]
+
+            await store.dispatch(idActions.createIdentity({
+                name: 'test',
+                signature: '',
+                address: '',
+                challenge: {
+                    id: '123',
+                    challenge: 'data',
+                },
+                json: 'moi',
+            }))
+            assert.deepStrictEqual(store.getActions(), expectedActions)
+        })
+
+        it('creates CREATE_IDENTITY_FAILURE when MetaMask is locked', async (done) => {
+            moxios.wait(() => {
+                const request = moxios.requests.mostRecent()
+                assert.equal(request.config.method, 'post')
+                request.respondWith({
+                    status: 400,
+                    response: {
+                        error: {
+                            message: 'MetaMask error',
+                            code: 'ERROR',
+                            statusCode: 400
+                        }
+                    }
+                })
+            })
+
+            const expectedActions = [{
+                type: idActions.CREATE_IDENTITY_REQUEST
+            }, {
+                type: idActions.CREATE_IDENTITY_FAILURE,
+                error: {
+                    message: 'MetaMask browser extension is not installed'
+                }
+            }]
+
+            try {
+                await store.dispatch(idActions.createIdentity({
+                    name: 'test',
+                    json: 'moi'
+                }))
             } catch (e) {
                 assert.deepStrictEqual(store.getActions().slice(0, 2), expectedActions)
                 done()
