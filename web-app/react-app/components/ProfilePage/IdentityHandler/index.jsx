@@ -43,7 +43,7 @@ export class IdentityHandler extends Component<Props> {
                         service={this.props.service}
                         name="Ethereum"
                         inputFields={[]}
-                        tableFields={[]}
+                        tableFields={['address']}
                     />
                 </Row>
             </Panel>
@@ -51,7 +51,7 @@ export class IdentityHandler extends Component<Props> {
     }
 }
 
-export const mapStateToProps = ({integrationKey: {listsByService, error}}: {integrationKey: IntegrationKeyState}, props: Props): StateProps => ({
+export const mapStateToProps = ({integrationKey: {listsByService, error}}: {integrationKey: IntegrationKeyState}, props: GivenProps): StateProps => ({
     integrationKeys: listsByService[props.service] || [],
     error
 })

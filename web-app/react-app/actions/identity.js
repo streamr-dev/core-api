@@ -5,7 +5,7 @@ import {error, success} from 'react-notification-system-redux'
 import axios from 'axios/index'
 import {parseError} from './utils/parseApiResponse'
 import type {ErrorInUi} from '../flowtype/common-types'
-import ownWeb3 from '../components/ProfilePage/IdentityHandler/web3'
+import ownWeb3 from '../utils/web3Instance'
 import type {IntegrationKey} from '../flowtype/integration-key-types'
 
 const apiUrl = 'api/v1/integration_keys'
@@ -23,7 +23,6 @@ export const createIdentity = (integrationKey: IntegrationKey) => (dispatch: Fun
         dispatch(error({
             title: 'Create identity failed',
             message: 'MetaMask browser extension is not installed',
-            autoDismiss: 0,
         }))
         return
     }
@@ -34,7 +33,6 @@ export const createIdentity = (integrationKey: IntegrationKey) => (dispatch: Fun
         dispatch(error({
             title: 'Create identity failed',
             message: 'MetaMask browser extension is locked',
-            autoDismiss: 0,
         }))
         return
     }
@@ -68,7 +66,6 @@ export const createIdentity = (integrationKey: IntegrationKey) => (dispatch: Fun
             dispatch(error({
                 title: 'Create identity failed',
                 message: err.message,
-                autoDismiss: 0,
             }))
         })
 }
