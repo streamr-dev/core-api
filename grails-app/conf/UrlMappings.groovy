@@ -64,6 +64,7 @@ class UrlMappings {
 		"/api/v1/products/$id/setUndeploying"(controller: "productApi", action: "setUndeploying")
 		"/api/v1/products/$id/setUndeployed"(controller: "productApi", action: "setUndeployed")
 		"/api/v1/products/$productId/streams"(resources: "productStreamsApi")
+		"/api/v1/subscriptions"(resources: "subscriptionApi")
 
 		// Mappings for pages using React Router (the root for the router)
 		"/dashboard/editor/$id**?"(controller: "dashboard", action: "editor")
