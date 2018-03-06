@@ -88,7 +88,7 @@ describe('IntegrationKey actions', () => {
     })
 
     describe('createIdentity', () => {
-        it('creates CREATE_IDENTITY_SUCCESS when creating identity has succeeded', async () => {
+        it('creates CREATE_IDENTITY_FAILURE when MetaMask is not installed', async () => {
             moxios.wait(() => {
                 const request = moxios.requests.mostRecent()
                 assert.equal(request.config.method, 'post')
@@ -99,68 +99,22 @@ describe('IntegrationKey actions', () => {
             })
 
             const expectedActions = [{
-                type: actions.CREATE_IDENTITY_REQUEST
-            }, {
-                type: actions.CREATE_IDENTITY_SUCCESS,
+                type: actions.CREATE_IDENTITY_REQUEST,
                 integrationKey: {
-                    name: 'test',
-                    signature: '',
-                    address: '',
-                    challenge: {
-                        id: '123',
-                        challenge: 'data',
-                    },
-                    json: 'moi',
-                }
-            }]
-
-            await store.dispatch(actions.createIdentity({
-                name: 'test',
-                signature: '',
-                address: '',
-                challenge: {
-                    id: '123',
-                    challenge: 'data',
+                    name: 'test'
                 },
-                json: 'moi',
-            }))
-            assert.deepStrictEqual(store.getActions(), expectedActions)
-        })
-
-        it('creates CREATE_IDENTITY_FAILURE when MetaMask is locked', async (done) => {
-            moxios.wait(() => {
-                const request = moxios.requests.mostRecent()
-                assert.equal(request.config.method, 'post')
-                request.respondWith({
-                    status: 400,
-                    response: {
-                        error: {
-                            message: 'MetaMask error',
-                            code: 'ERROR',
-                            statusCode: 400
-                        }
-                    }
-                })
-            })
-
-            const expectedActions = [{
-                type: actions.CREATE_IDENTITY_REQUEST
-            }, {
+            },
+            {
                 type: actions.CREATE_IDENTITY_FAILURE,
                 error: {
                     message: 'MetaMask browser extension is not installed'
                 }
             }]
 
-            try {
-                await store.dispatch(actions.createIdentity({
-                    name: 'test',
-                    json: 'moi'
-                }))
-            } catch (e) {
-                assert.deepStrictEqual(store.getActions().slice(0, 2), expectedActions)
-                done()
-            }
+            await store.dispatch(actions.createIdentity({
+                name: 'test',
+            }))
+            assert.deepStrictEqual(store.getActions().slice(0, 2), expectedActions)
         })
     })
 
@@ -189,7 +143,7 @@ describe('IntegrationKey actions', () => {
                 name: 'test',
                 json: 'moi'
             }))
-            assert.deepStrictEqual(store.getActions(), expectedActions)
+            assert.deepStrictEqual(store.getActions().slice(0, 2), expectedActions)
         })
 
         it('creates CREATE_INTEGRATION_KEY_FAILURE when creating integration key has failed', async (done) => {
