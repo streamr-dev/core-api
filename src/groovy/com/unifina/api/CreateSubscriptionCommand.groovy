@@ -8,6 +8,5 @@ import org.grails.databinding.BindingFormat
 class CreateSubscriptionCommand {
 	Product product
 	String address
-	@BindingFormat("yyyy-MM-dd'T'hh:mm:ss'Z'")
-	Date endsAt
+	Long endsAt
 }

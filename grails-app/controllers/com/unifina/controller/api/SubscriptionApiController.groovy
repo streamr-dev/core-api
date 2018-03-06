@@ -2,6 +2,7 @@ package com.unifina.controller.api
 
 import com.unifina.api.CreateSubscriptionCommand
 import com.unifina.api.NotPermittedException
+import com.unifina.api.ValidationException
 import com.unifina.domain.security.SecUser
 import com.unifina.security.AuthLevel
 import com.unifina.security.StreamrApi
@@ -16,8 +17,11 @@ class SubscriptionApiController {
 	@GrailsCompileStatic
 	@StreamrApi(authenticationLevel = AuthLevel.USER)
 	def save(CreateSubscriptionCommand command) {
+		if (!command.validate()) {
+			throw new ValidationException(command.errors)
+		}
 		verifyDevops(loggedInUser())
-		subscriptionService.onSubscribed(command.product, command.address, command.endsAt)
+		subscriptionService.onSubscribed(command.product, command.address, new Date(command.endsAt * 1000))
 		render(status: 204)
 	}
 

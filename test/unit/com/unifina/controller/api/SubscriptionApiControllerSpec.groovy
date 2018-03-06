@@ -1,6 +1,7 @@
 package com.unifina.controller.api
 
 import com.unifina.api.NotPermittedException
+import com.unifina.api.ValidationException
 import com.unifina.domain.marketplace.Product
 import com.unifina.domain.security.SecRole
 import com.unifina.domain.security.SecUser
@@ -23,8 +24,29 @@ class SubscriptionApiControllerSpec extends Specification {
 		new SecUserSecRole(secUser: devOpsUser, secRole:  devopsRole).save(failOnError: true)
 	}
 
+	void "save() throws ValidationException if request body does not pass validation"() {
+		request.apiUser = devOpsUser
+		request.JSON = [
+			address: "0x0",
+			product: "1"
+		]
+		when:
+		withFilters(action: "save") {
+			controller.save()
+		}
+		then:
+		thrown(ValidationException)
+	}
+
 	void "save() throws NotPermittedException if not devops user"() {
+		def product = new Product().save(failOnError: true, validate: false)
+		
 		request.apiUser = new SecUser()
+		request.JSON = [
+			address: "0x0",
+			product: "1",
+			endsAt: 1520334404
+		]
 		when:
 		withFilters(action: "save") {
 			controller.save()
@@ -43,14 +65,15 @@ class SubscriptionApiControllerSpec extends Specification {
 		request.JSON = [
 		    address: "0x0",
 			product: "1",
-			endsAt: "2008-09-15"
+			endsAt: 1520334404
 		]
+
 		when:
 		withFilters(action: "save") {
 			controller.save()
 		}
 		then:
-		1 * subscriptionService.onSubscribed(product, "0x0", null)
+		1 * subscriptionService.onSubscribed(product, "0x0", _ as Date)
 	}
 
 	void "save() returns 204 given devops user"() {
@@ -62,8 +85,9 @@ class SubscriptionApiControllerSpec extends Specification {
 		request.JSON = [
 			address: "0x0",
 			product: "1",
-			endsAt: "2008-09-15"
+			endsAt: 1520334404
 		]
+
 		when:
 		withFilters(action: "save") {
 			controller.save()
