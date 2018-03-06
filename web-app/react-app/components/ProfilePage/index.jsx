@@ -20,12 +20,8 @@ export default class ProfilePage extends Component<{}> {
                 </Col>
                 <Col xs={12} sm={6}>
                     <APICredentials/>
-                </Col>
-                <Col xs={12} sm={6}>
+                    <IdentityHandler/>
                     <IntegrationKeyHandler/>
-                </Col>
-                <Col xs={12} sm={6}>
-                    <IdentityHandler service="ETHEREUM_ID"/>
                 </Col>
             </Row>
         )

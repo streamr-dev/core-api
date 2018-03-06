@@ -8,25 +8,31 @@ import {createIdentity} from '../../../actions/integrationKey'
 import {connect} from 'react-redux'
 import type {ErrorInUi} from '../../../flowtype/common-types'
 import type {IntegrationKeyState} from '../../../flowtype/states/integration-key-state'
+import {deleteIntegrationKey, getIntegrationKeysByService} from '../../../actions/integrationKey'
 
 type StateProps = {
     error: ?ErrorInUi,
+    integrationKeys: Array<IntegrationKey>
 }
 
 type DispatchProps = {
     createIdentity: (integrationKey: IntegrationKey) => void,
+    deleteIntegrationKey: (id: $ElementType<IntegrationKey, 'id'>) => void,
+    getIntegrationKeysByService: (service: $ElementType<IntegrationKey, 'service'>) => void
 }
 
-type GivenProps = {
-    service: $ElementType<IntegrationKey, 'service'>,
-}
+type Props = StateProps & DispatchProps
 
-type Props = StateProps & DispatchProps & GivenProps
+const service = 'ETHEREUM_ID'
 
 export class IdentityHandler extends Component<Props> {
+    componentDidMount() {
+        // TODO: Move to (yet non-existent) router
+        this.props.getIntegrationKeysByService(service)
+    }
+
     onNew = (integrationKey: IntegrationKey) => {
         const name = integrationKey.name
-        const service = this.props.service
         delete integrationKey.name
         this.props.createIdentity({
             name,
@@ -34,16 +40,27 @@ export class IdentityHandler extends Component<Props> {
             json: integrationKey,
         })
     }
+
+    onDelete = (id: $ElementType<IntegrationKey, 'id'>) => {
+        this.props.deleteIntegrationKey(id)
+    }
+
     render() {
         return (
-            <Panel header="Identities">
+            <Panel header="Ethereum Identities">
+                <p>
+                    These Ethereum accounts are bound to your Streamr user. You can use them to authenticate and to participate on the Streamr Marketplace.
+                </p>
                 <Row>
                     <IntegrationKeyHandlerSegment
                         onNew={this.onNew}
-                        service={this.props.service}
-                        name="Ethereum"
-                        inputFields={[]}
-                        tableFields={['address']}
+                        onDelete={this.onDelete}
+                        service={service}
+                        integrationKeys={this.props.integrationKeys}
+                        copy="address"
+                        tableFields={[
+                            ['address', (add) => add && (typeof add === 'string') && `${add.substring(0, 15)}...` || add]
+                        ]}
                     />
                 </Row>
             </Panel>
@@ -51,15 +68,21 @@ export class IdentityHandler extends Component<Props> {
     }
 }
 
-export const mapStateToProps = ({integrationKey: {listsByService, error}}: {integrationKey: IntegrationKeyState}, props: GivenProps): StateProps => ({
-    integrationKeys: listsByService[props.service] || [],
+export const mapStateToProps = ({integrationKey: {listsByService, error}}: {integrationKey: IntegrationKeyState}): StateProps => ({
+    integrationKeys: listsByService[service] || [],
     error
 })
 
 export const mapDispatchToProps = (dispatch: Function): DispatchProps => ({
+    deleteIntegrationKey(id: $ElementType<IntegrationKey, 'id'>) {
+        dispatch(deleteIntegrationKey(id))
+    },
     createIdentity(integrationKey: IntegrationKey) {
         dispatch(createIdentity(integrationKey))
     },
+    getIntegrationKeysByService(service: $ElementType<IntegrationKey, 'service'>) {
+        dispatch(getIntegrationKeysByService(service))
+    }
 })
 
 export default connect(mapStateToProps, mapDispatchToProps)(IdentityHandler)
