@@ -13,13 +13,15 @@ import {
     DELETE_INTEGRATION_KEY_REQUEST,
     DELETE_INTEGRATION_KEY_SUCCESS,
     DELETE_INTEGRATION_KEY_FAILURE,
+    CREATE_IDENTITY_FAILURE,
+    CREATE_IDENTITY_REQUEST,
+    CREATE_IDENTITY_SUCCESS,
 } from '../actions/integrationKey.js'
 
 import _ from 'lodash'
 
 import type {IntegrationKeyState} from '../flowtype/states/integration-key-state'
 import type {IntegrationKeyAction} from '../flowtype/actions/integration-key-actions'
-import {CREATE_IDENTITY_FAILURE, CREATE_IDENTITY_REQUEST, CREATE_IDENTITY_SUCCESS} from '../actions/identity'
 
 const initialState = {
     listsByService: {},

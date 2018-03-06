@@ -1,6 +1,5 @@
 import reducer from '../../reducers/integrationKey'
 import * as actions from '../../actions/integrationKey'
-import * as idActions from '../../actions/identity'
 import assert from 'assert-diff'
 import _ from 'lodash'
 
@@ -25,7 +24,7 @@ describe('IntegrationKey reducer', () => {
     describe('CREATE_IDENTITY_REQUEST',() => {
         it('should handle CREATE_IDENTITY_REQUEST', () => {
             assert.deepStrictEqual(reducer({}, {
-                type: idActions.CREATE_IDENTITY_REQUEST
+                type: actions.CREATE_IDENTITY_REQUEST
             }), {
                 fetching: true
             })
@@ -43,7 +42,7 @@ describe('IntegrationKey reducer', () => {
                     }]
                 }
             }, {
-                type: idActions.CREATE_IDENTITY_SUCCESS,
+                type: actions.CREATE_IDENTITY_SUCCESS,
                 integrationKey: {
                     id: 3,
                     service: 'ETHEREUM'
@@ -78,7 +77,7 @@ describe('IntegrationKey reducer', () => {
                     }]
                 }
             }, {
-                type: idActions.CREATE_IDENTITY_FAILURE,
+                type: actions.CREATE_IDENTITY_FAILURE,
                 error: 'test-error'
             }), {
                 fetching: false,

@@ -1,7 +1,6 @@
 import configureMockStore from 'redux-mock-store'
 import thunk from 'redux-thunk'
 import * as actions from '../../actions/integrationKey'
-import * as idActions from '../../actions/identity'
 import assert from 'assert-diff'
 import moxios from 'moxios'
 
@@ -100,9 +99,9 @@ describe('IntegrationKey actions', () => {
             })
 
             const expectedActions = [{
-                type: idActions.CREATE_IDENTITY_REQUEST
+                type: actions.CREATE_IDENTITY_REQUEST
             }, {
-                type: idActions.CREATE_IDENTITY_SUCCESS,
+                type: actions.CREATE_IDENTITY_SUCCESS,
                 integrationKey: {
                     name: 'test',
                     signature: '',
@@ -115,7 +114,7 @@ describe('IntegrationKey actions', () => {
                 }
             }]
 
-            await store.dispatch(idActions.createIdentity({
+            await store.dispatch(actions.createIdentity({
                 name: 'test',
                 signature: '',
                 address: '',
@@ -145,16 +144,16 @@ describe('IntegrationKey actions', () => {
             })
 
             const expectedActions = [{
-                type: idActions.CREATE_IDENTITY_REQUEST
+                type: actions.CREATE_IDENTITY_REQUEST
             }, {
-                type: idActions.CREATE_IDENTITY_FAILURE,
+                type: actions.CREATE_IDENTITY_FAILURE,
                 error: {
                     message: 'MetaMask browser extension is not installed'
                 }
             }]
 
             try {
-                await store.dispatch(idActions.createIdentity({
+                await store.dispatch(actions.createIdentity({
                     name: 'test',
                     json: 'moi'
                 }))
