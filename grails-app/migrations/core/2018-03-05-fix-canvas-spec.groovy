@@ -13,7 +13,7 @@ databaseChangeLog = {
 	changeSet(author: "eric", id: "fix-canvas-spec-2", context: "test") {
 		sql("""
 			UPDATE canvas
-			SET request_url = 'http://127.0.0.1:8081/unifina-core/api/live/request'
+			SET server = 'localhost'
 			WHERE id = 'run-canvas-spec';
 		""")
 	}
