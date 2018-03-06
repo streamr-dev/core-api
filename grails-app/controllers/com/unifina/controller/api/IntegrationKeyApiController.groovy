@@ -37,15 +37,17 @@ class IntegrationKeyApiController {
 			response.status = 201
 			Map json = new JsonSlurper().parseText(key.json)
 			render([
-					service  : IntegrationKey.Service.ETHEREUM_ID.toString(),
 					id       : key.id,
-					name     : cmd.name,
 					challenge: [
-							id       : cmd.challenge.id,
-							challenge: cmd.challenge.challenge
+						id       : cmd.challenge.id,
+						challenge: cmd.challenge.challenge
 					],
-					signature: cmd.signature,
-					address  : json.address
+					json: [
+						address: json.address
+					],
+					name     : cmd.name,
+					service  : IntegrationKey.Service.ETHEREUM_ID.toString(),
+					signature: cmd.signature
 			] as JSON)
 		} else {
 			throw new ApiException(400, 'INVALID_SERVICE', "Invalid service: $request.JSON.service")
