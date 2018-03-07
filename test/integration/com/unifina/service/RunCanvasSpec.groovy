@@ -5,17 +5,20 @@ import com.unifina.domain.security.SecUser
 import com.unifina.domain.signalpath.Canvas
 import com.unifina.feed.FeedFactory
 import grails.test.spock.IntegrationSpec
+import spock.lang.Ignore
 import spock.lang.Unroll
 import spock.util.concurrent.PollingConditions
 
 /**
  * Verifies that Canvases can be created, run, fed data through StreamService, and that the fed data be processed.
  */
+@Ignore
 class RunCanvasSpec extends IntegrationSpec {
 
 	def static final SUM_FROM_1_TO_100_TIMES_2 = "10100.0"
 
 	CanvasService canvasService
+	SignalPathService signalPathService
 	StreamService streamService
 
 	SecUser user
@@ -64,7 +67,7 @@ class RunCanvasSpec extends IntegrationSpec {
 		finalState[3] == "[(out) Constant.out: 2.0]"
 
 		cleanup:
-		canvasService.stop(canvas, user)
+		signalPathService.stopLocal(canvas)
 
 		where:
 		round << (1..3)

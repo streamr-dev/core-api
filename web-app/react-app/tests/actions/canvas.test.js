@@ -34,7 +34,7 @@ describe('Canvas actions', () => {
             const request = moxios.requests.mostRecent()
             expect(request.url).toMatch(/api\/v1\/canvases/)
             expect(request.config.params).toEqual({
-                state: 'running',
+                state: 'RUNNING',
                 adhoc: false,
                 sort: 'dateCreated',
                 order: 'desc'
@@ -75,7 +75,7 @@ describe('Canvas actions', () => {
             const request = moxios.requests.mostRecent()
             expect(request.url).toMatch(/api\/v1\/canvases/)
             expect(request.config.params).toEqual({
-                state: 'running',
+                state: 'RUNNING',
                 adhoc: false,
                 sort: 'dateCreated',
                 order: 'desc'

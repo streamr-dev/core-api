@@ -2,12 +2,13 @@ package com.unifina.signalpath.charts
 
 import com.unifina.UiChannelMockingSpecification
 import com.unifina.domain.security.SecUser
-import com.unifina.utils.GlobalsFactory
 import com.unifina.utils.testutils.ModuleTestHelper
+import grails.test.mixin.Mock
 import grails.test.mixin.TestMixin
 import grails.test.mixin.support.GrailsUnitTestMixin
 
 @TestMixin(GrailsUnitTestMixin) // for grailsApplication
+@Mock([SecUser])
 class GaugeSpec extends UiChannelMockingSpecification {
 	
 	Gauge module
