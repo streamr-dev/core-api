@@ -13,7 +13,7 @@ export default class Sidebar extends Component<{}> {
     render() {
         return (
             <div id="main-menu" role="navigation" className={styles.sidebar}>
-                <div id="main-menu-inner">
+                <div id="main-menu-inner" className={styles.sidebarInner}>
                     <div id="sidebar-view" className="scrollable">
                         <NameEditor/>
                         <CanvasList/>
