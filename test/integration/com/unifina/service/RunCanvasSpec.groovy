@@ -5,6 +5,7 @@ import com.unifina.domain.security.SecUser
 import com.unifina.domain.signalpath.Canvas
 import com.unifina.feed.FeedFactory
 import grails.test.spock.IntegrationSpec
+import org.codehaus.groovy.grails.web.mapping.LinkGenerator
 import spock.lang.Unroll
 import spock.util.concurrent.PollingConditions
 
@@ -17,6 +18,7 @@ class RunCanvasSpec extends IntegrationSpec {
 
 	CanvasService canvasService
 	StreamService streamService
+	LinkGenerator grailsLinkGenerator
 
 	SecUser user
 	Stream stream
@@ -29,6 +31,7 @@ class RunCanvasSpec extends IntegrationSpec {
 		user = SecUser.load(1L)
 		stream = Stream.get("run-canvas-spec")
 		canvasService.signalPathService.servletContext = [signalPathRunners: [:]]
+		grailsLinkGenerator.contextPath = "/streamr-core"
 	}
 
 	def cleanup() {
