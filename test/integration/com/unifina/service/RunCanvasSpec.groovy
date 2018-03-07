@@ -16,6 +16,7 @@ class RunCanvasSpec extends IntegrationSpec {
 	def static final SUM_FROM_1_TO_100_TIMES_2 = "10100.0"
 
 	CanvasService canvasService
+	SignalPathService signalPathService
 	StreamService streamService
 
 	SecUser user
@@ -64,7 +65,7 @@ class RunCanvasSpec extends IntegrationSpec {
 		finalState[3] == "[(out) Constant.out: 2.0]"
 
 		cleanup:
-		canvasService.stop(canvas, user)
+		signalPathService.stopLocal(canvas)
 
 		where:
 		round << (1..3)
