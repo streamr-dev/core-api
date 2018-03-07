@@ -69,7 +69,7 @@ environments {
 }
 
 // See WebpackTagLib.groovy
-webpack.bundle.dir = System.getProperty("streamr.webpack.bundle.location") ?: '/webpack-bundles'
+webpack.bundle.dir = System.getProperty("webpack.bundle.location") ?: '/webpack-bundles'
 webpack.jsFiles.metadataKey = 'webpack.jsFiles'
 webpack.cssFiles.metadataKey = 'webpack.cssFiles'
 

@@ -81,8 +81,8 @@ The dev server updates bundle files on-the-fly as changes are detected in source
 
 #### Extra
 
-Normally the bundles are always written into files, where Grails no to take them from. However, if you want to use the files straight from the memory of the Webpack dev server (for increased building speed), is that possible with the following commands:
- 1) Run grails with `grails run-app -Dstreamr.webpack.bundle.location=http://localhost:9000` (9000 is the default port of the dev server)
+Normally the bundles are always written into files, where Grails knows to take them from. However, if you want to use the files straight from the memory of the Webpack dev server (for increased building speed), is that possible with the following commands:
+ 1) Run grails with `grails run-app -Dwebpack.bundle.location=http://localhost:9000` (9000 is the default port of the dev server)
  2) Run Webpack dev server with `NO_FILES=true npm run dev` to prevent it from writing the files 
 
 ### Back-end
