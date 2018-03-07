@@ -94,16 +94,9 @@ class StreamController {
 				stream: stream,
 				writable: writetable,
 				shareable: shareable,
-				key: springSecurityService.currentUser?.keys?.iterator()?.next()
+				key: springSecurityService.currentUser?.keys?.iterator()?.next(),
+				config: (stream.config ? JSON.parse(stream.config) : [:])
 			]
-		}
-	}
-
-	// Can be extended to handle more types
-	def details() {
-		getAuthorizedStream(params.id) { stream, user ->
-			def model = [stream: stream, config: (stream.config ? JSON.parse(stream.config) : [:])]
-			render(template: stream.feed.streamPageTemplate, model: model)
 		}
 	}
 

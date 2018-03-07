@@ -9,6 +9,7 @@ import {Panel, Table, Modal, Button} from 'react-bootstrap'
 import FontAwesome from 'react-fontawesome'
 import moment from 'moment-timezone'
 import stringifyObject from 'stringify-object'
+import {throttle} from 'lodash'
 
 const config = require('../../../config')
 
@@ -43,12 +44,14 @@ type State = {
 export class PreviewView extends Component<Props, State> {
     client: StreamrClient
     subscription: any
+    data: Array<{}>
     state = {
         visibleData: [],
         visibleDataLimit: 10,
         paused: false,
         infoScreenMessage: null
     }
+    data = []
 
     constructor() {
         super()
@@ -72,13 +75,18 @@ export class PreviewView extends Component<Props, State> {
         }
     }
 
-    onData = (dataPoint: DataPoint) => {
+    updateDataToState = throttle((data) => {
         this.setState({
-            visibleData: [
-                dataPoint,
-                ...this.state.visibleData
-            ].slice(0, this.state.visibleDataLimit)
+            visibleData: [...data]
         })
+    }, 100)
+
+    onData = (dataPoint: DataPoint) => {
+        this.data.unshift(dataPoint)
+        if (this.data.length > this.state.visibleDataLimit) {
+            this.data.pop()
+        }
+        this.updateDataToState(this.data)
     }
 
     openInfoScreen = (d: DataPoint) => {
@@ -114,14 +122,14 @@ export class PreviewView extends Component<Props, State> {
         })
     }
 
-    static prettyPrintDate = (timestamp: ?number, timezone: ?string) => timestamp && moment.tz(timestamp, timezone).format()
+    static prettyPrintDate = (timestamp: ?number, timezone: ?string) => timestamp && moment.tz(timestamp, timezone).format('YYYY-DD-MM HH:mm:ss')
 
     render() {
         const tz = this.props.currentUser && this.props.currentUser.timezone || moment.tz.guess()
         return (
             <Panel>
                 <Panel.Heading>
-                    Realtime Data Preview
+                    Recent Events
                     <div className="panel-heading-controls">
                         {this.state.paused ? (
                             <Button
@@ -148,13 +156,12 @@ export class PreviewView extends Component<Props, State> {
                         <thead>
                             <tr>
                                 <th>Timestamp</th>
-                                <th>Message JSON</th>
-                                <th/>
+                                <th>Data</th>
                             </tr>
                         </thead>
                         <tbody>
                             {this.state.visibleData.map(d => (
-                                <tr key={JSON.stringify(d.metadata)}>
+                                <tr key={JSON.stringify(d.metadata)} onClick={() => this.openInfoScreen(d)}>
                                     <td className={styles.timestampColumn}>
                                         {PreviewView.prettyPrintDate(d.metadata && d.metadata.timestamp, tz)}
                                     </td>
@@ -162,11 +169,6 @@ export class PreviewView extends Component<Props, State> {
                                         <div className={styles.messagePreview}>
                                             {PreviewView.prettyPrintData(d.data, true)}
                                         </div>
-                                    </td>
-                                    <td>
-                                        <a href="#" onClick={() => this.openInfoScreen(d)}>
-                                            <FontAwesome name="question-circle"/>
-                                        </a>
                                     </td>
                                 </tr>
                             ))}

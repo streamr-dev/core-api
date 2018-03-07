@@ -9,15 +9,20 @@ export default class IntegrationKeyHandler extends Component<{}> {
 
     render() {
         return (
-            <Panel header="Integration Keys">
-                <Row>
-                    <IntegrationKeyHandlerSegment
-                        service="ETHEREUM"
-                        name="Ethereum"
-                        inputFields={['privateKey']}
-                        tableFields={['address']}
-                    />
-                </Row>
+            <Panel>
+                <Panel.Heading>
+                    Integration Keys
+                </Panel.Heading>
+                <Panel.Body>
+                    <Row>
+                        <IntegrationKeyHandlerSegment
+                            service="ETHEREUM"
+                            name="Ethereum"
+                            inputFields={['privateKey']}
+                            tableFields={['address']}
+                        />
+                    </Row>
+                </Panel.Body>
             </Panel>
         )
     }

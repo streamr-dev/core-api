@@ -30,13 +30,18 @@ export class APICredentials extends Component<Props> {
     render() {
         const keys = this.props.keys.sort((a, b) => a.name.localeCompare(b.name))
         return (
-            <Panel header="API Credentials">
-                <CredentialsControl
-                    keys={keys}
-                    addKey={this.props.addKey}
-                    removeKey={this.props.removeKey}
-                    permissionTypeVisible={false}
-                />
+            <Panel>
+                <Panel.Heading>
+                    API Credentials
+                </Panel.Heading>
+                <Panel.Body>
+                    <CredentialsControl
+                        keys={keys}
+                        addKey={this.props.addKey}
+                        removeKey={this.props.removeKey}
+                        permissionTypeVisible={false}
+                    />
+                </Panel.Body>
             </Panel>
         )
     }
