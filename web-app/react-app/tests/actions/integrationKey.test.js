@@ -3,8 +3,8 @@ import thunk from 'redux-thunk'
 import * as actions from '../../actions/integrationKey'
 import assert from 'assert-diff'
 import moxios from 'moxios'
-import * as ownWeb3 from '../../utils/web3Instance'
 import sinon from 'sinon'
+import StreamrWeb3 from '../../utils/StreamrWeb3'
 
 const middlewares = [ thunk ]
 const mockStore = configureMockStore(middlewares)
@@ -15,19 +15,23 @@ global.Streamr = {
 
 describe('IntegrationKey actions', () => {
     let store
+    let sandbox
 
     beforeEach(() => {
         moxios.install()
+        sandbox = sinon.sandbox.create()
         store = mockStore({
             integrationKeys: [],
             error: null,
             fetching: false
         })
+        jest.resetModules()
     })
 
     afterEach(() => {
         moxios.uninstall()
         store.clearActions()
+        sandbox.reset()
     })
 
     describe('getAndReplaceIntegrationKeys', () => {
@@ -90,21 +94,21 @@ describe('IntegrationKey actions', () => {
     })
 
     describe('createIdentity', () => {
-        let sandbox
-        beforeEach(() => {
-            sandbox = sinon.sandbox.create()
-        })
-        afterEach(() => {
-            sandbox.reset()
-        })
         it('creates CREATE_IDENTITY_SUCCESS when creating identity has succeeded', async () => {
-            moxios.wait(() => {
-                const request = moxios.requests.mostRecent()
-                assert.equal(request.config.method, 'post')
-                request.respondWith({
-                    status: 200,
-                    response: request.config.data
-                })
+            sandbox.stub(StreamrWeb3.prototype).value({
+                isUnlocked: () => true,
+                isEnabled: () => true,
+                eth: {
+                    personal: {
+                        sign: () => Promise.resolve()
+                    }
+                }
+            })
+
+            const actionsWithMock = require('../../actions/integrationKey')
+
+            moxios.stubRequest('api/v1/login/challenge', {
+                status: 200
             })
 
             const expectedActions = [{
@@ -112,13 +116,13 @@ describe('IntegrationKey actions', () => {
                 integrationKey: {
                     name: 'test'
                 },
-            },
-            {
+            }, {
                 type: actions.CREATE_IDENTITY_SUCCESS,
             }]
 
-            await store.dispatch(actions.createIdentity({
+            await store.dispatch(actionsWithMock.createIdentity({
                 name: 'test',
+                response: 'moi'
             }))
             assert.deepStrictEqual(store.getActions().slice(0, 2), expectedActions)
         })

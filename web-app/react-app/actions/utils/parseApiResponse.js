@@ -2,13 +2,24 @@
 
 import type { ErrorFromApi, ErrorInUi } from '../../flowtype/common-types'
 
-export const parseError = ({response}: {
+type Args = Error | {
     response: {
         data: ErrorFromApi,
         status: number
     }
-}): ErrorInUi => ({
-    message: response.data.message || 'Something went wrong',
-    code: response.data.code,
-    statusCode: response.status
-})
+}
+
+export const parseError = (args: Args): ErrorInUi => {
+    if (args instanceof Error) {
+        return {
+            message: args.message
+        }
+    } else {
+        const {data: {message, code}, status} = args.response
+        return {
+            message: message || 'Something went wrong',
+            code: code,
+            statusCode: status
+        }
+    }
+}
