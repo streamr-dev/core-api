@@ -3,6 +3,8 @@ import thunk from 'redux-thunk'
 import * as actions from '../../actions/integrationKey'
 import assert from 'assert-diff'
 import moxios from 'moxios'
+import * as ownWeb3 from '../../utils/web3Instance'
+import sinon from 'sinon'
 
 const middlewares = [ thunk ]
 const mockStore = configureMockStore(middlewares)
@@ -88,6 +90,38 @@ describe('IntegrationKey actions', () => {
     })
 
     describe('createIdentity', () => {
+        let sandbox
+        beforeEach(() => {
+            sandbox = sinon.sandbox.create()
+        })
+        afterEach(() => {
+            sandbox.reset()
+        })
+        it('creates CREATE_IDENTITY_SUCCESS when creating identity has succeeded', async () => {
+            moxios.wait(() => {
+                const request = moxios.requests.mostRecent()
+                assert.equal(request.config.method, 'post')
+                request.respondWith({
+                    status: 200,
+                    response: request.config.data
+                })
+            })
+
+            const expectedActions = [{
+                type: actions.CREATE_IDENTITY_REQUEST,
+                integrationKey: {
+                    name: 'test'
+                },
+            },
+            {
+                type: actions.CREATE_IDENTITY_SUCCESS,
+            }]
+
+            await store.dispatch(actions.createIdentity({
+                name: 'test',
+            }))
+            assert.deepStrictEqual(store.getActions().slice(0, 2), expectedActions)
+        })
         it('creates CREATE_IDENTITY_FAILURE when MetaMask is not installed', async () => {
             moxios.wait(() => {
                 const request = moxios.requests.mostRecent()
