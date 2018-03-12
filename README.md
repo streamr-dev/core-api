@@ -97,7 +97,7 @@ A module is as simple as a Java class that extends `AbstractSignalPathModule` an
 
 You also need to add your module to the `module` table in the MySQL database so that Editor finds your module, and you can add it on the canvas.
 
-We want to integrate quality module contributions to the product. To get your custom module to the master, the following is required:
+We want to integrate quality module contributions to the project. To get your custom module to the master, the following is required:
 * the module code <small>(*MyModule* extends AbstractSignalPathModule)</small>
 * unit tests <small>(*MyModuleSpec* extends spock.lang.Specification)</small>
 * database migration <small>(under grails-app/migrations, [see example](https://github.com/streamr-dev/engine-and-editor/blob/master/grails-app/migrations/core/2017-03-08-list-to-events-module.groovy))</small>
