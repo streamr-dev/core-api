@@ -4,6 +4,7 @@ import * as actions from '../../actions/integrationKey'
 import assert from 'assert-diff'
 import moxios from 'moxios'
 import sinon from 'sinon'
+import * as web3Provider from '../../utils/web3Provider'
 
 const middlewares = [ thunk ]
 const mockStore = configureMockStore(middlewares)
@@ -14,19 +15,23 @@ global.Streamr = {
 
 describe('IntegrationKey actions', () => {
     let store
+    let sandbox
 
     beforeEach(() => {
         moxios.install()
+        sandbox = sinon.sandbox.create()
         store = mockStore({
             integrationKeys: [],
             error: null,
             fetching: false
         })
+        jest.resetModules()
     })
 
     afterEach(() => {
         moxios.uninstall()
         store.clearActions()
+        sandbox.reset()
     })
 
     describe('getAndReplaceIntegrationKeys', () => {
@@ -89,35 +94,63 @@ describe('IntegrationKey actions', () => {
     })
 
     describe('createIdentity', () => {
-        let sandbox
-        beforeEach(() => {
-            sandbox = sinon.sandbox.create()
-        })
-        afterEach(() => {
-            sandbox.reset()
-        })
         it('creates CREATE_IDENTITY_SUCCESS when creating identity has succeeded', async () => {
-            moxios.wait(() => {
-                const request = moxios.requests.mostRecent()
-                assert.equal(request.config.method, 'post')
-                request.respondWith({
-                    status: 200,
-                    response: request.config.data
+            const signSpy = sandbox.stub().callsFake((challenge, account) => Promise.resolve(`${challenge}SignedBy${account}`))
+            const acc = 'testAccount'
+            sandbox.stub(web3Provider, 'default').callsFake(() => ({
+                isEnabled: () => true,
+                getDefaultAccount: () => Promise.resolve(acc),
+                eth: {
+                    personal: {
+                        sign: signSpy
+                    }
+                }
+            }))
+
+            moxios.promiseWait()
+                .then(() => {
+                    const request = moxios.requests.mostRecent()
+                    assert.equal(request.config.method, 'post')
+
+                    assert.equal(request.url, 'api/v1/login/challenge')
+                    request.respondWith({
+                        status: 200,
+                        response: {
+                            id: 'moi',
+                            challenge: 'testChallenge'
+                        }
+                    })
+                    return moxios.promiseWait()
                 })
-            })
+                .then(() => {
+                    const request = moxios.requests.mostRecent()
+                    assert.equal(request.config.method, 'post')
+                    assert.equal(request.url, 'api/v1/integration_keys')
+                    assert(signSpy.calledOnce)
+                    assert(signSpy.calledWith('testChallenge'))
+                    request.respondWith({
+                        status: 200,
+                        response: request.config.data
+                    })
+                })
 
             const expectedActions = [{
                 type: actions.CREATE_IDENTITY_REQUEST,
                 integrationKey: {
                     name: 'test'
                 },
-            },
-            {
+            }, {
                 type: actions.CREATE_IDENTITY_SUCCESS,
+                integrationKey: {
+                    name: 'test',
+                    id: undefined,
+                    json: undefined,
+                    service: undefined
+                }
             }]
 
             await store.dispatch(actions.createIdentity({
-                name: 'test',
+                name: 'test'
             }))
             assert.deepStrictEqual(store.getActions().slice(0, 2), expectedActions)
         })

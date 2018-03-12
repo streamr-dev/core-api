@@ -6,7 +6,7 @@ import createLink from '../helpers/createLink'
 import {error, success} from 'react-notification-system-redux'
 import type {IntegrationKey} from '../flowtype/integration-key-types.js'
 import type {ErrorInUi} from '../flowtype/common-types.js'
-import ownWeb3 from '../utils/web3Instance'
+import getWeb3 from '../utils/web3Provider'
 
 export const GET_AND_REPLACE_INTEGRATION_KEYS_REQUEST = 'GET_AND_REPLACE_INTEGRATION_KEYS_REQUEST'
 export const GET_AND_REPLACE_INTEGRATION_KEYS_SUCCESS = 'GET_AND_REPLACE_INTEGRATION_KEYS_SUCCESS'
@@ -99,8 +99,9 @@ export const deleteIntegrationKey = (id: $ElementType<IntegrationKey, 'id'>) => 
 }
 
 export const createIdentity = (integrationKey: IntegrationKey) => (dispatch: Function) => {
+    const ownWeb3 = getWeb3()
     dispatch(createIdentityRequest(integrationKey))
-    if (!ownWeb3) {
+    if (!ownWeb3.isEnabled()) {
         dispatch(createIdentityFailure({
             message: 'MetaMask browser extension is not installed'
         }))
@@ -110,41 +111,37 @@ export const createIdentity = (integrationKey: IntegrationKey) => (dispatch: Fun
         }))
         return
     }
-    if (ownWeb3.eth.defaultAccount == null) {
-        dispatch(createIdentityFailure({
-            message: 'MetaMask browser extension is locked'
-        }))
-        dispatch(error({
-            title: 'Create identity failed',
-            message: 'MetaMask browser extension is locked',
-        }))
-        return
-    }
-    let challenge
-    axios.post(createLink('api/v1/login/challenge')).then(({data}) => {
-        challenge = data
-        return ownWeb3.eth.personal.sign(data.challenge, ownWeb3.eth.defaultAccount)
-    })
-        .then((signature) => {
-            const input = {
-                ...integrationKey,
-                signature: signature,
-                address: ownWeb3.eth.defaultAccount,
-                challenge: {
-                    ...challenge
-                },
-            }
-            return axios.post(createLink(apiUrl), input)
-                .then((response) => {
-                    dispatch(createIdentitySuccess(response.data))
-                    dispatch(success({
-                        title: 'Success!',
-                        message: 'New identity created',
-                    }))
+    return Promise.all([
+        ownWeb3.getDefaultAccount(),
+        axios.post(createLink('api/v1/login/challenge'))
+    ])
+        .then(([account, response]) => {
+            const challenge = response && response.data
+            return ownWeb3.eth.personal.sign(challenge.challenge, account)
+                .then((signature) => {
+                    return axios.post(createLink(apiUrl), {
+                        ...integrationKey,
+                        challenge: challenge,
+                        signature: signature,
+                        address: account,
+                    })
                 })
         })
-        .catch((response) => {
-            const err = parseError(response)
+        .then((response) => {
+            const {id, name, service, json} = response.data
+            dispatch(createIdentitySuccess({
+                id,
+                name,
+                service,
+                json
+            }))
+            dispatch(success({
+                title: 'Success!',
+                message: 'New identity created',
+            }))
+        })
+        .catch((errorResponse) => {
+            const err = parseError(errorResponse)
             dispatch(createIdentityFailure(err))
             dispatch(error({
                 title: 'Create identity failed',
