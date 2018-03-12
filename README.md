@@ -103,7 +103,7 @@ We want to integrate quality module contributions to the project. To get your cu
 * database migration <small>(under grails-app/migrations, [see example](https://github.com/streamr-dev/engine-and-editor/blob/master/grails-app/migrations/core/2017-03-08-list-to-events-module.groovy))</small>
 * all this in a neat git branch with no conflicts with master, and a PR in github
 
-We'll be happy to help with completing these steps.
+We'll be happy to help with completing these steps. Best way to reach the Streamr developer community is the [Streamr Chat](https://chat.streamr.com/)
 
 ## License
 
