@@ -4,7 +4,7 @@ import * as actions from '../../actions/integrationKey'
 import assert from 'assert-diff'
 import moxios from 'moxios'
 import sinon from 'sinon'
-import StreamrWeb3 from '../../utils/StreamrWeb3'
+import * as web3Provider from '../../utils/web3Provider'
 
 const middlewares = [ thunk ]
 const mockStore = configureMockStore(middlewares)
@@ -95,21 +95,44 @@ describe('IntegrationKey actions', () => {
 
     describe('createIdentity', () => {
         it('creates CREATE_IDENTITY_SUCCESS when creating identity has succeeded', async () => {
-            sandbox.stub(StreamrWeb3.prototype).value({
-                isUnlocked: () => true,
+            const signSpy = sandbox.stub().callsFake((challenge, account) => Promise.resolve(`${challenge}SignedBy${account}`))
+            const acc = 'testAccount'
+            sandbox.stub(web3Provider, 'default').callsFake(() => ({
                 isEnabled: () => true,
+                getDefaultAccount: () => Promise.resolve(acc),
                 eth: {
                     personal: {
-                        sign: () => Promise.resolve()
+                        sign: signSpy
                     }
                 }
-            })
+            }))
 
-            const actionsWithMock = require('../../actions/integrationKey')
+            moxios.promiseWait()
+                .then(() => {
+                    const request = moxios.requests.mostRecent()
+                    assert.equal(request.config.method, 'post')
 
-            moxios.stubRequest('api/v1/login/challenge', {
-                status: 200
-            })
+                    assert.equal(request.url, 'api/v1/login/challenge')
+                    request.respondWith({
+                        status: 200,
+                        response: {
+                            id: 'moi',
+                            challenge: 'testChallenge'
+                        }
+                    })
+                    return moxios.promiseWait()
+                })
+                .then(() => {
+                    const request = moxios.requests.mostRecent()
+                    assert.equal(request.config.method, 'post')
+                    assert.equal(request.url, 'api/v1/integration_keys')
+                    assert(signSpy.calledOnce)
+                    assert(signSpy.calledWith('testChallenge'))
+                    request.respondWith({
+                        status: 200,
+                        response: request.config.data
+                    })
+                })
 
             const expectedActions = [{
                 type: actions.CREATE_IDENTITY_REQUEST,
@@ -118,11 +141,16 @@ describe('IntegrationKey actions', () => {
                 },
             }, {
                 type: actions.CREATE_IDENTITY_SUCCESS,
+                integrationKey: {
+                    name: 'test',
+                    id: undefined,
+                    json: undefined,
+                    service: undefined
+                }
             }]
 
-            await store.dispatch(actionsWithMock.createIdentity({
-                name: 'test',
-                response: 'moi'
+            await store.dispatch(actions.createIdentity({
+                name: 'test'
             }))
             assert.deepStrictEqual(store.getActions().slice(0, 2), expectedActions)
         })

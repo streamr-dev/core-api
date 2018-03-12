@@ -15,8 +15,6 @@ const mockStore = configureMockStore(middlewares)
 sinon.stub(helpers, 'default')
     .callsFake((uri) => uri.replace(/^\//, ''))
 
-moxios.promiseWait = () => new Promise(resolve => moxios.wait(resolve))
-
 describe('User actions', () => {
     let store
 

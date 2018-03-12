@@ -115,20 +115,26 @@ export const createIdentity = (integrationKey: IntegrationKey) => (dispatch: Fun
         ownWeb3.getDefaultAccount(),
         axios.post(createLink('api/v1/login/challenge'))
     ])
-        .then((account, response) => {
-            const challenge = response && response.data && response.data.challenge
-            return ownWeb3.eth.personal.sign(challenge, account)
+        .then(([account, response]) => {
+            const challenge = response && response.data
+            return ownWeb3.eth.personal.sign(challenge.challenge, account)
                 .then((signature) => {
                     return axios.post(createLink(apiUrl), {
                         ...integrationKey,
+                        challenge: challenge,
                         signature: signature,
                         address: account,
-                        challenge,
                     })
                 })
         })
         .then((response) => {
-            dispatch(createIdentitySuccess(response.data))
+            const {id, name, service, json} = response.data
+            dispatch(createIdentitySuccess({
+                id,
+                name,
+                service,
+                json
+            }))
             dispatch(success({
                 title: 'Success!',
                 message: 'New identity created',

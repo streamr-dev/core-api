@@ -44,6 +44,7 @@ export default class IntegrationKeyHandlerInput extends Component<Props> {
                                 type="text"
                                 className={styles.integrationKeyInput}
                                 placeholder={titleCase(field)}
+                                required
                             />
                         ))}
                         <InputGroup.Button className={styles.buttonContainer}>

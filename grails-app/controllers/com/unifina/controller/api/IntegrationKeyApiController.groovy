@@ -24,19 +24,20 @@ class IntegrationKeyApiController {
 
 	@StreamrApi
 	def save(SaveIntegrationKeyCommand cmd) {
-		if (cmd.service as IntegrationKey.Service == IntegrationKey.Service.ETHEREUM) {
-			IntegrationKey key
-			try {
-				key = ethereumIntegrationKeyService.createEthereumAccount(request.apiUser, cmd.name, cmd.json.privateKey)
-			} catch (IllegalArgumentException e) {
-				throw new ApiException(400, "INVALID_HEX_STRING", e.message)
-			}
-			render key.toMap() as JSON
-		} else if (cmd.service as IntegrationKey.Service == IntegrationKey.Service.ETHEREUM_ID) {
-			IntegrationKey key = ethereumIntegrationKeyService.createEthereumID(request.apiUser, cmd.name, cmd.challenge.id, cmd.challenge.challenge, cmd.signature)
-			response.status = 201
-			Map json = new JsonSlurper().parseText(key.json)
-			render([
+		switch (cmd.service as IntegrationKey.Service) {
+			case IntegrationKey.Service.ETHEREUM:
+				IntegrationKey key
+				try {
+					key = ethereumIntegrationKeyService.createEthereumAccount(request.apiUser, cmd.name, cmd.json.privateKey)
+				} catch (IllegalArgumentException e) {
+					throw new ApiException(400, "INVALID_HEX_STRING", e.message)
+				}
+				render key.toMap() as JSON
+			case IntegrationKey.Service.ETHEREUM_ID:
+				IntegrationKey key = ethereumIntegrationKeyService.createEthereumID(request.apiUser, cmd.name, cmd.challenge.id, cmd.challenge.challenge, cmd.signature)
+				response.status = 201
+				Map json = new JsonSlurper().parseText(key.json)
+				render([
 					id       : key.id,
 					challenge: [
 						id       : cmd.challenge.id,
@@ -48,9 +49,9 @@ class IntegrationKeyApiController {
 					name     : cmd.name,
 					service  : IntegrationKey.Service.ETHEREUM_ID.toString(),
 					signature: cmd.signature
-			] as JSON)
-		} else {
-			throw new ApiException(400, 'INVALID_SERVICE', "Invalid service: $request.JSON.service")
+				] as JSON)
+			default:
+				throw new ApiException(400, 'INVALID_SERVICE', "Invalid service: $request.JSON.service")
 		}
 	}
 
