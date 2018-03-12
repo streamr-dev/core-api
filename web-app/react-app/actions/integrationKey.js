@@ -142,7 +142,6 @@ export const createIdentity = (integrationKey: IntegrationKey) => (dispatch: Fun
                         message: 'New identity created',
                     }))
                 })
-
         })
         .catch((response) => {
             const err = parseError(response)
@@ -151,6 +150,7 @@ export const createIdentity = (integrationKey: IntegrationKey) => (dispatch: Fun
                 title: 'Create identity failed',
                 message: err.message,
             }))
+            throw err
         })
 }
 

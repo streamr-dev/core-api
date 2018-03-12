@@ -3,7 +3,6 @@ import thunk from 'redux-thunk'
 import * as actions from '../../actions/integrationKey'
 import assert from 'assert-diff'
 import moxios from 'moxios'
-import * as ownWeb3 from '../../utils/web3Instance'
 import sinon from 'sinon'
 
 const middlewares = [ thunk ]
