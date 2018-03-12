@@ -95,7 +95,7 @@ If the required functionality is complex, or if it depends on libraries or exter
 
 A module is as simple as a Java class that extends `AbstractSignalPathModule` and implements the critical module-specific functionality (`sendOutput` and `clearState`). The code is going to look the same as in a JavaModule, only wrapped in a Java class. Please take a look at the [Multiply module](https://github.com/streamr-dev/engine-and-editor/blob/master/src/java/com/unifina/signalpath/simplemath/Multiply.java) for a simple example / boilerplate / starting point. For unit testing a module, see the [MultiplySpec unit test class](https://github.com/streamr-dev/engine-and-editor/blob/master/test/unit/com/unifina/signalpath/simplemath/MultiplySpec.groovy).
 
-You also need to add your module to the `module` table in SQL database so that Editor finds your module, and you can add it on the canvas.
+You also need to add your module to the `module` table in the MySQL database so that Editor finds your module, and you can add it on the canvas.
 
 We want to integrate quality module contributions to the product. To get your custom module to the master, the following is required:
 * the module code <small>(*MyModule* extends AbstractSignalPathModule)</small>
