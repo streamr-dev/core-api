@@ -21,10 +21,7 @@ class StreamSpec extends LoginTester1Spec implements ConfirmationMixin, StreamMi
 	}
 	
 	private File getFile(String filename) {
-		// The test csv files must be available in the local filesystem of the machine where the browser is running.
-		// Note that it's impossible to check here whether the file exists because this code runs on a different machine.
-		boolean inJenkins = (System.getenv('BUILD_NUMBER') != null)
-		return inJenkins ? new File("/vagrant/$filename") : Paths.get(getClass().getResource("files/$filename").toURI()).toFile() 
+		Paths.get(getClass().getResource("files/$filename").toURI()).toFile()
 	}
 	
 	void "removing data from a stream works"() {
