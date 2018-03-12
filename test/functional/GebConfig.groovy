@@ -1,13 +1,12 @@
 /*
  This is the Geb configuration file.
- See: http://www.gebish.org/manual/current/configuration.html
+ See: http://www.gebish.org/manual/current/#configuration
 */
+
 
 import org.openqa.selenium.Dimension
 import org.openqa.selenium.chrome.ChromeDriver
 import org.openqa.selenium.chrome.ChromeOptions
-import org.openqa.selenium.remote.DesiredCapabilities
-import org.openqa.selenium.remote.RemoteWebDriver
 
 def env = System.getenv()
 def inJenkins = env['BUILD_NUMBER'] != null
@@ -16,7 +15,8 @@ String sutHost = env['SUT_HOST'] ? env['SUT_HOST'] : 'localhost'
 String sutPort = env['SUT_PORT'] ? env['SUT_PORT'] : '8081'
 boolean headless = env['HEADLESS'] != null
 
-String baseUrl = "http://${sutHost}:${sutPort}/streamr-core/"
+reportsDir = new File("target/test-reports/geb")
+baseUrl = "http://${sutHost}:${sutPort}/streamr-core/"
 println("GebConfig ${baseUrl} (headless=${headless})")
 
 driver = {
