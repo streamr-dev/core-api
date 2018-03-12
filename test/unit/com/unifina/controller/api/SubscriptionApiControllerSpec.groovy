@@ -43,7 +43,7 @@ class SubscriptionApiControllerSpec extends Specification {
 		
 		request.apiUser = new SecUser()
 		request.JSON = [
-			address: "0x0",
+			address: "0x0000000000000000000000000000000000000000",
 			product: "1",
 			endsAt: 1520334404
 		]
@@ -63,7 +63,7 @@ class SubscriptionApiControllerSpec extends Specification {
 
 		request.apiUser = devOpsUser
 		request.JSON = [
-		    address: "0x0",
+		    address: "0x0000000000000000000000000000000000000000",
 			product: "1",
 			endsAt: 1520334404
 		]
@@ -73,7 +73,7 @@ class SubscriptionApiControllerSpec extends Specification {
 			controller.save()
 		}
 		then:
-		1 * subscriptionService.onSubscribed(product, "0x0", _ as Date)
+		1 * subscriptionService.onSubscribed(product, "0x0000000000000000000000000000000000000000", _ as Date)
 	}
 
 	void "save() returns 204 given devops user"() {
@@ -83,7 +83,7 @@ class SubscriptionApiControllerSpec extends Specification {
 
 		request.apiUser = devOpsUser
 		request.JSON = [
-			address: "0x0",
+			address: "0x0000000000000000000000000000000000000000",
 			product: "1",
 			endsAt: 1520334404
 		]

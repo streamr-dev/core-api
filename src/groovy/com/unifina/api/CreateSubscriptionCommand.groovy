@@ -9,4 +9,9 @@ class CreateSubscriptionCommand {
 	Product product
 	String address
 	Long endsAt
+
+	static constraints = {
+		address(validator: Product.isEthereumAddress)
+		endsAt(min: 0L)
+	}
 }
