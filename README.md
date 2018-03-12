@@ -87,6 +87,24 @@ When you run the Engine+Editor web app with `grails run-app` or `grails test run
 - [Grails Database Migration Plugin Documentation (single page)](http://grails-plugins.github.io/grails-database-migration/1.4.0/guide/single.html)
 - [Spock Concurrency Tools](http://spockframework.org/spock/javadoc/1.1/spock/util/concurrent/package-summary.html)
 
+### Coding your own modules
+
+There are already modules that allow running code on canvas, e.g. JavaModule and Javascript module. They are however more "last resort" patches for cases where the modules don't offer the required functionality, but the functionality also isn't reusable enough to warrant developing a custom module.
+
+If the required functionality is complex, and if it depends on libraries or external code, you'll need to set up the development environment following the above steps. Upside is of course, after it's done, you also get IDE support (we use [IntelliJ IDEA](https://www.jetbrains.com/idea/)), and you can write unit tests etc.
+
+A module is as simple as a Java class that extends `AbstractSignalPathModule` and overrides the critical module-specific functionality (e.g. `SendOutput`). The code is going to look the same as in a JavaModule, only encapsulated in a Java class. Please take a look at the [Multiply module](https://github.com/streamr-dev/engine-and-editor/blob/master/src/java/com/unifina/signalpath/simplemath/Multiply.java) for a simple example / boilerplate / starting point. For unit testing a module, see the [MultiplySpec unit test class](https://github.com/streamr-dev/engine-and-editor/blob/master/test/unit/com/unifina/signalpath/simplemath/MultiplySpec.groovy).
+
+You also need to add your module to the `module` table in SQL database so that Editor finds your module, and you can add it on the canvas.
+
+We want to integrate quality module contributions to the product. To get your custom module to the master, the following is required:
+* the module code <small>(*MyModule* extends AbstractSignalPathModule)</small>
+* unit tests <small>(*MyModuleSpec* extends spock.lang.Specification)</small>
+* database migration <small>(under grails-app/migrations, [see example](https://github.com/streamr-dev/engine-and-editor/blob/master/grails-app/migrations/core/2017-03-08-list-to-events-module.groovy))</small>
+* all this in a neat git branch with no conflicts with master, and a PR in github
+
+We'll be happy to help with completing these steps.
+
 ## License
 
 This software is open source, and dual licensed under [AGPLv3](https://www.gnu.org/licenses/agpl.html) and an enterprise-friendly commercial license.
