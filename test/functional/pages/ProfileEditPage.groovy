@@ -7,6 +7,12 @@ class ProfileEditPage extends GrailsPage {
 
 	static url = "$controller/$action"
 
+	static at = {
+		waitFor {
+			changePassword.displayed // Wait for React
+		}
+	}
+
 	static content = {
             navbar { module NavbarModule }
 

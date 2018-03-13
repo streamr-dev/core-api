@@ -44,4 +44,4 @@ RUN npm install
 
 # Set Default Behavior
 ENTRYPOINT ["grails"]
-CMD ["-Dstreamr.database.host=mysql -Dstreamr.kafka.bootstrap.servers=kafka:9092 -Dstreamr.redis.hosts=redis -Dstreamr.cassandra.hosts=cassandra run-app"]
+CMD ["-Dstreamr.database.host=localhost -Dstreamr.kafka.bootstrap.servers=localhost:9092 -Dstreamr.redis.hosts=localhost -Dstreamr.cassandra.hosts=localhost run-app"]

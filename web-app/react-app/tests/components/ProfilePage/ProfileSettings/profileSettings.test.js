@@ -71,9 +71,7 @@ describe('ProfileSettings', () => {
                 saveCurrentUser={() => {}}
             />)
             el.instance().onTimezoneChange({
-                target: {
-                    value: 'testtest'
-                }
+                value: 'testtest'
             })
             assert(spy.calledOnce)
             assert(spy.calledWith('testtest'))

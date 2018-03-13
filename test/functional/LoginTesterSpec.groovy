@@ -1,10 +1,14 @@
-
-
+import geb.driver.CachingDriverFactory
 import pages.CanvasPage
 import pages.LoginPage
 import geb.spock.GebReportingSpec
 
 abstract class LoginTesterSpec extends GebReportingSpec {
+
+	def setupSpec() {
+		resetBrowser()
+		CachingDriverFactory.clearCacheAndQuitDriver()
+	}
 	
 	def setup() {
 		this.login()
