@@ -79,7 +79,8 @@ describe('IntegrationKey actions', () => {
             }, {
                 type: actions.GET_AND_REPLACE_INTEGRATION_KEYS_FAILURE,
                 error: {
-                    message: 'Request failed with status code 500',
+                    message: 'test',
+                    code: 'TEST'
                 }
             }]
 
@@ -207,8 +208,8 @@ describe('IntegrationKey actions', () => {
                     request.respondWith({
                         status: 200,
                         response: {
-                            challenge: 'challenge text',
-                            id: '123'
+                            id: '123',
+                            challenge: 'challenge text'
                         }
                     })
                     return moxios.promiseWait()
@@ -217,8 +218,13 @@ describe('IntegrationKey actions', () => {
                     const request = moxios.requests.mostRecent()
                     assert.equal(request.config.method, 'post')
                     assert.equal(request.url, 'api/v1/integration_keys')
+                    assert(signSpy.calledOnce)
+                    assert(signSpy.calledWith('challenge text'))
                     request.respondWith({
                         status: 500,
+                        response: {
+                            message: 'error'
+                        }
                     })
                 })
 
@@ -231,7 +237,7 @@ describe('IntegrationKey actions', () => {
             {
                 type: actions.CREATE_IDENTITY_FAILURE,
                 error: {
-                    message: 'Request failed with status code 500'
+                    message: 'error'
                 }
             }]
 
@@ -292,7 +298,8 @@ describe('IntegrationKey actions', () => {
             }, {
                 type: actions.CREATE_INTEGRATION_KEY_FAILURE,
                 error: {
-                    message: 'Request failed with status code 500',
+                    message: 'test',
+                    code: 'TEST'
                 }
             }]
 
@@ -349,7 +356,8 @@ describe('IntegrationKey actions', () => {
             }, {
                 type: actions.DELETE_INTEGRATION_KEY_FAILURE,
                 error: {
-                    message: 'Request failed with status code 500',
+                    message: 'test',
+                    code: 'TEST'
                 }
             }]
 
