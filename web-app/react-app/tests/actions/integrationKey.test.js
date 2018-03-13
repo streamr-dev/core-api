@@ -32,6 +32,7 @@ describe('IntegrationKey actions', () => {
         moxios.uninstall()
         store.clearActions()
         sandbox.reset()
+        sandbox.restore()
     })
 
     describe('getAndReplaceIntegrationKeys', () => {
@@ -78,9 +79,7 @@ describe('IntegrationKey actions', () => {
             }, {
                 type: actions.GET_AND_REPLACE_INTEGRATION_KEYS_FAILURE,
                 error: {
-                    message: 'test',
-                    code: 'TEST',
-                    statusCode: 500
+                    message: 'Request failed with status code 500',
                 }
             }]
 
@@ -155,9 +154,14 @@ describe('IntegrationKey actions', () => {
             assert.deepStrictEqual(store.getActions().slice(0, 2), expectedActions)
         })
         it('creates CREATE_IDENTITY_FAILURE when MetaMask is not installed', async () => {
+            sandbox.stub(web3Provider, 'default').callsFake(() => ({
+                isEnabled: () => false,
+            }))
+
             moxios.wait(() => {
                 const request = moxios.requests.mostRecent()
                 assert.equal(request.config.method, 'post')
+                assert.equal(request.url, 'api/v1/integration_keys')
                 request.respondWith({
                     status: 200,
                     response: request.config.data
@@ -181,6 +185,64 @@ describe('IntegrationKey actions', () => {
                 name: 'test',
             }))
             assert.deepStrictEqual(store.getActions().slice(0, 2), expectedActions)
+        })
+        it('creates CREATE_IDENTITY_FAILURE when HTTP request to create identity "api/v1/integration_keys" fails', async (done) => {
+            const signSpy = sandbox.stub().callsFake((challenge, account) => Promise.resolve(`${challenge}SignedBy${account}`))
+            const acc = 'testAccount'
+            sandbox.stub(web3Provider, 'default').callsFake(() => ({
+                isEnabled: () => true,
+                getDefaultAccount: () => Promise.resolve(acc),
+                eth: {
+                    personal: {
+                        sign: signSpy
+                    }
+                }
+            }))
+
+            moxios.promiseWait()
+                .then(() => {
+                    const request = moxios.requests.mostRecent()
+                    assert.equal(request.config.method, 'post')
+                    assert.equal(request.url, 'api/v1/login/challenge')
+                    request.respondWith({
+                        status: 200,
+                        response: {
+                            challenge: 'challenge text',
+                            id: '123'
+                        }
+                    })
+                    return moxios.promiseWait()
+                })
+                .then(() => {
+                    const request = moxios.requests.mostRecent()
+                    assert.equal(request.config.method, 'post')
+                    assert.equal(request.url, 'api/v1/integration_keys')
+                    request.respondWith({
+                        status: 500,
+                    })
+                })
+
+            const expectedActions = [{
+                type: actions.CREATE_IDENTITY_REQUEST,
+                integrationKey: {
+                    name: 'test'
+                },
+            },
+            {
+                type: actions.CREATE_IDENTITY_FAILURE,
+                error: {
+                    message: 'Request failed with status code 500'
+                }
+            }]
+
+            try {
+                await store.dispatch(actions.createIdentity({
+                    name: 'test',
+                }))
+            } catch (e) {
+                assert.deepStrictEqual(store.getActions().slice(0, 2), expectedActions)
+                done()
+            }
         })
     })
 
@@ -230,9 +292,7 @@ describe('IntegrationKey actions', () => {
             }, {
                 type: actions.CREATE_INTEGRATION_KEY_FAILURE,
                 error: {
-                    message: 'test',
-                    code: 'TEST',
-                    statusCode: 500
+                    message: 'Request failed with status code 500',
                 }
             }]
 
@@ -289,9 +349,7 @@ describe('IntegrationKey actions', () => {
             }, {
                 type: actions.DELETE_INTEGRATION_KEY_FAILURE,
                 error: {
-                    message: 'test',
-                    code: 'TEST',
-                    statusCode: 500
+                    message: 'Request failed with status code 500',
                 }
             }]
 
