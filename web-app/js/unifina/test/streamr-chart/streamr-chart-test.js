@@ -31,8 +31,8 @@ describe('streamr-chart', function() {
 							}
 						},
 						setExtremes: function(min, max) {}
-					}],
-
+				}],
+					setSize: function(innerWidth, innerHeight) {},
 					redraw: function() {}
 				})
 
