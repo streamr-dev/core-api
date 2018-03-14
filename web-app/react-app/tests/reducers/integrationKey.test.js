@@ -21,7 +21,7 @@ describe('IntegrationKey reducer', () => {
         })
     })
 
-    describe('CREATE_IDENTITY_REQUEST',() => {
+    describe('CREATE_IDENTITY',() => {
         it('should handle CREATE_IDENTITY_REQUEST', () => {
             assert.deepStrictEqual(reducer({}, {
                 type: actions.CREATE_IDENTITY_REQUEST
