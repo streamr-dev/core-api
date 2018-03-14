@@ -50,10 +50,10 @@ export class IdentityHandler extends Component<Props> {
         const hasWeb3 = getWeb3().isEnabled()
         return (
             <Panel header="Ethereum Identities">
-                <p key={0}>
+                <p>
                     These Ethereum accounts are bound to your Streamr user. You can use them to authenticate and to participate on the Streamr Marketplace.
                 </p>
-                <Row key={1}>
+                <Row>
                     <IntegrationKeyHandlerSegment
                         onNew={this.onNew}
                         onDelete={this.onDelete}
