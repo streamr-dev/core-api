@@ -1,7 +1,7 @@
 // @flow
 
 import React, {Component} from 'react'
-import {Panel, Row} from 'react-bootstrap'
+import {Panel, Row, Alert} from 'react-bootstrap'
 import IntegrationKeyHandlerSegment from '../IntegrationKeyHandler/IntegrationKeyHandlerSegment'
 import type {IntegrationKey} from '../../../flowtype/integration-key-types'
 import {createIdentity} from '../../../actions/integrationKey'
@@ -9,6 +9,7 @@ import {connect} from 'react-redux'
 import type {ErrorInUi} from '../../../flowtype/common-types'
 import type {IntegrationKeyState} from '../../../flowtype/states/integration-key-state'
 import {deleteIntegrationKey, getIntegrationKeysByService} from '../../../actions/integrationKey'
+import getWeb3 from '../../../utils/web3Provider'
 
 type StateProps = {
     error: ?ErrorInUi,
@@ -46,23 +47,31 @@ export class IdentityHandler extends Component<Props> {
     }
 
     render() {
+        const hasWeb3 = getWeb3().isEnabled()
         return (
             <Panel header="Ethereum Identities">
-                <p>
+                <p key={0}>
                     These Ethereum accounts are bound to your Streamr user. You can use them to authenticate and to participate on the Streamr Marketplace.
                 </p>
-                <Row>
+                <Row key={1}>
                     <IntegrationKeyHandlerSegment
                         onNew={this.onNew}
                         onDelete={this.onDelete}
                         service={service}
                         integrationKeys={this.props.integrationKeys}
                         copy="address"
+                        showInput={hasWeb3}
                         tableFields={[
                             ['address', (add) => add && (typeof add === 'string') && `${add.substring(0, 15)}...` || add]
                         ]}
                     />
                 </Row>
+                {!hasWeb3 && (
+                    <Alert bsStyle="danger">
+                        To bind Ethereum addresses to your Streamr account, you need an Ethereum-enabled browser.
+                        Try the <a src="https://metamask.io">MetaMask plugin for Chrome</a> or the <a src="https://github.com/ethereum/mist/releases">Mist browser</a>.
+                    </Alert>
+                )}
             </Panel>
         )
     }

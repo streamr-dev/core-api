@@ -13,13 +13,16 @@ import type {Props as InputProps} from './IntegrationKeyHandlerInput'
 
 type GivenProps = {
     className?: string,
-    name?: $ElementType<IntegrationKey, 'name'>
+    name?: $ElementType<IntegrationKey, 'name'>,
+    showInput: boolean
 }
 
 type Props = InputProps & TableProps & GivenProps
 
 export default class IntegrationKeyHandlerSegment extends Component<Props> {
-
+    static defaultProps = {
+        showInput: true
+    }
     render() {
         return (
             <div className={this.props.className || ''}>
@@ -35,10 +38,12 @@ export default class IntegrationKeyHandlerSegment extends Component<Props> {
                         onDelete={this.props.onDelete}
                         copy={this.props.copy}
                     />
-                    <IntegrationKeyHandlerInput
-                        inputFields={this.props.inputFields}
-                        onNew={this.props.onNew}
-                    />
+                    {this.props.showInput && (
+                        <IntegrationKeyHandlerInput
+                            inputFields={this.props.inputFields}
+                            onNew={this.props.onNew}
+                        />
+                    )}
                 </Col>
             </div>
         )

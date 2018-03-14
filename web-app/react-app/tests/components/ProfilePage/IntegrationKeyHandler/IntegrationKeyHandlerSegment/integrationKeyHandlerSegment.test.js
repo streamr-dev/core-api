@@ -18,8 +18,7 @@ describe('IntegrationKeyHandler', () => {
                 createIntegrationKey={() => {}}
                 deleteIntegrationKey={() => {}}
             />)
-            const label = el.childAt(0).childAt(0)
-            assert(label.is('ControlLabel'))
+            const label = el.find('ControlLabel')
             assert.equal(label.childAt(0).text(), 'test')
         })
         it('renders IntegrationKeyHandlerTable correctly', () => {
@@ -36,8 +35,7 @@ describe('IntegrationKeyHandler', () => {
                 copy="test"
                 onDelete={onDelete}
             />)
-            const table = el.childAt(0).childAt(1)
-            assert(table.is('IntegrationKeyHandlerTable'))
+            const table = el.find('IntegrationKeyHandlerTable')
             assert.deepStrictEqual(table.props(), {
                 tableFields: [1,2,3],
                 integrationKeys: [3,2,1],
@@ -58,12 +56,27 @@ describe('IntegrationKeyHandler', () => {
                 deleteIntegrationKey=""
                 onNew={onNew}
             />)
-            const input = el.childAt(0).childAt(2)
-            assert(input.is('IntegrationKeyHandlerInput'))
+            const input = el.find('IntegrationKeyHandlerInput')
             assert.deepStrictEqual(input.props(), {
                 inputFields: [1,2,3],
                 onNew
             })
+        })
+        it('does not render IntegrationKeyHandlerInput if props.showInput === false', () => {
+            const onNew = () => {}
+            const el = shallow(<IntegrationKeyHandlerSegment
+                tableFields={[]}
+                inputFields={[1,2,3]}
+                integrationKeys={[3,2,1]}
+                service=""
+                name="test"
+                getIntegrationKeysByService={() => {}}
+                createIntegrationKey=""
+                deleteIntegrationKey=""
+                onNew={onNew}
+                showInput={false}
+            />)
+            assert.equal(el.find('IntegrationKeyHandlerInput').length, 0)
         })
     })
 

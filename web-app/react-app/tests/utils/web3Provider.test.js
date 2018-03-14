@@ -22,12 +22,23 @@ describe('web3Provider', () => {
                 const acc = await web3.getDefaultAccount()
                 assert.equal(acc, 'testAccount')
             })
-            it('must throw error if no account', async () => {
+            it('must throw error if getAccounts gives undefined/null', async (done) => {
                 try {
                     web3.setProvider(new FakeProvider())
                     await web3.getDefaultAccount()
                 } catch (e) {
                     assert(e.message.match('is locked'))
+                    done()
+                }
+            })
+            it('must throw error if getAccounts gives empty list', async (done) => {
+                web3.eth.getAccounts = () => new Promise(resolve => resolve([]))
+                try {
+                    web3.setProvider(new FakeProvider())
+                    await web3.getDefaultAccount()
+                } catch (e) {
+                    assert(e.message.match('is locked'))
+                    done()
                 }
             })
         })
