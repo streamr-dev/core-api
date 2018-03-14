@@ -18,11 +18,11 @@
     "test-jenkins": "npm run test-old-jenkins; npm run test-new-jenkins",
     "test-old-jenkins": "mocha web-app/js/unifina/test --recursive --reporter mocha-junit-reporter --reporter-options mochaFile=./test-old-report.xml",
     "test-new-jenkins": "JEST_JUNIT_OUTPUT=test-new-report.xml jest ./web-app/react-app/tests --ci --testResultsProcessor=\"jest-junit\"",
-    "build": "NODE_ENV=production ./node_modules/.bin/webpack",
-    "build-dev": "./node_modules/.bin/webpack",
+    "build": "NODE_ENV=production webpack",
+    "build-dev": "webpack",
     "clean": "rm -rf node_modules/",
     "clean-install": "npm run clean && npm install",
-    "dev": "./node_modules/.bin/webpack-dev-server"
+    "dev": "webpack-dev-server --hot"
   },
   "jest": {
     "moduleNameMapper": {
