@@ -79,7 +79,9 @@ describe('IntegrationKey actions', () => {
             }, {
                 type: actions.GET_AND_REPLACE_INTEGRATION_KEYS_FAILURE,
                 error: {
-                    message: 'Request failed with status code 500',
+                    message: 'test',
+                    code: 'TEST',
+                    statusCode: 500
                 }
             }]
 
@@ -236,7 +238,9 @@ describe('IntegrationKey actions', () => {
             {
                 type: actions.CREATE_IDENTITY_FAILURE,
                 error: {
-                    message: 'Request failed with status code 500'
+                    message: 'error',
+                    statusCode: 500,
+                    code: undefined
                 }
             }]
 
@@ -297,7 +301,9 @@ describe('IntegrationKey actions', () => {
             }, {
                 type: actions.CREATE_INTEGRATION_KEY_FAILURE,
                 error: {
-                    message: 'Request failed with status code 500',
+                    message: 'test',
+                    code: 'TEST',
+                    statusCode: 500
                 }
             }]
 
@@ -354,7 +360,9 @@ describe('IntegrationKey actions', () => {
             }, {
                 type: actions.DELETE_INTEGRATION_KEY_FAILURE,
                 error: {
-                    message: 'Request failed with status code 500',
+                    message: 'test',
+                    code: 'TEST',
+                    statusCode: 500
                 }
             }]
 

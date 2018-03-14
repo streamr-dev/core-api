@@ -12,7 +12,7 @@ import styles from './integrationKeyHandlerTableRow.pcss'
 import type {IntegrationKey} from '../../../../../../flowtype/integration-key-types'
 
 export type Props = {
-    fields: Array<string | [string, (any) => Node]>,
+    fields?: Array<string | [string, (any) => Node]>,
     onDelete: (id: $ElementType<IntegrationKey, 'id'>) => void,
     copy?: string,
     show?: string,
@@ -45,7 +45,7 @@ export default class IntegrationKeyHandlerTableRow extends Component<Props, Stat
                 <td>
                     {item.name}
                 </td>
-                {fields.map(f => (
+                {fields && fields.map(f => (
                     <td key={JSON.stringify(f)}>
                         <span className={styles.publicKey}>{Array.isArray(f) ? (
                             f[1](item.json[f[0]])

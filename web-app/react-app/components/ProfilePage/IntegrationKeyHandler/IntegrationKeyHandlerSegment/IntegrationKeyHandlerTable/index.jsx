@@ -14,7 +14,7 @@ import type {Props as TableRowProps} from './IntegrationKeyHandlerTableRow'
 
 export type Props = {
     integrationKeys: Array<IntegrationKey>,
-    tableFields: $ElementType<TableRowProps, 'fields'>,
+    tableFields?: $ElementType<TableRowProps, 'fields'>,
     onDelete: $ElementType<TableRowProps, 'onDelete'>,
     copy?: $ElementType<TableRowProps, 'copy'>
 }
@@ -28,7 +28,7 @@ export default class IntegrationKeyHandlerTable extends Component<Props> {
                 <thead>
                     <tr>
                         <th className={styles.nameHeader}>Name</th>
-                        {tableFields.map(f => (
+                        {tableFields && tableFields.map(f => (
                             <th key={JSON.stringify(f)}>
                                 {titleCase(Array.isArray(f) ? f[0] : f)}
                             </th>
