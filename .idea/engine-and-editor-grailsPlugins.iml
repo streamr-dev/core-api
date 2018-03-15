@@ -28,7 +28,7 @@
       </configuration>
     </facet>
   </component>
-  <component name="NewModuleRootManager" inherit-compiler-output="true">
+  <component name="NewModuleRootManager" LANGUAGE_LEVEL="JDK_1_8" inherit-compiler-output="true">
     <exclude-output />
     <content url="file://$USER_HOME$/.grails/2.5.6/projects/streamr-core/plugins/cache-headers-1.1.7">
       <sourceFolder url="file://$USER_HOME$/.grails/2.5.6/projects/streamr-core/plugins/cache-headers-1.1.7/grails-app/services" isTestSource="false" />
