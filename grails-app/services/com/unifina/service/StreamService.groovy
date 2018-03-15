@@ -15,12 +15,13 @@ import com.unifina.domain.security.Permission
 import com.unifina.domain.security.SecUser
 import com.unifina.domain.signalpath.Canvas
 import com.unifina.domain.task.Task
-import com.unifina.feed.DataRangeProvider
 import com.unifina.feed.AbstractStreamListener
 import com.unifina.feed.DataRange
+import com.unifina.feed.DataRangeProvider
 import com.unifina.feed.FieldDetector
 import com.unifina.feed.redis.StreamrBinaryMessageWithKafkaMetadata
 import com.unifina.signalpath.RuntimeRequest
+import com.unifina.task.DelayedDeleteStreamTask
 import com.unifina.utils.CSVImporter
 import com.unifina.utils.IdGenerator
 import grails.converters.JSON
@@ -116,6 +117,7 @@ class StreamService {
 	}
 
 	// Ref to Kafka will be abstracted out when Feed abstraction is reworked
+	@CompileStatic
 	void sendMessage(Stream stream, String partitionKey, long timestamp, byte[] content, byte contentType, int ttl=0) {
 		int streamPartition = partitioner.partition(stream, partitionKey)
 		StreamrBinaryMessage msg = new StreamrBinaryMessage(stream.id, streamPartition, timestamp, ttl, contentType, content)
