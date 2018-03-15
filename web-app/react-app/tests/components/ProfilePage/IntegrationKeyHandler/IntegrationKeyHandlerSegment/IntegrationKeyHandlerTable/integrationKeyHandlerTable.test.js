@@ -1,5 +1,5 @@
 import React from 'react'
-import {shallow, mount} from 'enzyme'
+import {shallow} from 'enzyme'
 import assert from 'assert-diff'
 import sinon from 'sinon'
 
@@ -7,20 +7,20 @@ import IntegrationKeyHandlerTable from '../../../../../../components/ProfilePage
 
 describe('IntegrationKeyHandlerTable', () => {
     let sandbox
-    
+
     beforeEach(() => {
         sandbox = sinon.sandbox.create()
     })
-    
+
     afterEach(() => {
         sandbox.restore()
     })
-    
+
     describe('render', () => {
         describe('thead', () => {
             it('renders header correctly', () => {
                 const el = shallow(<IntegrationKeyHandlerTable
-                    fields={['Test']}
+                    tableFields={['Test']}
                     integrationKeys={[]}
                     onDelete={() => {
                     }}
@@ -47,7 +47,7 @@ describe('IntegrationKeyHandlerTable', () => {
             })
             it('renders fields in title case', () => {
                 const el = shallow(<IntegrationKeyHandlerTable
-                    fields={['firstCamelCase', 'secondCamelCase']}
+                    tableFields={['firstCamelCase', 'secondCamelCase']}
                     integrationKeys={[]}
                     onDelete={() => {
                     }}
@@ -62,11 +62,11 @@ describe('IntegrationKeyHandlerTable', () => {
                     .text(), 'Second Camel Case')
             })
         })
-        
+
         describe('tbody', () => {
             it('must render IntegrationKeyHandlerTableRow fro every item', () => {
                 const el = shallow(<IntegrationKeyHandlerTable
-                    fields={['firstCamelCase', 'secondCamelCase']}
+                    tableFields={['firstCamelCase', 'secondCamelCase']}
                     integrationKeys={[]}
                     onDelete={() => {
                     }}

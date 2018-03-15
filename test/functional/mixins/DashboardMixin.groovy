@@ -79,6 +79,9 @@ trait DashboardMixin {
 	}
 
 	def saveDashboard() {
+		interact {
+			moveToElement(saveButton)
+		}
 		saveButton.click()
 		waitFor { findSuccessNotification() }
 	}

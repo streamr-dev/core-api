@@ -134,6 +134,8 @@ class EthereumIntegrationKeyServiceSpec extends Specification {
 		key.name == name
 		json.containsKey("address")
 		json.address == address
+		// Challenge deleted
+		Challenge.count() == 0
 	}
 
 	void "createEthereumID() validates challenge"() {

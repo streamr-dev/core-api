@@ -9,4 +9,12 @@ databaseChangeLog = {
 			WHERE id = 'run-canvas-spec';
 		""")
 	}
+
+	changeSet(author: "eric", id: "fix-canvas-spec-2", context: "test") {
+		sql("""
+			UPDATE canvas
+			SET server = 'localhost'
+			WHERE id = 'run-canvas-spec';
+		""")
+	}
 }

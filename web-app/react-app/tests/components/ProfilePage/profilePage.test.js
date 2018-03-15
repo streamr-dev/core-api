@@ -5,7 +5,7 @@ import assert from 'assert-diff'
 import ProfilePage from '../../../components/ProfilePage'
 
 describe('ProfilePageHandler', () => {
-    
+
     describe('render', () => {
         it('should be a Row', () => {
             const el = shallow(<ProfilePage/>)
@@ -27,6 +27,10 @@ describe('ProfilePageHandler', () => {
             const el = shallow(<ProfilePage/>)
             assert(el.find('Connect(IntegrationKeyHandler)'))
         })
+        it('should have a IdentityHandler', () => {
+            const el = shallow(<ProfilePage/>)
+            assert(el.find('Connect(IdentityHandler)'))
+        })
     })
-    
+
 })
