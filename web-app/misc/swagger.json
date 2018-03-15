@@ -3102,9 +3102,9 @@
           "description": "Unique identifier of purchased Product",
           "example": "JaHJaXclSmuR7cvqwfj9MQD13crwwvRXCLJBWflaRPaQ"
         },
-        "beneficiaryAddress": {
+        "subscriber": {
           "type": "string",
-          "description": "Ethereum address of buyer",
+          "description": "Ethereum address of the buyer",
           "example": "0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF"
         },
         "endsAt": {
