@@ -6,7 +6,7 @@ import sinon from 'sinon'
 import IntegrationKeyHandlerTableRow from '../../../../../../../components/ProfilePage/IntegrationKeyHandler/IntegrationKeyHandlerSegment/IntegrationKeyHandlerTable/IntegrationKeyHandlerTableRow'
 
 describe('IntegrationKeyHandlerTableRow', () => {
-    
+
     describe('render', () => {
         let el
         let onDeleteSpy = sinon.spy()
@@ -34,32 +34,31 @@ describe('IntegrationKeyHandlerTableRow', () => {
         it('must have correct amount of tds', () => {
             const tds = el.find('td')
             assert.equal(tds.length, 4)
-            
+
             assert.equal(tds.at(0).text(), 'testName')
-            
+
             const td = tds.at(1)
             const span = td.childAt(0)
             assert.equal(span.props().className, 'publicKey')
             assert.equal(span.text(), 'field')
-            
+
             const td2 = tds.at(2)
             assert(td2.is('td'))
             const span2 = td2.childAt(0)
             assert.equal(span2.props().className, 'publicKey')
             assert.equal(span2.text(), 'fieldAgain')
-            
+
             const td3 = tds.at(3)
             assert(td3.is('td'))
         })
         describe('last td', () => {
-            it('must have the right kind of button', () => {
+            it('must have actionButtonContainer', () => {
                 el.setProps({
                     fields: [1,2,3,4,5,6,7,8,9,0]
                 })
                 const lastTd = el.find('td').last()
-                const formGroup = lastTd.childAt(0)
-                assert(formGroup.is('FormGroup'))
-                assert.equal(formGroup.props().className, 'pull-right')
+                const actionButtonContainer = lastTd.find('div.actionButtonContainer')
+                assert.equal(actionButtonContainer.length, 1)
             })
             it('must have a ConfirmButton with correct props', () => {
                 const lastTd = el.find('td').last()
@@ -90,7 +89,7 @@ describe('IntegrationKeyHandlerTableRow', () => {
                 const formGroup = lastTd.childAt(0)
                 const confirmButton = formGroup.childAt(0)
                 confirmButton.props().confirmCallback()
-                
+
                 assert(spy.calledOnce)
                 assert(spy.calledWith('testId'))
             })

@@ -2,7 +2,6 @@
 
 import type {IntegrationKey} from '../integration-key-types'
 import type {ErrorInUi} from '../common-types'
-
 import {
     GET_AND_REPLACE_INTEGRATION_KEYS_REQUEST,
     GET_AND_REPLACE_INTEGRATION_KEYS_SUCCESS,
@@ -15,12 +14,16 @@ import {
     CREATE_INTEGRATION_KEY_FAILURE,
     DELETE_INTEGRATION_KEY_REQUEST,
     DELETE_INTEGRATION_KEY_SUCCESS,
-    DELETE_INTEGRATION_KEY_FAILURE
+    DELETE_INTEGRATION_KEY_FAILURE,
+    CREATE_IDENTITY_FAILURE,
+    CREATE_IDENTITY_REQUEST,
+    CREATE_IDENTITY_SUCCESS,
 } from '../../actions/integrationKey'
 
 export type IntegrationKeyAction = {
     type: typeof GET_AND_REPLACE_INTEGRATION_KEYS_REQUEST
         | typeof CREATE_INTEGRATION_KEY_REQUEST
+        | typeof CREATE_IDENTITY_REQUEST
 } | {
     type: typeof GET_INTEGRATION_KEYS_BY_SERVICE_REQUEST,
     service: $ElementType<IntegrationKey, 'service'>
@@ -36,12 +39,14 @@ export type IntegrationKeyAction = {
     integrationKeys: Array<IntegrationKey>,
     service: $ElementType<IntegrationKey, 'service'>
 } | {
-    type: typeof CREATE_INTEGRATION_KEY_SUCCESS,
+    type: typeof CREATE_INTEGRATION_KEY_SUCCESS
+        | typeof CREATE_IDENTITY_SUCCESS,
     integrationKey: IntegrationKey
 } | {
     type: typeof GET_AND_REPLACE_INTEGRATION_KEYS_FAILURE
         | typeof CREATE_INTEGRATION_KEY_FAILURE
-        | typeof DELETE_INTEGRATION_KEY_FAILURE,
+        | typeof DELETE_INTEGRATION_KEY_FAILURE
+        | typeof CREATE_IDENTITY_FAILURE,
     error: ErrorInUi
 } | {
     type: typeof GET_INTEGRATION_KEYS_BY_SERVICE_FAILURE,

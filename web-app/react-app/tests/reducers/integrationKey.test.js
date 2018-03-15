@@ -3,17 +3,16 @@ import * as actions from '../../actions/integrationKey'
 import assert from 'assert-diff'
 import _ from 'lodash'
 
-
 describe('IntegrationKey reducer', () => {
-    
+
     beforeEach(() => {
         global._ = _
     })
-    
+
     afterEach(() => {
         delete global._
     })
-    
+
     it('should return the initial state', () => {
         assert.deepStrictEqual(reducer(undefined, {}), {
             listsByService: {},
@@ -21,7 +20,80 @@ describe('IntegrationKey reducer', () => {
             fetching: false
         })
     })
-    
+
+    describe('CREATE_IDENTITY',() => {
+        it('should handle CREATE_IDENTITY_REQUEST', () => {
+            assert.deepStrictEqual(reducer({}, {
+                type: actions.CREATE_IDENTITY_REQUEST
+            }), {
+                fetching: true
+            })
+        })
+        it('should handle CREATE_IDENTITY_SUCCESS', () => {
+            assert.deepStrictEqual(reducer({
+                listsByService: {
+                    ETHEREUM: [{
+                        id: 1,
+                        service: 'ETHEREUM'
+                    }],
+                    ETHEREUM_ID: [{
+                        id: 2,
+                        service: 'ETHEREUM_ID'
+                    }]
+                }
+            }, {
+                type: actions.CREATE_IDENTITY_SUCCESS,
+                integrationKey: {
+                    id: 3,
+                    service: 'ETHEREUM'
+                }
+            }), {
+                fetching: false,
+                listsByService: {
+                    ETHEREUM: [{
+                        id: 1,
+                        service: 'ETHEREUM'
+                    }, {
+                        id: 3,
+                        service: 'ETHEREUM'
+                    }],
+                    ETHEREUM_ID: [{
+                        id: 2,
+                        service: 'ETHEREUM_ID'
+                    }]
+                },
+                error: null
+            })
+        })
+        it('should handle CREATE_IDENTITY_FAILURE', () => {
+            assert.deepStrictEqual(reducer({
+                listsByService: {
+                    ETHEREUM: [{
+                        id: 1
+                    }, {
+                        id: 2
+                    }, {
+                        id: 3
+                    }]
+                }
+            }, {
+                type: actions.CREATE_IDENTITY_FAILURE,
+                error: 'test-error'
+            }), {
+                fetching: false,
+                listsByService: {
+                    ETHEREUM: [{
+                        id: 1
+                    }, {
+                        id: 2
+                    }, {
+                        id: 3
+                    }]
+                },
+                error: 'test-error'
+            })
+        })
+    })
     describe('GET_AND_REPLACE_INTEGRATION_KEYS', () => {
         it('should handle GET_AND_REPLACE_INTEGRATION_KEYS_REQUEST', () => {
             assert.deepStrictEqual(reducer({}, {
@@ -120,7 +192,7 @@ describe('IntegrationKey reducer', () => {
             })
         })
     })
-    
+
     describe('CREATE_INTEGRATION_KEY', () => {
         it('should handle CREATE_INTEGRATION_KEY_REQUEST', () => {
             assert.deepStrictEqual(reducer({}, {
@@ -194,7 +266,7 @@ describe('IntegrationKey reducer', () => {
             })
         })
     })
-    
+
     describe('DELETE_INTEGRATION_KEY', () => {
         it('should handle DELETE_INTEGRATION_KEY_REQUEST', () => {
             assert.deepStrictEqual(reducer({}, {
