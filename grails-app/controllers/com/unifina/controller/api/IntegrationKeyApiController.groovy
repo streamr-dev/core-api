@@ -33,6 +33,7 @@ class IntegrationKeyApiController {
 					throw new ApiException(400, "INVALID_HEX_STRING", e.message)
 				}
 				render key.toMap() as JSON
+				break
 			case IntegrationKey.Service.ETHEREUM_ID:
 				IntegrationKey key = ethereumIntegrationKeyService.createEthereumID(request.apiUser, cmd.name, cmd.challenge.id, cmd.challenge.challenge, cmd.signature)
 				response.status = 201
@@ -50,6 +51,7 @@ class IntegrationKeyApiController {
 					service  : IntegrationKey.Service.ETHEREUM_ID.toString(),
 					signature: cmd.signature
 				] as JSON)
+				break
 			default:
 				throw new ApiException(400, 'INVALID_SERVICE', "Invalid service: $request.JSON.service")
 		}
