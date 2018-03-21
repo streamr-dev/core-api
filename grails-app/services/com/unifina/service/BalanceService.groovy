@@ -17,13 +17,14 @@ class BalanceService {
 	@PostConstruct
 	void init() {
 		final HttpService httpService = new HttpService("https://rinkeby.infura.io") // TODO: Fix address
-		web3 = new Web3BalanceImpl(Web3j.build(httpService))
+		final Web3j web3j = Web3j.build(httpService)
+		this.web3 = new Web3BalanceImpl(web3j)
 	}
 
 	@CompileStatic
 	BigInteger checkBalance(String address) throws ApiException {
 		try {
-			return web3.balance(address)
+			return this.web3.checkBalance(address)
 		} catch (ExecutionException e) {
 			throw new ApiException(500, "BALANCE_ERROR", e.getCause().getMessage())
 		} catch (MessageDecodingException e) {
@@ -35,7 +36,7 @@ class BalanceService {
 }
 
 interface Web3Balance {
-	BigInteger balance(String address) throws InterruptedException, ExecutionException, MessageDecodingException
+	BigInteger checkBalance(String address) throws InterruptedException, ExecutionException, MessageDecodingException
 }
 
 class Web3BalanceImpl implements Web3Balance {
@@ -46,12 +47,12 @@ class Web3BalanceImpl implements Web3Balance {
 	}
 
 	@Override
-	BigInteger balance(String address) throws InterruptedException, ExecutionException, MessageDecodingException {
-		EthGetBalance ethGetBalance = web3
+	BigInteger checkBalance(String address) throws InterruptedException, ExecutionException, MessageDecodingException {
+		EthGetBalance ethGetBalance = this.web3
 			.ethGetBalance(address, DefaultBlockParameterName.LATEST)
 			.sendAsync()
 			.get()
-		BigInteger balance = ethGetBalance.getBalance()
+		final BigInteger balance = ethGetBalance.getBalance()
 		return balance
 	}
 }

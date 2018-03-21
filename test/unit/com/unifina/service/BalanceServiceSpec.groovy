@@ -20,7 +20,7 @@ class BalanceServiceSpec extends Specification {
 		def result = service.checkBalance(address)
 
 		then:
-		1 * service.web3.balance(address) >> expected
+		1 * service.web3.checkBalance(address) >> expected
 		result == expected
 	}
 	void "check balance when underlying Web3j API throws InterruptedException"() {
@@ -28,7 +28,7 @@ class BalanceServiceSpec extends Specification {
 		service.checkBalance(address)
 
 		then:
-		1 * service.web3.balance(address) >> { throw new InterruptedException("mock: thread interrupted") }
+		1 * service.web3.checkBalance(address) >> { throw new InterruptedException("mock: thread interrupted") }
 		thrown(ApiException)
 	}
 	void "check balance when underlying Web3j API throws ExecutionException"() {
@@ -36,7 +36,7 @@ class BalanceServiceSpec extends Specification {
 		service.checkBalance(address)
 
 		then:
-		1 * service.web3.balance(address) >> { throw new ExecutionException("mock: execution aborted", new Exception("root cause")) }
+		1 * service.web3.checkBalance(address) >> { throw new ExecutionException("mock: execution aborted", new Exception("root cause")) }
 		thrown(ApiException)
 	}
 	void "check balance when underlying Web3j API throws MessageDecodingException"() {
@@ -44,7 +44,7 @@ class BalanceServiceSpec extends Specification {
 		service.checkBalance(address)
 
 		then:
-		1 * service.web3.balance(address) >> { throw new MessageDecodingException("mock: message decoding", new Exception("root cause")) }
+		1 * service.web3.checkBalance(address) >> { throw new MessageDecodingException("mock: message decoding", new Exception("root cause")) }
 		thrown(ApiException)
 	}
 }
