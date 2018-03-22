@@ -1,0 +1,59 @@
+language: groovy
+sudo: required
+jdk:
+- openjdk7
+services:
+- docker
+- mysql
+branches:
+  only:
+  - master
+git:
+  submodules: false
+before_install:
+- curl -s http://get.sdkman.io | bash
+- echo sdkman_auto_answer=true > ~/.sdkman/etc/config
+- source "/home/travis/.sdkman/bin/sdkman-init.sh"
+- sdk install grails 2.5.6
+- sed -i 's/git@github.com:/https:\/\/github.com\//' .gitmodules
+- git submodule update --init --recursive
+addons:
+  chrome: stable
+  apt:
+    packages:
+    - lynx
+jobs:
+  include:
+  - stage: Unit tests
+    script:
+    - grails clean
+    - grails test-app -unit
+  - stage: Integration tests
+    script:
+    - sudo /etc/init.d/mysql stop
+    - npm install
+    - git clone https://github.com/streamr-dev/streamr-docker-dev.git
+    - streamr-docker-dev/streamr-docker-dev/bin.sh start 1
+    - grails clean
+    - grails test-app -integration
+  - stage: Build war
+    script:
+    - grails clean
+    - npm install
+    - npm run build
+    - grails prod war
+    - mkdir build
+    - cp $(pwd)/target/ROOT.war $(pwd)/build
+    deploy:
+      provider: s3
+      access_key_id: AKIAI7LEOVJBY6ZEH44Q
+      secret_access_key:
+        secure: iKwr8sXvSmzDpv6GIl4q0m9beVNa4IDd/cYrF1gTB9oOESDFT9Q1EqiVeFUZGVQnKWcbvUmHbGu+f8AhF7AMpST6eeGm+h35m/Y1gBxehmFM4yf/kJkA2lj34/Xzy+3N8XpHnFGSF5alya0uEKV2wgQ7qUYvw/SkNA67VdwlzQSEbTu+yHYWP/PYuddTTePjQj3J8vJLwMoOSWsMl3n32nsFOx4cCCerzsfaA7F1JYJwTleyd71iFinQGRGjIaYJGQOGVjCmEZRuHLZEZNXCkEeFneoBhymYtoXsLVXkyf5VkibApTnKYaA8wXRCtI+Ow1zfTl8KzxFOiQ/zbtjtGb375TbwKOTBOQTJk7Heh99gdSAA+uhtnia2TvuqwZD+W8Ge7NW21/tJzQS9dPWM8rFtyK0BL7cYH4SLW4QtHTnwlg99jiHqR/RjtvPiVNxX6R23922n9ORJUmY81lsjgN74eq6stwyIl4HvbgiVqEd6w6+uUd4p2GLeFFN7w/Kn+W2V8VY/aUKwz2Mg/KfTd+l3kyPmlb9ITx4z39A4mmIislWD00SpnHvDYOBYUWCByzhDrMPFMY4RAQL8SCwjU/XKqbueFYUJncqW9aZm3N9Zcm2UcTnmfxHbnCN1Z/5gWXxIp5WbwxY6yt29p8UxHU8eGfHzWeIl+2fH0HT6bgU=
+      bucket: eu-west-1-streamr-vault
+      upload-dir: editor-engine/release
+      acl: 'private'
+      region: eu-west-1
+      skip_cleanup: true
+      local_dir: build
+    if: branch = master
+after_failure: "./travis-after-failure.sh"
