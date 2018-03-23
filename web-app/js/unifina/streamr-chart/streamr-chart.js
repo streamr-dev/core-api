@@ -25,7 +25,7 @@ function StreamrChart(parent, options) {
 	this.messageQueue = []
 
 	this.seriesMeta = []
-	this.realYAxis = [];	
+	this.realYAxis = [];
 	this.chartTitle = '';
 	this.yAxis = null;
 
@@ -38,7 +38,7 @@ function StreamrChart(parent, options) {
 	this.maxTime = null;
 	this.lastTime = null;
 	this.lastValue = null;
-    
+
     this.toolbar = $("<div/>", {
         class: 'chart-toolbar'
     })
@@ -68,19 +68,19 @@ function StreamrChart(parent, options) {
 			{name: "15 sec", range: 15*1000},
 			{name: "1 sec", range: 1000},
 		]
-		
+
 		rangeConfig.forEach(function(c) {
 			var $option =  $("<option value='"+c.range+"'>"+c.name+"</option>")
             $rangeSelect.append($option)
 		})
-        
+
         $rangeSelect.on('change', function() {
 			var r = $(this).val()
 			if (r) {
 				r = parseInt(r)
 			}
 			else r = "all"
-			
+
 			_this.range.value = r
 			if (_this.chart)
 				_this.redraw()
@@ -90,7 +90,7 @@ function StreamrChart(parent, options) {
         $rangeDiv.append($rangeSelect)
 		this.toolbarInner.append($rangeDiv);
 	}
-    
+
     // Show/Hide all series buttons
     if (this.options.showHideButtons) {
         this.toolbarInner.append('<div class="chart-series-buttons chart-show-on-run btn-group">' +
@@ -99,12 +99,12 @@ function StreamrChart(parent, options) {
             '<button class="btn btn-default btn-sm hide-all-series" '+
             'title="Hide all series"><i class="fa fa-minus-circle"></i></button>'+
             '</div>')
-        
+
         var showHide = function(doShow) {
             return function() {
                 if (!_this.chart)
                     return;
-                
+
                 _this.seriesMeta.forEach(function(series) {
                     series.impl.setVisible(doShow, false)
                 })
@@ -114,12 +114,12 @@ function StreamrChart(parent, options) {
         $('button.hide-all-series', this.$parent).click(showHide(false))
         $('button.show-all-series', this.$parent).click(showHide(true))
     }
-    
+
 	$(this).on("initialized", function() {
 		_this.$parent.find(".chart-show-on-run").show()
 		_this.redraw()
 	})
- 
+
 	this.$parent.on('resize', function() {
 		_this.resize()
 	})
@@ -134,7 +134,7 @@ function StreamrChart(parent, options) {
 		this.$parent.append(title)
 		this.$title = title
 	}
-	
+
 	// Create the chart area
 	var areaId = "chartArea_"+(new Date()).getTime()
     this.$area = $('<div/>', {
@@ -153,7 +153,7 @@ StreamrChart.prototype.createHighstocksInstance = function(title, series, yAxis)
 	var _this = this
 
 	this.$area.show();
-	
+
 	if (!yAxis) {
 		yAxis = {};
 	}
@@ -208,7 +208,7 @@ StreamrChart.prototype.createHighstocksInstance = function(title, series, yAxis)
 		"low": "low",
 		"close": "close"
 	}
-	
+
 	var opts = {
 		chart: {
 			animation: false,
@@ -236,12 +236,12 @@ StreamrChart.prototype.createHighstocksInstance = function(title, series, yAxis)
 			}
 		},
 
-		yAxis: yAxis, 
+		yAxis: yAxis,
 
 		legend: {
 			enabled: true
 		},
-		
+
 		rangeSelector: {
 			enabled: false
 		},
@@ -250,7 +250,7 @@ StreamrChart.prototype.createHighstocksInstance = function(title, series, yAxis)
 			enabled: true,
 			series: $.extend(true, {type: 'line', step:true}, series[0])
 		},
-		
+
 		plotOptions: {
 			series: {
 				animation: false,
@@ -259,19 +259,19 @@ StreamrChart.prototype.createHighstocksInstance = function(title, series, yAxis)
 				}
 			}
 		},
-		
+
 		scrollbar: {
 			enabled: false
 		},
-		
+
 		series: series
 	};
 
 	opts = $.extend(true, {}, this.options, opts);
-	
-	// Create the chart	
+
+	// Create the chart
 	this.chart = new Highcharts.StockChart(opts);
-	
+
 	// Collect pointers to actual series objects into seriesMeta[i].impl
 	// This helps in indexkeeping, as the navigator series is appended
 	// to chart.series
@@ -279,7 +279,7 @@ StreamrChart.prototype.createHighstocksInstance = function(title, series, yAxis)
 	for (var i=0; i<this.seriesMeta.length; i++) {
 		this.seriesMeta[i].impl = this.chart.series[i]
 	}
-	
+
 	// Request animation frame to update the chart whenever it's updated
 	$(this).on("updated", function() {
 		if (!_this.animationRequest) {
@@ -288,9 +288,9 @@ StreamrChart.prototype.createHighstocksInstance = function(title, series, yAxis)
 			})
 		}
 	})
-	
+
 	$(this).trigger("initialized")
-    
+
     this.resize()
 }
 
@@ -325,10 +325,9 @@ StreamrChart.prototype.redraw = function() {
 StreamrChart.prototype.resize = function() {
 	if (!this.$area)
 		return;
-    
+
     if (this.chart) {
         this.chart.setSize(this.$area.innerWidth(), this.$area.innerHeight())
-        console.log(this.$area.innerWidth(), this.$area.innerHeight())
     }
 }
 
@@ -344,7 +343,7 @@ StreamrChart.prototype.setYAxis = function(seriesIndex, yx) {
 		this.yAxis.push(newAxis)
 		this.chart.addAxis(newAxis, false)
 	}
-	
+
 	this.seriesMeta[seriesIndex].impl.update({yAxis: this.realYAxis[yx]}, true)
 }
 
@@ -405,7 +404,7 @@ StreamrChart.prototype.initMetaData = function(d) {
 	// Never reinitialize
 	if (!this.metaDataInitialized) {
 		this.yAxis = d.yAxis || [];
-		
+
 		var x=0;
 		var seenYAxisNumbers = []
 
@@ -423,14 +422,14 @@ StreamrChart.prototype.initMetaData = function(d) {
 				s.yAxis = _this.realYAxis[s.yAxis];
 			}
 		});
-		
+
 		// Must have at least one yAxis
 		if (this.yAxis.length==0) {
 			this.yAxis.push({
 				title: ""
 			});
 		}
-		
+
 		// Delay adding the series to the chart until they get data points, Highstocks is buggy
 		this.seriesMeta = d.series;
 		this.seriesMeta.forEach(function(meta) {
@@ -491,7 +490,7 @@ StreamrChart.prototype.handleMessage = function(d) {
 						}
 					}
 				}
-				
+
 				this.createHighstocksInstance(this.chartTitle,seriesMeta,this.yAxis);
 			}
 		}
@@ -505,7 +504,7 @@ StreamrChart.prototype.handleMessage = function(d) {
 					seriesMeta[d.s].min = d.y
 				if (seriesMeta[d.s].max < d.y)
 					seriesMeta[d.s].max = d.y
-					
+
 				// Only add new points to the navigator if they are at least ten minutes apart
 				if (d.s===0 && (!this.latestNavigatorTimestamp || d.x > this.latestNavigatorTimestamp + 60000)) {
 					this.navigatorSeries.addPoint([d.x, d.y],false,false,false);
@@ -517,25 +516,25 @@ StreamrChart.prototype.handleMessage = function(d) {
 			// We might come here after adding series to the chart on-the-fly
 			else {
 				this.pushDataToMetaSeries(seriesMeta[d.s], [d.x, d.y])
-				
+
 				// Find the first unadded series and see if it can be added
 				// (Unfortunately series need to be added in order to avoid problems with Highcharts)
 				for (var i=0;i<seriesMeta.length;i++) {
 					if (!seriesMeta[i].impl) {
 						if (seriesMeta[i].data!=null && seriesMeta[i].data.length>1)
-							seriesMeta[i].impl = chart.addSeries(seriesMeta[i],false,false);	
+							seriesMeta[i].impl = chart.addSeries(seriesMeta[i],false,false);
 						break
 					}
 				}
 			}
 		}
 	}
-	
+
 	// Init message, for backwards compatibility
 	else if (d.type=="init") {
 		this.initMetaData(d)
 	}
-	
+
 	// New series message
 	else if (d.type=="s") {
 		var s = d.series;
@@ -543,30 +542,30 @@ StreamrChart.prototype.handleMessage = function(d) {
 			// yAxis is read-only, I don't think this works
 			chart.yAxis.push({
 				title: s.name,
-				opposite: (chart.yAxis.length%2==0)	
+				opposite: (chart.yAxis.length%2==0)
 			});
 			s.yAxis = chart.yAxis.length-1;
 		}
-		
+
 		// Delay adding the series to the chart until they get data points, Highstocks is buggy
 		if (chart==null || s.data==null || s.data.length<2) {
 			while (seriesMeta.length < s.idx + 1)
 				seriesMeta.push({});
-			
+
 			seriesMeta[s.idx] = s;
 			s.min = Infinity
 			s.max = -Infinity
 		}
 		else chart.addSeries(s,false,false);
 	}
-	
+
 	// Day break
 	else if (d.type=="b") {
 		if (chart && chart.series && chart.series[d.s]) {
 			chart.series[d.s].addPoint([this.maxTime+1, null],false,false,false);
 		}
 	}
-	
+
 	$(this).trigger('updated')
 }
 
