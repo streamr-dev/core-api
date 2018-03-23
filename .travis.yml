@@ -2,7 +2,6 @@ language: groovy
 sudo: required
 jdk:
 - openjdk7
-- oraclejdk8
 services:
 - docker
 - mysql
@@ -26,6 +25,9 @@ addons:
 jobs:
   include:
   - stage: Unit tests
+    jdk:
+      - openjdk7
+      - oraclejdk8
     script:
     - grails clean
     - grails test-app -unit
