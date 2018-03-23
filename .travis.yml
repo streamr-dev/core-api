@@ -2,7 +2,7 @@ language: groovy
 sudo: required
 jdk:
 - openjdk7
-- openjdk8
+- oraclejdk8
 services:
 - docker
 - mysql
