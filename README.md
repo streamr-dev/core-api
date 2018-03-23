@@ -1,4 +1,6 @@
-# Streamr Engine and Editor
+# Streamr Engine and Editor 
+
+[![Build Status](https://travis-ci.org/streamr-dev/engine-and-editor.svg?branch=master)](https://travis-ci.org/streamr-dev/engine-and-editor)
 
 Web application containing and serving the Streamr Engine and Editor. Streamr Engine is an event processing system for real-time data. Streamr Editor is a visual programming environment for creating processes (called Canvases) that run on the Engine. 
 
