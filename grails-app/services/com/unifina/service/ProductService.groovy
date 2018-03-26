@@ -94,6 +94,23 @@ class ProductService {
 		return true
 	}
 
+	boolean updatePricing(Product product, SetPricingCommand command, SecUser currentUser) {
+		if (!command.validate()) {
+			throw new ValidationException(command.errors)
+		}
+		if (command.isStale(product)) {
+			return false
+		}
+		if (product.state == Product.State.UNDEPLOYING) {
+			throw new InvalidStateTransitionException(product.state, Product.State.DEPLOYED)
+		}
+		verifyDevops(currentUser)
+
+		product.setProperties(command.properties)
+		product.save(failOnError: true)
+		return product
+	}
+
 	void transitionToUndeploying(Product product) {
 		if (product.state == Product.State.DEPLOYED) {
 			product.state = Product.State.UNDEPLOYING

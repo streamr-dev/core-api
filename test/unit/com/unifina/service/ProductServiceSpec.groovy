@@ -750,4 +750,54 @@ class ProductServiceSpec extends Specification {
 		then:
 		1 * permissionService.systemGrantAnonymousAccess(product)
 	}
+
+	void "updatePricing() updates product price etc"() {
+		setupProduct(Product.State.DEPLOYED)
+		service.permissionService = new PermissionService()
+
+		def command = new SetPricingCommand(
+			ownerAddress: "0xBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB",
+			beneficiaryAddress: "0xAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
+			pricePerSecond: 2,
+			priceCurrency: Product.Currency.USD,
+			minimumSubscriptionInSeconds: 600,
+			blockNumber: 50000,
+			blockIndex: 10
+		)
+
+		when:
+		service.updatePricing(product, command, Stub(SecUser) {
+			isDevOps() >> true
+		})
+
+		then:
+		product.ownerAddress == "0xBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB"
+		product.beneficiaryAddress == "0xAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+		product.pricePerSecond == 2
+		product.priceCurrency == Product.Currency.USD
+		product.minimumSubscriptionInSeconds == 600
+		product.blockNumber == 50000
+		product.blockIndex == 10
+	}
+
+	void "updatePricing() throws NotPermittedException if user is not devops"() {
+		setupProduct()
+
+		def command = new SetPricingCommand(
+			ownerAddress: "0xBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB",
+			beneficiaryAddress: "0xAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
+			pricePerSecond: 2,
+			priceCurrency: Product.Currency.USD,
+			minimumSubscriptionInSeconds: 600,
+			blockNumber: 50000,
+			blockIndex: 10
+		)
+
+		when:
+		service.updatePricing(product, command, Stub(SecUser) {
+			isDevOps() >> false
+		})
+		then:
+		thrown(NotPermittedException)
+	}
 }

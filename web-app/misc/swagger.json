@@ -847,6 +847,89 @@
         }
       }
     },
+    "/products/{id}/setPricing": {
+      "post": {
+        "summary": "Update Product pricing data",
+        "description": "Idempotent operation that sets Product's pricing details (basically stuff held in smart contract).",
+        "tags": [
+          "products"
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "description": "unique identifier of a Product",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "description": "Updated product info and transaction block number",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/DeployedProduct"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Updated product",
+            "schema": {
+              "$ref": "#/definitions/Product"
+            }
+          },
+          "401": {
+            "description": "Not authenticated (code: `NOT_AUTHENTICATED`)",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            },
+            "examples": {
+              "application/json": {
+                "code": "NOT_AUTHENTICATED",
+                "message": "Not authenticated via token or cookie"
+              }
+            }
+          },
+          "404": {
+            "description": "Product not found (code: `NOT_FOUND`)",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            },
+            "examples": {
+              "application/json": {
+                "code": "NOT_FOUND",
+                "message": "Product with id 1kDWMNstSmW1NxhJPYFHsAYgkesh19QraMLtgfuDs4sA not found"
+              }
+            }
+          },
+          "403": {
+            "description": "User does not have DevOps privilege (code: `FORBIDDEN`)",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            },
+            "examples": {
+              "application/json": {
+                "code": "FORBIDDEN",
+                "message": "DevOps role required"
+              }
+            }
+          },
+          "422": {
+            "description": "Body does not pass validation (code: `VALIDATION_ERROR`)",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            },
+            "examples": {
+              "application/json": {
+                "code": "VALIDATION_ERROR",
+                "message": "Validation failed for fields: blockNumber (nullable)"
+              }
+            }
+          }
+        }
+      }
+    },
     "/streams": {
       "get": {
         "summary": "List streams",
