@@ -1,7 +1,7 @@
 language: groovy
 sudo: required
 jdk:
-  - openjdk7
+  - openjdk8
 services:
 - docker
 - mysql
@@ -25,11 +25,11 @@ addons:
 
 jobs:
   allow_failures:
-  - jdk: openjdk8
+  - jdk: openjdk9
     script: ./travis_scripts/unit_test.sh
-  - jdk: openjdk8
+  - jdk: openjdk9
     script: ./travis_scripts/integration_test.sh
-  - jdk: openjdk8
+  - jdk: openjdk9
     script: ./travis_scripts/build_war.sh
   include:
   - stage: Unit tests
