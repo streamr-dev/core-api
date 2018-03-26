@@ -1,12 +1,14 @@
 const fetch = require('node-fetch')
 const url = require('url')
 const querystring = require('querystring')
+const FormData = require('form-data')
 
 class StreamrApiRequest {
     constructor(options) {
         this.baseUrl = options.baseUrl || 'https://www.streamr.com/api/v1/'
         this.logging = options.logging || false
         this.authToken = null
+        this.contentType = null
         this.queryParams = ''
     }
 
@@ -30,6 +32,13 @@ class StreamrApiRequest {
 
     withBody(body) {
         this.body = JSON.stringify(body)
+        this.contentType = 'application/json'
+        return this
+    }
+
+    withRawBody(body) {
+        this.body = body
+        this.contentType = null
         return this
     }
 
@@ -46,8 +55,8 @@ class StreamrApiRequest {
         const headers = {
             'Accept': 'application/json'
         }
-        if (this.body) {
-            headers['Content-type'] = 'application/json'
+        if (this.body && this.contentType) {
+            headers['Content-type'] = this.contentType
         }
         if (this.authToken) {
             headers['Authorization'] = this.authToken
@@ -142,6 +151,15 @@ class Products {
         return new StreamrApiRequest(this.options)
             .methodAndPath('POST', `products/${id}/setUndeployed`)
             .withBody(body)
+    }
+
+    uploadImage(id, fileBytes) {
+        const formData = new FormData()
+        formData.append('file', fileBytes)
+
+        return new StreamrApiRequest(this.options)
+            .methodAndPath('POST', `products/${id}/images`)
+            .withRawBody(formData)
     }
 
     listStreams(id) {

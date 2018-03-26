@@ -1,4 +1,8 @@
 const assert = require('chai').assert
+const fs = require('fs')
+const zlib = require('zlib')
+const fetch = require('node-fetch')
+
 const initStreamrApi = require('./streamr-api-clients')
 const SchemaValidator = require('./schema-validator')
 
@@ -68,7 +72,6 @@ describe('Products API', () => {
         genericProductBody = {
             name: 'Product',
             description: 'Description of the product.',
-            imageUrl: 'https://www.streamr.com/uploads/product.png',
             category: 'satellite-id',
             streams: [
                 streamId1,
@@ -86,7 +89,7 @@ describe('Products API', () => {
 
         let createdProductId
 
-        before(async() => {
+        before(async () => {
             createdProductId = await createProductAndReturnId(genericProductBody)
         })
 
@@ -179,7 +182,7 @@ describe('Products API', () => {
                 assert.deepEqual(json, {
                     name: 'Product',
                     description: 'Description of the product.',
-                    imageUrl: 'https://www.streamr.com/uploads/product.png',
+                    imageUrl: null,
                     category: 'satellite-id',
                     streams: [
                         streamId1,
@@ -319,7 +322,6 @@ describe('Products API', () => {
                 delete json.created
                 delete json.updated
 
-
                 assert.deepEqual(json, {
                     id: createdProductId,
                     name: 'Product (updated)',
@@ -451,7 +453,6 @@ describe('Products API', () => {
                 .call()
             await assertResponseIsError(response, 403, 'FORBIDDEN', 'DevOps role required')
         })
-
 
         it('verifies legality of state transition', async () => {
             const productId = await createProductAndReturnId(genericProductBody)
@@ -839,6 +840,138 @@ describe('Products API', () => {
 
             it('responds with list of Streams', () => {
                 json.forEach(stream => assertIsStream(stream))
+            })
+        })
+    })
+
+    describe('POST /api/v1/products/:id/images', () => {
+        let createdProductId
+
+        before(async () => {
+            createdProductId = await createProductAndReturnId(genericProductBody)
+        })
+
+        it('requires authentication', async () => {
+            const fileBytes = Buffer.from([])
+            const response = await Streamr.api.v1.products
+                .uploadImage(createdProductId, fileBytes)
+                .call()
+            await assertResponseIsError(response, 401, 'NOT_AUTHENTICATED')
+        })
+
+        it('requires existing Product', async () => {
+            const fileBytes = Buffer.from([])
+            const response = await Streamr.api.v1.products
+                .uploadImage('non-existing-product-id', fileBytes)
+                .withAuthToken(AUTH_TOKEN)
+                .call()
+            await assertResponseIsError(response, 404, 'NOT_FOUND')
+        })
+
+        it('requires write permission on Product', async () => {
+            const fileBytes = Buffer.from([])
+            const response = await Streamr.api.v1.products
+                .uploadImage(createdProductId, fileBytes)
+                .withAuthToken(AUTH_TOKEN_2)
+                .call()
+            const json = await response.json()
+
+            assert.equal(response.status, 403)
+            assert.equal(json.code, 'FORBIDDEN')
+            assert.equal(json.operation, 'write')
+        })
+
+        it('requires parameter "file" to be a multipart file', async () => {
+            const fileBytes = 'I am not a file'
+            const response = await Streamr.api.v1.products
+                .uploadImage(createdProductId, fileBytes)
+                .withAuthToken(AUTH_TOKEN)
+                .call()
+            await assertResponseIsError(response, 400, 'PARAMETER_MISSING')
+        })
+
+        it('verifies file size', (done) => {
+            // TODO: Unpack file, how to do without going to File system?
+            const wstream = fs.createWriteStream('./rest-e2e-tests/test-data/bigfile.txt')
+
+            fs.createReadStream('./rest-e2e-tests/test-data/bigfile.txt.gz')
+                .pipe(zlib.createUnzip())
+                .pipe(wstream)
+
+            wstream.on('finish', async () => {
+                const response = await Streamr.api.v1.products
+                    .uploadImage(createdProductId, fs.createReadStream('./rest-e2e-tests/test-data/bigfile.txt'))
+                    .withAuthToken(AUTH_TOKEN)
+                    .call()
+                await assertResponseIsError(response, 413, 'FILE_TOO_LARGE')
+                done()
+            })
+
+        })
+
+        it('verifies file contents', async () => {
+            const response = await Streamr.api.v1.products
+                .uploadImage(createdProductId,  fs.createReadStream('./rest-e2e-tests/test-data/file.txt'))
+                .withAuthToken(AUTH_TOKEN)
+                .call()
+            await assertResponseIsError(response, 415, 'UNSUPPORTED_FILE_TYPE')
+        })
+
+        it('verifies image dimensions', async () => {
+            const response = await Streamr.api.v1.products
+                .uploadImage(createdProductId,  fs.createReadStream('./rest-e2e-tests/test-data/blue.png'))
+                .withAuthToken(AUTH_TOKEN)
+                .call()
+            await assertResponseIsError(response, 400, 'UNEXPECTED_IMAGE_DIMENSIONS')
+        })
+
+        context('when called with valid params, body, headers, and permissions', () => {
+            let response
+            let json
+
+            before(async () => {
+                response = await Streamr.api.v1.products
+                    .uploadImage(createdProductId,  fs.createReadStream('./rest-e2e-tests/test-data/500-by-400-image.png'))
+                    .withAuthToken(AUTH_TOKEN)
+                    .call()
+                json = await response.json()
+            })
+
+            it('responds with 200', () => {
+                assert.equal(response.status, 200)
+            })
+
+            it('responds with Product', () => {
+                assertIsProduct(json)
+            })
+
+            it('response Product contains image URL', () => {
+                assert.isNotNull(json.imageUrl)
+            })
+
+            it('image URL works', (done) => {
+                const readStream = fs.createReadStream('./rest-e2e-tests/test-data/500-by-400-image.png')
+                let bufs = []
+                readStream.on('data', (d) => bufs.push(d))
+                readStream.on('end', async () => {
+                    const expected = Buffer.concat(bufs)
+
+                    const response2 = await fetch(json.imageUrl)
+                    const actual = await response2.buffer()
+
+                    assert.equal(actual, expected)
+                    done()
+                })
+            })
+
+            it('can replace existing image with a new image', async () => {
+                const response2 = await Streamr.api.v1.products
+                    .uploadImage(createdProductId,  fs.createReadStream('./rest-e2e-tests/test-data/500-by-400-image-2.png'))
+                    .withAuthToken(AUTH_TOKEN)
+                    .call()
+                const json2 = await response2.json()
+
+                assert.notEqual(json2.imageUrl, json.imageUrl)
             })
         })
     })
