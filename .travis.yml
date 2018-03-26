@@ -1,7 +1,7 @@
 language: groovy
 sudo: required
 jdk:
-- openjdk7
+  - openjdk7
 services:
 - docker
 - mysql
@@ -22,31 +22,26 @@ addons:
   apt:
     packages:
     - lynx
+
 jobs:
+  allow_failures:
+  - jdk: openjdk8
+    script: ./travis_scripts/unit_test.sh
+  - jdk: openjdk8
+    script: ./travis_scripts/integration_test.sh
+  - jdk: openjdk8
+    script: ./travis_scripts/build_war.sh
   include:
   - stage: Unit tests
-    jdk:
-      - openjdk7
-      - oraclejdk8
-    script:
-    - grails clean
-    - grails test-app -unit
+    script: ./travis_scripts/unit_test.sh
+  - jdk: openjdk8
+    script: ./travis_scripts/unit_test.sh
   - stage: Integration tests
-    script:
-    - sudo /etc/init.d/mysql stop
-    - npm install
-    - git clone https://github.com/streamr-dev/streamr-docker-dev.git
-    - streamr-docker-dev/streamr-docker-dev/bin.sh start 1
-    - grails clean
-    - grails test-app -integration
+    script: ./travis_scripts/integration_test.sh
+  - jdk: openjdk8
+    script: ./travis_scripts/integration_test.sh
   - stage: Build war
-    script:
-    - grails clean
-    - npm install
-    - npm run build
-    - grails prod war
-    - mkdir build
-    - cp $(pwd)/target/ROOT.war $(pwd)/build
+    script:  ./travis_scripts/build_war.sh
     deploy:
       provider: s3
       access_key_id: AKIAI7LEOVJBY6ZEH44Q
@@ -58,6 +53,8 @@ jobs:
       region: eu-west-1
       skip_cleanup: true
       local_dir: build
+  - jdk: openjdk8
+    script: ./travis_scripts/build_war.sh
     if: branch = master
 after_failure: "./travis-after-failure.sh"
 notifications:
