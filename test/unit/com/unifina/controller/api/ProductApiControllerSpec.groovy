@@ -1,20 +1,17 @@
 package com.unifina.controller.api
 
-import com.unifina.api.CreateProductCommand
-import com.unifina.api.ProductDeployedCommand
-import com.unifina.api.ProductListParams
-import com.unifina.api.ProductUndeployedCommand
-import com.unifina.api.UpdateProductCommand
-import com.unifina.api.ValidationException
+import com.unifina.api.*
 import com.unifina.domain.marketplace.Category
 import com.unifina.domain.marketplace.Product
 import com.unifina.domain.security.Permission
 import com.unifina.domain.security.SecUser
 import com.unifina.filters.UnifinaCoreAPIFilters
 import com.unifina.service.ApiService
+import com.unifina.service.ProductImageService
 import com.unifina.service.ProductService
 import grails.test.mixin.Mock
 import grails.test.mixin.TestFor
+import org.springframework.mock.web.MockMultipartFile
 import spock.lang.Specification
 
 import javax.servlet.http.HttpServletResponse
@@ -352,6 +349,81 @@ class ProductApiControllerSpec extends Specification {
 		withFilters(action: "setUndeployed") {
 			controller.setUndeployed()
 		}
+		then:
+		response.status == 200
+		response.json == product.toMap()
+	}
+
+	void "uploadImage() responds with 400 and PARAMETER_MISSING if file not given"() {
+		def productService = controller.productService = Mock(ProductService)
+		controller.productImageService = Stub(ProductImageService)
+
+		def user = request.apiUser = new SecUser()
+
+		params.id = "product-id"
+		request.method = "POST"
+		when:
+		withFilters(action: "uploadImage") {
+			controller.uploadImage()
+		}
+		then:
+		def e = thrown(ApiException)
+		e.statusCode == 400
+		e.code == "PARAMETER_MISSING"
+	}
+
+	void "uploadImage() invokes productService#findById"() {
+		def productService = controller.productService = Mock(ProductService)
+		controller.productImageService = Stub(ProductImageService)
+
+		def user = request.apiUser = new SecUser()
+
+		params.id = "product-id"
+		request.method = "POST"
+		request.addFile(new MockMultipartFile("file", "my-product-image.jpg", "image/jpeg", new byte[2048]))
+		when:
+		withFilters(action: "uploadImage") {
+			controller.uploadImage()
+		}
+		then:
+		1 * productService.findById("product-id", user, Permission.Operation.WRITE) >> product
+	}
+
+	void "uploadImage() invokes productImageService#replaceImage"() {
+		controller.productService = Stub(ProductService) {
+			findById(_, _, _) >> product
+		}
+		def productImageService = controller.productImageService = Mock(ProductImageService)
+
+		def bytes = new byte[16]
+
+		params.id = "product-id"
+		request.method = "POST"
+		request.addFile(new MockMultipartFile("file", "my-product-image.jpg", "image/jpeg", bytes))
+		when:
+		withFilters(action: "uploadImage") {
+			controller.uploadImage()
+		}
+		then:
+		1 * productImageService.replaceImage(product, bytes)
+	}
+
+	void "uploadImage() returns 200 and renders a product"() {
+		controller.productService = Stub(ProductService) {
+			findById(_, _, _) >> product
+		}
+		controller.productImageService = Stub(ProductImageService)
+
+		def bytes = new byte[16]
+
+		params.id = "product-id"
+		request.method = "POST"
+		request.addFile(new MockMultipartFile("file", "my-product-image.jpg", "image/jpeg", bytes))
+		when:
+		withFilters(action: "uploadImage") {
+			controller.uploadImage()
+		}
+
 		then:
 		response.status == 200
 		response.json == product.toMap()

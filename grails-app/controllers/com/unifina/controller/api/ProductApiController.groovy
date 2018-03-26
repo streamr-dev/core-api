@@ -1,20 +1,18 @@
 package com.unifina.controller.api
 
-import com.unifina.api.CreateProductCommand
-import com.unifina.api.ProductDeployedCommand
-import com.unifina.api.ProductListParams
-import com.unifina.api.ProductUndeployedCommand
-import com.unifina.api.UpdateProductCommand
+import com.unifina.api.*
 import com.unifina.domain.marketplace.Product
 import com.unifina.domain.security.Permission
 import com.unifina.domain.security.SecUser
 import com.unifina.security.AuthLevel
 import com.unifina.security.StreamrApi
 import com.unifina.service.ApiService
+import com.unifina.service.ProductImageService
 import com.unifina.service.ProductService
 import grails.compiler.GrailsCompileStatic
 import grails.converters.JSON
 import grails.plugin.springsecurity.annotation.Secured
+import org.springframework.web.multipart.MultipartFile
 
 @Secured(["IS_AUTHENTICATED_ANONYMOUSLY"])
 class ProductApiController {
@@ -23,11 +21,13 @@ class ProductApiController {
 		setDeploying: "POST",
 		setDeployed: "POST",
 		setUndeploying: "POST",
-		setUndeployed: "POST"
+		setUndeployed: "POST",
+		uploadImage: "POST"
 	]
 
 	ApiService apiService
 	ProductService productService
+	ProductImageService productImageService
 
 	@GrailsCompileStatic
 	@StreamrApi(authenticationLevel = AuthLevel.NONE)
@@ -88,6 +88,23 @@ class ProductApiController {
 		Product product = apiService.getByIdAndThrowIfNotFound(Product, id)
 		productService.markAsUndeployed(product, command, loggedInUser())
 		render(product.toMap() as JSON)
+	}
+
+	@GrailsCompileStatic
+	@StreamrApi(authenticationLevel = AuthLevel.USER)
+	def uploadImage(String id) {
+		Product product = productService.findById(id, loggedInUser(), Permission.Operation.WRITE)
+		MultipartFile file = getUploadedFile()
+		productImageService.replaceImage(product, file.bytes)
+		render(product.toMap() as JSON)
+	}
+
+	MultipartFile getUploadedFile() {
+		MultipartFile file = request.getFile("file")
+		if (file == null) {
+			throw new ApiException(400, "PARAMETER_MISSING", "Parameter 'file' missing")
+		}
+		return file
 	}
 
 	SecUser loggedInUser() {
