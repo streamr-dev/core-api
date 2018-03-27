@@ -326,7 +326,7 @@ describe('Products API', () => {
                     id: createdProductId,
                     name: 'Product (updated)',
                     description: 'Description of the product.',
-                    imageUrl: 'https://www.streamr.com/uploads/product-2.png',
+                    imageUrl: null,
                     category: 'automobile-id',
                     streams: [],
 

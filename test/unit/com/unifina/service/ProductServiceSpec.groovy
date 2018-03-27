@@ -87,7 +87,6 @@ class ProductServiceSpec extends Specification {
 		def validCommand = new CreateProductCommand(
 				name: "Product",
 				description: "Description of Product.",
-				imageUrl: "product.png",
 				category: category,
 				streams: [s1, s2, s3],
 				ownerAddress: "0x0000000000000000000000000000000000000000",
@@ -107,7 +106,7 @@ class ProductServiceSpec extends Specification {
 			id: "1",
 			name: "Product",
 			description: "Description of Product.",
-			imageUrl: "product.png",
+			imageUrl: null,
 			category: "category-id",
 			streams: ["stream-1", "stream-2", "stream-3"],
 			state: "NOT_DEPLOYED",
@@ -132,7 +131,6 @@ class ProductServiceSpec extends Specification {
 		def validCommand = new CreateProductCommand(
 			name: "Product",
 			description: "Description of Product.",
-			imageUrl: "product.png",
 			category: category,
 			streams: [s1, s2, s3],
 			ownerAddress: "0x0000000000000000000000000000000000000000",
@@ -155,7 +153,6 @@ class ProductServiceSpec extends Specification {
 		def validCommand = new CreateProductCommand(
 			name: "Product",
 			description: "Description of Product.",
-			imageUrl: "product.png",
 			category: category,
 			streams: [s1, s2, s3],
 			ownerAddress: "0x0000000000000000000000000000000000000000",
@@ -180,7 +177,6 @@ class ProductServiceSpec extends Specification {
 		def validCommand = new CreateProductCommand(
 			name: "Product",
 			description: "Description of Product.",
-			imageUrl: "product.png",
 			category: category,
 			streams: [s1, s2, s3],
 			ownerAddress: "0x0000000000000000000000000000000000000000",
@@ -216,7 +212,6 @@ class ProductServiceSpec extends Specification {
 		def validCommand = new UpdateProductCommand(
 				name: "updated name",
 				description: "updated description",
-				imageUrl: "product.png",
 				category: category,
 				streams: [s2, s4]
 		)
@@ -237,7 +232,6 @@ class ProductServiceSpec extends Specification {
 		def validCommand = new UpdateProductCommand(
 				name: "updated name",
 				description: "updated description",
-				imageUrl: "product.png",
 				category: category,
 				streams: [s2, s4]
 		)
@@ -257,7 +251,6 @@ class ProductServiceSpec extends Specification {
 		def validCommand = new UpdateProductCommand(
 				name: "updated name",
 				description: "updated description",
-				imageUrl: "product.png",
 				category: category,
 				streams: []
 		)
@@ -286,7 +279,6 @@ class ProductServiceSpec extends Specification {
 		def validCommand = new UpdateProductCommand(
 				name: "updated name",
 				description: "updated description",
-				imageUrl: "product.png",
 				category: category2,
 				streams: [s2, s4]
 		)
@@ -302,7 +294,7 @@ class ProductServiceSpec extends Specification {
 				id: "product-id",
 				name: "updated name",
 				description: "updated description",
-				imageUrl: "product.png",
+				imageUrl: null,
 				category: "category2-id",
 				streams: ["stream-2", "stream-4"],
 				state: "NOT_DEPLOYED",
