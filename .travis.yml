@@ -53,7 +53,7 @@ jobs:
       region: eu-west-1
       skip_cleanup: true
       local_dir: build
-  - jdk: openjdk8
+  - jdk: oraclejdk9
     script: ./travis_scripts/build_war.sh
     if: branch = master
 after_failure: "./travis-after-failure.sh"
