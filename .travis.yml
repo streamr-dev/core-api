@@ -25,20 +25,20 @@ addons:
 
 jobs:
   allow_failures:
-  - jdk: openjdk9
+  - jdk: oraclejdk9
     script: ./travis_scripts/unit_test.sh
-  - jdk: openjdk9
+  - jdk: oraclejdk9
     script: ./travis_scripts/integration_test.sh
-  - jdk: openjdk9
+  - jdk: oraclejdk9
     script: ./travis_scripts/build_war.sh
   include:
   - stage: Unit tests
     script: ./travis_scripts/unit_test.sh
-  - jdk: openjdk9
+  - jdk: oraclejdk9
     script: ./travis_scripts/unit_test.sh
   - stage: Integration tests
     script: ./travis_scripts/integration_test.sh
-  - jdk: openjdk9
+  - jdk: oraclejdk9
     script: ./travis_scripts/integration_test.sh
   - stage: Build war
     script:  ./travis_scripts/build_war.sh
