@@ -53,6 +53,10 @@
       "description": "Manage Streams, and insert or read data from them"
     },
     {
+      "name": "subscriptions",
+      "description": "Subscriptions for Products purchased on the marketplace"
+    },
+    {
       "name": "users",
       "description": "User management"
     }
@@ -825,6 +829,89 @@
               "application/json": {
                 "code": "INVALID_STATE_TRANSITION",
                 "message": "Invalid transition DEPLOYING -> NOT_DEPLOYED"
+              }
+            }
+          },
+          "422": {
+            "description": "Body does not pass validation (code: `VALIDATION_ERROR`)",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            },
+            "examples": {
+              "application/json": {
+                "code": "VALIDATION_ERROR",
+                "message": "Validation failed for fields: blockNumber (nullable)"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/products/{id}/setPricing": {
+      "post": {
+        "summary": "Update Product pricing data",
+        "description": "Idempotent operation that sets Product's pricing details (basically stuff held in smart contract).",
+        "tags": [
+          "products"
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "description": "unique identifier of a Product",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "description": "Updated product info and transaction block number",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/DeployedProduct"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Updated product",
+            "schema": {
+              "$ref": "#/definitions/Product"
+            }
+          },
+          "401": {
+            "description": "Not authenticated (code: `NOT_AUTHENTICATED`)",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            },
+            "examples": {
+              "application/json": {
+                "code": "NOT_AUTHENTICATED",
+                "message": "Not authenticated via token or cookie"
+              }
+            }
+          },
+          "404": {
+            "description": "Product not found (code: `NOT_FOUND`)",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            },
+            "examples": {
+              "application/json": {
+                "code": "NOT_FOUND",
+                "message": "Product with id 1kDWMNstSmW1NxhJPYFHsAYgkesh19QraMLtgfuDs4sA not found"
+              }
+            }
+          },
+          "403": {
+            "description": "User does not have DevOps privilege (code: `FORBIDDEN`)",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            },
+            "examples": {
+              "application/json": {
+                "code": "FORBIDDEN",
+                "message": "DevOps role required"
               }
             }
           },
@@ -1619,6 +1706,67 @@
             "description": "Stream or permission wasn't found",
             "schema": {
               "$ref": "#/definitions/Error"
+            }
+          }
+        }
+      }
+    },
+    "/subscriptions": {
+      "post": {
+        "summary": "Inform engine-and-editor of Product purchase",
+        "description": "Idempotent operation that informs engine-and-editor that a Product has been purchased. Called by *Marketplace Watcher*. Creates or updates an existing Subscription and related Permissions.",
+        "tags": [
+          "subscriptions"
+        ],
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "description": "Information about Product purchase",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/CreateSubscription"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Success"
+          },
+          "401": {
+            "description": "Not authenticated (code: `NOT_AUTHENTICATED`)",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            },
+            "examples": {
+              "application/json": {
+                "code": "NOT_AUTHENTICATED",
+                "message": "Not authenticated via token or cookie"
+              }
+            }
+          },
+          "403": {
+            "description": "User does not have DevOps privilege (code: `FORBIDDEN`)",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            },
+            "examples": {
+              "application/json": {
+                "code": "FORBIDDEN",
+                "message": "DevOps role required"
+              }
+            }
+          },
+          "422": {
+            "description": "Body does not pass validation (code: `VALIDATION_ERROR`)",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            },
+            "examples": {
+              "application/json": {
+                "code": "VALIDATION_ERROR",
+                "message": "Validation failed for fields: address"
+              }
             }
           }
         }
@@ -3130,6 +3278,31 @@
         { "$ref": "#/definitions/UpdateProduct" },
         { "$ref": "#/definitions/ProductInBlockchain" }
       ]
+    },
+    "CreateSubscription": {
+      "type": "object",
+      "required": [
+        "product",
+        "address",
+        "endsAt"
+      ],
+      "properties": {
+        "product": {
+          "type": "string",
+          "description": "Unique identifier of purchased Product",
+          "example": "JaHJaXclSmuR7cvqwfj9MQD13crwwvRXCLJBWflaRPaQ"
+        },
+        "address": {
+          "type": "string",
+          "description": "Ethereum address of the buyer",
+          "example": "0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF"
+        },
+        "endsAt": {
+          "type": "integer",
+          "description": "End time of purchased subscription (Unix time, seconds)",
+          "example": 1520870998
+        }
+      }
     },
     "Product": {
       "allOf": [

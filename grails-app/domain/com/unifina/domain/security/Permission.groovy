@@ -4,6 +4,7 @@ import com.unifina.domain.dashboard.Dashboard
 import com.unifina.domain.data.Feed
 import com.unifina.domain.data.Stream
 import com.unifina.domain.marketplace.Product
+import com.unifina.domain.marketplace.Subscription
 import com.unifina.domain.signalpath.Canvas
 import com.unifina.domain.signalpath.ModulePackage
 
@@ -51,7 +52,10 @@ class Permission {
 	}
 	Operation operation = Operation.READ
 
-	static belongsTo = [Canvas, Dashboard, Feed, ModulePackage, Stream]
+	/** Is this a Permission of a Subscription? **/
+	Subscription subscription
+
+	static belongsTo = [Canvas, Dashboard, Feed, ModulePackage, Stream, Subscription]
 
 	static constraints = {
 		user(nullable: true)
@@ -66,6 +70,7 @@ class Permission {
 		canvas(validator: { val, obj ->
 			[obj.canvas, obj.dashboard, obj.feed, obj.modulePackage, obj.stream, obj.product].count { it != null } == 1
 		})
+		subscription(nullable: true)
 	}
 
 	static mapping = {
@@ -99,5 +104,43 @@ class Permission {
 		} else {
 			throw new IllegalStateException("Invalid Permission! Must relate to one of: anonymous, user, invite, key")
 		}
+	}
+
+	Map toInternalMap() {
+		Map map = [
+			operation: operation.toString(),
+			subscription: subscription?.id
+		]
+		if (anonymous) {
+			map["anonymous"] = true
+		}
+		if (user) {
+			map["user"] = user.id
+		}
+		if (key) {
+			map["key"] = key.id
+		}
+		if (invite) {
+			map["invite"] = invite.id
+		}
+		if (canvas) {
+			map["canvas"] = canvas.id
+		}
+		if (dashboard) {
+			map["dashboard"] = dashboard.id
+		}
+		if (feed) {
+			map["feed"] = feed.id
+		}
+		if (modulePackage) {
+			map["modulePackage"] = modulePackage.id
+		}
+		if (stream) {
+			map["stream"] = stream.id
+		}
+		if (product) {
+			map["product"] = product.id
+		}
+		return map
 	}
 }

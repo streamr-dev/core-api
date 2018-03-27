@@ -11,6 +11,7 @@ import grails.compiler.GrailsCompileStatic
 class ProductService {
 	ApiService apiService
 	PermissionService permissionService
+	SubscriptionService subscriptionService
 
 	List<Product> list(ProductListParams listParams, SecUser currentUser) {
 		apiService.list(Product, listParams, currentUser)
@@ -48,7 +49,9 @@ class ProductService {
 
 		Product product = findById(id, currentUser, Permission.Operation.WRITE)
 		product.setProperties(command.properties)
-		return product.save(failOnError: true)
+		product.save(failOnError: true)
+		subscriptionService.afterProductUpdated(product)
+		return product
 	}
 
 	void addStreamToProduct(Product product, Stream stream, SecUser currentUser)
@@ -89,6 +92,23 @@ class ProductService {
 		product.save(failOnError: true)
 		permissionService.systemGrantAnonymousAccess(product)
 		return true
+	}
+
+	boolean updatePricing(Product product, SetPricingCommand command, SecUser currentUser) {
+		if (!command.validate()) {
+			throw new ValidationException(command.errors)
+		}
+		if (command.isStale(product)) {
+			return false
+		}
+		if (product.state == Product.State.UNDEPLOYING) {
+			throw new InvalidStateTransitionException(product.state, Product.State.DEPLOYED)
+		}
+		verifyDevops(currentUser)
+
+		product.setProperties(command.properties)
+		product.save(failOnError: true)
+		return product
 	}
 
 	void transitionToUndeploying(Product product) {

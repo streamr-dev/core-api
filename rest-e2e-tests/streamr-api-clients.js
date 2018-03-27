@@ -190,6 +190,18 @@ class Streams {
     }
 }
 
+class Subscriptions {
+    constructor(options) {
+        this.options = options
+    }
+
+    create(body) {
+        return new StreamrApiRequest(this.options)
+            .methodAndPath('POST', 'subscriptions')
+            .withBody(body)
+    }
+}
+
 module.exports = (baseUrl, logging) => {
     const options = {
         baseUrl,
@@ -201,7 +213,8 @@ module.exports = (baseUrl, logging) => {
             v1: {
                 categories: new Categories(options),
                 products: new Products(options),
-                streams: new Streams(options)
+                streams: new Streams(options),
+                subscriptions: new Subscriptions(options)
             }
         }
     }

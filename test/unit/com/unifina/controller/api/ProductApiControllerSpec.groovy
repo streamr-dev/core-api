@@ -244,6 +244,25 @@ class ProductApiControllerSpec extends Specification {
 		1 * productService.markAsDeployed(product, _ as ProductDeployedCommand, user) >> product
 	}
 
+	void "setPricing() invokes productService#updatePricing"() {
+		controller.apiService = Stub(ApiService) {
+			getByIdAndThrowIfNotFound(Product, "product-id") >> product
+		}
+		def productService = controller.productService = Mock(ProductService)
+
+		def user = request.apiUser = new SecUser()
+
+		params.id = "product-id"
+		request.JSON = [:]
+		request.method = "POST"
+		when:
+		withFilters(action: "setPricing") {
+			controller.setPricing()
+		}
+		then:
+		1 * productService.updatePricing(product, _ as SetPricingCommand, user) >> product
+	}
+
 	void "setDeployed() returns 200 and renders a product"() {
 		controller.apiService = Stub(ApiService) {
 			getByIdAndThrowIfNotFound(Product, "product-id") >> product

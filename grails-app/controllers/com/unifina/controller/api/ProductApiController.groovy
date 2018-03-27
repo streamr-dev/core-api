@@ -22,6 +22,7 @@ class ProductApiController {
 		setDeployed: "POST",
 		setUndeploying: "POST",
 		setUndeployed: "POST",
+		setPricing: "POST",
 		uploadImage: "POST"
 	]
 
@@ -63,6 +64,14 @@ class ProductApiController {
 	def setDeploying(String id) {
 		Product product = productService.findById(id, loggedInUser(), Permission.Operation.WRITE)
 		productService.transitionToDeploying(product)
+		render(product.toMap() as JSON)
+	}
+
+	@GrailsCompileStatic
+	@StreamrApi(authenticationLevel = AuthLevel.USER)
+	def setPricing(String id, SetPricingCommand command) {
+		Product product = apiService.getByIdAndThrowIfNotFound(Product, id)
+		productService.updatePricing(product, command, loggedInUser())
 		render(product.toMap() as JSON)
 	}
 
