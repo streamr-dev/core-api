@@ -3202,10 +3202,6 @@
           "type": "string",
           "example": "Real-time USD/ETH exchange rate data aggregated from several cryptocurrency exchanges."
         },
-        "imageUrl": {
-          "type": "string",
-          "example": "https://www.streamr.com/uploads/to-the-moon.png"
-        },
         "category": {
           "type": "string",
           "description": "identifier of Category this Product belong to",
