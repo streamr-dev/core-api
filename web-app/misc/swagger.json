@@ -843,6 +843,113 @@
         }
       }
     },
+    "/products/{id}/images": {
+      "post": {
+        "summary": "Attach image to Product",
+        "description": "Upload and attach an image to a Product. Supported formats: JPG or PNG.",
+        "tags": [
+          "products"
+        ],
+        "consumes": [
+          "multipart/form-data"
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "description": "unique identifier of a Product",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "in": "formData",
+            "name": "file",
+            "type": "file",
+            "description": "Image file. JPG or PNG."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Product with imageUrl updated",
+            "schema": {
+              "$ref": "#/definitions/Product"
+            }
+          },
+          "401": {
+            "description": "Not authenticated (code: `NOT_AUTHENTICATED`)",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            },
+            "examples": {
+              "application/json": {
+                "code": "NOT_AUTHENTICATED",
+                "message": "Not authenticated via token or cookie"
+              }
+            }
+          },
+          "404": {
+            "description": "Product not found (code: `NOT_FOUND`)",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            },
+            "examples": {
+              "application/json": {
+                "code": "NOT_FOUND",
+                "message": "Product with id 1kDWMNstSmW1NxhJPYFHsAYgkesh19QraMLtgfuDs4sA not found"
+              }
+            }
+          },
+          "403": {
+            "description": "Insufficient permission to write Product (code: `FORBIDDEN`)",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            },
+            "examples": {
+              "application/json": {
+                "code": "FORBIDDEN",
+                "message": "Non-authenticated user does not have permission to write Product (id aQAd59nDQHiCUpXnhm7-TwPLCh9ALaQH2TIxOengS1FQ)"
+              }
+            }
+          },
+          "413": {
+            "description": "Uploaded file too large",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            },
+            "examples": {
+              "application/json": {
+                "code": "FILE_TOO_LARGE",
+                "message": "File size was 20000000 bytes (> 10000000 bytes)"
+              }
+            }
+          },
+          "415": {
+            "description": "File type not supported. (Not an image or unrecognized)",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            },
+            "examples": {
+              "application/json": {
+                "code": "UNSUPPORTED_FILE_TYPE",
+                "message": "File type is not a recognized image format"
+              }
+            }
+          },
+          "400": {
+            "description": "Parameter 'file' missing or unexepcted image dimensions",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            },
+            "examples": {
+              "application/json": {
+                "code": "UNEXPECTED_IMAGE_DIMENSIONS",
+                "message": ""
+              }
+            }
+          }
+        }
+      }
+    },
     "/streams": {
       "get": {
         "summary": "List streams",
