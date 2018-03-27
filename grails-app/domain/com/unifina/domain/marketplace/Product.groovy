@@ -2,7 +2,7 @@ package com.unifina.domain.marketplace
 
 import com.unifina.domain.data.Stream
 import com.unifina.domain.security.Permission
-import com.unifina.utils.IdGenerator
+import com.unifina.utils.HexIdGenerator
 import grails.compiler.GrailsCompileStatic
 
 class Product {
@@ -61,7 +61,7 @@ class Product {
 	}
 
 	static mapping = {
-		id generator: IdGenerator.name // Note: doesn't apply in unit tests
+		id generator: HexIdGenerator.name // Note: doesn't apply in unit tests
 		description type: 'text'
 		previewConfigJson type: 'text'
 		imageUrl length: 2048

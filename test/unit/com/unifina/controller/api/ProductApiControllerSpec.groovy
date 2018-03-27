@@ -4,6 +4,7 @@ import com.unifina.api.CreateProductCommand
 import com.unifina.api.ProductDeployedCommand
 import com.unifina.api.ProductListParams
 import com.unifina.api.ProductUndeployedCommand
+import com.unifina.api.SetPricingCommand
 import com.unifina.api.UpdateProductCommand
 import com.unifina.api.ValidationException
 import com.unifina.domain.marketplace.Category
@@ -245,6 +246,25 @@ class ProductApiControllerSpec extends Specification {
 		}
 		then:
 		1 * productService.markAsDeployed(product, _ as ProductDeployedCommand, user) >> product
+	}
+
+	void "setPricing() invokes productService#updatePricing"() {
+		controller.apiService = Stub(ApiService) {
+			getByIdAndThrowIfNotFound(Product, "product-id") >> product
+		}
+		def productService = controller.productService = Mock(ProductService)
+
+		def user = request.apiUser = new SecUser()
+
+		params.id = "product-id"
+		request.JSON = [:]
+		request.method = "POST"
+		when:
+		withFilters(action: "setPricing") {
+			controller.setPricing()
+		}
+		then:
+		1 * productService.updatePricing(product, _ as SetPricingCommand, user) >> product
 	}
 
 	void "setDeployed() returns 200 and renders a product"() {

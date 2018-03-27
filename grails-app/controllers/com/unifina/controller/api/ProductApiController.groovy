@@ -4,6 +4,7 @@ import com.unifina.api.CreateProductCommand
 import com.unifina.api.ProductDeployedCommand
 import com.unifina.api.ProductListParams
 import com.unifina.api.ProductUndeployedCommand
+import com.unifina.api.SetPricingCommand
 import com.unifina.api.UpdateProductCommand
 import com.unifina.domain.marketplace.Product
 import com.unifina.domain.security.Permission
@@ -23,7 +24,8 @@ class ProductApiController {
 		setDeploying: "POST",
 		setDeployed: "POST",
 		setUndeploying: "POST",
-		setUndeployed: "POST"
+		setUndeployed: "POST",
+		setPricing: "POST"
 	]
 
 	ApiService apiService
@@ -63,6 +65,14 @@ class ProductApiController {
 	def setDeploying(String id) {
 		Product product = productService.findById(id, loggedInUser(), Permission.Operation.WRITE)
 		productService.transitionToDeploying(product)
+		render(product.toMap() as JSON)
+	}
+
+	@GrailsCompileStatic
+	@StreamrApi(authenticationLevel = AuthLevel.USER)
+	def setPricing(String id, SetPricingCommand command) {
+		Product product = apiService.getByIdAndThrowIfNotFound(Product, id)
+		productService.updatePricing(product, command, loggedInUser())
 		render(product.toMap() as JSON)
 	}
 

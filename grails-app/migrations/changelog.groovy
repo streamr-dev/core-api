@@ -97,4 +97,5 @@ databaseChangeLog = {
 	include file: 'core/2018-02-18-add-devops-role.groovy'
 	include file: 'core/2018-02-20-test-data-for-product-api.groovy'
 	include file: 'core/2018-02-22-drop-class-column-from-stream.groovy'
+	include file: 'core/2018-02-27-add-subscription.groovy'
 }
