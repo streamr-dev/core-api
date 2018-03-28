@@ -24,14 +24,40 @@ type DispatchProps = {
 
 type Props = StateProps & DispatchProps
 
+type State = {
+    balanceData: {},
+}
+
 const service = 'ETHEREUM_ID'
 
-export class IdentityHandler extends Component<Props> {
+export class IdentityHandler extends Component<Props, State> {
+    state = {
+        balanceData: {},
+    }
     componentDidMount() {
         // TODO: Move to (yet non-existent) router
         this.props.getIntegrationKeysByService(service)
     }
-
+    componentWillReceiveProps(nextProps: Props) {
+        nextProps.integrationKeys.forEach((key) => {
+            const address: string = (Object.entries(key.json)[0][1]: any)
+            getWeb3().DATABalance('0xFeAACDBBc318EbBF9BB5835D4173C1a7fC24B3b9')
+                .then((balance: number) => {
+                    this.setState({
+                        balanceData: Object.assign({}, this.state.balanceData, {
+                            [address]: balance
+                        })
+                    })
+                })
+                .catch(() => {
+                    this.setState({
+                        balanceData: Object.assign({}, this.state.balanceData, {
+                            [address]: 0.0
+                        })
+                    })
+                })
+        })
+    }
     onNew = (integrationKey: IntegrationKey) => {
         const name = integrationKey.name
         delete integrationKey.name
@@ -44,6 +70,16 @@ export class IdentityHandler extends Component<Props> {
 
     onDelete = (id: $ElementType<IntegrationKey, 'id'>) => {
         this.props.deleteIntegrationKey(id)
+    }
+
+    formatBalance = (balance: number) => {
+        if (balance === undefined) {
+            return '0.0'
+        }
+        return balance > 999 ? balance.toFixed(0) : balance.toLocaleString('en-US', {
+            minimumSignificantDigits: 3,
+            maximumSignificantDigits: 5,
+        })
     }
 
     render() {
@@ -62,7 +98,12 @@ export class IdentityHandler extends Component<Props> {
                         copy="address"
                         showInput={hasWeb3}
                         tableFields={[
-                            ['address', (add) => add && (typeof add === 'string') && `${add.substring(0, 15)}...` || add]
+                            ['address', (address) => {
+                                if (address && (typeof address === 'string')) {
+                                    return `${address.substring(0, 15)}... (${this.formatBalance(this.state.balanceData[address])} DATA)`
+                                }
+                                return address
+                            } ]
                         ]}
                     />
                 </Row>
