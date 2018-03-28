@@ -97,6 +97,7 @@ class Categories {
 class Products {
     constructor(options) {
         this.options = options
+        this.permissions = new Permissions('products', options)
     }
 
     list(queryParams) {
@@ -181,6 +182,18 @@ class Subscriptions {
         return new StreamrApiRequest(this.options)
             .methodAndPath('POST', 'subscriptions')
             .withBody(body)
+    }
+}
+
+class Permissions {
+    constructor(resourcesName, options) {
+        this.resourcesName = resourcesName
+        this.options = options
+    }
+
+    getOwnPermissions(id) {
+        return new StreamrApiRequest(this.options)
+            .methodAndPath('GET', `${this.resourcesName}/${id}/permissions/me`)
     }
 }
 

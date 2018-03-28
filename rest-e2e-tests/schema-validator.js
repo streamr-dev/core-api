@@ -1,6 +1,7 @@
 const Ajv = require('ajv')
 
 const categorySchema = require('./schemas/category.json')
+const permissionSchema = require('./schemas/permission.json')
 const productSchema = require('./schemas/product.json')
 const streamSchema = require('./schemas/stream.json')
 
@@ -10,6 +11,7 @@ class SchemaValidator {
             allErrors: true,
             schemas: {
                 'Category': categorySchema,
+                'Permission': permissionSchema,
                 'Product': productSchema,
                 'Stream': streamSchema
             }
@@ -18,6 +20,10 @@ class SchemaValidator {
 
     validateCategory(data) {
         return this.ajv.validate('Category', data) ? [] : [... this.ajv.errors]
+    }
+
+    validatePermission(data) {
+        return this.ajv.validate('Permission', data) ? [] : [... this.ajv.errors]
     }
 
     validateProduct(data) {
