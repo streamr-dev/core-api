@@ -29,6 +29,59 @@ class SubscriptionServiceSpec extends Specification {
 		product = new Product(streams: [s1, s2]).save(failOnError: true, validate: false)
 	}
 
+	void "getSubscriptionsOfUser() returns empty if user has no integration keys"() {
+		expect:
+		service.getSubscriptionsOfUser(user) == []
+	}
+
+	void "getSubscriptionsOfUser() returns empty if user has no subscriptions tied to integration keys"() {
+		new IntegrationKey(
+			user: user,
+			name: "ik1",
+			service: IntegrationKey.Service.ETHEREUM_ID,
+			idInService: "0x0000000000000000000000000000000000000005"
+		).save(failOnError: true, validate: false)
+
+		new IntegrationKey(
+			user: user,
+			name: "ik1",
+			service: IntegrationKey.Service.ETHEREUM_ID,
+			idInService: "0x000000000000000000000000000000000000000C"
+		).save(failOnError: true, validate: false)
+
+		expect:
+		service.getSubscriptionsOfUser(user) == []
+	}
+
+	void "getSubscriptionsOfUser() returns subscriptions tied to user's integration keys"() {
+		new IntegrationKey(
+			user: user,
+			name: "ik1",
+			service: IntegrationKey.Service.ETHEREUM_ID,
+			idInService: "0x0000000000000000000000000000000000000005"
+		).save(failOnError: true, validate: false)
+
+		new IntegrationKey(
+			user: user,
+			name: "ik1",
+			service: IntegrationKey.Service.ETHEREUM_ID,
+			idInService: "0x000000000000000000000000000000000000000C"
+		).save(failOnError: true, validate: false)
+
+		def s1 = new Subscription(address: "0x0000000000000000000000000000000000000000")
+			.save(failOnError: true, validate: false)
+		def s2 = new Subscription(address: "0x0000000000000000000000000000000000000005")
+			.save(failOnError: true, validate: false)
+		def s3 = new Subscription(address: "0x000000000000000000000000000000000000000C")
+			.save(failOnError: true, validate: false)
+		def s4 = new Subscription(address: "0x000000000000000000000000000000000000000C")
+			.save(failOnError: true, validate: false)
+
+
+		expect:
+		service.getSubscriptionsOfUser(user) == [s2, s3, s4]
+	}
+
 	void "onSubscribed() creates new Subscription if product-address pair does not exist"() {
 		assert Subscription.count() == 0
 
