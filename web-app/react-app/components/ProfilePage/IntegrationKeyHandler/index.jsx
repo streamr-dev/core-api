@@ -42,7 +42,7 @@ export class IntegrationKeyHandler extends Component<Props, State> {
     componentWillReceiveProps(nextProps: Props) {
         nextProps.integrationKeys.forEach((key) => {
             const address: string = (Object.entries(key.json)[0][1]: any)
-            getWeb3().ethereumBalance('0xFeAACDBBc318EbBF9BB5835D4173C1a7fC24B3b9')
+            getWeb3().ethereumBalance(address)
                 .then((balance: number) => {
                     this.setState({
                         balanceData: Object.assign({}, this.state.balanceData, {
