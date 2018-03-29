@@ -2,14 +2,18 @@ package com.unifina.controller.api
 
 import com.unifina.api.NotPermittedException
 import com.unifina.api.ValidationException
+import com.unifina.domain.marketplace.Category
 import com.unifina.domain.marketplace.Product
+import com.unifina.domain.marketplace.Subscription
 import com.unifina.domain.security.SecRole
 import com.unifina.domain.security.SecUser
 import com.unifina.domain.security.SecUserSecRole
 import com.unifina.filters.UnifinaCoreAPIFilters
 import com.unifina.service.SubscriptionService
+import grails.converters.JSON
 import grails.test.mixin.Mock
 import grails.test.mixin.TestFor
+import groovy.json.JsonSlurper
 import spock.lang.Specification
 
 @TestFor(SubscriptionApiController)
@@ -23,6 +27,74 @@ class SubscriptionApiControllerSpec extends Specification {
 		def devopsRole = new SecRole(authority: "ROLE_DEV_OPS").save(failOnError: true)
 		new SecUserSecRole(secUser: devOpsUser, secRole:  devopsRole).save(failOnError: true)
 	}
+
+	void "index() invokes SubscriptionService#getSubscriptionsOfUser"() {
+		def subscriptionService = controller.subscriptionService = Mock(SubscriptionService)
+		def user = new SecUser()
+
+		request.apiUser = user
+
+		when:
+		withFilters(action: "index") {
+			controller.index()
+		}
+
+		then:
+		1 * subscriptionService.getSubscriptionsOfUser(user)
+	}
+
+	void "index() returns 200 and renders subscriptions"() {
+		def p1 = new Product(
+			name: "Product 1",
+			description: "description",
+			imageUrl: "image1",
+			category: new Category(id: "category-1"),
+			streams: [],
+		)
+
+		def p2 = new Product(
+			name: "Product 2",
+			description: "description",
+			imageUrl: "image1",
+			category: new Category(id: "category-2"),
+			streams: [],
+		)
+
+		def s1 = new Subscription(
+			address: "0x0",
+			endsAt: new Date(2018, 3, 29, 11, 00, 00),
+			product: p1
+		)
+
+		def s2 = new Subscription(
+			address: "0xA",
+			endsAt: new Date(2018, 3, 29, 15, 00, 00),
+			product: p2
+		)
+
+		p1.id = "p1"
+		p2.id = "p2"
+		s1.id = 10
+		s2.id = 20
+
+		controller.subscriptionService = Stub(SubscriptionService) {
+			getSubscriptionsOfUser(_) >> [s1, s2]
+		}
+
+		when:
+		withFilters(action: "index") {
+			controller.index()
+		}
+
+		then:
+		response.status == 200
+
+		and:
+		def actualJsonWithoutWeirdNullObjects = new JsonSlurper().parseText((response.json as JSON).toString())
+		def expectedJsonWithoutWeirdNullObjects = new JsonSlurper().parseText(([s1, s2]*.toMap() as JSON).toString())
+		actualJsonWithoutWeirdNullObjects == expectedJsonWithoutWeirdNullObjects
+	}
+
 
 	void "save() throws ValidationException if request body does not pass validation"() {
 		request.apiUser = devOpsUser

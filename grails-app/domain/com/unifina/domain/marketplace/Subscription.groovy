@@ -25,4 +25,13 @@ class Subscription {
 	SecUser getUser() {
 		IntegrationKey.findByServiceAndIdInService(IntegrationKey.Service.ETHEREUM_ID, address)?.user
 	}
+
+	Map toMap() {
+		return [
+			id: id,
+		    address: address,
+			endsAt: endsAt,
+			product: product.toMap(),
+		]
+	}
 }
