@@ -3,6 +3,7 @@ const Ajv = require('ajv')
 const categorySchema = require('./schemas/category.json')
 const productSchema = require('./schemas/product.json')
 const streamSchema = require('./schemas/stream.json')
+const subscriptionSchema = require('./schemas/subscription.json')
 
 class SchemaValidator {
     constructor() {
@@ -11,7 +12,8 @@ class SchemaValidator {
             schemas: {
                 'Category': categorySchema,
                 'Product': productSchema,
-                'Stream': streamSchema
+                'Stream': streamSchema,
+                'Subscription': subscriptionSchema
             }
         })
     }
@@ -26,6 +28,10 @@ class SchemaValidator {
 
     validateStream(data) {
         return this.ajv.validate('Stream', data) ? [] : [... this.ajv.errors]
+    }
+
+    validateSubscription(data) {
+        return this.ajv.validate('Subscription', data) ? [] : [... this.ajv.errors]
     }
 
     toMessages(errors) {
