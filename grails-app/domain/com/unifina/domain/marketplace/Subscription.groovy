@@ -28,8 +28,7 @@ class Subscription {
 
 	Map toMap() {
 		return [
-			id: id,
-		    address: address,
+			address: address,
 			endsAt: endsAt,
 			product: product.toMap(),
 		]
