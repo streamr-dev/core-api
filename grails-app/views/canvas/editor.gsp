@@ -23,6 +23,8 @@
 	var loadBrowser
 	var saveAndAskName
 
+	var hasUnsavedChanges = false
+
 $(function() {
 	$('#moduleTree').bind('loaded.jstree', function() {
 		Tour.startableTours([0])
@@ -161,6 +163,7 @@ $(function() {
 	})
 
 	$(SignalPath).on('saved', function(event, savedJson) {
+	    hasUnsavedChanges = false
 		$('#modal-spinner').hide()
 		Streamr.showSuccess('${message(code:"signalpath.saved")}: '+savedJson.name)
 		setAddressbarUrl(Streamr.createLink({controller: "canvas", action: "editor", id: savedJson.id}))
@@ -195,6 +198,17 @@ $(function() {
 		}
 	}
 
+	window.addEventListener("beforeunload", function (e) {
+		if (SignalPath.isReadOnly() || !hasUnsavedChanges) {
+			return undefined;
+		}
+
+		var confirmationMessage = 'Canvas has been edited. If you leave before saving, your changes will be lost.';
+
+		(e || window.event).returnValue = confirmationMessage; //Gecko + IE
+		return confirmationMessage; //Gecko + Webkit, Safari, Chrome etc.
+	});
+
 	// Streamr search for modules and streams
 	var streamrSearch = new StreamrSearch('#search', [{
 		name: "module",
@@ -205,6 +219,7 @@ $(function() {
 	}], {
 		inBody: true
 	}, function(item) {
+	    hasUnsavedChanges = true
 
 		if (item.resultType == "stream") { // is stream, specifies module
 			SignalPath.addModule(item.feed.module, {
@@ -349,6 +364,7 @@ $(function() {
 	}
 
 	$(SignalPath).on('new', function() {
+	    hasUnsavedChanges = false
 	    streamrDropDownSetEnabled('rename')
 	    nameEditor.setName(SignalPath.getName(), {
 	        silent: true
