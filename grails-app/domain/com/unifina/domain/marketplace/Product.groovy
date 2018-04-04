@@ -18,7 +18,7 @@ class Product {
 
 	Date dateCreated
 	Date lastUpdated
-	Integer score = 0
+	Integer score = 0 // set manually; used as default ordering for lists of Products (descending)
 
 	// The below fields exist in the domain object for speed & query support, but the ground truth is in the smart contract.
 	String ownerAddress
