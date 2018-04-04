@@ -79,7 +79,7 @@ describe('IdentityHandler', () => {
             assert.equal(handlerSegment.props().onNew, handler.instance().onNew)
             assert.equal(handlerSegment.props().onDelete, handler.instance().onDelete)
             assert.equal(handlerSegment.props().tableFields[0][0], 'address')
-            assert.equal(handlerSegment.props().tableFields[0][1]('12345123451234512345'), '123451234512345... (0.0 DATA)')
+            assert.equal(handlerSegment.props().tableFields[0][1]('12345123451234512345'), '123451234512345...')
         })
     })
     describe('mapStateToProps', () => {

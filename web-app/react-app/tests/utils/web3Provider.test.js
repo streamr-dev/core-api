@@ -51,22 +51,6 @@ describe('web3Provider', () => {
                 assert(web3.isEnabled())
             })
         })
-
-        describe('ethereumBalance', () => {
-            it('must return correct value with valid address', () => {
-                const web3 = new StreamrWeb3()
-                const balance = web3.ethereumBalance('0xFeAACDBBc318EbBF9BB5835D4173C1a7fC24B3b9')
-                assert(balance != null)
-            })
-        })
-
-        describe('DATABalance', () => {
-            it('must return correct value with valid address', () => {
-                const web3 = new StreamrWeb3()
-                const balance = web3.DATABalance('0xFeAACDBBc318EbBF9BB5835D4173C1a7fC24B3b9')
-                assert(balance != null)
-            })
-        })
     })
     describe('getWeb3', () => {
         it('must return the same instance every time', () => {

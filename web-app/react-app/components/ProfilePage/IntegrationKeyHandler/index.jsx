@@ -9,7 +9,6 @@ import {createIntegrationKey, deleteIntegrationKey, getIntegrationKeysByService}
 import {connect} from 'react-redux'
 import type {IntegrationKeyState} from '../../../flowtype/states/integration-key-state'
 import type {ErrorInUi} from '../../../flowtype/common-types'
-import getWeb3 from '../../../utils/web3Provider'
 
 type StateProps = {
     integrationKeys: Array<IntegrationKey>,
@@ -24,41 +23,15 @@ type DispatchProps = {
 
 type Props = StateProps & DispatchProps
 
-type State = {
-    balanceData: {},
-}
-
 const service = 'ETHEREUM'
 
-export class IntegrationKeyHandler extends Component<Props, State> {
-    state = {
-        balanceData: {},
-    }
+export class IntegrationKeyHandler extends Component<Props> {
 
     componentDidMount() {
         // TODO: Move to (yet non-existent) router
         this.props.getIntegrationKeysByService(service)
     }
-    componentWillReceiveProps(nextProps: Props) {
-        nextProps.integrationKeys.forEach((key) => {
-            const address: string = (Object.entries(key.json)[0][1]: any)
-            getWeb3().ethereumBalance(address)
-                .then((balance: number) => {
-                    this.setState({
-                        balanceData: Object.assign({}, this.state.balanceData, {
-                            [address]: balance
-                        })
-                    })
-                })
-                .catch(() => {
-                    this.setState({
-                        balanceData: Object.assign({}, this.state.balanceData, {
-                            [address]: 0.0
-                        })
-                    })
-                })
-        })
-    }
+
     onNew = (integrationKey: IntegrationKey) => {
         const name = integrationKey.name
         delete integrationKey.name
@@ -71,16 +44,6 @@ export class IntegrationKeyHandler extends Component<Props, State> {
 
     onDelete = (id: $ElementType<IntegrationKey, 'id'>) => {
         this.props.deleteIntegrationKey(id)
-    }
-
-    formatBalance = (balance: number) => {
-        if (balance === undefined) {
-            return '0.0'
-        }
-        return balance > 999 ? balance.toFixed(0) : balance.toLocaleString('en-US', {
-            minimumSignificantDigits: 3,
-            maximumSignificantDigits: 5,
-        })
     }
 
     render() {
@@ -97,12 +60,7 @@ export class IntegrationKeyHandler extends Component<Props, State> {
                         service={service}
                         inputFields={['privateKey']}
                         tableFields={[
-                            ['address', (address) => {
-                                if (address && (typeof address === 'string')) {
-                                    return `${address.substring(0, 15)} (${this.formatBalance(this.state.balanceData[address])} ETH)`
-                                }
-                                return ''
-                            }],
+                            ['address', (add) => add && (typeof add === 'string') && add.substring(0, 15)]
                         ]}
                     />
                 </Row>
