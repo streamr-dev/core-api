@@ -35,6 +35,16 @@ class ProductImageServiceSpec extends Specification {
 		).save(failOnError: true)
 	}
 
+	void "replaceImage() resizes image via imageResizer#resize"() {
+		def imageResizer = service.imageResizer = Mock(ImageResizer)
+		def bytes = new byte[256]
+
+		when:
+		service.replaceImage(product, bytes, filename)
+		then:
+		2 * imageResizer.resize(bytes, filename, _)
+	}
+
 	void "replaceImage() uploads image via fileUploadProvider#uploadFile"() {
 		def fileUploadProvider = service.fileUploadProvider = Mock(FileUploadProvider)
 		def bytes = new byte[256]
