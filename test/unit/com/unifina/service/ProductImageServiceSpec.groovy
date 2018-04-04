@@ -3,7 +3,7 @@ package com.unifina.service
 import com.unifina.domain.marketplace.Category
 import com.unifina.domain.marketplace.Product
 import com.unifina.provider.FileUploadProvider
-import com.unifina.utils.ImageVerifier
+import com.unifina.utils.ImageResizer
 import com.unifina.utils.testutils.FakeIdGenerator
 import grails.test.mixin.Mock
 import grails.test.mixin.TestFor
@@ -14,9 +14,10 @@ import spock.lang.Specification
 class ProductImageServiceSpec extends Specification {
 
 	Product product
+	String filename = "picture.png"
 
 	void setup() {
-		service.imageVerifier = Stub(ImageVerifier)
+		service.imageResizer = Stub(ImageResizer)
 		service.fileUploadProvider = Stub(FileUploadProvider) {
 			uploadFile(_, _) >> new URL("https://www.streamr.com/files/id-0")
 		}
@@ -34,24 +35,14 @@ class ProductImageServiceSpec extends Specification {
 		).save(failOnError: true)
 	}
 
-	void "replaceImage() verifies image bytes via imageVerifier#verifyImage"() {
-		def imageVerifier = service.imageVerifier = Mock(ImageVerifier)
-		def bytes = new byte[256]
-
-		when:
-		service.replaceImage(product, bytes)
-		then:
-		1 * imageVerifier.verifyImage(bytes)
-	}
-
 	void "replaceImage() uploads image via fileUploadProvider#uploadFile"() {
 		def fileUploadProvider = service.fileUploadProvider = Mock(FileUploadProvider)
 		def bytes = new byte[256]
 
 		when:
-		service.replaceImage(product, bytes)
+		service.replaceImage(product, bytes, filename)
 		then:
-		1 * fileUploadProvider.uploadFile("product-images/id-0", bytes)
+		2 * fileUploadProvider.uploadFile(_, _)
 	}
 
 	void "replaceImage() does not invoke fileUploadProvider#deleteFile if Product does not have existing image"() {
@@ -59,7 +50,7 @@ class ProductImageServiceSpec extends Specification {
 		def bytes = new byte[256]
 
 		when:
-		service.replaceImage(product, bytes)
+		service.replaceImage(product, bytes, filename)
 		then:
 		0 * fileUploadProvider.deleteFile(_)
 	}
@@ -68,19 +59,30 @@ class ProductImageServiceSpec extends Specification {
 		def fileUploadProvider = service.fileUploadProvider = Mock(FileUploadProvider)
 		def bytes = new byte[256]
 		product.imageUrl = "https://www.streamr.com/files/2.png"
+		product.thumbnailUrl = "https://www.streamr.com/files/t.png"
 
 		when:
-		service.replaceImage(product, bytes)
+		service.replaceImage(product, bytes, filename)
 		then:
 		1 * fileUploadProvider.deleteFile("https://www.streamr.com/files/2.png")
+		1 * fileUploadProvider.deleteFile("https://www.streamr.com/files/t.png")
 	}
 
 	void "replaceImage() updates Product.imageUrl"() {
 		def bytes = new byte[256]
 
 		when:
-		service.replaceImage(product, bytes)
+		service.replaceImage(product, bytes, filename)
 		then:
 		Product.get("1").imageUrl == "https://www.streamr.com/files/id-0"
+	}
+
+	void "replaceImage() updates Product.thumbnailUrl"() {
+		def bytes = new byte[256]
+
+		when:
+		service.replaceImage(product, bytes, filename)
+		then:
+		Product.get("1").thumbnailUrl == "https://www.streamr.com/files/id-0"
 	}
 }

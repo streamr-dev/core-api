@@ -104,7 +104,7 @@ class ProductApiController {
 	def uploadImage(String id) {
 		Product product = productService.findById(id, loggedInUser(), Permission.Operation.WRITE)
 		MultipartFile file = getUploadedFile()
-		productImageService.replaceImage(product, file.bytes)
+		productImageService.replaceImage(product, file.bytes, file.getName())
 		render(product.toMap() as JSON)
 	}
 
