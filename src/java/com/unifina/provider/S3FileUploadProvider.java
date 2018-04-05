@@ -39,10 +39,12 @@ public class S3FileUploadProvider implements FileUploadProvider {
 	public URL uploadFile(String fileName, byte[] contents)
 			throws HostingServiceException, CommunicationErrorWithHostException {
 		try {
+			final ObjectMetadata metadata = new ObjectMetadata();
+			metadata.setContentLength(contents.length);
 			s3client.putObject(new PutObjectRequest(bucketName,
 					fileName,
 					new ByteArrayInputStream(contents),
-					new ObjectMetadata()));
+					metadata));
 		} catch (AmazonServiceException e) {
 			log.error(e);
 			throw new HostingServiceException();

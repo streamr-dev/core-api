@@ -4,6 +4,7 @@ import com.unifina.domain.marketplace.Category
 import com.unifina.domain.marketplace.Product
 import com.unifina.provider.FileUploadProvider
 import com.unifina.utils.ImageResizer
+import com.unifina.utils.ImageVerifier
 import com.unifina.utils.testutils.FakeIdGenerator
 import grails.test.mixin.Mock
 import grails.test.mixin.TestFor
@@ -33,6 +34,16 @@ class ProductImageServiceSpec extends Specification {
 			beneficiaryAddress: "0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF",
 			pricePerSecond: 2
 		).save(failOnError: true)
+	}
+
+	void "replaceImage() verifies image bytes via imageVerifier#verifyImage"() {
+		def imageVerifier = service.imageVerifier = Mock(ImageVerifier)
+		def bytes = new byte[256]
+
+		when:
+		service.replaceImage(product, bytes, filename)
+		then:
+		1 * imageVerifier.verifyImage(bytes)
 	}
 
 	void "replaceImage() resizes image via imageResizer#resize"() {

@@ -4,13 +4,17 @@ import com.unifina.domain.marketplace.Product
 import com.unifina.provider.FileUploadProvider
 import com.unifina.utils.IdGenerator
 import com.unifina.utils.ImageResizer
+import com.unifina.utils.ImageVerifier
 
 class ProductImageService {
 	FileUploadProvider fileUploadProvider
+	private final long maxSize = 1024*1024*5
+	ImageVerifier imageVerifier = new ImageVerifier(maxSize)
 	IdGenerator idGenerator = new IdGenerator()
 	ImageResizer imageResizer = new ImageResizer()
 
 	void replaceImage(Product product, byte[] fileBytes, String filename) {
+		imageVerifier.verifyImage(fileBytes)
 		String newImageUrl;
 		String newThumbnailUrl;
 		for (ImageResizer.Size size : ImageResizer.Size.values()) {

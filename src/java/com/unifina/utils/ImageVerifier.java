@@ -9,16 +9,12 @@ import java.io.IOException;
 
 public class ImageVerifier {
 	private final long maxSizeInBytes;
-	private final int width;
-	private final int height;
 
-	public ImageVerifier(long maxSizeInBytes, int width, int height) {
+	public ImageVerifier(long maxSizeInBytes) {
 		this.maxSizeInBytes = maxSizeInBytes;
-		this.width = width;
-		this.height = height;
 	}
 
-	public void verifyImage(byte[] imageBytes) throws FileTooLargeException, UnsupportedFileTypeException, UnexpectedImageDimensions {
+	public void verifyImage(byte[] imageBytes) throws FileTooLargeException, UnsupportedFileTypeException {
 		if (imageBytes.length > maxSizeInBytes) {
 			throw new FileTooLargeException(imageBytes.length);
 		}
@@ -30,9 +26,7 @@ public class ImageVerifier {
 		}
 
 		if (bufferedImage == null) {
-			throw new UnsupportedFileTypeException();
-		} else if (bufferedImage.getHeight() != height || bufferedImage.getWidth() != width) {
-			throw new UnexpectedImageDimensions(bufferedImage);
+			throw new UnsupportedFileTypeException(imageBytes.length);
 		}
 	}
 
@@ -43,16 +37,9 @@ public class ImageVerifier {
 	}
 
 	static class UnsupportedFileTypeException extends ApiException {
-		UnsupportedFileTypeException() {
-			super(415, "UNSUPPORTED_FILE_TYPE", "File type is not a recognized image format");
+		UnsupportedFileTypeException(final long fileSize) {
+			super(415, "UNSUPPORTED_FILE_TYPE",
+					String.format("File type is not a recognized image format (size %d bytes)", fileSize));
 		}
 	}
-
-	class UnexpectedImageDimensions extends ApiException {
-		UnexpectedImageDimensions(BufferedImage bufferedImage) {
-			super(400, "UNEXPECTED_IMAGE_DIMENSIONS", String.format("Got %dx%d but expected %dx%d",
-					bufferedImage.getWidth(), bufferedImage.getHeight(), width, height));
-		}
-	}
-
 }

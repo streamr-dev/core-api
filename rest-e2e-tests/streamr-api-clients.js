@@ -69,7 +69,8 @@ class StreamrApiRequest {
                 '\n\n' + Object.keys(headers)
                     .map(key => `${key}: ${headers[key]}`)
                     .join('\n'),
-                this.body ? '\n\n' + JSON.stringify(JSON.parse(this.body), null, 4) : '',
+                typeof this.body === 'string' ? '\n\n' + JSON.stringify(JSON.parse(this.body), null, 4) : '\n\n' + JSON.stringify(this.body, null, 4),
+                //this.body ? '\n\n' + JSON.stringify(JSON.parse(this.body), null, 4) : '',
                 '\n\n'
             )
         }
