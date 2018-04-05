@@ -99,4 +99,5 @@ databaseChangeLog = {
 	include file: 'core/2018-02-22-drop-class-column-from-stream.groovy'
 	include file: 'core/2018-02-27-add-subscription.groovy'
 	include file: 'core/2018-04-04-add-product-thumbnailurl.groovy'
+	include file: 'core/2018-04-04-test-data-products-subscriptions.groovy'
 }
