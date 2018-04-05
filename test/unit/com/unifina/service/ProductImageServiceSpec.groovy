@@ -48,6 +48,7 @@ class ProductImageServiceSpec extends Specification {
 
 	void "replaceImage() resizes image via imageResizer#resize"() {
 		def imageResizer = service.imageResizer = Mock(ImageResizer)
+		service.imageVerifier = Mock(ImageVerifier)
 		def bytes = new byte[256]
 
 		when:
@@ -58,6 +59,7 @@ class ProductImageServiceSpec extends Specification {
 
 	void "replaceImage() uploads image via fileUploadProvider#uploadFile"() {
 		def fileUploadProvider = service.fileUploadProvider = Mock(FileUploadProvider)
+		service.imageVerifier = Mock(ImageVerifier)
 		def bytes = new byte[256]
 
 		when:
@@ -68,6 +70,7 @@ class ProductImageServiceSpec extends Specification {
 
 	void "replaceImage() does not invoke fileUploadProvider#deleteFile if Product does not have existing image"() {
 		def fileUploadProvider = service.fileUploadProvider = Mock(FileUploadProvider)
+		service.imageVerifier = Mock(ImageVerifier)
 		def bytes = new byte[256]
 
 		when:
@@ -78,6 +81,7 @@ class ProductImageServiceSpec extends Specification {
 
 	void "replaceImage() invokes fileUploadProvider#deleteFile if Product has existing image"() {
 		def fileUploadProvider = service.fileUploadProvider = Mock(FileUploadProvider)
+		service.imageVerifier = Mock(ImageVerifier)
 		def bytes = new byte[256]
 		product.imageUrl = "https://www.streamr.com/files/2.png"
 		product.thumbnailUrl = "https://www.streamr.com/files/t.png"
@@ -90,6 +94,8 @@ class ProductImageServiceSpec extends Specification {
 	}
 
 	void "replaceImage() updates Product.imageUrl"() {
+		service.imageVerifier = Mock(ImageVerifier)
+		service.imageResizer = Mock(ImageResizer)
 		def bytes = new byte[256]
 
 		when:
@@ -99,6 +105,8 @@ class ProductImageServiceSpec extends Specification {
 	}
 
 	void "replaceImage() updates Product.thumbnailUrl"() {
+		service.imageVerifier = Mock(ImageVerifier)
+		service.imageResizer = Mock(ImageResizer)
 		def bytes = new byte[256]
 
 		when:

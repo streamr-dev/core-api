@@ -12,7 +12,7 @@ public class ImageResizer {
 	private static final int HERO_HEIGHT = 400;
 	private static final int THUMB_WIDTH = 360;
 	private static final int THUMB_HEIGHT = 210;
-	private enum Size {
+	public enum Size {
 		HERO(HERO_WIDTH, HERO_HEIGHT),
 		THUMB(THUMB_WIDTH, THUMB_HEIGHT);
 
