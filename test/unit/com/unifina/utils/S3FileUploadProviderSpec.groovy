@@ -48,14 +48,4 @@ class S3FileUploadProviderSpec extends Specification {
 			return true
 		})
 	}
-
-	void "deleteFile() doesn't call AmazonS3.deleteObject() when image url is null"() {
-		def s3Client = Mock(AmazonS3)
-		def fileUploadProvider = new S3FileUploadProvider(s3Client, "bucketName")
-
-		when:
-		fileUploadProvider.deleteFile(null)
-		then:
-		0 * s3Client.deleteObject(_)
-	}
 }

@@ -1,5 +1,7 @@
 package com.unifina.utils;
 
+import com.unifina.api.ApiException;
+
 import javax.imageio.ImageIO;
 import java.awt.*;
 import java.awt.image.BufferedImage;
@@ -39,9 +41,9 @@ public class ImageResizer {
 		return baos.toByteArray();
 	}
 
-	private String guessImageFormat(final String filename) {
+	String guessImageFormat(final String filename) {
 		if (filename == null || filename.length() == 0) {
-			return "jpg";
+			throw new ApiException(400, "FILENAME_REQUIRED", "file name is required");
 		}
 		return filename.substring(filename.lastIndexOf(".") + 1).toLowerCase();
 	}

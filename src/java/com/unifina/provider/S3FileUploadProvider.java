@@ -57,9 +57,6 @@ public class S3FileUploadProvider implements FileUploadProvider {
 
 	@Override
 	public void deleteFile(String url) {
-		if (url == null) {
-			return;
-		}
 		try {
 			AmazonS3URI s3Uri = new AmazonS3URI(url);
 			s3client.deleteObject(new DeleteObjectRequest(s3Uri.getBucket(), s3Uri.getKey()));

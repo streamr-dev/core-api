@@ -1,5 +1,6 @@
 package com.unifina.service
 
+import com.unifina.api.ApiException
 import com.unifina.domain.marketplace.Category
 import com.unifina.domain.marketplace.Product
 import com.unifina.provider.FileUploadProvider
@@ -34,6 +35,18 @@ class ProductImageServiceSpec extends Specification {
 			beneficiaryAddress: "0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF",
 			pricePerSecond: 2
 		).save(failOnError: true)
+	}
+
+	void "replaceImage() throws ApiException is file extension is undefined"() {
+		def bytes = new byte[256]
+		service.imageResizer = Mock(ImageResizer)
+		service.imageVerifier = Mock(ImageVerifier)
+
+		when:
+		service.replaceImage(product, bytes, "filename")
+
+		then:
+		thrown(ApiException)
 	}
 
 	void "replaceImage() verifies image bytes via imageVerifier#verifyImage"() {

@@ -424,7 +424,7 @@ class ProductApiControllerSpec extends Specification {
 			controller.uploadImage()
 		}
 		then:
-		1 * productImageService.replaceImage(product, bytes, _)
+		1 * productImageService.replaceImage(product, bytes, "my-product-image.jpg")
 	}
 
 	void "uploadImage() returns 200 and renders a product"() {
