@@ -44,6 +44,7 @@ class RuleSpec extends Specification {
 
 
 		when: "targets is set"
+		targets = [:]
 		targets.put(Calendar.DATE, 9)
 		targets.put(Calendar.HOUR_OF_DAY, 9)
 

@@ -4,6 +4,9 @@ import axios from 'axios'
 import {parseError} from './utils/parseApiResponse'
 import createLink from '../helpers/createLink'
 import {error, success} from 'react-notification-system-redux'
+import type {IntegrationKey} from '../flowtype/integration-key-types.js'
+import type {ErrorInUi} from '../flowtype/common-types.js'
+import getWeb3 from '../utils/web3Provider'
 
 export const GET_AND_REPLACE_INTEGRATION_KEYS_REQUEST = 'GET_AND_REPLACE_INTEGRATION_KEYS_REQUEST'
 export const GET_AND_REPLACE_INTEGRATION_KEYS_SUCCESS = 'GET_AND_REPLACE_INTEGRATION_KEYS_SUCCESS'
@@ -21,10 +24,11 @@ export const DELETE_INTEGRATION_KEY_REQUEST = 'DELETE_INTEGRATION_KEY_REQUEST'
 export const DELETE_INTEGRATION_KEY_SUCCESS = 'DELETE_INTEGRATION_KEY_SUCCESS'
 export const DELETE_INTEGRATION_KEY_FAILURE = 'DELETE_INTEGRATION_KEY_FAILURE'
 
-const apiUrl = 'api/v1/integration_keys'
+export const CREATE_IDENTITY_REQUEST = 'CREATE_IDENTITY_REQUEST'
+export const CREATE_IDENTITY_SUCCESS = 'CREATE_IDENTITY_SUCCESS'
+export const CREATE_IDENTITY_FAILURE = 'CREATE_IDENTITY_FAILURE'
 
-import type {IntegrationKey} from '../flowtype/integration-key-types.js'
-import type {ErrorInUi} from '../flowtype/common-types.js'
+const apiUrl = 'api/v1/integration_keys'
 
 export const getAndReplaceIntegrationKeys = () => (dispatch: Function) => {
     dispatch(getAndReplaceIntegrationKeysRequest())
@@ -94,6 +98,59 @@ export const deleteIntegrationKey = (id: $ElementType<IntegrationKey, 'id'>) => 
         })
 }
 
+export const createIdentity = (integrationKey: IntegrationKey) => (dispatch: Function) => {
+    const ownWeb3 = getWeb3()
+    dispatch(createIdentityRequest(integrationKey))
+    if (!ownWeb3.isEnabled()) {
+        dispatch(createIdentityFailure({
+            message: 'MetaMask browser extension is not installed'
+        }))
+        dispatch(error({
+            title: 'Create identity failed',
+            message: 'MetaMask browser extension is not installed',
+        }))
+        return
+    }
+    return Promise.all([
+        ownWeb3.getDefaultAccount(),
+        axios.post(createLink('api/v1/login/challenge'))
+    ])
+        .then(([account, response]) => {
+            const challenge = response && response.data
+            return ownWeb3.eth.personal.sign(challenge.challenge, account)
+                .then((signature) => {
+                    return axios.post(createLink(apiUrl), {
+                        ...integrationKey,
+                        challenge: challenge,
+                        signature: signature,
+                        address: account,
+                    })
+                })
+        })
+        .then((response) => {
+            const {id, name, service, json} = response.data
+            dispatch(createIdentitySuccess({
+                id,
+                name,
+                service,
+                json
+            }))
+            dispatch(success({
+                title: 'Success!',
+                message: 'New identity created',
+            }))
+        })
+        .catch((errorResponse) => {
+            const err = parseError(errorResponse)
+            dispatch(createIdentityFailure(err))
+            dispatch(error({
+                title: 'Create identity failed',
+                message: err.message,
+            }))
+            throw err
+        })
+}
+
 const getAndReplaceIntegrationKeysRequest = () => ({
     type: GET_AND_REPLACE_INTEGRATION_KEYS_REQUEST,
 })
@@ -152,4 +209,19 @@ const createIntegrationKeyFailure = (error: ErrorInUi) => ({
 const deleteIntegrationKeyFailure = (error: ErrorInUi) => ({
     type: DELETE_INTEGRATION_KEY_FAILURE,
     error
+})
+
+const createIdentityRequest = (integrationKey: IntegrationKey) => ({
+    type: CREATE_IDENTITY_REQUEST,
+    integrationKey,
+})
+
+const createIdentitySuccess = (integrationKey: IntegrationKey) => ({
+    type: CREATE_IDENTITY_SUCCESS,
+    integrationKey,
+})
+
+const createIdentityFailure = (error: ErrorInUi) => ({
+    type: CREATE_IDENTITY_FAILURE,
+    error,
 })

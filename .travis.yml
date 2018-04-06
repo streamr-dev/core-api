@@ -1,0 +1,52 @@
+language: groovy
+sudo: required
+jdk:
+  - openjdk8
+services:
+- docker
+- mysql
+branches:
+  only:
+  - master
+git:
+  submodules: false
+before_install:
+- curl -s http://get.sdkman.io | bash
+- echo sdkman_auto_answer=true > ~/.sdkman/etc/config
+- source "/home/travis/.sdkman/bin/sdkman-init.sh"
+- sdk install grails 2.5.6
+- sed -i 's/git@github.com:/https:\/\/github.com\//' .gitmodules
+- git submodule update --init --recursive
+addons:
+  chrome: stable
+  apt:
+    packages:
+    - lynx
+
+jobs:
+  include:
+  - stage: Unit tests
+    script: ./travis_scripts/unit_test.sh
+  - stage: Integration tests
+    script: ./travis_scripts/integration_test.sh
+  - stage: Build war
+    script:  ./travis_scripts/build_war.sh
+    deploy:
+      provider: s3
+      access_key_id: AKIAI7LEOVJBY6ZEH44Q
+      secret_access_key:
+        secure: iKwr8sXvSmzDpv6GIl4q0m9beVNa4IDd/cYrF1gTB9oOESDFT9Q1EqiVeFUZGVQnKWcbvUmHbGu+f8AhF7AMpST6eeGm+h35m/Y1gBxehmFM4yf/kJkA2lj34/Xzy+3N8XpHnFGSF5alya0uEKV2wgQ7qUYvw/SkNA67VdwlzQSEbTu+yHYWP/PYuddTTePjQj3J8vJLwMoOSWsMl3n32nsFOx4cCCerzsfaA7F1JYJwTleyd71iFinQGRGjIaYJGQOGVjCmEZRuHLZEZNXCkEeFneoBhymYtoXsLVXkyf5VkibApTnKYaA8wXRCtI+Ow1zfTl8KzxFOiQ/zbtjtGb375TbwKOTBOQTJk7Heh99gdSAA+uhtnia2TvuqwZD+W8Ge7NW21/tJzQS9dPWM8rFtyK0BL7cYH4SLW4QtHTnwlg99jiHqR/RjtvPiVNxX6R23922n9ORJUmY81lsjgN74eq6stwyIl4HvbgiVqEd6w6+uUd4p2GLeFFN7w/Kn+W2V8VY/aUKwz2Mg/KfTd+l3kyPmlb9ITx4z39A4mmIislWD00SpnHvDYOBYUWCByzhDrMPFMY4RAQL8SCwjU/XKqbueFYUJncqW9aZm3N9Zcm2UcTnmfxHbnCN1Z/5gWXxIp5WbwxY6yt29p8UxHU8eGfHzWeIl+2fH0HT6bgU=
+      bucket: eu-west-1-streamr-vault
+      upload-dir: engine-editor/release
+      acl: private
+      region: eu-west-1
+      skip_cleanup: true
+      local_dir: build
+    if: branch = master
+after_failure: "./travis-after-failure.sh"
+notifications:
+  slack:
+    secure: rX8I0YHsgA0mvjlKhQ+69ZsO8mww0xYV/wc2VolQaBXIZ5Jcj4A82cLRAAyhoJxEP7tZUFhVBMkwmMSHnL4AvGG5JREialedQltAww/0/kTACxCc62/bxnbV+YDapxP4VIpOdL+/La+gWt4FsoW6oKavwMkNgPuNE65+IGK3ay2+G+BTfjldWkBLcBa8MAsKXp3XQdt04eyh3b3HBUk04rgotIPB+ndSW97NUTdj8LifiKFYV8n5c5LOLRWTgP68t1ktjPCWvjHzjwWRlSnxRcdXkj870mjCdH/l8WI93YzZE4g2auUjWFV8MzbGfObnCQ9McaoVwhiUt4IjpI51Iuc0qUwpoIfMk0J3BobZWcehXFilQknOTF9y5LqRplHND5Om3Dw8DdKWCzZVFw8S3dd5oBgKgxuOt01KD4lpQ/5nJZzmykrKMNWa7NkbYw6pLHVSaIMu4WVycZLnnyz4Rt/LZIdq7IH38QT0DDR9aG7CMgomnzAvgfSkte7lMdfeOo+uMsu2JA0MXOd1BYfEzwWCRh7QWhr5UgZXPX9sFReal/TtEODh71ZMI945iQVDNaEh3ypuBdraiFSR7SZbLTdvZEVbzCC2kS6JKBdUsUVTroWSyIl+gJUsXoyZ88c1YmFBMdj6jDSyzz4Ig4uBRwMEcx0aqtwDnQrvEtNhzKY=
+  on_success: change # default: always
+  on_failure: always # default: always
+  on_pull_requests: false

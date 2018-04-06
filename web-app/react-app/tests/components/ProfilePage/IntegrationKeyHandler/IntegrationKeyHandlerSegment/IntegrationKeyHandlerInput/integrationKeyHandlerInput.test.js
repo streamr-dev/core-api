@@ -6,7 +6,7 @@ import sinon from 'sinon'
 import IntegrationKeyHandlerInput from '../../../../../../components/ProfilePage/IntegrationKeyHandler/IntegrationKeyHandlerSegment/IntegrationKeyHandlerInput/index'
 
 describe('IntegrationKeyHandlerInput', () => {
-    
+
     describe('onSubmit', () => {
         it('must call e.preventDefault', () => {
             const spy = sinon.spy()
@@ -26,7 +26,7 @@ describe('IntegrationKeyHandlerInput', () => {
             // form-serialize mocked in tests/__mocks__
             const spy = sinon.spy()
             const el = shallow(<IntegrationKeyHandlerInput
-                fields={[]}
+                inputFields={[]}
                 onNew={spy}
             />)
             const form = {
@@ -41,14 +41,14 @@ describe('IntegrationKeyHandlerInput', () => {
             assert(spy.calledWith(form))
         })
     })
-    
+
     describe('render', () => {
         describe('initial rendering', () => {
             describe('rendering the correct elements', () => {
                 let el
                 beforeEach(() => {
                     el = shallow(<IntegrationKeyHandlerInput
-                        fields={['aField', 'bField', 'cField']}
+                        inputFields={['aField', 'bField', 'cField']}
                         onNew={sinon.spy()}
                     />)
                 })
@@ -66,12 +66,12 @@ describe('IntegrationKeyHandlerInput', () => {
                 it('must have InputGroup.Button and Button in it', () => {
                     const inputGroupButton = el.find('InputGroupButton')
                     assert.equal(inputGroupButton.props().className, 'buttonContainer')
-                    
+
                     const button = inputGroupButton.childAt(0)
                     assert(button.is('Button'))
                     assert.equal(button.props().bsStyle, 'default')
                     assert.equal(button.props().type, 'submit')
-                    
+
                     const fa = button.childAt(0)
                     assert(fa.is('FontAwesome'))
                     assert.equal(fa.props().name, 'plus')
@@ -80,22 +80,22 @@ describe('IntegrationKeyHandlerInput', () => {
                 it('must render FormControl for all the fields + for name and with correct props', () => {
                     const formControls = el.find('FormControl')
                     assert.equal(formControls.length, 4)
-                    
+
                     assert.equal(formControls.at(0).props().type, 'text')
                     assert.equal(formControls.at(0).props().className, 'integrationKeyInput')
                     assert.equal(formControls.at(0).props().name, 'name')
                     assert.equal(formControls.at(0).props().placeholder, 'Name')
-                    
+
                     assert.equal(formControls.at(1).props().type, 'text')
                     assert.equal(formControls.at(1).props().className, 'integrationKeyInput')
                     assert.equal(formControls.at(1).props().name, 'aField')
                     assert.equal(formControls.at(1).props().placeholder, 'A Field')
-                    
+
                     assert.equal(formControls.at(2).props().type, 'text')
                     assert.equal(formControls.at(2).props().className, 'integrationKeyInput')
                     assert.equal(formControls.at(2).props().name, 'bField')
                     assert.equal(formControls.at(2).props().placeholder, 'B Field')
-                    
+
                     assert.equal(formControls.at(3).props().type, 'text')
                     assert.equal(formControls.at(3).props().className, 'integrationKeyInput')
                     assert.equal(formControls.at(3).props().name, 'cField')

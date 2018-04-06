@@ -5,12 +5,10 @@ import com.unifina.api.IntegrationKeyListParams
 import com.unifina.domain.security.IntegrationKey
 import com.unifina.domain.security.SecUser
 import com.unifina.security.StreamrApi
-import com.unifina.service.ApiService
 import com.unifina.service.EthereumIntegrationKeyService
 import grails.converters.JSON
 import grails.plugin.springsecurity.annotation.Secured
 import groovy.json.JsonSlurper
-import org.grails.datastore.mapping.query.api.BuildableCriteria
 
 @Secured(["IS_AUTHENTICATED_ANONYMOUSLY"])
 class IntegrationKeyApiController {
@@ -27,29 +25,36 @@ class IntegrationKeyApiController {
 
 	@StreamrApi
 	def save(SaveIntegrationKeyCommand cmd) {
-		if (cmd.service as IntegrationKey.Service == IntegrationKey.Service.ETHEREUM) {
-			IntegrationKey key
-			try {
-				key = ethereumIntegrationKeyService.createEthereumAccount(apiUser(), cmd.name, cmd.json.privateKey)
-			} catch (IllegalArgumentException e) {
-				throw new ApiException(400, "INVALID_HEX_STRING", e.message)
-			}
-			render key.toMap() as JSON
-		} else if (cmd.service as IntegrationKey.Service == IntegrationKey.Service.ETHEREUM_ID) {
-			IntegrationKey key = ethereumIntegrationKeyService.createEthereumID(apiUser(), cmd.name, cmd.challenge.id, cmd.challenge.challenge, cmd.signature)
-			response.status = 201
-			Map json = new JsonSlurper().parseText(key.json)
-			render([
-					name     : cmd.name,
+		switch (cmd.service as IntegrationKey.Service) {
+			case IntegrationKey.Service.ETHEREUM:
+				IntegrationKey key
+				try {
+					key = ethereumIntegrationKeyService.createEthereumAccount(apiUser(), cmd.name, cmd.json.privateKey)
+				} catch (IllegalArgumentException e) {
+					throw new ApiException(400, "INVALID_HEX_STRING", e.message)
+				}
+				render key.toMap() as JSON
+				break
+			case IntegrationKey.Service.ETHEREUM_ID:
+				IntegrationKey key = ethereumIntegrationKeyService.createEthereumID(apiUser(), cmd.name, cmd.challenge.id, cmd.challenge.challenge, cmd.signature)
+				response.status = 201
+				Map json = new JsonSlurper().parseText(key.json)
+				render([
+					id       : key.id,
 					challenge: [
-							id       : cmd.challenge.id,
-							challenge: cmd.challenge.challenge
+						id       : cmd.challenge.id,
+						challenge: cmd.challenge.challenge
 					],
-					signature: cmd.signature,
-					address  : json.address
-			] as JSON)
-		} else {
-			throw new ApiException(400, 'INVALID_SERVICE', "Invalid service: $request.JSON.service")
+					json: [
+						address: json.address
+					],
+					name     : cmd.name,
+					service  : IntegrationKey.Service.ETHEREUM_ID.toString(),
+					signature: cmd.signature
+				] as JSON)
+				break
+			default:
+				throw new ApiException(400, 'INVALID_SERVICE', "Invalid service: $request.JSON.service")
 		}
 	}
 

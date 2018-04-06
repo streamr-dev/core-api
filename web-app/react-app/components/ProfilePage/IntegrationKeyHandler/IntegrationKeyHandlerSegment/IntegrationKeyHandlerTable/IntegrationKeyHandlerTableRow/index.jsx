@@ -1,22 +1,42 @@
 // @flow
 
-import React, {Component} from 'react'
+import React, {Component, type Node} from 'react'
 
-import {FormGroup} from 'react-bootstrap'
+import {Button} from 'react-bootstrap'
 import ConfirmButton from '../../../../../ConfirmButton'
 import FontAwesome from 'react-fontawesome'
+import {CopyToClipboard} from 'react-copy-to-clipboard'
 
 import styles from './integrationKeyHandlerTableRow.pcss'
 
 import type {IntegrationKey} from '../../../../../../flowtype/integration-key-types'
 
-type Props = {
-    fields: Array<string>,
-    onDelete: Function,
+export type Props = {
+    fields?: Array<string | [string, (any) => Node]>,
+    onDelete: (id: $ElementType<IntegrationKey, 'id'>) => void,
+    copy?: string,
+    show?: string,
     item: IntegrationKey
 }
 
-export default class IntegrationKeyHandlerTableRow extends Component<Props> {
+type State = {
+    copied: boolean
+}
+
+export default class IntegrationKeyHandlerTableRow extends Component<Props, State> {
+    timeout: TimeoutID
+    state = {
+        copied: false
+    }
+    onCopy = () => {
+        this.setState({
+            copied: true
+        })
+        clearTimeout(this.timeout)
+        this.timeout = setTimeout(() => this.setState({
+            copied: false
+        }), 3000)
+    }
 
     render() {
         const {item, onDelete, fields} = this.props
@@ -25,13 +45,27 @@ export default class IntegrationKeyHandlerTableRow extends Component<Props> {
                 <td>
                     {item.name}
                 </td>
-                {fields.map(f => (
-                    <td key={f}>
-                        <span className={styles.publicKey}>{item.json[f]}</span>
+                {fields && fields.map(f => (
+                    <td key={JSON.stringify(f)}>
+                        <span className={styles.publicKey}>{Array.isArray(f) ? (
+                            f[1](item.json[f[0]])
+                        ) : (
+                            item.json[f]
+                        )}</span>
                     </td>
                 ))}
                 <td>
-                    <FormGroup className="pull-right">
+                    <div className={styles.actionButtonContainer}>
+                        {this.props.copy && (
+                            <CopyToClipboard
+                                text={this.props.item.json[this.props.copy]}
+                                onCopy={() => this.onCopy()}
+                            >
+                                <Button>
+                                    <FontAwesome name={this.state.copied ? 'check' : 'copy'}/>
+                                </Button>
+                            </CopyToClipboard>
+                        )}
                         <ConfirmButton
                             confirmCallback={() => onDelete(item.id)}
                             buttonProps={{
@@ -44,7 +78,7 @@ export default class IntegrationKeyHandlerTableRow extends Component<Props> {
                             className={styles.deleteButton}>
                             <FontAwesome name="trash-o" className="icon"/>
                         </ConfirmButton>
-                    </FormGroup>
+                    </div>
                 </td>
             </tr>
         )

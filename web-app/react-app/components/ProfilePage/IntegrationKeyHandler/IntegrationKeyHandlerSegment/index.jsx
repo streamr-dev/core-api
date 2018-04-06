@@ -1,102 +1,51 @@
 // @flow
 
 import React, {Component} from 'react'
-
-import { connect } from 'react-redux'
-import { getIntegrationKeysByService, createIntegrationKey, deleteIntegrationKey } from '../../../../actions/integrationKey'
-
 import {Col, ControlLabel} from 'react-bootstrap'
-
 import IntegrationKeyHandlerInput from './IntegrationKeyHandlerInput'
 import IntegrationKeyHandlerTable from './IntegrationKeyHandlerTable'
 
 import styles from './integrationKeyHandlerSegment.pcss'
 
-import type {IntegrationKeyState} from '../../../../flowtype/states/integration-key-state'
 import type {IntegrationKey} from '../../../../flowtype/integration-key-types'
-import type {ErrorInUi} from '../../../../flowtype/common-types'
-
-type StateProps = {
-    integrationKeys: Array<IntegrationKey>,
-    error: ?ErrorInUi
-}
-
-type DispatchProps = {
-    deleteIntegrationKey: (id: $ElementType<IntegrationKey, 'id'>) => void,
-    createIntegrationKey: (key: IntegrationKey) => void,
-    getIntegrationKeysByService: (service: $ElementType<IntegrationKey, 'service'>) => void
-}
+import type {Props as TableProps} from './IntegrationKeyHandlerTable'
+import type {Props as InputProps} from './IntegrationKeyHandlerInput'
 
 type GivenProps = {
-    tableFields: Array<string>,
-    inputFields: Array<string>,
-    integrationKeys: Array<IntegrationKey>,
-    service: $ElementType<IntegrationKey, 'service'>,
-    name: $ElementType<IntegrationKey, 'name'>,
-    className: string
+    className?: string,
+    name?: $ElementType<IntegrationKey, 'name'>,
+    showInput: boolean
 }
 
-type Props = StateProps & DispatchProps & GivenProps
+type Props = InputProps & TableProps & GivenProps
 
-export class IntegrationKeyHandlerSegment extends Component<Props> {
-
-    componentDidMount() {
-        // TODO: Move to (yet non-existent) router
-        this.props.getIntegrationKeysByService(this.props.service)
+export default class IntegrationKeyHandlerSegment extends Component<Props> {
+    static defaultProps = {
+        showInput: true
     }
-
-    onNew = (integrationKey: IntegrationKey) => {
-        const name = integrationKey.name
-        const service = this.props.service
-        delete integrationKey.name
-        return this.props.createIntegrationKey({
-            name,
-            service,
-            json: integrationKey
-        })
-    }
-
-    onDelete = (id: $ElementType<IntegrationKey, 'id'>) => {
-        this.props.deleteIntegrationKey(id)
-    }
-
     render() {
         return (
             <div className={this.props.className || ''}>
                 <Col xs={12}>
-                    <ControlLabel className={styles.label}>
-                        {this.props.name}
-                    </ControlLabel>
+                    {this.props.name && (
+                        <ControlLabel className={styles.label}>
+                            {this.props.name}
+                        </ControlLabel>
+                    )}
                     <IntegrationKeyHandlerTable
-                        fields={this.props.tableFields}
+                        tableFields={this.props.tableFields}
                         integrationKeys={this.props.integrationKeys}
-                        onDelete={this.onDelete}
+                        onDelete={this.props.onDelete}
+                        copy={this.props.copy}
                     />
-                    <IntegrationKeyHandlerInput
-                        fields={this.props.inputFields}
-                        onNew={this.onNew}
-                    />
+                    {this.props.showInput && (
+                        <IntegrationKeyHandlerInput
+                            inputFields={this.props.inputFields}
+                            onNew={this.props.onNew}
+                        />
+                    )}
                 </Col>
             </div>
         )
     }
 }
-
-export const mapStateToProps = ({integrationKey: {listsByService, error}}: {integrationKey: IntegrationKeyState}, props: Props): StateProps => ({
-    integrationKeys: listsByService[props.service] || [],
-    error
-})
-
-export const mapDispatchToProps = (dispatch: Function): DispatchProps => ({
-    deleteIntegrationKey(id: $ElementType<IntegrationKey, 'id'>) {
-        dispatch(deleteIntegrationKey(id))
-    },
-    createIntegrationKey(key: IntegrationKey) {
-        dispatch(createIntegrationKey(key))
-    },
-    getIntegrationKeysByService(service: $ElementType<IntegrationKey, 'service'>) {
-        dispatch(getIntegrationKeysByService(service))
-    }
-})
-
-export default connect(mapStateToProps, mapDispatchToProps)(IntegrationKeyHandlerSegment)
