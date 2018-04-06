@@ -19,11 +19,11 @@
     "test-jenkins": "npm run test-old-jenkins; npm run test-new-jenkins",
     "test-old-jenkins": "mocha web-app/js/unifina/test --recursive --reporter mocha-junit-reporter --reporter-options mochaFile=./test-old-report.xml",
     "test-new-jenkins": "JEST_JUNIT_OUTPUT=test-new-report.xml jest ./web-app/react-app/tests --ci --testResultsProcessor=\"jest-junit\"",
-    "build": "NODE_ENV=production ./node_modules/.bin/webpack",
-    "build-dev": "./node_modules/.bin/webpack",
+    "build": "NODE_ENV=production webpack",
+    "build-dev": "webpack",
     "clean": "rm -rf node_modules/",
     "clean-install": "npm run clean && npm install",
-    "dev": "./node_modules/.bin/webpack-dev-server"
+    "dev": "webpack-dev-server --hot"
   },
   "jest": {
     "moduleNameMapper": {
@@ -69,6 +69,7 @@
     "eslint-plugin-flowtype": "^2.42.0",
     "eslint-plugin-mocha": "^4.9.0",
     "eslint-plugin-react": "^7.6.1",
+    "ethereumjs-util": "^5.1.5",
     "expect": "^1.20.2",
     "extract-text-webpack-plugin": "^2.1.2",
     "file-loader": "^0.11.1",
@@ -83,6 +84,7 @@
     "jquery": "1.11.1",
     "jquery-ui": "*",
     "jsdom": "8.1.0",
+    "keythereum": "^1.0.2",
     "lodash": "^4.17.4",
     "mocha": "^3.4.2",
     "mocha-junit-reporter": "^1.17.0",
@@ -125,9 +127,13 @@
     "style-loader": "^0.17.0",
     "underscore": "*",
     "uuid": "latest",
+    "web3": "^1.0.0-beta.33",
     "webpack": "^2.6.0",
     "webpack-dev-server": "^2.4.5",
     "webpack-notifier": "^1.5.0",
     "write-file-webpack-plugin": "^4.0.2"
+  },
+  "devDependencies": {
+    "web3-fake-provider": "^0.1.0"
   }
 }

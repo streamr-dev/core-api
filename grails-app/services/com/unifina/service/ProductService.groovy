@@ -14,6 +14,10 @@ class ProductService {
 	SubscriptionService subscriptionService
 
 	List<Product> list(ProductListParams listParams, SecUser currentUser) {
+		if (listParams.sortBy == null) { // By default, order by score
+			listParams.sortBy = "score"
+			listParams.order = "desc"
+		}
 		apiService.list(Product, listParams, currentUser)
 	}
 

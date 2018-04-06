@@ -19,6 +19,7 @@ class Product {
 
 	Date dateCreated
 	Date lastUpdated
+	Integer score = 0 // set manually; used as default ordering for lists of Products (descending)
 
 	// The below fields exist in the domain object for speed & query support, but the ground truth is in the smart contract.
 	String ownerAddress
@@ -67,6 +68,7 @@ class Product {
 		description type: 'text'
 		previewConfigJson type: 'text'
 		imageUrl length: 2048
+		score index: "score_idx"
 
 		ownerAddress index: "owner_address_idx"
 		beneficiaryAddress index: "beneficiary_address_idx"

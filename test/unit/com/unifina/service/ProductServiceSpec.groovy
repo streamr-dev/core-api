@@ -59,7 +59,10 @@ class ProductServiceSpec extends Specification {
 		service.list(new ProductListParams(max: 5), me)
 
 		then:
-		1 * apiService.list(Product, { it.toMap() == new ProductListParams(max: 5).toMap() }, me)
+		1 * apiService.list(Product, {
+			assert it.toMap() == new ProductListParams(max: 5, sortBy: "score", order: "desc").toMap()
+			true
+		}, me)
 	}
 
 	void "findById() delegates to ApiService#authorizedGetById"() {

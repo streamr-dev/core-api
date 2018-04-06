@@ -1,0 +1,33 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Permission",
+  "description": "Permission related to resource",
+  "type": "object",
+  "required": [
+    "id",
+    "user",
+    "operation"
+  ],
+  "properties": {
+    "id": {
+      "description": "Unique identifier of permission",
+      "type": "integer",
+      "minimum": 0
+    },
+    "user": {
+      "description": "User who permission affects",
+      "type": "string",
+      "maxLength": 255
+    },
+    "operation": {
+      "description": "Access level of permission",
+      "type": "string",
+      "enum": [
+        "read",
+        "write",
+        "share"
+      ]
+    }
+  },
+  "additionalProperties": false
+}

@@ -16,6 +16,11 @@ const DEVOPS_USER_TOKEN = 'devops-user-key'
 const Streamr = initStreamrApi(URL, LOGGING_ENABLED)
 const schemaValidator = new SchemaValidator()
 
+function assertIsPermission(data) {
+    const errors = schemaValidator.validatePermission(data)
+    assert(errors.length === 0, schemaValidator.toMessages(errors))
+}
+
 function assertIsProduct(data) {
     const errors = schemaValidator.validateProduct(data)
     assert(errors.length === 0, schemaValidator.toMessages(errors))
@@ -1115,6 +1120,38 @@ describe('Products API', () => {
                 .withAuthToken(AUTH_TOKEN)
                 .call()
             assert.equal(response.status, 204)
+        })
+    })
+
+    describe('GET /api/v1/products/:id/permissions/me', () => {
+        let createdProductId
+
+        before(async () => {
+            createdProductId = await createProductAndReturnId(genericProductBody)
+        })
+
+        context('when called with valid params, body, and headers', () => {
+            let response
+            let json
+
+            before(async () => {
+                response = await Streamr.api.v1.products.permissions
+                    .getOwnPermissions(createdProductId)
+                    .withAuthToken(AUTH_TOKEN)
+                    .call()
+
+                json = await response.json()
+            })
+
+            it('responds with 200', () => {
+                assert.equal(response.status, 200)
+            })
+
+            it('responds with expected Permissions', () => {
+                assert.equal(json.length, 3)
+                json.forEach(p => assertIsPermission(p))
+                assert.deepEqual(json.map(p => p.operation), ['read', 'write', 'share'])
+            })
         })
     })
 })

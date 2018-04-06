@@ -26,7 +26,9 @@ grails.project.fork = [
 		maxPerm: 512,
 		forkReserve:false,
 		daemon:true,
-		jvmArgs: ["-Dwebdriver.chrome.driver="+env["CHROMEDRIVER"]
+		jvmArgs: [
+			"-Djava.awt.headless=true",
+			"-Dwebdriver.chrome.driver="+env["CHROMEDRIVER"]
 		]
 	]
 ]
@@ -84,6 +86,7 @@ grails.project.dependency.resolution = {
 			excludes('org.springframework:spring-context:*')
 			excludes('org.springframework:spring-orm:*')
 		}
+		compile('org.web3j:core:3.3.1')
 		compile('com.amazonaws:aws-java-sdk:1.11.294')
 
 		runtime('mysql:mysql-connector-java:5.1.20')

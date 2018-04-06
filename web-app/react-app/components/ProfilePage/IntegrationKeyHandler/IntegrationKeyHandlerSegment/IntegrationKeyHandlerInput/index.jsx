@@ -11,12 +11,10 @@ import {titleCase} from 'change-case'
 
 import type {IntegrationKey} from '../../../../../flowtype/integration-key-types'
 
-type GivenProps = {
-    fields: Array<string>,
+export type Props = {
+    inputFields?: Array<string>,
     onNew: (integrationKey: IntegrationKey) => void
 }
-
-type Props = GivenProps
 
 export default class IntegrationKeyHandlerInput extends Component<Props> {
     form: ?HTMLFormElement
@@ -39,13 +37,14 @@ export default class IntegrationKeyHandlerInput extends Component<Props> {
             <form className={styles.integrationKeyInputForm} onSubmit={this.onSubmit}>
                 <FormGroup>
                     <InputGroup className={styles.integrationKeyInputGroup}>
-                        {['name', ...this.props.fields].map(field => (
+                        {['name', ...(this.props.inputFields || [])].map(field => (
                             <FormControl
                                 key={field}
                                 name={field}
                                 type="text"
                                 className={styles.integrationKeyInput}
                                 placeholder={titleCase(field)}
+                                required
                             />
                         ))}
                         <InputGroup.Button className={styles.buttonContainer}>

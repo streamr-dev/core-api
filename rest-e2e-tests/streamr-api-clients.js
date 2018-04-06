@@ -84,8 +84,11 @@ class StreamrApiRequest {
 
     async execute() {
         const response = await this.call()
+        if (response.status == 204) {
+            return true
+        }
         const json = await response.json()
-        if (response.status / 100 != 2) {
+        if (Math.floor(response.status / 100) != 2) {
             const jsonAsString = JSON.stringify(json)
             throw Error(`Failed to execute. HTTP status ${response.status}: ${jsonAsString}`)
         }
@@ -107,6 +110,7 @@ class Categories {
 class Products {
     constructor(options) {
         this.options = options
+        this.permissions = new Permissions('products', options)
     }
 
     list(queryParams) {
@@ -201,6 +205,47 @@ class Subscriptions {
             .methodAndPath('POST', 'subscriptions')
             .withBody(body)
     }
+
+    list() {
+        return new StreamrApiRequest(this.options)
+            .methodAndPath('GET', 'subscriptions')
+    }
+}
+
+class Login {
+    constructor(options) {
+        this.options = options
+    }
+
+    challenge() {
+        return new StreamrApiRequest(this.options)
+            .methodAndPath('POST', 'login/challenge')
+            .withBody()
+    }
+}
+
+class IntegrationKeys {
+    constructor(options) {
+        this.options = options
+    }
+
+    create(body) {
+        return new StreamrApiRequest(this.options)
+            .methodAndPath('POST', 'integration_keys')
+            .withBody(body)
+    }
+}
+
+class Permissions {
+    constructor(resourcesName, options) {
+        this.resourcesName = resourcesName
+        this.options = options
+    }
+
+    getOwnPermissions(id) {
+        return new StreamrApiRequest(this.options)
+            .methodAndPath('GET', `${this.resourcesName}/${id}/permissions/me`)
+    }
 }
 
 module.exports = (baseUrl, logging) => {
@@ -213,6 +258,8 @@ module.exports = (baseUrl, logging) => {
         api: {
             v1: {
                 categories: new Categories(options),
+                integration_keys: new IntegrationKeys(options),
+                login: new Login(options),
                 products: new Products(options),
                 streams: new Streams(options),
                 subscriptions: new Subscriptions(options)
