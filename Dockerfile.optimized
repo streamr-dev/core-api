@@ -1,5 +1,5 @@
 # Use official Tomcat 7 runtime as base image
-FROM tomcat:7.0-jre7-alpine
+FROM tomcat:7.0-jre8-alpine
 
 # Install dependencies
 #   bash: required by wait_for_it.sh script
