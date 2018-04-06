@@ -1,5 +1,5 @@
 # Use official OpenJDK 7 as base image
-FROM openjdk:7-jdk
+FROM openjdk:8-jdk-alpine
 
 # Set customizable env vars defaults.
 # Set Grails version.
