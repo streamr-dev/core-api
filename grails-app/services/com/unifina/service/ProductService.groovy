@@ -66,7 +66,7 @@ class ProductService {
 	}
 
 	void removeStreamFromProduct(Product product, Stream stream) {
-		product.removeFromStreams(stream)
+		product.streams.remove(stream)
 		product.save(failOnError: true)
 	}
 

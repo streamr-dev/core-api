@@ -10,6 +10,7 @@ class Product {
 	String name
 	String description
 	String imageUrl
+	String thumbnailUrl
 
 	Category category
 	State state = State.NOT_DEPLOYED
@@ -50,6 +51,7 @@ class Product {
 		name(blank: false)
 		description(blank: false)
 		imageUrl(nullable: true)
+		thumbnailUrl(nullable: true)
 		streams(maxSize: 1000)
 		previewStream(nullable: true, validator: { Stream s, p -> s == null || s in p.streams })
 		previewConfigJson(nullable: true)

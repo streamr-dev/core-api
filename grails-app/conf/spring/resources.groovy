@@ -1,3 +1,4 @@
+import com.unifina.provider.S3FileUploadProvider
 import com.unifina.utils.AjaxAwareRequestMatcher
 import com.unifina.utils.CustomEditorRegistrar
 import org.springframework.security.web.savedrequest.HttpSessionRequestCache
@@ -11,4 +12,9 @@ beans = {
 		createSessionAllowed = true
 		requestMatcher = new AjaxAwareRequestMatcher()
 	}
+
+	fileUploadProvider(S3FileUploadProvider,
+		(String) grailsApplication.config.streamr.fileUpload.s3.region,
+		(String) grailsApplication.config.streamr.fileUpload.s3.bucket
+	)
 }

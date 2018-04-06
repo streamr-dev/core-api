@@ -44,6 +44,15 @@
       "format": "uri",
       "maxLength": 2048
     },
+    "thumbnailUrl": {
+      "description": "URL for product thumbnail image",
+      "type": [
+        "null",
+        "string"
+      ],
+      "format": "uri",
+      "maxLength": 2048
+    },
     "category": {
       "description": "Identifier of category the product belongs to",
       "$ref": "#/definitions/resourceIdentifier"

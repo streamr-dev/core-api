@@ -63,6 +63,7 @@ class UrlMappings {
 		"/api/v1/products"(resources: "productApi")
 		"/api/v1/products/$productId/streams"(resources: "productStreamsApi")
 		"/api/v1/products/$id/$action"(controller: "productApi")
+		"/api/v1/products/$id/images"(controller: "productApi", action: "uploadImage")
 		"/api/v1/products/$resourceId/permissions/me"(controller: "permissionApi", action: "getOwnPermissions") { resourceClass = Product }
 
 		"/api/v1/subscriptions"(resources: "subscriptionApi")

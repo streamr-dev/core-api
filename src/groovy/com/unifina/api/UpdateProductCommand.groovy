@@ -9,7 +9,6 @@ import grails.validation.Validateable
 class UpdateProductCommand {
 	String name
 	String description
-	String imageUrl
 
 	Set<Stream> streams = []
 

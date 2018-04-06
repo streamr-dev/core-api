@@ -9,7 +9,6 @@ import grails.validation.Validateable
 class CreateProductCommand {
 	String name
 	String description
-	String imageUrl
 
 	Category category
 	Stream previewStream
