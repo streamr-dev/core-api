@@ -1,8 +1,11 @@
-# Use official OpenJDK 7 as base image
+# Use official OpenJDK 8 as base image
 FROM openjdk:8-jdk-alpine
 
 # Set customizable env vars defaults.
 # Set Grails version.
+RUN apk update
+RUN apk add curl git
+
 ENV GRAILS_VERSION 2.5.6
 ENV NODE_VERSION 8.9.4
 
@@ -18,9 +21,7 @@ ENV GRAILS_HOME /usr/lib/jvm/grails
 ENV PATH $GRAILS_HOME/bin:$PATH
 
 # Download and Install Node
-RUN curl -SLO "https://nodejs.org/dist/v$NODE_VERSION/node-v$NODE_VERSION-linux-x64.tar.xz" -o "node-v$NODE_VERSION-linux-x64.tar.xz" \
-    && tar -xJf "node-v$NODE_VERSION-linux-x64.tar.xz" -C /usr/local --strip-components=1 \
-    && rm "node-v$NODE_VERSION-linux-x64.tar.xz"
+RUN apk add --update nodejs nodejs-npm
 
 # Confirm node version
 RUN node --version
