@@ -72,6 +72,8 @@ class EthereumIntegrationKeyService {
 			throw new DuplicateNotAllowedException("This Ethereum address is already associated with another Streamr user.")
 		}
 
+		dbChallenge.delete()
+
 		IntegrationKey integrationKey = new IntegrationKey(
 			name: name,
 			user: user,

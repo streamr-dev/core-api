@@ -106,7 +106,6 @@
 
 			<g:include action="details" id="${stream.id}"/>
 
-
 		</div>
     </body>
 </html>

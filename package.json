@@ -15,15 +15,15 @@
     "test": "npm run test-old; npm run test-new",
     "test-old": "mocha web-app/js/unifina/test --recursive",
     "test-new": "node ./node_modules/.bin/jest ./web-app/react-app/tests",
-    "test-rest-api": "mocha rest-e2e-tests --recurisve",
+    "test-rest-api": "mocha rest-e2e-tests --recursive",
     "test-jenkins": "npm run test-old-jenkins; npm run test-new-jenkins",
     "test-old-jenkins": "mocha web-app/js/unifina/test --recursive --reporter mocha-junit-reporter --reporter-options mochaFile=./test-old-report.xml",
     "test-new-jenkins": "JEST_JUNIT_OUTPUT=test-new-report.xml jest ./web-app/react-app/tests --ci --testResultsProcessor=\"jest-junit\"",
-    "build": "NODE_ENV=production ./node_modules/.bin/webpack",
-    "build-dev": "./node_modules/.bin/webpack",
+    "build": "NODE_ENV=production webpack",
+    "build-dev": "webpack",
     "clean": "rm -rf node_modules/",
     "clean-install": "npm run clean && npm install",
-    "dev": "./node_modules/.bin/webpack-dev-server"
+    "dev": "webpack-dev-server --hot"
   },
   "jest": {
     "moduleNameMapper": {
@@ -132,5 +132,8 @@
     "webpack-dev-server": "^2.4.5",
     "webpack-notifier": "^1.5.0",
     "write-file-webpack-plugin": "^4.0.2"
+  },
+  "devDependencies": {
+    "web3-fake-provider": "^0.1.0"
   }
 }
