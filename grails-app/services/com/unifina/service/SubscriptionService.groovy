@@ -12,6 +12,12 @@ import grails.compiler.GrailsCompileStatic
 class SubscriptionService {
 	PermissionService permissionService
 
+	List<Subscription> getSubscriptionsOfUser(SecUser user) {
+		List<IntegrationKey> integrationKeys = IntegrationKey.findAllByUserAndService(user, IntegrationKey.Service.ETHEREUM_ID)
+		def addresses = integrationKeys*.idInService
+		return Subscription.findAllByAddressInList(addresses)
+	}
+
 	/**
 	 * Should be invoked after marketplace smart contract event `Subscribed` has been emitted.
 	 */

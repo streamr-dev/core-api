@@ -82,7 +82,7 @@ class EthereumIntegrationKeyService {
 			json: ([
 				address: new String(address)
 			] as JSON).toString()
-		).save()
+		).save(flush: true)
 
 		subscriptionService.afterIntegrationKeyCreated(integrationKey)
 		return integrationKey

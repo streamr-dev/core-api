@@ -1605,6 +1605,37 @@
       }
     },
     "/subscriptions": {
+      "get": {
+        "summary": "Fetch subscriptions of user",
+        "description": "Fetch a list of all the subscriptions of a user (based on auth token)",
+        "tags": [
+          "subscriptions"
+        ],
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "an array of subscriptions",
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/Subscription"
+              }
+            }
+          },
+          "401": {
+            "description": "Not authenticated (code: `NOT_AUTHENTICATED`)",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            },
+            "examples": {
+              "application/json": {
+                "code": "NOT_AUTHENTICATED",
+                "message": "Not authenticated via token or cookie"
+              }
+            }
+          },
+        }
+      },
       "post": {
         "summary": "Inform engine-and-editor of Product purchase",
         "description": "Idempotent operation that informs engine-and-editor that a Product has been purchased. Called by *Marketplace Watcher*. Creates or updates an existing Subscription and related Permissions.",
@@ -3299,6 +3330,29 @@
           "type": "string",
           "description": "User's timezone setting.",
           "example": "Europe/Helsinki"
+        }
+      }
+    },
+    "Subscription": {
+      "type": "object",
+      "required": [
+        "address",
+        "endsAt",
+        "product"
+      ],
+      "properties": {
+        "address": {
+          "type": "string",
+          "description": "Ethereum address of subscriber",
+          "example": "0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF"
+        },
+        "endsAt": {
+          "type": "string",
+          "description": "ISO-8601 datetime",
+          "example": "2018-02-21T12:26:18Z"
+        },
+        "product": {
+          "$ref": "#/definitions/Product"
         }
       }
     },
