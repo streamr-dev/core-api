@@ -15,7 +15,7 @@
     "test": "npm run test-old; npm run test-new",
     "test-old": "mocha web-app/js/unifina/test --recursive",
     "test-new": "node ./node_modules/.bin/jest ./web-app/react-app/tests",
-    "test-rest-api": "mocha rest-e2e-tests --recurisve",
+    "test-rest-api": "mocha rest-e2e-tests --recursive",
     "test-jenkins": "npm run test-old-jenkins; npm run test-new-jenkins",
     "test-old-jenkins": "mocha web-app/js/unifina/test --recursive --reporter mocha-junit-reporter --reporter-options mochaFile=./test-old-report.xml",
     "test-new-jenkins": "JEST_JUNIT_OUTPUT=test-new-report.xml jest ./web-app/react-app/tests --ci --testResultsProcessor=\"jest-junit\"",
