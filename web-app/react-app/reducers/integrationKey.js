@@ -13,6 +13,9 @@ import {
     DELETE_INTEGRATION_KEY_REQUEST,
     DELETE_INTEGRATION_KEY_SUCCESS,
     DELETE_INTEGRATION_KEY_FAILURE,
+    CREATE_IDENTITY_FAILURE,
+    CREATE_IDENTITY_REQUEST,
+    CREATE_IDENTITY_SUCCESS,
 } from '../actions/integrationKey.js'
 
 import _ from 'lodash'
@@ -29,6 +32,7 @@ const initialState = {
 export default function(state: IntegrationKeyState = initialState, action: IntegrationKeyAction): IntegrationKeyState {
 
     switch (action.type) {
+        case CREATE_IDENTITY_REQUEST:
         case GET_AND_REPLACE_INTEGRATION_KEYS_REQUEST:
         case GET_INTEGRATION_KEYS_BY_SERVICE_REQUEST:
         case CREATE_INTEGRATION_KEY_REQUEST:
@@ -61,6 +65,7 @@ export default function(state: IntegrationKeyState = initialState, action: Integ
             }
         }
 
+        case CREATE_IDENTITY_SUCCESS:
         case CREATE_INTEGRATION_KEY_SUCCESS:
             return {
                 ...state,
@@ -93,6 +98,7 @@ export default function(state: IntegrationKeyState = initialState, action: Integ
             }
         }
 
+        case CREATE_IDENTITY_FAILURE:
         case GET_AND_REPLACE_INTEGRATION_KEYS_FAILURE:
         case GET_INTEGRATION_KEYS_BY_SERVICE_FAILURE:
         case CREATE_INTEGRATION_KEY_FAILURE:

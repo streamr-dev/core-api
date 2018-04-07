@@ -28,7 +28,7 @@
       </configuration>
     </facet>
   </component>
-  <component name="NewModuleRootManager" inherit-compiler-output="true">
+  <component name="NewModuleRootManager" LANGUAGE_LEVEL="JDK_1_8" inherit-compiler-output="true">
     <exclude-output />
     <content url="file://$USER_HOME$/.grails/2.5.6/projects/streamr-core/plugins/cache-headers-1.1.7">
       <sourceFolder url="file://$USER_HOME$/.grails/2.5.6/projects/streamr-core/plugins/cache-headers-1.1.7/grails-app/services" isTestSource="false" />
@@ -307,6 +307,18 @@
           <root url="jar://$MAVEN_REPOSITORY$/org/apache/ant/ant-launcher/1.9.6/ant-launcher-1.9.6.jar!/" />
           <root url="jar://$MAVEN_REPOSITORY$/org/apache/ant/ant/1.9.6/ant-1.9.6.jar!/" />
           <root url="jar://$MAVEN_REPOSITORY$/cglib/cglib/3.2.6/cglib-3.2.6.jar!/" />
+          <root url="jar://$MAVEN_REPOSITORY$/com/squareup/okhttp3/logging-interceptor/3.8.1/logging-interceptor-3.8.1.jar!/" />
+          <root url="jar://$MAVEN_REPOSITORY$/com/squareup/okio/okio/1.13.0/okio-1.13.0.jar!/" />
+          <root url="jar://$MAVEN_REPOSITORY$/com/squareup/okhttp3/okhttp/3.8.1/okhttp-3.8.1.jar!/" />
+          <root url="jar://$MAVEN_REPOSITORY$/com/github/jnr/jnr-enxio/0.14/jnr-enxio-0.14.jar!/" />
+          <root url="jar://$MAVEN_REPOSITORY$/com/github/jnr/jnr-unixsocket/0.15/jnr-unixsocket-0.15.jar!/" />
+          <root url="jar://$MAVEN_REPOSITORY$/org/web3j/tuples/3.3.1/tuples-3.3.1.jar!/" />
+          <root url="jar://$MAVEN_REPOSITORY$/org/web3j/rlp/3.3.1/rlp-3.3.1.jar!/" />
+          <root url="jar://$MAVEN_REPOSITORY$/org/web3j/crypto/3.3.1/crypto-3.3.1.jar!/" />
+          <root url="jar://$MAVEN_REPOSITORY$/org/bouncycastle/bcprov-jdk15on/1.54/bcprov-jdk15on-1.54.jar!/" />
+          <root url="jar://$MAVEN_REPOSITORY$/org/web3j/utils/3.3.1/utils-3.3.1.jar!/" />
+          <root url="jar://$MAVEN_REPOSITORY$/org/web3j/abi/3.3.1/abi-3.3.1.jar!/" />
+          <root url="jar://$MAVEN_REPOSITORY$/org/web3j/core/3.3.1/core-3.3.1.jar!/" />
         </CLASSES>
         <JAVADOC />
         <SOURCES />

@@ -32,7 +32,7 @@ export class APICredentials extends Component<Props> {
         return (
             <Panel>
                 <Panel.Heading>
-                    API Credentials
+                    API Keys
                 </Panel.Heading>
                 <Panel.Body>
                     <CredentialsControl
