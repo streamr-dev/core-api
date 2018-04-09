@@ -283,7 +283,6 @@ class ProductServiceSpec extends Specification {
 		def validCommand = new UpdateProductCommand(
 			name: "updated name",
 			description: "updated description",
-			imageUrl: "product.png",
 			category: category,
 			streams: [s2, s4]
 		)
