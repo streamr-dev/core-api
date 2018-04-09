@@ -1,7 +1,7 @@
 language: groovy
 sudo: required
 jdk:
-  - openjdk8
+- openjdk8
 services:
 - docker
 - mysql
@@ -22,15 +22,19 @@ addons:
   apt:
     packages:
     - lynx
+env:
+  global:
+  - secure: Icz6PgvdiMvqiC1yMBknaSMqHvvthOo0hUrVCTGA8pWXaqofX5fKNVI8GL4kvRK7a+YpEZ7SCvHH1cgEfBx8jC+Wc0XjGfBZXH1C1gyo8X1keCcJQVRyhxXkrjaeOLF0Cas8m9MdgAqJlwDcAXkWh426kvpAbU1SbNkkSCX3Ksp6M43LVUEbtkdOCf0GxavfgsGL5S9fk7WUf7hU4+HqL/UbbM+XMTz9hgajI5zzyRPiFwMPLGohNfopLKZvRWL/2IDY4ldVEzRi8koxIYrhO68o5RJJsptw+Gfaf3mzmgDGP9jU/cWYxsrfWogtVGFOiB2nDA+opbDU79vwHCpP5dcZJUEDvgOMVA0aTRT6Mc6hXM07wiL9noJwrSqoudkXianDDJqCKja+myKNi4wVWpisZV0HfF3nWeiKoxBaQdlCc7UUadS4OYK30Xll/Z9Z3ebWWGRmdKRSeD+QmM4j8VMu/t624AX/Q0laAS7/6BKOjMaDUqm3Q7plNWTSQWRmVUFzaH0xRL1DPLIbz/8Z8D1IVOfnq6k2FYTtVnjKQdHH65ddtqZMwtsSJsS9fQRYOm3ly0avPvDNnNeEYEuhY5lF8Tiw1lwh+BHOhiQLAPi7dqTiV/I2ImgdFH6a8wr/KICSquaSRWzwWnod3Jstrz9WWQW+K9JKu4deIRUOEx4=
+  - secure: Ro0tLYzPfBquDume3DCVOBcwGQtnkDCsitIteCjoiA75epYyweTN4pdaVdmI+nM41mKlXhbo6MYPukOVlxC0DqERsbAbQH8LKuJi+Ylio27ueC8pC0eDS+HjBu0OYLRzNuuhYalHRjAIZFI67CD1CHwFmbws6mENfte5L0sWdieOfnAmM74/82+ZpAibCC1FlIu4qLJxmHSYmH8bC5ZmNTQ59yx2h2BmsXdpJ5b2AVnoevnY8fxSb7mYC98tfS9x979+CMth510v5MzQR4AhwhmnaBcm7wjDgyINVcCG3YSQIs9nhP+AOOi8p+WCibCHGwU9uCPiDBy9KZvNppG7Wpw2JhKVSKOQvZsaxy6tarPxXEFXwaZjLbFw4aUVTe/aPsiOq+LZCljlSNFHANwVpAFqpxtUip2nap9156XNueegWDsgHHkmvp17bHRgsbk+KXvNuD2ieCiuMBJPXSKjm/6oyYsqFc9sPo/0jficsQWkegPkbBZu13acniqRZHENN91SyIh/OfZJQ5hapd8eaPS68iBVseVjplMXbaoId2PMuLw9BF1RXkc/LXHP6mN3DzrILdlezcHzdd87zJseY9+GIgEnihqvhXa53LGEB3KHe22mX0zuw7pOpaxWE89N/mSQFVehh/nnU20lylsiWpXWHe/B9vjMlmk8FnBvjuI=
 
 jobs:
   include:
   - stage: Unit tests
-    script: ./travis_scripts/unit_test.sh
+    script: "make integration-test"
   - stage: Integration tests
-    script: ./travis_scripts/integration_test.sh
+    script: "make integration-test"
   - stage: Build war
-    script:  ./travis_scripts/build_war.sh
+    script: "make build-war"
     deploy:
       provider: s3
       access_key_id: AKIAI7LEOVJBY6ZEH44Q
@@ -43,10 +47,13 @@ jobs:
       skip_cleanup: true
       local_dir: build
     if: branch = master
+  - stage: Build docker
+    script: "make docker-lint docker-build docker-tag docker-push"
+    if: branch = master
 after_failure: "./travis-after-failure.sh"
 notifications:
   slack:
     secure: rX8I0YHsgA0mvjlKhQ+69ZsO8mww0xYV/wc2VolQaBXIZ5Jcj4A82cLRAAyhoJxEP7tZUFhVBMkwmMSHnL4AvGG5JREialedQltAww/0/kTACxCc62/bxnbV+YDapxP4VIpOdL+/La+gWt4FsoW6oKavwMkNgPuNE65+IGK3ay2+G+BTfjldWkBLcBa8MAsKXp3XQdt04eyh3b3HBUk04rgotIPB+ndSW97NUTdj8LifiKFYV8n5c5LOLRWTgP68t1ktjPCWvjHzjwWRlSnxRcdXkj870mjCdH/l8WI93YzZE4g2auUjWFV8MzbGfObnCQ9McaoVwhiUt4IjpI51Iuc0qUwpoIfMk0J3BobZWcehXFilQknOTF9y5LqRplHND5Om3Dw8DdKWCzZVFw8S3dd5oBgKgxuOt01KD4lpQ/5nJZzmykrKMNWa7NkbYw6pLHVSaIMu4WVycZLnnyz4Rt/LZIdq7IH38QT0DDR9aG7CMgomnzAvgfSkte7lMdfeOo+uMsu2JA0MXOd1BYfEzwWCRh7QWhr5UgZXPX9sFReal/TtEODh71ZMI945iQVDNaEh3ypuBdraiFSR7SZbLTdvZEVbzCC2kS6JKBdUsUVTroWSyIl+gJUsXoyZ88c1YmFBMdj6jDSyzz4Ig4uBRwMEcx0aqtwDnQrvEtNhzKY=
-  on_success: change # default: always
-  on_failure: always # default: always
+  on_success: change
+  on_failure: always
   on_pull_requests: false
