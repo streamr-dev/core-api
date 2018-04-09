@@ -168,7 +168,7 @@ class EthereumIntegrationKeyServiceSpec extends Specification {
 		service.subscriptionService = Stub(SubscriptionService)
 
 		def ch = new Challenge(challenge: "foobar")
-		ch.save(failOnError: true, validate: false)
+		ch.save(failOnError: true, validate: false, flush: true)
 		String signature = "0x50ba6f6df25ba593cb8188df29ca27ea0a7cd38fadc4d40ef9fad455117e190f2a7ec880a76b930071205fee19cf55eb415bd33b2f6cb5f7be36f79f740da6e81b"
 		String name = "foobar"
 
