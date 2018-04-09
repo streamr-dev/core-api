@@ -30,7 +30,7 @@ env:
 jobs:
   include:
   - stage: Unit tests
-    script: "make integration-test"
+    script: "make unit-test"
   - stage: Integration tests
     script: "make integration-test"
   - stage: Build war

@@ -16,7 +16,7 @@ integration-test:
 	sudo /etc/init.d/mysql stop
 	npm install
 	git clone https://github.com/streamr-dev/streamr-docker-dev.git
-	$TRAVIS_BUILD_DIR/streamr-docker-dev/streamr-docker-dev/bin.sh start 1
+	$(TRAVIS_BUILD_DIR)/streamr-docker-dev/streamr-docker-dev/bin.sh start 1
 	grails clean
 	grails test-app -integration
 
@@ -26,7 +26,7 @@ build-war:
 	npm run build
 	grails prod war
 	mkdir build
-	cp $(pwd)/target/ROOT.war $(pwd)/build
+	cp $(PWD)/target/ROOT.war $(PWD)/build
 
 docker-build:
 	docker build \
