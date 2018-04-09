@@ -146,6 +146,7 @@ databaseChangeLog = {
 				column(name: "state", value: rand(0, 10) < 5 ? "DEPLOYED" : rand(0, 10) < 8 ? "NOT_DEPLOYED" : "DEPLOYING")
 				column(name: "block_index", valueNumeric: 1)
 				column(name: "block_number", valueNumeric: rand(0, 1000))
+				column(name: "score", valueNumeric: 0)
 				column(name: "version", valueNumeric: 0)
 				column(name: "date_created", value: "2018-01-01 00:00:00")
 				column(name: "last_updated", value: "2018-01-01 00:00:00")
