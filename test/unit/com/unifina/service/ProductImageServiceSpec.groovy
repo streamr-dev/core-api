@@ -33,7 +33,8 @@ class ProductImageServiceSpec extends Specification {
 			state: Product.State.NOT_DEPLOYED,
 			ownerAddress: "0x0000000000000000000000000000000000000000",
 			beneficiaryAddress: "0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF",
-			pricePerSecond: 2
+			pricePerSecond: 2,
+			owner: "arnold"
 		).save(failOnError: true)
 	}
 

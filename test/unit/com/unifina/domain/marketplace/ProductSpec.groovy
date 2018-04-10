@@ -31,7 +31,8 @@ class ProductSpec extends Specification {
 				ownerAddress: "0x0000000000000000000000000000000000000000",
 				beneficiaryAddress: "0x0000000000000000000000000000000000000000",
 				pricePerSecond: 0,
-				category: new Category()
+				category: new Category(),
+				owner: "arnold"
 		)
 		when:
 		p.validate()
@@ -50,7 +51,8 @@ class ProductSpec extends Specification {
 				beneficiaryAddress: "0x0000000000000000000000000000000000000000",
 				pricePerSecond: 0,
 				category: new Category(),
-				previewStream: s1
+				previewStream: s1,
+				owner: "arnold"
 		)
 		when:
 		p.validate()
@@ -75,7 +77,8 @@ class ProductSpec extends Specification {
 				pricePerSecond: 0,
 				category: new Category(),
 				streams: [s1, s2],
-				previewStream: s3
+				previewStream: s3,
+				owner: "arnold"
 		)
 		when:
 		p.validate()
@@ -100,7 +103,8 @@ class ProductSpec extends Specification {
 				pricePerSecond: 0,
 				category: new Category(),
 				streams: [s1, s2, s3],
-				previewStream: s3
+				previewStream: s3,
+				owner: "arnold"
 		)
 		when:
 		p.validate()
