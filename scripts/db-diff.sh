@@ -17,6 +17,6 @@ grails dbm-gorm-diff $FILENAME --add $2 --stacktrace
 { printf "package core\n"; cat grails-app/migrations/$FILENAME; } > grails-app/migrations/$FILENAME.new
 mv grails-app/migrations/$FILENAME{.new,}
 
-sed -i '' -e '/^$/d' grails-app/migrations/changelog.groovy
-sed -i '' -e '/^$/d' -e 's/[[:space:]](generated)//' "grails-app/migrations/$FILENAME"
+sed -i '' -e '/^$/d' grails-app/migrations/changelog.groovy # remove empty lines
+sed -i '' -e '/^$/d' -e 's/[[:space:]](generated)//' "grails-app/migrations/$FILENAME" # replace " (generated)" with ""
 
