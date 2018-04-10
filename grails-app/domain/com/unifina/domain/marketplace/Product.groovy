@@ -20,6 +20,7 @@ class Product {
 	Date dateCreated
 	Date lastUpdated
 	Integer score = 0 // set manually; used as default ordering for lists of Products (descending)
+	String owner // set to username of the product creator when product is created.
 
 	// The below fields exist in the domain object for speed & query support, but the ground truth is in the smart contract.
 	String ownerAddress
@@ -65,6 +66,7 @@ class Product {
 		minimumSubscriptionInSeconds(min: 0L)
 		blockNumber(min: 0L)
 		blockIndex(min: 0L)
+		owner(blank: false)
 	}
 
 	static mapping = {
@@ -96,7 +98,8 @@ class Product {
 			beneficiaryAddress: beneficiaryAddress,
 			pricePerSecond: pricePerSecond,
 			priceCurrency: priceCurrency.toString(),
-			minimumSubscriptionInSeconds: minimumSubscriptionInSeconds
+			minimumSubscriptionInSeconds: minimumSubscriptionInSeconds,
+			owner: owner
 		]
 	}
 

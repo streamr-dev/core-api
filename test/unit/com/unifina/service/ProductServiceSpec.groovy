@@ -45,7 +45,8 @@ class ProductServiceSpec extends Specification {
 				category: category,
 				state: state,
 				blockNumber: 40000,
-				blockIndex: 30
+				blockIndex: 30,
+				owner: "arnold"
 		)
 		product.id = "product-id"
 		product.save(failOnError: true, validate: true)
@@ -98,8 +99,10 @@ class ProductServiceSpec extends Specification {
 				minimumSubscriptionInSeconds: 1
 		)
 
+		def user = new SecUser()
+		user.username = "arnold"
 		when:
-		def product = service.create(validCommand, new SecUser())
+		def product = service.create(validCommand, user)
 
 		then:
 		Product.findAll() == [product]
@@ -121,7 +124,8 @@ class ProductServiceSpec extends Specification {
 			beneficiaryAddress: "0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF",
 			pricePerSecond: 10,
 			priceCurrency: "DATA",
-			minimumSubscriptionInSeconds: 1
+			minimumSubscriptionInSeconds: 1,
+			owner: "arnold"
 		]
 		product.dateCreated != null
 		product.dateCreated == product.lastUpdated
@@ -338,7 +342,8 @@ class ProductServiceSpec extends Specification {
 				beneficiaryAddress: "0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF",
 				pricePerSecond: 10,
 				priceCurrency: "DATA",
-				minimumSubscriptionInSeconds: 0
+				minimumSubscriptionInSeconds: 0,
+				owner: "arnold"
 		]
 		product.dateCreated < product.lastUpdated
 	}
@@ -718,7 +723,8 @@ class ProductServiceSpec extends Specification {
 				beneficiaryAddress: "0xAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
 				pricePerSecond: 2,
 				priceCurrency: "USD",
-				minimumSubscriptionInSeconds: 600
+				minimumSubscriptionInSeconds: 600,
+				owner: "arnold"
 		]
 	}
 
