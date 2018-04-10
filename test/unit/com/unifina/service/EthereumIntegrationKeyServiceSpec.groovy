@@ -166,16 +166,18 @@ class EthereumIntegrationKeyServiceSpec extends Specification {
 
 	void "createEthereumID() checks for duplicate addresses"() {
 		service.subscriptionService = Stub(SubscriptionService)
-
-		def ch = new Challenge(challenge: "foobar")
-		ch.save(failOnError: true, validate: false)
 		String signature = "0x50ba6f6df25ba593cb8188df29ca27ea0a7cd38fadc4d40ef9fad455117e190f2a7ec880a76b930071205fee19cf55eb415bd33b2f6cb5f7be36f79f740da6e81b"
 		String name = "foobar"
 
+		def ch = new Challenge(challenge: "foobar")
+		ch.save(failOnError: true, validate: false, flush: true)
 		service.createEthereumID(me, name, ch.id, ch.challenge, signature)
 
 		when:
-		service.createEthereumID(me, name, ch.id, ch.challenge, signature)
+		def ch2 = new Challenge(challenge: "foobar")
+		ch2.save(failOnError: true, validate: false, flush: true)
+		service.createEthereumID(me, name, ch2.id, ch2.challenge, signature)
+
 		then:
 		thrown(DuplicateNotAllowedException)
 	}

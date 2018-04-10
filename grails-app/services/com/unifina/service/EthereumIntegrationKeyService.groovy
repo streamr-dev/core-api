@@ -33,10 +33,10 @@ class EthereumIntegrationKeyService {
 
 	IntegrationKey createEthereumAccount(SecUser user, String name, String privateKey) {
 		privateKey = trimPrivateKey(privateKey)
-		String encryptedPrivateKey = encryptor.encrypt(privateKey, user.id.byteValue())
 
 		try {
 			String publicKey = "0x" + getPublicKey(privateKey)
+			String encryptedPrivateKey = encryptor.encrypt(privateKey, user.id.byteValue())
 			return new IntegrationKey(
 					name: name,
 					user: user,

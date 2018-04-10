@@ -2,10 +2,13 @@ package com.unifina.signalpath.streams
 
 import com.unifina.ModuleTestingSpecification
 import com.unifina.domain.data.Stream
+import com.unifina.domain.security.SecUser
 import com.unifina.service.PermissionService
 import com.unifina.utils.Globals
 import com.unifina.utils.testutils.ModuleTestHelper
+import grails.test.mixin.Mock
 
+@Mock([SecUser])
 class SearchStreamSpec extends ModuleTestingSpecification {
 
 	SearchStream module

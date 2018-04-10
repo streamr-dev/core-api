@@ -9,21 +9,16 @@ def categoryIDs = ["ad-id",
 				   "satellite-id"]
 def streamIDs =  ["4jFT4_yRSFyElSj9pHmovg",
 				  "4nxQHjdNQVmy551UB6S4cQ",
-				  "BP00yoVpS027OUvo9Io0PA",
 				  "c1_fiG6PTxmtnCYGU-mKuQ",
-				  "cShPRJlLTYGuPLeDobvXKg",
-				  "gfEBaNrHQHyR4anyCHH9GQ",
 				  "IIkpufIYSBu9_Kfot2e78Q",
 				  "JFXhMJjCQzK-SardC8faXQ",
 				  "ln2g8OKHSdi7BcL-bcnh2g",
 				  "mvGKMdDrTeaij6mmZsQliA",
-				  "OFGGmCEVT8mTRh7yffwFUw",
 				  "pltRMd8rCfkij4mlZsQkJB",
 				  "RUj6iJggS3iEKsUx5C07Ig",
 				  "run-canvas-spec",
 				  "share-spec-stream-uuid",
-				  "YpTAPDbvSAmj-iCUYz-dxA",
-				  "zbDDFw_gR0qqodycFcaO_Q"]
+				  "YpTAPDbvSAmj-iCUYz-dxA"]
 def addresses = ["0x725bf47f71061034757b37cc7b9f73671c7b2973",
 				 "0x66c595baf661c8dfcebc50dd431b727246d748d4",
 				 "0xdb0ada416674557aa697cf33d261ce02d4016776",
@@ -146,6 +141,7 @@ databaseChangeLog = {
 				column(name: "state", value: rand(0, 10) < 5 ? "DEPLOYED" : rand(0, 10) < 8 ? "NOT_DEPLOYED" : "DEPLOYING")
 				column(name: "block_index", valueNumeric: 1)
 				column(name: "block_number", valueNumeric: rand(0, 1000))
+				column(name: "score", valueNumeric: 0)
 				column(name: "version", valueNumeric: 0)
 				column(name: "date_created", value: "2018-01-01 00:00:00")
 				column(name: "last_updated", value: "2018-01-01 00:00:00")
