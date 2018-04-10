@@ -10,7 +10,7 @@ class ProductSpec extends Specification {
 	@Unroll
 	void "isEthereumAddress(#value) == #expected"(String value, Object expected) {
 		expect:
-		Product.isEthereumAddress(value, null) == expected
+		Product.isEthereumAddress(value) == expected
 		where:
 		value                                        | expected
 		null                                         | "validation.isEthereumAddress"
@@ -24,13 +24,18 @@ class ProductSpec extends Specification {
 		"0x000000000000000000000000000000000000000"  | "validation.isEthereumAddress"
 	}
 
+	void "isEthereumAddressOrIsNull(null) == true"() {
+		expect:
+		Product.isEthereumAddressOrIsNull(null)
+	}
+
 	void "previewStream() validator passes if previewStream = null and streams empty"() {
 		def p = new Product(
 				name: "name",
 				description: "description",
 				ownerAddress: "0x0000000000000000000000000000000000000000",
 				beneficiaryAddress: "0x0000000000000000000000000000000000000000",
-				pricePerSecond: 0,
+				pricePerSecond: 1,
 				category: new Category(),
 				owner: "arnold"
 		)
@@ -49,7 +54,7 @@ class ProductSpec extends Specification {
 				description: "description",
 				ownerAddress: "0x0000000000000000000000000000000000000000",
 				beneficiaryAddress: "0x0000000000000000000000000000000000000000",
-				pricePerSecond: 0,
+				pricePerSecond: 1,
 				category: new Category(),
 				previewStream: s1,
 				owner: "arnold"
@@ -74,7 +79,7 @@ class ProductSpec extends Specification {
 				description: "description",
 				ownerAddress: "0x0000000000000000000000000000000000000000",
 				beneficiaryAddress: "0x0000000000000000000000000000000000000000",
-				pricePerSecond: 0,
+				pricePerSecond: 1,
 				category: new Category(),
 				streams: [s1, s2],
 				previewStream: s3,
@@ -100,15 +105,108 @@ class ProductSpec extends Specification {
 				description: "description",
 				ownerAddress: "0x0000000000000000000000000000000000000000",
 				beneficiaryAddress: "0x0000000000000000000000000000000000000000",
-				pricePerSecond: 0,
+				pricePerSecond: 1,
 				category: new Category(),
 				streams: [s1, s2, s3],
-				previewStream: s3,
+				previewStream: s3
+		)
+		when:
+		p.validate()
+		then:
+		p.errors.errorCount == 0
+	}
+
+	void "Product passes validation if ownerAddress=null and beneficiaryAddress=null when pricePerSecond=0"() {
+		def s1 = new Stream(name: "stream-1")
+		def s2 = new Stream(name: "stream-2")
+		def s3 = new Stream(name: "stream-3")
+		s1.id = "1"
+		s2.id = "2"
+		s3.id = "3"
+
+		def p = new Product(
+			name: "name",
+			description: "description",
+			pricePerSecond: 0,
+			category: new Category(),
+			streams: [s1, s2, s3],
+			previewStream: s3,
 				owner: "arnold"
 		)
 		when:
 		p.validate()
 		then:
 		p.errors.errorCount == 0
+	}
+
+	void "Product does not pass validation if ownerAddress != null and pricePerSecond=0"() {
+		def s1 = new Stream(name: "stream-1")
+		def s2 = new Stream(name: "stream-2")
+		def s3 = new Stream(name: "stream-3")
+		s1.id = "1"
+		s2.id = "2"
+		s3.id = "3"
+
+		def p = new Product(
+			name: "name",
+			description: "description",
+			pricePerSecond: 0,
+			ownerAddress: "0x0000000000000000000000000000000000000000",
+			category: new Category(),
+			streams: [s1, s2, s3],
+			previewStream: s3
+		)
+		when:
+		p.validate()
+		then:
+		p.errors.errorCount == 1
+		p.errors.fieldErrors.get(0).field == "pricePerSecond"
+	}
+
+	void "Product does not pass validation if beneficiaryAddress != null and pricePerSecond=0"() {
+		def s1 = new Stream(name: "stream-1")
+		def s2 = new Stream(name: "stream-2")
+		def s3 = new Stream(name: "stream-3")
+		s1.id = "1"
+		s2.id = "2"
+		s3.id = "3"
+
+		def p = new Product(
+			name: "name",
+			description: "description",
+			pricePerSecond: 0,
+			beneficiaryAddress: "0x0000000000000000000000000000000000000000",
+			category: new Category(),
+			streams: [s1, s2, s3],
+			previewStream: s3
+		)
+		when:
+		p.validate()
+		then:
+		p.errors.errorCount == 1
+		p.errors.fieldErrors.get(0).field == "pricePerSecond"
+	}
+
+	void "Product must have ownerAddress and beneficiaryAddress to pass validation if pricePerSecond != 0"() {
+		def s1 = new Stream(name: "stream-1")
+		def s2 = new Stream(name: "stream-2")
+		def s3 = new Stream(name: "stream-3")
+		s1.id = "1"
+		s2.id = "2"
+		s3.id = "3"
+
+		def p = new Product(
+			name: "name",
+			description: "description",
+			pricePerSecond: 5,
+			category: new Category(),
+			streams: [s1, s2, s3],
+			previewStream: s3
+		)
+		when:
+		p.validate()
+		then:
+		p.errors.errorCount == 1
+		p.errors.fieldErrors.get(0).field == "pricePerSecond"
 	}
 }

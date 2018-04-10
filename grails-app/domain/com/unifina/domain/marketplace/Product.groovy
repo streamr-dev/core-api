@@ -56,9 +56,13 @@ class Product {
 		streams(maxSize: 1000)
 		previewStream(nullable: true, validator: { Stream s, p -> s == null || s in p.streams })
 		previewConfigJson(nullable: true)
-		ownerAddress(validator: isEthereumAddress)
-		beneficiaryAddress(validator: isEthereumAddress)
-		pricePerSecond(min: 0L)
+		ownerAddress(nullable: true, validator: isEthereumAddressOrIsNull)
+		beneficiaryAddress(nullable: true, validator: isEthereumAddressOrIsNull)
+		pricePerSecond(min: 0L, validator: { Long price, p ->
+			price == 0 ?
+				p.ownerAddress == null && p.beneficiaryAddress == null :
+				p.ownerAddress != null && p.beneficiaryAddress != null
+		})
 		minimumSubscriptionInSeconds(min: 0L)
 		blockNumber(min: 0L)
 		blockIndex(min: 0L)
@@ -99,7 +103,11 @@ class Product {
 		]
 	}
 
-	static isEthereumAddress = { String value, object ->
+	static isEthereumAddressOrIsNull = { String value ->
+		value == null || Product.isEthereumAddress(value)
+	}
+
+	static isEthereumAddress = { String value ->
 		value ==~ /^0x[a-fA-F0-9]{40}$/ ?: "validation.isEthereumAddress"
 	}
 }
