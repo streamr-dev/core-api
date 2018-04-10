@@ -37,6 +37,7 @@ class ProductService {
 		}
 
 		Product product = new Product(command.properties)
+		product.owner = currentUser.username
 		product.save(failOnError: true)
 		permissionService.systemGrantAll(currentUser, product)
 		return product

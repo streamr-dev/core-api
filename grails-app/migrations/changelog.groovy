@@ -102,4 +102,5 @@ databaseChangeLog = {
 	include file: 'core/2018-04-04-add-product-thumbnailurl.groovy'
 	include file: 'core/2018-04-04-test-data-products-subscriptions.groovy'
 	include file: 'core/2018-04-06-add-altname-to-expression-module.groovy'
+	include file: 'core/2018-04-09-add-owner-to-product.groovy'
 }
