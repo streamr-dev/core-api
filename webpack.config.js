@@ -21,8 +21,8 @@ const commonPlugins = [
     new webpack.LoaderOptionsPlugin({
         test: /\.pcss$/,
         options: {
-            postcss: postcssConfig
-        }
+            postcss: postcssConfig,
+        },
     }),
     new ExtractTextPlugin(inProduction ? '[name].bundle.[chunkhash].css' : '[name].bundle.css'),
     new webpack.optimize.CommonsChunkPlugin('commons')]
@@ -30,39 +30,40 @@ const commonPlugins = [
 const environmentPlugins = inProduction ? [
     // Production plugins
     new CleanWebpackPlugin(['web-app/webpack-bundles/*.js', 'web-app/webpack-bundles/*.css'], {
-        verbose: true
+        verbose: true,
     }),
     new webpack.optimize.OccurrenceOrderPlugin(),
     new webpack.DefinePlugin({
         'process.env': {
-            'NODE_ENV': JSON.stringify('production')
-        }
+            'NODE_ENV': JSON.stringify('production'),
+        },
     }),
     new webpack.optimize.UglifyJsPlugin({
         compressor: {
-            warnings: false
-        }
-    })
+            warnings: false,
+        },
+    }),
 ] : [
     // Dev plugins
     new FlowtypePlugin(),
     new webpack.NoEmitOnErrorsPlugin(),
-    new WebpackNotifierPlugin()
+    new WebpackNotifierPlugin(),
 ]
 
 const additionalPlugins = [].concat(
-    (!inProduction && !noActualFiles) ? [new WriteFilePlugin()] : []
+    (!inProduction && !noActualFiles) ? [new WriteFilePlugin()] : [],
 )
 
 module.exports = {
     entry: {
         profilePage: path.resolve(root, 'web-app', 'react-app', 'profilePageMain.js'),
-        dashboardPage: path.resolve(root, 'web-app', 'react-app', 'dashboardPageMain.js')
+        dashboardPage: path.resolve(root, 'web-app', 'react-app', 'dashboardPageMain.js'),
+        authPage: path.resolve(root, 'web-app', 'react-app', 'authPageMain.js'),
     },
     output: {
         path: path.resolve(root, 'web-app', 'webpack-bundles'),
         publicPath: '/',
-        filename: inProduction ? '[name].bundle.[chunkhash].js' : '[name].bundle.js'
+        filename: inProduction ? '[name].bundle.[chunkhash].js' : '[name].bundle.js',
     },
     module: {
         rules: [
@@ -74,20 +75,20 @@ module.exports = {
                 use: [{
                     loader: 'eslint-loader',
                     options: {
-                        configFile: path.resolve(root, '.eslintrc.js')
-                    }
+                        configFile: path.resolve(root, '.eslintrc.js'),
+                    },
                 }, !inProduction ? {
-                    loader: 'flowtype-loader'
+                    loader: 'flowtype-loader',
                 } : undefined].filter(i => i) // remove possible undefined
             },
             {
                 test: /.jsx?$/,
                 loader: 'babel-loader',
-                exclude: /node_modules/
+                exclude: /node_modules/,
             },
             {
                 test: /\.(png|woff|woff2|eot|ttf|svg)$/,
-                loader: 'url-loader?limit=100000'
+                loader: 'url-loader?limit=100000',
             },
             // .pcss files treated as modules
             {
@@ -100,23 +101,23 @@ module.exports = {
                             options: {
                                 modules: true,
                                 importLoaders: 1,
-                                localIdentName: inProduction ? '[local]_[hash:base64:5]' : '[name]_[local]'
-                            }
+                                localIdentName: inProduction ? '[local]_[hash:base64:5]' : '[name]_[local]',
+                            },
                         }, {
-                            loader: 'postcss-loader'
-                        }
-                    ]
-                })
+                            loader: 'postcss-loader',
+                        },
+                    ],
+                }),
             },
             // .css files imported as plain css files
             {
                 test: /\.css$/,
                 use: ExtractTextPlugin.extract({
                     fallback: 'style-loader',
-                    use: 'css-loader'
-                })
-            }
-        ]
+                    use: 'css-loader',
+                }),
+            },
+        ],
     },
     plugins: commonPlugins
         .concat(environmentPlugins)
@@ -124,13 +125,13 @@ module.exports = {
     devtool: !inProduction && 'eval-source-map',
     devServer: {
         port: port,
-        contentBase: root
+        contentBase: root,
     },
     resolve: {
         extensions: ['.js', '.jsx', '.json'],
         alias: {
-            'ws': 'empty/functionThatReturnsTrue'
-        }
-    }
+            'ws': 'empty/functionThatReturnsTrue',
+        },
+    },
 }
 
