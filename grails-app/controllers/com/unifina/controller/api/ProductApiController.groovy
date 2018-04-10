@@ -7,6 +7,7 @@ import com.unifina.domain.security.SecUser
 import com.unifina.security.AuthLevel
 import com.unifina.security.StreamrApi
 import com.unifina.service.ApiService
+import com.unifina.service.FreeProductService
 import com.unifina.service.ProductImageService
 import com.unifina.service.ProductService
 import grails.compiler.GrailsCompileStatic
@@ -27,6 +28,7 @@ class ProductApiController {
 	]
 
 	ApiService apiService
+	FreeProductService freeProductService
 	ProductService productService
 	ProductImageService productImageService
 
@@ -80,6 +82,14 @@ class ProductApiController {
 	def setDeployed(String id, ProductDeployedCommand command) {
 		Product product = apiService.getByIdAndThrowIfNotFound(Product, id)
 		productService.markAsDeployed(product, command, loggedInUser())
+		render(product.toMap() as JSON)
+	}
+
+	@GrailsCompileStatic
+	@StreamrApi(authenticationLevel = AuthLevel.USER)
+	def deployFree(String id) {
+		Product product = productService.findById(id, loggedInUser(), Permission.Operation.SHARE)
+		freeProductService.deployFreeProduct(product)
 		render(product.toMap() as JSON)
 	}
 
