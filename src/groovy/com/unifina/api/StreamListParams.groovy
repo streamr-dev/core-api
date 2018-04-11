@@ -26,8 +26,8 @@ class StreamListParams extends ListParams {
 				eq("name", name)
 			}
 			// Filter by UI channel
-			if (uiChannel) {
-				eq("uiChannel", "uiChannel")
+			if (uiChannel != null) {
+				eq("uiChannel", uiChannel)
 			}
 		}
 	}

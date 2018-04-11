@@ -26,7 +26,8 @@ class ProductListParamsSpec extends Specification {
 			beneficiaryAddress: "0x0000000000000000000000000000000000000000",
 			category: c1,
 			pricePerSecond: 5,
-			state: Product.State.NOT_DEPLOYED
+			state: Product.State.NOT_DEPLOYED,
+			owner: "arnold"
 		)
 		Product p2 = new Product(
 			name: "Hello Product",
@@ -36,6 +37,7 @@ class ProductListParamsSpec extends Specification {
 			category: c2,
 			pricePerSecond: 10,
 			state: Product.State.DEPLOYING,
+			owner: "arnold"
 		)
 		Product p3 = new Product(
 			name: "Cryptocurrency Product",
@@ -44,7 +46,8 @@ class ProductListParamsSpec extends Specification {
 			beneficiaryAddress: "0x0000000000000000000000000000000000000000",
 			category: c3,
 			pricePerSecond: 1,
-			state: Product.State.DEPLOYED
+			state: Product.State.DEPLOYED,
+			owner: "arnold"
 		)
 		Product p4 = new Product(
 			name: "Automobile Product",
@@ -53,7 +56,8 @@ class ProductListParamsSpec extends Specification {
 			beneficiaryAddress: "0x0000000000000000000000000000000000000000",
 			category: c1,
 			pricePerSecond: 3,
-			state: Product.State.DEPLOYED
+			state: Product.State.DEPLOYED,
+			owner: "arnold"
 		)
 
 		mockCriteria(Product) // support for criteria `in`

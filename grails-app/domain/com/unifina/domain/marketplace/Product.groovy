@@ -20,6 +20,7 @@ class Product {
 	Date dateCreated
 	Date lastUpdated
 	Integer score = 0 // set manually; used as default ordering for lists of Products (descending)
+	String owner // set to username of the product creator when product is created.
 
 	// The below fields exist in the domain object for speed & query support, but the ground truth is in the smart contract.
 	String ownerAddress
@@ -55,12 +56,17 @@ class Product {
 		streams(maxSize: 1000)
 		previewStream(nullable: true, validator: { Stream s, p -> s == null || s in p.streams })
 		previewConfigJson(nullable: true)
-		ownerAddress(validator: isEthereumAddress)
-		beneficiaryAddress(validator: isEthereumAddress)
-		pricePerSecond(min: 0L)
+		ownerAddress(nullable: true, validator: isEthereumAddressOrIsNull)
+		beneficiaryAddress(nullable: true, validator: isEthereumAddressOrIsNull)
+		pricePerSecond(min: 0L, validator: { Long price, p ->
+			price == 0 ?
+				p.ownerAddress == null && p.beneficiaryAddress == null :
+				p.ownerAddress != null && p.beneficiaryAddress != null
+		})
 		minimumSubscriptionInSeconds(min: 0L)
 		blockNumber(min: 0L)
 		blockIndex(min: 0L)
+		owner(blank: false)
 	}
 
 	static mapping = {
@@ -92,11 +98,16 @@ class Product {
 			beneficiaryAddress: beneficiaryAddress,
 			pricePerSecond: pricePerSecond,
 			priceCurrency: priceCurrency.toString(),
-			minimumSubscriptionInSeconds: minimumSubscriptionInSeconds
+			minimumSubscriptionInSeconds: minimumSubscriptionInSeconds,
+			owner: owner
 		]
 	}
 
-	static isEthereumAddress = { String value, object ->
+	static isEthereumAddressOrIsNull = { String value ->
+		value == null || Product.isEthereumAddress(value)
+	}
+
+	static isEthereumAddress = { String value ->
 		value ==~ /^0x[a-fA-F0-9]{40}$/ ?: "validation.isEthereumAddress"
 	}
 }
