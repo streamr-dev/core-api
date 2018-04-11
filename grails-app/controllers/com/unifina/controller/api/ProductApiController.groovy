@@ -24,7 +24,8 @@ class ProductApiController {
 		setUndeploying: "POST",
 		setUndeployed: "POST",
 		setPricing: "POST",
-		uploadImage: "POST"
+		uploadImage: "POST",
+		deployFree: "POST"
 	]
 
 	ApiService apiService
