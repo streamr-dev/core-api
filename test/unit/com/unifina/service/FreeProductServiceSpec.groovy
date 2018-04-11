@@ -41,6 +41,7 @@ class FreeProductServiceSpec extends Specification {
 		freeProduct.id = "free-product-id"
 		freeProduct.save(failOnError: true, validate: true)
 	}
+
 	void "deployFreeProduct throws ProductNotFreeException when given paid Product"() {
 		when:
 		service.deployFreeProduct(new Product(pricePerSecond: 2))
@@ -82,5 +83,57 @@ class FreeProductServiceSpec extends Specification {
 		1 * permissionService.systemGrantAnonymousAccess(s1, Permission.Operation.READ)
 		1 * permissionService.systemGrantAnonymousAccess(s2, Permission.Operation.READ)
 		1 * permissionService.systemGrantAnonymousAccess(s3, Permission.Operation.READ)
+	}
+
+	void "undeployFreeProduct throws ProductNotFreeException when given paid Product"() {
+		when:
+		service.undeployFreeProduct(new Product(pricePerSecond: 2))
+		then:
+		thrown(ProductNotFreeException)
+	}
+
+	void "undeployFreeProduct throws InvalidStateTransitionException when given Product in state NOT_DEPLOYED"() {
+		when:
+		service.undeployFreeProduct(new Product(pricePerSecond: 0, state: Product.State.NOT_DEPLOYED))
+		then:
+		thrown(InvalidStateTransitionException)
+	}
+
+	void "undeployFreeProduct transitions Product state to NOT_DEPLOYED"() {
+		service.permissionService = Stub(PermissionService)
+
+		freeProduct.state = Product.State.DEPLOYED
+		freeProduct.save(failOnError: true)
+
+		when:
+		service.undeployFreeProduct(freeProduct)
+		then:
+		Product.findById("free-product-id").state == Product.State.NOT_DEPLOYED
+	}
+
+	void "undeployFreeProduct revokes anonymous access to Product"() {
+		def permissionService = service.permissionService = Mock(PermissionService)
+
+		freeProduct.state = Product.State.DEPLOYED
+		freeProduct.save(failOnError: true)
+
+		when:
+		service.undeployFreeProduct(freeProduct)
+		then:
+		1 * permissionService.systemRevokeAnonymousAccess(freeProduct)
+	}
+
+	void "undeployFreeProduct revokes anonymous READ access to the streams of Product"() {
+		def permissionService = service.permissionService = Mock(PermissionService)
+
+		freeProduct.state = Product.State.DEPLOYED
+		freeProduct.save(failOnError: true)
+
+		when:
+		service.undeployFreeProduct(freeProduct)
+		then:
+		1 * permissionService.systemRevokeAnonymousAccess(s1, Permission.Operation.READ)
+		1 * permissionService.systemRevokeAnonymousAccess(s2, Permission.Operation.READ)
+		1 * permissionService.systemRevokeAnonymousAccess(s3, Permission.Operation.READ)
 	}
 }
