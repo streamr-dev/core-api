@@ -455,6 +455,7 @@ class ProductApiControllerSpec extends Specification {
 		def user = new SecUser()
 
 		params.id = "product-id"
+		request.method = "POST"
 		request.apiUser = user
 		when:
 		withFilters(action: "deployFree") {
@@ -471,6 +472,7 @@ class ProductApiControllerSpec extends Specification {
 		def freeProductService = controller.freeProductService = Mock(FreeProductService)
 
 		params.id = "product-id"
+		request.method = "POST"
 		request.apiUser = new SecUser()
 		when:
 		withFilters(action: "deployFree") {
@@ -487,6 +489,7 @@ class ProductApiControllerSpec extends Specification {
 		controller.freeProductService = Stub(FreeProductService)
 
 		params.id = "product-id"
+		request.method = "POST"
 		request.apiUser = new SecUser()
 		when:
 		withFilters(action: "deployFree") {
