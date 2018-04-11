@@ -158,6 +158,11 @@ class Products {
             .withBody(body)
     }
 
+    deployFree(id) {
+        return new StreamrApiRequest(this.options)
+            .methodAndPath('POST', `products/${id}/deployFree`)
+    }
+
     uploadImage(id, fileBytes) {
         const formData = new FormData()
         formData.append('file', fileBytes)

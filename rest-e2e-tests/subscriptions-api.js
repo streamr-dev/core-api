@@ -215,9 +215,10 @@ describe('Subscriptions API', () => {
             it('responds with list of subscriptions', () => {
                 assert.isAtLeast(json.length, 1)
                 json.forEach(subscriptionData => assertIsSubscription(subscriptionData))
-                assert.deepEqual(json[json.length - 1].address, publicAddress)
-                assert.deepEqual(json[json.length - 1].endsAt, '2018-10-29T19:11:52Z')
-                assert.deepEqual(json[json.length - 1].product.id, productId)
+                const picked = json.find(subscriptionData => subscriptionData.address === publicAddress)
+                assert.isNotNull(picked)
+                assert.deepEqual(picked.endsAt, '2018-10-29T19:11:52Z')
+                assert.deepEqual(picked.product.id, productId)
             })
         })
     })

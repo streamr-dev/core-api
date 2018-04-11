@@ -1156,4 +1156,95 @@ describe('Products API', () => {
             })
         })
     })
+
+    describe('GET /api/v1/products/:id/deployFree', () => {
+        let freeProductId
+
+        before(async () => {
+            const freeProductBody = {
+                name: 'Product',
+                description: 'Description of the product.',
+                category: 'satellite-id',
+                streams: [
+                    streamId1,
+                    streamId2
+                ],
+                pricePerSecond: 0,
+                priceCurrency: 'USD',
+                minimumSubscriptionInSeconds: 60,
+            }
+            freeProductId = await createProductAndReturnId(freeProductBody)
+        })
+
+        it('requires authentication', async () => {
+            const response = await Streamr.api.v1.products
+                .deployFree(freeProductId)
+                .call()
+            await assertResponseIsError(response, 401, 'NOT_AUTHENTICATED')
+        })
+
+        it('requires existing Product', async () => {
+            const response = await Streamr.api.v1.products
+                .deployFree('non-existing-id')
+                .withAuthToken(AUTH_TOKEN)
+                .call()
+            await assertResponseIsError(response, 404, 'NOT_FOUND')
+        })
+
+        it('requires share permission on Product', async () => {
+            const response = await Streamr.api.v1.products
+                .deployFree(freeProductId)
+                .withAuthToken(AUTH_TOKEN_2)
+                .call()
+            const json = await response.json()
+
+            assert.equal(response.status, 403)
+            assert.equal(json.code, 'FORBIDDEN')
+            assert.equal(json.operation, 'share')
+        })
+
+        it('verifies that Product is free', async () => {
+            const paidProductId = await createProductAndReturnId(genericProductBody)
+
+            const response = await Streamr.api.v1.products
+                .deployFree(paidProductId)
+                .withAuthToken(AUTH_TOKEN)
+                .call()
+            await assertResponseIsError(response, 400, 'PRODUCT_IS_NOT_FREE')
+        })
+
+        context('when called with valid params, body, headers, and permissions', () => {
+            let response
+            let json
+
+            before(async () => {
+                response = await Streamr.api.v1.products
+                    .deployFree(freeProductId)
+                    .withAuthToken(AUTH_TOKEN)
+                    .call()
+
+                json = await response.json()
+            })
+
+            it('responds with 200', () => {
+                assert.equal(response.status, 200)
+            })
+
+            it('responds with Product', () => {
+                assertIsProduct(json)
+            })
+
+            it('state of Product is now DEPLOYED', () => {
+                assert.equal(json.state, 'DEPLOYED')
+            })
+
+            it('cannot be called again (already DEPLOYED)', async () => {
+                const response = await Streamr.api.v1.products
+                    .deployFree(freeProductId)
+                    .withAuthToken(AUTH_TOKEN)
+                    .call()
+                await assertResponseIsError(response, 409, 'INVALID_STATE_TRANSITION')
+            })
+        })
+    })
 })
