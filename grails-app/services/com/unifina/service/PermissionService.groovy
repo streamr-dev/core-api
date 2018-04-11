@@ -1,11 +1,17 @@
 package com.unifina.service
 
 import com.unifina.api.NotPermittedException
+import com.unifina.domain.dashboard.Dashboard
+import com.unifina.domain.data.Feed
+import com.unifina.domain.data.Stream
+import com.unifina.domain.marketplace.Product
 import com.unifina.domain.security.Key
 import com.unifina.domain.security.Permission
 import com.unifina.domain.security.Permission.Operation
 import com.unifina.domain.security.SecUser
 import com.unifina.domain.security.SignupInvite
+import com.unifina.domain.signalpath.Canvas
+import com.unifina.domain.signalpath.ModulePackage
 import com.unifina.security.Userish
 import groovy.transform.CompileStatic
 
@@ -482,9 +488,22 @@ class PermissionService {
 
 	@CompileStatic
 	private static String getResourcePropertyName(Object resource) {
-		// Derive property name from class name by turning it into camelCase
-		String simpleName = resource.getClass().getSimpleName()
-		return simpleName.substring(0, 1).toLowerCase() + simpleName.substring(1)
+		// Cannot derive name straight from resource.getClass() because of proxy assist objects!
+		if (resource instanceof Canvas) {
+			return "canvas"
+		} else if (resource instanceof Dashboard) {
+			return "dashboard"
+		} else if (resource instanceof Feed) {
+			return "feed"
+		} else if (resource instanceof ModulePackage) {
+			return "modulePackage"
+		} else if (resource instanceof Product) {
+			return "product"
+		} else if (resource instanceof Stream) {
+			return "stream"
+		} else {
+			throw new IllegalArgumentException("Unexpected resource class: " + resource)
+		}
 	}
 
 	/**
