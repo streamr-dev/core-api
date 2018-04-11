@@ -103,6 +103,7 @@
           { "$ref": "#/parameters/max" },
           { "$ref": "#/parameters/offset" },
           { "$ref": "#/parameters/publicAccess" },
+          { "$ref": "#/parameters/operation" },
           {
             "name": "categories",
             "type": "string",
@@ -1062,7 +1063,8 @@
           { "$ref": "#/parameters/order" },
           { "$ref": "#/parameters/max" },
           { "$ref": "#/parameters/offset" },
-          { "$ref": "#/parameters/publicAccess" }
+          { "$ref": "#/parameters/publicAccess" },
+          { "$ref": "#/parameters/operation" },
         ],
         "tags": [
           "streams"
@@ -1838,7 +1840,8 @@
           { "$ref": "#/parameters/order" },
           { "$ref": "#/parameters/max" },
           { "$ref": "#/parameters/offset" },
-          { "$ref": "#/parameters/publicAccess" }
+          { "$ref": "#/parameters/publicAccess" },
+          { "$ref": "#/parameters/operation" },
         ],
         "responses": {
           "200": {
@@ -2272,7 +2275,8 @@
           { "$ref": "#/parameters/order" },
           { "$ref": "#/parameters/max" },
           { "$ref": "#/parameters/offset" },
-          { "$ref": "#/parameters/publicAccess" }
+          { "$ref": "#/parameters/publicAccess" },
+          { "$ref": "#/parameters/operation" },
         ],
         "tags": [
           "dashboards"
@@ -2837,6 +2841,19 @@
       "description": "If true, includes publicly available resources in the results.",
       "required": false,
       "default": false
+    },
+    "operation": {
+      "name": "operation",
+      "type": "string",
+      "enum": [
+        "READ",
+        "WRITE",
+        "SHARE"
+      ],
+      "in": "query",
+      "description": "Filter results by Permission (access level)",
+      "required": false,
+      "default": "READ"
     }
   },
   "definitions": {
