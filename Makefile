@@ -8,17 +8,38 @@ GIT_TAG=$(QNAME):$(VCS_REF)
 BUILD_TAG=$(QNAME):$(IMAGE_VERSION)
 LATEST_TAG=$(QNAME):latest
 
-unit-test:
+
+install-submodules:
+	sed -i 's/git@github.com:/https:\/\/github.com\//' .gitmodules
+	git submodule update --init --recursive
+
+unit-test: install-submodules
 	grails clean
 	grails test-app -unit
 
-integration-test:
+install-driver:
+	wget -N http://chromedriver.storage.googleapis.com/2.37/chromedriver_linux64.zip -P ~/
+	unzip ~/chromedriver_linux64.zip -d ~/
+	rm ~/chromedriver_linux64.zip
+	sudo mv -f ~/chromedriver /usr/local/bin/chromedriver
+	sudo chown root:root /usr/local/bin/chromedriver
+	sudo chmod 0755 /usr/local/bin/chromedriver
+
+integration-test: install-submodules
 	sudo /etc/init.d/mysql stop
 	npm install
 	git clone https://github.com/streamr-dev/streamr-docker-dev.git
 	$(TRAVIS_BUILD_DIR)/streamr-docker-dev/streamr-docker-dev/bin.sh start 1
 	grails clean
 	grails test-app -integration
+
+functional-test: install-driver docker-login
+	sudo /etc/init.d/mysql stop
+	npm install
+	git clone https://github.com/streamr-dev/streamr-docker-dev.git /tmp/streamr-docker-dev
+	/tmp/streamr-docker-dev/streamr-docker-dev/bin.sh start 1
+	grails test test-app functional: TourSpec
+
 
 build-war:
 	grails clean
