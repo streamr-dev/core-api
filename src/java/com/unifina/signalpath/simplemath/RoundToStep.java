@@ -1,15 +1,11 @@
 package com.unifina.signalpath.simplemath;
 
+import com.unifina.signalpath.*;
+import com.unifina.utils.DU;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
-
-import com.unifina.signalpath.AbstractSignalPathModule;
-import com.unifina.signalpath.DoubleParameter;
-import com.unifina.signalpath.IntegerParameter;
-import com.unifina.signalpath.TimeSeriesInput;
-import com.unifina.signalpath.TimeSeriesOutput;
-import com.unifina.utils.DU;
 
 public class RoundToStep extends AbstractSignalPathModule {
 
@@ -57,7 +53,7 @@ public class RoundToStep extends AbstractSignalPathModule {
 
 	}
 
-	private class ModeParameter extends IntegerParameter {
+	private static class ModeParameter extends IntegerParameter {
 
 		public ModeParameter(AbstractSignalPathModule owner, String name, Integer defaultValue) {
 			super(owner, name, defaultValue);

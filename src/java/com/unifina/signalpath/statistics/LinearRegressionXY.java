@@ -70,7 +70,7 @@ public class LinearRegressionXY extends AbstractModuleWithWindow<LinearRegressio
 		}
 	}
 
-	class XYPair implements Serializable {
+	static class XYPair implements Serializable {
 		public double x;
 		public double y;
 
