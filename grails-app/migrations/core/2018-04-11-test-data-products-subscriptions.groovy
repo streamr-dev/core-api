@@ -145,6 +145,7 @@ databaseChangeLog = {
 				column(name: "version", valueNumeric: 0)
 				column(name: "date_created", value: "2018-01-01 00:00:00")
 				column(name: "last_updated", value: "2018-01-01 00:00:00")
+				column(name: "owner", value: "Tester")
 			}
 
 			randomSetOf(5, streamIDs).each { streamID ->
