@@ -6,7 +6,7 @@ import groovy.transform.CompileStatic
 
 @Validateable
 abstract class ListParams {
-	public static final int MAX_LIMIT = 100
+	public static final int MAX_LIMIT = 1000
 
 	String search
 	String sortBy
