@@ -1,6 +1,7 @@
 import com.unifina.domain.dashboard.Dashboard
 import com.unifina.domain.data.Stream
 import com.unifina.domain.marketplace.Product
+import com.unifina.domain.security.Permission
 import com.unifina.domain.security.SecUser
 import com.unifina.domain.signalpath.Canvas
 
@@ -48,6 +49,7 @@ class UrlMappings {
 
 		"/api/v1/users/me"(controller: "userApi", action: "getUserInfo")
 		"/api/v1/users/me/keys"(resources: "keyApi", excludes: ["create", "edit", "update"]) { resourceClass = SecUser }
+		"/api/v1/users/me/products"(controller: "productApi", action: "index") { operation = Permission.Operation.SHARE }
 
 		"/api/v1/integration_keys"(resources: "integrationKeyApi")
 
