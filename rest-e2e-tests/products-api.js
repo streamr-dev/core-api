@@ -200,7 +200,8 @@ describe('Products API', () => {
                     beneficiaryAddress: '0x0000000000000000000011111111111111111111',
                     pricePerSecond: 5,
                     priceCurrency: 'USD',
-                    minimumSubscriptionInSeconds: 60
+                    minimumSubscriptionInSeconds: 60,
+                    owner: 'product-api-tester@streamr.com'
                 })
             })
         })
@@ -344,7 +345,8 @@ describe('Products API', () => {
                     beneficiaryAddress: '0x0000000000000000000011111111111111111111',
                     pricePerSecond: 5,
                     priceCurrency: 'USD',
-                    minimumSubscriptionInSeconds: 60
+                    minimumSubscriptionInSeconds: 60,
+                    owner: 'product-api-tester@streamr.com'
                 })
             })
         })
