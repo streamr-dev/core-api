@@ -90,9 +90,9 @@ class ApiServiceSpec extends Specification {
 		def params = new DashboardListParams(offset: 150, name: "dashboard", publicAccess: true)
 
 		when:
-		service.addLinkHintToHeader(params, 100, [action: "index", controller: "dashboardApi"], response)
+		service.addLinkHintToHeader(params, 1000, [action: "index", controller: "dashboardApi"], response)
 		then:
-		1 * response.addHeader("Link", '<http://localhost:8080/api/v1/dashboards?max=100&offset=250&publicAccess=true&name=dashboard>; rel="more"')
+		1 * response.addHeader("Link", '<http://localhost:8080/api/v1/dashboards?max=1000&offset=1150&publicAccess=true&name=dashboard>; rel="more"')
 	}
 
 	void "getByIdAndThrowIfNotFound() throws NotFoundException if domain object cannot be found"() {
