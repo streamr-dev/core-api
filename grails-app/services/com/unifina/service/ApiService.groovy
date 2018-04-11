@@ -45,7 +45,7 @@ class ApiService {
 			throw new ValidationException(listParams.errors)
 		}
 		Closure searchCriteria = listParams.createListCriteria()
-		permissionService.get(domainClass, apiUser, listParams.getOperation(), listParams.publicAccess, searchCriteria)
+		permissionService.get(domainClass, apiUser, listParams.operation, listParams.publicAccess, searchCriteria)
 	}
 
 	/**

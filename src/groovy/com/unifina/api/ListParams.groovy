@@ -14,7 +14,7 @@ abstract class ListParams {
 	Integer max = MAX_LIMIT
 	Integer offset = 0
 	Boolean publicAccess = false
-	Permission.Operation operation
+	Permission.Operation operation = Permission.Operation.READ
 
 	static constraints = {
 		search(nullable: true, blank: false)
@@ -27,13 +27,6 @@ abstract class ListParams {
 
 	protected abstract List<String> getSearchFields()
 	protected abstract Closure additionalCriteria()
-
-	Permission.Operation getOperation() {
-		if (operation != null) {
-			return operation
-		}
-		return Permission.Operation.READ
-	}
 
 	Closure createListCriteria() {
 		return {
