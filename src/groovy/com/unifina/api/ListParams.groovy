@@ -1,5 +1,6 @@
 package com.unifina.api
 
+import com.unifina.domain.security.Permission
 import grails.validation.Validateable
 import groovy.transform.CompileStatic
 
@@ -13,6 +14,7 @@ abstract class ListParams {
 	Integer max = MAX_LIMIT
 	Integer offset = 0
 	Boolean publicAccess = false
+	Permission.Operation operation
 
 	static constraints = {
 		search(nullable: true, blank: false)
@@ -25,6 +27,13 @@ abstract class ListParams {
 
 	protected abstract List<String> getSearchFields()
 	protected abstract Closure additionalCriteria()
+
+	Permission.Operation getOperation() {
+		if (operation != null) {
+			return operation
+		}
+		return Permission.Operation.READ
+	}
 
 	Closure createListCriteria() {
 		return {

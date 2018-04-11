@@ -21,6 +21,21 @@ import javax.servlet.http.HttpServletResponse
 @Mock(Dashboard)
 class ApiServiceSpec extends Specification {
 
+	void "list() returns streams with share permission"() {
+		def permissionService = service.permissionService = Mock(PermissionService)
+		ListParams listParams = new DashboardListParams(operation: Permission.Operation.SHARE, publicAccess: true)
+		SecUser me = new SecUser(username: "me@me.com")
+
+		when:
+		def list = service.list(Dashboard, listParams, me)
+
+		then:
+		list.size() == 3
+		1 * permissionService.get(Dashboard, me, Permission.Operation.SHARE, true, _) >> [
+			new Dashboard(), new Dashboard(), new Dashboard()
+		]
+	}
+
 	void "list() delegates to permissionService#get"() {
 		def permissionService = service.permissionService = Mock(PermissionService)
 
