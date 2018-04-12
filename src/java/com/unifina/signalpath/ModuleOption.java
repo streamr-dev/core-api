@@ -125,7 +125,7 @@ public class ModuleOption extends LinkedHashMap<String, Object> {
 				for (Map<String, String> value : possibleValues) {
 					final String val = value.get("value");
 					final Object optValue = opt.get("value");
-					if (val.equals(optValue)) {
+					if (val != null && val.equals(optValue)) {
 						found = true;
 						break;
 					}
