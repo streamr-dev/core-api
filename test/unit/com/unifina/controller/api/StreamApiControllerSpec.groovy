@@ -72,6 +72,21 @@ class StreamApiControllerSpec extends Specification {
 		response.json.length() == 3
 	}
 
+	void "find all streams of logged in user without config"() {
+		when:
+		request.addHeader("Authorization", "Token apiKey")
+		request.method = "GET"
+		request.requestURI = "/api/v1/stream"
+		request.setParameter("noConfig", "true")
+		withFilters([action: 'index']) {
+			controller.index()
+		}
+
+		then:
+		response.json.length() == 3
+		response.json[0].config == null
+	}
+
 	void "find streams by name of logged in user"() {
 		when:
 		request.addHeader("Authorization", "Token apiKey")

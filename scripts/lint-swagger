@@ -1,0 +1,11 @@
+#!/bin/bash
+
+if [ ! "$(which fixjson)" ]; then
+	npm --no-color --no-progress install -g fixjson
+fi
+
+if [ ! "$(fixjson --write web-app/misc/swagger.json)" ]; then
+	echo "lint-swagger: unable to fix badly formatted json" 1>&2
+	exit 1
+fi
+
