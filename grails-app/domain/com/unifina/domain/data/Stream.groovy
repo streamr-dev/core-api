@@ -65,7 +65,9 @@ class Stream implements Comparable {
 			feed: feed.toMap(),
 			config: config == null || config.empty ? config : JSON.parse(config),
 			description: description,
-			uiChannel: uiChannel
+			uiChannel: uiChannel,
+			dateCreated: dateCreated,
+			lastUpdated: lastUpdated
 		]
 	}
 
@@ -77,7 +79,9 @@ class Stream implements Comparable {
 			name: name,
 			feed: feed.toMap(),
 			description: description,
-			uiChannel: uiChannel
+			uiChannel: uiChannel,
+			dateCreated: dateCreated,
+			lastUpdated: lastUpdated
 		]
 	}
 
