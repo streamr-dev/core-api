@@ -38,7 +38,7 @@ functional-test: install-submodules install-driver
 	npm install
 	git clone https://github.com/streamr-dev/streamr-docker-dev.git /tmp/streamr-docker-dev
 	/tmp/streamr-docker-dev/streamr-docker-dev/bin.sh start 1
-	grails test test-app functional: TourSpec
+
 
 
 build-war:
