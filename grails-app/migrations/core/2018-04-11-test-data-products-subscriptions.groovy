@@ -181,4 +181,15 @@ databaseChangeLog = {
 			}
 		}
 	}
+
+	changeSet(author: "juuso", id: "test-data-products-public-read-permissions", context: "test") {
+		products.each { product ->
+			insert(tableName: "permission") {
+				column(name: "version", valueNumeric: 0)
+				column(name: "product_id", value: product.id)
+				column(name: "operation", value: "read")
+				column(name: "anonymous", valueNumeric: 1)
+			}
+		}
+	}
 }
