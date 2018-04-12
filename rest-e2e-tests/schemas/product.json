@@ -105,11 +105,17 @@
     },
     "ownerAddress": {
       "description": "Ethereum address of product owner",
-      "$ref": "#/definitions/ethereumAddress"
+      "oneOf": [
+        { "type": "null" },
+        { "$ref": "#/definitions/ethereumAddress" }
+      ]
     },
     "beneficiaryAddress": {
       "description": "Ethereum address of beneficiary",
-      "$ref": "#/definitions/ethereumAddress"
+      "oneOf": [
+        { "type": "null" },
+        { "$ref": "#/definitions/ethereumAddress" }
+      ]
     },
     "pricePerSecond": {
       "description": "Unit price per second",

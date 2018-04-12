@@ -7,6 +7,7 @@ import com.unifina.domain.security.Permission
 import com.unifina.domain.security.SecUser
 import com.unifina.filters.UnifinaCoreAPIFilters
 import com.unifina.service.ApiService
+import com.unifina.service.FreeProductService
 import com.unifina.service.ProductImageService
 import com.unifina.service.ProductService
 import grails.test.mixin.Mock
@@ -447,4 +448,107 @@ class ProductApiControllerSpec extends Specification {
 		response.status == 200
 		response.json == product.toMap()
 	}
+
+	void "deployFree() invokes productService#findById (with SHARE permission requirement)"() {
+		def productService = controller.productService = Mock(ProductService)
+		controller.freeProductService = Stub(FreeProductService)
+		def user = new SecUser()
+
+		params.id = "product-id"
+		request.method = "POST"
+		request.apiUser = user
+		when:
+		withFilters(action: "deployFree") {
+			controller.deployFree()
+		}
+		then:
+		1 * productService.findById('product-id', user, Permission.Operation.SHARE) >> product
+	}
+
+	void "deployFree() invokes freeProductService#deployFreeProduct"() {
+		controller.productService = Stub(ProductService) {
+			findById(_, _, _) >> product
+		}
+		def freeProductService = controller.freeProductService = Mock(FreeProductService)
+
+		params.id = "product-id"
+		request.method = "POST"
+		request.apiUser = new SecUser()
+		when:
+		withFilters(action: "deployFree") {
+			controller.deployFree()
+		}
+		then:
+		1 * freeProductService.deployFreeProduct(product)
+	}
+
+	void "deployFree() returns 200 and renders a product"() {
+		controller.productService = Stub(ProductService) {
+			findById(_, _, _) >> product
+		}
+		controller.freeProductService = Stub(FreeProductService)
+
+		params.id = "product-id"
+		request.method = "POST"
+		request.apiUser = new SecUser()
+		when:
+		withFilters(action: "deployFree") {
+			controller.deployFree()
+		}
+		then:
+		response.status == 200
+		response.json == product.toMap()
+	}
+
+	void "undeployFree() invokes productService#findById (with SHARE permission requirement)"() {
+		def productService = controller.productService = Mock(ProductService)
+		controller.freeProductService = Stub(FreeProductService)
+		def user = new SecUser()
+
+		params.id = "product-id"
+		request.method = "POST"
+		request.apiUser = user
+		when:
+		withFilters(action: "undeployFree") {
+			controller.undeployFree()
+		}
+		then:
+		1 * productService.findById('product-id', user, Permission.Operation.SHARE) >> product
+	}
+
+	void "undeployFree() invokes freeProductService#undeployFreeProduct"() {
+		controller.productService = Stub(ProductService) {
+			findById(_, _, _) >> product
+		}
+		def freeProductService = controller.freeProductService = Mock(FreeProductService)
+
+		params.id = "product-id"
+		request.method = "POST"
+		request.apiUser = new SecUser()
+		when:
+		withFilters(action: "undeployFree") {
+			controller.undeployFree()
+		}
+		then:
+		1 * freeProductService.undeployFreeProduct(product)
+	}
+
+	void "undeployFree() returns 200 and renders a product"() {
+		controller.productService = Stub(ProductService) {
+			findById(_, _, _) >> product
+		}
+		controller.freeProductService = Stub(FreeProductService)
+
+		params.id = "product-id"
+		request.method = "POST"
+		request.apiUser = new SecUser()
+		when:
+		withFilters(action: "undeployFree") {
+			controller.undeployFree()
+		}
+		then:
+		response.status == 200
+		response.json == product.toMap()
+	}
+
 }
