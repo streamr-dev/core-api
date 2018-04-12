@@ -35,23 +35,11 @@ jobs:
     env:
     - CHROMEDRIVER=/usr/local/bin/chromedriver
     - HEADLESS=true
-    script:
-    - "make functional-test" #Groupe 1
-    - "grails test test-app functional: AccessControlCoreSpec ApiDocsSpec CSVImporterFuncSpec CanvasSpe DashboardPageFunctionalSpec"
+    script: "make functional-test functional-group-1"
   - env:
     - CHROMEDRIVER=/usr/local/bin/chromedriver
     - HEADLESS=true
-    script:
-    - "make functional-test" #Groupe 2
-    - "grails test test-app functional: ExampleSpec ExportCSVFunctionalSpec ForgotPasswordSpec InputModuleDashboardSpec InputModuleLiveSpec LiveSpec"
-    script: "make functional-test" #Groupe 3
-    grails test test-app functional: ApiDocsSpec TourSpec
-    script: "make functional-test" #Groupe 4
-    grails test test-app functional: ApiDocsSpec TourSpec
-    script: "make functional-test" #Groupe 5
-    grails test test-app functional: ApiDocsSpec TourSpec
-    script: "make functional-test" #Groupe 6
-    grails test test-app functional: ApiDocsSpec TourSpec
+    script: "make functional-test functional-group-2"
   - stage: Build war
     script: "make build-war"
     deploy:
