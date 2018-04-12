@@ -1,6 +1,7 @@
 package com.unifina.service
 
 import com.unifina.domain.data.Stream
+import com.unifina.domain.marketplace.FreeSubscription
 import com.unifina.domain.marketplace.PaidSubscription
 import com.unifina.domain.marketplace.Product
 import com.unifina.domain.marketplace.Subscription
@@ -24,15 +25,22 @@ class SubscriptionService {
 	 */
 	Subscription onSubscribed(Product product, String address, Date endsAt) {
 		Subscription subscription = PaidSubscription.findByProductAndAddress(product, address)
-		if (subscription) {
-			subscription.endsAt = endsAt
-		} else {
-			subscription = new PaidSubscription(address: address, product: product, endsAt: endsAt)
+		if (subscription == null) {
+			subscription = new PaidSubscription(product: product, address: address)
 		}
-		subscription.save(failOnError: true)
-		deletePermissions(subscription) // TODO: could be optimized to only remove/add what is necessary
-		createPermissions(subscription)
-		return subscription
+		return updateSubscriptionAndLinkedPermissions(subscription, endsAt)
+	}
+
+	/**
+	 * Subscribe to user to (free) Product
+	 */
+	Subscription subscribeToFreeProduct(Product product, SecUser user, Date endsAt) {
+		FreeProductService.verifyThatProductIsFree(product)
+		Subscription subscription = FreeSubscription.findByProductAndUser(product, user)
+		if (subscription == null) {
+			subscription = new FreeSubscription(product: product, user: user)
+		}
+		return updateSubscriptionAndLinkedPermissions(subscription, endsAt)
 	}
 
 	/**
@@ -70,6 +78,14 @@ class SubscriptionService {
 			deletePermissions(subscription, before - after)
 			createPermissions(subscription, after - before)
 		}
+	}
+
+	private Subscription updateSubscriptionAndLinkedPermissions(Subscription subscription, Date endsAt) {
+		subscription.endsAt = endsAt
+		subscription.save(failOnError: true)
+		deletePermissions(subscription) // TODO: could be optimized to only remove/add what is necessary
+		createPermissions(subscription)
+		return subscription
 	}
 
 	private static void deletePermissions(Subscription subscription) {

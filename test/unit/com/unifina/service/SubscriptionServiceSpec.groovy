@@ -1,6 +1,8 @@
 package com.unifina.service
 
+import com.unifina.api.ProductNotFreeException
 import com.unifina.domain.data.Stream
+import com.unifina.domain.marketplace.FreeSubscription
 import com.unifina.domain.marketplace.PaidSubscription
 import com.unifina.domain.marketplace.Product
 import com.unifina.domain.marketplace.Subscription
@@ -12,7 +14,7 @@ import grails.test.mixin.TestFor
 import spock.lang.Specification
 
 @TestFor(SubscriptionService)
-@Mock([IntegrationKey, PaidSubscription, Permission, Product, Stream, Subscription])
+@Mock([FreeSubscription, IntegrationKey, PaidSubscription, Permission, Product, Stream, Subscription])
 class SubscriptionServiceSpec extends Specification {
 
 	SecUser user, user2
@@ -28,6 +30,7 @@ class SubscriptionServiceSpec extends Specification {
 		[s1, s2, s3].eachWithIndex { s, i -> s.id = "stream-${i + 1}" }
 		[s1, s2, s3]*.save(failOnError: true, validate: false)
 		product = new Product(streams: [s1, s2]).save(failOnError: true, validate: false)
+		service.permissionService = new PermissionService()
 	}
 
 	void "getSubscriptionsOfUser() returns empty if user has no integration keys"() {
@@ -108,8 +111,6 @@ class SubscriptionServiceSpec extends Specification {
 	}
 
 	void "onSubscribed() does not create any permissions if user not found for address"() {
-		service.permissionService = new PermissionService()
-
 		when:
 		service.onSubscribed(product, "0x0000000000000000000000000000000000000000", new Date())
 
@@ -118,8 +119,6 @@ class SubscriptionServiceSpec extends Specification {
 	}
 
 	void "onSubscribed() creates subscription-linked permissions if user found for address"() {
-		service.permissionService = new PermissionService()
-
 		new IntegrationKey(
 			user: user,
 			idInService: "0x0000000000000000000000000000000000000000",
@@ -147,7 +146,7 @@ class SubscriptionServiceSpec extends Specification {
 	}
 
 	void "onSubscribed() does not remove existing non-subscription permissions if user found for address"() {
-		def permissionService = service.permissionService = new PermissionService()
+		def permissionService = service.permissionService
 
 		Permission p1 = permissionService.systemGrant(user, s1, Permission.Operation.READ)
 		Permission p2 = permissionService.systemGrant(user, s2, Permission.Operation.READ)
@@ -170,7 +169,7 @@ class SubscriptionServiceSpec extends Specification {
 	}
 
 	void "onSubscribed() removes existing subscription-linked permissions if user found for address"() {
-		def permissionService = service.permissionService = new PermissionService()
+		def permissionService = service.permissionService
 
 		def s = service.onSubscribed(product, "0x0000000000000000000000000000000000000000", new Date(0))
 
@@ -192,6 +191,88 @@ class SubscriptionServiceSpec extends Specification {
 
 		when:
 		service.onSubscribed(product, "0x0000000000000000000000000000000000000000", new Date())
+
+		then:
+		!Permission.exists(p1.id)
+		!Permission.exists(p2.id)
+	}
+
+	void "subscribeToFreeProduct() throws ProductNotFreeException if given non-free Product"() {
+		when:
+		service.subscribeToFreeProduct(product, user, new Date())
+		then:
+		thrown(ProductNotFreeException)
+	}
+
+	void "subscribeToFreeProduct() creates new FreeSubscription if product-user pair does not exist"() {
+		product.pricePerSecond = 0
+
+		assert FreeSubscription.count() == 0
+
+		when:
+		def s = service.subscribeToFreeProduct(product, user, new Date())
+
+		then:
+		s.id != null
+		FreeSubscription.findAll() == [s]
+	}
+
+	void "subscribeToFreeProduct() updates existing Subscription if product-user exists"() {
+		product.pricePerSecond = 0
+
+		def s1 = service.subscribeToFreeProduct(product, user, new Date(0))
+
+		when:
+		def newDate = new Date()
+		def s2 = service.subscribeToFreeProduct(product, user, newDate)
+
+		then:
+		s2.id == s1.id
+		Subscription.count() == 1
+		Subscription.findById(s2.id).endsAt == newDate
+	}
+
+	void "subscribeToFreeProduct() creates subscription-linked permissions"() {
+		product.pricePerSecond = 0
+
+		assert Permission.count() == 0
+
+		when:
+		service.subscribeToFreeProduct(product, user, new Date())
+
+		then:
+		Permission.findAll()*.toInternalMap() as Set == [
+			[
+				operation: "READ",
+				user: 1L,
+				stream: "stream-1",
+				subscription: 1L
+			],
+			[
+				operation: "READ",
+				user: 1L,
+				stream: "stream-2",
+				subscription: 1L
+			]
+		] as Set
+	}
+
+	void "subscribeToFreeProduct() removes existing subscription-linked permissions"() {
+		product.pricePerSecond = 0
+
+		def s = service.subscribeToFreeProduct(product, user2, new Date(0))
+		Permission p1 = service.permissionService.systemGrant(user, s1, Permission.Operation.READ)
+		Permission p2 = service.permissionService.systemGrant(user, s2, Permission.Operation.READ)
+		p1.subscription = s
+		p2.subscription = s
+		p1.save(failOnError: true)
+		p2.save(failOnError: true)
+
+		assert Permission.exists(p1.id)
+		assert Permission.exists(p2.id)
+
+		when:
+		service.subscribeToFreeProduct(product, user2, new Date())
 
 		then:
 		!Permission.exists(p1.id)
