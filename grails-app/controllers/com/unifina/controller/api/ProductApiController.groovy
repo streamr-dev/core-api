@@ -25,7 +25,8 @@ class ProductApiController {
 		setUndeployed: "POST",
 		setPricing: "POST",
 		uploadImage: "POST",
-		deployFree: "POST"
+		deployFree: "POST",
+		undeployFree: "POST"
 	]
 
 	ApiService apiService
@@ -91,6 +92,14 @@ class ProductApiController {
 	def deployFree(String id) {
 		Product product = productService.findById(id, loggedInUser(), Permission.Operation.SHARE)
 		freeProductService.deployFreeProduct(product)
+		render(product.toMap() as JSON)
+	}
+
+	@GrailsCompileStatic
+	@StreamrApi(authenticationLevel = AuthLevel.USER)
+	def undeployFree(String id) {
+		Product product = productService.findById(id, loggedInUser(), Permission.Operation.SHARE)
+		freeProductService.undeployFreeProduct(product)
 		render(product.toMap() as JSON)
 	}
 

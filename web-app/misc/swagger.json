@@ -137,7 +137,7 @@
             "in": "query",
             "description": "Maximum price (per second) of product",
             "required": false
-          },
+          }
         ],
         "responses": {
           "200": {
@@ -267,7 +267,7 @@
             "in": "query",
             "description": "Maximum price (per second) of product",
             "required": false
-          },
+          }
         ],
         "responses": {
           "200": {
@@ -1002,7 +1002,7 @@
     "/products/{id}/deployFree": {
       "post": {
         "summary": "Deploy free Product",
-        "description": "Deploy a free Product (price = 0) so that it is publicly viewable and 'gettable'. Its streams are made public as well.",
+        "description": "Deploy a free Product (price = 0) so that it is publicly viewable and purchasable. Its streams are made public as well.",
         "tags": [
           "products"
         ],
@@ -1056,17 +1056,91 @@
                 "code": "FORBIDDEN",
                 "message": "Non-authenticated user does not have permission to share Product (id aQAd59nDQHiCUpXnhm7-TwPLCh9ALaQH2TIxOengS1FQ)"
               }
+            }
+          },
+          "409": {
+            "description": "Cannot move to this state from current state of Product (code: `INVALID_STATE_TRANSITION`)",
+            "schema": {
+              "$ref": "#/definitions/Error"
             },
-            "409": {
-              "description": "Cannot move to this state from current state of Product (code: `INVALID_STATE_TRANSITION`)",
-              "schema": {
-                "$ref": "#/definitions/Error"
-              },
-              "examples": {
-                "application/json": {
-                  "code": "INVALID_STATE_TRANSITION",
-                  "message": "Invalid transition DEPLOYED -> DEPLOYED"
-                }
+            "examples": {
+              "application/json": {
+                "code": "INVALID_STATE_TRANSITION",
+                "message": "Invalid transition DEPLOYED -> DEPLOYED"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/products/{id}/undeployFree": {
+      "post": {
+        "summary": "Undeploy free Product",
+        "description": "Undeploy a free Product (price = 0) so that it is no longer publicly viewable or purchasable. Its streams will be made private as well.",
+        "tags": [
+          "products"
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "description": "unique identifier of a Product",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Product with state=`NOT_DEPLOYED`",
+            "schema": {
+              "$ref": "#/definitions/Product"
+            }
+          },
+          "401": {
+            "description": "Not authenticated (code: `NOT_AUTHENTICATED`)",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            },
+            "examples": {
+              "application/json": {
+                "code": "NOT_AUTHENTICATED",
+                "message": "Not authenticated via token or cookie"
+              }
+            }
+          },
+          "404": {
+            "description": "Product not found (code: `NOT_FOUND`)",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            },
+            "examples": {
+              "application/json": {
+                "code": "NOT_FOUND",
+                "message": "Product with id 1kDWMNstSmW1NxhJPYFHsAYgkesh19QraMLtgfuDs4sA not found"
+              }
+            }
+          },
+          "403": {
+            "description": "Insufficient permission to share Product (code: `FORBIDDEN`)",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            },
+            "examples": {
+              "application/json": {
+                "code": "FORBIDDEN",
+                "message": "Non-authenticated user does not have permission to share Product (id aQAd59nDQHiCUpXnhm7-TwPLCh9ALaQH2TIxOengS1FQ)"
+              }
+            }
+          },
+          "409": {
+            "description": "Cannot move to this state from current state of Product (code: `INVALID_STATE_TRANSITION`)",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            },
+            "examples": {
+              "application/json": {
+                "code": "INVALID_STATE_TRANSITION",
+                "message": "Invalid transition NOT_DEPLOYED -> NOT_DEPLOYED"
               }
             }
           }
@@ -1206,7 +1280,7 @@
           { "$ref": "#/parameters/max" },
           { "$ref": "#/parameters/offset" },
           { "$ref": "#/parameters/publicAccess" },
-          { "$ref": "#/parameters/operation" },
+          { "$ref": "#/parameters/operation" }
         ],
         "tags": [
           "streams"
@@ -1983,7 +2057,7 @@
           { "$ref": "#/parameters/max" },
           { "$ref": "#/parameters/offset" },
           { "$ref": "#/parameters/publicAccess" },
-          { "$ref": "#/parameters/operation" },
+          { "$ref": "#/parameters/operation" }
         ],
         "responses": {
           "200": {
@@ -2418,7 +2492,7 @@
           { "$ref": "#/parameters/max" },
           { "$ref": "#/parameters/offset" },
           { "$ref": "#/parameters/publicAccess" },
-          { "$ref": "#/parameters/operation" },
+          { "$ref": "#/parameters/operation" }
         ],
         "tags": [
           "dashboards"
