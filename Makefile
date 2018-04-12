@@ -40,7 +40,7 @@ functional-test: install-submodules install-driver
 	/tmp/streamr-docker-dev/streamr-docker-dev/bin.sh start 1
 
 functional-group-1:
-	grails test test-app functional: AccessControlCoreSpec ApiDocsSpec CSVImporterFuncSpec CanvasSpe DashboardPageFunctionalSpec
+	grails test-app -functional
 
 functional-group-2:
 	grails test test-app functional: ExampleSpec ExportCSVFunctionalSpec ForgotPasswordSpec InputModuleDashboardSpec InputModuleLiveSpec LiveSpec
