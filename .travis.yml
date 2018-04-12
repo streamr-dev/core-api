@@ -38,12 +38,9 @@ jobs:
     script:
     - "make functional-test" #Groupe 1
     - "grails test test-app functional: AccessControlCoreSpec ApiDocsSpec CSVImporterFuncSpec CanvasSpe DashboardPageFunctionalSpec"
-    env:
-    - CHROMEDRIVER=/usr/local/bin/chromedriver
-    - HEADLESS=true
-    script:
-    - "make functional-test" #Groupe 2
-    - "grails test test-app functional: ExampleSpec ExportCSVFunctionalSpec ForgotPasswordSpec InputModuleDashboardSpec InputModuleLiveSpec LiveSpec"
+  script:
+  - "make functional-test" #Groupe 2
+  - "grails test test-app functional: ExampleSpec ExportCSVFunctionalSpec ForgotPasswordSpec InputModuleDashboardSpec InputModuleLiveSpec LiveSpec"
 
   - stage: Build war
     script: "make build-war"
