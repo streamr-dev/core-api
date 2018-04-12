@@ -164,7 +164,7 @@ public abstract class AbstractFeedProxy<ModuleClass, RawMessageClass, MessageCla
 
 			// TODO: remove debug
 			if (firstRealQueue == null && checkAge) {
-				log.info("First real time message: " + counter + ".");
+				log.info("First real time message: " + counter + ". Event count: " + events.length);
 				firstRealQueue = counter;
 			}
 
