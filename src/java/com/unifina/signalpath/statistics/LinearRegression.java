@@ -1,11 +1,12 @@
 package com.unifina.signalpath.statistics;
 
-import java.io.Serializable;
-import java.util.ArrayList;
-
-import com.unifina.signalpath.*;
+import com.unifina.signalpath.AbstractModuleWithWindow;
+import com.unifina.signalpath.TimeSeriesInput;
+import com.unifina.signalpath.TimeSeriesOutput;
 import com.unifina.utils.window.WindowListener;
 import org.apache.commons.math3.stat.regression.SimpleRegression;
+
+import java.io.Serializable;
 
 public class LinearRegression extends AbstractModuleWithWindow<com.unifina.signalpath.statistics.LinearRegression.XYPair> {
 
@@ -64,7 +65,7 @@ public class LinearRegression extends AbstractModuleWithWindow<com.unifina.signa
 		}
 	}
 
-	class XYPair implements Serializable {
+	static class XYPair implements Serializable {
 		public double x;
 		public double y;
 
