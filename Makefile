@@ -33,7 +33,7 @@ integration-test: install-submodules
 	grails clean
 	grails test-app -integration
 
-functional-test: install-driver docker-login
+functional-test: install-submodules install-driver
 	sudo /etc/init.d/mysql stop
 	npm install
 	git clone https://github.com/streamr-dev/streamr-docker-dev.git /tmp/streamr-docker-dev
@@ -67,3 +67,5 @@ docker-login:
 
 docker-push: docker-login
 	docker push $(LATEST_TAG)
+
+
