@@ -1154,6 +1154,14 @@
             "default": false
           },
           {
+            "name": "noConfig",
+            "in": "query",
+            "description": "Remove config object from JSON response.",
+            "required": false,
+            "type": "boolean",
+            "default": false
+          },
+          {
             "$ref": "#/parameters/search"
           },
           {
