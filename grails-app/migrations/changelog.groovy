@@ -100,8 +100,8 @@ databaseChangeLog = {
 	include file: 'core/2018-02-27-add-subscription.groovy'
 	include file: 'core/2018-03-27-add-field-score-to-product.groovy'
 	include file: 'core/2018-04-04-add-product-thumbnailurl.groovy'
-	include file: 'core/2018-04-04-test-data-products-subscriptions.groovy'
 	include file: 'core/2018-04-06-add-altname-to-expression-module.groovy'
 	include file: 'core/2018-04-09-add-owner-to-product.groovy'
 	include file: 'core/2018-04-09-allow-nulls-in-certain-product-fields.groovy'
+	include file: 'core/2018-04-11-test-data-products-subscriptions.groovy'
 }

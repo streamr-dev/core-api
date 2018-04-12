@@ -43,7 +43,7 @@ class ListParamsSpec extends Specification {
 			search: null,
 			sortBy: null,
 			order: null,
-			max: 100,
+			max: 1000,
 			offset: 0,
 			publicAccess: false
 		]
@@ -105,7 +105,7 @@ class ListParamsSpec extends Specification {
 		[sortBy: ""]         | 1           | ["sortBy"]
 		[order: "chaos"]     | 1           | ["order"]
 		[max: 0]             | 1           | ["max"]
-		[max: 101]           | 1           | ["max"]
+		[max: 1001]          | 1           | ["max"]
 		[offset: -1]         | 1           | ["offset"]
 		[additional: ""]     | 1           | ["additional"]
 	}
@@ -121,7 +121,7 @@ class ListParamsSpec extends Specification {
 
 		then:
 		1 * builder.invokeMethod("firstResult", [0])
-		1 * builder.invokeMethod("maxResults", [100])
+		1 * builder.invokeMethod("maxResults", [1000])
 		0 * builder._
 	}
 
@@ -170,7 +170,7 @@ class ListParamsSpec extends Specification {
 		def p3 = new DashboardListParams(max: 30, offset: 30)
 		def p4 = new DashboardListParams(max: 30, offset: 60)
 		def p5 = new DashboardListParams(max: 30, offset: 90)
-		def p6 = new DashboardListParams(max: 30, offset: 1000)
+		def p6 = new DashboardListParams(max: 30, offset: 1100)
 
 		expect:
 		Dashboard.withCriteria(p1.createListCriteria())*.id == (1..30)*.toString()
