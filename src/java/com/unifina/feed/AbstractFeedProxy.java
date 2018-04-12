@@ -162,9 +162,7 @@ public abstract class AbstractFeedProxy<ModuleClass, RawMessageClass, MessageCla
 			expected++;
 			FeedEvent<MessageClass, EventRecipientClass>[] events = process(msg);
 
-			// TODO: remove debug
 			if (firstRealQueue == null && checkAge) {
-				log.info("First real time message: " + counter + ". Event count: " + events.length);
 				firstRealQueue = counter;
 			}
 
