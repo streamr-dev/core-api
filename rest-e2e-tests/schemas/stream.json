@@ -10,7 +10,9 @@
     "description",
     "uiChannel",
     "feed",
-    "config"
+    "config",
+    "dateCreated",
+    "lastUpdated"
   ],
   "properties": {
     "id": {
@@ -46,6 +48,16 @@
     "config": {
       "description": "Configuration of this stream",
       "type": "object"
+    },
+    "dateCreated": {
+      "description": "Timestamp of when this stream was created",
+      "type": "string",
+      "format": "date-time"
+    },
+    "lastUpdated": {
+      "description": "Timestamp of when this stream was last updated",
+      "type": "string",
+      "format": "date-time"
     }
   },
   "additionalProperties": false,

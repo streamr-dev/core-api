@@ -90,7 +90,7 @@ class Product {
 			category: category.id,
 			streams: streams*.id,
 			state: state.toString(),
-			previewStream: previewStream,
+			previewStream: previewStream?.id,
 			previewConfigJson: previewConfigJson,
 			created: dateCreated,
 			updated: lastUpdated,
