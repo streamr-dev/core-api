@@ -11,12 +11,12 @@ class SubscriptionSpec extends Specification {
 	Subscription subscription
 
 	void setup() {
-		subscription = new Subscription(address: "0xFAFABCBC00FAFABCBC00FAFABCBC00FAFABCBC00")
+		subscription = new PaidSubscription(address: "0xFAFABCBC00FAFABCBC00FAFABCBC00FAFABCBC00")
 	}
 
 	void "getUser() returns null if no IntegrationKey with address found"() {
 		expect:
-		subscription.getUser() == null
+		subscription.fetchUser() == null
 	}
 
 	void "getUser() returns null if IntegrationKey with address found but IntegrationKey.service != ETHEREUM_ID"() {
@@ -30,7 +30,7 @@ class SubscriptionSpec extends Specification {
 		).save(failOnError: true, validate: true)
 
 		expect:
-		subscription.getUser() == null
+		subscription.fetchUser() == null
 	}
 
 	void "getUser() returns user if IntegrationKey with address found and IntegrationKey.service == ETHEREUM_ID"() {
@@ -44,6 +44,6 @@ class SubscriptionSpec extends Specification {
 		).save(failOnError: true, validate: true)
 
 		expect:
-		subscription.getUser() != null
+		subscription.fetchUser() != null
 	}
 }

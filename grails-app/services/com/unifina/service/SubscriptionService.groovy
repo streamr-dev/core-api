@@ -1,6 +1,7 @@
 package com.unifina.service
 
 import com.unifina.domain.data.Stream
+import com.unifina.domain.marketplace.PaidSubscription
 import com.unifina.domain.marketplace.Product
 import com.unifina.domain.marketplace.Subscription
 import com.unifina.domain.security.IntegrationKey
@@ -15,18 +16,18 @@ class SubscriptionService {
 	List<Subscription> getSubscriptionsOfUser(SecUser user) {
 		List<IntegrationKey> integrationKeys = IntegrationKey.findAllByUserAndService(user, IntegrationKey.Service.ETHEREUM_ID)
 		def addresses = integrationKeys*.idInService
-		return Subscription.findAllByAddressInList(addresses)
+		return PaidSubscription.findAllByAddressInList(addresses)
 	}
 
 	/**
 	 * Should be invoked after marketplace smart contract event `Subscribed` has been emitted.
 	 */
 	Subscription onSubscribed(Product product, String address, Date endsAt) {
-		Subscription subscription = Subscription.findByProductAndAddress(product, address)
+		Subscription subscription = PaidSubscription.findByProductAndAddress(product, address)
 		if (subscription) {
 			subscription.endsAt = endsAt
 		} else {
-			subscription = new Subscription(address: address, product: product, endsAt: endsAt)
+			subscription = new PaidSubscription(address: address, product: product, endsAt: endsAt)
 		}
 		subscription.save(failOnError: true)
 		deletePermissions(subscription) // TODO: could be optimized to only remove/add what is necessary
@@ -39,7 +40,7 @@ class SubscriptionService {
 	 */
 	void beforeIntegrationKeyRemoved(IntegrationKey key) {
 		verifyIsEthereumID(key)
-		List<Subscription> subscriptions = Subscription.findAllByAddress(key.idInService)
+		List<Subscription> subscriptions = PaidSubscription.findAllByAddress(key.idInService)
 		subscriptions.each {
 			deletePermissions(it)
 		}
@@ -50,7 +51,7 @@ class SubscriptionService {
 	 */
 	void afterIntegrationKeyCreated(IntegrationKey key) {
 		verifyIsEthereumID(key)
-		List<Subscription> subscriptions = Subscription.findAllByAddress(key.idInService)
+		List<Subscription> subscriptions = PaidSubscription.findAllByAddress(key.idInService)
 		subscriptions.each {
 			createPermissions(it)
 		}
@@ -85,7 +86,7 @@ class SubscriptionService {
 	}
 
 	private void createPermissions(Subscription subscription, Set<Stream> streams) {
-		SecUser user = subscription.user
+		SecUser user = subscription.fetchUser()
 		if (user) {
 			streams.collect { Stream stream ->
 				Permission permission = permissionService.systemGrant(user, stream, Permission.Operation.READ)

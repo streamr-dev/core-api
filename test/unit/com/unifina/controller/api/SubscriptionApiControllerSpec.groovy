@@ -3,6 +3,7 @@ package com.unifina.controller.api
 import com.unifina.api.NotPermittedException
 import com.unifina.api.ValidationException
 import com.unifina.domain.marketplace.Category
+import com.unifina.domain.marketplace.PaidSubscription
 import com.unifina.domain.marketplace.Product
 import com.unifina.domain.marketplace.Subscription
 import com.unifina.domain.security.SecRole
@@ -60,13 +61,13 @@ class SubscriptionApiControllerSpec extends Specification {
 			streams: [],
 		)
 
-		def s1 = new Subscription(
+		def s1 = new PaidSubscription(
 			address: "0x0",
 			endsAt: new Date(2018, 3, 29, 11, 00, 00),
 			product: p1
 		)
 
-		def s2 = new Subscription(
+		def s2 = new PaidSubscription(
 			address: "0xA",
 			endsAt: new Date(2018, 3, 29, 15, 00, 00),
 			product: p2
