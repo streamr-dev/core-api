@@ -1,7 +1,5 @@
 package com.unifina.signalpath;
 
-import com.unifina.domain.data.Stream;
-import com.unifina.domain.signalpath.Module;
 import com.unifina.utils.StreamrColor;
 
 import java.util.*;
@@ -116,7 +114,7 @@ public class ModuleOption extends LinkedHashMap<String, Object> {
 	}
 
 	public static boolean validate(Object option) {
-		if (option == null && !(option instanceof ModuleOption)) {
+		if (option == null) {
 			return false;
 		}
 		ModuleOption opt = (ModuleOption) option;
@@ -125,7 +123,9 @@ public class ModuleOption extends LinkedHashMap<String, Object> {
 				List<Map<String, String>> possibleValues = (List<Map<String, String>>) opt.get("possibleValues");
 				boolean found = false;
 				for (Map<String, String> value : possibleValues) {
-					if (value.get("value") == opt.get("value") || value.get("value").equals(opt.get("value"))) {
+					final String val = value.get("value");
+					final Object optValue = opt.get("value");
+					if (val != null && val.equals(optValue)) {
 						found = true;
 						break;
 					}

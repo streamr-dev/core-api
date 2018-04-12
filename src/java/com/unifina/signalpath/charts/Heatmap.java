@@ -1,12 +1,12 @@
 package com.unifina.signalpath.charts;
 
-import java.util.LinkedHashMap;
-import java.util.Map;
-
 import com.unifina.signalpath.ModuleOption;
 import com.unifina.signalpath.ModuleOptions;
 import com.unifina.signalpath.ModuleWithUI;
 import com.unifina.signalpath.TimeSeriesInput;
+
+import java.util.LinkedHashMap;
+import java.util.Map;
 
 public class Heatmap extends ModuleWithUI {
 
@@ -75,7 +75,7 @@ public class Heatmap extends ModuleWithUI {
 		super.onConfiguration(config);
 	}
 
-	class HeatPoint extends LinkedHashMap<String,Object> {
+	static class HeatPoint extends LinkedHashMap<String,Object> {
 		public HeatPoint(Double latitude, Double longitude, Double value) {
 			super();
 			put("t", "p");

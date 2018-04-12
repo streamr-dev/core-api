@@ -58,7 +58,7 @@ public class SearchStream extends AbstractSignalPathModule {
 		return map;
 	}
 
-	class NameFilteringClosure extends Closure {
+	static class NameFilteringClosure extends Closure {
 
 		private String name;
 

@@ -74,7 +74,7 @@ public class PeakDetect extends AbstractSignalPathModule {
 			prevChange = currentChange;
 
 		// If the derivative has a value, record it
-		if (derivative != null && (prevDerivative==null || derivative != prevDerivative))
+		if (derivative != null && (prevDerivative == null || !derivative.equals(prevDerivative)))
 			prevDerivative = derivative;
 	}
 	
