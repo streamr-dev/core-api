@@ -36,7 +36,7 @@ jobs:
     - CHROMEDRIVER=/usr/local/bin/chromedriver
     - HEADLESS=true
     script: "make functional-test functional-group-1"
-  - stage: Functional tests 2
+  - stage: Functional tests group 2
       env:
       - CHROMEDRIVER=/usr/local/bin/chromedriver
       - HEADLESS=true
