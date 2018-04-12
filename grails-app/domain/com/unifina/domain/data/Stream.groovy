@@ -69,6 +69,18 @@ class Stream implements Comparable {
 		]
 	}
 
+	@CompileStatic
+	Map toSummaryMap() {
+		[
+			id: id,
+			partitions: partitions,
+			name: name,
+			feed: feed.toMap(),
+			description: description,
+			uiChannel: uiChannel
+		]
+	}
+
 	@Override
 	public int compareTo(Object arg0) {
 		if (!(arg0 instanceof Stream)) return 0

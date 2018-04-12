@@ -145,6 +145,7 @@ databaseChangeLog = {
 				column(name: "version", valueNumeric: 0)
 				column(name: "date_created", value: "2018-01-01 00:00:00")
 				column(name: "last_updated", value: "2018-01-01 00:00:00")
+				column(name: "owner", value: "Tester")
 			}
 
 			randomSetOf(5, streamIDs).each { streamID ->
@@ -154,12 +155,11 @@ databaseChangeLog = {
 				}
 			}
 
-			// 10% of subscriptions will be expired (TODO: is this bad?)
 			randomSetOf(3, addresses).each { address ->
 				insert(tableName: "subscription") {
 					column(name: "product_id", value: product.id)
 					column(name: "address", value: address)
-					column(name: "ends_at", valueDate: (new Date() + rand(-100, 900)).format("YYYY-MM-DD'T'hh:mm:ss"))
+					column(name: "ends_at", value: "${rand(2018, 2020)}-0${rand(1, 9)}-${rand(10, 28)} 13:37:00")
 					column(name: "version", valueNumeric: 0)
 					column(name: "date_created", value: "2018-01-01 00:00:00")
 					column(name: "last_updated", value: "2018-01-01 00:00:00")
@@ -178,6 +178,17 @@ databaseChangeLog = {
 					column(name: "user_id", valueNumeric: 1)	// tester1
 					column(name: "anonymous", valueNumeric: 0)
 				}
+			}
+		}
+	}
+
+	changeSet(author: "juuso", id: "test-data-products-public-read-permissions", context: "test") {
+		products.each { product ->
+			insert(tableName: "permission") {
+				column(name: "version", valueNumeric: 0)
+				column(name: "product_id", value: product.id)
+				column(name: "operation", value: "read")
+				column(name: "anonymous", valueNumeric: 1)
 			}
 		}
 	}

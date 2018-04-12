@@ -1,4 +1,5 @@
-{ "swagger": "2.0",
+{
+  "swagger": "2.0",
   "info": {
     "title": "Streamr API",
     "version": "1.0.0"
@@ -97,13 +98,27 @@
           "products"
         ],
         "parameters": [
-          { "$ref": "#/parameters/search" },
-          { "$ref": "#/parameters/sortBy" },
-          { "$ref": "#/parameters/order" },
-          { "$ref": "#/parameters/max" },
-          { "$ref": "#/parameters/offset" },
-          { "$ref": "#/parameters/publicAccess" },
-          { "$ref": "#/parameters/operation" },
+          {
+            "$ref": "#/parameters/search"
+          },
+          {
+            "$ref": "#/parameters/sortBy"
+          },
+          {
+            "$ref": "#/parameters/order"
+          },
+          {
+            "$ref": "#/parameters/max"
+          },
+          {
+            "$ref": "#/parameters/offset"
+          },
+          {
+            "$ref": "#/parameters/publicAccess"
+          },
+          {
+            "$ref": "#/parameters/operation"
+          },
           {
             "name": "categories",
             "type": "string",
@@ -193,18 +208,6 @@
               }
             }
           },
-          "422": {
-            "description": "Body does not pass validation (code: `VALIDATION_ERROR`)",
-            "schema": {
-              "$ref": "#/definitions/Error"
-            },
-            "examples": {
-              "application/json": {
-                "code": "VALIDATION_ERROR",
-                "message": "Validation failed for fields: category (typeMismatch)"
-              }
-            }
-          },
           "403": {
             "description": "Insufficient permission to a included `Stream` (code: `FORBIDDEN`)",
             "schema": {
@@ -214,6 +217,18 @@
               "application/json": {
                 "code": "FORBIDDEN",
                 "message": "me@streamr.com does not have permission to share Stream (id bqO9tp3wQVCPbKh6elAFLw)"
+              }
+            }
+          },
+          "422": {
+            "description": "Body does not pass validation (code: `VALIDATION_ERROR`)",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            },
+            "examples": {
+              "application/json": {
+                "code": "VALIDATION_ERROR",
+                "message": "Validation failed for fields: category (typeMismatch)"
               }
             }
           }
@@ -228,12 +243,24 @@
           "products"
         ],
         "parameters": [
-          { "$ref": "#/parameters/search" },
-          { "$ref": "#/parameters/sortBy" },
-          { "$ref": "#/parameters/order" },
-          { "$ref": "#/parameters/max" },
-          { "$ref": "#/parameters/offset" },
-          { "$ref": "#/parameters/publicAccess" },
+          {
+            "$ref": "#/parameters/search"
+          },
+          {
+            "$ref": "#/parameters/sortBy"
+          },
+          {
+            "$ref": "#/parameters/order"
+          },
+          {
+            "$ref": "#/parameters/max"
+          },
+          {
+            "$ref": "#/parameters/offset"
+          },
+          {
+            "$ref": "#/parameters/publicAccess"
+          },
           {
             "name": "categories",
             "type": "string",
@@ -311,18 +338,6 @@
               "$ref": "#/definitions/Product"
             }
           },
-          "404": {
-            "description": "Product not found (code: `NOT_FOUND`)",
-            "schema": {
-              "$ref": "#/definitions/Error"
-            },
-            "examples": {
-              "application/json": {
-                "code": "NOT_FOUND",
-                "message": "Product with id 1kDWMNstSmW1NxhJPYFHsAYgkesh19QraMLtgfuDs4sA not found"
-              }
-            }
-          },
           "403": {
             "description": "Insufficient permission to read Product (code: `FORBIDDEN`)",
             "schema": {
@@ -332,6 +347,18 @@
               "application/json": {
                 "code": "FORBIDDEN",
                 "message": "Non-authenticated user does not have permission to read Product (id aQAd59nDQHiCUpXnhm7-TwPLCh9ALaQH2TIxOengS1FQ)"
+              }
+            }
+          },
+          "404": {
+            "description": "Product not found (code: `NOT_FOUND`)",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            },
+            "examples": {
+              "application/json": {
+                "code": "NOT_FOUND",
+                "message": "Product with id 1kDWMNstSmW1NxhJPYFHsAYgkesh19QraMLtgfuDs4sA not found"
               }
             }
           }
@@ -380,18 +407,6 @@
               }
             }
           },
-          "404": {
-            "description": "Product not found (code: `NOT_FOUND`)",
-            "schema": {
-              "$ref": "#/definitions/Error"
-            },
-            "examples": {
-              "application/json": {
-                "code": "NOT_FOUND",
-                "message": "Product with id 1kDWMNstSmW1NxhJPYFHsAYgkesh19QraMLtgfuDs4sA not found"
-              }
-            }
-          },
           "403": {
             "description": "Insufficient permission to write Product or include Stream (code: `FORBIDDEN`)",
             "schema": {
@@ -401,6 +416,18 @@
               "application/json": {
                 "code": "FORBIDDEN",
                 "message": "Non-authenticated user does not have permission to write Product (id aQAd59nDQHiCUpXnhm7-TwPLCh9ALaQH2TIxOengS1FQ)"
+              }
+            }
+          },
+          "404": {
+            "description": "Product not found (code: `NOT_FOUND`)",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            },
+            "examples": {
+              "application/json": {
+                "code": "NOT_FOUND",
+                "message": "Product with id 1kDWMNstSmW1NxhJPYFHsAYgkesh19QraMLtgfuDs4sA not found"
               }
             }
           },
@@ -445,18 +472,6 @@
               }
             }
           },
-          "404": {
-            "description": "Product not found (code: `NOT_FOUND`)",
-            "schema": {
-              "$ref": "#/definitions/Error"
-            },
-            "examples": {
-              "application/json": {
-                "code": "NOT_FOUND",
-                "message": "Product with id 1kDWMNstSmW1NxhJPYFHsAYgkesh19QraMLtgfuDs4sA not found"
-              }
-            }
-          },
           "403": {
             "description": "Insufficient permission to read Product (code: `FORBIDDEN`)",
             "schema": {
@@ -466,6 +481,18 @@
               "application/json": {
                 "code": "FORBIDDEN",
                 "message": "Non-authenticated user does not have permission to read Product (id aQAd59nDQHiCUpXnhm7-TwPLCh9ALaQH2TIxOengS1FQ)"
+              }
+            }
+          },
+          "404": {
+            "description": "Product not found (code: `NOT_FOUND`)",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            },
+            "examples": {
+              "application/json": {
+                "code": "NOT_FOUND",
+                "message": "Product with id 1kDWMNstSmW1NxhJPYFHsAYgkesh19QraMLtgfuDs4sA not found"
               }
             }
           }
@@ -499,18 +526,6 @@
           "204": {
             "description": "Successfully added"
           },
-          "404": {
-            "description": "Product or Stream not found (code: `NOT_FOUND`)",
-            "schema": {
-              "$ref": "#/definitions/Error"
-            },
-            "examples": {
-              "application/json": {
-                "code": "NOT_FOUND",
-                "message": "Product with id 1kDWMNstSmW1NxhJPYFHsAYgkesh19QraMLtgfuDs4sA not found"
-              }
-            }
-          },
           "403": {
             "description": "Insufficient permission to write Product or to share Stream (code: `FORBIDDEN`)",
             "schema": {
@@ -520,6 +535,18 @@
               "application/json": {
                 "code": "FORBIDDEN",
                 "message": "Non-authenticated user does not have permission to read Product (id aQAd59nDQHiCUpXnhm7-TwPLCh9ALaQH2TIxOengS1FQ)"
+              }
+            }
+          },
+          "404": {
+            "description": "Product or Stream not found (code: `NOT_FOUND`)",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            },
+            "examples": {
+              "application/json": {
+                "code": "NOT_FOUND",
+                "message": "Product with id 1kDWMNstSmW1NxhJPYFHsAYgkesh19QraMLtgfuDs4sA not found"
               }
             }
           }
@@ -551,18 +578,6 @@
           "204": {
             "description": "Successfully removed"
           },
-          "404": {
-            "description": "Product or Stream not found (code: `NOT_FOUND`)",
-            "schema": {
-              "$ref": "#/definitions/Error"
-            },
-            "examples": {
-              "application/json": {
-                "code": "NOT_FOUND",
-                "message": "Product with id 1kDWMNstSmW1NxhJPYFHsAYgkesh19QraMLtgfuDs4sA not found"
-              }
-            }
-          },
           "403": {
             "description": "Insufficient permission to write Product (code: `FORBIDDEN`)",
             "schema": {
@@ -572,6 +587,18 @@
               "application/json": {
                 "code": "FORBIDDEN",
                 "message": "Non-authenticated user does not have permission to read Product (id aQAd59nDQHiCUpXnhm7-TwPLCh9ALaQH2TIxOengS1FQ)"
+              }
+            }
+          },
+          "404": {
+            "description": "Product or Stream not found (code: `NOT_FOUND`)",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            },
+            "examples": {
+              "application/json": {
+                "code": "NOT_FOUND",
+                "message": "Product with id 1kDWMNstSmW1NxhJPYFHsAYgkesh19QraMLtgfuDs4sA not found"
               }
             }
           }
@@ -613,18 +640,6 @@
               }
             }
           },
-          "404": {
-            "description": "Product not found (code: `NOT_FOUND`)",
-            "schema": {
-              "$ref": "#/definitions/Error"
-            },
-            "examples": {
-              "application/json": {
-                "code": "NOT_FOUND",
-                "message": "Product with id 1kDWMNstSmW1NxhJPYFHsAYgkesh19QraMLtgfuDs4sA not found"
-              }
-            }
-          },
           "403": {
             "description": "Insufficient permission to write Product (code: `FORBIDDEN`)",
             "schema": {
@@ -634,6 +649,18 @@
               "application/json": {
                 "code": "FORBIDDEN",
                 "message": "Non-authenticated user does not have permission to write Product (id aQAd59nDQHiCUpXnhm7-TwPLCh9ALaQH2TIxOengS1FQ)"
+              }
+            }
+          },
+          "404": {
+            "description": "Product not found (code: `NOT_FOUND`)",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            },
+            "examples": {
+              "application/json": {
+                "code": "NOT_FOUND",
+                "message": "Product with id 1kDWMNstSmW1NxhJPYFHsAYgkesh19QraMLtgfuDs4sA not found"
               }
             }
           },
@@ -696,18 +723,6 @@
               }
             }
           },
-          "404": {
-            "description": "Product not found (code: `NOT_FOUND`)",
-            "schema": {
-              "$ref": "#/definitions/Error"
-            },
-            "examples": {
-              "application/json": {
-                "code": "NOT_FOUND",
-                "message": "Product with id 1kDWMNstSmW1NxhJPYFHsAYgkesh19QraMLtgfuDs4sA not found"
-              }
-            }
-          },
           "403": {
             "description": "User does not have DevOps privilege (code: `FORBIDDEN`)",
             "schema": {
@@ -717,6 +732,18 @@
               "application/json": {
                 "code": "FORBIDDEN",
                 "message": "DevOps role required"
+              }
+            }
+          },
+          "404": {
+            "description": "Product not found (code: `NOT_FOUND`)",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            },
+            "examples": {
+              "application/json": {
+                "code": "NOT_FOUND",
+                "message": "Product with id 1kDWMNstSmW1NxhJPYFHsAYgkesh19QraMLtgfuDs4sA not found"
               }
             }
           },
@@ -782,18 +809,6 @@
               }
             }
           },
-          "404": {
-            "description": "Product not found (code: `NOT_FOUND`)",
-            "schema": {
-              "$ref": "#/definitions/Error"
-            },
-            "examples": {
-              "application/json": {
-                "code": "NOT_FOUND",
-                "message": "Product with id 1kDWMNstSmW1NxhJPYFHsAYgkesh19QraMLtgfuDs4sA not found"
-              }
-            }
-          },
           "403": {
             "description": "Insufficient permission to write Product (code: `FORBIDDEN`)",
             "schema": {
@@ -803,6 +818,18 @@
               "application/json": {
                 "code": "FORBIDDEN",
                 "message": "Non-authenticated user does not have permission to write Product (id aQAd59nDQHiCUpXnhm7-TwPLCh9ALaQH2TIxOengS1FQ)"
+              }
+            }
+          },
+          "404": {
+            "description": "Product not found (code: `NOT_FOUND`)",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            },
+            "examples": {
+              "application/json": {
+                "code": "NOT_FOUND",
+                "message": "Product with id 1kDWMNstSmW1NxhJPYFHsAYgkesh19QraMLtgfuDs4sA not found"
               }
             }
           },
@@ -865,18 +892,6 @@
               }
             }
           },
-          "404": {
-            "description": "Product not found (code: `NOT_FOUND`)",
-            "schema": {
-              "$ref": "#/definitions/Error"
-            },
-            "examples": {
-              "application/json": {
-                "code": "NOT_FOUND",
-                "message": "Product with id 1kDWMNstSmW1NxhJPYFHsAYgkesh19QraMLtgfuDs4sA not found"
-              }
-            }
-          },
           "403": {
             "description": "User does not have DevOps privilege (code: `FORBIDDEN`)",
             "schema": {
@@ -886,6 +901,18 @@
               "application/json": {
                 "code": "FORBIDDEN",
                 "message": "DevOps role required"
+              }
+            }
+          },
+          "404": {
+            "description": "Product not found (code: `NOT_FOUND`)",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            },
+            "examples": {
+              "application/json": {
+                "code": "NOT_FOUND",
+                "message": "Product with id 1kDWMNstSmW1NxhJPYFHsAYgkesh19QraMLtgfuDs4sA not found"
               }
             }
           },
@@ -960,18 +987,6 @@
               }
             }
           },
-          "404": {
-            "description": "Product not found (code: `NOT_FOUND`)",
-            "schema": {
-              "$ref": "#/definitions/Error"
-            },
-            "examples": {
-              "application/json": {
-                "code": "NOT_FOUND",
-                "message": "Product with id 1kDWMNstSmW1NxhJPYFHsAYgkesh19QraMLtgfuDs4sA not found"
-              }
-            }
-          },
           "403": {
             "description": "User does not have DevOps privilege (code: `FORBIDDEN`)",
             "schema": {
@@ -981,6 +996,18 @@
               "application/json": {
                 "code": "FORBIDDEN",
                 "message": "DevOps role required"
+              }
+            }
+          },
+          "404": {
+            "description": "Product not found (code: `NOT_FOUND`)",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            },
+            "examples": {
+              "application/json": {
+                "code": "NOT_FOUND",
+                "message": "Product with id 1kDWMNstSmW1NxhJPYFHsAYgkesh19QraMLtgfuDs4sA not found"
               }
             }
           },
@@ -1179,6 +1206,18 @@
               "$ref": "#/definitions/Product"
             }
           },
+          "400": {
+            "description": "Parameter 'file' missing or unexepcted image dimensions",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            },
+            "examples": {
+              "application/json": {
+                "code": "UNEXPECTED_IMAGE_DIMENSIONS",
+                "message": ""
+              }
+            }
+          },
           "401": {
             "description": "Not authenticated (code: `NOT_AUTHENTICATED`)",
             "schema": {
@@ -1191,18 +1230,6 @@
               }
             }
           },
-          "404": {
-            "description": "Product not found (code: `NOT_FOUND`)",
-            "schema": {
-              "$ref": "#/definitions/Error"
-            },
-            "examples": {
-              "application/json": {
-                "code": "NOT_FOUND",
-                "message": "Product with id 1kDWMNstSmW1NxhJPYFHsAYgkesh19QraMLtgfuDs4sA not found"
-              }
-            }
-          },
           "403": {
             "description": "Insufficient permission to write Product (code: `FORBIDDEN`)",
             "schema": {
@@ -1212,6 +1239,18 @@
               "application/json": {
                 "code": "FORBIDDEN",
                 "message": "Non-authenticated user does not have permission to write Product (id aQAd59nDQHiCUpXnhm7-TwPLCh9ALaQH2TIxOengS1FQ)"
+              }
+            }
+          },
+          "404": {
+            "description": "Product not found (code: `NOT_FOUND`)",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            },
+            "examples": {
+              "application/json": {
+                "code": "NOT_FOUND",
+                "message": "Product with id 1kDWMNstSmW1NxhJPYFHsAYgkesh19QraMLtgfuDs4sA not found"
               }
             }
           },
@@ -1238,18 +1277,6 @@
                 "message": "File type is not a recognized image format"
               }
             }
-          },
-          "400": {
-            "description": "Parameter 'file' missing or unexepcted image dimensions",
-            "schema": {
-              "$ref": "#/definitions/Error"
-            },
-            "examples": {
-              "application/json": {
-                "code": "UNEXPECTED_IMAGE_DIMENSIONS",
-                "message": ""
-              }
-            }
           }
         }
       }
@@ -1274,13 +1301,35 @@
             "type": "boolean",
             "default": false
           },
-          { "$ref": "#/parameters/search" },
-          { "$ref": "#/parameters/sortBy" },
-          { "$ref": "#/parameters/order" },
-          { "$ref": "#/parameters/max" },
-          { "$ref": "#/parameters/offset" },
-          { "$ref": "#/parameters/publicAccess" },
-          { "$ref": "#/parameters/operation" }
+          {
+            "name": "noConfig",
+            "in": "query",
+            "description": "Remove config object from JSON response.",
+            "required": false,
+            "type": "boolean",
+            "default": false
+          },
+          {
+            "$ref": "#/parameters/search"
+          },
+          {
+            "$ref": "#/parameters/sortBy"
+          },
+          {
+            "$ref": "#/parameters/order"
+          },
+          {
+            "$ref": "#/parameters/max"
+          },
+          {
+            "$ref": "#/parameters/offset"
+          },
+          {
+            "$ref": "#/parameters/publicAccess"
+          },
+          {
+            "$ref": "#/parameters/operation"
+          }
         ],
         "tags": [
           "streams"
@@ -2051,13 +2100,27 @@
             "type": "boolean",
             "default": false
           },
-          { "$ref": "#/parameters/search" },
-          { "$ref": "#/parameters/sortBy" },
-          { "$ref": "#/parameters/order" },
-          { "$ref": "#/parameters/max" },
-          { "$ref": "#/parameters/offset" },
-          { "$ref": "#/parameters/publicAccess" },
-          { "$ref": "#/parameters/operation" }
+          {
+            "$ref": "#/parameters/search"
+          },
+          {
+            "$ref": "#/parameters/sortBy"
+          },
+          {
+            "$ref": "#/parameters/order"
+          },
+          {
+            "$ref": "#/parameters/max"
+          },
+          {
+            "$ref": "#/parameters/offset"
+          },
+          {
+            "$ref": "#/parameters/publicAccess"
+          },
+          {
+            "$ref": "#/parameters/operation"
+          }
         ],
         "responses": {
           "200": {
@@ -2486,13 +2549,27 @@
             "required": false,
             "type": "string"
           },
-          { "$ref": "#/parameters/search" },
-          { "$ref": "#/parameters/sortBy" },
-          { "$ref": "#/parameters/order" },
-          { "$ref": "#/parameters/max" },
-          { "$ref": "#/parameters/offset" },
-          { "$ref": "#/parameters/publicAccess" },
-          { "$ref": "#/parameters/operation" }
+          {
+            "$ref": "#/parameters/search"
+          },
+          {
+            "$ref": "#/parameters/sortBy"
+          },
+          {
+            "$ref": "#/parameters/order"
+          },
+          {
+            "$ref": "#/parameters/max"
+          },
+          {
+            "$ref": "#/parameters/offset"
+          },
+          {
+            "$ref": "#/parameters/publicAccess"
+          },
+          {
+            "$ref": "#/parameters/operation"
+          }
         ],
         "tags": [
           "dashboards"
@@ -3449,7 +3526,7 @@
         }
       }
     },
-    "UpdateProduct" : {
+    "UpdateProduct": {
       "type": "object",
       "required": [
         "name",
@@ -3535,8 +3612,12 @@
     },
     "CreateProduct": {
       "allOf": [
-        { "$ref": "#/definitions/UpdateProduct" },
-        { "$ref": "#/definitions/ProductInBlockchain" }
+        {
+          "$ref": "#/definitions/UpdateProduct"
+        },
+        {
+          "$ref": "#/definitions/ProductInBlockchain"
+        }
       ]
     },
     "CreateSubscription": {
@@ -3602,7 +3683,9 @@
             }
           }
         },
-        { "$ref": "#/definitions/CreateProduct" }
+        {
+          "$ref": "#/definitions/CreateProduct"
+        }
       ]
     },
     "DeployedProduct": {
@@ -3626,7 +3709,9 @@
             }
           }
         },
-        { "$ref": "#/definitions/ProductInBlockchain" }
+        {
+          "$ref": "#/definitions/ProductInBlockchain"
+        }
       ]
     },
     "UndeployedProduct": {
@@ -3650,7 +3735,11 @@
     },
     "User": {
       "type": "object",
-      "required": ["name", "username", "timezone"],
+      "required": [
+        "name",
+        "username",
+        "timezone"
+      ],
       "properties": {
         "name": {
           "type": "string",
@@ -3694,7 +3783,9 @@
     },
     "UserKeyCreateRequest": {
       "type": "object",
-      "required": ["name"],
+      "required": [
+        "name"
+      ],
       "properties": {
         "name": {
           "type": "string",
@@ -3705,7 +3796,10 @@
     },
     "UserKey": {
       "type": "object",
-      "required": ["id", "name"],
+      "required": [
+        "id",
+        "name"
+      ],
       "properties": {
         "id": {
           "type": "string",
@@ -3726,7 +3820,9 @@
     },
     "ResourceKeyCreateRequest": {
       "type": "object",
-      "required": ["name"],
+      "required": [
+        "name"
+      ],
       "properties": {
         "name": {
           "type": "string",
@@ -3742,7 +3838,10 @@
     },
     "ResourceKey": {
       "type": "object",
-      "required": ["id", "name"],
+      "required": [
+        "id",
+        "name"
+      ],
       "properties": {
         "id": {
           "type": "string",
