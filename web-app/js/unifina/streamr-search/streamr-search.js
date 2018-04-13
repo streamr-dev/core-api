@@ -162,19 +162,20 @@ var StreamSearchModule = function (limit) {
                 })
                 async(result)
             })
-        }, 250),
-        templates: {
-            header: '<p class="streamr-search-dataset-header">Streams</p>',
-            suggestion: function(stream) {
-                var el = "<div data-type='stream'><p class='streamr-search-suggestion-name'>" + stream.name + "</p>"
-                if(stream.description)
-                    el += "<p class='streamr-search-suggestion-description'>"+stream.description+"</p>"
-                el += "</div>"
-                return el
-            }
-        },
-        // This is needed because of a bug in typeahead
-        limit: Infinity
+            }, 250),
+            templates: {
+                header: '<p class="streamr-search-dataset-header">Streams</p>',
+                suggestion: function(stream) {
+                    var el = '<div data-type=\'stream\'><p class=\'streamr-search-suggestion-name\'>' + Streamr.escape(stream.name) + '</p>'
+                    if (stream.description) {
+                        el += '<p class=\'streamr-search-suggestion-description\'>'+Streamr.escape(stream.description)+'</p>'
+                    }
+                    el += '</div>'
+                    return el
+                }
+            },
+            // This is needed because of a bug in typeahead
+            limit: Infinity
     }
 }
 

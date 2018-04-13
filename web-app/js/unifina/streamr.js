@@ -72,4 +72,28 @@ Streamr.showSuccess = function(msg, title, delay) {
 		text: msg,
 		delay: delay
 	})
+// TODO: move into a module, or even download the whole https://github.com/mathiasbynens/he
+Streamr.regexEscape = /["&'<>`]/g
+Streamr.escapeMap = {
+    '"': '&quot;',
+    '&': '&amp;',
+    '\'': '&#x27;',
+    '<': '&lt;',
+    // See https://mathiasbynens.be/notes/ambiguous-ampersands: in HTML, the
+    // following is not strictly necessary unless it’s part of a tag or an
+    // unquoted attribute value. We’re only escaping it to support those
+    // situations, and for XML support.
+    '>': '&gt;',
+    // In Internet Explorer ≤ 8, the backtick character can be used
+    // to break out of (un)quoted attribute values or HTML comments.
+    // See http://html5sec.org/#102, http://html5sec.org/#108, and
+    // http://html5sec.org/#133.
+    '`': '&#x60;'
+}
+
+Streamr.escape = function(string) {
+    return string.replace(Streamr.regexEscape, function($0) {
+        // Note: there is no need to check `has(escapeMap, $0)` here.
+        return Streamr.escapeMap[$0]
+    })
 }

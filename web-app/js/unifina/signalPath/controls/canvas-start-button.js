@@ -115,7 +115,7 @@ var CanvasStartButton = Backbone.View.extend({
         else {
             // Ask for confirmation
             bootbox.confirm({
-                message: "Are you sure you want to stop canvas "+this.signalPath.getName()+"?",
+                message: 'Are you sure you want to stop canvas '+Streamr.escape(this.signalPath.getName())+'?',
                 callback: function(confirmed) {
                     if (confirmed) {
                         _this.signalPath.stop(callback)
