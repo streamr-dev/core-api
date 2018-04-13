@@ -1,10 +1,12 @@
+/*global $ _ */
+
 // the Streamr global object is normally initialized in _layoutHead.gsp.
 if (!Streamr) {
-	var Streamr = {}
+    var Streamr = {}
 }
 
 $.pnotify.defaults.history = false
-$.pnotify.defaults.styling = "fontawesome"
+$.pnotify.defaults.styling = 'fontawesome'
 $.pnotify.defaults.icon = false
 $.pnotify.defaults.closer = true
 $.pnotify.defaults.sticker = false
@@ -12,66 +14,69 @@ $.pnotify.defaults.closer_hover = false
 
 //Change the variable signs in underscore/lodash from <%= var %> to {{ var }}
 _.templateSettings = {
-	evaluate : /\{\[([\s\S]+?)\]\}/g, // {[ ]}
-	escape : /\[\[([\s\S]+?)\]\]/g, // [[ ]]
-	interpolate : /\{\{([\s\S]+?)\}\}/g // {{ }}
-};
+    evaluate : /\{\[([\s\S]+?)\]\}/g, // {[ ]}
+    escape : /\[\[([\s\S]+?)\]\]/g, // [[ ]]
+    interpolate : /\{\{([\s\S]+?)\}\}/g // {{ }}
+}
 
 Streamr.createLink = function(optsOrController, action, id) {
-	var opts = optsOrController
+    var opts = optsOrController
 
-	if (action) {
-		opts = {
-			controller: optsOrController,
-			action: action,
-			id: id
-		}
-	}
-
-	if (opts.uri) {
-		return Streamr.projectWebroot + opts.uri.replace(/^\//, '')
+    if (action) {
+        opts = {
+            controller: optsOrController,
+            action: action,
+            id: id
+        }
     }
 
-	var ctrl = opts.controller[0].toLowerCase() + opts.controller.slice(1)
-	var url = Streamr.projectWebroot + ctrl
+    if (opts.uri) {
+        return Streamr.projectWebroot + opts.uri.replace(/^\//, '')
+    }
 
-	if (opts.action)
-		url += '/' + opts.action
+    var ctrl = opts.controller[0].toLowerCase() + opts.controller.slice(1)
+    var url = Streamr.projectWebroot + ctrl
 
-	if (opts.id!==undefined) {
-		url += '/' + opts.id
-	}
+    if (opts.action) {
+        url += '/' + opts.action
+    }
 
-	return url
+    if (opts.id!==undefined) {
+        url += '/' + opts.id
+    }
+
+    return url
 }
 
 Streamr.showError = function(msg, title, delay) {
-	$.pnotify({
-		type: 'error',
-		title: title || 'Error',
-		text: msg,
-		delay: delay || 4000
-	})
+    $.pnotify({
+        type: 'error',
+        title: title || 'Error',
+        text: msg,
+        delay: delay || 4000
+    })
 }
 
 Streamr.showInfo = function(msg, title, delay) {
-	delay = delay || 4000
-	$.pnotify({
-		type: 'info',
-		title: title,
-		text: msg,
-		delay: delay
-	})
+    delay = delay || 4000
+    $.pnotify({
+        type: 'info',
+        title: title,
+        text: msg,
+        delay: delay
+    })
 }
 
 Streamr.showSuccess = function(msg, title, delay) {
-	delay = delay || 4000
-	$.pnotify({
-		type: 'success',
-		title: title,
-		text: msg,
-		delay: delay
-	})
+    delay = delay || 4000
+    $.pnotify({
+        type: 'success',
+        title: title,
+        text: msg,
+        delay: delay,
+    })
+}
+
 // TODO: move into a module, or even download the whole https://github.com/mathiasbynens/he
 Streamr.regexEscape = /["&'<>`]/g
 Streamr.escapeMap = {
