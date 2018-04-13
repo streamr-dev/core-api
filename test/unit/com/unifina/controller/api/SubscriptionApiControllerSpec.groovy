@@ -96,7 +96,6 @@ class SubscriptionApiControllerSpec extends Specification {
 		actualJsonWithoutWeirdNullObjects == expectedJsonWithoutWeirdNullObjects
 	}
 
-
 	void "save() throws ValidationException if request body does not pass validation"() {
 		request.apiUser = devOpsUser
 		request.JSON = [
@@ -111,7 +110,7 @@ class SubscriptionApiControllerSpec extends Specification {
 		thrown(ValidationException)
 	}
 
-	void "save() throws NotPermittedException if not devops user"() {
+	void "save() given subscription with address throws NotPermittedException if not devops user"() {
 		def product = new Product().save(failOnError: true, validate: false)
 		
 		request.apiUser = new SecUser()
@@ -129,7 +128,7 @@ class SubscriptionApiControllerSpec extends Specification {
 		e.message.contains("DevOps")
 	}
 
-	void "save() invokes subscriptionService#onSubscribed() given devops user"() {
+	void "save() given subscription with address invokes subscriptionService#onSubscribed()"() {
 		def subscriptionService = controller.subscriptionService = Mock(SubscriptionService)
 
 		def product = new Product().save(failOnError: true, validate: false)
@@ -149,7 +148,7 @@ class SubscriptionApiControllerSpec extends Specification {
 		1 * subscriptionService.onSubscribed(product, "0x0000000000000000000000000000000000000000", _ as Date)
 	}
 
-	void "save() returns 204 given devops user"() {
+	void "save() given subscription with address returns 204"() {
 		controller.subscriptionService = Stub(SubscriptionService)
 
 		def product = new Product().save(failOnError: true, validate: false)
@@ -157,6 +156,46 @@ class SubscriptionApiControllerSpec extends Specification {
 		request.apiUser = devOpsUser
 		request.JSON = [
 			address: "0x0000000000000000000000000000000000000000",
+			product: "1",
+			endsAt: 1520334404
+		]
+
+		when:
+		withFilters(action: "save") {
+			controller.save()
+		}
+		then:
+		response.status == 204
+
+	}
+
+	void "save() given subscription without address invokes subscriptionService#onSubscribed()"() {
+		def subscriptionService = controller.subscriptionService = Mock(SubscriptionService)
+
+		def product = new Product().save(failOnError: true, validate: false)
+		def user = new SecUser()
+
+		request.apiUser = user
+		request.JSON = [
+			product: "1",
+			endsAt: 1520334404
+		]
+
+		when:
+		withFilters(action: "save") {
+			controller.save()
+		}
+		then:
+		1 * subscriptionService.subscribeToFreeProduct(product, user, _ as Date)
+	}
+
+	void "save() given subscription without address returns 204"() {
+		controller.subscriptionService = Stub(SubscriptionService)
+
+		def product = new Product().save(failOnError: true, validate: false)
+
+		request.apiUser = new SecUser()
+		request.JSON = [
 			product: "1",
 			endsAt: 1520334404
 		]

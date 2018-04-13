@@ -28,8 +28,14 @@ class SubscriptionApiController {
 		if (!command.validate()) {
 			throw new ValidationException(command.errors)
 		}
-		verifyDevops(loggedInUser())
-		subscriptionService.onSubscribed(command.product, command.address, new Date(command.endsAt * 1000))
+
+		if (command.address) {
+			verifyDevops(loggedInUser())
+			subscriptionService.onSubscribed(command.product, command.address, command.endsAtAsDate)
+		} else {
+			subscriptionService.subscribeToFreeProduct(command.product, loggedInUser(), command.endsAtAsDate)
+		}
+
 		render(status: 204)
 	}
 

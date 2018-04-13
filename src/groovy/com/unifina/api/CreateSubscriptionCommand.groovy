@@ -2,7 +2,6 @@ package com.unifina.api
 
 import com.unifina.domain.marketplace.Product
 import grails.validation.Validateable
-import org.grails.databinding.BindingFormat
 
 @Validateable
 class CreateSubscriptionCommand {
@@ -11,7 +10,11 @@ class CreateSubscriptionCommand {
 	Long endsAt
 
 	static constraints = {
-		address(validator: Product.isEthereumAddress)
+		address(nullable: true, validator: Product.isEthereumAddressOrIsNull)
 		endsAt(min: 0L)
+	}
+
+	Date getEndsAtAsDate() {
+		return endsAt ? new Date(endsAt * 1000) : null
 	}
 }
