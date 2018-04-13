@@ -33,12 +33,12 @@ class SubscriptionServiceSpec extends Specification {
 		service.permissionService = new PermissionService()
 	}
 
-	void "getSubscriptionsOfUser() returns empty if user has no integration keys"() {
+	void "getSubscriptionsOfUser() returns empty if user has no integration keys or free subscriptions"() {
 		expect:
 		service.getSubscriptionsOfUser(user) == []
 	}
 
-	void "getSubscriptionsOfUser() returns empty if user has no subscriptions tied to integration keys"() {
+	void "getSubscriptionsOfUser() returns empty if user has no subscriptions tied to integration keys and no free subscriptions"() {
 		new IntegrationKey(
 			user: user,
 			name: "ik1",
@@ -84,6 +84,21 @@ class SubscriptionServiceSpec extends Specification {
 
 		expect:
 		service.getSubscriptionsOfUser(user) == [s2, s3, s4]
+	}
+
+	void "getSubscriptionsOfUser() returns free subscriptions as well"() {
+		def product2 = new Product().save(failOnError: true, validate: false)
+		def s1 = new FreeSubscription(product: product, user: user, endsAt: new Date(2018, 4, 13, 13, 6))
+			.save(failOnError: true)
+		def s2 = new FreeSubscription(product: product2, user: user, endsAt: new Date(2018, 10, 20, 14, 0))
+			.save(failOnError: true)
+		def s3 = new FreeSubscription(product: product2, user: user2, endsAt: new Date(2018, 10, 20, 14, 0))
+			.save(failOnError: true)
+		def s4 = new FreeSubscription(product: product, user: user2, endsAt: new Date(2018, 10, 20, 14, 0))
+			.save(failOnError: true)
+
+		expect:
+		service.getSubscriptionsOfUser(user) == [s1, s2]
 	}
 
 	void "onSubscribed() creates new PaidSubscription if product-address pair does not exist"() {

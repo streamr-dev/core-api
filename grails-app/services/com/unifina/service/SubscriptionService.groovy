@@ -17,7 +17,10 @@ class SubscriptionService {
 	List<Subscription> getSubscriptionsOfUser(SecUser user) {
 		List<IntegrationKey> integrationKeys = IntegrationKey.findAllByUserAndService(user, IntegrationKey.Service.ETHEREUM_ID)
 		def addresses = integrationKeys*.idInService
-		return PaidSubscription.findAllByAddressInList(addresses)
+		List<Subscription> subscriptions = new ArrayList<>()
+		subscriptions.addAll(PaidSubscription.findAllByAddressInList(addresses))
+		subscriptions.addAll(FreeSubscription.findAllByUser(user))
+		return subscriptions
 	}
 
 	/**
