@@ -54,6 +54,8 @@ class Permission {
 
 	/** Is this a Permission of a Subscription? **/
 	Subscription subscription
+	/** When does this Permission expire? null == forever valid */
+	Date endsAt
 
 	static belongsTo = [Canvas, Dashboard, Feed, ModulePackage, Stream, Subscription]
 
@@ -71,6 +73,7 @@ class Permission {
 			[obj.canvas, obj.dashboard, obj.feed, obj.modulePackage, obj.stream, obj.product].count { it != null } == 1
 		})
 		subscription(nullable: true)
+		endsAt(nullable: true)
 	}
 
 	static mapping = {
@@ -140,6 +143,9 @@ class Permission {
 		}
 		if (product) {
 			map["product"] = product.id
+		}
+		if (endsAt) {
+			map["endsAt"] = endsAt
 		}
 		return map
 	}
