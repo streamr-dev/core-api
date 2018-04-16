@@ -110,6 +110,7 @@ class SubscriptionService {
 			streams.collect { Stream stream ->
 				Permission permission = permissionService.systemGrant(user, stream, Permission.Operation.READ)
 				permission.subscription = subscription
+				permission.endsAt = subscription.endsAt
 				permission.save(failOnError: true)
 			}
 		}
