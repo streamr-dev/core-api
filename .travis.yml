@@ -15,8 +15,6 @@ before_install:
 - echo sdkman_auto_answer=true > ~/.sdkman/etc/config
 - source "/home/travis/.sdkman/bin/sdkman-init.sh"
 - sdk install grails 2.5.6
-- sed -i 's/git@github.com:/https:\/\/github.com\//' .gitmodules
-- git submodule update --init --recursive
 addons:
   chrome: stable
   apt:
@@ -33,6 +31,16 @@ jobs:
     script: "make unit-test"
   - stage: Integration tests
     script: "make integration-test"
+  - stage: Functional tests
+    env:
+    - CHROMEDRIVER=/usr/local/bin/chromedriver
+    - HEADLESS=true
+    script: "make functional-test functional-group-1"
+  - stage: Functional tests group 2
+    env:
+    - CHROMEDRIVER=/usr/local/bin/chromedriver
+    - HEADLESS=true
+    script: "make functional-test functional-group-2"
   - stage: Build war
     script: "make build-war"
     deploy:
