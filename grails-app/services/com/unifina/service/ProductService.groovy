@@ -64,11 +64,13 @@ class ProductService {
 		permissionService.verifyShare(currentUser, stream)
 		product.streams.add(stream)
 		product.save(failOnError: true)
+		subscriptionService.afterProductUpdated(product)
 	}
 
 	void removeStreamFromProduct(Product product, Stream stream) {
 		product.streams.remove(stream)
 		product.save(failOnError: true)
+		subscriptionService.afterProductUpdated(product)
 	}
 
 	void transitionToDeploying(Product product) {
