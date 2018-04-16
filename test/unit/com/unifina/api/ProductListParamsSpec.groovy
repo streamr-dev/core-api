@@ -88,7 +88,6 @@ class ProductListParamsSpec extends Specification {
 		[states: []]         | 1           | ["states"]
 	}
 
-	/* TODO: uncomment when Plastic Criteria has released the fix Eric sent
 	void "createListCriteria() with empty-args constructor returns criteria that returns all"() {
 		when:
 		def paramsList = new ProductListParams()
@@ -141,5 +140,4 @@ class ProductListParamsSpec extends Specification {
 	private static Set<String> fetchProductIdsFor(ListParams listParams) {
 		Product.withCriteria(listParams.createListCriteria())*.id
 	}
-	*/
 }
