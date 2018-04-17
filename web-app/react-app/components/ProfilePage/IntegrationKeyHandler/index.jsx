@@ -62,10 +62,12 @@ export class IntegrationKeyHandler extends Component<Props> {
                             onNew={this.onNew}
                             onDelete={this.onDelete}
                             service={service}
+                            copy="address"
                             inputFields={['privateKey']}
                             tableFields={[
-                                ['address', (add) => add && (typeof add === 'string') && add.substring(0, 15)]
-                            ]}                        />
+                                ['address', (add) => add && (typeof add === 'string') && `${add.substring(0, 15)}...` || add]
+                            ]}
+                        />
                     </Row>
                 </Panel.Body>
             </Panel>
