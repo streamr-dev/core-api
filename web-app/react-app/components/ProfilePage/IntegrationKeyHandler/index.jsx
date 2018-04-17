@@ -48,22 +48,26 @@ export class IntegrationKeyHandler extends Component<Props> {
 
     render() {
         return (
-            <Panel header="Ethereum Private Keys">
-                <p>
-                    These Ethereum accounts can be used on Canvases to build data-driven interactions with Ethereum. Even though the private keys are securely stored server-side, we do not recommend having significant amounts of value on these accounts.
-                </p>
-                <Row>
-                    <IntegrationKeyHandlerSegment
-                        integrationKeys={this.props.integrationKeys}
-                        onNew={this.onNew}
-                        onDelete={this.onDelete}
-                        service={service}
-                        inputFields={['privateKey']}
-                        tableFields={[
-                            ['address', (add) => add && (typeof add === 'string') && add.substring(0, 15)]
-                        ]}
-                    />
-                </Row>
+            <Panel>
+                <Panel.Heading>
+                    Ethereum Private Keys
+                </Panel.Heading>
+                <Panel.Body>
+                    <p>
+                        These Ethereum accounts can be used on Canvases to build data-driven interactions with Ethereum. Even though the private keys are securely stored server-side, we do not recommend having significant amounts of value on these accounts.
+                    </p>
+                    <Row>
+                        <IntegrationKeyHandlerSegment
+                            integrationKeys={this.props.integrationKeys}
+                            onNew={this.onNew}
+                            onDelete={this.onDelete}
+                            service={service}
+                            inputFields={['privateKey']}
+                            tableFields={[
+                                ['address', (add) => add && (typeof add === 'string') && add.substring(0, 15)]
+                            ]}                        />
+                    </Row>
+                </Panel.Body>
             </Panel>
         )
     }

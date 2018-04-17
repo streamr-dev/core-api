@@ -58,66 +58,67 @@ export class ProfileSettings extends Component<Props> {
             label: tz,
         }))
         return (
-            <Panel header="Profile Settings">
-                <Form onSubmit={this.onSubmit}>
-                    <FormGroup>
-                        <ControlLabel>
-                            Email
-                        </ControlLabel>
-                        <div>{this.props.user && this.props.user.username}</div>
-                    </FormGroup>
-
-                    <FormGroup>
-                        <ControlLabel>
-                            Password
-                        </ControlLabel>
-                        <div>
-                            <a href={createLink('profile/changePwd')}>
-                                Change Password
-                            </a>
-                        </div>
-                    </FormGroup>
-
-                    <FormGroup>
-                        <ControlLabel>
-                            Full Name
-                        </ControlLabel>
-                        <FormControl
-                            name="name"
-                            value={this.props.user && this.props.user.name || ''}
-                            onChange={this.onNameChange}
-                            required
-                        />
-                    </FormGroup>
-
-                    <FormGroup>
-                        <ControlLabel>
-                            Timezone
-                        </ControlLabel>
-                        <Select
-                            placeholder="Select timezone"
-                            options={options}
-                            value={this.props.user && this.props.user.timezone}
-                            name="timezone"
-                            onChange={this.onTimezoneChange}
-                            required={true}
-                            clearable={false}
-                        />
-                    </FormGroup>
-
-                    <FormGroup>
-                        <InputGroup>
-                            <Button
-                                type="submit"
-                                name="submit"
-                                bsStyle="primary"
-                                bsSize="lg"
-                            >
-                                Save
-                            </Button>
-                        </InputGroup>
-                    </FormGroup>
-                </Form>
+            <Panel>
+                <Panel.Heading>
+                    Profile Settings
+                </Panel.Heading>
+                <Panel.Body>
+                    <Form onSubmit={this.onSubmit}>
+                        <FormGroup>
+                            <ControlLabel>
+                                Email
+                            </ControlLabel>
+                            <div>{this.props.user && this.props.user.username}</div>
+                        </FormGroup>
+                        <FormGroup>
+                            <ControlLabel>
+                                Password
+                            </ControlLabel>
+                            <div>
+                                <a href={createLink('profile/changePwd')}>
+                                    Change Password
+                                </a>
+                            </div>
+                        </FormGroup>
+                        <FormGroup>
+                            <ControlLabel>
+                                Full Name
+                            </ControlLabel>
+                            <FormControl
+                                name="name"
+                                value={this.props.user && this.props.user.name || ''}
+                                onChange={this.onNameChange}
+                                required
+                            />
+                        </FormGroup>
+                        <FormGroup>
+                            <ControlLabel>
+                                Timezone
+                            </ControlLabel>
+                            <Select
+                                placeholder="Select timezone"
+                                options={options}
+                                value={this.props.user && this.props.user.timezone}
+                                name="timezone"
+                                onChange={this.onTimezoneChange}
+                                required={true}
+                                clearable={false}
+                            />
+                        </FormGroup>
+                        <FormGroup>
+                            <InputGroup>
+                                <Button
+                                    type="submit"
+                                    name="submit"
+                                    bsStyle="primary"
+                                    bsSize="lg"
+                                >
+                                    Save
+                                </Button>
+                            </InputGroup>
+                        </FormGroup>
+                    </Form>
+                </Panel.Body>
             </Panel>
         )
     }
