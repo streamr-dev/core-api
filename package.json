@@ -120,6 +120,7 @@
     "streamr-client": "^0.9.3",
     "stringify-object": "^3.2.2",
     "style-loader": "^0.17.0",
+    "uglifyjs-webpack-plugin": "^1.2.4",
     "underscore": "*",
     "uuid": "latest",
     "web3": "^1.0.0-beta.30",
