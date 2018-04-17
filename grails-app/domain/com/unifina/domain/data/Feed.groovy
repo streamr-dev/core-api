@@ -37,8 +37,6 @@ class Feed implements Serializable {
 	@Deprecated
 	String streamListenerClass
 	@Deprecated
-	String streamPageTemplate
-	@Deprecated
 	String fieldDetectorClass
 	@Deprecated
 	String dataRangeProviderClass

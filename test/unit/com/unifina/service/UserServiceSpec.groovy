@@ -28,7 +28,6 @@ class UserServiceSpec extends Specification {
 		feed.parserClass = ""
 		feed.timezone = "Europe/Minsk"
 		feed.streamListenerClass = NoOpStreamListener.name
-		feed.streamPageTemplate = ""
 		feed.save(failOnError: true)
 
 		// A modulePackage created with minimum fields required
