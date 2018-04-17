@@ -351,6 +351,7 @@ class ProductServiceSpec extends Specification {
 	void "addStreamToProduct() verifies Stream via PermissionService#verifyShare"() {
 		setupStreams()
 		setupProduct()
+		service.subscriptionService = Stub(SubscriptionService)
 		def permissionService = service.permissionService = Mock(PermissionService)
 		def user = new SecUser()
 		when:
@@ -365,6 +366,7 @@ class ProductServiceSpec extends Specification {
 		setupProduct()
 		assert !product.streams.contains(s4)
 
+		service.subscriptionService = Stub(SubscriptionService)
 		service.permissionService = Stub(PermissionService)
 		def user = new SecUser()
 
@@ -374,15 +376,40 @@ class ProductServiceSpec extends Specification {
 		product.streams.contains(s4)
 	}
 
+	void "addStreamToProduct() invokes subscriptionService#afterProductUpdated"() {
+		setupStreams()
+		setupProduct()
+		def subscriptionService = service.subscriptionService = Mock(SubscriptionService)
+		service.permissionService = Stub(PermissionService)
+		def user = new SecUser()
+
+		when:
+		service.addStreamToProduct(product, s4, user)
+		then:
+		1 * subscriptionService.afterProductUpdated(product)
+	}
+
 	void "removeStreamFromProduct() removes Stream from Product"() {
 		setupStreams()
 		setupProduct()
+		service.subscriptionService = Stub(SubscriptionService)
 		assert product.streams.contains(s1)
 
 		when:
 		service.removeStreamFromProduct(product, s1)
 		then:
 		!product.streams.contains(s1)
+	}
+
+	void "removeStreamFromProduct() invokes subscriptionService#afterProductUpdated"() {
+		setupStreams()
+		setupProduct()
+		def subscriptionService = service.subscriptionService = Mock(SubscriptionService)
+
+		when:
+		service.removeStreamFromProduct(product, s1)
+		then:
+		1 * subscriptionService.afterProductUpdated(product)
 	}
 
 	@Unroll
