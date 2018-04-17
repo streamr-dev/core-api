@@ -94,5 +94,5 @@ databaseChangeLog = {
 	include file: 'core/2018-02-22-drop-class-column-from-stream.groovy'
 	include file: 'core/2018-02-27-add-id-in-service-to-integration-key.groovy'
 	include file: 'core/2018-03-05-fix-canvas-spec.groovy'
-	include file: 'core/2018-03-07-remove-template-field-of-feed'
+	include file: 'core/2018-03-07-remove-template-field-of-feed.groovy'
 }
