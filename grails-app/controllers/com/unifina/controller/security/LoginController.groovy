@@ -52,9 +52,19 @@ class LoginController {
 
 		String view = 'auth'
 		String postUrl = "${request.contextPath}${config.apf.filterProcessesUrl}"
-		render view: view, model: [postUrl: postUrl,
-		                           rememberMeParameter: config.rememberMe.parameter,
-								   redirect: params.redirect]
+		def redirect = params.redirect
+		if (redirect != null) {
+			redirect = redirect.trim()
+			// Match https://www.streamr.com/ with required subdomain.
+			// Subdomain can be anything within [a-zA-Z0-9]
+			// Note required trailing slash!
+			if (!redirect.matches("^https://([a-zA-Z0-9]*)?\\.streamr\\.com/.*")) {
+				redirect = null
+			}
+		}
+		render view: view, model: [postUrl            : postUrl,
+								   rememberMeParameter: config.rememberMe.parameter,
+								   redirect           : redirect]
 	}
 
 	/**
