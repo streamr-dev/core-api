@@ -124,8 +124,8 @@ describe('ProfileSettings', () => {
                 updateCurrentUserTimezone={() => {}}
                 saveCurrentUser={() => {}}
             />)
-            assert(el.is('Panel'))
-            assert.equal(el.props().header, 'Profile Settings')
+            const header = el.find('PanelHeading')
+            assert.equal(header.props().children, 'Profile Settings')
         })
         it('must have a Form with correct onSubmit as a child', () => {
             const el = shallow(<ProfileSettings
@@ -135,8 +135,7 @@ describe('ProfileSettings', () => {
                 updateCurrentUserTimezone={() => {}}
                 saveCurrentUser={() => {}}
             />)
-            const form = el.childAt(0)
-            assert(form.is('Form'))
+            const form = el.find('Form')
             assert.equal(form.props().onSubmit, el.instance().onSubmit)
         })
 
@@ -155,7 +154,7 @@ describe('ProfileSettings', () => {
                     updateCurrentUserTimezone={() => {}}
                     saveCurrentUser={() => {}}
                 />)
-                form = el.childAt(0)
+                form = el.find('Form')
                 form.children().forEach((c) => assert(c.is('FormGroup')))
             })
             it('must have an email field', () => {
