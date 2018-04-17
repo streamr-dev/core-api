@@ -67,12 +67,12 @@ async function submitChallenge(challenge, signature) {
 describe('Subscriptions API', () => {
     describe('POST /api/v1/subscriptions', () => {
 
-        let subscriptionBody = {}
-        let productId
+        let paidProductId
+        let freeProductId
 
         before(async () => {
-            productId = await createProductAndReturnId({
-                name: 'Product',
+            paidProductId = await createProductAndReturnId({
+                name: 'Paid Product',
                 description: 'Description of the product.',
                 imageUrl: 'https://www.streamr.com/uploads/product.png',
                 category: 'satellite-id',
@@ -83,18 +83,24 @@ describe('Subscriptions API', () => {
                 priceCurrency: 'USD',
                 minimumSubscriptionInSeconds: 60,
             })
-        })
 
-        beforeEach(() => {
-            subscriptionBody = {
-                product: productId,
-                address: '0x0000000000000000000000000000000000000000',
-                endsAt: 1520840312
-            }
+            freeProductId = await createProductAndReturnId({
+                name: 'Free Product',
+                description: 'Description of the product.',
+                imageUrl: 'https://www.streamr.com/uploads/product2.png',
+                category: 'satellite-id',
+                streams: [],
+                pricePerSecond: 0,
+                priceCurrency: 'DATA',
+                minimumSubscriptionInSeconds: 30,
+            })
         })
 
         it('requires authentication', async () => {
-            const body = subscriptionBody
+            const body = {
+                product: paidProductId,
+                endsAt: 1520840312
+            }
             const response = await Streamr.api.v1.subscriptions
                 .create(body)
                 .call()
@@ -112,8 +118,8 @@ describe('Subscriptions API', () => {
 
         it('validates existence of Product', async () => {
             const body = {
-                ...subscriptionBody,
-                product: 'non-existing-product'
+                product: 'non-existing-product',
+                endsAt: 1520840312
             }
             const response = await Streamr.api.v1.subscriptions
                 .create(body)
@@ -122,22 +128,58 @@ describe('Subscriptions API', () => {
             await assertResponseIsError(response, 422, 'VALIDATION_ERROR', 'product')
         })
 
-        it('requires DevOps role', async () => {
-            const body = subscriptionBody
-            const response = await Streamr.api.v1.subscriptions
-                .create(body)
-                .withAuthToken(AUTH_TOKEN)
-                .call()
-            await assertResponseIsError(response, 403, 'FORBIDDEN', 'DevOps role required')
+        context('when passing body with address', () => {
+            it('requires DevOps role', async () => {
+                const body = {
+                    product: paidProductId,
+                    endsAt: 1520840312,
+                    address: '0x0000000000000000000000000000000000000000'
+                }
+                const response = await Streamr.api.v1.subscriptions
+                    .create(body)
+                    .withAuthToken(AUTH_TOKEN)
+                    .call()
+                await assertResponseIsError(response, 403, 'FORBIDDEN', 'DevOps role required')
+            })
+
+            it('responds with 204 given valid parameters', async () => {
+                const body = {
+                    product: paidProductId,
+                    endsAt: 1520840312,
+                    address: '0x0000000000000000000000000000000000000000'
+                }
+                const response = await Streamr.api.v1.subscriptions
+                    .create(body)
+                    .withAuthToken(DEVOPS_USER_TOKEN)
+                    .call()
+                assert.equal(response.status, 204)
+            })
         })
 
-        it('responds with 200 given valid parameters', async () => {
-            const body = subscriptionBody
-            const response = await Streamr.api.v1.subscriptions
-                .create(body)
-                .withAuthToken(DEVOPS_USER_TOKEN)
-                .call()
-            assert.equal(response.status, 204)
+        context('when passing body without address', () => {
+            it('verifies that Product is free', async () => {
+                const body = {
+                    product: paidProductId,
+                    endsAt: 1520840312
+                }
+                const response = await Streamr.api.v1.subscriptions
+                    .create(body)
+                    .withAuthToken(AUTH_TOKEN)
+                    .call()
+                await assertResponseIsError(response, 400, 'PRODUCT_IS_NOT_FREE')
+            })
+
+            it('responds with 204 given valid parameters', async () => {
+                const body = {
+                    product: freeProductId,
+                    endsAt: 1520840312
+                }
+                const response = await Streamr.api.v1.subscriptions
+                    .create(body)
+                    .withAuthToken(AUTH_TOKEN)
+                    .call()
+                assert.equal(response.status, 204)
+            })
         })
     })
 

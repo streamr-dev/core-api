@@ -104,4 +104,5 @@ databaseChangeLog = {
 	include file: 'core/2018-04-09-add-owner-to-product.groovy'
 	include file: 'core/2018-04-09-allow-nulls-in-certain-product-fields.groovy'
 	include file: 'core/2018-04-11-test-data-products-subscriptions.groovy'
+	include file: 'core/2018-04-12-free-and-paid-subscriptions.groovy'
 }

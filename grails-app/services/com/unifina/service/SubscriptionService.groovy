@@ -1,6 +1,8 @@
 package com.unifina.service
 
 import com.unifina.domain.data.Stream
+import com.unifina.domain.marketplace.FreeSubscription
+import com.unifina.domain.marketplace.PaidSubscription
 import com.unifina.domain.marketplace.Product
 import com.unifina.domain.marketplace.Subscription
 import com.unifina.domain.security.IntegrationKey
@@ -15,23 +17,33 @@ class SubscriptionService {
 	List<Subscription> getSubscriptionsOfUser(SecUser user) {
 		List<IntegrationKey> integrationKeys = IntegrationKey.findAllByUserAndService(user, IntegrationKey.Service.ETHEREUM_ID)
 		def addresses = integrationKeys*.idInService
-		return Subscription.findAllByAddressInList(addresses)
+		List<Subscription> subscriptions = new ArrayList<>()
+		subscriptions.addAll(PaidSubscription.findAllByAddressInList(addresses))
+		subscriptions.addAll(FreeSubscription.findAllByUser(user))
+		return subscriptions
 	}
 
 	/**
 	 * Should be invoked after marketplace smart contract event `Subscribed` has been emitted.
 	 */
 	Subscription onSubscribed(Product product, String address, Date endsAt) {
-		Subscription subscription = Subscription.findByProductAndAddress(product, address)
-		if (subscription) {
-			subscription.endsAt = endsAt
-		} else {
-			subscription = new Subscription(address: address, product: product, endsAt: endsAt)
+		Subscription subscription = PaidSubscription.findByProductAndAddress(product, address)
+		if (subscription == null) {
+			subscription = new PaidSubscription(product: product, address: address)
 		}
-		subscription.save(failOnError: true)
-		deletePermissions(subscription) // TODO: could be optimized to only remove/add what is necessary
-		createPermissions(subscription)
-		return subscription
+		return updateSubscriptionAndLinkedPermissions(subscription, endsAt)
+	}
+
+	/**
+	 * Subscribe to user to (free) Product
+	 */
+	Subscription subscribeToFreeProduct(Product product, SecUser user, Date endsAt) {
+		FreeProductService.verifyThatProductIsFree(product)
+		Subscription subscription = FreeSubscription.findByProductAndUser(product, user)
+		if (subscription == null) {
+			subscription = new FreeSubscription(product: product, user: user)
+		}
+		return updateSubscriptionAndLinkedPermissions(subscription, endsAt)
 	}
 
 	/**
@@ -39,7 +51,7 @@ class SubscriptionService {
 	 */
 	void beforeIntegrationKeyRemoved(IntegrationKey key) {
 		verifyIsEthereumID(key)
-		List<Subscription> subscriptions = Subscription.findAllByAddress(key.idInService)
+		List<Subscription> subscriptions = PaidSubscription.findAllByAddress(key.idInService)
 		subscriptions.each {
 			deletePermissions(it)
 		}
@@ -50,7 +62,7 @@ class SubscriptionService {
 	 */
 	void afterIntegrationKeyCreated(IntegrationKey key) {
 		verifyIsEthereumID(key)
-		List<Subscription> subscriptions = Subscription.findAllByAddress(key.idInService)
+		List<Subscription> subscriptions = PaidSubscription.findAllByAddress(key.idInService)
 		subscriptions.each {
 			createPermissions(it)
 		}
@@ -71,6 +83,14 @@ class SubscriptionService {
 		}
 	}
 
+	private Subscription updateSubscriptionAndLinkedPermissions(Subscription subscription, Date endsAt) {
+		subscription.endsAt = endsAt
+		subscription.save(failOnError: true)
+		deletePermissions(subscription) // TODO: could be optimized to only remove/add what is necessary
+		createPermissions(subscription)
+		return subscription
+	}
+
 	private static void deletePermissions(Subscription subscription) {
 		streamPermissionsFor(subscription)*.delete()
 	}
@@ -85,7 +105,7 @@ class SubscriptionService {
 	}
 
 	private void createPermissions(Subscription subscription, Set<Stream> streams) {
-		SecUser user = subscription.user
+		SecUser user = subscription.fetchUser()
 		if (user) {
 			streams.collect { Stream stream ->
 				Permission permission = permissionService.systemGrant(user, stream, Permission.Operation.READ)
