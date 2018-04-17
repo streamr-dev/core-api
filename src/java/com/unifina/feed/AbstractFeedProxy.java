@@ -1,16 +1,15 @@
 package com.unifina.feed;
 
-import java.lang.reflect.InvocationTargetException;
-import java.util.Queue;
-import java.util.concurrent.ConcurrentLinkedQueue;
-
+import com.unifina.data.FeedEvent;
 import com.unifina.data.IEventRecipient;
+import com.unifina.domain.data.Feed;
+import com.unifina.utils.Globals;
 import grails.util.Holders;
 import org.apache.log4j.Logger;
 
-import com.unifina.data.FeedEvent;
-import com.unifina.domain.data.Feed;
-import com.unifina.utils.Globals;
+import java.lang.reflect.InvocationTargetException;
+import java.util.Queue;
+import java.util.concurrent.ConcurrentLinkedQueue;
 
 
 /**
@@ -163,9 +162,7 @@ public abstract class AbstractFeedProxy<ModuleClass, RawMessageClass, MessageCla
 			expected++;
 			FeedEvent<MessageClass, EventRecipientClass>[] events = process(msg);
 
-			// TODO: remove debug
 			if (firstRealQueue == null && checkAge) {
-				log.info("First real time message: " + counter + ". Events: " + events);
 				firstRealQueue = counter;
 			}
 

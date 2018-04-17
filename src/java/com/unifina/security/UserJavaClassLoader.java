@@ -133,7 +133,7 @@ public class UserJavaClassLoader extends URLClassLoader {
 		else return diagnostics.getDiagnostics();
 	}
 	
-	public class CharSequenceJavaFileObject extends SimpleJavaFileObject {
+	public static class CharSequenceJavaFileObject extends SimpleJavaFileObject {
 
 	    /**
 	    * CharSequence representing the source code to be compiled
@@ -168,7 +168,7 @@ public class UserJavaClassLoader extends URLClassLoader {
 	    }
 	}
 	
-	public class JavaClassObject extends SimpleJavaFileObject {
+	public static class JavaClassObject extends SimpleJavaFileObject {
 
 		private String name;
 		
