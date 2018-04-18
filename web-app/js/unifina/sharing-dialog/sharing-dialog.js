@@ -153,6 +153,9 @@
             })
             this.$(".switcher-toggler").html('<i class="fa fa-globe anonymous-switcher-knob">')
 
+            this.createAccessView = this.createAccessView.bind(this)
+            this.addAll = this.addAll.bind(this)
+
             this.listenTo(accessList, 'add', this.createAccessView)
             this.listenTo(accessList, 'reset', this.addAll)
         },
