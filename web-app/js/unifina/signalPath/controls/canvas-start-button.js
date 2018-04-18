@@ -1,3 +1,5 @@
+/*global Streamr Backbone bootbox $ */
+
 /**
  * Events triggered on the button:
  * start-confirmed
@@ -11,19 +13,20 @@ var CanvasStartButton = Backbone.View.extend({
 
         this.signalPath = options.signalPath
         this.settings = options.settings
-        this.startContent = options.startContent || "Start"
-        this.stopContent = options.stopContent || "Stop"
+        this.startContent = options.startContent || 'Start'
+        this.stopContent = options.stopContent || 'Stop'
         this.adhoc = options.adhoc || false
         this.clearState = options.clearState || false
         this.$clickElement = options.clickElement || this.$el
 
         $(this.signalPath).on('loaded', function() {
-            if (!_this.adhoc)
+            if (!_this.adhoc) {
                 _this.setRunning(_this.signalPath.isRunning())
+            }
         })
 
         $(this.signalPath).on('new error stopped stopping', function() {
-            _this.setRunning(_this.signalPath.isRunning());
+            _this.setRunning(_this.signalPath.isRunning())
         })
 
         $(this.signalPath).on('starting started', function() {
@@ -38,8 +41,7 @@ var CanvasStartButton = Backbone.View.extend({
     startOrStop: function() {
         if (this.running) {
             this.stop()
-        }
-        else {
+        } else {
             this.start()
         }
     },
@@ -48,16 +50,16 @@ var CanvasStartButton = Backbone.View.extend({
         var _this = this
 
         var callback = function(response, err) {
-            if (err)
+            if (err) {
                 _this.trigger('start-error', err)
-            else
+            } else {
                 _this.trigger('start-confirmed')
+            }
         }
 
         if (this.adhoc) {
             this.signalPath.startAdhoc({}, callback)
-        }
-        else {
+        } else {
             var doStart = function() {
                 _this.signalPath.start({
                     clearState: _this.clearState
@@ -67,19 +69,18 @@ var CanvasStartButton = Backbone.View.extend({
             if (this.signalPath.isDirty()) {
                 // Ask for confirmation
                 bootbox.confirm({
-                    message: "Canvas needs to be saved before starting.",
+                    message: 'Canvas needs to be saved before starting.',
                     callback: function(confirmed) {
                         if (confirmed) {
                             // Let's save or save as
                             if (_this.signalPath.isSaved()) {
                                 _this.signalPath.save(doStart)
-                            }
-                            else {
+                            } else {
                                 _this.signalPath.saveAs(_this.signalPath.getName(), doStart)
                             }
                         }
                     },
-                    className: "save-on-start-confirmation-dialog bootbox-sm",
+                    className: 'save-on-start-confirmation-dialog bootbox-sm',
                     buttons: {
                         'cancel': {
                             label: 'Cancel',
@@ -90,9 +91,8 @@ var CanvasStartButton = Backbone.View.extend({
                             className: 'btn-primary'
                         }
                     },
-                });
-            }
-            else {
+                })
+            } else {
                 doStart()
             }
 
@@ -103,26 +103,26 @@ var CanvasStartButton = Backbone.View.extend({
         var _this = this
 
         var callback = function(response, err) {
-            if (err)
+            if (err) {
                 _this.trigger('stop-error', err)
-            else
+            } else {
                 _this.trigger('stop-confirmed')
+            }
         }
 
         if (this.adhoc) {
             this.signalPath.stop(callback)
-        }
-        else {
+        } else {
             // Ask for confirmation
             bootbox.confirm({
-                message: "Are you sure you want to stop canvas "+this.signalPath.getName()+"?",
+                message: 'Are you sure you want to stop canvas '+Streamr.escape(this.signalPath.getName())+'?',
                 callback: function(confirmed) {
                     if (confirmed) {
                         _this.signalPath.stop(callback)
                     }
                 },
-                className: "stop-confirmation-dialog bootbox-sm"
-            });
+                className: 'stop-confirmation-dialog bootbox-sm'
+            })
         }
     },
 
@@ -130,8 +130,7 @@ var CanvasStartButton = Backbone.View.extend({
         if (running) {
             this.running = true
             this.$el.html(this.stopContent)
-        }
-        else {
+        } else {
             this.running = false
             this.$el.html(this.startContent)
         }

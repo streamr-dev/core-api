@@ -30,11 +30,16 @@ env:
 jobs:
   include:
   - stage: Unit tests
-    script: "make unit-test"
+    env:
+    - BACKEND_END_TEST=true
+    script: ./travis_scripts/unit_test.sh
+  - env:
+    - FRONT_END_TEST=true
+    script: ./travis_scripts/fe_unit_test.sh
   - stage: Integration tests
-    script: "make integration-test"
+    script: ./travis_scripts/integration_test.sh
   - stage: Build war
-    script: "make build-war"
+    script: ./travis_scripts/build_war.sh
     deploy:
       provider: s3
       access_key_id: AKIAI7LEOVJBY6ZEH44Q
@@ -48,7 +53,7 @@ jobs:
       local_dir: build
     if: branch = master
   - stage: Build docker
-    script: "make docker-lint docker-build docker-tag docker-push"
+    script: ./travis_scripts/docker_build.sh
     if: branch = master
 after_failure: "./travis-after-failure.sh"
 notifications:

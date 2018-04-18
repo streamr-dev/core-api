@@ -162,7 +162,7 @@ $(function() {
 
 	$(SignalPath).on('saved', function(event, savedJson) {
 		$('#modal-spinner').hide()
-		Streamr.showSuccess('${message(code:"signalpath.saved")}: '+savedJson.name)
+		Streamr.showSuccess('${message(code:"signalpath.saved")}: '+Streamr.escape(savedJson.name))
 		setAddressbarUrl(Streamr.createLink({controller: "canvas", action: "editor", id: savedJson.id}))
 	})
 
@@ -286,7 +286,7 @@ $(function() {
         clearState: false
 	})
 	realtimeRunButton.on('start-confirmed', function() {
-		Streamr.showSuccess('${message(code:"canvas.started")}'.replace('{0}', SignalPath.getName()))
+		Streamr.showSuccess('${message(code:"canvas.started")}'.replace('{0}', Streamr.escape(SignalPath.getName())))
 	})
 	realtimeRunButton.on('start-error', function(err) {
 		var msg = '${message(code:"canvas.start.error")}'
@@ -296,7 +296,7 @@ $(function() {
 		Streamr.showError(msg)
 	})
 	realtimeRunButton.on('stop-confirmed', function() {
-		Streamr.showSuccess('${message(code:"canvas.stopped")}'.replace('{0}', SignalPath.getName()))
+		Streamr.showSuccess('${message(code:"canvas.stopped")}'.replace('{0}', Streamr.escape(SignalPath.getName())))
 	})
 	realtimeRunButton.on('stop-error', function(err) {
 		var msg = '${message(code:"canvas.stop.error")}'
@@ -318,7 +318,7 @@ $(function() {
         clickElement: $("#run-realtime-clear")
 	})
 	realtimeRunAndClearButton.on('start-confirmed', function() {
-		Streamr.showSuccess('${message(code:"canvas.clearAndStarted")}: '.replace('{0}', SignalPath.getName()))
+		Streamr.showSuccess('${message(code:"canvas.clearAndStarted")}: '.replace('{0}', Streamr.escape(SignalPath.getName())))
 	})
 
 	var nameEditor = new StreamrNameEditor({

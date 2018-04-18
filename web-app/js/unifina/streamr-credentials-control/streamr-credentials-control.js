@@ -1,4 +1,9 @@
 (function (exports) {
+    // This should be done in streamr.js but for some reason it doesn't work.
+    // Anyway, this file will be removed really soon so I let it be here for now
+    _.templateSettings.evaluate = /\{\[([\s\S]+?)\]\}/g // {[ ]}
+	_.templateSettings.escape = /\[\[([\s\S]+?)\]\]/g // [[ ]]
+	_.templateSettings.interpolate = /\{\{([\s\S]+?)\}\}/g // {{ }}
 
 	var listTemplate = '' +
 		'<div class="col-xs-12">' +
@@ -83,7 +88,7 @@
 			} else if (!this.username && !this.streamId) {
 				throw new Error("Must give either streamId or username!")
 			}
-   
+
 			$.getJSON(this.url)
 				.then(function (keys) {
 					_this.keys = keys
@@ -258,5 +263,5 @@
 	})
 
 	exports.StreamrCredentialsControl = CredentialsControl
- 
+
 })(typeof(exports) !== 'undefined' ? exports : window)

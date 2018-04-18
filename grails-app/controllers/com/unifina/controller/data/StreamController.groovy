@@ -32,9 +32,9 @@ import java.text.SimpleDateFormat
 class StreamController {
 
 	def springSecurityService
-	
+
 	static defaultAction = "list"
-	
+
 	def permissionService
 	def streamService
 
@@ -90,15 +90,13 @@ class StreamController {
 		getAuthorizedStream(params.id) { stream, user ->
 			boolean writetable = permissionService.canWrite(user, stream)
 			boolean shareable = permissionService.canShare(user, stream)
-			[stream: stream, writable: writetable, shareable: shareable]
-		}
-	}
-
-	// Can be extended to handle more types
-	def details() {
-		getAuthorizedStream(params.id) { stream, user ->
-			def model = [stream: stream, config: (stream.config ? JSON.parse(stream.config) : [:])]
-			render(template: stream.feed.streamPageTemplate, model: model)
+			[
+				stream: stream,
+				writable: writetable,
+				shareable: shareable,
+				key: springSecurityService.currentUser?.keys?.iterator()?.next(),
+				config: (stream.config ? JSON.parse(stream.config) : [:])
+			]
 		}
 	}
 
@@ -135,7 +133,7 @@ class StreamController {
 			}
 		}
 	}
-	
+
 	def fields() {
 		if (request.method == "GET") {
 			getAuthorizedStream(params.id) { stream, user ->
@@ -154,14 +152,14 @@ class StreamController {
 			}
 		}
 	}
-	
+
 	def files() {
 		getAuthorizedStream(params.id) { stream, user ->
 			DataRange dataRange = streamService.getDataRange(stream)
 			return [dataRange: dataRange, stream:stream]
 		}
 	}
-	
+
 	def upload() {
 		getAuthorizedStream(params.id, Operation.WRITE) { stream, user ->
 			File temp
@@ -213,7 +211,7 @@ class StreamController {
 			[schema: schema, file: params.file, stream: stream]
 		}
 	}
-	
+
 	def confirmUpload() {
 		getAuthorizedStream(params.id, Operation.WRITE) { stream, user ->
 			File file = new File(params.file)
@@ -252,5 +250,5 @@ class StreamController {
 		} else {
 			action.call(stream, user)
 		}
-	}	
+	}
 }

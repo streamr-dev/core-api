@@ -253,7 +253,6 @@ class RegisterControllerSpec extends Specification {
 			feed.parserClass = ""
 			feed.timezone = "Europe/Minsk"
 			feed.streamListenerClass = NoOpStreamListener.name
-			feed.streamPageTemplate = ""
 			feed.save()
 
 			// A modulePackage created with minimum fields required
