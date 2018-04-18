@@ -212,7 +212,6 @@ environments {
  * API & CORS config
  */
 cors.url.pattern = ['/api/*', '/contact/send']
-cors.headers = ['Access-Control-Allow-Origin': '*']
 streamr.apiKey.revokeNotificationStream = "revoked-api-keys"
 
 /**
