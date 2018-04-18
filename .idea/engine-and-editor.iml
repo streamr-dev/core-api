@@ -185,8 +185,6 @@
           <root url="jar://$USER_HOME$/.sdkman/candidates/grails/2.5.6/lib/org.aspectj/aspectjrt/jars/aspectjrt-1.8.7.jar!/" />
           <root url="jar://$USER_HOME$/.sdkman/candidates/grails/2.5.6/lib/org.aspectj/aspectjweaver/jars/aspectjweaver-1.8.7.jar!/" />
           <root url="jar://$MAVEN_REPOSITORY$/org/mozilla/rhino/1.7R4/rhino-1.7R4.jar!/" />
-          <root url="jar://$MAVEN_REPOSITORY$/org/springframework/security/spring-security-web/3.2.3.RELEASE/spring-security-web-3.2.3.RELEASE.jar!/" />
-          <root url="jar://$MAVEN_REPOSITORY$/org/springframework/security/spring-security-core/3.2.3.RELEASE/spring-security-core-3.2.3.RELEASE.jar!/" />
           <root url="jar://$MAVEN_REPOSITORY$/org/liquibase/liquibase-core/2.0.5/liquibase-core-2.0.5.jar!/" />
           <root url="jar://$MAVEN_REPOSITORY$/org/hibernate/hibernate-commons-annotations/3.2.0.Final/hibernate-commons-annotations-3.2.0.Final.jar!/" />
           <root url="jar://$MAVEN_REPOSITORY$/org/hibernate/hibernate-entitymanager/3.6.10.Final/hibernate-entitymanager-3.6.10.Final.jar!/" />
@@ -411,6 +409,8 @@
           <root url="jar://$MAVEN_REPOSITORY$/com/amazonaws/jmespath-java/1.11.294/jmespath-java-1.11.294.jar!/" />
           <root url="jar://$MAVEN_REPOSITORY$/com/amazonaws/aws-java-sdk-transcribe/1.11.294/aws-java-sdk-transcribe-1.11.294.jar!/" />
           <root url="jar://$MAVEN_REPOSITORY$/com/amazonaws/aws-java-sdk/1.11.294/aws-java-sdk-1.11.294.jar!/" />
+          <root url="jar://$MAVEN_REPOSITORY$/org/springframework/security/spring-security-web/3.2.9.RELEASE/spring-security-web-3.2.9.RELEASE.jar!/" />
+          <root url="jar://$MAVEN_REPOSITORY$/org/springframework/security/spring-security-core/3.2.9.RELEASE/spring-security-core-3.2.9.RELEASE.jar!/" />
         </CLASSES>
         <JAVADOC />
         <SOURCES>

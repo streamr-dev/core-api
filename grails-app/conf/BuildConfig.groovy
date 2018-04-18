@@ -119,7 +119,7 @@ grails.project.dependency.resolution = {
 			excludes('spring-security-web')
 		}
 		runtime(':database-migration:1.4.0')
-		runtime(":spring-security-core:2.0-RC4")
+		runtime(":spring-security-core:2.0.0")
 		runtime(":resources:1.2.14")
 		runtime(":cached-resources:1.0")
 		runtime(":zipped-resources:1.0")

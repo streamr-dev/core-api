@@ -1,12 +1,8 @@
 package com.unifina.controller.security
 
-import com.unifina.security.StreamrApi
 import grails.converters.JSON
 import grails.plugin.springsecurity.SpringSecurityUtils
 import grails.plugin.springsecurity.annotation.Secured
-
-import javax.servlet.http.HttpServletResponse
-
 import org.springframework.security.authentication.AccountExpiredException
 import org.springframework.security.authentication.CredentialsExpiredException
 import org.springframework.security.authentication.DisabledException
@@ -14,6 +10,8 @@ import org.springframework.security.authentication.LockedException
 import org.springframework.security.core.context.SecurityContextHolder as SCH
 import org.springframework.security.web.WebAttributes
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter
+
+import javax.servlet.http.HttpServletResponse
 
 @Secured(["permitAll"])
 class LoginController {
@@ -54,8 +52,16 @@ class LoginController {
 
 		String view = 'auth'
 		String postUrl = "${request.contextPath}${config.apf.filterProcessesUrl}"
-		render view: view, model: [postUrl: postUrl,
-		                           rememberMeParameter: config.rememberMe.parameter]
+		def redirect = params.redirect
+		if (redirect != null) {
+			redirect = redirect.trim()
+			if (!LoginRedirectValidator.isValid(redirect)) {
+				redirect = null
+			}
+		}
+		render view: view, model: [postUrl            : postUrl,
+								   rememberMeParameter: config.rememberMe.parameter,
+								   redirect           : redirect]
 	}
 
 	/**
