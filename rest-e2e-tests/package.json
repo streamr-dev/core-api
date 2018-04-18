@@ -7,7 +7,7 @@
     "test": "mocha *.test.js --recursive"
   },
   "author": "",
-  "license": "UNLICENSED",
+  "license": "AGPL",
   "dependencies": {
     "ajv": "^6.4.0",
     "chai": "^4.1.2",
