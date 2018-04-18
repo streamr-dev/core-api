@@ -899,15 +899,15 @@ describe('Products API', () => {
 
         it('verifies file size', (done) => {
             // TODO: Unpack file, how to do without going to File system?
-            const wstream = fs.createWriteStream('./rest-e2e-tests/test-data/bigfile.txt')
+            const wstream = fs.createWriteStream('./test-data/bigfile.txt')
 
-            fs.createReadStream('./rest-e2e-tests/test-data/bigfile.txt.gz')
+            fs.createReadStream('./test-data/bigfile.txt.gz')
                 .pipe(zlib.createUnzip())
                 .pipe(wstream)
 
             wstream.on('finish', async () => {
                 const response = await Streamr.api.v1.products
-                    .uploadImage(createdProductId, fs.createReadStream('./rest-e2e-tests/test-data/bigfile.txt'))
+                    .uploadImage(createdProductId, fs.createReadStream('./test-data/bigfile.txt'))
                     .withAuthToken(AUTH_TOKEN)
                     .call()
                 await assertResponseIsError(response, 413, 'FILE_TOO_LARGE')
@@ -918,7 +918,7 @@ describe('Products API', () => {
 
         it('verifies file contents', async () => {
             const response = await Streamr.api.v1.products
-                .uploadImage(createdProductId,  fs.createReadStream('./rest-e2e-tests/test-data/file.txt'))
+                .uploadImage(createdProductId,  fs.createReadStream('./test-data/file.txt'))
                 .withAuthToken(AUTH_TOKEN)
                 .call()
             await assertResponseIsError(response, 415, 'UNSUPPORTED_FILE_TYPE')
@@ -930,7 +930,7 @@ describe('Products API', () => {
 
             before(async () => {
                 response = await Streamr.api.v1.products
-                    .uploadImage(createdProductId,  fs.createReadStream('./rest-e2e-tests/test-data/500-by-400-image.png'))
+                    .uploadImage(createdProductId,  fs.createReadStream('./test-data/500-by-400-image.png'))
                     .withAuthToken(AUTH_TOKEN)
                     .call()
                 json = await response.json()
@@ -971,7 +971,7 @@ describe('Products API', () => {
 
             it('can replace existing image with a new image', async () => {
                 const response2 = await Streamr.api.v1.products
-                    .uploadImage(createdProductId,  fs.createReadStream('./rest-e2e-tests/test-data/500-by-400-image-2.png'))
+                    .uploadImage(createdProductId,  fs.createReadStream('./test-data/500-by-400-image-2.png'))
                     .withAuthToken(AUTH_TOKEN)
                     .call()
                 const json2 = await response2.json()

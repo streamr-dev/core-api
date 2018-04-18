@@ -2,7 +2,7 @@
   <configuration default="false" name="all rest-e2e-tests" type="mocha-javascript-test-runner" factoryName="Mocha">
     <node-interpreter>project</node-interpreter>
     <node-options />
-    <working-directory>$PROJECT_DIR$</working-directory>
+    <working-directory>$PROJECT_DIR$/rest-e2e-tests</working-directory>
     <pass-parent-env>true</pass-parent-env>
     <envs />
     <ui>bdd</ui>
