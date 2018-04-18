@@ -55,10 +55,7 @@ class LoginController {
 		def redirect = params.redirect
 		if (redirect != null) {
 			redirect = redirect.trim()
-			// Match https://www.streamr.com/ with required subdomain.
-			// Subdomain can be anything within [a-zA-Z0-9]
-			// Note required trailing slash!
-			if (!redirect.matches("^https://([a-zA-Z0-9]*)?\\.streamr\\.com/.*")) {
+			if (!LoginRedirectValidator.isValid(redirect)) {
 				redirect = null
 			}
 		}
