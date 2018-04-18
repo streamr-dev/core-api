@@ -122,7 +122,7 @@ export class PreviewView extends Component<Props, State> {
         })
     }
 
-    static prettyPrintDate = (timestamp: ?number, timezone: ?string) => timestamp && moment.tz(timestamp, timezone).format('YYYY-DD-MM HH:mm:ss')
+    static prettyPrintDate = (timestamp: ?number, timezone: ?string) => timestamp && moment.tz(timestamp, timezone).format('YYYY-MM-DD HH:mm:ss')
 
     render() {
         const tz = this.props.currentUser && this.props.currentUser.timezone || moment.tz.guess()
