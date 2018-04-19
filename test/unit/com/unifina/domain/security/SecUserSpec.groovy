@@ -32,17 +32,31 @@ class SecUserSpec extends Specification {
 		u1.hashCode() != u2.hashCode()
 	}
 
-	def "isDevOpsRole() == false if user does not have ROLE_DEV_OPS SecRole"() {
+	def "isDevOps() == false if user does not have ROLE_DEV_OPS SecRole"() {
 		expect:
 		!new SecUser().devOps
 	}
 
-	def "isDevOpsRole() == true if user does not have ROLE_DEV_OPS SecRole"() {
+	def "isDevOps() == true if user has ROLE_DEV_OPS SecRole"() {
 		def user = new SecUser().save(failOnError: true, validate: false)
 		def role = new SecRole(authority: "ROLE_DEV_OPS").save(failOnError: true)
 		new SecUserSecRole(secUser: user, secRole: role).save(failOnError: true)
 
 		expect:
 		user.devOps
+	}
+
+	def "isAdmin() == false if user does not have ROLE_ADMIN SecRole"() {
+		expect:
+		!new SecUser().isAdmin()
+	}
+
+	def "isAdmin() == true if user has ROLE_ADMIN SecRole"() {
+		def user = new SecUser().save(failOnError: true, validate: false)
+		def role = new SecRole(authority: "ROLE_ADMIN").save(failOnError: true)
+		new SecUserSecRole(secUser: user, secRole: role).save(failOnError: true)
+
+		expect:
+		user.isAdmin()
 	}
 }

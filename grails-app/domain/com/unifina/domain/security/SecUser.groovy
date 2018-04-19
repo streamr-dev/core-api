@@ -40,6 +40,10 @@ class SecUser implements Userish {
 		"ROLE_DEV_OPS" in authorities*.authority
 	}
 
+	boolean isAdmin() {
+		"ROLE_ADMIN" in authorities*.authority
+	}
+
 	Map toMap() {
 		return [
 			name           : name,

@@ -14,6 +14,10 @@ class RemoveUsersProductsController {
 			render(status: 400)
 			return
 		}
+		if (!request.apiUser.isAdmin()) {
+			render(status: 401)
+			return
+		}
 		productService.removeUsersProducts(params.username)
 		render(status: 204)
 	}
