@@ -52,6 +52,34 @@ class ProductServiceSpec extends Specification {
 		product.save(failOnError: true, validate: true)
 	}
 
+	void "removeUsersProducts()"() {
+		setupStreams()
+		setupProduct()
+		Product troll = new Product(
+			name: "troll product",
+			description: "description",
+			ownerAddress: "0x0000000000000000000000000000000000000000",
+			beneficiaryAddress: "0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF",
+			streams: s1 != null ? [s1, s2, s3] : [],
+			pricePerSecond: 10,
+			category: category,
+			state: Product.State.NOT_DEPLOYED,
+			blockNumber: 40000,
+			blockIndex: 30,
+			owner: "sylvester"
+		)
+		troll.id = "product-id-troll"
+		troll.save(failOnError: true, validate: true)
+		service.subscriptionService = Stub(SubscriptionService)
+
+		when:
+		service.removeUsersProducts("sylvester")
+
+		then:
+		Product.get("product-id-troll") == null
+		Product.get("product-id") != null
+	}
+
 	void "list() delegates to ApiService#list"() {
 		def apiService = service.apiService = Mock(ApiService)
 		def me = new SecUser(username: "me@streamr.com")
