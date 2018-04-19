@@ -1,0 +1,33 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Subscription",
+  "description": "A subscription to a product",
+  "type": "object",
+  "required": [
+    "address",
+    "endsAt",
+    "product"
+  ],
+  "properties": {
+    "address": {
+      "description": "Ethereum address of subscriber",
+      "$ref": "#/definitions/ethereumAddress"
+    },
+    "endsAt": {
+      "description": "Timestamp until which this subscription is valid",
+      "type": "string",
+      "format": "date-time"
+    },
+    "product": {
+      "description": "Product of subscription",
+      "$ref": "Product"
+    }
+  },
+  "additionalProperties": false,
+  "definitions": {
+    "ethereumAddress": {
+      "type": "string",
+      "pattern": "^0x[a-fA-F0-9]{40}$"
+    }
+  }
+}

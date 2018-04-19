@@ -1,0 +1,40 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Category",
+  "description": "A category for products",
+  "type": "object",
+  "required": [
+    "id",
+    "name",
+    "imageUrl"
+  ],
+  "properties": {
+    "id": {
+      "description": "Unique identifier for a category",
+      "$ref": "#/definitions/resourceIdentifier"
+    },
+    "name": {
+      "description": "Name of the category",
+      "type": "string",
+      "maxLength": 255
+    },
+    "imageUrl": {
+      "description": "URL for category image",
+      "type": [
+        "null",
+        "string"
+      ],
+      "format": "uri",
+      "maxLength": 2048
+    }
+  },
+  "additionalProperties": false,
+  "definitions": {
+    "resourceIdentifier": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 255,
+      "pattern": "^[a-zA-Z0-9-_]+$"
+    }
+  }
+}

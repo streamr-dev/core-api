@@ -1,11 +1,12 @@
 package com.unifina.api
 
+import com.unifina.domain.security.Permission
 import grails.validation.Validateable
 import groovy.transform.CompileStatic
 
 @Validateable
 abstract class ListParams {
-	public static final int MAX_LIMIT = 100
+	public static final int MAX_LIMIT = 1000
 
 	String search
 	String sortBy
@@ -13,6 +14,7 @@ abstract class ListParams {
 	Integer max = MAX_LIMIT
 	Integer offset = 0
 	Boolean publicAccess = false
+	Permission.Operation operation = Permission.Operation.READ
 
 	static constraints = {
 		search(nullable: true, blank: false)

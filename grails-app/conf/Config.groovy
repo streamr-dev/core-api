@@ -212,7 +212,6 @@ environments {
  * API & CORS config
  */
 cors.url.pattern = ['/api/*', '/contact/send']
-cors.headers = ['Access-Control-Allow-Origin': '*']
 streamr.apiKey.revokeNotificationStream = "revoked-api-keys"
 
 /**
@@ -463,6 +462,12 @@ environments {
 		recaptchainvisible.secret = System.getProperty("recaptchainvisible.secret")
 	}
 }
+
+/**
+ * S3 File upload
+ */
+streamr.fileUpload.s3.region = "eu-west-1"
+streamr.fileUpload.s3.bucket = "streamr-dev-public"
 
 /**
  * Signup Configs

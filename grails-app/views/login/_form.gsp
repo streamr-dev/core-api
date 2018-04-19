@@ -15,8 +15,10 @@
 			<input type="password" name="j_password" id="password" class="form-control input-lg" placeholder="Password">
 			
 		</div> <!-- / Password -->
-		
-		
+
+		<g:if test="${redirect}">
+			<input type="hidden" name="spring-security-redirect" value="${redirect}">
+		</g:if>
 		
 		<div class="form-actions">
 			<input id="loginButton" type="submit" value="${message(code:'springSecurity.login.button')}" class="btn btn-primary btn-block btn-lg">

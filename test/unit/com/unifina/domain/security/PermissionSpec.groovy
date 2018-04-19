@@ -19,4 +19,16 @@ class PermissionSpec extends Specification {
 		expect:
 		new Permission(canvas: new Canvas()).validate()
 	}
+
+	void "all items in resourceFields are defined as fields"() {
+		Permission p = new Permission()
+
+		when:
+		Permission.resourceFields.each {
+			p[it] // throws if field doesn't exist
+		}
+
+		then:
+		noExceptionThrown()
+	}
 }
