@@ -14,15 +14,9 @@ class ProductService {
 	SubscriptionService subscriptionService
 
 	void removeUsersProducts(String username) {
-		def query = Product.where {
-			owner == username
-		}
-		def all = query.findAll()
+		def all = Product.findAllByOwner(username)
 		all.each{ it ->
 			Product product = (Product) it
-			product.streams.toArray().each{ Stream stream ->
-				removeStreamFromProduct(product, stream)
-			}
 			product.delete(flush: true)
 		}
 	}

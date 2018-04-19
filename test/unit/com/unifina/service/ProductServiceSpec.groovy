@@ -70,7 +70,6 @@ class ProductServiceSpec extends Specification {
 		)
 		troll.id = "product-id-troll"
 		troll.save(failOnError: true, validate: true)
-		service.subscriptionService = Stub(SubscriptionService)
 
 		when:
 		service.removeUsersProducts("sylvester")
