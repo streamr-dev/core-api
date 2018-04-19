@@ -76,7 +76,7 @@ databaseChangeLog = {
 		}
 
 		insert(tableName: "sec_user_sec_role") {
-			column(name: "sec_role_id", valueNumeric: 4) // ROLE_DEV_OPS
+			column(name: "sec_role_id", valueNumeric: 7) // ROLE_DEV_OPS
 			column(name: 'sec_user_id', valueNumeric: userId)
 		}
 	}
