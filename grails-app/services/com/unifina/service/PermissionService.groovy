@@ -481,9 +481,12 @@ class PermissionService {
 		throw new AccessControlException("${violator?.username}(id ${violator?.id}) has no 'share' permission to $resource!")
 	}
 
-	@CompileStatic
 	private static Object getResourceFromPermission(Permission p) {
-		return Permission.resourceFields.find { p[it] }
+		String field = Permission.resourceFields.find { p[it] }
+		if (field == null) {
+			throw new IllegalArgumentException("No known resource attached to " + p)
+		}
+		return p[field]
 	}
 
 	@CompileStatic
@@ -502,7 +505,7 @@ class PermissionService {
 		} else if (resource instanceof Stream) {
 			return "stream"
 		} else {
-			throw new IllegalArgumentException("Unexpected resource class: " + resource)
+			throw new IllegalArgumentException("Unexpected resource class: " + resource.getClass())
 		}
 	}
 
