@@ -1,5 +1,6 @@
 package com.unifina.service
 
+import com.unifina.BeanMockingSpecification
 import com.unifina.domain.security.Permission
 import com.unifina.domain.security.SecUser
 import com.unifina.domain.signalpath.Canvas
@@ -11,14 +12,14 @@ import com.unifina.signalpath.SignalPathRunner
 import com.unifina.utils.Globals
 import grails.test.mixin.Mock
 import grails.test.mixin.TestFor
-import spock.lang.Specification
 
 @TestFor(SignalPathService)
 @Mock([SecUser, Canvas, Serialization])
-class SignalPathServiceSpec extends Specification {
+class SignalPathServiceSpec extends BeanMockingSpecification {
 
 	SecUser me
 	Canvas c1
+	CanvasService canvasService
 
 	def setup() {
 		me = new SecUser(username: "me@streamr.com", password: "pw", name: "name", timezone: "Europe/Helsinki")
@@ -33,7 +34,7 @@ class SignalPathServiceSpec extends Specification {
 		c1.save(failOnError: true)
 		assert c1.serialization.id != null
 
-		service.canvasService = Mock(CanvasService)
+		canvasService = mockBean(CanvasService, Mock(CanvasService))
 		service.servletContext = [:]
 	}
 
@@ -113,7 +114,7 @@ class SignalPathServiceSpec extends Specification {
 		RuntimeRequest req = service.buildRuntimeRequest([type: 'test'], "canvases/$c1.id", me)
 
 		then:
-		1 * service.canvasService.authorizedGetById(c1.id, me, Permission.Operation.READ) >> c1
+		1 * canvasService.authorizedGetById(c1.id, me, Permission.Operation.READ) >> c1
 		req.getType() == 'test'
 		req.get("type") == 'test'
 		req.getCheckedOperations().contains(Permission.Operation.READ)
