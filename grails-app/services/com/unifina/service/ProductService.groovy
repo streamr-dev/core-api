@@ -15,8 +15,15 @@ class ProductService {
 
 	void removeUsersProducts(String username) {
 		def all = Product.findAllByOwner(username)
-		all.each{ it ->
-			Product product = (Product) it
+		all.toArray().each{ Product product ->
+			// The Product X is deleted
+			// - Remove all entries of the Product-Subscription pivot table related to Product X are deleted
+			// - Remove all subscriptions of the Product X are deleted
+			// - Remove all permissions related to the above subscriptions are deleted
+			// - Remove all streams from product
+			product.streams.toArray().each{ Stream stream ->
+				removeStreamFromProduct(product, stream)
+			}
 			product.delete(flush: true)
 		}
 	}

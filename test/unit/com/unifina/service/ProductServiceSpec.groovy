@@ -3,7 +3,10 @@ package com.unifina.service
 import com.unifina.api.*
 import com.unifina.domain.data.Stream
 import com.unifina.domain.marketplace.Category
+import com.unifina.domain.marketplace.FreeSubscription
+import com.unifina.domain.marketplace.PaidSubscription
 import com.unifina.domain.marketplace.Product
+import com.unifina.domain.security.IntegrationKey
 import com.unifina.domain.security.Permission
 import com.unifina.domain.security.SecUser
 import grails.test.mixin.Mock
@@ -52,9 +55,10 @@ class ProductServiceSpec extends Specification {
 		product.save(failOnError: true, validate: true)
 	}
 
-	void "removeUsersProducts()"() {
+	void "remove users products and related entities"() {
 		setupStreams()
 		setupProduct()
+		SecUser user = new SecUser(username: "sylvester").save(failOnError: true, validate: false)
 		Product troll = new Product(
 			name: "troll product",
 			description: "description",
@@ -70,6 +74,31 @@ class ProductServiceSpec extends Specification {
 		)
 		troll.id = "product-id-troll"
 		troll.save(failOnError: true, validate: true)
+
+		new IntegrationKey(
+			user: user,
+			name: "ik1",
+			service: IntegrationKey.Service.ETHEREUM_ID,
+			idInService: "0x0000000000000000000000000000000000000005"
+		).save(failOnError: true, validate: false)
+
+		new IntegrationKey(
+			user: user,
+			name: "ik2",
+			service: IntegrationKey.Service.ETHEREUM_ID,
+			idInService: "0x000000000000000000000000000000000000000C"
+		).save(failOnError: true, validate: false)
+
+		def s1 = new PaidSubscription(product: troll, user: user, address: "0x0000000000000000000000000000000000000005")
+			.save(failOnError: true, validate: false)
+		def s2 = new PaidSubscription(product: troll, user: user, address: "0x000000000000000000000000000000000000000C")
+			.save(failOnError: true, validate: false)
+		def s3 = new FreeSubscription(product: troll, user: user, address: "0x0000000000000000000000000000000000000005")
+			.save(failOnError: true, validate: false)
+		def s4 = new FreeSubscription(product: troll, user: user, address: "0x000000000000000000000000000000000000000C")
+			.save(failOnError: true, validate: false)
+
+		service.subscriptionService = Mock(SubscriptionService)
 
 		when:
 		service.removeUsersProducts("sylvester")
