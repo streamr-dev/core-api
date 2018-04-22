@@ -20,7 +20,7 @@ class PermissionServiceIntegrationSpec extends IntegrationSpec {
 
 	PermissionService service
 
-	SecUser me, anotherUser, stranger
+	SecUser me, anotherUser, stranger, someone
 	Key anonymousKey
 
 	Dashboard dashAllowed, dashRestricted, dashOwned, dashPublic
@@ -32,6 +32,7 @@ class PermissionServiceIntegrationSpec extends IntegrationSpec {
 		SecUser.findByUsername("me-permission-service-integration-spec@streamr.com")?.delete(flush: true)
 		SecUser.findByUsername("him-permission-service-integration-spec@streamr.com")?.delete(flush: true)
 		SecUser.findByUsername("stranger-permission-service-integration-spec@streamr.com")?.delete(flush: true)
+		SecUser.findByUsername("someone-service-integration-spec@streamr.com")?.delete(flush: true)
 
 		// Users
 		me = new SecUser(
@@ -51,6 +52,13 @@ class PermissionServiceIntegrationSpec extends IntegrationSpec {
 		stranger = new SecUser(
 			username: "stranger-permission-service-integration-spec@streamr.com",
 			name: "stranger",
+			password: "x",
+			timezone: "Europe/Helsinki",
+		).save(failOnError: true)
+
+		someone = new SecUser(
+			username: "someone-service-integration-spec@streamr.com",
+			name: "someone",
 			password: "x",
 			timezone: "Europe/Helsinki",
 		).save(failOnError: true)
@@ -76,7 +84,6 @@ class PermissionServiceIntegrationSpec extends IntegrationSpec {
 	}
 
 	void cleanup() {
-
 		Permission.findAllByDashboard(dashAllowed)*.delete(flush: true)
 		Permission.findAllByDashboard(dashRestricted)*.delete(flush: true)
 		Permission.findAllByDashboard(dashOwned)*.delete(flush: true)
@@ -92,6 +99,7 @@ class PermissionServiceIntegrationSpec extends IntegrationSpec {
 		me?.delete(flush: true)
 		anotherUser?.delete(flush: true)
 		stranger?.delete(flush: true)
+		someone?.delete(flush: true)
 	}
 
 
@@ -140,5 +148,29 @@ class PermissionServiceIntegrationSpec extends IntegrationSpec {
 		then: "only 'share' access is revoked"
 		service.get(Dashboard, stranger) == [dashOwned]
 		service.get(Dashboard, stranger, Permission.Operation.SHARE) == []
+	}
+
+	void "get does not return expired permissions"() {
+		def p1 = service.systemGrant(someone, dashRestricted, Permission.Operation.READ)
+		def p2 = service.systemGrant(someone, dashOwned, Permission.Operation.READ)
+		p1.endsAt = new Date(System.currentTimeMillis() - 1000*60000)
+		p2.endsAt = new Date(0)
+		p1.save(failOnError: true)
+		p2.save(failOnError: true)
+
+		expect:
+		service.get(Dashboard, someone, Permission.Operation.READ) == []
+	}
+
+	void "get returns non-expired permissions"() {
+		def p1 = service.systemGrant(someone, dashRestricted, Permission.Operation.READ)
+		def p2 = service.systemGrant(someone, dashOwned, Permission.Operation.READ)
+		p1.endsAt = new Date(System.currentTimeMillis() + 10000)
+		p2.endsAt = new Date(System.currentTimeMillis() + 1000000)
+		p1.save(failOnError: true)
+		p2.save(failOnError: true)
+
+		expect:
+		service.get(Dashboard, someone, Permission.Operation.READ) as Set == [dashOwned, dashRestricted] as Set
 	}
 }

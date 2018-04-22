@@ -256,7 +256,8 @@ class SubscriptionServiceSpec extends Specification {
 		assert Permission.count() == 0
 
 		when:
-		service.subscribeToFreeProduct(product, user, new Date())
+		def endDate = new Date()
+		service.subscribeToFreeProduct(product, user, endDate)
 
 		then:
 		Permission.findAll()*.toInternalMap() as Set == [
@@ -264,13 +265,15 @@ class SubscriptionServiceSpec extends Specification {
 				operation: "READ",
 				user: 1L,
 				stream: "stream-1",
-				subscription: 1L
+				subscription: 1L,
+				endsAt: endDate
 			],
 			[
 				operation: "READ",
 				user: 1L,
 				stream: "stream-2",
-				subscription: 1L
+				subscription: 1L,
+				endsAt: endDate
 			]
 		] as Set
 	}
