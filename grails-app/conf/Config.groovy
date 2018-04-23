@@ -466,8 +466,8 @@ environments {
 /**
  * S3 File upload
  */
-streamr.fileUpload.s3.region = "eu-west-1"
-streamr.fileUpload.s3.bucket = "streamr-dev-public"
+streamr.fileUpload.s3.region = System.getProperty("streamr.fileUpload.s3.region") ?: "eu-west-1"
+streamr.fileUpload.s3.bucket = System.getProperty("streamr.fileUpload.s3.bucket") ?: "streamr-dev-public"
 
 /**
  * Signup Configs
