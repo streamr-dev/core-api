@@ -35,7 +35,6 @@ class SignalPathService {
 	def serializationService
 	StreamService streamService
 	PermissionService permissionService
-	CanvasService canvasService
 	ApiService apiService
 
 	private static final Logger log = Logger.getLogger(SignalPathService.class)
@@ -82,6 +81,7 @@ class SignalPathService {
 
 	@Transactional
 	void deleteReferences(SignalPath signalPath, boolean delayed) {
+		CanvasService canvasService = Holders.getApplicationContext().getBean(CanvasService) // Cannot use dependency injection because of circular dependency! Do not turn into instance variable.
 		canvasService.deleteCanvas(signalPath.canvas, SecUser.load(signalPath.globals.userId), delayed)
 	}
 
@@ -227,6 +227,7 @@ class SignalPathService {
 		RuntimeRequest.PathReader pathReader = RuntimeRequest.getPathReader(path)
 
 		// All runtime requests require at least read permission
+		CanvasService canvasService = Holders.getApplicationContext().getBean(CanvasService) // Cannot use dependency injection because of circular dependency! Do not turn into instance variable.
 		Canvas canvas = canvasService.authorizedGetById(pathReader.readCanvasId(), user, Permission.Operation.READ)
 		Set<Permission.Operation> checkedOperations = new HashSet<>()
 		checkedOperations.add(Permission.Operation.READ)
