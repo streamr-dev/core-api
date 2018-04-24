@@ -96,7 +96,6 @@ class PermissionServiceSpec extends Specification {
 		service.canRead(myKey, dashAllowed)
 	}
 
-
 	void "access denied through key to non-permitted Dashboard"() {
 		expect:
 		!service.canRead(myKey, dashRestricted)
@@ -412,5 +411,23 @@ class PermissionServiceSpec extends Specification {
 		then:
 		!Permission.exists(dashAnonymousReadPermission.id)
 		!service.canRead(null, dashPublic)
+	}
+
+	void "check() returns false if permission with endsAt set in past"() {
+		def p = service.systemGrant(stranger, dashOwned, Operation.READ)
+		p.endsAt = new Date(0)
+		p.save(failOnError: true)
+
+		expect:
+		!service.check(stranger, dashOwned, Operation.READ)
+	}
+
+	void "check() returns true if permission with endsAt set in future"() {
+		def p = service.systemGrant(stranger, dashOwned, Operation.READ)
+		p.endsAt = new Date(System.currentTimeMillis() + 60000)
+		p.save(failOnError: true)
+
+		expect:
+		service.check(stranger, dashOwned, Operation.READ)
 	}
 }
