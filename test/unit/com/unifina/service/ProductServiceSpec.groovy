@@ -72,8 +72,23 @@ class ProductServiceSpec extends Specification {
 			blockIndex: 30,
 			owner: "sylvester"
 		)
-		troll.id = "product-id-troll"
+		troll.id = "product-id-troll-1"
 		troll.save(failOnError: true, validate: true)
+		Product troll2 = new Product(
+			name: "troll product",
+			description: "description",
+			ownerAddress: "0x0000000000000000000000000000000000000000",
+			beneficiaryAddress: "0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF",
+			streams: [],
+			pricePerSecond: 10,
+			category: category,
+			state: Product.State.NOT_DEPLOYED,
+			blockNumber: 40000,
+			blockIndex: 30,
+			owner: "sylvester"
+		)
+		troll2.id = "product-id-troll-2"
+		troll2.save(failOnError: true, validate: true)
 
 		new IntegrationKey(
 			user: user,
@@ -93,9 +108,9 @@ class ProductServiceSpec extends Specification {
 			.save(failOnError: true, validate: false)
 		def ps2 = new PaidSubscription(product: troll, user: user, address: "0x000000000000000000000000000000000000000C")
 			.save(failOnError: true, validate: false)
-		def fs1 = new FreeSubscription(product: troll, user: user, address: "0x0000000000000000000000000000000000000005")
+		def fs1 = new FreeSubscription(product: troll2, user: user, address: "0x0000000000000000000000000000000000000005")
 			.save(failOnError: true, validate: false)
-		def fs2 = new FreeSubscription(product: troll, user: user, address: "0x000000000000000000000000000000000000000C")
+		def fs2 = new FreeSubscription(product: troll2, user: user, address: "0x000000000000000000000000000000000000000C")
 			.save(failOnError: true, validate: false)
 
 		service.subscriptionService = new SubscriptionService()
@@ -106,7 +121,8 @@ class ProductServiceSpec extends Specification {
 		service.removeUsersProducts("sylvester")
 
 		then:
-		Product.get("product-id-troll") == null
+		Product.get("product-id-troll-1") == null
+		Product.get("product-id-troll-2") == null
 		Product.get("product-id") != null
 		Stream.get(s1.id) != null
 		Stream.get(s2.id) != null
