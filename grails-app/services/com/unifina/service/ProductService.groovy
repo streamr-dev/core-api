@@ -3,6 +3,7 @@ package com.unifina.service
 import com.unifina.api.*
 import com.unifina.domain.data.Stream
 import com.unifina.domain.marketplace.Product
+import com.unifina.domain.marketplace.Subscription
 import com.unifina.domain.security.Permission
 import com.unifina.domain.security.SecUser
 import grails.compiler.GrailsCompileStatic
@@ -16,15 +17,22 @@ class ProductService {
 	void removeUsersProducts(String username) {
 		def all = Product.findAllByOwner(username)
 		all.toArray().each{ Product product ->
-			// The Product X is deleted
-			// - Remove all entries of the Product-Subscription pivot table related to Product X are deleted
-			// - Remove all subscriptions of the Product X are deleted
-			// - Remove all permissions related to the above subscriptions are deleted
-			// - Remove all streams from product
-			product.streams.toArray().each{ Stream stream ->
-				removeStreamFromProduct(product, stream)
-			}
 			product.delete(flush: true)
+			// Delete users all subscriptions
+			def user = SecUser.where {
+				username == username
+			}.find()
+			def subscriptions = subscriptionService.getSubscriptionsOfUser(user)
+			subscriptions.toArray().each { Subscription subscription ->
+				subscriptionService.deletePermissions(subscription)
+				subscription.delete(flush: true)
+			}
+			// Remove all streams from product
+			if (product.streams != null) {
+				product.streams.toArray().each{ Stream stream ->
+					removeStreamFromProduct(product, stream)
+				}
+			}
 		}
 	}
 

@@ -15,7 +15,7 @@ import spock.lang.Specification
 import spock.lang.Unroll
 
 @TestFor(ProductService)
-@Mock([Category, Product])
+@Mock([Category, Product, IntegrationKey, FreeSubscription, PaidSubscription])
 class ProductServiceSpec extends Specification {
 	Stream s1, s2, s3, s4
 	Category category
@@ -62,10 +62,10 @@ class ProductServiceSpec extends Specification {
 		Product troll = new Product(
 			name: "troll product",
 			description: "description",
-			ownerAddress: "0x0000000000000000000000000000000000000000",
-			beneficiaryAddress: "0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF",
+			ownerAddress: null,
+			beneficiaryAddress: null,
 			streams: s1 != null ? [s1, s2, s3] : [],
-			pricePerSecond: 10,
+			pricePerSecond: 0,
 			category: category,
 			state: Product.State.NOT_DEPLOYED,
 			blockNumber: 40000,
@@ -89,16 +89,18 @@ class ProductServiceSpec extends Specification {
 			idInService: "0x000000000000000000000000000000000000000C"
 		).save(failOnError: true, validate: false)
 
-		def s1 = new PaidSubscription(product: troll, user: user, address: "0x0000000000000000000000000000000000000005")
+		def ps1 = new PaidSubscription(product: troll, user: user, address: "0x0000000000000000000000000000000000000005")
 			.save(failOnError: true, validate: false)
-		def s2 = new PaidSubscription(product: troll, user: user, address: "0x000000000000000000000000000000000000000C")
+		def ps2 = new PaidSubscription(product: troll, user: user, address: "0x000000000000000000000000000000000000000C")
 			.save(failOnError: true, validate: false)
-		def s3 = new FreeSubscription(product: troll, user: user, address: "0x0000000000000000000000000000000000000005")
+		def fs1 = new FreeSubscription(product: troll, user: user, address: "0x0000000000000000000000000000000000000005")
 			.save(failOnError: true, validate: false)
-		def s4 = new FreeSubscription(product: troll, user: user, address: "0x000000000000000000000000000000000000000C")
+		def fs2 = new FreeSubscription(product: troll, user: user, address: "0x000000000000000000000000000000000000000C")
 			.save(failOnError: true, validate: false)
 
-		service.subscriptionService = Mock(SubscriptionService)
+		service.subscriptionService = new SubscriptionService()
+		service.subscriptionService.permissionService = new PermissionService()
+		service.subscriptionService.subscribeToFreeProduct(troll, user, new Date())
 
 		when:
 		service.removeUsersProducts("sylvester")
@@ -106,6 +108,14 @@ class ProductServiceSpec extends Specification {
 		then:
 		Product.get("product-id-troll") == null
 		Product.get("product-id") != null
+		Stream.get(s1.id) != null
+		Stream.get(s2.id) != null
+		Stream.get(s3.id) != null
+		Stream.get(s4.id) != null
+		PaidSubscription.get(ps1.id) == null
+		PaidSubscription.get(ps2.id) == null
+		FreeSubscription.get(fs1.id) == null
+		FreeSubscription.get(fs2.id) == null
 	}
 
 	void "list() delegates to ApiService#list"() {

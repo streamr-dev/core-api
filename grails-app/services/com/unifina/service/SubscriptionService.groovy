@@ -91,11 +91,11 @@ class SubscriptionService {
 		return subscription
 	}
 
-	private static void deletePermissions(Subscription subscription) {
+	static void deletePermissions(Subscription subscription) {
 		streamPermissionsFor(subscription)*.delete()
 	}
 
-	private static void deletePermissions(Subscription subscription, Set<Stream> streams) {
+	static void deletePermissions(Subscription subscription, Set<Stream> streams) {
 		List<Permission> permissions = Permission.findAllBySubscriptionAndStreamInList(subscription, streams as List)
 		permissions*.delete()
 	}
