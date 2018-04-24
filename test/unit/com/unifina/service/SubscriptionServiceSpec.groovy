@@ -141,7 +141,8 @@ class SubscriptionServiceSpec extends Specification {
 		).save(failOnError: true, validate: false)
 
 		when:
-		service.onSubscribed(product, "0x0000000000000000000000000000000000000000", new Date())
+		def date = new Date()
+		service.onSubscribed(product, "0x0000000000000000000000000000000000000000", date)
 
 		then:
 		Permission.findAll()*.toInternalMap() as Set == [
@@ -149,13 +150,15 @@ class SubscriptionServiceSpec extends Specification {
 				operation: "READ",
 				user: 1L,
 				stream: "stream-1",
-				subscription: 1L
+				subscription: 1L,
+				endsAt: date
 			],
 			[
 				operation: "READ",
 				user: 1L,
 				stream: "stream-2",
-				subscription: 1L
+				subscription: 1L,
+				endsAt: date
 			]
 		] as Set
 	}
@@ -253,7 +256,8 @@ class SubscriptionServiceSpec extends Specification {
 		assert Permission.count() == 0
 
 		when:
-		service.subscribeToFreeProduct(product, user, new Date())
+		def endDate = new Date()
+		service.subscribeToFreeProduct(product, user, endDate)
 
 		then:
 		Permission.findAll()*.toInternalMap() as Set == [
@@ -261,13 +265,15 @@ class SubscriptionServiceSpec extends Specification {
 				operation: "READ",
 				user: 1L,
 				stream: "stream-1",
-				subscription: 1L
+				subscription: 1L,
+				endsAt: endDate
 			],
 			[
 				operation: "READ",
 				user: 1L,
 				stream: "stream-2",
-				subscription: 1L
+				subscription: 1L,
+				endsAt: endDate
 			]
 		] as Set
 	}
@@ -344,16 +350,17 @@ class SubscriptionServiceSpec extends Specification {
 	void "afterIntegrationKeyCreated() creates subscription-linked permissions for given integration key"() {
 		service.permissionService = new PermissionService()
 
+		def date = new Date()
 		def product2 = new Product(streams: [s3]).save(failOnError: true, validate: false)
 		def sub1 = new PaidSubscription(
 			address: "0x0000000000000000000000000000000000000000",
 			product: product,
-			endsAt: new Date()
+			endsAt: date
 		).save(failOnError: true, validate: true)
 		def sub2 = new PaidSubscription(
 			address: "0x0000000000000000000000000000000000000000",
 			product: product2,
-			endsAt: new Date()
+			endsAt: date
 		).save(failOnError: true, validate: true)
 
 		def integrationKey = new IntegrationKey(
@@ -372,18 +379,21 @@ class SubscriptionServiceSpec extends Specification {
 				user: 1L,
 				stream: "stream-1",
 				subscription: 1L,
+				endsAt: date
 		    ],
 			[
 				operation: "READ",
 				user: 1L,
 				stream: "stream-2",
 				subscription: 1L,
+				endsAt: date
 			],
 			[
 				operation: "READ",
 				user: 1L,
 				stream: "stream-3",
 				subscription: 2L,
+				endsAt: date
 			]
 		] as Set
 	}
@@ -404,16 +414,17 @@ class SubscriptionServiceSpec extends Specification {
 		).save(failOnError: true, validate: false)
 
 		setup: "create permissions"
-		service.onSubscribed(product, "0x0000000000000000000000000000000000000000", new Date()) // 1, 2
+		def date = new Date()
+		service.onSubscribed(product, "0x0000000000000000000000000000000000000000", date) // 1, 2
 
 		product.streams = [s1]
 		product.save(failOnError: true, validate: false)
-		service.onSubscribed(product, "0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF", new Date()) // 3
+		service.onSubscribed(product, "0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF", date) // 3
 
 		assert Permission.findAll()*.toInternalMap() as Set == [
-			[operation: "READ", subscription: 1L, user: 1L, stream: "stream-1"],
-			[operation: "READ", subscription: 1L, user: 1L, stream: "stream-2"],
-			[operation: "READ", subscription: 2L, user: 2L, stream: "stream-1"],
+			[operation: "READ", subscription: 1L, user: 1L, stream: "stream-1", endsAt: date],
+			[operation: "READ", subscription: 1L, user: 1L, stream: "stream-2", endsAt: date],
+			[operation: "READ", subscription: 2L, user: 2L, stream: "stream-1", endsAt: date],
 		] as Set
 
 		and: "change product"
@@ -424,10 +435,10 @@ class SubscriptionServiceSpec extends Specification {
 		service.afterProductUpdated(product)
 		then:
 		Permission.findAll()*.toInternalMap() as Set == [
-			[operation: "READ", subscription: 1L, user: 1L, stream: "stream-2"],
-			[operation: "READ", subscription: 1L, user: 1L, stream: "stream-3"],
-			[operation: "READ", subscription: 2L, user: 2L, stream: "stream-2"],
-			[operation: "READ", subscription: 2L, user: 2L, stream: "stream-3"],
+			[operation: "READ", subscription: 1L, user: 1L, stream: "stream-2", endsAt: date],
+			[operation: "READ", subscription: 1L, user: 1L, stream: "stream-3", endsAt: date],
+			[operation: "READ", subscription: 2L, user: 2L, stream: "stream-2", endsAt: date],
+			[operation: "READ", subscription: 2L, user: 2L, stream: "stream-3", endsAt: date],
 		] as Set
 	}
 }

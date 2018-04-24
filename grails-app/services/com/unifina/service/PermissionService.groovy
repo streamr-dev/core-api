@@ -122,6 +122,10 @@ class PermissionService {
 					eq(userProp, userish)
 				}
 			}
+			or {
+				isNull("endsAt")
+				gt("endsAt", new Date())
+			}
 		}.toList()
 	}
 
@@ -191,6 +195,10 @@ class PermissionService {
 					if (isUser) {
 						eq(userProp, userish)
 					}
+				}
+				or {
+					isNull("endsAt")
+					gt("endsAt", new Date())
 				}
 			}
 		}
@@ -411,6 +419,10 @@ class PermissionService {
 					String userProp = getUserPropertyName(userish)
 					eq(userProp, userish)
 				}
+			}
+			or {
+				isNull("endsAt")
+				gt("endsAt", new Date())
 			}
 		}
 		return !p.empty
