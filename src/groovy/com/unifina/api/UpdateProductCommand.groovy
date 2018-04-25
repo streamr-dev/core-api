@@ -47,7 +47,7 @@ class UpdateProductCommand {
 		product.previewStream = previewStream
 		product.previewConfigJson = previewConfigJson
 
-		if (product.state == Product.State.NOT_DEPLOYED) {
+		if (product.pricePerSecond > 0 && product.state == Product.State.NOT_DEPLOYED) {
 			product.ownerAddress = ownerAddress
 			product.beneficiaryAddress = beneficiaryAddress
 			product.pricePerSecond = pricePerSecond

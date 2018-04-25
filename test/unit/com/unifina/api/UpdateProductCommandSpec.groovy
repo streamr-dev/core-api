@@ -61,7 +61,36 @@ class UpdateProductCommandSpec extends Specification {
 		)
 	}
 
-	void "updateProduct() updates non-blockchain fields of deployed Product"() {
+	void "updateProduct() updates only non-blockchain fields of free Product"() {
+		product.state = Product.State.NOT_DEPLOYED
+		product.pricePerSecond = 0
+
+		when:
+		command.updateProduct(product)
+
+		then:
+		product.toMap() == [
+			id: "product-id",
+			state: "NOT_DEPLOYED",
+			created: null,
+			updated: null,
+			owner: "owner",
+			name: "new name",
+			description: "new description",
+			imageUrl: "image.jpg",
+			category: "new-category-id",
+			streams: ["new-stream-id"],
+			previewStream: "new-stream-id",
+			previewConfigJson: "{newConfig: true}",
+			ownerAddress: "0x0",
+			beneficiaryAddress: "0x0",
+			pricePerSecond: 0L,
+			priceCurrency: "DATA",
+			minimumSubscriptionInSeconds: 0L
+		]
+	}
+
+	void "updateProduct() updates only non-blockchain fields of deployed paid Product"() {
 		product.state = Product.State.DEPLOYED
 
 		when:
@@ -89,7 +118,7 @@ class UpdateProductCommandSpec extends Specification {
 		]
 	}
 
-	void "updateProduct() updates non-blockchain and blockchain fields of undeployed Product"() {
+	void "updateProduct() updates non-blockchain and blockchain fields of undeployed paid Product"() {
 		product.state = Product.State.NOT_DEPLOYED
 
 		when:
@@ -116,4 +145,5 @@ class UpdateProductCommandSpec extends Specification {
 			minimumSubscriptionInSeconds: 10L
 		]
 	}
+
 }

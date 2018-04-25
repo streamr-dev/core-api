@@ -366,7 +366,7 @@
       },
       "put": {
         "summary": "Update a Product",
-        "description": "Updates the non-Blockchain information of a *deployed* Product. Updates the non-Blockchain and Blockchain information of a *undeployed* Product.",
+        "description": "Updates the non-Blockchain information of a *deployed* Product. Updates the non-Blockchain and Blockchain information of a *undeployed* and *paid* Product.",
         "tags": [
           "products"
         ],
@@ -381,7 +381,7 @@
           {
             "name": "body",
             "in": "body",
-            "description": "Updated Product. When performing on Product with state `DEPLOYED` can leave out fields `ownerAddress`, `beneficiaryAddress`, `pricePerSecond`, `priceCurrency`, and `minimumSubscriptionInSeconds` since they are ignored anyway.",
+            "description": "Updated Product. When performing on a paid Product with state `DEPLOYED` or a free Product, can leave out fields `ownerAddress`, `beneficiaryAddress`, `pricePerSecond`, `priceCurrency`, and `minimumSubscriptionInSeconds` since they are ignored anyway.",
             "required": true,
             "schema": {
               "$ref": "#/definitions/UpdateProduct"
