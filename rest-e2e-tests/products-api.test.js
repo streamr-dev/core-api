@@ -261,7 +261,12 @@ describe('Products API', () => {
             description: 'Description of the product.',
             imageUrl: 'https://www.streamr.com/uploads/product-2.png',
             category: 'automobile-id',
-            streams: []
+            streams: [],
+            ownerAddress: '0xAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA',
+            beneficiaryAddress: '0xCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC',
+            pricePerSecond: 4556,
+            priceCurrency: 'DATA',
+            minimumSubscriptionInSeconds: 30000
         }
 
         let createdProductId
@@ -341,11 +346,11 @@ describe('Products API', () => {
                     state: 'NOT_DEPLOYED',
                     previewStream: null,
                     previewConfigJson: null,
-                    ownerAddress: '0xAAAAAAAAAABBBBBBBBBBCCCCCCCCCCDDDDDDDDDD',
-                    beneficiaryAddress: '0x0000000000000000000011111111111111111111',
-                    pricePerSecond: 5,
-                    priceCurrency: 'USD',
-                    minimumSubscriptionInSeconds: 60,
+                    ownerAddress: '0xAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA',
+                    beneficiaryAddress: '0xCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC',
+                    pricePerSecond: 4556,
+                    priceCurrency: 'DATA',
+                    minimumSubscriptionInSeconds: 30000,
                     owner: 'product-api-tester@streamr.com'
                 })
             })

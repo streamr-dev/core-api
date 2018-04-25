@@ -53,7 +53,7 @@ class ProductService {
 		}
 
 		Product product = findById(id, currentUser, Permission.Operation.WRITE)
-		product.setProperties(command.properties)
+		command.updateProduct(product)
 		product.save(failOnError: true)
 		subscriptionService.afterProductUpdated(product)
 		return product
