@@ -14,6 +14,16 @@ import grails.compiler.GrailsCompileStatic
 class SubscriptionService {
 	PermissionService permissionService
 
+	void deleteProduct(Product product) {
+		def user = SecUser.where {
+			username == product.owner
+		}.find()
+		getSubscriptionsOfUser(user).toArray().each { Subscription subscription ->
+			deletePermissions(subscription)
+			subscription.delete()
+		}
+	}
+
 	List<Subscription> getSubscriptionsOfUser(SecUser user) {
 		List<IntegrationKey> integrationKeys = IntegrationKey.findAllByUserAndService(user, IntegrationKey.Service.ETHEREUM_ID)
 		def addresses = integrationKeys*.idInService
@@ -91,11 +101,11 @@ class SubscriptionService {
 		return subscription
 	}
 
-	static void deletePermissions(Subscription subscription) {
+	private static void deletePermissions(Subscription subscription) {
 		streamPermissionsFor(subscription)*.delete()
 	}
 
-	static void deletePermissions(Subscription subscription, Set<Stream> streams) {
+	private static void deletePermissions(Subscription subscription, Set<Stream> streams) {
 		List<Permission> permissions = Permission.findAllBySubscriptionAndStreamInList(subscription, streams as List)
 		permissions*.delete()
 	}
