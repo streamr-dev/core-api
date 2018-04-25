@@ -54,7 +54,7 @@ jobs:
     if: branch = master
   - stage: Build docker
     script: ./travis_scripts/docker_build.sh
-    if: branch = master
+    if: "(NOT type IN (pull_request)) AND (branch = master)"
 after_failure: "./travis-after-failure.sh"
 notifications:
   slack:
