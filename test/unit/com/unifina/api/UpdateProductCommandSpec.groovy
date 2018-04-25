@@ -146,4 +146,14 @@ class UpdateProductCommandSpec extends Specification {
 		]
 	}
 
+	void "updateProduct() throws InvalidStateException if trying to set price = 0 of undeployed paid Product"() {
+		product.state = Product.State.NOT_DEPLOYED
+
+		when:
+		command.pricePerSecond = 0
+		command.updateProduct(product)
+
+		then:
+		thrown(InvalidStateException)
+	}
 }
