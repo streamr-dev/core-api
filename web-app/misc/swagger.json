@@ -3652,7 +3652,8 @@
             "id",
             "state",
             "created",
-            "updated"
+            "updated",
+            "owner"
           ],
           "properties": {
             "id": {
@@ -3679,6 +3680,11 @@
               "type": "string",
               "description": "ISO-8601 datetime",
               "example": "2018-02-21T12:26:18Z"
+            },
+            "owner": {
+              "type": "string",
+              "description": "Username of the creator of this Product",
+              "example": "John Doe"
             }
           }
         },
