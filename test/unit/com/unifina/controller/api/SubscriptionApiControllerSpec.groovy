@@ -5,7 +5,6 @@ import com.unifina.api.ValidationException
 import com.unifina.domain.marketplace.Category
 import com.unifina.domain.marketplace.PaidSubscription
 import com.unifina.domain.marketplace.Product
-import com.unifina.domain.marketplace.Subscription
 import com.unifina.domain.security.SecRole
 import com.unifina.domain.security.SecUser
 import com.unifina.domain.security.SecUserSecRole
@@ -45,12 +44,20 @@ class SubscriptionApiControllerSpec extends Specification {
 	}
 
 	void "index() returns 200 and renders subscriptions"() {
+		SecUser user = new SecUser(
+			username: "user@domain.com",
+			name: "Firstname Lastname",
+			password: "salasana"
+		)
+		user.id = 1
+		user.save(failOnError: true, validate: false)
 		def p1 = new Product(
 			name: "Product 1",
 			description: "description",
 			imageUrl: "image1",
 			category: new Category(id: "category-1"),
 			streams: [],
+			owner: user
 		)
 
 		def p2 = new Product(
@@ -59,6 +66,7 @@ class SubscriptionApiControllerSpec extends Specification {
 			imageUrl: "image1",
 			category: new Category(id: "category-2"),
 			streams: [],
+			owner: user
 		)
 
 		def s1 = new PaidSubscription(

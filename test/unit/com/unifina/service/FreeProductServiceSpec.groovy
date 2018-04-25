@@ -6,6 +6,7 @@ import com.unifina.domain.data.Stream
 import com.unifina.domain.marketplace.Category
 import com.unifina.domain.marketplace.Product
 import com.unifina.domain.security.Permission
+import com.unifina.domain.security.SecUser
 import grails.test.mixin.Mock
 import grails.test.mixin.TestFor
 import spock.lang.Specification
@@ -17,6 +18,13 @@ class FreeProductServiceSpec extends Specification {
 	Product freeProduct
 
 	void setup() {
+		SecUser user = new SecUser(
+			username: "user@domain.com",
+			name: "Firstname Lastname",
+			password: "salasana"
+		)
+		user.id = 1
+		user.save(failOnError: true, validate: false)
 		Category category = new Category(name: "Category")
 		category.id = "category-id"
 		category.save()
@@ -36,7 +44,7 @@ class FreeProductServiceSpec extends Specification {
 			state: Product.State.NOT_DEPLOYED,
 			blockNumber: 40000,
 			blockIndex: 30,
-			owner: "arnold"
+			owner: user
 		)
 		freeProduct.id = "free-product-id"
 		freeProduct.save(failOnError: true, validate: true)

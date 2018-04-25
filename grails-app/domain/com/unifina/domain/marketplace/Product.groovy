@@ -2,6 +2,7 @@ package com.unifina.domain.marketplace
 
 import com.unifina.domain.data.Stream
 import com.unifina.domain.security.Permission
+import com.unifina.domain.security.SecUser
 import com.unifina.utils.HexIdGenerator
 import grails.compiler.GrailsCompileStatic
 
@@ -20,7 +21,7 @@ class Product {
 	Date dateCreated
 	Date lastUpdated
 	Integer score = 0 // set manually; used as default ordering for lists of Products (descending)
-	String owner // set to username of the product creator when product is created.
+	SecUser owner // set to product creator when product is created.
 
 	// The below fields exist in the domain object for speed & query support, but the ground truth is in the smart contract.
 	String ownerAddress
@@ -66,7 +67,7 @@ class Product {
 		minimumSubscriptionInSeconds(min: 0L)
 		blockNumber(min: 0L)
 		blockIndex(min: 0L)
-		owner(blank: false)
+		owner(nullable: false)
 	}
 
 	static mapping = {
@@ -100,7 +101,7 @@ class Product {
 			pricePerSecond: pricePerSecond,
 			priceCurrency: priceCurrency.toString(),
 			minimumSubscriptionInSeconds: minimumSubscriptionInSeconds,
-			owner: owner
+			owner: owner.name
 		]
 	}
 
