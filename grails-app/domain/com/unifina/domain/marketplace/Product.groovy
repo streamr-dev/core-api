@@ -97,7 +97,7 @@ class Product {
 			updated: lastUpdated,
 			ownerAddress: ownerAddress,
 			beneficiaryAddress: beneficiaryAddress,
-			pricePerSecond: pricePerSecond,
+			pricePerSecond: pricePerSecond.toString(),
 			priceCurrency: priceCurrency.toString(),
 			minimumSubscriptionInSeconds: minimumSubscriptionInSeconds,
 			owner: owner
