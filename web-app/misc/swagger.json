@@ -366,7 +366,7 @@
       },
       "put": {
         "summary": "Update a Product",
-        "description": "Updates the non-Blockchain information of a Product.",
+        "description": "Updates the non-Blockchain information of a *deployed* Product. Updates the non-Blockchain and Blockchain information of a *undeployed* Product.",
         "tags": [
           "products"
         ],
@@ -381,7 +381,7 @@
           {
             "name": "body",
             "in": "body",
-            "description": "Updated Product",
+            "description": "Updated Product. When performing on Product with state `DEPLOYED` can leave out fields `ownerAddress`, `beneficiaryAddress`, `pricePerSecond`, `priceCurrency`, and `minimumSubscriptionInSeconds` since they are ignored anyway.",
             "required": true,
             "schema": {
               "$ref": "#/definitions/UpdateProduct"
@@ -1061,18 +1061,6 @@
               }
             }
           },
-          "404": {
-            "description": "Product not found (code: `NOT_FOUND`)",
-            "schema": {
-              "$ref": "#/definitions/Error"
-            },
-            "examples": {
-              "application/json": {
-                "code": "NOT_FOUND",
-                "message": "Product with id 1kDWMNstSmW1NxhJPYFHsAYgkesh19QraMLtgfuDs4sA not found"
-              }
-            }
-          },
           "403": {
             "description": "Insufficient permission to share Product (code: `FORBIDDEN`)",
             "schema": {
@@ -1082,6 +1070,18 @@
               "application/json": {
                 "code": "FORBIDDEN",
                 "message": "Non-authenticated user does not have permission to share Product (id aQAd59nDQHiCUpXnhm7-TwPLCh9ALaQH2TIxOengS1FQ)"
+              }
+            }
+          },
+          "404": {
+            "description": "Product not found (code: `NOT_FOUND`)",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            },
+            "examples": {
+              "application/json": {
+                "code": "NOT_FOUND",
+                "message": "Product with id 1kDWMNstSmW1NxhJPYFHsAYgkesh19QraMLtgfuDs4sA not found"
               }
             }
           },
@@ -1135,18 +1135,6 @@
               }
             }
           },
-          "404": {
-            "description": "Product not found (code: `NOT_FOUND`)",
-            "schema": {
-              "$ref": "#/definitions/Error"
-            },
-            "examples": {
-              "application/json": {
-                "code": "NOT_FOUND",
-                "message": "Product with id 1kDWMNstSmW1NxhJPYFHsAYgkesh19QraMLtgfuDs4sA not found"
-              }
-            }
-          },
           "403": {
             "description": "Insufficient permission to share Product (code: `FORBIDDEN`)",
             "schema": {
@@ -1156,6 +1144,18 @@
               "application/json": {
                 "code": "FORBIDDEN",
                 "message": "Non-authenticated user does not have permission to share Product (id aQAd59nDQHiCUpXnhm7-TwPLCh9ALaQH2TIxOengS1FQ)"
+              }
+            }
+          },
+          "404": {
+            "description": "Product not found (code: `NOT_FOUND`)",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            },
+            "examples": {
+              "application/json": {
+                "code": "NOT_FOUND",
+                "message": "Product with id 1kDWMNstSmW1NxhJPYFHsAYgkesh19QraMLtgfuDs4sA not found"
               }
             }
           },
@@ -3526,7 +3526,7 @@
         }
       }
     },
-    "UpdateProduct": {
+    "ProductWithoutBlockchain": {
       "type": "object",
       "required": [
         "name",
@@ -3613,7 +3613,17 @@
     "CreateProduct": {
       "allOf": [
         {
-          "$ref": "#/definitions/UpdateProduct"
+          "$ref": "#/definitions/ProductWithoutBlockchain"
+        },
+        {
+          "$ref": "#/definitions/ProductInBlockchain"
+        }
+      ]
+    },
+    "UpdateProduct": {
+      "allOf": [
+        {
+          "$ref": "#/definitions/ProductWithoutBlockchain"
         },
         {
           "$ref": "#/definitions/ProductInBlockchain"
