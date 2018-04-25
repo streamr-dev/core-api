@@ -21,10 +21,12 @@ class ProductServiceIntegrationSpec extends IntegrationSpec {
 	ModuleCategory mc
 	Module module
 	Feed feed
+	SecUser troll
 	SecUser user
-	Product troll
-	Product troll2
+	Product p1
+	Product p2
 	Subscription fs1
+	Subscription fs2
 
 	void setup() {
 		category = new Category(name: "Category")
@@ -59,9 +61,11 @@ class ProductServiceIntegrationSpec extends IntegrationSpec {
 		[s1, s2, s3, s4].eachWithIndex { Stream s, int i -> s.id = "stream-id-${i+1}" }
 		[s1, s2, s3, s4]*.save(failOnError: true, validate: true)
 
-		user = new SecUser(username: "sylvester", name: "sylvester stallone", password: "x", email: "s@s.com", timezone: "Europe/Helsinki")
+		troll = new SecUser(username: "sylvester", name: "sylvester stallone", password: "x", email: "s@s.com", timezone: "Europe/Helsinki")
+		troll.save(failOnError: true, validate: false)
+		user = new SecUser(username: "arnold", name: "arnold schwarzenegger", password: "x", email: "a@schwarzenegger.com", timezone: "Europe/Helsinki")
 		user.save(failOnError: true, validate: false)
-		troll = new Product(
+		p1 = new Product(
 			name: "troll product",
 			description: "description",
 			ownerAddress: null,
@@ -74,8 +78,8 @@ class ProductServiceIntegrationSpec extends IntegrationSpec {
 			blockIndex: 30,
 			owner: "sylvester"
 		)
-		troll.save(failOnError: true, validate: true)
-		troll2 = new Product(
+		p1.save(failOnError: true, validate: true)
+		p2 = new Product(
 			name: "troll product 2",
 			description: "description",
 			ownerAddress: "0x0000000000000000000000000000000000000000",
@@ -88,18 +92,20 @@ class ProductServiceIntegrationSpec extends IntegrationSpec {
 			blockIndex: 30,
 			owner: "sylvester"
 		)
-		troll2.save(failOnError: true, validate: true)
+		p2.save(failOnError: true, validate: true)
 
 		new IntegrationKey(
-			user: user,
+			user: troll,
 			name: "ik1",
 			service: IntegrationKey.Service.ETHEREUM_ID,
 			idInService: "0x0000000000000000000000000000000000000005",
 			json: "{}"
 		).save(failOnError: true, validate: false)
 
-		fs1 = new FreeSubscription(product: troll, user: user, address: "0x0000000000000000000000000000000000000005", endsAt: new Date())
+		fs1 = new FreeSubscription(product: p1, user: troll, address: "0x0000000000000000000000000000000000000005", endsAt: new Date())
 		fs1.save(failOnError: true, validate: true)
+		fs2 = new FreeSubscription(product: p1, user: user, address: "0x0000000000000000000000000000000000000005", endsAt: new Date())
+		fs2.save(failOnError: true, validate: true)
 	}
 
 	void cleanup() {
@@ -114,9 +120,10 @@ class ProductServiceIntegrationSpec extends IntegrationSpec {
 		service.removeUsersProducts("sylvester")
 
 		then:
-		Product.get(troll.id) == null
-		Product.get(troll2.id) == null
+		Product.get(p1.id) == null
+		Product.get(p2.id) == null
 		FreeSubscription.get(fs1.id) == null
+		FreeSubscription.get(fs2.id) == null
 
 		Stream.get(s1.id) != null
 		Stream.get(s2.id) != null

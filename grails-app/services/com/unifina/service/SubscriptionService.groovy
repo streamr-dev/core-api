@@ -15,10 +15,7 @@ class SubscriptionService {
 	PermissionService permissionService
 
 	void deleteProduct(Product product) {
-		def user = SecUser.where {
-			username == product.owner
-		}.find()
-		getSubscriptionsOfUser(user).toArray().each { Subscription subscription ->
+		Subscription.findAllByProduct(product).toArray().each { Subscription subscription ->
 			deletePermissions(subscription)
 			subscription.delete()
 		}
