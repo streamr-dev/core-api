@@ -4,3 +4,5 @@
 target
 out
 .git
+node_modules
+terraform*
