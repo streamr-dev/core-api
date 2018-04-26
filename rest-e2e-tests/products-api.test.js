@@ -188,6 +188,7 @@ describe('Products API', () => {
                     name: 'Product',
                     description: 'Description of the product.',
                     imageUrl: null,
+                    thumbnailUrl: null,
                     category: 'satellite-id',
                     streams: [
                         streamId1,
@@ -333,6 +334,7 @@ describe('Products API', () => {
                     name: 'Product (updated)',
                     description: 'Description of the product.',
                     imageUrl: null,
+                    thumbnailUrl: null,
                     category: 'automobile-id',
                     streams: [],
 

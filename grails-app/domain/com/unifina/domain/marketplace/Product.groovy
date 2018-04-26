@@ -87,6 +87,7 @@ class Product {
 			name: name,
 			description: description,
 			imageUrl: imageUrl,
+			thumbnailUrl: thumbnailUrl,
 			category: category.id,
 			streams: streams*.id,
 			state: state.toString(),
