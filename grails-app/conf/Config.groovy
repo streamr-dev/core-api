@@ -413,13 +413,13 @@ grails {
 
 		environments {
 			development {
-				host = "127.0.0.1"
-				port = 25
+				host = System.getProperty("grails.mail.host") ?: "127.0.0.1"
+				port = System.getProperty("grails.mail.port") ?: 25
 				props = []
 			}
 			test {
-				host = "127.0.0.1"
-				port = 25
+				host = System.getProperty("grails.mail.host") ?: "127.0.0.1"
+				port = System.getProperty("grails.mail.port") ?: 25
 				props = []
 			}
 		}
