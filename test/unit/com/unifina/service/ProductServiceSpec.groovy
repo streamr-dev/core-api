@@ -225,7 +225,12 @@ class ProductServiceSpec extends Specification {
 				name: "updated name",
 				description: "updated description",
 				category: category,
-				streams: [s2, s4]
+				streams: [s2, s4],
+				pricePerSecond: 20L,
+				ownerAddress: "0xCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC",
+				beneficiaryAddress: "0xCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC",
+				priceCurrency: Product.Currency.DATA,
+				minimumSubscriptionInSeconds: 1000
 		)
 		def user = new SecUser(username: "me@streamr.com")
 
@@ -266,7 +271,12 @@ class ProductServiceSpec extends Specification {
 				name: "updated name",
 				description: "updated description",
 				category: category,
-				streams: []
+				streams: [],
+				pricePerSecond: 20L,
+				ownerAddress: "0xCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC",
+				beneficiaryAddress: "0xCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC",
+				priceCurrency: Product.Currency.DATA,
+				minimumSubscriptionInSeconds: 1000
 		)
 		def user = new SecUser(username: "me@streamr.com")
 
@@ -291,7 +301,12 @@ class ProductServiceSpec extends Specification {
 			name: "updated name",
 			description: "updated description",
 			category: category,
-			streams: [s2, s4]
+			streams: [s2, s4],
+			pricePerSecond: 20L,
+			ownerAddress: "0xCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC",
+			beneficiaryAddress: "0xCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC",
+			priceCurrency: Product.Currency.DATA,
+			minimumSubscriptionInSeconds: 1000
 		)
 		def user = new SecUser(username: "me@streamr.com")
 
@@ -319,7 +334,12 @@ class ProductServiceSpec extends Specification {
 				name: "updated name",
 				description: "updated description",
 				category: category2,
-				streams: [s2, s4]
+				streams: [s2, s4],
+				pricePerSecond: 20L,
+				ownerAddress: "0xCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC",
+				beneficiaryAddress: "0xCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC",
+				priceCurrency: Product.Currency.DATA,
+				minimumSubscriptionInSeconds: 1000
 		)
 
 		when:
@@ -341,11 +361,11 @@ class ProductServiceSpec extends Specification {
 				previewConfigJson: null,
 				created: product.dateCreated,
 				updated: product.lastUpdated,
-				ownerAddress: "0x0000000000000000000000000000000000000000",
-				beneficiaryAddress: "0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF",
-				pricePerSecond: 10,
+				ownerAddress: "0xCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC",
+				beneficiaryAddress: "0xCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC",
+				pricePerSecond: 20L,
 				priceCurrency: "DATA",
-				minimumSubscriptionInSeconds: 0,
+				minimumSubscriptionInSeconds: 1000,
 				owner: "arnold"
 		]
 		product.dateCreated < product.lastUpdated
