@@ -3,7 +3,7 @@ package com.unifina.controller.help
 import com.unifina.domain.security.SecUser
 import grails.plugin.springsecurity.annotation.Secured
 
-@Secured(["ROLE_USER"])
+@Secured(["IS_AUTHENTICATED_ANONYMOUSLY"])
 class HelpController {
 
 	def springSecurityService
