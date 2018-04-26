@@ -164,7 +164,7 @@ class PermissionService {
 			return []
 		}
 
-		Closure permissionCriteria = createUserPermissionCriteria(userish, op, includeAnonymous)
+		Closure permissionCriteria = createUserPermissionCriteria(resourceClass, userish, op, includeAnonymous)
 
 		return resourceClass.withCriteria {
 			permissionCriteria.delegate = delegate
@@ -179,11 +179,12 @@ class PermissionService {
 	 * (Dashboard, Canvas, Stream etc.) to filter query results so that user has specified permission on
 	 * them.
 	 */
-	Closure createUserPermissionCriteria(Userish userish, Operation op, boolean includeAnonymous) {
+	Closure createUserPermissionCriteria(Class resourceClass, Userish userish, Operation op, boolean includeAnonymous) {
 		userish = userish?.resolveToUserish()
 
 		boolean isUser = isNotNullAndIdNotNull(userish)
 		String userProp = isUser ? getUserPropertyName(userish) : null
+		String idProperty = getResourcePropertyName(resourceClass)
 
 		return {
 			permissions {
@@ -199,6 +200,9 @@ class PermissionService {
 				or {
 					isNull("endsAt")
 					gt("endsAt", new Date())
+				}
+				projections {
+					groupProperty(idProperty)
 				}
 			}
 		}
@@ -504,20 +508,21 @@ class PermissionService {
 	@CompileStatic
 	private static String getResourcePropertyName(Object resource) {
 		// Cannot derive name straight from resource.getClass() because of proxy assist objects!
-		if (resource instanceof Canvas) {
+		Class resourceClass = resource instanceof Class ? resource : resource.getClass()
+		if (Canvas.isAssignableFrom(resourceClass)) {
 			return "canvas"
-		} else if (resource instanceof Dashboard) {
+		} else if (Dashboard.isAssignableFrom(resourceClass)) {
 			return "dashboard"
-		} else if (resource instanceof Feed) {
+		} else if (Feed.isAssignableFrom(resourceClass)) {
 			return "feed"
-		} else if (resource instanceof ModulePackage) {
+		} else if (ModulePackage.isAssignableFrom(resourceClass)) {
 			return "modulePackage"
-		} else if (resource instanceof Product) {
+		} else if (Product.isAssignableFrom(resourceClass)) {
 			return "product"
-		} else if (resource instanceof Stream) {
+		} else if (Stream.isAssignableFrom(resourceClass)) {
 			return "stream"
 		} else {
-			throw new IllegalArgumentException("Unexpected resource class: " + resource.getClass())
+			throw new IllegalArgumentException("Unexpected resource class: " + resourceClass)
 		}
 	}
 
