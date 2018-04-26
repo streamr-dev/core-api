@@ -947,10 +947,12 @@ describe('Products API', () => {
             })
 
             it('response Product contains image URL', () => {
+                assert.isDefined(json.imageUrl)
                 assert.isNotNull(json.imageUrl)
             })
 
             it('response Product contains image thumbnail URL', () => {
+                assert.isDefined(json.thumbnailUrl)
                 assert.isNotNull(json.thumbnailUrl)
             })
 
