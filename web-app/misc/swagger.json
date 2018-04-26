@@ -3691,7 +3691,9 @@
             "state",
             "created",
             "updated",
-            "owner"
+            "owner",
+            "imageUrl",
+            "thumbnailUrl"
           ],
           "properties": {
             "id": {
@@ -3723,6 +3725,16 @@
               "type": "string",
               "description": "Username of the creator of this Product",
               "example": "John Doe"
+            },
+            "imageUrl": {
+              "type": "string",
+              "description": "URL of image",
+              "example": "http://www.google.com/a.jpg"
+            },
+            "thumbnailUrl": {
+              "type": "string",
+              "description": "URL of thumbnail image",
+              "example": "http://www.google.com/b.jpg"
             }
           }
         },
