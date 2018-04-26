@@ -1,0 +1,10 @@
+delete from permission;
+delete from product_streams;
+delete from subscription;
+delete from product;
+delete from feed_file;
+delete from stream;
+delete from feed;
+delete from integration_key;
+delete from sec_user;
+delete from module;

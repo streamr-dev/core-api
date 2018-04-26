@@ -13,6 +13,17 @@ class ProductService {
 	PermissionService permissionService
 	SubscriptionService subscriptionService
 
+	void removeUsersProducts(String username) {
+		def all = Product.findAllByOwner(username)
+		all.toArray().each { Product product ->
+			product.streams.toArray().each { Stream stream ->
+				product.streams.remove(stream)
+			}
+			subscriptionService.deleteProduct(product)
+			product.delete(flush: true)
+		}
+	}
+
 	List<Product> list(ProductListParams listParams, SecUser currentUser) {
 		if (listParams.sortBy == null) { // By default, order by score
 			listParams.sortBy = "score"

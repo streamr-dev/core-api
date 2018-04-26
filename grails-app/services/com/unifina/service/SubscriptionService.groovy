@@ -14,6 +14,13 @@ import grails.compiler.GrailsCompileStatic
 class SubscriptionService {
 	PermissionService permissionService
 
+	void deleteProduct(Product product) {
+		Subscription.findAllByProduct(product).toArray().each { Subscription subscription ->
+			deletePermissions(subscription)
+			subscription.delete()
+		}
+	}
+
 	List<Subscription> getSubscriptionsOfUser(SecUser user) {
 		List<IntegrationKey> integrationKeys = IntegrationKey.findAllByUserAndService(user, IntegrationKey.Service.ETHEREUM_ID)
 		def addresses = integrationKeys*.idInService

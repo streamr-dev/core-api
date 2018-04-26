@@ -1061,18 +1061,6 @@
               }
             }
           },
-          "404": {
-            "description": "Product not found (code: `NOT_FOUND`)",
-            "schema": {
-              "$ref": "#/definitions/Error"
-            },
-            "examples": {
-              "application/json": {
-                "code": "NOT_FOUND",
-                "message": "Product with id 1kDWMNstSmW1NxhJPYFHsAYgkesh19QraMLtgfuDs4sA not found"
-              }
-            }
-          },
           "403": {
             "description": "Insufficient permission to share Product (code: `FORBIDDEN`)",
             "schema": {
@@ -1082,6 +1070,18 @@
               "application/json": {
                 "code": "FORBIDDEN",
                 "message": "Non-authenticated user does not have permission to share Product (id aQAd59nDQHiCUpXnhm7-TwPLCh9ALaQH2TIxOengS1FQ)"
+              }
+            }
+          },
+          "404": {
+            "description": "Product not found (code: `NOT_FOUND`)",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            },
+            "examples": {
+              "application/json": {
+                "code": "NOT_FOUND",
+                "message": "Product with id 1kDWMNstSmW1NxhJPYFHsAYgkesh19QraMLtgfuDs4sA not found"
               }
             }
           },
@@ -1135,18 +1135,6 @@
               }
             }
           },
-          "404": {
-            "description": "Product not found (code: `NOT_FOUND`)",
-            "schema": {
-              "$ref": "#/definitions/Error"
-            },
-            "examples": {
-              "application/json": {
-                "code": "NOT_FOUND",
-                "message": "Product with id 1kDWMNstSmW1NxhJPYFHsAYgkesh19QraMLtgfuDs4sA not found"
-              }
-            }
-          },
           "403": {
             "description": "Insufficient permission to share Product (code: `FORBIDDEN`)",
             "schema": {
@@ -1156,6 +1144,18 @@
               "application/json": {
                 "code": "FORBIDDEN",
                 "message": "Non-authenticated user does not have permission to share Product (id aQAd59nDQHiCUpXnhm7-TwPLCh9ALaQH2TIxOengS1FQ)"
+              }
+            }
+          },
+          "404": {
+            "description": "Product not found (code: `NOT_FOUND`)",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            },
+            "examples": {
+              "application/json": {
+                "code": "NOT_FOUND",
+                "message": "Product with id 1kDWMNstSmW1NxhJPYFHsAYgkesh19QraMLtgfuDs4sA not found"
               }
             }
           },
@@ -1276,6 +1276,44 @@
                 "code": "UNSUPPORTED_FILE_TYPE",
                 "message": "File type is not a recognized image format"
               }
+            }
+          }
+        }
+      }
+    },
+    "/products/remove/{username}": {
+      "delete": {
+        "summary": "Remove troll users products",
+        "description": "Removes users all products. Undo is not supported. Admin role is required.",
+        "tags": [
+          "products"
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "username",
+            "description": "Username of the product owner",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Product's removed'",
+            "schema": {
+              "$ref": "#/definitions/Product"
+            }
+          },
+          "400": {
+            "description": "Username is missing from the request.",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          },
+          "401": {
+            "description": "Not authenticated",
+            "schema": {
+              "$ref": "#/definitions/Error"
             }
           }
         }
