@@ -188,6 +188,7 @@ describe('Products API', () => {
                     name: 'Product',
                     description: 'Description of the product.',
                     imageUrl: null,
+                    thumbnailUrl: null,
                     category: 'satellite-id',
                     streams: [
                         streamId1,
@@ -338,6 +339,7 @@ describe('Products API', () => {
                     name: 'Product (updated)',
                     description: 'Description of the product.',
                     imageUrl: null,
+                    thumbnailUrl: null,
                     category: 'automobile-id',
                     streams: [],
 
@@ -950,10 +952,12 @@ describe('Products API', () => {
             })
 
             it('response Product contains image URL', () => {
+                assert.isDefined(json.imageUrl)
                 assert.isNotNull(json.imageUrl)
             })
 
             it('response Product contains image thumbnail URL', () => {
+                assert.isDefined(json.thumbnailUrl)
                 assert.isNotNull(json.thumbnailUrl)
             })
 
