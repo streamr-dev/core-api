@@ -27,7 +27,6 @@ jobs:
   include:
   - stage: REST API tests
     env:
-    - BACKEND_END_TEST=true
     script: ./travis_scripts/rest_e2e_test.sh
   - stage: Unit tests
     env:
