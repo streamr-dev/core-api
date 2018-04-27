@@ -97,6 +97,7 @@ class Product {
 			updated: lastUpdated,
 			ownerAddress: ownerAddress,
 			beneficiaryAddress: beneficiaryAddress,
+			isFree: pricePerSecond == 0L,
 			pricePerSecond: pricePerSecond,
 			priceCurrency: priceCurrency.toString(),
 			minimumSubscriptionInSeconds: minimumSubscriptionInSeconds,

@@ -85,6 +85,7 @@ class UpdateProductCommandSpec extends Specification {
 			previewConfigJson: "{newConfig: true}",
 			ownerAddress: "0x0",
 			beneficiaryAddress: "0x0",
+			isFree: true,
 			pricePerSecond: 0L,
 			priceCurrency: "DATA",
 			minimumSubscriptionInSeconds: 0L
@@ -114,6 +115,7 @@ class UpdateProductCommandSpec extends Specification {
 			previewConfigJson: "{newConfig: true}",
 			ownerAddress: "0x0",
 			beneficiaryAddress: "0x0",
+			isFree: false,
 			pricePerSecond: 5L,
 			priceCurrency: "DATA",
 			minimumSubscriptionInSeconds: 0L
@@ -143,6 +145,7 @@ class UpdateProductCommandSpec extends Specification {
 			previewConfigJson: "{newConfig: true}",
 			ownerAddress: "0xA",
 			beneficiaryAddress: "0xF",
+			isFree: false,
 			pricePerSecond: 10L,
 			priceCurrency: "USD",
 			minimumSubscriptionInSeconds: 10L
