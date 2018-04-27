@@ -108,4 +108,5 @@ databaseChangeLog = {
 	include file: 'core/2018-04-12-free-and-paid-subscriptions.groovy'
 	include file: 'core/2018-04-16-add-ends-at-field-to-permission.groovy'
 	include file: 'core/2018-04-26-fix-test-data-products.groovy'
+	include file: 'core/2018-04-27-insert-categories.groovy'
 }
