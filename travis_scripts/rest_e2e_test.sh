@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+sudo /etc/init.d/mysql stop
 (cd rest-e2e-tests && npm install)
 git clone https://github.com/streamr-dev/streamr-docker-dev.git
 $TRAVIS_BUILD_DIR/streamr-docker-dev/streamr-docker-dev/bin.sh start mysql
