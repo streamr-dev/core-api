@@ -4,7 +4,6 @@ jdk:
 - openjdk8
 services:
 - docker
-- mysql
 branches:
   only:
   - master
@@ -26,7 +25,6 @@ env:
 jobs:
   include:
   - stage: REST API tests
-    env:
     script: ./travis_scripts/rest_e2e_test.sh
   - stage: Unit tests
     env:
