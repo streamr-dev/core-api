@@ -12,6 +12,30 @@ class ProductService {
 	ApiService apiService
 	PermissionService permissionService
 	SubscriptionService subscriptionService
+	final Random random = new Random()
+
+	List<Product> relatedProducts(String id) {
+		Product product = Product.get(id)
+		if (product == null) {
+			return new ArrayList<Product>()
+		}
+		// find Product.owner's other products
+		Set<Product> all = new HashSet<Product>(Product.findAllByOwner(product.owner))
+		// find other products from the same category
+		Set<Product> cat = new HashSet<Product>(Product.findAllByCategory(product.category))
+		all.addAll(cat)
+
+		final int max = 3 // max number of related products
+		all.removeIf { Product p -> p.id == id }
+		if (all.size() <= max) {
+			return new ArrayList<Product>(all)
+		}
+		while (all.size() > max) {
+			int i = random.nextInt(all.size() - 1)
+			all.remove(i)
+		}
+		return new ArrayList<Product>(all)
+	}
 
 	void removeUsersProducts(String username) {
 		def user = SecUser.findByUsername(username)
