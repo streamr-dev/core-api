@@ -202,7 +202,7 @@ describe('Products API', () => {
                     pricePerSecond: 5,
                     priceCurrency: 'USD',
                     minimumSubscriptionInSeconds: 60,
-                    owner: 'product-api-tester@streamr.com'
+                    owner: 'Product API Test User'
                 })
             })
         })
@@ -353,7 +353,7 @@ describe('Products API', () => {
                     pricePerSecond: 4556,
                     priceCurrency: 'DATA',
                     minimumSubscriptionInSeconds: 30000,
-                    owner: 'product-api-tester@streamr.com'
+                    owner: 'Product API Test User'
                 })
             })
         })
