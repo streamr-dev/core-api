@@ -133,7 +133,8 @@ class ProductServiceSpec extends Specification {
 			updated: product.lastUpdated,
 			ownerAddress: "0x0000000000000000000000000000000000000000",
 			beneficiaryAddress: "0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF",
-			pricePerSecond: 10,
+			pricePerSecond: "10",
+			isFree: false,
 			priceCurrency: "DATA",
 			minimumSubscriptionInSeconds: 1,
 			owner: "Arnold Schwarzenegger"
@@ -372,7 +373,8 @@ class ProductServiceSpec extends Specification {
 				updated: product.lastUpdated,
 				ownerAddress: "0xCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC",
 				beneficiaryAddress: "0xCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC",
-				pricePerSecond: 20L,
+				pricePerSecond: "20",
+				isFree: false,
 				priceCurrency: "DATA",
 				minimumSubscriptionInSeconds: 1000,
 				owner: "Firstname Lastname"
@@ -781,7 +783,8 @@ class ProductServiceSpec extends Specification {
 				state: "DEPLOYED",
 				ownerAddress: "0xBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB",
 				beneficiaryAddress: "0xAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
-				pricePerSecond: 2,
+				pricePerSecond: "2",
+				isFree: false,
 				priceCurrency: "USD",
 				minimumSubscriptionInSeconds: 600,
 				owner: "Firstname Lastname"

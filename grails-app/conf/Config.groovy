@@ -473,6 +473,7 @@ streamr.fileUpload.s3.bucket = System.getProperty("streamr.fileUpload.s3.bucket"
  * Signup Configs
  */
 streamr.signup.requireInvite = (System.getProperty("streamr.signup.requireInvite") ? Boolean.parseBoolean(System.getProperty("streamr.signup.requireInvite")) : false)
+streamr.signup.requireCaptcha = (System.getProperty("streamr.signup.requireCaptcha") ? Boolean.parseBoolean(System.getProperty("streamr.signup.requireCaptcha")) : false)
 
 /**
  * Miscellaneous

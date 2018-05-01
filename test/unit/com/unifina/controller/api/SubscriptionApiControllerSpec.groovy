@@ -57,7 +57,8 @@ class SubscriptionApiControllerSpec extends Specification {
 			imageUrl: "image1",
 			category: new Category(id: "category-1"),
 			streams: [],
-			owner: user
+			owner: user,
+			pricePerSecond: 0
 		)
 
 		def p2 = new Product(
@@ -66,7 +67,8 @@ class SubscriptionApiControllerSpec extends Specification {
 			imageUrl: "image1",
 			category: new Category(id: "category-2"),
 			streams: [],
-			owner: user
+			owner: user,
+			pricePerSecond: 0
 		)
 
 		def s1 = new PaidSubscription(
