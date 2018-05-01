@@ -86,6 +86,7 @@ class UpdateProductCommandSpec extends Specification {
 			ownerAddress: "0x0",
 			beneficiaryAddress: "0x0",
 			pricePerSecond: "0",
+			isFree: true,
 			priceCurrency: "DATA",
 			minimumSubscriptionInSeconds: 0L
 		]
@@ -115,6 +116,7 @@ class UpdateProductCommandSpec extends Specification {
 			ownerAddress: "0x0",
 			beneficiaryAddress: "0x0",
 			pricePerSecond: "5",
+			isFree: false,
 			priceCurrency: "DATA",
 			minimumSubscriptionInSeconds: 0L
 		]
@@ -144,6 +146,7 @@ class UpdateProductCommandSpec extends Specification {
 			ownerAddress: "0xA",
 			beneficiaryAddress: "0xF",
 			pricePerSecond: "10",
+			isFree: false,
 			priceCurrency: "USD",
 			minimumSubscriptionInSeconds: 10L
 		]
