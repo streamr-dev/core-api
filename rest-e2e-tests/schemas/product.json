@@ -123,8 +123,8 @@
     },
     "pricePerSecond": {
       "description": "Unit price per second",
-      "type": "integer",
-      "minimum": 0
+      "type": "string",
+      "pattern": "^\\d+$"
     },
     "priceCurrency": {
       "description": "Unit currency",
