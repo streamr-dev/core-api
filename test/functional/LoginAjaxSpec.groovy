@@ -4,8 +4,9 @@ import pages.*
 class LoginAjaxSpec extends LoginTester1Spec {
 
 	def "ajax login screen"() {
-		when: "session expires"
+		when: "session expires and an authenticated request is made"
 			js.exec("\$.ajax({url: Streamr.createLink('logout','index'), async:false})")
+			js.exec("\$.ajax({url: Streamr.createLink({uri: '/api/v1/users/me'})})")
 		then: "login form must be displayed"
 			waitFor {
 				$("#loginForm").displayed
@@ -24,8 +25,9 @@ class LoginAjaxSpec extends LoginTester1Spec {
 	}
 
 	def "ajax login screen failed login message"() {
-		when: "session expires"
+		when: "session expires and an authenticated request is made"
 			js.exec("\$.ajax({url: Streamr.createLink('logout','index'), async:false})")
+			js.exec("\$.ajax({url: Streamr.createLink({uri: '/api/v1/users/me'})})")
 		then: "login form must be displayed"
 			waitFor {
 				$("#loginForm").displayed
