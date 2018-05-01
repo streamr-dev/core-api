@@ -79,6 +79,7 @@ class Product {
 
 		ownerAddress index: "owner_address_idx"
 		beneficiaryAddress index: "beneficiary_address_idx"
+		owner(fetch: 'join')
 	}
 
 	@GrailsCompileStatic
