@@ -117,10 +117,14 @@
         { "$ref": "#/definitions/ethereumAddress" }
       ]
     },
+    "isFree": {
+      "description": "Indicates whether the product is free (or paid)",
+      "type": "boolean"
+    },
     "pricePerSecond": {
       "description": "Unit price per second",
-      "type": "integer",
-      "minimum": 0
+      "type": "string",
+      "pattern": "^\\d+$"
     },
     "priceCurrency": {
       "description": "Unit currency",

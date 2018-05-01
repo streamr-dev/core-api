@@ -199,7 +199,8 @@ describe('Products API', () => {
                     previewConfigJson: null,
                     ownerAddress: '0xAAAAAAAAAABBBBBBBBBBCCCCCCCCCCDDDDDDDDDD',
                     beneficiaryAddress: '0x0000000000000000000011111111111111111111',
-                    pricePerSecond: 5,
+                    pricePerSecond: '5',
+                    isFree: false,
                     priceCurrency: 'USD',
                     minimumSubscriptionInSeconds: 60,
                     owner: 'product-api-tester@streamr.com'
@@ -350,7 +351,8 @@ describe('Products API', () => {
                     previewConfigJson: null,
                     ownerAddress: '0xAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA',
                     beneficiaryAddress: '0xCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC',
-                    pricePerSecond: 4556,
+                    pricePerSecond: '4556',
+                    isFree: false,
                     priceCurrency: 'DATA',
                     minimumSubscriptionInSeconds: 30000,
                     owner: 'product-api-tester@streamr.com'

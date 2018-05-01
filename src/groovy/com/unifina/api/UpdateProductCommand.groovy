@@ -31,8 +31,8 @@ class UpdateProductCommand {
 		previewStream(nullable: true)
 		previewConfigJson(nullable: true)
 
-		ownerAddress(nullable: true)
-		beneficiaryAddress(nullable: true)
+		ownerAddress(nullable: true, validator: Product.isEthereumAddressOrIsNull)
+		beneficiaryAddress(nullable: true, validator: Product.isEthereumAddressOrIsNull)
 		pricePerSecond(nullable: true)
 		priceCurrency(nullable: true)
 		minimumSubscriptionInSeconds(nullable: true)
