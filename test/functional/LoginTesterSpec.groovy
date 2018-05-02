@@ -12,9 +12,6 @@ abstract class LoginTesterSpec extends GebReportingSpec {
 	
 	def setup() {
 		this.login()
-		waitFor {
-			at CanvasPage
-		}
 	}
 
 	def login() {
@@ -25,6 +22,9 @@ abstract class LoginTesterSpec extends GebReportingSpec {
 		username = getTesterUsername()
 		password = getTesterPassword()
 		loginButton.click()
+		waitFor {
+			at CanvasPage
+		}
 	}
 
 	abstract String getTesterUsername();
