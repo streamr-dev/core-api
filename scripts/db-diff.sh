@@ -19,4 +19,6 @@ mv grails-app/migrations/$FILENAME{.new,}
 
 sed -i '' -e '/^$/d' grails-app/migrations/changelog.groovy # remove empty lines
 sed -i '' -e '/^$/d' -e 's/[[:space:]](generated)//' "grails-app/migrations/$FILENAME" # replace " (generated)" with ""
+# replace generated numeric (len 13-14) changeset id with $1
+sed -i '' -E 's/^	changeSet\(author: "([a-zA-Z]+)", id: "[0-9]{13,14}-([0-9])"\) \{$/	changeSet\(author: "\1", id: "'"$1"'-\2"\) \{/g' "grails-app/migrations/$FILENAME"
 

@@ -76,7 +76,7 @@ class ProductServiceIntegrationSpec extends IntegrationSpec {
 			state: Product.State.NOT_DEPLOYED,
 			blockNumber: 40000,
 			blockIndex: 30,
-			owner: "sylvester"
+			owner: troll
 		)
 		p1.save(failOnError: true, validate: true)
 		p2 = new Product(
@@ -90,7 +90,7 @@ class ProductServiceIntegrationSpec extends IntegrationSpec {
 			state: Product.State.NOT_DEPLOYED,
 			blockNumber: 40000,
 			blockIndex: 30,
-			owner: "sylvester"
+			owner: troll
 		)
 		p2.save(failOnError: true, validate: true)
 

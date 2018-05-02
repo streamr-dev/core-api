@@ -3,6 +3,7 @@ package com.unifina.api
 import com.unifina.domain.data.Stream
 import com.unifina.domain.marketplace.Category
 import com.unifina.domain.marketplace.Product
+import com.unifina.domain.security.SecUser
 import spock.lang.Specification
 
 class UpdateProductCommandSpec extends Specification {
@@ -29,7 +30,7 @@ class UpdateProductCommandSpec extends Specification {
 			streams: [stream],
 			previewConfigJson: "{}",
 			score: 5,
-			owner: "owner",
+			owner: new SecUser(name: "John Doe"),
 			ownerAddress: "0x0",
 			beneficiaryAddress: "0x0",
 			pricePerSecond: 5,
@@ -74,7 +75,7 @@ class UpdateProductCommandSpec extends Specification {
 			state: "NOT_DEPLOYED",
 			created: null,
 			updated: null,
-			owner: "owner",
+			owner: "John Doe",
 			name: "new name",
 			description: "new description",
 			imageUrl: "image.jpg",
@@ -88,7 +89,7 @@ class UpdateProductCommandSpec extends Specification {
 			pricePerSecond: "0",
 			isFree: true,
 			priceCurrency: "DATA",
-			minimumSubscriptionInSeconds: 0L
+			minimumSubscriptionInSeconds: 0L,
 		]
 	}
 
@@ -104,7 +105,7 @@ class UpdateProductCommandSpec extends Specification {
 			state: "DEPLOYED",
 			created: null,
 			updated: null,
-			owner: "owner",
+			owner: "John Doe",
 			name: "new name",
 			description: "new description",
 			imageUrl: "image.jpg",
@@ -134,7 +135,7 @@ class UpdateProductCommandSpec extends Specification {
 			state: "NOT_DEPLOYED",
 			created: null,
 			updated: null,
-			owner: "owner",
+			owner: "John Doe",
 			name: "new name",
 			description: "new description",
 			imageUrl: "image.jpg",

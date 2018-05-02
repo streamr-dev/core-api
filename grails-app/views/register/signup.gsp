@@ -3,14 +3,16 @@
     <meta name="layout" content="login" />
     <title>Sign Up</title>
 
-	<r:script>
-	function reCaptchaSuccess(response) {
-		$("form[name=signupForm]").submit()
-	}
-	</r:script>
+	<g:if test="${grailsApplication.config.streamr.signup.requireCaptcha}">
+		<r:script>
+			function reCaptchaSuccess(response) {
+				$("form[name=signupForm]").submit()
+			}
+		</r:script>
 
-	<!-- reCAPTCHA script-->
-	<script src='https://www.google.com/recaptcha/api.js' async></script>
+		<!-- reCAPTCHA script-->
+		<script src='https://www.google.com/recaptcha/api.js' async></script>
+	</g:if>
 </head>
 
 <body class="login-page show-sign-in">
@@ -36,7 +38,10 @@
 		</div>
 
 		 %{--reCaptcha v2--}%
-		<div class="g-recaptcha" data-sitekey="${grailsApplication.config.recaptchav2.sitekey}" style="margin: 10px 0;"></div>
+		<g:if test="${grailsApplication.config.streamr.signup.requireCaptcha}">
+			<div class="g-recaptcha" data-sitekey="${grailsApplication.config.recaptchav2.sitekey}" style="margin: 10px 0;"></div>
+		</g:if>
+
 		<button id="signUpButton" class="btn btn-primary btn-block btn-lg">
 			<g:message code="springSecurity.register.button" />
 		</button>

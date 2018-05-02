@@ -3,6 +3,7 @@ package com.unifina.service
 import com.unifina.api.ApiException
 import com.unifina.domain.marketplace.Category
 import com.unifina.domain.marketplace.Product
+import com.unifina.domain.security.SecUser
 import com.unifina.provider.FileUploadProvider
 import com.unifina.utils.ImageResizer
 import com.unifina.utils.ImageVerifier
@@ -25,6 +26,13 @@ class ProductImageServiceSpec extends Specification {
 		}
 		service.idGenerator = new FakeIdGenerator()
 
+		SecUser user = new SecUser(
+			username: "user@domain.com",
+			name: "Firstname Lastname",
+			password: "salasana"
+		)
+		user.id = 1
+		user.save(failOnError: true, validate: false)
 		product = new Product(
 			name: "Product name",
 			description: "Product description",
@@ -34,8 +42,8 @@ class ProductImageServiceSpec extends Specification {
 			ownerAddress: "0x0000000000000000000000000000000000000000",
 			beneficiaryAddress: "0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF",
 			pricePerSecond: 2,
-			owner: "arnold"
-		).save(failOnError: true)
+			owner: user
+		).save(failOnError: true, validate: false)
 	}
 
 	void "replaceImage() throws ApiException is file extension is undefined"() {

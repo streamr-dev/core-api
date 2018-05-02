@@ -101,14 +101,16 @@ class RegisterController {
             return
         }
 
-		def response = Unirest.post(grailsApplication.config.recaptcha.verifyUrl)
+		if (grailsApplication.config.streamr.signup.requireCaptcha) {
+			def response = Unirest.post(grailsApplication.config.recaptcha.verifyUrl)
 				.field("secret", (String) grailsApplication.config.recaptchav2.secret)
-				.field("response",(String) params."g-recaptcha-response")
+				.field("response", (String) params."g-recaptcha-response")
 				.asJson()
-		if (response.body.jsonObject.success != true) {
-			flash.error = "Confirming reCaptcha failed for some reason. Please refresh page and refill form."
-			render view: 'signup', model: [ user: cmd ]
-			return
+			if (response.body.jsonObject.success != true) {
+				flash.error = "Confirming reCaptcha failed for some reason. Please refresh page and refill form."
+				render view: 'signup', model: [user: cmd]
+				return
+			}
 		}
 
 		SignupInvite invite

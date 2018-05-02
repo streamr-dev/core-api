@@ -1,11 +1,14 @@
 package com.unifina.domain.marketplace
 
 import com.unifina.domain.data.Stream
+import com.unifina.domain.security.SecUser
+import grails.test.mixin.Mock
 import grails.test.mixin.TestFor
 import spock.lang.Specification
 import spock.lang.Unroll
 
 @TestFor(Product)
+@Mock(SecUser)
 class ProductSpec extends Specification {
 	@Unroll
 	void "isEthereumAddress(#value) == #expected"(String value, Object expected) {
@@ -37,7 +40,7 @@ class ProductSpec extends Specification {
 				beneficiaryAddress: "0x0000000000000000000000000000000000000000",
 				pricePerSecond: 1,
 				category: new Category(),
-				owner: "arnold"
+				owner: Mock(SecUser)
 		)
 		when:
 		p.validate()
@@ -57,7 +60,7 @@ class ProductSpec extends Specification {
 				pricePerSecond: 1,
 				category: new Category(),
 				previewStream: s1,
-				owner: "arnold"
+				owner: Mock(SecUser)
 		)
 		when:
 		p.validate()
@@ -83,7 +86,7 @@ class ProductSpec extends Specification {
 				category: new Category(),
 				streams: [s1, s2],
 				previewStream: s3,
-				owner: "arnold"
+				owner: Mock(SecUser)
 		)
 		when:
 		p.validate()
@@ -109,7 +112,7 @@ class ProductSpec extends Specification {
 				category: new Category(),
 				streams: [s1, s2, s3],
 				previewStream: s3,
-				owner: "arnold"
+				owner: Mock(SecUser)
 		)
 		when:
 		p.validate()
@@ -132,7 +135,7 @@ class ProductSpec extends Specification {
 			category: new Category(),
 			streams: [s1, s2, s3],
 			previewStream: s3,
-			owner: "arnold"
+			owner: Mock(SecUser)
 		)
 		when:
 		p.validate()
@@ -156,7 +159,7 @@ class ProductSpec extends Specification {
 			category: new Category(),
 			streams: [s1, s2, s3],
 			previewStream: s3,
-			owner: "arnold"
+			owner: Mock(SecUser)
 		)
 		when:
 		p.validate()
@@ -181,7 +184,7 @@ class ProductSpec extends Specification {
 			category: new Category(),
 			streams: [s1, s2, s3],
 			previewStream: s3,
-			owner: "arnold"
+			owner: Mock(SecUser)
 		)
 		when:
 		p.validate()
@@ -205,7 +208,7 @@ class ProductSpec extends Specification {
 			category: new Category(),
 			streams: [s1, s2, s3],
 			previewStream: s3,
-			owner: "arnold"
+			owner: Mock(SecUser)
 		)
 		when:
 		p.validate()
