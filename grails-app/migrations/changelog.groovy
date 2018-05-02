@@ -104,8 +104,7 @@ databaseChangeLog = {
 	include file: 'core/2018-04-06-add-altname-to-expression-module.groovy'
 	include file: 'core/2018-04-09-add-owner-to-product.groovy'
 	include file: 'core/2018-04-09-allow-nulls-in-certain-product-fields.groovy'
-	include file: 'core/2018-04-11-test-data-products-subscriptions.groovy'
 	include file: 'core/2018-04-12-free-and-paid-subscriptions.groovy'
 	include file: 'core/2018-04-16-add-ends-at-field-to-permission.groovy'
-	include file: 'core/2018-04-26-fix-test-data-products.groovy'
+	include file: 'core/2018-05-02-test-data-products-subscriptions.groovy'
 }
