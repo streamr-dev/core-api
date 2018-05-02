@@ -106,5 +106,8 @@ databaseChangeLog = {
 	include file: 'core/2018-04-09-allow-nulls-in-certain-product-fields.groovy'
 	include file: 'core/2018-04-12-free-and-paid-subscriptions.groovy'
 	include file: 'core/2018-04-16-add-ends-at-field-to-permission.groovy'
+	include file: 'core/2018-04-25-product-owner-to-user.groovy'
+	include file: 'core/2018-04-27-insert-categories.groovy'
+	include file: 'core/2018-04-29-fix-webcomponent-deserialization-bug.groovy'
 	include file: 'core/2018-05-02-test-data-products-subscriptions.groovy'
 }
