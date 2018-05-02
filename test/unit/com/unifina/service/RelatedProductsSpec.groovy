@@ -20,7 +20,7 @@ class RelatedProductsSpec extends Specification {
 			dateCreated: new Date(),
 			lastUpdated: new Date(),
 			score: 0,
-			owner: user.username,
+			owner: user,
 			ownerAddress: null,
 			beneficiaryAddress: null,
 			pricePerSecond: 0,
