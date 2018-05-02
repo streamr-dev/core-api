@@ -38,6 +38,8 @@ jobs:
     script: ./travis_scripts/fe_unit_test.sh
   - stage: Integration tests
     script: ./travis_scripts/integration_test.sh
+  - stage: functional tests
+    script: ./travis_scripts/integration_test.sh
   - stage: Build war
     script: ./travis_scripts/build_war.sh
     deploy:
