@@ -39,7 +39,7 @@ jobs:
   - stage: Integration tests
     script: ./travis_scripts/integration_test.sh
   - stage: functional tests
-    script: ./travis_scripts/integration_test.sh
+    script: ./travis_scripts/functional_test.sh
   - stage: Build war
     script: ./travis_scripts/build_war.sh
     deploy:
