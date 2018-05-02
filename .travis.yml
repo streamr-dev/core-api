@@ -26,22 +26,23 @@ env:
   global:
   - secure: Icz6PgvdiMvqiC1yMBknaSMqHvvthOo0hUrVCTGA8pWXaqofX5fKNVI8GL4kvRK7a+YpEZ7SCvHH1cgEfBx8jC+Wc0XjGfBZXH1C1gyo8X1keCcJQVRyhxXkrjaeOLF0Cas8m9MdgAqJlwDcAXkWh426kvpAbU1SbNkkSCX3Ksp6M43LVUEbtkdOCf0GxavfgsGL5S9fk7WUf7hU4+HqL/UbbM+XMTz9hgajI5zzyRPiFwMPLGohNfopLKZvRWL/2IDY4ldVEzRi8koxIYrhO68o5RJJsptw+Gfaf3mzmgDGP9jU/cWYxsrfWogtVGFOiB2nDA+opbDU79vwHCpP5dcZJUEDvgOMVA0aTRT6Mc6hXM07wiL9noJwrSqoudkXianDDJqCKja+myKNi4wVWpisZV0HfF3nWeiKoxBaQdlCc7UUadS4OYK30Xll/Z9Z3ebWWGRmdKRSeD+QmM4j8VMu/t624AX/Q0laAS7/6BKOjMaDUqm3Q7plNWTSQWRmVUFzaH0xRL1DPLIbz/8Z8D1IVOfnq6k2FYTtVnjKQdHH65ddtqZMwtsSJsS9fQRYOm3ly0avPvDNnNeEYEuhY5lF8Tiw1lwh+BHOhiQLAPi7dqTiV/I2ImgdFH6a8wr/KICSquaSRWzwWnod3Jstrz9WWQW+K9JKu4deIRUOEx4=
   - secure: Ro0tLYzPfBquDume3DCVOBcwGQtnkDCsitIteCjoiA75epYyweTN4pdaVdmI+nM41mKlXhbo6MYPukOVlxC0DqERsbAbQH8LKuJi+Ylio27ueC8pC0eDS+HjBu0OYLRzNuuhYalHRjAIZFI67CD1CHwFmbws6mENfte5L0sWdieOfnAmM74/82+ZpAibCC1FlIu4qLJxmHSYmH8bC5ZmNTQ59yx2h2BmsXdpJ5b2AVnoevnY8fxSb7mYC98tfS9x979+CMth510v5MzQR4AhwhmnaBcm7wjDgyINVcCG3YSQIs9nhP+AOOi8p+WCibCHGwU9uCPiDBy9KZvNppG7Wpw2JhKVSKOQvZsaxy6tarPxXEFXwaZjLbFw4aUVTe/aPsiOq+LZCljlSNFHANwVpAFqpxtUip2nap9156XNueegWDsgHHkmvp17bHRgsbk+KXvNuD2ieCiuMBJPXSKjm/6oyYsqFc9sPo/0jficsQWkegPkbBZu13acniqRZHENN91SyIh/OfZJQ5hapd8eaPS68iBVseVjplMXbaoId2PMuLw9BF1RXkc/LXHP6mN3DzrILdlezcHzdd87zJseY9+GIgEnihqvhXa53LGEB3KHe22mX0zuw7pOpaxWE89N/mSQFVehh/nnU20lylsiWpXWHe/B9vjMlmk8FnBvjuI=
-
+  - secure: rFe9yLUC3Z4iDxtnSk74zkqIs7FuqLcCL88geIZMU2IExEaUwEqL81hYf/PLJ+5ihDpMKblyibCaiwTI2O4VNWbDfSLioTrzQmg+rsC2TuRKaLx03rusNqA51On3T316n3TzqBhwPDFY6E+Ph7ORGVAzf6xk06PfPXPEKwxBs2rlrCIQbR+UK/iOV+VvtYwgjoiRQO9ZncJ/eOn4t0syGw1OlHEPUjlATugql/GaqQKiXaXAfDEO3KmDvUOVUlaE8PPEhWsHm1UNMYHRhuSD0y1eswEintNNqFG/pdtXkeTWwyPTSEj0v3lkJsv3d4BAOm/kU1iPBsA4BDJ8+8s5ZCexbYOfMpOcjgOA6vj61pzCAYvjSI8UWhHxwh4lcoYIzHVz3Q7T81fBPbshIQNU5vomXXGFtr4naRVGQ9fIQB5BPXGCNMNY26uWyMtUS46Qf+3UwlygnyfWm9X+0rKgbc1s0JlZS9jFAkw3FqtdTzqGtsOfwXxxT5OVnJuTNuelLX7DhH0pzBYNMaP6zPe9yB0qicCT3emiVUxskJ3C5NAvBvYjS4Jkug8NcuCGohdnaYuJrv1AviwxkUjQ5Cw+OMu4/4VH6ifsMYv7Wrzm5m1sXe6YpQrzP+vfMyVLYN/WHwkwMjObSdMrvS76oY1n/7u+X6OI5UnDLi97W496sSI=
+  - secure: C1Hq7wFVdkEsfqTdmfqISEMY+62Or/C3uB6FcuR4WL+p5USg24H3Hf5DO7aBOzVWDnw+75ISA1l8YIG19I5pPyhqB8E3EHIak1IYdKLv+SzO2zcNL95GBx7ld+L6uDKs4vjQGZseNPHwbAJfVvQu3gFZ9jJEafre8EKXg6X69hIDkqBQSTUZapZlvpa3GVILJ0cTnDM4/QeNQXJrg+ITDaFp/T4YPFnCBMxnPKAn3f66j9AM03oMOEQkqiu3Wndaryy9M4ij3Aqq3yU5r3wBAEpaVU97cIItb/T6iu5oEFT31w/I2d07RdzfNB3ZuRUvAbCEbFJccGSVRAOXG50G/OssT5gwSygyJtDdbYCHRaY6+WEhYw9/SP9jGIVVwGXUxZZB/7smZ5CGeUvMnx0+6MCz8vam6ZmNB3Ig1AOk8NBeaM4UCJcevUUZ+krc5r4B+2WLh2YsILLCDTlU1fH4LR+LRp1UbmCVAMTaYZWljRbRzK/S/7n5BZmjtcZjHV3/LhMvmbKwAnYXzwh6fdjwPl3lzhmvx9awEKljTebM3ZxcNQZkA8ryJpOvVUdAGYRpRek+5uq1r+zPo23ZdDknrIrgFWEO1I71Oqu0htWlSWnmDEsnxavuwTmukEe6KN3UXthhoo2EZkSZmTJoNPtt0y2AMsLzoXlqIZxHRKPfIfs=
 jobs:
   include:
   - stage: Unit tests
     env:
     - BACKEND_END_TEST=true
-    script: ./travis_scripts/unit_test.sh
+    script: "./travis_scripts/unit_test.sh"
   - env:
     - FRONT_END_TEST=true
-    script: ./travis_scripts/fe_unit_test.sh
+    script: "./travis_scripts/fe_unit_test.sh"
   - stage: Integration tests
-    script: ./travis_scripts/integration_test.sh
+    script: "./travis_scripts/integration_test.sh"
   - stage: functional tests
-    script: ./travis_scripts/functional_test.sh
+    script: "./travis_scripts/functional_test.sh"
   - stage: Build war
-    script: ./travis_scripts/build_war.sh
+    script: "./travis_scripts/build_war.sh"
     deploy:
       provider: s3
       access_key_id: AKIAI7LEOVJBY6ZEH44Q
@@ -55,7 +56,7 @@ jobs:
       local_dir: build
     if: branch = master
   - stage: Build docker
-    script: ./travis_scripts/docker_build.sh
+    script: "./travis_scripts/docker_build.sh"
     if: "(NOT type IN (pull_request)) AND (branch = master)"
 after_failure: "./travis-after-failure.sh"
 notifications:
