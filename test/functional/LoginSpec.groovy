@@ -3,16 +3,18 @@ import pages.LoginPage
 import geb.spock.GebReportingSpec
 
 class LoginSpec extends GebReportingSpec {
-	
+
 	def "cannot log in with empty form"() {
 		when: "just clicked to log in"
 		to LoginPage
 		loginButton.click()
 		then: "should not go forward"
-		at LoginPage
-		$("p.login-failed-message").displayed
+		waitFor {
+			at LoginPage
+			$("p.login-failed-message").displayed
+		}
 	}
-	
+
 	def "cannot log in with false information"() {
 		when: "given false username and password"
 		to LoginPage
@@ -20,9 +22,11 @@ class LoginSpec extends GebReportingSpec {
 		password = "falsePassword"
 		loginButton.click()
 		then: "should not go forward"
-		at LoginPage
-		$("p.login-failed-message").displayed
-	}	
+		waitFor {
+			at LoginPage
+			$("p.login-failed-message").displayed
+		}
+	}
 
 	def "basic login works"(){
 		when: "logged in"
@@ -31,6 +35,8 @@ class LoginSpec extends GebReportingSpec {
 		password = "tester1TESTER1"
 		loginButton.click()
 		then:
-		at CanvasPage
+		waitFor {
+			at CanvasPage
+		}
 	}
 }
