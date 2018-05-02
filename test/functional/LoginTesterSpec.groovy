@@ -9,7 +9,7 @@ abstract class LoginTesterSpec extends GebReportingSpec {
 		resetBrowser()
 		CachingDriverFactory.clearCacheAndQuitDriver()
 	}
-	
+
 	def setup() {
 		this.login()
 		waitFor {
@@ -25,7 +25,7 @@ abstract class LoginTesterSpec extends GebReportingSpec {
 		username = getTesterUsername()
 		password = getTesterPassword()
 		loginButton.click()
-	}
+}
 
 	abstract String getTesterUsername();
 	abstract String getTesterPassword();
