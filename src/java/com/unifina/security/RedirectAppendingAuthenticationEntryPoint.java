@@ -37,7 +37,7 @@ public class RedirectAppendingAuthenticationEntryPoint extends LoginUrlAuthentic
 		} else if (LoginRedirectValidator.isValid(request.getRequestURL().toString())){
 			return loginPageUrl + "?redirect="+request.getRequestURL();
 		} else {
-			log.info("Redirect url rejected: "+request.getRequestURL());
+			log.warn("Redirect url rejected: "+request.getRequestURL());
 			return loginPageUrl;
 		}
 	}
