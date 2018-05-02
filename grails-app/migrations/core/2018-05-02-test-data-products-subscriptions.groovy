@@ -122,7 +122,7 @@ databaseChangeLog = {
 				column(name: "version", valueNumeric: 0)
 				column(name: "date_created", value: "2018-01-01 00:00:00")
 				column(name: "last_updated", value: "2018-01-01 00:00:00")
-				column(name: "owner", value: "Tester")
+				column(name: "owner_id", value: rand(1, 3)) // tester one/two/admin
 
 				if (isFreeProduct) {
 					column(name: "price_per_second", valueNumeric: 0)
