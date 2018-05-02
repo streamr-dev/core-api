@@ -9,7 +9,7 @@ abstract class LoginTesterSpec extends GebReportingSpec {
 		resetBrowser()
 		CachingDriverFactory.clearCacheAndQuitDriver()
 	}
-	
+
 	def setup() {
 		this.login()
 	}

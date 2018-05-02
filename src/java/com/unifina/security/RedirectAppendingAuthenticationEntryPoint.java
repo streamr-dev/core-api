@@ -18,6 +18,7 @@ import java.util.Map;
 public class RedirectAppendingAuthenticationEntryPoint extends LoginUrlAuthenticationEntryPoint {
 
 	private static final Logger log = Logger.getLogger(RedirectAppendingAuthenticationEntryPoint.class);
+	private static final String REDIRECT_PARAM_NAME = "redirect";
 
 	private LinkGenerator linkGenerator;
 	private String defaultRedirectURI;
@@ -35,11 +36,15 @@ public class RedirectAppendingAuthenticationEntryPoint extends LoginUrlAuthentic
 				|| request.getRequestURI().equals(getFullURI(defaultRedirectURI))) {
 			return loginPageUrl;
 		} else if (LoginRedirectValidator.isValid(request.getRequestURL().toString())){
-			return loginPageUrl + "?redirect="+request.getRequestURL();
+			return loginPageUrl + "?" + REDIRECT_PARAM_NAME + "=" + request.getRequestURL().toString();
 		} else {
 			log.warn("Redirect url rejected: "+request.getRequestURL());
 			return loginPageUrl;
 		}
+	}
+
+	public String getRedirectParameterName() {
+		return REDIRECT_PARAM_NAME;
 	}
 
 	private String getFullURI(String uriWithoutContextPath) {
@@ -48,16 +53,8 @@ public class RedirectAppendingAuthenticationEntryPoint extends LoginUrlAuthentic
 		return linkGenerator.link(linkGeneratorArgs);
 	}
 
-	public LinkGenerator getLinkGenerator() {
-		return linkGenerator;
-	}
-
 	public void setLinkGenerator(LinkGenerator linkGenerator) {
 		this.linkGenerator = linkGenerator;
-	}
-
-	public String getDefaultRedirectURI() {
-		return defaultRedirectURI;
 	}
 
 	public void setDefaultRedirectURI(String defaultRedirectURI) {
