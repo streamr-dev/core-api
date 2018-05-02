@@ -3,6 +3,7 @@ package com.unifina.api
 import com.unifina.domain.data.Stream
 import com.unifina.domain.marketplace.Category
 import com.unifina.domain.marketplace.Product
+import com.unifina.domain.security.SecUser
 import spock.lang.Specification
 
 class UpdateProductCommandSpec extends Specification {
@@ -29,7 +30,7 @@ class UpdateProductCommandSpec extends Specification {
 			streams: [stream],
 			previewConfigJson: "{}",
 			score: 5,
-			owner: "owner",
+			owner: new SecUser(name: "John Doe"),
 			ownerAddress: "0x0",
 			beneficiaryAddress: "0x0",
 			pricePerSecond: 5,
@@ -74,19 +75,21 @@ class UpdateProductCommandSpec extends Specification {
 			state: "NOT_DEPLOYED",
 			created: null,
 			updated: null,
-			owner: "owner",
+			owner: "John Doe",
 			name: "new name",
 			description: "new description",
 			imageUrl: "image.jpg",
+			thumbnailUrl: "thumb.jpg",
 			category: "new-category-id",
 			streams: ["new-stream-id"],
 			previewStream: "new-stream-id",
 			previewConfigJson: "{newConfig: true}",
 			ownerAddress: "0x0",
 			beneficiaryAddress: "0x0",
-			pricePerSecond: 0L,
+			pricePerSecond: "0",
+			isFree: true,
 			priceCurrency: "DATA",
-			minimumSubscriptionInSeconds: 0L
+			minimumSubscriptionInSeconds: 0L,
 		]
 	}
 
@@ -102,17 +105,19 @@ class UpdateProductCommandSpec extends Specification {
 			state: "DEPLOYED",
 			created: null,
 			updated: null,
-			owner: "owner",
+			owner: "John Doe",
 			name: "new name",
 			description: "new description",
 			imageUrl: "image.jpg",
+			thumbnailUrl: "thumb.jpg",
 			category: "new-category-id",
 			streams: ["new-stream-id"],
 			previewStream: "new-stream-id",
 			previewConfigJson: "{newConfig: true}",
 			ownerAddress: "0x0",
 			beneficiaryAddress: "0x0",
-			pricePerSecond: 5L,
+			pricePerSecond: "5",
+			isFree: false,
 			priceCurrency: "DATA",
 			minimumSubscriptionInSeconds: 0L
 		]
@@ -130,17 +135,19 @@ class UpdateProductCommandSpec extends Specification {
 			state: "NOT_DEPLOYED",
 			created: null,
 			updated: null,
-			owner: "owner",
+			owner: "John Doe",
 			name: "new name",
 			description: "new description",
 			imageUrl: "image.jpg",
+			thumbnailUrl: "thumb.jpg",
 			category: "new-category-id",
 			streams: ["new-stream-id"],
 			previewStream: "new-stream-id",
 			previewConfigJson: "{newConfig: true}",
 			ownerAddress: "0xA",
 			beneficiaryAddress: "0xF",
-			pricePerSecond: 10L,
+			pricePerSecond: "10",
+			isFree: false,
 			priceCurrency: "USD",
 			minimumSubscriptionInSeconds: 10L
 		]

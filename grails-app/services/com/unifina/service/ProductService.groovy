@@ -14,7 +14,8 @@ class ProductService {
 	SubscriptionService subscriptionService
 
 	void removeUsersProducts(String username) {
-		def all = Product.findAllByOwner(username)
+		def user = SecUser.findByUsername(username)
+		def all = Product.findAllByOwner(user)
 		all.toArray().each { Product product ->
 			product.streams.toArray().each { Stream stream ->
 				product.streams.remove(stream)
@@ -48,7 +49,7 @@ class ProductService {
 		}
 
 		Product product = new Product(command.properties)
-		product.owner = currentUser.username
+		product.owner = currentUser
 		product.save(failOnError: true)
 		permissionService.systemGrantAll(currentUser, product)
 		return product

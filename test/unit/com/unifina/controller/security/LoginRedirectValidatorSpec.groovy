@@ -19,12 +19,19 @@ class LoginRedirectValidatorSpec extends Specification {
 		true   | "http://127.0.0.1:3333/"
 		true   | "http://127.0.0.1:3333/index.html?foobar=lol"
 		true   | "http://127.0.0.1:3131/index.html?foobar=lol"
-		false  | "https://www.streamr.com"
-		false  | ""
+		true   | "https://www.streamr.com"
+		true   | "https://marketplace.streamr.com"
+		true   | "https://marketplace-staging.streamr.com"
+		true   | "https://marketplace.streamr.com/sub"
+		true   | "https://streamr.com"
+		true   | "https://streamr.com/"
+		true   | "https://streamr.com/marketplace"
 		false  | "http://www.streamr.com/"
-		false  | "https://streamr.com/"
+		false  | ""
 		false  | null
 		false  | "https://www.google.fi/"
+		false  | "https://www.streamr.com.phissing.com"
 		false  | "https://www.streamr.com.phissing.com/"
+		false  | "https://www.streamr.com.phissing.com/sub"
 	}
 }

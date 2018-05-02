@@ -7,10 +7,10 @@ class LoginRedirectValidator {
 	// Accepts:
 	// - localhost:port
 	// - 127.0.0.1:port
-	// - streamr.com with required subdomain
+	// - streamr.com and its subdomains
 	// Trailing slash is required.
 	final static String regex = """
-^https://([a-zA-Z0-9]*)?\\.streamr\\.com/.*        # streamr.com with subdomains. subdomain == [a-zA-Z0-9]
+^https://([a-zA-Z0-9-]*\\.)?streamr\\.com(/.*)?     # streamr.com and its subdomains. subdomain == [a-zA-Z0-9-]
 |http://localhost:\\d\\d\\d\\d/.*                  # or localhost with any port
 |http://127\\.0\\.0\\.1:\\d\\d\\d\\d/.*\$          # or 127.0.0.1 with any port
 """

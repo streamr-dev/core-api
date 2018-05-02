@@ -188,6 +188,7 @@ describe('Products API', () => {
                     name: 'Product',
                     description: 'Description of the product.',
                     imageUrl: null,
+                    thumbnailUrl: null,
                     category: 'satellite-id',
                     streams: [
                         streamId1,
@@ -198,10 +199,11 @@ describe('Products API', () => {
                     previewConfigJson: null,
                     ownerAddress: '0xAAAAAAAAAABBBBBBBBBBCCCCCCCCCCDDDDDDDDDD',
                     beneficiaryAddress: '0x0000000000000000000011111111111111111111',
-                    pricePerSecond: 5,
+                    pricePerSecond: '5',
+                    isFree: false,
                     priceCurrency: 'USD',
                     minimumSubscriptionInSeconds: 60,
-                    owner: 'product-api-tester@streamr.com'
+                    owner: 'Product API Test User'
                 })
             })
         })
@@ -338,6 +340,7 @@ describe('Products API', () => {
                     name: 'Product (updated)',
                     description: 'Description of the product.',
                     imageUrl: null,
+                    thumbnailUrl: null,
                     category: 'automobile-id',
                     streams: [],
 
@@ -348,10 +351,11 @@ describe('Products API', () => {
                     previewConfigJson: null,
                     ownerAddress: '0xAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA',
                     beneficiaryAddress: '0xCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC',
-                    pricePerSecond: 4556,
+                    pricePerSecond: '4556',
+                    isFree: false,
                     priceCurrency: 'DATA',
                     minimumSubscriptionInSeconds: 30000,
-                    owner: 'product-api-tester@streamr.com'
+                    owner: 'Product API Test User'
                 })
             })
         })
@@ -950,10 +954,12 @@ describe('Products API', () => {
             })
 
             it('response Product contains image URL', () => {
+                assert.isDefined(json.imageUrl)
                 assert.isNotNull(json.imageUrl)
             })
 
             it('response Product contains image thumbnail URL', () => {
+                assert.isDefined(json.thumbnailUrl)
                 assert.isNotNull(json.thumbnailUrl)
             })
 

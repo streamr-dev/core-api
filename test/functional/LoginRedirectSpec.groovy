@@ -8,7 +8,7 @@ class LoginRedirectSpec extends GebReportingSpec {
 			go DashboardListPage.url
 		then: "must redirect to login page"
 			waitFor { at LoginPage }
-			
+
 		when: "logged in"
 			username = LoginTester1Spec.testerUsername
 			password = LoginTester1Spec.testerPassword
@@ -21,7 +21,7 @@ class LoginRedirectSpec extends GebReportingSpec {
 
 	def "redirects to redirect parameter value after successful login"() {
 		when:
-			go LoginPage.url + "?redirect=https%3A%2F%2Fwww.streamr.com%2Fmarketplace"
+			go LoginPage.url + "?redirect=https%3A%2F%2Fmarketplace.streamr.com%2Ffoobar"
 		then: "must redirect to login page"
 			waitFor {
 				at LoginPage
@@ -32,7 +32,7 @@ class LoginRedirectSpec extends GebReportingSpec {
 			loginButton.click()
 		then: "redirects browser to url defined by redirect parameter"
 			waitFor {
-				currentUrl.equals("https://www.streamr.com/marketplace")
+				currentUrl.equals("https://marketplace.streamr.com/foobar")
 			}
 	}
 }

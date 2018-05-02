@@ -52,16 +52,9 @@ class LoginController {
 
 		String view = 'auth'
 		String postUrl = "${request.contextPath}${config.apf.filterProcessesUrl}"
-		def redirect = params.redirect
-		if (redirect != null) {
-			redirect = redirect.trim()
-			if (!LoginRedirectValidator.isValid(redirect)) {
-				redirect = null
-			}
-		}
+
 		render view: view, model: [postUrl            : postUrl,
-								   rememberMeParameter: config.rememberMe.parameter,
-								   redirect           : redirect]
+								   rememberMeParameter: config.rememberMe.parameter]
 	}
 
 	/**
@@ -135,7 +128,7 @@ class LoginController {
 	 * The Ajax success redirect url.
 	 */
 	def ajaxSuccess = {
-		render([success: true, username: springSecurityService.authentication.name] as JSON)
+		render([success: true, user: springSecurityService.currentUser.toMap()] as JSON)
 	}
 
 	/**
@@ -144,7 +137,7 @@ class LoginController {
 	def ajaxDenied = {
 		render([error: 'access denied'] as JSON)
 	}
-	
+
 	def loginForm() {
 		def config = SpringSecurityUtils.securityConfig
 		String postUrl = "${request.contextPath}${config.apf.filterProcessesUrl}"

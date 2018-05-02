@@ -2,6 +2,7 @@ package com.unifina.api
 
 import com.unifina.domain.marketplace.Category
 import com.unifina.domain.marketplace.Product
+import com.unifina.domain.security.SecUser
 import grails.test.mixin.Mock
 import spock.lang.Specification
 import spock.lang.Unroll
@@ -14,6 +15,14 @@ class ProductListParamsSpec extends Specification {
 	Category c1, c2, c3
 
 	void setup() {
+		SecUser user = new SecUser(
+			username: "user@domain.com",
+			name: "Firstname Lastname",
+			password: "salasana"
+		)
+		user.id = 1
+		user.save(failOnError: true, validate: false)
+
 		c1 = new Category(name: "category-1")
 		c2 = new Category(name: "category-2")
 		c3 = new Category(name: "category-3")
@@ -27,7 +36,7 @@ class ProductListParamsSpec extends Specification {
 			category: c1,
 			pricePerSecond: 5,
 			state: Product.State.NOT_DEPLOYED,
-			owner: "arnold"
+			owner: user
 		)
 		Product p2 = new Product(
 			name: "Hello Product",
@@ -37,7 +46,7 @@ class ProductListParamsSpec extends Specification {
 			category: c2,
 			pricePerSecond: 10,
 			state: Product.State.DEPLOYING,
-			owner: "arnold"
+			owner: user
 		)
 		Product p3 = new Product(
 			name: "Cryptocurrency Product",
@@ -47,7 +56,7 @@ class ProductListParamsSpec extends Specification {
 			category: c3,
 			pricePerSecond: 1,
 			state: Product.State.DEPLOYED,
-			owner: "arnold"
+			owner: user
 		)
 		Product p4 = new Product(
 			name: "Automobile Product",
@@ -57,7 +66,7 @@ class ProductListParamsSpec extends Specification {
 			category: c1,
 			pricePerSecond: 3,
 			state: Product.State.DEPLOYED,
-			owner: "arnold"
+			owner: user
 		)
 
 		mockCriteria(Product) // support for criteria `in`

@@ -18,7 +18,7 @@ import spock.lang.Specification
 import javax.servlet.http.HttpServletResponse
 
 @TestFor(ProductApiController)
-@Mock([UnifinaCoreAPIFilters])
+@Mock([UnifinaCoreAPIFilters, SecUser])
 class ProductApiControllerSpec extends Specification {
 
 	Product product
@@ -26,7 +26,13 @@ class ProductApiControllerSpec extends Specification {
 	void setup() {
 		def category = new Category(name: "category")
 		category.id = "category-id"
-
+		SecUser user = new SecUser(
+			username: "user@domain.com",
+			name: "Firstname Lastname",
+			password: "salasana"
+		)
+		user.id = 1
+		user.save(failOnError: true, validate: false)
 		product = new Product(
 			name: "product",
 			description: "description",
@@ -34,6 +40,7 @@ class ProductApiControllerSpec extends Specification {
 			ownerAddress: "0x0",
 			beneficiaryAddress: "0x1",
 			pricePerSecond: 5,
+			owner: user
 		)
 		product.id = "product-id"
 	}

@@ -38,6 +38,13 @@ class ProductServiceSpec extends Specification {
 	}
 
 	private void setupProduct(Product.State state = Product.State.NOT_DEPLOYED) {
+		SecUser user = new SecUser(
+			username: "user@domain.com",
+			name: "Firstname Lastname",
+			password: "salasana"
+		)
+		user.id = 1
+		user.save(failOnError: true, validate: false)
 		product = new Product(
 				name: "name",
 				description: "description",
@@ -49,7 +56,7 @@ class ProductServiceSpec extends Specification {
 				state: state,
 				blockNumber: 40000,
 				blockIndex: 30,
-				owner: "arnold"
+				owner: user
 		)
 		product.id = "product-id"
 		product.save(failOnError: true, validate: true)
@@ -103,7 +110,7 @@ class ProductServiceSpec extends Specification {
 		)
 
 		def user = new SecUser()
-		user.username = "arnold"
+		user.name = "Arnold Schwarzenegger"
 		when:
 		def product = service.create(validCommand, user)
 
@@ -116,6 +123,7 @@ class ProductServiceSpec extends Specification {
 			name: "Product",
 			description: "Description of Product.",
 			imageUrl: null,
+			thumbnailUrl: null,
 			category: "category-id",
 			streams: ["stream-1", "stream-2", "stream-3"],
 			state: "NOT_DEPLOYED",
@@ -125,10 +133,11 @@ class ProductServiceSpec extends Specification {
 			updated: product.lastUpdated,
 			ownerAddress: "0x0000000000000000000000000000000000000000",
 			beneficiaryAddress: "0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF",
-			pricePerSecond: 10,
+			pricePerSecond: "10",
+			isFree: false,
 			priceCurrency: "DATA",
 			minimumSubscriptionInSeconds: 1,
-			owner: "arnold"
+			owner: "Arnold Schwarzenegger"
 		]
 		product.dateCreated != null
 		product.dateCreated == product.lastUpdated
@@ -354,6 +363,7 @@ class ProductServiceSpec extends Specification {
 				name: "updated name",
 				description: "updated description",
 				imageUrl: null,
+				thumbnailUrl: null,
 				category: "category2-id",
 				streams: ["stream-2", "stream-4"],
 				state: "NOT_DEPLOYED",
@@ -363,10 +373,11 @@ class ProductServiceSpec extends Specification {
 				updated: product.lastUpdated,
 				ownerAddress: "0xCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC",
 				beneficiaryAddress: "0xCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC",
-				pricePerSecond: 20L,
+				pricePerSecond: "20",
+				isFree: false,
 				priceCurrency: "DATA",
 				minimumSubscriptionInSeconds: 1000,
-				owner: "arnold"
+				owner: "Firstname Lastname"
 		]
 		product.dateCreated < product.lastUpdated
 	}
@@ -760,6 +771,7 @@ class ProductServiceSpec extends Specification {
 				name: "name",
 				description: "description",
 				imageUrl: null,
+				thumbnailUrl: null,
 				category: "category-id",
 				streams: [],
 				previewStream: null,
@@ -771,10 +783,11 @@ class ProductServiceSpec extends Specification {
 				state: "DEPLOYED",
 				ownerAddress: "0xBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB",
 				beneficiaryAddress: "0xAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
-				pricePerSecond: 2,
+				pricePerSecond: "2",
+				isFree: false,
 				priceCurrency: "USD",
 				minimumSubscriptionInSeconds: 600,
-				owner: "arnold"
+				owner: "Firstname Lastname"
 		]
 	}
 
