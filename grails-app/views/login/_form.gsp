@@ -70,8 +70,6 @@
 
 		// Submit form on button click
 		$btn.click(function(event) {
-		    debugger;
-
 			disableButton()
 
 			$.ajax({

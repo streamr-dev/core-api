@@ -30,6 +30,8 @@ class LoginRedirectValidatorSpec extends Specification {
 		false  | ""
 		false  | null
 		false  | "https://www.google.fi/"
+		false  | "https://www.streamr.com.phissing.com"
 		false  | "https://www.streamr.com.phissing.com/"
+		false  | "https://www.streamr.com.phissing.com/sub"
 	}
 }

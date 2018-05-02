@@ -12,7 +12,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * An AjaxAwareAuthenticationEntryPoint which appends a 'redirect' query parameter
+ * An extension to LoginUrlAuthenticationEntryPoint, which appends a 'redirect' query parameter
  * when trying to access a protected page and redirecting to the login view.
  */
 public class RedirectAppendingAuthenticationEntryPoint extends LoginUrlAuthenticationEntryPoint {
@@ -28,17 +28,17 @@ public class RedirectAppendingAuthenticationEntryPoint extends LoginUrlAuthentic
 
 	@Override
 	protected String buildRedirectUrlToLoginPage(HttpServletRequest request, HttpServletResponse response, AuthenticationException authException) {
-		String url = super.buildRedirectUrlToLoginPage(request, response, authException);
+		String loginPageUrl = super.buildRedirectUrlToLoginPage(request, response, authException);
 
 		// If we are looking for the base url or the default redirect, don't add the redirect query param
 		if (request.getRequestURI().equals(getFullURI("/"))
 				|| request.getRequestURI().equals(getFullURI(defaultRedirectURI))) {
-			return url;
+			return loginPageUrl;
 		} else if (LoginRedirectValidator.isValid(request.getRequestURL().toString())){
-			return url + "?redirect="+request.getRequestURL();
+			return loginPageUrl + "?redirect="+request.getRequestURL();
 		} else {
 			log.info("Redirect url rejected: "+request.getRequestURL());
-			return url;
+			return loginPageUrl;
 		}
 	}
 
