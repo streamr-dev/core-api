@@ -38,6 +38,13 @@ class ProductServiceSpec extends Specification {
 	}
 
 	private void setupProduct(Product.State state = Product.State.NOT_DEPLOYED) {
+		SecUser user = new SecUser(
+			username: "user@domain.com",
+			name: "Firstname Lastname",
+			password: "salasana"
+		)
+		user.id = 1
+		user.save(failOnError: true, validate: false)
 		product = new Product(
 				name: "name",
 				description: "description",
@@ -49,7 +56,7 @@ class ProductServiceSpec extends Specification {
 				state: state,
 				blockNumber: 40000,
 				blockIndex: 30,
-				owner: "arnold"
+				owner: user
 		)
 		product.id = "product-id"
 		product.save(failOnError: true, validate: true)
@@ -103,7 +110,7 @@ class ProductServiceSpec extends Specification {
 		)
 
 		def user = new SecUser()
-		user.username = "arnold"
+		user.name = "Arnold Schwarzenegger"
 		when:
 		def product = service.create(validCommand, user)
 
@@ -130,7 +137,7 @@ class ProductServiceSpec extends Specification {
 			isFree: false,
 			priceCurrency: "DATA",
 			minimumSubscriptionInSeconds: 1,
-			owner: "arnold"
+			owner: "Arnold Schwarzenegger"
 		]
 		product.dateCreated != null
 		product.dateCreated == product.lastUpdated
@@ -370,7 +377,7 @@ class ProductServiceSpec extends Specification {
 				isFree: false,
 				priceCurrency: "DATA",
 				minimumSubscriptionInSeconds: 1000,
-				owner: "arnold"
+				owner: "Firstname Lastname"
 		]
 		product.dateCreated < product.lastUpdated
 	}
@@ -780,7 +787,7 @@ class ProductServiceSpec extends Specification {
 				isFree: false,
 				priceCurrency: "USD",
 				minimumSubscriptionInSeconds: 600,
-				owner: "arnold"
+				owner: "Firstname Lastname"
 		]
 	}
 

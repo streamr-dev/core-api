@@ -203,7 +203,7 @@ describe('Products API', () => {
                     isFree: false,
                     priceCurrency: 'USD',
                     minimumSubscriptionInSeconds: 60,
-                    owner: 'product-api-tester@streamr.com'
+                    owner: 'Product API Test User'
                 })
             })
         })
@@ -355,7 +355,7 @@ describe('Products API', () => {
                     isFree: false,
                     priceCurrency: 'DATA',
                     minimumSubscriptionInSeconds: 30000,
-                    owner: 'product-api-tester@streamr.com'
+                    owner: 'Product API Test User'
                 })
             })
         })
