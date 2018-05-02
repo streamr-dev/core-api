@@ -10,7 +10,7 @@ import grails.test.mixin.Mock
 import grails.test.mixin.TestFor
 import spock.lang.Specification
 
-@TestFor(RelatedProductsController)
+@TestFor(ProductApiController)
 @Mock([UnifinaCoreAPIFilters, Product, SecUser, Category])
 class RelatedProductsControllerSpec extends Specification {
 	Product newProduct(String id, String name, String description, Category c, SecUser user) {
@@ -91,7 +91,7 @@ class RelatedProductsControllerSpec extends Specification {
 		request.requestURI = "/api/v1/products/${p1.id}/related"
 
 		withFilters(action: "index") {
-			controller.index()
+			controller.related()
 		}
 		then:
 		1 * controller.productService.relatedProducts(p1.id) >> [p2, p3, p4]
@@ -112,7 +112,7 @@ class RelatedProductsControllerSpec extends Specification {
 		request.requestURI = "/api/v1/products/xxx-id-xxx/related"
 
 		withFilters(action: "index") {
-			controller.index()
+			controller.related()
 		}
 		then:
 		1 * controller.productService.relatedProducts("xxx-id-xxx") >> new ArrayList<Product>()

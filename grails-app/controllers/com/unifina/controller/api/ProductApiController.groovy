@@ -36,6 +36,13 @@ class ProductApiController {
 
 	@GrailsCompileStatic
 	@StreamrApi(authenticationLevel = AuthLevel.NONE)
+	def related() {
+		def related = productService.relatedProducts((String) params.id)
+		render(related as JSON)
+	}
+
+	@GrailsCompileStatic
+	@StreamrApi(authenticationLevel = AuthLevel.NONE)
 	def index(ProductListParams listParams) {
 		def products = productService.list(listParams, loggedInUser())
 		apiService.addLinkHintToHeader(listParams, products.size(), params, response)
