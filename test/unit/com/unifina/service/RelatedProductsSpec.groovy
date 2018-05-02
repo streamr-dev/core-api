@@ -86,7 +86,7 @@ class RelatedProductsSpec extends Specification {
 
 	void "find related products"() {
 		when:
-		def products = service.relatedProducts(p1.id)
+		def products = service.relatedProducts(p1)
 		then:
 		products.size() == 3
 		products.contains(p1) == false
@@ -97,7 +97,7 @@ class RelatedProductsSpec extends Specification {
 
 	void "find related products with non existing id"() {
 		when:
-		def products = service.relatedProducts("not-existing")
+		def products = service.relatedProducts(null)
 		then:
 		products.size() == 0
 	}

@@ -3,6 +3,7 @@ package com.unifina.controller.api
 import com.unifina.domain.marketplace.Category
 import com.unifina.domain.marketplace.Product
 import com.unifina.domain.security.Key
+import com.unifina.domain.security.Permission
 import com.unifina.domain.security.SecUser
 import com.unifina.filters.UnifinaCoreAPIFilters
 import com.unifina.service.ProductService
@@ -37,12 +38,12 @@ class RelatedProductsControllerSpec extends Specification {
 	}
 
 	Product p1, p2, p3, p4
-	SecUser u1, u2
+	SecUser u1, u2, apiUser
 	Category cat1, cat2
 
 	void setup() {
 		controller.productService = Mock(ProductService)
-		def apiUser = new SecUser(
+		apiUser = new SecUser(
 			username: "username: api@user.com",
 			name: "Regular API user",
 			password: "xxx"
@@ -94,7 +95,8 @@ class RelatedProductsControllerSpec extends Specification {
 			controller.related()
 		}
 		then:
-		1 * controller.productService.relatedProducts(p1.id) >> [p2, p3, p4]
+		1 * controller.productService.findById(p1.id, apiUser, Permission.Operation.READ) >> p1
+		1 * controller.productService.relatedProducts(p1) >> [p2, p3, p4]
 		response.status == 200
 		response.json[0].id == p2.id
 		response.json[0].name == p2.name
@@ -115,7 +117,7 @@ class RelatedProductsControllerSpec extends Specification {
 			controller.related()
 		}
 		then:
-		1 * controller.productService.relatedProducts("xxx-id-xxx") >> new ArrayList<Product>()
+		1 * controller.productService.relatedProducts(null) >> new ArrayList<Product>()
 		response.status == 200
 		response.json == []
 	}
