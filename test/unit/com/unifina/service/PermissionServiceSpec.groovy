@@ -181,100 +181,16 @@ class PermissionServiceSpec extends Specification {
 		service.getPermissionsTo(dashPublic, anonymousKey)[0].operation == Operation.READ
 	}
 
-	void "retrieve all readable Dashboards correctly"() {
-		expect:
-		service.get(Dashboard, me) as Set == [dashOwned, dashAllowed] as Set
-		service.get(Dashboard, anotherUser) as Set == [dashAllowed, dashRestricted, dashPublic] as Set
-		service.get(Dashboard, stranger) == []
-	}
-
-	void "retrieve all readable Dashboards correctly with keys"() {
-		expect:
-		service.get(Dashboard, myKey) as Set == [dashOwned, dashAllowed] as Set
-		service.get(Dashboard, anotherUserKey) as Set == [dashAllowed, dashRestricted, dashPublic] as Set
-		service.get(Dashboard, anonymousKey) as Set == [dashAllowed] as Set
-	}
-
-	void "getAll lists public resources"() {
-		expect:
-		service.getAll(Dashboard, me) as Set == [dashOwned, dashPublic, dashAllowed] as Set
-		service.getAll(Dashboard, anotherUser) as Set == [dashAllowed, dashRestricted, dashPublic] as Set
-		service.getAll(Dashboard, stranger) == [dashPublic]
-	}
-
-	void "getAll lists public resources with keys"() {
-		expect:
-		service.getAll(Dashboard, myKey) as Set == [dashOwned, dashPublic, dashAllowed] as Set
-		service.getAll(Dashboard, anotherUserKey) as Set == [dashAllowed, dashRestricted, dashPublic] as Set
-		service.getAll(Dashboard, anonymousKey) as Set == [dashPublic, dashAllowed] as Set
-	}
-
 	void "get throws exceptions on invalid resource"() {
 		when:
 		service.get(java.lang.Object, me)
 		then:
-		thrown MissingMethodException
+		thrown(IllegalArgumentException)
 
 		when:
 		service.get(null, me)
 		then:
-		thrown NullPointerException
-	}
-
-	void "getAll returns public resources on bad/null user"() {
-		expect:
-		service.get(Dashboard, new SecUser()) == []
-		service.get(Dashboard, null) == []
-		service.getAll(Dashboard, new SecUser()) == [dashPublic]
-		service.getAll(Dashboard, null) == [dashPublic]
-	}
-
-	void "granting and revoking read rights"() {
-		when:
-		service.grant(me, dashOwned, stranger)
-		then:
-		service.get(Dashboard, stranger) == [dashOwned]
-
-		when:
-		service.revoke(me, dashOwned, stranger)
-		then:
-		service.get(Dashboard, stranger) == []
-	}
-
-	void "granting and revoking write rights"() {
-		when:
-		service.grant(me, dashOwned, stranger, Operation.WRITE)
-		then:
-		service.get(Dashboard, stranger, Operation.WRITE) == [dashOwned]
-
-		when:
-		service.revoke(me, dashOwned, stranger, Operation.WRITE)
-		then:
-		service.get(Dashboard, stranger, Operation.WRITE) == []
-
-		when: "revoking read also revokes write"
-		service.grant(me, dashOwned, stranger, Operation.WRITE)
-		service.revoke(me, dashOwned, stranger)
-		then:
-		service.get(Dashboard, stranger, Operation.WRITE) == []
-	}
-
-	void "granting and revoking share rights"() {
-		when:
-		service.grant(me, dashOwned, stranger, Operation.SHARE)
-		then:
-		service.get(Dashboard, stranger, Operation.SHARE) == [dashOwned]
-
-		when:
-		service.revoke(me, dashOwned, stranger, Operation.SHARE)
-		then:
-		service.get(Dashboard, stranger, Operation.SHARE) == []
-
-		when: "revoking read also revokes share"
-		service.grant(me, dashOwned, stranger, Operation.SHARE)
-		service.revoke(me, dashOwned, stranger)
-		then:
-		service.get(Dashboard, stranger, Operation.SHARE) == []
+		thrown(NullPointerException)
 	}
 
 	void "grant and revoke throw for non-'share'-access users"() {
@@ -323,34 +239,6 @@ class PermissionServiceSpec extends Specification {
 		then:
 		def e = thrown(AccessControlException)
 		e.message == "Cannot revoke only SHARE permission of ${dashOwned}"
-	}
-
-	void "default revocation is all access"() {
-		setup:
-		service.grant(me, dashOwned, stranger, Operation.READ)
-		service.grant(me, dashOwned, stranger, Operation.SHARE)
-		when:
-		service.revoke(me, dashOwned, stranger)
-		then: "by default, revoke all access"
-		service.get(Dashboard, stranger) == []
-		service.get(Dashboard, stranger, Operation.SHARE) == []
-	}
-
-	void "granting works (roughly) idempotently"() {
-		expect:
-		service.get(Dashboard, stranger) == []
-		when: "double-granting still has the same effect: there exists a permission for user to resource"
-		service.grant(me, dashOwned, stranger)
-		service.grant(me, dashOwned, stranger)
-		then: "now you see it..."
-		service.get(Dashboard, stranger) == [dashOwned]
-		when:
-		service.grant(me, dashOwned, stranger)
-		service.grant(me, dashOwned, stranger)
-		service.grant(me, dashOwned, stranger)
-		service.revoke(me, dashOwned, stranger)
-		then: "now you don't."
-		service.get(Dashboard, stranger) == []
 	}
 
 	void "signup invitation can be granted and revoked of permissions just like normal users"() {
