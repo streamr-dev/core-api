@@ -23,8 +23,8 @@ describe('Categories API', () => {
             assert.equal(response.status, 200)
         })
 
-        it('body is expected array of categories', () => {
-            assert.deepEqual(json, [
+        it('body contains at least expected array of categories', () => {
+            assert.includeDeepMembers(json, [
                 {
                     'id': 'ad-id',
                     'name': 'Advertising',
