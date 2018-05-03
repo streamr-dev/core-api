@@ -13,15 +13,23 @@ import static plastic.criteria.PlasticCriteria.*
 class ProductListParamsSpec extends Specification {
 
 	Category c1, c2, c3
+	SecUser user, other
 
 	void setup() {
-		SecUser user = new SecUser(
+		user = new SecUser(
 			username: "user@domain.com",
 			name: "Firstname Lastname",
 			password: "salasana"
 		)
 		user.id = 1
 		user.save(failOnError: true, validate: false)
+		other = new SecUser(
+			username: "usr@foo.com",
+			name: "Firstname Lastname",
+			password: "salasana"
+		)
+		other.id = 2
+		other.save(failOnError: true, validate: false)
 
 		c1 = new Category(name: "category-1")
 		c2 = new Category(name: "category-2")
@@ -66,7 +74,7 @@ class ProductListParamsSpec extends Specification {
 			category: c1,
 			pricePerSecond: 3,
 			state: Product.State.DEPLOYED,
-			owner: user
+			owner: other
 		)
 
 		mockCriteria(Product) // support for criteria `in`
@@ -144,6 +152,13 @@ class ProductListParamsSpec extends Specification {
 		def paramsList = new ProductListParams(states: [Product.State.NOT_DEPLOYED, Product.State.DEPLOYING])
 		then:
 		fetchProductIdsFor(paramsList) == ["product-1", "product-2"] as Set
+	}
+
+	void "createListCriteria() with owner returns criteria that filters products by owner"() {
+		when:
+		def paramsList = new ProductListParams(productOwner: user)
+		then:
+		fetchProductIdsFor(paramsList) == ["product-1", "product-2", "product-3"] as Set
 	}
 
 	private static Set<String> fetchProductIdsFor(ListParams listParams) {
