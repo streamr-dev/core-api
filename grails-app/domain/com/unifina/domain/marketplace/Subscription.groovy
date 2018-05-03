@@ -15,7 +15,7 @@ abstract class Subscription {
 	Map toMap() {
 		return [
 			endsAt: endsAt,
-			product: product.toMap(),
+			product: product.toSummaryMap(),
 		] + toMapInherited()
 	}
 
