@@ -55,7 +55,7 @@ class ProductApiController {
 	def index(ProductListParams listParams) {
 		def products = productService.list(listParams, loggedInUser())
 		apiService.addLinkHintToHeader(listParams, products.size(), params, response)
-		render(products*.toMap() as JSON)
+		render(products*.toSummaryMap() as JSON)
 	}
 
 	@GrailsCompileStatic

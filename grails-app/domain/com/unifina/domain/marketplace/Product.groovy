@@ -107,6 +107,31 @@ class Product {
 		]
 	}
 
+	@GrailsCompileStatic
+	Map toSummaryMap() {
+		[
+			id: id,
+			name: name,
+			description: description,
+			imageUrl: imageUrl,
+			thumbnailUrl: thumbnailUrl,
+			category: category.id,
+			streams: [],
+			state: state.toString(),
+			previewStream: previewStream?.id,
+			previewConfigJson: previewConfigJson,
+			created: dateCreated,
+			updated: lastUpdated,
+			ownerAddress: ownerAddress,
+			beneficiaryAddress: beneficiaryAddress,
+			pricePerSecond: pricePerSecond.toString(),
+			isFree: pricePerSecond == 0L,
+			priceCurrency: priceCurrency.toString(),
+			minimumSubscriptionInSeconds: minimumSubscriptionInSeconds,
+			owner: owner.name
+		]
+	}
+
 	static isEthereumAddressOrIsNull = { String value ->
 		value == null || Product.isEthereumAddress(value)
 	}

@@ -84,7 +84,7 @@ class ProductApiControllerSpec extends Specification {
 		then:
 		response.status == 200
 		response.json == [
-			product.toMap()
+			product.toSummaryMap()
 		]
 	}
 
