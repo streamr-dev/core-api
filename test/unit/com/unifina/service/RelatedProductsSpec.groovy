@@ -97,6 +97,7 @@ class RelatedProductsSpec extends Specification {
 
 		// UI is specified to show three (3) related products
 		service.apiService = Mock(ApiService)
+		service.random = Mock(Random)
 	}
 
 	void "find max related products"() {
@@ -104,6 +105,7 @@ class RelatedProductsSpec extends Specification {
 		def max = 10
 		def products = service.relatedProducts(p1, max, apiUser)
 		then:
+		service.random.nextInt(_) >> 1
 		1 * service.apiService.list(Product, _, apiUser) >> [p2, p3, p4, p5, p6]
 		1 * service.apiService.list(Product, _, apiUser) >> [p7, p8, p9, p10, p11]
 		products.size() == max
@@ -114,6 +116,7 @@ class RelatedProductsSpec extends Specification {
 		def max = 3
 		def products = service.relatedProducts(p1, max, apiUser)
 		then:
+		service.random.nextInt(_) >> 1
 		1 * service.apiService.list(Product, _, apiUser) >> [p2]
 		1 * service.apiService.list(Product, _, apiUser) >> [p3, p5]
 		products.size() == max
