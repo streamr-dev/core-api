@@ -14,7 +14,7 @@ class ProductService {
 	SubscriptionService subscriptionService
 	final Random random = new Random()
 
-	List<Product> relatedProducts(Product product) {
+	List<Product> relatedProducts(Product product, int max) {
 		if (product == null) {
 			return new ArrayList<Product>()
 		}
@@ -24,7 +24,6 @@ class ProductService {
 		Set<Product> cat = new HashSet<Product>(Product.findAllByCategory(product.category))
 		all.addAll(cat)
 
-		final int max = 3 // max number of related products
 		all.removeIf { Product p -> p.id == product.id }
 		if (all.size() <= max) {
 			return new ArrayList<Product>(all)

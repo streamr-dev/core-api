@@ -84,12 +84,59 @@ class RelatedProductsControllerSpec extends Specification {
 		p4 = newProduct("p4-id", "Rally car data", "data of rally cars", cat1, u2)
 	}
 
-	def "show related products for a product"() {
+	def "max param has default value of three"() {
 		when:
 		request.addHeader("Authorization", "Token myApiKey")
 		request.method = "GET"
 		params.id = p1.id
 		request.requestURI = "/api/v1/products/${p1.id}/related"
+
+		withFilters(action: "index") {
+			controller.related()
+		}
+		then:
+		1 * controller.productService.findById(p1.id, apiUser, Permission.Operation.READ) >> p1
+		1 * controller.productService.relatedProducts(p1) >> [p2, p3, p4]
+		response.status == 200
+		response.json[0].id == p2.id
+		response.json[0].name == p2.name
+		response.json[1].id == p3.id
+		response.json[1].name == p3.name
+		response.json[2].id == p4.id
+		response.json[2].name == p4.name
+	}
+
+	def "max param has maximum value of ten"() {
+		when:
+		request.addHeader("Authorization", "Token myApiKey")
+		request.method = "GET"
+		params.id = p1.id
+		params.max = "20"
+		request.requestURI = "/api/v1/products/${p1.id}/related?max=20"
+
+		withFilters(action: "index") {
+			controller.related()
+		}
+		then:
+		1 * controller.productService.findById(p1.id, apiUser, Permission.Operation.READ) >> p1
+		1 * controller.productService.relatedProducts(p1) >> [p2, p3, p4]
+		response.status == 200
+		// response.json.length() == 10
+		response.json[0].id == p2.id
+		response.json[0].name == p2.name
+		response.json[1].id == p3.id
+		response.json[1].name == p3.name
+		response.json[2].id == p4.id
+		response.json[2].name == p4.name
+	}
+
+	def "show related products for a product"() {
+		when:
+		request.addHeader("Authorization", "Token myApiKey")
+		request.method = "GET"
+		params.id = p1.id
+		params.max = 3
+		request.requestURI = "/api/v1/products/${p1.id}/related?max=3"
 
 		withFilters(action: "index") {
 			controller.related()

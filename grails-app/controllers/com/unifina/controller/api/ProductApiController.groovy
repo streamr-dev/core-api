@@ -35,7 +35,18 @@ class ProductApiController {
 	@StreamrApi(authenticationLevel = AuthLevel.NONE)
 	def related() {
 		Product product = productService.findById((String) params.id, loggedInUser(), Permission.Operation.READ)
-		def related = productService.relatedProducts(product)
+		int max = 3
+		if (params.max != null) {
+			try {
+				max = Integer.parseInt((String) params.max)
+			} catch (NumberFormatException e) {
+				max = 3
+			}
+			if (max > 10) {
+				max = 10
+			}
+		}
+		def related = productService.relatedProducts(product, max)
 		render(related as JSON)
 	}
 
