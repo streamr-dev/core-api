@@ -50,6 +50,9 @@ class StreamService {
 
 	private static final Charset utf8 = Charset.forName("UTF-8")
 
+	// https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number/MIN_SAFE_INTEGER
+	private static final Long MINIMUM_SAFE_INTEGER_IN_JAVASCRIPT = -9007199254740991L
+
 	Stream getStream(String id) {
 		return Stream.get(id)
 	}
@@ -184,7 +187,7 @@ class StreamService {
 		 */
 		List<Long> latestOffsetByPartition = (0..stream.getPartitions()-1).collect { Integer partition ->
 			StreamrBinaryMessageWithKafkaMetadata msg = cassandraService.getLatestBeforeOffset(stream, partition, 0)
-			return msg ? msg.offset : Long.MIN_VALUE
+			return msg ? msg.offset : MINIMUM_SAFE_INTEGER_IN_JAVASCRIPT
 		}
 
 		for (CSVImporter.LineValues line : csv) {
@@ -202,7 +205,7 @@ class StreamService {
 			int partition = partitioner.partition(stream, null)
 			long offset = latestOffsetByPartition[partition] + 1
 			latestOffsetByPartition[partition] = offset
-			saveMessage(stream, null, date.time, message, 0, offset, offset > Long.MIN_VALUE ? offset-1 : null)
+			saveMessage(stream, null, date.time, message, 0, offset, offset > MINIMUM_SAFE_INTEGER_IN_JAVASCRIPT ? offset-1 : null)
 		}
 
 		// Autocreate the stream config based on fields in the csv schema
