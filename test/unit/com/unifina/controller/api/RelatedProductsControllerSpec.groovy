@@ -96,14 +96,10 @@ class RelatedProductsControllerSpec extends Specification {
 		}
 		then:
 		1 * controller.productService.findById(p1.id, apiUser, Permission.Operation.READ) >> p1
-		1 * controller.productService.relatedProducts(p1) >> [p2, p3, p4]
+		1 * controller.productService.relatedProducts(p1, 3, apiUser) >> [p2]
 		response.status == 200
 		response.json[0].id == p2.id
 		response.json[0].name == p2.name
-		response.json[1].id == p3.id
-		response.json[1].name == p3.name
-		response.json[2].id == p4.id
-		response.json[2].name == p4.name
 	}
 
 	def "max param has maximum value of ten"() {
@@ -111,7 +107,7 @@ class RelatedProductsControllerSpec extends Specification {
 		request.addHeader("Authorization", "Token myApiKey")
 		request.method = "GET"
 		params.id = p1.id
-		params.max = "20"
+		params.max = "11"
 		request.requestURI = "/api/v1/products/${p1.id}/related?max=20"
 
 		withFilters(action: "index") {
@@ -119,15 +115,10 @@ class RelatedProductsControllerSpec extends Specification {
 		}
 		then:
 		1 * controller.productService.findById(p1.id, apiUser, Permission.Operation.READ) >> p1
-		1 * controller.productService.relatedProducts(p1) >> [p2, p3, p4]
+		1 * controller.productService.relatedProducts(p1, 10, apiUser) >> [p2]
 		response.status == 200
-		// response.json.length() == 10
 		response.json[0].id == p2.id
 		response.json[0].name == p2.name
-		response.json[1].id == p3.id
-		response.json[1].name == p3.name
-		response.json[2].id == p4.id
-		response.json[2].name == p4.name
 	}
 
 	def "show related products for a product"() {
@@ -135,15 +126,14 @@ class RelatedProductsControllerSpec extends Specification {
 		request.addHeader("Authorization", "Token myApiKey")
 		request.method = "GET"
 		params.id = p1.id
-		params.max = 3
-		request.requestURI = "/api/v1/products/${p1.id}/related?max=3"
+		request.requestURI = "/api/v1/products/${p1.id}/related"
 
 		withFilters(action: "index") {
 			controller.related()
 		}
 		then:
 		1 * controller.productService.findById(p1.id, apiUser, Permission.Operation.READ) >> p1
-		1 * controller.productService.relatedProducts(p1) >> [p2, p3, p4]
+		1 * controller.productService.relatedProducts(p1, 3, apiUser) >> [p2, p3, p4]
 		response.status == 200
 		response.json[0].id == p2.id
 		response.json[0].name == p2.name
@@ -164,7 +154,7 @@ class RelatedProductsControllerSpec extends Specification {
 			controller.related()
 		}
 		then:
-		1 * controller.productService.relatedProducts(null) >> new ArrayList<Product>()
+		1 * controller.productService.relatedProducts(null, 3, apiUser) >> new ArrayList<Product>()
 		response.status == 200
 		response.json == []
 	}

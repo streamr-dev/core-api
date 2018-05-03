@@ -14,21 +14,24 @@ class ProductService {
 	SubscriptionService subscriptionService
 	final Random random = new Random()
 
-	List<Product> relatedProducts(Product product, int max) {
+	List<Product> relatedProducts(Product product, int maxResults, SecUser user) {
 		if (product == null) {
 			return new ArrayList<Product>()
 		}
 		// find Product.owner's other products
-		Set<Product> all = new HashSet<Product>(Product.findAllByOwner(product.owner))
+		ListParams params = new ProductListParams(productOwner: product.owner, max: maxResults)
+		Set<Product> all = new HashSet<Product>(list(params, user))
+
 		// find other products from the same category
-		Set<Product> cat = new HashSet<Product>(Product.findAllByCategory(product.category))
+		params = new ProductListParams(categories: [product.category].toSet(), max: maxResults)
+		Set<Product> cat = new HashSet<Product>(list(params, user))
 		all.addAll(cat)
 
 		all.removeIf { Product p -> p.id == product.id }
-		if (all.size() <= max) {
+		if (all.size() <= maxResults) {
 			return new ArrayList<Product>(all)
 		}
-		while (all.size() > max) {
+		while (all.size() > maxResults) {
 			int i = random.nextInt(all.size() - 1)
 			all.remove(i)
 		}

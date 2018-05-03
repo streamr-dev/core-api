@@ -46,7 +46,7 @@ class ProductApiController {
 				max = 10
 			}
 		}
-		def related = productService.relatedProducts(product, max)
+		def related = productService.relatedProducts(product, max, loggedInUser())
 		render(related as JSON)
 	}
 
