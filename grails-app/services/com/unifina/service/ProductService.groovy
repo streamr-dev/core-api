@@ -7,12 +7,14 @@ import com.unifina.domain.security.Permission
 import com.unifina.domain.security.SecUser
 import grails.compiler.GrailsCompileStatic
 
+import java.util.concurrent.ThreadLocalRandom
+
 @GrailsCompileStatic
 class ProductService {
 	ApiService apiService
 	PermissionService permissionService
 	SubscriptionService subscriptionService
-	final Random random = new Random()
+	Random random = ThreadLocalRandom.current()
 
 	List<Product> relatedProducts(Product product, int maxResults, SecUser user) {
 		if (product == null) {
