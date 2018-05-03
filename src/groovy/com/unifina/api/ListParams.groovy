@@ -13,6 +13,7 @@ abstract class ListParams {
 	String order = "asc"
 	Integer max = MAX_LIMIT
 	Integer offset = 0
+	Boolean grantedAccess = true
 	Boolean publicAccess = false
 	Permission.Operation operation = Permission.Operation.READ
 
@@ -22,6 +23,7 @@ abstract class ListParams {
 		order(inList: ["asc", "desc"], nullable: false)
 		max(min: 1, max: MAX_LIMIT)
 		offset(min: 0, nullable: false)
+		grantedAccess(nullable: false)
 		publicAccess(nullable: false)
 	}
 
@@ -53,6 +55,7 @@ abstract class ListParams {
 			order: sortBy != null ? order : null,
 			max: max,
 			offset: offset,
+			grantedAccess: grantedAccess,
 			publicAccess: publicAccess
 		]
 	}
