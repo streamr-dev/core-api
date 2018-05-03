@@ -6,10 +6,7 @@ import com.unifina.domain.security.Permission
 import com.unifina.domain.security.SecUser
 import com.unifina.security.AuthLevel
 import com.unifina.security.StreamrApi
-import com.unifina.service.ApiService
-import com.unifina.service.FreeProductService
-import com.unifina.service.ProductImageService
-import com.unifina.service.ProductService
+import com.unifina.service.*
 import grails.compiler.GrailsCompileStatic
 import grails.converters.JSON
 import grails.plugin.springsecurity.annotation.Secured
@@ -33,6 +30,25 @@ class ProductApiController {
 	FreeProductService freeProductService
 	ProductService productService
 	ProductImageService productImageService
+
+	@GrailsCompileStatic
+	@StreamrApi(authenticationLevel = AuthLevel.NONE)
+	def related() {
+		Product product = productService.findById((String) params.id, loggedInUser(), Permission.Operation.READ)
+		int max = 3
+		if (params.max != null) {
+			try {
+				max = Integer.parseInt((String) params.max)
+			} catch (NumberFormatException e) {
+				max = 3
+			}
+			if (max > 10) {
+				max = 10
+			}
+		}
+		def related = productService.relatedProducts(product, max, loggedInUser())
+		render(related as JSON)
+	}
 
 	@GrailsCompileStatic
 	@StreamrApi(authenticationLevel = AuthLevel.NONE)

@@ -2,6 +2,7 @@ package com.unifina.api
 
 import com.unifina.domain.marketplace.Category
 import com.unifina.domain.marketplace.Product
+import com.unifina.domain.security.SecUser
 import grails.validation.Validateable
 
 @Validateable
@@ -10,12 +11,14 @@ class ProductListParams extends ListParams {
 	Set<Product.State> states
 	Long minPrice
 	Long maxPrice
+	SecUser productOwner
 
 	static constraints = {
 		categories(nullable: true, minSize: 1)
 		states(nullable: true, minSize: 1)
 		minPrice(nullable: true, min: 0L)
 		maxPrice(nullable: true)
+		productOwner(nullable: true)
 	}
 
 	@Override
@@ -38,6 +41,9 @@ class ProductListParams extends ListParams {
 			if (maxPrice != null) {
 				le("pricePerSecond", maxPrice)
 			}
+			if (productOwner != null) {
+				eq("owner", productOwner)
+			}
 		}
 	}
 
@@ -47,7 +53,8 @@ class ProductListParams extends ListParams {
 		    categories: categories*.id,
 			states: states*.id,
 			minPrice: minPrice,
-			maxPrice: maxPrice
+			maxPrice: maxPrice,
+			owner: productOwner
 		]
 	}
 }

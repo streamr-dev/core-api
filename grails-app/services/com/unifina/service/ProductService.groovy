@@ -7,11 +7,38 @@ import com.unifina.domain.security.Permission
 import com.unifina.domain.security.SecUser
 import grails.compiler.GrailsCompileStatic
 
+import java.util.concurrent.ThreadLocalRandom
+
 @GrailsCompileStatic
 class ProductService {
 	ApiService apiService
 	PermissionService permissionService
 	SubscriptionService subscriptionService
+	Random random = ThreadLocalRandom.current()
+
+	List<Product> relatedProducts(Product product, int maxResults, SecUser user) {
+		if (product == null) {
+			return new ArrayList<Product>()
+		}
+		// find Product.owner's other products
+		ListParams params = new ProductListParams(productOwner: product.owner, max: maxResults)
+		Set<Product> all = new HashSet<Product>(list(params, user))
+
+		// find other products from the same category
+		params = new ProductListParams(categories: [product.category].toSet(), max: maxResults)
+		Set<Product> cat = new HashSet<Product>(list(params, user))
+		all.addAll(cat)
+
+		all.removeIf { Product p -> p.id == product.id }
+		if (all.size() <= maxResults) {
+			return new ArrayList<Product>(all)
+		}
+		while (all.size() > maxResults) {
+			int i = random.nextInt(all.size() - 1)
+			all.remove(i)
+		}
+		return new ArrayList<Product>(all)
+	}
 
 	void removeUsersProducts(String username) {
 		def user = SecUser.findByUsername(username)
