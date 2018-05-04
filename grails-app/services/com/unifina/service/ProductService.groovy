@@ -17,27 +17,24 @@ class ProductService {
 	Random random = ThreadLocalRandom.current()
 
 	List<Product> relatedProducts(Product product, int maxResults, SecUser user) {
-		if (product == null) {
-			return new ArrayList<Product>()
-		}
 		// find Product.owner's other products
-		ListParams params = new ProductListParams(productOwner: product.owner, max: maxResults)
+		ListParams params = new ProductListParams(productOwner: product.owner, max: maxResults, publicAccess: true)
 		Set<Product> all = new HashSet<Product>(list(params, user))
 
 		// find other products from the same category
-		params = new ProductListParams(categories: [product.category].toSet(), max: maxResults)
-		Set<Product> cat = new HashSet<Product>(list(params, user))
-		all.addAll(cat)
+		params = new ProductListParams(categories: [product.category].toSet(), max: maxResults, publicAccess: true)
+		all.addAll(list(params, user))
 
-		all.removeIf { Product p -> p.id == product.id }
-		if (all.size() <= maxResults) {
-			return new ArrayList<Product>(all)
+		// remove given product itself from the set (if it is there)
+		all.remove(product)
+
+		def relatedProducts = new ArrayList<Product>(all)
+
+		while (relatedProducts.size() > maxResults) {
+			int i = random.nextInt(relatedProducts.size() - 1)
+			relatedProducts.remove(i)
 		}
-		while (all.size() > maxResults) {
-			int i = random.nextInt(all.size() - 1)
-			all.remove(i)
-		}
-		return new ArrayList<Product>(all)
+		return relatedProducts
 	}
 
 	void removeUsersProducts(String username) {

@@ -35,19 +35,9 @@ class ProductApiController {
 	@StreamrApi(authenticationLevel = AuthLevel.NONE)
 	def related() {
 		Product product = productService.findById((String) params.id, loggedInUser(), Permission.Operation.READ)
-		int max = 3
-		if (params.max != null) {
-			try {
-				max = Integer.parseInt((String) params.max)
-			} catch (NumberFormatException e) {
-				max = 3
-			}
-			if (max > 10) {
-				max = 10
-			}
-		}
+		int max = Math.min(params.int('max', 3), 10)
 		def related = productService.relatedProducts(product, max, loggedInUser())
-		render(related as JSON)
+		render(related*.toSummaryMap() as JSON)
 	}
 
 	@GrailsCompileStatic
