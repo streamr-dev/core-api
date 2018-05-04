@@ -9,7 +9,7 @@ import spock.lang.Specification
 
 @TestFor(ProductService)
 @Mock([Product, SecUser, Category])
-class RelatedProductsSpec extends Specification {
+class ProductServiceRelatedProductsSpec extends Specification {
 	Product newProduct(String id, String name, String description, Category c, SecUser user) {
 		Product p = new Product(
 			name: name,
