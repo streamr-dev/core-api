@@ -125,13 +125,4 @@ class RelatedProductsSpec extends Specification {
 		products.contains(p3) == true
 		products.contains(p5) == true
 	}
-
-	void "find related products with non existing id"() {
-		when:
-		def products = service.relatedProducts(null, 3, apiUser)
-		then:
-		0 * service.apiService._
-		products.size() == 0
-	}
-
 }
