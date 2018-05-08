@@ -9,7 +9,7 @@ import spock.lang.Specification
 
 @TestFor(ProductService)
 @Mock([Product, SecUser, Category])
-class RelatedProductsSpec extends Specification {
+class ProductServiceRelatedProductsSpec extends Specification {
 	Product newProduct(String id, String name, String description, Category c, SecUser user) {
 		Product p = new Product(
 			name: name,
@@ -125,13 +125,4 @@ class RelatedProductsSpec extends Specification {
 		products.contains(p3) == true
 		products.contains(p5) == true
 	}
-
-	void "find related products with non existing id"() {
-		when:
-		def products = service.relatedProducts(null, 3, apiUser)
-		then:
-		0 * service.apiService._
-		products.size() == 0
-	}
-
 }
