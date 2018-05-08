@@ -114,6 +114,9 @@
             "$ref": "#/parameters/offset"
           },
           {
+            "$ref": "#/parameters/grantedAccess"
+          },
+          {
             "$ref": "#/parameters/publicAccess"
           },
           {
@@ -257,6 +260,9 @@
           },
           {
             "$ref": "#/parameters/offset"
+          },
+          {
+            "$ref": "#/parameters/grantedAccess"
           },
           {
             "$ref": "#/parameters/publicAccess"
@@ -1363,6 +1369,9 @@
             "$ref": "#/parameters/offset"
           },
           {
+            "$ref": "#/parameters/grantedAccess"
+          },
+          {
             "$ref": "#/parameters/publicAccess"
           },
           {
@@ -2154,6 +2163,9 @@
             "$ref": "#/parameters/offset"
           },
           {
+            "$ref": "#/parameters/grantedAccess"
+          },
+          {
             "$ref": "#/parameters/publicAccess"
           },
           {
@@ -2601,6 +2613,9 @@
           },
           {
             "$ref": "#/parameters/offset"
+          },
+          {
+            "$ref": "#/parameters/grantedAccess"
           },
           {
             "$ref": "#/parameters/publicAccess"
@@ -3164,6 +3179,14 @@
       "description": "Skip the first (offset) results. Used together with max for paging.",
       "required": false,
       "default": 0
+    },
+    "grantedAccess": {
+      "name": "grantedAccess",
+      "type": "boolean",
+      "in": "query",
+      "description": "If false, excludes resources that user has been granted specific permission to from results.",
+      "required": false,
+      "default": true
     },
     "publicAccess": {
       "name": "publicAccess",

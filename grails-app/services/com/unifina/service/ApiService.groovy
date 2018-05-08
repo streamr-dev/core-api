@@ -35,7 +35,7 @@ class ApiService {
 	 *
 	 * @param domainClass Class of domain object
 	 * @param listParams conditions for listing
-	 * @param apiUser user for which listing is conducted (READ permission is checked)
+	 * @param apiUser user for which listing is conducted
 	 * @return list of results with pagination information
 	 * @throws ValidationException if listParams does not pass validation
 	 */
@@ -45,7 +45,8 @@ class ApiService {
 			throw new ValidationException(listParams.errors)
 		}
 		Closure searchCriteria = listParams.createListCriteria()
-		permissionService.get(domainClass, apiUser, listParams.operation, listParams.publicAccess, searchCriteria)
+		SecUser effectiveUser = listParams.grantedAccess ? apiUser : null
+		permissionService.get(domainClass, effectiveUser, listParams.operation, listParams.publicAccess, searchCriteria)
 	}
 
 	/**

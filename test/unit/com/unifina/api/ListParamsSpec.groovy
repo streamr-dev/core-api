@@ -45,6 +45,7 @@ class ListParamsSpec extends Specification {
 			order: null,
 			max: 1000,
 			offset: 0,
+			grantedAccess: true,
 			publicAccess: false
 		]
 	}
@@ -62,6 +63,7 @@ class ListParamsSpec extends Specification {
 			order: "desc",
 			max: 50,
 			offset: 1337,
+			grantedAccess: false,
 			publicAccess: true
 		)
 
@@ -72,6 +74,7 @@ class ListParamsSpec extends Specification {
 			order: "desc",
 			max: 50,
 			offset: 1337,
+			grantedAccess: false,
 			publicAccess: true
 		]
 	}
@@ -83,6 +86,7 @@ class ListParamsSpec extends Specification {
 			order: "desc",
 			max: 50,
 			offset: 1337,
+			grantedAccess: false,
 			publicAccess: true
 		)
 
@@ -136,6 +140,7 @@ class ListParamsSpec extends Specification {
 			order: "desc",
 			max: 50,
 			offset: 1337,
+			grantedAccess: false,
 			publicAccess: true,
 			additional: "additional information here"
 		).createListCriteria()

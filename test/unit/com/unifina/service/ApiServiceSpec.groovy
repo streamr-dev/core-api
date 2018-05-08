@@ -52,6 +52,19 @@ class ApiServiceSpec extends Specification {
 		]
 	}
 
+	void "list() passes user as null to permissionService#get if grantedAccess=false"() {
+		def permissionService = service.permissionService = Mock(PermissionService)
+
+		SecUser me = new SecUser(username: "me@me.com")
+		ListParams listParams = new DashboardListParams(publicAccess: true, grantedAccess: false)
+
+		when:
+		service.list(Dashboard, listParams, me)
+
+		then:
+		1 * permissionService.get(Dashboard, null, _, _, _)
+	}
+
 	void "list() invokes listParams#validate and listParams#createListCriteria and passes returned closure to permissionService#get"() {
 		def permissionService = service.permissionService = Mock(PermissionService)
 
@@ -92,7 +105,7 @@ class ApiServiceSpec extends Specification {
 		when:
 		service.addLinkHintToHeader(params, 1000, [action: "index", controller: "dashboardApi"], response)
 		then:
-		1 * response.addHeader("Link", '<http://localhost:8080/api/v1/dashboards?max=1000&offset=1150&publicAccess=true&name=dashboard>; rel="more"')
+		1 * response.addHeader("Link", '<http://localhost:8080/api/v1/dashboards?max=1000&offset=1150&grantedAccess=true&publicAccess=true&name=dashboard>; rel="more"')
 	}
 
 	void "getByIdAndThrowIfNotFound() throws NotFoundException if domain object cannot be found"() {
