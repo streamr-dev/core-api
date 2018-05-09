@@ -76,7 +76,8 @@ class ProductImageServiceSpec extends Specification {
 		when:
 		service.replaceImage(product, bytes, filename)
 		then:
-		2 * imageResizer.resize(bytes, filename, _)
+		1 * imageResizer.resize(bytes, filename, ImageResizer.Size.THUMB)
+		1 * imageResizer.resize(bytes, filename, ImageResizer.Size.HERO)
 	}
 
 	void "replaceImage() uploads image via fileUploadProvider#uploadFile"() {
