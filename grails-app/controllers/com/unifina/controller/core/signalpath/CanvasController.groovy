@@ -47,6 +47,8 @@ class CanvasController {
 		def beginDate = new Date()
 		def endDate = new Date()
 		def currentUser = SecUser.get(springSecurityService.currentUser.id)
+
+		// TODO: what's the case for request.JSON in editor action? GETs don't have bodies. Where can a POST come from? What can it possibly do with the response?
 		def json = request.JSON
 
 		[
@@ -56,7 +58,9 @@ class CanvasController {
 			examples: params.examples,
 			user: currentUser,
 			key: currentUser?.keys?.iterator()?.next(), // any one of the user's keys will do
-			json: (json as JSON)?.toString()
+			json: (json as JSON)?.toString(),
+			addModuleId: params.addModule,
+			addStreamId: params.addStream
 		]
 	}
 

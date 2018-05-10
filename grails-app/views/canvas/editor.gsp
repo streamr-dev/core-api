@@ -204,8 +204,9 @@ $(function() {
 		limit: 3
 	}], {
 		inBody: true
-	}, function(item) {
+	}, addModuleToCanvas)
 
+	function addModuleToCanvas(item) {
 		if (item.resultType == "stream") { // is stream, specifies module
 			SignalPath.addModule(item.feed.module, {
 				params: [{
@@ -216,7 +217,7 @@ $(function() {
 		} else { // is module
 			SignalPath.addModule(item.id, {})
 		}
-	})
+	}
 
     $('#main-menu-inner').scroll(function() {
     	streamrSearch.redrawMenu()
@@ -400,6 +401,19 @@ $(function() {
 	<g:else>
 		$(SignalPath).trigger('new') // For event listeners
 	</g:else>
+
+	<g:if test="${addModuleId}">
+		addModuleToCanvas({
+			id: "${addModuleId}"
+		})
+	</g:if>
+	<g:if test="${addStreamId}">
+		addModuleToCanvas({
+			resultType: "stream",
+			feed: { id: 7, name: "API", module: 147 },
+			id: "${addStreamId}"
+		})
+	</g:if>
 
     $(document).unload(function () {
         SignalPath.unload()
