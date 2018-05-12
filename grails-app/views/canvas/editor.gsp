@@ -400,9 +400,6 @@ $(function() {
 	<g:if test="${id}">
 		SignalPath.load('${id}');
 	</g:if>
-	<g:elseif test="${ json && json != "{}" }">
-		SignalPath.loadJSON(${raw(json)})
-	</g:elseif>
 	<g:else>
 		$(SignalPath).trigger('new') // For event listeners
 	</g:else>
