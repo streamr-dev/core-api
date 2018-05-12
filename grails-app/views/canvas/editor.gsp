@@ -23,10 +23,15 @@
 	var loadBrowser
 	var saveAndAskName
 
+
+	var shouldPreventTour = ${addStreamId || addModuleId}
+
 $(function() {
 	$('#moduleTree').bind('loaded.jstree', function() {
-		Tour.startableTours([0])
-		Tour.autoStart()
+	    if (!shouldPreventTour){
+			Tour.startableTours([0])
+			Tour.autoStart()
+		}
 	})
 	saveAsAndAskName = function() {
 		bootbox.prompt({
