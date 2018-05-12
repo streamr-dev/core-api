@@ -254,14 +254,6 @@ class RegisterController {
         String postResetUrl = conf.ui.register.postResetUrl ?: conf.successHandler.defaultTargetUrl
         redirect uri: postResetUrl
     }
-	
-    def terms() {
-        render(template:"terms_and_conditions", plugin:'unifina-core')
-    }
-	
-    def privacy() {
-        render(template:"privacy_policy", plugin:'unifina-core')
-    }
 
     protected String generateLink(String action, linkParams) {
         createLink(base: "$request.scheme://$request.serverName:$request.serverPort$request.contextPath",

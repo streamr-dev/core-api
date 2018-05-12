@@ -33,20 +33,6 @@
 
 		$tzSelect.append(tzOpts)
 
-		$("#tc-link").click(function() {
-			bootbox.dialog({
-				title: "Terms And Conditions",
-				message: $("#tc-content").html()
-			})
-		})
-
-		$("#privacy-link").click(function() {
-			bootbox.dialog({
-				title: "Privacy Policy",
-				message: $("#privacy-content").html()
-			})
-		})
-
 		new PasswordMeter("password", 8, function() {
 			return ["algocanvas", "streamr", $("#name").val(), $("#username").val()]
 		})
@@ -136,7 +122,7 @@
 			<div class="form-group" style="margin-top: 20px;margin-bottom: 20px;">
 				<label class="checkbox-inline">
 					<input type="checkbox" name="tosConfirmed" class="px" id="tosConfirmed" value="on" required>
-					<span class="lbl">I agree with the <a href="#" id="tc-link">Terms and Conditions</a> and <a href="#" id="privacy-link">Privacy Policy</a></span>
+					<span class="lbl">I agree with the <a href="https://s3.amazonaws.com/streamr-public/streamr-terms-of-use.pdf" target="_blank" id="tc-link">Terms of Use</a> and <a href="https://s3.amazonaws.com/streamr-public/streamr-privacy-policy.pdf" target="_blank" id="privacy-link">Privacy Policy</a></span>
 				</label>
 
 				<g:hasErrors bean="${user}" field="tosConfirmed">
@@ -150,15 +136,6 @@
 			<div class="form-actions">
 				<input id="loginButton" type="submit" value="${message(code:'springSecurity.register.button')}" class="btn btn-primary btn-block btn-lg">
 			</div>
-
-			<div id="tc-content" style="display:none">
-				<g:render template="terms_and_conditions"/>
-			</div>
-
-			<div id="privacy-content" style="display:none">
-				<g:render template="privacy_policy"/>
-			</div>
-
 		</g:form>
 	</g:else>
 </body>
