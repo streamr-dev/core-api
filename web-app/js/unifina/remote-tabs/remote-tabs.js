@@ -43,7 +43,7 @@ RemoteTabs.prototype.show = function(name) {
 		if (this._tabs[i].title===name)
 			break;
 	}
-	
+
 	if (i<this._tabs.length) {
 		$(this.$el.find("li a")[i]).tab("show")
 	}
@@ -115,8 +115,6 @@ RemoteTabs.prototype._tabShow = function($a) {
 		return;
 
 	$tabBody.data('_tabShown', true)
-
-	// console.log('_tabShow', id, url)
 
 	$.get(url, function(content) {
 		$tabBody.html(content)
