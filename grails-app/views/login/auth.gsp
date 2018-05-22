@@ -19,7 +19,7 @@
 				$('#loginForm').on('login-success', function() {
 					var defaultRedirectUrl = Streamr.createLink('canvas', 'editor')
 					var redirectParam = getParameterByName('redirect')
-					window.location = redirectParam || defaultRedirectUrl
+					window.location.replace(redirectParam || defaultRedirectUrl)
 				})
 			})
 		</r:script>
