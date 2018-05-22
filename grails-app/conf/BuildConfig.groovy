@@ -87,6 +87,7 @@ grails.project.dependency.resolution = {
 			excludes('org.springframework:spring-orm:*')
 		}
 		compile('org.web3j:core:3.3.1')
+		compile('com.amazonaws:aws-java-sdk:1.11.294')
 
 		runtime('mysql:mysql-connector-java:5.1.20')
 		runtime('commons-net:commons-net:3.3')
@@ -118,12 +119,12 @@ grails.project.dependency.resolution = {
 			excludes('spring-security-web')
 		}
 		runtime(':database-migration:1.4.0')
-		runtime(":spring-security-core:2.0-RC4")
+		runtime(":spring-security-core:2.0.0")
 		runtime(":resources:1.2.14")
 		runtime(":cached-resources:1.0")
 		runtime(":zipped-resources:1.0")
 
-		test(":plastic-criteria:1.5")
+		test(":plastic-criteria:1.6.7")
 		test(":geb:$gebVersion")
 		test(":rest-client-builder:2.1.1")
 	}

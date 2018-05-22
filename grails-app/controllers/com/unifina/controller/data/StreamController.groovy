@@ -76,15 +76,13 @@ class StreamController {
 		getAuthorizedStream(params.id) { stream, user ->
 			boolean writetable = permissionService.canWrite(user, stream)
 			boolean shareable = permissionService.canShare(user, stream)
-			[stream: stream, writable: writetable, shareable: shareable]
-		}
-	}
-
-	// Can be extended to handle more types
-	def details() {
-		getAuthorizedStream(params.id) { stream, user ->
-			def model = [stream: stream, config: (stream.config ? JSON.parse(stream.config) : [:])]
-			render(template: stream.feed.streamPageTemplate, model: model)
+			[
+				stream: stream,
+				writable: writetable,
+				shareable: shareable,
+				key: springSecurityService.currentUser?.keys?.iterator()?.next(),
+				config: (stream.config ? JSON.parse(stream.config) : [:])
+			]
 		}
 	}
 

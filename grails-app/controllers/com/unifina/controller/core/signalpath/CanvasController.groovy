@@ -47,7 +47,6 @@ class CanvasController {
 		def beginDate = new Date()
 		def endDate = new Date()
 		def currentUser = SecUser.get(springSecurityService.currentUser.id)
-		def json = request.JSON
 
 		[
 			beginDate: beginDate,
@@ -56,7 +55,8 @@ class CanvasController {
 			examples: params.examples,
 			user: currentUser,
 			key: currentUser?.keys?.iterator()?.next(), // any one of the user's keys will do
-			json: (json as JSON)?.toString()
+			addModuleId: params.addModule,
+			addStreamId: params.addStream
 		]
 	}
 

@@ -26,16 +26,12 @@
   ],
   "tags": [
     {
-      "name": "streams",
-      "description": "Manage Streams, and insert or read data from them"
+      "name": "categories",
+      "description": "Product categories"
     },
     {
       "name": "canvases",
       "description": "Start, stop, and manage Canvases"
-    },
-    {
-      "name": "permissions",
-      "description": "Read, write, and share rights"
     },
     {
       "name": "dashboards",
@@ -46,11 +42,1289 @@
       "description": "Keys for authenticating users and resources"
     },
     {
+      "name": "permissions",
+      "description": "Read, write, and share rights"
+    },
+    {
+      "name": "products",
+      "description": "Products sold on a marketplace containing Streams"
+    },
+    {
+      "name": "streams",
+      "description": "Manage Streams, and insert or read data from them"
+    },
+    {
+      "name": "subscriptions",
+      "description": "Subscriptions for Products purchased on the marketplace"
+    },
+    {
       "name": "users",
       "description": "User management"
     }
   ],
   "paths": {
+    "/categories": {
+      "get": {
+        "summary": "List categories",
+        "description": "Lists all categories in alphabetical order.",
+        "tags": [
+          "categories"
+        ],
+        "security": [],
+        "responses": {
+          "200": {
+            "description": "An array of categories",
+            "headers": {
+              "Link": {
+                "type": "string",
+                "description": "a RFC5988 Link containing a URL for fetching more results"
+              }
+            },
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/Category"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/products": {
+      "get": {
+        "summary": "List products",
+        "description": "Lists products according to provided parameters.",
+        "tags": [
+          "products"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/parameters/search"
+          },
+          {
+            "$ref": "#/parameters/sortBy"
+          },
+          {
+            "$ref": "#/parameters/order"
+          },
+          {
+            "$ref": "#/parameters/max"
+          },
+          {
+            "$ref": "#/parameters/offset"
+          },
+          {
+            "$ref": "#/parameters/grantedAccess"
+          },
+          {
+            "$ref": "#/parameters/publicAccess"
+          },
+          {
+            "$ref": "#/parameters/operation"
+          },
+          {
+            "name": "categories",
+            "type": "string",
+            "in": "query",
+            "description": "Filter products by category id(s)",
+            "required": false
+          },
+          {
+            "name": "states",
+            "type": "string",
+            "in": "query",
+            "description": "Filter products by state(s)",
+            "required": false,
+            "enum": [
+              "NOT_DEPLOYED",
+              "DEPLOYING",
+              "DEPLOYED",
+              "UNDEPLOYING"
+            ]
+          },
+          {
+            "name": "minPrice",
+            "type": "number",
+            "in": "query",
+            "description": "Minimum price (per second) of product",
+            "required": false
+          },
+          {
+            "name": "maxPrice",
+            "type": "number",
+            "in": "query",
+            "description": "Maximum price (per second) of product",
+            "required": false
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "An array of products",
+            "headers": {
+              "Link": {
+                "type": "string",
+                "description": "a RFC5988 Link containing a URL for fetching more results"
+              }
+            },
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/Product"
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "summary": "Create a Product",
+        "description": "Creates a new Product with state `NOT_DEPLOYED`.",
+        "tags": [
+          "products"
+        ],
+        "parameters": [
+          {
+            "name": "Body",
+            "in": "body",
+            "description": "Product object",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/CreateProduct"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Product created",
+            "schema": {
+              "$ref": "#/definitions/Product"
+            }
+          },
+          "401": {
+            "description": "Not authenticated (code: `NOT_AUTHENTICATED`)",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            },
+            "examples": {
+              "application/json": {
+                "code": "NOT_AUTHENTICATED",
+                "message": "Not authenticated via token or cookie"
+              }
+            }
+          },
+          "403": {
+            "description": "Insufficient permission to a included `Stream` (code: `FORBIDDEN`)",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            },
+            "examples": {
+              "application/json": {
+                "code": "FORBIDDEN",
+                "message": "me@streamr.com does not have permission to share Stream (id bqO9tp3wQVCPbKh6elAFLw)"
+              }
+            }
+          },
+          "422": {
+            "description": "Body does not pass validation (code: `VALIDATION_ERROR`)",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            },
+            "examples": {
+              "application/json": {
+                "code": "VALIDATION_ERROR",
+                "message": "Validation failed for fields: category (typeMismatch)"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/users/me/products": {
+      "get": {
+        "summary": "List my products",
+        "description": "Lists products that current user has SHARE permission on",
+        "tags": [
+          "products"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/parameters/search"
+          },
+          {
+            "$ref": "#/parameters/sortBy"
+          },
+          {
+            "$ref": "#/parameters/order"
+          },
+          {
+            "$ref": "#/parameters/max"
+          },
+          {
+            "$ref": "#/parameters/offset"
+          },
+          {
+            "$ref": "#/parameters/grantedAccess"
+          },
+          {
+            "$ref": "#/parameters/publicAccess"
+          },
+          {
+            "name": "categories",
+            "type": "string",
+            "in": "query",
+            "description": "Filter products by category id(s)",
+            "required": false
+          },
+          {
+            "name": "states",
+            "type": "string",
+            "in": "query",
+            "description": "Filter products by state(s)",
+            "required": false,
+            "enum": [
+              "NOT_DEPLOYED",
+              "DEPLOYING",
+              "DEPLOYED",
+              "UNDEPLOYING"
+            ]
+          },
+          {
+            "name": "minPrice",
+            "type": "number",
+            "in": "query",
+            "description": "Minimum price (per second) of product",
+            "required": false
+          },
+          {
+            "name": "maxPrice",
+            "type": "number",
+            "in": "query",
+            "description": "Maximum price (per second) of product",
+            "required": false
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "An array of products",
+            "headers": {
+              "Link": {
+                "type": "string",
+                "description": "a RFC5988 Link containing a URL for fetching more results"
+              }
+            },
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/Product"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/products/{id}": {
+      "get": {
+        "summary": "Get a Product",
+        "description": "Get a Product by id",
+        "tags": [
+          "products"
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "description": "unique identifier of a Product",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Product found",
+            "schema": {
+              "$ref": "#/definitions/Product"
+            }
+          },
+          "403": {
+            "description": "Insufficient permission to read Product (code: `FORBIDDEN`)",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            },
+            "examples": {
+              "application/json": {
+                "code": "FORBIDDEN",
+                "message": "Non-authenticated user does not have permission to read Product (id aQAd59nDQHiCUpXnhm7-TwPLCh9ALaQH2TIxOengS1FQ)"
+              }
+            }
+          },
+          "404": {
+            "description": "Product not found (code: `NOT_FOUND`)",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            },
+            "examples": {
+              "application/json": {
+                "code": "NOT_FOUND",
+                "message": "Product with id 1kDWMNstSmW1NxhJPYFHsAYgkesh19QraMLtgfuDs4sA not found"
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "summary": "Update a Product",
+        "description": "Updates the non-Blockchain information of a *deployed* Product. Updates the non-Blockchain and Blockchain information of a *undeployed* and *paid* Product.",
+        "tags": [
+          "products"
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "description": "unique identifier of a Product",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "description": "Updated Product. When performing on a paid Product with state `DEPLOYED` or a free Product, can leave out fields `ownerAddress`, `beneficiaryAddress`, `pricePerSecond`, `priceCurrency`, and `minimumSubscriptionInSeconds` since they are ignored anyway.",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/UpdateProduct"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Product updated",
+            "schema": {
+              "$ref": "#/definitions/Product"
+            }
+          },
+          "401": {
+            "description": "Not authenticated (code: `NOT_AUTHENTICATED`)",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            },
+            "examples": {
+              "application/json": {
+                "code": "NOT_AUTHENTICATED",
+                "message": "Not authenticated via token or cookie"
+              }
+            }
+          },
+          "403": {
+            "description": "Insufficient permission to write Product or include Stream (code: `FORBIDDEN`)",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            },
+            "examples": {
+              "application/json": {
+                "code": "FORBIDDEN",
+                "message": "Non-authenticated user does not have permission to write Product (id aQAd59nDQHiCUpXnhm7-TwPLCh9ALaQH2TIxOengS1FQ)"
+              }
+            }
+          },
+          "404": {
+            "description": "Product not found (code: `NOT_FOUND`)",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            },
+            "examples": {
+              "application/json": {
+                "code": "NOT_FOUND",
+                "message": "Product with id 1kDWMNstSmW1NxhJPYFHsAYgkesh19QraMLtgfuDs4sA not found"
+              }
+            }
+          },
+          "422": {
+            "description": "Body does not pass validation (code: `VALIDATION_ERROR`)",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            },
+            "examples": {
+              "application/json": {
+                "code": "VALIDATION_ERROR",
+                "message": "Validation failed for fields: category (typeMismatch)"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/products/{id}/streams": {
+      "get": {
+        "summary": "Get Streams of Product",
+        "description": "Get all the Streams of a Product",
+        "tags": [
+          "products"
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "description": "unique identifier of a Product",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "An array of Streams",
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/Stream"
+              }
+            }
+          },
+          "403": {
+            "description": "Insufficient permission to read Product (code: `FORBIDDEN`)",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            },
+            "examples": {
+              "application/json": {
+                "code": "FORBIDDEN",
+                "message": "Non-authenticated user does not have permission to read Product (id aQAd59nDQHiCUpXnhm7-TwPLCh9ALaQH2TIxOengS1FQ)"
+              }
+            }
+          },
+          "404": {
+            "description": "Product not found (code: `NOT_FOUND`)",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            },
+            "examples": {
+              "application/json": {
+                "code": "NOT_FOUND",
+                "message": "Product with id 1kDWMNstSmW1NxhJPYFHsAYgkesh19QraMLtgfuDs4sA not found"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/products/{id}/streams/{streamId}": {
+      "put": {
+        "summary": "Add Stream to Product",
+        "description": "Add a Stream to a Product",
+        "tags": [
+          "products"
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "description": "unique identifier of a Product",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "in": "path",
+            "name": "streamId",
+            "description": "unique identifier of a Stream",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Successfully added"
+          },
+          "403": {
+            "description": "Insufficient permission to write Product or to share Stream (code: `FORBIDDEN`)",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            },
+            "examples": {
+              "application/json": {
+                "code": "FORBIDDEN",
+                "message": "Non-authenticated user does not have permission to read Product (id aQAd59nDQHiCUpXnhm7-TwPLCh9ALaQH2TIxOengS1FQ)"
+              }
+            }
+          },
+          "404": {
+            "description": "Product or Stream not found (code: `NOT_FOUND`)",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            },
+            "examples": {
+              "application/json": {
+                "code": "NOT_FOUND",
+                "message": "Product with id 1kDWMNstSmW1NxhJPYFHsAYgkesh19QraMLtgfuDs4sA not found"
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "summary": "Remove Stream from Product",
+        "description": "Remove a Stream from a Product",
+        "tags": [
+          "products"
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "description": "unique identifier of a Product",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "in": "path",
+            "name": "streamId",
+            "description": "unique identifier of a Stream",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Successfully removed"
+          },
+          "403": {
+            "description": "Insufficient permission to write Product (code: `FORBIDDEN`)",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            },
+            "examples": {
+              "application/json": {
+                "code": "FORBIDDEN",
+                "message": "Non-authenticated user does not have permission to read Product (id aQAd59nDQHiCUpXnhm7-TwPLCh9ALaQH2TIxOengS1FQ)"
+              }
+            }
+          },
+          "404": {
+            "description": "Product or Stream not found (code: `NOT_FOUND`)",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            },
+            "examples": {
+              "application/json": {
+                "code": "NOT_FOUND",
+                "message": "Product with id 1kDWMNstSmW1NxhJPYFHsAYgkesh19QraMLtgfuDs4sA not found"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/products/{id}/setDeploying": {
+      "post": {
+        "summary": "Transition Product to state DEPLOYING",
+        "description": "Inform engine-and-editor that a Product has moved from state `NOT_DEPLOYED` to `DEPLOYING`. Should be called after transaction to submit product to marketplace has been sent to Ethereum.",
+        "tags": [
+          "products"
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "description": "unique identifier of a Product",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Product with state=`DEPLOYING`",
+            "schema": {
+              "$ref": "#/definitions/Product"
+            }
+          },
+          "401": {
+            "description": "Not authenticated (code: `NOT_AUTHENTICATED`)",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            },
+            "examples": {
+              "application/json": {
+                "code": "NOT_AUTHENTICATED",
+                "message": "Not authenticated via token or cookie"
+              }
+            }
+          },
+          "403": {
+            "description": "Insufficient permission to write Product (code: `FORBIDDEN`)",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            },
+            "examples": {
+              "application/json": {
+                "code": "FORBIDDEN",
+                "message": "Non-authenticated user does not have permission to write Product (id aQAd59nDQHiCUpXnhm7-TwPLCh9ALaQH2TIxOengS1FQ)"
+              }
+            }
+          },
+          "404": {
+            "description": "Product not found (code: `NOT_FOUND`)",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            },
+            "examples": {
+              "application/json": {
+                "code": "NOT_FOUND",
+                "message": "Product with id 1kDWMNstSmW1NxhJPYFHsAYgkesh19QraMLtgfuDs4sA not found"
+              }
+            }
+          },
+          "409": {
+            "description": "Cannot move to this state from current state of Product (code: `INVALID_STATE_TRANSITION`)",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            },
+            "examples": {
+              "application/json": {
+                "code": "INVALID_STATE_TRANSITION",
+                "message": "Invalid transition UNDEPLOYING -> DEPLOYING"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/products/{id}/setDeployed": {
+      "post": {
+        "summary": "Transition Product to state DEPLOYED",
+        "description": "Idempotent operation that informs engine-and-editor that a Product has moved from state `NOT_DEPLOYED` / `DEPLOYING` to `DEPLOYED`. Called by *Marketplace Watcher* after it notices that a Product has been added to the marketplace smart contract. Also updates Blockchain-specific information of the Product.",
+        "tags": [
+          "products"
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "description": "unique identifier of a Product",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "description": "Deployed product and transaction block number information",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/DeployedProduct"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Product with state=`DEPLOYED`",
+            "schema": {
+              "$ref": "#/definitions/Product"
+            }
+          },
+          "401": {
+            "description": "Not authenticated (code: `NOT_AUTHENTICATED`)",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            },
+            "examples": {
+              "application/json": {
+                "code": "NOT_AUTHENTICATED",
+                "message": "Not authenticated via token or cookie"
+              }
+            }
+          },
+          "403": {
+            "description": "User does not have DevOps privilege (code: `FORBIDDEN`)",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            },
+            "examples": {
+              "application/json": {
+                "code": "FORBIDDEN",
+                "message": "DevOps role required"
+              }
+            }
+          },
+          "404": {
+            "description": "Product not found (code: `NOT_FOUND`)",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            },
+            "examples": {
+              "application/json": {
+                "code": "NOT_FOUND",
+                "message": "Product with id 1kDWMNstSmW1NxhJPYFHsAYgkesh19QraMLtgfuDs4sA not found"
+              }
+            }
+          },
+          "409": {
+            "description": "Cannot move to this state from current state of Product (code: `INVALID_STATE_TRANSITION`)",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            },
+            "examples": {
+              "application/json": {
+                "code": "INVALID_STATE_TRANSITION",
+                "message": "Invalid transition UNDEPLOYING -> DEPLOYED"
+              }
+            }
+          },
+          "422": {
+            "description": "Body does not pass validation (code: `VALIDATION_ERROR`)",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            },
+            "examples": {
+              "application/json": {
+                "code": "VALIDATION_ERROR",
+                "message": "Validation failed for fields: blockNumber (nullable)"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/products/{id}/setUndeploying": {
+      "post": {
+        "summary": "Transition Product to state UNDEPLOYING",
+        "description": "Inform engine-and-editor that a Product has moved from state `DEPLOYED` to `UNDEPLOYING`. Should be called after transaction to remove product from marketplace has been sent to Ethereum.",
+        "tags": [
+          "products"
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "description": "unique identifier of a Product",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Product with state=`UNDEPLOYING`",
+            "schema": {
+              "$ref": "#/definitions/Product"
+            }
+          },
+          "401": {
+            "description": "Not authenticated (code: `NOT_AUTHENTICATED`)",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            },
+            "examples": {
+              "application/json": {
+                "code": "NOT_AUTHENTICATED",
+                "message": "Not authenticated via token or cookie"
+              }
+            }
+          },
+          "403": {
+            "description": "Insufficient permission to write Product (code: `FORBIDDEN`)",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            },
+            "examples": {
+              "application/json": {
+                "code": "FORBIDDEN",
+                "message": "Non-authenticated user does not have permission to write Product (id aQAd59nDQHiCUpXnhm7-TwPLCh9ALaQH2TIxOengS1FQ)"
+              }
+            }
+          },
+          "404": {
+            "description": "Product not found (code: `NOT_FOUND`)",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            },
+            "examples": {
+              "application/json": {
+                "code": "NOT_FOUND",
+                "message": "Product with id 1kDWMNstSmW1NxhJPYFHsAYgkesh19QraMLtgfuDs4sA not found"
+              }
+            }
+          },
+          "409": {
+            "description": "Cannot move to this state from current state of Product (code: `INVALID_STATE_TRANSITION`)",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            },
+            "examples": {
+              "application/json": {
+                "code": "INVALID_STATE_TRANSITION",
+                "message": "Invalid transition NOT_DEPLOYED -> UNDEPLOYING"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/products/{id}/setUndeployed": {
+      "post": {
+        "summary": "Transition Product to state NOT_DEPLOYED",
+        "description": "Idempotent operation that informs engine-and-editor that a Product has moved from state `DEPLOYED` / `UNDEPLOYING` to `NOT_DEPLOYED`. Called by *Marketplace Watcher* after it notices that a Product has been removed from the marketplace contract.",
+        "tags": [
+          "products"
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "description": "unique identifier of a Product",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "description": "Transaction block number information",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/UndeployedProduct"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Product with state=`NOT_DEPLOYED`",
+            "schema": {
+              "$ref": "#/definitions/Product"
+            }
+          },
+          "401": {
+            "description": "Not authenticated (code: `NOT_AUTHENTICATED`)",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            },
+            "examples": {
+              "application/json": {
+                "code": "NOT_AUTHENTICATED",
+                "message": "Not authenticated via token or cookie"
+              }
+            }
+          },
+          "403": {
+            "description": "User does not have DevOps privilege (code: `FORBIDDEN`)",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            },
+            "examples": {
+              "application/json": {
+                "code": "FORBIDDEN",
+                "message": "DevOps role required"
+              }
+            }
+          },
+          "404": {
+            "description": "Product not found (code: `NOT_FOUND`)",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            },
+            "examples": {
+              "application/json": {
+                "code": "NOT_FOUND",
+                "message": "Product with id 1kDWMNstSmW1NxhJPYFHsAYgkesh19QraMLtgfuDs4sA not found"
+              }
+            }
+          },
+          "409": {
+            "description": "Cannot move to this state from current state of Product (code: `INVALID_STATE_TRANSITION`)",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            },
+            "examples": {
+              "application/json": {
+                "code": "INVALID_STATE_TRANSITION",
+                "message": "Invalid transition DEPLOYING -> NOT_DEPLOYED"
+              }
+            }
+          },
+          "422": {
+            "description": "Body does not pass validation (code: `VALIDATION_ERROR`)",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            },
+            "examples": {
+              "application/json": {
+                "code": "VALIDATION_ERROR",
+                "message": "Validation failed for fields: blockNumber (nullable)"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/products/{id}/setPricing": {
+      "post": {
+        "summary": "Update Product pricing data",
+        "description": "Idempotent operation that sets Product's pricing details (basically stuff held in smart contract).",
+        "tags": [
+          "products"
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "description": "unique identifier of a Product",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "description": "Updated product info and transaction block number",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/DeployedProduct"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Updated product",
+            "schema": {
+              "$ref": "#/definitions/Product"
+            }
+          },
+          "401": {
+            "description": "Not authenticated (code: `NOT_AUTHENTICATED`)",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            },
+            "examples": {
+              "application/json": {
+                "code": "NOT_AUTHENTICATED",
+                "message": "Not authenticated via token or cookie"
+              }
+            }
+          },
+          "403": {
+            "description": "User does not have DevOps privilege (code: `FORBIDDEN`)",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            },
+            "examples": {
+              "application/json": {
+                "code": "FORBIDDEN",
+                "message": "DevOps role required"
+              }
+            }
+          },
+          "404": {
+            "description": "Product not found (code: `NOT_FOUND`)",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            },
+            "examples": {
+              "application/json": {
+                "code": "NOT_FOUND",
+                "message": "Product with id 1kDWMNstSmW1NxhJPYFHsAYgkesh19QraMLtgfuDs4sA not found"
+              }
+            }
+          },
+          "422": {
+            "description": "Body does not pass validation (code: `VALIDATION_ERROR`)",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            },
+            "examples": {
+              "application/json": {
+                "code": "VALIDATION_ERROR",
+                "message": "Validation failed for fields: blockNumber (nullable)"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/products/{id}/deployFree": {
+      "post": {
+        "summary": "Deploy free Product",
+        "description": "Deploy a free Product (price = 0) so that it is publicly viewable and purchasable. Its streams are made public as well.",
+        "tags": [
+          "products"
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "description": "unique identifier of a Product",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Product with state=`DEPLOYED`",
+            "schema": {
+              "$ref": "#/definitions/Product"
+            }
+          },
+          "401": {
+            "description": "Not authenticated (code: `NOT_AUTHENTICATED`)",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            },
+            "examples": {
+              "application/json": {
+                "code": "NOT_AUTHENTICATED",
+                "message": "Not authenticated via token or cookie"
+              }
+            }
+          },
+          "403": {
+            "description": "Insufficient permission to share Product (code: `FORBIDDEN`)",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            },
+            "examples": {
+              "application/json": {
+                "code": "FORBIDDEN",
+                "message": "Non-authenticated user does not have permission to share Product (id aQAd59nDQHiCUpXnhm7-TwPLCh9ALaQH2TIxOengS1FQ)"
+              }
+            }
+          },
+          "404": {
+            "description": "Product not found (code: `NOT_FOUND`)",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            },
+            "examples": {
+              "application/json": {
+                "code": "NOT_FOUND",
+                "message": "Product with id 1kDWMNstSmW1NxhJPYFHsAYgkesh19QraMLtgfuDs4sA not found"
+              }
+            }
+          },
+          "409": {
+            "description": "Cannot move to this state from current state of Product (code: `INVALID_STATE_TRANSITION`)",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            },
+            "examples": {
+              "application/json": {
+                "code": "INVALID_STATE_TRANSITION",
+                "message": "Invalid transition DEPLOYED -> DEPLOYED"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/products/{id}/undeployFree": {
+      "post": {
+        "summary": "Undeploy free Product",
+        "description": "Undeploy a free Product (price = 0) so that it is no longer publicly viewable or purchasable. Its streams will be made private as well.",
+        "tags": [
+          "products"
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "description": "unique identifier of a Product",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Product with state=`NOT_DEPLOYED`",
+            "schema": {
+              "$ref": "#/definitions/Product"
+            }
+          },
+          "401": {
+            "description": "Not authenticated (code: `NOT_AUTHENTICATED`)",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            },
+            "examples": {
+              "application/json": {
+                "code": "NOT_AUTHENTICATED",
+                "message": "Not authenticated via token or cookie"
+              }
+            }
+          },
+          "403": {
+            "description": "Insufficient permission to share Product (code: `FORBIDDEN`)",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            },
+            "examples": {
+              "application/json": {
+                "code": "FORBIDDEN",
+                "message": "Non-authenticated user does not have permission to share Product (id aQAd59nDQHiCUpXnhm7-TwPLCh9ALaQH2TIxOengS1FQ)"
+              }
+            }
+          },
+          "404": {
+            "description": "Product not found (code: `NOT_FOUND`)",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            },
+            "examples": {
+              "application/json": {
+                "code": "NOT_FOUND",
+                "message": "Product with id 1kDWMNstSmW1NxhJPYFHsAYgkesh19QraMLtgfuDs4sA not found"
+              }
+            }
+          },
+          "409": {
+            "description": "Cannot move to this state from current state of Product (code: `INVALID_STATE_TRANSITION`)",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            },
+            "examples": {
+              "application/json": {
+                "code": "INVALID_STATE_TRANSITION",
+                "message": "Invalid transition NOT_DEPLOYED -> NOT_DEPLOYED"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/products/{id}/images": {
+      "post": {
+        "summary": "Attach image to Product",
+        "description": "Upload and attach an image to a Product. Supported formats: JPG or PNG.",
+        "tags": [
+          "products"
+        ],
+        "consumes": [
+          "multipart/form-data"
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "description": "unique identifier of a Product",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "in": "formData",
+            "name": "file",
+            "type": "file",
+            "description": "Image file. JPG or PNG."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Product with imageUrl updated",
+            "schema": {
+              "$ref": "#/definitions/Product"
+            }
+          },
+          "400": {
+            "description": "Parameter 'file' missing or unexepcted image dimensions",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            },
+            "examples": {
+              "application/json": {
+                "code": "UNEXPECTED_IMAGE_DIMENSIONS",
+                "message": ""
+              }
+            }
+          },
+          "401": {
+            "description": "Not authenticated (code: `NOT_AUTHENTICATED`)",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            },
+            "examples": {
+              "application/json": {
+                "code": "NOT_AUTHENTICATED",
+                "message": "Not authenticated via token or cookie"
+              }
+            }
+          },
+          "403": {
+            "description": "Insufficient permission to write Product (code: `FORBIDDEN`)",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            },
+            "examples": {
+              "application/json": {
+                "code": "FORBIDDEN",
+                "message": "Non-authenticated user does not have permission to write Product (id aQAd59nDQHiCUpXnhm7-TwPLCh9ALaQH2TIxOengS1FQ)"
+              }
+            }
+          },
+          "404": {
+            "description": "Product not found (code: `NOT_FOUND`)",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            },
+            "examples": {
+              "application/json": {
+                "code": "NOT_FOUND",
+                "message": "Product with id 1kDWMNstSmW1NxhJPYFHsAYgkesh19QraMLtgfuDs4sA not found"
+              }
+            }
+          },
+          "413": {
+            "description": "Uploaded file too large",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            },
+            "examples": {
+              "application/json": {
+                "code": "FILE_TOO_LARGE",
+                "message": "File size was 20000000 bytes (> 10000000 bytes)"
+              }
+            }
+          },
+          "415": {
+            "description": "File type not supported. (Not an image or unrecognized)",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            },
+            "examples": {
+              "application/json": {
+                "code": "UNSUPPORTED_FILE_TYPE",
+                "message": "File type is not a recognized image format"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/products/remove/{username}": {
+      "delete": {
+        "summary": "Remove troll users products",
+        "description": "Removes users all products. Undo is not supported. Admin role is required.",
+        "tags": [
+          "products"
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "username",
+            "description": "Username of the product owner",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Product's removed'",
+            "schema": {
+              "$ref": "#/definitions/Product"
+            }
+          },
+          "400": {
+            "description": "Username is missing from the request.",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          },
+          "401": {
+            "description": "Not authenticated",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          }
+        }
+      }
+    },
     "/streams": {
       "get": {
         "summary": "List streams",
@@ -64,62 +1338,44 @@
             "type": "string"
           },
           {
-            "name": "max",
-            "in": "query",
-            "description": "Maximum number of returned results.",
-            "required": false,
-            "type": "integer"
-          },
-          {
-            "name": "offset",
-            "in": "query",
-            "description": "Skip the first (offset) results. Used together with max for paging.",
-            "required": false,
-            "type": "integer",
-            "default": 0
-          },
-          {
-            "name": "sort",
-            "in": "query",
-            "description": "Sort the returned results by the given field.",
-            "required": false,
-            "type": "string",
-            "default": "id"
-          },
-          {
-            "name": "order",
-            "in": "query",
-            "description": "Control whether the results are sorted in ascending or descending order.",
-            "required": false,
-            "type": "string",
-            "default": "asc",
-            "enum": [
-              "asc",
-              "desc"
-            ]
-          },
-          {
-            "name": "search",
-            "in": "query",
-            "description": "Returns streams that contain the given search term in their name or description.",
-            "required": false,
-            "type": "string"
-          },
-          {
-            "name": "public",
-            "in": "query",
-            "description": "If true, includes publicly available resources in the results.",
-            "required": false,
-            "type": "boolean",
-            "default": false
-          },
-          {
             "name": "uiChannel",
             "in": "query",
             "description": "Filter by whether this stream is an UI channel or not. UI channels are streams used to push updates to visualisation widgets. For the typical list of streams, set this to false.",
             "required": false,
             "type": "boolean",
             "default": false
+          },
+          {
+            "name": "noConfig",
+            "in": "query",
+            "description": "Remove config object from JSON response.",
+            "required": false,
+            "type": "boolean",
+            "default": false
+          },
+          {
+            "$ref": "#/parameters/search"
+          },
+          {
+            "$ref": "#/parameters/sortBy"
+          },
+          {
+            "$ref": "#/parameters/order"
+          },
+          {
+            "$ref": "#/parameters/max"
+          },
+          {
+            "$ref": "#/parameters/offset"
+          },
+          {
+            "$ref": "#/parameters/grantedAccess"
+          },
+          {
+            "$ref": "#/parameters/publicAccess"
+          },
+          {
+            "$ref": "#/parameters/operation"
           }
         ],
         "tags": [
@@ -769,6 +2025,98 @@
         }
       }
     },
+    "/subscriptions": {
+      "get": {
+        "summary": "Fetch subscriptions of user",
+        "description": "Fetch a list of all the subscriptions of a user (based on auth token)",
+        "tags": [
+          "subscriptions"
+        ],
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "an array of subscriptions",
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/Subscription"
+              }
+            }
+          },
+          "401": {
+            "description": "Not authenticated (code: `NOT_AUTHENTICATED`)",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            },
+            "examples": {
+              "application/json": {
+                "code": "NOT_AUTHENTICATED",
+                "message": "Not authenticated via token or cookie"
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "summary": "Purchase free Product / Inform engine-and-editor of Product purchase",
+        "description": "If not given field 'address', assumes user is purchasing a *free Product*. If field 'address' is given, is an idempotent operation that informs engine-and-editor that a *paid Product* has been purchased and is called by Marketplace Watcher. In both cases creates or updates an existing Subscription and related Permissions.",
+        "tags": [
+          "subscriptions"
+        ],
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "description": "Information about Product purchase",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/CreateSubscription"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Success"
+          },
+          "401": {
+            "description": "Not authenticated (code: `NOT_AUTHENTICATED`)",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            },
+            "examples": {
+              "application/json": {
+                "code": "NOT_AUTHENTICATED",
+                "message": "Not authenticated via token or cookie"
+              }
+            }
+          },
+          "403": {
+            "description": "User does not have DevOps privilege (code: `FORBIDDEN`)",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            },
+            "examples": {
+              "application/json": {
+                "code": "FORBIDDEN",
+                "message": "DevOps role required"
+              }
+            }
+          },
+          "422": {
+            "description": "Body does not pass validation (code: `VALIDATION_ERROR`)",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            },
+            "examples": {
+              "application/json": {
+                "code": "VALIDATION_ERROR",
+                "message": "Validation failed for fields: address"
+              }
+            }
+          }
+        }
+      }
+    },
     "/canvases": {
       "get": {
         "summary": "List canvases",
@@ -800,54 +2148,28 @@
             "default": false
           },
           {
-            "name": "max",
-            "in": "query",
-            "description": "Maximum number of returned results.",
-            "required": false,
-            "type": "integer"
+            "$ref": "#/parameters/search"
           },
           {
-            "name": "offset",
-            "in": "query",
-            "description": "Skip the first (offset) results. Used together with max for paging.",
-            "required": false,
-            "type": "integer",
-            "default": 0
+            "$ref": "#/parameters/sortBy"
           },
           {
-            "name": "sort",
-            "in": "query",
-            "description": "Sort the returned results by the given field.",
-            "required": false,
-            "type": "string",
-            "default": "id"
+            "$ref": "#/parameters/order"
           },
           {
-            "name": "order",
-            "in": "query",
-            "description": "Control whether the results are sorted in ascending or descending order.",
-            "required": false,
-            "type": "string",
-            "default": "asc",
-            "enum": [
-              "asc",
-              "desc"
-            ]
+            "$ref": "#/parameters/max"
           },
           {
-            "name": "search",
-            "in": "query",
-            "description": "Returns canvases that contain the given search term in their name.",
-            "required": false,
-            "type": "string"
+            "$ref": "#/parameters/offset"
           },
           {
-            "name": "public",
-            "in": "query",
-            "description": "If true, includes publicly available resources in the results.",
-            "required": false,
-            "type": "boolean",
-            "default": false
+            "$ref": "#/parameters/grantedAccess"
+          },
+          {
+            "$ref": "#/parameters/publicAccess"
+          },
+          {
+            "$ref": "#/parameters/operation"
           }
         ],
         "responses": {
@@ -1278,54 +2600,28 @@
             "type": "string"
           },
           {
-            "name": "max",
-            "in": "query",
-            "description": "Maximum number of returned results.",
-            "required": false,
-            "type": "integer"
+            "$ref": "#/parameters/search"
           },
           {
-            "name": "offset",
-            "in": "query",
-            "description": "Skip the first (offset) results. Used together with max for paging.",
-            "required": false,
-            "type": "integer",
-            "default": 0
+            "$ref": "#/parameters/sortBy"
           },
           {
-            "name": "sort",
-            "in": "query",
-            "description": "Sort the returned results by the given field.",
-            "required": false,
-            "type": "string",
-            "default": "id"
+            "$ref": "#/parameters/order"
           },
           {
-            "name": "order",
-            "in": "query",
-            "description": "Control whether the results are sorted in ascending or descending order.",
-            "required": false,
-            "type": "string",
-            "default": "asc",
-            "enum": [
-              "asc",
-              "desc"
-            ]
+            "$ref": "#/parameters/max"
           },
           {
-            "name": "search",
-            "in": "query",
-            "description": "Returns dashboards that contain the given search term in their name.",
-            "required": false,
-            "type": "string"
+            "$ref": "#/parameters/offset"
           },
           {
-            "name": "public",
-            "in": "query",
-            "description": "If true, includes publicly available resources in the results.",
-            "required": false,
-            "type": "boolean",
-            "default": false
+            "$ref": "#/parameters/grantedAccess"
+          },
+          {
+            "$ref": "#/parameters/publicAccess"
+          },
+          {
+            "$ref": "#/parameters/operation"
           }
         ],
         "tags": [
@@ -1840,6 +3136,80 @@
       }
     }
   },
+  "parameters": {
+    "search": {
+      "name": "search",
+      "type": "string",
+      "in": "query",
+      "description": "Filter by search term in name or description",
+      "required": false
+    },
+    "sortBy": {
+      "name": "sortBy",
+      "type": "string",
+      "in": "query",
+      "description": "Sort the returned results by the given field.",
+      "required": false,
+      "default": "id"
+    },
+    "order": {
+      "name": "order",
+      "type": "string",
+      "enum": [
+        "asc",
+        "desc"
+      ],
+      "in": "query",
+      "description": "Control whether the results are sorted in ascending or descending order. Used with parameter `sortBy`.",
+      "required": false,
+      "default": "asc"
+    },
+    "max": {
+      "name": "max",
+      "type": "integer",
+      "in": "query",
+      "description": "Maximum number of returned results (capped at 100)",
+      "required": false,
+      "default": 100
+    },
+    "offset": {
+      "name": "offset",
+      "type": "integer",
+      "in": "query",
+      "description": "Skip the first (offset) results. Used together with max for paging.",
+      "required": false,
+      "default": 0
+    },
+    "grantedAccess": {
+      "name": "grantedAccess",
+      "type": "boolean",
+      "in": "query",
+      "description": "If false, excludes resources that user has been granted specific permission to from results.",
+      "required": false,
+      "default": true
+    },
+    "publicAccess": {
+      "name": "publicAccess",
+      "type": "boolean",
+      "in": "query",
+      "description": "If true, includes publicly available resources in the results.",
+      "required": false,
+      "default": false
+    },
+    "operation": {
+      "name": "operation",
+      "type": "string",
+      "enum": [
+        "READ",
+        "WRITE",
+        "SHARE"
+      ],
+      "in": "query",
+      "description": "Filter results by Permission (access level)",
+      "required": false,
+      "default": "READ"
+    }
+  },
   "definitions": {
     "Stream": {
       "type": "object",
@@ -2041,6 +3411,25 @@
         }
       }
     },
+    "Category": {
+      "type": "object",
+      "required": [
+        "id",
+        "name"
+      ],
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "unique identifier"
+        },
+        "name": {
+          "type": "string"
+        },
+        "imageUrl": {
+          "type": "string"
+        }
+      }
+    },
     "DashboardSaveRequest": {
       "type": "object",
       "properties": {
@@ -2198,9 +3587,247 @@
         }
       }
     },
+    "ProductWithoutBlockchain": {
+      "type": "object",
+      "required": [
+        "name",
+        "description",
+        "category",
+        "streams"
+      ],
+      "properties": {
+        "name": {
+          "type": "string",
+          "example": "USD/ETH exchange rate"
+        },
+        "description": {
+          "type": "string",
+          "example": "Real-time USD/ETH exchange rate data aggregated from several cryptocurrency exchanges."
+        },
+        "category": {
+          "type": "string",
+          "description": "identifier of Category this Product belong to",
+          "example": "cryptocurrencies-id"
+        },
+        "streams": {
+          "type": "array",
+          "description": "List of Stream identifiers that belong to this Product",
+          "items": {
+            "type": "string"
+          },
+          "example": [
+            "stream-1-id",
+            "stream-2-id",
+            "stream-3-id"
+          ]
+        },
+        "previewStream": {
+          "type": "string",
+          "description": "Identifier of Stream selected for preview",
+          "example": "stream-2-id"
+        },
+        "previewConfigJson": {
+          "type": "string",
+          "description": "Configuration of previewStream"
+        }
+      }
+    },
+    "ProductInBlockchain": {
+      "type": "object",
+      "required": [
+        "ownerAddress",
+        "beneficiaryAddress",
+        "pricePerSecond",
+        "priceCurrency",
+        "minimumSubscriptionInSeconds"
+      ],
+      "properties": {
+        "ownerAddress": {
+          "type": "string",
+          "description": "Ethereum address of owner",
+          "example": "0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF"
+        },
+        "beneficiaryAddress": {
+          "type": "string",
+          "description": "Ethereum address of beneficiary",
+          "example": "0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF"
+        },
+        "pricePerSecond": {
+          "type": "integer",
+          "description": "Unit cost per second",
+          "example": 5
+        },
+        "priceCurrency": {
+          "type": "string",
+          "description": "Unit currency",
+          "enum": [
+            "DATA",
+            "USD"
+          ]
+        },
+        "minimumSubscriptionInSeconds": {
+          "type": "integer",
+          "description": "Minimum subscription length (in seconds)"
+        }
+      }
+    },
+    "CreateProduct": {
+      "allOf": [
+        {
+          "$ref": "#/definitions/ProductWithoutBlockchain"
+        },
+        {
+          "$ref": "#/definitions/ProductInBlockchain"
+        }
+      ]
+    },
+    "UpdateProduct": {
+      "allOf": [
+        {
+          "$ref": "#/definitions/ProductWithoutBlockchain"
+        },
+        {
+          "$ref": "#/definitions/ProductInBlockchain"
+        }
+      ]
+    },
+    "CreateSubscription": {
+      "type": "object",
+      "required": [
+        "product",
+        "endsAt"
+      ],
+      "properties": {
+        "product": {
+          "type": "string",
+          "description": "Unique identifier of purchased Product",
+          "example": "JaHJaXclSmuR7cvqwfj9MQD13crwwvRXCLJBWflaRPaQ"
+        },
+        "address": {
+          "type": "string",
+          "description": "Ethereum address of the buyer",
+          "example": "0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF"
+        },
+        "endsAt": {
+          "type": "integer",
+          "description": "End time of purchased subscription (Unix time, seconds)",
+          "example": 1520870998
+        }
+      }
+    },
+    "Product": {
+      "allOf": [
+        {
+          "type": "object",
+          "required": [
+            "id",
+            "state",
+            "created",
+            "updated",
+            "owner",
+            "imageUrl",
+            "thumbnailUrl"
+          ],
+          "properties": {
+            "id": {
+              "type": "string",
+              "description": "unique identifier",
+              "example": "11o6bc2HTs6W8oFRpMugmwTeodGTOxSzKQCIHeK_qDnA"
+            },
+            "state": {
+              "type": "string",
+              "description": "State of Product",
+              "enum": [
+                "NOT_DEPLOYED",
+                "DEPLOYING",
+                "DEPLOYED",
+                "UNDEPLOYING"
+              ]
+            },
+            "created": {
+              "type": "string",
+              "description": "ISO-8601 datetime",
+              "example": "2018-02-21T12:26:18Z"
+            },
+            "updated": {
+              "type": "string",
+              "description": "ISO-8601 datetime",
+              "example": "2018-02-21T12:26:18Z"
+            },
+            "owner": {
+              "type": "string",
+              "description": "Username of the creator of this Product",
+              "example": "John Doe"
+            },
+            "imageUrl": {
+              "type": "string",
+              "description": "URL of image",
+              "example": "http://www.google.com/a.jpg"
+            },
+            "thumbnailUrl": {
+              "type": "string",
+              "description": "URL of thumbnail image",
+              "example": "http://www.google.com/b.jpg"
+            }
+          }
+        },
+        {
+          "$ref": "#/definitions/CreateProduct"
+        }
+      ]
+    },
+    "DeployedProduct": {
+      "allOf": [
+        {
+          "type": "object",
+          "required": [
+            "blockNumber",
+            "blockIndex"
+          ],
+          "properties": {
+            "blockNumber": {
+              "type": "integer",
+              "description": "Block number of associated Ethereum transaction",
+              "example": 5137054
+            },
+            "blockIndex": {
+              "type": "integer",
+              "description": "Index of associated Ethereum transaction in block",
+              "example": 5
+            }
+          }
+        },
+        {
+          "$ref": "#/definitions/ProductInBlockchain"
+        }
+      ]
+    },
+    "UndeployedProduct": {
+      "type": "object",
+      "required": [
+        "blockNumber",
+        "blockIndex"
+      ],
+      "properties": {
+        "blockNumber": {
+          "type": "integer",
+          "description": "Block number of associated Ethereum transaction",
+          "example": 5137054
+        },
+        "blockIndex": {
+          "type": "integer",
+          "description": "Index of associated Ethereum transaction in block",
+          "example": 5
+        }
+      }
+    },
     "User": {
       "type": "object",
-      "required": ["name", "username", "timezone"],
+      "required": [
+        "name",
+        "username",
+        "timezone"
+      ],
       "properties": {
         "name": {
           "type": "string",
@@ -2219,9 +3846,34 @@
         }
       }
     },
+    "Subscription": {
+      "type": "object",
+      "required": [
+        "address",
+        "endsAt",
+        "product"
+      ],
+      "properties": {
+        "address": {
+          "type": "string",
+          "description": "Ethereum address of subscriber",
+          "example": "0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF"
+        },
+        "endsAt": {
+          "type": "string",
+          "description": "ISO-8601 datetime",
+          "example": "2018-02-21T12:26:18Z"
+        },
+        "product": {
+          "$ref": "#/definitions/Product"
+        }
+      }
+    },
     "UserKeyCreateRequest": {
       "type": "object",
-      "required": ["name"],
+      "required": [
+        "name"
+      ],
       "properties": {
         "name": {
           "type": "string",
@@ -2232,7 +3884,10 @@
     },
     "UserKey": {
       "type": "object",
-      "required": ["id", "name"],
+      "required": [
+        "id",
+        "name"
+      ],
       "properties": {
         "id": {
           "type": "string",
@@ -2253,7 +3908,9 @@
     },
     "ResourceKeyCreateRequest": {
       "type": "object",
-      "required": ["name"],
+      "required": [
+        "name"
+      ],
       "properties": {
         "name": {
           "type": "string",
@@ -2269,7 +3926,10 @@
     },
     "ResourceKey": {
       "type": "object",
-      "required": ["id", "name"],
+      "required": [
+        "id",
+        "name"
+      ],
       "properties": {
         "id": {
           "type": "string",
@@ -2296,7 +3956,7 @@
       "properties": {
         "code": {
           "type": "string",
-          "description": "Error code (e.g. \"NOT_FOUND\") for recognizing error type automatically."
+          "description": "Error code (e.g. \"NOT_FOUND\") for recognizing error type programmatically."
         },
         "message": {
           "type": "string",

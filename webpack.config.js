@@ -5,6 +5,7 @@ const WebpackNotifierPlugin = require('webpack-notifier')
 const WriteFilePlugin = require('write-file-webpack-plugin')
 const FlowtypePlugin = require('flowtype-loader/plugin')
 const CleanWebpackPlugin = require('clean-webpack-plugin')
+const UglifyJsPlugin = require('uglifyjs-webpack-plugin')
 
 const postcssConfig = require('./postcss.config.js')
 
@@ -38,11 +39,13 @@ const environmentPlugins = inProduction ? [
             'NODE_ENV': JSON.stringify('production'),
         },
     }),
-    new webpack.optimize.UglifyJsPlugin({
-        compressor: {
-            warnings: false,
-        },
-    }),
+    new UglifyJsPlugin({
+        uglifyOptions: {
+            compressor: {
+                warnings: false
+            }
+        }
+    })
 ] : [
     // Dev plugins
     new FlowtypePlugin(),
@@ -59,6 +62,9 @@ module.exports = {
         profilePage: path.resolve(root, 'web-app', 'react-app', 'profilePageMain.js'),
         dashboardPage: path.resolve(root, 'web-app', 'react-app', 'dashboardPageMain.js'),
         authPage: path.resolve(root, 'web-app', 'react-app', 'authPageMain.js'),
+        dashboardPage: path.resolve(root, 'web-app', 'react-app', 'dashboardPageMain.js'),
+        // TODO: remove this when CORE-1075-reactify-stream-page is ready
+        streamPageDataPreview: path.resolve(root, 'web-app', 'react-app', 'streamPageDataPreviewMain.js')
     },
     output: {
         path: path.resolve(root, 'web-app', 'webpack-bundles'),

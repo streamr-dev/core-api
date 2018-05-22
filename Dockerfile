@@ -19,6 +19,9 @@ RUN apk add --no-cache \
                 make \
                 python
 
+RUN wget -q -O /etc/apk/keys/sgerrand.rsa.pub https://raw.githubusercontent.com/sgerrand/alpine-pkg-glibc/master/sgerrand.rsa.pub
+RUN wget https://github.com/sgerrand/alpine-pkg-glibc/releases/download/2.27-r0/glibc-2.27-r0.apk
+RUN apk add glibc-2.27-r0.apk
 
 ENV GRAILS_VERSION 2.5.6
 
@@ -52,7 +55,6 @@ COPY . /app
 # artifacts.
 RUN grails refresh-dependencies
 RUN grails compile
-
 
 RUN npm install --python=python2.7
 

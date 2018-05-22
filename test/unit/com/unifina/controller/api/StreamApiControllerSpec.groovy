@@ -2,6 +2,7 @@ package com.unifina.controller.api
 
 import com.unifina.api.NotFoundException
 import com.unifina.api.NotPermittedException
+import com.unifina.api.StreamListParams
 import com.unifina.domain.data.Feed
 import com.unifina.domain.data.Stream
 import com.unifina.domain.security.Key
@@ -16,7 +17,7 @@ import grails.test.mixin.TestFor
 import spock.lang.Specification
 
 @TestFor(StreamApiController)
-@Mock([SecUser, Stream, Key, Permission, Feed, UnifinaCoreAPIFilters, UserService, PermissionService, SpringSecurityService, StreamService, ApiService, DashboardService])
+@Mock([SecUser, Stream, Key, Permission, Feed, UnifinaCoreAPIFilters, UserService, PermissionService, SpringSecurityService, StreamService, DashboardService])
 class StreamApiControllerSpec extends Specification {
 
 	Feed feed
@@ -24,6 +25,7 @@ class StreamApiControllerSpec extends Specification {
 
 	def streamService
 	def permissionService
+	def apiService
 
 	def streamOneId
 	def streamTwoId
@@ -34,8 +36,7 @@ class StreamApiControllerSpec extends Specification {
 		permissionService = mainContext.getBean(PermissionService)
 
 		controller.permissionService = permissionService
-		controller.apiService = mainContext.getBean(ApiService)
-		controller.apiService.permissionService = permissionService
+		apiService = controller.apiService = Mock(ApiService)
 
 		user = new SecUser(username: "me", password: "foo")
 		user.save(validate: false)
@@ -70,6 +71,37 @@ class StreamApiControllerSpec extends Specification {
 
 		then:
 		response.json.length() == 3
+		1 * apiService.list(Stream, {
+			assert it.toMap() == new StreamListParams().toMap()
+			return true
+		}, user) >> [
+		    Stream.findById(streamOneId),
+			Stream.findById(streamTwoId),
+			Stream.findById(streamThreeId)
+		]
+	}
+
+	void "find all streams of logged in user without config"() {
+		when:
+		request.addHeader("Authorization", "Token apiKey")
+		request.method = "GET"
+		request.requestURI = "/api/v1/stream"
+		request.setParameter("noConfig", "true")
+		withFilters([action: 'index']) {
+			controller.index()
+		}
+
+		then:
+		response.json.length() == 3
+		response.json[0].config == null
+		1 * apiService.list(Stream, {
+			assert it.toMap() == new StreamListParams().toMap()
+			return true
+		}, user) >> [
+			Stream.findById(streamOneId),
+			Stream.findById(streamTwoId),
+			Stream.findById(streamThreeId)
+		]
 	}
 
 	void "find streams by name of logged in user"() {
@@ -90,6 +122,12 @@ class StreamApiControllerSpec extends Specification {
 			fields: []
 		]
 		response.json[0].description == "description"
+		1 * apiService.list(Stream, {
+			assert it.toMap() == new StreamListParams(name: "stream").toMap()
+			return true
+		}, user) >> [
+			Stream.findById(streamOneId)
+		]
 	}
 
 	void "index() adds name param to filter criteria"() {
@@ -104,6 +142,12 @@ class StreamApiControllerSpec extends Specification {
 
 		then:
 		response.json[0].name == name
+		1 * apiService.list(Stream, {
+			assert it.toMap() == new StreamListParams(name: "ztream").toMap()
+			return true
+		}, user) >> [
+			Stream.findById(streamTwoId)
+		]
 	}
 
 	void "creating stream fails given invalid token"() {

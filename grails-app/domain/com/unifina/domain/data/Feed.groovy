@@ -12,10 +12,10 @@ class Feed implements Serializable {
 	String backtestFeed // TODO: rename?
 	String realtimeFeed
 	String feedConfig
-	
+
 	String timezone
 	String preprocessor
-	
+
 	String directory
 
 	@Deprecated
@@ -37,12 +37,10 @@ class Feed implements Serializable {
 	@Deprecated
 	String streamListenerClass
 	@Deprecated
-	String streamPageTemplate
-	@Deprecated
 	String fieldDetectorClass
 	@Deprecated
 	String dataRangeProviderClass
-	
+
 	Module module
 
 	@Deprecated
@@ -68,12 +66,12 @@ class Feed implements Serializable {
 		fieldDetectorClass(nullable: true)
 		dataRangeProviderClass(nullable: true)
 	}
-	
+
 	@Override
 	public int hashCode() {
 		return id.hashCode()
 	}
-	
+
 	@Override
 	public boolean equals(Object obj) {
 		return obj instanceof Feed && obj.id == this.id

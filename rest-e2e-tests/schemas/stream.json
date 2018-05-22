@@ -1,0 +1,98 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Stream",
+  "description": "A description of a data stream",
+  "type": "object",
+  "required": [
+    "id",
+    "partitions",
+    "name",
+    "description",
+    "uiChannel",
+    "feed",
+    "config",
+    "dateCreated",
+    "lastUpdated"
+  ],
+  "properties": {
+    "id": {
+      "description": "Unique identifier for a stream",
+      "$ref": "#/definitions/resourceIdentifier"
+    },
+    "partitions": {
+      "description": "Number of partitions in this stream",
+      "type": "integer",
+      "minimum": 1
+    },
+    "name": {
+      "description": "Name of the stream",
+      "type": "string",
+      "maxLength": 255
+    },
+    "description": {
+      "description": "Description of this stream",
+      "type": [
+        "null",
+        "string"
+      ],
+      "maxLength": 255
+    },
+    "uiChannel": {
+      "description": "Is this a uiChannel stream?",
+      "type": "boolean"
+    },
+    "feed": {
+      "description": "Feed information of this stream",
+      "$ref": "#/definitions/feed"
+    },
+    "config": {
+      "description": "Configuration of this stream",
+      "type": "object"
+    },
+    "dateCreated": {
+      "description": "Timestamp of when this stream was created",
+      "type": "string",
+      "format": "date-time"
+    },
+    "lastUpdated": {
+      "description": "Timestamp of when this stream was last updated",
+      "type": "string",
+      "format": "date-time"
+    }
+  },
+  "additionalProperties": false,
+  "definitions": {
+    "resourceIdentifier": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 255,
+      "pattern": "^[a-zA-Z0-9-_]+$"
+    },
+    "feed": {
+      "type": "object",
+      "required": [
+        "id",
+        "name",
+        "module"
+      ],
+      "properties": {
+        "id": {
+          "description": "Unique identifier for a feed",
+          "type": "integer",
+          "minimumValue": 7,
+          "maximumValue": 7
+        },
+        "name": {
+          "description": "Name of the feed",
+          "type": "string",
+          "maxLength": 255
+        },
+        "module": {
+          "description": "Module identifier for the feed",
+          "type": "integer",
+          "minimum": 1
+        }
+      }
+    }
+  }
+}

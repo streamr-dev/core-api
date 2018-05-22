@@ -112,7 +112,7 @@ public abstract class AbstractHttpModule extends ModuleWithSideEffects implement
 	}
 
 	@Override
-	public void finalize() {
+	protected void finalize() throws Throwable {
 		stopClient();
 	}
 

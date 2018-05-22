@@ -9,7 +9,6 @@ import org.apache.commons.math3.stat.correlation.PearsonsCorrelation;
 import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
 import org.apache.log4j.Logger;
 import org.codehaus.groovy.grails.web.json.JSONArray;
-import org.codehaus.groovy.grails.web.json.JSONElement;
 import org.codehaus.groovy.grails.web.json.JSONObject;
 import org.codehaus.groovy.runtime.InvokerHelper;
 import org.nustaq.serialization.*;
@@ -68,9 +67,16 @@ public class SerializerImpl implements Serializer {
 		try {
 			fstOutput.writeObject(object);
 			fstOutput.flush();
-			fstOutput.close();
 		} catch (IOException e) {
 			throw new SerializationException("Failed to serialize ", e);
+		} finally {
+			try {
+				fstOutput.close();
+			} catch (IOException e) {
+				logger.warn("error closing file", e);
+			} finally {
+				fstOutput = null;
+			}
 		}
 	}
 
@@ -92,13 +98,20 @@ public class SerializerImpl implements Serializer {
 		try {
 			FSTObjectInput fstInput = conf.getObjectInput(in);
 			Object object = fstInput.readObject();
-			in.close();
 			if (object instanceof Unknown) {
 				throw new ClassNotFoundException("Deserialization failed");
 			}
 			return object;
 		} catch (ClassNotFoundException | IOException | NullPointerException e) {
 			throw new SerializationException("Failed to deserialize", e);
+		} finally {
+			try {
+				in.close();
+			} catch (IOException e) {
+				logger.warn("error closing file", e);
+			} finally {
+				in = null;
+			}
 		}
 	}
 

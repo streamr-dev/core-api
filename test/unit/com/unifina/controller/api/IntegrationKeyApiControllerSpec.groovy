@@ -128,4 +128,32 @@ class IntegrationKeyApiControllerSpec extends Specification {
 				service: IntegrationKey.Service.ETHEREUM_ID.toString()
 		)
 	}
+
+	def "delete() invokes ethereumIntegrationKeyService#delete"() {
+		ethereumIntegrationKeyService = controller.ethereumIntegrationKeyService = Mock(EthereumIntegrationKeyService)
+
+		when:
+		params.id = "integration-key-id"
+		request.apiUser = me
+		withFilters(action: "delete") {
+			controller.delete()
+		}
+
+		then:
+		1 * ethereumIntegrationKeyService.delete("integration-key-id", me)
+	}
+
+	def "delete() responds with 204"() {
+		controller.ethereumIntegrationKeyService = Stub(EthereumIntegrationKeyService)
+
+		when:
+		params.id = "integration-key-id"
+		request.apiUser = me
+		withFilters(action: "delete") {
+			controller.delete()
+		}
+
+		then:
+		response.status == 204
+	}
 }

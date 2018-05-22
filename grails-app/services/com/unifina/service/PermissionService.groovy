@@ -1,8 +1,10 @@
 package com.unifina.service
 
+import com.unifina.api.NotPermittedException
 import com.unifina.domain.dashboard.Dashboard
 import com.unifina.domain.data.Feed
 import com.unifina.domain.data.Stream
+import com.unifina.domain.marketplace.Product
 import com.unifina.domain.security.Key
 import com.unifina.domain.security.Permission
 import com.unifina.domain.security.Permission.Operation
@@ -39,12 +41,28 @@ class PermissionService {
 	}
 
 	/**
+	 * Throws an exception if user is not allowed to read a resource
+	 */
+	@CompileStatic
+	void verifyRead(Userish userish, resource) throws NotPermittedException {
+		verify(userish, resource, Operation.READ)
+	}
+
+	/**
 	 * Check whether user is allowed to write a resource
 	 */
 
 	@CompileStatic
 	boolean canWrite(Userish userish, resource) {
 		return check(userish, resource, Operation.WRITE)
+	}
+
+	/**
+	 * Throws an exception if user is not allowed to write a resource
+	 */
+	@CompileStatic
+	void verifyWrite(Userish userish, resource) throws NotPermittedException {
+		verify(userish, resource, Operation.WRITE)
 	}
 
 	/**
@@ -56,10 +74,28 @@ class PermissionService {
 	}
 
 	/**
+	 * Throws an exception if user is not allowed to share a resource
+	 */
+	@CompileStatic
+	void verifyShare(Userish userish, resource) throws NotPermittedException {
+		verify(userish, resource, Operation.SHARE)
+	}
+
+	/**
 	 * Check whether user is allowed to perform specified operation on a resource
 	 */
 	boolean check(Userish userish, resource, Operation op) {
 		return resource?.id != null && hasPermission(userish, resource, op)
+	}
+
+	/**
+	 * Throws an exception if user is not allowed to perform specified operation on a resource.
+	 */
+	void verify(Userish userish, resource, Operation op) throws NotPermittedException {
+		if (!check(userish, resource, op)) {
+			SecUser user = userish?.resolveToUserish()
+			throw new NotPermittedException(user?.username, resource.class.simpleName, resource.id, op.id)
+		}
 	}
 
 	/**
@@ -85,6 +121,10 @@ class PermissionService {
 					String userProp = getUserPropertyName(userish)
 					eq(userProp, userish)
 				}
+			}
+			or {
+				isNull("endsAt")
+				gt("endsAt", new Date())
 			}
 		}.toList()
 	}
@@ -124,7 +164,7 @@ class PermissionService {
 			return []
 		}
 
-		Closure permissionCriteria = createUserPermissionCriteria(userish, op, includeAnonymous)
+		Closure permissionCriteria = createUserPermissionCriteria(resourceClass, userish, op, includeAnonymous)
 
 		return resourceClass.withCriteria {
 			permissionCriteria.delegate = delegate
@@ -139,11 +179,12 @@ class PermissionService {
 	 * (Dashboard, Canvas, Stream etc.) to filter query results so that user has specified permission on
 	 * them.
 	 */
-	Closure createUserPermissionCriteria(Userish userish, Operation op, boolean includeAnonymous) {
+	Closure createUserPermissionCriteria(Class resourceClass, Userish userish, Operation op, boolean includeAnonymous) {
 		userish = userish?.resolveToUserish()
 
 		boolean isUser = isNotNullAndIdNotNull(userish)
 		String userProp = isUser ? getUserPropertyName(userish) : null
+		String idProperty = getResourcePropertyName(resourceClass)
 
 		return {
 			permissions {
@@ -155,6 +196,13 @@ class PermissionService {
 					if (isUser) {
 						eq(userProp, userish)
 					}
+				}
+				or {
+					isNull("endsAt")
+					gt("endsAt", new Date())
+				}
+				projections {
+					groupProperty(idProperty)
 				}
 			}
 		}
@@ -298,6 +346,18 @@ class PermissionService {
 	}
 
 	/**
+	 * Revoke anonymous (public) Permission to a resource (as sudo/system)
+	 *
+	 * @param resource to be revoked anonymous/public access to
+	 *
+	 * @return Permissions that were deleted
+	 */
+	@CompileStatic
+	List<Permission> systemRevokeAnonymousAccess(resource, Operation operation=Operation.READ) {
+		return performRevoke(true, null, resource, operation)
+	}
+
+	/**
 	 * As a SecUser, revoke a Permission.
 	 *
 	 * @param revoker user attempting to revoke permission (needs SHARE permission)
@@ -363,6 +423,10 @@ class PermissionService {
 					String userProp = getUserPropertyName(userish)
 					eq(userProp, userish)
 				}
+			}
+			or {
+				isNull("endsAt")
+				gt("endsAt", new Date())
 			}
 		}
 		return !p.empty
@@ -433,25 +497,32 @@ class PermissionService {
 		throw new AccessControlException("${violator?.username}(id ${violator?.id}) has no 'share' permission to $resource!")
 	}
 
-	@CompileStatic
 	private static Object getResourceFromPermission(Permission p) {
-		return p.canvas ?: p.dashboard ?: p.feed ?: p.modulePackage ?: p.stream
+		String field = Permission.resourceFields.find { p[it] }
+		if (field == null) {
+			throw new IllegalArgumentException("No known resource attached to " + p)
+		}
+		return p[field]
 	}
 
 	@CompileStatic
 	private static String getResourcePropertyName(Object resource) {
-		if (resource instanceof Canvas) {
+		// Cannot derive name straight from resource.getClass() because of proxy assist objects!
+		Class resourceClass = resource instanceof Class ? resource : resource.getClass()
+		if (Canvas.isAssignableFrom(resourceClass)) {
 			return "canvas"
-		} else if (resource instanceof Dashboard) {
+		} else if (Dashboard.isAssignableFrom(resourceClass)) {
 			return "dashboard"
-		} else if (resource instanceof Feed) {
+		} else if (Feed.isAssignableFrom(resourceClass)) {
 			return "feed"
-		} else if (resource instanceof ModulePackage) {
+		} else if (ModulePackage.isAssignableFrom(resourceClass)) {
 			return "modulePackage"
-		} else if (resource instanceof Stream) {
+		} else if (Product.isAssignableFrom(resourceClass)) {
+			return "product"
+		} else if (Stream.isAssignableFrom(resourceClass)) {
 			return "stream"
 		} else {
-			throw new IllegalArgumentException("Unexpected resource class: " + resource)
+			throw new IllegalArgumentException("Unexpected resource class: " + resourceClass)
 		}
 	}
 

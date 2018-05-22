@@ -16,7 +16,7 @@ import spock.lang.Specification
 
 @TestFor(RegisterController)
 @Mock([SignupInvite, SignupCodeService, RegistrationCode, SecUser, Key, SecRole, SecUserSecRole,
-		Feed, ModulePackage, PermissionService, Permission, UserService])
+		Feed, ModulePackage, Permission, UserService])
 class RegisterControllerSpec extends Specification {
 
 	def username = "user@invite.to"
@@ -40,7 +40,7 @@ class RegisterControllerSpec extends Specification {
 		
 		controller.springSecurityService = springSecurityService
 		controller.signupCodeService = new SignupCodeService()
-		def permissionService = new PermissionService()
+		def permissionService = Stub(PermissionService)
 		controller.userService = new UserService()
 		controller.userService.springSecurityService = springSecurityService
 		controller.userService.grailsApplication = grailsApplication
@@ -253,7 +253,6 @@ class RegisterControllerSpec extends Specification {
 			feed.parserClass = ""
 			feed.timezone = "Europe/Minsk"
 			feed.streamListenerClass = NoOpStreamListener.name
-			feed.streamPageTemplate = ""
 			feed.save()
 
 			// A modulePackage created with minimum fields required

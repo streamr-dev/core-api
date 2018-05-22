@@ -28,7 +28,6 @@ class UserServiceSpec extends Specification {
 		feed.parserClass = ""
 		feed.timezone = "Europe/Minsk"
 		feed.streamListenerClass = NoOpStreamListener.name
-		feed.streamPageTemplate = ""
 		feed.save(failOnError: true)
 
 		// A modulePackage created with minimum fields required
@@ -56,12 +55,11 @@ class UserServiceSpec extends Specification {
 		defineBeans {
 			passwordEncoder(PlaintextPasswordEncoder)
 			springSecurityService(SpringSecurityService)
-			permissionService(PermissionService)
 		}
 		// Do some wiring that should be done automatically but for some reason is not (in unit tests)
 		grailsApplication.mainContext.getBean("springSecurityService").grailsApplication = grailsApplication
 		grailsApplication.mainContext.getBean("springSecurityService").passwordEncoder = grailsApplication.mainContext.getBean("passwordEncoder")
-		permissionService = mainContext.getBean(PermissionService)
+		permissionService = service.permissionService = Mock(PermissionService)
 	}
 
     def "the user is created when called, with default roles if none supplied"() {
@@ -107,11 +105,10 @@ class UserServiceSpec extends Specification {
 		user.getAuthorities().size() == 1
 		user.getAuthorities().toArray()[0].authority == "ROLE_USER"
 
-		permissionService.get(Feed, user).size() == 0
-
-		permissionService.get(ModulePackage, user).size() == 2
-		permissionService.get(ModulePackage, user)[0].id == 1
-		permissionService.get(ModulePackage, user)[1].id == 2
+		1 * permissionService.get(Feed, {it.id == 1} as SecUser) >> []
+		1 * permissionService.get(ModulePackage, {it.id == 1} as SecUser) >> []
+		1 * permissionService.systemGrant({ it.id == 1} as SecUser, { it.id == 1} as ModulePackage)
+		1 * permissionService.systemGrant({ it.id == 1} as SecUser, { it.id == 2} as ModulePackage)
     }
 
 	def "it should fail if the default roles, feeds of modulePackages are not found"() {

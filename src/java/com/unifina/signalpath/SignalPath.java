@@ -1,7 +1,6 @@
 package com.unifina.signalpath;
 
 import com.unifina.data.FeedEvent;
-import com.unifina.domain.data.Stream;
 import com.unifina.domain.signalpath.Canvas;
 import com.unifina.domain.signalpath.Module;
 import com.unifina.serialization.SerializationRequest;
@@ -391,7 +390,7 @@ public class SignalPath extends ModuleWithUI {
 		}
 	}
 
-	class InputConnection {
+	static class InputConnection {
 		public Input input;
 		public String connectedTo;
 
@@ -401,7 +400,7 @@ public class SignalPath extends ModuleWithUI {
 		}
 	}
 
-	class ModuleConfig implements Serializable {
+	static class ModuleConfig implements Serializable {
 		public AbstractSignalPathModule module;
 		public Map config;
 

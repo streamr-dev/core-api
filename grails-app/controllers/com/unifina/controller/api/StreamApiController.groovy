@@ -24,6 +24,10 @@ class StreamApiController {
 		}
 		def results = apiService.list(Stream, listParams, (SecUser) request.apiUser)
 		apiService.addLinkHintToHeader(listParams, results.size(), params, response)
+		if (params.noConfig) {
+			render(results*.toSummaryMap() as JSON)
+			return
+		}
 		render(results*.toMap() as JSON)
 	}
 

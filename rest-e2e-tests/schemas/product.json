@@ -1,0 +1,161 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Product",
+  "description": "A product sold on the Streamr Marketplace consisting of streams",
+  "type": "object",
+  "required": [
+    "id",
+    "name",
+    "description",
+    "imageUrl",
+    "category",
+    "streams",
+    "state",
+    "previewStream",
+    "previewConfigJson",
+    "created",
+    "updated",
+    "ownerAddress",
+    "beneficiaryAddress",
+    "pricePerSecond",
+    "priceCurrency",
+    "minimumSubscriptionInSeconds",
+    "owner"
+  ],
+  "properties": {
+    "id": {
+      "description": "Unique identifier for a product",
+      "$ref": "#/definitions/resourceIdentifier"
+    },
+    "name": {
+      "description": "Name of the product",
+      "type": "string",
+      "maxLength": 255
+    },
+    "description": {
+      "description": "Longer description of the product",
+      "type": "string"
+    },
+    "imageUrl": {
+      "description": "URL for product image",
+      "type": [
+        "null",
+        "string"
+      ],
+      "format": "uri",
+      "maxLength": 2048
+    },
+    "thumbnailUrl": {
+      "description": "URL for product thumbnail image",
+      "type": [
+        "null",
+        "string"
+      ],
+      "format": "uri",
+      "maxLength": 2048
+    },
+    "category": {
+      "description": "Identifier of category the product belongs to",
+      "$ref": "#/definitions/resourceIdentifier"
+    },
+    "streams": {
+      "description": "Identifiers of streams that belong to this product",
+      "type": "array",
+      "items": {
+        "$ref": "#/definitions/resourceIdentifier"
+      }
+    },
+    "state": {
+      "description": "State of product",
+      "type": "string",
+      "enum": [
+        "NOT_DEPLOYED",
+        "DEPLOYING",
+        "DEPLOYED",
+        "UNDEPLOYING"
+      ]
+    },
+    "previewStream": {
+      "description": "Identifier of stream chosen to be displayed in product preview",
+      "oneOf": [
+        {
+          "type": "null"
+        },
+        {
+          "$ref": "#/definitions/resourceIdentifier"
+        }
+      ]
+    },
+    "previewConfigJson": {
+      "description": "Configuration of preview stream",
+      "type": [
+        "null",
+        "string"
+      ]
+    },
+    "created": {
+      "description": "Timestamp of when this product was created",
+      "type": "string",
+      "format": "date-time"
+    },
+    "updated": {
+      "description": "Timestamp of when this product was last updated",
+      "type": "string",
+      "format": "date-time"
+    },
+    "ownerAddress": {
+      "description": "Ethereum address of product owner",
+      "oneOf": [
+        { "type": "null" },
+        { "$ref": "#/definitions/ethereumAddress" }
+      ]
+    },
+    "beneficiaryAddress": {
+      "description": "Ethereum address of beneficiary",
+      "oneOf": [
+        { "type": "null" },
+        { "$ref": "#/definitions/ethereumAddress" }
+      ]
+    },
+    "isFree": {
+      "description": "Indicates whether the product is free (or paid)",
+      "type": "boolean"
+    },
+    "pricePerSecond": {
+      "description": "Unit price per second",
+      "type": "string",
+      "pattern": "^\\d+$"
+    },
+    "priceCurrency": {
+      "description": "Unit currency",
+      "type": "string",
+      "enum": [
+        "DATA",
+        "USD"
+      ]
+    },
+    "minimumSubscriptionInSeconds": {
+      "description": "Minimum subscription period in seconds",
+      "type": "integer",
+      "minimum": 0
+    },
+    "owner": {
+      "description": "Username of the owner",
+      "type": "string",
+      "maxLength": 255
+    }
+  },
+  "additionalProperties": false,
+  "definitions": {
+    "ethereumAddress": {
+      "type": "string",
+      "pattern": "^0x[a-fA-F0-9]{40}$"
+    },
+    "resourceIdentifier": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 255,
+      "pattern": "^[a-zA-Z0-9-_]+$"
+    }
+  }
+}

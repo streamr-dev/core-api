@@ -4,6 +4,8 @@ import com.mashape.unirest.http.HttpResponse
 import com.mashape.unirest.http.Unirest
 import com.unifina.api.ApiException
 import com.unifina.api.ListParams
+import com.unifina.api.NotFoundException
+import com.unifina.api.NotPermittedException
 import com.unifina.api.ValidationException
 import com.unifina.domain.security.Key
 import com.unifina.domain.security.Permission
@@ -33,7 +35,7 @@ class ApiService {
 	 *
 	 * @param domainClass Class of domain object
 	 * @param listParams conditions for listing
-	 * @param apiUser user for which listing is conducted (READ permission is checked)
+	 * @param apiUser user for which listing is conducted
 	 * @return list of results with pagination information
 	 * @throws ValidationException if listParams does not pass validation
 	 */
@@ -43,7 +45,8 @@ class ApiService {
 			throw new ValidationException(listParams.errors)
 		}
 		Closure searchCriteria = listParams.createListCriteria()
-		permissionService.get(domainClass, apiUser, Permission.Operation.READ, listParams.publicAccess, searchCriteria)
+		SecUser effectiveUser = listParams.grantedAccess ? apiUser : null
+		permissionService.get(domainClass, effectiveUser, listParams.operation, listParams.publicAccess, searchCriteria)
 	}
 
 	/**
@@ -62,6 +65,28 @@ class ApiService {
 			)
 			response.addHeader("Link", "<${url}>; rel=\"more\"")
 		}
+	}
+
+	/**
+	 * Fetch a domain object by id while authorizing that current user has required permission
+	 */
+	@GrailsCompileStatic
+	<T> T authorizedGetById(Class<T> domainClass, String id, SecUser currentUser, Permission.Operation operation)
+			throws NotFoundException, NotPermittedException {
+		T domainObject = getByIdAndThrowIfNotFound(domainClass, id)
+		permissionService.verify(currentUser, domainObject, operation)
+		return domainObject
+	}
+
+	/**
+	 * Fetch a domain object by id and throw NotFoundException if not found
+	 */
+	def <T> T getByIdAndThrowIfNotFound(Class<T> domainClass, String id) throws NotFoundException {
+		T domainObject = domainClass.get(id)
+		if (domainObject == null) {
+			throw new NotFoundException(domainClass.simpleName, id)
+		}
+		return domainObject
 	}
 
 	@CompileStatic

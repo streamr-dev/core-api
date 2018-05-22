@@ -212,7 +212,6 @@ environments {
  * API & CORS config
  */
 cors.url.pattern = ['/api/*', '/contact/send']
-cors.headers = ['Access-Control-Allow-Origin': '*']
 streamr.apiKey.revokeNotificationStream = "revoked-api-keys"
 
 /**
@@ -414,13 +413,13 @@ grails {
 
 		environments {
 			development {
-				host = "127.0.0.1"
-				port = 25
+				host = System.getProperty("grails.mail.host") ?: "127.0.0.1"
+				port = System.getProperty("grails.mail.port") ?: 25
 				props = []
 			}
 			test {
-				host = "127.0.0.1"
-				port = 25
+				host = System.getProperty("grails.mail.host") ?: "127.0.0.1"
+				port = System.getProperty("grails.mail.port") ?: 25
 				props = []
 			}
 		}
@@ -465,9 +464,16 @@ environments {
 }
 
 /**
+ * S3 File upload
+ */
+streamr.fileUpload.s3.region = System.getProperty("streamr.fileUpload.s3.region") ?: "eu-west-1"
+streamr.fileUpload.s3.bucket = System.getProperty("streamr.fileUpload.s3.bucket") ?: "streamr-dev-public"
+
+/**
  * Signup Configs
  */
 streamr.signup.requireInvite = (System.getProperty("streamr.signup.requireInvite") ? Boolean.parseBoolean(System.getProperty("streamr.signup.requireInvite")) : false)
+streamr.signup.requireCaptcha = (System.getProperty("streamr.signup.requireCaptcha") ? Boolean.parseBoolean(System.getProperty("streamr.signup.requireCaptcha")) : false)
 
 /**
  * Miscellaneous

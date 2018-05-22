@@ -39,7 +39,7 @@ public class LinearRegressionXY extends AbstractModuleWithWindow<LinearRegressio
 	@Override
 	protected void doSendOutput() {
 		double s = regression.getSlope();
-		if (s != Double.NaN) {
+		if (!Double.isNaN(s)) {
 			slope.send(regression.getSlope());
 			intercept.send(regression.getIntercept());
 			error.send(regression.getMeanSquareError());
@@ -70,7 +70,7 @@ public class LinearRegressionXY extends AbstractModuleWithWindow<LinearRegressio
 		}
 	}
 
-	class XYPair implements Serializable {
+	static class XYPair implements Serializable {
 		public double x;
 		public double y;
 
