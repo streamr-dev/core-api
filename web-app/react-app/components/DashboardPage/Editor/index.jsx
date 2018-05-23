@@ -16,8 +16,8 @@ import Fullscreen from 'react-full-screen'
 import StreamrClient from 'streamr-client'
 import _ from 'lodash'
 
-import {parseDashboard} from '../../../helpers/parseState'
-import createLink from '../../../helpers/createLink'
+import {parseDashboard} from '../../../utils/parseState'
+import createLink from '../../../utils/createLink'
 
 import {Responsive, WidthProvider} from 'react-grid-layout'
 import 'react-grid-layout/css/styles.css'

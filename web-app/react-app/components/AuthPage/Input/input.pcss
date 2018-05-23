@@ -1,0 +1,24 @@
+@import "@streamr/streamr-layout/pcss/variables.pcss";
+
+.input {
+  height: 32px;
+  border: none;
+  border-bottom: 2px solid var(--greyDark);
+  border-radius: 0;
+  outline: none;
+  font-size: 16px;
+  line-height: 24px;
+  color: var(--greyDark);
+  padding: 0;
+
+  &::placeholder {
+    color: inherit;
+    font-size: inherit;
+    padding-left: 0;
+  }
+
+  &.block {
+    width: 100%;
+    display: block;
+  }
+}

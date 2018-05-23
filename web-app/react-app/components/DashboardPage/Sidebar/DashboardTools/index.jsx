@@ -5,7 +5,7 @@ import {connect} from 'react-redux'
 import {Button} from 'react-bootstrap'
 import FontAwesome from 'react-fontawesome'
 
-import {parseDashboard} from '../../../../helpers/parseState'
+import {parseDashboard} from '../../../../utils/parseState'
 
 import DeleteButton from '../../DashboardDeleteButton'
 import ShareDialog from '../../../ShareDialog'

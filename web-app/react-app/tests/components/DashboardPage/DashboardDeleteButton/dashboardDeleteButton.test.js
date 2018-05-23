@@ -2,8 +2,8 @@
 import React from 'react'
 import {shallow} from 'enzyme'
 import assert from 'assert-diff'
-import * as createLink from '../../../../helpers/createLink'
-import * as parseState from '../../../../helpers/parseState'
+import * as createLink from '../../../../utils/createLink'
+import * as parseState from '../../../../utils/parseState'
 import * as actions from '../../../../actions/dashboard'
 import sinon from 'sinon'
 
@@ -15,7 +15,7 @@ describe('DashboardDeleteButton', () => {
     let dashboardDeleteButton
     let dashboard
     let sandbox
-    
+
     beforeEach(() => {
         sandbox = sinon.sandbox.create()
         global.window = {}
@@ -23,11 +23,11 @@ describe('DashboardDeleteButton', () => {
             name: 'test'
         }
     })
-    
+
     afterEach(() => {
         sandbox.reset()
     })
-    
+
     describe('onDelete', () => {
         it('must call props.deleteDashboard and set the window.location', (done) => {
             const locationMock = sinon.stub(global.window.location, 'assign')
@@ -46,7 +46,7 @@ describe('DashboardDeleteButton', () => {
             dashboardDeleteButton.instance().onDelete()
         })
     })
-    
+
     describe('render', () => {
         it('must render ConfirmButton with onDelete as props.confirmCallBack', () => {
             const deleteButton = shallow(<DashboardDeleteButton
@@ -56,7 +56,7 @@ describe('DashboardDeleteButton', () => {
             assert.deepStrictEqual(confirmButton.props().confirmCallback, deleteButton.instance().onDelete)
         })
     })
-    
+
     describe('mapStateToProps', () => {
         it('must return parseDashboard(state)', () => {
             const stub = sandbox.stub(parseState, 'parseDashboard').callsFake((state) => state.id)
@@ -66,7 +66,7 @@ describe('DashboardDeleteButton', () => {
             assert(stub.calledOnce)
         })
     })
-    
+
     describe('mapDispatchToProps', () => {
         it('must dispatch deleteDashboard(id)', () => {
             const deleteDashboardStub = sandbox.stub(actions, 'deleteDashboard').callsFake(id => id)

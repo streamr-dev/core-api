@@ -3,10 +3,10 @@
 import React, {Component} from 'react'
 import {connect} from 'react-redux'
 import ConfirmButton from '../../ConfirmButton'
-import createLink from '../../../helpers/createLink'
+import createLink from '../../../utils/createLink'
 
 import {deleteDashboard} from '../../../actions/dashboard'
-import {parseDashboard} from '../../../helpers/parseState'
+import {parseDashboard} from '../../../utils/parseState'
 
 import type {Node} from 'react'
 import type {DashboardState} from '../../../flowtype/states/dashboard-state'
