@@ -64,7 +64,7 @@
 		}
 
 		function handleError(error) {
-			$form.find('.login-failed-message').html(error).show()
+			$form.find('.login-failed-message').text(error).show()
 			enableButton()
 		}
 

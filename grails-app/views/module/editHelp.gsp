@@ -4,28 +4,28 @@
         <meta name="layout" content="main" />
         <title>Edit Module Help</title>
         <r:script>
-        
+
         function addRow(table, io, map) {
 			var newRow = $("<tr><td class='name'></td><td class='value'><input type='text'></td></tr>");
 			table.append(newRow);
-			newRow.find("td.name").html(io.name);
-			
+			newRow.find("td.name").text(io.name);
+
 			var helpText = ""
 			if (map!=null && map[io.name]!=null)
 				helpText = map[io.name];
-				
+
 			newRow.find("td.value input").val(helpText);
         }
-        
+
         function loadHelp(moduleJson) {
-        
+
 			var helpJson = null;
 			$("#message").html("Loading module help texts..");
         	$.ajax({
 			    type: 'GET',
 			    url: Streamr.createLink({uri: 'api/v1/modules/'+moduleJson.id+'/help'}),
 			    dataType: 'json',
-			    success: function(data) { 
+			    success: function(data) {
 			    	helpJson = data;
 					$("#message").hide();
 				},
@@ -33,14 +33,14 @@
 			    data: {id:${module.id}},
 			    async: false
 			});
-        
+
 			if (helpJson!=null && helpJson.helpText!=null)
 				$("#moduleHelp").val(helpJson.helpText);
 
 			var paramTable = $("#params"),
 				inputTable = $("#inputs"),
 				outputTable = $("#outputs");
-				
+
 			$(moduleJson.params).each(function(i,io) {
 				addRow(paramTable, io, helpJson.params);
 			});
@@ -50,9 +50,9 @@
 			$(moduleJson.outputs).each(function(i,io) {
 				addRow(outputTable, io, helpJson.outputs);
 			});
-			
+
         }
-        
+
         function saveHelp(helpJson) {
        		$.ajax({
 			    type: 'POST',
@@ -60,21 +60,21 @@
 			    dataType: 'json',
 			    success: function(data) {
 			    	var msg = (data.success ? "Module help successfully saved." : "An error has occurred.");
-			    	$("#message").html(msg).show();
+			    	$("#message").text(msg).show();
 			    },
 			    error: function(jqXHR, textStatus, errorThrown) {
-			    	$("#message").html("An error has occurred.").show();
+			    	$("#message").text("An error has occurred.").show();
 			    },
 			    data: {id:${module.id}, jsonHelp:JSON.stringify(makeHelp())}
 			});
         }
-        
+
         function makeHelp() {
         	var paramTable = $("#params"),
 				inputTable = $("#inputs"),
 				outputTable = $("#outputs"),
 				result = {params:{}, paramNames:[], inputs:{}, inputNames:[], outputs:{}, outputNames:[]};
-			
+
 			result.helpText = $("#moduleHelp").val();
 			paramTable.find("tr").each(function(i,row) {
 				var name = $(row).find("td.name").text();
@@ -102,9 +102,9 @@
 			});
 			return result;
         }
-        
+
         $(document).ready(function() {
-        
+
         	$("#message").html("Loading module information..");
         	// Do a couple of sync calls to get the JSON
 			var moduleJson = null;
@@ -117,7 +117,7 @@
 			    data: {id:${module.id}},
 			    async: false
 			});
-			
+
 			if (moduleJson==null) {
 				$("#message").html("An error occured, module data could not be loaded.");
 				return;
@@ -131,18 +131,18 @@
     <body class="help-page">
         <div class="body">
             <h1>Module help editor: ${module.name} (Package: ${module.modulePackage.name})</h1>
-            
+
             <div id="message" class="message"></div>
-            
+
             <h2>Module Help Text</h2>
             <textarea id="moduleHelp"></textarea>
 
             <h2>Parameters</h2>
             <table id="params"></table>
-            
+
             <h2>Inputs</h2>
             <table id="inputs"></table>
-            
+
             <h2>Outputs</h2>
             <table id="outputs"></table>
 

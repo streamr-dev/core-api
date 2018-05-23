@@ -1,31 +1,31 @@
 (function(exports) {
-    
+
     var Module = Backbone.AssociatedModel.extend({
         toggle: function() {
             this.set('checked', !this.get('checked'))
         }
     })
-    
+
     var ModuleList = Backbone.Collection.extend({
         model: Module
     })
-    
+
     var ModuleView = Backbone.View.extend({
         tagName: 'li',
         className: 'module',
         template: _.template($('#module-template').html()),
-        
+
         events: {
             'click .module-title': 'toggleChecked'
         },
-        
+
         initialize: function() {
             if (this.model.get('checked')) {
                 this.$el.addClass('checked')
             }
             this.listenTo(this.model, 'change:checked', this.render)
         },
-        
+
         render: function() {
             this.$el.html(this.template(this.model.toJSON()))
             if (this.model.get('checked')) {
@@ -35,7 +35,7 @@
             }
             return this
         },
-        
+
         toggleChecked: function() {
             this.model.toggle()
             if (this.model.get('checked')) {
@@ -45,7 +45,7 @@
             }
         }
     })
-    
+
     var Canvas = Backbone.AssociatedModel.extend({
         relations: [
             {
@@ -55,28 +55,28 @@
                 relatedModel: Module
             }
         ],
-        
+
         getChecked: function() {
             return _.filter(this.get('modules').models, function(module) {
                 return module.get('checked')
             })
         }
     })
-    
+
     var CanvasList = Backbone.Collection.extend({
         model: Canvas
     })
-    
+
     var CanvasView = Backbone.View.extend({
         tagName: 'li',
         className: 'canvas mm-dropdown mm-dropdown-root',
         template: _.template($('#canvas-template')
             .html()),
-        
+
         events: {
             'click .canvas-title': 'openClose'
         },
-        
+
         initialize: function() {
             this.model.get('modules')
                 .on('change:checked', function() {
@@ -84,13 +84,13 @@
                 }, this)
             this.render()
         },
-        
+
         render: function() {
             if (!this.$el.children().length) {
                 this.$el.append(this.template(this.model.toJSON()))
                 this.$el.append(this.renderModules())
             }
-            
+
             if (this.model.getChecked().length) {
                 this.$el.find('.howmanychecked')
                     .html(this.model.getChecked().length)
@@ -98,61 +98,61 @@
                 this.$el.find('.howmanychecked')
                     .empty()
             }
-            
+
             if (this.model.get('state') == 'stopped') {
                 this.$el.addClass('stopped')
             }
             return this
         },
-        
+
         renderModules: function() {
             var list = $('<ul/>', {
                 class: 'mmc-dropdown-delay animated fadeInLeft'
             })
-            
+
             var filteredModules = _.filter(this.model.get('modules').models, function(module) {
                 return module.get('uiChannel') && module.get('uiChannel').webcomponent
             })
-            
+
             _.each(filteredModules, function(module) {
                 var moduleView = new ModuleView({
                     model: module
                 })
                 list.append(moduleView.render().el)
             }, this)
-            
+
             return list
         },
-        
+
         openClose: function() {
             this.$el.toggleClass('open')
         }
     })
-    
+
     var DashboardItem = Backbone.AssociatedModel.extend({
         makeSmall: function() {
             if (this.get('size') != 'small') {
                 this.set('size', 'small')
             }
         },
-        
+
         makeMedium: function() {
             if (this.get('size') != 'medium') {
                 this.set('size', 'medium')
             }
         },
-        
+
         makeLarge: function() {
             if (this.get('size') != 'large') {
                 this.set('size', 'large')
             }
         }
     })
-    
+
     var DashboardItemList = Backbone.Collection.extend({
         model: DashboardItem
     })
-    
+
     var DashboardItemView = Backbone.View.extend({
         tagName: 'li',
         className: 'dashboarditem',
@@ -160,7 +160,7 @@
             .html()),
         titlebarTemplate: _.template($('#titlebar-template')
             .html()),
-        
+
         events: {
             'click .delete-btn': 'deleteDashBoardItem',
             'click .titlebar-clickable': 'toggleEdit',
@@ -172,18 +172,18 @@
             'click .make-medium-btn': 'changeSize',
             'click .make-large-btn': 'changeSize'
         },
-        
+
         initialize: function(options) {
             this.baseUrl = options.baseUrl
         },
-        
+
         render: function() {
             var _this = this
-            
+
             this.smallClass = 'small-size col-xs-12 col-sm-6 col-md-4 col-lg-3 col-centered'
             this.mediumClass = 'medium-size col-xs-12 col-sm-12 col-md-8 col-lg-6 col-centered'
             this.largeClass = 'large-size col-xs-12 col-centered'
-            
+
             var webcomponent = this.model.get('webcomponent')
             this.$el.html(this.template(this.model.toJSON()))
             if (webcomponent == 'streamr-label' ||
@@ -209,7 +209,7 @@
             } else {
                 throw 'No webcomponent defined for uiChannel ' + this.model.get('uiChannel').id + '!'
             }
-            
+
             var titlebar = this.titlebarTemplate(this.model.toJSON())
             this.$el.find('.title')
                 .append(titlebar)
@@ -217,24 +217,24 @@
             this.$el.find('.make-' + this.model.get('size') + '-btn')
                 .parent()
                 .addClass('checked')
-            
+
             // Pass error events from webcomponents onto the model
             this.$el.find('.streamr-widget')
                 .on('error', function(e) {
                     _this.model.trigger('error', e.originalEvent.detail.message, _this.model.get('title'))
                 })
-            
+
             this.streamrWidget = this.$el.find('.streamr-widget')
-            
+
             this.bindEvents()
-            
+
             return this
         },
-        
+
         deleteDashBoardItem: function() {
             this.model.collection.remove(this.model)
         },
-        
+
         bindEvents: function() {
             var _this = this
             this.listenTo(this.model, 'resize', function() {
@@ -244,19 +244,19 @@
                 _this.model.collection.trigger('orderchange')
             })
         },
-        
+
         remove: function() {
             this.streamrWidget[0].dispatchEvent(new Event('remove'))
             Backbone.View.prototype.remove.apply(this)
         },
-        
+
         toggleEdit: function(e) {
             var _this = this
             this.editOff = function() {
                 if (this.$el.hasClass('editing')) {
                     this.model.set('title', this.$el.find('.name-input').val())
-                    this.$el.find('.titlebar').html(this.model.get('title'))
-                    this.$el.find('.titlebar-clickable').html(this.model.get('title'))
+                    this.$el.find('.titlebar').text(this.model.get('title'))
+                    this.$el.find('.titlebar-clickable').text(this.model.get('title'))
                     this.$el.removeClass('editing')
                 }
             }
@@ -281,9 +281,9 @@
             } else if (e.keyCode == 13) {
                 this.editOff()
             }
-            
+
         },
-        
+
         initSize: function() {
             this.$el.removeClass(this.smallClass + ' ' + this.mediumClass + ' ' + this.largeClass)
             var size = this.model.get('size')
@@ -299,7 +299,7 @@
                 throw new Error('Module size not found')
             }
         },
-        
+
         changeSize: function(e) {
             this.$el.find('.make-' + this.model.get('size') + '-btn')
                 .parent()
@@ -320,40 +320,40 @@
                 .dispatchEvent(new Event('resize'))
         }
     })
-    
+
     var SidebarView = Backbone.View.extend({
         template: _.template($('#sidebar-template')
             .html()),
-        
+
         events: {
             'checked': 'syncDashboardItems',
             'unchecked': 'syncDashboardItems',
             'click .save-button': 'save'
         },
-        
+
         initialize: function(options) {
             var _this = this
-            
+
             this.el = options.el
-            
+
             var requiredOptions = ['dashboard', 'menuToggle', 'canvases', 'baseUrl']
-            
+
             requiredOptions.forEach(function(requiredOption) {
                 if (options[requiredOption] === undefined) {
                     throw 'Required option is missing: ' + requiredOption
                 }
             })
-            
+
             this.dashboard = options.dashboard
             this.menuToggle = options.menuToggle
             this.baseUrl = options.baseUrl
             this.canvases = new CanvasList(options.canvases)
             this.syncCheckedState()
-            
+
             this.listenTo(this.dashboard.get('items'), 'remove', function(item) {
                 this.syncCheckedState()
             })
-            
+
             this.dashboard.get('items')
                 .on('change', function() {
                     _this.dashboard.saved = false
@@ -365,34 +365,34 @@
                     _this.setEditMode(true)
                 }
             })
-            
+
             if (this.dashboard.get('items').models.length) {
                 this.setEditMode(options.edit)
             } else {
                 this.setEditMode(true)
             }
-            
+
             this.$el.find(".dashboard-name")
                 .change(function() {
                     _this.dashboard.saved = false
                 })
-            
+
             this.dashboard.on('invalid', function() {
                 Streamr.showError(_this.dashboard.validationError, 'Invalid value')
             })
-            
+
             this.render()
         },
-        
+
         // Synchronize the "checked" state of sidebar modules from the DashboardItemList
         syncCheckedState: function() {
             var checked = {}
-            
+
             _.each(this.dashboard.get('items').models, function(item) {
                 if (checked[item.get('canvas')] === undefined) {
                     checked[item.get('canvas')] = {}
                 }
-                
+
                 checked[item.get('canvas')][item.get('module')] = true
             })
             _.each(this.canvases.models, function(canvas) {
@@ -401,7 +401,7 @@
                 })
             })
         },
-        
+
         render: function() {
             var _this = this
             this.$el.append(this.template(this.dashboard.toJSON()))
@@ -440,7 +440,7 @@
             this.checkPermissions()
             this.trigger('ready')
         },
-        
+
         checkPermissions: function() {
             var _this = this
             if (this.dashboard && this.dashboard.id) {
@@ -468,7 +468,7 @@
                 }
             }
         },
-        
+
         setEditMode: function(active) {
             if (active || active === undefined && !$('body').hasClass('mmc')) {
                 $('body').addClass('mme')
@@ -479,18 +479,18 @@
                 $('body').removeClass('mme')
                 $('body').removeClass('editing')
             }
-            
+
             $('body').trigger('classChange')
-            
+
             _.each(this.dashboard.get('items').models, function(item) {
                 item.trigger('resize')
             }, this)
         },
-        
+
         // When modules become checked or unchecked, sync the dashboard items
         syncDashboardItems: function(event, module) {
             var canvas = module.collection.parents[0]
-            
+
             if (event.type == 'checked') {
                 this.dashboard.get('items')
                     .add({
@@ -509,10 +509,10 @@
                     .remove(list)
             }
         },
-        
+
         save: function() {
             var _this = this
-            
+
             this.dashboard.save({}, {
                 success: function() {
                     _this.dashboard.trigger('saved')
@@ -530,7 +530,7 @@
             })
         }
     })
-    
+
     var Dashboard = Backbone.AssociatedModel.extend({
         relations: [
             {
@@ -540,13 +540,13 @@
                 relatedModel: DashboardItem
             }
         ],
-        
+
         validate: function() {
             if (!this.get('name')) {
                 return 'Dashboard name can\'t be empty'
             }
         },
-        
+
         initialize: function() {
             var _this = this
             this.saved = true
@@ -555,21 +555,21 @@
             })
         }
     })
-    
+
     var DashboardView = Backbone.View.extend({
-        
+
         initialize: function(options) {
             var _this = this
-            
+
             var requiredOptions = ['baseUrl']
-            
+
             requiredOptions.forEach(function(requiredOption) {
                 if (options[requiredOption] === undefined) {
                     throw 'Required option is missing: ' + requiredOption
                 }
             })
             this.baseUrl = options.baseUrl
-            
+
             this.dashboardItemViews = []
             // Avoid needing jquery ui in tests
             if (this.$el.sortable) {
@@ -583,18 +583,18 @@
                 this.$el.droppable()
             }
             _.each(this.model.get('items').models, this.addDashboardItem, this)
-            
+
             this.model.get('items').on('add', this.addDashboardItem, this)
             this.model.get('items').on('add', this.updateOrders, this)
             this.model.get('items').on('remove', this.removeDashboardItem, this)
             this.model.get('items').on('remove', this.updateOrders, this)
             this.model.get('items').on('orderchange', this.updateOrders, this)
-            
+
             // Pass errors on items onto this view
             this.model.get('items').on('error', function(error, itemTitle) {
                 _this.trigger('error', error, itemTitle)
             })
-            
+
             $('body').on('classChange', function() {
                 //This is called after the classChange
                 //editing -> !editing
@@ -609,7 +609,7 @@
                 }
             })
         },
-        
+
         addDashboardItem: function(model) {
             var DIView = new DashboardItemView({
                 model: model,
@@ -618,7 +618,7 @@
             this.$el.append(DIView.render().el)
             this.dashboardItemViews.push(DIView)
         },
-        
+
         removeDashboardItem: function(model) {
             var viewsToRemove = _.filter(this.dashboardItemViews, function(DIView) {
                 return DIView.model === model
@@ -628,28 +628,28 @@
             })
             this.dashboardItemViews = _.without(this.dashboardItemViews, viewsToRemove)
         },
-        
+
         updateOrders: function() {
             _.each(this.dashboardItemViews, function(item) {
                 item.model.set('ord', item.$el.index())
             }, this)
         },
-        
+
         enableSortable: function() {
             if (this.$el.sortable) {
                 this.$el.sortable('option', 'disabled', false)
             }
         },
-        
+
         disableSortable: function() {
             if (this.$el.sortable) {
                 this.$el.sortable('option', 'disabled', true)
             }
         }
     })
-    
+
     exports.Dashboard = Dashboard
     exports.DashboardView = DashboardView
     exports.SidebarView = SidebarView
-    
+
 })(typeof (exports) !== 'undefined' ? exports : window)

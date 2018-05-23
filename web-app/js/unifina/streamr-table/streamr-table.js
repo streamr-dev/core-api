@@ -3,7 +3,7 @@
 function StreamrTable(parent, options) {
 	this.$parent = $(parent)
     this.options = options
-    
+
     this.createTable()
     this.initTable()
 }
@@ -12,7 +12,7 @@ function StreamrTable(parent, options) {
 StreamrTable.prototype.createTable = function() {
     if (this.tableContainer)
         this.tableContainer.remove()
-    
+
     this.tableContainer = $("<div class='table-module-container'></div>");
     this.$parent.append(this.tableContainer);
 }
@@ -21,9 +21,9 @@ StreamrTable.prototype.createTable = function() {
 StreamrTable.prototype.initTable = function (title, headers) {
     headers = headers || this.options.headers
     title = title || this.options.title
-    
+
     this.tableContainer.empty()
-    
+
 	if (this.options.displayTitle) {
         this.setTitle(title)
 	}
@@ -80,7 +80,7 @@ StreamrTable.prototype.receiveResponse = function (d) {
 		this.addRow(d.nr, d.id);
 		// Remove last row(s) if table full
 	    	while ($(this.tableBody).children().length > (this.options.maxRows || Infinity)) {
-			$(this.tableBody).children().last().remove()       
+			$(this.tableBody).children().last().remove()
 		}
 	} else if (d.nc) {
 	    // New contents: 2d array that replaces existing contents
@@ -97,7 +97,7 @@ StreamrTable.prototype.receiveResponse = function (d) {
 	} else if (d.e != null && d.id) {
 	    // Edit cell message: d.id=row id, d.e=cell index, d.c=cell content
 		var cell = this.tableBody.find('#'+d.id+ " td").eq(d.e);
-		cell.html(d.c);
+		cell.text(d.c);
 	}
 	else if (d.hdr) {
 		this.setHeaders(d.hdr.headers)
@@ -107,7 +107,7 @@ StreamrTable.prototype.receiveResponse = function (d) {
 	}
 }
 
-StreamrTable.prototype.clean = function() {		
+StreamrTable.prototype.clean = function() {
 	// Clean rows
 	if (this.tableBody) {
 		this.tableBody.empty()
