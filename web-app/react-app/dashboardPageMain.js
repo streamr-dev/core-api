@@ -4,7 +4,7 @@ import React from 'react'
 import {render} from 'react-dom'
 import {Provider} from 'react-redux'
 import { BrowserRouter, Route } from 'react-router-dom'
-import createLink from './helpers/createLink'
+import createLink from './utils/createLink'
 import ShortcutHandler from './components/DashboardPage/ShortcutHandler'
 
 import DashboardPage from './components/DashboardPage'

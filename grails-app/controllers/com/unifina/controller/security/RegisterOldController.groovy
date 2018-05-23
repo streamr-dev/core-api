@@ -14,7 +14,7 @@ import com.unifina.exceptions.UserCreationFailedException
 import com.unifina.domain.security.SecUser
 import com.unifina.domain.security.SignupInvite
 
-class RegisterController {
+class RegisterOldController {
 
     static defaultAction = 'index'
 
@@ -25,11 +25,11 @@ class RegisterController {
 
     def saltSource
 
-    def log = Logger.getLogger(RegisterController)
+    def log = Logger.getLogger(RegisterOldController)
 
     // override to add GET method
     static allowedMethods = [register: ['GET', 'POST']]
-	
+
     def index() {
         render status: 404
     }
@@ -174,7 +174,7 @@ class RegisterController {
             subject grailsApplication.config.unifina.email.invite.subject
             html g.render(template:"email_invite", model:[user: invite], plugin:'unifina-core')
         }
-		
+
         flash.message = "Invitation was sent to $invite.username"
         log.info("Invitation sent to $invite.username")
 
@@ -188,7 +188,7 @@ class RegisterController {
 
         if (!cmd.validate()) {
             render view: 'forgotPassword', model: [ user: cmd ]
-            return 
+            return
         }
 
         def user = SecUser.findWhere(username: cmd.username)
@@ -210,23 +210,23 @@ class RegisterController {
 
         [emailSent: true]
     }
-	
+
     def resetPassword(ResetPasswordCommand command) {
 
         String token = params.t
 
         def registrationCode = token ? RegistrationCode.findByToken(token) : null
-		
+
         if (!registrationCode) {
             flash.error = message(code: 'spring.security.ui.resetPassword.badCode')
             redirect uri: SpringSecurityUtils.securityConfig.successHandler.defaultTargetUrl
             return
         }
-		
+
         def user = SecUser.findByUsername(registrationCode.username)
         if (!user)
         throw new RuntimeException("User belonging to the registration code was not found: $registrationCode.username")
-				
+
         if (!request.post) {
             log.info("Password reset code activated for user $registrationCode.username")
             return [token: token, command: new ResetPasswordCommand(), user:user]
@@ -283,7 +283,7 @@ class RegisterCommand {
     String timezone
     String tosConfirmed
     Integer pwdStrength
-	
+
     def userService
 
     static constraints = {
@@ -298,7 +298,7 @@ class RegisterCommand {
 
         timezone blank: false
         name blank: false
-				
+
         password validator: {String password, RegisterCommand command ->
             return command.userService.passwordValidator(password, command)
         }
@@ -316,7 +316,7 @@ class ResetPasswordCommand {
     Integer pwdStrength
 
     def userService
-	
+
     static constraints = {
         password validator: {String password, ResetPasswordCommand command ->
             return command.userService.passwordValidator(password, command)

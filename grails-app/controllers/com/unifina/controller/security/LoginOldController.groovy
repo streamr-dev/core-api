@@ -18,7 +18,7 @@ import org.springframework.security.web.savedrequest.SavedRequest
 import javax.servlet.http.HttpServletResponse
 
 @Secured(["permitAll"])
-class LoginController {
+class LoginOldController {
 
 	/**
 	 * Dependency injection for the authenticationTrustResolver.

@@ -4,7 +4,7 @@ import React, {Component} from 'react'
 import {connect} from 'react-redux'
 import {error} from 'react-notification-system-redux'
 import path from 'path'
-import createLink from '../../../../helpers/createLink'
+import createLink from '../../../../utils/createLink'
 import TitleRow from './DashboardItemTitleRow'
 
 import styles from './dashboardItem.pcss'

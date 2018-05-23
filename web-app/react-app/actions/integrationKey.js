@@ -2,7 +2,7 @@
 
 import axios from 'axios'
 import {parseError} from './utils/parseApiResponse'
-import createLink from '../helpers/createLink'
+import createLink from '../utils/createLink'
 import {error, success} from 'react-notification-system-redux'
 import type {IntegrationKey} from '../flowtype/integration-key-types.js'
 import type {ErrorInUi} from '../flowtype/common-types.js'

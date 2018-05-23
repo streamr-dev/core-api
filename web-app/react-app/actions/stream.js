@@ -4,7 +4,7 @@ declare var Streamr: any
 
 import axios from 'axios'
 import {parseError} from './utils/parseApiResponse'
-import createLink from '../helpers/createLink'
+import createLink from '../utils/createLink'
 
 import {error} from 'react-notification-system-redux'
 

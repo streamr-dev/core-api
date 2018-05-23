@@ -1,7 +1,7 @@
 import React from 'react'
 import {shallow} from 'enzyme'
 import assert from 'assert-diff'
-import * as createLink from '../../../../../helpers/createLink'
+import * as createLink from '../../../../../utils/createLink'
 import sinon from 'sinon'
 
 import {
@@ -14,15 +14,15 @@ sinon.stub(createLink, 'default').callsFake((url) => url)
 
 describe('DashboardItem', () => {
     let sandbox
-    
+
     beforeEach(() => {
         sandbox = sinon.sandbox.create()
     })
-    
+
     afterEach(() => {
         sandbox.restore()
     })
-    
+
     describe('onResize', () => {
         it('must update wrapper width and height to state', () => {
             const el = shallow(<DashboardItem
@@ -48,7 +48,7 @@ describe('DashboardItem', () => {
             })
         })
     })
-    
+
     describe('componentWillReceiveProps', () => {
         it('must call onResize', () => {
             const spy = sandbox.spy()
@@ -69,7 +69,7 @@ describe('DashboardItem', () => {
             assert(spy.calledOnce)
         })
     })
-    
+
     describe('createWebcomponentUrl', () => {
         let el
         beforeEach(() => {
@@ -110,7 +110,7 @@ describe('DashboardItem', () => {
             assert.equal(el.instance().createWebcomponentUrl(), '/api/v1/dashboards/test/canvases/canvasId/modules/3')
         })
     })
-    
+
     describe('onError', () => {
         afterEach(() => {
             delete process.env.NODE_ENV
@@ -168,7 +168,7 @@ describe('DashboardItem', () => {
             assert(consoleErrorStub.calledWith('testStack'))
         })
     })
-    
+
     describe('createCustomComponent', () => {
         it('must use the component/props pairs from config', () => {
             const el = shallow(<DashboardItem
@@ -192,7 +192,7 @@ describe('DashboardItem', () => {
             assert.equal(el2wrapped.props().a, 'b')
         })
     })
-    
+
     describe('mapStateToProps', () => {
         it('must return right kind of object', () => {
             assert.deepStrictEqual(mapStateToProps({
@@ -207,7 +207,7 @@ describe('DashboardItem', () => {
             }).dashboard, 'aapeli')
         })
     })
-    
+
     describe('mapDispatchToProps', () => {
         it('must dispatch error when called error', () => {
             const dispatchSpy = sandbox.spy()

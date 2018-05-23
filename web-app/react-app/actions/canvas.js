@@ -2,7 +2,7 @@
 
 import axios from 'axios'
 import {parseError} from './utils/parseApiResponse'
-import createLink from '../helpers/createLink'
+import createLink from '../utils/createLink'
 
 export const GET_RUNNING_CANVASES_REQUEST = 'GET_RUNNING_CANVASES_REQUEST'
 export const GET_RUNNING_CANVASES_SUCCESS = 'GET_RUNNING_CANVASES_SUCCESS'

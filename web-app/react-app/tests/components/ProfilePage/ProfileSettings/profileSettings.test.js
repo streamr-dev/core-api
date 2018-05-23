@@ -8,7 +8,7 @@ const momentStub = sinon.stub(moment.tz, 'names')
     .callsFake(() => ['a', 'b', 'c'])
 
 import * as userActions from '../../../../actions/user'
-import * as helpers from '../../../../helpers/createLink'
+import * as helpers from '../../../../utils/createLink'
 
 import {ProfileSettings, mapStateToProps, mapDispatchToProps} from '../../../../components/ProfilePage/ProfileSettings'
 

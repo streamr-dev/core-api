@@ -4,7 +4,7 @@ import axios from 'axios'
 import path from 'path'
 import settle from 'promise-settle'
 import {parseError} from './utils/parseApiResponse'
-import createLink from '../helpers/createLink'
+import createLink from '../utils/createLink'
 
 import {error, success} from 'react-notification-system-redux'
 

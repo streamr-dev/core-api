@@ -4,7 +4,7 @@ import configureMockStore from 'redux-mock-store'
 import moxios from 'moxios'
 import sinon from 'sinon'
 
-import * as helpers from '../../helpers/createLink'
+import * as helpers from '../../utils/createLink'
 
 import * as actions from '../../actions/permission'
 

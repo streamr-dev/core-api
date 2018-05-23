@@ -2,9 +2,9 @@ import React from 'react'
 import {shallow} from 'enzyme'
 import assert from 'assert-diff'
 import sinon from 'sinon'
-import * as createLink from '../../../../helpers/createLink'
+import * as createLink from '../../../../utils/createLink'
 import StreamrClient from 'streamr-client'
-import * as utils from '../../../../helpers/parseState'
+import * as utils from '../../../../utils/parseState'
 import * as dashboardActions from '../../../../actions/dashboard'
 
 import {
@@ -17,17 +17,17 @@ sinon.stub(createLink, 'default').callsFake((url) => url)
 
 describe('Editor', () => {
     let sandbox
-    
+
     beforeEach(() => {
         global.keyId = 'key'
         sandbox = sinon.sandbox.create()
     })
-    
+
     afterEach(() => {
         delete global.keyId
         sandbox.restore()
     })
-    
+
     describe('componentDidMount', () => {
         let el
         beforeEach(() => {
@@ -41,7 +41,7 @@ describe('Editor', () => {
             assert(stub.calledWith('beforeunload', 'onBeforeUnload'))
         })
     })
-    
+
     describe('componentWillReceiveProps', () => {
         let spy
         let el
@@ -83,7 +83,7 @@ describe('Editor', () => {
             assert(spy.calledWith('/'))
         })
     })
-    
+
     describe('onLayoutChange', () => {
         it('must call right functions', () => {
             const onResizeSpy = sandbox.spy()
@@ -102,7 +102,7 @@ describe('Editor', () => {
             assert(updateDashboardLayoutSpy.calledWith('test', 'allLayouts'))
         })
     })
-    
+
     describe('onFullscreenToggle', () => {
         let el
         beforeEach(() => {
@@ -121,7 +121,7 @@ describe('Editor', () => {
             assert(!el.state().isFullscreen)
         })
     })
-    
+
     describe('generateLayout', () => {
         it('must provide a correct-looking result', () => {
             const el = shallow(<Editor
@@ -153,7 +153,7 @@ describe('Editor', () => {
             }
         })
     })
-    
+
     describe('onResize', () => {
         it('must parse the layout correctly', () => {
             const el = shallow(<Editor/>)
@@ -189,7 +189,7 @@ describe('Editor', () => {
             })
         })
     })
-    
+
     describe('onBeforeUnload', () => {
         it('must return undefined and do nothing if dashboard is saved', () => {
             const el = shallow(<Editor
@@ -214,7 +214,7 @@ describe('Editor', () => {
             assert.notEqual(event.returnValue, undefined)
         })
     })
-    
+
     describe('generateItemId', () => {
         it('must return canvas-module', () => {
             assert.equal(Editor.generateItemId({
@@ -223,7 +223,7 @@ describe('Editor', () => {
             }), 'testCanvas-100')
         })
     })
-    
+
     describe('render', () => {
         it('must provide streamrClient to items', () => {
             const el = shallow(<Editor
@@ -241,7 +241,7 @@ describe('Editor', () => {
             assert(provider.find('DashboardItem'))
         })
     })
-    
+
     describe('mapStateToProps', () => {
         it('must return a right kind of object', () => {
             let stub =  sandbox.stub(utils, 'parseDashboard')
@@ -293,7 +293,7 @@ describe('Editor', () => {
             })
         })
     })
-    
+
     describe('mapDispatchToProps', () => {
         it('should dispatch updateDashboardChanges when called update', () => {
             const dispatchSpy = sandbox.spy()

@@ -2,7 +2,7 @@
 
 import axios from 'axios'
 import {parseError} from './utils/parseApiResponse'
-import createLink from '../helpers/createLink'
+import createLink from '../utils/createLink'
 
 import {success, error} from 'react-notification-system-redux'
 

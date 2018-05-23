@@ -3,7 +3,7 @@
 import React, {Component} from 'react'
 import {connect} from 'react-redux'
 import {FormControl} from 'react-bootstrap'
-import {parseDashboard} from '../../../../helpers/parseState'
+import {parseDashboard} from '../../../../utils/parseState'
 
 import {updateDashboard} from '../../../../actions/dashboard'
 

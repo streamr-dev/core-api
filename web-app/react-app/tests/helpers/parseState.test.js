@@ -1,5 +1,5 @@
 import assert from 'assert-diff'
-import {parseDashboard} from '../../helpers/parseState'
+import {parseDashboard} from '../../utils/parseState'
 
 describe('parseState', () => {
     describe('parseDashboard', () => {
