@@ -7,6 +7,7 @@ import com.unifina.domain.security.SecUser
 import com.unifina.domain.signalpath.ModulePackage
 import com.unifina.exceptions.UserCreationFailedException
 import org.springframework.validation.FieldError
+import org.springframework.validation.ObjectError
 
 class UserService {
 
@@ -27,8 +28,17 @@ class UserService {
 		user.enabled = true
 
 		if (!user.validate()) {
-			log.warn(checkErrors(user.errors.getAllErrors()))
-			throw new UserCreationFailedException("Registration user validation failed: " + checkErrors(user.errors.getAllErrors()))
+			def errors = checkErrors(user.errors.getAllErrors())
+			log.warn(errors)
+			def errorStrings = errors.collect { e ->
+				if (e.getCode() == "unique") {
+					"Email already in use."
+				} else {
+					e.toString()
+				}
+
+			}
+			throw new UserCreationFailedException("Registration failed:\n" + errorStrings.join(",\n"))
 		}
 
 		// Users must have at least one API key
