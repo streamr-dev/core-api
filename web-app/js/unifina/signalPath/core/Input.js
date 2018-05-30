@@ -1,7 +1,7 @@
 SignalPath.Input = function(json, parentDiv, module, type, pub) {
 	pub = pub || {};
 	pub = SignalPath.Endpoint(json, parentDiv, module, type || "input", pub);
-	
+
 	var super_createDiv = pub.createDiv;
 	pub.createDiv = function() {
 		var div = super_createDiv();
@@ -12,17 +12,17 @@ SignalPath.Input = function(json, parentDiv, module, type, pub) {
 				me.json.sourceId = output.getId();
 			}
 		})(pub));
-		
+
 		div.bind("spDisconnect", (function(me) {
 			return function(event, output) {
 				delete me.source
 				delete me.json.sourceId;
 			}
 		})(pub));
-		
+
 		return div;
 	}
-	
+
 	var super_hasWarning = pub.hasWarning
 	pub.hasWarning = function() {
 		// No warning if has initialvalue
@@ -36,9 +36,9 @@ SignalPath.Input = function(json, parentDiv, module, type, pub) {
 	var super_createSettings = pub.createSettings;
 	pub.createSettings = function(div,data) {
 		super_createSettings(div,data);
-		
+
 		// Driving input. Default true.
-		
+
 		var switchDiv = $("<div class='switchContainer showOnFocus'></div>");
 		div.append(switchDiv);
 
@@ -86,7 +86,7 @@ SignalPath.Input = function(json, parentDiv, module, type, pub) {
 				} else {
 					iv.setValue(undefined);
 					iv.update();
-					iv.div.html(iv.buttonText());
+					iv.div.text(iv.buttonText());
 				}
 			}
 
@@ -115,24 +115,24 @@ SignalPath.Input = function(json, parentDiv, module, type, pub) {
 			});
 		}
 	}
-	
+
 	function getInitialValue() {
 		return pub.json.initialValue;
 	}
 	pub.getInitialValue = getInitialValue;
-	
+
 	var super_getJSPlumbEndpointOptions = pub.getJSPlumbEndpointOptions;
 	pub.getJSPlumbEndpointOptions = function(json,connDiv) {
 		var opts = super_getJSPlumbEndpointOptions(json,connDiv);
-		
+
 		opts.connectorOverlays[0][1].direction = -1;
 		opts.maxConnections = 1;
 		opts.anchor = [0, 0.5, -1, 0, -15, 0];
 		opts.cssClass = (opts.cssClass || "") + " jsPlumb_input";
-		
+
 		return opts;
 	}
-	
+
 	pub.connect = function(endpoint) {
 		jsPlumb.connect({source: pub.jsPlumbEndpoint, target:endpoint.jsPlumbEndpoint});
 	}
@@ -143,7 +143,7 @@ SignalPath.Input = function(json, parentDiv, module, type, pub) {
 			jsPlumb.detach(connection)
 		});
 	}
-	
+
 	pub.getConnectedEndpoints = function() {
 		var result = [];
 		var connections = jsPlumb.getConnections({source:pub.getId(), scope:"*"});
@@ -152,7 +152,7 @@ SignalPath.Input = function(json, parentDiv, module, type, pub) {
 		});
 		return result;
 	}
-	
+
 	pub.refreshConnections = function() {
 		if (pub.json.sourceId!=null) {
 			var connectedEndpoints = pub.getConnectedEndpoints();
@@ -171,6 +171,6 @@ SignalPath.Input = function(json, parentDiv, module, type, pub) {
 	pub.getSource = function() {
 		return pub.source
 	}
-	
+
 	return pub;
 }

@@ -143,7 +143,7 @@
 				// Handle same module implementation
 				else {
 					_this.data.value = item.id
-					_this.label.find("a").html(item.name)
+					_this.label.find("a").text(item.name)
 					_this.data.streamName = item.name
 				}
 			}
