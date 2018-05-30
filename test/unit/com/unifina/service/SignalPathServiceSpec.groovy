@@ -2,7 +2,9 @@ package com.unifina.service
 
 import com.unifina.BeanMockingSpecification
 import com.unifina.domain.security.Permission
+import com.unifina.domain.security.SecRole
 import com.unifina.domain.security.SecUser
+import com.unifina.domain.security.SecUserSecRole
 import com.unifina.domain.signalpath.Canvas
 import com.unifina.domain.signalpath.Serialization
 import com.unifina.exceptions.CanvasUnreachableException
@@ -14,16 +16,23 @@ import grails.test.mixin.Mock
 import grails.test.mixin.TestFor
 
 @TestFor(SignalPathService)
-@Mock([SecUser, Canvas, Serialization])
+@Mock([SecUser, SecRole, SecUserSecRole, Canvas, Serialization])
 class SignalPathServiceSpec extends BeanMockingSpecification {
 
 	SecUser me
+	SecUser admin
 	Canvas c1
 	CanvasService canvasService
 
 	def setup() {
 		me = new SecUser(username: "me@streamr.com", password: "pw", name: "name", timezone: "Europe/Helsinki")
 		me.save(failOnError: true)
+
+		SecRole role = new SecRole(authority: "ROLE_ADMIN")
+		role.save(failOnError: true)
+		admin = new SecUser(username: "admin@streamr.com", password: "pw", name: "admin", timezone: "Europe/Helsinki")
+		admin.save(failOnError: true)
+		new SecUserSecRole(secUser: admin, secRole: role).save(failOnError: true)
 
 		c1 = new Canvas(
 				name: "canvas-1",
@@ -121,6 +130,19 @@ class SignalPathServiceSpec extends BeanMockingSpecification {
 		req.getPath() == "canvases/$c1.id"
 		req.getOriginalPath() == req.getPath()
 		req.getUser() == me
+	}
+
+	def "buildRuntimeRequest() lets admin role return a RuntimeRequest without permission"() {
+		when:
+		RuntimeRequest req = service.buildRuntimeRequest([type: 'test'], "canvases/$c1.id", admin)
+
+		then:
+		req.getType() == 'test'
+		req.get("type") == 'test'
+		req.getCheckedOperations().contains(Permission.Operation.READ)
+		req.getPath() == "canvases/$c1.id"
+		req.getOriginalPath() == req.getPath()
+		req.getUser() == admin
 	}
 
 	def "buildRuntimeRequest() must throw if the path is malformed"() {
