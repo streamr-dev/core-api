@@ -33,6 +33,9 @@ Tour.list(function(tourList) {
 					<li>
 						<a id="navStreamsLink" href="${createLink(controller:"stream")}"><g:message code="streams.label"/></a>
 					</li>
+					<li>
+						<a id="navMarketplaceLink" href="https://marketplace.streamr.com"><g:message code="marketplace.label"/></a>
+					</li>
 				</sec:ifLoggedIn>
 				
 				<sec:ifAllGranted roles="ROLE_ADMIN">
