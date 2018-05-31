@@ -1,6 +1,7 @@
 package com.unifina.signalpath;
 
 import com.unifina.data.FeedEvent;
+import com.unifina.domain.data.Stream;
 import com.unifina.domain.signalpath.Canvas;
 import com.unifina.domain.signalpath.Module;
 import com.unifina.serialization.SerializationRequest;
@@ -16,6 +17,8 @@ import org.codehaus.groovy.grails.web.json.JSONObject;
 import javax.validation.constraints.NotNull;
 import java.io.Serializable;
 import java.util.*;
+
+import static java.util.stream.Collectors.toSet;
 
 public class SignalPath extends ModuleWithUI {
 
@@ -388,6 +391,17 @@ public class SignalPath extends ModuleWithUI {
 		for (AbstractSignalPathModule module : mods) {
 			module.afterDeserialization(serializationService);
 		}
+	}
+
+	/**
+	 * Get streams on this canvas, NOT including subcanvases
+	 * @return Streams on this canvas
+	 */
+	public Set<Stream> getStreams() {
+		return mods.stream()
+				.filter(mod -> mod instanceof AbstractStreamSourceModule)
+				.map(mod -> ((AbstractStreamSourceModule)mod).getStream())
+				.collect(toSet());
 	}
 
 	static class InputConnection {
