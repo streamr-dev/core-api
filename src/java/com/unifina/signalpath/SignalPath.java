@@ -399,9 +399,9 @@ public class SignalPath extends ModuleWithUI {
 	 */
 	public Set<Stream> getStreams() {
 		return mods.stream()
-				.filter(mod -> mod instanceof AbstractStreamSourceModule)
-				.map(mod -> ((AbstractStreamSourceModule)mod).getStream())
-				.collect(toSet());
+			.filter(mod -> mod instanceof AbstractStreamSourceModule)
+			.map(mod -> ((AbstractStreamSourceModule)mod).getStream())
+			.collect(toSet());
 	}
 
 	static class InputConnection {
