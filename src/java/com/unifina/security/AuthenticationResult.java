@@ -57,4 +57,13 @@ public class AuthenticationResult {
 			throw new RuntimeException("Unexpected authLevel: " + level);
 		}
 	}
+
+	public boolean hasOneOfRoles(AllowRole[] roles) {
+		for (AllowRole role : roles) {
+			if (role.hasUserRole(getSecUser())) {
+				return true;
+			}
+		}
+		return false;
+	}
 }
