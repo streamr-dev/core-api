@@ -17,4 +17,6 @@ public @interface StreamrApi {
 	 * Set to false if authentication is optional for this API method.
 	 */
 	AuthLevel authenticationLevel() default AuthLevel.USER;
+
+	AllowRole[] allowRoles() default AllowRole.NO_ROLE_REQUIRED;
 }
