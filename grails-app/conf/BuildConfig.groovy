@@ -4,8 +4,8 @@ grails.server.port.http = '8081'
 grails.servlet.version = "3.0" // Change depending on target container compliance (2.5 or 3.0)
 grails.tomcat.nio = true
 
-grails.project.target.level = 1.7
-grails.project.source.level = 1.7
+grails.project.target.level = 1.8
+grails.project.source.level = 1.8
 grails.project.class.dir = "target/classes"
 grails.project.test.class.dir = "target/test-classes"
 grails.project.test.reports.dir = "target/test-reports"
