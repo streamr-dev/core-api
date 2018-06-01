@@ -1,6 +1,5 @@
-package com.unifina.controller.security
+package com.unifina.controller.api
 
-import com.unifina.api.ApiException
 import com.unifina.domain.security.SecUser
 import com.unifina.domain.signalpath.Canvas
 import com.unifina.service.CanvasService
@@ -10,25 +9,15 @@ import grails.test.mixin.Mock
 import grails.test.mixin.TestFor
 import spock.lang.Specification
 
-@TestFor(HostController)
+@TestFor(NodeApiController)
 @Mock([Canvas, SecUser])
-class HostControllerSpec extends Specification {
+class NodeApiControllerSpec extends Specification {
 
 	SecUser user1, user2
 
 	def setup() {
 		user1 = new SecUser(username: "user1@streamr.com").save(failOnError: true, validate: false)
 		user2 = new SecUser(username: "user2@streamr.com").save(failOnError: true, validate: false)
-	}
-
-	void "shutdown throws ApiException for wrong http verb"() {
-		when:
-		request.method = 'GET'
-		controller.shutdown()
-
-		then:
-		ApiException e = thrown(ApiException)
-		e.statusCode == 405
 	}
 
 	void "shutdown must stop all TaskWorkers, stop local Canvases and start them remotely"() {
