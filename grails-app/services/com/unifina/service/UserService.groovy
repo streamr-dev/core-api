@@ -20,9 +20,11 @@ class UserService {
 		SecUser user = cl.loadClass(secConf.userLookup.userDomainClassName).newInstance(properties)
 
 		// Encode the password
-		if (user.password == null) { throw new UserCreationFailedException("The password is empty!") }
+		if (user.password == null) {
+			throw new UserCreationFailedException("The password is empty!")
+		}
 		user.password = springSecurityService.encodePassword(user.password)
-		
+
 		// When created, the account is always enabled
 		user.enabled = true
 
@@ -88,8 +90,8 @@ class UserService {
 
 	def passwordValidator = { String password, command ->
 		// Check password score
-		if (command.pwdStrength < 1) {
-			return ['command.password.error.strength']
+		if (command.password == null || command.password.isEmpty()) {
+			return ['command.password.nullable']
 		}
 	}
 
@@ -111,10 +113,10 @@ class UserService {
 	List checkErrors(List<FieldError> errorList) {
 		List<String> blackList = (List<String>) grailsApplication?.config?.grails?.exceptionresolver?.params?.exclude
 		if (blackList == null) {
-			blackList = Collections.emptyList();
+			blackList = Collections.emptyList()
 		}
 		List<FieldError> finalErrors = new ArrayList<>()
-		List<FieldError> toBeCensoredList = new ArrayList<>();
+		List<FieldError> toBeCensoredList = new ArrayList<>()
 		errorList.each {
 			if (blackList.contains(it.getField())) {
 				toBeCensoredList.add(it)
@@ -124,8 +126,6 @@ class UserService {
 		}
 		toBeCensoredList.each {
 			List arguments = Arrays.asList(it.getArguments())
-			int index = arguments.indexOf(it.getRejectedValue())
-			arguments.set(index, "***")
 			FieldError fieldError = new FieldError(
 				it.getObjectName(), it.getField(), "***", it.isBindingFailure(),
 				it.getCodes(), arguments.toArray(), it.getDefaultMessage()
@@ -133,5 +133,9 @@ class UserService {
 			finalErrors.add(fieldError)
 		}
 		return finalErrors
+	}
+
+	List beautifyErrors(List<FieldError> errorList) {
+
 	}
 }
