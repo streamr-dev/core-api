@@ -4,11 +4,13 @@ import com.google.gson.Gson
 import com.unifina.api.CanvasCommunicationException
 import com.unifina.datasource.IStartListener
 import com.unifina.datasource.IStopListener
+import com.unifina.domain.data.Stream
 import com.unifina.domain.security.Permission
 import com.unifina.domain.security.SecUser
 import com.unifina.domain.signalpath.Canvas
 import com.unifina.domain.signalpath.Serialization
 import com.unifina.exceptions.CanvasUnreachableException
+import com.unifina.exceptions.UnauthorizedStreamException
 import com.unifina.serialization.SerializationException
 import com.unifina.signalpath.*
 import com.unifina.utils.Globals
@@ -99,6 +101,15 @@ class SignalPathService {
 		} else {
 			log.info("De-serializing existing signalPath (canvasId=$canvas.id)")
 			sp = (SignalPath) serializationService.deserialize(canvas.serialization.bytes)
+		}
+
+		// require read access to all streams when starting
+		// can be problematic when collaborating on shared canvas; though even then it makes sense to force
+		//   explicit read rights sharing to streams on that canvas
+		for (Stream s in sp.getStreams()) {
+			if (!permissionService.canRead(asUser, s)) {
+				throw new UnauthorizedStreamException(canvas, s, asUser);
+			}
 		}
 
 		sp.canvas = canvas

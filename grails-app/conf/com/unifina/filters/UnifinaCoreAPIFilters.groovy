@@ -73,11 +73,20 @@ class UnifinaCoreAPIFilters {
 					result = new AuthenticationResult((SecUser) springSecurityService.getCurrentUser())
 				}
 				if (!result.guarantees(annotation.authenticationLevel())) {
-					render (
+					render(
 						status: 401,
 						text: [
 							code: "NOT_AUTHENTICATED",
 							message: "Not authenticated via token or cookie"
+						] as JSON
+					)
+					return false
+				} else if (!result.hasOneOfRoles(annotation.allowRoles())) {
+					render(
+						status: 403,
+						text: [
+							code: "NOT_PERMITTED",
+							message: "Not authorized to access this endpoint"
 						] as JSON
 					)
 					return false
