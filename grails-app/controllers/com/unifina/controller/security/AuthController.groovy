@@ -1,6 +1,6 @@
 package com.unifina.controller.security
 
-import com.unifina.api.ApiException
+import com.mashape.unirest.http.Unirest
 import com.unifina.domain.security.RegistrationCode
 import com.unifina.domain.security.SecUser
 import com.unifina.domain.security.SignupInvite
@@ -13,10 +13,10 @@ import grails.plugin.springsecurity.SpringSecurityService
 import grails.plugin.springsecurity.SpringSecurityUtils
 import grails.plugin.springsecurity.annotation.Secured
 import grails.plugin.springsecurity.authentication.dao.NullSaltSource
+import grails.util.Environment
 
 @Secured(["permitAll"])
 class AuthController {
-
 	UserService userService
 	MailService mailService
 	SpringSecurityService springSecurityService
@@ -34,10 +34,7 @@ class AuthController {
 	}
 
 	def register(RegisterCommand cmd) {
-		def conf = SpringSecurityUtils.securityConfig
-		String defaultTargetUrl = conf.successHandler.defaultTargetUrl
-
-		def invite = SignupInvite.findByCode(cmd.invite)
+		SignupInvite invite = SignupInvite.findByCode(cmd.invite)
 		if (!invite || invite.used || !invite.sent) {
 			response.status = 400
 			return render([success: false, error: "Invitation code not valid"] as JSON)
@@ -50,8 +47,7 @@ class AuthController {
 		if (cmd.hasErrors()) {
 			log.warn("Registration command has errors: ${userService.checkErrors(cmd.errors.getAllErrors())}")
 			response.status = 400
-			// TODO: errors
-			return render([success: false, error: userService.checkErrors(cmd.errors.getAllErrors())] as JSON)
+			return render([success: false, error: userService.beautifyErrors(cmd.errors.getAllErrors())] as JSON)
 		}
 
 		try {
@@ -83,12 +79,9 @@ class AuthController {
 	}
 
 	def signup(EmailCommand cmd) {
-		if (request.method != "POST") {
-			return [ user: new EmailCommand() ]
-		}
 		if (cmd.hasErrors()) {
-			render view: 'signup', model: [ user: cmd ]
-			return
+			response.status = 400
+			return render([success: false, error: userService.beautifyErrors(cmd.errors.getAllErrors())] as JSON)
 		}
 
 		if (grailsApplication.config.streamr.signup.requireCaptcha) {
@@ -97,10 +90,15 @@ class AuthController {
 				.field("response", (String) params."g-recaptcha-response")
 				.asJson()
 			if (response.body.jsonObject.success != true) {
-				flash.error = "Confirming reCaptcha failed for some reason. Please refresh page and refill form."
-				render view: 'signup', model: [user: cmd]
-				return
+				response.status = 400
+				return render([success: false, error: "Confirming reCaptcha failed for some reason. Please refresh page and refill form."] as JSON)
 			}
+		}
+
+		def existingUser = SecUser.findByUsername(cmd.username)
+		if (existingUser) {
+			response.status = 400
+			return render([success: false, error: "User exists already"])
 		}
 
 		SignupInvite invite
@@ -117,43 +115,34 @@ class AuthController {
 			invite = signupCodeService.create(cmd.username)
 		}
 
-		if (grailsApplication.config.streamr.signup.requireInvite) {
-			mailService.sendMail {
-				from grailsApplication.config.unifina.email.sender
-				to invite.username
-				subject grailsApplication.config.unifina.email.waitForInvite.subject
-				html g.render(template: "email_wait_for_invite", model: [user: invite], plugin: 'unifina-core')
-			}
-			render view: 'waitForInvitation'
-
-		} else {
-			invite.sent = true
-			invite.save(flush: true, failOnError:true)
-			mailService.sendMail {
-				from grailsApplication.config.unifina.email.sender
-				to invite.username
-				subject grailsApplication.config.unifina.email.registerLink.subject
-				html g.render(template:"email_register_link", model:[user: invite], plugin:'unifina-core')
-			}
-			render view: 'registerLinkSent'
-
+		invite.sent = true
+		if (!invite.save(flush: true)) {
+			log.warn("Failed to save invite: ${invite.errors}")
+			response.status = 500
+			return render([success: false, error: "Failed to save invite: ${invite.errors}"] as JSON)
 		}
+
 		log.info("Signed up $invite.username")
+
+		mailService.sendMail {
+			from grailsApplication.config.unifina.email.sender
+			to invite.username
+			subject grailsApplication.config.unifina.email.registerLink.subject
+			html g.render(template:"email_register_link", model:[user: invite])
+		}
+
+		return render([username: cmd.username] as JSON)
 	}
 
 	def forgotPassword(EmailCommand cmd) {
-		if (request.method != 'POST') {
-			return
-		}
-
-		if (!cmd.validate()) {
-			render view: 'forgotPassword', model: [ user: cmd ]
-			return
+		if (cmd.hasErrors()) {
+			response.status = 400
+			return render([success: false, error: userService.beautifyErrors(cmd.errors.getAllErrors())] as JSON)
 		}
 
 		def user = SecUser.findWhere(username: cmd.username)
 		if (!user) {
-			return [emailSent: true] // don't reveal users
+			return render([emailSent: true] as JSON) // don't reveal users
 		}
 
 		def registrationCode = new RegistrationCode(username: user.username)
@@ -165,10 +154,10 @@ class AuthController {
 			from grailsApplication.config.unifina.email.sender
 			to user.username
 			subject grailsApplication.config.unifina.email.forgotPassword.subject
-			html g.render(template:"email_forgot_password", model:[token:registrationCode.token], plugin:'unifina-core')
+			html g.render(template:"email_forgot_password", model:[token: registrationCode.token])
 		}
 
-		[emailSent: true]
+		return render([emailSent: true] as JSON)
 	}
 
 	def resetPassword(ResetPasswordCommand command) {

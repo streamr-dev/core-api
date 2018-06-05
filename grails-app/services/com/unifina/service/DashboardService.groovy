@@ -1,6 +1,5 @@
 package com.unifina.service
 
-import com.unifina.api.ApiException
 import com.unifina.api.NotFoundException
 import com.unifina.api.NotPermittedException
 import com.unifina.api.SaveDashboardCommand

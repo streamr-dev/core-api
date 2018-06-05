@@ -6,10 +6,13 @@ import com.unifina.domain.security.SecRole
 import com.unifina.domain.security.SecUser
 import com.unifina.domain.signalpath.ModulePackage
 import com.unifina.exceptions.UserCreationFailedException
+import org.springframework.context.MessageSource
 import org.springframework.validation.FieldError
 import org.springframework.validation.ObjectError
 
 class UserService {
+
+	MessageSource messageSource
 
 	def grailsApplication
 	def springSecurityService
@@ -146,6 +149,8 @@ class UserService {
 	}
 
 	List beautifyErrors(List<FieldError> errorList) {
-
+		checkErrors(errorList).collect { FieldError it ->
+			messageSource.getMessage(it, null)
+		}
 	}
 }
