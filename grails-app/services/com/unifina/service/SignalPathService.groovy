@@ -239,7 +239,12 @@ class SignalPathService {
 
 		// All runtime requests require at least read permission
 		CanvasService canvasService = Holders.getApplicationContext().getBean(CanvasService) // Cannot use dependency injection because of circular dependency! Do not turn into instance variable.
-		Canvas canvas = canvasService.authorizedGetById(pathReader.readCanvasId(), user, Permission.Operation.READ)
+		Canvas canvas
+		if (user.isAdmin()) {
+			canvas = Canvas.get(pathReader.readCanvasId())
+		} else {
+			canvas = canvasService.authorizedGetById(pathReader.readCanvasId(), user, Permission.Operation.READ)
+		}
 		Set<Permission.Operation> checkedOperations = new HashSet<>()
 		checkedOperations.add(Permission.Operation.READ)
 
@@ -313,7 +318,7 @@ class SignalPathService {
 						throw new CanvasUnreachableException("Timed out while waiting for response.")
 					}
 				}
-				
+
 			}
 		}
 		
