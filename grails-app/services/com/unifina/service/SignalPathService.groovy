@@ -177,7 +177,6 @@ class SignalPathService {
 		return canvasIdToUser
 	}
 
-	/* Cherry-picked from CORE-1421: Create NodeApiController */
 	@GrailsCompileStatic
 	List<SignalPath> getRunningSignalPaths() {
 		List<List<SignalPath>> signalPaths = runners().values()*.signalPaths

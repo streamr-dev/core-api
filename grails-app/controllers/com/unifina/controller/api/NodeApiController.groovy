@@ -21,6 +21,8 @@ import org.codehaus.groovy.grails.web.mapping.LinkGenerator
 class NodeApiController {
 
 	static allowedMethods = [
+		index: "GET",
+		canvases: "GET",
 		shutdown: "POST",
 		shutdownNode: "POST"
 	]
@@ -38,6 +40,28 @@ class NodeApiController {
 	@StreamrApi(allowRoles = AllowRole.ADMIN)
 	def index() {
 		render(getStreamrNodes() as JSON)
+	}
+
+	@GrailsCompileStatic
+	@StreamrApi(allowRoles = AllowRole.ADMIN)
+	def canvases() {
+		Collection<Canvas> running = signalPathService.runningSignalPaths*.canvas
+		Collection<Canvas> shouldBeRunning = Canvas.findAllByStateAndServer(Canvas.State.RUNNING, ipAddressOfHost())
+
+		Map<String, Canvas> canvasById = (running + shouldBeRunning).collectEntries { Canvas c -> [(c.id): c] }
+
+		Collection<Canvas> areAndShouldBeRunning = (running*.id).intersect(shouldBeRunning*.id)
+			.collect { canvasById.get(it) }
+		Collection<Canvas> areNotButShouldBeRunning = (shouldBeRunning*.id).minus(running*.id)
+			.collect { canvasById.get(it) }
+		Collection<Canvas> areButShouldNotBeRunning = (running*.id).minus(shouldBeRunning*.id)
+			.collect { canvasById.get(it) }
+
+		render([
+			ok: areAndShouldBeRunning*.toMap(),
+			shouldBeRunning: areNotButShouldBeRunning*.toMap(),
+			shouldNotBeRunning: areButShouldNotBeRunning*.toMap()
+		] as JSON)
 	}
 
 	@GrailsCompileStatic
@@ -78,5 +102,9 @@ class NodeApiController {
 
 	private List<String> getStreamrNodes() {
 		(List<String>) grailsApplication.config.streamr.nodes
+	}
+
+	private String ipAddressOfHost() {
+		NetworkInterfaceUtils.getIPAddress(grailsApplication.config.streamr.ip.address.prefixes ?: []).hostAddress
 	}
 }
