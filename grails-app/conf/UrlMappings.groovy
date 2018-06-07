@@ -72,7 +72,9 @@ class UrlMappings {
 
 		"/api/v1/subscriptions"(resources: "subscriptionApi")
 
-		"/api/v1/nodes"(resources: "nodeApi", excludes: ["create", "edit"])
+		"/api/v1/nodes"(controller: "nodeApi", action: "index")
+		"/api/v1/nodes/shutdown"(controller: "nodeApi", action: "shutdown")
+		"/api/v1/nodes/$nodeIp/shutdown"(controller: "nodeApi", action: "shutdownNode")
 
 		"/api/v1/canvasSizes"(controller: "canvasSizesApi", action: "index")
 

@@ -1,5 +1,8 @@
 package com.unifina.controller.api
 
+import com.unifina.api.ApiException
+import com.unifina.api.node.NodeRequest
+import com.unifina.api.node.NodeRequestDispatcher
 import com.unifina.domain.security.SecUser
 import com.unifina.domain.signalpath.Canvas
 import com.unifina.security.AllowRole
@@ -7,22 +10,28 @@ import com.unifina.security.StreamrApi
 import com.unifina.service.CanvasService
 import com.unifina.service.SignalPathService
 import com.unifina.service.TaskService
+import com.unifina.utils.NetworkInterfaceUtils
 import grails.compiler.GrailsCompileStatic
 import grails.converters.JSON
 import grails.plugin.springsecurity.annotation.Secured
 import org.codehaus.groovy.grails.commons.GrailsApplication
+import org.codehaus.groovy.grails.web.mapping.LinkGenerator
 
 @Secured(["IS_AUTHENTICATED_ANONYMOUSLY"])
 class NodeApiController {
 
 	static allowedMethods = [
-		shutdown: "POST"
+		shutdown: "POST",
+		shutdownNode: "POST"
 	]
 
 	GrailsApplication grailsApplication
 	CanvasService canvasService
+	LinkGenerator grailsLinkGenerator
 	SignalPathService signalPathService
 	TaskService taskService
+
+	NodeRequestDispatcher nodeRequestDispatcher = new NodeRequestDispatcher()
 
 
 	@GrailsCompileStatic
@@ -52,6 +61,19 @@ class NodeApiController {
 		}
 
 		render(stoppedCanvases*.toMap() as JSON)
+	}
+
+	@GrailsCompileStatic
+	@StreamrApi(allowRoles = AllowRole.ADMIN)
+	def shutdownNode(String nodeIp) {
+		if (NetworkInterfaceUtils.isIpAddressOfCurrentNode(nodeIp)) {
+			shutdown()
+		} else if (!getStreamrNodes().contains(nodeIp)) {
+			throw new ApiException(400, "NOT_A_VALID_NODE", "Not a valid node: '${nodeIp}'")
+		} else {
+			String path = grailsLinkGenerator.link(controller: "nodeApi", action: "shutdown", absolute: false)
+			nodeRequestDispatcher.perform(new NodeRequest(nodeIp, path, request, response))
+		}
 	}
 
 	private List<String> getStreamrNodes() {
