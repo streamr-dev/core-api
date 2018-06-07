@@ -196,4 +196,39 @@ class SignalPathServiceSpec extends BeanMockingSpecification {
 		]
 	}
 
+	void "getRunningSignalPaths() returns empty list if no SignalPath(s) running"() {
+		service.servletContext["signalPathRunners"] = [:]
+
+		expect:
+		service.runningSignalPaths == []
+	}
+
+	void "getRunningSignalPaths() returns list of running SignalPaths"() {
+		setup: "stub running canvases"
+		Canvas c1 = new Canvas()
+		Canvas c2 = new Canvas()
+		Canvas c3 = new Canvas()
+
+		c1.id = "canvas-1"
+		c2.id = "canvas-2"
+		c3.id = "canvas-3"
+
+		SignalPath sp1 = new SignalPath()
+		SignalPath sp2 = new SignalPath()
+		SignalPath sp3 = new SignalPath()
+
+		sp1.setCanvas(c1)
+		sp2.setCanvas(c2)
+		sp3.setCanvas(c3)
+
+		service.servletContext["signalPathRunners"] = [
+			"runner-id-1": new SignalPathRunner(sp1, new Globals([:], me), false),
+			"runner-id-2": new SignalPathRunner(sp2, new Globals([:], me), false),
+			"runner-id-3": new SignalPathRunner(sp3, new Globals([:], me), false),
+		]
+
+		expect:
+		service.runningSignalPaths == [sp1, sp2, sp3]
+	}
+
 }

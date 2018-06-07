@@ -8,6 +8,8 @@ import com.unifina.domain.signalpath.Canvas
 import com.unifina.service.CanvasService
 import com.unifina.service.SignalPathService
 import com.unifina.service.TaskService
+import com.unifina.signalpath.SignalPath
+import com.unifina.utils.NetworkInterfaceUtils
 import grails.test.mixin.Mock
 import grails.test.mixin.TestFor
 import spock.lang.Specification
@@ -149,5 +151,77 @@ class NodeApiControllerSpec extends Specification {
 			return true
 		})
 	}
-	
+
+	void "canvases lists empty canvases if nothing running and nothing marked as running in DB"() {
+		setup:
+		controller.signalPathService = Stub(SignalPathService) {
+			getRunningSignalPaths() >> []
+		}
+
+		when:
+		request.method = "GET"
+		controller.canvases()
+
+		then:
+		response.status == 200
+		response.json == [
+			ok: [],
+		    shouldBeRunning: [],
+			shouldNotBeRunning: []
+		]
+	}
+
+	void "canvases lists canvases according to whether they are really running and according to DB"() {
+		setup: "setup Canvases"
+		def canvases = [
+			new Canvas(name: "Canvas #1", state: Canvas.State.RUNNING, json: "{}", server: "10.0.0.5"),
+			new Canvas(name: "Canvas #2", state: Canvas.State.RUNNING, json: "{}", server: "10.0.0.5"),
+			new Canvas(name: "Canvas #3", state: Canvas.State.RUNNING, json: "{}", server: "10.0.0.5"),
+			new Canvas(name: "Canvas #4", state: Canvas.State.STOPPED, json: "{}", server: "10.0.0.5"),
+			new Canvas(name: "Canvas #5", state: Canvas.State.STOPPED, json: "{}", server: "10.0.0.5"),
+			new Canvas(name: "Canvas #6", state: Canvas.State.RUNNING, json: "{}", server: "10.0.0.6"),
+		]
+		canvases.eachWithIndex { Canvas c, int index -> c.id = "canvas-${index+1}" }
+		canvases*.save(failOnError: true, validate: false)
+
+		def unsavedCanvas = new Canvas(name: "unsaved canvas", json: "{}")
+		unsavedCanvas.id = "non-existing-canvas-id"
+
+		and: "setup SignalPaths"
+		def runningCanvas1 = new SignalPath()
+		def runningCanvas2 = new SignalPath()
+		def runningCanvas3 = new SignalPath()
+		def runningCanvas4 = new SignalPath()
+		runningCanvas1.canvas = canvases[0]
+		runningCanvas2.canvas = canvases[1]
+		runningCanvas3.canvas = canvases[3]
+		runningCanvas4.canvas = unsavedCanvas
+
+		controller.signalPathService = Stub(SignalPathService) {
+			getRunningSignalPaths() >> [
+				runningCanvas1,
+				runningCanvas2,
+				runningCanvas3,
+				runningCanvas4
+			]
+		}
+
+		and:
+		GroovySpy(NetworkInterfaceUtils, global: true)
+
+		when:
+		request.method = "GET"
+		controller.canvases()
+
+		then:
+		1 * NetworkInterfaceUtils.getIPAddress(_) >> Inet4Address.getByName("10.0.0.5")
+
+		and:
+		response.status == 200
+		response.json.keySet() == ["ok", "shouldBeRunning", "shouldNotBeRunning"] as Set
+		response.json.ok*.id == ["canvas-1", "canvas-2"]
+		response.json.shouldBeRunning*.id == ["canvas-3"]
+		response.json.shouldNotBeRunning*.id == ["canvas-4", "non-existing-canvas-id"]
+	}
+
 }
