@@ -94,64 +94,6 @@ class NodeApiControllerSpec extends Specification {
 		response.json.size() == 2
 	}
 
-	void "shutdownNode invokes shutdown() if given ipAddress is of current machine"() {
-		def canvases = [
-			new Canvas(state: Canvas.State.RUNNING, json: "{}"),
-			new Canvas(state: Canvas.State.RUNNING, json: "{}"),
-			new Canvas(state: Canvas.State.RUNNING, json: "{}", adhoc: true)
-		]
-		canvases*.save(validate:false)
-
-		controller.taskService = Mock(TaskService)
-		controller.signalPathService = Mock(SignalPathService)
-		controller.canvasService = Mock(CanvasService)
-
-		when:
-		request.method = "POST"
-		params.nodeIp = "127.0.0.1"
-		controller.shutdownNode()
-
-		then:
-		1 * controller.signalPathService.getUsersOfRunningCanvases() >> ["1": user1, "2": user2, "3": user1]
-		1 * controller.signalPathService.stopAllLocalCanvases() >> {
-			canvases*.state = Canvas.State.STOPPED
-			return canvases
-		}
-		1 * controller.canvasService.startRemote(canvases[0], user1, false, true)
-		1 * controller.canvasService.startRemote(canvases[1], user2, false, true)
-		0 * controller.canvasService.startRemote(canvases[2], _, _, _)
-		response.json.size() == 2
-	}
-
-	void "shutdownNode throws ApiException if trying to forward to non-allowed ip"() {
-		when:
-		request.method = "POST"
-		params.nodeIp = "192.168.13.55"
-		controller.shutdownNode()
-
-		then:
-		def e = thrown(ApiException)
-		e.code == "NOT_A_VALID_NODE"
-	}
-
-	void "shutdownNode performs shutdown API request on other node if given allowed ip"() {
-		setup:
-		grailsApplication.config.streamr.nodes = ["192.168.13.55"]
-		def nodeRequestDispatcher = controller.nodeRequestDispatcher = Mock(NodeRequestDispatcher)
-
-		when:
-		request.method = "POST"
-		params.nodeIp = "192.168.13.55"
-		controller.shutdownNode()
-
-		then:
-		1 * nodeRequestDispatcher.perform({ NodeRequest nodeRequest ->
-			assert nodeRequest.url.toString() == "http://192.168.13.55:80/api/v1/nodes/shutdown"
-			assert nodeRequest.request.method == "POST"
-			return true
-		})
-	}
-
 	void "canvases lists empty canvases if nothing running and nothing marked as running in DB"() {
 		setup:
 		controller.signalPathService = Stub(SignalPathService) {
@@ -222,6 +164,109 @@ class NodeApiControllerSpec extends Specification {
 		response.json.ok*.id == ["canvas-1", "canvas-2"]
 		response.json.shouldBeRunning*.id == ["canvas-3"]
 		response.json.shouldNotBeRunning*.id == ["canvas-4", "non-existing-canvas-id"]
+	}
+
+	void "shutdownNode invokes shutdown() if given ipAddress is of current machine"() {
+		def canvases = [
+			new Canvas(state: Canvas.State.RUNNING, json: "{}"),
+			new Canvas(state: Canvas.State.RUNNING, json: "{}"),
+			new Canvas(state: Canvas.State.RUNNING, json: "{}", adhoc: true)
+		]
+		canvases*.save(validate:false)
+
+		controller.taskService = Mock(TaskService)
+		controller.signalPathService = Mock(SignalPathService)
+		controller.canvasService = Mock(CanvasService)
+
+		when:
+		request.method = "POST"
+		params.nodeIp = "127.0.0.1"
+		controller.shutdownNode()
+
+		then:
+		1 * controller.signalPathService.getUsersOfRunningCanvases() >> ["1": user1, "2": user2, "3": user1]
+		1 * controller.signalPathService.stopAllLocalCanvases() >> {
+			canvases*.state = Canvas.State.STOPPED
+			return canvases
+		}
+		1 * controller.canvasService.startRemote(canvases[0], user1, false, true)
+		1 * controller.canvasService.startRemote(canvases[1], user2, false, true)
+		0 * controller.canvasService.startRemote(canvases[2], _, _, _)
+
+		and:
+		response.status == 200
+		response.json.size() == 2
+	}
+
+	void "shutdownNode throws ApiException if trying to forward to non-allowed ip"() {
+		when:
+		request.method = "POST"
+		params.nodeIp = "192.168.13.55"
+		controller.shutdownNode()
+
+		then:
+		def e = thrown(ApiException)
+		e.code == "NOT_A_VALID_NODE"
+	}
+
+	void "shutdownNode performs shutdown API request on other node if given allowed ip"() {
+		setup:
+		grailsApplication.config.streamr.nodes = ["192.168.13.55"]
+		def nodeRequestDispatcher = controller.nodeRequestDispatcher = Mock(NodeRequestDispatcher)
+
+		when:
+		request.method = "POST"
+		params.nodeIp = "192.168.13.55"
+		controller.shutdownNode()
+
+		then:
+		1 * nodeRequestDispatcher.perform({ NodeRequest nodeRequest ->
+			assert nodeRequest.url.toString() == "http://192.168.13.55:80/api/v1/nodes/shutdown"
+			assert nodeRequest.request.method == "POST"
+			return true
+		})
+	}
+
+	void "canvasesNode invokes canvases() if given ipAddress is of current machine"() {
+		controller.signalPathService = Stub(SignalPathService)
+
+		when:
+		request.method = "GET"
+		params.nodeIp = "127.0.0.1"
+		controller.canvasesNode()
+
+		then:
+		response.status == 200
+		response.json.keySet() == ["ok", "shouldBeRunning", "shouldNotBeRunning"] as Set
+	}
+
+	void "canvasesNode throws ApiException if trying to forward to non-allowed ip"() {
+		when:
+		request.method = "GET"
+		params.nodeIp = "192.168.13.57"
+		controller.canvasesNode()
+
+		then:
+		def e = thrown(ApiException)
+		e.code == "NOT_A_VALID_NODE"
+	}
+
+	void "canvasesNode performs shutdown API request on other node if given allowed ip"() {
+		setup:
+		grailsApplication.config.streamr.nodes = ["192.168.13.55"]
+		def nodeRequestDispatcher = controller.nodeRequestDispatcher = Mock(NodeRequestDispatcher)
+
+		when:
+		request.method = "GET"
+		params.nodeIp = "192.168.13.55"
+		controller.canvasesNode()
+
+		then:
+		1 * nodeRequestDispatcher.perform({ NodeRequest nodeRequest ->
+			assert nodeRequest.url.toString() == "http://192.168.13.55:80/api/v1/nodes/canvases"
+			assert nodeRequest.request.method == "GET"
+			return true
+		})
 	}
 
 }
