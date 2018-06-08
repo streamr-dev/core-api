@@ -20,6 +20,18 @@ class NodeApiControllerSpec extends Specification {
 		user2 = new SecUser(username: "user2@streamr.com").save(failOnError: true, validate: false)
 	}
 
+	void "index lists streamr nodes"() {
+		setup:
+		config.streamr.nodes = ['192.168.1.51', '192.168.1.53']
+
+		when:
+		request.method = "GET"
+		controller.index()
+
+		then:
+		response.json == ['192.168.1.51', '192.168.1.53']
+	}
+
 	void "shutdown must stop all TaskWorkers, stop local Canvases and start them remotely"() {
 		def canvases = [
 				new Canvas(state: Canvas.State.RUNNING, json: "{}"),

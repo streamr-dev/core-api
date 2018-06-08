@@ -10,6 +10,7 @@ import com.unifina.service.TaskService
 import grails.compiler.GrailsCompileStatic
 import grails.converters.JSON
 import grails.plugin.springsecurity.annotation.Secured
+import org.codehaus.groovy.grails.commons.GrailsApplication
 
 @Secured(["IS_AUTHENTICATED_ANONYMOUSLY"])
 class NodeApiController {
@@ -18,9 +19,17 @@ class NodeApiController {
 		shutdown: "POST"
 	]
 
+	GrailsApplication grailsApplication
 	CanvasService canvasService
 	SignalPathService signalPathService
 	TaskService taskService
+
+
+	@GrailsCompileStatic
+	@StreamrApi(allowRoles = AllowRole.ADMIN)
+	def index() {
+		render(getStreamrNodes() as JSON)
+	}
 
 	@GrailsCompileStatic
 	@StreamrApi(allowRoles = AllowRole.ADMIN)
@@ -43,5 +52,9 @@ class NodeApiController {
 		}
 
 		render(stoppedCanvases*.toMap() as JSON)
+	}
+
+	private List<String> getStreamrNodes() {
+		(List<String>) grailsApplication.config.streamr.nodes
 	}
 }

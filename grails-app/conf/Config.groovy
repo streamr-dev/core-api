@@ -476,6 +476,11 @@ streamr.signup.requireInvite = (System.getProperty("streamr.signup.requireInvite
 streamr.signup.requireCaptcha = (System.getProperty("streamr.signup.requireCaptcha") ? Boolean.parseBoolean(System.getProperty("streamr.signup.requireCaptcha")) : false)
 
 /**
+ * Streamr engine-and-editor nodes
+ */
+streamr.nodes = System.getProperty("streamr.nodes") ? Arrays.asList(System.getProperty("streamr.nodes").split(",")) : []
+
+/**
  * Miscellaneous
  */
 tomcat.nio = true // in run-app or test-app
