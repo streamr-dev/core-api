@@ -76,6 +76,7 @@ class UrlMappings {
 		"/api/v1/nodes/shutdown"(controller: "nodeApi", action: "shutdown")
 		"/api/v1/nodes/canvases"(controller: "nodeApi", action: "canvases")
 		"/api/v1/nodes/$nodeIp/shutdown"(controller: "nodeApi", action: "shutdownNode")
+		"/api/v1/nodes/$nodeIp/canvases"(controller: "nodeApi", action: "canvasesNode")
 
 		"/api/v1/canvasSizes"(controller: "canvasSizesApi", action: "index")
 

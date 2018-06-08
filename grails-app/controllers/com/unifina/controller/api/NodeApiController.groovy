@@ -24,7 +24,8 @@ class NodeApiController {
 		index: "GET",
 		canvases: "GET",
 		shutdown: "POST",
-		shutdownNode: "POST"
+		shutdownNode: "POST",
+		canvasesNode: "GET"
 	]
 
 	GrailsApplication grailsApplication
@@ -90,14 +91,13 @@ class NodeApiController {
 	@GrailsCompileStatic
 	@StreamrApi(allowRoles = AllowRole.ADMIN)
 	def shutdownNode(String nodeIp) {
-		if (NetworkInterfaceUtils.isIpAddressOfCurrentNode(nodeIp)) {
-			shutdown()
-		} else if (!getStreamrNodes().contains(nodeIp)) {
-			throw new ApiException(400, "NOT_A_VALID_NODE", "Not a valid node: '${nodeIp}'")
-		} else {
-			String path = grailsLinkGenerator.link(controller: "nodeApi", action: "shutdown", absolute: false)
-			nodeRequestDispatcher.perform(new NodeRequest(nodeIp, path, request, response))
-		}
+		invokeOrRedirect("shutdown", nodeIp, this.&shutdown)
+	}
+
+	@GrailsCompileStatic
+	@StreamrApi(allowRoles = AllowRole.ADMIN)
+	def canvasesNode(String nodeIp) {
+		invokeOrRedirect("canvases", nodeIp, this.&canvases)
 	}
 
 	private List<String> getStreamrNodes() {
@@ -106,5 +106,17 @@ class NodeApiController {
 
 	private String ipAddressOfHost() {
 		NetworkInterfaceUtils.getIPAddress(grailsApplication.config.streamr.ip.address.prefixes ?: []).hostAddress
+	}
+
+	@GrailsCompileStatic
+	private void invokeOrRedirect(String action, String nodeIp, Closure closure) {
+		if (NetworkInterfaceUtils.isIpAddressOfCurrentNode(nodeIp)) {
+			closure.call()
+		} else if (!getStreamrNodes().contains(nodeIp)) {
+			throw new ApiException(400, "NOT_A_VALID_NODE", "Not a valid node: '${nodeIp}'")
+		} else {
+			String path = grailsLinkGenerator.link(controller: "nodeApi", action: action, absolute: false)
+			nodeRequestDispatcher.perform(new NodeRequest(nodeIp, path, request, response))
+		}
 	}
 }
