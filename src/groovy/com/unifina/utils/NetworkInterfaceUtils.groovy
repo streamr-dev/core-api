@@ -29,7 +29,7 @@ class NetworkInterfaceUtils {
 
 	static boolean isIpAddressOfCurrentNode(String ipAddress) {
 		Enumeration<NetworkInterface> interfaces = NetworkInterface.getNetworkInterfaces()
-		for (NetworkInterface anInterface : interfaces.findAll {!(it.virtual || it.pointToPoint )}) {
+		for (NetworkInterface anInterface : interfaces.findAll {!(it.isVirtual() || it.isPointToPoint() )}) {
 			for (InetAddress addr : anInterface.inetAddresses.findAll {it instanceof Inet4Address}) {
 				if (addr.hostAddress.equals(ipAddress)) {
 					return true
