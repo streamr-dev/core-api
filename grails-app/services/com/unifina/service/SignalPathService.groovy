@@ -16,6 +16,7 @@ import com.unifina.signalpath.*
 import com.unifina.utils.Globals
 import com.unifina.utils.GlobalsFactory
 import com.unifina.utils.NetworkInterfaceUtils
+import grails.compiler.GrailsCompileStatic
 import grails.transaction.NotTransactional
 import grails.transaction.Transactional
 import grails.util.Holders
@@ -174,6 +175,13 @@ class SignalPathService {
 			}
 		}
 		return canvasIdToUser
+	}
+
+	/* Cherry-picked from CORE-1421: Create NodeApiController */
+	@GrailsCompileStatic
+	List<SignalPath> getRunningSignalPaths() {
+		List<List<SignalPath>> signalPaths = runners().values()*.signalPaths
+		return (List<SignalPath>) signalPaths.flatten()
 	}
 
 	@CompileStatic

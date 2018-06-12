@@ -72,6 +72,8 @@ class UrlMappings {
 
 		"/api/v1/subscriptions"(resources: "subscriptionApi")
 
+		"/api/v1/canvasSizes"(controller: "canvasSizesApi", action: "index")
+
 		// Mappings for pages using React Router (the root for the router)
 		"/dashboard/editor/$id**?"(controller: "dashboard", action: "editor")
 	}
