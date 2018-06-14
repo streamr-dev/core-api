@@ -1,10 +1,10 @@
 package com.unifina.feed;
 
+import org.apache.log4j.Logger;
+
 import java.util.*;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
-
-import org.apache.log4j.Logger;
 
 /**
  * This singleton class serves two purposes:
@@ -73,6 +73,8 @@ public class MessageHub<RawMessageClass, MessageClass, KeyClass> extends Thread 
 			}
 
 			if (parsedMessage != null) {
+				final String msg = String.format("run: MessageHub.proxiesByKey size = %d", proxiesByKey.size());
+				log.info(msg);
 				try {
 					// If the message contains a key, distribute to subscribers for that key only
 					List<MessageRecipient> proxyList = m.key != null ? proxiesByKey.get(m.key) : proxiesByPriority;
@@ -206,11 +208,14 @@ public class MessageHub<RawMessageClass, MessageClass, KeyClass> extends Thread 
 			synchronized (list) {
 				list.remove(proxy);
 				if (list.isEmpty()) {
-					log.info("unsubscribe: No more MessageRecipients for key " + key + ", unsubscribing from source");
+					final String msg = String.format("unsubscribe: No more MessageRecipients for key %s, unsubscribing from source", key);
+					log.info(msg);
 					source.unsubscribe(key);
 				}
 			}
 		}
+		final String msg = String.format("unsubscribe: MessageHub.proxiesByKey size = %d", proxiesByKey.size());
+		log.info(msg);
 	}
 
 	public void quit() {
