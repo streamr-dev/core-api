@@ -22,7 +22,8 @@
     "build-dev": "webpack",
     "clean": "rm -rf node_modules/",
     "clean-install": "npm run clean && npm install",
-    "dev": "webpack-dev-server --hot"
+    "dev": "webpack-dev-server --hot",
+    "start": "npm run dev"
   },
   "jest": {
     "moduleNameMapper": {
