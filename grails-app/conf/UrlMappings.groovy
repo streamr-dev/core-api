@@ -75,10 +75,9 @@ class UrlMappings {
 		"/api/v1/nodes"(controller: "nodeApi", action: "index")
 		"/api/v1/nodes/shutdown"(controller: "nodeApi", action: "shutdown")
 		"/api/v1/nodes/canvases"(controller: "nodeApi", action: "canvases")
+		"/api/v1/nodes/canvases/sizes"(controller: "nodeApi", action: "canvasSizes")
 		"/api/v1/nodes/$nodeIp/shutdown"(controller: "nodeApi", action: "shutdownNode")
 		"/api/v1/nodes/$nodeIp/canvases"(controller: "nodeApi", action: "canvasesNode")
-
-		"/api/v1/canvasSizes"(controller: "canvasSizesApi", action: "index")
 
 		// Mappings for pages using React Router (the root for the router)
 		"/dashboard/editor/$id**?"(controller: "dashboard", action: "editor")
