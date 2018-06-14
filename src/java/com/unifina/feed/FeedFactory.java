@@ -1,6 +1,7 @@
 package com.unifina.feed;
 
 import com.unifina.domain.data.Feed;
+import org.apache.log4j.Logger;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
@@ -12,12 +13,15 @@ import java.util.Map;
  * with/by feed implementations that extend AbstractFeedProxy.
  */
 public class FeedFactory {
+	private static final Logger log = Logger.getLogger(FeedFactory.class);
 	private static Map<Long, MessageHub> instanceByFeed = new HashMap<>();
 
 	synchronized static MessageHub getInstance(Feed feed, Map<String,Object> config) throws InstantiationException, ClassNotFoundException, NoSuchMethodException, InvocationTargetException, IllegalAccessException, IllegalArgumentException {
 		if (!instanceByFeed.containsKey(feed.getId())) {
 			startInstance(feed, config);
 		}
+		final String msg = String.format("getInstance: FeedFactory.instanceByFeed size = %d", instanceByFeed.size());
+		log.info(msg);
 		return instanceByFeed.get(feed.getId());
 	}
 
