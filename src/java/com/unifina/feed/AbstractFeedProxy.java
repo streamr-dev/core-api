@@ -45,6 +45,7 @@ public abstract class AbstractFeedProxy<ModuleClass, RawMessageClass, MessageCla
 	private Catchup catchup = null;
 	private Long firstRealQueue = null;
 	private int expected = 0;
+	private long lastQueueSizeLoggingTime = 0;
 
 	public AbstractFeedProxy(Globals globals, Feed domainObject) {
 		super(globals, domainObject);
@@ -177,6 +178,14 @@ public abstract class AbstractFeedProxy<ModuleClass, RawMessageClass, MessageCla
 
 				for (FeedEvent event : events) {
 					eventQueue.enqueue(event);
+				}
+
+				long time = System.currentTimeMillis();
+				if (time - lastQueueSizeLoggingTime > 60000) {
+					lastQueueSizeLoggingTime = time;
+					if (!realtimeWaitQueue.isEmpty()) {
+						log.info("WaitQueue size " + realtimeWaitQueue.size());
+					}
 				}
 			}
 		}
