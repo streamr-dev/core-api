@@ -8,8 +8,11 @@ import com.unifina.domain.signalpath.Canvas
 import com.unifina.security.AllowRole
 import com.unifina.security.StreamrApi
 import com.unifina.service.CanvasService
+import com.unifina.service.SerializationService
 import com.unifina.service.SignalPathService
 import com.unifina.service.TaskService
+import com.unifina.signalpath.SignalPath
+import com.unifina.signalpath.map.ValueSortedMap
 import com.unifina.utils.NetworkInterfaceUtils
 import grails.compiler.GrailsCompileStatic
 import grails.converters.JSON
@@ -23,6 +26,7 @@ class NodeApiController {
 	static allowedMethods = [
 		index: "GET",
 		canvases: "GET",
+		canvasSizes: "GET",
 		shutdown: "POST",
 		shutdownNode: "POST",
 		canvasesNode: "GET"
@@ -32,6 +36,7 @@ class NodeApiController {
 	CanvasService canvasService
 	LinkGenerator grailsLinkGenerator
 	SignalPathService signalPathService
+	SerializationService serializationService
 	TaskService taskService
 
 	NodeRequestDispatcher nodeRequestDispatcher = new NodeRequestDispatcher()
@@ -63,6 +68,16 @@ class NodeApiController {
 			shouldBeRunning: areNotButShouldBeRunning*.toMap(),
 			shouldNotBeRunning: areButShouldNotBeRunning*.toMap()
 		] as JSON)
+	}
+
+	@StreamrApi(allowRoles = AllowRole.ADMIN)
+	def canvasSizes() {
+		def sizePerCanvas = new ValueSortedMap(true)
+		signalPathService.runningSignalPaths.each { SignalPath sp ->
+			long bytes = serializationService.serialize(sp).length
+			sizePerCanvas[sp.canvas.id] = bytes
+		}
+		render(sizePerCanvas as JSON)
 	}
 
 	@GrailsCompileStatic

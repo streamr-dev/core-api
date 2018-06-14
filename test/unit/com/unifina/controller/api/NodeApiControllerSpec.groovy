@@ -6,6 +6,7 @@ import com.unifina.api.node.NodeRequestDispatcher
 import com.unifina.domain.security.SecUser
 import com.unifina.domain.signalpath.Canvas
 import com.unifina.service.CanvasService
+import com.unifina.service.SerializationService
 import com.unifina.service.SignalPathService
 import com.unifina.service.TaskService
 import com.unifina.signalpath.SignalPath
@@ -164,6 +165,62 @@ class NodeApiControllerSpec extends Specification {
 		response.json.ok*.id == ["canvas-1", "canvas-2"]
 		response.json.shouldBeRunning*.id == ["canvas-3"]
 		response.json.shouldNotBeRunning*.id == ["canvas-4", "non-existing-canvas-id"]
+	}
+
+	void "canvasSizes returns empty map if nothing running"() {
+		setup:
+		controller.signalPathService = Stub(SignalPathService) {
+			getRunningSignalPaths() >> []
+		}
+
+		when:
+		request.method = "GET"
+		controller.canvasSizes()
+
+		then:
+		response.status == 200
+		response.json == [:]
+	}
+
+	void "canvasSizes uses serializationService#serialize to determine canvas size"() {
+		setup: "setup Canvases"
+		def canvases = [
+			new Canvas(name: "Canvas #1", state: Canvas.State.RUNNING, json: "{}", server: "10.0.0.5"),
+			new Canvas(name: "Canvas #2", state: Canvas.State.RUNNING, json: "{}", server: "10.0.0.5")
+		]
+		canvases.eachWithIndex { Canvas c, int index -> c.id = "canvas-${index+1}" }
+		canvases*.save(failOnError: true, validate: false)
+
+		and: "setup SignalPaths"
+		def runningCanvas1 = new SignalPath()
+		def runningCanvas2 = new SignalPath()
+		runningCanvas1.canvas = canvases[0]
+		runningCanvas2.canvas = canvases[1]
+
+		controller.signalPathService = Stub(SignalPathService) {
+			getRunningSignalPaths() >> [
+				runningCanvas1,
+				runningCanvas2,
+			]
+		}
+
+		def serialziationService = controller.serializationService = Mock(SerializationService)
+
+		when:
+		request.method = "GET"
+		controller.canvasSizes()
+
+		then:
+		1 * serialziationService.serialize(runningCanvas1) >> new byte[256]
+		1 * serialziationService.serialize(runningCanvas2) >> new byte[666]
+		0 * serialziationService._
+
+		and:
+		response.status == 200
+		response.json == [
+		    "canvas-1": 256,
+			"canvas-2": 666
+		]
 	}
 
 	void "shutdownNode invokes shutdown() if given ipAddress is of current machine"() {
