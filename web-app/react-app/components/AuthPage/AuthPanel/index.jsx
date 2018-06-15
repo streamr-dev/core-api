@@ -44,7 +44,7 @@ class AuthPanel extends React.Component<Props> {
                                     Sign in with Ethereum
                                 </a>
                             ) : (
-                                <span />
+                                <span>&nbsp;</span>
                             )}
                             <span>
                                 {signupLink && (
