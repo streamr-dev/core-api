@@ -1,3 +1,6 @@
+@import "@streamr/streamr-layout/pcss/variables.pcss";
+@import "@streamr/streamr-layout/pcss/selectors.pcss";
+
 .authPage {
   align-items: center;
   display: flex;
@@ -7,5 +10,33 @@
 .content {
   background: inherit;
   flex: 1;
-  padding: 0;
+  padding: 7em 0;
+}
+
+.logo {
+  display: block;
+  margin: 0 auto;
+  width: 100px;
+
+  &,
+  &:--enter,
+  &:--idle {
+    outline: 0;
+  }
+}
+
+.panel {
+  padding: 7em 0;
+}
+
+.footer {
+  color: #897FFD;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 0.75em;
+  font-weight: var(--semiBold);
+  letter-spacing: 1px;
+  line-height: 1em;
+  margin-top: 3em;
+  text-align: center;
+  text-transform: uppercase;
 }

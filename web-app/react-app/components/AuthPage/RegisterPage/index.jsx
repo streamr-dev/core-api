@@ -1,24 +1,13 @@
 // @flow
 
-import React, {Component} from 'react'
-import { Link } from 'react-router-dom'
-
+import React from 'react'
 import AuthPanel from '../AuthPanel'
+import Input from '../Input'
 
-type Props = {}
+const RegisterPage = () => (
+    <AuthPanel title="Sign Up" ethLink signinLink>
+        <Input placeholder="Email" />
+    </AuthPanel>
+)
 
-type State = {}
-
-export default class RegisterPage extends Component<Props, State> {
-    render() {
-        return (
-            <AuthPanel
-                title={'Sign Up'}
-                leftUtil={'Sign in with ethereum'}
-                rightUtil={<Link to="/login">Sign in</Link>}
-            >
-                LoginPage
-            </AuthPanel>
-        )
-    }
-}
+export default RegisterPage

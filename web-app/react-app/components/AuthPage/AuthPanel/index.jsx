@@ -4,14 +4,15 @@ import * as React from 'react'
 import { Link } from 'react-router-dom'
 import cx from 'classnames'
 
-import createLink from '../../../utils/createLink'
-
 import styles from './authPanel.pcss'
 
 type Props = {
     title: string,
     children: React.Node,
     onGoBack?: () => void,
+    ethLink?: boolean,
+    signupLink?: boolean,
+    signinLink?: boolean,
 }
 
 class AuthPanel extends React.Component<Props> {
@@ -22,23 +23,41 @@ class AuthPanel extends React.Component<Props> {
     }
 
     render = () => {
-        const { title, children, onGoBack } = this.props
+        const { title, children, onGoBack, ethLink, signupLink, signinLink } = this.props
 
         return (
             <div className={cx(styles.authPanel)}>
-                <a href="https://www.streamr.com" className={styles.logo}>
-                    <img src={createLink('static/images/streamr-logo.svg')} />
-                </a>
                 <div
                     className={cx(styles.navbar)}
                 >
                     {onGoBack ? (
-                        <a href="#" onClick={this.onBackClick}>
-                            Back
-                        </a>
+                        <React.Fragment>
+                            <a href="#" onClick={this.onBackClick}>
+                                Back
+                            </a>
+                            <span />
+                        </React.Fragment>
                     ) : (
                         <React.Fragment>
-                            <div />
+                            {ethLink ? (
+                                <a href="#">
+                                    Sign in with Ethereum
+                                </a>
+                            ) : (
+                                <span />
+                            )}
+                            <span>
+                                {signupLink && (
+                                    <Link to="/register/signup">
+                                        Sign up
+                                    </Link>
+                                )}
+                                {signinLink && (
+                                    <Link to="/login/auth">
+                                        Sign in
+                                    </Link>
+                                )}
+                            </span>
                         </React.Fragment>
                     )}
                 </div>
@@ -49,9 +68,6 @@ class AuthPanel extends React.Component<Props> {
                     <div className={styles.body}>
                         {children}
                     </div>
-                </div>
-                <div className={styles.footer}>
-                    Made with ❤️ & ☕️ by Streamr Network AG in 2018
                 </div>
             </div>
         )
