@@ -8,7 +8,7 @@ import Button from '../Button'
 import Checkbox from '../Checkbox'
 
 const LoginPage = () => (
-    <AuthPanel title="Sign In" signupLink ethLink>
+    <AuthPanel title="Sign In" signupLink onUseEthClick={() => {}}>
         <Input placeholder="Email" />
         <Actions>
             <Checkbox>Remember me</Checkbox>

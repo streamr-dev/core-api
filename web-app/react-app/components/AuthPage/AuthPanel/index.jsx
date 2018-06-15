@@ -10,20 +10,20 @@ type Props = {
     title: string,
     children: React.Node,
     onGoBack?: () => void,
-    ethLink?: boolean,
+    onUseEthClick?: () => void,
     signupLink?: boolean,
     signinLink?: boolean,
 }
 
 class AuthPanel extends React.Component<Props> {
-    onBackClick = (e: SyntheticInputEvent<EventTarget>) => {
-        const onGoBack = this.props.onGoBack || (() => {})
+    onClick = (callback?: () => void) => (e: SyntheticInputEvent<EventTarget>) => {
+        const onClick = callback || (() => {})
         e.preventDefault()
-        onGoBack()
+        onClick()
     }
 
     render = () => {
-        const { title, children, onGoBack, ethLink, signupLink, signinLink } = this.props
+        const { title, children, onGoBack, onUseEthClick, signupLink, signinLink } = this.props
 
         return (
             <div className={cx(styles.authPanel)}>
@@ -32,15 +32,15 @@ class AuthPanel extends React.Component<Props> {
                 >
                     {onGoBack ? (
                         <React.Fragment>
-                            <a href="#" onClick={this.onBackClick}>
+                            <a href="#" onClick={this.onClick(onGoBack)}>
                                 Back
                             </a>
                             <span />
                         </React.Fragment>
                     ) : (
                         <React.Fragment>
-                            {ethLink ? (
-                                <a href="#">
+                            {onUseEthClick ? (
+                                <a href="#" onClick={this.onClick(onUseEthClick)}>
                                     Sign in with Ethereum
                                 </a>
                             ) : (
