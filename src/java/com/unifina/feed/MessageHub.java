@@ -27,7 +27,6 @@ public class MessageHub<RawMessageClass, MessageClass, KeyClass> extends Thread 
 	private final List<MessageRecipient> proxies = new ArrayList<>();
 	private final List<MessageRecipient> proxiesByPriority = new ArrayList<>();
 	private final Map<KeyClass, List<MessageRecipient>> proxiesByKey = new HashMap<>();
-	private long lastRunLoggingTime = 0;
 
 	private final Comparator<MessageRecipient> proxyPriorityComparator = new Comparator<MessageRecipient>() {
 		@Override
@@ -74,12 +73,8 @@ public class MessageHub<RawMessageClass, MessageClass, KeyClass> extends Thread 
 			}
 
 			if (parsedMessage != null) {
-				long time = System.currentTimeMillis();
-				if (time - lastRunLoggingTime > 60000) {
-					lastRunLoggingTime = time;
-					final String msg = String.format("run: MessageHub.proxiesByKey size = %d", proxiesByKey.size());
-					log.info(msg);
-				}
+				final String msg = String.format("run: MessageHub.proxiesByKey size = %d", proxiesByKey.size());
+				log.info(msg);
 				try {
 					// If the message contains a key, distribute to subscribers for that key only
 					List<MessageRecipient> proxyList = m.key != null ? proxiesByKey.get(m.key) : proxiesByPriority;
