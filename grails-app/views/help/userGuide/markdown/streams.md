@@ -52,7 +52,7 @@ As an example of a more complicated event, here’s a data point in a stock mark
 
 ## Working with streams
 
-You can create new streams either manually in the user interface or by using the <g:link controller="help" action="api">stream API</g:link>. Each stream is identified by a unique ID. There’s no technical limit on the total number of streams.
+You can create new streams either manually in the user interface or by using the <g:link controller="help" action="api">API</g:link>. Each stream is identified by a unique ID. There’s no technical limit on the total number of streams.
 
 If you want to create a stream manually, go to the <kbd>Streams</kbd> tab.  There’s a button which looks like this:
 
@@ -140,72 +140,16 @@ There is no theoretical limitation as to the format or type of data in Streamr. 
 <a id="pushing-events-section"></a>
 ## Pushing events to a stream
 
-Streamr has a simple API which allows you to push events in JSON format to a stream.  The events are immediately processed by any canvas which subscribes to the stream.  The events are also available for historical playback as soon as they are received by Streamr.
+Streamr has a simple <g:link controller="help" action="api">API</g:link> which allows you to push events in JSON format to a stream. The events are immediately delivered to subscribers of the stream, including canvases which use the stream as well as any external applications listening to the stream via the API.
 
-You can push events to a stream from any programming language.  This is the HTTPS endpoint for the JSON API you would use:
+You can push events to a stream from any programming language, and there are also convenient client libraries for some languages. For details and usage examples please see the <g:link controller="help" action="api">API documentation</g:link>.
 
-    POST https://www.streamr.com/api/v1/streams/STREAM_ID/data
-
-API credentials must be provided in the <strong>Authorization</strong> request header. Authorization header should contain the word <strong>token</strong> and a key with write permissions to the stream. Create this key on the <a href="#stream-view-image">stream's configuration page</a>.
-
-The event timestamp is optional.  If omitted, the current timestamp on the receiving server is used.  If you want to include an explicit timestamp, it should be given in milliseconds since January 1, 1970 UTC.  In any case, any explicit timestamp only affects the playback.  Each event is processed as soon as it is received.
-
-The actual data payload is sent in the POST request body, encoded in JSON.
-
-Here's an example HTTP request for pushing a data event into a stream:
-
-    POST https://www.streamr.com/api/v1/streams/z2IwFcsJSzOxx9nt0nhc7g/data
-
-Here’s an example of request headers:
-
-    Authorization: mejriQ8FSimIbUlOvSpcIwDL0htzeQR-e1N0plTfcZzg
-    Timestamp: 1441227869000
-
-And here’s an example of a request body.
-
-    {
-        "foo": "hello",
-        "bar": 24.5
-    }
-
-A fully-formed request example using `jquery` looks like the following:
-
-    var msg = {
-        foo: "hello",
-        bar: 24.5
-    }
-
-    $.ajax({
-        type: "POST",
-        url: "https://www.streamr.com/api/v1/streams/z2IwFcsJSzOxx9nt0nhc7g/data",
-        headers: {
-            Authorization: "token mejriQ8FSimIbUlOvSpcIwDL0htzeQR-e1N0plTfcZzg"
-        },
-        data: JSON.stringify(msg)
-    });
-
-
-The same example using `curl` looks like this.
-
-    curl -i -X POST -H "Authorization: token mejriQ8FSimIbUlOvSpcIwDL0htzeQR-e1N0plTfcZzg" \
-    -d "{\"foo\":\"hello\",\"bar\":24.5}" https://www.streamr.com/api/v1/streams/z2IwFcsJSzOxx9nt0nhc7g/data
-
-If the call is successful, the data API returns the code 204 (i.e. “no content”).  These are the possible return codes:
-
-Code | Description
----- | -----------
-204  | Success
-400  | Invalid request
-403  | Authentication failed
-404  | Unknown endpoint
-500  | Unexpected error
+Instead of using the API, you can produce events to streams on a canvas using the SendToStream module. This is highly useful when you refine data using a canvas and want to produce the results to another stream.
 
 ## Subscribing to a stream
 
-You’ll need to be a stream subscriber in order to receive events. Streamr makes the subscription process trivially easy: You just add a stream module to a Streamr canvas.  As a simple taster of how this works, here's a stream of social media messages connected to a **Table** module.
+Subscribing to streams in order to use the data on canvases is trivially easy: just add the stream to a canvas. As a simple taster of how this works, here's a stream of social media messages connected to a **Table** module.
 
 <r:img plugin="unifina-core" dir="images/user-guide" file="twitter-stream-with-table.png" class="img-responsive center-block" />
 
-You can also subscribe to a stream in external applications via our [API](${createLink(controller:'help', action:'api')}).
-
-
+You can also subscribe to a stream in any external application via our [API](${createLink(controller:'help', action:'api')}).
