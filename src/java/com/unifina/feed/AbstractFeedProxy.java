@@ -38,7 +38,7 @@ public abstract class AbstractFeedProxy<ModuleClass, RawMessageClass, MessageCla
 	private static final Logger log = Logger.getLogger(AbstractFeedProxy.class);
 
 	private final MessageHub<RawMessageClass, MessageClass, KeyClass> hub;
-	private Queue<MessageClass> realtimeWaitQueue = new ConcurrentLinkedQueue<>();
+	private final Queue<MessageClass> realtimeWaitQueue = new ConcurrentLinkedQueue<>();
 	private final Queue<Long> realtimeWaitQueueCounter = new ConcurrentLinkedQueue<>();
 
 	private CatchupState catchupState = CatchupState.CATCHUP; // start in catchup state
@@ -89,7 +89,6 @@ public abstract class AbstractFeedProxy<ModuleClass, RawMessageClass, MessageCla
 				log.warn("Discarding duplicate message: " + parsedMsg.counter + ", expected: " + expected);
 			}
 		}
-		logWaitQueueState();
 	}
 
 	private MessageHub<RawMessageClass, MessageClass, KeyClass> getMessageHub() {
@@ -181,24 +180,17 @@ public abstract class AbstractFeedProxy<ModuleClass, RawMessageClass, MessageCla
 					eventQueue.enqueue(event);
 				}
 
-				logWaitQueueState();
+				long time = System.currentTimeMillis();
+				if (time - lastQueueSizeLoggingTime > 60000) {
+					lastQueueSizeLoggingTime = time;
+					if (!realtimeWaitQueue.isEmpty()) {
+						log.info("WaitQueue size " + realtimeWaitQueue.size());
+					}
+				}
 			}
 		}
 	}
-
-	private void logWaitQueueState() {
-		long time = System.currentTimeMillis();
-		if (time - lastQueueSizeLoggingTime > 300000) {
-			lastQueueSizeLoggingTime = time;
-			if (!realtimeWaitQueue.isEmpty()) {
-				log.info("WaitQueue size " + realtimeWaitQueue.size());
-			} else {
-				realtimeWaitQueue = new ConcurrentLinkedQueue<>();
-				log.info("Reset queue...");
-			}
-		}
-	}
-
+	
 	/**
 	 * This method is guaranteed to be called in correct order without gaps.
 	 * It should convert the feed message to FeedEvent(s).
