@@ -20,8 +20,6 @@ type State = {
     },
 }
 
-// HERE: we need to make Actions > [proceed] to go through to the next step.
-
 class LoginPage extends React.Component<Props, State> {
     state = {
         form: {
