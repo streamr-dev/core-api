@@ -2,6 +2,7 @@
 
 import * as React from 'react'
 
+import AuthPanelNav from '../AuthPanelNav'
 import styles from './authPanel.pcss'
 
 type Props = {
@@ -29,6 +30,12 @@ class AuthPanel extends React.Component<Props, State> {
         })
     }
 
+    onGoBack = () => {
+        this.setState({
+            step: Math.max(0, this.state.step - 1),
+        })
+    }
+
     setHeight = (height: number) => {
         this.setState({
             height,
@@ -41,6 +48,17 @@ class AuthPanel extends React.Component<Props, State> {
 
         return (
             <div className={styles.authPanel}>
+                <div className={styles.navs}>
+                    {React.Children.map(this.props.children, (child, index) => (
+                        <AuthPanelNav
+                            active={index === step}
+                            signin={child.props.showSignin}
+                            signup={child.props.showSignup}
+                            onUseEth={child.props.showEth ? (() => {}) : null}
+                            onGoBack={child.props.showBack ? this.onGoBack : null}
+                        />
+                    ))}
+                </div>
                 <div className={styles.panel}>
                     <div className={styles.header}>
                         {title}

@@ -10,11 +10,19 @@
   justify-content: space-between;
   letter-spacing: 1px;
   line-height: 1em;
+  opacity: 0;
+  position: absolute;
   text-transform: uppercase;
+  top: 0;
+  transition: 0.2s ease-in-out;
+  transition-property: visibility, opacity;
+  transition-delay: 0.2s, 0s;
   user-select: none;
+  visibility: hidden;
+  width: 100%;
 
   a {
-    transition: 200ms ease-in-out color;
+    transition: 300ms ease-in-out color;
   }
 
   a,
@@ -29,4 +37,12 @@
     color: white;
     transition-duration: 50ms;
   }
+}
+
+.active {
+  opacity: 1;
+  position: relative;
+  transition-delay: 0s, 0.15s;
+  visibility: visible;
+  z-index: 1;
 }

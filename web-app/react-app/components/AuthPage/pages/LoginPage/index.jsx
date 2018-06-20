@@ -36,13 +36,13 @@ class LoginPage extends React.Component<Props, State> {
 
         return (
             <AuthPanel title="Sign In">
-                <AuthStep>
+                <AuthStep showEth showSignup>
                     <Input placeholder="Email" />
                     <Actions>
                         <Button proceed>Next</Button>
                     </Actions>
                 </AuthStep>
-                <AuthStep>
+                <AuthStep showBack>
                     <Input placeholder="Password" type="password" />
                     <Actions>
                         <Checkbox checked={rememberMe}>Remember me</Checkbox>
@@ -50,7 +50,7 @@ class LoginPage extends React.Component<Props, State> {
                         <Button proceed>Go</Button>
                     </Actions>
                 </AuthStep>
-                <AuthStep>
+                <AuthStep showBack>
                     Signed in.
                 </AuthStep>
             </AuthPanel>

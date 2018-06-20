@@ -2,11 +2,14 @@
 
 import * as React from 'react'
 import { Link } from 'react-router-dom'
+import cx from 'classnames'
+
 import styles from './authPanelNav.pcss'
 
 type Props = {
-    onGoBack: () => void,
-    onUseEth: () => void,
+    active?: boolean,
+    onGoBack?: ?() => void,
+    onUseEth?: ?() => void,
     signup?: boolean,
     signin?: boolean,
 }
@@ -19,10 +22,14 @@ class AuthPanelNav extends React.Component<Props> {
     }
 
     render = () => {
-        const { onGoBack, onUseEth, signin, signup } = this.props
+        const { active, onGoBack, onUseEth, signin, signup } = this.props
 
         return (
-            <div className={styles.root}>
+            <div
+                className={cx(styles.root, {
+                    [styles.active]: !!active,
+                })}
+            >
                 {onGoBack ? (
                     <React.Fragment>
                         <a href="#" onClick={this.onClick(onGoBack)}>
