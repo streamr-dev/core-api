@@ -8,8 +8,8 @@ import 'bootstrap/dist/css/bootstrap.min.css'
 import '@streamr/streamr-layout/css'
 import '@streamr/streamr-layout/pcss'
 
-import LoginPage from './LoginPage'
-import RegisterPage from './RegisterPage'
+import LoginPage from './pages/LoginPage'
+// import RegisterPage from './RegisterPage'
 
 const basename = createLink('/').replace(window.location.origin, '')
 
@@ -25,7 +25,7 @@ const AuthPage = () => (
                 <div className={styles.panel}>
                     <Switch>
                         <Route exact path="/login/auth" component={LoginPage} />
-                        <Route exact path="/register/signup" component={RegisterPage} />
+                        {/* <Route exact path="/register/signup" component={RegisterPage} /> */}
                         <Redirect from="/register" to="/register/signup" />
                         <Redirect from="/login" to="/login/auth" />
                         <Route path="/" component={() => '404'} />
