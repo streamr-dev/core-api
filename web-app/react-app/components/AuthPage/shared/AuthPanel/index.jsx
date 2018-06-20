@@ -11,11 +11,13 @@ type Props = {
 
 type State = {
     step: number,
+    height: string | number,
 }
 
 class AuthPanel extends React.Component<Props, State> {
     state = {
         step: 0,
+        height: 'auto',
     }
 
     onProceed = () => {
@@ -27,9 +29,15 @@ class AuthPanel extends React.Component<Props, State> {
         })
     }
 
+    setHeight = (height: number) => {
+        this.setState({
+            height,
+        })
+    }
+
     render = () => {
         const { children, title } = this.props
-        const { step } = this.state
+        const { step, height } = this.state
 
         return (
             <div className={styles.authPanel}>
@@ -38,10 +46,16 @@ class AuthPanel extends React.Component<Props, State> {
                         {title}
                     </div>
                     <div className={styles.body}>
-                        <div className={styles.inner}>
+                        <div
+                            className={styles.inner}
+                            style={{
+                                height,
+                            }}
+                        >
                             {React.Children.map(children, (child, index) => React.cloneElement(child, {
                                 active: index === step,
                                 onProceed: this.onProceed,
+                                onHeightChange: this.setHeight,
                             }))}
                         </div>
                     </div>
