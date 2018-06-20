@@ -6,7 +6,6 @@ import AuthPanelNav from '../AuthPanelNav'
 import styles from './authPanel.pcss'
 
 type Props = {
-    title: string,
     children: React.Node,
 }
 
@@ -42,8 +41,10 @@ class AuthPanel extends React.Component<Props, State> {
         })
     }
 
+    titles = () => React.Children.map(this.props.children, (child) => child.props.title || 'Title')
+
     render = () => {
-        const { children, title } = this.props
+        const { children } = this.props
         const { step, height } = this.state
 
         return (
@@ -61,7 +62,7 @@ class AuthPanel extends React.Component<Props, State> {
                 </div>
                 <div className={styles.panel}>
                     <div className={styles.header}>
-                        {title}
+                        {this.titles()[step]}
                     </div>
                     <div className={styles.body}>
                         <div

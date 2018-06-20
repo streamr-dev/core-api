@@ -33,14 +33,14 @@ class LoginPage extends React.Component<Props, State> {
         const { form: { rememberMe } } = this.state
 
         return (
-            <AuthPanel title="Sign In">
-                <AuthStep showEth showSignup>
+            <AuthPanel>
+                <AuthStep title="Sign In" showEth showSignup>
                     <Input placeholder="Email" />
                     <Actions>
                         <Button proceed>Next</Button>
                     </Actions>
                 </AuthStep>
-                <AuthStep showBack>
+                <AuthStep title="Sign In" showBack>
                     <Input placeholder="Password" type="password" />
                     <Actions>
                         <Checkbox checked={rememberMe}>Remember me</Checkbox>
@@ -48,7 +48,7 @@ class LoginPage extends React.Component<Props, State> {
                         <Button proceed>Go</Button>
                     </Actions>
                 </AuthStep>
-                <AuthStep showBack>
+                <AuthStep title="Done" showBack>
                     Signed in.
                 </AuthStep>
             </AuthPanel>
