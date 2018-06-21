@@ -10,13 +10,16 @@ import Actions from '../../shared/Actions'
 import Button from '../../shared/Button'
 import Checkbox from '../../shared/Checkbox'
 import AuthStep from '../../shared/AuthStep'
+import * as schemas from '../../schemas/login'
 
 type Props = {}
 
 type State = {
-    email: string,
-    password: string,
-    rememberMe: boolean,
+    form: {
+        email: string,
+        password: string,
+        rememberMe: boolean,
+    },
     errors: {
         [string]: string,
     },
@@ -24,33 +27,32 @@ type State = {
 
 class LoginPage extends React.Component<Props, State> {
     state = {
-        email: '',
-        password: '',
-        rememberMe: false,
+        form: {
+            email: '',
+            password: '',
+            rememberMe: false,
+        },
         errors: {},
     }
 
-    validateEmail = () => yup.object()
-        .shape({
-            email: yup.string()
-                .trim()
-                .required('is required'),
-        })
-        .validate(this.state)
+    validate = (field: string) => schemas[field].validate(this.state.form)
 
-    validatePassword = () => yup.object()
-        .shape({
-            password: yup.string().required('is required'),
-        })
-        .validate(this.state)
+    onInputChange = (e: SyntheticInputEvent<EventTarget>) => {
+        const { form, errors: prevErrors } = this.state
+        const field = e.target.name
+        const value = e.target.type === 'checkbox' ? e.target.checked : e.target.value
+        const errors = {
+            ...prevErrors,
+        }
 
-    onInputChange = (field: string) => (e: SyntheticInputEvent<EventTarget>) => {
+        delete errors[field]
+
         this.setState({
-            [field]: e.target.value,
-            errors: {
-                ...this.state.errors,
-                [field]: '',
+            form: {
+                ...form,
+                [field]: value,
             },
+            errors,
         })
     }
 
@@ -65,38 +67,40 @@ class LoginPage extends React.Component<Props, State> {
         }
     }
 
-    onRememberMeChange = (e: any) => {
-        this.setState({
-            rememberMe: e.target.checked,
-        })
-    }
-
     render = () => {
-        const { email, password, rememberMe, errors } = this.state
+        const { form: { email, password, rememberMe }, errors } = this.state
 
         return (
             <AuthPanel>
-                <AuthStep title="Sign In" showEth showSignup validate={this.validateEmail} onValidationError={this.onValidationError}>
+                <AuthStep title="Sign In" showEth showSignup validate={this.validate('email')} onValidationError={this.onValidationError}>
                     <Input
+                        name="email"
                         placeholder="Email"
-                        onChange={this.onInputChange('email')}
                         value={email}
+                        onChange={this.onInputChange}
                         error={errors.email}
                     />
                     <Actions>
                         <Button proceed>Next</Button>
                     </Actions>
                 </AuthStep>
-                <AuthStep title="Sign In" showBack validate={this.validatePassword} onValidationError={this.onValidationError}>
+                <AuthStep title="Sign In" showBack validate={this.validate('password')} onValidationError={this.onValidationError}>
                     <Input
-                        placeholder="Password"
-                        onChange={this.onInputChange('password')}
-                        value={password}
+                        name="password"
                         type="password"
+                        placeholder="Password"
+                        value={password}
+                        onChange={this.onInputChange}
                         error={errors.password}
                     />
                     <Actions>
-                        <Checkbox checked={rememberMe} onChange={this.onRememberMeChange}>Remember me</Checkbox>
+                        <Checkbox
+                            name="rememberMe"
+                            checked={rememberMe}
+                            onChange={this.onInputChange}
+                        >
+                            Remember me
+                        </Checkbox>
                         <Link to="#">Forgot your password?</Link>
                         <Button proceed>Go</Button>
                     </Actions>
