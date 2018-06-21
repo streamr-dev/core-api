@@ -7,6 +7,7 @@ import styles from './authPanel.pcss'
 
 type Props = {
     children: React.Node,
+    onValidationError?: (ValidationError) => void,
 }
 
 type State = {
@@ -44,7 +45,7 @@ class AuthPanel extends React.Component<Props, State> {
     titles = () => React.Children.map(this.props.children, (child) => child.props.title || 'Title')
 
     render = () => {
-        const { children } = this.props
+        const { children, onValidationError } = this.props
         const { step, height } = this.state
 
         return (
@@ -75,6 +76,7 @@ class AuthPanel extends React.Component<Props, State> {
                                 active: index === step,
                                 onProceed: this.onProceed,
                                 onHeightChange: this.setHeight,
+                                onValidationError,
                             }))}
                         </div>
                     </div>

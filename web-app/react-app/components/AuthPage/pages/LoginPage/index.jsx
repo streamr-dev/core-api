@@ -71,8 +71,8 @@ class LoginPage extends React.Component<Props, State> {
         const { form: { email, password, rememberMe }, errors } = this.state
 
         return (
-            <AuthPanel>
-                <AuthStep title="Sign In" showEth showSignup validate={this.validate('email')} onValidationError={this.onValidationError}>
+            <AuthPanel onValidationError={this.onValidationError}>
+                <AuthStep title="Sign In" showEth showSignup validate={this.validate('email')}>
                     <Input
                         name="email"
                         placeholder="Email"
@@ -84,7 +84,7 @@ class LoginPage extends React.Component<Props, State> {
                         <Button proceed>Next</Button>
                     </Actions>
                 </AuthStep>
-                <AuthStep title="Sign In" showBack validate={this.validate('password')} onValidationError={this.onValidationError}>
+                <AuthStep title="Sign In" showBack validate={this.validate('password')}>
                     <Input
                         name="password"
                         type="password"
