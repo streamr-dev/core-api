@@ -4,10 +4,10 @@ export const email = yup.object()
     .shape({
         email: yup.string()
             .trim()
-            .required('is required'),
+            .required('Email is required'),
     })
 
 export const password = yup.object()
     .shape({
-        password: yup.string().required('is required'),
+        password: yup.string().required('Password is required'),
     })

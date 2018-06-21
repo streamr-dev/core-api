@@ -35,7 +35,7 @@ class LoginPage extends React.Component<Props, State> {
         errors: {},
     }
 
-    validate = (field: string) => schemas[field].validate(this.state.form)
+    validate = (field: string) => () => schemas[field].validate(this.state.form)
 
     onInputChange = (e: SyntheticInputEvent<EventTarget>) => {
         const { form, errors: prevErrors } = this.state
