@@ -10,11 +10,12 @@ import Actions from '../../shared/Actions'
 import Button from '../../shared/Button'
 import Checkbox from '../../shared/Checkbox'
 import AuthStep from '../../shared/AuthStep'
-import * as schemas from '../../schemas/login'
+import schemas from '../../schemas/login'
 
 type Props = {}
 
 type State = {
+    step: number,
     form: {
         email: string,
         password: string,
@@ -26,7 +27,10 @@ type State = {
 }
 
 class LoginPage extends React.Component<Props, State> {
+    panel: ?AuthPanel
+
     state = {
+        step: 0,
         form: {
             email: '',
             password: '',
@@ -35,7 +39,19 @@ class LoginPage extends React.Component<Props, State> {
         errors: {},
     }
 
-    validate = (field: string) => () => schemas[field].validate(this.state.form)
+    setPanel = (panel: ?AuthPanel) => {
+        this.panel = panel
+    }
+
+    numSteps = () => (this.panel ? React.Children.count(this.panel.props.children) : 0)
+
+    validateCurrentStep = () => (schemas[this.state.step] || yup.object()).validate(this.state.form)
+
+    onBack = () => {
+        this.setState({
+            step: Math.max(0, this.state.step - 1),
+        })
+    }
 
     onInputChange = (e: SyntheticInputEvent<EventTarget>) => {
         const { form, errors: prevErrors } = this.state
@@ -56,23 +72,36 @@ class LoginPage extends React.Component<Props, State> {
         })
     }
 
-    onValidationError = (error: ?yup.ValidationError) => {
-        if (error) {
-            this.setState({
-                errors: {
-                    ...this.state.errors,
-                    [error.path]: error.message,
-                },
+    onNextClick = (e: SyntheticInputEvent<EventTarget>) => {
+        const { step, errors } = this.state
+        e.persist()
+        e.target.disabled = true
+        e.preventDefault()
+
+        this.validateCurrentStep()
+            .then(() => {
+                this.setState({
+                    step: Math.min(this.numSteps(), step + 1),
+                })
+            }, (error: yup.ValidationError) => {
+                this.setState({
+                    errors: {
+                        ...errors,
+                        [error.path]: error.message,
+                    },
+                })
             })
-        }
+            .finally(() => {
+                e.target.disabled = false
+            })
     }
 
     render = () => {
-        const { form: { email, password, rememberMe }, errors } = this.state
+        const { step, form: { email, password, rememberMe }, errors } = this.state
 
         return (
-            <AuthPanel onValidationError={this.onValidationError}>
-                <AuthStep title="Sign In" showEth showSignup validate={this.validate('email')}>
+            <AuthPanel currentStep={step} onBack={this.onBack} ref={this.setPanel}>
+                <AuthStep title="Sign In" showEth showSignup>
                     <Input
                         name="email"
                         placeholder="Email"
@@ -81,10 +110,10 @@ class LoginPage extends React.Component<Props, State> {
                         error={errors.email}
                     />
                     <Actions>
-                        <Button proceed>Next</Button>
+                        <Button onClick={this.onNextClick}>Next</Button>
                     </Actions>
                 </AuthStep>
-                <AuthStep title="Sign In" showBack validate={this.validate('password')}>
+                <AuthStep title="Sign In" showBack>
                     <Input
                         name="password"
                         type="password"
@@ -101,8 +130,8 @@ class LoginPage extends React.Component<Props, State> {
                         >
                             Remember me
                         </Checkbox>
-                        <Link to="#">Forgot your password?</Link>
-                        <Button proceed>Go</Button>
+                        <Link to="/password/new">Forgot your password?</Link>
+                        <Button onClick={this.onNextClick}>Go</Button>
                     </Actions>
                 </AuthStep>
                 <AuthStep title="Done" showBack>
