@@ -1,28 +1,83 @@
 @import "@streamr/streamr-layout/pcss/variables.pcss";
 
+@keyframes onAutoFillStart { from { /**/ } to { /**/ } }
+@keyframes onAutoFillCancel { from { /**/ } to { /**/ } }
+
+@keyframes underlineLoop {
+  0% {
+    left: 0%;
+    right: 100%;
+  }
+  33% {
+    left: 0%;
+    right: 0%;
+  }
+  67% {
+    left: 0%;
+    right: 0%;
+  }
+  100% {
+    left: 100%;
+    right: 0%;
+  }
+}
+
 .root {
   display: block;
   margin: 0;
   position: relative;
+
+  label {
+    font-size: 1em;
+    left: 0;
+    line-height: 1em;
+    margin: 0;
+    position: absolute;
+    top: 0;
+    transform: translate(0, 1.75em) scale(1);
+    transform-origin: top left;
+    transition: 200ms cubic-bezier(0.0, 0, 0.2, 1) 0ms;
+    transition-property: color, transform;
+  }
+
+  label + .wrapper {
+    padding-top: 1em;
+  }
 }
 
 .input {
-  border: solid var(--greyDark);
-  border-width: 0 0 1px;
+  border: 0;
+  box-sizing: content-box;
   color: var(--greyDark);
   display: block;
   font-size: 1em;
+  height: 1em;
   line-height: 2.5em;
-  outline: none;
-  padding: 0;
+  outline: 0;
+  padding: 0.75em 0;
   width: 100%;
-
-  &::placeholder {
-    color: inherit;
-    font-size: inherit;
-    padding-left: 0;
-  }
 }
+
+.input::placeholder {
+  color: inherit;
+  font-size: inherit;
+  opacity: 0;
+  padding-left: 0;
+  transition: opacity 200ms cubic-bezier(0.4, 0, 0.2, 1) 0ms;
+}
+
+.input:focus::placeholder {
+  opacity: 1;
+}
+
+.input:-webkit-autofill {
+  animation-name: onAutoFillStart;
+}
+
+.input:not(:-webkit-autofill) {
+  animation-name: onAutoFillCancel;
+}
+
 
 .withError .input {
   border-color: #FF0F2D;
@@ -32,4 +87,57 @@
   color: #FF0F2D;
   font-size: 0.75em;
   position: absolute;
+}
+
+.filled label {
+  transition: none;
+}
+
+.focused {
+}
+
+.filled,
+.focused {
+  label {
+    transform: translate(0, 0) scale(0.75);
+  }
+}
+
+.wrapper::after,
+.wrapper::before {
+  bottom: 0;
+  content: '';
+  height: 1px;
+  position: absolute;
+}
+
+.wrapper::after {
+  animation: 1200ms infinite paused;
+  animation-name: underlineLoop;
+  background: #0424FF;
+  display: none;
+}
+
+.wrapper::before {
+  background: #323232;
+  display: block;
+  width: 100%;
+}
+
+.processing .wrapper::after {
+  animation-play-state: running;
+  display: block;
+}
+
+.processing .wrapper::before {
+  opacity: 0.25;
+}
+
+.withError.filled label,
+.withError.focused label {
+  color: #FF0F2D;
+}
+
+.withError .wrapper::before {
+  background: #FF0F2D;
 }

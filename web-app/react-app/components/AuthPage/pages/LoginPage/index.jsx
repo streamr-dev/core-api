@@ -15,6 +15,7 @@ import schemas from '../../schemas/login'
 type Props = {}
 
 type State = {
+    processing: boolean,
     step: number,
     form: {
         email: string,
@@ -31,6 +32,7 @@ class LoginPage extends React.Component<Props, State> {
 
     state = {
         step: 0,
+        processing: false,
         form: {
             email: '',
             password: '',
@@ -45,7 +47,11 @@ class LoginPage extends React.Component<Props, State> {
 
     numSteps = () => (this.panel ? React.Children.count(this.panel.props.children) : 0)
 
-    validateCurrentStep = () => (schemas[this.state.step] || yup.object()).validate(this.state.form)
+    validateCurrentStep = (): Promise<any> => new Promise((resolve: any, reject: any) => {
+        setTimeout(() => {
+            (schemas[this.state.step] || yup.object()).validate(this.state.form).then(resolve, reject)
+        }, Math.floor(Math.random() * 2000))
+    })
 
     onBack = () => {
         this.setState({
@@ -74,53 +80,58 @@ class LoginPage extends React.Component<Props, State> {
 
     onNextClick = (e: SyntheticInputEvent<EventTarget>) => {
         const { step, errors } = this.state
-        e.persist()
-        e.target.disabled = true
         e.preventDefault()
 
-        this.validateCurrentStep()
-            .then(() => {
-                this.setState({
-                    step: Math.min(this.numSteps(), step + 1),
+        this.setState({
+            processing: true,
+        }, () => {
+            this.validateCurrentStep()
+                .then(() => {
+                    this.setState({
+                        processing: false,
+                        step: Math.min(this.numSteps(), step + 1),
+                    })
+                }, (error: yup.ValidationError) => {
+                    this.setState({
+                        processing: false,
+                        errors: {
+                            ...errors,
+                            [error.path]: error.message,
+                        },
+                    })
                 })
-            }, (error: yup.ValidationError) => {
-                this.setState({
-                    errors: {
-                        ...errors,
-                        [error.path]: error.message,
-                    },
-                })
-            })
-            .finally(() => {
-                e.target.disabled = false
-            })
+        })
     }
 
     render = () => {
-        const { step, form: { email, password, rememberMe }, errors } = this.state
+        const { processing, step, form: { email, password, rememberMe }, errors } = this.state
 
         return (
             <AuthPanel currentStep={step} onBack={this.onBack} ref={this.setPanel}>
                 <AuthStep title="Sign In" showEth showSignup>
                     <Input
                         name="email"
-                        placeholder="Email"
+                        label="Email"
                         value={email}
                         onChange={this.onInputChange}
                         error={errors.email}
+                        processing={step === 0 && processing}
                     />
                     <Actions>
-                        <Button onClick={this.onNextClick}>Next</Button>
+                        <Button onClick={this.onNextClick} disabled={processing}>
+                            Next
+                        </Button>
                     </Actions>
                 </AuthStep>
                 <AuthStep title="Sign In" showBack>
                     <Input
                         name="password"
                         type="password"
-                        placeholder="Password"
+                        label="Password"
                         value={password}
                         onChange={this.onInputChange}
                         error={errors.password}
+                        processing={step === 1 && processing}
                     />
                     <Actions>
                         <Checkbox
@@ -131,7 +142,7 @@ class LoginPage extends React.Component<Props, State> {
                             Remember me
                         </Checkbox>
                         <Link to="/password/new">Forgot your password?</Link>
-                        <Button onClick={this.onNextClick}>Go</Button>
+                        <Button onClick={this.onNextClick} disabled={processing}>Go</Button>
                     </Actions>
                 </AuthStep>
                 <AuthStep title="Done" showBack>
