@@ -69,7 +69,7 @@ const withAuthFlow = (WrappedComponent: React.ComponentType<any>, step: Step, in
             // NOTE(mr): It's a validation placeholder. Promise-based so everything is possible.
             setTimeout(() => {
                 (schema || yup.object()).validate(this.state.form).then(resolve, reject)
-            }, Math.floor(Math.random() * 2000))
+            }, Math.floor(Math.random() * 400))
         })
 
         next = (schemas: Array<yup.Schema>) => {

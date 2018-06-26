@@ -1,33 +1,32 @@
 // @flow
 
 import * as React from 'react'
-import { Link } from 'react-router-dom'
+import cx from 'classnames'
 
 import AuthPanel from '../../shared/AuthPanel'
 import Input from '../../shared/Input'
 import Actions from '../../shared/Actions'
 import Button from '../../shared/Button'
-import Checkbox from '../../shared/Checkbox'
 import AuthStep from '../../shared/AuthStep'
 
 import withAuthFlow, { type AuthFlowProps } from '../../shared/withAuthFlow'
 import { preventDefault, onInputChange } from '../../shared/utils'
-import schemas from '../../schemas/login'
+import schemas from '../../schemas/resetPassoword'
 
 type Props = AuthFlowProps & {
     form: {
         email: string,
         password: string,
-        rememberMe: boolean,
+        confirmPassword: string,
     },
 }
 
-const LoginPage = ({ processing, step, form: { email, password, rememberMe }, errors, next, prev, attach, setFormField }: Props) => {
+const ResetPasswordPage = ({ processing, step, form: { email, password, confirmPassword }, errors, next, prev, attach, setFormField }: Props) => {
     const onNextClick = preventDefault(() => next(schemas))
 
     return (
         <AuthPanel currentStep={step} onBack={prev} ref={attach}>
-            <AuthStep title="Sign In" showEth showSignup>
+            <AuthStep title="Reset password">
                 <Input
                     name="email"
                     label="Email"
@@ -42,37 +41,45 @@ const LoginPage = ({ processing, step, form: { email, password, rememberMe }, er
                     </Button>
                 </Actions>
             </AuthStep>
-            <AuthStep title="Sign In" showBack>
+            <AuthStep title="Reset password">
                 <Input
                     name="password"
                     type="password"
-                    label="Password"
+                    label="Create a Password"
                     value={password}
                     onChange={onInputChange(setFormField)}
                     error={errors.password}
                     processing={step === 1 && processing}
                 />
                 <Actions>
-                    <Checkbox
-                        name="rememberMe"
-                        checked={rememberMe}
-                        onChange={onInputChange(setFormField)}
-                    >
-                        Remember me
-                    </Checkbox>
-                    <Link to="/register/forgotPassword">Forgot your password?</Link>
-                    <Button onClick={onNextClick} disabled={processing}>Go</Button>
+                    <Button onClick={onNextClick} disabled={processing}>Next</Button>
                 </Actions>
             </AuthStep>
-            <AuthStep title="Done" showBack>
-                Signed in.
+            <AuthStep title="Reset password" showBack>
+                <Input
+                    name="confirmPassword"
+                    type="password"
+                    label="Confirm your password"
+                    value={confirmPassword}
+                    onChange={onInputChange(setFormField)}
+                    error={errors.confirmPassword}
+                    processing={step === 2 && processing}
+                />
+                <Actions>
+                    <Button onClick={onNextClick} disabled={processing}>Next</Button>
+                </Actions>
+            </AuthStep>
+            <AuthStep title="Done." showSignin>
+                <div className={cx(AuthPanel.styles.spaceLarge, 'text-center')}>
+                    <p>Done.</p>
+                </div>
             </AuthStep>
         </AuthPanel>
     )
 }
 
-export default withAuthFlow(LoginPage, 0, {
+export default withAuthFlow(ResetPasswordPage, 0, {
     email: '',
     password: '',
-    rememberMe: false,
+    confirmPassword: '',
 })

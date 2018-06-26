@@ -10,6 +10,8 @@ import '@streamr/streamr-layout/pcss'
 
 import LoginPage from './pages/LoginPage'
 import RegisterPage from './pages/RegisterPage'
+import ForgotPasswordPage from './pages/ForgotPasswordPage'
+import ResetPasswordPage from './pages/ResetPasswordPage'
 
 const basename = createLink('/').replace(window.location.origin, '')
 
@@ -26,6 +28,8 @@ const AuthPage = () => (
                     <Switch>
                         <Route exact path="/login/auth" component={LoginPage} />
                         <Route exact path="/register/signup" component={RegisterPage} />
+                        <Route exact path="/register/forgotPassword" component={ForgotPasswordPage} />
+                        <Route exact path="/register/resetPassword" component={ResetPasswordPage} />
                         <Redirect from="/register" to="/register/signup" />
                         <Redirect from="/login" to="/login/auth" />
                         <Route path="/" component={() => '404'} />

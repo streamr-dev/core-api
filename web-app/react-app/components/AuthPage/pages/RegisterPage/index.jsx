@@ -13,7 +13,6 @@ import AuthStep from '../../shared/AuthStep'
 import withAuthFlow, { type AuthFlowProps } from '../../shared/withAuthFlow'
 import { preventDefault, onInputChange } from '../../shared/utils'
 import schemas from '../../schemas/register'
-import styles from './registerPage.pcss'
 
 type Props = AuthFlowProps & {
     form: {
@@ -88,7 +87,7 @@ const RegisterPage = ({ processing, step, form: { email, password, confirmPasswo
                 </Actions>
             </AuthStep>
             <AuthStep title="Terms">
-                <div className={cx(styles.spaceMedium, styles.centered)}>
+                <div className={cx(AuthPanel.styles.spaceMedium, AuthPanel.styles.centered)}>
                     <Checkbox
                         name="toc"
                         checked={toc}
@@ -102,7 +101,7 @@ const RegisterPage = ({ processing, step, form: { email, password, confirmPasswo
                 </Actions>
             </AuthStep>
             <AuthStep title="Thanks for signing up!" showSignin>
-                <div className={cx(styles.spaceLarge, 'text-center')}>
+                <div className={cx(AuthPanel.styles.spaceLarge, 'text-center')}>
                     <p>We have sent a sign up link to your email.</p>
                     <p>Please click it to finish your registration.</p>
                 </div>
@@ -111,7 +110,7 @@ const RegisterPage = ({ processing, step, form: { email, password, confirmPasswo
     )
 }
 
-export default withAuthFlow(RegisterPage, 2, {
+export default withAuthFlow(RegisterPage, 0, {
     email: '',
     password: '',
     confirmPassword: '',

@@ -16,6 +16,8 @@ type State = {
 }
 
 class AuthPanel extends React.Component<Props, State> {
+    static styles = styles
+
     state = {
         height: 'auto',
     }
