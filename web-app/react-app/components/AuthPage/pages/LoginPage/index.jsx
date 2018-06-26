@@ -48,6 +48,7 @@ class LoginPage extends React.Component<Props, State> {
     numSteps = () => (this.panel ? React.Children.count(this.panel.props.children) : 0)
 
     validateCurrentStep = (): Promise<any> => new Promise((resolve: any, reject: any) => {
+        // NOTE(mr): It's a validation placeholder. Promise-based so everything is possible.
         setTimeout(() => {
             (schemas[this.state.step] || yup.object()).validate(this.state.form).then(resolve, reject)
         }, Math.floor(Math.random() * 2000))
