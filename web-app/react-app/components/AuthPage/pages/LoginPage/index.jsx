@@ -11,7 +11,7 @@ import Checkbox from '../../shared/Checkbox'
 import AuthStep from '../../shared/AuthStep'
 
 import withAuthFlow, { type AuthFlowProps } from '../../shared/withAuthFlow'
-import { preventDefault, onInputChange } from '../../shared/utils'
+import { preventDefault, onInputChange, onEnterKeyDown } from '../../shared/utils'
 import schemas from '../../schemas/login'
 
 type Props = AuthFlowProps & {
@@ -22,54 +22,52 @@ type Props = AuthFlowProps & {
     },
 }
 
-const LoginPage = ({ processing, step, form: { email, password, rememberMe }, errors, next, prev, attach, setFormField }: Props) => {
-    const onNextClick = preventDefault(() => next(schemas))
-
-    return (
-        <AuthPanel currentStep={step} onBack={prev} ref={attach}>
-            <AuthStep title="Sign In" showEth showSignup>
-                <Input
-                    name="email"
-                    label="Email"
-                    value={email}
+const LoginPage = ({ processing, step, form: { email, password, rememberMe }, errors, next, prev, attach, setFormField }: Props) => (
+    <AuthPanel currentStep={step} onBack={prev} ref={attach}>
+        <AuthStep title="Sign In" showEth showSignup>
+            <Input
+                name="email"
+                label="Email"
+                value={email}
+                onChange={onInputChange(setFormField)}
+                error={errors.email}
+                processing={step === 0 && processing}
+                onKeyDown={onEnterKeyDown(next, schemas)}
+            />
+            <Actions>
+                <Button onClick={preventDefault(next, schemas)} disabled={processing}>
+                    Next
+                </Button>
+            </Actions>
+        </AuthStep>
+        <AuthStep title="Sign In" showBack>
+            <Input
+                name="password"
+                type="password"
+                label="Password"
+                value={password}
+                onChange={onInputChange(setFormField)}
+                error={errors.password}
+                processing={step === 1 && processing}
+                onKeyDown={onEnterKeyDown(next, schemas)}
+            />
+            <Actions>
+                <Checkbox
+                    name="rememberMe"
+                    checked={rememberMe}
                     onChange={onInputChange(setFormField)}
-                    error={errors.email}
-                    processing={step === 0 && processing}
-                />
-                <Actions>
-                    <Button onClick={onNextClick} disabled={processing}>
-                        Next
-                    </Button>
-                </Actions>
-            </AuthStep>
-            <AuthStep title="Sign In" showBack>
-                <Input
-                    name="password"
-                    type="password"
-                    label="Password"
-                    value={password}
-                    onChange={onInputChange(setFormField)}
-                    error={errors.password}
-                    processing={step === 1 && processing}
-                />
-                <Actions>
-                    <Checkbox
-                        name="rememberMe"
-                        checked={rememberMe}
-                        onChange={onInputChange(setFormField)}
-                    >
-                        Remember me
-                    </Checkbox>
-                    <Link to="/register/forgotPassword">Forgot your password?</Link>
-                    <Button onClick={onNextClick} disabled={processing}>Go</Button>
-                </Actions>
-            </AuthStep>
-            <AuthStep title="Done" showBack>
-                Signed in.
-            </AuthStep>
-        </AuthPanel>
-    )
-}
+                >
+                    Remember me
+                </Checkbox>
+                <Link to="/register/forgotPassword">Forgot your password?</Link>
+                <Button onClick={preventDefault(next, schemas)} disabled={processing}>Go</Button>
+            </Actions>
+        </AuthStep>
+        <AuthStep title="Done" showBack>
+            Signed in.
+        </AuthStep>
+    </AuthPanel>
+)
 
 export default withAuthFlow(LoginPage, 0, {
     email: '',
