@@ -35,14 +35,14 @@ export type AuthFlowProps = {
 
 const getDisplayName = (WrappedComponent: React.ComponentType<any>) => WrappedComponent.displayName || WrappedComponent.name || 'Component'
 
-const withAuthFlow = (WrappedComponent: React.ComponentType<any>, initialFormFields: FormFields) => {
+const withAuthFlow = (WrappedComponent: React.ComponentType<any>, step: Step, initialFormFields: FormFields) => {
     class WithAuthFlow extends React.Component<{}, State> {
         static displayName = `WithAuthFlow(${getDisplayName(WrappedComponent)})`
 
         panel: ?AuthPanel
 
         state = {
-            step: 0,
+            step,
             processing: false,
             form: initialFormFields,
             errors: {},

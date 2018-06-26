@@ -71,7 +71,7 @@ const LoginPage = ({ processing, step, form: { email, password, rememberMe }, er
     )
 }
 
-export default withAuthFlow(LoginPage, {
+export default withAuthFlow(LoginPage, 0, {
     email: '',
     password: '',
     rememberMe: false,
