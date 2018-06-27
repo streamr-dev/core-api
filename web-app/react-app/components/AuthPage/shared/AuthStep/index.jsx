@@ -14,6 +14,7 @@ type Props = {
 
 class AuthStep extends React.Component<Props> {
     root: ?HTMLDivElement = null
+    timeout: TimeoutID
 
     setRoot = (root: ?HTMLDivElement) => {
         this.root = root
@@ -22,6 +23,7 @@ class AuthStep extends React.Component<Props> {
     componentDidMount = () => {
         if (this.props.active) {
             this.bumpHeight()
+            this.focus()
         }
     }
 
@@ -30,7 +32,22 @@ class AuthStep extends React.Component<Props> {
 
         if (active !== prevProps.active && active) {
             this.bumpHeight()
+            this.focus()
         }
+    }
+
+    focus = () => {
+        clearTimeout(this.timeout)
+
+        this.timeout = setTimeout(() => {
+            if (this.root) {
+                const input = this.root.querySelector('input')
+
+                if (input) {
+                    input.focus()
+                }
+            }
+        }, 100)
     }
 
     bumpHeight = () => {
