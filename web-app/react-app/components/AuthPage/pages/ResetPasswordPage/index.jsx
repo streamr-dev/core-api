@@ -15,29 +15,13 @@ import schemas from '../../schemas/resetPassoword'
 
 type Props = AuthFlowProps & {
     form: {
-        email: string,
         password: string,
         confirmPassword: string,
     },
 }
 
-const ResetPasswordPage = ({ processing, step, form: { email, password, confirmPassword }, errors, next, prev, attach, setFormField }: Props) => (
+const ResetPasswordPage = ({ processing, step, form: { password, confirmPassword }, errors, next, prev, attach, setFormField }: Props) => (
     <AuthPanel currentStep={step} onBack={prev} ref={attach} onProceed={preventDefault(next, schemas)}>
-        <AuthStep title="Reset password">
-            <Input
-                name="email"
-                label="Email"
-                value={email}
-                onChange={onInputChange(setFormField)}
-                error={errors.email}
-                processing={step === 0 && processing}
-            />
-            <Actions>
-                <Button disabled={processing}>
-                    Next
-                </Button>
-            </Actions>
-        </AuthStep>
         <AuthStep title="Reset password">
             <Input
                 name="password"
@@ -46,7 +30,8 @@ const ResetPasswordPage = ({ processing, step, form: { email, password, confirmP
                 value={password}
                 onChange={onInputChange(setFormField)}
                 error={errors.password}
-                processing={step === 1 && processing}
+                processing={step === 0 && processing}
+                autoComplete="new-password"
             />
             <Actions>
                 <Button disabled={processing}>Next</Button>
@@ -60,7 +45,8 @@ const ResetPasswordPage = ({ processing, step, form: { email, password, confirmP
                 value={confirmPassword}
                 onChange={onInputChange(setFormField)}
                 error={errors.confirmPassword}
-                processing={step === 2 && processing}
+                processing={step === 1 && processing}
+                autoComplete="new-password"
             />
             <Actions>
                 <Button disabled={processing}>Next</Button>
@@ -75,7 +61,6 @@ const ResetPasswordPage = ({ processing, step, form: { email, password, confirmP
 )
 
 export default withAuthFlow(ResetPasswordPage, 0, {
-    email: '',
     password: '',
     confirmPassword: '',
 })

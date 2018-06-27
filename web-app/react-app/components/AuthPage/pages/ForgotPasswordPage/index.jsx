@@ -30,7 +30,11 @@ const ForgotPasswordPage = ({ processing, step, form: { email }, errors, next, p
                 onChange={onInputChange(setFormField)}
                 error={errors.email}
                 processing={step === 0 && processing}
+                autocomplete="email"
             />
+            <input type="password" name="password" style={{
+                display: 'none',
+            }} />
             <Actions>
                 <Button disabled={processing}>Send</Button>
             </Actions>

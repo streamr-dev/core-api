@@ -34,6 +34,7 @@ const RegisterPage = ({ processing, step, form: { email, password, confirmPasswo
                 onChange={onInputChange(setFormField)}
                 error={errors.email}
                 processing={step === 0 && processing}
+                autoComplete="off"
             />
             <Actions>
                 <Button disabled={processing}>Next</Button>
@@ -48,6 +49,7 @@ const RegisterPage = ({ processing, step, form: { email, password, confirmPasswo
                 onChange={onInputChange(setFormField)}
                 error={errors.password}
                 processing={step === 1 && processing}
+                autoComplete="new-password"
             />
             <Actions>
                 <Button disabled={processing}>Next</Button>
@@ -62,6 +64,7 @@ const RegisterPage = ({ processing, step, form: { email, password, confirmPasswo
                 onChange={onInputChange(setFormField)}
                 error={errors.confirmPassword}
                 processing={step === 2 && processing}
+                autoComplete="new-password"
             />
             <Actions>
                 <Button disabled={processing}>Next</Button>

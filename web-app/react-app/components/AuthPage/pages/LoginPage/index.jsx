@@ -32,6 +32,7 @@ const LoginPage = ({ processing, step, form: { email, password, rememberMe }, er
                 onChange={onInputChange(setFormField)}
                 error={errors.email}
                 processing={step === 0 && processing}
+                autoComplete="email"
             />
             <Actions>
                 <Button disabled={processing}>Next</Button>
@@ -46,6 +47,7 @@ const LoginPage = ({ processing, step, form: { email, password, rememberMe }, er
                 onChange={onInputChange(setFormField)}
                 error={errors.password}
                 processing={step === 1 && processing}
+                autoComplete="current-password"
             />
             <Actions>
                 <Checkbox
