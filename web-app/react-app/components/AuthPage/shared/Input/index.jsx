@@ -1,17 +1,21 @@
 // @flow
 
-import React from 'react'
+import * as React from 'react'
 import cx from 'classnames'
+import zxcvbn from 'zxcvbn'
 
 import styles from './input.pcss'
+import Label from '../Label'
 
 type Props = {
-    label?: string,
+    type?: string,
+    label: string,
     error?: string,
     className?: string,
     processing?: boolean,
     value: string,
     onChange: (SyntheticInputEvent<EventTarget>) => void,
+    meastureStrength?: boolean,
 }
 
 type State = {
@@ -39,8 +43,18 @@ class Input extends React.Component<Props, State> {
         }
     }
 
+    strengthLevel = () => {
+        const { value, type, meastureStrength } = this.props
+
+        if (type !== 'password' || !meastureStrength || !value) {
+            return -1
+        }
+
+        return zxcvbn(value).score
+    }
+
     render = () => {
-        const { label, error, processing, value, onChange, ...props } = this.props
+        const { label, error, processing, value, onChange, type, meastureStrength, ...props } = this.props
         const { focused, autoFilled } = this.state
 
         return (
@@ -52,10 +66,11 @@ class Input extends React.Component<Props, State> {
                     [styles.filled]: !!(value || autoFilled),
                 })}
             >
-                {!!label && <label>{label}</label>}
+                <Label value={label} strengthLevel={this.strengthLevel()} />
                 <div className={styles.wrapper}>
                     <input
                         {...props}
+                        type={type}
                         className={styles.input}
                         value={value}
                         onChange={onChange}

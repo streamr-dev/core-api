@@ -50,6 +50,7 @@ const RegisterPage = ({ processing, step, form: { email, password, confirmPasswo
                 error={errors.password}
                 processing={step === 1 && processing}
                 autoComplete="new-password"
+                meastureStrength
             />
             <Actions>
                 <Button disabled={processing}>Next</Button>
