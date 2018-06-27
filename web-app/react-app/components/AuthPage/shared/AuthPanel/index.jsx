@@ -9,6 +9,7 @@ type Props = {
     children: React.Node,
     onBack?: () => void,
     currentStep: number,
+    onProceed?: (SyntheticEvent<EventTarget>) => void,
 }
 
 type State = {
@@ -31,11 +32,11 @@ class AuthPanel extends React.Component<Props, State> {
     titles = () => React.Children.map(this.props.children, (child) => child.props.title || 'Title')
 
     render = () => {
-        const { children, onBack, currentStep } = this.props
+        const { children, onBack, currentStep, onProceed } = this.props
         const { height } = this.state
 
         return (
-            <div className={styles.authPanel}>
+            <form className={styles.authPanel} onSubmit={onProceed}>
                 <div className={styles.navs}>
                     {React.Children.map(children, (child, index) => (
                         <AuthPanelNav
@@ -65,7 +66,7 @@ class AuthPanel extends React.Component<Props, State> {
                         </div>
                     </div>
                 </div>
-            </div>
+            </form>
         )
     }
 }

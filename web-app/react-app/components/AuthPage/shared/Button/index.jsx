@@ -8,12 +8,11 @@ import styles from './button.pcss'
 
 type Props = {
     className?: string,
-    proceed?: boolean,
 }
 
-const Button = ({ className, proceed, ...props }: Props) => (
+const Button = ({ className, ...props }: Props) => (
     <button
-        type="button"
+        type="submit"
         {...props}
         className={cx(className, styles.button)}
     />

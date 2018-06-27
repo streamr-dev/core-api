@@ -11,7 +11,7 @@ import Checkbox from '../../shared/Checkbox'
 import AuthStep from '../../shared/AuthStep'
 
 import withAuthFlow, { type AuthFlowProps } from '../../shared/withAuthFlow'
-import { preventDefault, onInputChange, onEnterKeyDown } from '../../shared/utils'
+import { preventDefault, onInputChange } from '../../shared/utils'
 import schemas from '../../schemas/register'
 
 type Props = AuthFlowProps & {
@@ -25,7 +25,7 @@ type Props = AuthFlowProps & {
 }
 
 const RegisterPage = ({ processing, step, form: { email, password, confirmPassword, timezone, toc }, errors, next, prev, attach, setFormField }: Props) => (
-    <AuthPanel currentStep={step} onBack={prev} ref={attach}>
+    <AuthPanel currentStep={step} onBack={prev} ref={attach} onProceed={preventDefault(next, schemas)}>
         <AuthStep title="Sign up" showEth showSignin>
             <Input
                 name="email"
@@ -34,12 +34,9 @@ const RegisterPage = ({ processing, step, form: { email, password, confirmPasswo
                 onChange={onInputChange(setFormField)}
                 error={errors.email}
                 processing={step === 0 && processing}
-                onKeyDown={onEnterKeyDown(next, schemas)}
             />
             <Actions>
-                <Button onClick={preventDefault(next, schemas)} disabled={processing}>
-                    Next
-                </Button>
+                <Button disabled={processing}>Next</Button>
             </Actions>
         </AuthStep>
         <AuthStep title="Sign up" showBack>
@@ -51,10 +48,9 @@ const RegisterPage = ({ processing, step, form: { email, password, confirmPasswo
                 onChange={onInputChange(setFormField)}
                 error={errors.password}
                 processing={step === 1 && processing}
-                onKeyDown={onEnterKeyDown(next, schemas)}
             />
             <Actions>
-                <Button onClick={preventDefault(next, schemas)} disabled={processing}>Next</Button>
+                <Button disabled={processing}>Next</Button>
             </Actions>
         </AuthStep>
         <AuthStep title="Sign up" showBack>
@@ -66,10 +62,9 @@ const RegisterPage = ({ processing, step, form: { email, password, confirmPasswo
                 onChange={onInputChange(setFormField)}
                 error={errors.confirmPassword}
                 processing={step === 2 && processing}
-                onKeyDown={onEnterKeyDown(next, schemas)}
             />
             <Actions>
-                <Button onClick={preventDefault(next, schemas)} disabled={processing}>Next</Button>
+                <Button disabled={processing}>Next</Button>
             </Actions>
         </AuthStep>
         <AuthStep title="Timezone" showBack>
@@ -83,7 +78,7 @@ const RegisterPage = ({ processing, step, form: { email, password, confirmPasswo
                 processing={step === 3 && processing}
             />
             <Actions>
-                <Button onClick={preventDefault(next, schemas)} disabled={processing}>Next</Button>
+                <Button disabled={processing}>Next</Button>
             </Actions>
         </AuthStep>
         <AuthStep title="Terms">
@@ -97,7 +92,7 @@ const RegisterPage = ({ processing, step, form: { email, password, confirmPasswo
                 </Checkbox>
             </div>
             <Actions>
-                <Button onClick={preventDefault(next, schemas)} disabled={processing}>Finish</Button>
+                <Button disabled={processing}>Finish</Button>
             </Actions>
         </AuthStep>
         <AuthStep title="Thanks for signing up!" showSignin>

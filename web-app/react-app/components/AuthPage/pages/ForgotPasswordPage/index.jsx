@@ -11,7 +11,7 @@ import Button from '../../shared/Button'
 import AuthStep from '../../shared/AuthStep'
 
 import withAuthFlow, { type AuthFlowProps } from '../../shared/withAuthFlow'
-import { preventDefault, onInputChange, onEnterKeyDown } from '../../shared/utils'
+import { preventDefault, onInputChange } from '../../shared/utils'
 import schemas from '../../schemas/forgotPassword'
 
 type Props = AuthFlowProps & {
@@ -21,7 +21,7 @@ type Props = AuthFlowProps & {
 }
 
 const ForgotPasswordPage = ({ processing, step, form: { email }, errors, next, prev, attach, setFormField }: Props) => (
-    <AuthPanel currentStep={step} onBack={prev} ref={attach}>
+    <AuthPanel currentStep={step} onBack={prev} ref={attach} onProceed={preventDefault(next, schemas)}>
         <AuthStep title="Get a link to reset your password">
             <Input
                 name="email"
@@ -30,12 +30,9 @@ const ForgotPasswordPage = ({ processing, step, form: { email }, errors, next, p
                 onChange={onInputChange(setFormField)}
                 error={errors.email}
                 processing={step === 0 && processing}
-                onKeyDown={onEnterKeyDown(next, schemas)}
             />
             <Actions>
-                <Button onClick={preventDefault(next, schemas)} disabled={processing}>
-                    Send
-                </Button>
+                <Button disabled={processing}>Send</Button>
             </Actions>
         </AuthStep>
         <AuthStep title="Link sent">

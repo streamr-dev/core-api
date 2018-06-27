@@ -10,7 +10,7 @@ import Button from '../../shared/Button'
 import AuthStep from '../../shared/AuthStep'
 
 import withAuthFlow, { type AuthFlowProps } from '../../shared/withAuthFlow'
-import { preventDefault, onInputChange, onEnterKeyDown } from '../../shared/utils'
+import { preventDefault, onInputChange } from '../../shared/utils'
 import schemas from '../../schemas/resetPassoword'
 
 type Props = AuthFlowProps & {
@@ -22,7 +22,7 @@ type Props = AuthFlowProps & {
 }
 
 const ResetPasswordPage = ({ processing, step, form: { email, password, confirmPassword }, errors, next, prev, attach, setFormField }: Props) => (
-    <AuthPanel currentStep={step} onBack={prev} ref={attach}>
+    <AuthPanel currentStep={step} onBack={prev} ref={attach} onProceed={preventDefault(next, schemas)}>
         <AuthStep title="Reset password">
             <Input
                 name="email"
@@ -31,10 +31,9 @@ const ResetPasswordPage = ({ processing, step, form: { email, password, confirmP
                 onChange={onInputChange(setFormField)}
                 error={errors.email}
                 processing={step === 0 && processing}
-                onKeyDown={onEnterKeyDown(next, schemas)}
             />
             <Actions>
-                <Button onClick={preventDefault(next, schemas)} disabled={processing}>
+                <Button disabled={processing}>
                     Next
                 </Button>
             </Actions>
@@ -48,10 +47,9 @@ const ResetPasswordPage = ({ processing, step, form: { email, password, confirmP
                 onChange={onInputChange(setFormField)}
                 error={errors.password}
                 processing={step === 1 && processing}
-                onKeyDown={onEnterKeyDown(next, schemas)}
             />
             <Actions>
-                <Button onClick={preventDefault(next, schemas)} disabled={processing}>Next</Button>
+                <Button disabled={processing}>Next</Button>
             </Actions>
         </AuthStep>
         <AuthStep title="Reset password" showBack>
@@ -63,10 +61,9 @@ const ResetPasswordPage = ({ processing, step, form: { email, password, confirmP
                 onChange={onInputChange(setFormField)}
                 error={errors.confirmPassword}
                 processing={step === 2 && processing}
-                onKeyDown={onEnterKeyDown(next, schemas)}
             />
             <Actions>
-                <Button onClick={preventDefault(next, schemas)} disabled={processing}>Next</Button>
+                <Button disabled={processing}>Next</Button>
             </Actions>
         </AuthStep>
         <AuthStep title="Done." showSignin>

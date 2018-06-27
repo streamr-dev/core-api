@@ -11,7 +11,7 @@ import Checkbox from '../../shared/Checkbox'
 import AuthStep from '../../shared/AuthStep'
 
 import withAuthFlow, { type AuthFlowProps } from '../../shared/withAuthFlow'
-import { preventDefault, onInputChange, onEnterKeyDown } from '../../shared/utils'
+import { preventDefault, onInputChange } from '../../shared/utils'
 import schemas from '../../schemas/login'
 
 type Props = AuthFlowProps & {
@@ -23,7 +23,7 @@ type Props = AuthFlowProps & {
 }
 
 const LoginPage = ({ processing, step, form: { email, password, rememberMe }, errors, next, prev, attach, setFormField }: Props) => (
-    <AuthPanel currentStep={step} onBack={prev} ref={attach}>
+    <AuthPanel currentStep={step} onBack={prev} ref={attach} onProceed={preventDefault(next, schemas)}>
         <AuthStep title="Sign In" showEth showSignup>
             <Input
                 name="email"
@@ -32,12 +32,9 @@ const LoginPage = ({ processing, step, form: { email, password, rememberMe }, er
                 onChange={onInputChange(setFormField)}
                 error={errors.email}
                 processing={step === 0 && processing}
-                onKeyDown={onEnterKeyDown(next, schemas)}
             />
             <Actions>
-                <Button onClick={preventDefault(next, schemas)} disabled={processing}>
-                    Next
-                </Button>
+                <Button disabled={processing}>Next</Button>
             </Actions>
         </AuthStep>
         <AuthStep title="Sign In" showBack>
@@ -49,7 +46,6 @@ const LoginPage = ({ processing, step, form: { email, password, rememberMe }, er
                 onChange={onInputChange(setFormField)}
                 error={errors.password}
                 processing={step === 1 && processing}
-                onKeyDown={onEnterKeyDown(next, schemas)}
             />
             <Actions>
                 <Checkbox
@@ -60,7 +56,7 @@ const LoginPage = ({ processing, step, form: { email, password, rememberMe }, er
                     Remember me
                 </Checkbox>
                 <Link to="/register/forgotPassword">Forgot your password?</Link>
-                <Button onClick={preventDefault(next, schemas)} disabled={processing}>Go</Button>
+                <Button disabled={processing}>Go</Button>
             </Actions>
         </AuthStep>
         <AuthStep title="Done" showBack>
