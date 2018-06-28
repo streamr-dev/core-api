@@ -12,6 +12,7 @@ type Props = {
     onUseEth?: ?() => void,
     signup?: boolean,
     signin?: boolean,
+    className?: string,
 }
 
 class AuthPanelNav extends React.Component<Props> {
@@ -22,11 +23,11 @@ class AuthPanelNav extends React.Component<Props> {
     }
 
     render = () => {
-        const { active, onGoBack, onUseEth, signin, signup } = this.props
+        const { active, onGoBack, onUseEth, signin, signup, className } = this.props
 
         return (
             <div
-                className={cx(styles.root, {
+                className={cx(styles.root, className, {
                     [styles.active]: !!active,
                 })}
             >

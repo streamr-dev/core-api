@@ -3,6 +3,7 @@
 import * as React from 'react'
 
 import AuthPanelNav from '../AuthPanelNav'
+import Switch from '../Switch'
 import styles from './authPanel.pcss'
 
 type Props = {
@@ -29,28 +30,29 @@ class AuthPanel extends React.Component<Props, State> {
         })
     }
 
-    titles = () => React.Children.map(this.props.children, (child) => child.props.title || 'Title')
-
     render = () => {
         const { children, onBack, currentStep, onProceed } = this.props
         const { height } = this.state
 
         return (
             <form className={styles.authPanel} onSubmit={onProceed}>
-                <div className={styles.navs}>
-                    {React.Children.map(children, (child, index) => (
+                <Switch current={currentStep}>
+                    {React.Children.map(children, (child) => (
                         <AuthPanelNav
-                            active={index === currentStep}
                             signin={child.props.showSignin}
                             signup={child.props.showSignup}
                             onUseEth={child.props.showEth ? (() => {}) : null}
                             onGoBack={child.props.showBack ? onBack : null}
                         />
                     ))}
-                </div>
+                </Switch>
                 <div className={styles.panel}>
                     <div className={styles.header}>
-                        {this.titles()[currentStep]}
+                        <Switch current={currentStep}>
+                            {React.Children.map(children, (child) => (
+                                <span>{child.props.title || 'Title'}</span>
+                            ))}
+                        </Switch>
                     </div>
                     <div className={styles.body}>
                         <div
