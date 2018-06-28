@@ -2,20 +2,34 @@
 
 import * as yup from 'yup'
 
+import { email, password, confirmPassword } from './common'
+
 export default [
     // Step 0: Email
-    null,
+    yup.object()
+        .shape({
+            email,
+        }),
     // Step 1: New password
     yup.object()
         .shape({
-            password: yup.string()
-                .min(3)
-                .required('Password is required'),
+            password,
         }),
     // Step 2: Confirm password
-    null,
+    yup.object()
+        .shape({
+            confirmPassword,
+        }),
     // Step 3: Timezone
-    null,
+    yup.object()
+        .shape({
+            timezone: yup.string()
+                .required('Timezone is required'),
+        }),
     // Step 4: Terms
-    null,
+    yup.object()
+        .shape({
+            toc: yup.boolean()
+                .oneOf([true], 'Must Accept Terms and Conditions'),
+        }),
 ]
