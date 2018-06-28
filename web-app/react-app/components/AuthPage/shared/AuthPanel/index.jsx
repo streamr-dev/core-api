@@ -13,26 +13,11 @@ type Props = {
     onProceed?: (SyntheticEvent<EventTarget>) => void,
 }
 
-type State = {
-    height: string | number,
-}
-
-class AuthPanel extends React.Component<Props, State> {
+class AuthPanel extends React.Component<Props> {
     static styles = styles
-
-    state = {
-        height: 'auto',
-    }
-
-    setHeight = (height: number) => {
-        this.setState({
-            height,
-        })
-    }
 
     render = () => {
         const { children, onBack, currentStep, onProceed } = this.props
-        const { height } = this.state
 
         return (
             <form className={styles.authPanel} onSubmit={onProceed}>
@@ -55,17 +40,9 @@ class AuthPanel extends React.Component<Props, State> {
                         </Switch>
                     </div>
                     <div className={styles.body}>
-                        <div
-                            className={styles.inner}
-                            style={{
-                                height,
-                            }}
-                        >
-                            {React.Children.map(children, (child, index) => React.cloneElement(child, {
-                                active: index === currentStep,
-                                onHeightChange: this.setHeight,
-                            }))}
-                        </div>
+                        <Switch current={currentStep}>
+                            {children}
+                        </Switch>
                     </div>
                 </div>
             </form>
