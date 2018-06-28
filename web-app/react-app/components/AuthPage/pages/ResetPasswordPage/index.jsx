@@ -32,6 +32,7 @@ const ResetPasswordPage = ({ processing, step, form: { password, confirmPassword
                 error={errors.password}
                 processing={step === 0 && processing}
                 autoComplete="new-password"
+                meastureStrength
             />
             <Actions>
                 <Button disabled={processing}>Next</Button>
