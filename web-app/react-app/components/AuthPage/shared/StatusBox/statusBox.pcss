@@ -1,0 +1,62 @@
+@keyframes underlineLoop {
+  0% {
+    left: 0%;
+    right: 100%;
+  }
+  33% {
+    left: 0%;
+    right: 0%;
+  }
+  67% {
+    left: 0%;
+    right: 0%;
+  }
+  100% {
+    left: 100%;
+    right: 0%;
+  }
+}
+
+.root::after,
+.root::before {
+  bottom: 0;
+  content: '';
+  height: 1px;
+  position: absolute;
+}
+
+.root::after {
+  display: none;
+}
+
+.root::before {
+  background-color: #323232;
+  display: block;
+  transition: background-color 200ms;
+  width: 100%;
+}
+
+.success::before {
+  background-color: #2AC437;
+}
+
+.caution::before {
+  background-color: #F9CF0D;
+}
+
+.error::before {
+  background-color: #FF0F2D;
+}
+
+.processing::after {
+  animation: 1200ms infinite;
+  animation-name: underlineLoop;
+  background-color: #0424FF;
+  display: block;
+}
+
+.processing::before {
+  background-color: #323232;
+  opacity: 0.25;
+  transition: none;
+}

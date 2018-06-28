@@ -7,8 +7,9 @@ import cx from 'classnames'
 import zxcvbn from 'zxcvbn'
 
 import styles from './input.pcss'
-import Label from '../Label'
 import TextField from '../TextField'
+import StatusBox from '../StatusBox'
+import Switch from '../Switch'
 
 type Props = {
     type?: string,
@@ -24,12 +25,14 @@ type Props = {
 type State = {
     focused: boolean,
     autoCompleted: boolean,
+    lastKnownError: string,
 }
 
 class Input extends React.Component<Props, State> {
     state = {
         focused: false,
         autoCompleted: false,
+        lastKnownError: '',
     }
 
     onFocusChange = (focused: boolean) => {
@@ -51,12 +54,23 @@ class Input extends React.Component<Props, State> {
             return -1
         }
 
-        return zxcvbn(value).score
+        return [0, 1, 1, 2, 2][zxcvbn(value).score]
+    }
+
+    componentDidUpdate = (prevProps: Props) => {
+        const { error } = this.props
+
+        if (error && prevProps.error !== error) {
+            this.setState({
+                lastKnownError: error,
+            })
+        }
     }
 
     render = () => {
         const { label, error, processing, value, onChange, type, meastureStrength, ...props } = this.props
-        const { focused, autoCompleted } = this.state
+        const { focused, autoCompleted, lastKnownError } = this.state
+        const strength = this.strengthLevel()
 
         return (
             <div
@@ -67,8 +81,21 @@ class Input extends React.Component<Props, State> {
                     [styles.filled]: !!(value || autoCompleted),
                 })}
             >
-                <Label value={label} strengthLevel={this.strengthLevel()} />
-                <div className={styles.wrapper}>
+                <label>
+                    <Switch current={strength + 1}>
+                        <span>{label}</span>
+                        <span className={styles.weak}>Password is weak</span>
+                        <span className={styles.moderate}>Password is not strong</span>
+                        <span className={styles.strong}>Password is quite strong</span>
+                    </Switch>
+                </label>
+                <StatusBox
+                    className={styles.statusBar}
+                    processing={!!processing}
+                    error={!!error || strength === 0}
+                    caution={strength === 1}
+                    success={strength === 2}
+                >
                     <TextField
                         {...props}
                         type={type}
@@ -77,10 +104,13 @@ class Input extends React.Component<Props, State> {
                         onAutoComplete={this.onAutoComplete}
                         onFocusChange={this.onFocusChange}
                     />
+                </StatusBox>
+                <div className={styles.error}>
+                    <Switch current={!!error && !processing ? 1 : 0}>
+                        <div>&nbsp;</div>
+                        {lastKnownError}
+                    </Switch>
                 </div>
-                {!!error && !processing && (
-                    <div className={styles.error}>{error}</div>
-                )}
             </div>
         )
     }
