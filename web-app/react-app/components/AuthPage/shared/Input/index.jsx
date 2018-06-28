@@ -8,6 +8,7 @@ import zxcvbn from 'zxcvbn'
 
 import styles from './input.pcss'
 import Label from '../Label'
+import TextField from '../TextField'
 
 type Props = {
     type?: string,
@@ -22,27 +23,25 @@ type Props = {
 
 type State = {
     focused: boolean,
-    autoFilled: boolean,
+    autoCompleted: boolean,
 }
 
 class Input extends React.Component<Props, State> {
     state = {
         focused: false,
-        autoFilled: false,
+        autoCompleted: false,
     }
 
-    onFocusChange = ({ type }: SyntheticInputEvent<EventTarget>) => {
+    onFocusChange = (focused: boolean) => {
         this.setState({
-            focused: type === 'focus',
+            focused,
         })
     }
 
-    onAnimationStart = ({ animationName }: SyntheticAnimationEvent<EventTarget>) => {
-        if (animationName === styles.onAutoFillStart || animationName === styles.onAutoFillCancel) {
-            this.setState({
-                autoFilled: animationName === styles.onAutoFillStart,
-            })
-        }
+    onAutoComplete = (autoCompleted: boolean) => {
+        this.setState({
+            autoCompleted,
+        })
     }
 
     strengthLevel = () => {
@@ -57,7 +56,7 @@ class Input extends React.Component<Props, State> {
 
     render = () => {
         const { label, error, processing, value, onChange, type, meastureStrength, ...props } = this.props
-        const { focused, autoFilled } = this.state
+        const { focused, autoCompleted } = this.state
 
         return (
             <div
@@ -65,20 +64,18 @@ class Input extends React.Component<Props, State> {
                     [styles.withError]: !!error && !processing,
                     [styles.focused]: !!focused,
                     [styles.processing]: !!processing,
-                    [styles.filled]: !!(value || autoFilled),
+                    [styles.filled]: !!(value || autoCompleted),
                 })}
             >
                 <Label value={label} strengthLevel={this.strengthLevel()} />
                 <div className={styles.wrapper}>
-                    <input
+                    <TextField
                         {...props}
                         type={type}
-                        className={styles.input}
                         value={value}
                         onChange={onChange}
-                        onAnimationStart={this.onAnimationStart}
-                        onFocus={this.onFocusChange}
-                        onBlur={this.onFocusChange}
+                        onAutoComplete={this.onAutoComplete}
+                        onFocusChange={this.onFocusChange}
                     />
                 </div>
                 {!!error && !processing && (
