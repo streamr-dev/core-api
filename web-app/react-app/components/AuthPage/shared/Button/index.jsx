@@ -1,7 +1,5 @@
 // @flow
 
-/* eslint no-unused-vars: ["error", { "ignoreRestSiblings": true }] */
-
 import * as React from 'react'
 import cx from 'classnames'
 import styles from './button.pcss'
