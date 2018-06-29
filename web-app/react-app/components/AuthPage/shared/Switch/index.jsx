@@ -69,6 +69,7 @@ class Switch extends React.Component<Props, State> {
         const { current } = this.props
 
         if (current !== prevProps.current) {
+            console.log(current, prevProps.current)
             this.bumpHeight()
             this.focus()
         }

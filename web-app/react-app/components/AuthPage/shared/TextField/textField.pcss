@@ -8,7 +8,7 @@
   box-sizing: content-box;
   color: var(--greyDark);
   display: block;
-  font-size: 1em;
+  font-size: 0.75em;
   height: 1em;
   line-height: 2.5em;
   outline: 0;
@@ -34,4 +34,10 @@
 
 .root:focus::placeholder {
   opacity: 1;
+}
+
+@media (--md-up) {
+  .root {
+    font-size: 1em;
+  }
 }

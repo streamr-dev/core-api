@@ -1,10 +1,12 @@
+@import "@streamr/streamr-layout/pcss/variables.pcss";
+
 .root {
   display: block;
   margin: 0;
   position: relative;
 
   label {
-    font-size: 1em;
+    font-size: 0.75em;
     left: 0;
     line-height: 1em;
     margin: 0;
@@ -16,14 +18,13 @@
     transition: 200ms cubic-bezier(0.0, 0, 0.2, 1) 0ms;
     transition-property: color, transform;
     width: 100%;
+    z-index: 1;
   }
 }
 
 .error {
   color: #FF0F2D;
   font-size: 0.75em;
-  position: absolute;
-  width: 100%;
 }
 
 .filled label {
@@ -46,7 +47,7 @@
 }
 
 label + .statusBar {
-  padding-top: 1em;
+  padding-top: 0.75em;
 }
 
 .weak {
@@ -59,4 +60,14 @@ label + .statusBar {
 
 .strong {
   color: #2AC437;
+}
+
+@media (--md-up) {
+  .root label {
+    font-size: 1em;
+  }
+
+  label + .statusBar {
+    padding-top: 1em;
+  }
 }

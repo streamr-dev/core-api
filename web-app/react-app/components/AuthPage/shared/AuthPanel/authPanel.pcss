@@ -5,7 +5,8 @@
   color: #323232;
   font-size: 16px;
   margin: 0 auto;
-  width: 528px;
+  max-width: 528px;
+  width: 100%;
 }
 
 .panel {
@@ -17,7 +18,7 @@
 
 .header {
   border-bottom: 1px solid #F2F1F1;
-  font-size: 1.25em;
+  font-size: 1em;
   line-height: 1em;
   padding: 1.6em 0;
   text-align: center;
@@ -27,7 +28,7 @@
 .body {
   line-height: 1.75em;
   overflow: hidden;
-  padding: 2em 4.5em;
+  padding: 2em;
 }
 
 .panel a,
@@ -54,4 +55,22 @@
 .centered {
   display: flex;
   justify-content: space-around;
+}
+
+@media (--md-up) {
+  .header {
+    font-size: 1.25em;
+  }
+
+  .body {
+    padding-left: 3.75em;
+    padding-right: 3.75em;
+  }
+}
+
+@media (--lg-up) {
+  .body {
+    padding-left: 4.5em;
+    padding-right: 4.5em;
+  }
 }
