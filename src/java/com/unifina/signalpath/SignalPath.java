@@ -54,18 +54,6 @@ public class SignalPath extends ModuleWithUI {
 		this.root = isRoot;
 	}
 
-	@Deprecated
-	public SignalPath(Map iData, boolean isRoot, Globals globals) {
-		super();
-		this.root = isRoot;
-		this.setGlobals(globals);
-		setInitPriority(10);
-		canRefresh = true;
-
-		// Backwards compatibility, TODO: remove this constructor eventually
-		initFromRepresentation(iData);
-	}
-
 	public boolean isRoot() {
 		return root;
 	}
