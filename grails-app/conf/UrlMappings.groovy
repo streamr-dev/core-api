@@ -7,8 +7,6 @@ import com.unifina.domain.signalpath.Canvas
 
 class UrlMappings {
 	static mappings = {
-		"/localFeedFile/$feedDir/$day/$file"(controller:"localFeedFile",action:"index")
-
 		"/$controller/$action?/$id?"{
 			constraints {
 				// apply constraints here
