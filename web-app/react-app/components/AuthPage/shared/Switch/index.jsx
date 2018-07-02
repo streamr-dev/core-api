@@ -2,7 +2,6 @@
 
 import * as React from 'react'
 import cx from 'classnames'
-import elementSize from 'element-size'
 
 import styles from './switch.pcss'
 
@@ -20,24 +19,9 @@ class Switch extends React.Component<Props, State> {
         current: 0,
     }
 
-    state = {
-        height: 'auto',
-    }
-
     elements: Array<?HTMLDivElement> = []
 
     timeout: TimeoutID
-
-    bumpHeight = () => {
-        const { current } = this.props
-        const root = this.elements[current]
-
-        if (root) {
-            this.setState({
-                height: elementSize(root)[1],
-            })
-        }
-    }
 
     focus = () => {
         clearTimeout(this.timeout)
@@ -61,7 +45,6 @@ class Switch extends React.Component<Props, State> {
     }
 
     componentDidMount = () => {
-        this.bumpHeight()
         this.focus()
     }
 
@@ -69,23 +52,15 @@ class Switch extends React.Component<Props, State> {
         const { current } = this.props
 
         if (current !== prevProps.current) {
-            console.log(current, prevProps.current)
-            this.bumpHeight()
             this.focus()
         }
     }
 
     render = () => {
         const { current, children } = this.props
-        const { height } = this.state
 
         return (
-            <div
-                className={styles.root}
-                style={{
-                    height,
-                }}
-            >
+            <div className={styles.root}>
                 {React.Children.map(children, (child, index) => (
                     <div
                         className={cx(styles.switchable, {

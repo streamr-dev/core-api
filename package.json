@@ -59,7 +59,6 @@
     "css-loader": "^0.28.1",
     "css-mqpacker": "^6.0.0",
     "draggabilly": "^2.1.1",
-    "element-size": "^1.1.1",
     "empty": "^0.10.1",
     "enzyme": "^3.1.1",
     "enzyme-adapter-react-16": "^1.0.4",
