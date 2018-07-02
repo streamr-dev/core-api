@@ -6,7 +6,6 @@ import com.unifina.api.ValidationException
 import com.unifina.domain.dashboard.Dashboard
 import com.unifina.domain.dashboard.DashboardItem
 import com.unifina.domain.data.Feed
-import com.unifina.domain.data.FeedFile
 import com.unifina.domain.data.Stream
 import com.unifina.domain.security.Key
 import com.unifina.domain.security.Permission
@@ -24,12 +23,11 @@ import spock.lang.Specification
  * See the API for {@link grails.test.mixin.support.GrailsUnitTestMixin} for usage instructions
  */
 @TestFor(StreamService)
-@Mock([Canvas, Dashboard, DashboardItem, Stream, Feed, FeedFile, SecUser, Key, Permission, PermissionService])
+@Mock([Canvas, Dashboard, DashboardItem, Stream, Feed, SecUser, Key, Permission, PermissionService])
 class StreamServiceSpec extends Specification {
 
 	Feed feed
 	KafkaService kafkaService = Stub(KafkaService)
-	FeedFileService feedFileService = new FeedFileService()
 	DashboardService dashboardService = Mock(DashboardService)
 
 	SecUser me = new SecUser(username: "me")
@@ -42,7 +40,6 @@ class StreamServiceSpec extends Specification {
 		// Setup application context
 		def applicationContext = Stub(ApplicationContext) {
 			getBean(KafkaService) >> kafkaService
-			getBean(FeedFileService) >> feedFileService
 			getBean(DashboardService) >> dashboardService
 		}
 
