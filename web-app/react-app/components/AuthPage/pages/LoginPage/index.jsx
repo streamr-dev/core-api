@@ -13,6 +13,7 @@ import AuthStep from '../../shared/AuthStep'
 import withAuthFlow, { type AuthFlowProps } from '../../shared/withAuthFlow'
 import { preventDefault, onInputChange } from '../../shared/utils'
 import schemas from '../../schemas/login'
+import styles from './loginPage.pcss'
 
 type Props = AuthFlowProps & {
     form: {
@@ -58,7 +59,7 @@ const LoginPage = ({ processing, step, form: { email, password, rememberMe }, er
                     Remember me
                 </Checkbox>
                 <Link to="/register/forgotPassword">Forgot your password?</Link>
-                <Button disabled={processing}>Go</Button>
+                <Button className={styles.button} disabled={processing}>Go</Button>
             </Actions>
         </AuthStep>
         <AuthStep title="Done" showBack>

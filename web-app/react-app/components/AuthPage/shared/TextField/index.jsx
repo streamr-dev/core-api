@@ -1,5 +1,7 @@
 // @flow
 
+/* eslint no-unused-vars: ["error", { "ignoreRestSiblings": true }] */
+
 import React from 'react'
 import cx from 'classnames'
 
@@ -29,7 +31,7 @@ class TextField extends React.Component<Props> {
     }
 
     render = () => {
-        const { className, ...props } = this.props
+        const { className,  onFocusChange, onAutoComplete, ...props } = this.props
 
         return (
             <input

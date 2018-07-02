@@ -107,8 +107,8 @@ class Input extends React.Component<Props, State> {
                 </StatusBox>
                 <div className={styles.error}>
                     <Switch current={!!error && !processing ? 1 : 0}>
-                        <div>&nbsp;</div>
-                        {lastKnownError}
+                        <div />
+                        {lastKnownError || '&nbsp;'}
                     </Switch>
                 </div>
             </div>
