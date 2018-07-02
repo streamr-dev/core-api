@@ -4,7 +4,6 @@ package com.unifina.datasource;
 import com.unifina.data.FeedEvent;
 import com.unifina.data.RealtimeEventQueue;
 import com.unifina.feed.AbstractFeed;
-import com.unifina.feed.ICatchupFeed;
 import com.unifina.serialization.SerializationRequest;
 import com.unifina.service.SerializationService;
 import com.unifina.signalpath.SignalPath;
@@ -13,13 +12,14 @@ import com.unifina.utils.Globals;
 import grails.util.Holders;
 import org.apache.log4j.Logger;
 
-import java.util.*;
+import java.util.Date;
+import java.util.Timer;
+import java.util.TimerTask;
 
 public class RealtimeDataSource extends DataSource {
 	private static final Logger log = Logger.getLogger(RealtimeDataSource.class);
 
 	private final Timer secTimer = new Timer();
-	private final PriorityQueue<FeedEvent> catchupQueue = new PriorityQueue<>();
 	private final RealtimeEventQueue eventQueue;
 	private boolean abort = false;
 

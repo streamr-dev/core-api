@@ -26,13 +26,12 @@ import java.lang.reflect.InvocationTargetException;
  */
 public abstract class AbstractFeedProxy<ModuleClass, RawMessageClass, MessageClass extends ITimestamped, KeyClass, EventRecipientClass extends IEventRecipient>
 		extends AbstractFeed<ModuleClass, MessageClass, KeyClass, EventRecipientClass>
-		implements MessageRecipient<RawMessageClass, KeyClass>, ICatchupFeed {
+		implements MessageRecipient<RawMessageClass, KeyClass> {
 
 	private static final Logger log = Logger.getLogger(AbstractFeedProxy.class);
 
 	private final MessageHub<RawMessageClass, MessageClass, KeyClass> hub;
 
-	private Catchup catchup = null;
 	private Long firstRealQueue = null;
 	private int expected = 0;
 
@@ -51,8 +50,7 @@ public abstract class AbstractFeedProxy<ModuleClass, RawMessageClass, MessageCla
 	
 	/**
 	 * This method is called by the hub to distribute messages to session-specific proxies.
-	 * It processes the message and adds it to the event queue - or if a catchup is in
-	 * progress, it adds them to the wait queue.
+	 * It processes the message and adds it to the event queue.
 	 */
 	@Override
 	public void receive(Message parsedMsg) {
@@ -110,36 +108,6 @@ public abstract class AbstractFeedProxy<ModuleClass, RawMessageClass, MessageCla
 	 * It should convert the feed message to FeedEvent(s).
 	 */
 	protected abstract FeedEvent<MessageClass, EventRecipientClass>[] process(MessageClass msg);
-	
-	
-	@Override
-	public FeedEvent[] getNextEvents() {
-		if (catchup == null) {
-			throw new IllegalStateException("Catchup is not started!");
-		}
-
-		FeedEvent[] result = null;
-		
-		while (result == null) {
-			int catchupCounter = catchup.getNextCounter();
-			RawMessageClass line = (RawMessageClass) catchup.getNext();
-
-			if (line == null) {
-				return null;
-			}
-
-			MessageClass msg = hub.getParser().parse(line);
-
-			if (catchupCounter != expected) {
-				throw new IllegalStateException("Gap in catchup! Counter: " + catchupCounter + ", expected: " + expected);
-			} else {
-				expected++;
-				result = process(msg);
-			}
-		}
-		
-		return result;
-	}
 	
 	@Override
 	public void startFeed() throws Exception {
