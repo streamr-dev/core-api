@@ -26,8 +26,6 @@ class Feed implements Serializable {
 	@Deprecated
 	String messageSourceClass
 	String messageSourceConfig
-	@Deprecated
-	String discoveryUtilClass
 	String discoveryUtilConfig
 
 	@Deprecated
@@ -57,7 +55,6 @@ class Feed implements Serializable {
 		feedConfig(nullable:true)
 		cacheConfig(nullable:true)
 		messageSourceConfig(nullable:true)
-		discoveryUtilClass(nullable:true)
 		discoveryUtilConfig(nullable:true)
 		startOnDemand(nullable:true)
 		fieldDetectorClass(nullable: true)

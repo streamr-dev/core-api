@@ -112,4 +112,5 @@ databaseChangeLog = {
 	include file: 'core/2018-05-02-test-data-products-subscriptions.groovy'
 	include file: 'core/2018-07-02-rm-feedfile-table.groovy'
 	include file: 'core/2018-07-02-rm-feed-bundled-feed-files.groovy'
+	include file: 'core/2018-07-02-remove-feed-discoveryutilclass.groovy'
 }
