@@ -23,4 +23,14 @@ public class StreamrMessage extends MapMessage {
 	public String getStreamId() {
 		return streamId;
 	}
+
+	@Override
+	public String toString() {
+		return "StreamrMessage{" +
+				"partition=" + partition +
+				", streamId='" + streamId + '\'' +
+				", timestamp=" + timestamp +
+				", payload=" + payload +
+				'}';
+	}
 }

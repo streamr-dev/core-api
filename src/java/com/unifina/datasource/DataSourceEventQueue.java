@@ -3,6 +3,7 @@ package com.unifina.datasource;
 import com.unifina.data.FeedEvent;
 import com.unifina.feed.MasterClock;
 import com.unifina.utils.Globals;
+import org.apache.log4j.Logger;
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
 
@@ -12,6 +13,9 @@ import java.util.List;
 import java.util.Queue;
 
 public abstract class DataSourceEventQueue {
+	private static final Logger log = Logger.getLogger(DataSourceEventQueue.class);
+	private static final int QUEUE_HARD_LIMIT = 10000;
+
 	private final MasterClock masterClock;
 	private final List<IDayListener> dayListeners = new ArrayList<>();
 	private final Object syncLock;
@@ -55,7 +59,11 @@ public abstract class DataSourceEventQueue {
 		if (syncLock != null) {
 			synchronized (syncLock) {
 				event.queueTicket = queueTicket++;
-				queue.add(event);
+				if (queue.size() <= QUEUE_HARD_LIMIT) {
+					queue.add(event);
+				} else {
+					log.warn("Queue hard limit reached: " + event.toString());
+				}
 				syncLock.notify(); // Notify the SignalPathRunner thread
 			}
 		} else {
