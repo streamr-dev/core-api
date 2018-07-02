@@ -45,8 +45,6 @@ class Feed implements Serializable {
 
 	@Deprecated
 	Boolean startOnDemand
-	@Deprecated
-	Boolean bundledFeedFiles
 
 	static hasMany = [permissions: Permission]
 
@@ -62,7 +60,6 @@ class Feed implements Serializable {
 		discoveryUtilClass(nullable:true)
 		discoveryUtilConfig(nullable:true)
 		startOnDemand(nullable:true)
-		bundledFeedFiles(nullable:true)
 		fieldDetectorClass(nullable: true)
 		dataRangeProviderClass(nullable: true)
 	}
