@@ -15,6 +15,8 @@ import grails.test.mixin.support.GrailsUnitTestMixin
 import grails.test.runtime.FreshRuntime
 import org.codehaus.groovy.grails.commons.InstanceFactoryBean
 
+import java.text.SimpleDateFormat
+
 @FreshRuntime
 @TestMixin(GrailsUnitTestMixin)
 @Mock(SecUser)
@@ -90,6 +92,8 @@ class EmailModuleSpec extends UiChannelMockingSpecification {
 	void "module should send an email for a realtime datasource"() {
 		initContext()
 		globals.realtime = true
+		def df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS")
+		df.setTimeZone(TimeZone.getTimeZone("Europe/Helsinki"))
 
 		when: "feedback sent from the feedback page"
 			module.sub.receive("Test subject")
@@ -111,7 +115,7 @@ Message:
 Test message
 
 Event Timestamp:
-${module.df.format(globals.time)}
+${df.format(globals.time)}
 
 Input Values:
 value1: 500
