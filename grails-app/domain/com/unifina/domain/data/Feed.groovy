@@ -41,9 +41,6 @@ class Feed implements Serializable {
 
 	Module module
 
-	@Deprecated
-	Boolean startOnDemand
-
 	static hasMany = [permissions: Permission]
 
 	static constraints = {
@@ -56,7 +53,6 @@ class Feed implements Serializable {
 		cacheConfig(nullable:true)
 		messageSourceConfig(nullable:true)
 		discoveryUtilConfig(nullable:true)
-		startOnDemand(nullable:true)
 		fieldDetectorClass(nullable: true)
 		dataRangeProviderClass(nullable: true)
 	}
