@@ -62,8 +62,6 @@ module.exports = {
         profilePage: path.resolve(root, 'web-app', 'react-app', 'profilePageMain.js'),
         authPage: path.resolve(root, 'web-app', 'react-app', 'authPageMain.js'),
         dashboardPage: path.resolve(root, 'web-app', 'react-app', 'dashboardPageMain.js'),
-        authPage: path.resolve(root, 'web-app', 'react-app', 'authPageMain.js'),
-        dashboardPage: path.resolve(root, 'web-app', 'react-app', 'dashboardPageMain.js'),
         // TODO: remove this when CORE-1075-reactify-stream-page is ready
         streamPageDataPreview: path.resolve(root, 'web-app', 'react-app', 'streamPageDataPreviewMain.js')
     },
