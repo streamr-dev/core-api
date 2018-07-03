@@ -141,10 +141,12 @@ public class SignalPathRunner extends Thread {
 
 	private void runSignalPaths() {
 		// Start feed, blocks until feed is complete
-		globals.getDataSource().startFeed();
-
-		// Stop the feed, cleanup
-		globals.getDataSource().stopFeed();
+		try {
+			globals.getDataSource().startFeed();
+		} finally {
+			// Stop the feed, cleanup
+			globals.getDataSource().stopFeed();
+		}
 	}
 
 	/**
