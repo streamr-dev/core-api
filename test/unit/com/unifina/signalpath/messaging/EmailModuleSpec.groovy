@@ -3,6 +3,7 @@ package com.unifina.signalpath.messaging
 import com.unifina.UiChannelMockingSpecification
 import com.unifina.datasource.RealtimeDataSource
 import com.unifina.domain.security.SecUser
+import com.unifina.domain.signalpath.Canvas
 import com.unifina.signalpath.NotificationMessage
 import com.unifina.signalpath.SignalPath
 import com.unifina.utils.Globals
@@ -24,6 +25,7 @@ class EmailModuleSpec extends UiChannelMockingSpecification {
 
 	EmailModule module
 	MockMailService ms
+	MockCanvasService cs
 
 	Globals globals
 
@@ -36,13 +38,17 @@ class EmailModuleSpec extends UiChannelMockingSpecification {
 
 		defineBeans {
 			mailService(MockMailService)
+			canvasService(MockCanvasService)
 		}
 		ms = grailsApplication.mainContext.getBean("mailService")
 		assert ms != null
-		
+		cs = grailsApplication.mainContext.getBean("canvasService")
+		assert cs != null
+
 		grailsApplication.config.unifina.email.sender = "sender"
 		
 		module = new EmailModule()
+		module.canvasService = cs
 	}
 
 	private void initContext(Map context = [:], SecUser user = new SecUser(timezone:"Europe/Helsinki", username: "username").save(failOnError: true, validate: false)) {
@@ -57,6 +63,9 @@ class EmailModuleSpec extends UiChannelMockingSpecification {
 		module.parentSignalPath = new SignalPath(true)
 		module.parentSignalPath.globals = globals
 		module.parentSignalPath.configure([uiChannel: [id: "uiChannel"]])
+
+		module.rootSignalPath.canvas = new Canvas()
+		module.rootSignalPath.canvas.save()
 	}
 
 	void "emailModule sends the correct email"() {
@@ -83,7 +92,22 @@ class EmailModuleSpec extends UiChannelMockingSpecification {
 				assert ms.from == grailsApplication.config.unifina.email.sender
 				assert ms.to == "username"
 				assert ms.subject == "Subject"
-				assert ms.body == "\nMessage:\nMessage\n\nEvent Timestamp:\n1970-01-01 02:00:00.000\n\nInput Values:\nvalue1: 1\nvalue2: abcd\n\n"
+				assert ms.body == """
+This email was sent by one of your running Canvases on Streamr.
+
+Message:
+Message
+
+Event Timestamp:
+1970-01-01 02:00:00.000
+
+Input Values:
+value1: 1
+value2: abcd
+
+To view, edit, or stop the Canvas that sent this message, click the below link:
+https://www.streamr.com/canvas/editor/1
+"""
 				ms.clear()
 			}
 			.test()
@@ -111,6 +135,8 @@ class EmailModuleSpec extends UiChannelMockingSpecification {
 			ms.subject == "Test subject"
 		then: "body must be correct"
 			ms.body == """
+This email was sent by one of your running Canvases on Streamr.
+
 Message:
 Test message
 
@@ -121,6 +147,8 @@ Input Values:
 value1: 500
 value2: test value
 
+To view, edit, or stop the Canvas that sent this message, click the below link:
+https://www.streamr.com/canvas/editor/1
 """
 	}
 

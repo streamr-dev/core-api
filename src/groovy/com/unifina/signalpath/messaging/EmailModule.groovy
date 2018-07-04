@@ -1,6 +1,8 @@
 package com.unifina.signalpath.messaging
 
 import com.unifina.domain.security.SecUser
+import com.unifina.domain.signalpath.Canvas
+import com.unifina.service.CanvasService
 import com.unifina.signalpath.*
 import grails.util.Holders
 
@@ -21,6 +23,7 @@ class EmailModule extends ModuleWithSideEffects {
 	Long emailInterval = 60000
 	boolean emailSent
 	boolean lastEmailBlocked
+	transient CanvasService canvasService
 
 	@Override
 	void init() {
@@ -58,6 +61,14 @@ class EmailModule extends ModuleWithSideEffects {
 		parentSignalPath?.showNotification(getMessageBody())
 	}
 
+	private String linkToCanvas() {
+		if (canvasService == null) {
+			canvasService = (CanvasService) Holders.grailsApplication.getMainContext().getBean("canvasService")
+		}
+		final Canvas c = getRootSignalPath().canvas
+		return canvasService.getCanvasURL(c)
+	}
+
 	private String getMessageBody() {
 		// Create String with the input values
 		String inputValues = ""
@@ -68,6 +79,8 @@ class EmailModule extends ModuleWithSideEffects {
 		}
 
 		String body = """
+This email was sent by one of your running Canvases on Streamr.
+
 Message:
 {0}
 
@@ -76,7 +89,9 @@ Event Timestamp:
 
 Input Values:
 {2}
-{3}"""
+To view, edit, or stop the Canvas that sent this message, click the below link:
+{3}
+{4}"""
 
 		MessageFormat mf = new MessageFormat(body)
 		for (Format format : mf.getFormats()) {
@@ -92,6 +107,7 @@ Input Values:
 			message.getValue(),
 			globals.time,
 			inputValues,
+			linkToCanvas(),
 			warning
 		]
 		return mf.format(data)

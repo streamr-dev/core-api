@@ -19,6 +19,7 @@ import grails.transaction.Transactional
 import groovy.json.JsonBuilder
 import groovy.transform.CompileStatic
 import org.codehaus.groovy.grails.web.json.JSONObject
+import org.codehaus.groovy.grails.web.mapping.LinkGenerator
 
 class CanvasService {
 
@@ -27,6 +28,7 @@ class CanvasService {
 	PermissionService permissionService
 	DashboardService dashboardService
 	StreamService streamService
+	LinkGenerator linkGenerator
 
 	@CompileStatic
 	Map reconstruct(Canvas canvas, SecUser user) {
@@ -175,6 +177,11 @@ class CanvasService {
 		for (UiChannelIterator.Element element in UiChannelIterator.over(signalPathMap)) {
 			element.uiChannelData.id = null
 		}
+	}
+
+	@CompileStatic
+	String getCanvasURL(Canvas canvas) {
+		return linkGenerator.link(controller: 'canvas', action: 'editor', id: canvas.id, absolute: true)
 	}
 
 	private boolean hasCanvasPermission(Canvas canvas, SecUser user, Permission.Operation op) {
