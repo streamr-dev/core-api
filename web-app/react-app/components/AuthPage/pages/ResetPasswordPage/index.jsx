@@ -3,7 +3,7 @@
 import * as React from 'react'
 import cx from 'classnames'
 
-import AuthPanel from '../../shared/AuthPanel'
+import AuthPanel, { styles as authPanelStyles } from '../../shared/AuthPanel'
 import Input from '../../shared/Input'
 import Actions from '../../shared/Actions'
 import Button from '../../shared/Button'
@@ -20,46 +20,48 @@ type Props = AuthFlowProps & {
     },
 }
 
-const ResetPasswordPage = ({ processing, step, form: { password, confirmPassword }, errors, next, prev, attach, setFormField }: Props) => (
-    <AuthPanel currentStep={step} onBack={prev} ref={attach} onProceed={preventDefault(next, schemas)}>
-        <AuthStep title="Reset password">
-            <Input
-                name="password"
-                type="password"
-                label="Create a Password"
-                value={password}
-                onChange={onInputChange(setFormField)}
-                error={errors.password}
-                processing={step === 0 && processing}
-                autoComplete="new-password"
-                meastureStrength
-            />
-            <Actions>
-                <Button disabled={processing}>Next</Button>
-            </Actions>
-        </AuthStep>
-        <AuthStep title="Reset password" showBack>
-            <Input
-                name="confirmPassword"
-                type="password"
-                label="Confirm your password"
-                value={confirmPassword}
-                onChange={onInputChange(setFormField)}
-                error={errors.confirmPassword}
-                processing={step === 1 && processing}
-                autoComplete="new-password"
-            />
-            <Actions>
-                <Button disabled={processing}>Next</Button>
-            </Actions>
-        </AuthStep>
-        <AuthStep title="Done." showSignin>
-            <div className={cx(AuthPanel.styles.spaceLarge, 'text-center')}>
-                <p>Done.</p>
-            </div>
-        </AuthStep>
-    </AuthPanel>
-)
+// const ResetPasswordPage = ({ processing, step, form: { password, confirmPassword }, errors, next, prev, attach, setFormField }: Props) => (
+//     <AuthPanel currentStep={step} onBack={prev} ref={attach} onProceed={preventDefault(next, schemas)}>
+//         <AuthStep title="Reset password">
+//             <Input
+//                 name="password"
+//                 type="password"
+//                 label="Create a Password"
+//                 value={password}
+//                 onChange={onInputChange(setFormField)}
+//                 error={errors.password}
+//                 processing={step === 0 && processing}
+//                 autoComplete="new-password"
+//                 meastureStrength
+//             />
+//             <Actions>
+//                 <Button disabled={processing}>Next</Button>
+//             </Actions>
+//         </AuthStep>
+//         <AuthStep title="Reset password" showBack>
+//             <Input
+//                 name="confirmPassword"
+//                 type="password"
+//                 label="Confirm your password"
+//                 value={confirmPassword}
+//                 onChange={onInputChange(setFormField)}
+//                 error={errors.confirmPassword}
+//                 processing={step === 1 && processing}
+//                 autoComplete="new-password"
+//             />
+//             <Actions>
+//                 <Button disabled={processing}>Next</Button>
+//             </Actions>
+//         </AuthStep>
+//         <AuthStep title="Done." showSignin>
+//             <div className={cx(authPanelStyles.spaceLarge, 'text-center')}>
+//                 <p>Done.</p>
+//             </div>
+//         </AuthStep>
+//     </AuthPanel>
+// )
+
+const ResetPasswordPage = () => <div />
 
 export default withAuthFlow(ResetPasswordPage, 0, {
     password: '',

@@ -11,7 +11,7 @@ import Checkbox from '../../shared/Checkbox'
 import AuthStep from '../../shared/AuthStep'
 
 import withAuthFlow, { type AuthFlowProps } from '../../shared/withAuthFlow'
-import { preventDefault, onInputChange } from '../../shared/utils'
+import { onInputChange } from '../../shared/utils'
 import schemas from '../../schemas/login'
 import styles from './loginPage.pcss'
 
@@ -23,8 +23,15 @@ type Props = AuthFlowProps & {
     },
 }
 
-const LoginPage = ({ processing, step, form: { email, password, rememberMe }, errors, next, prev, attach, setFormField }: Props) => (
-    <AuthPanel currentStep={step} onBack={prev} ref={attach} onProceed={preventDefault(next, schemas)}>
+const LoginPage = ({ setIsProcessing, isProcessing, step, form: { email, password, rememberMe }, errors, setFieldError, next, prev, setFormField }: Props) => (
+    <AuthPanel
+        currentStep={step}
+        onPrev={prev}
+        onNext={next}
+        onProcessing={setIsProcessing}
+        validationSchemas={schemas}
+        onValidationError={setFieldError}
+    >
         <AuthStep title="Sign In" showEth showSignup>
             <Input
                 name="email"
@@ -32,11 +39,11 @@ const LoginPage = ({ processing, step, form: { email, password, rememberMe }, er
                 value={email}
                 onChange={onInputChange(setFormField)}
                 error={errors.email}
-                processing={step === 0 && processing}
+                processing={step === 0 && isProcessing}
                 autoComplete="email"
             />
             <Actions>
-                <Button disabled={processing}>Next</Button>
+                <Button disabled={isProcessing}>Next</Button>
             </Actions>
         </AuthStep>
         <AuthStep title="Sign In" showBack>
@@ -47,7 +54,7 @@ const LoginPage = ({ processing, step, form: { email, password, rememberMe }, er
                 value={password}
                 onChange={onInputChange(setFormField)}
                 error={errors.password}
-                processing={step === 1 && processing}
+                processing={step === 1 && isProcessing}
                 autoComplete="current-password"
             />
             <Actions>
@@ -59,11 +66,8 @@ const LoginPage = ({ processing, step, form: { email, password, rememberMe }, er
                     Remember me
                 </Checkbox>
                 <Link to="/register/forgotPassword">Forgot your password?</Link>
-                <Button className={styles.button} disabled={processing}>Go</Button>
+                <Button className={styles.button} disabled={isProcessing}>Go</Button>
             </Actions>
-        </AuthStep>
-        <AuthStep title="Done" showBack>
-            Signed in.
         </AuthStep>
     </AuthPanel>
 )
