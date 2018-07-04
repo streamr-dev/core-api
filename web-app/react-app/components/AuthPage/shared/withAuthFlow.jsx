@@ -2,6 +2,7 @@
 
 import * as React from 'react'
 import * as yup from 'yup'
+import axios from 'axios'
 
 import AuthPanel from './AuthPanel'
 
@@ -33,10 +34,16 @@ export type AuthFlowProps = {
     step: Step,
 }
 
+type Props = {
+    endpoint: string,
+    onSuccess?: () => void,
+    onFailure?: (Error) => void,
+}
+
 const getDisplayName = (WrappedComponent: React.ComponentType<any>) => WrappedComponent.displayName || WrappedComponent.name || 'Component'
 
 const withAuthFlow = (WrappedComponent: React.ComponentType<any>, step: Step, initialFormFields: FormFields) => {
-    class WithAuthFlow extends React.Component<{}, State> {
+    class WithAuthFlow extends React.Component<Props, State> {
         static displayName = `WithAuthFlow(${getDisplayName(WrappedComponent)})`
 
         panel: ?AuthPanel
@@ -67,18 +74,41 @@ const withAuthFlow = (WrappedComponent: React.ComponentType<any>, step: Step, in
 
         validate = (schema: ?yup.Schema): Promise<any> => (schema || yup.object()).validate(this.state.form)
 
+        stopProcessing = () => {
+            this.setState({
+                processing: false,
+            })
+        }
+
         next = (schemas: Array<yup.Schema>) => {
             const { step, errors } = this.state
+            const { onSuccess, onFailure } = this.props
 
             this.setState({
                 processing: true,
             }, () => {
                 this.validate(schemas[step])
                     .then(() => {
-                        this.setState({
-                            processing: false,
-                            step: Math.min(this.numSteps(), step + 1),
-                        })
+                        if (step < this.numSteps() - 1) {
+                            this.setState({
+                                processing: false,
+                                step: step + 1,
+                            })
+                        } else {
+                            this.submit()
+                                .then(onSuccess, (error) => {
+                                    if (onFailure) {
+                                        onFailure(error)
+                                    } else {
+                                        throw error
+                                    }
+                                })
+                                .then(() => {
+                                    this.setState({
+                                        processing: false,
+                                    })
+                                })
+                        }
                     }, (error: yup.ValidationError) => {
                         this.setState({
                             processing: false,
@@ -89,6 +119,11 @@ const withAuthFlow = (WrappedComponent: React.ComponentType<any>, step: Step, in
                         })
                     })
             })
+        }
+
+        submit = () => {
+            const { endpoint } = this.props
+            return axios.post(endpoint, this.state.form)
         }
 
         prev = () => {
