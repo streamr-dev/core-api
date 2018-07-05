@@ -19,7 +19,7 @@ type Props = PanelProps & {
     onValidationError?: FieldErrorSetter,
     step: number,
     totalSteps: number,
-    onProcessing?: FlagSetter,
+    setIsProcessing?: FlagSetter,
     onSubmit: () => Promise<any>,
     onSuccess?: () => void,
     onFailure?: ErrorHandler,
@@ -35,10 +35,10 @@ class AuthStep extends React.Component<Props> {
     }
 
     setProcessing = (value: boolean) => {
-        const { onProcessing } = this.props
+        const { setIsProcessing } = this.props
 
-        if (onProcessing) {
-            onProcessing(value)
+        if (setIsProcessing) {
+            setIsProcessing(value)
         }
     }
 

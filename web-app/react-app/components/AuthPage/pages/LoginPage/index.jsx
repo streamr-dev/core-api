@@ -30,7 +30,7 @@ const LoginPage = ({ setIsProcessing, isProcessing, step, form, errors, setField
         form={form}
         onPrev={prev}
         onNext={next}
-        onProcessing={setIsProcessing}
+        setIsProcessing={setIsProcessing}
         validationSchemas={schemas}
         onValidationError={setFieldError}
     >
