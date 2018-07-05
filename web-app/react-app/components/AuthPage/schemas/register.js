@@ -2,13 +2,14 @@
 
 import * as yup from 'yup'
 
-import { email, password, confirmPassword } from './common'
+import { password, confirmPassword } from './common'
 
 export default [
-    // Step 0: Email
+    // Step 0: Name
     yup.object()
         .shape({
-            email,
+            name: yup.string()
+                .required('Name is required'),
         }),
     // Step 1: New password
     yup.object()
