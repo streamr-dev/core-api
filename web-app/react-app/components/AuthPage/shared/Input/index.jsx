@@ -19,7 +19,7 @@ type Props = {
     processing?: boolean,
     value: string,
     onChange: (SyntheticInputEvent<EventTarget>) => void,
-    meastureStrength?: boolean,
+    measureStrength?: boolean,
 }
 
 type State = {
@@ -48,9 +48,9 @@ class Input extends React.Component<Props, State> {
     }
 
     strengthLevel = () => {
-        const { value, type, meastureStrength } = this.props
+        const { value, type, measureStrength } = this.props
 
-        if (type !== 'password' || !meastureStrength || !value) {
+        if (type !== 'password' || !measureStrength || !value) {
             return -1
         }
 
@@ -68,7 +68,7 @@ class Input extends React.Component<Props, State> {
     }
 
     render = () => {
-        const { label, error, processing, value, onChange, type, meastureStrength, ...props } = this.props
+        const { label, error, processing, value, onChange, type, measureStrength, ...props } = this.props
         const { focused, autoCompleted, lastKnownError } = this.state
         const strength = this.strengthLevel()
 

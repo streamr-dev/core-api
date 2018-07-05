@@ -1,6 +1,8 @@
 // @flow
 
 import * as React from 'react'
+import axios from 'axios'
+import qs from 'qs'
 import { Link } from 'react-router-dom'
 
 import AuthPanel, { styles as authPanelStyles } from '../../shared/AuthPanel'
@@ -10,13 +12,28 @@ import Button from '../../shared/Button'
 import Checkbox from '../../shared/Checkbox'
 import AuthStep from '../../shared/AuthStep'
 
+import createLink from '../../../../utils/createLink'
 import withAuthFlow from '../../shared/withAuthFlow'
 import { onInputChange } from '../../shared/utils'
 import schemas from '../../schemas/login'
 import styles from './loginPage.pcss'
 import type { AuthFlowProps } from '../../shared/types'
 
+// Spring security service requires its own input names
+const loginUrl = createLink('j_spring_security_check')
+const defaultRedirectUrl = createLink('canvas/editor')
+const inputNames = {
+    email: 'j_username',
+    password: 'j_password',
+    rememberMe: '_spring_security_remember_me',
+}
+
 type Props = AuthFlowProps & {
+    match: {
+        params: {
+            redirect?: ?string,
+        },
+    },
     form: {
         email: string,
         password: string,
@@ -26,21 +43,35 @@ type Props = AuthFlowProps & {
 
 class LoginPage extends React.Component<Props> {
     submit = () => new Promise((resolve, reject) => {
-        // NOTE: Placeholder for axios.post(…) or some other
-        //       async puppy.
-        setTimeout(() => {
-            // resolve()
-            const { password } = this.props.form
-            if (password === 'qwerty123') {
-                resolve()
-            } else {
-                reject(new Error('Invalid creds.'))
-            }
-        }, 1000)
+        const { email, password, rememberMe } = this.props.form
+        const data = {
+            [inputNames.email]: email,
+            [inputNames.password]: password,
+            [inputNames.rememberMe]: rememberMe ? 'on' : undefined,
+        }
+        axios({
+            method: 'post',
+            url: loginUrl,
+            data: qs.stringify(data),
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+                'X-Requested-With': 'XMLHttpRequest', // Required
+            },
+        })
+            .then(({ data }) => {
+                if (data.error) {
+                    this.onFailure(new Error(data.error))
+                    reject()
+                } else {
+                    this.onSuccess()
+                    resolve()
+                }
+            })
     })
 
     onSuccess = () => {
-        /* noop */
+        const redirectUrl = this.props.match.params.redirect || defaultRedirectUrl
+        window.location.assign(redirectUrl)
     }
 
     onFailure = (error: Error) => {
@@ -61,7 +92,7 @@ class LoginPage extends React.Component<Props> {
                 validationSchemas={schemas}
                 onValidationError={setFieldError}
             >
-                <AuthStep title="Sign In" showEth showSignup>
+                <AuthStep title="Sign in" showEth={false} showSignup>
                     <Input
                         name="email"
                         label="Email"
@@ -84,7 +115,7 @@ class LoginPage extends React.Component<Props> {
                     </Actions>
                 </AuthStep>
                 <AuthStep
-                    title="Sign In"
+                    title="Sign in"
                     showBack
                     onSubmit={this.submit}
                     onSuccess={this.onSuccess}
@@ -119,11 +150,6 @@ class LoginPage extends React.Component<Props> {
                         <Link to="/register/forgotPassword">Forgot your password?</Link>
                         <Button className={styles.button} disabled={isProcessing}>Go</Button>
                     </Actions>
-                </AuthStep>
-                <AuthStep title="Logged in?">
-                    <p className={authPanelStyles.spaceLarge}>
-                        Remove this step and redirect in `onSuccess` prop/callback.
-                    </p>
                 </AuthStep>
             </AuthPanel>
         )

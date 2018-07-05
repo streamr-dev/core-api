@@ -10,6 +10,7 @@ import '@streamr/streamr-layout/pcss'
 
 import LoginPage from './pages/LoginPage'
 import RegisterPage from './pages/RegisterPage'
+import SignupPage from './pages/SignupPage'
 import ForgotPasswordPage from './pages/ForgotPasswordPage'
 import ResetPasswordPage from './pages/ResetPasswordPage'
 
@@ -27,7 +28,8 @@ const AuthPage = () => (
                 <div className={styles.panel}>
                     <Switch>
                         <Route exact path="/login/auth" component={LoginPage} />
-                        <Route exact path="/register/signup" component={RegisterPage} />
+                        <Route exact path="/register/register" component={RegisterPage} />
+                        <Route exact path="/register/signup" component={SignupPage} />
                         <Route exact path="/register/forgotPassword" component={ForgotPasswordPage} />
                         <Route exact path="/register/resetPassword" component={ResetPasswordPage} />
                         <Redirect from="/register" to="/register/signup" />

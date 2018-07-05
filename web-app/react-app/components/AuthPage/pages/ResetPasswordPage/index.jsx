@@ -41,7 +41,7 @@ const ResetPasswordPage = ({ setIsProcessing, isProcessing, step, form, errors, 
                 error={errors.password}
                 processing={step === 0 && isProcessing}
                 autoComplete="new-password"
-                meastureStrength
+                measureStrength
             />
             <Actions>
                 <Button disabled={isProcessing}>Next</Button>

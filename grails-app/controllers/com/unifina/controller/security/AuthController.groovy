@@ -84,6 +84,7 @@ class AuthController {
 			return render([success: false, error: userService.beautifyErrors(cmd.errors.getAllErrors())] as JSON)
 		}
 
+		// TODO: in the UI the recaptcha is just totally taken away. should we just remove it from here as well?
 		if (grailsApplication.config.streamr.signup.requireCaptcha) {
 			def response = Unirest.post(grailsApplication.config.recaptcha.verifyUrl)
 				.field("secret", (String) grailsApplication.config.recaptchav2.secret)

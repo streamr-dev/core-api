@@ -4,6 +4,8 @@ declare var Streamr: {
     createLink: Function
 }
 
-export default (uri: string) => Streamr.createLink({
+const createLink = (uri: string) => Streamr.createLink({
     uri
 })
+
+export default createLink

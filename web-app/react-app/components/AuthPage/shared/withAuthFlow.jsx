@@ -77,6 +77,7 @@ const withAuthFlow = (WrappedComponent: React.ComponentType<any>, step: number, 
 
             return (
                 <WrappedComponent
+                    {...this.props}
                     next={this.next}
                     prev={this.prev}
                     setFormField={this.setFormField}
