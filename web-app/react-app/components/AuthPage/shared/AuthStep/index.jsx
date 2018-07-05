@@ -2,6 +2,12 @@
 
 import * as React from 'react'
 import * as yup from 'yup'
+import type {
+    FieldErrorSetter,
+    FlagSetter,
+    ErrorHandler,
+    FormFields,
+} from '../types'
 
 type PanelProps = {
     title: string,
@@ -10,14 +16,15 @@ type PanelProps = {
 type Props = PanelProps & {
     children: React.Node,
     validationSchema?: ?yup.Schema,
-    onValidationError?: (string, string) => void,
+    onValidationError?: FieldErrorSetter,
     step: number,
     totalSteps: number,
-    onProcessing?: (boolean) => void,
+    onProcessing?: FlagSetter,
     onSubmit: () => Promise<any>,
     onSuccess?: () => void,
-    onFailure?: (Error) => void,
+    onFailure?: ErrorHandler,
     next?: () => void,
+    form?: FormFields,
 }
 
 class AuthStep extends React.Component<Props> {
@@ -25,28 +32,6 @@ class AuthStep extends React.Component<Props> {
         step: 0,
         totalSteps: 0,
         onSubmit: (): Promise<any> => Promise.resolve(),
-    }
-
-    form: ?HTMLFormElement = null
-
-    setForm = (form: ?HTMLFormElement) => {
-        this.form = form
-    }
-
-    formData = () => {
-        const form = this.form
-
-        if (form) {
-            return [...form.querySelectorAll('input[name]')].reduce((memo, element: any) => {
-                const input: HTMLInputElement = element
-                return {
-                    ...memo,
-                    [input.name]: (input.type === 'checkbox' ? input.checked : input.value),
-                }
-            }, {})
-        }
-
-        return {}
     }
 
     setProcessing = (value: boolean) => {
@@ -59,8 +44,11 @@ class AuthStep extends React.Component<Props> {
 
     validate = (): Promise<any> => new Promise((resolve, reject) => {
         setTimeout(() => {
-            (this.props.validationSchema || yup.object())
-                .validate(this.formData())
+            const { form } = this.props
+            const schema = this.props.validationSchema || yup.object()
+
+            schema
+                .validate(form || {})
                 .then(resolve, reject)
         }, 500)
     })
@@ -92,15 +80,11 @@ class AuthStep extends React.Component<Props> {
             })
     }
 
-    render = () => {
-        const { children } = this.props
-
-        return (
-            <form onSubmit={this.onSubmit} ref={this.setForm}>
-                {children}
-            </form>
-        )
-    }
+    render = () => (
+        <form onSubmit={this.onSubmit}>
+            {this.props.children}
+        </form>
+    )
 }
 
 export default AuthStep

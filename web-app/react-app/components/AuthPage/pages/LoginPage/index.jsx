@@ -10,10 +10,11 @@ import Button from '../../shared/Button'
 import Checkbox from '../../shared/Checkbox'
 import AuthStep from '../../shared/AuthStep'
 
-import withAuthFlow, { type AuthFlowProps } from '../../shared/withAuthFlow'
+import withAuthFlow from '../../shared/withAuthFlow'
 import { onInputChange } from '../../shared/utils'
 import schemas from '../../schemas/login'
 import styles from './loginPage.pcss'
+import type { AuthFlowProps } from '../../shared/types'
 
 type Props = AuthFlowProps & {
     form: {
@@ -23,9 +24,10 @@ type Props = AuthFlowProps & {
     },
 }
 
-const LoginPage = ({ setIsProcessing, isProcessing, step, form: { email, password, rememberMe }, errors, setFieldError, next, prev, setFormField }: Props) => (
+const LoginPage = ({ setIsProcessing, isProcessing, step, form, errors, setFieldError, next, prev, setFormField }: Props) => (
     <AuthPanel
         currentStep={step}
+        form={form}
         onPrev={prev}
         onNext={next}
         onProcessing={setIsProcessing}
@@ -36,22 +38,38 @@ const LoginPage = ({ setIsProcessing, isProcessing, step, form: { email, passwor
             <Input
                 name="email"
                 label="Email"
-                value={email}
+                value={form.email}
                 onChange={onInputChange(setFormField)}
                 error={errors.email}
                 processing={step === 0 && isProcessing}
                 autoComplete="email"
+            />
+            <input
+                name="password"
+                type="password"
+                value={form.password}
+                style={{
+                    display: 'none',
+                }}
             />
             <Actions>
                 <Button disabled={isProcessing}>Next</Button>
             </Actions>
         </AuthStep>
         <AuthStep title="Sign In" showBack>
+            <input
+                type="email"
+                name="email"
+                value={form.email}
+                style={{
+                    display: 'none',
+                }}
+            />
             <Input
                 name="password"
                 type="password"
                 label="Password"
-                value={password}
+                value={form.password}
                 onChange={onInputChange(setFormField)}
                 error={errors.password}
                 processing={step === 1 && isProcessing}
@@ -60,7 +78,7 @@ const LoginPage = ({ setIsProcessing, isProcessing, step, form: { email, passwor
             <Actions>
                 <Checkbox
                     name="rememberMe"
-                    checked={rememberMe}
+                    checked={form.rememberMe}
                     onChange={onInputChange(setFormField)}
                 >
                     Remember me

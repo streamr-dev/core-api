@@ -9,9 +9,10 @@ import Actions from '../../shared/Actions'
 import Button from '../../shared/Button'
 import AuthStep from '../../shared/AuthStep'
 
-import withAuthFlow, { type AuthFlowProps } from '../../shared/withAuthFlow'
+import withAuthFlow from '../../shared/withAuthFlow'
 import { preventDefault, onInputChange } from '../../shared/utils'
 import schemas from '../../schemas/resetPassoword'
+import type { AuthFlowProps } from '../../shared/types'
 
 type Props = AuthFlowProps & {
     form: {

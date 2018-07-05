@@ -1,49 +1,26 @@
 // @flow
 
 import * as React from 'react'
-import * as yup from 'yup'
-import axios from 'axios'
 
-import AuthPanel from './AuthPanel'
-
-type Step = number
-
-type FormFields = {
-    [string]: any,
-}
+import type {
+    FormFields,
+    Errors,
+} from './types'
 
 type State = {
     form: FormFields,
-    errors: {
-        [string]: string,
-    },
+    errors: Errors,
     isProcessing: boolean,
-    step: Step,
-}
-
-export type AuthFlowProps = {
-    errors: {
-        [string]: string,
-    },
-    form: FormFields,
-    next: () => void,
-    prev: () => void,
-    isProcessing: boolean,
-    setIsProcessing: () => void,
-    setFormField: (string, any) => void,
-    setFieldError: (string, string) => void,
-    step: Step,
+    step: number,
 }
 
 const getDisplayName = (WrappedComponent: React.ComponentType<any>) => (
     WrappedComponent.displayName || WrappedComponent.name || 'Component'
 )
 
-const withAuthFlow = (WrappedComponent: React.ComponentType<any>, step: Step, initialFormFields: FormFields) => {
+const withAuthFlow = (WrappedComponent: React.ComponentType<any>, step: number, initialFormFields: FormFields) => {
     class WithAuthFlow extends React.Component<{}, State> {
         static displayName = `WithAuthFlow(${getDisplayName(WrappedComponent)})`
-
-        panel: ?AuthPanel
 
         state = {
             step,

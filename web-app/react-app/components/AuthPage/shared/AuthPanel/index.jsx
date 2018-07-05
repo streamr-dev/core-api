@@ -6,24 +6,30 @@ import { Schema } from 'yup'
 import AuthPanelNav from '../AuthPanelNav'
 import Switch from '../Switch'
 import styles from './authPanel.pcss'
+import type {
+    FormFields,
+    FlagSetter,
+    FieldErrorSetter,
+} from '../types'
 
 export {
     styles,
 }
 
 type Props = {
+    form: FormFields,
     children: React.Node,
     currentStep: number,
     onPrev: () => void,
     onNext: () => void,
-    onProcessing: (boolean) => void,
+    onProcessing: FlagSetter,
     validationSchemas: Array<Schema>,
-    onValidationError: (string, string) => void,
+    onValidationError: FieldErrorSetter,
 }
 
 class AuthPanel extends React.Component<Props> {
     render = () => {
-        const { children, onPrev, currentStep, validationSchemas, onValidationError, onProcessing, onNext: next } = this.props
+        const { children, onPrev, currentStep, validationSchemas, onValidationError, onProcessing, onNext: next, form } = this.props
         const totalSteps = React.Children.count(children)
 
         return (
@@ -55,6 +61,7 @@ class AuthPanel extends React.Component<Props> {
                                 onValidationError,
                                 onProcessing,
                                 next,
+                                form,
                             }))}
                         </Switch>
                     </div>
