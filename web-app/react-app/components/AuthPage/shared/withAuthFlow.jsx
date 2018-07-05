@@ -1,120 +1,89 @@
 // @flow
 
 import * as React from 'react'
-import * as yup from 'yup'
 
-import AuthPanel from './AuthPanel'
-
-type Step = number
-
-type FormFields = {
-    [string]: any,
-}
+import type {
+    FormFields,
+    Errors,
+} from './types'
 
 type State = {
     form: FormFields,
-    errors: {
-        [string]: string,
-    },
-    processing: boolean,
-    step: Step,
+    errors: Errors,
+    isProcessing: boolean,
+    step: number,
 }
 
-export type AuthFlowProps = {
-    attach: (?AuthPanel) => void,
-    errors: {
-        [string]: string,
-    },
-    form: FormFields,
-    next: (Array<yup.Schema>) => void,
-    prev: () => void,
-    processing: boolean,
-    setFormField: (string, any) => void,
-    step: Step,
-}
+const getDisplayName = (WrappedComponent: React.ComponentType<any>) => (
+    WrappedComponent.displayName || WrappedComponent.name || 'Component'
+)
 
-const getDisplayName = (WrappedComponent: React.ComponentType<any>) => WrappedComponent.displayName || WrappedComponent.name || 'Component'
-
-const withAuthFlow = (WrappedComponent: React.ComponentType<any>, step: Step, initialFormFields: FormFields) => {
+const withAuthFlow = (WrappedComponent: React.ComponentType<any>, step: number, initialFormFields: FormFields) => {
     class WithAuthFlow extends React.Component<{}, State> {
         static displayName = `WithAuthFlow(${getDisplayName(WrappedComponent)})`
 
-        panel: ?AuthPanel
-
         state = {
             step,
-            processing: false,
+            isProcessing: false,
             form: initialFormFields,
             errors: {},
         }
 
-        setFormField = (field: string, value: any) => {
-            const { form, errors: prevErrors } = this.state
+        setFieldError = (field: string, message: string) => {
             const errors = {
-                ...prevErrors,
+                ...this.state.errors,
+                [field]: message,
             }
-
-            delete errors[field]
-
+            if (!message) {
+                delete errors[field]
+            }
             this.setState({
-                form: {
-                    ...form,
-                    [field]: value,
-                },
                 errors,
             })
         }
 
-        validate = (schema: ?yup.Schema): Promise<any> => (schema || yup.object()).validate(this.state.form)
-
-        next = (schemas: Array<yup.Schema>) => {
-            const { step, errors } = this.state
-
+        setFormField = (field: string, value: any) => {
+            this.setFieldError(field, '')
             this.setState({
-                processing: true,
-            }, () => {
-                this.validate(schemas[step])
-                    .then(() => {
-                        this.setState({
-                            processing: false,
-                            step: Math.min(this.numSteps(), step + 1),
-                        })
-                    }, (error: yup.ValidationError) => {
-                        this.setState({
-                            processing: false,
-                            errors: {
-                                ...errors,
-                                [error.path]: error.message,
-                            },
-                        })
-                    })
+                form: {
+                    ...this.state.form,
+                    [field]: value,
+                },
             })
         }
 
-        prev = () => {
+        setIsProcessing = (isProcessing: boolean) => {
             this.setState({
-                step: Math.max(0, this.state.step - 1),
+                isProcessing,
             })
         }
 
-        attach = (panel: ?AuthPanel) => {
-            this.panel = panel
+        setStep = (step: number) => {
+            this.setState({
+                step,
+            })
         }
 
-        numSteps = () => (this.panel ? React.Children.count(this.panel.props.children) : 0)
+        prev = () => (
+            this.setStep(Math.max(0, this.state.step - 1))
+        )
+
+        next = () => (
+            this.setStep(this.state.step + 1)
+        )
 
         render = () => {
-            const { step, processing, errors, form } = this.state
+            const { step, isProcessing, errors, form } = this.state
 
             return (
                 <WrappedComponent
-                    {...this.props}
-                    attach={this.attach}
                     next={this.next}
                     prev={this.prev}
                     setFormField={this.setFormField}
+                    setFieldError={this.setFieldError}
+                    setIsProcessing={this.setIsProcessing}
                     step={step}
-                    processing={processing}
+                    isProcessing={isProcessing}
                     errors={errors}
                     form={form}
                 />

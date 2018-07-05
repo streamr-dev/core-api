@@ -1,33 +1,46 @@
 // @flow
 
 import * as React from 'react'
+import { Schema } from 'yup'
 
 import AuthPanelNav from '../AuthPanelNav'
 import Switch from '../Switch'
 import styles from './authPanel.pcss'
+import type {
+    FormFields,
+    FlagSetter,
+    FieldErrorSetter,
+} from '../types'
+
+export {
+    styles,
+}
 
 type Props = {
+    form: FormFields,
     children: React.Node,
-    onBack?: () => void,
     currentStep: number,
-    onProceed?: (SyntheticEvent<EventTarget>) => void,
+    onPrev: () => void,
+    onNext: () => void,
+    setIsProcessing: FlagSetter,
+    validationSchemas: Array<Schema>,
+    onValidationError: FieldErrorSetter,
 }
 
 class AuthPanel extends React.Component<Props> {
-    static styles = styles
-
     render = () => {
-        const { children, onBack, currentStep, onProceed } = this.props
+        const { children, onPrev, currentStep, validationSchemas, onValidationError, setIsProcessing, onNext: next, form } = this.props
+        const totalSteps = React.Children.count(children)
 
         return (
-            <form className={styles.authPanel} onSubmit={onProceed}>
+            <div className={styles.authPanel}>
                 <Switch current={currentStep}>
                     {React.Children.map(children, (child) => (
                         <AuthPanelNav
                             signin={child.props.showSignin}
                             signup={child.props.showSignup}
                             onUseEth={child.props.showEth ? (() => {}) : null}
-                            onGoBack={child.props.showBack ? onBack : null}
+                            onGoBack={child.props.showBack ? onPrev : null}
                         />
                     ))}
                 </Switch>
@@ -41,11 +54,20 @@ class AuthPanel extends React.Component<Props> {
                     </div>
                     <div className={styles.body}>
                         <Switch current={currentStep}>
-                            {children}
+                            {React.Children.map(children, (child, index) => React.cloneElement(child, {
+                                validationSchema: validationSchemas[index],
+                                step: index,
+                                totalSteps,
+                                onValidationError,
+                                setIsProcessing,
+                                next,
+                                form,
+                                current: index === currentStep,
+                            }))}
                         </Switch>
                     </div>
                 </div>
-            </form>
+            </div>
         )
     }
 }

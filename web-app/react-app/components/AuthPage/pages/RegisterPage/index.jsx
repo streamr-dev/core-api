@@ -3,16 +3,17 @@
 import * as React from 'react'
 import cx from 'classnames'
 
-import AuthPanel from '../../shared/AuthPanel'
+import AuthPanel, { styles as authPanelStyles } from '../../shared/AuthPanel'
 import Input from '../../shared/Input'
 import Actions from '../../shared/Actions'
 import Button from '../../shared/Button'
 import Checkbox from '../../shared/Checkbox'
 import AuthStep from '../../shared/AuthStep'
 
-import withAuthFlow, { type AuthFlowProps } from '../../shared/withAuthFlow'
-import { preventDefault, onInputChange } from '../../shared/utils'
+import withAuthFlow from '../../shared/withAuthFlow'
+import { onInputChange } from '../../shared/utils'
 import schemas from '../../schemas/register'
+import type { AuthFlowProps } from '../../shared/types'
 
 type Props = AuthFlowProps & {
     form: {
@@ -24,20 +25,28 @@ type Props = AuthFlowProps & {
     },
 }
 
-const RegisterPage = ({ processing, step, form: { email, password, confirmPassword, timezone, toc }, errors, next, prev, attach, setFormField }: Props) => (
-    <AuthPanel currentStep={step} onBack={prev} ref={attach} onProceed={preventDefault(next, schemas)}>
+const RegisterPage = ({ setIsProcessing, isProcessing, step, form, errors, setFieldError, next, prev, setFormField }: Props) => (
+    <AuthPanel
+        currentStep={step}
+        form={form}
+        onPrev={prev}
+        onNext={next}
+        setIsProcessing={setIsProcessing}
+        validationSchemas={schemas}
+        onValidationError={setFieldError}
+    >
         <AuthStep title="Sign up" showEth showSignin>
             <Input
                 name="email"
                 label="Email"
-                value={email}
+                value={form.email}
                 onChange={onInputChange(setFormField)}
                 error={errors.email}
-                processing={step === 0 && processing}
+                processing={step === 0 && isProcessing}
                 autoComplete="off"
             />
             <Actions>
-                <Button disabled={processing}>Next</Button>
+                <Button disabled={isProcessing}>Next</Button>
             </Actions>
         </AuthStep>
         <AuthStep title="Sign up" showBack>
@@ -45,15 +54,15 @@ const RegisterPage = ({ processing, step, form: { email, password, confirmPasswo
                 name="password"
                 type="password"
                 label="Create a Password"
-                value={password}
+                value={form.password}
                 onChange={onInputChange(setFormField)}
                 error={errors.password}
-                processing={step === 1 && processing}
+                processing={step === 1 && isProcessing}
                 autoComplete="new-password"
                 meastureStrength
             />
             <Actions>
-                <Button disabled={processing}>Next</Button>
+                <Button disabled={isProcessing}>Next</Button>
             </Actions>
         </AuthStep>
         <AuthStep title="Sign up" showBack>
@@ -61,14 +70,14 @@ const RegisterPage = ({ processing, step, form: { email, password, confirmPasswo
                 name="confirmPassword"
                 type="password"
                 label="Confirm your password"
-                value={confirmPassword}
+                value={form.confirmPassword}
                 onChange={onInputChange(setFormField)}
                 error={errors.confirmPassword}
-                processing={step === 2 && processing}
+                processing={step === 2 && isProcessing}
                 autoComplete="new-password"
             />
             <Actions>
-                <Button disabled={processing}>Next</Button>
+                <Button disabled={isProcessing}>Next</Button>
             </Actions>
         </AuthStep>
         <AuthStep title="Timezone" showBack>
@@ -76,31 +85,31 @@ const RegisterPage = ({ processing, step, form: { email, password, confirmPasswo
                 name="timezone"
                 type="text"
                 label="Your timezone"
-                value={timezone}
+                value={form.timezone}
                 onChange={onInputChange(setFormField)}
                 error={errors.timezone}
-                processing={step === 3 && processing}
+                processing={step === 3 && isProcessing}
             />
             <Actions>
-                <Button disabled={processing}>Next</Button>
+                <Button disabled={isProcessing}>Next</Button>
             </Actions>
         </AuthStep>
         <AuthStep title="Terms">
-            <div className={cx(AuthPanel.styles.spaceMedium, AuthPanel.styles.centered)}>
+            <div className={cx(authPanelStyles.spaceMedium, authPanelStyles.centered)}>
                 <Checkbox
                     name="toc"
-                    checked={toc}
+                    checked={form.toc}
                     onChange={onInputChange(setFormField)}
                 >
                     I agree with the <a href="#">terms and conditions</a>, and <a href="#">privacy policy</a>.
                 </Checkbox>
             </div>
             <Actions>
-                <Button disabled={processing}>Finish</Button>
+                <Button disabled={isProcessing}>Finish</Button>
             </Actions>
         </AuthStep>
         <AuthStep title="Thanks for signing up!" showSignin>
-            <div className={cx(AuthPanel.styles.spaceLarge, 'text-center')}>
+            <div className={cx(authPanelStyles.spaceLarge, 'text-center')}>
                 <p>We have sent a sign up link to your email.</p>
                 <p>Please click it to finish your registration.</p>
             </div>
