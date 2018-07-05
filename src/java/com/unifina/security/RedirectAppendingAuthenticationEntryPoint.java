@@ -8,6 +8,9 @@ import org.springframework.security.web.authentication.LoginUrlAuthenticationEnt
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -35,19 +38,30 @@ public class RedirectAppendingAuthenticationEntryPoint extends LoginUrlAuthentic
 		if (request.getRequestURI().equals(getFullURI("/"))
 				|| request.getRequestURI().equals(getFullURI(defaultRedirectURI))) {
 			return loginPageUrl;
-		} else if (LoginRedirectValidator.isValid(request.getRequestURL().toString())){
-			return loginPageUrl + "?" + REDIRECT_PARAM_NAME + "=" + request.getRequestURL().toString();
+		} else if (LoginRedirectValidator.isValid(request.getRequestURL().toString())) {
+			final String value = String.format("%s?%s", request.getRequestURL(), request.getQueryString());
+			final String url = String.format("%s?%s=%s", loginPageUrl, REDIRECT_PARAM_NAME, urlencode(value));
+			return url;
 		} else {
 			log.warn("Redirect url rejected: "+request.getRequestURL());
 			return loginPageUrl;
 		}
 	}
 
+	private String urlencode(final String s) {
+		try {
+			return URLEncoder.encode(s, StandardCharsets.UTF_8.name());
+		} catch (UnsupportedEncodingException e) {
+			log.error("error while url encoding parameter", e);
+		}
+		return s;
+	}
+
 	public String getRedirectParameterName() {
 		return REDIRECT_PARAM_NAME;
 	}
 
-	private String getFullURI(String uriWithoutContextPath) {
+	String getFullURI(String uriWithoutContextPath) {
 		Map<String, String> linkGeneratorArgs = new HashMap<>();
 		linkGeneratorArgs.put("uri", uriWithoutContextPath);
 		return linkGenerator.link(linkGeneratorArgs);
