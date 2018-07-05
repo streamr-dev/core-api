@@ -84,16 +84,21 @@ class AuthStep extends React.Component<Props> {
 
         this.validate()
             .then(() => {
-                this.setProcessing(false)
                 return onSubmit()
                     .then(() => {
+                        this.setProcessing(false)
                         if (onSuccess) {
                             onSuccess()
                         }
                         if ((step < totalSteps - 1) && next) {
                             next()
                         }
-                    }, onFailure)
+                    }, (error) => {
+                        this.setProcessing(false)
+                        if (onFailure) {
+                            onFailure(error)
+                        }
+                    })
             }, (error: yup.ValidationError) => {
                 this.setProcessing(false)
                 if (!onValidationError) {
