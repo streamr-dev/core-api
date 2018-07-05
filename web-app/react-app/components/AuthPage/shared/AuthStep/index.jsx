@@ -25,6 +25,7 @@ type Props = PanelProps & {
     onFailure?: ErrorHandler,
     next?: () => void,
     form?: FormFields,
+    current?: boolean,
 }
 
 class AuthStep extends React.Component<Props> {
@@ -34,12 +35,20 @@ class AuthStep extends React.Component<Props> {
         onSubmit: (): Promise<any> => Promise.resolve(),
     }
 
+    timeout: TimeoutID
+
+    root: ?HTMLFormElement = null
+
     setProcessing = (value: boolean) => {
         const { setIsProcessing } = this.props
 
         if (setIsProcessing) {
             setIsProcessing(value)
         }
+    }
+
+    setRoot = (ref: ?HTMLFormElement) => {
+        this.root = ref
     }
 
     validate = (): Promise<any> => new Promise((resolve, reject) => {
@@ -52,6 +61,20 @@ class AuthStep extends React.Component<Props> {
                 .then(resolve, reject)
         }, 500)
     })
+
+    focus = () => {
+        clearTimeout(this.timeout)
+
+        this.timeout = setTimeout(() => {
+            if (this.root) {
+                const input = this.root.querySelector('input:not([style])')
+
+                if (input) {
+                    input.focus()
+                }
+            }
+        }, 100)
+    }
 
     onSubmit = (e: SyntheticEvent<EventTarget>) => {
         e.preventDefault()
@@ -80,8 +103,22 @@ class AuthStep extends React.Component<Props> {
             })
     }
 
+    componentDidMount = () => {
+        if (this.props.current) {
+            this.focus()
+        }
+    }
+
+    componentDidUpdate = ({ current: prevCurrent }: Props) => {
+        const { current } = this.props
+
+        if (current && prevCurrent !== current) {
+            this.focus()
+        }
+    }
+
     render = () => (
-        <form onSubmit={this.onSubmit}>
+        <form onSubmit={this.onSubmit} ref={this.setRoot}>
             {this.props.children}
         </form>
     )

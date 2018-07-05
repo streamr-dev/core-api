@@ -62,6 +62,7 @@ class AuthPanel extends React.Component<Props> {
                                 setIsProcessing,
                                 next,
                                 form,
+                                current: index === currentStep,
                             }))}
                         </Switch>
                     </div>
