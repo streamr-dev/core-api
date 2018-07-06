@@ -119,25 +119,6 @@ public class MessageHub<RawMessageClass, MessageClass, KeyClass> extends Thread 
 			Collections.sort(proxiesByPriority, proxyPriorityComparator);
 		}
 	}
-	
-	/**
-	 * Starts the catchup and adds the proxy to the proxy list in an
-	 * atomic operation, so that the messages in the catchup and subsequent
-	 * messages in the eventQueue don't overlap.
-	 * @param proxy
-	 * @return
-	 */
-	public Catchup startCatchup(MessageRecipient proxy) {
-		if (cache != null) {
-			synchronized(proxies) {
-				Catchup catchup = cache.getCatchup();
-				addRecipient(proxy);
-				return catchup;
-			}
-		} else {
-			return null;
-		}
-	}
 
 	public MessageSource getSource() {
 		return source;
