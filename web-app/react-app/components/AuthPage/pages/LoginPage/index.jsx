@@ -64,7 +64,6 @@ class LoginPage extends React.Component<Props> {
                     this.onFailure(new Error(data.error))
                     reject()
                 } else {
-                    this.onSuccess()
                     resolve()
                 }
             })

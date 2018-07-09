@@ -48,7 +48,6 @@ class SignupPage extends React.Component<Props> {
             },
         })
             .then(() => {
-                this.onSuccess()
                 resolve()
             })
             .catch(({ response }) => {
@@ -57,10 +56,6 @@ class SignupPage extends React.Component<Props> {
                 reject()
             })
     })
-
-    onSuccess = () => {
-        /* noop */
-    }
 
     onFailure = (error: Error) => {
         const { setFieldError } = this.props
@@ -83,7 +78,6 @@ class SignupPage extends React.Component<Props> {
                     title="Sign up"
                     showEth={false}
                     onSubmit={this.submit}
-                    onSuccess={this.onSuccess}
                     onFailure={this.onFailure}
                     showSignin
                 >

@@ -14,6 +14,7 @@ import grails.plugin.springsecurity.SpringSecurityUtils
 import grails.plugin.springsecurity.annotation.Secured
 import grails.plugin.springsecurity.authentication.dao.NullSaltSource
 import grails.util.Environment
+import org.springframework.security.authentication.dao.SaltSource
 
 @Secured(["permitAll"])
 class AuthController {
@@ -21,6 +22,7 @@ class AuthController {
 	MailService mailService
 	SpringSecurityService springSecurityService
 	SignupCodeService signupCodeService
+	SaltSource saltSource
 
 	static allowedMethods = [
 		register      : "POST",

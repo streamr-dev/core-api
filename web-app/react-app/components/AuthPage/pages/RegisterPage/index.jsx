@@ -4,7 +4,7 @@ import * as React from 'react'
 import qs from 'qs'
 import cx from 'classnames'
 
-import AuthPanel, { styles as authPanelStyles } from '../../shared/AuthPanel'
+import AuthPanel, {styles as authPanelStyles} from '../../shared/AuthPanel'
 import Input from '../../shared/Input'
 import Actions from '../../shared/Actions'
 import Button from '../../shared/Button'
@@ -12,9 +12,9 @@ import Checkbox from '../../shared/Checkbox'
 import AuthStep from '../../shared/AuthStep'
 
 import withAuthFlow from '../../shared/withAuthFlow'
-import { onInputChange } from '../../shared/utils'
+import {onInputChange} from '../../shared/utils'
 import schemas from '../../schemas/register'
-import type { AuthFlowProps } from '../../shared/types'
+import type {AuthFlowProps} from '../../shared/types'
 import axios from 'axios/index'
 import createLink from '../../../../utils/createLink'
 
@@ -52,12 +52,13 @@ const inputNames = {
     confirmPassword: 'password2',
     timezone: 'timezone',
     toc: 'tosConfirmed',
+    invite: 'invite',
 }
 
 class RegisterPage extends React.Component<Props, State> {
     constructor(props) {
         super(props)
-        const { invite } = qs.parse(this.props.location.search.slice(1))
+        const {invite} = qs.parse(this.props.location.search.slice(1))
         this.state = {
             invite: invite || null,
         }
@@ -65,20 +66,20 @@ class RegisterPage extends React.Component<Props, State> {
             // TODO: uncomment
             // props.history.replace(props.location.pathname)
         } else {
-            props.setFieldError('name', 'An invite is needed. Pleas go back to the email you received, and click the click again.')
+            props.setFieldError('name', 'An invite is needed. Please go back to the email you received, and click the click again.')
         }
     }
 
     submit = () => new Promise((resolve, reject) => {
-        const { name, password, confirmPassword, timezone, toc } = this.props.form
-        const { invite } = this.state
+        const {name, password, confirmPassword, timezone, toc} = this.props.form
+        const {invite} = this.state
         const data = {
             [inputNames.name]: name,
             [inputNames.password]: password,
             [inputNames.confirmPassword]: confirmPassword,
             [inputNames.timezone]: timezone,
             [inputNames.toc]: toc,
-            invite,
+            [inputNames.invite]: invite,
         }
         axios({
             method: 'post',
@@ -93,8 +94,8 @@ class RegisterPage extends React.Component<Props, State> {
                 this.onSuccess()
                 resolve()
             })
-            .catch(({ response }) => {
-                const { data } = response
+            .catch(({response}) => {
+                const {data} = response
                 this.onFailure(new Error(data.error || 'Something went wrong'))
                 reject()
             })
@@ -106,12 +107,12 @@ class RegisterPage extends React.Component<Props, State> {
     }
 
     onFailure = (error: Error) => {
-        const { setFieldError } = this.props
+        const {setFieldError} = this.props
         setFieldError('toc', error.message)
     }
 
     render() {
-        const { setIsProcessing, isProcessing, step, form, errors, setFieldError, next, prev, setFormField } = this.props
+        const {setIsProcessing, isProcessing, step, form, errors, setFieldError, next, prev, setFormField} = this.props
         return (
             <AuthPanel
                 currentStep={step}
@@ -183,7 +184,13 @@ class RegisterPage extends React.Component<Props, State> {
                         <Button disabled={isProcessing}>Next</Button>
                     </Actions>
                 </AuthStep>
-                <AuthStep title="Terms" onSubmit={this.submit} onFailure={this.onFailure} showBack>
+                <AuthStep
+                    title="Terms"
+                    onSubmit={this.submit}
+                    onSuccess={this.onSuccess}
+                    onFailure={this.onFailure}
+                    showBack
+                >
                     <div className={cx(authPanelStyles.spaceMedium, authPanelStyles.centered)}>
                         <Checkbox
                             name="toc"
