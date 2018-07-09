@@ -19,6 +19,11 @@ import axios from 'axios/index'
 import createLink from '../../../../utils/createLink'
 
 type Props = AuthFlowProps & {
+    match: {
+        params: {
+            redirect?: ?string,
+        },
+    },
     history: {
         replace: (string) => void,
     },
@@ -65,12 +70,14 @@ class RegisterPage extends React.Component<Props, State> {
 
     submit = () => new Promise((resolve, reject) => {
         const { name, password, confirmPassword, timezone, toc } = this.props.form
+        const { invite } = this.state
         const data = {
             [inputNames.name]: name,
             [inputNames.password]: password,
             [inputNames.confirmPassword]: confirmPassword,
             [inputNames.timezone]: timezone,
             [inputNames.toc]: toc,
+            invite,
         }
         axios({
             method: 'post',
@@ -81,19 +88,25 @@ class RegisterPage extends React.Component<Props, State> {
                 'X-Requested-With': 'XMLHttpRequest', // Required
             },
         })
-            .then(({ data }) => {
-                if (data.error) {
-                    this.onFailure(new Error(data.error))
-                    reject()
-                } else {
-                    resolve()
-                }
+            .then(() => {
+                this.onSuccess()
+                resolve()
+            })
+            .catch(({ response }) => {
+                const { data } = response
+                this.onFailure(new Error(data.error || 'Something went wrong'))
+                reject()
             })
     })
 
+    onSuccess = () => {
+        const redirectUrl = this.props.match.params.redirect || defaultRedirectUrl
+        window.location.assign(redirectUrl)
+    }
+
     onFailure = (error: Error) => {
         const { setFieldError } = this.props
-        setFieldError('terms', error.message)
+        setFieldError('toc', error.message)
     }
 
     render() {
@@ -169,12 +182,13 @@ class RegisterPage extends React.Component<Props, State> {
                         <Button disabled={isProcessing}>Next</Button>
                     </Actions>
                 </AuthStep>
-                <AuthStep title="Terms" onSubmit={this.submit} onFailure={this.onFailure}>
+                <AuthStep title="Terms" onSubmit={this.submit} onFailure={this.onFailure} showBack>
                     <div className={cx(authPanelStyles.spaceMedium, authPanelStyles.centered)}>
                         <Checkbox
                             name="toc"
                             checked={form.toc}
                             onChange={onInputChange(setFormField)}
+                            error={errors.toc}
                         >
                             I agree with the <a href="#">terms and conditions</a>, and <a href="#">privacy policy</a>.
                         </Checkbox>

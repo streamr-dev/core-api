@@ -99,7 +99,7 @@ class AuthController {
 		def existingUser = SecUser.findByUsername(cmd.username)
 		if (existingUser) {
 			response.status = 400
-			return render([success: false, error: "User exists already"])
+			return render([success: false, error: "User exists already"] as JSON)
 		}
 
 		SignupInvite invite
@@ -244,8 +244,9 @@ class RegisterCommand {
 		password validator: { String password, RegisterCommand command ->
 			return command.userService.passwordValidator(password, command)
 		}
-		password2 validator: { value, RegisterCommand command ->
-			return command.userService.password2Validator(value, command)
+
+		password2 validator: { String password2, RegisterCommand command ->
+			return command.userService.password2Validator(password2, command)
 		}
 	}
 }

@@ -10,6 +10,7 @@ import styles from './input.pcss'
 import TextField from '../TextField'
 import StatusBox from '../StatusBox'
 import Switch from '../Switch'
+import InputError from '../InputError'
 
 type Props = {
     type?: string,
@@ -105,12 +106,7 @@ class Input extends React.Component<Props, State> {
                         onFocusChange={this.onFocusChange}
                     />
                 </StatusBox>
-                <div className={styles.error}>
-                    <Switch current={!!error && !processing ? 1 : 0}>
-                        <div />
-                        {lastKnownError || '&nbsp;'}
-                    </Switch>
-                </div>
+                <InputError error={(!processing && !!error) ? lastKnownError : null} />
             </div>
         )
     }

@@ -33,7 +33,7 @@ const inputNames = {
     email: 'username',
 }
 
-class RegisterPage extends React.Component<Props> {
+class SignupPage extends React.Component<Props> {
     submit = () => new Promise((resolve, reject) => {
         const { email } = this.props.form
         const data = {
@@ -47,14 +47,14 @@ class RegisterPage extends React.Component<Props> {
                 'Content-Type': 'application/x-www-form-urlencoded',
             },
         })
-            .then(({ data }) => {
-                if (data.error) {
-                    this.onFailure(new Error(data.error))
-                    reject()
-                } else {
-                    this.onSuccess()
-                    resolve()
-                }
+            .then(() => {
+                this.onSuccess()
+                resolve()
+            })
+            .catch(({ response }) => {
+                const { data } = response
+                this.onFailure(new Error(data.error || 'Something went wrong'))
+                reject()
             })
     })
 
@@ -111,6 +111,6 @@ class RegisterPage extends React.Component<Props> {
     }
 }
 
-export default withAuthFlow(RegisterPage, 0, {
+export default withAuthFlow(SignupPage, 0, {
     email: '',
 })
