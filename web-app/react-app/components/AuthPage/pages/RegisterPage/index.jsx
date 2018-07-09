@@ -45,6 +45,7 @@ type State = {
 }
 
 const registerUrl = createLink('auth/register')
+const defaultRedirectUrl = createLink('canvas/editor')
 const inputNames = {
     name: 'name',
     password: 'password',
