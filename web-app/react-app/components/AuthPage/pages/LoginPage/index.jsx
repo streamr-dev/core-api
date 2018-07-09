@@ -4,8 +4,9 @@ import * as React from 'react'
 import axios from 'axios'
 import qs from 'qs'
 import { Link } from 'react-router-dom'
+import { debounce } from 'lodash'
 
-import AuthPanel, { styles as authPanelStyles } from '../../shared/AuthPanel'
+import AuthPanel from '../../shared/AuthPanel'
 import Input from '../../shared/Input'
 import Actions from '../../shared/Actions'
 import Button from '../../shared/Button'
@@ -79,6 +80,8 @@ class LoginPage extends React.Component<Props> {
         setFieldError('password', error.message)
     }
 
+    debouncedNext = debounce(this.props.next, 500)
+
     render = () => {
         const { setIsProcessing, isProcessing, step, form, errors, setFieldError, next, prev, setFormField } = this.props
 
@@ -103,8 +106,12 @@ class LoginPage extends React.Component<Props> {
                         autoComplete="email"
                     />
                     <input
-                        name="password"
+                        name="hiddenPassword"
                         type="password"
+                        onChange={(e) => {
+                            onInputChange(setFormField, 'password')(e)
+                            this.debouncedNext()
+                        }}
                         value={form.password}
                         style={{
                             display: 'none',
