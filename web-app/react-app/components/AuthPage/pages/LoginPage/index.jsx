@@ -104,6 +104,7 @@ class LoginPage extends React.Component<Props> {
                         processing={step === 0 && isProcessing}
                         autoComplete="email"
                         className={styles.emailInput}
+                        autoFocus
                     />
                     <input
                         name="hiddenPassword"
@@ -138,6 +139,7 @@ class LoginPage extends React.Component<Props> {
                         processing={step === 1 && isProcessing}
                         autoComplete="current-password"
                         className={styles.passwordInput}
+                        autoFocus
                     />
                     <Actions>
                         <Checkbox

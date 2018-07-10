@@ -89,6 +89,7 @@ class SignupPage extends React.Component<Props> {
                         error={errors.email}
                         processing={step === 0 && isProcessing}
                         autoComplete="off"
+                        autoFocus
                     />
                     <Actions>
                         <Button disabled={isProcessing}>Next</Button>

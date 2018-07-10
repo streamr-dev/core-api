@@ -143,6 +143,7 @@ class RegisterPage extends React.Component<Props, State> {
                         processing={step === 0 && isProcessing}
                         autoComplete="name"
                         disabled={!this.state.invite}
+                        autoFocus
                     />
                     <Actions>
                         <Button disabled={isProcessing}>Next</Button>
@@ -159,6 +160,7 @@ class RegisterPage extends React.Component<Props, State> {
                         processing={step === 1 && isProcessing}
                         autoComplete="new-password"
                         measureStrength
+                        autoFocus
                     />
                     <Actions>
                         <Button disabled={isProcessing}>Next</Button>
@@ -174,6 +176,7 @@ class RegisterPage extends React.Component<Props, State> {
                         error={errors.confirmPassword}
                         processing={step === 2 && isProcessing}
                         autoComplete="new-password"
+                        autoFocus
                     />
                     <Actions>
                         <Button disabled={isProcessing}>Next</Button>
@@ -188,6 +191,7 @@ class RegisterPage extends React.Component<Props, State> {
                             label: tz,
                         }))}
                         onChange={this.onTimezoneChange}
+                        autoFocus
                     />
                     <Actions>
                         <Button disabled={isProcessing}>Next</Button>
@@ -206,6 +210,7 @@ class RegisterPage extends React.Component<Props, State> {
                             checked={form.toc}
                             onChange={onInputChange(setFormField)}
                             error={errors.toc}
+                            autoFocus
                         >
                             I agree with the <a href="#">terms and conditions</a>, and <a href="#">privacy policy</a>.
                         </Checkbox>
