@@ -59,7 +59,7 @@ class ResetPasswordPage extends React.Component<Props, State> {
             // TODO: uncomment
             // props.history.replace(props.location.pathname)
         } else {
-            props.setFieldError('name', 'An token is needed. Please go back to the email you received, and click the click again.')
+            props.setFieldError('password', 'A token is needed. Please go back to the email you received, and click the click again.')
         }
     }
 
@@ -102,6 +102,7 @@ class ResetPasswordPage extends React.Component<Props, State> {
 
     render() {
         const { setIsProcessing, isProcessing, step, form, errors, setFieldError, next, prev, setFormField } = this.props
+        const { token } = this.state
         return (
             <AuthPanel
                 currentStep={step}
@@ -122,6 +123,7 @@ class ResetPasswordPage extends React.Component<Props, State> {
                         error={errors.password}
                         processing={step === 0 && isProcessing}
                         autoComplete="new-password"
+                        disabled={!token}
                         measureStrength
                     />
                     <Actions>
