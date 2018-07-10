@@ -1,6 +1,5 @@
 import mixins.LoginMixin
 import pages.LoginPage
-import pages.CanvasPage
 import geb.spock.GebReportingSpec
 
 class LoginSpec extends GebReportingSpec implements LoginMixin {
