@@ -1,14 +1,18 @@
 package pages
 
 class ForgotPasswordPage extends GrailsPage {
-	static controller = "register"
-	static action = "forgotPassword"
+	static at = {
+		waitFor {
+			sendButton.displayed
+		}
+	}
 
-	static url = "$controller/$action"
+	static url = "register/forgotPassword"
 
 	static content = {
-		username    { $("#username") }
-		sendButton { $("#reset") }
+		username    { $("input", name: "email") }
+		sendButton { $("button", type: "submit") }
+		error { $(".inputError_inputError") }
 	}
 
 }

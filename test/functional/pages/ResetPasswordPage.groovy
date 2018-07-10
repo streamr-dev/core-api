@@ -1,15 +1,19 @@
 package pages
 
 class ResetPasswordPage extends GrailsPage {
-	static controller = "register"
-	static action = "resetPassword"
+	static at = {
+		waitFor {
+			password.displayed || password2.displayed
+		}
+	}
 
-	static url = "$controller/$action"
+	static url = "register/resetPassword"
 
 	static content = {
-		password    { $("#password") }
-		password2 { $("#password2") }
-		resetButton { $("#reset") }
+		password    { $("input", name: "password") }
+		password2 { $("input", name: "confirmPassword") }
+		nextButton { $("button", type: "submit") }
+		error { $(".inputError_inputError") }
 	}
 
 }

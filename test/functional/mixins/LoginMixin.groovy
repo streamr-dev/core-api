@@ -14,19 +14,27 @@ trait LoginMixin {
 	def loginTester1() {
 		login(LoginTester1Spec.testerUsername, LoginTester1Spec.testerPassword)
 	}
+
 	def loginTester2() {
 		login(LoginTester2Spec.testerUsername, LoginTester2Spec.testerPassword)
 	}
+
 	def loginTesterAdmin() {
 		login(LoginTesterAdminSpec.testerUsername, LoginTesterAdminSpec.testerPassword)
 	}
 
-	def login(String u, String p) {
+	def tryLogin(String u, String p) {
 		to LoginPage
 		waitFor { username.displayed }
 		username << u
+		waitFor { nextButton.click() }
+		waitFor { password.displayed }
 		password << p
-		loginButton.click()
+		waitFor { nextButton.click() }
+	}
+
+	def login(String u, String p) {
+		tryLogin(u, p)
 		waitFor { at CanvasPage }
 	}
 
