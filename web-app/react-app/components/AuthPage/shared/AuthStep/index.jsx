@@ -35,10 +35,6 @@ class AuthStep extends React.Component<Props> {
         onSubmit: (): Promise<any> => Promise.resolve(),
     }
 
-    timeout: TimeoutID
-
-    root: ?HTMLFormElement = null
-
     setProcessing = (value: boolean) => {
         const { setIsProcessing } = this.props
 
@@ -47,33 +43,9 @@ class AuthStep extends React.Component<Props> {
         }
     }
 
-    setRoot = (ref: ?HTMLFormElement) => {
-        this.root = ref
-    }
-
-    validate = (): Promise<any> => new Promise((resolve, reject) => {
-        setTimeout(() => {
-            const { form } = this.props
-            const schema = this.props.validationSchema || yup.object()
-
-            schema
-                .validate(form || {})
-                .then(resolve, reject)
-        }, 500)
-    })
-
-    focus = () => {
-        clearTimeout(this.timeout)
-
-        this.timeout = setTimeout(() => {
-            if (this.root) {
-                const input = this.root.querySelector('input:not([style])')
-
-                if (input) {
-                    input.focus()
-                }
-            }
-        }, 100)
+    validate = (): Promise<any> => {
+        const { form, validationSchema } = this.props
+        return (validationSchema || yup.object()).validate(form || {})
     }
 
     onSubmit = (e: SyntheticEvent<EventTarget>) => {
@@ -108,22 +80,8 @@ class AuthStep extends React.Component<Props> {
             })
     }
 
-    componentDidMount = () => {
-        if (this.props.current) {
-            this.focus()
-        }
-    }
-
-    componentDidUpdate = ({ current: prevCurrent }: Props) => {
-        const { current } = this.props
-
-        if (current && prevCurrent !== current) {
-            this.focus()
-        }
-    }
-
     render = () => (
-        <form onSubmit={this.onSubmit} ref={this.setRoot}>
+        <form onSubmit={this.onSubmit}>
             {this.props.children}
         </form>
     )

@@ -3,6 +3,8 @@
 import * as React from 'react'
 import qs from 'qs'
 import cx from 'classnames'
+import Select from 'react-select'
+import moment from 'moment-timezone'
 
 import AuthPanel, {styles as authPanelStyles} from '../../shared/AuthPanel'
 import Input from '../../shared/Input'
@@ -111,6 +113,13 @@ class RegisterPage extends React.Component<Props, State> {
         setFieldError('toc', error.message)
     }
 
+    onTimezoneChange = (option: {
+        value: string,
+        label: string,
+    }) => {
+        this.props.setFormField('timezone', option.value)
+    }
+
     render() {
         const {setIsProcessing, isProcessing, step, form, errors, setFieldError, next, prev, setFormField} = this.props
         return (
@@ -134,6 +143,7 @@ class RegisterPage extends React.Component<Props, State> {
                         processing={step === 0 && isProcessing}
                         autoComplete="name"
                         disabled={!this.state.invite}
+                        autoFocus
                     />
                     <Actions>
                         <Button disabled={isProcessing}>Next</Button>
@@ -150,6 +160,7 @@ class RegisterPage extends React.Component<Props, State> {
                         processing={step === 1 && isProcessing}
                         autoComplete="new-password"
                         measureStrength
+                        autoFocus
                     />
                     <Actions>
                         <Button disabled={isProcessing}>Next</Button>
@@ -165,20 +176,22 @@ class RegisterPage extends React.Component<Props, State> {
                         error={errors.confirmPassword}
                         processing={step === 2 && isProcessing}
                         autoComplete="new-password"
+                        autoFocus
                     />
                     <Actions>
                         <Button disabled={isProcessing}>Next</Button>
                     </Actions>
                 </AuthStep>
                 <AuthStep title="Timezone" showBack>
-                    <Input
+                    <Select
                         name="timezone"
-                        type="text"
-                        label="Your timezone"
                         value={form.timezone}
-                        onChange={onInputChange(setFormField)}
-                        error={errors.timezone}
-                        processing={step === 3 && isProcessing}
+                        options={moment.tz.names().map(tz => ({
+                            value: tz,
+                            label: tz,
+                        }))}
+                        onChange={this.onTimezoneChange}
+                        autoFocus
                     />
                     <Actions>
                         <Button disabled={isProcessing}>Next</Button>
@@ -197,6 +210,7 @@ class RegisterPage extends React.Component<Props, State> {
                             checked={form.toc}
                             onChange={onInputChange(setFormField)}
                             error={errors.toc}
+                            autoFocus
                         >
                             I agree with the <a href="#">terms and conditions</a>, and <a href="#">privacy policy</a>.
                         </Checkbox>

@@ -7,6 +7,7 @@ import createLink from '../../utils/createLink'
 import 'bootstrap/dist/css/bootstrap.min.css'
 import '@streamr/streamr-layout/css'
 import '@streamr/streamr-layout/pcss'
+import 'react-select/dist/react-select.css'
 
 import LoginPage from './pages/LoginPage'
 import RegisterPage from './pages/RegisterPage'

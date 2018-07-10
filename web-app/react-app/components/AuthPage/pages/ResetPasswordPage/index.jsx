@@ -125,6 +125,7 @@ class ResetPasswordPage extends React.Component<Props, State> {
                         autoComplete="new-password"
                         disabled={!token}
                         measureStrength
+                        autoFocus
                     />
                     <Actions>
                         <Button disabled={isProcessing}>Next</Button>
@@ -146,6 +147,7 @@ class ResetPasswordPage extends React.Component<Props, State> {
                         error={errors.confirmPassword}
                         processing={step === 1 && isProcessing}
                         autoComplete="new-password"
+                        autoFocus
                     />
                     <Actions>
                         <Button disabled={isProcessing}>Next</Button>

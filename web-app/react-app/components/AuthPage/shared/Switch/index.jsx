@@ -1,7 +1,6 @@
 // @flow
 
 import * as React from 'react'
-import cx from 'classnames'
 import { CSSTransitionGroup } from 'react-transition-group'
 
 import styles from './switch.pcss'
