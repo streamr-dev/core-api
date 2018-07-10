@@ -51,16 +51,10 @@ class AuthStep extends React.Component<Props> {
         this.root = ref
     }
 
-    validate = (): Promise<any> => new Promise((resolve, reject) => {
-        setTimeout(() => {
-            const { form } = this.props
-            const schema = this.props.validationSchema || yup.object()
-
-            schema
-                .validate(form || {})
-                .then(resolve, reject)
-        }, 500)
-    })
+    validate = (): Promise<any> => {
+        const { form, validationSchema } = this.props
+        return (validationSchema || yup.object()).validate(form || {})
+    }
 
     focus = () => {
         clearTimeout(this.timeout)
