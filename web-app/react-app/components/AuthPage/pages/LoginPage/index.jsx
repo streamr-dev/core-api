@@ -103,6 +103,7 @@ class LoginPage extends React.Component<Props> {
                         error={errors.email}
                         processing={step === 0 && isProcessing}
                         autoComplete="email"
+                        className={styles.emailInput}
                     />
                     <input
                         name="hiddenPassword"
@@ -127,14 +128,6 @@ class LoginPage extends React.Component<Props> {
                     onSuccess={this.onSuccess}
                     onFailure={this.onFailure}
                 >
-                    <input
-                        type="email"
-                        name="email"
-                        value={form.email}
-                        style={{
-                            display: 'none',
-                        }}
-                    />
                     <Input
                         name="password"
                         type="password"
@@ -144,6 +137,7 @@ class LoginPage extends React.Component<Props> {
                         error={errors.password}
                         processing={step === 1 && isProcessing}
                         autoComplete="current-password"
+                        className={styles.passwordInput}
                     />
                     <Actions>
                         <Checkbox

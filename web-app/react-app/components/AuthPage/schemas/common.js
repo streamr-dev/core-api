@@ -10,6 +10,9 @@ export const email = yup.string()
 
 export const password = yup.string()
     .required('Password is required')
+
+export const passwordWithStrength = yup.string()
+    .required('Password is required')
     .min(8, 'Password must be at least 8 characters long')
     .test('is-strong', 'Please use a stronger password', (value) => zxcvbn(value).score > 1)
 

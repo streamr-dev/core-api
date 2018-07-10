@@ -2,7 +2,7 @@
 
 import * as yup from 'yup'
 
-import { password, confirmPassword } from './common'
+import { passwordWithStrength, confirmPassword } from './common'
 
 export default [
     // Step 0: Name
@@ -14,7 +14,7 @@ export default [
     // Step 1: New password
     yup.object()
         .shape({
-            password,
+            password: passwordWithStrength,
         }),
     // Step 2: Confirm password
     yup.object()
