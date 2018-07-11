@@ -1,9 +1,8 @@
 // @flow
 
 import * as React from 'react'
-import cx from 'classnames'
 
-import AuthPanel, { styles as authPanelStyles } from '../../shared/AuthPanel'
+import AuthPanel from '../../shared/AuthPanel'
 import Input from '../../shared/Input'
 import Actions from '../../shared/Actions'
 import Button from '../../shared/Button'

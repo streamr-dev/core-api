@@ -2,7 +2,7 @@
 
 import * as yup from 'yup'
 
-import { email, password, confirmPassword } from './common'
+import { email } from './common'
 
 export default [
     // Email

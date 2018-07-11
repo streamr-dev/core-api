@@ -6,7 +6,7 @@ import cx from 'classnames'
 import Select from 'react-select'
 import moment from 'moment-timezone'
 
-import AuthPanel, {styles as authPanelStyles} from '../../shared/AuthPanel'
+import AuthPanel, { styles as authPanelStyles } from '../../shared/AuthPanel'
 import Input from '../../shared/Input'
 import Actions from '../../shared/Actions'
 import Button from '../../shared/Button'
