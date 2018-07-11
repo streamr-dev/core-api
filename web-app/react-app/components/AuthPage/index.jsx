@@ -14,10 +14,9 @@ import RegisterPage from './pages/RegisterPage'
 import SignupPage from './pages/SignupPage'
 import ForgotPasswordPage from './pages/ForgotPasswordPage'
 import ResetPasswordPage from './pages/ResetPasswordPage'
+import styles from './authPage.pcss'
 
 const basename = createLink('/').replace(window.location.origin, '')
-
-import styles from './authPage.pcss'
 
 const AuthPage = () => (
     <BrowserRouter basename={basename}>

@@ -26,4 +26,5 @@ export type AuthFlowProps = {
     setFormField: FieldSetter,
     setIsProcessing: () => void,
     step: number,
+    onComplete: () => void,
 }

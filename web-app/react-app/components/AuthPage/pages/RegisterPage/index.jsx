@@ -6,7 +6,7 @@ import cx from 'classnames'
 import Select from 'react-select'
 import moment from 'moment-timezone'
 
-import AuthPanel, {styles as authPanelStyles} from '../../shared/AuthPanel'
+import AuthPanel, { styles as authPanelStyles } from '../../shared/AuthPanel'
 import Input from '../../shared/Input'
 import Actions from '../../shared/Actions'
 import Button from '../../shared/Button'
@@ -21,11 +21,6 @@ import axios from 'axios/index'
 import createLink from '../../../../utils/createLink'
 
 type Props = AuthFlowProps & {
-    match: {
-        params: {
-            redirect?: ?string,
-        },
-    },
     history: {
         replace: (string) => void,
     },
@@ -47,7 +42,6 @@ type State = {
 }
 
 const registerUrl = createLink('auth/register')
-const defaultRedirectUrl = createLink('canvas/editor')
 const inputNames = {
     name: 'name',
     password: 'password',
@@ -93,7 +87,7 @@ class RegisterPage extends React.Component<Props, State> {
             },
         })
             .then(() => {
-                this.onSuccess()
+                this.props.onComplete()
                 resolve()
             })
             .catch(({response}) => {
@@ -102,11 +96,6 @@ class RegisterPage extends React.Component<Props, State> {
                 reject()
             })
     })
-
-    onSuccess = () => {
-        const redirectUrl = this.props.match.params.redirect || defaultRedirectUrl
-        window.location.assign(redirectUrl)
-    }
 
     onFailure = (error: Error) => {
         const {setFieldError} = this.props
@@ -121,7 +110,7 @@ class RegisterPage extends React.Component<Props, State> {
     }
 
     render() {
-        const {setIsProcessing, isProcessing, step, form, errors, setFieldError, next, prev, setFormField} = this.props
+        const { setIsProcessing, isProcessing, step, form, errors, setFieldError, next, prev, setFormField, onComplete } = this.props
         return (
             <AuthPanel
                 currentStep={step}
@@ -200,7 +189,7 @@ class RegisterPage extends React.Component<Props, State> {
                 <AuthStep
                     title="Terms"
                     onSubmit={this.submit}
-                    onSuccess={this.onSuccess}
+                    onSuccess={onComplete}
                     onFailure={this.onFailure}
                     showBack
                 >

@@ -7,7 +7,6 @@ import AuthPanel, { styles as authPanelStyles } from '../../shared/AuthPanel'
 import Input from '../../shared/Input'
 import Actions from '../../shared/Actions'
 import Button from '../../shared/Button'
-import Checkbox from '../../shared/Checkbox'
 import AuthStep from '../../shared/AuthStep'
 
 import createLink from '../../../../utils/createLink'

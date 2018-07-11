@@ -1,9 +1,8 @@
 // @flow
 
 import * as React from 'react'
-import cx from 'classnames'
 
-import AuthPanel, { styles as authPanelStyles } from '../../shared/AuthPanel'
+import AuthPanel from '../../shared/AuthPanel'
 import Input from '../../shared/Input'
 import Actions from '../../shared/Actions'
 import Button from '../../shared/Button'
@@ -18,11 +17,6 @@ import createLink from '../../../../utils/createLink'
 import axios from 'axios/index'
 
 type Props = AuthFlowProps & {
-    match: {
-        params: {
-            redirect?: ?string,
-        },
-    },
     history: {
         replace: (string) => void,
     },
@@ -41,7 +35,6 @@ type State = {
 }
 
 const resetPasswordUrl = createLink('auth/resetPassword')
-const defaultRedirectUrl = createLink('canvas/editor')
 const inputNames = {
     password: 'password',
     confirmPassword: 'password2',
@@ -90,18 +83,13 @@ class ResetPasswordPage extends React.Component<Props, State> {
             })
     })
 
-    onSuccess = () => {
-        const redirectUrl = this.props.match.params.redirect || defaultRedirectUrl
-        window.location.assign(redirectUrl)
-    }
-
     onFailure = (error: Error) => {
         const { setFieldError } = this.props
         setFieldError('confirmPassword', error.message)
     }
 
     render() {
-        const { setIsProcessing, isProcessing, step, form, errors, setFieldError, next, prev, setFormField } = this.props
+        const { setIsProcessing, isProcessing, step, form, errors, setFieldError, next, prev, setFormField, onComplete } = this.props
         const { token } = this.state
         return (
             <AuthPanel
@@ -134,7 +122,7 @@ class ResetPasswordPage extends React.Component<Props, State> {
                 <AuthStep
                     title="Reset password"
                     onSubmit={this.submit}
-                    onSuccess={this.onSuccess}
+                    onSuccess={onComplete}
                     onFailure={this.onFailure}
                     showBack
                 >
