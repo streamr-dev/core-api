@@ -19,9 +19,6 @@ before_install:
 - git submodule update --init --recursive
 addons:
   chrome: stable
-  apt:
-    packages:
-    - lynx
 env:
   global:
   - secure: Icz6PgvdiMvqiC1yMBknaSMqHvvthOo0hUrVCTGA8pWXaqofX5fKNVI8GL4kvRK7a+YpEZ7SCvHH1cgEfBx8jC+Wc0XjGfBZXH1C1gyo8X1keCcJQVRyhxXkrjaeOLF0Cas8m9MdgAqJlwDcAXkWh426kvpAbU1SbNkkSCX3Ksp6M43LVUEbtkdOCf0GxavfgsGL5S9fk7WUf7hU4+HqL/UbbM+XMTz9hgajI5zzyRPiFwMPLGohNfopLKZvRWL/2IDY4ldVEzRi8koxIYrhO68o5RJJsptw+Gfaf3mzmgDGP9jU/cWYxsrfWogtVGFOiB2nDA+opbDU79vwHCpP5dcZJUEDvgOMVA0aTRT6Mc6hXM07wiL9noJwrSqoudkXianDDJqCKja+myKNi4wVWpisZV0HfF3nWeiKoxBaQdlCc7UUadS4OYK30Xll/Z9Z3ebWWGRmdKRSeD+QmM4j8VMu/t624AX/Q0laAS7/6BKOjMaDUqm3Q7plNWTSQWRmVUFzaH0xRL1DPLIbz/8Z8D1IVOfnq6k2FYTtVnjKQdHH65ddtqZMwtsSJsS9fQRYOm3ly0avPvDNnNeEYEuhY5lF8Tiw1lwh+BHOhiQLAPi7dqTiV/I2ImgdFH6a8wr/KICSquaSRWzwWnod3Jstrz9WWQW+K9JKu4deIRUOEx4=
