@@ -63,10 +63,6 @@ class LoginPage extends React.Component<Props> {
             })
     })
 
-    onSuccess = () => {
-        this.props.onComplete()
-    }
-
     onFailure = (error: Error) => {
         const { setFieldError } = this.props
         setFieldError('password', error.message)
@@ -75,7 +71,7 @@ class LoginPage extends React.Component<Props> {
     debouncedNext = debounce(this.props.next, 500)
 
     render = () => {
-        const { setIsProcessing, isProcessing, step, form, errors, setFieldError, next, prev, setFormField } = this.props
+        const { setIsProcessing, isProcessing, step, form, errors, setFieldError, next, prev, setFormField, onComplete } = this.props
 
         return (
             <AuthPanel
@@ -119,7 +115,7 @@ class LoginPage extends React.Component<Props> {
                     title="Sign in"
                     showBack
                     onSubmit={this.submit}
-                    onSuccess={this.onSuccess}
+                    onSuccess={onComplete}
                     onFailure={this.onFailure}
                 >
                     <Input

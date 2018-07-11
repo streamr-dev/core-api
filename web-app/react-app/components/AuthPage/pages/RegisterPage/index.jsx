@@ -87,7 +87,7 @@ class RegisterPage extends React.Component<Props, State> {
             },
         })
             .then(() => {
-                this.onSuccess()
+                this.props.onComplete()
                 resolve()
             })
             .catch(({response}) => {
@@ -96,10 +96,6 @@ class RegisterPage extends React.Component<Props, State> {
                 reject()
             })
     })
-
-    onSuccess = () => {
-        this.props.onComplete()
-    }
 
     onFailure = (error: Error) => {
         const {setFieldError} = this.props
@@ -114,7 +110,7 @@ class RegisterPage extends React.Component<Props, State> {
     }
 
     render() {
-        const {setIsProcessing, isProcessing, step, form, errors, setFieldError, next, prev, setFormField} = this.props
+        const { setIsProcessing, isProcessing, step, form, errors, setFieldError, next, prev, setFormField, onComplete } = this.props
         return (
             <AuthPanel
                 currentStep={step}
@@ -193,7 +189,7 @@ class RegisterPage extends React.Component<Props, State> {
                 <AuthStep
                     title="Terms"
                     onSubmit={this.submit}
-                    onSuccess={this.onSuccess}
+                    onSuccess={onComplete}
                     onFailure={this.onFailure}
                     showBack
                 >

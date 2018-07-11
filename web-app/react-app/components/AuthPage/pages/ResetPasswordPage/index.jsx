@@ -83,17 +83,13 @@ class ResetPasswordPage extends React.Component<Props, State> {
             })
     })
 
-    onSuccess = () => {
-        this.props.onComplete()
-    }
-
     onFailure = (error: Error) => {
         const { setFieldError } = this.props
         setFieldError('confirmPassword', error.message)
     }
 
     render() {
-        const { setIsProcessing, isProcessing, step, form, errors, setFieldError, next, prev, setFormField } = this.props
+        const { setIsProcessing, isProcessing, step, form, errors, setFieldError, next, prev, setFormField, onComplete } = this.props
         const { token } = this.state
         return (
             <AuthPanel
@@ -126,7 +122,7 @@ class ResetPasswordPage extends React.Component<Props, State> {
                 <AuthStep
                     title="Reset password"
                     onSubmit={this.submit}
-                    onSuccess={this.onSuccess}
+                    onSuccess={onComplete}
                     onFailure={this.onFailure}
                     showBack
                 >
