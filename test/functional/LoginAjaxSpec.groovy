@@ -1,4 +1,3 @@
-import LoginTester1Spec
 import pages.*
 
 class LoginAjaxSpec extends LoginTester1Spec {

@@ -1,4 +1,5 @@
 import mixins.LoginMixin
+import mixins.RegisterMixin
 import pages.*
 import geb.spock.GebReportingSpec
 import grails.util.Environment
@@ -6,13 +7,11 @@ import spock.lang.Shared
 import spock.lang.Stepwise
 
 @Stepwise
-class RegisterSpec extends GebReportingSpec implements LoginMixin {
+class RegisterSpec extends GebReportingSpec implements LoginMixin, RegisterMixin {
 
 	// Not a real email
 	@Shared
 	def emailAddress = "testingemail${System.currentTimeMillis()}@streamr.com"
-	@Shared
-	def code = emailAddress.replaceAll("@", "_")
 	// Just a random password
 	@Shared
 	def pwd = "Aymaw4HVa(dB42"
@@ -69,39 +68,9 @@ class RegisterSpec extends GebReportingSpec implements LoginMixin {
 			}
 	}
 
-	def "the invitation token can be requested correctly"() {
-		when: "requested to get the invitation"
-			to SignUpPage
-			email = emailAddress
-			nextButton.click()
-		then: "the invitation is told to be sent"
-			waitFor {
-				signUpOk.displayed
-			}
-	}
-
-	def "registering can now be done correctly"() {
-		when: "registered"
-			to RegisterPage, "?invite="+ code
-			name = "Test Tester"
-			nextButton.click()
-			waitFor { password.displayed }
-			password = pwd
-			nextButton.click()
-			waitFor { password2.displayed }
-			password2 = pwd
-			nextButton.click()
-			waitFor { timezone.displayed }
-			timezone = "Europe/Zurich"
-			nextButton.click()
-			waitFor {
-				agreeCheckbox.displayed
-				agreeCheckbox.click()
-			}
-			nextButton.click()
-
-		then: "go to canvas page"
-			at CanvasPage
+	def "register flow works"() {
+		expect: "register a new user"
+		registerUser(emailAddress, pwd)
 	}
 
 	def "cannot register without accepting tos"() {
@@ -116,7 +85,8 @@ class RegisterSpec extends GebReportingSpec implements LoginMixin {
 			password2 = pwd
 			nextButton.click()
 			waitFor { timezone.displayed }
-			timezone = "Europe/Zurich"
+			timezone << "Europe/Zurich"
+			timezoneFirstResult.click()
 			nextButton.click()
 			waitFor {
 				agreeCheckbox.displayed

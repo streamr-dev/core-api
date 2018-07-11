@@ -1,8 +1,5 @@
 package mixins
 
-import LoginTester1Spec
-import LoginTester2Spec
-import LoginTesterAdminSpec
 import pages.CanvasPage
 import pages.LoginPage
 
@@ -23,18 +20,21 @@ trait LoginMixin {
 		login(LoginTesterAdminSpec.testerUsername, LoginTesterAdminSpec.testerPassword)
 	}
 
-	def tryLogin(String u, String p) {
+	def tryLogin(String u, String p, boolean rememberMe = false) {
 		to LoginPage
 		waitFor { username.displayed }
 		username << u
 		waitFor { nextButton.click() }
 		waitFor { password.displayed }
 		password << p
+		if (rememberMe) {
+			rememberMeCheckbox.click()
+		}
 		waitFor { nextButton.click() }
 	}
 
-	def login(String u, String p) {
-		tryLogin(u, p)
+	def login(String u, String p, boolean rememberMe) {
+		tryLogin(u, p, rememberMe)
 		waitFor { at CanvasPage }
 	}
 

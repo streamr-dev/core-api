@@ -23,7 +23,7 @@ abstract class GrailsPage extends Page {
 
 		def actualPageControllerName
 		def actualPageActionName
-		
+
 		int retryCount = 100
 		while (retryCount-- > 0) {
 			try {

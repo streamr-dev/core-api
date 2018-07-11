@@ -14,7 +14,7 @@ class CanvasPage extends Page {
 
 	static controller = "canvas"
 	static action = "editor"
-	
+
 	static url = "$controller/$action"
 
 	static content = {

@@ -9,19 +9,20 @@ class ProfileEditPage extends GrailsPage {
 
 	static at = {
 		waitFor {
-			changePassword.displayed // Wait for React
+			changePasswordButton.displayed // Wait for React
 		}
 	}
 
 	static content = {
-            navbar { module NavbarModule }
+		navbar { module NavbarModule }
 
-            changePassword { $('.form-group a', text: "Change Password") }
-            timeZone { $("#timezone") }
-            defaultCommission { $("input", name: "defaultCommission") }
-            defaultLatency { $("input", name: "defaultLatency") }
-            defaultPortfolioName { $("input", name: "defaultPortfolio") }
-            saveButton { $("#submit") }
+		changePasswordButton { $('.form-group a', text: "Change Password") }
+		timeZone { $("#timezone") }
+		defaultCommission { $("input", name: "defaultCommission") }
+		defaultLatency { $("input", name: "defaultLatency") }
+		defaultPortfolioName { $("input", name: "defaultPortfolio") }
+		alert { $(".alert") }
+		saveButton { $("#submit") }
 	}
 }
 

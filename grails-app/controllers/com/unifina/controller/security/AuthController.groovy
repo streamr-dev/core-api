@@ -15,6 +15,10 @@ import grails.plugin.springsecurity.annotation.Secured
 import grails.plugin.springsecurity.authentication.dao.NullSaltSource
 import grails.util.Environment
 import org.springframework.security.authentication.dao.SaltSource
+import org.springframework.security.web.savedrequest.RequestCache
+import org.springframework.security.web.savedrequest.SavedRequest
+
+import javax.servlet.http.HttpServletResponse
 
 @Secured(["permitAll"])
 class AuthController {
@@ -23,6 +27,7 @@ class AuthController {
 	SpringSecurityService springSecurityService
 	SignupCodeService signupCodeService
 	SaltSource saltSource
+	RequestCache requestCache
 
 	static allowedMethods = [
 		register      : "POST",
@@ -33,6 +38,12 @@ class AuthController {
 
 	def index = {
 		return
+	}
+
+	def fullAuth = {
+		SavedRequest savedRequest = requestCache.getRequest(request, response)
+		println savedRequest.getRedirectUrl()
+		redirect action: "index", params: [redirect: savedRequest.getRedirectUrl()]
 	}
 
 	def register(RegisterCommand cmd) {
@@ -207,6 +218,14 @@ class AuthController {
 		redirect uri: postResetUrl
 	}
 
+	/**
+	 * The redirect action for Ajax requests.
+	 */
+	def authAjax = {
+		response.setHeader 'Location', SpringSecurityUtils.securityConfig.auth.ajaxLoginFormUrl
+		response.sendError HttpServletResponse.SC_UNAUTHORIZED
+	}
+
 	protected String generateLink(String action, linkParams) {
 		createLink(base: "$request.scheme://$request.serverName:$request.serverPort$request.contextPath",
 			controller: 'register', action: action,
@@ -216,7 +235,7 @@ class AuthController {
 	def ajaxLoginForm = {
 		def config = SpringSecurityUtils.securityConfig
 		String postUrl = "${request.contextPath}${config.apf.filterProcessesUrl}"
-		render(template: "ajaxLoginForm", model: [postUrl: postUrl, rememberMeParameter: config.rememberMe.parameter])
+		[postUrl: postUrl, rememberMeParameter: config.rememberMe.parameter]
 	}
 }
 

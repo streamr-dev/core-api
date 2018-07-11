@@ -23,7 +23,8 @@ class UrlMappings {
 		"500"(controller: "error", action: "index", exception: Exception)
 
 		// TODO: figure out how SpringSecurityService works with these
-		"/login/auth?"(controller: "auth", action: "index")
+		"/login/auth"(controller: "auth", action: "index")
+		"/login/full"(controller: "auth", action: "fullAuth")
 		"/login/$action**?"(controller: "auth", action: "index")
 		"/register/$action**?"(controller: "auth", action: "index")
 
