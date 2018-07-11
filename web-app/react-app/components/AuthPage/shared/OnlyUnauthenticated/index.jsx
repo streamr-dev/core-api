@@ -2,10 +2,18 @@
 
 import * as React from 'react'
 import axios from 'axios'
+import { withRouter } from 'react-router-dom'
+import qs from 'qs'
 
 import createLink from '../../../../utils/createLink'
 
-type Props = {
+type RouterProps = {
+    location: {
+        search: string,
+    }
+}
+
+type Props = RouterProps & {
     children: React.Node,
 }
 
@@ -28,6 +36,13 @@ class OnlyUnauthenticated extends React.Component<Props, State> {
             })
     })
 
+    getNewLocation = () => {
+        const { redirect } = qs.parse(this.props.location.search, {
+            ignoreQueryPrefix: true,
+        })
+        return redirect || createLink('/canvas/editor')
+    }
+
     componentDidMount = () => {
         this.getIsAuthenticated().then((authenticated) => {
             this.setState({
@@ -35,7 +50,7 @@ class OnlyUnauthenticated extends React.Component<Props, State> {
             })
 
             if (authenticated) {
-                window.location.href = createLink('/canvas/editor')
+                window.location.href = this.getNewLocation()
             }
         })
     }
@@ -48,4 +63,4 @@ class OnlyUnauthenticated extends React.Component<Props, State> {
     }
 }
 
-export default OnlyUnauthenticated
+export default withRouter(OnlyUnauthenticated)
