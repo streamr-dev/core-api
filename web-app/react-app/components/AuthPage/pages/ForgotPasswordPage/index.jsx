@@ -13,9 +13,8 @@ import withAuthFlow from '../../shared/withAuthFlow'
 import { onInputChange } from '../../shared/utils'
 import schemas from '../../schemas/forgotPassword'
 import type { AuthFlowProps } from '../../shared/types'
-import qs from 'qs'
-import axios from 'axios/index'
 import createLink from '../../../../utils/createLink'
+import { post } from '../../shared/utils'
 
 type Props = AuthFlowProps & {
     form: {
@@ -23,35 +22,15 @@ type Props = AuthFlowProps & {
     },
 }
 
-const forgotPasswordUrl = createLink('auth/forgotPassword')
-const inputNames = {
-    email: 'username',
-}
-
 class ForgotPasswordPage extends React.Component<Props> {
-    submit = () => new Promise((resolve, reject) => {
-        const { email } = this.props.form
-        const data = {
-            [inputNames.email]: email,
-        }
-        axios({
-            method: 'post',
-            url: forgotPasswordUrl,
-            data: qs.stringify(data),
-            headers: {
-                'Content-Type': 'application/x-www-form-urlencoded',
-                'X-Requested-With': 'XMLHttpRequest', // Required
-            },
-        })
-            .then(() => {
-                resolve()
-            })
-            .catch(({ response }) => {
-                const { data } = response
-                this.onFailure(new Error(data.error || 'Something went wrong'))
-                reject()
-            })
-    })
+    submit = () => {
+        const url = createLink('auth/forgotPassword')
+        const { email: username } = this.props.form
+
+        return post(url, {
+            username,
+        }, false, false)
+    }
 
     onFailure = (error: Error) => {
         const { setFieldError } = this.props

@@ -1,6 +1,7 @@
 // @flow
 
 import * as React from 'react'
+import * as yup from 'yup'
 
 import AuthPanel from '../../shared/AuthPanel'
 import Input from '../../shared/Input'
@@ -9,88 +10,61 @@ import Button from '../../shared/Button'
 import AuthStep from '../../shared/AuthStep'
 
 import withAuthFlow from '../../shared/withAuthFlow'
-import { onInputChange } from '../../shared/utils'
+import { onInputChange, post } from '../../shared/utils'
 import schemas from '../../schemas/resetPassword'
 import type { AuthFlowProps } from '../../shared/types'
 import qs from 'qs'
 import createLink from '../../../../utils/createLink'
-import axios from 'axios/index'
 
 type Props = AuthFlowProps & {
-    history: {
-        replace: (string) => void,
-    },
     location: {
-        pathname: string,
         search: string,
     },
     form: {
         password: string,
         confirmPassword: string,
+        token: string,
     },
 }
 
-type State = {
-    token: ?string,
-}
+class ResetPasswordPage extends React.Component<Props> {
+    submit = () => {
+        const url = createLink('auth/resetPassword')
+        const { password, confirmPassword: password2, token: t } = this.props.form
 
-const resetPasswordUrl = createLink('auth/resetPassword')
-const inputNames = {
-    password: 'password',
-    confirmPassword: 'password2',
-    token: 't',
-}
-
-class ResetPasswordPage extends React.Component<Props, State> {
-    constructor(props) {
-        super(props)
-        const { t } = qs.parse(this.props.location.search.slice(1))
-        this.state = {
-            token: t || null,
-        }
-        if (t) {
-            // TODO: uncomment
-            // props.history.replace(props.location.pathname)
-        } else {
-            props.setFieldError('password', 'A token is needed. Please go back to the email you received, and click the click again.')
-        }
+        return post(url, {
+            password,
+            password2,
+            t,
+        }, false, false)
     }
-
-    submit = () => new Promise((resolve, reject) => {
-        const { password, confirmPassword } = this.props.form
-        const { token } = this.state
-        const data = {
-            [inputNames.password]: password,
-            [inputNames.confirmPassword]: confirmPassword,
-            [inputNames.token]: token,
-        }
-        axios({
-            method: 'post',
-            url: resetPasswordUrl,
-            data: qs.stringify(data),
-            headers: {
-                'Content-Type': 'application/x-www-form-urlencoded',
-                'X-Requested-With': 'XMLHttpRequest', // Required
-            },
-        })
-            .then(() => {
-                resolve()
-            })
-            .catch(({ response }) => {
-                const { data } = response
-                this.onFailure(new Error(data.error || 'Something went wrong'))
-                reject()
-            })
-    })
 
     onFailure = (error: Error) => {
         const { setFieldError } = this.props
         setFieldError('confirmPassword', error.message)
     }
 
+    componentDidMount = () => {
+        const { setFormField, location: { search }, setFieldError } = this.props
+
+        setFormField('token', qs.parse(search, {
+            ignoreQueryPrefix: true,
+        }).token || '', () => {
+            yup
+                .object()
+                .shape({
+                    token: yup.reach(schemas[0], 'token'),
+                })
+                .validate(this.props.form)
+                .then(() => {}, (error: yup.ValidationError) => {
+                    setFieldError('password', error.message)
+                })
+        })
+    }
+
     render() {
         const { setIsProcessing, isProcessing, step, form, errors, setFieldError, next, prev, setFormField, onComplete } = this.props
-        const { token } = this.state
+
         return (
             <AuthPanel
                 currentStep={step}
@@ -111,7 +85,7 @@ class ResetPasswordPage extends React.Component<Props, State> {
                         error={errors.password}
                         processing={step === 0 && isProcessing}
                         autoComplete="new-password"
-                        disabled={!token}
+                        disabled={!form.token}
                         measureStrength
                         autoFocus
                     />
@@ -149,4 +123,5 @@ class ResetPasswordPage extends React.Component<Props, State> {
 export default withAuthFlow(ResetPasswordPage, 0, {
     password: '',
     confirmPassword: '',
+    token: '',
 })

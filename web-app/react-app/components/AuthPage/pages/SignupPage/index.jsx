@@ -11,11 +11,9 @@ import AuthStep from '../../shared/AuthStep'
 
 import createLink from '../../../../utils/createLink'
 import withAuthFlow from '../../shared/withAuthFlow'
-import { onInputChange } from '../../shared/utils'
+import { onInputChange, post } from '../../shared/utils'
 import schemas from '../../schemas/signup'
 import type { AuthFlowProps } from '../../shared/types'
-import qs from 'qs'
-import axios from 'axios/index'
 
 type Props = AuthFlowProps & {
     form: {
@@ -27,34 +25,15 @@ type Props = AuthFlowProps & {
     },
 }
 
-const registerUrl = createLink('auth/signup')
-const inputNames = {
-    email: 'username',
-}
-
 class SignupPage extends React.Component<Props> {
-    submit = () => new Promise((resolve, reject) => {
-        const { email } = this.props.form
-        const data = {
-            [inputNames.email]: email,
-        }
-        axios({
-            method: 'post',
-            url: registerUrl,
-            data: qs.stringify(data),
-            headers: {
-                'Content-Type': 'application/x-www-form-urlencoded',
-            },
-        })
-            .then(() => {
-                resolve()
-            })
-            .catch(({ response }) => {
-                const { data } = response
-                this.onFailure(new Error(data.error || 'Something went wrong'))
-                reject()
-            })
-    })
+    submit = () => {
+        const url = createLink('auth/signup')
+        const { email: username } = this.props.form
+
+        return post(url, {
+            username,
+        }, false, false)
+    }
 
     onFailure = (error: Error) => {
         const { setFieldError } = this.props

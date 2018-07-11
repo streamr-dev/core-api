@@ -8,8 +8,12 @@ export default [
     // Step 0: Name
     yup.object()
         .shape({
-            name: yup.string()
+            name: yup
+                .string()
                 .required('Name is required'),
+            invite: yup
+                .string()
+                .required('An invite is needed. Please go back to the email you received, and click the link again.'),
         }),
     // Step 1: New password
     yup.object()

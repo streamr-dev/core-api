@@ -45,14 +45,14 @@ const withAuthFlow = (WrappedComponent: React.ComponentType<any>, step: number, 
             })
         }
 
-        setFormField = (field: string, value: any) => {
+        setFormField = (field: string, value: any, callback?: () => void) => {
             this.setFieldError(field, '')
             this.setState({
                 form: {
                     ...this.state.form,
                     [field]: value,
                 },
-            })
+            }, callback)
         }
 
         setIsProcessing = (isProcessing: boolean) => {

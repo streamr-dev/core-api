@@ -8,7 +8,7 @@ export type Errors = {
     [string]: string,
 }
 
-export type FieldSetter = (string, any) => void
+export type FieldSetter = (string, any, ?() => void) => void
 
 export type FieldErrorSetter = (string, string) => void
 

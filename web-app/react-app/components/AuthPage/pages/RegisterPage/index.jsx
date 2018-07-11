@@ -5,6 +5,7 @@ import qs from 'qs'
 import cx from 'classnames'
 import Select from 'react-select'
 import moment from 'moment-timezone'
+import * as yup from 'yup'
 
 import AuthPanel, { styles as authPanelStyles } from '../../shared/AuthPanel'
 import Input from '../../shared/Input'
@@ -14,18 +15,13 @@ import Checkbox from '../../shared/Checkbox'
 import AuthStep from '../../shared/AuthStep'
 
 import withAuthFlow from '../../shared/withAuthFlow'
-import {onInputChange} from '../../shared/utils'
+import { onInputChange, post } from '../../shared/utils'
 import schemas from '../../schemas/register'
-import type {AuthFlowProps} from '../../shared/types'
-import axios from 'axios/index'
+import type { AuthFlowProps } from '../../shared/types'
 import createLink from '../../../../utils/createLink'
 
 type Props = AuthFlowProps & {
-    history: {
-        replace: (string) => void,
-    },
     location: {
-        pathname: string,
         search: string,
     },
     form: {
@@ -34,71 +30,27 @@ type Props = AuthFlowProps & {
         confirmPassword: string,
         timezone: string,
         toc: boolean,
+        invite: string,
     },
 }
 
-type State = {
-    invite: ?string,
-}
+class RegisterPage extends React.Component<Props> {
+    submit = () => {
+        const url = createLink('auth/register')
+        const { name, password, confirmPassword: password2, timezone, toc: tosConfirmed, invite } = this.props.form
 
-const registerUrl = createLink('auth/register')
-const inputNames = {
-    name: 'name',
-    password: 'password',
-    confirmPassword: 'password2',
-    timezone: 'timezone',
-    toc: 'tosConfirmed',
-    invite: 'invite',
-}
-
-class RegisterPage extends React.Component<Props, State> {
-    constructor(props) {
-        super(props)
-        const {invite} = qs.parse(this.props.location.search.slice(1))
-        this.state = {
-            invite: invite || null,
-        }
-        if (invite) {
-            // TODO: uncomment
-            // props.history.replace(props.location.pathname)
-        } else {
-            props.setFieldError('name', 'An invite is needed. Please go back to the email you received, and click the click again.')
-        }
+        return post(url, {
+            name,
+            password,
+            password2,
+            timezone,
+            tosConfirmed,
+            invite,
+        }, false, false)
     }
 
-    submit = () => new Promise((resolve, reject) => {
-        const {name, password, confirmPassword, timezone, toc} = this.props.form
-        const {invite} = this.state
-        const data = {
-            [inputNames.name]: name,
-            [inputNames.password]: password,
-            [inputNames.confirmPassword]: confirmPassword,
-            [inputNames.timezone]: timezone,
-            [inputNames.toc]: toc,
-            [inputNames.invite]: invite,
-        }
-        axios({
-            method: 'post',
-            url: registerUrl,
-            data: qs.stringify(data),
-            headers: {
-                'Content-Type': 'application/x-www-form-urlencoded',
-                'X-Requested-With': 'XMLHttpRequest', // Required
-            },
-        })
-            .then(() => {
-                this.props.onComplete()
-                resolve()
-            })
-            .catch(({response}) => {
-                const {data} = response
-                this.onFailure(new Error(data.error || 'Something went wrong'))
-                reject()
-            })
-    })
-
     onFailure = (error: Error) => {
-        const {setFieldError} = this.props
+        const { setFieldError } = this.props
         setFieldError('toc', error.message)
     }
 
@@ -107,6 +59,24 @@ class RegisterPage extends React.Component<Props, State> {
         label: string,
     }) => {
         this.props.setFormField('timezone', option.value)
+    }
+
+    componentDidMount = () => {
+        const { setFormField, location: { search }, setFieldError } = this.props
+
+        setFormField('invite', qs.parse(search, {
+            ignoreQueryPrefix: true,
+        }).invite || '', () => {
+            yup
+                .object()
+                .shape({
+                    invite: yup.reach(schemas[0], 'invite'),
+                })
+                .validate(this.props.form)
+                .then(() => {}, (error: yup.ValidationError) => {
+                    setFieldError('name', error.message)
+                })
+        })
     }
 
     render() {
@@ -131,7 +101,7 @@ class RegisterPage extends React.Component<Props, State> {
                         error={errors.name}
                         processing={step === 0 && isProcessing}
                         autoComplete="name"
-                        disabled={!this.state.invite}
+                        disabled={!form.invite}
                         autoFocus
                     />
                     <Actions>
@@ -219,4 +189,5 @@ export default withAuthFlow(RegisterPage, 0, {
     confirmPassword: '',
     timezone: '',
     toc: false,
+    invite: '',
 })

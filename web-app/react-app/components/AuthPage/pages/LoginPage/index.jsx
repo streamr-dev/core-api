@@ -1,8 +1,6 @@
 // @flow
 
 import * as React from 'react'
-import axios from 'axios'
-import qs from 'qs'
 import { Link } from 'react-router-dom'
 import { debounce } from 'lodash'
 
@@ -19,14 +17,7 @@ import { onInputChange } from '../../shared/utils'
 import schemas from '../../schemas/login'
 import styles from './loginPage.pcss'
 import type { AuthFlowProps } from '../../shared/types'
-
-// Spring security service requires its own input names
-const loginUrl = createLink('j_spring_security_check')
-const inputNames = {
-    email: 'j_username',
-    password: 'j_password',
-    rememberMe: '_spring_security_remember_me',
-}
+import { post } from '../../shared/utils'
 
 type Props = AuthFlowProps & {
     form: {
@@ -36,32 +27,21 @@ type Props = AuthFlowProps & {
     },
 }
 
+// NOTE: Spring security service requires its own input names
+
 class LoginPage extends React.Component<Props> {
-    submit = () => new Promise((resolve, reject) => {
-        const { email, password, rememberMe } = this.props.form
-        const data = {
-            [inputNames.email]: email,
-            [inputNames.password]: password,
-            [inputNames.rememberMe]: rememberMe ? 'on' : undefined,
-        }
-        axios({
-            method: 'post',
-            url: loginUrl,
-            data: qs.stringify(data),
-            headers: {
-                'Content-Type': 'application/x-www-form-urlencoded',
-                'X-Requested-With': 'XMLHttpRequest', // Required
-            },
-        })
-            .then(({ data }) => {
-                if (data.error) {
-                    this.onFailure(new Error(data.error))
-                    reject()
-                } else {
-                    resolve()
-                }
-            })
-    })
+    submit = () => {
+        const url = createLink('j_spring_security_check')
+        const { email: j_username, password: j_password, rememberMe } = this.props.form
+
+        return post(url, {
+            j_username,
+            j_password,
+            ...(rememberMe ? {
+                _spring_security_remember_me: 'on',
+            } : {})
+        }, true, true)
+    }
 
     onFailure = (error: Error) => {
         const { setFieldError } = this.props
