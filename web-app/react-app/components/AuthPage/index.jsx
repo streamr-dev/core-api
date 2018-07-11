@@ -14,35 +14,37 @@ import RegisterPage from './pages/RegisterPage'
 import SignupPage from './pages/SignupPage'
 import ForgotPasswordPage from './pages/ForgotPasswordPage'
 import ResetPasswordPage from './pages/ResetPasswordPage'
+import OnlyUnauthenticated from './shared/OnlyUnauthenticated'
+import styles from './authPage.pcss'
 
 const basename = createLink('/').replace(window.location.origin, '')
 
-import styles from './authPage.pcss'
-
 const AuthPage = () => (
     <BrowserRouter basename={basename}>
-        <div className={styles.authPage}>
-            <section className={styles.content}>
-                <a href="https://www.streamr.com" className={styles.logo}>
-                    <img src={createLink('static/images/streamr-logo.svg')} />
-                </a>
-                <div className={styles.panel}>
-                    <Switch>
-                        <Route exact path="/login/auth" component={LoginPage} />
-                        <Route exact path="/register/register" component={RegisterPage} />
-                        <Route exact path="/register/signup" component={SignupPage} />
-                        <Route exact path="/register/forgotPassword" component={ForgotPasswordPage} />
-                        <Route exact path="/register/resetPassword" component={ResetPasswordPage} />
-                        <Redirect from="/register" to="/register/signup" />
-                        <Redirect from="/login" to="/login/auth" />
-                        <Route path="/" component={() => '404'} />
-                    </Switch>
-                    <div className={styles.footer}>
-                        Made with ❤️ & ☕️ by Streamr Network AG in 2018
+        <OnlyUnauthenticated>
+            <div className={styles.authPage}>
+                <section className={styles.content}>
+                    <a href="https://www.streamr.com" className={styles.logo}>
+                        <img src={createLink('static/images/streamr-logo.svg')} />
+                    </a>
+                    <div className={styles.panel}>
+                        <Switch>
+                            <Route exact path="/login/auth" component={LoginPage} />
+                            <Route exact path="/register/register" component={RegisterPage} />
+                            <Route exact path="/register/signup" component={SignupPage} />
+                            <Route exact path="/register/forgotPassword" component={ForgotPasswordPage} />
+                            <Route exact path="/register/resetPassword" component={ResetPasswordPage} />
+                            <Redirect from="/register" to="/register/signup" />
+                            <Redirect from="/login" to="/login/auth" />
+                            <Route path="/" component={() => '404'} />
+                        </Switch>
+                        <div className={styles.footer}>
+                            Made with ❤️ & ☕️ by Streamr Network AG in 2018
+                        </div>
                     </div>
-                </div>
-            </section>
-        </div>
+                </section>
+            </div>
+        </OnlyUnauthenticated>
     </BrowserRouter>
 )
 
