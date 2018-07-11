@@ -1,2 +1,2 @@
 #!/bin/bash
-lynx -dump $(pwd)/target/test-reports/html/failed.html
+sed '/<script/,/<\/script>/d' "$(pwd)/target/test-reports/html/failed.html" | sed 's/<[^>]*>//g' | sed '/^$/d'
