@@ -2,6 +2,7 @@
 
 import * as React from 'react'
 
+import RedirectAuthenticated from './RedirectAuthenticated'
 import type {
     FormFields,
     Errors,
@@ -12,6 +13,7 @@ type State = {
     errors: Errors,
     isProcessing: boolean,
     step: number,
+    complete: boolean,
 }
 
 const getDisplayName = (WrappedComponent: React.ComponentType<any>) => (
@@ -27,6 +29,7 @@ const withAuthFlow = (WrappedComponent: React.ComponentType<any>, step: number, 
             isProcessing: false,
             form: initialFormFields,
             errors: {},
+            complete: false,
         }
 
         setFieldError = (field: string, message: string) => {
@@ -72,22 +75,32 @@ const withAuthFlow = (WrappedComponent: React.ComponentType<any>, step: number, 
             this.setStep(this.state.step + 1)
         )
 
+        onComplete = () => {
+            this.setState({
+                complete: true,
+            })
+        }
+
         render = () => {
-            const { step, isProcessing, errors, form } = this.state
+            const { step, isProcessing, errors, form, complete } = this.state
 
             return (
-                <WrappedComponent
-                    {...this.props}
-                    next={this.next}
-                    prev={this.prev}
-                    setFormField={this.setFormField}
-                    setFieldError={this.setFieldError}
-                    setIsProcessing={this.setIsProcessing}
-                    step={step}
-                    isProcessing={isProcessing}
-                    errors={errors}
-                    form={form}
-                />
+                <React.Fragment>
+                    <WrappedComponent
+                        {...this.props}
+                        next={this.next}
+                        prev={this.prev}
+                        setFormField={this.setFormField}
+                        setFieldError={this.setFieldError}
+                        setIsProcessing={this.setIsProcessing}
+                        step={step}
+                        isProcessing={isProcessing}
+                        errors={errors}
+                        form={form}
+                        onComplete={this.onComplete}
+                    />
+                    <RedirectAuthenticated blindly={complete} />
+                </React.Fragment>
             )
         }
     }

@@ -14,7 +14,6 @@ import RegisterPage from './pages/RegisterPage'
 import SignupPage from './pages/SignupPage'
 import ForgotPasswordPage from './pages/ForgotPasswordPage'
 import ResetPasswordPage from './pages/ResetPasswordPage'
-import RedirectAuthenticated from './shared/RedirectAuthenticated'
 import styles from './authPage.pcss'
 
 const basename = createLink('/').replace(window.location.origin, '')
@@ -42,7 +41,6 @@ const AuthPage = () => (
                     </div>
                 </div>
             </section>
-            <RedirectAuthenticated />
         </div>
     </BrowserRouter>
 )

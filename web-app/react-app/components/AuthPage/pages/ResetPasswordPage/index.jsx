@@ -17,11 +17,6 @@ import createLink from '../../../../utils/createLink'
 import axios from 'axios/index'
 
 type Props = AuthFlowProps & {
-    match: {
-        params: {
-            redirect?: ?string,
-        },
-    },
     history: {
         replace: (string) => void,
     },
@@ -40,7 +35,6 @@ type State = {
 }
 
 const resetPasswordUrl = createLink('auth/resetPassword')
-const defaultRedirectUrl = createLink('canvas/editor')
 const inputNames = {
     password: 'password',
     confirmPassword: 'password2',
@@ -90,8 +84,7 @@ class ResetPasswordPage extends React.Component<Props, State> {
     })
 
     onSuccess = () => {
-        const redirectUrl = this.props.match.params.redirect || defaultRedirectUrl
-        window.location.assign(redirectUrl)
+        this.props.onComplete()
     }
 
     onFailure = (error: Error) => {

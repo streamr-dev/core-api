@@ -22,7 +22,6 @@ import type { AuthFlowProps } from '../../shared/types'
 
 // Spring security service requires its own input names
 const loginUrl = createLink('j_spring_security_check')
-const defaultRedirectUrl = createLink('canvas/editor')
 const inputNames = {
     email: 'j_username',
     password: 'j_password',
@@ -30,11 +29,6 @@ const inputNames = {
 }
 
 type Props = AuthFlowProps & {
-    match: {
-        params: {
-            redirect?: ?string,
-        },
-    },
     form: {
         email: string,
         password: string,
@@ -70,8 +64,7 @@ class LoginPage extends React.Component<Props> {
     })
 
     onSuccess = () => {
-        const redirectUrl = this.props.match.params.redirect || defaultRedirectUrl
-        window.location.assign(redirectUrl)
+        this.props.onComplete()
     }
 
     onFailure = (error: Error) => {

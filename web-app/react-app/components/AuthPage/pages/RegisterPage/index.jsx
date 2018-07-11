@@ -21,11 +21,6 @@ import axios from 'axios/index'
 import createLink from '../../../../utils/createLink'
 
 type Props = AuthFlowProps & {
-    match: {
-        params: {
-            redirect?: ?string,
-        },
-    },
     history: {
         replace: (string) => void,
     },
@@ -47,7 +42,6 @@ type State = {
 }
 
 const registerUrl = createLink('auth/register')
-const defaultRedirectUrl = createLink('canvas/editor')
 const inputNames = {
     name: 'name',
     password: 'password',
@@ -104,8 +98,7 @@ class RegisterPage extends React.Component<Props, State> {
     })
 
     onSuccess = () => {
-        const redirectUrl = this.props.match.params.redirect || defaultRedirectUrl
-        window.location.assign(redirectUrl)
+        this.props.onComplete()
     }
 
     onFailure = (error: Error) => {
