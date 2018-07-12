@@ -5,6 +5,7 @@ import org.apache.log4j.Logger;
 import org.codehaus.groovy.grails.web.mapping.LinkGenerator;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.web.authentication.LoginUrlAuthenticationEntryPoint;
+import org.springframework.security.web.util.RedirectUrlBuilder;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -30,6 +31,25 @@ public class RedirectAppendingAuthenticationEntryPoint extends LoginUrlAuthentic
 		super(loginFormUrl);
 	}
 
+	private String getOriginalRequestUrl(HttpServletRequest request) {
+		RedirectUrlBuilder urlBuilder = new RedirectUrlBuilder();
+		urlBuilder.setScheme(request.getHeader("x-forwarded-proto") != null ?
+				request.getHeader("x-forwarded-proto") :
+				request.getScheme()
+		);
+		urlBuilder.setServerName(request.getHeader("x-forwarded-host") != null ?
+				request.getHeader("x-forwarded-host") :
+				request.getServerName())
+		;
+		urlBuilder.setPort(request.getHeader("x-forwarded-port") != null ?
+				Integer.parseInt(request.getHeader("x-forwarded-port")) :
+				getPortResolver().getServerPort(request)
+		);
+		urlBuilder.setPathInfo(request.getRequestURI());
+		urlBuilder.setQuery(request.getQueryString()); // is null safe
+		return urlBuilder.getUrl();
+	}
+
 	@Override
 	protected String buildRedirectUrlToLoginPage(HttpServletRequest request, HttpServletResponse response, AuthenticationException authException) {
 		String loginPageUrl = super.buildRedirectUrlToLoginPage(request, response, authException);
@@ -38,13 +58,14 @@ public class RedirectAppendingAuthenticationEntryPoint extends LoginUrlAuthentic
 		if (request.getRequestURI().equals(getFullURI("/"))
 				|| request.getRequestURI().equals(getFullURI(defaultRedirectURI))) {
 			return loginPageUrl;
-		} else if (LoginRedirectValidator.isValid(request.getRequestURL().toString())) {
-			final String value = String.format("%s?%s", request.getRequestURL(), request.getQueryString());
-			final String url = String.format("%s?%s=%s", loginPageUrl, REDIRECT_PARAM_NAME, urlencode(value));
-			return url;
 		} else {
-			log.warn("Redirect url rejected: "+request.getRequestURL());
-			return loginPageUrl;
+			String redirectUrl = getOriginalRequestUrl(request);
+			if (LoginRedirectValidator.isValid(redirectUrl)) {
+				return String.format("%s?%s=%s", loginPageUrl, REDIRECT_PARAM_NAME, urlencode(redirectUrl));
+			} else {
+				log.warn("Redirect url rejected: " + request.getRequestURL());
+				return loginPageUrl;
+			}
 		}
 	}
 
