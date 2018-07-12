@@ -2,7 +2,6 @@
 
 import * as React from 'react'
 import { Link } from 'react-router-dom'
-import { debounce } from 'lodash'
 
 import AuthPanel from '../../shared/AuthPanel'
 import Input from '../../shared/Input'
@@ -48,8 +47,6 @@ class LoginPage extends React.Component<Props> {
         setFieldError('password', error.message)
     }
 
-    debouncedNext = debounce(this.props.next, 500)
-
     render = () => {
         const { setIsProcessing, isProcessing, step, form, errors, setFieldError, next, prev, setFormField, onComplete } = this.props
 
@@ -63,7 +60,7 @@ class LoginPage extends React.Component<Props> {
                 validationSchemas={schemas}
                 onValidationError={setFieldError}
             >
-                <AuthStep title="Sign in" showEth={false} showSignup>
+                <AuthStep title="Sign in" showSignup autoSubmitOnChange={['hiddenPassword']}>
                     <Input
                         name="email"
                         label="Email"
@@ -80,7 +77,6 @@ class LoginPage extends React.Component<Props> {
                         type="password"
                         onChange={(e) => {
                             onInputChange(setFormField, 'password')(e)
-                            this.debouncedNext()
                         }}
                         value={form.password}
                         style={{

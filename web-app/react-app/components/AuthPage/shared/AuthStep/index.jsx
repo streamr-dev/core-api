@@ -2,6 +2,8 @@
 
 import * as React from 'react'
 import * as yup from 'yup'
+import debounce from 'lodash/debounce'
+
 import type {
     FieldErrorSetter,
     FlagSetter,
@@ -26,6 +28,7 @@ type Props = PanelProps & {
     next?: () => void,
     form?: FormFields,
     current?: boolean,
+    autoSubmitOnChange?: Array<string>,
 }
 
 class AuthStep extends React.Component<Props> {
@@ -33,6 +36,37 @@ class AuthStep extends React.Component<Props> {
         step: 0,
         totalSteps: 0,
         onSubmit: (): Promise<any> => Promise.resolve(),
+    }
+
+    form: ?HTMLFormElement = null
+
+    setForm = (ref: ?HTMLFormElement) => {
+        this.form = ref
+    }
+
+    onFieldChange = (event: any) => {
+        const e: SyntheticInputEvent<EventTarget> = event
+        const { autoSubmitOnChange } = this.props
+
+        if ((autoSubmitOnChange || []).indexOf(e.target.name) !== -1) {
+            this.debouncedSubmit()
+        }
+    }
+
+    componentDidMount() {
+        const form = this.form
+
+        if (form) {
+            form.addEventListener('change', this.onFieldChange)
+        }
+    }
+
+    componentWillMount() {
+        const form = this.form
+
+        if (form) {
+            form.removeEventListener('change', this.onFieldChange)
+        }
     }
 
     setProcessing = (value: boolean) => {
@@ -48,12 +82,10 @@ class AuthStep extends React.Component<Props> {
         return (validationSchema || yup.object()).validate(form || {})
     }
 
-    onSubmit = (e: SyntheticEvent<EventTarget>) => {
-        e.preventDefault()
+    submit = () => {
         const { onValidationError, step, totalSteps, onSubmit, onSuccess, onFailure, next } = this.props
 
         this.setProcessing(true)
-
         this.validate()
             .then(() => {
                 return onSubmit()
@@ -80,8 +112,15 @@ class AuthStep extends React.Component<Props> {
             })
     }
 
+    debouncedSubmit = debounce(this.submit, 500)
+
+    onSubmit = (e: SyntheticEvent<EventTarget>) => {
+        e.preventDefault()
+        this.debouncedSubmit.flush()
+    }
+
     render = () => (
-        <form onSubmit={this.onSubmit}>
+        <form onSubmit={this.onSubmit} ref={this.setForm}>
             {this.props.children}
         </form>
     )
