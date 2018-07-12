@@ -61,7 +61,7 @@ class AuthStep extends React.Component<Props> {
         }
     }
 
-    componentWillMount() {
+    componentWillUnmount() {
         const form = this.form
 
         if (form) {
