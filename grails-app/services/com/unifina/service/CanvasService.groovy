@@ -172,7 +172,7 @@ class CanvasService {
 
 	@CompileStatic
 	void resetUiChannels(Map signalPathMap) {
-		UiChannelIterator.over(signalPathMap).each { UiChannelIterator.Element element ->
+		for (UiChannelIterator.Element element in UiChannelIterator.over(signalPathMap)) {
 			element.uiChannelData.id = null
 		}
 	}
