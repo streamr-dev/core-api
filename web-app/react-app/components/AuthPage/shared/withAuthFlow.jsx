@@ -75,7 +75,7 @@ const withAuthFlow = (WrappedComponent: React.ComponentType<any>, step: number, 
             this.setStep(this.state.step + 1)
         )
 
-        onComplete = () => {
+        markAsComplete = () => {
             this.setState({
                 complete: true,
             })
@@ -97,7 +97,7 @@ const withAuthFlow = (WrappedComponent: React.ComponentType<any>, step: number, 
                         isProcessing={isProcessing}
                         errors={errors}
                         form={form}
-                        onComplete={this.onComplete}
+                        redirect={this.markAsComplete}
                     />
                     <RedirectAuthenticated blindly={complete} />
                 </React.Fragment>

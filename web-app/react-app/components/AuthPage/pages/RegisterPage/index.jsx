@@ -80,7 +80,7 @@ class RegisterPage extends React.Component<Props> {
     }
 
     render() {
-        const { setIsProcessing, isProcessing, step, form, errors, setFieldError, next, prev, setFormField, onComplete } = this.props
+        const { setIsProcessing, isProcessing, step, form, errors, setFieldError, next, prev, setFormField, redirect } = this.props
         return (
             <AuthPanel
                 currentStep={step}
@@ -159,7 +159,7 @@ class RegisterPage extends React.Component<Props> {
                 <AuthStep
                     title="Terms"
                     onSubmit={this.submit}
-                    onSuccess={onComplete}
+                    onSuccess={redirect}
                     onFailure={this.onFailure}
                     showBack
                 >

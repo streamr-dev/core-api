@@ -48,7 +48,7 @@ class LoginPage extends React.Component<Props> {
     }
 
     render = () => {
-        const { setIsProcessing, isProcessing, step, form, errors, setFieldError, next, prev, setFormField, onComplete } = this.props
+        const { setIsProcessing, isProcessing, step, form, errors, setFieldError, next, prev, setFormField, redirect } = this.props
 
         return (
             <AuthPanel
@@ -91,7 +91,7 @@ class LoginPage extends React.Component<Props> {
                     title="Sign in"
                     showBack
                     onSubmit={this.submit}
-                    onSuccess={onComplete}
+                    onSuccess={redirect}
                     onFailure={this.onFailure}
                 >
                     <Input
