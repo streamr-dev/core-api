@@ -23,7 +23,7 @@ class EmailModule extends ModuleWithSideEffects {
 	boolean lastEmailBlocked
 
 	@Override
-	public void init() {
+	void init() {
 		addInput(sub)
 		addInput(message)
 		sender = Holders.grailsApplication.config.unifina.email.sender
@@ -31,7 +31,7 @@ class EmailModule extends ModuleWithSideEffects {
 	}
 
 	@Override
-	public void activateWithSideEffects() {
+	void activateWithSideEffects() {
 		if (isNotTooOften(emailInterval, globals.time.getTime(), prevTime)) {
 			prevTime = globals.time.getTime()
 			emailSent = true
@@ -53,7 +53,7 @@ class EmailModule extends ModuleWithSideEffects {
 	}
 
 	@Override
-	public void activateWithoutSideEffects() {
+	void activateWithoutSideEffects() {
 		// Show email contents as notifications in the UI
 		parentSignalPath?.showNotification(getMessageBody())
 	}
@@ -112,7 +112,7 @@ Input Values:
 	}
 
 	@Override
-	public Map<String,Object> getConfiguration() {
+	Map<String,Object> getConfiguration() {
 		Map<String,Object> config = super.getConfiguration();
 
 		// Module options
@@ -141,7 +141,7 @@ Input Values:
 	}
 
 	@Override
-	public void clearState() {
+	void clearState() {
 		prevTime = null
 		emailSent = false
 		emailInputCount = 1
