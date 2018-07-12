@@ -23,3 +23,4 @@ class LoginRedirectValidator {
 		return matcher.matches()
 	}
 }
+
