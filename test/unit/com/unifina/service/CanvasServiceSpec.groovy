@@ -349,6 +349,20 @@ class CanvasServiceSpec extends Specification {
 		true
 	}
 
+	def "start() sets canvas.startedBy to user who started the canvas"() {
+		service.signalPathService = Mock(SignalPathService)
+		myFirstCanvas.state = Canvas.State.STOPPED
+		myFirstCanvas.startedBy = someoneElse
+		myFirstCanvas.save(failOnError: true)
+
+		when:
+		service.start(myFirstCanvas, false, me)
+
+		then:
+		1 * service.signalPathService.startLocal(myFirstCanvas, _, me)
+		myFirstCanvas.startedBy.id == me.id
+	}
+
 	def "stop() invokes SignalPathService.stopRemote()"() {
 		def signalPathService = Mock(SignalPathService)
 
