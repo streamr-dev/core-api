@@ -116,7 +116,8 @@ class AuthStep extends React.Component<Props> {
 
     onSubmit = (e: SyntheticEvent<EventTarget>) => {
         e.preventDefault()
-        this.debouncedSubmit.flush()
+        this.debouncedSubmit.cancel()
+        this.submit()
     }
 
     render = () => (
