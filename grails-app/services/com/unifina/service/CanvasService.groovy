@@ -29,7 +29,7 @@ class CanvasService {
 	StreamService streamService
 
 	@CompileStatic
-	public Map reconstruct(Canvas canvas, SecUser user) {
+	Map reconstruct(Canvas canvas, SecUser user) {
 		Map signalPathMap = (JSONObject) JSON.parse(canvas.json)
 		return reconstructFrom(signalPathMap, user)
 	}
@@ -43,7 +43,7 @@ class CanvasService {
 	}
 
 	@CompileStatic
-	public void updateExisting(Canvas canvas, SaveCanvasCommand command, SecUser user, boolean resetUi = false) {
+	void updateExisting(Canvas canvas, SaveCanvasCommand command, SecUser user, boolean resetUi = false) {
 		if (!command.validate()) {
 			throw new ValidationException(command.errors)
 		}
@@ -84,7 +84,7 @@ class CanvasService {
 		}
 	}
 
-	public void start(Canvas canvas, boolean clearSerialization, SecUser asUser) {
+	void start(Canvas canvas, boolean clearSerialization, SecUser asUser) {
 		if (canvas.state == Canvas.State.RUNNING) {
 			throw new InvalidStateException("Cannot run canvas $canvas.id because it's already running. Stop it first.")
 		}
@@ -104,12 +104,12 @@ class CanvasService {
 		}
 	}
 
-	public void startRemote(Canvas canvas, SecUser user, boolean forceReset=false, boolean resetOnError=true) {
+	void startRemote(Canvas canvas, SecUser user, boolean forceReset=false, boolean resetOnError=true) {
 		taskService.createTask(CanvasStartTask, CanvasStartTask.getConfig(canvas, forceReset, resetOnError), "canvas-start", user)
 	}
 
 	@Transactional(noRollbackFor=[CanvasUnreachableException])
-	public void stop(Canvas canvas, SecUser user) throws ApiException {
+	void stop(Canvas canvas, SecUser user) throws ApiException {
 		if (canvas.state != Canvas.State.RUNNING) {
 			throw new InvalidStateException("Canvas $canvas.id not currently running.")
 		}
