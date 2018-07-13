@@ -10,10 +10,10 @@ class LoginRedirectValidator {
 	// - streamr.com and its subdomains
 	// Trailing slash is required.
 	final static String regex = """
-^https://([a-zA-Z0-9-]*\\.)?streamr\\.com(/.*)?     # streamr.com and its subdomains. subdomain == [a-zA-Z0-9-]
-|http://localhost:\\d\\d\\d\\d/.*                  # or localhost with any port
-|http://127\\.0\\.0\\.1:\\d\\d\\d\\d/.*\$          # or 127.0.0.1 with any port
-"""
+		^(https://([a-zA-Z0-9-]+\\.)*streamr.com				# streamr.com and its subdomains
+		|http://(localhost|(127\\.0\\.0\\.1))(:[0-9]{2,5})?)	# localhost or 127.0.0.1 any port
+		([/\\#?].*)?\$											# plus any route, query param or hash
+	"""
 	final static Pattern pattern = Pattern.compile(regex, Pattern.COMMENTS)
 	static boolean isValid(final String url) {
 		if (url == null) {
@@ -23,3 +23,4 @@ class LoginRedirectValidator {
 		return matcher.matches()
 	}
 }
+
