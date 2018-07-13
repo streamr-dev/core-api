@@ -1,8 +1,12 @@
 package mixins
 
 import pages.CanvasPage
+import pages.LoginPage
 import pages.RegisterPage
 import pages.SignUpPage
+import pages.UserEditPage
+import pages.UserSearchPage
+import pages.UserSearchResultPage
 
 /**
  * Handle registering a new user
@@ -41,5 +45,36 @@ trait RegisterMixin {
 
 		then: "go to canvas page"
 		at CanvasPage
+	}
+
+	def removeUser(emailAddress) {
+		setup: "login"
+		login(LoginTesterAdminSpec.testerUsername, LoginTesterAdminSpec.testerPassword)
+
+		when: "search for the user and click it"
+		to UserSearchPage
+		assert username.displayed
+		username = emailAddress
+		searchButton.click()
+		waitFor {
+			at UserSearchResultPage
+		}
+		searchResult.click()
+
+		then: "go to user edit page"
+		at UserEditPage
+
+		when: "click to delete"
+		withConfirm(true) {
+			deleteButton.click()
+		}
+
+		then: "goes to search page"
+		at UserSearchPage
+
+		when:
+		$("#loginLinkContainer a").click()
+		then:
+		at LoginPage
 	}
 }

@@ -1,8 +1,11 @@
 import geb.spock.GebReportingSpec
 import mixins.LoginMixin
 import pages.*
+import spock.lang.Shared
 
 class ForgotPasswordSpec extends GebReportingSpec implements LoginMixin {
+
+	@Shared newPwd = "!#¤%t3stPassword123!"
 
 	def "go to forgotPasswordPage"(){
 		setup:
@@ -22,8 +25,12 @@ class ForgotPasswordSpec extends GebReportingSpec implements LoginMixin {
 	def "weak password is not accepted"() {
 		when: "go to the URL normally found from email"
 		to ResetPasswordPage, "?t=ForgotPasswordSpec"
-		then: "reset password page must be shown"
+		then: "the password field must be enabled"
 		at ResetPasswordPage
+		waitFor {
+			password.displayed
+			!password.@disabled
+		}
 
 		when: "a weak password is given"
 		password << "weakPassword"
@@ -44,10 +51,10 @@ class ForgotPasswordSpec extends GebReportingSpec implements LoginMixin {
 		at ResetPasswordPage
 
 		when: "an acceptable password is given"
-		password << "!#¤%t3stPassword123!"
+		password << newPwd
 		waitFor { nextButton.click() }
 		waitFor { password2.displayed }
-		password2 << "!#¤%t3stPassword123!"
+		password2 << newPwd
 		waitFor { nextButton.click() }
 		then: "should log in"
 		waitFor {
@@ -63,24 +70,23 @@ class ForgotPasswordSpec extends GebReportingSpec implements LoginMixin {
 		}
 
 		expect: "logged in with new password"
-		login("tester1@streamr.com", "!#¤%t3stPassword123!")
+		login(LoginTester1Spec.testerUsername, newPwd)
 
 		when: "Changing password (back to original)"
-		navbar.navSettingsLink.click()
-		navbar.navProfileLink.click()
+		to ProfileEditPage
 		waitFor {
-			at ProfileEditPage
+			changePasswordButton.displayed
+			changePasswordButton.click()
 		}
-		changePassword.click()
 		waitFor { at ChangePasswordPage }
-		currentPassword << "!#¤%t3stPassword123!"
-		newPassword << "tester1TESTER1"
-		newPasswordAgain << "tester1TESTER1"
-		changePassword.click()
+		currentPassword << newPwd
+		newPassword << LoginTester1Spec.testerPassword
+		newPasswordAgain << LoginTester1Spec.testerPassword
+		changePasswordButton.click()
 		then: "Must go back to profile edit page and show info message"
 		waitFor {
 			at ProfileEditPage
-			$(".alert-info").size()>0
+			$(".alert-info").size() > 0
 		}
 	}
 }

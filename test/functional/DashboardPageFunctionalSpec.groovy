@@ -20,7 +20,7 @@ class DashboardPageFunctionalSpec extends LoginTester1Spec implements CanvasMixi
 		name = "test" + new Date().getTime()
 		name2 = name + "2"
 
-		super.login()
+		loginAsTester()
 		waitFor { at CanvasPage }
 
 		// Go start the Canvas related to this spec
@@ -43,7 +43,7 @@ class DashboardPageFunctionalSpec extends LoginTester1Spec implements CanvasMixi
 	}
 
 	def cleanupSpec() {
-		super.login()
+		loginAsTester()
 
 		to CanvasListPage
 		waitFor { at CanvasListPage }
@@ -54,7 +54,7 @@ class DashboardPageFunctionalSpec extends LoginTester1Spec implements CanvasMixi
 	}
 
 	void "dashboard can be created"() {
-//		Creating a new dashboard
+		// Creating a new dashboard
 		to DashboardListPage
 		waitFor { at DashboardListPage }
 

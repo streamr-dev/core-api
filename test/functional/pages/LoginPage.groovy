@@ -6,7 +6,7 @@ class LoginPage extends Page {
 
 	static at = {
 		waitFor {
-			$(".authPanel_header span", text: "Sign in").collect { it.displayed }.size() >= 1
+			$("span", text: "Sign in").size() > 1
 		}
 	}
 

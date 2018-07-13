@@ -1,4 +1,3 @@
-import LoginTester1Spec
 import mixins.CanvasMixin
 import mixins.ConfirmationMixin
 import mixins.TourMixin

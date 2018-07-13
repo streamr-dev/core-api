@@ -21,7 +21,6 @@ trait LoginMixin {
 	}
 
 	def tryLogin(String u, String p, boolean rememberMe = false) {
-		to LoginPage
 		waitFor { username.displayed }
 		username << u
 		waitFor { nextButton.click() }
@@ -33,21 +32,15 @@ trait LoginMixin {
 		waitFor { nextButton.click() }
 	}
 
-	def login(String u, String p, boolean rememberMe) {
+	def login(String u, String p, boolean rememberMe = false) {
+		logout()
+		to LoginPage
 		tryLogin(u, p, rememberMe)
 		waitFor { at CanvasPage }
 	}
 
 	def logout() {
-		// open top-screen menu if visible
-		if ($(".navbar-toggle").displayed) {
-			$(".navbar-toggle").click()
-			waitFor { $("#navSettingsLink").displayed }
-		}
-		$("#navSettingsLink").click()
-		waitFor { $("#navLogoutLink").displayed }
-
-		$("#navLogoutLink").click()
+		go "logout"
 		waitFor { at LoginPage }
 	}
 }

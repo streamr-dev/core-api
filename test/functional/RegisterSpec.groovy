@@ -12,11 +12,17 @@ class RegisterSpec extends GebReportingSpec implements LoginMixin, RegisterMixin
 	// Not a real email
 	@Shared
 	def emailAddress = "testingemail${System.currentTimeMillis()}@streamr.com"
+	@Shared
+	def code = emailAddress.replaceAll("@", "_")
 	// Just a random password
 	@Shared
 	def pwd = "Aymaw4HVa(dB42"
 
 	def setup() {
+		logout()
+	}
+
+	def setupSpec() {
 		// The environment must be TEST so the SignUpCodeService creates a previsible invitation token
 		expect:
 		assert Environment.current == Environment.TEST
@@ -25,9 +31,7 @@ class RegisterSpec extends GebReportingSpec implements LoginMixin, RegisterMixin
 	// Delete the user
 	def cleanupSpec() {
 		setup: "login"
-			go "logout"
 			login("tester-admin@streamr.com", "tester-adminTESTER-ADMIN")
-
 
 		when: "search for the user and click it"
 			to UserSearchPage
@@ -75,7 +79,7 @@ class RegisterSpec extends GebReportingSpec implements LoginMixin, RegisterMixin
 
 	def "cannot register without accepting tos"() {
 		when: "registered"
-			to RegisterPage, "?invite="+ code
+			to RegisterPage, "?invite=" + code
 			name = "Test Tester"
 			nextButton.click()
 			waitFor { password.displayed }

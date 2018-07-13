@@ -4,9 +4,6 @@ import mixins.RegisterMixin
 import pages.ChangePasswordPage
 import pages.LoginPage
 import pages.ProfileEditPage
-import pages.UserEditPage
-import pages.UserSearchPage
-import pages.UserSearchResultPage
 import spock.lang.Shared
 
 class ProfileEditCoreSpec extends GebReportingSpec implements LoginMixin, RegisterMixin {
@@ -15,6 +12,7 @@ class ProfileEditCoreSpec extends GebReportingSpec implements LoginMixin, Regist
 	def emailAddress = "testingemail${System.currentTimeMillis()}@streamr.com"
 	@Shared
 	def pwd = "Aymaw4HVa(dB42"
+	@Shared
 	def pwd2 = "!#¤%testPassword123!?"
 
 	def setupSpec() {
@@ -23,36 +21,7 @@ class ProfileEditCoreSpec extends GebReportingSpec implements LoginMixin, Regist
 
 	// Delete the user
 	def cleanupSpec() {
-		setup: "login"
-		go "logout"
-		login("tester-admin@streamr.com", "tester-adminTESTER-ADMIN")
-
-
-		when: "search for the user and click it"
-		to UserSearchPage
-		assert username.displayed
-		username = emailAddress
-		searchButton.click()
-		waitFor {
-			at UserSearchResultPage
-		}
-		searchResult.click()
-
-		then: "go to user edit page"
-		at UserEditPage
-
-		when: "click to delete"
-		withConfirm(true) {
-			deleteButton.click()
-		}
-
-		then: "goes to search page"
-		at UserSearchPage
-
-		when:
-		$("#loginLinkContainer a").click()
-		then:
-		at LoginPage
+		removeUser(emailAddress)
 	}
 
 	def "changing password works correctly"() {

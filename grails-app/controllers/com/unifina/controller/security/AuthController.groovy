@@ -42,8 +42,10 @@ class AuthController {
 
 	def fullAuth = {
 		SavedRequest savedRequest = requestCache.getRequest(request, response)
-		println savedRequest.getRedirectUrl()
-		redirect action: "index", params: [redirect: savedRequest.getRedirectUrl()]
+		redirect action: "index", params: [
+			redirect: savedRequest.getRedirectUrl(),
+			redirectIfAuthenticated: false
+		]
 	}
 
 	def register(RegisterCommand cmd) {
