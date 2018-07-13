@@ -26,8 +26,6 @@ class Feed implements Serializable {
 	@Deprecated
 	String messageSourceClass
 	String messageSourceConfig
-	@Deprecated
-	String discoveryUtilClass
 	String discoveryUtilConfig
 
 	@Deprecated
@@ -43,11 +41,6 @@ class Feed implements Serializable {
 
 	Module module
 
-	@Deprecated
-	Boolean startOnDemand
-	@Deprecated
-	Boolean bundledFeedFiles
-
 	static hasMany = [permissions: Permission]
 
 	static constraints = {
@@ -59,10 +52,7 @@ class Feed implements Serializable {
 		feedConfig(nullable:true)
 		cacheConfig(nullable:true)
 		messageSourceConfig(nullable:true)
-		discoveryUtilClass(nullable:true)
 		discoveryUtilConfig(nullable:true)
-		startOnDemand(nullable:true)
-		bundledFeedFiles(nullable:true)
 		fieldDetectorClass(nullable: true)
 		dataRangeProviderClass(nullable: true)
 	}

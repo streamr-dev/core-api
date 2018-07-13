@@ -7,8 +7,6 @@ import com.unifina.domain.signalpath.Canvas
 
 class UrlMappings {
 	static mappings = {
-		"/localFeedFile/$feedDir/$day/$file"(controller:"localFeedFile",action:"index")
-
 		"/$controller/$action?/$id?"{
 			constraints {
 				// apply constraints here
@@ -78,7 +76,12 @@ class UrlMappings {
 
 		"/api/v1/subscriptions"(resources: "subscriptionApi")
 
-		"/api/v1/canvasSizes"(controller: "canvasSizesApi", action: "index")
+		"/api/v1/nodes"(controller: "nodeApi", action: "index")
+		"/api/v1/nodes/shutdown"(controller: "nodeApi", action: "shutdown")
+		"/api/v1/nodes/canvases"(controller: "nodeApi", action: "canvases")
+		"/api/v1/nodes/canvases/sizes"(controller: "nodeApi", action: "canvasSizes")
+		"/api/v1/nodes/$nodeIp/shutdown"(controller: "nodeApi", action: "shutdownNode")
+		"/api/v1/nodes/$nodeIp/canvases"(controller: "nodeApi", action: "canvasesNode")
 
 		// Mappings for pages using React Router (the root for the router)
 		"/dashboard/editor/$id**?"(controller: "dashboard", action: "editor")

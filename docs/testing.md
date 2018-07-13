@@ -76,13 +76,13 @@ import org.springframework.context.ApplicationContext
 
 class FooSpec extends spock.lang.Specification {
     KafkaService kafkaService = Mock(KafkaService)
-	FeedFileService feedFileService = Mock(FeedFileService)
+	ExampleService exampleService = Mock(ExampleService)
 
     def setup() {
         // Setup application context
 		def applicationContext = Stub(ApplicationContext) {
 			getBean(KafkaService) >> kafkaService
-			getBean(FeedFileService) >> feedFileService
+			getBean(ExampleService) >> exampleService
 		}
         
         // Setup grailsApplication
