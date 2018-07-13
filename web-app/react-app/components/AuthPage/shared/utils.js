@@ -19,9 +19,9 @@ export const post = (url: string, data: FormFields, successWithError: boolean, x
                 } : {}),
             },
         })
-        .then((response) => {
-            if (successWithError && response.error) {
-                reject(new Error(response.error))
+        .then(({ data }) => {
+            if (successWithError && data.error) {
+                reject(new Error(data.error))
             } else {
                 resolve()
             }
