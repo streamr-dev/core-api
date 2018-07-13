@@ -46,10 +46,11 @@ class ResetPasswordPage extends React.Component<Props> {
 
     componentDidMount = () => {
         const { setFormField, location: { search }, setFieldError } = this.props
-
-        setFormField('token', qs.parse(search, {
+        const token = qs.parse(search, {
             ignoreQueryPrefix: true,
-        }).token || '', () => {
+        }).t || ''
+
+        setFormField('token', token, () => {
             yup
                 .object()
                 .shape({
