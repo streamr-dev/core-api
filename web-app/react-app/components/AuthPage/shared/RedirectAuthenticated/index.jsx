@@ -15,17 +15,19 @@ type Props = {
 }
 
 class RedirectAuthenticated extends React.Component<Props> {
-    redirect = () => {
-        this.getIsAuthenticated().then((authenticated) => {
-            if (authenticated) {
-                const { search } = this.props.location
-                const url = qs.parse(search, {
-                    ignoreQueryPrefix: true,
-                }).redirect || createLink('/canvas/editor')
-
-                window.location.assign(url)
-            }
+    redirect = (initial: boolean = false) => {
+        const { search } = this.props.location
+        const { redirectIfAuthenticated, redirect } = qs.parse(search, {
+            ignoreQueryPrefix: true,
         })
+        if (!initial || (redirectIfAuthenticated !== 'false' && redirectIfAuthenticated !== false)) {
+            this.getIsAuthenticated().then((authenticated) => {
+                if (authenticated) {
+                    const url = redirect || createLink('/canvas/editor')
+                    window.location.assign(url)
+                }
+            })
+        }
     }
 
     getIsAuthenticated = (): Promise<boolean> => this.props.blindly ? (
@@ -43,7 +45,7 @@ class RedirectAuthenticated extends React.Component<Props> {
     )
 
     componentDidMount = () => {
-        this.redirect()
+        this.redirect(true)
     }
 
     componentDidUpdate = (prevProps: Props) => {
