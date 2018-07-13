@@ -16,19 +16,6 @@ class LoginRedirectValidatorSpec extends Specification {
 		]
 	}
 
-	boolean testList(List<String> urls) {
-		for (int i = 0; i < urls.size(); i++) {
-			if (!LoginRedirectValidator.isValid(urls.get(i))) {
-				return false
-			}
-		}
-		return true
-	}
-
-	boolean testString(String url) {
-		testList(allCombinations(url))
-	}
-
 	void "accepts only streamr.com and developer addresses"() {
 		expect:
 		allCombinations(url).each {
@@ -37,6 +24,7 @@ class LoginRedirectValidatorSpec extends Specification {
 
 		where:
 		result | url
+		// Don't put trailing slashes or any other endings to the url (added in allCombinations)
 		true   | "https://streamr.com"
 		true   | "https://www.streamr.com"
 		true   | "https://www.marketplace.streamr.com"
