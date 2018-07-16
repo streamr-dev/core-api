@@ -23,7 +23,6 @@ class GoogleAnalyticsTracker extends Component<Props> {
     }
 
     logPageview = (page) => {
-        debugger
         ReactGA.pageview(page)
     }
 
