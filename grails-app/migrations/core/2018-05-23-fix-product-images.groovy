@@ -1,7 +1,7 @@
 package core
 
+import com.google.common.hash.Hashing
 import com.unifina.provider.S3FileUploadProvider
-import com.unifina.utils.IdGenerator
 import com.unifina.utils.ImageResizer
 import grails.util.Holders
 import org.apache.commons.io.IOUtils
@@ -10,10 +10,6 @@ databaseChangeLog = {
 	changeSet(author: "kkn", id: "fix-product-images") {
 		grailsChange {
 			change {
-				// User Agent is required for images hosted at pexels.com
-				String chrome = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_13_5) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/67.0.3396.99 Safari/537.36"
-				System.setProperty("http.agent", chrome)
-
 				sql.eachRow("SELECT id, image_url, thumbnail_url FROM product") { row ->
 					String id = row['id']
 					String imageUrl = row['image_url']
@@ -31,20 +27,25 @@ databaseChangeLog = {
 					String ext
 					if (i == -1) {
 						ext = ".jpg"
+					} else {
+						ext = imageUrl.substring(i)
 					}
-					ext = imageUrl.substring(i)
 
 					// scale image to thumbnail
-					def thumb = new ImageResizer().resize(bytes, "thumbimage" + ext, ImageResizer.Size.THUMB)
+					byte[] thumb = new ImageResizer().resize(bytes, "thumbimage" + ext, ImageResizer.Size.THUMB)
+					// Use SHA-256 hash of the thumbnail bytes as the filename
+					String thumbFilename = Hashing.sha256()
+						.hashBytes(thumb)
+						.toString()
 
-					// remove thumbnail
 					def s3 = new S3FileUploadProvider(
 						(String) Holders.config.streamr.fileUpload.s3.region,
 						(String) Holders.config.streamr.fileUpload.s3.bucket
 					)
 					// upload new thumbnail
-					def newThumbUrl = s3.uploadFile("product-images/" + IdGenerator.get() + ext, thumb).toString()
+					def newThumbUrl = s3.uploadFile("product-images/" + thumbFilename + ext, thumb).toString()
 
+					// remove old thumbnail
 					s3.deleteFile(thumbnailUrl)
 
 					// update row
