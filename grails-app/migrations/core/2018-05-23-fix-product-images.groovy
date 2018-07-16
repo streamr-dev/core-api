@@ -5,23 +5,29 @@ import com.unifina.provider.S3FileUploadProvider
 import com.unifina.utils.ImageResizer
 import grails.util.Holders
 import org.apache.commons.io.IOUtils
+import org.apache.log4j.Logger
+
+final Logger log = Logger.getLogger("2018-05-23-fix-product-images.groovy")
 
 databaseChangeLog = {
 	changeSet(author: "kkn", id: "fix-product-images") {
 		grailsChange {
 			change {
-				sql.eachRow("SELECT id, image_url, thumbnail_url FROM product") { row ->
+				sql.eachRow("SELECT id, image_url, thumbnail_url FROM product WHERE image_url IS NOT NULL") { row ->
 					String id = row['id']
 					String imageUrl = row['image_url']
 					String thumbnailUrl = row['thumbnail_url']
 
 					// download image
-					def url = new URL(imageUrl)
-					def con = url.openConnection()
-					con.setRequestProperty("Referer", "https://streamr.com")
-					def input = new BufferedInputStream(con.getInputStream())
-					def bytes = IOUtils.toByteArray(input)
-					input.close()
+					byte[] bytes
+					try {
+						def input = new BufferedInputStream(new URL(imageUrl).openConnection().getInputStream())
+						bytes = IOUtils.toByteArray(input)
+						input.close()
+					} catch (IOException e) {
+						log.error("Failed to read " + imageUrl + ", skipping this file", e)
+						return
+					}
 
 					def i = imageUrl.lastIndexOf(".")
 					String ext
