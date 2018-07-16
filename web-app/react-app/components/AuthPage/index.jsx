@@ -14,7 +14,9 @@ import RegisterPage from './pages/RegisterPage'
 import SignupPage from './pages/SignupPage'
 import ForgotPasswordPage from './pages/ForgotPasswordPage'
 import ResetPasswordPage from './pages/ResetPasswordPage'
+import GoogleAnalyticsTracker from '../../components/GoogleAnalyticsTracker'
 import styles from './authPage.pcss'
+import isProduction from '../../utils/isProduction'
 
 const basename = createLink('/').replace(window.location.origin, '')
 
@@ -41,6 +43,7 @@ const AuthPage = () => (
                     </div>
                 </div>
             </section>
+            {isProduction() && <GoogleAnalyticsTracker />}
         </div>
     </BrowserRouter>
 )
