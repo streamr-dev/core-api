@@ -44,7 +44,7 @@ class AuthController {
 		SavedRequest savedRequest = requestCache.getRequest(request, response)
 		redirect action: "index", params: [
 			redirect: savedRequest.getRedirectUrl(),
-			redirectIfAuthenticated: false
+			ignoreSession: true
 		]
 	}
 

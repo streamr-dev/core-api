@@ -17,10 +17,10 @@ type Props = {
 class RedirectAuthenticated extends React.Component<Props> {
     redirect = (initial: boolean = false) => {
         const { search } = this.props.location
-        const { redirectIfAuthenticated, redirect } = qs.parse(search, {
+        const { ignoreSession, redirect } = qs.parse(search, {
             ignoreQueryPrefix: true,
         })
-        if (!initial || (redirectIfAuthenticated !== 'false' && redirectIfAuthenticated !== false)) {
+        if (!initial || (ignoreSession && ignoreSession !== 'false')) {
             this.getIsAuthenticated().then((authenticated) => {
                 if (authenticated) {
                     const url = redirect || createLink('/canvas/editor')
