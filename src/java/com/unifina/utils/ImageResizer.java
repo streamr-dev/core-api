@@ -33,7 +33,7 @@ public class ImageResizer {
 		final BufferedImage source = ImageIO.read(new ByteArrayInputStream(image));
 		BufferedImage tmp;
 		// if source image is wider in shape than target image
-		if (source.getWidth() / source.getHeight() >= size.width() / size.height()) {
+		if (source.getWidth() / (double) source.getHeight() >= size.width() / (double) size.height()) {
 			tmp = Scalr.resize(source, Scalr.Method.ULTRA_QUALITY, Scalr.Mode.FIT_TO_HEIGHT, size.height());
 			int x = (tmp.getWidth() - size.width()) / 2;
 			if (x < 0) {
