@@ -19,6 +19,7 @@ import grails.transaction.Transactional
 import groovy.json.JsonBuilder
 import groovy.transform.CompileStatic
 import org.codehaus.groovy.grails.web.json.JSONObject
+import org.codehaus.groovy.grails.web.mapping.LinkGenerator
 
 class CanvasService {
 
@@ -27,9 +28,10 @@ class CanvasService {
 	PermissionService permissionService
 	DashboardService dashboardService
 	StreamService streamService
+	LinkGenerator linkGenerator
 
 	@CompileStatic
-	public Map reconstruct(Canvas canvas, SecUser user) {
+	Map reconstruct(Canvas canvas, SecUser user) {
 		Map signalPathMap = (JSONObject) JSON.parse(canvas.json)
 		return reconstructFrom(signalPathMap, user)
 	}
@@ -43,7 +45,7 @@ class CanvasService {
 	}
 
 	@CompileStatic
-	public void updateExisting(Canvas canvas, SaveCanvasCommand command, SecUser user, boolean resetUi = false) {
+	void updateExisting(Canvas canvas, SaveCanvasCommand command, SecUser user, boolean resetUi = false) {
 		if (!command.validate()) {
 			throw new ValidationException(command.errors)
 		}
@@ -84,7 +86,7 @@ class CanvasService {
 		}
 	}
 
-	public void start(Canvas canvas, boolean clearSerialization, SecUser asUser) {
+	void start(Canvas canvas, boolean clearSerialization, SecUser asUser) {
 		if (canvas.state == Canvas.State.RUNNING) {
 			throw new InvalidStateException("Cannot run canvas $canvas.id because it's already running. Stop it first.")
 		}
@@ -104,12 +106,12 @@ class CanvasService {
 		}
 	}
 
-	public void startRemote(Canvas canvas, SecUser user, boolean forceReset=false, boolean resetOnError=true) {
+	void startRemote(Canvas canvas, SecUser user, boolean forceReset=false, boolean resetOnError=true) {
 		taskService.createTask(CanvasStartTask, CanvasStartTask.getConfig(canvas, forceReset, resetOnError), "canvas-start", user)
 	}
 
 	@Transactional(noRollbackFor=[CanvasUnreachableException])
-	public void stop(Canvas canvas, SecUser user) throws ApiException {
+	void stop(Canvas canvas, SecUser user) throws ApiException {
 		if (canvas.state != Canvas.State.RUNNING) {
 			throw new InvalidStateException("Canvas $canvas.id not currently running.")
 		}
@@ -172,9 +174,14 @@ class CanvasService {
 
 	@CompileStatic
 	void resetUiChannels(Map signalPathMap) {
-		UiChannelIterator.over(signalPathMap).each { UiChannelIterator.Element element ->
+		for (UiChannelIterator.Element element in UiChannelIterator.over(signalPathMap)) {
 			element.uiChannelData.id = null
 		}
+	}
+
+	@CompileStatic
+	String getCanvasURL(Canvas canvas) {
+		return linkGenerator.link(controller: 'canvas', action: 'editor', id: canvas.id, absolute: true)
 	}
 
 	private boolean hasCanvasPermission(Canvas canvas, SecUser user, Permission.Operation op) {
