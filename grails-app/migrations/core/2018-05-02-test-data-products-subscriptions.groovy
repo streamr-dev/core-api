@@ -109,7 +109,7 @@ databaseChangeLog = {
 				column(name: "owner_address", value: randomFrom(addresses))
 				column(name: "category_id", value: randomFrom(categoryIDs))
 				column(name: "image_url", value: product.img)
-				column(name: "thumbnail_url", value: "thumb_" + product.img) // note: thumbnail_url will be overwritten by 2018-05-23-fix-product-images migration
+				column(name: "thumbnail_url", value: null) // note: thumbnail_url will be overwritten by 2018-05-23-fix-product-images migration
 				column(name: "minimum_subscription_in_seconds", valueNumeric: rand(1, 600))
 				column(name: "name", value: product.name)
 				column(name: "description", value: "${product.name}. " * rand(3, 7))

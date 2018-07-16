@@ -52,7 +52,9 @@ databaseChangeLog = {
 					def newThumbUrl = s3.uploadFile("product-images/" + thumbFilename + ext, thumb).toString()
 
 					// remove old thumbnail
-					s3.deleteFile(thumbnailUrl)
+					if (thumbnailUrl) {
+						s3.deleteFile(thumbnailUrl)
+					}
 
 					// update row
 					sql.execute('UPDATE product SET thumbnail_url = ? WHERE id = ?', [newThumbUrl, id])
