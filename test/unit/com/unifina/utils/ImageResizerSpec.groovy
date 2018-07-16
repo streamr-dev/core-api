@@ -46,7 +46,7 @@ class ImageResizerSpec extends Specification {
 		BufferedImage image = imageFromBytes(resizer.resize(bytes, filename, size))
 
 		// to view images when manually testing, uncomment the line below
-		ImageIO.write(image, "jpg", File.createTempFile(filename, ".jpg"))
+		// ImageIO.write(image, "jpg", File.createTempFile(filename, ".jpg"))
 
 		expect:
 		image.width == size.width()
