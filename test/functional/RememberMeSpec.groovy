@@ -3,7 +3,6 @@ import pages.CanvasPage
 import pages.LoginPage
 import pages.ProfileEditPage
 import geb.spock.GebReportingSpec
-import org.openqa.selenium.Cookie
 import spock.lang.Shared
 import spock.lang.Stepwise
 
