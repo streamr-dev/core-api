@@ -1,9 +1,13 @@
 package com.unifina.signalpath.messaging
 
 import com.unifina.domain.security.SecUser
+import com.unifina.domain.signalpath.Canvas
+import com.unifina.service.CanvasService
 import com.unifina.signalpath.*
 import grails.util.Holders
 
+import java.text.Format
+import java.text.MessageFormat
 import java.text.SimpleDateFormat
 
 class EmailModule extends ModuleWithSideEffects {
@@ -15,24 +19,22 @@ class EmailModule extends ModuleWithSideEffects {
 
 	int emailInputCount = 1
 
-	transient SimpleDateFormat df
-
 	Long prevTime
 	Long emailInterval = 60000
 	boolean emailSent
 	boolean lastEmailBlocked
+	transient CanvasService canvasService
 
 	@Override
-	public void init() {
+	void init() {
 		addInput(sub)
 		addInput(message)
 		sender = Holders.grailsApplication.config.unifina.email.sender
-		initDf()
 		emailSent = true
 	}
 
 	@Override
-	public void activateWithSideEffects() {
+	void activateWithSideEffects() {
 		if (isNotTooOften(emailInterval, globals.time.getTime(), prevTime)) {
 			prevTime = globals.time.getTime()
 			emailSent = true
@@ -54,14 +56,20 @@ class EmailModule extends ModuleWithSideEffects {
 	}
 
 	@Override
-	public void activateWithoutSideEffects() {
+	void activateWithoutSideEffects() {
 		// Show email contents as notifications in the UI
 		parentSignalPath?.showNotification(getMessageBody())
 	}
 
-	private String getMessageBody() {
-		initDf()
+	private String linkToCanvas() {
+		if (canvasService == null) {
+			canvasService = (CanvasService) Holders.grailsApplication.getMainContext().getBean("canvasService")
+		}
+		final Canvas c = getRootSignalPath().canvas
+		return canvasService.getCanvasURL(c)
+	}
 
+	private String getMessageBody() {
 		// Create String with the input values
 		String inputValues = ""
 		for (Input i : super.getInputs()){
@@ -70,18 +78,39 @@ class EmailModule extends ModuleWithSideEffects {
 			}
 		}
 
-		// Create body for the email
-		String messageBody = ("\n" +
-				"Message:\n" +
-				"${message.getValue()}\n\n" +
-				"Event Timestamp:\n" +
-				"${df.format(globals.time)}\n\n" +
-				"Input Values:\n" +
-				"${inputValues}\n" +
-				(lastEmailBlocked ? "\nWARNING: Some emails between this and the last mail have not been sent because of trying to send too frequently.\n" : "") +
-				"")
+		String body = """
+This email was sent by one of your running Canvases on Streamr.
 
-		return messageBody
+Message:
+{0}
+
+Event Timestamp:
+{1,date,yyyy-MM-dd HH:mm:ss.SSS}
+
+Input Values:
+{2}
+To view, edit, or stop the Canvas that sent this message, click the below link:
+{3}
+{4}"""
+
+		MessageFormat mf = new MessageFormat(body)
+		for (Format format : mf.getFormats()) {
+			if (format instanceof SimpleDateFormat && globals.userId != null) {
+				((SimpleDateFormat) format).setTimeZone(globals.userTimeZone)
+			}
+		}
+		String warning = ""
+		if (lastEmailBlocked) {
+			warning = "\nWARNING: Some emails between this and the last mail have not been sent because of trying to send too frequently.\n"
+		}
+		Object[] data = [
+			message.getValue(),
+			globals.time,
+			inputValues,
+			linkToCanvas(),
+			warning
+		]
+		return mf.format(data)
 	}
 
 	private Input<Object> createAndAddInput(String name) {
@@ -99,7 +128,7 @@ class EmailModule extends ModuleWithSideEffects {
 	}
 
 	@Override
-	public Map<String,Object> getConfiguration() {
+	Map<String,Object> getConfiguration() {
 		Map<String,Object> config = super.getConfiguration();
 
 		// Module options
@@ -128,20 +157,11 @@ class EmailModule extends ModuleWithSideEffects {
 	}
 
 	@Override
-	public void clearState() {
+	void clearState() {
 		prevTime = null
 		emailSent = false
 		emailInputCount = 1
 		lastEmailBlocked = false
-	}
-
-	private def initDf() {
-		if (df == null) {
-			df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS")
-			if (globals.userId != null) {
-				df.setTimeZone(globals.userTimeZone)
-			}
-		}
 	}
 
 	@Override
