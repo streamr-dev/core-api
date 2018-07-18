@@ -88,10 +88,9 @@ class AuthController {
 				html g.render(template: "email_welcome", model: [user: user])
 			}
 		} catch (Exception error) {
-			String errorMessage = "Sending email failed, userId: ${user.id}, error: ${error.getMessage()}"
-			log.warn(errorMessage)
+			log.warn("Sending email failed, userId: ${user.id}, error: ${error.getMessage()}")
 			response.status = 500
-			return render([success: false, error: errorMessage] as JSON)
+			return render([success: false, error: "Sending email failed"] as JSON)
 		}
 
 		log.info("Logging in ${user.username} after registering")
@@ -171,8 +170,6 @@ class AuthController {
 		def registrationCode = new RegistrationCode(username: user.username)
 		registrationCode.save(flush: true)
 
-		String url = generateLink('resetPassword', [t: registrationCode.token])
-
 		mailService.sendMail {
 			from grailsApplication.config.unifina.email.sender
 			to user.username
@@ -230,15 +227,10 @@ class AuthController {
 	/**
 	 * The redirect action for Ajax requests.
 	 */
+	// TODO: is this needed?
 	def authAjax = {
 		response.setHeader 'Location', SpringSecurityUtils.securityConfig.auth.ajaxLoginFormUrl
 		response.sendError HttpServletResponse.SC_UNAUTHORIZED
-	}
-
-	protected String generateLink(String action, linkParams) {
-		createLink(base: "$request.scheme://$request.serverName:$request.serverPort$request.contextPath",
-			controller: 'register', action: action,
-			params: linkParams)
 	}
 
 	def ajaxLoginForm = {
