@@ -66,8 +66,8 @@ class AuthController {
 		}
 
 		try {
-			// TODO: timezone
-			user = userService.createUser([:] << cmd.properties << [username: invite.username, timezone: "aapeli"])
+			// TODO: Don't respond with status code 500 if the email is already taken
+			user = userService.createUser([:] << cmd.properties << [username: invite.username])
 		} catch (UserCreationFailedException e) {
 			response.status = 500
 			return render([success: false, error: e.getMessage()] as JSON)
@@ -80,11 +80,18 @@ class AuthController {
 			return render([success: false, error: "Failed to save invite: ${invite.errors}"] as JSON)
 		}
 
-		mailService.sendMail {
-			from grailsApplication.config.unifina.email.sender
-			to user.username
-			subject grailsApplication.config.unifina.email.welcome.subject
-			html g.render(template: "email_welcome", model: [user: user])
+		try {
+			mailService.sendMail {
+				from grailsApplication.config.unifina.email.sender
+				to user.username
+				subject grailsApplication.config.unifina.email.welcome.subject
+				html g.render(template: "email_welcome", model: [user: user])
+			}
+		} catch (Exception error) {
+			String errorMessage = "Sending email failed, userId: ${user.id}, error: ${error.getMessage()}"
+			log.warn(errorMessage)
+			response.status = 500
+			return render([success: false, error: errorMessage] as JSON)
 		}
 
 		log.info("Logging in ${user.username} after registering")
@@ -253,21 +260,19 @@ class RegisterCommand {
 	String name
 	String password
 	String password2
+	String timezone
 	String tosConfirmed
 
-	def userService
+	UserService userService
 
 	static constraints = {
 		invite blank: false
-
 		tosConfirmed blank: false, validator: { val -> new Boolean(val) }
-
 		name blank: false
-
+		timezone blank: false
 		password validator: { String password, RegisterCommand command ->
 			return command.userService.passwordValidator(password, command)
 		}
-
 		password2 validator: { String password2, RegisterCommand command ->
 			return command.userService.password2Validator(password2, command)
 		}
@@ -279,7 +284,7 @@ class ResetPasswordCommand {
 	String password
 	String password2
 
-	def userService
+	UserService userService
 
 	static constraints = {
 		username blank: false
