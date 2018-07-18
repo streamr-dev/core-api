@@ -25,10 +25,8 @@
 	}
 
 	function showLogin() {
-		debugger
 		if (!$("#loginForm").length) {
 			$.get(Streamr.createLink("auth", "ajaxLoginForm"), function(data) {
-				debugger
 				var dialog = bootbox.dialog({
 					closeButton: false,
 					message: data
