@@ -21,8 +21,12 @@ import type { AuthFlowProps } from '../../shared/types'
 import createLink from '../../../../utils/createLink'
 
 type Props = AuthFlowProps & {
+    history: {
+        replace: (string) => void,
+    },
     location: {
         search: string,
+        pathname: string,
     },
     form: {
         email: string,
@@ -35,6 +39,31 @@ type Props = AuthFlowProps & {
 }
 
 class RegisterPage extends React.Component<Props> {
+    constructor(props: Props) {
+        super(props)
+
+        const { setFormField, location: { search }, setFieldError } = props
+        setFormField('invite', qs.parse(search, {
+            ignoreQueryPrefix: true,
+        }).invite || '', () => {
+            yup
+                .object()
+                .shape({
+                    invite: yup.reach(schemas[0], 'invite'),
+                })
+                .validate(this.props.form)
+                .then(
+                    () => {
+                        // To make sure that the registerPage invite doesn't stick in the browser history
+                        props.history.replace(props.location.pathname)
+                    },
+                    (error: yup.ValidationError) => {
+                        setFieldError('name', error.message)
+                    }
+                )
+        })
+    }
+
     submit = () => {
         const url = createLink('auth/register')
         const { name, password, confirmPassword: password2, timezone, toc: tosConfirmed, invite } = this.props.form
@@ -59,24 +88,6 @@ class RegisterPage extends React.Component<Props> {
         label: string,
     }) => {
         this.props.setFormField('timezone', option.value)
-    }
-
-    componentDidMount = () => {
-        const { setFormField, location: { search }, setFieldError } = this.props
-
-        setFormField('invite', qs.parse(search, {
-            ignoreQueryPrefix: true,
-        }).invite || '', () => {
-            yup
-                .object()
-                .shape({
-                    invite: yup.reach(schemas[0], 'invite'),
-                })
-                .validate(this.props.form)
-                .then(() => {}, (error: yup.ValidationError) => {
-                    setFieldError('name', error.message)
-                })
-        })
     }
 
     render() {

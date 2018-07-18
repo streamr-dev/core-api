@@ -17,8 +17,12 @@ import qs from 'qs'
 import createLink from '../../../../utils/createLink'
 
 type Props = AuthFlowProps & {
+    history: {
+        replace: (string) => void,
+    },
     location: {
         search: string,
+        pathname: string,
     },
     form: {
         password: string,
@@ -28,6 +32,32 @@ type Props = AuthFlowProps & {
 }
 
 class ResetPasswordPage extends React.Component<Props> {
+    constructor(props: Props) {
+        super(props)
+        const { setFormField, location: { search }, setFieldError } = props
+        const token = qs.parse(search, {
+            ignoreQueryPrefix: true,
+        }).t || ''
+
+        setFormField('token', token, () => {
+            yup
+                .object()
+                .shape({
+                    token: yup.reach(schemas[0], 'token'),
+                })
+                .validate(this.props.form)
+                .then(
+                    () => {
+                        // To make sure that the resetPassword token doesn't stick in the browser history
+                        props.history.replace(props.location.pathname)
+                    },
+                    (error: yup.ValidationError) => {
+                        setFieldError('password', error.message)
+                    }
+                )
+        })
+    }
+
     submit = () => {
         const url = createLink('auth/resetPassword')
         const { password, confirmPassword: password2, token: t } = this.props.form
@@ -42,25 +72,6 @@ class ResetPasswordPage extends React.Component<Props> {
     onFailure = (error: Error) => {
         const { setFieldError } = this.props
         setFieldError('confirmPassword', error.message)
-    }
-
-    componentDidMount = () => {
-        const { setFormField, location: { search }, setFieldError } = this.props
-        const token = qs.parse(search, {
-            ignoreQueryPrefix: true,
-        }).t || ''
-
-        setFormField('token', token, () => {
-            yup
-                .object()
-                .shape({
-                    token: yup.reach(schemas[0], 'token'),
-                })
-                .validate(this.props.form)
-                .then(() => {}, (error: yup.ValidationError) => {
-                    setFieldError('password', error.message)
-                })
-        })
     }
 
     render() {
