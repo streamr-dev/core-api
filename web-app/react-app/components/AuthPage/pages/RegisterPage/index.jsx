@@ -20,6 +20,8 @@ import schemas from '../../schemas/register'
 import type { AuthFlowProps } from '../../shared/types'
 import createLink from '../../../../utils/createLink'
 
+import links from '../../../../links'
+
 type Props = AuthFlowProps & {
     history: {
         replace: (string) => void,
@@ -182,7 +184,7 @@ class RegisterPage extends React.Component<Props> {
                             error={errors.toc}
                             autoFocus
                         >
-                            I agree with the <a href="#">terms and conditions</a>, and <a href="#">privacy policy</a>.
+                            I agree with the <a href={links.termsOfUse}>terms and conditions</a>, and <a href={links.privacyPolicy}>privacy policy</a>.
                         </Checkbox>
                     </div>
                     <Actions>

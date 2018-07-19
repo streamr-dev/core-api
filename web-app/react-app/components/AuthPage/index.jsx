@@ -25,7 +25,7 @@ const AuthPage = () => (
         <div className={styles.authPage}>
             <section className={styles.content}>
                 <a href="https://www.streamr.com" className={styles.logo}>
-                    <img src={createLink('static/images/streamr-logo.svg')} />
+                    <img src={createLink('static/images/streamr-logo.svg')} alt="Streamr logo" />
                 </a>
                 <div className={styles.panel}>
                     <Switch>

@@ -6,7 +6,7 @@ import zxcvbn from 'zxcvbn'
 export const email = yup.string()
     .trim()
     .required('Email is required')
-    .email('Email must be a valid email address')
+    .email('Please enter a valid email address')
 
 export const password = yup.string()
     .required('Password is required')
