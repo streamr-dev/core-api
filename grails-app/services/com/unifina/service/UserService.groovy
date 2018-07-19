@@ -6,17 +6,18 @@ import com.unifina.domain.security.SecRole
 import com.unifina.domain.security.SecUser
 import com.unifina.domain.signalpath.ModulePackage
 import com.unifina.exceptions.UserCreationFailedException
+import grails.plugin.springsecurity.SpringSecurityService
+import org.codehaus.groovy.grails.commons.GrailsApplication
 import org.springframework.context.MessageSource
 import org.springframework.validation.FieldError
-import org.springframework.validation.ObjectError
 
 class UserService {
 
 	MessageSource messageSource
 
-	def grailsApplication
-	def springSecurityService
-	def permissionService
+	GrailsApplication grailsApplication
+	SpringSecurityService springSecurityService
+	PermissionService permissionService
 
 	def createUser(Map properties, List<SecRole> roles = null, List<Feed> feeds = null, List<ModulePackage> packages = null) {
 		def secConf = grailsApplication.config.grails.plugin.springsecurity
@@ -24,7 +25,9 @@ class UserService {
 		SecUser user = cl.loadClass(secConf.userLookup.userDomainClassName).newInstance(properties)
 
 		// Encode the password
-		if (user.password == null) { throw new UserCreationFailedException("The password is empty!") }
+		if (user.password == null) {
+			throw new UserCreationFailedException("The password is empty!")
+		}
 		user.password = springSecurityService.encodePassword(user.password)
 
 		// When created, the account is always enabled

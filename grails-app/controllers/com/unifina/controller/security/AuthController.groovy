@@ -22,8 +22,9 @@ import javax.servlet.http.HttpServletResponse
 
 @Secured(["permitAll"])
 class AuthController {
+	def mailService
+
 	UserService userService
-	MailService mailService
 	SpringSecurityService springSecurityService
 	SignupCodeService signupCodeService
 	SaltSource saltSource
@@ -146,11 +147,18 @@ class AuthController {
 
 		log.info("Signed up $invite.username")
 
-		mailService.sendMail {
-			from grailsApplication.config.unifina.email.sender
-			to invite.username
-			subject grailsApplication.config.unifina.email.registerLink.subject
-			html g.render(template: "email_register_link", model: [user: invite])
+
+		try {
+			mailService.sendMail {
+				from grailsApplication.config.unifina.email.sender
+				to invite.username
+				subject grailsApplication.config.unifina.email.registerLink.subject
+				html g.render(template: "email_register_link", model: [user: invite])
+			}
+		} catch (Exception error) {
+			log.warn("Sending email failed, inviteId: ${invite.id}, error: ${error.getMessage()}")
+			response.status = 500
+			return render([success: false, error: "Sending email failed"] as JSON)
 		}
 
 		return render([username: cmd.username] as JSON)
@@ -170,11 +178,17 @@ class AuthController {
 		def registrationCode = new RegistrationCode(username: user.username)
 		registrationCode.save(flush: true)
 
-		mailService.sendMail {
-			from grailsApplication.config.unifina.email.sender
-			to user.username
-			subject grailsApplication.config.unifina.email.forgotPassword.subject
-			html g.render(template: "email_forgot_password", model: [token: registrationCode.token])
+		try {
+			mailService.sendMail {
+				from grailsApplication.config.unifina.email.sender
+				to user.username
+				subject grailsApplication.config.unifina.email.forgotPassword.subject
+				html g.render(template: "email_forgot_password", model: [token: registrationCode.token])
+			}
+		} catch (Exception error) {
+			log.warn("Sending email failed, userId: ${user.id}, error: ${error.getMessage()}")
+			response.status = 500
+			return render([success: false, error: "Sending email failed"] as JSON)
 		}
 
 		return render([emailSent: true] as JSON)
