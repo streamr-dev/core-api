@@ -7,8 +7,8 @@ import com.unifina.domain.security.SignupInvite
 import com.unifina.exceptions.UserCreationFailedException
 import com.unifina.service.SignupCodeService
 import com.unifina.service.UserService
+import com.unifina.utils.EmailValidator
 import grails.converters.JSON
-import grails.plugin.mail.MailService
 import grails.plugin.springsecurity.SpringSecurityService
 import grails.plugin.springsecurity.SpringSecurityUtils
 import grails.plugin.springsecurity.annotation.Secured
@@ -257,7 +257,7 @@ class AuthController {
 class EmailCommand {
 	String username
 	static constraints = {
-		username blank: false, email: true
+		username blank: false, validator: EmailValidator.validate
 	}
 }
 
