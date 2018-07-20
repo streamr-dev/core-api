@@ -1,11 +1,6 @@
 package com.unifina.service
 
-import com.unifina.api.ApiException
-import com.unifina.api.InvalidStateException
-import com.unifina.api.NotFoundException
-import com.unifina.api.NotPermittedException
-import com.unifina.api.SaveCanvasCommand
-import com.unifina.api.ValidationException
+import com.unifina.api.*
 import com.unifina.domain.dashboard.Dashboard
 import com.unifina.domain.dashboard.DashboardItem
 import com.unifina.domain.data.Stream
@@ -25,6 +20,7 @@ import grails.test.mixin.TestFor
 import grails.test.mixin.TestMixin
 import grails.test.mixin.web.ControllerUnitTestMixin
 import groovy.json.JsonBuilder
+import org.codehaus.groovy.grails.web.mapping.LinkGenerator
 import spock.lang.Specification
 
 @TestMixin(ControllerUnitTestMixin) // "as JSON" converter
@@ -615,6 +611,17 @@ class CanvasServiceSpec extends Specification {
 		thrown(NotFoundException)
 		1 * service.permissionService.check(me, myFirstCanvas, Permission.Operation.READ) >> false
 		1 * service.dashboardService.authorizedGetById("1", me, Permission.Operation.READ) >> { throw new NotFoundException("thrown by mock") }
+	}
+
+	def "getCanvasURL() returns a link for the canvas"() {
+		service.linkGenerator = Mock(LinkGenerator)
+
+		when:
+		def link = service.getCanvasURL(myFirstCanvas)
+
+		then:
+		1 * service.linkGenerator.link([controller: 'canvas', action: 'editor', id: myFirstCanvas.id, absolute: true]) >> "https://www.streamr.com/canvas/editor/1"
+		link == "https://www.streamr.com/canvas/editor/1"
 	}
 
 	private uiChannelIdsFromMap(Map signalPathMap) {
