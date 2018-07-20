@@ -14,7 +14,20 @@ export const password = yup.string()
 export const passwordWithStrength = yup.string()
     .required('Password is required')
     .min(8, 'Password must be at least 8 characters long')
-    .test('is-strong', 'Please use a stronger password', (value) => zxcvbn(value).score > 1)
+    .test({
+        path: 'is-strong',
+        message: 'Please use a stronger password',
+        test: function(value) {
+            if (zxcvbn(value).score > 1) {
+                return true
+            } else {
+                return this.createError({
+                    message: zxcvbn(value).feedback.warning,
+                    path: this.path,
+                })
+            }
+        }
+    })
 
 export const confirmPassword = yup.string()
     .oneOf([yup.ref('password')], 'Passwords do not match')

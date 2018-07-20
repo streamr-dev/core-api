@@ -38,7 +38,7 @@
   "license": "UNLICENSED",
   "private": true,
   "dependencies": {
-    "@streamr/streamr-layout": "^1.1.0",
+    "@streamr/streamr-layout": "^1.2.1",
     "assert-diff": "^1.2.0",
     "autoprefixer": "^7.0.1",
     "axios": "^0.16.1",
