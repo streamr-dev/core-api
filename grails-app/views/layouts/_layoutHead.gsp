@@ -51,6 +51,6 @@
 		</r:script>
 	</sec:ifLoggedIn>
 
-    <g:layoutHead />
 	<r:layoutResources/>
+    <g:layoutHead />
 </head>
