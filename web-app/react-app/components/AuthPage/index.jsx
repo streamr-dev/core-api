@@ -36,7 +36,7 @@ const AuthPage = () => (
                         <Route exact path="/register/resetPassword" component={ResetPasswordPage} />
                         <Redirect from="/register" to="/register/signup" />
                         <Redirect from="/login" to="/login/auth" />
-                        <Route path="/" component={() => '404'} />
+                        <Redirect from="/" to="/login/auth" />
                     </Switch>
                     <div className={styles.footer}>
                         Made with ❤️ & ☕️ by Streamr Network AG in 2018
