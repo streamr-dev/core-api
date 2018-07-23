@@ -14,8 +14,8 @@ export type Props = {
 }
 
 const Checkbox = ({ checked, className, children, error, ...props }: Props) => (
-    <div>
-        <label className={styles.root}>
+    <div className={styles.root}>
+        <label className={styles.label}>
             <input
                 {...props}
                 type="checkbox"
