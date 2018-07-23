@@ -33,14 +33,12 @@ class RedirectAuthenticated extends React.Component<Props> {
     getIsAuthenticated = (): Promise<boolean> => this.props.blindly ? (
         Promise.resolve(true)
     ) : (
-        new Promise((resolve) => {
-            axios
-                .get(createLink('/api/v1/users/me'))
-                .then(
-                    () => resolve(true),
-                    () => resolve(false)
-                )
-        })
+        axios
+            .get(createLink('/api/v1/users/me'))
+            .then(
+                () => Promise.resolve(true),
+                () => Promise.resolve(false)
+            )
     )
 
     componentDidMount = () => {
