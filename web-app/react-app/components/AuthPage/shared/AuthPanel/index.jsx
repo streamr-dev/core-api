@@ -23,13 +23,14 @@ type Props = {
     onPrev: () => void,
     onNext: () => void,
     setIsProcessing: FlagSetter,
+    isProcessing?: boolean,
     validationSchemas: Array<Schema>,
     onValidationError: FieldErrorSetter,
 }
 
 class AuthPanel extends React.Component<Props> {
     render = () => {
-        const { children, onPrev, currentStep, validationSchemas, onValidationError, setIsProcessing, onNext: next, form } = this.props
+        const { children, onPrev, currentStep, validationSchemas, onValidationError, setIsProcessing, onNext: next, form, isProcessing } = this.props
         const totalSteps = React.Children.count(children)
 
         return (
@@ -60,6 +61,7 @@ class AuthPanel extends React.Component<Props> {
                                 totalSteps,
                                 onValidationError,
                                 setIsProcessing,
+                                isProcessing,
                                 next,
                                 form,
                                 current: index === currentStep,

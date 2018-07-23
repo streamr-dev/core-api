@@ -12,7 +12,7 @@ export type FieldSetter = (string, any, ?() => void) => void
 
 export type FieldErrorSetter = (string, string) => void
 
-export type FlagSetter = (boolean) => void
+export type FlagSetter = (boolean, ?() => void) => void
 
 export type ErrorHandler = (Error) => void
 

@@ -55,10 +55,10 @@ const withAuthFlow = (WrappedComponent: React.ComponentType<any>, step: number, 
             }, callback)
         }
 
-        setIsProcessing = (isProcessing: boolean) => {
+        setIsProcessing = (isProcessing: boolean, callback?: () => void) => {
             this.setState({
                 isProcessing,
-            })
+            }, callback)
         }
 
         setStep = (step: number) => {
