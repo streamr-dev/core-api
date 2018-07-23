@@ -20,7 +20,7 @@ class RedirectAuthenticated extends React.Component<Props> {
         const { ignoreSession, redirect } = qs.parse(search, {
             ignoreQueryPrefix: true,
         })
-        if (!initial || (ignoreSession && ignoreSession !== 'false')) {
+        if (!initial || !ignoreSession || ignoreSession === 'false') {
             this.getIsAuthenticated().then((authenticated) => {
                 if (authenticated) {
                     const url = redirect || createLink('/canvas/editor')
@@ -36,11 +36,10 @@ class RedirectAuthenticated extends React.Component<Props> {
         new Promise((resolve) => {
             axios
                 .get(createLink('/api/v1/users/me'))
-                .then(() => {
-                    resolve(true)
-                }, () => {
-                    resolve(false)
-                })
+                .then(
+                    () => resolve(true),
+                    () => resolve(false)
+                )
         })
     )
 
