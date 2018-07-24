@@ -64,7 +64,7 @@ class SignupPage extends React.Component<Props> {
                         name="email"
                         label="Email"
                         value={form.email}
-                        onChange={onInputChange(setFormField)}
+                        onChange={setFormField}
                         error={errors.email}
                         processing={step === 0 && isProcessing}
                         autoComplete="off"

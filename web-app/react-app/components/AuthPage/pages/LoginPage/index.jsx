@@ -66,7 +66,7 @@ class LoginPage extends React.Component<Props> {
                         name="email"
                         label="Email"
                         value={form.email}
-                        onChange={onInputChange(setFormField)}
+                        onChange={setFormField}
                         error={errors.email}
                         processing={step === 0 && isProcessing}
                         autoComplete="email"
@@ -100,7 +100,7 @@ class LoginPage extends React.Component<Props> {
                         type="password"
                         label="Password"
                         value={form.password}
-                        onChange={onInputChange(setFormField)}
+                        onChange={setFormField}
                         error={errors.password}
                         processing={step === 1 && isProcessing}
                         autoComplete="current-password"

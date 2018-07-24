@@ -94,7 +94,7 @@ class ResetPasswordPage extends React.Component<Props> {
                         type="password"
                         label="Create a Password"
                         value={form.password}
-                        onChange={onInputChange(setFormField)}
+                        onChange={setFormField}
                         error={errors.password}
                         processing={step === 0 && isProcessing}
                         autoComplete="new-password"
@@ -118,7 +118,7 @@ class ResetPasswordPage extends React.Component<Props> {
                         type="password"
                         label="Confirm your password"
                         value={form.confirmPassword}
-                        onChange={onInputChange(setFormField)}
+                        onChange={setFormField}
                         error={errors.confirmPassword}
                         processing={step === 1 && isProcessing}
                         autoComplete="new-password"
