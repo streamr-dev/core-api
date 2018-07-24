@@ -29,3 +29,7 @@ export const post = (url: string, data: FormFields, successWithError: boolean, x
             reject(new Error(data.error || 'Something went wrong'))
         })
 })
+
+export const getDisplayName = (WrappedComponent: React.ComponentType<any>) => (
+    WrappedComponent.displayName || WrappedComponent.name || 'Component'
+)

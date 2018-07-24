@@ -7,6 +7,7 @@ import type {
     FormFields,
     Errors,
 } from './types'
+import { getDisplayName } from './utils'
 
 type State = {
     form: FormFields,
@@ -15,10 +16,6 @@ type State = {
     step: number,
     complete: boolean,
 }
-
-const getDisplayName = (WrappedComponent: React.ComponentType<any>) => (
-    WrappedComponent.displayName || WrappedComponent.name || 'Component'
-)
 
 const withAuthFlow = (WrappedComponent: React.ComponentType<any>, step: number, initialFormFields: FormFields) => {
     class WithAuthFlow extends React.Component<{}, State> {
