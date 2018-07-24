@@ -1,67 +1,79 @@
 @import "@streamr/streamr-layout/pcss/variables.pcss";
 
-.selectContainer {
-  display: block;
-  margin: 0;
-  position: relative;
+.root {
+  font-size: 0.75em;
+}
 
-  label {
-    font-size: 0.75em;
-    line-height: 1em;
-    left: 0;
-    margin: 0;
-    pointer-events: none;
-    position: absolute;
-    top: 0;
-    transform: translate(0, 1.75em) scale(1);
-    transform-origin: top left;
-    transition: 200ms cubic-bezier(0.0, 0, 0.2, 1) 0ms;
-    transition-property: color, transform;
-    width: 100%;
-    z-index: 1;
+.root :global {
+  .Select-clear-zone,
+  .Select-placeholder {
+    display: none;
   }
 
-  &.focused {
-    label {
-      transform: translate(0, 0) scale(0.75);
+  .Select-control {
+    border: 0;
+    border-radius: 0;
+    box-shadow: none !important;
+    height: auto;
+  }
+
+  .Select-control:hover {
+    box-shadow: none;
+  }
+
+  .Select-input {
+    height: 2.5em;
+    padding: 0;
+  }
+
+  .Select-input > input {
+    box-sizing: content-box;
+    height: 1em;
+    line-height: 2.5em;
+    padding: 0.75em 0;
+  }
+
+  .Select-control .Select-value {
+    height: 2.5em;
+    line-height: 2.5em;
+    padding-left: 0;
+  }
+
+  .Select-arrow {
+    border-color: #323232 transparent transparent;
+    border-width: 6px 6px 3px;
+    top: 3px;
+
+    &::after {
+      content: '';
+      border: solid;
+      border-color: white transparent transparent;
+      border-width: 6px 6px 3px;
+      height: 0;
+      left: -6px;
+      position: absolute;
+      top: -8px;
+      width: 0;
     }
   }
 }
 
-.select {
+.root:global(.is-open) :global .Select-arrow {
+  border-color: transparent transparent #323232;
+  border-width: 0 6px 6px;
+  top: 0;
 
-  :global {
-    .Select-placeholder {
-      display: none;
-    }
-    .Select-control {
-      border: none;
-      border-radius: 0;
-      border-bottom: 1px solid #323232;
-      box-sizing: content-box;
-      color: var(--greyDark);
-      display: block;
-      font-size: 0.75em;
-      height: 1em;
-      line-height: 2.5em;
-      outline: 0;
-      padding: 0.75em 0;
-      width: 100%;
-    }
-    .Select--single {
-      .Select-value {
-        padding-left: 0 !important;
-      }
-    }
+  &::after {
+    border: solid;
+    border-color: transparent transparent white;
+    border-width: 0 6px 6px;
+    left: -6px;
+    top: 2px;
   }
 }
 
 @media (--md-up) {
-  .selectContainer label {
-    font-size: 1em;
-  }
-  :global(.Select),
-  :global(.Select-control) {
+  .root {
     font-size: 1em;
   }
 }

@@ -5,6 +5,7 @@
 import React from 'react'
 import ReactSelect from 'react-select'
 
+import styles from './select.pcss'
 import FormControl from '../FormControl'
 
 type Props = {
@@ -18,6 +19,7 @@ type Props = {
 const Select = ({ name, onAutoComplete, ...props }: Props) => (
     <ReactSelect
         {...props}
+        className={styles.root}
         name={name}
     />
 )

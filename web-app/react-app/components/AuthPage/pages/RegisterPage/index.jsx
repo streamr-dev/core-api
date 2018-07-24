@@ -158,6 +158,8 @@ class RegisterPage extends React.Component<Props> {
                             label: tz,
                         }))}
                         onChange={setFormField}
+                        error={errors.timezone}
+                        processing={step === 3 && isProcessing}
                         autoFocus
                     />
                     <Actions>
