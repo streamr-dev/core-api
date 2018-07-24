@@ -46,6 +46,7 @@ class ForgotPasswordPage extends React.Component<Props> {
                 onPrev={prev}
                 onNext={next}
                 setIsProcessing={setIsProcessing}
+                isProcessing={isProcessing}
                 validationSchemas={schemas}
                 onValidationError={setFieldError}
             >
