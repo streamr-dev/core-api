@@ -3,7 +3,7 @@
 import * as React from 'react'
 import qs from 'qs'
 import cx from 'classnames'
-import Select from 'react-select'
+import Select from '../../shared/Select'
 import moment from 'moment-timezone'
 import * as yup from 'yup'
 
@@ -85,14 +85,6 @@ class RegisterPage extends React.Component<Props> {
         setFieldError('toc', error.message)
     }
 
-    onTimezoneChange = (option: ?{
-        value: string,
-        label: string,
-    }) => {
-        const { value = '' } = option || {}
-        this.props.setFormField('timezone', value)
-    }
-
     render() {
         const { setIsProcessing, isProcessing, step, form, errors, setFieldError, next, prev, setFormField, redirect } = this.props
         return (
@@ -159,12 +151,13 @@ class RegisterPage extends React.Component<Props> {
                 <AuthStep title="Timezone" showBack>
                     <Select
                         name="timezone"
+                        label="Timezone"
                         value={form.timezone}
                         options={moment.tz.names().map(tz => ({
                             value: tz,
                             label: tz,
                         }))}
-                        onChange={this.onTimezoneChange}
+                        onChange={setFormField}
                         autoFocus
                     />
                     <Actions>

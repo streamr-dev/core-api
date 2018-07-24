@@ -10,7 +10,7 @@ import Button from '../../shared/Button'
 import AuthStep from '../../shared/AuthStep'
 
 import withAuthFlow from '../../shared/withAuthFlow'
-import { onInputChange, post } from '../../shared/utils'
+import { post } from '../../shared/utils'
 import schemas from '../../schemas/resetPassword'
 import type { AuthFlowProps } from '../../shared/types'
 import qs from 'qs'

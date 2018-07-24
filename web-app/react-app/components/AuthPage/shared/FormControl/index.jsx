@@ -11,13 +11,13 @@ import StatusBox from './StatusBox'
 import InputError from './InputError'
 import styles from './formControl.pcss'
 import { getDisplayName } from '../utils'
-import type { ChangeFormatter, FieldSetter } from '../types'
+import type { ValueFormatter, FieldSetter } from '../types'
 
 type Props = {
-    changeFormatter?: ChangeFormatter<any>,
     error?: string,
     label: string,
     measureStrength?: boolean,
+    name: string,
     onChange?: FieldSetter,
     processing?: boolean,
     type?: string,
@@ -30,7 +30,7 @@ type State = {
     lastKnownError: string,
 }
 
-const formControl = (WrappedComponent: React.ComponentType<any>) => (
+const formControl = (WrappedComponent: React.ComponentType<any>, valueFormatter?: ValueFormatter<any>) => (
     class FormControl extends React.Component<Props, State> {
         static displayName = `FormControl(${getDisplayName(WrappedComponent)})`
 
@@ -38,12 +38,6 @@ const formControl = (WrappedComponent: React.ComponentType<any>) => (
             focused: false,
             autoCompleted: false,
             lastKnownError: '',
-        }
-
-        setFocused = (focused: boolean) => {
-            this.setState({
-                focused,
-            })
         }
 
         setAutoCompleted = (autoCompleted: boolean) => {
@@ -73,17 +67,22 @@ const formControl = (WrappedComponent: React.ComponentType<any>) => (
         }
 
         onChange = (payload: any) => {
-            const { onChange, changeFormatter } = this.props
-            const formatter = changeFormatter || ((obj) => obj)
+            const { onChange, name } = this.props
+            const formatter = valueFormatter || ((obj) => obj)
 
             if (onChange) {
-                const { name, value } = formatter(payload)
-                onChange(name, value)
+                onChange(name, formatter(payload))
             }
         }
 
+        onFocusChange = ({ type }: SyntheticEvent<EventTarget>) => {
+            this.setState({
+                focused: type === 'focus',
+            })
+        }
+
         render() {
-            const { processing, error, value, label, changeFormatter, ...props } = this.props
+            const { processing, error, value, label, ...props } = this.props
             const { lastKnownError, focused, autoCompleted } = this.state
             const strength = this.strengthLevel()
 
@@ -115,7 +114,8 @@ const formControl = (WrappedComponent: React.ComponentType<any>) => (
                             {...props}
                             value={value}
                             onChange={this.onChange}
-                            onFocusChange={this.setFocused}
+                            onBlur={this.onFocusChange}
+                            onFocus={this.onFocusChange}
                             onAutoComplete={this.setAutoCompleted}
                         />
                     </StatusBox>

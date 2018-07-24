@@ -1,68 +1,27 @@
 // @flow
 
+/* eslint no-unused-vars: ["error", { "ignoreRestSiblings": true }] */
+
 import React from 'react'
 import ReactSelect from 'react-select'
-import classnames from 'classnames'
 
-import styles from './select.pcss'
+import FormControl from '../FormControl'
 
 type Props = {
-    placeholder: string,
-    className?: ?string,
-    onFocus?: (Event) => void,
-    onBlur?: (Event) => void,
-    [string]: any,
+    name: string,
+    label: string,
+    value: string,
+    onFocusChange?: any,
+    onAutoComplete?: any,
 }
 
-type State = {
-    focused: boolean,
-}
+const Select = ({ name, onAutoComplete, ...props }: Props) => (
+    <ReactSelect
+        {...props}
+        name={name}
+    />
+)
 
-class Select extends React.Component<Props, State> {
-    static defaultProps = {
-        placeholder: 'Select...'
-    }
-
-    state = {
-        focused: false,
-    }
-
-    onFocus() {
-        this.setState({
-            focused: true,
-        })
-    }
-
-    onBlur() {
-        this.setState({
-            focused: false,
-        })
-    }
-
-    render() {
-        const { className, placeholder, onFocus, onBlur, ...props } = this.props
-        return (
-            <div className={classnames(styles.selectContainer, {
-                [styles.focused]: this.state.focused,
-            })}>
-                <label>
-                    {placeholder}
-                </label>
-                <ReactSelect
-                    {...props}
-                    onFocus={(e) => {
-                        onFocus && onFocus(e)
-                        this.onFocus()
-                    }}
-                    onBlur={(e) => {
-                        onBlur && onBlur(e)
-                        this.onBlur()
-                    }}
-                    className={classnames(styles.select, className)}
-                />
-            </div>
-        )
-    }
-}
-
-export default Select
+export default FormControl(Select, (option: ?{
+    value: string,
+}) => (option || {}).value || '')

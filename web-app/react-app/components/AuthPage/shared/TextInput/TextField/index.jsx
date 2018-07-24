@@ -9,7 +9,6 @@ import styles from './textField.pcss'
 
 type Props = {
     className?: string,
-    onFocusChange?: (boolean) => void,
     onAutoComplete?: (boolean) => void,
 }
 
@@ -22,24 +21,14 @@ class TextField extends React.Component<Props> {
         }
     }
 
-    onFocusChange = ({ type }: SyntheticEvent<EventTarget>) => {
-        const { onFocusChange } = this.props
-
-        if (onFocusChange) {
-            onFocusChange(type === 'focus')
-        }
-    }
-
     render = () => {
-        const { className,  onFocusChange, onAutoComplete, ...props } = this.props
+        const { className, onAutoComplete, ...props } = this.props
 
         return (
             <input
                 {...props}
                 className={cx(className, styles.root)}
                 onAnimationStart={this.onAnimationStart}
-                onBlur={this.onFocusChange}
-                onFocus={this.onFocusChange}
             />
         )
     }
