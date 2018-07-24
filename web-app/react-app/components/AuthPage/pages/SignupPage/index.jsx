@@ -4,7 +4,7 @@ import * as React from 'react'
 import cx from 'classnames'
 
 import AuthPanel, { styles as authPanelStyles } from '../../shared/AuthPanel'
-import Input from '../../shared/Input'
+import TextInput from '../../shared/TextInput'
 import Actions from '../../shared/Actions'
 import Button from '../../shared/Button'
 import AuthStep from '../../shared/AuthStep'
@@ -60,7 +60,7 @@ class SignupPage extends React.Component<Props> {
                     onFailure={this.onFailure}
                     showSignin
                 >
-                    <Input
+                    <TextInput
                         name="email"
                         label="Email"
                         value={form.email}

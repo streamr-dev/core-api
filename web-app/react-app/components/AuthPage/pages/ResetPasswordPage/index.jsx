@@ -4,7 +4,7 @@ import * as React from 'react'
 import * as yup from 'yup'
 
 import AuthPanel from '../../shared/AuthPanel'
-import Input from '../../shared/Input'
+import TextInput from '../../shared/TextInput'
 import Actions from '../../shared/Actions'
 import Button from '../../shared/Button'
 import AuthStep from '../../shared/AuthStep'
@@ -89,7 +89,7 @@ class ResetPasswordPage extends React.Component<Props> {
                 onValidationError={setFieldError}
             >
                 <AuthStep title="Reset password">
-                    <Input
+                    <TextInput
                         name="password"
                         type="password"
                         label="Create a Password"
@@ -113,7 +113,7 @@ class ResetPasswordPage extends React.Component<Props> {
                     onFailure={this.onFailure}
                     showBack
                 >
-                    <Input
+                    <TextInput
                         name="confirmPassword"
                         type="password"
                         label="Confirm your password"

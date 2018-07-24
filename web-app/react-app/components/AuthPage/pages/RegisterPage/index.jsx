@@ -8,7 +8,7 @@ import moment from 'moment-timezone'
 import * as yup from 'yup'
 
 import AuthPanel, { styles as authPanelStyles } from '../../shared/AuthPanel'
-import Input from '../../shared/Input'
+import TextInput from '../../shared/TextInput'
 import Actions from '../../shared/Actions'
 import Button from '../../shared/Button'
 import Checkbox from '../../shared/Checkbox'
@@ -107,7 +107,7 @@ class RegisterPage extends React.Component<Props> {
                 onValidationError={setFieldError}
             >
                 <AuthStep title="Sign up" showEth={false} showSignin>
-                    <Input
+                    <TextInput
                         name="name"
                         label="Your Name"
                         type="text"
@@ -124,7 +124,7 @@ class RegisterPage extends React.Component<Props> {
                     </Actions>
                 </AuthStep>
                 <AuthStep title="Sign up" showBack>
-                    <Input
+                    <TextInput
                         name="password"
                         type="password"
                         label="Create a Password"
@@ -141,7 +141,7 @@ class RegisterPage extends React.Component<Props> {
                     </Actions>
                 </AuthStep>
                 <AuthStep title="Sign up" showBack>
-                    <Input
+                    <TextInput
                         name="confirmPassword"
                         type="password"
                         label="Confirm your password"

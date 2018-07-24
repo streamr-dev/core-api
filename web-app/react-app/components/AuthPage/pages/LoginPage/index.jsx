@@ -4,7 +4,7 @@ import * as React from 'react'
 import { Link } from 'react-router-dom'
 
 import AuthPanel from '../../shared/AuthPanel'
-import Input from '../../shared/Input'
+import TextInput from '../../shared/TextInput'
 import Actions from '../../shared/Actions'
 import Button from '../../shared/Button'
 import Checkbox from '../../shared/Checkbox'
@@ -62,7 +62,7 @@ class LoginPage extends React.Component<Props> {
                 onValidationError={setFieldError}
             >
                 <AuthStep title="Sign in" showSignup autoSubmitOnChange={['hiddenPassword']}>
-                    <Input
+                    <TextInput
                         name="email"
                         label="Email"
                         value={form.email}
@@ -95,7 +95,7 @@ class LoginPage extends React.Component<Props> {
                     onSuccess={redirect}
                     onFailure={this.onFailure}
                 >
-                    <Input
+                    <TextInput
                         name="password"
                         type="password"
                         label="Password"
