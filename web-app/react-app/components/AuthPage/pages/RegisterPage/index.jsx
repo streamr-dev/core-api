@@ -85,11 +85,12 @@ class RegisterPage extends React.Component<Props> {
         setFieldError('toc', error.message)
     }
 
-    onTimezoneChange = (option: {
+    onTimezoneChange = (option: ?{
         value: string,
         label: string,
     }) => {
-        this.props.setFormField('timezone', option.value)
+        const { value = '' } = option || {}
+        this.props.setFormField('timezone', value)
     }
 
     render() {
