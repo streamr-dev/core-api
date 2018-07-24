@@ -8,7 +8,7 @@ type Props = {
 }
 
 const InputError = ({ error }: Props) => (error ? (
-    <div className={styles.inputError}>
+    <div className={styles.root}>
         {error}
     </div>
 ) : null)
