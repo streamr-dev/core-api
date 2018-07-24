@@ -4,7 +4,7 @@ import * as React from 'react'
 import cx from 'classnames'
 
 import styles from './checkbox.pcss'
-import InputError from '../InputError'
+import InputError from '../FormControl/InputError'
 
 export type Props = {
     className?: string,
