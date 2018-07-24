@@ -28,3 +28,8 @@ export type AuthFlowProps = {
     step: number,
     redirect: () => void,
 }
+
+export type ChangeFormatter<T> = (T) => {
+    name: string,
+    value: string,
+}

@@ -3,6 +3,7 @@
 import axios from 'axios'
 import qs from 'qs'
 import type { FormFields } from './types'
+import type { ComponentType } from 'react'
 
 export const onInputChange = (callback: (string, any) => void, inputName: ?string) => (e: SyntheticInputEvent<EventTarget>) => {
     const value = e.target.type === 'checkbox' ? e.target.checked : e.target.value
@@ -30,6 +31,6 @@ export const post = (url: string, data: FormFields, successWithError: boolean, x
         })
 })
 
-export const getDisplayName = (WrappedComponent: React.ComponentType<any>) => (
+export const getDisplayName = (WrappedComponent: ComponentType<any>) => (
     WrappedComponent.displayName || WrappedComponent.name || 'Component'
 )
