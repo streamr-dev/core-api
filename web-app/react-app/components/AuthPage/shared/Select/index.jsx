@@ -4,6 +4,8 @@
 
 import React from 'react'
 import ReactSelect from 'react-select'
+import MediaQuery from 'react-responsive'
+import { breakpoints } from '@streamr/streamr-layout'
 
 import styles from './select.pcss'
 import FormControl from '../FormControl'
@@ -17,11 +19,16 @@ type Props = {
 }
 
 const Select = ({ name, onAutoComplete, ...props }: Props) => (
-    <ReactSelect
-        {...props}
-        className={styles.root}
-        name={name}
-    />
+    <MediaQuery maxWidth={breakpoints.xs.max}>
+        {(isMobile) => (
+            <ReactSelect
+                {...props}
+                className={styles.root}
+                searchable={!isMobile}
+                name={name}
+            />
+        )}
+    </MediaQuery>
 )
 
 export default FormControl(Select, (option: ?{
