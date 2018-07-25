@@ -1,4 +1,4 @@
-@import "@streamr/streamr-layout/pcss/variables.pcss";
+@import '@streamr/streamr-layout/pcss/variables.pcss';
 
 .button {
   background: #0324FF;
@@ -8,7 +8,7 @@
   cursor: pointer;
   flex-shrink: 0;
   font-family: 'IBM Plex Mono', monospace;
-  font-size: 0.875em;
+  font-size: 1em;
   font-weight: 600;
   line-height: 3em;
   outline: 0 !important;
@@ -17,8 +17,16 @@
   text-transform: uppercase;
   width: 100%;
   letter-spacing: 1.5px;
+}
 
-  @media (--md-up) {
+@media (--sm-up) {
+  .button {
+    font-size: 0.875em;
+  }
+}
+
+@media (--md-up) {
+  .button {
     width: auto;
   }
 }
