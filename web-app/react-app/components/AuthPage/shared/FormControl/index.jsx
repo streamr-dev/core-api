@@ -82,7 +82,7 @@ const formControl = (WrappedComponent: React.ComponentType<any>, valueFormatter?
         }
 
         render() {
-            const { processing, error, value, label, ...props } = this.props
+            const { processing, error, value, label, measureStrength, ...props } = this.props
             const { lastKnownError, focused, autoCompleted } = this.state
             const strength = this.strengthLevel()
 
