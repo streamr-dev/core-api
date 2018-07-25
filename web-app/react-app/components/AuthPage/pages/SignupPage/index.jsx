@@ -11,7 +11,7 @@ import AuthStep from '../../shared/AuthStep'
 
 import createLink from '../../../../utils/createLink'
 import withAuthFlow from '../../shared/withAuthFlow'
-import { onInputChange, post } from '../../shared/utils'
+import { post } from '../../shared/utils'
 import schemas from '../../schemas/signup'
 import type { AuthFlowProps } from '../../shared/types'
 

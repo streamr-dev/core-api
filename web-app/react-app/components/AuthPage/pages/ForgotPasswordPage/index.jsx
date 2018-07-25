@@ -10,7 +10,6 @@ import Button from '../../shared/Button'
 import AuthStep from '../../shared/AuthStep'
 
 import withAuthFlow from '../../shared/withAuthFlow'
-import { onInputChange } from '../../shared/utils'
 import schemas from '../../schemas/forgotPassword'
 import type { AuthFlowProps } from '../../shared/types'
 import createLink from '../../../../utils/createLink'
@@ -54,6 +53,7 @@ class ForgotPasswordPage extends React.Component<Props> {
                     title="Get a link to reset your password"
                     onSubmit={this.submit}
                     onFailure={this.onFailure}
+                    showSignin
                 >
                     <TextInput
                         name="email"
@@ -69,7 +69,10 @@ class ForgotPasswordPage extends React.Component<Props> {
                         <Button disabled={isProcessing}>Send</Button>
                     </Actions>
                 </AuthStep>
-                <AuthStep title="Link sent">
+                <AuthStep
+                    title="Link sent"
+                    showSignin
+                >
                     <p className={cx(authPanelStyles.spaceLarge, 'text-center')}>
                         If a user with that email exists, we have sent a link to reset the password.
                         Please check your email and click the link — it may be in your spam folder!
