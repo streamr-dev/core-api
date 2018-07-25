@@ -4,6 +4,7 @@
 .authPage {
   align-items: center;
   display: flex;
+  font-size: 16px;
   min-height: 100vh;
 }
 
@@ -33,12 +34,20 @@
 .footer {
   color: #897FFD;
   font-family: 'IBM Plex Mono', monospace;
-  font-size: 0.75em;
-  font-weight: var(--semiBold);
+  font-size: 0.625em;
+  font-weight: var(--medium);
   letter-spacing: 1px;
-  line-height: 1em;
+  line-height: 2.5em;
   margin-top: 3em;
   text-align: center;
   text-transform: uppercase;
   user-select: none;
+}
+
+@media (--sm-up) {
+  .footer {
+    font-size: 0.75em;
+    font-weight: var(--semiBold);
+    line-height: 1em;
+  }
 }
