@@ -26,7 +26,9 @@ const AuthPage = () => (
     <BrowserRouter basename={basename}>
         <div className={styles.root}>
             <section className={styles.content}>
-                <Logo />
+                <div className={styles.logo}>
+                    <Logo />
+                </div>
                 <div className={styles.panel}>
                     <Switch>
                         <Route exact path="/login/auth" component={LoginPage} />
@@ -38,9 +40,11 @@ const AuthPage = () => (
                         <Redirect from="/login" to="/login/auth" />
                         <Redirect from="/" to="/login/auth" />
                     </Switch>
-                    <Footer />
                 </div>
             </section>
+            <div className={styles.footer}>
+                <Footer />
+            </div>
             {isProduction() && <GoogleAnalyticsTracker />}
         </div>
     </BrowserRouter>
