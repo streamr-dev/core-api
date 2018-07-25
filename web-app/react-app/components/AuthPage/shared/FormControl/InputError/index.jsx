@@ -4,13 +4,14 @@ import React from 'react'
 import styles from './inputError.pcss'
 
 type Props = {
-    error: ?string,
+    eligible?: boolean,
+    message: ?string,
 }
 
-const InputError = ({ error }: Props) => (error ? (
+const InputError = ({ message, eligible }: Props) => (
     <div className={styles.root}>
-        {error}
+        {eligible && message ? message : null}
     </div>
-) : null)
+)
 
 export default InputError

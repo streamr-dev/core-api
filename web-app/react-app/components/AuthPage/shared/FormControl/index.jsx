@@ -119,7 +119,10 @@ const formControl = (WrappedComponent: React.ComponentType<any>, valueFormatter?
                             onAutoComplete={this.setAutoCompleted}
                         />
                     </StatusBox>
-                    <InputError error={(!processing && !!error) ? lastKnownError : null} />
+                    <InputError
+                        eligible={!processing && !!error}
+                        message={lastKnownError}
+                    />
                 </div>
             )
         }

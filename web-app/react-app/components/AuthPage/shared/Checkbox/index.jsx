@@ -24,7 +24,7 @@ const Checkbox = ({ checked, className, children, error, ...props }: Props) => (
             />
             <span>{children}</span>
         </label>
-        <InputError error={error} />
+        {!!error && <InputError eligible message={error} />}
     </div>
 )
 
