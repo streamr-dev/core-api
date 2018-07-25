@@ -151,7 +151,7 @@ class RegisterPage extends React.Component<Props> {
                 <AuthStep title="Timezone" showBack>
                     <Select
                         name="timezone"
-                        label="Timezone"
+                        label="Your timezone"
                         value={form.timezone}
                         options={moment.tz.names().map(tz => ({
                             value: tz,
