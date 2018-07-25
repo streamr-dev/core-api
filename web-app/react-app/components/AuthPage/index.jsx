@@ -15,6 +15,8 @@ import SignupPage from './pages/SignupPage'
 import ForgotPasswordPage from './pages/ForgotPasswordPage'
 import ResetPasswordPage from './pages/ResetPasswordPage'
 import GoogleAnalyticsTracker from '../../components/GoogleAnalyticsTracker'
+import Footer from './shared/Footer'
+import Logo from './shared/Logo'
 import styles from './authPage.pcss'
 import isProduction from '../../utils/isProduction'
 
@@ -22,11 +24,9 @@ const basename = createLink('/').replace(window.location.origin, '')
 
 const AuthPage = () => (
     <BrowserRouter basename={basename}>
-        <div className={styles.authPage}>
+        <div className={styles.root}>
             <section className={styles.content}>
-                <a href="https://www.streamr.com" className={styles.logo}>
-                    <img src={createLink('static/images/streamr-logo.svg')} alt="Streamr logo" />
-                </a>
+                <Logo />
                 <div className={styles.panel}>
                     <Switch>
                         <Route exact path="/login/auth" component={LoginPage} />
@@ -38,9 +38,7 @@ const AuthPage = () => (
                         <Redirect from="/login" to="/login/auth" />
                         <Redirect from="/" to="/login/auth" />
                     </Switch>
-                    <div className={styles.footer}>
-                        Made with ❤️ & ☕️ by Streamr Network AG in 2018
-                    </div>
+                    <Footer />
                 </div>
             </section>
             {isProduction() && <GoogleAnalyticsTracker />}
