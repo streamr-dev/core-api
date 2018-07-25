@@ -95,6 +95,14 @@ class LoginPage extends React.Component<Props> {
                     onSuccess={redirect}
                     onFailure={this.onFailure}
                 >
+                    <input
+                        name="email"
+                        type="text"
+                        value={form.email}
+                        style={{
+                            display: 'none',
+                        }}
+                    />
                     <TextInput
                         name="password"
                         type="password"
