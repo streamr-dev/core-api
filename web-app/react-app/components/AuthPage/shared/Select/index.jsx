@@ -26,6 +26,11 @@ const Select = ({ name, onAutoComplete, ...props }: Props) => (
                 className={styles.root}
                 searchable={!isMobile}
                 name={name}
+                optionRenderer={(option: {
+                    label: string,
+                }) => (
+                    <div className={styles.optionLabel}>{option.label}</div>
+                )}
             />
         )}
     </MediaQuery>

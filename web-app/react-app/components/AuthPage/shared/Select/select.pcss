@@ -4,6 +4,12 @@
   font-size: 0.75em;
 }
 
+.optionLabel {
+    max-width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
 .root :global {
   .Select-clear-zone,
   .Select-placeholder {
@@ -69,6 +75,14 @@
     border-width: 0 6px 6px;
     left: -6px;
     top: 2px;
+  }
+}
+
+@media (--xs) {
+  .root :global .Select-menu-outer {
+    left: -1em;
+    right: -1em;
+    width: auto;
   }
 }
 
