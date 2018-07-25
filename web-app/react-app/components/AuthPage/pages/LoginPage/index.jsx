@@ -99,6 +99,7 @@ class LoginPage extends React.Component<Props> {
                         name="email"
                         type="text"
                         value={form.email}
+                        readOnly
                         style={{
                             display: 'none',
                         }}
