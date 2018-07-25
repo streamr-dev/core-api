@@ -2,18 +2,18 @@
 
 import * as React from 'react'
 import qs from 'qs'
-import cx from 'classnames'
 import Select from '../../shared/Select'
 import moment from 'moment-timezone'
 import * as yup from 'yup'
 
-import AuthPanel, { styles as authPanelStyles } from '../../shared/AuthPanel'
+import AuthPanel from '../../shared/AuthPanel'
 import TextInput from '../../shared/TextInput'
 import Actions from '../../shared/Actions'
 import Button from '../../shared/Button'
 import Checkbox from '../../shared/Checkbox'
 import AuthStep from '../../shared/AuthStep'
 
+import styles from './registerPage.pcss'
 import withAuthFlow from '../../shared/withAuthFlow'
 import { onInputChange, post } from '../../shared/utils'
 import schemas from '../../schemas/register'
@@ -173,13 +173,14 @@ class RegisterPage extends React.Component<Props> {
                     onFailure={this.onFailure}
                     showBack
                 >
-                    <div className={cx(authPanelStyles.spaceMedium, authPanelStyles.centered)}>
+                    <div className={styles.termsWrapper}>
                         <Checkbox
                             name="toc"
                             checked={form.toc}
                             onChange={onInputChange(setFormField)}
                             error={errors.toc}
                             autoFocus
+                            keepError
                         >
                             I agree with the <a href={links.termsOfUse}>terms and conditions</a>, and <a href={links.privacyPolicy}>privacy policy</a>.
                         </Checkbox>

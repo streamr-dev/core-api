@@ -11,9 +11,10 @@ export type Props = {
     checked?: boolean,
     children: React.Node,
     error?: string,
+    keepError?: boolean,
 }
 
-const Checkbox = ({ checked, className, children, error, ...props }: Props) => (
+const Checkbox = ({ checked, className, children, error, keepError, ...props }: Props) => (
     <div className={styles.root}>
         <label className={styles.label}>
             <input
@@ -24,7 +25,7 @@ const Checkbox = ({ checked, className, children, error, ...props }: Props) => (
             />
             <span>{children}</span>
         </label>
-        {!!error && <InputError eligible message={error} />}
+        {!!(keepError || error) && <InputError eligible message={error} />}
     </div>
 )
 

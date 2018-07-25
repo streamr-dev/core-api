@@ -1,13 +1,12 @@
 // @flow
 
 import * as React from 'react'
-import cx from 'classnames'
 
-import AuthPanel, { styles as authPanelStyles } from '../../shared/AuthPanel'
+import AuthPanel from '../../shared/AuthPanel'
 import TextInput from '../../shared/TextInput'
 import Actions from '../../shared/Actions'
 import Button from '../../shared/Button'
-import AuthStep from '../../shared/AuthStep'
+import AuthStep, { styles as stepStyles } from '../../shared/AuthStep'
 
 import withAuthFlow from '../../shared/withAuthFlow'
 import schemas from '../../schemas/forgotPassword'
@@ -72,8 +71,9 @@ class ForgotPasswordPage extends React.Component<Props> {
                 <AuthStep
                     title="Link sent"
                     showSignin
+                    className={stepStyles.spaceLarge}
                 >
-                    <p className={cx(authPanelStyles.spaceLarge, 'text-center')}>
+                    <p>
                         If a user with that email exists, we have sent a link to reset the password.
                         Please check your email and click the link — it may be in your spam folder!
                     </p>

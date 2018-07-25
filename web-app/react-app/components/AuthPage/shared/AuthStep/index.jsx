@@ -3,6 +3,9 @@
 import * as React from 'react'
 import * as yup from 'yup'
 import debounce from 'lodash/debounce'
+import cx from 'classnames'
+
+import styles from './authStep.pcss'
 
 import type {
     FieldErrorSetter,
@@ -11,11 +14,16 @@ import type {
     FormFields,
 } from '../types'
 
+export {
+    styles,
+}
+
 type PanelProps = {
     title: string,
 }
 
 type Props = PanelProps & {
+    className?: string,
     children: React.Node,
     validationSchema?: ?yup.Schema,
     onValidationError?: FieldErrorSetter,
@@ -133,11 +141,19 @@ class AuthStep extends React.Component<Props> {
         this.scheduleSubmit()
     }
 
-    render = () => (
-        <form onSubmit={this.onSubmit} ref={this.setForm}>
-            {this.props.children}
-        </form>
-    )
+    render() {
+        const { children, className } = this.props
+
+        return (
+            <form
+                onSubmit={this.onSubmit}
+                ref={this.setForm}
+                className={cx(styles.root, className)}
+            >
+                {children}
+            </form>
+        )
+    }
 }
 
 export default AuthStep
