@@ -115,7 +115,7 @@
     "react-redux": "^5.0.5",
     "react-responsive": "^5.0.0",
     "react-router-dom": "^4.2.2",
-    "react-select": "^1.0.0-rc.4",
+    "react-select": "^1.2.1",
     "react-shortcuts": "^2.0.0",
     "react-switcher": "^1.0.2",
     "react-test-renderer": "^15.6.1",
