@@ -85,6 +85,13 @@ class RegisterPage extends React.Component<Props> {
         setFieldError('toc', error.message)
     }
 
+    timezones() {
+        return moment.tz.names().map(zone => ({
+            value: zone,
+            label: `(UTC${moment.tz(moment(), zone).format('Z')}) ${zone.replace(/\//g, ', ').replace(/_/g, ' ')}`,
+        }))
+    }
+
     render() {
         const { setIsProcessing, isProcessing, step, form, errors, setFieldError, next, prev, setFormField, redirect } = this.props
         return (
@@ -153,10 +160,7 @@ class RegisterPage extends React.Component<Props> {
                         name="timezone"
                         label="Your timezone"
                         value={form.timezone}
-                        options={moment.tz.names().map(tz => ({
-                            value: tz,
-                            label: tz,
-                        }))}
+                        options={this.timezones()}
                         onChange={setFormField}
                         error={errors.timezone}
                         processing={step === 3 && isProcessing}

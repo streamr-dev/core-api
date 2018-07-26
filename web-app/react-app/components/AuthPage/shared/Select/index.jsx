@@ -2,13 +2,14 @@
 
 /* eslint no-unused-vars: ["error", { "ignoreRestSiblings": true }] */
 
-import React from 'react'
+import * as React from 'react'
 import ReactSelect from 'react-select'
 import MediaQuery from 'react-responsive'
 import { breakpoints } from '@streamr/streamr-layout'
 
-import styles from './select.pcss'
+import SelectOption from './SelectOption'
 import FormControl from '../FormControl'
+import styles from './select.pcss'
 
 type Props = {
     name: string,
@@ -18,14 +19,6 @@ type Props = {
     onAutoComplete?: any,
 }
 
-type OptionProps = {
-    label: string,
-}
-
-const OptionRenderer = ({ label }: OptionProps) => (
-    <div className={styles.optionLabel}>{label}</div>
-)
-
 const Select = ({ name, onAutoComplete, ...props }: Props) => (
     <MediaQuery maxWidth={breakpoints.xs.max}>
         {(isMobile) => (
@@ -34,7 +27,7 @@ const Select = ({ name, onAutoComplete, ...props }: Props) => (
                 className={styles.root}
                 searchable={!isMobile}
                 name={name}
-                optionRenderer={OptionRenderer}
+                optionComponent={SelectOption}
             />
         )}
     </MediaQuery>

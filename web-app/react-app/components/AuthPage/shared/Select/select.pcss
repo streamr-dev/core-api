@@ -4,12 +4,6 @@
   font-size: 0.75em;
 }
 
-.optionLabel {
-    max-width: 100%;
-    overflow: hidden;
-    text-overflow: ellipsis;
-}
-
 .root :global {
   .Select-clear-zone,
   .Select-placeholder {
@@ -62,6 +56,32 @@
       width: 0;
     }
   }
+
+  .Select-menu-outer {
+    border: 0;
+    border-radius: 4px;
+    box-shadow: 0 0 3px rgba(0, 0, 0, 0.1), 0 2px 5px rgba(0, 0, 0, 0.2);
+    left: -2.625em;
+    margin-top: 0;
+    right: -2.625em;
+    width: auto;
+  }
+
+  .Select-option {
+    background: transparent;
+    color: #323232;
+    padding-left: 0;
+  }
+
+  .Select-option.is-focused,
+  .Select-option.is-selected {
+    background: transparent;
+    color: #323232;
+  }
+
+  .Select-option.is-focused {
+    color: #0324FF;
+  }
 }
 
 .root:global(.is-open) :global .Select-arrow {
@@ -75,14 +95,6 @@
     border-width: 0 6px 6px;
     left: -6px;
     top: 2px;
-  }
-}
-
-@media (--xs) {
-  .root :global .Select-menu-outer {
-    left: -1em;
-    right: -1em;
-    width: auto;
   }
 }
 
