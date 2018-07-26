@@ -18,6 +18,14 @@ type Props = {
     onAutoComplete?: any,
 }
 
+type OptionProps = {
+    label: string,
+}
+
+const OptionRenderer = ({ label }: OptionProps) => (
+    <div className={styles.optionLabel}>{label}</div>
+)
+
 const Select = ({ name, onAutoComplete, ...props }: Props) => (
     <MediaQuery maxWidth={breakpoints.xs.max}>
         {(isMobile) => (
@@ -26,11 +34,7 @@ const Select = ({ name, onAutoComplete, ...props }: Props) => (
                 className={styles.root}
                 searchable={!isMobile}
                 name={name}
-                optionRenderer={(option: {
-                    label: string,
-                }) => (
-                    <div className={styles.optionLabel}>{option.label}</div>
-                )}
+                optionRenderer={OptionRenderer}
             />
         )}
     </MediaQuery>
