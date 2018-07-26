@@ -25,25 +25,25 @@ const basename = createLink('/').replace(window.location.origin, '')
 const AuthPage = () => (
     <BrowserRouter basename={basename}>
         <div className={styles.root}>
-            <section className={styles.content}>
-                <div className={styles.logo}>
-                    <Logo />
-                </div>
-                <div className={styles.panel}>
-                    <Switch>
-                        <Route exact path="/login/auth" component={LoginPage} />
-                        <Route exact path="/register/register" component={RegisterPage} />
-                        <Route exact path="/register/signup" component={SignupPage} />
-                        <Route exact path="/register/forgotPassword" component={ForgotPasswordPage} />
-                        <Route exact path="/register/resetPassword" component={ResetPasswordPage} />
-                        <Redirect from="/register" to="/register/signup" />
-                        <Redirect from="/login" to="/login/auth" />
-                        <Redirect from="/" to="/login/auth" />
-                    </Switch>
-                </div>
-            </section>
-            <div className={styles.footer}>
-                <Footer />
+            <div className={styles.outer}>
+                <section className={styles.content}>
+                    <div className={styles.inner}>
+                        <Logo className={styles.logo} />
+                        <div className={styles.panel}>
+                            <Switch>
+                                <Route exact path="/login/auth" component={LoginPage} />
+                                <Route exact path="/register/register" component={RegisterPage} />
+                                <Route exact path="/register/signup" component={SignupPage} />
+                                <Route exact path="/register/forgotPassword" component={ForgotPasswordPage} />
+                                <Route exact path="/register/resetPassword" component={ResetPasswordPage} />
+                                <Redirect from="/register" to="/register/signup" />
+                                <Redirect from="/login" to="/login/auth" />
+                                <Redirect from="/" to="/login/auth" />
+                            </Switch>
+                        </div>
+                    </div>
+                </section>
+                <Footer className={styles.footer} mobile />
             </div>
             {isProduction() && <GoogleAnalyticsTracker />}
         </div>
