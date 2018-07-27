@@ -91,6 +91,8 @@ class AuthStep extends React.Component<Props> {
 
         if (setIsProcessing) {
             setIsProcessing(value, callback)
+        } else if (callback) {
+            callback()
         }
     }
 
@@ -105,13 +107,13 @@ class AuthStep extends React.Component<Props> {
 
     debouncedScheduleSubmit = debounce(this.scheduleSubmit, 500)
 
-    submit() {
+    submit(): Promise<any> {
         const { onValidationError, step, totalSteps, onSubmit, onSuccess, onFailure, next } = this.props
 
-        this.validate()
+        return this.validate()
             .then(() => {
                 return onSubmit()
-                    .then(() => {
+                    .then(() => new Promise((resolve) => {
                         this.setProcessing(false, () => {
                             if (onSuccess) {
                                 onSuccess()
@@ -119,8 +121,9 @@ class AuthStep extends React.Component<Props> {
                             if ((step < totalSteps - 1) && next) {
                                 next()
                             }
+                            resolve()
                         })
-                    }, (error) => {
+                    }), (error) => {
                         this.setProcessing(false)
                         if (onFailure) {
                             onFailure(error)

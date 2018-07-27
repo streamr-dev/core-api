@@ -6,6 +6,10 @@ import cx from 'classnames'
 
 import styles from './authPanelNav.pcss'
 
+export {
+    styles,
+}
+
 type Props = {
     active?: boolean,
     onGoBack?: ?() => void,

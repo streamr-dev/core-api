@@ -7,8 +7,12 @@ type Props = {
     children: React.Node,
 }
 
+export {
+    styles,
+}
+
 const Actions = ({ children }: Props) => (
-    <div className={styles.actions}>
+    <div className={styles.root}>
         {React.Children.count(children) === 1 && <span />}
         {children}
     </div>

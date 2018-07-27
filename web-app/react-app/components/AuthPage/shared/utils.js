@@ -34,3 +34,5 @@ export const post = (url: string, data: FormFields, successWithError: boolean, x
 export const getDisplayName = (WrappedComponent: ComponentType<any>) => (
     WrappedComponent.displayName || WrappedComponent.name || 'Component'
 )
+
+export const noop = () => {}

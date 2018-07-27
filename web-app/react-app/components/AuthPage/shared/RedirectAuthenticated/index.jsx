@@ -15,7 +15,7 @@ type Props = {
 }
 
 class RedirectAuthenticated extends React.Component<Props> {
-    redirect = (initial: boolean = false) => {
+    redirect(initial: boolean = false): void {
         const { search } = this.props.location
         const { ignoreSession, redirect } = qs.parse(search, {
             ignoreQueryPrefix: true,
@@ -30,28 +30,34 @@ class RedirectAuthenticated extends React.Component<Props> {
         }
     }
 
-    getIsAuthenticated = (): Promise<boolean> => this.props.blindly ? (
-        Promise.resolve(true)
-    ) : (
-        axios
+    getIsAuthenticated(): Promise<boolean> {
+        if (this.props.blindly) {
+            return Promise.resolve(true)
+        }
+        return axios
             .get(createLink('/api/v1/users/me'))
             .then(
                 () => Promise.resolve(true),
                 () => Promise.resolve(false)
             )
-    )
+    }
 
-    componentDidMount = () => {
+    componentDidMount() {
         this.redirect(true)
     }
 
-    componentDidUpdate = (prevProps: Props) => {
+    componentDidUpdate(prevProps: Props) {
         if (this.props.blindly !== prevProps.blindly) {
             this.redirect()
         }
     }
 
-    render = () => null
+    render() {
+        return null
+    }
 }
+
+// FIXME(mr): I don't like it. It makes testing easier.
+export const UnwrappedRedirectAuthenticated = RedirectAuthenticated
 
 export default withRouter(RedirectAuthenticated)

@@ -46,7 +46,17 @@ const formControl = (WrappedComponent: React.ComponentType<any>, valueFormatter?
             })
         }
 
-        componentDidUpdate = (prevProps: Props) => {
+        componentDidMount() {
+            const { error: lastKnownError } = this.props
+
+            if (lastKnownError) {
+                this.setState({
+                    lastKnownError,
+                })
+            }
+        }
+
+        componentDidUpdate(prevProps: Props) {
             const { error } = this.props
 
             if (error && prevProps.error !== error) {
@@ -56,7 +66,7 @@ const formControl = (WrappedComponent: React.ComponentType<any>, valueFormatter?
             }
         }
 
-        strengthLevel = () => {
+        strengthLevel() {
             const { value, type, measureStrength } = this.props
 
             if (type !== 'password' || !measureStrength || !value) {

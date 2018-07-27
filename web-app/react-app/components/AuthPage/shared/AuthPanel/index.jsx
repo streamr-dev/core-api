@@ -11,6 +11,7 @@ import type {
     FlagSetter,
     FieldErrorSetter,
 } from '../types'
+import { noop } from '../utils'
 
 export {
     styles,
@@ -28,7 +29,15 @@ type Props = {
     onValidationError: FieldErrorSetter,
 }
 
+type TitleProps = {
+    children: React.Node,
+}
+
 class AuthPanel extends React.Component<Props> {
+    static Title = ({ children }: TitleProps) => (
+        <span>{children}</span>
+    )
+
     render = () => {
         const { children, onPrev, currentStep, validationSchemas, onValidationError, setIsProcessing, onNext: next, form, isProcessing } = this.props
         const totalSteps = React.Children.count(children)
@@ -38,9 +47,9 @@ class AuthPanel extends React.Component<Props> {
                 <Switch current={currentStep}>
                     {React.Children.map(children, (child) => (
                         <AuthPanelNav
-                            signin={child.props.showSignin}
-                            signup={child.props.showSignup}
-                            onUseEth={child.props.showEth ? (() => {}) : null}
+                            signin={!!child.props.showSignin}
+                            signup={!!child.props.showSignup}
+                            onUseEth={child.props.showEth ? noop : null}
                             onGoBack={child.props.showBack ? onPrev : null}
                         />
                     ))}
@@ -49,7 +58,9 @@ class AuthPanel extends React.Component<Props> {
                     <div className={styles.header}>
                         <Switch current={currentStep}>
                             {React.Children.map(children, (child) => (
-                                <span>{child.props.title || 'Title'}</span>
+                                <AuthPanel.Title>
+                                    {child.props.title || 'Title'}
+                                </AuthPanel.Title>
                             ))}
                         </Switch>
                     </div>

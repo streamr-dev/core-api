@@ -1,0 +1,5 @@
+#!/bin/sh
+
+path=($1)
+
+./node_modules/.bin/jest "web-app/react-app/tests/${path}"
