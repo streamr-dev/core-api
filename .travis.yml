@@ -38,16 +38,16 @@ jobs:
   - stage: Build war
     script: ./travis_scripts/build_war.sh
     deploy:
-    - provider: s3 #staging
-      access_key_id: AKIAI3FGPGMK3EREJJTQ
-      secret_access_key:
-        secure: OZ0Zkeor9wniM8ubfpHjGLrN7D7vLYr//SBD0ak5dKvYKw0LLd6KwXtIjjj6GsEtq/V/+7ugKNLs4Ni+FPeewe7BhMHfjh2m4gOD/yZg8u45Hk7bLzh6gB8mNgfYIB9aO2/0BQr1CTLD85s6v8MS8LCogQECNtHl8JaZc4CoeB8mKmwnV8e5eRJPCpMKk/Oegk92M098wcz7geNUfgbXKa0LO4fUMgwytyHlDYLKBcPxQNT+E/NpjHyVLK8ndkdykOnmPBazLlDvxZifagt/7gQAPK4mZjs8cO9BFsPdPQCHlBfZrG/K0umD2mMAvvfGbB+31lKihAeUtSMZt1idKo+5jv5Ctbi02di2QLWnPrPA13F++f5zU1qAIZLp7Tp6vyQGE4COaC+ykpcRJZzdpC+FVmK3Lf8yGk/Otvi5S2QWScLFPM3P3O39TO0lv/nRgag8N9kxuLOEGssOsURzv2Bx+XH8/xgB5B70QvLvghvQj6r8nM25GcgTYa8po8QiC7a1jLuLxb+WPMejae/vHkPinxkiKV0QfkdbIz2ALVxW62uXuQX+ANB4BfNpxlUU+Hrok3OdloAW3efR09RFRxcGIEFGUY2s9IvAPeKtbSvEwflusq1YzBtBMOK4Dpno0QnV+CdKc0Gnky7dsUv7cZRLhmwRr7Ss1v4gxLyUACM=
-      bucket: eu-west-1-stg-streamr-vault
-      upload-dir: engine-editor/releases
-      skip_cleanup: true
-      acl: private
-      region: eu-west-1
-      local_dir: build
+#    - provider: s3 #staging
+#      access_key_id: AKIAI3FGPGMK3EREJJTQ
+#      secret_access_key:
+#        secure: OZ0Zkeor9wniM8ubfpHjGLrN7D7vLYr//SBD0ak5dKvYKw0LLd6KwXtIjjj6GsEtq/V/+7ugKNLs4Ni+FPeewe7BhMHfjh2m4gOD/yZg8u45Hk7bLzh6gB8mNgfYIB9aO2/0BQr1CTLD85s6v8MS8LCogQECNtHl8JaZc4CoeB8mKmwnV8e5eRJPCpMKk/Oegk92M098wcz7geNUfgbXKa0LO4fUMgwytyHlDYLKBcPxQNT+E/NpjHyVLK8ndkdykOnmPBazLlDvxZifagt/7gQAPK4mZjs8cO9BFsPdPQCHlBfZrG/K0umD2mMAvvfGbB+31lKihAeUtSMZt1idKo+5jv5Ctbi02di2QLWnPrPA13F++f5zU1qAIZLp7Tp6vyQGE4COaC+ykpcRJZzdpC+FVmK3Lf8yGk/Otvi5S2QWScLFPM3P3O39TO0lv/nRgag8N9kxuLOEGssOsURzv2Bx+XH8/xgB5B70QvLvghvQj6r8nM25GcgTYa8po8QiC7a1jLuLxb+WPMejae/vHkPinxkiKV0QfkdbIz2ALVxW62uXuQX+ANB4BfNpxlUU+Hrok3OdloAW3efR09RFRxcGIEFGUY2s9IvAPeKtbSvEwflusq1YzBtBMOK4Dpno0QnV+CdKc0Gnky7dsUv7cZRLhmwRr7Ss1v4gxLyUACM=
+#      bucket: eu-west-1-stg-streamr-vault
+#      upload-dir: engine-editor/releases
+#      skip_cleanup: true
+#      acl: private
+#      region: eu-west-1
+#      local_dir: build
     - provider: s3 #production
       access_key_id: AKIAI7LEOVJBY6ZEH44Q
       secret_access_key:
