@@ -37,16 +37,6 @@ jobs:
   - stage: Build war
     script: "./travis_scripts/build_war.sh"
     deploy:
-    - provider: s3
-      access_key_id: AKIAI3FGPGMK3EREJJTQ
-      secret_access_key:
-        secure: W9VOb3O8OAcgg7iE5o5kW72FhsAu8sdubcGuqTHOhy3hqFIzk78utO0KXAxT77woJRtHDpduOpI0Y0JOj5r7HOk56bpPWmF5yfXQsJI7IADleQk+jiVNHWTr7Q18PjBQ4Mhtb7/LlRo3A0soolnNGJId0ZMh5oIpNoYbWM3e7wqNtpq57eYf8Ht52XinHaBHn73i+zmI/j9qcKQt5AE/VzQq6/iExEDJuYh+XJUTHDoPni0pUCuxG+jG0kRUAUZue6utLEHer89IVBgaoFKBU/grIBFHHbbJnbIcwpk9h4ln5OcvYbV6a53N7iNIoecraKTqZR8xUMxNYRwLEP8X2Nm4zufJpP2+SBXMXmOJS/P4QZOomnv/WX4IP0EVNNdD4jbillns5R2Fw6EgtsKERF9JxBW/FhPBReYW58XdZRlygfHJbm3ESfPhAqoMxlXJm+Pe9bD0Wf3TtNzw/Gc+L8OEg/2GfWTF7QJTDgJm5PDTL+OFm3JUa/jEbC962zGB7BYv9quSdT6tvkyVip+zSjpyuNk9TTtQk6+QsFN820UyCuipJ73p9uU5DbQeO/6XGCslzVP5vob7dypV4myVki+c1qUgFVl01JoDy0mCrHJ21MgBJLr96dQmKPz4p6wMo5YN+Y4x+EbU/q1zVK+bFztoFV2mEd8SRE+aqjZeHZA=
-      bucket: eu-west-1-stg-streamr-vault
-      upload-dir: engine-editor/releases
-      skip_cleanup: true
-      region: eu-west-1
-      local_dir: build
-    - provider: s3
       access_key_id: AKIAI7LEOVJBY6ZEH44Q
       secret_access_key:
         secure: iKwr8sXvSmzDpv6GIl4q0m9beVNa4IDd/cYrF1gTB9oOESDFT9Q1EqiVeFUZGVQnKWcbvUmHbGu+f8AhF7AMpST6eeGm+h35m/Y1gBxehmFM4yf/kJkA2lj34/Xzy+3N8XpHnFGSF5alya0uEKV2wgQ7qUYvw/SkNA67VdwlzQSEbTu+yHYWP/PYuddTTePjQj3J8vJLwMoOSWsMl3n32nsFOx4cCCerzsfaA7F1JYJwTleyd71iFinQGRGjIaYJGQOGVjCmEZRuHLZEZNXCkEeFneoBhymYtoXsLVXkyf5VkibApTnKYaA8wXRCtI+Ow1zfTl8KzxFOiQ/zbtjtGb375TbwKOTBOQTJk7Heh99gdSAA+uhtnia2TvuqwZD+W8Ge7NW21/tJzQS9dPWM8rFtyK0BL7cYH4SLW4QtHTnwlg99jiHqR/RjtvPiVNxX6R23922n9ORJUmY81lsjgN74eq6stwyIl4HvbgiVqEd6w6+uUd4p2GLeFFN7w/Kn+W2V8VY/aUKwz2Mg/KfTd+l3kyPmlb9ITx4z39A4mmIislWD00SpnHvDYOBYUWCByzhDrMPFMY4RAQL8SCwjU/XKqbueFYUJncqW9aZm3N9Zcm2UcTnmfxHbnCN1Z/5gWXxIp5WbwxY6yt29p8UxHU8eGfHzWeIl+2fH0HT6bgU=
