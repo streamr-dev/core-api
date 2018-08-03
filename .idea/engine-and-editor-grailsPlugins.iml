@@ -450,6 +450,7 @@
           <root url="jar://$MAVEN_REPOSITORY$/com/amazonaws/aws-java-sdk/1.11.294/aws-java-sdk-1.11.294.jar!/" />
           <root url="jar://$MAVEN_REPOSITORY$/org/springframework/security/spring-security-web/3.2.9.RELEASE/spring-security-web-3.2.9.RELEASE.jar!/" />
           <root url="jar://$MAVEN_REPOSITORY$/org/springframework/security/spring-security-core/3.2.9.RELEASE/spring-security-core-3.2.9.RELEASE.jar!/" />
+          <root url="jar://$MAVEN_REPOSITORY$/org/imgscalr/imgscalr-lib/4.2/imgscalr-lib-4.2.jar!/" />
         </CLASSES>
         <JAVADOC />
         <SOURCES />
