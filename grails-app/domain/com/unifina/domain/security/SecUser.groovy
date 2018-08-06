@@ -1,6 +1,7 @@
 package com.unifina.domain.security
 
 import com.unifina.security.Userish
+import com.unifina.utils.EmailValidator
 import groovy.transform.CompileStatic
 
 class SecUser implements Userish {
@@ -12,7 +13,7 @@ class SecUser implements Userish {
 	boolean accountExpired
 	boolean accountLocked
 	boolean passwordExpired
-	
+
 	String name
 	String timezone
 
@@ -20,9 +21,9 @@ class SecUser implements Userish {
 	Set<Permission> permissions
 
 	static hasMany = [permissions: Permission, keys: Key]
-	
+
 	static constraints = {
-		username blank: false, unique: true, email: true
+		username blank: false, unique: true, validator: EmailValidator.validate
 		password blank: false
 		name blank: false
 	}

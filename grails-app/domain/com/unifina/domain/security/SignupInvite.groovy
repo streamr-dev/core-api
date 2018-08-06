@@ -1,5 +1,6 @@
 package com.unifina.domain.security
 
+import com.unifina.utils.EmailValidator
 import com.unifina.security.Userish
 
 class SignupInvite implements Userish {
@@ -12,7 +13,7 @@ class SignupInvite implements Userish {
 
     static constraints = {
 		code blank: false, unique: true
-		username blank: false, email: true
+		username blank: false, validator: EmailValidator.validate
     }
 
 	@Override
