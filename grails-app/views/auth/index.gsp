@@ -20,7 +20,6 @@
 	</r:script>
 	<r:require module="streamr"/>
 
-	<webpack:cssBundle name="commons"/>
 	<webpack:cssBundle name="authPage"/>
 	<style>
 		body {
