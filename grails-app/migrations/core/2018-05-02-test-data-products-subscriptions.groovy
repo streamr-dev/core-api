@@ -35,52 +35,52 @@ def addresses = ["0x725bf47f71061034757b37cc7b9f73671c7b2973",
 //   licensed under the Creative Commons Zero (CC0) license https://creativecommons.org/publicdomain/zero/1.0/
 products = [[
 	name: "Air Quality Index (pm10)",
-	img: "https://images.pexels.com/photos/158904/pexels-photo-158904.jpeg"
+	img: "https://s3-eu-west-1.amazonaws.com/streamr-dev-public/product-images/test-hero-images/pexels-photo-158904.jpeg"
 ], [
 	name: "Flower pollination",
-	img: "https://images.pexels.com/photos/22455/pexels-photo.jpg"
+	img: "https://s3-eu-west-1.amazonaws.com/streamr-dev-public/product-images/test-hero-images/pexels-photo.jpg"
 ], [
 	name: "Rail road traffic conditions",
-	img: "https://images.pexels.com/photos/673803/pexels-photo-673803.jpeg"
+	img: "https://s3-eu-west-1.amazonaws.com/streamr-dev-public/product-images/test-hero-images/pexels-photo-673803.jpeg"
 ], [
 	name: "Bike traffic conditions",
-	img: "https://images.pexels.com/photos/250674/pexels-photo-250674.jpeg"
+	img: "https://s3-eu-west-1.amazonaws.com/streamr-dev-public/product-images/test-hero-images/pexels-photo-250674.jpeg"
 ], [
 	name: "Glacial snow status in Alps",
-	img: "https://images.pexels.com/photos/273040/pexels-photo-273040.jpeg"
+	img: "https://s3-eu-west-1.amazonaws.com/streamr-dev-public/product-images/test-hero-images/pexels-photo-273040.jpeg"
 ], [
 	name: "Weather on North Atlantic",
-	img: "https://images.pexels.com/photos/744515/pexels-photo-744515.jpeg"
+	img: "https://s3-eu-west-1.amazonaws.com/streamr-dev-public/product-images/test-hero-images/pexels-photo-744515.jpeg"
 ], [
 	name: "Credit card transactions",
-	img: "https://images.pexels.com/photos/164501/pexels-photo-164501.jpeg"
+	img: "https://s3-eu-west-1.amazonaws.com/streamr-dev-public/product-images/test-hero-images/pexels-photo-164501.jpeg"
 ], [
 	name: "Endangered species tracking sensors",
-	img: "https://images.pexels.com/photos/772997/pexels-photo-772997.jpeg"
+	img: "https://s3-eu-west-1.amazonaws.com/streamr-dev-public/product-images/test-hero-images/pexels-photo-772997.jpeg"
 ], [
 	name: "Amusement park ride maintenance condition sensors",
-	img: "https://images.pexels.com/photos/772449/pexels-photo-772449.jpeg"
+	img: "https://s3-eu-west-1.amazonaws.com/streamr-dev-public/product-images/test-hero-images/pexels-photo-772449.jpeg"
 ], [
 	name: "Fruit ripeness sensors",
-	img: "https://images.pexels.com/photos/701969/pexels-photo-701969.jpeg"
+	img: "https://s3-eu-west-1.amazonaws.com/streamr-dev-public/product-images/test-hero-images/pexels-photo-701969.jpeg"
 ], [
 	name: "Glacial snow status in the Rocky Mountains",
-	img: "https://images.pexels.com/photos/301558/pexels-photo-301558.jpeg"
+	img: "https://s3-eu-west-1.amazonaws.com/streamr-dev-public/product-images/test-hero-images/pexels-photo-301558.jpeg"
 ], [
 	name: "Ride-hailing vehicle tracking data",
-	img: "https://images.pexels.com/photos/36853/pretty-woman-traffic-young-vintage.jpg"
+	img: "https://s3-eu-west-1.amazonaws.com/streamr-dev-public/product-images/test-hero-images/pretty-woman-traffic-young-vintage.jpg"
 ], [
 	name: "CO2 atmospheric sensors",
-	img: "https://images.pexels.com/photos/459670/pexels-photo-459670.jpeg"
+	img: "https://s3-eu-west-1.amazonaws.com/streamr-dev-public/product-images/test-hero-images/pexels-photo-459670.jpeg"
 ], [
 	name: "People Flow(TM) sensors",
-	img: "https://images.pexels.com/photos/275286/pexels-photo-275286.jpeg"
+	img: "https://s3-eu-west-1.amazonaws.com/streamr-dev-public/product-images/test-hero-images/pexels-photo-275286.jpeg"
 ], [
 	name: "Plastic packages recycling data stream",
-	img: "https://images.pexels.com/photos/802221/pexels-photo-802221.jpeg"
+	img: "https://s3-eu-west-1.amazonaws.com/streamr-dev-public/product-images/test-hero-images/pexels-photo-802221.jpeg"
 ], [
 	name: "Brightness of stars visible in the Northern hemisphere",
-	img: "https://images.pexels.com/photos/62385/night-stars-sky-trees-62385.jpeg"
+	img: "https://s3-eu-west-1.amazonaws.com/streamr-dev-public/product-images/test-hero-images/night-stars-sky-trees-62385.jpeg"
 ]]
 
 // deterministic pseudorandom numbers and stream sets
@@ -108,8 +108,8 @@ databaseChangeLog = {
 				column(name: "beneficiary_address", value: randomFrom(addresses))
 				column(name: "owner_address", value: randomFrom(addresses))
 				column(name: "category_id", value: randomFrom(categoryIDs))
-				column(name: "image_url", value: product.img + "?h=400")
-				column(name: "thumbnail_url", value: product.img + "?h=210")
+				column(name: "image_url", value: product.img)
+				column(name: "thumbnail_url", value: null) // note: thumbnail_url will be overwritten by 2018-05-23-fix-product-images migration
 				column(name: "minimum_subscription_in_seconds", valueNumeric: rand(1, 600))
 				column(name: "name", value: product.name)
 				column(name: "description", value: "${product.name}. " * rand(3, 7))

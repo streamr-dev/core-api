@@ -88,6 +88,7 @@ grails.project.dependency.resolution = {
 		}
 		compile('org.web3j:core:3.3.1')
 		compile('com.amazonaws:aws-java-sdk:1.11.294')
+		compile('org.imgscalr:imgscalr-lib:4.2')
 
 		runtime('mysql:mysql-connector-java:5.1.20')
 		runtime('commons-net:commons-net:3.3')
