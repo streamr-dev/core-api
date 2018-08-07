@@ -76,6 +76,8 @@ class AuthStep extends React.Component<Props> {
         if (form) {
             form.removeEventListener('change', this.onFieldChange)
         }
+
+        this.debouncedScheduleSubmit.cancel()
     }
 
     componentDidUpdate({ isProcessing: prevIsProcessing }: Props) {
