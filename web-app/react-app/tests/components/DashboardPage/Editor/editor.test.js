@@ -16,11 +16,10 @@ import {
 sinon.stub(createLink, 'default').callsFake((url) => url)
 
 describe('Editor', () => {
-    let sandbox
+    const sandbox = sinon.createSandbox()
 
     beforeEach(() => {
         global.keyId = 'key'
-        sandbox = sinon.sandbox.create()
     })
 
     afterEach(() => {
@@ -29,11 +28,8 @@ describe('Editor', () => {
     })
 
     describe('componentDidMount', () => {
-        let el
-        beforeEach(() => {
-            el = shallow(<Editor/>)
-        })
         it('must add window beforeunload listener', () => {
+            const el = shallow(<Editor/>)
             const stub = sandbox.stub(global.window, 'addEventListener')
             el.instance().onBeforeUnload = 'onBeforeUnload'
             el.instance().componentDidMount()

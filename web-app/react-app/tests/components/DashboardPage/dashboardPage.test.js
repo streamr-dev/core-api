@@ -9,12 +9,8 @@ import * as canvasActions from '../../../actions/canvas'
 import uuid from 'uuid'
 
 describe('DashboardPage', () => {
-    let sandbox
-    
-    beforeEach(() => {
-        sandbox = sinon.sandbox.create()
-    })
-    
+    const sandbox = sinon.createSandbox()
+
     afterEach(() => {
         sandbox.restore()
     })

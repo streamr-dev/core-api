@@ -9,11 +9,10 @@ describe('IntegrationKeyHandlerTableRow', () => {
 
     describe('render', () => {
         let el
-        let onDeleteSpy = sinon.spy()
         beforeEach(() => {
             el = shallow(<IntegrationKeyHandlerTableRow
                 fields={['a', 'b']}
-                onDelete={onDeleteSpy}
+                onDelete={() => {}}
                 item={{
                     id: 'testId',
                     name: 'testName',
@@ -23,9 +22,6 @@ describe('IntegrationKeyHandlerTableRow', () => {
                     }
                 }}
             />)
-        })
-        afterEach(() => {
-            onDeleteSpy.reset()
         })
 
         it('must be a tr', () => {

@@ -13,11 +13,7 @@ import {
 sinon.stub(createLink, 'default').callsFake((url) => url)
 
 describe('DashboardItem', () => {
-    let sandbox
-
-    beforeEach(() => {
-        sandbox = sinon.sandbox.create()
-    })
+    const sandbox = sinon.createSandbox()
 
     afterEach(() => {
         sandbox.restore()

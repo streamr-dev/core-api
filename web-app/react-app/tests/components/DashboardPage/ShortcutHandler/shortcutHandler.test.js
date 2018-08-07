@@ -9,12 +9,8 @@ import sinon from 'sinon'
 import {ShortcutHandler, mapDispatchToProps} from '../../../../components/DashboardPage/ShortcutHandler'
 
 describe('ShortcutHandler', () => {
-    let sandbox
-    
-    beforeEach(() => {
-        sandbox = sinon.sandbox.create()
-    })
-    
+    const sandbox = sinon.createSandbox()
+
     afterEach(() => {
         sandbox.reset()
     })

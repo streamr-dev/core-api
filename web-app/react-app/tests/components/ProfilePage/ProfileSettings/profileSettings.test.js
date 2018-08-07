@@ -12,14 +12,11 @@ import * as helpers from '../../../../utils/createLink'
 
 import {ProfileSettings, mapStateToProps, mapDispatchToProps} from '../../../../components/ProfilePage/ProfileSettings'
 
-sinon.stub(helpers, 'default')
-    .callsFake((uri) => uri)
-
 describe('ProfileSettings', () => {
-    let sandbox
+    const sandbox = sinon.createSandbox()
 
     beforeEach(() => {
-        sandbox = sinon.sandbox.create()
+        sandbox.stub(helpers, 'default').callsFake((uri) => uri)
     })
 
     afterEach(() => {

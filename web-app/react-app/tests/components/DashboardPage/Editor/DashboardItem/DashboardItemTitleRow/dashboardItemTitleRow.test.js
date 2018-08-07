@@ -11,14 +11,10 @@ import {
 } from '../../../../../../components/DashboardPage/Editor/DashboardItem/DashboardItemTitleRow'
 
 describe('DashboardItemTitleRow', () => {
-    let sandbox
-    
-    beforeEach(() => {
-        sandbox = sinon.sandbox.create()
-    })
-    
+    const sandbox = sinon.createSandbox()
+
     afterEach(() => {
-        sandbox.reset()
+        sandbox.restore()
     })
     
     describe('onRemove', () => {

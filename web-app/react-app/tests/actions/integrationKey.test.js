@@ -15,11 +15,10 @@ global.Streamr = {
 
 describe('IntegrationKey actions', () => {
     let store
-    let sandbox
+    const sandbox = sinon.createSandbox()
 
     beforeEach(() => {
         moxios.install()
-        sandbox = sinon.sandbox.create()
         store = mockStore({
             integrationKeys: [],
             error: null,
@@ -31,7 +30,6 @@ describe('IntegrationKey actions', () => {
     afterEach(() => {
         moxios.uninstall()
         store.clearActions()
-        sandbox.reset()
         sandbox.restore()
     })
 
@@ -159,16 +157,6 @@ describe('IntegrationKey actions', () => {
             sandbox.stub(web3Provider, 'default').callsFake(() => ({
                 isEnabled: () => false,
             }))
-
-            moxios.wait(() => {
-                const request = moxios.requests.mostRecent()
-                assert.equal(request.config.method, 'post')
-                assert.equal(request.url, 'api/v1/integration_keys')
-                request.respondWith({
-                    status: 200,
-                    response: request.config.data
-                })
-            })
 
             const expectedActions = [{
                 type: actions.CREATE_IDENTITY_REQUEST,

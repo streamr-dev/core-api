@@ -7,16 +7,6 @@ import sinon from 'sinon'
 import * as integrationKeyActions from '../../../../actions/integrationKey'
 
 describe('IntegrationKeyHandler', () => {
-    let sandbox
-
-    beforeEach(() => {
-        sandbox = sinon.sandbox.create()
-    })
-
-    afterEach(() => {
-        sandbox.restore()
-    })
-
     describe('componentDidMount', () => {
         it('calls props.getIntegrationKeyByService', () => {
             const spy = sinon.spy()
@@ -120,6 +110,12 @@ describe('IntegrationKeyHandler', () => {
     })
 
     describe('mapDispatchToProps', () => {
+        const sandbox = sinon.createSandbox()
+
+        afterEach(() => {
+            sandbox.restore()
+        })
+
         it('must return right kind of object with right type of attrs', () => {
             assert.equal(typeof mapDispatchToProps(), 'object')
             assert.equal(typeof mapDispatchToProps().deleteIntegrationKey, 'function')

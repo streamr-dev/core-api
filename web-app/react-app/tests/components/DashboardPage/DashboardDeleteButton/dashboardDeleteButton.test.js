@@ -9,28 +9,26 @@ import sinon from 'sinon'
 
 import {DashboardDeleteButton, mapStateToProps, mapDispatchToProps} from '../../../../components/DashboardPage/DashboardDeleteButton'
 
-sinon.stub(createLink, 'default').callsFake(url => url)
-
 describe('DashboardDeleteButton', () => {
     let dashboardDeleteButton
     let dashboard
-    let sandbox
+    const sandbox = sinon.createSandbox()
 
     beforeEach(() => {
-        sandbox = sinon.sandbox.create()
         global.window = {}
         dashboard = {
             name: 'test'
         }
+        sandbox.stub(createLink, 'default').callsFake((url) => url)
     })
 
     afterEach(() => {
-        sandbox.reset()
+        sandbox.restore()
     })
 
     describe('onDelete', () => {
         it('must call props.deleteDashboard and set the window.location', (done) => {
-            const locationMock = sinon.stub(global.window.location, 'assign')
+            const locationMock = sandbox.stub(global.window.location, 'assign')
             const mock = sandbox.stub().callsFake(() => new Promise((resolve) => {
                 resolve()
                 setTimeout(() => {
