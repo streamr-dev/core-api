@@ -97,7 +97,6 @@ class CanvasService {
 
 		Map signalPathContext = canvas.toMap().settings
 
-		canvas.startedBy = asUser
 		try {
 			signalPathService.startLocal(canvas, signalPathContext, asUser)
 		} catch (SerializationException ex) {
