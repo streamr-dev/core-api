@@ -1,0 +1,25 @@
+##
+# This file is used by aws clouddeploy to know how to update the ee nodes
+##
+version: 0.0
+os: linux
+files:
+  - source: /
+    destination: /usr/share/tomcat7/webapps/
+hooks:
+  BeforeInstall:
+    - location: /srv/codedeploy/before_install.sh
+      timeout: 300
+      runas: root
+  AfterInstall:
+    - location: /srv/codedeploy/asfter_install.sh
+      timeout: 300
+      runas: root
+  ApplicationStart:
+    - location: /srv/codedeploy/start_server.sh
+      timeout: 300
+      runas: root
+  ApplicationStop:
+    - location: /srv/codedeploy/stop_server.sh
+      timeout: 300
+      runas: root
