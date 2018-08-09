@@ -293,14 +293,13 @@ class SignalPathService {
 				 * Special handling for runner thread stop request
 				 */
 				if (req.type=="stopRequest") {
-					if (!permissionService.canWrite(req.getUser(), req.getCanvas())) {
+					if (!permissionService.canWrite(req.getUser(), req.getCanvas()) && !req.getUser()?.isAdmin()) {
 						throw new AccessControlException("stopRequest requires write permission!");
 					}
 
 					if (stopLocal(req.getCanvas())) {
 						return req
-					}
-					else {
+					} else {
 						throw new CanvasUnreachableException("Canvas could not be stopped.")
 					}
 				}

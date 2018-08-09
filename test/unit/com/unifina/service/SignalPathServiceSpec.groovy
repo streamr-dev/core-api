@@ -1,6 +1,6 @@
 package com.unifina.service
 
-import com.unifina.BeanMockingSpecification
+
 import com.unifina.domain.security.Permission
 import com.unifina.domain.security.SecRole
 import com.unifina.domain.security.SecUser
@@ -14,10 +14,14 @@ import com.unifina.signalpath.SignalPathRunner
 import com.unifina.utils.Globals
 import grails.test.mixin.Mock
 import grails.test.mixin.TestFor
+import grails.util.Holders
+import spock.lang.Specification
+
+import java.security.AccessControlException
 
 @TestFor(SignalPathService)
 @Mock([SecUser, SecRole, SecUserSecRole, Canvas, Serialization])
-class SignalPathServiceSpec extends BeanMockingSpecification {
+class SignalPathServiceSpec extends Specification {
 
 	SecUser me
 	SecUser admin
@@ -43,8 +47,13 @@ class SignalPathServiceSpec extends BeanMockingSpecification {
 		c1.save(failOnError: true)
 		assert c1.serialization.id != null
 
-		canvasService = mockBean(CanvasService, Mock(CanvasService))
+		canvasService = Mock(CanvasService)
+		Holders.getApplicationContext().beanFactory.registerSingleton("canvasService", canvasService)
 		service.servletContext = [:]
+	}
+
+	def cleanup() {
+		Holders.getApplicationContext().beanFactory.destroySingleton("canvasService")
 	}
 
 	def "clearState() clears serialized state"() {
@@ -229,6 +238,130 @@ class SignalPathServiceSpec extends BeanMockingSpecification {
 
 		expect:
 		service.runningSignalPaths == [sp1, sp2, sp3]
+	}
+
+	void "runtimeRequest() does not allow stopping canvas if user does not have write permission on canvas"() {
+		Canvas canvas = new Canvas(runner: "runner-id")
+		canvas.id = "canvas-id"
+
+		SignalPath sp = new SignalPath()
+		sp.canvas = canvas
+
+		service.permissionService = new PermissionService()
+		service.servletContext["signalPathRunners"] = [
+			"runner-id": new SignalPathRunner(sp, new Globals(), false),
+		]
+
+		def request = new RuntimeRequest(
+			[type: "stopRequest"],
+			new SecUser(),
+			canvas,
+			"canvases/canvas-id",
+			"",
+			[] as Set
+		)
+		when:
+		service.runtimeRequest(request, true)
+		then:
+		def e = thrown(AccessControlException)
+		e.message == "stopRequest requires write permission!"
+	}
+
+	void "runtimeRequest() allows stopping canvas if user has write permission on canvas"() {
+		SecUser user = new SecUser()
+		user.save(failOnError: true, validate: false)
+
+		Canvas canvas = new Canvas(runner: "runner-id")
+		canvas.id = "canvas-id"
+
+		SignalPath sp = new SignalPath()
+		sp.canvas = canvas
+
+		boolean isAborted = false
+
+		def permissionService = service.permissionService = Mock(PermissionService)
+		service.servletContext["signalPathRunners"] = [
+			"runner-id": new SignalPathRunner(sp, new Globals(), false) {
+				@Override
+				void abort() {
+					isAborted = true
+				}
+			},
+		]
+
+		def request = new RuntimeRequest(
+			[type: "stopRequest"],
+			user,
+			canvas,
+			"canvases/canvas-id",
+			"",
+			[] as Set
+		)
+
+		when:
+		def response = service.runtimeRequest(request, true)
+
+		then:
+		noExceptionThrown()
+
+		and:
+		1 * permissionService.canWrite(user, canvas) >> true
+
+		and:
+		response == [type: "stopRequest"]
+
+		and:
+		isAborted
+	}
+
+	void "runtimeRequest() allows stopping canvas if user is admin"() {
+		SecUser user = new SecUser()
+		user.save(failOnError: true, validate: false)
+
+		SecRole adminRole = new SecRole(authority: "ROLE_ADMIN")
+		adminRole.save(failOnError: true, validate: false)
+
+		SecUserSecRole secUserSecRole = new SecUserSecRole(secUser: user, secRole: adminRole)
+		secUserSecRole.save(failOnError: true, validate: false)
+
+		Canvas canvas = new Canvas(runner: "runner-id")
+		canvas.id = "canvas-id"
+
+		SignalPath sp = new SignalPath()
+		sp.canvas = canvas
+
+		boolean isAborted = false
+
+		service.permissionService = new PermissionService()
+		service.servletContext["signalPathRunners"] = [
+			"runner-id": new SignalPathRunner(sp, new Globals(), false) {
+				@Override
+				void abort() {
+					isAborted = true
+				}
+			},
+		]
+
+		def request = new RuntimeRequest(
+			[type: "stopRequest"],
+			user,
+			canvas,
+			"canvases/canvas-id",
+			"",
+			[] as Set
+		)
+
+		when:
+		def response = service.runtimeRequest(request, true)
+
+		then:
+		noExceptionThrown()
+
+		and:
+		response == [type: "stopRequest"]
+
+		and:
+		isAborted
 	}
 
 }
