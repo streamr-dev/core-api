@@ -47,6 +47,14 @@ jobs:
         region: eu-west-1
         skip_cleanup: true
         local_dir: build
+      - provider: codedeploy
+        access_key_id: AKIAI3FGPGMK3EREJJTQ
+        secret_access_key:
+          secure: VHz9wZb/IuYsfVko6q5zUzkfg2Impn9wrhfWJB5KQtHu73eozlbd6okkwl324dwS6TwB/oo7PdVyQL4ugLGvGlgbN6T4z/5KwQ/roS/z6ycKHIspeFZiiU7TYPTboOwOhWhV0ze+FmQD/E8I49J6mTOkwW2Y0rHA5awMQHz5LSWsF5heTlo3NAeQO2ynPW+Ely6HNoSP39a/d84gUJ+VTlkIivoQr7QwEe0JWrpvncMVkGvTinH+2oWeLwAkRFD2e9tu8jr9f182JfA0m6SHCJaCTp0e+3Uv4BQZ2NM/xtMgjjBDBvCZG4ZbO06+U2NwPe2nI4IQBj/23NXdTn1D4O1/7xYzk1H/mSzOYNFe7ATpfp7fOanJI6TB0Hq+jY+xHrQcD66sPPJPg8qkf8TuDRpsQqWVbHxmfQT0L3pDFajwG18kwtJ3LBwynwDcsZeGpAWQLXKYvVRVGDbKb+sZBq/qJKjDc0lJ0C/Ml6MNbJS8OP8b68nP6/sJ/N3Hbb9MQu+xhei3FCCrWqarE7fgpWT+oTHjNEC1ceUUMV+2rEb5fskSwipchHVADrIAqtiUPvNiKMp4Iom306OfmljBR85pA238AHGy1X7DOfEM0hSg9FkWWxZI/4d2GL+wfk5bhVVwlnFUrd4azco5l7W172I97PhpMqcRnaHrzpvGvj4=
+        bucket: eu-west-1-stg-streamr-vault
+        key: engine-editor/releases/ee.tar
+        application: staging-engine-editor-codedeploy
+        deployment_group: staging-engine-editor-deployment-group
       - provider: s3 #production
         access_key_id: AKIAI7LEOVJBY6ZEH44Q
         secret_access_key:
