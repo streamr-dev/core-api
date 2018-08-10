@@ -55,6 +55,7 @@ jobs:
         key: engine-editor/releases/ee.tar
         application: staging-engine-editor-codedeploy
         deployment_group: staging-engine-editor-deployment-group
+        region: eu-west-1
       - provider: s3 #production
         access_key_id: AKIAI7LEOVJBY6ZEH44Q
         secret_access_key:
