@@ -119,6 +119,7 @@ const formControl = (WrappedComponent: React.ComponentType<any>, valueFormatter?
                         error={!!error || strength === 0}
                         caution={strength === 1}
                         success={strength === 2}
+                        active={!!focused}
                     >
                         <WrappedComponent
                             {...props}
