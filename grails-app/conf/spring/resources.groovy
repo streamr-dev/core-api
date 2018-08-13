@@ -1,3 +1,4 @@
+import com.streamr.api.client.StreamrClientProvider
 import com.unifina.provider.S3FileUploadProvider
 import com.unifina.security.RedirectAppendingAuthenticationEntryPoint
 import com.unifina.utils.AjaxAwareRequestMatcher
@@ -26,5 +27,9 @@ beans = {
 	fileUploadProvider(S3FileUploadProvider,
 		(String) grailsApplication.config.streamr.fileUpload.s3.region,
 		(String) grailsApplication.config.streamr.fileUpload.s3.bucket
+	)
+
+	streamrClient(StreamrClientProvider,
+		(String) grailsApplication.config.streamr.http.api.server
 	)
 }
