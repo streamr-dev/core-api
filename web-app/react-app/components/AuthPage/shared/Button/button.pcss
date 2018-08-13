@@ -1,7 +1,7 @@
 @import '@streamr/streamr-layout/pcss/variables.pcss';
 
 .button {
-  background: #0324FF;
+  background-color: #0324FF;
   border: 0;
   border-radius: 2px;
   color: white;
@@ -17,6 +17,23 @@
   text-transform: uppercase;
   width: 100%;
   letter-spacing: 1.5px;
+  transition: 0.2s ease-in-out;
+  transition-property: background-color, opacity;
+}
+
+.button:hover {
+  background-color: #0D009A;
+}
+
+.button:active {
+  background-color: #09006D;
+  transition-duration: 0.1s;
+}
+
+.button[disabled] {
+  background-color: #0324FF;
+  cursor: default;
+  opacity: 0.5;
 }
 
 @media (--md-up) {
