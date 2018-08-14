@@ -322,7 +322,13 @@ public class CSVImporter implements Iterable<LineValues> {
 			this.format = format;
 		}
 
-
+		public Map toMap() {
+			Map map = new HashMap<String, Object>();
+			map.put("timestampColumnIndex", timestampColumnIndex);
+			map.put("timeZone", timeZone);
+			map.put("headers", headers);
+			return map;
+		}
 	}
 	
 	public class SchemaEntry {
