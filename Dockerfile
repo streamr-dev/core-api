@@ -11,6 +11,7 @@ RUN apk add --no-cache \
             && apk add --no-cache --virtual .build-deps \
                 binutils-gold \
                 curl \
+                wget \
                 g++ \
                 gcc \
                 gnupg \
@@ -19,9 +20,12 @@ RUN apk add --no-cache \
                 make \
                 python
 
-RUN wget -q -O /etc/apk/keys/sgerrand.rsa.pub https://raw.githubusercontent.com/sgerrand/alpine-pkg-glibc/master/sgerrand.rsa.pub
-RUN wget https://github.com/sgerrand/alpine-pkg-glibc/releases/download/2.27-r0/glibc-2.27-r0.apk
-RUN apk add glibc-2.27-r0.apk
+#
+ENV ALPINE_PKG_GLIBC_VERSION 2.28-r0
+
+RUN wget -q -O /etc/apk/keys/sgerrand.rsa.pub https://alpine-pkgs.sgerrand.com/sgerrand.rsa.pub
+RUN wget https://github.com/sgerrand/alpine-pkg-glibc/releases/download/$ALPINE_PKG_GLIBC_VERSION/glibc-$ALPINE_PKG_GLIBC_VERSION.apk
+RUN apk add glibc-$ALPINE_PKG_GLIBC_VERSION.apk
 
 ENV GRAILS_VERSION 2.5.6
 
