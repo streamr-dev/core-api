@@ -66,8 +66,12 @@ class AuthController {
 			return render([success: false, error: userService.beautifyErrors(cmd.errors.getAllErrors())] as JSON)
 		}
 
+		if (SecUser.findByUsername(invite.username)) {
+			response.status = 400
+			return render([success: false, error: "User already exists"] as JSON)
+		}
+
 		try {
-			// TODO: Don't respond with status code 500 if the email is already taken
 			user = userService.createUser([:] << cmd.properties << [username: invite.username])
 		} catch (UserCreationFailedException e) {
 			response.status = 500

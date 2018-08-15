@@ -208,6 +208,35 @@ class AuthControllerSpec extends Specification {
 		response.json.error.find { it.contains("on field 'password'") }
 	}
 
+	void "submitting registration for existing username fails with 400 status"() {
+		when: "username already exists"
+		def user = new SecUser(
+			id: 1,
+			username: "test@test.com",
+			name: "Test User",
+			password: springSecurityService.encodePassword("foobar123!"),
+			timezone: "Europe/Helsinki"
+		)
+		user.save(validate: false)
+		def inv = controller.signupCodeService.create(user.username)
+		inv.sent = true
+		inv.save()
+
+		params.invite = inv.code
+		params.name = "Name"
+		params.username = user.username
+		params.password = 'fooBar123!'
+		params.password2 = 'fooBar123!'
+		params.timezone = 'NoContinent/NoPlace'
+		params.tosConfirmed = true
+		request.method = 'POST'
+		controller.register()
+		then: "should fail"
+		response.status == 400
+		!response.json.success
+		response.json.error == 'User already exists'
+	}
+
 	void "submitting registration with valid invite should create user"() {
 		setup:
 		// A feed created with minimum fields required
