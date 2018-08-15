@@ -230,15 +230,6 @@ class AuthController {
 		redirect uri: postResetUrl
 	}
 
-	/**
-	 * The redirect action for Ajax requests.
-	 */
-	// TODO: is this needed?
-	def authAjax = {
-		response.setHeader 'Location', SpringSecurityUtils.securityConfig.auth.ajaxLoginFormUrl
-		response.sendError HttpServletResponse.SC_UNAUTHORIZED
-	}
-
 	def ajaxLoginForm = {
 		def config = SpringSecurityUtils.securityConfig
 		String postUrl = "${request.contextPath}${config.apf.filterProcessesUrl}"
