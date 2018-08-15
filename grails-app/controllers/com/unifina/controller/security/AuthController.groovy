@@ -37,6 +37,8 @@ class AuthController {
 		resetPassword : "POST",
 	]
 
+	static layout = 'application'
+
 	def index = {
 		return
 	}
