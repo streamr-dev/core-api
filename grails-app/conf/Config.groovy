@@ -211,7 +211,7 @@ environments {
 /**
  * API & CORS config
  */
-cors.url.pattern = ['/api/*', '/contact/send']
+cors.url.pattern = ['/api/*', '/contact/send', '/profile/*']
 streamr.apiKey.revokeNotificationStream = "revoked-api-keys"
 
 /**
