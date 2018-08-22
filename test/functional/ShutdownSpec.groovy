@@ -14,7 +14,7 @@ class ShutdownSpec extends LoginTesterAdminSpec implements CanvasMixin, Confirma
 		// Async callback signaling done is passed as last argument by executeAsyncScript
 		// https://groups.google.com/forum/#!topic/geb-user/Lpi_4lroTcQ
 		browser.driver.manage().timeouts().setScriptTimeout(20, TimeUnit.SECONDS);
-		browser.driver.executeAsyncScript("jQuery.ajax({url: Streamr.createLink('host', 'shutdown'), method: 'POST'}).done(arguments[arguments.length - 1])")
+		browser.driver.executeAsyncScript("jQuery.ajax({url: Streamr.createLink({uri: 'api/v1/nodes/shutdown'}), method: 'POST'}).done(arguments[arguments.length - 1])")
 	}
 
 	void startTaskWorker() {
