@@ -143,6 +143,8 @@ class SignalPathService {
 		canvas.requestUrl = protocol + "://" + canvas.server + ":" + port + grailsLinkGenerator.link(uri: "/api/v1/canvases/$canvas.id", absolute: false)
 		canvas.state = Canvas.State.RUNNING
 
+		canvas.startedBy = asUser
+
 		canvas.save(flush: true)
 
 		// Start the runner thread

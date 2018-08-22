@@ -211,7 +211,7 @@ environments {
 /**
  * API & CORS config
  */
-cors.url.pattern = ['/api/*', '/contact/send']
+cors.url.pattern = ['/api/*', '/contact/send', '/profile/*']
 streamr.apiKey.revokeNotificationStream = "revoked-api-keys"
 
 /**
@@ -468,6 +468,13 @@ environments {
  */
 streamr.fileUpload.s3.region = System.getProperty("streamr.fileUpload.s3.region") ?: "eu-west-1"
 streamr.fileUpload.s3.bucket = System.getProperty("streamr.fileUpload.s3.bucket") ?: "streamr-dev-public"
+
+environments {
+	production {
+		streamr.fileUpload.s3.region = System.getProperty("streamr.fileUpload.s3.region") ?: "eu-west-1"
+		streamr.fileUpload.s3.bucket = System.getProperty("streamr.fileUpload.s3.bucket") ?: "streamr-public"
+	}
+}
 
 /**
  * Signup Configs
