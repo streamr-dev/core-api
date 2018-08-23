@@ -145,6 +145,20 @@ class SignalPathServiceSpec extends BeanMockingSpecification {
 		req.getUser() == admin
 	}
 
+	def "buildRuntimeRequest() works in non-authenticated context (user is null)"() {
+		when:
+		RuntimeRequest req = service.buildRuntimeRequest([type: 'test'], "canvases/$c1.id", null)
+
+		then:
+		1 * canvasService.authorizedGetById(c1.id, null, Permission.Operation.READ) >> c1
+		req.getType() == 'test'
+		req.get("type") == 'test'
+		req.getCheckedOperations().contains(Permission.Operation.READ)
+		req.getPath() == "canvases/$c1.id"
+		req.getOriginalPath() == req.getPath()
+		req.getUser() == null
+	}
+
 	def "buildRuntimeRequest() must throw if the path is malformed"() {
 		when:
 		service.buildRuntimeRequest([type: 'test'], "foobar/$c1.id", me)
