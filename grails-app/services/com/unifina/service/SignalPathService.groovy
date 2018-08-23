@@ -31,7 +31,7 @@ import java.util.concurrent.TimeoutException
 class SignalPathService {
 
     static transactional = false
-	
+
 	def servletContext
 	def grailsApplication
 	def grailsLinkGenerator
@@ -71,7 +71,7 @@ class SignalPathService {
 			uiChannel: sp.getUiChannel().toMap()
 		]
 	}
-	
+
 	/**
 	 * Rebuilds a saved representation of a root SignalPath along with its config.
 	 * Potentially modifies the config given as parameter.
@@ -249,7 +249,7 @@ class SignalPathService {
 		// All runtime requests require at least read permission
 		CanvasService canvasService = Holders.getApplicationContext().getBean(CanvasService) // Cannot use dependency injection because of circular dependency! Do not turn into instance variable.
 		Canvas canvas
-		if (user.isAdmin()) {
+		if (user?.isAdmin()) {
 			canvas = Canvas.get(pathReader.readCanvasId())
 		} else {
 			canvas = canvasService.authorizedGetById(pathReader.readCanvasId(), user, Permission.Operation.READ)
@@ -263,9 +263,9 @@ class SignalPathService {
 	@CompileStatic
 	Map runtimeRequest(RuntimeRequest req, boolean localOnly = false) {
 		SignalPathRunner spr = getRunner(req.getCanvas().runner)
-		
+
 		log.info("runtimeRequest: $req, path: ${req.getPath()}, localOnly: $localOnly")
-		
+
 		// Give an error if the runner was not found locally although it should have been
 		if (localOnly && !spr) {
 			log.error("runtimeRequest: $req, runner not found with localOnly=true, responding with error")
@@ -285,7 +285,7 @@ class SignalPathService {
 			SignalPath sp = spr.signalPaths.find {SignalPath it->
 				it.canvas.id == req.getCanvas().id
 			}
-			
+
 			if (!sp) {
 				log.error("runtimeRequest: $req, runner found but canvas not found. This should not happen. Canvas: ${req.canvas}, path: ${req.path}")
 				throw new CanvasUnreachableException("Canvas not found in runner. This should not happen.")
@@ -318,7 +318,7 @@ class SignalPathService {
 					}
 
 					Future<RuntimeResponse> future = sp.onRequest(req, pathReader)
-					
+
 					try {
 						RuntimeResponse resp = future.get(30, TimeUnit.SECONDS)
 						log.debug("runtimeRequest: responding with $resp")
@@ -330,9 +330,9 @@ class SignalPathService {
 
 			}
 		}
-		
+
 	}
-	
+
 	void updateState(String runnerId, Canvas.State state) {
 		Canvas.executeUpdate("update Canvas c set c.state = ? where c.runner = ?", [state, runnerId])
 	}
