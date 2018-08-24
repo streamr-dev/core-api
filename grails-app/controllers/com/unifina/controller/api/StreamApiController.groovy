@@ -17,7 +17,7 @@ import org.springframework.web.multipart.MultipartFile
 class StreamApiController {
 
 	static allowedMethods = [
-	  	"setFields": "POST",
+		"setFields": "POST",
 		"uploadCsvFile": "POST",
 		"confirmCsvFileUpload": "POST"
 	]
