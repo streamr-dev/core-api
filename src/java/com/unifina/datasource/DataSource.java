@@ -1,5 +1,6 @@
 package com.unifina.datasource;
 
+import com.unifina.data.EventQueueMetrics;
 import com.unifina.data.FeedEvent;
 import com.unifina.data.IFeedRequirement;
 import com.unifina.data.IStreamRequirement;
@@ -131,6 +132,10 @@ public abstract class DataSource {
 
 	public AbstractFeed getFeedById(Long id) {
 		return feedById.get(id);
+	}
+
+	public EventQueueMetrics retrieveMetricsAndReset() {
+		return getEventQueue().retrieveMetricsAndReset();
 	}
 
 	protected abstract DataSourceEventQueue getEventQueue();

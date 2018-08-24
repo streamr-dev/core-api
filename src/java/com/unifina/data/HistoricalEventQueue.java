@@ -155,6 +155,11 @@ public class HistoricalEventQueue extends DataSourceEventQueue {
 	}
 
 	@Override
+	protected EventQueueMetrics retrieveMetricsAndReset() {
+		return new EventQueueMetrics();
+	}
+
+	@Override
 	protected void doStop() {
 		for (AbstractFeed feed : feeds) {
 			try {
