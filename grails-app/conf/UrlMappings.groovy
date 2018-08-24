@@ -25,6 +25,7 @@ class UrlMappings {
 		// API v1 url mappings
 		"/api/v1/canvases"(resources: "canvasApi", excludes: ["create", "edit"])
 		"/api/v1/canvases/$id/start"(controller: "canvasApi", action: "start")
+		"/api/v1/canvases/$id/startAsAdmin"(controller: "canvasApi", action: "startAsAdmin")
 		"/api/v1/canvases/$id/stop"(controller: "canvasApi", action: "stop")
 		"/api/v1/canvases/$resourceId/permissions"(resources: "permissionApi", excludes: ["create", "edit", "update"]) { resourceClass = Canvas }
 		"/api/v1/canvases/$resourceId/permissions/me"(controller: "permissionApi", action: "getOwnPermissions") { resourceClass = Canvas }
