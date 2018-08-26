@@ -18,7 +18,7 @@ class LoginPage extends Page {
 		forgotPasswordButton { $("a", text: contains("Forgot")) }
 		nextButton { $("button", type: "submit") }
 		rememberMeCheckbox { $("input", type: "checkbox", name: "rememberMe") }
-		error { $(".inputError_inputError") }
+		error { $(".inputError_root") }
 	}
 }
 

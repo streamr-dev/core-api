@@ -21,7 +21,7 @@ class RegisterPage extends GrailsPage {
 		timezoneFirstResult { $(".Select .Select-menu .Select-option").first() }
         nextButton { $("button", type: "submit") }
         agreeCheckbox { $("input", name: "toc") }
-		error { $(".inputError_inputError") }
+		error { $(".inputError_root") }
     }
 }
 

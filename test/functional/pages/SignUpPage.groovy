@@ -13,7 +13,7 @@ class SignUpPage extends GrailsPage {
 		email { $("input", name: "email") }
 		nextButton { $("button", type: "submit") }
 		signUpOk { $("p", text: contains("link to your email")) }
-		error { $(".inputError_inputError") }
+		error { $(".inputError_root") }
 	}
 }
 

@@ -13,7 +13,7 @@ class ResetPasswordPage extends GrailsPage {
 		password    { $("input", name: "password") }
 		password2 { $("input", name: "confirmPassword") }
 		nextButton { $("button", type: "submit") }
-		error { $(".inputError_inputError") }
+		error { $(".inputError_root") }
 	}
 
 }

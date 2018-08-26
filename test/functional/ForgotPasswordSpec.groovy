@@ -2,10 +2,20 @@ import geb.spock.GebReportingSpec
 import mixins.LoginMixin
 import pages.*
 import spock.lang.Shared
+import grails.plugin.remotecontrol.RemoteControl
+import com.unifina.domain.security.RegistrationCode
 
 class ForgotPasswordSpec extends GebReportingSpec implements LoginMixin {
 
 	@Shared newPwd = "!#¤%t3stPassword123!"
+
+	def createToken(username) {
+		return (new RemoteControl()) {
+			def registrationCode = new RegistrationCode(username: username)
+			registrationCode.save()
+			registrationCode.token
+		}
+	}
 
 	def "go to forgotPasswordPage"(){
 		setup:
@@ -43,10 +53,10 @@ class ForgotPasswordSpec extends GebReportingSpec implements LoginMixin {
 	}
 
 	def "password reset flow"() {
-		// TODO: add setup via remote-control plugin after upgrading to Grails 2.4 and remove setup from Bootstrap.groovy
+		def token = createToken(LoginTester1Spec.testerUsername)
 
 		when: "go to the URL normally found from email"
-		to ResetPasswordPage, "?t=ForgotPasswordSpec"
+		to ResetPasswordPage, "?t=${token}"
 		then: "reset password page must be shown"
 		at ResetPasswordPage
 

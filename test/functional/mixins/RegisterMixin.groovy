@@ -7,13 +7,15 @@ import pages.SignUpPage
 import pages.UserEditPage
 import pages.UserSearchPage
 import pages.UserSearchResultPage
+import com.unifina.domain.security.SignupInvite
+import grails.plugin.remotecontrol.RemoteControl
 
 /**
  * Handle registering a new user
  */
 trait RegisterMixin {
 	def registerUser(String emailAddress, String pwd, String fullName = "Test Tester", String tz = "Europe/Zurich") {
-		def code = emailAddress.replaceAll("@", "_")
+		def remote = new RemoteControl()
 
 		when: "requested to get the invitation"
 		to SignUpPage
@@ -24,6 +26,9 @@ trait RegisterMixin {
 			signUpOk.displayed
 		}
 		when: "registered"
+		def code = remote {
+			SignupInvite.findByUsername(emailAddress).code
+		}
 		to RegisterPage, "?invite=" + code
 		name = fullName
 		nextButton.click()

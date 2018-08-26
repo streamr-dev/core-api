@@ -113,6 +113,7 @@ grails.project.dependency.resolution = {
 		compile(":mail:1.0.7")
 		compile(":cache-headers:1.1.7")
 		compile(":uglify-js-minified-resources:0.1.1")
+		compile(":remote-control:2.0")
 
 		runtime(':hibernate:3.6.10.19') // or :hibernate4:4.3.10
 		runtime(":cors:1.1.8") {

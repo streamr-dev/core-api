@@ -1,4 +1,5 @@
-<html>
+<!DOCTYPE html>
+<ui:html>
 	<head>
 		<r:require module="streamr"/>
 		<webpack:cssBundle name="authPage"/>
@@ -17,4 +18,4 @@
 		<webpack:jsBundle name="commons"/>
 		<webpack:jsBundle name="authPage"/>
 	</body>
-</html>
+</ui:html>

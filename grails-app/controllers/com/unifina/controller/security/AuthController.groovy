@@ -37,7 +37,7 @@ class AuthController {
 		resetPassword : "POST",
 	]
 
-	static layout = 'application'
+	static layout = 'app'
 
 	def index = {
 		return
@@ -118,19 +118,7 @@ class AuthController {
 			return render([success: false, error: "User exists already"] as JSON)
 		}
 
-		SignupInvite invite
-		if (Environment.current == Environment.TEST) {
-			// kludge needed for RegisterSpec."registering can now be done correctly"()
-			invite = new SignupInvite(
-				username: cmd.username,
-				code: cmd.username.replaceAll("@", "_"),
-				sent: true,
-				used: false
-			)
-			invite.save()
-		} else {
-			invite = signupCodeService.create(cmd.username)
-		}
+		SignupInvite invite = signupCodeService.create(cmd.username)
 
 		invite.sent = true
 		if (!invite.save(flush: true)) {
@@ -195,9 +183,8 @@ class AuthController {
 		def registrationCode = token ? RegistrationCode.findByToken(token) : null
 
 		if (!registrationCode) {
-			flash.error = message(code: 'spring.security.ui.resetPassword.badCode')
-			redirect uri: SpringSecurityUtils.securityConfig.successHandler.defaultTargetUrl
-			return
+			response.status = 422
+			return render([success: false, error: message(code: 'spring.security.ui.resetPassword.badCode')] as JSON)
 		}
 
 		def user = SecUser.findByUsername(registrationCode.username)

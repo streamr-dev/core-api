@@ -12,7 +12,7 @@ class ForgotPasswordPage extends GrailsPage {
 	static content = {
 		username    { $("input", name: "email") }
 		sendButton { $("button", type: "submit") }
-		error { $(".inputError_inputError") }
+		error { $(".inputError_root") }
 	}
 
 }

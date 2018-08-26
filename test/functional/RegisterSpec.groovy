@@ -5,6 +5,8 @@ import geb.spock.GebReportingSpec
 import grails.util.Environment
 import spock.lang.Shared
 import spock.lang.Stepwise
+import com.unifina.service.SignupCodeService
+import grails.plugin.remotecontrol.RemoteControl
 
 @Stepwise
 class RegisterSpec extends GebReportingSpec implements LoginMixin, RegisterMixin {
@@ -12,11 +14,19 @@ class RegisterSpec extends GebReportingSpec implements LoginMixin, RegisterMixin
 	// Not a real email
 	@Shared
 	def emailAddress = "testingemail${System.currentTimeMillis()}@streamr.com"
-	@Shared
-	def code = emailAddress.replaceAll("@", "_")
 	// Just a random password
 	@Shared
 	def pwd = "Aymaw4HVa(dB42"
+
+	def createSignupCode(username) {
+		def remote = new RemoteControl()
+		return remote {
+			def invite = (new SignupCodeService()).create(username)
+			invite.sent = true
+			invite.save()
+			invite.code
+		}
+	}
 
 	def setup() {
 		logout()
@@ -79,7 +89,7 @@ class RegisterSpec extends GebReportingSpec implements LoginMixin, RegisterMixin
 
 	def "cannot register without accepting tos"() {
 		when: "registered"
-			to RegisterPage, "?invite=" + code
+			to RegisterPage, "?invite=${createSignupCode(emailAddress)}"
 			name = "Test Tester"
 			nextButton.click()
 			waitFor { password.displayed }
