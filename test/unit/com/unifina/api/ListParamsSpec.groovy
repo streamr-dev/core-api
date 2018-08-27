@@ -46,7 +46,8 @@ class ListParamsSpec extends Specification {
 			max: 1000,
 			offset: 0,
 			grantedAccess: true,
-			publicAccess: false
+			publicAccess: false,
+			includePermissions: false,
 		]
 	}
 
@@ -64,7 +65,8 @@ class ListParamsSpec extends Specification {
 			max: 50,
 			offset: 1337,
 			grantedAccess: false,
-			publicAccess: true
+			publicAccess: true,
+			includePermissions: true
 		)
 
 		expect:
@@ -75,7 +77,8 @@ class ListParamsSpec extends Specification {
 			max: 50,
 			offset: 1337,
 			grantedAccess: false,
-			publicAccess: true
+			publicAccess: true,
+			includePermissions: true
 		]
 	}
 

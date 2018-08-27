@@ -15,6 +15,7 @@ abstract class ListParams {
 	Integer offset = 0
 	Boolean grantedAccess = true
 	Boolean publicAccess = false
+	Boolean includePermissions = false
 	Permission.Operation operation = Permission.Operation.READ
 
 	static constraints = {
@@ -25,6 +26,7 @@ abstract class ListParams {
 		offset(min: 0, nullable: false)
 		grantedAccess(nullable: false)
 		publicAccess(nullable: false)
+		includePermissions(nullable: false)
 	}
 
 	protected abstract List<String> getSearchFields()
@@ -56,7 +58,8 @@ abstract class ListParams {
 			max: max,
 			offset: offset,
 			grantedAccess: grantedAccess,
-			publicAccess: publicAccess
+			publicAccess: publicAccess,
+			includePermissions: includePermissions,
 		]
 	}
 }
