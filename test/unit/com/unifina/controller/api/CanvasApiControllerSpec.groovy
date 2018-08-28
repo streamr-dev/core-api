@@ -119,6 +119,7 @@ class CanvasApiControllerSpec extends Specification {
 			assert listParams.toMap() == new CanvasListParams(name: "Foo").toMap()
 			[]
 		}
+		1 * controller.apiService.formListResult(Canvas, [], me, _) >> []
 	}
 
 	void "index() adds adhoc param to filter criteria"() {
@@ -137,6 +138,7 @@ class CanvasApiControllerSpec extends Specification {
 			assert listParams.toMap() == new CanvasListParams(adhoc: true).toMap()
 			[]
 		}
+		1 * controller.apiService.formListResult(Canvas, [], me, _) >> []
 	}
 
 	void "index() adds state param to filter criteria"() {
@@ -155,6 +157,7 @@ class CanvasApiControllerSpec extends Specification {
 			assert listParams.toMap() == new CanvasListParams(state: Canvas.State.RUNNING).toMap()
 			[]
 		}
+		1 * controller.apiService.formListResult(Canvas, [], me, _) >> []
 	}
 
 	void "show() authorizes, reconstructs and renders the canvas as json"() {
