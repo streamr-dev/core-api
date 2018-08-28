@@ -100,6 +100,7 @@ class CanvasApiControllerSpec extends Specification {
 			assert listParams.toMap() == new CanvasListParams().toMap()
 			[canvas1, canvas2, canvas3]
 		}
+		1 * controller.apiService.formListResult(Canvas, [canvas1, canvas2, canvas3], me, _) >> [canvas1, canvas2, canvas3]*.toMap()
 	}
 
 	void "index() adds name param to filter criteria"() {

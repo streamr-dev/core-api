@@ -91,6 +91,7 @@ class DashboardApiControllerSpec extends Specification {
 			assert listParams.toMap() == new DashboardListParams().toMap()
 			dashboards
 		}
+		1 * controller.apiService.formListResult(Dashboard, dashboards, me, _) >> dashboards*.toMap()
 	}
 
 	void "index() adds name param to filter criteria"() {

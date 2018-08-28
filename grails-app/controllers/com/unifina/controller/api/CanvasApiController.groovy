@@ -34,7 +34,7 @@ class CanvasApiController {
 		}
 		def results = apiService.list(Canvas, listParams, (SecUser) request.apiUser)
 		apiService.addLinkHintToHeader(listParams, results.size(), params, response)
-		render(results*.toMap() as JSON)
+		render(apiService.formListResult(Canvas, results, (SecUser) request.apiUser, listParams) as JSON)
 	}
 
 	@StreamrApi(authenticationLevel = AuthLevel.NONE)

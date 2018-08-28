@@ -28,7 +28,7 @@ class StreamApiController {
 			render(results*.toSummaryMap() as JSON)
 			return
 		}
-		render(results*.toMap() as JSON)
+		render(apiService.formListResult(Stream, results, (SecUser) request.apiUser, listParams) as JSON)
 	}
 
 	@StreamrApi

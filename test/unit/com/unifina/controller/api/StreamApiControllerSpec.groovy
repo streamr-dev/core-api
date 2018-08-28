@@ -61,6 +61,12 @@ class StreamApiControllerSpec extends Specification {
 	}
 
 	void "find all streams of logged in user"() {
+		def streamOneTwoAndThree = [
+			Stream.findById(streamOneId),
+			Stream.findById(streamTwoId),
+			Stream.findById(streamThreeId)
+		]
+
 		when:
 		request.addHeader("Authorization", "Token apiKey")
 		request.method = "GET"
@@ -74,14 +80,17 @@ class StreamApiControllerSpec extends Specification {
 		1 * apiService.list(Stream, {
 			assert it.toMap() == new StreamListParams().toMap()
 			return true
-		}, user) >> [
-		    Stream.findById(streamOneId),
-			Stream.findById(streamTwoId),
-			Stream.findById(streamThreeId)
-		]
+		}, user) >> streamOneTwoAndThree
+		1 * apiService.formListResult(Stream, streamOneTwoAndThree, user, _) >> streamOneTwoAndThree*.toMap()
 	}
 
 	void "find all streams of logged in user without config"() {
+		def streamOneTwoAndThree = [
+			Stream.findById(streamOneId),
+			Stream.findById(streamTwoId),
+			Stream.findById(streamThreeId)
+		]
+
 		when:
 		request.addHeader("Authorization", "Token apiKey")
 		request.method = "GET"
@@ -97,11 +106,7 @@ class StreamApiControllerSpec extends Specification {
 		1 * apiService.list(Stream, {
 			assert it.toMap() == new StreamListParams().toMap()
 			return true
-		}, user) >> [
-			Stream.findById(streamOneId),
-			Stream.findById(streamTwoId),
-			Stream.findById(streamThreeId)
-		]
+		}, user) >> streamOneTwoAndThree
 	}
 
 	void "find streams by name of logged in user"() {
@@ -128,6 +133,7 @@ class StreamApiControllerSpec extends Specification {
 		}, user) >> [
 			Stream.findById(streamOneId)
 		]
+		1 * apiService.formListResult(Stream, [Stream.findById(streamOneId)], user, _) >> [Stream.findById(streamOneId)]*.toMap()
 	}
 
 	void "index() adds name param to filter criteria"() {
@@ -148,6 +154,7 @@ class StreamApiControllerSpec extends Specification {
 		}, user) >> [
 			Stream.findById(streamTwoId)
 		]
+		1 * apiService.formListResult(Stream, [Stream.findById(streamTwoId)], user, _) >> [Stream.findById(streamTwoId)]*.toMap()
 	}
 
 	void "creating stream fails given invalid token"() {

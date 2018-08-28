@@ -25,7 +25,7 @@ class DashboardApiController {
 		}
 		def results = apiService.list(Dashboard, listParams, (SecUser) request.apiUser)
 		apiService.addLinkHintToHeader(listParams, results.size(), params, response)
-		render(results*.toMap() as JSON)
+		render(apiService.formListResult(Dashboard, results, (SecUser) request.apiUser, listParams) as JSON)
 	}
 
 	@StreamrApi
