@@ -133,6 +133,11 @@ class PermissionService {
 	 * Get all the user's permissions associated with a specific resource class.
 	 */
 	List<Permission> getPermissionsForUserishAndResources(Class resourceClass, Userish userish, List resources) {
+		// GORM doesn't handle empty `in` properly
+		if (resources == null || resources.isEmpty()) {
+			return []
+		}
+
 		userish = userish.resolveToUserish()
 
 		String userProp = getUserPropertyName(userish)
