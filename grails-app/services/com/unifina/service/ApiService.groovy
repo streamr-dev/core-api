@@ -68,6 +68,35 @@ class ApiService {
 	}
 
 	/**
+	 * Form response suitable for API listing endpoints. Will return domainObjects*.toMap(). When
+	 * listParams.includePermissions = true, will additionally attach user permissions to results.
+	 */
+	List<Map> formListResult(Class domainClass, List domainObjects, SecUser user, ListParams listParams) {
+		if (listParams.includePermissions) {
+			def permissions = permissionService.getPermissionsForUserishAndResources(domainClass, user, domainObjects)
+
+			Map<Object, List<Permission>> domainToPermissions = [:]
+			for (Object domainObject : domainObjects) {
+				List<Permission> permissionsOfDomainObject = []
+				for (Permission p : permissions) {
+					if (p.getDomainObjectId() == domainObject.id) {
+						permissionsOfDomainObject.add(p)
+					}
+				}
+				domainToPermissions.put(domainObject, permissionsOfDomainObject)
+			}
+
+			return domainToPermissions.collect { Object domainObject, List<Permission> perms ->
+				domainObject.toMap() + [permissions: perms*.operation*.name()]
+			}
+
+
+		} else {
+			return domainObjects*.toMap()
+		}
+	}
+
+	/**
 	 * Fetch a domain object by id while authorizing that current user has required permission
 	 */
 	@GrailsCompileStatic

@@ -80,6 +80,24 @@ class Permission {
 		anonymous(index: 'anonymous_idx')
 	}
 
+	Object getDomainObjectId() {
+		if (canvas) {
+			return canvas.id
+		} else if (dashboard) {
+			return dashboard.id
+		} else if (feed) {
+			return feed.id
+		} else if (modulePackage) {
+			return modulePackage.id
+		} else if (stream) {
+			return stream.id
+		} else if (product) {
+			return product.id
+		} else {
+			throw new IllegalStateException("Illegal state.")
+		}
+	}
+
 	/**
 	 * Client-side representation of Permission object
 	 * Resource type/id is not indicated because API caller will have it in the URL

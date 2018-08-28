@@ -129,6 +129,28 @@ class PermissionService {
 		}.toList()
 	}
 
+	/**
+	 * Get all the user's permissions associated with a specific resource class.
+	 */
+	List<Permission> getPermissionsForUserishAndResources(Class resourceClass, Userish userish, List resources) {
+		userish = userish.resolveToUserish()
+
+		String userProp = getUserPropertyName(userish)
+		String idProperty = getResourcePropertyName(resourceClass)
+
+		return Permission.withCriteria {
+			'in'(idProperty, resources)
+			or {
+				eq("anonymous", true)
+				eq(userProp, userish)
+			}
+			or {
+				isNull("endsAt")
+				gt("endsAt", new Date())
+			}
+		}
+	}
+
 	/** Overload to allow leaving out the anonymous-include-flag but including the filter */
 	@CompileStatic
 	<T> List<T> get(Class<T> resourceClass, Userish userish, Operation op, Closure resourceFilter = {}) {

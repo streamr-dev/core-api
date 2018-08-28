@@ -1,10 +1,6 @@
 package com.unifina.service
 
-import com.unifina.api.DashboardListParams
-import com.unifina.api.ListParams
-import com.unifina.api.NotFoundException
-import com.unifina.api.NotPermittedException
-import com.unifina.api.ValidationException
+import com.unifina.api.*
 import com.unifina.domain.dashboard.Dashboard
 import com.unifina.domain.security.Permission
 import com.unifina.domain.security.SecUser
@@ -12,13 +8,16 @@ import grails.test.mixin.Mock
 import grails.test.mixin.TestFor
 import grails.test.mixin.TestMixin
 import grails.test.mixin.web.ControllerUnitTestMixin
+import grails.util.Holders
 import spock.lang.Specification
 
 import javax.servlet.http.HttpServletResponse
 
+import static plastic.criteria.PlasticCriteria.mockCriteria
+
 @TestMixin(ControllerUnitTestMixin) // "as JSON" converter
 @TestFor(ApiService)
-@Mock(Dashboard)
+@Mock([Dashboard, PermissionService])
 class ApiServiceSpec extends Specification {
 
 	void "list() returns streams with share permission"() {
@@ -179,4 +178,72 @@ class ApiServiceSpec extends Specification {
 		then:
 		result == dashboard
 	}
+
+	void "formListResult() does just basic toMap() when includePermissions=false"() {
+		Dashboard d1 = new Dashboard(name: "dashboard-1")
+		Dashboard d2 = new Dashboard(name: "dashboard-2")
+		d1.id = "d1"
+		d2.id = "d2"
+		d1.save(failOnError: true)
+		d2.save(failOnError: true)
+
+
+		when:
+		def result = service.formListResult(Dashboard, [d1, d2], null, new StreamListParams())
+		then:
+		result == [
+		    [
+		        id: "d1",
+				name: "dashboard-1",
+				items: [],
+				layout: [:]
+		    ],
+			[
+				id: "d2",
+				name: "dashboard-2",
+				items: [],
+				layout: [:]
+			],
+		]
+	}
+
+	void "formListResult() attaches permission info with toMap() when includePermissions=true"() {
+		mockCriteria([Permission, Dashboard])
+		PermissionService permissionService = Holders.applicationContext.getBean(PermissionService)
+
+		SecUser me = new SecUser(username: "me@me.com").save(failOnError: true)
+		SecUser someoneElse = new SecUser(username: "someoneElse@streamr.com").save(failOnError: true)
+		Dashboard d1 = new Dashboard(name: "dashboard-1")
+		Dashboard d2 = new Dashboard(name: "dashboard-2")
+		d1.id = "d1"
+		d2.id = "d2"
+		d1.save(failOnError: true)
+		d2.save(failOnError: true)
+
+		permissionService.systemGrantAll(me, d1)
+		permissionService.systemGrant(me, d2, Permission.Operation.READ)
+		permissionService.systemGrant(someoneElse, d1)
+
+
+		when:
+		def result = service.formListResult(Dashboard, [d1, d2], me, new StreamListParams(includePermissions: true))
+		then:
+		result == [
+			[
+				id: "d1",
+				name: "dashboard-1",
+				items: [],
+				layout: [:],
+				permissions: ["READ", "WRITE", "SHARE"]
+			],
+			[
+				id: "d2",
+				name: "dashboard-2",
+				items: [],
+				layout: [:],
+				permissions: ["READ"]
+			],
+		]
+	}
+
 }
