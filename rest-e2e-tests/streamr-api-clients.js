@@ -203,6 +203,12 @@ class Streams {
             .methodAndPath('POST', 'streams')
             .withBody(body)
     }
+
+    setFields(id, body) {
+        return new StreamrApiRequest(this.options)
+            .methodAndPath('POST', `streams/${id}/fields`)
+            .withBody(body)
+    }
 }
 
 class Subscriptions {
