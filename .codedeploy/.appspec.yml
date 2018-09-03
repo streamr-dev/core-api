@@ -8,18 +8,18 @@ files:
     destination: /usr/share/tomcat7/webapps/
 hooks:
   BeforeInstall:
-    - location: /srv/codedeploy/before_install.sh
+    - location: /.codedeploy/before_install.sh
       timeout: 300
       runas: root
   AfterInstall:
-    - location: /srv/codedeploy/asfter_install.sh
+    - location: /.codedeploy/after_install.sh
       timeout: 300
       runas: root
   ApplicationStart:
-    - location: /srv/codedeploy/start_server.sh
+    - location: /.codedeploy/start_server.sh
       timeout: 300
       runas: root
   ApplicationStop:
-    - location: /srv/codedeploy/stop_server.sh
+    - location: /.codedeploy/stop_server.sh
       timeout: 300
       runas: root

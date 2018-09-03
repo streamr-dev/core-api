@@ -4,9 +4,12 @@ import com.unifina.api.CanvasListParams
 import com.unifina.api.ListParams
 import com.unifina.api.NotPermittedException
 import com.unifina.api.SaveCanvasCommand
+import com.unifina.api.ValidationException
 import com.unifina.domain.security.Key
 import com.unifina.domain.security.Permission
+import com.unifina.domain.security.SecRole
 import com.unifina.domain.security.SecUser
+import com.unifina.domain.security.SecUserSecRole
 import com.unifina.domain.signalpath.Canvas
 import com.unifina.exceptions.CanvasUnreachableException
 import com.unifina.filters.UnifinaCoreAPIFilters
@@ -22,7 +25,7 @@ import groovy.json.JsonBuilder
 import spock.lang.Specification
 
 @TestFor(CanvasApiController)
-@Mock([SecUser, Permission, Canvas, Key, UnifinaCoreAPIFilters])
+@Mock([SecUser, SecUserSecRole, Permission, Canvas, Key, UnifinaCoreAPIFilters])
 class CanvasApiControllerSpec extends Specification {
 
 	ApiService apiService
@@ -348,6 +351,90 @@ class CanvasApiControllerSpec extends Specification {
 		and: "exception must not be swallowed"
 		thrown NotPermittedException
 		1 * canvasService.authorizedGetById(canvas2.id, me, Permission.Operation.WRITE) >> {throw new NotPermittedException("mock")}
+	}
+
+	void "startAsAdmin() checks that user is admin"() {
+		when:
+		request.addHeader("Authorization", "Token myApiKey")
+		params.id = "1"
+		params.startedBy = "1"
+		request.method = "POST"
+		request.requestURI = "/api/v1/canvases/$params.id/startAsAdmin"
+		withFilters(action: "startAsAdmin") {
+			controller.startAsAdmin()
+		}
+
+		then:
+		response.status == 403
+		response.json == [
+		    code: "NOT_PERMITTED",
+			message: "Not authorized to access this endpoint"
+		]
+	}
+
+	void "startAsAdmin() requires parameter startedBy to be given"() {
+		setup:
+		def adminRole = new SecRole(authority: "ROLE_ADMIN").save(failOnError: true, validate: false)
+		new SecUserSecRole(secUser: me, secRole: adminRole).save(failOnError: true, validate: false)
+
+		when:
+		request.addHeader("Authorization", "Token myApiKey")
+		params.id = "1"
+		request.method = "POST"
+		request.requestURI = "/api/v1/canvases/$params.id/startAsAdmin"
+		withFilters(action: "startAsAdmin") {
+			controller.startAsAdmin()
+		}
+
+		then:
+		def e = thrown(ValidationException)
+		e.message.contains("nullable")
+	}
+
+	void "startAsAdmin() requires parameter startedBy to be an existing user id"() {
+		setup:
+		def adminRole = new SecRole(authority: "ROLE_ADMIN").save(failOnError: true, validate: false)
+		new SecUserSecRole(secUser: me, secRole: adminRole).save(failOnError: true, validate: false)
+
+		when:
+		request.addHeader("Authorization", "Token myApiKey")
+		params.id = "1"
+		params.startedBy = 6
+		request.method = "POST"
+		request.requestURI = "/api/v1/canvases/$params.id/startAsAdmin"
+		withFilters(action: "startAsAdmin") {
+			controller.startAsAdmin()
+		}
+
+		then:
+		def e = thrown(ValidationException)
+		e.message.contains("typeMismatch") // typeMismatch means Grails didn't find SecUser for id
+	}
+
+	void "startAsAdmin() starts a Canvas if user is admin"() {
+		setup:
+		def adminRole = new SecRole(authority: "ROLE_ADMIN").save(failOnError: true, validate: false)
+		new SecUserSecRole(secUser: me, secRole: adminRole).save(failOnError: true, validate: false)
+
+		def someoneElse = new SecUser(username: "someoneElse@streamr.com").save(failOnError: true, validate: false)
+
+		when:
+		request.addHeader("Authorization", "Token myApiKey")
+		params.id = "1"
+		params.startedBy = someoneElse.id
+		request.method = "POST"
+		request.requestURI = "/api/v1/canvases/$params.id/startAsAdmin"
+		withFilters(action: "startAsAdmin") {
+			controller.startAsAdmin()
+		}
+
+		then:
+		1 * apiService.getByIdAndThrowIfNotFound(Canvas, "1") >> canvas1
+		1 * canvasService.start(canvas1, false, someoneElse)
+
+		and:
+		response.status == 200
+		response.json?.size() > 0
 	}
 
 	void "stop() must authorize and stop a canvas"() {

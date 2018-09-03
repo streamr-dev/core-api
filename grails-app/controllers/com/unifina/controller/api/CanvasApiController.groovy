@@ -2,9 +2,12 @@ package com.unifina.controller.api
 
 import com.unifina.api.CanvasListParams
 import com.unifina.api.SaveCanvasCommand
+import com.unifina.api.StartCanvasAsAdminParams
+import com.unifina.api.ValidationException
 import com.unifina.domain.security.Permission.Operation
 import com.unifina.domain.security.SecUser
 import com.unifina.domain.signalpath.Canvas
+import com.unifina.security.AllowRole
 import com.unifina.security.AuthLevel
 import com.unifina.security.StreamrApi
 import com.unifina.service.ApiService
@@ -78,6 +81,17 @@ class CanvasApiController {
 	def start(String id) {
 		Canvas canvas = canvasService.authorizedGetById(id, request.apiUser, Operation.WRITE)
 		canvasService.start(canvas, request.JSON?.clearState ?: false, request.apiUser)
+		render canvas.toMap() as JSON
+	}
+
+	@StreamrApi(authenticationLevel = AuthLevel.USER, allowRoles = AllowRole.ADMIN)
+	def startAsAdmin(String id, StartCanvasAsAdminParams adminParams) {
+		if (!adminParams.validate()) {
+			throw new ValidationException(adminParams.errors)
+		}
+
+		Canvas canvas = apiService.getByIdAndThrowIfNotFound(Canvas, id)
+		canvasService.start(canvas, request.JSON?.clearState ?: false, adminParams.startedBy)
 		render canvas.toMap() as JSON
 	}
 
