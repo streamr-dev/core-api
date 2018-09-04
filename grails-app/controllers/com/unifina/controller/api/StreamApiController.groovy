@@ -25,6 +25,7 @@ class StreamApiController {
 	def streamService
 	def permissionService
 	def apiService
+	def csvUploadService
 
 	@StreamrApi
 	def index(StreamListParams listParams) {
@@ -105,61 +106,26 @@ class StreamApiController {
 
 	@StreamrApi
 	def uploadCsvFile(String id) {
-		def stream = apiService.authorizedGetById(Stream, id, (SecUser) request.apiUser, Operation.WRITE)
+		// Copy multipart contents to temporary file
+		MultipartFile multipartFile = request.getFile("file")
+		File temporaryFile = File.createTempFile("csv_upload_", ".csv")
+		multipartFile.transferTo(temporaryFile)
 
-		boolean deleteFileAfterwards = true
-		File temporaryFile
 		try {
-			// Copy multipart contents to temporary file
-			MultipartFile multipartFile = request.getFile("file")
-			temporaryFile = File.createTempFile("csv_upload_", ".csv")
-			multipartFile.transferTo(temporaryFile)
-
-			Map config = (stream.config ? JSON.parse(stream.config) : [:])
-			List fields = config.fields ? config.fields : []
-
-			CSVImporter csv = new CSVImporter(temporaryFile, fields, null, null, (String) request.apiUser.timezone)
-			if (csv.getSchema().timestampColumnIndex == null) {
-				deleteFileAfterwards = false
-				throw new CsvParseUnknownSchemaException(temporaryFile.getCanonicalPath(), (csv.getSchema().toMap() as JSON).toString())
-			} else {
-				Map updatedConfig = streamService.importCsv(csv, stream)
-				stream.config = (updatedConfig as JSON)
-				stream.save()
-				render(status: 204)
-			}
+			def result = csvUploadService.uploadCsvFile(temporaryFile, id, (SecUser) request.apiUser)
+			render(result as JSON)
 		} catch (Exception e) {
-			Exception rootCause = ExceptionUtils.getRootCause(e)
-			if (rootCause != null) {
-				e = rootCause
-			}
-			log.error("Failed to import file", e)
-			throw e
-		} finally {
-			if (deleteFileAfterwards && temporaryFile != null && temporaryFile.exists()) {
+			if (temporaryFile != null && temporaryFile.exists()) {
 				temporaryFile.delete()
 			}
+			throw e
 		}
 	}
 
 	@StreamrApi
-	def confirmCsvFileUpload(String id) {
-		getAuthorizedStream(id, Operation.WRITE) { stream ->
-			File file = new File(request.JSON.fileUrl)
-			List fields = stream.config ? JSON.parse(stream.config).fields : []
-			def index = Integer.parseInt(request.JSON.timestampColumnIndex)
-			def format = request.JSON.dateFormat
-			try {
-				CSVImporter csv = new CSVImporter(file, fields, index, format)
-				Map config = streamService.importCsv(csv, stream)
-				stream.config = (config as JSON)
-				stream.save()
-				render(stream.toMap() as JSON)
-			} catch (Throwable e) {
-				e = ExceptionUtils.getRootCause(e)
-				throw e
-			}
-		}
+	def confirmCsvFileUpload(String id, CsvParseInstructions instructions) {
+		Stream stream = csvUploadService.parseAndConsumeCsvFile(instructions, id, (SecUser) request.apiUser)
+		render(stream.toMap() as JSON)
 	}
 
 	private String readConfig() {

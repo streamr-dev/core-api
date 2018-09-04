@@ -165,14 +165,23 @@ describe('Streams API', () => {
             })
 
             it('responds with 500', () => {
-                assert.equal(response.status, 500)
+                assert.equal(response.status, 200)
             })
 
-            it('returns CSV_PARSE_UNKNOWN_SCHEMA and fileUrl', async () => {
+            it('returns json', async () => {
                 const json = await response.json()
-                assert.equal(json.code, 'CSV_PARSE_UNKNOWN_SCHEMA')
-                assert.isString(json.fileUrl)
-                assert.include(json.message, 'schema')
+                assert.deepEqual(Object.keys(json), ['fileId', 'schema'])
+                assert.isString(json.fileId)
+                assert.deepEqual(json.schema, {
+                    headers: [
+                        'seq',
+                        'age',
+                        'digit',
+                        'word',
+                    ],
+                    timeZone: 'UTC',
+                    timestampColumnIndex: null
+                })
             })
         })
     })
@@ -228,8 +237,8 @@ describe('Streams API', () => {
 
                 response = await Streamr.api.v1.streams
                     .confirmCsvUpload(streamId, {
-                        fileUrl: uploadJson.fileUrl,
-                        timestampColumnIndex: '0',
+                        fileId: uploadJson.fileId,
+                        timestampColumnIndex: 0,
                         dateFormat: 'unix'
                     })
                     .withAuthToken(AUTH_TOKEN)
