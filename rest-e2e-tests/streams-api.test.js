@@ -168,11 +168,92 @@ describe('Streams API', () => {
                 assert.equal(response.status, 500)
             })
 
-            it('updates stream config fields', async () => {
+            it('returns CSV_PARSE_UNKNOWN_SCHEMA and fileUrl', async () => {
                 const json = await response.json()
                 assert.equal(json.code, 'CSV_PARSE_UNKNOWN_SCHEMA')
                 assert.isString(json.fileUrl)
                 assert.include(json.message, 'schema')
+            })
+        })
+    })
+
+    describe('POST /api/v1/streams/:id/confirmCsvFileUpload', () => {
+        it('requires authentication', async () => {
+            const response = await Streamr.api.v1.streams
+                .confirmCsvUpload(streamId, {
+                    fileUrl: '',
+                    timestampColumnIndex: '0',
+                    dateFormat: 'unix'
+                })
+                .call()
+
+            await assertResponseIsError(response, 401, 'NOT_AUTHENTICATED')
+        })
+
+        it('validates existence of Stream', async () => {
+            const response = await Streamr.api.v1.streams
+                .confirmCsvUpload('non-existing-stream-id', {
+                    fileUrl: '',
+                    timestampColumnIndex: '0',
+                    dateFormat: 'unix'
+                })
+                .withAuthToken(AUTH_TOKEN)
+                .call()
+
+            await assertResponseIsError(response, 404, 'NOT_FOUND')
+        })
+
+        it('requires WRITE permission on Stream', async () => {
+            const response = await Streamr.api.v1.streams
+                .confirmCsvUpload(streamId, {
+                    fileUrl: '',
+                    timestampColumnIndex: '0',
+                    dateFormat: 'unix'
+                })
+                .withAuthToken(AUTH_TOKEN_2)
+                .call()
+
+            await assertResponseIsError(response, 403, 'FORBIDDEN', 'write')
+        })
+
+        context('when called with valid body and permissions', () => {
+            let response
+
+            before(async () => {
+                const uploadResponse = await Streamr.api.v1.streams
+                    .uploadCsvFile(streamId, fs.createReadStream('./test-data/test-csv.csv'))
+                    .withAuthToken(AUTH_TOKEN)
+                    .call()
+                const uploadJson = await uploadResponse.json()
+
+                response = await Streamr.api.v1.streams
+                    .confirmCsvUpload(streamId, {
+                        fileUrl: uploadJson.fileUrl,
+                        timestampColumnIndex: '0',
+                        dateFormat: 'unix'
+                    })
+                    .withAuthToken(AUTH_TOKEN)
+                    .call()
+            })
+
+            it('responds with 200', () => {
+                assert.equal(response.status, 200)
+            })
+
+            it('updates stream config fields', async () => {
+                const json = await response.json()
+                assert.deepEqual(json.config.fields, [{
+                    name: 'age',
+                    type: 'timestamp'
+                },
+                {
+                    name: 'digit',
+                    type: 'timestamp'
+                },
+                {
+                    name: 'word',
+                    type: 'string'
+                }])
             })
         })
     })

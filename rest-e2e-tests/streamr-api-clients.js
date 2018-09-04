@@ -218,6 +218,12 @@ class Streams {
             .methodAndPath('POST', `streams/${id}/uploadCsvFile`)
             .withRawBody(formData)
     }
+
+    confirmCsvUpload(id, body) {
+        return new StreamrApiRequest(this.options)
+            .methodAndPath('POST', `streams/${id}/confirmCsvFileUpload`)
+            .withBody(body)
+    }
 }
 
 class Subscriptions {
