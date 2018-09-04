@@ -105,39 +105,39 @@ class StreamApiController {
 
 	@StreamrApi
 	def uploadCsvFile(String id) {
-		getAuthorizedStream(id, Operation.WRITE) { Stream stream ->
-			File temp
-			boolean deleteFile = true
-			try {
-				MultipartFile file = request.getFile("file")
-				temp = File.createTempFile("csv_upload_", ".csv")
-				file.transferTo(temp)
+		def stream = apiService.authorizedGetById(Stream, id, (SecUser) request.apiUser, Operation.WRITE)
 
-				Map config = (stream.config ? JSON.parse(stream.config) : [:])
-				List fields = config.fields ? config.fields : []
-				CSVImporter csv = new CSVImporter(temp, fields, null, null, request.apiUser.timezone)
-				if (csv.getSchema().timestampColumnIndex == null) {
-					deleteFile = false
-					def e = new ApiException(500, 'CSV_PARSE_UNKNOWN_SCHEMA', 'Parsing of the file failed. Please configure the schema of the file and try again!')
-					response.setStatus(e.statusCode)
-					render([code: e.code, message: e.message, fileUrl: temp.getCanonicalPath(), schema: csv.getSchema().toMap()] as JSON)
-				} else {
-					Map updatedConfig = streamService.importCsv(csv, stream)
-					stream.config = (updatedConfig as JSON)
-					stream.save()
-					render([success: true] as JSON)
-				}
-			} catch (Exception e) {
-				Exception rootCause = ExceptionUtils.getRootCause(e)
-				if (rootCause != null) {
-					e = rootCause
-				}
-				log.error("Failed to import file", e)
-				throw e
-			} finally {
-				if (deleteFile && temp != null && temp.exists()) {
-					temp.delete()
-				}
+		boolean deleteFileAfterwards = true
+		File temporaryFile
+		try {
+			// Copy multipart contents to temporary file
+			MultipartFile multipartFile = request.getFile("file")
+			temporaryFile = File.createTempFile("csv_upload_", ".csv")
+			multipartFile.transferTo(temporaryFile)
+
+			Map config = (stream.config ? JSON.parse(stream.config) : [:])
+			List fields = config.fields ? config.fields : []
+
+			CSVImporter csv = new CSVImporter(temporaryFile, fields, null, null, (String) request.apiUser.timezone)
+			if (csv.getSchema().timestampColumnIndex == null) {
+				deleteFileAfterwards = false
+				throw new CsvParseUnknownSchemaException(temporaryFile.getCanonicalPath(), (csv.getSchema().toMap() as JSON).toString())
+			} else {
+				Map updatedConfig = streamService.importCsv(csv, stream)
+				stream.config = (updatedConfig as JSON)
+				stream.save()
+				render(status: 204)
+			}
+		} catch (Exception e) {
+			Exception rootCause = ExceptionUtils.getRootCause(e)
+			if (rootCause != null) {
+				e = rootCause
+			}
+			log.error("Failed to import file", e)
+			throw e
+		} finally {
+			if (deleteFileAfterwards && temporaryFile != null && temporaryFile.exists()) {
+				temporaryFile.delete()
 			}
 		}
 	}
