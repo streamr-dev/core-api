@@ -16,6 +16,7 @@ import javax.ws.rs.core.HttpHeaders
 class ClusterApiController {
 	static allowedMethods = [
 		index: "GET",
+		shutdown: "POST",
 	]
 
 	GrailsApplication grailsApplication
@@ -40,6 +41,21 @@ class ClusterApiController {
 		render([
 			dead: dead,
 			ghost: ghost
+		] as JSON)
+	}
+
+	@GrailsCompileStatic
+	@StreamrApi(allowRoles = AllowRole.ADMIN)
+	def shutdown() {
+		String token = request.getHeader(HttpHeaders.AUTHORIZATION)
+		List<Map<String, Object>> nodeResults = new ArrayList<Map<String, Object>>()
+
+		for (String ip : getStreamrNodes()) {
+			List<Map<String, Object>> result = client.shutdown(token, ip)
+			nodeResults.addAll(result)
+		}
+		render([
+			nodeResults: nodeResults
 		] as JSON)
 	}
 
