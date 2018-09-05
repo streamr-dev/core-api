@@ -6,11 +6,7 @@ import sinon from 'sinon'
 import IntegrationKeyHandlerTable from '../../../../../../components/ProfilePage/IntegrationKeyHandler/IntegrationKeyHandlerSegment/IntegrationKeyHandlerTable/index'
 
 describe('IntegrationKeyHandlerTable', () => {
-    let sandbox
-
-    beforeEach(() => {
-        sandbox = sinon.sandbox.create()
-    })
+    const sandbox = sinon.createSandbox()
 
     afterEach(() => {
         sandbox.restore()

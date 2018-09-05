@@ -12,11 +12,10 @@ import {
 import * as dashboardActions from '../../../../../../../../actions/dashboard'
 
 describe('ModuleInModuleList', () => {
-    let sandbox
+    const sandbox = sinon.createSandbox()
     let lastUuid
     
     beforeEach(() => {
-        sandbox = sinon.sandbox.create()
         const oldUuidV4 = uuid.v4
         sandbox.stub(uuid, 'v4').callsFake(() => {
             const id = oldUuidV4()

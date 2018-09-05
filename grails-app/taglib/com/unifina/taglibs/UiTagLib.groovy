@@ -73,6 +73,17 @@ public class UiTagLib {
 	}
 
 	/**
+	 * Renders html tag with classes indicating current browser.
+	 */
+	def html = {attrs, body->
+		out << "<!--[if IE 8]><html class='ie8'> <![endif]-->"
+		out << "<!--[if IE 9]><html class='ie9 gt-ie8'> <![endif]-->"
+		out << "<!--[if gt IE 9]><!--><html class='gt-ie8 gt-ie9 not-ie'><!--<![endif]-->"
+		out << body()
+		out << "</html>"
+	}
+
+	/**
 	 * Renders a breadcrumb. Body of the tag should be <li> list items.
 	 * @attr class Classes added to the breadcrumb
 	 */

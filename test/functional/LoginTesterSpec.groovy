@@ -1,9 +1,10 @@
 import geb.driver.CachingDriverFactory
+import mixins.LoginMixin
 import pages.CanvasPage
 import pages.LoginPage
 import geb.spock.GebReportingSpec
 
-abstract class LoginTesterSpec extends GebReportingSpec {
+abstract class LoginTesterSpec extends GebReportingSpec implements LoginMixin {
 
 	def setupSpec() {
 		resetBrowser()
@@ -11,22 +12,17 @@ abstract class LoginTesterSpec extends GebReportingSpec {
 	}
 
 	def setup() {
-		this.login()
+		loginAsTester()
 	}
 
-	def login() {
+	def loginAsTester() {
 		// First logged out to prevent the browser from remembering the user.
 		// Does nothing if not logged in.
-		go "logout"
-		at LoginPage
-		username = getTesterUsername()
-		password = getTesterPassword()
-		loginButton.click()
-		waitFor {
-			at CanvasPage
-		}
+		logout()
+		// Use tryLogin instead of login because of a naming conflict
+		login(getTesterUsername(), getTesterPassword())
 	}
 
-	abstract String getTesterUsername();
-	abstract String getTesterPassword();
+	abstract String getTesterUsername()
+	abstract String getTesterPassword()
 }

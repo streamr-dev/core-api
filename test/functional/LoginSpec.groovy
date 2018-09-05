@@ -1,42 +1,34 @@
-import pages.CanvasPage
+import mixins.LoginMixin
 import pages.LoginPage
 import geb.spock.GebReportingSpec
 
-class LoginSpec extends GebReportingSpec {
+class LoginSpec extends GebReportingSpec implements LoginMixin {
 
 	def "cannot log in with empty form"() {
 		when: "just clicked to log in"
 		to LoginPage
-		loginButton.click()
+		nextButton.click()
 		then: "should not go forward"
 		waitFor {
 			at LoginPage
-			$("p.login-failed-message").displayed
+			error.displayed
 		}
 	}
 
-	def "cannot log in with false information"() {
+	def "cannot log in with false credentials"() {
 		when: "given false username and password"
 		to LoginPage
-		username = "falseUserName"
-		password = "falsePassword"
-		loginButton.click()
+		tryLogin("false@user.name", "falsePassword")
 		then: "should not go forward"
 		waitFor {
 			at LoginPage
-			$("p.login-failed-message").displayed
+			error.displayed
 		}
 	}
 
 	def "basic login works"(){
-		when: "logged in"
+		expect: "logged in"
 		to LoginPage
-		username = "tester1@streamr.com"
-		password = "tester1TESTER1"
-		loginButton.click()
-		then:
-		waitFor {
-			at CanvasPage
-		}
+		loginTester1()
 	}
 }

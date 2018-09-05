@@ -1,5 +1,4 @@
 
-
 class LoginTester2Spec extends LoginTesterSpec {
 
 	public static String testerUsername = "tester2@streamr.com"

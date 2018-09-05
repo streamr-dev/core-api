@@ -8,9 +8,9 @@ class MockMailService {
 	def subject
 	def body
 	def html
-	
+
 	public MockMailService() {
-	
+
 	}
 
 	def sendMail(Closure c) {

@@ -1,78 +1,102 @@
 import geb.spock.GebReportingSpec
+import mixins.LoginMixin
 import pages.*
+import spock.lang.Shared
+import grails.plugin.remotecontrol.RemoteControl
+import com.unifina.domain.security.RegistrationCode
 
-class ForgotPasswordSpec extends GebReportingSpec {
-	
-	def "go to forgotPasswordPage"(){
-		to LoginPage
-		
-		when: "Clicked 'Forgot password'"
-			$(".forgot").click()
-		then: "ForgotPasswordPage opened"
-			waitFor {
-				at ForgotPasswordPage
-			}
+class ForgotPasswordSpec extends GebReportingSpec implements LoginMixin {
+
+	@Shared newPwd = "!#¤%t3stPassword123!"
+
+	def createToken(username) {
+		return (new RemoteControl()) {
+			def registrationCode = new RegistrationCode(username: username)
+			registrationCode.save()
+			registrationCode.token
+		}
 	}
-	
-	def "password reset flow"() {
-		// TODO: add setup via remote-control plugin after upgrading to Grails 2.4 and remove setup from Bootstrap.groovy
-			
+
+	def "go to forgotPasswordPage"(){
+		setup:
+		to LoginPage
+		username = "random@user.name"
+		nextButton.click()
+
+		when: "Clicked 'Forgot password'"
+		waitFor {
+			forgotPasswordButton.displayed
+			forgotPasswordButton.click()
+		}
+		then: "ForgotPasswordPage opened"
+		at ForgotPasswordPage
+	}
+
+	def "weak password is not accepted"() {
 		when: "go to the URL normally found from email"
-			go "register/resetPassword?t=ForgotPasswordSpec"
-		then: "reset password page must be shown"
-			at ResetPasswordPage
-			
+		to ResetPasswordPage, "?t=ForgotPasswordSpec"
+		then: "the password field must be enabled"
+		at ResetPasswordPage
+		waitFor {
+			password.displayed
+			!password.@disabled
+		}
+
 		when: "a weak password is given"
-			password << "weakPassword"
-			password2 << "weakPassword"
-			resetButton.click()
+		password << "weakPassword"
+		nextButton.click()
 		then: "it must not be accepted"
-			waitFor {
-				at ResetPasswordPage
-			}
-			
+		waitFor {
+			at ResetPasswordPage
+			error.displayed
+		}
+	}
+
+	def "password reset flow"() {
+		def token = createToken(LoginTester1Spec.testerUsername)
+
+		when: "go to the URL normally found from email"
+		to ResetPasswordPage, "?t=${token}"
+		then: "reset password page must be shown"
+		at ResetPasswordPage
+
 		when: "an acceptable password is given"
-			password << "!#¤%t3stPassword123!"
-			password2 << "!#¤%t3stPassword123!"
-			resetButton.click()
+		password << newPwd
+		waitFor { nextButton.click() }
+		waitFor { password2.displayed }
+		password2 << newPwd
+		waitFor { nextButton.click() }
 		then: "should log in"
-			waitFor(10) {
-				at CanvasPage
-			}
-		
+		waitFor {
+			at CanvasPage
+		}
+
 		when: "logged out"
-			navbar.navSettingsLink.click()
-			navbar.navLogoutLink.click()
+		navbar.navSettingsLink.click()
+		navbar.navLogoutLink.click()
 		then: "loginPage visible"
-			waitFor {
-				at LoginPage
-			}
-			
-		when: "logged in with new password"
-			username = "tester1@streamr.com"
-			password = "!#¤%t3stPassword123!"
-			loginButton.click()
-		then: "should log in normally"
-			waitFor {
-				at CanvasPage
-			}
-			
+		waitFor {
+			at LoginPage
+		}
+
+		expect: "logged in with new password"
+		login(LoginTester1Spec.testerUsername, newPwd)
+
 		when: "Changing password (back to original)"
-			navbar.navSettingsLink.click()
-			navbar.navProfileLink.click()
-			waitFor {
-				at ProfileEditPage
-			}
-			changePassword.click()
-			waitFor { at ChangePasswordPage }
-			currentPassword << "!#¤%t3stPassword123!"
-			newPassword << "tester1TESTER1"
-			newPasswordAgain << "tester1TESTER1"
-			changePassword.click()
+		to ProfileEditPage
+		waitFor {
+			changePasswordButton.displayed
+			changePasswordButton.click()
+		}
+		waitFor { at ChangePasswordPage }
+		currentPassword << newPwd
+		newPassword << LoginTester1Spec.testerPassword
+		newPasswordAgain << LoginTester1Spec.testerPassword
+		changePasswordButton.click()
 		then: "Must go back to profile edit page and show info message"
-			waitFor {
-				at ProfileEditPage
-				$(".alert-info").size()>0
-			}
+		waitFor {
+			at ProfileEditPage
+			$(".alert-info").size() > 0
+		}
 	}
 }

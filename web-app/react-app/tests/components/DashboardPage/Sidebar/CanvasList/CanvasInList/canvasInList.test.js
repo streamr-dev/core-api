@@ -6,12 +6,8 @@ import sinon from 'sinon'
 import CanvasInList from '../../../../../../components/DashboardPage/Sidebar/CanvasList/CanvasInList'
 
 describe('CanvasInList', () => {
-    let sandbox
-    
-    beforeEach(() => {
-        sandbox = sinon.sandbox.create()
-    })
-    
+    const sandbox = sinon.createSandbox()
+
     afterEach(() => {
         sandbox.restore()
     })

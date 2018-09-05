@@ -1,0 +1,45 @@
+.root {
+  /* … */
+}
+
+.label {
+  display: flex;
+  cursor: pointer;
+  font-size: 0.75em;
+  margin: 0;
+}
+
+.checkbox {
+  border: 0;
+  flex-shrink: 0;
+  margin-right: 0.25em;
+  width: 22px;
+  height: 19px;
+  top: 2px;
+  position: relative;
+  background: url('../../../../../images/checkbox.svg');
+  cursor: pointer;
+  appearance: none;
+
+  &:focus {
+    outline: none;
+  }
+}
+
+.checkbox::after {
+  content: ' ';
+  display: block;
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  opacity: 0;
+  transition: opacity;
+  transition-duration: 0.1s;
+  background: url('../../../../../images/checkbox-checked.svg');
+}
+
+.checkbox:checked::after {
+  opacity: 1;
+}

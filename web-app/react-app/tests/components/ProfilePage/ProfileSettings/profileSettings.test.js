@@ -8,18 +8,15 @@ const momentStub = sinon.stub(moment.tz, 'names')
     .callsFake(() => ['a', 'b', 'c'])
 
 import * as userActions from '../../../../actions/user'
-import * as helpers from '../../../../helpers/createLink'
+import * as helpers from '../../../../utils/createLink'
 
 import {ProfileSettings, mapStateToProps, mapDispatchToProps} from '../../../../components/ProfilePage/ProfileSettings'
 
-sinon.stub(helpers, 'default')
-    .callsFake((uri) => uri)
-
 describe('ProfileSettings', () => {
-    let sandbox
+    const sandbox = sinon.createSandbox()
 
     beforeEach(() => {
-        sandbox = sinon.sandbox.create()
+        sandbox.stub(helpers, 'default').callsFake((uri) => uri)
     })
 
     afterEach(() => {

@@ -4,7 +4,7 @@ import React, {Component} from 'react'
 import {connect} from 'react-redux'
 import moment from 'moment-timezone'
 import Select from 'react-select'
-import createLink from '../../../helpers/createLink'
+import createLink from '../../../utils/createLink'
 import {Panel, Form, FormControl, FormGroup, ControlLabel, InputGroup, Button} from 'react-bootstrap'
 import 'react-select/dist/react-select.css'
 

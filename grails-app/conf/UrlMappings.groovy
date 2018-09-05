@@ -20,6 +20,11 @@ class UrlMappings {
 		"403"(controller: "login", action: "denied")
 		"500"(controller: "error", action: "index", exception: Exception)
 
+		"/login/auth"(controller: "auth", action: "index")
+		"/login/full"(controller: "auth", action: "fullAuth")
+		"/login/$action**?"(controller: "auth", action: "index")
+		"/register/$action**?"(controller: "auth", action: "index")
+
 		"/webcomponents/$view"(controller: "webcomponents", action: "index")
 
 		// API v1 url mappings

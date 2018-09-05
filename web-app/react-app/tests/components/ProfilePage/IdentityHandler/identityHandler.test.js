@@ -6,11 +6,7 @@ import * as actions from '../../../../actions/integrationKey'
 import {IdentityHandler, mapStateToProps, mapDispatchToProps} from '../../../../components/ProfilePage/IdentityHandler'
 
 describe('IdentityHandler', () => {
-    let sandbox
-
-    beforeEach(() => {
-        sandbox = sinon.sandbox.create()
-    })
+    const sandbox = sinon.createSandbox()
 
     afterEach(() => {
         sandbox.restore()

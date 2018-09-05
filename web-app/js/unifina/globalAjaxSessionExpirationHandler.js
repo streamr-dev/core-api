@@ -13,8 +13,10 @@
 
 	function isSessionActive(callback) {
 		$.ajax({
-			url: Streamr.createLink({ uri: 'api/v1/users/me'}),
-			global: false
+			url: Streamr.createLink({
+				uri: 'api/v1/users/me',
+			}),
+			global: false,
 		}).fail(function() {
 			callback(false)
 		}).done(function(data) {
@@ -24,7 +26,7 @@
 
 	function showLogin() {
 		if (!$("#loginForm").length) {
-			$.get(Streamr.createLink("login","loginForm"), function(data) {
+			$.get(Streamr.createLink("auth", "ajaxLoginForm"), function(data) {
 				var dialog = bootbox.dialog({
 					closeButton: false,
 					message: data

@@ -1,74 +1,76 @@
+import mixins.LoginMixin
 import pages.CanvasPage
 import pages.LoginPage
 import pages.ProfileEditPage
 import geb.spock.GebReportingSpec
-import org.openqa.selenium.Cookie
 import spock.lang.Shared
+import spock.lang.Stepwise
 
-class RememberMeSpec extends GebReportingSpec {
-	
-	@Shared cookieName = "streamr_remember_me"
-	@Shared cookieValue = "initial"
-	
+@Stepwise
+class RememberMeSpec extends GebReportingSpec implements LoginMixin {
+
+	@Shared sessionCookieName = "JSESSIONID"
+	@Shared rememberMeCookieName = "streamr_remember_me"
+	@Shared rememberMeCookieValue = "initial"
+
 	// NB! These tests must be executed in order
-	
-	def "log in with checking remember me"(){
-		when: "logged in and clicked remember me"
-		to LoginPage
-		then: "the remember me checkbox is visible"
-		rememberMeCheckbox.displayed
-		when: "logged in and checked the remember me"
-		username = "tester1@streamr.com"
-		password = "tester1TESTER1"
-		rememberMeCheckbox.click()
-		loginButton.click()
-		at CanvasPage
-		cookieValue = driver.manage().getCookieNamed(cookieName).getValue()
-		then: "at canvaspage" 
-		at CanvasPage
+
+	def setup() {
+		driver.manage().deleteAllCookies()
+		logout()
 	}
-	
-	def "the browser should remember me"(){
-		Cookie cookie = new Cookie(cookieName, cookieValue)
-		driver.manage().addCookie(cookie)
-		expect: "should be able to go straight to the canvas page"
-		to CanvasPage
+
+	def loginAndSaveCookie() {
+		login(LoginTester1Spec.testerUsername, LoginTester1Spec.testerPassword, true)
+		rememberMeCookieValue = driver.manage().getCookieNamed(rememberMeCookieName).getValue()
+		// Remove the session cookie
+		driver.manage().deleteCookie(driver.manage().getCookieNamed(sessionCookieName))
 	}
-	
+
+	def "rememberMe works"(){
+		setup: "logged in with remember me"
+		loginAndSaveCookie()
+
+		when: "go to canvas page"
+		go CanvasPage.url
+		then: "the browser still remembers me"
+		waitFor { at CanvasPage }
+	}
+
 	def "the profile page still needs logging in if the user has logged in to the app with a cookie"(){
-		Cookie cookie = new Cookie(cookieName, cookieValue)
-		driver.manage().addCookie(cookie)
+		setup:
+		loginAndSaveCookie()
+
 		when: "go to the profileEditPage"
 		to CanvasPage
-		navbar.navSettingsLink.click()
-		navbar.navProfileLink.click()
+		go ProfileEditPage.url
 		then: "require logging in"
-		at LoginPage
+		waitFor {
+			at LoginPage
+		}
 	}
-	
+
 	def "once the user has logged in to the profile page, a new logging isn't required"(){
-		Cookie cookie = new Cookie(cookieName, cookieValue)
-		driver.manage().addCookie(cookie)
+		setup:
+		loginAndSaveCookie()
+
 		when: "first try go to the profileEditPage"
 		to CanvasPage
-		navbar.navSettingsLink.click()
-		navbar.navProfileLink.click()
+		go ProfileEditPage.url
 		then: "require logging in"
-		at LoginPage
+		waitFor {
+			at LoginPage
+		}
 		when: "log in"
-		username = "tester1@streamr.com"
-		password = "tester1TESTER1"
-		loginButton.click()
+		tryLogin(LoginTester1Spec.testerUsername, LoginTester1Spec.testerPassword)
 		then: "go to the profileEditPage"
 		at ProfileEditPage
 		when: "go to the canvasPage and back"
 		to CanvasPage
-		navbar.navSettingsLink.click()
-		navbar.navProfileLink.click()
+		to ProfileEditPage
 		then: "go straight to the profileEditPage"
 		at ProfileEditPage
 	}
-	
-	
+
+
 }
-		

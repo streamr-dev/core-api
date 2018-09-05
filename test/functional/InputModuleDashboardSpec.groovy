@@ -9,7 +9,7 @@ class InputModuleDashboardSpec extends LoginTester1Spec implements CanvasMixin, 
 	static String dashboardSpecName = "InputModuleDashboardSpec" + System.currentTimeMillis()
 
 	def setupSpec() {
-		super.login()
+		super.loginAsTester()
 		waitFor { at CanvasPage }
 
 		// Go start the RunningSignalPath related to this spec
@@ -53,7 +53,7 @@ class InputModuleDashboardSpec extends LoginTester1Spec implements CanvasMixin, 
 
 	def cleanupSpec() {
 		// Delete the dashboard
-		super.login()
+		super.loginAsTester()
 		deleteDashboard(dashboardSpecName)
 
 		// Stop the canvas
@@ -134,7 +134,7 @@ class InputModuleDashboardSpec extends LoginTester1Spec implements CanvasMixin, 
 
 		navbar.navSettingsLink.click()
 		navbar.navLogoutLink.click()
-		super.login()
+		super.loginAsTester()
 		openDashboard()
 
 		then: "Switcher remembers its state"

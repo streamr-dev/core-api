@@ -5,7 +5,7 @@ import moxios from 'moxios'
 import axios from 'axios'
 import sinon from 'sinon'
 
-import * as helpers from '../../helpers/createLink'
+import * as helpers from '../../utils/createLink'
 
 import * as actions from '../../actions/user'
 

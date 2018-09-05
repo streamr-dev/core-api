@@ -1,5 +1,4 @@
 
-
 class LoginTesterAdminSpec extends LoginTesterSpec {
 
 	public static String testerUsername = "tester-admin@streamr.com"

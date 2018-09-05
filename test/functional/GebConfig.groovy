@@ -7,6 +7,7 @@
 import org.openqa.selenium.Dimension
 import org.openqa.selenium.chrome.ChromeDriver
 import org.openqa.selenium.chrome.ChromeOptions
+import grails.util.BuildSettings
 
 def env = System.getenv()
 def inJenkins = env['BUILD_NUMBER'] != null
@@ -18,6 +19,8 @@ boolean headless = env['HEADLESS'] != null
 reportsDir = new File("target/test-reports/geb")
 baseUrl = "http://${sutHost}:${sutPort}/streamr-core/"
 println("GebConfig ${baseUrl} (headless=${headless})")
+
+System.setProperty(BuildSettings.FUNCTIONAL_BASE_URL_PROPERTY, baseUrl)
 
 driver = {
 	def options = new ChromeOptions()

@@ -1,13 +1,14 @@
-import LoginTesterAdminSpec
+import mixins.LoginMixin
 import pages.*
+import spock.lang.Shared
 import spock.lang.Stepwise
 
 // The order of the tests is important
 @Stepwise
-class UserEditAdminSpec extends LoginTesterAdminSpec {
+class UserEditAdminSpec extends LoginTesterAdminSpec implements LoginMixin {
 
-	String specUserName = "user-edit-admin-spec@streamr.com"
-	String specUserPwd = "user-edit-admin-spec"
+	@Shared specUserName = "user-edit-admin-spec@streamr.com"
+	@Shared specUserPwd = "user-edit-admin-spec"
 
 	private void goChangeUserPassword(String userNameToChange, String newPassword) {
 		to UserSearchPage
@@ -26,14 +27,6 @@ class UserEditAdminSpec extends LoginTesterAdminSpec {
 		waitFor {
 			at UserEditPage
 		}
-	}
-
-	private void loginAs(String loginUsername, String loginPassword) {
-		waitFor { at LoginPage }
-		username = loginUsername
-		password = loginPassword
-		loginButton.click()
-		waitFor { at CanvasPage }
 	}
 
 	def setup(){
@@ -60,7 +53,7 @@ class UserEditAdminSpec extends LoginTesterAdminSpec {
 		createButton.click()
 
 		then:
-		at UserSearchPage
+		waitFor { at UserSearchPage }
 	}
 
 	def "the just created user can be searched"(){
@@ -79,14 +72,14 @@ class UserEditAdminSpec extends LoginTesterAdminSpec {
 
 		when: "logout and relogin with new password"
 			logoutLink.click()
-			loginAs(specUserName, "test-pwd")
+			login(specUserName, "test-pwd")
 		then: "successful login"
 			waitFor { at CanvasPage }
 
 		when: "log out"
 			navbar.navSettingsLink.click()
 			navbar.navLogoutLink.click()
-			loginAs(testerUsername, testerPassword)
+			login(testerUsername, testerPassword)
 		then: "successful login"
 			waitFor { at CanvasPage }
 			// Change back the user password

@@ -111,8 +111,10 @@ class ShareSpec extends LoginTester1Spec implements CanvasMixin, DashboardMixin,
 		scrollToAndClickShareButton("ShareSpec")
 		then:
 		waitFor { $(".sharing-dialog") }
-		waitFor { $(".new-user-field").displayed }
-		$(".access-row").size() == 1
+		waitFor {
+			$(".new-user-field").displayed
+			$(".access-row").size() == 1
+		}
 
 		when: "add invalid email"
 		feedTextInput("foobar")

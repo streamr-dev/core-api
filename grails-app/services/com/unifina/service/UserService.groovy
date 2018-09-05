@@ -6,14 +6,18 @@ import com.unifina.domain.security.SecRole
 import com.unifina.domain.security.SecUser
 import com.unifina.domain.signalpath.ModulePackage
 import com.unifina.exceptions.UserCreationFailedException
+import grails.plugin.springsecurity.SpringSecurityService
+import org.codehaus.groovy.grails.commons.GrailsApplication
+import org.springframework.context.MessageSource
 import org.springframework.validation.FieldError
-import org.springframework.validation.ObjectError
 
 class UserService {
 
-	def grailsApplication
-	def springSecurityService
-	def permissionService
+	MessageSource messageSource
+
+	GrailsApplication grailsApplication
+	SpringSecurityService springSecurityService
+	PermissionService permissionService
 
 	def createUser(Map properties, List<SecRole> roles = null, List<Feed> feeds = null, List<ModulePackage> packages = null) {
 		def secConf = grailsApplication.config.grails.plugin.springsecurity
@@ -21,9 +25,11 @@ class UserService {
 		SecUser user = cl.loadClass(secConf.userLookup.userDomainClassName).newInstance(properties)
 
 		// Encode the password
-		if (user.password == null) { throw new UserCreationFailedException("The password is empty!") }
+		if (user.password == null) {
+			throw new UserCreationFailedException("The password is empty!")
+		}
 		user.password = springSecurityService.encodePassword(user.password)
-		
+
 		// When created, the account is always enabled
 		user.enabled = true
 
@@ -98,8 +104,8 @@ class UserService {
 
 	def passwordValidator = { String password, command ->
 		// Check password score
-		if (command.pwdStrength < 1) {
-			return ['command.password.error.strength']
+		if (command.password != null && command.password.size() < 8) {
+			return ['command.password.error.length', 8]
 		}
 	}
 
@@ -135,7 +141,9 @@ class UserService {
 		toBeCensoredList.each {
 			List arguments = Arrays.asList(it.getArguments())
 			int index = arguments.indexOf(it.getRejectedValue())
-			arguments.set(index, "***")
+			if (index >= 0 && index < arguments.size()) {
+				arguments.set(index, "***")
+			}
 			FieldError fieldError = new FieldError(
 				it.getObjectName(), it.getField(), "***", it.isBindingFailure(),
 				it.getCodes(), arguments.toArray(), it.getDefaultMessage()
@@ -143,5 +151,11 @@ class UserService {
 			finalErrors.add(fieldError)
 		}
 		return finalErrors
+	}
+
+	List beautifyErrors(List<FieldError> errorList) {
+		checkErrors(errorList).collect { FieldError it ->
+			messageSource.getMessage(it, null)
+		}
 	}
 }

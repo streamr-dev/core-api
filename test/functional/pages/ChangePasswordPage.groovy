@@ -13,9 +13,10 @@ class ChangePasswordPage extends GrailsPage {
 		currentPassword { $("#currentpassword") }
 		newPassword { $("#password") }
 		newPasswordAgain { $("#password2") }
-		
-		changePassword { $("#submit") }
+
+		alert { $(".alert") }
+		error { $(".text-danger li") }
+
+		changePasswordButton { $("#submit") }
 	}
 }
-
-
