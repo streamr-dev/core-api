@@ -256,4 +256,61 @@ class ClusterApiControllerSpec extends Specification {
 		response.json.multipleMachines.size() == 2
 	}
 */
+
+	void "test shutdown"() {
+		setup:
+		List<Map<String, Object>> shutdownResult1 = new ArrayList<HashMap<String, Object>>()
+		Map<String, Object> result1 = new HashMap<String, Object>()
+		result1.put("id", "JRlZpFgdS3-uH4gMh8RgfQxBHz7E__T_uAbj9RxiFkZQ")
+		result1.put("name", "Tram Demo")
+		result1.put("created", "2018-09-04T13:08:55Z")
+		result1.put("updated", "2018-09-04T13:19:57Z")
+		result1.put("adhoc", false)
+		result1.put("state", "RUNNING")
+		result1.put("hasExports", false)
+		result1.put("serialized", false)
+		shutdownResult1.add(result1)
+
+		List<Map<String, Object>> shutdownResult2 = new ArrayList<HashMap<String, Object>>()
+		Map<String, Object> result2 = new HashMap<String, Object>()
+		result2.put("id", "XXXXXFgdS3-uH4gMh8RgfQxBHz7E__T_uAbj9RxXXXXX")
+		result2.put("name", "Tram Demo 2")
+		result2.put("created", "2018-09-04T13:08:55Z")
+		result2.put("updated", "2018-09-04T13:19:57Z")
+		result2.put("adhoc", false)
+		result2.put("state", "RUNNING")
+		result2.put("hasExports", false)
+		result2.put("serialized", false)
+		shutdownResult2.add(result1)
+
+		when:
+		request.addHeader("Authorization", apiKey)
+		request.method = "POST"
+		withFilters(action: "shutdown") {
+			controller.shutdown()
+		}
+
+		then:
+		1 * controller.client.shutdown(apiKey, "10.0.0.5") >> shutdownResult1
+		1 * controller.client.shutdown(apiKey, "10.0.0.6") >> shutdownResult2
+		0 * controller.client._
+		response.status == 200
+		response.json.nodeResults.size() == 2
+	}
+
+	void "test shutdown noop"() {
+		when:
+		request.addHeader("Authorization", apiKey)
+		request.method = "POST"
+		withFilters(action: "shutdown") {
+			controller.shutdown()
+		}
+
+		then:
+		1 * controller.client.shutdown(apiKey, "10.0.0.5") >> new ArrayList<HashMap<String, Object>>()
+		1 * controller.client.shutdown(apiKey, "10.0.0.6") >> new ArrayList<HashMap<String, Object>>()
+		0 * controller.client._
+		response.status == 200
+		response.json.nodeResults.size() == 0
+	}
 }
