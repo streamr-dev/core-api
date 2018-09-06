@@ -89,4 +89,8 @@ class Canvas {
 			uiChannel: map?.uiChannel,
 		]
 	}
+	@Override
+	String toString() {
+		return String.format("Canvas{id=%s}", id)
+	}
 }

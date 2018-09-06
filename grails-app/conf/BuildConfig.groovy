@@ -89,6 +89,11 @@ grails.project.dependency.resolution = {
 		compile('org.web3j:core:3.3.1')
 		compile('com.amazonaws:aws-java-sdk:1.11.294')
 		compile('org.imgscalr:imgscalr-lib:4.2')
+		compile('org.glassfish.jersey.core:jersey-client:2.27')
+		compile('org.glassfish.jersey.inject:jersey-hk2:2.27')
+		compile('org.glassfish.jersey.media:jersey-media-json-jackson:2.27')
+		compile('com.fasterxml.jackson.core:jackson-databind:2.9.6')
+		compile('com.fasterxml.jackson.core:jackson-annotations:2.9.6')
 
 		runtime('mysql:mysql-connector-java:5.1.20')
 		runtime('commons-net:commons-net:3.3')
