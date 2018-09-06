@@ -412,6 +412,8 @@
           <root url="jar://$MAVEN_REPOSITORY$/org/springframework/security/spring-security-web/3.2.9.RELEASE/spring-security-web-3.2.9.RELEASE.jar!/" />
           <root url="jar://$MAVEN_REPOSITORY$/org/springframework/security/spring-security-core/3.2.9.RELEASE/spring-security-core-3.2.9.RELEASE.jar!/" />
           <root url="jar://$MAVEN_REPOSITORY$/org/imgscalr/imgscalr-lib/4.2/imgscalr-lib-4.2.jar!/" />
+          <root url="jar://$MAVEN_REPOSITORY$/io/remotecontrol/remote-transport-http/0.7/remote-transport-http-0.7.jar!/" />
+          <root url="jar://$MAVEN_REPOSITORY$/io/remotecontrol/remote-core/0.7/remote-core-0.7.jar!/" />
         </CLASSES>
         <JAVADOC />
         <SOURCES>
