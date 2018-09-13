@@ -2,6 +2,7 @@ package com.unifina.data;
 
 import com.unifina.datasource.DataSource;
 import com.unifina.datasource.DataSourceEventQueue;
+import com.unifina.exceptions.StreamFieldChangedException;
 import com.unifina.signalpath.StopRequest;
 import com.unifina.utils.Globals;
 import org.apache.log4j.Logger;
@@ -76,7 +77,8 @@ public class RealtimeEventQueue extends DataSourceEventQueue implements IEventRe
 			event.deliver();
 
 			return true;
-
+		} catch (StreamFieldChangedException e) {
+			throw e;
 		} catch (Exception e) {
 			// Catch any Exception to prevent crashing the whole thing
 			log.error("Exception while processing event: "+event.toString(), e);
