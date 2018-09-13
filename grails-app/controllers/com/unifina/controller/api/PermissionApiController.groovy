@@ -19,7 +19,7 @@ class PermissionApiController {
 
 	PermissionService permissionService
 	SignupCodeService signupCodeService
-	MailService mailService
+	def mailService
 
 	/**
 	 * Execute a Controller action using a domain class with access control ("resource")
@@ -109,7 +109,7 @@ class PermissionApiController {
 						to invite.username
 						subject grailsApplication.config.unifina.email.shareInvite.subject.replace("%USER%", sharer)
 						html g.render(
-								template: "/register/email_share_invite",
+								template: "/auth/email_share_invite",
 								model: [invite: invite, sharer: sharer],
 								plugin: "unifina-core"
 						)

@@ -9,8 +9,10 @@ import com.unifina.domain.security.Permission.Operation
 import com.unifina.domain.security.SecUser
 import com.unifina.domain.signalpath.Canvas
 import com.unifina.service.PermissionService
+import com.unifina.service.SignupCodeService
 import com.unifina.service.UserService
 import com.unifina.filters.UnifinaCoreAPIFilters
+import com.unifina.signalpath.messaging.MockMailService
 import grails.converters.JSON
 import grails.test.mixin.Mock
 import grails.test.mixin.TestFor
@@ -32,6 +34,8 @@ class PermissionApiControllerSpec extends Specification {
 
 	def setup() {
 		controller.permissionService = permissionService = Mock(PermissionService)
+		controller.mailService = new MockMailService()
+		controller.signupCodeService = new SignupCodeService()
 
 		me = new SecUser(id: 1, username: "me").save(validate: false)
 		other = new SecUser(id: 2, username: "other").save(validate: false)
@@ -211,6 +215,21 @@ class PermissionApiControllerSpec extends Specification {
 		response.status == 201
 		response.json.user == other.username
 		response.json.operation == "read"
+	}
+
+	void "save sends an email if the user has no account yet"() {
+		setup:
+		request.addHeader("Authorization", "Token myApiKey")
+		request.requestURI = "/api/v1/canvases/${canvasOwned.id}/permissions"
+		params.resourceClass = Canvas
+		params.resourceId = canvasOwned.id
+		when:
+		request.JSON = [anonymous: false, user: "test@tester.test", operation: "read"] as JSON
+		withFilters(action: "save") { controller.save() }
+		then:
+		controller.mailService.mailSent
+		1 * permissionService.canShare(me, _) >> true
+		1 * permissionService.grant(me, _, _, Operation.READ) >> new Permission(user: other, operation: Operation.READ)
 	}
 
 	void "delete revokes permissions"() {
