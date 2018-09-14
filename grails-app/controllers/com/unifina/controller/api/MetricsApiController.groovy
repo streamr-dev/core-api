@@ -1,6 +1,6 @@
 package com.unifina.controller.api
 
-
+import com.unifina.security.AllowRole
 import com.unifina.security.StreamrApi
 import com.unifina.service.MetricsService
 import grails.compiler.GrailsCompileStatic
@@ -13,7 +13,7 @@ class MetricsApiController {
 
 	MetricsService metricsService
 
-	@StreamrApi
+	@StreamrApi(allowRoles = AllowRole.DEVOPS)
 	def index() {
 		MetricsService.EventProcessingMetrics eventProcessingMetrics = metricsService.fetchEventProcessingMetrics()
 		render([
