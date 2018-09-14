@@ -21,9 +21,12 @@ class MetricsApiController {
 				running: metricsService.numOfRunningCanvases(),
 				totalSerializedBytes: metricsService.bytesUsedByRunningCanvases(),
 			],
-			eventProcessing: [
-				eventsPerSecond: eventProcessingMetrics.eventsPerSecond,
-				avgProcessingDelay: eventProcessingMetrics.avgProcessingDelay,
+			realTime: [
+				eventsPerSecond: eventProcessingMetrics.realTimeEventsPerSecond,
+				avgProcessingDelay: eventProcessingMetrics.realTimeAvgProcessingDelay,
+			],
+			historical: [
+			  eventsPerSecond: eventProcessingMetrics.historicalEventsPerSecond
 			],
 			numOfTomcatSessions: metricsService.numOfSessionsTomcat()
 		] as JSON)

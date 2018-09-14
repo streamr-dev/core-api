@@ -1,6 +1,8 @@
 package com.unifina.service
 
 import com.unifina.data.EventQueueMetrics
+import com.unifina.data.HistoricalEventQueueMetrics
+import com.unifina.data.RealTimeEventQueueMetrics
 import grails.compiler.GrailsCompileStatic
 
 import javax.management.ObjectName
@@ -25,8 +27,10 @@ class MetricsService {
 			*.retrieveMetricsAndReset()
 
 		return new EventProcessingMetrics(
-			EventQueueMetrics.aggregateEventsPerSecond(metrics),
-			EventQueueMetrics.aggregateMeanProcessingDelay(metrics))
+			RealTimeEventQueueMetrics.aggregateEventsPerSecond(metrics),
+			RealTimeEventQueueMetrics.aggregateMeanProcessingDelay(metrics),
+			HistoricalEventQueueMetrics.aggregateEventsPerSecond(metrics)
+		)
 	}
 
 	Object numOfSessionsTomcat() {
@@ -35,12 +39,16 @@ class MetricsService {
 	}
 
 	static class EventProcessingMetrics {
-		final double eventsPerSecond
-		final double avgProcessingDelay
+		final double realTimeEventsPerSecond
+		final double realTimeAvgProcessingDelay
+		final double historicalEventsPerSecond
 
-		EventProcessingMetrics(double eventsPerSecond, double avgProcessingDelay) {
-			this.eventsPerSecond = eventsPerSecond
-			this.avgProcessingDelay = avgProcessingDelay
+		EventProcessingMetrics(double realTimeEventsPerSecond,
+							   double realTimeAvgProcessingDelay,
+							   double historicalEventsPerSecond) {
+			this.realTimeEventsPerSecond = realTimeEventsPerSecond
+			this.realTimeAvgProcessingDelay = realTimeAvgProcessingDelay
+			this.historicalEventsPerSecond = historicalEventsPerSecond
 		}
 	}
 }

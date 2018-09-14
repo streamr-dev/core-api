@@ -14,7 +14,7 @@ public class RealtimeEventQueue extends DataSourceEventQueue implements IEventRe
 	private static final int LOGGING_INTERVAL = 10000; // set to 0 for no logging
 
 	private boolean firstEvent = true;
-	private EventQueueMetrics eventQueueMetrics = new EventQueueMetrics();
+	private EventQueueMetrics eventQueueMetrics = new RealTimeEventQueueMetrics();
 
 	public RealtimeEventQueue(Globals globals, DataSource dataSource) {
 		super(true, globals, dataSource);
@@ -93,7 +93,7 @@ public class RealtimeEventQueue extends DataSourceEventQueue implements IEventRe
 	@Override
 	protected EventQueueMetrics retrieveMetricsAndReset() {
 		EventQueueMetrics returnMetrics = eventQueueMetrics;
-		eventQueueMetrics = new EventQueueMetrics();
+		eventQueueMetrics = new RealTimeEventQueueMetrics();
 		return returnMetrics;
 	}
 

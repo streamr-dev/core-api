@@ -15,6 +15,7 @@ public class HistoricalEventQueue extends DataSourceEventQueue {
 
 	private final List<AbstractFeed> feeds = new ArrayList<>();
 	private final int speed;
+	private EventQueueMetrics eventQueueMetrics = new HistoricalEventQueueMetrics();
 
 	public HistoricalEventQueue(Globals globals, DataSource dataSource) {
 		super(false, globals, dataSource);
@@ -110,6 +111,7 @@ public class HistoricalEventQueue extends DataSourceEventQueue {
 
 			long startTime = System.nanoTime();
 			boolean processed = process(event);
+			eventQueueMetrics.countEvent(System.nanoTime() - startTime, 0);
 			timeSpentProcessing += System.nanoTime() - startTime;
 			eventCounter++;
 
@@ -156,7 +158,9 @@ public class HistoricalEventQueue extends DataSourceEventQueue {
 
 	@Override
 	protected EventQueueMetrics retrieveMetricsAndReset() {
-		return new EventQueueMetrics();
+		EventQueueMetrics returnMetrics = eventQueueMetrics;
+		eventQueueMetrics = new HistoricalEventQueueMetrics();
+		return returnMetrics;
 	}
 
 	@Override
