@@ -15,6 +15,7 @@ public class RealtimeEventQueue extends DataSourceEventQueue implements IEventRe
 	private static final int LOGGING_INTERVAL = 10000; // set to 0 for no logging
 
 	private boolean firstEvent = true;
+	private EventQueueMetrics eventQueueMetrics = new RealTimeEventQueueMetrics();
 
 	public RealtimeEventQueue(Globals globals, DataSource dataSource) {
 		super(true, globals, dataSource);
@@ -39,12 +40,17 @@ public class RealtimeEventQueue extends DataSourceEventQueue implements IEventRe
 			}
 
 			long startTime = System.nanoTime();
+			long startTimeInMillis = System.currentTimeMillis();
 			process(event);
+			long now = System.nanoTime();
+
+			eventQueueMetrics.countEvent(now - startTime, startTimeInMillis - event.timestamp.getTime());
 
 			// Report processing
 			if (LOGGING_INTERVAL > 0) {
-				elapsedTime += System.nanoTime() - startTime;
+				elapsedTime += now - startTime;
 				eventCounter++;
+
 				if (eventCounter >= LOGGING_INTERVAL) {
 					double perEvent = (elapsedTime / eventCounter) / 1000.0;
 					log.info("Processed " + eventCounter + " events in " + elapsedTime + " nanoseconds. " +
@@ -84,6 +90,13 @@ public class RealtimeEventQueue extends DataSourceEventQueue implements IEventRe
 			log.error("Exception while processing event: "+event.toString(), e);
 			return true;
 		}
+	}
+
+	@Override
+	protected EventQueueMetrics retrieveMetricsAndReset() {
+		EventQueueMetrics returnMetrics = eventQueueMetrics;
+		eventQueueMetrics = new RealTimeEventQueueMetrics();
+		return returnMetrics;
 	}
 
 	@Override

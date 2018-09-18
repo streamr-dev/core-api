@@ -1,5 +1,6 @@
 package com.unifina.datasource;
 
+import com.unifina.data.EventQueueMetrics;
 import com.unifina.data.FeedEvent;
 import com.unifina.feed.MasterClock;
 import com.unifina.utils.Globals;
@@ -90,6 +91,8 @@ public abstract class DataSourceEventQueue {
 	 * @return True if the event was processed, false if it was not (then it should be returned to the queue).
 	 */
 	public abstract boolean process(FeedEvent event);
+
+	protected abstract EventQueueMetrics retrieveMetricsAndReset();
 
 	protected abstract void doStop();
 
