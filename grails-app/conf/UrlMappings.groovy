@@ -91,6 +91,7 @@ class UrlMappings {
 		"/api/v1/nodes/$nodeIp/canvases"(controller: "nodeApi", action: "canvasesNode")
 
 		"/api/v1/cluster/canvases"(controller: "clusterApi", action: "index")
+		"/api/v1/cluster/shutdown"(controller: "clusterApi", action: "shutdown")
 
 		// Mappings for pages using React Router (the root for the router)
 		"/dashboard/editor/$id**?"(controller: "dashboard", action: "editor")
