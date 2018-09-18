@@ -7,15 +7,25 @@ import com.unifina.domain.security.SecUser
 import com.unifina.feed.DataRange
 import com.unifina.security.AuthLevel
 import com.unifina.security.StreamrApi
+import com.unifina.utils.CSVImporter
 import grails.converters.JSON
 import grails.plugin.springsecurity.annotation.Secured
+import org.apache.commons.lang.exception.ExceptionUtils
+import org.springframework.web.multipart.MultipartFile
 
 @Secured(["IS_AUTHENTICATED_ANONYMOUSLY"])
 class StreamApiController {
 
+	static allowedMethods = [
+		"setFields": "POST",
+		"uploadCsvFile": "POST",
+		"confirmCsvFileUpload": "POST"
+	]
+
 	def streamService
 	def permissionService
 	def apiService
+	def csvUploadService
 
 	@StreamrApi
 	def index(StreamListParams listParams) {
@@ -72,6 +82,51 @@ class StreamApiController {
 		}
 	}
 
+	@StreamrApi
+	def setFields(String id) {
+		def stream = apiService.authorizedGetById(Stream, id, (SecUser) request.apiUser, Operation.WRITE)
+		def givenFields = request.JSON
+
+		Map config = stream.config ? JSON.parse(stream.config) : [:]
+		config.fields = givenFields
+
+		stream.config = (config as JSON)
+		stream.save(failOnError: true)
+
+		render(stream.toMap() as JSON)
+	}
+
+	@StreamrApi
+	def dataFiles(String id) {
+		getAuthorizedStream(id) { stream ->
+			DataRange dataRange = streamService.getDataRange(stream)
+			render([dataRange: dataRange, stream:stream] as JSON)
+		}
+	}
+
+	@StreamrApi
+	def uploadCsvFile(String id) {
+		// Copy multipart contents to temporary file
+		MultipartFile multipartFile = request.getFile("file")
+		File temporaryFile = File.createTempFile("csv_upload_", ".csv")
+		multipartFile.transferTo(temporaryFile)
+
+		try {
+			def result = csvUploadService.uploadCsvFile(temporaryFile, id, (SecUser) request.apiUser)
+			render(result as JSON)
+		} catch (Exception e) {
+			if (temporaryFile != null && temporaryFile.exists()) {
+				temporaryFile.delete()
+			}
+			throw e
+		}
+	}
+
+	@StreamrApi
+	def confirmCsvFileUpload(String id, CsvParseInstructions instructions) {
+		Stream stream = csvUploadService.parseAndConsumeCsvFile(instructions, id, (SecUser) request.apiUser)
+		render(stream.toMap() as JSON)
+	}
 
 	private String readConfig() {
 		Map config = request.JSON.config

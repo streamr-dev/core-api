@@ -10,6 +10,7 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
 
+import com.unifina.api.ApiException;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.LineIterator;
 import org.apache.log4j.Logger;
@@ -322,7 +323,13 @@ public class CSVImporter implements Iterable<LineValues> {
 			this.format = format;
 		}
 
-
+		public Map toMap() {
+			Map map = new HashMap<String, Object>();
+			map.put("timestampColumnIndex", timestampColumnIndex);
+			map.put("timeZone", timeZone);
+			map.put("headers", headers);
+			return map;
+		}
 	}
 	
 	public class SchemaEntry {
@@ -420,13 +427,13 @@ public class CSVImporter implements Iterable<LineValues> {
 		}
 	}
 
-	public class CSVImporterException extends RuntimeException {
-		public CSVImporterException(String message) {
-			super(message);
+	public class CSVImporterException extends ApiException {
+		CSVImporterException(String message) {
+			super(400, "NOT_RECOGNIZED_AS_CSV", message);
 		}
 
-		public CSVImporterException(String message, int lineNumber) {
-			super(message + " (Line: " + lineNumber + ")");
+		CSVImporterException(String message, int lineNumber) {
+			super(400, "NOT_RECOGNIZED_AS_CSV", message + " (Line: " + lineNumber + ")");
 		}
 	}
 }

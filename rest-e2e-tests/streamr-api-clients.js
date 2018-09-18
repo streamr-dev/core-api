@@ -203,6 +203,27 @@ class Streams {
             .methodAndPath('POST', 'streams')
             .withBody(body)
     }
+
+    setFields(id, body) {
+        return new StreamrApiRequest(this.options)
+            .methodAndPath('POST', `streams/${id}/fields`)
+            .withBody(body)
+    }
+
+    uploadCsvFile(id, fileBytes) {
+        const formData = new FormData()
+        formData.append('file', fileBytes)
+
+        return new StreamrApiRequest(this.options)
+            .methodAndPath('POST', `streams/${id}/uploadCsvFile`)
+            .withRawBody(formData)
+    }
+
+    confirmCsvUpload(id, body) {
+        return new StreamrApiRequest(this.options)
+            .methodAndPath('POST', `streams/${id}/confirmCsvFileUpload`)
+            .withBody(body)
+    }
 }
 
 class Subscriptions {

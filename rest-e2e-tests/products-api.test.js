@@ -5,6 +5,7 @@ const fetch = require('node-fetch')
 
 const initStreamrApi = require('./streamr-api-clients')
 const SchemaValidator = require('./schema-validator')
+const assertResponseIsError = require('./test-utilities.js').assertResponseIsError
 
 const URL = 'http://localhost:8081/streamr-core/api/v1/'
 const LOGGING_ENABLED = process.env.LOGGING_ENABLED || false
@@ -29,15 +30,6 @@ function assertIsProduct(data) {
 function assertIsStream(data) {
     const errors = schemaValidator.validateStream(data)
     assert(errors.length === 0, schemaValidator.toMessages(errors))
-}
-
-async function assertResponseIsError(response, statusCode, programmaticCode, includeInMessage) {
-    const json = await response.json()
-    assert.equal(response.status, statusCode)
-    assert.equal(json.code, programmaticCode)
-    if (includeInMessage) {
-        assert.include(json.message, includeInMessage)
-    }
 }
 
 async function createProductAndReturnId(productBody) {
