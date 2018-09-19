@@ -92,6 +92,7 @@ class UrlMappings {
 
 		"/api/v1/cluster/canvases"(controller: "clusterApi", action: "index")
 		"/api/v1/cluster/shutdown"(controller: "clusterApi", action: "shutdown")
+		"/api/v1/cluster/repair"(controller: "clusterApi", action: "repair")
 
 		// Mappings for pages using React Router (the root for the router)
 		"/dashboard/editor/$id**?"(controller: "dashboard", action: "editor")
