@@ -476,6 +476,13 @@ environments {
 	}
 }
 
+streamr.metrics.numberOfSessions = "Tomcat:type=Manager,context=/streamr-core,host=localhost"
+environments {
+	production {
+		streamr.metrics.numberOfSessions = "Catalina:type=Manager,context=/,host=localhost"
+	}
+}
+
 /**
  * Signup Configs
  */
