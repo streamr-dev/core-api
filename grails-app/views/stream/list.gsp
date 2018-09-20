@@ -4,6 +4,8 @@
         <title><g:message code="stream.list.label" /></title>
 		<r:require module="sharing-dialog"/>
 		<r:require module="confirm-button"/>
+		<r:require module="moment"/>
+
 		<r:script>
 			$(document).ready(function() {
 				$(".delete-stream-link").each(function(i, el) {
@@ -28,14 +30,14 @@
     </head>
     <body class="stream-list-page">
 		<ui:flashMessage/>
-		
+
 		<div class="btn-group toolbar">
 			<a id="createButton" class="btn btn-primary" href="${createLink(action:'create')}">
 				<i class="fa fa-plus"></i>
 				<g:message code="stream.create.label"/>
-			</a>        	
+			</a>
 		</div>
-		
+
 		<ui:panel class="list-panel" title="${message(code:"stream.list.label")}">
 			<ui:table>
 			    <ui:thead>
@@ -49,11 +51,15 @@
 			    </ui:thead>
 			    <ui:tbody>
 				    <g:each in="${streams}" var="stream">
-				        <ui:tr link="${ createLink(action:'show', id: stream.id) }" data-id="${stream.id }">					        
+				        <ui:tr link="${ createLink(action:'show', id: stream.id) }" data-id="${stream.id }">
 				            <ui:td>${fieldValue(bean: stream, field: "name")}</ui:td>
 				            <ui:td>${fieldValue(bean: stream.feed, field: "name")}</ui:td>
 				            <ui:td class="hidden-xs">${fieldValue(bean: stream, field: "description")}</ui:td>
-							<ui:td class="hidden-xs"><g:formatDate date="${stream.lastUpdated}" formatName="default.date.format" timeZone="${user.timezone}" /></ui:td>
+							<ui:td class="hidden-xs" id="streamLastUpdated-${stream.id}">
+								<g:javascript>
+										document.getElementById('streamLastUpdated-${stream.id}').innerHTML = moment.utc('${stream.lastUpdated}').local().format('<g:message code="default.date.moment.format"/>');
+								</g:javascript>
+							</ui:td>
 							<ui:td class="button-column">
 								<g:if test="${writable.contains(stream) || shareable.contains(stream)}">
 									<div class="streamr-dropdown">
@@ -82,6 +88,6 @@
 				</ui:tbody>
 			</ui:table>
 		</ui:panel>
-		
+
     </body>
 </html>

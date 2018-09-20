@@ -4,6 +4,7 @@
         <title><g:message code="canvas.list.label" /></title>
 
 		<r:require module="confirm-button"/>
+		<r:require module="moment"/>
 
         <r:script>
         	$(function() {
@@ -69,7 +70,7 @@
 		<r:layoutResources disposition="head"/>
     </head>
     <body class="canvas-list-page">
-		
+
 		<ui:flashMessage/>
 
 		<div class="btn-group toolbar">
@@ -108,8 +109,10 @@
 								<ui:td>
 									<span class="label ${canvas.state == com.unifina.domain.signalpath.Canvas.State.RUNNING ? "label-primary" : "label-default"}">${canvas.state.id.toLowerCase()}</span>
 								</ui:td>
-								<ui:td class="hidden-xs">
-									<g:formatDate date="${canvas.dateCreated}" formatName="default.date.format" timeZone="${user.timezone}" />
+								<ui:td class="hidden-xs" id="canvasDateCreated-${canvas.id}">
+									<g:javascript>
+										document.getElementById('canvasDateCreated-${canvas.id}').innerHTML = moment.utc('${canvas.dateCreated}').local().format('<g:message code="default.date.moment.format"/>');
+									</g:javascript>
 								</ui:td>
 								<ui:td class="button-column">
 									<g:if test="${writableCanvases.contains(canvas) || shareableCanvases.contains(canvas)}">
