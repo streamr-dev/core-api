@@ -2,9 +2,11 @@ package com.unifina.controller.api
 
 import com.unifina.ControllerSpecification
 import com.unifina.domain.security.SecUser
+import grails.test.mixin.Mock
 import grails.test.mixin.TestFor
 
 @TestFor(UserApiController)
+@Mock(SecUser)
 class UserApiControllerSpec extends ControllerSpecification {
 
 	SecUser me
@@ -15,8 +17,7 @@ class UserApiControllerSpec extends ControllerSpecification {
 			name: "me",
 			username: "me@too.com",
 			enabled: true,
-			timezone: "Europe/Helsinki"
-		)
+		).save(validate: false)
 	}
 
 	void "unauthenticated user gets back 401"() {
@@ -34,7 +35,6 @@ class UserApiControllerSpec extends ControllerSpecification {
 		then:
 		response.json.name == me.name
 		response.json.username == me.username
-		response.json.timezone == me.timezone
 		!response.json.hasProperty("password")
 		!response.json.hasProperty("id")
 	}

@@ -96,7 +96,7 @@ To view, edit, or stop the Canvas that sent this message, click the below link:
 		MessageFormat mf = new MessageFormat(body)
 		for (Format format : mf.getFormats()) {
 			if (format instanceof SimpleDateFormat && globals.userId != null) {
-				((SimpleDateFormat) format).setTimeZone(globals.userTimeZone)
+				((SimpleDateFormat) format).setTimeZone(TimeZone.getTimeZone("UTC"))
 			}
 		}
 		String warning = ""

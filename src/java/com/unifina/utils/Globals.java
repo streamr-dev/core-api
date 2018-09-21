@@ -18,7 +18,6 @@ public class Globals {
 
 	private final Map signalPathContext;
 	private final Long userId;
-	private final TimeZone userTimeZone;
 	private final TimezoneConverter tzConverter;
 	private DataSource dataSource = null;
 	private Date startDate = null;
@@ -34,19 +33,15 @@ public class Globals {
 	public Globals() {
 		this(new HashMap(), null);
 	}
-	
+
 	public Globals(Map signalPathContext, SecUser user) {
 		if (signalPathContext == null) {
 			throw new NullPointerException("signalPathContext can not be null!");
 		}
-		
 		this.signalPathContext = signalPathContext;
 		this.userId = user != null ? user.getId() : null;
-		
-		String tzString = resolveTimezoneString(user);
-		this.userTimeZone = TimeZone.getTimeZone(tzString);
-		this.tzConverter = new TimezoneConverter(tzString);
-		this.dateTimeFormat.setTimeZone(this.userTimeZone);
+		this.tzConverter = new TimezoneConverter(TimeZone.getTimeZone("UTC"));
+		this.dateTimeFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
 		this.dateFormatUTC.setTimeZone(TimeZone.getTimeZone("UTC"));
 	}
 
@@ -61,7 +56,7 @@ public class Globals {
 	public Date getTime() {
 		return time;
 	}
-	
+
 	public void init() {
 		try {
 			time = startDate = new Date(MapTraversal.getLong(signalPathContext, "beginDate"));
@@ -88,21 +83,21 @@ public class Globals {
 			}
 		}
 	}
-	
+
 	public Date getStartDate() {
 		return startDate;
 	}
-	
+
 	public Date getEndDate() {
 		return endDate;
 	}
-	
+
 	public TimezoneConverter getTzConverter() {
 		return tzConverter;
 	}
-	
+
 	public TimeZone getUserTimeZone() {
-		return userTimeZone;
+		return TimeZone.getTimeZone("UTC");
 	}
 
 	public void setRealtime(boolean realtime) {
@@ -120,14 +115,14 @@ public class Globals {
 	public boolean isSerializationEnabled() {
 		return MapTraversal.getBoolean(signalPathContext, "serializationEnabled");
 	}
-	
+
 	public DataSource getDataSource() {
 		if (System.getSecurityManager() != null) {
 			AccessController.checkPermission(new DataSourcePermission());
 		}
 		return dataSource;
 	}
-	
+
 	public void setDataSource(DataSource dataSource) {
 		if (System.getSecurityManager() != null) {
 			AccessController.checkPermission(new DataSourcePermission());
@@ -153,9 +148,5 @@ public class Globals {
 
 	public String formatDateTime(Date date) {
 		return dateTimeFormat.format(date);
-	}
-
-	private static String resolveTimezoneString(SecUser user) {
-		return user != null && user.getTimezone() != null ? user.getTimezone() : "UTC";
 	}
 }

@@ -16,7 +16,6 @@ class SecUser implements Userish {
 	boolean passwordExpired
 
 	String name
-	String timezone
 
 	Set<Key> keys
 	Set<Permission> permissions
@@ -50,7 +49,6 @@ class SecUser implements Userish {
 		return [
 			name           : name,
 			username       : username,
-			timezone       : timezone,
 		]
 	}
 

@@ -1,5 +1,8 @@
 package com.unifina.signalpath.time;
 
+import com.unifina.service.SerializationService;
+import com.unifina.signalpath.*;
+
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
@@ -7,19 +10,11 @@ import java.util.Date;
 import java.util.Locale;
 import java.util.TimeZone;
 
-import com.unifina.service.SerializationService;
-import com.unifina.signalpath.AbstractSignalPathModule;
-import com.unifina.signalpath.Input;
-import com.unifina.signalpath.StringOutput;
-import com.unifina.signalpath.StringParameter;
-import com.unifina.signalpath.TimeSeriesOutput;
-
 public class DateConversion extends AbstractSignalPathModule {
-	
-	// The default value of tz is added in the initialize() method
-	StringParameter tz = new StringParameter(this, "timezone", "");
+
+	StringParameter tz = new StringParameter(this, "timezone", "UTC");
 	StringParameter pattern = new StringParameter(this, "format", "yyyy-MM-dd HH:mm:ss z");
-	
+
 	Input<Object> dateIn = new Input<>(this, "date", "Date Double String");
 
 	StringOutput dateOut = new StringOutput(this, "date");
@@ -35,13 +30,13 @@ public class DateConversion extends AbstractSignalPathModule {
 
 	transient Calendar cal = null;
 	transient SimpleDateFormat df = null;
-	
+
 	@Override
 	public void init() {
 		addInput(tz);
 		addInput(pattern);
 		addInput(dateIn);
-		
+
 		addOutput(dateOut);
 		addOutput(tsOut);
 		addOutput(wdOut);
@@ -60,10 +55,10 @@ public class DateConversion extends AbstractSignalPathModule {
 	public void initialize() {
 		super.initialize();
 		if (getGlobals().getUserId() != null) {
-			tz.receive(getGlobals().getUserTimeZone().getID());
+			tz.receive(TimeZone.getTimeZone("UTC").getID());
 		}
 	}
-	
+
 	@Override
 	public void sendOutput() {
 		if(pattern.getValue() != null && !df.toPattern().equals(pattern.getValue())){
@@ -130,11 +125,11 @@ public class DateConversion extends AbstractSignalPathModule {
 
 	private void ensureState() {
 		if (cal == null) {
-			cal = Calendar.getInstance(getGlobals().getUserTimeZone());
+			cal = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
 		}
 		if (df == null) {
 			df = new SimpleDateFormat();
-			df.setTimeZone(getGlobals().getUserTimeZone());
+			df.setTimeZone(TimeZone.getTimeZone("UTC"));
 		}
 	}
 }

@@ -47,7 +47,7 @@ public class ExportCSV extends ModuleWithUI {
 			openCsvWriter();
 		}
 		if (timeFormatter == null) {
-			timeFormatter = timeFormat.getTimeFormatter(getGlobals().getUserTimeZone());
+			timeFormatter = timeFormat.getTimeFormatter();
 		}
 
 		List<Object> row = new ArrayList<>();
@@ -145,7 +145,7 @@ public class ExportCSV extends ModuleWithUI {
 	public void afterDeserialization(SerializationService serializationService) {
 		super.afterDeserialization(serializationService);
 		openCsvWriter();
-		timeFormatter = timeFormat.getTimeFormatter(getGlobals().getUserTimeZone());
+		timeFormatter = timeFormat.getTimeFormatter();
 	}
 
 	private void openCsvWriter() {
@@ -223,13 +223,13 @@ public class ExportCSV extends ModuleWithUI {
 			return option == null ? ISO_8601_UTC : valueOf(option.getString());
 		}
 
-		private TimeFormatter getTimeFormatter(final TimeZone localTimeZone) {
+		private TimeFormatter getTimeFormatter() {
 			if (this == ISO_8601_LOCAL) {
 				return new TimeFormatter() {
 					private final DateFormat df = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ");
 
 					{
-						df.setTimeZone(localTimeZone);
+						df.setTimeZone(TimeZone.getTimeZone("UTC"));
 					}
 
 					@Override

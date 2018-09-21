@@ -33,11 +33,10 @@ class ProfileControllerSpec extends Specification {
 		controller.springSecurityService = springSecurityService
 		controller.streamService = Mock(StreamService)
 		user = new SecUser(id:1,
-			username: "test@test.com",
+			username:"test@test.com",
 			name: "Test User",
 			password:springSecurityService.encodePassword("foobar123!"),
-			timezone: "Europe/Helsinki",
-			enabled: true)
+		)
 		user.save(validate:false)
 		springSecurityService.currentUser = user
 
@@ -115,13 +114,10 @@ class ProfileControllerSpec extends Specification {
 		when: "new settings are submitted"
 			request.method = 'POST'
 			params.name = "Changed Name"
-			params.timezone = "Europe/Helsinki"
 			controller.update()
 		then: "values must be updated and show update message"
 			SecUser.get(1).name == "Changed Name"
 			response.json.name == "Changed Name"
-			SecUser.get(1).timezone == "Europe/Helsinki"
-			response.json.timezone == "Europe/Helsinki"
 	}
 
 	void "sensitive fields cannot be changed"() {
@@ -139,5 +135,4 @@ class ProfileControllerSpec extends Specification {
 		response.json.username == "test@test.com"
 		SecUser.get(1).enabled
 	}
-
 }

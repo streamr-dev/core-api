@@ -2,11 +2,8 @@ package com.unifina.signalpath.time
 
 import com.unifina.UiChannelMockingSpecification
 import com.unifina.domain.security.SecUser
-import com.unifina.utils.Globals
-import com.unifina.utils.GlobalsFactory
 import com.unifina.utils.testutils.ModuleTestHelper
 import grails.test.mixin.Mock
-import grails.test.mixin.support.GrailsUnitTestMixin
 
 import java.text.SimpleDateFormat
 
@@ -14,13 +11,9 @@ import java.text.SimpleDateFormat
 class SchedulerSpec extends UiChannelMockingSpecification {
 	Scheduler module
 	SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss")
-	TimeZone UTC = TimeZone.getTimeZone("UTC")
 
 	def setup() {
 		mockServicesForUiChannels()
-		TimeZone Helsinki = TimeZone.getTimeZone("Europe/Helsinki")
-
-		df.setTimeZone(Helsinki)
 	}
 
 	void "Scheduler works as expected"() {

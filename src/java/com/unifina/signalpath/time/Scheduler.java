@@ -79,7 +79,7 @@ public class Scheduler extends ModuleWithUI implements ITimeListener {
 
 			rules.clear();
 			for (Map<String, Object> ruleConfig : ruleConfigList) {
-				rules.add(Rule.instantiateRule(ruleConfig, getGlobals().getUserTimeZone()));
+				rules.add(Rule.instantiateRule(ruleConfig, TimeZone.getTimeZone("UTC")));
 			}
 		}
 	}

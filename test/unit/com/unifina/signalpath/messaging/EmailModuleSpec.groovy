@@ -46,12 +46,12 @@ class EmailModuleSpec extends UiChannelMockingSpecification {
 		assert cs != null
 
 		grailsApplication.config.unifina.email.sender = "sender"
-		
+
 		module = new EmailModule()
 		module.canvasService = cs
 	}
 
-	private void initContext(Map context = [:], SecUser user = new SecUser(timezone:"Europe/Helsinki", username: "username").save(failOnError: true, validate: false)) {
+	private void initContext(Map context = [:], SecUser user = new SecUser(username: "username").save(failOnError: true, validate: false)) {
 		globals = GlobalsFactory.createInstance(context, user)
 		globals.time = new Date()
 
@@ -99,7 +99,7 @@ Message:
 Message
 
 Event Timestamp:
-1970-01-01 02:00:00.000
+1970-01-01 00:00:00.000
 
 Input Values:
 value1: 1
@@ -117,7 +117,7 @@ https://www.streamr.com/canvas/editor/1
 		initContext()
 		globals.realtime = true
 		def df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS")
-		df.setTimeZone(TimeZone.getTimeZone("Europe/Helsinki"))
+		df.setTimeZone(TimeZone.getTimeZone("UTC"))
 
 		when: "feedback sent from the feedback page"
 			module.sub.receive("Test subject")
