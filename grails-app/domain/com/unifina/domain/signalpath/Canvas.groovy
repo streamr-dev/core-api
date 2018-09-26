@@ -55,6 +55,7 @@ class Canvas {
 	]
 
 	static constraints = {
+		name(blank: false)
 		runner(nullable: true)
 		server(nullable: true)
 		requestUrl(nullable: true)

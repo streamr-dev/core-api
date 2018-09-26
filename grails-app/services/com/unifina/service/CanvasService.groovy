@@ -46,6 +46,9 @@ class CanvasService {
 
 	@CompileStatic
 	void updateExisting(Canvas canvas, SaveCanvasCommand command, SecUser user, boolean resetUi = false) {
+		if (command.name == null || command.name.trim() == "") {
+			command.name = "Untitled Canvas"
+		}
 		if (!command.validate()) {
 			throw new ValidationException(command.errors)
 		}

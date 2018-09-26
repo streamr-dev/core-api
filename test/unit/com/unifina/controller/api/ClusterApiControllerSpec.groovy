@@ -34,7 +34,6 @@ class ClusterApiControllerSpec extends Specification {
 			name: "Canvas #2",
 			server: "10.0.0.5",
 			state: Canvas.State.RUNNING,
-			json: "{}"
 		)
 		canvases1.shouldBeRunning[0].id = "c2"
 		canvases1.shouldBeRunning[0].save(failOnError: true, validate: false)
@@ -45,7 +44,6 @@ class ClusterApiControllerSpec extends Specification {
 			name: "Canvas #5",
 			server: "10.0.0.6",
 			state: Canvas.State.RUNNING,
-			json: "{}"
 		)
 		canvases2.shouldBeRunning[0].id = "c5"
 		canvases2.shouldBeRunning[0].save(failOnError: true, validate: false)
@@ -75,7 +73,6 @@ class ClusterApiControllerSpec extends Specification {
 			name: "Canvas #2",
 			server: "10.0.0.5",
 			state: Canvas.State.RUNNING,
-			json: "{}"
 		)
 		canvases1.shouldNotBeRunning[0].id = "c2"
 		canvases1.shouldNotBeRunning[0].save(failOnError: true, validate: false)
@@ -87,7 +84,6 @@ class ClusterApiControllerSpec extends Specification {
 			name: "Canvas #5",
 			server: "10.0.0.6",
 			state: Canvas.State.RUNNING,
-			json: "{}"
 		)
 		canvases2.shouldNotBeRunning[0].id = "c5"
 		canvases2.shouldNotBeRunning[0].save(failOnError: true, validate: false)
@@ -116,7 +112,6 @@ class ClusterApiControllerSpec extends Specification {
 			name: "Canvas #2",
 			server: "10.0.0.5",
 			state: Canvas.State.RUNNING,
-			json: "{}"
 		)
 		canvases1.shouldBeRunning[0].id = "c2"
 		canvases1.shouldBeRunning[0].save(failOnError: true, validate: false)
@@ -126,7 +121,6 @@ class ClusterApiControllerSpec extends Specification {
 			name: "Canvas #2",
 			server: "10.0.0.5",
 			state: Canvas.State.RUNNING,
-			json: "{}"
 		)
 		canvases1.shouldNotBeRunning[0].id = "c2"
 		canvases1.shouldNotBeRunning[0].save(failOnError: true, validate: false)
@@ -137,7 +131,6 @@ class ClusterApiControllerSpec extends Specification {
 			name: "Canvas #5",
 			server: "10.0.0.6",
 			state: Canvas.State.RUNNING,
-			json: "{}"
 		)
 		canvases2.shouldBeRunning[0].id = "c5"
 		canvases2.shouldBeRunning[0].save(failOnError: true, validate: false)
@@ -147,7 +140,6 @@ class ClusterApiControllerSpec extends Specification {
 			name: "Canvas #5",
 			server: "10.0.0.6",
 			state: Canvas.State.RUNNING,
-			json: "{}"
 		)
 		canvases2.shouldNotBeRunning[0].id = "c5"
 		canvases2.shouldNotBeRunning[0].save(failOnError: true, validate: false)
@@ -177,7 +169,6 @@ class ClusterApiControllerSpec extends Specification {
 			name: "Canvas #2",
 			server: "10.0.0.5",
 			state: Canvas.State.RUNNING,
-			json: "{}"
 		)
 		canvases1.shouldNotBeRunning[0].id = "c2"
 		canvases1.shouldNotBeRunning[0].save(failOnError: true, validate: false)
@@ -189,7 +180,6 @@ class ClusterApiControllerSpec extends Specification {
 			name: "Canvas #5",
 			server: "10.0.0.6",
 			state: Canvas.State.RUNNING,
-			json: "{}"
 		)
 		canvases2.shouldNotBeRunning[0].id = "c5"
 		canvases2.shouldNotBeRunning[0].save(failOnError: true, validate: false)
@@ -221,7 +211,6 @@ class ClusterApiControllerSpec extends Specification {
 			name: "Canvas #2",
 			server: "10.0.0.5",
 			state: Canvas.State.RUNNING,
-			json: "{}"
 		)
 		canvases1.shouldNotBeRunning[0].id = "c2"
 		canvases1.shouldNotBeRunning[0].save(failOnError: true, validate: false)
@@ -233,7 +222,6 @@ class ClusterApiControllerSpec extends Specification {
 			name: "Canvas #5",
 			server: "10.0.0.6",
 			state: Canvas.State.RUNNING,
-			json: "{}"
 		)
 		canvases2.shouldNotBeRunning[0].id = "c5"
 		canvases2.shouldNotBeRunning[0].save(failOnError: true, validate: false)
