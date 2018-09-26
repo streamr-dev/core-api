@@ -8,7 +8,7 @@ import grails.compiler.GrailsCompileStatic
 
 class Product {
 	String id
-	String name
+	String name = "Untitled Product"
 	String description
 	String imageUrl
 	String thumbnailUrl
@@ -51,9 +51,10 @@ class Product {
 
 	static constraints = {
 		name(blank: false)
-		description(blank: false)
+		description(nullable: true)
 		imageUrl(nullable: true)
 		thumbnailUrl(nullable: true)
+		category(nullable: true)
 		streams(maxSize: 1000)
 		previewStream(nullable: true, validator: { Stream s, p -> s == null || s in p.streams })
 		previewConfigJson(nullable: true)

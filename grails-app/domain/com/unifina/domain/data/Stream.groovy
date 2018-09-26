@@ -10,11 +10,11 @@ class Stream implements Comparable {
 	String id
 	Integer partitions = 1
 
-	String name
+	String name = "Untitled Stream"
 	Feed feed
 	String config
 	String description
-	
+
 	Date firstHistoricalDay
 	Date lastHistoricalDay
 
@@ -41,7 +41,7 @@ class Stream implements Comparable {
 		uiChannelPath(nullable:true)
 		uiChannelCanvas(nullable:true)
 	}
-	
+
 	static mapping = {
 		id generator: 'assigned'
 		name index: "name_idx"
@@ -50,7 +50,7 @@ class Stream implements Comparable {
 		uiChannelPath index: "ui_channel_path_idx"
 		config type: 'text'
 	}
-	
+
 	@Override
 	public String toString() {
 		return name
@@ -90,12 +90,12 @@ class Stream implements Comparable {
 		if (!(arg0 instanceof Stream)) return 0
 		else return arg0.name.compareTo(this.name)
 	}
-	
+
 	@Override
 	public int hashCode() {
 		return id.hashCode()
 	}
-	
+
 	@Override
 	public boolean equals(Object obj) {
 		return obj instanceof Stream && obj.id == this.id

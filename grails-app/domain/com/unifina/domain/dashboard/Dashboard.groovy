@@ -8,7 +8,7 @@ import groovy.transform.CompileStatic
 class Dashboard {
 
 	String id
-	String name
+	String name = "Untitled Dashboard"
 
 	Date dateCreated
 	Date lastUpdated

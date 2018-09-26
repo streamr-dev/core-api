@@ -33,8 +33,8 @@ class Canvas {
 	Date dateCreated
 	Date lastUpdated
 
-	String name
-	String json
+	String name = "Untitled Canvas"
+	String json = "{}"
 	State state = State.STOPPED
 
 	Boolean hasExports = false
