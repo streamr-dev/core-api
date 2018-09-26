@@ -23,6 +23,6 @@ class CreateProductCommand {
 	Long minimumSubscriptionInSeconds = 0
 
 	static constraints = {
-		importFrom(Product)
+		importFrom(Product, exclude: ["name"])
 	}
 }
