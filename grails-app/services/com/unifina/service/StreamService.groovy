@@ -65,6 +65,9 @@ class StreamService {
 		Stream stream = new Stream(params)
 		stream.id = id
 		stream.config = params.config
+		if (stream.name == null || stream.name.trim() == "") {
+			stream.name = "Untitled Stream"
+		}
 
 		// If no feed given, API feed is used
 		if (stream.feed == null) {

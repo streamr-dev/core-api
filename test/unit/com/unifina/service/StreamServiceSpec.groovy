@@ -2,7 +2,6 @@ package com.unifina.service
 
 import com.unifina.api.NotFoundException
 import com.unifina.api.NotPermittedException
-import com.unifina.api.ValidationException
 import com.unifina.domain.dashboard.Dashboard
 import com.unifina.domain.dashboard.DashboardItem
 import com.unifina.domain.data.Feed
@@ -18,7 +17,6 @@ import grails.test.mixin.TestFor
 import org.codehaus.groovy.grails.commons.DefaultGrailsApplication
 import org.springframework.context.ApplicationContext
 import spock.lang.Specification
-
 /**
  * See the API for {@link grails.test.mixin.support.GrailsUnitTestMixin} for usage instructions
  */
@@ -51,13 +49,12 @@ class StreamServiceSpec extends Specification {
 		me.save(validate: false, failOnError: true)
 	}
 
-	void "createStream throws ValidationException input incomplete"() {
-
+	void "createStream replaces empty name with default value"() {
 		when:
-		service.createStream([feed: feed], me)
+		Stream s = service.createStream([name: "", feed: feed], me)
 
 		then:
-		thrown(ValidationException)
+		s.name == "Untitled Stream"
 	}
 
 	void "createStream results in persisted Stream"() {
