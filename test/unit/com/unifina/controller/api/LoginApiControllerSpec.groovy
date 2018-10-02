@@ -11,9 +11,9 @@ import spock.lang.Specification
 /**
  * See the API for {@link grails.test.mixin.web.ControllerUnitTestMixin} for usage instructions
  */
-@TestFor(ChallengeApiController)
+@TestFor(LoginApiController)
 @Mock([SecUser, com.unifina.filters.UnifinaCoreAPIFilters, Key])
-class ChallengeApiControllerSpec extends Specification {
+class LoginApiControllerSpec extends Specification {
 	ChallengeService challengeService
 	def setup() {
 		challengeService = controller.challengeService = Mock(ChallengeService)

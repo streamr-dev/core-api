@@ -68,7 +68,7 @@ class UrlMappings {
 
 		"/api/v1/oembed"(controller: "oembedApi", action: "index")
 
-		"/api/v1/login/$action"(controller: "challengeApi")
+		"/api/v1/login/$action"(controller: "loginApi")
 
 		"/api/v1/categories"(resources: "categoryApi")
 
