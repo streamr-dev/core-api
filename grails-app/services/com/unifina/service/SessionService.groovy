@@ -29,5 +29,4 @@ class SessionService {
 	void invalidateSession(String sessionToken) {
 		keyValueStoreService.delete(sessionToken)
 	}
-
 }
