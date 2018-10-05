@@ -1,13 +1,12 @@
 package com.unifina.controller.api
 
 import com.unifina.api.ApiException
-import com.unifina.crypto.ECRecover
-import com.unifina.domain.security.SessionToken
+import com.unifina.domain.security.SecUser
+import com.unifina.security.SessionToken
 import com.unifina.security.AuthLevel
 import com.unifina.security.StreamrApi
 import grails.converters.JSON
 import grails.plugin.springsecurity.annotation.Secured
-import com.unifina.domain.security.Challenge
 
 @Secured(["IS_AUTHENTICATED_ANONYMOUSLY"])
 class LoginApiController {
@@ -15,6 +14,7 @@ class LoginApiController {
 	static allowedMethods = [challenge: "POST", response: "POST"]
 	def challengeService
 	def sessionService
+	def ethereumIntegrationKeyService
 
 	@StreamrApi(authenticationLevel = AuthLevel.NONE)
 	def challenge() {
@@ -24,14 +24,16 @@ class LoginApiController {
 
 	@StreamrApi(authenticationLevel = AuthLevel.NONE)
 	def response(ChallengeResponseCommand cmd) {
-		def valid = challengeService.verifyChallengeResponse(cmd.challenge.id, cmd.challenge.challenge, cmd.signature, cmd.address)
+		boolean valid = challengeService.verifyChallengeResponse(cmd.challenge.id,
+			cmd.challenge.challenge, cmd.signature.toLowerCase(), cmd.address.toLowerCase())
 		if(!valid){
-			throw new ApiException(400, 'INVALID_CHALLENGE', "challenge validation failed: "+cmd.challenge.id+" "+cmd.address)
+			throw new ApiException(400, 'INVALID_CHALLENGE', "challenge validation failed")
 		}else{
-			SessionToken sk = sessionService.generateToken(cmd.address)
+			SecUser user = ethereumIntegrationKeyService.getOrCreateFromEthereumAddress(cmd.address)
+			SessionToken sk = sessionService.generateToken(user)
 			render([
-				token	: sk.token,
-				expires	: sk.expiration.toString()
+				token	: sk.getToken(),
+				expires	: sk.getExpiration().toString()
 			] as JSON)
 		}
 	}
