@@ -245,4 +245,28 @@ class EthereumIntegrationKeyServiceSpec extends Specification {
 		then:
 		0 * subscriptionService._
 	}
+
+	void "getOrCreateFromEthereumAddress() creates user if key does not exists"() {
+		when:
+		service.getOrCreateFromEthereumAddress("address")
+		then:
+		IntegrationKey.count == 1
+		SecUser.count == 2
+	}
+
+	void "getOrCreateFromEthereumAddress() returns user if key exists"() {
+		String address = "someEthereumAdddress"
+		IntegrationKey integrationKey = new IntegrationKey(
+			user: me,
+			idInService: address,
+			service: IntegrationKey.Service.ETHEREUM_ID
+		).save(failOnError: true, validate: false)
+
+		when:
+		SecUser user = service.getOrCreateFromEthereumAddress(address)
+		then:
+		user.username == me.username
+		IntegrationKey.count == 1
+		SecUser.count == 1
+	}
 }
