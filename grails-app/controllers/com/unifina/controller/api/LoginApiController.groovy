@@ -37,4 +37,13 @@ class LoginApiController {
 			] as JSON)
 		}
 	}
+
+	@StreamrApi(authenticationLevel = AuthLevel.NONE)
+	def index(LoginCommand cmd) {
+		switch(cmd.method) {
+			case LoginCommand.Method.ETHEREUM: redirect(action: challenge())
+			case LoginCommand.Method.PASSWORD: //TODO: add password-based login
+			default: redirect(action: challenge())
+		}
+	}
 }
