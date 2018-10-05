@@ -12,6 +12,7 @@ import grails.converters.JSON
 import groovy.transform.CompileStatic
 import org.apache.commons.codec.DecoderException
 import org.apache.commons.codec.binary.Hex
+import org.apache.commons.lang.RandomStringUtils
 import org.ethereum.crypto.ECKey
 import org.springframework.util.Assert
 
@@ -106,6 +107,34 @@ class EthereumIntegrationKeyService {
 
 	List<IntegrationKey> getAllKeysForUser(SecUser user) {
 		IntegrationKey.findAllByServiceAndUser(IntegrationKey.Service.ETHEREUM, user)
+	}
+
+	SecUser getOrCreateFromEthereumAddress(String address){
+		IntegrationKey key = IntegrationKey.findByIdInServiceAndService(address, IntegrationKey.Service.ETHEREUM_ID)
+		if(key==null){
+			SecUser user = new SecUser(
+				username: address,
+				password: generatePassword(16),
+				name: address,
+				timezone: "UTC"
+			).save(failOnError: true, flush: true, validate: false)
+			key = new IntegrationKey(
+				name: address,
+				user: user,
+				service: IntegrationKey.Service.ETHEREUM_ID,
+				idInService: address,
+				json: ([
+					address: new String(address)
+				] as JSON).toString()
+			).save(failOnError: true, flush: true)
+		}
+		return key.user
+	}
+
+	//TODO: Must be moved to some util class. Maybe in java.com.unifina.security.SomeClass?
+	private String generatePassword(int length){
+		String charset = (('a'..'z') + ('A'..'Z') + ('0'..'9')).join()
+		return RandomStringUtils.random(length, charset.toCharArray())
 	}
 
 	@CompileStatic
