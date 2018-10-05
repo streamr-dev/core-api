@@ -56,7 +56,7 @@ class ChallengeServiceSpec extends Specification {
 		service.verifyChallengeResponse(challenge.id, challenge.challenge, signature, address)
 	}
 
-	void "response3 to challenge should fail"() {
+	void "response to challenge should fail"() {
 		when:
 		String address = "0x99a3ae3f5e713f01eca8c2bcf4c32702c2e7ea03"
 		String signature = "0x50ba6f6df25ba593cb8188df29ca27ea0a7cd38fadc4d40ef9fad455117e190f2a7ec880a76b930071205fee19cf55eb415bd33b2f6cb5f7be36f79f740da6e81b"
