@@ -195,11 +195,12 @@ class EthereumIntegrationKeyServiceSpec extends Specification {
 		IntegrationKey.count() == 0
 	}
 
-	void "delete() invokes subscriptionService#beforeIntegrationKeyRemoved"() {
+	void "delete() invokes subscriptionService#beforeIntegrationKeyRemoved for Ethereum IDs"() {
 		def subscriptionService = service.subscriptionService = Mock(SubscriptionService)
 
 		def integrationKey = new IntegrationKey(user: me)
 		integrationKey.id = "integration-key"
+		integrationKey.service = IntegrationKey.Service.ETHEREUM_ID
 		integrationKey.save(failOnError: true, validate: false)
 
 		when:
