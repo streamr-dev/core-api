@@ -92,7 +92,9 @@ class EthereumIntegrationKeyService {
 	void delete(String integrationKeyId, SecUser currentUser) {
 		IntegrationKey account = IntegrationKey.findByIdAndUser(integrationKeyId, currentUser)
 		if (account) {
-			subscriptionService.beforeIntegrationKeyRemoved(account)
+			if (account.service == IntegrationKey.Service.ETHEREUM_ID) {
+				subscriptionService.beforeIntegrationKeyRemoved(account)
+			}
 			account.delete(flush: true)
 		}
 	}
