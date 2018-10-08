@@ -18,6 +18,7 @@ import java.lang.reflect.Method
 
 class UnifinaCoreAPIFilters {
 	def springSecurityService
+	def sessionService
 
 	GrailsApplication grailsApplication
 	
@@ -56,6 +57,24 @@ class UnifinaCoreAPIFilters {
 
 				TokenAuthenticator authenticator = new TokenAuthenticator()
 				AuthenticationResult result = authenticator.authenticate(request)
+
+				try{
+					String sessionToken = authenticator.parseAuthorizationHeader(
+						request.getHeader("Authorization"), "bearer")
+					SecUser user = sessionService.getUserFromToken(sessionToken)
+					if(user!=null){
+						result = new AuthenticationResult(user)
+					}
+				}catch(AuthenticationMalformedException){
+					render (
+						status: 400,
+						text: [
+							code: "MALFORMED_TOKEN",
+							message: "Invalid request. Did you pass a HTTP header of the form 'Authorization: bearer token' ?"
+						] as JSON
+					)
+					return false
+				}
 
 				if (result.lastAuthenticationMalformed) {
 					render (
