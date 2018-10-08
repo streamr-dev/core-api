@@ -21,7 +21,7 @@ class ClusterServiceSpec extends Specification {
 		key.id = "myApiKey"
 		key.save(failOnError: true, validate: false)
 
-		service.client = Mock(StreamrClient)
+		service.streamrClient = Mock(StreamrClient)
 		config.streamr.nodes = ["10.0.0.5", "10.0.0.6"]
 	}
 
@@ -53,9 +53,9 @@ class ClusterServiceSpec extends Specification {
 		def canvases = service.getCanvases(apiKey, ["10.0.0.5", "10.0.0.6"])
 
 		then:
-		1 * service.client.canvasesPerNode(apiKey, "10.0.0.5") >> canvases1
-		1 * service.client.canvasesPerNode(apiKey, "10.0.0.6") >> canvases2
-		0 * service.client._
+		1 * service.streamrClient.canvasesPerNode(apiKey, "10.0.0.5") >> canvases1
+		1 * service.streamrClient.canvasesPerNode(apiKey, "10.0.0.6") >> canvases2
+		0 * service.streamrClient._
 		canvases.ghost.size() == 0
 		canvases.dead.size() == 2
 	}
@@ -90,9 +90,9 @@ class ClusterServiceSpec extends Specification {
 		def canvases = service.getCanvases(apiKey, ["10.0.0.5", "10.0.0.6"])
 
 		then:
-		1 * service.client.canvasesPerNode(apiKey, "10.0.0.5") >> canvases1
-		1 * service.client.canvasesPerNode(apiKey, "10.0.0.6") >> canvases2
-		0 * service.client._
+		1 * service.streamrClient.canvasesPerNode(apiKey, "10.0.0.5") >> canvases1
+		1 * service.streamrClient.canvasesPerNode(apiKey, "10.0.0.6") >> canvases2
+		0 * service.streamrClient._
 		canvases.ghost.size() == 2
 		canvases.dead.size() == 0
 	}
@@ -145,9 +145,9 @@ class ClusterServiceSpec extends Specification {
 		def canvases = service.getCanvases(apiKey, ["10.0.0.5", "10.0.0.6"])
 
 		then:
-		1 * service.client.canvasesPerNode(apiKey, "10.0.0.5") >> canvases1
-		1 * service.client.canvasesPerNode(apiKey, "10.0.0.6") >> canvases2
-		0 * service.client._
+		1 * service.streamrClient.canvasesPerNode(apiKey, "10.0.0.5") >> canvases1
+		1 * service.streamrClient.canvasesPerNode(apiKey, "10.0.0.6") >> canvases2
+		0 * service.streamrClient._
 		canvases.ghost.size() == 2
 		canvases.dead.size() == 2
 	}
@@ -182,9 +182,9 @@ class ClusterServiceSpec extends Specification {
 		def result = service.shutdown(apiKey, ["10.0.0.5", "10.0.0.6"])
 
 		then:
-		1 * service.client.shutdown(apiKey, "10.0.0.5") >> shutdownResult1
-		1 * service.client.shutdown(apiKey, "10.0.0.6") >> shutdownResult2
-		0 * service.client._
+		1 * service.streamrClient.shutdown(apiKey, "10.0.0.5") >> shutdownResult1
+		1 * service.streamrClient.shutdown(apiKey, "10.0.0.6") >> shutdownResult2
+		0 * service.streamrClient._
 		result.nodes.size() == 2
 	}
 
@@ -193,9 +193,9 @@ class ClusterServiceSpec extends Specification {
 		def results = service.shutdown(apiKey, ["10.0.0.5", "10.0.0.6"])
 
 		then:
-		1 * service.client.shutdown(apiKey, "10.0.0.5") >> new ArrayList<HashMap<String, Object>>()
-		1 * service.client.shutdown(apiKey, "10.0.0.6") >> new ArrayList<HashMap<String, Object>>()
-		0 * service.client._
+		1 * service.streamrClient.shutdown(apiKey, "10.0.0.5") >> new ArrayList<HashMap<String, Object>>()
+		1 * service.streamrClient.shutdown(apiKey, "10.0.0.6") >> new ArrayList<HashMap<String, Object>>()
+		0 * service.streamrClient._
 		results.nodes.size() == 0
 	}
 
@@ -213,9 +213,9 @@ class ClusterServiceSpec extends Specification {
 		def results = service.repair(apiKey, ["10.0.0.5", "10.0.0.6"])
 
 		then:
-		1 * service.client.canvasesPerNode(apiKey, "10.0.0.5") >> canvasesPerNode
-		1 * service.client.canvasesPerNode(apiKey, "10.0.0.6") >> new CanvasesPerNode()
-		0 * service.client._
+		1 * service.streamrClient.canvasesPerNode(apiKey, "10.0.0.5") >> canvasesPerNode
+		1 * service.streamrClient.canvasesPerNode(apiKey, "10.0.0.6") >> new CanvasesPerNode()
+		0 * service.streamrClient._
 		1 * service.canvasService.startRemote(canvasesPerNode.shouldBeRunning[0], canvasesPerNode.shouldBeRunning[0].startedBy, false, true)
 		0 * service.canvasService._
 		results.size() == 1

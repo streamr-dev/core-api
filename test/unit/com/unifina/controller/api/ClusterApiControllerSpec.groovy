@@ -24,7 +24,7 @@ class ClusterApiControllerSpec extends Specification {
 		key.id = "myApiKey"
 		key.save(failOnError: true, validate: false)
 
-		controller.service = Mock(ClusterService)
+		controller.clusterService = Mock(ClusterService)
 		config.streamr.nodes = ["10.0.0.5", "10.0.0.6"]
 	}
 
@@ -54,8 +54,8 @@ class ClusterApiControllerSpec extends Specification {
 		}
 
 		then:
-		1 * controller.service.getCanvases(apiKey, config.streamr.nodes) >> canvases
-		0 * controller.service._
+		1 * controller.clusterService.getCanvases(apiKey, config.streamr.nodes) >> canvases
+		0 * controller.clusterService._
 		response.status == 200
 		response.json.ghost.size() == 0
 		response.json.dead.size() == 2
@@ -87,8 +87,8 @@ class ClusterApiControllerSpec extends Specification {
 		}
 
 		then:
-		1 * controller.service.getCanvases(apiKey, config.streamr.nodes) >> canvases
-		0 * controller.service._
+		1 * controller.clusterService.getCanvases(apiKey, config.streamr.nodes) >> canvases
+		0 * controller.clusterService._
 		response.status == 200
 		response.json.ghost.size() == 2
 		response.json.dead.size() == 0
@@ -134,8 +134,8 @@ class ClusterApiControllerSpec extends Specification {
 		}
 
 		then:
-		1 * controller.service.getCanvases(apiKey, config.streamr.nodes) >> canvases
-		0 * controller.service._
+		1 * controller.clusterService.getCanvases(apiKey, config.streamr.nodes) >> canvases
+		0 * controller.clusterService._
 		response.status == 200
 		response.json.ghost.size() == 2
 		response.json.dead.size() == 2
@@ -174,8 +174,8 @@ class ClusterApiControllerSpec extends Specification {
 		}
 
 		then:
-		1 * controller.service.shutdown(apiKey, config.streamr.nodes) >> result
-		0 * controller.service._
+		1 * controller.clusterService.shutdown(apiKey, config.streamr.nodes) >> result
+		0 * controller.clusterService._
 		response.status == 200
 		response.json.nodeResults.size() == 2
 	}
@@ -189,8 +189,8 @@ class ClusterApiControllerSpec extends Specification {
 		}
 
 		then:
-		1 * controller.service.shutdown(apiKey, config.streamr.nodes) >> new ClusterService.Nodes()
-		0 * controller.service._
+		1 * controller.clusterService.shutdown(apiKey, config.streamr.nodes) >> new ClusterService.Nodes()
+		0 * controller.clusterService._
 		response.status == 200
 		response.json.nodeResults.size() == 0
 	}
@@ -204,8 +204,8 @@ class ClusterApiControllerSpec extends Specification {
 		}
 
 		then:
-		1 * controller.service.repair(apiKey, config.streamr.nodes) >> new ArrayList<Canvas>()
-		0 * controller.service._
+		1 * controller.clusterService.repair(apiKey, config.streamr.nodes) >> new ArrayList<Canvas>()
+		0 * controller.clusterService._
 		response.status == 200
 		response.json.restartedNodes.size() == 0
 	}

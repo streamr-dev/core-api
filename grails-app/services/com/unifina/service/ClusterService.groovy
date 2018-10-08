@@ -7,14 +7,14 @@ import groovy.transform.CompileStatic
 
 class ClusterService {
 	CanvasService canvasService
-	StreamrClient client
+	StreamrClient streamrClient
 
 	@CompileStatic
 	Canvases getCanvases(String token, List<String> streamrNodes) {
 		List<Canvas> dead = new ArrayList<Canvas>()
 		List<Canvas> ghost = new ArrayList<Canvas>()
 		for (String ip : streamrNodes) {
-			CanvasesPerNode canvases = client.canvasesPerNode(token, ip)
+			CanvasesPerNode canvases = streamrClient.canvasesPerNode(token, ip)
 			if (canvases.shouldBeRunning != null) {
 				dead.addAll(canvases.shouldBeRunning)
 			}
@@ -29,7 +29,7 @@ class ClusterService {
 	Nodes shutdown(String token, List<String> streamrNodes) {
 		List<Map<String, Object>> nodeResults = new ArrayList<Map<String, Object>>()
 		for (String ip : streamrNodes) {
-			List<Map<String, Object>> result = client.shutdown(token, ip)
+			List<Map<String, Object>> result = streamrClient.shutdown(token, ip)
 			nodeResults.addAll(result)
 		}
 		return new Nodes(nodes: nodeResults)

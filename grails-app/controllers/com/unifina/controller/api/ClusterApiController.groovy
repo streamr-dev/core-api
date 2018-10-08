@@ -21,13 +21,13 @@ class ClusterApiController {
 	]
 
 	GrailsApplication grailsApplication
-	ClusterService service
+	ClusterService clusterService
 
 	@GrailsCompileStatic
 	@StreamrApi(allowRoles = AllowRole.ADMIN)
 	def index() {
 		String token = request.getHeader(HttpHeaders.AUTHORIZATION)
-		ClusterService.Canvases canvases = service.getCanvases(token, getStreamrNodes())
+		ClusterService.Canvases canvases = clusterService.getCanvases(token, getStreamrNodes())
 		render([
 			dead: canvases.dead,
 			ghost: canvases.ghost,
@@ -38,7 +38,7 @@ class ClusterApiController {
 	@StreamrApi(allowRoles = AllowRole.ADMIN)
 	def shutdown() {
 		String token = request.getHeader(HttpHeaders.AUTHORIZATION)
-		ClusterService.Nodes result = service.shutdown(token, getStreamrNodes())
+		ClusterService.Nodes result = clusterService.shutdown(token, getStreamrNodes())
 		render([
 			nodeResults: result.nodes,
 		] as JSON)
@@ -48,7 +48,7 @@ class ClusterApiController {
 	@StreamrApi(allowRoles = AllowRole.ADMIN)
 	def repair() {
 		String token = request.getHeader(HttpHeaders.AUTHORIZATION)
-		List<Canvas> nodes = service.repair(token, getStreamrNodes())
+		List<Canvas> nodes = clusterService.repair(token, getStreamrNodes())
 		render([
 		    restartedNodes: nodes,
 		] as JSON)
