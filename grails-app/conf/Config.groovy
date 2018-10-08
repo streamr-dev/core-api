@@ -265,10 +265,10 @@ environments {
 /**
  * HTTP API server address
  */
-streamr.http.api.server = System.getProperty("streamr.http.api.server") ?: "http://127.0.0.1:8890/api/v1"
+streamr.http.api.url = System.getProperty("streamr.http.api.url") ?: "http://127.0.0.1:8081/streamr-core/api/v1"
 environments {
 	production {
-		streamr.http.api.server = System.getProperty("streamr.http.api.server") ?: "${prodBaseUrl}/api/v1"
+		streamr.http.api.url = System.getProperty("streamr.http.api.url") ?: "${prodBaseUrl}/api/v1"
 	}
 }
 
