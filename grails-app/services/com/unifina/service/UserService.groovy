@@ -158,4 +158,9 @@ class UserService {
 			messageSource.getMessage(it, null)
 		}
 	}
+
+	SecUser getUserFromUsernameAndPassword(String username, String password){
+		String encodedPassword = springSecurityService.encodePassword(password)
+		return SecUser.findByUsernameAndPassword(username, encodedPassword)
+	}
 }
