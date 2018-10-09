@@ -30,7 +30,7 @@ class SessionServiceIntegrationSpec extends IntegrationSpec {
 		connection = redisClient.connect()
 	}
 
-	void "should generate session token"() {
+	void "should generate session token and store it in redis"() {
 		when:
 		SecUser user = new SecUser(
 			id: 123L,
@@ -46,5 +46,6 @@ class SessionServiceIntegrationSpec extends IntegrationSpec {
 		token.getExpiration().getMillis() - expectedExpiration.getMillis() < 500
 		token.getToken().length() == SessionService.TOKEN_LENGTH
 		connection.get(token.token) == user.id.toString()
+		service.getUserFromToken(token.token).id == user.id
 	}
 }
