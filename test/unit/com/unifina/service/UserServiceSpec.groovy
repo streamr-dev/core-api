@@ -143,4 +143,18 @@ class UserServiceSpec extends Specification {
 		checkedErrors.get(1).getRejectedValue() == "***"
 		checkedErrors.get(1).getArguments() == ['null', 'null', '***']
 	}
+
+	def "should find user from both username and password"() {
+		String username = "username"
+		String password = "password"
+		String wrongPassword = "wrong"
+		new SecUser(username: username, password: password).save(failOnError: true, validate: false)
+		when:
+		SecUser retrievedUser = service.getUserFromUsernameAndPassword(username, password)
+		SecUser wronglyRetrieved = service.getUserFromUsernameAndPassword(username, wrongPassword)
+		then:
+		retrievedUser!=null
+		retrievedUser.username == username
+		wronglyRetrieved==null
+	}
 }
