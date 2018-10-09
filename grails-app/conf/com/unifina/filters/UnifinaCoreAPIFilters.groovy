@@ -49,7 +49,7 @@ class UnifinaCoreAPIFilters {
 	}
 	
 	def filters = {
-		authenticationFilter(uri: '/api/**') {
+		authenticationFilter(uri: '/api/**', uriExclude: '/api/v1/login/**') {
 			before = {
 				StreamrApi annotation = getApiAnnotation(controllerName, actionName)
 
