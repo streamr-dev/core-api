@@ -60,17 +60,19 @@ class UnifinaCoreAPIFilters {
 
 				try{
 					String sessionToken = authenticator.parseAuthorizationHeader(
-						request.getHeader("Authorization"), "bearer")
-					SecUser user = sessionService.getUserFromToken(sessionToken)
-					if(user!=null){
-						result = new AuthenticationResult(user)
+						request.getHeader("Authorization"), "Bearer")
+					if(sessionToken!=null){
+						SecUser user = sessionService.getUserFromToken(sessionToken)
+						if(user!=null){
+							result = new AuthenticationResult(user)
+						}
 					}
 				}catch(AuthenticationMalformedException){
 					render (
 						status: 400,
 						text: [
 							code: "MALFORMED_TOKEN",
-							message: "Invalid request. Did you pass a HTTP header of the form 'Authorization: bearer token' ?"
+							message: "Invalid request. Did you pass a HTTP header of the form 'Authorization: Bearer token' ?"
 						] as JSON
 					)
 					return false
