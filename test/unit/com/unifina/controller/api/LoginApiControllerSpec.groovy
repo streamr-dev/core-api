@@ -8,6 +8,7 @@ import com.unifina.security.SessionToken
 import com.unifina.service.ChallengeService
 import com.unifina.service.EthereumIntegrationKeyService
 import com.unifina.service.SessionService
+import com.unifina.service.UserService
 import grails.test.mixin.Mock
 import grails.test.mixin.TestFor
 import spock.lang.Specification
@@ -21,10 +22,12 @@ class LoginApiControllerSpec extends Specification {
 	ChallengeService challengeService
 	SessionService sessionService
 	EthereumIntegrationKeyService ethereumIntegrationKeyService
+	UserService userService
 	def setup() {
 		challengeService = controller.challengeService = Mock(ChallengeService)
 		sessionService = controller.sessionService = Mock(SessionService)
 		ethereumIntegrationKeyService = controller.ethereumIntegrationKeyService = Mock(EthereumIntegrationKeyService)
+		userService = controller.userService = Mock(UserService)
 		def me = new SecUser().save(failOnError: true, validate: false)
 		Key key = new Key(name: "key", user: me)
 		key.id = "myApiKey"
@@ -117,5 +120,54 @@ class LoginApiControllerSpec extends Specification {
 		then:
 		thrown ApiException
 		1 * challengeService.verifyChallengeResponse(challenge.id, challenge.challenge, signature, address) >> false
+	}
+
+	def "password-based login should pass"() {
+		SecUser user = new SecUser(
+			username: "username",
+			password: "password"
+		).save(failOnError: true, validate: false)
+
+		SessionToken sk = new SessionToken(64, user, 3)
+
+		when:
+		request.requestURI = "/api/v1/login/password"
+		request.method = "POST"
+		request.JSON = [
+			username: user.username,
+			password: user.password
+		]
+		withFilters(action: "password") {
+			controller.password()
+		}
+
+		then:
+		1 * userService.getUserFromUsernameAndPassword(user.username, user.password) >> user
+		1 * sessionService.generateToken(user) >> sk
+		response.status == 200
+		response.json == [
+			token	: sk.getToken(),
+			expires	: sk.getExpiration().toString()
+		]
+	}
+
+	def "password-based login should fail"() {
+		String username = "username"
+		String password = "password"
+
+		when:
+		request.requestURI = "/api/v1/login/password"
+		request.method = "POST"
+		request.JSON = [
+			username: username,
+			password: password
+		]
+		withFilters(action: "password") {
+			controller.password()
+		}
+
+		then:
+		thrown ApiException
+		1 * userService.getUserFromUsernameAndPassword(username, password) >> null
 	}
 }
