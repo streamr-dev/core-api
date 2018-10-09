@@ -8,7 +8,8 @@ class ChallengeResponseCommand {
 	String signature
 	String address
 	static constraints = {
-		signature(blank: false)
-		address(blank: false)
+		challenge(blank: false, nullable: false)
+		signature(blank: false, nullable: false)
+		address(blank: false, nullable: false)
 	}
 }
