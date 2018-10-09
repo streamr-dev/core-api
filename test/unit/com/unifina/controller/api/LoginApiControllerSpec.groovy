@@ -36,7 +36,6 @@ class LoginApiControllerSpec extends Specification {
 
 	void "should generate challenge"() {
 		when:
-		request.addHeader("Authorization", "Token myApiKey")
 		request.requestURI = "/api/v1/login/challenge"
 		request.method = "POST"
 		withFilters(action: "challenge") {
@@ -69,7 +68,6 @@ class LoginApiControllerSpec extends Specification {
 		SessionToken sk = new SessionToken(64, user, 3)
 
 		when:
-		request.addHeader("Authorization", "Token myApiKey")
 		request.requestURI = "/api/v1/login/response"
 		request.method = "POST"
 		request.JSON = [
@@ -102,7 +100,6 @@ class LoginApiControllerSpec extends Specification {
 		Challenge challenge = new Challenge(id: "id", challenge: "challenge").save(failOnError: true, validate: true)
 
 		when:
-		request.addHeader("Authorization", "Token myApiKey")
 		request.requestURI = "/api/v1/login/response"
 		request.method = "POST"
 		request.JSON = [
