@@ -216,19 +216,4 @@ class LoginApiControllerSpec extends Specification {
 		1 * userService.getUserFromApiKey(apiKey) >> null
 		thrown ApiException
 	}
-
-	def "redirects from index to different logins"() {
-		when:
-		request.requestURI = "/api/v1/login"
-		request.method = "POST"
-		request.JSON = [
-			method: LoginCommand.Method.ETHEREUM.toString()
-		]
-		withFilters(action: "index") {
-			controller.index()
-		}
-		then:
-		1 * challengeService.createChallenge() >> new Challenge(id: "123", challenge: "challenge 123")
-		//controller.challenge()
-	}
 }

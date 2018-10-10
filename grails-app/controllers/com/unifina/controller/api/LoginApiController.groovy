@@ -67,11 +67,4 @@ class LoginApiController {
 			expires: sk.getExpiration().toString()
 		] as JSON)
 	}
-
-	@StreamrApi(authenticationLevel = AuthLevel.NONE)
-	def index(LoginCommand cmd) {
-		if (cmd.method == LoginCommand.Method.ETHEREUM) {
-			redirect(action: challenge())
-		}
-	}
 }
