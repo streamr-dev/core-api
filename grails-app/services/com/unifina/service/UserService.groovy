@@ -163,4 +163,10 @@ class UserService {
 		String encodedPassword = springSecurityService.encodePassword(password)
 		return SecUser.findByUsernameAndPassword(username, encodedPassword)
 	}
+
+	SecUser getUserFromApiKey(String apiKey){
+		Key key = Key.get(apiKey)
+		if(key==null) return null
+		return key.user
+	}
 }

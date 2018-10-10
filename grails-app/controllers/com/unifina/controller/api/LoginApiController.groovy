@@ -56,11 +56,22 @@ class LoginApiController {
 	}
 
 	@StreamrApi(authenticationLevel = AuthLevel.NONE)
+	def apikey(ApiKeyCommand cmd) {
+		SecUser user = userService.getUserFromApiKey(cmd.apiKey)
+		if(user==null){
+			throw new ApiException(400, 'INVALID_API_KEY', "apikey-based login failed")
+		}
+		SessionToken sk = sessionService.generateToken(user)
+		render([
+			token	: sk.getToken(),
+			expires	: sk.getExpiration().toString()
+		] as JSON)
+	}
+
+	@StreamrApi(authenticationLevel = AuthLevel.NONE)
 	def index(LoginCommand cmd) {
-		switch(cmd.method) {
-			case LoginCommand.Method.ETHEREUM: redirect(action: challenge())
-			case LoginCommand.Method.PASSWORD: //TODO: add password-based login
-			default: redirect(action: challenge())
+		if(cmd.method == LoginCommand.Method.ETHEREUM){
+			redirect(action: challenge())
 		}
 	}
 }

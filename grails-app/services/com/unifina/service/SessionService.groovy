@@ -15,24 +15,24 @@ class SessionService {
 
 	RedisClient redisClient
 
-    SessionToken generateToken(SecUser user) {
+	SessionToken generateToken(SecUser user) {
 		SessionToken sk = new SessionToken(TOKEN_LENGTH, user, TTL_HOURS)
 		RedisConnection<String, String> connection = getRedisClient().connect()
-		connection.setex(sk.getToken(), TTL_HOURS*3600, sk.getUser().id.toString())
+		connection.setex(sk.getToken(), TTL_HOURS * 3600, sk.getUser().id.toString())
 		return sk
 	}
 
-	SecUser getUserFromToken(String token){
+	SecUser getUserFromToken(String token) {
 		RedisConnection<String, String> connection = getRedisClient().connect()
 		String userID = connection.get(token)
-		if(userID==null){
+		if (userID == null) {
 			return null
 		}
 		return SecUser.get(userID.toLong())
 	}
 
 	private RedisClient getRedisClient() {
-		if(redisClient==null){
+		if (redisClient == null) {
 			List<String> hosts = MapTraversal.getList(Holders.getConfig(), "streamr.redis.hosts");
 			String password = MapTraversal.getString(Holders.getConfig(), "streamr.redis.password");
 
@@ -40,8 +40,8 @@ class SessionService {
 			Assert.notEmpty(hosts, "streamr.redis.hosts is empty!")
 			Assert.notNull(password, "streamr.redis.password is null!")
 
-			redisClient = RedisClient.create(RedisURI.create("redis://"+password+"@"+hosts.get(0)))
-		}else{
+			redisClient = RedisClient.create(RedisURI.create("redis://" + password + "@" + hosts.get(0)))
+		} else {
 			return redisClient
 		}
 	}

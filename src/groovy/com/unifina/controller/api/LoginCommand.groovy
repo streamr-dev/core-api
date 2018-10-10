@@ -5,12 +5,14 @@ import grails.validation.Validateable
 class LoginCommand {
 	enum Method {
 		ETHEREUM,
-		PASSWORD
+		PASSWORD,
+		APIKEY
 	}
 
 	Method method
 	String username
 	String password
+	String apiKey
 
 	static constraints = {
 		method(blank: false, nullable: false)
