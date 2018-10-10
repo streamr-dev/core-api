@@ -13,12 +13,14 @@ import groovy.json.JsonSlurper
 import spock.lang.Shared
 import spock.lang.Specification
 
-@TestMixin(ControllerUnitTestMixin) // "as JSON" converter
+@TestMixin(ControllerUnitTestMixin)
+// "as JSON" converter
 @TestFor(EthereumIntegrationKeyService)
 @Mock([IntegrationKey, SecUser, Challenge])
 class EthereumIntegrationKeyServiceSpec extends Specification {
 
-	@Shared String actualPassword
+	@Shared
+	String actualPassword
 	SecUser me
 
 	void setupSpec() {
@@ -66,12 +68,12 @@ class EthereumIntegrationKeyServiceSpec extends Specification {
 
 		then:
 		integrationKey.toMap() == [
-		    id: "1",
-			user: 1,
-			name: "ethKey",
+			id     : "1",
+			user   : 1,
+			name   : "ethKey",
 			service: "ETHEREUM",
-			json: [
-			    address: "0xf4f683a8502b2796392bedb05dbbcc8c6e582e59"
+			json   : [
+				address: "0xf4f683a8502b2796392bedb05dbbcc8c6e582e59"
 			]
 		]
 	}

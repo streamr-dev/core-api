@@ -39,14 +39,14 @@ class EthereumIntegrationKeyService {
 			String publicKey = "0x" + getPublicKey(privateKey)
 			String encryptedPrivateKey = encryptor.encrypt(privateKey, user.id.byteValue())
 			return new IntegrationKey(
-					name: name,
-					user: user,
-					service: IntegrationKey.Service.ETHEREUM,
-					idInService: publicKey,
-					json: ([
-							privateKey: encryptedPrivateKey,
-							address   : publicKey
-					] as JSON).toString()
+				name: name,
+				user: user,
+				service: IntegrationKey.Service.ETHEREUM,
+				idInService: publicKey,
+				json: ([
+					privateKey: encryptedPrivateKey,
+					address   : publicKey
+				] as JSON).toString()
 			).save(flush: true, failOnError: true)
 		} catch (NumberFormatException e) {
 			throw new IllegalArgumentException("Private key must be a valid hex string!")
@@ -109,9 +109,9 @@ class EthereumIntegrationKeyService {
 		IntegrationKey.findAllByServiceAndUser(IntegrationKey.Service.ETHEREUM, user)
 	}
 
-	SecUser getOrCreateFromEthereumAddress(String address){
+	SecUser getOrCreateFromEthereumAddress(String address) {
 		IntegrationKey key = IntegrationKey.findByIdInServiceAndService(address, IntegrationKey.Service.ETHEREUM_ID)
-		if(key==null){
+		if (key == null) {
 			SecUser user = new SecUser(
 				username: address,
 				password: generatePassword(16),
@@ -132,7 +132,7 @@ class EthereumIntegrationKeyService {
 	}
 
 	//TODO: Must be moved to some util class. Maybe in java.com.unifina.security.SomeClass?
-	private String generatePassword(int length){
+	private String generatePassword(int length) {
 		String charset = (('a'..'z') + ('A'..'Z') + ('0'..'9')).join()
 		return RandomStringUtils.random(length, charset.toCharArray())
 	}

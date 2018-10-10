@@ -23,6 +23,7 @@ class LoginApiControllerSpec extends Specification {
 	SessionService sessionService
 	EthereumIntegrationKeyService ethereumIntegrationKeyService
 	UserService userService
+
 	def setup() {
 		challengeService = controller.challengeService = Mock(ChallengeService)
 		sessionService = controller.sessionService = Mock(SessionService)
@@ -45,8 +46,8 @@ class LoginApiControllerSpec extends Specification {
 		then:
 		response.status == 200
 		response.json == [
-				id       : null,
-				challenge: "challenge 123"
+			id       : null,
+			challenge: "challenge 123"
 		]
 		1 * challengeService.createChallenge() >> new Challenge(id: "123", challenge: "challenge 123")
 	}
@@ -88,8 +89,8 @@ class LoginApiControllerSpec extends Specification {
 		1 * sessionService.generateToken(user) >> sk
 		response.status == 200
 		response.json == [
-			token	: sk.getToken(),
-			expires	: sk.getExpiration().toString()
+			token  : sk.getToken(),
+			expires: sk.getExpiration().toString()
 		]
 	}
 
@@ -143,8 +144,8 @@ class LoginApiControllerSpec extends Specification {
 		1 * sessionService.generateToken(user) >> sk
 		response.status == 200
 		response.json == [
-			token	: sk.getToken(),
-			expires	: sk.getExpiration().toString()
+			token  : sk.getToken(),
+			expires: sk.getExpiration().toString()
 		]
 	}
 
@@ -193,8 +194,8 @@ class LoginApiControllerSpec extends Specification {
 		1 * sessionService.generateToken(user) >> sk
 		response.status == 200
 		response.json == [
-			token	: sk.getToken(),
-			expires	: sk.getExpiration().toString()
+			token  : sk.getToken(),
+			expires: sk.getExpiration().toString()
 		]
 	}
 

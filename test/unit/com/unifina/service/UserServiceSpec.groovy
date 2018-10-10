@@ -62,10 +62,10 @@ class UserServiceSpec extends Specification {
 		permissionService = service.permissionService = Mock(PermissionService)
 	}
 
-    def "the user is created when called, with default roles if none supplied"() {
+	def "the user is created when called, with default roles if none supplied"() {
 		when:
 		createData()
-		SecUser user = service.createUser([username: "test@test.com", name:"test", password: "test", timezone:"Europe/Minsk", enabled:true, accountLocked:false, passwordExpired:false])
+		SecUser user = service.createUser([username: "test@test.com", name: "test", password: "test", timezone: "Europe/Minsk", enabled: true, accountLocked: false, passwordExpired: false])
 
 		then:
 		SecUser.count() == 1
@@ -78,7 +78,7 @@ class UserServiceSpec extends Specification {
 	def "default API key is created for user"() {
 		when:
 		createData()
-		SecUser user = service.createUser([username: "test@test.com", name:"test", password: "test", timezone:"Europe/Minsk", enabled:true, accountLocked:false, passwordExpired:false])
+		SecUser user = service.createUser([username: "test@test.com", name: "test", password: "test", timezone: "Europe/Minsk", enabled: true, accountLocked: false, passwordExpired: false])
 
 		then:
 		user.getKeys().size() == 1
@@ -105,11 +105,11 @@ class UserServiceSpec extends Specification {
 		user.getAuthorities().size() == 1
 		user.getAuthorities().toArray()[0].authority == "ROLE_USER"
 
-		1 * permissionService.get(Feed, {it.id == 1} as SecUser) >> []
-		1 * permissionService.get(ModulePackage, {it.id == 1} as SecUser) >> []
-		1 * permissionService.systemGrant({ it.id == 1} as SecUser, { it.id == 1} as ModulePackage)
-		1 * permissionService.systemGrant({ it.id == 1} as SecUser, { it.id == 2} as ModulePackage)
-    }
+		1 * permissionService.get(Feed, { it.id == 1 } as SecUser) >> []
+		1 * permissionService.get(ModulePackage, { it.id == 1 } as SecUser) >> []
+		1 * permissionService.systemGrant({ it.id == 1 } as SecUser, { it.id == 1 } as ModulePackage)
+		1 * permissionService.systemGrant({ it.id == 1 } as SecUser, { it.id == 2 } as ModulePackage)
+	}
 
 	def "it should fail if the default roles, feeds of modulePackages are not found"() {
 		when:
@@ -153,9 +153,9 @@ class UserServiceSpec extends Specification {
 		SecUser retrievedUser = service.getUserFromUsernameAndPassword(username, password)
 		SecUser wronglyRetrieved = service.getUserFromUsernameAndPassword(username, wrongPassword)
 		then:
-		retrievedUser!=null
+		retrievedUser != null
 		retrievedUser.username == username
-		wronglyRetrieved==null
+		wronglyRetrieved == null
 	}
 
 	def "should find user from api key"() {
@@ -167,7 +167,7 @@ class UserServiceSpec extends Specification {
 		when:
 		SecUser retrievedUser = service.getUserFromApiKey(key.id)
 		then:
-		retrievedUser!=null
+		retrievedUser != null
 		retrievedUser.username == user.username
 	}
 }

@@ -25,19 +25,19 @@ class LoginApiController {
 
 	@StreamrApi(authenticationLevel = AuthLevel.NONE)
 	def response(ChallengeResponseCommand cmd) {
-		if(cmd.challenge==null){
+		if (cmd.challenge == null) {
 			throw new ApiException(400, 'INVALID_CHALLENGE', "challenge validation failed")
 		}
 		boolean valid = challengeService.verifyChallengeResponse(cmd.challenge.id,
 			cmd.challenge.challenge, cmd.signature.toLowerCase(), cmd.address.toLowerCase())
-		if(!valid){
+		if (!valid) {
 			throw new ApiException(400, 'INVALID_CHALLENGE', "challenge-based login failed")
-		}else{
+		} else {
 			SecUser user = ethereumIntegrationKeyService.getOrCreateFromEthereumAddress(cmd.address)
 			SessionToken sk = sessionService.generateToken(user)
 			render([
-				token	: sk.getToken(),
-				expires	: sk.getExpiration().toString()
+				token  : sk.getToken(),
+				expires: sk.getExpiration().toString()
 			] as JSON)
 		}
 	}
@@ -45,32 +45,32 @@ class LoginApiController {
 	@StreamrApi(authenticationLevel = AuthLevel.NONE)
 	def password(UsernamePasswordCommand cmd) {
 		SecUser user = userService.getUserFromUsernameAndPassword(cmd.username, cmd.password)
-		if(user==null){
+		if (user == null) {
 			throw new ApiException(400, 'INVALID_USERNAME_OR_PASSWORD', "password-based login failed")
 		}
 		SessionToken sk = sessionService.generateToken(user)
 		render([
-			token	: sk.getToken(),
-			expires	: sk.getExpiration().toString()
+			token  : sk.getToken(),
+			expires: sk.getExpiration().toString()
 		] as JSON)
 	}
 
 	@StreamrApi(authenticationLevel = AuthLevel.NONE)
 	def apikey(ApiKeyCommand cmd) {
 		SecUser user = userService.getUserFromApiKey(cmd.apiKey)
-		if(user==null){
+		if (user == null) {
 			throw new ApiException(400, 'INVALID_API_KEY', "apikey-based login failed")
 		}
 		SessionToken sk = sessionService.generateToken(user)
 		render([
-			token	: sk.getToken(),
-			expires	: sk.getExpiration().toString()
+			token  : sk.getToken(),
+			expires: sk.getExpiration().toString()
 		] as JSON)
 	}
 
 	@StreamrApi(authenticationLevel = AuthLevel.NONE)
 	def index(LoginCommand cmd) {
-		if(cmd.method == LoginCommand.Method.ETHEREUM){
+		if (cmd.method == LoginCommand.Method.ETHEREUM) {
 			redirect(action: challenge())
 		}
 	}

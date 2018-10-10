@@ -21,9 +21,9 @@ class UnifinaCoreAPIFilters {
 	def sessionService
 
 	GrailsApplication grailsApplication
-	
+
 	private Map<String, StreamrApi> apiAnnotationCache = new HashMap<String, StreamrApi>()
-	
+
 	@CompileStatic
 	private StreamrApi getApiAnnotation(String controllerName, String actionName) {
 		String key = "$controllerName/$actionName"
@@ -47,7 +47,7 @@ class UnifinaCoreAPIFilters {
 			return annotation
 		}
 	}
-	
+
 	def filters = {
 		authenticationFilter(uri: '/api/**', uriExclude: '/api/v1/login/**') {
 			before = {
@@ -58,20 +58,20 @@ class UnifinaCoreAPIFilters {
 				TokenAuthenticator authenticator = new TokenAuthenticator()
 				AuthenticationResult result = authenticator.authenticate(request)
 
-				try{
+				try {
 					String sessionToken = authenticator.parseAuthorizationHeader(
 						request.getHeader("Authorization"), "Bearer")
-					if(sessionToken!=null){
+					if (sessionToken != null) {
 						SecUser user = sessionService.getUserFromToken(sessionToken)
-						if(user!=null){
+						if (user != null) {
 							result = new AuthenticationResult(user)
 						}
 					}
-				}catch(AuthenticationMalformedException){
-					render (
+				} catch (AuthenticationMalformedException) {
+					render(
 						status: 400,
 						text: [
-							code: "MALFORMED_TOKEN",
+							code   : "MALFORMED_TOKEN",
 							message: "Invalid request. Did you pass a HTTP header of the form 'Authorization: Bearer token' ?"
 						] as JSON
 					)
@@ -79,10 +79,10 @@ class UnifinaCoreAPIFilters {
 				}
 
 				if (result.lastAuthenticationMalformed) {
-					render (
+					render(
 						status: 400,
 						text: [
-							code: "MALFORMED_TOKEN",
+							code   : "MALFORMED_TOKEN",
 							message: "Invalid request. Did you pass a HTTP header of the form 'Authorization: Token apiKey' ?"
 						] as JSON
 					)
@@ -97,7 +97,7 @@ class UnifinaCoreAPIFilters {
 					render(
 						status: 401,
 						text: [
-							code: "NOT_AUTHENTICATED",
+							code   : "NOT_AUTHENTICATED",
 							message: "Not authenticated via token or cookie"
 						] as JSON
 					)
@@ -106,7 +106,7 @@ class UnifinaCoreAPIFilters {
 					render(
 						status: 403,
 						text: [
-							code: "NOT_PERMITTED",
+							code   : "NOT_PERMITTED",
 							message: "Not authorized to access this endpoint"
 						] as JSON
 					)

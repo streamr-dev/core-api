@@ -159,14 +159,14 @@ class UserService {
 		}
 	}
 
-	SecUser getUserFromUsernameAndPassword(String username, String password){
+	SecUser getUserFromUsernameAndPassword(String username, String password) {
 		String encodedPassword = springSecurityService.encodePassword(password)
 		return SecUser.findByUsernameAndPassword(username, encodedPassword)
 	}
 
-	SecUser getUserFromApiKey(String apiKey){
+	SecUser getUserFromApiKey(String apiKey) {
 		Key key = Key.get(apiKey)
-		if(key==null) return null
+		if (key == null) return null
 		return key.user
 	}
 }

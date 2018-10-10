@@ -42,7 +42,7 @@ class UnifinaCoreAPIFiltersSpec extends Specification {
 		then:
 		response.status == 403
 		response.json == [
-		    code: "NOT_PERMITTED",
+			code   : "NOT_PERMITTED",
 			message: "Not authorized to access this endpoint"
 		]
 	}
@@ -74,7 +74,7 @@ class UnifinaCoreAPIFiltersSpec extends Specification {
 		when:
 		new SecUserSecRole(secUser: user, secRole: adminRole).save(failOnError: true)
 		String token = "mytoken"
-		request.addHeader("Authorization", "Bearer "+token)
+		request.addHeader("Authorization", "Bearer " + token)
 		request.requestURI = "/api/v1/nodes"
 		withFilters(action: "index") {
 			controller.index()

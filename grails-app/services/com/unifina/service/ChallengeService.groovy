@@ -15,13 +15,13 @@ class ChallengeService {
 	boolean verifyChallengeResponse(String challengeID, String challenge, String signature, String publicKey) {
 		Challenge dbChallenge = Challenge.get(challengeID)
 		boolean invalidChallenge = dbChallenge == null || challenge != dbChallenge.challenge
-		if(invalidChallenge){
+		if (invalidChallenge) {
 			return false
 		}
 		byte[] messageHash = ECRecover.calculateMessageHash(challenge)
 		String address = ECRecover.recoverAddress(messageHash, signature)
 		boolean valid = address == publicKey
-		if(valid){
+		if (valid) {
 			dbChallenge.delete()
 		}
 		return valid
