@@ -185,17 +185,4 @@ class UserServiceSpec extends Specification {
 		retrievedUser != null
 		retrievedUser.username == user.username
 	}
-
-	def "should find user from api key"() {
-		SecUser user = new SecUser(username: "username", password: "password").save(failOnError: true, validate: false)
-		Key key = new Key(name: "key", user: user)
-		key.id = "myApiKey"
-		key.save(failOnError: true, validate: true)
-
-		when:
-		SecUser retrievedUser = service.getUserFromApiKey(key.id)
-		then:
-		retrievedUser!=null
-		retrievedUser.username == user.username
-	}
 }
