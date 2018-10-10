@@ -7,7 +7,6 @@ import com.unifina.api.DuplicateNotAllowedException
 import com.unifina.domain.security.IntegrationKey
 import com.unifina.domain.security.SecUser
 import com.unifina.security.StringEncryptor
-import com.unifina.utils.EthereumAddressValidator
 import grails.compiler.GrailsCompileStatic
 import grails.converters.JSON
 import groovy.transform.CompileStatic
