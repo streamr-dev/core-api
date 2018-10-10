@@ -8,8 +8,4 @@ class ApiKeyCommand {
 	static constraints = {
 		apiKey(blank: false, nullable: false)
 	}
-
-	ApiKeyCommand(String apiKey){
-		this.apiKey = apiKey
-	}
 }

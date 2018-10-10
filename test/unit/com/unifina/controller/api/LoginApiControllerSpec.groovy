@@ -1,7 +1,7 @@
 package com.unifina.controller.api
 
 import com.unifina.api.ApiException
-import com.unifina.domain.security.Challenge
+import com.unifina.security.Challenge
 import com.unifina.domain.security.Key
 import com.unifina.domain.security.SecUser
 import com.unifina.security.SessionToken
@@ -17,7 +17,7 @@ import spock.lang.Specification
  * See the API for {@link grails.test.mixin.web.ControllerUnitTestMixin} for usage instructions
  */
 @TestFor(LoginApiController)
-@Mock([Challenge, SecUser, com.unifina.filters.UnifinaCoreAPIFilters, Key])
+@Mock([SecUser, com.unifina.filters.UnifinaCoreAPIFilters, Key])
 class LoginApiControllerSpec extends Specification {
 	ChallengeService challengeService
 	SessionService sessionService
@@ -36,6 +36,8 @@ class LoginApiControllerSpec extends Specification {
 	}
 
 	void "should generate challenge"() {
+		Challenge challenge = new Challenge("id", "challenge", challengeService.TTL_SECONDS)
+
 		when:
 		request.requestURI = "/api/v1/login/challenge"
 		request.method = "POST"
@@ -46,17 +48,18 @@ class LoginApiControllerSpec extends Specification {
 		then:
 		response.status == 200
 		response.json == [
-			id       : null,
-			challenge: "challenge 123"
+			id       : challenge.getId(),
+			challenge: challenge.getChallenge(),
+			expires: challenge.getExpiration().toString()
 		]
-		1 * challengeService.createChallenge() >> new Challenge(id: "123", challenge: "challenge 123")
+		1 * challengeService.createChallenge() >> challenge
 	}
 
 	def "response to challenge should pass"() {
 		String address = "address"
 		String signature = "signature"
 
-		Challenge challenge = new Challenge(id: "id", challenge: "challenge").save(failOnError: true, validate: true)
+		Challenge challenge = new Challenge("id", "challenge", challengeService.TTL_SECONDS)
 
 		SecUser user = new SecUser(
 			username: "username",
@@ -73,8 +76,8 @@ class LoginApiControllerSpec extends Specification {
 		request.method = "POST"
 		request.JSON = [
 			challenge: [
-				id       : challenge.id,
-				challenge: challenge.challenge
+				id       : challenge.getId(),
+				challenge: challenge.getChallenge()
 			],
 			signature: signature,
 			address  : address
@@ -84,7 +87,7 @@ class LoginApiControllerSpec extends Specification {
 		}
 
 		then:
-		1 * challengeService.verifyChallengeResponse(challenge.id, challenge.challenge, signature, address) >> true
+		1 * challengeService.verifyChallengeResponse(challenge.getId(), challenge.getChallenge(), signature, address) >> true
 		1 * ethereumIntegrationKeyService.getOrCreateFromEthereumAddress(address) >> user
 		1 * sessionService.generateToken(user) >> sk
 		response.status == 200
@@ -98,15 +101,15 @@ class LoginApiControllerSpec extends Specification {
 		String address = "address"
 		String signature = "signature"
 
-		Challenge challenge = new Challenge(id: "id", challenge: "challenge").save(failOnError: true, validate: true)
+		Challenge challenge = new Challenge("id", "challenge", challengeService.TTL_SECONDS)
 
 		when:
 		request.requestURI = "/api/v1/login/response"
 		request.method = "POST"
 		request.JSON = [
 			challenge: [
-				id       : challenge.id,
-				challenge: challenge.challenge
+				id       : challenge.getId(),
+				challenge: challenge.getChallenge()
 			],
 			signature: signature,
 			address  : address
@@ -117,7 +120,7 @@ class LoginApiControllerSpec extends Specification {
 
 		then:
 		thrown ApiException
-		1 * challengeService.verifyChallengeResponse(challenge.id, challenge.challenge, signature, address) >> false
+		1 * challengeService.verifyChallengeResponse(challenge.getId(), challenge.getChallenge(), signature, address) >> false
 	}
 
 	def "password-based login should pass"() {

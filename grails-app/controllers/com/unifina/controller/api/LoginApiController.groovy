@@ -2,6 +2,7 @@ package com.unifina.controller.api
 
 import com.unifina.api.ApiException
 import com.unifina.domain.security.SecUser
+import com.unifina.security.Challenge
 import com.unifina.security.SessionToken
 import com.unifina.security.AuthLevel
 import com.unifina.security.StreamrApi
@@ -19,8 +20,12 @@ class LoginApiController {
 
 	@StreamrApi(authenticationLevel = AuthLevel.NONE)
 	def challenge() {
-		def ch = challengeService.createChallenge()
-		render([id: ch.id, challenge: ch.challenge] as JSON)
+		Challenge ch = challengeService.createChallenge()
+		render([
+			id: ch.getId(),
+			challenge: ch.getChallenge(),
+			expires: ch.getExpiration().toString()
+		] as JSON)
 	}
 
 	@StreamrApi(authenticationLevel = AuthLevel.NONE)

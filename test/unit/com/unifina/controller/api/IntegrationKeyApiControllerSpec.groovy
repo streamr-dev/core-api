@@ -1,6 +1,6 @@
 package com.unifina.controller.api
 
-import com.unifina.domain.security.Challenge
+import com.unifina.security.Challenge
 import com.unifina.domain.security.IntegrationKey
 import com.unifina.domain.security.Key
 import com.unifina.domain.security.SecUser
@@ -12,7 +12,7 @@ import grails.test.mixin.TestFor
 import spock.lang.Specification
 
 @TestFor(IntegrationKeyApiController)
-@Mock([UnifinaCoreAPIFilters, Challenge, Key, SecUser, IntegrationKey])
+@Mock([UnifinaCoreAPIFilters, Key, SecUser, IntegrationKey])
 class IntegrationKeyApiControllerSpec extends Specification {
 	EthereumIntegrationKeyService ethereumIntegrationKeyService
 	SecUser me
@@ -81,10 +81,9 @@ class IntegrationKeyApiControllerSpec extends Specification {
 		String address = "0x494531425508c4bc95e522b24fd571461583e916"
 		String signature = "0x50ba6f6df25ba593cb8188df29ca27ea0a7cd38fadc4d40ef9fad455117e190f2a7ec880a76b930071205fee19cf55eb415bd33b2f6cb5f7be36f79f740da6e81b"
 
-		Challenge challenge = new Challenge(
-			id: "cc_KtW2PQT-ak4VV2DJJjgF48-j7GPQNejd-1dQENE1A",
-			challenge: "This is a challenge created by Streamr to prove private key ownership by signing this random data with it:\n\ncc_KtW2PQT-ak4VV2DJJjgF48-j7GPQNejd-1dQENE1A"
-		).save(failOnError: true, validate: true)
+		Challenge challenge = new Challenge("cc_KtW2PQT-ak4VV2DJJjgF48-j7GPQNejd-1dQENE1A",
+			"This is a challenge created by Streamr to prove private key ownership by signing this random data with it:\n\n",
+			300)
 
 		when:
 		request.addHeader("Authorization", "Token myApiKey")
@@ -94,8 +93,8 @@ class IntegrationKeyApiControllerSpec extends Specification {
 				name     : "foobar",
 				service  : IntegrationKey.Service.ETHEREUM_ID.toString(),
 				challenge: [
-						id       : challenge.id,
-						challenge: challenge.challenge
+						id       : challenge.getId(),
+						challenge: challenge.getChallenge()
 				],
 				signature: signature,
 				account  : address
@@ -109,8 +108,8 @@ class IntegrationKeyApiControllerSpec extends Specification {
 		response.json == [
 				id		 : null,
 				challenge: [
-					id       : challenge.id,
-					challenge: challenge.challenge
+					id       : challenge.getId(),
+					challenge: challenge.getChallenge()
 				],
 				json: [
 					address  : address
