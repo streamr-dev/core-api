@@ -167,4 +167,67 @@ class LoginApiControllerSpec extends Specification {
 		thrown ApiException
 		1 * userService.getUserFromUsernameAndPassword(username, password) >> null
 	}
+
+	def "apikey-based login should pass"() {
+		SecUser user = new SecUser(
+			username: "username",
+			password: "password"
+		).save(failOnError: true, validate: false)
+
+		String apiKey = "apiKey"
+
+		SessionToken sk = new SessionToken(64, user, 3)
+
+		when:
+		request.requestURI = "/api/v1/login/apikey"
+		request.method = "POST"
+		request.JSON = [
+			apiKey: apiKey
+		]
+		withFilters(action: "apikey") {
+			controller.apikey()
+		}
+
+		then:
+		1 * userService.getUserFromApiKey(apiKey) >> user
+		1 * sessionService.generateToken(user) >> sk
+		response.status == 200
+		response.json == [
+			token	: sk.getToken(),
+			expires	: sk.getExpiration().toString()
+		]
+	}
+
+	def "apikey-based login should fail"() {
+		String apiKey = "apiKey"
+
+		when:
+		request.requestURI = "/api/v1/login/apikey"
+		request.method = "POST"
+		request.JSON = [
+			apiKey: apiKey
+		]
+		withFilters(action: "apikey") {
+			controller.apikey()
+		}
+
+		then:
+		1 * userService.getUserFromApiKey(apiKey) >> null
+		thrown ApiException
+	}
+
+	def "redirects from index to different logins"() {
+		when:
+		request.requestURI = "/api/v1/login"
+		request.method = "POST"
+		request.JSON = [
+			method: LoginCommand.Method.ETHEREUM.toString()
+		]
+		withFilters(action: "index") {
+			controller.index()
+		}
+		then:
+		1 * challengeService.createChallenge() >> new Challenge(id: "123", challenge: "challenge 123")
+		//controller.challenge()
+	}
 }
