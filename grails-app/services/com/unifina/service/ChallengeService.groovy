@@ -20,7 +20,7 @@ class ChallengeService {
 		}
 		byte[] messageHash = ECRecover.calculateMessageHash(challenge)
 		String address = ECRecover.recoverAddress(messageHash, signature)
-		boolean valid = address == publicKey
+		boolean valid = address.toLowerCase() == publicKey.toLowerCase()
 		if (valid) {
 			dbChallenge.delete()
 		}
