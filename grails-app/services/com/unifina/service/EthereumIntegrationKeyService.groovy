@@ -112,12 +112,14 @@ class EthereumIntegrationKeyService {
 	SecUser getOrCreateFromEthereumAddress(String address) {
 		IntegrationKey key = IntegrationKey.findByIdInServiceAndService(address, IntegrationKey.Service.ETHEREUM_ID)
 		if (key == null) {
+			Calendar now = Calendar.getInstance()
+			TimeZone timeZone = now.getTimeZone()
 			SecUser user = new SecUser(
 				username: address,
 				password: generatePassword(16),
 				name: address,
-				timezone: "UTC"
-			).save(failOnError: true, flush: true, validate: false)
+				timezone: timeZone.getDisplayName()
+			).save(failOnError: true, flush: true, validate: true)
 			key = new IntegrationKey(
 				name: address,
 				user: user,
