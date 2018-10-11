@@ -10,15 +10,15 @@ public class Challenge {
 	private String challenge;
 	private Date expiration;
 
-	public Challenge (String text, int length, int ttlSeconds) {
+	public Challenge(String text, int length, int ttlSeconds) {
 		this.id = RandomStringUtils.randomAlphanumeric(length);
-		this.challenge = text+id;
+		this.challenge = text + id;
 		this.expiration = new DateTime().plusSeconds(ttlSeconds).toDate();
 	}
 
 	public Challenge(String id, String text, int ttlSeconds) {
 		this.id = id;
-		this.challenge = text+id;
+		this.challenge = text + id;
 		this.expiration = new DateTime().plusSeconds(ttlSeconds).toDate();
 	}
 

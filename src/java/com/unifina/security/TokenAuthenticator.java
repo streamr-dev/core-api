@@ -10,6 +10,7 @@ import javax.servlet.http.HttpServletRequest;
 
 public class TokenAuthenticator {
 	SessionService sessionService = Holders.getApplicationContext().getBean(SessionService.class);
+
 	public AuthenticationResult authenticate(HttpServletRequest request) {
 		String[] header;
 		try {
@@ -17,14 +18,14 @@ public class TokenAuthenticator {
 		} catch (AuthenticationMalformedException e) {
 			return new AuthenticationResult(false, true);
 		}
-		if(header==null) {
+		if (header == null) {
 			return new AuthenticationResult(true, false);
 		}
 		if (header[0].equals("Token")) {
 			AuthenticationResult res = getResultFromApiKey(header[1]);
 			res.setAuthorizationHeaderName("Token");
 			return res;
-		}else if(header[0].equals("Bearer")) {
+		} else if (header[0].equals("Bearer")) {
 			AuthenticationResult res = getResultFromSessionToken(header[1]);
 			res.setAuthorizationHeaderName("Bearer");
 			return res;
@@ -36,7 +37,7 @@ public class TokenAuthenticator {
 		s = s == null ? null : s.trim();
 		if (s != null && !s.isEmpty()) {
 			String[] parts = s.split("\\s+");
-			if(parts.length!=2){
+			if (parts.length != 2) {
 				throw new AuthenticationMalformedException();
 			}
 			if (parts[0].toLowerCase().equals("Token".toLowerCase())) {
@@ -45,10 +46,10 @@ public class TokenAuthenticator {
 			} else if (parts[0].toLowerCase().equals("Bearer".toLowerCase())) {
 				String[] res = {"Bearer", parts[1]};
 				return res;
-			}else {
+			} else {
 				throw new AuthenticationMalformedException();
 			}
- 		}
+		}
 		return null;
 	}
 
@@ -63,7 +64,7 @@ public class TokenAuthenticator {
 		return new AuthenticationResult(false, false);
 	}
 
-	public AuthenticationResult getResultFromApiKey(String apiKey){
+	public AuthenticationResult getResultFromApiKey(String apiKey) {
 		if (apiKey == null) {
 			return new AuthenticationResult(true, false);
 		}

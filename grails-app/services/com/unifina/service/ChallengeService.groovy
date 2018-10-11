@@ -43,7 +43,7 @@ class ChallengeService {
 		boolean invalidChallenge = challengeRedis == null || challenge != challengeRedis
 		if (invalidChallenge) {
 			return null
-		}else {
+		} else {
 			getConnection().del(challengeID)
 		}
 		byte[] messageHash = ECRecover.calculateMessageHash(challenge)

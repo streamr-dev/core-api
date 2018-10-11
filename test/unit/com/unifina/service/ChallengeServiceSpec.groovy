@@ -12,9 +12,11 @@ import spock.lang.Specification
 @TestFor(ChallengeService)
 class ChallengeServiceSpec extends Specification {
 	String text
+
 	void setup() {
 		text = "This is a challenge created by Streamr to prove private key ownership by signing this random data with it:\n\n"
 	}
+
 	void "should generate challenge"() {
 		when:
 		Challenge challenge = service.createChallenge()

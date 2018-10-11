@@ -57,7 +57,7 @@ class EthereumIntegrationKeyService {
 		String address
 		try {
 			address = challengeService.verifyChallengeAndGetAddress(challengeID, challenge, signature)
-			if(address==null) {
+			if (address == null) {
 				throw new ApiException(400, "INVALID_CHALLENGE", "challenge validation failed")
 			}
 		} catch (SignatureException | DecoderException e) {
@@ -108,10 +108,10 @@ class EthereumIntegrationKeyService {
 			Calendar now = Calendar.getInstance()
 			TimeZone timeZone = now.getTimeZone()
 			SecUser user = userService.createUser([
-				username: address,
-				password: RandomStringUtils.random(32),
-				name: address,
-				timezone: timeZone.getDisplayName(),
+				username       : address,
+				password       : RandomStringUtils.random(32),
+				name           : address,
+				timezone       : timeZone.getDisplayName(),
 				enabled        : true,
 				accountLocked  : false,
 				passwordExpired: false

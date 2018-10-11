@@ -62,7 +62,7 @@ class UnifinaCoreAPIFilters {
 							status: 400,
 							text: [
 								code   : "MALFORMED_TOKEN",
-								message: "Invalid request. Did you pass a HTTP header of the form 'Authorization: "+result.getAuthorizationHeaderName()+" token' ?"
+								message: "Invalid request. Did you pass a HTTP header of the form 'Authorization: " + result.getAuthorizationHeaderName() + " token' ?"
 							] as JSON
 						)
 						return false
@@ -98,7 +98,7 @@ class UnifinaCoreAPIFilters {
 						}
 						return true
 					}
-				}catch (Exception e) {
+				} catch (Exception e) {
 					render(
 						status: 500,
 						text: [
