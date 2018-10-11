@@ -13,6 +13,7 @@ import com.unifina.domain.security.SecUser
 import com.unifina.domain.signalpath.Canvas
 import com.unifina.feed.AbstractStreamListener
 import com.unifina.feed.NoOpStreamListener
+import grails.plugin.springsecurity.SpringSecurityService
 import grails.test.mixin.Mock
 import grails.test.mixin.TestFor
 import org.codehaus.groovy.grails.commons.DefaultGrailsApplication
@@ -31,6 +32,14 @@ class StreamServiceSpec extends Specification {
 	DashboardService dashboardService = Mock(DashboardService)
 
 	SecUser me = new SecUser(username: "me")
+
+	// This gets the real services injected into the filters
+	// From https://github.com/grails/grails-core/issues/9191
+	static doWithSpring = {
+		springSecurityService(SpringSecurityService)
+		userService(UserService)
+		sessionService(SessionService)
+	}
 
 	def setup() {
 		feed = new Feed(

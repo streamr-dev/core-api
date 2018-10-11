@@ -8,6 +8,7 @@ import com.unifina.exceptions.CanvasUnreachableException
 import com.unifina.security.AllowRole
 import com.unifina.service.ApiService
 import com.unifina.service.CanvasService
+import com.unifina.service.SessionService
 import com.unifina.service.SignalPathService
 import grails.converters.JSON
 import grails.test.mixin.Mock

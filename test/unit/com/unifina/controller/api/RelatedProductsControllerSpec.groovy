@@ -7,6 +7,9 @@ import com.unifina.domain.security.Key
 import com.unifina.domain.security.Permission
 import com.unifina.domain.security.SecUser
 import com.unifina.service.ProductService
+import com.unifina.service.SessionService
+import com.unifina.service.UserService
+import grails.plugin.springsecurity.SpringSecurityService
 import grails.test.mixin.Mock
 import grails.test.mixin.TestFor
 
