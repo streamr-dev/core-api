@@ -24,7 +24,6 @@ class SessionServiceIntegrationSpec extends IntegrationSpec {
 
 		Assert.notNull(hosts, "streamr.redis.hosts is null!")
 		Assert.notEmpty(hosts, "streamr.redis.hosts is empty!")
-		Assert.notNull(password, "streamr.redis.password is null!")
 
 		RedisClient redisClient = RedisClient.create(RedisURI.create("redis://"+password+"@"+hosts.get(0)))
 		connection = redisClient.connect()
@@ -41,11 +40,27 @@ class SessionServiceIntegrationSpec extends IntegrationSpec {
 			timezone: "timezone"
 		).save(failOnError: true, validate: false)
 		SessionToken token = service.generateToken(user)
-		DateTime expectedExpiration = new DateTime().plusHours(SessionService.TTL_HOURS)
 		then:
-		token.getExpiration().getMillis() - expectedExpiration.getMillis() < 500
-		token.getToken().length() == SessionService.TOKEN_LENGTH
 		connection.get(token.token) == user.id.toString()
 		service.getUserFromToken(token.token).id == user.id
 	}
+	void "should update expiration"() {
+		SecUser user = new SecUser(
+			id: 123L,
+			username: "username",
+			password: "password",
+			name: "name",
+			email: "email@email.com",
+			timezone: "timezone"
+		).save(failOnError: true, validate: false)
+		SessionToken token = service.generateToken(user)
+		Long ttl1 = connection.ttl(token.token)
+		Thread.sleep(2000)
+		when:
+		service.getUserFromToken(token.token)
+		then:
+		Long ttl2 = connection.ttl(token.token)
+		ttl2 - ttl1 <= 10
+	}
+
 }
