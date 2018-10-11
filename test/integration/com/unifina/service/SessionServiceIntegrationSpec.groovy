@@ -8,7 +8,6 @@ import com.unifina.security.SessionToken
 import com.unifina.utils.MapTraversal
 import grails.test.spock.IntegrationSpec
 import grails.util.Holders
-import org.joda.time.DateTime
 import org.springframework.util.Assert
 
 class SessionServiceIntegrationSpec extends IntegrationSpec {
@@ -25,7 +24,7 @@ class SessionServiceIntegrationSpec extends IntegrationSpec {
 		Assert.notNull(hosts, "streamr.redis.hosts is null!")
 		Assert.notEmpty(hosts, "streamr.redis.hosts is empty!")
 
-		RedisClient redisClient = RedisClient.create(RedisURI.create("redis://"+password+"@"+hosts.get(0)))
+		RedisClient redisClient = RedisClient.create(RedisURI.create("redis://" + password + "@" + hosts.get(0)))
 		connection = redisClient.connect()
 	}
 
@@ -44,6 +43,7 @@ class SessionServiceIntegrationSpec extends IntegrationSpec {
 		connection.get(token.token) == user.id.toString()
 		service.getUserFromToken(token.token).id == user.id
 	}
+
 	void "should update expiration"() {
 		SecUser user = new SecUser(
 			id: 123L,

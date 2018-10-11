@@ -50,7 +50,7 @@ class LoginApiControllerSpec extends Specification {
 		response.json == [
 			id       : challenge.getId(),
 			challenge: challenge.getChallenge(),
-			expires: challenge.getExpiration()
+			expires  : challenge.getExpiration()
 		]
 		1 * challengeService.createChallenge() >> challenge
 	}
