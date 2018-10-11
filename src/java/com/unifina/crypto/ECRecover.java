@@ -31,19 +31,4 @@ public class ECRecover {
 		ECKey.ECDSASignature signatureObj = ECKey.ECDSASignature.fromComponents(r, s, v);
 		return "0x" + Hex.encodeHexString(ECKey.signatureToKey(messageHash, signatureObj.toBase64()).getAddress());
 	}
-
-	public static boolean verifySignature(byte[] messageHash, String signatureHex, String publicKeyHex) throws DecoderException {
-		byte[] signature = Hex.decodeHex(signatureHex.replace("0x", "").toCharArray());
-		byte[] publicKey = Hex.decodeHex(publicKeyHex.replace("0x", "").toCharArray());
-
-		byte[] r = new byte[32];
-		byte[] s = new byte[32];
-		byte v = signature[64];
-		System.arraycopy(signature, 0, r, 0, r.length);
-		System.arraycopy(signature, 32, s, 0, s.length);
-
-		ECKey.ECDSASignature signatureObj = ECKey.ECDSASignature.fromComponents(r, s, v);
-
-		return ECKey.verify(messageHash, signatureObj, publicKey);
-	}
 }
