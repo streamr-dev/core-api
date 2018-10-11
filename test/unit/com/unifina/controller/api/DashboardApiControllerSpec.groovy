@@ -12,6 +12,7 @@ import com.unifina.domain.signalpath.Canvas
 import com.unifina.filters.UnifinaCoreAPIFilters
 import com.unifina.service.ApiService
 import com.unifina.service.DashboardService
+import com.unifina.service.SessionService
 import com.unifina.service.UserService
 import com.unifina.utils.Webcomponent
 import grails.plugin.springsecurity.SpringSecurityService
@@ -33,6 +34,7 @@ class DashboardApiControllerSpec extends Specification {
 	static doWithSpring = {
 		springSecurityService(SpringSecurityService)
 		userService(UserService)
+		sessionService(SessionService)
 	}
 
 	def setup() {

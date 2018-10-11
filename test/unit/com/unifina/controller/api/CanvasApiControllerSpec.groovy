@@ -15,6 +15,7 @@ import com.unifina.exceptions.CanvasUnreachableException
 import com.unifina.filters.UnifinaCoreAPIFilters
 import com.unifina.service.ApiService
 import com.unifina.service.CanvasService
+import com.unifina.service.SessionService
 import com.unifina.service.SignalPathService
 import com.unifina.service.UserService
 import grails.converters.JSON
@@ -40,6 +41,7 @@ class CanvasApiControllerSpec extends Specification {
 	static doWithSpring = {
 		springSecurityService(SpringSecurityService)
 		userService(UserService)
+		sessionService(SessionService)
 	}
 
 	void setup() {

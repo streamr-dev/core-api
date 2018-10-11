@@ -6,7 +6,10 @@ import com.unifina.domain.security.Key
 import com.unifina.domain.security.SecUser
 import com.unifina.filters.UnifinaCoreAPIFilters
 import com.unifina.service.EthereumIntegrationKeyService
+import com.unifina.service.SessionService
+import com.unifina.service.UserService
 import grails.converters.JSON
+import grails.plugin.springsecurity.SpringSecurityService
 import grails.test.mixin.Mock
 import grails.test.mixin.TestFor
 import spock.lang.Specification
@@ -17,6 +20,12 @@ class IntegrationKeyApiControllerSpec extends Specification {
 	EthereumIntegrationKeyService ethereumIntegrationKeyService
 	SecUser me
 	SecUser someoneElse
+
+	static doWithSpring = {
+		springSecurityService(SpringSecurityService)
+		userService(UserService)
+		sessionService(SessionService)
+	}
 
 	void setup() {
 		me = new SecUser().save(failOnError: true, validate: false)

@@ -9,9 +9,13 @@ import com.unifina.service.ChallengeService
 import com.unifina.service.EthereumIntegrationKeyService
 import com.unifina.service.SessionService
 import com.unifina.service.UserService
+import grails.plugin.springsecurity.SpringSecurityService
 import grails.test.mixin.Mock
 import grails.test.mixin.TestFor
 import spock.lang.Specification
+
+import java.text.DateFormat
+import java.text.SimpleDateFormat
 
 /**
  * See the API for {@link grails.test.mixin.web.ControllerUnitTestMixin} for usage instructions
@@ -23,8 +27,17 @@ class LoginApiControllerSpec extends Specification {
 	SessionService sessionService
 	EthereumIntegrationKeyService ethereumIntegrationKeyService
 	UserService userService
+	DateFormat df
+
+	// This gets the real services injected into the filters
+	// From https://github.com/grails/grails-core/issues/9191
+	static doWithSpring = {
+		springSecurityService(SpringSecurityService)
+	}
 
 	def setup() {
+		df = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'")
+		df.setTimeZone(TimeZone.getTimeZone("UTC"));
 		challengeService = controller.challengeService = Mock(ChallengeService)
 		sessionService = controller.sessionService = Mock(SessionService)
 		ethereumIntegrationKeyService = controller.ethereumIntegrationKeyService = Mock(EthereumIntegrationKeyService)
@@ -50,7 +63,7 @@ class LoginApiControllerSpec extends Specification {
 		response.json == [
 			id       : challenge.getId(),
 			challenge: challenge.getChallenge(),
-			expires  : challenge.getExpiration()
+			expires  : df.format(challenge.getExpiration())
 		]
 		1 * challengeService.createChallenge() >> challenge
 	}
@@ -69,7 +82,7 @@ class LoginApiControllerSpec extends Specification {
 			timezone: "timezone"
 		).save(failOnError: true, validate: false)
 
-		SessionToken sk = new SessionToken(64, user, 3)
+		SessionToken token = new SessionToken(64, user, 3)
 
 		when:
 		request.requestURI = "/api/v1/login/response"
@@ -89,11 +102,11 @@ class LoginApiControllerSpec extends Specification {
 		then:
 		1 * challengeService.verifyChallengeResponse(challenge.getId(), challenge.getChallenge(), signature, address) >> true
 		1 * ethereumIntegrationKeyService.getOrCreateFromEthereumAddress(address) >> user
-		1 * sessionService.generateToken(user) >> sk
+		1 * sessionService.generateToken(user) >> token
 		response.status == 200
 		response.json == [
-			token  : sk.getToken(),
-			expires: sk.getExpiration()
+			token  : token.getToken(),
+			expires: df.format(token.getExpiration())
 		]
 	}
 
@@ -129,7 +142,7 @@ class LoginApiControllerSpec extends Specification {
 			password: "password"
 		).save(failOnError: true, validate: false)
 
-		SessionToken sk = new SessionToken(64, user, 3)
+		SessionToken token = new SessionToken(64, user, 3)
 
 		when:
 		request.requestURI = "/api/v1/login/password"
@@ -144,11 +157,11 @@ class LoginApiControllerSpec extends Specification {
 
 		then:
 		1 * userService.getUserFromUsernameAndPassword(user.username, user.password) >> user
-		1 * sessionService.generateToken(user) >> sk
+		1 * sessionService.generateToken(user) >> token
 		response.status == 200
 		response.json == [
-			token  : sk.getToken(),
-			expires: sk.getExpiration()
+			token  : token.getToken(),
+			expires: df.format(token.getExpiration())
 		]
 	}
 
@@ -180,7 +193,7 @@ class LoginApiControllerSpec extends Specification {
 
 		String apiKey = "apiKey"
 
-		SessionToken sk = new SessionToken(64, user, 3)
+		SessionToken token = new SessionToken(64, user, 3)
 
 		when:
 		request.requestURI = "/api/v1/login/apikey"
@@ -194,11 +207,11 @@ class LoginApiControllerSpec extends Specification {
 
 		then:
 		1 * userService.getUserFromApiKey(apiKey) >> user
-		1 * sessionService.generateToken(user) >> sk
+		1 * sessionService.generateToken(user) >> token
 		response.status == 200
 		response.json == [
-			token  : sk.getToken(),
-			expires: sk.getExpiration()
+			token  : token.getToken(),
+			expires: df.format(token.getExpiration())
 		]
 	}
 

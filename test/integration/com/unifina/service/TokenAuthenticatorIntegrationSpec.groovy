@@ -1,14 +1,13 @@
-package com.unifina.security
+package com.unifina.service
 
 import com.unifina.domain.security.Key
 import com.unifina.domain.security.SecUser
-import grails.test.mixin.Mock
-import spock.lang.Specification
+import com.unifina.security.TokenAuthenticator
+import grails.test.spock.IntegrationSpec
 
 import javax.servlet.http.HttpServletRequest
 
-@Mock([Key])
-class TokenAuthenticatorSpec extends Specification {
+class TokenAuthenticatorIntegrationSpec extends IntegrationSpec {
 	TokenAuthenticator authenticator = new TokenAuthenticator()
 
 	def "no authorization string"() {

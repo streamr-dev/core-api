@@ -2,6 +2,8 @@ package com.unifina.controller.api
 
 import com.unifina.domain.marketplace.Category
 import com.unifina.filters.UnifinaCoreAPIFilters
+import com.unifina.service.SessionService
+import com.unifina.service.UserService
 import grails.plugin.springsecurity.SpringSecurityService
 import grails.test.mixin.Mock
 import grails.test.mixin.TestFor
@@ -10,6 +12,14 @@ import spock.lang.Specification
 @TestFor(CategoryApiController)
 @Mock([Category, UnifinaCoreAPIFilters, SpringSecurityService])
 class CategoryApiControllerSpec extends Specification {
+
+	// This gets the real services injected into the filters
+	// From https://github.com/grails/grails-core/issues/9191
+	static doWithSpring = {
+		springSecurityService(SpringSecurityService)
+		userService(UserService)
+		sessionService(SessionService)
+	}
 
 	void "lists categories in alphabetical order"() {
 		Category c1 = new Category(name: "Traffic", imageUrl: "traffic.png")

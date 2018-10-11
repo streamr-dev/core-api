@@ -8,7 +8,9 @@ import com.unifina.domain.signalpath.Module
 import com.unifina.domain.signalpath.ModulePackage
 import com.unifina.filters.UnifinaCoreAPIFilters
 import com.unifina.service.PermissionService
+import com.unifina.service.SessionService
 import com.unifina.service.UserService
+import grails.plugin.springsecurity.SpringSecurityService
 import grails.test.mixin.Mock
 import grails.test.mixin.TestFor
 import grails.test.mixin.web.FiltersUnitTestMixin
@@ -21,6 +23,14 @@ class ModuleApiControllerSpec extends Specification {
 	SecUser me
 	ModulePackage modulePackage
 	Module module
+
+	// This gets the real services injected into the filters
+	// From https://github.com/grails/grails-core/issues/9191
+	static doWithSpring = {
+		springSecurityService(SpringSecurityService)
+		userService(UserService)
+		sessionService(SessionService)
+	}
 
 	void setup() {
 		me = new SecUser(id: 1).save(validate: false)

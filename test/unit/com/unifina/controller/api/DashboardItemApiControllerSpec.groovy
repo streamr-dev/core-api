@@ -8,6 +8,7 @@ import com.unifina.domain.security.SecUser
 import com.unifina.domain.signalpath.Canvas
 import com.unifina.filters.UnifinaCoreAPIFilters
 import com.unifina.service.DashboardService
+import com.unifina.service.SessionService
 import com.unifina.service.UserService
 import grails.plugin.springsecurity.SpringSecurityService
 import grails.test.mixin.Mock
@@ -23,6 +24,14 @@ class DashboardItemApiControllerSpec extends Specification {
 	DashboardService dashboardService
 	SecUser me
 	List<Dashboard> dashboards
+
+	// This gets the real services injected into the filters
+	// From https://github.com/grails/grails-core/issues/9191
+	static doWithSpring = {
+		springSecurityService(SpringSecurityService)
+		userService(UserService)
+		sessionService(SessionService)
+	}
 
 	def setup() {
 		dashboardService = controller.dashboardService = Mock(DashboardService)

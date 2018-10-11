@@ -9,11 +9,13 @@ import com.unifina.domain.security.Permission.Operation
 import com.unifina.domain.security.SecUser
 import com.unifina.domain.signalpath.Canvas
 import com.unifina.service.PermissionService
+import com.unifina.service.SessionService
 import com.unifina.service.SignupCodeService
 import com.unifina.service.UserService
 import com.unifina.filters.UnifinaCoreAPIFilters
 import com.unifina.signalpath.messaging.MockMailService
 import grails.converters.JSON
+import grails.plugin.springsecurity.SpringSecurityService
 import grails.test.mixin.Mock
 import grails.test.mixin.TestFor
 import grails.test.mixin.web.FiltersUnitTestMixin
@@ -31,6 +33,14 @@ class PermissionApiControllerSpec extends Specification {
 	SecUser me, other
 	Permission canvasPermission, streamPermission, canvasAnonPermission
 	List<Permission> ownerPermissions
+
+	// This gets the real services injected into the filters
+	// From https://github.com/grails/grails-core/issues/9191
+	static doWithSpring = {
+		springSecurityService(SpringSecurityService)
+		userService(UserService)
+		sessionService(SessionService)
+	}
 
 	def setup() {
 		controller.permissionService = permissionService = Mock(PermissionService)

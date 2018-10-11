@@ -8,6 +8,7 @@ import com.unifina.domain.security.Permission
 import com.unifina.domain.security.SecUser
 import com.unifina.filters.UnifinaCoreAPIFilters
 import com.unifina.service.PermissionService
+import com.unifina.service.SessionService
 import com.unifina.service.UserService
 import grails.plugin.springsecurity.SpringSecurityService
 import grails.test.mixin.Mock
@@ -22,6 +23,14 @@ class KeyApiControllerSpec extends Specification {
 	def permissionService
 
 	SecUser loggedInUser
+
+	// This gets the real services injected into the filters
+	// From https://github.com/grails/grails-core/issues/9191
+	static doWithSpring = {
+		springSecurityService(SpringSecurityService)
+		userService(UserService)
+		sessionService(SessionService)
+	}
 
 	void setup() {
 		loggedInUser = new SecUser(

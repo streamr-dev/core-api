@@ -32,6 +32,14 @@ class StreamApiControllerSpec extends Specification {
 	def streamThreeId
 	def streamFourId
 
+	// This gets the real services injected into the filters
+	// From https://github.com/grails/grails-core/issues/9191
+	static doWithSpring = {
+		springSecurityService(SpringSecurityService)
+		userService(UserService)
+		sessionService(SessionService)
+	}
+
 	def setup() {
 		permissionService = mainContext.getBean(PermissionService)
 

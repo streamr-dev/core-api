@@ -6,6 +6,8 @@ import com.unifina.domain.security.SecUser
 import com.unifina.domain.security.SecUserSecRole
 import com.unifina.filters.UnifinaCoreAPIFilters
 import com.unifina.service.ProductService
+import com.unifina.service.SessionService
+import com.unifina.service.UserService
 import grails.plugin.springsecurity.SpringSecurityService
 import grails.test.mixin.Mock
 import grails.test.mixin.TestFor
@@ -16,6 +18,14 @@ import spock.lang.Specification
 class RemoveUsersProductsControllerSpec extends Specification {
 	ProductService productService
 	SecUser me
+
+	// This gets the real services injected into the filters
+	// From https://github.com/grails/grails-core/issues/9191
+	static doWithSpring = {
+		springSecurityService(SpringSecurityService)
+		userService(UserService)
+		sessionService(SessionService)
+	}
 
 	void setup() {
 		productService = controller.productService = Mock(ProductService)
