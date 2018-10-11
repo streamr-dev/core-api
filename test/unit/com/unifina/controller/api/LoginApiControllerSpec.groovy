@@ -50,7 +50,7 @@ class LoginApiControllerSpec extends Specification {
 		response.json == [
 			id       : challenge.getId(),
 			challenge: challenge.getChallenge(),
-			expires: challenge.getExpiration().toString()
+			expires: challenge.getExpiration()
 		]
 		1 * challengeService.createChallenge() >> challenge
 	}
@@ -93,7 +93,7 @@ class LoginApiControllerSpec extends Specification {
 		response.status == 200
 		response.json == [
 			token  : sk.getToken(),
-			expires: sk.getExpiration().toString()
+			expires: sk.getExpiration()
 		]
 	}
 
@@ -148,7 +148,7 @@ class LoginApiControllerSpec extends Specification {
 		response.status == 200
 		response.json == [
 			token  : sk.getToken(),
-			expires: sk.getExpiration().toString()
+			expires: sk.getExpiration()
 		]
 	}
 
@@ -198,7 +198,7 @@ class LoginApiControllerSpec extends Specification {
 		response.status == 200
 		response.json == [
 			token  : sk.getToken(),
-			expires: sk.getExpiration().toString()
+			expires: sk.getExpiration()
 		]
 	}
 

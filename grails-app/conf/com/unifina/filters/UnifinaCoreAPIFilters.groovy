@@ -18,7 +18,6 @@ import java.lang.reflect.Method
 
 class UnifinaCoreAPIFilters {
 	def springSecurityService
-	def sessionService
 
 	GrailsApplication grailsApplication
 
@@ -54,71 +53,61 @@ class UnifinaCoreAPIFilters {
 				StreamrApi annotation = getApiAnnotation(controllerName, actionName)
 
 				request.isApiAction = true
-
-				TokenAuthenticator authenticator = new TokenAuthenticator()
-				AuthenticationResult result = authenticator.authenticate(request)
-
 				try {
-					String sessionToken = authenticator.parseAuthorizationHeader(
-						request.getHeader("Authorization"), "Bearer")
-					if (sessionToken != null) {
-						SecUser user = sessionService.getUserFromToken(sessionToken)
-						if (user != null) {
-							result = new AuthenticationResult(user)
-						}
+					TokenAuthenticator authenticator = new TokenAuthenticator()
+					AuthenticationResult result = authenticator.authenticate(request)
+
+					if (result.lastAuthenticationMalformed) {
+						render(
+							status: 400,
+							text: [
+								code   : "MALFORMED_TOKEN",
+								message: "Invalid request. Did you pass a HTTP header of the form 'Authorization: "+result.getAuthorizationHeaderName()+" token' ?"
+							] as JSON
+						)
+						return false
 					}
-				} catch (AuthenticationMalformedException) {
-					render(
-						status: 400,
-						text: [
-							code   : "MALFORMED_TOKEN",
-							message: "Invalid request. Did you pass a HTTP header of the form 'Authorization: Bearer token' ?"
-						] as JSON
-					)
-					return false
-				}
 
-				if (result.lastAuthenticationMalformed) {
-					render(
-						status: 400,
-						text: [
-							code   : "MALFORMED_TOKEN",
-							message: "Invalid request. Did you pass a HTTP header of the form 'Authorization: Token apiKey' ?"
-						] as JSON
-					)
-					return false
-				}
-
-				// Use cookie-based authentication if api key was not present in header.
-				if (result.keyMissing) {
-					result = new AuthenticationResult((SecUser) springSecurityService.getCurrentUser())
-				}
-				if (!result.guarantees(annotation.authenticationLevel())) {
-					render(
-						status: 401,
-						text: [
-							code   : "NOT_AUTHENTICATED",
-							message: "Not authenticated via token or cookie"
-						] as JSON
-					)
-					return false
-				} else if (!result.hasOneOfRoles(annotation.allowRoles())) {
-					render(
-						status: 403,
-						text: [
-							code   : "NOT_PERMITTED",
-							message: "Not authorized to access this endpoint"
-						] as JSON
-					)
-					return false
-				} else {
-					if (result.secUser) {
-						request.apiUser = result.secUser
+					// Use cookie-based authentication if api key was not present in header.
+					if (result.keyMissing) {
+						result = new AuthenticationResult((SecUser) springSecurityService.getCurrentUser())
+					}
+					if (!result.guarantees(annotation.authenticationLevel())) {
+						render(
+							status: 401,
+							text: [
+								code   : "NOT_AUTHENTICATED",
+								message: "Not authenticated via token or cookie"
+							] as JSON
+						)
+						return false
+					} else if (!result.hasOneOfRoles(annotation.allowRoles())) {
+						render(
+							status: 403,
+							text: [
+								code   : "NOT_PERMITTED",
+								message: "Not authorized to access this endpoint"
+							] as JSON
+						)
+						return false
 					} else {
-						request.apiKey = result.key
+						if (result.secUser) {
+							request.apiUser = result.secUser
+						} else {
+							request.apiKey = result.key
+						}
+						return true
 					}
-					return true
+				}catch (Exception e) {
+					render(
+						status: 500,
+						text: [
+							code   : "INTERNAL_ERROR",
+							message: e.toString()
+						] as JSON
+					)
 				}
+
 			}
 		}
 	}

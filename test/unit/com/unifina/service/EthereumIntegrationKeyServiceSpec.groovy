@@ -24,6 +24,7 @@ class EthereumIntegrationKeyServiceSpec extends Specification {
 	SecUser me
 
 	ChallengeService challengeService
+	UserService userService
 
 	void setupSpec() {
 		actualPassword = grailsApplication.config.streamr.encryption.password
@@ -38,6 +39,7 @@ class EthereumIntegrationKeyServiceSpec extends Specification {
 		me = new SecUser(username: "me@me.com").save(failOnError: true, validate: false)
 		service.init()
 		challengeService = service.challengeService = Mock(ChallengeService)
+		userService = service.userService = Mock(UserService)
 	}
 
 	void "init() without grailsConfig streamr.encryption.password throws IllegalArgumentException"() {
@@ -239,9 +241,11 @@ class EthereumIntegrationKeyServiceSpec extends Specification {
 	}
 
 	void "getOrCreateFromEthereumAddress() creates user if key does not exists"() {
+		SecUser someoneElse = new SecUser(username: "someoneElse@streamr.com").save(failOnError: true, validate: false)
 		when:
 		service.getOrCreateFromEthereumAddress("address")
 		then:
+		1 * userService.createUser(_) >> someoneElse
 		IntegrationKey.count == 1
 		SecUser.count == 2
 	}

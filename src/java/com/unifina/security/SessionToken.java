@@ -3,19 +3,19 @@ package com.unifina.security;
 import com.unifina.domain.security.SecUser;
 import org.apache.commons.lang.RandomStringUtils;
 import org.joda.time.DateTime;
-
-import java.io.*;
-import java.util.Base64;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
 
 public class SessionToken {
 	private String token;
 	private SecUser user;
-	private DateTime expiration;
+	private Date expiration;
 
 	public SessionToken(int tokenLength, SecUser user, int ttlHours) {
 		this.token = RandomStringUtils.randomAlphanumeric(tokenLength);
 		this.user = user;
-		this.expiration = new DateTime().plusHours(ttlHours);
+		this.expiration = new DateTime().plusHours(ttlHours).toDate();
 	}
 
 	public String getToken() {
@@ -26,7 +26,14 @@ public class SessionToken {
 		return user;
 	}
 
-	public DateTime getExpiration() {
+	public Date getExpiration() {
 		return expiration;
+	}
+
+	public Map<String,Object> toMap() {
+		Map<String, Object> map = new HashMap<String, Object>();
+		map.put("token", token);
+		map.put("expires", expiration);
+		return map;
 	}
 }

@@ -1,18 +1,12 @@
 package com.unifina.service
 
-import com.lambdaworks.redis.RedisClient
-import com.lambdaworks.redis.RedisConnection
-import com.lambdaworks.redis.RedisURI
 import com.unifina.api.ApiException
 import com.unifina.api.DuplicateNotAllowedException
-import com.unifina.crypto.ECRecover
 import com.unifina.domain.security.IntegrationKey
 import com.unifina.domain.security.SecUser
 import com.unifina.security.StringEncryptor
-import com.unifina.utils.MapTraversal
 import grails.compiler.GrailsCompileStatic
 import grails.converters.JSON
-import grails.util.Holders
 import groovy.transform.CompileStatic
 import org.apache.commons.codec.DecoderException
 import org.apache.commons.codec.binary.Hex
@@ -29,6 +23,7 @@ class EthereumIntegrationKeyService {
 	StringEncryptor encryptor
 	SubscriptionService subscriptionService
 	ChallengeService challengeService
+	UserService userService
 
 	@PostConstruct
 	void init() {
@@ -112,12 +107,15 @@ class EthereumIntegrationKeyService {
 		if (key == null) {
 			Calendar now = Calendar.getInstance()
 			TimeZone timeZone = now.getTimeZone()
-			SecUser user = new SecUser(
+			SecUser user = userService.createUser([
 				username: address,
-				password: generatePassword(16),
+				password: RandomStringUtils.random(32),
 				name: address,
-				timezone: timeZone.getDisplayName()
-			).save(failOnError: true, flush: true, validate: true)
+				timezone: timeZone.getDisplayName(),
+				enabled        : true,
+				accountLocked  : false,
+				passwordExpired: false
+			])
 			key = new IntegrationKey(
 				name: address,
 				user: user,
@@ -129,12 +127,6 @@ class EthereumIntegrationKeyService {
 			).save(failOnError: true, flush: true)
 		}
 		return key.user
-	}
-
-	//TODO: Must be moved to some util class. Maybe in java.com.unifina.security.SomeClass?
-	private String generatePassword(int length) {
-		String charset = (('a'..'z') + ('A'..'Z') + ('0'..'9')).join()
-		return RandomStringUtils.random(length, charset.toCharArray())
 	}
 
 	@CompileStatic

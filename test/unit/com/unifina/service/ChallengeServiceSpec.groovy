@@ -21,7 +21,7 @@ class ChallengeServiceSpec extends Specification {
 		DateTime expectedExpiration = new DateTime().plusSeconds(ChallengeService.TTL_SECONDS)
 		then:
 		challenge.getChallenge().startsWith(text)
-		challenge.getExpiration().getMillis() - expectedExpiration.getMillis() < 500
+		new DateTime(challenge.getExpiration()).getMillis() - expectedExpiration.getMillis() < 500
 		challenge.getId().length() == ChallengeService.CHALLENGE_LENGTH
 	}
 }

@@ -166,7 +166,9 @@ class UserService {
 
 	SecUser getUserFromApiKey(String apiKey) {
 		Key key = Key.get(apiKey)
-		if (key == null) return null
+		if (!key) {
+			return null
+		}
 		return key.user
 	}
 }

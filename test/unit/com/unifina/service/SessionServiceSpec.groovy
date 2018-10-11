@@ -26,7 +26,7 @@ class SessionServiceSpec extends Specification {
 		SessionToken token = service.generateToken(user)
 		DateTime expectedExpiration = new DateTime().plusHours(SessionService.TTL_HOURS)
 		then:
-		token.getExpiration().getMillis() - expectedExpiration.getMillis() < 500
+		new DateTime(token.getExpiration()).getMillis() - expectedExpiration.getMillis() < 500
 		token.getToken().length() == SessionService.TOKEN_LENGTH
 	}
 }
