@@ -5,6 +5,7 @@ import com.unifina.api.DuplicateNotAllowedException
 import com.unifina.domain.security.IntegrationKey
 import com.unifina.domain.security.SecUser
 import com.unifina.security.StringEncryptor
+import com.unifina.utils.EthereumAddressValidator
 import grails.compiler.GrailsCompileStatic
 import grails.converters.JSON
 import groovy.transform.CompileStatic
@@ -83,7 +84,15 @@ class EthereumIntegrationKeyService {
 	}
 
 	@GrailsCompileStatic
-	void delete(String integrationKeyId, SecUser currentUser) {
+	boolean delete(String integrationKeyId, SecUser currentUser) {
+		if (currentUser.isEthereumUser()) {
+			List<IntegrationKey> keys = IntegrationKey.findAllByUser(currentUser)
+			if (keys.size()<=1) {
+				return false
+			}
+		}
+
+
 		IntegrationKey account = IntegrationKey.findByIdAndUser(integrationKeyId, currentUser)
 		if (account) {
 			if (account.service == IntegrationKey.Service.ETHEREUM_ID) {
@@ -91,6 +100,7 @@ class EthereumIntegrationKeyService {
 			}
 			account.delete(flush: true)
 		}
+		return true
 	}
 
 	String decryptPrivateKey(IntegrationKey key) {

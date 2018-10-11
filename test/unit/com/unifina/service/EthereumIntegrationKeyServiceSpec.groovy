@@ -265,4 +265,17 @@ class EthereumIntegrationKeyServiceSpec extends Specification {
 		IntegrationKey.count == 1
 		SecUser.count == 1
 	}
+
+	void "cannot remove only key of ethereum user"() {
+		when:
+		String address = "0x26e1ae3f5efe8a01eca8c2e9d3c32702cf4bead6"
+		SecUser user = new SecUser(username: address).save(failOnError: true, validate: false)
+		IntegrationKey integrationKey = new IntegrationKey(
+			user: user,
+			idInService: address,
+			service: IntegrationKey.Service.ETHEREUM_ID
+		).save(failOnError: true, validate: false)
+		then:
+		service.delete(integrationKey.id, user) == false
+	}
 }
