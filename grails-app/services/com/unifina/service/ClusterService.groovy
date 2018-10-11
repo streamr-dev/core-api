@@ -2,6 +2,7 @@ package com.unifina.service
 
 import com.streamr.api.client.CanvasesPerNode
 import com.streamr.api.client.StreamrClient
+import com.unifina.domain.security.SecUser
 import com.unifina.domain.signalpath.Canvas
 import groovy.transform.CompileStatic
 
@@ -11,8 +12,8 @@ class ClusterService {
 
 	@CompileStatic
 	Canvases getCanvases(String token, List<String> streamrNodes) {
-		List<Canvas> dead = new ArrayList<Canvas>()
-		List<Canvas> ghost = new ArrayList<Canvas>()
+		List<Map<String, Object>> dead = new ArrayList<Map<String, Object>>()
+		List<Map<String, Object>> ghost = new ArrayList<Map<String, Object>>()
 		for (String ip : streamrNodes) {
 			CanvasesPerNode canvases = streamrClient.canvasesPerNode(token, ip)
 			if (canvases.shouldBeRunning != null) {
@@ -36,19 +37,24 @@ class ClusterService {
 	}
 
 	@CompileStatic
-    List<Canvas> repair(String token, List<String> streamrNodes) {
+    List<Map<String, Object>> repair(String token, List<String> streamrNodes) {
 		Canvases canvases = getCanvases(token, streamrNodes)
-		for (Canvas c : canvases.dead) {
+		for (Map<String, Object> canvas : canvases.dead) {
+			String id = canvas.get("id")
+			String startedById = canvas.get("startedById")
+
+			Canvas c = Canvas.get(id)
+			SecUser u = SecUser.get(startedById)
 			boolean forceReset = false
 			boolean resetOnError = true
-			canvasService.startRemote(c, c.startedBy, forceReset, resetOnError)
+			canvasService.startRemote(c, u, forceReset, resetOnError)
 		}
 		return canvases.dead
     }
 
 	static class Canvases {
-		List<Canvas> dead = new ArrayList<Canvas>()
-		List<Canvas> ghost = new ArrayList<Canvas>()
+		List<Map<String, Object>> dead = new ArrayList<Map<String, Object>>()
+		List<Map<String, Object>> ghost = new ArrayList<Map<String, Object>>()
 	}
 
 	static class Nodes {

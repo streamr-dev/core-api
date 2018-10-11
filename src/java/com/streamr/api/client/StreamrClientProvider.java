@@ -48,7 +48,7 @@ public class StreamrClientProvider implements StreamrClient {
 
 	public static void main(final String... args) {
 		StreamrClient client = new StreamrClientProvider("http://localhost:8081/streamr-core/api/v1");
-		final List<Map<String, Object>> list = client.shutdown("token tester-admin-api-key", "192.168.10.116");
-		System.out.println(list);
+		final CanvasesPerNode canvases = client.canvasesPerNode("token tester-admin-api-key", "192.168.10.116");
+		System.out.println(canvases.shouldBeRunning.get(0));
 	}
 }

@@ -1,7 +1,6 @@
 package com.unifina.controller.api
 
 
-import com.unifina.domain.signalpath.Canvas
 import com.unifina.security.AllowRole
 import com.unifina.security.StreamrApi
 import com.unifina.service.ClusterService
@@ -15,9 +14,9 @@ import javax.ws.rs.core.HttpHeaders
 @Secured(["IS_AUTHENTICATED_ANONYMOUSLY"])
 class ClusterApiController {
 	static allowedMethods = [
-		index: "GET",
+		canvases: "GET",
 		shutdown: "POST",
-		repair: "POST",
+		repair  : "POST",
 	]
 
 	GrailsApplication grailsApplication
@@ -25,7 +24,7 @@ class ClusterApiController {
 
 	@GrailsCompileStatic
 	@StreamrApi(allowRoles = AllowRole.ADMIN)
-	def index() {
+	def canvases() {
 		String token = request.getHeader(HttpHeaders.AUTHORIZATION)
 		ClusterService.Canvases canvases = clusterService.getCanvases(token, getStreamrNodes())
 		render([
@@ -48,7 +47,7 @@ class ClusterApiController {
 	@StreamrApi(allowRoles = AllowRole.ADMIN)
 	def repair() {
 		String token = request.getHeader(HttpHeaders.AUTHORIZATION)
-		List<Canvas> nodes = clusterService.repair(token, getStreamrNodes())
+		List<Map<String, Object>> nodes = clusterService.repair(token, getStreamrNodes())
 		render([
 		    restartedNodes: nodes,
 		] as JSON)

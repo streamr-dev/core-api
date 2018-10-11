@@ -50,7 +50,7 @@ class ClusterApiControllerSpec extends Specification {
 		request.addHeader(HttpHeaders.AUTHORIZATION, apiKey)
 		request.method = "GET"
 		withFilters(action: "index") {
-			controller.index()
+			controller.canvases()
 		}
 
 		then:
@@ -83,7 +83,7 @@ class ClusterApiControllerSpec extends Specification {
 		request.addHeader(HttpHeaders.AUTHORIZATION, apiKey)
 		request.method = "GET"
 		withFilters(action: "index") {
-			controller.index()
+			controller.canvases()
 		}
 
 		then:
@@ -130,7 +130,7 @@ class ClusterApiControllerSpec extends Specification {
 		request.addHeader(HttpHeaders.AUTHORIZATION, apiKey)
 		request.method = "GET"
 		withFilters(action: "index") {
-			controller.index()
+			controller.canvases()
 		}
 
 		then:
