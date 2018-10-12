@@ -70,7 +70,7 @@
     "/login/challenge": {
       "post": {
         "summary": "Generate challenge",
-        "description": "Generates a challenge to be signed by an ethereum private key to prove possession of an ethereum account.",
+        "description": "Generates a challenge to be signed by an Ethereum private key to prove possession of an Ethereum account.",
         "tags": [
           "logins"
         ],
@@ -4055,7 +4055,7 @@
         "apikey": {
           "type": "string",
           "description": "User's API Key",
-          "example": "0xa50E97f6a98dD992D9eCb8207c2Aa58F54970729"
+          "example": "mc8YO3mlTaKyd3ZOSnwHUgKccU7pOvQw-WoWNcR-cFbw"
         }
       }
     },
