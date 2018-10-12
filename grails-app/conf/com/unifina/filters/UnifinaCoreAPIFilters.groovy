@@ -48,11 +48,15 @@ class UnifinaCoreAPIFilters {
 	}
 
 	def filters = {
+		apiFilter(uri: '/api/**') {
+			before = {
+				request.isApiAction = true
+			}
+		}
 		authenticationFilter(uri: '/api/**', uriExclude: '/api/v1/login/**') {
 			before = {
 				StreamrApi annotation = getApiAnnotation(controllerName, actionName)
 
-				request.isApiAction = true
 				try {
 					TokenAuthenticator authenticator = new TokenAuthenticator()
 					AuthenticationResult result = authenticator.authenticate(request)
