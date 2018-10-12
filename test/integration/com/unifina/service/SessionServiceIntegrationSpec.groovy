@@ -63,4 +63,20 @@ class SessionServiceIntegrationSpec extends IntegrationSpec {
 		ttl2 - ttl1 <= 10
 	}
 
+	void "invalidate should delete token from redis"() {
+		SecUser user = new SecUser(
+			id: 123L,
+			username: "username",
+			password: "password",
+			name: "name",
+			email: "email@email.com",
+			timezone: "timezone"
+		).save(failOnError: true, validate: false)
+		SessionToken token = service.generateToken(user)
+
+		when:
+		service.invalidateSession(token.token)
+		then:
+		connection.get(token.token) == null
+	}
 }
