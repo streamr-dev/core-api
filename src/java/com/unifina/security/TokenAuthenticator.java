@@ -53,6 +53,18 @@ public class TokenAuthenticator {
 		return null;
 	}
 
+	public String getSessionToken(HttpServletRequest request) {
+		try {
+			String[] parts = parseAuthorizationHeader(request.getHeader("Authorization"));
+			if (parts == null || parts[0] != "Bearer") {
+				return null;
+			}
+			return parts[1];
+		} catch (AuthenticationMalformedException e) {
+			return null;
+		}
+	}
+
 	private AuthenticationResult getResultFromSessionToken(String token) {
 		if (token == null) {
 			return new AuthenticationResult(true, false);

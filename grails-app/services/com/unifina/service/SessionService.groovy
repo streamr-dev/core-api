@@ -48,4 +48,8 @@ class SessionService {
 		return connection
 	}
 
+	void invalidateSession(String sessionToken) {
+		connection.del(sessionToken)
+	}
+
 }

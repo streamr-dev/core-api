@@ -17,7 +17,7 @@ class UnifinaCoreAPIFiltersSpec extends Specification {
 
 	SecUser user
 	SecRole adminRole, devopsRole
-	def sessionService
+	SessionService sessionService
 
 	void setup() {
 		user = new SecUser().save(failOnError: true, validate: false)
