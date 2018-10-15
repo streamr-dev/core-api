@@ -51,7 +51,7 @@ ModuleBrowser.prototype.renderModules = function(element,list){
 			var title = $('<' + h + '/>', {
 				id: 'category' + module.metadata.id,
 				style: 'padding-left:' + ((_this.level-1)*20) + 'px',
-				text: this.categoryName,
+				text: _this.categoryName,
 			})
 			element.append(title)
 			_this.renderModules(element, module.children)

@@ -70,9 +70,9 @@ StreamrTable.prototype.addRow = function (row, rowId, op) {
 	for (var i = 0; i < row.length; i++) {
 		var content = row[i] == null ? "" :
 					  row[i] instanceof Object ? JSON.stringify(row[i]) : row[i];
-		newRow.append('<td/>', {
+		newRow.append($('<td/>', {
 			text: content,
-		});
+		}));
 	}
 	this.tableBody[op](newRow);
 }

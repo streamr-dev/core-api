@@ -4,11 +4,11 @@ Tour.list(function(tourList) {
 	$('#help-tour-list').prepend(
 		tourList.map(function(item, idx) {
 			var url = Streamr.createLink(item.controller, item.action) + "?playTour=" + idx
-			return $('<li/>').append('<a/>', {
+			return $('<li/>').append($('<a/>', {
 				class: 'tour-link',
 				href: url,
-				text: 'Tour' + item.title,
-			})
+				text: 'Tour: ' + item.title,
+			}))
 		})
 	)
 })
