@@ -4055,7 +4055,7 @@
         "apikey": {
           "type": "string",
           "description": "User's API Key",
-          "example": "mc8YO3mlTaKyd3ZOSnwHUgKccU7pOvQw-WoWNcR-cFbw"
+          "example": "QaSEO3mlSaTGd3ZOSnwHUgK3ecU7pOvQw-WPkZcR-6TBv"
         }
       }
     },
