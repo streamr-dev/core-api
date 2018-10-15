@@ -64,12 +64,15 @@ StreamrTable.prototype.setHeaders = function(headers) {
 
 StreamrTable.prototype.addRow = function (row, rowId, op) {
 	if (op != "append") { op = "prepend" }
-	var rowIdString = (rowId != null) ? " id='" + rowId + "'" : "";
-	var newRow = $("<tr"+ rowIdString +"></tr>");
+	var newRow = $('<tr/>', {
+        id: rowId != null ? rowId : '',
+	});
 	for (var i = 0; i < row.length; i++) {
 		var content = row[i] == null ? "" :
 					  row[i] instanceof Object ? JSON.stringify(row[i]) : row[i];
-		newRow.append("<td>" + content + "</td>");
+		newRow.append('<td/>', {
+			text: content,
+		});
 	}
 	this.tableBody[op](newRow);
 }

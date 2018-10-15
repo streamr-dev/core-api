@@ -42,7 +42,10 @@ SignalPath.EmptyModule = function(data, canvas, prot) {
 	function createDiv() {
 		var buttons = []
 
-		prot.div = $("<div id='"+prot.id+"' class='component module context-menu "+prot.type+"'></div>");
+		prot.div = $("<div/>", {
+			id: prot.id,
+			class: 'component module context-menu ' + prot.type,
+		})
 		prot.div.data("spObject",prot);
 		
 		// Set absolute position
@@ -54,7 +57,10 @@ SignalPath.EmptyModule = function(data, canvas, prot) {
 		
 		// Create title
 		var moduleName = prot.jsonData.displayName || prot.jsonData.name
-		prot.title = $("<span class='modulename'>" + moduleName + "</span>");
+		prot.title = $("<span/>", {
+			class: 'modulename',
+			text: moduleName,
+		})
 		prot.header.append(prot.title);
         
         // If there are options, create options editor
@@ -371,7 +377,17 @@ SignalPath.EmptyModule = function(data, canvas, prot) {
 	
 
 	function createModuleButton(additionalClasses) {
-		var button = $("<div class='modulebutton'><a class='btn btn-default btn-xs showOnFocus' href='#' style='padding: 0px'><i class='fa fa-fw "+(additionalClasses ? additionalClasses : "")+"'></span></div>");
+		var i = $('<i/>', {
+            class: 'fa fa-fw ' + additionalClasses || '',
+        })
+		var a = $('<a/>', {
+            class: 'btn btn-default btn-xs showOnFocus',
+            href: '#',
+            style: 'padding: 0px',
+        }).append(i)
+		var button = $('<div/>', {
+			class: 'modulebutton',
+		}).append(a)
 		return button;
 	}
 	prot.createModuleButton = createModuleButton;
@@ -402,7 +418,10 @@ SignalPath.EmptyModule = function(data, canvas, prot) {
 	 */
 	function createOption(key, option) {
 		var div = $("<div class='option'></div>");
-		var title = $("<span class='optionTitle'>" + key + "</span>").appendTo(div);
+		var title = $('<span/>', {
+			class: 'optionTitle',
+			text: key,
+		}).appendTo(div)
 		var value = $("<span class='optionValue'></span>").appendTo(div);
 		var input
 
@@ -670,12 +689,14 @@ $('body').contextMenu({
 		menu.data('spObject', target.data('spObject'))
 
 		var prot = menu.data('spObject');
-		var html = prot.getContextMenu(menu.data('target')).map(function(item) {
-			return '<li><a tabindex="-1" data-cmd="' +
-				item.cmd+'" href="#">' +
-				item.title+'</a></li>';
-		}).join('');
-    	menu.html(html)
+		menu.append(prot.getContextMenu(menu.data('target')).map(function(item) {
+			return $('<li/>').append($('<a/>', {
+				tabindex: '-1',
+				'data-cmd': item.cmd,
+				href: '#',
+				text: item.title,
+			}))
+        }))
     },
 
     onSelected: function(menu, item) {

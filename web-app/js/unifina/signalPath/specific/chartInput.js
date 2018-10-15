@@ -22,8 +22,10 @@ SignalPath.ChartInput = function(json, parentDiv, module, type, pub) {
     // Use 1-based index for display to the user
     var displayedAxis = json.yAxis + 1
     // Cycle Y-axis button
-    var $yAxisSelectorButton = $("<div class='y-axis-number btn "+btnDefaultClass+" btn-xs "+popoverClass+" popover-colorful'></div>")
-    
+    var $yAxisSelectorButton = $('<div/>', {
+        class: 'y-axis-number btn btn-xs popover-colorful ' + btnDefaultClass + ' ' + popoverClass
+    })
+
     pub.seriesIndex = null
     pub.disableContextMenu = true
     
@@ -107,8 +109,8 @@ SignalPath.ChartInput = function(json, parentDiv, module, type, pub) {
     
     function updateButton() {
         displayedAxis = json.yAxis + 1
-        $yAxisSelectorButton.html(displayedAxis)
-        $("#"+tooltipAxisId).html(displayedAxis)
+        $yAxisSelectorButton.text(displayedAxis)
+        $("#"+tooltipAxisId).text(displayedAxis)
     }
     
     function cycleYAxis() {

@@ -21,7 +21,10 @@ SignalPath.SolidityModule = function(data,canvas,prot) {
         if (!pub.getContract) { return }
 
 		if (pub.getContract() && pub.getContract().address) {
-            var $addressField = $("<input style='width:100%' value='" + pub.getContract().address +"'>")
+			var $addressField = $('<input/>', {
+				style: 'width: 100%',
+				value: pub.getContract().address,
+			})
             $addressField.on("change", function () {
                 var address = $addressField.val()
                 if (address.length === 42 && address.slice(0, 2) === "0x") {

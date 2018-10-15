@@ -78,7 +78,7 @@ SignalPath.Input = function(json, parentDiv, module, type, pub) {
 							if (result != null) {
 								iv.setValue(result);
 								iv.update();
-								iv.div.html(iv.buttonText());
+								iv.div.text(iv.buttonText());
 							}
 						},
 						className: 'initial-value-dialog'
