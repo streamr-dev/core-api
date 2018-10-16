@@ -4,19 +4,32 @@ import org.apache.commons.lang.RandomStringUtils;
 import org.joda.time.DateTime;
 
 import java.io.Serializable;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.TimeZone;
 
 public class Challenge {
 	private String id;
 	private String challenge;
 	private Date expiration;
+	private static DateFormat df;
+
+	private static DateFormat getDateFormat() {
+		if (df == null) {
+			df = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'");
+			df.setTimeZone(TimeZone.getTimeZone("UTC"));
+		}
+		return df;
+	}
 
 	public Challenge(String text, int length, int ttlSeconds) {
 		this.id = RandomStringUtils.randomAlphanumeric(length);
 		this.challenge = text + id;
 		this.expiration = new DateTime().plusSeconds(ttlSeconds).toDate();
+
 	}
 
 	public Challenge(String id, String text, int ttlSeconds) {
@@ -41,7 +54,7 @@ public class Challenge {
 		HashMap<String, Object> map = new HashMap<String, Object>();
 		map.put("id", id);
 		map.put("challenge", challenge);
-		map.put("expires", expiration);
+		map.put("expires", getDateFormat().format(expiration));
 		return map;
 	}
 }
