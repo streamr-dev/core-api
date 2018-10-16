@@ -1,5 +1,6 @@
 package com.unifina.controller.api
 
+import com.unifina.FilterMockingSpecification
 import com.unifina.api.DashboardListParams
 import com.unifina.api.ListParams
 import com.unifina.api.SaveDashboardCommand
@@ -12,30 +13,18 @@ import com.unifina.domain.signalpath.Canvas
 import com.unifina.filters.UnifinaCoreAPIFilters
 import com.unifina.service.ApiService
 import com.unifina.service.DashboardService
-import com.unifina.service.SessionService
-import com.unifina.service.UserService
 import com.unifina.utils.Webcomponent
-import grails.plugin.springsecurity.SpringSecurityService
 import grails.test.mixin.Mock
 import grails.test.mixin.TestFor
-import spock.lang.Specification
 
 @TestFor(DashboardApiController)
 @Mock([Canvas, Dashboard, DashboardItem, Key, SecUser, UnifinaCoreAPIFilters])
-class DashboardApiControllerSpec extends Specification {
+class DashboardApiControllerSpec extends FilterMockingSpecification {
 
 	ApiService apiService
 	DashboardService dashboardService
 	SecUser me
 	List<Dashboard> dashboards
-
-	// This gets the real services injected into the filters
-	// From https://github.com/grails/grails-core/issues/9191
-	static doWithSpring = {
-		springSecurityService(SpringSecurityService)
-		userService(UserService)
-		sessionService(SessionService)
-	}
 
 	def setup() {
 		dashboardService = controller.dashboardService = Mock(DashboardService)
@@ -80,11 +69,7 @@ class DashboardApiControllerSpec extends Specification {
 
 	void "index() renders authorized dashboards as a list"() {
 		when:
-		request.addHeader("Authorization", "Token myApiKey")
-		request.requestURI = "/api/v1/dashboards"
-		withFilters(action: "index") {
-			controller.index()
-		}
+		authenticatedAs(me) { controller.index() }
 
 		then:
 		response.status == 200
@@ -98,11 +83,7 @@ class DashboardApiControllerSpec extends Specification {
 	void "index() adds name param to filter criteria"() {
 		when:
 		params.name = "Foo"
-		request.addHeader("Authorization", "Token myApiKey")
-		request.requestURI = "/api/v1/dashboards"
-		withFilters(action: "index") {
-			controller.index()
-		}
+		authenticatedAs(me) { controller.index() }
 
 		then:
 		response.status == 200
@@ -116,11 +97,7 @@ class DashboardApiControllerSpec extends Specification {
 	def "show() shows dashboard with 0 items"() {
 		when:
 		params.id = "1"
-		request.addHeader("Authorization", "Token myApiKey")
-		request.requestURI = "/api/v1/dashboards"
-		withFilters(action: "show") {
-			controller.show()
-		}
+		authenticatedAs(me) { controller.show() }
 
 		then:
 		response.status == 200
@@ -139,11 +116,7 @@ class DashboardApiControllerSpec extends Specification {
 	def "show() shows dashboard with many items"() {
 		when:
 		params.id = "3"
-		request.addHeader("Authorization", "Token myApiKey")
-		request.requestURI = "/api/v1/dashboards"
-		withFilters(action: "show") {
-			controller.show()
-		}
+		authenticatedAs(me) { controller.show() }
 
 		then:
 		response.status == 200
@@ -176,14 +149,10 @@ class DashboardApiControllerSpec extends Specification {
 
 	def "save() throws ValidationException given incomplete json"() {
 		when:
-		request.addHeader("Authorization", "Token myApiKey")
 		request.JSON = [
 				name: "",
 		]
-		request.requestURI = "/api/v1/dashboards"
-		withFilters(action: "save") {
-			controller.save()
-		}
+		authenticatedAs(me) { controller.save() }
 
 		then:
 		thrown(ValidationException)
@@ -201,17 +170,13 @@ class DashboardApiControllerSpec extends Specification {
 		controller.dashboardService = dashboardService
 
 		when:
-		request.addHeader("Authorization", "Token myApiKey")
 		request.JSON = [
 				id   : "dashboard",
 				name : "new dashboard",
 				layout: "{}",
 				items: items
 		]
-		request.requestURI = "/api/v1/dashboards"
-		withFilters(action: "save") {
-			controller.save()
-		}
+		authenticatedAs(me) { controller.save() }
 
 		then:
 		response.status == 200
@@ -226,14 +191,10 @@ class DashboardApiControllerSpec extends Specification {
 	def "update() throws ValidationException given incomplete json"() {
 		when:
 		params.id = 1L
-		request.addHeader("Authorization", "Token myApiKey")
 		request.JSON = [
 				name: "",
 		]
-		request.requestURI = "/api/v1/dashboards"
-		withFilters(action: "update") {
-			controller.update()
-		}
+		authenticatedAs(me) { controller.update() }
 
 		then:
 		thrown(ValidationException)
@@ -255,16 +216,12 @@ class DashboardApiControllerSpec extends Specification {
 
 		when:
 		params.id = "4"
-		request.addHeader("Authorization", "Token myApiKey")
 		request.JSON = [
 				layout: "{}",
 				name : "new dashboard",
 				items: items
 		]
-		request.requestURI = "/api/v1/dashboards"
-		withFilters(action: "save") {
-			controller.update()
-		}
+		authenticatedAs(me) { controller.update() }
 
 		then:
 		response.status == 200
@@ -279,11 +236,7 @@ class DashboardApiControllerSpec extends Specification {
 	def "delete() delegates to dashboardService.deleteById(String, SecUser)"() {
 		when:
 		params.id = "3"
-		request.addHeader("Authorization", "Token myApiKey")
-		request.requestURI = "/api/v1/dashboards/"
-		withFilters(action: "delete") {
-			controller.delete()
-		}
+		authenticatedAs(me) { controller.delete() }
 
 		then:
 		response.status == 204

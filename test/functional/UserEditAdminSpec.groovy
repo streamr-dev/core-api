@@ -7,8 +7,8 @@ import spock.lang.Stepwise
 @Stepwise
 class UserEditAdminSpec extends LoginTesterAdminSpec implements LoginMixin {
 
-	@Shared specUserName = "user-edit-admin-spec@streamr.com"
-	@Shared specUserPwd = "user-edit-admin-spec"
+	@Shared specUserName = "me-edit-admin-spec@streamr.com"
+	@Shared specUserPwd = "me-edit-admin-spec"
 
 	private void goChangeUserPassword(String userNameToChange, String newPassword) {
 		to UserSearchPage
@@ -34,13 +34,13 @@ class UserEditAdminSpec extends LoginTesterAdminSpec implements LoginMixin {
 	}
 
 	def "user creation works correctly"(){
-		when: "click to user create page"
+		when: "click to me create page"
 		$("ul.jd_menu li",0).find("ul li a", text:"Create").click()
 
 		then:
 		at UserCreatePage
 
-		when: "data is given and the user is created"
+		when: "data is given and the me is created"
 		username = specUserName
 		name = "Test"
 		password = specUserPwd
@@ -61,7 +61,7 @@ class UserEditAdminSpec extends LoginTesterAdminSpec implements LoginMixin {
 		username = specUserName
 		searchButton.click()
 
-		then: "the user is found"
+		then: "the me is found"
 		at UserSearchResultPage
 		searchResult.size() == 1
 		searchResult.text() == specUserName
@@ -82,12 +82,12 @@ class UserEditAdminSpec extends LoginTesterAdminSpec implements LoginMixin {
 			login(testerUsername, testerPassword)
 		then: "successful login"
 			waitFor { at CanvasPage }
-			// Change back the user password
+			// Change back the me password
 			goChangeUserPassword(specUserName, specUserPwd)
 	}
 
 	def "the user can be edited"() {
-		when: "search for and go to the user page"
+		when: "search for and go to the me page"
 		username = specUserName
 		searchButton.click()
 		at UserSearchResultPage
@@ -96,37 +96,37 @@ class UserEditAdminSpec extends LoginTesterAdminSpec implements LoginMixin {
 		}
 		searchResult.click()
 
-		then: "go to the user edit page"
+		then: "go to the me edit page"
 		at UserEditPage
 
 		when: "change username and save"
-		username = "user-edit-admin-spec2@streamr.com"
+		username = "me-edit-admin-spec2@streamr.com"
 		saveButton.click()
 
 		then:
 		at UserEditPage
 
-		when: "go to the user search page and search for the user"
+		when: "go to the me search page and search for the me"
 		to UserSearchPage
-		username = "user-edit-admin-spec2@streamr.com"
+		username = "me-edit-admin-spec2@streamr.com"
 		searchButton.click()
 
-		then: "the user is found"
+		then: "the me is found"
 		at UserSearchResultPage
 		waitFor {
 			searchResult.size() == 1
-			searchResult.text() == "user-edit-admin-spec2@streamr.com"
+			searchResult.text() == "me-edit-admin-spec2@streamr.com"
 		}
 	}
 
 	def "the user can be removed"() {
-		when: "search for and go to the user page"
-		username = "user-edit-admin-spec2@streamr.com"
+		when: "search for and go to the me page"
+		username = "me-edit-admin-spec2@streamr.com"
 		searchButton.click()
 		at UserSearchResultPage
 		searchResult.click()
 
-		then: "go to the user edit page"
+		then: "go to the me edit page"
 		at UserEditPage
 
 		when: "when clicked to delete and then cancel"

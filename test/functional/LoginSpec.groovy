@@ -18,7 +18,7 @@ class LoginSpec extends GebReportingSpec implements LoginMixin {
 	def "cannot log in with false credentials"() {
 		when: "given false username and password"
 		to LoginPage
-		tryLogin("false@user.name", "falsePassword")
+		tryLogin("false@me.name", "falsePassword")
 		then: "should not go forward"
 		waitFor {
 			at LoginPage

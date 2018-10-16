@@ -2,7 +2,7 @@ package pages
 
 class UserEditPage extends GrailsPage {
     
-    static controller = "user"
+    static controller = "me"
     static action = "edit"
 
     static url = "$controller/$action"

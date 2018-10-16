@@ -20,9 +20,8 @@ class SessionService {
 
 	SessionToken generateToken(SecUser user) {
 		SessionToken sk = new SessionToken(TOKEN_LENGTH, user, TTL_HOURS)
-		getConnection().setex(sk.getToken(), TTL_HOURS * 3600, sk.getUser().id.toString())
+		getConnection().setex(sk.getToken(), TTL_HOURS * 3600, sk.getUser().id.toString()).get()
 		return sk
-		redisClient.connectAsync().expireat()
 	}
 
 	SecUser getUserFromToken(String token) {

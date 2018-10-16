@@ -3,7 +3,10 @@ package com.unifina.security;
 import org.apache.commons.lang.RandomStringUtils;
 import org.joda.time.DateTime;
 
+import java.io.Serializable;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
 
 public class Challenge {
 	private String id;
@@ -32,5 +35,13 @@ public class Challenge {
 
 	public Date getExpiration() {
 		return expiration;
+	}
+
+	public Map<String, Object> toMap() {
+		HashMap<String, Object> map = new HashMap<String, Object>();
+		map.put("id", id);
+		map.put("challenge", challenge);
+		map.put("expires", expiration);
+		return map;
 	}
 }

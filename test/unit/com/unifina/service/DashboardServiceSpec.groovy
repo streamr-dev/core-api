@@ -17,8 +17,8 @@ import spock.lang.Specification
 @Mock([Canvas, Dashboard, DashboardItem, Permission, SecUser, PermissionService])
 class DashboardServiceSpec extends Specification {
 
-	SecUser user = new SecUser(username: "first@user.com", name: "user")
-	SecUser otherUser = new SecUser(username: "second@user.com", name: "someoneElse")
+	SecUser user = new SecUser(username: "first@me.com", name: "me")
+	SecUser otherUser = new SecUser(username: "second@me.com", name: "someoneElse")
 
 	def setup() {
 		PermissionService permissionService = service.permissionService

@@ -17,7 +17,7 @@ class ProductListParamsSpec extends Specification {
 
 	void setup() {
 		user = new SecUser(
-			username: "user@domain.com",
+			username: "me@domain.com",
 			name: "Firstname Lastname",
 			password: "salasana"
 		)

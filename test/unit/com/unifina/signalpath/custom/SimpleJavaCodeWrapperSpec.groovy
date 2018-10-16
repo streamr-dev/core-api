@@ -111,7 +111,7 @@ class SimpleJavaCodeWrapperSpec extends Specification {
 				"\n" +
 				"@Override\n" +
 				"public void sendOutput() {\n" +
-				"Object user = getGlobals().getDataSource();\n" +
+				"Object me = getGlobals().getDataSource();\n" +
 				"sum += in.value;\n" +
 				"out.send(sum);\n" +
 				"}\n" +
@@ -187,7 +187,7 @@ class SimpleJavaCodeWrapperSpec extends Specification {
 				"\n" +
 				"@Override\n" +
 				"public void sendOutput() {\n" +
-				"Object user = in.getSource();\n" +
+				"Object me = in.getSource();\n" +
 				"sum += in.value;\n" +
 				"out.send(sum);\n" +
 				"}\n" +
@@ -225,7 +225,7 @@ class SimpleJavaCodeWrapperSpec extends Specification {
 				"\n" +
 				"@Override\n" +
 				"public void sendOutput() {\n" +
-				"Object user = out.getTargets();\n" +
+				"Object me = out.getTargets();\n" +
 				"sum += in.value;\n" +
 				"out.send(sum);\n" +
 				"}\n" +

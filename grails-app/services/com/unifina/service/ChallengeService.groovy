@@ -24,13 +24,10 @@ class ChallengeService {
 	}
 
 	boolean verifyChallengeResponse(String challengeID, String challenge, String signature, String publicKey) {
-		String challengeRedis = getConnection().get(challengeID)
-		boolean invalidChallenge = challengeRedis == null || challenge != challengeRedis
-		if (invalidChallenge) {
+		String address = verifyChallengeAndGetAddress(challengeID, challenge, signature)
+		if (address == null) {
 			return false
 		}
-		byte[] messageHash = ECRecover.calculateMessageHash(challenge)
-		String address = ECRecover.recoverAddress(messageHash, signature)
 		boolean valid = address.toLowerCase() == publicKey.toLowerCase()
 		if (valid) {
 			getConnection().del(challengeID)
