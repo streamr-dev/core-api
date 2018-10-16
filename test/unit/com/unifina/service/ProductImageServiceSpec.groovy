@@ -27,7 +27,7 @@ class ProductImageServiceSpec extends Specification {
 		service.idGenerator = new FakeIdGenerator()
 
 		SecUser user = new SecUser(
-			username: "user@domain.com",
+			username: "me@domain.com",
 			name: "Firstname Lastname",
 			password: "salasana"
 		)

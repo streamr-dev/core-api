@@ -7,9 +7,6 @@ import com.unifina.domain.security.Key
 import com.unifina.domain.security.Permission
 import com.unifina.domain.security.SecUser
 import com.unifina.service.ProductService
-import com.unifina.service.SessionService
-import com.unifina.service.UserService
-import grails.plugin.springsecurity.SpringSecurityService
 import grails.test.mixin.Mock
 import grails.test.mixin.TestFor
 
@@ -54,7 +51,7 @@ class RelatedProductsControllerSpec extends ControllerSpecification {
 		key.id = "myApiKey"
 		key.save(failOnError: true, validate: true)
 
-		// u1 is the user who owns the product p1 used to search for related products
+		// u1 is the me who owns the product p1 used to search for related products
 		u1 = new SecUser(
 			username: "username: masa@hypätääneka.com",
 			name: "Matti Nykänen",

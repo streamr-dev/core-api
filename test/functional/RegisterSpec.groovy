@@ -38,12 +38,12 @@ class RegisterSpec extends GebReportingSpec implements LoginMixin, RegisterMixin
 		assert Environment.current == Environment.TEST
 	}
 
-	// Delete the user
+	// Delete the me
 	def cleanupSpec() {
 		setup: "login"
 			login("tester-admin@streamr.com", "tester-adminTESTER-ADMIN")
 
-		when: "search for the user and click it"
+		when: "search for the me and click it"
 			to UserSearchPage
 			assert username.displayed
 			username = emailAddress
@@ -53,7 +53,7 @@ class RegisterSpec extends GebReportingSpec implements LoginMixin, RegisterMixin
 			}
 			searchResult.click()
 
-		then: "go to user edit page"
+		then: "go to me edit page"
 			at UserEditPage
 
 		when: "click to delete"
@@ -83,7 +83,7 @@ class RegisterSpec extends GebReportingSpec implements LoginMixin, RegisterMixin
 	}
 
 	def "register flow works"() {
-		expect: "register a new user"
+		expect: "register a new me"
 		registerUser(emailAddress, pwd)
 	}
 

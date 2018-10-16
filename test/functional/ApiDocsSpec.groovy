@@ -20,7 +20,7 @@ class ApiDocsSpec extends LoginTester1Spec {
 		then:
 		waitFor { at ApiDocsPage }
 
-		when: "click on last top-level title of user guide"
+		when: "click on last top-level title of me guide"
 		def link = tableOfContents.children().last().children("a")
 		link.click()
 		then: "the corresponding header should be visible"

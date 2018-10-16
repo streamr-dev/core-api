@@ -39,7 +39,7 @@ class ProductServiceSpec extends Specification {
 
 	private void setupProduct(Product.State state = Product.State.NOT_DEPLOYED) {
 		SecUser user = new SecUser(
-			username: "user@domain.com",
+			username: "me@domain.com",
 			name: "Firstname Lastname",
 			password: "salasana"
 		)

@@ -53,9 +53,9 @@ class ShareSpec extends LoginTester1Spec implements CanvasMixin, DashboardMixin,
 
 	def removeAllButFirstPermission() {
 		scrollToAndClickShareButton("ShareSpec")
-		waitFor { $(".new-user-field").displayed }
-		while ($(".user-delete-button").size() > 1) {
-			$(".user-delete-button").lastElement().click()
+		waitFor { $(".new-me-field").displayed }
+		while ($(".me-delete-button").size() > 1) {
+			$(".me-delete-button").lastElement().click()
 		}
 		save()
 	}
@@ -81,15 +81,15 @@ class ShareSpec extends LoginTester1Spec implements CanvasMixin, DashboardMixin,
 	}
 
 	// We still don't know why it's so hard to type text into the input,
-	// just "$('.new-user-field') << text" won't work.
+	// just "$('.new-me-field') << text" won't work.
 	// That's why this hack.
 	// The same is used also in ShareMixin.groovy
 	def feedTextInput(String text) {
 		waitFor {
-			$('.new-user-field').displayed
-			$('.new-user-field').firstElement().clear()
-			$('.new-user-field') << text
-			$('.new-user-field').value().equals(text)
+			$('.new-me-field').displayed
+			$('.new-me-field').firstElement().clear()
+			$('.new-me-field') << text
+			$('.new-me-field').value().equals(text)
 		}
 	}
 
@@ -112,35 +112,35 @@ class ShareSpec extends LoginTester1Spec implements CanvasMixin, DashboardMixin,
 		then:
 		waitFor { $(".sharing-dialog") }
 		waitFor {
-			$(".new-user-field").displayed
+			$(".new-me-field").displayed
 			$(".access-row").size() == 1
 		}
 
 		when: "add invalid email"
 		feedTextInput("foobar")
-		pressKeyUntil(".new-user-field", Keys.ENTER) {
+		pressKeyUntil(".new-me-field", Keys.ENTER) {
 			$(".ui-pnotify .alert-danger")
 		}
 		then: "enter would add a permission row, but doesn't since there was error"
 		$(".access-row").size() == 1
-		$(".new-user-field").value() == "foobar"
+		$(".new-me-field").value() == "foobar"
 
 		expect: "esc clears the email"
-		pressKeyUntil(".new-user-field", Keys.ESCAPE) {
-			!$(".new-user-field").value()
+		pressKeyUntil(".new-me-field", Keys.ESCAPE) {
+			!$(".new-me-field").value()
 		}
 
 		when:
 		closeNotifications()
 		feedTextInput("tester2@streamr.com")
-		$(".new-user-button").click()
+		$(".new-me-button").click()
 		then:
 		waitFor { $(".access-row") }
 		$(".access-row").size() == 2
-		!$(".new-user-field").value()
+		!$(".new-me-field").value()
 
 		expect: "esc closes the popup discarding changes"
-		pressKeyUntil(".new-user-field", Keys.ESCAPE) {
+		pressKeyUntil(".new-me-field", Keys.ESCAPE) {
 			!$(".sharing-dialog")
 		}
 		!$(".ui-pnotify")
@@ -152,20 +152,20 @@ class ShareSpec extends LoginTester1Spec implements CanvasMixin, DashboardMixin,
 		scrollToAndClickShareButton("ShareSpec")
 		then: "access row from last time was discarded"
 		waitFor { $(".sharing-dialog") }
-		waitFor { $(".new-user-field").displayed }
+		waitFor { $(".new-me-field").displayed }
 		$(".access-row").size() == 1
 
 		when:
 		feedTextInput("tester2@streamr.com")
-		pressKeyUntil(".new-user-field", Keys.ENTER) {
+		pressKeyUntil(".new-me-field", Keys.ENTER) {
 			$(".access-row").size() == 2
 		}
 		then:
 		$(".access-row").size() == 2
-		!$(".new-user-field").value()
+		!$(".new-me-field").value()
 
-		expect: "enter saves changes when user field is empty"
-		pressKeyUntil(".new-user-field", Keys.ENTER) {
+		expect: "enter saves changes when me field is empty"
+		pressKeyUntil(".new-me-field", Keys.ENTER) {
 			$(".ui-pnotify .alert-success")
 		}
 		waitFor { !$(".sharing-dialog") }
@@ -175,7 +175,7 @@ class ShareSpec extends LoginTester1Spec implements CanvasMixin, DashboardMixin,
 		closeNotifications()	// the second pnotify would cover the share button
 		then: "check that the saved row is still there"
 		waitFor { $(".sharing-dialog") }
-		waitFor { $(".new-user-field").displayed }
+		waitFor { $(".new-me-field").displayed }
 		$(".access-row").size() == 2
 
 		when:
@@ -200,11 +200,11 @@ class ShareSpec extends LoginTester1Spec implements CanvasMixin, DashboardMixin,
 		shareButton.click()
 		then: "check that the saved row is still there"
 		waitFor { $(".sharing-dialog") }
-		waitFor { $(".new-user-field").displayed }
+		waitFor { $(".new-me-field").displayed }
 		$(".access-row").size() == 2
 
 		when: "there should be two rows, click the last delete-button..."
-		$(".user-delete-button").lastElement().click()
+		$(".me-delete-button").lastElement().click()
 		then:
 		waitFor { $(".access-row").size() == 1 }
 
@@ -222,16 +222,16 @@ class ShareSpec extends LoginTester1Spec implements CanvasMixin, DashboardMixin,
 		shareButton.click()
 		then: "check that row hasn't been deleted"
 		waitFor { $(".sharing-dialog") }
-		waitFor { $(".new-user-field").displayed }
+		waitFor { $(".new-me-field").displayed }
 		$(".access-row").size() == 2
 
 		when: "delete again"
-		$(".user-delete-button").lastElement().click()
+		$(".me-delete-button").lastElement().click()
 		then:
 		waitFor { $(".access-row").size() == 1 }
 
 		expect: "...this time for reals"
-		pressKeyUntil(".new-user-field", Keys.ENTER) {
+		pressKeyUntil(".new-me-field", Keys.ENTER) {
 			$(".ui-pnotify .alert-success")
 		}
 		waitFor { !$(".sharing-dialog") }
@@ -245,12 +245,12 @@ class ShareSpec extends LoginTester1Spec implements CanvasMixin, DashboardMixin,
 		shareButton.click()
 		then: "...to double-check it's gone"
 		waitFor { $(".sharing-dialog") }
-		waitFor { $(".new-user-field").displayed }
+		waitFor { $(".new-me-field").displayed }
 		$(".access-row").size() == 1
 
 		when: "save and close"
 		closeNotifications()
-		pressKeyUntil(".new-user-field", Keys.ENTER) {
+		pressKeyUntil(".new-me-field", Keys.ENTER) {
 			!$(".sharing-dialog")
 		}
 		then: "...but no changes, so no message displayed"
@@ -272,31 +272,31 @@ class ShareSpec extends LoginTester1Spec implements CanvasMixin, DashboardMixin,
 		scrollToAndClickShareButton("ShareSpec")
 		then:
 		waitFor { $(".sharing-dialog") }
-		waitFor { $(".new-user-field").displayed }
+		waitFor { $(".new-me-field").displayed }
 		$(".access-row").size() == 1
 
 		when: "add invalid email"
 		feedTextInput( "foobar")
-		pressKeyUntil(".new-user-field", Keys.ENTER) {
+		pressKeyUntil(".new-me-field", Keys.ENTER) {
 			$(".ui-pnotify .alert-danger")
 		}
 		then: "enter adds a permission row"
 		$(".access-row").size() == 1
-		$(".new-user-field").value() == "foobar"
+		$(".new-me-field").value() == "foobar"
 
 		expect: "esc clears the email"
-		pressKeyUntil(".new-user-field", Keys.ESCAPE) {
-			!$(".new-user-field").value()
+		pressKeyUntil(".new-me-field", Keys.ESCAPE) {
+			!$(".new-me-field").value()
 		}
 
 		when:
 		closeNotifications()
 		feedTextInput("tester2@streamr.com")
-		$(".new-user-button").click()
+		$(".new-me-button").click()
 		then:
 		waitFor { $(".access-row") }
 		$(".access-row").size() == 2
-		!$(".new-user-field").value()
+		!$(".new-me-field").value()
 
 		when: "discard changes"
 		cancel()
@@ -309,19 +309,19 @@ class ShareSpec extends LoginTester1Spec implements CanvasMixin, DashboardMixin,
 		scrollToAndClickShareButton("ShareSpec")
 		then: "access row from last time was discarded"
 		waitFor { $(".sharing-dialog") }
-		waitFor { $(".new-user-field").displayed }
+		waitFor { $(".new-me-field").displayed }
 		$(".access-row").size() == 1
 
 		when:
 		feedTextInput("tester2@streamr.com")
-		$(".new-user-button").click()
+		$(".new-me-button").click()
 		then:
 		waitFor { $(".access-row") }
 		$(".access-row").size() == 2
-		!$(".new-user-field").value()
+		!$(".new-me-field").value()
 
-		expect: "enter saves changes when user field is empty"
-		pressKeyUntil(".new-user-field", Keys.ENTER) {
+		expect: "enter saves changes when me field is empty"
+		pressKeyUntil(".new-me-field", Keys.ENTER) {
 			$(".ui-pnotify .alert-success")
 		}
 		waitFor { !$(".sharing-dialog") }
@@ -331,7 +331,7 @@ class ShareSpec extends LoginTester1Spec implements CanvasMixin, DashboardMixin,
 		scrollToAndClickShareButton("ShareSpec")
 		then: "check that the saved row is still there"
 		waitFor { $(".sharing-dialog") }
-		waitFor { $(".new-user-field").displayed }
+		waitFor { $(".new-me-field").displayed }
 		$(".access-row").size() == 2
 
 		when:
@@ -351,11 +351,11 @@ class ShareSpec extends LoginTester1Spec implements CanvasMixin, DashboardMixin,
 		clickDropdownShareButton()
 		then: "check that the saved row is still there"
 		waitFor { $(".sharing-dialog") }
-		waitFor { $(".new-user-field").displayed }
+		waitFor { $(".new-me-field").displayed }
 		$(".access-row").size() == 2
 
 		when: "there should be only two rows and only two delete-buttons..."
-		$(".user-delete-button").lastElement().click()
+		$(".me-delete-button").lastElement().click()
 		then: "it's gone!"
 		waitFor { $(".access-row").size() == 1 }
 
@@ -368,16 +368,16 @@ class ShareSpec extends LoginTester1Spec implements CanvasMixin, DashboardMixin,
 		clickDropdownShareButton()
 		then: "check that row hasn't been deleted"
 		waitFor { $(".sharing-dialog") }
-		waitFor { $(".new-user-field").displayed }
+		waitFor { $(".new-me-field").displayed }
 		$(".access-row").size() == 2
 
 		when: "delete again"
-		$(".user-delete-button").lastElement().click()
+		$(".me-delete-button").lastElement().click()
 		then: "it's gone!"
 		waitFor { $(".access-row").size() == 1 }
 
 		expect: "...this time for reals"
-		pressKeyUntil(".new-user-field", Keys.ENTER) {
+		pressKeyUntil(".new-me-field", Keys.ENTER) {
 			$(".ui-pnotify .alert-success")
 		}
 		waitFor { !$(".sharing-dialog") }
@@ -387,7 +387,7 @@ class ShareSpec extends LoginTester1Spec implements CanvasMixin, DashboardMixin,
 		clickDropdownShareButton()
 		then: "...to double-check it's gone"
 		waitFor { $(".sharing-dialog") }
-		waitFor { $(".new-user-field").displayed }
+		waitFor { $(".new-me-field").displayed }
 		$(".access-row").size() == 1
 
 		when: "save"
@@ -412,31 +412,31 @@ class ShareSpec extends LoginTester1Spec implements CanvasMixin, DashboardMixin,
 		scrollToAndClickShareButton("ShareSpec")
 		then:
 		waitFor { $(".sharing-dialog") }
-		waitFor { $(".new-user-field").displayed }
+		waitFor { $(".new-me-field").displayed }
 		$(".access-row").size() == 1
 
 		when: "add invalid email"
 		feedTextInput( "foobar")
-		pressKeyUntil(".new-user-field", Keys.ENTER) {
+		pressKeyUntil(".new-me-field", Keys.ENTER) {
 			$(".ui-pnotify .alert-danger")
 		}
 		then: "no new permission row"
 		$(".access-row").size() == 1
-		$(".new-user-field").value() == "foobar"
+		$(".new-me-field").value() == "foobar"
 
 		expect: "esc clears the email"
-		pressKeyUntil(".new-user-field", Keys.ESCAPE) {
-			!$(".new-user-field").value()
+		pressKeyUntil(".new-me-field", Keys.ESCAPE) {
+			!$(".new-me-field").value()
 		}
 
 		when:
 		closeNotifications()
 		feedTextInput("tester2@streamr.com")
-		$(".new-user-button").click()
+		$(".new-me-button").click()
 		then:
 		waitFor { $(".access-row") }
 		$(".access-row").size() == 2
-		!$(".new-user-field").value()
+		!$(".new-me-field").value()
 
 		when: "discard changes"
 		cancel()
@@ -449,19 +449,19 @@ class ShareSpec extends LoginTester1Spec implements CanvasMixin, DashboardMixin,
 		scrollToAndClickShareButton("ShareSpec")
 		then: "access row from last time was discarded"
 		waitFor { $(".sharing-dialog") }
-		waitFor { $(".new-user-field").displayed }
+		waitFor { $(".new-me-field").displayed }
 		$(".access-row").size() == 1
 
 		when:
 		feedTextInput("tester2@streamr.com")
-		$(".new-user-button").click()
+		$(".new-me-button").click()
 		then:
 		waitFor { $(".access-row") }
 		$(".access-row").size() == 2
-		!$(".new-user-field").value()
+		!$(".new-me-field").value()
 
-		expect: "enter saves changes when user field is empty"
-		pressKeyUntil(".new-user-field", Keys.ENTER) {
+		expect: "enter saves changes when me field is empty"
+		pressKeyUntil(".new-me-field", Keys.ENTER) {
 			$(".ui-pnotify .alert-success")
 		}
 		waitFor { !$(".sharing-dialog") }
@@ -471,7 +471,7 @@ class ShareSpec extends LoginTester1Spec implements CanvasMixin, DashboardMixin,
 		scrollToAndClickShareButton("ShareSpec")
 		then: "check that the saved row is still there"
 		waitFor { $(".sharing-dialog") }
-		waitFor { $(".new-user-field").displayed }
+		waitFor { $(".new-me-field").displayed }
 		$(".access-row").size() == 2
 
 		when:
@@ -545,13 +545,13 @@ class ShareSpec extends LoginTester1Spec implements CanvasMixin, DashboardMixin,
 		to StreamListPage
 		scrollToAndClickShareButton("ShareSpec")
 		feedTextInput("tester2@streamr.com")
-		$(".new-user-button").click()
+		$(".new-me-button").click()
 		then: "got the access-row; also it's the last one so we're not mixing things up"
 		waitFor { $(".access-row").firstElement().displayed }
 		$(".access-row").size() == 2
 
-		expect: "enter saves changes when user field is empty"
-		pressKeyUntil(".new-user-field", Keys.ENTER) {
+		expect: "enter saves changes when me field is empty"
+		pressKeyUntil(".new-me-field", Keys.ENTER) {
 			$(".ui-pnotify .alert-success")
 		}
 		waitFor { !$(".sharing-dialog") }
@@ -560,13 +560,13 @@ class ShareSpec extends LoginTester1Spec implements CanvasMixin, DashboardMixin,
 		to CanvasListPage
 		scrollToAndClickShareButton("ShareSpec")
 		feedTextInput("tester2@streamr.com")
-		$(".new-user-button").click()
+		$(".new-me-button").click()
 		then: "got the access-row; also it's the last one so we're not mixing things up"
 		waitFor { $(".access-row").firstElement().displayed }
 		$(".access-row").size() == 2
 
-		expect: "enter saves changes when user field is empty"
-		pressKeyUntil(".new-user-field", Keys.ENTER) {
+		expect: "enter saves changes when me field is empty"
+		pressKeyUntil(".new-me-field", Keys.ENTER) {
 			$(".ui-pnotify .alert-success")
 		}
 		waitFor { !$(".sharing-dialog") }
@@ -575,13 +575,13 @@ class ShareSpec extends LoginTester1Spec implements CanvasMixin, DashboardMixin,
 		to DashboardListPage
 		scrollToAndClickShareButton("ShareSpec")
 		feedTextInput("tester2@streamr.com")
-		$(".new-user-button").click()
+		$(".new-me-button").click()
 		then: "got the access-row; also it's the last one so we're not mixing things up"
 		waitFor { $(".access-row").firstElement().displayed }
 		$(".access-row").size() == 2
 
-		expect: "enter saves changes when user field is empty"
-		pressKeyUntil(".new-user-field", Keys.ENTER) {
+		expect: "enter saves changes when me field is empty"
+		pressKeyUntil(".new-me-field", Keys.ENTER) {
 			$(".ui-pnotify .alert-success")
 		}
 		waitFor { !$(".sharing-dialog") }
@@ -637,7 +637,7 @@ class ShareSpec extends LoginTester1Spec implements CanvasMixin, DashboardMixin,
 		to StreamListPage
 		scrollToAndClickShareButton("ShareSpec")
 		feedTextInput("tester2@streamr.com")
-		$(".new-user-button").click()
+		$(".new-me-button").click()
 		then: "got the access-row"
 		waitFor { $(".access-row").firstElement().displayed }
 		$(".access-row").size() == 2
@@ -648,8 +648,8 @@ class ShareSpec extends LoginTester1Spec implements CanvasMixin, DashboardMixin,
 		then:
 		$(".permission-dropdown-toggle").lastElement().getText() == "can edit"
 
-		expect: "enter saves changes when user field is empty"
-		pressKeyUntil(".new-user-field", Keys.ENTER) {
+		expect: "enter saves changes when me field is empty"
+		pressKeyUntil(".new-me-field", Keys.ENTER) {
 			$(".ui-pnotify .alert-success")
 		}
 		waitFor { !$(".sharing-dialog") }
@@ -686,15 +686,15 @@ class ShareSpec extends LoginTester1Spec implements CanvasMixin, DashboardMixin,
 		when:
 		to StreamListPage
 		scrollToAndClickShareButton("ShareSpec")
-		waitFor { $(".new-user-field").displayed }
+		waitFor { $(".new-me-field").displayed }
 		feedTextInput("tester2@streamr.com")
-		$(".new-user-button").click()
+		$(".new-me-button").click()
 		then: "got the access-row; also it's the second one so we're not mixing things up"
 		waitFor { $(".access-row") }
 		$(".access-row").size() == 2
 
-		expect: "enter saves changes when user field is empty"
-		pressKeyUntil(".new-user-field", Keys.ENTER) {
+		expect: "enter saves changes when me field is empty"
+		pressKeyUntil(".new-me-field", Keys.ENTER) {
 			$(".ui-pnotify .alert-success")
 		}
 		waitFor { !$(".sharing-dialog") }

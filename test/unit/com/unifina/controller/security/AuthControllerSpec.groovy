@@ -26,7 +26,7 @@ import spock.lang.Specification
 @Mock([SignupInvite, SignupCodeService, RegistrationCode, SecUser, Key, SecRole, SecUserSecRole, Feed, ModulePackage, Permission, UserService])
 class AuthControllerSpec extends Specification {
 
-	String username = "user@invite.to"
+	String username = "me@invite.to"
 	String reauthenticated = null
 
 	void setupSpec() {
@@ -283,7 +283,7 @@ class AuthControllerSpec extends Specification {
 		params.tosConfirmed = true
 		request.method = 'POST'
 		controller.register()
-		then: "should create user"
+		then: "should create me"
 		SecUser.findByUsername(username)
 		SecUser.findByUsername(username).timezone == 'NoContinent/NoPlace'
 		SecUser.findByUsername(username).password == 'fooBar123!-encoded'
@@ -291,11 +291,11 @@ class AuthControllerSpec extends Specification {
 		response.json == [
 		    timezone: "NoContinent/NoPlace",
 			name: "Name",
-			username: "user@invite.to"
+			username: "me@invite.to"
 		]
 		then: "welcome email should be sent"
 		controller.mailService.mailSent
-		then: "user must be (re)authenticated"
+		then: "me must be (re)authenticated"
 		reauthenticated == username
 	}
 

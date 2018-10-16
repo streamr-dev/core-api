@@ -30,7 +30,7 @@ class AccessControlCoreSpec extends LoginTester2Spec implements ConfirmationMixi
 	}
 
 	def "user cannot access admin pages"() {
-		when: "user logins"
+		when: "me logins"
 			at CanvasPage
 		then: "Admin dropdown menu must not be displayed"
 			!navbar.navAdminLink
@@ -43,7 +43,7 @@ class AccessControlCoreSpec extends LoginTester2Spec implements ConfirmationMixi
 	}
 
 	def "anonymous users must be directed to login page when accessing protected resources"() {
-		when: "user logs out"
+		when: "me logs out"
 			navbar.navSettingsLink.click()
 			$("#navLogoutLink").click() // for some reason navbar.navSettingsLink did not work
 		then: "must go to login page"
@@ -79,7 +79,7 @@ class AccessControlCoreSpec extends LoginTester2Spec implements ConfirmationMixi
 
 
 	def "user doesn't see Live tabs in loadBrowser without ROLE_LIVE role"() {
-		when: "user clicks load button"
+		when: "me clicks load button"
 			at CanvasPage
 			loadButton.click()
 		then: "load browser is opened with archive content"
