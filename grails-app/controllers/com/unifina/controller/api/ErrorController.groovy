@@ -2,6 +2,7 @@ package com.unifina.controller.api
 
 import com.unifina.api.ApiError
 import com.unifina.api.ApiException
+import com.unifina.api.CannotRemoveEthereumKeyException
 import com.unifina.api.CanvasCommunicationException
 import com.unifina.api.ChallengeVerificationFailedException
 import com.unifina.api.InvalidAPIKeyException
