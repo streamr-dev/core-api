@@ -10,6 +10,12 @@ import grails.test.mixin.TestFor
 @Mock([Category])
 class CategoryApiControllerSpec extends ControllerSpecification {
 
+	SecUser me
+
+	def setup() {
+		me = new SecUser(id: 1).save(validate: false)
+	}
+
 	void "lists categories in alphabetical order"() {
 		Category c1 = new Category(name: "Traffic", imageUrl: "traffic.png")
 		c1.id = "id-1"
@@ -24,11 +30,7 @@ class CategoryApiControllerSpec extends ControllerSpecification {
 		c3.save(failOnError: true, validate: true)
 
 		when:
-		request.requestURI = "/api/v1/categories"
-		request.method = "GET"
-		withFilters(action: "index") {
-			controller.index()
-		}
+		authenticatedAs(me) { controller.index() }
 
 		then:
 		response.status == 200
