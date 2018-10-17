@@ -16,6 +16,7 @@ class FilterMockingSpecification extends BeanMockingSpecification {
 
 	def unauthenticated(Map arguments = [:], Closure callable) {
 		checkFilter()
+		MockAPIFilters.setUser(null)
 		return withFilters(arguments, callable)
 	}
 
