@@ -1,22 +1,11 @@
 package com.unifina.feed
 
-import com.unifina.service.SessionService
-import com.unifina.service.UserService
-import grails.plugin.springsecurity.SpringSecurityService
 import spock.lang.Specification
 import spock.util.concurrent.PollingConditions
 
 class PollingMessageSourceSpec extends Specification {
 
 	List<PollingMessageSource<String,String>> sources = []
-
-	// This gets the real services injected into the filters
-	// From https://github.com/grails/grails-core/issues/9191
-	static doWithSpring = {
-		springSecurityService(SpringSecurityService)
-		userService(UserService)
-		sessionService(SessionService)
-	}
 
 	def setup() {
 		sources.clear()
@@ -254,5 +243,5 @@ class PollingMessageSourceSpec extends Specification {
 			assert counter1 >= 5 && counter1 < counter0
 		}
 	}
-	
+
 }
