@@ -10,9 +10,6 @@ import com.unifina.domain.signalpath.Canvas
 import com.unifina.service.DashboardService
 import grails.test.mixin.Mock
 import grails.test.mixin.TestFor
-import grails.test.mixin.web.FiltersUnitTestMixin
-import groovy.json.JsonBuilder
-import spock.lang.Specification
 
 @TestFor(DashboardItemApiController)
 @Mock([Canvas, Dashboard, DashboardItem, Key, SecUser])
@@ -39,11 +36,7 @@ class DashboardItemApiControllerSpec extends ControllerSpecification {
 	def "index() lists dashboard items"() {
 		when:
 		params.dashboardId = 3
-		request.addHeader("Authorization", "Token myApiKey")
-		request.requestURI = "/api/v1/dashboards/3/items"
-		withFilters(action: "index") {
-			controller.index()
-		}
+		authenticatedAs(me) { controller.index() }
 
 		then:
 		response.status == 200
@@ -73,11 +66,7 @@ class DashboardItemApiControllerSpec extends ControllerSpecification {
 		when:
 		params.dashboardId = 3
 		params.id = 2
-		request.addHeader("Authorization", "Token myApiKey")
-		request.requestURI = "/api/v1/dashboards/3/items/2"
-		withFilters(action: "index") {
-			controller.show()
-		}
+		authenticatedAs(me) { controller.show() }
 
 		then:
 		response.status == 200
@@ -101,11 +90,7 @@ class DashboardItemApiControllerSpec extends ControllerSpecification {
 			canvas: "canvas",
 			module: 1
 		]
-		request.addHeader("Authorization", "Token myApiKey")
-		request.requestURI = "/api/v1/dashboards/3/items/"
-		withFilters(action: "save") {
-			controller.save()
-		}
+		authenticatedAs(me) { controller.save() }
 
 		then:
 		response.status == 200
@@ -135,11 +120,7 @@ class DashboardItemApiControllerSpec extends ControllerSpecification {
 			canvas: "canvas",
 			module: 1
 		]
-		request.addHeader("Authorization", "Token myApiKey")
-		request.requestURI = "/api/v1/dashboards/3/items/2"
-		withFilters(action: "update") {
-			controller.update()
-		}
+		authenticatedAs(me) { controller.update() }
 
 		then:
 		response.status == 200
@@ -163,11 +144,7 @@ class DashboardItemApiControllerSpec extends ControllerSpecification {
 		when:
 		params.dashboardId = 3
 		params.id = 2
-		request.addHeader("Authorization", "Token myApiKey")
-		request.requestURI = "/api/v1/dashboards/3/items/2"
-		withFilters(action: "delete") {
-			controller.delete()
-		}
+		authenticatedAs(me) { controller.delete() }
 
 		then:
 		response.status == 204
