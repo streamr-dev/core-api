@@ -1,33 +1,23 @@
 package com.unifina.controller.api
 
+import com.unifina.FilterMockingSpecification
 import com.unifina.security.Challenge
 import com.unifina.domain.security.IntegrationKey
 import com.unifina.domain.security.Key
 import com.unifina.domain.security.SecUser
-import com.unifina.filters.UnifinaCoreAPIFilters
 import com.unifina.service.EthereumIntegrationKeyService
-import com.unifina.service.SessionService
-import com.unifina.service.UserService
 import grails.converters.JSON
-import grails.plugin.springsecurity.SpringSecurityService
 import grails.test.mixin.Mock
 import grails.test.mixin.TestFor
-import spock.lang.Specification
 
 @TestFor(IntegrationKeyApiController)
-@Mock([UnifinaCoreAPIFilters, Key, SecUser, IntegrationKey])
-class IntegrationKeyApiControllerSpec extends Specification {
+@Mock([Key, SecUser, IntegrationKey])
+class IntegrationKeyApiControllerSpec extends FilterMockingSpecification {
 	EthereumIntegrationKeyService ethereumIntegrationKeyService
 	SecUser me
 	SecUser someoneElse
 
-	static doWithSpring = {
-		springSecurityService(SpringSecurityService)
-		userService(UserService)
-		sessionService(SessionService)
-	}
-
-	void setup() {
+	def setup() {
 		me = new SecUser().save(failOnError: true, validate: false)
 		someoneElse = new SecUser().save(failOnError: true, validate: false)
 
@@ -36,35 +26,31 @@ class IntegrationKeyApiControllerSpec extends Specification {
 		key.save(failOnError: true, validate: true)
 
 		new IntegrationKey(
-				name: "my-integration-key-1",
-				user: me,
-				service: IntegrationKey.Service.ETHEREUM,
-				idInService: "0x0000000000000000000",
-				json: "{ address: '0x0000000000000000000' }"
+			name: "my-integration-key-1",
+			user: me,
+			service: IntegrationKey.Service.ETHEREUM,
+			idInService: "0x0000000000000000000",
+			json: "{ address: '0x0000000000000000000' }"
 		).save(validate: true, failOnError: true)
 		new IntegrationKey(
-				name: "my-integration-key-2",
-				user: me,
-				service: IntegrationKey.Service.ETHEREUM_ID,
-				idInService: "0x0000000000000000000",
-				json: "{ address: '0x0000000000000000000' }"
+			name: "my-integration-key-2",
+			user: me,
+			service: IntegrationKey.Service.ETHEREUM_ID,
+			idInService: "0x0000000000000000000",
+			json: "{ address: '0x0000000000000000000' }"
 		).save(validate: true, failOnError: true)
 		new IntegrationKey(
-				name: "not-my-integration-key",
-				user: someoneElse,
-				service: IntegrationKey.Service.ETHEREUM,
-				idInService: "0x0000000000000000000",
-				json: "{ address: '0x0000000000000000000' }"
+			name: "not-my-integration-key",
+			user: someoneElse,
+			service: IntegrationKey.Service.ETHEREUM,
+			idInService: "0x0000000000000000000",
+			json: "{ address: '0x0000000000000000000' }"
 		).save(validate: true, failOnError: true)
 	}
 
 	void "index() lists users integration keys"() {
 		when:
-		request.addHeader("Authorization", "Token myApiKey")
-		request.requestURI = "/api/v1/integration_keys"
-		withFilters(action: "index") {
-			controller.index()
-		}
+		authenticatedAs(me) { controller.index() }
 
 		then:
 		response.status == 200
@@ -74,11 +60,7 @@ class IntegrationKeyApiControllerSpec extends Specification {
 	void "index() can be filtered by service"() {
 		when:
 		params.service = "ETHEREUM_ID"
-		request.addHeader("Authorization", "Token myApiKey")
-		request.requestURI = "/api/v1/integration_keys"
-		withFilters(action: "index") {
-			controller.index()
-		}
+		authenticatedAs(me) { controller.index() }
 
 		then:
 		response.status == 200
@@ -95,45 +77,41 @@ class IntegrationKeyApiControllerSpec extends Specification {
 			300)
 
 		when:
-		request.addHeader("Authorization", "Token myApiKey")
-		request.requestURI = "/api/v1/integration_keys"
 		request.method = "POST"
 		request.JSON = [
-				name     : "foobar",
-				service  : IntegrationKey.Service.ETHEREUM_ID.toString(),
-				challenge: [
-						id       : challenge.getId(),
-						challenge: challenge.getChallenge()
-				],
-				signature: signature,
-				account  : address
+			name     : "foobar",
+			service  : IntegrationKey.Service.ETHEREUM_ID.toString(),
+			challenge: [
+				id       : challenge.getId(),
+				challenge: challenge.getChallenge()
+			],
+			signature: signature,
+			account  : address
 		]
-		withFilters(action: "save") {
-			controller.save()
-		}
+		authenticatedAs(me) { controller.save() }
 
 		then:
 		response.status == 201
 		response.json == [
-				id		 : null,
-				challenge: [
-					id       : challenge.getId(),
-					challenge: challenge.getChallenge()
-				],
-				json: [
-					address  : address
-				],
-				name     : "foobar",
-				service  : IntegrationKey.Service.ETHEREUM_ID.toString(),
-				signature: signature,
+			id		 : null,
+			challenge: [
+				id       : challenge.getId(),
+				challenge: challenge.getChallenge()
+			],
+			json: [
+				address  : address
+			],
+			name     : "foobar",
+			service  : IntegrationKey.Service.ETHEREUM_ID.toString(),
+			signature: signature,
 		]
 		1 * ethereumIntegrationKeyService.createEthereumID(_, _, _, _, _) >> new IntegrationKey(
-				name: "foobar",
-				user: me,
-				json: ([
-						address: address
-				] as JSON).toString(),
-				service: IntegrationKey.Service.ETHEREUM_ID.toString()
+			name: "foobar",
+			user: me,
+			json: ([
+				address: address
+			] as JSON).toString(),
+			service: IntegrationKey.Service.ETHEREUM_ID.toString()
 		)
 	}
 
@@ -143,9 +121,7 @@ class IntegrationKeyApiControllerSpec extends Specification {
 		when:
 		params.id = "integration-key-id"
 		request.apiUser = me
-		withFilters(action: "delete") {
-			controller.delete()
-		}
+		authenticatedAs(me) { controller.delete() }
 
 		then:
 		1 * ethereumIntegrationKeyService.delete("integration-key-id", me)
@@ -157,9 +133,7 @@ class IntegrationKeyApiControllerSpec extends Specification {
 		when:
 		params.id = "integration-key-id"
 		request.apiUser = me
-		withFilters(action: "delete") {
-			controller.delete()
-		}
+		authenticatedAs(me) { controller.delete() }
 
 		then:
 		response.status == 204
