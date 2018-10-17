@@ -1,6 +1,8 @@
 package com.unifina.domain.security
 
 import com.unifina.security.Userish
+import com.unifina.utils.EmailValidator
+import com.unifina.utils.EthereumAddressValidator
 import com.unifina.utils.UsernameValidator
 import groovy.transform.CompileStatic
 

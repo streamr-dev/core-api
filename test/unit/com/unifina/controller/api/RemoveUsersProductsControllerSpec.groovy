@@ -1,23 +1,33 @@
 package com.unifina.controller.api
 
-import com.unifina.FilterMockingSpecification
 import com.unifina.domain.security.Key
 import com.unifina.domain.security.SecRole
 import com.unifina.domain.security.SecUser
 import com.unifina.domain.security.SecUserSecRole
 import com.unifina.filters.UnifinaCoreAPIFilters
 import com.unifina.service.ProductService
+import com.unifina.service.SessionService
+import com.unifina.service.UserService
 import grails.plugin.springsecurity.SpringSecurityService
 import grails.test.mixin.Mock
 import grails.test.mixin.TestFor
+import spock.lang.Specification
 
 @TestFor(RemoveUsersProductsController)
 @Mock([UnifinaCoreAPIFilters, SpringSecurityService, SecUser, Key, SecRole, SecUserSecRole])
-class RemoveUsersProductsControllerSpec extends FilterMockingSpecification {
+class RemoveUsersProductsControllerSpec extends Specification {
 	ProductService productService
 	SecUser me
 
-	def setup() {
+	// This gets the real services injected into the filters
+	// From https://github.com/grails/grails-core/issues/9191
+	static doWithSpring = {
+		springSecurityService(SpringSecurityService)
+		userService(UserService)
+		sessionService(SessionService)
+	}
+
+	void setup() {
 		productService = controller.productService = Mock(ProductService)
 		me = new SecUser(id: 1, username: "arnold").save(validate: false)
 		Key key = new Key(name: "key", user: me)
@@ -30,9 +40,12 @@ class RemoveUsersProductsControllerSpec extends FilterMockingSpecification {
 		new SecUserSecRole(secUser: me, secRole: role).save(failOnError: true)
 		when:
 		request.method = "DELETE"
+		request.requestURI = "/api/v1/products/remove/sylvester"
+		request.addHeader("Authorization", "Token myApiKey")
 		params.username = "sylvester"
-		authenticatedAs(me) { controller.index() }
-
+		withFilters(action: "index") {
+			controller.index()
+		}
 		then:
 		response.status == 204
 		1 * productService.removeUsersProducts("sylvester")
@@ -41,9 +54,12 @@ class RemoveUsersProductsControllerSpec extends FilterMockingSpecification {
 	def "should handle remove users products with invalid argument"() {
 		when:
 		request.method = "DELETE"
+		request.requestURI = "/api/v1/products/remove"
+		request.addHeader("Authorization", "Token myApiKey")
 		params.username = null
-		authenticatedAs(me) { controller.index() }
-
+		withFilters(action: "index") {
+			controller.index()
+		}
 		then:
 		response.status == 400
 		0 * productService._
@@ -55,9 +71,12 @@ class RemoveUsersProductsControllerSpec extends FilterMockingSpecification {
 		when:
 		request.apiUser = me
 		request.method = "DELETE"
+		request.requestURI = "/api/v1/products/remove/sylvester"
+		request.addHeader("Authorization", "Token myApiKey")
 		params.username = "sylvester"
-		authenticatedAs(me) { controller.index() }
-
+		withFilters(action: "index") {
+			controller.index()
+		}
 		then:
 		response.status == 401
 		0 * productService._

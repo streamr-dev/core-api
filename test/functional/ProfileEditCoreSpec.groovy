@@ -19,7 +19,7 @@ class ProfileEditCoreSpec extends GebReportingSpec implements LoginMixin, Regist
 		registerUser(emailAddress, pwd)
 	}
 
-	// Delete the me
+	// Delete the user
 	def cleanupSpec() {
 		removeUser(emailAddress)
 	}

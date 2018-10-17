@@ -1,6 +1,5 @@
 package com.unifina.controller.api
 
-import com.unifina.FilterMockingSpecification
 import com.unifina.api.NotFoundException
 import com.unifina.api.NotPermittedException
 import com.unifina.api.StreamListParams
@@ -15,13 +14,14 @@ import com.unifina.service.*
 import grails.plugin.springsecurity.SpringSecurityService
 import grails.test.mixin.Mock
 import grails.test.mixin.TestFor
+import spock.lang.Specification
 
 @TestFor(StreamApiController)
 @Mock([SecUser, Stream, Key, Permission, Feed, UnifinaCoreAPIFilters, UserService, PermissionService, SpringSecurityService, StreamService, DashboardService])
-class StreamApiControllerSpec extends FilterMockingSpecification {
+class StreamApiControllerSpec extends Specification {
 
 	Feed feed
-	SecUser me
+	SecUser user
 
 	def streamService
 	def permissionService
@@ -32,16 +32,24 @@ class StreamApiControllerSpec extends FilterMockingSpecification {
 	def streamThreeId
 	def streamFourId
 
+	// This gets the real services injected into the filters
+	// From https://github.com/grails/grails-core/issues/9191
+	static doWithSpring = {
+		springSecurityService(SpringSecurityService)
+		userService(UserService)
+		sessionService(SessionService)
+	}
+
 	def setup() {
 		permissionService = mainContext.getBean(PermissionService)
 
 		controller.permissionService = permissionService
 		apiService = controller.apiService = Mock(ApiService)
 
-		me = new SecUser(username: "me", password: "foo")
-		me.save(validate: false)
+		user = new SecUser(username: "me", password: "foo")
+		user.save(validate: false)
 
-		Key key = new Key(name: "key", user: me)
+		Key key = new Key(name: "key", user: user)
 		key.id = "apiKey"
 		key.save(failOnError: true, validate: true)
 
@@ -52,9 +60,9 @@ class StreamApiControllerSpec extends FilterMockingSpecification {
 		// First use real streamService to create the streams
 		streamService = mainContext.getBean(StreamService)
 		streamService.permissionService = permissionService
-		streamOneId = streamService.createStream([name: "stream", description: "description", feed: feed], me).id
-		streamTwoId = streamService.createStream([name: "ztream", feed: feed], me).id
-		streamThreeId = streamService.createStream([name: "atream", feed: feed], me).id
+		streamOneId = streamService.createStream([name: "stream", description: "description", feed: feed], user).id
+		streamTwoId = streamService.createStream([name: "ztream", feed: feed], user).id
+		streamThreeId = streamService.createStream([name: "atream", feed: feed], user).id
 		streamFourId = streamService.createStream([name: "otherUserStream", feed: feed], otherUser).id
 
 		controller.streamService = streamService
@@ -62,14 +70,19 @@ class StreamApiControllerSpec extends FilterMockingSpecification {
 
 	void "find all streams of logged in user"() {
 		when:
-		authenticatedAs(me) { controller.index() }
+		request.addHeader("Authorization", "Token apiKey")
+		request.method = "GET"
+		request.requestURI = "/api/v1/stream"
+		withFilters([action: 'index']) {
+			controller.index()
+		}
 
 		then:
 		response.json.length() == 3
 		1 * apiService.list(Stream, {
 			assert it.toMap() == new StreamListParams().toMap()
 			return true
-		}, me) >> [
+		}, user) >> [
 		    Stream.findById(streamOneId),
 			Stream.findById(streamTwoId),
 			Stream.findById(streamThreeId)
@@ -78,8 +91,13 @@ class StreamApiControllerSpec extends FilterMockingSpecification {
 
 	void "find all streams of logged in user without config"() {
 		when:
+		request.addHeader("Authorization", "Token apiKey")
+		request.method = "GET"
+		request.requestURI = "/api/v1/stream"
 		request.setParameter("noConfig", "true")
-		authenticatedAs(me) { controller.index() }
+		withFilters([action: 'index']) {
+			controller.index()
+		}
 
 		then:
 		response.json.length() == 3
@@ -87,7 +105,7 @@ class StreamApiControllerSpec extends FilterMockingSpecification {
 		1 * apiService.list(Stream, {
 			assert it.toMap() == new StreamListParams().toMap()
 			return true
-		}, me) >> [
+		}, user) >> [
 			Stream.findById(streamOneId),
 			Stream.findById(streamTwoId),
 			Stream.findById(streamThreeId)
@@ -96,8 +114,13 @@ class StreamApiControllerSpec extends FilterMockingSpecification {
 
 	void "find streams by name of logged in user"() {
 		when:
+		request.addHeader("Authorization", "Token apiKey")
 		params.name = "stream"
-		authenticatedAs(me) { controller.index() }
+		request.method = "GET"
+		request.requestURI = "/api/v1/stream"
+		withFilters([action: 'index']) {
+			controller.index()
+		}
 
 		then:
 		response.json.length() == 1
@@ -110,7 +133,7 @@ class StreamApiControllerSpec extends FilterMockingSpecification {
 		1 * apiService.list(Stream, {
 			assert it.toMap() == new StreamListParams(name: "stream").toMap()
 			return true
-		}, me) >> [
+		}, user) >> [
 			Stream.findById(streamOneId)
 		]
 	}
@@ -119,24 +142,31 @@ class StreamApiControllerSpec extends FilterMockingSpecification {
 		when:
 		def name = Stream.get(streamTwoId).name
 		params.name = name
-		authenticatedAs(me) { controller.index() }
+		request.addHeader("Authorization", "Token apiKey")
+		request.requestURI = "/api/v1/streams"
+		withFilters(action: "index") {
+			controller.index()
+		}
 
 		then:
 		response.json[0].name == name
 		1 * apiService.list(Stream, {
 			assert it.toMap() == new StreamListParams(name: "ztream").toMap()
 			return true
-		}, me) >> [
+		}, user) >> [
 			Stream.findById(streamTwoId)
 		]
 	}
 
 	void "creating stream fails given invalid token"() {
 		when:
+		request.addHeader("Authorization", "Token wrongKey")
 		request.json = [name: "Test stream", description: "Test stream", feed: feed]
 		request.method = 'POST'
-		unauthenticated() { controller.save() }
-
+		request.requestURI = '/api/v1/stream/create'
+		withFilters([action:'save']) {
+			controller.save()
+		}
 		then:
 		response.status == 401
 	}
@@ -149,19 +179,27 @@ class StreamApiControllerSpec extends FilterMockingSpecification {
 
 
 		when:
+		request.addHeader("Authorization", "Token apiKey")
 		request.json = [test: "test"]
 		request.method = 'POST'
-		authenticatedAs(me) { controller.save() }
-
+		request.requestURI = '/api/v1/stream/create'
+		withFilters([action:'save']) {
+			controller.save()
+		}
 		then:
-		1 * streamService.createStream([test: "test"], me) >> { stream }
+		1 * streamService.createStream([test: "test"], user) >> { stream }
 		response.json.id == stream.toMap().id
 	}
 
 	void "show a Stream of logged in user"() {
 		when:
+		request.addHeader("Authorization", "Token apiKey")
 		params.id = streamOneId
-		authenticatedAs(me) { controller.show() }
+		request.method = "GET"
+		request.requestURI = "/api/v1/stream"
+		withFilters([action: "show"]) {
+			controller.show()
+		}
 
 		then:
 		response.status == 200
@@ -170,8 +208,13 @@ class StreamApiControllerSpec extends FilterMockingSpecification {
 
 	void "cannot shown non-existent Stream"() {
 		when:
+		request.addHeader("Authorization", "Token apiKey")
 		params.id = "666-666-666"
-		authenticatedAs(me) { controller.show() }
+		request.method = "GET"
+		request.requestURI = "/api/v1/stream"
+		withFilters([action: "show"]) {
+			controller.show()
+		}
 
 		then:
 		thrown NotFoundException
@@ -179,8 +222,13 @@ class StreamApiControllerSpec extends FilterMockingSpecification {
 
 	void "cannot show other user's Stream"() {
 		when:
+		request.addHeader("Authorization", "Token apiKey")
 		params.id = streamFourId
-		authenticatedAs(me) { controller.show() }
+		request.method = "GET"
+		request.requestURI = "/api/v1/stream"
+		withFilters([action: "show"]) {
+			controller.show()
+		}
 
 		then:
 		thrown NotPermittedException
@@ -193,8 +241,13 @@ class StreamApiControllerSpec extends FilterMockingSpecification {
 		permissionService.systemGrant(key, Stream.get(streamOneId), Permission.Operation.READ)
 
 		when:
+		request.addHeader("Authorization", "Token anonymousKeyKey")
 		params.id = streamOneId
-		authenticatedAs(me) { controller.show() }
+		request.method = "GET"
+		request.requestURI = "/api/v1/stream"
+		withFilters([action: "show"]) {
+			controller.show()
+		}
 
 		then:
 		response.status == 200
@@ -207,19 +260,28 @@ class StreamApiControllerSpec extends FilterMockingSpecification {
 		key.save(failOnError: true)
 
 		when:
+		request.addHeader("Authorization", "Token anonymousKeyKey")
 		params.id = streamOneId
-		unauthenticated() { controller.show() }
+		request.method = "GET"
+		request.requestURI = "/api/v1/stream"
+		withFilters([action: "show"]) {
+			controller.show()
+		}
 
 		then:
-		response.status == 401
+		thrown NotPermittedException
 	}
 
 	void "update a Stream of logged in user"() {
 		when:
+		request.addHeader("Authorization", "Token apiKey")
 		params.id = streamOneId
 		request.method = "PUT"
 		request.json = '{name: "newName", description: "newDescription"}'
-		authenticatedAs(me) { controller.update() }
+		request.requestURI = "/api/v1/stream"
+		withFilters([action: "update"]) {
+			controller.update()
+		}
 
 		then:
 		response.status == 204
@@ -233,10 +295,14 @@ class StreamApiControllerSpec extends FilterMockingSpecification {
 
 	void "cannot update non-existent Stream"() {
 		when:
+		request.addHeader("Authorization", "Token apiKey")
 		params.id = "666-666-666"
 		request.method = "PUT"
 		request.json = '{name: "newName", description: "newDescription"}'
-		authenticatedAs(me) { controller.update() }
+		request.requestURI = "/api/v1/stream"
+		withFilters([action: "update"]) {
+			controller.update()
+		}
 
 		then:
 		thrown NotFoundException
@@ -244,10 +310,14 @@ class StreamApiControllerSpec extends FilterMockingSpecification {
 
 	void "cannot update other user's Stream"() {
 		when:
+		request.addHeader("Authorization", "Token apiKey")
 		params.id = streamFourId
 		request.method = "PUT"
 		request.json = '{name: "newName", description: "newDescription"}'
-		authenticatedAs(me) { controller.update() }
+		request.requestURI = "/api/v1/stream"
+		withFilters([action: "update"]) {
+			controller.update()
+		}
 
 		then:
 		thrown NotPermittedException
@@ -255,9 +325,13 @@ class StreamApiControllerSpec extends FilterMockingSpecification {
 
 	void "delete a Stream of logged in user"() {
 		when:
+		request.addHeader("Authorization", "Token apiKey")
 		params.id = streamOneId
 		request.method = "DELETE"
-		authenticatedAs(me) { controller.delete() }
+		request.requestURI = "/api/v1/stream"
+		withFilters([action: "delete"]) {
+			controller.delete()
+		}
 
 		then:
 		response.status == 204
@@ -265,9 +339,13 @@ class StreamApiControllerSpec extends FilterMockingSpecification {
 
 	void "cannot delete non-existent Stream"() {
 		when:
+		request.addHeader("Authorization", "Token apiKey")
 		params.id = "666-666-666"
 		request.method = "DELETE"
-		authenticatedAs(me) { controller.delete() }
+		request.requestURI = "/api/v1/stream"
+		withFilters([action: "delete"]) {
+			controller.delete()
+		}
 
 		then:
 		thrown NotFoundException
@@ -275,9 +353,13 @@ class StreamApiControllerSpec extends FilterMockingSpecification {
 
 	void "cannot delete other user's Stream"() {
 		when:
+		request.addHeader("Authorization", "Token apiKey")
 		params.id = streamFourId
 		request.method = "DELETE"
-		authenticatedAs(me) { controller.delete() }
+		request.requestURI = "/api/v1/stream"
+		withFilters([action: "delete"]) {
+			controller.delete()
+		}
 
 		then:
 		thrown NotPermittedException

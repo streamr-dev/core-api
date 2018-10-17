@@ -11,7 +11,7 @@ import com.unifina.domain.security.SignupInvite
 import grails.plugin.remotecontrol.RemoteControl
 
 /**
- * Handle registering a new me
+ * Handle registering a new user
  */
 trait RegisterMixin {
 	def registerUser(String emailAddress, String pwd, String fullName = "Test Tester", String tz = "Europe/Zurich") {
@@ -56,7 +56,7 @@ trait RegisterMixin {
 		setup: "login"
 		login(LoginTesterAdminSpec.testerUsername, LoginTesterAdminSpec.testerPassword)
 
-		when: "search for the me and click it"
+		when: "search for the user and click it"
 		to UserSearchPage
 		assert username.displayed
 		username = emailAddress
@@ -66,7 +66,7 @@ trait RegisterMixin {
 		}
 		searchResult.click()
 
-		then: "go to me edit page"
+		then: "go to user edit page"
 		at UserEditPage
 
 		when: "click to delete"

@@ -2,7 +2,6 @@ package com.unifina.controller.api
 
 import com.unifina.api.ApiError
 import com.unifina.api.ApiException
-import com.unifina.api.CannotRemoveEthereumKeyException
 import com.unifina.api.CanvasCommunicationException
 import com.unifina.api.InvalidStateException
 import com.unifina.api.ValidationException
@@ -18,8 +17,7 @@ class ErrorController {
 		InvalidStateException: { InvalidStateException e -> new ApiError(500, "STATE_NOT_ALLOWED", e.message) },
 		ValidationException: { ValidationException e -> new ApiError(422, "VALIDATION_ERROR", e.message) },
 		CanvasUnreachableException: { CanvasUnreachableException e -> new ApiError(500, "CANVAS_UNREACHABLE", e.message) },
-		CanvasCommunicationException: { CanvasCommunicationException e -> new ApiError(503, "CANVAS_COMMUNICATION_ERROR", e.message)},
-		CannotRemoveEthereumKeyException: { CannotRemoveEthereumKeyException e -> new ApiError(409, "ETHEREUM_KEY_REMOVAL_ERROR", e.message)}
+		CanvasCommunicationException: { CanvasCommunicationException e -> new ApiError(503, "CANVAS_COMMUNICATION_ERROR", e.message)}
 	]
 
 	@StreamrApi(authenticationLevel = AuthLevel.NONE)

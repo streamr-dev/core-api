@@ -1,6 +1,5 @@
 package com.unifina.controller.api
 
-import com.unifina.FilterMockingSpecification
 import com.unifina.api.ApiException
 import com.unifina.security.Challenge
 import com.unifina.domain.security.Key
@@ -10,8 +9,10 @@ import com.unifina.service.ChallengeService
 import com.unifina.service.EthereumIntegrationKeyService
 import com.unifina.service.SessionService
 import com.unifina.service.UserService
+import grails.plugin.springsecurity.SpringSecurityService
 import grails.test.mixin.Mock
 import grails.test.mixin.TestFor
+import spock.lang.Specification
 
 import java.text.DateFormat
 import java.text.SimpleDateFormat
@@ -21,30 +22,41 @@ import java.text.SimpleDateFormat
  */
 @TestFor(LoginApiController)
 @Mock([SecUser, com.unifina.filters.UnifinaCoreAPIFilters, Key])
-class LoginApiControllerSpec extends FilterMockingSpecification {
+class LoginApiControllerSpec extends Specification {
 	ChallengeService challengeService
 	SessionService sessionService
 	EthereumIntegrationKeyService ethereumIntegrationKeyService
 	UserService userService
 	DateFormat df
-	SecUser me
+
+	// This gets the real services injected into the filters
+	// From https://github.com/grails/grails-core/issues/9191
+	static doWithSpring = {
+		springSecurityService(SpringSecurityService)
+	}
 
 	def setup() {
-		me = new SecUser().save(failOnError: true, validate: false)
 		df = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'")
-		df.setTimeZone(TimeZone.getTimeZone("UTC"))
+		df.setTimeZone(TimeZone.getTimeZone("UTC"));
 		challengeService = controller.challengeService = Mock(ChallengeService)
 		sessionService = controller.sessionService = Mock(SessionService)
 		ethereumIntegrationKeyService = controller.ethereumIntegrationKeyService = Mock(EthereumIntegrationKeyService)
 		userService = controller.userService = Mock(UserService)
+		def me = new SecUser().save(failOnError: true, validate: false)
+		Key key = new Key(name: "key", user: me)
+		key.id = "myApiKey"
+		key.save(failOnError: true, validate: true)
 	}
 
 	void "should generate challenge"() {
 		Challenge challenge = new Challenge("id", "challenge", challengeService.TTL_SECONDS)
 
 		when:
+		request.requestURI = "/api/v1/login/challenge"
 		request.method = "POST"
-		authenticatedAs(me) { controller.challenge() }
+		withFilters(action: "challenge") {
+			controller.challenge()
+		}
 
 		then:
 		response.status == 200
@@ -73,6 +85,7 @@ class LoginApiControllerSpec extends FilterMockingSpecification {
 		SessionToken token = new SessionToken(64, user, 3)
 
 		when:
+		request.requestURI = "/api/v1/login/response"
 		request.method = "POST"
 		request.JSON = [
 			challenge: [
@@ -82,7 +95,9 @@ class LoginApiControllerSpec extends FilterMockingSpecification {
 			signature: signature,
 			address  : address
 		]
-		authenticatedAs(me) { controller.response() }
+		withFilters(action: "response") {
+			controller.response()
+		}
 
 		then:
 		1 * challengeService.verifyChallengeResponse(challenge.getId(), challenge.getChallenge(), signature, address) >> true
@@ -102,6 +117,7 @@ class LoginApiControllerSpec extends FilterMockingSpecification {
 		Challenge challenge = new Challenge("id", "challenge", challengeService.TTL_SECONDS)
 
 		when:
+		request.requestURI = "/api/v1/login/response"
 		request.method = "POST"
 		request.JSON = [
 			challenge: [
@@ -111,7 +127,9 @@ class LoginApiControllerSpec extends FilterMockingSpecification {
 			signature: signature,
 			address  : address
 		]
-		authenticatedAs(me) { controller.response() }
+		withFilters(action: "response") {
+			controller.response()
+		}
 
 		then:
 		thrown ApiException
@@ -127,12 +145,15 @@ class LoginApiControllerSpec extends FilterMockingSpecification {
 		SessionToken token = new SessionToken(64, user, 3)
 
 		when:
+		request.requestURI = "/api/v1/login/password"
 		request.method = "POST"
 		request.JSON = [
 			username: user.username,
 			password: user.password
 		]
-		authenticatedAs(me) { controller.password() }
+		withFilters(action: "password") {
+			controller.password()
+		}
 
 		then:
 		1 * userService.getUserFromUsernameAndPassword(user.username, user.password) >> user
@@ -149,12 +170,15 @@ class LoginApiControllerSpec extends FilterMockingSpecification {
 		String password = "password"
 
 		when:
+		request.requestURI = "/api/v1/login/password"
 		request.method = "POST"
 		request.JSON = [
 			username: username,
 			password: password
 		]
-		authenticatedAs(me) { controller.password() }
+		withFilters(action: "password") {
+			controller.password()
+		}
 
 		then:
 		thrown ApiException
@@ -172,11 +196,14 @@ class LoginApiControllerSpec extends FilterMockingSpecification {
 		SessionToken token = new SessionToken(64, user, 3)
 
 		when:
+		request.requestURI = "/api/v1/login/apikey"
 		request.method = "POST"
 		request.JSON = [
 			apiKey: apiKey
 		]
-		authenticatedAs(me) { controller.apikey() }
+		withFilters(action: "apikey") {
+			controller.apikey()
+		}
 
 		then:
 		1 * userService.getUserFromApiKey(apiKey) >> user
@@ -192,11 +219,14 @@ class LoginApiControllerSpec extends FilterMockingSpecification {
 		String apiKey = "apiKey"
 
 		when:
+		request.requestURI = "/api/v1/login/apikey"
 		request.method = "POST"
 		request.JSON = [
 			apiKey: apiKey
 		]
-		authenticatedAs(me) { controller.apikey() }
+		withFilters(action: "apikey") {
+			controller.apikey()
+		}
 
 		then:
 		1 * userService.getUserFromApiKey(apiKey) >> null

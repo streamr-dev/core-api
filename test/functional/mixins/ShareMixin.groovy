@@ -8,7 +8,7 @@ import com.unifina.domain.security.Permission
 trait ShareMixin implements NotificationMixin {
 
 	// We still don't know why it's so hard to type text into the input,
-	// just "$('.new-me-field') << text" won't work.
+	// just "$('.new-user-field') << text" won't work.
 	// That's why this hack.
 	// The same is used in ShareSpec.groovy
 	def feedTextInput(String selector, String text) {
@@ -20,7 +20,7 @@ trait ShareMixin implements NotificationMixin {
 		}
 	}
 	def feedTextInput(String text) {
-		feedTextInput('.new-me-field', text)
+		feedTextInput('.new-user-field', text)
 	}
 
 	def getSharingDialog() {
@@ -49,7 +49,7 @@ trait ShareMixin implements NotificationMixin {
 
 	void shareTo(String username, Permission.Operation op = Permission.Operation.READ) {
 		feedTextInput(username)
-		$(".sharing-dialog .new-me-button").click()
+		$(".sharing-dialog .new-user-button").click()
 		setPermission(username, op)
 		acceptShareDialog()
 		waitForSuccessNotification()

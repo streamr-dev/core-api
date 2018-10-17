@@ -20,7 +20,7 @@ class UserGuideSpec extends LoginTester1Spec {
 		then:
 		waitFor { at UserGuidePage }
 
-		when: "click on last top-level title of me guide"
+		when: "click on last top-level title of user guide"
 		def link = tableOfContents.children().last().children("a")
 		link.click()
 		then: "the corresponding header should be visible"

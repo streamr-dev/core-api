@@ -1,6 +1,5 @@
 package com.unifina.controller.api
 
-import com.unifina.FilterMockingSpecification
 import com.unifina.api.SaveDashboardItemCommand
 import com.unifina.domain.dashboard.Dashboard
 import com.unifina.domain.dashboard.DashboardItem
@@ -9,18 +8,30 @@ import com.unifina.domain.security.SecUser
 import com.unifina.domain.signalpath.Canvas
 import com.unifina.filters.UnifinaCoreAPIFilters
 import com.unifina.service.DashboardService
+import com.unifina.service.SessionService
 import com.unifina.service.UserService
 import grails.plugin.springsecurity.SpringSecurityService
 import grails.test.mixin.Mock
 import grails.test.mixin.TestFor
+import grails.test.mixin.web.FiltersUnitTestMixin
+import groovy.json.JsonBuilder
+import spock.lang.Specification
 
 @TestFor(DashboardItemApiController)
 @Mock([Canvas, Dashboard, DashboardItem, Key, SecUser, UnifinaCoreAPIFilters, UserService, SpringSecurityService])
-class DashboardItemApiControllerSpec extends FilterMockingSpecification {
+class DashboardItemApiControllerSpec extends Specification {
 
 	DashboardService dashboardService
 	SecUser me
 	List<Dashboard> dashboards
+
+	// This gets the real services injected into the filters
+	// From https://github.com/grails/grails-core/issues/9191
+	static doWithSpring = {
+		springSecurityService(SpringSecurityService)
+		userService(UserService)
+		sessionService(SessionService)
+	}
 
 	def setup() {
 		dashboardService = controller.dashboardService = Mock(DashboardService)
@@ -39,7 +50,11 @@ class DashboardItemApiControllerSpec extends FilterMockingSpecification {
 	def "index() lists dashboard items"() {
 		when:
 		params.dashboardId = 3
-		authenticatedAs(me) { controller.index() }
+		request.addHeader("Authorization", "Token myApiKey")
+		request.requestURI = "/api/v1/dashboards/3/items"
+		withFilters(action: "index") {
+			controller.index()
+		}
 
 		then:
 		response.status == 200
@@ -69,7 +84,11 @@ class DashboardItemApiControllerSpec extends FilterMockingSpecification {
 		when:
 		params.dashboardId = 3
 		params.id = 2
-		authenticatedAs(me) { controller.show() }
+		request.addHeader("Authorization", "Token myApiKey")
+		request.requestURI = "/api/v1/dashboards/3/items/2"
+		withFilters(action: "index") {
+			controller.show()
+		}
 
 		then:
 		response.status == 200
@@ -93,7 +112,11 @@ class DashboardItemApiControllerSpec extends FilterMockingSpecification {
 				canvas: "canvas",
 				module: 1
 		]
-		authenticatedAs(me) { controller.save() }
+		request.addHeader("Authorization", "Token myApiKey")
+		request.requestURI = "/api/v1/dashboards/3/items/"
+		withFilters(action: "save") {
+			controller.save()
+		}
 
 		then:
 		response.status == 200
@@ -123,7 +146,11 @@ class DashboardItemApiControllerSpec extends FilterMockingSpecification {
 				canvas: "canvas",
 				module: 1
 		]
-		authenticatedAs(me) { controller.update() }
+		request.addHeader("Authorization", "Token myApiKey")
+		request.requestURI = "/api/v1/dashboards/3/items/2"
+		withFilters(action: "update") {
+			controller.update()
+		}
 
 		then:
 		response.status == 200
@@ -147,7 +174,11 @@ class DashboardItemApiControllerSpec extends FilterMockingSpecification {
 		when:
 		params.dashboardId = 3
 		params.id = 2
-		authenticatedAs(me) { controller.delete() }
+		request.addHeader("Authorization", "Token myApiKey")
+		request.requestURI = "/api/v1/dashboards/3/items/2"
+		withFilters(action: "delete") {
+			controller.delete()
+		}
 
 		then:
 		response.status == 204

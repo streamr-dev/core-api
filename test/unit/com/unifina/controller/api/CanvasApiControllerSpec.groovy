@@ -1,22 +1,33 @@
 package com.unifina.controller.api
 
-import com.unifina.FilterMockingSpecification
-import com.unifina.api.*
-import com.unifina.domain.security.*
+import com.unifina.api.CanvasListParams
+import com.unifina.api.ListParams
+import com.unifina.api.NotPermittedException
+import com.unifina.api.SaveCanvasCommand
+import com.unifina.api.ValidationException
+import com.unifina.domain.security.Key
+import com.unifina.domain.security.Permission
+import com.unifina.domain.security.SecRole
+import com.unifina.domain.security.SecUser
+import com.unifina.domain.security.SecUserSecRole
 import com.unifina.domain.signalpath.Canvas
 import com.unifina.exceptions.CanvasUnreachableException
 import com.unifina.filters.UnifinaCoreAPIFilters
 import com.unifina.service.ApiService
 import com.unifina.service.CanvasService
+import com.unifina.service.SessionService
 import com.unifina.service.SignalPathService
+import com.unifina.service.UserService
 import grails.converters.JSON
+import grails.plugin.springsecurity.SpringSecurityService
 import grails.test.mixin.Mock
 import grails.test.mixin.TestFor
 import groovy.json.JsonBuilder
+import spock.lang.Specification
 
 @TestFor(CanvasApiController)
 @Mock([SecUser, SecUserSecRole, Permission, Canvas, Key, UnifinaCoreAPIFilters])
-class CanvasApiControllerSpec extends FilterMockingSpecification {
+class CanvasApiControllerSpec extends Specification {
 
 	ApiService apiService
 	CanvasService canvasService
@@ -25,7 +36,15 @@ class CanvasApiControllerSpec extends FilterMockingSpecification {
 	Canvas canvas2
 	Canvas canvas3
 
-	def setup() {
+	// This gets the real services injected into the filters
+	// From https://github.com/grails/grails-core/issues/9191
+	static doWithSpring = {
+		springSecurityService(SpringSecurityService)
+		userService(UserService)
+		sessionService(SessionService)
+	}
+
+	void setup() {
 		controller.canvasService = canvasService = Mock(CanvasService)
 		controller.signalPathService = Mock(SignalPathService)
 		controller.apiService = apiService = Mock(ApiService)
@@ -70,7 +89,11 @@ class CanvasApiControllerSpec extends FilterMockingSpecification {
 
 	void "index() renders authorized canvases as a list"() {
 		when:
-		authenticatedAs(me) { controller.index() }
+		request.addHeader("Authorization", "Token myApiKey")
+		request.requestURI = "/api/v1/canvases"
+		withFilters(action: "index") {
+			controller.index()
+		}
 
 		then:
 		response.status == 200
@@ -84,7 +107,11 @@ class CanvasApiControllerSpec extends FilterMockingSpecification {
 	void "index() adds name param to filter criteria"() {
 		when:
 		params.name = "Foo"
-		authenticatedAs(me) { controller.index() }
+		request.addHeader("Authorization", "Token myApiKey")
+		request.requestURI = "/api/v1/canvases"
+		withFilters(action: "index") {
+			controller.index()
+		}
 
 		then:
 		response.status == 200
@@ -98,7 +125,11 @@ class CanvasApiControllerSpec extends FilterMockingSpecification {
 	void "index() adds adhoc param to filter criteria"() {
 		when:
 		params.adhoc = "true"
-		authenticatedAs(me) { controller.index() }
+		request.addHeader("Authorization", "Token myApiKey")
+		request.requestURI = "/api/v1/canvases"
+		withFilters(action: "index") {
+			controller.index()
+		}
 
 		then:
 		response.status == 200
@@ -112,7 +143,11 @@ class CanvasApiControllerSpec extends FilterMockingSpecification {
 	void "index() adds state param to filter criteria"() {
 		when:
 		params.state = "RUNNING"
-		authenticatedAs(me) { controller.index() }
+		request.addHeader("Authorization", "Token myApiKey")
+		request.requestURI = "/api/v1/canvases"
+		withFilters(action: "index") {
+			controller.index()
+		}
 
 		then:
 		response.status == 200
@@ -126,7 +161,11 @@ class CanvasApiControllerSpec extends FilterMockingSpecification {
 	void "show() authorizes, reconstructs and renders the canvas as json"() {
 		when:
 		params.id = "1"
-		authenticatedAs(me) { controller.show() }
+		request.addHeader("Authorization", "Token myApiKey")
+		request.requestURI = "/api/v1/canvases/$params.id"
+		withFilters(action: "show") {
+			controller.show()
+		}
 
 		then:
 		response.status == 200
@@ -140,7 +179,11 @@ class CanvasApiControllerSpec extends FilterMockingSpecification {
 		when:
 		params.id = canvas1.id
 		params.runtime = true
-		authenticatedAs(me) { controller.show() }
+		request.addHeader("Authorization", "Token myApiKey")
+		request.requestURI = "/api/v1/canvases/$params.id"
+		withFilters(action: "show") {
+			controller.show()
+		}
 
 		then:
 		response.status == 200
@@ -154,11 +197,16 @@ class CanvasApiControllerSpec extends FilterMockingSpecification {
 		def newCanvasId
 
 		when:
+		request.addHeader("Authorization", "Token myApiKey")
 		request.JSON = [
 			name: "brand new Canvas",
 			modules: [],
 		]
-		authenticatedAs(me) { controller.save() }
+		request.method = "POST"
+		request.requestURI = "/api/v1/canvases"
+		withFilters(action: "save") {
+			controller.save()
+		}
 
 		then:
 		response.status == 200
@@ -174,13 +222,17 @@ class CanvasApiControllerSpec extends FilterMockingSpecification {
 
 	void "update() authorizes, updates and renders the canvas as json"() {
 		when:
+		request.addHeader("Authorization", "Token myApiKey")
 		params.id = "1"
 		request.JSON = [
 			name: "updated, new name",
 			modules: [],
 		]
 		request.method = "PUT"
-		authenticatedAs(me) { controller.update() }
+		request.requestURI = "/api/v1/canvases/$params.id"
+		withFilters(action: "update") {
+			controller.update()
+		}
 
 		then:
 		response.status == 200
@@ -196,13 +248,17 @@ class CanvasApiControllerSpec extends FilterMockingSpecification {
 		Map originalProperties = canvas2.properties
 
 		when:
+		request.addHeader("Authorization", "Token myApiKey")
 		params.id = canvas2.id
 		request.JSON = [
 			name: "me me me",
 			modules: []
 		]
 		request.method = "PUT"
-		authenticatedAs(me) { controller.update() }
+		request.requestURI = "/api/v1/canvases/$params.id"
+		withFilters(action: "update") {
+			controller.update()
+		}
 
 		then: "canvas must be unchanged"
 		originalProperties == canvas2.properties
@@ -214,9 +270,13 @@ class CanvasApiControllerSpec extends FilterMockingSpecification {
 
 	void "delete() must authorize and delete the canvas"() {
 		when:
+		request.addHeader("Authorization", "Token myApiKey")
 		params.id = "1"
 		request.method = "DELETE"
-		authenticatedAs(me) { controller.delete() }
+		request.requestURI = "/api/v1/canvases/$params.id"
+		withFilters(action: "delete") {
+			controller.delete()
+		}
 
 		then:
 		response.status == 204
@@ -226,9 +286,13 @@ class CanvasApiControllerSpec extends FilterMockingSpecification {
 
 	void "delete() must not delete the canvas if authorization fails"() {
 		when:
+		request.addHeader("Authorization", "Token myApiKey")
 		params.id = "2"
 		request.method = "DELETE"
-		authenticatedAs(me) { controller.delete() }
+		request.requestURI = "/api/v1/canvases/$params.id"
+		withFilters(action: "delete") {
+			controller.delete()
+		}
 
 		then:
 		thrown NotPermittedException
@@ -238,9 +302,13 @@ class CanvasApiControllerSpec extends FilterMockingSpecification {
 
 	void "start() must authorize and start a canvas"() {
 		when:
+		request.addHeader("Authorization", "Token myApiKey")
 		params.id = "1"
 		request.method = "POST"
-		authenticatedAs(me) { controller.start() }
+		request.requestURI = "/api/v1/canvases/$params.id/start"
+		withFilters(action: "start") {
+			controller.start()
+		}
 
 		then:
 		response.status == 200
@@ -251,10 +319,14 @@ class CanvasApiControllerSpec extends FilterMockingSpecification {
 
 	void "start() must authorize and be able to start a Canvas with clearing enabled"() {
 		when:
+		request.addHeader("Authorization", "Token myApiKey")
 		params.id = "1"
 		request.JSON = [clearState: true]
 		request.method = "POST"
-		authenticatedAs(me) { controller.start() }
+		request.requestURI = "/api/v1/canvases/$params.id/start"
+		withFilters(action: "start") {
+			controller.start()
+		}
 
 		then:
 		response.status == 200
@@ -267,9 +339,13 @@ class CanvasApiControllerSpec extends FilterMockingSpecification {
 		Map originalProperties = canvas2.properties
 
 		when:
+		request.addHeader("Authorization", "Token myApiKey")
 		params.id = canvas2.id
 		request.method = "POST"
-		authenticatedAs(me) { controller.start() }
+		request.requestURI = "/api/v1/canvases/$params.id/start"
+		withFilters(action: "start") {
+			controller.start()
+		}
 
 		then: "canvas must be unchanged"
 		originalProperties == canvas2.properties
@@ -281,10 +357,14 @@ class CanvasApiControllerSpec extends FilterMockingSpecification {
 
 	void "startAsAdmin() checks that user is admin"() {
 		when:
+		request.addHeader("Authorization", "Token myApiKey")
 		params.id = "1"
 		params.startedBy = "1"
 		request.method = "POST"
-		authenticatedAs(me) { controller.startAsAdmin() }
+		request.requestURI = "/api/v1/canvases/$params.id/startAsAdmin"
+		withFilters(action: "startAsAdmin") {
+			controller.startAsAdmin()
+		}
 
 		then:
 		response.status == 403
@@ -300,9 +380,13 @@ class CanvasApiControllerSpec extends FilterMockingSpecification {
 		new SecUserSecRole(secUser: me, secRole: adminRole).save(failOnError: true, validate: false)
 
 		when:
+		request.addHeader("Authorization", "Token myApiKey")
 		params.id = "1"
 		request.method = "POST"
-		authenticatedAs(me) { controller.startAsAdmin() }
+		request.requestURI = "/api/v1/canvases/$params.id/startAsAdmin"
+		withFilters(action: "startAsAdmin") {
+			controller.startAsAdmin()
+		}
 
 		then:
 		def e = thrown(ValidationException)
@@ -315,10 +399,14 @@ class CanvasApiControllerSpec extends FilterMockingSpecification {
 		new SecUserSecRole(secUser: me, secRole: adminRole).save(failOnError: true, validate: false)
 
 		when:
+		request.addHeader("Authorization", "Token myApiKey")
 		params.id = "1"
 		params.startedBy = 6
 		request.method = "POST"
-		authenticatedAs(me) { controller.startAsAdmin() }
+		request.requestURI = "/api/v1/canvases/$params.id/startAsAdmin"
+		withFilters(action: "startAsAdmin") {
+			controller.startAsAdmin()
+		}
 
 		then:
 		def e = thrown(ValidationException)
@@ -333,10 +421,14 @@ class CanvasApiControllerSpec extends FilterMockingSpecification {
 		def someoneElse = new SecUser(username: "someoneElse@streamr.com").save(failOnError: true, validate: false)
 
 		when:
+		request.addHeader("Authorization", "Token myApiKey")
 		params.id = "1"
 		params.startedBy = someoneElse.id
 		request.method = "POST"
-		authenticatedAs(me) { controller.startAsAdmin() }
+		request.requestURI = "/api/v1/canvases/$params.id/startAsAdmin"
+		withFilters(action: "startAsAdmin") {
+			controller.startAsAdmin()
+		}
 
 		then:
 		1 * apiService.getByIdAndThrowIfNotFound(Canvas, "1") >> canvas1
@@ -349,9 +441,13 @@ class CanvasApiControllerSpec extends FilterMockingSpecification {
 
 	void "stop() must authorize and stop a canvas"() {
 		when:
+		request.addHeader("Authorization", "Token myApiKey")
 		params.id = "1"
 		request.method = "POST"
-		authenticatedAs(me) { controller.stop() }
+		request.requestURI = "/api/v1/canvases/$params.id/stop"
+		withFilters(action: "stop") {
+			controller.stop()
+		}
 
 		then:
 		response.status == 200
@@ -364,9 +460,13 @@ class CanvasApiControllerSpec extends FilterMockingSpecification {
 		canvas1.adhoc = true
 
 		when:
+		request.addHeader("Authorization", "Token myApiKey")
 		params.id = "1"
 		request.method = "POST"
-		authenticatedAs(me) { controller.stop() }
+		request.requestURI = "/api/v1/canvases/$params.id/stop"
+		withFilters(action: "stop") {
+			controller.stop()
+		}
 
 		then:
 		response.status == 204
@@ -378,9 +478,13 @@ class CanvasApiControllerSpec extends FilterMockingSpecification {
 		Map originalProperties = canvas2.properties
 
 		when:
+		request.addHeader("Authorization", "Token myApiKey")
 		params.id = canvas2.id
 		request.method = "POST"
-		authenticatedAs(me) { controller.stop() }
+		request.requestURI = "/api/v1/canvases/$params.id/stop"
+		withFilters(action: "stop") {
+			controller.stop()
+		}
 
 		then: "canvas must be unchanged"
 		originalProperties == canvas2.properties
@@ -392,9 +496,13 @@ class CanvasApiControllerSpec extends FilterMockingSpecification {
 
 	void "stop() must throw an exception if the canvas can't be reached"() {
 		when:
+		request.addHeader("Authorization", "Token myApiKey")
 		params.id = "1"
 		request.method = "POST"
-		authenticatedAs(me) { controller.stop() }
+		request.requestURI = "/api/v1/canvases/$params.id/stop"
+		withFilters(action: "stop") {
+			controller.stop()
+		}
 
 		then:
 		thrown(CanvasUnreachableException)
@@ -407,11 +515,15 @@ class CanvasApiControllerSpec extends FilterMockingSpecification {
 		def result = JSON.parse(canvas1.json).modules.find {it.hash == 1}
 
 		when:
+		request.addHeader("Authorization", "Token myApiKey")
 		params.canvasId = "1"
 		params.moduleId = 1
 		params.dashboardId = "2"
 		request.method = "GET"
-		authenticatedAs(me) { controller.module() }
+		request.requestURI = "/api/v1/canvases/$params.id/modules/"
+		withFilters(action: "module") {
+			controller.module()
+		}
 
 		then:
 		response.status == 200
@@ -423,12 +535,16 @@ class CanvasApiControllerSpec extends FilterMockingSpecification {
 		def result = JSON.parse(canvas1.json).modules.find {it.hash == 1}
 
 		when:
+		request.addHeader("Authorization", "Token myApiKey")
 		params.canvasId = "1"
 		params.moduleId = 1
 		params.dashboardId = "2"
 		params.runtime = true
 		request.method = "GET"
-		authenticatedAs(me) { controller.module() }
+		request.requestURI = "/api/v1/canvases/$params.id/modules/$params.moduleId"
+		withFilters(action: "module") {
+			controller.module()
+		}
 
 		then:
 		response.status == 200
@@ -440,11 +556,15 @@ class CanvasApiControllerSpec extends FilterMockingSpecification {
 		def runtimeResponse = [foo: 'bar']
 
 		when:
+		request.addHeader("Authorization", "Token myApiKey")
 		params.id = canvas1.id
 		params.path = canvas1.id
 		request.JSON = [bar: 'foo']
 		request.method = "POST"
-		authenticatedAs(me) { controller.runtimeRequest() }
+		request.requestURI = "/api/v1/canvases/$params.id/request"
+		withFilters(action: "runtimeRequest") {
+			controller.runtimeRequest()
+		}
 
 		then:
 		response.status == 200
@@ -457,12 +577,16 @@ class CanvasApiControllerSpec extends FilterMockingSpecification {
 		def runtimeResponse = [foo: 'bar']
 
 		when:
+		request.addHeader("Authorization", "Token myApiKey")
 		params.id = canvas1.id
 		params.path = canvas1.id
 		params.local = "true"
 		request.JSON = [bar: 'foo']
 		request.method = "POST"
-		authenticatedAs(me) { controller.runtimeRequest() }
+		request.requestURI = "/api/v1/canvases/$params.id/request"
+		withFilters(action: "runtimeRequest") {
+			controller.runtimeRequest()
+		}
 
 		then:
 		response.status == 200

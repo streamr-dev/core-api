@@ -1,6 +1,5 @@
 package com.unifina.controller.api
 
-import com.unifina.FilterMockingSpecification
 import com.unifina.domain.marketplace.Category
 import com.unifina.domain.marketplace.Product
 import com.unifina.domain.security.Key
@@ -8,12 +7,16 @@ import com.unifina.domain.security.Permission
 import com.unifina.domain.security.SecUser
 import com.unifina.filters.UnifinaCoreAPIFilters
 import com.unifina.service.ProductService
+import com.unifina.service.SessionService
+import com.unifina.service.UserService
+import grails.plugin.springsecurity.SpringSecurityService
 import grails.test.mixin.Mock
 import grails.test.mixin.TestFor
+import spock.lang.Specification
 
 @TestFor(ProductApiController)
 @Mock([UnifinaCoreAPIFilters, Product, SecUser, Category])
-class RelatedProductsControllerSpec extends FilterMockingSpecification {
+class RelatedProductsControllerSpec extends Specification {
 	Product newProduct(String id, String name, String description, Category c, SecUser user) {
 		Product p = new Product(
 			name: name,
@@ -38,21 +41,29 @@ class RelatedProductsControllerSpec extends FilterMockingSpecification {
 	}
 
 	Product p1, p2, p3, p4
-	SecUser u1, u2, me
+	SecUser u1, u2, apiUser
 	Category cat1, cat2
 
-	def setup() {
+	// This gets the real services injected into the filters
+	// From https://github.com/grails/grails-core/issues/9191
+	static doWithSpring = {
+		springSecurityService(SpringSecurityService)
+		userService(UserService)
+		sessionService(SessionService)
+	}
+
+	void setup() {
 		controller.productService = Mock(ProductService)
-		me = new SecUser(
-			username: "username: api@me.com",
-			name: "Regular API me",
+		apiUser = new SecUser(
+			username: "username: api@user.com",
+			name: "Regular API user",
 			password: "xxx"
 		)
-		def key = new Key(name: "meKey", user: me)
+		def key = new Key(name: "meKey", user: apiUser)
 		key.id = "myApiKey"
 		key.save(failOnError: true, validate: true)
 
-		// u1 is the me who owns the product p1 used to search for related products
+		// u1 is the user who owns the product p1 used to search for related products
 		u1 = new SecUser(
 			username: "username: masa@hypätääneka.com",
 			name: "Matti Nykänen",
@@ -86,12 +97,17 @@ class RelatedProductsControllerSpec extends FilterMockingSpecification {
 
 	def "max param has default value of three"() {
 		when:
+		request.addHeader("Authorization", "Token myApiKey")
+		request.method = "GET"
 		params.id = p1.id
-		authenticatedAs(me) { controller.related() }
+		request.requestURI = "/api/v1/products/${p1.id}/related"
 
+		withFilters(action: "index") {
+			controller.related()
+		}
 		then:
-		1 * controller.productService.findById(p1.id, me, Permission.Operation.READ) >> p1
-		1 * controller.productService.relatedProducts(p1, 3, me) >> [p2]
+		1 * controller.productService.findById(p1.id, apiUser, Permission.Operation.READ) >> p1
+		1 * controller.productService.relatedProducts(p1, 3, apiUser) >> [p2]
 		response.status == 200
 		response.json[0].id == p2.id
 		response.json[0].name == p2.name
@@ -99,13 +115,18 @@ class RelatedProductsControllerSpec extends FilterMockingSpecification {
 
 	def "max param has maximum value of ten"() {
 		when:
+		request.addHeader("Authorization", "Token myApiKey")
+		request.method = "GET"
 		params.id = p1.id
 		params.max = "11"
-		authenticatedAs(me) { controller.related() }
+		request.requestURI = "/api/v1/products/${p1.id}/related?max=20"
 
+		withFilters(action: "index") {
+			controller.related()
+		}
 		then:
-		1 * controller.productService.findById(p1.id, me, Permission.Operation.READ) >> p1
-		1 * controller.productService.relatedProducts(p1, 10, me) >> [p2]
+		1 * controller.productService.findById(p1.id, apiUser, Permission.Operation.READ) >> p1
+		1 * controller.productService.relatedProducts(p1, 10, apiUser) >> [p2]
 		response.status == 200
 		response.json[0].id == p2.id
 		response.json[0].name == p2.name
@@ -113,12 +134,17 @@ class RelatedProductsControllerSpec extends FilterMockingSpecification {
 
 	def "show related products for a product"() {
 		when:
+		request.addHeader("Authorization", "Token myApiKey")
+		request.method = "GET"
 		params.id = p1.id
-		authenticatedAs(me) { controller.related() }
+		request.requestURI = "/api/v1/products/${p1.id}/related"
 
+		withFilters(action: "index") {
+			controller.related()
+		}
 		then:
-		1 * controller.productService.findById(p1.id, me, Permission.Operation.READ) >> p1
-		1 * controller.productService.relatedProducts(p1, 3, me) >> [p2, p3, p4]
+		1 * controller.productService.findById(p1.id, apiUser, Permission.Operation.READ) >> p1
+		1 * controller.productService.relatedProducts(p1, 3, apiUser) >> [p2, p3, p4]
 		response.status == 200
 		response.json[0].id == p2.id
 		response.json[0].name == p2.name
@@ -130,11 +156,16 @@ class RelatedProductsControllerSpec extends FilterMockingSpecification {
 
 	def "unknown id parameter returns en empty list"() {
 		when:
+		request.addHeader("Authorization", "Token myApiKey")
+		request.method = "GET"
 		params.id = "xxx-id-xxx"
-		authenticatedAs(me) { controller.related() }
+		request.requestURI = "/api/v1/products/xxx-id-xxx/related"
 
+		withFilters(action: "index") {
+			controller.related()
+		}
 		then:
-		1 * controller.productService.relatedProducts(null, 3, me) >> new ArrayList<Product>()
+		1 * controller.productService.relatedProducts(null, 3, apiUser) >> new ArrayList<Product>()
 		response.status == 200
 		response.json == []
 	}

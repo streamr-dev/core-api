@@ -42,7 +42,7 @@ class PermissionServiceSpec extends Specification {
 
 		// Keys
 		myKey = new Key(name: "my key", user: me).save(failOnError: true)
-		anotherUserKey = new Key(name: "another me's key", user: anotherUser).save(failOnError: true)
+		anotherUserKey = new Key(name: "another user's key", user: anotherUser).save(failOnError: true)
 		anonymousKey = new Key(name: "anonymous key 1").save(failOnError: true)
 
 		// Sign-up invitations can also receive Permissions; they will later be converted to User permissions

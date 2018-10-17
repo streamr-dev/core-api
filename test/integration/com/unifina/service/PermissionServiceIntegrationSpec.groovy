@@ -65,7 +65,7 @@ class PermissionServiceIntegrationSpec extends IntegrationSpec {
 
 		// Keys
 		myKey = new Key(name: "my key", user: me).save(failOnError: true)
-		anotherUserKey = new Key(name: "another me's key", user: anotherUser).save(failOnError: true)
+		anotherUserKey = new Key(name: "another user's key", user: anotherUser).save(failOnError: true)
 		anonymousKey = new Key(name: "anonymous key 1").save(failOnError: true)
 
 		// Dashboards
@@ -262,7 +262,7 @@ class PermissionServiceIntegrationSpec extends IntegrationSpec {
 	void "granting works (roughly) idempotently"() {
 		expect:
 		service.get(Dashboard, stranger) == []
-		when: "double-granting still has the same effect: there exists a permission for me to resource"
+		when: "double-granting still has the same effect: there exists a permission for user to resource"
 		service.grant(me, dashOwned, stranger)
 		service.grant(me, dashOwned, stranger)
 		then: "now you see it..."

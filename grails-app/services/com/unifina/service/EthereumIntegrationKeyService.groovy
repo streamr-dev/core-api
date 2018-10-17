@@ -1,7 +1,6 @@
 package com.unifina.service
 
 import com.unifina.api.ApiException
-import com.unifina.api.CannotRemoveEthereumKeyException
 import com.unifina.api.DuplicateNotAllowedException
 import com.unifina.domain.security.IntegrationKey
 import com.unifina.domain.security.SecUser
@@ -85,11 +84,11 @@ class EthereumIntegrationKeyService {
 	}
 
 	@GrailsCompileStatic
-	void delete(String integrationKeyId, SecUser currentUser) {
+	boolean delete(String integrationKeyId, SecUser currentUser) {
 		if (currentUser.isEthereumUser()) {
-			int nbKeys = IntegrationKey.countByUserAndService(currentUser, IntegrationKey.Service.ETHEREUM_ID)
-			if (nbKeys <= 1) {
-				throw new CannotRemoveEthereumKeyException("Cannot remove only Ethereum key.")
+			List<IntegrationKey> keys = IntegrationKey.findAllByUser(currentUser)
+			if (keys.size()<=1) {
+				return false
 			}
 		}
 
@@ -101,6 +100,7 @@ class EthereumIntegrationKeyService {
 			}
 			account.delete(flush: true)
 		}
+		return true
 	}
 
 	String decryptPrivateKey(IntegrationKey key) {

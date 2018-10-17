@@ -33,6 +33,14 @@ class StreamServiceSpec extends Specification {
 
 	SecUser me = new SecUser(username: "me")
 
+	// This gets the real services injected into the filters
+	// From https://github.com/grails/grails-core/issues/9191
+	static doWithSpring = {
+		springSecurityService(SpringSecurityService)
+		userService(UserService)
+		sessionService(SessionService)
+	}
+
 	def setup() {
 		feed = new Feed(
 				streamListenerClass: NoOpStreamListener.name

@@ -1,6 +1,5 @@
 package com.unifina.controller.api
 
-import com.unifina.FilterMockingSpecification
 import com.unifina.api.NotPermittedException
 import com.unifina.domain.security.Key
 import com.unifina.domain.security.Permission
@@ -9,19 +8,31 @@ import com.unifina.domain.signalpath.Module
 import com.unifina.domain.signalpath.ModulePackage
 import com.unifina.filters.UnifinaCoreAPIFilters
 import com.unifina.service.PermissionService
+import com.unifina.service.SessionService
 import com.unifina.service.UserService
+import grails.plugin.springsecurity.SpringSecurityService
 import grails.test.mixin.Mock
 import grails.test.mixin.TestFor
+import grails.test.mixin.web.FiltersUnitTestMixin
+import spock.lang.Specification
 
 @TestFor(ModuleApiController)
 @Mock([SecUser, Module, Key, ModulePackage, UnifinaCoreAPIFilters, UserService])
-class ModuleApiControllerSpec extends FilterMockingSpecification {
+class ModuleApiControllerSpec extends Specification {
 
 	SecUser me
 	ModulePackage modulePackage
 	Module module
 
-	def setup() {
+	// This gets the real services injected into the filters
+	// From https://github.com/grails/grails-core/issues/9191
+	static doWithSpring = {
+		springSecurityService(SpringSecurityService)
+		userService(UserService)
+		sessionService(SessionService)
+	}
+
+	void setup() {
 		me = new SecUser(id: 1).save(validate: false)
 		modulePackage = new ModulePackage().save(validate: false)
 		module = new Module(modulePackage: modulePackage).save(validate: false)
@@ -40,8 +51,12 @@ class ModuleApiControllerSpec extends FilterMockingSpecification {
 		module.jsonHelp = "help"
 
 		when:
+		request.addHeader("Authorization", "Token myApiKey")
 		params.id = module.id
-		authenticatedAs(me) { controller.help() }
+		request.requestURI = "/api/v1/modules/$module.id/help"
+		withFilters(action: "help") {
+			controller.help()
+		}
 
 		then:
 		1 * controller.permissionService.check(me, module.modulePackage, Permission.Operation.READ) >> true
@@ -53,8 +68,12 @@ class ModuleApiControllerSpec extends FilterMockingSpecification {
 		module.jsonHelp = null
 
 		when:
+		request.addHeader("Authorization", "Token myApiKey")
 		params.id = module.id
-		authenticatedAs(me) { controller.help() }
+		request.requestURI = "/api/v1/modules/$module.id/help"
+		withFilters(action: "help") {
+			controller.help()
+		}
 
 		then:
 		1 * controller.permissionService.check(me, module.modulePackage, Permission.Operation.READ) >> true
@@ -65,8 +84,12 @@ class ModuleApiControllerSpec extends FilterMockingSpecification {
 		controller.permissionService = Mock(PermissionService)
 
 		when:
+		request.addHeader("Authorization", "Token myApiKey")
 		params.id = module.id
-		authenticatedAs(me) { controller.help() }
+		request.requestURI = "/api/v1/modules/$module.id/help"
+		withFilters(action: "help") {
+			controller.help()
+		}
 
 		then:
 		thrown(NotPermittedException)
