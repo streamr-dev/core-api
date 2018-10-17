@@ -92,7 +92,7 @@ class EthereumIntegrationKeyService {
 				throw new CannotRemoveEthereumKeyException("Cannot remove only Ethereum key.")
 			}
 		}
-		
+
 		IntegrationKey account = IntegrationKey.findByIdAndUser(integrationKeyId, currentUser)
 		if (account) {
 			if (account.service == IntegrationKey.Service.ETHEREUM_ID) {
