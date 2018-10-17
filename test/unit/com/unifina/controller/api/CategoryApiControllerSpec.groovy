@@ -1,24 +1,19 @@
 package com.unifina.controller.api
 
+import com.unifina.FilterMockingSpecification
 import com.unifina.domain.marketplace.Category
-import com.unifina.filters.UnifinaCoreAPIFilters
-import com.unifina.service.SessionService
-import com.unifina.service.UserService
-import grails.plugin.springsecurity.SpringSecurityService
+import com.unifina.domain.security.SecUser
 import grails.test.mixin.Mock
 import grails.test.mixin.TestFor
-import spock.lang.Specification
 
 @TestFor(CategoryApiController)
-@Mock([Category, UnifinaCoreAPIFilters, SpringSecurityService])
-class CategoryApiControllerSpec extends Specification {
+@Mock([Category])
+class CategoryApiControllerSpec extends FilterMockingSpecification {
 
-	// This gets the real services injected into the filters
-	// From https://github.com/grails/grails-core/issues/9191
-	static doWithSpring = {
-		springSecurityService(SpringSecurityService)
-		userService(UserService)
-		sessionService(SessionService)
+	SecUser me
+
+	def setup() {
+		me = new SecUser(id: 1).save(validate: false)
 	}
 
 	void "lists categories in alphabetical order"() {
@@ -35,11 +30,7 @@ class CategoryApiControllerSpec extends Specification {
 		c3.save(failOnError: true, validate: true)
 
 		when:
-		request.requestURI = "/api/v1/categories"
-		request.method = "GET"
-		withFilters(action: "index") {
-			controller.index()
-		}
+		authenticatedAs(me) { controller.index() }
 
 		then:
 		response.status == 200
