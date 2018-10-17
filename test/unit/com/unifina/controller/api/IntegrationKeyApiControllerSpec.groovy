@@ -151,7 +151,7 @@ class IntegrationKeyApiControllerSpec extends Specification {
 		1 * ethereumIntegrationKeyService.delete("integration-key-id", me)
 	}
 
-	def "delete() responds with 409"() {
+	def "delete() responds with 204"() {
 		controller.ethereumIntegrationKeyService = Stub(EthereumIntegrationKeyService)
 
 		when:
@@ -162,6 +162,6 @@ class IntegrationKeyApiControllerSpec extends Specification {
 		}
 
 		then:
-		response.status == 409
+		response.status == 204
 	}
 }

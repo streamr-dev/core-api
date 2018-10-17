@@ -1,6 +1,7 @@
 package com.unifina.service
 
 import com.unifina.api.ApiException
+import com.unifina.api.CannotRemoveEthereumKeyException
 import com.unifina.api.DuplicateNotAllowedException
 import com.unifina.security.Challenge
 import com.unifina.domain.security.IntegrationKey
@@ -275,7 +276,8 @@ class EthereumIntegrationKeyServiceSpec extends Specification {
 			idInService: address,
 			service: IntegrationKey.Service.ETHEREUM_ID
 		).save(failOnError: true, validate: false)
+		service.delete(integrationKey.id, user)
 		then:
-		service.delete(integrationKey.id, user) == false
+		thrown CannotRemoveEthereumKeyException
 	}
 }
