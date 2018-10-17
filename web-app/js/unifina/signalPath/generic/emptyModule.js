@@ -689,7 +689,7 @@ $('body').contextMenu({
 		menu.data('spObject', target.data('spObject'))
 
 		var prot = menu.data('spObject');
-		menu.append(prot.getContextMenu(menu.data('target')).map(function(item) {
+		menu.empty().append(prot.getContextMenu(menu.data('target')).map(function(item) {
 			return $('<li/>').append($('<a/>', {
 				tabindex: '-1',
 				'data-cmd': item.cmd,
