@@ -4,7 +4,12 @@ import com.unifina.domain.security.SecUser;
 import org.apache.commons.lang.RandomStringUtils;
 import org.joda.time.DateTime;
 
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.TimeZone;
 
 public class SessionToken {
 	private String token;
@@ -36,5 +41,12 @@ public class SessionToken {
 
 	public Date getExpiration() {
 		return expiration;
+	}
+
+	public Map<String, Object> toMap() {
+		HashMap<String, Object> map = new HashMap<String, Object>();
+		map.put("token", token);
+		map.put("expires", getDateFormat().format(expiration));
+		return map;
 	}
 }

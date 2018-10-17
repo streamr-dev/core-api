@@ -60,11 +60,7 @@ class LoginApiControllerSpec extends Specification {
 
 		then:
 		response.status == 200
-		response.json == [
-			id       : challenge.getId(),
-			challenge: challenge.getChallenge(),
-			expires  : df.format(challenge.getExpiration())
-		]
+		response.json == challenge.toMap()
 		1 * challengeService.createChallenge() >> challenge
 	}
 
@@ -104,10 +100,7 @@ class LoginApiControllerSpec extends Specification {
 		1 * ethereumIntegrationKeyService.getOrCreateFromEthereumAddress(address) >> user
 		1 * sessionService.generateToken(user) >> token
 		response.status == 200
-		response.json == [
-			token  : token.getToken(),
-			expires: df.format(token.getExpiration())
-		]
+		response.json == token.toMap()
 	}
 
 	def "response to challenge should fail"() {
@@ -159,10 +152,7 @@ class LoginApiControllerSpec extends Specification {
 		1 * userService.getUserFromUsernameAndPassword(user.username, user.password) >> user
 		1 * sessionService.generateToken(user) >> token
 		response.status == 200
-		response.json == [
-			token  : token.getToken(),
-			expires: df.format(token.getExpiration())
-		]
+		response.json == token.toMap()
 	}
 
 	def "password-based login should fail"() {
@@ -209,10 +199,7 @@ class LoginApiControllerSpec extends Specification {
 		1 * userService.getUserFromApiKey(apiKey) >> user
 		1 * sessionService.generateToken(user) >> token
 		response.status == 200
-		response.json == [
-			token  : token.getToken(),
-			expires: df.format(token.getExpiration())
-		]
+		response.json == token.toMap()
 	}
 
 	def "apikey-based login should fail"() {
