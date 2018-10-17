@@ -1,5 +1,6 @@
 package com.unifina.controller.api
 
+import com.unifina.FilterMockingSpecification
 import com.unifina.api.ApiException
 import com.unifina.security.Challenge
 import com.unifina.domain.security.Key
@@ -9,10 +10,8 @@ import com.unifina.service.ChallengeService
 import com.unifina.service.EthereumIntegrationKeyService
 import com.unifina.service.SessionService
 import com.unifina.service.UserService
-import grails.plugin.springsecurity.SpringSecurityService
 import grails.test.mixin.Mock
 import grails.test.mixin.TestFor
-import spock.lang.Specification
 
 import java.text.DateFormat
 import java.text.SimpleDateFormat
@@ -21,42 +20,31 @@ import java.text.SimpleDateFormat
  * See the API for {@link grails.test.mixin.web.ControllerUnitTestMixin} for usage instructions
  */
 @TestFor(LoginApiController)
-@Mock([SecUser, com.unifina.filters.UnifinaCoreAPIFilters, Key])
-class LoginApiControllerSpec extends Specification {
+@Mock([SecUser, Key])
+class LoginApiControllerSpec extends FilterMockingSpecification {
 	ChallengeService challengeService
 	SessionService sessionService
 	EthereumIntegrationKeyService ethereumIntegrationKeyService
 	UserService userService
 	DateFormat df
-
-	// This gets the real services injected into the filters
-	// From https://github.com/grails/grails-core/issues/9191
-	static doWithSpring = {
-		springSecurityService(SpringSecurityService)
-	}
+	SecUser me
 
 	def setup() {
+		me = new SecUser().save(failOnError: true, validate: false)
 		df = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'")
-		df.setTimeZone(TimeZone.getTimeZone("UTC"));
+		df.setTimeZone(TimeZone.getTimeZone("UTC"))
 		challengeService = controller.challengeService = Mock(ChallengeService)
 		sessionService = controller.sessionService = Mock(SessionService)
 		ethereumIntegrationKeyService = controller.ethereumIntegrationKeyService = Mock(EthereumIntegrationKeyService)
 		userService = controller.userService = Mock(UserService)
-		def me = new SecUser().save(failOnError: true, validate: false)
-		Key key = new Key(name: "key", user: me)
-		key.id = "myApiKey"
-		key.save(failOnError: true, validate: true)
 	}
 
 	void "should generate challenge"() {
 		Challenge challenge = new Challenge("id", "challenge", challengeService.TTL_SECONDS)
 
 		when:
-		request.requestURI = "/api/v1/login/challenge"
 		request.method = "POST"
-		withFilters(action: "challenge") {
-			controller.challenge()
-		}
+		authenticatedAs(me) { controller.challenge() }
 
 		then:
 		response.status == 200
@@ -81,7 +69,6 @@ class LoginApiControllerSpec extends Specification {
 		SessionToken token = new SessionToken(64, user, 3)
 
 		when:
-		request.requestURI = "/api/v1/login/response"
 		request.method = "POST"
 		request.JSON = [
 			challenge: [
@@ -91,9 +78,7 @@ class LoginApiControllerSpec extends Specification {
 			signature: signature,
 			address  : address
 		]
-		withFilters(action: "response") {
-			controller.response()
-		}
+		authenticatedAs(me) { controller.response() }
 
 		then:
 		1 * challengeService.verifyChallengeResponse(challenge.getId(), challenge.getChallenge(), signature, address) >> true
@@ -110,7 +95,6 @@ class LoginApiControllerSpec extends Specification {
 		Challenge challenge = new Challenge("id", "challenge", challengeService.TTL_SECONDS)
 
 		when:
-		request.requestURI = "/api/v1/login/response"
 		request.method = "POST"
 		request.JSON = [
 			challenge: [
@@ -120,9 +104,7 @@ class LoginApiControllerSpec extends Specification {
 			signature: signature,
 			address  : address
 		]
-		withFilters(action: "response") {
-			controller.response()
-		}
+		authenticatedAs(me) { controller.response() }
 
 		then:
 		thrown ApiException
@@ -138,15 +120,12 @@ class LoginApiControllerSpec extends Specification {
 		SessionToken token = new SessionToken(64, user, 3)
 
 		when:
-		request.requestURI = "/api/v1/login/password"
 		request.method = "POST"
 		request.JSON = [
 			username: user.username,
 			password: user.password
 		]
-		withFilters(action: "password") {
-			controller.password()
-		}
+		authenticatedAs(me) { controller.password() }
 
 		then:
 		1 * userService.getUserFromUsernameAndPassword(user.username, user.password) >> user
@@ -160,15 +139,12 @@ class LoginApiControllerSpec extends Specification {
 		String password = "password"
 
 		when:
-		request.requestURI = "/api/v1/login/password"
 		request.method = "POST"
 		request.JSON = [
 			username: username,
 			password: password
 		]
-		withFilters(action: "password") {
-			controller.password()
-		}
+		authenticatedAs(me) { controller.password() }
 
 		then:
 		thrown ApiException
@@ -186,14 +162,11 @@ class LoginApiControllerSpec extends Specification {
 		SessionToken token = new SessionToken(64, user, 3)
 
 		when:
-		request.requestURI = "/api/v1/login/apikey"
 		request.method = "POST"
 		request.JSON = [
 			apiKey: apiKey
 		]
-		withFilters(action: "apikey") {
-			controller.apikey()
-		}
+		authenticatedAs(me) { controller.apikey() }
 
 		then:
 		1 * userService.getUserFromApiKey(apiKey) >> user
@@ -206,14 +179,11 @@ class LoginApiControllerSpec extends Specification {
 		String apiKey = "apiKey"
 
 		when:
-		request.requestURI = "/api/v1/login/apikey"
 		request.method = "POST"
 		request.JSON = [
 			apiKey: apiKey
 		]
-		withFilters(action: "apikey") {
-			controller.apikey()
-		}
+		authenticatedAs(me) { controller.apikey() }
 
 		then:
 		1 * userService.getUserFromApiKey(apiKey) >> null
