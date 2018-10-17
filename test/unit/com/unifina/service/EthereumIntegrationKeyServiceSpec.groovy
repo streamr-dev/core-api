@@ -275,8 +275,7 @@ class EthereumIntegrationKeyServiceSpec extends Specification {
 			idInService: address,
 			service: IntegrationKey.Service.ETHEREUM_ID
 		).save(failOnError: true, validate: false)
-		service.delete(integrationKey.id, user)
 		then:
-		thrown CannotRemoveEthereumKeyException
+		service.delete(integrationKey.id, user) == false
 	}
 }

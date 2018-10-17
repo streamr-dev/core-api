@@ -27,7 +27,7 @@ class SqlSpec extends Specification {
 				[name: "engine", value: "PostgreSQL"],
 				[name: "host", value: "test.com"],
 				[name: "database", value: "mydatabase"],
-				[name: "username", value: "me"],
+				[name: "username", value: "user"],
 				[name: "password", value: "pass"],
 			]
 		])

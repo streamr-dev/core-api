@@ -60,9 +60,15 @@ class IntegrationKeyApiController {
 
 	@StreamrApi
 	def delete(String id) {
-		ethereumIntegrationKeyService.delete(id, apiUser())
-		response.status = 204
-		render ""
+		boolean statusOk = ethereumIntegrationKeyService.delete(id, apiUser())
+		if(statusOk) {
+			response.status = 204
+			render ""
+		} else {
+			response.status = 409
+			render "Cannot delete only key of ethereum user"
+		}
+
 	}
 
 	SecUser apiUser() {

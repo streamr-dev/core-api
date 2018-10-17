@@ -45,7 +45,7 @@ class SubscriptionApiControllerSpec extends Specification {
 
 	void "index() returns 200 and renders subscriptions"() {
 		SecUser user = new SecUser(
-			username: "me@domain.com",
+			username: "user@domain.com",
 			name: "Firstname Lastname",
 			password: "salasana"
 		)

@@ -2,7 +2,7 @@ package pages
 
 class UserCreatePage extends GrailsPage {
     
-    static controller = "me"
+    static controller = "user"
     static action = "create"
 
     static url = "$controller/$action"

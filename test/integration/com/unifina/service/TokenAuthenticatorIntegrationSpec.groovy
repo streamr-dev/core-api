@@ -1,11 +1,10 @@
-package com.unifina.controller.security
+package com.unifina.service
 
 import com.unifina.BeanMockingSpecification
 import com.unifina.api.InvalidSessionTokenException
 import com.unifina.domain.security.Key
 import com.unifina.domain.security.SecUser
 import com.unifina.security.TokenAuthenticator
-import com.unifina.service.SessionService
 import grails.test.mixin.Mock
 
 import javax.servlet.http.HttpServletRequest
@@ -62,7 +61,7 @@ class TokenAuthenticatorSpec extends BeanMockingSpecification {
 	def "valid authorization with existent user-linked Key"() {
 		setup:
 		SecUser user = new SecUser()
-		Key key = new Key(name: 'me-linked key', user: user).save(validate: false)
+		Key key = new Key(name: 'user-linked key', user: user).save(validate: false)
 
 		when:
 		def result = authenticator.authenticate(Stub(HttpServletRequest) {
@@ -79,7 +78,7 @@ class TokenAuthenticatorSpec extends BeanMockingSpecification {
 
 	def "valid authorization with existent anonymous Key"() {
 		setup:
-		Key key = new Key(name: 'me-linked key').save(validate: false)
+		Key key = new Key(name: 'user-linked key').save(validate: false)
 
 		when:
 		def result = authenticator.authenticate(Stub(HttpServletRequest) {

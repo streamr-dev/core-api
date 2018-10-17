@@ -8,6 +8,7 @@ import com.unifina.domain.security.SecUserSecRole
 import com.unifina.service.ProductService
 import grails.test.mixin.Mock
 import grails.test.mixin.TestFor
+import spock.lang.Specification
 
 @TestFor(RemoveUsersProductsController)
 @Mock([SecUser, Key, SecRole, SecUserSecRole])
@@ -28,9 +29,12 @@ class RemoveUsersProductsControllerSpec extends ControllerSpecification {
 		new SecUserSecRole(secUser: me, secRole: role).save(failOnError: true)
 		when:
 		request.method = "DELETE"
+		request.requestURI = "/api/v1/products/remove/sylvester"
+		request.addHeader("Authorization", "Token myApiKey")
 		params.username = "sylvester"
-		authenticatedAs(me) { controller.index() }
-
+		withFilters(action: "index") {
+			controller.index()
+		}
 		then:
 		response.status == 204
 		1 * productService.removeUsersProducts("sylvester")
@@ -39,9 +43,12 @@ class RemoveUsersProductsControllerSpec extends ControllerSpecification {
 	def "should handle remove users products with invalid argument"() {
 		when:
 		request.method = "DELETE"
+		request.requestURI = "/api/v1/products/remove"
+		request.addHeader("Authorization", "Token myApiKey")
 		params.username = null
-		authenticatedAs(me) { controller.index() }
-
+		withFilters(action: "index") {
+			controller.index()
+		}
 		then:
 		response.status == 400
 		0 * productService._
@@ -53,9 +60,12 @@ class RemoveUsersProductsControllerSpec extends ControllerSpecification {
 		when:
 		request.apiUser = me
 		request.method = "DELETE"
+		request.requestURI = "/api/v1/products/remove/sylvester"
+		request.addHeader("Authorization", "Token myApiKey")
 		params.username = "sylvester"
-		authenticatedAs(me) { controller.index() }
-
+		withFilters(action: "index") {
+			controller.index()
+		}
 		then:
 		response.status == 401
 		0 * productService._

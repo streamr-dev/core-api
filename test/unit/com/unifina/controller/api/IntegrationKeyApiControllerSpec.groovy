@@ -6,9 +6,13 @@ import com.unifina.domain.security.IntegrationKey
 import com.unifina.domain.security.Key
 import com.unifina.domain.security.SecUser
 import com.unifina.service.EthereumIntegrationKeyService
+import com.unifina.service.SessionService
+import com.unifina.service.UserService
 import grails.converters.JSON
+import grails.plugin.springsecurity.SpringSecurityService
 import grails.test.mixin.Mock
 import grails.test.mixin.TestFor
+import spock.lang.Specification
 
 @TestFor(IntegrationKeyApiController)
 @Mock([Key, SecUser, IntegrationKey])
@@ -50,7 +54,11 @@ class IntegrationKeyApiControllerSpec extends ControllerSpecification {
 
 	void "index() lists users integration keys"() {
 		when:
-		authenticatedAs(me) { controller.index() }
+		request.addHeader("Authorization", "Token myApiKey")
+		request.requestURI = "/api/v1/integration_keys"
+		withFilters(action: "index") {
+			controller.index()
+		}
 
 		then:
 		response.status == 200
@@ -60,7 +68,11 @@ class IntegrationKeyApiControllerSpec extends ControllerSpecification {
 	void "index() can be filtered by service"() {
 		when:
 		params.service = "ETHEREUM_ID"
-		authenticatedAs(me) { controller.index() }
+		request.addHeader("Authorization", "Token myApiKey")
+		request.requestURI = "/api/v1/integration_keys"
+		withFilters(action: "index") {
+			controller.index()
+		}
 
 		then:
 		response.status == 200
@@ -77,6 +89,8 @@ class IntegrationKeyApiControllerSpec extends ControllerSpecification {
 			300)
 
 		when:
+		request.addHeader("Authorization", "Token myApiKey")
+		request.requestURI = "/api/v1/integration_keys"
 		request.method = "POST"
 		request.JSON = [
 			name     : "foobar",
@@ -88,7 +102,9 @@ class IntegrationKeyApiControllerSpec extends ControllerSpecification {
 			signature: signature,
 			account  : address
 		]
-		authenticatedAs(me) { controller.save() }
+		withFilters(action: "save") {
+			controller.save()
+		}
 
 		then:
 		response.status == 201
@@ -121,21 +137,25 @@ class IntegrationKeyApiControllerSpec extends ControllerSpecification {
 		when:
 		params.id = "integration-key-id"
 		request.apiUser = me
-		authenticatedAs(me) { controller.delete() }
+		withFilters(action: "delete") {
+			controller.delete()
+		}
 
 		then:
 		1 * ethereumIntegrationKeyService.delete("integration-key-id", me)
 	}
 
-	def "delete() responds with 204"() {
+	def "delete() responds with 409"() {
 		controller.ethereumIntegrationKeyService = Stub(EthereumIntegrationKeyService)
 
 		when:
 		params.id = "integration-key-id"
 		request.apiUser = me
-		authenticatedAs(me) { controller.delete() }
+		withFilters(action: "delete") {
+			controller.delete()
+		}
 
 		then:
-		response.status == 204
+		response.status == 409
 	}
 }

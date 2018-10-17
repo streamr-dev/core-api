@@ -20,7 +20,7 @@ class ForgotPasswordSpec extends GebReportingSpec implements LoginMixin {
 	def "go to forgotPasswordPage"(){
 		setup:
 		to LoginPage
-		username = "random@me.name"
+		username = "random@user.name"
 		nextButton.click()
 
 		when: "Clicked 'Forgot password'"

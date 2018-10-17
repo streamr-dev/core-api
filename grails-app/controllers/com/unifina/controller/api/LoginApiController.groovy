@@ -25,7 +25,7 @@ class LoginApiController {
 	@StreamrApi(authenticationLevel = AuthLevel.NONE)
 	def challenge() {
 		Challenge ch = challengeService.createChallenge()
-		render(ch.toMap() as JSON)
+		render(challengeToMap(ch) as JSON)
 	}
 
 	@StreamrApi(authenticationLevel = AuthLevel.NONE)
@@ -37,7 +37,7 @@ class LoginApiController {
 		} else {
 			SecUser user = ethereumIntegrationKeyService.getOrCreateFromEthereumAddress(cmd.address)
 			SessionToken token = sessionService.generateToken(user)
-			render(token.toMap() as JSON)
+			render(sessionTokenToMap(token) as JSON)
 		}
 	}
 
@@ -48,7 +48,7 @@ class LoginApiController {
 			throw new ApiException(400, 'INVALID_USERNAME_OR_PASSWORD', "password-based login failed")
 		}
 		SessionToken token = sessionService.generateToken(user)
-		render(token.toMap() as JSON)
+		render(sessionTokenToMap(token) as JSON)
 	}
 
 	@StreamrApi(authenticationLevel = AuthLevel.NONE)
@@ -58,6 +58,21 @@ class LoginApiController {
 			throw new ApiException(400, 'INVALID_API_KEY', "apikey-based login failed")
 		}
 		SessionToken token = sessionService.generateToken(user)
-		render(token.toMap() as JSON)
+		render(sessionTokenToMap(token) as JSON)
+	}
+
+	private def challengeToMap(Challenge challenge) {
+		return [
+			id       : challenge.getId(),
+			challenge: challenge.getChallenge(),
+			expires  : challenge.getExpiration()
+		]
+	}
+
+	private def sessionTokenToMap(SessionToken token) {
+		return [
+			token  : token.getToken(),
+			expires: token.getExpiration()
+		]
 	}
 }

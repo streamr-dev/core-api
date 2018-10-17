@@ -2,7 +2,7 @@ package pages
 
 class UserSearchPage extends GrailsPage {
     
-    static controller = "me"
+    static controller = "user"
     static action = "search"
 
     static url = "$controller/$action"

@@ -15,6 +15,7 @@ class SessionService {
 		SessionToken sk = new SessionToken(TOKEN_LENGTH, user, TTL_HOURS)
 		keyValueStoreService.setWithExpiration(sk.getToken(), sk.getUser().id.toString(), TTL_HOURS * 3600)
 		return sk
+		redisClient.connectAsync().expireat()
 	}
 
 	SecUser getUserFromToken(String token) throws InvalidSessionTokenException {

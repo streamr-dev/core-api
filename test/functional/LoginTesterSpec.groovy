@@ -16,7 +16,7 @@ abstract class LoginTesterSpec extends GebReportingSpec implements LoginMixin {
 	}
 
 	def loginAsTester() {
-		// First logged out to prevent the browser from remembering the me.
+		// First logged out to prevent the browser from remembering the user.
 		// Does nothing if not logged in.
 		logout()
 		// Use tryLogin instead of login because of a naming conflict

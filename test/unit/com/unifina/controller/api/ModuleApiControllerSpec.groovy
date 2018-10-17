@@ -10,6 +10,8 @@ import com.unifina.domain.signalpath.ModulePackage
 import com.unifina.service.PermissionService
 import grails.test.mixin.Mock
 import grails.test.mixin.TestFor
+import grails.test.mixin.web.FiltersUnitTestMixin
+import spock.lang.Specification
 
 @TestFor(ModuleApiController)
 @Mock([SecUser, Module, Key, ModulePackage])
@@ -38,8 +40,12 @@ class ModuleApiControllerSpec extends ControllerSpecification {
 		module.jsonHelp = "help"
 
 		when:
+		request.addHeader("Authorization", "Token myApiKey")
 		params.id = module.id
-		authenticatedAs(me) { controller.help() }
+		request.requestURI = "/api/v1/modules/$module.id/help"
+		withFilters(action: "help") {
+			controller.help()
+		}
 
 		then:
 		1 * controller.permissionService.check(me, module.modulePackage, Permission.Operation.READ) >> true
@@ -51,8 +57,12 @@ class ModuleApiControllerSpec extends ControllerSpecification {
 		module.jsonHelp = null
 
 		when:
+		request.addHeader("Authorization", "Token myApiKey")
 		params.id = module.id
-		authenticatedAs(me) { controller.help() }
+		request.requestURI = "/api/v1/modules/$module.id/help"
+		withFilters(action: "help") {
+			controller.help()
+		}
 
 		then:
 		1 * controller.permissionService.check(me, module.modulePackage, Permission.Operation.READ) >> true
@@ -63,8 +73,12 @@ class ModuleApiControllerSpec extends ControllerSpecification {
 		controller.permissionService = Mock(PermissionService)
 
 		when:
+		request.addHeader("Authorization", "Token myApiKey")
 		params.id = module.id
-		authenticatedAs(me) { controller.help() }
+		request.requestURI = "/api/v1/modules/$module.id/help"
+		withFilters(action: "help") {
+			controller.help()
+		}
 
 		then:
 		thrown(NotPermittedException)

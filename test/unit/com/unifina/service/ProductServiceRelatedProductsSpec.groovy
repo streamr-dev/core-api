@@ -39,12 +39,12 @@ class ProductServiceRelatedProductsSpec extends Specification {
 
 	void setup() {
 		apiUser = new SecUser(
-			username: "username: api@me.com",
-			name: "Regular API me",
+			username: "username: api@user.com",
+			name: "Regular API user",
 			password: "xxx"
 		)
 
-		// u1 is the me who owns the product p1 used to search for related products
+		// u1 is the user who owns the product p1 used to search for related products
 		u1 = new SecUser(
 			username: "username: masa@hypätääneka.com",
 			name: "Matti Nykänen",
@@ -87,13 +87,13 @@ class ProductServiceRelatedProductsSpec extends Specification {
 		p6 = newProduct("p6-id", "Teapot data 3", "data of teapots 3", cat2, u2)
 		// results should list:
 		//   - p2 (same category)
-		//   - p3 (same me, but different category)
+		//   - p3 (same user, but different category)
 		//   - p5 (same category)
 		//
 		// results should not list:
 		//   - p1 (product used to find related products)
-		//   - p4 (different category and me)
-		//   - p6 (different category and me)
+		//   - p4 (different category and user)
+		//   - p6 (different category and user)
 
 		// UI is specified to show three (3) related products
 		service.apiService = Mock(ApiService)

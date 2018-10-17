@@ -53,7 +53,7 @@ class ProfileControllerSpec extends Specification {
 			controller.changePwd(cmd)
 		then: "password must be changed"
 			springSecurityService.passwordEncoder.isPasswordValid(SecUser.get(1).password, 'barbar123!', null)
-		then: "me must be reauthenticated"
+		then: "user must be reauthenticated"
 			reauthenticated == user.username
 		then: "must redirect and show success message"
 			flash.error == null
@@ -70,7 +70,7 @@ class ProfileControllerSpec extends Specification {
 			controller.changePwd(cmd)
 		then: "the old password must remain valid"
 			springSecurityService.passwordEncoder.isPasswordValid(SecUser.get(1).password, 'foobar123!', null)
-		then: "me must not be reauthenticated"
+		then: "user must not be reauthenticated"
 			!reauthenticated
 		then: "must stay on page and show error message"
 			flash.error != null
@@ -86,7 +86,7 @@ class ProfileControllerSpec extends Specification {
 			controller.changePwd(cmd)
 		then: "the old password must remain valid"
 			springSecurityService.passwordEncoder.isPasswordValid(SecUser.get(1).password, 'foobar123!', null)
-		then: "me must not be reauthenticated"
+		then: "user must not be reauthenticated"
 			!reauthenticated
 		then: "must stay on page and show error message"
 			flash.error != null
@@ -102,7 +102,7 @@ class ProfileControllerSpec extends Specification {
 			controller.changePwd(cmd)
 		then: "the old password must remain valid"
 			springSecurityService.passwordEncoder.isPasswordValid(SecUser.get(1).password, 'foobar123!', null)
-		then: "me must not be reauthenticated"
+		then: "user must not be reauthenticated"
 			!reauthenticated
 		then: "must stay on page and show error message"
 			flash.error != null

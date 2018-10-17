@@ -10,6 +10,8 @@ import com.unifina.domain.security.SecUser
 import com.unifina.service.PermissionService
 import grails.test.mixin.Mock
 import grails.test.mixin.TestFor
+import grails.test.mixin.web.FiltersUnitTestMixin
+import spock.lang.Specification
 
 @TestFor(KeyApiController)
 @Mock([Key, Permission, SecUser, Stream, PermissionService])
@@ -17,17 +19,17 @@ class KeyApiControllerSpec extends ControllerSpecification {
 
 	def permissionService
 
-	SecUser me
+	SecUser loggedInUser
 
 	def setup() {
-		me = new SecUser(
-			username: "me@me.com",
+		loggedInUser = new SecUser(
+			username: "user@user.com",
 			password: "pwd",
 			name: "name",
 			timezone: "Europe/Helsinki"
 		).save(failOnError: true, validate: true)
 
-		def userLinkedKey = new Key(name: 'users key', user: me)
+		def userLinkedKey = new Key(name: 'users key', user: loggedInUser)
 		userLinkedKey.id = "apiKey"
 		userLinkedKey.save(failOnError: true, validate: true)
 
@@ -39,13 +41,20 @@ class KeyApiControllerSpec extends ControllerSpecification {
 		Stream s = new Stream(name: "stream")
 		s.id = "streamId"
 		s.save(failOnError: true, validate: false)
-		permissionService.systemGrant(me, s, Permission.Operation.READ)
+		permissionService.systemGrant(loggedInUser, s, Permission.Operation.READ)
 
 		when:
+		request.addHeader("Authorization", "Token apiKey")
+		request.method = "GET"
+		request.requestURI = "/api/v1/streams/streamId/keys"
+
 		params.resourceClass = Stream
 		params.resourceId = "streamId"
 
-		authenticatedAs(me) { controller.index() }
+		withFilters([action: 'index']) {
+			controller.index()
+		}
+
 
 		then:
 		thrown(NotPermittedException)
@@ -53,31 +62,39 @@ class KeyApiControllerSpec extends ControllerSpecification {
 
 	void "save() creates user-linked for logged in user"() {
 		when:
+		request.addHeader("Authorization", "Token apiKey")
 		request.method = "POST"
+		request.requestURI = "/api/v1/users/me/keys"
 		request.JSON = [
 			name: "key name"
 		]
 		params.resourceClass = SecUser
-		authenticatedAs(me) { controller.save() }
+		withFilters([action: 'save']) {
+			controller.save()
+		}
 
 		then:
 		response.status == 200
 		response.json == [
 			id: "1",
 			name: "key name",
-			user: me.username
+			user: loggedInUser.username
 		]
 	}
 
 	void "save() throws NotFoundException (404) if given resource does not exist"() {
 		when:
+		request.addHeader("Authorization", "Token apiKey")
 		request.method = "POST"
+		request.requestURI = "/api/v1/streams/streamId/keys"
 		request.JSON = [
 			name: "key name"
 		]
 		params.id = "streamId"
 		params.resourceClass = Stream
-		authenticatedAs(me) { controller.save() }
+		withFilters([action: 'save']) {
+			controller.save()
+		}
 
 		then:
 		thrown(NotFoundException)
@@ -89,17 +106,21 @@ class KeyApiControllerSpec extends ControllerSpecification {
 		stream.id = "streamId"
 		stream.save(validate: false, failOnError: true)
 
-		permissionService.systemGrant(me, stream, Permission.Operation.WRITE)
+		permissionService.systemGrant(loggedInUser, stream, Permission.Operation.WRITE)
 
 		when:
+		request.addHeader("Authorization", "Token apiKey")
 		request.method = "POST"
+		request.requestURI = "/api/v1/streams/streamId/keys"
 		request.JSON = [
 			name: "key name"
 		]
 		params.id = stream.id
 		params.resourceClass = Stream
 		params.resourceId = stream.id
-		authenticatedAs(me) { controller.save() }
+		withFilters([action: 'save']) {
+			controller.save()
+		}
 
 		then:
 		thrown(NotPermittedException)
@@ -111,10 +132,12 @@ class KeyApiControllerSpec extends ControllerSpecification {
 		stream.id = "streamId"
 		stream.save(validate: false, failOnError: true)
 
-		permissionService.systemGrant(me, stream, Permission.Operation.SHARE)
+		permissionService.systemGrant(loggedInUser, stream, Permission.Operation.SHARE)
 
 		when:
+		request.addHeader("Authorization", "Token apiKey")
 		request.method = "POST"
+		request.requestURI = "/api/v1/streams/streamId/keys"
 		request.JSON = [
 			name: "key name",
 			permission: "read"
@@ -122,7 +145,9 @@ class KeyApiControllerSpec extends ControllerSpecification {
 		params.id = stream.id
 		params.resourceClass = Stream
 		params.resourceId = stream.id
-		authenticatedAs(me) { controller.save() }
+		withFilters([action: 'save']) {
+			controller.save()
+		}
 
 		then:
 		response.status == 200
@@ -144,10 +169,12 @@ class KeyApiControllerSpec extends ControllerSpecification {
 		stream.id = "streamId"
 		stream.save(validate: false, failOnError: true)
 
-		permissionService.systemGrant(me, stream, Permission.Operation.SHARE)
+		permissionService.systemGrant(loggedInUser, stream, Permission.Operation.SHARE)
 
 		when:
+		request.addHeader("Authorization", "Token apiKey")
 		request.method = "POST"
+		request.requestURI = "/api/v1/streams/streamId/keys"
 		request.JSON = [
 			name: "key name",
 			permission: "write"
@@ -155,7 +182,9 @@ class KeyApiControllerSpec extends ControllerSpecification {
 		params.id = stream.id
 		params.resourceClass = Stream
 		params.resourceId = stream.id
-		authenticatedAs(me) { controller.save() }
+		withFilters([action: 'save']) {
+			controller.save()
+		}
 
 		then:
 		response.status == 200
@@ -174,8 +203,12 @@ class KeyApiControllerSpec extends ControllerSpecification {
 
 	void "delete() throws NotFoundException if given keyId doesn't exist"() {
 		when:
+		request.addHeader("Authorization", "Token apiKey")
 		request.method = "DELETE"
-		authenticatedAs(me) { controller.delete() }
+		request.requestURI = "/api/v1/users/me/keys/keyId"
+		withFilters([action: 'delete']) {
+			controller.delete()
+		}
 
 		then:
 		thrown(NotFoundException)
@@ -184,7 +217,7 @@ class KeyApiControllerSpec extends ControllerSpecification {
 	void "delete() throws NotPermittedException if attempting to delete user-linked key as other user"() {
 		setup:
 		SecUser user2 = new SecUser(
-			username: "user2@me.com",
+			username: "user2@user.com",
 			password: "pwd",
 			name: "name",
 			timezone: "Europe/Helsinki"
@@ -193,23 +226,31 @@ class KeyApiControllerSpec extends ControllerSpecification {
 		Key otherKey = new Key(name: "user2's key", user: user2).save(failOnError: true, validate: true)
 
 		when:
+		request.addHeader("Authorization", "Token apiKey")
 		request.method = "DELETE"
+		request.requestURI = "/api/v1/users/me/keys/${otherKey.id}"
 		params.id = otherKey.id
 		params.resourceClass = SecUser
-		authenticatedAs(me) { controller.delete() }
+		withFilters([action: 'delete']) {
+			controller.delete()
+		}
 
 		then:
 		thrown(NotPermittedException)
 	}
 
 	void "delete() deletes key if deleting user-linked key as said user"() {
-		Key key = new Key(name: "me's key", user: me).save(failOnError: true, validate: true)
+		Key key = new Key(name: "user's key", user: loggedInUser).save(failOnError: true, validate: true)
 
 		when:
+		request.addHeader("Authorization", "Token apiKey")
 		request.method = "DELETE"
+		request.requestURI = "/api/v1/keys/${key.id}"
 		params.id = key.id
 		params.resourceClass = SecUser
-		authenticatedAs(me) { controller.delete() }
+		withFilters([action: 'delete']) {
+			controller.delete()
+		}
 
 		then:
 		response.status == 204
@@ -218,14 +259,18 @@ class KeyApiControllerSpec extends ControllerSpecification {
 
 	void "delete() does not permit deleting the user's only api key"() {
 		expect:
-		me.keys.size() == 1
+		loggedInUser.keys.size() == 1
 
 		when:
-		def key = me.keys.iterator().next()
+		def key = loggedInUser.keys.iterator().next()
+		request.addHeader("Authorization", "Token apiKey")
 		request.method = "DELETE"
+		request.requestURI = "/api/v1/users/me/keys/${key.id}"
 		params.id = key.id
 		params.resourceClass = SecUser
-		authenticatedAs(me) { controller.delete() }
+		withFilters([action: 'delete']) {
+			controller.delete()
+		}
 
 		then:
 		thrown(NotPermittedException)
@@ -240,15 +285,19 @@ class KeyApiControllerSpec extends ControllerSpecification {
 		Key key = new Key(name: "anonymous key").save(failOnError: true, validate: true)
 
 		controller.permissionService = permissionService = Stub(PermissionService)
-		permissionService.get(Stream, me, Permission.Operation.SHARE) >> [stream]
+		permissionService.get(Stream, loggedInUser, Permission.Operation.SHARE) >> [stream]
 		permissionService.canRead(key, stream) >> false
 
 		when:
+		request.addHeader("Authorization", "Token apiKey")
 		request.method = "DELETE"
+		request.requestURI = "/api/v1/streams/${stream.id}/keys/${key.id}"
 		params.id = key.id
 		params.resourceClass = Stream
 		params.resourceId = stream.id
-		authenticatedAs(me) { controller.delete() }
+		withFilters([action: 'delete']) {
+			controller.delete()
+		}
 
 		then:
 		thrown(NotPermittedException)
@@ -263,16 +312,20 @@ class KeyApiControllerSpec extends ControllerSpecification {
 		Key key = new Key(name: "anonymous key").save(failOnError: true, validate: true)
 
 		controller.permissionService = permissionService = Stub(PermissionService)
-		permissionService.canShare(me, stream) >> true
+		permissionService.canShare(loggedInUser, stream) >> true
 
 		assert Key.get(key.id) != null
 
 		when:
+		request.addHeader("Authorization", "Token apiKey")
 		request.method = "DELETE"
+		request.requestURI = "/api/v1/streams/${stream.id}/keys/${key.id}"
 		params.id = key.id
 		params.resourceClass = Stream
 		params.resourceId = stream.id
-		authenticatedAs(me) { controller.delete() }
+		withFilters([action: 'delete']) {
+			controller.delete()
+		}
 
 		then:
 		response.status == 204
