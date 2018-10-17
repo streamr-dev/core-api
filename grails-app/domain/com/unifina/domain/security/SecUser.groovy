@@ -1,7 +1,6 @@
 package com.unifina.domain.security
 
 import com.unifina.security.Userish
-import com.unifina.utils.EmailValidator
 import com.unifina.utils.EthereumAddressValidator
 import com.unifina.utils.UsernameValidator
 import groovy.transform.CompileStatic
@@ -92,6 +91,6 @@ class SecUser implements Userish {
 
 	//TODO: Once all users are defined with their ethereum public key we can remove this
 	boolean isEthereumUser() {
-		return username.matches("^0x[a-fA-F0-9]{40}\$")
+		return EthereumAddressValidator.validate(username)
 	}
 }
