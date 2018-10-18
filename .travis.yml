@@ -57,9 +57,9 @@ jobs:
         deployment_group: staging-engine-editor-deployment-group
         region: eu-west-1
       - provider: s3 #production
-        access_key_id: AKIAI7LEOVJBY6ZEH44Q
+        access_key_id: AKIAISTYQBVHXK5LXXIQ
         secret_access_key:
-          secure: iKwr8sXvSmzDpv6GIl4q0m9beVNa4IDd/cYrF1gTB9oOESDFT9Q1EqiVeFUZGVQnKWcbvUmHbGu+f8AhF7AMpST6eeGm+h35m/Y1gBxehmFM4yf/kJkA2lj34/Xzy+3N8XpHnFGSF5alya0uEKV2wgQ7qUYvw/SkNA67VdwlzQSEbTu+yHYWP/PYuddTTePjQj3J8vJLwMoOSWsMl3n32nsFOx4cCCerzsfaA7F1JYJwTleyd71iFinQGRGjIaYJGQOGVjCmEZRuHLZEZNXCkEeFneoBhymYtoXsLVXkyf5VkibApTnKYaA8wXRCtI+Ow1zfTl8KzxFOiQ/zbtjtGb375TbwKOTBOQTJk7Heh99gdSAA+uhtnia2TvuqwZD+W8Ge7NW21/tJzQS9dPWM8rFtyK0BL7cYH4SLW4QtHTnwlg99jiHqR/RjtvPiVNxX6R23922n9ORJUmY81lsjgN74eq6stwyIl4HvbgiVqEd6w6+uUd4p2GLeFFN7w/Kn+W2V8VY/aUKwz2Mg/KfTd+l3kyPmlb9ITx4z39A4mmIislWD00SpnHvDYOBYUWCByzhDrMPFMY4RAQL8SCwjU/XKqbueFYUJncqW9aZm3N9Zcm2UcTnmfxHbnCN1Z/5gWXxIp5WbwxY6yt29p8UxHU8eGfHzWeIl+2fH0HT6bgU=
+          secure: BKQToY0A5oDX/lpO9FZOdFO6ED59KzfcOXzVRkU+A1rwyMRo1fftI176X+zQf9E94hzlIucMKAW9fgbbQUJKdy+Er0VPep33iQ5po5c+UOoRV0+ds+3Eg7vN1rLH38U79nC+OvRtXibxLr/1nr9dXA5esyqdQ/r/BEScoETNK8OiGR6nLSR6upVsv8KjEax5z7YAMpPMjdflRW18OPhErO/w/YD1NugGP8Llz82gk/NVX4k9LdQhfKtY76PQSCG8yPF/RObuXrymFK173UtUDcQZKHNAbUwrGGq3WBgpg177OcOt0UETGP0u9CCVvjbndbB9Vf+hbo47a6YC+ZA/a7rmi4FesrGBsIgV/tPGd9nTzzRe14ewkVd5r0zkIImAO2quuMtkXj0Ecr38nYaWBu0w4EsWrsYVRoB79iYq0ZG6ZarZFwOifVT6NJ7+6o1w+EBpMl+wQ8GUQjQORNod1rBNcdAFYLDJT5KRLtDTM6gOF1qbzPhCEZV0okDpCj/roa0jgWvjLoEjI0U7gONU79236kiCjEsKvoGnjm1UNRFVODxZ9fG3Sn2q+JUOV3lpdj+CVEdQx24kTnHMIk1p7Ayfv5wBa4VA81IXn+QpnnNFf7hMUmV7FWYpvvAPTPoHxK0+/9mjkashJT5YtcgVKGZ+i7mNir9v0yqUuBHIDzM=
         bucket: eu-west-1-streamr-vault
         upload-dir: engine-editor/releases
         acl: private
