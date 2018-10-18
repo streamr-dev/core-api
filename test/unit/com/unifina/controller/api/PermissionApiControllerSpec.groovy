@@ -9,6 +9,7 @@ import com.unifina.domain.security.Permission
 import com.unifina.domain.security.Permission.Operation
 import com.unifina.domain.security.SecUser
 import com.unifina.domain.signalpath.Canvas
+import com.unifina.service.EthereumIntegrationKeyService
 import com.unifina.service.PermissionService
 import com.unifina.service.SignupCodeService
 import com.unifina.signalpath.messaging.MockMailService
@@ -20,6 +21,7 @@ import grails.test.mixin.TestFor
 @Mock([Permission, Key, Stream, SecUser, Canvas])
 class PermissionApiControllerSpec extends ControllerSpecification {
 	def permissionService
+	EthereumIntegrationKeyService ethereumIntegrationKeyService
 
 	// Canvas and Stream chosen because one has string id and one has long id
 	Canvas canvasOwned, canvasShared, canvasRestricted, canvasPublic
@@ -31,6 +33,7 @@ class PermissionApiControllerSpec extends ControllerSpecification {
 
 	def setup() {
 		controller.permissionService = permissionService = Mock(PermissionService)
+		controller.ethereumIntegrationKeyService = ethereumIntegrationKeyService = Mock(EthereumIntegrationKeyService)
 		controller.mailService = new MockMailService()
 		controller.signupCodeService = new SignupCodeService()
 
@@ -211,6 +214,24 @@ class PermissionApiControllerSpec extends ControllerSpecification {
 		controller.mailService.mailSent
 		1 * permissionService.canShare(me, _) >> true
 		1 * permissionService.grant(me, _, _, Operation.READ) >> new Permission(user: other, operation: Operation.READ)
+	}
+
+	void "save() creates a new user with permission if unknown ethereum address provided"() {
+		setup:
+		SecUser ethUser = new SecUser(id: 3, username: "0xa50E97f6a98dD992D9eCb8207c2Aa58F54970729")
+		params.id = canvasOwned.id
+		params.resourceClass = Canvas
+		params.resourceId = canvasOwned.id
+		when:
+		request.JSON = [user: ethUser.username, operation: "read"] as JSON
+		authenticatedAs(me) { controller.save() }
+		then:
+		1 * ethereumIntegrationKeyService.createEthereumUser(ethUser.username) >> ethUser
+		1 * permissionService.canShare(me, _) >> true
+		1 * permissionService.grant(me, _, _, Operation.READ) >> new Permission(user: ethUser, operation: Operation.READ)
+		response.status == 201
+		response.json.user == ethUser.username
+		response.json.operation == "read"
 	}
 
 	void "delete revokes permissions"() {

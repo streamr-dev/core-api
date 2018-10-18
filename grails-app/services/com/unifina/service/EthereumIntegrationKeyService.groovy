@@ -114,26 +114,31 @@ class EthereumIntegrationKeyService {
 	SecUser getOrCreateFromEthereumAddress(String address) {
 		IntegrationKey key = IntegrationKey.findByIdInServiceAndService(address, IntegrationKey.Service.ETHEREUM_ID)
 		if (key == null) {
-			SecUser user = userService.createUser([
-				username       : address,
-				password       : RandomStringUtils.random(32),
-				name           : address,
-				timezone       : "UTC",
-				enabled        : true,
-				accountLocked  : false,
-				passwordExpired: false
-			])
-			key = new IntegrationKey(
-				name: address,
-				user: user,
-				service: IntegrationKey.Service.ETHEREUM_ID,
-				idInService: address,
-				json: ([
-					address: new String(address)
-				] as JSON).toString()
-			).save(failOnError: true, flush: true)
+			return createEthereumUser(address)
 		}
 		return key.user
+	}
+
+	SecUser createEthereumUser(String address) {
+		SecUser user = userService.createUser([
+			username       : address,
+			password       : RandomStringUtils.random(32),
+			name           : address,
+			timezone       : "UTC",
+			enabled        : true,
+			accountLocked  : false,
+			passwordExpired: false
+		])
+		new IntegrationKey(
+			name: address,
+			user: user,
+			service: IntegrationKey.Service.ETHEREUM_ID,
+			idInService: address,
+			json: ([
+				address: new String(address)
+			] as JSON).toString()
+		).save(failOnError: true, flush: true)
+		return user
 	}
 
 	@CompileStatic
