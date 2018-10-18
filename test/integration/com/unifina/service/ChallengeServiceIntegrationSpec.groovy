@@ -33,8 +33,12 @@ class ChallengeServiceIntegrationSpec extends IntegrationSpec{
 	void "should generate challenge"() {
 		when:
 		Challenge challenge = service.createChallenge()
+		DateTime expectedExpiration = new DateTime().plusSeconds(ChallengeService.TTL_SECONDS)
 		then:
 		connection.get(challenge.getId()) == challenge.getChallenge()
+		challenge.getChallenge().startsWith(text)
+		new DateTime(challenge.getExpiration()).getMillis() - expectedExpiration.getMillis() < 500
+		challenge.getId().length() == ChallengeService.CHALLENGE_LENGTH
 	}
 
 	void "response to challenge should pass - case 1"() {
