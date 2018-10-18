@@ -1,5 +1,6 @@
 package com.unifina.filters
 
+import com.unifina.BeanMockingSpecification
 import com.unifina.controller.api.NodeApiController
 import com.unifina.domain.security.Key
 import com.unifina.domain.security.SecRole
@@ -8,12 +9,10 @@ import com.unifina.domain.security.SecUserSecRole
 import com.unifina.service.SessionService
 import grails.test.mixin.Mock
 import grails.test.mixin.TestFor
-import org.springframework.beans.factory.config.MethodInvokingFactoryBean
-import spock.lang.Specification
 
 @TestFor(NodeApiController)
-@Mock([SecUser, SecUserSecRole, UnifinaCoreAPIFilters, SessionService])
-class UnifinaCoreAPIFiltersSpec extends Specification {
+@Mock([SecUser, SecUserSecRole, UnifinaCoreAPIFilters])
+class UnifinaCoreAPIFiltersSpec extends BeanMockingSpecification {
 
 	SecUser user
 	SecRole adminRole, devopsRole
@@ -21,7 +20,7 @@ class UnifinaCoreAPIFiltersSpec extends Specification {
 
 	void setup() {
 		user = new SecUser().save(failOnError: true, validate: false)
-		sessionService = Mock(SessionService)
+		sessionService = mockBean(SessionService, Mock(SessionService))
 
 		Key key = new Key(name: "k1", user: user)
 		key.id = "myApiKey"
@@ -63,17 +62,9 @@ class UnifinaCoreAPIFiltersSpec extends Specification {
 	}
 
 	void "authentication passes when session token provided"() {
-		given:
-		defineBeans {
-			sessionService(MethodInvokingFactoryBean) {
-				targetObject = this
-				targetMethod = "buildSessionServiceStub"
-				arguments = [false]
-			}
-		}
+		String token = "mytoken"
 		when:
 		new SecUserSecRole(secUser: user, secRole: adminRole).save(failOnError: true)
-		String token = "mytoken"
 		request.addHeader("Authorization", "Bearer " + token)
 		request.requestURI = "/api/v1/nodes"
 		withFilters(action: "index") {
@@ -81,12 +72,7 @@ class UnifinaCoreAPIFiltersSpec extends Specification {
 		}
 
 		then:
+		1 * sessionService.getUserFromToken(token) >> user
 		response.status == 200
-	}
-
-	private SessionService buildSessionServiceStub(boolean ok) {
-		SessionService result = Stub(SessionService)
-		result.getUserFromToken("mytoken") >> user
-		return result
 	}
 }
