@@ -56,7 +56,8 @@ public class GetEthereumContractAt extends AbstractSignalPathModule {
 			} else {
 				// ABI param not yet added to UI => query streamr-web3 for known ABI
 				try {
-					String responseString = Unirest.get(ethereumOptions.getServer() + "/contract?at=" + address).asString().getBody();
+					String networkName = ethereumOptions.getNetwork();
+					String responseString = Unirest.get(ethereumOptions.getServer() + "/contract?at=" + address + "&network=" + networkName).asString().getBody();
 					JsonObject response = new JsonParser().parse(responseString).getAsJsonObject();
 					if (response.has("abi")) {
 						JsonArray abiArray = response.getAsJsonArray("abi");
