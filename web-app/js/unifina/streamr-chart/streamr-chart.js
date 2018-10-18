@@ -51,9 +51,13 @@ function StreamrChart(parent, options) {
 	// Range dropdown
 	if (this.options.rangeDropdown) {
 		var $rangeDiv = $("<div></div>");
-        var $rangeSelect = $("<select class='chart-range-selector chart-show-on-run form-control' title='Range'></select>")
+        var $rangeSelect = $('<select/>', {
+        	class: 'chart-range-selector chart-show-on-run form-control',
+			title: 'Range',
+			value: _this.range.value,
+    	})
 		var rangeConfig = [
-			{name: "All", range: ""},
+			{name: "All", range: "all"},
 			{name: "month", range: 30*24*60*60*1000},
 			{name: "week", range: 7*24*60*60*1000},
 			{name: "day", range: 24*60*60*1000},
@@ -79,10 +83,9 @@ function StreamrChart(parent, options) {
 
         $rangeSelect.on('change', function() {
 			var r = $(this).val()
-			if (r) {
+			if (r !== 'all') {
 				r = parseInt(r)
 			}
-			else r = "all"
 
 			_this.range.value = r
 			if (_this.chart)
