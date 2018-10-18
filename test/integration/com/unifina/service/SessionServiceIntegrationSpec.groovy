@@ -8,6 +8,7 @@ import com.unifina.security.SessionToken
 import com.unifina.utils.MapTraversal
 import grails.test.spock.IntegrationSpec
 import grails.util.Holders
+import org.joda.time.DateTime
 import org.springframework.util.Assert
 
 class SessionServiceIntegrationSpec extends IntegrationSpec {
@@ -39,7 +40,10 @@ class SessionServiceIntegrationSpec extends IntegrationSpec {
 			timezone: "timezone"
 		).save(failOnError: true, validate: false)
 		SessionToken token = service.generateToken(user)
+		DateTime expectedExpiration = new DateTime().plusHours(SessionService.TTL_HOURS)
 		then:
+		new DateTime(token.getExpiration()).getMillis() - expectedExpiration.getMillis() < 500
+		token.getToken().length() == SessionService.TOKEN_LENGTH
 		connection.get(token.token) == user.id.toString()
 		service.getUserFromToken(token.token).id == user.id
 	}
