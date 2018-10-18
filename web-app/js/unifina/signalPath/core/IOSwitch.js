@@ -39,10 +39,10 @@ SignalPath.IOSwitch = function(parentContainer, clazz, options) {
 			var currentValue = pub.getValue();
 			pub.setValue(pub.nextValue(currentValue));
 			pub.update();
-			pub.div.html(pub.buttonText());
+			pub.div.text(pub.buttonText());
 		},
 		update: function() {
-			pub.div.html(pub.buttonText());
+			pub.div.text(pub.buttonText());
 			if (pub.isActiveValue(pub.getValue())) {
 				pub.div.addClass("ioSwitchTrue");
 				pub.div.removeClass("ioSwitchFalse");
@@ -52,7 +52,7 @@ SignalPath.IOSwitch = function(parentContainer, clazz, options) {
 				pub.div.addClass("ioSwitchFalse");
 			}
 			// The value may be visible elsewhere (eg. a tooltip), update that too
-			$("#"+pub.getStateTextId()).html(pub.stateText());
+			$("#"+pub.getStateTextId()).text(pub.stateText());
 
  			_setTooltipTitle(pub.stateText())
  			

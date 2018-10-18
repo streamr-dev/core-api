@@ -8,8 +8,8 @@ SignalPath.CommentModule = function(data,canvas,prot) {
 		superCreateDiv();
         prot.body.addClass("drag-exclude")
 		textarea = $("<textarea class='comment'></textarea>");
-		textarea.html(prot.jsonData.text || "");
-        
+		textarea.text(prot.jsonData.text || "");
+
         prot.initResizable({
             minWidth: 100,
             minHeight: 50

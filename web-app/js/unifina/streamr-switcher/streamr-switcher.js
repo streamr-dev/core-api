@@ -70,7 +70,27 @@
 		if ($el.is('input[type="checkbox"]')) {
 			box_class = $el.attr('data-class');
 			this.$checkbox = $el;
-			this.$box = $('<div class="switcher"><div class="switcher-toggler"></div><div class="switcher-inner"><div class="switcher-state-on">' + this.options.on_state_content + '</div><div class="switcher-state-off">' + this.options.off_state_content + '</div></div></div>');
+			var $switcherToggler = $('<div/>', {
+                class: 'switcher-toggler',
+            })
+			var $switcherStateOn = $('<div/>', {
+				class: 'switcher-state-on',
+				text: this.options.on_state_content,
+			})
+			var $switcherStateOff = $('<div/>', {
+				class: 'switcher-state-off',
+				text: this.options.off_state_content,
+			})
+			var $switcherInner = $('<div/>', {
+				class: 'switcher-inner',
+			})
+				.append($switcherStateOn)
+				.append($switcherStateOff)
+			this.$box = $('<div/>', {
+				class: 'switcher',
+			})
+				.append($switcherToggler)
+				.append($switcherInner)
 			if (this.options.theme) {
 				this.$box.addClass('switcher-theme-' + this.options.theme);
 			}

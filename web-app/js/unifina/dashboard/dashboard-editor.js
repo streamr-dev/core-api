@@ -93,7 +93,7 @@
 
             if (this.model.getChecked().length) {
                 this.$el.find('.howmanychecked')
-                    .html(this.model.getChecked().length)
+                    .text(this.model.getChecked().length)
             } else {
                 this.$el.find('.howmanychecked')
                     .empty()

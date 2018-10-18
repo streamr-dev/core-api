@@ -70,7 +70,10 @@ function StreamrChart(parent, options) {
 		]
 
 		rangeConfig.forEach(function(c) {
-			var $option =  $("<option value='"+c.range+"'>"+c.name+"</option>")
+			var $option =  $('<option/>', {
+				value: c.range,
+				text: c.name,
+			})
             $rangeSelect.append($option)
 		})
 
