@@ -8,15 +8,14 @@ import com.unifina.service.SessionService
 import grails.test.mixin.Mock
 
 import javax.servlet.http.HttpServletRequest
-@Mock([Key, SessionService])
+@Mock([Key])
 class TokenAuthenticatorSpec extends BeanMockingSpecification {
 	TokenAuthenticator authenticator
 	SessionService sessionService
 
 	def setup() {
+		sessionService = mockBean(SessionService, Mock(SessionService))
 		authenticator = new TokenAuthenticator()
-		sessionService = Mock(SessionService)
-		mockBean(SessionService, sessionService)
 	}
 
 	def "no authorization string"() {
@@ -101,6 +100,7 @@ class TokenAuthenticatorSpec extends BeanMockingSpecification {
 		})
 
 		then:
+		1 * sessionService.getUserFromToken("session-token") >> null
 		result != null
 		result.getKey() == null
 		result.getSecUser() == null
