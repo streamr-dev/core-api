@@ -8,7 +8,6 @@ public class AuthenticationResult {
 	private final SecUser secUser;
 	private final boolean keyMissing;
 	private final boolean lastAuthenticationMalformed;
-	private String authorizationHeaderName = "Bearer or Token";
 
 	public AuthenticationResult(boolean keyMissing, boolean lastAuthenticationMalformed) {
 		this.key = null;
@@ -66,13 +65,5 @@ public class AuthenticationResult {
 			}
 		}
 		return false;
-	}
-
-	public void setAuthorizationHeaderName(String headerName) {
-		this.authorizationHeaderName = headerName;
-	}
-
-	public String getAuthorizationHeaderName() {
-		return authorizationHeaderName;
 	}
 }
