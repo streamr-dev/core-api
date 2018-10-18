@@ -1,6 +1,6 @@
 package com.unifina.controller.api
 
-import com.unifina.FilterMockingSpecification
+import com.unifina.ControllerSpecification
 import com.unifina.security.Challenge
 import com.unifina.domain.security.IntegrationKey
 import com.unifina.domain.security.Key
@@ -12,7 +12,7 @@ import grails.test.mixin.TestFor
 
 @TestFor(IntegrationKeyApiController)
 @Mock([Key, SecUser, IntegrationKey])
-class IntegrationKeyApiControllerSpec extends FilterMockingSpecification {
+class IntegrationKeyApiControllerSpec extends ControllerSpecification {
 	EthereumIntegrationKeyService ethereumIntegrationKeyService
 	SecUser me
 	SecUser someoneElse

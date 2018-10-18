@@ -1,6 +1,6 @@
 package com.unifina.controller.api
 
-import com.unifina.FilterMockingSpecification
+import com.unifina.ControllerSpecification
 import com.unifina.api.InvalidArgumentsException
 import com.unifina.api.NotPermittedException
 import com.unifina.domain.data.Stream
@@ -18,7 +18,7 @@ import grails.test.mixin.TestFor
 
 @TestFor(PermissionApiController)
 @Mock([Permission, Key, Stream, SecUser, Canvas])
-class PermissionApiControllerSpec extends FilterMockingSpecification {
+class PermissionApiControllerSpec extends ControllerSpecification {
 	def permissionService
 
 	// Canvas and Stream chosen because one has string id and one has long id

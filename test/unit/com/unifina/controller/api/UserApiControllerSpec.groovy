@@ -1,11 +1,11 @@
 package com.unifina.controller.api
 
-import com.unifina.FilterMockingSpecification
+import com.unifina.ControllerSpecification
 import com.unifina.domain.security.SecUser
 import grails.test.mixin.TestFor
 
 @TestFor(UserApiController)
-class UserApiControllerSpec extends FilterMockingSpecification {
+class UserApiControllerSpec extends ControllerSpecification {
 
 	SecUser me
 

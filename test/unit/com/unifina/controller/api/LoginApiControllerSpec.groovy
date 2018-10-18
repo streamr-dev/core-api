@@ -1,6 +1,6 @@
 package com.unifina.controller.api
 
-import com.unifina.FilterMockingSpecification
+import com.unifina.ControllerSpecification
 import com.unifina.api.ApiException
 import com.unifina.security.Challenge
 import com.unifina.domain.security.Key
@@ -21,7 +21,7 @@ import java.text.SimpleDateFormat
  */
 @TestFor(LoginApiController)
 @Mock([SecUser, Key])
-class LoginApiControllerSpec extends FilterMockingSpecification {
+class LoginApiControllerSpec extends ControllerSpecification {
 	ChallengeService challengeService
 	SessionService sessionService
 	EthereumIntegrationKeyService ethereumIntegrationKeyService

@@ -1,6 +1,6 @@
 package com.unifina.controller.api
 
-import com.unifina.FilterMockingSpecification
+import com.unifina.ControllerSpecification
 import com.unifina.domain.marketplace.Category
 import com.unifina.domain.security.SecUser
 import grails.test.mixin.Mock
@@ -8,7 +8,7 @@ import grails.test.mixin.TestFor
 
 @TestFor(CategoryApiController)
 @Mock([Category])
-class CategoryApiControllerSpec extends FilterMockingSpecification {
+class CategoryApiControllerSpec extends ControllerSpecification {
 
 	SecUser me
 

@@ -1,10 +1,11 @@
 package com.unifina.controller.api
 
-import com.unifina.FilterMockingSpecification
+import com.unifina.ControllerSpecification
 import com.unifina.api.*
 import com.unifina.domain.security.*
 import com.unifina.domain.signalpath.Canvas
 import com.unifina.exceptions.CanvasUnreachableException
+import com.unifina.security.AllowRole
 import com.unifina.service.ApiService
 import com.unifina.service.CanvasService
 import com.unifina.service.SignalPathService
@@ -15,7 +16,7 @@ import groovy.json.JsonBuilder
 
 @TestFor(CanvasApiController)
 @Mock([SecUser, SecUserSecRole, Permission, Canvas, Key])
-class CanvasApiControllerSpec extends FilterMockingSpecification {
+class CanvasApiControllerSpec extends ControllerSpecification {
 
 	ApiService apiService
 	CanvasService canvasService
@@ -65,6 +66,13 @@ class CanvasApiControllerSpec extends FilterMockingSpecification {
 
 		assert SecUser.count() == 2
 		assert Canvas.count() == 3
+	}
+
+	void "check annotations"() {
+		when:
+		Map<String, List<AllowRole>> actionRoles = [startAsAdmin: [AllowRole.ADMIN]]
+		then:
+		getInvalidAnnotations(CanvasApiController, actionRoles) == new HashSet()
 	}
 
 	void "index() renders authorized canvases as a list"() {
@@ -276,21 +284,6 @@ class CanvasApiControllerSpec extends FilterMockingSpecification {
 		and: "exception must not be swallowed"
 		thrown NotPermittedException
 		1 * canvasService.authorizedGetById(canvas2.id, me, Permission.Operation.WRITE) >> {throw new NotPermittedException("mock")}
-	}
-
-	void "startAsAdmin() checks that user is admin"() {
-		when:
-		params.id = "1"
-		params.startedBy = "1"
-		request.method = "POST"
-		authenticatedAs(me) { controller.startAsAdmin() }
-
-		then:
-		response.status == 403
-		response.json == [
-			code: "NOT_PERMITTED",
-			message: "Not authorized to access this endpoint"
-		]
 	}
 
 	void "startAsAdmin() requires parameter startedBy to be given"() {

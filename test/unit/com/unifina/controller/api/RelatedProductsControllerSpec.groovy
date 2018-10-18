@@ -1,6 +1,6 @@
 package com.unifina.controller.api
 
-import com.unifina.FilterMockingSpecification
+import com.unifina.ControllerSpecification
 import com.unifina.domain.marketplace.Category
 import com.unifina.domain.marketplace.Product
 import com.unifina.domain.security.Key
@@ -12,7 +12,7 @@ import grails.test.mixin.TestFor
 
 @TestFor(ProductApiController)
 @Mock([Product, SecUser, Category])
-class RelatedProductsControllerSpec extends FilterMockingSpecification {
+class RelatedProductsControllerSpec extends ControllerSpecification {
 	Product newProduct(String id, String name, String description, Category c, SecUser user) {
 		Product p = new Product(
 			name: name,

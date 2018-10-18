@@ -1,6 +1,6 @@
 package com.unifina.controller.api
 
-import com.unifina.FilterMockingSpecification
+import com.unifina.ControllerSpecification
 import com.unifina.api.NotPermittedException
 import com.unifina.domain.security.Key
 import com.unifina.domain.security.Permission
@@ -13,7 +13,7 @@ import grails.test.mixin.TestFor
 
 @TestFor(ModuleApiController)
 @Mock([SecUser, Module, Key, ModulePackage])
-class ModuleApiControllerSpec extends FilterMockingSpecification {
+class ModuleApiControllerSpec extends ControllerSpecification {
 
 	SecUser me
 	ModulePackage modulePackage

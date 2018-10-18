@@ -1,6 +1,6 @@
 package com.unifina.controller.api
 
-import com.unifina.FilterMockingSpecification
+import com.unifina.ControllerSpecification
 import com.unifina.api.DashboardListParams
 import com.unifina.api.ListParams
 import com.unifina.api.SaveDashboardCommand
@@ -18,7 +18,7 @@ import grails.test.mixin.TestFor
 
 @TestFor(DashboardApiController)
 @Mock([Canvas, Dashboard, DashboardItem, Key, SecUser])
-class DashboardApiControllerSpec extends FilterMockingSpecification {
+class DashboardApiControllerSpec extends ControllerSpecification {
 
 	ApiService apiService
 	DashboardService dashboardService

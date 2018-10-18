@@ -1,6 +1,6 @@
 package com.unifina.controller.api
 
-import com.unifina.FilterMockingSpecification
+import com.unifina.ControllerSpecification
 import com.unifina.domain.security.Key
 import com.unifina.domain.security.SecRole
 import com.unifina.domain.security.SecUser
@@ -11,7 +11,7 @@ import grails.test.mixin.TestFor
 
 @TestFor(RemoveUsersProductsController)
 @Mock([SecUser, Key, SecRole, SecUserSecRole])
-class RemoveUsersProductsControllerSpec extends FilterMockingSpecification {
+class RemoveUsersProductsControllerSpec extends ControllerSpecification {
 	ProductService productService
 	SecUser me
 

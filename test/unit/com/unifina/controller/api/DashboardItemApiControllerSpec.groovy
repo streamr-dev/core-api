@@ -1,6 +1,6 @@
 package com.unifina.controller.api
 
-import com.unifina.FilterMockingSpecification
+import com.unifina.ControllerSpecification
 import com.unifina.api.SaveDashboardItemCommand
 import com.unifina.domain.dashboard.Dashboard
 import com.unifina.domain.dashboard.DashboardItem
@@ -13,7 +13,7 @@ import grails.test.mixin.TestFor
 
 @TestFor(DashboardItemApiController)
 @Mock([Canvas, Dashboard, DashboardItem, Key, SecUser])
-class DashboardItemApiControllerSpec extends FilterMockingSpecification {
+class DashboardItemApiControllerSpec extends ControllerSpecification {
 
 	DashboardService dashboardService
 	SecUser me

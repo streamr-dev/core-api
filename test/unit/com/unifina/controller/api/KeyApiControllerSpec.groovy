@@ -1,6 +1,6 @@
 package com.unifina.controller.api
 
-import com.unifina.FilterMockingSpecification
+import com.unifina.ControllerSpecification
 import com.unifina.api.NotFoundException
 import com.unifina.api.NotPermittedException
 import com.unifina.domain.data.Stream
@@ -13,7 +13,7 @@ import grails.test.mixin.TestFor
 
 @TestFor(KeyApiController)
 @Mock([Key, Permission, SecUser, Stream, PermissionService])
-class KeyApiControllerSpec extends FilterMockingSpecification {
+class KeyApiControllerSpec extends ControllerSpecification {
 
 	def permissionService
 

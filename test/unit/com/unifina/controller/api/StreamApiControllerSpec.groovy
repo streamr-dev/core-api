@@ -1,6 +1,6 @@
 package com.unifina.controller.api
 
-import com.unifina.FilterMockingSpecification
+import com.unifina.ControllerSpecification
 import com.unifina.api.NotFoundException
 import com.unifina.api.NotPermittedException
 import com.unifina.api.StreamListParams
@@ -16,7 +16,7 @@ import grails.test.mixin.TestFor
 
 @TestFor(StreamApiController)
 @Mock([SecUser, Stream, Key, Permission, Feed, PermissionService, StreamService, DashboardService])
-class StreamApiControllerSpec extends FilterMockingSpecification {
+class StreamApiControllerSpec extends ControllerSpecification {
 
 	Feed feed
 	SecUser me
