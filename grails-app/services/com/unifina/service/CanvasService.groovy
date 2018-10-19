@@ -28,7 +28,7 @@ class CanvasService {
 	PermissionService permissionService
 	DashboardService dashboardService
 	StreamService streamService
-	LinkGenerator linkGenerator
+	LinkGenerator grailsLinkGenerator
 
 	@CompileStatic
 	Map reconstruct(Canvas canvas, SecUser user) {
@@ -181,7 +181,7 @@ class CanvasService {
 
 	@CompileStatic
 	String getCanvasURL(Canvas canvas) {
-		return linkGenerator.link(controller: 'canvas', action: 'editor', id: canvas.id, absolute: true)
+		return grailsLinkGenerator.link(controller: 'canvas', action: 'editor', id: canvas.id, absolute: true)
 	}
 
 	private boolean hasCanvasPermission(Canvas canvas, SecUser user, Permission.Operation op) {
