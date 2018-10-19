@@ -45,7 +45,7 @@ class ClusterService {
 
 			Canvas c = Canvas.get(id)
 			SecUser u = SecUser.get(startedById)
-			boolean forceReset = false
+			boolean forceReset = true
 			boolean resetOnError = true
 			canvasService.startRemote(c, u, forceReset, resetOnError)
 		}
