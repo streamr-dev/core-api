@@ -291,8 +291,8 @@ environments {
 			rinkeby: "http://rinkeby:3001"
 		]
 		streamr.ethereum.rpcUrls = System.getProperty("streamr.ethereum.rpcUrls") ? new Gson().fromJson(System.getProperty("streamr.ethereum.rpcUrls")) : [
-			ropsten: "http://ropsten:8545",
-			rinkeby: "http://rinkeby:8546"
+			ropsten: "http://ropsten-rpc:8545",
+			rinkeby: "http://rinkeby-rpc:8546"
 		]
 	}
 }
