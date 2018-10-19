@@ -39,7 +39,9 @@ class EthereumJsonRpc {
 	}
 
 	private RequestBodyEntity formRequest(String method, List params, int callId) {
-		return Unirest.post(url).body(new Gson().toJson(ImmutableMap.of(
+		return Unirest.post(url)
+				.header("Content-Type", "application/json")
+				.body(new Gson().toJson(ImmutableMap.of(
 			"id", callId,
 			"jsonrpc", "2.0",
 			"method", method,
