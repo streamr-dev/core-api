@@ -614,13 +614,13 @@ class CanvasServiceSpec extends Specification {
 	}
 
 	def "getCanvasURL() returns a link for the canvas"() {
-		service.linkGenerator = Mock(LinkGenerator)
+		service.grailsLinkGenerator = Mock(LinkGenerator)
 
 		when:
 		def link = service.getCanvasURL(myFirstCanvas)
 
 		then:
-		1 * service.linkGenerator.link([controller: 'canvas', action: 'editor', id: myFirstCanvas.id, absolute: true]) >> "https://www.streamr.com/canvas/editor/1"
+		1 * service.grailsLinkGenerator.link([controller: 'canvas', action: 'editor', id: myFirstCanvas.id, absolute: true]) >> "https://www.streamr.com/canvas/editor/1"
 		link == "https://www.streamr.com/canvas/editor/1"
 	}
 
