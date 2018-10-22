@@ -53,7 +53,7 @@ class LoginApiController {
 
 	@StreamrApi(authenticationLevel = AuthLevel.NONE)
 	def apikey(ApiKeyCommand cmd) {
-		SecUser user = userService.getUserFromApiKey(cmd.apiKey)
+		SecUser user = userService.getUserFromApiKey(cmd.apikey)
 		if (user == null) {
 			throw new ApiException(400, 'INVALID_API_KEY', "apikey-based login failed")
 		}
