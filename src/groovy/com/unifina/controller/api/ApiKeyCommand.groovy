@@ -4,8 +4,8 @@ import grails.validation.Validateable
 
 @Validateable
 class ApiKeyCommand {
-	String apiKey
+	String apikey
 	static constraints = {
-		apiKey(blank: false, nullable: false)
+		apikey(blank: false, nullable: false)
 	}
 }
