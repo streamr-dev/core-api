@@ -17,9 +17,41 @@ When reading from or writing to Streams, you can use a Stream-specific anonymous
 
 If you own an Ethereum account, you can use it to authenticate by signing a challenge with your private key and providing your Ethereum public address for verification.
 
-The endpoint at `/api/v1/login/challenge` will generate a random text called a challenge. Alongside this challenge you will receive its expiration, you must provide the challenge response before it expires to be authenticated.
+Use the `POST` endpoint at `/api/v1/login/challenge` to generate a random text called a challenge in the following format: 
 
-You can provide your response at `/api/v1/login/response`. It must contain the challenge, the signature and the Ethereum address. If the signature is correct, you will receive a session token with an expiration date and time.
+```
+{
+    "id": "challenge-id"
+    "challenge": "challenge-text-to-be-signed"
+    "expires": "2018-10-22T08:38:59Z"
+}
+```
+
+You must provide the challenge response before it expires to be authenticated. You can do it with a `POST` at `/api/v1/login/response`. It must contain the challenge, the signature and the Ethereum address in the following format:
+
+```
+{
+    "challenge": {
+	    "id": "challenge-id",
+	    "challenge": "challenge-text-that-you-signed"
+    },
+    "signature": "signature-of-the-challenge",
+    "address": "your-public-ethereum-address"
+}
+```
+
+The signature must follow the convention described [here](https://github.com/ethereum/EIPs/blob/master/EIPS/eip-712.md). The secp256k1 ECDSA algorithm is applied on the keccak256 hash of a string derived from the challenge text:
+
+`sign(keccak256("\x19Ethereum Signed Message:\n" + len(challengeText) + challengeText)))`
+
+If the signature is correct, you will receive a session token with an expiration date and time in the following format:
+
+```
+{
+    "token": "your-session-token"
+    "expires": "2018-10-22T11:38:59Z"
+}
+```
 
 You can now use this session token to be authenticated by including the following HTTP header in every request:
 
