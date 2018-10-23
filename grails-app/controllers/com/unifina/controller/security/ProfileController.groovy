@@ -19,6 +19,11 @@ class ProfileController {
 
 	static defaultAction = "edit"
 
+	static allowedMethods = [
+		update: "POST",
+		regenerateApiKey: "POST"
+	]
+
 	def edit() {
 		def currentUser = SecUser.get(springSecurityService.currentUser.id)
 		[user: currentUser]
