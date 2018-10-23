@@ -113,6 +113,7 @@ class ProfileControllerSpec extends Specification {
 		controller.userService = new UserService()
 		controller.userService.grailsApplication = grailsApplication
 		when: "new settings are submitted"
+			request.method = 'POST'
 			params.name = "Changed Name"
 			params.timezone = "Europe/Helsinki"
 			controller.update()
@@ -126,7 +127,9 @@ class ProfileControllerSpec extends Specification {
 	void "sensitive fields cannot be changed"() {
 		controller.userService = new UserService()
 		controller.userService.grailsApplication = grailsApplication
+
 		when:
+		request.method = 'POST'
 		params.username = "attacker@email.com"
 		params.enabled = false
 		controller.update()
