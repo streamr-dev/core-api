@@ -9,6 +9,8 @@ import grails.plugin.springsecurity.SpringSecurityService
 import grails.test.mixin.Mock
 import grails.test.mixin.TestFor
 import org.springframework.security.authentication.encoding.PlaintextPasswordEncoder
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder
+import org.springframework.security.crypto.password.PasswordEncoder
 import org.springframework.validation.FieldError
 import spock.lang.Specification
 
@@ -148,7 +150,9 @@ class UserServiceSpec extends Specification {
 		String username = "username"
 		String password = "password"
 		String wrongPassword = "wrong"
-		new SecUser(username: username, password: password).save(failOnError: true, validate: false)
+		PasswordEncoder encoder = new BCryptPasswordEncoder()
+		String hashedPassword = encoder.encode(password)
+		new SecUser(username: username, password: hashedPassword).save(failOnError: true, validate: false)
 		when:
 		SecUser retrievedUser = service.getUserFromUsernameAndPassword(username, password)
 		SecUser wronglyRetrieved = service.getUserFromUsernameAndPassword(username, wrongPassword)

@@ -9,6 +9,8 @@ import com.unifina.exceptions.UserCreationFailedException
 import grails.plugin.springsecurity.SpringSecurityService
 import org.codehaus.groovy.grails.commons.GrailsApplication
 import org.springframework.context.MessageSource
+import org.springframework.security.crypto.password.PasswordEncoder
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder
 import org.springframework.validation.FieldError
 
 class UserService {
@@ -160,8 +162,17 @@ class UserService {
 	}
 
 	SecUser getUserFromUsernameAndPassword(String username, String password) {
-		String encodedPassword = springSecurityService.encodePassword(password)
-		return SecUser.findByUsernameAndPassword(username, encodedPassword)
+		PasswordEncoder encoder = new BCryptPasswordEncoder()
+		SecUser user = SecUser.findByUsername(username)
+		if (user == null) {
+			return null
+		}
+		String dbHash = user.password
+		if (encoder.matches(password, dbHash)) {
+			return user
+		}else {
+			return null
+		}
 	}
 
 	SecUser getUserFromApiKey(String apiKey) {
