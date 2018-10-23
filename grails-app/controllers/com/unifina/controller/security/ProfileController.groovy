@@ -20,8 +20,7 @@ class ProfileController {
 	static defaultAction = "edit"
 
 	static allowedMethods = [
-		update: "POST",
-		regenerateApiKey: "POST"
+		update: "POST"
 	]
 
 	def edit() {
@@ -43,28 +42,6 @@ class ProfileController {
 		} else {
 			return render(user.toMap() as JSON)
 		}
-	}
-
-	def regenerateApiKey() {
-		SecUser user = SecUser.get(springSecurityService.currentUser.id)
-		List<Key> oldKeys = Key.findAllByUser(user)
-
-		// Revoke old keys
-		Stream revokeNotificationStream = new Stream()
-		revokeNotificationStream.id = grailsApplication.config.streamr.apiKey.revokeNotificationStream
-		for (Key oldKey : oldKeys) {
-			oldKey.delete()
-			streamService.sendMessage(revokeNotificationStream, [
-				action: "revoked",
-				user: user.id,
-				key: oldKey.id
-			], 60)
-		}
-
-		new Key(name: 'Key for ' + user.username, user: user).save(validate: true, failOnError: true, flush: true)
-		log.info("User $user.username regenerated api key!")
-
-		render ([success: true] as JSON)
 	}
 
 	def changePwd(ChangePasswordCommand cmd) {

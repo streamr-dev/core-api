@@ -137,48 +137,4 @@ class ProfileControllerSpec extends Specification {
 		SecUser.get(1).enabled
 	}
 
-	void "regenerating api key removes old user-linked keys"() {
-		setup:
-		Key key = new Key(name: "key", user: user).save(failOnError: true, validate: true)
-		String keyId = key.id
-
-		when:
-		request.method = "POST"
-		controller.regenerateApiKey()
-
-		then:
-		Key.get(keyId) == null
-	}
-
-	void "regenerating api key creates a new user-linked key"() {
-		setup:
-		Key key = new Key(name: "key", user: user).save(failOnError: true, validate: true)
-		String keyId = key.id
-
-		when:
-		request.method = "POST"
-		controller.regenerateApiKey()
-
-		then:
-		Key.findByUser(user) != null
-		Key.findByUser(user).id != keyId
-	}
-
-	void "regenerating the api key sends message to Kafka"() {
-		setup:
-		Key key = new Key(name: "key", user: user).save(failOnError: true, validate: true)
-		String keyId = key.id
-
-		when:
-		request.method = "POST"
-		controller.regenerateApiKey()
-
-		then:
-		1 * controller.streamService.sendMessage(_, [
-				action: "revoked",
-				user: 1,
-				key: keyId
-		], _)
-	}
-
 }
