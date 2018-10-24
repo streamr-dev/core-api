@@ -16,18 +16,24 @@ class ProfileController {
 	def userService
 	def permissionService
 	def streamService
-	
+
 	static defaultAction = "edit"
+
+	static allowedMethods = [
+		update: "POST"
+	]
 
 	def edit() {
 		def currentUser = SecUser.get(springSecurityService.currentUser.id)
 		[user: currentUser]
 	}
-	
+
 	def update() {
 		SecUser user = SecUser.get(springSecurityService.currentUser.id)
-		user.properties = params
-		user.name = params.name // for some reason not updated by above row
+
+		// Only these user fields can be updated!
+		user.name = params.name ?: user.name
+		user.timezone = params.timezone ?: user.timezone
 
 		user = user.save(failOnError: true)
 		if (user.hasErrors()) {
@@ -38,28 +44,6 @@ class ProfileController {
 		}
 	}
 
-	def regenerateApiKey() {
-		SecUser user = SecUser.get(springSecurityService.currentUser.id)
-		List<Key> oldKeys = Key.findAllByUser(user)
-
-		// Revoke old keys
-		Stream revokeNotificationStream = new Stream()
-		revokeNotificationStream.id = grailsApplication.config.streamr.apiKey.revokeNotificationStream
-		for (Key oldKey : oldKeys) {
-			oldKey.delete()
-			streamService.sendMessage(revokeNotificationStream, [
-				action: "revoked",
-				user: user.id,
-				key: oldKey.id
-			], 60)
-		}
-
-		new Key(name: 'Key for ' + user.username, user: user).save(validate: true, failOnError: true, flush: true)
-		log.info("User $user.username regenerated api key!")
-
-		render ([success: true] as JSON)
-	}
-	
 	def changePwd(ChangePasswordCommand cmd) {
 		def user = SecUser.get(springSecurityService.currentUser.id)
 		if (request.method == 'GET') {
@@ -73,24 +57,24 @@ class ProfileController {
 			else {
 				user.password = springSecurityService.encodePassword(cmd.password)
 				user.save(flush:true, failOnError:true)
-				
+
 				springSecurityService.reauthenticate user.username
-				
+
 				log.info("User $user.username changed password!")
-				
+
 				flash.message = "Password changed!"
 				redirect(action:"edit")
 			}
 		}
 	}
-	
+
 }
 
 class ChangePasswordCommand {
-	
+
 	def springSecurityService
 	def userService
-	
+
 	String currentpassword
 	String password
 	String password2

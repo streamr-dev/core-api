@@ -14,7 +14,7 @@ class ProfileControllerSpec extends Specification {
 
 	SecUser user
 	String reauthenticated = null
-	
+
 	def springSecurityService = [
 		encodePassword: { pw ->
 			return pw+"-encoded"
@@ -32,14 +32,15 @@ class ProfileControllerSpec extends Specification {
 	void setup() {
 		controller.springSecurityService = springSecurityService
 		controller.streamService = Mock(StreamService)
-		user = new SecUser(id:1, 
-			username:"test@test.com",
+		user = new SecUser(id:1,
+			username: "test@test.com",
 			name: "Test User",
-			password:springSecurityService.encodePassword("foobar123!"), 
-			timezone: "Europe/Helsinki")
+			password:springSecurityService.encodePassword("foobar123!"),
+			timezone: "Europe/Helsinki",
+			enabled: true)
 		user.save(validate:false)
 		springSecurityService.currentUser = user
-		
+
 		assert SecUser.count()==1
 	}
 
@@ -59,7 +60,7 @@ class ProfileControllerSpec extends Specification {
 			response.redirectedUrl == '/profile/edit'
 			flash.message.contains("changed")
 	}
-	
+
 	void "submitting an invalid current password won't let the password be changed"() {
 		when: "password change form is submitted with invalid password"
 			def cmd = new ChangePasswordCommand(currentpassword: "invalid", password: 'barbar123!', password2: 'barbar123!')
@@ -75,7 +76,7 @@ class ProfileControllerSpec extends Specification {
 			flash.error != null
 			view == '/profile/changePwd'
 	}
-	
+
 	void "submitting a too short new password won't let the password be changed"() {
 		when: "password change form is submitted with invalid new password"
 			def cmd = new ChangePasswordCommand(currentpassword: "foobar", password: 'asd', password2: 'asd', pwdStrength: 0)
@@ -91,7 +92,7 @@ class ProfileControllerSpec extends Specification {
 			flash.error != null
 			view == '/profile/changePwd'
 	}
-	
+
 	void "submitting a too weak new password won't let the password be changed"() {
 		when: "password change form is submitted with invalid new password"
 			def cmd = new ChangePasswordCommand(currentpassword: "foobar123", password: 'asd', password2: 'asd', pwdStrength: 0)
@@ -112,6 +113,7 @@ class ProfileControllerSpec extends Specification {
 		controller.userService = new UserService()
 		controller.userService.grailsApplication = grailsApplication
 		when: "new settings are submitted"
+			request.method = 'POST'
 			params.name = "Changed Name"
 			params.timezone = "Europe/Helsinki"
 			controller.update()
@@ -122,48 +124,20 @@ class ProfileControllerSpec extends Specification {
 			response.json.timezone == "Europe/Helsinki"
 	}
 
-	void "regenerating api key removes old user-linked keys"() {
-		setup:
-		Key key = new Key(name: "key", user: user).save(failOnError: true, validate: true)
-		String keyId = key.id
+	void "sensitive fields cannot be changed"() {
+		controller.userService = new UserService()
+		controller.userService.grailsApplication = grailsApplication
 
 		when:
-		request.method = "POST"
-		controller.regenerateApiKey()
+		request.method = 'POST'
+		params.username = "attacker@email.com"
+		params.enabled = false
+		controller.update()
 
 		then:
-		Key.get(keyId) == null
+		SecUser.get(1).username == "test@test.com"
+		response.json.username == "test@test.com"
+		SecUser.get(1).enabled
 	}
 
-	void "regenerating api key creates a new user-linked key"() {
-		setup:
-		Key key = new Key(name: "key", user: user).save(failOnError: true, validate: true)
-		String keyId = key.id
-
-		when:
-		request.method = "POST"
-		controller.regenerateApiKey()
-
-		then:
-		Key.findByUser(user) != null
-		Key.findByUser(user).id != keyId
-	}
-
-	void "regenerating the api key sends message to Kafka"() {
-		setup:
-		Key key = new Key(name: "key", user: user).save(failOnError: true, validate: true)
-		String keyId = key.id
-
-		when:
-		request.method = "POST"
-		controller.regenerateApiKey()
-
-		then:
-		1 * controller.streamService.sendMessage(_, [
-				action: "revoked",
-				user: 1,
-				key: keyId
-		], _)
-	}
-	
 }
