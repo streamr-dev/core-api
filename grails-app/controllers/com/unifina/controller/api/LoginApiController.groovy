@@ -44,9 +44,6 @@ class LoginApiController {
 	@StreamrApi(authenticationLevel = AuthLevel.NONE)
 	def password(UsernamePasswordCommand cmd) {
 		SecUser user = userService.getUserFromUsernameAndPassword(cmd.username, cmd.password)
-		if (user == null) {
-			throw new ApiException(400, 'INVALID_USERNAME_OR_PASSWORD', "password-based login failed")
-		}
 		SessionToken token = sessionService.generateToken(user)
 		render(token.toMap() as JSON)
 	}
@@ -54,9 +51,6 @@ class LoginApiController {
 	@StreamrApi(authenticationLevel = AuthLevel.NONE)
 	def apikey(ApiKeyCommand cmd) {
 		SecUser user = userService.getUserFromApiKey(cmd.apikey)
-		if (user == null) {
-			throw new ApiException(400, 'INVALID_API_KEY', "apikey-based login failed")
-		}
 		SessionToken token = sessionService.generateToken(user)
 		render(token.toMap() as JSON)
 	}
