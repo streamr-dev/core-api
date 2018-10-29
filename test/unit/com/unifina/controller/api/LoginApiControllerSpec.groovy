@@ -43,15 +43,16 @@ class LoginApiControllerSpec extends ControllerSpecification {
 
 	void "should generate challenge"() {
 		Challenge challenge = new Challenge("id", "challenge", challengeService.TTL_SECONDS)
-
+		String address = "some-address"
 		when:
+		params.address = address
 		request.method = "POST"
 		authenticatedAs(me) { controller.challenge() }
 
 		then:
 		response.status == 200
 		response.json == challenge.toMap()
-		1 * challengeService.createChallenge() >> challenge
+		1 * challengeService.createChallenge(address) >> challenge
 	}
 
 	def "response to challenge should pass"() {
