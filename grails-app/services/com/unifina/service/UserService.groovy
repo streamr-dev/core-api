@@ -167,20 +167,20 @@ class UserService {
 		PasswordEncoder encoder = new BCryptPasswordEncoder()
 		SecUser user = SecUser.findByUsername(username)
 		if (user == null) {
-			throw new InvalidUsernameAndPasswordException("Invalid: "+username+", "+password)
+			throw new InvalidUsernameAndPasswordException("Invalid username or password")
 		}
 		String dbHash = user.password
 		if (encoder.matches(password, dbHash)) {
 			return user
 		}else {
-			throw new InvalidUsernameAndPasswordException("Invalid: "+username+", "+password)
+			throw new InvalidUsernameAndPasswordException("Invalid username or password")
 		}
 	}
 
 	SecUser getUserFromApiKey(String apiKey) throws InvalidAPIKeyException {
 		Key key = Key.get(apiKey)
 		if (!key) {
-			throw new InvalidAPIKeyException("Invalid API key: "+apiKey)
+			throw new InvalidAPIKeyException("Invalid API key")
 		}
 		return key.user
 	}
