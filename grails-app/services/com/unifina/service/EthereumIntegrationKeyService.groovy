@@ -76,7 +76,7 @@ class EthereumIntegrationKeyService {
 			service: IntegrationKey.Service.ETHEREUM_ID.toString(),
 			idInService: address,
 			json: ([
-				address: new String(address)
+				address: address
 			] as JSON).toString()
 		).save(flush: true)
 
