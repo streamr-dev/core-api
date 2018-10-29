@@ -1,5 +1,6 @@
 package com.unifina.service
 
+import com.unifina.api.InvalidSessionTokenException
 import com.unifina.domain.security.SecUser
 import com.unifina.security.SessionToken
 import org.joda.time.DateTime
@@ -16,11 +17,11 @@ class SessionService {
 		return sk
 	}
 
-	SecUser getUserFromToken(String token) {
+	SecUser getUserFromToken(String token) throws InvalidSessionTokenException {
 		keyValueStoreService.resetExpiration(token, new DateTime().plusHours(TTL_HOURS).toDate())
 		String userID = keyValueStoreService.get(token)
 		if (userID == null) {
-			return null
+			throw new InvalidSessionTokenException("Invalid token: "+token)
 		}
 		return SecUser.get(userID.toLong())
 	}

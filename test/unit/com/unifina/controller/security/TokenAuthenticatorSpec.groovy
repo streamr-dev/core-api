@@ -1,6 +1,7 @@
 package com.unifina.controller.security
 
 import com.unifina.BeanMockingSpecification
+import com.unifina.api.InvalidSessionTokenException
 import com.unifina.domain.security.Key
 import com.unifina.domain.security.SecUser
 import com.unifina.security.TokenAuthenticator
@@ -100,7 +101,7 @@ class TokenAuthenticatorSpec extends BeanMockingSpecification {
 		})
 
 		then:
-		1 * sessionService.getUserFromToken("session-token") >> null
+		1 * sessionService.getUserFromToken("session-token") >> { throw new InvalidSessionTokenException() }
 		result != null
 		result.getKey() == null
 		result.getSecUser() == null

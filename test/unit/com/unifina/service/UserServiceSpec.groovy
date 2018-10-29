@@ -1,5 +1,6 @@
 package com.unifina.service
 
+import com.unifina.api.InvalidUsernameAndPasswordException
 import com.unifina.domain.data.Feed
 import com.unifina.domain.security.*
 import com.unifina.domain.signalpath.Module
@@ -149,17 +150,27 @@ class UserServiceSpec extends Specification {
 	def "should find user from both username and password"() {
 		String username = "username"
 		String password = "password"
-		String wrongPassword = "wrong"
 		PasswordEncoder encoder = new BCryptPasswordEncoder()
 		String hashedPassword = encoder.encode(password)
 		new SecUser(username: username, password: hashedPassword).save(failOnError: true, validate: false)
 		when:
 		SecUser retrievedUser = service.getUserFromUsernameAndPassword(username, password)
-		SecUser wronglyRetrieved = service.getUserFromUsernameAndPassword(username, wrongPassword)
 		then:
 		retrievedUser != null
 		retrievedUser.username == username
-		wronglyRetrieved == null
+	}
+
+	def "should throw if wrong password"() {
+		String username = "username"
+		String password = "password"
+		String wrongPassword = "wrong"
+		PasswordEncoder encoder = new BCryptPasswordEncoder()
+		String hashedPassword = encoder.encode(password)
+		new SecUser(username: username, password: hashedPassword).save(failOnError: true, validate: false)
+		when:
+		service.getUserFromUsernameAndPassword(username, wrongPassword)
+		then:
+		thrown(InvalidUsernameAndPasswordException)
 	}
 
 	def "should find user from api key"() {

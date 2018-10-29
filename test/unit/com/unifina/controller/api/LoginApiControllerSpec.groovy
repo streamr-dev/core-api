@@ -2,6 +2,8 @@ package com.unifina.controller.api
 
 import com.unifina.ControllerSpecification
 import com.unifina.api.ApiException
+import com.unifina.api.InvalidAPIKeyException
+import com.unifina.api.InvalidUsernameAndPasswordException
 import com.unifina.security.Challenge
 import com.unifina.domain.security.Key
 import com.unifina.domain.security.SecUser
@@ -147,8 +149,8 @@ class LoginApiControllerSpec extends ControllerSpecification {
 		authenticatedAs(me) { controller.password() }
 
 		then:
-		thrown ApiException
-		1 * userService.getUserFromUsernameAndPassword(username, password) >> null
+		1 * userService.getUserFromUsernameAndPassword(username, password) >> { throw new InvalidUsernameAndPasswordException() }
+		thrown InvalidUsernameAndPasswordException
 	}
 
 	def "apikey-based login should pass"() {
@@ -186,7 +188,7 @@ class LoginApiControllerSpec extends ControllerSpecification {
 		authenticatedAs(me) { controller.apikey() }
 
 		then:
-		1 * userService.getUserFromApiKey(apiKey) >> null
-		thrown ApiException
+		1 * userService.getUserFromApiKey(apiKey) >> { throw new InvalidAPIKeyException() }
+		thrown InvalidAPIKeyException
 	}
 }

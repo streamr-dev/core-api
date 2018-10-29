@@ -1,5 +1,6 @@
 package com.unifina.service
 
+import com.unifina.api.ChallengeVerificationFailedException
 import com.unifina.crypto.ECRecover
 import com.unifina.security.Challenge
 
@@ -17,22 +18,23 @@ class ChallengeService {
 	}
 
 	boolean verifyChallengeResponse(String challengeID, String challenge, String signature, String publicKey) {
-		String address = verifyChallengeAndGetAddress(challengeID, challenge, signature)
-		if (address == null) {
+		try {
+			String address = verifyChallengeAndGetAddress(challengeID, challenge, signature)
+			boolean valid = address.toLowerCase() == publicKey.toLowerCase()
+			if (valid) {
+				keyValueStoreService.delete(challengeID)
+			}
+			return valid
+		} catch(ChallengeVerificationFailedException e) {
 			return false
 		}
-		boolean valid = address.toLowerCase() == publicKey.toLowerCase()
-		if (valid) {
-			keyValueStoreService.delete(challengeID)
-		}
-		return valid
 	}
 
-	String verifyChallengeAndGetAddress(String challengeID, String challenge, String signature) {
+	String verifyChallengeAndGetAddress(String challengeID, String challenge, String signature) throws ChallengeVerificationFailedException {
 		String challengeRedis = keyValueStoreService.get(challengeID)
 		boolean invalidChallenge = challengeRedis == null || challenge != challengeRedis
 		if (invalidChallenge) {
-			return null
+			throw new ChallengeVerificationFailedException("Invalid challenge: "+challengeID)
 		}
 		byte[] messageHash = ECRecover.calculateMessageHash(challenge)
 		return ECRecover.recoverAddress(messageHash, signature)

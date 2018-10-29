@@ -1,5 +1,6 @@
 package com.unifina.security;
 
+import com.unifina.api.InvalidSessionTokenException;
 import com.unifina.domain.security.Key;
 import com.unifina.domain.security.SecUser;
 import com.unifina.service.SessionService;
@@ -86,11 +87,12 @@ public class TokenAuthenticator {
 		if (token == null) {
 			return new AuthenticationResult(true, false);
 		}
-		SecUser user = sessionService.getUserFromToken(token);
-		if (user != null) {
+		try {
+			SecUser user = sessionService.getUserFromToken(token);
 			return new AuthenticationResult(user);
+		} catch (InvalidSessionTokenException e) {
+			return new AuthenticationResult(false, false);
 		}
-		return new AuthenticationResult(false, false);
 	}
 
 	public AuthenticationResult getResultFromApiKey(String apiKey) {

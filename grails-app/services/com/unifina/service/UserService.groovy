@@ -1,5 +1,7 @@
 package com.unifina.service
 
+import com.unifina.api.InvalidAPIKeyException
+import com.unifina.api.InvalidUsernameAndPasswordException
 import com.unifina.domain.data.Feed
 import com.unifina.domain.security.Key
 import com.unifina.domain.security.SecRole
@@ -161,24 +163,24 @@ class UserService {
 		}
 	}
 
-	SecUser getUserFromUsernameAndPassword(String username, String password) {
+	SecUser getUserFromUsernameAndPassword(String username, String password) throws InvalidUsernameAndPasswordException {
 		PasswordEncoder encoder = new BCryptPasswordEncoder()
 		SecUser user = SecUser.findByUsername(username)
 		if (user == null) {
-			return null
+			throw new InvalidUsernameAndPasswordException("Invalid: "+username+", "+password)
 		}
 		String dbHash = user.password
 		if (encoder.matches(password, dbHash)) {
 			return user
 		}else {
-			return null
+			throw new InvalidUsernameAndPasswordException("Invalid: "+username+", "+password)
 		}
 	}
 
-	SecUser getUserFromApiKey(String apiKey) {
+	SecUser getUserFromApiKey(String apiKey) throws InvalidAPIKeyException {
 		Key key = Key.get(apiKey)
 		if (!key) {
-			return null
+			throw new InvalidAPIKeyException("Invalid API key: "+apiKey)
 		}
 		return key.user
 	}

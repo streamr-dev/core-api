@@ -2,6 +2,7 @@ package com.unifina.service
 
 import com.unifina.api.ApiException
 import com.unifina.api.CannotRemoveEthereumKeyException
+import com.unifina.api.ChallengeVerificationFailedException
 import com.unifina.api.DuplicateNotAllowedException
 import com.unifina.domain.security.IntegrationKey
 import com.unifina.domain.security.SecUser
@@ -59,9 +60,8 @@ class EthereumIntegrationKeyService {
 		String address
 		try {
 			address = challengeService.verifyChallengeAndGetAddress(challengeID, challenge, signature)
-			if (address == null) {
-				throw new ApiException(400, "INVALID_CHALLENGE", "challenge validation failed")
-			}
+		} catch (ChallengeVerificationFailedException e) {
+			throw e
 		} catch (SignatureException | DecoderException e) {
 			throw new ApiException(400, "ADDRESS_RECOVERY_ERROR", e.message)
 		}

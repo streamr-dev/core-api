@@ -4,7 +4,11 @@ import com.unifina.api.ApiError
 import com.unifina.api.ApiException
 import com.unifina.api.CannotRemoveEthereumKeyException
 import com.unifina.api.CanvasCommunicationException
+import com.unifina.api.ChallengeVerificationFailedException
+import com.unifina.api.InvalidAPIKeyException
+import com.unifina.api.InvalidSessionTokenException
 import com.unifina.api.InvalidStateException
+import com.unifina.api.InvalidUsernameAndPasswordException
 import com.unifina.api.ValidationException
 import com.unifina.exceptions.CanvasUnreachableException
 import com.unifina.security.AuthLevel
@@ -19,7 +23,11 @@ class ErrorController {
 		ValidationException: { ValidationException e -> new ApiError(422, "VALIDATION_ERROR", e.message) },
 		CanvasUnreachableException: { CanvasUnreachableException e -> new ApiError(500, "CANVAS_UNREACHABLE", e.message) },
 		CanvasCommunicationException: { CanvasCommunicationException e -> new ApiError(503, "CANVAS_COMMUNICATION_ERROR", e.message)},
-		CannotRemoveEthereumKeyException: { CannotRemoveEthereumKeyException e -> new ApiError(409, "ETHEREUM_KEY_REMOVAL_ERROR", e.message)}
+		CannotRemoveEthereumKeyException: { CannotRemoveEthereumKeyException e -> new ApiError(409, "ETHEREUM_KEY_REMOVAL_ERROR", e.message)},
+		InvalidSessionTokenException: { InvalidSessionTokenException e -> new ApiError(400, "INVALID_SESSION_TOKEN_ERROR", e.message)},
+		ChallengeVerificationFailedException: { ChallengeVerificationFailedException e -> new ApiError(400, "CHALLENGE_VERIFICATION_FAILED_ERROR", e.message)},
+		InvalidUsernameAndPasswordException: { InvalidUsernameAndPasswordException e -> new ApiError(400, "INVALID_USERNAME_PASSWORD_ERROR", e.message)},
+		InvalidAPIKeyException: { InvalidAPIKeyException e -> new ApiError(400, "INVALID_API_KEY_ERROR", e.message)}
 	]
 
 	@StreamrApi(authenticationLevel = AuthLevel.NONE)
