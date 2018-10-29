@@ -23,8 +23,8 @@ class LoginApiController {
 	UserService userService
 
 	@StreamrApi(authenticationLevel = AuthLevel.NONE)
-	def challenge() {
-		Challenge ch = challengeService.createChallenge()
+	def challenge(String address) {
+		Challenge ch = challengeService.createChallenge(address.toLowerCase())
 		render(ch.toMap() as JSON)
 	}
 
