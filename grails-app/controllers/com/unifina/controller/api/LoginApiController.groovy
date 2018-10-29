@@ -50,7 +50,7 @@ class LoginApiController {
 
 	@StreamrApi(authenticationLevel = AuthLevel.NONE)
 	def apikey(ApiKeyCommand cmd) {
-		SecUser user = userService.getUserFromApiKey(cmd.apikey)
+		SecUser user = userService.getUserFromApiKey(cmd.apiKey)
 		SessionToken token = sessionService.generateToken(user)
 		render(token.toMap() as JSON)
 	}

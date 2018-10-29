@@ -166,7 +166,7 @@ class LoginApiControllerSpec extends ControllerSpecification {
 		when:
 		request.method = "POST"
 		request.JSON = [
-			apikey: apiKey
+			apiKey: apiKey
 		]
 		authenticatedAs(me) { controller.apikey() }
 
@@ -183,7 +183,7 @@ class LoginApiControllerSpec extends ControllerSpecification {
 		when:
 		request.method = "POST"
 		request.JSON = [
-			apikey: apiKey
+			apiKey: apiKey
 		]
 		authenticatedAs(me) { controller.apikey() }
 
