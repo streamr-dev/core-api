@@ -2,6 +2,7 @@ package com.unifina.controller.api
 
 import com.unifina.ControllerSpecification
 import com.unifina.api.ApiException
+import com.unifina.api.ChallengeVerificationFailedException
 import com.unifina.api.InvalidAPIKeyException
 import com.unifina.api.InvalidUsernameAndPasswordException
 import com.unifina.security.Challenge
@@ -84,7 +85,7 @@ class LoginApiControllerSpec extends ControllerSpecification {
 		authenticatedAs(me) { controller.response() }
 
 		then:
-		1 * challengeService.verifyChallengeResponse(challenge.getId(), challenge.getChallenge(), signature, address) >> true
+		1 * challengeService.checkValidChallengeResponse(challenge.getId(), challenge.getChallenge(), signature, address)
 		1 * ethereumIntegrationKeyService.getOrCreateFromEthereumAddress(address) >> user
 		1 * sessionService.generateToken(user) >> token
 		response.status == 200
@@ -110,8 +111,8 @@ class LoginApiControllerSpec extends ControllerSpecification {
 		authenticatedAs(me) { controller.response() }
 
 		then:
-		thrown ApiException
-		1 * challengeService.verifyChallengeResponse(challenge.getId(), challenge.getChallenge(), signature, address) >> false
+		thrown ChallengeVerificationFailedException
+		1 * challengeService.checkValidChallengeResponse(challenge.getId(), challenge.getChallenge(), signature, address) >> { throw new ChallengeVerificationFailedException() }
 	}
 
 	def "password-based login should pass"() {

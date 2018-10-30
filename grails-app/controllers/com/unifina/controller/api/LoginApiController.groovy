@@ -30,15 +30,11 @@ class LoginApiController {
 
 	@StreamrApi(authenticationLevel = AuthLevel.NONE)
 	def response(ChallengeResponseCommand cmd) {
-		boolean valid = challengeService.verifyChallengeResponse(cmd.challenge?.id,
+		challengeService.checkValidChallengeResponse(cmd.challenge?.id,
 			cmd.challenge?.challenge, cmd.signature.toLowerCase(), cmd.address.toLowerCase())
-		if (!valid) {
-			throw new ApiException(400, 'INVALID_CHALLENGE', "challenge-based login failed")
-		} else {
-			SecUser user = ethereumIntegrationKeyService.getOrCreateFromEthereumAddress(cmd.address)
-			SessionToken token = sessionService.generateToken(user)
-			render(token.toMap() as JSON)
-		}
+		SecUser user = ethereumIntegrationKeyService.getOrCreateFromEthereumAddress(cmd.address)
+		SessionToken token = sessionService.generateToken(user)
+		render(token.toMap() as JSON)
 	}
 
 	@StreamrApi(authenticationLevel = AuthLevel.NONE)
