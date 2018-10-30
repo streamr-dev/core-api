@@ -3,6 +3,7 @@
 import Web3 from 'web3'
 
 declare var web3: Web3
+declare var ethereum: Web3
 
 export class StreamrWeb3 extends Web3 {
     getDefaultAccount = (): Promise<string> => new Promise((resolve, reject) => {
@@ -15,8 +16,20 @@ export class StreamrWeb3 extends Web3 {
     isEnabled = (): boolean => !!this.currentProvider
 }
 
-const sharedWeb3 = new StreamrWeb3(typeof web3 !== 'undefined' && web3.currentProvider)
+export const getWeb3 = (): StreamrWeb3 => {
+    if (typeof ethereum !== 'undefined') {
+        return new StreamrWeb3(ethereum)
+    } else if (typeof web3 !== 'undefined') {
+        return new StreamrWeb3(web3.currentProvider)
+    }
+    return new StreamrWeb3(false)
+}
 
-export const getWeb3 = (): StreamrWeb3 => sharedWeb3
+export const requestMetamaskPermission = () => {
+    window.postMessage({
+        type: 'ETHEREUM_PROVIDER_REQUEST',
+    }, '*')
+}
 
 export default getWeb3
+
