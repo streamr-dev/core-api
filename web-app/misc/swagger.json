@@ -67,12 +67,21 @@
     }
   ],
   "paths": {
-    "/login/challenge": {
+    "/login/challenge/${address}": {
       "post": {
         "summary": "Generate challenge",
         "description": "Generates a challenge to be signed by an Ethereum private key to prove possession of an Ethereum account.",
         "tags": [
           "logins"
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "address",
+            "description": "Public Ethereum address of the account",
+            "required": true,
+            "type": "string"
+          }
         ],
         "responses": {
           "200": {

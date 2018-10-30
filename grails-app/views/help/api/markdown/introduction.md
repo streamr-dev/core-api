@@ -17,7 +17,7 @@ When reading from or writing to Streams, you can use a Stream-specific anonymous
 
 If you own an Ethereum account, you can use it to authenticate by signing a challenge with your private key and providing your Ethereum public address for verification.
 
-Use the `POST` endpoint at `/api/v1/login/challenge` to generate a random text called a challenge in the following format: 
+Use the `POST` endpoint at `/api/v1/login/challenge/$your-public-ethereum-address` to generate a random text called a challenge in the following format: 
 
 ```
 {
