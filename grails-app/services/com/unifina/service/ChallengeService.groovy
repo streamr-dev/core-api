@@ -18,16 +18,13 @@ class ChallengeService {
 		return ch
 	}
 
-	boolean verifyChallengeResponse(String challengeID, String challenge, String signature, String givenAddress) {
-		try {
-			String address = verifyChallengeAndGetAddress(challengeID, challenge, signature)
-			boolean valid = address.toLowerCase() == givenAddress.toLowerCase() && challengeTextContainsAddress(challenge, givenAddress)
-			if (valid) {
-				keyValueStoreService.delete(challengeID)
-			}
-			return valid
-		} catch(ChallengeVerificationFailedException e) {
-			return false
+	void checkValidChallengeResponse(String challengeID, String challenge, String signature, String givenAddress) throws ChallengeVerificationFailedException {
+		String address = verifyChallengeAndGetAddress(challengeID, challenge, signature)
+		boolean valid = address.toLowerCase() == givenAddress.toLowerCase() && challengeTextContainsAddress(challenge, givenAddress)
+		if (valid) {
+			keyValueStoreService.delete(challengeID)
+		} else {
+			throw new ChallengeVerificationFailedException("Invalid challenge")
 		}
 	}
 
@@ -35,7 +32,7 @@ class ChallengeService {
 		String challengeRedis = keyValueStoreService.get(challengeID)
 		boolean invalidChallenge = challengeRedis == null || challenge != challengeRedis
 		if (invalidChallenge) {
-			throw new ChallengeVerificationFailedException("Invalid challenge: "+challengeID)
+			throw new ChallengeVerificationFailedException("Invalid challenge")
 		}
 		byte[] messageHash = ECRecover.calculateMessageHash(challenge)
 		return ECRecover.recoverAddress(messageHash, signature)
