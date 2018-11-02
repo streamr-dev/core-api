@@ -53,21 +53,23 @@ export class IdentityHandler extends Component<Props, State> {
         this.props.deleteIntegrationKey(id)
     }
 
-    requestMetamaskAccess = (askPermission: boolean = false) => {
+    requestMetamaskAccess(askPermission: boolean = false): Promise<void> {
         // Checks for legacy access. Asks to unlock if possible.
-        Promise.resolve(window.web3 || window.ethereum)
+        return Promise.resolve()
             .then(() => {
+                if (!window.web3 && !window.ethereum) {
+                    throw new Error('Metamask not detected')
+                }
                 return window.web3.eth.defaultAccount || (askPermission ? window.ethereum.enable() : undefined)
             })
             .then((account) => {
-                if (typeof account !== 'undefined') {
+                if (account) {
                     this.setState({
                         hasWeb3: true,
                     })
                 }
-            })
-            .catch(() => {
-                // no web3 or ethereum
+            }, (err) => {
+                console.warn(err)
                 this.setState({
                     hasWeb3: false,
                 })
