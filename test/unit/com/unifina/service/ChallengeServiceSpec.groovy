@@ -63,6 +63,18 @@ class ChallengeServiceSpec extends Specification {
 		1 * keyValueStoreService.delete(challenge.getId())
 	}
 
+	void "response to challenge should pass - case 4"() {
+		String address = "0xF915eD664e43C50eB7b9Ca7CfEB992703eDe55c4"
+		String text = getChallengeText(address)
+		Challenge challenge = new Challenge("DglN8UTwVTXjF2AbumvGczdAEHNqYJ", text, ChallengeService.TTL_SECONDS)
+		when:
+		String signature = "0xcb168209298e75f27d3f179d236c07960de39e4b424c51b390306fc6e7e442bb415ecea1bd093320dd91fd9177374828671c972548c52a95179822a014dc84931b"
+		service.checkValidChallengeResponse(challenge.getId(), challenge.getChallenge(), signature, address)
+		then:
+		1 * keyValueStoreService.get(challenge.getId()) >> challenge.challenge
+		1 * keyValueStoreService.delete(challenge.getId())
+	}
+
 	void "response to challenge should fail"() {
 		String address = "0x99a3ae3f5e713f01eca8c2bcf4c32702c2e7ea03"
 		String text = getChallengeText(address)
