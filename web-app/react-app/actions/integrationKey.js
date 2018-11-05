@@ -111,20 +111,20 @@ export const createIdentity = (integrationKey: IntegrationKey) => (dispatch: Fun
         }))
         return
     }
-    return Promise.all([
-        ownWeb3.getDefaultAccount(),
-        axios.post(createLink('api/v1/login/challenge'))
-    ])
-        .then(([account, response]) => {
-            const challenge = response && response.data
-            return ownWeb3.eth.personal.sign(challenge.challenge, account)
-                .then((signature) => {
-                    return axios.post(createLink(apiUrl), {
-                        ...integrationKey,
-                        challenge: challenge,
-                        signature: signature,
-                        address: account,
-                    })
+    return ownWeb3.getDefaultAccount()
+        .then((account) => {
+            return axios.post(createLink(`api/v1/login/challenge/${account}`))
+                .then((response) => {
+                    const challenge = response && response.data
+                    return ownWeb3.eth.personal.sign(challenge.challenge, account)
+                        .then((signature) => {
+                            return axios.post(createLink(apiUrl), {
+                                ...integrationKey,
+                                challenge: challenge,
+                                signature: signature,
+                                address: account,
+                            })
+                        })
                 })
         })
         .then((response) => {
