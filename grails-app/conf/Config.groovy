@@ -227,12 +227,6 @@ unifina.reports.recipient = "henri.pihkala@streamr.com"
 unifina.task.workers = 1
 unifina.task.messageQueue = "streamr-tasks"
 
-environments {
-	development {
-		unifina.task.workers = 0
-	}
-}
-
 /**
  * Data feed config
  */
