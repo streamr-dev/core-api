@@ -111,7 +111,7 @@ describe('IntegrationKey actions', () => {
                     const request = moxios.requests.mostRecent()
                     assert.equal(request.config.method, 'post')
 
-                    assert.equal(request.url, 'api/v1/login/challenge')
+                    assert.equal(request.url, `api/v1/login/challenge/${acc}`)
                     request.respondWith({
                         status: 200,
                         response: {
@@ -193,7 +193,7 @@ describe('IntegrationKey actions', () => {
                 .then(() => {
                     const request = moxios.requests.mostRecent()
                     assert.equal(request.config.method, 'post')
-                    assert.equal(request.url, 'api/v1/login/challenge')
+                    assert.equal(request.url, `api/v1/login/challenge/${acc}`)
                     request.respondWith({
                         status: 200,
                         response: {
