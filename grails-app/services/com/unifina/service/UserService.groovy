@@ -1,5 +1,7 @@
 package com.unifina.service
 
+import com.unifina.api.InvalidAPIKeyException
+import com.unifina.api.InvalidUsernameAndPasswordException
 import com.unifina.domain.data.Feed
 import com.unifina.domain.security.Key
 import com.unifina.domain.security.SecRole
@@ -9,6 +11,8 @@ import com.unifina.exceptions.UserCreationFailedException
 import grails.plugin.springsecurity.SpringSecurityService
 import org.codehaus.groovy.grails.commons.GrailsApplication
 import org.springframework.context.MessageSource
+import org.springframework.security.crypto.password.PasswordEncoder
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder
 import org.springframework.validation.FieldError
 
 class UserService {
@@ -157,5 +161,27 @@ class UserService {
 		checkErrors(errorList).collect { FieldError it ->
 			messageSource.getMessage(it, null)
 		}
+	}
+
+	SecUser getUserFromUsernameAndPassword(String username, String password) throws InvalidUsernameAndPasswordException {
+		PasswordEncoder encoder = new BCryptPasswordEncoder()
+		SecUser user = SecUser.findByUsername(username)
+		if (user == null) {
+			throw new InvalidUsernameAndPasswordException("Invalid username or password")
+		}
+		String dbHash = user.password
+		if (encoder.matches(password, dbHash)) {
+			return user
+		}else {
+			throw new InvalidUsernameAndPasswordException("Invalid username or password")
+		}
+	}
+
+	SecUser getUserFromApiKey(String apiKey) throws InvalidAPIKeyException {
+		Key key = Key.get(apiKey)
+		if (!key) {
+			throw new InvalidAPIKeyException("Invalid API key")
+		}
+		return key.user
 	}
 }

@@ -243,5 +243,5 @@ class PollingMessageSourceSpec extends Specification {
 			assert counter1 >= 5 && counter1 < counter0
 		}
 	}
-	
+
 }

@@ -1,6 +1,5 @@
 package com.unifina.controller.security
 
-import com.mashape.unirest.http.Unirest
 import com.unifina.domain.security.RegistrationCode
 import com.unifina.domain.security.SecUser
 import com.unifina.domain.security.SignupInvite
@@ -13,12 +12,9 @@ import grails.plugin.springsecurity.SpringSecurityService
 import grails.plugin.springsecurity.SpringSecurityUtils
 import grails.plugin.springsecurity.annotation.Secured
 import grails.plugin.springsecurity.authentication.dao.NullSaltSource
-import grails.util.Environment
 import org.springframework.security.authentication.dao.SaltSource
 import org.springframework.security.web.savedrequest.RequestCache
 import org.springframework.security.web.savedrequest.SavedRequest
-
-import javax.servlet.http.HttpServletResponse
 
 @Secured(["permitAll"])
 class AuthController {

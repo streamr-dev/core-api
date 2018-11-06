@@ -1,15 +1,20 @@
 package com.unifina.controller.api
 
+import com.unifina.ControllerSpecification
 import com.unifina.domain.marketplace.Category
-import com.unifina.filters.UnifinaCoreAPIFilters
-import grails.plugin.springsecurity.SpringSecurityService
+import com.unifina.domain.security.SecUser
 import grails.test.mixin.Mock
 import grails.test.mixin.TestFor
-import spock.lang.Specification
 
 @TestFor(CategoryApiController)
-@Mock([Category, UnifinaCoreAPIFilters, SpringSecurityService])
-class CategoryApiControllerSpec extends Specification {
+@Mock([Category])
+class CategoryApiControllerSpec extends ControllerSpecification {
+
+	SecUser me
+
+	def setup() {
+		me = new SecUser(id: 1).save(validate: false)
+	}
 
 	void "lists categories in alphabetical order"() {
 		Category c1 = new Category(name: "Traffic", imageUrl: "traffic.png")
@@ -25,11 +30,7 @@ class CategoryApiControllerSpec extends Specification {
 		c3.save(failOnError: true, validate: true)
 
 		when:
-		request.requestURI = "/api/v1/categories"
-		request.method = "GET"
-		withFilters(action: "index") {
-			controller.index()
-		}
+		authenticatedAs(me) { controller.index() }
 
 		then:
 		response.status == 200

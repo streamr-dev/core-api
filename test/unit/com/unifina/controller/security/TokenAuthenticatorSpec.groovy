@@ -1,15 +1,23 @@
-package com.unifina.security
+package com.unifina.controller.security
 
+import com.unifina.BeanMockingSpecification
+import com.unifina.api.InvalidSessionTokenException
 import com.unifina.domain.security.Key
 import com.unifina.domain.security.SecUser
+import com.unifina.security.TokenAuthenticator
+import com.unifina.service.SessionService
 import grails.test.mixin.Mock
-import spock.lang.Specification
 
 import javax.servlet.http.HttpServletRequest
-
 @Mock([Key])
-class TokenAuthenticatorSpec extends Specification {
-	TokenAuthenticator authenticator = new TokenAuthenticator()
+class TokenAuthenticatorSpec extends BeanMockingSpecification {
+	TokenAuthenticator authenticator
+	SessionService sessionService
+
+	def setup() {
+		sessionService = mockBean(SessionService, Mock(SessionService))
+		authenticator = new TokenAuthenticator()
+	}
 
 	def "no authorization string"() {
 		when:
@@ -54,7 +62,7 @@ class TokenAuthenticatorSpec extends Specification {
 	def "valid authorization with existent user-linked Key"() {
 		setup:
 		SecUser user = new SecUser()
-		Key key = new Key(name: 'user-linked key', user: user).save(validate: false)
+		Key key = new Key(name: 'me-linked key', user: user).save(validate: false)
 
 		when:
 		def result = authenticator.authenticate(Stub(HttpServletRequest) {
@@ -71,7 +79,7 @@ class TokenAuthenticatorSpec extends Specification {
 
 	def "valid authorization with existent anonymous Key"() {
 		setup:
-		Key key = new Key(name: 'user-linked key').save(validate: false)
+		Key key = new Key(name: 'me-linked key').save(validate: false)
 
 		when:
 		def result = authenticator.authenticate(Stub(HttpServletRequest) {
@@ -81,6 +89,21 @@ class TokenAuthenticatorSpec extends Specification {
 		then:
 		result != null
 		result.getKey().is(key)
+		result.getSecUser() == null
+		!result.lastAuthenticationMalformed
+		!result.keyMissing
+	}
+
+	def "valid authorization string with non-existent session token"() {
+		when:
+		def result = authenticator.authenticate(Stub(HttpServletRequest) {
+			getHeader(_) >> "Bearer session-token"
+		})
+
+		then:
+		1 * sessionService.getUserFromToken("session-token") >> { throw new InvalidSessionTokenException() }
+		result != null
+		result.getKey() == null
 		result.getSecUser() == null
 		!result.lastAuthenticationMalformed
 		!result.keyMissing

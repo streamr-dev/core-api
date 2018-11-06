@@ -1,7 +1,8 @@
 package com.unifina.domain.security
 
 import com.unifina.security.Userish
-import com.unifina.utils.EmailValidator
+import com.unifina.utils.EthereumAddressValidator
+import com.unifina.utils.UsernameValidator
 import groovy.transform.CompileStatic
 
 class SecUser implements Userish {
@@ -23,7 +24,7 @@ class SecUser implements Userish {
 	static hasMany = [permissions: Permission, keys: Key]
 
 	static constraints = {
-		username blank: false, unique: true, validator: EmailValidator.validate
+		username blank: false, unique: true, validator: UsernameValidator.validate
 		password blank: false
 		name blank: false
 	}
@@ -86,5 +87,10 @@ class SecUser implements Userish {
 	@CompileStatic
 	static SecUser getViaJava(Long userId) {
 		SecUser.get(userId)
+	}
+
+	//TODO: Once all users are defined with their ethereum public key we can remove this
+	boolean isEthereumUser() {
+		return EthereumAddressValidator.validate(username)
 	}
 }

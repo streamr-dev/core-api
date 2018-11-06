@@ -8,8 +8,10 @@ import com.unifina.domain.security.SecUser
 import com.unifina.domain.security.SignupInvite
 import com.unifina.security.AuthLevel
 import com.unifina.security.StreamrApi
+import com.unifina.service.EthereumIntegrationKeyService
 import com.unifina.service.PermissionService
 import com.unifina.service.SignupCodeService
+import com.unifina.utils.EthereumAddressValidator
 import grails.converters.JSON
 import grails.plugin.mail.MailService
 import grails.plugin.springsecurity.annotation.Secured
@@ -19,6 +21,7 @@ class PermissionApiController {
 
 	PermissionService permissionService
 	SignupCodeService signupCodeService
+	EthereumIntegrationKeyService ethereumIntegrationKeyService
 	def mailService
 
 	/**
@@ -99,27 +102,31 @@ class PermissionApiController {
 			// incoming "username" is either SecUser.username or SignupInvite.username (possibly of a not yet created SignupInvite)
 			def user = SecUser.findByUsername(username)
 			if (!user) {
-				def invite = SignupInvite.findByUsername(username)
-				if (!invite) {
-					invite = signupCodeService.create(username)
-					def sharer = request.apiUser?.username ?: "A friend"    // TODO: get default from config?
-					// TODO: react to MailSendException if invite.username is not valid a e-mail address
-					mailService.sendMail {
-						from grailsApplication.config.unifina.email.sender
-						to invite.username
-						subject grailsApplication.config.unifina.email.shareInvite.subject.replace("%USER%", sharer)
-						html g.render(
+				if (EthereumAddressValidator.validate(username)) {
+					user = ethereumIntegrationKeyService.createEthereumUser(username)
+				}else {
+					def invite = SignupInvite.findByUsername(username)
+					if (!invite) {
+						invite = signupCodeService.create(username)
+						def sharer = request.apiUser?.username ?: "A friend"    // TODO: get default from config?
+						// TODO: react to MailSendException if invite.username is not valid a e-mail address
+						mailService.sendMail {
+							from grailsApplication.config.unifina.email.sender
+							to invite.username
+							subject grailsApplication.config.unifina.email.shareInvite.subject.replace("%USER%", sharer)
+							html g.render(
 								template: "/auth/email_share_invite",
 								model: [invite: invite, sharer: sharer],
 								plugin: "unifina-core"
-						)
+							)
+						}
+						invite.sent = true
+						invite.save()
 					}
-					invite.sent = true
-					invite.save()
-				}
 
-				// permissionService handles SecUsers and SignupInvitations equally
-				user = invite
+					// permissionService handles SecUsers and SignupInvitations equally
+					user = invite
+				}
 			}
 
 			useResource(params.resourceClass, params.resourceId) { res ->

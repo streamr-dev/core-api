@@ -1,23 +1,26 @@
 package com.unifina.filters
 
+import com.unifina.BeanMockingSpecification
 import com.unifina.controller.api.NodeApiController
 import com.unifina.domain.security.Key
 import com.unifina.domain.security.SecRole
 import com.unifina.domain.security.SecUser
 import com.unifina.domain.security.SecUserSecRole
+import com.unifina.service.SessionService
 import grails.test.mixin.Mock
 import grails.test.mixin.TestFor
-import spock.lang.Specification
 
 @TestFor(NodeApiController)
 @Mock([SecUser, SecUserSecRole, UnifinaCoreAPIFilters])
-class UnifinaCoreAPIFiltersSpec extends Specification {
+class UnifinaCoreAPIFiltersSpec extends BeanMockingSpecification {
 
 	SecUser user
 	SecRole adminRole, devopsRole
+	SessionService sessionService
 
 	void setup() {
 		user = new SecUser().save(failOnError: true, validate: false)
+		sessionService = mockBean(SessionService, Mock(SessionService))
 
 		Key key = new Key(name: "k1", user: user)
 		key.id = "myApiKey"
@@ -38,7 +41,7 @@ class UnifinaCoreAPIFiltersSpec extends Specification {
 		then:
 		response.status == 403
 		response.json == [
-		    code: "NOT_PERMITTED",
+			code   : "NOT_PERMITTED",
 			message: "Not authorized to access this endpoint"
 		]
 	}
@@ -55,6 +58,21 @@ class UnifinaCoreAPIFiltersSpec extends Specification {
 		}
 
 		then:
+		response.status == 200
+	}
+
+	void "authentication passes when session token provided"() {
+		String token = "mytoken"
+		when:
+		new SecUserSecRole(secUser: user, secRole: adminRole).save(failOnError: true)
+		request.addHeader("Authorization", "Bearer " + token)
+		request.requestURI = "/api/v1/nodes"
+		withFilters(action: "index") {
+			controller.index()
+		}
+
+		then:
+		1 * sessionService.getUserFromToken(token) >> user
 		response.status == 200
 	}
 }

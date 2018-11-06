@@ -1,8 +1,9 @@
 package com.unifina.service
 
 import com.unifina.api.ApiException
+import com.unifina.api.CannotRemoveEthereumKeyException
 import com.unifina.api.DuplicateNotAllowedException
-import com.unifina.domain.security.Challenge
+import com.unifina.security.Challenge
 import com.unifina.domain.security.IntegrationKey
 import com.unifina.domain.security.SecUser
 import grails.test.mixin.Mock
@@ -13,13 +14,18 @@ import groovy.json.JsonSlurper
 import spock.lang.Shared
 import spock.lang.Specification
 
-@TestMixin(ControllerUnitTestMixin) // "as JSON" converter
+@TestMixin(ControllerUnitTestMixin)
+// "as JSON" converter
 @TestFor(EthereumIntegrationKeyService)
-@Mock([IntegrationKey, SecUser, Challenge])
+@Mock([IntegrationKey, SecUser])
 class EthereumIntegrationKeyServiceSpec extends Specification {
 
-	@Shared String actualPassword
+	@Shared
+	String actualPassword
 	SecUser me
+
+	ChallengeService challengeService
+	UserService userService
 
 	void setupSpec() {
 		actualPassword = grailsApplication.config.streamr.encryption.password
@@ -33,6 +39,8 @@ class EthereumIntegrationKeyServiceSpec extends Specification {
 	void setup() {
 		me = new SecUser(username: "me@me.com").save(failOnError: true, validate: false)
 		service.init()
+		challengeService = service.challengeService = Mock(ChallengeService)
+		userService = service.userService = Mock(UserService)
 	}
 
 	void "init() without grailsConfig streamr.encryption.password throws IllegalArgumentException"() {
@@ -66,12 +74,12 @@ class EthereumIntegrationKeyServiceSpec extends Specification {
 
 		then:
 		integrationKey.toMap() == [
-		    id: "1",
-			user: 1,
-			name: "ethKey",
+			id     : "1",
+			user   : 1,
+			name   : "ethKey",
 			service: "ETHEREUM",
-			json: [
-			    address: "0xf4f683a8502b2796392bedb05dbbcc8c6e582e59"
+			json   : [
+				address: "0xf4f683a8502b2796392bedb05dbbcc8c6e582e59"
 			]
 		]
 	}
@@ -124,44 +132,33 @@ class EthereumIntegrationKeyServiceSpec extends Specification {
 	void "createEthereumID() creates IntegrationKey with proper values"() {
 		service.subscriptionService = Stub(SubscriptionService)
 
-		def ch = new Challenge(challenge: "foobar")
-		ch.save(failOnError: true, validate: false)
+		def ch = new Challenge("id", "foobar", 300)
 		final String signature = "0x50ba6f6df25ba593cb8188df29ca27ea0a7cd38fadc4d40ef9fad455117e190f2a7ec880a76b930071205fee19cf55eb415bd33b2f6cb5f7be36f79f740da6e81b"
 		final String address = "0x10705c0b408eb64860f67a81f5908b51b62a86fc"
 		final String name = "foobar"
 		when:
-		IntegrationKey key = service.createEthereumID(me, name, ch.id, ch.challenge, signature)
+		IntegrationKey key = service.createEthereumID(me, name, ch.getId(), ch.getChallenge(), signature)
 		Map json = new JsonSlurper().parseText(key.json)
 		then:
+		1 * challengeService.verifyChallengeAndGetAddress(ch.getId(), ch.getChallenge(), signature) >> address
 		key.name == name
 		json.containsKey("address")
 		json.address == address
-		// Challenge deleted
-		Challenge.count() == 0
 	}
 
 	void "createEthereumID() invokes subscriptionService#afterIntegrationKeyCreated when integration key created"() {
 		def subscriptionService = service.subscriptionService = Mock(SubscriptionService)
 
-		def ch = new Challenge(challenge: "foobar")
-		ch.save(failOnError: true, validate: false)
+		def ch = new Challenge("id", "foobar", 300)
 		final String signature = "0x50ba6f6df25ba593cb8188df29ca27ea0a7cd38fadc4d40ef9fad455117e190f2a7ec880a76b930071205fee19cf55eb415bd33b2f6cb5f7be36f79f740da6e81b"
 		final String address = "0x10705c0b408eb64860f67a81f5908b51b62a86fc"
 		final String name = "foobar"
 
 		when:
-		service.createEthereumID(me, name, ch.id, ch.challenge, signature)
+		service.createEthereumID(me, name, ch.getId(), ch.getChallenge(), signature)
 		then:
+		1 * challengeService.verifyChallengeAndGetAddress(ch.getId(), ch.getChallenge(), signature) >> address
 		1 * subscriptionService.afterIntegrationKeyCreated({ it.id != null })
-	}
-
-	void "createEthereumID() validates challenge"() {
-		final String signature = "0x50ba6f6df25ba593cb8188df29ca27ea0a7cd38fadc4d40ef9fad455117e190f2a7ec880a76b930071205fee19cf55eb415bd33b2f6cb5f7be36f79f740da6e81b"
-		when:
-		service.createEthereumID(me, "name", "", "", signature)
-		then:
-		def e = thrown(ApiException)
-		e.message == "challenge validation failed"
 	}
 
 	void "createEthereumID() checks for duplicate addresses"() {
@@ -169,16 +166,14 @@ class EthereumIntegrationKeyServiceSpec extends Specification {
 		String signature = "0x50ba6f6df25ba593cb8188df29ca27ea0a7cd38fadc4d40ef9fad455117e190f2a7ec880a76b930071205fee19cf55eb415bd33b2f6cb5f7be36f79f740da6e81b"
 		String name = "foobar"
 
-		def ch = new Challenge(challenge: "foobar")
-		ch.save(failOnError: true, validate: false, flush: true)
-		service.createEthereumID(me, name, ch.id, ch.challenge, signature)
+		def ch = new Challenge("id", "foobar", 300)
 
 		when:
-		def ch2 = new Challenge(challenge: "foobar")
-		ch2.save(failOnError: true, validate: false, flush: true)
-		service.createEthereumID(me, name, ch2.id, ch2.challenge, signature)
+		service.createEthereumID(me, name, ch.getId(), ch.getChallenge(), signature)
+		service.createEthereumID(me, name, ch.getId(), ch.getChallenge(), signature)
 
 		then:
+		2 * challengeService.verifyChallengeAndGetAddress(ch.getId(), ch.getChallenge(), signature) >> "address"
 		thrown(DuplicateNotAllowedException)
 	}
 
@@ -244,5 +239,45 @@ class EthereumIntegrationKeyServiceSpec extends Specification {
 		service.delete("integration-key", someoneElse)
 		then:
 		0 * subscriptionService._
+	}
+
+	void "getOrCreateFromEthereumAddress() creates user if key does not exists"() {
+		SecUser someoneElse = new SecUser(username: "someoneElse@streamr.com").save(failOnError: true, validate: false)
+		when:
+		service.getOrCreateFromEthereumAddress("address")
+		then:
+		1 * userService.createUser(_) >> someoneElse
+		IntegrationKey.count == 1
+		SecUser.count == 2
+	}
+
+	void "getOrCreateFromEthereumAddress() returns user if key exists"() {
+		String address = "someEthereumAdddress"
+		IntegrationKey integrationKey = new IntegrationKey(
+			user: me,
+			idInService: address,
+			service: IntegrationKey.Service.ETHEREUM_ID
+		).save(failOnError: true, validate: false)
+
+		when:
+		SecUser user = service.getOrCreateFromEthereumAddress(address)
+		then:
+		user.username == me.username
+		IntegrationKey.count == 1
+		SecUser.count == 1
+	}
+
+	void "cannot remove only key of ethereum user"() {
+		when:
+		String address = "0x26e1ae3f5efe8a01eca8c2e9d3c32702cf4bead6"
+		SecUser user = new SecUser(username: address).save(failOnError: true, validate: false)
+		IntegrationKey integrationKey = new IntegrationKey(
+			user: user,
+			idInService: address,
+			service: IntegrationKey.Service.ETHEREUM_ID
+		).save(failOnError: true, validate: false)
+		service.delete(integrationKey.id, user)
+		then:
+		thrown CannotRemoveEthereumKeyException
 	}
 }

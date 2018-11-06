@@ -42,6 +42,10 @@
       "description": "Keys for authenticating users and resources"
     },
     {
+      "name": "logins",
+      "description": "Login authentication methods"
+    },
+    {
       "name": "permissions",
       "description": "Read, write, and share rights"
     },
@@ -63,6 +67,152 @@
     }
   ],
   "paths": {
+    "/login/challenge/${address}": {
+      "post": {
+        "summary": "Generate challenge",
+        "description": "Generates a challenge to be signed by an Ethereum private key to prove possession of an Ethereum account.",
+        "tags": [
+          "logins"
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "address",
+            "description": "Public Ethereum address of the account for signature verification",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "A challenge and its expiration",
+            "schema": {
+              "$ref": "#/definitions/Challenge"
+            }
+          }
+        }
+      }
+    },
+    "/login/response": {
+      "post": {
+        "summary": "Log in with challenge verification",
+        "description": "Verifies a signature against a challenge. If it matches, generates a session token for the user.",
+        "tags": [
+          "logins"
+        ],
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "description": "Challenge response",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/ChallengeResponse"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "A session token and its expiration",
+            "schema": {
+              "$ref": "#/definitions/SessionToken"
+            }
+          },
+          "400": {
+            "description": "Challenge-based login failed",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            },
+            "examples": {
+              "application/json": {
+                "code": "INVALID_CHALLENGE",
+                "message": "Challenge-based login failed"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/login/password": {
+      "post": {
+        "summary": "Log in with password verification",
+        "description": "Verifies a username/password combination. If correct, generates a session token for the user.",
+        "tags": [
+          "logins"
+        ],
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "description": "Username and password combination",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/UsernamePassword"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "A session token and its expiration",
+            "schema": {
+              "$ref": "#/definitions/SessionToken"
+            }
+          },
+          "400": {
+            "description": "Password-based login failed",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            },
+            "examples": {
+              "application/json": {
+                "code": "INVALID_USERNAME_OR_PASSWORD",
+                "message": "Password-based login failed"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/login/apikey": {
+      "post": {
+        "summary": "Log in with API key verification",
+        "description": "Verifies that an API key belongs to the user. If it does, generates a session token for the user.",
+        "tags": [
+          "logins"
+        ],
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "description": "API Key",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/APIKey"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "A session token and its expiration",
+            "schema": {
+              "$ref": "#/definitions/SessionToken"
+            }
+          },
+          "400": {
+            "description": "API key-based login failed",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            },
+            "examples": {
+              "application/json": {
+                "code": "INVALID_API_KEY",
+                "message": "API key-based login failed"
+              }
+            }
+          }
+        }
+      }
+    },
     "/categories": {
       "get": {
         "summary": "List categories",
@@ -3818,6 +3968,123 @@
           "type": "integer",
           "description": "Index of associated Ethereum transaction in block",
           "example": 5
+        }
+      }
+    },
+    "Challenge": {
+      "type": "object",
+      "required": [
+        "id",
+        "challenge",
+        "expires"
+      ],
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Challenge's  ID",
+          "example": "NU1upjblRsexkPzZOmbBGA36MzNMxESIKLL4HRpOOBXQ"
+        },
+        "challenge": {
+          "type": "string",
+          "description": "Text to be signed by private key",
+          "example": "This is a challenge created by Streamr to prove private key ownership by signing this random data with it\\n\\nNU1upjblRsexkPzZOmbBGA36MzNMxESIKLL4HRpOOBXQ"
+        },
+        "expires": {
+          "type": "string",
+          "format": "dateTime",
+          "description": "date and time at which the challenge expires",
+          "example": "2018-02-21T12:26:18Z"
+        }
+      }
+    },
+    "ChallengeResponse": {
+      "type": "object",
+      "required": [
+        "challenge",
+        "signature",
+        "address"
+      ],
+      "properties": {
+        "challenge": {
+          "type": "object",
+          "required": [
+            "id",
+            "challenge"
+          ],
+          "properties": {
+            "id": {
+              "type": "string",
+              "description": "The challenge's ID",
+              "example": "NU1upjblRsexkPzZOmbBGA36MzNMxESIKLL4HRpOOBXQ"
+            },
+            "challenge": {
+              "type": "string",
+              "description": "Text that must have been signed by the private key",
+              "example": "This is a challenge created by Streamr to prove private key ownership by signing this random data with it\\n\\nNU1upjblRsexkPzZOmbBGA36MzNMxESIKLL4HRpOOBXQ"
+            }
+          }
+        },
+        "signature": {
+          "type": "string",
+          "description": "The signature of the challenge with an Ethereum private key",
+          "example": "0x7b6de48393a030ade11168ab774b320ee63cb7e976152fc530bfbbad558dbe4c59bfc68391558fde58988054ec3149e0b41e30af549a974a2c7b93b7ec7430211b"
+        },
+        "address": {
+          "type": "string",
+          "description": "The Ethereum address corresponding to the public key",
+          "example": "0xa50E97f6a98dD992D9eCb8207c2Aa58F54970729"
+        }
+      }
+    },
+    "UsernamePassword": {
+      "type": "object",
+      "required": [
+        "username",
+        "password"
+      ],
+      "properties": {
+        "username": {
+          "type": "string",
+          "description": "User's username",
+          "example": "john123"
+        },
+        "password": {
+          "type": "string",
+          "description": "User's password",
+          "example": "fjkn56fdjk23"
+        }
+      }
+    },
+    "APIKey": {
+      "type": "object",
+      "required": [
+        "apikey"
+      ],
+      "properties": {
+        "apikey": {
+          "type": "string",
+          "description": "User's API Key",
+          "example": "QaSEO3mlSaTGd3ZOSnwHUgK3ecU7pOvQw-WPkZcR-6TBv"
+        }
+      }
+    },
+    "SessionToken": {
+      "type": "object",
+      "required": [
+        "token",
+        "expires"
+      ],
+      "properties": {
+        "token": {
+          "type": "string",
+          "description": "Session token to be used in Authorization header for every request",
+          "example": "vavS7p5iJIwdYhDVhNXnYjSX5utoLU80adujGQcBID5m3e8b5TGE3Quy9s05NaV6"
+        },
+        "expires": {
+          "type": "string",
+          "format": "dateTime",
+          "description": "date and time at which the session token expires",
+          "example": "2018-10-12T17:34:40Z"
         }
       }
     },

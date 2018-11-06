@@ -1,23 +1,21 @@
 package com.unifina.controller.api
 
+import com.unifina.ControllerSpecification
 import com.unifina.domain.security.Key
 import com.unifina.domain.security.SecRole
 import com.unifina.domain.security.SecUser
 import com.unifina.domain.security.SecUserSecRole
-import com.unifina.filters.UnifinaCoreAPIFilters
 import com.unifina.service.ProductService
-import grails.plugin.springsecurity.SpringSecurityService
 import grails.test.mixin.Mock
 import grails.test.mixin.TestFor
-import spock.lang.Specification
 
 @TestFor(RemoveUsersProductsController)
-@Mock([UnifinaCoreAPIFilters, SpringSecurityService, SecUser, Key, SecRole, SecUserSecRole])
-class RemoveUsersProductsControllerSpec extends Specification {
+@Mock([SecUser, Key, SecRole, SecUserSecRole])
+class RemoveUsersProductsControllerSpec extends ControllerSpecification {
 	ProductService productService
 	SecUser me
 
-	void setup() {
+	def setup() {
 		productService = controller.productService = Mock(ProductService)
 		me = new SecUser(id: 1, username: "arnold").save(validate: false)
 		Key key = new Key(name: "key", user: me)
@@ -30,12 +28,9 @@ class RemoveUsersProductsControllerSpec extends Specification {
 		new SecUserSecRole(secUser: me, secRole: role).save(failOnError: true)
 		when:
 		request.method = "DELETE"
-		request.requestURI = "/api/v1/products/remove/sylvester"
-		request.addHeader("Authorization", "Token myApiKey")
 		params.username = "sylvester"
-		withFilters(action: "index") {
-			controller.index()
-		}
+		authenticatedAs(me) { controller.index() }
+
 		then:
 		response.status == 204
 		1 * productService.removeUsersProducts("sylvester")
@@ -44,12 +39,9 @@ class RemoveUsersProductsControllerSpec extends Specification {
 	def "should handle remove users products with invalid argument"() {
 		when:
 		request.method = "DELETE"
-		request.requestURI = "/api/v1/products/remove"
-		request.addHeader("Authorization", "Token myApiKey")
 		params.username = null
-		withFilters(action: "index") {
-			controller.index()
-		}
+		authenticatedAs(me) { controller.index() }
+
 		then:
 		response.status == 400
 		0 * productService._
@@ -61,12 +53,9 @@ class RemoveUsersProductsControllerSpec extends Specification {
 		when:
 		request.apiUser = me
 		request.method = "DELETE"
-		request.requestURI = "/api/v1/products/remove/sylvester"
-		request.addHeader("Authorization", "Token myApiKey")
 		params.username = "sylvester"
-		withFilters(action: "index") {
-			controller.index()
-		}
+		authenticatedAs(me) { controller.index() }
+
 		then:
 		response.status == 401
 		0 * productService._
