@@ -203,11 +203,20 @@ class ClusterServiceSpec extends Specification {
 		setup:
 		service.canvasService = Mock(CanvasService)
 		CanvasesPerNode canvasesPerNode = new CanvasesPerNode()
-		canvasesPerNode.shouldBeRunning = new Canvas[1]
-		canvasesPerNode.shouldBeRunning[0] = new Canvas(
-			name: "Canvas 1",
-			startedBy: new SecUser(username: "pena"),
-		)
+		canvasesPerNode.shouldBeRunning = new ArrayList<HashMap<String, Object>>()
+		SecUser u = new SecUser(username: "pena@host.com", password: "abcabcabcabc123", name: "Pena", timezone: "Europe/Helsinki")
+		u.id = 1
+		u.save(failOnError: true)
+		Canvas c = new Canvas(name: "Canvas 1", startedBy: u, json: "{}")
+		c.id = "c1"
+		c.save(failOnError: true)
+		canvasesPerNode.shouldBeRunning.add(new HashMap<String, Object>() {
+			{
+				put("name",  c.name)
+				put("id", c.id)
+				put("startedById", u.id)
+			}
+		})
 
 		when:
 		def results = service.repair(apiKey, ["10.0.0.5", "10.0.0.6"])
@@ -216,7 +225,7 @@ class ClusterServiceSpec extends Specification {
 		1 * service.streamrClient.canvasesPerNode(apiKey, "10.0.0.5") >> canvasesPerNode
 		1 * service.streamrClient.canvasesPerNode(apiKey, "10.0.0.6") >> new CanvasesPerNode()
 		0 * service.streamrClient._
-		1 * service.canvasService.startRemote(canvasesPerNode.shouldBeRunning[0], canvasesPerNode.shouldBeRunning[0].startedBy, false, true)
+		1 * service.canvasService.startRemote(c, u, true, true)
 		0 * service.canvasService._
 		results.size() == 1
     }
