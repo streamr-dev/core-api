@@ -44,6 +44,8 @@ class ClusterService {
 			String startedById = canvas.get("startedById")
 
 			Canvas c = Canvas.get(id)
+			c.state = Canvas.State.STOPPED
+			c.save()
 			SecUser u = SecUser.get(startedById)
 			boolean forceReset = true
 			boolean resetOnError = true
