@@ -1,13 +1,11 @@
 package com.unifina.controller.api
 
-
 import com.unifina.security.AllowRole
 import com.unifina.security.StreamrApi
 import com.unifina.service.ClusterService
 import grails.compiler.GrailsCompileStatic
 import grails.converters.JSON
 import grails.plugin.springsecurity.annotation.Secured
-import org.codehaus.groovy.grails.commons.GrailsApplication
 
 import javax.ws.rs.core.HttpHeaders
 
@@ -19,14 +17,13 @@ class ClusterApiController {
 		repair  : "POST",
 	]
 
-	GrailsApplication grailsApplication
 	ClusterService clusterService
 
 	@GrailsCompileStatic
 	@StreamrApi(allowRoles = AllowRole.ADMIN)
 	def canvases() {
 		String token = request.getHeader(HttpHeaders.AUTHORIZATION)
-		ClusterService.Canvases canvases = clusterService.getCanvases(token, getStreamrNodes())
+		ClusterService.Canvases canvases = clusterService.getCanvases(token)
 		render([
 			dead: canvases.dead,
 			ghost: canvases.ghost,
@@ -37,7 +34,7 @@ class ClusterApiController {
 	@StreamrApi(allowRoles = AllowRole.ADMIN)
 	def shutdown() {
 		String token = request.getHeader(HttpHeaders.AUTHORIZATION)
-		ClusterService.Nodes result = clusterService.shutdown(token, getStreamrNodes())
+		ClusterService.Nodes result = clusterService.shutdown(token)
 		render([
 			nodeResults: result.nodes,
 		] as JSON)
@@ -47,13 +44,9 @@ class ClusterApiController {
 	@StreamrApi(allowRoles = AllowRole.ADMIN)
 	def repair() {
 		String token = request.getHeader(HttpHeaders.AUTHORIZATION)
-		List<Map<String, Object>> nodes = clusterService.repair(token, getStreamrNodes())
+		List<Map<String, Object>> nodes = clusterService.repair(token)
 		render([
 		    restartedNodes: nodes,
 		] as JSON)
-	}
-
-	private List<String> getStreamrNodes() {
-		(List<String>) grailsApplication.config.streamr.nodes
 	}
 }

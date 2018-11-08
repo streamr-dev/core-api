@@ -5,16 +5,18 @@ import com.streamr.api.client.StreamrClient
 import com.unifina.domain.security.SecUser
 import com.unifina.domain.signalpath.Canvas
 import groovy.transform.CompileStatic
+import org.codehaus.groovy.grails.commons.GrailsApplication
 
 class ClusterService {
 	CanvasService canvasService
 	StreamrClient streamrClient
+	GrailsApplication grailsApplication
 
 	@CompileStatic
-	Canvases getCanvases(String token, List<String> streamrNodes) {
+	Canvases getCanvases(String token) {
 		List<Map<String, Object>> dead = new ArrayList<Map<String, Object>>()
 		List<Map<String, Object>> ghost = new ArrayList<Map<String, Object>>()
-		for (String ip : streamrNodes) {
+		for (String ip : getStreamrNodes()) {
 			CanvasesPerNode canvases = streamrClient.canvasesPerNode(token, ip)
 			if (canvases.shouldBeRunning != null) {
 				dead.addAll(canvases.shouldBeRunning)
@@ -27,9 +29,9 @@ class ClusterService {
 	}
 
 	@CompileStatic
-	Nodes shutdown(String token, List<String> streamrNodes) {
+	Nodes shutdown(String token) {
 		List<Map<String, Object>> nodeResults = new ArrayList<Map<String, Object>>()
-		for (String ip : streamrNodes) {
+		for (String ip : getStreamrNodes()) {
 			List<Map<String, Object>> result = streamrClient.shutdown(token, ip)
 			nodeResults.addAll(result)
 		}
@@ -37,8 +39,8 @@ class ClusterService {
 	}
 
 	@CompileStatic
-    List<Map<String, Object>> repair(String token, List<String> streamrNodes) {
-		Canvases canvases = getCanvases(token, streamrNodes)
+    List<Map<String, Object>> repair(String token) {
+		Canvases canvases = getCanvases(token)
 		for (Map<String, Object> canvas : canvases.dead) {
 			String id = canvas.get("id")
 			String startedById = canvas.get("startedById")
@@ -61,5 +63,9 @@ class ClusterService {
 
 	static class Nodes {
 		List<Map<String, Object>> nodes = new ArrayList<Map<String, Object>>()
+	}
+
+	private List<String> getStreamrNodes() {
+		(List<String>) grailsApplication.config.streamr.nodes
 	}
 }

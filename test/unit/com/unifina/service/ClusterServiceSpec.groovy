@@ -50,7 +50,7 @@ class ClusterServiceSpec extends Specification {
 		canvases2.shouldBeRunning[0].save(failOnError: true, validate: false)
 
 		when:
-		def canvases = service.getCanvases(apiKey, ["10.0.0.5", "10.0.0.6"])
+		def canvases = service.getCanvases(apiKey)
 
 		then:
 		1 * service.streamrClient.canvasesPerNode(apiKey, "10.0.0.5") >> canvases1
@@ -87,7 +87,7 @@ class ClusterServiceSpec extends Specification {
 		canvases2.shouldNotBeRunning[0].save(failOnError: true, validate: false)
 
 		when:
-		def canvases = service.getCanvases(apiKey, ["10.0.0.5", "10.0.0.6"])
+		def canvases = service.getCanvases(apiKey)
 
 		then:
 		1 * service.streamrClient.canvasesPerNode(apiKey, "10.0.0.5") >> canvases1
@@ -142,7 +142,7 @@ class ClusterServiceSpec extends Specification {
 		canvases2.shouldNotBeRunning[0].save(failOnError: true, validate: false)
 
 		when:
-		def canvases = service.getCanvases(apiKey, ["10.0.0.5", "10.0.0.6"])
+		def canvases = service.getCanvases(apiKey)
 
 		then:
 		1 * service.streamrClient.canvasesPerNode(apiKey, "10.0.0.5") >> canvases1
@@ -179,7 +179,7 @@ class ClusterServiceSpec extends Specification {
 		shutdownResult2.add(result1)
 
 		when:
-		def result = service.shutdown(apiKey, ["10.0.0.5", "10.0.0.6"])
+		def result = service.shutdown(apiKey)
 
 		then:
 		1 * service.streamrClient.shutdown(apiKey, "10.0.0.5") >> shutdownResult1
@@ -190,7 +190,7 @@ class ClusterServiceSpec extends Specification {
 
 	void "shutdown noop"() {
 		when:
-		def results = service.shutdown(apiKey, ["10.0.0.5", "10.0.0.6"])
+		def results = service.shutdown(apiKey)
 
 		then:
 		1 * service.streamrClient.shutdown(apiKey, "10.0.0.5") >> new ArrayList<HashMap<String, Object>>()
@@ -219,7 +219,7 @@ class ClusterServiceSpec extends Specification {
 		})
 
 		when:
-		def results = service.repair(apiKey, ["10.0.0.5", "10.0.0.6"])
+		def results = service.repair(apiKey)
 
 		then:
 		1 * service.streamrClient.canvasesPerNode(apiKey, "10.0.0.5") >> canvasesPerNode
