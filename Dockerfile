@@ -61,7 +61,7 @@ COPY . /app
 RUN grails refresh-dependencies
 RUN grails compile
 
-RUN npm install --python=python2.7
+RUN npm ci --python=python2.7
 
 # Set Default Behavior
 ENTRYPOINT ["grails"]
