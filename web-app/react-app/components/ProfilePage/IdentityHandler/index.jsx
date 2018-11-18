@@ -9,7 +9,6 @@ import {connect} from 'react-redux'
 import type {ErrorInUi} from '../../../flowtype/common-types'
 import type {IntegrationKeyState} from '../../../flowtype/states/integration-key-state'
 import {deleteIntegrationKey, getIntegrationKeysByService} from '../../../actions/integrationKey'
-import getWeb3 from '../../../utils/web3Provider'
 
 type StateProps = {
     error: ?ErrorInUi,
@@ -26,10 +25,18 @@ type Props = StateProps & DispatchProps
 
 const service = 'ETHEREUM_ID'
 
-export class IdentityHandler extends Component<Props> {
+type State = {
+    hasWeb3: boolean,
+}
+export class IdentityHandler extends Component<Props, State> {
+    state = {
+        hasWeb3: false,
+    }
+
     componentDidMount() {
         // TODO: Move to (yet non-existent) router
         this.props.getIntegrationKeysByService(service)
+        this.requestMetamaskAccess()
     }
 
     onNew = (integrationKey: IntegrationKey) => {
@@ -46,8 +53,31 @@ export class IdentityHandler extends Component<Props> {
         this.props.deleteIntegrationKey(id)
     }
 
+    requestMetamaskAccess(askPermission: boolean = false): Promise<void> {
+        // Checks for legacy access. Asks to unlock if possible.
+        return Promise.resolve()
+            .then(() => {
+                if (!window.web3 && !window.ethereum) {
+                    throw new Error('Metamask not detected')
+                }
+                return window.web3.eth.defaultAccount || (askPermission ? window.ethereum.enable() : undefined)
+            })
+            .then((account) => {
+                if (account) {
+                    this.setState({
+                        hasWeb3: true,
+                    })
+                }
+            }, (err) => {
+                console.warn(err)
+                this.setState({
+                    hasWeb3: false,
+                })
+            })
+    }
+
     render() {
-        const hasWeb3 = getWeb3().isEnabled()
+        const {hasWeb3} = this.state
         return (
             <Panel>
                 <Panel.Heading>
@@ -74,6 +104,7 @@ export class IdentityHandler extends Component<Props> {
                         <Alert bsStyle="danger">
                             To bind Ethereum addresses to your Streamr account, you need an Ethereum-enabled browser.
                             Try the <a href="https://metamask.io">MetaMask plugin for Chrome</a> or the <a href="https://github.com/ethereum/mist/releases">Mist browser</a>.
+                            If you have Metamask installed already, please <a href="#" onClick={() => this.requestMetamaskAccess(true)} >click here</a> to grant permission to read your account information.
                         </Alert>
                     )}
                 </Panel.Body>
