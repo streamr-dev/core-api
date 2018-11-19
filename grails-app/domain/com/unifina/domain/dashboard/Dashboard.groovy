@@ -6,9 +6,9 @@ import com.unifina.domain.security.Permission
 import groovy.transform.CompileStatic
 
 class Dashboard {
-
+	public final static String DEFAULT_NAME = "Untitled Dashboard"
 	String id
-	String name = "Untitled Dashboard"
+	String name = DEFAULT_NAME
 
 	Date dateCreated
 	Date lastUpdated

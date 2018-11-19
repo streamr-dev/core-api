@@ -7,8 +7,9 @@ import com.unifina.utils.HexIdGenerator
 import grails.compiler.GrailsCompileStatic
 
 class Product {
+	public final static String DEFAULT_NAME = "Untitled Product"
 	String id
-	String name = "Untitled Product"
+	String name = DEFAULT_NAME
 	String description
 	String imageUrl
 	String thumbnailUrl

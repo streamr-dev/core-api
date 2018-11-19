@@ -66,7 +66,7 @@ class StreamService {
 		stream.id = id
 		stream.config = params.config
 		if (stream.name == null || stream.name.trim() == "") {
-			stream.name = "Untitled Stream"
+			stream.name = Stream.DEFAULT_NAME
 		}
 
 		// If no feed given, API feed is used

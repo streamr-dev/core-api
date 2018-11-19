@@ -65,7 +65,7 @@ class ProductService {
 	Product create(CreateProductCommand command, SecUser currentUser)
 			throws ValidationException, NotPermittedException {
 		if (command.name == null || command.name.trim() == "") {
-			command.name = "Untitled Product"
+			command.name = Product.DEFAULT_NAME
 		}
 		if (!command.validate()) {
 			throw new ValidationException(command.errors)
