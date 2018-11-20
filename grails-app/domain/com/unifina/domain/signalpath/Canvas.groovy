@@ -88,6 +88,7 @@ class Canvas {
 			modules: map?.modules,
 			settings: map?.settings,
 			uiChannel: map?.uiChannel,
+			startedById: startedBy?.id,
 		]
 	}
 	@Override
