@@ -40,7 +40,6 @@ class SignalPathServiceSpec extends Specification {
 
 		c1 = new Canvas(
 				name: "canvas-1",
-				json: "{}",
 				serialization: new Serialization(bytes: new byte[512], date: new Date()),
 				runner: "runnerId"
 		)

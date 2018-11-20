@@ -9,7 +9,7 @@ import groovy.transform.CompileStatic
 import org.codehaus.groovy.grails.web.json.JSONObject
 
 class Canvas {
-
+	public final static String DEFAULT_NAME = "Untitled Canvas"
 	enum State {
 		STOPPED("stopped"),
 		RUNNING("running")
@@ -33,8 +33,8 @@ class Canvas {
 	Date dateCreated
 	Date lastUpdated
 
-	String name
-	String json
+	String name = DEFAULT_NAME
+	String json = "{}"
 	State state = State.STOPPED
 
 	Boolean hasExports = false
@@ -55,6 +55,7 @@ class Canvas {
 	]
 
 	static constraints = {
+		name(blank: false)
 		runner(nullable: true)
 		server(nullable: true)
 		requestUrl(nullable: true)
