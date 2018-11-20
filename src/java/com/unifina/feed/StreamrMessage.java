@@ -3,14 +3,14 @@ package com.unifina.feed;
 import java.util.Date;
 import java.util.Map;
 
-import com.unifina.data.StreamrBinaryMessage;
+import com.unifina.data.StreamrBinaryMessage.SignatureType;
 import com.unifina.feed.map.MapMessage;
 
 public class StreamrMessage extends MapMessage {
 
 	private final int partition;
 	private final String streamId;
-	private final byte signatureType;
+	private final SignatureType signatureType;
 	private final String address;
 	private final String signature;
 
@@ -18,12 +18,13 @@ public class StreamrMessage extends MapMessage {
 		super(timestamp, content);
 		this.streamId = streamId;
 		this.partition = partition;
-		this.signatureType = StreamrBinaryMessage.SIGNATURE_TYPE_NONE;
+		this.signatureType = SignatureType.SIGNATURE_TYPE_NONE;
 		this.address = null;
 		this.signature = null;
 	}
 
-	public StreamrMessage(String streamId, int partition, Date timestamp, Map content, byte signatureType, String address, String signature) {
+	public StreamrMessage(String streamId, int partition, Date timestamp, Map content,
+						  SignatureType signatureType, String address, String signature) {
 		super(timestamp, content);
 		this.streamId = streamId;
 		this.partition = partition;

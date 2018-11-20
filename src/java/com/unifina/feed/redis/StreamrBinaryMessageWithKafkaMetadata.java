@@ -69,7 +69,7 @@ public class StreamrBinaryMessageWithKafkaMetadata extends StreamrBinaryMessage 
 	 * Creates a new StreamrBinaryMessageWithKafkaMetadata using given values.
 	 */
 	public StreamrBinaryMessageWithKafkaMetadata(byte version, String streamId, int streamPartition, long timestamp, int ttl, byte contentType,
-												 byte[] content, byte signatureType, String address, String signature, int kafkaPartition, long offset, Long previousOffset) {
+												 byte[] content, SignatureType signatureType, String address, String signature, int kafkaPartition, long offset, Long previousOffset) {
 		super(version, streamId, streamPartition, timestamp, ttl, contentType, content, signatureType, address, signature);
 		this.offset = offset;
 		this.previousOffset = previousOffset;
