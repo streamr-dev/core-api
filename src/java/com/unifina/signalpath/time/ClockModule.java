@@ -1,14 +1,16 @@
 package com.unifina.signalpath.time;
 
 import com.unifina.datasource.ITimeListener;
+import com.unifina.signalpath.TimezoneModule;
 import com.unifina.signalpath.*;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.TimeZone;
 
-public class ClockModule extends AbstractSignalPathModule implements ITimeListener {
+public class ClockModule extends AbstractSignalPathModule implements ITimeListener, TimezoneModule {
 
+	private final StringParameter tz = new StringParameter(this, "timezone", "");
 	private final StringParameter format = new StringParameter(this, "format", "yyyy-MM-dd HH:mm:ss z");
 	private final EnumParameter<TimeUnit> tickUnit = new EnumParameter<>(this, "unit", TimeUnit.values());
 	private final IntegerParameter tickRate = new NonZeroIntegerParameter(this, "rate", 1);
@@ -45,10 +47,20 @@ public class ClockModule extends AbstractSignalPathModule implements ITimeListen
 	private void updateDateFormatIfNecessary(String format) {
 		if (df == null) {
 			df = new SimpleDateFormat(format);
-			df.setTimeZone(TimeZone.getTimeZone("UTC"));
+			df.setTimeZone(getTimezone());
 		} else if (!df.toPattern().equals(format)) {
 			df.applyPattern(format);
 		}
+	}
+
+	@Override
+	public void setTimezone(String timezone) {
+		tz.receive(timezone);
+	}
+
+	@Override
+	public TimeZone getTimezone() {
+		return TimeZone.getTimeZone(tz.getValue());
 	}
 
 	static class NonZeroIntegerParameter extends IntegerParameter {

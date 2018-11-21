@@ -1,10 +1,7 @@
 package com.unifina.signalpath.utils;
 
 import com.unifina.service.SerializationService;
-import com.unifina.signalpath.Input;
-import com.unifina.signalpath.ModuleOption;
-import com.unifina.signalpath.ModuleOptions;
-import com.unifina.signalpath.ModuleWithUI;
+import com.unifina.signalpath.*;
 import com.unifina.signalpath.variadic.InputInstantiator;
 import com.unifina.signalpath.variadic.VariadicInput;
 import com.unifina.utils.RFC4180CSVWriter;
@@ -15,11 +12,13 @@ import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.*;
 
-public class ExportCSV extends ModuleWithUI {
+public class ExportCSV extends ModuleWithUI implements TimezoneModule {
 
 	public static final long MIN_MS_BETWEEN_UI_UPDATES = 1000;
 
 	private static final Logger log = Logger.getLogger(ExportCSV.class);
+
+	StringParameter tz = new StringParameter(this, "timezone", "");
 
 	private final VariadicInput<Object> ins = new VariadicInput<>(this, new InputInstantiator.SimpleObject());
 
@@ -47,7 +46,7 @@ public class ExportCSV extends ModuleWithUI {
 			openCsvWriter();
 		}
 		if (timeFormatter == null) {
-			timeFormatter = timeFormat.getTimeFormatter();
+			timeFormatter = timeFormat.getTimeFormatter(getTimezone());
 		}
 
 		List<Object> row = new ArrayList<>();
@@ -145,7 +144,7 @@ public class ExportCSV extends ModuleWithUI {
 	public void afterDeserialization(SerializationService serializationService) {
 		super.afterDeserialization(serializationService);
 		openCsvWriter();
-		timeFormatter = timeFormat.getTimeFormatter();
+		timeFormatter = timeFormat.getTimeFormatter(getTimezone());
 	}
 
 	private void openCsvWriter() {
@@ -162,6 +161,16 @@ public class ExportCSV extends ModuleWithUI {
 			}
 			csvWriter.writeRow(inputNames);
 		}
+	}
+
+	@Override
+	public void setTimezone(String timezone) {
+		tz.receive(timezone);
+	}
+
+	@Override
+	public TimeZone getTimezone() {
+		return TimeZone.getTimeZone(tz.getValue());
 	}
 
 	public static class Context implements Serializable {
@@ -223,13 +232,13 @@ public class ExportCSV extends ModuleWithUI {
 			return option == null ? ISO_8601_UTC : valueOf(option.getString());
 		}
 
-		private TimeFormatter getTimeFormatter() {
+		private TimeFormatter getTimeFormatter(final TimeZone localTimeZone) {
 			if (this == ISO_8601_LOCAL) {
 				return new TimeFormatter() {
 					private final DateFormat df = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ");
 
 					{
-						df.setTimeZone(TimeZone.getTimeZone("UTC"));
+						df.setTimeZone(localTimeZone);
 					}
 
 					@Override

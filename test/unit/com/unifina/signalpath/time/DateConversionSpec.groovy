@@ -25,11 +25,13 @@ class DateConversionSpec extends Specification {
 		module.globals = new Globals([:], user)
 		module.init()
 		module.connectionsReady()
+		module.setTimezone("UTC")
 	}
 
 	void "dateConversion gives the right answer"() {
 		initContext("username2")
 		when:
+		module.setTimezone("Europe/Helsinki")
 		module.getInput("format").receive("yyyy-MM-dd HH:mm:ss")
 		Map inputValues = [
 			date: [

@@ -10,6 +10,7 @@ class TimeOfDaySpec extends Specification {
 	def setup(){
 		module = new TimeOfDay()
 		module.init()
+		module.setTimezone("UTC")
 	}
 
 	void "timeOfDay gives the right answer"() {
