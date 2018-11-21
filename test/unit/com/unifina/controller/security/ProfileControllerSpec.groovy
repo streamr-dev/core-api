@@ -36,6 +36,7 @@ class ProfileControllerSpec extends Specification {
 			username:"test@test.com",
 			name: "Test User",
 			password:springSecurityService.encodePassword("foobar123!"),
+			enabled: true,
 		)
 		user.save(validate:false)
 		springSecurityService.currentUser = user
