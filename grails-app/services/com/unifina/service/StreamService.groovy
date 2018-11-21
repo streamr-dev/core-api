@@ -7,6 +7,7 @@ import com.unifina.api.NotPermittedException
 import com.unifina.api.ValidationException
 import com.unifina.data.StreamPartitioner
 import com.unifina.data.StreamrBinaryMessage
+import com.unifina.data.StreamrBinaryMessageV28
 import com.unifina.domain.dashboard.DashboardItem
 import com.unifina.domain.data.Feed
 import com.unifina.domain.data.Stream
@@ -123,7 +124,7 @@ class StreamService {
 
 	void sendMessage(Stream stream, String partitionKey, long timestamp, byte[] content, byte contentType, int ttl=0) {
 		int streamPartition = partitioner.partition(stream, partitionKey)
-		StreamrBinaryMessage msg = new StreamrBinaryMessage(stream.id, streamPartition, timestamp, ttl, contentType, content)
+		StreamrBinaryMessage msg = new StreamrBinaryMessageV28(stream.id, streamPartition, timestamp, ttl, contentType, content)
 
 		String kafkaPartitionKey = "${stream.id}-$streamPartition"
 		kafkaService.sendMessage(msg, kafkaPartitionKey)

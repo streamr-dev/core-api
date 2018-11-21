@@ -3,7 +3,7 @@ package com.unifina.feed;
 import java.util.Date;
 import java.util.Map;
 
-import com.unifina.data.StreamrBinaryMessage.SignatureType;
+import com.unifina.data.StreamrBinaryMessageV29.SignatureType;
 import com.unifina.feed.map.MapMessage;
 
 public class StreamrMessage extends MapMessage {

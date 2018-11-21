@@ -1,6 +1,9 @@
 package com.unifina.feed.redis;
 
 import com.unifina.data.StreamrBinaryMessage;
+import com.unifina.data.StreamrBinaryMessageV28;
+import com.unifina.data.StreamrBinaryMessageV29;
+
 import java.nio.ByteBuffer;
 
 /**
@@ -11,10 +14,10 @@ import java.nio.ByteBuffer;
  * - previousOffset 8 bytes (long)
  * - partition 4 bytes (int)
  */
-public class StreamrBinaryMessageWithKafkaMetadata extends StreamrBinaryMessage {
+public class StreamrBinaryMessageWithKafkaMetadata {
 
 	private static final byte VERSION = 0;
-
+	private final StreamrBinaryMessage msg;
 	private final long offset;
 	private final Long previousOffset;
 	private final int kafkaPartition;
@@ -24,7 +27,7 @@ public class StreamrBinaryMessageWithKafkaMetadata extends StreamrBinaryMessage 
 	 * obtained from toBytesWithKafkaMetadata()
 	 */
 	public StreamrBinaryMessageWithKafkaMetadata(ByteBuffer bb) {
-		super(bb);
+		msg = StreamrBinaryMessage.from(bb);
 
 		byte version = bb.get();
 		if (version == 0) {
@@ -40,7 +43,7 @@ public class StreamrBinaryMessageWithKafkaMetadata extends StreamrBinaryMessage 
 	 * obtained from (super.)toBytes(), adding the Kafka metadata using the other args
 	 */
 	public StreamrBinaryMessageWithKafkaMetadata(ByteBuffer parentBytes, int kafkaPartition, long offset, Long previousOffset) {
-		super(parentBytes);
+		msg = StreamrBinaryMessage.from(parentBytes);
 		this.offset = offset;
 		this.previousOffset = previousOffset;
 		this.kafkaPartition = kafkaPartition;
@@ -51,15 +54,17 @@ public class StreamrBinaryMessageWithKafkaMetadata extends StreamrBinaryMessage 
 	 * adding the Kafka metadata using the other args
 	 */
 	public StreamrBinaryMessageWithKafkaMetadata(StreamrBinaryMessage original, int kafkaPartition, long offset, Long previousOffset) {
-		this(original.getVersion(), original.getStreamId(), original.getPartition(), original.getTimestamp(), original.getTTL(),
-				original.getContentType(), original.getContentBytes(), original.getSignatureType(), original.getAddress(), original.getSignature(), kafkaPartition, offset, previousOffset);
+		msg = original;
+		this.offset = offset;
+		this.previousOffset = previousOffset;
+		this.kafkaPartition = kafkaPartition;
 	}
 
 	/**
 	 * Creates a new StreamrBinaryMessageWithKafkaMetadata using given values.
 	 */
 	public StreamrBinaryMessageWithKafkaMetadata(String streamId, int streamPartition, long timestamp, int ttl, byte contentType, byte[] content, int kafkaPartition, long offset, Long previousOffset) {
-		super(streamId, streamPartition, timestamp, ttl, contentType, content);
+		msg = new StreamrBinaryMessageV28(streamId, streamPartition, timestamp, ttl, contentType, content);
 		this.offset = offset;
 		this.previousOffset = previousOffset;
 		this.kafkaPartition = kafkaPartition;
@@ -68,12 +73,16 @@ public class StreamrBinaryMessageWithKafkaMetadata extends StreamrBinaryMessage 
 	/**
 	 * Creates a new StreamrBinaryMessageWithKafkaMetadata using given values.
 	 */
-	public StreamrBinaryMessageWithKafkaMetadata(byte version, String streamId, int streamPartition, long timestamp, int ttl, byte contentType,
-												 byte[] content, SignatureType signatureType, String address, String signature, int kafkaPartition, long offset, Long previousOffset) {
-		super(version, streamId, streamPartition, timestamp, ttl, contentType, content, signatureType, address, signature);
+	public StreamrBinaryMessageWithKafkaMetadata(String streamId, int streamPartition, long timestamp, int ttl, byte contentType,
+												 byte[] content, StreamrBinaryMessageV29.SignatureType signatureType, String address, String signature, int kafkaPartition, long offset, Long previousOffset) {
+		msg = new StreamrBinaryMessageV29(streamId, streamPartition, timestamp, ttl, contentType, content, signatureType, address, signature);
 		this.offset = offset;
 		this.previousOffset = previousOffset;
 		this.kafkaPartition = kafkaPartition;
+	}
+
+	public StreamrBinaryMessage getStreamrBinaryMessage() {
+		return msg;
 	}
 
 	public long getOffset() {
@@ -89,7 +98,7 @@ public class StreamrBinaryMessageWithKafkaMetadata extends StreamrBinaryMessage 
 	}
 
 	public byte[] toBytesWithKafkaMetadata() {
-		byte[] orig = super.toBytes();
+		byte[] orig = msg.toBytes();
 		ByteBuffer bb = ByteBuffer.allocate(orig.length + 21);
 		bb.put(orig);
 		bb.put(VERSION); // 1
@@ -98,5 +107,7 @@ public class StreamrBinaryMessageWithKafkaMetadata extends StreamrBinaryMessage 
 		bb.putInt(kafkaPartition); // 4
 		return bb.array();
 	}
+
+
 }
 

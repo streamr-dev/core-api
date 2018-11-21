@@ -4,6 +4,7 @@ import com.datastax.driver.core.Cluster
 import com.datastax.driver.core.ResultSet
 import com.datastax.driver.core.Row
 import com.datastax.driver.core.Session
+import com.unifina.data.StreamrBinaryMessage
 import com.unifina.domain.data.Stream
 import com.unifina.feed.redis.StreamrBinaryMessageWithKafkaMetadata
 import groovy.transform.CompileStatic
@@ -50,20 +51,21 @@ class CassandraService implements DisposableBean {
 
 	void save(StreamrBinaryMessageWithKafkaMetadata msg) {
 		Session session = getSession()
-		session.executeAsync("INSERT INTO stream_events (stream, stream_partition, kafka_partition, kafka_offset, previous_offset, ts, payload) values (?, ?, ?, ?, ?, ?, ?) ${msg.getTTL() > 0 ? "USING TTL ${msg.getTTL()}" : ""}",
-				msg.getStreamId(),
-				msg.getPartition(),
+		StreamrBinaryMessage msgPayload = msg.getStreamrBinaryMessage()
+		session.executeAsync("INSERT INTO stream_events (stream, stream_partition, kafka_partition, kafka_offset, previous_offset, ts, payload) values (?, ?, ?, ?, ?, ?, ?) ${msgPayload.getTTL() > 0 ? "USING TTL ${msgPayload.getTTL()}" : ""}",
+				msgPayload.getStreamId(),
+				msgPayload.getPartition(),
 				msg.getKafkaPartition(),
 				msg.getOffset(),
 				msg.getPreviousOffset(),
-				new Date(msg.getTimestamp()),
-				ByteBuffer.wrap(msg.toBytes()))
+				new Date(msgPayload.getTimestamp()),
+				ByteBuffer.wrap(msgPayload.toBytes()))
 
-		session.executeAsync("INSERT INTO stream_timestamps (stream, stream_partition, kafka_offset, ts) values (?, ?, ?, ?) ${msg.getTTL() > 0 ? "USING TTL ${msg.getTTL()}" : ""}",
-				msg.getStreamId(),
-				msg.getPartition(),
+		session.executeAsync("INSERT INTO stream_timestamps (stream, stream_partition, kafka_offset, ts) values (?, ?, ?, ?) ${msgPayload.getTTL() > 0 ? "USING TTL ${msgPayload.getTTL()}" : ""}",
+				msgPayload.getStreamId(),
+				msgPayload.getPartition(),
 				msg.getOffset(),
-				new Date(msg.getTimestamp()))
+				new Date(msgPayload.getTimestamp()))
 	}
 
 	void deleteAll(Stream stream) {
