@@ -29,7 +29,7 @@ class CanvasListParams extends ListParams {
 				eq("name", name)
 			}
 			// Filter by adhoc
-			if (adhoc) {
+			if (adhoc != null) {
 				eq("adhoc", adhoc)
 			}
 			// Filter by state
