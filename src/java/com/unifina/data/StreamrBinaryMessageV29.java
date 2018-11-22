@@ -54,19 +54,13 @@ public class StreamrBinaryMessageV29 extends StreamrBinaryMessageV28 {
 	}
 
 	@Override
-	public byte[] toBytes() {
-		ByteBuffer bb;
-		bb = ByteBuffer.allocate(sizeInBytes());
-		// When calling super.toBytes(), the sizeInBytes() method called is the one in this child class
-		// and not the one in the parent class... As a result the byte array is too large and needs to be truncated.
-		byte[] v28 = java.util.Arrays.copyOf(super.toBytes(), super.sizeInBytes());
-		bb.put(v28);
+	protected void toByteBuffer(ByteBuffer bb) {
+		super.toByteBuffer(bb);
 		bb.put(signatureType.getId()); // 1 byte
 		if (signatureType == SignatureType.SIGNATURE_TYPE_ETH) {
 			bb.put(addressBytes); // 20 bytes
 			bb.put(signatureBytes); // 65 bytes
 		}
-		return bb.array();
 	}
 
 	@Override

@@ -23,7 +23,14 @@ public abstract class StreamrBinaryMessage {
 		}
 	}
 
-	public abstract byte[] toBytes();
+	protected abstract void toByteBuffer(ByteBuffer bb);
+
+	public final byte[] toBytes() {
+		ByteBuffer bb;
+		bb = ByteBuffer.allocate(sizeInBytes());
+		toByteBuffer(bb);
+		return bb.array();
+	}
 
 	public abstract int sizeInBytes();
 

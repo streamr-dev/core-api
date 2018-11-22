@@ -56,20 +56,8 @@ public class StreamrBinaryMessageV28 extends StreamrBinaryMessage {
 		this.content = content;
 	}
 
-	/**
-	 * 	version 1 byte
-	 * 	timestamp 8 bytes
-	 * 	stream id length 1 byte (interpret as unsigned)
-	 * 	stream id, N bytes
-	 * 	content type 1 byte
-	 * 	content length 4 bytes
-	 * 	payload, N bytes
-	 * 	ttl, 4 bytes
-	 */
 	@Override
-	public byte[] toBytes() {
-		ByteBuffer bb;
-		bb = ByteBuffer.allocate(sizeInBytes());
+	protected void toByteBuffer(ByteBuffer bb) {
 		bb.put(getVersion()); // 1 byte
 		bb.putLong(timestamp); // 8 bytes
 		bb.putInt(ttl); // 4 bytes
@@ -85,7 +73,6 @@ public class StreamrBinaryMessageV28 extends StreamrBinaryMessage {
 		bb.put(contentType); // 1 byte
 		bb.putInt(content.length); // 4 bytes
 		bb.put(content); // contentLength bytes
-		return bb.array();
 	}
 
 	@Override
