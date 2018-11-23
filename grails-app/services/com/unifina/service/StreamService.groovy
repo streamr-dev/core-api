@@ -25,6 +25,7 @@ import com.unifina.feed.redis.StreamrBinaryMessageWithKafkaMetadata
 import com.unifina.signalpath.RuntimeRequest
 import com.unifina.task.DelayedDeleteStreamTask
 import com.unifina.utils.CSVImporter
+import com.unifina.utils.EthereumAddressValidator
 import com.unifina.utils.IdGenerator
 import grails.converters.JSON
 import groovy.transform.CompileStatic
@@ -273,6 +274,22 @@ class StreamService {
 				throw new NotPermittedException(user?.username, "Stream", id, Permission.Operation.READ.id)
 			}
 		}
+	}
+
+	Set<SecUser> getStreamWriters(Stream stream) {
+		List<Permission> permissions = permissionService.getPermissionsTo(stream, Permission.Operation.WRITE)
+		return permissions.user.toSet()
+	}
+
+	Set<String> getStreamEthereumProducers(Stream stream) {
+		Set<SecUser> writers = getStreamWriters(stream)
+		Set<String> addresses = new HashSet<String>()
+		for(SecUser user: writers) {
+			if(EthereumAddressValidator.validate(user.username)) {
+				addresses.add(user.username)
+			}
+		}
+		return addresses
 	}
 
 	@CompileStatic

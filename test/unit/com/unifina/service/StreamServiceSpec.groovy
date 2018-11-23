@@ -387,4 +387,47 @@ class StreamServiceSpec extends Specification {
 		1 * dashboardService.authorizedGetDashboardItem(dashboard.id, dashboardItem.id, user, Permission.Operation.READ) >> null
 		0 * cb._
 	}
+
+	void "getStreamWriters retrieves the SecUsers with WRITE permission to the stream"() {
+		service.permissionService = Mock(PermissionService)
+		SecUser user1 = new SecUser(username: "u1")
+		SecUser user2 = new SecUser(username: "u2")
+		Set<SecUser> users = new HashSet<SecUser>()
+		users.add(user1)
+		users.add(user2)
+		Permission p1 = new Permission(user: user1)
+		Permission p2 = new Permission(user: user2)
+		List<Permission> perms = new ArrayList<Permission>();
+		perms.add(p1)
+		perms.add(p2)
+		Stream stream = new Stream(name: "name")
+		stream.id = "streamId"
+		stream.save(failOnError: true, validate: false)
+
+		when:
+		Set<SecUser> retrievedUsers = service.getStreamWriters(stream)
+		then:
+		1 * service.permissionService.getPermissionsTo(stream, Permission.Operation.WRITE) >> perms
+		retrievedUsers == users
+	}
+
+	void "getStreamEthereumProducers should return only Ethereum users"() {
+		setup:
+		def service = Spy(StreamService)
+		SecUser user1 = new SecUser(username: "u1")
+		SecUser user2 = new SecUser(username: "0x26e1ae3f5efe8a01eca8c2e9d3c32702cf4bead6")
+		Set<SecUser> users = new HashSet<SecUser>()
+		users.add(user1)
+		users.add(user2)
+		Set<String> validAddresses = new HashSet<String>()
+		validAddresses.add("0x26e1ae3f5efe8a01eca8c2e9d3c32702cf4bead6")
+		Stream stream = new Stream(name: "name")
+		stream.id = "streamId"
+		stream.save(failOnError: true, validate: false)
+		when:
+		Set<String> addresses = service.getStreamEthereumProducers(stream)
+		then:
+		1 * service.getStreamWriters(stream) >> users
+		addresses == validAddresses
+	}
 }
