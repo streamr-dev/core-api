@@ -280,4 +280,23 @@ class StreamApiControllerSpec extends ControllerSpecification {
 		then:
 		thrown NotPermittedException
 	}
+
+	void "returns set of producer addresses"() {
+		setup:
+		controller.streamService = streamService = Mock(StreamService)
+		Set<String> addresses = new HashSet<String>()
+		addresses.add('0x26e1ae3f5efe8a01eca8c2e9d3c32702cf4bead6')
+		addresses.add('0x0181ae2f5efe8947eca8c2e9d3f32702cf4be7dd')
+		when:
+		params.id = streamOneId
+		request.method = "GET"
+		authenticatedAs(me) { controller.producers() }
+
+		then:
+		1 * streamService.getStreamEthereumProducers(Stream.findById(streamOneId)) >> addresses
+		response.status == 200
+		response.json == [
+		    'addresses': addresses.toArray()
+		]
+	}
 }
