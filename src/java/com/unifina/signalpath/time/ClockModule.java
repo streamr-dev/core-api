@@ -24,6 +24,7 @@ public class ClockModule extends AbstractSignalPathModule implements ITimeListen
 		format.setCanToggleDrivingInput(false);
 		tickUnit.setCanToggleDrivingInput(false);
 		tickRate.setCanToggleDrivingInput(false);
+		addInput(tz);
 	}
 
 	@Override

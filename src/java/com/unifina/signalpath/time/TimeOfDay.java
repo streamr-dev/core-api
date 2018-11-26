@@ -30,6 +30,7 @@ public class TimeOfDay extends AbstractSignalPathModule implements ITimeListener
 
 	@Override
 	public void init() {
+		addInput(tz);
 		addInput(startTime);
 		addInput(endTime);
 		addOutput(out);

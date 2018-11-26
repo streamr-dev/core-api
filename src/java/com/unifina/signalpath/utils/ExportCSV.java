@@ -36,6 +36,7 @@ public class ExportCSV extends ModuleWithUI implements TimezoneModule {
 	}
 
 	ExportCSV(Context context) {
+		addInput(tz);
 		this.context = context;
 		resendLast = 1;
 	}
