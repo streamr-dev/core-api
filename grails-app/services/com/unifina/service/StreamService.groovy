@@ -286,7 +286,7 @@ class StreamService {
 		Set<String> addresses = new HashSet<String>()
 		for(SecUser user: writers) {
 			if(EthereumAddressValidator.validate(user.username)) {
-				addresses.add(user.username)
+				addresses.add(user.username.toLowerCase())
 			}
 		}
 		return addresses

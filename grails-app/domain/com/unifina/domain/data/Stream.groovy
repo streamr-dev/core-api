@@ -14,7 +14,7 @@ class Stream implements Comparable {
 	Feed feed
 	String config
 	String description
-	
+
 	Date firstHistoricalDay
 	Date lastHistoricalDay
 
@@ -24,6 +24,8 @@ class Stream implements Comparable {
 	Boolean uiChannel = false
 	String uiChannelPath
 	Canvas uiChannelCanvas
+
+	Boolean requireSignedData = false
 
 	static hasMany = [
 		permissions: Permission,
@@ -41,7 +43,7 @@ class Stream implements Comparable {
 		uiChannelPath(nullable:true)
 		uiChannelCanvas(nullable:true)
 	}
-	
+
 	static mapping = {
 		id generator: 'assigned'
 		name index: "name_idx"
@@ -49,8 +51,9 @@ class Stream implements Comparable {
 		uiChannel defaultValue: "false"
 		uiChannelPath index: "ui_channel_path_idx"
 		config type: 'text'
+		requireSignedData defaultValue: false
 	}
-	
+
 	@Override
 	public String toString() {
 		return name
@@ -67,7 +70,8 @@ class Stream implements Comparable {
 			description: description,
 			uiChannel: uiChannel,
 			dateCreated: dateCreated,
-			lastUpdated: lastUpdated
+			lastUpdated: lastUpdated,
+			requireSignedData: requireSignedData
 		]
 	}
 
@@ -81,7 +85,8 @@ class Stream implements Comparable {
 			description: description,
 			uiChannel: uiChannel,
 			dateCreated: dateCreated,
-			lastUpdated: lastUpdated
+			lastUpdated: lastUpdated,
+			requireSignedData: requireSignedData
 		]
 	}
 
@@ -90,12 +95,12 @@ class Stream implements Comparable {
 		if (!(arg0 instanceof Stream)) return 0
 		else return arg0.name.compareTo(this.name)
 	}
-	
+
 	@Override
 	public int hashCode() {
 		return id.hashCode()
 	}
-	
+
 	@Override
 	public boolean equals(Object obj) {
 		return obj instanceof Stream && obj.id == this.id

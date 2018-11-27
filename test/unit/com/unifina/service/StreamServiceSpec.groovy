@@ -94,7 +94,8 @@ class StreamServiceSpec extends Specification {
 								[name: "profit", type: "number"],
 								[name: "keyword", type: "string"]
 						]
-				]
+				],
+				requireSignedData: "true"
 		]
 		service.createStream(params, me)
 
@@ -104,6 +105,7 @@ class StreamServiceSpec extends Specification {
 		stream.name == "Test stream"
 		stream.description == "Test stream"
 		stream.feed == feed
+		stream.requireSignedData
 	}
 
 	void "createStream uses Feed.KAFKA_ID as default value for feed"() {
@@ -127,6 +129,7 @@ class StreamServiceSpec extends Specification {
 		Stream.count() == 1
 		def stream = Stream.findAll().get(0)
 		stream.feed == feed
+		!stream.requireSignedData
 	}
 
 	void "createStream initializes streamListener"() {
