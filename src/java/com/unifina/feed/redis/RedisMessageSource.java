@@ -38,6 +38,7 @@ public class RedisMessageSource extends AbstractMessageSource<StreamrBinaryMessa
 			redisURI.setPassword("" + config.get("password"));
 		}
 		client = RedisClient.create(redisURI);
+		log.info("Connecting to Redis on " + redisURI);
 		connection = client.connectPubSub(new ByteArrayCodec());
 
 		connection.addListener(new RedisPubSubAdapter<byte[], byte[]>() {
