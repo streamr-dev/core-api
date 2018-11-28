@@ -126,6 +126,12 @@ class NodeApiController {
 
 	@GrailsCompileStatic
 	@StreamrApi(allowRoles = AllowRole.ADMIN)
+	def configNode(String nodeIp) {
+		invokeOrRedirect("config", nodeIp, this.&config)
+	}
+
+	@GrailsCompileStatic
+	@StreamrApi(allowRoles = AllowRole.ADMIN)
 	def shutdownNode(String nodeIp) {
 		invokeOrRedirect("shutdown", nodeIp, this.&shutdown)
 	}
