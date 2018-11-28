@@ -213,6 +213,55 @@ class ProductServiceSpec extends Specification {
 		Product.count() == 0
 	}
 
+	void "create() creates and returns Product when name is empty and description/category are null"() {
+		setupStreams()
+		service.permissionService = Stub(PermissionService)
+
+		def validCommand = new CreateProductCommand(
+			name: "",
+			description: null,
+			category: null,
+			streams: [s1, s2, s3],
+			ownerAddress: "0x0000000000000000000000000000000000000000",
+			beneficiaryAddress: "0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF",
+			pricePerSecond: 10,
+			minimumSubscriptionInSeconds: 1
+		)
+		def user = new SecUser()
+		user.name = "Arnold Schwarzenegger"
+
+		when:
+		def product = service.create(validCommand, user)
+
+		then:
+		Product.findAll() == [product]
+
+		and:
+		product.toMap() == [
+			id: "1",
+			name: "Untitled Product",
+			description: null,
+			imageUrl: null,
+			thumbnailUrl: null,
+			category: null,
+			streams: ["stream-1", "stream-2", "stream-3"],
+			state: "NOT_DEPLOYED",
+			previewStream: null,
+			previewConfigJson: null,
+			created: product.dateCreated,
+			updated: product.lastUpdated,
+			ownerAddress: "0x0000000000000000000000000000000000000000",
+			beneficiaryAddress: "0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF",
+			pricePerSecond: "10",
+			isFree: false,
+			priceCurrency: "DATA",
+			minimumSubscriptionInSeconds: 1,
+			owner: "Arnold Schwarzenegger"
+		]
+		product.dateCreated != null
+		product.dateCreated == product.lastUpdated
+	}
+
 	void "update() throws ValidationException if command object does not pass validation"() {
 		when:
 		service.update("product-id", new UpdateProductCommand(), new SecUser())

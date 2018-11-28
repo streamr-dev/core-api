@@ -68,33 +68,28 @@ class CanvasServiceSpec extends Specification {
 
 		canvases << new Canvas(
 			name: "my_canvas_2",
-			json: "{}",
 		).save(failOnError: true)
 
 		canvases << new Canvas(
 			name: "my_canvas_3",
-			json: "{}",
 			adhoc: false,
 			state: Canvas.State.RUNNING
 		).save(failOnError: true)
 
 		canvases << new Canvas(
 			name: "my_canvas_4",
-			json: "{}",
 			adhoc: true,
 			state: Canvas.State.RUNNING
 		).save(failOnError: true)
 
 		canvases << new Canvas(
 			name: "my_canvas_5",
-			json: "{}",
 			adhoc: true,
 			state: Canvas.State.STOPPED
 		).save(failOnError: true)
 
 		canvases << new Canvas(
 			name: "my_canvas_6",
-			json: "{}",
 			adhoc: false,
 			state: Canvas.State.STOPPED
 		).save(failOnError: true)
@@ -103,14 +98,12 @@ class CanvasServiceSpec extends Specification {
 
 		canvases << new Canvas(
 			name: "someoneElses_canvas_1",
-			json: "{}",
 			adhoc: false,
 			state: Canvas.State.STOPPED
 		).save(failOnError: true)
 
 		canvases << new Canvas(
 			name: "someoneElses_canvas_2",
-			json: "{}",
 		).save(failOnError: true)
 	}
 
@@ -128,6 +121,14 @@ class CanvasServiceSpec extends Specification {
 
 		then:
 		thrown(ValidationException)
+	}
+
+	def "createNew() replaces empty name with default value"() {
+		when:
+		Canvas c = service.createNew(new SaveCanvasCommand(name: "", modules: []), me)
+
+		then:
+		c.name == "Untitled Canvas"
 	}
 
 	def "createNew() creates a new Canvas"() {

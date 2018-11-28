@@ -7,8 +7,9 @@ import com.unifina.utils.HexIdGenerator
 import grails.compiler.GrailsCompileStatic
 
 class Product {
+	public final static String DEFAULT_NAME = "Untitled Product"
 	String id
-	String name
+	String name = DEFAULT_NAME
 	String description
 	String imageUrl
 	String thumbnailUrl
@@ -51,9 +52,10 @@ class Product {
 
 	static constraints = {
 		name(blank: false)
-		description(blank: false)
+		description(nullable: true)
 		imageUrl(nullable: true)
 		thumbnailUrl(nullable: true)
+		category(nullable: true)
 		streams(maxSize: 1000)
 		previewStream(nullable: true, validator: { Stream s, p -> s == null || s in p.streams })
 		previewConfigJson(nullable: true)
@@ -90,7 +92,7 @@ class Product {
 			description: description,
 			imageUrl: imageUrl,
 			thumbnailUrl: thumbnailUrl,
-			category: category.id,
+			category: category?.id,
 			streams: streams*.id,
 			state: state.toString(),
 			previewStream: previewStream?.id,
@@ -115,7 +117,7 @@ class Product {
 			description: description,
 			imageUrl: imageUrl,
 			thumbnailUrl: thumbnailUrl,
-			category: category.id,
+			category: category?.id,
 			streams: [],
 			state: state.toString(),
 			previewStream: previewStream?.id,

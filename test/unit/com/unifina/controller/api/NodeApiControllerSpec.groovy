@@ -40,8 +40,8 @@ class NodeApiControllerSpec extends Specification {
 
 	void "shutdown must stop all TaskWorkers, stop local Canvases and start them remotely"() {
 		def canvases = [
-				new Canvas(state: Canvas.State.RUNNING, json: "{}"),
-				new Canvas(state: Canvas.State.RUNNING, json: "{}")
+				new Canvas(state: Canvas.State.RUNNING),
+				new Canvas(state: Canvas.State.RUNNING)
 		]
 		canvases*.save(validate:false)
 
@@ -69,9 +69,9 @@ class NodeApiControllerSpec extends Specification {
 
 	void "shutdown must not create start tasks for adhoc canvases"() {
 		def canvases = [
-				new Canvas(state: Canvas.State.RUNNING, json: "{}"),
-				new Canvas(state: Canvas.State.RUNNING, json: "{}"),
-				new Canvas(state: Canvas.State.RUNNING, json: "{}", adhoc: true)
+				new Canvas(state: Canvas.State.RUNNING),
+				new Canvas(state: Canvas.State.RUNNING),
+				new Canvas(state: Canvas.State.RUNNING, adhoc: true)
 		]
 		canvases*.save(validate:false)
 
@@ -117,17 +117,17 @@ class NodeApiControllerSpec extends Specification {
 	void "canvases lists canvases according to whether they are really running and according to DB"() {
 		setup: "setup Canvases"
 		def canvases = [
-			new Canvas(name: "Canvas #1", state: Canvas.State.RUNNING, json: "{}", server: "10.0.0.5"),
-			new Canvas(name: "Canvas #2", state: Canvas.State.RUNNING, json: "{}", server: "10.0.0.5"),
-			new Canvas(name: "Canvas #3", state: Canvas.State.RUNNING, json: "{}", server: "10.0.0.5"),
-			new Canvas(name: "Canvas #4", state: Canvas.State.STOPPED, json: "{}", server: "10.0.0.5"),
-			new Canvas(name: "Canvas #5", state: Canvas.State.STOPPED, json: "{}", server: "10.0.0.5"),
-			new Canvas(name: "Canvas #6", state: Canvas.State.RUNNING, json: "{}", server: "10.0.0.6"),
+			new Canvas(name: "Canvas #1", state: Canvas.State.RUNNING, server: "10.0.0.5"),
+			new Canvas(name: "Canvas #2", state: Canvas.State.RUNNING, server: "10.0.0.5"),
+			new Canvas(name: "Canvas #3", state: Canvas.State.RUNNING, server: "10.0.0.5"),
+			new Canvas(name: "Canvas #4", state: Canvas.State.STOPPED, server: "10.0.0.5"),
+			new Canvas(name: "Canvas #5", state: Canvas.State.STOPPED, server: "10.0.0.5"),
+			new Canvas(name: "Canvas #6", state: Canvas.State.RUNNING, server: "10.0.0.6"),
 		]
 		canvases.eachWithIndex { Canvas c, int index -> c.id = "canvas-${index+1}" }
 		canvases*.save(failOnError: true, validate: false)
 
-		def unsavedCanvas = new Canvas(name: "unsaved canvas", json: "{}")
+		def unsavedCanvas = new Canvas(name: "unsaved canvas")
 		unsavedCanvas.id = "non-existing-canvas-id"
 
 		and: "setup SignalPaths"
@@ -185,8 +185,8 @@ class NodeApiControllerSpec extends Specification {
 	void "canvasSizes uses serializationService#serialize to determine canvas size"() {
 		setup: "setup Canvases"
 		def canvases = [
-			new Canvas(name: "Canvas #1", state: Canvas.State.RUNNING, json: "{}", server: "10.0.0.5"),
-			new Canvas(name: "Canvas #2", state: Canvas.State.RUNNING, json: "{}", server: "10.0.0.5")
+			new Canvas(name: "Canvas #1", state: Canvas.State.RUNNING, server: "10.0.0.5"),
+			new Canvas(name: "Canvas #2", state: Canvas.State.RUNNING, server: "10.0.0.5")
 		]
 		canvases.eachWithIndex { Canvas c, int index -> c.id = "canvas-${index+1}" }
 		canvases*.save(failOnError: true, validate: false)
@@ -225,9 +225,9 @@ class NodeApiControllerSpec extends Specification {
 
 	void "shutdownNode invokes shutdown() if given ipAddress is of current machine"() {
 		def canvases = [
-			new Canvas(state: Canvas.State.RUNNING, json: "{}"),
-			new Canvas(state: Canvas.State.RUNNING, json: "{}"),
-			new Canvas(state: Canvas.State.RUNNING, json: "{}", adhoc: true)
+			new Canvas(state: Canvas.State.RUNNING,),
+			new Canvas(state: Canvas.State.RUNNING,),
+			new Canvas(state: Canvas.State.RUNNING, adhoc: true)
 		]
 		canvases*.save(validate:false)
 

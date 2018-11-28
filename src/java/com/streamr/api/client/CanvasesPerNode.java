@@ -1,20 +1,21 @@
 package com.streamr.api.client;
 
-import com.unifina.domain.signalpath.Canvas;
+import java.util.List;
+import java.util.Map;
 
 public class CanvasesPerNode {
-	public Canvas[] ok;
-	public Canvas[] shouldBeRunning;
-	public Canvas[] shouldNotBeRunning;
+	public List<Map<String, Object>> ok;
+	public List<Map<String, Object>> shouldBeRunning;
+	public List<Map<String, Object>> shouldNotBeRunning;
 
 	public CanvasesPerNode() {}
 
 	@Override
 	public String toString() {
 		StringBuilder sb = new StringBuilder("CanvasesPerNode[");
-		sb.append("ok=").append(this.ok.length).append(',');
-		sb.append("shouldBeRunning=").append(this.shouldBeRunning.length).append(',');
-		sb.append("shouldNotBeRunning=").append(this.shouldNotBeRunning.length);
+		sb.append("ok=").append(this.ok).append(',');
+		sb.append("shouldBeRunning=").append(this.shouldBeRunning).append(',');
+		sb.append("shouldNotBeRunning=").append(this.shouldNotBeRunning);
 		sb.append(']');
 		return sb.toString();
 	}

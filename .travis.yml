@@ -17,6 +17,7 @@ before_install:
 - sdk install grails 2.5.6
 - sed -i 's/git@github.com:/https:\/\/github.com\//' .gitmodules
 - git submodule update --init --recursive
+- npm i -g npm@6.4.0
 addons:
   chrome: stable
 env:
@@ -34,7 +35,7 @@ jobs:
     script: "./travis_scripts/fe_unit_test.sh"
   - stage: Integration tests
     script: "./travis_scripts/integration_test.sh"
-  - stage: Build war
+  - stage: Build war Prod
     script: "./travis_scripts/build_war.sh"
     deploy:
       - provider: s3 #staging
@@ -67,9 +68,20 @@ jobs:
         skip_cleanup: true
         local_dir: build
     if: branch = master
-  - stage: Build docker
-    script: "./travis_scripts/docker_build.sh"
-    if: "(NOT type IN (pull_request)) AND (branch = master)"
+  - stage: Build docker Staging
+    env:
+    - OWNER=streamr
+    - IMAGE_NAME=engine-and-editor
+    - TAG=dev
+    script:
+    - grails clean
+    - npm install
+    - grails test war
+    - docker build -f Dockerfile.dev -t $OWNER/$IMAGE_NAME:$TAG .
+    deploy:
+    - provider: script
+      script: bash travis_scripts/deploy_docker.sh staging
+    if: branch = master
 after_failure: "./travis-after-failure.sh"
 notifications:
   slack:
