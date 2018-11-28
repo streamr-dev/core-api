@@ -36,7 +36,14 @@ class KeyValueStoreService {
 			Assert.notNull(hosts, "streamr.redis.hosts is null!")
 			Assert.notEmpty(hosts, "streamr.redis.hosts is empty!")
 
-			redisClient = RedisClient.create(RedisURI.create("redis://" + password + "@" + hosts.get(0)))
+			log.info("Configured Redis hosts: " + hosts)
+			RedisURI redisURI = RedisURI.create("redis://" + hosts.get(0))
+			if (password) {
+				redisURI.setPassword(password)
+			}
+
+			log.info("Initializing RedisClient: " + redisURI)
+			redisClient = RedisClient.create(redisURI)
 			connection = redisClient.connectAsync()
 		}
 		return connection

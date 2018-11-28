@@ -109,18 +109,21 @@ class ContractEventPoller implements Closeable, Runnable {
 	private void uninstallFilter() {
 		boolean result;
 
+		// avoid race condition where another close() enters while rpcCall is executing
+		String id = filterId;
+		filterId = null;
+
 		try {
-			result = rpc.rpcCall("eth_uninstallFilter", singletonList(filterId)).getBoolean("result");
+			result = rpc.rpcCall("eth_uninstallFilter", singletonList(id)).getBoolean("result");
 		} catch (JSONException e) {
 			throw new RuntimeException(e);
 		}
 
 		if (result) {
-			log.info(String.format("Filter '%s' uninstalled.", filterId));
-			filterId = null;
+			log.info(String.format("Filter '%s' uninstalled.", id));
 		} else {
-			listener.onError("Unable to uninstall filter " + filterId);
-			throw new RuntimeException("Unable to uninstall filter " + filterId);
+			listener.onError("Unable to uninstall filter " + id);
+			throw new RuntimeException("Unable to uninstall filter " + id);
 		}
 	}
 

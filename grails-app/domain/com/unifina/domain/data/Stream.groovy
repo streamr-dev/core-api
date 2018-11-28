@@ -7,10 +7,11 @@ import grails.converters.JSON
 import groovy.transform.CompileStatic
 
 class Stream implements Comparable {
+	public final static String DEFAULT_NAME = "Untitled Stream"
 	String id
 	Integer partitions = 1
 
-	String name
+	String name = DEFAULT_NAME
 	Feed feed
 	String config
 	String description
