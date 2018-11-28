@@ -38,6 +38,16 @@ class NodeApiControllerSpec extends Specification {
 		response.json == ['192.168.1.51', '192.168.1.53']
 	}
 
+	void "config returns the Grails config as flattened json"() {
+		when:
+		request.method = "GET"
+		controller.config()
+
+		then:
+		response.json.size() > 0
+		response.json["streamr.nodes"] != null
+	}
+
 	void "shutdown must stop all TaskWorkers, stop local Canvases and start them remotely"() {
 		def canvases = [
 				new Canvas(state: Canvas.State.RUNNING),
