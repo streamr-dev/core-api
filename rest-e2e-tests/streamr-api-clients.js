@@ -279,6 +279,18 @@ class Permissions {
     }
 }
 
+class Users {
+    constructor(options) {
+        this.options = options
+    }
+
+    create(body) {
+        return new StreamrApiRequest(this.options)
+            .methodAndPath('POST', 'users')
+            .withBody(body)
+    }
+}
+
 module.exports = (baseUrl, logging) => {
     const options = {
         baseUrl,
@@ -293,7 +305,8 @@ module.exports = (baseUrl, logging) => {
                 login: new Login(options),
                 products: new Products(options),
                 streams: new Streams(options),
-                subscriptions: new Subscriptions(options)
+                subscriptions: new Subscriptions(options),
+                users: new Users(options)
             }
         }
     }

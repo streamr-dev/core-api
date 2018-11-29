@@ -57,6 +57,7 @@ class UrlMappings {
 		"/api/v1/modules"(resources: "moduleApi")
 		"/api/v1/modules/$id/help"(controller: "moduleApi", action: "help")
 
+		"/api/v1/users"(resources: "userApi")
 		"/api/v1/users/me"(controller: "userApi", action: "getUserInfo")
 		"/api/v1/users/me/keys"(resources: "keyApi", excludes: ["create", "edit", "update"]) { resourceClass = SecUser }
 		"/api/v1/users/me/products"(controller: "productApi", action: "index") { operation = Permission.Operation.SHARE }

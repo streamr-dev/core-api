@@ -11,6 +11,7 @@ import com.unifina.api.InvalidStateException
 import com.unifina.api.InvalidUsernameAndPasswordException
 import com.unifina.api.ValidationException
 import com.unifina.exceptions.CanvasUnreachableException
+import com.unifina.exceptions.UserCreationFailedException
 import com.unifina.security.AuthLevel
 import com.unifina.security.StreamrApi
 import grails.converters.JSON
@@ -27,7 +28,8 @@ class ErrorController {
 		InvalidSessionTokenException: { InvalidSessionTokenException e -> new ApiError(400, "INVALID_SESSION_TOKEN_ERROR", e.message)},
 		ChallengeVerificationFailedException: { ChallengeVerificationFailedException e -> new ApiError(400, "CHALLENGE_VERIFICATION_FAILED_ERROR", e.message)},
 		InvalidUsernameAndPasswordException: { InvalidUsernameAndPasswordException e -> new ApiError(400, "INVALID_USERNAME_PASSWORD_ERROR", e.message)},
-		InvalidAPIKeyException: { InvalidAPIKeyException e -> new ApiError(400, "INVALID_API_KEY_ERROR", e.message)}
+		InvalidAPIKeyException: { InvalidAPIKeyException e -> new ApiError(400, "INVALID_API_KEY_ERROR", e.message)},
+		UserCreationFailedException: { UserCreationFailedException e -> new ApiError(422, "FAILED_TO_CREATE_USER", e.message)}
 	]
 
 	@StreamrApi(authenticationLevel = AuthLevel.NONE)
