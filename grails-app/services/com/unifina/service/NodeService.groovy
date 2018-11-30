@@ -1,27 +1,30 @@
-package com.unifina.utils
+package com.unifina.service
 
-import grails.util.Holders
+import com.unifina.utils.MapTraversal
 import org.apache.log4j.Logger
+import org.codehaus.groovy.grails.commons.GrailsApplication
 
-class NetworkInterfaceUtils {
+class NodeService {
 
-	public static final Logger log = Logger.getLogger(NetworkInterfaceUtils)
+	public static final Logger log = Logger.getLogger(NodeService)
 
-	private static String cachedIp = null
+	GrailsApplication grailsApplication
 
-	static String getIPAddress(Map config = Holders.getConfig()) {
+	private String cachedIp = null
+
+	String getIPAddress(Map config = grailsApplication.config) {
 		// Return cachedIp if set
 		if (cachedIp) {
 			return cachedIp
 		}
 
 		// Check for a configured IP address
-		String configuredIp = config?.streamr?.node?.ip
+		String configuredIp = MapTraversal.getString(config, "streamr.node.ip")
 		if (configuredIp) {
 			cachedIp = configuredIp
 		} else {
 			// Else search for a non-loopback non-virtual non-p2p interface with at least one ipv4 address
-			List<NetworkInterface> interfaces = NetworkInterface.getNetworkInterfaces().findAll {
+			List<NetworkInterface> interfaces = getNetworkInterfaces().findAll {
 				!(it.isVirtual() || it.isPointToPoint() || it.isLoopback())
 			}
 			List<Inet4Address> addresses = interfaces.collect {
@@ -43,8 +46,11 @@ class NetworkInterfaceUtils {
 		return cachedIp
 	}
 
-	static boolean isIpAddressOfCurrentNode(String ipAddress, Map config = Holders.getConfig()) {
+	boolean isIpAddressOfCurrentNode(String ipAddress, Map config = grailsApplication.config) {
 		return getIPAddress(config).equals(ipAddress)
 	}
 
+	Enumeration<NetworkInterface> getNetworkInterfaces() {
+		return NetworkInterface.getNetworkInterfaces()
+	}
 }

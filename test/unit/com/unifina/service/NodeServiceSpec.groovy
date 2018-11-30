@@ -1,18 +1,24 @@
-package com.unifina.utils
+package com.unifina.service
 
+import grails.test.mixin.TestFor
 import spock.lang.Specification
 
-import static NetworkInterfaceUtils.*
+@TestFor(NodeService)
+class NodeServiceSpec extends Specification {
 
-class NetworkInterfaceUtilsSpec extends Specification {
+	NodeService nodeService
 
 	void setup() {
-		GroovySpy(NetworkInterface, global: true)
+		nodeService = Spy(NodeService)
+		nodeService.grailsApplication = grailsApplication
+		grailsApplication.config.streamr.node.ip = null
 	}
 
 	void "getIpAddress() returns a configured IP address if given"() {
+		grailsApplication.config.streamr.node.ip = "1.2.3.4"
+
 		expect:
-		getIPAddress(setConfiguredIp("1.2.3.4")) == "1.2.3.4"
+		nodeService.getIPAddress([streamr: [node: [ip: "1.2.3.4"]]]) == "1.2.3.4"
 	}
 
 	void "getIpAddress() returns the first IPv4 address it finds"() {
@@ -31,19 +37,19 @@ class NetworkInterfaceUtilsSpec extends Specification {
 		]
 
 		when:
-		String result = getIPAddress([:])
+		String result = nodeService.getIPAddress()
 
 		then:
-		1 * NetworkInterface.getNetworkInterfaces() >> Collections.enumeration(interfaces)
+		1 * nodeService.getNetworkInterfaces() >> (interfaces as Enumeration)
 		result == "5.5.5.5"
 	}
 
 	void "getIpAddress() falls back to 127.0.0.1 if it can't find other suitable interfaces"() {
 		when:
-		String result = getIPAddress([:])
+		String result = nodeService.getIPAddress()
 
 		then:
-		1 * NetworkInterface.getNetworkInterfaces() >> Collections.enumeration([])
+		1 * nodeService.getNetworkInterfaces() >> Collections.enumeration([])
 		result == "127.0.0.1"
 	}
 
@@ -51,62 +57,58 @@ class NetworkInterfaceUtilsSpec extends Specification {
 		def networkInterface = setUpNetworkInterface(false, false)
 
 		when:
-		def result = isIpAddressOfCurrentNode("6.6.6.6", [:])
+		def result = nodeService.isIpAddressOfCurrentNode("6.6.6.6", [:])
 
 		then:
 		result
 
 		and:
-		1 * NetworkInterface.getNetworkInterfaces() >> Collections.enumeration([networkInterface])
+		1 * nodeService.getNetworkInterfaces() >> ([networkInterface] as Enumeration)
 	}
 
 	void "isIpAddressOfCurrentNode() returns false if given ipAddress matches virtual interface address"() {
 		def networkInterface = setUpNetworkInterface(true, false)
 
 		when:
-		def result = isIpAddressOfCurrentNode("6.6.6.6", [:])
+		def result = nodeService.isIpAddressOfCurrentNode("6.6.6.6", [:])
 
 		then:
 		!result
 
 		and:
-		1 * NetworkInterface.getNetworkInterfaces() >> Collections.enumeration([networkInterface])
+		1 * nodeService.getNetworkInterfaces() >> ([networkInterface] as Enumeration)
 	}
 
 	void "isIpAddressOfCurrentNode() returns false if given ipAddress matches point-to-point interface address"() {
 		def networkInterface = setUpNetworkInterface(false, true)
 
 		when:
-		def result = isIpAddressOfCurrentNode("6.6.6.6", [:])
+		def result = nodeService.isIpAddressOfCurrentNode("6.6.6.6", [:])
 
 		then:
 		!result
 
 		and:
-		1 * NetworkInterface.getNetworkInterfaces() >> Collections.enumeration([networkInterface])
+		1 * nodeService.getNetworkInterfaces() >> ([networkInterface] as Enumeration)
 	}
 
 	void "isIpAddressOfCurrentNode() returns false if given ipAddress does not match network interface address"() {
 		def networkInterface = setUpNetworkInterface(false, false)
 
 		when:
-		def result = isIpAddressOfCurrentNode("7.7.7.7", [:])
+		def result = nodeService.isIpAddressOfCurrentNode("7.7.7.7", [:])
 
 		then:
 		!result
 
 		and:
-		1 * NetworkInterface.getNetworkInterfaces() >> Collections.enumeration([networkInterface])
-	}
-
-	private Map setConfiguredIp(String ipAddress) {
-		return [streamr: [node: [ip: ipAddress]]]
+		1 * nodeService.getNetworkInterfaces() >> ([networkInterface] as Enumeration)
 	}
 
 	private NetworkInterface setUpNetworkInterface(boolean virtual, boolean pointToPoint,
 												   Collection<Inet4Address> addresses = [Inet4Address.getByName("6.6.6.6")]) {
 		return GroovyStub(NetworkInterface) {
-			getInetAddresses() >> Collections.enumeration(addresses)
+			getInetAddresses() >> (addresses as Enumeration)
 			isVirtual() >> virtual
 			isPointToPoint() >> pointToPoint
 		}

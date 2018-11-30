@@ -2,7 +2,6 @@ package com.unifina.service
 
 import com.unifina.domain.config.HostConfig
 import com.unifina.domain.security.SecRole
-import com.unifina.utils.NetworkInterfaceUtils
 import grails.util.Environment
 import grails.util.Holders
 import org.apache.log4j.Logger
@@ -17,6 +16,7 @@ class BootService {
 
 	def grailsApplication
 	def taskService
+	NodeService nodeService
 	def servletContext
 
 	private static final Logger log = Logger.getLogger(BootService.class)
@@ -63,7 +63,7 @@ class BootService {
 		 * Start a number of taskWorkers, specified by system property or config
 		 */
 		if (isFullEnvironment()) {
-			def ip = NetworkInterfaceUtils.getIPAddress()
+			String ip = nodeService.getIPAddress()
 			log.info("Using IP address: $ip")
 
 			HostConfig taskWorkerConfig = HostConfig.findByHostAndParameter(ip.toString(),"task.workers")
