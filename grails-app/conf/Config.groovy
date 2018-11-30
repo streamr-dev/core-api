@@ -243,17 +243,9 @@ unifina.feed.cachedir = System.getProperty("java.io.tmpdir")
 
 
 /**
- * Node IP address config
+ * Node IP address config. Autodetected in BootService if not set.
  */
-// Useful for forcing node IP. Useful if discovery fails for any reason (developing offline, behind NAT, using VPN, etc.)
-streamr.ip.address.force = System.getProperty("streamr.ip.address.force")
-// Aid IP address discovery by defining acceptable IP address prefixes (or empty if anything goes)
-streamr.ip.address.prefixes = System.getProperty("streamr.ip.address.prefixes") ? Arrays.asList(System.getProperty("streamr.ip.address.prefixes").split(",")) : ["192.168.10.", "192.168.", "10.", "172.18."]
-environments {
-	production {
-		streamr.ip.address.prefixes = []
-	}
-}
+streamr.node.ip = System.getProperty("streamr.node.ip")
 
 /**
  * UI update server address

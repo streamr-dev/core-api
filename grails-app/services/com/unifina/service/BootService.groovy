@@ -63,8 +63,8 @@ class BootService {
 		 * Start a number of taskWorkers, specified by system property or config
 		 */
 		if (isFullEnvironment()) {
-			def ip = (config.streamr.ip.address.force ? Inet4Address.getByName(config.streamr.ip.address.force) : NetworkInterfaceUtils.getIPAddress())
-			log.info("My network interface is: $ip")
+			def ip = NetworkInterfaceUtils.getIPAddress()
+			log.info("Using IP address: $ip")
 
 			HostConfig taskWorkerConfig = HostConfig.findByHostAndParameter(ip.toString(),"task.workers")
 
