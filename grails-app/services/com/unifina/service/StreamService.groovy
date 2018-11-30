@@ -7,11 +7,12 @@ import com.unifina.api.NotPermittedException
 import com.unifina.api.ValidationException
 import com.unifina.data.StreamPartitioner
 import com.unifina.data.StreamrBinaryMessage
-import com.unifina.data.StreamrBinaryMessageV28
 import com.unifina.data.StreamrBinaryMessageV29
+import com.unifina.data.StreamrBinaryMessageV29.SignatureType
 import com.unifina.domain.dashboard.DashboardItem
 import com.unifina.domain.data.Feed
 import com.unifina.domain.data.Stream
+import com.unifina.domain.security.IntegrationKey
 import com.unifina.domain.security.Key
 import com.unifina.domain.security.Permission
 import com.unifina.domain.security.SecUser
@@ -127,10 +128,11 @@ class StreamService {
 
 	// Ref to Kafka will be abstracted out when Feed abstraction is reworked
 
-	void sendMessage(Stream stream, String partitionKey, long timestamp, byte[] content, byte contentType, int ttl=0) {
+	void sendMessage(Stream stream, String partitionKey, long timestamp, byte[] content, byte contentType, int ttl=0,
+					 SignatureType signatureType = SignatureType.SIGNATURE_TYPE_NONE, String address = null, String signature = null) {
 		int streamPartition = partitioner.partition(stream, partitionKey)
 		StreamrBinaryMessage msg = new StreamrBinaryMessageV29(stream.id, streamPartition, timestamp, ttl, contentType, content,
-			StreamrBinaryMessageV29.SignatureType.SIGNATURE_TYPE_NONE, null, null)
+			signatureType, address, signature)
 
 		String kafkaPartitionKey = "${stream.id}-$streamPartition"
 		kafkaService.sendMessage(msg, kafkaPartitionKey)
@@ -279,18 +281,21 @@ class StreamService {
 		}
 	}
 
-	Set<SecUser> getStreamWriters(Stream stream) {
-		List<Permission> permissions = permissionService.getPermissionsTo(stream, Permission.Operation.WRITE)
-		return permissions.user.toSet()
-	}
-
 	Set<String> getStreamEthereumProducers(Stream stream) {
-		Set<SecUser> writers = getStreamWriters(stream)
+		List<SecUser> writers = permissionService.getPermissionsTo(stream, Permission.Operation.WRITE).user
+		List<IntegrationKey.Service> services = [IntegrationKey.Service.ETHEREUM, IntegrationKey.Service.ETHEREUM_ID]
+
+		// For some reason the following returns an empty list
+		// List<IntegrationKey> keys = IntegrationKey.findAllByServiceInListAndUserInList(services, writers)
+		List<IntegrationKey> keys = []
+		for(SecUser w: writers) {
+			List<IntegrationKey> t = IntegrationKey.findAllByServiceInListAndUser(services, w)
+			keys.addAll(t)
+		}
+
 		Set<String> addresses = new HashSet<String>()
-		for(SecUser user: writers) {
-			if(EthereumAddressValidator.validate(user.username)) {
-				addresses.add(user.username.toLowerCase())
-			}
+		for(IntegrationKey key: keys) {
+			addresses.add(key.idInService)
 		}
 		return addresses
 	}

@@ -7,6 +7,7 @@ databaseChangeLog = {
 			}
 		}
 	}
+	// leftover from authentication project
 	changeSet(author: "mthambipillai", id: "add-requireSignedData-field-3") {
 		dropTable(tableName: "challenge")
 	}

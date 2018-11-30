@@ -6,6 +6,7 @@ import com.unifina.domain.dashboard.Dashboard
 import com.unifina.domain.dashboard.DashboardItem
 import com.unifina.domain.data.Feed
 import com.unifina.domain.data.Stream
+import com.unifina.domain.security.IntegrationKey
 import com.unifina.domain.security.Key
 import com.unifina.domain.security.Permission
 import com.unifina.domain.security.SecUser
@@ -21,7 +22,7 @@ import spock.lang.Specification
  * See the API for {@link grails.test.mixin.support.GrailsUnitTestMixin} for usage instructions
  */
 @TestFor(StreamService)
-@Mock([Canvas, Dashboard, DashboardItem, Stream, Feed, SecUser, Key, Permission, PermissionService])
+@Mock([Canvas, Dashboard, DashboardItem, Stream, Feed, SecUser, Key, IntegrationKey, Permission, PermissionService])
 class StreamServiceSpec extends Specification {
 
 	Feed feed
@@ -388,46 +389,31 @@ class StreamServiceSpec extends Specification {
 		0 * cb._
 	}
 
-	void "getStreamWriters retrieves the SecUsers with WRITE permission to the stream"() {
-		service.permissionService = Mock(PermissionService)
-		SecUser user1 = new SecUser(username: "u1")
-		SecUser user2 = new SecUser(username: "u2")
-		Set<SecUser> users = new HashSet<SecUser>()
-		users.add(user1)
-		users.add(user2)
-		Permission p1 = new Permission(user: user1)
-		Permission p2 = new Permission(user: user2)
-		List<Permission> perms = new ArrayList<Permission>();
-		perms.add(p1)
-		perms.add(p2)
-		Stream stream = new Stream(name: "name")
-		stream.id = "streamId"
-		stream.save(failOnError: true, validate: false)
-
-		when:
-		Set<SecUser> retrievedUsers = service.getStreamWriters(stream)
-		then:
-		1 * service.permissionService.getPermissionsTo(stream, Permission.Operation.WRITE) >> perms
-		retrievedUsers == users
-	}
-
 	void "getStreamEthereumProducers should return only Ethereum users"() {
 		setup:
-		def service = Spy(StreamService)
-		SecUser user1 = new SecUser(username: "u1")
-		SecUser user2 = new SecUser(username: "0x26e1ae3f5efe8a01eca8c2e9d3c32702cf4bead6")
-		Set<SecUser> users = new HashSet<SecUser>()
-		users.add(user1)
-		users.add(user2)
+		service.permissionService = Mock(PermissionService)
+		SecUser user1 = new SecUser(id: 1, username: "u1").save(failOnError: true, validate: false)
+		IntegrationKey key1 = new IntegrationKey(user: user1, service: IntegrationKey.Service.ETHEREUM_ID,
+			idInService: "0x9fe1ae3f5efe2a01eca8c2e9d3c11102cf4bea57").save(failOnError: true, validate: false)
+		SecUser user2 = new SecUser(id: 2, username: "u2").save(failOnError: true, validate: false)
+		IntegrationKey key2 = new IntegrationKey(user: user2, service: IntegrationKey.Service.ETHEREUM,
+			idInService: "0x26e1ae3f5efe8a01eca8c2e9d3c32702cf4bead6").save(failOnError: true, validate: false)
+		SecUser user3 = new SecUser(id: 3, username: "u3").save(failOnError: true, validate: false)
+
 		Set<String> validAddresses = new HashSet<String>()
-		validAddresses.add("0x26e1ae3f5efe8a01eca8c2e9d3c32702cf4bead6")
+		validAddresses.add(key1.idInService)
+		validAddresses.add(key2.idInService)
+		Permission p1 = new Permission(user: user1)
+		Permission p2 = new Permission(user: user2)
+		Permission p3 = new Permission(user: user3)
+		List<Permission> perms = [p1, p2, p3]
 		Stream stream = new Stream(name: "name")
 		stream.id = "streamId"
 		stream.save(failOnError: true, validate: false)
 		when:
 		Set<String> addresses = service.getStreamEthereumProducers(stream)
 		then:
-		1 * service.getStreamWriters(stream) >> users
+		1 * service.permissionService.getPermissionsTo(stream, Permission.Operation.WRITE) >> perms
 		addresses == validAddresses
 	}
 }
