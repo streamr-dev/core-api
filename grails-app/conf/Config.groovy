@@ -1,5 +1,6 @@
 import com.google.gson.Gson
 import com.unifina.data.KafkaPartitioner
+import com.unifina.service.NodeService
 
 /*****
  * This config file gets merged with the application config file.
@@ -480,7 +481,7 @@ streamr.signup.requireCaptcha = (System.getProperty("streamr.signup.requireCaptc
 /**
  * Streamr engine-and-editor nodes
  */
-streamr.nodes = System.getProperty("streamr.nodes") ? Arrays.asList(System.getProperty("streamr.nodes").split(",")) : ["127.0.0.1"]
+streamr.nodes = System.getProperty("streamr.nodes") ? Arrays.asList(System.getProperty("streamr.nodes").split(",")) : [new NodeService().getIPAddress([streamr: [node: [ip: System.getProperty("streamr.node.ip")]]])]
 
 /**
  * Miscellaneous
