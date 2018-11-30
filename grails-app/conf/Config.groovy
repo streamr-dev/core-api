@@ -238,7 +238,7 @@ unifina.feed.cachedir = System.getProperty("java.io.tmpdir")
 
 
 /**
- * Node IP address config. Autodetected in BootService if not set.
+ * Node IP address config. Autodetected if not set.
  */
 streamr.node.ip = System.getProperty("streamr.node.ip")
 
