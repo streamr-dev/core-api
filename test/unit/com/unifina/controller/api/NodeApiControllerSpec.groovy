@@ -40,6 +40,16 @@ class NodeApiControllerSpec extends Specification {
 		response.json == ['192.168.1.51', '192.168.1.53']
 	}
 
+	void "ip() returns node IP address"() {
+		when:
+		request.method = "GET"
+		controller.ip()
+
+		then:
+		1 * controller.nodeService.getIPAddress() >> "1.2.3.4"
+		response.json["ip"] == "1.2.3.4"
+	}
+
 	void "config returns the Grails config as flattened json"() {
 		when:
 		request.method = "GET"

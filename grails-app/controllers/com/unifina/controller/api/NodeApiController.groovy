@@ -47,6 +47,12 @@ class NodeApiController {
 		render(getStreamrNodes() as JSON)
 	}
 
+	@GrailsCompileStatic
+	@StreamrApi(allowRoles = AllowRole.ADMIN)
+	def ip() {
+		render([ip: nodeService.getIPAddress()] as JSON)
+	}
+
 	@StreamrApi(allowRoles = AllowRole.ADMIN)
 	def config() {
 		Map<String, Object> config = Holders.getFlatConfig()
