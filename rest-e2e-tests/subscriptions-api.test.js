@@ -36,9 +36,9 @@ async function createSubscription(subscriptionBody) {
         .execute()
 }
 
-async function obtainChallenge() {
+async function obtainChallenge(address) {
     const json = await Streamr.api.v1.login
-        .challenge()
+        .challenge(address)
         .execute()
     return json
 }
@@ -214,13 +214,12 @@ describe('Subscriptions API', () => {
                 endsAt: 1540840312
             })
 
-            const challenge = await obtainChallenge()
+            const challenge = await obtainChallenge(publicAddress)
             const web3 = new Web3()
 
             const signedChallenge = web3.eth.accounts.sign(challenge.challenge, privateKey)
 
-            const response = await submitChallenge(challenge, signedChallenge.signature)
-            response
+            await submitChallenge(challenge, signedChallenge.signature)
         })
 
         it('requires authentication', async () => {

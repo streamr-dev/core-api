@@ -211,7 +211,7 @@ environments {
 /**
  * API & CORS config
  */
-cors.url.pattern = ['/api/*', '/contact/send', '/profile/*', '/logout/*', '/login/*', '/j_spring_security_check', '/canvas', '/auth/forgotPassword', '/logout', '/auth/register', '/auth/resetPassword', '/auth/signup']
+cors.url.pattern = ['/api/*', '/contact/send', '/profile/*', '/logout/*', '/login/*', '/j_spring_security_check', '/canvas', '/auth/forgotPassword', '/logout', '/auth/register', '/auth/resetPassword', '/auth/signup', '/j_spring_security_logout']
 streamr.apiKey.revokeNotificationStream = "revoked-api-keys"
 
 /**
@@ -226,12 +226,6 @@ unifina.reports.recipient = "henri.pihkala@streamr.com"
 // How many task worker threads to launch on startup
 unifina.task.workers = 1
 unifina.task.messageQueue = "streamr-tasks"
-
-environments {
-	development {
-		unifina.task.workers = 0
-	}
-}
 
 /**
  * Data feed config
@@ -260,10 +254,10 @@ environments {
 /**
  * HTTP API server address
  */
-streamr.http.api.server = System.getProperty("streamr.http.api.server") ?: "http://127.0.0.1:8890/api/v1"
+streamr.http.api.url = System.getProperty("streamr.http.api.url") ?: "http://127.0.0.1:8081/streamr-core/api/v1"
 environments {
 	production {
-		streamr.http.api.server = System.getProperty("streamr.http.api.server") ?: "${prodBaseUrl}/api/v1"
+		streamr.http.api.url = System.getProperty("streamr.http.api.url") ?: "${prodBaseUrl}/api/v1"
 	}
 }
 

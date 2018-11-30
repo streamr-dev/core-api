@@ -13,10 +13,12 @@ import com.unifina.service.SignalPathService
 import com.unifina.service.TaskService
 import com.unifina.signalpath.SignalPath
 import com.unifina.signalpath.map.ValueSortedMap
+import com.unifina.utils.MapTraversal
 import com.unifina.utils.NetworkInterfaceUtils
 import grails.compiler.GrailsCompileStatic
 import grails.converters.JSON
 import grails.plugin.springsecurity.annotation.Secured
+import grails.util.Holders
 import org.codehaus.groovy.grails.commons.GrailsApplication
 import org.codehaus.groovy.grails.web.mapping.LinkGenerator
 
@@ -25,6 +27,7 @@ class NodeApiController {
 
 	static allowedMethods = [
 		index: "GET",
+		config: "GET",
 		canvases: "GET",
 		canvasSizes: "GET",
 		shutdown: "POST",
@@ -46,6 +49,24 @@ class NodeApiController {
 	@StreamrApi(allowRoles = AllowRole.ADMIN)
 	def index() {
 		render(getStreamrNodes() as JSON)
+	}
+
+	@StreamrApi(allowRoles = AllowRole.ADMIN)
+	def config() {
+		Map<String, Object> config = Holders.getFlatConfig()
+
+		// Clean up the config from values that the JSON marshaller won't support by calling toString() on them
+		config.keySet().each {String key->
+			def value = config.get(key)
+			if (!(value instanceof Number
+				|| value instanceof String
+				|| value instanceof Boolean
+				|| value instanceof Collection
+				|| value instanceof Map)) {
+				config.put(key, value?.toString())
+			}
+		}
+		render(config as JSON)
 	}
 
 	@GrailsCompileStatic
@@ -101,6 +122,12 @@ class NodeApiController {
 		}
 
 		render(stoppedCanvases*.toMap() as JSON)
+	}
+
+	@GrailsCompileStatic
+	@StreamrApi(allowRoles = AllowRole.ADMIN)
+	def configNode(String nodeIp) {
+		invokeOrRedirect("config", nodeIp, this.&config)
 	}
 
 	@GrailsCompileStatic

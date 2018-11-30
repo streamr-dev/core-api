@@ -117,4 +117,5 @@ databaseChangeLog = {
 	include file: 'core/2018-07-03-rm-feed-start-on-demand.groovy'
 	include file: 'core/2018-07-12-canvas-started-by.groovy'
 	include file: 'core/2018-08-30-test-data-for-stream-api-tests.groovy'
+	include file: 'core/2018-09-26-unify-domain.groovy'
 }

@@ -5,7 +5,8 @@ FROM openjdk:8-jdk-alpine
 # Set Grails version.
 
 RUN apk update
-RUN apk add curl git python nodejs nodejs-npm
+RUN apk add curl git python nodejs npm
+RUN npm install -g npm@6.4.1
 RUN apk add --no-cache \
             libstdc++ \
             && apk add --no-cache --virtual .build-deps \

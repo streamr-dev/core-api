@@ -173,7 +173,7 @@ class CanvasApiControllerSpec extends ControllerSpecification {
 		1 * canvasService.createNew(_, me) >> { SaveCanvasCommand command, SecUser user ->
 			assert command.name == "brand new Canvas"
 			assert command.modules == []
-			def c = new Canvas(json: "{}").save(validate: false)
+			def c = new Canvas().save(validate: false)
 			newCanvasId = c.id
 			return c
 		}
