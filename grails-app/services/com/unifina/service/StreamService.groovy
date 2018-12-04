@@ -282,22 +282,14 @@ class StreamService {
 	}
 
 	Set<String> getStreamEthereumProducers(Stream stream) {
-		List<SecUser> writers = permissionService.getPermissionsTo(stream, Permission.Operation.WRITE).user
-		List<IntegrationKey.Service> services = [IntegrationKey.Service.ETHEREUM, IntegrationKey.Service.ETHEREUM_ID]
+		// This approach might be slow if there are a lot of allowed writers to the Stream
+		List<SecUser> writers = permissionService.getPermissionsTo(stream, Permission.Operation.WRITE)*.user
 
-		// For some reason the following returns an empty list
-		// List<IntegrationKey> keys = IntegrationKey.findAllByServiceInListAndUserInList(services, writers)
-		List<IntegrationKey> keys = []
-		for(SecUser w: writers) {
-			List<IntegrationKey> t = IntegrationKey.findAllByServiceInListAndUser(services, w)
-			keys.addAll(t)
+		List<IntegrationKey> keys = IntegrationKey.findAll {
+			user.id in writers*.id && service in [IntegrationKey.Service.ETHEREUM, IntegrationKey.Service.ETHEREUM_ID]
 		}
 
-		Set<String> addresses = new HashSet<String>()
-		for(IntegrationKey key: keys) {
-			addresses.add(key.idInService)
-		}
-		return addresses
+		return keys*.idInService as Set
 	}
 
 	@CompileStatic

@@ -389,7 +389,7 @@ class StreamServiceSpec extends Specification {
 		0 * cb._
 	}
 
-	void "getStreamEthereumProducers should return only Ethereum users"() {
+	void "getStreamEthereumProducers should return Ethereum addresses of users with write permission to the Stream"() {
 		setup:
 		service.permissionService = Mock(PermissionService)
 		SecUser user1 = new SecUser(id: 1, username: "u1").save(failOnError: true, validate: false)
@@ -399,6 +399,11 @@ class StreamServiceSpec extends Specification {
 		IntegrationKey key2 = new IntegrationKey(user: user2, service: IntegrationKey.Service.ETHEREUM,
 			idInService: "0x26e1ae3f5efe8a01eca8c2e9d3c32702cf4bead6").save(failOnError: true, validate: false)
 		SecUser user3 = new SecUser(id: 3, username: "u3").save(failOnError: true, validate: false)
+
+		// User with key but no write permission - this key should not be returned by the query
+		SecUser userWithKeyButNoPermission = new SecUser(id: 4, username: "u4").save(failOnError: true, validate: false)
+		new IntegrationKey(user: userWithKeyButNoPermission, service: IntegrationKey.Service.ETHEREUM_ID,
+			idInService: "0x12345e3f5efe8a01eca8c2e9d3c32702cf4bead6").save(failOnError: true, validate: false)
 
 		Set<String> validAddresses = new HashSet<String>()
 		validAddresses.add(key1.idInService)
