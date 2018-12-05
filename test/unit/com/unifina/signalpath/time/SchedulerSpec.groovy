@@ -18,7 +18,6 @@ class SchedulerSpec extends UiChannelMockingSpecification {
 
 	void "Scheduler works as expected"() {
 		when:
-		System.out.printf("%s%n", new Date().toString())
 		module = setupModule(new Scheduler(), [
 			uiChannel: [id: "schedulerChannel"],
 			schedule: [
