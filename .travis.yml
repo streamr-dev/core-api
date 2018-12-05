@@ -67,7 +67,7 @@ jobs:
         region: eu-west-1
         skip_cleanup: true
         local_dir: build
-    if: branch = master
+    if: NOT type IN (pull_request)
   - stage: Build docker Staging
     env:
     - OWNER=streamr
@@ -81,7 +81,7 @@ jobs:
     deploy:
     - provider: script
       script: bash travis_scripts/deploy_docker.sh staging
-    if: branch = master
+    if: NOT type IN (pull_request)
 after_failure: "./travis-after-failure.sh"
 notifications:
   slack:
@@ -89,3 +89,4 @@ notifications:
   on_success: change
   on_failure: always
   on_pull_requests: false
+
