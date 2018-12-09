@@ -6,11 +6,11 @@ import com.unifina.api.node.NodeRequestDispatcher
 import com.unifina.domain.security.SecUser
 import com.unifina.domain.signalpath.Canvas
 import com.unifina.service.CanvasService
+import com.unifina.service.NodeService
 import com.unifina.service.SerializationService
 import com.unifina.service.SignalPathService
 import com.unifina.service.TaskService
 import com.unifina.signalpath.SignalPath
-import com.unifina.utils.NetworkInterfaceUtils
 import grails.test.mixin.Mock
 import grails.test.mixin.TestFor
 import spock.lang.Specification
@@ -24,6 +24,8 @@ class NodeApiControllerSpec extends Specification {
 	def setup() {
 		user1 = new SecUser(username: "user1@streamr.com").save(failOnError: true, validate: false)
 		user2 = new SecUser(username: "user2@streamr.com").save(failOnError: true, validate: false)
+
+		controller.nodeService = Mock(NodeService)
 	}
 
 	void "index lists streamr nodes"() {
@@ -36,6 +38,16 @@ class NodeApiControllerSpec extends Specification {
 
 		then:
 		response.json == ['192.168.1.51', '192.168.1.53']
+	}
+
+	void "ip() returns node IP address"() {
+		when:
+		request.method = "GET"
+		controller.ip()
+
+		then:
+		1 * controller.nodeService.getIPAddress() >> "1.2.3.4"
+		response.json["ip"] == "1.2.3.4"
 	}
 
 	void "config returns the Grails config as flattened json"() {
@@ -159,15 +171,12 @@ class NodeApiControllerSpec extends Specification {
 			]
 		}
 
-		and:
-		GroovySpy(NetworkInterfaceUtils, global: true)
-
 		when:
 		request.method = "GET"
 		controller.canvases()
 
 		then:
-		1 * NetworkInterfaceUtils.getIPAddress(_) >> Inet4Address.getByName("10.0.0.5")
+		1 * controller.nodeService.getIPAddress() >> "10.0.0.5"
 
 		and:
 		response.status == 200
@@ -247,10 +256,11 @@ class NodeApiControllerSpec extends Specification {
 
 		when:
 		request.method = "POST"
-		params.nodeIp = "127.0.0.1"
+		params.nodeIp = "1.2.3.4"
 		controller.shutdownNode()
 
 		then:
+		1 * controller.nodeService.isIpAddressOfCurrentNode("1.2.3.4") >> true
 		1 * controller.signalPathService.getUsersOfRunningCanvases() >> ["1": user1, "2": user2, "3": user1]
 		1 * controller.signalPathService.stopAllLocalCanvases() >> {
 			canvases*.state = Canvas.State.STOPPED
@@ -299,10 +309,11 @@ class NodeApiControllerSpec extends Specification {
 
 		when:
 		request.method = "GET"
-		params.nodeIp = "127.0.0.1"
+		params.nodeIp = "1.2.3.4"
 		controller.canvasesNode()
 
 		then:
+		1 * controller.nodeService.isIpAddressOfCurrentNode("1.2.3.4") >> true
 		response.status == 200
 		response.json.keySet() == ["ok", "shouldBeRunning", "shouldNotBeRunning"] as Set
 	}

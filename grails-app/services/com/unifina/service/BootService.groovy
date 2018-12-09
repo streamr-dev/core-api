@@ -2,7 +2,6 @@ package com.unifina.service
 
 import com.unifina.domain.config.HostConfig
 import com.unifina.domain.security.SecRole
-import com.unifina.utils.NetworkInterfaceUtils
 import grails.util.Environment
 import grails.util.Holders
 import org.apache.log4j.Logger
@@ -14,17 +13,18 @@ import org.codehaus.groovy.grails.plugins.GrailsPluginManager
  * @author Henri
  */
 class BootService {
-	
+
 	def grailsApplication
 	def taskService
+	NodeService nodeService
 	def servletContext
-	
+
 	private static final Logger log = Logger.getLogger(BootService.class)
-	
+
 	boolean isFullEnvironment() {
 		return Environment.getCurrent()!=Environment.TEST || System.getProperty("grails.test.phase") == "functional"
 	}
-	
+
 	def onInit() {
 		/**
 		 * Workaround for GRAILS-8895
@@ -41,40 +41,40 @@ class BootService {
 					wp.extension = "groovyXX";
 			}
 		}
-		
+
 		TimeZone.setDefault(TimeZone.getTimeZone("UTC"))
-		
+
 		def config = grailsApplication.config
 		def flatConfig = grailsApplication.flatConfig
-		
-		
+
+
 		// Create user roles if not present
 		def userRole = SecRole.findByAuthority('ROLE_USER') ?: new SecRole(authority: 'ROLE_USER').save(failOnError: true)
 		def adminRole = SecRole.findByAuthority('ROLE_ADMIN') ?: new SecRole(authority: 'ROLE_ADMIN').save(failOnError: true)
 		def liveRole = SecRole.findByAuthority('ROLE_LIVE') ?: new SecRole(authority: 'ROLE_LIVE').save(failOnError: true)
-		
+
 		/**
 		 * Create a map for signalPathRunners
 		 */
 		if (servletContext)
 			servletContext["signalPathRunners"] = [:]
-		
+
 		/**
 		 * Start a number of taskWorkers, specified by system property or config
 		 */
 		if (isFullEnvironment()) {
-			def ip = NetworkInterfaceUtils.getIPAddress()
-			log.info("My network interface is: $ip")
+			String ip = nodeService.getIPAddress()
+			log.info("Using IP address: $ip")
 
 			HostConfig taskWorkerConfig = HostConfig.findByHostAndParameter(ip.toString(),"task.workers")
-			
+
 			int workerCount
 			if (System.getProperty("task.workers")!=null)
 				workerCount = Integer.parseInt(System.getProperty("task.workers"))
 			else if (taskWorkerConfig!=null)
 				workerCount = Integer.parseInt(taskWorkerConfig.value)
 			else workerCount = config.unifina.task.workers ?: 0
-			
+
 			for (int i=0; i<workerCount; i++) {
 				taskService.startTaskWorker()
 			}
@@ -84,7 +84,7 @@ class BootService {
 			log.info("onInit: Task workers and listeners not started due to reduced environment: "+Environment.getCurrent()+", grails.test.phase: "+System.getProperty("grails.test.phase"))
 		}
 	}
-	
+
 	def onDestroy() {
 		taskService?.stopAllTaskWorkers()
 

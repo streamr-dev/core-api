@@ -1,5 +1,6 @@
 import com.google.gson.Gson
 import com.unifina.data.KafkaPartitioner
+import com.unifina.service.NodeService
 
 /*****
  * This config file gets merged with the application config file.
@@ -237,14 +238,9 @@ unifina.feed.cachedir = System.getProperty("java.io.tmpdir")
 
 
 /**
- * Aid IP address discovery by defining acceptable IP address prefixes (or empty if anything goes)
+ * Node IP address config. Autodetected if not set.
  */
-streamr.ip.address.prefixes = System.getProperty("streamr.ip.address.prefixes") ? Arrays.asList(System.getProperty("streamr.ip.address.prefixes").split(",")) : ["192.168.10.", "192.168.", "10.", "172.18.", "172.19"]
-environments {
-	production {
-		streamr.ip.address.prefixes = []
-	}
-}
+streamr.node.ip = System.getProperty("streamr.node.ip")
 
 /**
  * UI update server address
@@ -485,7 +481,7 @@ streamr.signup.requireCaptcha = (System.getProperty("streamr.signup.requireCaptc
 /**
  * Streamr engine-and-editor nodes
  */
-streamr.nodes = System.getProperty("streamr.nodes") ? Arrays.asList(System.getProperty("streamr.nodes").split(",")) : ["127.0.0.1"]
+streamr.nodes = System.getProperty("streamr.nodes") ? Arrays.asList(System.getProperty("streamr.nodes").split(",")) : [new NodeService().getIPAddress([streamr: [node: [ip: System.getProperty("streamr.node.ip")]]])]
 
 /**
  * Miscellaneous
