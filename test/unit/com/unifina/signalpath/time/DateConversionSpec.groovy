@@ -16,6 +16,10 @@ class DateConversionSpec extends Specification {
 
 	DateConversion module
 
+	def setup() {
+		TimeZone.setDefault(TimeZone.getTimeZone("UTC"))
+	}
+
 	private void initContext(String username="username") {
 		initContextWithUser(new SecUser(username: username).save(failOnError: true, validate: false))
 	}
@@ -25,19 +29,17 @@ class DateConversionSpec extends Specification {
 		module.globals = new Globals([:], user)
 		module.init()
 		module.connectionsReady()
-		module.setTimezone("UTC")
 	}
 
 	void "dateConversion gives the right answer"() {
 		initContext("username2")
 		when:
-		module.setTimezone("Europe/Helsinki")
 		module.getInput("format").receive("yyyy-MM-dd HH:mm:ss")
 		Map inputValues = [
 			date: [
-				new Date(2015 - 1900, 9, 15, 10, 35, 10),
-				"2000-01-01 12:45:55",
-				Double.valueOf(1000 * 60 * 15) // +15 minutes to epoch
+				new Date(2015 - 1900, 9, 15, 10, 35, 10), // Thu Oct 15 10:35:10 UTC 2015
+				"2000-01-01 12:45:55", // Sat Jan 01 12:45:55 UTC 2000
+				Double.valueOf(1000 * 60 * 15) // +15 minutes to epoch: Thu Jan 01 00:15:00 UTC 1970
 			],
 		]
 		Map outputValues = [
