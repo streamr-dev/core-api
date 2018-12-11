@@ -145,6 +145,26 @@ class PermissionServiceSpec extends Specification {
 		service.getPermissionsTo(dashRestricted)[0].user == anotherUser
 	}
 
+	void "getPermissionsTo with Operation returns all permissions for the given resource"() {
+		setup:
+		List<Permission> beforeRead = service.getPermissionsTo(dashOwned, Operation.READ)
+		List<Permission> beforeWrite = service.getPermissionsTo(dashOwned, Operation.WRITE)
+		Permission perm = service.grant(me, dashOwned, stranger, Operation.READ)
+		List<Permission> afterRead = service.getPermissionsTo(dashOwned, Operation.READ)
+		List<Permission> afterWrite = service.getPermissionsTo(dashOwned, Operation.WRITE)
+		List<Permission> all = service.getPermissionsTo(dashOwned)
+		List<Permission> allOperations = new ArrayList<Permission>()
+		Operation.values().collect { Operation op ->
+			allOperations.addAll(service.getPermissionsTo(dashOwned, op))
+		}
+		expect:
+		!beforeRead.contains(perm)
+		afterRead.contains(perm)
+		beforeRead.size() + 1 == afterRead.size()
+		beforeWrite.size() == afterWrite.size()
+		all.size() == allOperations.size()
+	}
+
 	void "getSingleUserPermissionsTo returns permissions for single user"() {
 		expect:
 		service.getPermissionsTo(dashOwned, me).size() == 3

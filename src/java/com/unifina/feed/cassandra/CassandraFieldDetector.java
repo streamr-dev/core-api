@@ -32,7 +32,7 @@ public class CassandraFieldDetector extends FieldDetector {
 			}
 			if (latestRow != null) {
 				StreamrBinaryMessageParser parser = new StreamrBinaryMessageParser();
-				return parser.parse(new StreamrBinaryMessage(latestRow.getBytes("payload")));
+				return parser.parse(StreamrBinaryMessage.from(latestRow.getBytes("payload")));
 			} else {
 				return null;
 			}

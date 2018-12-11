@@ -119,4 +119,5 @@ databaseChangeLog = {
 	include file: 'core/2018-08-30-test-data-for-stream-api-tests.groovy'
 	include file: 'core/2018-09-26-unify-domain.groovy'
 	include file: 'core/2018-09-20-rm-user-timezone.groovy'
+	include file: 'core/2018-11-27-add-requireSignedData-field.groovy'
 }

@@ -82,7 +82,7 @@ public class CassandraHistoricalIterator implements Iterator<MapMessage>, Closea
 			resultSet.fetchMoreResults(); // this is asynchronous
 		}
 
-		StreamrBinaryMessage msg = new StreamrBinaryMessage(row.getBytes("payload"));
+		StreamrBinaryMessage msg = StreamrBinaryMessage.from(row.getBytes("payload"));
 		return parser.parse(msg);
 	}
 

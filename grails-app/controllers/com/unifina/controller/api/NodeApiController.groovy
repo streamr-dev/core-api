@@ -7,16 +7,13 @@ import com.unifina.domain.security.SecUser
 import com.unifina.domain.signalpath.Canvas
 import com.unifina.security.AllowRole
 import com.unifina.security.StreamrApi
-import com.unifina.service.CanvasService
-import com.unifina.service.SerializationService
-import com.unifina.service.SignalPathService
-import com.unifina.service.TaskService
+import com.unifina.service.*
 import com.unifina.signalpath.SignalPath
 import com.unifina.signalpath.map.ValueSortedMap
-import com.unifina.utils.NetworkInterfaceUtils
 import grails.compiler.GrailsCompileStatic
 import grails.converters.JSON
 import grails.plugin.springsecurity.annotation.Secured
+import grails.util.Holders
 import org.codehaus.groovy.grails.commons.GrailsApplication
 import org.codehaus.groovy.grails.web.mapping.LinkGenerator
 
@@ -25,6 +22,7 @@ class NodeApiController {
 
 	static allowedMethods = [
 		index: "GET",
+		config: "GET",
 		canvases: "GET",
 		canvasSizes: "GET",
 		shutdown: "POST",
@@ -38,6 +36,7 @@ class NodeApiController {
 	SignalPathService signalPathService
 	SerializationService serializationService
 	TaskService taskService
+	NodeService nodeService
 
 	NodeRequestDispatcher nodeRequestDispatcher = new NodeRequestDispatcher()
 
@@ -50,9 +49,33 @@ class NodeApiController {
 
 	@GrailsCompileStatic
 	@StreamrApi(allowRoles = AllowRole.ADMIN)
+	def ip() {
+		render([ip: nodeService.getIPAddress()] as JSON)
+	}
+
+	@StreamrApi(allowRoles = AllowRole.ADMIN)
+	def config() {
+		Map<String, Object> config = Holders.getFlatConfig()
+
+		// Clean up the config from values that the JSON marshaller won't support by calling toString() on them
+		config.keySet().each {String key->
+			def value = config.get(key)
+			if (!(value instanceof Number
+				|| value instanceof String
+				|| value instanceof Boolean
+				|| value instanceof Collection
+				|| value instanceof Map)) {
+				config.put(key, value?.toString())
+			}
+		}
+		render(config as JSON)
+	}
+
+	@GrailsCompileStatic
+	@StreamrApi(allowRoles = AllowRole.ADMIN)
 	def canvases() {
 		Collection<Canvas> running = signalPathService.runningSignalPaths*.canvas
-		Collection<Canvas> shouldBeRunning = Canvas.findAllByStateAndServer(Canvas.State.RUNNING, ipAddressOfHost())
+		Collection<Canvas> shouldBeRunning = Canvas.findAllByStateAndServer(Canvas.State.RUNNING, nodeService.getIPAddress())
 
 		Map<String, Canvas> canvasById = (running + shouldBeRunning).collectEntries { Canvas c -> [(c.id): c] }
 
@@ -105,6 +128,12 @@ class NodeApiController {
 
 	@GrailsCompileStatic
 	@StreamrApi(allowRoles = AllowRole.ADMIN)
+	def configNode(String nodeIp) {
+		invokeOrRedirect("config", nodeIp, this.&config)
+	}
+
+	@GrailsCompileStatic
+	@StreamrApi(allowRoles = AllowRole.ADMIN)
 	def shutdownNode(String nodeIp) {
 		invokeOrRedirect("shutdown", nodeIp, this.&shutdown)
 	}
@@ -119,13 +148,9 @@ class NodeApiController {
 		(List<String>) grailsApplication.config.streamr.nodes
 	}
 
-	private String ipAddressOfHost() {
-		NetworkInterfaceUtils.getIPAddress(grailsApplication.config.streamr.ip.address.prefixes ?: []).hostAddress
-	}
-
 	@GrailsCompileStatic
 	private void invokeOrRedirect(String action, String nodeIp, Closure closure) {
-		if (NetworkInterfaceUtils.isIpAddressOfCurrentNode(nodeIp)) {
+		if (nodeService.isIpAddressOfCurrentNode(nodeIp)) {
 			closure.call()
 		} else if (!getStreamrNodes().contains(nodeIp)) {
 			throw new ApiException(400, "NOT_A_VALID_NODE", "Not a valid node: '${nodeIp}'")

@@ -67,7 +67,7 @@
     }
   ],
   "paths": {
-    "/login/challenge/${address}": {
+    "/login/challenge/{address}": {
       "post": {
         "summary": "Generate challenge",
         "description": "Generates a challenge to be signed by an Ethereum private key to prove possession of an Ethereum account.",
@@ -1712,6 +1712,27 @@
             "in": "query",
             "name": "pkey",
             "description": "For partitioned streams, provides the key to partition by. Can be eg. a customer id to make all events for that customer to go to the same Canvas for processing. If not given, a random partition is selected.",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "in": "query",
+            "name": "signatureType",
+            "description": "Signature type of the signature query parameter. 1 for Ethereum signature, 0 for no signature. If not given, defaults to 0.",
+            "required": false,
+            "type": "integer"
+          },
+          {
+            "in": "query",
+            "name": "address",
+            "description": "Ethereum address of the publisher in case the signature type is 1. The parameter is not needed if the signature type is 0.",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "in": "query",
+            "name": "signature",
+            "description": "If the signature type is 1, this parameter is the hex string representation of the Ethereum signature produced by the Ethereum address provided in the 'address' query parameter. This parameter is not needed if the signature type is 0.",
             "required": false,
             "type": "string"
           }

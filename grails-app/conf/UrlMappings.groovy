@@ -45,6 +45,7 @@ class UrlMappings {
 		"/api/v1/streams/$id/uploadCsvFile"(controller: "streamApi", action: "uploadCsvFile")
 		"/api/v1/streams/$id/confirmCsvFileUpload"(controller: "streamApi", action: "confirmCsvFileUpload")
 		"/api/v1/streams/$id/dataFiles"(controller: "streamApi", action: "dataFiles")
+		"/api/v1/streams/$id/producers"(controller: "streamApi", action: "producers")
 		"/api/v1/streams/$resourceId/keys"(resources: "keyApi", excludes: ["create", "edit", "update"]) { resourceClass = Stream }
 
 		"/api/v1/dashboards"(resources: "dashboardApi", excludes: ["create", "edit"])
@@ -84,9 +85,12 @@ class UrlMappings {
 		"/api/v1/subscriptions"(resources: "subscriptionApi")
 
 		"/api/v1/nodes"(controller: "nodeApi", action: "index")
+		"/api/v1/nodes/ip"(controller: "nodeApi", action: "ip")
+		"/api/v1/nodes/config"(controller: "nodeApi", action: "config")
 		"/api/v1/nodes/shutdown"(controller: "nodeApi", action: "shutdown")
 		"/api/v1/nodes/canvases"(controller: "nodeApi", action: "canvases")
 		"/api/v1/nodes/canvases/sizes"(controller: "nodeApi", action: "canvasSizes")
+		"/api/v1/nodes/$nodeIp/config"(controller: "nodeApi", action: "configNode")
 		"/api/v1/nodes/$nodeIp/shutdown"(controller: "nodeApi", action: "shutdownNode")
 		"/api/v1/nodes/$nodeIp/canvases"(controller: "nodeApi", action: "canvasesNode")
 

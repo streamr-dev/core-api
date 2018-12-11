@@ -15,7 +15,6 @@ import com.unifina.serialization.SerializationException
 import com.unifina.signalpath.*
 import com.unifina.utils.Globals
 import com.unifina.utils.GlobalsFactory
-import com.unifina.utils.NetworkInterfaceUtils
 import grails.compiler.GrailsCompileStatic
 import grails.transaction.NotTransactional
 import grails.transaction.Transactional
@@ -39,6 +38,7 @@ class SignalPathService {
 	StreamService streamService
 	PermissionService permissionService
 	ApiService apiService
+	NodeService nodeService
 
 	private static final Logger log = Logger.getLogger(SignalPathService.class)
 
@@ -137,7 +137,7 @@ class SignalPathService {
 
 		def port = Holders.getConfig().streamr.cluster.internalPort
 		def protocol = Holders.getConfig().streamr.cluster.internalProtocol
-		canvas.server = NetworkInterfaceUtils.getIPAddress(grailsApplication.config.streamr.ip.address.prefixes ?: []).getHostAddress()
+		canvas.server = nodeService.getIPAddress()
 
 		// Form an internal url that Streamr nodes will use to directly address this machine and the canvas that runs on it
 		canvas.requestUrl = protocol + "://" + canvas.server + ":" + port + grailsLinkGenerator.link(uri: "/api/v1/canvases/$canvas.id", absolute: false)

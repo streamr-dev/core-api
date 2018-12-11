@@ -1,26 +1,24 @@
 package com.unifina.task
 
+import com.unifina.domain.security.SecUser
+import com.unifina.domain.task.Task
+import com.unifina.service.NodeService
+import com.unifina.service.TaskService
 import grails.util.GrailsUtil
-
-import java.sql.Connection
-import java.sql.ResultSet
-import java.sql.SQLException
-import java.sql.Statement
-
+import grails.util.Holders
 import org.apache.log4j.Logger
 import org.codehaus.groovy.grails.commons.GrailsApplication
 import org.hibernate.Session
 import org.hibernate.SessionFactory
 import org.hibernate.jdbc.Work
 
-import com.unifina.domain.security.SecUser
-import com.unifina.domain.task.Task
-import com.unifina.service.TaskService
-import com.unifina.utils.NetworkInterfaceUtils
-
+import java.sql.Connection
+import java.sql.ResultSet
+import java.sql.SQLException
+import java.sql.Statement
 
 class TaskWorker extends Thread {
-	
+
 	GrailsApplication grailsApplication
 	TaskService taskService
 	SessionFactory sessionFactory
@@ -32,22 +30,22 @@ class TaskWorker extends Thread {
 	String lastKnownStatus
 	Throwable lastError
 	int workerId
-	
+
 	SecUser priorityUser
-	
+
 	Task currentTask
 	AbstractTask currentTaskImpl
 
 	public static final Logger log = Logger.getLogger(TaskWorker.class)
-	
+
 	public TaskWorker(GrailsApplication grailsApplication, int id, SecUser priorityUser=null) {
 		super("TaskWorker-"+id)
-		
+
 		this.grailsApplication = grailsApplication
 		taskService = (TaskService) grailsApplication.mainContext.getBean("taskService")
 		sessionFactory = (SessionFactory) grailsApplication.mainContext.getBean("sessionFactory")
-		
-		this.workerId = id	
+
+		this.workerId = id
 		this.priorityUser = priorityUser
 	}
 
@@ -55,12 +53,12 @@ class TaskWorker extends Thread {
 	private Task getTask(SecUser priorityUser=null) {
 		boolean retry = true
 		Task task = null
-		
+
 		try {
-			
+
 			// First transaction: try to find a Task for the priorityUser
-			
-			
+
+
 			def id = null
 			if (priorityUser) {
 				Task.withTransaction {
@@ -73,13 +71,13 @@ class TaskWorker extends Thread {
 							stmt.executeUpdate("UPDATE task SET available=false, id = (SELECT @update_id := id), last_updated = current_timestamp WHERE user_id = $priorityUser.id AND available = true AND (run_after is null OR current_timestamp > run_after) LIMIT 1")
 							ResultSet rs = stmt.executeQuery("SELECT @update_id as uid")
 							rs.next()
-							id = rs.getLong("uid")	
-							rs.close()					
+							id = rs.getLong("uid")
+							rs.close()
 						}
-					});		
+					});
 				}
 			}
-			
+
 			// Second transaction: If no priority units found, accept any
 			if (!id) {
 				Task.withTransaction {
@@ -92,28 +90,28 @@ class TaskWorker extends Thread {
 							stmt.executeUpdate("UPDATE task SET available=false, id = (SELECT @update_id := id), last_updated = current_timestamp WHERE available = true AND (run_after is null OR current_timestamp > run_after) LIMIT 1")
 							ResultSet rs = stmt.executeQuery("SELECT @update_id as uid")
 							rs.next()
-							id = rs.getLong("uid")	
-							rs.close()					
+							id = rs.getLong("uid")
+							rs.close()
 						}
-					});		
+					});
 				}
 			}
-			
+
 			if (id) {
 				Task.withTransaction {
 					task = Task.get(id)
-					
+
 					// Unit has already been marked not available
-					def myIp = NetworkInterfaceUtils.getIPAddress()
-					task.serverIp = myIp?.toString()
+					String myIp = grailsApplication.mainContext.getBean(NodeService).getIPAddress()
+					task.serverIp = myIp
 					task.save(flush:true)
 				}
 			}
-		
+
 		} catch (Exception e) {
 			println "Warning: couldn't acquire Task, error is: $e"
 			e = GrailsUtil.deepSanitize(e)
-			
+
 			println e.toString()
 			println e.cause
 			e.printStackTrace(System.out)
@@ -122,7 +120,7 @@ class TaskWorker extends Thread {
 
 		return task
 	}
-	
+
 	/**
 	 * Aborts currently running task
 	 */
@@ -130,11 +128,11 @@ class TaskWorker extends Thread {
 		log.info("Calling abort on task implementation: $currentTaskImpl")
 		currentTaskImpl?.abort();
 	}
-	
+
 	public int getWorkerId() {
 		return workerId;
 	}
-	
+
 	void run() {
 		int i = -1
 		while(!quit) {
@@ -142,19 +140,19 @@ class TaskWorker extends Thread {
 
 			Throwable error
 			boolean taskGroupComplete = false
-			
+
 			try {
 				// Get a unit of work
 				currentTask = getTask(priorityUser)
-	
+
 				if (currentTask) {
 					log.info("Found task $currentTask.id")
-	
+
 					stateCode = 1
-						
+
 					lastKnownTaskId = currentTask.id
 					log.info("Running task $currentTask.id...")
-					
+
 					// On successful completion of unit, mark the unit as completed
 					currentTaskImpl = taskService.getTaskInstance(currentTask)
 					taskService.setStatus(currentTask, currentTaskImpl)
@@ -170,7 +168,7 @@ class TaskWorker extends Thread {
 				error = e
 				lastError = e
 			}
-			
+
 			// Try to report error
 			if (error && !taskGroupComplete) try {
 				taskService.setError(currentTask, error)
@@ -188,7 +186,7 @@ class TaskWorker extends Thread {
 				}
 			}
 		}
-		
+
 		stateCode = -1
 		log.info("Task worker thread $workerId stopped.")
 	}

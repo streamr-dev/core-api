@@ -248,9 +248,9 @@ class Login {
         this.options = options
     }
 
-    challenge() {
+    challenge(address) {
         return new StreamrApiRequest(this.options)
-            .methodAndPath('POST', 'login/challenge')
+            .methodAndPath('POST', `login/challenge/${address}`)
             .withBody()
     }
 }

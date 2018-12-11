@@ -25,7 +25,7 @@ class StreamApiControllerSpec extends ControllerSpecification {
 	def permissionService
 	def apiService
 
-	def streamOneId
+	Stream streamOne
 	def streamTwoId
 	def streamThreeId
 	def streamFourId
@@ -50,7 +50,7 @@ class StreamApiControllerSpec extends ControllerSpecification {
 		// First use real streamService to create the streams
 		streamService = mainContext.getBean(StreamService)
 		streamService.permissionService = permissionService
-		streamOneId = streamService.createStream([name: "stream", description: "description", feed: feed], me).id
+		streamOne = streamService.createStream([name: "stream", description: "description", feed: feed], me)
 		streamTwoId = streamService.createStream([name: "ztream", feed: feed], me).id
 		streamThreeId = streamService.createStream([name: "atream", feed: feed], me).id
 		streamFourId = streamService.createStream([name: "otherUserStream", feed: feed], otherUser).id
@@ -68,7 +68,7 @@ class StreamApiControllerSpec extends ControllerSpecification {
 			assert it.toMap() == new StreamListParams().toMap()
 			return true
 		}, me) >> [
-			Stream.findById(streamOneId),
+			streamOne,
 			Stream.findById(streamTwoId),
 			Stream.findById(streamThreeId)
 		]
@@ -86,7 +86,7 @@ class StreamApiControllerSpec extends ControllerSpecification {
 			assert it.toMap() == new StreamListParams().toMap()
 			return true
 		}, me) >> [
-			Stream.findById(streamOneId),
+			streamOne,
 			Stream.findById(streamTwoId),
 			Stream.findById(streamThreeId)
 		]
@@ -109,7 +109,7 @@ class StreamApiControllerSpec extends ControllerSpecification {
 			assert it.toMap() == new StreamListParams(name: "stream").toMap()
 			return true
 		}, me) >> [
-			Stream.findById(streamOneId)
+			streamOne
 		]
 	}
 
@@ -158,7 +158,7 @@ class StreamApiControllerSpec extends ControllerSpecification {
 
 	void "show a Stream of logged in user"() {
 		when:
-		params.id = streamOneId
+		params.id = streamOne.id
 		authenticatedAs(me) { controller.show() }
 
 		then:
@@ -188,10 +188,10 @@ class StreamApiControllerSpec extends ControllerSpecification {
 		Key key = new Key(name: "anonymous key")
 		key.id = "anonymousKeyKey"
 		key.save(failOnError: true)
-		permissionService.systemGrant(key, Stream.get(streamOneId), Permission.Operation.READ)
+		permissionService.systemGrant(key, streamOne, Permission.Operation.READ)
 
 		when:
-		params.id = streamOneId
+		params.id = streamOne.id
 		authenticatedAs(me) { controller.show() }
 
 		then:
@@ -205,7 +205,7 @@ class StreamApiControllerSpec extends ControllerSpecification {
 		key.save(failOnError: true)
 
 		when:
-		params.id = streamOneId
+		params.id = streamOne.id
 		unauthenticated() { controller.show() }
 
 		then:
@@ -214,7 +214,7 @@ class StreamApiControllerSpec extends ControllerSpecification {
 
 	void "update a Stream of logged in user"() {
 		when:
-		params.id = streamOneId
+		params.id = streamOne.id
 		request.method = "PUT"
 		request.json = '{name: "newName", description: "newDescription"}'
 		authenticatedAs(me) { controller.update() }
@@ -223,7 +223,7 @@ class StreamApiControllerSpec extends ControllerSpecification {
 		response.status == 204
 
 		then:
-		def stream = Stream.findById(streamOneId)
+		def stream = streamOne
 		stream.name == "newName"
 		stream.description == "newDescription"
 		stream.config == null
@@ -253,7 +253,7 @@ class StreamApiControllerSpec extends ControllerSpecification {
 
 	void "delete a Stream of logged in user"() {
 		when:
-		params.id = streamOneId
+		params.id = streamOne.id
 		request.method = "DELETE"
 		authenticatedAs(me) { controller.delete() }
 
@@ -279,5 +279,24 @@ class StreamApiControllerSpec extends ControllerSpecification {
 
 		then:
 		thrown NotPermittedException
+	}
+
+	void "returns set of producer addresses"() {
+		setup:
+		controller.streamService = streamService = Mock(StreamService)
+		Set<String> addresses = new HashSet<String>()
+		addresses.add('0x26e1ae3f5efe8a01eca8c2e9d3c32702cf4bead6')
+		addresses.add('0x0181ae2f5efe8947eca8c2e9d3f32702cf4be7dd')
+		when:
+		params.id = streamOne.id
+		request.method = "GET"
+		authenticatedAs(me) { controller.producers() }
+
+		then:
+		1 * streamService.getStreamEthereumProducers(streamOne) >> addresses
+		response.status == 200
+		response.json == [
+		    'addresses': addresses.toArray()
+		]
 	}
 }

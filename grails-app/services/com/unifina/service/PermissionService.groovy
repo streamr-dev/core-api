@@ -107,6 +107,14 @@ class PermissionService {
 	}
 
 	/**
+	 * List all Permissions with some Operation right granted on a resource
+	 */
+	List<Permission> getPermissionsTo(resource, Operation op) {
+		String resourceProp = getResourcePropertyName(resource)
+		return Permission.findAllWhere([(resourceProp): resource, "operation": op])
+	}
+
+	/**
 	 * List all Permissions granted on a resource to a Userish
 	 */
 	List<Permission> getPermissionsTo(resource, Userish userish) {
