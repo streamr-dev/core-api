@@ -7,9 +7,12 @@ import com.unifina.api.NotPermittedException
 import com.unifina.api.ValidationException
 import com.unifina.data.StreamPartitioner
 import com.unifina.data.StreamrBinaryMessage
+import com.unifina.data.StreamrBinaryMessageV29
+import com.unifina.data.StreamrBinaryMessageV29.SignatureType
 import com.unifina.domain.dashboard.DashboardItem
 import com.unifina.domain.data.Feed
 import com.unifina.domain.data.Stream
+import com.unifina.domain.security.IntegrationKey
 import com.unifina.domain.security.Key
 import com.unifina.domain.security.Permission
 import com.unifina.domain.security.SecUser
@@ -23,6 +26,7 @@ import com.unifina.feed.redis.StreamrBinaryMessageWithKafkaMetadata
 import com.unifina.signalpath.RuntimeRequest
 import com.unifina.task.DelayedDeleteStreamTask
 import com.unifina.utils.CSVImporter
+import com.unifina.utils.EthereumAddressValidator
 import com.unifina.utils.IdGenerator
 import grails.converters.JSON
 import groovy.transform.CompileStatic
@@ -124,9 +128,11 @@ class StreamService {
 
 	// Ref to Kafka will be abstracted out when Feed abstraction is reworked
 
-	void sendMessage(Stream stream, String partitionKey, long timestamp, byte[] content, byte contentType, int ttl=0) {
+	void sendMessage(Stream stream, String partitionKey, long timestamp, byte[] content, byte contentType, int ttl=0,
+					 SignatureType signatureType = SignatureType.SIGNATURE_TYPE_NONE, String address = null, String signature = null) {
 		int streamPartition = partitioner.partition(stream, partitionKey)
-		StreamrBinaryMessage msg = new StreamrBinaryMessage(stream.id, streamPartition, timestamp, ttl, contentType, content)
+		StreamrBinaryMessage msg = new StreamrBinaryMessageV29(stream.id, streamPartition, timestamp, ttl, contentType, content,
+			signatureType, address, signature)
 
 		String kafkaPartitionKey = "${stream.id}-$streamPartition"
 		kafkaService.sendMessage(msg, kafkaPartitionKey)
@@ -273,6 +279,17 @@ class StreamService {
 				throw new NotPermittedException(user?.username, "Stream", id, Permission.Operation.READ.id)
 			}
 		}
+	}
+
+	Set<String> getStreamEthereumProducers(Stream stream) {
+		// This approach might be slow if there are a lot of allowed writers to the Stream
+		List<SecUser> writers = permissionService.getPermissionsTo(stream, Permission.Operation.WRITE)*.user
+
+		List<IntegrationKey> keys = IntegrationKey.findAll {
+			user.id in writers*.id && service in [IntegrationKey.Service.ETHEREUM, IntegrationKey.Service.ETHEREUM_ID]
+		}
+
+		return keys*.idInService as Set
 	}
 
 	@CompileStatic

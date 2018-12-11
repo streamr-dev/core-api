@@ -26,6 +26,8 @@ class Stream implements Comparable {
 	String uiChannelPath
 	Canvas uiChannelCanvas
 
+	Boolean requireSignedData = false
+
 	static hasMany = [
 		permissions: Permission,
 		products: Product
@@ -50,6 +52,7 @@ class Stream implements Comparable {
 		uiChannel defaultValue: "false"
 		uiChannelPath index: "ui_channel_path_idx"
 		config type: 'text'
+		requireSignedData defaultValue: false
 	}
 
 	@Override
@@ -68,7 +71,8 @@ class Stream implements Comparable {
 			description: description,
 			uiChannel: uiChannel,
 			dateCreated: dateCreated,
-			lastUpdated: lastUpdated
+			lastUpdated: lastUpdated,
+			requireSignedData: requireSignedData
 		]
 	}
 
@@ -82,7 +86,8 @@ class Stream implements Comparable {
 			description: description,
 			uiChannel: uiChannel,
 			dateCreated: dateCreated,
-			lastUpdated: lastUpdated
+			lastUpdated: lastUpdated,
+			requireSignedData: requireSignedData
 		]
 	}
 

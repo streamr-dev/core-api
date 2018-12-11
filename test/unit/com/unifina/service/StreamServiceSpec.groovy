@@ -6,6 +6,7 @@ import com.unifina.domain.dashboard.Dashboard
 import com.unifina.domain.dashboard.DashboardItem
 import com.unifina.domain.data.Feed
 import com.unifina.domain.data.Stream
+import com.unifina.domain.security.IntegrationKey
 import com.unifina.domain.security.Key
 import com.unifina.domain.security.Permission
 import com.unifina.domain.security.SecUser
@@ -21,7 +22,7 @@ import spock.lang.Specification
  * See the API for {@link grails.test.mixin.support.GrailsUnitTestMixin} for usage instructions
  */
 @TestFor(StreamService)
-@Mock([Canvas, Dashboard, DashboardItem, Stream, Feed, SecUser, Key, Permission, PermissionService])
+@Mock([Canvas, Dashboard, DashboardItem, Stream, Feed, SecUser, Key, IntegrationKey, Permission, PermissionService])
 class StreamServiceSpec extends Specification {
 
 	Feed feed
@@ -91,7 +92,8 @@ class StreamServiceSpec extends Specification {
 								[name: "profit", type: "number"],
 								[name: "keyword", type: "string"]
 						]
-				]
+				],
+				requireSignedData: "true"
 		]
 		service.createStream(params, me)
 
@@ -101,6 +103,7 @@ class StreamServiceSpec extends Specification {
 		stream.name == "Test stream"
 		stream.description == "Test stream"
 		stream.feed == feed
+		stream.requireSignedData
 	}
 
 	void "createStream uses Feed.KAFKA_ID as default value for feed"() {
@@ -124,6 +127,7 @@ class StreamServiceSpec extends Specification {
 		Stream.count() == 1
 		def stream = Stream.findAll().get(0)
 		stream.feed == feed
+		!stream.requireSignedData
 	}
 
 	void "createStream initializes streamListener"() {
@@ -383,5 +387,38 @@ class StreamServiceSpec extends Specification {
 		1 * service.permissionService.canRead(user, canvas) >> false
 		1 * dashboardService.authorizedGetDashboardItem(dashboard.id, dashboardItem.id, user, Permission.Operation.READ) >> null
 		0 * cb._
+	}
+
+	void "getStreamEthereumProducers should return Ethereum addresses of users with write permission to the Stream"() {
+		setup:
+		service.permissionService = Mock(PermissionService)
+		SecUser user1 = new SecUser(id: 1, username: "u1").save(failOnError: true, validate: false)
+		IntegrationKey key1 = new IntegrationKey(user: user1, service: IntegrationKey.Service.ETHEREUM_ID,
+			idInService: "0x9fe1ae3f5efe2a01eca8c2e9d3c11102cf4bea57").save(failOnError: true, validate: false)
+		SecUser user2 = new SecUser(id: 2, username: "u2").save(failOnError: true, validate: false)
+		IntegrationKey key2 = new IntegrationKey(user: user2, service: IntegrationKey.Service.ETHEREUM,
+			idInService: "0x26e1ae3f5efe8a01eca8c2e9d3c32702cf4bead6").save(failOnError: true, validate: false)
+		SecUser user3 = new SecUser(id: 3, username: "u3").save(failOnError: true, validate: false)
+
+		// User with key but no write permission - this key should not be returned by the query
+		SecUser userWithKeyButNoPermission = new SecUser(id: 4, username: "u4").save(failOnError: true, validate: false)
+		new IntegrationKey(user: userWithKeyButNoPermission, service: IntegrationKey.Service.ETHEREUM_ID,
+			idInService: "0x12345e3f5efe8a01eca8c2e9d3c32702cf4bead6").save(failOnError: true, validate: false)
+
+		Set<String> validAddresses = new HashSet<String>()
+		validAddresses.add(key1.idInService)
+		validAddresses.add(key2.idInService)
+		Permission p1 = new Permission(user: user1)
+		Permission p2 = new Permission(user: user2)
+		Permission p3 = new Permission(user: user3)
+		List<Permission> perms = [p1, p2, p3]
+		Stream stream = new Stream(name: "name")
+		stream.id = "streamId"
+		stream.save(failOnError: true, validate: false)
+		when:
+		Set<String> addresses = service.getStreamEthereumProducers(stream)
+		then:
+		1 * service.permissionService.getPermissionsTo(stream, Permission.Operation.WRITE) >> perms
+		addresses == validAddresses
 	}
 }
