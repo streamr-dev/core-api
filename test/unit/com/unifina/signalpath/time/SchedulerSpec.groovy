@@ -9,16 +9,15 @@ import java.text.SimpleDateFormat
 
 @Mock(SecUser)
 class SchedulerSpec extends UiChannelMockingSpecification {
-	Scheduler module
-	SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss")
-
 	def setup() {
 		mockServicesForUiChannels()
 	}
 
 	void "Scheduler works as expected"() {
 		when:
-		module = setupModule(new Scheduler(), [
+		Scheduler module = new Scheduler()
+		module.setTimezone("UTC")
+		module = setupModule(module, [
 			uiChannel: [id: "schedulerChannel"],
 			schedule: [
 				defaultValue: 100,
@@ -43,6 +42,10 @@ class SchedulerSpec extends UiChannelMockingSpecification {
 				[activeRules:[]]
 			]
 		]
+
+		TimeZone.setDefault(TimeZone.getTimeZone("UTC"))
+		SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", new Locale("en", "US"))
+		df.setTimeZone(TimeZone.getTimeZone("UTC"))
 		Map<Integer, Date> ticks = [
 			1: "2015-04-05 07:05:00",
 			2: "2015-04-05 11:30:00",
