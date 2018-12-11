@@ -12,7 +12,7 @@ import java.util.TimeZone;
 
 public class DateConversion extends AbstractSignalPathModule implements TimezoneModule {
 
-	StringParameter tz = new StringParameter(this, "timezone", "");
+	StringParameter tz = new StringParameter(this, "timezone", "UTC");
 	StringParameter pattern = new StringParameter(this, "format", "yyyy-MM-dd HH:mm:ss z");
 
 	Input<Object> dateIn = new Input<>(this, "date", "Date Double String");
@@ -54,9 +54,7 @@ public class DateConversion extends AbstractSignalPathModule implements Timezone
 	@Override
 	public void initialize() {
 		super.initialize();
-		if (getGlobals().getUserId() != null) {
-			tz.receive(this.getTimezone().getID());
-		}
+		tz.receive(this.getTimezone().getID());
 	}
 
 	@Override
@@ -66,7 +64,7 @@ public class DateConversion extends AbstractSignalPathModule implements Timezone
 		}
 
 		if (tz.getValue() != null) {
-			TimeZone timeZone = TimeZone.getTimeZone(tz.getValue());
+			TimeZone timeZone = this.getTimezone();
 			if (timeZone != null) {
 				cal.setTimeZone(timeZone);
 				df.setTimeZone(timeZone);
