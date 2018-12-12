@@ -44,14 +44,14 @@ class SchedulerSpec extends UiChannelMockingSpecification {
 		]
 
 		TimeZone.setDefault(TimeZone.getTimeZone("UTC"))
-		SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", new Locale("en", "US"))
-		df.setTimeZone(TimeZone.getTimeZone("UTC"))
+		SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss z")
+		df.setTimeZone(TimeZone.getTimeZone("EEST"))
 		Map<Integer, Date> ticks = [
-			1: "2015-04-05 07:05:00",
-			2: "2015-04-05 11:30:00",
-			3: "2015-04-05 18:29:00",
-			4: "2015-04-05 18:30:00",
-			5: "2015-04-06 03:15:00"
+			1: "2015-04-05 07:05:00 EEST",
+			2: "2015-04-05 11:30:00 EEST",
+			3: "2015-04-05 18:29:00 EEST",
+			4: "2015-04-05 18:30:00 EEST",
+			5: "2015-04-06 03:15:00 EEST"
 		].collectEntries() { Integer key, String value -> [(key): df.parse(value)] }
 
 		then:
