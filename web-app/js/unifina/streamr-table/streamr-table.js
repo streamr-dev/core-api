@@ -62,30 +62,46 @@ StreamrTable.prototype.setHeaders = function(headers) {
     }
 }
 
-StreamrTable.prototype.addRow = function (row, rowId, op) {
-	if (op != "append") { op = "prepend" }
-	var newRow = $('<tr/>', {
+StreamrTable.prototype.addRow = function(row, rowId, op) {
+    if (op != 'append') {
+        op = 'prepend'
+    }
+    let newRow = $('<tr/>', {
         id: rowId != null ? rowId : '',
-	});
-	for (var i = 0; i < row.length; i++) {
-		var content = row[i] == null ? "" :
-					  row[i] instanceof Object ? JSON.stringify(row[i]) : row[i];
-		newRow.append($('<td/>', {
-			text: content,
-		}));
-	}
-	this.tableBody[op](newRow);
+    })
+    for (var i = 0; i < row.length; i++) {
+        let content
+        if (row[i] == null) {
+            content = ''
+        } else {
+            if (row[i] instanceof Object) {
+                if (row[i].date) {
+                    content = row[i].date
+                } else {
+                    content = row[i]
+                }
+            } else if (row[i] instanceof String) {
+                content = JSON.stringify(row[i])
+            } else {
+                content = row[i]
+            }
+        }
+        newRow.append($('<td/>', {
+            text: content,
+        }))
+    }
+    this.tableBody[op](newRow)
 }
 
 StreamrTable.prototype.receiveResponse = function (d) {
 	// New row message
 	if (d.nr) {
-		this.addRow(d.nr, d.id);
-		// Remove last row(s) if table full
-	    	while ($(this.tableBody).children().length > (this.options.maxRows || Infinity)) {
-			$(this.tableBody).children().last().remove()
-		}
-	} else if (d.nc) {
+      this.addRow(d.nr, d.id);
+      // Remove last row(s) if table full
+      while ($(this.tableBody).children().length > (this.options.maxRows || Infinity)) {
+          $(this.tableBody).children().last().remove()
+      }
+  } else if (d.nc) {
 	    // New contents: 2d array that replaces existing contents
 		this.tableBody.empty();
 		for (var i in d.nc) {

@@ -85,6 +85,19 @@ describe('streamr-table', function() {
 			assert($($($parent.find("table tbody tr")[1]).find("td")[0]).text() == "C")
 			assert($($($parent.find("table tbody tr")[1]).find("td")[1]).text() == "D")
 		})
+
+		it('should replace the contents when message field has custom date object', function() {
+			table.receiveResponse({
+				id: 123,
+				nr: [
+					{ date: '2018-12-13T10:17:48.126Z' },
+					{ date: '2018-12-15T15:15:00.123Z' }
+				]
+			})
+			assert($($($parent.find('table tbody tr')[0]).find('td')[0]).text() == '2018-12-13T10:17:48.126Z')
+			assert($($($parent.find('table tbody tr')[0]).find('td')[1]).text() == '2018-12-15T15:15:00.123Z')
+		})
+
 	})
 
 })
