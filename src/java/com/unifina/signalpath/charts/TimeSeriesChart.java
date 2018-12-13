@@ -7,16 +7,19 @@ import java.util.List;
 import java.util.Map;
 
 public class TimeSeriesChart extends Chart {
-	
+
+	private final StringParameter tz = new StringParameter(this, "timezone", "UTC");
+
 	private int tsInputCount = 10;
 	private boolean barify = false;
 	private boolean overnightBreak = true;
 	private Integer range = null;
-	
+
 	@Override
 	public void initialize() {
 		super.initialize();
 
+		addInput(tz);
 		ArrayList<String> names = new ArrayList<>();
 		int seriesIdx = 0;
 
@@ -46,13 +49,13 @@ public class TimeSeriesChart extends Chart {
 			pushToUiChannel(getInitMessage());
 		}
 	}
-	
+
 	protected InitMessage getInitMessage() {
 		ArrayList<Series> seriesData = new ArrayList<>();
-		
+
 		for (Input input : getInputs()) {
 			TimeSeriesChartInput it = (TimeSeriesChartInput) input;
-			
+
 			// Set names and series indices
 			if (it.isConnected()) {
 				seriesData.add(new Series(it.seriesName,it.seriesIndex,true,it.yAxis));
@@ -61,7 +64,7 @@ public class TimeSeriesChart extends Chart {
 
 		return new InitMessage(getUiChannelName(), seriesData, null);
 	}
-	
+
 	public TimeSeriesInput getInputConnection(String name) {
 
 		TimeSeriesChartInput conn = new TimeSeriesChartInput(this,name);
@@ -72,26 +75,26 @@ public class TimeSeriesChart extends Chart {
 		conn.setCanToggleDrivingInput(false);
 		conn.setCanHaveInitialValue(false);
 		conn.setRequiresConnection(false);
-		
+
 		// Add the input
 		if (getInput(name) == null) {
 			addInput(conn);
 		}
-			
+
 		return conn;
 	}
-	
+
 	@Override
 	protected void record() {
 		for (Input i : getDrivingInputs()) {
 			TimeSeriesChartInput input = (TimeSeriesChartInput) i;
 			if (!Double.isNaN(input.value) && (!barify || getGlobals().time.getTime() - input.previousTime >= 60000L)) {
-				
+
 					PointMessage msg = new PointMessage(
-							input.seriesIndex, 
-							getGlobals().getTzConverter().getFakeLocalTime(getGlobals().time.getTime()),
+							input.seriesIndex,
+							getGlobals().time.getTime(),
 							input.value);
-					
+
 					pushToUiChannel(msg);
 					input.previousTime = getGlobals().time.getTime();
 			}
@@ -104,17 +107,17 @@ public class TimeSeriesChart extends Chart {
 
 		config.put("barify", barify);
 		config.put("range", range);
-		
+
 		ModuleOptions options = ModuleOptions.get(config);
 		options.add(new ModuleOption("inputs", tsInputCount, ModuleOption.OPTION_INTEGER));
-		
+
 		return config;
 	}
-	
+
 	@Override
 	public void onConfiguration(Map config) {
 		super.onConfiguration(config);
-		
+
 		if (config.containsKey("barify"))
 			barify = Boolean.parseBoolean(config.get("barify").toString());
 
@@ -122,12 +125,12 @@ public class TimeSeriesChart extends Chart {
 			range = (int) Double.parseDouble(config.get("range").toString());
 
 		ModuleOptions options = ModuleOptions.get(config);
-		
+
 		if (options.getOption("inputs") != null)
 			tsInputCount = options.getOption("inputs").getInt();
 		if (options.getOption("overnightBreak") != null)
 			overnightBreak = options.getOption("overnightBreak").getBoolean();
-		
+
 		// Backwards compatibility
 		if (config.containsKey("params")) {
 			List params = (List) config.get("params");
@@ -140,17 +143,17 @@ public class TimeSeriesChart extends Chart {
 			if (inputConfig != null)
 				tsInputCount = Integer.parseInt(inputConfig.get("value").toString());
 		}
-		
+
 		for (int i = 1; i <= tsInputCount; i++) {
 			getInputConnection("in"+i);
 		}
 	}
-	
+
 	@Override
 	protected void handleRequest(RuntimeRequest request, RuntimeResponse response) {
 		if (request.getType().equals("initRequest")) {
 			// We need to support unauthenticated initRequests for public views, so no authentication check
-			
+
 			response.put("initRequest", getInitMessage());
 			response.setSuccess(true);
 		} else {
