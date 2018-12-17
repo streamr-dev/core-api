@@ -24,6 +24,9 @@ public class TimeSeriesChart extends Chart {
 		int seriesIdx = 0;
 
 		for (Input input : getInputs()) {
+			if (!(input instanceof TimeSeriesChartInput)) {
+				continue;
+			}
 			TimeSeriesChartInput it = (TimeSeriesChartInput) input;
 
 			it.setInitialValue(Double.NaN);
@@ -54,6 +57,9 @@ public class TimeSeriesChart extends Chart {
 		ArrayList<Series> seriesData = new ArrayList<>();
 
 		for (Input input : getInputs()) {
+			if (!(input instanceof TimeSeriesChartInput)) {
+				continue;
+			}
 			TimeSeriesChartInput it = (TimeSeriesChartInput) input;
 
 			// Set names and series indices
