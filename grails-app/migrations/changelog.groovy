@@ -121,5 +121,4 @@ databaseChangeLog = {
 	include file: 'core/2018-09-20-rm-user-timezone.groovy'
   	include file: 'core/2018-11-27-add-requireSignedData-field.groovy'
 	include file: 'core/2018-12-18-change-default-value-require-signed-data.groovy'
->>>>>>> origin/master
 }
