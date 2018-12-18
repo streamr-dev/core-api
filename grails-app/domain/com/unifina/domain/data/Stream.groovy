@@ -52,7 +52,7 @@ class Stream implements Comparable {
 		uiChannel defaultValue: "false"
 		uiChannelPath index: "ui_channel_path_idx"
 		config type: 'text'
-		requireSignedData defaultValue: false
+		requireSignedData defaultValue: "false"
 	}
 
 	@Override
