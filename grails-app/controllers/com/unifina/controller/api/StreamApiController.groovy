@@ -151,10 +151,10 @@ class StreamApiController {
 	}
 
 	@StreamrApi
-	def producers(String id) {
+	def publishers(String id) {
 		getAuthorizedStream(id, Operation.READ) { Stream stream ->
-			Set<String> producerAddresses = streamService.getStreamEthereumProducers(stream)
-			render([addresses: producerAddresses] as JSON)
+			Set<String> publisherAddresses = streamService.getStreamEthereumPublishers(stream)
+			render([addresses: publisherAddresses] as JSON)
 		}
 	}
 
