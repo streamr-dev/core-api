@@ -389,7 +389,7 @@ class StreamServiceSpec extends Specification {
 		0 * cb._
 	}
 
-	void "getStreamEthereumProducers should return Ethereum addresses of users with write permission to the Stream"() {
+	void "getStreamEthereumPublishers should return Ethereum addresses of users with write permission to the Stream"() {
 		setup:
 		service.permissionService = Mock(PermissionService)
 		SecUser user1 = new SecUser(id: 1, username: "u1").save(failOnError: true, validate: false)
@@ -416,7 +416,7 @@ class StreamServiceSpec extends Specification {
 		stream.id = "streamId"
 		stream.save(failOnError: true, validate: false)
 		when:
-		Set<String> addresses = service.getStreamEthereumProducers(stream)
+		Set<String> addresses = service.getStreamEthereumPublishers(stream)
 		then:
 		1 * service.permissionService.getPermissionsTo(stream, Permission.Operation.WRITE) >> perms
 		addresses == validAddresses

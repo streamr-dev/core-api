@@ -281,7 +281,7 @@ class StreamService {
 		}
 	}
 
-	Set<String> getStreamEthereumProducers(Stream stream) {
+	Set<String> getStreamEthereumPublishers(Stream stream) {
 		// This approach might be slow if there are a lot of allowed writers to the Stream
 		List<SecUser> writers = permissionService.getPermissionsTo(stream, Permission.Operation.WRITE)*.user
 
