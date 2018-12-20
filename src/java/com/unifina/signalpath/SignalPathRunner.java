@@ -71,10 +71,14 @@ public class SignalPathRunner extends Thread {
 		while (getRunning() != target && i++ < 60) {
 			log.debug("Waiting for " + runnerId + " to start...");
 			if (target && thrownOnStartUp != null) {
-				log.info("Giving up on waiting because run threw exception.");
+				log.error("Giving up on waiting because run threw exception.");
 			} else {
 				wait(500);
 			}
+		}
+
+		if (getRunning() != target) {
+			log.error("Timed out while waiting for runner to " + (target ? "start" : "stop"));
 		}
 	}
 
