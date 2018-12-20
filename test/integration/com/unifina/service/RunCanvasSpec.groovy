@@ -44,13 +44,18 @@ class RunCanvasSpec extends IntegrationSpec {
 		when:
 		canvasService.start(canvas, true, user)
 
+		// Allow time for Canvas to start
+		Thread.sleep(60 * 1000)
+
+		// Try and warm up Kafka by sending one message and waiting some more
+		streamService.sendMessage(stream, [numero: 0, areWeDoneYet: false], 300)
 		Thread.sleep(60 * 1000)
 
 		// Produce data
-		(1..100).each { streamService.sendMessage(stream, [numero: it, areWeDoneYet: false], 30) }
+		(1..100).each { streamService.sendMessage(stream, [numero: it, areWeDoneYet: false], 300) }
 
 		// Terminator data package to know when we're done
-		streamService.sendMessage(stream, [numero: 0, areWeDoneYet: true], 30)
+		streamService.sendMessage(stream, [numero: 0, areWeDoneYet: true], 300)
 
 		// Synchronization: wait for terminator package
 		conditions.within(10) { assert modules(canvasService, canvas)*.outputs[0][1].value == true }
