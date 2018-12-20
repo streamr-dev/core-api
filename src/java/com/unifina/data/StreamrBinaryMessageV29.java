@@ -6,7 +6,8 @@ import javax.xml.bind.DatatypeConverter;
 import java.nio.ByteBuffer;
 import java.util.Date;
 
-public class StreamrBinaryMessageV29 extends StreamrBinaryMessageV28 {
+public class StreamrBinaryMessageV29 extends StreamrBinaryMessage {
+	public static final byte VERSION = 29; //0x1D
 
 	public enum SignatureType {
 		SIGNATURE_TYPE_NONE ((byte) 0),
@@ -27,8 +28,8 @@ public class StreamrBinaryMessageV29 extends StreamrBinaryMessageV28 {
 	private final byte[] addressBytes;
 	private final byte[] signatureBytes;
 
-	protected StreamrBinaryMessageV29(ByteBuffer bb) {
-		super(bb);
+	public StreamrBinaryMessageV29(ByteBuffer bb) {
+		super(VERSION, bb);
 		byte signatureTypeByte = bb.get();
 		if (signatureTypeByte == SignatureType.SIGNATURE_TYPE_ETH.getId()) {
 			signatureType = SignatureType.SIGNATURE_TYPE_ETH;
@@ -47,7 +48,7 @@ public class StreamrBinaryMessageV29 extends StreamrBinaryMessageV28 {
 
 	public StreamrBinaryMessageV29(String streamId, int partition, long timestamp, int ttl, byte contentType, byte[] content,
 								SignatureType signatureType, String address, String signature) {
-		super(streamId, partition, timestamp, ttl, contentType, content);
+		super(VERSION, streamId, partition, timestamp, ttl, contentType, content);
 		this.signatureType = signatureType;
 		this.addressBytes = hexToBytes(address);
 		this.signatureBytes = hexToBytes(signature);
@@ -74,11 +75,6 @@ public class StreamrBinaryMessageV29 extends StreamrBinaryMessageV28 {
 		} else {
 			throw new IllegalArgumentException("Unknown signature type: "+signatureType);
 		}
-	}
-
-	@Override
-	public byte getVersion() {
-		return VERSION_SIGNED;
 	}
 
 	public SignatureType getSignatureType() {
