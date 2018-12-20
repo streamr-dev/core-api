@@ -5,6 +5,7 @@ import com.lambdaworks.redis.RedisURI;
 import com.lambdaworks.redis.codec.ByteArrayCodec;
 import com.lambdaworks.redis.pubsub.RedisPubSubAdapter;
 import com.lambdaworks.redis.pubsub.RedisPubSubConnection;
+import com.unifina.data.StreamrBinaryMessage;
 import com.unifina.domain.data.Feed;
 import com.unifina.feed.AbstractMessageSource;
 import com.unifina.feed.Message;
@@ -15,7 +16,7 @@ import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
 import java.util.Map;
 
-public class RedisMessageSource extends AbstractMessageSource<StreamrBinaryMessageWithKafkaMetadata, String> {
+public class RedisMessageSource extends AbstractMessageSource<StreamrBinaryMessage, String> {
 
 	private static final Charset utf8 = Charset.forName("UTF-8");
 
@@ -46,7 +47,7 @@ public class RedisMessageSource extends AbstractMessageSource<StreamrBinaryMessa
 			public void message(byte[] channel, byte[] messageBytes) {
 				String streamId = new String(channel, utf8);
 				StreamrBinaryMessageWithKafkaMetadata msg = new StreamrBinaryMessageWithKafkaMetadata(ByteBuffer.wrap(messageBytes));
-				forward(new Message<>(streamId, msg.getOffset(), msg, false));
+				forward(new Message<>(streamId, msg.getOffset(), msg.getStreamrBinaryMessage(), false));
 			}
 
 			@Override
