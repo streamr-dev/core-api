@@ -10,6 +10,7 @@ import com.unifina.service.StreamService;
 import com.unifina.utils.IdGenerator;
 import com.unifina.utils.MapTraversal;
 import grails.util.Holders;
+import org.apache.log4j.Logger;
 
 import java.io.Serializable;
 import java.security.AccessControlException;
@@ -24,6 +25,8 @@ public abstract class ModuleWithUI extends AbstractSignalPathModule {
 	protected int resendLast = 0;
 
 	private transient StreamService streamService;
+
+	private static final Logger log = Logger.getLogger(ModuleWithUI.class);
 
 	public ModuleWithUI() {
 		super();
@@ -93,7 +96,7 @@ public abstract class ModuleWithUI extends AbstractSignalPathModule {
 			return domainObject.getWebcomponent();
 		}
 	}
-	
+
 	@Override
 	public Map<String, Object> getConfiguration() {
 		Map<String, Object> config = super.getConfiguration();
@@ -101,14 +104,14 @@ public abstract class ModuleWithUI extends AbstractSignalPathModule {
 		if (uiChannel != null) {
 			config.put("uiChannel", uiChannel.toMap());
 		}
-		
+
 		ModuleOptions options = ModuleOptions.get(config);
 		options.add(new ModuleOption("uiResendAll", resendAll, "boolean"));
 		options.add(new ModuleOption("uiResendLast", resendLast, "int"));
-		
+
 		return config;
 	}
-	
+
 	@Override
 	protected void onConfiguration(Map<String, Object> config) {
 		super.onConfiguration(config);
@@ -119,7 +122,7 @@ public abstract class ModuleWithUI extends AbstractSignalPathModule {
 				uiChannelId == null ? IdGenerator.getShort() : uiChannelId,
 				getEffectiveName(),
 				uiChannelId == null);
-		
+
 		ModuleOptions options = ModuleOptions.get(config);
 		if (options.getOption("uiResendAll")!=null) {
 			resendAll = options.getOption("uiResendAll").getBoolean();
@@ -127,7 +130,7 @@ public abstract class ModuleWithUI extends AbstractSignalPathModule {
 		if (options.getOption("uiResendLast")!=null) {
 			resendLast = options.getOption("uiResendLast").getInt();
 		}
-		
+
 	}
 
 	public class UiChannel implements Serializable {
@@ -167,14 +170,21 @@ public abstract class ModuleWithUI extends AbstractSignalPathModule {
 		 * case that it's created dynamically and not saved in the JSON.
 		 */
 		public void initialize() {
+			log.info("initialize(): isNew: "+isNew+", id: "+id);
+
 			// Avoid lookup if we are sure the Stream won't be found
 			if (!isNew) {
 				stream = getStreamService().getStream(id);
+				log.info("Searching for stream "+id+" got me "+stream);
 			}
 
 			// If not found by id, try to find the Stream by path. This UI channel may be dynamically generated, and the id is not saved in the JSON.
 			if (stream == null) {
+				String runtimePath = getRuntimePath();
+				log.info("runtimePath: "+runtimePath);
 				stream = getStreamService().getStreamByUiChannelPath(getRuntimePath());
+
+				log.info("stream for runtimePath: "+stream);
 
 				// The uiChannelId may be replaced by a stream loaded by path from the db
 				if (stream != null) {
@@ -193,19 +203,23 @@ public abstract class ModuleWithUI extends AbstractSignalPathModule {
 				params.put("uiChannelPath", getRuntimePath());
 				params.put("uiChannelCanvas", getRootSignalPath().getCanvas());
 				stream = getStreamService().createStream(params, user, id);
+				log.info("Created stream: "+stream);
 			}
 
 			// Fix for CORE-893: Guard against excessive memory use by setting stream.uiChannelCanvas to the instance already in memory
+			log.info("setting the uiChannelCanvas: "+stream);
 			stream.setUiChannelCanvas(getRootSignalPath().getCanvas());
 
 			// User must have write permission to related Canvas in order to write to the UI channel
 			PermissionService permissionService = Holders.getApplicationContext().getBean(PermissionService.class);
+			log.info("Checking permissions for stream "+stream);
 			if (!permissionService.canWrite(user, stream.getUiChannelCanvas())) {
 				throw new AccessControlException(ModuleWithUI.this.getName() + ": User " + user.getUsername() +
 						" does not have write access to UI Channel Stream " + stream.getId());
 			}
 
 			isNew = false;
+			log.info("returning from initialize()");
 		}
 
 		public boolean isInitialized() {
