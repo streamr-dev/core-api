@@ -192,16 +192,23 @@ public abstract class ModuleWithUI extends AbstractSignalPathModule {
 				}
 			}
 
+			log.info("Getting user");
 			SecUser user = SecUser.getViaJava(getGlobals().getUserId());
+			log.info("Got user: "+user);
 
 			// Else create a new Stream object for this UI channel
 			if (stream == null) {
+				log.info("Starting stream auto-creation");
 				// Initialize a new UI channel Stream
 				Map<String, Object> params = new LinkedHashMap<>();
+				log.info("calling getUiChannelName()");
 				params.put("name", getUiChannelName());
 				params.put("uiChannel", true);
+				log.info("calling getRuntimePath()");
 				params.put("uiChannelPath", getRuntimePath());
+				log.info("calling getRootSignalPath().getCanvas()");
 				params.put("uiChannelCanvas", getRootSignalPath().getCanvas());
+				log.info("Creating stream with params: "+params);
 				stream = getStreamService().createStream(params, user, id);
 				log.info("Created stream: "+stream);
 			}
