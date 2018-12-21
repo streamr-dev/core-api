@@ -177,7 +177,6 @@ public abstract class ModuleWithUI extends AbstractSignalPathModule {
 
 			// If not found by id, try to find the Stream by path. This UI channel may be dynamically generated, and the id is not saved in the JSON.
 			if (stream == null) {
-				String runtimePath = getRuntimePath();
 				stream = getStreamService().getStreamByUiChannelPath(getRuntimePath());
 
 				// The uiChannelId may be replaced by a stream loaded by path from the db
