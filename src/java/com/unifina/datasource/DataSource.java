@@ -14,7 +14,7 @@ import java.util.*;
 
 /**
  * DataSource is a class global to the current run context. It handles
- * the creation of data feeds either explicitly (via DataSource#connectFeed(feed)) 
+ * the creation of data feeds either explicitly (via DataSource#connectFeed(feed))
  * or implicitly according to a SignalPath's needs (via DataSource#connectSignalPath(signalPath)).
  *
  * @author Henri
@@ -84,7 +84,10 @@ public abstract class DataSource {
 	}
 
 	public void startFeed() {
+		log.info("startListeners: " + startListeners);
+
 		for (IStartListener startListener : startListeners) {
+			log.info("calling onStart() on " + startListener);
 			startListener.onStart();
 		}
 
