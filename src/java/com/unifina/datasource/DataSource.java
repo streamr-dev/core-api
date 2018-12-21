@@ -84,10 +84,7 @@ public abstract class DataSource {
 	}
 
 	public void startFeed() {
-		log.info("startListeners: " + startListeners);
-
 		for (IStartListener startListener : startListeners) {
-			log.info("calling onStart() on " + startListener);
 			startListener.onStart();
 		}
 

@@ -121,7 +121,6 @@ class SignalPathService {
 		runner.addStartListener(new IStartListener() {
 			@Override
 			void onStart() {
-				log.info("Start listener called for runner ${runner.runnerId}")
 				addRunner(runner)
 			}
 		})
@@ -129,7 +128,6 @@ class SignalPathService {
 		runner.addStopListener(new IStopListener() {
 			@Override
 			void onStop() {
-				log.info("Stop listener called for runner ${runner.runnerId}")
 				removeRunner(runner)
 			}
 		})
