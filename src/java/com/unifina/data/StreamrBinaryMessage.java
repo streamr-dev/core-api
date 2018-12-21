@@ -14,29 +14,10 @@ import java.util.Date;
 import java.util.LinkedHashMap;
 
 public abstract class StreamrBinaryMessage {
+	protected static final Charset utf8 = Charset.forName("UTF-8");
 
 	public static final byte CONTENT_TYPE_STRING = 11; //0x0B
 	public static final byte CONTENT_TYPE_JSON = 27; //0x1B
-
-	public static StreamrBinaryMessage from(ByteBuffer bb) {
-		byte version = bb.get();
-		if (version == StreamrBinaryMessageV28.VERSION) {
-			return new StreamrBinaryMessageV28(bb);
-		} else if (version == StreamrBinaryMessageV29.VERSION) {
-			return new StreamrBinaryMessageV29(bb);
-		} else {
-			throw new IllegalArgumentException("Unknown version byte: "+version);
-		}
-	}
-
-	public final byte[] toBytes() {
-		ByteBuffer bb;
-		bb = ByteBuffer.allocate(sizeInBytes());
-		toByteBuffer(bb);
-		return bb.array();
-	}
-
-	protected static final Charset utf8 = Charset.forName("UTF-8");
 
 	private static Type type = new TypeToken<LinkedHashMap<String, Object>>(){}.getType();
 
@@ -45,29 +26,14 @@ public abstract class StreamrBinaryMessage {
 			.setDateFormat(DateFormat.LONG)
 			.create();
 
-	private final byte version;
-	private final String streamId;
-	private final int partition;
-	private final long timestamp;
-	private final byte contentType;
-	private final byte[] streamIdAsBytes;
-	private final byte[] content;
-	private final int ttl;
-
-	protected StreamrBinaryMessage(byte version, ByteBuffer bb) {
-		this.version = version;
-		timestamp = bb.getLong();
-		ttl = bb.getInt();
-		int streamIdLength = bb.get() & 0xFF; // unsigned byte
-		streamIdAsBytes = new byte[streamIdLength];
-		bb.get(streamIdAsBytes);
-		streamId = new String(streamIdAsBytes, utf8);
-		partition = bb.get() & 0xff; // unsigned byte
-		contentType = bb.get();
-		int contentLength = bb.getInt();
-		content = new byte[contentLength];
-		bb.get(content);
-	}
+	protected byte version;
+	protected String streamId;
+	protected int partition;
+	protected long timestamp;
+	protected byte contentType;
+	protected byte[] streamIdAsBytes;
+	protected byte[] content;
+	protected int ttl;
 
 	public StreamrBinaryMessage(byte version, String streamId, int partition, long timestamp, int ttl, byte contentType, byte[] content) {
 		this.version = version;
@@ -78,6 +44,13 @@ public abstract class StreamrBinaryMessage {
 		this.ttl = ttl;
 		this.contentType = contentType;
 		this.content = content;
+	}
+
+	public final byte[] toBytes() {
+		ByteBuffer bb;
+		bb = ByteBuffer.allocate(sizeInBytes());
+		toByteBuffer(bb);
+		return bb.array();
 	}
 
 	protected void toByteBuffer(ByteBuffer bb) {

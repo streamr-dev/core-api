@@ -1,7 +1,7 @@
 package com.unifina.feed.redis;
 
 import com.unifina.data.StreamrBinaryMessage;
-import com.unifina.data.StreamrBinaryMessageV28;
+import com.unifina.data.StreamrBinaryMessageFactory;
 import com.unifina.data.StreamrBinaryMessageV29;
 
 import java.nio.ByteBuffer;
@@ -27,7 +27,7 @@ public class StreamrBinaryMessageWithKafkaMetadata {
 	 * obtained from toBytesWithKafkaMetadata()
 	 */
 	public StreamrBinaryMessageWithKafkaMetadata(ByteBuffer bb) {
-		msg = StreamrBinaryMessage.from(bb);
+		msg = StreamrBinaryMessageFactory.fromBytes(bb);
 
 		byte version = bb.get();
 		if (version == 0) {
@@ -43,7 +43,7 @@ public class StreamrBinaryMessageWithKafkaMetadata {
 	 * obtained from (super.)toBytes(), adding the Kafka metadata using the other args
 	 */
 	public StreamrBinaryMessageWithKafkaMetadata(ByteBuffer parentBytes, int kafkaPartition, long offset, Long previousOffset) {
-		msg = StreamrBinaryMessage.from(parentBytes);
+		msg = StreamrBinaryMessageFactory.fromBytes(parentBytes);
 		this.offset = offset;
 		this.previousOffset = previousOffset;
 		this.kafkaPartition = kafkaPartition;
@@ -64,7 +64,7 @@ public class StreamrBinaryMessageWithKafkaMetadata {
 	 * Creates a new StreamrBinaryMessageWithKafkaMetadata using given values.
 	 */
 	public StreamrBinaryMessageWithKafkaMetadata(String streamId, int streamPartition, long timestamp, int ttl, byte contentType, byte[] content, int kafkaPartition, long offset, Long previousOffset) {
-		msg = new StreamrBinaryMessageV29(streamId, streamPartition, timestamp, ttl, contentType, content, StreamrBinaryMessageV29.SignatureType.SIGNATURE_TYPE_NONE, null, null);
+		msg = new StreamrBinaryMessageV29(streamId, streamPartition, timestamp, ttl, contentType, content, StreamrBinaryMessageV29.SignatureType.SIGNATURE_TYPE_NONE, (String) null, null);
 		this.offset = offset;
 		this.previousOffset = previousOffset;
 		this.kafkaPartition = kafkaPartition;

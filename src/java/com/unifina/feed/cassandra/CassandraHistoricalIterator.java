@@ -2,6 +2,7 @@ package com.unifina.feed.cassandra;
 
 import com.datastax.driver.core.*;
 import com.unifina.data.StreamrBinaryMessage;
+import com.unifina.data.StreamrBinaryMessageFactory;
 import com.unifina.domain.data.Stream;
 import com.unifina.feed.StreamrBinaryMessageParser;
 import com.unifina.feed.map.MapMessage;
@@ -82,7 +83,7 @@ public class CassandraHistoricalIterator implements Iterator<MapMessage>, Closea
 			resultSet.fetchMoreResults(); // this is asynchronous
 		}
 
-		StreamrBinaryMessage msg = StreamrBinaryMessage.from(row.getBytes("payload"));
+		StreamrBinaryMessage msg = StreamrBinaryMessageFactory.fromBytes(row.getBytes("payload"));
 		return parser.parse(msg);
 	}
 
