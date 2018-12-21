@@ -13,6 +13,9 @@ import spock.util.concurrent.PollingConditions
  */
 class RunCanvasSpec extends IntegrationSpec {
 
+	// Needed because otherwise a transaction started in the SignalPathRunner thread will deadlock with this one
+	static transactional = false
+
 	def static final SUM_FROM_1_TO_100_TIMES_2 = "10100.0"
 
 	CanvasService canvasService
@@ -21,10 +24,6 @@ class RunCanvasSpec extends IntegrationSpec {
 
 	SecUser user
 	Stream stream
-
-	def setupSpec() {
-		Canvas.metaClass.'static'.executeUpdate = { String query, List list -> println "Invoking Fake ExecuteUpdate" }
-	}
 
 	def setup() {
 		user = SecUser.load(1L)
@@ -39,17 +38,13 @@ class RunCanvasSpec extends IntegrationSpec {
 	@Unroll
 	def "start a canvas, send data to it via StreamService, and receive expected processed output values (#round)"(int round) {
 		def conditions = new PollingConditions()
-		Canvas canvas = Canvas.get("run-canvas-spec")
+		Canvas canvas = Canvas.get("run-canvas-spec").refresh() // Make sure the state doesn't come from cache
 
 		when:
 		canvasService.start(canvas, true, user)
 
 		// Allow time for Canvas to start
-		Thread.sleep(60 * 1000)
-
-		// Try and warm up Kafka by sending one message and waiting some more
-		streamService.sendMessage(stream, [numero: 0, areWeDoneYet: false], 300)
-		Thread.sleep(60 * 1000)
+		Thread.sleep(5 * 1000)
 
 		// Produce data
 		(1..100).each { streamService.sendMessage(stream, [numero: it, areWeDoneYet: false], 300) }
