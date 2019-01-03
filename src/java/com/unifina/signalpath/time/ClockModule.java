@@ -10,7 +10,7 @@ import java.util.TimeZone;
 
 public class ClockModule extends AbstractSignalPathModule implements ITimeListener, TimezoneModule {
 
-	private final StringParameter tz = new StringParameter(this, "timezone", "");
+	private final StringParameter tz = new StringParameter(this, "timezone", "UTC");
 	private final StringParameter format = new StringParameter(this, "format", "yyyy-MM-dd HH:mm:ss z");
 	private final EnumParameter<TimeUnit> tickUnit = new EnumParameter<>(this, "unit", TimeUnit.values());
 	private final IntegerParameter tickRate = new NonZeroIntegerParameter(this, "rate", 1);
