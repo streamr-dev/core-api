@@ -1,5 +1,6 @@
 package com.unifina.feed.redis;
 
+import com.unifina.data.StreamrBinaryMessage;
 import com.unifina.domain.data.Feed;
 import com.unifina.feed.AbstractMessageSource;
 import com.unifina.feed.MessageRecipient;
@@ -16,7 +17,7 @@ import java.util.*;
  * All the RedisMessageSources forward their received messages to the same recipient: the one
  * set on the MultipleRedisMessageSource instance.
  */
-public class MultipleRedisMessageSource extends AbstractMessageSource<StreamrBinaryMessageWithKafkaMetadata, String> {
+public class MultipleRedisMessageSource extends AbstractMessageSource<StreamrBinaryMessage, String> {
 	private final Map<String, RedisMessageSource> messageSourceByHost = new HashMap<>();
 
 	public MultipleRedisMessageSource(Feed feed, Map<String, Object> config) {
@@ -68,7 +69,7 @@ public class MultipleRedisMessageSource extends AbstractMessageSource<StreamrBin
 	}
 
 	@Override
-	public void setRecipient(MessageRecipient<StreamrBinaryMessageWithKafkaMetadata, String> recipient) {
+	public void setRecipient(MessageRecipient<StreamrBinaryMessage, String> recipient) {
 		super.setRecipient(recipient);
 		for (RedisMessageSource ms : messageSourceByHost.values()) {
 			ms.setRecipient(recipient);

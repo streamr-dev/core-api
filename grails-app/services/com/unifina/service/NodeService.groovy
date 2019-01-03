@@ -34,7 +34,7 @@ class NodeService {
 			if (addresses.size() == 1) {
 				cachedIp = addresses[0].hostAddress
 			} else if (addresses.size() > 1) {
-				log.warn("Multiple IPs found: ${addresses*.hostAddress}. To select which address to use, please set the streamr.node.ip system property.")
+				log.warn("Multiple IPs found: ${addresses*.hostAddress}. By default the first one will be used. To select another aaddress, please set the streamr.node.ip system property.")
 				cachedIp = addresses[0].hostAddress
 			} else {
 				// Fallback to localhost
@@ -43,6 +43,7 @@ class NodeService {
 			}
 		}
 
+		log.info("Using IP address: " + cachedIp)
 		return cachedIp
 	}
 
