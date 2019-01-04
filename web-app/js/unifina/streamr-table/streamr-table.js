@@ -75,13 +75,10 @@ StreamrTable.prototype.addRow = function(row, rowId, op) {
             content = ''
         } else {
             if (row[i] instanceof Object) {
-                if (row[i].date) {
-                    content = row[i].date
-                } else {
-                    content = row[i]
+                if (row[i].date && row[i].streamr_date) {
+                    const msFromEpoch = Number.parseInt(row[i].date)
+                    content = new Date(msFromEpoch).toISOString()
                 }
-            } else if (row[i] instanceof String) {
-                content = JSON.stringify(row[i])
             } else {
                 content = row[i]
             }
