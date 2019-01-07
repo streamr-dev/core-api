@@ -101,7 +101,7 @@ class TokenAuthenticatorSpec extends BeanMockingSpecification {
 		})
 
 		then:
-		1 * sessionService.getUserFromToken("session-token") >> { throw new InvalidSessionTokenException() }
+		1 * sessionService.getUserishFromToken("session-token") >> { throw new InvalidSessionTokenException() }
 		result != null
 		result.getKey() == null
 		result.getSecUser() == null

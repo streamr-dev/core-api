@@ -1,6 +1,5 @@
 package com.unifina.security;
 
-import com.unifina.domain.security.SecUser;
 import org.apache.commons.lang.RandomStringUtils;
 import org.joda.time.DateTime;
 
@@ -13,7 +12,7 @@ import java.util.TimeZone;
 
 public class SessionToken {
 	private String token;
-	private SecUser user;
+	private Userish user;
 	private Date expiration;
 
 	private static DateFormat df;
@@ -25,7 +24,7 @@ public class SessionToken {
 		return df;
 	}
 
-	public SessionToken(int tokenLength, SecUser user, int ttlHours) {
+	public SessionToken(int tokenLength, Userish user, int ttlHours) {
 		this.token = RandomStringUtils.randomAlphanumeric(tokenLength);
 		this.user = user;
 		this.expiration = new DateTime().plusHours(ttlHours).toDate();
@@ -35,7 +34,7 @@ public class SessionToken {
 		return token;
 	}
 
-	public SecUser getUser() {
+	public Userish getUserish() {
 		return user;
 	}
 

@@ -173,8 +173,31 @@ class LoginApiControllerSpec extends ControllerSpecification {
 		authenticatedAs(me) { controller.apikey() }
 
 		then:
-		1 * userService.getUserFromApiKey(apiKey) >> user
+		1 * userService.getUserishFromApiKey(apiKey) >> user
 		1 * sessionService.generateToken(user) >> token
+		response.status == 200
+		response.json == token.toMap()
+	}
+
+	def "apikey-based login for anonymous key should pass"() {
+		Key key = new Key(
+			id: "apiKey",
+		).save(failOnError: true, validate: false)
+
+		String apiKey = "apiKey"
+
+		SessionToken token = new SessionToken(64, key, 3)
+
+		when:
+		request.method = "POST"
+		request.JSON = [
+			apiKey: apiKey
+		]
+		authenticatedAs(me) { controller.apikey() }
+
+		then:
+		1 * userService.getUserishFromApiKey(apiKey) >> key
+		1 * sessionService.generateToken(key) >> token
 		response.status == 200
 		response.json == token.toMap()
 	}
@@ -190,7 +213,7 @@ class LoginApiControllerSpec extends ControllerSpecification {
 		authenticatedAs(me) { controller.apikey() }
 
 		then:
-		1 * userService.getUserFromApiKey(apiKey) >> { throw new InvalidAPIKeyException() }
+		1 * userService.getUserishFromApiKey(apiKey) >> { throw new InvalidAPIKeyException() }
 		thrown InvalidAPIKeyException
 	}
 }

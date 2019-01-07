@@ -6,6 +6,7 @@ import com.unifina.security.Challenge
 import com.unifina.security.SessionToken
 import com.unifina.security.AuthLevel
 import com.unifina.security.StreamrApi
+import com.unifina.security.Userish
 import com.unifina.service.ChallengeService
 import com.unifina.service.EthereumIntegrationKeyService
 import com.unifina.service.SessionService
@@ -46,8 +47,9 @@ class LoginApiController {
 
 	@StreamrApi(authenticationLevel = AuthLevel.NONE)
 	def apikey(ApiKeyCommand cmd) {
-		SecUser user = userService.getUserFromApiKey(cmd.apiKey)
-		SessionToken token = sessionService.generateToken(user)
+		// returns either a SecUser or a Key (anonymous key)
+		Userish userish = userService.getUserishFromApiKey(cmd.apiKey)
+		SessionToken token = sessionService.generateToken(userish)
 		render(token.toMap() as JSON)
 	}
 }
