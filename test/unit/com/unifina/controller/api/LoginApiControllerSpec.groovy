@@ -4,6 +4,7 @@ import com.unifina.ControllerSpecification
 import com.unifina.api.ApiException
 import com.unifina.api.ChallengeVerificationFailedException
 import com.unifina.api.InvalidAPIKeyException
+import com.unifina.api.InvalidArgumentsException
 import com.unifina.api.InvalidUsernameAndPasswordException
 import com.unifina.security.Challenge
 import com.unifina.domain.security.Key
@@ -215,5 +216,29 @@ class LoginApiControllerSpec extends ControllerSpecification {
 		then:
 		1 * userService.getUserishFromApiKey(apiKey) >> { throw new InvalidAPIKeyException() }
 		thrown InvalidAPIKeyException
+	}
+
+	def "apikey-based login should return 400 if no api key provided"() {
+		when:
+		request.method = "POST"
+		request.JSON = [
+			wrongfield: "apiKey"
+		]
+		authenticatedAs(me) { controller.apikey() }
+
+		then:
+		thrown InvalidArgumentsException
+	}
+
+	def "password-based login should return 400 if no username or password provided"() {
+		when:
+		request.method = "POST"
+		request.JSON = [
+			wrongfield: "password"
+		]
+		authenticatedAs(me) { controller.apikey() }
+
+		then:
+		thrown InvalidArgumentsException
 	}
 }
