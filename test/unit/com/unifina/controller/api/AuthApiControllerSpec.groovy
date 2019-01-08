@@ -1,13 +1,7 @@
-package com.unifina.controller.security
+package com.unifina.controller.api
 
 import com.unifina.domain.data.Feed
-import com.unifina.domain.security.Key
-import com.unifina.domain.security.Permission
-import com.unifina.domain.security.RegistrationCode
-import com.unifina.domain.security.SecRole
-import com.unifina.domain.security.SecUser
-import com.unifina.domain.security.SecUserSecRole
-import com.unifina.domain.security.SignupInvite
+import com.unifina.domain.security.*
 import com.unifina.domain.signalpath.Module
 import com.unifina.domain.signalpath.ModulePackage
 import com.unifina.feed.NoOpStreamListener
@@ -16,18 +10,17 @@ import com.unifina.service.SignupCodeService
 import com.unifina.service.UserService
 import com.unifina.signalpath.messaging.MockMailService
 import grails.plugin.springsecurity.SpringSecurityService
-import org.codehaus.groovy.grails.commons.GrailsApplication
-import org.springframework.context.MessageSource
 import grails.test.mixin.Mock
 import grails.test.mixin.TestFor
+import org.codehaus.groovy.grails.commons.GrailsApplication
+import org.springframework.context.MessageSource
 import spock.lang.Specification
 
-@TestFor(AuthController)
+@TestFor(AuthApiController)
 @Mock([SignupInvite, SignupCodeService, RegistrationCode, SecUser, Key, SecRole, SecUserSecRole, Feed, ModulePackage, Permission, UserService])
-class AuthControllerSpec extends Specification {
+class AuthApiControllerSpec extends Specification {
 
 	String username = "user@invite.to"
-	String reauthenticated = null
 
 	void setupSpec() {
 
@@ -36,9 +29,6 @@ class AuthControllerSpec extends Specification {
 	def springSecurityService = [
 		encodePassword: { pw ->
 			return pw + "-encoded"
-		},
-		reauthenticate: { username->
-			reauthenticated = username
 		}
 	]
 
@@ -58,14 +48,6 @@ class AuthControllerSpec extends Specification {
 		controller.userService.grailsApplication = grailsApplication as GrailsApplication
 		controller.userService.permissionService = permissionService as PermissionService
 		controller.userService.messageSource = messageSource as MessageSource
-		reauthenticated = null
-	}
-
-	void "index should be available"() {
-		when: "index is requested"
-		controller.index()
-		then: "200 is returned"
-		response.status == 200
 	}
 
 	void "signup with bad email should return error"() {
@@ -295,8 +277,6 @@ class AuthControllerSpec extends Specification {
 		]
 		then: "welcome email should be sent"
 		controller.mailService.mailSent
-		then: "user must be (re)authenticated"
-		reauthenticated == username
 	}
 
 	void "forgotPassword returns emailSent=true but does not send email if the user does not exist"() {

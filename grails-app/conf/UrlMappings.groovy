@@ -22,12 +22,16 @@ class UrlMappings {
 
 		"/login/auth"(controller: "auth", action: "index")
 		"/login/full"(controller: "auth", action: "fullAuth")
-		"/login/$action**?"(controller: "auth", action: "index")
 		"/register/$action**?"(controller: "auth", action: "index")
 
 		"/webcomponents/$view"(controller: "webcomponents", action: "index")
 
 		// API v1 url mappings
+		"/api/v1/signups"(controller: "authApi", action: "signup")
+		"/api/v1/users"(controller: "authApi", action: "register")
+		"/api/v1/passwords/tokens"(controller: "authApi", action: "forgotPassword")
+		"/api/v1/passwords"(controller: "authApi", action: "resetPassword")
+
 		"/api/v1/canvases"(resources: "canvasApi", excludes: ["create", "edit"])
 		"/api/v1/canvases/$id/start"(controller: "canvasApi", action: "start")
 		"/api/v1/canvases/$id/startAsAdmin"(controller: "canvasApi", action: "startAsAdmin")

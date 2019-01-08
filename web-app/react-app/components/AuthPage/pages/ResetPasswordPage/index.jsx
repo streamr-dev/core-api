@@ -59,7 +59,7 @@ class ResetPasswordPage extends React.Component<Props> {
     }
 
     submit = () => {
-        const url = createLink('auth/resetPassword')
+        const url = createLink('api/v1/passwords')
         const { password, confirmPassword: password2, token: t } = this.props.form
 
         return post(url, {

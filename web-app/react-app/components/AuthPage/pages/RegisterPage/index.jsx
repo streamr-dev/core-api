@@ -67,7 +67,7 @@ class RegisterPage extends React.Component<Props> {
     }
 
     submit = () => {
-        const url = createLink('auth/register')
+        const url = createLink('api/v1/users')
         const { name, password, confirmPassword: password2, timezone, toc: tosConfirmed, invite } = this.props.form
 
         return post(url, {
