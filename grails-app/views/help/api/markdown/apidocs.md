@@ -11,8 +11,8 @@ For efficiently publishing and subscribing to data in realtime, using the websoc
 For easy usage of both the HTTP and websocket APIs, there are official and community-maintained client libraries available for various languages:
   
 <a name="libraries"></a>
-- [JavaScript (official)](https://github.com/streamr-dev/streamr-client) - client works in the browser as well as node.js. The package is available on [npm](https://www.npmjs.com/package/streamr-client).
-- Java (official) - coming soon
+- [JavaScript (official)](https://github.com/streamr-dev/streamr-client-javascript) - client works in the browser as well as node.js. The package is available on [npm](https://www.npmjs.com/package/streamr-client).
+- [Java (official)](https://github.com/streamr-dev/streamr-client-java) - work-in-progress but already implements the most important set of functionality.
 - Python (community-maintained) - coming soon
 
 If you'd like to contribute a client library, please get in touch!
