@@ -13,9 +13,9 @@ For easy usage of both the HTTP and websocket APIs, there are official and commu
 <a name="libraries"></a>
 - [JavaScript (official)](https://github.com/streamr-dev/streamr-client-javascript) - client works in the browser as well as node.js. The package is available on [npm](https://www.npmjs.com/package/streamr-client).
 - [Java (official)](https://github.com/streamr-dev/streamr-client-java) - work-in-progress but already implements the most important set of functionality.
-- Python (community-maintained) - coming soon
+- Python (community) - coming soon
 
-If you'd like to contribute a client library, please get in touch!
+If you'd like to contribute a client library and get it listed here, please get in touch on [Telegram](https://t.me/streamrdata), [Reddit](https://www.reddit.com/r/streamr/) or [email](mailto:contact@streamr.com)!
 
 <a name="authentication"></a>
 # Authentication
