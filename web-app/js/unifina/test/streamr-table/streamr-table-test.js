@@ -90,14 +90,13 @@ describe('streamr-table', function() {
 			table.receiveResponse({
 				id: 123,
 				nr: [
-					{ date: '1544689068126', streamr_date: true }, // 2018-12-13T08:17:48.126Z
-					{ date: '1544696268126', streamr_date: true },  // 2018-12-13T10:17:48.126Z
-					'2019-01-04 15:12:17 EET' // string date from DateConversion
+					{ __streamr_date: 1544689068126 }, // 2018-12-13T08:17:48.126Z
+					{ __streamr_date: 1544696268126 },  // 2018-12-13T10:17:48.126Z
 				]
 			})
-			assert($($($parent.find('table tbody tr')[0]).find('td')[0]).text() === '2018-12-13T08:17:48.126Z')
-			assert($($($parent.find('table tbody tr')[0]).find('td')[1]).text() === '2018-12-13T10:17:48.126Z')
-			assert($($($parent.find('table tbody tr')[0]).find('td')[2]).text() === '2019-01-04 15:12:17 EET')
+			console.log($($($parent.find('table tbody tr')[0]).find('td')[1]).text())
+			assert($($($parent.find('table tbody tr')[0]).find('td')[0]).text() === '2018-12-13 10:17:48 +02:00')
+			assert($($($parent.find('table tbody tr')[0]).find('td')[1]).text() === '2018-12-13 12:17:48 +02:00')
 		})
 
 	})

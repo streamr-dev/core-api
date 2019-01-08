@@ -18,7 +18,7 @@ public class ExportCSV extends ModuleWithUI implements TimezoneModule {
 
 	private static final Logger log = Logger.getLogger(ExportCSV.class);
 
-	StringParameter tz = new StringParameter(this, "timezone", "");
+	StringParameter tz = new StringParameter(this, "timezone", "UTC");
 
 	private final VariadicInput<Object> ins = new VariadicInput<>(this, new InputInstantiator.SimpleObject());
 

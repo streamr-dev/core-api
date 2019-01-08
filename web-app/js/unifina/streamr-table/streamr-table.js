@@ -1,5 +1,5 @@
 (function(exports) {
-
+    const moment = require('moment')
 function StreamrTable(parent, options) {
 	this.$parent = $(parent)
     this.options = options
@@ -75,9 +75,8 @@ StreamrTable.prototype.addRow = function(row, rowId, op) {
             content = ''
         } else {
             if (row[i] instanceof Object) {
-                if (row[i].date && row[i].streamr_date) {
-                    const msFromEpoch = Number.parseInt(row[i].date)
-                    content = new Date(msFromEpoch).toISOString()
+                if (row[i].__streamr_date) {
+                    content = moment(new Date(row[i].__streamr_date).getTime()).format('YYYY-MM-DD HH:mm:ss Z')
                 }
             } else {
                 content = row[i]

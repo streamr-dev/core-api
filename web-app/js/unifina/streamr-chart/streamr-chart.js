@@ -170,7 +170,7 @@ StreamrChart.prototype.createHighstocksInstance = function(title, series, yAxis)
 
 	Highcharts.setOptions({
 		global: {
-			useUTC: true
+			useUTC: false
 		}
 	});
 

@@ -14,11 +14,9 @@ import java.util.TimeZone;
 
 public class Globals {
 	private final SimpleDateFormat dateFormatUTC = new SimpleDateFormat("yyyy-MM-dd");
-	private final SimpleDateFormat dateTimeFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS");
 
 	private final Map signalPathContext;
 	private final Long userId;
-	private final TimezoneConverter tzConverter;
 	private DataSource dataSource = null;
 	private Date startDate = null;
 	private Date endDate = null;
@@ -40,8 +38,6 @@ public class Globals {
 		}
 		this.signalPathContext = signalPathContext;
 		this.userId = user != null ? user.getId() : null;
-		this.tzConverter = new TimezoneConverter(TimeZone.getTimeZone("UTC"));
-		this.dateTimeFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
 		this.dateFormatUTC.setTimeZone(TimeZone.getTimeZone("UTC"));
 	}
 
@@ -92,10 +88,6 @@ public class Globals {
 		return endDate;
 	}
 
-	public TimezoneConverter getTzConverter() {
-		return tzConverter;
-	}
-
 	public TimeZone getUserTimeZone() {
 		return TimeZone.getTimeZone("UTC");
 	}
@@ -144,9 +136,5 @@ public class Globals {
      */
 	public boolean isRunContext() {
 		return getDataSource() != null;
-	}
-
-	public String formatDateTime(Date date) {
-		return dateTimeFormat.format(date);
 	}
 }

@@ -54,7 +54,6 @@ public class DateConversion extends AbstractSignalPathModule implements Timezone
 	@Override
 	public void initialize() {
 		super.initialize();
-		tz.receive(this.getTimezone().getID());
 	}
 
 	@Override

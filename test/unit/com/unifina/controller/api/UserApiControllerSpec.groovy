@@ -6,7 +6,6 @@ import grails.test.mixin.Mock
 import grails.test.mixin.TestFor
 
 @TestFor(UserApiController)
-@Mock(SecUser)
 class UserApiControllerSpec extends ControllerSpecification {
 
 	SecUser me
@@ -17,7 +16,7 @@ class UserApiControllerSpec extends ControllerSpecification {
 			name: "me",
 			username: "me@too.com",
 			enabled: true,
-		).save(validate: false)
+		)
 	}
 
 	void "unauthenticated user gets back 401"() {

@@ -61,7 +61,7 @@
 					            <ui:td>${dashboard.name}</ui:td>
 					            <ui:td class="hidden-xs" id="dashboardDateCreated-${dashboard.id}">
 									<g:javascript>
-										document.getElementById('dashboardDateCreated-${dashboard.id}').innerHTML = moment.utc('${dashboard.lastUpdated}').local().format('<g:message code="default.date.moment.format"/>');
+										document.getElementById('dashboardDateCreated-${dashboard.id}').innerHTML = moment('${dashboard.lastUpdated.getTime()}').format('<g:message code="default.date.moment.format"/>');
 									</g:javascript>
 								</ui:td>
 								<ui:td class="button-column">

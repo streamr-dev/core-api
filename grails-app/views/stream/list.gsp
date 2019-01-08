@@ -57,7 +57,7 @@
 				            <ui:td class="hidden-xs">${fieldValue(bean: stream, field: "description")}</ui:td>
 							<ui:td class="hidden-xs" id="streamLastUpdated-${stream.id}">
 								<g:javascript>
-										document.getElementById('streamLastUpdated-${stream.id}').innerHTML = moment.utc('${stream.lastUpdated}').local().format('<g:message code="default.date.moment.format"/>');
+										document.getElementById('streamLastUpdated-${stream.id}').innerHTML = moment('${stream.lastUpdated.getTime()}').format('<g:message code="default.date.moment.format"/>');
 								</g:javascript>
 							</ui:td>
 							<ui:td class="button-column">

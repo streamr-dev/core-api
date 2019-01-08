@@ -8,8 +8,6 @@ import java.util.Map;
 
 public class TimeSeriesChart extends Chart {
 
-	private final StringParameter tz = new StringParameter(this, "timezone", "UTC");
-
 	private int tsInputCount = 10;
 	private boolean barify = false;
 	private boolean overnightBreak = true;
@@ -19,7 +17,6 @@ public class TimeSeriesChart extends Chart {
 	public void initialize() {
 		super.initialize();
 
-		addInput(tz);
 		ArrayList<String> names = new ArrayList<>();
 		int seriesIdx = 0;
 

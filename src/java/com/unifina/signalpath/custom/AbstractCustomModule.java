@@ -20,7 +20,7 @@ public abstract class AbstractCustomModule extends ModuleWithUI {
 		}
 		String t = null;
 		if (getGlobals().time != null)
-			t = df.format(getGlobals().getTzConverter().getFakeLocalTime(getGlobals().time));
+			t = df.format(new Date().getTime());
 
 		final HashMap<String, String> msg = new HashMap<>();
 		msg.put("type", "debug");

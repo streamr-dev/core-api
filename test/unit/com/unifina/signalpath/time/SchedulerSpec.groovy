@@ -16,7 +16,7 @@ class SchedulerSpec extends UiChannelMockingSpecification {
 	void "Scheduler works as expected"() {
 		when:
 		Scheduler module = new Scheduler()
-		module.setTimezone("UTC")
+		module.setTimezone("EEST")
 		module = setupModule(module, [
 			uiChannel: [id: "schedulerChannel"],
 			schedule: [
@@ -43,7 +43,6 @@ class SchedulerSpec extends UiChannelMockingSpecification {
 			]
 		]
 
-		TimeZone.setDefault(TimeZone.getTimeZone("UTC"))
 		SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss z")
 		df.setTimeZone(TimeZone.getTimeZone("EEST"))
 		Map<Integer, Date> ticks = [

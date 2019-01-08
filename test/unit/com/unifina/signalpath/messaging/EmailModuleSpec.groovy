@@ -98,7 +98,7 @@ This email was sent by one of your running Canvases on Streamr.
 Message:
 Message
 
-Event Timestamp:
+Event Timestamp (UTC):
 1970-01-01 00:00:00.000
 
 Input Values:
@@ -140,7 +140,7 @@ This email was sent by one of your running Canvases on Streamr.
 Message:
 Test message
 
-Event Timestamp:
+Event Timestamp (UTC):
 ${df.format(globals.time)}
 
 Input Values:
