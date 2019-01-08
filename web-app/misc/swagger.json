@@ -42,8 +42,8 @@
       "description": "Keys for authenticating users and resources"
     },
     {
-      "name": "logins",
-      "description": "Login authentication methods"
+      "name": "login",
+      "description": "Methods for obtaining a session token for authentication"
     },
     {
       "name": "permissions",
@@ -72,7 +72,7 @@
         "summary": "Generate challenge",
         "description": "Generates a challenge to be signed by an Ethereum private key to prove possession of an Ethereum account.",
         "tags": [
-          "logins"
+          "login"
         ],
         "parameters": [
           {
@@ -98,7 +98,7 @@
         "summary": "Log in with challenge verification",
         "description": "Verifies a signature against a challenge. If it matches, generates a session token for the user.",
         "tags": [
-          "logins"
+          "login"
         ],
         "parameters": [
           {
@@ -138,7 +138,7 @@
         "summary": "Log in with password verification",
         "description": "Verifies a username/password combination. If correct, generates a session token for the user.",
         "tags": [
-          "logins"
+          "login"
         ],
         "parameters": [
           {
@@ -178,7 +178,7 @@
         "summary": "Log in with API key verification",
         "description": "Verifies that an API key belongs to the user. If it does, generates a session token for the user.",
         "tags": [
-          "logins"
+          "login"
         ],
         "parameters": [
           {
@@ -3405,13 +3405,17 @@
         "config": {
           "$ref": "#/definitions/StreamConfig"
         },
-        "apiKey": {
-          "type": "string",
-          "description": "Api key needed to produce data to this stream."
-        },
         "uiChannel": {
           "type": "boolean",
           "description": "Indicates whether this stream is an UI channel: a stream used internally to push updates to UI widgets."
+        },
+        "partitions": {
+          "type": "integer",
+          "description": "Number of partitions in this stream. Defaults to 1 (unpartitioned)."
+        },
+        "requireSignedData": {
+          "type": "boolean",
+          "description": "If true, all messages in this stream must be cryptographically signed. Client's should not accept unsigned messages."
         }
       }
     },
@@ -4079,10 +4083,10 @@
     "APIKey": {
       "type": "object",
       "required": [
-        "apikey"
+        "apiKey"
       ],
       "properties": {
-        "apikey": {
+        "apiKey": {
           "type": "string",
           "description": "User's API Key",
           "example": "QaSEO3mlSaTGd3ZOSnwHUgK3ecU7pOvQw-WPkZcR-6TBv"

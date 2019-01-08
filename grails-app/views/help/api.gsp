@@ -17,13 +17,7 @@
 	</ui:breadcrumb>
 
 <script id="api-docs-markdown" type="text/x-markdown">
-<g:render template="api/introduction" />
-<hr>
-<g:render template="api/data-input" />
-<hr>
-<g:render template="api/data-output" />
-<hr>
-<g:render template="api/resources" />
+<g:render template="api/apidocs" />
 </script>
 	<div id="api-docs-wrapper" class="docs-wrapper">
 		<g:render template="api/swagger"/>
