@@ -25,7 +25,6 @@ class DateConversionSpec extends Specification {
 		module.globals = new Globals([:], user)
 		module.init()
 		module.connectionsReady()
-		module.setTimezone("UTC")
 	}
 
 	void "dateConversion gives the right answer"() {
@@ -284,7 +283,7 @@ class DateConversionSpec extends Specification {
 		when: "time is set and asked"
 		Date date = df.parse("2015-07-15 09:32:00")
 		module.getInput("date").receive((Double)date.getTime())
-		module.getInput("timezone").receive("America/Argentina/Buenos_Aires") // Argentina, used because there's no daylight saving time there
+		module.getInput("timezone").receive(TimeZone.getTimeZone("America/Argentina/Buenos_Aires")) // Argentina, used because there's no daylight saving time there
 		module.sendOutput()
 
 		then: "the values are correct"
@@ -299,7 +298,7 @@ class DateConversionSpec extends Specification {
 		when: "time is set and asked"
 		Date date = df.parse("2015-01-15 09:32:00")
 		module.getInput("date").receive((Double)date.getTime())
-		module.getInput("timezone").receive("America/Argentina/Buenos_Aires") // Argentina, used because there's no daylight saving time there
+		module.getInput("timezone").receive(TimeZone.getTimeZone("America/Argentina/Buenos_Aires")) // Argentina, used because there's no daylight saving time there
 		module.sendOutput()
 
 		then: "the values are correct"

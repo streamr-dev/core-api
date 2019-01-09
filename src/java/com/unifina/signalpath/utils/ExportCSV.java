@@ -2,6 +2,7 @@ package com.unifina.signalpath.utils;
 
 import com.unifina.service.SerializationService;
 import com.unifina.signalpath.*;
+import com.unifina.signalpath.time.TimezoneParameter;
 import com.unifina.signalpath.variadic.InputInstantiator;
 import com.unifina.signalpath.variadic.VariadicInput;
 import com.unifina.utils.RFC4180CSVWriter;
@@ -12,13 +13,13 @@ import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.*;
 
-public class ExportCSV extends ModuleWithUI implements TimezoneModule {
+public class ExportCSV extends ModuleWithUI {
 
 	public static final long MIN_MS_BETWEEN_UI_UPDATES = 1000;
 
 	private static final Logger log = Logger.getLogger(ExportCSV.class);
 
-	StringParameter tz = new StringParameter(this, "timezone", "UTC");
+	TimezoneParameter tz = new TimezoneParameter(this, "timezone", TimeZone.getTimeZone("UTC"));
 
 	private final VariadicInput<Object> ins = new VariadicInput<>(this, new InputInstantiator.SimpleObject());
 
@@ -47,7 +48,7 @@ public class ExportCSV extends ModuleWithUI implements TimezoneModule {
 			openCsvWriter();
 		}
 		if (timeFormatter == null) {
-			timeFormatter = timeFormat.getTimeFormatter(getTimezone());
+			timeFormatter = timeFormat.getTimeFormatter(tz.getValue());
 		}
 
 		List<Object> row = new ArrayList<>();
@@ -145,7 +146,7 @@ public class ExportCSV extends ModuleWithUI implements TimezoneModule {
 	public void afterDeserialization(SerializationService serializationService) {
 		super.afterDeserialization(serializationService);
 		openCsvWriter();
-		timeFormatter = timeFormat.getTimeFormatter(getTimezone());
+		timeFormatter = timeFormat.getTimeFormatter(tz.getValue());
 	}
 
 	private void openCsvWriter() {
@@ -162,16 +163,6 @@ public class ExportCSV extends ModuleWithUI implements TimezoneModule {
 			}
 			csvWriter.writeRow(inputNames);
 		}
-	}
-
-	@Override
-	public void setTimezone(String timezone) {
-		tz.receive(timezone);
-	}
-
-	@Override
-	public TimeZone getTimezone() {
-		return TimeZone.getTimeZone(tz.getValue());
 	}
 
 	public static class Context implements Serializable {

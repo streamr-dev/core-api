@@ -2,15 +2,13 @@ package com.unifina.signalpath.time;
 
 import com.unifina.datasource.ITimeListener;
 import com.unifina.signalpath.ModuleWithUI;
-import com.unifina.signalpath.StringParameter;
 import com.unifina.signalpath.TimeSeriesOutput;
-import com.unifina.signalpath.TimezoneModule;
 
 import java.util.*;
 
-public class Scheduler extends ModuleWithUI implements ITimeListener, TimezoneModule {
+public class Scheduler extends ModuleWithUI implements ITimeListener {
 
-	private final StringParameter tz = new StringParameter(this, "timezone", "UTC");
+	private final TimezoneParameter tz = new TimezoneParameter(this, "timezone", TimeZone.getTimeZone("UTC"));
 	private final TimeSeriesOutput out = new TimeSeriesOutput(this, "value");
 
 	private final List<Rule> rules = new ArrayList<>();
@@ -83,7 +81,7 @@ public class Scheduler extends ModuleWithUI implements ITimeListener, TimezoneMo
 
 			rules.clear();
 			for (Map<String, Object> ruleConfig : ruleConfigList) {
-				rules.add(Rule.instantiateRule(ruleConfig, getTimezone()));
+				rules.add(Rule.instantiateRule(ruleConfig, tz.getValue()));
 			}
 		}
 	}
@@ -103,15 +101,5 @@ public class Scheduler extends ModuleWithUI implements ITimeListener, TimezoneMo
 		config.put("schedule", scheduleConfig);
 
 		return config;
-	}
-
-	@Override
-	public void setTimezone(String timezone) {
-		tz.receive(timezone);
-	}
-
-	@Override
-	public TimeZone getTimezone() {
-		return TimeZone.getTimeZone(tz.getValue());
 	}
 }

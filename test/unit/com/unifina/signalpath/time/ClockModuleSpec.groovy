@@ -19,7 +19,6 @@ class ClockModuleSpec extends Specification {
 		module.globals = globals
 		module.init()
 		module.connectionsReady()
-		module.setTimezone("UTC")
     }
 
 	void "clockModule gives the right answer"() {

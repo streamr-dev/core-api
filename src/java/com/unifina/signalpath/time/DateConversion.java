@@ -10,9 +10,9 @@ import java.util.Date;
 import java.util.Locale;
 import java.util.TimeZone;
 
-public class DateConversion extends AbstractSignalPathModule implements TimezoneModule {
+public class DateConversion extends AbstractSignalPathModule {
 
-	StringParameter tz = new StringParameter(this, "timezone", "UTC");
+	TimezoneParameter tz = new TimezoneParameter(this, "timezone", TimeZone.getTimeZone("UTC"));
 	StringParameter pattern = new StringParameter(this, "format", "yyyy-MM-dd HH:mm:ss z");
 
 	Input<Object> dateIn = new Input<>(this, "date", "Date Double String");
@@ -63,7 +63,7 @@ public class DateConversion extends AbstractSignalPathModule implements Timezone
 		}
 
 		if (tz.getValue() != null) {
-			TimeZone timeZone = this.getTimezone();
+			TimeZone timeZone = tz.getValue();
 			if (timeZone != null) {
 				cal.setTimeZone(timeZone);
 				df.setTimeZone(timeZone);
@@ -121,7 +121,7 @@ public class DateConversion extends AbstractSignalPathModule implements Timezone
 	}
 
 	private void ensureState() {
-		final TimeZone timezone = this.getTimezone();
+		final TimeZone timezone = tz.getValue();
 		if (cal == null) {
 			cal = Calendar.getInstance(timezone);
 		}
@@ -129,15 +129,5 @@ public class DateConversion extends AbstractSignalPathModule implements Timezone
 			df = new SimpleDateFormat();
 			df.setTimeZone(timezone);
 		}
-	}
-
-	@Override
-	public void setTimezone(String timezone) {
-		tz.receive(timezone);
-	}
-
-	@Override
-	public TimeZone getTimezone() {
-		return TimeZone.getTimeZone(tz.getValue());
 	}
 }

@@ -4,15 +4,14 @@ import com.unifina.datasource.ITimeListener;
 import com.unifina.signalpath.AbstractSignalPathModule;
 import com.unifina.signalpath.StringParameter;
 import com.unifina.signalpath.TimeSeriesOutput;
-import com.unifina.signalpath.TimezoneModule;
 import com.unifina.utils.TimeOfDayUtil;
 
 import java.util.Date;
 import java.util.TimeZone;
 
-public class TimeOfDay extends AbstractSignalPathModule implements ITimeListener, TimezoneModule {
+public class TimeOfDay extends AbstractSignalPathModule implements ITimeListener {
 
-	private final StringParameter tz = new StringParameter(this, "timezone", "");
+	private final TimezoneParameter tz = new TimezoneParameter(this, "timezone", TimeZone.getTimeZone("UTC"));
 
 	TimeSeriesOutput out = new TimeSeriesOutput(this,"out");
 
@@ -82,20 +81,10 @@ public class TimeOfDay extends AbstractSignalPathModule implements ITimeListener
 
 	private void initUtilIfNeeded() {
 		if (util == null) {
-			util = new TimeOfDayUtil(lastStartTime, lastEndTime, getTimezone());
+			util = new TimeOfDayUtil(lastStartTime, lastEndTime, tz.getValue());
 			if (lastBaseDay != null) {
 				util.setBaseDate(lastBaseDay);
 			}
 		}
-	}
-
-	@Override
-	public void setTimezone(String timezone) {
-		tz.receive(timezone);
-	}
-
-	@Override
-	public TimeZone getTimezone() {
-		return TimeZone.getTimeZone(tz.getValue());
 	}
 }

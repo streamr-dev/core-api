@@ -16,7 +16,6 @@ class SchedulerSpec extends UiChannelMockingSpecification {
 	void "Scheduler works as expected"() {
 		when:
 		Scheduler module = new Scheduler()
-		module.setTimezone("EEST")
 		module = setupModule(module, [
 			uiChannel: [id: "schedulerChannel"],
 			schedule: [
