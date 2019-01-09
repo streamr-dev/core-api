@@ -72,7 +72,7 @@ class UnifinaCoreAPIFiltersSpec extends BeanMockingSpecification {
 		}
 
 		then:
-		1 * sessionService.getUserFromToken(token) >> user
+		1 * sessionService.getUserishFromToken(token) >> user
 		response.status == 200
 	}
 }

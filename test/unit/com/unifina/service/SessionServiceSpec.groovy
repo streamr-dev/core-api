@@ -1,5 +1,6 @@
 package com.unifina.service
 
+import com.unifina.domain.security.Key
 import com.unifina.domain.security.SecUser
 import com.unifina.security.SessionToken
 import grails.test.mixin.Mock
@@ -18,7 +19,7 @@ class SessionServiceSpec extends Specification {
 		keyValueStoreService = service.keyValueStoreService = Mock(KeyValueStoreService)
 	}
 
-	void "generateToken() should generate session token"() {
+	void "generateToken() should generate session token from user"() {
 		SecUser user = new SecUser(id: 123L).save(failOnError: true, validate: false)
 		when:
 		SessionToken token = service.generateToken(user)
@@ -27,13 +28,32 @@ class SessionServiceSpec extends Specification {
 		token.getToken().length() == SessionService.TOKEN_LENGTH
 	}
 
-	void "getUserFromToken() should return user"() {
+	void "generateToken() should generate session token from anonymous key"() {
+		Key key = new Key(id: 123L).save(failOnError: true, validate: false)
+		when:
+		SessionToken token = service.generateToken(key)
+		then:
+		1 * keyValueStoreService.setWithExpiration(_, _, _)
+		token.getToken().length() == SessionService.TOKEN_LENGTH
+	}
+
+	void "getUserishFromToken() should return user"() {
 		SecUser user = new SecUser(id: 123L).save(failOnError: true, validate: false)
 		String token = "token"
 		when:
-		SecUser retrieved = service.getUserFromToken(token)
+		SecUser retrieved = (SecUser) service.getUserishFromToken(token)
 		then:
-		1 * keyValueStoreService.get(token) >> user.id.toString()
+		1 * keyValueStoreService.get(token) >> "SecUser"+user.id.toString()
 		retrieved.id == user.id
+	}
+
+	void "getUserishFromToken() should return anonymous key"() {
+		Key key = new Key(id: 123L).save(failOnError: true, validate: false)
+		String token = "token"
+		when:
+		Key retrieved = (Key) service.getUserishFromToken(token)
+		then:
+		1 * keyValueStoreService.get(token) >> "Key"+key.id.toString()
+		retrieved.id == key.id
 	}
 }

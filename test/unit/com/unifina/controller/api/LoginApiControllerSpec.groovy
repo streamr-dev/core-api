@@ -4,6 +4,7 @@ import com.unifina.ControllerSpecification
 import com.unifina.api.ApiException
 import com.unifina.api.ChallengeVerificationFailedException
 import com.unifina.api.InvalidAPIKeyException
+import com.unifina.api.InvalidArgumentsException
 import com.unifina.api.InvalidUsernameAndPasswordException
 import com.unifina.security.Challenge
 import com.unifina.domain.security.Key
@@ -173,8 +174,31 @@ class LoginApiControllerSpec extends ControllerSpecification {
 		authenticatedAs(me) { controller.apikey() }
 
 		then:
-		1 * userService.getUserFromApiKey(apiKey) >> user
+		1 * userService.getUserishFromApiKey(apiKey) >> user
 		1 * sessionService.generateToken(user) >> token
+		response.status == 200
+		response.json == token.toMap()
+	}
+
+	def "apikey-based login for anonymous key should pass"() {
+		Key key = new Key(
+			id: "apiKey",
+		).save(failOnError: true, validate: false)
+
+		String apiKey = "apiKey"
+
+		SessionToken token = new SessionToken(64, key, 3)
+
+		when:
+		request.method = "POST"
+		request.JSON = [
+			apiKey: apiKey
+		]
+		authenticatedAs(me) { controller.apikey() }
+
+		then:
+		1 * userService.getUserishFromApiKey(apiKey) >> key
+		1 * sessionService.generateToken(key) >> token
 		response.status == 200
 		response.json == token.toMap()
 	}
@@ -190,7 +214,31 @@ class LoginApiControllerSpec extends ControllerSpecification {
 		authenticatedAs(me) { controller.apikey() }
 
 		then:
-		1 * userService.getUserFromApiKey(apiKey) >> { throw new InvalidAPIKeyException() }
+		1 * userService.getUserishFromApiKey(apiKey) >> { throw new InvalidAPIKeyException() }
 		thrown InvalidAPIKeyException
+	}
+
+	def "apikey-based login should return 400 if no api key provided"() {
+		when:
+		request.method = "POST"
+		request.JSON = [
+			wrongfield: "apiKey"
+		]
+		authenticatedAs(me) { controller.apikey() }
+
+		then:
+		thrown InvalidArgumentsException
+	}
+
+	def "password-based login should return 400 if no username or password provided"() {
+		when:
+		request.method = "POST"
+		request.JSON = [
+			wrongfield: "password"
+		]
+		authenticatedAs(me) { controller.apikey() }
+
+		then:
+		thrown InvalidArgumentsException
 	}
 }

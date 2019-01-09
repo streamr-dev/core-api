@@ -8,6 +8,7 @@ import com.unifina.domain.security.SecRole
 import com.unifina.domain.security.SecUser
 import com.unifina.domain.signalpath.ModulePackage
 import com.unifina.exceptions.UserCreationFailedException
+import com.unifina.security.Userish
 import grails.plugin.springsecurity.SpringSecurityService
 import org.codehaus.groovy.grails.commons.GrailsApplication
 import org.springframework.context.MessageSource
@@ -177,11 +178,14 @@ class UserService {
 		}
 	}
 
-	SecUser getUserFromApiKey(String apiKey) throws InvalidAPIKeyException {
+	Userish getUserishFromApiKey(String apiKey) throws InvalidAPIKeyException {
 		Key key = Key.get(apiKey)
 		if (!key) {
 			throw new InvalidAPIKeyException("Invalid API key")
 		}
-		return key.user
+		if (key.user) { // is a 'real' user
+			return key.user
+		}
+		return key // is an anonymous key
 	}
 }
