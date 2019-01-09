@@ -24,10 +24,10 @@ class ErrorController {
 		CanvasUnreachableException: { CanvasUnreachableException e -> new ApiError(500, "CANVAS_UNREACHABLE", e.message) },
 		CanvasCommunicationException: { CanvasCommunicationException e -> new ApiError(503, "CANVAS_COMMUNICATION_ERROR", e.message)},
 		CannotRemoveEthereumKeyException: { CannotRemoveEthereumKeyException e -> new ApiError(409, "ETHEREUM_KEY_REMOVAL_ERROR", e.message)},
-		InvalidSessionTokenException: { InvalidSessionTokenException e -> new ApiError(400, "INVALID_SESSION_TOKEN_ERROR", e.message)},
-		ChallengeVerificationFailedException: { ChallengeVerificationFailedException e -> new ApiError(400, "CHALLENGE_VERIFICATION_FAILED_ERROR", e.message)},
-		InvalidUsernameAndPasswordException: { InvalidUsernameAndPasswordException e -> new ApiError(400, "INVALID_USERNAME_PASSWORD_ERROR", e.message)},
-		InvalidAPIKeyException: { InvalidAPIKeyException e -> new ApiError(400, "INVALID_API_KEY_ERROR", e.message)}
+		InvalidSessionTokenException: { InvalidSessionTokenException e -> new ApiError(401, "INVALID_SESSION_TOKEN_ERROR", e.message)},
+		ChallengeVerificationFailedException: { ChallengeVerificationFailedException e -> new ApiError(401, "CHALLENGE_VERIFICATION_FAILED_ERROR", e.message)},
+		InvalidUsernameAndPasswordException: { InvalidUsernameAndPasswordException e -> new ApiError(401, "INVALID_USERNAME_PASSWORD_ERROR", e.message)},
+		InvalidAPIKeyException: { InvalidAPIKeyException e -> new ApiError(401, "INVALID_API_KEY_ERROR", e.message)}
 	]
 
 	@StreamrApi(authenticationLevel = AuthLevel.NONE)

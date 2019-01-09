@@ -1,8 +1,11 @@
 package com.unifina.service
 
+import com.unifina.api.InvalidArgumentsException
 import com.unifina.api.InvalidSessionTokenException
+import com.unifina.domain.security.Key
 import com.unifina.domain.security.SecUser
 import com.unifina.security.SessionToken
+import com.unifina.security.Userish
 import org.joda.time.DateTime
 
 class SessionService {
@@ -11,23 +14,45 @@ class SessionService {
 
 	KeyValueStoreService keyValueStoreService
 
-	SessionToken generateToken(SecUser user) {
-		SessionToken sk = new SessionToken(TOKEN_LENGTH, user, TTL_HOURS)
-		keyValueStoreService.setWithExpiration(sk.getToken(), sk.getUser().id.toString(), TTL_HOURS * 3600)
+	SessionToken generateToken(Userish userish) {
+		SessionToken sk = new SessionToken(TOKEN_LENGTH, userish, TTL_HOURS)
+		keyValueStoreService.setWithExpiration(sk.getToken(), userishToString(userish), TTL_HOURS * 3600)
 		return sk
 	}
 
-	SecUser getUserFromToken(String token) throws InvalidSessionTokenException {
+	Userish getUserishFromToken(String token) throws InvalidSessionTokenException {
 		keyValueStoreService.resetExpiration(token, new DateTime().plusHours(TTL_HOURS).toDate())
-		String userID = keyValueStoreService.get(token)
-		if (userID == null) {
+		String userishClassAndId = keyValueStoreService.get(token)
+
+		if (userishClassAndId == null) {
 			throw new InvalidSessionTokenException("Invalid token: "+token)
 		}
-		return SecUser.get(userID.toLong())
+		return stringToUserish(userishClassAndId)
 	}
 
 	void invalidateSession(String sessionToken) {
 		keyValueStoreService.delete(sessionToken)
+	}
+
+	String userishToString(Userish u) {
+		if (u instanceof SecUser) {
+			return "SecUser"+u.id.toString()
+		} else if (u instanceof Key) {
+			return "Key"+u.id.toString()
+		}
+		throw new InvalidArgumentsException("Unrecognized userish")
+	}
+
+	Userish stringToUserish(String s) {
+		if(s.startsWith("SecUser")) {
+			String id = s.substring(7)
+			return SecUser.get(id)
+		} else if (s.startsWith("Key")) {
+			String id = s.substring(3)
+			return Key.get(id)
+		} else {
+			throw new InvalidArgumentsException("Unrecognized string")
+		}
 	}
 
 }

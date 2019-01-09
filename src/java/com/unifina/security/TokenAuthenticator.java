@@ -88,8 +88,14 @@ public class TokenAuthenticator {
 			return new AuthenticationResult(true, false);
 		}
 		try {
-			SecUser user = sessionService.getUserFromToken(token);
-			return new AuthenticationResult(user);
+			Userish userish = sessionService.getUserishFromToken(token);
+			if (userish instanceof SecUser) {
+				return new AuthenticationResult((SecUser) userish);
+			} else if (userish instanceof Key) {
+				return new AuthenticationResult((Key) userish);
+			} else {
+				throw new InvalidSessionTokenException("Invalid token: "+token);
+			}
 		} catch (InvalidSessionTokenException e) {
 			return new AuthenticationResult(false, false);
 		}

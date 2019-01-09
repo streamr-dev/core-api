@@ -180,9 +180,19 @@ class UserServiceSpec extends Specification {
 		key.save(failOnError: true, validate: true)
 
 		when:
-		SecUser retrievedUser = service.getUserFromApiKey(key.id)
+		SecUser retrievedUser = (SecUser) service.getUserishFromApiKey(key.id)
 		then:
 		retrievedUser != null
 		retrievedUser.username == user.username
+	}
+
+	def "should find anonymous key from api key"() {
+		Key key = new Key(id: "myApiKey").save(failOnError: true, validate: false)
+
+		when:
+		Key retrievedKey = (Key) service.getUserishFromApiKey(key.id)
+		then:
+		retrievedKey != null
+		retrievedKey.id == retrievedKey.id
 	}
 }
