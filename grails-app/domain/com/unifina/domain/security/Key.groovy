@@ -53,9 +53,4 @@ class Key implements Userish {
 	Userish resolveToUserish() {
 		return user ?: this
 	}
-
-	// Cannot use @Override because of bug in Grails 2.3 and later
-	String getClassAndId() {
-		return "Key"+id.toString()
-	}
 }

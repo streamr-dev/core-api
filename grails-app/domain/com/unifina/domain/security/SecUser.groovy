@@ -93,9 +93,4 @@ class SecUser implements Userish {
 	boolean isEthereumUser() {
 		return EthereumAddressValidator.validate(username)
 	}
-
-	// Cannot use @Override because of bug in Grails 2.3 and later
-	String getClassAndId() {
-		return "SecUser"+id.toString()
-	}
 }
