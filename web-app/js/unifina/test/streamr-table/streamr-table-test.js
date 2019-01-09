@@ -94,7 +94,6 @@ describe('streamr-table', function() {
 					{ __streamr_date: 1544696268126 },  // 2018-12-13T10:17:48.126Z
 				]
 			})
-			console.log($($($parent.find('table tbody tr')[0]).find('td')[1]).text())
 			assert($($($parent.find('table tbody tr')[0]).find('td')[0]).text() === '2018-12-13 10:17:48 +02:00')
 			assert($($($parent.find('table tbody tr')[0]).find('td')[1]).text() === '2018-12-13 12:17:48 +02:00')
 		})
