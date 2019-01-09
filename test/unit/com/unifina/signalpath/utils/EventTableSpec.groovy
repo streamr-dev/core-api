@@ -36,11 +36,11 @@ class EventTableSpec extends UiChannelMockingSpecification {
 		Map outputValues = [:]
 		Map channelMessages = [
 			table: [
-				[hdr: [headers: ["timestamp", "streamr_date", "outputForinput1", "outputForinput2", "outputForinput3"]]],
+				[hdr: [headers: ["timestamp", "outputForinput1", "outputForinput2", "outputForinput3"]]],
 				[nr: [0, [__streamr_date: 0], "a", "1", null]],
-				[nr: [new Date(60 * 1000).getTime(), [__streamr_date: 0], "b", "2", null]],
-				[nr: [new Date(60 * 1000 * 2).getTime(), [__streamr_date: 0], "c", "3", "hello"]],
-				[nr: [new Date(60 * 1000 * 3).getTime(), [__streamr_date: 0], "d", "4", "world"]],
+				[nr: [new Date(60 * 1000).getTime(), [__streamr_date: 60 * 1000], "b", "2", null]],
+				[nr: [new Date(60 * 1000 * 2).getTime(), [__streamr_date: 60 * 1000 * 2], "c", "3", "hello"]],
+				[nr: [new Date(60 * 1000 * 3).getTime(), [__streamr_date: 60 * 1000 * 3], "d", "4", "world"]],
 			]
 		]
 
