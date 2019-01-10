@@ -68,7 +68,7 @@ jobs:
         skip_cleanup: true
         local_dir: build
     if: NOT type IN (pull_request)
-  - stage: Build docker Staging
+  - stage: Build docker dev
     env:
     - OWNER=streamr
     - IMAGE_NAME=engine-and-editor
@@ -78,6 +78,20 @@ jobs:
     - npm install
     - grails test war
     - docker build -f Dockerfile.dev -t $OWNER/$IMAGE_NAME:$TAG .
+    deploy:
+    - provider: script
+      script: bash travis_scripts/deploy_docker.sh staging
+    if: NOT type IN (pull_request)
+  - stage: Build docker Staging
+    env:
+    - OWNER=streamr
+    - IMAGE_NAME=engine-and-editor
+    - TAG=stg
+    script:
+    - grails clean
+    - npm install
+    - grails war
+    - docker build -f Dockerfile.stg -t $OWNER/$IMAGE_NAME:$TAG .
     deploy:
     - provider: script
       script: bash travis_scripts/deploy_docker.sh staging
