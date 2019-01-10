@@ -1,5 +1,4 @@
 (function(exports) {
-    const moment = require('moment')
 function StreamrTable(parent, options) {
 	this.$parent = $(parent)
     this.options = options
