@@ -1,6 +1,8 @@
 package com.unifina.signalpath.custom;
 
 import com.unifina.datasource.ITimeListener;
+import com.unifina.security.MyPolicy;
+import com.unifina.security.MySecurityManager;
 import com.unifina.security.UserJavaClassLoader;
 import com.unifina.service.SerializationService;
 import com.unifina.signalpath.*;
@@ -10,6 +12,7 @@ import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 
 import javax.tools.Diagnostic;
+import java.security.Policy;
 import java.util.*;
 
 public abstract class AbstractJavaCodeWrapper extends ModuleWithUI {
@@ -81,7 +84,7 @@ public abstract class AbstractJavaCodeWrapper extends ModuleWithUI {
 	public void onDay(Date day) {
 		instance.onDay(day);
 	}
-	
+
 	protected List<String> getImports() {
 		return Arrays.asList(new String[] {
 			"com.unifina.signalpath.custom.*",
@@ -117,11 +120,11 @@ public abstract class AbstractJavaCodeWrapper extends ModuleWithUI {
 		}
 		return result.toString();
 	}
-	
+
 	protected abstract String getHeader();
 	protected abstract String getDefaultCode();
 	protected abstract String getFooter();
-	
+
 	@Override
 	public Map<String,Object> getConfiguration() {
 		Map<String,Object> config = super.getConfiguration();
