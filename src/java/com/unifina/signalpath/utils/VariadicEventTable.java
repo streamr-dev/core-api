@@ -46,7 +46,6 @@ public class VariadicEventTable extends ModuleWithUI {
 		HashMap<String, Object> msg = new HashMap<String, Object>();
 		ArrayList<Object> nr = new ArrayList<>(2);
 		msg.put("nr", nr);
-		nr.add(getGlobals().time.getTime());
 		Map<String, Object> dateObject = new HashMap<>();
 		dateObject.put("__streamr_date", getGlobals().time.getTime());
 		nr.add(dateObject);
