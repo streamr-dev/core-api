@@ -33,7 +33,51 @@ class UserJavaClassLoaderSpec extends Specification {
 		def e = thrown(SecurityException)
 		e.message == "Access denied to java.io.File"
     }
-	
+
+	void "doesn't throw SecurityException if doing nothing"() {
+		when:
+		parseLoadAndRunInstanceOfCode("""
+			public class CustomModule implements Runnable {
+				public void run() {
+					int x = 1;
+				} 
+			}
+		""")
+
+		then:
+		noExceptionThrown()
+	}
+
+	void "throws SecurityException if trying to exit"() {
+		when:
+		parseLoadAndRunInstanceOfCode("""
+			public class CustomModule implements Runnable {
+				public void run() {
+					System.exit(1);
+				} 
+			}
+		""")
+
+		then:
+		def e = thrown(SecurityException)
+		e.message == "Access denied to java.lang.System"
+	}
+
+	void "throws SecurityException if trying to peek env"() {
+		when:
+		parseLoadAndRunInstanceOfCode("""
+			public class CustomModule implements Runnable {
+				public void run() {
+					System.getenv();
+				} 
+			}
+		""")
+
+		then:
+		def e = thrown(SecurityException)
+		e.message == "Access denied to java.lang.System"
+	}
+
 	void "throws SecurityException if trying to get parent class loader"() {
 		when:
 		parseLoadAndRunInstanceOfCode("""
@@ -46,7 +90,7 @@ class UserJavaClassLoaderSpec extends Specification {
 
 		then:
 		def e = thrown(SecurityException)
-		e.message == 'access denied ("java.lang.RuntimePermission" "getClassLoader")'
+		e.message == 'Access denied to java.lang.ClassLoader'
 	}
 	
 	void "throws SecurityException if trying to get system class loader"() {
@@ -61,7 +105,7 @@ class UserJavaClassLoaderSpec extends Specification {
 
 		then:
 		def e = thrown(SecurityException)
-		e.message == 'access denied ("java.lang.RuntimePermission" "getClassLoader")'
+		e.message == 'Access denied to java.lang.ClassLoader'
 	}
 	
 	void "throws SecurityException if trying to start a thread"() {
