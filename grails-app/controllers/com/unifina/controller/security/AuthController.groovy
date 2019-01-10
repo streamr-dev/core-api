@@ -70,7 +70,8 @@ class AuthController {
 		}
 
 		try {
-			user = userService.createUser([:] << cmd.properties << [username: invite.username])
+			def props = [:] << cmd.properties.findAll{ it != "dateCreated" } << [username: invite.username, lastLogin: new Date(0)]
+			user = userService.createUser(props)
 		} catch (UserCreationFailedException e) {
 			response.status = 500
 			return render([success: false, error: e.getMessage()] as JSON)

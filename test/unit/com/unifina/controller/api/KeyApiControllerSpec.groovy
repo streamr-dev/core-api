@@ -24,6 +24,7 @@ class KeyApiControllerSpec extends ControllerSpecification {
 			username: "me@me.com",
 			password: "pwd",
 			name: "name",
+			lastLogin: new Date(),
 		).save(failOnError: true, validate: true)
 
 		def userLinkedKey = new Key(name: 'users key', user: me)
@@ -186,6 +187,7 @@ class KeyApiControllerSpec extends ControllerSpecification {
 			username: "user2@me.com",
 			password: "pwd",
 			name: "name",
+			lastLogin: new Date(),
 		).save(validate: true, failOnError: true)
 
 		Key otherKey = new Key(name: "user2's key", user: user2).save(failOnError: true, validate: true)

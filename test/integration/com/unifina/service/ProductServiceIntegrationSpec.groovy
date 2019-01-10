@@ -61,9 +61,9 @@ class ProductServiceIntegrationSpec extends IntegrationSpec {
 		[s1, s2, s3, s4].eachWithIndex { Stream s, int i -> s.id = "stream-id-${i+1}" }
 		[s1, s2, s3, s4]*.save(failOnError: true, validate: true)
 
-		troll = new SecUser(username: "sylvester", name: "sylvester stallone", password: "x", email: "s@s.com", timezone: "Europe/Helsinki")
+		troll = new SecUser(username: "sylvester", name: "sylvester stallone", password: "x", email: "s@s.com", lastLogin: new Date(0))
 		troll.save(failOnError: true, validate: false)
-		user = new SecUser(username: "arnold", name: "arnold schwarzenegger", password: "x", email: "a@schwarzenegger.com", timezone: "Europe/Helsinki")
+		user = new SecUser(username: "arnold", name: "arnold schwarzenegger", password: "x", email: "a@schwarzenegger.com", lastLogin: new Date(0))
 		user.save(failOnError: true, validate: false)
 		p1 = new Product(
 			name: "troll product",

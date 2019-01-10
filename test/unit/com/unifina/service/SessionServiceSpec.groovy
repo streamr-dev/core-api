@@ -19,6 +19,15 @@ class SessionServiceSpec extends Specification {
 		keyValueStoreService = service.keyValueStoreService = Mock(KeyValueStoreService)
 	}
 
+	void "update users login date"() {
+		SecUser user = new SecUser(id: 123L).save(failOnError: true, validate: false)
+		Date date = new Date(1547210776)
+		when:
+		service.updateUsersLoginDate(user, date)
+		then:
+		user.lastLogin == date
+	}
+
 	void "generateToken() should generate session token from user"() {
 		SecUser user = new SecUser(id: 123L).save(failOnError: true, validate: false)
 		when:
@@ -35,6 +44,14 @@ class SessionServiceSpec extends Specification {
 		then:
 		1 * keyValueStoreService.setWithExpiration(_, _, _)
 		token.getToken().length() == SessionService.TOKEN_LENGTH
+	}
+
+	void "generateToken() should update SecUsers lastLogin"() {
+		SecUser user = new SecUser(id: 123L, lastLogin: new Date(0)).save(failOnError: true, validate: false)
+		when:
+		service.generateToken(user)
+		then:
+		user.lastLogin != new Date(0)
 	}
 
 	void "getUserishFromToken() should return user"() {

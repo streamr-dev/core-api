@@ -20,17 +20,24 @@ class SecUser implements Userish {
 	Set<Key> keys
 	Set<Permission> permissions
 
+	// dateCreated is the date when account is created.
+	Date dateCreated
+	// lastLogin is the date when last successful login was made.
+	Date lastLogin
+
 	static hasMany = [permissions: Permission, keys: Key]
 
 	static constraints = {
 		username blank: false, unique: true, validator: UsernameValidator.validate
 		password blank: false
 		name blank: false
+		lastLogin nullable: false
 	}
 
 	static mapping = {
 		password column: '`password`'
 		permissions cascade: 'all-delete-orphan'
+		lastLogin defaultValue: new Date(0)
 	}
 
 	Set<SecRole> getAuthorities() {

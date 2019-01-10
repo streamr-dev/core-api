@@ -68,7 +68,7 @@ class UserServiceSpec extends Specification {
 	def "the user is created when called, with default roles if none supplied"() {
 		when:
 		createData()
-		SecUser user = service.createUser([username: "test@test.com", name:"test", password: "test", enabled:true, accountLocked:false, passwordExpired:false])
+		SecUser user = service.createUser([username: "test@test.com", name:"test", password: "test", enabled:true, accountLocked:false, passwordExpired:false, lastLogin: new Date()])
 
 		then:
 		SecUser.count() == 1
@@ -81,7 +81,7 @@ class UserServiceSpec extends Specification {
 	def "default API key is created for user"() {
 		when:
 		createData()
-		SecUser user = service.createUser([username: "test@test.com", name:"test", password: "test", enabled:true, accountLocked:false, passwordExpired:false])
+		SecUser user = service.createUser([username: "test@test.com", name:"test", password: "test", enabled:true, accountLocked:false, passwordExpired:false, lastLogin: new Date()])
 
 		then:
 		user.getKeys().size() == 1
@@ -96,7 +96,8 @@ class UserServiceSpec extends Specification {
 			password       : "test",
 			enabled        : true,
 			accountLocked  : false,
-			passwordExpired: false
+			passwordExpired: false,
+			lastLogin      : new Date(),
 		],
 			SecRole.findAllByAuthorityInList(["ROLE_USER"]),
 			new ArrayList<Feed>(),
@@ -116,7 +117,7 @@ class UserServiceSpec extends Specification {
 	def "it should fail if the default roles, feeds of modulePackages are not found"() {
 		when:
 		// The data has not been created
-		SecUser user = service.createUser([username: "test@test.com", name: "test", password: "test", enabled: true, accountLocked: false, passwordExpired: false])
+		SecUser user = service.createUser([username: "test@test.com", name: "test", password: "test", enabled: true, accountLocked: false, passwordExpired: false, lastLogin: new Date(0)])
 
 		then:
 		thrown RuntimeException
