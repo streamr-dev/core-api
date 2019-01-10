@@ -431,8 +431,9 @@ public class ModuleTestHelper {
 					), this);
 				}
 
-				Object actual = new TreeMap(actualMessages.get(i));
-				Object expected = new TreeMap(expectedMessages.get(i));
+				// Coerce key sorting order with TreeMap for equals comparison
+				Map actual = new TreeMap(actualMessages.get(i));
+				Map expected = new TreeMap(expectedMessages.get(i));
 
 				String a = new JsonBuilder(actual).toString();
 				String b = new JsonBuilder(expected).toString();
