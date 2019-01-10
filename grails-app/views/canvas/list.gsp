@@ -111,7 +111,7 @@
 								</ui:td>
 								<ui:td class="hidden-xs" id="canvasDateCreated-${canvas.id}">
 									<g:javascript>
-										document.getElementById('canvasDateCreated-${canvas.id}').innerHTML = moment('${canvas.dateCreated.getTime()}').format('<g:message code="default.date.moment.format"/>');
+										document.getElementById('canvasDateCreated-${canvas.id}').innerHTML = moment(${canvas.dateCreated.getTime()}).format('<g:message code="default.date.moment.format"/>');
 									</g:javascript>
 								</ui:td>
 								<ui:td class="button-column">
