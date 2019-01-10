@@ -2,10 +2,14 @@ package com.unifina.service
 
 import com.unifina.domain.config.HostConfig
 import com.unifina.domain.security.SecRole
+import com.unifina.security.MyPolicy
+import com.unifina.security.MySecurityManager
 import grails.util.Environment
 import grails.util.Holders
 import org.apache.log4j.Logger
 import org.codehaus.groovy.grails.plugins.GrailsPluginManager
+
+import java.security.Policy
 
 /**
  * The onInit and onDestroy methods should be triggered from conf/BootStrap.groovy of the app.
@@ -26,6 +30,10 @@ class BootService {
 	}
 
 	def onInit() {
+		// Do not remove these!
+		Policy.setPolicy(new MyPolicy())
+		System.setSecurityManager(new MySecurityManager())
+
 		/**
 		 * Workaround for GRAILS-8895
 		 * https://jira.grails.org/browse/GRAILS-8895
