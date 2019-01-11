@@ -7,7 +7,7 @@ import java.security.Policy
 class UserJavaClassLoaderSpec extends Specification {
 
 	UserJavaClassLoader cl
-	
+
     void setup() {
 		Policy.setPolicy(new MyPolicy())
         System.setSecurityManager(new MySecurityManager())
@@ -18,7 +18,22 @@ class UserJavaClassLoaderSpec extends Specification {
         System.setSecurityManager(null)
 		cl.close()
     }
-	  
+
+	void "throws SecurityException if a SecurityManager is not installed"() {
+		System.setSecurityManager(null)
+
+		when:
+		parseLoadAndRunInstanceOfCode("""
+			public class CustomModule implements Runnable {
+				public void run() {} 
+			}
+		""")
+
+		then:
+		def e = thrown(SecurityException)
+		e.message.contains("MySecurityManager")
+	}
+	
     void "throws SecurityException if trying to open file"() {
 		when:
 		parseLoadAndRunInstanceOfCode("""
@@ -33,7 +48,7 @@ class UserJavaClassLoaderSpec extends Specification {
 		def e = thrown(SecurityException)
 		e.message == "Access denied to java.io.File"
     }
-	
+
 	void "throws SecurityException if trying to get parent class loader"() {
 		when:
 		parseLoadAndRunInstanceOfCode("""
@@ -48,7 +63,7 @@ class UserJavaClassLoaderSpec extends Specification {
 		def e = thrown(SecurityException)
 		e.message == 'access denied ("java.lang.RuntimePermission" "getClassLoader")'
 	}
-	
+
 	void "throws SecurityException if trying to get system class loader"() {
 		when:
 		parseLoadAndRunInstanceOfCode("""
@@ -63,7 +78,7 @@ class UserJavaClassLoaderSpec extends Specification {
 		def e = thrown(SecurityException)
 		e.message == 'access denied ("java.lang.RuntimePermission" "getClassLoader")'
 	}
-	
+
 	void "throws SecurityException if trying to start a thread"() {
 		when:
 		parseLoadAndRunInstanceOfCode("""
@@ -78,7 +93,7 @@ class UserJavaClassLoaderSpec extends Specification {
 		def e = thrown(SecurityException)
 		e.message == "Access denied to java.lang.Thread"
 	}
-	
+
 	void "throws SecurityException if trying to open a HTTP connection"() {
 		when:
 		parseLoadAndRunInstanceOfCode("""
