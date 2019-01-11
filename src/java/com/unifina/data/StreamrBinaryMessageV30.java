@@ -11,25 +11,31 @@ public class StreamrBinaryMessageV30 extends StreamrBinaryMessage {
 	public static final byte VERSION = 30; //0x1E
 
 	private final int sequenceNumber;
+	private final long prevTimestamp;
+	private final int prevSequenceNumber;
 	private final SignatureType signatureType;
 	private final byte[] publisherIdBytes;
 	private final byte[] signatureBytes;
 
 	public StreamrBinaryMessageV30(String streamId, int partition, long timestamp, int sequenceNumber,
-								   String publisherId, int ttl, byte contentType, byte[] content,
-								   SignatureType signatureType, String signature) {
+								   String publisherId, long prevTimestamp, int prevSequenceNumber, int ttl,
+								   byte contentType, byte[] content, SignatureType signatureType, String signature) {
 		super(VERSION, streamId, partition, timestamp, ttl, contentType, content);
 		this.sequenceNumber = sequenceNumber;
+		this.prevTimestamp = prevTimestamp;
+		this.prevSequenceNumber = prevSequenceNumber;
 		this.signatureType = signatureType;
 		this.publisherIdBytes = hexToBytes(publisherId);
 		this.signatureBytes = hexToBytes(signature);
 	}
 
 	public StreamrBinaryMessageV30(String streamId, int partition, long timestamp, int sequenceNumber,
-								   byte[] publisherIdBytes, int ttl, byte contentType, byte[] content,
-								   SignatureType signatureType, byte[] signatureBytes) {
+								   byte[] publisherIdBytes, long prevTimestamp, int prevSequenceNumber, int ttl,
+								   byte contentType, byte[] content, SignatureType signatureType, byte[] signatureBytes) {
 		super(VERSION, streamId, partition, timestamp, ttl, contentType, content);
 		this.sequenceNumber = sequenceNumber;
+		this.prevTimestamp = prevTimestamp;
+		this.prevSequenceNumber = prevSequenceNumber;
 		this.signatureType = signatureType;
 		this.publisherIdBytes = publisherIdBytes;
 		this.signatureBytes = signatureBytes;
@@ -50,6 +56,8 @@ public class StreamrBinaryMessageV30 extends StreamrBinaryMessage {
 		bb.putLong(timestamp); // 8 bytes
 		bb.putInt(sequenceNumber); // 4 bytes
 		bb.put(publisherIdBytes); // 20 bytes
+		bb.putLong(prevTimestamp); // 8 bytes
+		bb.putInt(prevSequenceNumber); // 4 bytes
 		bb.putInt(ttl); // 4 bytes
 		bb.put(contentType); // 1 byte
 		bb.putInt(content.length); // 4 bytes
@@ -62,8 +70,8 @@ public class StreamrBinaryMessageV30 extends StreamrBinaryMessage {
 
 	@Override
 	public int sizeInBytes() {
-		// add sequenceNumber, publisherId and signatureType
-		int size = super.sizeInBytes() + 4 + 20 + 1;
+		// add sequenceNumber, publisherId, prevTimestamp, prevSequenceNumber and signatureType
+		int size = super.sizeInBytes() + 4 + 20 + 8 + 4 + 1;
 		if (signatureType == SignatureType.SIGNATURE_TYPE_NONE) {
 			return size;
 		} else if (signatureType == SignatureType.SIGNATURE_TYPE_ETH) {
@@ -80,6 +88,14 @@ public class StreamrBinaryMessageV30 extends StreamrBinaryMessage {
 
 	public int getSequenceNumber() {
 		return sequenceNumber;
+	}
+
+	public long getPrevTimestamp() {
+		return prevTimestamp;
+	}
+
+	public int getPrevSequenceNumber() {
+		return prevSequenceNumber;
 	}
 
 	public String getPublisherId() {

@@ -4,6 +4,7 @@ import com.datastax.driver.core.ResultSet;
 import com.datastax.driver.core.Row;
 import com.datastax.driver.core.Session;
 import com.unifina.data.StreamrBinaryMessage;
+import com.unifina.data.StreamrBinaryMessageFactory;
 import com.unifina.domain.data.Stream;
 import com.unifina.feed.FieldDetector;
 import com.unifina.feed.StreamrBinaryMessageParser;
@@ -32,7 +33,7 @@ public class CassandraFieldDetector extends FieldDetector {
 			}
 			if (latestRow != null) {
 				StreamrBinaryMessageParser parser = new StreamrBinaryMessageParser();
-				return parser.parse(StreamrBinaryMessage.from(latestRow.getBytes("payload")));
+				return parser.parse(StreamrBinaryMessageFactory.fromBytes(latestRow.getBytes("payload")));
 			} else {
 				return null;
 			}

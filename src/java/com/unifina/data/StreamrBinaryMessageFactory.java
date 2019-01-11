@@ -77,6 +77,8 @@ public class StreamrBinaryMessageFactory {
 		int sequenceNumber = bb.getInt();
 		byte[] publisherIdBytes = new byte[20];
 		bb.get(publisherIdBytes);
+		long prevTimestamp = bb.getLong();
+		int prevSequenceNumber = bb.getInt();
 		int ttl = bb.getInt();
 		byte contentType = bb.get();
 		int contentLength = bb.getInt();
@@ -95,7 +97,7 @@ public class StreamrBinaryMessageFactory {
 		} else {
 			throw new IllegalArgumentException("Unknown signature type: "+signatureTypeByte);
 		}
-		return new StreamrBinaryMessageV30(streamId, partition, timestamp, sequenceNumber, publisherIdBytes, ttl,
-				contentType, content, signatureType, signatureBytes);
+		return new StreamrBinaryMessageV30(streamId, partition, timestamp, sequenceNumber, publisherIdBytes,
+				prevTimestamp, prevSequenceNumber, ttl, contentType, content, signatureType, signatureBytes);
 	}
 }
