@@ -44,4 +44,25 @@ class FilterMapSpec extends Specification {
 		then:
 		new ModuleTestHelper.Builder(module, inputValues, outputValues).test()
 	}
+
+	def "FilterMap works regardless of key type"() {
+		when:
+		Map inputValues = [
+			keys: [
+				[123, 789],
+			],
+			in: [
+				["123": true, "456": false, "789": true],
+			]
+		]
+
+		Map outputValues = [
+			out: [
+				["123": true, "789": true],
+			]
+		]
+
+		then:
+		new ModuleTestHelper.Builder(module, inputValues, outputValues).test()
+	}
 }
