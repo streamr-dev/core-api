@@ -28,7 +28,6 @@ class RunCanvasSpec extends IntegrationSpec {
 	def setup() {
 		user = SecUser.load(1L)
 		stream = Stream.get("run-canvas-spec")
-		canvasService.signalPathService.servletContext = [signalPathRunners: [:]]
 	}
 
 	def cleanup() {
@@ -72,6 +71,6 @@ class RunCanvasSpec extends IntegrationSpec {
 	}
 
 	static def modules(CanvasService canvasService, Canvas canvas) {
-		canvasService.signalPathService.servletContext["signalPathRunners"][canvas.runner].signalPaths[0].mods
+		canvasService.signalPathService.runnersById[canvas.runner].signalPaths[0].mods
 	}
 }

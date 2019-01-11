@@ -109,11 +109,6 @@ class CanvasController {
 		else throw new FileNotFoundException("File not found: "+params.filename)
 	}
 
-	@Secured(["ROLE_ADMIN"])
-	def debug() {
-		return [runners: servletContext["signalPathRunners"], returnChannels: servletContext["returnChannels"]]
-	}
-
 	def loadBrowser() {
 		def result = [
 				browserId: params.browserId,
