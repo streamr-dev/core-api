@@ -19,6 +19,35 @@ class UserJavaClassLoaderSpec extends Specification {
 		cl.close()
     }
 
+	void "doesn't throw SecurityException if doing nothing"() {
+		when:
+		parseLoadAndRunInstanceOfCode("""
+			public class CustomModule implements Runnable {
+				public void run() {
+					int x = 1;
+				} 
+			}
+		""")
+
+		then:
+		noExceptionThrown()
+	}
+
+	void "throws SecurityException if trying to exit"() {
+		when:
+		parseLoadAndRunInstanceOfCode("""
+			public class CustomModule implements Runnable {
+				public void run() {
+					System.exit(1);
+				} 
+			}
+		""")
+
+		then:
+		def e = thrown(SecurityException)
+		e.message == 'access denied ("java.lang.RuntimePermission" "exitVM.1")'
+	}
+
 	void "throws SecurityException if a SecurityManager is not installed"() {
 		System.setSecurityManager(null)
 
