@@ -189,7 +189,7 @@ class AuthApiController {
 			registrationCode.delete()
 		}
 
-		return render([success: true] as JSON)
+		return render(user.toMap() as JSON)
 	}
 }
 

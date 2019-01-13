@@ -60,13 +60,17 @@ class ResetPasswordPage extends React.Component<Props> {
 
     submit = () => {
         const url = createLink('api/v1/passwords')
+        const loginUrl = createLink('j_spring_security_check')
         const { password, confirmPassword: password2, token: t } = this.props.form
 
         return post(url, {
             password,
             password2,
             t,
-        }, false, false)
+        }, false, false).then(({ username: j_username }) => post(loginUrl, {
+            j_username,
+            j_password: password,
+        }, true, true))
     }
 
     onFailure = (error: Error) => {
