@@ -37,6 +37,11 @@ ENV HTTPS_API_SERVER http://127.0.0.1:8890/api/v1
 ENV REDIS_HOSTS redis
 ENV CASSANDRA_HOSTS cassandra
 
+EXPOSE 8081
+
+ENTRYPOINT ["sh","docker-entrypoint.sh"]
+
+#Load Secrets
 ENV CATALINA_OPTS -Dstreamr.database.user=${DB_USER}  \
     -Dstreamr.database.password=${DB_PASS}  \
     -Dstreamr.database.host=${DB_HOST} \
@@ -45,9 +50,7 @@ ENV CATALINA_OPTS -Dstreamr.database.user=${DB_USER}  \
     -Dstreamr.http.api.server=${HTTPS_API_SERVER}  \
     -Dstreamr.redis.hosts=${REDIS_HOSTS}  \
     -Dstreamr.cassandra.hosts=${CASSANDRA_HOSTS}
-EXPOSE 8081
-#Load Secrets
-ENTRYPOINT ["sh","docker-entrypoint.sh"]
+
 # Wait for MySQL server, MySQL dumps, and Cassandra to be ready
 CMD ["sh", "-c", "wait-for-it.sh mysql:3306 --timeout=120 && while ! mysql --user=root --host=mysql --password=password core_dev -e \"SELECT 1;\"; do echo 'waiting for db'; sleep 1; done && wait-for-it.sh cassandra:9042 --timeout=120 && catalina.sh run"]
 
