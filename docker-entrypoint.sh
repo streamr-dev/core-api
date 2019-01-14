@@ -9,3 +9,4 @@ if $REMOTE_SECRETS; then
    $(aws kms decrypt --region eu-west-1 --ciphertext-blob fileb:///tmp/secrets.enc --output text --query Plaintext | base64 -d)
    rm /tmp/secrets.enc
 fi
+exec "$@"
