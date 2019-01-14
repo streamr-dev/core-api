@@ -47,17 +47,17 @@ public class StreamrBinaryMessageFactory {
 		byte[] content = new byte[contentLength];
 		bb.get(content);
 		byte signatureTypeByte = bb.get();
-		StreamrBinaryMessageV29.SignatureType signatureType;
+		StreamrBinaryMessage.SignatureType signatureType;
 		byte[] addressBytes;
 		byte[] signatureBytes;
-		if (signatureTypeByte == StreamrBinaryMessageV29.SignatureType.SIGNATURE_TYPE_ETH.getId()) {
-			signatureType = StreamrBinaryMessageV29.SignatureType.SIGNATURE_TYPE_ETH;
+		if (signatureTypeByte == StreamrBinaryMessage.SignatureType.SIGNATURE_TYPE_ETH.getId()) {
+			signatureType = StreamrBinaryMessage.SignatureType.SIGNATURE_TYPE_ETH;
 			addressBytes = new byte[20];
 			bb.get(addressBytes);
 			signatureBytes = new byte[65];
 			bb.get(signatureBytes);
-		} else if (signatureTypeByte == StreamrBinaryMessageV29.SignatureType.SIGNATURE_TYPE_NONE.getId()) {
-			signatureType = StreamrBinaryMessageV29.SignatureType.SIGNATURE_TYPE_NONE;
+		} else if (signatureTypeByte == StreamrBinaryMessage.SignatureType.SIGNATURE_TYPE_NONE.getId()) {
+			signatureType = StreamrBinaryMessage.SignatureType.SIGNATURE_TYPE_NONE;
 			addressBytes = null;
 			signatureBytes = null;
 		} else {
@@ -75,7 +75,8 @@ public class StreamrBinaryMessageFactory {
 		int partition = bb.get() & 0xff; // unsigned byte
 		long timestamp = bb.getLong();
 		int sequenceNumber = bb.getInt();
-		byte[] publisherIdBytes = new byte[20];
+		int publisherIdLength = bb.get() & 0xFF; // unsigned byte;
+		byte[] publisherIdBytes = new byte[publisherIdLength];
 		bb.get(publisherIdBytes);
 		long prevTimestamp = bb.getLong();
 		int prevSequenceNumber = bb.getInt();
@@ -85,14 +86,14 @@ public class StreamrBinaryMessageFactory {
 		byte[] content = new byte[contentLength];
 		bb.get(content);
 		byte signatureTypeByte = bb.get();
-		StreamrBinaryMessageV29.SignatureType signatureType;
+		StreamrBinaryMessage.SignatureType signatureType;
 		byte[] signatureBytes;
-		if (signatureTypeByte == StreamrBinaryMessageV29.SignatureType.SIGNATURE_TYPE_ETH.getId()) {
-			signatureType = StreamrBinaryMessageV29.SignatureType.SIGNATURE_TYPE_ETH;
+		if (signatureTypeByte == StreamrBinaryMessage.SignatureType.SIGNATURE_TYPE_ETH.getId()) {
+			signatureType = StreamrBinaryMessage.SignatureType.SIGNATURE_TYPE_ETH;
 			signatureBytes = new byte[65];
 			bb.get(signatureBytes);
-		} else if (signatureTypeByte == StreamrBinaryMessageV29.SignatureType.SIGNATURE_TYPE_NONE.getId()) {
-			signatureType = StreamrBinaryMessageV29.SignatureType.SIGNATURE_TYPE_NONE;
+		} else if (signatureTypeByte == StreamrBinaryMessage.SignatureType.SIGNATURE_TYPE_NONE.getId()) {
+			signatureType = StreamrBinaryMessage.SignatureType.SIGNATURE_TYPE_NONE;
 			signatureBytes = null;
 		} else {
 			throw new IllegalArgumentException("Unknown signature type: "+signatureTypeByte);

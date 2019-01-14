@@ -9,21 +9,6 @@ import java.util.Date;
 public class StreamrBinaryMessageV29 extends StreamrBinaryMessage {
 	public static final byte VERSION = 29; //0x1D
 
-	public enum SignatureType {
-		SIGNATURE_TYPE_NONE ((byte) 0),
-		SIGNATURE_TYPE_ETH ((byte) 1);
-
-		private final byte id;
-
-		SignatureType(byte id) {
-			this.id = id;
-		}
-
-		public byte getId() {
-			return this.id;
-		}
-	}
-
 	private final SignatureType signatureType;
 	private final byte[] addressBytes;
 	private final byte[] signatureBytes;

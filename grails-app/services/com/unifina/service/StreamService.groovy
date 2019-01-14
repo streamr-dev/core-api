@@ -8,7 +8,7 @@ import com.unifina.api.ValidationException
 import com.unifina.data.StreamPartitioner
 import com.unifina.data.StreamrBinaryMessage
 import com.unifina.data.StreamrBinaryMessageV29
-import com.unifina.data.StreamrBinaryMessageV29.SignatureType
+import com.unifina.data.StreamrBinaryMessage.SignatureType
 import com.unifina.domain.dashboard.DashboardItem
 import com.unifina.domain.data.Feed
 import com.unifina.domain.data.Stream
@@ -26,7 +26,6 @@ import com.unifina.feed.redis.StreamrBinaryMessageWithKafkaMetadata
 import com.unifina.signalpath.RuntimeRequest
 import com.unifina.task.DelayedDeleteStreamTask
 import com.unifina.utils.CSVImporter
-import com.unifina.utils.EthereumAddressValidator
 import com.unifina.utils.IdGenerator
 import grails.converters.JSON
 import groovy.transform.CompileStatic

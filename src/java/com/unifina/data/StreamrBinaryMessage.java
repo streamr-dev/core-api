@@ -19,6 +19,21 @@ public abstract class StreamrBinaryMessage {
 	public static final byte CONTENT_TYPE_STRING = 11; //0x0B
 	public static final byte CONTENT_TYPE_JSON = 27; //0x1B
 
+	public enum SignatureType {
+		SIGNATURE_TYPE_NONE ((byte) 0),
+		SIGNATURE_TYPE_ETH ((byte) 1);
+
+		private final byte id;
+
+		SignatureType(byte id) {
+			this.id = id;
+		}
+
+		public byte getId() {
+			return this.id;
+		}
+	}
+
 	private static Type type = new TypeToken<LinkedHashMap<String, Object>>(){}.getType();
 
 	private static Gson gson = new GsonBuilder()

@@ -1,5 +1,6 @@
 package com.unifina.feed
 
+import com.unifina.data.StreamrBinaryMessage
 import com.unifina.data.StreamrBinaryMessageFactory
 import com.unifina.data.StreamrBinaryMessageV28
 import com.unifina.data.StreamrBinaryMessageV29
@@ -14,11 +15,11 @@ class StreamrBinaryMessageSpec extends Specification {
 		StreamrBinaryMessageV28.CONTENT_TYPE_STRING, "foobar hello world 666".getBytes("UTF-8"))
 	StreamrBinaryMessageV29 v29 = new StreamrBinaryMessageV29("testId", 0, System.currentTimeMillis(), 100,
 		StreamrBinaryMessageV28.CONTENT_TYPE_STRING, "foobar hello world 666".getBytes("UTF-8"),
-		StreamrBinaryMessageV29.SignatureType.SIGNATURE_TYPE_ETH, '0xF915eD664e43C50eB7b9Ca7CfEB992703eDe55c4',
+		StreamrBinaryMessage.SignatureType.SIGNATURE_TYPE_ETH, '0xF915eD664e43C50eB7b9Ca7CfEB992703eDe55c4',
 		'0xcb1fa20f2f8e75f27d3f171d236c071f0de39e4b497c51b390306fc6e7e112bb415ecea1bd093320dd91fd91113748286711122548c52a15179822a014dc14931b')
 	StreamrBinaryMessageV30 v30 = new StreamrBinaryMessageV30("testId", 0, System.currentTimeMillis(), 0,
 		'0xF915eD664e43C50eB7b9Ca7CfEB992703eDe55c4', System.currentTimeMillis() - 100, 0, 100, StreamrBinaryMessageV28.CONTENT_TYPE_STRING,
-		"foobar hello world 666".getBytes("UTF-8"), StreamrBinaryMessageV29.SignatureType.SIGNATURE_TYPE_ETH,
+		"foobar hello world 666".getBytes("UTF-8"), StreamrBinaryMessage.SignatureType.SIGNATURE_TYPE_ETH,
 		'0xcb1fa20f2f8e75f27d3f171d236c071f0de39e4b497c51b390306fc6e7e112bb415ecea1bd093320dd91fd91113748286711122548c52a15179822a014dc14931b')
 
 	def "data is not altered on encode/decode for version 28"() {
