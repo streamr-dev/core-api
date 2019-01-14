@@ -50,10 +50,13 @@
 			})
 			var td2 = $('<td/>', {
 			    class: 'types',
-            }).append(span)
+            })
+			var td3 = $('<td/>')
+				.append(span)
 			$(this.el).empty()
 				.append(td1)
 				.append(td2)
+				.append(td3)
 			$types.val(this.model.get('type'))
 			$(this.el).find("td.types").empty().append($types)
 			return this; // for chainable calls, like .render().el

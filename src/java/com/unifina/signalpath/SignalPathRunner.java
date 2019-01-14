@@ -16,8 +16,7 @@ import java.util.List;
 
 /**
  * A Thread that instantiates and runs a list of SignalPaths.
- * Identified by a runnerId, by which this runner can be looked up from the
- * servletContext["signalPathRunners"] map.
+ * Identified by a runnerId, by which this runner can be looked up from signalPathService.
  */
 public class SignalPathRunner extends Thread {
 	private static final Logger log = Logger.getLogger(SignalPathRunner.class);

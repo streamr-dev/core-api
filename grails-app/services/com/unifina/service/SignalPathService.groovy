@@ -23,6 +23,7 @@ import groovy.transform.CompileStatic
 import org.apache.log4j.Logger
 
 import java.security.AccessControlException
+import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.Future
 import java.util.concurrent.TimeUnit
 import java.util.concurrent.TimeoutException
@@ -39,6 +40,8 @@ class SignalPathService {
 	PermissionService permissionService
 	ApiService apiService
 	NodeService nodeService
+
+	Map<String, SignalPathRunner> runnersById = new ConcurrentHashMap<>()
 
 	private static final Logger log = Logger.getLogger(SignalPathService.class)
 
@@ -180,18 +183,15 @@ class SignalPathService {
 	}
 
 	@GrailsCompileStatic
-	List<SignalPath> getRunningSignalPaths() {
+	Set<SignalPath> getRunningSignalPaths() {
 		List<List<SignalPath>> signalPaths = runners().values()*.signalPaths
-		return (List<SignalPath>) signalPaths.flatten()
+		return signalPaths.flatten() as Set<SignalPath>
 	}
 
 	@CompileStatic
 	List<Canvas> stopAllLocalCanvases() {
-		// Copy list to prevent ConcurrentModificationException
-		Map<String, SignalPathRunner> copyOfRunners = [:]
-		copyOfRunners.putAll(runners())
 		List canvases = []
-		copyOfRunners.each { String key, SignalPathRunner runner ->
+		runners().each { String key, SignalPathRunner runner ->
 			if (stopLocalRunner(key)) {
 				canvases.addAll(runner.getSignalPaths()*.getCanvas())
 			}
@@ -386,21 +386,22 @@ class SignalPathService {
 
 	@CompileStatic
 	private Map<String, SignalPathRunner> runners() {
-		(servletContext["signalPathRunners"]) as Map<String, SignalPathRunner>
+		// Return a copy
+		return new HashMap<String, SignalPathRunner>(runnersById)
 	}
 
 	@CompileStatic
 	private SignalPathRunner getRunner(String runnerId) {
-		runners().get(runnerId)
+		return runnersById[runnerId]
 	}
 
 	@CompileStatic
 	private void addRunner(SignalPathRunner runner) {
-		runners().put(runner.runnerId, runner)
+		runnersById[runner.runnerId] = runner
 	}
 
 	@CompileStatic
 	private void removeRunner(SignalPathRunner runner) {
-		runners().remove(runner.runnerId)
+		runnersById.remove(runner.runnerId)
 	}
 }

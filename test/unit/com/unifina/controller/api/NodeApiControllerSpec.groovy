@@ -120,7 +120,7 @@ class NodeApiControllerSpec extends Specification {
 	void "canvases lists empty canvases if nothing running and nothing marked as running in DB"() {
 		setup:
 		controller.signalPathService = Stub(SignalPathService) {
-			getRunningSignalPaths() >> []
+			getRunningSignalPaths() >> ([] as Set<SignalPath>)
 		}
 
 		when:
@@ -163,12 +163,12 @@ class NodeApiControllerSpec extends Specification {
 		runningCanvas4.canvas = unsavedCanvas
 
 		controller.signalPathService = Stub(SignalPathService) {
-			getRunningSignalPaths() >> [
+			getRunningSignalPaths() >> ([
 				runningCanvas1,
 				runningCanvas2,
 				runningCanvas3,
 				runningCanvas4
-			]
+			] as Set<SignalPath>)
 		}
 
 		when:
@@ -189,7 +189,7 @@ class NodeApiControllerSpec extends Specification {
 	void "canvasSizes returns empty map if nothing running"() {
 		setup:
 		controller.signalPathService = Stub(SignalPathService) {
-			getRunningSignalPaths() >> []
+			getRunningSignalPaths() >> ([] as Set)
 		}
 
 		when:
@@ -217,22 +217,22 @@ class NodeApiControllerSpec extends Specification {
 		runningCanvas2.canvas = canvases[1]
 
 		controller.signalPathService = Stub(SignalPathService) {
-			getRunningSignalPaths() >> [
+			getRunningSignalPaths() >> ([
 				runningCanvas1,
 				runningCanvas2,
-			]
+			] as Set<SignalPath>)
 		}
 
-		def serialziationService = controller.serializationService = Mock(SerializationService)
+		def serializationService = controller.serializationService = Mock(SerializationService)
 
 		when:
 		request.method = "GET"
 		controller.canvasSizes()
 
 		then:
-		1 * serialziationService.serialize(runningCanvas1) >> new byte[256]
-		1 * serialziationService.serialize(runningCanvas2) >> new byte[666]
-		0 * serialziationService._
+		1 * serializationService.serialize(runningCanvas1) >> new byte[256]
+		1 * serializationService.serialize(runningCanvas2) >> new byte[666]
+		0 * serializationService._
 
 		and:
 		response.status == 200

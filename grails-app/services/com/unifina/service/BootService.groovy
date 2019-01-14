@@ -61,11 +61,6 @@ class BootService {
 		def adminRole = SecRole.findByAuthority('ROLE_ADMIN') ?: new SecRole(authority: 'ROLE_ADMIN').save(failOnError: true)
 		def liveRole = SecRole.findByAuthority('ROLE_LIVE') ?: new SecRole(authority: 'ROLE_LIVE').save(failOnError: true)
 
-		/**
-		 * Create a map for signalPathRunners
-		 */
-		if (servletContext)
-			servletContext["signalPathRunners"] = [:]
 
 		/**
 		 * Start a number of taskWorkers, specified by system property or config
@@ -93,12 +88,4 @@ class BootService {
 		}
 	}
 
-	def onDestroy() {
-		taskService?.stopAllTaskWorkers()
-
-		if (servletContext) {
-			servletContext["signalPathRunners"]?.values().each {it.abort()}
-			servletContext["realtimeDataSource"]?.stopFeed()
-		}
-	}
 }

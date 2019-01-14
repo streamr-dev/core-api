@@ -65,8 +65,6 @@ class SignalPathServiceSpec extends Specification {
 
 	def "stopLocalRunner() sets state to STOPPED if runner is not found"() {
 		def service = Spy(SignalPathService)
-		service.servletContext = service.servletContext ?: [:]
-		service.servletContext["signalPathRunners"] = [:]
 
 		when:
 		boolean success = service.stopLocalRunner("id")
@@ -78,8 +76,7 @@ class SignalPathServiceSpec extends Specification {
 
 	def "stopLocalRunner() tries to stop the runner if found and alive"() {
 		def runner = Mock(SignalPathRunner)
-		service.servletContext = service.servletContext ?: [:]
-		service.servletContext.signalPathRunners = [id: runner]
+		service.runnersById = [id: runner]
 
 		when:
 		boolean success = service.stopLocalRunner("id")
@@ -93,8 +90,7 @@ class SignalPathServiceSpec extends Specification {
 
 	def "stopLocalRunner() returns false if the canvas doesn't stop"() {
 		def runner = Mock(SignalPathRunner)
-		service.servletContext = service.servletContext ?: [:]
-		service.servletContext.signalPathRunners = [id: runner]
+		service.runnersById = [id: runner]
 
 		when:
 		boolean success = service.stopLocalRunner("id")
@@ -112,8 +108,7 @@ class SignalPathServiceSpec extends Specification {
 		def sp = Mock(SignalPath)
 		service.permissionService = Mock(PermissionService)
 		service.servletContext = service.servletContext ?: [:]
-		service.servletContext.signalPathRunners = [:]
-		service.servletContext.signalPathRunners[c1.runner] = runner
+		service.runnersById[c1.runner] = runner
 
 		when:
 		service.runtimeRequest(new RuntimeRequest([type: 'stopRequest'], me, c1, "canvases/$c1.id", "canvases/$c1.id", new HashSet<>()))
@@ -176,7 +171,6 @@ class SignalPathServiceSpec extends Specification {
 	}
 
 	void "getUsersOfRunningCanvases() returns empty map if no canvases running"() {
-		service.servletContext["signalPathRunners"] = [:]
 		expect:
 		service.getUsersOfRunningCanvases() == [:]
 	}
@@ -203,7 +197,7 @@ class SignalPathServiceSpec extends Specification {
 		sp2.setCanvas(c2)
 		sp3.setCanvas(c3)
 
-		service.servletContext["signalPathRunners"] = [
+		service.runnersById = [
 		    "runner-id-1": new SignalPathRunner(sp1, new Globals([:], someoneElse), false),
 			"runner-id-2": new SignalPathRunner(sp2, new Globals([:], me), false),
 			"runner-id-3": new SignalPathRunner(sp3, new Globals([:], someoneElse), false),
@@ -217,11 +211,9 @@ class SignalPathServiceSpec extends Specification {
 		]
 	}
 
-	void "getRunningSignalPaths() returns empty list if no SignalPath(s) running"() {
-		service.servletContext["signalPathRunners"] = [:]
-
+	void "getRunningSignalPaths() returns empty set if no SignalPath(s) running"() {
 		expect:
-		service.runningSignalPaths == []
+		service.runningSignalPaths.isEmpty()
 	}
 
 	void "getRunningSignalPaths() returns list of running SignalPaths"() {
@@ -239,17 +231,20 @@ class SignalPathServiceSpec extends Specification {
 		SignalPath sp3 = new SignalPath()
 
 		sp1.setCanvas(c1)
+		sp1.setName("sp1")
 		sp2.setCanvas(c2)
+		sp2.setName("sp2")
 		sp3.setCanvas(c3)
+		sp3.setName("sp3")
 
-		service.servletContext["signalPathRunners"] = [
+		service.runnersById = [
 			"runner-id-1": new SignalPathRunner(sp1, new Globals([:], me), false),
 			"runner-id-2": new SignalPathRunner(sp2, new Globals([:], me), false),
 			"runner-id-3": new SignalPathRunner(sp3, new Globals([:], me), false),
 		]
 
 		expect:
-		service.runningSignalPaths == [sp1, sp2, sp3]
+		service.runningSignalPaths.containsAll([sp1, sp2, sp3])
 	}
 
 	void "runtimeRequest() does not allow stopping canvas if user does not have write permission on canvas"() {
@@ -260,7 +255,7 @@ class SignalPathServiceSpec extends Specification {
 		sp.canvas = canvas
 
 		service.permissionService = new PermissionService()
-		service.servletContext["signalPathRunners"] = [
+		service.runnersById = [
 			"runner-id": new SignalPathRunner(sp, new Globals(), false),
 		]
 
@@ -292,7 +287,7 @@ class SignalPathServiceSpec extends Specification {
 		boolean isAborted = false
 
 		def permissionService = service.permissionService = Mock(PermissionService)
-		service.servletContext["signalPathRunners"] = [
+		service.runnersById = [
 			"runner-id": new SignalPathRunner(sp, new Globals(), false) {
 				@Override
 				void abort() {
@@ -345,7 +340,7 @@ class SignalPathServiceSpec extends Specification {
 		boolean isAborted = false
 
 		service.permissionService = new PermissionService()
-		service.servletContext["signalPathRunners"] = [
+		service.runnersById = [
 			"runner-id": new SignalPathRunner(sp, new Globals(), false) {
 				@Override
 				void abort() {
