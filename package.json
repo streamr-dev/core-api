@@ -12,12 +12,9 @@
   },
   "repository": "https://github.com/streamr-dev/engine-and-editor",
   "scripts": {
-    "test": "npm run test-old; npm run test-new",
+    "test": "npm run test-old && npm run test-new",
     "test-old": "mocha web-app/js/unifina/test --recursive",
     "test-new": "node ./node_modules/.bin/jest ./web-app/react-app/tests",
-    "test-jenkins": "npm run test-old-jenkins; npm run test-new-jenkins",
-    "test-old-jenkins": "mocha web-app/js/unifina/test --recursive --reporter mocha-junit-reporter --reporter-options mochaFile=./test-old-report.xml",
-    "test-new-jenkins": "JEST_JUNIT_OUTPUT=test-new-report.xml jest ./web-app/react-app/tests --ci --testResultsProcessor=\"jest-junit\"",
     "build": "NODE_ENV=production webpack",
     "build-dev": "webpack",
     "clean": "rm -rf node_modules/",
