@@ -1,5 +1,6 @@
 var assert = require('assert')
 var $ = require('jquery')(require("jsdom").jsdom().defaultView);
+var moment = require('moment')
 var StreamrTable = require('../../streamr-table/streamr-table').StreamrTable
 
 describe('streamr-table', function() {
@@ -13,6 +14,7 @@ describe('streamr-table', function() {
 				setTimeout(cb,0)
 			}
 		}
+		global.moment = moment
 	})
 
 	beforeEach(function() {
@@ -90,12 +92,12 @@ describe('streamr-table', function() {
 			table.receiveResponse({
 				id: 123,
 				nr: [
-					{ __streamr_date: 1544689068126 }, // 2018-12-13T08:17:48.126Z
-					{ __streamr_date: 1544696268126 },  // 2018-12-13T10:17:48.126Z
+					{ __streamr_date: 1544689068126 },
+					{ __streamr_date: 1544696268126 },
 				]
 			})
-			assert($($($parent.find('table tbody tr')[0]).find('td')[0]).text() === '2018-12-13 10:17:48 +02:00')
-			assert($($($parent.find('table tbody tr')[0]).find('td')[1]).text() === '2018-12-13 12:17:48 +02:00')
+			assert($($($parent.find('table tbody tr')[0]).find('td')[0]).text() === '2018-12-13 10:17:48')
+			assert($($($parent.find('table tbody tr')[0]).find('td')[1]).text() === '2018-12-13 12:17:48')
 		})
 
 	})
