@@ -85,6 +85,7 @@ class UrlMappings {
 		"/api/v1/products/$resourceId/permissions/me"(controller: "permissionApi", action: "getOwnPermissions") { resourceClass = Product }
 		"/api/v1/products/remove/$username"(controller: "removeUsersProducts", action: "index", method: "DELETE")
 		"/api/v1/products/$id/related"(controller: "productApi", action: "related", method: "GET")
+		"/api/v1/products/stale"(controller: "productApi", action: "staleProducts", method: "GET")
 
 		"/api/v1/subscriptions"(resources: "subscriptionApi")
 

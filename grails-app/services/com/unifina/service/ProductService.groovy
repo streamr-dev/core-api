@@ -5,6 +5,7 @@ import com.unifina.domain.data.Stream
 import com.unifina.domain.marketplace.Product
 import com.unifina.domain.security.Permission
 import com.unifina.domain.security.SecUser
+import com.unifina.feed.StreamrMessage
 import grails.compiler.GrailsCompileStatic
 
 import java.util.concurrent.ThreadLocalRandom
@@ -14,7 +15,81 @@ class ProductService {
 	ApiService apiService
 	PermissionService permissionService
 	SubscriptionService subscriptionService
+	CassandraService cassandraService
 	Random random = ThreadLocalRandom.current()
+
+	static class StreamWithMessages {
+		Stream stream
+		final List<StreamrMessage> messages = new ArrayList<>()
+		String toString() {
+			return String.format("StreamWithMessages[stream=%s, messages=%s]", stream, messages.toString())
+		}
+		StreamrMessage findMostRecentMessage() {
+			Date date = new Date(0)
+			StreamrMessage msg = null
+			for (StreamrMessage m : messages) {
+				if (m.getTimestamp().after(date)) {
+					date = m.getTimestamp()
+					msg = m
+				}
+			}
+			return msg
+		}
+	}
+
+	static class StaleProduct {
+		Product product
+		final List<StreamWithMessages> streams = new ArrayList<>()
+		String toString() {
+			return String.format("StaleProduct[product=%s, streams=%s]", product, streams.toString())
+		}
+	}
+
+	// ???This will skip duplicate product in the results in case of product with two streams???
+	boolean contains(List<StaleProduct> products, StaleProduct stale) {
+		for (StaleProduct sp : products) {
+			if (sp.product.name == stale.product.name && sp.product.id == stale.product.id) {
+				return true
+			}
+		}
+		return false
+	}
+
+	List<StaleProduct> findStaleProducts(List<Product> products, final Date threshold) {
+		// Find products and their streams
+		final List<StaleProduct> staleProducts = new ArrayList<>()
+		for (Product p : products) {
+			StaleProduct stale = new StaleProduct()
+			stale.product = p
+			// Get messages from streams
+			for (Stream s : p.getStreams()) {
+				StreamrMessage msg = cassandraService.getLatestFromAllPartitions(s)
+				if (msg != null) {
+					StreamWithMessages sm = new StreamWithMessages()
+					sm.stream = s
+					sm.messages.add(msg)
+					stale.streams.add(sm)
+				}
+			}
+			staleProducts.add(stale)
+		}
+
+		// Find products whose streams haven't received new messages within threshold days
+		final List<StaleProduct> results = new ArrayList<>()
+		for (StaleProduct sp : staleProducts) {
+			for (StreamWithMessages sm : sp.streams) {
+				StreamrMessage m = sm.findMostRecentMessage()
+				if (m != null) {
+					if (m.getTimestamp().after(threshold)) {
+						if (!contains(results, sp)) {
+							results.add(sp)
+						}
+					}
+				}
+			}
+		}
+		return results
+	}
 
 	List<Product> relatedProducts(Product product, int maxResults, SecUser user) {
 		// find Product.owner's other products
