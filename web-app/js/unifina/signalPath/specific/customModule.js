@@ -163,7 +163,7 @@ SignalPath.CustomModule = function(data,canvas,prot) {
 
 	prot.receiveResponse = function(payload) {
 		if (payload.type=="debug" && debug != null) {
-			debugTextArea.append(moment(payload.t).format('YYYY-MM-DD HH:mm:ss Z') + ' - ' + payload.msg + '<br>');
+			debugTextArea.append(moment(payload.t).format('YYYY-MM-DD HH:mm:ss') + ' - ' + payload.msg + '<br>');
 		}
 	}
 
