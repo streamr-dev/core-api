@@ -139,6 +139,7 @@
     "zxcvbn": "^4.4.2"
   },
   "devDependencies": {
+    "timezone-mock": "^1.0.2",
     "web3-fake-provider": "^0.1.0"
   }
 }

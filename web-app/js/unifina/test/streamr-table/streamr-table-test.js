@@ -1,6 +1,7 @@
 var assert = require('assert')
 var $ = require('jquery')(require("jsdom").jsdom().defaultView);
 var moment = require('moment')
+const timezoneMock = require('timezone-mock')
 var StreamrTable = require('../../streamr-table/streamr-table').StreamrTable
 
 describe('streamr-table', function() {
@@ -14,8 +15,13 @@ describe('streamr-table', function() {
 				setTimeout(cb,0)
 			}
 		}
+		timezoneMock.register('Brazil/East')
 		global.moment = moment
 	})
+
+		after(function() {
+        timezoneMock.unregister()
+		})
 
 	beforeEach(function() {
 		$parent = $('<div></div>')
@@ -92,12 +98,12 @@ describe('streamr-table', function() {
 			table.receiveResponse({
 				id: 123,
 				nr: [
-					{ __streamr_date: 1544689068126 },
-					{ __streamr_date: 1544696268126 },
+					{ __streamr_date: 1544689068126 }, // 2018-12-13 08:17:48 UTC
+					{ __streamr_date: 1544696268126 }, // 2018-12-13 10:17:48 UTC
 				]
 			})
-			assert($($($parent.find('table tbody tr')[0]).find('td')[0]).text() === '2018-12-13 10:17:48')
-			assert($($($parent.find('table tbody tr')[0]).find('td')[1]).text() === '2018-12-13 12:17:48')
+			assert.equal($($($parent.find('table tbody tr')[0]).find('td')[0]).text(), '2018-12-13 06:17:48')
+			assert.equal($($($parent.find('table tbody tr')[0]).find('td')[1]).text(), '2018-12-13 08:17:48')
 		})
 
 	})
