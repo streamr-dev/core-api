@@ -64,7 +64,8 @@ class RegisterPage extends React.Component<Props> {
     }
 
     submit = () => {
-        const url = createLink('auth/register')
+        const url = createLink('api/v1/users')
+        const loginUrl = createLink('j_spring_security_check')
         const { name, password, confirmPassword: password2, toc: tosConfirmed, invite } = this.props.form
 
         return post(url, {
@@ -73,7 +74,10 @@ class RegisterPage extends React.Component<Props> {
             password2,
             tosConfirmed,
             invite,
-        }, false, false)
+        }, false, false).then(({ username: j_username }) => post(loginUrl, {
+            j_username,
+            j_password: password,
+        }, true, true))
     }
 
     onFailure = (error: Error) => {
