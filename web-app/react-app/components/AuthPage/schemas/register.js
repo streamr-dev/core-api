@@ -25,13 +25,7 @@ export default [
         .shape({
             confirmPassword,
         }),
-    // Step 3: Timezone
-    yup.object()
-        .shape({
-            timezone: yup.string()
-                .required('Timezone is required'),
-        }),
-    // Step 4: Terms
+    // Step 3: Terms
     yup.object()
         .shape({
             toc: yup.boolean()

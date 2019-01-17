@@ -4,6 +4,7 @@
 <r:require module="jquery" />
 <r:require module="main-theme" />
 <r:require module="global-error-handler" />
+<r:require module="moment" />
 
 <g:render template="/tours/tours" />
 <r:require module="tour" />

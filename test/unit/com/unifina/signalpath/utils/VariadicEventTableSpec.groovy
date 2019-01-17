@@ -41,10 +41,10 @@ class VariadicEventTableSpec extends UiChannelMockingSpecification {
 		Map channelMessages = [
 			uiChannel: [
 				[hdr: [headers: ["timestamp", "outputForin1", "outputForin2", "outputForin3"], title: null]],
-				[nr: [dateFormat.format(new Date(0)), "a", "1", null]],
-				[nr: [dateFormat.format(new Date(60 * 1000)), "b", "2", null]],
-				[nr: [dateFormat.format(new Date(60 * 1000 * 2)), "c", "3", "hello"]],
-				[nr: [dateFormat.format(new Date(60 * 1000 * 3)), "d", "4", "world"]],
+				[nr: [[__streamr_date: 0], "a", "1", null]],
+				[nr: [[__streamr_date: 60 * 1000], "b", "2", null]],
+				[nr: [[__streamr_date: 60 * 1000 * 2], "c", "3", "hello"]],
+				[nr: [[__streamr_date: 60 * 1000 * 3], "d", "4", "world"]],
 			]
 		]
 

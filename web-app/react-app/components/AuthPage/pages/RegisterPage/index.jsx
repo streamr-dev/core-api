@@ -2,8 +2,6 @@
 
 import * as React from 'react'
 import qs from 'qs'
-import Select from '../../shared/Select'
-import moment from 'moment-timezone'
 import * as yup from 'yup'
 
 import AuthPanel from '../../shared/AuthPanel'
@@ -34,7 +32,6 @@ type Props = AuthFlowProps & {
         email: string,
         password: string,
         confirmPassword: string,
-        timezone: string,
         toc: boolean,
         invite: string,
     },
@@ -68,13 +65,12 @@ class RegisterPage extends React.Component<Props> {
 
     submit = () => {
         const url = createLink('auth/register')
-        const { name, password, confirmPassword: password2, timezone, toc: tosConfirmed, invite } = this.props.form
+        const { name, password, confirmPassword: password2, toc: tosConfirmed, invite } = this.props.form
 
         return post(url, {
             name,
             password,
             password2,
-            timezone,
             tosConfirmed,
             invite,
         }, false, false)
@@ -83,13 +79,6 @@ class RegisterPage extends React.Component<Props> {
     onFailure = (error: Error) => {
         const { setFieldError } = this.props
         setFieldError('toc', error.message)
-    }
-
-    timezones() {
-        return moment.tz.names().map(zone => ({
-            value: zone,
-            label: `(UTC${moment.tz(moment(), zone).format('Z')}) ${zone.replace(/\//g, ', ').replace(/_/g, ' ')}`,
-        }))
     }
 
     render() {
@@ -155,21 +144,6 @@ class RegisterPage extends React.Component<Props> {
                         <Button disabled={isProcessing}>Next</Button>
                     </Actions>
                 </AuthStep>
-                <AuthStep title="Timezone" showBack>
-                    <Select
-                        name="timezone"
-                        label="Your timezone"
-                        value={form.timezone}
-                        options={this.timezones()}
-                        onChange={setFormField}
-                        error={errors.timezone}
-                        processing={step === 3 && isProcessing}
-                        autoFocus
-                    />
-                    <Actions>
-                        <Button disabled={isProcessing}>Next</Button>
-                    </Actions>
-                </AuthStep>
                 <AuthStep
                     title="Terms"
                     onSubmit={this.submit}
@@ -202,7 +176,6 @@ export default withAuthFlow(RegisterPage, 0, {
     name: '',
     password: '',
     confirmPassword: '',
-    timezone: '',
     toc: false,
     invite: '',
 })

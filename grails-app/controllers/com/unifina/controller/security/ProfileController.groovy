@@ -33,7 +33,6 @@ class ProfileController {
 
 		// Only these user fields can be updated!
 		user.name = params.name ?: user.name
-		user.timezone = params.timezone ?: user.timezone
 
 		user = user.save(failOnError: true)
 		if (user.hasErrors()) {

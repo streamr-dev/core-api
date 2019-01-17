@@ -1,5 +1,6 @@
 package com.unifina.utils.testutils;
 
+import com.google.gson.Gson;
 import com.unifina.datasource.ITimeListener;
 import com.unifina.serialization.Serializer;
 import com.unifina.serialization.SerializerImpl;
@@ -7,6 +8,7 @@ import com.unifina.service.SerializationService;
 import com.unifina.signalpath.*;
 import com.unifina.utils.DU;
 import com.unifina.utils.Globals;
+import groovy.json.JsonBuilder;
 import groovy.lang.Closure;
 
 import java.io.ByteArrayInputStream;
@@ -429,12 +431,15 @@ public class ModuleTestHelper {
 					), this);
 				}
 
-				Object actual = actualMessages.get(i);
-				Object expected = expectedMessages.get(i);
+				// Coerce key sorting order with TreeMap for equals comparison
+				Map actual = new TreeMap(actualMessages.get(i));
+				Map expected = new TreeMap(expectedMessages.get(i));
 
-				if (!actual.equals(expected)) {
+				String a = new JsonBuilder(actual).toString();
+				String b = new JsonBuilder(expected).toString();
+				if (!a.equals(b)) {
 					String msg = "uiChannel: mismatch at %d, was '%s' expected '%s'";
-					throw new TestHelperException(String.format(msg, i, actual, expected), this);
+					throw new TestHelperException(String.format(msg, i, a, b), this);
 				}
 			}
 

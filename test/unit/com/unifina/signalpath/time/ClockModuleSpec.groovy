@@ -11,9 +11,9 @@ class ClockModuleSpec extends Specification {
 
 	Globals globals
 	ClockModule module
-	
+
     def setup() {
-		globals = new Globals([:], new SecUser(timezone:"UTC", username: "username"))
+		globals = new Globals([:], new SecUser(username: "username"))
 		globals.time = new Date(0)
 		module = new ClockModule()
 		module.globals = globals
@@ -84,50 +84,50 @@ class ClockModuleSpec extends Specification {
 			.extraIterationsAfterInput(4)
 			.test()
 	}
-	
+
 	void "timestamp output must be correct"() {
 		when: "time is set and asked"
 		Date date = new Date()
 		module.setTime(date)
-		
+
 		then: "the time is sent out"
 		module.getOutput("timestamp").getValue() == date.getTime()
 	}
-	
+
 	void "string output works correctly (daylight saving)"() {
 		when: "time is set and asked without giving a format"
 		SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss")
 		df.setTimeZone(TimeZone.getTimeZone("Europe/Helsinki"))
 		Date date = df.parse("2015-07-15 09:32:00")
 		module.setTime(date)
-		
+
 		then: "the time is sent out with the default format"
 		module.getOutput("date").getValue() == "2015-07-15 06:32:00 UTC"
-		
+
 		when: "time is set and asked with a format"
 		date = df.parse("2015-07-15 10:32:00")
 		module.getInput("format").receive("yyyy/MM/dd HH:mm")
 		module.setTime(date)
-		
+
 		then: "the time is sent out"
 		module.getOutput("date").getValue() == "2015/07/15 07:32"
 	}
-	
+
 	void "string output works correctly (no daylight saving)"() {
 		SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss")
 		df.setTimeZone(TimeZone.getTimeZone("Europe/Helsinki"))
 		when: "time is set and asked without giving a format"
 		Date date = df.parse("2015-01-15 09:32:00")
 		module.setTime(date)
-		
+
 		then: "the time is sent out with the default format"
 		module.getOutput("date").getValue() == "2015-01-15 07:32:00 UTC"
-		
+
 		when: "time is set and asked with a format"
 		date = df.parse("2015-01-15 10:32:00")
 		module.getInput("format").receive("yyyy/MM/dd HH:mm")
 		module.setTime(date)
-		
+
 		then: "the time is sent out"
 		module.getOutput("date").getValue() == "2015/01/15 08:32"
 	}
