@@ -6,7 +6,6 @@ import com.unifina.domain.marketplace.Category
 import com.unifina.domain.marketplace.FreeSubscription
 import com.unifina.domain.marketplace.PaidSubscription
 import com.unifina.domain.marketplace.Product
-import com.unifina.domain.security.IntegrationKey
 import com.unifina.domain.security.Permission
 import com.unifina.domain.security.SecUser
 import grails.test.mixin.Mock
@@ -15,7 +14,7 @@ import spock.lang.Specification
 import spock.lang.Unroll
 
 @TestFor(ProductService)
-@Mock([Category, Product, IntegrationKey, FreeSubscription, PaidSubscription])
+@Mock([Category, Product, FreeSubscription, PaidSubscription])
 class ProductServiceSpec extends Specification {
 	Stream s1, s2, s3, s4
 	Category category

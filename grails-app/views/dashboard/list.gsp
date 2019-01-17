@@ -4,6 +4,8 @@
     <title><g:message code="dashboard.list.label"/></title>
 
 	<r:require module="confirm-button"/>
+	<r:require module="moment"/>
+
 	<r:script>
 		$(document).ready(function() {
 			$(".delete-button").each(function(i, el) {
@@ -34,16 +36,16 @@
 	<div class="btn-group toolbar">
 		<a id="createButton" class="btn btn-primary" href="${createLink(controller:'dashboard', action:'editor')}">
 			<i class="fa fa-plus"></i> Create Dashboard
-		</a>        	
+		</a>
 	</div>
-	
+
 	<div class="panel list-panel">
             <div class="panel-heading">
             	<span class="panel-title">
             		<g:message code="dashboard.list.label" />
             	</span>
             </div>
-            
+
             <div class="panel-body">
 				<ui:table>
 				    <ui:thead>
@@ -56,8 +58,12 @@
 				    <ui:tbody>
 					    <g:each in="${dashboards}" status="i" var="dashboard">
 					    	<ui:tr title="Show or edit dashboard" link="${createLink(action: 'editor', id:dashboard.id) }" data-id="${dashboard.id}">
-					            <ui:td>${dashboard.name}</ui:td>					        
-					            <ui:td class="hidden-xs"><g:formatDate date="${dashboard.lastUpdated}" formatName="default.date.format" timeZone="${user.timezone}" /></ui:td>
+					            <ui:td>${dashboard.name}</ui:td>
+					            <ui:td class="hidden-xs" id="dashboardDateCreated-${dashboard.id}">
+									<g:javascript>
+										document.getElementById('dashboardDateCreated-${dashboard.id}').innerHTML = moment(${dashboard.lastUpdated.getTime()}).format('<g:message code="default.date.moment.format"/>');
+									</g:javascript>
+								</ui:td>
 								<ui:td class="button-column">
 									<g:if test="${writable.contains(dashboard) || shareable.contains(dashboard)}">
 										<div class="streamr-dropdown">

@@ -29,7 +29,7 @@ class CsvUploadService {
 		List fields = (List) (config.fields ? config.fields : [])
 
 		// Attempt to auto-detect timestamp field
-		CSVImporter csv = new CSVImporter(file, fields, null, null, user.timezone)
+		CSVImporter csv = new CSVImporter(file, fields, null, null, "UTC")
 		Map schema = csv.getSchema().toMap()
 
 		String fileId = idGenerator.generate()

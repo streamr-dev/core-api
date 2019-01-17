@@ -14,7 +14,7 @@ import grails.plugin.remotecontrol.RemoteControl
  * Handle registering a new user
  */
 trait RegisterMixin {
-	def registerUser(String emailAddress, String pwd, String fullName = "Test Tester", String tz = "Europe/Zurich") {
+	def registerUser(String emailAddress, String pwd, String fullName = "Test Tester") {
 		def remote = new RemoteControl()
 
 		when: "requested to get the invitation"
@@ -37,10 +37,6 @@ trait RegisterMixin {
 		nextButton.click()
 		waitFor { password2.displayed }
 		password2 = pwd
-		nextButton.click()
-		waitFor { timezone.displayed }
-		timezone << tz
-		timezoneFirstResult.click()
 		nextButton.click()
 		waitFor {
 			agreeCheckbox.displayed

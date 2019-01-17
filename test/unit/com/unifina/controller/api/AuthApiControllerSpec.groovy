@@ -122,7 +122,6 @@ class AuthApiControllerSpec extends Specification {
 		params.name = "Name"
 		params.password = 'fooBar123!'
 		params.password2 = 'fooBar123!'
-		params.timezone = 'NoContinent/NoPlace'
 		request.method = 'POST'
 		controller.register()
 		then: "should fail"
@@ -141,7 +140,6 @@ class AuthApiControllerSpec extends Specification {
 		params.name = "Name"
 		params.password = 'fooBar123!'
 		params.password2 = 'fooBar234!'
-		params.timezone = 'NoContinent/NoPlace'
 		params.tosConfirmed = true
 		request.method = 'POST'
 		controller.register()
@@ -160,7 +158,6 @@ class AuthApiControllerSpec extends Specification {
 		params.username = username
 		params.password = 'fooBar123!'
 		params.password2 = 'fooBar123!'
-		params.timezone = 'NoContinent/NoPlace'
 		params.tosConfirmed = true
 		request.method = 'POST'
 		controller.register()
@@ -180,7 +177,6 @@ class AuthApiControllerSpec extends Specification {
 		params.name = "Name"
 		params.password = 'weak'
 		params.password2 = 'weak'
-		params.timezone = 'NoContinent/NoPlace'
 		params.tosConfirmed = true
 		request.method = 'POST'
 		controller.register()
@@ -197,7 +193,6 @@ class AuthApiControllerSpec extends Specification {
 			username: "test@test.com",
 			name: "Test User",
 			password: springSecurityService.encodePassword("foobar123!"),
-			timezone: "Europe/Helsinki"
 		)
 		user.save(validate: false)
 		def inv = controller.signupCodeService.create(user.username)
@@ -209,7 +204,6 @@ class AuthApiControllerSpec extends Specification {
 		params.username = user.username
 		params.password = 'fooBar123!'
 		params.password2 = 'fooBar123!'
-		params.timezone = 'NoContinent/NoPlace'
 		params.tosConfirmed = true
 		request.method = 'POST'
 		controller.register()
@@ -230,7 +224,6 @@ class AuthApiControllerSpec extends Specification {
 		feed.messageSourceClass = ""
 		feed.module = new Module()
 		feed.parserClass = ""
-		feed.timezone = "Europe/Minsk"
 		feed.streamListenerClass = NoOpStreamListener.name
 		feed.save()
 
@@ -261,17 +254,14 @@ class AuthApiControllerSpec extends Specification {
 		params.username = username
 		params.password = 'fooBar123!'
 		params.password2 = 'fooBar123!'
-		params.timezone = 'NoContinent/NoPlace'
 		params.tosConfirmed = true
 		request.method = 'POST'
 		controller.register()
 		then: "should create user"
 		SecUser.findByUsername(username)
-		SecUser.findByUsername(username).timezone == 'NoContinent/NoPlace'
 		SecUser.findByUsername(username).password == 'fooBar123!-encoded'
 		response.status == 200
 		response.json == [
-		    timezone: "NoContinent/NoPlace",
 			name: "Name",
 			username: "user@invite.to"
 		]

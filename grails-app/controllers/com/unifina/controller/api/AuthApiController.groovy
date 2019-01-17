@@ -205,7 +205,6 @@ class RegisterCommand {
 	String name
 	String password
 	String password2
-	String timezone
 	String tosConfirmed
 
 	UserService userService
@@ -214,7 +213,6 @@ class RegisterCommand {
 		invite blank: false
 		tosConfirmed blank: false, validator: { val -> new Boolean(val) }
 		name blank: false
-		timezone blank: false
 		password validator: { String password, RegisterCommand command ->
 			return command.userService.passwordValidator(password, command)
 		}

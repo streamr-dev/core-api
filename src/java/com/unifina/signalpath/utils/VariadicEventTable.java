@@ -6,6 +6,7 @@ import com.unifina.signalpath.variadic.VariadicInput;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -45,7 +46,9 @@ public class VariadicEventTable extends ModuleWithUI {
 		HashMap<String, Object> msg = new HashMap<String, Object>();
 		ArrayList<Object> nr = new ArrayList<>(2);
 		msg.put("nr", nr);
-		nr.add(getGlobals().formatDateTime(getGlobals().time));
+		Map<String, Object> dateObject = new HashMap<>();
+		dateObject.put("__streamr_date", getGlobals().time.getTime());
+		nr.add(dateObject);
 
 		for (Input<Object> i : ins.getEndpoints()) {
 			if (i.hasValue() && (!showOnlyNewValues || getDrivingInputs().contains(i))) {
