@@ -29,12 +29,12 @@ class SignalPathServiceSpec extends Specification {
 	CanvasService canvasService
 
 	def setup() {
-		me = new SecUser(username: "me@streamr.com", password: "pw", name: "name", lastLogin: new Date())
+		me = new SecUser(username: "me@streamr.com", password: "pw", name: "name")
 		me.save(failOnError: true)
 
 		SecRole role = new SecRole(authority: "ROLE_ADMIN")
 		role.save(failOnError: true)
-		admin = new SecUser(username: "admin@streamr.com", password: "pw", name: "admin", lastLogin: new Date())
+		admin = new SecUser(username: "admin@streamr.com", password: "pw", name: "admin")
 		admin.save(failOnError: true)
 		new SecUserSecRole(secUser: admin, secRole: role).save(failOnError: true)
 

@@ -47,7 +47,7 @@ class SessionServiceSpec extends Specification {
 	}
 
 	void "generateToken() should update SecUsers lastLogin"() {
-		SecUser user = new SecUser(id: 123L, lastLogin: new Date(0)).save(failOnError: true, validate: false)
+		SecUser user = new SecUser(id: 123L).save(failOnError: true, validate: false)
 		when:
 		service.generateToken(user)
 		then:

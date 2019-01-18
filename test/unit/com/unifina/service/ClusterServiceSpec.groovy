@@ -204,7 +204,7 @@ class ClusterServiceSpec extends Specification {
 		service.canvasService = Mock(CanvasService)
 		CanvasesPerNode canvasesPerNode = new CanvasesPerNode()
 		canvasesPerNode.shouldBeRunning = new ArrayList<HashMap<String, Object>>()
-		SecUser u = new SecUser(username: "pena@host.com", password: "abcabcabcabc123", name: "Pena", lastLogin: new Date())
+		SecUser u = new SecUser(username: "pena@host.com", password: "abcabcabcabc123", name: "Pena")
 		u.id = 1
 		u.save(failOnError: true)
 		Canvas c = new Canvas(name: "Canvas 1", startedBy: u, json: "{}")

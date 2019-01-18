@@ -23,7 +23,7 @@ class SecUser implements Userish {
 	// dateCreated is the date when account is created.
 	Date dateCreated
 	// lastLogin is the date when last successful login was made.
-	Date lastLogin
+	Date lastLogin = new Date()
 
 	static hasMany = [permissions: Permission, keys: Key]
 
@@ -31,13 +31,11 @@ class SecUser implements Userish {
 		username blank: false, unique: true, validator: UsernameValidator.validate
 		password blank: false
 		name blank: false
-		lastLogin nullable: false
 	}
 
 	static mapping = {
 		password column: '`password`'
 		permissions cascade: 'all-delete-orphan'
-		lastLogin defaultValue: new Date(0)
 	}
 
 	Set<SecRole> getAuthorities() {

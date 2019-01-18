@@ -39,28 +39,24 @@ class PermissionServiceIntegrationSpec extends IntegrationSpec {
 			username: "me-permission-service-integration-spec@streamr.com",
 			name: "me",
 			password: "foo",
-			lastLogin: new Date(0),
 		).save(failOnError: true)
 
 		anotherUser = new SecUser(
 			username: "him-permission-service-integration-spec@streamr.com",
 			name: "him",
 			password: "bar",
-			lastLogin: new Date(0),
 		).save(failOnError: true)
 
 		stranger = new SecUser(
 			username: "stranger-permission-service-integration-spec@streamr.com",
 			name: "stranger",
 			password: "x",
-			lastLogin: new Date(0),
 		).save(failOnError: true)
 
 		someone = new SecUser(
 			username: "someone-service-integration-spec@streamr.com",
 			name: "someone",
 			password: "x",
-			lastLogin: new Date(0),
 		).save(failOnError: true)
 
 		// Keys
