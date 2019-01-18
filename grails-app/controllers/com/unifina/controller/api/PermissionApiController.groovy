@@ -115,7 +115,7 @@ class PermissionApiController {
 							to invite.username
 							subject grailsApplication.config.unifina.email.shareInvite.subject.replace("%USER%", sharer)
 							html g.render(
-								template: "/auth/email_share_invite",
+								template: "/emails/email_share_invite",
 								model: [invite: invite, sharer: sharer],
 								plugin: "unifina-core"
 							)
