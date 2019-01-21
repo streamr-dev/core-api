@@ -12,7 +12,7 @@ type Props = {
 const Footer = ({ className }: Props) => (
     <div className={cx(className, styles.root)}>
         <div className={styles.inner}>
-            Made with ❤️ & ☕️ by Streamr Network AG in 2018
+            Made with ❤️ & ☕️ by Streamr Contributors
         </div>
     </div>
 )
