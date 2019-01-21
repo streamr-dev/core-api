@@ -249,28 +249,76 @@
         ],
         "parameters": [
           {
-            "$ref": "#/parameters/search"
+            "name": "search",
+            "type": "string",
+            "in": "query",
+            "description": "Filter by search term in name or description",
+            "required": false
           },
           {
-            "$ref": "#/parameters/sortBy"
+            "name": "sortBy",
+            "type": "string",
+            "in": "query",
+            "description": "Sort the returned results by the given field.",
+            "required": false,
+            "default": "id"
           },
           {
-            "$ref": "#/parameters/order"
+            "name": "order",
+            "type": "string",
+            "enum": [
+              "asc",
+              "desc"
+            ],
+            "in": "query",
+            "description": "Control whether the results are sorted in ascending or descending order. Used with parameter `sortBy`.",
+            "required": false,
+            "default": "asc"
           },
           {
-            "$ref": "#/parameters/max"
+            "name": "max",
+            "type": "integer",
+            "in": "query",
+            "description": "Maximum number of returned results (capped at 100)",
+            "required": false,
+            "default": 100
           },
           {
-            "$ref": "#/parameters/offset"
+            "name": "offset",
+            "type": "integer",
+            "in": "query",
+            "description": "Skip the first (offset) results. Used together with max for paging.",
+            "required": false,
+            "default": 0
           },
           {
-            "$ref": "#/parameters/grantedAccess"
+            "name": "grantedAccess",
+            "type": "boolean",
+            "in": "query",
+            "description": "If false, excludes resources that user has been granted specific permission to from results.",
+            "required": false,
+            "default": true
           },
           {
-            "$ref": "#/parameters/publicAccess"
+            "name": "publicAccess",
+            "type": "boolean",
+            "in": "query",
+            "description": "If true, includes publicly available resources in the results.",
+            "required": false,
+            "default": false
           },
           {
-            "$ref": "#/parameters/operation"
+            "name": "operation",
+            "type": "string",
+            "enum": [
+              "READ",
+              "WRITE",
+              "SHARE"
+            ],
+            "in": "query",
+            "description": "Filter results by Permission (access level)",
+            "required": false,
+            "default": "READ"
           },
           {
             "name": "categories",
@@ -397,25 +445,63 @@
         ],
         "parameters": [
           {
-            "$ref": "#/parameters/search"
+            "name": "search",
+            "type": "string",
+            "in": "query",
+            "description": "Filter by search term in name or description",
+            "required": false
           },
           {
-            "$ref": "#/parameters/sortBy"
+            "name": "sortBy",
+            "type": "string",
+            "in": "query",
+            "description": "Sort the returned results by the given field.",
+            "required": false,
+            "default": "id"
           },
           {
-            "$ref": "#/parameters/order"
+            "name": "order",
+            "type": "string",
+            "enum": [
+              "asc",
+              "desc"
+            ],
+            "in": "query",
+            "description": "Control whether the results are sorted in ascending or descending order. Used with parameter `sortBy`.",
+            "required": false,
+            "default": "asc"
           },
           {
-            "$ref": "#/parameters/max"
+            "name": "max",
+            "type": "integer",
+            "in": "query",
+            "description": "Maximum number of returned results (capped at 100)",
+            "required": false,
+            "default": 100
           },
           {
-            "$ref": "#/parameters/offset"
+            "name": "offset",
+            "type": "integer",
+            "in": "query",
+            "description": "Skip the first (offset) results. Used together with max for paging.",
+            "required": false,
+            "default": 0
           },
           {
-            "$ref": "#/parameters/grantedAccess"
+            "name": "grantedAccess",
+            "type": "boolean",
+            "in": "query",
+            "description": "If false, excludes resources that user has been granted specific permission to from results.",
+            "required": false,
+            "default": true
           },
           {
-            "$ref": "#/parameters/publicAccess"
+            "name": "publicAccess",
+            "type": "boolean",
+            "in": "query",
+            "description": "If true, includes publicly available resources in the results.",
+            "required": false,
+            "default": false
           },
           {
             "name": "categories",
@@ -1504,28 +1590,76 @@
             "default": false
           },
           {
-            "$ref": "#/parameters/search"
+            "name": "search",
+            "type": "string",
+            "in": "query",
+            "description": "Filter by search term in name or description",
+            "required": false
           },
           {
-            "$ref": "#/parameters/sortBy"
+            "name": "sortBy",
+            "type": "string",
+            "in": "query",
+            "description": "Sort the returned results by the given field.",
+            "required": false,
+            "default": "id"
           },
           {
-            "$ref": "#/parameters/order"
+            "name": "order",
+            "type": "string",
+            "enum": [
+              "asc",
+              "desc"
+            ],
+            "in": "query",
+            "description": "Control whether the results are sorted in ascending or descending order. Used with parameter `sortBy`.",
+            "required": false,
+            "default": "asc"
           },
           {
-            "$ref": "#/parameters/max"
+            "name": "max",
+            "type": "integer",
+            "in": "query",
+            "description": "Maximum number of returned results (capped at 100)",
+            "required": false,
+            "default": 100
           },
           {
-            "$ref": "#/parameters/offset"
+            "name": "offset",
+            "type": "integer",
+            "in": "query",
+            "description": "Skip the first (offset) results. Used together with max for paging.",
+            "required": false,
+            "default": 0
           },
           {
-            "$ref": "#/parameters/grantedAccess"
+            "name": "grantedAccess",
+            "type": "boolean",
+            "in": "query",
+            "description": "If false, excludes resources that user has been granted specific permission to from results.",
+            "required": false,
+            "default": true
           },
           {
-            "$ref": "#/parameters/publicAccess"
+            "name": "publicAccess",
+            "type": "boolean",
+            "in": "query",
+            "description": "If true, includes publicly available resources in the results.",
+            "required": false,
+            "default": false
           },
           {
-            "$ref": "#/parameters/operation"
+            "name": "operation",
+            "type": "string",
+            "enum": [
+              "READ",
+              "WRITE",
+              "SHARE"
+            ],
+            "in": "query",
+            "description": "Filter results by Permission (access level)",
+            "required": false,
+            "default": "READ"
           }
         ],
         "tags": [
@@ -2319,28 +2453,76 @@
             "default": false
           },
           {
-            "$ref": "#/parameters/search"
+            "name": "search",
+            "type": "string",
+            "in": "query",
+            "description": "Filter by search term in name or description",
+            "required": false
           },
           {
-            "$ref": "#/parameters/sortBy"
+            "name": "sortBy",
+            "type": "string",
+            "in": "query",
+            "description": "Sort the returned results by the given field.",
+            "required": false,
+            "default": "id"
           },
           {
-            "$ref": "#/parameters/order"
+            "name": "order",
+            "type": "string",
+            "enum": [
+              "asc",
+              "desc"
+            ],
+            "in": "query",
+            "description": "Control whether the results are sorted in ascending or descending order. Used with parameter `sortBy`.",
+            "required": false,
+            "default": "asc"
           },
           {
-            "$ref": "#/parameters/max"
+            "name": "max",
+            "type": "integer",
+            "in": "query",
+            "description": "Maximum number of returned results (capped at 100)",
+            "required": false,
+            "default": 100
           },
           {
-            "$ref": "#/parameters/offset"
+            "name": "offset",
+            "type": "integer",
+            "in": "query",
+            "description": "Skip the first (offset) results. Used together with max for paging.",
+            "required": false,
+            "default": 0
           },
           {
-            "$ref": "#/parameters/grantedAccess"
+            "name": "grantedAccess",
+            "type": "boolean",
+            "in": "query",
+            "description": "If false, excludes resources that user has been granted specific permission to from results.",
+            "required": false,
+            "default": true
           },
           {
-            "$ref": "#/parameters/publicAccess"
+            "name": "publicAccess",
+            "type": "boolean",
+            "in": "query",
+            "description": "If true, includes publicly available resources in the results.",
+            "required": false,
+            "default": false
           },
           {
-            "$ref": "#/parameters/operation"
+            "name": "operation",
+            "type": "string",
+            "enum": [
+              "READ",
+              "WRITE",
+              "SHARE"
+            ],
+            "in": "query",
+            "description": "Filter results by Permission (access level)",
+            "required": false,
+            "default": "READ"
           }
         ],
         "responses": {
@@ -2407,7 +2589,7 @@
             "name": "id",
             "description": "ID of the canvas to be fetched",
             "required": true,
-            "type": "integer"
+            "type": "string"
           }
         ],
         "responses": {
@@ -2485,7 +2667,7 @@
             "name": "id",
             "description": "ID of the canvas to be deleted",
             "required": true,
-            "type": "integer"
+            "type": "string"
           }
         ],
         "responses": {
@@ -2514,7 +2696,7 @@
             "name": "id",
             "description": "ID of the live canvas to be started",
             "required": true,
-            "type": "integer"
+            "type": "string"
           },
           {
             "name": "body",
@@ -2558,7 +2740,7 @@
             "name": "id",
             "description": "ID of the live canvas to be stopped",
             "required": true,
-            "type": "integer"
+            "type": "string"
           }
         ],
         "responses": {
@@ -2771,28 +2953,76 @@
             "type": "string"
           },
           {
-            "$ref": "#/parameters/search"
+            "name": "search",
+            "type": "string",
+            "in": "query",
+            "description": "Filter by search term in name or description",
+            "required": false
           },
           {
-            "$ref": "#/parameters/sortBy"
+            "name": "sortBy",
+            "type": "string",
+            "in": "query",
+            "description": "Sort the returned results by the given field.",
+            "required": false,
+            "default": "id"
           },
           {
-            "$ref": "#/parameters/order"
+            "name": "order",
+            "type": "string",
+            "enum": [
+              "asc",
+              "desc"
+            ],
+            "in": "query",
+            "description": "Control whether the results are sorted in ascending or descending order. Used with parameter `sortBy`.",
+            "required": false,
+            "default": "asc"
           },
           {
-            "$ref": "#/parameters/max"
+            "name": "max",
+            "type": "integer",
+            "in": "query",
+            "description": "Maximum number of returned results (capped at 100)",
+            "required": false,
+            "default": 100
           },
           {
-            "$ref": "#/parameters/offset"
+            "name": "offset",
+            "type": "integer",
+            "in": "query",
+            "description": "Skip the first (offset) results. Used together with max for paging.",
+            "required": false,
+            "default": 0
           },
           {
-            "$ref": "#/parameters/grantedAccess"
+            "name": "grantedAccess",
+            "type": "boolean",
+            "in": "query",
+            "description": "If false, excludes resources that user has been granted specific permission to from results.",
+            "required": false,
+            "default": true
           },
           {
-            "$ref": "#/parameters/publicAccess"
+            "name": "publicAccess",
+            "type": "boolean",
+            "in": "query",
+            "description": "If true, includes publicly available resources in the results.",
+            "required": false,
+            "default": false
           },
           {
-            "$ref": "#/parameters/operation"
+            "name": "operation",
+            "type": "string",
+            "enum": [
+              "READ",
+              "WRITE",
+              "SHARE"
+            ],
+            "in": "query",
+            "description": "Filter results by Permission (access level)",
+            "required": false,
+            "default": "READ"
           }
         ],
         "tags": [
@@ -2862,7 +3092,7 @@
             "name": "id",
             "description": "ID of the Dashboard to be fetched",
             "required": true,
-            "type": "integer"
+            "type": "string"
           }
         ],
         "responses": {
@@ -2943,7 +3173,7 @@
             "name": "id",
             "description": "ID of the Dashboard to be deleted",
             "required": true,
-            "type": "integer"
+            "type": "string"
           }
         ],
         "responses": {
@@ -2978,7 +3208,7 @@
             "name": "id",
             "description": "ID of the Dashboard whose Items are to be fetched",
             "required": true,
-            "type": "integer"
+            "type": "string"
           }
         ],
         "responses": {
@@ -3017,7 +3247,7 @@
             "name": "id",
             "description": "ID of the associated Dashboard",
             "required": true,
-            "type": "integer"
+            "type": "string"
           },
           {
             "name": "body",
@@ -3070,14 +3300,14 @@
             "name": "dashboardId",
             "description": "ID of the Dashboard",
             "required": true,
-            "type": "integer"
+            "type": "string"
           },
           {
             "in": "path",
             "name": "id",
             "description": "ID of the Dashboard Item",
             "required": true,
-            "type": "integer"
+            "type": "string"
           }
         ],
         "responses": {
@@ -3113,14 +3343,14 @@
             "name": "dashboardId",
             "description": "ID of the Dashboard",
             "required": true,
-            "type": "integer"
+            "type": "string"
           },
           {
             "in": "path",
             "name": "id",
             "description": "ID of the Dashboard Item",
             "required": true,
-            "type": "integer"
+            "type": "string"
           },
           {
             "name": "body",
@@ -3171,14 +3401,14 @@
             "name": "dashboardId",
             "description": "ID of the Dashboard",
             "required": true,
-            "type": "integer"
+            "type": "string"
           },
           {
             "in": "path",
             "name": "id",
             "description": "ID of the Dashboard Item",
             "required": true,
-            "type": "integer"
+            "type": "string"
           }
         ],
         "responses": {
@@ -3504,12 +3734,12 @@
         "created": {
           "type": "string",
           "description": "when Canvas was created",
-          "format": "dateTime"
+          "format": "date-time"
         },
         "updated": {
           "type": "string",
           "description": "when Canvas was last updated",
-          "format": "dateTime"
+          "format": "date-time"
         },
         "hasExports": {
           "type": "boolean",
@@ -3576,12 +3806,12 @@
         },
         "beginDate": {
           "type": "string",
-          "format": "date",
+          "format": "date-time",
           "description": "begin date (historical mode) to start feeding from"
         },
         "endDate": {
           "type": "string",
-          "format": "date",
+          "format": "date-time",
           "description": "end date (historical mode) to stop feeding at"
         }
       }
@@ -3847,24 +4077,158 @@
       }
     },
     "CreateProduct": {
-      "allOf": [
-        {
-          "$ref": "#/definitions/ProductWithoutBlockchain"
+      "type": "object",
+      "required": [
+        "name",
+        "description",
+        "category",
+        "streams",
+        "ownerAddress",
+        "beneficiaryAddress",
+        "pricePerSecond",
+        "priceCurrency",
+        "minimumSubscriptionInSeconds"
+      ],
+      "properties": {
+        "name": {
+          "type": "string",
+          "example": "USD/ETH exchange rate"
         },
-        {
-          "$ref": "#/definitions/ProductInBlockchain"
+        "description": {
+          "type": "string",
+          "example": "Real-time USD/ETH exchange rate data aggregated from several cryptocurrency exchanges."
+        },
+        "category": {
+          "type": "string",
+          "description": "identifier of Category this Product belong to",
+          "example": "cryptocurrencies-id"
+        },
+        "streams": {
+          "type": "array",
+          "description": "List of Stream identifiers that belong to this Product",
+          "items": {
+            "type": "string"
+          },
+          "example": [
+            "stream-1-id",
+            "stream-2-id",
+            "stream-3-id"
+          ]
+        },
+        "previewStream": {
+          "type": "string",
+          "description": "Identifier of Stream selected for preview",
+          "example": "stream-2-id"
+        },
+        "previewConfigJson": {
+          "type": "string",
+          "description": "Configuration of previewStream"
+        },
+        "ownerAddress": {
+          "type": "string",
+          "description": "Ethereum address of owner",
+          "example": "0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF"
+        },
+        "beneficiaryAddress": {
+          "type": "string",
+          "description": "Ethereum address of beneficiary",
+          "example": "0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF"
+        },
+        "pricePerSecond": {
+          "type": "integer",
+          "description": "Unit cost per second",
+          "example": 5
+        },
+        "priceCurrency": {
+          "type": "string",
+          "description": "Unit currency",
+          "enum": [
+            "DATA",
+            "USD"
+          ]
+        },
+        "minimumSubscriptionInSeconds": {
+          "type": "integer",
+          "description": "Minimum subscription length (in seconds)"
         }
-      ]
+      }
     },
     "UpdateProduct": {
-      "allOf": [
-        {
-          "$ref": "#/definitions/ProductWithoutBlockchain"
+      "type": "object",
+      "required": [
+        "name",
+        "description",
+        "category",
+        "streams",
+        "ownerAddress",
+        "beneficiaryAddress",
+        "pricePerSecond",
+        "priceCurrency",
+        "minimumSubscriptionInSeconds"
+      ],
+      "properties": {
+        "name": {
+          "type": "string",
+          "example": "USD/ETH exchange rate"
         },
-        {
-          "$ref": "#/definitions/ProductInBlockchain"
+        "description": {
+          "type": "string",
+          "example": "Real-time USD/ETH exchange rate data aggregated from several cryptocurrency exchanges."
+        },
+        "category": {
+          "type": "string",
+          "description": "identifier of Category this Product belong to",
+          "example": "cryptocurrencies-id"
+        },
+        "streams": {
+          "type": "array",
+          "description": "List of Stream identifiers that belong to this Product",
+          "items": {
+            "type": "string"
+          },
+          "example": [
+            "stream-1-id",
+            "stream-2-id",
+            "stream-3-id"
+          ]
+        },
+        "previewStream": {
+          "type": "string",
+          "description": "Identifier of Stream selected for preview",
+          "example": "stream-2-id"
+        },
+        "previewConfigJson": {
+          "type": "string",
+          "description": "Configuration of previewStream"
+        },
+        "ownerAddress": {
+          "type": "string",
+          "description": "Ethereum address of owner",
+          "example": "0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF"
+        },
+        "beneficiaryAddress": {
+          "type": "string",
+          "description": "Ethereum address of beneficiary",
+          "example": "0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF"
+        },
+        "pricePerSecond": {
+          "type": "integer",
+          "description": "Unit cost per second",
+          "example": 5
+        },
+        "priceCurrency": {
+          "type": "string",
+          "description": "Unit currency",
+          "enum": [
+            "DATA",
+            "USD"
+          ]
+        },
+        "minimumSubscriptionInSeconds": {
+          "type": "integer",
+          "description": "Minimum subscription length (in seconds)"
         }
-      ]
+      }
     },
     "CreateSubscription": {
       "type": "object",
@@ -3891,91 +4255,179 @@
       }
     },
     "Product": {
-      "allOf": [
-        {
-          "type": "object",
-          "required": [
-            "id",
-            "state",
-            "created",
-            "updated",
-            "owner",
-            "imageUrl",
-            "thumbnailUrl"
-          ],
-          "properties": {
-            "id": {
-              "type": "string",
-              "description": "unique identifier",
-              "example": "11o6bc2HTs6W8oFRpMugmwTeodGTOxSzKQCIHeK_qDnA"
-            },
-            "state": {
-              "type": "string",
-              "description": "State of Product",
-              "enum": [
-                "NOT_DEPLOYED",
-                "DEPLOYING",
-                "DEPLOYED",
-                "UNDEPLOYING"
-              ]
-            },
-            "created": {
-              "type": "string",
-              "description": "ISO-8601 datetime",
-              "example": "2018-02-21T12:26:18Z"
-            },
-            "updated": {
-              "type": "string",
-              "description": "ISO-8601 datetime",
-              "example": "2018-02-21T12:26:18Z"
-            },
-            "owner": {
-              "type": "string",
-              "description": "Username of the creator of this Product",
-              "example": "John Doe"
-            },
-            "imageUrl": {
-              "type": "string",
-              "description": "URL of image",
-              "example": "http://www.google.com/a.jpg"
-            },
-            "thumbnailUrl": {
-              "type": "string",
-              "description": "URL of thumbnail image",
-              "example": "http://www.google.com/b.jpg"
-            }
-          }
+      "type": "object",
+      "required": [
+        "id",
+        "state",
+        "created",
+        "updated",
+        "owner",
+        "imageUrl",
+        "thumbnailUrl",
+        "name",
+        "description",
+        "category",
+        "streams",
+        "ownerAddress",
+        "beneficiaryAddress",
+        "pricePerSecond",
+        "priceCurrency",
+        "minimumSubscriptionInSeconds"
+      ],
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "unique identifier",
+          "example": "11o6bc2HTs6W8oFRpMugmwTeodGTOxSzKQCIHeK_qDnA"
         },
-        {
-          "$ref": "#/definitions/CreateProduct"
+        "state": {
+          "type": "string",
+          "description": "State of Product",
+          "enum": [
+            "NOT_DEPLOYED",
+            "DEPLOYING",
+            "DEPLOYED",
+            "UNDEPLOYING"
+          ]
+        },
+        "created": {
+          "type": "string",
+          "description": "ISO-8601 datetime",
+          "example": "2018-02-21T12:26:18Z"
+        },
+        "updated": {
+          "type": "string",
+          "description": "ISO-8601 datetime",
+          "example": "2018-02-21T12:26:18Z"
+        },
+        "owner": {
+          "type": "string",
+          "description": "Username of the creator of this Product",
+          "example": "John Doe"
+        },
+        "imageUrl": {
+          "type": "string",
+          "description": "URL of image",
+          "example": "http://www.google.com/a.jpg"
+        },
+        "thumbnailUrl": {
+          "type": "string",
+          "description": "URL of thumbnail image",
+          "example": "http://www.google.com/b.jpg"
+        },
+        "name": {
+          "type": "string",
+          "example": "USD/ETH exchange rate"
+        },
+        "description": {
+          "type": "string",
+          "example": "Real-time USD/ETH exchange rate data aggregated from several cryptocurrency exchanges."
+        },
+        "category": {
+          "type": "string",
+          "description": "identifier of Category this Product belong to",
+          "example": "cryptocurrencies-id"
+        },
+        "streams": {
+          "type": "array",
+          "description": "List of Stream identifiers that belong to this Product",
+          "items": {
+            "type": "string"
+          },
+          "example": [
+            "stream-1-id",
+            "stream-2-id",
+            "stream-3-id"
+          ]
+        },
+        "previewStream": {
+          "type": "string",
+          "description": "Identifier of Stream selected for preview",
+          "example": "stream-2-id"
+        },
+        "previewConfigJson": {
+          "type": "string",
+          "description": "Configuration of previewStream"
+        },
+        "ownerAddress": {
+          "type": "string",
+          "description": "Ethereum address of owner",
+          "example": "0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF"
+        },
+        "beneficiaryAddress": {
+          "type": "string",
+          "description": "Ethereum address of beneficiary",
+          "example": "0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF"
+        },
+        "pricePerSecond": {
+          "type": "integer",
+          "description": "Unit cost per second",
+          "example": 5
+        },
+        "priceCurrency": {
+          "type": "string",
+          "description": "Unit currency",
+          "enum": [
+            "DATA",
+            "USD"
+          ]
+        },
+        "minimumSubscriptionInSeconds": {
+          "type": "integer",
+          "description": "Minimum subscription length (in seconds)"
         }
-      ]
+      }
     },
     "DeployedProduct": {
-      "allOf": [
-        {
-          "type": "object",
-          "required": [
-            "blockNumber",
-            "blockIndex"
-          ],
-          "properties": {
-            "blockNumber": {
-              "type": "integer",
-              "description": "Block number of associated Ethereum transaction",
-              "example": 5137054
-            },
-            "blockIndex": {
-              "type": "integer",
-              "description": "Index of associated Ethereum transaction in block",
-              "example": 5
-            }
-          }
+      "type": "object",
+      "required": [
+        "blockNumber",
+        "blockIndex",
+        "ownerAddress",
+        "beneficiaryAddress",
+        "pricePerSecond",
+        "priceCurrency",
+        "minimumSubscriptionInSeconds"
+      ],
+      "properties": {
+        "blockNumber": {
+          "type": "integer",
+          "description": "Block number of associated Ethereum transaction",
+          "example": 5137054
         },
-        {
-          "$ref": "#/definitions/ProductInBlockchain"
+        "blockIndex": {
+          "type": "integer",
+          "description": "Index of associated Ethereum transaction in block",
+          "example": 5
+        },
+        "ownerAddress": {
+          "type": "string",
+          "description": "Ethereum address of owner",
+          "example": "0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF"
+        },
+        "beneficiaryAddress": {
+          "type": "string",
+          "description": "Ethereum address of beneficiary",
+          "example": "0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF"
+        },
+        "pricePerSecond": {
+          "type": "integer",
+          "description": "Unit cost per second",
+          "example": 5
+        },
+        "priceCurrency": {
+          "type": "string",
+          "description": "Unit currency",
+          "enum": [
+            "DATA",
+            "USD"
+          ]
+        },
+        "minimumSubscriptionInSeconds": {
+          "type": "integer",
+          "description": "Minimum subscription length (in seconds)"
         }
-      ]
+      }
     },
     "UndeployedProduct": {
       "type": "object",
@@ -4016,7 +4468,7 @@
         },
         "expires": {
           "type": "string",
-          "format": "dateTime",
+          "format": "date-time",
           "description": "date and time at which the challenge expires",
           "example": "2018-02-21T12:26:18Z"
         }
@@ -4107,7 +4559,7 @@
         },
         "expires": {
           "type": "string",
-          "format": "dateTime",
+          "format": "date-time",
           "description": "date and time at which the session token expires",
           "example": "2018-10-12T17:34:40Z"
         }
