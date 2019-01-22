@@ -9,7 +9,7 @@ import java.util.TimeZone;
 
 public class ClockModule extends AbstractSignalPathModule implements ITimeListener {
 
-	private final TimezoneParameter tz = new TimezoneParameter(this, "timezone", TimeZone.getTimeZone("UTC"));
+	private final TimezoneParameter tz = new TimezoneParameter(this, "timezone", "UTC");
 	private final StringParameter format = new StringParameter(this, "format", "yyyy-MM-dd HH:mm:ss z");
 	private final EnumParameter<TimeUnit> tickUnit = new EnumParameter<>(this, "unit", TimeUnit.values());
 	private final IntegerParameter tickRate = new NonZeroIntegerParameter(this, "rate", 1);
@@ -47,7 +47,7 @@ public class ClockModule extends AbstractSignalPathModule implements ITimeListen
 	private void updateDateFormatIfNecessary(String format) {
 		if (df == null) {
 			df = new SimpleDateFormat(format);
-			df.setTimeZone(tz.getValue());
+			df.setTimeZone(TimeZone.getTimeZone(tz.getValue()));
 		} else if (!df.toPattern().equals(format)) {
 			df.applyPattern(format);
 		}
