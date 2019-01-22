@@ -32,4 +32,13 @@ class TimezoneParameterSpec extends Specification {
 		then:
 		result == "Europe/Helsinki"
 	}
+
+	def "parseValue and formatValue are compatible"() {
+		TimeZone tz = TimeZone.getTimeZone("Europe/Zurich")
+
+		when:
+		TimeZone result = p.parseValue(p.formatValue(tz).toString())
+		then:
+		result == tz
+	}
 }
