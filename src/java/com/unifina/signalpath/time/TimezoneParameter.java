@@ -5,25 +5,25 @@ import com.unifina.signalpath.Parameter;
 
 import java.util.TimeZone;
 
-public class TimezoneParameter extends Parameter<String> {
+public class TimezoneParameter extends Parameter<TimeZone> {
 
-	public TimezoneParameter(AbstractSignalPathModule owner, String name, String defaultValue) {
+	public TimezoneParameter(AbstractSignalPathModule owner, String name, TimeZone defaultValue) {
 		super(owner, name, defaultValue, "String");
 	}
 
 	@Override
-	public String parseValue(String timezoneID) {
+	public TimeZone parseValue(String timezoneID) {
 		if (timezoneID == null) {
 			return getValue();
 		}
-		return TimeZone.getTimeZone(timezoneID).getID();
+		return TimeZone.getTimeZone(timezoneID);
 	}
 
 	@Override
-	public Object formatValue(String value) {
+	public Object formatValue(TimeZone value) {
 		if (value == null) {
-			return getValue();
+			return getValue().getID();
 		}
-		return value;
+		return value.getID();
 	}
 }

@@ -11,7 +11,7 @@ import java.util.TimeZone;
 
 public class TimeOfDay extends AbstractSignalPathModule implements ITimeListener {
 
-	private final TimezoneParameter tz = new TimezoneParameter(this, "timezone", "UTC");
+	private final TimezoneParameter tz = new TimezoneParameter(this, "timezone", TimeZone.getTimeZone("UTC"));
 
 	TimeSeriesOutput out = new TimeSeriesOutput(this,"out");
 
@@ -81,7 +81,7 @@ public class TimeOfDay extends AbstractSignalPathModule implements ITimeListener
 
 	private void initUtilIfNeeded() {
 		if (util == null) {
-			util = new TimeOfDayUtil(lastStartTime, lastEndTime, TimeZone.getTimeZone(tz.getValue()));
+			util = new TimeOfDayUtil(lastStartTime, lastEndTime, tz.getValue());
 			if (lastBaseDay != null) {
 				util.setBaseDate(lastBaseDay);
 			}

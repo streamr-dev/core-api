@@ -170,7 +170,7 @@ class ExportCSVSpec extends UiChannelMockingSpecification {
 				timeFormat: [value: "ISO_8601_LOCAL"]
 			]
 		], new SignalPath(true), globals)
-		module.getInput("timezone").receive("EST")
+		module.getInput("timezone").receive(TimeZone.getTimeZone("EST"))
 
 		then:
 		testForFileContentAndUiMessages(

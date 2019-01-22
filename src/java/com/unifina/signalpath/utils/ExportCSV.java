@@ -19,7 +19,7 @@ public class ExportCSV extends ModuleWithUI {
 
 	private static final Logger log = Logger.getLogger(ExportCSV.class);
 
-	TimezoneParameter tz = new TimezoneParameter(this, "timezone", "UTC");
+	TimezoneParameter tz = new TimezoneParameter(this, "timezone", TimeZone.getTimeZone("UTC"));
 
 	private final VariadicInput<Object> ins = new VariadicInput<>(this, new InputInstantiator.SimpleObject());
 
@@ -48,7 +48,7 @@ public class ExportCSV extends ModuleWithUI {
 			openCsvWriter();
 		}
 		if (timeFormatter == null) {
-			timeFormatter = timeFormat.getTimeFormatter(TimeZone.getTimeZone(tz.getValue()));
+			timeFormatter = timeFormat.getTimeFormatter(tz.getValue());
 		}
 
 		List<Object> row = new ArrayList<>();
@@ -146,7 +146,7 @@ public class ExportCSV extends ModuleWithUI {
 	public void afterDeserialization(SerializationService serializationService) {
 		super.afterDeserialization(serializationService);
 		openCsvWriter();
-		timeFormatter = timeFormat.getTimeFormatter(TimeZone.getTimeZone(tz.getValue()));
+		timeFormatter = timeFormat.getTimeFormatter(tz.getValue());
 	}
 
 	private void openCsvWriter() {

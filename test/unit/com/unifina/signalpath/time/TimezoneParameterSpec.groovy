@@ -3,25 +3,25 @@ package com.unifina.signalpath.time
 import spock.lang.Specification
 
 class TimezoneParameterSpec extends Specification {
-	TimezoneParameter p = new TimezoneParameter(null, "timezone", "Europe/Helsinki")
+	TimezoneParameter p = new TimezoneParameter(null, "timezone", TimeZone.getTimeZone("Europe/Helsinki"))
 
 	def "parse paris timezone"() {
 		when:
-		String result = p.parseValue("CET")
+		TimeZone result = p.parseValue("CET")
 		then:
-		result == "CET"
+		result.getID() == "CET"
 	}
 
 	def "parse null value returns the default value"() {
 		when:
-		String result = p.parseValue(null)
+		TimeZone result = p.parseValue(null)
 		then:
-		result == "Europe/Helsinki"
+		result.getID() == "Europe/Helsinki"
 	}
 
 	def "format value returns timezone as string"() {
 		when:
-		String result = p.formatValue("GMT")
+		String result = p.formatValue(TimeZone.getTimeZone("GMT"))
 		then:
 		result == "GMT"
 	}
