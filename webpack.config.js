@@ -19,6 +19,12 @@ const noActualFiles = !!process.env.NO_FILES
 
 const commonPlugins = [
     // Plugins always in use
+    new webpack.DefinePlugin({
+        'process.env': {
+            'NODE_ENV': JSON.stringify(process.env.NODE_ENV), // JSON.stringify is needed for this to work
+            'WS_URL': JSON.stringify(process.env.WS_URL),
+        },
+    }),
     new webpack.LoaderOptionsPlugin({
         test: /\.pcss$/,
         options: {
@@ -34,11 +40,6 @@ const environmentPlugins = inProduction ? [
         verbose: true,
     }),
     new webpack.optimize.OccurrenceOrderPlugin(),
-    new webpack.DefinePlugin({
-        'process.env': {
-            'NODE_ENV': JSON.stringify('production'),
-        },
-    }),
     new UglifyJsPlugin({
         uglifyOptions: {
             compressor: {

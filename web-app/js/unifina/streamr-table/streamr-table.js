@@ -65,11 +65,11 @@ StreamrTable.prototype.addRow = function(row, rowId, op) {
     if (op != 'append') {
         op = 'prepend'
     }
-    let newRow = $('<tr/>', {
+    var newRow = $('<tr/>', {
         id: rowId != null ? rowId : '',
     })
     for (var i = 0; i < row.length; i++) {
-        let content
+        var content
         if (row[i] == null) {
             content = ''
         } else {
