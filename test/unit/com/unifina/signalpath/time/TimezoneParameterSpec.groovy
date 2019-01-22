@@ -7,29 +7,38 @@ class TimezoneParameterSpec extends Specification {
 
 	def "parse paris timezone"() {
 		when:
-		def result = p.parseValue("CET")
+		TimeZone result = p.parseValue("CET")
 		then:
 		result.getID() == "CET"
 	}
 
 	def "parse null value returns the default value"() {
 		when:
-		def result = p.parseValue(null)
+		TimeZone result = p.parseValue(null)
 		then:
 		result.getID() == "Europe/Helsinki"
 	}
 
 	def "format value returns timezone as string"() {
 		when:
-		def result = p.formatValue(TimeZone.getTimeZone("GMT"))
+		String result = p.formatValue(TimeZone.getTimeZone("GMT"))
 		then:
-		result.getID() == "GMT"
+		result == "GMT"
 	}
 
 	def "format null value returns parameters default"() {
 		when:
-		def result = p.formatValue(null)
+		String result = p.formatValue(null)
 		then:
-		result.getID() == "Europe/Helsinki"
+		result == "Europe/Helsinki"
+	}
+
+	def "parseValue and formatValue are compatible"() {
+		TimeZone tz = TimeZone.getTimeZone("Europe/Zurich")
+
+		when:
+		TimeZone result = p.parseValue(p.formatValue(tz).toString())
+		then:
+		result == tz
 	}
 }

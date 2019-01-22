@@ -22,8 +22,8 @@ public class TimezoneParameter extends Parameter<TimeZone> {
 	@Override
 	public Object formatValue(TimeZone value) {
 		if (value == null) {
-			return getValue();
+			return getValue().getID();
 		}
-		return value;
+		return value.getID();
 	}
 }
