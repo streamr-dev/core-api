@@ -96,7 +96,7 @@ class UserServiceSpec extends Specification {
 			password       : "test",
 			enabled        : true,
 			accountLocked  : false,
-			passwordExpired: false
+			passwordExpired: false,
 		],
 			SecRole.findAllByAuthorityInList(["ROLE_USER"]),
 			new ArrayList<Feed>(),

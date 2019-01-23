@@ -20,6 +20,11 @@ class SecUser implements Userish {
 	Set<Key> keys
 	Set<Permission> permissions
 
+	// dateCreated is the date when account is created.
+	Date dateCreated
+	// lastLogin is the date when last successful login was made.
+	Date lastLogin = new Date()
+
 	static hasMany = [permissions: Permission, keys: Key]
 
 	static constraints = {

@@ -17,7 +17,6 @@ class PaidSubscriptionIntegrationSpec extends IntegrationSpec {
 			username: "subscription-service-integration-spec-1@streamr.com",
 			password: "xxx",
 			name: "Subscription Service Integration Spec 1",
-			timezone: "UTC"
 		).save(failOnError: true)
 
 		product = new Product(
@@ -40,7 +39,6 @@ class PaidSubscriptionIntegrationSpec extends IntegrationSpec {
 			username: "subscription-service-integration-spec-2@streamr.com",
 			password: "xxx",
 			name: "Subscription Service Integration Spec 2",
-			timezone: "UTC"
 		).save(failOnError: true)
 
 		new IntegrationKey(

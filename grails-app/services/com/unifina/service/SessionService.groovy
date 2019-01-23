@@ -14,9 +14,17 @@ class SessionService {
 
 	KeyValueStoreService keyValueStoreService
 
+	void updateUsersLoginDate(SecUser user, Date date) {
+		user.lastLogin = date
+		user.save(failOnError: true, validate: false)
+	}
+
 	SessionToken generateToken(Userish userish) {
 		SessionToken sk = new SessionToken(TOKEN_LENGTH, userish, TTL_HOURS)
 		keyValueStoreService.setWithExpiration(sk.getToken(), userishToString(userish), TTL_HOURS * 3600)
+		if (userish instanceof SecUser) {
+			updateUsersLoginDate((SecUser) userish, new Date())
+		}
 		return sk
 	}
 
