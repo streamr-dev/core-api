@@ -2,13 +2,12 @@ package com.unifina.service
 
 import com.google.gson.Gson
 import com.google.gson.GsonBuilder
+import com.streamr.client.protocol.message_layer.StreamMessage
+import com.streamr.client.protocol.message_layer.StreamMessageV30
 import com.unifina.api.NotFoundException
 import com.unifina.api.NotPermittedException
 import com.unifina.api.ValidationException
 import com.unifina.data.StreamPartitioner
-import com.unifina.data.StreamrBinaryMessage
-import com.unifina.data.StreamrBinaryMessageV29
-import com.unifina.data.StreamrBinaryMessage.SignatureType
 import com.unifina.domain.dashboard.DashboardItem
 import com.unifina.domain.data.Feed
 import com.unifina.domain.data.Stream
@@ -22,7 +21,6 @@ import com.unifina.feed.AbstractStreamListener
 import com.unifina.feed.DataRange
 import com.unifina.feed.DataRangeProvider
 import com.unifina.feed.FieldDetector
-import com.unifina.feed.redis.StreamrBinaryMessageWithKafkaMetadata
 import com.unifina.signalpath.RuntimeRequest
 import com.unifina.task.DelayedDeleteStreamTask
 import com.unifina.utils.CSVImporter
@@ -127,40 +125,41 @@ class StreamService {
 
 	// Ref to Kafka will be abstracted out when Feed abstraction is reworked
 
-	void sendMessage(Stream stream, String partitionKey, long timestamp, byte[] content, byte contentType, int ttl=0,
-					 SignatureType signatureType = SignatureType.SIGNATURE_TYPE_NONE, String address = null, String signature = null) {
+	void sendMessage(Stream stream, String partitionKey, long timestamp, String content, StreamMessage.ContentType contentType,
+					 StreamMessage.SignatureType signatureType = StreamMessage.SignatureType.SIGNATURE_TYPE_NONE, String address = "", String signature = null) {
 		int streamPartition = partitioner.partition(stream, partitionKey)
-		StreamrBinaryMessage msg = new StreamrBinaryMessageV29(stream.id, streamPartition, timestamp, ttl, contentType, content,
-			signatureType, address, signature)
+		StreamMessage msg = new StreamMessageV30(stream.id, streamPartition, timestamp,
+			0, address, (Long) null, 0, contentType, content, signatureType, signature)
 
 		String kafkaPartitionKey = "${stream.id}-$streamPartition"
 		kafkaService.sendMessage(msg, kafkaPartitionKey)
 	}
 
 	@CompileStatic
-	void sendMessage(Stream stream, Map message, int ttl=0) {
+	void sendMessage(Stream stream, Map message) {
 		String str = gson.toJson(message)
-		sendMessage(stream, null, System.currentTimeMillis(), str.getBytes(utf8), StreamrBinaryMessage.CONTENT_TYPE_JSON, ttl);
+		sendMessage(stream, null, System.currentTimeMillis(), str, StreamMessage.ContentType.CONTENT_TYPE_JSON)
 	}
 
 	@CompileStatic
-	void sendMessage(Stream stream, long timestamp, Map message, int ttl=0) {
+	void sendMessage(Stream stream, long timestamp, Map message) {
 		String str = gson.toJson(message)
-		sendMessage(stream, null, timestamp, str.getBytes(utf8), StreamrBinaryMessage.CONTENT_TYPE_JSON, ttl);
+		sendMessage(stream, null, timestamp, str, StreamMessage.ContentType.CONTENT_TYPE_JSON)
 	}
 
 	@CompileStatic
-	void sendMessage(Stream stream, @Nullable String partitionKey, Map message, int ttl=0) {
+	void sendMessage(Stream stream, @Nullable String partitionKey, Map message) {
 		String str = gson.toJson(message)
-		sendMessage(stream, partitionKey, System.currentTimeMillis(), str.getBytes(utf8), StreamrBinaryMessage.CONTENT_TYPE_JSON, ttl);
+		sendMessage(stream, partitionKey, System.currentTimeMillis(), str, StreamMessage.ContentType.CONTENT_TYPE_JSON)
 	}
 
-	void saveMessage(Stream stream, String partitionKey, long timestamp, Map message, int ttl, long messageNumber, Long previousMessageNumber) {
-		int streamPartition = partitioner.partition(stream, partitionKey)
+	StreamMessage saveMessage(Stream stream, int streamPartition, long timestamp, long sequenceNumber, String publisherId, Map message, long previousTimestamp, long previousSequenceNumber) {
 		String str = gson.toJson(message)
-		// Fake Kafka partition to be 0 (does not matter)
-		StreamrBinaryMessageWithKafkaMetadata msg = new StreamrBinaryMessageWithKafkaMetadata(stream.id, streamPartition, timestamp, ttl, StreamrBinaryMessage.CONTENT_TYPE_JSON, str.getBytes(utf8), 0, messageNumber, previousMessageNumber)
+		StreamMessage msg = new StreamMessageV30(
+			stream.id, streamPartition, timestamp, sequenceNumber, publisherId, previousTimestamp,
+			previousSequenceNumber, StreamMessage.ContentType.CONTENT_TYPE_JSON, str, StreamMessage.SignatureType.SIGNATURE_TYPE_NONE, null)
 		cassandraService.save(msg)
+		return msg
 	}
 
 	// Ref to Cassandra will be abstracted out when Feed abstraction is reworked
@@ -189,13 +188,8 @@ class StreamService {
      */
 	@CompileStatic
 	public Map importCsv(CSVImporter csv, Stream stream) {
-		/**
-		 * Batch-imported rows have negative Kafka offsets to avoid collisions with messages actually produced
-		 * to the stream via Kafka.
-		 */
-		List<Long> latestOffsetByPartition = (0..stream.getPartitions()-1).collect { Integer partition ->
-			StreamrBinaryMessageWithKafkaMetadata msg = cassandraService.getLatestBeforeOffset(stream, partition, 0)
-			return msg ? msg.offset : MINIMUM_SAFE_INTEGER_IN_JAVASCRIPT
+		List<StreamMessage> latestMessageByPartition = (0..stream.getPartitions()-1).collect { Integer partition ->
+			return cassandraService.getLatestStreamMessage(stream, partition)
 		}
 
 		for (CSVImporter.LineValues line : csv) {
@@ -211,9 +205,11 @@ class StreamService {
 			}
 
 			int partition = partitioner.partition(stream, null)
-			long offset = latestOffsetByPartition[partition] + 1
-			latestOffsetByPartition[partition] = offset
-			saveMessage(stream, null, date.time, message, 0, offset, offset > MINIMUM_SAFE_INTEGER_IN_JAVASCRIPT ? offset-1 : null)
+			StreamMessage latest = latestMessageByPartition[partition]
+			long sequenceNumber = (latest.getTimestamp() == date.getTime()) ? latest.getSequenceNumber() + 1 : 0
+			// TODO: get current logged in user's name for publisherId
+			StreamMessage savedMessage = saveMessage(stream, partition, date.time, sequenceNumber, "publisherId", message, latest.getTimestamp(), latest.getSequenceNumber())
+			latestMessageByPartition[partition] = savedMessage
 		}
 
 		// Autocreate the stream config based on fields in the csv schema

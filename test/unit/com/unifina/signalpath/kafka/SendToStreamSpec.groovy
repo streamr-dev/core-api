@@ -8,7 +8,7 @@ import com.unifina.domain.data.Feed
 import com.unifina.domain.data.Stream
 import com.unifina.domain.security.SecUser
 import com.unifina.feed.NoOpStreamListener
-import com.unifina.feed.StreamrBinaryMessageKeyProvider
+import com.unifina.feed.StreamrMessageKeyProvider
 import com.unifina.feed.cassandra.CassandraHistoricalFeed
 import com.unifina.feed.map.MapMessageEventRecipient
 import com.unifina.security.Userish
@@ -69,7 +69,7 @@ class SendToStreamSpec extends BeanMockingSpecification {
 		feed.id = Feed.KAFKA_ID
 		feed.backtestFeed = CassandraHistoricalFeed.getName()
 		feed.eventRecipientClass = MapMessageEventRecipient.getName()
-		feed.keyProviderClass = StreamrBinaryMessageKeyProvider.getName()
+		feed.keyProviderClass = StreamrMessageKeyProvider.getName()
 		feed.streamListenerClass = NoOpStreamListener.getName()
 		feed.timezone = "UTC"
 		feed.save(validate: false, failOnError: true)

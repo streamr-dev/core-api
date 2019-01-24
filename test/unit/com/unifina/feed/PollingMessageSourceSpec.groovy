@@ -62,7 +62,8 @@ class PollingMessageSourceSpec extends Specification {
 				return new Poller() {
 					@Override
 					List<Message<String,String>> poll() {
-						return [new Message<String, String>("foo", msgCounter++, "")]
+						msgCounter++
+						return [new Message<String, String>("foo", "")]
 					}
 
 					@Override

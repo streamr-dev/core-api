@@ -7,9 +7,9 @@ import com.unifina.utils.Globals;
 import java.util.ArrayList;
 import java.util.List;
 
-public class StreamrBinaryMessageKeyProvider extends AbstractKeyProvider<IStreamRequirement, StreamrMessage, String> {
+public class StreamrMessageKeyProvider extends AbstractKeyProvider<IStreamRequirement, StreamrMessage, String> {
 
-	public StreamrBinaryMessageKeyProvider(Globals globals, Feed feed) {
+	public StreamrMessageKeyProvider(Globals globals, Feed feed) {
 		super(globals, feed);
 	}
 

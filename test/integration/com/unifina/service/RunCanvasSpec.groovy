@@ -46,10 +46,10 @@ class RunCanvasSpec extends IntegrationSpec {
 		Thread.sleep(5 * 1000)
 
 		// Produce data
-		(1..100).each { streamService.sendMessage(stream, [numero: it, areWeDoneYet: false], 300) }
+		(1..100).each { streamService.sendMessage(stream, [numero: it, areWeDoneYet: false]) }
 
 		// Terminator data package to know when we're done
-		streamService.sendMessage(stream, [numero: 0, areWeDoneYet: true], 300)
+		streamService.sendMessage(stream, [numero: 0, areWeDoneYet: true])
 
 		// Synchronization: wait for terminator package
 		conditions.within(10) { assert modules(canvasService, canvas)*.outputs[0][1].value == true }

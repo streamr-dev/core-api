@@ -37,7 +37,7 @@ public class MessageHub<RawMessageClass, MessageClass, KeyClass> extends Thread 
 
 	private boolean quit = false;
 
-	
+
 	MessageHub(MessageSource source, MessageParser<RawMessageClass, MessageClass> parser, IFeedCache cache) {
 		this.source = source;
 		this.parser = parser;
@@ -47,11 +47,11 @@ public class MessageHub<RawMessageClass, MessageClass, KeyClass> extends Thread 
 		if (cache != null) {
 			addRecipient(cache);
 		}
-		
+
 		setName("MsgHub_" + source.getClass().getSimpleName());
 		// not safe to start Thread in constructor! Started in FeedFactory
 	}
-	
+
 	@Override
 	public void run() {
 		while (!quit) {
@@ -63,11 +63,11 @@ public class MessageHub<RawMessageClass, MessageClass, KeyClass> extends Thread 
 			} catch (InterruptedException e) {
 				throw new RuntimeException(e);
 			}
-			
+
 			ParsedMessage<MessageClass, KeyClass> parsedMessage = null;
 			try {
 				// Preprocess here to avoid repeating something in each feed proxy
-				parsedMessage = new ParsedMessage<>(m.counter, parser.parse((RawMessageClass) m.message), m.checkCounter);
+				parsedMessage = new ParsedMessage<>(parser.parse((RawMessageClass) m.message));
 			} catch (Exception e) {
 				log.error("Failed to parse message " + m.message.toString(), e);
 			}
@@ -129,7 +129,7 @@ public class MessageHub<RawMessageClass, MessageClass, KeyClass> extends Thread 
 	}
 
 	// Escalate session state to proxies
-	
+
 	public void sessionBroken() {
 		for (MessageRecipient p : proxiesByPriority) {
 			p.sessionBroken();
@@ -166,23 +166,23 @@ public class MessageHub<RawMessageClass, MessageClass, KeyClass> extends Thread 
 				proxiesByKey.put(key, new ArrayList<MessageRecipient>());
 			}
 		}
-		
+
 		List<MessageRecipient> list = proxiesByKey.get(key);
-		
+
 		synchronized (list) {
 			if (!list.contains(proxy)) {
 				list.add(proxy);
 			}
-			
+
 			Collections.sort(list, proxyPriorityComparator);
-			
+
 			source.subscribe(key);
 		}
 	}
-	
+
 	public void unsubscribe(Object key, MessageRecipient proxy) {
 		List<MessageRecipient> list = proxiesByKey.get(key);
-		
+
 		if (list != null) {
 			synchronized (list) {
 				list.remove(proxy);

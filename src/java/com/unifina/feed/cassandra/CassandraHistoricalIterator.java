@@ -1,16 +1,13 @@
 package com.unifina.feed.cassandra;
 
 import com.datastax.driver.core.*;
-import com.unifina.data.StreamrBinaryMessage;
-import com.unifina.data.StreamrBinaryMessageFactory;
+import com.streamr.client.protocol.message_layer.StreamMessage;
 import com.unifina.domain.data.Stream;
-import com.unifina.feed.StreamrBinaryMessageParser;
+import com.unifina.feed.StreamrMessageParser;
 import com.unifina.feed.map.MapMessage;
 import com.unifina.service.CassandraService;
-import grails.converters.JSON;
 import grails.util.Holders;
 import org.apache.log4j.Logger;
-import org.codehaus.groovy.grails.web.json.JSONObject;
 
 import java.io.Closeable;
 import java.io.IOException;
@@ -34,7 +31,7 @@ public class CassandraHistoricalIterator implements Iterator<MapMessage>, Closea
 	private static final int PREFETCH_WHEN_REMAINING = 4500;
 	private static final int FETCH_SIZE = 5000;
 
-	private StreamrBinaryMessageParser parser = new StreamrBinaryMessageParser();
+	private StreamrMessageParser parser = new StreamrMessageParser();
 
 	public CassandraHistoricalIterator(Stream stream, Integer partition, Date startDate, Date endDate) {
 		this.stream = stream;
@@ -55,15 +52,7 @@ public class CassandraHistoricalIterator implements Iterator<MapMessage>, Closea
 	private void connect() {
 		session = getSession();
 		session.getCluster().getConfiguration().getQueryOptions().setFetchSize(FETCH_SIZE);
-
-		// Get timestamp limits as offsets, then execute query using offsets
-		Long firstOffset = cassandraService.getFirstKafkaOffsetAfter(stream, partition, startDate);
-		Long lastOffset = cassandraService.getLastKafkaOffsetBefore(stream, partition, endDate);
-		if (firstOffset == null || lastOffset == null) {
-			return;
-		}
-
-		Statement s = new SimpleStatement("SELECT payload FROM stream_events WHERE stream = ? AND stream_partition = ? AND kafka_offset >= ? and kafka_offset <= ? ORDER BY kafka_offset ASC", stream.getId(), partition, firstOffset, lastOffset);
+		Statement s = new SimpleStatement("SELECT payload FROM stream_data WHERE id = ? AND partition = ? AND ts >= ? and ts <= ? ORDER BY ts ASC", stream.getId(), partition, startDate, endDate);
 		s.setIdempotent(true);
 		resultSet = session.execute(s);
 	}
@@ -82,9 +71,13 @@ public class CassandraHistoricalIterator implements Iterator<MapMessage>, Closea
 			log.info("Fetching more results.");
 			resultSet.fetchMoreResults(); // this is asynchronous
 		}
-
-		StreamrBinaryMessage msg = StreamrBinaryMessageFactory.fromBytes(row.getBytes("payload"));
-		return parser.parse(msg);
+		try {
+			StreamMessage msg = StreamMessage.fromBytes(row.getBytes("payload").array());
+			return parser.parse(msg);
+		} catch (IOException e) {
+			log.error(e);
+			return null;
+		}
 	}
 
 	@Override

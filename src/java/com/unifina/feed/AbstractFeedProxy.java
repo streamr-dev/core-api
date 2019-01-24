@@ -13,14 +13,14 @@ import java.lang.reflect.InvocationTargetException;
 /**
  * Acts as a feed instance in a realtime situation. Really gets its messages
  * from an underlying singleton hub, an AbstractMessageHub. For every session
- * there is one feed proxy holding the session's subscriptions. There can be 
+ * there is one feed proxy holding the session's subscriptions. There can be
  * only one actual feed implementation, which is the hub.
- * 
+ *
  * This class receives preprocessed messages (of type MessageClass) from the hub,
  * filters them using the collection of subscribed objects and creates
  * FeedEvents from the preprocessed message, finally pushing them into
  * the event queue.
- * 
+ *
  * @author Henri
  *
  */
@@ -47,7 +47,7 @@ public abstract class AbstractFeedProxy<ModuleClass, RawMessageClass, MessageCla
 		}
 		return super.subscribe(subscriber);
 	}
-	
+
 	/**
 	 * This method is called by the hub to distribute messages to session-specific proxies.
 	 * It processes the message and adds it to the event queue.
@@ -55,15 +55,7 @@ public abstract class AbstractFeedProxy<ModuleClass, RawMessageClass, MessageCla
 	@Override
 	public void receive(Message parsedMsg) {
 		MessageClass msg = (MessageClass) parsedMsg.message;
-		// ProcessAndQueue a message with the correct counter
-		if (parsedMsg.counter == expected || !parsedMsg.checkCounter) {
-			processAndQueue(parsedMsg.checkCounter ? parsedMsg.counter : expected, msg, true);
-		} else if (parsedMsg.counter > expected) { // If there is a gap, try to handle it
-			// If the gap was handled successfully, processAndQueue the current message
-			processAndQueue(parsedMsg.counter, msg, true);
-		} else { // Discard old messages
-			log.warn("Discarding duplicate message: " + parsedMsg.counter + ", expected: " + expected);
-		}
+		processAndQueue(msg);
 	}
 
 	private MessageHub<RawMessageClass, MessageClass, KeyClass> getMessageHub() {
@@ -75,45 +67,27 @@ public abstract class AbstractFeedProxy<ModuleClass, RawMessageClass, MessageCla
 			throw new RuntimeException(e);
 		}
 	}
-	
-	private void processAndQueue(long counter, MessageClass msg, boolean checkAge) {
-		if (counter != expected) {
-			throw new IllegalArgumentException("Tried to process messages in invalid order! Counter: " + counter + ", expected: " + expected);
-		} else {
-			expected++;
-			FeedEvent<MessageClass, EventRecipientClass>[] events = process(msg);
 
-			if (firstRealQueue == null && checkAge) {
-				firstRealQueue = counter;
-			}
-
-			if (events != null) {
-				// Warn about old events
-				if (checkAge && events.length > 0) {
-					long age = System.currentTimeMillis() - events[0].timestamp.getTime();
-					if (age > 1000L) {
-						log.warn("Event age " + age + ": " + events[0]);
-					}
-				}
-
-				for (FeedEvent event : events) {
-					eventQueue.enqueue(event);
-				}
+	private void processAndQueue(MessageClass msg) {
+		FeedEvent<MessageClass, EventRecipientClass>[] events = process(msg);
+		if (events != null) {
+			for (FeedEvent event : events) {
+				eventQueue.enqueue(event);
 			}
 		}
 	}
-	
+
 	/**
 	 * This method is guaranteed to be called in correct order without gaps.
 	 * It should convert the feed message to FeedEvent(s).
 	 */
 	protected abstract FeedEvent<MessageClass, EventRecipientClass>[] process(MessageClass msg);
-	
+
 	@Override
 	public void startFeed() throws Exception {
 		hub.addRecipient(this);
 	}
-	
+
 	@Override
 	public void stopFeed() throws Exception {
 		for (ModuleClass subscriber : subscribers) {
@@ -121,7 +95,7 @@ public abstract class AbstractFeedProxy<ModuleClass, RawMessageClass, MessageCla
 				hub.unsubscribe(key, this);
 			}
 		}
-		
+
 		hub.removeRecipient(this);
 		log.info("Unsubscribed from hub: "+this);
 	}
