@@ -49,11 +49,6 @@ class StreamService {
 		.setDateFormat(DateFormat.LONG)
 		.create()
 
-	private static final Charset utf8 = Charset.forName("UTF-8")
-
-	// https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number/MIN_SAFE_INTEGER
-	private static final Long MINIMUM_SAFE_INTEGER_IN_JAVASCRIPT = -9007199254740991L
-
 	Stream getStream(String id) {
 		return Stream.get(id)
 	}
@@ -187,7 +182,7 @@ class StreamService {
      * @return Autocreated Stream field config as a Map (can be written to stream.config as JSON)
      */
 	@CompileStatic
-	public Map importCsv(CSVImporter csv, Stream stream) {
+	public Map importCsv(CSVImporter csv, Stream stream, String publisherId) {
 		List<StreamMessage> latestMessageByPartition = (0..stream.getPartitions()-1).collect { Integer partition ->
 			return cassandraService.getLatestStreamMessage(stream, partition)
 		}
@@ -207,8 +202,7 @@ class StreamService {
 			int partition = partitioner.partition(stream, null)
 			StreamMessage latest = latestMessageByPartition[partition]
 			long sequenceNumber = (latest.getTimestamp() == date.getTime()) ? latest.getSequenceNumber() + 1 : 0
-			// TODO: get current logged in user's name for publisherId
-			StreamMessage savedMessage = saveMessage(stream, partition, date.time, sequenceNumber, "publisherId", message, latest.getTimestamp(), latest.getSequenceNumber())
+			StreamMessage savedMessage = saveMessage(stream, partition, date.time, sequenceNumber, publisherId, message, latest.getTimestamp(), latest.getSequenceNumber())
 			latestMessageByPartition[partition] = savedMessage
 		}
 

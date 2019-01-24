@@ -47,7 +47,7 @@ public class RedisMessageSource extends AbstractMessageSource<StreamMessage, Str
 			public void message(byte[] channel, byte[] messageBytes) {
 				String streamId = new String(channel, utf8);
 				try {
-					StreamMessage msg = StreamMessage.fromJson(new String(messageBytes, StandardCharsets.UTF_8));
+					StreamMessage msg = StreamMessage.fromBytes(messageBytes);
 					forward(new Message<>(streamId, msg));
 				} catch (IOException e) {
 					log.error(e);

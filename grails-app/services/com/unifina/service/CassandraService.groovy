@@ -78,24 +78,6 @@ class CassandraService implements DisposableBean {
 		}
 	}
 
-	Long getFirstKafkaOffsetAfter(Stream stream, int partition, Date date) {
-		Row row = session.execute("SELECT kafka_offset FROM stream_timestamps WHERE stream = ? AND stream_partition = ? AND ts >= ? ORDER BY ts ASC LIMIT 1", stream.getId(), partition, date).one();
-		if (row) {
-			return row.getLong("kafka_offset");
-		} else {
-			return null
-		}
-	}
-
-	Long getLastKafkaOffsetBefore(Stream stream, int partition, Date date) {
-		Row row = session.execute("SELECT kafka_offset FROM stream_timestamps WHERE stream = ? AND stream_partition = ? AND ts <= ? ORDER BY ts DESC LIMIT 1", stream.getId(), partition, date).one()
-		if (row) {
-			return row.getLong("kafka_offset");
-		} else {
-			return null
-		}
-	}
-
 	StreamMessage getLatestStreamMessage(Stream stream, int partition) {
 		ResultSet resultSet = getSession().execute("SELECT payload FROM stream_data WHERE id = ? AND partition = ? ORDER BY ts DESC, sequence_no DESC LIMIT 1", stream.getId(), partition)
 		Row row = resultSet.one()
