@@ -96,4 +96,11 @@ class SecUser implements Userish {
 	boolean isEthereumUser() {
 		return EthereumAddressValidator.validate(username)
 	}
+
+	String getPublisherId() {
+		if (isEthereumUser()) {
+			return username
+		}
+		return id.toString()
+	}
 }

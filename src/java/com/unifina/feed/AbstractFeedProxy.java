@@ -55,7 +55,7 @@ public abstract class AbstractFeedProxy<ModuleClass, RawMessageClass, MessageCla
 	@Override
 	public void receive(Message parsedMsg) {
 		MessageClass msg = (MessageClass) parsedMsg.message;
-		processAndQueue(msg);
+		processAndQueue(msg, true);
 	}
 
 	private MessageHub<RawMessageClass, MessageClass, KeyClass> getMessageHub() {
@@ -68,9 +68,16 @@ public abstract class AbstractFeedProxy<ModuleClass, RawMessageClass, MessageCla
 		}
 	}
 
-	private void processAndQueue(MessageClass msg) {
+	private void processAndQueue(MessageClass msg, boolean checkAge) {
 		FeedEvent<MessageClass, EventRecipientClass>[] events = process(msg);
 		if (events != null) {
+			// Warn about old events
+			if (checkAge && events.length > 0) {
+				long age = System.currentTimeMillis() - events[0].timestamp.getTime();
+				if (age > 1000L) {
+					log.warn("Event age " + age + ": " + events[0]);
+				}
+			}
 			for (FeedEvent event : events) {
 				eventQueue.enqueue(event);
 			}

@@ -120,41 +120,43 @@ class StreamService {
 
 	// Ref to Kafka will be abstracted out when Feed abstraction is reworked
 
-	void sendMessage(Stream stream, String partitionKey, long timestamp, String content, StreamMessage.ContentType contentType,
-					 StreamMessage.SignatureType signatureType = StreamMessage.SignatureType.SIGNATURE_TYPE_NONE, String address = "", String signature = null) {
-		int streamPartition = partitioner.partition(stream, partitionKey)
-		StreamMessage msg = new StreamMessageV30(stream.id, streamPartition, timestamp,
-			0, address, (Long) null, 0, contentType, content, signatureType, signature)
-
-		String kafkaPartitionKey = "${stream.id}-$streamPartition"
+	void sendMessage(StreamMessage msg) {
+		String kafkaPartitionKey = "${msg.getStreamId()}-${msg.getStreamPartition()}"
 		kafkaService.sendMessage(msg, kafkaPartitionKey)
 	}
 
 	@CompileStatic
 	void sendMessage(Stream stream, Map message) {
 		String str = gson.toJson(message)
-		sendMessage(stream, null, System.currentTimeMillis(), str, StreamMessage.ContentType.CONTENT_TYPE_JSON)
+		int streamPartition = partitioner.partition(stream, null)
+		StreamMessage msg = new StreamMessageV30(stream.id, streamPartition, System.currentTimeMillis(),
+			0L, "", (Long) null, 0L,
+			StreamMessage.ContentType.CONTENT_TYPE_JSON, str, StreamMessage.SignatureType.SIGNATURE_TYPE_NONE, null)
+		sendMessage(msg)
 	}
 
 	@CompileStatic
 	void sendMessage(Stream stream, long timestamp, Map message) {
 		String str = gson.toJson(message)
-		sendMessage(stream, null, timestamp, str, StreamMessage.ContentType.CONTENT_TYPE_JSON)
+		int streamPartition = partitioner.partition(stream, null)
+		StreamMessage msg = new StreamMessageV30(stream.id, streamPartition, timestamp,
+			0L, "", (Long) null, 0L,
+			StreamMessage.ContentType.CONTENT_TYPE_JSON, str, StreamMessage.SignatureType.SIGNATURE_TYPE_NONE, null)
+		sendMessage(msg)
 	}
 
 	@CompileStatic
 	void sendMessage(Stream stream, @Nullable String partitionKey, Map message) {
 		String str = gson.toJson(message)
-		sendMessage(stream, partitionKey, System.currentTimeMillis(), str, StreamMessage.ContentType.CONTENT_TYPE_JSON)
+		int streamPartition = partitioner.partition(stream, partitionKey)
+		StreamMessage msg = new StreamMessageV30(stream.id, streamPartition, System.currentTimeMillis(),
+			0L, "", (Long) null, 0L,
+			StreamMessage.ContentType.CONTENT_TYPE_JSON, str, StreamMessage.SignatureType.SIGNATURE_TYPE_NONE, null)
+		sendMessage(msg)
 	}
 
-	StreamMessage saveMessage(Stream stream, int streamPartition, long timestamp, long sequenceNumber, String publisherId, Map message, long previousTimestamp, long previousSequenceNumber) {
-		String str = gson.toJson(message)
-		StreamMessage msg = new StreamMessageV30(
-			stream.id, streamPartition, timestamp, sequenceNumber, publisherId, previousTimestamp,
-			previousSequenceNumber, StreamMessage.ContentType.CONTENT_TYPE_JSON, str, StreamMessage.SignatureType.SIGNATURE_TYPE_NONE, null)
+	void saveMessage(StreamMessage msg) {
 		cassandraService.save(msg)
-		return msg
 	}
 
 	// Ref to Cassandra will be abstracted out when Feed abstraction is reworked
@@ -202,8 +204,11 @@ class StreamService {
 			int partition = partitioner.partition(stream, null)
 			StreamMessage latest = latestMessageByPartition[partition]
 			long sequenceNumber = (latest.getTimestamp() == date.getTime()) ? latest.getSequenceNumber() + 1 : 0
-			StreamMessage savedMessage = saveMessage(stream, partition, date.time, sequenceNumber, publisherId, message, latest.getTimestamp(), latest.getSequenceNumber())
-			latestMessageByPartition[partition] = savedMessage
+			StreamMessageV30 msg = new StreamMessageV30(stream.id, partition, date.time, sequenceNumber, publisherId,
+				latest.getTimestamp(), latest.getSequenceNumber(), StreamMessage.ContentType.CONTENT_TYPE_JSON,
+				gson.toJson(message), StreamMessage.SignatureType.SIGNATURE_TYPE_NONE, null)
+			saveMessage(msg)
+			latestMessageByPartition[partition] = msg
 		}
 
 		// Autocreate the stream config based on fields in the csv schema

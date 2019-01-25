@@ -56,7 +56,7 @@ class CsvUploadService {
 
 		try {
 			CSVImporter csv = new CSVImporter(file, fields, instructions.timestampColumnIndex, instructions.dateFormat)
-			Map newStreamConfig = streamService.importCsv(csv, stream, user.username)
+			Map newStreamConfig = streamService.importCsv(csv, stream, user.getPublisherId())
 			stream.config = (newStreamConfig as JSON)
 			return stream.save()
 		} finally {

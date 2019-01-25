@@ -165,7 +165,7 @@ class StreamController {
 					response.status = 500
 					render([success: false, redirect: createLink(action: 'confirm', params: [id: params.id, file: temp.getCanonicalPath()])] as JSON)
 				} else {
-					Map updatedConfig = streamService.importCsv(csv, stream, user.username)
+					Map updatedConfig = streamService.importCsv(csv, stream, user.getPublisherId())
 					stream.config = (updatedConfig as JSON)
 					stream.save()
 					render([success: true] as JSON)
@@ -207,7 +207,7 @@ class StreamController {
 			def format = params.customFormat ?: params.format
 			try {
 				CSVImporter csv = new CSVImporter(file, fields, index, format)
-				Map config = streamService.importCsv(csv, stream, user.username)
+				Map config = streamService.importCsv(csv, stream, user.getPublisherId())
 				stream.config = (config as JSON)
 				stream.save()
 			} catch (Throwable e) {
