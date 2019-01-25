@@ -1,5 +1,6 @@
 package com.unifina.feed;
 
+import com.streamr.client.protocol.message_layer.StreamMessage;
 import com.unifina.data.FeedEvent;
 import com.unifina.data.IEventRecipient;
 import org.apache.log4j.Logger;
@@ -19,15 +20,15 @@ public class FeedEventIterator<MessageClass extends ITimestamped, EventRecipient
 	private Iterator<MessageClass> contentIterator;
 	private EventRecipientClass recipient;
 	private AbstractHistoricalFeed feed;
-	
+
 	private final Logger log = Logger.getLogger(FeedEventIterator.class);
-	
+
 	public FeedEventIterator(Iterator<MessageClass> contentIterator, AbstractHistoricalFeed feed, EventRecipientClass recipient) {
 		this.contentIterator = contentIterator;
 		this.recipient = recipient;
 		this.feed = feed;
 	}
-	
+
 	@Override
 	public boolean hasNext() {
 		return contentIterator.hasNext();

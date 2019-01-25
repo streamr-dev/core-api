@@ -25,18 +25,18 @@ import com.unifina.utils.Globals;
 public abstract class AbstractFeed<ModuleClass, MessageClass extends ITimestamped, KeyClass, EventRecipientClass extends IEventRecipient> {
 
 	protected DataSourceEventQueue eventQueue;
-	
+
 	protected Set<ModuleClass> subscribers = new HashSet<>();
-	
+
 	protected ArrayList<EventRecipientClass> eventRecipients = new ArrayList<>();
 	protected HashMap<KeyClass, EventRecipientClass> eventRecipientsByKey = new HashMap<>();
-	
+
 	protected Globals globals;
 	protected TimeZone timeZone;
 
 	protected Feed domainObject;
 	protected AbstractKeyProvider<ModuleClass, MessageClass, KeyClass> keyProvider;
-	
+
 	public AbstractFeed(Globals globals, Feed domainObject) {
 		this.globals = globals;
 		this.domainObject = domainObject;
@@ -52,10 +52,10 @@ public abstract class AbstractFeed<ModuleClass, MessageClass extends ITimestampe
 			throw new RuntimeException("Could not create key provider of class "+domainObject.getKeyProviderClass(),e);
 		}
 	}
-	
+
 	/**
 	 * Creates an EventRecipientClass that should be set on FeedEvents
-	 * created for this subscriber. 
+	 * created for this subscriber.
 	 * @param subscriber
 	 * @return
 	 */
@@ -85,11 +85,11 @@ public abstract class AbstractFeed<ModuleClass, MessageClass extends ITimestampe
 	public EventRecipientClass getEventRecipientForMessage(MessageClass message) {
 		return eventRecipientsByKey.get(keyProvider.getMessageKey(message));
 	}
-	
+
 	public boolean isSubscribed(ModuleClass subscriber) {
 		return subscribers.contains(subscriber);
-	}	
-	
+	}
+
 	/**
 	 * Creates a new subscription on this feed and creates an event handler for
 	 * this subscription. Returns true if the subscription was successful,
@@ -119,7 +119,7 @@ public abstract class AbstractFeed<ModuleClass, MessageClass extends ITimestampe
 					((AbstractEventRecipient<ModuleClass, MessageClass>)recipient).register(subscriber);
 				}
 			}
-			
+
 		}
 		return true;
 	}
@@ -131,8 +131,8 @@ public abstract class AbstractFeed<ModuleClass, MessageClass extends ITimestampe
 	public void setTimeZone(TimeZone tz) {
 		this.timeZone = tz;
 	}
-	
+
 	public abstract void startFeed() throws Exception;
 	public abstract void stopFeed() throws Exception;
-	
+
 }

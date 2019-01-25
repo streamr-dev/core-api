@@ -1,8 +1,6 @@
 package com.unifina.data;
 
 import java.util.Date;
-import java.util.Iterator;
-
 import com.unifina.feed.AbstractFeed;
 import com.unifina.feed.FeedEventIterator;
 import com.unifina.feed.ITimestamped;

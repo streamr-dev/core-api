@@ -6,8 +6,6 @@ import com.datastax.driver.core.Session;
 import com.streamr.client.protocol.message_layer.StreamMessage;
 import com.unifina.domain.data.Stream;
 import com.unifina.feed.FieldDetector;
-import com.unifina.feed.StreamrMessageParser;
-import com.unifina.feed.map.MapMessage;
 import com.unifina.service.CassandraService;
 import grails.util.Holders;
 
@@ -18,7 +16,7 @@ import grails.util.Holders;
 public class CassandraFieldDetector extends FieldDetector {
 
 	@Override
-	protected MapMessage fetchExampleMessage(Stream stream) {
+	protected StreamMessage fetchExampleMessage(Stream stream) {
 		try {
 			Session session = getSession();
 			Row latestRow = null;
@@ -31,8 +29,7 @@ public class CassandraFieldDetector extends FieldDetector {
 				}
 			}
 			if (latestRow != null) {
-				StreamrMessageParser parser = new StreamrMessageParser();
-				return parser.parse(StreamMessage.fromBytes(latestRow.getBytes("payload").array()));
+				return StreamMessage.fromBytes(latestRow.getBytes("payload").array());
 			} else {
 				return null;
 			}
