@@ -40,35 +40,49 @@ jobs:
     env:
     - WS_URL="wss://ee-staging.streamr.com/api/v1/ws"
     deploy:
-      - provider: s3 #staging
-        access_key_id: AKIAI3FGPGMK3EREJJTQ
-        secret_access_key:
-          secure: VHz9wZb/IuYsfVko6q5zUzkfg2Impn9wrhfWJB5KQtHu73eozlbd6okkwl324dwS6TwB/oo7PdVyQL4ugLGvGlgbN6T4z/5KwQ/roS/z6ycKHIspeFZiiU7TYPTboOwOhWhV0ze+FmQD/E8I49J6mTOkwW2Y0rHA5awMQHz5LSWsF5heTlo3NAeQO2ynPW+Ely6HNoSP39a/d84gUJ+VTlkIivoQr7QwEe0JWrpvncMVkGvTinH+2oWeLwAkRFD2e9tu8jr9f182JfA0m6SHCJaCTp0e+3Uv4BQZ2NM/xtMgjjBDBvCZG4ZbO06+U2NwPe2nI4IQBj/23NXdTn1D4O1/7xYzk1H/mSzOYNFe7ATpfp7fOanJI6TB0Hq+jY+xHrQcD66sPPJPg8qkf8TuDRpsQqWVbHxmfQT0L3pDFajwG18kwtJ3LBwynwDcsZeGpAWQLXKYvVRVGDbKb+sZBq/qJKjDc0lJ0C/Ml6MNbJS8OP8b68nP6/sJ/N3Hbb9MQu+xhei3FCCrWqarE7fgpWT+oTHjNEC1ceUUMV+2rEb5fskSwipchHVADrIAqtiUPvNiKMp4Iom306OfmljBR85pA238AHGy1X7DOfEM0hSg9FkWWxZI/4d2GL+wfk5bhVVwlnFUrd4azco5l7W172I97PhpMqcRnaHrzpvGvj4=
-        bucket: eu-west-1-stg-streamr-vault
-        upload-dir: engine-editor/releases
-        acl: private
-        region: eu-west-1
-        skip_cleanup: true
-        local_dir: build
-      - provider: codedeploy
-        access_key_id: AKIAI3FGPGMK3EREJJTQ
-        secret_access_key:
-          secure: VHz9wZb/IuYsfVko6q5zUzkfg2Impn9wrhfWJB5KQtHu73eozlbd6okkwl324dwS6TwB/oo7PdVyQL4ugLGvGlgbN6T4z/5KwQ/roS/z6ycKHIspeFZiiU7TYPTboOwOhWhV0ze+FmQD/E8I49J6mTOkwW2Y0rHA5awMQHz5LSWsF5heTlo3NAeQO2ynPW+Ely6HNoSP39a/d84gUJ+VTlkIivoQr7QwEe0JWrpvncMVkGvTinH+2oWeLwAkRFD2e9tu8jr9f182JfA0m6SHCJaCTp0e+3Uv4BQZ2NM/xtMgjjBDBvCZG4ZbO06+U2NwPe2nI4IQBj/23NXdTn1D4O1/7xYzk1H/mSzOYNFe7ATpfp7fOanJI6TB0Hq+jY+xHrQcD66sPPJPg8qkf8TuDRpsQqWVbHxmfQT0L3pDFajwG18kwtJ3LBwynwDcsZeGpAWQLXKYvVRVGDbKb+sZBq/qJKjDc0lJ0C/Ml6MNbJS8OP8b68nP6/sJ/N3Hbb9MQu+xhei3FCCrWqarE7fgpWT+oTHjNEC1ceUUMV+2rEb5fskSwipchHVADrIAqtiUPvNiKMp4Iom306OfmljBR85pA238AHGy1X7DOfEM0hSg9FkWWxZI/4d2GL+wfk5bhVVwlnFUrd4azco5l7W172I97PhpMqcRnaHrzpvGvj4=
-        bucket: eu-west-1-stg-streamr-vault
-        key: engine-editor/releases/ee.tar
-        application: staging-engine-editor-codedeploy
-        deployment_group: staging-engine-editor-deployment-group
-        region: eu-west-1
-#      - provider: s3 #production
-#        access_key_id: AKIAISTYQBVHXK5LXXIQ
-#        secret_access_key:
-#          secure: BKQToY0A5oDX/lpO9FZOdFO6ED59KzfcOXzVRkU+A1rwyMRo1fftI176X+zQf9E94hzlIucMKAW9fgbbQUJKdy+Er0VPep33iQ5po5c+UOoRV0+ds+3Eg7vN1rLH38U79nC+OvRtXibxLr/1nr9dXA5esyqdQ/r/BEScoETNK8OiGR6nLSR6upVsv8KjEax5z7YAMpPMjdflRW18OPhErO/w/YD1NugGP8Llz82gk/NVX4k9LdQhfKtY76PQSCG8yPF/RObuXrymFK173UtUDcQZKHNAbUwrGGq3WBgpg177OcOt0UETGP0u9CCVvjbndbB9Vf+hbo47a6YC+ZA/a7rmi4FesrGBsIgV/tPGd9nTzzRe14ewkVd5r0zkIImAO2quuMtkXj0Ecr38nYaWBu0w4EsWrsYVRoB79iYq0ZG6ZarZFwOifVT6NJ7+6o1w+EBpMl+wQ8GUQjQORNod1rBNcdAFYLDJT5KRLtDTM6gOF1qbzPhCEZV0okDpCj/roa0jgWvjLoEjI0U7gONU79236kiCjEsKvoGnjm1UNRFVODxZ9fG3Sn2q+JUOV3lpdj+CVEdQx24kTnHMIk1p7Ayfv5wBa4VA81IXn+QpnnNFf7hMUmV7FWYpvvAPTPoHxK0+/9mjkashJT5YtcgVKGZ+i7mNir9v0yqUuBHIDzM=
-#        bucket: eu-west-1-streamr-vault
-#        upload-dir: engine-editor/releases
-#        acl: private
-#        region: eu-west-1
-#        skip_cleanup: true
-#        local_dir: build
+    - provider: s3
+      access_key_id: AKIAI3FGPGMK3EREJJTQ
+      secret_access_key:
+        secure: VHz9wZb/IuYsfVko6q5zUzkfg2Impn9wrhfWJB5KQtHu73eozlbd6okkwl324dwS6TwB/oo7PdVyQL4ugLGvGlgbN6T4z/5KwQ/roS/z6ycKHIspeFZiiU7TYPTboOwOhWhV0ze+FmQD/E8I49J6mTOkwW2Y0rHA5awMQHz5LSWsF5heTlo3NAeQO2ynPW+Ely6HNoSP39a/d84gUJ+VTlkIivoQr7QwEe0JWrpvncMVkGvTinH+2oWeLwAkRFD2e9tu8jr9f182JfA0m6SHCJaCTp0e+3Uv4BQZ2NM/xtMgjjBDBvCZG4ZbO06+U2NwPe2nI4IQBj/23NXdTn1D4O1/7xYzk1H/mSzOYNFe7ATpfp7fOanJI6TB0Hq+jY+xHrQcD66sPPJPg8qkf8TuDRpsQqWVbHxmfQT0L3pDFajwG18kwtJ3LBwynwDcsZeGpAWQLXKYvVRVGDbKb+sZBq/qJKjDc0lJ0C/Ml6MNbJS8OP8b68nP6/sJ/N3Hbb9MQu+xhei3FCCrWqarE7fgpWT+oTHjNEC1ceUUMV+2rEb5fskSwipchHVADrIAqtiUPvNiKMp4Iom306OfmljBR85pA238AHGy1X7DOfEM0hSg9FkWWxZI/4d2GL+wfk5bhVVwlnFUrd4azco5l7W172I97PhpMqcRnaHrzpvGvj4=
+      bucket: eu-west-1-stg-streamr-vault
+      upload-dir: engine-editor/releases
+      acl: private
+      region: eu-west-1
+      skip_cleanup: true
+      local_dir: build
+    - provider: codedeploy
+      access_key_id: AKIAI3FGPGMK3EREJJTQ
+      secret_access_key:
+        secure: VHz9wZb/IuYsfVko6q5zUzkfg2Impn9wrhfWJB5KQtHu73eozlbd6okkwl324dwS6TwB/oo7PdVyQL4ugLGvGlgbN6T4z/5KwQ/roS/z6ycKHIspeFZiiU7TYPTboOwOhWhV0ze+FmQD/E8I49J6mTOkwW2Y0rHA5awMQHz5LSWsF5heTlo3NAeQO2ynPW+Ely6HNoSP39a/d84gUJ+VTlkIivoQr7QwEe0JWrpvncMVkGvTinH+2oWeLwAkRFD2e9tu8jr9f182JfA0m6SHCJaCTp0e+3Uv4BQZ2NM/xtMgjjBDBvCZG4ZbO06+U2NwPe2nI4IQBj/23NXdTn1D4O1/7xYzk1H/mSzOYNFe7ATpfp7fOanJI6TB0Hq+jY+xHrQcD66sPPJPg8qkf8TuDRpsQqWVbHxmfQT0L3pDFajwG18kwtJ3LBwynwDcsZeGpAWQLXKYvVRVGDbKb+sZBq/qJKjDc0lJ0C/Ml6MNbJS8OP8b68nP6/sJ/N3Hbb9MQu+xhei3FCCrWqarE7fgpWT+oTHjNEC1ceUUMV+2rEb5fskSwipchHVADrIAqtiUPvNiKMp4Iom306OfmljBR85pA238AHGy1X7DOfEM0hSg9FkWWxZI/4d2GL+wfk5bhVVwlnFUrd4azco5l7W172I97PhpMqcRnaHrzpvGvj4=
+      bucket: eu-west-1-stg-streamr-vault
+      key: engine-editor/releases/ee.tar
+      application: staging-engine-editor-codedeploy
+      deployment_group: staging-engine-editor-deployment-group
+      region: eu-west-1
+  - stage: Build war Lisboa
+    script: "./travis_scripts/build_war.sh"
+    env:
+    - WS_URL="wss://ee-lisboa.streamr.com/api/v1/ws"
+    deploy:
+    - provider: s3
+      access_key_id: AKIAJBAGP3WA5UXQ3AZQ
+      secret_access_key:
+        secure: h4tMVVTqRfYz8B4mNX6PWknLHiNdUeXaNTJQ87ZJfEgtfHUQBkOjLvar93HLlsrbDOr49K9c1evYK2nyYtaNiW9Q0TCUySJZNiPlgM5DdKyPLdMN4XrUfCvmP0BIxeaDollfnbtGkvvTyUpaoJvsqyhmoAkAEyHJWJ+SfRYcg4ktvrQJQY0yDiuHpAdduAZDbV4qbwhFZc3VMauCP5dPEwHARwLK3QklTwkKVOZjE1rwvWlZPGus4JQ+Eo3wAXdobeDzxZTOK9IxL9bJKRZJpPXazo2/taN56G6iUVjJT3HUNudO3BC5fuTJm2TnnM7o/TKHMM2LZ1L0j/gsuT6n9oi9X6sl0UizcSFeyrRRO8N6875wsvcYtaL8KdjpERw19Bd4ZNHXVZHFkNhHTnUA6HjOB57ic4TT8lODs2kUgUeqNFn7rvSdwPNm8cbnBSbFRJMiDi5ofbKhdu5qAxZ3fx8SsuciZaXCflNzmoPKqRUSgHhc17WAi65wPdPufCuFjB01BcayN66QmRApdeAcKF8dkvKQF2/IY/RBhw7LQ5mfvGpWDLiF/NnCkPxX19LBHx92jSYlfuy1BLCs2OWXs5YQLrISjuiDlHm7IvN7KGLNaCtCxyxXxJCVvzOxpLpdQF/hAvgV6BGu5AB+lS2GNg3vnx8vAZaMpV2NTWc1xL0=
+      bucket: eu-west-1-lx-streamr-vault
+      upload-dir: engine-editor/releases
+      acl: private
+      region: eu-west-1
+      skip_cleanup: true
+      local_dir: build
+    - provider: codedeploy
+      access_key_id: AKIAJBAGP3WA5UXQ3AZQ
+      secret_access_key:
+        secure: h4tMVVTqRfYz8B4mNX6PWknLHiNdUeXaNTJQ87ZJfEgtfHUQBkOjLvar93HLlsrbDOr49K9c1evYK2nyYtaNiW9Q0TCUySJZNiPlgM5DdKyPLdMN4XrUfCvmP0BIxeaDollfnbtGkvvTyUpaoJvsqyhmoAkAEyHJWJ+SfRYcg4ktvrQJQY0yDiuHpAdduAZDbV4qbwhFZc3VMauCP5dPEwHARwLK3QklTwkKVOZjE1rwvWlZPGus4JQ+Eo3wAXdobeDzxZTOK9IxL9bJKRZJpPXazo2/taN56G6iUVjJT3HUNudO3BC5fuTJm2TnnM7o/TKHMM2LZ1L0j/gsuT6n9oi9X6sl0UizcSFeyrRRO8N6875wsvcYtaL8KdjpERw19Bd4ZNHXVZHFkNhHTnUA6HjOB57ic4TT8lODs2kUgUeqNFn7rvSdwPNm8cbnBSbFRJMiDi5ofbKhdu5qAxZ3fx8SsuciZaXCflNzmoPKqRUSgHhc17WAi65wPdPufCuFjB01BcayN66QmRApdeAcKF8dkvKQF2/IY/RBhw7LQ5mfvGpWDLiF/NnCkPxX19LBHx92jSYlfuy1BLCs2OWXs5YQLrISjuiDlHm7IvN7KGLNaCtCxyxXxJCVvzOxpLpdQF/hAvgV6BGu5AB+lS2GNg3vnx8vAZaMpV2NTWc1xL0=
+      bucket: eu-west-1-lx-streamr-vault
+      key: engine-editor/releases/ee.tar
+      application: lisboa-engine-editor-codedeploy
+      deployment_group: lisboa-engine-editor-deployment-group
+      region: eu-west-1
     if: NOT type IN (pull_request)
   - stage: Build docker dev
     env:
@@ -105,4 +119,3 @@ notifications:
   on_success: change
   on_failure: always
   on_pull_requests: false
-
