@@ -59,6 +59,7 @@ jobs:
       application: staging-engine-editor-codedeploy
       deployment_group: staging-engine-editor-deployment-group
       region: eu-west-1
+    if: NOT type IN (pull_request)
   - stage: Build war Lisboa
     script: "./travis_scripts/build_war.sh"
     env:
