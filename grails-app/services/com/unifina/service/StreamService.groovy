@@ -185,9 +185,8 @@ class StreamService {
      */
 	@CompileStatic
 	public Map importCsv(CSVImporter csv, Stream stream, String publisherId) {
-		List<StreamMessage> latestMessageByPartition = (0..stream.getPartitions()-1).collect { Integer partition ->
-			return cassandraService.getLatestStreamMessage(stream, partition)
-		}
+		long sequenceNumber = 0L
+		Long previousTimestamp = null
 
 		for (CSVImporter.LineValues line : csv) {
 			Date date = line.getTimestamp()
@@ -202,13 +201,14 @@ class StreamService {
 			}
 
 			int partition = partitioner.partition(stream, null)
-			StreamMessage latest = latestMessageByPartition[partition]
-			long sequenceNumber = (latest.getTimestamp() == date.getTime()) ? latest.getSequenceNumber() + 1 : 0
+			if (sequenceNumber != 0L) {
+				previousTimestamp = date.time
+			}
 			StreamMessageV30 msg = new StreamMessageV30(stream.id, partition, date.time, sequenceNumber, publisherId,
-				latest.getTimestamp(), latest.getSequenceNumber(), StreamMessage.ContentType.CONTENT_TYPE_JSON,
+				previousTimestamp, sequenceNumber, StreamMessage.ContentType.CONTENT_TYPE_JSON,
 				gson.toJson(message), StreamMessage.SignatureType.SIGNATURE_TYPE_NONE, null)
 			saveMessage(msg)
-			latestMessageByPartition[partition] = msg
+			sequenceNumber++
 		}
 
 		// Autocreate the stream config based on fields in the csv schema
