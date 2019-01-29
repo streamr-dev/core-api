@@ -1,10 +1,10 @@
 package com.unifina.signalpath.kafka;
 
-import com.streamr.client.protocol.message_layer.MessageRef;
 import com.streamr.client.protocol.message_layer.StreamMessage;
 import com.streamr.client.protocol.message_layer.StreamMessageV30;
 import com.unifina.data.FeedEvent;
 import com.unifina.data.IEventRecipient;
+import com.unifina.data.StreamPartitioner;
 import com.unifina.domain.data.Feed;
 import com.unifina.domain.data.Stream;
 import com.unifina.domain.security.SecUser;
@@ -74,11 +74,16 @@ public class SendToStream extends ModuleWithSideEffects {
 	}
 
 	@Override
-	public void activateWithSideEffects() {
+	public void activateWithSideEffects() throws IOException {
 		ensureServices();
 		Stream stream = streamParameter.getValue();
 		authenticateStream(stream);
-		streamService.sendMessage(stream, inputValuesToMap());
+		int streamPartition = StreamPartitioner.partition(stream, null);
+		StreamMessage msg = new StreamMessageV30(stream.getId(), streamPartition, System.currentTimeMillis(),
+				0L, "", null, 0L,
+				StreamMessage.ContentType.CONTENT_TYPE_JSON, inputValuesToMap(),
+				StreamMessage.SignatureType.SIGNATURE_TYPE_NONE, null);
+		streamService.sendMessage(msg);
 	}
 
 	@Override
@@ -86,9 +91,10 @@ public class SendToStream extends ModuleWithSideEffects {
 		Globals globals = getGlobals();
 
 		// Create the message locally and route it to the stream locally, without actually producing to the stream
-		StreamMessage msg = new StreamMessageV30(streamParameter.getValue().getId(), 0, globals.time.getTime(), 0, "", null, 0L,
+		int streamPartition = StreamPartitioner.partition(streamParameter.getValue(), null);
+		StreamMessage msg = new StreamMessageV30(streamParameter.getValue().getId(), streamPartition, globals.time.getTime(), 0, "", null, 0L,
 				StreamMessage.ContentType.CONTENT_TYPE_JSON, inputValuesToMap(),
-				StreamMessage.SignatureType.SIGNATURE_TYPE_NONE, null); // TODO: fix hard-coded partition
+				StreamMessage.SignatureType.SIGNATURE_TYPE_NONE, null);
 
 		// Find the Feed implementation for the target Stream
 		AbstractFeed feed = getGlobals().getDataSource().getFeedById(streamParameter.getValue().getFeed().getId());

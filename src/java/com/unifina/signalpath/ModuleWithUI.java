@@ -1,5 +1,8 @@
 package com.unifina.signalpath;
 
+import com.streamr.client.protocol.message_layer.StreamMessage;
+import com.streamr.client.protocol.message_layer.StreamMessageV30;
+import com.unifina.data.StreamPartitioner;
 import com.unifina.datasource.IStartListener;
 import com.unifina.datasource.IStopListener;
 import com.unifina.domain.data.Stream;
@@ -12,6 +15,7 @@ import com.unifina.utils.MapTraversal;
 import grails.util.Holders;
 import org.apache.log4j.Logger;
 
+import java.io.IOException;
 import java.io.Serializable;
 import java.security.AccessControlException;
 import java.util.HashMap;
@@ -68,8 +72,17 @@ public abstract class ModuleWithUI extends AbstractSignalPathModule {
 		return streamService;
 	}
 
-	public void pushToUiChannel(Map msg) {
-		getStreamService().sendMessage(getUiChannel().getStream(), msg);
+	public void pushToUiChannel(Map content) {
+		Stream stream = getUiChannel().getStream();
+		int streamPartition = StreamPartitioner.partition(stream, null);
+		try {
+			StreamMessage msg = new StreamMessageV30(stream.getId(), streamPartition, System.currentTimeMillis(), 0L,
+					"", null, 0L, StreamMessage.ContentType.CONTENT_TYPE_JSON,
+					content, StreamMessage.SignatureType.SIGNATURE_TYPE_NONE, null);
+			getStreamService().sendMessage(msg);
+		} catch (IOException e) {
+			log.error(e);
+		}
 	}
 
 	public UiChannel getUiChannel() {

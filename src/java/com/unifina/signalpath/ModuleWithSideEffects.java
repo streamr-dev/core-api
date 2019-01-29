@@ -55,7 +55,7 @@ public abstract class ModuleWithSideEffects extends AbstractSignalPathModule {
 	/**
 	 * This method implements the normal operation of the module.
 	 */
-	protected abstract void activateWithSideEffects();
+	protected abstract void activateWithSideEffects() throws IOException;
 
 	/**
 	 * This method can implement a backup action without side effects. The default implementation does nothing.

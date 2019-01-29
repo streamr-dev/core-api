@@ -224,6 +224,6 @@ class ModuleWithUISpec extends Specification {
 		when:
 		module.pushToUiChannel(msg)
 		then:
-		1 * streamService.sendMessage(module.getUiChannel().getStream(), msg)
+		1 * streamService.sendMessage(_)
 	}
 }

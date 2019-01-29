@@ -1,5 +1,6 @@
 package com.unifina.utils.testutils;
 
+import com.streamr.client.protocol.message_layer.StreamMessage;
 import com.unifina.domain.data.Stream;
 import com.unifina.service.StreamService;
 
@@ -19,6 +20,15 @@ public class FakeStreamService extends StreamService {
 			sentMessagesByChannel.put(c, new ArrayList<Map>());
 		}
 		sentMessagesByChannel.get(c).add(message);
+	}
+
+	@Override
+	public void sendMessage(StreamMessage msg) {
+		String c = msg.getStreamId();
+		if (!sentMessagesByChannel.containsKey(c)) {
+			sentMessagesByChannel.put(c, new ArrayList<Map>());
+		}
+		sentMessagesByChannel.get(c).add(msg.getContent());
 	}
 
 }

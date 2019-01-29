@@ -124,36 +124,6 @@ class StreamService {
 		kafkaService.sendMessage(msg, kafkaPartitionKey)
 	}
 
-	@CompileStatic
-	void sendMessage(Stream stream, Map message) {
-		String str = gson.toJson(message)
-		int streamPartition = partitioner.partition(stream, null)
-		StreamMessage msg = new StreamMessageV30(stream.id, streamPartition, System.currentTimeMillis(),
-			0L, "", (Long) null, 0L,
-			StreamMessage.ContentType.CONTENT_TYPE_JSON, str, StreamMessage.SignatureType.SIGNATURE_TYPE_NONE, null)
-		sendMessage(msg)
-	}
-
-	@CompileStatic
-	void sendMessage(Stream stream, long timestamp, Map message) {
-		String str = gson.toJson(message)
-		int streamPartition = partitioner.partition(stream, null)
-		StreamMessage msg = new StreamMessageV30(stream.id, streamPartition, timestamp,
-			0L, "", (Long) null, 0L,
-			StreamMessage.ContentType.CONTENT_TYPE_JSON, str, StreamMessage.SignatureType.SIGNATURE_TYPE_NONE, null)
-		sendMessage(msg)
-	}
-
-	@CompileStatic
-	void sendMessage(Stream stream, @Nullable String partitionKey, Map message) {
-		String str = gson.toJson(message)
-		int streamPartition = partitioner.partition(stream, partitionKey)
-		StreamMessage msg = new StreamMessageV30(stream.id, streamPartition, System.currentTimeMillis(),
-			0L, "", (Long) null, 0L,
-			StreamMessage.ContentType.CONTENT_TYPE_JSON, str, StreamMessage.SignatureType.SIGNATURE_TYPE_NONE, null)
-		sendMessage(msg)
-	}
-
 	void saveMessage(StreamMessage msg) {
 		cassandraService.save(msg)
 	}

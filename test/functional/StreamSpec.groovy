@@ -1,3 +1,5 @@
+import com.streamr.client.protocol.message_layer.StreamMessage
+import com.streamr.client.protocol.message_layer.StreamMessageV30
 import com.unifina.domain.data.Stream
 import com.unifina.service.StreamService
 import LoginTester1Spec
@@ -19,11 +21,11 @@ class StreamSpec extends LoginTester1Spec implements ConfirmationMixin, StreamMi
 	def cleanupSpec() {
 		cleanupStreamService(streamService)
 	}
-	
+
 	private File getFile(String filename) {
 		Paths.get(getClass().getResource("files/$filename").toURI()).toFile()
 	}
-	
+
 	void "removing data from a stream works"() {
 		setup:
 			to StreamListPage
@@ -36,7 +38,7 @@ class StreamSpec extends LoginTester1Spec implements ConfirmationMixin, StreamMi
 				historyStartDate.text() == "2015-02-23"
 				historyEndDate.text() == "2015-02-25"
 			}
-		
+
 		when: "only one day's feed files are removed"
 			deleteFeedFilesUpTo("2015-02-23")
 		then: "The stream has no data from that day anymore"
@@ -47,32 +49,32 @@ class StreamSpec extends LoginTester1Spec implements ConfirmationMixin, StreamMi
 		then: "the stream has no data anymore"
 			waitFor { noHistoryMessage.displayed }
 
-		
+
 		when: "Clicked to go to the configure view and deleted the fields"
 			configureFieldsButton.click()
 		waitFor { $(".delete-field-button").size() == 4 }
 			deleteFields()
 		then: "There are no fields anymore"
 			waitFor { $(".delete-field-button").size() == 0 }
-		
+
 		when: "Saved"
 			$("button.save").click()
 		then: "Go to StreamShowPage, no configured fields"
 			waitFor { at StreamShowPage }
 			waitFor { $("div.alert.alert-info")[0].displayed }
 	}
-	
+
 	void "creating streams and autodetecting fields"() {
 		setup:
 			def streamName = "StreamSpec"+System.currentTimeMillis()
 			to StreamListPage
 			waitFor { at StreamListPage }
-		
+
 		when: "create stream button is clicked"
 			createButton.click()
 		then: "must go to stream create page"
 			waitFor { at StreamCreatePage }
-			
+
 		when: "name and desc are entered and next button is clicked"
 			name << streamName
 			description << streamName + " description"
@@ -90,7 +92,10 @@ class StreamSpec extends LoginTester1Spec implements ConfirmationMixin, StreamMi
 		when: "Produce an event into the stream and click autodetect button"
 			Stream testStream = new Stream()
 			testStream.id = streamId
-			streamService.sendMessage(testStream, [foo: "bar", "xyz": 45.5], 30)
+			StreamMessage msg = new StreamMessageV30(testStream.id, 0, 30L, 0L,
+				"", null, 0L, StreamMessage.ContentType.CONTENT_TYPE_JSON,
+				[foo: "bar", "xyz": 45.5], StreamMessage.SignatureType.SIGNATURE_TYPE_NONE, null)
+			streamService.sendMessage(msg)
 			sleep(1000)
 			autodetectButton.click()
 		then: "The fields in the stream must appear and be of correct type"
@@ -101,7 +106,7 @@ class StreamSpec extends LoginTester1Spec implements ConfirmationMixin, StreamMi
 					$("select", name:"field_type").getAt(1).value() == "number"
 					$(".delete-field-button").size() == 2
 			}
-			
+
 		when: "save button is clicked"
 			saveButton.click()
 		then: "navigate back to show page, showing the fields and message"
@@ -118,7 +123,7 @@ class StreamSpec extends LoginTester1Spec implements ConfirmationMixin, StreamMi
 			deleteStreamButton.click()
 		then: "must show confirmation"
 			waitForConfirmation()
-			
+
 		when: "confirmation accepted"
 			acceptConfirmation()
 		then: "must navigate to list page and show message"

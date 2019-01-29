@@ -1,5 +1,7 @@
 package com.unifina.service
 
+import com.streamr.client.protocol.message_layer.StreamMessage
+import com.streamr.client.protocol.message_layer.StreamMessageV30
 import com.unifina.domain.data.Stream
 import com.unifina.domain.security.SecUser
 import com.unifina.domain.signalpath.Canvas
@@ -46,10 +48,18 @@ class RunCanvasSpec extends IntegrationSpec {
 		Thread.sleep(5 * 1000)
 
 		// Produce data
-		(1..100).each { streamService.sendMessage(stream, [numero: it, areWeDoneYet: false]) }
+		(1..100).each {
+			StreamMessage msg = new StreamMessageV30(stream.id, 0, System.currentTimeMillis(), 0L,
+				"", null, 0L, StreamMessage.ContentType.CONTENT_TYPE_JSON,
+				[numero: it, areWeDoneYet: false], StreamMessage.SignatureType.SIGNATURE_TYPE_NONE, null)
+			streamService.sendMessage(msg)
+		}
 
 		// Terminator data package to know when we're done
-		streamService.sendMessage(stream, [numero: 0, areWeDoneYet: true])
+		StreamMessage msg = new StreamMessageV30(stream.id, 0, System.currentTimeMillis(), 0L,
+			"", null, 0L, StreamMessage.ContentType.CONTENT_TYPE_JSON,
+			[numero: 0, areWeDoneYet: true], StreamMessage.SignatureType.SIGNATURE_TYPE_NONE, null)
+		streamService.sendMessage(msg)
 
 		// Synchronization: wait for terminator package
 		conditions.within(10) { assert modules(canvasService, canvas)*.outputs[0][1].value == true }
