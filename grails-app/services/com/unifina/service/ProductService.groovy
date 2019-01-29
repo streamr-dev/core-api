@@ -18,77 +18,47 @@ class ProductService {
 	CassandraService cassandraService
 	Random random = ThreadLocalRandom.current()
 
-	static class StreamWithMessages {
+	static class StreamWithLatestMessage {
 		Stream stream
-		final List<StreamrMessage> messages = new ArrayList<>()
-		String toString() {
-			return String.format("StreamWithMessages[stream=%s, messages=%s]", stream, messages.toString())
+		StreamrMessage latestMessage
+		StreamWithLatestMessage(Stream s, StreamrMessage latest) {
+			this.stream = s
+			this.latestMessage = latest
 		}
-		StreamrMessage findMostRecentMessage() {
-			Date date = new Date(0)
-			StreamrMessage msg = null
-			for (StreamrMessage m : messages) {
-				if (m.getTimestamp().after(date)) {
-					date = m.getTimestamp()
-					msg = m
-				}
-			}
-			return msg
+		String toString() {
+			return String.format("StreamWithLatestMessage[stream=%s, latestMessage=%s]", stream, latestMessage)
 		}
 	}
 
 	static class StaleProduct {
 		Product product
-		final List<StreamWithMessages> streams = new ArrayList<>()
+		final List<StreamWithLatestMessage> streams = new ArrayList<>()
+		StaleProduct(Product p) {
+			this.product = p
+		}
 		String toString() {
 			return String.format("StaleProduct[product=%s, streams=%s]", product, streams.toString())
 		}
 	}
 
-	// ???This will skip duplicate product in the results in case of product with two streams???
-	boolean contains(List<StaleProduct> products, StaleProduct stale) {
-		for (StaleProduct sp : products) {
-			if (sp.product.name == stale.product.name && sp.product.id == stale.product.id) {
-				return true
-			}
-		}
-		return false
-	}
-
 	List<StaleProduct> findStaleProducts(List<Product> products, final Date threshold) {
-		// Find products and their streams
 		final List<StaleProduct> staleProducts = new ArrayList<>()
 		for (Product p : products) {
-			StaleProduct stale = new StaleProduct()
-			stale.product = p
-			// Get messages from streams
+			StaleProduct stale = new StaleProduct(p)
 			for (Stream s : p.getStreams()) {
 				StreamrMessage msg = cassandraService.getLatestFromAllPartitions(s)
-				if (msg != null) {
-					StreamWithMessages sm = new StreamWithMessages()
-					sm.stream = s
-					sm.messages.add(msg)
-					stale.streams.add(sm)
+				if (msg != null && msg.getTimestamp().before(threshold)) {
+					stale.streams.add(new StreamWithLatestMessage(s, msg))
+				} else if (msg == null) {
+					stale.streams.add(new StreamWithLatestMessage(s, null))
 				}
 			}
-			staleProducts.add(stale)
+			if (!stale.streams.isEmpty()) {
+				staleProducts.add(stale)
+			}
 		}
 
-		// Find products whose streams haven't received new messages within threshold days
-		final List<StaleProduct> results = new ArrayList<>()
-		for (StaleProduct sp : staleProducts) {
-			for (StreamWithMessages sm : sp.streams) {
-				StreamrMessage m = sm.findMostRecentMessage()
-				if (m != null) {
-					if (m.getTimestamp().after(threshold)) {
-						if (!contains(results, sp)) {
-							results.add(sp)
-						}
-					}
-				}
-			}
-		}
-		return results
+		return staleProducts
 	}
 
 	List<Product> relatedProducts(Product product, int maxResults, SecUser user) {

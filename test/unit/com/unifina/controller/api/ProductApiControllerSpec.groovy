@@ -10,22 +10,17 @@ import com.unifina.domain.security.SecUser
 import com.unifina.feed.StreamrMessage
 import com.unifina.filters.UnifinaCoreAPIFilters
 import com.unifina.service.ApiService
-import com.unifina.service.CassandraService
 import com.unifina.service.FreeProductService
 import com.unifina.service.ProductImageService
 import com.unifina.service.ProductService
-import grails.converters.JSON
 import grails.test.mixin.Mock
 import grails.test.mixin.TestFor
-import groovy.json.JsonParser
-import org.apache.commons.lang.time.DateUtils
 import org.codehaus.groovy.grails.web.json.JSONArray
 import org.codehaus.groovy.grails.web.json.JSONObject
 import org.springframework.mock.web.MockMultipartFile
 import spock.lang.Specification
 
 import javax.servlet.http.HttpServletResponse
-import java.text.SimpleDateFormat
 
 @TestFor(ProductApiController)
 @Mock([UnifinaCoreAPIFilters, SecUser])
@@ -70,59 +65,58 @@ class ProductApiControllerSpec extends Specification {
 		return s
 	}
 
-	Date newDate(int milliSeconds) {
-		Date d = new Date(System.currentTimeMillis() - milliSeconds)
+	Date newDate(int minusMilliSeconds) {
+		Date d = new Date(System.currentTimeMillis() - minusMilliSeconds)
 		return d
-	}
-
-	ProductService.StaleProduct newStaleProduct(Product product, Stream stream, StreamrMessage msg) {
-		ProductService.StaleProduct sp = new ProductService.StaleProduct()
-		sp.product = product
-		ProductService.StreamWithMessages sm = new ProductService.StreamWithMessages()
-		sm.stream = stream
-		sm.messages.add(msg)
-		sp.streams.add(sm)
-		return sp
 	}
 
 	void "stale products"() {
 		setup:
-		Stream s1 = newStream("s1","Air Stream") // This stream has a message four hours ago
-		Stream s2 = newStream("s2", "Wind Stream") // This stream has a message two minutes ago
+		// Fresh products
+		Product a = newProduct("a", "Air quality")
+		Product b = newProduct("b", "Wind speed")
+		Product d = newProduct("d", "Hacked computers")
+		Product e = newProduct("e", "Time machine")
+
+		// Stale streams and products
+		// Stale product 1
 		Stream s3 = newStream("s3", "Storm Stream") // This stream has a message three days ago
-		Stream s4 = newStream("s4", "Hacked Stream") // This stream has a message one day ago
-		Stream s5 = newStream("s5", "Time Stream") // This stream has a message two hours ago
-		Stream s6 = newStream("s6", "Mainframe Stream") // This stream has a message two weeks ago
-		Stream s6b = newStream("s6b", "Mainframe B Stream") // This stream has a message one week ago
-		Stream s7 = newStream("s7", "Barometer Stream") // This stream doesn't have any messages
-		Stream s8 = newStream("s8", "Stream a")
-		Stream s9 = newStream("s9", "Stream b")
-
-		Product a = newProduct("a", "Air quality", s1)
-		Product b = newProduct("b", "Wind speed", s2)
 		Product c = newProduct("c", "Storm warning", s3)
-		Product d = newProduct("d", "Hacked computers", s4)
-		Product e = newProduct("e", "Time machine", s5)
+		StreamrMessage m3 = new StreamrMessage("s3", 1, newDate(3*24*60*60*1000), new HashMap())
+		ProductService.StaleProduct sp1 = new ProductService.StaleProduct(c)
+		ProductService.StreamWithLatestMessage sm1 = new ProductService.StreamWithLatestMessage(s3, m3)
+		sp1.streams.add(sm1)
+
+		// Stale product 2
+		Stream s6 = newStream("s6", "Mainframe Stream") // This stream has a message two weeks ago
+		StreamrMessage m6 = new StreamrMessage("s6", 1, newDate(14*24*60*60*1000), new HashMap())
+		Stream s6b = newStream("s6b", "Mainframe B Stream") // This stream has a message one week ago
+		StreamrMessage m6b = new StreamrMessage("s6b", 1, newDate(7*24*60*60*1000), new HashMap())
 		Product f = newProduct("f", "Mainframe connector", s6, s6b)
+		ProductService.StaleProduct sp2 = new ProductService.StaleProduct(f)
+		ProductService.StreamWithLatestMessage sm2 = new ProductService.StreamWithLatestMessage(s6, m6)
+		sp2.streams.add(sm2)
+		ProductService.StreamWithLatestMessage sm3 = new ProductService.StreamWithLatestMessage(s6b, m6b)
+		sp2.streams.add(sm3)
+
+		// Stale product 3
+		Stream s7 = newStream("s7", "Barometer Stream") // This stream doesn't have any messages
 		Product g = newProduct("g", "Barometer", s7)
+		ProductService.StaleProduct sp3 = new ProductService.StaleProduct(g)
+		ProductService.StreamWithLatestMessage sm4 = new ProductService.StreamWithLatestMessage(s7, null)
+		sp3.streams.add(sm4)
+
+		// Stale product 4
+		Stream s8 = newStream("s8", "Stream a") // This stream has message six days ago
+		Stream s9 = newStream("s9", "Stream b") // This stream has message over five days ago
 		Product h = newProduct("h", "Product with two streams", s8, s9)
-
-		StreamrMessage m1 = new StreamrMessage("s1", 1, newDate(4*60*60*1000), new HashMap())
-		StreamrMessage m2 = new StreamrMessage("s2", 1, newDate(2*60*1000), new HashMap())
-		StreamrMessage m4 = new StreamrMessage("s4", 1, newDate(24*60*60*1000), new HashMap())
-		StreamrMessage m5 = new StreamrMessage("s5", 1, newDate(2*60*60*1000), new HashMap())
-		StreamrMessage m8 = new StreamrMessage("s8", 1, newDate(24*60*60*1000), new HashMap())
-		StreamrMessage m9 = new StreamrMessage("s9", 1, newDate(28*60*60*1000), new HashMap())
-
-		ProductService.StaleProduct sp1 = newStaleProduct(a, s1, m1)
-		ProductService.StaleProduct sp2 = newStaleProduct(b, s2, m2)
-		ProductService.StaleProduct sp3 = newStaleProduct(d, s4, m4)
-		ProductService.StaleProduct sp4 = newStaleProduct(e, s5, m5)
-		ProductService.StaleProduct sp5 = newStaleProduct(h, s8, m8)
-		ProductService.StreamWithMessages sm = new ProductService.StreamWithMessages()
-		sm.stream = s9
-		sm.messages.add(m9)
-		sp5.streams.add(sm)
+		StreamrMessage m8 = new StreamrMessage("s8", 1, newDate(6*24*60*60*1000), new HashMap())
+		StreamrMessage m9 = new StreamrMessage("s9", 1, newDate(5*25*60*60*1000), new HashMap())
+		ProductService.StaleProduct sp4 = new ProductService.StaleProduct(h)
+		ProductService.StreamWithLatestMessage sm5 = new ProductService.StreamWithLatestMessage(s8, m8)
+		sp4.streams.add(sm5)
+		ProductService.StreamWithLatestMessage sm6 = new ProductService.StreamWithLatestMessage(s9, m9)
+		sp4.streams.add(sm6)
 
 		controller.productService = Mock(ProductService)
 		List<ProductService.StaleProduct> products = Lists.newArrayList(a, b, c, d, e, f, g, h)
@@ -135,22 +129,14 @@ class ProductApiControllerSpec extends Specification {
 
 		then:
 		1 * controller.productService.list(_, _) >> products
-		1 * controller.productService.findStaleProducts(products, _) >> Lists.newArrayList(sp1, sp2, sp3, sp4, sp5)
+		1 * controller.productService.findStaleProducts(products, _) >> Lists.newArrayList(sp1, sp2, sp3, sp4)
 
 		JSONArray json = (JSONArray) response.json
-		json.size() == 5
-		json.find { it.id == "a" && it.name == "Air quality" && it.streams.size() == 1 && it.streams.get(0).id == "s1" }
-		json.find { it.id == "b" && it.name == "Wind speed" && it.streams.size() == 1 && it.streams.get(0).id == "s2" }
-		json.find { it.id == "d" && it.name == "Hacked computers" && it.streams.size() == 1 && it.streams.get(0).id == "s4" }
-		json.find { it.id == "e" && it.name == "Time machine" && it.streams.size() == 1 && it.streams.get(0).id == "s5" }
-		json.find { it.id == "h" && it.name == "Product with two streams" && it.streams.size() == 2 && it.streams.get(0).id == "s8" && it.streams.get(1).id == "s9" }
-
-		//System.out.println(response.json)
-		for (Object ob : response.json) {
-			JSONObject o = (JSONObject) ob
-			o.getJSONArray("streams")
-			System.out.printf("%s\n", o)
-		}
+		json.size() == 4
+		json.find { it.product.id == c.id }
+		json.find { it.product.id == f.id }
+		json.find { it.product.id == g.id }
+		json.find { it.product.id == h.id }
 	}
 
 	void "index() invokes productService#list"() {

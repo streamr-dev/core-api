@@ -43,14 +43,7 @@ class ProductApiController {
 		int days = params.int("days", 2)
 		Date threshold = DateUtils.addDays(new Date(), -days)
 		List<ProductService.StaleProduct> results = productService.findStaleProducts(products, threshold)
-		System.out.println(results)
-		def json = results.collect { stale ->
-			[id: stale.product.id, name: stale.product.name, streams: stale.streams.collect { stream ->
-				StreamrMessage msg = stream.findMostRecentMessage()
-				[id: stream.stream.id, lastDataPoint: msg.timestamp]
-			}]
-		}
-		return render(json as JSON)
+		return render(results as JSON)
 	}
 
 

@@ -134,8 +134,7 @@ class CassandraService implements DisposableBean {
 		}
 		Date now = new Date(0)
 		StreamrMessage latest = null
-		for (int i = 0; i < messages.size(); i++) {
-			StreamrMessage m = messages.get(i)
+		for (StreamrMessage m : messages) {
 			if (m.getTimestamp().after(now)) {
 				now = m.getTimestamp()
 				latest = m
