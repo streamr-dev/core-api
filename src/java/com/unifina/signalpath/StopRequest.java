@@ -1,7 +1,6 @@
 package com.unifina.signalpath;
 
-import com.unifina.feed.ITimestamped;
-
+import com.streamr.client.protocol.message_layer.ITimestamped;
 import java.util.Date;
 
 public class StopRequest implements ITimestamped {
@@ -13,7 +12,7 @@ public class StopRequest implements ITimestamped {
 	}
 
 	@Override
-	public Date getTimestamp() {
+	public Date getTimestampAsDate() {
 		return date;
 	}
 }

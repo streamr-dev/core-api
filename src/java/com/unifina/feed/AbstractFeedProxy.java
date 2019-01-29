@@ -8,6 +8,7 @@ import grails.util.Holders;
 import org.apache.log4j.Logger;
 
 import java.lang.reflect.InvocationTargetException;
+import com.streamr.client.protocol.message_layer.ITimestamped;
 
 
 /**
@@ -30,7 +31,7 @@ public abstract class AbstractFeedProxy<ModuleClass, RawMessageClass, MessageCla
 
 	private static final Logger log = Logger.getLogger(AbstractFeedProxy.class);
 
-	private final MessageHub<RawMessageClass, MessageClass, KeyClass> hub;
+	private final MessageHub<MessageClass, KeyClass> hub;
 
 	private Long firstRealQueue = null;
 	private int expected = 0;
@@ -58,7 +59,7 @@ public abstract class AbstractFeedProxy<ModuleClass, RawMessageClass, MessageCla
 		processAndQueue(msg, true);
 	}
 
-	private MessageHub<RawMessageClass, MessageClass, KeyClass> getMessageHub() {
+	private MessageHub<MessageClass, KeyClass> getMessageHub() {
 		try {
 			return FeedFactory.getInstance(domainObject, Holders.getGrailsApplication().getConfig());
 		} catch (InstantiationException | ClassNotFoundException
@@ -107,7 +108,7 @@ public abstract class AbstractFeedProxy<ModuleClass, RawMessageClass, MessageCla
 		log.info("Unsubscribed from hub: "+this);
 	}
 
-	public MessageHub<RawMessageClass, MessageClass, KeyClass> getHub() {
+	public MessageHub<MessageClass, KeyClass> getHub() {
 		return hub;
 	}
 

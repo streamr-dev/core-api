@@ -11,6 +11,7 @@ import com.unifina.datasource.IStartListener;
 import com.unifina.signalpath.AbstractSignalPathModule;
 import com.unifina.signalpath.Propagator;
 import com.unifina.utils.Globals;
+import com.streamr.client.protocol.message_layer.ITimestamped;
 
 /**
  * An AbstractEventRecipient receives FeedEvents and updates the outputs

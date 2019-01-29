@@ -5,6 +5,7 @@ import com.unifina.data.IEventRecipient;
 import com.unifina.domain.data.Feed;
 import com.unifina.utils.Globals;
 import org.apache.log4j.Logger;
+import com.streamr.client.protocol.message_layer.ITimestamped;
 
 import java.util.*;
 

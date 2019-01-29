@@ -2,6 +2,7 @@ package com.unifina.signalpath;
 
 import com.unifina.utils.Globals;
 
+import java.io.IOException;
 import java.util.Map;
 
 /**
@@ -23,7 +24,7 @@ public abstract class ModuleWithSideEffects extends AbstractSignalPathModule {
 	public static final String OPTION_ACTIVATE_IN_HISTORICAL_MODE = "activateInHistoricalMode";
 
 	@Override
-	public void sendOutput() {
+	public void sendOutput() throws IOException {
 		Globals globals = getGlobals();
 
 		if (globals.isRealtime() || activateInHistoricalMode) {
@@ -59,7 +60,7 @@ public abstract class ModuleWithSideEffects extends AbstractSignalPathModule {
 	/**
 	 * This method can implement a backup action without side effects. The default implementation does nothing.
 	 */
-	protected void activateWithoutSideEffects() {}
+	protected void activateWithoutSideEffects() throws IOException {}
 
 	/**
 	 * Returns a notification shown on the first activation without side effects, or null if

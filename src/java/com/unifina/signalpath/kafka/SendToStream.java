@@ -1,12 +1,14 @@
 package com.unifina.signalpath.kafka;
 
+import com.streamr.client.protocol.message_layer.MessageRef;
+import com.streamr.client.protocol.message_layer.StreamMessage;
+import com.streamr.client.protocol.message_layer.StreamMessageV30;
 import com.unifina.data.FeedEvent;
 import com.unifina.data.IEventRecipient;
 import com.unifina.domain.data.Feed;
 import com.unifina.domain.data.Stream;
 import com.unifina.domain.security.SecUser;
 import com.unifina.feed.AbstractFeed;
-import com.unifina.feed.StreamrMessage;
 import com.unifina.service.PermissionService;
 import com.unifina.service.StreamService;
 import com.unifina.signalpath.*;
@@ -16,6 +18,7 @@ import grails.util.Holders;
 import org.codehaus.groovy.grails.web.json.JSONArray;
 import org.codehaus.groovy.grails.web.json.JSONObject;
 
+import java.io.IOException;
 import java.security.AccessControlException;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
@@ -44,7 +47,7 @@ public class SendToStream extends ModuleWithSideEffects {
 	public void init() {
 		// Pre-fetch services for more predictable performance
 		ensureServices();
-		
+
 		addInput(streamParameter);
 		streamParameter.setUpdateOnChange(true);
 
@@ -79,11 +82,13 @@ public class SendToStream extends ModuleWithSideEffects {
 	}
 
 	@Override
-	protected void activateWithoutSideEffects() {
+	protected void activateWithoutSideEffects() throws IOException {
 		Globals globals = getGlobals();
 
 		// Create the message locally and route it to the stream locally, without actually producing to the stream
-		StreamrMessage msg = new StreamrMessage(streamParameter.getValue().getId(), 0, globals.time, inputValuesToMap()); // TODO: fix hard-coded partition
+		StreamMessage msg = new StreamMessageV30(streamParameter.getValue().getId(), 0, globals.time.getTime(), 0, "", null, 0L,
+				StreamMessage.ContentType.CONTENT_TYPE_JSON, inputValuesToMap(),
+				StreamMessage.SignatureType.SIGNATURE_TYPE_NONE, null); // TODO: fix hard-coded partition
 
 		// Find the Feed implementation for the target Stream
 		AbstractFeed feed = getGlobals().getDataSource().getFeedById(streamParameter.getValue().getFeed().getId());

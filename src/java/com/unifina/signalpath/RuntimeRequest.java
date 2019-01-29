@@ -3,7 +3,7 @@ package com.unifina.signalpath;
 import com.unifina.domain.security.Permission;
 import com.unifina.domain.security.SecUser;
 import com.unifina.domain.signalpath.Canvas;
-import com.unifina.feed.ITimestamped;
+import com.streamr.client.protocol.message_layer.ITimestamped;
 
 import java.util.*;
 import java.util.concurrent.Future;
@@ -36,7 +36,7 @@ public class RuntimeRequest extends LinkedHashMap<String, Object> implements ITi
 		}
 		this.checkedOperations.addAll(checkedOperations);
 	}
-	
+
 	public String getType() {
 		return this.get("type").toString();
 	}
@@ -54,7 +54,7 @@ public class RuntimeRequest extends LinkedHashMap<String, Object> implements ITi
 	}
 
 	@Override
-	public Date getTimestamp() {
+	public Date getTimestampAsDate() {
 		return timestamp;
 	}
 

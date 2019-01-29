@@ -3,8 +3,6 @@ package com.unifina.feed.cassandra;
 import com.datastax.driver.core.*;
 import com.streamr.client.protocol.message_layer.StreamMessage;
 import com.unifina.domain.data.Stream;
-import com.unifina.feed.StreamrMessageParser;
-import com.unifina.feed.map.MapMessage;
 import com.unifina.service.CassandraService;
 import grails.util.Holders;
 import org.apache.log4j.Logger;
@@ -14,7 +12,7 @@ import java.io.IOException;
 import java.util.Date;
 import java.util.Iterator;
 
-public class CassandraHistoricalIterator implements Iterator<MapMessage>, Closeable {
+public class CassandraHistoricalIterator implements Iterator<StreamMessage>, Closeable {
 
 	private final Stream stream;
 	private final Integer partition;
@@ -30,8 +28,6 @@ public class CassandraHistoricalIterator implements Iterator<MapMessage>, Closea
 
 	private static final int PREFETCH_WHEN_REMAINING = 4500;
 	private static final int FETCH_SIZE = 5000;
-
-	private StreamrMessageParser parser = new StreamrMessageParser();
 
 	public CassandraHistoricalIterator(Stream stream, Integer partition, Date startDate, Date endDate) {
 		this.stream = stream;
@@ -63,7 +59,7 @@ public class CassandraHistoricalIterator implements Iterator<MapMessage>, Closea
 	}
 
 	@Override
-	public MapMessage next() {
+	public StreamMessage next() {
 		Row row = resultSet.one();
 
 		// Async-fetch more rows if not many left
@@ -72,8 +68,7 @@ public class CassandraHistoricalIterator implements Iterator<MapMessage>, Closea
 			resultSet.fetchMoreResults(); // this is asynchronous
 		}
 		try {
-			StreamMessage msg = StreamMessage.fromBytes(row.getBytes("payload").array());
-			return parser.parse(msg);
+			return StreamMessage.fromBytes(row.getBytes("payload").array());
 		} catch (IOException e) {
 			log.error(e);
 			return null;

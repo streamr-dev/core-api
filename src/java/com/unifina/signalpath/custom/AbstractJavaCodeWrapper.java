@@ -12,6 +12,7 @@ import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 
 import javax.tools.Diagnostic;
+import java.io.IOException;
 import java.security.Policy;
 import java.util.*;
 
@@ -57,7 +58,11 @@ public abstract class AbstractJavaCodeWrapper extends ModuleWithUI {
 
 	@Override
 	public void sendOutput() {
-		instance.sendOutput();
+		try {
+			instance.sendOutput();
+		} catch (IOException e) {
+			log.error(e);
+		}
 	}
 
 	@Override

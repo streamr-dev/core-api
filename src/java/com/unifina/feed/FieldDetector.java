@@ -2,7 +2,6 @@ package com.unifina.feed;
 
 import com.streamr.client.protocol.message_layer.StreamMessage;
 import com.unifina.domain.data.Stream;
-import com.unifina.feed.map.MapMessage;
 import com.unifina.utils.MapTraversal;
 
 import java.util.ArrayList;

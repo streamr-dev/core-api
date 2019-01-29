@@ -8,7 +8,7 @@ import com.unifina.domain.data.Feed
 import com.unifina.domain.data.Stream
 import com.unifina.domain.security.SecUser
 import com.unifina.feed.NoOpStreamListener
-import com.unifina.feed.StreamrMessageKeyProvider
+import com.unifina.feed.StreamrBinaryMessageKeyProvider
 import com.unifina.feed.cassandra.CassandraHistoricalFeed
 import com.unifina.feed.map.MapMessageEventRecipient
 import com.unifina.security.Userish
@@ -69,7 +69,7 @@ class SendToStreamSpec extends BeanMockingSpecification {
 		feed.id = Feed.KAFKA_ID
 		feed.backtestFeed = CassandraHistoricalFeed.getName()
 		feed.eventRecipientClass = MapMessageEventRecipient.getName()
-		feed.keyProviderClass = StreamrMessageKeyProvider.getName()
+		feed.keyProviderClass = StreamrBinaryMessageKeyProvider.getName()
 		feed.streamListenerClass = NoOpStreamListener.getName()
 		feed.timezone = "UTC"
 		feed.save(validate: false, failOnError: true)
@@ -108,7 +108,7 @@ class SendToStreamSpec extends BeanMockingSpecification {
 				options: options
 		])
 	}
-	
+
 	void "SendToStream sends correct data to Kafka"() {
 		createModule()
 
@@ -121,7 +121,7 @@ class SendToStreamSpec extends BeanMockingSpecification {
 
 		when:
 		true
-		
+
 		then:
 		new ModuleTestHelper.Builder(module, inputValues, outputValues)
 			.overrideGlobals { globals }
@@ -305,8 +305,8 @@ class SendToStreamSpec extends BeanMockingSpecification {
 						assert e != null
 
 						// Values are correct
-						assert e.content.payload.strIn == inputValues.strIn[i]
-						assert e.content.payload.numIn == inputValues.numIn[i]
+						assert e.content.getContent().strIn == inputValues.strIn[i]
+						assert e.content.getContent().numIn == inputValues.numIn[i]
 
 						// Event recipient is correct
 						assert e.recipient.modules.find {it == sourceModule}

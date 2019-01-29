@@ -3,7 +3,7 @@ package com.unifina.signalpath.remote;
 import com.unifina.data.FeedEvent;
 import com.unifina.data.IEventRecipient;
 import com.unifina.datasource.IStopListener;
-import com.unifina.feed.ITimestamped;
+import com.streamr.client.protocol.message_layer.ITimestamped;
 import com.unifina.signalpath.*;
 import com.unifina.utils.MapTraversal;
 import org.apache.http.HttpHeaders;
@@ -397,7 +397,7 @@ public abstract class AbstractHttpModule extends ModuleWithSideEffects implement
 		}
 
 		@Override
-		public Date getTimestamp() {
+		public Date getTimestampAsDate() {
 			return timestamp;
 		}
 	}

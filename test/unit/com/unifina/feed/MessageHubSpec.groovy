@@ -6,12 +6,10 @@ class MessageHubSpec extends Specification {
 
 	MessageHub hub
 	MessageSource source
-	MessageParser parser
 
 	def setup() {
 		source = Mock(MessageSource)
-		parser = Mock(MessageParser)
-		hub = new MessageHub(source, parser, null)
+		hub = new MessageHub(source, null)
 		hub.start()
 	}
 

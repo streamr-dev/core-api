@@ -13,6 +13,7 @@ import com.unifina.datasource.DataSourceEventQueue;
 import com.unifina.domain.data.Feed;
 import com.unifina.domain.data.Stream;
 import com.unifina.utils.Globals;
+import com.streamr.client.protocol.message_layer.ITimestamped;
 
 /**
  * An AbstractFeed is responsible for starting and stopping an event stream
