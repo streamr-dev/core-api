@@ -1,5 +1,6 @@
 package com.unifina.service
 
+import com.google.common.collect.Lists
 import com.unifina.api.*
 import com.unifina.domain.data.Stream
 import com.unifina.domain.marketplace.Category
@@ -8,8 +9,10 @@ import com.unifina.domain.marketplace.PaidSubscription
 import com.unifina.domain.marketplace.Product
 import com.unifina.domain.security.Permission
 import com.unifina.domain.security.SecUser
+import com.unifina.feed.StreamrMessage
 import grails.test.mixin.Mock
 import grails.test.mixin.TestFor
+import org.apache.commons.lang.time.DateUtils
 import spock.lang.Specification
 import spock.lang.Unroll
 
@@ -59,6 +62,124 @@ class ProductServiceSpec extends Specification {
 		)
 		product.id = "product-id"
 		product.save(failOnError: true, validate: true)
+	}
+
+	Product newProduct(String id, String name, Stream... s) {
+		Product p = new Product(
+			name: name,
+			streams: s,
+		)
+		p.id = id
+		return p
+	}
+
+	Stream newStream(String id, String name) {
+		Stream s = new Stream(name: name)
+		s.id = id
+		return s
+	}
+
+	Date newDate(int minusMilliSeconds) {
+		return new Date(System.currentTimeMillis() - minusMilliSeconds)
+	}
+
+	void "stale products"() {
+		setup:
+		// Fresh streams and products
+		Stream s1 = newStream("s1","Air Stream") // This stream has a message four hours ago
+		Product a = newProduct("a", "Air quality", s1)
+		StreamrMessage m1 = new StreamrMessage("s1", 1, newDate(4*60*60*1000), new HashMap())
+
+		Stream s2 = newStream("s2", "Wind Stream") // This stream has a message two minutes ago
+		Product b = newProduct("b", "Wind speed", s2)
+		StreamrMessage m2 = new StreamrMessage("s2", 1, newDate(2*60*1000), new HashMap())
+
+		Stream s4 = newStream("s4", "Hacked Stream") // This stream has a message one day ago
+		Product d = newProduct("d", "Hacked computers", s4)
+		StreamrMessage m4 = new StreamrMessage("s4", 1, newDate(24*60*60*1000), new HashMap())
+
+		Stream s5 = newStream("s5", "Time Stream") // This stream has a message two hours ago
+		Product e = newProduct("e", "Time machine", s5)
+		StreamrMessage m5 = new StreamrMessage("s5", 1, newDate(2*60*60*1000), new HashMap())
+
+		// Stale streams and products
+		// Stale product 1
+		Stream s3 = newStream("s3", "Storm Stream") // This stream has a message three days ago
+		Product c = newProduct("c", "Storm warning", s3)
+		StreamrMessage m3 = new StreamrMessage("s3", 1, newDate(3*24*60*60*1000), new HashMap())
+		ProductService.StaleProduct sp1 = new ProductService.StaleProduct(c)
+		ProductService.StreamWithLatestMessage sm1 = new ProductService.StreamWithLatestMessage(s3, m3)
+		sp1.streams.add(sm1)
+
+
+		// Stale product 2
+		Stream s6 = newStream("s6", "Mainframe Stream") // This stream has a message two weeks ago
+		StreamrMessage m6 = new StreamrMessage("s6", 1, newDate(14*24*60*60*1000), new HashMap())
+		Stream s6b = newStream("s6b", "Mainframe B Stream") // This stream has a message one week ago
+		StreamrMessage m6b = new StreamrMessage("s6b", 1, newDate(7*24*60*60*1000), new HashMap())
+		Product f = newProduct("f", "Mainframe connector", s6, s6b)
+		ProductService.StaleProduct sp2 = new ProductService.StaleProduct(f)
+		ProductService.StreamWithLatestMessage sm2 = new ProductService.StreamWithLatestMessage(s6, m6)
+		sp2.streams.add(sm2)
+		ProductService.StreamWithLatestMessage sm2b = new ProductService.StreamWithLatestMessage(s6b, m6b)
+		sp2.streams.add(sm2b)
+
+		// Stale product 3
+		Stream s7 = newStream("s7", "Barometer Stream") // This stream doesn't have any messages
+		Product g = newProduct("g", "Barometer", s7)
+		StreamrMessage m7 = null
+		ProductService.StaleProduct sp3 = new ProductService.StaleProduct(g)
+		ProductService.StreamWithLatestMessage sm3 = new ProductService.StreamWithLatestMessage(s7, m7)
+		sp3.streams.add(sm3)
+
+		// Stale product 4
+		Stream s8 = newStream("s8", "Stream a") // This stream has message six days ago
+		Stream s9 = newStream("s9", "Stream b") // This stream has message over five days ago
+		Product h = newProduct("h", "Product with two streams", s8, s9)
+		StreamrMessage m8 = new StreamrMessage("s8", 1, newDate(6*24*60*60*1000), new HashMap())
+		StreamrMessage m9 = new StreamrMessage("s9", 1, newDate(5*25*60*60*1000), new HashMap())
+		ProductService.StaleProduct sp4 = new ProductService.StaleProduct(h)
+		ProductService.StreamWithLatestMessage sm4 = new ProductService.StreamWithLatestMessage(s8, m8)
+		sp4.streams.add(sm4)
+		ProductService.StreamWithLatestMessage sm5 = new ProductService.StreamWithLatestMessage(s9, m9)
+		sp4.streams.add(sm5)
+
+		// Stale product 5
+		Stream s10 = newStream("s10", "Stream X") // This stream has message two minutes ago
+		Stream s11 = newStream("s11", "Stream Y") // This stream has message five days ago
+		Product i = newProduct("i", "Product with two streams. other expired", s10, s11)
+		StreamrMessage m10 = new StreamrMessage("s10", 1, newDate(2*60*60*1000), new HashMap())
+		StreamrMessage m11 = new StreamrMessage("s11", 1, newDate(5*24*60*60*1000), new HashMap())
+		ProductService.StaleProduct sp5 = new ProductService.StaleProduct(i)
+		ProductService.StreamWithLatestMessage sm6 = new ProductService.StreamWithLatestMessage(s10, m10)
+		sp5.streams.add(sm6)
+
+		service.cassandraService = Mock(CassandraService)
+
+		when:
+		Date threshold = DateUtils.addDays(new Date(), -2)
+		List<ProductService.StaleProduct> results = service.findStaleProducts(Lists.newArrayList(a, b, c, d, e, f, g, h, i), threshold)
+
+		then:
+		1 * service.cassandraService.getLatestFromAllPartitions(s1) >> m1
+		1 * service.cassandraService.getLatestFromAllPartitions(s2) >> m2
+		1 * service.cassandraService.getLatestFromAllPartitions(s3) >> m3
+		1 * service.cassandraService.getLatestFromAllPartitions(s4) >> m4
+		1 * service.cassandraService.getLatestFromAllPartitions(s5) >> m5
+		1 * service.cassandraService.getLatestFromAllPartitions(s6) >> m6
+		1 * service.cassandraService.getLatestFromAllPartitions(s6b) >> m6b
+		1 * service.cassandraService.getLatestFromAllPartitions(s7) >> m7
+		1 * service.cassandraService.getLatestFromAllPartitions(s8) >> m8
+		1 * service.cassandraService.getLatestFromAllPartitions(s9) >> m9
+		1 * service.cassandraService.getLatestFromAllPartitions(s10) >> m10
+		1 * service.cassandraService.getLatestFromAllPartitions(s11) >> m11
+
+		results.size() == 5
+		results.find { it.product.id == "c" && it.streams.size() == 1 && it.streams.get(0).latestMessage == m3 }
+		results.find { it.product.id == "f" && it.streams.size() == 2 && it.streams.get(0).latestMessage == m6 && it.streams.get(1).latestMessage == m6b }
+		results.find { it.product.id == "g" && it.streams.size() == 1 && it.streams.get(0).latestMessage == m7 }
+		results.find { it.product.id == "h" && it.streams.size() == 2 && it.streams.get(0).latestMessage == m8 && it.streams.get(1).latestMessage == m9 }
+		results.find { it.product.id == "i" && it.streams.size() == 1 && it.streams.get(0).latestMessage == m11 }
 	}
 
 	void "list() delegates to ApiService#list"() {
