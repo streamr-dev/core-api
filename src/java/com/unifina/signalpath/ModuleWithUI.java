@@ -1,5 +1,7 @@
 package com.unifina.signalpath;
 
+import com.streamr.client.protocol.message_layer.MessageID;
+import com.streamr.client.protocol.message_layer.MessageRef;
 import com.streamr.client.protocol.message_layer.StreamMessage;
 import com.streamr.client.protocol.message_layer.StreamMessageV30;
 import com.unifina.data.StreamPartitioner;
@@ -32,13 +34,38 @@ public abstract class ModuleWithUI extends AbstractSignalPathModule {
 
 	private static final Logger log = Logger.getLogger(ModuleWithUI.class);
 
+	private Map<String,Long> previousTimestamps = new HashMap<>();
+	private Map<String,Long> previousSequenceNumbers = new HashMap<>();
+
 	public ModuleWithUI() {
 		super();
+	}
+
+	private long getNextSequenceNumber(String streamId, long timestamp) {
+		if (!previousTimestamps.containsKey(streamId) || previousTimestamps.get(streamId) != timestamp) {
+			return 0L;
+		}
+		if (!previousSequenceNumbers.containsKey(streamId)) {
+			previousSequenceNumbers.put(streamId, 0L);
+		}
+		return previousSequenceNumbers.get(streamId)+1;
+	}
+
+	private MessageRef getPreviousMessageRef(String streamId) {
+		if (!previousTimestamps.containsKey(streamId)) {
+			return null;
+		}
+		if (!previousSequenceNumbers.containsKey(streamId)) {
+			previousSequenceNumbers.put(streamId, 0L);
+		}
+		return new MessageRef(previousTimestamps.get(streamId), previousSequenceNumbers.get(streamId));
 	}
 
 	@Override
 	public void initialize() {
 		super.initialize();
+		previousTimestamps = new HashMap<>();
+		previousSequenceNumbers = new HashMap<>();
 
 		if (getGlobals().isRunContext()) {
 			streamService = Holders.getApplicationContext().getBean(StreamService.class);
@@ -63,6 +90,8 @@ public abstract class ModuleWithUI extends AbstractSignalPathModule {
 
 	protected void onStop() {
 		// The UI channel streams get deleted along with the canvas, so no need to clean them up explicitly
+		previousTimestamps = new HashMap<>();
+		previousSequenceNumbers = new HashMap<>();
 	}
 
 	private StreamService getStreamService() {
@@ -72,17 +101,29 @@ public abstract class ModuleWithUI extends AbstractSignalPathModule {
 		return streamService;
 	}
 
-	public void pushToUiChannel(Map content) {
-		Stream stream = getUiChannel().getStream();
+	private StreamMessage getMsg(Stream stream, Map content){
 		int streamPartition = StreamPartitioner.partition(stream, null);
+		long timestamp = System.currentTimeMillis();
+		long sequenceNumber = getNextSequenceNumber(stream.getId(), timestamp);
+		SecUser user = SecUser.getViaJava(getGlobals().getUserId());
+		MessageID msgId = new MessageID(stream.getId(), streamPartition, timestamp, sequenceNumber, user.getPublisherId());
+		MessageRef prevMsgRef = this.getPreviousMessageRef(stream.getId());
 		try {
-			StreamMessage msg = new StreamMessageV30(stream.getId(), streamPartition, System.currentTimeMillis(), 0L,
-					"", null, 0L, StreamMessage.ContentType.CONTENT_TYPE_JSON,
+			StreamMessage msg = new StreamMessageV30(msgId, prevMsgRef, StreamMessage.ContentType.CONTENT_TYPE_JSON,
 					content, StreamMessage.SignatureType.SIGNATURE_TYPE_NONE, null);
-			getStreamService().sendMessage(msg);
+			previousTimestamps.put(stream.getId(), timestamp);
+			previousSequenceNumbers.put(stream.getId(), sequenceNumber);
+			return msg;
 		} catch (IOException e) {
 			log.error(e);
 		}
+		return null;
+	}
+
+	public void pushToUiChannel(Map content) {
+		Stream stream = getUiChannel().getStream();
+		StreamMessage msg = getMsg(stream, content);
+		getStreamService().sendMessage(msg);
 	}
 
 	public UiChannel getUiChannel() {

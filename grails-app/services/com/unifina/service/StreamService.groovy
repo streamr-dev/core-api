@@ -170,14 +170,12 @@ class StreamService {
 			}
 
 			int partition = partitioner.partition(stream, null)
-			if (sequenceNumber != 0L) {
-				previousTimestamp = date.time
-			}
 			StreamMessageV30 msg = new StreamMessageV30(stream.id, partition, date.time, sequenceNumber, publisherId,
 				previousTimestamp, sequenceNumber, StreamMessage.ContentType.CONTENT_TYPE_JSON,
 				gson.toJson(message), StreamMessage.SignatureType.SIGNATURE_TYPE_NONE, null)
 			saveMessage(msg)
 			sequenceNumber++
+			previousTimestamp = date.time
 		}
 
 		// Autocreate the stream config based on fields in the csv schema

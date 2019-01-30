@@ -98,7 +98,8 @@ public class SendToStream extends ModuleWithSideEffects {
 		int streamPartition = StreamPartitioner.partition(stream, null);
 		long timestamp = System.currentTimeMillis();
 		long sequenceNumber = getNextSequenceNumber(stream.getId(), timestamp);
-		MessageID msgId = new MessageID(stream.getId(), streamPartition, timestamp, sequenceNumber, "");
+		SecUser user = SecUser.getViaJava(getGlobals().getUserId());
+		MessageID msgId = new MessageID(stream.getId(), streamPartition, timestamp, sequenceNumber, user.getPublisherId());
 		MessageRef prevMsgRef = this.getPreviousMessageRef(stream.getId());
 		try {
 			StreamMessage msg = new StreamMessageV30(msgId, prevMsgRef, StreamMessage.ContentType.CONTENT_TYPE_JSON,
