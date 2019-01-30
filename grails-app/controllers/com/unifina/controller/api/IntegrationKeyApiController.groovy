@@ -2,6 +2,7 @@ package com.unifina.controller.api
 
 import com.unifina.api.ApiException
 import com.unifina.api.IntegrationKeyListParams
+import com.unifina.api.NotFoundException
 import com.unifina.domain.security.IntegrationKey
 import com.unifina.domain.security.SecUser
 import com.unifina.security.StreamrApi
@@ -12,6 +13,13 @@ import groovy.json.JsonSlurper
 
 @Secured(["IS_AUTHENTICATED_ANONYMOUSLY"])
 class IntegrationKeyApiController {
+	static allowedMethods = [
+		index: "GET",
+		save: "POST",
+		delete: "DELETE",
+		update: "PUT",
+	]
+
 	EthereumIntegrationKeyService ethereumIntegrationKeyService
 
 	@StreamrApi
@@ -61,6 +69,25 @@ class IntegrationKeyApiController {
 	@StreamrApi
 	def delete(String id) {
 		ethereumIntegrationKeyService.delete(id, apiUser())
+		response.status = 204
+		render ""
+	}
+
+	@StreamrApi
+	def update(String id) {
+		Map json = new JsonSlurper().parseText((String) request.JSON)
+		if (json.name == null || json.name.trim() == "") {
+			response.status = 400
+			return
+		}
+		String name = (String) json.name
+
+		try {
+			ethereumIntegrationKeyService.updateKey(apiUser(), id, name)
+		} catch (NotFoundException e) {
+			response.status = 404
+			return
+		}
 		response.status = 204
 		render ""
 	}

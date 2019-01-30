@@ -1,6 +1,7 @@
 package com.unifina.controller.api
 
 import com.unifina.ControllerSpecification
+import com.unifina.api.NotFoundException
 import com.unifina.security.Challenge
 import com.unifina.domain.security.IntegrationKey
 import com.unifina.domain.security.Key
@@ -119,9 +120,11 @@ class IntegrationKeyApiControllerSpec extends ControllerSpecification {
 		ethereumIntegrationKeyService = controller.ethereumIntegrationKeyService = Mock(EthereumIntegrationKeyService)
 
 		when:
-		params.id = "integration-key-id"
+		String id = "integration-key-id"
+		request.requestURI = "/api/v1/integration_keys/" + id
+		request.method = "DELETE"
 		request.apiUser = me
-		authenticatedAs(me) { controller.delete() }
+		authenticatedAs(me) { controller.delete(id) }
 
 		then:
 		1 * ethereumIntegrationKeyService.delete("integration-key-id", me)
@@ -131,11 +134,68 @@ class IntegrationKeyApiControllerSpec extends ControllerSpecification {
 		controller.ethereumIntegrationKeyService = Stub(EthereumIntegrationKeyService)
 
 		when:
-		params.id = "integration-key-id"
+		String id = "integration-key-id"
+		request.requestURI = "/api/v1/integration_keys/" + id
+		request.method = "DELETE"
 		request.apiUser = me
-		authenticatedAs(me) { controller.delete() }
+		authenticatedAs(me) { controller.delete(id) }
 
 		then:
 		response.status == 204
+	}
+
+	def "update integration key name"() {
+		setup:
+		controller.ethereumIntegrationKeyService = Mock(EthereumIntegrationKeyService)
+
+		when:
+		String id = "1234"
+		request.requestURI = "/api/v1/integration_keys/" + id
+		request.method = "PUT"
+		request.json = [
+		    name: "key's new name",
+		]
+		request.apiUser = me
+		authenticatedAs(me) { controller.update(id) }
+
+		then:
+		1 * controller.ethereumIntegrationKeyService.updateKey(me, "1234", "key's new name")
+		response.status == 204
+	}
+
+	def "update integration key name but no name provided"() {
+		setup:
+		controller.ethereumIntegrationKeyService = Mock(EthereumIntegrationKeyService)
+
+		when:
+		String id = "1234"
+		request.requestURI = "/api/v1/integration_keys/" + id
+		request.method = "PUT"
+		request.json = [:]
+		request.apiUser = me
+		authenticatedAs(me) { controller.update(id) }
+
+		then:
+		0 * controller.ethereumIntegrationKeyService._
+		response.status == 400
+	}
+
+	def "update integration key name but key not found by id"() {
+		setup:
+		controller.ethereumIntegrationKeyService = Mock(EthereumIntegrationKeyService)
+
+		when:
+		String id = "1234-not-found"
+		request.requestURI = "/api/v1/integration_keys/" + id
+		request.method = "PUT"
+		request.json = [
+			name: "key's new name",
+		]
+		request.apiUser = me
+		authenticatedAs(me) { controller.update(id) }
+
+		then:
+		1 * controller.ethereumIntegrationKeyService.updateKey(me, "1234-not-found", "key's new name") >> { throw new NotFoundException("mocked") }
+		response.status == 404
 	}
 }

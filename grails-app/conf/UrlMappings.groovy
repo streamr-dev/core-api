@@ -66,7 +66,10 @@ class UrlMappings {
 		"/api/v1/users/me/keys"(resources: "keyApi", excludes: ["create", "edit", "update"]) { resourceClass = SecUser }
 		"/api/v1/users/me/products"(controller: "productApi", action: "index") { operation = Permission.Operation.SHARE }
 
-		"/api/v1/integration_keys"(resources: "integrationKeyApi")
+		"/api/v1/integration_keys"(controller: "integrationKeyApi", action: "index", excludes: ["delete", "update", "save"], method: "GET")
+		"/api/v1/integration_keys"(controller: "integrationKeyApi", action: "save", excludes: ["delete", "update", "index"], method: "POST")
+		"/api/v1/integration_keys/$id"(controller: "integrationKeyApi", action: "delete", excludes: ["save", "update", "index"], method: "DELETE")
+		"/api/v1/integration_keys/$id"(controller: "integrationKeyApi", action: "update", excludes: ["save", "delete", "index"], method: "PUT")
 
 		"/api/v1/canvases/($path**)/request"(controller: "canvasApi", action: "runtimeRequest") // for internal use, runtime requests to canvases
 		"/api/v1/dashboards/($path**)/request"(controller: "dashboardApi", action: "runtimeRequest") // for internal use, runtime requests to canvases via dashboards

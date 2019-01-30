@@ -4,6 +4,7 @@ import com.unifina.api.ApiException
 import com.unifina.api.CannotRemoveEthereumKeyException
 import com.unifina.api.ChallengeVerificationFailedException
 import com.unifina.api.DuplicateNotAllowedException
+import com.unifina.api.NotFoundException
 import com.unifina.domain.security.IntegrationKey
 import com.unifina.domain.security.SecUser
 import com.unifina.security.StringEncryptor
@@ -124,7 +125,6 @@ class EthereumIntegrationKeyService {
 			username       : address,
 			password       : RandomStringUtils.random(32),
 			name           : address,
-			timezone       : "UTC",
 			enabled        : true,
 			accountLocked  : false,
 			passwordExpired: false
@@ -157,5 +157,14 @@ class EthereumIntegrationKeyService {
 		String publicKey = Hex.encodeHexString(key.getAddress())
 
 		return publicKey
+	}
+
+	void updateKey(SecUser user, String id, String name) {
+		IntegrationKey key = IntegrationKey.findByIdAndUser(id, user)
+		if (key == null) {
+			throw new NotFoundException("integration key not found", "IntegrationKey", id)
+		}
+		key.name = name
+		key.save(failOnError: true, validate: true)
 	}
 }
