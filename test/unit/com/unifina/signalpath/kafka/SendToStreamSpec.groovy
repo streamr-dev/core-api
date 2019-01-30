@@ -1,5 +1,8 @@
 package com.unifina.signalpath.kafka
 
+import com.streamr.client.protocol.message_layer.MessageRef
+import com.streamr.client.protocol.message_layer.StreamMessage
+import com.streamr.client.protocol.message_layer.StreamMessageV30
 import com.unifina.BeanMockingSpecification
 import com.unifina.data.FeedEvent
 import com.unifina.datasource.HistoricalDataSource
@@ -109,9 +112,26 @@ class SendToStreamSpec extends BeanMockingSpecification {
 		])
 	}
 
+	private void assertSequencing(List<StreamMessage> messages) {
+		if (messages.size() == 0) {
+			return
+		}
+		assert messages.get(0).sequenceNumber == 0L
+		MessageRef previous = null
+		messages.each {
+			MessageRef ref = ((StreamMessageV30) it).previousMessageRef
+			if (ref == null) {
+				assert previous == null
+			} else {
+				assert ref.timestamp == previous.timestamp
+				assert ref.sequenceNumber == previous.sequenceNumber
+			}
+			previous = new MessageRef(it.timestamp, it.sequenceNumber)
+		}
+	}
+
 	void "SendToStream sends correct data to Kafka"() {
 		createModule()
-
 
 		Map inputValues = [
 			strIn: ["a", "b", "c", "d"],
@@ -126,7 +146,11 @@ class SendToStreamSpec extends BeanMockingSpecification {
 		new ModuleTestHelper.Builder(module, inputValues, outputValues)
 			.overrideGlobals { globals }
 			.afterEachTestCase {
-				assert mockStreamService.sentMessagesByChannel == [
+				Map<String, List<Map>> sentContentByChannel = new HashMap<>()
+				mockStreamService.sentMessagesByChannel.entrySet().each { entry ->
+					sentContentByChannel.put(entry.key, entry.value.collect{it.getContent()})
+				}
+				assert sentContentByChannel == [
 					"stream-0": [
 						[strIn:"a", numIn:1.0],
 						[strIn:"b", numIn:2.0],
@@ -134,6 +158,7 @@ class SendToStreamSpec extends BeanMockingSpecification {
 						[strIn:"d", numIn:4.0]
 					]
 				]
+				assertSequencing(mockStreamService.sentMessagesByChannel.get("stream-0"))
 				mockStreamService.sentMessagesByChannel = [:]
 			}.test()
 	}
@@ -195,7 +220,11 @@ class SendToStreamSpec extends BeanMockingSpecification {
 		new ModuleTestHelper.Builder(module, inputValues, outputValues)
 			.overrideGlobals { globals }
 			.afterEachTestCase {
-				assert mockStreamService.sentMessagesByChannel == [
+				Map<String, List<Map>> sentContentByChannel = new HashMap<>()
+				mockStreamService.sentMessagesByChannel.entrySet().each { entry ->
+					sentContentByChannel.put(entry.key, entry.value.collect{it.getContent()})
+				}
+				assert sentContentByChannel == [
 					"stream-0": [
 						[strIn:"a", numIn:1.0],
 						[strIn:"b", numIn:2.0],
@@ -205,6 +234,8 @@ class SendToStreamSpec extends BeanMockingSpecification {
 						[strIn:"d", numIn:4.0],
 					]
 				]
+				assertSequencing(mockStreamService.sentMessagesByChannel.get("stream-0"))
+				assertSequencing(mockStreamService.sentMessagesByChannel.get("stream-1"))
 				mockStreamService.sentMessagesByChannel = [:]
 			}.test()
 	}
@@ -223,7 +254,11 @@ class SendToStreamSpec extends BeanMockingSpecification {
 		new ModuleTestHelper.Builder(module, inputValues, outputValues)
 			.overrideGlobals { globals }
 			.afterEachTestCase {
-			assert mockStreamService.sentMessagesByChannel == [
+			Map<String, List<Map>> sentContentByChannel = new HashMap<>()
+			mockStreamService.sentMessagesByChannel.entrySet().each { entry ->
+				sentContentByChannel.put(entry.key, entry.value.collect{it.getContent()})
+			}
+			assert sentContentByChannel == [
 				"stream-0": [
 					[strIn: "a", numIn: 1.0],
 					[strIn: "a", numIn: 2.0],
@@ -232,6 +267,7 @@ class SendToStreamSpec extends BeanMockingSpecification {
 					[strIn: "f", numIn: 6.0]
 				]
 			]
+			assertSequencing(mockStreamService.sentMessagesByChannel.get("stream-0"))
 			mockStreamService.sentMessagesByChannel = [:]
 		}.test()
 	}
@@ -250,7 +286,11 @@ class SendToStreamSpec extends BeanMockingSpecification {
 		new ModuleTestHelper.Builder(module, inputValues, outputValues)
 			.overrideGlobals { globals }
 			.afterEachTestCase {
-			assert mockStreamService.sentMessagesByChannel == [
+			Map<String, List<Map>> sentContentByChannel = new HashMap<>()
+			mockStreamService.sentMessagesByChannel.entrySet().each { entry ->
+				sentContentByChannel.put(entry.key, entry.value.collect{it.getContent()})
+			}
+			assert sentContentByChannel == [
 				"stream-0": [
 					[strIn: "a", numIn: 1.0],
 					[numIn: 2.0],
@@ -259,6 +299,7 @@ class SendToStreamSpec extends BeanMockingSpecification {
 					[strIn: "f", numIn: 6.0]
 				]
 			]
+			assertSequencing(mockStreamService.sentMessagesByChannel.get("stream-0"))
 			mockStreamService.sentMessagesByChannel = [:]
 		}.test()
 	}

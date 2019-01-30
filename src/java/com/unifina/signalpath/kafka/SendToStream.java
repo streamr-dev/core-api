@@ -1,5 +1,7 @@
 package com.unifina.signalpath.kafka;
 
+import com.streamr.client.protocol.message_layer.MessageID;
+import com.streamr.client.protocol.message_layer.MessageRef;
 import com.streamr.client.protocol.message_layer.StreamMessage;
 import com.streamr.client.protocol.message_layer.StreamMessageV30;
 import com.unifina.data.FeedEvent;
@@ -15,15 +17,13 @@ import com.unifina.signalpath.*;
 import com.unifina.utils.Globals;
 import grails.converters.JSON;
 import grails.util.Holders;
+import org.apache.log4j.Logger;
 import org.codehaus.groovy.grails.web.json.JSONArray;
 import org.codehaus.groovy.grails.web.json.JSONObject;
 
 import java.io.IOException;
 import java.security.AccessControlException;
-import java.util.ArrayList;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * This module (only) supports sending messages to Kafka/json streams (feed id 7)
@@ -43,6 +43,31 @@ public class SendToStream extends ModuleWithSideEffects {
 	private boolean sendOnlyNewValues = false;
 	private List<Input> fieldInputs = new ArrayList<>();
 
+	private Map<String,Long> previousTimestamps = new HashMap<>();
+	private Map<String,Long> previousSequenceNumbers = new HashMap<>();
+
+	private static final Logger log = Logger.getLogger(SendToStream.class);
+
+	private long getNextSequenceNumber(String streamId, long timestamp) {
+		if (!previousTimestamps.containsKey(streamId) || previousTimestamps.get(streamId) != timestamp) {
+			return 0L;
+		}
+		if (!previousSequenceNumbers.containsKey(streamId)) {
+			previousSequenceNumbers.put(streamId, 0L);
+		}
+		return previousSequenceNumbers.get(streamId)+1;
+	}
+
+	private MessageRef getPreviousMessageRef(String streamId) {
+		if (!previousTimestamps.containsKey(streamId)) {
+			return null;
+		}
+		if (!previousSequenceNumbers.containsKey(streamId)) {
+			previousSequenceNumbers.put(streamId, 0L);
+		}
+		return new MessageRef(previousTimestamps.get(streamId), previousSequenceNumbers.get(streamId));
+	}
+
 	@Override
 	public void init() {
 		// Pre-fetch services for more predictable performance
@@ -50,6 +75,8 @@ public class SendToStream extends ModuleWithSideEffects {
 
 		addInput(streamParameter);
 		streamParameter.setUpdateOnChange(true);
+		previousTimestamps = new HashMap<>();
+		previousSequenceNumbers = new HashMap<>();
 
 		// TODO: don't rely on static ids
 		Feed feedFilter = new Feed();
@@ -67,6 +94,24 @@ public class SendToStream extends ModuleWithSideEffects {
 		}
 	}
 
+	private StreamMessage getMsg(Stream stream){
+		int streamPartition = StreamPartitioner.partition(stream, null);
+		long timestamp = System.currentTimeMillis();
+		long sequenceNumber = getNextSequenceNumber(stream.getId(), timestamp);
+		MessageID msgId = new MessageID(stream.getId(), streamPartition, timestamp, sequenceNumber, "");
+		MessageRef prevMsgRef = this.getPreviousMessageRef(stream.getId());
+		try {
+			StreamMessage msg = new StreamMessageV30(msgId, prevMsgRef, StreamMessage.ContentType.CONTENT_TYPE_JSON,
+					inputValuesToMap(), StreamMessage.SignatureType.SIGNATURE_TYPE_NONE, null);
+			previousTimestamps.put(stream.getId(), timestamp);
+			previousSequenceNumbers.put(stream.getId(), sequenceNumber);
+			return msg;
+		} catch (IOException e) {
+			log.error(e);
+		}
+		return null;
+	}
+
 	@Override
 	protected boolean allowSideEffectsInHistoricalMode() {
 		// SendToStream cannot be configured to really write to the stream in historical mode (for now)
@@ -74,27 +119,20 @@ public class SendToStream extends ModuleWithSideEffects {
 	}
 
 	@Override
-	public void activateWithSideEffects() throws IOException {
+	public void activateWithSideEffects(){
 		ensureServices();
 		Stream stream = streamParameter.getValue();
 		authenticateStream(stream);
-		int streamPartition = StreamPartitioner.partition(stream, null);
-		StreamMessage msg = new StreamMessageV30(stream.getId(), streamPartition, System.currentTimeMillis(),
-				0L, "", null, 0L,
-				StreamMessage.ContentType.CONTENT_TYPE_JSON, inputValuesToMap(),
-				StreamMessage.SignatureType.SIGNATURE_TYPE_NONE, null);
+		StreamMessage msg = getMsg(stream);
 		streamService.sendMessage(msg);
 	}
 
 	@Override
-	protected void activateWithoutSideEffects() throws IOException {
+	protected void activateWithoutSideEffects(){
 		Globals globals = getGlobals();
 
 		// Create the message locally and route it to the stream locally, without actually producing to the stream
-		int streamPartition = StreamPartitioner.partition(streamParameter.getValue(), null);
-		StreamMessage msg = new StreamMessageV30(streamParameter.getValue().getId(), streamPartition, globals.time.getTime(), 0, "", null, 0L,
-				StreamMessage.ContentType.CONTENT_TYPE_JSON, inputValuesToMap(),
-				StreamMessage.SignatureType.SIGNATURE_TYPE_NONE, null);
+		StreamMessage msg = getMsg(streamParameter.getValue());
 
 		// Find the Feed implementation for the target Stream
 		AbstractFeed feed = getGlobals().getDataSource().getFeedById(streamParameter.getValue().getFeed().getId());
@@ -123,7 +161,10 @@ public class SendToStream extends ModuleWithSideEffects {
 	}
 
 	@Override
-	public void clearState() {}
+	public void clearState() {
+		previousTimestamps = new HashMap<>();
+		previousSequenceNumbers = new HashMap<>();
+	}
 
 	@Override
 	public Map<String, Object> getConfiguration() {

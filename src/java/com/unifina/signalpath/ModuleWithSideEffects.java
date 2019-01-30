@@ -24,7 +24,7 @@ public abstract class ModuleWithSideEffects extends AbstractSignalPathModule {
 	public static final String OPTION_ACTIVATE_IN_HISTORICAL_MODE = "activateInHistoricalMode";
 
 	@Override
-	public void sendOutput() throws IOException {
+	public void sendOutput(){
 		Globals globals = getGlobals();
 
 		if (globals.isRealtime() || activateInHistoricalMode) {
@@ -55,12 +55,12 @@ public abstract class ModuleWithSideEffects extends AbstractSignalPathModule {
 	/**
 	 * This method implements the normal operation of the module.
 	 */
-	protected abstract void activateWithSideEffects() throws IOException;
+	protected abstract void activateWithSideEffects();
 
 	/**
 	 * This method can implement a backup action without side effects. The default implementation does nothing.
 	 */
-	protected void activateWithoutSideEffects() throws IOException {}
+	protected void activateWithoutSideEffects() {}
 
 	/**
 	 * Returns a notification shown on the first activation without side effects, or null if

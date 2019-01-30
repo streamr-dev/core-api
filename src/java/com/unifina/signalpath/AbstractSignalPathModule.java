@@ -255,7 +255,7 @@ public abstract class AbstractSignalPathModule implements IEventRecipient, IDayL
 		return readyInputs.size() == inputs.size();
 	}
 
-	public abstract void sendOutput() throws IOException;
+	public abstract void sendOutput();
 
 	public void clear() {
 		if (canClearState) {
@@ -316,11 +316,7 @@ public abstract class AbstractSignalPathModule implements IEventRecipient, IDayL
 		if (isSendPending() && allInputsReady()) {
 			wasReady = true;
 			setSendPending(false);
-			try {
-				sendOutput();
-			} catch (IOException e) {
-				log.error(e);
-			}
+			sendOutput();
 			drivingInputs.clear();
 		}
 	}

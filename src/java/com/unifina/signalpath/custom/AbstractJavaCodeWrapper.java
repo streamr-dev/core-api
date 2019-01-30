@@ -58,11 +58,7 @@ public abstract class AbstractJavaCodeWrapper extends ModuleWithUI {
 
 	@Override
 	public void sendOutput() {
-		try {
-			instance.sendOutput();
-		} catch (IOException e) {
-			log.error(e);
-		}
+		instance.sendOutput();
 	}
 
 	@Override
