@@ -88,14 +88,24 @@ class CassandraService implements DisposableBean {
 		}
 	}
 
-	StreamMessage getLatestStreamMessage(Stream stream) {
-		ResultSet resultSet = getSession().execute("SELECT payload FROM stream_data WHERE id = ? ORDER BY ts DESC, sequence_no DESC LIMIT 1", stream.getId())
-		Row row = resultSet.one()
-		if (row) {
-			return StreamMessage.fromJson(new String(row.getBytes("payload").array(), StandardCharsets.UTF_8))
-		} else {
+	StreamMessage getLatestFromAllPartitions(Stream stream) {
+		final List<StreamMessage> messages = new ArrayList<>()
+		for (int i = 0; i < stream.getPartitions(); i++) {
+			final StreamMessage msg = getLatestStreamMessage(stream, i)
+			messages.add(msg)
+		}
+		if (messages.size() < 1) {
 			return null
 		}
+		Date now = new Date(0)
+		StreamMessage latest = null
+		for (StreamMessage m : messages) {
+			if (m.getTimestampAsDate().after(now)) {
+				now = m.getTimestampAsDate()
+				latest = m
+			}
+		}
+		return latest
 	}
 
 	void destroy() throws Exception {

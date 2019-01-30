@@ -106,7 +106,8 @@ public abstract class ModuleWithUI extends AbstractSignalPathModule {
 		long timestamp = System.currentTimeMillis();
 		long sequenceNumber = getNextSequenceNumber(stream.getId(), timestamp);
 		SecUser user = SecUser.getViaJava(getGlobals().getUserId());
-		MessageID msgId = new MessageID(stream.getId(), streamPartition, timestamp, sequenceNumber, user.getPublisherId());
+		String publisherId = user == null ? "" : user.getPublisherId();
+		MessageID msgId = new MessageID(stream.getId(), streamPartition, timestamp, sequenceNumber, publisherId);
 		MessageRef prevMsgRef = this.getPreviousMessageRef(stream.getId());
 		try {
 			StreamMessage msg = new StreamMessageV30(msgId, prevMsgRef, StreamMessage.ContentType.CONTENT_TYPE_JSON,

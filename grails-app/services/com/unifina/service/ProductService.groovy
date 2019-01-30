@@ -46,8 +46,8 @@ class ProductService {
 		for (Product p : products) {
 			StaleProduct stale = new StaleProduct(p)
 			for (Stream s : p.getStreams()) {
-				StreamMessage msg = cassandraService.getLatestStreamMessage(s)
-				if (msg != null && msg.getTimestamp().before(threshold)) {
+				StreamMessage msg = cassandraService.getLatestFromAllPartitions(s)
+				if (msg != null && msg.getTimestampAsDate().before(threshold)) {
 					stale.streams.add(new StreamWithLatestMessage(s, msg))
 				} else if (msg == null) {
 					stale.streams.add(new StreamWithLatestMessage(s, null))
