@@ -6,6 +6,7 @@ import com.datastax.driver.core.Row
 import com.datastax.driver.core.Session
 import com.unifina.data.StreamrBinaryMessage
 import com.unifina.domain.data.Stream
+import com.unifina.feed.StreamrMessage
 import com.unifina.feed.redis.StreamrBinaryMessageWithKafkaMetadata
 import groovy.transform.CompileStatic
 import org.codehaus.groovy.grails.commons.GrailsApplication
@@ -118,6 +119,28 @@ class CassandraService implements DisposableBean {
 		} else {
 			return null
 		}
+	}
+
+	StreamrMessage getLatestFromAllPartitions(Stream stream) {
+		final List<StreamrMessage> messages = new ArrayList<>()
+		for (int i = 0; i < stream.getPartitions(); i++) {
+			final StreamrBinaryMessageWithKafkaMetadata meta = getLatest(stream, i)
+			final StreamrBinaryMessage bin = meta.getStreamrBinaryMessage()
+			final StreamrMessage msg = bin.toStreamrMessage()
+			messages.add(msg)
+		}
+		if (messages.size() < 1) {
+			return null
+		}
+		Date now = new Date(0)
+		StreamrMessage latest = null
+		for (StreamrMessage m : messages) {
+			if (m.getTimestamp().after(now)) {
+				now = m.getTimestamp()
+				latest = m
+			}
+		}
+		return latest
 	}
 
 	StreamrBinaryMessageWithKafkaMetadata getLatestBeforeOffset(Stream stream, int partition, long offset) {
