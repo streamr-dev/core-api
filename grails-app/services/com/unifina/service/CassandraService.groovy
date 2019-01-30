@@ -88,6 +88,16 @@ class CassandraService implements DisposableBean {
 		}
 	}
 
+	StreamMessage getLatestStreamMessage(Stream stream) {
+		ResultSet resultSet = getSession().execute("SELECT payload FROM stream_data WHERE id = ? ORDER BY ts DESC, sequence_no DESC LIMIT 1", stream.getId())
+		Row row = resultSet.one()
+		if (row) {
+			return StreamMessage.fromJson(new String(row.getBytes("payload").array(), StandardCharsets.UTF_8))
+		} else {
+			return null
+		}
+	}
+
 	void destroy() throws Exception {
 		if (session) {
 			session.close()

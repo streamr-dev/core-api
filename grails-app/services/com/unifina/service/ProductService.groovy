@@ -1,11 +1,11 @@
 package com.unifina.service
 
+import com.streamr.client.protocol.message_layer.StreamMessage
 import com.unifina.api.*
 import com.unifina.domain.data.Stream
 import com.unifina.domain.marketplace.Product
 import com.unifina.domain.security.Permission
 import com.unifina.domain.security.SecUser
-import com.unifina.feed.StreamrMessage
 import grails.compiler.GrailsCompileStatic
 
 import java.util.concurrent.ThreadLocalRandom
@@ -20,8 +20,8 @@ class ProductService {
 
 	static class StreamWithLatestMessage {
 		Stream stream
-		StreamrMessage latestMessage
-		StreamWithLatestMessage(Stream s, StreamrMessage latest) {
+		StreamMessage latestMessage
+		StreamWithLatestMessage(Stream s, StreamMessage latest) {
 			this.stream = s
 			this.latestMessage = latest
 		}
@@ -46,7 +46,7 @@ class ProductService {
 		for (Product p : products) {
 			StaleProduct stale = new StaleProduct(p)
 			for (Stream s : p.getStreams()) {
-				StreamrMessage msg = cassandraService.getLatestFromAllPartitions(s)
+				StreamMessage msg = cassandraService.getLatestStreamMessage(s)
 				if (msg != null && msg.getTimestamp().before(threshold)) {
 					stale.streams.add(new StreamWithLatestMessage(s, msg))
 				} else if (msg == null) {
