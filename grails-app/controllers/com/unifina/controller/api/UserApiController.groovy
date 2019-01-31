@@ -7,6 +7,10 @@ import grails.plugin.springsecurity.annotation.Secured
 @Secured(["IS_AUTHENTICATED_ANONYMOUSLY"])
 class UserApiController {
 
+	static allowedMethods = [
+		getUserInfo: "GET",
+	]
+
 	@StreamrApi
 	def getUserInfo() {
 		render(request.apiUser?.toMap() as JSON)

@@ -2,7 +2,6 @@ package com.unifina.controller.api
 
 import com.unifina.ControllerSpecification
 import com.unifina.domain.security.SecUser
-import grails.test.mixin.Mock
 import grails.test.mixin.TestFor
 
 @TestFor(UserApiController)

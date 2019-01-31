@@ -66,6 +66,8 @@ class UrlMappings {
 		"/api/v1/users/me/keys"(resources: "keyApi", excludes: ["create", "edit", "update"]) { resourceClass = SecUser }
 		"/api/v1/users/me/products"(controller: "productApi", action: "index") { operation = Permission.Operation.SHARE }
 
+		"/api/v1/profile/changePwd"(controller: "profileApi", action: "changePwd", method: "POST")
+
 		"/api/v1/integration_keys"(resources: "integrationKeyApi")
 
 		"/api/v1/canvases/($path**)/request"(controller: "canvasApi", action: "runtimeRequest") // for internal use, runtime requests to canvases
