@@ -1,12 +1,8 @@
 package com.unifina.signalpath.kafka;
 
-import com.streamr.client.protocol.message_layer.MessageID;
-import com.streamr.client.protocol.message_layer.MessageRef;
 import com.streamr.client.protocol.message_layer.StreamMessage;
-import com.streamr.client.protocol.message_layer.StreamMessageV30;
 import com.unifina.data.FeedEvent;
 import com.unifina.data.IEventRecipient;
-import com.unifina.data.StreamPartitioner;
 import com.unifina.domain.data.Feed;
 import com.unifina.domain.data.Stream;
 import com.unifina.domain.security.SecUser;
@@ -14,14 +10,13 @@ import com.unifina.feed.AbstractFeed;
 import com.unifina.service.PermissionService;
 import com.unifina.service.StreamService;
 import com.unifina.signalpath.*;
+import com.unifina.signalpath.utils.MessageChainUtil;
 import com.unifina.utils.Globals;
 import grails.converters.JSON;
 import grails.util.Holders;
-import org.apache.log4j.Logger;
 import org.codehaus.groovy.grails.web.json.JSONArray;
 import org.codehaus.groovy.grails.web.json.JSONObject;
 
-import java.io.IOException;
 import java.security.AccessControlException;
 import java.util.*;
 
@@ -43,30 +38,7 @@ public class SendToStream extends ModuleWithSideEffects {
 	private boolean sendOnlyNewValues = false;
 	private List<Input> fieldInputs = new ArrayList<>();
 
-	private Map<String,Long> previousTimestamps = new HashMap<>();
-	private Map<String,Long> previousSequenceNumbers = new HashMap<>();
-
-	private static final Logger log = Logger.getLogger(SendToStream.class);
-
-	private long getNextSequenceNumber(String streamId, long timestamp) {
-		if (!previousTimestamps.containsKey(streamId) || previousTimestamps.get(streamId) != timestamp) {
-			return 0L;
-		}
-		if (!previousSequenceNumbers.containsKey(streamId)) {
-			previousSequenceNumbers.put(streamId, 0L);
-		}
-		return previousSequenceNumbers.get(streamId)+1;
-	}
-
-	private MessageRef getPreviousMessageRef(String streamId) {
-		if (!previousTimestamps.containsKey(streamId)) {
-			return null;
-		}
-		if (!previousSequenceNumbers.containsKey(streamId)) {
-			previousSequenceNumbers.put(streamId, 0L);
-		}
-		return new MessageRef(previousTimestamps.get(streamId), previousSequenceNumbers.get(streamId));
-	}
+	private MessageChainUtil msgChainUtil = new MessageChainUtil();
 
 	@Override
 	public void init() {
@@ -75,8 +47,7 @@ public class SendToStream extends ModuleWithSideEffects {
 
 		addInput(streamParameter);
 		streamParameter.setUpdateOnChange(true);
-		previousTimestamps = new HashMap<>();
-		previousSequenceNumbers = new HashMap<>();
+		msgChainUtil = new MessageChainUtil();
 
 		// TODO: don't rely on static ids
 		Feed feedFilter = new Feed();
@@ -94,26 +65,6 @@ public class SendToStream extends ModuleWithSideEffects {
 		}
 	}
 
-	private StreamMessage getMsg(Stream stream){
-		int streamPartition = StreamPartitioner.partition(stream, null);
-		long timestamp = System.currentTimeMillis();
-		long sequenceNumber = getNextSequenceNumber(stream.getId(), timestamp);
-		SecUser user = SecUser.getViaJava(getGlobals().getUserId());
-		String publisherId = user == null ? "" : user.getPublisherId();
-		MessageID msgId = new MessageID(stream.getId(), streamPartition, timestamp, sequenceNumber, publisherId);
-		MessageRef prevMsgRef = this.getPreviousMessageRef(stream.getId());
-		try {
-			StreamMessage msg = new StreamMessageV30(msgId, prevMsgRef, StreamMessage.ContentType.CONTENT_TYPE_JSON,
-					inputValuesToMap(), StreamMessage.SignatureType.SIGNATURE_TYPE_NONE, null);
-			previousTimestamps.put(stream.getId(), timestamp);
-			previousSequenceNumbers.put(stream.getId(), sequenceNumber);
-			return msg;
-		} catch (IOException e) {
-			log.error(e);
-		}
-		return null;
-	}
-
 	@Override
 	protected boolean allowSideEffectsInHistoricalMode() {
 		// SendToStream cannot be configured to really write to the stream in historical mode (for now)
@@ -125,7 +76,7 @@ public class SendToStream extends ModuleWithSideEffects {
 		ensureServices();
 		Stream stream = streamParameter.getValue();
 		authenticateStream(stream);
-		StreamMessage msg = getMsg(stream);
+		StreamMessage msg = msgChainUtil.getStreamMessage(stream, getGlobals().time, inputValuesToMap(), getGlobals().getUserId());
 		streamService.sendMessage(msg);
 	}
 
@@ -134,7 +85,7 @@ public class SendToStream extends ModuleWithSideEffects {
 		Globals globals = getGlobals();
 
 		// Create the message locally and route it to the stream locally, without actually producing to the stream
-		StreamMessage msg = getMsg(streamParameter.getValue());
+		StreamMessage msg = msgChainUtil.getStreamMessage(streamParameter.getValue(), getGlobals().time, inputValuesToMap(), getGlobals().getUserId());
 
 		// Find the Feed implementation for the target Stream
 		AbstractFeed feed = getGlobals().getDataSource().getFeedById(streamParameter.getValue().getFeed().getId());
@@ -164,8 +115,7 @@ public class SendToStream extends ModuleWithSideEffects {
 
 	@Override
 	public void clearState() {
-		previousTimestamps = new HashMap<>();
-		previousSequenceNumbers = new HashMap<>();
+		msgChainUtil = new MessageChainUtil();
 	}
 
 	@Override

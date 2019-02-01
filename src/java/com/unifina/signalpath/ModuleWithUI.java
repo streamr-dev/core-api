@@ -1,10 +1,6 @@
 package com.unifina.signalpath;
 
-import com.streamr.client.protocol.message_layer.MessageID;
-import com.streamr.client.protocol.message_layer.MessageRef;
 import com.streamr.client.protocol.message_layer.StreamMessage;
-import com.streamr.client.protocol.message_layer.StreamMessageV30;
-import com.unifina.data.StreamPartitioner;
 import com.unifina.datasource.IStartListener;
 import com.unifina.datasource.IStopListener;
 import com.unifina.domain.data.Stream;
@@ -12,12 +8,12 @@ import com.unifina.domain.security.SecUser;
 import com.unifina.domain.signalpath.Module;
 import com.unifina.service.PermissionService;
 import com.unifina.service.StreamService;
+import com.unifina.signalpath.utils.MessageChainUtil;
 import com.unifina.utils.IdGenerator;
 import com.unifina.utils.MapTraversal;
 import grails.util.Holders;
 import org.apache.log4j.Logger;
 
-import java.io.IOException;
 import java.io.Serializable;
 import java.security.AccessControlException;
 import java.util.HashMap;
@@ -34,38 +30,16 @@ public abstract class ModuleWithUI extends AbstractSignalPathModule {
 
 	private static final Logger log = Logger.getLogger(ModuleWithUI.class);
 
-	private Map<String,Long> previousTimestamps = new HashMap<>();
-	private Map<String,Long> previousSequenceNumbers = new HashMap<>();
+	private MessageChainUtil msgChainUtil = new MessageChainUtil();
 
 	public ModuleWithUI() {
 		super();
 	}
 
-	private long getNextSequenceNumber(String streamId, long timestamp) {
-		if (!previousTimestamps.containsKey(streamId) || previousTimestamps.get(streamId) != timestamp) {
-			return 0L;
-		}
-		if (!previousSequenceNumbers.containsKey(streamId)) {
-			previousSequenceNumbers.put(streamId, 0L);
-		}
-		return previousSequenceNumbers.get(streamId)+1;
-	}
-
-	private MessageRef getPreviousMessageRef(String streamId) {
-		if (!previousTimestamps.containsKey(streamId)) {
-			return null;
-		}
-		if (!previousSequenceNumbers.containsKey(streamId)) {
-			previousSequenceNumbers.put(streamId, 0L);
-		}
-		return new MessageRef(previousTimestamps.get(streamId), previousSequenceNumbers.get(streamId));
-	}
-
 	@Override
 	public void initialize() {
 		super.initialize();
-		previousTimestamps = new HashMap<>();
-		previousSequenceNumbers = new HashMap<>();
+		msgChainUtil = new MessageChainUtil();
 
 		if (getGlobals().isRunContext()) {
 			streamService = Holders.getApplicationContext().getBean(StreamService.class);
@@ -90,8 +64,7 @@ public abstract class ModuleWithUI extends AbstractSignalPathModule {
 
 	protected void onStop() {
 		// The UI channel streams get deleted along with the canvas, so no need to clean them up explicitly
-		previousTimestamps = new HashMap<>();
-		previousSequenceNumbers = new HashMap<>();
+		msgChainUtil = new MessageChainUtil();
 	}
 
 	private StreamService getStreamService() {
@@ -101,29 +74,9 @@ public abstract class ModuleWithUI extends AbstractSignalPathModule {
 		return streamService;
 	}
 
-	private StreamMessage getMsg(Stream stream, Map content){
-		int streamPartition = StreamPartitioner.partition(stream, null);
-		long timestamp = System.currentTimeMillis();
-		long sequenceNumber = getNextSequenceNumber(stream.getId(), timestamp);
-		SecUser user = SecUser.getViaJava(getGlobals().getUserId());
-		String publisherId = user == null ? "" : user.getPublisherId();
-		MessageID msgId = new MessageID(stream.getId(), streamPartition, timestamp, sequenceNumber, publisherId);
-		MessageRef prevMsgRef = this.getPreviousMessageRef(stream.getId());
-		try {
-			StreamMessage msg = new StreamMessageV30(msgId, prevMsgRef, StreamMessage.ContentType.CONTENT_TYPE_JSON,
-					content, StreamMessage.SignatureType.SIGNATURE_TYPE_NONE, null);
-			previousTimestamps.put(stream.getId(), timestamp);
-			previousSequenceNumbers.put(stream.getId(), sequenceNumber);
-			return msg;
-		} catch (IOException e) {
-			log.error(e);
-		}
-		return null;
-	}
-
 	public void pushToUiChannel(Map content) {
 		Stream stream = getUiChannel().getStream();
-		StreamMessage msg = getMsg(stream, content);
+		StreamMessage msg = msgChainUtil.getStreamMessage(stream, getGlobals().time, content, getGlobals().getUserId());
 		getStreamService().sendMessage(msg);
 	}
 

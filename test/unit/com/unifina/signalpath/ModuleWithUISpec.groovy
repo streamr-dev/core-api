@@ -81,6 +81,7 @@ class ModuleWithUISpec extends Specification {
 		}
 
 		module.globals = GlobalsFactory.createInstance([:], user)
+		module.globals.time = new Date()
 		module.globals.setDataSource(Mock(DataSource))
 		module.parentSignalPath = Mock(SignalPath)
 		module.parentSignalPath.getRootSignalPath() >> module.parentSignalPath

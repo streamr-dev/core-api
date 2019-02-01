@@ -1,16 +1,23 @@
 package com.unifina.signalpath.blockchain
 
 import com.unifina.ModuleTestingSpecification
+import com.unifina.domain.security.SecUser
 import com.unifina.utils.testutils.ModuleTestHelper
+import grails.test.mixin.Mock
 
+@Mock(SecUser)
 class VerifySignatureSpec extends ModuleTestingSpecification {
 
-	def module = setupModule(new VerifySignature())
+	VerifySignature module
+
+	def setup() {
+		module = setupModule(new VerifySignature())
+	}
 
 	String message = "Dear Pacifics user,\n" +
 		"in order to track your parcels you need to proof that you own the address below.\n"
-	
-	void "VerifySignature gives the right answer"() {
+
+	def "VerifySignature gives the right answer"() {
 		when:
 		Map inputValues = [
 			signature: [
@@ -38,7 +45,7 @@ class VerifySignatureSpec extends ModuleTestingSpecification {
 				'Header byte out of range: -69'
 			]
 		]
-		
+
 		then:
 		new ModuleTestHelper.Builder(module, inputValues, outputValues).test()
 	}

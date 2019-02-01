@@ -3,11 +3,14 @@ package com.unifina.signalpath
 import com.unifina.ModuleTestingSpecification
 import com.unifina.data.FeedEvent
 import com.unifina.datasource.DataSource
+import com.unifina.domain.security.SecUser
 import com.unifina.feed.MasterClock
 import com.unifina.signalpath.simplemath.Count
 import com.unifina.signalpath.time.ClockModule
 import com.unifina.utils.Globals
+import grails.test.mixin.Mock
 
+@Mock(SecUser)
 class PropagatorSpec extends ModuleTestingSpecification {
 
 	Globals globals
