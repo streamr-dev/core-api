@@ -2,6 +2,7 @@ package com.unifina.signalpath.charts
 
 import com.unifina.UiChannelMockingSpecification
 import com.unifina.domain.security.SecUser
+import com.unifina.signalpath.SignalPath
 import com.unifina.utils.testutils.ModuleTestHelper
 import grails.test.mixin.Mock
 import grails.test.mixin.TestMixin
@@ -10,12 +11,12 @@ import grails.test.mixin.support.GrailsUnitTestMixin
 @TestMixin(GrailsUnitTestMixin) // for grailsApplication
 @Mock([SecUser])
 class GaugeSpec extends UiChannelMockingSpecification {
-	
+
 	Gauge module
-	
+
     def setup() {
 		mockServicesForUiChannels()
-
+		SecUser user = new SecUser().save(failOnError: true, validate: false)
 		module = setupModule(new Gauge(), [
 			uiChannel: [id: "gauge"],
 			params: [
@@ -25,7 +26,7 @@ class GaugeSpec extends UiChannelMockingSpecification {
 			options: [
 			  title: [value: "Gauge"]
 			]
-		])
+		], new SignalPath(true), mockGlobals([:], user))
     }
 
 	void "gauge sends correct data to uiChannel"() {
@@ -46,7 +47,7 @@ class GaugeSpec extends UiChannelMockingSpecification {
 				[v: 0D, type: "u"],
 			]
 		]
-		
+
 		then:
 		new ModuleTestHelper.Builder(module, inputValues, outputValues)
 			.uiChannelMessages(channelMessages, getSentMessagesByStreamId())

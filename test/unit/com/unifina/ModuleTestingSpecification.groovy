@@ -23,7 +23,6 @@ class ModuleTestingSpecification extends BeanMockingSpecification {
 	}
 
 	protected Globals mockGlobals(Map context=[:], SecUser user = new SecUser(timezone: "UTC")) {
-		user.save(failOnError: true, validate: false)
 		Globals globals = GlobalsFactory.createInstance(context, user)
 		globals.setDataSource(Mock(DataSource))
 		globals.init()

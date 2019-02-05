@@ -6,25 +6,26 @@ import com.unifina.domain.security.SecUser
 import grails.test.mixin.Mock
 import spock.lang.Specification
 
-@Mock(SecUser)
+@Mock([SecUser])
 class MessageChainUtilSpec extends Specification {
 
-	MessageChainUtil msgChainUtil = new MessageChainUtil()
+	MessageChainUtil msgChainUtil
 	Map content = [foo: "bar"]
 	Stream stream = new Stream()
-	Long userId = 1
 	def setup() {
 		stream.id = "streamId"
+		Long userId = 1
 		new SecUser(id: userId).save(failOnError: true, validate: false)
+		msgChainUtil = new MessageChainUtil(userId)
 	}
 
 
 	void "chains correctly messages with same timestamp"() {
 		Date date = new Date()
 		when:
-		StreamMessageV30 msg1 = msgChainUtil.getStreamMessage(stream, date, content, userId)
-		StreamMessageV30 msg2 = msgChainUtil.getStreamMessage(stream, date, content, userId)
-		StreamMessageV30 msg3 = msgChainUtil.getStreamMessage(stream, date, content, userId)
+		StreamMessageV30 msg1 = msgChainUtil.getStreamMessage(stream, date, content)
+		StreamMessageV30 msg2 = msgChainUtil.getStreamMessage(stream, date, content)
+		StreamMessageV30 msg3 = msgChainUtil.getStreamMessage(stream, date, content)
 		then:
 		msg1.getStreamId() == stream.getId()
 		msg1.getPublisherId() == "1"
@@ -51,9 +52,9 @@ class MessageChainUtilSpec extends Specification {
 		Date date2 = new Date(date1.getTime()+1000)
 		Date date3 = new Date(date2.getTime()+1000)
 		when:
-		StreamMessageV30 msg1 = msgChainUtil.getStreamMessage(stream, date1, content, userId)
-		StreamMessageV30 msg2 = msgChainUtil.getStreamMessage(stream, date2, content, userId)
-		StreamMessageV30 msg3 = msgChainUtil.getStreamMessage(stream, date3, content, userId)
+		StreamMessageV30 msg1 = msgChainUtil.getStreamMessage(stream, date1, content)
+		StreamMessageV30 msg2 = msgChainUtil.getStreamMessage(stream, date2, content)
+		StreamMessageV30 msg3 = msgChainUtil.getStreamMessage(stream, date3, content)
 		then:
 		msg1.getStreamId() == stream.getId()
 		msg1.getPublisherId() == "1"
@@ -82,10 +83,10 @@ class MessageChainUtilSpec extends Specification {
 		Stream stream2 = new Stream()
 		stream2.id = "streamId2"
 		when:
-		StreamMessageV30 msg1 = msgChainUtil.getStreamMessage(stream, date1, content, userId)
-		StreamMessageV30 msg2 = msgChainUtil.getStreamMessage(stream2, date2, content, userId)
-		StreamMessageV30 msg3 = msgChainUtil.getStreamMessage(stream, date3, content, userId)
-		StreamMessageV30 msg4 = msgChainUtil.getStreamMessage(stream2, date2, content, userId)
+		StreamMessageV30 msg1 = msgChainUtil.getStreamMessage(stream, date1, content)
+		StreamMessageV30 msg2 = msgChainUtil.getStreamMessage(stream2, date2, content)
+		StreamMessageV30 msg3 = msgChainUtil.getStreamMessage(stream, date3, content)
+		StreamMessageV30 msg4 = msgChainUtil.getStreamMessage(stream2, date2, content)
 		then:
 		msg1.getStreamId() == stream.getId()
 		msg1.getPublisherId() == "1"

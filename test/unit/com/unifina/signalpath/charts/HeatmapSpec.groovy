@@ -2,6 +2,7 @@ package com.unifina.signalpath.charts
 
 import com.unifina.UiChannelMockingSpecification
 import com.unifina.domain.security.SecUser
+import com.unifina.signalpath.SignalPath
 import com.unifina.utils.testutils.ModuleTestHelper
 import grails.test.mixin.Mock
 import grails.test.mixin.TestMixin
@@ -18,7 +19,7 @@ class HeatmapSpec extends UiChannelMockingSpecification {
 
 		module = setupModule(new Heatmap(), [
 			uiChannel: [id: "heatmap"],
-		])
+		], new SignalPath(true), mockGlobals([:], new SecUser().save(failOnError: true, validate: false)))
 	}
 
 	void "heatmap sends correct data to uiChannel"() {

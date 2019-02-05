@@ -30,7 +30,7 @@ public abstract class ModuleWithUI extends AbstractSignalPathModule {
 
 	private static final Logger log = Logger.getLogger(ModuleWithUI.class);
 
-	private MessageChainUtil msgChainUtil = new MessageChainUtil();
+	private MessageChainUtil msgChainUtil;
 
 	public ModuleWithUI() {
 		super();
@@ -39,7 +39,7 @@ public abstract class ModuleWithUI extends AbstractSignalPathModule {
 	@Override
 	public void initialize() {
 		super.initialize();
-		msgChainUtil = new MessageChainUtil();
+		msgChainUtil = new MessageChainUtil(getGlobals().getUserId());
 
 		if (getGlobals().isRunContext()) {
 			streamService = Holders.getApplicationContext().getBean(StreamService.class);
@@ -64,7 +64,7 @@ public abstract class ModuleWithUI extends AbstractSignalPathModule {
 
 	protected void onStop() {
 		// The UI channel streams get deleted along with the canvas, so no need to clean them up explicitly
-		msgChainUtil = new MessageChainUtil();
+		msgChainUtil = new MessageChainUtil(getGlobals().getUserId());
 	}
 
 	private StreamService getStreamService() {
@@ -76,7 +76,7 @@ public abstract class ModuleWithUI extends AbstractSignalPathModule {
 
 	public void pushToUiChannel(Map content) {
 		Stream stream = getUiChannel().getStream();
-		StreamMessage msg = msgChainUtil.getStreamMessage(stream, getGlobals().time, content, getGlobals().getUserId());
+		StreamMessage msg = msgChainUtil.getStreamMessage(stream, getGlobals().time, content);
 		getStreamService().sendMessage(msg);
 	}
 

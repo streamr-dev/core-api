@@ -1,17 +1,14 @@
 package com.unifina.signalpath.blockchain
 
 import com.unifina.ModuleTestingSpecification
-import com.unifina.domain.security.SecUser
 import com.unifina.utils.testutils.ModuleTestHelper
-import grails.test.mixin.Mock
 
-@Mock(SecUser)
 class VerifySignatureSpec extends ModuleTestingSpecification {
 
 	VerifySignature module
 
 	def setup() {
-		module = setupModule(new VerifySignature())
+		module = setupModule(new VerifySignature(), [:], null)
 	}
 
 	String message = "Dear Pacifics user,\n" +

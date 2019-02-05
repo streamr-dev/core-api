@@ -103,6 +103,7 @@ class SendToStreamSpec extends BeanMockingSpecification {
 		module.parentSignalPath = new SignalPath(true)
 		module.parentSignalPath.setGlobals(globals)
 		module.parentSignalPath.configure([uiChannel: [id: "uiChannel"]])
+		module.parentSignalPath.initialize()
 		module.init()
 		module.configure([
 				params: [
@@ -171,7 +172,7 @@ class SendToStreamSpec extends BeanMockingSpecification {
 		when:
 		createModule()
 		then:
-		1 * globals.isRunContext() >> true
+		2 * globals.isRunContext() >> true
 		thrown(AccessControlException)
 	}
 
@@ -183,7 +184,7 @@ class SendToStreamSpec extends BeanMockingSpecification {
 		when:
 		createModule()
 		then:
-		1 * globals.isRunContext() >> true
+		2 * globals.isRunContext() >> true
 		notThrown(AccessControlException)
 	}
 
@@ -195,7 +196,7 @@ class SendToStreamSpec extends BeanMockingSpecification {
 		when:
 		createModule()
 		then:
-		1 * globals.isRunContext() >> false
+		2 * globals.isRunContext() >> false
 		notThrown(AccessControlException)
 	}
 

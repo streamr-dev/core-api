@@ -79,7 +79,6 @@ class ModuleWithUISpec extends Specification {
 				return "webcomponent-name"
 			}
 		}
-
 		module.globals = GlobalsFactory.createInstance([:], user)
 		module.globals.time = new Date()
 		module.globals.setDataSource(Mock(DataSource))

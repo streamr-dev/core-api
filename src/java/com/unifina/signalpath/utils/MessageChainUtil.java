@@ -19,43 +19,37 @@ public class MessageChainUtil implements Serializable {
 	private Map<String,Long> previousTimestamps = new HashMap<>();
 	private Map<String,Long> previousSequenceNumbers = new HashMap<>();
 
-	private transient SecUser cachedUser = null;
+	private SecUser user;
 
 	private static final Logger log = Logger.getLogger(MessageChainUtil.class);
 
-	private SecUser getUser(Long userId) {
-		if (cachedUser == null) {
-			cachedUser = SecUser.getViaJava(userId);
-		}
-		return cachedUser;
+	public MessageChainUtil(Long userId) {
+		user = SecUser.getViaJava(userId);
 	}
 
 	private long getNextSequenceNumber(String key, long timestamp) {
-		if (!previousTimestamps.containsKey(key) || previousTimestamps.get(key) != timestamp) {
+		Long previousTimestamp = previousTimestamps.get(key);
+		if (previousTimestamp == null || previousTimestamp != timestamp) {
 			return 0L;
 		}
-		if (!previousSequenceNumbers.containsKey(key)) {
-			previousSequenceNumbers.put(key, 0L);
-		}
-		return previousSequenceNumbers.get(key)+1;
+		Long previousSequenceNumber = previousSequenceNumbers.get(key);
+		return previousSequenceNumber == null ? 0L : previousSequenceNumber + 1;
 	}
 
 	private MessageRef getPreviousMessageRef(String key) {
-		if (!previousTimestamps.containsKey(key)) {
+		Long previousTimestamp = previousTimestamps.get(key);
+		Long previousSequenceNumber = previousSequenceNumbers.get(key);
+		if (previousTimestamp == null || previousSequenceNumber == null) {
 			return null;
 		}
-		if (!previousSequenceNumbers.containsKey(key)) {
-			previousSequenceNumbers.put(key, 0L);
-		}
-		return new MessageRef(previousTimestamps.get(key), previousSequenceNumbers.get(key));
+		return new MessageRef(previousTimestamp, previousSequenceNumber);
 	}
 
-	public StreamMessage getStreamMessage(Stream stream, Date timestampAsDate, Map content, Long userId){
+	public StreamMessage getStreamMessage(Stream stream, Date timestampAsDate, Map content){
 		int streamPartition = StreamPartitioner.partition(stream, null);
 		String key = stream.getId()+streamPartition;
 		long timestamp = timestampAsDate.getTime();
 		long sequenceNumber = getNextSequenceNumber(key, timestamp);
-		SecUser user = getUser(userId);
 		String publisherId = user.getPublisherId();
 		MessageID msgId = new MessageID(stream.getId(), streamPartition, timestamp, sequenceNumber, publisherId);
 		MessageRef prevMsgRef = this.getPreviousMessageRef(key);

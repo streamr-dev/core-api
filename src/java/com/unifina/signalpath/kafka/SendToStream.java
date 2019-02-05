@@ -38,7 +38,7 @@ public class SendToStream extends ModuleWithSideEffects {
 	private boolean sendOnlyNewValues = false;
 	private List<Input> fieldInputs = new ArrayList<>();
 
-	private MessageChainUtil msgChainUtil = new MessageChainUtil();
+	private MessageChainUtil msgChainUtil;
 
 	@Override
 	public void init() {
@@ -47,7 +47,7 @@ public class SendToStream extends ModuleWithSideEffects {
 
 		addInput(streamParameter);
 		streamParameter.setUpdateOnChange(true);
-		msgChainUtil = new MessageChainUtil();
+		msgChainUtil = new MessageChainUtil(getGlobals().getUserId());
 
 		// TODO: don't rely on static ids
 		Feed feedFilter = new Feed();
@@ -76,7 +76,7 @@ public class SendToStream extends ModuleWithSideEffects {
 		ensureServices();
 		Stream stream = streamParameter.getValue();
 		authenticateStream(stream);
-		StreamMessage msg = msgChainUtil.getStreamMessage(stream, getGlobals().time, inputValuesToMap(), getGlobals().getUserId());
+		StreamMessage msg = msgChainUtil.getStreamMessage(stream, getGlobals().time, inputValuesToMap());
 		streamService.sendMessage(msg);
 	}
 
@@ -85,7 +85,7 @@ public class SendToStream extends ModuleWithSideEffects {
 		Globals globals = getGlobals();
 
 		// Create the message locally and route it to the stream locally, without actually producing to the stream
-		StreamMessage msg = msgChainUtil.getStreamMessage(streamParameter.getValue(), getGlobals().time, inputValuesToMap(), getGlobals().getUserId());
+		StreamMessage msg = msgChainUtil.getStreamMessage(streamParameter.getValue(), getGlobals().time, inputValuesToMap());
 
 		// Find the Feed implementation for the target Stream
 		AbstractFeed feed = getGlobals().getDataSource().getFeedById(streamParameter.getValue().getFeed().getId());
@@ -115,7 +115,7 @@ public class SendToStream extends ModuleWithSideEffects {
 
 	@Override
 	public void clearState() {
-		msgChainUtil = new MessageChainUtil();
+		msgChainUtil = new MessageChainUtil(getGlobals().getUserId());
 	}
 
 	@Override

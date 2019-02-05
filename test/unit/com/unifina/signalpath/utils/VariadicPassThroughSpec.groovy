@@ -1,11 +1,8 @@
 package com.unifina.signalpath.utils
 
 import com.unifina.ModuleTestingSpecification
-import com.unifina.domain.security.SecUser
 import com.unifina.utils.testutils.ModuleTestHelper
-import grails.test.mixin.Mock
 
-@Mock(SecUser)
 class VariadicPassThroughSpec extends ModuleTestingSpecification {
 
 	VariadicPassThrough module
@@ -21,7 +18,7 @@ class VariadicPassThroughSpec extends ModuleTestingSpecification {
 		module.getOutput("output-b")
 		module.getOutput("output-c")
 		module.getOutput("output-d")
-		setupModule(module)
+		setupModule(module, [:], null)
 	}
 
 	void "passThrough gives the right answer"() {

@@ -3,14 +3,11 @@ package com.unifina.signalpath
 import com.unifina.ModuleTestingSpecification
 import com.unifina.data.FeedEvent
 import com.unifina.datasource.DataSource
-import com.unifina.domain.security.SecUser
 import com.unifina.feed.MasterClock
 import com.unifina.signalpath.simplemath.Count
 import com.unifina.signalpath.time.ClockModule
 import com.unifina.utils.Globals
-import grails.test.mixin.Mock
 
-@Mock(SecUser)
 class PropagatorSpec extends ModuleTestingSpecification {
 
 	Globals globals
@@ -22,8 +19,8 @@ class PropagatorSpec extends ModuleTestingSpecification {
 	def "Propagator should activate interdependent modules in originSet"() {
 		MasterClock masterClock = new MasterClock(globals, Mock(DataSource))
 
-		Count count = setupModule(new Count())
-		ClockModule clock = setupModule(new ClockModule())
+		Count count = setupModule(new Count(), [:], null)
+		ClockModule clock = setupModule(new ClockModule(), [:], null)
 
 		// Connect
 		clock.getOutput("timestamp").connect(count.getInput("in"))
@@ -45,8 +42,8 @@ class PropagatorSpec extends ModuleTestingSpecification {
 	def "Propagator should activate interdependent modules in originSet, more complex case with indirect dependencies"() {
 		MasterClock masterClock = new MasterClock(globals, Mock(DataSource))
 
-		Count count = setupModule(new Count())
-		ClockModule clock = setupModule(new ClockModule())
+		Count count = setupModule(new Count(), [:], null)
+		ClockModule clock = setupModule(new ClockModule(), [:], null)
 		AbstractSignalPathModule mod = setupModule(new AbstractSignalPathModule() {
 			TimeSeriesInput input = new TimeSeriesInput(this, "in")
 			TimeSeriesOutput output = new TimeSeriesOutput(this, "out")
@@ -56,7 +53,7 @@ class PropagatorSpec extends ModuleTestingSpecification {
 			}
 			@Override
 			void clearState() {}
-		})
+		}, [:], null)
 		AbstractSignalPathModule mod2 = setupModule(new AbstractSignalPathModule() {
 			TimeSeriesInput input = new TimeSeriesInput(this, "in")
 			TimeSeriesOutput output = new TimeSeriesOutput(this, "out")
@@ -66,7 +63,7 @@ class PropagatorSpec extends ModuleTestingSpecification {
 			}
 			@Override
 			void clearState() {}
-		})
+		}, [:], null)
 
 		// Connect clock-mod-count-mod2
 		clock.getOutput("timestamp").connect(mod.getInput("in"))

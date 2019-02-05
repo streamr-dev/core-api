@@ -2,6 +2,7 @@ package com.unifina.signalpath.utils
 
 import com.unifina.UiChannelMockingSpecification
 import com.unifina.domain.security.SecUser
+import com.unifina.signalpath.SignalPath
 import com.unifina.utils.testutils.ModuleTestHelper
 import grails.test.mixin.Mock
 import grails.test.mixin.TestMixin
@@ -15,7 +16,8 @@ class LabelSpec extends UiChannelMockingSpecification {
 
 	def setup() {
 		mockServicesForUiChannels()
-		module = setupModule(new Label(), [uiChannel: [id: "labelChannel"]])
+		SecUser user = new SecUser().save(failOnError: true, validate: false)
+		module = setupModule(new Label(), [uiChannel: [id: "labelChannel"]], new SignalPath(true), mockGlobals([:], user))
 	}
 
 	void "label sends correct data to uiChannel"() {
