@@ -29,7 +29,7 @@ class Stream implements Comparable {
 
 	Boolean requireSignedData = false
 	// Always try to autoconfigure field names and types
-	Boolean autoConfigure = false
+	Boolean autoConfigure = true
 	// Historical data storage period (days)
 	Integer storageDays = DEFAULT_STORAGE_DAYS
 
@@ -49,7 +49,7 @@ class Stream implements Comparable {
 		uiChannelPath(nullable:true)
 		uiChannelCanvas(nullable:true)
 		autoConfigure(nullable: false)
-		storageDays(nullable: false, min: 1)
+		storageDays(nullable: false, min: 0)
 	}
 
 	static mapping = {
@@ -60,6 +60,8 @@ class Stream implements Comparable {
 		uiChannelPath index: "ui_channel_path_idx"
 		config type: 'text'
 		requireSignedData defaultValue: "false"
+		autoConfigure defaultValue: "true"
+		storageDays defaultValue: DEFAULT_STORAGE_DAYS
 	}
 
 	@Override

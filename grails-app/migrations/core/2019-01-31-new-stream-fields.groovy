@@ -10,12 +10,12 @@ databaseChangeLog = {
 	changeSet(author: "kkn", id: "new-stream-fields-2") {
 		grailsChange {
 			change {
-				sql.execute('UPDATE stream SET auto_configure = false')
+				sql.execute('UPDATE stream SET auto_configure = true')
 			}
 		}
 	}
 	changeSet(author: "kkn", id: "new-stream-fields-3") {
-		addNotNullConstraint(columnDataType: "bit", columnName: "auto_configure", tableName: "stream")
+		addNotNullConstraint(columnDataType: "bit", columnName: "auto_configure", defaultNullValue: "true", tableName: "stream")
 	}
 
 	changeSet(author: "kkn", id: "new-stream-fields-4") {
@@ -33,6 +33,6 @@ databaseChangeLog = {
 		}
 	}
 	changeSet(author: "kkn", id: "new-stream-fields-6") {
-		addNotNullConstraint(columnDataType: "integer", columnName: "storage_days", tableName: "stream")
+		addNotNullConstraint(columnDataType: "integer", columnName: "storage_days", defaultNullValue: 365, tableName: "stream")
 	}
 }
