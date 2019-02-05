@@ -30,8 +30,6 @@ class Stream implements Comparable {
 	Boolean requireSignedData = false
 	// Always try to autoconfigure field names and types
 	Boolean autoConfigure = false
-	// Require all messages in this stream to be signed
-	Boolean allSigned = false
 	// Historical data storage period (days)
 	Integer storageDays = DEFAULT_STORAGE_DAYS
 
@@ -51,7 +49,6 @@ class Stream implements Comparable {
 		uiChannelPath(nullable:true)
 		uiChannelCanvas(nullable:true)
 		autoConfigure(nullable: false)
-		allSigned(nullable: false)
 		storageDays(nullable: false, min: 1)
 	}
 
