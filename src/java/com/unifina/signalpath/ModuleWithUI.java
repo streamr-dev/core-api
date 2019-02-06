@@ -23,7 +23,6 @@ import java.util.Map;
 public abstract class ModuleWithUI extends AbstractSignalPathModule {
 
 	private UiChannel uiChannel;
-	protected boolean resendAll = false;
 	protected int resendLast = 0;
 
 	private transient StreamService streamService;
@@ -114,7 +113,6 @@ public abstract class ModuleWithUI extends AbstractSignalPathModule {
 		}
 
 		ModuleOptions options = ModuleOptions.get(config);
-		options.add(new ModuleOption("uiResendAll", resendAll, "boolean"));
 		options.add(new ModuleOption("uiResendLast", resendLast, "int"));
 
 		return config;
@@ -132,9 +130,6 @@ public abstract class ModuleWithUI extends AbstractSignalPathModule {
 				uiChannelId == null);
 
 		ModuleOptions options = ModuleOptions.get(config);
-		if (options.getOption("uiResendAll")!=null) {
-			resendAll = options.getOption("uiResendAll").getBoolean();
-		}
 		if (options.getOption("uiResendLast")!=null) {
 			resendLast = options.getOption("uiResendLast").getInt();
 		}

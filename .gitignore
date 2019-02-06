@@ -25,3 +25,5 @@ tomcat.8081
 # test reports
 test-old-report.xml
 test-new-report.xml
+
+lib/grails-rt.jar

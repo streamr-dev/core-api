@@ -63,7 +63,6 @@ abstract class MapModule extends ModuleWithUI implements ITimeListener {
 		addInput(type.isXYOrder() ? xInput : yInput);
 		addInput(type.isXYOrder() ? yInput : xInput);
 
-		this.resendAll = false;
 		this.resendLast = 0;
 		yInput.setDrivingInput(true);
 		yInput.setCanHaveInitialValue(false);

@@ -1,6 +1,6 @@
 /**
  * Triggered events (on SignalPath instance):
- * 
+ *
  * new ()
  * loading
  * loaded (saveData, signalPathData, settings)
@@ -14,12 +14,12 @@
  * moduleBeforeClose (jsonData, div)
  * done
  * error (message)
- * 
+ *
  * Events for internal use:
  * _signalPathLoadModulesReady
- * 
+ *
  * Options:
- * 
+ *
  * parentElement: the parent DOM element to draw the SignalPath on
  * settings: function() that returns the settings object
  * errorHandler: function(data) that shows an error message. data can be a string or object, in which case data.msg is shown.
@@ -30,7 +30,7 @@
  * connectionOptions: option object passed to StreamrClient
  */
 
-var SignalPath = (function () { 
+var SignalPath = (function () {
 
     var options = {
 		parentElement: "parentElement",
@@ -53,10 +53,10 @@ var SignalPath = (function () {
 		zoom: 1,
         embedMode: false // We can render some things in different ways depending on the mode we're in
     };
-    
+
     var connection
 	var subscription
-	
+
 	var modules = {}
 	var moduleHashGenerator = 0
 
@@ -68,28 +68,28 @@ var SignalPath = (function () {
     // set in init()
     var parentElement;
     var name = "Untitled canvas"
-    
+
 	// Public
 	var pub = {};
 	pub.options = options;
 
 	var isBeingReloaded = false
 	var debugLoopInterval = null
-	
+
     // TODO: remove if not needed anymore!
     pub.replacedIds = {};
-	
+
 	pub.init = function (opts) {
 		jQuery.extend(true, options, opts);
-		
+
 		parentElement = $(options.parentElement);
 		jsPlumb.Defaults.Container = parentElement;
 		parentElement.data("spObject",pub)
-		
+
 		jsPlumb.bind('ready', function() {
 			pub.clear();
 		});
-		
+
 	    connection = new StreamrClient(options.connectionOptions)
 
 		pub.setZoom(opts.zoom)
@@ -200,18 +200,18 @@ var SignalPath = (function () {
 		});
 
 		$(pub).trigger("_signalPathLoadModulesReady");
-		
+
 		checkJsPlumbEndpoints()
 		jsPlumb.setSuspendDrawing(false,true);
 	}
 	pub.loadJSON = loadJSON;
-	
+
 	pub.updateModule = function(module, callback) {
-		
+
 		$.ajax({
 			type: 'POST',
-			url: options.getModuleUrl, 
-			data: {id: module.toJSON().id, configuration: JSON.stringify(module.toJSON())}, 
+			url: options.getModuleUrl,
+			data: {id: module.toJSON().id, configuration: JSON.stringify(module.toJSON())},
 			dataType: 'json',
 			success: function(data) {
 				if (!data.error) {
@@ -256,11 +256,11 @@ var SignalPath = (function () {
 		return savedJson ? savedJson.id : undefined
 	}
 	pub.getId = getId
-	
+
 	function replaceModule(module,id,configuration) {
 		addModule(id,configuration,function(newModule) {
 			deleteModuleById(newModule.getHash())
-			
+
 			newModule.setLayoutData(module.getLayoutData());
 			// TODO: replace connections
 			module.close();
@@ -269,7 +269,7 @@ var SignalPath = (function () {
 		});
 	}
 	pub.replaceModule = replaceModule;
-	
+
 	// Attempted workaround for CORE-283
 	function checkJsPlumbEndpoints() {
 		// Make sure that jsPlumb agrees with the DOM on which elements exist, otherwise the following call may fail
@@ -281,13 +281,13 @@ var SignalPath = (function () {
 			}
 		})
 	}
-	
+
 	function addModule(id, configuration, callback) {
 		// Get indicator JSON from server
 		$.ajax({
 			type: 'POST',
-			url: options.getModuleUrl, 
-			data: {id: id, configuration: JSON.stringify(configuration)}, 
+			url: options.getModuleUrl,
+			data: {id: id, configuration: JSON.stringify(configuration)},
 			dataType: 'json',
 			success: function(data) {
 				if (!data.error) {
@@ -308,18 +308,18 @@ var SignalPath = (function () {
 		});
 	}
 	pub.addModule = addModule;
-	
+
 	function handleError(message) {
 		$(pub).trigger("error", [message])
 		options.errorHandler({msg:message})
 	}
-	
+
 	function createModuleFromJSON(data) {
 		if (data.error) {
 			handleError(data.message)
 			return undefined;
 		}
-		
+
 		// Generate an internal index for the module and store a reference in a table
 		if (data.hash == null) {
 			data.hash = moduleHashGenerator++
@@ -328,17 +328,17 @@ var SignalPath = (function () {
 		else if (data.hash >= moduleHashGenerator) {
 			moduleHashGenerator = data.hash + 1
 		}
-		
+
 		var mod = eval("SignalPath."+data.jsModule+"(data,parentElement,{signalPath:pub})");
-		
+
 		setModuleById(mod.getHash(), mod)
-		
+
 		var div = mod.getDiv();
-		
+
 		mod.redraw(); // Just in case
-		
+
 		var oldClose = mod.onClose;
-		
+
 		mod.onClose = function() {
 			// Remove hash entry
 			var hash = mod.getHash();
@@ -346,11 +346,11 @@ var SignalPath = (function () {
 			if (oldClose)
 				oldClose();
 		}
-		
+
 		return mod;
 	}
 	pub.createModuleFromJSON = createModuleFromJSON;
-	
+
 	function redraw() {
 		pub.getModules().forEach(function(module) {
 			module.redraw()
@@ -358,7 +358,7 @@ var SignalPath = (function () {
 		jsPlumb.repaintEverything()
 	}
 	pub.redraw = redraw
-	
+
 	function getModules() {
 		var result = []
 		Object.keys(modules).forEach(function(key) {
@@ -367,27 +367,27 @@ var SignalPath = (function () {
 		return result
 	}
 	pub.getModules = getModules;
-	
+
 	function getModuleById(id) {
 		return modules[id.toString()];
 	}
 	pub.getModuleById = getModuleById;
-	
+
 	function setModuleById(id, module) {
 		modules[id.toString()] = module
 	}
-	
+
 	function deleteModuleById(id) {
 		delete modules[id.toString()]
 	}
-	
+
 	function toJSON(settings) {
 		var result = {
 			name: getName(),
 			settings: (settings ? settings : options.settings()),
 			modules: []
 		}
-		
+
 		getModules().forEach(function(module) {
 			var json = module.toJSON()
 			result.modules.push(json);
@@ -403,7 +403,7 @@ var SignalPath = (function () {
 		return name;
 	}
 	pub.getName = getName
-	
+
 	function setName(n) {
 		name = n
 	}
@@ -507,33 +507,33 @@ var SignalPath = (function () {
 			}
 		})
 	}
-	
+
 	function clear(isSilent) {
 		unsubscribe()
 
 		if (isRunning() && runningJson.adhoc)
 			stop();
-		
+
 		getModules().forEach(function(module) {
 			module.close()
 		})
-		
+
 		modules = {};
 		moduleHashGenerator = 0;
-		
+
 		parentElement.empty()
 
 		name = "Untitled canvas"
 		savedJson = {}
 		runningJson = null
-		
-		jsPlumb.reset();		
+
+		jsPlumb.reset();
 
 		if (!isSilent)
 			$(pub).trigger('new');
 	}
 	pub.clear = clear;
-	
+
 	/**
 	 * idOrObject can be either an id to fetch from the api, or json to apply as-is
 	 */
@@ -555,7 +555,7 @@ var SignalPath = (function () {
 				callback(json);
 
 			SignalPath.isBeingReloaded = false
-			
+
 			// Trigger loaded on pub and parentElement
 			$(pub).add(parentElement).trigger('loaded', [savedJson]);
 
@@ -576,7 +576,7 @@ var SignalPath = (function () {
 		}
 	}
 	pub.load = load;
-	
+
 	function start(startRequest, callback, ignoreDirty) {
 		startRequest = startRequest || {}
 
@@ -598,7 +598,7 @@ var SignalPath = (function () {
 		getModules().forEach(function(module) {
 			module.clean()
 		})
-		
+
 		$.ajax({
 			type: 'POST',
 			url: options.apiUrl + '/canvases/' + runningJson.id + '/start',
@@ -648,25 +648,25 @@ var SignalPath = (function () {
 		})
 	}
 	pub.startAdhoc = startAdhoc
-	
+
 	function subscribe() {
 		if (isRunning() && runningJson.uiChannel) {
 			subscription = connection.subscribe(
 				{
 					stream: runningJson.uiChannel.id,
-					resend_all: (runningJson.adhoc ? true : undefined)
+					resend_from: (runningJson.adhoc ? 0 : undefined)
 				},
 				processMessage
 			)
 		}
 	}
 	pub.subscribe = subscribe
-	
+
 	function reconnect() {
 		subscribe();
 	}
 	pub.reconnect = reconnect;
-	
+
 	function processMessage(message) {
 		if (message.type=="MW") {
 			var hash = message.hash;
@@ -686,7 +686,7 @@ var SignalPath = (function () {
 			options.notificationHandler(message);
 		}
 	}
-	
+
 	function unsubscribe() {
 		if (subscription) {
 			connection.unsubscribe(subscription)
@@ -694,7 +694,7 @@ var SignalPath = (function () {
 		}
 	}
 	pub.unsubscribe = unsubscribe;
-	
+
 	function isRunning() {
 		return runningJson!=null && runningJson.state!==undefined && runningJson.state.toLowerCase() === 'running'
 	}
@@ -757,7 +757,7 @@ var SignalPath = (function () {
 		}
 	}
 	pub.stop = stop;
-	
+
 	function getZoom() {
 		return parentElement.css("zoom") != null ? parseFloat(parentElement.css("zoom")) : 1
 	}
@@ -766,7 +766,7 @@ var SignalPath = (function () {
 	function setZoom(zoom, animate) {
 		if (animate===undefined)
 			animate = true
-		
+
 		if (animate)
 			parentElement.animate({ zoom: zoom }, 300);
 		else (parentElement.css("zoom", zoom))

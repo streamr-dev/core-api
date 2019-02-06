@@ -6,10 +6,6 @@ export type Subscription = {
 }
 
 export type ModuleOptions = {
-    uiResendAll?: {
-        type: 'boolean',
-        value: boolean
-    },
     uiResendLast?: {
         type: 'number',
         value: number
@@ -22,7 +18,6 @@ export type SubscriptionOptions = {
     stream?: StreamId,
     authKey?: string,
     partition?: number,
-    resend_all?: boolean,
     resend_last?: number,
     resend_from?: number,
     resend_from_time?: number | Date,

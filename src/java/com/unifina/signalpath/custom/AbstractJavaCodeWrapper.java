@@ -1,8 +1,5 @@
 package com.unifina.signalpath.custom;
 
-import com.unifina.datasource.ITimeListener;
-import com.unifina.security.MyPolicy;
-import com.unifina.security.MySecurityManager;
 import com.unifina.security.UserJavaClassLoader;
 import com.unifina.service.SerializationService;
 import com.unifina.signalpath.*;
@@ -12,8 +9,6 @@ import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 
 import javax.tools.Diagnostic;
-import java.io.IOException;
-import java.security.Policy;
 import java.util.*;
 
 public abstract class AbstractJavaCodeWrapper extends ModuleWithUI {
@@ -32,7 +27,6 @@ public abstract class AbstractJavaCodeWrapper extends ModuleWithUI {
 	@Override
 	public void init() {
 		super.init();
-		resendAll = false;
 		resendLast = 0;
 	}
 

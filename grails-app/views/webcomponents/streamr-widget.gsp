@@ -7,12 +7,12 @@
 	<r:layoutResources disposition="defer"/>
 </g:if>
 
-<polymer-element name="streamr-widget" attributes="url dashboard resendAll resendLast authkey">
+<polymer-element name="streamr-widget" attributes="url dashboard resendLast authkey">
 	<template>
 		<streamr-client id="client"></streamr-client>
 		<div id="streamr-widget-container" class="streamr-widget-container"></div>
 	</template>
-	
+
 	<script>
 		Polymer('streamr-widget',{
 			attached: function() {
@@ -68,26 +68,18 @@
 				}
 
 				// Can be overridden by module options
-				if (json.options && (json.options.uiResendAll.value || json.options.uiResendLast.value != null)) {
+				if (json.options && json.options.uiResendLast.value != null) {
 					resendOptions = {
-						resend_all: (json.options && json.options.uiResendAll ? json.options.uiResendAll.value : undefined),
-						resend_last: (json.options && (!json.options.uiResendAll || !json.options.uiResendAll.value) && json.options.uiResendLast ? json.options.uiResendLast.value : undefined)
+						resend_last: (json.options && json.options.uiResendLast ? json.options.uiResendLast.value : undefined)
 					}
 				}
 
 				// Can be overridden by tag attributes
-				if (this.resendAll || this.resendLast != null) {
-					resendOptions = {}
-
-					if (this.resendAll !== undefined) {
-						resendOptions.resend_all = (this.resendAll.toLowerCase() === 'true')
-					}
-					else if (this.resendLast !== undefined) {
-						try {
-							resendOptions.resend_last = parseInt(this.resendLast)
-						} catch (err) {
-							console.error("resendLast could not be parsed to an integer! Value was: %s", this.resendLast)
-						}
+				if (this.resendLast !== undefined) {
+					try {
+						resendOptions.resend_last = parseInt(this.resendLast)
+					} catch (err) {
+						console.error("resendLast could not be parsed to an integer! Value was: %s", this.resendLast)
 					}
 				}
 

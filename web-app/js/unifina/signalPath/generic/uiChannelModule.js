@@ -29,13 +29,10 @@ SignalPath.UIChannelModule = function(data,canvas,prot) {
 
     prot.getUIChannelOptions = function() {
         // Check if module options contain channel options
-        if (prot.jsonData.options && prot.jsonData.options.uiResendAll && prot.jsonData.options.uiResendAll.value) {
-            return { resend_all: true }
-        }
-        else if (prot.jsonData.options && prot.jsonData.options.uiResendLast) {
+        if (prot.jsonData.options && prot.jsonData.options.uiResendLast) {
             return { resend_last: prot.jsonData.options.uiResendLast.value }
         }
-        else return { resend_all: true }
+        else return {}
     }
 
     /**
