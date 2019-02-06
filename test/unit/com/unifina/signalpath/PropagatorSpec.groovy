@@ -19,8 +19,8 @@ class PropagatorSpec extends ModuleTestingSpecification {
 	def "Propagator should activate interdependent modules in originSet"() {
 		MasterClock masterClock = new MasterClock(globals, Mock(DataSource))
 
-		Count count = setupModule(new Count(), [:], null)
-		ClockModule clock = setupModule(new ClockModule(), [:], null)
+		Count count = setupModule(new Count())
+		ClockModule clock = setupModule(new ClockModule())
 
 		// Connect
 		clock.getOutput("timestamp").connect(count.getInput("in"))
@@ -42,8 +42,8 @@ class PropagatorSpec extends ModuleTestingSpecification {
 	def "Propagator should activate interdependent modules in originSet, more complex case with indirect dependencies"() {
 		MasterClock masterClock = new MasterClock(globals, Mock(DataSource))
 
-		Count count = setupModule(new Count(), [:], null)
-		ClockModule clock = setupModule(new ClockModule(), [:], null)
+		Count count = setupModule(new Count())
+		ClockModule clock = setupModule(new ClockModule())
 		AbstractSignalPathModule mod = setupModule(new AbstractSignalPathModule() {
 			TimeSeriesInput input = new TimeSeriesInput(this, "in")
 			TimeSeriesOutput output = new TimeSeriesOutput(this, "out")
@@ -53,7 +53,7 @@ class PropagatorSpec extends ModuleTestingSpecification {
 			}
 			@Override
 			void clearState() {}
-		}, [:], null)
+		})
 		AbstractSignalPathModule mod2 = setupModule(new AbstractSignalPathModule() {
 			TimeSeriesInput input = new TimeSeriesInput(this, "in")
 			TimeSeriesOutput output = new TimeSeriesOutput(this, "out")
@@ -63,7 +63,7 @@ class PropagatorSpec extends ModuleTestingSpecification {
 			}
 			@Override
 			void clearState() {}
-		}, [:], null)
+		})
 
 		// Connect clock-mod-count-mod2
 		clock.getOutput("timestamp").connect(mod.getInput("in"))

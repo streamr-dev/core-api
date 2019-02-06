@@ -8,7 +8,7 @@ class VerifySignatureSpec extends ModuleTestingSpecification {
 	VerifySignature module
 
 	def setup() {
-		module = setupModule(new VerifySignature(), [:], null)
+		module = setupModule(new VerifySignature())
 	}
 
 	String message = "Dear Pacifics user,\n" +

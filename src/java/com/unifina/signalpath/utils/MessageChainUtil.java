@@ -19,12 +19,20 @@ public class MessageChainUtil implements Serializable {
 	private Map<String,Long> previousTimestamps = new HashMap<>();
 	private Map<String,Long> previousSequenceNumbers = new HashMap<>();
 
-	private SecUser user;
+	private Long userId;
+	private transient SecUser user;
 
 	private static final Logger log = Logger.getLogger(MessageChainUtil.class);
 
 	public MessageChainUtil(Long userId) {
-		user = SecUser.getViaJava(userId);
+		this.userId = userId;
+	}
+
+	private SecUser getUser() {
+		if (user == null) {
+			user = SecUser.getViaJava(userId);
+		}
+		return user;
 	}
 
 	private long getNextSequenceNumber(String key, long timestamp) {
@@ -50,7 +58,7 @@ public class MessageChainUtil implements Serializable {
 		String key = stream.getId()+streamPartition;
 		long timestamp = timestampAsDate.getTime();
 		long sequenceNumber = getNextSequenceNumber(key, timestamp);
-		String publisherId = user.getPublisherId();
+		String publisherId = getUser().getPublisherId();
 		MessageID msgId = new MessageID(stream.getId(), streamPartition, timestamp, sequenceNumber, publisherId);
 		MessageRef prevMsgRef = this.getPreviousMessageRef(key);
 		try {

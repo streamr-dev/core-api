@@ -19,6 +19,9 @@ class ModuleTestingSpecification extends BeanMockingSpecification {
 		module.init()
 		module.configure(moduleConfig)
 		module.setParentSignalPath(parentSignalPath)
+		if (parentSignalPath != null) {
+			parentSignalPath.globals = globals
+		}
 		return module
 	}
 
