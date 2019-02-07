@@ -136,6 +136,10 @@ public abstract class ModuleWithUI extends AbstractSignalPathModule {
 
 	}
 
+	public void ensureUiChannel() {
+		uiChannel.initialize();
+	}
+
 	public class UiChannel implements Serializable {
 
 		private String id;

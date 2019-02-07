@@ -80,9 +80,9 @@ class SignalPathService {
 	 * Potentially modifies the config given as parameter.
 	 */
 	@CompileStatic
-	Map reconstruct(Map config, Globals globals) {
+	ReconstructedResult reconstruct(Map config, Globals globals) {
 		SignalPath sp = mapToSignalPath(config, true, globals, new SignalPath(true))
-		return signalPathToMap(sp)
+		return new ReconstructedResult(signalPathToMap(sp), sp)
 	}
 
 	@Transactional
@@ -403,5 +403,15 @@ class SignalPathService {
 	@CompileStatic
 	private void removeRunner(SignalPathRunner runner) {
 		runnersById.remove(runner.runnerId)
+	}
+
+	public class ReconstructedResult {
+		public Map map
+		public SignalPath signalPath
+
+		ReconstructedResult(Map map, SignalPath signalPath) {
+			this.map = map
+			this.signalPath = signalPath
+		}
 	}
 }
