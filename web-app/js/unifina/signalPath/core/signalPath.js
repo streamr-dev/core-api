@@ -599,41 +599,65 @@ var SignalPath = (function () {
 			module.clean()
 		})
 
-		$.ajax({
-			type: 'POST',
-			url: options.apiUrl + '/canvases/' + runningJson.id + '/start',
-			data: JSON.stringify(startRequest),
-			contentType: 'application/json',
-			dataType: 'json',
-			success: function(response) {
-				if (response.error) {
-					handleError("Error:\n"+response.error)
-				}
+		runningJson.modules.forEach(function(runningModuleJson) {
+				$(pub.getModuleById(runningModuleJson.hash)).trigger('subscribing', [runningModuleJson])
+		})
 
-				runningJson = response
-
-				if (!response.adhoc)
-					savedJson = runningJson
-
-				if (callback)
-					callback(response)
-
-				$(pub).trigger('started', [response])
-
-				response.modules.forEach(function(runningModuleJson) {
-					$(pub.getModuleById(runningModuleJson.hash)).trigger('started', [runningModuleJson])
-				})
-			},
-			error: function(jqXHR, textStatus, errorThrown) {
-				if (callback) {
-					callback(undefined, jqXHR.responseJSON)
-				} if (jqXHR && jqXHR.responseJSON && jqXHR.responseJSON.message) {
-					handleError(jqXHR.responseJSON.message)
-				} else {
-					handleError(textStatus + "\n" + errorThrown)
+		function checkSubscribed() {
+			for (var i=0;i<runningJson.modules.length;i++) {
+				var runningModuleJson = runningJson.modules[i]
+				var module = $(pub.getModuleById(runningModuleJson.hash))
+				if(module.isSubscribed !== undefined && !module.isSubscribed()) {
+					return false
 				}
 			}
-		});
+			return true
+		}
+
+		function sendStartRequest() {
+        $.ajax({
+            type: 'POST',
+            url: options.apiUrl + '/canvases/' + runningJson.id + '/start',
+            data: JSON.stringify(startRequest),
+            contentType: 'application/json',
+            dataType: 'json',
+            success: function(response) {
+                if (response.error) {
+                    handleError("Error:\n"+response.error)
+                }
+
+                runningJson = response
+
+                if (!response.adhoc)
+                    savedJson = runningJson
+
+                if (callback)
+                    callback(response)
+
+                $(pub).trigger('started', [response])
+
+                response.modules.forEach(function(runningModuleJson) {
+                    $(pub.getModuleById(runningModuleJson.hash)).trigger('started', [runningModuleJson])
+                })
+            },
+            error: function(jqXHR, textStatus, errorThrown) {
+                if (callback) {
+                    callback(undefined, jqXHR.responseJSON)
+                } if (jqXHR && jqXHR.responseJSON && jqXHR.responseJSON.message) {
+                    handleError(jqXHR.responseJSON.message)
+                } else {
+                    handleError(textStatus + "\n" + errorThrown)
+                }
+            }
+        });
+		}
+
+		var intervalId = setInterval(function() {
+			if(checkSubscribed()) {
+				clearInterval(intervalId)
+				sendStartRequest()
+			}
+		}, 100)
 	}
 	pub.start = start;
 
