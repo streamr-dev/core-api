@@ -4,6 +4,7 @@ import com.unifina.security.Userish
 import com.unifina.utils.EthereumAddressValidator
 import com.unifina.utils.UsernameValidator
 import groovy.transform.CompileStatic
+import org.apache.commons.codec.digest.DigestUtils
 
 class SecUser implements Userish {
 
@@ -101,6 +102,7 @@ class SecUser implements Userish {
 		if (isEthereumUser()) {
 			return username
 		}
-		return id.toString()
+		// 'username' is the email address of the user. For privacy concerns, the publisher id is the hash of the email address.
+		return DigestUtils.sha256Hex(username)
 	}
 }

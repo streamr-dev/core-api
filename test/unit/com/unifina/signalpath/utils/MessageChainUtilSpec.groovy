@@ -4,6 +4,7 @@ import com.streamr.client.protocol.message_layer.StreamMessageV30
 import com.unifina.domain.data.Stream
 import com.unifina.domain.security.SecUser
 import grails.test.mixin.Mock
+import org.apache.commons.codec.digest.DigestUtils
 import spock.lang.Specification
 
 @Mock([SecUser])
@@ -12,11 +13,13 @@ class MessageChainUtilSpec extends Specification {
 	MessageChainUtil msgChainUtil
 	Map content = [foo: "bar"]
 	Stream stream = new Stream()
+	String hashedUsername
 	def setup() {
 		stream.id = "streamId"
 		Long userId = 1
-		new SecUser(id: userId).save(failOnError: true, validate: false)
+		new SecUser(id: userId, username: 'user').save(failOnError: true, validate: false)
 		msgChainUtil = new MessageChainUtil(userId)
+		hashedUsername = DigestUtils.sha256Hex("user")
 	}
 
 
@@ -28,19 +31,19 @@ class MessageChainUtilSpec extends Specification {
 		StreamMessageV30 msg3 = msgChainUtil.getStreamMessage(stream, date, content)
 		then:
 		msg1.getStreamId() == stream.getId()
-		msg1.getPublisherId() == "1"
+		msg1.getPublisherId() == hashedUsername
 		msg1.getTimestamp() == date.getTime()
 		msg1.getSequenceNumber() == 0
 		msg1.getPreviousMessageRef() == null
 		msg1.getContent() == content
 		msg2.getStreamId() == stream.getId()
-		msg2.getPublisherId() == "1"
+		msg2.getPublisherId() == hashedUsername
 		msg2.getTimestamp() == date.getTime()
 		msg2.getSequenceNumber() == 1
 		msg2.getPreviousMessageRef().timestamp == date.getTime()
 		msg2.getPreviousMessageRef().sequenceNumber == 0
 		msg3.getStreamId() == stream.getId()
-		msg3.getPublisherId() == "1"
+		msg3.getPublisherId() == hashedUsername
 		msg3.getTimestamp() == date.getTime()
 		msg3.getSequenceNumber() == 2
 		msg3.getPreviousMessageRef().timestamp == date.getTime()
@@ -57,19 +60,19 @@ class MessageChainUtilSpec extends Specification {
 		StreamMessageV30 msg3 = msgChainUtil.getStreamMessage(stream, date3, content)
 		then:
 		msg1.getStreamId() == stream.getId()
-		msg1.getPublisherId() == "1"
+		msg1.getPublisherId() == hashedUsername
 		msg1.getTimestamp() == date1.getTime()
 		msg1.getSequenceNumber() == 0
 		msg1.getPreviousMessageRef() == null
 		msg1.getContent() == content
 		msg2.getStreamId() == stream.getId()
-		msg2.getPublisherId() == "1"
+		msg2.getPublisherId() == hashedUsername
 		msg2.getTimestamp() == date2.getTime()
 		msg2.getSequenceNumber() == 0
 		msg2.getPreviousMessageRef().timestamp == date1.getTime()
 		msg2.getPreviousMessageRef().sequenceNumber == 0
 		msg3.getStreamId() == stream.getId()
-		msg3.getPublisherId() == "1"
+		msg3.getPublisherId() == hashedUsername
 		msg3.getTimestamp() == date3.getTime()
 		msg3.getSequenceNumber() == 0
 		msg3.getPreviousMessageRef().timestamp == date2.getTime()
@@ -89,24 +92,24 @@ class MessageChainUtilSpec extends Specification {
 		StreamMessageV30 msg4 = msgChainUtil.getStreamMessage(stream2, date2, content)
 		then:
 		msg1.getStreamId() == stream.getId()
-		msg1.getPublisherId() == "1"
+		msg1.getPublisherId() == hashedUsername
 		msg1.getTimestamp() == date1.getTime()
 		msg1.getSequenceNumber() == 0
 		msg1.getPreviousMessageRef() == null
 		msg1.getContent() == content
 		msg2.getStreamId() == stream2.getId()
-		msg2.getPublisherId() == "1"
+		msg2.getPublisherId() == hashedUsername
 		msg2.getTimestamp() == date2.getTime()
 		msg2.getSequenceNumber() == 0
 		msg2.getPreviousMessageRef() == null
 		msg3.getStreamId() == stream.getId()
-		msg3.getPublisherId() == "1"
+		msg3.getPublisherId() == hashedUsername
 		msg3.getTimestamp() == date3.getTime()
 		msg3.getSequenceNumber() == 0
 		msg3.getPreviousMessageRef().timestamp == date1.getTime()
 		msg3.getPreviousMessageRef().sequenceNumber == 0
 		msg4.getStreamId() == stream2.getId()
-		msg4.getPublisherId() == "1"
+		msg4.getPublisherId() == hashedUsername
 		msg4.getTimestamp() == date2.getTime()
 		msg4.getSequenceNumber() == 1
 		msg4.getPreviousMessageRef().timestamp == date2.getTime()

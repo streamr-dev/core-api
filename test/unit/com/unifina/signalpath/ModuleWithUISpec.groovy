@@ -24,8 +24,8 @@ class ModuleWithUISpec extends Specification {
 	ModuleWithUI module
 	PermissionService permissionService
 	StreamService streamService
-	SecUser permittedUser = new SecUser()
-	SecUser nonPermitterUser = new SecUser()
+	SecUser permittedUser = new SecUser(username: 'permittedUser')
+	SecUser nonPermitterUser = new SecUser(username: 'nonPermittedUser')
 
 	def setup() {
 		streamService = Mock(StreamService)

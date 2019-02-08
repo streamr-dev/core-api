@@ -65,7 +65,7 @@ class SendToStreamSpec extends BeanMockingSpecification {
 			permissionService(AllPermissionService)
 		}
 
-		def user = new SecUser(name: "test user")
+		def user = new SecUser(name: "test user", username: 'test user')
 		user.save(failOnError: true, validate: false)
 
 		def feed = new Feed()

@@ -16,7 +16,7 @@ class EventTableSpec extends UiChannelMockingSpecification {
 
 	def setup() {
 		mockServicesForUiChannels()
-		SecUser user = new SecUser().save(failOnError: true, validate: false)
+		SecUser user = new SecUser(username: 'user').save(failOnError: true, validate: false)
 		module = setupModule(
 				new EventTable(),
 				[

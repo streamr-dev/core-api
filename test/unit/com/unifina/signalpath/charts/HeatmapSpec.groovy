@@ -19,7 +19,7 @@ class HeatmapSpec extends UiChannelMockingSpecification {
 
 		module = setupModule(new Heatmap(), [
 			uiChannel: [id: "heatmap"],
-		], new SignalPath(true), mockGlobals([:], new SecUser().save(failOnError: true, validate: false)))
+		], new SignalPath(true), mockGlobals([:], new SecUser(username: 'user').save(failOnError: true, validate: false)))
 	}
 
 	void "heatmap sends correct data to uiChannel"() {
