@@ -1,6 +1,7 @@
 package com.unifina.controller.api
 
 import com.unifina.ControllerSpecification
+import com.unifina.api.ApiException
 import com.unifina.api.NotFoundException
 import com.unifina.security.Challenge
 import com.unifina.domain.security.IntegrationKey
@@ -177,6 +178,7 @@ class IntegrationKeyApiControllerSpec extends ControllerSpecification {
 
 		then:
 		0 * controller.ethereumIntegrationKeyService._
+		thrown ApiException
 		response.status == 400
 	}
 
@@ -196,6 +198,7 @@ class IntegrationKeyApiControllerSpec extends ControllerSpecification {
 
 		then:
 		1 * controller.ethereumIntegrationKeyService.updateKey(me, "1234-not-found", "key's new name") >> { throw new NotFoundException("mocked") }
+		thrown NotFoundException
 		response.status == 404
 	}
 }

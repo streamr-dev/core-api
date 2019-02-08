@@ -78,7 +78,7 @@ class IntegrationKeyApiController {
 		Map json = new JsonSlurper().parseText((String) request.JSON)
 		if (json.name == null || json.name.trim() == "") {
 			response.status = 400
-			return
+			throw new ApiException(400, "BODY_NOT_VALID", "must send JSON body containing property 'name'.")
 		}
 		String name = (String) json.name
 
@@ -86,7 +86,7 @@ class IntegrationKeyApiController {
 			ethereumIntegrationKeyService.updateKey(apiUser(), id, name)
 		} catch (NotFoundException e) {
 			response.status = 404
-			return
+			throw e
 		}
 		response.status = 204
 		render ""
