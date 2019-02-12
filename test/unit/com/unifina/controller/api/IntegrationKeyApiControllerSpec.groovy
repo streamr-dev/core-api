@@ -163,42 +163,4 @@ class IntegrationKeyApiControllerSpec extends ControllerSpecification {
 		1 * controller.ethereumIntegrationKeyService.updateKey(me, "1234", "key's new name")
 		response.status == 204
 	}
-
-	def "update integration key name but no name provided"() {
-		setup:
-		controller.ethereumIntegrationKeyService = Mock(EthereumIntegrationKeyService)
-
-		when:
-		String id = "1234"
-		request.requestURI = "/api/v1/integration_keys/" + id
-		request.method = "PUT"
-		request.json = [:]
-		request.apiUser = me
-		authenticatedAs(me) { controller.update(id) }
-
-		then:
-		0 * controller.ethereumIntegrationKeyService._
-		thrown ApiException
-		response.status == 400
-	}
-
-	def "update integration key name but key not found by id"() {
-		setup:
-		controller.ethereumIntegrationKeyService = Mock(EthereumIntegrationKeyService)
-
-		when:
-		String id = "1234-not-found"
-		request.requestURI = "/api/v1/integration_keys/" + id
-		request.method = "PUT"
-		request.json = [
-			name: "key's new name",
-		]
-		request.apiUser = me
-		authenticatedAs(me) { controller.update(id) }
-
-		then:
-		1 * controller.ethereumIntegrationKeyService.updateKey(me, "1234-not-found", "key's new name") >> { throw new NotFoundException("mocked") }
-		thrown NotFoundException
-		response.status == 404
-	}
 }

@@ -69,15 +69,13 @@ class IntegrationKeyApiController {
 	@StreamrApi
 	def delete(String id) {
 		ethereumIntegrationKeyService.delete(id, apiUser())
-		response.status = 204
-		render ""
+		render(status: 204, body: "")
 	}
 
 	@StreamrApi
 	def update(String id) {
 		Map json = new JsonSlurper().parseText((String) request.JSON)
 		if (json.name == null || json.name.trim() == "") {
-			response.status = 400
 			throw new ApiException(400, "BODY_NOT_VALID", "must send JSON body containing property 'name'.")
 		}
 		String name = (String) json.name
@@ -85,11 +83,9 @@ class IntegrationKeyApiController {
 		try {
 			ethereumIntegrationKeyService.updateKey(apiUser(), id, name)
 		} catch (NotFoundException e) {
-			response.status = 404
 			throw e
 		}
-		response.status = 204
-		render ""
+		render(status: 204, body: "")
 	}
 
 	SecUser apiUser() {
