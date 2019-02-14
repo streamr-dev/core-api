@@ -125,6 +125,9 @@ class CassandraService implements DisposableBean {
 		final List<StreamrMessage> messages = new ArrayList<>()
 		for (int i = 0; i < stream.getPartitions(); i++) {
 			final StreamrBinaryMessageWithKafkaMetadata meta = getLatest(stream, i)
+			if (meta == null) {
+				continue
+			}
 			final StreamrBinaryMessage bin = meta.getStreamrBinaryMessage()
 			final StreamrMessage msg = bin.toStreamrMessage()
 			messages.add(msg)

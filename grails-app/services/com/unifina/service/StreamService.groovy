@@ -22,11 +22,11 @@ import com.unifina.feed.AbstractStreamListener
 import com.unifina.feed.DataRange
 import com.unifina.feed.DataRangeProvider
 import com.unifina.feed.FieldDetector
+import com.unifina.feed.StreamrMessage
 import com.unifina.feed.redis.StreamrBinaryMessageWithKafkaMetadata
 import com.unifina.signalpath.RuntimeRequest
 import com.unifina.task.DelayedDeleteStreamTask
 import com.unifina.utils.CSVImporter
-import com.unifina.utils.EthereumAddressValidator
 import com.unifina.utils.IdGenerator
 import grails.converters.JSON
 import groovy.transform.CompileStatic
@@ -327,5 +327,25 @@ class StreamService {
 		RuntimeRequest.PathReader reader = new RuntimeRequest.PathReader(path.substring(1))
 		reader.readCanvasId()
 		return reader.readModuleId()
+	}
+
+	static class StreamStatus {
+		Boolean ok
+		Date date
+		StreamStatus(Boolean ok, Date date) {
+			this.ok = ok
+			this.date = date
+		}
+	}
+
+	@CompileStatic
+	StreamStatus status(Stream s, Date threshold) {
+		StreamrMessage msg = cassandraService.getLatestFromAllPartitions(s)
+		if (msg == null) {
+			return new StreamStatus(false, null)
+		} else if (msg != null && msg.getTimestamp().before(threshold)) {
+			return new StreamStatus(false, msg.timestamp)
+		}
+		return new StreamStatus(true, msg.timestamp)
 	}
 }
