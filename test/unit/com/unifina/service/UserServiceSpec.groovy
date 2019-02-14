@@ -1,6 +1,8 @@
 package com.unifina.service
 
+import com.unifina.api.ApiException
 import com.unifina.api.InvalidUsernameAndPasswordException
+import com.unifina.api.NotFoundException
 import com.unifina.domain.data.Feed
 import com.unifina.domain.security.*
 import com.unifina.domain.signalpath.Module
@@ -193,5 +195,37 @@ class UserServiceSpec extends Specification {
 		then:
 		retrievedKey != null
 		retrievedKey.id == retrievedKey.id
+	}
+
+	def "delete user"() {
+		setup:
+		SecUser user = new SecUser()
+		user.id = 1
+
+		when:
+		service.delete(user, user.id)
+
+		then:
+		user.enabled == false
+	}
+
+	def "delete user deletes only currently logged in user"() {
+		setup:
+		SecUser user = new SecUser()
+		user.id = 1
+
+		when:
+		service.delete(user, 2)
+
+		then:
+		thrown ApiException
+	}
+
+	def "delete user validates parameters"() {
+		when:
+		service.delete(null, null)
+
+		then:
+		thrown NotFoundException
 	}
 }
