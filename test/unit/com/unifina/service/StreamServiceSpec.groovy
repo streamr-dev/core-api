@@ -13,8 +13,10 @@ import com.unifina.domain.security.SecUser
 import com.unifina.domain.signalpath.Canvas
 import com.unifina.feed.AbstractStreamListener
 import com.unifina.feed.NoOpStreamListener
+import com.unifina.feed.StreamrMessage
 import grails.test.mixin.Mock
 import grails.test.mixin.TestFor
+import org.apache.commons.lang.time.DateUtils
 import org.codehaus.groovy.grails.commons.DefaultGrailsApplication
 import org.springframework.context.ApplicationContext
 import spock.lang.Specification
@@ -420,5 +422,72 @@ class StreamServiceSpec extends Specification {
 		then:
 		1 * service.permissionService.getPermissionsTo(stream, Permission.Operation.WRITE) >> perms
 		addresses == validAddresses
+	}
+
+	void "status ok and has recent messages"() {
+		setup:
+		service.cassandraService = Mock(CassandraService)
+		Stream s = new Stream([name: "Stream 1"])
+		s.id = "s1"
+
+		Date timestamp = newDate(2019, 1, 15, 11, 12, 06)
+		long expected = timestamp.getTime()
+		Date threshold = newDate(2019, 1, 14, 10, 50, 0)
+		StreamrMessage msg = new StreamrMessage("s1", 1, timestamp, new HashMap())
+
+		when:
+		StreamService.StreamStatus status = service.status(s, threshold)
+
+		then:
+		1 * service.cassandraService.getLatestFromAllPartitions(s) >> msg
+		status.ok == true
+		status.date.getTime() == expected
+	}
+
+	void "status not ok, no messages in stream"() {
+		setup:
+		service.cassandraService = Mock(CassandraService)
+		Stream s = new Stream([name: "Stream 1"])
+		s.id = "s1"
+		StreamrMessage msg = null
+
+		when:
+		StreamService.StreamStatus status = service.status(s, new Date())
+
+		then:
+		1 * service.cassandraService.getLatestFromAllPartitions(s) >> msg
+		status.ok == false
+		status.date == null
+	}
+
+	void "status stream has messages, but stream is stale"() {
+		setup:
+		service.cassandraService = Mock(CassandraService)
+		Stream s = new Stream([name: "Stream 1"])
+		s.id = "s1"
+
+		Date timestamp = newDate(2019, 1, 10, 12, 12, 06)
+		long expected = timestamp.getTime()
+		StreamrMessage msg = new StreamrMessage("s1", 1, timestamp, new HashMap())
+		Date threshold = newDate(2019, 1, 15, 0, 0, 0)
+
+		when:
+		StreamService.StreamStatus status = service.status(s, threshold)
+
+		then:
+		1 * service.cassandraService.getLatestFromAllPartitions(s) >> msg
+		status.ok == false
+		status.date.getTime() == expected
+	}
+
+	Date newDate(int year, int month, int date, int hour, int minute, int second) {
+		Calendar cal = Calendar.getInstance()
+		cal.set(Calendar.YEAR, year)
+		cal.set(Calendar.MONTH, month - 1)
+		cal.set(Calendar.DATE, date)
+		cal.set(Calendar.HOUR_OF_DAY, hour)
+		cal.set(Calendar.MINUTE, minute)
+		cal.set(Calendar.SECOND, second)
+		return cal.getTime()
 	}
 }

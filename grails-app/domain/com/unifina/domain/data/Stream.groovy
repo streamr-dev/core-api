@@ -8,6 +8,7 @@ import groovy.transform.CompileStatic
 
 class Stream implements Comparable {
 	public final static String DEFAULT_NAME = "Untitled Stream"
+	public final static Integer DEFAULT_STORAGE_DAYS = 365
 	String id
 	Integer partitions = 1
 
@@ -27,6 +28,10 @@ class Stream implements Comparable {
 	Canvas uiChannelCanvas
 
 	Boolean requireSignedData = false
+	// Always try to autoconfigure field names and types
+	Boolean autoConfigure = true
+	// Historical data storage period (days)
+	Integer storageDays = DEFAULT_STORAGE_DAYS
 
 	static hasMany = [
 		permissions: Permission,
@@ -43,6 +48,8 @@ class Stream implements Comparable {
 		lastHistoricalDay(nullable:true)
 		uiChannelPath(nullable:true)
 		uiChannelCanvas(nullable:true)
+		autoConfigure(nullable: false)
+		storageDays(nullable: false, min: 0)
 	}
 
 	static mapping = {
@@ -53,6 +60,8 @@ class Stream implements Comparable {
 		uiChannelPath index: "ui_channel_path_idx"
 		config type: 'text'
 		requireSignedData defaultValue: "false"
+		autoConfigure defaultValue: "true"
+		storageDays defaultValue: DEFAULT_STORAGE_DAYS
 	}
 
 	@Override

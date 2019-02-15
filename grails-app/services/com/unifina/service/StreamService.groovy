@@ -289,4 +289,24 @@ class StreamService {
 		reader.readCanvasId()
 		return reader.readModuleId()
 	}
+
+	static class StreamStatus {
+		Boolean ok
+		Date date
+		StreamStatus(Boolean ok, Date date) {
+			this.ok = ok
+			this.date = date
+		}
+	}
+
+	@CompileStatic
+	StreamStatus status(Stream s, Date threshold) {
+		StreamrMessage msg = cassandraService.getLatestFromAllPartitions(s)
+		if (msg == null) {
+			return new StreamStatus(false, null)
+		} else if (msg != null && msg.getTimestamp().before(threshold)) {
+			return new StreamStatus(false, msg.timestamp)
+		}
+		return new StreamStatus(true, msg.timestamp)
+	}
 }

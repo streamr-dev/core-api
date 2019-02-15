@@ -32,6 +32,8 @@ class SecUser implements Userish {
 		username blank: false, unique: true, validator: UsernameValidator.validate
 		password blank: false
 		name blank: false
+		dateCreated nullable: true
+		lastLogin nullable: true
 	}
 
 	static mapping = {
