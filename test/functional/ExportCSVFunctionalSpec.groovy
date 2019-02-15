@@ -75,7 +75,7 @@ class ExportCSVFunctionalSpec extends LoginTester1Spec implements CanvasMixin, C
 		stream.id = id
 		(1..iters).each { num ->
 			StreamMessage msg = new StreamMessageV30(stream.id, 0, 30L, 0L,
-				"", null, 0L, StreamMessage.ContentType.CONTENT_TYPE_JSON,
+				"", "", null, 0L, StreamMessage.ContentType.CONTENT_TYPE_JSON,
 				[key: "key-$num", value: num], StreamMessage.SignatureType.SIGNATURE_TYPE_NONE, null)
 			streamService.sendMessage(msg)
 		}

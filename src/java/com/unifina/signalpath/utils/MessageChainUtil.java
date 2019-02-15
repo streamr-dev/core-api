@@ -59,17 +59,12 @@ public class MessageChainUtil implements Serializable {
 		long timestamp = timestampAsDate.getTime();
 		long sequenceNumber = getNextSequenceNumber(key, timestamp);
 		String publisherId = getUser().getPublisherId();
-		MessageID msgId = new MessageID(stream.getId(), streamPartition, timestamp, sequenceNumber, publisherId);
+		MessageID msgId = new MessageID(stream.getId(), streamPartition, timestamp, sequenceNumber, publisherId, "");
 		MessageRef prevMsgRef = this.getPreviousMessageRef(key);
-		try {
-			StreamMessage msg = new StreamMessageV30(msgId, prevMsgRef, StreamMessage.ContentType.CONTENT_TYPE_JSON,
-					content, StreamMessage.SignatureType.SIGNATURE_TYPE_NONE, null);
-			previousTimestamps.put(key, timestamp);
-			previousSequenceNumbers.put(key, sequenceNumber);
-			return msg;
-		} catch (IOException e) {
-			log.error(e);
-		}
-		return null;
+		StreamMessage msg = new StreamMessageV30(msgId, prevMsgRef, StreamMessage.ContentType.CONTENT_TYPE_JSON,
+				content, StreamMessage.SignatureType.SIGNATURE_TYPE_NONE, null);
+		previousTimestamps.put(key, timestamp);
+		previousSequenceNumbers.put(key, sequenceNumber);
+		return msg;
 	}
 }

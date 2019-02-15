@@ -302,7 +302,7 @@ class CanvasSpec extends LoginTester1Spec implements CanvasMixin, ListPageMixin,
 		String uniqueText = "test-"+System.currentTimeMillis()
 		SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS")
 		Date date = df.parse("2015-02-23 18:30:00.011")
-		StreamMessageV30 msg = new StreamMessageV30(testStream.id, 0, date.getTime(), 0L, "", null, 0L,
+		StreamMessageV30 msg = new StreamMessageV30(testStream.id, 0, date.getTime(), 0L, "", "", null, 0L,
 			StreamMessage.ContentType.CONTENT_TYPE_JSON, '["temperature": 24, "rpm": 100, "text": '+uniqueText+']',
 			StreamMessage.SignatureType.SIGNATURE_TYPE_NONE, null)
 		streamService.saveMessage(msg)

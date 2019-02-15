@@ -85,7 +85,7 @@ class ProductServiceSpec extends Specification {
 	}
 
 	StreamMessage buildMsg(String streamId, int streamPartition, Date timestamp, Map content) {
-		return new StreamMessageV30(streamId, streamPartition, timestamp.getTime(), 0, "", null, null,
+		return new StreamMessageV30(streamId, streamPartition, timestamp.getTime(), 0, "", "", null, null,
 			StreamMessage.ContentType.CONTENT_TYPE_JSON, content, StreamMessage.SignatureType.SIGNATURE_TYPE_NONE, null)
 	}
 

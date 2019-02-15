@@ -25,7 +25,7 @@ class FieldDetectorSpec extends Specification {
 		detector = new FieldDetector() {
 			@Override
 			protected StreamMessage fetchExampleMessage(Stream stream) {
-				return new StreamMessageV30(stream.id, 0, System.currentTimeMillis(), 0L, "", (Long) null, 0L,
+				return new StreamMessageV30(stream.id, 0, System.currentTimeMillis(), 0L, "", "", (Long) null, 0L,
 					StreamMessage.ContentType.CONTENT_TYPE_JSON, gson.toJson(mapToReturn),
 					StreamMessage.SignatureType.SIGNATURE_TYPE_NONE, null)
 			}

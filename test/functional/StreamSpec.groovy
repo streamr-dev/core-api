@@ -93,7 +93,7 @@ class StreamSpec extends LoginTester1Spec implements ConfirmationMixin, StreamMi
 			Stream testStream = new Stream()
 			testStream.id = streamId
 			StreamMessage msg = new StreamMessageV30(testStream.id, 0, 30L, 0L,
-				"", null, 0L, StreamMessage.ContentType.CONTENT_TYPE_JSON,
+				"", "", null, 0L, StreamMessage.ContentType.CONTENT_TYPE_JSON,
 				[foo: "bar", "xyz": 45.5], StreamMessage.SignatureType.SIGNATURE_TYPE_NONE, null)
 			streamService.sendMessage(msg)
 			sleep(1000)

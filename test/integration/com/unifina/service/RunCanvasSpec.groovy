@@ -50,14 +50,14 @@ class RunCanvasSpec extends IntegrationSpec {
 		// Produce data
 		(1..100).each {
 			StreamMessage msg = new StreamMessageV30(stream.id, 0, System.currentTimeMillis(), 0L,
-				"", null, 0L, StreamMessage.ContentType.CONTENT_TYPE_JSON,
+				"", "", null, 0L, StreamMessage.ContentType.CONTENT_TYPE_JSON,
 				[numero: it, areWeDoneYet: false], StreamMessage.SignatureType.SIGNATURE_TYPE_NONE, null)
 			streamService.sendMessage(msg)
 		}
 
 		// Terminator data package to know when we're done
 		StreamMessage msg = new StreamMessageV30(stream.id, 0, System.currentTimeMillis(), 0L,
-			"", null, 0L, StreamMessage.ContentType.CONTENT_TYPE_JSON,
+			"", "", null, 0L, StreamMessage.ContentType.CONTENT_TYPE_JSON,
 			[numero: 0, areWeDoneYet: true], StreamMessage.SignatureType.SIGNATURE_TYPE_NONE, null)
 		streamService.sendMessage(msg)
 

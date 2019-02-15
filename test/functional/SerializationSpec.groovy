@@ -64,7 +64,7 @@ class SerializationSpec extends LoginTester1Spec implements CanvasMixin, Confirm
 			Thread.start {
 				for (int i = 0; i < 20; ++i) {
 					StreamMessage msg = new StreamMessageV30(testStream.id, 0, 30L, 0L,
-						"", null, 0L, StreamMessage.ContentType.CONTENT_TYPE_JSON,
+						"", "", null, 0L, StreamMessage.ContentType.CONTENT_TYPE_JSON,
 						[a: i, b: (i * 0.5)], StreamMessage.SignatureType.SIGNATURE_TYPE_NONE, null)
 					streamService.sendMessage(msg)
 					sleep(150)
@@ -88,7 +88,7 @@ class SerializationSpec extends LoginTester1Spec implements CanvasMixin, Confirm
 			Thread.start {
 				for (int i = 100; i < 105; ++i) {
 					StreamMessage msg = new StreamMessageV30(testStream.id, 0, 30L, 0L,
-						"", null, 0L, StreamMessage.ContentType.CONTENT_TYPE_JSON,
+						"", "", null, 0L, StreamMessage.ContentType.CONTENT_TYPE_JSON,
 						[a: i, b: (i * 0.5)], StreamMessage.SignatureType.SIGNATURE_TYPE_NONE, null)
 					streamService.sendMessage(msg)
 					sleep(150)
@@ -107,7 +107,7 @@ class SerializationSpec extends LoginTester1Spec implements CanvasMixin, Confirm
 			Thread.start {
 				for (int i = 0; i < 20; ++i) {
 					StreamMessage msg = new StreamMessageV30(testStream.id, 0, 30L, 0L,
-						"", null, 0L, StreamMessage.ContentType.CONTENT_TYPE_JSON,
+						"", "", null, 0L, StreamMessage.ContentType.CONTENT_TYPE_JSON,
 						[a: i, b: (i * 0.5)], StreamMessage.SignatureType.SIGNATURE_TYPE_NONE, null)
 					streamService.sendMessage(msg)
 					sleep(150)

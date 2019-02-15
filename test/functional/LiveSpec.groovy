@@ -25,7 +25,7 @@ class LiveSpec extends LoginTester1Spec implements CanvasMixin, ConfirmationMixi
 		final TimerTask task = new TimerTask() {
 			void run() {
 				StreamMessage msg = new StreamMessageV30(testStream.id, 0, 30L, 0L,
-					"", null, 0L, StreamMessage.ContentType.CONTENT_TYPE_JSON,
+					"", "", null, 0L, StreamMessage.ContentType.CONTENT_TYPE_JSON,
 					[rand: Math.random()], StreamMessage.SignatureType.SIGNATURE_TYPE_NONE, null)
 				ss.sendMessage(msg)
 			}

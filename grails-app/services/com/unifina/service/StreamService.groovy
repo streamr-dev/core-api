@@ -170,7 +170,7 @@ class StreamService {
 			}
 
 			int partition = partitioner.partition(stream, null)
-			StreamMessageV30 msg = new StreamMessageV30(stream.id, partition, date.time, sequenceNumber, publisherId,
+			StreamMessageV30 msg = new StreamMessageV30(stream.id, partition, date.time, sequenceNumber, publisherId, "",
 				previousTimestamp, sequenceNumber, StreamMessage.ContentType.CONTENT_TYPE_JSON,
 				gson.toJson(message), StreamMessage.SignatureType.SIGNATURE_TYPE_NONE, null)
 			saveMessage(msg)
