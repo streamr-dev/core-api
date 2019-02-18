@@ -1,5 +1,7 @@
 package com.unifina.service
 
+import com.streamr.client.protocol.message_layer.StreamMessage
+import com.streamr.client.protocol.message_layer.StreamMessageV30
 import com.unifina.api.NotFoundException
 import com.unifina.api.NotPermittedException
 import com.unifina.domain.dashboard.Dashboard
@@ -433,7 +435,8 @@ class StreamServiceSpec extends Specification {
 		Date timestamp = newDate(2019, 1, 15, 11, 12, 06)
 		long expected = timestamp.getTime()
 		Date threshold = newDate(2019, 1, 14, 10, 50, 0)
-		StreamrMessage msg = new StreamrMessage("s1", 1, timestamp, new HashMap())
+		StreamMessage msg = new StreamMessageV30("s1", 0, timestamp.getTime(), 0L, "publisherId", "1", 0L, 0L,
+			StreamMessage.ContentType.CONTENT_TYPE_JSON, "", StreamMessage.SignatureType.SIGNATURE_TYPE_NONE, "")
 
 		when:
 		StreamService.StreamStatus status = service.status(s, threshold)
@@ -449,13 +452,12 @@ class StreamServiceSpec extends Specification {
 		service.cassandraService = Mock(CassandraService)
 		Stream s = new Stream([name: "Stream 1"])
 		s.id = "s1"
-		StreamrMessage msg = null
 
 		when:
 		StreamService.StreamStatus status = service.status(s, new Date())
 
 		then:
-		1 * service.cassandraService.getLatestFromAllPartitions(s) >> msg
+		1 * service.cassandraService.getLatestFromAllPartitions(s) >> null
 		status.ok == false
 		status.date == null
 	}
@@ -468,7 +470,8 @@ class StreamServiceSpec extends Specification {
 
 		Date timestamp = newDate(2019, 1, 10, 12, 12, 06)
 		long expected = timestamp.getTime()
-		StreamrMessage msg = new StreamrMessage("s1", 1, timestamp, new HashMap())
+		StreamMessage msg = new StreamMessageV30("s1", 0, timestamp.getTime(), 0L, "publisherId", "1", 0L, 0L,
+			StreamMessage.ContentType.CONTENT_TYPE_JSON, "", StreamMessage.SignatureType.SIGNATURE_TYPE_NONE, "")
 		Date threshold = newDate(2019, 1, 15, 0, 0, 0)
 
 		when:
