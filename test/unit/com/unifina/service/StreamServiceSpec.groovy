@@ -15,10 +15,8 @@ import com.unifina.domain.security.SecUser
 import com.unifina.domain.signalpath.Canvas
 import com.unifina.feed.AbstractStreamListener
 import com.unifina.feed.NoOpStreamListener
-import com.unifina.feed.StreamrMessage
 import grails.test.mixin.Mock
 import grails.test.mixin.TestFor
-import org.apache.commons.lang.time.DateUtils
 import org.codehaus.groovy.grails.commons.DefaultGrailsApplication
 import org.springframework.context.ApplicationContext
 import spock.lang.Specification
