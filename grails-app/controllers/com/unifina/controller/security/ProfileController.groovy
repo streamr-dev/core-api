@@ -1,10 +1,6 @@
 package com.unifina.controller.security
 
-import com.unifina.domain.data.Stream
-import com.unifina.domain.security.Key
-import com.unifina.domain.security.Permission
 import com.unifina.domain.security.SecUser
-import com.unifina.service.StreamService
 import grails.converters.JSON
 import grails.plugin.springsecurity.annotation.Secured
 

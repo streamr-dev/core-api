@@ -32,12 +32,13 @@ class ProfileControllerSpec extends Specification {
 	void setup() {
 		controller.springSecurityService = springSecurityService
 		controller.streamService = Mock(StreamService)
-		user = new SecUser(id:1,
+		user = new SecUser(
 			username:"test@test.com",
 			name: "Test User",
 			password:springSecurityService.encodePassword("foobar123!"),
 			enabled: true,
 		)
+		user.id = 1
 		user.save(validate:false)
 		springSecurityService.currentUser = user
 
@@ -135,5 +136,19 @@ class ProfileControllerSpec extends Specification {
 		SecUser.get(1).username == "test@test.com"
 		response.json.username == "test@test.com"
 		SecUser.get(1).enabled
+	}
+
+	void "upload image"() {
+		setup:
+		controller.userService = Mock(UserService)
+
+		when:
+		request.method = "POST"
+		authenticatedAs(user) {
+			controller.uploadAvatarImage()
+		}
+
+		then:
+		1 * controller.userService.uploadImage()
 	}
 }
