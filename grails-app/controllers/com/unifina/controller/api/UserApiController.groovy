@@ -2,7 +2,6 @@ package com.unifina.controller.api
 
 import com.unifina.api.ApiException
 import com.unifina.domain.security.SecUser
-import com.unifina.security.AuthLevel
 import com.unifina.security.StreamrApi
 import com.unifina.service.UserAvatarImageService
 import com.unifina.service.UserService

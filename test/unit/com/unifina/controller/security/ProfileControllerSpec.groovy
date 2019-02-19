@@ -137,18 +137,4 @@ class ProfileControllerSpec extends Specification {
 		response.json.username == "test@test.com"
 		SecUser.get(1).enabled
 	}
-
-	void "upload image"() {
-		setup:
-		controller.userService = Mock(UserService)
-
-		when:
-		request.method = "POST"
-		authenticatedAs(user) {
-			controller.uploadAvatarImage()
-		}
-
-		then:
-		1 * controller.userService.uploadImage()
-	}
 }
