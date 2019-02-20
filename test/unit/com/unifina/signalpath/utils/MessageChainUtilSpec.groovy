@@ -17,9 +17,9 @@ class MessageChainUtilSpec extends Specification {
 	def setup() {
 		stream.id = "streamId"
 		Long userId = 1
-		new SecUser(id: userId, username: 'user').save(failOnError: true, validate: false)
+		SecUser user = new SecUser(id: userId, username: 'user').save(failOnError: true, validate: false)
 		msgChainUtil = new MessageChainUtil(userId)
-		hashedUsername = DigestUtils.sha256Hex("user")
+		hashedUsername = user.getPublisherId()
 	}
 
 

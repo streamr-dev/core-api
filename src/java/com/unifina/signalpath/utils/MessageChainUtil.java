@@ -7,6 +7,7 @@ import com.streamr.client.protocol.message_layer.StreamMessageV30;
 import com.unifina.data.StreamPartitioner;
 import com.unifina.domain.data.Stream;
 import com.unifina.domain.security.SecUser;
+import com.unifina.utils.IdGenerator;
 import org.apache.log4j.Logger;
 
 import java.io.IOException;
@@ -14,18 +15,23 @@ import java.io.Serializable;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
-
+/**
+ * Generates StreamMessage chains by maintaining a state of the last message reference per
+ * streamId-streamPartition-publisherId-msgChainId.
+ */
 public class MessageChainUtil implements Serializable {
 	private Map<String,Long> previousTimestamps = new HashMap<>();
 	private Map<String,Long> previousSequenceNumbers = new HashMap<>();
 
 	private Long userId;
+	private String msgChainId;
 	private transient SecUser user;
 
 	private static final Logger log = Logger.getLogger(MessageChainUtil.class);
 
 	public MessageChainUtil(Long userId) {
 		this.userId = userId;
+		this.msgChainId = IdGenerator.getShort();
 	}
 
 	private SecUser getUser() {
@@ -59,7 +65,7 @@ public class MessageChainUtil implements Serializable {
 		long timestamp = timestampAsDate.getTime();
 		long sequenceNumber = getNextSequenceNumber(key, timestamp);
 		String publisherId = getUser().getPublisherId();
-		MessageID msgId = new MessageID(stream.getId(), streamPartition, timestamp, sequenceNumber, publisherId, "");
+		MessageID msgId = new MessageID(stream.getId(), streamPartition, timestamp, sequenceNumber, publisherId, msgChainId);
 		MessageRef prevMsgRef = this.getPreviousMessageRef(key);
 		StreamMessage msg = new StreamMessageV30(msgId, prevMsgRef, StreamMessage.ContentType.CONTENT_TYPE_JSON,
 				content, StreamMessage.SignatureType.SIGNATURE_TYPE_NONE, null);
