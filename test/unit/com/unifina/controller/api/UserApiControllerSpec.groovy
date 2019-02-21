@@ -2,6 +2,7 @@ package com.unifina.controller.api
 
 import com.unifina.ControllerSpecification
 import com.unifina.domain.security.SecUser
+import com.unifina.service.UserService
 import grails.test.mixin.TestFor
 
 @TestFor(UserApiController)
@@ -11,11 +12,11 @@ class UserApiControllerSpec extends ControllerSpecification {
 
 	def setup() {
 		me = new SecUser(
-			id: 1,
 			name: "me",
 			username: "me@too.com",
 			enabled: true,
 		)
+		me.id = 1
 	}
 
 	void "unauthenticated user gets back 401"() {
@@ -35,5 +36,21 @@ class UserApiControllerSpec extends ControllerSpecification {
 		response.json.username == me.username
 		!response.json.hasProperty("password")
 		!response.json.hasProperty("id")
+	}
+
+	void "delete user account"() {
+		setup:
+		controller.userService = Mock(UserService)
+
+		when:
+		request.apiUser = me
+		request.method = "DELETE"
+		request.requestURI = "/api/v1/users/me/1"
+		params.id = me.id
+		authenticatedAs(me) { controller.delete(me.id) }
+
+		then:
+		1 * controller.userService.delete(me, me.id)
+		response.status == 204
 	}
 }

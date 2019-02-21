@@ -50,6 +50,7 @@ class UrlMappings {
 		"/api/v1/streams/$id/confirmCsvFileUpload"(controller: "streamApi", action: "confirmCsvFileUpload")
 		"/api/v1/streams/$id/dataFiles"(controller: "streamApi", action: "dataFiles")
 		"/api/v1/streams/$id/publishers"(controller: "streamApi", action: "publishers")
+		"/api/v1/streams/$id/status"(controller: "streamApi", action: "status")
 		"/api/v1/streams/$resourceId/keys"(resources: "keyApi", excludes: ["create", "edit", "update"]) { resourceClass = Stream }
 
 		"/api/v1/dashboards"(resources: "dashboardApi", excludes: ["create", "edit"])
@@ -62,7 +63,8 @@ class UrlMappings {
 		"/api/v1/modules"(resources: "moduleApi")
 		"/api/v1/modules/$id/help"(controller: "moduleApi", action: "help")
 
-		"/api/v1/users/me"(controller: "userApi", action: "getUserInfo")
+		"/api/v1/users/me"(controller: "userApi", action: "getUserInfo", excludes: ["delete"])
+		"/api/v1/users/me/$id"(controller: "userApi", action: "delete", excludes: ["getUserInfo"])
 		"/api/v1/users/me/keys"(resources: "keyApi", excludes: ["create", "edit", "update"]) { resourceClass = SecUser }
 		"/api/v1/users/me/products"(controller: "productApi", action: "index") { operation = Permission.Operation.SHARE }
 

@@ -1,7 +1,9 @@
 package com.unifina.service
 
+import com.unifina.api.ApiException
 import com.unifina.api.InvalidAPIKeyException
 import com.unifina.api.InvalidUsernameAndPasswordException
+import com.unifina.api.NotFoundException
 import com.unifina.domain.data.Feed
 import com.unifina.domain.security.Key
 import com.unifina.domain.security.SecRole
@@ -118,6 +120,17 @@ class UserService {
 		if (command.password != command.password2) {
 			return 'command.password2.error.mismatch'
 		}
+	}
+
+	def delete(SecUser user, Long id) {
+		if (user == null || user.id == null || id == null) {
+			throw new NotFoundException("user not found", "User", null)
+		}
+		if (user.id != id) {
+			throw new ApiException(400, "DELETE_OWN_ACCOUNT_ERROR", "only own account can be deleted")
+		}
+		user.enabled = false
+		user.save(validate: true)
 	}
 
 	/**

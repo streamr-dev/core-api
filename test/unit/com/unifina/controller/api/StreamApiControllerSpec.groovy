@@ -13,6 +13,7 @@ import com.unifina.feed.NoOpStreamListener
 import com.unifina.service.*
 import grails.test.mixin.Mock
 import grails.test.mixin.TestFor
+import org.apache.commons.lang.time.DateUtils
 
 @TestFor(StreamApiController)
 @Mock([SecUser, Stream, Key, Permission, Feed, PermissionService, StreamService, DashboardService])
@@ -298,5 +299,70 @@ class StreamApiControllerSpec extends ControllerSpecification {
 		response.json == [
 		    'addresses': addresses.toArray()
 		]
+	}
+
+	void "streams status"() {
+		setup:
+		controller.streamService = Mock(StreamService)
+		Date timestamp = newDate(2019, 1, 19, 2, 0, 3)
+
+		when:
+		params.days = 2
+		params.id = streamOne.id
+		request.method = "GET"
+		authenticatedAs(me) { controller.status() }
+
+		then:
+		1 * controller.streamService.status(_, _) >> new StreamService.StreamStatus(true, timestamp)
+		response.status == 200
+		response.json == [
+		    ok: true,
+			date: "2019-01-19T02:00:03Z",
+		]
+	}
+
+	void "streams status no message"() {
+		setup:
+		controller.streamService = Mock(StreamService)
+
+		when:
+		params.days = 2
+		params.id = streamOne.id
+		request.method = "GET"
+		authenticatedAs(me) { controller.status() }
+
+		then:
+		1 * controller.streamService.status(_, _) >> new StreamService.StreamStatus(false, null)
+		response.status == 200
+		response.json == [
+			ok: false,
+		]
+	}
+
+	void "stream status not found"() {
+		setup:
+		controller.streamService = Mock(StreamService)
+
+		when:
+		params.days = 2
+		params.id = "not-found"
+		request.method = "GET"
+		authenticatedAs(me) { controller.status() }
+
+		then:
+		0 * controller.streamService._
+		thrown NotFoundException
+		response.status == 404
+	}
+
+	Date newDate(int year, int month, int date, int hour, int minute, int second) {
+		Calendar cal = Calendar.getInstance()
+		cal.set(Calendar.YEAR, year)
+		cal.set(Calendar.MONTH, month - 1)
+		cal.set(Calendar.DATE, date)
+		cal.set(Calendar.HOUR_OF_DAY, hour)
+		cal.set(Calendar.MINUTE, minute)
+		cal.set(Calendar.SECOND, second)
+		return cal.getTime()
 	}
 }

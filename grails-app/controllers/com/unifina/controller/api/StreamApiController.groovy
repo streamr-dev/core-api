@@ -7,11 +7,13 @@ import com.unifina.domain.security.SecUser
 import com.unifina.feed.DataRange
 import com.unifina.security.AuthLevel
 import com.unifina.security.StreamrApi
-import com.unifina.utils.CSVImporter
+import com.unifina.service.StreamService
 import grails.converters.JSON
 import grails.plugin.springsecurity.annotation.Secured
-import org.apache.commons.lang.exception.ExceptionUtils
+import org.apache.commons.lang.time.DateUtils
 import org.springframework.web.multipart.MultipartFile
+
+import java.text.SimpleDateFormat
 
 @Secured(["IS_AUTHENTICATED_ANONYMOUSLY"])
 class StreamApiController {
@@ -21,6 +23,8 @@ class StreamApiController {
 		"uploadCsvFile": "POST",
 		"confirmCsvFileUpload": "POST"
 	]
+
+	private final SimpleDateFormat iso8601 = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'")
 
 	def streamService
 	def permissionService
@@ -167,5 +171,27 @@ class StreamApiController {
 		} else {
 			action.call(stream)
 		}
+	}
+
+	@StreamrApi
+	def status() {
+		Stream s = Stream.get((String) params.id)
+		if (s == null) {
+			response.status = 404
+			throw new NotFoundException("Stream not found.", "Stream", (String) params.id)
+		}
+
+		int days = params.int("days", 2)
+		Date threshold = DateUtils.addDays(new Date(), -days)
+		StreamService.StreamStatus status = streamService.status(s, threshold)
+		response.status = 200
+		if (status.date == null) {
+			render([ok: status.ok ] as JSON)
+			return
+		}
+		render([
+			ok: status.ok,
+			date: iso8601.format(status.date),
+		] as JSON)
 	}
 }
