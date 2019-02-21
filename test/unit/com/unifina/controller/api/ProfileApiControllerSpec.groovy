@@ -90,7 +90,7 @@ class ProfileApiControllerSpec extends ControllerSpecification {
 		}
 		request.method = "POST"
 		authenticatedAs(user) {
-			controller.changePwd(cmd)
+			controller.changePassword(cmd)
 		}
 		then: "password must be changed"
 		springSecurityService.passwordEncoder.isPasswordValid(SecUser.get(1).password, "barbar123!", null)
@@ -112,7 +112,7 @@ class ProfileApiControllerSpec extends ControllerSpecification {
 		}
 		request.method = "POST"
 		authenticatedAs(user) {
-			controller.changePwd(cmd)
+			controller.changePassword(cmd)
 		}
 		then: "the old password must remain valid"
 		springSecurityService.passwordEncoder.isPasswordValid(SecUser.get(1).password, "foobar123!", null)
@@ -136,7 +136,7 @@ class ProfileApiControllerSpec extends ControllerSpecification {
 		}
 		request.method = "POST"
 		authenticatedAs(user) {
-			controller.changePwd(cmd)
+			controller.changePassword(cmd)
 		}
 		then: "the old password must remain valid"
 		springSecurityService.passwordEncoder.isPasswordValid(SecUser.get(1).password, "foobar123!", null)
@@ -160,7 +160,7 @@ class ProfileApiControllerSpec extends ControllerSpecification {
 		}
 		request.method = "POST"
 		authenticatedAs(user) {
-			controller.changePwd(cmd)
+			controller.changePassword(cmd)
 		}
 		then: "the old password must remain valid"
 		springSecurityService.passwordEncoder.isPasswordValid(SecUser.get(1).password, "foobar123!", null)

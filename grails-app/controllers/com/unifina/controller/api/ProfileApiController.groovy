@@ -14,7 +14,7 @@ class ProfileApiController {
 
 	static allowedMethods = [
 		update: "POST",
-		changePwd: "POST",
+		changePassword: "POST",
 	]
 
 	@StreamrApi
@@ -31,7 +31,7 @@ class ProfileApiController {
 	}
 
 	@StreamrApi
-	def changePwd(ChangePasswordCommand cmd) {
+	def changePassword(ChangePasswordCommand cmd) {
 		if (!cmd.validate()) {
 			throw new ApiException(400, "PASSWORD_CHANGE_FAILED", "Password not changed!")
 		}

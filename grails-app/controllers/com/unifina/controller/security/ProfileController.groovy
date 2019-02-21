@@ -42,7 +42,7 @@ class ProfileController {
 	}
 
 	/*
-	 * @Deprecated See ProfileApiController.changePwd
+	 * @Deprecated See ProfileApiController.changePassword
 	 * 20.02.2019. Remove when new front end is deployed.
 	 */
 	def changePwd(ChangePasswordCommand cmd) {

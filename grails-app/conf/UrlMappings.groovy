@@ -68,8 +68,8 @@ class UrlMappings {
 		"/api/v1/users/me/keys"(resources: "keyApi", excludes: ["create", "edit", "update"]) { resourceClass = SecUser }
 		"/api/v1/users/me/products"(controller: "productApi", action: "index") { operation = Permission.Operation.SHARE }
 
-		"/api/v1/profile/changePwd"(controller: "profileApi", action: "changePwd", excludes: ["update"])
-		"/api/v1/profile/update"(controller: "profileApi", action: "update", excludes: ["changePwd"])
+		"/api/v1/profile/changePassword"(controller: "profileApi", action: "changePassword", excludes: ["update"])
+		"/api/v1/profile/update"(controller: "profileApi", action: "update", excludes: ["changePassword"])
 
 		"/api/v1/integration_keys"(resources: "integrationKeyApi")
 
