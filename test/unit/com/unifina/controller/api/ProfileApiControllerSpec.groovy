@@ -40,6 +40,45 @@ class ProfileApiControllerSpec extends ControllerSpecification {
 		user.save(validate: false)
 	}
 
+	void "changing user settings must change them"() {
+		controller.userService = new UserService()
+		when: "new settings are submitted"
+		request.method = "POST"
+		request.requestURI = "/api/v1/profile/update"
+		request.json = [
+			name: "Changed Name",
+		]
+		request.apiUser = user
+		authenticatedAs(user) {
+			controller.update(new UpdateProfileCommand(name: "Changed Name"))
+		}
+
+		then: "values must be updated and show update message"
+		SecUser.get(1).name == "Changed Name"
+		response.json.name == "Changed Name"
+	}
+
+	void "sensitive fields cannot be changed"() {
+		controller.userService = new UserService()
+
+		when:
+		request.method = "POST"
+		request.requestURI = "/api/v1/profile/update"
+		request.json = [
+			username: "attacker@email.com",
+			enabled: false,
+		]
+		request.apiUser = user
+		authenticatedAs(user) {
+			controller.update(new UpdateProfileCommand())
+		}
+
+		then:
+		SecUser.get(1).username == "test@test.com"
+		response.json.username == "test@test.com"
+		SecUser.get(1).enabled
+	}
+
 	void "submitting valid content in user password change form must change user password"() {
 		when: "password change form is submitted"
 		def cmd = new ChangePasswordCommand(username: user.username, currentpassword: "foobar123!", password: "barbar123!", password2: "barbar123!")

@@ -22,6 +22,10 @@ class ProfileController {
 		[user: currentUser]
 	}
 
+	/**
+	 * @Deprecated See ProfileApiController.update
+	 * 21.02.2019. Remove when new front end is deployed.
+	 */
 	def update() {
 		SecUser user = SecUser.get(springSecurityService.currentUser.id)
 
@@ -38,7 +42,7 @@ class ProfileController {
 	}
 
 	/*
-	 * @Deprecated See UserApiController.changePwd
+	 * @Deprecated See ProfileApiController.changePwd
 	 * 20.02.2019. Remove when new front end is deployed.
 	 */
 	def changePwd(ChangePasswordCommand cmd) {

@@ -3,16 +3,32 @@ package com.unifina.controller.api
 import com.unifina.api.ApiException
 import com.unifina.domain.security.SecUser
 import com.unifina.security.StreamrApi
+import grails.converters.JSON
 import grails.plugin.springsecurity.annotation.Secured
 import grails.validation.Validateable
 
 @Secured(["IS_AUTHENTICATED_ANONYMOUSLY"])
 class ProfileApiController {
 	def springSecurityService
+	def userService
 
 	static allowedMethods = [
+		update: "POST",
 		changePwd: "POST",
 	]
+
+	@StreamrApi
+	def update(UpdateProfileCommand cmd) {
+		SecUser user = loggedInUser()
+		// Only these user fields can be updated!
+		user.name = cmd.name ?: user.name
+		user = user.save(failOnError: true)
+		if (user.hasErrors()) {
+			log.warn("Update failed due to validation errors: " + userService.checkErrors(user.errors.getAllErrors()))
+			throw new ApiException(400, "PROFILE_UPDATE_FAILED", "Profile update failed.")
+		}
+		return render(user.toMap() as JSON)
+	}
 
 	@StreamrApi
 	def changePwd(ChangePasswordCommand cmd) {
@@ -30,6 +46,11 @@ class ProfileApiController {
 	SecUser loggedInUser() {
 		return (SecUser) request.apiUser
 	}
+}
+
+@Validateable
+class UpdateProfileCommand {
+	String name
 }
 
 @Validateable
