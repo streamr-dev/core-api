@@ -155,6 +155,7 @@ class StreamService {
 	public Map importCsv(CSVImporter csv, Stream stream, String publisherId) {
 		long sequenceNumber = 0L
 		Long previousTimestamp = null
+		String msgChainId = IdGenerator.getShort()
 
 		for (CSVImporter.LineValues line : csv) {
 			Date date = line.getTimestamp()
@@ -169,7 +170,7 @@ class StreamService {
 			}
 
 			int partition = partitioner.partition(stream, null)
-			StreamMessageV30 msg = new StreamMessageV30(stream.id, partition, date.time, sequenceNumber, publisherId, IdGenerator.getShort(),
+			StreamMessageV30 msg = new StreamMessageV30(stream.id, partition, date.time, sequenceNumber, publisherId, msgChainId,
 				previousTimestamp, sequenceNumber, StreamMessage.ContentType.CONTENT_TYPE_JSON,
 				gson.toJson(message), StreamMessage.SignatureType.SIGNATURE_TYPE_NONE, null)
 			saveMessage(msg)
