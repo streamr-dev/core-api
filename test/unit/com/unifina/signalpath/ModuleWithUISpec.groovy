@@ -24,8 +24,8 @@ class ModuleWithUISpec extends Specification {
 	ModuleWithUI module
 	PermissionService permissionService
 	StreamService streamService
-	SecUser permittedUser = new SecUser()
-	SecUser nonPermitterUser = new SecUser()
+	SecUser permittedUser = new SecUser(username: 'permittedUser')
+	SecUser nonPermitterUser = new SecUser(username: 'nonPermittedUser')
 
 	def setup() {
 		streamService = Mock(StreamService)
@@ -79,8 +79,8 @@ class ModuleWithUISpec extends Specification {
 				return "webcomponent-name"
 			}
 		}
-
 		module.globals = GlobalsFactory.createInstance([:], user)
+		module.globals.time = new Date()
 		module.globals.setDataSource(Mock(DataSource))
 		module.parentSignalPath = Mock(SignalPath)
 		module.parentSignalPath.getRootSignalPath() >> module.parentSignalPath
@@ -224,6 +224,6 @@ class ModuleWithUISpec extends Specification {
 		when:
 		module.pushToUiChannel(msg)
 		then:
-		1 * streamService.sendMessage(module.getUiChannel().getStream(), msg)
+		1 * streamService.sendMessage(_)
 	}
 }

@@ -63,6 +63,7 @@ class EmailModuleSpec extends UiChannelMockingSpecification {
 		module.parentSignalPath = new SignalPath(true)
 		module.parentSignalPath.globals = globals
 		module.parentSignalPath.configure([uiChannel: [id: "uiChannel"]])
+		module.parentSignalPath.initialize()
 
 		module.rootSignalPath.canvas = new Canvas()
 		module.rootSignalPath.canvas.save()

@@ -5,18 +5,18 @@ import com.lambdaworks.redis.RedisURI;
 import com.lambdaworks.redis.codec.ByteArrayCodec;
 import com.lambdaworks.redis.pubsub.RedisPubSubAdapter;
 import com.lambdaworks.redis.pubsub.RedisPubSubConnection;
-import com.unifina.data.StreamrBinaryMessage;
+import com.streamr.client.protocol.message_layer.StreamMessage;
 import com.unifina.domain.data.Feed;
 import com.unifina.feed.AbstractMessageSource;
 import com.unifina.feed.Message;
 import org.apache.log4j.Logger;
 
 import java.io.IOException;
-import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.util.Map;
 
-public class RedisMessageSource extends AbstractMessageSource<StreamrBinaryMessage, String> {
+public class RedisMessageSource extends AbstractMessageSource<StreamMessage, String> {
 
 	private static final Charset utf8 = Charset.forName("UTF-8");
 
@@ -46,8 +46,12 @@ public class RedisMessageSource extends AbstractMessageSource<StreamrBinaryMessa
 			@Override
 			public void message(byte[] channel, byte[] messageBytes) {
 				String streamId = new String(channel, utf8);
-				StreamrBinaryMessageWithKafkaMetadata msg = new StreamrBinaryMessageWithKafkaMetadata(ByteBuffer.wrap(messageBytes));
-				forward(new Message<>(streamId, msg.getOffset(), msg.getStreamrBinaryMessage(), false));
+				try {
+					StreamMessage msg = StreamMessage.fromBytes(messageBytes);
+					forward(new Message<>(streamId, msg));
+				} catch (IOException e) {
+					log.error(e);
+				}
 			}
 
 			@Override

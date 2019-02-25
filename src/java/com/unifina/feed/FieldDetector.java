@@ -1,7 +1,7 @@
 package com.unifina.feed;
 
+import com.streamr.client.protocol.message_layer.StreamMessage;
 import com.unifina.domain.data.Stream;
-import com.unifina.feed.map.MapMessage;
 import com.unifina.utils.MapTraversal;
 
 import java.util.ArrayList;
@@ -24,12 +24,12 @@ public abstract class FieldDetector {
 	 * May return null if the example message couldn't be fetched (Stream is empty for example).
      */
 	public List<Map<String, String>> detectFields(Stream stream) {
-		MapMessage mapMessage = fetchExampleMessage(stream);
-		if (mapMessage == null) {
+		StreamMessage msg = fetchExampleMessage(stream);
+		if (msg == null) {
 			return null;
 		}
 
-		Map map = mapMessage.payload;
+		Map map = msg.getContent();
 
 		if (flattenMap) {
 			map = MapTraversal.flatten(map);
@@ -59,5 +59,5 @@ public abstract class FieldDetector {
 		}
 	}
 
-	protected abstract MapMessage fetchExampleMessage(Stream stream);
+	protected abstract StreamMessage fetchExampleMessage(Stream stream);
 }

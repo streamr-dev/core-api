@@ -6,7 +6,6 @@ import com.unifina.signalpath.Propagator;
 import com.unifina.signalpath.RuntimeRequest;
 import com.unifina.signalpath.RuntimeResponse;
 
-import java.util.HashMap;
 import java.util.Map;
 
 public abstract class InputModule extends ModuleWithUI {
@@ -15,7 +14,6 @@ public abstract class InputModule extends ModuleWithUI {
 
 	public InputModule() {
 		super();
-		resendAll = false;
 		resendLast = 1;
 	}
 

@@ -1,13 +1,14 @@
 package com.unifina.controller.api
 
 import com.google.common.collect.Lists
+import com.streamr.client.protocol.message_layer.StreamMessage
+import com.streamr.client.protocol.message_layer.StreamMessageV30
 import com.unifina.api.*
 import com.unifina.domain.data.Stream
 import com.unifina.domain.marketplace.Category
 import com.unifina.domain.marketplace.Product
 import com.unifina.domain.security.Permission
 import com.unifina.domain.security.SecUser
-import com.unifina.feed.StreamrMessage
 import com.unifina.filters.UnifinaCoreAPIFilters
 import com.unifina.service.ApiService
 import com.unifina.service.FreeProductService
@@ -70,6 +71,11 @@ class ProductApiControllerSpec extends Specification {
 		return d
 	}
 
+	StreamMessage buildMsg(String streamId, int streamPartition, Date timestamp, Map content) {
+		return new StreamMessageV30(streamId, streamPartition, timestamp.getTime(), 0, "", "", null, null,
+			StreamMessage.ContentType.CONTENT_TYPE_JSON, content, StreamMessage.SignatureType.SIGNATURE_TYPE_NONE, null)
+	}
+
 	void "stale products"() {
 		setup:
 		// Fresh products
@@ -82,16 +88,16 @@ class ProductApiControllerSpec extends Specification {
 		// Stale product 1
 		Stream s3 = newStream("s3", "Storm Stream") // This stream has a message three days ago
 		Product c = newProduct("c", "Storm warning", s3)
-		StreamrMessage m3 = new StreamrMessage("s3", 1, newDate(3*24*60*60*1000), new HashMap())
+		StreamMessage m3 = buildMsg("s3", 1, newDate(3*24*60*60*1000), new HashMap())
 		ProductService.StaleProduct sp1 = new ProductService.StaleProduct(c)
 		ProductService.StreamWithLatestMessage sm1 = new ProductService.StreamWithLatestMessage(s3, m3)
 		sp1.streams.add(sm1)
 
 		// Stale product 2
 		Stream s6 = newStream("s6", "Mainframe Stream") // This stream has a message two weeks ago
-		StreamrMessage m6 = new StreamrMessage("s6", 1, newDate(14*24*60*60*1000), new HashMap())
+		StreamMessage m6 = buildMsg("s6", 1, newDate(14*24*60*60*1000), new HashMap())
 		Stream s6b = newStream("s6b", "Mainframe B Stream") // This stream has a message one week ago
-		StreamrMessage m6b = new StreamrMessage("s6b", 1, newDate(7*24*60*60*1000), new HashMap())
+		StreamMessage m6b = buildMsg("s6b", 1, newDate(7*24*60*60*1000), new HashMap())
 		Product f = newProduct("f", "Mainframe connector", s6, s6b)
 		ProductService.StaleProduct sp2 = new ProductService.StaleProduct(f)
 		ProductService.StreamWithLatestMessage sm2 = new ProductService.StreamWithLatestMessage(s6, m6)
@@ -110,8 +116,8 @@ class ProductApiControllerSpec extends Specification {
 		Stream s8 = newStream("s8", "Stream a") // This stream has message six days ago
 		Stream s9 = newStream("s9", "Stream b") // This stream has message over five days ago
 		Product h = newProduct("h", "Product with two streams", s8, s9)
-		StreamrMessage m8 = new StreamrMessage("s8", 1, newDate(6*24*60*60*1000), new HashMap())
-		StreamrMessage m9 = new StreamrMessage("s9", 1, newDate(5*25*60*60*1000), new HashMap())
+		StreamMessage m8 = buildMsg("s8", 1, newDate(6*24*60*60*1000), new HashMap())
+		StreamMessage m9 = buildMsg("s9", 1, newDate(5*25*60*60*1000), new HashMap())
 		ProductService.StaleProduct sp4 = new ProductService.StaleProduct(h)
 		ProductService.StreamWithLatestMessage sm5 = new ProductService.StreamWithLatestMessage(s8, m8)
 		sp4.streams.add(sm5)

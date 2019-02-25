@@ -1,8 +1,10 @@
 package com.unifina.service
 
+import com.unifina.BeanMockingSpecification
 import com.unifina.api.*
 import com.unifina.domain.dashboard.Dashboard
 import com.unifina.domain.dashboard.DashboardItem
+import com.unifina.domain.data.Feed
 import com.unifina.domain.data.Stream
 import com.unifina.domain.security.Permission
 import com.unifina.domain.security.SecUser
@@ -14,19 +16,17 @@ import com.unifina.signalpath.UiChannelIterator
 import com.unifina.signalpath.charts.Heatmap
 import com.unifina.task.CanvasDeleteTask
 import grails.converters.JSON
-import grails.plugin.springsecurity.SpringSecurityService
 import grails.test.mixin.Mock
 import grails.test.mixin.TestFor
 import grails.test.mixin.TestMixin
 import grails.test.mixin.web.ControllerUnitTestMixin
 import groovy.json.JsonBuilder
 import org.codehaus.groovy.grails.web.mapping.LinkGenerator
-import spock.lang.Specification
 
 @TestMixin(ControllerUnitTestMixin) // "as JSON" converter
 @TestFor(CanvasService)
-@Mock([SecUser, Canvas, Module, Stream, ModuleService, StreamService, SpringSecurityService, SignalPathService, PermissionService, Permission, Serialization, Dashboard, DashboardItem])
-class CanvasServiceSpec extends Specification {
+@Mock([SecUser, Canvas, Module, Permission, Serialization, Dashboard, DashboardItem])
+class CanvasServiceSpec extends BeanMockingSpecification {
 
 	SecUser me
 	SecUser someoneElse
@@ -36,8 +36,13 @@ class CanvasServiceSpec extends Specification {
 	Module moduleWithUi
 
 	def setup() {
-		service.permissionService = Mock(PermissionService)
-		service.dashboardService = Mock(DashboardService)
+		service.permissionService = mockBean(PermissionService, Mock(PermissionService))
+		service.permissionService.canWrite(_,_) >> true
+		service.dashboardService = mockBean(DashboardService, Mock(DashboardService))
+		service.streamService = mockBean(StreamService, Mock(StreamService))
+		service.streamService.createStream(_,_,_) >> new Stream()
+		mockBean(ModuleService, new ModuleService())
+		service.signalPathService = mockBean(SignalPathService, new SignalPathService())
 
 		moduleWithUi = new Module(implementingClass: Heatmap.name).save(validate: false)
 

@@ -4,10 +4,11 @@ import com.google.common.hash.HashFunction;
 import com.unifina.domain.data.Stream;
 
 import javax.annotation.Nullable;
+import java.io.Serializable;
 import java.nio.charset.Charset;
 import java.util.concurrent.ThreadLocalRandom;
 
-public class StreamPartitioner {
+public class StreamPartitioner{
 
 	private static HashFunction murmur3_32 = com.google.common.hash.Hashing.murmur3_32(0);
 	private static final Charset utf8 = Charset.forName("UTF-8");

@@ -1,6 +1,6 @@
 package com.unifina.data;
 
-import com.unifina.feed.ITimestamped;
+import com.streamr.client.protocol.message_layer.ITimestamped;
 
 import java.util.Date;
 
@@ -22,7 +22,7 @@ class PlaybackMessage implements ITimestamped {
 	}
 
 	@Override
-	public Date getTimestamp() {
+	public Date getTimestampAsDate() {
 		return timestamp;
 	}
 
