@@ -2,6 +2,7 @@ package com.unifina.signalpath.utils
 
 import com.unifina.UiChannelMockingSpecification
 import com.unifina.domain.security.SecUser
+import com.unifina.signalpath.SignalPath
 import com.unifina.utils.testutils.ModuleTestHelper
 import grails.test.mixin.Mock
 
@@ -15,12 +16,13 @@ class EventTableSpec extends UiChannelMockingSpecification {
 
 	def setup() {
 		mockServicesForUiChannels()
+		SecUser user = new SecUser(username: 'user').save(failOnError: true, validate: false)
 		module = setupModule(
 				new EventTable(),
 				[
 					uiChannel: [id: "table"],
 					options: [inputs: [value: 3]]
-				])
+				], new SignalPath(true), mockGlobals([:], user))
 
 		dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS")
 		dateFormat.setTimeZone(TimeZone.getTimeZone("UTC"))

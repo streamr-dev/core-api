@@ -84,8 +84,8 @@ class CanvasController {
 	def reconstruct() {
 		Map json = [signalPathContext: (params.signalPathContext ? JSON.parse(params.signalPathContext) : [:]), signalPathData: JSON.parse(params.signalPathData)]
 		Globals globals = GlobalsFactory.createInstance(json.signalPathContext, null)
-		Map result = signalPathService.reconstruct(json, globals)
-		render result as JSON
+		SignalPathService.ReconstructedResult result = signalPathService.reconstruct(json, globals)
+		render result.map as JSON
 	}
 
 	def existsCsv() {

@@ -6,7 +6,6 @@ import com.unifina.signalpath.variadic.VariadicInput;
 
 import java.io.Serializable;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -26,7 +25,6 @@ public class VariadicEventTable extends ModuleWithUI {
 		super();
 
 		// More sensible defaults, in line with default maxRows
-		resendAll = false;
 		resendLast = 20;
 	}
 

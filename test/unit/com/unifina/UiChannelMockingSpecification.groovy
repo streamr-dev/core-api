@@ -1,5 +1,6 @@
 package com.unifina
 
+import com.streamr.client.protocol.message_layer.StreamMessage
 import com.unifina.domain.data.Stream
 import com.unifina.domain.security.SecUser
 import com.unifina.domain.signalpath.Canvas
@@ -28,12 +29,12 @@ class UiChannelMockingSpecification extends ModuleTestingSpecification {
 			s.uiChannelCanvas = canvas
 			return s
 		}
-		streamService.sendMessage(_, _) >> {Stream stream, Map msg->
-			String c = stream.getId();
+		streamService.sendMessage(_) >> {StreamMessage msg->
+			String c = msg.getStreamId()
 			if (!sentMessagesByStreamId.containsKey(c)) {
-				sentMessagesByStreamId.put(c, new ArrayList<Map>());
+				sentMessagesByStreamId.put(c, new ArrayList<Map>())
 			}
-			sentMessagesByStreamId.get(c).add(msg);
+			sentMessagesByStreamId.get(c).add(msg.getContent())
 		}
 		streamService.createStream(_, _, _) >> { Map params, SecUser user, String id->
 			Stream s = new Stream(params)

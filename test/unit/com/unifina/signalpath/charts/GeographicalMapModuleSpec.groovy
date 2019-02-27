@@ -2,6 +2,7 @@ package com.unifina.signalpath.charts
 
 import com.unifina.UiChannelMockingSpecification
 import com.unifina.domain.security.SecUser
+import com.unifina.signalpath.SignalPath
 import com.unifina.utils.Globals
 import com.unifina.utils.StreamrColor
 import com.unifina.utils.testutils.FakeIdGenerator
@@ -14,8 +15,10 @@ import grails.test.mixin.support.GrailsUnitTestMixin
 @Mock([SecUser])
 class GeographicalMapModuleSpec extends UiChannelMockingSpecification {
 
+	SecUser user
 	def setup() {
 		mockServicesForUiChannels()
+		user = new SecUser(username: 'user').save(failOnError: true, validate: false)
 	}
 
 	Map inputValues = [
@@ -31,7 +34,7 @@ class GeographicalMapModuleSpec extends UiChannelMockingSpecification {
 			options: [
 				drawTrace: [value: true],
 			]
-		])
+		], new SignalPath(true), mockGlobals([:], user))
 
 		Map outputValues = [:]
 		Map channelMessages = [
@@ -60,7 +63,7 @@ class GeographicalMapModuleSpec extends UiChannelMockingSpecification {
 				drawTrace: [value: true],
 				markerLabel: [value: true]
 			]
-		])
+		], new SignalPath(true), mockGlobals([:], user))
 
 		inputValues["label"] = ["label", null, "label2", "label3"]
 		Map outputValues = [:]
@@ -90,7 +93,7 @@ class GeographicalMapModuleSpec extends UiChannelMockingSpecification {
 				drawTrace: [value: true],
 				expiringTimeOfMarkerInSecs: [value: 2]
 			]
-		])
+		], new SignalPath(true), mockGlobals([:], user))
 
 		Map inputValues = [
 			id: [
@@ -165,7 +168,7 @@ class GeographicalMapModuleSpec extends UiChannelMockingSpecification {
 						drawTrace: [value: true],
 						expiringTimeOfTraceInSecs: [value: 2]
 				]
-		])
+		], new SignalPath(true), mockGlobals([:], user))
 		Map inputValues = [
 				//			  0	   1    2    3    4    5    6    7    8    9    10
 				id: 		["1", "2", "3", "1", "2", "3", "2", "3", "1", "2", "3"],

@@ -29,13 +29,10 @@ SignalPath.UIChannelModule = function(data,canvas,prot) {
 
     prot.getUIChannelOptions = function() {
         // Check if module options contain channel options
-        if (prot.jsonData.options && prot.jsonData.options.uiResendAll && prot.jsonData.options.uiResendAll.value) {
-            return { resend_all: true }
-        }
-        else if (prot.jsonData.options && prot.jsonData.options.uiResendLast) {
+        if (prot.jsonData.options && prot.jsonData.options.uiResendLast) {
             return { resend_last: prot.jsonData.options.uiResendLast.value }
         }
-        else return { resend_all: true }
+        else return {}
     }
 
     /**
@@ -57,22 +54,30 @@ SignalPath.UIChannelModule = function(data,canvas,prot) {
         }
     }
 
-    function onStarted(e, runningJson) {
-        prot.subscribe(prot.getUIChannelIdsFromJson(runningJson))
-    }
-
     function onStopped() {
         prot.unsubscribe()
     }
 
+    function onSubscribing(e, runningJson) {
+        prot.subscribe(prot.getUIChannelIdsFromJson(runningJson))
+    }
+
+    function isSubscribed() {
+        for (var i=0;i<subs.length;i++) {
+            if (!subs[i].isSubscribed()) {
+                return false
+            }
+        }
+        return true
+    }
+
     $(SignalPath).on('loaded', onLoaded)
-    $(pub).on('started', onStarted)
     $(pub).on('stopped', onStopped)
+    $(pub).on('subscribing', onSubscribing)
 
     $(prot).on('closed', function() {
         prot.unsubscribe()
         $(SignalPath).off('loaded', onLoaded)
-        $(pub).off('started', onStarted)
         $(pub).off('stopped', onStopped)
     })
 

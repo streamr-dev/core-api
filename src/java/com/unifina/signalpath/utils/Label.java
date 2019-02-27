@@ -9,16 +9,15 @@ import com.unifina.signalpath.ModuleWithUI;
 public class Label extends ModuleWithUI {
 
 	Input<Object> label = new Input<>(this, "label", "Object");
-	
+
 	@Override
 	public void init() {
 		addInput(label);
 		label.setDrivingInput(true);
 		label.setCanToggleDrivingInput(false);
-		
+
 		canClearState = false;
 
-		resendAll = false;
 		resendLast = 1;
 	}
 
@@ -33,7 +32,7 @@ public class Label extends ModuleWithUI {
 	public void clearState() {
 
 	}
-	
+
 	@Override
 	public Map<String, Object> getConfiguration() {
 		// Remove default configuration, always force resendLast=1
@@ -41,7 +40,7 @@ public class Label extends ModuleWithUI {
 		config.remove("options");
 		return config;
 	}
-	
+
 	@Override
 	public String getUiChannelName() {
 		if (label.isConnected()) {
@@ -49,10 +48,10 @@ public class Label extends ModuleWithUI {
 		}
 		else return super.getUiChannelName();
 	}
-	
+
 	@Override
 	public String getWebcomponentName() {
 		return "streamr-label";
 	}
-	
+
 }

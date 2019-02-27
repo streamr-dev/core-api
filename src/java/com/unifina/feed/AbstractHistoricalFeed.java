@@ -5,8 +5,8 @@ import com.unifina.data.IEventRecipient;
 import com.unifina.domain.data.Feed;
 import com.unifina.utils.Globals;
 import org.apache.log4j.Logger;
+import com.streamr.client.protocol.message_layer.ITimestamped;
 
-import java.io.IOException;
 import java.util.*;
 
 /**
@@ -16,16 +16,16 @@ import java.util.*;
 public abstract class AbstractHistoricalFeed<ModuleClass, MessageClass extends ITimestamped, KeyClass, EventRecipientClass extends IEventRecipient>
 		extends AbstractFeed<ModuleClass, MessageClass, KeyClass, EventRecipientClass>
 		implements Iterator<FeedEvent<MessageClass, EventRecipientClass>> {
-	
+
 	/**
 	 * The queue orders FeedEvents from multiple streams in their natural order (timestamp, queue insertion order)
 	 */
 	protected PriorityQueue<FeedEvent<MessageClass, EventRecipientClass>> queue = new PriorityQueue<>();
 	private HashSet<EventRecipientClass> iteratorCreatedFor = new HashSet<>();
 	protected boolean started = false;
-	
+
 	private static final Logger log = Logger.getLogger(AbstractHistoricalFeed.class);
-	
+
 	public AbstractHistoricalFeed(Globals globals, Feed domainObject) {
 		super(globals, domainObject);
 	}
@@ -33,7 +33,7 @@ public abstract class AbstractHistoricalFeed<ModuleClass, MessageClass extends I
 	@Override
 	public void startFeed() throws Exception {
 		started = true;
-		
+
 		log.debug("Starting feed with event recipients by key: "+eventRecipientsByKey);
 
 		// For each recipient get an input stream and place the first event in a PriorityQueue
@@ -44,14 +44,14 @@ public abstract class AbstractHistoricalFeed<ModuleClass, MessageClass extends I
 				queue.add(event);
 			}
 		}
-		
+
 		log.debug("Starting contents of event queue: "+queue);
 	}
-	
+
 	@Override
 	public void stopFeed() throws Exception {
 		started = false;
-		
+
 		// Close all the remaining unclosed sources
 		for (FeedEvent event : queue) {
 			if (event.iterator != null) {
@@ -59,12 +59,12 @@ public abstract class AbstractHistoricalFeed<ModuleClass, MessageClass extends I
 			}
 		}
 	}
-	
+
 	@Override
 	public boolean hasNext() {
 		return !queue.isEmpty();
 	}
-	
+
     /**
      * Returns the next FeedEvent in the iteration.
      *
@@ -74,10 +74,10 @@ public abstract class AbstractHistoricalFeed<ModuleClass, MessageClass extends I
 	@Override
 	public FeedEvent<MessageClass, EventRecipientClass> next() {
 		FeedEvent<MessageClass, EventRecipientClass> event = queue.poll();
-		
+
 		if (event==null)
 			throw new NoSuchElementException();
-		
+
 		// From the same iterator, get the next event
 		Iterator<FeedEvent<MessageClass, EventRecipientClass>> iterator = event.iterator;
 
@@ -85,10 +85,10 @@ public abstract class AbstractHistoricalFeed<ModuleClass, MessageClass extends I
 		if (iterator!=null && iterator.hasNext()) {
 			queue.add(iterator.next());
 		}
-		
+
 		return event;
 	}
-	
+
 	@Override
 	public void remove() {
 		throw new RuntimeException("Remove operation is not supported!");

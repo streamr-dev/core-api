@@ -2,6 +2,7 @@ package com.unifina.signalpath.time
 
 import com.unifina.UiChannelMockingSpecification
 import com.unifina.domain.security.SecUser
+import com.unifina.signalpath.SignalPath
 import com.unifina.utils.testutils.ModuleTestHelper
 import grails.test.mixin.Mock
 
@@ -16,6 +17,7 @@ class SchedulerSpec extends UiChannelMockingSpecification {
 	void "Scheduler works as expected"() {
 		when:
 		Scheduler module = new Scheduler()
+		SecUser user = new SecUser(username: 'user').save(failOnError: true, validate: false)
 		module = setupModule(module, [
 			uiChannel: [id: "schedulerChannel"],
 			schedule: [
@@ -26,7 +28,7 @@ class SchedulerSpec extends UiChannelMockingSpecification {
 					[value: 30, intervalType: 1, startDate:[hour:15, minute:29], endDate:[hour: 0, minute:15]]  // 15:30 - 00:15
 				]
 			]
-		])
+		], new SignalPath(true), mockGlobals([:], user))
 
 		Map inputValues = [:]
 		Map outputValues = [

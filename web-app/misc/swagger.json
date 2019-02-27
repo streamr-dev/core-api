@@ -1953,7 +1953,7 @@
     "/streams/{id}/data/partitions/{partition}/range": {
       "get": {
         "summary": "Get events between a range from the stream",
-        "description": "Get events between a range from the stream. The range can be defined in terms of offsets or timestamps, but not both at the same time (fromOffset must be used with toOffset, and fromTimestamp with toTimestamp). In the absence of an upper bound, range will span until latest message. Lower bound is always required, i.e., either fromOffset or fromTimestamp must be present in request.",
+        "description": "Get events between a range from the stream. The range can be defined between two timestamps or between two message references (timestamp and sequence number). The publisher must be specified in the case of message references.",
         "parameters": [
           {
             "in": "path",
@@ -1972,22 +1972,15 @@
           },
           {
             "in": "query",
-            "name": "fromOffset",
-            "description": "Event offset lower bound",
-            "required": false,
-            "type": "integer"
-          },
-          {
-            "in": "query",
-            "name": "toOffset",
-            "description": "Event offset upper bound",
-            "required": false,
-            "type": "integer"
-          },
-          {
-            "in": "query",
             "name": "fromTimestamp",
             "description": "Timestamp lower bound in milliseconds since Jan 1st 1970 UTC",
+            "required": true,
+            "type": "integer"
+          },
+          {
+            "in": "query",
+            "name": "fromSequenceNumber",
+            "description": "Sequence number lower bound of fromTimestamp",
             "required": false,
             "type": "integer"
           },
@@ -1995,8 +1988,89 @@
             "in": "query",
             "name": "toTimestamp",
             "description": "Timestamp upper bound in milliseconds since Jan 1st 1970 UTC",
+            "required": true,
+            "type": "integer"
+          },
+          {
+            "in": "query",
+            "name": "toSequenceNumber",
+            "description": "Sequence number upper bound of toTimestamp",
             "required": false,
             "type": "integer"
+          },
+          {
+            "in": "query",
+            "name": "publisherId",
+            "description": "Id of the publisher of the two message references, in case sequence numbers are defined",
+            "required": false,
+            "type": "string"
+          }
+        ],
+        "tags": [
+          "streams"
+        ],
+        "responses": {
+          "200": {
+            "description": "A list of events"
+          },
+          "400": {
+            "description": "Malformed request"
+          },
+          "401": {
+            "description": "Permission denied"
+          },
+          "403": {
+            "description": "Authentication failed"
+          },
+          "404": {
+            "description": "Stream not found"
+          },
+          "500": {
+            "description": "Unexpected error"
+          }
+        }
+      }
+    },
+    "/streams/{id}/data/partitions/{partition}/from": {
+      "get": {
+        "summary": "Get events from a timestamp or reference from the stream",
+        "description": "Get events from a timestamp or reference from the stream. The starting point can be defined by a timestamp or by a message reference (timestamp and sequence number). The publisher must be specified in the case of message reference.",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "description": "ID of the stream",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "in": "path",
+            "name": "partition",
+            "description": "Partition number",
+            "required": true,
+            "type": "integer",
+            "default": 0
+          },
+          {
+            "in": "query",
+            "name": "fromTimestamp",
+            "description": "Timestamp lower bound in milliseconds since Jan 1st 1970 UTC",
+            "required": true,
+            "type": "integer"
+          },
+          {
+            "in": "query",
+            "name": "fromSequenceNumber",
+            "description": "Sequence number lower bound of fromTimestamp",
+            "required": false,
+            "type": "integer"
+          },
+          {
+            "in": "query",
+            "name": "publisherId",
+            "description": "Id of the publisher of the two message references, in case sequence numbers are defined",
+            "required": false,
+            "type": "string"
           }
         ],
         "tags": [
