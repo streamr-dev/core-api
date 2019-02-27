@@ -1,5 +1,6 @@
 package com.unifina.feed;
 
+import com.streamr.client.protocol.message_layer.StreamMessage;
 import com.unifina.data.IStreamRequirement;
 import com.unifina.domain.data.Feed;
 import com.unifina.utils.Globals;
@@ -7,9 +8,9 @@ import com.unifina.utils.Globals;
 import java.util.ArrayList;
 import java.util.List;
 
-public class StreamrBinaryMessageKeyProvider extends AbstractKeyProvider<IStreamRequirement, StreamrMessage, String> {
+public class StreamMessageKeyProvider extends AbstractKeyProvider<IStreamRequirement, StreamMessage, String> {
 
-	public StreamrBinaryMessageKeyProvider(Globals globals, Feed feed) {
+	public StreamMessageKeyProvider(Globals globals, Feed feed) {
 		super(globals, feed);
 	}
 
@@ -23,8 +24,8 @@ public class StreamrBinaryMessageKeyProvider extends AbstractKeyProvider<IStream
 	}
 
 	@Override
-	public String getMessageKey(StreamrMessage message) {
-		return message.getStreamId() + "-" + message.getPartition();
+	public String getMessageKey(StreamMessage message) {
+		return message.getStreamId() + "-" + message.getStreamPartition();
 	}
 
 }

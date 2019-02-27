@@ -39,9 +39,8 @@ public class FeedFactory {
 		if (!instanceByFeed.containsKey(feed.getId())) {
 			MessageSource source = createMessageSource(feed, config);
 			IFeedCache cache = createCache(feed, config);
-			MessageParser parser = createParser(feed);
 
-			MessageHub instance = createAndStartMessageHub(source, parser, cache);
+			MessageHub instance = createAndStartMessageHub(source, cache);
 			instanceByFeed.put(feed.getId(), instance);
 		} else {
 			throw new IllegalStateException("Singleton instance for " + feed + " already started!");
@@ -53,7 +52,7 @@ public class FeedFactory {
 		Constructor messageSourceConstructor = messageSourceClass.getConstructor(Feed.class, Map.class);
 		return (MessageSource) messageSourceConstructor.newInstance(feed, config);
 	}
-	
+
 	private static IFeedCache createCache(Feed feed, Map<String,Object> config) throws ClassNotFoundException, NoSuchMethodException, InvocationTargetException, IllegalAccessException, InstantiationException, IllegalArgumentException {
 		if (feed.getCacheClass() != null) {
 			Class cacheClass = FeedFactory.class.getClassLoader().loadClass(feed.getCacheClass());
@@ -63,14 +62,9 @@ public class FeedFactory {
 			return null;
 		}
 	}
-	
-	private static MessageParser createParser(Feed feed) throws ClassNotFoundException, IllegalAccessException, InstantiationException, IllegalArgumentException {
-		Class parserClass = FeedFactory.class.getClassLoader().loadClass(feed.getParserClass());
-		return (MessageParser) parserClass.newInstance();
-	}
-	
-	private static MessageHub createAndStartMessageHub(MessageSource source, MessageParser parser, IFeedCache cache) throws SecurityException, IllegalArgumentException {
-		MessageHub hub = new MessageHub(source, parser, cache);
+
+	private static MessageHub createAndStartMessageHub(MessageSource source, IFeedCache cache) throws SecurityException, IllegalArgumentException {
+		MessageHub hub = new MessageHub(source, cache);
 		hub.start();
 		return hub;
 	}

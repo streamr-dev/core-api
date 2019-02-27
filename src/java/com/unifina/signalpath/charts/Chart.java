@@ -3,7 +3,6 @@ package com.unifina.signalpath.charts;
 import com.unifina.signalpath.ModuleOption;
 import com.unifina.signalpath.ModuleOptions;
 import com.unifina.signalpath.ModuleWithUI;
-import com.unifina.utils.TimeOfDayUtil;
 
 import java.util.Date;
 import java.util.Map;
@@ -14,7 +13,6 @@ public abstract class Chart extends ModuleWithUI {
 	@Override
 	public void init() {
 		canClearState = false;
-		resendAll = false;
 		resendLast = 500;
 	}
 

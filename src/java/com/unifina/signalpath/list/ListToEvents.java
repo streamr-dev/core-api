@@ -2,7 +2,7 @@ package com.unifina.signalpath.list;
 
 import com.unifina.data.FeedEvent;
 import com.unifina.data.IEventRecipient;
-import com.unifina.feed.ITimestamped;
+import com.streamr.client.protocol.message_layer.ITimestamped;
 import com.unifina.signalpath.*;
 
 import java.util.Date;
@@ -61,7 +61,7 @@ public class ListToEvents extends AbstractSignalPathModule implements IEventReci
 		}
 
 		@Override
-		public Date getTimestamp() {
+		public Date getTimestampAsDate() {
 			return timestamp;
 		}
 	}

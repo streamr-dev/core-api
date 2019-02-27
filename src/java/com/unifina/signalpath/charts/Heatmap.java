@@ -28,10 +28,9 @@ public class Heatmap extends ModuleWithUI {
 		value.setCanToggleDrivingInput(false);
 		value.setCanHaveInitialValue(false);
 
-		resendAll = false;
 		resendLast = 0;
 	}
-	
+
 	@Override
 	public void sendOutput() {
 		pushToUiChannel(new HeatPoint(latitude.getValue(), longitude.getValue(), value.getValue()));

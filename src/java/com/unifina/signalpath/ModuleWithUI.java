@@ -1,5 +1,6 @@
 package com.unifina.signalpath;
 
+import com.streamr.client.protocol.message_layer.StreamMessage;
 import com.unifina.datasource.IStartListener;
 import com.unifina.datasource.IStopListener;
 import com.unifina.domain.data.Stream;
@@ -7,6 +8,7 @@ import com.unifina.domain.security.SecUser;
 import com.unifina.domain.signalpath.Module;
 import com.unifina.service.PermissionService;
 import com.unifina.service.StreamService;
+import com.unifina.signalpath.utils.MessageChainUtil;
 import com.unifina.utils.IdGenerator;
 import com.unifina.utils.MapTraversal;
 import grails.util.Holders;
@@ -21,12 +23,13 @@ import java.util.Map;
 public abstract class ModuleWithUI extends AbstractSignalPathModule {
 
 	private UiChannel uiChannel;
-	protected boolean resendAll = false;
 	protected int resendLast = 0;
 
 	private transient StreamService streamService;
 
 	private static final Logger log = Logger.getLogger(ModuleWithUI.class);
+
+	private MessageChainUtil msgChainUtil;
 
 	public ModuleWithUI() {
 		super();
@@ -35,6 +38,7 @@ public abstract class ModuleWithUI extends AbstractSignalPathModule {
 	@Override
 	public void initialize() {
 		super.initialize();
+		msgChainUtil = new MessageChainUtil(getGlobals().getUserId());
 
 		if (getGlobals().isRunContext()) {
 			streamService = Holders.getApplicationContext().getBean(StreamService.class);
@@ -59,6 +63,7 @@ public abstract class ModuleWithUI extends AbstractSignalPathModule {
 
 	protected void onStop() {
 		// The UI channel streams get deleted along with the canvas, so no need to clean them up explicitly
+		msgChainUtil = new MessageChainUtil(getGlobals().getUserId());
 	}
 
 	private StreamService getStreamService() {
@@ -68,8 +73,10 @@ public abstract class ModuleWithUI extends AbstractSignalPathModule {
 		return streamService;
 	}
 
-	public void pushToUiChannel(Map msg) {
-		getStreamService().sendMessage(getUiChannel().getStream(), msg);
+	public void pushToUiChannel(Map content) {
+		Stream stream = getUiChannel().getStream();
+		StreamMessage msg = msgChainUtil.getStreamMessage(stream, getGlobals().time, content);
+		getStreamService().sendMessage(msg);
 	}
 
 	public UiChannel getUiChannel() {
@@ -106,7 +113,6 @@ public abstract class ModuleWithUI extends AbstractSignalPathModule {
 		}
 
 		ModuleOptions options = ModuleOptions.get(config);
-		options.add(new ModuleOption("uiResendAll", resendAll, "boolean"));
 		options.add(new ModuleOption("uiResendLast", resendLast, "int"));
 
 		return config;
@@ -124,13 +130,14 @@ public abstract class ModuleWithUI extends AbstractSignalPathModule {
 				uiChannelId == null);
 
 		ModuleOptions options = ModuleOptions.get(config);
-		if (options.getOption("uiResendAll")!=null) {
-			resendAll = options.getOption("uiResendAll").getBoolean();
-		}
 		if (options.getOption("uiResendLast")!=null) {
 			resendLast = options.getOption("uiResendLast").getInt();
 		}
 
+	}
+
+	public void ensureUiChannel() {
+		uiChannel.initialize();
 	}
 
 	public class UiChannel implements Serializable {

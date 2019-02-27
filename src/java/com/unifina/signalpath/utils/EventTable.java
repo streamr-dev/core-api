@@ -3,7 +3,6 @@ package com.unifina.signalpath.utils;
 import com.unifina.signalpath.*;
 
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -17,7 +16,6 @@ public class EventTable extends ModuleWithUI {
 		super();
 
 		// More sensible defaults, in line with default maxRows
-		resendAll = false;
 		resendLast = 20;
 	}
 

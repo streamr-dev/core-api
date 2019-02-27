@@ -1,15 +1,16 @@
 package com.unifina.signalpath.kafka;
 
+import com.streamr.client.protocol.message_layer.StreamMessage;
 import com.unifina.data.FeedEvent;
 import com.unifina.data.IEventRecipient;
 import com.unifina.domain.data.Feed;
 import com.unifina.domain.data.Stream;
 import com.unifina.domain.security.SecUser;
 import com.unifina.feed.AbstractFeed;
-import com.unifina.feed.StreamrMessage;
 import com.unifina.service.PermissionService;
 import com.unifina.service.StreamService;
 import com.unifina.signalpath.*;
+import com.unifina.signalpath.utils.MessageChainUtil;
 import com.unifina.utils.Globals;
 import grails.converters.JSON;
 import grails.util.Holders;
@@ -17,10 +18,7 @@ import org.codehaus.groovy.grails.web.json.JSONArray;
 import org.codehaus.groovy.grails.web.json.JSONObject;
 
 import java.security.AccessControlException;
-import java.util.ArrayList;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * This module (only) supports sending messages to Kafka/json streams (feed id 7)
@@ -40,13 +38,16 @@ public class SendToStream extends ModuleWithSideEffects {
 	private boolean sendOnlyNewValues = false;
 	private List<Input> fieldInputs = new ArrayList<>();
 
+	private MessageChainUtil msgChainUtil;
+
 	@Override
 	public void init() {
 		// Pre-fetch services for more predictable performance
 		ensureServices();
-		
+
 		addInput(streamParameter);
 		streamParameter.setUpdateOnChange(true);
+		msgChainUtil = new MessageChainUtil(getGlobals().getUserId());
 
 		// TODO: don't rely on static ids
 		Feed feedFilter = new Feed();
@@ -71,19 +72,20 @@ public class SendToStream extends ModuleWithSideEffects {
 	}
 
 	@Override
-	public void activateWithSideEffects() {
+	public void activateWithSideEffects(){
 		ensureServices();
 		Stream stream = streamParameter.getValue();
 		authenticateStream(stream);
-		streamService.sendMessage(stream, inputValuesToMap());
+		StreamMessage msg = msgChainUtil.getStreamMessage(stream, getGlobals().time, inputValuesToMap());
+		streamService.sendMessage(msg);
 	}
 
 	@Override
-	protected void activateWithoutSideEffects() {
+	protected void activateWithoutSideEffects(){
 		Globals globals = getGlobals();
 
 		// Create the message locally and route it to the stream locally, without actually producing to the stream
-		StreamrMessage msg = new StreamrMessage(streamParameter.getValue().getId(), 0, globals.time, inputValuesToMap()); // TODO: fix hard-coded partition
+		StreamMessage msg = msgChainUtil.getStreamMessage(streamParameter.getValue(), getGlobals().time, inputValuesToMap());
 
 		// Find the Feed implementation for the target Stream
 		AbstractFeed feed = getGlobals().getDataSource().getFeedById(streamParameter.getValue().getFeed().getId());
@@ -112,7 +114,9 @@ public class SendToStream extends ModuleWithSideEffects {
 	}
 
 	@Override
-	public void clearState() {}
+	public void clearState() {
+		msgChainUtil = new MessageChainUtil(getGlobals().getUserId());
+	}
 
 	@Override
 	public Map<String, Object> getConfiguration() {

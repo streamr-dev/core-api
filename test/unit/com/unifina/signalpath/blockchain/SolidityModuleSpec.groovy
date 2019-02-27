@@ -282,11 +282,6 @@ class SolidityModuleSpec extends ModuleTestingSpecification {
             "value": 0,
             "type": "int"
         },
-        "uiResendAll":
-        {
-            "value": false,
-            "type": "boolean"
-        },
         "network":
         {
             "possibleValues": [

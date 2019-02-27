@@ -19,10 +19,13 @@ class ModuleTestingSpecification extends BeanMockingSpecification {
 		module.init()
 		module.configure(moduleConfig)
 		module.setParentSignalPath(parentSignalPath)
+		if (parentSignalPath != null) {
+			parentSignalPath.globals = globals
+		}
 		return module
 	}
 
-	protected Globals mockGlobals(Map context=[:], SecUser user = new SecUser(timezone: "UTC")) {
+	protected Globals mockGlobals(Map context=[:], SecUser user = new SecUser(username: 'user', timezone: "UTC")) {
 		Globals globals = GlobalsFactory.createInstance(context, user)
 		globals.setDataSource(Mock(DataSource))
 		globals.init()

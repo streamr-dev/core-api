@@ -1,6 +1,6 @@
 package com.unifina.service
 
-import com.unifina.data.StreamrBinaryMessage
+import com.streamr.client.protocol.message_layer.StreamMessage
 import groovy.transform.CompileStatic
 import org.apache.kafka.clients.producer.KafkaProducer
 import org.apache.kafka.clients.producer.ProducerRecord
@@ -38,7 +38,7 @@ class KafkaService implements DisposableBean {
 		}
 		return dataTopic
 	}
-	
+
 	@CompileStatic
 	private KafkaProducer<String, byte[]> getProducer() {
 		if (producer == null) {
@@ -48,9 +48,9 @@ class KafkaService implements DisposableBean {
 	}
 
 	@CompileStatic
-    void sendMessage(StreamrBinaryMessage msg, String kafkaPartitionKey) {
+    void sendMessage(StreamMessage msg, String kafkaPartitionKey) {
 		ProducerRecord<String, byte[]> record = new ProducerRecord<String, byte[]>(getDataTopic(), kafkaPartitionKey, msg.toBytes())
-		getProducer().send(record);
+		getProducer().send(record)
     }
 
 	void destroy() {

@@ -1,12 +1,11 @@
 package com.unifina.feed.redis;
 
-import com.unifina.data.StreamrBinaryMessage;
+import com.streamr.client.protocol.message_layer.StreamMessage;
 import com.unifina.domain.data.Feed;
 import com.unifina.feed.AbstractMessageSource;
 import com.unifina.feed.MessageRecipient;
 import com.unifina.utils.MapTraversal;
 import grails.util.Holders;
-import org.apache.log4j.Logger;
 import org.springframework.util.Assert;
 
 import java.io.IOException;
@@ -17,7 +16,7 @@ import java.util.*;
  * All the RedisMessageSources forward their received messages to the same recipient: the one
  * set on the MultipleRedisMessageSource instance.
  */
-public class MultipleRedisMessageSource extends AbstractMessageSource<StreamrBinaryMessage, String> {
+public class MultipleRedisMessageSource extends AbstractMessageSource<StreamMessage, String> {
 	private final Map<String, RedisMessageSource> messageSourceByHost = new HashMap<>();
 
 	public MultipleRedisMessageSource(Feed feed, Map<String, Object> config) {
@@ -69,7 +68,7 @@ public class MultipleRedisMessageSource extends AbstractMessageSource<StreamrBin
 	}
 
 	@Override
-	public void setRecipient(MessageRecipient<StreamrBinaryMessage, String> recipient) {
+	public void setRecipient(MessageRecipient<StreamMessage, String> recipient) {
 		super.setRecipient(recipient);
 		for (RedisMessageSource ms : messageSourceByHost.values()) {
 			ms.setRecipient(recipient);

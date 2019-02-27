@@ -9,6 +9,7 @@ import com.unifina.domain.security.SecUser
 import com.unifina.domain.signalpath.Canvas
 import com.unifina.exceptions.CanvasUnreachableException
 import com.unifina.serialization.SerializationException
+import com.unifina.signalpath.ModuleWithUI
 import com.unifina.signalpath.UiChannelIterator
 import com.unifina.task.CanvasDeleteTask
 import com.unifina.task.CanvasStartTask
@@ -33,14 +34,13 @@ class CanvasService {
 	@CompileStatic
 	Map reconstruct(Canvas canvas, SecUser user) {
 		Map signalPathMap = (JSONObject) JSON.parse(canvas.json)
-		return reconstructFrom(signalPathMap, user)
+		return reconstructFrom(signalPathMap, user).map
 	}
 
 	@CompileStatic
 	Canvas createNew(SaveCanvasCommand command, SecUser user) {
 		Canvas canvas = new Canvas()
 		updateExisting(canvas, command, user, true)
-		permissionService.systemGrantAll(user, canvas)
 		return canvas
 	}
 
@@ -56,7 +56,8 @@ class CanvasService {
 			throw new InvalidStateException("Cannot update canvas with state " + canvas.state)
 		}
 
-		Map newSignalPathMap = constructNewSignalPathMap(canvas, command, user, resetUi)
+		SignalPathService.ReconstructedResult result = constructNewSignalPathMap(canvas, command, user, resetUi)
+		Map newSignalPathMap = result.map
 
 		canvas.name = newSignalPathMap.name
 		canvas.hasExports = newSignalPathMap.hasExports
@@ -67,7 +68,20 @@ class CanvasService {
 		// clear serialization
 		canvas.serialization?.delete()
 		canvas.serialization = null
+		boolean isNewCanvas = canvas.id == null
 		canvas.save(flush: true, failOnError: true)
+		if (isNewCanvas) {
+			permissionService.systemGrantAll(user, canvas)
+		}
+
+		// ensure that the UI channel streams are created
+		result.signalPath.setCanvas(canvas)
+		result.signalPath.getModules().each {
+			if (it instanceof ModuleWithUI) {
+				it.ensureUiChannel()
+			}
+		}
+		result.signalPath.ensureUiChannel()
 	}
 
 	/**
@@ -204,7 +218,7 @@ class CanvasService {
 		} != null
 	}
 
-	private Map constructNewSignalPathMap(Canvas canvas, SaveCanvasCommand command, SecUser user, boolean resetUi) {
+	private SignalPathService.ReconstructedResult constructNewSignalPathMap(Canvas canvas, SaveCanvasCommand command, SecUser user, boolean resetUi) {
 		Map inputSignalPathMap = JSON.parse(canvas.json != null ? canvas.json : "{}")
 
 		inputSignalPathMap.name = command.name
@@ -221,7 +235,7 @@ class CanvasService {
 	/**
 	 * Rebuild JSON to check it is ok and up-to-date
 	 */
-	private Map reconstructFrom(Map signalPathMap, SecUser user) {
+	private SignalPathService.ReconstructedResult reconstructFrom(Map signalPathMap, SecUser user) {
 		Globals globals = GlobalsFactory.createInstance(signalPathMap.settings ?: [:], user)
 		return signalPathService.reconstruct(signalPathMap, globals)
 	}
