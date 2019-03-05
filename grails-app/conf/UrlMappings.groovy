@@ -65,7 +65,7 @@ class UrlMappings {
 
 		"/api/v1/users/me"(controller: "userApi", action: "getUserInfo", excludes: ["delete", "uploadAvatarImage"])
 		"/api/v1/users/me/$id"(controller: "userApi", action: "delete", excludes: ["getUserInfo", "uploadAvatarImage"])
-		"/api/v1/users/me/images"(controller: "userApi", action: "uploadAvatarImage", excludes: ["getUserInfo", "delete"])
+		"/api/v1/users/me/image"(controller: "userApi", action: "uploadAvatarImage")
 		"/api/v1/users/me/keys"(resources: "keyApi", excludes: ["create", "edit", "update"]) { resourceClass = SecUser }
 		"/api/v1/users/me/products"(controller: "productApi", action: "index") { operation = Permission.Operation.SHARE }
 

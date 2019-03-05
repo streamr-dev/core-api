@@ -56,12 +56,6 @@ class SecUser implements Userish {
 	}
 
 	Map toMap() {
-		if (imageUrl == null || "".equals(imageUrl)) {
-			return [
-				name           : name,
-				username       : username,
-			]
-		}
 		return [
 			name           : name,
 			username       : username,

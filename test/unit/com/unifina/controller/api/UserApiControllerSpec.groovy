@@ -65,7 +65,7 @@ class UserApiControllerSpec extends ControllerSpecification {
 		controller.userAvatarImageService = Mock(UserAvatarImageService)
 		request.apiUser = new SecUser()
 		request.method = "POST"
-		request.requestURI = "/api/v1/users/me/images"
+		request.requestURI = "/api/v1/users/me/image"
 
 		when:
 		withFilters(action: "uploadAvatarImage") {
@@ -84,7 +84,7 @@ class UserApiControllerSpec extends ControllerSpecification {
 		controller.userAvatarImageService = Mock(UserAvatarImageService)
 		request.apiUser = new SecUser()
 		request.method = "POST"
-		request.requestURI = "/api/v1/users/me/images"
+		request.requestURI = "/api/v1/users/me/image"
 		def bytes = new byte[16]
 		request.addFile(new MockMultipartFile("file", "my-user-avatar-image.jpg", "image/jpeg", bytes))
 
@@ -101,7 +101,7 @@ class UserApiControllerSpec extends ControllerSpecification {
 		controller.userAvatarImageService = Mock(UserAvatarImageService)
 		request.apiUser = new SecUser()
 		request.method = "POST"
-		request.requestURI = "/api/v1/users/me/images"
+		request.requestURI = "/api/v1/users/me/image"
 		def bytes = new byte[16]
 		request.addFile(new MockMultipartFile("file", "my-user-avatar-image.jpg", "image/jpeg", bytes))
 
