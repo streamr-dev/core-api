@@ -64,12 +64,11 @@ class UrlMappings {
 		"/api/v1/modules/$id/help"(controller: "moduleApi", action: "help")
 
 		"/api/v1/users/me"(controller: "userApi", action: "getUserInfo", excludes: ["delete"])
+		"/api/v1/users/me"(controller: "userApi", action: "update")
 		"/api/v1/users/me/$id"(controller: "userApi", action: "delete", excludes: ["getUserInfo"])
 		"/api/v1/users/me/keys"(resources: "keyApi", excludes: ["create", "edit", "update"]) { resourceClass = SecUser }
 		"/api/v1/users/me/products"(controller: "productApi", action: "index") { operation = Permission.Operation.SHARE }
-
-		"/api/v1/profile/changePassword"(controller: "profileApi", action: "changePassword", excludes: ["update"])
-		"/api/v1/profile/update"(controller: "profileApi", action: "update", excludes: ["changePassword"])
+		"/api/v1/users/me/changePassword"(controller: "userApi", action: "changePassword")
 
 		"/api/v1/integration_keys"(resources: "integrationKeyApi")
 

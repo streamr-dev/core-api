@@ -203,27 +203,15 @@ class UserServiceSpec extends Specification {
 		user.id = 1
 
 		when:
-		service.delete(user, user.id)
+		service.delete(user)
 
 		then:
 		user.enabled == false
 	}
 
-	def "delete user deletes only currently logged in user"() {
-		setup:
-		SecUser user = new SecUser()
-		user.id = 1
-
-		when:
-		service.delete(user, 2)
-
-		then:
-		thrown ApiException
-	}
-
 	def "delete user validates parameters"() {
 		when:
-		service.delete(null, null)
+		service.delete(null)
 
 		then:
 		thrown NotFoundException
