@@ -67,7 +67,7 @@ class UserApiControllerSpec extends ControllerSpecification {
 		when:
 		request.apiUser = me
 		request.method = "DELETE"
-		request.requestURI = "/api/v1/users/me/1"
+		request.requestURI = "/api/v1/users/me"
 		params.id = me.id
 		authenticatedAs(me) { controller.delete() }
 
@@ -79,8 +79,8 @@ class UserApiControllerSpec extends ControllerSpecification {
 	void "changing user settings must change them"() {
 		controller.userService = new UserService()
 		when: "new settings are submitted"
-		request.method = "POST"
-		request.requestURI = "/api/v1/profile/update"
+		request.method = "PUT"
+		request.requestURI = "/api/v1/users/me"
 		request.json = [
 			name: "Changed Name",
 		]
@@ -98,8 +98,8 @@ class UserApiControllerSpec extends ControllerSpecification {
 		controller.userService = new UserService()
 
 		when:
-		request.method = "POST"
-		request.requestURI = "/api/v1/profile/update"
+		request.method = "PUT"
+		request.requestURI = "/api/v1/users/me"
 		request.json = [
 			username: "attacker@email.com",
 			enabled: false,
