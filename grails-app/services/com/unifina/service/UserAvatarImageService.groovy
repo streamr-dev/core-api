@@ -4,6 +4,7 @@ import com.unifina.api.ApiException
 import com.unifina.domain.security.SecUser
 import com.unifina.provider.FileUploadProvider
 import com.unifina.utils.IdGenerator
+import com.unifina.utils.ImageResizer
 import com.unifina.utils.ImageVerifier
 import grails.transaction.Transactional
 
@@ -13,14 +14,22 @@ class UserAvatarImageService {
 	FileUploadProvider fileUploadProvider
 	ImageVerifier imageVerifier = new ImageVerifier(maxSize)
 	IdGenerator idGenerator = new IdGenerator()
+	ImageResizer imageResizer = new ImageResizer()
 
 	def replaceImage(SecUser user, byte[] fileBytes, String filename) {
 		imageVerifier.verifyImage(fileBytes)
-		final String newAvatarImageUrl = fileUploadProvider.uploadFile(generateFilename(filename), fileBytes)
-		if (user.imageUrl != null) {
-			fileUploadProvider.deleteFile(user.imageUrl)
+		final byte[] small = imageResizer.resize(fileBytes, filename, ImageResizer.Size.AVATAR_SMALL)
+		final String smallImageUrl = fileUploadProvider.uploadFile(generateFilename(filename), small)
+		final byte[] large = imageResizer.resize(fileBytes, filename, ImageResizer.Size.AVATAR_LARGE)
+		final String largeImageUrl = fileUploadProvider.uploadFile(generateFilename(filename), large)
+		if (user.imageUrlSmall != null) {
+			fileUploadProvider.deleteFile(user.imageUrlSmall)
 		}
-		user.imageUrl = newAvatarImageUrl
+		if (user.imageUrlLarge != null) {
+			fileUploadProvider.deleteFile(user.imageUrlLarge)
+		}
+		user.imageUrlSmall = smallImageUrl
+		user.imageUrlLarge = largeImageUrl
 		user.save(failOnError: true)
     }
 

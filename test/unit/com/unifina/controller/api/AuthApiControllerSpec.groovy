@@ -260,7 +260,8 @@ class AuthApiControllerSpec extends Specification {
 		response.json == [
 			name: "Name",
 			username: "user@invite.to",
-			imageUrl: null,
+			imageUrlSmall: null,
+			imageUrlLarge: null,
 		]
 		then: "welcome email should be sent"
 		controller.mailService.mailSent
