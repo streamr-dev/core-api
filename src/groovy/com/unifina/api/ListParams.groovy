@@ -41,6 +41,9 @@ abstract class ListParams {
 			}
 			if (sortBy) {
 				'order'(sortBy, order)
+				if (!"id".equals(sortBy)) {
+					'order'("id", "asc")
+				}
 			}
 			firstResult(offset)
 			maxResults(max)
