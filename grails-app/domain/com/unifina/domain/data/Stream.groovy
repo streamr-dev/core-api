@@ -76,13 +76,30 @@ class Stream implements Comparable {
 			partitions: partitions,
 			name: name,
 			feed: feed.toMap(),
-			config: config == null || config.empty ? config : JSON.parse(config),
+			config: generateIDsForConfigFields(),
 			description: description,
 			uiChannel: uiChannel,
 			dateCreated: dateCreated,
 			lastUpdated: lastUpdated,
 			requireSignedData: requireSignedData
 		]
+	}
+
+	@CompileStatic
+	def generateIDsForConfigFields() {
+		if (this.config == null || config.isEmpty()) {
+			return config
+		}
+		def conf = JSON.parse(config)
+		conf["fields"].collect { it ->
+			final Map field = (Map) it
+			final String name = field.get("name")
+			final String type = field.get("type")
+			final String id = name+type
+			field.put("id", id.hashCode())
+			return field
+		}
+		return conf
 	}
 
 	@CompileStatic
