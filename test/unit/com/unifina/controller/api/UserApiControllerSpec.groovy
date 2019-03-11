@@ -13,7 +13,6 @@ import grails.test.mixin.TestFor
 class UserApiControllerSpec extends ControllerSpecification {
 
 	SecUser me
-	String reauthenticated = null
 
 	def springSecurityService = [
 		encodePassword: { pw ->
@@ -24,9 +23,6 @@ class UserApiControllerSpec extends ControllerSpecification {
 				return rawPwd+"-encoded" == encodedPassword
 			}
 		],
-		reauthenticate: {username->
-			reauthenticated = username
-		}
 	]
 
 	def setup() {
@@ -130,8 +126,6 @@ class UserApiControllerSpec extends ControllerSpecification {
 		}
 		then: "password must be changed"
 		springSecurityService.passwordEncoder.isPasswordValid(SecUser.get(1).password, "barbar123!", null)
-		then: "user must be reauthenticated"
-		reauthenticated == me.username
 		then:
 		response.status == 204
 	}
@@ -152,8 +146,6 @@ class UserApiControllerSpec extends ControllerSpecification {
 		}
 		then: "the old password must remain valid"
 		springSecurityService.passwordEncoder.isPasswordValid(SecUser.get(1).password, "foobar123!", null)
-		then: "user must not be reauthenticated"
-		!reauthenticated
 		then:
 		def e = thrown(ApiException)
 		e.message == "Password not changed!"
@@ -176,8 +168,6 @@ class UserApiControllerSpec extends ControllerSpecification {
 		}
 		then: "the old password must remain valid"
 		springSecurityService.passwordEncoder.isPasswordValid(SecUser.get(1).password, "foobar123!", null)
-		then: "user must not be reauthenticated"
-		!reauthenticated
 		then:
 		def e = thrown(ApiException)
 		e.message == "Password not changed!"
@@ -200,8 +190,6 @@ class UserApiControllerSpec extends ControllerSpecification {
 		}
 		then: "the old password must remain valid"
 		springSecurityService.passwordEncoder.isPasswordValid(SecUser.get(1).password, "foobar123!", null)
-		then: "user must not be reauthenticated"
-		!reauthenticated
 		then:
 		def e = thrown(ApiException)
 		e.message == "Password not changed!"

@@ -41,7 +41,6 @@ class UserApiController {
 		SecUser user = loggedInUser()
 		user.password = springSecurityService.encodePassword(cmd.password)
 		user.save(flush: true, failOnError: true)
-		springSecurityService.reauthenticate(user.username)
 		log.info("User $user.username changed password!")
 		render(status: 204, body: "")
 	}
