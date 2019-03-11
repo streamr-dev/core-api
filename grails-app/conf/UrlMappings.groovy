@@ -62,6 +62,8 @@ class UrlMappings {
 
 		"/api/v1/modules"(resources: "moduleApi")
 		"/api/v1/modules/$id/help"(controller: "moduleApi", action: "help")
+		"/api/v1/modules/jsonGetModule"(controller: "moduleApi", action: "jsonGetModule")
+		"/api/v1/modules/jsonGetModuleTree"(controller: "moduleApi", action: "jsonGetModuleTree")
 
 		"/api/v1/users/me"(controller: "userApi", action: "getUserInfo", excludes: ["delete"])
 		"/api/v1/users/me/$id"(controller: "userApi", action: "delete", excludes: ["getUserInfo"])
