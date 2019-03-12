@@ -114,8 +114,11 @@ class ModuleApiController {
 		Globals globals = GlobalsFactory.createInstance([:], user)
 
 		Module domainObject = Module.get(id)
+		if (domainObject == null) {
+			throw new NotFoundException(Module.simpleName, id.toString())
+		}
 		if (!permissionService.canRead(user, domainObject.modulePackage)) {
-			throw new Exception("Access denied to modulePackage")
+			throw new NotPermittedException(user?.username, Module.simpleName, id.toString(), Permission.Operation.READ.toString())
 		}
 
 		AbstractSignalPathModule m = moduleService.getModuleInstance(domainObject, moduleConfig, null, globals)
