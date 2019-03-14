@@ -3,6 +3,7 @@ package com.unifina.datasource;
 
 import com.unifina.data.FeedEvent;
 import com.unifina.data.RealtimeEventQueue;
+import com.unifina.data.ClockTickEvent;
 import com.unifina.feed.AbstractFeed;
 import com.unifina.serialization.SerializationRequest;
 import com.unifina.service.SerializationService;
@@ -48,7 +49,7 @@ public class RealtimeDataSource extends DataSource {
 				 	@Override
 				 	public void run() {
 					 	if (eventQueue.isEmpty()) {
-							eventQueue.enqueue(new FeedEvent<>(null, new Date(), null));
+							eventQueue.enqueue(new ClockTickEvent(new Date()));
 					 	}
 					}
 			 	},

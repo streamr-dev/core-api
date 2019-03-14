@@ -30,6 +30,7 @@ public class HistoricalEventQueue extends DataSourceEventQueue {
 
 	@Override
 	protected Queue<FeedEvent> initQueue() {
+		// In historical mode, events are ordered primarily by timestamp and secondarily by "ticket" (counter)
 		// Not thread-safe! It should not matter because currently everything runs in a single thread.
 		return new PriorityQueue<>();
 	}
@@ -53,8 +54,8 @@ public class HistoricalEventQueue extends DataSourceEventQueue {
 		// Init global time if it has not already been initialized
 		if (globals.time == null) {
 			// Take the beginDate from signalPathContext if defined
-			if (globals.getSignalPathContext().containsKey("beginDate")) {
-				globals.time = (Date) globals.getSignalPathContext().get("beginDate");
+			if (globals.getStartDate() != null) {
+				globals.time = globals.getStartDate();
 			} else {
 				// Otherwise get it from the first event
 				globals.time = peek().timestamp;
@@ -83,18 +84,24 @@ public class HistoricalEventQueue extends DataSourceEventQueue {
 		long todBegin = (todUtil != null ? todUtil.getBeginTime() : 0);
 		long todEnd = (todUtil != null ? todUtil.getEndTime() : 0);
 
-		// Subtract one second so the first reported time will be the first second
-		initTimeReporting(time - (time%1000) - 1000);
+		initTimeReporting(time - (time%1000));
 
 		long simTimeStart = (todUtil==null ? time : Math.max(time,todUtil.getBeginTime()));
 		long realTimeStart = System.currentTimeMillis();
 
 		while (!isEmpty() && !isAborted()) {
+			// Insert time events to the queue if necessary to "tick" the clock every second.
+			// This is needed if there are no actual stream events covering every second.
+			if (peek().timestamp.getTime() > lastHandledTime + 1000) {
+				// Insert a time event to the front of the queue, before the next real event
+				enqueue(new ClockTickEvent(new Date(lastHandledTime + 1000)));
+			}
+
 			FeedEvent event = poll();
 			time = event.timestamp.getTime();
 
 			// Check if a delay is needed
-			if (speed != 0 && time > todBegin && time < todEnd) {
+			if (speed != 0 && (todUtil == null || time > todBegin && time < todEnd)) {
 				long realTimeElapsed = System.currentTimeMillis() - realTimeStart;
 				long simTimeMax = realTimeElapsed*speed + simTimeStart;
 				long diff = time - simTimeMax;
