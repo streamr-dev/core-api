@@ -122,12 +122,9 @@ class UserService {
 		}
 	}
 
-	def delete(SecUser user, Long id) {
-		if (user == null || user.id == null || id == null) {
+	def delete(SecUser user) {
+		if (user == null) {
 			throw new NotFoundException("user not found", "User", null)
-		}
-		if (user.id != id) {
-			throw new ApiException(400, "DELETE_OWN_ACCOUNT_ERROR", "only own account can be deleted")
 		}
 		user.enabled = false
 		user.save(validate: true)
