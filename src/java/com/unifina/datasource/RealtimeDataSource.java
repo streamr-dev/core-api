@@ -49,7 +49,8 @@ public class RealtimeDataSource extends DataSource {
 				 	@Override
 				 	public void run() {
 					 	if (eventQueue.isEmpty()) {
-							eventQueue.enqueue(new ClockTickEvent(new Date()));
+							final ClockTickEvent event = new ClockTickEvent(new Date());
+							eventQueue.enqueue(event);
 					 	}
 					}
 			 	},

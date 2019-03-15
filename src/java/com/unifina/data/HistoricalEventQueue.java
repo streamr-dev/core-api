@@ -94,7 +94,8 @@ public class HistoricalEventQueue extends DataSourceEventQueue {
 			// This is needed if there are no actual stream events covering every second.
 			if (peek().timestamp.getTime() > lastHandledTime + 1000) {
 				// Insert a time event to the front of the queue, before the next real event
-				enqueue(new ClockTickEvent(new Date(lastHandledTime + 1000)));
+				final ClockTickEvent event = new ClockTickEvent(new Date(lastHandledTime + 1000));
+				enqueue(event);
 			}
 
 			FeedEvent event = poll();

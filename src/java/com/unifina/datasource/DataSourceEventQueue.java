@@ -134,7 +134,8 @@ public abstract class DataSourceEventQueue {
 				nextDay = nextDay.plusDays(1);
 			}
 
-			masterClock.receive(new ClockTickEvent(d));
+			final ClockTickEvent event = new ClockTickEvent(d);
+			masterClock.receive(event);
 		}
 	}
 
