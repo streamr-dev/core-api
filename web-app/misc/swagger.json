@@ -46,6 +46,10 @@
       "description": "Methods for obtaining a session token for authentication"
     },
     {
+      "name": "modules",
+      "description": "Modules that are placed on canvases"
+    },
+    {
       "name": "permissions",
       "description": "Read, write, and share rights"
     },
@@ -3609,6 +3613,113 @@
           }
         }
       }
+    },
+    "/modules/{id}": {
+      "get": {
+        "summary": "Get module configuration by id",
+        "description": "Instantiate a fresh module by id and get its configuration",
+        "tags": [
+          "modules"
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "description": "ID of the module",
+            "required": true,
+            "type": "integer"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "schema": {
+              "$ref": "#/definitions/Module"
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          }
+        }
+      },
+      "post": {
+        "summary": "Get module configuration by id",
+        "description": "Instantiate a module (with pre-existing config) by id and get its configuration",
+        "tags": [
+          "modules"
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "description": "ID of the module",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "description": "Module object",
+            "required": false,
+            "schema": {
+              "$ref": "#/definitions/Module"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "schema": {
+              "$ref": "#/definitions/Module"
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          }
+        }
+      }
+    },
+    "/module_categories": {
+      "get": {
+        "summary": "Get list of module categories and the modules within them",
+        "description": "Get list of module categories and the modules within them",
+        "tags": [
+          "modules"
+        ],
+        "parameters": [
+          {
+            "name": "modulesFirst",
+            "in": "query",
+            "description": "Order list of children by modules first",
+            "required": false,
+            "type": "boolean",
+            "default": false
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        }
+      },
     }
   },
   "parameters": {

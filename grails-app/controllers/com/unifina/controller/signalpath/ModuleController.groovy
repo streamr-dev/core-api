@@ -76,7 +76,8 @@ class ModuleController {
 
 		render mods as JSON
 	}
-	
+
+	// TODO: moved to ModuleApiController in CORE-1642. Remove when new front-end ready.
 	def jsonGetModuleTree() {
 		def categories = ModuleCategory.findAllByParentIsNullAndHideIsNull([sort:"sortOrder"])
 
@@ -94,6 +95,7 @@ class ModuleController {
 		render result as JSON
 	}
 
+	// TODO: moved to ModuleApiController in CORE-1642. Remove when new front-end ready.
 	private Map moduleTreeRecurse(ModuleCategory category, Set<Long> allowedPackageIds, boolean modulesFirst=false) {
 		def item = [:]
 		item.data = category.name
@@ -129,6 +131,7 @@ class ModuleController {
 		return item
 	}
 
+	// TODO: moved to ModuleApiController in CORE-1642. Remove when new front-end ready.
 	def jsonGetModule() {
 		def user = springSecurityService.currentUser
 		Globals globals = GlobalsFactory.createInstance([:], user)
