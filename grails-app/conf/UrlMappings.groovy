@@ -62,12 +62,16 @@ class UrlMappings {
 
 		"/api/v1/modules"(resources: "moduleApi")
 		"/api/v1/modules/$id/help"(controller: "moduleApi", action: "help")
+		"/api/v1/modules/$id"(controller: "moduleApi", action: "jsonGetModule")
+		"/api/v1/module_categories"(controller: "moduleApi", action: "jsonGetModuleTree")
 
-		"/api/v1/users/me"(controller: "userApi", action: "getUserInfo", excludes: ["delete", "uploadAvatarImage"])
-		"/api/v1/users/me/$id"(controller: "userApi", action: "delete", excludes: ["getUserInfo", "uploadAvatarImage"])
 		"/api/v1/users/me/image"(controller: "userApi", action: "uploadAvatarImage")
+		"/api/v1/users/me"(controller: "userApi", action: "getUserInfo")
+		"/api/v1/users/me"(controller: "userApi", action: "update")
+		"/api/v1/users/me"(controller: "userApi", action: "delete")
 		"/api/v1/users/me/keys"(resources: "keyApi", excludes: ["create", "edit", "update"]) { resourceClass = SecUser }
 		"/api/v1/users/me/products"(controller: "productApi", action: "index") { operation = Permission.Operation.SHARE }
+		"/api/v1/users/me/changePassword"(controller: "userApi", action: "changePassword")
 
 		"/api/v1/integration_keys"(resources: "integrationKeyApi")
 

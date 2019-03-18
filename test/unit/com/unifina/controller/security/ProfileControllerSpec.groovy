@@ -1,15 +1,13 @@
 package com.unifina.controller.security
 
-import com.unifina.domain.security.Key
 import com.unifina.domain.security.SecUser
-import com.unifina.service.StreamService
 import com.unifina.service.UserService
 import grails.test.mixin.Mock
 import grails.test.mixin.TestFor
 import spock.lang.Specification
 
 @TestFor(ProfileController)
-@Mock([Key, SecUser])
+@Mock([SecUser])
 class ProfileControllerSpec extends Specification {
 
 	SecUser user
@@ -31,7 +29,6 @@ class ProfileControllerSpec extends Specification {
 
 	void setup() {
 		controller.springSecurityService = springSecurityService
-		controller.streamService = Mock(StreamService)
 		user = new SecUser(
 			username:"test@test.com",
 			name: "Test User",
@@ -47,7 +44,7 @@ class ProfileControllerSpec extends Specification {
 
 	void "submitting valid content in user password change form must change user password"() {
 		when: "password change form is submitted"
-			def cmd = new ChangePasswordCommand(currentpassword: "foobar123!", password: 'barbar123!', password2: 'barbar123!', pwdStrength: 3)
+			def cmd = new ChangePasswordCommand(currentpassword: "foobar123!", password: 'barbar123!', password2: 'barbar123!')
 			cmd.springSecurityService = springSecurityService
 			cmd.userService = new UserService()
 			request.method = 'POST'
@@ -80,7 +77,7 @@ class ProfileControllerSpec extends Specification {
 
 	void "submitting a too short new password won't let the password be changed"() {
 		when: "password change form is submitted with invalid new password"
-			def cmd = new ChangePasswordCommand(currentpassword: "foobar", password: 'asd', password2: 'asd', pwdStrength: 0)
+			def cmd = new ChangePasswordCommand(currentpassword: "foobar", password: 'asd', password2: 'asd')
 			cmd.springSecurityService = springSecurityService
 			cmd.userService = new UserService()
 			request.method = 'POST'
@@ -96,7 +93,7 @@ class ProfileControllerSpec extends Specification {
 
 	void "submitting a too weak new password won't let the password be changed"() {
 		when: "password change form is submitted with invalid new password"
-			def cmd = new ChangePasswordCommand(currentpassword: "foobar123", password: 'asd', password2: 'asd', pwdStrength: 0)
+			def cmd = new ChangePasswordCommand(currentpassword: "foobar123", password: 'asd', password2: 'asd')
 			cmd.springSecurityService = springSecurityService
 			cmd.userService = new UserService()
 			request.method = 'POST'
