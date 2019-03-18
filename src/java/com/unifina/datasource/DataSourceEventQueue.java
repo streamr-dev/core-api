@@ -1,5 +1,6 @@
 package com.unifina.datasource;
 
+import com.unifina.data.ClockTickEvent;
 import com.unifina.data.EventQueueMetrics;
 import com.unifina.data.FeedEvent;
 import com.unifina.feed.MasterClock;
@@ -23,7 +24,7 @@ public abstract class DataSourceEventQueue {
 	private Queue<FeedEvent> queue;
 	protected final Globals globals;
 	private boolean abort = false;
-	private long lastHandledTime = 0;
+	protected long lastHandledTime = 0;
 	private DateTime nextDay;
 	private long queueTicket = 0;
 
@@ -133,7 +134,8 @@ public abstract class DataSourceEventQueue {
 				nextDay = nextDay.plusDays(1);
 			}
 
-			masterClock.receive(new FeedEvent<>(null, d, null));
+			final ClockTickEvent event = new ClockTickEvent(d);
+			masterClock.receive(event);
 		}
 	}
 

@@ -68,14 +68,14 @@ public class Globals {
 				time = startDate;
 			} else {
 				// As a fallback, set time to midnight today
-				time = TimeOfDayUtil.getMidnight(new Date());
+				time = DateRange.getMidnight(new Date());
 			}
 
 			// Interpret endDate as one millisecond to the next midnight
 			// Change this if the possibility to enter a time range is added
 			endDate = MapTraversal.getDate(signalPathContext, "endDate", dateFormatUTC);
 			if (endDate != null) {
-				endDate = new Date(TimeOfDayUtil.getMidnight(endDate).getTime() + 24 * 60 * 60 * 1000 - 1);
+				endDate = new Date(DateRange.getMidnight(endDate).getTime() + 24 * 60 * 60 * 1000 - 1);
 			}
 		}
 	}
@@ -86,10 +86,6 @@ public class Globals {
 
 	public Date getEndDate() {
 		return endDate;
-	}
-
-	public TimeZone getUserTimeZone() {
-		return TimeZone.getTimeZone("UTC");
 	}
 
 	public void setRealtime(boolean realtime) {
