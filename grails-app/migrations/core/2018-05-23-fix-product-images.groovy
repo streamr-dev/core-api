@@ -38,7 +38,7 @@ databaseChangeLog = {
 					}
 
 					// scale image to thumbnail
-					byte[] thumb = new ImageResizer().resize(bytes, "thumbimage" + ext, ImageResizer.Size.THUMB)
+					byte[] thumb = new ImageResizer().resize(bytes, "thumbimage" + ext, ImageResizer.Size.PRODUCT_THUMB)
 					// Use SHA-256 hash of the thumbnail bytes as the filename
 					String thumbFilename = Hashing.sha256()
 						.hashBytes(thumb)

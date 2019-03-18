@@ -25,6 +25,9 @@ class SecUser implements Userish {
 	Date dateCreated
 	// lastLogin is the date when last successful login was made.
 	Date lastLogin = new Date()
+	// Users avatar images.
+	String imageUrlSmall
+	String imageUrlLarge
 
 	static hasMany = [permissions: Permission, keys: Key]
 
@@ -34,6 +37,8 @@ class SecUser implements Userish {
 		name blank: false
 		dateCreated nullable: true
 		lastLogin nullable: true
+		imageUrlSmall nullable: true
+		imageUrlLarge nullable: true
 	}
 
 	static mapping = {
@@ -55,8 +60,10 @@ class SecUser implements Userish {
 
 	Map toMap() {
 		return [
-			name           : name,
-			username       : username,
+			name : name,
+			username : username,
+			imageUrlSmall : imageUrlSmall,
+			imageUrlLarge : imageUrlLarge,
 		]
 	}
 

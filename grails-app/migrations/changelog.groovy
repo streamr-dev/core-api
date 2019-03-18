@@ -124,4 +124,5 @@ databaseChangeLog = {
 	include file: 'core/2019-01-17-date-created-login.groovy'
 	include file: 'core/2019-01-30-rename-key-provider.groovy'
 	include file: 'core/2019-01-31-new-stream-fields.groovy'
+	include file: 'core/2019-02-15-user-avatar.groovy'
 }

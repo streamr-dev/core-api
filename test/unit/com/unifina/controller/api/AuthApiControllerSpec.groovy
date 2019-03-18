@@ -22,10 +22,6 @@ class AuthApiControllerSpec extends Specification {
 
 	String username = "user@invite.to"
 
-	void setupSpec() {
-
-	}
-
 	def springSecurityService = [
 		encodePassword: { pw ->
 			return pw + "-encoded"
@@ -263,7 +259,9 @@ class AuthApiControllerSpec extends Specification {
 		response.status == 200
 		response.json == [
 			name: "Name",
-			username: "user@invite.to"
+			username: "user@invite.to",
+			imageUrlSmall: null,
+			imageUrlLarge: null,
 		]
 		then: "welcome email should be sent"
 		controller.mailService.mailSent

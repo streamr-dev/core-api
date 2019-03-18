@@ -29,12 +29,13 @@ class ProfileControllerSpec extends Specification {
 
 	void setup() {
 		controller.springSecurityService = springSecurityService
-		user = new SecUser(id:1,
+		user = new SecUser(
 			username:"test@test.com",
 			name: "Test User",
 			password:springSecurityService.encodePassword("foobar123!"),
 			enabled: true,
 		)
+		user.id = 1
 		user.save(validate:false)
 		springSecurityService.currentUser = user
 

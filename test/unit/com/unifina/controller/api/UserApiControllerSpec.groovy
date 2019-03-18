@@ -4,9 +4,11 @@ import com.unifina.ControllerSpecification
 import com.unifina.api.ApiException
 import com.unifina.api.InvalidUsernameAndPasswordException
 import com.unifina.domain.security.SecUser
+import com.unifina.service.UserAvatarImageService
 import com.unifina.service.UserService
 import grails.test.mixin.Mock
 import grails.test.mixin.TestFor
+import org.springframework.mock.web.MockMultipartFile
 
 @TestFor(UserApiController)
 @Mock(SecUser)
@@ -130,6 +132,60 @@ class UserApiControllerSpec extends ControllerSpecification {
 		response.status == 204
 	}
 
+	void "uploadAvatarImage() responds with 400 and PARAMETER_MISSING if file not given"() {
+		setup:
+		controller.userAvatarImageService = Mock(UserAvatarImageService)
+		request.apiUser = new SecUser()
+		request.method = "POST"
+		request.requestURI = "/api/v1/users/me/image"
+
+		when:
+		withFilters(action: "uploadAvatarImage") {
+			controller.uploadAvatarImage()
+		}
+
+		then:
+		0 * controller.userAvatarImageService._
+		def e = thrown(ApiException)
+		e.statusCode == 400
+		e.code == "PARAMETER_MISSING"
+	}
+
+	void "uploadAvatarImage() invokes replaceImage()"() {
+		setup:
+		controller.userAvatarImageService = Mock(UserAvatarImageService)
+		request.apiUser = new SecUser()
+		request.method = "POST"
+		request.requestURI = "/api/v1/users/me/image"
+		def bytes = new byte[16]
+		request.addFile(new MockMultipartFile("file", "my-user-avatar-image.jpg", "image/jpeg", bytes))
+
+		when:
+		withFilters(action: "uploadAvatarImage") {
+			controller.uploadAvatarImage()
+		}
+
+		then:
+		1 * controller.userAvatarImageService.replaceImage((SecUser) request.apiUser, bytes, "my-user-avatar-image.jpg")
+	}
+
+	void "uploadAvatarImage() returns 200 and renders user"() {
+		controller.userAvatarImageService = Mock(UserAvatarImageService)
+		request.apiUser = new SecUser()
+		request.method = "POST"
+		request.requestURI = "/api/v1/users/me/image"
+		def bytes = new byte[16]
+		request.addFile(new MockMultipartFile("file", "my-user-avatar-image.jpg", "image/jpeg", bytes))
+
+		when:
+		withFilters(action: "uploadAvatarImage") {
+			controller.uploadAvatarImage()
+		}
+
+		then:
+		response.status == 200
+		response.json == ((SecUser) request.apiUser).toMap()
+	}
 
 	void "submitting an invalid current password won't let the password be changed"() {
 		when: "password change form is submitted with invalid password"

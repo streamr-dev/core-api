@@ -16,9 +16,9 @@ class ProductImageService {
 
 	void replaceImage(Product product, byte[] fileBytes, String filename) {
 		imageVerifier.verifyImage(fileBytes)
-		final byte[] heroBytes = imageResizer.resize(fileBytes, filename, ImageResizer.Size.HERO)
+		final byte[] heroBytes = imageResizer.resize(fileBytes, filename, ImageResizer.Size.PRODUCT_HERO)
 		final String newImageUrl = fileUploadProvider.uploadFile(generateFilename(filename), heroBytes)
-		final byte[] thumbBytes = imageResizer.resize(fileBytes, filename, ImageResizer.Size.THUMB)
+		final byte[] thumbBytes = imageResizer.resize(fileBytes, filename, ImageResizer.Size.PRODUCT_THUMB)
 		final String newThumbnailUrl = fileUploadProvider.uploadFile(generateFilename(filename), thumbBytes)
 		if (product.imageUrl) {
 			fileUploadProvider.deleteFile(product.imageUrl)
