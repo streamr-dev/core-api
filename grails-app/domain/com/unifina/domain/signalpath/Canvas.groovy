@@ -1,5 +1,6 @@
 package com.unifina.domain.signalpath
 
+import com.unifina.domain.ExampleType
 import com.unifina.domain.dashboard.DashboardItem
 import com.unifina.domain.security.Permission
 import com.unifina.domain.security.SecUser
@@ -49,6 +50,9 @@ class Canvas {
 	// startedBy is set to user who started the canvas.
 	SecUser startedBy
 
+	// exampleType marks this Canvas as an example for new users.
+	ExampleType exampleType = ExampleType.NOT_SET
+
 	static hasMany = [
 		dashboardItems: DashboardItem,
 		permissions: Permission
@@ -71,6 +75,7 @@ class Canvas {
 		adhoc defaultValue: false
 		runner index: 'runner_idx'
 		dashboardItems cascade: 'all-delete-orphan'
+		exampleType enumType: "identity", defaultValue: ExampleType.NOT_SET
 	}
 
 	@CompileStatic
