@@ -1,6 +1,7 @@
 package com.unifina.service
 
 import com.unifina.api.*
+import com.unifina.domain.ExampleType
 import com.unifina.domain.dashboard.Dashboard
 import com.unifina.domain.dashboard.DashboardItem
 import com.unifina.domain.data.Stream
@@ -201,6 +202,48 @@ class CanvasService {
 		return grailsLinkGenerator.link(controller: 'canvas', action: 'editor', id: canvas.id, absolute: true)
 	}
 
+	@CompileStatic
+	def addExampleCanvases(SecUser user, List<Canvas> examples) {
+		for (Canvas c : examples) {
+			switch (c.exampleType) {
+				// Create a copy of the example canvas for the user and grant all permissions.
+				case ExampleType.COPY:
+					Canvas canvas = new Canvas()
+					canvas.dateCreated = c.dateCreated
+					canvas.lastUpdated = c.lastUpdated
+					canvas.name = c.name
+					canvas.json = c.json
+					canvas.state = Canvas.State.STOPPED
+					canvas.hasExports = c.hasExports
+					canvas.adhoc = c.adhoc
+					canvas.runner = null //c.runner
+					canvas.server = null //c.server
+					canvas.requestUrl = null //c.requestUrl
+					canvas.serialization = null //c.serialization
+					canvas.startedBy = null //c.startedBy
+					canvas.exampleType = ExampleType.NOT_SET
+					c.save(validate: true, failOnError: true)
+					permissionService.systemGrantAll(user, canvas)
+
+					Map signalPathMap = (Map) JSON.parse(canvas.json)
+					resetUiChannels(signalPathMap)
+					SignalPathService.ReconstructedResult result = reconstructFrom(signalPathMap, user)
+					result.signalPath.setCanvas(canvas)
+					result.signalPath.getModules().each {
+						if (it instanceof ModuleWithUI) {
+							it.ensureUiChannel()
+						}
+					}
+					result.signalPath.ensureUiChannel()
+					break
+				// Grant read permission to example canvas.
+				case ExampleType.SHARE:
+					permissionService.systemGrant(user, c, Permission.Operation.READ)
+					break
+			}
+		}
+	}
+
 	private boolean hasCanvasPermission(Canvas canvas, SecUser user, Permission.Operation op) {
 		return op == Permission.Operation.READ && canvas.example || permissionService.check(user, canvas, op)
 	}
@@ -219,7 +262,7 @@ class CanvasService {
 	}
 
 	private SignalPathService.ReconstructedResult constructNewSignalPathMap(Canvas canvas, SaveCanvasCommand command, SecUser user, boolean resetUi) {
-		Map inputSignalPathMap = JSON.parse(canvas.json != null ? canvas.json : "{}")
+		Map inputSignalPathMap = (Map) JSON.parse(canvas.json != null ? canvas.json : "{}")
 
 		inputSignalPathMap.name = command.name
 		inputSignalPathMap.modules = command.modules

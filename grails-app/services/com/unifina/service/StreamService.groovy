@@ -8,6 +8,7 @@ import com.unifina.api.NotFoundException
 import com.unifina.api.NotPermittedException
 import com.unifina.api.ValidationException
 import com.unifina.data.StreamPartitioner
+import com.unifina.domain.ExampleType
 import com.unifina.domain.dashboard.DashboardItem
 import com.unifina.domain.data.Feed
 import com.unifina.domain.data.Stream
@@ -308,5 +309,13 @@ class StreamService {
 			return new StreamStatus(false, msg.getTimestampAsDate())
 		}
 		return new StreamStatus(true, msg.getTimestampAsDate())
+	}
+
+	@CompileStatic
+	def addExampleStreams(SecUser user, List<Stream> examples) {
+		for (Stream s : examples) {
+			// Grant read permission to example stream.
+			permissionService.systemGrant(user, s, Permission.Operation.READ)
+		}
 	}
 }

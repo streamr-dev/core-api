@@ -2,9 +2,9 @@ package com.unifina.service
 
 import com.unifina.BeanMockingSpecification
 import com.unifina.api.*
+import com.unifina.domain.ExampleType
 import com.unifina.domain.dashboard.Dashboard
 import com.unifina.domain.dashboard.DashboardItem
-import com.unifina.domain.data.Feed
 import com.unifina.domain.data.Stream
 import com.unifina.domain.security.Permission
 import com.unifina.domain.security.SecUser
@@ -110,6 +110,38 @@ class CanvasServiceSpec extends BeanMockingSpecification {
 		canvases << new Canvas(
 			name: "someoneElses_canvas_2",
 		).save(failOnError: true)
+	}
+
+
+	def "add example shared canvases"() {
+		setup:
+		service.permissionService = Mock(PermissionService)
+		Canvas c = new Canvas(
+			name: "example canvas",
+			exampleType: ExampleType.SHARE
+		).save(failOnError: true)
+		canvases << c
+
+		when:
+		service.addExampleCanvases(me, canvases)
+		then:
+		1 * service.permissionService.systemGrant(me, c, Permission.Operation.READ)
+	}
+
+	def "add example copy canvases"() {
+		setup:
+		service.permissionService = Mock(PermissionService)
+		service.streamService = Mock(StreamService)
+		Canvas c = new Canvas(
+			name: "example canvas",
+			exampleType: ExampleType.COPY
+		).save(failOnError: true)
+		canvases << c
+
+		when:
+		service.addExampleCanvases(me, canvases)
+		then:
+		1 * service.permissionService.systemGrantAll(me, _)
 	}
 
 	def "createNew() throws error when given null command object"() {

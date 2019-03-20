@@ -1,13 +1,15 @@
 package com.unifina.service
 
-import com.unifina.api.ApiException
 import com.unifina.api.InvalidAPIKeyException
 import com.unifina.api.InvalidUsernameAndPasswordException
 import com.unifina.api.NotFoundException
+import com.unifina.domain.ExampleType
 import com.unifina.domain.data.Feed
+import com.unifina.domain.data.Stream
 import com.unifina.domain.security.Key
 import com.unifina.domain.security.SecRole
 import com.unifina.domain.security.SecUser
+import com.unifina.domain.signalpath.Canvas
 import com.unifina.domain.signalpath.ModulePackage
 import com.unifina.exceptions.UserCreationFailedException
 import com.unifina.security.Userish
@@ -25,6 +27,8 @@ class UserService {
 	GrailsApplication grailsApplication
 	SpringSecurityService springSecurityService
 	PermissionService permissionService
+	StreamService streamService
+	CanvasService canvasService
 
 	def createUser(Map properties, List<SecRole> roles = null, List<Feed> feeds = null, List<ModulePackage> packages = null) {
 		def secConf = grailsApplication.config.grails.plugin.springsecurity
@@ -69,6 +73,17 @@ class UserService {
 			// Transfer permissions that were attached to sign-up invitation before user existed
 			permissionService.transferInvitePermissionsTo(user)
 		}
+
+		List<Canvas> canvasExamples = Canvas.createCriteria().list {
+			ne("exampleType", ExampleType.NOT_SET)
+		}
+		canvasService.addExampleCanvases(user, canvasExamples)
+
+		List<Stream> streamExamples = Stream.createCriteria().list {
+			eq("exampleType", ExampleType.SHARE)
+		}
+		streamService.addExampleStreams(user, streamExamples)
+
 		log.info("Created user for " + user.username)
 
 		return user
