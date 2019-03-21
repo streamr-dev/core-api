@@ -5,6 +5,7 @@ FROM tomcat:7.0-jre8-alpine
 #   bash: required by wait_for_it.sh script
 #   mysql: required for waiting for database dumps to be done
 RUN apk update
+RUN apk add openjdk8
 RUN apk add bash mysql-client
 RUN sed -i "s/port=\"8080\"/port=\"8081\"/g" /usr/local/tomcat/conf/server.xml
 # Copy wait-for-it.sh script
