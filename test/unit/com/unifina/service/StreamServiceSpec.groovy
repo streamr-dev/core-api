@@ -4,6 +4,7 @@ import com.streamr.client.protocol.message_layer.StreamMessage
 import com.streamr.client.protocol.message_layer.StreamMessageV30
 import com.unifina.api.NotFoundException
 import com.unifina.api.NotPermittedException
+import com.unifina.domain.ExampleType
 import com.unifina.domain.dashboard.Dashboard
 import com.unifina.domain.dashboard.DashboardItem
 import com.unifina.domain.data.Feed
@@ -51,6 +52,31 @@ class StreamServiceSpec extends Specification {
 		service.grailsApplication = grailsApplication
 		me.save(validate: false, failOnError: true)
 	}
+
+	def "add example shared streams"() {
+		setup:
+		service.permissionService = Mock(PermissionService)
+		List<Stream> streams = []
+		Stream s0 = new Stream(
+			name: "example stream",
+			feed: feed,
+			exampleType: ExampleType.SHARE
+		).save(failOnError: true)
+		streams << s0
+		Stream s1 = new Stream(
+			name: "example 2 stream",
+			feed: feed,
+			exampleType: ExampleType.SHARE
+		).save(failOnError: true)
+		streams << s1
+
+		when:
+		service.addExampleStreams(me, streams)
+		then:
+		1 * service.permissionService.systemGrant(me, s0, Permission.Operation.READ)
+		1 * service.permissionService.systemGrant(me, s1, Permission.Operation.READ)
+	}
+
 
 	void "createStream replaces empty name with default value"() {
 		when:

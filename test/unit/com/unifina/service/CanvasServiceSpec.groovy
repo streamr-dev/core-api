@@ -116,31 +116,73 @@ class CanvasServiceSpec extends BeanMockingSpecification {
 	def "add example shared canvases"() {
 		setup:
 		service.permissionService = Mock(PermissionService)
-		Canvas c = new Canvas(
+		Canvas c0 = new Canvas(
 			name: "example canvas",
 			exampleType: ExampleType.SHARE
 		).save(failOnError: true)
-		canvases << c
+		canvases << c0
+		Canvas c1 = new Canvas(
+			name: "example 2 canvas",
+			exampleType: ExampleType.SHARE
+		).save(failOnError: true)
+		canvases << c1
 
 		when:
 		service.addExampleCanvases(me, canvases)
 		then:
-		1 * service.permissionService.systemGrant(me, c, Permission.Operation.READ)
+		1 * service.permissionService.systemGrant(me, c0, Permission.Operation.READ)
+		1 * service.permissionService.systemGrant(me, c1, Permission.Operation.READ)
 	}
 
 	def "add example copy canvases"() {
 		setup:
 		service.permissionService = Mock(PermissionService)
 		service.streamService = Mock(StreamService)
-		Canvas c = new Canvas(
+		Canvas c0 = new Canvas(
 			name: "example canvas",
 			exampleType: ExampleType.COPY
-		).save(failOnError: true)
-		canvases << c
+		)
+		c0.id = "c0"
+		c0.save(failOnError: true)
+		canvases << c0
+		Canvas c1 = new Canvas(
+			name: "example 2 canvas",
+			exampleType: ExampleType.COPY
+		)
+		c1.id = "c1"
+		c1.save(failOnError: true)
+		canvases << c1
 
 		when:
 		service.addExampleCanvases(me, canvases)
 		then:
+		1 * service.permissionService.systemGrantAll(me, _)
+		1 * service.permissionService.systemGrantAll(me, _)
+	}
+
+	def "add example copy and share canvases"() {
+		setup:
+		service.permissionService = Mock(PermissionService)
+		service.streamService = Mock(StreamService)
+		Canvas c0 = new Canvas(
+			name: "example canvas",
+			exampleType: ExampleType.COPY
+		)
+		c0.id = "c0"
+		c0.save(failOnError: true)
+		canvases << c0
+		Canvas c1 = new Canvas(
+			name: "example 2 canvas",
+			exampleType: ExampleType.SHARE
+		)
+		c1.id = "c1"
+		c1.save(failOnError: true)
+		canvases << c1
+
+		when:
+		service.addExampleCanvases(me, canvases)
+		then:
+		1 * service.permissionService.systemGrant(me, c1, Permission.Operation.READ)
 		1 * service.permissionService.systemGrantAll(me, _)
 	}
 
