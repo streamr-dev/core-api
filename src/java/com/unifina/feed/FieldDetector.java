@@ -4,6 +4,7 @@ import com.streamr.client.protocol.message_layer.StreamMessage;
 import com.unifina.domain.data.Stream;
 import com.unifina.utils.MapTraversal;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -29,7 +30,12 @@ public abstract class FieldDetector {
 			return null;
 		}
 
-		Map map = msg.getContent();
+		Map map;
+		try {
+			map = msg.getContent();
+		} catch (IOException e) {
+			map = new HashMap();
+		}
 
 		if (flattenMap) {
 			map = MapTraversal.flatten(map);
