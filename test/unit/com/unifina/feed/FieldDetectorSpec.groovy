@@ -22,6 +22,7 @@ class FieldDetectorSpec extends Specification {
 
 	def setup() {
 		stream = new Stream()
+		stream.id = "stream-id"
 		detector = new FieldDetector() {
 			@Override
 			protected StreamMessage fetchExampleMessage(Stream stream) {
