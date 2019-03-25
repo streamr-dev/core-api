@@ -8,7 +8,6 @@ import com.unifina.api.NotFoundException
 import com.unifina.api.NotPermittedException
 import com.unifina.api.ValidationException
 import com.unifina.data.StreamPartitioner
-import com.unifina.domain.ExampleType
 import com.unifina.domain.dashboard.DashboardItem
 import com.unifina.domain.data.Feed
 import com.unifina.domain.data.Stream
