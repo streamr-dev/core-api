@@ -245,7 +245,7 @@ class CanvasService {
 	}
 
 	private boolean hasCanvasPermission(Canvas canvas, SecUser user, Permission.Operation op) {
-		return op == Permission.Operation.READ && canvas.example || permissionService.check(user, canvas, op)
+		return permissionService.check(user, canvas, op)
 	}
 
 	private boolean hasModulePermissionViaDashboard(Canvas canvas, Integer moduleId, String dashboardId, SecUser user, Permission.Operation op) {

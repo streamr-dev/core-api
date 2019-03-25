@@ -223,7 +223,6 @@ class CanvasServiceSpec extends BeanMockingSpecification {
 		c.json != null // TODO: JSON Schema validation
 		c.state == Canvas.State.STOPPED
 		!c.hasExports
-		!c.example
 
 		c.runner == null
 		c.server == null
@@ -550,42 +549,6 @@ class CanvasServiceSpec extends BeanMockingSpecification {
 		1 * service.permissionService.check(me, myFirstCanvas, Permission.Operation.READ) >> false
 	}
 
-	def "authorizedGetById() grants read access to examples to anyone without checking permissions"() {
-		myFirstCanvas.example = true
-
-		when:
-		def canvas = service.authorizedGetById(myFirstCanvas.id, null, Permission.Operation.READ)
-
-		then:
-		canvas == myFirstCanvas
-		0 * service.permissionService._
-	}
-
-	def "authorizedGetById() does not grant write or share permission to examples unless permitted by PermissionService"() {
-		myFirstCanvas.example = true
-
-		when:
-		service.authorizedGetById(myFirstCanvas.id, me, Permission.Operation.WRITE)
-
-		then:
-		thrown(NotPermittedException)
-		1 * service.permissionService.check(me, myFirstCanvas, Permission.Operation.WRITE) >> false
-
-		when:
-		service.authorizedGetById(myFirstCanvas.id, me, Permission.Operation.SHARE)
-
-		then:
-		thrown(NotPermittedException)
-		1 * service.permissionService.check(me, myFirstCanvas, Permission.Operation.SHARE) >> false
-
-		when:
-		def canvas = service.authorizedGetById(myFirstCanvas.id, me, Permission.Operation.SHARE)
-
-		then:
-		canvas == myFirstCanvas
-		1 * service.permissionService.check(me, myFirstCanvas, Permission.Operation.SHARE) >> true
-	}
-
 	def "authorizedGetById() throws NotFoundException if no canvas exists"() {
 		when:
 		service.authorizedGetById("foo", me, Permission.Operation.READ)
@@ -654,17 +617,6 @@ class CanvasServiceSpec extends BeanMockingSpecification {
 		then:
 		1 * service.permissionService.check(me, myFirstCanvas, Permission.Operation.READ) >> false
 		thrown(NotPermittedException)
-	}
-
-	def "authorizedGetModuleOnCanvas() grants read access to examples to anyone without checking permissions"() {
-		myFirstCanvas.example = true
-
-		when:
-		def module = service.authorizedGetModuleOnCanvas(myFirstCanvas.id, 1, null, null, Permission.Operation.READ)
-
-		then:
-		module == JSON.parse(myFirstCanvas.json).modules.find {it.hash == 1}
-		0 * service.permissionService._
 	}
 
 	def "authorizedGetModuleOnCanvas() throws NotFoundException if no canvas exists"() {

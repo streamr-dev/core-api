@@ -39,7 +39,6 @@ class Canvas {
 	State state = State.STOPPED
 
 	Boolean hasExports = false
-	Boolean example = false
 	Boolean adhoc = false
 
 	String runner
@@ -71,7 +70,6 @@ class Canvas {
 		id generator: IdGenerator.name // Note: doesn't apply in unit tests
 		json type: 'text'
 		hasExports defaultValue: false
-		example defaultValue: false
 		adhoc defaultValue: false
 		runner index: 'runner_idx'
 		dashboardItems cascade: 'all-delete-orphan'
