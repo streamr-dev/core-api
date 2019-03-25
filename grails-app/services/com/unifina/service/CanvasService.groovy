@@ -223,7 +223,7 @@ class CanvasService {
 					canvas.startedBy = null //c.startedBy
 					canvas.exampleType = ExampleType.NOT_SET
 					c.save(validate: true, failOnError: true)
-					permissionService.systemGrantAll(user, canvas)
+					permissionService.systemGrant(user, canvas, Permission.Operation.SHARE)
 
 					Map signalPathMap = (Map) JSON.parse(canvas.json)
 					resetUiChannels(signalPathMap)

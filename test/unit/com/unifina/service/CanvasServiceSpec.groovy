@@ -156,8 +156,7 @@ class CanvasServiceSpec extends BeanMockingSpecification {
 		when:
 		service.addExampleCanvases(me, canvases)
 		then:
-		1 * service.permissionService.systemGrantAll(me, _)
-		1 * service.permissionService.systemGrantAll(me, _)
+		2 * service.permissionService.systemGrant(me, _, Permission.Operation.SHARE)
 	}
 
 	def "add example copy and share canvases"() {
@@ -183,7 +182,7 @@ class CanvasServiceSpec extends BeanMockingSpecification {
 		service.addExampleCanvases(me, canvases)
 		then:
 		1 * service.permissionService.systemGrant(me, c1, Permission.Operation.READ)
-		1 * service.permissionService.systemGrantAll(me, _)
+		1 * service.permissionService.systemGrant(me, _, Permission.Operation.SHARE)
 	}
 
 	def "createNew() throws error when given null command object"() {
