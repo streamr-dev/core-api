@@ -1,6 +1,8 @@
 package com.unifina.signalpath.blockchain;
 
 import com.google.gson.*;
+import com.unifina.data.FeedEvent;
+import com.unifina.feed.ITimestamped;
 import com.unifina.signalpath.*;
 import com.unifina.signalpath.remote.AbstractHttpModule;
 import com.unifina.utils.MapTraversal;
@@ -13,15 +15,12 @@ import org.apache.log4j.Logger;
 
 import java.io.UnsupportedEncodingException;
 import java.math.BigDecimal;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * Send out a call to specified function in Ethereum block chain
  */
-public class SendEthereumTransaction extends AbstractSignalPathModule {
+public class SendEthereumTransaction extends ModuleWithSideEffects {
 
 	private EthereumModuleOptions ethereumOptions = new EthereumModuleOptions();
 
@@ -190,37 +189,89 @@ public class SendEthereumTransaction extends AbstractSignalPathModule {
 		chosenFunction = null;
 	}
 
-	public void sendOutput() {
+	static class TransactionResult implements ITimestamped {
+		String hash;
+		Map<String, List<Object>> events;
+		List<Object> results;
+		Date timestamp;
+
+		public TransactionResult(Date timestamp) {
+			this.timestamp = timestamp;
+		}
+
+		@Override
+		public Date getTimestamp() {
+			return timestamp;
+		}
+	}
+
+	/**
+	 * Asynchronously handle server response, call comes from event queue
+	 * @param event containing HttpTransaction created within sendOutput
+	 */
+	@Override
+	public void receive(FeedEvent event) {
+		if (event.content instanceof TransactionResult) {
+			sendOutput((TransactionResult)event.content);
+			getPropagator().propagate();
+		} else {
+			super.receive(event);
+		}
+	}
+
+	private transient Propagator asyncPropagator;
+	private Propagator getPropagator() {
+		if (asyncPropagator == null) {
+			asyncPropagator = new Propagator(this);
+		}
+		return asyncPropagator;
+	}
+
+	// TODO: get old tx and send out correct values (TODO: create another JIRA ticket for that)
+	@Override
+	protected void activateWithoutSideEffects() {
+		String msg = "Real-time action by '" + getEffectiveName() + "' ignored in historical mode:\n\n" + getDummyNotificationMessage();
+		getParentSignalPath().showNotification(msg);
+	}
+
+	@Override
+	protected void activateWithSideEffects() {
 		// ethereumAccount
 		// ethereumOptions
 		EthereumContract c = contract.getValue();
 		// chosenFunction
 		// arguments
-		double ethToSend = ether.getValue();	// whole eth, use toWei to convert
+		double ethToSend = ether.getValue();    // whole eth, use toWei to convert
 
-		// TODO: send ethereum transaction, populate following variables:
-		String txHashStr = "";
-		List<Object> events;
+		// TODO: send ethereum transaction
 
+		//web3j.send().then(() -> {
+			// TODO: populate
+			TransactionResult tr = new TransactionResult(getGlobals().time);
+			// push the response into Streamr's event queue
+			getGlobals().getDataSource().enqueueEvent(new FeedEvent<>(tr, tr.timestamp, this));
+		//});
+	}
+
+	public void sendOutput(TransactionResult tx) {
 		if (chosenFunction.constant) {
-			JsonArray resultValues = response.get("results").getAsJsonArray();
-			int n = Math.min(results.size(), resultValues.size());
+			int n = Math.min(results.size(), tx.results.size());
 			for (int i = 0; i < n; i++) {
-				String result = resultValues.get(i).getAsString();
+				Object result = tx.results.get(i);
 				Output<Object> output = results.get(i);
 				convertAndSend(output, result);
 			}
 		} else {
 			if (gson == null) { gson = new Gson(); }
-			txHash.send(txHashStr);
+			txHash.send(tx.hash);
 			for (EthereumABI.Event ev : abi.getEvents()) {
-				List<JsonElement> args = events.get(ev.name);
+				List<Object> args = tx.events.get(ev.name);
 				List<Output<Object>> evOutputs = eventOutputs.get(ev);
 				if (args != null) {
 					if (ev.inputs.size() > 0) {
 						int n = Math.min(evOutputs.size(), args.size());
 						for (int i = 0; i < n; i++) {
-							String value = args.get(i).getAsString();
+							Object value = args.get(i);
 							Output output = evOutputs.get(i);
 							convertAndSend(output, value);
 						}
@@ -232,16 +283,8 @@ public class SendEthereumTransaction extends AbstractSignalPathModule {
 		}
 	}
 
-	static void convertAndSend(Output output, String value) {
-		if (output instanceof StringOutput) {
-			output.send(value);
-		} else if (output instanceof BooleanOutput) {
-			output.send(Boolean.parseBoolean(value));
-		} else if (output instanceof TimeSeriesOutput) {
-			output.send(Double.parseDouble(value));
-		} else {
-			output.send(value);
-		}
+	static void convertAndSend(Output output, Object value) {
+		// TODO (get from another branch)
 	}
 
 	public static class FunctionNameParameter extends StringParameter {
@@ -276,7 +319,6 @@ public class SendEthereumTransaction extends AbstractSignalPathModule {
 	}
 
 	/** Message to show in UI in historical/side-effect-free mode */
-	@Override
 	protected String getDummyNotificationMessage() {
 		String recipient = contract.getValue().getAddress();
 		if (chosenFunction.name.length() > 0) {
@@ -287,7 +329,6 @@ public class SendEthereumTransaction extends AbstractSignalPathModule {
     }
 
 	/** Streamr-web3 ethereum bridge can be running on a local machine */
-	@Override
 	protected boolean localAddressesAreAllowed() {
 		return true;
 	}
