@@ -7,6 +7,7 @@ import grails.test.mixin.Mock
 import grails.test.mixin.TestFor
 import grails.test.mixin.TestMixin
 import grails.test.mixin.web.ControllerUnitTestMixin
+import org.hibernate.StaleObjectStateException
 import spock.lang.Specification
 
 @TestMixin(ControllerUnitTestMixin)
@@ -19,13 +20,25 @@ class SessionServiceSpec extends Specification {
 		keyValueStoreService = service.keyValueStoreService = Mock(KeyValueStoreService)
 	}
 
-	void "update users login date"() {
-		SecUser user = new SecUser(id: 123L).save(failOnError: true, validate: false)
+	void "updateUsersLoginDate()"() {
+		SecUser user = new SecUser().save(failOnError: true, validate: false)
 		Date date = new Date(1547210776)
 		when:
 		service.updateUsersLoginDate(user, date)
 		then:
-		user.lastLogin == date
+		SecUser.get(user.id).lastLogin == date
+	}
+
+	void "updateUsersLoginDate() ignores StaleObjectStateException"() {
+		SecUser user = new SecUser(lastLogin: new Date(0)).save(failOnError: true, validate: false)
+		Date date = new Date(1547210776)
+		user.metaClass.save = {Map args->
+			throw new StaleObjectStateException(user.class.name, 123L)
+		}
+		when:
+		service.updateUsersLoginDate(user, date)
+		then:
+		SecUser.get(user.id).lastLogin.equals(new Date(0))
 	}
 
 	void "generateToken() should generate session token from user"() {
@@ -73,4 +86,5 @@ class SessionServiceSpec extends Specification {
 		1 * keyValueStoreService.get(token) >> "Key"+key.id.toString()
 		retrieved.id == key.id
 	}
+
 }

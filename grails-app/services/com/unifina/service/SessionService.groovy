@@ -6,6 +6,8 @@ import com.unifina.domain.security.Key
 import com.unifina.domain.security.SecUser
 import com.unifina.security.SessionToken
 import com.unifina.security.Userish
+import org.apache.log4j.Logger
+import org.hibernate.StaleObjectStateException
 import org.joda.time.DateTime
 
 class SessionService {
@@ -14,9 +16,18 @@ class SessionService {
 
 	KeyValueStoreService keyValueStoreService
 
+	private static final Logger log = Logger.getLogger(SessionService)
+
 	void updateUsersLoginDate(SecUser user, Date date) {
+		Date originalDate = user.lastLogin
 		user.lastLogin = date
-		user.save(failOnError: true, validate: false)
+		try {
+			user.save(failOnError: true, validate: false, flush: true)
+		} catch (StaleObjectStateException e) {
+			log.info("Exception ignored while updating user login date: ${e}")
+			// rollback field to make the instance not-dirty
+			user.lastLogin = originalDate
+		}
 	}
 
 	SessionToken generateToken(Userish userish) {
