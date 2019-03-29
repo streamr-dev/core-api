@@ -116,7 +116,7 @@ We want to integrate quality module contributions to the project. To get your cu
 * database migration <small>(under grails-app/migrations, [see XOR module migration for example](https://github.com/streamr-dev/engine-and-editor/blob/master/grails-app/migrations/core/2017-01-17-xor-module.groovy))</small>
 * all this in a neat git branch with no conflicts with master, and a [pull request in github](https://github.com/streamr-dev/engine-and-editor/pull/229)
 
-We'll be happy to help with completing these steps. Best way to reach the Streamr developer community is the [Streamr Chat](https://chat.streamr.com/)
+We'll be happy to help with completing these steps. Best ways to reach the Streamr developer community are the [official Telegram group](https://t.me/streamrdata) and the community-run [developer forum](http://forum.streamr.dev/).
 
 ## License
 
