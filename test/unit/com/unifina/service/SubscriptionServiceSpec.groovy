@@ -17,20 +17,36 @@ import spock.lang.Specification
 @Mock([FreeSubscription, IntegrationKey, PaidSubscription, Permission, Product, Stream, Subscription])
 class SubscriptionServiceSpec extends Specification {
 
-	SecUser user, user2
-	Stream s1, s2, s3
+	SecUser user, user2, user3
+	Stream s1, s2, s3, pub1Inbox, pub2Inbox, user3Inbox
 	Product product
+	StreamService streamService
+	EthereumIntegrationKeyService ethereumIntegrationKeyService
 
 	void setup() {
 		user = new SecUser(username: "me@streamr.com").save(failOnError: true, validate: false)
 		user2 = new SecUser(username: "someoneElse@streamr.com").save(failOnError: true, validate: false)
+		user3 = new SecUser(username: "0x26e1ae3f5efe8a01eca8c2e9d3c32702cf4bead6").save(failOnError: true, validate: false)
 		s1 = new Stream(name: "stream-1")
 		s2 = new Stream(name: "stream-2")
 		s3 = new Stream(name: "stream-3")
+
+		pub1Inbox = new Stream(name: "publisher1", inbox: true)
+		pub1Inbox.id = "publisher1"
+		pub1Inbox.save(failOnError: true, validate: false)
+		pub2Inbox = new Stream(name: "publisher2", inbox: true)
+		pub2Inbox.id = "publisher2"
+		pub2Inbox.save(failOnError: true, validate: false)
+		user3Inbox = new Stream(name: user3.username, inbox: true)
+		user3Inbox.id = user3.username
+		user3Inbox.save(failOnError: true, validate: false)
+
 		[s1, s2, s3].eachWithIndex { s, i -> s.id = "stream-${i + 1}" }
 		[s1, s2, s3]*.save(failOnError: true, validate: false)
 		product = new Product(streams: [s1, s2]).save(failOnError: true, validate: false)
 		service.permissionService = new PermissionService()
+		streamService = service.permissionService.streamService = Mock(StreamService)
+		ethereumIntegrationKeyService = service.permissionService.ethereumIntegrationKeyService = Mock(EthereumIntegrationKeyService)
 	}
 
 	void "getSubscriptionsOfUser() returns empty if user has no integration keys or free subscriptions"() {
@@ -157,6 +173,72 @@ class SubscriptionServiceSpec extends Specification {
 				operation: "READ",
 				user: 1L,
 				stream: "stream-2",
+				subscription: 1L,
+				endsAt: date
+			]
+		] as Set
+	}
+
+	void "onSubscribed() with an Ethereum user creates also inbox permissions"() {
+		new IntegrationKey(
+			user: user3,
+			idInService: "0x0000000000000000000000000000000000000000",
+			service: IntegrationKey.Service.ETHEREUM_ID
+		).save(failOnError: true, validate: false)
+		SecUser publisher1 = new SecUser()
+		publisher1.id = 4L
+		SecUser publisher2 = new SecUser()
+		publisher2.id = 5L
+
+		when:
+		def date = new Date()
+		service.onSubscribed(product, "0x0000000000000000000000000000000000000000", date)
+
+		then:
+		1 * streamService.getStreamEthereumPublishers(s1) >> ["publisher1", "publisher2"]
+		1 * streamService.getStreamEthereumPublishers(s2) >> []
+		1 * ethereumIntegrationKeyService.getEthereumUser("publisher1") >> publisher1
+		1 * ethereumIntegrationKeyService.getEthereumUser("publisher2") >> publisher2
+		Permission.findAll()*.toInternalMap() as Set == [
+			[
+				operation: "READ",
+				user: 3L,
+				stream: "stream-1",
+				subscription: 1L,
+				endsAt: date
+			],
+			[
+				operation: "READ",
+				user: 3L,
+				stream: "stream-2",
+				subscription: 1L,
+				endsAt: date
+			],
+			[
+				operation: "WRITE",
+				user: 3L,
+				stream: "publisher1",
+				subscription: 1L,
+				endsAt: date
+			],
+			[
+				operation: "WRITE",
+				user: 3L,
+				stream: "publisher2",
+				subscription: 1L,
+				endsAt: date
+			],
+			[
+				operation: "WRITE",
+				user: 4L,
+				stream: "0x26e1ae3f5efe8a01eca8c2e9d3c32702cf4bead6",
+				subscription: 1L,
+				endsAt: date
+			],
+			[
+				operation: "WRITE",
+				user: 5L,
+				stream: "0x26e1ae3f5efe8a01eca8c2e9d3c32702cf4bead6",
 				subscription: 1L,
 				endsAt: date
 			]

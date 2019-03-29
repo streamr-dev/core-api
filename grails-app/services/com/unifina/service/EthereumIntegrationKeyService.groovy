@@ -5,6 +5,7 @@ import com.unifina.api.CannotRemoveEthereumKeyException
 import com.unifina.api.ChallengeVerificationFailedException
 import com.unifina.api.DuplicateNotAllowedException
 import com.unifina.api.NotFoundException
+import com.unifina.domain.data.Stream
 import com.unifina.domain.security.IntegrationKey
 import com.unifina.domain.security.SecUser
 import com.unifina.security.StringEncryptor
@@ -81,6 +82,8 @@ class EthereumIntegrationKeyService {
 			] as JSON).toString()
 		).save(flush: true)
 
+		createUserInboxStream(address)
+
 		subscriptionService.afterIntegrationKeyCreated(integrationKey)
 		return integrationKey
 	}
@@ -112,12 +115,20 @@ class EthereumIntegrationKeyService {
 		IntegrationKey.findAllByServiceAndUser(IntegrationKey.Service.ETHEREUM, user)
 	}
 
-	SecUser getOrCreateFromEthereumAddress(String address) {
+	SecUser getEthereumUser(String address) {
 		IntegrationKey key = IntegrationKey.findByIdInServiceAndService(address, IntegrationKey.Service.ETHEREUM_ID)
 		if (key == null) {
-			return createEthereumUser(address)
+			return null
 		}
 		return key.user
+	}
+
+	SecUser getOrCreateFromEthereumAddress(String address) {
+		SecUser user = getEthereumUser(address)
+		if (user == null) {
+			user = createEthereumUser(address)
+		}
+		return user
 	}
 
 	SecUser createEthereumUser(String address) {
@@ -138,7 +149,17 @@ class EthereumIntegrationKeyService {
 				address: address
 			] as JSON).toString()
 		).save(failOnError: true, flush: true)
+		createUserInboxStream(address)
 		return user
+	}
+
+	@CompileStatic
+	private static void createUserInboxStream(String address) {
+		Stream inboxStream = new Stream()
+		inboxStream.id = address
+		inboxStream.name = address
+		inboxStream.inbox = true
+		inboxStream.save(failOnError: true, flush: true)
 	}
 
 	@CompileStatic

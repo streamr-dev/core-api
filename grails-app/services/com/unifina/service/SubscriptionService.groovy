@@ -13,6 +13,8 @@ import grails.compiler.GrailsCompileStatic
 @GrailsCompileStatic
 class SubscriptionService {
 	PermissionService permissionService
+	StreamService streamService
+	EthereumIntegrationKeyService ethereumIntegrationKeyService
 
 	void deleteProduct(Product product) {
 		Subscription.findAllByProduct(product).toArray().each { Subscription subscription ->
@@ -115,10 +117,7 @@ class SubscriptionService {
 		SecUser user = subscription.fetchUser()
 		if (user) {
 			streams.collect { Stream stream ->
-				Permission permission = permissionService.systemGrant(user, stream, Permission.Operation.READ)
-				permission.subscription = subscription
-				permission.endsAt = subscription.endsAt
-				permission.save(failOnError: true)
+				permissionService.systemGrant(user, stream, Permission.Operation.READ, subscription, subscription.endsAt)
 			}
 		}
 	}

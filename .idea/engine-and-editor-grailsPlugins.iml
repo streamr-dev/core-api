@@ -88,7 +88,7 @@
     <content url="file://$USER_HOME$/.grails/2.5.6/projects/streamr-core/plugins/zipped-resources-1.0">
       <sourceFolder url="file://$USER_HOME$/.grails/2.5.6/projects/streamr-core/plugins/zipped-resources-1.0/grails-app/i18n" isTestSource="false" />
     </content>
-    <orderEntry type="inheritedJdk" />
+    <orderEntry type="jdk" jdkName="1.8" jdkType="JavaSDK" />
     <orderEntry type="sourceFolder" forTests="false" />
     <orderEntry type="module-library" exported="">
       <library name="Grails User Library (engine-and-editor-grailsPlugins)">

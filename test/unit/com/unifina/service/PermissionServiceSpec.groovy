@@ -2,6 +2,7 @@ package com.unifina.service
 
 import com.unifina.api.NotPermittedException
 import com.unifina.domain.dashboard.Dashboard
+import com.unifina.domain.data.Stream
 import com.unifina.domain.security.Key
 import com.unifina.domain.security.Permission
 import com.unifina.domain.security.Permission.Operation
@@ -32,6 +33,9 @@ class PermissionServiceSpec extends Specification {
 
 	Dashboard dashAllowed, dashRestricted, dashOwned, dashPublic
 	Permission dashReadPermission, dashAnonymousReadPermission
+
+	StreamService streamService
+	EthereumIntegrationKeyService ethereumIntegrationKeyService
 
     def setup() {
 
@@ -66,6 +70,9 @@ class PermissionServiceSpec extends Specification {
 		dashReadPermission = service.grant(anotherUser, dashAllowed, me, Operation.READ)
 		dashAnonymousReadPermission = service.grantAnonymousAccess(anotherUser, dashPublic)
 		service.grant(anotherUser, dashAllowed, anonymousKey)
+
+		streamService = service.streamService = Mock(StreamService)
+		ethereumIntegrationKeyService = service.ethereumIntegrationKeyService = Mock(EthereumIntegrationKeyService)
     }
 
 	void "test setup"() {
@@ -199,6 +206,38 @@ class PermissionServiceSpec extends Specification {
 		service.getPermissionsTo(dashPublic, myKey)[0].operation == Operation.READ
 		service.getPermissionsTo(dashPublic, anotherUserKey).size() == 4
 		service.getPermissionsTo(dashPublic, anonymousKey)[0].operation == Operation.READ
+	}
+
+	void "systemGrant() on an Ethereum user and a stream creates also inbox permissions"() {
+		SecUser publisher1 = new SecUser()
+		publisher1.id = 4L
+		SecUser publisher2 = new SecUser()
+		publisher2.id = 5L
+		SecUser subscriber = new SecUser(username: "0x26e1ae3f5efe8a01eca8c2e9d3c32702cf4bead6").save(failOnError: true, validate: false)
+
+		Stream pub1Inbox = new Stream(name: "publisher1", inbox: true)
+		pub1Inbox.id = "publisher1"
+		pub1Inbox.save(failOnError: true, validate: false)
+		Stream pub2Inbox = new Stream(name: "publisher2", inbox: true)
+		pub2Inbox.id = "publisher2"
+		pub2Inbox.save(failOnError: true, validate: false)
+		Stream subInbox = new Stream(name: subscriber.username, inbox: true)
+		subInbox.id = subscriber.username
+		subInbox.save(failOnError: true, validate: false)
+
+		Stream stream = new Stream()
+		stream.id = "stream"
+
+		when:
+		service.systemGrant(subscriber, stream, Operation.READ)
+		then:
+		1 * streamService.getStreamEthereumPublishers(stream) >> ["publisher1", "publisher2"]
+		1 * ethereumIntegrationKeyService.getEthereumUser("publisher1") >> publisher1
+		1 * ethereumIntegrationKeyService.getEthereumUser("publisher2") >> publisher2
+		service.canWrite(subscriber, pub1Inbox)
+		service.canWrite(subscriber, pub2Inbox)
+		service.canWrite(publisher1, subInbox)
+		service.canWrite(publisher2, subInbox)
 	}
 
 	void "get throws exceptions on invalid resource"() {

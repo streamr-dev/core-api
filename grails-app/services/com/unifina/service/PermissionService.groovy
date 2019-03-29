@@ -5,6 +5,7 @@ import com.unifina.domain.dashboard.Dashboard
 import com.unifina.domain.data.Feed
 import com.unifina.domain.data.Stream
 import com.unifina.domain.marketplace.Product
+import com.unifina.domain.marketplace.Subscription
 import com.unifina.domain.security.Key
 import com.unifina.domain.security.Permission
 import com.unifina.domain.security.Permission.Operation
@@ -31,6 +32,9 @@ import java.security.AccessControlException
 class PermissionService {
 	// Cascade revocations to "higher" rights to ensure meaningful combinations (e.g. WRITE without READ makes no sense)
 	private static final Map<String, List<Operation>> ALSO_REVOKE = [read: [Operation.WRITE, Operation.SHARE]]
+
+	StreamService streamService
+	EthereumIntegrationKeyService ethereumIntegrationKeyService
 
 	/**
 	 * Check whether user is allowed to read a resource
@@ -265,15 +269,40 @@ class PermissionService {
      * @return granted permission
      */
 	Permission systemGrant(Userish target, resource, Operation operation=Operation.READ) {
+		return systemGrant(target, resource, operation, null, null)
+	}
+
+	Permission systemGrant(Userish target, resource, Operation operation=Operation.READ, Subscription subscription, Date endsAt) {
 		target = target.resolveToUserish()
 		String userProp = getUserPropertyName(target)
 		String resourceProp = getResourcePropertyName(resource)
+
+		if (userProp == "user" && resourceProp == "stream") {
+			SecUser user = (SecUser) target
+			if (user.isEthereumUser()) {
+				grantInboxStreamPermissions(user, (Stream) resource, subscription, endsAt)
+			}
+		}
 
 		return new Permission(
 			(resourceProp): resource,
 			(userProp): target,
 			operation: operation,
+			subscription: subscription,
+			endsAt: endsAt
 		).save(flush: true, failOnError: true)
+	}
+
+	private void grantInboxStreamPermissions(SecUser subscriber, Stream stream, Subscription subscription, Date endsAt) {
+		Set<String> publishers = streamService.getStreamEthereumPublishers(stream)
+		Stream subscriberInbox = Stream.get(subscriber.username)
+		for (String address: publishers) {
+			Stream publisherInbox = Stream.get(address)
+			systemGrant(subscriber, publisherInbox, Operation.WRITE, subscription, endsAt)
+
+			SecUser publisher = ethereumIntegrationKeyService.getEthereumUser(address)
+			systemGrant(publisher, subscriberInbox, Operation.WRITE, subscription, endsAt)
+		}
 	}
 
 	/**

@@ -3,6 +3,7 @@ package com.unifina.service
 import com.unifina.api.ApiException
 import com.unifina.api.CannotRemoveEthereumKeyException
 import com.unifina.api.DuplicateNotAllowedException
+import com.unifina.domain.data.Stream
 import com.unifina.security.Challenge
 import com.unifina.domain.security.IntegrationKey
 import com.unifina.domain.security.SecUser
@@ -265,6 +266,16 @@ class EthereumIntegrationKeyServiceSpec extends Specification {
 		user.username == me.username
 		IntegrationKey.count == 1
 		SecUser.count == 1
+	}
+
+	void "createEthereumUser() creates inbox stream"() {
+		SecUser someoneElse = new SecUser(username: "someoneElse@streamr.com").save(failOnError: true, validate: false)
+		when:
+		service.createEthereumUser("address")
+		then:
+		1 * userService.createUser(_) >> someoneElse
+		Stream.count == 1
+		Stream.get("address").inbox
 	}
 
 	void "cannot remove only key of ethereum user"() {
