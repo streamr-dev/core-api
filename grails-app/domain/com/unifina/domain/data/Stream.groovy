@@ -81,7 +81,9 @@ class Stream implements Comparable {
 			uiChannel: uiChannel,
 			dateCreated: dateCreated,
 			lastUpdated: lastUpdated,
-			requireSignedData: requireSignedData
+			requireSignedData: requireSignedData,
+			autoConfigure: autoConfigure,
+			storageDays: storageDays
 		]
 	}
 
