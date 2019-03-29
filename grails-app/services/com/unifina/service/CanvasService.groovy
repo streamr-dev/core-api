@@ -22,6 +22,7 @@ import groovy.json.JsonBuilder
 import groovy.transform.CompileStatic
 import org.codehaus.groovy.grails.web.json.JSONObject
 import org.codehaus.groovy.grails.web.mapping.LinkGenerator
+import org.codehaus.groovy.runtime.InvokerHelper
 
 class CanvasService {
 
@@ -204,41 +205,38 @@ class CanvasService {
 
 	@CompileStatic
 	def addExampleCanvases(SecUser user, List<Canvas> examples) {
-		for (Canvas c : examples) {
-			switch (c.exampleType) {
-				// Create a copy of the example canvas for the user and grant all permissions.
+		for (Canvas example : examples) {
+			switch (example.exampleType) {
+				// Create a copy of the example canvas for the user and grant share permission.
 				case ExampleType.COPY:
-					Canvas canvas = new Canvas()
-					canvas.dateCreated = c.dateCreated
-					canvas.lastUpdated = c.lastUpdated
-					canvas.name = c.name
-					canvas.json = c.json
-					canvas.state = Canvas.State.STOPPED
-					canvas.hasExports = c.hasExports
-					canvas.adhoc = c.adhoc
-					canvas.runner = null //c.runner
-					canvas.server = null //c.server
-					canvas.requestUrl = null //c.requestUrl
-					canvas.serialization = null //c.serialization
-					canvas.startedBy = null //c.startedBy
-					canvas.exampleType = ExampleType.NOT_SET
+					Canvas c = new Canvas()
+					InvokerHelper.setProperties(c, example.properties)
+					c.runner = null
+					c.server = null
+					c.requestUrl = null
+					c.serialization = null
+					c.startedBy = null
+					c.state = Canvas.State.STOPPED
+					c.exampleType = ExampleType.NOT_SET
 					c.save(validate: true, failOnError: true)
-					permissionService.systemGrant(user, canvas, Permission.Operation.SHARE)
+					permissionService.systemGrant(user, c, Permission.Operation.SHARE)
 
-					Map signalPathMap = (Map) JSON.parse(canvas.json)
+					Map signalPathMap = (Map) JSON.parse(example.json)
 					resetUiChannels(signalPathMap)
 					SignalPathService.ReconstructedResult result = reconstructFrom(signalPathMap, user)
-					result.signalPath.setCanvas(canvas)
+					result.signalPath.setCanvas(c)
 					result.signalPath.getModules().each {
 						if (it instanceof ModuleWithUI) {
 							it.ensureUiChannel()
 						}
 					}
 					result.signalPath.ensureUiChannel()
+					c.json = example.json
+					c.save(validate: true, failOnError: true)
 					break
 				// Grant read permission to example canvas.
 				case ExampleType.SHARE:
-					permissionService.systemGrant(user, c, Permission.Operation.READ)
+					permissionService.systemGrant(user, example, Permission.Operation.READ)
 					break
 			}
 		}

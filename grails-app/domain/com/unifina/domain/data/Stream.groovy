@@ -66,7 +66,7 @@ class Stream implements Comparable {
 		requireSignedData defaultValue: "false"
 		autoConfigure defaultValue: "true"
 		storageDays defaultValue: DEFAULT_STORAGE_DAYS
-		exampleType enumType: "identity", defaultValue: ExampleType.NOT_SET
+		exampleType enumType: "identity", defaultValue: ExampleType.NOT_SET, index: 'example_type_idx'
 	}
 
 	@Override
