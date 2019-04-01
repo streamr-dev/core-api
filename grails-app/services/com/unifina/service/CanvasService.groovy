@@ -211,6 +211,8 @@ class CanvasService {
 				case ExampleType.COPY:
 					Canvas c = new Canvas()
 					InvokerHelper.setProperties(c, example.properties)
+					c.dashboardItems = new HashSet<DashboardItem>()
+					c.permissions = new HashSet<Permission>()
 					c.runner = null
 					c.server = null
 					c.requestUrl = null
