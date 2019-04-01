@@ -33,8 +33,7 @@ class PermissionService {
 	// Cascade revocations to "higher" rights to ensure meaningful combinations (e.g. WRITE without READ makes no sense)
 	private static final Map<String, List<Operation>> ALSO_REVOKE = [read: [Operation.WRITE, Operation.SHARE]]
 
-	StreamService streamService
-	EthereumIntegrationKeyService ethereumIntegrationKeyService
+	def grailsApplication
 
 	/**
 	 * Check whether user is allowed to read a resource
@@ -294,6 +293,9 @@ class PermissionService {
 	}
 
 	private void grantInboxStreamPermissions(SecUser subscriber, Stream stream, Subscription subscription, Date endsAt) {
+		// Need to initialize the two services below this way because of circular dependencies issues
+		StreamService streamService = grailsApplication.mainContext.getBean(StreamService)
+		EthereumIntegrationKeyService ethereumIntegrationKeyService = grailsApplication.mainContext.getBean(EthereumIntegrationKeyService)
 		Set<String> publishers = streamService.getStreamEthereumPublishers(stream)
 		Stream subscriberInbox = Stream.get(subscriber.username)
 		for (String address: publishers) {

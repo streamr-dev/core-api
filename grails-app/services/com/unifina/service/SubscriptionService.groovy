@@ -13,8 +13,6 @@ import grails.compiler.GrailsCompileStatic
 @GrailsCompileStatic
 class SubscriptionService {
 	PermissionService permissionService
-	StreamService streamService
-	EthereumIntegrationKeyService ethereumIntegrationKeyService
 
 	void deleteProduct(Product product) {
 		Subscription.findAllByProduct(product).toArray().each { Subscription subscription ->
