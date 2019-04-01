@@ -77,7 +77,6 @@ class StreamServiceSpec extends Specification {
 		1 * service.permissionService.systemGrant(me, s1, Permission.Operation.READ)
 	}
 
-
 	void "createStream replaces empty name with default value"() {
 		when:
 		Stream s = service.createStream([name: "", feed: feed], me)

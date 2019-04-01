@@ -112,7 +112,6 @@ class CanvasServiceSpec extends BeanMockingSpecification {
 		).save(failOnError: true)
 	}
 
-
 	def "add example shared canvases"() {
 		setup:
 		service.permissionService = Mock(PermissionService)
@@ -157,6 +156,8 @@ class CanvasServiceSpec extends BeanMockingSpecification {
 		service.addExampleCanvases(me, canvases)
 		then:
 		2 * service.permissionService.systemGrant(me, _, Permission.Operation.SHARE)
+		2 * service.permissionService.systemGrant(me, _, Permission.Operation.READ)
+		2 * service.permissionService.systemGrant(me, _, Permission.Operation.WRITE)
 	}
 
 	def "add example copy and share canvases"() {
@@ -182,6 +183,8 @@ class CanvasServiceSpec extends BeanMockingSpecification {
 		service.addExampleCanvases(me, canvases)
 		then:
 		1 * service.permissionService.systemGrant(me, c1, Permission.Operation.READ)
+		1 * service.permissionService.systemGrant(me, _, Permission.Operation.READ)
+		1 * service.permissionService.systemGrant(me, _, Permission.Operation.WRITE)
 		1 * service.permissionService.systemGrant(me, _, Permission.Operation.SHARE)
 	}
 

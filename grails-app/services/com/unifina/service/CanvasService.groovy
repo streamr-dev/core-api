@@ -207,7 +207,7 @@ class CanvasService {
 	def addExampleCanvases(SecUser user, List<Canvas> examples) {
 		for (Canvas example : examples) {
 			switch (example.exampleType) {
-				// Create a copy of the example canvas for the user and grant share permission.
+				// Create a copy of the example canvas for the user and grant read/write/share permissions.
 				case ExampleType.COPY:
 					Canvas c = new Canvas()
 					InvokerHelper.setProperties(c, example.properties)
@@ -220,6 +220,8 @@ class CanvasService {
 					c.exampleType = ExampleType.NOT_SET
 					c.save(validate: true, failOnError: true)
 					permissionService.systemGrant(user, c, Permission.Operation.SHARE)
+					permissionService.systemGrant(user, c, Permission.Operation.READ)
+					permissionService.systemGrant(user, c, Permission.Operation.WRITE)
 
 					Map signalPathMap = (Map) JSON.parse(example.json)
 					resetUiChannels(signalPathMap)
@@ -231,7 +233,7 @@ class CanvasService {
 						}
 					}
 					result.signalPath.ensureUiChannel()
-					c.json = example.json
+					c.json = result.map as JSON
 					c.save(validate: true, failOnError: true)
 					break
 				// Grant read permission to example canvas.
