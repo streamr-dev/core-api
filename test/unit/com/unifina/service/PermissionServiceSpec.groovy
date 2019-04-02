@@ -15,6 +15,8 @@ import grails.test.mixin.Mock
 import grails.test.mixin.TestFor
 import grails.test.mixin.TestMixin
 import grails.test.mixin.support.GrailsUnitTestMixin
+import org.codehaus.groovy.grails.commons.DefaultGrailsApplication
+import org.springframework.context.ApplicationContext
 import spock.lang.Specification
 
 import java.security.AccessControlException
@@ -71,8 +73,20 @@ class PermissionServiceSpec extends Specification {
 		dashAnonymousReadPermission = service.grantAnonymousAccess(anotherUser, dashPublic)
 		service.grant(anotherUser, dashAllowed, anonymousKey)
 
-		streamService = service.streamService = Mock(StreamService)
-		ethereumIntegrationKeyService = service.ethereumIntegrationKeyService = Mock(EthereumIntegrationKeyService)
+		streamService = Mock(StreamService)
+		ethereumIntegrationKeyService = Mock(EthereumIntegrationKeyService)
+
+		// Setup application context
+		def applicationContext = Stub(ApplicationContext) {
+			getBean(StreamService) >> streamService
+			getBean(EthereumIntegrationKeyService) >> ethereumIntegrationKeyService
+		}
+
+		// Setup grailsApplication
+		def grailsApplication = new DefaultGrailsApplication()
+		grailsApplication.setMainContext(applicationContext)
+
+		service.grailsApplication = grailsApplication
     }
 
 	void "test setup"() {
