@@ -32,8 +32,12 @@ class CanvasServiceSpec extends BeanMockingSpecification {
 	SecUser someoneElse
 	Canvas myFirstCanvas
 	List<Canvas> canvases = []
-
 	Module moduleWithUi
+
+	String json = new JsonBuilder([
+		modules: [],
+		settings: [:],
+	]).toPrettyString()
 
 	def setup() {
 		service.permissionService = mockBean(PermissionService, Mock(PermissionService))
@@ -73,30 +77,35 @@ class CanvasServiceSpec extends BeanMockingSpecification {
 
 		canvases << new Canvas(
 			name: "my_canvas_2",
+			json: json,
 		).save(failOnError: true)
 
 		canvases << new Canvas(
 			name: "my_canvas_3",
 			adhoc: false,
-			state: Canvas.State.RUNNING
+			state: Canvas.State.RUNNING,
+			json: json,
 		).save(failOnError: true)
 
 		canvases << new Canvas(
 			name: "my_canvas_4",
 			adhoc: true,
-			state: Canvas.State.RUNNING
+			state: Canvas.State.RUNNING,
+			json: json,
 		).save(failOnError: true)
 
 		canvases << new Canvas(
 			name: "my_canvas_5",
 			adhoc: true,
-			state: Canvas.State.STOPPED
+			state: Canvas.State.STOPPED,
+			json: json,
 		).save(failOnError: true)
 
 		canvases << new Canvas(
 			name: "my_canvas_6",
 			adhoc: false,
-			state: Canvas.State.STOPPED
+			state: Canvas.State.STOPPED,
+			json: json,
 		).save(failOnError: true)
 
 		someoneElse = new SecUser(username: "someone@someone.com").save(validate: false)
@@ -104,11 +113,13 @@ class CanvasServiceSpec extends BeanMockingSpecification {
 		canvases << new Canvas(
 			name: "someoneElses_canvas_1",
 			adhoc: false,
-			state: Canvas.State.STOPPED
+			state: Canvas.State.STOPPED,
+			json: json,
 		).save(failOnError: true)
 
 		canvases << new Canvas(
 			name: "someoneElses_canvas_2",
+			json: json,
 		).save(failOnError: true)
 	}
 
@@ -139,14 +150,16 @@ class CanvasServiceSpec extends BeanMockingSpecification {
 		service.streamService = Mock(StreamService)
 		Canvas c0 = new Canvas(
 			name: "example canvas",
-			exampleType: ExampleType.COPY
+			exampleType: ExampleType.COPY,
+			json: json,
 		)
 		c0.id = "c0"
 		c0.save(failOnError: true)
 		canvases << c0
 		Canvas c1 = new Canvas(
 			name: "example 2 canvas",
-			exampleType: ExampleType.COPY
+			exampleType: ExampleType.COPY,
+			json: json,
 		)
 		c1.id = "c1"
 		c1.save(failOnError: true)
@@ -166,14 +179,16 @@ class CanvasServiceSpec extends BeanMockingSpecification {
 		service.streamService = Mock(StreamService)
 		Canvas c0 = new Canvas(
 			name: "example canvas",
-			exampleType: ExampleType.COPY
+			exampleType: ExampleType.COPY,
+			json: json,
 		)
 		c0.id = "c0"
 		c0.save(failOnError: true)
 		canvases << c0
 		Canvas c1 = new Canvas(
 			name: "example 2 canvas",
-			exampleType: ExampleType.SHARE
+			exampleType: ExampleType.SHARE,
+			json: json,
 		)
 		c1.id = "c1"
 		c1.save(failOnError: true)

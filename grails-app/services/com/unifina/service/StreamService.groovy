@@ -312,9 +312,9 @@ class StreamService {
 
 	@CompileStatic
 	def addExampleStreams(SecUser user, List<Stream> examples) {
-		for (Stream s : examples) {
+		for (final Stream example : examples) {
 			// Grant read permission to example stream.
-			permissionService.systemGrant(user, s, Permission.Operation.READ)
+			permissionService.systemGrant(user, example, Permission.Operation.READ)
 		}
 	}
 }

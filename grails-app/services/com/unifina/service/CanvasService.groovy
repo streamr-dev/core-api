@@ -205,7 +205,7 @@ class CanvasService {
 
 	@CompileStatic
 	def addExampleCanvases(SecUser user, List<Canvas> examples) {
-		for (Canvas example : examples) {
+		for (final Canvas example : examples) {
 			switch (example.exampleType) {
 				// Create a copy of the example canvas for the user and grant read/write/share permissions.
 				case ExampleType.COPY:
@@ -225,18 +225,14 @@ class CanvasService {
 					permissionService.systemGrant(user, c, Permission.Operation.READ)
 					permissionService.systemGrant(user, c, Permission.Operation.WRITE)
 
-					Map signalPathMap = (Map) JSON.parse(example.json)
-					resetUiChannels(signalPathMap)
-					SignalPathService.ReconstructedResult result = reconstructFrom(signalPathMap, user)
-					result.signalPath.setCanvas(c)
-					result.signalPath.getModules().each {
-						if (it instanceof ModuleWithUI) {
-							it.ensureUiChannel()
-						}
-					}
-					result.signalPath.ensureUiChannel()
-					c.json = result.map as JSON
-					c.save(validate: true, failOnError: true)
+					Map map = (JSONObject) JSON.parse(example.json)
+					SaveCanvasCommand cmd = new SaveCanvasCommand(
+						name: c.name,
+						modules: map?.getJSONArray("modules") == null ? [] : map?.getJSONArray("modules"),
+						settings: map?.getJSONObject("settings") == null ? [:] : map?.getJSONObject("settings"),
+						adhoc: false,
+					)
+					updateExisting(c, cmd, user,true)
 					break
 				// Grant read permission to example canvas.
 				case ExampleType.SHARE:
