@@ -13,9 +13,7 @@ import org.apache.http.client.methods.HttpRequestBase;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.util.EntityUtils;
 import org.apache.log4j.Logger;
-import org.web3j.abi.FunctionEncoder;
-import org.web3j.abi.TypeDecoder;
-import org.web3j.abi.TypeReference;
+import org.web3j.abi.*;
 import org.web3j.abi.datatypes.*;
 import org.web3j.abi.datatypes.generated.AbiTypes;
 import org.web3j.crypto.Credentials;
@@ -23,18 +21,25 @@ import org.web3j.crypto.RawTransaction;
 import org.web3j.crypto.TransactionEncoder;
 import org.web3j.protocol.Web3j;
 import org.web3j.protocol.core.DefaultBlockParameterName;
+import org.web3j.protocol.core.Response;
 import org.web3j.protocol.core.methods.request.Transaction;
 import org.web3j.protocol.core.methods.response.EthGetTransactionCount;
 import org.web3j.protocol.core.methods.response.EthSendTransaction;
+import org.web3j.protocol.core.methods.response.Log;
+import org.web3j.protocol.core.methods.response.TransactionReceipt;
 import org.web3j.protocol.http.HttpService;
 import org.web3j.utils.Numeric;
 
+import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.*;
+import java.util.concurrent.CompletableFuture;
+import java.util.function.BiFunction;
+import java.util.function.Consumer;
 
 /**
  * Send out a call to specified function in Ethereum block chain
@@ -66,7 +71,7 @@ public class SendEthereumTransaction extends ModuleWithSideEffects {
 	private static final Logger log = Logger.getLogger(SendEthereumTransaction.class);
 	private static final int ETHEREUM_TRANSACTION_DEFAULT_TIMEOUT_SECONDS = 1800;
 
-	private transient Gson gson;
+	//private transient Gson gson;
 	private Web3j web3j;
 //	private Web3Bridge web3Bridge;
 	@Override
@@ -209,14 +214,51 @@ public class SendEthereumTransaction extends ModuleWithSideEffects {
 		chosenFunction = null;
 	}
 
-	static class TransactionResult implements ITimestamped {
-		String hash;
-		Map<String, List<Object>> events;
-		List<Object> results;
+	/**
+	 * wraps EthSendTransaction with utility methods
+	 */
+	class TransactionResult implements ITimestamped {
+//		String hash;
+//		Map<String, List<Object>> events;
+//		List<Object> results;
+		EthSendTransaction web3jTx;
 		Date timestamp;
 
-		public TransactionResult(Date timestamp) {
+		public TransactionResult(Date timestamp, EthSendTransaction tx) {
 			this.timestamp = timestamp;
+			web3jTx = tx;
+		}
+		public Map<String, List<Object>> getEvents() throws IOException {
+			Map<String, List<Object>> events = new HashMap<String, List<Object>>();
+			for(EthereumABI.Event e : abi.getEvents()){
+				/*
+				    final Event event = new Event("dataPosted",
+                Arrays.<TypeReference<?>>asList(),
+                Arrays.<TypeReference<?>>asList(new TypeReference<Address>() {}, new TypeReference<Utf8String>() {}, new TypeReference<Utf8String>() {}, new TypeReference<Utf8String>() {}, new TypeReference<Utf8String>() {}));
+
+				 */
+				ArrayList<TypeReference<?>> non_indexed_params = new ArrayList<TypeReference<?>>();
+				for(EthereumABI.Slot s : e.inputs){
+					non_indexed_params.add(TypeReference.create(Web3jHelper.getTypeClass(s.type)));
+				}
+				Event web3jevent = new Event(e.name, Arrays.<TypeReference<?>>asList(),non_indexed_params);
+				TransactionReceipt txr = Web3jHelper.getTransactionReceipt(web3j,web3jTx.getTransactionHash());
+				if(txr == null){
+					throw new IOException("couldnt find transaction receipt for txhash: "+web3jTx.getTransactionHash());
+				}
+				List<EventValues> valueList = Web3jHelper.extractEventParameters(web3jevent, txr);
+				if(valueList == null)
+					continue;
+				for(EventValues ev : valueList){
+					List<Object> objs = new ArrayList<Object>();
+					List<Type> niv = ev.getNonIndexedValues();
+					for(Type t : niv){
+						 objs.add(t.getValue());
+					}
+					events.put(e.name,objs);
+				}
+			}
+			return events;
 		}
 
 		@Override
@@ -232,7 +274,13 @@ public class SendEthereumTransaction extends ModuleWithSideEffects {
 	@Override
 	public void receive(FeedEvent event) {
 		if (event.content instanceof TransactionResult) {
-			sendOutput((TransactionResult)event.content);
+			try {
+				sendOutput((TransactionResult) event.content);
+			}
+			catch(IOException e){
+				log.error(e.getMessage());
+				throw new RuntimeException(e);
+			}
 			getPropagator().propagate();
 		} else {
 			super.receive(event);
@@ -254,93 +302,6 @@ public class SendEthereumTransaction extends ModuleWithSideEffects {
 		getParentSignalPath().showNotification(msg);
 	}
 
-	/**
-	 * translate string type name to web3j Type Class
-	 * @param type
-	 * @return
-	 */
-	public static Class getTypeClass(String type) {
-		if(type.endsWith("[]")){
-			return Array.class;
-		}
-		switch(type){
-			case "int":return Int.class;
-			case "uint":return Uint.class;
-		}
-		Class c =AbiTypes.getType(type);
-		return c;
-	}
-
-	protected static BigInteger asBigInteger(Object arg){
-		if(arg instanceof BigInteger)
-			return (BigInteger) arg;
-		else if(arg instanceof BigDecimal) {
-			return ((BigDecimal) arg).toBigInteger();
-		}
-		else if(arg instanceof String) {
-			return Numeric.toBigInt((String) arg);
-		}
-		else if(arg instanceof Number)
-			return BigInteger.valueOf(((Number) arg).longValue());
-		return null;
-	}
-
-	protected static Type instantiateType(Class type, Object arg) throws NoSuchMethodException, IllegalAccessException, InvocationTargetException, InstantiationException {
-		if(type == null || !Type.class.isAssignableFrom(type))
-			throw new ClassCastException("Class "+type+" must be a subclass of web3j Type");
-
-		if(Array.class.isAssignableFrom(type)) {
-			 if(!(arg instanceof List))
-				 throw new ClassCastException("Arg of type "+arg.getClass()+" should be a list to instantiate web3j Array Type");
-			List arglist = (List) arg;
-			Constructor listcons = type.getConstructor(new Class[]{List.class});
-			//instantiate a sample of the array to see what class it holds
-			Array sample = (Array) listcons.newInstance(Collections.EMPTY_LIST);
-			Class valueclass = sample.getClass();
-			//create a list of transformed arguments
-			ArrayList transformedList = new ArrayList(arglist.size());
-			for(Object o : arglist){
-				transformedList.add(instantiateType(valueclass,o));
-			}
-			return (Type) listcons.newInstance(transformedList);
-		}
-
-
-		Object constructorArg = null;
-		if(NumericType.class.isAssignableFrom(type)){
-			constructorArg = asBigInteger(arg);
-		}
-		else if(BytesType.class.isAssignableFrom(type)) {
-			if(arg instanceof byte[])
-				constructorArg = arg;
-			else if(arg instanceof BigInteger) {
-				constructorArg = ((BigInteger) arg).toByteArray();
-			}
-			else if(arg instanceof String){
-				constructorArg = Numeric.hexStringToByteArray((String) arg);
-			}
-		}
-		else if(Utf8String.class.isAssignableFrom(type)) {
-			constructorArg = arg.toString();
-		}
-		else if(Address.class.isAssignableFrom(type)) {
-			constructorArg = arg.toString();
-		}
-		else if(Bool.class.isAssignableFrom(type)) {
-			if(arg instanceof Boolean){
-				constructorArg = arg;
-			}
-			else {
-				BigInteger bival = asBigInteger(arg);
-				constructorArg = bival == null ? null : !bival.equals(BigInteger.ZERO);
-			}
-		}
-		if(constructorArg == null){
-			throw new RuntimeException("Could not create type "+type+" from arg "+arg.toString()+" of type "+arg.getClass());
-		}
-		Constructor cons = type.getConstructor(new Class[]{constructorArg.getClass()});
-		return (Type) cons.newInstance(constructorArg);
-	}
 
 	protected Function createWeb3jFunctionCall() throws InvocationTargetException, NoSuchMethodException, InstantiationException, IllegalAccessException {
 		List<Type> inputs = new ArrayList<Type>(chosenFunction.inputs.size());
@@ -348,13 +309,13 @@ public class SendEthereumTransaction extends ModuleWithSideEffects {
 			EthereumABI.Slot slot = chosenFunction.inputs.get(i);
 			Input<Object> input = arguments.get(i);
 //			Type t = TypeDecoder.decode(input.getValue().toString(),0, TypeReference.create(getTypeClass(slot.type)));
-			Type t = instantiateType(getTypeClass(slot.type), input.getValue());
+			Type t = Web3jHelper.instantiateType(slot.type, input.getValue());
 			inputs.add(t);
 		}
 		List<TypeReference<?>> outputs = new ArrayList<TypeReference<?>>(chosenFunction.outputs.size());
 		for(int i=0;i<chosenFunction.outputs.size();i++){
 			EthereumABI.Slot slot = chosenFunction.outputs.get(i);
-			outputs.add(TypeReference.create(getTypeClass(slot.type)));
+			outputs.add(TypeReference.create(Web3jHelper.getTypeClass(slot.type)));
 		}
 		Function webjfn = new Function(chosenFunction.name,inputs,outputs);
 		return webjfn;
@@ -394,8 +355,19 @@ public class SendEthereumTransaction extends ModuleWithSideEffects {
 			RawTransaction rawTransaction = RawTransaction.createTransaction(nonce,gasPrice,getGasLimit(),c.getAddress(),valueWei,encodeFnCall);
 			byte[] signedMessage = TransactionEncoder.signMessage(rawTransaction, credentials);
 			String hexValue = Numeric.toHexString(signedMessage);
-			EthSendTransaction ethSendTransaction = web3j.ethSendRawTransaction(hexValue).sendAsync().get();
-			txHash.send(ethSendTransaction.getTransactionHash());
+			CompletableFuture<EthSendTransaction> cf = web3j.ethSendRawTransaction(hexValue).sendAsync();
+			final SendEthereumTransaction module = this;
+			cf.thenAccept(new Consumer<EthSendTransaction>() {
+				@Override
+				public void accept(EthSendTransaction tx) {
+					log.debug("TX response: "+tx.getRawResponse());
+					TransactionResult tr = new TransactionResult(getGlobals().time, tx);
+					// push the response into Streamr's event queue
+					getGlobals().getDataSource().enqueueEvent(new FeedEvent<TransactionResult,SendEthereumTransaction>(tr, tr.timestamp, module));
+					//sendOutput(tr);
+				}
+			});
+//			txHash.send(ethSendTransaction.getTransactionHash());
 		}
 		catch (Exception e){
 			log.error(e.getMessage());
@@ -408,29 +380,44 @@ public class SendEthereumTransaction extends ModuleWithSideEffects {
                 "totalSupply",
                 Collections.emptyList(),
                 Collections.singletonList(new TypeReference<Uint256>() {}));
-		 */
 
 		//web3j.send().then(() -> {
 			// TODO: populate
 			TransactionResult tr = new TransactionResult(getGlobals().time);
 			// push the response into Streamr's event queue
 			getGlobals().getDataSource().enqueueEvent(new FeedEvent<>(tr, tr.timestamp, this));
+			*/
 		//});
 	}
 
-	public void sendOutput(TransactionResult tx) {
+	public void sendOutput(TransactionResult tx) throws IOException {
+		Response.Error e = tx.web3jTx.getError();
+		if(e != null){
+			errors.send(Arrays.asList(e.toString()));
+		}
 		if (chosenFunction.constant) {
+			/*
 			int n = Math.min(results.size(), tx.results.size());
 			for (int i = 0; i < n; i++) {
 				Object result = tx.results.get(i);
 				Output<Object> output = results.get(i);
 				convertAndSend(output, result);
 			}
+			*/
 		} else {
-			if (gson == null) { gson = new Gson(); }
-			txHash.send(tx.hash);
+			txHash.send(tx.web3jTx.getTransactionHash());
+			/*
+			valueSent.send(resp.valueSent);
+			valueReceived.send(resp.valueReceived);
+			gasUsed.send(resp.gasUsed);
+			gasPrice.send(resp.gasPrice);
+			blockNumber.send(resp.blockNumber);
+			nonce.send(resp.nonce);
+			txHash.send(resp.txHash);
+			*/
+			Map<String, List<Object>>  events  = tx.getEvents();
 			for (EthereumABI.Event ev : abi.getEvents()) {
-				List<Object> args = tx.events.get(ev.name);
+				List<Object> args = events.get(ev.name);
 				List<Output<Object>> evOutputs = eventOutputs.get(ev);
 				if (args != null) {
 					if (ev.inputs.size() > 0) {
@@ -445,11 +432,20 @@ public class SendEthereumTransaction extends ModuleWithSideEffects {
 					}
 				}
 			}
+
 		}
 	}
 
 	static void convertAndSend(Output output, Object value) {
-		// TODO (get from another branch)
+		if (output instanceof StringOutput) {
+			output.send(value);
+		} else if (output instanceof BooleanOutput) {
+			output.send(Boolean.parseBoolean(value.toString()));
+		} else if (output instanceof TimeSeriesOutput) {
+			output.send(Double.parseDouble(value.toString()));
+		} else {
+			output.send(value);
+		}
 	}
 
 	public static class FunctionNameParameter extends StringParameter {
