@@ -289,6 +289,23 @@ public class SendEthereumTransaction extends ModuleWithSideEffects {
 		if(type == null || !Type.class.isAssignableFrom(type))
 			throw new ClassCastException("Class "+type+" must be a subclass of web3j Type");
 
+		if(Array.class.isAssignableFrom(type)) {
+			 if(!(arg instanceof List))
+				 throw new ClassCastException("Arg of type "+arg.getClass()+" should be a list to instantiate web3j Array Type");
+			List arglist = (List) arg;
+			Constructor listcons = type.getConstructor(new Class[]{List.class});
+			//instantiate a sample of the array to see what class it holds
+			Array sample = (Array) listcons.newInstance(Collections.EMPTY_LIST);
+			Class valueclass = sample.getClass();
+			//create a list of transformed arguments
+			ArrayList transformedList = new ArrayList(arglist.size());
+			for(Object o : arglist){
+				transformedList.add(instantiateType(valueclass,o));
+			}
+			return (Type) listcons.newInstance(transformedList);
+		}
+
+
 		Object constructorArg = null;
 		if(NumericType.class.isAssignableFrom(type)){
 			constructorArg = asBigInteger(arg);
@@ -313,11 +330,10 @@ public class SendEthereumTransaction extends ModuleWithSideEffects {
 			if(arg instanceof Boolean){
 				constructorArg = arg;
 			}
-			BigInteger bival = asBigInteger(arg);
-			constructorArg = bival == null ? null : !bival.equals(BigInteger.ZERO);
-		}
-		else if(Array.class.isAssignableFrom(type)) {
-
+			else {
+				BigInteger bival = asBigInteger(arg);
+				constructorArg = bival == null ? null : !bival.equals(BigInteger.ZERO);
+			}
 		}
 		if(constructorArg == null){
 			throw new RuntimeException("Could not create type "+type+" from arg "+arg.toString()+" of type "+arg.getClass());
@@ -359,8 +375,6 @@ public class SendEthereumTransaction extends ModuleWithSideEffects {
 		if (chosenFunction == null) { throw new RuntimeException("Need valid function to call"); }
 		if (c.getAddress() == null) { throw new RuntimeException("Contract must be deployed before calling"); }
 
-
-		// TODO: send ethereum transaction
 		try {
 			Function fn = createWeb3jFunctionCall();
 			Credentials credentials = Credentials.create(ethereumAccount.getPrivateKey());
@@ -388,7 +402,6 @@ public class SendEthereumTransaction extends ModuleWithSideEffects {
 			throw new RuntimeException(e);
 		}
 //		Transaction.createContractTransaction()
-//		web3j.ethSendTransaction()
 
 		/*
 		        return new Function(
