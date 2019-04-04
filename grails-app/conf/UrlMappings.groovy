@@ -83,6 +83,7 @@ class UrlMappings {
 
 		"/api/v1/login/challenge/$address"(controller: "loginApi", action: "challenge")
 		"/api/v1/login/$action"(controller: "loginApi")
+		"/api/v1/logout"(controller: "logoutApi", action: "logout")
 
 		"/api/v1/categories"(resources: "categoryApi")
 
