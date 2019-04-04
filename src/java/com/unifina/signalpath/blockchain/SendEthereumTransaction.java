@@ -228,20 +228,14 @@ public class SendEthereumTransaction extends ModuleWithSideEffects {
 			this.timestamp = timestamp;
 			web3jTx = tx;
 		}
-		public Map<String, List<Object>> getEvents() throws IOException {
+		public Map<String, List<Object>> getEvents() throws IOException, ClassNotFoundException {
 			Map<String, List<Object>> events = new HashMap<String, List<Object>>();
 			for(EthereumABI.Event e : abi.getEvents()){
-				/*
-				    final Event event = new Event("dataPosted",
-                Arrays.<TypeReference<?>>asList(),
-                Arrays.<TypeReference<?>>asList(new TypeReference<Address>() {}, new TypeReference<Utf8String>() {}, new TypeReference<Utf8String>() {}, new TypeReference<Utf8String>() {}, new TypeReference<Utf8String>() {}));
-
-				 */
-				ArrayList<TypeReference<?>> non_indexed_params = new ArrayList<TypeReference<?>>();
+				ArrayList<TypeReference<?>> params = new ArrayList<TypeReference<?>>();
 				for(EthereumABI.Slot s : e.inputs){
-					non_indexed_params.add(TypeReference.create(Web3jHelper.getTypeClass(s.type)));
+					params.add(TypeReference.create(Web3jHelper.getTypeClass(s.type)));
 				}
-				Event web3jevent = new Event(e.name, Arrays.<TypeReference<?>>asList(),non_indexed_params);
+				Event web3jevent = new Event(e.name, params);
 				TransactionReceipt txr = Web3jHelper.getTransactionReceipt(web3j,web3jTx.getTransactionHash());
 				if(txr == null){
 					throw new IOException("couldnt find transaction receipt for txhash: "+web3jTx.getTransactionHash());
@@ -277,7 +271,7 @@ public class SendEthereumTransaction extends ModuleWithSideEffects {
 			try {
 				sendOutput((TransactionResult) event.content);
 			}
-			catch(IOException e){
+			catch(Exception e){
 				log.error(e.getMessage());
 				throw new RuntimeException(e);
 			}
@@ -303,7 +297,7 @@ public class SendEthereumTransaction extends ModuleWithSideEffects {
 	}
 
 
-	protected Function createWeb3jFunctionCall() throws InvocationTargetException, NoSuchMethodException, InstantiationException, IllegalAccessException {
+	protected Function createWeb3jFunctionCall() throws InvocationTargetException, NoSuchMethodException, InstantiationException, IllegalAccessException, ClassNotFoundException {
 		List<Type> inputs = new ArrayList<Type>(chosenFunction.inputs.size());
 		for(int i=0;i<chosenFunction.inputs.size();i++){
 			EthereumABI.Slot slot = chosenFunction.inputs.get(i);
@@ -373,24 +367,9 @@ public class SendEthereumTransaction extends ModuleWithSideEffects {
 			log.error(e.getMessage());
 			throw new RuntimeException(e);
 		}
-//		Transaction.createContractTransaction()
-
-		/*
-		        return new Function(
-                "totalSupply",
-                Collections.emptyList(),
-                Collections.singletonList(new TypeReference<Uint256>() {}));
-
-		//web3j.send().then(() -> {
-			// TODO: populate
-			TransactionResult tr = new TransactionResult(getGlobals().time);
-			// push the response into Streamr's event queue
-			getGlobals().getDataSource().enqueueEvent(new FeedEvent<>(tr, tr.timestamp, this));
-			*/
-		//});
 	}
 
-	public void sendOutput(TransactionResult tx) throws IOException {
+	public void sendOutput(TransactionResult tx) throws IOException, ClassNotFoundException {
 		Response.Error e = tx.web3jTx.getError();
 		if(e != null){
 			errors.send(Arrays.asList(e.toString()));
