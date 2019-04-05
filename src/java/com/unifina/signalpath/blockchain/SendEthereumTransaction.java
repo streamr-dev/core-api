@@ -1,21 +1,12 @@
 package com.unifina.signalpath.blockchain;
 
-import com.google.gson.*;
 import com.unifina.data.FeedEvent;
 import com.streamr.client.protocol.message_layer.ITimestamped;
 import com.unifina.signalpath.*;
-import com.unifina.signalpath.remote.AbstractHttpModule;
 import com.unifina.utils.MapTraversal;
-import jdk.nashorn.internal.ir.RuntimeNode;
-import org.apache.http.HttpEntity;
-import org.apache.http.client.methods.HttpPost;
-import org.apache.http.client.methods.HttpRequestBase;
-import org.apache.http.entity.StringEntity;
-import org.apache.http.util.EntityUtils;
 import org.apache.log4j.Logger;
 import org.web3j.abi.*;
 import org.web3j.abi.datatypes.*;
-import org.web3j.abi.datatypes.generated.AbiTypes;
 import org.web3j.crypto.Credentials;
 import org.web3j.crypto.RawTransaction;
 import org.web3j.crypto.TransactionEncoder;
@@ -23,22 +14,19 @@ import org.web3j.protocol.Web3j;
 import org.web3j.protocol.core.DefaultBlockParameterName;
 import org.web3j.protocol.core.Response;
 import org.web3j.protocol.core.methods.request.Transaction;
+import org.web3j.protocol.core.methods.response.EthCall;
 import org.web3j.protocol.core.methods.response.EthGetTransactionCount;
 import org.web3j.protocol.core.methods.response.EthSendTransaction;
-import org.web3j.protocol.core.methods.response.Log;
 import org.web3j.protocol.core.methods.response.TransactionReceipt;
 import org.web3j.protocol.http.HttpService;
 import org.web3j.utils.Numeric;
 
 import java.io.IOException;
-import java.io.UnsupportedEncodingException;
-import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
-import java.util.function.BiFunction;
 import java.util.function.Consumer;
 
 /**
@@ -215,18 +203,61 @@ public class SendEthereumTransaction extends ModuleWithSideEffects {
 	}
 
 	/**
-	 * wraps EthSendTransaction with utility methods
+	 * wraps Web3j Resonse with utility methods
 	 */
-	class TransactionResult implements ITimestamped {
+
+	abstract class FunctionCallResult implements ITimestamped{
 //		String hash;
 //		Map<String, List<Object>> events;
 //		List<Object> results;
-		EthSendTransaction web3jTx;
 		Date timestamp;
-
-		public TransactionResult(Date timestamp, EthSendTransaction tx) {
+		Function fn;
+		public FunctionCallResult(Date timestamp, Function _fn){
 			this.timestamp = timestamp;
+			fn = _fn;
+		}
+		@Override
+		public Date getTimestampAsDate() {
+			return timestamp;
+		}
+
+		public abstract Response getResponse();
+		public Response.Error getError(){
+			return getResponse().getError();
+		}
+	}
+
+	class ConstantFunctionResult extends FunctionCallResult{
+		private EthCall ethcall;
+		public ConstantFunctionResult(Date timestamp,Function _fn , EthCall ec){
+			super(timestamp,_fn);
+			ethcall = ec;
+		}
+		public Response getResponse(){
+			return ethcall;
+		}
+		public List<Type> getResults() {
+			return FunctionReturnDecoder.decode(
+					ethcall.getValue(), fn.getOutputParameters());
+		}
+	}
+
+	/**
+	 * non constant function call result
+	 */
+	class TransactionResult extends FunctionCallResult{
+		private EthSendTransaction web3jTx;
+
+		public TransactionResult(Date timestamp, Function _fn, EthSendTransaction tx) {
+			super(timestamp,_fn);
 			web3jTx = tx;
+		}
+		@Override
+		public Response getResponse(){
+			return web3jTx;
+		}
+		public String getTransactionHash(){
+			return web3jTx.getTransactionHash();
 		}
 		public Map<String, List<Object>> getEvents() throws IOException, ClassNotFoundException {
 			Map<String, List<Object>> events = new HashMap<String, List<Object>>();
@@ -255,10 +286,6 @@ public class SendEthereumTransaction extends ModuleWithSideEffects {
 			return events;
 		}
 
-		@Override
-		public Date getTimestampAsDate() {
-			return timestamp;
-		}
 	}
 
 	/**
@@ -267,9 +294,9 @@ public class SendEthereumTransaction extends ModuleWithSideEffects {
 	 */
 	@Override
 	public void receive(FeedEvent event) {
-		if (event.content instanceof TransactionResult) {
+		if (event.content instanceof FunctionCallResult) {
 			try {
-				sendOutput((TransactionResult) event.content);
+				sendOutput((FunctionCallResult) event.content);
 			}
 			catch(Exception e){
 				log.error(e.getMessage());
@@ -332,35 +359,44 @@ public class SendEthereumTransaction extends ModuleWithSideEffects {
 
 		try {
 			Function fn = createWeb3jFunctionCall();
-			Credentials credentials = Credentials.create(ethereumAccount.getPrivateKey());
 			String encodeFnCall = FunctionEncoder.encode(fn);
-			//String encodeFnCall = web3Bridge.encodeMethodCall(abi,chosenFunction,arguments);
-			EthGetTransactionCount ethGetTransactionCount = web3j.ethGetTransactionCount(
-					ethereumAccount.getAddress(), DefaultBlockParameterName.LATEST).sendAsync().get();
-			BigInteger nonce = ethGetTransactionCount.getTransactionCount();
-			BigInteger gasPrice = BigDecimal.valueOf(ethereumOptions.getGasPriceWei()).toBigInteger();
-			BigInteger valueWei;
-			if (!chosenFunction.constant && ether.isConnected())
-				valueWei = BigDecimal.valueOf(ether.getValue()).multiply(BigDecimal.TEN.pow(18)).toBigInteger();
-			else
-				valueWei = BigInteger.ZERO;
-
-			//createTransaction(BigInteger nonce, BigInteger gasPrice, BigInteger gasLimit, String to, BigInteger value, String data) {
-			RawTransaction rawTransaction = RawTransaction.createTransaction(nonce,gasPrice,getGasLimit(),c.getAddress(),valueWei,encodeFnCall);
-			byte[] signedMessage = TransactionEncoder.signMessage(rawTransaction, credentials);
-			String hexValue = Numeric.toHexString(signedMessage);
-			CompletableFuture<EthSendTransaction> cf = web3j.ethSendRawTransaction(hexValue).sendAsync();
 			final SendEthereumTransaction module = this;
-			cf.thenAccept(new Consumer<EthSendTransaction>() {
-				@Override
-				public void accept(EthSendTransaction tx) {
-					log.debug("TX response: "+tx.getRawResponse());
-					TransactionResult tr = new TransactionResult(getGlobals().time, tx);
-					// push the response into Streamr's event queue
-					getGlobals().getDataSource().enqueueEvent(new FeedEvent<TransactionResult,SendEthereumTransaction>(tr, tr.timestamp, module));
-					//sendOutput(tr);
-				}
-			});
+			//String encodeFnCall = web3Bridge.encodeMethodCall(abi,chosenFunction,arguments);
+			if(chosenFunction.constant) {
+				EthCall response = web3j.ethCall(
+						Transaction.createEthCallTransaction(ethereumAccount.getAddress(), c.getAddress(), encodeFnCall),
+				DefaultBlockParameterName.LATEST).sendAsync().get();
+				ConstantFunctionResult rslt = new ConstantFunctionResult(getGlobals().time,fn, response);
+				getGlobals().getDataSource().enqueueEvent(new FeedEvent<FunctionCallResult, SendEthereumTransaction>(rslt, rslt.timestamp, module));
+			}
+			else{
+				BigInteger gasPrice = BigDecimal.valueOf(ethereumOptions.getGasPriceWei()).toBigInteger();
+				EthGetTransactionCount ethGetTransactionCount = web3j.ethGetTransactionCount(
+						ethereumAccount.getAddress(), DefaultBlockParameterName.LATEST).sendAsync().get();
+				BigInteger nonce = ethGetTransactionCount.getTransactionCount();
+				BigInteger valueWei;
+				Credentials credentials = Credentials.create(ethereumAccount.getPrivateKey());
+				if (!chosenFunction.constant && ether.isConnected())
+					valueWei = BigDecimal.valueOf(ether.getValue()).multiply(BigDecimal.TEN.pow(18)).toBigInteger();
+				else
+					valueWei = BigInteger.ZERO;
+
+				//createTransaction(BigInteger nonce, BigInteger gasPrice, BigInteger gasLimit, String to, BigInteger value, String data) {
+				RawTransaction rawTransaction = RawTransaction.createTransaction(nonce, gasPrice, getGasLimit(), c.getAddress(), valueWei, encodeFnCall);
+				byte[] signedMessage = TransactionEncoder.signMessage(rawTransaction, credentials);
+				String hexValue = Numeric.toHexString(signedMessage);
+				CompletableFuture<EthSendTransaction> cf = web3j.ethSendRawTransaction(hexValue).sendAsync();
+				cf.thenAccept(new Consumer<EthSendTransaction>() {
+					@Override
+					public void accept(EthSendTransaction tx) {
+						log.debug("TX response: " + tx.getRawResponse());
+						TransactionResult tr = new TransactionResult(getGlobals().time,fn, tx);
+						// push the response into Streamr's event queue
+						getGlobals().getDataSource().enqueueEvent(new FeedEvent<FunctionCallResult, SendEthereumTransaction>(tr, tr.timestamp, module));
+						//sendOutput(tr);
+					}
+				});
+			}
 //			txHash.send(ethSendTransaction.getTransactionHash());
 		}
 		catch (Exception e){
@@ -369,22 +405,26 @@ public class SendEthereumTransaction extends ModuleWithSideEffects {
 		}
 	}
 
-	public void sendOutput(TransactionResult tx) throws IOException, ClassNotFoundException {
-		Response.Error e = tx.web3jTx.getError();
+	public void sendOutput(FunctionCallResult rslt) throws IOException, ClassNotFoundException {
+		Response.Error e = rslt.getError();
 		if(e != null){
 			errors.send(Arrays.asList(e.toString()));
 		}
-		if (chosenFunction.constant) {
-			/*
-			int n = Math.min(results.size(), tx.results.size());
+		if (rslt instanceof ConstantFunctionResult) {
+			ConstantFunctionResult crslt = (ConstantFunctionResult) rslt;
+			List<Type> txResults = crslt.getResults();
+			if(txResults == null)
+				return;
+			int n = Math.min(results.size(), txResults.size());
 			for (int i = 0; i < n; i++) {
-				Object result = tx.results.get(i);
+				Object val = txResults.get(i).getValue();
 				Output<Object> output = results.get(i);
-				convertAndSend(output, result);
+				convertAndSend(output, val);
 			}
-			*/
-		} else {
-			txHash.send(tx.web3jTx.getTransactionHash());
+		}
+		else if(rslt instanceof TransactionResult){
+			TransactionResult tx = (TransactionResult) rslt;
+			txHash.send(tx.getTransactionHash());
 			/*
 			valueSent.send(resp.valueSent);
 			valueReceived.send(resp.valueReceived);
@@ -394,8 +434,8 @@ public class SendEthereumTransaction extends ModuleWithSideEffects {
 			nonce.send(resp.nonce);
 			txHash.send(resp.txHash);
 			*/
-			Map<String, List<Object>>  events  = tx.getEvents();
-			for (EthereumABI.Event ev : abi.getEvents()) {
+			Map<String, List<Object>> events  = tx.getEvents();
+			for(EthereumABI.Event ev : abi.getEvents()) {
 				List<Object> args = events.get(ev.name);
 				List<Output<Object>> evOutputs = eventOutputs.get(ev);
 				if (args != null) {
@@ -411,7 +451,6 @@ public class SendEthereumTransaction extends ModuleWithSideEffects {
 					}
 				}
 			}
-
 		}
 	}
 

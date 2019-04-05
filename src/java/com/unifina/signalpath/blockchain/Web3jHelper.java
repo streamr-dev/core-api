@@ -30,7 +30,7 @@ public class Web3jHelper {
 	private static final Logger log = Logger.getLogger(Web3jHelper.class);
 	protected static Pattern ARRAY_SUFFIX = Pattern.compile("\\[(\\d*)\\]$");
 
-	public static Function encodeFunction(String fnname, List<String> solidity_inputtypes, List<Object> arguments,List<String> solidity_output_types) throws ClassNotFoundException, NoSuchMethodException, InstantiationException, IllegalAccessException, InvocationTargetException {
+	public static Function encodeFunction(String fnname, List<String> solidity_inputtypes, List<Object> arguments, List<String> solidity_output_types) throws ClassNotFoundException, NoSuchMethodException, InstantiationException, IllegalAccessException, InvocationTargetException {
 		List<Type> encoded_input = new ArrayList<Type>();
 		Iterator argit = arguments.iterator();
 		for(String st : solidity_inputtypes){
