@@ -116,6 +116,9 @@ public class Web3jHelper {
 		else if(arg instanceof String) {
 			return Numeric.toBigInt((String) arg);
 		}
+		else if(arg instanceof byte[]){
+			return Numeric.toBigInt((byte[]) arg);
+		}
 		else if(arg instanceof Number)
 			return BigInteger.valueOf(((Number) arg).longValue());
 		return null;
