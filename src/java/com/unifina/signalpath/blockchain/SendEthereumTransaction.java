@@ -61,10 +61,8 @@ public class SendEthereumTransaction extends ModuleWithSideEffects {
 
 	//private transient Gson gson;
 	private Web3j web3j;
-//	private Web3Bridge web3Bridge;
 	@Override
 	public void init() {
-//		web3Bridge = new Web3Bridge();
 		addInput(ethereumAccount);
 		addInput(contract);
 		contract.setDrivingInput(false);
@@ -158,9 +156,11 @@ public class SendEthereumTransaction extends ModuleWithSideEffects {
 		log.info("Chose function " + chosenFunction.name);
 
 		arguments.clear();
+		int i=0;
 		for (EthereumABI.Slot s : chosenFunction.inputs) {
 			String name = s.name;
-			if (name.length() < 1) { name = "(" + s.type + ")"; }
+			if (name.length() < 1) { name = "(" + s.type + i + ")"; }
+			i++;
 			Input input = EthereumToStreamrTypes.asInput(s.type, name, this);
 			addInput(input);
 			arguments.add(input);
@@ -172,10 +172,10 @@ public class SendEthereumTransaction extends ModuleWithSideEffects {
 		if (chosenFunction.constant) {
 			// constant functions send an eth_call and get back returned result(s)
 			results.clear();
-			int i=0;
+			i=0;
 			for (EthereumABI.Slot s : chosenFunction.outputs) {
 				String name = s.name;
-				if (name.length() < 1) { name = "(" + s.type +i+ ")"; }
+				if (name.length() < 1) { name = "(" + s.type + i + ")"; }
 				i++;
 				Output output = EthereumToStreamrTypes.asOutput(s.type, name, this);
 				addOutput(output);
