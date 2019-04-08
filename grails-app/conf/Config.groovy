@@ -267,8 +267,8 @@ environments {
  */
 streamr.ethereum.defaultNetwork = "rinkeby"
 streamr.ethereum.networks = System.getProperty("streamr.ethereum.networks") ? new Gson().fromJson(System.getProperty("streamr.ethereum.networks")) : [
-	ropsten: "http://localhost:3000",
-	rinkeby: "http://localhost:3001"
+	ropsten: "http://10.200.10.1:3000",
+	rinkeby: "http://10.200.10.1:3001"
 ]
 streamr.ethereum.rpcUrls = System.getProperty("streamr.ethereum.rpcUrls") ? new Gson().fromJson(System.getProperty("streamr.ethereum.rpcUrls")) : [
 	ropsten: "http://localhost:8545",

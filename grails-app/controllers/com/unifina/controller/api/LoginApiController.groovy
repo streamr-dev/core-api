@@ -1,6 +1,5 @@
 package com.unifina.controller.api
 
-import com.unifina.api.ApiException
 import com.unifina.api.InvalidArgumentsException
 import com.unifina.domain.security.SecUser
 import com.unifina.security.Challenge
@@ -14,7 +13,6 @@ import com.unifina.service.SessionService
 import com.unifina.service.UserService
 import grails.converters.JSON
 import grails.plugin.springsecurity.annotation.Secured
-import grails.validation.Validateable
 
 @Secured(["IS_AUTHENTICATED_ANONYMOUSLY"])
 class LoginApiController {
