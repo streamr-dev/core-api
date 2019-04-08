@@ -123,12 +123,14 @@ public class SendEthereumTransaction extends ModuleWithSideEffects {
 		if (contract.hasValue()) {
 			abi = contract.getValue().getABI();
 			function.list = abi.getFunctions();
-
+			int eventNum=0;
 			for (EthereumABI.Event ev : abi.getEvents()) {
 				List<Output<Object>> evOutputs = new ArrayList<>();
 				if (ev.inputs.size() > 0) {
+					int argnum=0;
 					for (EthereumABI.Slot arg : ev.inputs) {
-						String displayName = ev.name + "." + (arg.name.length() > 0 ? arg.name : "(" + arg.type + ")");
+						String displayName = ev.name + "." + (arg.name.length() > 0 ? arg.name : "(" + arg.type +eventNum+"_"+argnum+")");
+						argnum++;
 						Output output = EthereumToStreamrTypes.asOutput(arg.type, displayName, this);
 						evOutputs.add(output);
 					}
@@ -138,6 +140,7 @@ public class SendEthereumTransaction extends ModuleWithSideEffects {
 					evOutputs.add(output);
 				}
 				eventOutputs.put(ev, evOutputs);
+				eventNum++;
 			}
 		}
 	}
