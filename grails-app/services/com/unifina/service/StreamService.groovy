@@ -253,6 +253,15 @@ class StreamService {
 		return keys*.idInService as Set
 	}
 
+	Set<Stream> getInboxStreams(List<SecUser> users) {
+		List<IntegrationKey> keys = IntegrationKey.findAll {
+			user.id in users*.id && service in [IntegrationKey.Service.ETHEREUM, IntegrationKey.Service.ETHEREUM_ID]
+		}
+		return Stream.findAll {
+			id in keys*.idInService && inbox == true
+		}
+	}
+
 	@CompileStatic
 	private boolean isDirectPermissionToStream(SecUser user, Stream stream) {
 		return permissionService.canRead(user, stream)

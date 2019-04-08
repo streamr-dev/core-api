@@ -276,7 +276,7 @@ class PermissionService {
 		String userProp = getUserPropertyName(target)
 		String resourceProp = getResourcePropertyName(resource)
 
-		if (userProp == "user" && resourceProp == "stream") {
+		if (userProp == "user" && resourceProp == "stream" && operation == Operation.READ) {
 			SecUser user = (SecUser) target
 			if (user.isEthereumUser()) {
 				grantInboxStreamPermissions(user, (Stream) resource, subscription, endsAt)
@@ -295,15 +295,16 @@ class PermissionService {
 	private void grantInboxStreamPermissions(SecUser subscriber, Stream stream, Subscription subscription, Date endsAt) {
 		// Need to initialize the two services below this way because of circular dependencies issues
 		StreamService streamService = grailsApplication.mainContext.getBean(StreamService)
-		EthereumIntegrationKeyService ethereumIntegrationKeyService = grailsApplication.mainContext.getBean(EthereumIntegrationKeyService)
-		Set<String> publishers = streamService.getStreamEthereumPublishers(stream)
-		Stream subscriberInbox = Stream.get(subscriber.username)
-		for (String address: publishers) {
-			Stream publisherInbox = Stream.get(address)
+		List<SecUser> publishers = getPermissionsTo(stream, Operation.WRITE)*.user
+		Set<Stream> subscriberInboxes = streamService.getInboxStreams([subscriber])
+		Set<Stream> publisherInboxes = streamService.getInboxStreams(publishers)
+		for (Stream publisherInbox: publisherInboxes) {
 			systemGrant(subscriber, publisherInbox, Operation.WRITE, subscription, endsAt)
-
-			SecUser publisher = ethereumIntegrationKeyService.getEthereumUser(address)
-			systemGrant(publisher, subscriberInbox, Operation.WRITE, subscription, endsAt)
+		}
+		for (SecUser publisher: publishers) {
+			for (Stream subscriberInbox: subscriberInboxes) {
+				systemGrant(publisher, subscriberInbox, Operation.WRITE, subscription, endsAt)
+			}
 		}
 	}
 

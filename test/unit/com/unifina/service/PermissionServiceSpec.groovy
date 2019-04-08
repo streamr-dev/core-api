@@ -241,13 +241,14 @@ class PermissionServiceSpec extends Specification {
 
 		Stream stream = new Stream()
 		stream.id = "stream"
+		service.systemGrant(publisher1, stream, Operation.WRITE)
+		service.systemGrant(publisher2, stream, Operation.WRITE)
 
 		when:
 		service.systemGrant(subscriber, stream, Operation.READ)
 		then:
-		1 * streamService.getStreamEthereumPublishers(stream) >> ["publisher1", "publisher2"]
-		1 * ethereumIntegrationKeyService.getEthereumUser("publisher1") >> publisher1
-		1 * ethereumIntegrationKeyService.getEthereumUser("publisher2") >> publisher2
+		1 * streamService.getInboxStreams([subscriber]) >> [subInbox]
+		1 * streamService.getInboxStreams([publisher1, publisher2]) >> [pub1Inbox, pub2Inbox]
 		service.canWrite(subscriber, pub1Inbox)
 		service.canWrite(subscriber, pub2Inbox)
 		service.canWrite(publisher1, subInbox)

@@ -424,6 +424,34 @@ class StreamServiceSpec extends Specification {
 		addresses == validAddresses
 	}
 
+	void "getInboxStreams() returns all inbox streams of the users"() {
+		SecUser user1 = new SecUser(id: 1, username: "u1").save(failOnError: true, validate: false)
+		IntegrationKey key1 = new IntegrationKey(user: user1, service: IntegrationKey.Service.ETHEREUM_ID,
+			idInService: "0x9fe1ae3f5efe2a01eca8c2e9d3c11102cf4bea57").save(failOnError: true, validate: false)
+		SecUser user2 = new SecUser(id: 2, username: "u2").save(failOnError: true, validate: false)
+		IntegrationKey key2 = new IntegrationKey(user: user2, service: IntegrationKey.Service.ETHEREUM,
+			idInService: "0x26e1ae3f5efe8a01eca8c2e9d3c32702cf4bead6").save(failOnError: true, validate: false)
+		IntegrationKey key3 = new IntegrationKey(user: user2, service: IntegrationKey.Service.ETHEREUM,
+			idInService: "0xfff1ae3f5efe8a01eca8c25933c32702cf4b1121").save(failOnError: true, validate: false)
+		SecUser user3 = new SecUser(id: 3, username: "u3").save(failOnError: true, validate: false)
+
+		Stream s1 = new Stream(name: key1.idInService, inbox: true)
+		s1.id = key1.idInService
+		s1.save(failOnError: true, validate: false)
+		Stream s2 = new Stream(name: key1.idInService, inbox: true)
+		s2.id = key2.idInService
+		s2.save(failOnError: true, validate: false)
+		Stream s3 = new Stream(name: key1.idInService, inbox: true)
+		s3.id = key3.idInService
+		s3.save(failOnError: true, validate: false)
+
+		Set<Stream> expectedResults = [s1, s2, s3]
+		when:
+		Set<Stream> results = service.getInboxStreams([user1, user2, user3])
+		then:
+		results == expectedResults
+	}
+
 	void "status ok and has recent messages"() {
 		setup:
 		service.cassandraService = Mock(CassandraService)
