@@ -170,20 +170,17 @@ public class SolidityCompileDeploy extends ModuleWithUI implements Pullable<Ethe
 				//createTransaction(BigInteger nonce, BigInteger gasPrice, BigInteger gasLimit, String to, BigInteger value, String data) {
 				Function cons = encodeConstructor(args);
 				String cons_encoded = FunctionEncoder.encodeConstructor(cons.getInputParameters());
-				if(cons_encoded.startsWith("0x"))
-					cons_encoded = cons_encoded.substring(2);
-
 				String createContract  = jsonTree.get("bin").getAsString()+ cons_encoded;
 				RawTransaction rawTransaction = RawTransaction.createTransaction(nonce, gasPrice, getGasLimit(), null, sendWei, createContract);
 				byte[] signedMessage = TransactionEncoder.signMessage(rawTransaction, credentials);
 				String hexValue = Numeric.toHexString(signedMessage);
 
+				//async deploy not implemented atm because of UI constraints:
 				/*
 				CompletableFuture<EthSendTransaction> cf = web3j.ethSendRawTransaction(hexValue).sendAsync();
 				cf.thenAccept(new Consumer<EthSendTransaction>() {
 					@Override
 					public void accept(EthSendTransaction tx) {
-						//sendOutput(tr);
 					}
 				});
 				*/
@@ -193,7 +190,6 @@ public class SolidityCompileDeploy extends ModuleWithUI implements Pullable<Ethe
 				log.debug("TX response: " + txhash);
 				String address = web3j.ethGetTransactionReceipt(txhash).send().getResult().getContractAddress();
 				contract = new EthereumContract(address,contract.getABI());
-//				contract = web3.deploy(code, args, sendWei, ethereumAccount.getAddress(), ethereumAccount.getPrivateKey());
 			}
 		} catch (Exception e) {
 			if (ExceptionUtils.getRootCause(e) instanceof java.net.ConnectException) {

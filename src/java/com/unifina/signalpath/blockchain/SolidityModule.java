@@ -4,7 +4,6 @@ import com.unifina.signalpath.*;
 import com.unifina.utils.MapTraversal;
 import org.apache.commons.lang.exception.ExceptionUtils;
 import org.apache.log4j.Logger;
-import org.ethereum.solidity.compiler.Solc;
 
 import java.math.BigDecimal;
 import java.util.List;
@@ -77,6 +76,7 @@ public class SolidityModule extends ModuleWithUI implements Pullable<EthereumCon
 		ModuleOptions options = ModuleOptions.get(config);
 		ethereumOptions = EthereumModuleOptions.readFrom(options);
 		final StreamrWeb3Interface web3 = createWeb3Interface();
+
 		try {
 			if (config.containsKey("compile") || (code != null && !code.trim().isEmpty() && ethereumAccount.getAddress() != null && (contract == null || !contract.isDeployed()))) {
 				contract = web3.compile(code);

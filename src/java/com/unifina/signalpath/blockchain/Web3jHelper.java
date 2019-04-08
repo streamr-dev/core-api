@@ -126,19 +126,18 @@ public class Web3jHelper {
 
 	public static Type instantiateType(String solidity_type, Object arg) throws InvocationTargetException, NoSuchMethodException, InstantiationException, IllegalAccessException, ClassNotFoundException {
 		Matcher m = ARRAY_SUFFIX.matcher(solidity_type);
-		if(m.find()) {
-			String digits = m.group(1);
-			if(digits == null || digits.equals(""))
-				//dynamic array
-				return instantiateType(getTypeClass(solidity_type.substring(0, solidity_type.length() - 2)), arg, true, -1);
-			else{
-				//sized array
-				int array_size = Integer.parseInt(digits);
-				return instantiateType(getTypeClass(solidity_type.substring(0, solidity_type.length() - m.group(0).length())), arg, true, array_size);
-			}
+		if (!m.find())
+			return instantiateType(getTypeClass(solidity_type), arg, false, -1);
+
+		String digits = m.group(1);
+		if (digits == null || digits.equals(""))
+			//dynamic array
+			return instantiateType(getTypeClass(solidity_type.substring(0, solidity_type.length() - 2)), arg, true, -1);
+		else {
+			//sized array
+			int array_size = Integer.parseInt(digits);
+			return instantiateType(getTypeClass(solidity_type.substring(0, solidity_type.length() - m.group(0).length())), arg, true, array_size);
 		}
-		else
-			return instantiateType(getTypeClass(solidity_type),arg,false,-1);
 	}
 
 	/**
