@@ -23,6 +23,7 @@ import groovy.transform.CompileStatic
 import org.codehaus.groovy.grails.web.json.JSONObject
 import org.codehaus.groovy.grails.web.mapping.LinkGenerator
 import org.codehaus.groovy.runtime.InvokerHelper
+import org.codehaus.groovy.runtime.InvokerInvocationException
 
 class CanvasService {
 
@@ -210,9 +211,8 @@ class CanvasService {
 				// Create a copy of the example canvas for the user and grant read/write/share permissions.
 				case ExampleType.COPY:
 					Canvas c = new Canvas()
-					InvokerHelper.setProperties(c, example.properties)
-					c.dashboardItems = new HashSet<DashboardItem>()
-					c.permissions = new HashSet<Permission>()
+					setProperties(c, example.properties)
+					c.id = null
 					c.runner = null
 					c.server = null
 					c.requestUrl = null
@@ -220,10 +220,6 @@ class CanvasService {
 					c.startedBy = null
 					c.state = Canvas.State.STOPPED
 					c.exampleType = ExampleType.NOT_SET
-					c.save(validate: true, failOnError: true)
-					permissionService.systemGrant(user, c, Permission.Operation.SHARE)
-					permissionService.systemGrant(user, c, Permission.Operation.READ)
-					permissionService.systemGrant(user, c, Permission.Operation.WRITE)
 
 					Map map = (JSONObject) JSON.parse(example.json)
 					SaveCanvasCommand cmd = new SaveCanvasCommand(
@@ -238,6 +234,33 @@ class CanvasService {
 				case ExampleType.SHARE:
 					permissionService.systemGrant(user, example, Permission.Operation.READ)
 					break
+			}
+		}
+	}
+
+	// This code is copied and modified from InvokerHelper
+	private static setProperties(Object object, Map properties) {
+		MetaClass mc = InvokerHelper.getMetaClass(object)
+		Iterator i = properties.entrySet().iterator()
+		while (i.hasNext()) {
+			Object o = i.next()
+			Map.Entry entry = (Map.Entry) o
+			String key = entry.getKey().toString()
+			Object value = entry.getValue()
+			if (value instanceof Collection) { // Do not duplicate references to Hibernate collections
+				continue
+			}
+			setPropertySafe(object, mc, key, value)
+		}
+	}
+	private static setPropertySafe(Object object, MetaClass mc, String key, Object value) {
+		try {
+			mc.setProperty(object, key, value)
+		} catch (MissingPropertyException ignored) {
+		} catch (InvokerInvocationException e) {
+			Throwable cause = e.getCause()
+			if (cause == null || !(cause instanceof IllegalArgumentException)) {
+				throw e
 			}
 		}
 	}
