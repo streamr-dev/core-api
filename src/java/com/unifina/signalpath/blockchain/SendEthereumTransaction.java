@@ -172,9 +172,11 @@ public class SendEthereumTransaction extends ModuleWithSideEffects {
 		if (chosenFunction.constant) {
 			// constant functions send an eth_call and get back returned result(s)
 			results.clear();
+			int i=0;
 			for (EthereumABI.Slot s : chosenFunction.outputs) {
 				String name = s.name;
-				if (name.length() < 1) { name = "(" + s.type + ")"; }
+				if (name.length() < 1) { name = "(" + s.type +i+ ")"; }
+				i++;
 				Output output = EthereumToStreamrTypes.asOutput(s.type, name, this);
 				addOutput(output);
 				results.add(output);
@@ -411,7 +413,7 @@ public class SendEthereumTransaction extends ModuleWithSideEffects {
 	public void sendOutput(FunctionCallResult rslt) throws IOException, ClassNotFoundException {
 		Response.Error e = rslt.getError();
 		if(e != null){
-			errors.send(Arrays.asList(e.toString()));
+			errors.send(Arrays.asList(e.getMessage()));
 		}
 		if (rslt instanceof ConstantFunctionResult) {
 			ConstantFunctionResult crslt = (ConstantFunctionResult) rslt;

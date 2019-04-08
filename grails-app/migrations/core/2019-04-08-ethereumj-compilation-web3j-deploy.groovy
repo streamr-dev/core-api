@@ -7,7 +7,7 @@ databaseChangeLog = {
 			column(name: "category_id", valueNumeric: 1001) // Ethereum
 			column(name: "implementing_class", value: "com.unifina.signalpath.blockchain.SolidityCompileDeploy")
 			column(name: "name", value: "SolidityCompileDeploy")
-			column(name: "js_module", value: "SolidityCompileDeploy")
+			column(name: "js_module", value: "SolidityModule")
 			column(name: "type", value: "module")
 			column(name: "module_package_id", valueNumeric: 1)
 			column(name: "json_help", value: null)
