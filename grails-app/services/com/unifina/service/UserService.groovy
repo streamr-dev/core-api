@@ -74,15 +74,23 @@ class UserService {
 			permissionService.transferInvitePermissionsTo(user)
 		}
 
-		List<Canvas> canvasExamples = Canvas.createCriteria().list {
-			ne("exampleType", ExampleType.NOT_SET)
+		try {
+			List<Canvas> canvasExamples = Canvas.createCriteria().list {
+				ne("exampleType", ExampleType.NOT_SET)
+			}
+			canvasService.addExampleCanvases(user, canvasExamples)
+		} catch (RuntimeException e) {
+			log.error("error while adding example canvases: ", e)
 		}
-		canvasService.addExampleCanvases(user, canvasExamples)
 
-		List<Stream> streamExamples = Stream.createCriteria().list {
-			eq("exampleType", ExampleType.SHARE)
+		try {
+			List<Stream> streamExamples = Stream.createCriteria().list {
+				eq("exampleType", ExampleType.SHARE)
+			}
+			streamService.addExampleStreams(user, streamExamples)
+		} catch (RuntimeException e) {
+			log.error("error while adding example streams: ", e)
 		}
-		streamService.addExampleStreams(user, streamExamples)
 
 		log.info("Created user for " + user.username)
 
