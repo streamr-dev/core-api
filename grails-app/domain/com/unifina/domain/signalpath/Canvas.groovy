@@ -1,5 +1,6 @@
 package com.unifina.domain.signalpath
 
+import com.unifina.domain.ExampleType
 import com.unifina.domain.dashboard.DashboardItem
 import com.unifina.domain.security.Permission
 import com.unifina.domain.security.SecUser
@@ -38,7 +39,6 @@ class Canvas {
 	State state = State.STOPPED
 
 	Boolean hasExports = false
-	Boolean example = false
 	Boolean adhoc = false
 
 	String runner
@@ -48,6 +48,9 @@ class Canvas {
 	Serialization serialization
 	// startedBy is set to user who started the canvas.
 	SecUser startedBy
+
+	// exampleType marks this Canvas as an example for new users.
+	ExampleType exampleType = ExampleType.NOT_SET
 
 	static hasMany = [
 		dashboardItems: DashboardItem,
@@ -67,10 +70,10 @@ class Canvas {
 		id generator: IdGenerator.name // Note: doesn't apply in unit tests
 		json type: 'text'
 		hasExports defaultValue: false
-		example defaultValue: false
 		adhoc defaultValue: false
 		runner index: 'runner_idx'
 		dashboardItems cascade: 'all-delete-orphan'
+		exampleType enumType: "identity", defaultValue: ExampleType.NOT_SET, index: 'example_type_idx'
 	}
 
 	@CompileStatic

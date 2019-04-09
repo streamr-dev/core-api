@@ -309,4 +309,12 @@ class StreamService {
 		}
 		return new StreamStatus(true, msg.getTimestampAsDate())
 	}
+
+	@CompileStatic
+	def addExampleStreams(SecUser user, List<Stream> examples) {
+		for (final Stream example : examples) {
+			// Grant read permission to example stream.
+			permissionService.systemGrant(user, example, Permission.Operation.READ)
+		}
+	}
 }

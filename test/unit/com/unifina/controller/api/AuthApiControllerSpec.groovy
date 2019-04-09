@@ -5,8 +5,10 @@ import com.unifina.domain.security.*
 import com.unifina.domain.signalpath.Module
 import com.unifina.domain.signalpath.ModulePackage
 import com.unifina.feed.NoOpStreamListener
+import com.unifina.service.CanvasService
 import com.unifina.service.PermissionService
 import com.unifina.service.SignupCodeService
+import com.unifina.service.StreamService
 import com.unifina.service.UserService
 import com.unifina.signalpath.messaging.MockMailService
 import grails.plugin.springsecurity.SpringSecurityService
@@ -44,6 +46,8 @@ class AuthApiControllerSpec extends Specification {
 		controller.userService.grailsApplication = grailsApplication as GrailsApplication
 		controller.userService.permissionService = permissionService as PermissionService
 		controller.userService.messageSource = messageSource as MessageSource
+		controller.userService.canvasService = Mock(CanvasService)
+		controller.userService.streamService = Mock(StreamService)
 	}
 
 	void "signup with bad email should return error"() {
