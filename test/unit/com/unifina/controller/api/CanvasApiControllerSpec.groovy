@@ -9,6 +9,7 @@ import com.unifina.security.AllowRole
 import com.unifina.service.ApiService
 import com.unifina.service.CanvasService
 import com.unifina.service.SignalPathService
+import com.unifina.signalpath.ModuleException
 import grails.converters.JSON
 import grails.test.mixin.Mock
 import grails.test.mixin.TestFor
@@ -155,6 +156,18 @@ class CanvasApiControllerSpec extends ControllerSpecification {
 
 		1 * canvasService.authorizedGetById("1", me, Permission.Operation.READ) >> canvas1
 		1 * controller.signalPathService.runtimeRequest(_, false) >> [success:true, json:JSON.parse(canvas1.json)]
+	}
+
+	void "show() lets load a canvas in invalid state"() {
+		when:
+		params.id = canvas1.id
+		authenticatedAs(me) { controller.show() }
+
+		then:
+		response.status == 200
+		response.json.size() > 0
+		1 * canvasService.authorizedGetById("1", me, Permission.Operation.READ) >> canvas1
+		1 * controller.canvasService.reconstruct(_, _) >> { throw new ModuleException("mocked", null, null) }
 	}
 
 	void "save() creates a new canvas and renders it as json"() {

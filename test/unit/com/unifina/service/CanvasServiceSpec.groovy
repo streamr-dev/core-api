@@ -12,6 +12,7 @@ import com.unifina.domain.signalpath.Canvas
 import com.unifina.domain.signalpath.Module
 import com.unifina.domain.signalpath.Serialization
 import com.unifina.exceptions.CanvasUnreachableException
+import com.unifina.signalpath.ModuleException
 import com.unifina.signalpath.UiChannelIterator
 import com.unifina.signalpath.charts.Heatmap
 import com.unifina.task.CanvasDeleteTask
@@ -274,6 +275,22 @@ class CanvasServiceSpec extends BeanMockingSpecification {
 
 		then:
 		thrown(InvalidStateException)
+	}
+
+	def "updateExisting lets save canvas in invalid state"() {
+		setup:
+		service.signalPathService = Mock(SignalPathService)
+		def cmd = new SaveCanvasCommand(
+			name: "canvas",
+			modules: [],
+			settings: [:]
+		)
+
+		when:
+		service.updateExisting(myFirstCanvas, cmd, me)
+
+		then:
+		1 * service.signalPathService.reconstruct(_, _) >> { throw new ModuleException("mocked", null, null) }
 	}
 
 	def "createNew always generates new uiChannels"() {

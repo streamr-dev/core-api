@@ -13,9 +13,11 @@ import com.unifina.security.StreamrApi
 import com.unifina.service.ApiService
 import com.unifina.service.CanvasService
 import com.unifina.service.SignalPathService
+import com.unifina.signalpath.ModuleException
 import grails.converters.JSON
 import grails.plugin.springsecurity.annotation.Secured
 import grails.transaction.NotTransactional
+import groovy.json.JsonBuilder
 import org.apache.log4j.Logger
 
 @Secured(["IS_AUTHENTICATED_ANONYMOUSLY"])
@@ -47,12 +49,17 @@ class CanvasApiController {
 			render result as JSON
 		}
 		else {
-			Map result = canvasService.reconstruct(canvas, request.apiUser)
-			// Need to discard this change below to prevent auto-update
-			canvas.json = result as JSON
-			render canvas.toMap() as JSON
-			// Prevent auto-update of the canvas
-			canvas.discard()
+			try {
+				Map result = canvasService.reconstruct(canvas, request.apiUser)
+				// Need to discard this change below to prevent auto-update
+				canvas.json = result as JSON
+				render canvas.toMap() as JSON
+				// Prevent auto-update of the canvas
+				canvas.discard()
+			} catch (ModuleException e) {
+				// Load canvas even if it is in an invalid state. For front-end auto-save.
+				render canvas.toMap() as JSON
+			}
 		}
 	}
 

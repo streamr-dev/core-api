@@ -9,6 +9,7 @@ import com.unifina.domain.security.SecUser
 import com.unifina.domain.signalpath.Canvas
 import com.unifina.exceptions.CanvasUnreachableException
 import com.unifina.serialization.SerializationException
+import com.unifina.signalpath.ModuleException
 import com.unifina.signalpath.ModuleWithUI
 import com.unifina.signalpath.UiChannelIterator
 import com.unifina.task.CanvasDeleteTask
@@ -56,32 +57,42 @@ class CanvasService {
 			throw new InvalidStateException("Cannot update canvas with state " + canvas.state)
 		}
 
-		SignalPathService.ReconstructedResult result = constructNewSignalPathMap(canvas, command, user, resetUi)
-		Map newSignalPathMap = result.map
+		try {
+			SignalPathService.ReconstructedResult result = constructNewSignalPathMap(canvas, command, user, resetUi)
+			Map newSignalPathMap = result.map
 
-		canvas.name = newSignalPathMap.name
-		canvas.hasExports = newSignalPathMap.hasExports
-		canvas.json = new JsonBuilder(newSignalPathMap).toPrettyString() // JsonBuilder is more stable than "as JSON"
-		canvas.state = Canvas.State.STOPPED
-		canvas.adhoc = command.isAdhoc()
-
-		// clear serialization
-		canvas.serialization?.delete()
-		canvas.serialization = null
-		boolean isNewCanvas = canvas.id == null
-		canvas.save(flush: true, failOnError: true)
-		if (isNewCanvas) {
-			permissionService.systemGrantAll(user, canvas)
-		}
-
-		// ensure that the UI channel streams are created
-		result.signalPath.setCanvas(canvas)
-		result.signalPath.getModules().each {
-			if (it instanceof ModuleWithUI) {
-				it.ensureUiChannel()
+			canvas.name = newSignalPathMap.name
+			canvas.hasExports = newSignalPathMap.hasExports
+			canvas.json = new JsonBuilder(newSignalPathMap).toPrettyString()
+			canvas.state = Canvas.State.STOPPED
+			canvas.adhoc = command.isAdhoc()
+			// clear serialization
+			canvas.serialization?.delete()
+			canvas.serialization = null
+			boolean isNewCanvas = canvas.id == null
+			canvas.save(flush: true, failOnError: true)
+			if (isNewCanvas) {
+				permissionService.systemGrantAll(user, canvas)
 			}
+
+			// ensure that the UI channel streams are created
+			result.signalPath.setCanvas(canvas)
+			result.signalPath.getModules().each {
+				if (it instanceof ModuleWithUI) {
+					it.ensureUiChannel()
+				}
+			}
+			result.signalPath.ensureUiChannel()
+		} catch (ModuleException e) {
+			// Save canvas even if it is in an invalid state. For front-end auto-save.
+			def canvasJson = [
+			    name: command.name,
+				modules: command.modules,
+				settings: command.settings,
+			]
+			canvas.json = new JsonBuilder(canvasJson).toPrettyString()
+			canvas.save(flush: true, failOnError: true)
 		}
-		result.signalPath.ensureUiChannel()
 	}
 
 	/**
