@@ -11,6 +11,7 @@ import com.unifina.signalpath.Output;
 import com.unifina.signalpath.TimeSeriesOutput;
 import com.unifina.utils.Globals;
 
+import java.io.IOException;
 import java.util.*;
 
 /**
@@ -35,7 +36,12 @@ public class MapMessageEventRecipient extends StreamEventRecipient<AbstractSigna
 			initCacheMap();
 		}
 
-		Map msg = event.content.getContent();
+		Map msg;
+		try {
+			msg = event.content.getContent();
+		} catch (IOException e) {
+			msg = new HashMap();
+		}
 
 		for (String name : outputsByName.keySet()) {
 			if (msg.containsKey(name)) {
