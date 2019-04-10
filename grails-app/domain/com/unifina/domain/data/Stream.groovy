@@ -1,5 +1,6 @@
 package com.unifina.domain.data
 
+import com.unifina.domain.ExampleType
 import com.unifina.domain.marketplace.Product
 import com.unifina.domain.security.Permission
 import com.unifina.domain.signalpath.Canvas
@@ -35,6 +36,9 @@ class Stream implements Comparable {
 	// Historical data storage period (days)
 	Integer storageDays = DEFAULT_STORAGE_DAYS
 
+	// exampleType marks this Stream as an example for new users.
+	ExampleType exampleType = ExampleType.NOT_SET
+
 	static hasMany = [
 		permissions: Permission,
 		products: Product
@@ -65,6 +69,7 @@ class Stream implements Comparable {
 		requireSignedData defaultValue: "false"
 		autoConfigure defaultValue: "true"
 		storageDays defaultValue: DEFAULT_STORAGE_DAYS
+		exampleType enumType: "identity", defaultValue: ExampleType.NOT_SET, index: 'example_type_idx'
 	}
 
 	@Override
