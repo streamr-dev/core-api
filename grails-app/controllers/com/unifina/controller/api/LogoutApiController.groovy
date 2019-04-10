@@ -1,6 +1,5 @@
 package com.unifina.controller.api
 
-import com.unifina.security.AuthLevel
 import com.unifina.security.StreamrApi
 import com.unifina.security.TokenAuthenticator
 import com.unifina.service.SessionService
@@ -13,7 +12,7 @@ class LogoutApiController {
 	static allowedMethods = [logout: "POST"]
 	SessionService sessionService
 
-	@StreamrApi(authenticationLevel = AuthLevel.NONE)
+	@StreamrApi
     def logout() {
 		TokenAuthenticator authenticator = new TokenAuthenticator()
 		String sessionToken = authenticator.getSessionToken(request)
