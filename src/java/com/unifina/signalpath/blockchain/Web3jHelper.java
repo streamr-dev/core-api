@@ -128,16 +128,10 @@ public class Web3jHelper {
 		Matcher m = ARRAY_SUFFIX.matcher(solidity_type);
 		if (!m.find())
 			return instantiateType(getTypeClass(solidity_type), arg, false, -1);
-
 		String digits = m.group(1);
-		if (digits == null || digits.equals(""))
-			//dynamic array
-			return instantiateType(getTypeClass(solidity_type.substring(0, solidity_type.length() - 2)), arg, true, -1);
-		else {
-			//sized array
-			int array_size = Integer.parseInt(digits);
-			return instantiateType(getTypeClass(solidity_type.substring(0, solidity_type.length() - m.group(0).length())), arg, true, array_size);
-		}
+		//dynamic array (-1) or sized array:
+		int array_size = digits == null || digits.equals("") ? -1 : Integer.parseInt(digits);
+		return instantiateType(getTypeClass(solidity_type.substring(0, solidity_type.length() - m.group(0).length())), arg, true, array_size);
 	}
 
 	/**
@@ -166,17 +160,17 @@ public class Web3jHelper {
 			List arglist = (List) arg;
 			Constructor listcons;
 			if(arraySize <= 0)
-				listcons = DynamicArray.class.getConstructor(new Class[]{type, List.class});
+				listcons = DynamicArray.class.getConstructor(new Class[]{Class.class, List.class});
 			else{
 				Class arrayClass= Class.forName("org.web3j.abi.datatypes.generated.StaticArray"+arraySize);
-				listcons = arrayClass.getConstructor(new Class[]{type, List.class});
+				listcons = arrayClass.getConstructor(new Class[]{Class.class, List.class});
 			}
 			//create a list of transformed arguments
 			ArrayList transformedList = new ArrayList(arglist.size());
 			for(Object o : arglist){
 				transformedList.add(instantiateType(type,o,false,-1));
 			}
-			return (Type) listcons.newInstance(transformedList);
+			return (Type) listcons.newInstance(type,transformedList);
 		}
 
 
