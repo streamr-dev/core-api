@@ -180,7 +180,7 @@ class CanvasApiControllerSpec extends ControllerSpecification {
 		response.json.size() > 0
 		1 * canvasService.authorizedGetById("1", me, Permission.Operation.READ) >> canvas1
 		1 * controller.canvasService.reconstruct(_, _) >> { throw new ModuleException("mocked", null, exceptions) }
-		response.json.compileErrors[0].line == "5"
+		response.json.compileErrors[0].line == 5
 		response.json.compileErrors[0].message == "syntax error"
 	}
 
@@ -272,7 +272,7 @@ class CanvasApiControllerSpec extends ControllerSpecification {
 		response.status == 200
 		1 * canvasService.authorizedGetById("1", me, Permission.Operation.WRITE) >> canvas1
 		1 * canvasService.updateExisting(canvas1, _, me) >> { throw new ModuleException("mocked", null, exceptions) }
-		response.json.compileErrors[0].line == "5"
+		response.json.compileErrors[0].line == 5
 		response.json.compileErrors[0].message == "syntax error"
 	}
 

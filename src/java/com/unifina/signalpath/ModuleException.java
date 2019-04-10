@@ -17,8 +17,8 @@ public class ModuleException extends RuntimeException {
 		return moduleExceptions;
 	}
 
-	public static class CompileError extends HashMap<String, String> {
-		public CompileError(String line, String message) {
+	public static class CompileError extends HashMap<String, Object> {
+		public CompileError(Long line, String message) {
 			put("line", line);
 			put("message", message);
 		}
@@ -27,7 +27,12 @@ public class ModuleException extends RuntimeException {
 		final List<CompileError> errors = new ArrayList<>();
 		for (ModuleExceptionMessage msg : getModuleExceptions()) {
 			for (Map map : msg.getErrors()) {
-				final String line = map.get("line").toString();
+				Long line;
+				try {
+					line = Long.parseLong(map.get("line").toString());
+				} catch (NumberFormatException e) {
+					line = new Long(0);
+				}
 				final String message = map.get("msg").toString();
 				final CompileError error = new CompileError(line, message);
 				errors.add(error);
