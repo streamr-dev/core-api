@@ -92,6 +92,7 @@ class CanvasService {
 			]
 			canvas.json = new JsonBuilder(canvasJson).toPrettyString()
 			canvas.save(flush: true, failOnError: true)
+			throw e;
 		}
 	}
 

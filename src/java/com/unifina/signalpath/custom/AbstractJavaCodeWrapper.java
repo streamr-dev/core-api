@@ -143,10 +143,7 @@ public abstract class AbstractJavaCodeWrapper extends ModuleWithUI {
 				if (e instanceof ModuleException) {
 					throw (ModuleException) e;
 				}
-				// TODO: How to allow saving of invalid code? If it doesn't get compiled, inputs etc. won't be found
-//				if (!globals.target.save) {
 				throw new RuntimeException(e);
-//				}
 			}
 		}
 	}

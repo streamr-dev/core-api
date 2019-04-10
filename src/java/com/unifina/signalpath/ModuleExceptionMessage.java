@@ -1,5 +1,6 @@
 package com.unifina.signalpath;
 
+import java.util.List;
 import java.util.Map;
 
 public class ModuleExceptionMessage {
@@ -10,4 +11,8 @@ public class ModuleExceptionMessage {
 	}
 	private int hash;
 	private Map<String,Object> msg;
+
+	public List<Map> getErrors() {
+		return (List<Map>) this.msg.get("errors");
+	}
 }

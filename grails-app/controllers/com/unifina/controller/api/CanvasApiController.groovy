@@ -14,6 +14,7 @@ import com.unifina.service.ApiService
 import com.unifina.service.CanvasService
 import com.unifina.service.SignalPathService
 import com.unifina.signalpath.ModuleException
+import com.unifina.signalpath.ModuleExceptionMessage
 import grails.converters.JSON
 import grails.plugin.springsecurity.annotation.Secured
 import grails.transaction.NotTransactional
@@ -58,7 +59,9 @@ class CanvasApiController {
 				canvas.discard()
 			} catch (ModuleException e) {
 				// Load canvas even if it is in an invalid state. For front-end auto-save.
-				render canvas.toMap() as JSON
+				def response = canvas.toMap()
+				response.compileErrors = e.getCompilerErrors()
+				render response as JSON
 			}
 		}
 	}
@@ -72,7 +75,13 @@ class CanvasApiController {
 	@StreamrApi
 	def update(String id) {
 		Canvas canvas = canvasService.authorizedGetById(id, request.apiUser, Operation.WRITE)
-		canvasService.updateExisting(canvas, readSaveCommand(), request.apiUser)
+		try {
+			canvasService.updateExisting(canvas, readSaveCommand(), request.apiUser)
+		} catch (ModuleException e) {
+			def response = canvas.toMap()
+			response.compileErrors = e.getCompilerErrors()
+			render response as JSON
+		}
 		render canvas.toMap() as JSON
 	}
 

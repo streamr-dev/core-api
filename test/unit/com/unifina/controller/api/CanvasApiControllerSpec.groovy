@@ -10,6 +10,7 @@ import com.unifina.service.ApiService
 import com.unifina.service.CanvasService
 import com.unifina.service.SignalPathService
 import com.unifina.signalpath.ModuleException
+import com.unifina.signalpath.ModuleExceptionMessage
 import grails.converters.JSON
 import grails.test.mixin.Mock
 import grails.test.mixin.TestFor
@@ -159,6 +160,17 @@ class CanvasApiControllerSpec extends ControllerSpecification {
 	}
 
 	void "show() lets load a canvas in invalid state"() {
+		setup:
+		List<ModuleExceptionMessage> exceptions = new ArrayList<>()
+		Map<String, Object> error = new HashMap<>()
+		error.put("line", 5)
+		error.put("msg", "syntax error")
+		Map<String, Object> map = new HashMap<>()
+		List list = new ArrayList()
+		list.add(error)
+		map.put("errors", list)
+		exceptions.add(new ModuleExceptionMessage(1, map))
+
 		when:
 		params.id = canvas1.id
 		authenticatedAs(me) { controller.show() }
@@ -167,7 +179,9 @@ class CanvasApiControllerSpec extends ControllerSpecification {
 		response.status == 200
 		response.json.size() > 0
 		1 * canvasService.authorizedGetById("1", me, Permission.Operation.READ) >> canvas1
-		1 * controller.canvasService.reconstruct(_, _) >> { throw new ModuleException("mocked", null, null) }
+		1 * controller.canvasService.reconstruct(_, _) >> { throw new ModuleException("mocked", null, exceptions) }
+		response.json.compileErrors[0].line == "5"
+		response.json.compileErrors[0].message == "syntax error"
 	}
 
 	void "save() creates a new canvas and renders it as json"() {
@@ -231,6 +245,37 @@ class CanvasApiControllerSpec extends ControllerSpecification {
 		thrown NotPermittedException
 		1 * canvasService.authorizedGetById(canvas2.id, me, Permission.Operation.WRITE) >> { throw new NotPermittedException("mock") }
 	}
+
+	def "update() lets save canvas in invalid state"() {
+		setup:
+		List<ModuleExceptionMessage> exceptions = new ArrayList<>()
+		Map<String, Object> error = new HashMap<>()
+		error.put("line", 5)
+		error.put("msg", "syntax error")
+		Map<String, Object> map = new HashMap<>()
+		List list = new ArrayList()
+		list.add(error)
+		map.put("errors", list)
+		exceptions.add(new ModuleExceptionMessage(1, map))
+
+		params.id = "1"
+		request.JSON = [
+			name: "broken canvas",
+			modules: [],
+		]
+		request.method = "PUT"
+
+		when:
+		authenticatedAs(me) { controller.update() }
+
+		then:
+		response.status == 200
+		1 * canvasService.authorizedGetById("1", me, Permission.Operation.WRITE) >> canvas1
+		1 * canvasService.updateExisting(canvas1, _, me) >> { throw new ModuleException("mocked", null, exceptions) }
+		response.json.compileErrors[0].line == "5"
+		response.json.compileErrors[0].message == "syntax error"
+	}
+
 
 	void "delete() must authorize and delete the canvas"() {
 		when:

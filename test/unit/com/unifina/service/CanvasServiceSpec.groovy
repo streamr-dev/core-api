@@ -291,6 +291,7 @@ class CanvasServiceSpec extends BeanMockingSpecification {
 
 		then:
 		1 * service.signalPathService.reconstruct(_, _) >> { throw new ModuleException("mocked", null, null) }
+		thrown ModuleException
 	}
 
 	def "createNew always generates new uiChannels"() {
