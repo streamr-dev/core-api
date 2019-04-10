@@ -217,7 +217,7 @@ class StreamApiControllerSpec extends ControllerSpecification {
 		when:
 		params.id = streamOne.id
 		request.method = "PUT"
-		request.json = '{name: "newName", description: "newDescription", autoConfigure: false, requireSignedData: true }'
+		request.json = '{name: "newName", description: "newDescription", autoConfigure: false, requireSignedData: true, storageDays: 24 }'
 		authenticatedAs(me) { controller.update() }
 
 		then:
@@ -230,6 +230,7 @@ class StreamApiControllerSpec extends ControllerSpecification {
 		stream.config == null
 		stream.autoConfigure == false
 		stream.requireSignedData == true
+		stream.storageDays == 24
 	}
 
 	void "cannot update non-existent Stream"() {

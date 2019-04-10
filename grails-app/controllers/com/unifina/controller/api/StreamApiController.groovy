@@ -68,6 +68,7 @@ class StreamApiController {
 			stream.config = readConfig()
 			stream.autoConfigure = newStream.autoConfigure
 			stream.requireSignedData = newStream.requireSignedData
+			stream.storageDays = newStream.storageDays
 			if (stream.validate()) {
 				stream.save(failOnError: true)
 				render(status: 204)
