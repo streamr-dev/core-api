@@ -132,17 +132,11 @@ class CanvasController {
 
 		def canvases = []
 		if (params.browserId == 'examplesLoadBrowser') {
-			// bypass Permission check; examples are public (make sure example-bit can't be set through API!)
-			canvases = Canvas.withCriteria {
-				eq "example", true
-				order "dateCreated", "asc"
-				maxResults max
-				firstResult offset
-			}
+			// Example canvases functionality removed. Always return an empty list.
+			canvases = []
 		} else if (params.browserId == 'archiveLoadBrowser') {
 			def user = springSecurityService.currentUser
 			canvases = permissionService.get(Canvas, user, Operation.READ) {
-				eq "example", false
 				eq "adhoc", false
 				order "lastUpdated", "desc"
 				maxResults max
