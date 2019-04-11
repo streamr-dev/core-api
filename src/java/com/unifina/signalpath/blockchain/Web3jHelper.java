@@ -134,6 +134,14 @@ public class Web3jHelper {
 		return instantiateType(getTypeClass(solidity_type.substring(0, solidity_type.length() - m.group(0).length())), arg, true, array_size);
 	}
 
+	public static List arrayToList(Object array){
+		int len = java.lang.reflect.Array.getLength(array);
+		ArrayList rslt = new ArrayList(len);
+		for(int i=0; i<len;i++){
+			rslt.add(java.lang.reflect.Array.get(array,i));
+		}
+		return rslt;
+	}
 	/**
 	 *
 	 * @param type
@@ -155,9 +163,15 @@ public class Web3jHelper {
 		}
 
 		if(isArray) {
-			if(!(arg instanceof List))
+			List arglist;
+			if(arg instanceof List){
+				arglist = (List) arg;
+			}
+			else if(arg.getClass().isArray()){
+				arglist = arrayToList(arg);
+			}
+			else
 				throw new ClassCastException("Arg of type "+arg.getClass()+" should be a list to instantiate web3j Array");
-			List arglist = (List) arg;
 			Constructor listcons;
 			if(arraySize <= 0)
 				listcons = DynamicArray.class.getConstructor(new Class[]{Class.class, List.class});

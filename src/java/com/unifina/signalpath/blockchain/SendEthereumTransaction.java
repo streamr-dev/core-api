@@ -367,7 +367,6 @@ public class SendEthereumTransaction extends ModuleWithSideEffects {
 			Function fn = createWeb3jFunctionCall();
 			String encodeFnCall = FunctionEncoder.encode(fn);
 			final SendEthereumTransaction module = this;
-			//String encodeFnCall = web3Bridge.encodeMethodCall(abi,chosenFunction,arguments);
 			if(chosenFunction.constant) {
 				EthCall response = web3j.ethCall(
 						Transaction.createEthCallTransaction(ethereumAccount.getAddress(), c.getAddress(), encodeFnCall),
