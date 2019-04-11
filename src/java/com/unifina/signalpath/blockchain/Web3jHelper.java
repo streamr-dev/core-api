@@ -1,16 +1,14 @@
 package com.unifina.signalpath.blockchain;
 
 import org.apache.log4j.Logger;
-import org.web3j.abi.EventEncoder;
-import org.web3j.abi.EventValues;
-import org.web3j.abi.FunctionReturnDecoder;
-import org.web3j.abi.TypeReference;
+import org.web3j.abi.*;
 import org.web3j.abi.datatypes.*;
 import org.web3j.abi.datatypes.generated.AbiTypes;
 import org.web3j.protocol.Web3j;
-import org.web3j.protocol.core.methods.response.EthGetTransactionReceipt;
-import org.web3j.protocol.core.methods.response.Log;
-import org.web3j.protocol.core.methods.response.TransactionReceipt;
+import org.web3j.protocol.core.DefaultBlockParameterName;
+import org.web3j.protocol.core.Response;
+import org.web3j.protocol.core.methods.request.Transaction;
+import org.web3j.protocol.core.methods.response.*;
 import org.web3j.utils.Numeric;
 
 import java.io.IOException;
@@ -19,8 +17,10 @@ import java.lang.reflect.InvocationTargetException;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
+import java.util.concurrent.ExecutionException;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -214,5 +214,36 @@ public class Web3jHelper {
 		}
 		Constructor cons = type.getConstructor(new Class[]{constructorArg.getClass()});
 		return (Type) cons.newInstance(constructorArg);
+	}
+	/**
+	 *
+	 * @param web3j
+	 * @param erc20address address of ERC20 or 0x0 for ETH balance
+	 * @param holder_address
+	 * @return token balance in wei
+	 * @throws ExecutionException
+	 * @throws InterruptedException
+	 */
+	public static BigInteger getERC20Balance(Web3j web3j, String erc20address, String holder_address) throws ExecutionException, InterruptedException {
+		Address tokenAddress = new Address(erc20address);
+		if(tokenAddress.toUint160().getValue().equals(BigInteger.ZERO)){
+			EthGetBalance ethGetBalance = web3j
+					.ethGetBalance(holder_address, DefaultBlockParameterName.LATEST)
+					.sendAsync()
+					.get();
+			final BigInteger balance = ethGetBalance.getBalance();
+			return balance;
+		}
+		//    function balanceOf(address tokenOwner) public view returns (uint balance);
+		Function balanceOf = new Function("balanceOf", Arrays.<Type>asList(new Address(holder_address)),Arrays.<TypeReference<?>>asList(TypeReference.create(Uint.class)));
+		EthCall response = web3j.ethCall(
+				Transaction.createEthCallTransaction(holder_address, erc20address, FunctionEncoder.encode(balanceOf)),
+				DefaultBlockParameterName.LATEST).sendAsync().get();
+		Response.Error err = response.getError();
+		if(err != null){
+			throw new RuntimeException(err.getMessage());
+		}
+		List<Type> rslt = FunctionReturnDecoder.decode(response.getValue(), balanceOf.getOutputParameters());
+		return ((Uint) rslt.iterator().next()).getValue();
 	}
 }
