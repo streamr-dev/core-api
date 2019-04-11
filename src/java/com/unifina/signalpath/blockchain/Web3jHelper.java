@@ -132,17 +132,26 @@ public class Web3jHelper {
 		return instantiateType(getTypeClass(solidity_type.substring(0, solidity_type.length() - m.group(0).length())), arg, true, array_size);
 	}
 
+	public static List arrayToList(Object array) {
+		int len = java.lang.reflect.Array.getLength(array);
+		ArrayList rslt = new ArrayList(len);
+		for (int i = 0; i < len; i++) {
+			rslt.add(java.lang.reflect.Array.get(array, i));
+		}
+		return rslt;
+	}
+
 	/**
 	 * @param type
 	 * @param arg
 	 * @param isArray
 	 * @param arraySize if isArray and arraySize > 0, static array will be allocated instead of dynamic array
 	 * @return
-	 * @throws NoSuchMethodException if Class.getConstructor fails (if constructor not found, means there may be something wrong with generated web3j types)
-	 * @throws IllegalAccessException if Constructor.newInstance fails (no public constructor, shouldn't happen)
+	 * @throws NoSuchMethodException     if Class.getConstructor fails (if constructor not found, means there may be something wrong with generated web3j types)
+	 * @throws IllegalAccessException    if Constructor.newInstance fails (no public constructor, shouldn't happen)
 	 * @throws InvocationTargetException if the function call through Constructor.newInstance throws (if throws, something is wrong with generated web3j types)
-	 * @throws InstantiationException if Constructor.newInstance fails because class can't be instantiated (check web3j types)
-	 * @throws ClassNotFoundException if org.web3j.abi.datatypes.generated.StaticArrayNNN not found for NNN = arraysize (check arraysize, then web3j types)
+	 * @throws InstantiationException    if Constructor.newInstance fails because class can't be instantiated (check web3j types)
+	 * @throws ClassNotFoundException    if org.web3j.abi.datatypes.generated.StaticArrayNNN not found for NNN = arraysize (check arraysize, then web3j types)
 	 */
 
 	public static Type instantiateType(Class type, Object arg, boolean isArray, int arraySize) throws NoSuchMethodException, IllegalAccessException, InvocationTargetException, InstantiationException, ClassNotFoundException {
@@ -154,10 +163,14 @@ public class Web3jHelper {
 		}
 
 		if (isArray) {
-			if (!(arg instanceof List)) {
+			List arglist;
+			if (arg instanceof List) {
+				arglist = (List) arg;
+			} else if (arg.getClass().isArray()) {
+				arglist = arrayToList(arg);
+			} else {
 				throw new ClassCastException("Arg of type " + arg.getClass() + " should be a list to instantiate web3j Array");
 			}
-			List arglist = (List) arg;
 			Constructor listcons;
 			if (arraySize <= 0) {
 				listcons = DynamicArray.class.getConstructor(new Class[]{Class.class, List.class});

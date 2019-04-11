@@ -163,7 +163,7 @@ public class SendEthereumTransaction extends ModuleWithSideEffects {
 		for (EthereumABI.Slot s : chosenFunction.inputs) {
 			String name = s.name;
 			if (name.length() < 1) {
-				name = "(" + s.type + i + ")";
+				name = "(" + s.type + ")_" + i;
 			}
 			i++;
 			Input input = EthereumToStreamrTypes.asInput(s.type, name, this);
@@ -181,7 +181,7 @@ public class SendEthereumTransaction extends ModuleWithSideEffects {
 			for (EthereumABI.Slot s : chosenFunction.outputs) {
 				String name = s.name;
 				if (name.length() < 1) {
-					name = "(" + s.type + i + ")";
+					name = "(" + s.type + ")_" + i;
 				}
 				i++;
 				Output output = EthereumToStreamrTypes.asOutput(s.type, name, this);
@@ -390,7 +390,6 @@ public class SendEthereumTransaction extends ModuleWithSideEffects {
 			Function fn = createWeb3jFunctionCall();
 			String encodeFnCall = FunctionEncoder.encode(fn);
 			final SendEthereumTransaction module = this;
-			//String encodeFnCall = web3Bridge.encodeMethodCall(abi,chosenFunction,arguments);
 			if (chosenFunction.constant) {
 				EthCall response = web3j.ethCall(
 					Transaction.createEthCallTransaction(ethereumAccount.getAddress(), c.getAddress(), encodeFnCall),
