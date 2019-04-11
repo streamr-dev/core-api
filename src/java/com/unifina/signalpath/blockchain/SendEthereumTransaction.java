@@ -41,7 +41,7 @@ public class SendEthereumTransaction extends ModuleWithSideEffects {
 
 	private ListOutput errors = new ListOutput(this, "errors");
 	private TimeSeriesInput ether = new TimeSeriesInput(this, "ether");
-	private Input<Object> trigger = new Input<>(this, "trigger", "Object");		// shown if there are no inputs
+	private Input<Object> trigger = new Input<>(this, "trigger", "Object");        // shown if there are no inputs
 
 	private EthereumABI abi;
 	private EthereumABI.Function chosenFunction;
@@ -54,13 +54,14 @@ public class SendEthereumTransaction extends ModuleWithSideEffects {
 
 	// transaction outputs
 	private StringOutput txHash = new StringOutput(this, "txHash");
-	private Map<EthereumABI.Event, List<Output<Object>>> eventOutputs;		// outputs for each event separately
+	private Map<EthereumABI.Event, List<Output<Object>>> eventOutputs;        // outputs for each event separately
 
 	private static final Logger log = Logger.getLogger(SendEthereumTransaction.class);
 	private static final int ETHEREUM_TRANSACTION_DEFAULT_TIMEOUT_SECONDS = 1800;
 
 	//private transient Gson gson;
 	private Web3j web3j;
+
 	@Override
 	public void init() {
 		addInput(ethereumAccount);
@@ -68,7 +69,7 @@ public class SendEthereumTransaction extends ModuleWithSideEffects {
 		contract.setDrivingInput(false);
 		contract.setCanToggleDrivingInput(false);
 
-		function.setUpdateOnChange(true);		// update argument inputs
+		function.setUpdateOnChange(true);        // update argument inputs
 
 		trigger.setCanToggleDrivingInput(false);
 		trigger.setDrivingInput(true);
@@ -100,7 +101,7 @@ public class SendEthereumTransaction extends ModuleWithSideEffects {
 		// The input is not yet configured, so otherwise it won't hold the correct value yet.
 		if (config.containsKey("params")) {
 			for (Object configObject : MapTraversal.getList(config, "params")) {
-				Map<String, Object> inputConfig = (Map<String, Object>)configObject;
+				Map<String, Object> inputConfig = (Map<String, Object>) configObject;
 				if (function.getName().equals(MapTraversal.getString(inputConfig, "name"))) {
 					function.setConfiguration(inputConfig);
 					break;
@@ -121,13 +122,13 @@ public class SendEthereumTransaction extends ModuleWithSideEffects {
 		if (contract.hasValue()) {
 			abi = contract.getValue().getABI();
 			function.list = abi.getFunctions();
-			int eventNum=0;
+			int eventNum = 0;
 			for (EthereumABI.Event ev : abi.getEvents()) {
 				List<Output<Object>> evOutputs = new ArrayList<>();
 				if (ev.inputs.size() > 0) {
-					int argnum=0;
+					int argnum = 0;
 					for (EthereumABI.Slot arg : ev.inputs) {
-						String displayName = ev.name + "." + (arg.name.length() > 0 ? arg.name : "(" + arg.type +eventNum+"_"+argnum+")");
+						String displayName = ev.name + "." + (arg.name.length() > 0 ? arg.name : "(" + arg.type + eventNum + "_" + argnum + ")");
 						argnum++;
 						Output output = EthereumToStreamrTypes.asOutput(arg.type, displayName, this);
 						evOutputs.add(output);
@@ -144,7 +145,9 @@ public class SendEthereumTransaction extends ModuleWithSideEffects {
 	}
 
 	private void updateFunction() {
-		if (function.list == null || function.list.size() < 1) { return; }
+		if (function.list == null || function.list.size() < 1) {
+			return;
+		}
 
 		addInput(function);
 		chosenFunction = function.getSelected();
@@ -156,10 +159,12 @@ public class SendEthereumTransaction extends ModuleWithSideEffects {
 		log.info("Chose function " + chosenFunction.name);
 
 		arguments.clear();
-		int i=0;
+		int i = 0;
 		for (EthereumABI.Slot s : chosenFunction.inputs) {
 			String name = s.name;
-			if (name.length() < 1) { name = "(" + s.type + i + ")"; }
+			if (name.length() < 1) {
+				name = "(" + s.type + i + ")";
+			}
 			i++;
 			Input input = EthereumToStreamrTypes.asInput(s.type, name, this);
 			addInput(input);
@@ -172,10 +177,12 @@ public class SendEthereumTransaction extends ModuleWithSideEffects {
 		if (chosenFunction.constant) {
 			// constant functions send an eth_call and get back returned result(s)
 			results.clear();
-			i=0;
+			i = 0;
 			for (EthereumABI.Slot s : chosenFunction.outputs) {
 				String name = s.name;
-				if (name.length() < 1) { name = "(" + s.type + i + ")"; }
+				if (name.length() < 1) {
+					name = "(" + s.type + i + ")";
+				}
 				i++;
 				Output output = EthereumToStreamrTypes.asOutput(s.type, name, this);
 				addOutput(output);
@@ -211,82 +218,92 @@ public class SendEthereumTransaction extends ModuleWithSideEffects {
 	 * wraps Web3j Resonse with utility methods
 	 */
 
-	abstract class FunctionCallResult implements ITimestamped{
-//		String hash;
+	abstract class FunctionCallResult implements ITimestamped {
+		//		String hash;
 //		Map<String, List<Object>> events;
 //		List<Object> results;
 		Date timestamp;
 		Function fn;
-		public FunctionCallResult(Date timestamp, Function _fn){
+
+		public FunctionCallResult(Date timestamp, Function _fn) {
 			this.timestamp = timestamp;
 			fn = _fn;
 		}
+
 		@Override
 		public Date getTimestampAsDate() {
 			return timestamp;
 		}
 
 		public abstract Response getResponse();
-		public Response.Error getError(){
+
+		public Response.Error getError() {
 			return getResponse().getError();
 		}
 	}
 
-	class ConstantFunctionResult extends FunctionCallResult{
+	class ConstantFunctionResult extends FunctionCallResult {
 		private EthCall ethcall;
-		public ConstantFunctionResult(Date timestamp,Function _fn , EthCall ec){
-			super(timestamp,_fn);
+
+		public ConstantFunctionResult(Date timestamp, Function _fn, EthCall ec) {
+			super(timestamp, _fn);
 			ethcall = ec;
 		}
+
 		@Override
-		public Response getResponse(){
+		public Response getResponse() {
 			return ethcall;
 		}
+
 		public List<Type> getResults() {
 			return FunctionReturnDecoder.decode(
-					ethcall.getValue(), fn.getOutputParameters());
+				ethcall.getValue(), fn.getOutputParameters());
 		}
 	}
 
 	/**
 	 * non constant function call result
 	 */
-	class TransactionResult extends FunctionCallResult{
+	class TransactionResult extends FunctionCallResult {
 		private EthSendTransaction web3jTx;
 
 		public TransactionResult(Date timestamp, Function _fn, EthSendTransaction tx) {
-			super(timestamp,_fn);
+			super(timestamp, _fn);
 			web3jTx = tx;
 		}
+
 		@Override
-		public Response getResponse(){
+		public Response getResponse() {
 			return web3jTx;
 		}
-		public String getTransactionHash(){
+
+		public String getTransactionHash() {
 			return web3jTx.getTransactionHash();
 		}
+
 		public Map<String, List<Object>> getEvents() throws IOException, ClassNotFoundException {
 			Map<String, List<Object>> events = new HashMap<String, List<Object>>();
-			for(EthereumABI.Event e : abi.getEvents()){
+			for (EthereumABI.Event e : abi.getEvents()) {
 				ArrayList<TypeReference<?>> params = new ArrayList<TypeReference<?>>();
-				for(EthereumABI.Slot s : e.inputs){
+				for (EthereumABI.Slot s : e.inputs) {
 					params.add(TypeReference.create(Web3jHelper.getTypeClass(s.type)));
 				}
 				Event web3jevent = new Event(e.name, params);
-				TransactionReceipt txr = Web3jHelper.getTransactionReceipt(web3j,web3jTx.getTransactionHash());
-				if(txr == null){
-					throw new IOException("couldnt find transaction receipt for txhash: "+web3jTx.getTransactionHash());
+				TransactionReceipt txr = Web3jHelper.getTransactionReceipt(web3j, web3jTx.getTransactionHash());
+				if (txr == null) {
+					throw new IOException("couldnt find transaction receipt for txhash: " + web3jTx.getTransactionHash());
 				}
 				List<EventValues> valueList = Web3jHelper.extractEventParameters(web3jevent, txr);
-				if(valueList == null)
+				if (valueList == null) {
 					continue;
-				for(EventValues ev : valueList){
+				}
+				for (EventValues ev : valueList) {
 					List<Object> objs = new ArrayList<Object>();
 					List<Type> niv = ev.getNonIndexedValues();
-					for(Type t : niv){
-						 objs.add(t.getValue());
+					for (Type t : niv) {
+						objs.add(t.getValue());
 					}
-					events.put(e.name,objs);
+					events.put(e.name, objs);
 				}
 			}
 			return events;
@@ -296,6 +313,7 @@ public class SendEthereumTransaction extends ModuleWithSideEffects {
 
 	/**
 	 * Asynchronously handle server response, call comes from event queue
+	 *
 	 * @param event containing HttpTransaction created within sendOutput
 	 */
 	@Override
@@ -303,8 +321,7 @@ public class SendEthereumTransaction extends ModuleWithSideEffects {
 		if (event.content instanceof FunctionCallResult) {
 			try {
 				sendOutput((FunctionCallResult) event.content);
-			}
-			catch(Exception e){
+			} catch (Exception e) {
 				log.error(e.getMessage());
 				throw new RuntimeException(e);
 			}
@@ -315,6 +332,7 @@ public class SendEthereumTransaction extends ModuleWithSideEffects {
 	}
 
 	private transient Propagator asyncPropagator;
+
 	private Propagator getPropagator() {
 		if (asyncPropagator == null) {
 			asyncPropagator = new Propagator(this);
@@ -332,7 +350,7 @@ public class SendEthereumTransaction extends ModuleWithSideEffects {
 
 	protected Function createWeb3jFunctionCall() throws InvocationTargetException, NoSuchMethodException, InstantiationException, IllegalAccessException, ClassNotFoundException {
 		List<Type> inputs = new ArrayList<Type>(chosenFunction.inputs.size());
-		for(int i=0;i<chosenFunction.inputs.size();i++){
+		for (int i = 0; i < chosenFunction.inputs.size(); i++) {
 			EthereumABI.Slot slot = chosenFunction.inputs.get(i);
 			Input<Object> input = arguments.get(i);
 //			Type t = TypeDecoder.decode(input.getValue().toString(),0, TypeReference.create(getTypeClass(slot.type)));
@@ -340,17 +358,16 @@ public class SendEthereumTransaction extends ModuleWithSideEffects {
 			inputs.add(t);
 		}
 		List<TypeReference<?>> outputs = new ArrayList<TypeReference<?>>(chosenFunction.outputs.size());
-		for(int i=0;i<chosenFunction.outputs.size();i++){
+		for (int i = 0; i < chosenFunction.outputs.size(); i++) {
 			EthereumABI.Slot slot = chosenFunction.outputs.get(i);
 			outputs.add(TypeReference.create(Web3jHelper.getTypeClass(slot.type)));
 		}
-		Function webjfn = new Function(chosenFunction.name,inputs,outputs);
+		Function webjfn = new Function(chosenFunction.name, inputs, outputs);
 		return webjfn;
 	}
 
 
-
-	protected BigInteger getGasLimit(){
+	protected BigInteger getGasLimit() {
 		return BigInteger.valueOf(6000000l);
 	}
 
@@ -359,33 +376,39 @@ public class SendEthereumTransaction extends ModuleWithSideEffects {
 		// ethereumAccount
 		// ethereumOptions
 		EthereumContract c = contract.getValue();
-		if (c == null || c.getABI() == null || function.list == null) { throw new RuntimeException("Faulty contract"); }
-		if (chosenFunction == null) { throw new RuntimeException("Need valid function to call"); }
-		if (c.getAddress() == null) { throw new RuntimeException("Contract must be deployed before calling"); }
+		if (c == null || c.getABI() == null || function.list == null) {
+			throw new RuntimeException("Faulty contract");
+		}
+		if (chosenFunction == null) {
+			throw new RuntimeException("Need valid function to call");
+		}
+		if (c.getAddress() == null) {
+			throw new RuntimeException("Contract must be deployed before calling");
+		}
 
 		try {
 			Function fn = createWeb3jFunctionCall();
 			String encodeFnCall = FunctionEncoder.encode(fn);
 			final SendEthereumTransaction module = this;
 			//String encodeFnCall = web3Bridge.encodeMethodCall(abi,chosenFunction,arguments);
-			if(chosenFunction.constant) {
+			if (chosenFunction.constant) {
 				EthCall response = web3j.ethCall(
-						Transaction.createEthCallTransaction(ethereumAccount.getAddress(), c.getAddress(), encodeFnCall),
-				DefaultBlockParameterName.LATEST).sendAsync().get();
-				ConstantFunctionResult rslt = new ConstantFunctionResult(getGlobals().time,fn, response);
+					Transaction.createEthCallTransaction(ethereumAccount.getAddress(), c.getAddress(), encodeFnCall),
+					DefaultBlockParameterName.LATEST).sendAsync().get();
+				ConstantFunctionResult rslt = new ConstantFunctionResult(getGlobals().time, fn, response);
 				getGlobals().getDataSource().enqueueEvent(new FeedEvent<FunctionCallResult, SendEthereumTransaction>(rslt, rslt.timestamp, module));
-			}
-			else{
+			} else {
 				BigInteger gasPrice = BigDecimal.valueOf(ethereumOptions.getGasPriceWei()).toBigInteger();
 				EthGetTransactionCount ethGetTransactionCount = web3j.ethGetTransactionCount(
-						ethereumAccount.getAddress(), DefaultBlockParameterName.LATEST).sendAsync().get();
+					ethereumAccount.getAddress(), DefaultBlockParameterName.LATEST).sendAsync().get();
 				BigInteger nonce = ethGetTransactionCount.getTransactionCount();
 				BigInteger valueWei;
 				Credentials credentials = Credentials.create(ethereumAccount.getPrivateKey());
-				if (!chosenFunction.constant && ether.isConnected())
+				if (!chosenFunction.constant && ether.isConnected()) {
 					valueWei = BigDecimal.valueOf(ether.getValue()).multiply(BigDecimal.TEN.pow(18)).toBigInteger();
-				else
+				} else {
 					valueWei = BigInteger.ZERO;
+				}
 
 				//createTransaction(BigInteger nonce, BigInteger gasPrice, BigInteger gasLimit, String to, BigInteger value, String data) {
 				RawTransaction rawTransaction = RawTransaction.createTransaction(nonce, gasPrice, getGasLimit(), c.getAddress(), valueWei, encodeFnCall);
@@ -396,7 +419,7 @@ public class SendEthereumTransaction extends ModuleWithSideEffects {
 					@Override
 					public void accept(EthSendTransaction tx) {
 						log.debug("TX response: " + tx.getRawResponse());
-						TransactionResult tr = new TransactionResult(getGlobals().time,fn, tx);
+						TransactionResult tr = new TransactionResult(getGlobals().time, fn, tx);
 						// push the response into Streamr's event queue
 						getGlobals().getDataSource().enqueueEvent(new FeedEvent<FunctionCallResult, SendEthereumTransaction>(tr, tr.timestamp, module));
 						//sendOutput(tr);
@@ -404,8 +427,7 @@ public class SendEthereumTransaction extends ModuleWithSideEffects {
 				});
 			}
 //			txHash.send(ethSendTransaction.getTransactionHash());
-		}
-		catch (Exception e){
+		} catch (Exception e) {
 			log.error(e.getMessage());
 			throw new RuntimeException(e);
 		}
@@ -413,22 +435,22 @@ public class SendEthereumTransaction extends ModuleWithSideEffects {
 
 	public void sendOutput(FunctionCallResult rslt) throws IOException, ClassNotFoundException {
 		Response.Error e = rslt.getError();
-		if(e != null){
+		if (e != null) {
 			errors.send(Arrays.asList(e.getMessage()));
 		}
 		if (rslt instanceof ConstantFunctionResult) {
 			ConstantFunctionResult crslt = (ConstantFunctionResult) rslt;
 			List<Type> txResults = crslt.getResults();
-			if(txResults == null)
+			if (txResults == null) {
 				return;
+			}
 			int n = Math.min(results.size(), txResults.size());
 			for (int i = 0; i < n; i++) {
 				Object val = txResults.get(i).getValue();
 				Output<Object> output = results.get(i);
 				convertAndSend(output, val);
 			}
-		}
-		else if(rslt instanceof TransactionResult){
+		} else if (rslt instanceof TransactionResult) {
 			TransactionResult tx = (TransactionResult) rslt;
 			txHash.send(tx.getTransactionHash());
 			/*
@@ -440,8 +462,8 @@ public class SendEthereumTransaction extends ModuleWithSideEffects {
 			nonce.send(resp.nonce);
 			txHash.send(resp.txHash);
 			*/
-			Map<String, List<Object>> events  = tx.getEvents();
-			for(EthereumABI.Event ev : abi.getEvents()) {
+			Map<String, List<Object>> events = tx.getEvents();
+			for (EthereumABI.Event ev : abi.getEvents()) {
 				List<Object> args = events.get(ev.name);
 				List<Output<Object>> evOutputs = eventOutputs.get(ev);
 				if (args != null) {
@@ -484,7 +506,7 @@ public class SendEthereumTransaction extends ModuleWithSideEffects {
 			List<PossibleValue> ret = new ArrayList<>();
 			for (EthereumABI.Function f : list) {
 				if (f.name.length() < 1) {
-					ret.add(new PossibleValue("(default)", ""));	// fallback function
+					ret.add(new PossibleValue("(default)", ""));    // fallback function
 				} else {
 					ret.add(new PossibleValue(f.name, f.name));
 				}
@@ -503,7 +525,9 @@ public class SendEthereumTransaction extends ModuleWithSideEffects {
 		}
 	}
 
-	/** Message to show in UI in historical/side-effect-free mode */
+	/**
+	 * Message to show in UI in historical/side-effect-free mode
+	 */
 	protected String getDummyNotificationMessage() {
 		String recipient = contract.getValue().getAddress();
 		if (chosenFunction.name.length() > 0) {
@@ -511,9 +535,11 @@ public class SendEthereumTransaction extends ModuleWithSideEffects {
 		} else {
 			return ether.getValue() + " ETH sent to " + recipient;
 		}
-    }
+	}
 
-	/** Streamr-web3 ethereum bridge can be running on a local machine */
+	/**
+	 * Streamr-web3 ethereum bridge can be running on a local machine
+	 */
 	protected boolean localAddressesAreAllowed() {
 		return true;
 	}
