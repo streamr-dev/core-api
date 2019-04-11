@@ -63,10 +63,11 @@ public class SolidityModule extends ModuleWithUI implements Pullable<EthereumCon
 	protected void onConfiguration(Map<String, Object> config) {
 		super.onConfiguration(config);
 
-		if (config.containsKey("code")) {
-			code = config.get("code").toString();
-		} else {
+		Object codeItem = config.get("code");
+		if (codeItem == null) {
 			code = getCodeTemplate();
+		} else {
+			code = codeItem.toString();
 		}
 
 		if (config.containsKey("contract")) {

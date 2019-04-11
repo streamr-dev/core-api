@@ -1,5 +1,7 @@
 package com.unifina.signalpath.blockchain;
 
+import com.google.gson.Gson;
+import com.google.gson.JsonElement;
 import com.unifina.signalpath.*;
 
 import java.util.ArrayList;
@@ -72,6 +74,21 @@ public class EthereumToStreamrTypes {
 			return new TimeSeriesOutput(owner, name);
 		} else {
 			return new Output(owner, name, "Object");
+		}
+	}
+
+	public static void convertAndSend(Output output, JsonElement value) {
+		if (output instanceof ListOutput) {
+			ArrayList val = new Gson().fromJson(value, ArrayList.class);
+			output.send(val);
+		} else if (output instanceof StringOutput) {
+			output.send(value.getAsString());
+		} else if (output instanceof BooleanOutput) {
+			output.send(value.getAsBoolean());
+		} else if (output instanceof TimeSeriesOutput) {
+			output.send(value.getAsNumber().doubleValue());
+		} else {
+			output.send(value.getAsString());
 		}
 	}
 }
