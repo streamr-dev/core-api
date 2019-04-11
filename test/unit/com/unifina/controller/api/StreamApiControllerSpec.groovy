@@ -233,6 +233,26 @@ class StreamApiControllerSpec extends ControllerSpecification {
 		stream.storageDays == 24
 	}
 
+	void "update a Stream of logged in user but do not update undefined fields"() {
+		when:
+		params.id = streamOne.id
+		request.method = "PUT"
+		request.json = '{name: "newName", description: "newDescription", autoConfigure: null, requireSignedData: null, storageDays: null }'
+		authenticatedAs(me) { controller.update() }
+
+		then:
+		response.status == 204
+
+		then:
+		def stream = streamOne
+		stream.name == "newName"
+		stream.description == "newDescription"
+		stream.config == null
+		stream.autoConfigure == true
+		stream.requireSignedData == false
+		stream.storageDays == Stream.DEFAULT_STORAGE_DAYS
+	}
+
 	void "cannot update non-existent Stream"() {
 		when:
 		params.id = "666-666-666"
