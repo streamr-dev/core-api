@@ -116,10 +116,12 @@ public class SolidityCompileDeploy extends ModuleWithUI implements Pullable<Ethe
 	protected void onConfiguration(Map<String, Object> config) {
 		super.onConfiguration(config);
 		web3j = Web3j.build(new HttpService(ethereumOptions.getRpcUrl()));
-		if (config.containsKey("code")) {
-			code = config.get("code").toString();
+
+		Object codeFromEditor = config.get("code");
+		if (codeFromEditor == null) {
+			code = getCodeTemplate();			// initially, get template from inheriting class e.g. PayByUse
 		} else {
-			code = getCodeTemplate();
+			code = codeFromEditor.toString();
 		}
 
 		if (config.containsKey("contract")) {
