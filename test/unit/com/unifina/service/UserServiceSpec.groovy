@@ -65,6 +65,8 @@ class UserServiceSpec extends Specification {
 		grailsApplication.mainContext.getBean("springSecurityService").grailsApplication = grailsApplication
 		grailsApplication.mainContext.getBean("springSecurityService").passwordEncoder = grailsApplication.mainContext.getBean("passwordEncoder")
 		permissionService = service.permissionService = Mock(PermissionService)
+		service.streamService = Mock(StreamService)
+		service.canvasService = Mock(CanvasService)
 	}
 
 	def "the user is created when called, with default roles if none supplied"() {

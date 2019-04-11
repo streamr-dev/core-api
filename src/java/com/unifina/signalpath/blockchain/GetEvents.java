@@ -1,10 +1,7 @@
 package com.unifina.signalpath.blockchain;
 
 import com.google.common.collect.ImmutableMap;
-import com.google.gson.Gson;
-import com.google.gson.JsonArray;
-import com.google.gson.JsonObject;
-import com.google.gson.JsonParser;
+import com.google.gson.*;
 import com.mashape.unirest.http.Unirest;
 import com.mashape.unirest.http.exceptions.UnirestException;
 import com.unifina.datasource.IStartListener;
@@ -165,9 +162,9 @@ public class GetEvents extends AbstractSignalPathModule implements ContractEvent
 				if (abiEvent.inputs.size() > 0) {
 					int n = Math.min(eventOutputs.size(), values.size());
 					for (int i = 0; i < n; i++) {
-						String value = values.get(i).getAsString();
+						JsonElement value = values.get(i);
 						Output output = eventOutputs.get(i);
-						EthereumCall.convertAndSend(output, value);
+						EthereumToStreamrTypes.convertAndSend(output, value);
 					}
 				} else {
 					eventOutputs.get(0).send(Boolean.TRUE);

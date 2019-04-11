@@ -31,4 +31,13 @@ class LogoutApiControllerSpec extends ControllerSpecification {
 		response.json == [:]
 		1 * sessionService.invalidateSession("session-token")
 	}
+
+	def "logout throws if not logged in"() {
+		when:
+		request.addHeader("Authorization", "BEARER session-token")
+		request.method = "POST"
+		unauthenticated() { controller.logout() }
+		then:
+		response.status == 401
+	}
 }
