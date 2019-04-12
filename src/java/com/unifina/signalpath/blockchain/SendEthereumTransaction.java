@@ -215,9 +215,8 @@ public class SendEthereumTransaction extends ModuleWithSideEffects {
 	}
 
 	/**
-	 * wraps Web3j Resonse with utility methods
+	 * wraps Web3j Response with utility methods
 	 */
-
 	abstract class FunctionCallResult implements ITimestamped {
 		//		String hash;
 //		Map<String, List<Object>> events;
