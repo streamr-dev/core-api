@@ -55,6 +55,12 @@ class UserApiController {
 	}
 
 	@StreamrApi
+	def getCurrentUserBalance() {
+		def sum = BalanceService.getBalances(request.apiUser).values.sum()
+		render([sum: sum] as JSON)
+	}
+
+	@StreamrApi
 	def delete() {
 		SecUser user = (SecUser) request.apiUser
 		userService.delete(user)

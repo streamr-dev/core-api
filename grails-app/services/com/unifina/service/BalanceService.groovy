@@ -1,6 +1,8 @@
 package com.unifina.service
 
 import com.unifina.api.ApiException
+import com.unifina.domain.security.IntegrationKey
+import com.unifina.domain.security.SecUser
 import groovy.transform.CompileStatic
 import org.web3j.exceptions.MessageDecodingException
 import org.web3j.protocol.Web3j
@@ -54,5 +56,17 @@ class Web3BalanceImpl implements Web3Balance {
 			.get()
 		final BigInteger balance = ethGetBalance.getBalance()
 		return balance
+	}
+
+	public Map<String, BigInteger> getBalances(SecUser user) {
+		def keys =
+			IntegrationKey.findAllByUserAndService(user, IntegrationKey.Service.ETHEREUM) +
+			IntegrationKey.findAllByUserAndService(user, IntegrationKey.Service.ETHEREUM_ID)
+
+		List<String> addresses = keys*.toMap()*.address
+
+		return addresses.collectEntries {
+			[it: checkBalance(it)]
+		}
 	}
 }
