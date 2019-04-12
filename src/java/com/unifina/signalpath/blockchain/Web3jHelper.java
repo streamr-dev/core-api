@@ -215,32 +215,32 @@ public class Web3jHelper {
 		Constructor cons = type.getConstructor(new Class[]{constructorArg.getClass()});
 		return (Type) cons.newInstance(constructorArg);
 	}
+
 	/**
-	 *
 	 * @param web3j
-	 * @param erc20address address of ERC20 or 0x0 for ETH balance
-	 * @param holder_address
+	 * @param erc20address   address of ERC20 or 0x0 for ETH balance
+	 * @param holderAddress
 	 * @return token balance in wei
 	 * @throws ExecutionException
 	 * @throws InterruptedException
 	 */
-	public static BigInteger getERC20Balance(Web3j web3j, String erc20address, String holder_address) throws ExecutionException, InterruptedException {
+	public static BigInteger getERC20Balance(Web3j web3j, String erc20address, String holderAddress) throws ExecutionException, InterruptedException {
 		Address tokenAddress = new Address(erc20address);
-		if(tokenAddress.toUint160().getValue().equals(BigInteger.ZERO)){
+		if (tokenAddress.toUint160().getValue().equals(BigInteger.ZERO)) {
 			EthGetBalance ethGetBalance = web3j
-					.ethGetBalance(holder_address, DefaultBlockParameterName.LATEST)
-					.sendAsync()
-					.get();
+				.ethGetBalance(holderAddress, DefaultBlockParameterName.LATEST)
+				.sendAsync()
+				.get();
 			final BigInteger balance = ethGetBalance.getBalance();
 			return balance;
 		}
 		//    function balanceOf(address tokenOwner) public view returns (uint balance);
-		Function balanceOf = new Function("balanceOf", Arrays.<Type>asList(new Address(holder_address)),Arrays.<TypeReference<?>>asList(TypeReference.create(Uint.class)));
+		Function balanceOf = new Function("balanceOf", Arrays.<Type>asList(new Address(holderAddress)), Arrays.<TypeReference<?>>asList(TypeReference.create(Uint.class)));
 		EthCall response = web3j.ethCall(
-				Transaction.createEthCallTransaction(holder_address, erc20address, FunctionEncoder.encode(balanceOf)),
-				DefaultBlockParameterName.LATEST).sendAsync().get();
+			Transaction.createEthCallTransaction(holderAddress, erc20address, FunctionEncoder.encode(balanceOf)),
+			DefaultBlockParameterName.LATEST).sendAsync().get();
 		Response.Error err = response.getError();
-		if(err != null){
+		if (err != null) {
 			throw new RuntimeException(err.getMessage());
 		}
 		List<Type> rslt = FunctionReturnDecoder.decode(response.getValue(), balanceOf.getOutputParameters());
