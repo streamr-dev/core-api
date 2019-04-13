@@ -285,7 +285,7 @@ public class SendEthereumTransaction extends ModuleWithSideEffects {
 			for (EthereumABI.Event e : abi.getEvents()) {
 				ArrayList<TypeReference<?>> params = new ArrayList<TypeReference<?>>();
 				for (EthereumABI.Slot s : e.inputs) {
-					params.add(TypeReference.create(Web3jHelper.getTypeClass(s.type)));
+					params.add(Web3jHelper.makeTypeReference(s.type));
 				}
 				Event web3jevent = new Event(e.name, params);
 				TransactionReceipt txr = Web3jHelper.getTransactionReceipt(web3j, web3jTx.getTransactionHash());

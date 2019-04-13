@@ -21,6 +21,8 @@ class Web3jHelperSpec extends ModuleTestingSpecification {
 		Object[] nums = [1, 2, "0x123"];
 		byte[] bytes = [1, 2, 3];
 		byte[][] bytesArray = [bytes, bytes, bytes]
+		Object[][] twodim = [nums, nums, nums]
+
 		then:
 		Type t;
 		Web3jHelper.instantiateType("bool", false) instanceof Bool
@@ -37,5 +39,9 @@ class Web3jHelperSpec extends ModuleTestingSpecification {
 		Web3jHelper.instantiateType("bytes" + bytes.length, bytes) instanceof BytesType
 		Web3jHelper.instantiateType("bytes[]", Arrays.asList(bytesArray)) instanceof DynamicArray
 		Web3jHelper.instantiateType("bytes[3]", Arrays.asList(bytesArray)) instanceof StaticArray
+		Web3jHelper.instantiateType("uint[][]", twodim) instanceof DynamicArray
+		Web3jHelper.instantiateType("uint[3][]", twodim) instanceof DynamicArray
+		Web3jHelper.instantiateType("uint[][3]", twodim) instanceof StaticArray
+
 	}
 }

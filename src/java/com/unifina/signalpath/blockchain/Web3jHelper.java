@@ -30,14 +30,18 @@ public class Web3jHelper {
 	private static final Logger log = Logger.getLogger(Web3jHelper.class);
 	protected static Pattern ARRAY_SUFFIX = Pattern.compile("\\[(\\d*)\\]$");
 
-	public static TypeReference makeTypeRefernce(String solidity_type) throws ClassNotFoundException {
+	public static Type instantiateType(String solidity_type, Object arg) throws InvocationTargetException, NoSuchMethodException, InstantiationException, IllegalAccessException, ClassNotFoundException {
+		return instantiateType(makeTypeReference(solidity_type),arg);
+	}
+
+	public static TypeReference makeTypeReference(String solidity_type) throws ClassNotFoundException {
 		Matcher m = ARRAY_SUFFIX.matcher(solidity_type);
 		if(!m.find()) {
-			return TypeReference.create(getTypeClass(solidity_type));
+			return TypeReference.create(getAtomicTypeClass(solidity_type));
 		}
 		//Class array_class;
 		String digits = m.group(1);
-		TypeReference baseTr = makeTypeRefernce(solidity_type.substring(0,solidity_type.length() - m.group(0).length()));
+		TypeReference baseTr = makeTypeReference(solidity_type.substring(0,solidity_type.length() - m.group(0).length()));
 		TypeReference<?> ref;
 		if (digits == null || digits.equals("")) {
 			ref = new TypeReference<DynamicArray>() {
@@ -93,6 +97,79 @@ public class Web3jHelper {
 		return ref;
 	}
 
+	public static Type instantiateType(TypeReference ref, Object arg) throws NoSuchMethodException, IllegalAccessException, InvocationTargetException, InstantiationException, ClassNotFoundException {
+		Class rc = ref.getClassType();
+		if(Array.class.isAssignableFrom(rc)){
+			List arglist;
+			if (arg instanceof List) {
+				arglist = (List) arg;
+			} else if (arg.getClass().isArray()) {
+				arglist = arrayToList(arg);
+			} else {
+				throw new ClassCastException("Arg of type " + arg.getClass() + " should be a list to instantiate web3j Array");
+			}
+			Constructor listcons;
+			int arraySize = ref instanceof TypeReference.StaticArrayTypeReference ? ((TypeReference.StaticArrayTypeReference) ref).getSize() : -1;
+			if (arraySize <= 0) {
+				listcons = DynamicArray.class.getConstructor(new Class[]{Class.class, List.class});
+			} else {
+				Class arrayClass = Class.forName("org.web3j.abi.datatypes.generated.StaticArray" + arraySize);
+				listcons = arrayClass.getConstructor(new Class[]{Class.class, List.class});
+			}
+			//create a list of transformed arguments
+			ArrayList transformedList = new ArrayList(arglist.size());
+			java.lang.reflect.Type subtype = ((ParameterizedType) ref.getType()).getActualTypeArguments()[0];
+			for (Object o : arglist) {
+				TypeReference elementTR;
+				//array of arrays
+				if(subtype instanceof ParameterizedType){
+					elementTR = new TypeReference<Array>() {
+						@Override
+						public java.lang.reflect.Type getType(){
+							return subtype;
+						}
+					};
+				}
+				//array of basic types
+				else{
+					elementTR = TypeReference.create((Class) subtype);
+				}
+				transformedList.add(instantiateType(elementTR, o));
+			}
+			return (Type) listcons.newInstance(ref.getClassType(), transformedList);
+		}
+
+		Object constructorArg = null;
+		if (NumericType.class.isAssignableFrom(rc)) {
+			constructorArg = asBigInteger(arg);
+		} else if (BytesType.class.isAssignableFrom(rc)) {
+			if (arg instanceof byte[]) {
+				constructorArg = arg;
+			} else if (arg instanceof BigInteger) {
+				constructorArg = ((BigInteger) arg).toByteArray();
+			} else if (arg instanceof String) {
+				constructorArg = Numeric.hexStringToByteArray((String) arg);
+			}
+		} else if (Utf8String.class.isAssignableFrom(rc)) {
+			constructorArg = arg.toString();
+		} else if (Address.class.isAssignableFrom(rc)) {
+			constructorArg = arg.toString();
+		} else if (Bool.class.isAssignableFrom(rc)) {
+			if (arg instanceof Boolean) {
+				constructorArg = arg;
+			} else {
+				BigInteger bival = asBigInteger(arg);
+				constructorArg = bival == null ? null : !bival.equals(BigInteger.ZERO);
+			}
+		}
+		if (constructorArg == null) {
+			throw new RuntimeException("Could not create type " + rc + " from arg " + arg.toString() + " of type " + arg.getClass());
+		}
+		Constructor cons = rc.getConstructor(new Class[]{constructorArg.getClass()});
+		return (Type) cons.newInstance(constructorArg);
+	}
+
+
 
 	public static Function encodeFunction(String fnname, List<String> solidity_inputtypes, List<Object> arguments, List<String> solidity_output_types) throws ClassNotFoundException, NoSuchMethodException, InstantiationException, IllegalAccessException, InvocationTargetException {
 		List<Type> encoded_input = new ArrayList<>();
@@ -102,12 +179,12 @@ public class Web3jHelper {
 		}
 		List<TypeReference<?>> encoded_output = new ArrayList<>();
 		for (String st : solidity_output_types) {
-			encoded_output.add(makeTypeRefernce(st));
+			encoded_output.add(makeTypeReference(st));
 		}
 		return new Function(fnname, encoded_input, encoded_output);
 	}
 
-	protected static Class getTypeClass(String type) throws ClassNotFoundException {
+	protected static Class getAtomicTypeClass(String type) throws ClassNotFoundException {
 		Matcher m = ARRAY_SUFFIX.matcher(type);
 		if (m.find()) {
 			throw new RuntimeException("getTypeClass does not work with array types. See makeTypeRefernce()");
@@ -182,17 +259,6 @@ public class Web3jHelper {
 		return null;
 	}
 
-	public static Type instantiateType(String solidity_type, Object arg) throws InvocationTargetException, NoSuchMethodException, InstantiationException, IllegalAccessException, ClassNotFoundException {
-		Matcher m = ARRAY_SUFFIX.matcher(solidity_type);
-		if(!m.find()) {
-			return instantiateType(getTypeClass(solidity_type), arg, false, -1);
-		}
-		String digits = m.groupCount() > 1 ?  m.group(1) : null;
-		//dynamic array (-1) or sized array:
-		int array_size = digits == null || digits.equals("") ? -1 : Integer.parseInt(digits);
-		return instantiateType(getTypeClass(solidity_type.substring(0, solidity_type.length() - m.group(0).length())), arg, true, array_size);
-	}
-
 	public static List arrayToList(Object array) {
 		int len = java.lang.reflect.Array.getLength(array);
 		ArrayList rslt = new ArrayList(len);
@@ -202,80 +268,6 @@ public class Web3jHelper {
 		return rslt;
 	}
 
-	/**
-	 * @param type
-	 * @param arg
-	 * @param isArray
-	 * @param arraySize if isArray and arraySize > 0, static array will be allocated instead of dynamic array
-	 * @return
-	 * @throws NoSuchMethodException     if Class.getConstructor fails (if constructor not found, means there may be something wrong with generated web3j types)
-	 * @throws IllegalAccessException    if Constructor.newInstance fails (no public constructor, shouldn't happen)
-	 * @throws InvocationTargetException if the function call through Constructor.newInstance throws (if throws, something is wrong with generated web3j types)
-	 * @throws InstantiationException    if Constructor.newInstance fails because class can't be instantiated (check web3j types)
-	 * @throws ClassNotFoundException    if org.web3j.abi.datatypes.generated.StaticArrayNNN not found for NNN = arraysize (check arraysize, then web3j types)
-	 */
-
-	public static Type instantiateType(Class type, Object arg, boolean isArray, int arraySize) throws NoSuchMethodException, IllegalAccessException, InvocationTargetException, InstantiationException, ClassNotFoundException {
-		if (type == null || !Type.class.isAssignableFrom(type)) {
-			throw new ClassCastException("Class " + type + " must be a subclass of web3j Type");
-		}
-		if (Array.class.isAssignableFrom(type)) {
-			throw new ClassCastException("Instead of passing Array, pass the raw type and isArray = true");
-		}
-
-		if (isArray) {
-			List arglist;
-			if (arg instanceof List) {
-				arglist = (List) arg;
-			} else if (arg.getClass().isArray()) {
-				arglist = arrayToList(arg);
-			} else {
-				throw new ClassCastException("Arg of type " + arg.getClass() + " should be a list to instantiate web3j Array");
-			}
-			Constructor listcons;
-			if (arraySize <= 0) {
-				listcons = DynamicArray.class.getConstructor(new Class[]{Class.class, List.class});
-			} else {
-				Class arrayClass = Class.forName("org.web3j.abi.datatypes.generated.StaticArray" + arraySize);
-				listcons = arrayClass.getConstructor(new Class[]{Class.class, List.class});
-			}
-			//create a list of transformed arguments
-			ArrayList transformedList = new ArrayList(arglist.size());
-			for (Object o : arglist) {
-				transformedList.add(instantiateType(type, o, false, -1));
-			}
-			return (Type) listcons.newInstance(type, transformedList);
-		}
-
-		Object constructorArg = null;
-		if (NumericType.class.isAssignableFrom(type)) {
-			constructorArg = asBigInteger(arg);
-		} else if (BytesType.class.isAssignableFrom(type)) {
-			if (arg instanceof byte[]) {
-				constructorArg = arg;
-			} else if (arg instanceof BigInteger) {
-				constructorArg = ((BigInteger) arg).toByteArray();
-			} else if (arg instanceof String) {
-				constructorArg = Numeric.hexStringToByteArray((String) arg);
-			}
-		} else if (Utf8String.class.isAssignableFrom(type)) {
-			constructorArg = arg.toString();
-		} else if (Address.class.isAssignableFrom(type)) {
-			constructorArg = arg.toString();
-		} else if (Bool.class.isAssignableFrom(type)) {
-			if (arg instanceof Boolean) {
-				constructorArg = arg;
-			} else {
-				BigInteger bival = asBigInteger(arg);
-				constructorArg = bival == null ? null : !bival.equals(BigInteger.ZERO);
-			}
-		}
-		if (constructorArg == null) {
-			throw new RuntimeException("Could not create type " + type + " from arg " + arg.toString() + " of type " + arg.getClass());
-		}
-		Constructor cons = type.getConstructor(new Class[]{constructorArg.getClass()});
-		return (Type) cons.newInstance(constructorArg);
-	}
 
 	/**
 	 * @param web3j
