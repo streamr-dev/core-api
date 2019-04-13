@@ -30,11 +30,6 @@ public class Web3jHelper {
 	private static final Logger log = Logger.getLogger(Web3jHelper.class);
 	protected static Pattern ARRAY_SUFFIX = Pattern.compile("\\[(\\d*)\\]$");
 
-	public static interface NamedType extends java.lang.reflect.Type{
-		@Override
-		String getTypeName();
-	}
-
 	public static TypeReference makeTypeRefernce(String solidity_type) throws ClassNotFoundException {
 		Matcher m = ARRAY_SUFFIX.matcher(solidity_type);
 		if(!m.find()) {
