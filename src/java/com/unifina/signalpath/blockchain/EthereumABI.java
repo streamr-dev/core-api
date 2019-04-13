@@ -69,6 +69,10 @@ public class EthereumABI implements Serializable {
 				throw new RuntimeException("Whoa! Found unknown item type in ABI: "+type);
 			}
 		}
+		if(constructor == null){
+			log.debug("No constructor found. Using empty one.");
+			constructor = new Function();
+		}
 	}
 
 	public Function getConstructor() {

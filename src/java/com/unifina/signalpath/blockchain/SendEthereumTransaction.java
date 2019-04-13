@@ -348,21 +348,18 @@ public class SendEthereumTransaction extends ModuleWithSideEffects {
 
 
 	protected Function createWeb3jFunctionCall() throws InvocationTargetException, NoSuchMethodException, InstantiationException, IllegalAccessException, ClassNotFoundException {
-		List<Type> inputs = new ArrayList<Type>(chosenFunction.inputs.size());
+		List<String> solidity_inputtypes = new ArrayList<String>(chosenFunction.inputs.size());
+		List args = new ArrayList(chosenFunction.inputs.size());
+		List<String> solidity_outputtypes = new ArrayList<String>(chosenFunction.outputs.size());
+
 		for (int i = 0; i < chosenFunction.inputs.size(); i++) {
-			EthereumABI.Slot slot = chosenFunction.inputs.get(i);
-			Input<Object> input = arguments.get(i);
-//			Type t = TypeDecoder.decode(input.getValue().toString(),0, TypeReference.create(getTypeClass(slot.type)));
-			Type t = Web3jHelper.instantiateType(slot.type, input.getValue());
-			inputs.add(t);
+			solidity_inputtypes.add(chosenFunction.inputs.get(i).type);
+			args.add(arguments.get(i).getValue());
 		}
-		List<TypeReference<?>> outputs = new ArrayList<TypeReference<?>>(chosenFunction.outputs.size());
 		for (int i = 0; i < chosenFunction.outputs.size(); i++) {
-			EthereumABI.Slot slot = chosenFunction.outputs.get(i);
-			outputs.add(TypeReference.create(Web3jHelper.getTypeClass(slot.type)));
+			solidity_outputtypes.add(chosenFunction.outputs.get(i).type);
 		}
-		Function webjfn = new Function(chosenFunction.name, inputs, outputs);
-		return webjfn;
+		return Web3jHelper.encodeFunction(chosenFunction.name, solidity_inputtypes, args, solidity_outputtypes);
 	}
 
 
@@ -431,6 +428,40 @@ public class SendEthereumTransaction extends ModuleWithSideEffects {
 		}
 	}
 
+	/**
+	 * format the list as an array of Strings
+	 * @param l
+	 * @return
+	 */
+	public static List stringifyTypeList(List l){
+		ArrayList<String> printed = new ArrayList<String>(l.size());
+		for(Object o : l){
+			printed.add(typeToString(o));
+		}
+		return printed;
+	}
+
+	public static String typeToString(Object o){
+		if(!(o instanceof List)) {
+			if(o instanceof Type){
+				return ((Type) o).getValue().toString();
+			}
+			else
+				return o.toString();
+		}
+		StringBuilder sb = new StringBuilder();
+		List l = (List) o;
+		sb.append("[");
+		int i=0;
+		for(Object li : l){
+			if(i++ > 0)
+				sb.append(",");
+			sb.append(typeToString(li));
+		}
+		sb.append("]");
+		return sb.toString();
+	}
+
 	public void sendOutput(FunctionCallResult rslt) throws IOException, ClassNotFoundException {
 		Response.Error e = rslt.getError();
 		if (e != null) {
@@ -445,6 +476,8 @@ public class SendEthereumTransaction extends ModuleWithSideEffects {
 			int n = Math.min(results.size(), txResults.size());
 			for (int i = 0; i < n; i++) {
 				Object val = txResults.get(i).getValue();
+				if(val instanceof List)
+					val = stringifyTypeList((List) val);
 				Output<Object> output = results.get(i);
 				convertAndSend(output, val);
 			}

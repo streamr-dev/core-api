@@ -1,6 +1,7 @@
 package com.unifina.signalpath.blockchain;
 
 import org.apache.log4j.Logger;
+import org.jetbrains.annotations.NotNull;
 import org.web3j.abi.*;
 import org.web3j.abi.datatypes.*;
 import org.web3j.abi.datatypes.generated.AbiTypes;
@@ -14,6 +15,7 @@ import org.web3j.utils.Numeric;
 import java.io.IOException;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.ParameterizedType;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.ArrayList;
@@ -28,6 +30,11 @@ public class Web3jHelper {
 	private static final Logger log = Logger.getLogger(Web3jHelper.class);
 	protected static Pattern ARRAY_SUFFIX = Pattern.compile("\\[(\\d*)\\]$");
 
+	public static interface NamedType extends java.lang.reflect.Type{
+		@Override
+		String getTypeName();
+	}
+
 	public static Function encodeFunction(String fnname, List<String> solidity_inputtypes, List<Object> arguments, List<String> solidity_output_types) throws ClassNotFoundException, NoSuchMethodException, InstantiationException, IllegalAccessException, InvocationTargetException {
 		List<Type> encoded_input = new ArrayList<>();
 		Iterator argit = arguments.iterator();
@@ -36,7 +43,69 @@ public class Web3jHelper {
 		}
 		List<TypeReference<?>> encoded_output = new ArrayList<>();
 		for (String st : solidity_output_types) {
-			encoded_output.add(TypeReference.create(getTypeClass(st)));
+			Matcher m = ARRAY_SUFFIX.matcher(st);
+			if(!m.find()) {
+				encoded_output.add(TypeReference.create(getTypeClass(st)));
+				continue;
+			}
+			//Class array_class;
+			String digits = m.group(1);
+			Class baseclass = getTypeClass(st.substring(0,st.length() - m.group(0).length()));
+			Class arrayclass;
+			TypeReference<?> ref;
+			if (digits == null || digits.equals("")) {
+				 ref = new TypeReference<DynamicArray>() {
+					@Override
+					public java.lang.reflect.Type getType(){
+						return new ParameterizedType() {
+							@Override
+							public java.lang.reflect.Type[] getActualTypeArguments() {
+								return new java.lang.reflect.Type[]{baseclass};
+							}
+
+							@Override
+							public java.lang.reflect.Type getRawType() {
+								return DynamicArray.class;
+							}
+
+							@Override
+							public java.lang.reflect.Type getOwnerType() {
+								return Class.class;
+							}
+						};
+					}
+				};
+			}
+			else {
+				ref = new TypeReference.StaticArrayTypeReference<StaticArray>(Integer.parseInt(digits)){
+					@Override
+					public java.lang.reflect.Type getType(){
+						return new ParameterizedType() {
+							@Override
+							public java.lang.reflect.Type[] getActualTypeArguments() {
+								return new java.lang.reflect.Type[]{baseclass};
+							}
+
+							@Override
+							public java.lang.reflect.Type getRawType() {
+								try{
+									return Class.forName("org.web3j.abi.datatypes.generated.StaticArray" + getSize());
+								}
+								catch(ClassNotFoundException e){
+									throw new RuntimeException(e);
+								}
+							}
+
+							@Override
+							public java.lang.reflect.Type getOwnerType() {
+								return Class.class;
+							}
+						};
+					}
+				};
+			}
+
+			encoded_output.add(ref);
 		}
 		return new Function(fnname, encoded_input, encoded_output);
 	}
@@ -123,10 +192,10 @@ public class Web3jHelper {
 
 	public static Type instantiateType(String solidity_type, Object arg) throws InvocationTargetException, NoSuchMethodException, InstantiationException, IllegalAccessException, ClassNotFoundException {
 		Matcher m = ARRAY_SUFFIX.matcher(solidity_type);
-		if (m.find()) {
+		if(!m.find()) {
 			return instantiateType(getTypeClass(solidity_type), arg, false, -1);
 		}
-		String digits = m.group(1);
+		String digits = m.groupCount() > 1 ?  m.group(1) : null;
 		//dynamic array (-1) or sized array:
 		int array_size = digits == null || digits.equals("") ? -1 : Integer.parseInt(digits);
 		return instantiateType(getTypeClass(solidity_type.substring(0, solidity_type.length() - m.group(0).length())), arg, true, array_size);
@@ -245,5 +314,8 @@ public class Web3jHelper {
 		}
 		List<Type> rslt = FunctionReturnDecoder.decode(response.getValue(), balanceOf.getOutputParameters());
 		return ((Uint) rslt.iterator().next()).getValue();
+	}
+	public static void main(String[] args){
+		System.out.println("etdsfsdfe");
 	}
 }
