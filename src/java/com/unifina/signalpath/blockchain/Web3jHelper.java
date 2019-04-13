@@ -35,6 +35,70 @@ public class Web3jHelper {
 		String getTypeName();
 	}
 
+	public static TypeReference makeTypeRefernce(String solidity_type) throws ClassNotFoundException {
+		Matcher m = ARRAY_SUFFIX.matcher(solidity_type);
+		if(!m.find()) {
+			return TypeReference.create(getTypeClass(solidity_type));
+		}
+		//Class array_class;
+		String digits = m.group(1);
+		TypeReference baseTr = makeTypeRefernce(solidity_type.substring(0,solidity_type.length() - m.group(0).length()));
+		TypeReference<?> ref;
+		if (digits == null || digits.equals("")) {
+			ref = new TypeReference<DynamicArray>() {
+				@Override
+				public java.lang.reflect.Type getType(){
+					return new ParameterizedType() {
+						@Override
+						public java.lang.reflect.Type[] getActualTypeArguments() {
+							return new java.lang.reflect.Type[]{baseTr.getType()};
+						}
+
+						@Override
+						public java.lang.reflect.Type getRawType() {
+							return DynamicArray.class;
+						}
+
+						@Override
+						public java.lang.reflect.Type getOwnerType() {
+							return Class.class;
+						}
+					};
+				}
+			};
+		}
+		else {
+			ref = new TypeReference.StaticArrayTypeReference<StaticArray>(Integer.parseInt(digits)){
+				@Override
+				public java.lang.reflect.Type getType(){
+					return new ParameterizedType() {
+						@Override
+						public java.lang.reflect.Type[] getActualTypeArguments() {
+							return new java.lang.reflect.Type[]{baseTr.getType()};
+						}
+
+						@Override
+						public java.lang.reflect.Type getRawType() {
+							try{
+								return Class.forName("org.web3j.abi.datatypes.generated.StaticArray" + getSize());
+							}
+							catch(ClassNotFoundException e){
+								throw new RuntimeException(e);
+							}
+						}
+
+						@Override
+						public java.lang.reflect.Type getOwnerType() {
+							return Class.class;
+						}
+					};
+				}
+			};
+		}
+		return ref;
+	}
+
+
 	public static Function encodeFunction(String fnname, List<String> solidity_inputtypes, List<Object> arguments, List<String> solidity_output_types) throws ClassNotFoundException, NoSuchMethodException, InstantiationException, IllegalAccessException, InvocationTargetException {
 		List<Type> encoded_input = new ArrayList<>();
 		Iterator argit = arguments.iterator();
@@ -43,69 +107,7 @@ public class Web3jHelper {
 		}
 		List<TypeReference<?>> encoded_output = new ArrayList<>();
 		for (String st : solidity_output_types) {
-			Matcher m = ARRAY_SUFFIX.matcher(st);
-			if(!m.find()) {
-				encoded_output.add(TypeReference.create(getTypeClass(st)));
-				continue;
-			}
-			//Class array_class;
-			String digits = m.group(1);
-			Class baseclass = getTypeClass(st.substring(0,st.length() - m.group(0).length()));
-			Class arrayclass;
-			TypeReference<?> ref;
-			if (digits == null || digits.equals("")) {
-				 ref = new TypeReference<DynamicArray>() {
-					@Override
-					public java.lang.reflect.Type getType(){
-						return new ParameterizedType() {
-							@Override
-							public java.lang.reflect.Type[] getActualTypeArguments() {
-								return new java.lang.reflect.Type[]{baseclass};
-							}
-
-							@Override
-							public java.lang.reflect.Type getRawType() {
-								return DynamicArray.class;
-							}
-
-							@Override
-							public java.lang.reflect.Type getOwnerType() {
-								return Class.class;
-							}
-						};
-					}
-				};
-			}
-			else {
-				ref = new TypeReference.StaticArrayTypeReference<StaticArray>(Integer.parseInt(digits)){
-					@Override
-					public java.lang.reflect.Type getType(){
-						return new ParameterizedType() {
-							@Override
-							public java.lang.reflect.Type[] getActualTypeArguments() {
-								return new java.lang.reflect.Type[]{baseclass};
-							}
-
-							@Override
-							public java.lang.reflect.Type getRawType() {
-								try{
-									return Class.forName("org.web3j.abi.datatypes.generated.StaticArray" + getSize());
-								}
-								catch(ClassNotFoundException e){
-									throw new RuntimeException(e);
-								}
-							}
-
-							@Override
-							public java.lang.reflect.Type getOwnerType() {
-								return Class.class;
-							}
-						};
-					}
-				};
-			}
-
-			encoded_output.add(ref);
+			encoded_output.add(makeTypeRefernce(st));
 		}
 		return new Function(fnname, encoded_input, encoded_output);
 	}
@@ -113,12 +115,7 @@ public class Web3jHelper {
 	protected static Class getTypeClass(String type) throws ClassNotFoundException {
 		Matcher m = ARRAY_SUFFIX.matcher(type);
 		if (m.find()) {
-			String digits = m.group(1);
-			if (digits == null || digits.equals("")) {
-				return DynamicArray.class;
-			} else {
-				return Class.forName("org.web3j.abi.datatypes.generated.StaticArray" + digits);
-			}
+			throw new RuntimeException("getTypeClass does not work with array types. See makeTypeRefernce()");
 		}
 		switch (type) {
 			case "int":
