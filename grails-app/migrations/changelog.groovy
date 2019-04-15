@@ -127,4 +127,5 @@ databaseChangeLog = {
 	include file: 'core/2019-02-15-user-avatar.groovy'
 	include file: 'core/2019-03-19-stream-canvas-example.groovy'
 	include file: 'core/2019-03-25-rm-canvas-example.groovy'
+	include file: 'core/2019-04-12-cp-domain.groovy'
 }
