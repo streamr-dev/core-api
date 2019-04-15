@@ -276,4 +276,109 @@ class KeyApiControllerSpec extends ControllerSpecification {
 		response.status == 204
 		Key.get(key.id) == null
 	}
+
+	void "update() throws NotFoundException on unknown id"() {
+		when:
+		request.method = "PUT"
+		params.id = "XXXX"
+		params.resourceId = "0"
+		params.resourceClass = SecUser
+
+		authenticatedAs(me) { controller.update() }
+
+		then:
+		thrown(NotFoundException)
+	}
+
+	void "update() does not update empty name"() {
+		setup:
+		Stream stream = new Stream(name: "stream")
+		stream.id = "streamId"
+		stream.save(validate: false, failOnError: true)
+
+		Key key = new Key(name: "anonymous key")
+		key.id = "key-id-1"
+		key.save(failOnError: true, validate: true)
+
+		controller.permissionService = permissionService = Stub(PermissionService)
+		permissionService.canShare(me, stream) >> true
+
+		when:
+		request.method = "PUT"
+		params.id = key.id
+		params.resourceId = stream.id
+		params.resourceClass = Stream
+		request.JSON = [
+			name: ""
+		]
+
+		authenticatedAs(me) { controller.update() }
+
+		then:
+		response.status == 200
+		Key.get(key.id).name == "anonymous key"
+	}
+
+	void "update() updates name field of stream's key"() {
+		setup:
+		Stream stream = new Stream(name: "stream")
+		stream.id = "streamId"
+		stream.save(validate: false, failOnError: true)
+
+		Key key = new Key(name: "anonymous key")
+		key.id = "key-id-1"
+		key.save(failOnError: true, validate: true)
+
+		controller.permissionService = permissionService = Stub(PermissionService)
+		permissionService.canShare(me, stream) >> true
+
+		when:
+		request.method = "PUT"
+		params.id = key.id
+		params.resourceId = stream.id
+		params.resourceClass = Stream
+		request.JSON = [
+			name: "new key name"
+		]
+
+		authenticatedAs(me) { controller.update() }
+
+		then:
+		response.status == 200
+		Key.get(key.id).name == "new key name"
+	}
+
+	void "update() updates name field of user's key"() {
+		setup:
+		SecUser user = new SecUser(
+			username: "address@emailprovider.com",
+			password: "pwd",
+			name: "first last name",
+		)
+		user.id = 1
+		user.save(failOnError: true, validate: true)
+
+		Key key = new Key(name: "key for user", user: user)
+		key.id = "key-1"
+		key.save(failOnError: true, validate: true)
+
+		controller.permissionService = permissionService = Stub(PermissionService)
+		permissionService.canShare(me, user) >> true
+
+		when:
+		request.method = "PUT"
+		request.requestURI = "/api/v1/users/me/keys/" + key.id
+		params.id = key.id
+		params.resourceId = user.id
+		params.resourceClass = SecUser
+		request.JSON = [
+			name: "new key name"
+		]
+
+		authenticatedAs(user) { controller.update() }
+
+		then:
+		response.status == 200
+		Key.get(key.id).name == "new key name"
+	}
 }

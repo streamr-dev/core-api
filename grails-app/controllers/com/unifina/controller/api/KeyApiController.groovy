@@ -2,6 +2,7 @@ package com.unifina.controller.api
 
 import com.unifina.api.NotFoundException
 import com.unifina.api.NotPermittedException
+import com.unifina.domain.data.Stream
 import com.unifina.domain.security.Key
 import com.unifina.domain.security.Permission
 import com.unifina.domain.security.SecUser
@@ -10,6 +11,7 @@ import com.unifina.security.StreamrApi
 import com.unifina.service.PermissionService
 import grails.converters.JSON
 import grails.plugin.springsecurity.annotation.Secured
+import groovy.json.JsonSlurper
 
 @Secured(["IS_AUTHENTICATED_ANONYMOUSLY"])
 class KeyApiController {
@@ -21,7 +23,7 @@ class KeyApiController {
 	 * Checks Permissions for current user first, and blocks the action if access hasn't been granted
 	 * @param action Closure that takes up to one argument: the specified resource
 	 */
-	private useResource(Class resourceClass, resourceId, boolean requireSharePermission=true, Closure action) {
+	private useResource(Class resourceClass, resourceId, boolean requireSharePermission = true, Closure action) {
 		if (!grailsApplication.isDomainClass(resourceClass)) {
 			throw new IllegalArgumentException("${resourceClass.simpleName} is not a domain class!")
 		}
@@ -44,13 +46,13 @@ class KeyApiController {
 
 	@StreamrApi(authenticationLevel = AuthLevel.USER)
 	def index() {
-		useResource(params.resourceClass, params.resourceId) {res ->
+		useResource(params.resourceClass, params.resourceId) { res ->
 			if (res instanceof SecUser) {
 				render res.keys*.toMap() as JSON
 			} else {
 				Map permissionsByKey = permissionService.getPermissionsTo(res)
-						.findAll { it.key != null }
-						.groupBy { it.key }
+					.findAll { it.key != null }
+					.groupBy { it.key }
 
 				List keys = permissionsByKey.collect { key, permissions ->
 					Map map = key.toMap()
@@ -67,7 +69,7 @@ class KeyApiController {
 
 	@StreamrApi(authenticationLevel = AuthLevel.USER)
 	def save() {
-		useResource(params.resourceClass, params.resourceId) {res ->
+		useResource(params.resourceClass, params.resourceId) { res ->
 			Key key = new Key(request.JSON)
 			key.user = res instanceof SecUser ? res : null
 			key.save(failOnError: true, validate: true)
@@ -123,4 +125,23 @@ class KeyApiController {
 		}
 	}
 
+	@StreamrApi(authenticationLevel = AuthLevel.USER)
+	def update() {
+		Key k = Key.get(params.id)
+		if (k == null) {
+			throw new NotFoundException(k.toString(), params.id)
+		}
+		Map json = new JsonSlurper().parseText((String) request.JSON)
+		if (json.name != null && json.name.trim() != "") {
+			useResource(params.resourceClass, params.resourceId) { res ->
+				k.name = json.name.trim()
+				k.save(flush: true, failOnError: true)
+			}
+		}
+		response.status = 200
+		render([
+			id: k.id,
+			name: k.name,
+		] as JSON)
+	}
 }
