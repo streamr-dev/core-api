@@ -34,12 +34,30 @@ public class Web3jHelper {
 		return instantiateType(makeTypeReference(solidity_type),arg);
 	}
 
+	public static Function encodeFunction(String fnname, List<String> solidity_inputtypes, List<Object> arguments, List<String> solidity_output_types) throws ClassNotFoundException, NoSuchMethodException, InstantiationException, IllegalAccessException, InvocationTargetException {
+		List<Type> encoded_input = new ArrayList<>();
+		Iterator argit = arguments.iterator();
+		for (String st : solidity_inputtypes) {
+			encoded_input.add(instantiateType(st, argit.next()));
+		}
+		List<TypeReference<?>> encoded_output = new ArrayList<>();
+		for (String st : solidity_output_types) {
+			encoded_output.add(makeTypeReference(st));
+		}
+		return new Function(fnname, encoded_input, encoded_output);
+	}
+	/*
+		Web3j uses a TypeReference to indicate the Solidity type.
+		In the case of atomic types (uint, bytes, etc), the TypeReference just wraps a Class (implementing org.web3j.abi.datatypes.Type).
+		In the case of arrays, the TypeReference wraps a java.lang.reflect.ParamaterizedType to indicate the array type
+			(eg ParamaterizedType references StaticArray5<Uint> for uint[5] or DynamicArray<StaticArray5<Address>> for address[5][])
+	 */
+
 	public static TypeReference makeTypeReference(String solidity_type) throws ClassNotFoundException {
 		Matcher m = ARRAY_SUFFIX.matcher(solidity_type);
 		if(!m.find()) {
 			return TypeReference.create(getAtomicTypeClass(solidity_type));
 		}
-		//Class array_class;
 		String digits = m.group(1);
 		TypeReference baseTr = makeTypeReference(solidity_type.substring(0,solidity_type.length() - m.group(0).length()));
 		TypeReference<?> ref;
@@ -169,25 +187,17 @@ public class Web3jHelper {
 		return (Type) cons.newInstance(constructorArg);
 	}
 
-
-
-	public static Function encodeFunction(String fnname, List<String> solidity_inputtypes, List<Object> arguments, List<String> solidity_output_types) throws ClassNotFoundException, NoSuchMethodException, InstantiationException, IllegalAccessException, InvocationTargetException {
-		List<Type> encoded_input = new ArrayList<>();
-		Iterator argit = arguments.iterator();
-		for (String st : solidity_inputtypes) {
-			encoded_input.add(instantiateType(st, argit.next()));
-		}
-		List<TypeReference<?>> encoded_output = new ArrayList<>();
-		for (String st : solidity_output_types) {
-			encoded_output.add(makeTypeReference(st));
-		}
-		return new Function(fnname, encoded_input, encoded_output);
-	}
+	/**
+	 * This is a helper method that only works for atomic types (uint, bytes, etc). Array types must be wrapped by a java.lang.reflect.ParamaterizedType
+	 * @param type
+	 * @return
+	 * @throws ClassNotFoundException
+	 */
 
 	protected static Class getAtomicTypeClass(String type) throws ClassNotFoundException {
 		Matcher m = ARRAY_SUFFIX.matcher(type);
 		if (m.find()) {
-			throw new RuntimeException("getTypeClass does not work with array types. See makeTypeRefernce()");
+			throw new ClassNotFoundException("getTypeClass does not work with array types. See makeTypeRefernce()");
 		}
 		switch (type) {
 			case "int":

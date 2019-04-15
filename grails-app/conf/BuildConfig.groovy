@@ -82,12 +82,15 @@ grails.project.dependency.resolution = {
 		compile('org.postgresql:postgresql:9.4.1208.jre7')
 		compile('biz.paluch.redis:lettuce:3.5.0.Final')
 		compile('com.datastax.cassandra:cassandra-driver-core:3.1.0')
-		compile('org.ethereum:ethereumj-core:1.4.3-RELEASE') {
+		compile('com.google.code.findbugs:jsr305:3.0.2')
+		compile('org.jetbrains:annotations:17.0.0')
+		compile('org.ethereum:ethereumj-core:1.12.0-RELEASE') {
 			excludes('ch.qos.logback:logback-classic:*')
 			excludes('org.springframework:spring-core:*')
 			excludes('org.springframework:spring-context:*')
 			excludes('org.springframework:spring-orm:*')
 		}
+
 		compile('org.web3j:core:4.2.0')
 		compile('com.amazonaws:aws-java-sdk:1.11.294')
 		compile('org.imgscalr:imgscalr-lib:4.2')

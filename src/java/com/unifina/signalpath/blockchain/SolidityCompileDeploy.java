@@ -67,8 +67,8 @@ public class SolidityCompileDeploy extends ModuleWithUI implements Pullable<Ethe
 		return config;
 	}
 
-	protected SolidityCompiler.Options[] getSolcOptions() {
-		SolidityCompiler.Options[] opts = {SolidityCompiler.Options.ABI, SolidityCompiler.Options.BIN};
+	protected SolidityCompiler.Option[] getSolcOptions() {
+		SolidityCompiler.Option[] opts = {SolidityCompiler.Options.ABI, SolidityCompiler.Options.BIN};
 		return opts;
 	}
 
