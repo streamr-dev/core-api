@@ -17,27 +17,16 @@ import spock.lang.Specification
 @Mock([FreeSubscription, IntegrationKey, PaidSubscription, Permission, Product, Stream, Subscription])
 class SubscriptionServiceSpec extends Specification {
 
-	SecUser user, user2, user3
-	Stream s1, s2, s3, pub1Inbox, pub2Inbox, user3Inbox
+	SecUser user, user2
+	Stream s1, s2, s3
 	Product product
 
 	void setup() {
 		user = new SecUser(username: "me@streamr.com").save(failOnError: true, validate: false)
 		user2 = new SecUser(username: "someoneElse@streamr.com").save(failOnError: true, validate: false)
-		user3 = new SecUser(username: "0x26e1ae3f5efe8a01eca8c2e9d3c32702cf4bead6").save(failOnError: true, validate: false)
 		s1 = new Stream(name: "stream-1")
 		s2 = new Stream(name: "stream-2")
 		s3 = new Stream(name: "stream-3")
-
-		pub1Inbox = new Stream(name: "publisher1", inbox: true)
-		pub1Inbox.id = "publisher1"
-		pub1Inbox.save(failOnError: true, validate: false)
-		pub2Inbox = new Stream(name: "publisher2", inbox: true)
-		pub2Inbox.id = "publisher2"
-		pub2Inbox.save(failOnError: true, validate: false)
-		user3Inbox = new Stream(name: user3.username, inbox: true)
-		user3Inbox.id = user3.username
-		user3Inbox.save(failOnError: true, validate: false)
 
 		[s1, s2, s3].eachWithIndex { s, i -> s.id = "stream-${i + 1}" }
 		[s1, s2, s3]*.save(failOnError: true, validate: false)

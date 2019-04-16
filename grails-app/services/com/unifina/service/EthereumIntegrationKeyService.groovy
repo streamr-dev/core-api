@@ -41,18 +41,22 @@ class EthereumIntegrationKeyService {
 		privateKey = trimPrivateKey(privateKey)
 
 		try {
-			String publicKey = "0x" + getPublicKey(privateKey)
+			String address = "0x" + getAddress(privateKey)
 			String encryptedPrivateKey = encryptor.encrypt(privateKey, user.id.byteValue())
-			return new IntegrationKey(
+			IntegrationKey key = new IntegrationKey(
 				name: name,
 				user: user,
 				service: IntegrationKey.Service.ETHEREUM,
-				idInService: publicKey,
+				idInService: address,
 				json: ([
 					privateKey: encryptedPrivateKey,
-					address   : publicKey
+					address   : address
 				] as JSON).toString()
 			).save(flush: true, failOnError: true)
+
+			createUserInboxStream(address)
+
+			return key
 		} catch (NumberFormatException e) {
 			throw new IllegalArgumentException("Private key must be a valid hex string!")
 		}
@@ -159,6 +163,7 @@ class EthereumIntegrationKeyService {
 		inboxStream.id = address
 		inboxStream.name = address
 		inboxStream.inbox = true
+		inboxStream.autoConfigure = false
 		inboxStream.save(failOnError: true, flush: true)
 	}
 
@@ -172,7 +177,7 @@ class EthereumIntegrationKeyService {
 	}
 
 	@CompileStatic
-	private static String getPublicKey(String privateKey) {
+	private static String getAddress(String privateKey) {
 		BigInteger pk = new BigInteger(privateKey, 16)
 		ECKey key = ECKey.fromPrivate(pk)
 		String publicKey = Hex.encodeHexString(key.getAddress())

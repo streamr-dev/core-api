@@ -19,7 +19,7 @@ databaseChangeLog = {
 					String ethereumAddress = row['id_in_service']
 					Date d = new Date()
 					sql.execute('INSERT INTO stream (version, feed_id, id, name, date_created, last_updated, partitions, require_signed_data, auto_configure, storage_days, inbox)' +
-						' VALUES (0, 7, ?, ?, ?, ?, 1, b\'0\', b\'1\', ?, b\'1\')', ethereumAddress, ethereumAddress, d, d, Stream.DEFAULT_STORAGE_DAYS)
+						' VALUES (0, 7, ?, ?, ?, ?, 1, b\'0\', b\'0\', ?, b\'1\')', ethereumAddress, ethereumAddress, d, d, Stream.DEFAULT_STORAGE_DAYS)
 					sql.execute('INSERT INTO permission (version, operation, stream_id, anonymous, user_id) VALUES (0, "read", ?, b\'0\', ?)',
 						ethereumAddress, userId
 					)
