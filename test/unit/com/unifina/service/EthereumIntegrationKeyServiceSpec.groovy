@@ -1,6 +1,5 @@
 package com.unifina.service
 
-import com.unifina.api.ApiException
 import com.unifina.api.CannotRemoveEthereumKeyException
 import com.unifina.api.DuplicateNotAllowedException
 import com.unifina.domain.data.Stream

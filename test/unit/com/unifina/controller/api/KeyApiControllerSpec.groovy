@@ -4,18 +4,21 @@ import com.unifina.ControllerSpecification
 import com.unifina.api.NotFoundException
 import com.unifina.api.NotPermittedException
 import com.unifina.domain.data.Stream
+import com.unifina.domain.security.IntegrationKey
 import com.unifina.domain.security.Key
 import com.unifina.domain.security.Permission
 import com.unifina.domain.security.SecUser
 import com.unifina.service.PermissionService
+import com.unifina.service.StreamService
 import grails.test.mixin.Mock
 import grails.test.mixin.TestFor
 
 @TestFor(KeyApiController)
-@Mock([Key, Permission, SecUser, Stream, PermissionService])
+@Mock([Key, Permission, SecUser, Stream, PermissionService, StreamService, IntegrationKey])
 class KeyApiControllerSpec extends ControllerSpecification {
 
 	def permissionService
+	StreamService streamService
 
 	SecUser me
 
@@ -30,6 +33,7 @@ class KeyApiControllerSpec extends ControllerSpecification {
 		userLinkedKey.id = "apiKey"
 		userLinkedKey.save(failOnError: true, validate: true)
 
+		streamService = mainContext.getBean(StreamService)
 		controller.permissionService = permissionService = grailsApplication.mainContext.getBean(PermissionService)
 	}
 

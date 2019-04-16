@@ -1,5 +1,6 @@
 package com.unifina.service
 
+import com.unifina.BeanMockingSpecification
 import com.unifina.api.ProductNotFreeException
 import com.unifina.domain.data.Stream
 import com.unifina.domain.marketplace.FreeSubscription
@@ -11,15 +12,18 @@ import com.unifina.domain.security.Permission
 import com.unifina.domain.security.SecUser
 import grails.test.mixin.Mock
 import grails.test.mixin.TestFor
+import org.codehaus.groovy.grails.commons.DefaultGrailsApplication
 import spock.lang.Specification
 
 @TestFor(SubscriptionService)
 @Mock([FreeSubscription, IntegrationKey, PaidSubscription, Permission, Product, Stream, Subscription])
-class SubscriptionServiceSpec extends Specification {
+class SubscriptionServiceSpec extends BeanMockingSpecification {
 
 	SecUser user, user2
 	Stream s1, s2, s3
 	Product product
+	StreamService streamService
+	PermissionService permissionService
 
 	void setup() {
 		user = new SecUser(username: "me@streamr.com").save(failOnError: true, validate: false)
@@ -31,7 +35,9 @@ class SubscriptionServiceSpec extends Specification {
 		[s1, s2, s3].eachWithIndex { s, i -> s.id = "stream-${i + 1}" }
 		[s1, s2, s3]*.save(failOnError: true, validate: false)
 		product = new Product(streams: [s1, s2]).save(failOnError: true, validate: false)
-		service.permissionService = new PermissionService()
+		streamService = mockBean(StreamService, Mock(StreamService))
+		permissionService = service.permissionService = new PermissionService()
+		permissionService.grailsApplication = grailsApplication
 	}
 
 	void "getSubscriptionsOfUser() returns empty if user has no integration keys or free subscriptions"() {
@@ -311,6 +317,7 @@ class SubscriptionServiceSpec extends Specification {
 
 	void "beforeIntegrationKeyRemoved() removes all subscription-linked permissions for given integration key"() {
 		def permissionService = service.permissionService = new PermissionService()
+		permissionService.grailsApplication = grailsApplication
 
 		def integrationKey = new IntegrationKey(
 			user: user,
@@ -350,6 +357,7 @@ class SubscriptionServiceSpec extends Specification {
 
 	void "afterIntegrationKeyCreated() creates subscription-linked permissions for given integration key"() {
 		service.permissionService = new PermissionService()
+		service.permissionService.grailsApplication = grailsApplication
 
 		def date = new Date()
 		def product2 = new Product(streams: [s3]).save(failOnError: true, validate: false)
@@ -401,6 +409,7 @@ class SubscriptionServiceSpec extends Specification {
 
 	void "afterIntegrationKeyCreated() updates subscription-linked permissions on a per-user basis"() {
 		service.permissionService = new PermissionService()
+		service.permissionService.grailsApplication = grailsApplication
 
 		new IntegrationKey(
 			user: user,

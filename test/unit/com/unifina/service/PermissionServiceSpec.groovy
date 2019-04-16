@@ -1,5 +1,6 @@
 package com.unifina.service
 
+import com.unifina.BeanMockingSpecification
 import com.unifina.api.NotPermittedException
 import com.unifina.domain.dashboard.Dashboard
 import com.unifina.domain.data.Stream
@@ -15,9 +16,6 @@ import grails.test.mixin.Mock
 import grails.test.mixin.TestFor
 import grails.test.mixin.TestMixin
 import grails.test.mixin.support.GrailsUnitTestMixin
-import org.codehaus.groovy.grails.commons.DefaultGrailsApplication
-import org.springframework.context.ApplicationContext
-import spock.lang.Specification
 
 import java.security.AccessControlException
 
@@ -27,7 +25,7 @@ import java.security.AccessControlException
 @TestMixin(GrailsUnitTestMixin)
 @TestFor(PermissionService)
 @Mock([SecUser, Key, SignupInvite, Module, ModulePackage, Permission, Dashboard, Canvas])
-class PermissionServiceSpec extends Specification {
+class PermissionServiceSpec extends BeanMockingSpecification {
 
 	SecUser me, anotherUser, stranger
 	Key myKey, anotherUserKey, anonymousKey
@@ -37,7 +35,6 @@ class PermissionServiceSpec extends Specification {
 	Permission dashReadPermission, dashAnonymousReadPermission
 
 	StreamService streamService
-	EthereumIntegrationKeyService ethereumIntegrationKeyService
 
     def setup() {
 
@@ -73,20 +70,7 @@ class PermissionServiceSpec extends Specification {
 		dashAnonymousReadPermission = service.grantAnonymousAccess(anotherUser, dashPublic)
 		service.grant(anotherUser, dashAllowed, anonymousKey)
 
-		streamService = Mock(StreamService)
-		ethereumIntegrationKeyService = Mock(EthereumIntegrationKeyService)
-
-		// Setup application context
-		def applicationContext = Stub(ApplicationContext) {
-			getBean(StreamService) >> streamService
-			getBean(EthereumIntegrationKeyService) >> ethereumIntegrationKeyService
-		}
-
-		// Setup grailsApplication
-		def grailsApplication = new DefaultGrailsApplication()
-		grailsApplication.setMainContext(applicationContext)
-
-		service.grailsApplication = grailsApplication
+		streamService = mockBean(StreamService, Mock(StreamService))
     }
 
 	void "test setup"() {

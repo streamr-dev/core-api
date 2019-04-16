@@ -6,6 +6,7 @@ import com.unifina.api.NotPermittedException
 import com.unifina.api.StreamListParams
 import com.unifina.domain.data.Feed
 import com.unifina.domain.data.Stream
+import com.unifina.domain.security.IntegrationKey
 import com.unifina.domain.security.Key
 import com.unifina.domain.security.Permission
 import com.unifina.domain.security.SecUser
@@ -14,9 +15,11 @@ import com.unifina.service.*
 import grails.test.mixin.Mock
 import grails.test.mixin.TestFor
 import org.apache.commons.lang.time.DateUtils
+import org.codehaus.groovy.grails.commons.DefaultGrailsApplication
+import org.springframework.context.ApplicationContext
 
 @TestFor(StreamApiController)
-@Mock([SecUser, Stream, Key, Permission, Feed, PermissionService, StreamService, DashboardService])
+@Mock([SecUser, Stream, Key, Permission, Feed, PermissionService, StreamService, DashboardService, IntegrationKey])
 class StreamApiControllerSpec extends ControllerSpecification {
 
 	Feed feed
@@ -57,6 +60,12 @@ class StreamApiControllerSpec extends ControllerSpecification {
 		streamFourId = streamService.createStream([name: "otherUserStream", feed: feed], otherUser).id
 
 		controller.streamService = streamService
+
+		// Setup grailsApplication
+		def grailsApplication = new DefaultGrailsApplication()
+		grailsApplication.setMainContext(mainContext)
+
+		permissionService.grailsApplication = grailsApplication
 	}
 
 	void "find all streams of logged in user"() {
