@@ -118,6 +118,11 @@ class UrlMappings {
 
 		"/api/v1/cluster/$action"(controller: "clusterApi")
 
+		"/api/v1/communities/$communityAddress/joinRequests"(method: "GET", controller: "communityProductApi", action: "findCommunityJoinRequests")
+		"/api/v1/communities/$communityAddress/joinRequests"(method: "POST", controller: "communityProductApi", action: "createCommunityJoinRequest")
+		"/api/v1/communities/$communityAddress/joinRequests/$joinRequestId"(method: "GET", controller: "communityProductApi", action: "findCommunityJoinRequest")
+		"/api/v1/communities/$communityAddress/joinRequests/$joinRequestId"(method: "PUT", controller: "communityProductApi", action: "updateCommunityJoinRequest")
+
 		// Mappings for pages using React Router (the root for the router)
 		"/dashboard/editor/$id**?"(controller: "dashboard", action: "editor")
 	}
