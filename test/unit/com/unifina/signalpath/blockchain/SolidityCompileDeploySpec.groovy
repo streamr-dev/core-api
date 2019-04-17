@@ -10,13 +10,68 @@ import com.unifina.service.SerializationService
 import com.unifina.utils.Globals
 import grails.converters.JSON
 import grails.test.mixin.Mock
+import io.reactivex.Flowable
 import org.web3j.protocol.Web3j
+import org.web3j.protocol.core.DefaultBlockParameter
 import org.web3j.protocol.core.DefaultBlockParameterName
 import org.web3j.protocol.core.Request
+import org.web3j.protocol.core.methods.request.ShhFilter
+import org.web3j.protocol.core.methods.request.Transaction
+import org.web3j.protocol.core.methods.response.DbGetHex
+import org.web3j.protocol.core.methods.response.DbGetString
+import org.web3j.protocol.core.methods.response.DbPutHex
+import org.web3j.protocol.core.methods.response.DbPutString
+import org.web3j.protocol.core.methods.response.EthAccounts
+import org.web3j.protocol.core.methods.response.EthBlock
+import org.web3j.protocol.core.methods.response.EthBlockNumber
+import org.web3j.protocol.core.methods.response.EthCall
+import org.web3j.protocol.core.methods.response.EthCoinbase
+import org.web3j.protocol.core.methods.response.EthCompileLLL
+import org.web3j.protocol.core.methods.response.EthCompileSerpent
+import org.web3j.protocol.core.methods.response.EthCompileSolidity
+import org.web3j.protocol.core.methods.response.EthEstimateGas
+import org.web3j.protocol.core.methods.response.EthFilter
+import org.web3j.protocol.core.methods.response.EthGasPrice
+import org.web3j.protocol.core.methods.response.EthGetBalance
+import org.web3j.protocol.core.methods.response.EthGetBlockTransactionCountByHash
+import org.web3j.protocol.core.methods.response.EthGetBlockTransactionCountByNumber
+import org.web3j.protocol.core.methods.response.EthGetCode
+import org.web3j.protocol.core.methods.response.EthGetCompilers
+import org.web3j.protocol.core.methods.response.EthGetStorageAt
 import org.web3j.protocol.core.methods.response.EthGetTransactionCount
 import org.web3j.protocol.core.methods.response.EthGetTransactionReceipt
+import org.web3j.protocol.core.methods.response.EthGetUncleCountByBlockHash
+import org.web3j.protocol.core.methods.response.EthGetUncleCountByBlockNumber
+import org.web3j.protocol.core.methods.response.EthGetWork
+import org.web3j.protocol.core.methods.response.EthHashrate
+import org.web3j.protocol.core.methods.response.EthLog
+import org.web3j.protocol.core.methods.response.EthMining
+import org.web3j.protocol.core.methods.response.EthProtocolVersion
 import org.web3j.protocol.core.methods.response.EthSendTransaction
+import org.web3j.protocol.core.methods.response.EthSign
+import org.web3j.protocol.core.methods.response.EthSubmitHashrate
+import org.web3j.protocol.core.methods.response.EthSubmitWork
+import org.web3j.protocol.core.methods.response.EthSyncing
+import org.web3j.protocol.core.methods.response.EthTransaction
+import org.web3j.protocol.core.methods.response.EthUninstallFilter
+import org.web3j.protocol.core.methods.response.Log
+import org.web3j.protocol.core.methods.response.NetListening
+import org.web3j.protocol.core.methods.response.NetPeerCount
+import org.web3j.protocol.core.methods.response.NetVersion
+import org.web3j.protocol.core.methods.response.ShhAddToGroup
+import org.web3j.protocol.core.methods.response.ShhHasIdentity
+import org.web3j.protocol.core.methods.response.ShhMessages
+import org.web3j.protocol.core.methods.response.ShhNewFilter
+import org.web3j.protocol.core.methods.response.ShhNewGroup
+import org.web3j.protocol.core.methods.response.ShhNewIdentity
+import org.web3j.protocol.core.methods.response.ShhPost
+import org.web3j.protocol.core.methods.response.ShhUninstallFilter
+import org.web3j.protocol.core.methods.response.ShhVersion
 import org.web3j.protocol.core.methods.response.TransactionReceipt
+import org.web3j.protocol.core.methods.response.Web3ClientVersion
+import org.web3j.protocol.core.methods.response.Web3Sha3
+import org.web3j.protocol.websocket.events.LogNotification
+import org.web3j.protocol.websocket.events.NewHeadsNotification
 
 import java.lang.reflect.InvocationTargetException
 
@@ -26,6 +81,29 @@ class SolidityCompileDeploySpec extends ModuleTestingSpecification {
 	public static final String DEPLOY_ADDRESS = "0x60f78aa68266c87fecec6dcb27672455111bb347";
 	SolidityCompileDeploy module
 
+
+
+	public static class ModifiedSolidityCompileDeploy extends SolidityCompileDeploy{
+		def deployArgs
+		def sentWei
+		def mockWeb3j
+
+		public ModifiedSolidityCompileDeploy(Web3j web3j){
+			mockWeb3j = web3j
+		}
+
+		@Override
+		protected Web3j getWeb3j() {
+			return mockWeb3j;
+		}
+		@Override
+		protected String deploy(String bytecode, List<Object> args, BigInteger sendWei) throws IOException, ClassNotFoundException, NoSuchMethodException, InstantiationException, IllegalAccessException, InvocationTargetException {
+			deployArgs = args;
+			sentWei = sendWei;
+			super.deploy(bytecode,args,sendWei);
+		}
+
+	}
 	def setup() {
 		// mock the key for ethereum account
 		SecUser user = new SecUser(name: "name", username: "name@name.com", password: "pass").save(failOnError: true, validate: false)
@@ -41,20 +119,8 @@ class SolidityCompileDeploySpec extends ModuleTestingSpecification {
 			}
 		})
 
-		module = new SolidityCompileDeploy() {
-			def deployArgs
-			def sentWei
-			@Override
-			protected Web3j getWeb3j() {
-				return mockWeb3j
-			}
-			@Override
-			protected String deploy(String bytecode, List<Object> args, BigInteger sendWei) throws IOException, ClassNotFoundException, NoSuchMethodException, InstantiationException, IllegalAccessException, InvocationTargetException {
-				deployArgs = args;
-				sentWei = sendWei;
-				super.deploy(bytecode,args,sendWei);
-			}
-		}
+		module = new ModifiedSolidityCompileDeploy(mockWeb3j);
+
 		module.globals = mockGlobals([:], user)
 		module.init()
 
@@ -111,6 +177,8 @@ class SolidityCompileDeploySpec extends ModuleTestingSpecification {
 	void "Module parameters correspond to non-payable constructor arguments"() {
 		when:
 		applyConfig.contract.abi[2].payable = false
+		applyConfig.code = unpayable_constructor;
+
 		module.onConfiguration(applyConfig)
 
 		then:
@@ -120,6 +188,7 @@ class SolidityCompileDeploySpec extends ModuleTestingSpecification {
 	void "Module parameters correspond to payable constructor arguments"() {
 		when:
 		applyConfig.contract.abi[2].payable = true
+		applyConfig.code = payable_constructor;
 		module.onConfiguration(applyConfig)
 
 		then:
@@ -129,6 +198,7 @@ class SolidityCompileDeploySpec extends ModuleTestingSpecification {
 	void "After configuration the contract can be pulled"() {
 		when:
 		applyConfig.contract.abi[2].payable = true
+		applyConfig.code = payable_constructor;
 		module.onConfiguration(applyConfig)
 
 		then:
@@ -138,6 +208,8 @@ class SolidityCompileDeploySpec extends ModuleTestingSpecification {
 	void "Values are sent correctly to deploy function with non-payable constructor"() {
 		when:
 		applyConfig.contract.abi[2].payable = false
+		applyConfig.code = unpayable_constructor;
+
 		applyConfig << [deploy: true]
 		module.onConfiguration(applyConfig)
 
@@ -149,7 +221,7 @@ class SolidityCompileDeploySpec extends ModuleTestingSpecification {
 	void "Values are sent correctly to deploy function with payable constructor"() {
 		when:
 		applyConfig.contract.abi[2].payable = true
-		applyConfig.code = applyConfig.code.replaceFirst(/\/\*payable\*\//, " payable ")
+		applyConfig.code = payable_constructor
 		applyConfig.params << initialEthInputConfig
 		applyConfig << [deploy: true]
 		module.onConfiguration(applyConfig)
@@ -170,6 +242,7 @@ class SolidityCompileDeploySpec extends ModuleTestingSpecification {
 
 		when:
 		applyConfig.contract.abi[2].payable = true
+		applyConfig.code = payable_constructor
 		applyConfig.params << initialEthInputConfig
 		applyConfig << [deploy: true]
 		module.onConfiguration(applyConfig)
@@ -183,9 +256,12 @@ class SolidityCompileDeploySpec extends ModuleTestingSpecification {
 		def serializationService = new SerializationService()
 		// Use the classloader of this class, otherwise the deserializer won't find SolidityModuleWithMockedWeb3
 		serializationService.serializer = new SerializerImpl(this.getClass().getClassLoader())
+//		serializationService.serializer = new SerializerImpl(SolidityCompileDeploy.class.getClassLoader())
 
 		when:
 		applyConfig.contract.abi[2].payable = true
+		applyConfig.code = payable_constructor
+		module = new ModifiedSolidityCompileDeploy(null)
 		module.onConfiguration(applyConfig)
 		byte[] bytes = serializationService.serialize(module)
 		module = serializationService.deserialize(bytes)
@@ -380,6 +456,11 @@ class SolidityCompileDeploySpec extends ModuleTestingSpecification {
     }
 }
 	''', Map.class)
+
+	final static String unpayable_constructor=applyConfig.code
+	final static String payable_constructor=applyConfig.code.replaceFirst(/\/\*payable\*\//, " payable ")
+
+
 	static Map initialEthInputConfig = new Gson().fromJson('''{
 		"canConnect": true,
 		"export": false,
