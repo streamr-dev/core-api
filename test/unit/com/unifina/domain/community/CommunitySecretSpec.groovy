@@ -21,6 +21,7 @@ class CommunitySecretSpec extends Specification {
 		def result = sec.validate()
 		then:
 		result
+		sec.errors.errorCount == 0
 	}
 
 	void "name cannot be null"() {
@@ -29,6 +30,8 @@ class CommunitySecretSpec extends Specification {
 		def result = sec.validate()
 		then:
 		!result
+		sec.errors.errorCount == 1
+		sec.errors.fieldErrors.get(0).field == "name"
 	}
 
 	void "secret cannot be null"() {
@@ -37,6 +40,8 @@ class CommunitySecretSpec extends Specification {
 		def result = sec.validate()
 		then:
 		!result
+		sec.errors.errorCount == 1
+		sec.errors.fieldErrors.get(0).field == "secret"
 	}
 
 	void "communityAddress must be an Ethereum address"() {
@@ -45,6 +50,8 @@ class CommunitySecretSpec extends Specification {
 		def result = sec.validate()
 		then:
 		!result
+		sec.errors.errorCount == 1
+		sec.errors.fieldErrors.get(0).field == "communityAddress"
 	}
 
 	void "communityAddress cannot be null"() {
@@ -53,5 +60,7 @@ class CommunitySecretSpec extends Specification {
 		def result = sec.validate()
 		then:
 		!result
+		sec.errors.errorCount == 1
+		sec.errors.fieldErrors.get(0).field == "communityAddress"
 	}
 }

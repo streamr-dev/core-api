@@ -36,6 +36,7 @@ class CommunityJoinRequestSpec extends Specification {
 		def result = req.validate()
 		then:
 		result
+		req.errors.errorCount == 0
 	}
 
 	void "user cannot be null"() {
@@ -47,6 +48,8 @@ class CommunityJoinRequestSpec extends Specification {
 		def result = req.validate()
 		then:
 		!result
+		req.errors.errorCount == 1
+		req.errors.fieldErrors.get(0).field == "user"
 	}
 
     void "memberAddress must be an Ethereum address"() {
@@ -58,7 +61,9 @@ class CommunityJoinRequestSpec extends Specification {
 		def result = req.validate()
 		then:
 		!result
-    }
+		req.errors.errorCount == 1
+		req.errors.fieldErrors.get(0).field == "memberAddress"
+	}
 
 	void "memberAddress cannot be null"() {
 		setup:
@@ -69,6 +74,8 @@ class CommunityJoinRequestSpec extends Specification {
 		def result = req.validate()
 		then:
 		!result
+		req.errors.errorCount == 1
+		req.errors.fieldErrors.get(0).field == "memberAddress"
 	}
 
 	void "communityAddress must be an Ethereum address"() {
@@ -80,6 +87,8 @@ class CommunityJoinRequestSpec extends Specification {
 		def result = req.validate()
 		then:
 		!result
+		req.errors.errorCount == 1
+		req.errors.fieldErrors.get(0).field == "communityAddress"
 	}
 
 	void "communityAddress cannot be null"() {
@@ -91,6 +100,8 @@ class CommunityJoinRequestSpec extends Specification {
 		def result = req.validate()
 		then:
 		!result
+		req.errors.errorCount == 1
+		req.errors.fieldErrors.get(0).field == "communityAddress"
 	}
 
 	void "state cannot be null"() {
