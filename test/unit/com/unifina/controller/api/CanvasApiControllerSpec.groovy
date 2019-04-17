@@ -9,8 +9,9 @@ import com.unifina.security.AllowRole
 import com.unifina.service.ApiService
 import com.unifina.service.CanvasService
 import com.unifina.service.SignalPathService
+import com.unifina.signalpath.JavaCompilerErrorMessage
 import com.unifina.signalpath.ModuleException
-import com.unifina.signalpath.ModuleExceptionMessage
+import com.unifina.signalpath.custom.CompilationErrorMessage
 import grails.converters.JSON
 import grails.test.mixin.Mock
 import grails.test.mixin.TestFor
@@ -161,15 +162,13 @@ class CanvasApiControllerSpec extends ControllerSpecification {
 
 	void "show() lets load a canvas in invalid state"() {
 		setup:
-		List<ModuleExceptionMessage> exceptions = new ArrayList<>()
 		Map<String, Object> error = new HashMap<>()
 		error.put("line", 5)
 		error.put("msg", "syntax error")
-		Map<String, Object> map = new HashMap<>()
 		List list = new ArrayList()
 		list.add(error)
-		map.put("errors", list)
-		exceptions.add(new ModuleExceptionMessage(1, map))
+		List<CompilationErrorMessage> exceptions = new ArrayList<>()
+		exceptions.add(new JavaCompilerErrorMessage(1, list))
 
 		when:
 		params.id = canvas1.id
@@ -248,15 +247,13 @@ class CanvasApiControllerSpec extends ControllerSpecification {
 
 	def "update() lets save canvas in invalid state"() {
 		setup:
-		List<ModuleExceptionMessage> exceptions = new ArrayList<>()
 		Map<String, Object> error = new HashMap<>()
 		error.put("line", 5)
 		error.put("msg", "syntax error")
-		Map<String, Object> map = new HashMap<>()
 		List list = new ArrayList()
 		list.add(error)
-		map.put("errors", list)
-		exceptions.add(new ModuleExceptionMessage(1, map))
+		List<CompilationErrorMessage> exceptions = new ArrayList<>()
+		exceptions.add(new JavaCompilerErrorMessage(1, list))
 
 		params.id = "1"
 		request.JSON = [

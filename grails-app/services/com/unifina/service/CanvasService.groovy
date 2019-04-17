@@ -48,6 +48,14 @@ class CanvasService {
 		return canvas
 	}
 
+	private String extractJson(String json, SaveCanvasCommand cmd) {
+		Map canvasJson = (Map) JSON.parse(json)
+		canvasJson.name = cmd.name
+		canvasJson.modules = cmd.modules
+		canvasJson.settings = cmd.settings
+		return new JsonBuilder(canvasJson).toPrettyString()
+	}
+
 	@CompileStatic
 	void updateExisting(Canvas canvas, SaveCanvasCommand command, SecUser user, boolean resetUi = false) {
 		if (command.name == null || command.name.trim() == "") {
@@ -60,25 +68,37 @@ class CanvasService {
 			throw new InvalidStateException("Cannot update canvas with state " + canvas.state)
 		}
 
+		SignalPathService.ReconstructedResult result = null
+		Exception reconstructException = null
 		try {
-			SignalPathService.ReconstructedResult result = constructNewSignalPathMap(canvas, command, user, resetUi)
-			Map newSignalPathMap = result.map
-
-			canvas.name = newSignalPathMap.name
-			canvas.hasExports = newSignalPathMap.hasExports
-			canvas.json = new JsonBuilder(newSignalPathMap).toPrettyString()
-			canvas.state = Canvas.State.STOPPED
-			canvas.adhoc = command.isAdhoc()
-			// clear serialization
-			canvas.serialization?.delete()
-			canvas.serialization = null
-			boolean isNewCanvas = canvas.id == null
+			result = constructNewSignalPathMap(canvas, command, user, resetUi)
+		} catch (ModuleException e) {
+			// Save canvas even if it is in an invalid state. For front-end auto-save.
+			canvas.json = extractJson(canvas.json, command)
 			canvas.save(flush: true, failOnError: true)
-			if (isNewCanvas) {
-				permissionService.systemGrantAll(user, canvas)
-			}
+			reconstructException = e
+		}
+		if (result != null) {
+			canvas.name = result.map.name
+			canvas.hasExports = result.map.hasExports
+			canvas.json = new JsonBuilder(result.map).toPrettyString()
+		} else {
+			canvas.name = command.name
+			canvas.json = extractJson(canvas.json, command)
+		}
+		canvas.state = Canvas.State.STOPPED
+		canvas.adhoc = command.isAdhoc()
+		// clear serialization
+		canvas.serialization?.delete()
+		canvas.serialization = null
+		boolean isNewCanvas = canvas.id == null
+		canvas.save(flush: true, failOnError: true)
+		if (isNewCanvas) {
+			permissionService.systemGrantAll(user, canvas)
+		}
 
-			// ensure that the UI channel streams are created
+		// ensure that the UI channel streams are created
+		if (result != null) {
 			result.signalPath.setCanvas(canvas)
 			result.signalPath.getModules().each {
 				if (it instanceof ModuleWithUI) {
@@ -86,16 +106,9 @@ class CanvasService {
 				}
 			}
 			result.signalPath.ensureUiChannel()
-		} catch (ModuleException e) {
-			// Save canvas even if it is in an invalid state. For front-end auto-save.
-			def canvasJson = [
-			    name: command.name,
-				modules: command.modules,
-				settings: command.settings,
-			]
-			canvas.json = new JsonBuilder(canvasJson).toPrettyString()
-			canvas.save(flush: true, failOnError: true)
-			throw e;
+		}
+		if (reconstructException != null) {
+			throw reconstructException
 		}
 	}
 

@@ -171,14 +171,14 @@ public abstract class AbstractJavaCodeWrapper extends ModuleWithUI {
 				long line = d.getLineNumber()- StringUtils.countMatches(makeImportString(), "\n")-StringUtils.countMatches(getHeader(), "\n");
 
 				sb.append("Line ");
-				sb.append(Long.toString(line));
+				sb.append(line);
 				sb.append(": ");
 				sb.append(d.getMessage(null));
 				sb.append("\n");
 
 				CompilationErrorMessage msg = new CompilationErrorMessage();
 				msg.addError(line, d.getMessage(null));
-				msgs.add(new ModuleExceptionMessage(hash,msg));
+				msgs.add(new JavaCompilerErrorMessage(hash, msg));
 			}
 
 			throw new ModuleException(sb.toString(),null,msgs);
