@@ -1,5 +1,6 @@
 package com.unifina.signalpath.blockchain;
 
+import com.google.gson.Gson;
 import com.unifina.data.FeedEvent;
 import com.streamr.client.protocol.message_layer.ITimestamped;
 import com.unifina.signalpath.*;
@@ -59,7 +60,6 @@ public class SendEthereumTransaction extends ModuleWithSideEffects {
 	private static final Logger log = Logger.getLogger(SendEthereumTransaction.class);
 	private static final int ETHEREUM_TRANSACTION_DEFAULT_TIMEOUT_SECONDS = 1800;
 
-	//private transient Gson gson;
 	private Web3j web3j;
 
 	@Override
@@ -88,13 +88,17 @@ public class SendEthereumTransaction extends ModuleWithSideEffects {
 		return config;
 	}
 
+	protected Web3j getWeb3j(){
+		return Web3j.build(new HttpService(ethereumOptions.getRpcUrl()));
+	}
+
 	@Override
 	protected void onConfiguration(Map<String, Object> config) {
 		super.onConfiguration(config);
-
+		//String stringconfig = new Gson().toJson(config);
 		ModuleOptions options = ModuleOptions.get(config);
 		ethereumOptions = EthereumModuleOptions.readFrom(options);
-		web3j = Web3j.build(new HttpService(ethereumOptions.getRpcUrl()));
+		web3j = getWeb3j();
 		updateInterface();
 
 		// Find the function input config and configure it manually.

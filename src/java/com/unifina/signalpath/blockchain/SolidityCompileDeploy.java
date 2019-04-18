@@ -17,13 +17,14 @@ import org.web3j.protocol.http.HttpService;
 import org.web3j.utils.Numeric;
 
 import java.io.IOException;
+import java.io.Serializable;
 import java.lang.reflect.InvocationTargetException;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
 
-public class SolidityCompileDeploy extends ModuleWithUI implements Pullable<EthereumContract> {
+public class SolidityCompileDeploy extends ModuleWithUI implements Pullable<EthereumContract>, Serializable {
 
 	private static final Logger log = Logger.getLogger(SolidityCompileDeploy.class);
 

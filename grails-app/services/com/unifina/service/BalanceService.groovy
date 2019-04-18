@@ -3,6 +3,8 @@ package com.unifina.service
 import com.unifina.api.ApiException
 import com.unifina.domain.security.IntegrationKey
 import com.unifina.domain.security.SecUser
+import com.unifina.signalpath.blockchain.EthereumModuleOptions
+import com.unifina.signalpath.blockchain.Web3jHelper
 import groovy.transform.CompileStatic
 import org.web3j.exceptions.MessageDecodingException
 import org.web3j.protocol.Web3j
@@ -15,18 +17,19 @@ import java.util.concurrent.ExecutionException
 
 class BalanceService {
 	protected Web3Balance web3
-
+	protected EthereumModuleOptions ethereumOptions;
 	@PostConstruct
 	void init() {
-		final HttpService httpService = new HttpService("https://rinkeby.infura.io") // TODO: Fix address
+		ethereumOptions = new EthereumModuleOptions()
+		final HttpService httpService = new HttpService(ethereumOptions.getRpcUrl())
 		final Web3j web3j = Web3j.build(httpService)
-		this.web3 = new Web3BalanceImpl(web3j)
+		this.web3 = new Web3BalanceImpl(web3j,ethereumOptions.getDatacoinAddress())
 	}
 
 	@CompileStatic
-	BigInteger checkBalance(String address) throws ApiException {
+	Map<String, BigInteger> checkBalances(SecUser user) throws ApiException {
 		try {
-			return this.web3.checkBalance(address)
+			return this.web3.getDatacoinBalances(user)
 		} catch (ExecutionException e) {
 			throw new ApiException(500, "BALANCE_ERROR", e.getCause().getMessage())
 		} catch (MessageDecodingException e) {
@@ -37,36 +40,42 @@ class BalanceService {
 	}
 }
 
-interface Web3Balance {
-	BigInteger checkBalance(String address) throws InterruptedException, ExecutionException, MessageDecodingException
+abstract class Web3Balance {
+	abstract BigInteger getDatacoinBalance(String address) throws InterruptedException, ExecutionException, MessageDecodingException
+	/*
+	@Override
+	BigInteger getSummedDatacoinBalance(SecUser user) throws InterruptedException, ExecutionException, MessageDecodingException {
+		Map<String, BigInteger> balances = getDatacoinBalances(user);
+		BigInteger sum= BigInteger.ZERO;
+		for(String address : addresses){
+			sum = sum.add(getDatacoinBalance(address))
+		}
+		return sum;
+	}
+	*/
+	Map<String, BigInteger> getDatacoinBalances(SecUser user) throws InterruptedException, ExecutionException, MessageDecodingException  {
+		def keys =
+			IntegrationKey.findAllByUserAndService(user, IntegrationKey.Service.ETHEREUM) +
+				IntegrationKey.findAllByUserAndService(user, IntegrationKey.Service.ETHEREUM_ID)
+		Map<String, BigInteger> rslt = new LinkedHashMap<String, BigInteger>();
+		for(IntegrationKey ik : keys){
+			rslt.put(ik.idInService, getDatacoinBalance(ik.idInService))
+		}
+		return rslt;
+	}
 }
 
-class Web3BalanceImpl implements Web3Balance {
+class Web3BalanceImpl extends Web3Balance {
 	private Web3j web3
+	private String datacoinAddress
 
-	Web3BalanceImpl(Web3j web3) {
+	Web3BalanceImpl(Web3j web3, String datacoinAddress) {
 		this.web3 = web3
+		this.datacoinAddress = datacoinAddress
 	}
 
 	@Override
-	BigInteger checkBalance(String address) throws InterruptedException, ExecutionException, MessageDecodingException {
-		EthGetBalance ethGetBalance = this.web3
-			.ethGetBalance(address, DefaultBlockParameterName.LATEST)
-			.sendAsync()
-			.get()
-		final BigInteger balance = ethGetBalance.getBalance()
-		return balance
-	}
-
-	public Map<String, BigInteger> getBalances(SecUser user) {
-		def keys =
-			IntegrationKey.findAllByUserAndService(user, IntegrationKey.Service.ETHEREUM) +
-			IntegrationKey.findAllByUserAndService(user, IntegrationKey.Service.ETHEREUM_ID)
-
-		List<String> addresses = keys*.toMap()*.address
-
-		return addresses.collectEntries {
-			[it: checkBalance(it)]
-		}
+	BigInteger getDatacoinBalance(String holderAddress) throws InterruptedException, ExecutionException, MessageDecodingException {
+		return Web3jHelper.getERC20Balance(web3, datacoinAddress, holderAddress)
 	}
 }

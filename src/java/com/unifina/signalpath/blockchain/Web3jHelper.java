@@ -278,6 +278,24 @@ public class Web3jHelper {
 		return rslt;
 	}
 
+	/**
+	 * get item (i,j,k...) from a multi-dimensional Web3j array
+	 * @param array
+	 * @param indices
+	 * @return
+	 */
+
+	public static Type web3jArrayGet(Array array,int... indices){
+		Array ar = array;
+		Object val=null;
+		for(int d=0;d<indices.length;d++){
+			val = ar.getValue().get(indices[d]);
+			if(d < indices.length -1)
+				ar = (Array) val;
+		}
+		return (Type) val;
+	}
+
 
 	/**
 	 * @param web3j
@@ -308,8 +326,5 @@ public class Web3jHelper {
 		}
 		List<Type> rslt = FunctionReturnDecoder.decode(response.getValue(), balanceOf.getOutputParameters());
 		return ((Uint) rslt.iterator().next()).getValue();
-	}
-	public static void main(String[] args){
-		System.out.println("etdsfsdfe");
 	}
 }

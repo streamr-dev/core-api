@@ -3,19 +3,36 @@ package com.unifina.signalpath.blockchain
 import com.google.gson.Gson
 import com.unifina.datasource.DataSource
 import com.unifina.domain.signalpath.Canvas
+import com.unifina.domain.signalpath.Module
+
 import com.unifina.signalpath.SignalPath
 import com.unifina.utils.Globals
 import com.unifina.utils.testutils.ModuleTestHelper
 import grails.test.mixin.Mock
+
 import org.web3j.protocol.Web3j
+import org.web3j.protocol.core.DefaultBlockParameter
+import org.web3j.protocol.core.DefaultBlockParameterName
 import org.web3j.protocol.core.Request
+import org.web3j.protocol.core.methods.request.Transaction
+import org.web3j.protocol.core.methods.response.EthCall
+import org.web3j.protocol.core.methods.response.EthGetTransactionCount
 import org.web3j.protocol.core.methods.response.EthGetTransactionReceipt
 import org.web3j.protocol.core.methods.response.EthSendTransaction
 import org.web3j.protocol.core.methods.response.TransactionReceipt
 import spock.lang.Specification
 
-@Mock(Canvas)
+import java.util.concurrent.CompletableFuture
+import java.util.concurrent.CompletionStage
+import java.util.function.Consumer
+
+@Mock([Canvas, Module])
 class SendEthereumTransactionSpec extends Specification {
+	public static final String TXHASH = "0x123";
+	public static final String RAW_FNCALL_RESPONSE = "";
+//	public static final String DEPLOY_ADDRESS = "0x60f78aa68266c87fecec6dcb27672455111bb347";
+
+
 	SendEthereumTransaction module
 
 	def setup() {
@@ -25,12 +42,7 @@ class SendEthereumTransactionSpec extends Specification {
 			}
 		}
 		module.init()
-		module.configure([
-			params : [
-				[name: "URL", value: "localhost"],
-				[name: "verb", value: "GET"],
-			]
-		])
+		module.configure(applyConfig)
 		def signalPath = new SignalPath(true)
 		signalPath.setCanvas(new Canvas())
 		module.setParentSignalPath(signalPath)
@@ -58,6 +70,70 @@ class SendEthereumTransactionSpec extends Specification {
 				}
 			}
 		}
+
+		ethGetTransactionCount(_, _) >> { String address, DefaultBlockParameterName latest ->
+			return new Request(){
+				public EthGetTransactionCount send() throws IOException {
+					return new EthGetTransactionCount(){
+						@Override
+						public BigInteger getTransactionCount(){
+							return 1;
+						}
+					};
+				}
+			};
+		}
+		ethSendRawTransaction(_) >> { String bytesHex ->
+			return new Request(){
+				public EthSendTransaction send() throws IOException {
+					return new EthSendTransaction(){
+						@Override
+						public String getTransactionHash(){
+							return TXHASH;
+						}
+					};
+				}
+				public CompletableFuture sendAsync() {
+					return new CompletableFuture(){
+						@Override
+						CompletableFuture thenAccept(Consumer<? super EthSendTransaction> consumer){
+							EthSendTransaction tx = new EthSendTransaction() {
+								@Override
+								public String getTransactionHash() {
+									return TXHASH;
+								}
+
+								@Override
+								public String getRawResponse() {
+									return RAW_FNCALL_RESPONSE;
+								}
+							}
+							consumer.accept(tx);
+						}
+					}
+				}
+			};
+		}
+		/*
+		ethGetTransactionReceipt(_) >> { String txHash ->
+			return new Request(){
+				public EthGetTransactionReceipt send() throws IOException {
+					return new EthGetTransactionReceipt(){
+						@Override
+						public TransactionReceipt getResult(){
+							return new TransactionReceipt() {
+								@Override
+								public String getContractAddress() {
+									return DEPLOY_ADDRESS;
+								}
+							}
+						}
+					};
+				}
+
+			}
+
+		}
 		ethSendRawTransaction(_) >> Stub(Request) {
 			sendAsync() >> {
 				thenAccept(_) >> { consumer ->
@@ -66,6 +142,7 @@ class SendEthereumTransactionSpec extends Specification {
 				}
 			}
 		}
+		*/
 
 		// helpers for handy mocking of different responses within same test
 		def responseI = [].iterator()
@@ -92,7 +169,220 @@ class SendEthereumTransactionSpec extends Specification {
 	}
 
 	static Map applyConfig = new Gson().fromJson('''
-TODO: capture
+{
+  "outputs": [
+    {
+      "connected": true,
+      "name": "errors",
+      "canConnect": true,
+      "id": "ep_P3GiGglLSYalVojWpyvG3Q",
+      "type": "List",
+      "export": false,
+      "longName": "EthereumSend.errors"
+    },
+    {
+      "connected": true,
+      "name": "out",
+      "canConnect": true,
+      "id": "ep__t9VKixtTMaF-1te8c5Byw",
+      "type": "List",
+      "export": false,
+      "longName": "EthereumSend.out"
+    }
+  ],
+  "layout": {
+    "position": {
+      "top": "105px",
+      "left": "436px"
+    }
+  },
+  "inputs": [
+    {
+      "sourceId": "ep_2Y1qp6qnS1y7hvrObQGPAg",
+      "canToggleDrivingInput": false,
+      "drivingInput": false,
+      "type": "EthereumContract",
+      "connected": true,
+      "requiresConnection": true,
+      "name": "contract",
+      "canConnect": true,
+      "id": "ep_nxUlNHzjRKOwGNWg-px1UQ",
+      "jsClass": "EthereumContractInput",
+      "acceptedTypes": [
+        "EthereumContract"
+      ],
+      "export": false,
+      "value": {
+        "address": "0x338090c5492c5c5e41a4458f5fc4b205cbc54a24",
+        "abi": [
+          {
+            "outputs": [
+              {
+                "name": "",
+                "type": "uint256"
+              }
+            ],
+            "constant": true,
+            "payable": false,
+            "inputs": [
+              {
+                "name": "a",
+                "type": "uint256"
+              }
+            ],
+            "name": "testOutput",
+            "stateMutability": "view",
+            "type": "function"
+          },
+          {
+            "outputs": [
+              {
+                "name": "out",
+                "type": "uint256[]"
+              }
+            ],
+            "constant": true,
+            "payable": false,
+            "inputs": [
+              {
+                "name": "a",
+                "type": "uint256"
+              }
+            ],
+            "name": "testOutput1D",
+            "stateMutability": "view",
+            "type": "function"
+          },
+          {
+            "inputs": [
+              {
+                "indexed": false,
+                "name": "poster",
+                "type": "address"
+              },
+              {
+                "indexed": false,
+                "name": "data",
+                "type": "string"
+              }
+            ],
+            "name": "testEvent",
+            "anonymous": false,
+            "type": "event"
+          }
+        ]
+      },
+      "longName": "EthereumSend.contract"
+    },
+    {
+      "sourceId": "ep_2jaahlX3Ty6AeQQIbsV4XA",
+      "canToggleDrivingInput": true,
+      "drivingInput": true,
+      "type": "Double",
+      "connected": true,
+      "requiresConnection": true,
+      "name": "a",
+      "canConnect": true,
+      "id": "ep_YJHJEL4pRUqLusUtyQdLlA",
+      "acceptedTypes": [
+        "Double"
+      ],
+      "canHaveInitialValue": true,
+      "export": false,
+      "initialValue": {},
+      "longName": "EthereumSend.a"
+    }
+  ],
+  "name": "EthereumSend",
+  "options": {
+    "gasPriceGWei": {
+      "type": "double",
+      "value": 20
+    },
+    "activateInHistoricalMode": {
+      "type": "boolean",
+      "value": false
+    },
+    "network": {
+      "possibleValues": [
+        {
+          "text": "ropsten",
+          "value": "ropsten"
+        },
+        {
+          "text": "rinkeby",
+          "value": "rinkeby"
+        }
+      ],
+      "type": "string",
+      "value": "rinkeby"
+    }
+  },
+  "canRefresh": false,
+  "id": 1150,
+  "params": [
+    {
+      "possibleValues": [
+        {
+          "name": "(none)",
+          "value": {}
+        },
+        {
+          "name": "t0",
+          "value": "UGEaxuOqRBeqVFQNws8-6gRg8MeV9xRUmNtIDWuYp1qQ"
+        }
+      ],
+      "canToggleDrivingInput": true,
+      "defaultValue": {},
+      "drivingInput": false,
+      "type": "String",
+      "connected": false,
+      "requiresConnection": false,
+      "name": "ethAccount",
+      "canConnect": false,
+      "id": "ep_jToBE5S4Qg-V6G_WbIrDdQ",
+      "acceptedTypes": [
+        "String"
+      ],
+      "export": false,
+      "value": "UGEaxuOqRBeqVFQNws8-6gRg8MeV9xRUmNtIDWuYp1qQ",
+      "longName": "EthereumSend.ethAccount"
+    },
+    {
+      "possibleValues": [
+        {
+          "name": "testOutput",
+          "value": "testOutput"
+        },
+        {
+          "name": "testOutput1D",
+          "value": "testOutput1D"
+        }
+      ],
+      "canToggleDrivingInput": true,
+      "defaultValue": "",
+      "drivingInput": false,
+      "type": "String",
+      "connected": false,
+      "updateOnChange": true,
+      "requiresConnection": false,
+      "name": "function",
+      "isTextArea": false,
+      "canConnect": true,
+      "id": "ep_81s3PcBETUawfxcvt1DhMQ",
+      "acceptedTypes": [
+        "String"
+      ],
+      "export": false,
+      "value": "testOutput1D",
+      "longName": "EthereumSend.function"
+    }
+  ],
+  "jsModule": "GenericModule",
+  "type": "module",
+  "canClearState": true,
+  "hash": 3
+}
 ''', Map.class)
 
 	void "test"() {

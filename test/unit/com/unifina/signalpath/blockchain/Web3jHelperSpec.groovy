@@ -15,16 +15,20 @@ import org.web3j.abi.datatypes.generated.Uint256
 import org.web3j.abi.datatypes.generated.Uint32
 
 class Web3jHelperSpec extends ModuleTestingSpecification {
+
+
 	@StreamrApi
 	void "instantiateType produces correct Solidity type"() {
 		when:
 		Object[] nums = [1, 2, "0x123"];
 		byte[] bytes = [1, 2, 3];
 		byte[][] bytesArray = [bytes, bytes, bytes]
-		Object[][] twodim = [nums, nums, nums]
+		byte[][][] twoDimBytesArray = [bytesArray, bytesArray, bytesArray]
+		Object[][] twoDimIntarray = [nums, nums, nums]
+
+		Type twoDarray = Web3jHelper.instantiateType("uint[][3]", twoDimIntarray)
 
 		then:
-		Type t;
 		Web3jHelper.instantiateType("bool", false) instanceof Bool
 		Web3jHelper.instantiateType("bool", 1) instanceof Bool
 		Web3jHelper.instantiateType("int", -123) instanceof Int
@@ -32,6 +36,7 @@ class Web3jHelperSpec extends ModuleTestingSpecification {
 		Web3jHelper.instantiateType("uint", 123) instanceof Uint
 		Web3jHelper.instantiateType("uint256", 123) instanceof Uint256
 		Web3jHelper.instantiateType("address", "0x123") instanceof Address
+	//	Web3jHelper.instantiateType("address", "0x6e6adf6e579d83f8f1bc388a392c1a130b8f8d0cae6250612eb2aab4e945b1f0") instanceof Address
 		Web3jHelper.instantiateType("uint256[]", Arrays.asList(nums)) instanceof DynamicArray
 		Web3jHelper.instantiateType("uint256[3]", Arrays.asList(nums)) instanceof StaticArray
 		Web3jHelper.instantiateType("uint256[]", nums) instanceof DynamicArray
@@ -39,9 +44,11 @@ class Web3jHelperSpec extends ModuleTestingSpecification {
 		Web3jHelper.instantiateType("bytes" + bytes.length, bytes) instanceof BytesType
 		Web3jHelper.instantiateType("bytes[]", Arrays.asList(bytesArray)) instanceof DynamicArray
 		Web3jHelper.instantiateType("bytes[3]", Arrays.asList(bytesArray)) instanceof StaticArray
-		Web3jHelper.instantiateType("uint[][]", twodim) instanceof DynamicArray
-		Web3jHelper.instantiateType("uint[3][]", twodim) instanceof DynamicArray
-		Web3jHelper.instantiateType("uint[][3]", twodim) instanceof StaticArray
+		Web3jHelper.instantiateType("uint[][]", twoDimIntarray) instanceof DynamicArray
+		Web3jHelper.instantiateType("uint[3][]", twoDimIntarray) instanceof DynamicArray
+		Web3jHelper.web3jArrayGet((StaticArray) twoDarray, 0,1).getValue().equals(BigInteger.valueOf(2))
+		Web3jHelper.instantiateType("bytes[][3]", twoDimBytesArray) instanceof StaticArray
+
 
 	}
 }
