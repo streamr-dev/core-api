@@ -393,13 +393,13 @@ public class SendEthereumTransaction extends ModuleWithSideEffects {
 			if (chosenFunction.constant) {
 				EthCall response = web3j.ethCall(
 					Transaction.createEthCallTransaction(ethereumAccount.getAddress(), c.getAddress(), encodeFnCall),
-					DefaultBlockParameterName.LATEST).sendAsync().get();
+					DefaultBlockParameterName.LATEST).send();
 				ConstantFunctionResult rslt = new ConstantFunctionResult(getGlobals().time, fn, response);
 				getGlobals().getDataSource().enqueueEvent(new FeedEvent<FunctionCallResult, SendEthereumTransaction>(rslt, rslt.timestamp, module));
 			} else {
 				BigInteger gasPrice = BigDecimal.valueOf(ethereumOptions.getGasPriceWei()).toBigInteger();
 				EthGetTransactionCount ethGetTransactionCount = web3j.ethGetTransactionCount(
-					ethereumAccount.getAddress(), DefaultBlockParameterName.LATEST).sendAsync().get();
+					ethereumAccount.getAddress(), DefaultBlockParameterName.LATEST).send();
 				BigInteger nonce = ethGetTransactionCount.getTransactionCount();
 				BigInteger valueWei;
 				Credentials credentials = Credentials.create(ethereumAccount.getPrivateKey());
