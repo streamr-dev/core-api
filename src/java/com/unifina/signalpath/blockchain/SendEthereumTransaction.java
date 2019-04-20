@@ -304,8 +304,8 @@ public class SendEthereumTransaction extends ModuleWithSideEffects {
 					if (get.getTransactionReceipt().isPresent()) {
 						receipt = get.getResult();
 						transaction = web3j.ethGetTransactionByHash(web3jTx.getTransactionHash()).send().getResult();
-						enqueueEvent(fncall);
 						log.info("Receipt found for txHash: " + web3jTx.getTransactionHash());
+						enqueueEvent(fncall);
 						return;
 					}
 					log.info("No receipt found for txHash: " + web3jTx.getTransactionHash());
@@ -485,9 +485,7 @@ public class SendEthereumTransaction extends ModuleWithSideEffects {
 						}
 					}
 				});
-				int x=1;
 			}
-//			txHash.send(ethSendTransaction.getTransactionHash());
 		} catch (Exception e) {
 			log.error(e.getMessage());
 			throw new RuntimeException(e);
