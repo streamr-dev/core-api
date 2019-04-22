@@ -301,8 +301,7 @@ public class SendEthereumTransaction extends ModuleWithSideEffects {
 				int tries = 0;
 				while (tries++ < check_result_max_tries) {
 					EthGetTransactionReceipt get = web3j.ethGetTransactionReceipt(web3jTx.getTransactionHash()).send();
-					if (get.getTransactionReceipt().isPresent()) {
-						receipt = get.getResult();
+					if ((receipt = get.getResult()) != null) {
 						transaction = web3j.ethGetTransactionByHash(web3jTx.getTransactionHash()).send().getResult();
 						log.info("Receipt found for txHash: " + web3jTx.getTransactionHash());
 						enqueueEvent(fncall);
@@ -477,9 +476,13 @@ public class SendEthereumTransaction extends ModuleWithSideEffects {
 						//enqueue the txHash only when submitted, before result from blockchain
 						//enqueueEvent(tr);
 
-						//enqueue the result from blockchain, when confirmed or error
 						try {
-							tr.enqueueConfirmedTx();
+							//if tx submit had error, don't wait to confirm tx
+							if(tr.getError() != null)
+								enqueueEvent(tr);
+							else
+							//enqueue the result from blockchain, when tx finishes
+								tr.enqueueConfirmedTx();
 						} catch (IOException e) {
 							throw new RuntimeException(e);
 						}
