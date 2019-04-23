@@ -99,7 +99,7 @@ class SubscriptionService {
 	}
 
 	private static void deletePermissions(Subscription subscription) {
-		streamPermissionsFor(subscription)*.delete()
+		streamPermissionsFor(subscription)*.delete(flush: true)
 	}
 
 	private static void deletePermissions(Subscription subscription, Set<Stream> streams) {
