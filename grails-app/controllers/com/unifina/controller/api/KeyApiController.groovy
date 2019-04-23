@@ -139,9 +139,6 @@ class KeyApiController {
 			}
 		}
 		response.status = 200
-		render([
-			id: k.id,
-			name: k.name,
-		] as JSON)
+		render(k.toMap() as JSON)
 	}
 }
