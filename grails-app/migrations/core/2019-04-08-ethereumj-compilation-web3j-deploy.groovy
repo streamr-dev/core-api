@@ -10,7 +10,7 @@ databaseChangeLog = {
 			column(name: "js_module", value: "SolidityModule")
 			column(name: "type", value: "module")
 			column(name: "module_package_id", valueNumeric: 1)
-			column(name: "json_help", value: null)
+			column(name: "json_help", value: "Compile and deploy Solidity code to blockchain")
 		}
 	}
 }

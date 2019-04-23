@@ -237,9 +237,6 @@ public class SendEthereumTransaction extends ModuleWithSideEffects {
 	 * wraps Web3j Response with utility methods
 	 */
 	abstract class FunctionCallResult implements ITimestamped {
-		//		String hash;
-//		Map<String, List<Object>> events;
-//		List<Object> results;
 		Date timestamp;
 		Function fn;
 
@@ -379,7 +376,6 @@ public class SendEthereumTransaction extends ModuleWithSideEffects {
 			try {
 				sendOutput((FunctionCallResult) event.content);
 			} catch (Exception e) {
-				log.error(e.getMessage());
 				throw new RuntimeException(e);
 			}
 			getPropagator().propagate();
@@ -427,8 +423,6 @@ public class SendEthereumTransaction extends ModuleWithSideEffects {
 
 	@Override
 	protected void activateWithSideEffects() {
-		// ethereumAccount
-		// ethereumOptions
 		EthereumContract c = contract.getValue();
 		if (c == null || c.getABI() == null || function.list == null) {
 			throw new RuntimeException("Faulty contract");
@@ -462,7 +456,6 @@ public class SendEthereumTransaction extends ModuleWithSideEffects {
 					valueWei = BigInteger.ZERO;
 				}
 
-				//createTransaction(BigInteger nonce, BigInteger gasPrice, BigInteger gasLimit, String to, BigInteger value, String data) {
 				RawTransaction rawTransaction = RawTransaction.createTransaction(nonce, gasPrice, getGasLimit(), c.getAddress(), valueWei, encodeFnCall);
 				byte[] signedMessage = TransactionEncoder.signMessage(rawTransaction, credentials);
 				String hexValue = Numeric.toHexString(signedMessage);
@@ -490,7 +483,6 @@ public class SendEthereumTransaction extends ModuleWithSideEffects {
 				});
 			}
 		} catch (Exception e) {
-			log.error(e.getMessage());
 			throw new RuntimeException(e);
 		}
 	}
