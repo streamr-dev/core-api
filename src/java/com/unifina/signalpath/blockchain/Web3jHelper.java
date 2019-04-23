@@ -10,6 +10,7 @@ import org.web3j.protocol.core.DefaultBlockParameterName;
 import org.web3j.protocol.core.Response;
 import org.web3j.protocol.core.methods.request.Transaction;
 import org.web3j.protocol.core.methods.response.*;
+import org.web3j.tx.Contract;
 import org.web3j.utils.Numeric;
 
 import java.io.IOException;
@@ -223,36 +224,20 @@ public class Web3jHelper {
 		return tr;
 	}
 
-	public static EventValues extractEventParameters(Event event, Log log) {
-		List<String> topics = log.getTopics();
-
-		String encodedEventSignature = EventEncoder.encode(event);
-		if (!topics.get(0).equals(encodedEventSignature)) { return null; }
-
-		List<Type> nonIndexedValues = FunctionReturnDecoder.decode(log.getData(), event.getNonIndexedParameters());
-
-		// TODO: handle param/value list length mismatch (this means ABI is wrong/outdated). The module behaviour should be cut to shorter list and keep running. Add test.
-		List<Type> indexedValues = new ArrayList<>();
-		List<TypeReference<Type>> indexedParameters = event.getIndexedParameters();
-		for (int i = 0; i < indexedParameters.size(); i++) {
-			Type value = FunctionReturnDecoder.decodeIndexedValue(topics.get(i + 1), indexedParameters.get(i));
-			indexedValues.add(value);
-		}
-		return new EventValues(indexedValues, nonIndexedValues);
-	}
 
 	public static List<EventValues> extractEventParameters(
 		Event event, TransactionReceipt transactionReceipt) {
 		List<Log> logs = transactionReceipt.getLogs();
 		List<EventValues> values = new ArrayList<>();
 		for (Log log : logs) {
-			EventValues eventValues = extractEventParameters(event, log);
+			EventValues eventValues = Contract.staticExtractEventParameters(event, log);
 			if (eventValues != null) {
 				values.add(eventValues);
 			}
 		}
 		return values;
 	}
+
 
 	public static BigInteger asBigInteger(Object arg) {
 		if (arg instanceof BigInteger) {

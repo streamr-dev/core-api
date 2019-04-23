@@ -11,8 +11,8 @@ databaseChangeLog = {
 			column(name: "type", value: "module")
 			column(name: "module_package_id", valueNumeric: 1)
 			column(name: "json_help", value: '{' +
-				'"params":{},' +
-				'"paramNames":[],' +
+				'"params":{"ethAccount":"The account used to make transaction or call", "function":"The contract function to invoke"},' +
+				'"paramNames":["ethAccount","function"],' +
 				'"inputs":{"contract":"Ethereum contract", "trigger":"Send call (for functions that have no inputs)", "ether":"ETH to send with the function call (for <i>payable</i> functions)"},' +
 				'"inputNames":["contract", "trigger", "ether"],' +
 				'"outputs":{"errors":"List of error messages"},' +

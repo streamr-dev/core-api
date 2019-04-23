@@ -73,6 +73,29 @@ public class SolidityCompileDeploy extends ModuleWithUI implements Pullable<Ethe
 		return opts;
 	}
 
+	/**
+	 * choose the "main" contract from a list of compiled contract,
+	 * default implements simple heuristic: it chooses the one with the biggest bytecode
+	 * @param contracts
+	 * @return
+	 */
+	protected JsonObject chooseMainContract(Set<Map.Entry<String, JsonElement>> contracts){
+		JsonObject longestcode=null;
+		int maxcodelen=0;
+		String name=null;
+		for(Map.Entry<String, JsonElement> e : contracts){
+			JsonObject rslt = e.getValue().getAsJsonObject();
+			int codelen = rslt.get("bin").getAsString().length();
+			if(codelen > maxcodelen){
+				longestcode = rslt;
+				maxcodelen = codelen;
+				name = e.getKey();
+			}
+		}
+		log.info("Chose contract "+name+" with length "+maxcodelen + " as the main contract");
+		return longestcode;
+	}
+
 	protected JsonObject compile(String solidity_code) {
 		String result = null;
 		String errors = null;
@@ -90,10 +113,10 @@ public class SolidityCompileDeploy extends ModuleWithUI implements Pullable<Ethe
 			throw new RuntimeException("Error compiling contract: " + errors);
 		}
 
-		// TODO: in case of many contracts, pick the one with the longest bytecode (or find better heuristic for the "main" conrtact)
 		Set<Map.Entry<String, JsonElement>> entries = new JsonParser().parse(result).getAsJsonObject().get("contracts").getAsJsonObject().entrySet();
-		Map.Entry<String, JsonElement> e = entries.iterator().next();
-		return e.getValue().getAsJsonObject();
+
+		//in case of many contracts, pick the one with the longest bytecode
+		return chooseMainContract(entries);
 	}
 
 	protected String deploy(String bytecode, List<Object> args, BigInteger sendWei) throws IOException, ClassNotFoundException, NoSuchMethodException, InstantiationException, IllegalAccessException, InvocationTargetException {
