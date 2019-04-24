@@ -159,16 +159,18 @@ class KeyApiController {
 		if (json.name != null && json.name.trim() != "") {
 			useResource(Stream, params.streamId) { res ->
 				k.name = json.name.trim()
-				k.save(flush: true, failOnError: true)
-
 				if (permission) {
 					Permission.Operation operation = Permission.Operation.fromString(permission)
+					k.getPermissions().collect().each { p ->
+						k.removeFromPermissions(p)
+					}
 					permissionService.grant(request.apiUser, res, k, operation, false)
 					// If granting write, grant also read
 					if (operation == Permission.Operation.WRITE) {
 						permissionService.grant(request.apiUser, res, k, Permission.Operation.READ, false)
 					}
 				}
+				k.save(flush: true, failOnError: true)
 			}
 		}
 		response.status = 200
