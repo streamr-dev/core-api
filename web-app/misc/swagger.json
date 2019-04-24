@@ -1827,6 +1827,52 @@
         }
       }
     },
+    "/api/v1/streams/$streamId/keys/$keyId": {
+      "put": {
+        "summary": "Update Stream's Key's name and permission",
+        "description": "Update Stream's Key's name and permission.",
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "description": "UpdateStreamKeyRequest object",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/UpdateStreamKeyRequest"
+            }
+          },
+          {
+            "in": "path",
+            "name": "streamId",
+            "description": "ID of the stream",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "in": "path",
+            "name": "keyId",
+            "description": "ID of the key to be updated",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "tags": [
+          "streams",
+          "keys"
+        ],
+        "responses": {
+          "200": {
+            "description": "Success"
+          },
+          "400": {
+            "description": "Invalid Request"
+          },
+          "404": {
+            "description": "Not Found"
+          }
+        }
+      }
+    },
     "/streams/{id}/data": {
       "post": {
         "summary": "Add new event to stream",
@@ -3612,6 +3658,43 @@
             }
           }
         }
+      },
+      "put": {
+        "summary": "Update User's Key's name",
+        "description": "Update User's Key's name.",
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "description": "UpdateUserKeyRequest object",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/UpdateUserKeyRequest"
+            }
+          },
+          {
+            "in": "path",
+            "name": "id",
+            "description": "ID of the key to be updated",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "tags": [
+          "users",
+          "keys"
+        ],
+        "responses": {
+          "200": {
+            "description": "Success"
+          },
+          "400": {
+            "description": "Invalid Request"
+          },
+          "404": {
+            "description": "Not Found"
+          }
+        }
       }
     },
     "/modules/{id}": {
@@ -3797,6 +3880,36 @@
     }
   },
   "definitions": {
+    "UpdateStreamKeyRequest": {
+      "type": "object",
+      "required": [
+        "name"
+      ],
+      "properties": {
+        "permission": {
+          "type": "string",
+          "description": "Permission type. Either 'read' or 'write'."
+        },
+        "name": {
+          "type": "string",
+          "description": "Name of the Key.",
+          "example": "Name of my Stream's Key"
+        }
+      }
+    },
+    "UpdateUserKeyRequest": {
+      "type": "object",
+      "required": [
+        "name"
+      ],
+      "properties": {
+        "name": {
+          "type": "string",
+          "description": "Name of the Key.",
+          "example": "Name of my own key"
+        }
+      }
+    },
     "Stream": {
       "type": "object",
       "required": [
