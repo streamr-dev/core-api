@@ -52,7 +52,7 @@ class UrlMappings {
 		"/api/v1/streams/$id/publishers"(controller: "streamApi", action: "publishers")
 		"/api/v1/streams/$id/status"(controller: "streamApi", action: "status")
 		"/api/v1/streams/$resourceId/keys"(resources: "keyApi", excludes: ["create", "edit", "update"]) { resourceClass = Stream }
-		"/api/v1/streams/$streamId/keys/$keyId"(method: "PUT", controller: "keyApi", action: "update") { resourceClass = Stream }
+		"/api/v1/streams/$streamId/keys/$keyId"(method: "PUT", controller: "keyApi", action: "updateStreamKey")
 
 		"/api/v1/dashboards"(resources: "dashboardApi", excludes: ["create", "edit"])
 		"/api/v1/dashboards/$dashboardId/items"(resources: "dashboardItemApi", excludes: ["create", "edit"])
@@ -71,7 +71,7 @@ class UrlMappings {
 		"/api/v1/users/me"(method: "DELETE", controller: "userApi", action: "delete")
 
 		"/api/v1/users/me/keys"(resources: "keyApi", excludes: ["create", "edit", "update"]) { resourceClass = SecUser }
-		"/api/v1/users/me/keys/$keyId"(method: "PUT", resources: "keyApi", action: "update") { resourceClass = SecUser }
+		"/api/v1/users/me/keys/$keyId"(method: "PUT", controller: "keyApi", action: "updateUserKey")
 		"/api/v1/users/me/products"(controller: "productApi", action: "index") { operation = Permission.Operation.SHARE }
 		"/api/v1/users/me/changePassword"(controller: "userApi", action: "changePassword")
 		"/api/v1/users/me/image"(controller: "userApi", action: "uploadAvatarImage")

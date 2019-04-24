@@ -1,5 +1,6 @@
 package com.unifina.controller.api
 
+import com.unifina.api.ApiException
 import com.unifina.api.NotFoundException
 import com.unifina.api.NotPermittedException
 import com.unifina.domain.data.Stream
@@ -126,16 +127,48 @@ class KeyApiController {
 	}
 
 	@StreamrApi(authenticationLevel = AuthLevel.USER)
-	def update() {
-		Key k = Key.get(params.id)
+	def updateUserKey() {
+		Key k = Key.get(params.keyId)
 		if (k == null) {
-			throw new NotFoundException(k.toString(), params.id)
+			throw new NotFoundException(k.toString(), params.keyId)
 		}
 		Map json = new JsonSlurper().parseText((String) request.JSON)
 		if (json.name != null && json.name.trim() != "") {
-			useResource(params.resourceClass, params.resourceId) { res ->
+			useResource(SecUser, params.keyId) { res ->
 				k.name = json.name.trim()
 				k.save(flush: true, failOnError: true)
+			}
+		}
+		response.status = 200
+		render(k.toMap() as JSON)
+	}
+
+	@StreamrApi(authenticationLevel = AuthLevel.USER)
+	def updateStreamKey() {
+		Key k = Key.get(params.keyId)
+		if (k == null) {
+			throw new NotFoundException(k.toString(), params.keyId)
+		}
+		Map json = new JsonSlurper().parseText((String) request.JSON)
+		String permission = request.JSON?.permission
+		if (permission) {
+			if (permission != "read" && permission != "write") {
+				throw new ApiException(400, "INVALID_PARAMETER", "permission field in json should be 'read' or 'write'.")
+			}
+		}
+		if (json.name != null && json.name.trim() != "") {
+			useResource(Stream, params.streamId) { res ->
+				k.name = json.name.trim()
+				k.save(flush: true, failOnError: true)
+
+				if (permission) {
+					Permission.Operation operation = Permission.Operation.fromString(permission)
+					permissionService.grant(request.apiUser, res, k, operation, false)
+					// If granting write, grant also read
+					if (operation == Permission.Operation.WRITE) {
+						permissionService.grant(request.apiUser, res, k, Permission.Operation.READ, false)
+					}
+				}
 			}
 		}
 		response.status = 200
