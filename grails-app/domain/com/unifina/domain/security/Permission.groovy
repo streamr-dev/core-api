@@ -1,7 +1,7 @@
 package com.unifina.domain.security
 
 import com.unifina.domain.dashboard.Dashboard
-import com.unifina.domain.data.Feed
+
 import com.unifina.domain.data.Stream
 import com.unifina.domain.marketplace.Product
 import com.unifina.domain.marketplace.Subscription

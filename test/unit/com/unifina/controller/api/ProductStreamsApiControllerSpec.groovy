@@ -1,6 +1,6 @@
 package com.unifina.controller.api
 
-import com.unifina.domain.data.Feed
+
 import com.unifina.domain.data.Stream
 import com.unifina.domain.marketplace.Product
 import com.unifina.domain.security.Permission

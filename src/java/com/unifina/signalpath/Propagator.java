@@ -86,7 +86,7 @@ public class Propagator implements Serializable {
 				}
 			}
 
-			// Resolve 1st order forward dependencies by reachable outputs
+			// Resolve 1st order onMessage dependencies by reachable outputs
 			Set<AbstractSignalPathModule> fwdDepSet = new HashSet<>();
 			for (Output o : module.getOutputs()) {
 				for (Input i : (List<Input>) o.getTargets()) {

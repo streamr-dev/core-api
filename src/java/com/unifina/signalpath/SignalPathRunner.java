@@ -133,7 +133,7 @@ public class SignalPathRunner extends Thread {
 
 	public void abort() {
 		log.info("Aborting...");
-		globals.getDataSource().stopFeed();
+		globals.getDataSource().close();
 	}
 
 	private synchronized void setRunning(boolean running) {
@@ -145,10 +145,10 @@ public class SignalPathRunner extends Thread {
 	private void runSignalPaths() {
 		// Start feed, blocks until feed is complete
 		try {
-			globals.getDataSource().startFeed();
+			globals.getDataSource().start();
 		} finally {
 			// Stop the feed, cleanup
-			globals.getDataSource().stopFeed();
+			globals.getDataSource().close();
 		}
 	}
 

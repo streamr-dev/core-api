@@ -1,7 +1,6 @@
 package com.unifina.signalpath.remote;
 
-import com.unifina.data.FeedEvent;
-import com.unifina.data.IEventRecipient;
+import com.unifina.data.Event;
 import com.unifina.datasource.IStopListener;
 import com.streamr.client.protocol.message_layer.ITimestamped;
 import com.unifina.signalpath.*;
@@ -255,7 +254,7 @@ public abstract class AbstractHttpModule extends ModuleWithSideEffects implement
 				.setSocketTimeout(timeoutMillis).build();
 		request.setConfig(requestConfig);
 
-		// if async: push server response into FeedEvent queue; it will later call this.receive
+		// if async: push server response into Event queue; it will later call this.receive
 		final AbstractHttpModule self = this;
 		final CountDownLatch latch = new CountDownLatch(1);
 		final long startTime = System.currentTimeMillis();
@@ -285,7 +284,7 @@ public abstract class AbstractHttpModule extends ModuleWithSideEffects implement
 				response.responseTime = System.currentTimeMillis() - startTime;
 				response.timestamp = getGlobals().isRealtime() ? new Date() : getGlobals().time;
 				if (async) {
-					getGlobals().getDataSource().enqueueEvent(new FeedEvent<>(response, response.timestamp, self));
+					getGlobals().getDataSource().enqueueEvent(new Event<>(response, response.timestamp, self));
 				} else {
 					latch.countDown();	// goto latch.await() below
 				}
@@ -332,7 +331,7 @@ public abstract class AbstractHttpModule extends ModuleWithSideEffects implement
 	 * @param event containing HttpTransaction created within sendOutput
 	 */
 	@Override
-	public void receive(FeedEvent event) {
+	public void receive(Event event) {
 		if (event.content instanceof HttpTransaction) {
 			sendOutput((HttpTransaction) event.content);
 			getPropagator().propagate();

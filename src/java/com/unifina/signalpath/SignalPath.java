@@ -1,10 +1,8 @@
 package com.unifina.signalpath;
 
-import com.unifina.data.FeedEvent;
 import com.unifina.domain.data.Stream;
 import com.unifina.domain.signalpath.Canvas;
 import com.unifina.domain.signalpath.Module;
-import com.unifina.serialization.SerializationRequest;
 import com.unifina.service.CanvasService;
 import com.unifina.service.ModuleService;
 import com.unifina.service.SerializationService;
@@ -294,15 +292,6 @@ public class SignalPath extends ModuleWithUI {
 			signalPathParameter = new SignalPathParameter(this, "canvas");
 			signalPathParameter.setUpdateOnChange(true);
 			addInput(signalPathParameter);
-		}
-	}
-
-	@Override
-	public void receive(FeedEvent event) {
-		if (event.content instanceof SerializationRequest) {
-			((SerializationRequest) event.content).serialize(this);
-		} else {
-			super.receive(event);
 		}
 	}
 

@@ -1,7 +1,7 @@
 package com.unifina.signalpath.utils
 
 import com.unifina.domain.data.Stream
-import com.unifina.service.FeedService
+
 import com.unifina.utils.Globals
 import com.unifina.utils.testutils.ModuleTestHelper
 import grails.test.mixin.Mock

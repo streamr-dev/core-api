@@ -3,14 +3,13 @@ package com.unifina.data;
 import com.unifina.datasource.DataSource;
 import com.unifina.datasource.DataSourceEventQueue;
 import com.unifina.exceptions.StreamFieldChangedException;
-import com.unifina.signalpath.StopRequest;
 import com.unifina.utils.Globals;
 import org.apache.log4j.Logger;
 
 import java.util.ArrayDeque;
 import java.util.Queue;
 
-public class RealtimeEventQueue extends DataSourceEventQueue implements IEventRecipient {
+public class RealtimeEventQueue extends DataSourceEventQueue {
 	private static final Logger log = Logger.getLogger(RealtimeEventQueue.class);
 	private static final int LOGGING_INTERVAL = 10000; // set to 0 for no logging
 
@@ -22,8 +21,8 @@ public class RealtimeEventQueue extends DataSourceEventQueue implements IEventRe
 	}
 
 	@Override
-	protected Queue<FeedEvent> initQueue() {
-		return new ArrayDeque<>();
+	protected Queue<Event> createQueue(int capacity) {
+		return new ArrayDeque<>(capacity);
 	}
 
 	protected void doStart() throws Exception {
@@ -33,7 +32,7 @@ public class RealtimeEventQueue extends DataSourceEventQueue implements IEventRe
 		long elapsedTime = 0;
 
 		while (!isAborted()) {
-			FeedEvent event = waitForAndPullFeedEvent();
+			Event event = waitForAndPullFeedEvent();
 			if (event == null) {
 				log.info("doStart: aborting");
 				return;
@@ -44,7 +43,7 @@ public class RealtimeEventQueue extends DataSourceEventQueue implements IEventRe
 			process(event);
 			long now = System.nanoTime();
 
-			eventQueueMetrics.countEvent(now - startTime, startTimeInMillis - event.timestamp.getTime());
+			eventQueueMetrics.countEvent(now - startTime, startTimeInMillis - event.getTimestamp().getTime());
 
 			// Report processing
 			if (LOGGING_INTERVAL > 0) {
@@ -64,9 +63,9 @@ public class RealtimeEventQueue extends DataSourceEventQueue implements IEventRe
 	}
 
 	@Override
-	public boolean process(FeedEvent event) {
+	public boolean process(Event event) {
 
-		long time = event.timestamp.getTime();
+		long time = event.getTimestamp().getTime();
 
 		if (firstEvent) {
 			firstEvent = false;
@@ -77,10 +76,10 @@ public class RealtimeEventQueue extends DataSourceEventQueue implements IEventRe
 			// Never go backwards in time
 			if (globals.time == null || time > globals.time.getTime()) {
 				reportTime(time);
-				globals.time = event.timestamp;
+				globals.time = event.getTimestamp();
 			}
 
-			event.deliver();
+			event.dispatch();
 
 			return true;
 		} catch (StreamFieldChangedException e) {
@@ -100,19 +99,11 @@ public class RealtimeEventQueue extends DataSourceEventQueue implements IEventRe
 	}
 
 	@Override
-	protected void doStop() {}
-
-	@Override
-	public void receive(FeedEvent event) {
-		if (event.content instanceof StopRequest) {
-			log.info("Received abort request, aborting...");
-			abort();
-		} else {
-			log.warn("Unrecognized request " + event);
-		}
+	protected void doStop() {
+		// Don't need to do anything
 	}
 
-	private FeedEvent waitForAndPullFeedEvent() {
+	private Event waitForAndPullFeedEvent() {
 		synchronized (getSyncLock()) {
 			while (isEmpty() && !isAborted()) {
 				try {

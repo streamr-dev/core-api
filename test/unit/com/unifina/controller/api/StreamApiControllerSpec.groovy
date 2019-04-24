@@ -4,7 +4,7 @@ import com.unifina.ControllerSpecification
 import com.unifina.api.NotFoundException
 import com.unifina.api.NotPermittedException
 import com.unifina.api.StreamListParams
-import com.unifina.domain.data.Feed
+
 import com.unifina.domain.data.Stream
 import com.unifina.domain.security.Key
 import com.unifina.domain.security.Permission
@@ -13,7 +13,6 @@ import com.unifina.feed.NoOpStreamListener
 import com.unifina.service.*
 import grails.test.mixin.Mock
 import grails.test.mixin.TestFor
-import org.apache.commons.lang.time.DateUtils
 
 @TestFor(StreamApiController)
 @Mock([SecUser, Stream, Key, Permission, Feed, PermissionService, StreamService, DashboardService])

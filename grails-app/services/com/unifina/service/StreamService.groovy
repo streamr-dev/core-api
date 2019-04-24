@@ -9,7 +9,7 @@ import com.unifina.api.NotPermittedException
 import com.unifina.api.ValidationException
 import com.unifina.data.StreamPartitioner
 import com.unifina.domain.dashboard.DashboardItem
-import com.unifina.domain.data.Feed
+
 import com.unifina.domain.data.Stream
 import com.unifina.domain.security.IntegrationKey
 import com.unifina.domain.security.Key

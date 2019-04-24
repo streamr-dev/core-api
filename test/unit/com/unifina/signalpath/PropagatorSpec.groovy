@@ -1,7 +1,7 @@
 package com.unifina.signalpath
 
 import com.unifina.ModuleTestingSpecification
-import com.unifina.data.FeedEvent
+import com.unifina.data.Event
 import com.unifina.datasource.DataSource
 import com.unifina.feed.MasterClock
 import com.unifina.signalpath.simplemath.Count
@@ -31,7 +31,7 @@ class PropagatorSpec extends ModuleTestingSpecification {
 		masterClock.register(count)
 
 		when: "The clock ticks"
-		FeedEvent e = new FeedEvent(null, new Date(0), null)
+		Event e = new Event(null, new Date(0), null)
 		masterClock.receive(e)
 
 		then: "Count must be activated"
@@ -76,7 +76,7 @@ class PropagatorSpec extends ModuleTestingSpecification {
 		masterClock.register(count)
 
 		when: "The clock ticks"
-		FeedEvent e = new FeedEvent(null, new Date(0), null)
+		Event e = new Event(null, new Date(0), null)
 		masterClock.receive(e)
 
 		then: "mod must be activated first"

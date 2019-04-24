@@ -1,8 +1,8 @@
 package com.unifina.signalpath.list
 
-import com.unifina.data.FeedEvent;
-import com.unifina.datasource.DataSource;
-import com.unifina.datasource.DataSourceEventQueue
+
+import com.unifina.data.Event;
+import com.unifina.datasource.DataSource
 import com.unifina.signalpath.AbstractSignalPathModule
 import com.unifina.signalpath.TimeSeriesInput
 import com.unifina.utils.Globals
@@ -74,7 +74,7 @@ public class ListToEventsSpec extends Specification {
 		module.getOutput("item").connect(target.getInput("in"))
 
 		when:
-		module.receive(new FeedEvent(new ListToEvents.QueuedItem(1, new Date(0)), new Date(0), module))
+		module.receive(new Event(new ListToEvents.QueuedItem(1, new Date(0)), new Date(0), module))
 		then:
 		module.getOutput("item").getValue() == 1
 		target.getInput("in").getValue() == 1

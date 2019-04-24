@@ -1,10 +1,7 @@
 package com.unifina.utils.testutils;
 
 import com.streamr.client.protocol.message_layer.StreamMessage;
-import com.unifina.domain.data.Feed;
 import com.unifina.feed.Message;
-import com.unifina.feed.MessageRecipient;
-import com.unifina.feed.MessageSource;
 
 import java.io.IOException;
 import java.util.Map;

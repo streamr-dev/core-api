@@ -8,7 +8,7 @@ class LoginSpec extends GebReportingSpec implements LoginMixin {
 		when: "just clicked to log in"
 		to LoginPage
 		nextButton.click()
-		then: "should not go forward"
+		then: "should not go onMessage"
 		waitFor {
 			at LoginPage
 			error.displayed
@@ -19,7 +19,7 @@ class LoginSpec extends GebReportingSpec implements LoginMixin {
 		when: "given false username and password"
 		to LoginPage
 		tryLogin("false@user.name", "falsePassword")
-		then: "should not go forward"
+		then: "should not go onMessage"
 		waitFor {
 			at LoginPage
 			error.displayed

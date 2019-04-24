@@ -2,7 +2,7 @@ package com.unifina.signalpath.streams
 
 import com.unifina.BeanMockingSpecification
 import com.unifina.api.ValidationException
-import com.unifina.domain.data.Feed
+
 import com.unifina.domain.data.Stream
 import com.unifina.feed.NoOpStreamListener
 import com.unifina.service.StreamService
@@ -11,7 +11,6 @@ import com.unifina.utils.testutils.ModuleTestHelper
 import grails.test.mixin.Mock
 import grails.test.mixin.TestMixin
 import grails.test.mixin.web.ControllerUnitTestMixin
-import spock.lang.Specification
 
 @TestMixin(ControllerUnitTestMixin) // to get JSON converter
 @Mock([Stream, Feed])

@@ -1,8 +1,8 @@
 package com.unifina.datasource;
 
-import com.unifina.data.ClockTickEvent;
+import com.unifina.data.ClockTick;
+import com.unifina.data.Event;
 import com.unifina.data.EventQueueMetrics;
-import com.unifina.data.FeedEvent;
 import com.unifina.feed.MasterClock;
 import com.unifina.utils.Globals;
 import org.apache.log4j.Logger;
@@ -21,22 +21,20 @@ public abstract class DataSourceEventQueue {
 	private final MasterClock masterClock;
 	private final List<IDayListener> dayListeners = new ArrayList<>();
 	private final Object syncLock;
-	private Queue<FeedEvent> queue;
+	private Queue<Event> queue;
 	protected final Globals globals;
 	private boolean abort = false;
 	protected long lastHandledTime = 0;
 	private DateTime nextDay;
-	private long queueTicket = 0;
 
 	/**
-	 * Must be set to true if events are enqueued from multiple threads
+	 * sync must be set to true if events are enqueued from multiple threads
 	 */
-
 	public DataSourceEventQueue(boolean sync, Globals globals, DataSource dataSource) {
 		this.syncLock = sync ? new Object() : null;
 		this.globals = globals;
 		masterClock = new MasterClock(globals, dataSource);
-		queue = initQueue();
+		queue = createQueue(QUEUE_HARD_LIMIT);
 	}
 
 	public void addTimeListener(ITimeListener timeListener) {
@@ -57,10 +55,9 @@ public abstract class DataSourceEventQueue {
 		doStart();
 	}
 
-	public void enqueue(FeedEvent event) {
+	public void enqueue(Event event) {
 		if (syncLock != null) {
 			synchronized (syncLock) {
-				event.queueTicket = queueTicket++;
 				if (queue.size() <= QUEUE_HARD_LIMIT) {
 					queue.add(event);
 				} else {
@@ -69,7 +66,6 @@ public abstract class DataSourceEventQueue {
 				syncLock.notify(); // Notify the SignalPathRunner thread
 			}
 		} else {
-			event.queueTicket = queueTicket++;
 			queue.add(event);
 		}
 	}
@@ -84,14 +80,14 @@ public abstract class DataSourceEventQueue {
 		}
 	}
 
-	protected abstract Queue<FeedEvent> initQueue();
+	protected abstract Queue<Event> createQueue(int capacity);
 
 	protected abstract void doStart() throws Exception;
 
 	/**
 	 * @return True if the event was processed, false if it was not (then it should be returned to the queue).
 	 */
-	public abstract boolean process(FeedEvent event);
+	public abstract boolean process(Event event);
 
 	protected abstract EventQueueMetrics retrieveMetricsAndReset();
 
@@ -134,8 +130,8 @@ public abstract class DataSourceEventQueue {
 				nextDay = nextDay.plusDays(1);
 			}
 
-			final ClockTickEvent event = new ClockTickEvent(d);
-			masterClock.receive(event);
+			final ClockTick tick = new ClockTick(d);
+			masterClock.accept(tick);
 		}
 	}
 
@@ -147,23 +143,19 @@ public abstract class DataSourceEventQueue {
 		return queue.isEmpty();
 	}
 
-	protected Queue<FeedEvent> getQueue() {
+	protected Queue<Event> getQueue() {
 		return queue;
 	}
 
-	protected void setQueue(Queue<FeedEvent> queue) {
+	protected void setQueue(Queue<Event> queue) {
 		this.queue = queue;
 	}
 
-	protected void addWithoutUpdatingTicket(FeedEvent feedEvent) {
-		queue.add(feedEvent);
-	}
-
-	protected FeedEvent peek() {
+	protected Event peek() {
 		return queue.peek();
 	}
 
-	protected FeedEvent poll() {
+	protected Event poll() {
 		return queue.poll();
 	}
 }

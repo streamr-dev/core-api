@@ -1,12 +1,9 @@
 package com.unifina.signalpath.kafka;
 
 import com.streamr.client.protocol.message_layer.StreamMessage;
-import com.unifina.data.FeedEvent;
-import com.unifina.data.IEventRecipient;
-import com.unifina.domain.data.Feed;
+import com.unifina.data.Event;
 import com.unifina.domain.data.Stream;
 import com.unifina.domain.security.SecUser;
-import com.unifina.feed.AbstractFeed;
 import com.unifina.service.PermissionService;
 import com.unifina.service.StreamService;
 import com.unifina.signalpath.*;
@@ -94,7 +91,7 @@ public class SendToStream extends ModuleWithSideEffects {
 		IEventRecipient eventRecipient = feed.getEventRecipientForMessage(msg);
 
 		if (eventRecipient != null) {
-			FeedEvent event = new FeedEvent(msg, globals.time, eventRecipient);
+			Event event = new Event(msg, globals.time, eventRecipient);
 			getGlobals().getDataSource().enqueueEvent(event);
 		}
 	}

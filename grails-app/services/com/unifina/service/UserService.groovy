@@ -4,7 +4,7 @@ import com.unifina.api.InvalidAPIKeyException
 import com.unifina.api.InvalidUsernameAndPasswordException
 import com.unifina.api.NotFoundException
 import com.unifina.domain.ExampleType
-import com.unifina.domain.data.Feed
+
 import com.unifina.domain.data.Stream
 import com.unifina.domain.security.Key
 import com.unifina.domain.security.SecRole

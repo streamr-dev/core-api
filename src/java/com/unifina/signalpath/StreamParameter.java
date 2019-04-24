@@ -1,9 +1,7 @@
 package com.unifina.signalpath;
 
-import com.unifina.domain.data.Feed;
 import com.unifina.domain.data.Stream;
 import com.unifina.exceptions.StreamNotFoundException;
-import com.unifina.service.FeedService;
 import grails.util.Holders;
 
 import java.util.Map;

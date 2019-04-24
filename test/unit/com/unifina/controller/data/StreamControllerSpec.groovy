@@ -1,6 +1,6 @@
 package com.unifina.controller.data
 
-import com.unifina.domain.data.Feed
+
 import com.unifina.domain.data.Stream
 import com.unifina.domain.security.SecUser
 import com.unifina.domain.signalpath.Module

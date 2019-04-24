@@ -1,7 +1,6 @@
 package com.unifina.signalpath.list;
 
-import com.unifina.data.FeedEvent;
-import com.unifina.data.IEventRecipient;
+import com.unifina.data.Event;
 import com.streamr.client.protocol.message_layer.ITimestamped;
 import com.unifina.signalpath.*;
 
@@ -29,12 +28,12 @@ public class ListToEvents extends AbstractSignalPathModule implements IEventReci
 		// enqueue the items, send out in receive() below
 		for (Object item : inList) {
 			QueuedItem queuedItem = new QueuedItem(item, getGlobals().time);
-			getGlobals().getDataSource().enqueueEvent(new FeedEvent<>(queuedItem, queuedItem.timestamp, this));
+			getGlobals().getDataSource().enqueueEvent(new Event<>(queuedItem, queuedItem.timestamp, this));
 		}
 	}
 
 	@Override
-	public void receive(FeedEvent event) {
+	public void receive(Event event) {
 		if (event.content instanceof QueuedItem) {
 			out.send(((QueuedItem)event.content).item);
 			getPropagator().propagate();

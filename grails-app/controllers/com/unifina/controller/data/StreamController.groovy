@@ -3,7 +3,7 @@ package com.unifina.controller.data
 import com.unifina.domain.security.Permission.Operation
 import org.apache.commons.lang.exception.ExceptionUtils
 
-import com.unifina.domain.data.Feed
+
 import com.unifina.domain.data.Stream
 import com.unifina.domain.security.SecUser
 import com.unifina.feed.DataRange

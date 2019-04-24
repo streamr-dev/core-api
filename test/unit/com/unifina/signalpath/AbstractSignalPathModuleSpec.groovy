@@ -1,17 +1,15 @@
 package com.unifina.signalpath
 
 import com.unifina.BeanMockingSpecification
-import com.unifina.data.FeedEvent
+import com.unifina.data.Event
 import com.unifina.datasource.RealtimeDataSource
 import com.unifina.domain.security.SecUser
 import com.unifina.service.PermissionService
 import com.unifina.utils.Globals
-import grails.test.mixin.support.GrailsUnitTestMixin
 import groovy.transform.CompileStatic
 import org.apache.log4j.Level
 import org.apache.log4j.Logger
 import spock.lang.Shared
-import spock.lang.Specification
 
 import java.util.concurrent.TimeUnit
 
@@ -92,9 +90,9 @@ class AbstractSignalPathModuleSpec extends BeanMockingSpecification {
 	private void setUpModuleWithRuntimeRequestEnv() {
 		globals = new Globals()
 		globals.setDataSource(new RealtimeDataSource(globals) {
-			FeedEvent lastFeedEvent
+			Event lastFeedEvent
 			@Override
-			void enqueueEvent(FeedEvent feedEvent) {
+			void enqueueEvent(Event feedEvent) {
 				super.enqueueEvent(feedEvent)
 				lastFeedEvent = feedEvent
 			}

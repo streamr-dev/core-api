@@ -1,6 +1,6 @@
 package com.unifina.controller.api
 
-import com.unifina.domain.data.Feed
+
 import com.unifina.domain.security.*
 import com.unifina.domain.signalpath.Module
 import com.unifina.domain.signalpath.ModulePackage

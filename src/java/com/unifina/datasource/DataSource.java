@@ -1,39 +1,53 @@
 package com.unifina.datasource;
 
-import com.unifina.data.*;
-import com.unifina.domain.data.Feed;
-import com.unifina.feed.AbstractFeed;
-import com.unifina.service.FeedService;
+import com.streamr.client.protocol.message_layer.StreamMessage;
+import com.streamr.client.utils.StreamPartition;
+import com.unifina.data.Event;
+import com.unifina.data.EventQueueMetrics;
+import com.unifina.feed.MessageRouter;
+import com.unifina.feed.StreamMessageSource;
+import com.unifina.feed.map.MapMessageEventRecipient;
+import com.unifina.serialization.SerializationRequest;
 import com.unifina.signalpath.AbstractSignalPathModule;
+import com.unifina.signalpath.AbstractStreamSourceModule;
 import com.unifina.signalpath.SignalPath;
+import com.unifina.signalpath.StopRequest;
 import com.unifina.utils.Globals;
-import grails.util.Holders;
 import org.apache.log4j.Logger;
 
+import java.io.Closeable;
 import java.util.*;
+import java.util.function.Consumer;
 
 /**
- * DataSource is a class global to the current run context. It handles
- * the creation of data feeds either explicitly (via DataSource#connectFeed(feed))
- * or implicitly according to a SignalPath's needs (via DataSource#connectSignalPath(signalPath)).
- *
- * @author Henri
+ * TODO: write new class description
  */
-public abstract class DataSource {
+public abstract class DataSource implements Consumer<Event>, Closeable {
 	private static final Logger log = Logger.getLogger(DataSource.class);
 
 	private final Set<SignalPath> signalPaths = new HashSet<>();
 	private final List<IStartListener> startListeners = new ArrayList<>();
 	private final List<IStopListener> stopListeners = new ArrayList<>();
-	private final Map<Long, AbstractFeed> feedById = new HashMap<>();
-	private final Globals globals;
-	private final boolean isHistoricalFeed;
+	protected final Globals globals;
 	private boolean started = false;
 
+	private final Map<Collection<StreamPartition>, MapMessageEventRecipient> eventRecipientsByStreamPartitions = new HashMap<>();
+	private final MessageRouter router = new MessageRouter();
 
-	public DataSource(boolean isHistoricalFeed, Globals globals) {
-		this.isHistoricalFeed = isHistoricalFeed;
+	private StreamMessageSource streamMessageSource;
+	protected DataSourceEventQueue eventQueue;
+
+	public DataSource(Globals globals) {
 		this.globals = globals;
+		this.eventQueue = createEventQueue();
+	}
+
+	/**
+	 * Consumed events are added to the event queue.
+	 */
+	@Override
+	public void accept(Event event) {
+		eventQueue.enqueue(event);
 	}
 
 	/**
@@ -53,17 +67,14 @@ public abstract class DataSource {
 	 * Registers an object with this DataSource.
 	 */
 	public void register(Object o) {
-		if (o instanceof IStreamRequirement) {
-			subscribeToFeed(o, ((IStreamRequirement) o).getStream().getFeed());
-		} else if (o instanceof IFeedRequirement) {
-			subscribeToFeed(o, ((IFeedRequirement) o).getFeed());
+		if (o instanceof AbstractStreamSourceModule) {
+			subscribe((AbstractStreamSourceModule) o);
 		}
-
 		if (o instanceof ITimeListener) {
-			getEventQueue().addTimeListener((ITimeListener) o);
+			eventQueue.addTimeListener((ITimeListener) o);
 		}
 		if (o instanceof IDayListener) {
-			getEventQueue().addDayListener((IDayListener) o);
+			eventQueue.addDayListener((IDayListener) o);
 		}
 	}
 
@@ -83,69 +94,73 @@ public abstract class DataSource {
 		stopListeners.add(stopListener);
 	}
 
-	public void startFeed() {
+	public void start() {
 		for (IStartListener startListener : startListeners) {
 			startListener.onStart();
 		}
 
+		started = true;
+
+		// Collect all the required StreamPartitions
+		Set<StreamPartition> allStreamPartitions = new HashSet<>();
+		eventRecipientsByStreamPartitions.keySet().forEach((streamPartitions -> allStreamPartitions.addAll(streamPartitions)));
+
 		try {
-			started = true;
-			doStartFeed();
+			streamMessageSource = createStreamMessageSource(
+				allStreamPartitions,
+				// Route StreamMessages to consumers registered with the router
+				streamMessage -> router.route(streamMessage).forEach(consumer ->
+						accept(new Event<>(streamMessage, streamMessage.getTimestampAsDate(), streamMessage.getSequenceNumber(), consumer)))
+			);
 		} catch (Exception e) {
-			log.error("Exception thrown while running feed", e);
-			throw new RuntimeException("Error while running feed", e);
+			throw new RuntimeException("Error while creating StreamMessageSource", e);
 		}
+
+		try {
+			// Main event loop, blocks until stopped
+			eventQueue.start();
+		} catch (Exception e) {
+			throw new RuntimeException("Error while processing event queue", e);
+		}
+
+		log.info("DataSource has stopped.");
 	}
 
-	public void stopFeed() {
-		// re-throw if exception happened, but only after all listeners have had chance to clean up
-		Exception stopException = null;
+	@Override
+	public void close() {
 		try {
-			doStopFeed();
+			streamMessageSource.close();
 		} catch (Exception e) {
 			log.error("Exception thrown while stopping feed", e);
-			stopException = e;
 		}
-		for (IStopListener it : stopListeners) {
-			try {
-				it.onStop();
-			} catch (Exception e) {
-				log.error("Exception thrown while stopping feed", e);
-				stopException = e;
+
+		// Final serialization requests
+		for (SignalPath signalPath : getSerializableSignalPaths()) {
+			accept(SerializationRequest.makeFeedEvent(signalPath));
+		}
+
+		// Add stop request to queue
+		Date stopTime = globals.getTime() != null ? globals.getTime() : new Date();
+		accept(new Event<>(new StopRequest(stopTime), stopTime, 0L, (stopRequest) -> {
+			started = false;
+			eventQueue.abort();
+
+			for (IStopListener it : stopListeners) {
+				try {
+					it.onStop();
+				} catch (Exception e) {
+					log.error("Exception thrown while stopping feed", e);
+				}
 			}
-		}
-
-		if (stopException != null) {
-			throw new RuntimeException("Error while stopping feed", stopException);
-		}
-	}
-
-	/**
-	 * Enqueue an event into event queue
-	 */
-	public void enqueueEvent(FeedEvent feedEvent) {
-		getEventQueue().enqueue(feedEvent);
-	}
-
-	public AbstractFeed getFeedById(Long id) {
-		return feedById.get(id);
+		}));
 	}
 
 	public EventQueueMetrics retrieveMetricsAndReset() {
-		return getEventQueue().retrieveMetricsAndReset();
+		return eventQueue.retrieveMetricsAndReset();
 	}
 
-	protected abstract DataSourceEventQueue getEventQueue();
-
-	protected abstract void onSubscribedToFeed(AbstractFeed feed);
-
-	protected abstract void doStartFeed() throws Exception;
-
-	protected abstract void doStopFeed() throws Exception;
-
-	protected Collection<AbstractFeed> getFeeds() {
-		return feedById.values();
-	}
+	protected abstract StreamMessageSource createStreamMessageSource(Collection<StreamPartition> streamPartitions, Consumer<StreamMessage> consumer);
+	protected abstract DataSourceEventQueue createEventQueue();
 
 	protected Iterable<SignalPath> getSerializableSignalPaths() {
 		List<SignalPath> serializableSps = new ArrayList<>();
@@ -157,31 +172,21 @@ public abstract class DataSource {
 		return serializableSps;
 	}
 
-	private void subscribeToFeed(Object subscriber, Feed feedDomain) {
-		AbstractFeed feed = createFeed(feedDomain);
-		try {
-			log.debug("subscribeToFeed: subscriber " + subscriber + " subscribing to feed " + feedDomain.getName());
-			feed.subscribe(subscriber);
-		} catch (Exception e) {
-			throw new RuntimeException("Failed to subscribe " + subscriber + " to feed " + feed, e);
-		}
-		onSubscribedToFeed(feed);
-	}
+	private void subscribe(AbstractStreamSourceModule module) {
+		Collection<StreamPartition> streamPartitions = module.getStreamPartitions();
 
-	private AbstractFeed createFeed(Feed domain) {
-		// Feed implementation already instantiated?
-		AbstractFeed feed = feedById.get(domain.getId());
-		if (feed == null) {
-			log.debug("createFeed: Instantiating new feed described by domain object "+domain+(isHistoricalFeed ? " in historical mode" : " in realtime mode"));
+		// Create and register the event recipient for this StreamPartition if it doesn't already exist
+		MapMessageEventRecipient recipient = eventRecipientsByStreamPartitions.get(streamPartitions);
 
-			FeedService feedService = Holders.getApplicationContext().getBean(FeedService.class);
-			feed = feedService.instantiateFeed(domain, isHistoricalFeed, globals);
-			feed.setEventQueue(getEventQueue());
-			feedById.put(domain.getId(), feed);
-		} else {
-			log.debug("createFeed: Feed " + feed + " exists, using that instance.");
+		if (recipient == null) {
+			recipient = new MapMessageEventRecipient(globals, module.getStream(), streamPartitions);
+			eventRecipientsByStreamPartitions.put(streamPartitions, recipient);
+			for (StreamPartition streamPartition : streamPartitions) {
+				router.subscribe(recipient, streamPartition);
+			}
 		}
 
-		return feed;
+		recipient.register(module);
 	}
+
 }

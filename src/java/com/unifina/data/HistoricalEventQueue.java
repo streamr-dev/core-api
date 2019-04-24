@@ -2,18 +2,19 @@ package com.unifina.data;
 
 import com.unifina.datasource.DataSource;
 import com.unifina.datasource.DataSourceEventQueue;
-import com.unifina.feed.AbstractFeed;
-import com.unifina.feed.AbstractHistoricalFeed;
 import com.unifina.utils.DateRange;
 import com.unifina.utils.Globals;
 import org.apache.log4j.Logger;
 
-import java.util.*;
+import java.util.Date;
+import java.util.Map;
+import java.util.PriorityQueue;
+import java.util.Queue;
+import java.util.concurrent.PriorityBlockingQueue;
 
 public class HistoricalEventQueue extends DataSourceEventQueue {
 	private static final Logger log = Logger.getLogger(HistoricalEventQueue.class);
 
-	private final List<AbstractFeed> feeds = new ArrayList<>();
 	private final int speed;
 	private EventQueueMetrics eventQueueMetrics = new HistoricalEventQueueMetrics();
 
@@ -22,17 +23,18 @@ public class HistoricalEventQueue extends DataSourceEventQueue {
 		speed = readSpeedConfiguration(globals);
 	}
 
-	public void addFeed(AbstractFeed feed) {
-		if (!feeds.contains(feed)) {
-			feeds.add(feed);
-		}
-	}
-
 	@Override
-	protected Queue<FeedEvent> initQueue() {
-		// In historical mode, events are ordered primarily by timestamp and secondarily by "ticket" (counter)
-		// Not thread-safe! It should not matter because currently everything runs in a single thread.
-		return new PriorityQueue<>();
+	protected Queue<Event> createQueue(int capacity) {
+		Queue<Event> queue = new PriorityQueue<>(capacity);
+
+		/**
+		 * Queue events at lower and upper bounds of selected playback range to ensure that MasterClock ticks through
+		 * range even in the absence of feed data.
+		 */
+		queue.add(PlaybackMessage.newStartEvent(globals.getStartDate()));
+		queue.add(PlaybackMessage.newEndEvent(globals.getEndDate()));
+
+		return queue;
 	}
 
 	@Override
@@ -41,37 +43,9 @@ public class HistoricalEventQueue extends DataSourceEventQueue {
 		long eventCounter = 0;
 		long timeSpentProcessing = 0;
 
-		// Insert first event from each feed into the queue
-		for (AbstractFeed feed : feeds) {
-			feed.startFeed();
-			if (feed instanceof AbstractHistoricalFeed && ((AbstractHistoricalFeed)feed).hasNext()) {
-				FeedEvent event = ((AbstractHistoricalFeed)feed).next();
-				enqueue(event);
-			}
-		}
+		// Set start time
+		globals.time = peek().getTimestamp();
 
-		// TODO: this shouldn't be unclear at this point, either we set it here or somewhere else, but not both.
-		// Init global time if it has not already been initialized
-		if (globals.time == null) {
-			// Take the beginDate from signalPathContext if defined
-			if (globals.getStartDate() != null) {
-				globals.time = globals.getStartDate();
-			} else {
-				// Otherwise get it from the first event
-				globals.time = peek().timestamp;
-			}
-		}
-
-		/**
-		 * Queue events at lower and upper bounds of selected playback range to ensure that MasterClock ticks through
-		 * range even in the absence of feed data.
-		 */
-		addWithoutUpdatingTicket(PlaybackMessage.newStartEvent(globals.getStartDate()));
-		addWithoutUpdatingTicket(PlaybackMessage.newEndEvent(globals.getEndDate()));
-
-		/**
-		 * Initialize some values
-		 */
 		long time = globals.time.getTime();
 
 		DateRange range = null;
@@ -92,14 +66,15 @@ public class HistoricalEventQueue extends DataSourceEventQueue {
 		while (!isEmpty() && !isAborted()) {
 			// Insert time events to the queue if necessary to "tick" the clock every second.
 			// This is needed if there are no actual stream events covering every second.
-			if (peek().timestamp.getTime() > lastHandledTime + 1000) {
+			if (peek().getTimestamp().getTime() > lastHandledTime + 1000) {
 				// Insert a time event to the front of the queue, before the next real event
-				final ClockTickEvent event = new ClockTickEvent(new Date(lastHandledTime + 1000));
+				Date next = new Date(lastHandledTime + 1000);
+				final Event<ClockTick> event = new Event<>(new ClockTick(next), next, 0L, null);
 				enqueue(event);
 			}
 
-			FeedEvent event = poll();
-			time = event.timestamp.getTime();
+			Event event = poll();
+			time = event.getTimestamp().getTime();
 
 			// Check if a delay is needed
 			if (speed != 0 && (range == null || time > todBegin && time < todEnd)) {
@@ -123,12 +98,9 @@ public class HistoricalEventQueue extends DataSourceEventQueue {
 			timeSpentProcessing += System.nanoTime() - startTime;
 			eventCounter++;
 
-			// If not processed, add to queue without updating the ticket (don't call enqueue(event))
+			// If not processed, an event which precedes this event must have been added to the queue. Add the event back to queue.
 			if (!processed) {
-				addWithoutUpdatingTicket(event);
-			} else if (event.feed instanceof AbstractHistoricalFeed && ((AbstractHistoricalFeed) event.feed).hasNext()) {
-				FeedEvent next = ((AbstractHistoricalFeed) event.feed).next();
-				enqueue(next);
+				enqueue(event);
 			}
 		}
 
@@ -142,8 +114,8 @@ public class HistoricalEventQueue extends DataSourceEventQueue {
 	}
 
 	@Override
-	public boolean process(FeedEvent event) {
-		long time = event.timestamp.getTime();
+	public boolean process(Event event) {
+		long time = event.getTimestamp().getTime();
 
 		// Never go backwards in time
 		// TODO: this shouldn't be a concern...
@@ -156,11 +128,11 @@ public class HistoricalEventQueue extends DataSourceEventQueue {
 			}
 
 			// Update global time
-			globals.time = event.timestamp;
+			globals.time = event.getTimestamp();
 		}
 
 		// Handle event
-		event.deliver();
+		event.dispatch();
 		return true;
 	}
 
@@ -173,13 +145,7 @@ public class HistoricalEventQueue extends DataSourceEventQueue {
 
 	@Override
 	protected void doStop() {
-		for (AbstractFeed feed : feeds) {
-			try {
-				feed.stopFeed();
-			} catch (Exception e) {
-				log.error("Feed error while stopping HistoricalEventQueue: " + e.getMessage());
-			}
-		}
+		// Don't need to do anything
 	}
 
 	private static int readSpeedConfiguration(Globals globals) {

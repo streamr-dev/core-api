@@ -2,14 +2,14 @@ package com.unifina.feed
 import spock.lang.Specification
 
 
-class MessageHubSpec extends Specification {
+class MessageRouterThreadSpec extends Specification {
 
-	MessageHub hub
+	MessageRouterThread hub
 	MessageSource source
 
 	def setup() {
 		source = Mock(MessageSource)
-		hub = new MessageHub(source, null)
+		hub = new MessageRouterThread(source, null)
 		hub.start()
 	}
 

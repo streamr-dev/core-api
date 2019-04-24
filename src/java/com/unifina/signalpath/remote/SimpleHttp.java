@@ -23,7 +23,7 @@ import java.io.UnsupportedEncodingException;
 import java.util.*;
 
 /**
- * Module that makes HTTP requests and sends forward responses.
+ * Module that makes HTTP requests and sends onMessage responses.
  * It constructs request input from variable number of Inputs, and
  *    de-constructs response output into specified Outputs using dot-notation names (e.g. values[3].car.id)
  * This module makes assumptions from input (GET uses URL params, POST uses body) and response (first found object is what we want)

@@ -1,11 +1,9 @@
 package com.unifina.signalpath.remote
 
-import com.unifina.data.FeedEvent
+
+import com.unifina.data.Event
 import com.unifina.datasource.DataSource
-import com.unifina.datasource.DataSourceEventQueue
 import com.unifina.signalpath.Input
-import com.unifina.signalpath.StringInput
-import com.unifina.signalpath.StringParameter
 import com.unifina.utils.Globals
 import com.unifina.utils.testutils.ModuleTestHelper
 import org.eclipse.paho.client.mqttv3.MqttClient
@@ -39,7 +37,7 @@ class MqttSpec extends Specification {
 		}
 		isRealtime() >> true
 	}
-	FeedEvent event
+	Event event
 
 	void "module outputs the messages"() {
 		TestableMqtt.mqttClient = mockClient

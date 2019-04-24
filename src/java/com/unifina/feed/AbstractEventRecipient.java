@@ -4,9 +4,8 @@ import java.lang.reflect.ParameterizedType;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.function.Consumer;
 
-import com.unifina.data.FeedEvent;
-import com.unifina.data.IEventRecipient;
 import com.unifina.datasource.IStartListener;
 import com.unifina.signalpath.AbstractSignalPathModule;
 import com.unifina.signalpath.Propagator;
@@ -22,7 +21,7 @@ import com.streamr.client.protocol.message_layer.ITimestamped;
  *
  * @param <ModuleClass> The type of objects than can be registered
  */
-public abstract class AbstractEventRecipient<ModuleClass, MessageClass extends ITimestamped> implements IEventRecipient, IStartListener {
+public abstract class AbstractEventRecipient<ModuleClass, MessageClass extends ITimestamped> implements Consumer<MessageClass>, IStartListener {
 
 	private final List<ModuleClass> modules = new ArrayList<>();
 	private final Propagator propagator = new Propagator();
@@ -55,8 +54,8 @@ public abstract class AbstractEventRecipient<ModuleClass, MessageClass extends I
 	}
 
 	@Override
-	public void receive(FeedEvent event) {
-		sendOutputFromModules(event);
+	public void accept(MessageClass message) {
+		sendOutputFromModules(message);
 		propagator.propagate();
 	}
 
@@ -70,6 +69,6 @@ public abstract class AbstractEventRecipient<ModuleClass, MessageClass extends I
 	 * modules. Propagation will take place immediately after calling this method.
 	 * @param event
 	 */
-	protected abstract void sendOutputFromModules(FeedEvent<MessageClass, ? extends IEventRecipient> event);
+	protected abstract void sendOutputFromModules(MessageClass event);
 
 }

@@ -1,8 +1,7 @@
 package com.unifina.feed.map;
 
 import com.streamr.client.protocol.message_layer.StreamMessage;
-import com.unifina.data.FeedEvent;
-import com.unifina.data.IEventRecipient;
+import com.streamr.client.utils.StreamPartition;
 import com.unifina.domain.data.Stream;
 import com.unifina.exceptions.StreamFieldChangedException;
 import com.unifina.feed.StreamEventRecipient;
@@ -20,25 +19,24 @@ import java.util.*;
  * with a corresponding name. Other values are ignored.
  *
  * Note that the type of value is unchecked and must match with the output type.
- * @author Henri
  */
-public class MapMessageEventRecipient extends StreamEventRecipient<AbstractSignalPathModule, StreamMessage> {
+public class MapMessageEventRecipient extends StreamEventRecipient {
 
 	private Map<String, List<Output>> outputsByName = null;
 
-	public MapMessageEventRecipient(Globals globals, Stream stream, Set<Integer> partitions) {
+	public MapMessageEventRecipient(Globals globals, Stream stream, Collection<StreamPartition> partitions) {
 		super(globals, stream, partitions);
 	}
 
 	@Override
-	protected void sendOutputFromModules(FeedEvent<StreamMessage, ? extends IEventRecipient> event) {
+	protected void sendOutputFromModules(StreamMessage streamMessage) {
 		if (outputsByName == null) {
 			initCacheMap();
 		}
 
 		Map msg;
 		try {
-			msg = event.content.getContent();
+			msg = streamMessage.getContent();
 		} catch (IOException e) {
 			msg = new HashMap();
 		}

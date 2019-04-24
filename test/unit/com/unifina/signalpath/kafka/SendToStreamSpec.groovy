@@ -4,18 +4,18 @@ import com.streamr.client.protocol.message_layer.MessageRef
 import com.streamr.client.protocol.message_layer.StreamMessage
 import com.streamr.client.protocol.message_layer.StreamMessageV30
 import com.unifina.BeanMockingSpecification
-import com.unifina.data.FeedEvent
+import com.unifina.data.Event
 import com.unifina.datasource.HistoricalDataSource
 import com.unifina.datasource.RealtimeDataSource
-import com.unifina.domain.data.Feed
+
 import com.unifina.domain.data.Stream
 import com.unifina.domain.security.SecUser
 import com.unifina.feed.NoOpStreamListener
-import com.unifina.feed.StreamMessageKeyProvider
-import com.unifina.feed.cassandra.CassandraHistoricalFeed
+
+import com.unifina.feed.cassandra.CassandraMessageSource
 import com.unifina.feed.map.MapMessageEventRecipient
 import com.unifina.security.Userish
-import com.unifina.service.FeedService
+
 import com.unifina.service.PermissionService
 import com.unifina.service.StreamService
 import com.unifina.signalpath.SignalPath
@@ -70,7 +70,7 @@ class SendToStreamSpec extends BeanMockingSpecification {
 
 		def feed = new Feed()
 		feed.id = Feed.KAFKA_ID
-		feed.backtestFeed = CassandraHistoricalFeed.getName()
+		feed.backtestFeed = CassandraMessageSource.getName()
 		feed.eventRecipientClass = MapMessageEventRecipient.getName()
 		feed.keyProviderClass = StreamMessageKeyProvider.getName()
 		feed.streamListenerClass = NoOpStreamListener.getName()
@@ -306,10 +306,10 @@ class SendToStreamSpec extends BeanMockingSpecification {
 	}
 
 	void "events should be produced to DataSource event queue in historical mode"() {
-		List<FeedEvent> enqueuedEvents = []
+		List<Event> enqueuedEvents = []
 		globals.dataSource = new HistoricalDataSource(globals) {
 			@Override
-			void enqueueEvent(FeedEvent feedEvent) {
+			void enqueueEvent(Event feedEvent) {
 				super.enqueueEvent(feedEvent)
 				enqueuedEvents.push(feedEvent)
 			}
@@ -343,7 +343,7 @@ class SendToStreamSpec extends BeanMockingSpecification {
 
 					// Correct events have been inserted to event queue
 					for (int i=0; i<inputValues.strIn.size(); i++) {
-						FeedEvent e = enqueuedEvents.remove(0)
+						Event e = enqueuedEvents.remove(0)
 						assert e != null
 
 						// Values are correct

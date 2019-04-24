@@ -1,7 +1,8 @@
 package com.unifina.serialization
 
-import com.unifina.data.FeedEvent
-import com.streamr.client.protocol.message_layer.ITimestamped;
+
+import com.streamr.client.protocol.message_layer.ITimestamped
+import com.unifina.data.Event;
 import com.unifina.service.SignalPathService
 import com.unifina.signalpath.SignalPath
 import grails.util.Holders
@@ -14,14 +15,12 @@ class SerializationRequest implements ITimestamped {
 		this.timestamp = timestamp
 	}
 
-	void serialize(SignalPath sp) {
-		SignalPathService service = Holders.getApplicationContext().getBean(SignalPathService)
-		service.saveState(sp)
-	}
-
-	static FeedEvent makeFeedEvent(SignalPath signalPath) {
+	static Event makeFeedEvent(final SignalPath signalPath) {
 		Date timestamp = new Date()
-		return new FeedEvent(new SerializationRequest(timestamp), timestamp, signalPath)
+		return new Event(new SerializationRequest(timestamp), timestamp, 0L, () -> {
+			SignalPathService service = Holders.getApplicationContext().getBean(SignalPathService)
+			service.saveState(signalPath)
+		})
 	}
 
 	@Override

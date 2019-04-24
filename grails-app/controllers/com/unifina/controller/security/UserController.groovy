@@ -1,6 +1,6 @@
 package com.unifina.controller.security
 
-import com.unifina.domain.data.Feed
+
 import com.unifina.domain.security.Key
 import com.unifina.domain.security.Permission
 import com.unifina.domain.security.SecRole
@@ -11,7 +11,6 @@ import com.unifina.exceptions.UserCreationFailedException
 import grails.converters.JSON
 import grails.plugin.springsecurity.SpringSecurityUtils
 import grails.plugin.springsecurity.annotation.Secured
-import grails.plugin.springsecurity.authentication.dao.NullSaltSource
 import org.springframework.dao.DataIntegrityViolationException
 
 @Secured(["ROLE_ADMIN"])

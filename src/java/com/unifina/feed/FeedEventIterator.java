@@ -1,7 +1,6 @@
 package com.unifina.feed;
 
-import com.unifina.data.FeedEvent;
-import com.unifina.data.IEventRecipient;
+import com.unifina.data.Event;
 import org.apache.log4j.Logger;
 
 import java.io.Closeable;
@@ -12,21 +11,18 @@ import com.streamr.client.protocol.message_layer.ITimestamped;
 /**
  * A helper class to apply a static recipient and iterator to FeedEvents,
  * whose content is pulled from a separate content iterator.
- * @author Henri
  */
-public class FeedEventIterator<MessageClass extends ITimestamped, EventRecipientClass extends IEventRecipient>
-		implements Iterator<FeedEvent<MessageClass, EventRecipientClass>>, Closeable {
+public class FeedEventIterator<MessageClass extends ITimestamped>
+		implements Iterator<Event<MessageClass>>, Closeable {
 
 	private Iterator<MessageClass> contentIterator;
-	private EventRecipientClass recipient;
-	private AbstractHistoricalFeed feed;
+	private AbstractEventRecipient recipient;
 
 	private final Logger log = Logger.getLogger(FeedEventIterator.class);
 
-	public FeedEventIterator(Iterator<MessageClass> contentIterator, AbstractHistoricalFeed feed, EventRecipientClass recipient) {
+	public FeedEventIterator(Iterator<MessageClass> contentIterator, AbstractEventRecipient recipient) {
 		this.contentIterator = contentIterator;
 		this.recipient = recipient;
-		this.feed = feed;
 	}
 
 	@Override
@@ -35,13 +31,12 @@ public class FeedEventIterator<MessageClass extends ITimestamped, EventRecipient
 	}
 
 	@Override
-	public FeedEvent<MessageClass, EventRecipientClass> next() {
+	public Event<MessageClass> next() {
 		MessageClass content = contentIterator.next();
 		if (content==null)
 			return null;
 
-		FeedEvent<MessageClass, EventRecipientClass> fe = new FeedEvent<>(content, content.getTimestampAsDate(), recipient);
-		fe.feed = feed;
+		Event<MessageClass> fe = new Event<>(content, content.getTimestampAsDate(), recipient);
 		fe.iterator = this;
 		return fe;
 	}
@@ -61,7 +56,7 @@ public class FeedEventIterator<MessageClass extends ITimestamped, EventRecipient
 			}
 	}
 
-	public EventRecipientClass getRecipient() {
+	public AbstractEventRecipient getRecipient() {
 		return recipient;
 	}
 

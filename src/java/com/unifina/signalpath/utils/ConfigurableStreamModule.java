@@ -1,15 +1,12 @@
 package com.unifina.signalpath.utils;
 
-import com.unifina.data.IStreamRequirement;
 import com.unifina.domain.data.Stream;
 import com.unifina.signalpath.*;
 import grails.converters.JSON;
 import org.codehaus.groovy.grails.web.json.JSONArray;
 import org.codehaus.groovy.grails.web.json.JSONObject;
 
-import java.util.HashSet;
 import java.util.Map;
-import java.util.Set;
 
 /**
  * This module creates inputs and outputs on configuration time
@@ -23,7 +20,7 @@ import java.util.Set;
  * This module works well with the MapMessageEventRecipient event recipient class.
  * @author Henri
  */
-public class ConfigurableStreamModule extends AbstractStreamSourceModule implements IStreamRequirement {
+public class ConfigurableStreamModule extends AbstractStreamSourceModule {
 
 	transient protected JSONObject streamConfig = null;
 

@@ -1,6 +1,6 @@
 package com.unifina.service
 
-import com.unifina.domain.data.Feed
+
 import com.unifina.domain.data.Stream
 import com.unifina.domain.marketplace.Category
 import com.unifina.domain.marketplace.FreeSubscription

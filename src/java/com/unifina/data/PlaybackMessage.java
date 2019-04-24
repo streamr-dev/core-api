@@ -8,12 +8,12 @@ class PlaybackMessage implements ITimestamped {
 	private final String code;
 	private final Date timestamp;
 
-	static FeedEvent<PlaybackMessage, IEventRecipient> newStartEvent(Date timestamp) {
-		return new FeedEvent<>(new PlaybackMessage("start", timestamp), timestamp, null);
+	static Event<PlaybackMessage> newStartEvent(Date timestamp) {
+		return new Event<>(new PlaybackMessage("start", timestamp), timestamp, 0L, null);
 	}
 
-	static FeedEvent<PlaybackMessage, IEventRecipient> newEndEvent(Date timestamp) {
-		return new FeedEvent<>(new PlaybackMessage("end", timestamp), timestamp, null);
+	static Event<PlaybackMessage> newEndEvent(Date timestamp) {
+		return new Event<>(new PlaybackMessage("end", timestamp), timestamp, 0L, null);
 	}
 
 	private PlaybackMessage(String code, Date timestamp) {
