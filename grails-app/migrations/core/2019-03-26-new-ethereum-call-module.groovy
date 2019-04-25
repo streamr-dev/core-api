@@ -1,12 +1,15 @@
 package core
 databaseChangeLog = {
 	changeSet(author: "jtakalai", id: "2019-03-26-new-ethereum-call-module") {
+		//deprecate previous streamr-web3 module
+		sql("UPDATE module SET hide = true, name = CONCAT(name, ' (Old)') WHERE id = 1020;")
+
 		insert(tableName: "module") {
 			column(name: "id", valueNumeric: 1150)
 			column(name: "version", valueNumeric: 0)
 			column(name: "category_id", valueNumeric: 1001) // Ethereum
 			column(name: "implementing_class", value: "com.unifina.signalpath.blockchain.SendEthereumTransaction")
-			column(name: "name", value: "EthereumSend")
+			column(name: "name", value: "EthereumCall")
 			column(name: "js_module", value: "GenericModule")
 			column(name: "type", value: "module")
 			column(name: "module_package_id", valueNumeric: 1)

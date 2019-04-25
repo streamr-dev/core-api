@@ -1,6 +1,10 @@
 package core
 databaseChangeLog = {
+
 	changeSet(author: "jwolff", id: "2019-04-08-ethereumj-compilation-web3j-deploy") {
+		//deprecate previous streamr-web3 compile/deploy module
+		sql("UPDATE module SET hide = true, name = CONCAT(name, ' (Old)') WHERE id = 1021;")
+
 		insert(tableName: "module") {
 			column(name: "id", valueNumeric: 1151)
 			column(name: "version", valueNumeric: 0)
