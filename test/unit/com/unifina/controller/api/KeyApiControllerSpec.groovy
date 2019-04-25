@@ -464,6 +464,7 @@ class KeyApiControllerSpec extends ControllerSpecification {
 		1 * controller.permissionService.grant(me, stream, key, Permission.Operation.READ, false)
 		response.status == 200
 		Key.get(key.id).name == "new key name"
+		response.json.permission == "read"
 	}
 
 	void "updateStreamKey() updates write permission for key"() {
@@ -495,5 +496,6 @@ class KeyApiControllerSpec extends ControllerSpecification {
 		1 * controller.permissionService.grant(me, stream, key, Permission.Operation.WRITE, false)
 		response.status == 200
 		Key.get(key.id).name == "new key name"
+		response.json.permission == "write"
 	}
 }

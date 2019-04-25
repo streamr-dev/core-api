@@ -151,10 +151,8 @@ class KeyApiController {
 		}
 		Map json = new JsonSlurper().parseText((String) request.JSON)
 		String permission = request.JSON?.permission
-		if (permission) {
-			if (permission != "read" && permission != "write") {
-				throw new ApiException(400, "INVALID_PARAMETER", "permission field in json should be 'read' or 'write'.")
-			}
+		if (permission && permission != "read" && permission != "write") {
+			throw new ApiException(400, "INVALID_PARAMETER", "permission field in json should be 'read' or 'write'.")
 		}
 		if (json.name != null && json.name.trim() != "") {
 			useResource(Stream, params.streamId) { res ->
@@ -174,6 +172,10 @@ class KeyApiController {
 			}
 		}
 		response.status = 200
-		render(k.toMap() as JSON)
+		Map result = k.toMap()
+		if (permission) {
+			result["permission"] = permission
+		}
+		render(result as JSON)
 	}
 }
