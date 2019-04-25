@@ -1,23 +1,18 @@
 package com.unifina.signalpath.blockchain;
 
-import com.google.common.collect.ImmutableMap;
-import com.google.gson.Gson;
-import com.google.gson.JsonArray;
-import com.google.gson.JsonObject;
-import com.google.gson.JsonParser;
-import com.mashape.unirest.http.Unirest;
 import com.mashape.unirest.http.exceptions.UnirestException;
 import com.unifina.datasource.IStartListener;
 import com.unifina.datasource.IStopListener;
-import com.unifina.service.SerializationService;
 import com.unifina.signalpath.*;
-import org.apache.commons.io.IOUtils;
 import org.apache.log4j.Logger;
 import org.json.JSONArray;
 import org.json.JSONException;
+import org.web3j.abi.EventValues;
+import org.web3j.abi.TypeReference;
+import org.web3j.abi.datatypes.Event;
+import org.web3j.protocol.core.methods.response.TransactionReceipt;
 
 import java.io.IOException;
-import java.io.InputStream;
 import java.util.*;
 
 /**
@@ -28,7 +23,9 @@ public class GetEvents extends AbstractSignalPathModule implements ContractEvent
 
 	private final EthereumContractInput contract = new EthereumContractInput(this, "contract");
 	private final ListOutput errors = new ListOutput(this, "errors");
+
 	private Map<String, List<Output>> outputsByEvent; // event name -> [output for each event argument]
+	private Map<String, Event> web3jEvents; // event name -> Web3j.Event object
 
 	private EthereumModuleOptions ethereumOptions = new EthereumModuleOptions();
 
@@ -81,14 +78,34 @@ public class GetEvents extends AbstractSignalPathModule implements ContractEvent
 		try {
 			String txHash = events.getJSONObject(0).getString("transactionHash");
 			log.info(String.format("Received event '%s'", txHash));
-			JsonObject decodedEvent = fetchDecodedEvent(txHash);
-			log.info(String.format("Decoded event '%s': '%s'", txHash, decodedEvent));
-			if (decodedEvent.get("error") != null) {
-				onError(decodedEvent.get("error").toString());
-			} else {
-				sendEventOutputs(decodedEvent);
+
+			// TODO: web3j
+			TransactionReceipt txr = Web3jHelper.getTransactionReceipt(null, txHash);
+
+			for (EthereumABI.Event abiEvent : contract.getValue().getABI().getEvents()) {
+				List<Output> eventOutputs = outputsByEvent.get(abiEvent.name);
+				Event web3jEvent = web3jEvents.get(abiEvent.name);
+				List<EventValues> valueList = Web3jHelper.extractEventParameters(web3jEvent, txr);
+				if (valueList == null) {
+					throw new RuntimeException("Failed to get event params");	// TODO: what happens when you throw in poller thread?
+				}
+
+				if (abiEvent.inputs.size() > 0) {
+					// TODO: parse events from EventValues
+					int n = Math.min(eventOutputs.size(), valueList.size());
+					for (int i = 0; i < n; i++) {
+						String value = valueList.get(i).getIndexedValues().get(i).toString();
+						Output output = eventOutputs.get(i);
+						EthereumCall.convertAndSend(output, value);
+					}
+				} else {
+					// events with no arguments just get a true sent as a sign of event being triggered
+					eventOutputs.get(0).send(Boolean.TRUE);
+				}
 			}
-		} catch (JSONException | UnirestException | IOException e) {
+			asyncPropagator.propagate();
+
+		} catch (JSONException | IOException e) {
 			onError(e.getMessage());
 		}
 	}
@@ -108,6 +125,7 @@ public class GetEvents extends AbstractSignalPathModule implements ContractEvent
 		if (contract.hasValue()) {
 			EthereumABI abi = contract.getValue().getABI();
 			for (EthereumABI.Event abiEvent : abi.getEvents()) {
+				// create outputs
 				List<Output> eventOutputs = new ArrayList<>();
 				if (abiEvent.inputs.size() > 0) {
 					for (EthereumABI.Slot arg : abiEvent.inputs) {
@@ -123,6 +141,18 @@ public class GetEvents extends AbstractSignalPathModule implements ContractEvent
 					addOutput(output);
 				}
 				outputsByEvent.put(abiEvent.name, eventOutputs);
+
+				// cache the web3j Event object
+				ArrayList<TypeReference<?>> params = new ArrayList<TypeReference<?>>();
+				for (EthereumABI.Slot s : abiEvent.inputs) {
+					try {
+						params.add(Web3jHelper.makeTypeReference(s.type));
+					} catch (ClassNotFoundException e) {
+						throw new RuntimeException(e);
+					}
+				}
+				Event web3jEvent = new Event(abiEvent.name, params);
+				web3jEvents.put(abiEvent.name, web3jEvent);
 			}
 		}
 
@@ -136,44 +166,5 @@ public class GetEvents extends AbstractSignalPathModule implements ContractEvent
 		ModuleOptions options = ModuleOptions.get(config);
 		ethereumOptions.writeNetworkOption(options);
 		return config;
-	}
-
-	// TODO: web3j should do the decoding; i.e. change to Java 8, or backport org.web3j.abi.FunctionReturnDecoder
-	private JsonObject fetchDecodedEvent(String txHash) throws UnirestException, IOException {
-		String url = ethereumOptions.getServer() + "/events";
-		String body = new Gson().toJson(ImmutableMap.of(
-			"abi", contract.getValue().getABI().toString(),
-			"address", contract.getValue().getAddress(),
-			"txHash", txHash
-		));
-		InputStream eventJsonStream = Unirest.post(url)
-			.header("Accept", "application/json")
-			.header("Content-Type", "application/json")
-			.body(body)
-			.asJson()
-			.getRawBody();
-
-		String responseString = IOUtils.toString(eventJsonStream, "UTF-8");
-		return new JsonParser().parse(responseString).getAsJsonObject();
-	}
-
-	private void sendEventOutputs(JsonObject decodedEvent) {
-		for (EthereumABI.Event abiEvent : contract.getValue().getABI().getEvents()) {
-			JsonArray values = decodedEvent.getAsJsonArray(abiEvent.name);
-			if (values != null) {
-				List<Output> eventOutputs = outputsByEvent.get(abiEvent.name);
-				if (abiEvent.inputs.size() > 0) {
-					int n = Math.min(eventOutputs.size(), values.size());
-					for (int i = 0; i < n; i++) {
-						String value = values.get(i).getAsString();
-						Output output = eventOutputs.get(i);
-						EthereumCall.convertAndSend(output, value);
-					}
-				} else {
-					eventOutputs.get(0).send(Boolean.TRUE);
-				}
-			}
-		}
-		asyncPropagator.propagate();
 	}
 }
