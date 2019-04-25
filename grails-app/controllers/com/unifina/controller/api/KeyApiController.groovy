@@ -143,6 +143,16 @@ class KeyApiController {
 		render(k.toMap() as JSON)
 	}
 
+
+	private boolean hasPermission(Permission.Operation operation, Set<Permission> permissions) {
+		for (Permission p : permissions) {
+			if (p.operation == operation) {
+				return true
+			}
+		}
+		return false
+	}
+
 	@StreamrApi(authenticationLevel = AuthLevel.USER)
 	def updateStreamKey() {
 		Key k = Key.get(params.keyId)
@@ -159,13 +169,22 @@ class KeyApiController {
 				k.name = json.name.trim()
 				if (permission) {
 					Permission.Operation operation = Permission.Operation.fromString(permission)
-					k.getPermissions().collect().each { p ->
-						k.removeFromPermissions(p)
-					}
-					permissionService.grant(request.apiUser, res, k, operation, false)
-					// If granting write, grant also read
-					if (operation == Permission.Operation.WRITE) {
-						permissionService.grant(request.apiUser, res, k, Permission.Operation.READ, false)
+					SecUser user = request.apiUser
+					boolean logIfDenied = false
+					if (operation == Permission.Operation.READ) {
+						if (!hasPermission(Permission.Operation.READ, k.getPermissions())) {
+							permissionService.grant(user, res, k, Permission.Operation.READ, logIfDenied)
+						}
+						if (hasPermission(Permission.Operation.WRITE, k.getPermissions())) {
+							permissionService.revoke(user, res, k, Permission.Operation.WRITE, logIfDenied)
+						}
+					} else if (operation == Permission.Operation.WRITE) {
+						if (!hasPermission(Permission.Operation.READ, k.getPermissions())) {
+							permissionService.grant(user, res, k, Permission.Operation.READ, logIfDenied)
+						}
+						if (!hasPermission(Permission.Operation.WRITE, k.getPermissions())) {
+							permissionService.grant(user, res, k, Permission.Operation.WRITE, logIfDenied)
+						}
 					}
 				}
 				k.save(flush: true, failOnError: true)
