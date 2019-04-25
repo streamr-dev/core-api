@@ -8,8 +8,7 @@ import grails.util.Holders;
 import java.io.Serializable;
 import java.util.Map;
 
-public class
-EthereumModuleOptions implements Serializable {
+public class EthereumModuleOptions implements Serializable {
 	private String network = MapTraversal.getString(Holders.getConfig(), "streamr.ethereum.defaultNetwork");
 	private double gasPriceWei = 20e9; // 20 Gwei
 
@@ -63,14 +62,6 @@ EthereumModuleOptions implements Serializable {
 			network = networkOption.getString();
 			getServer(); // Throws if the network not valid
 		}
-	}
-
-	public String getDatacoinAddress(){
-		String address = MapTraversal.getString(Holders.getConfig(), "streamr.ethereum.datacoinAddress");
-		if (address == null) {
-			throw new RuntimeException("No datacoin address found in config");
-		}
-		return address;
 	}
 
 	public String getServer() {

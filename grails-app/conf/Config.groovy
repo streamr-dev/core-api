@@ -262,8 +262,6 @@ environments {
 	}
 }
 
-streamr.ethereum.datacoinAddress = System.getProperty("streamr.ethereum.datacoinAddress") ? System.getProperty("streamr.ethereum.datacoinAddress") : "0x0cf0ee63788a0849fe5297f3407f701e122cc023"
-
 /**
  * Streamr-web3 Ethereum bridge address
  */

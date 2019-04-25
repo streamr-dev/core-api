@@ -70,7 +70,6 @@ class UrlMappings {
 		"/api/v1/users/me"(method: "DELETE", controller: "userApi", action: "delete")
 
 		"/api/v1/users/me/keys"(resources: "keyApi", excludes: ["create", "edit", "update"]) { resourceClass = SecUser }
-		"/api/v1/users/me/balance"(controller: "userApi", action: "getCurrentUserBalance")
 		"/api/v1/users/me/products"(controller: "productApi", action: "index") { operation = Permission.Operation.SHARE }
 		"/api/v1/users/me/changePassword"(controller: "userApi", action: "changePassword")
 		"/api/v1/users/me/image"(controller: "userApi", action: "uploadAvatarImage")
