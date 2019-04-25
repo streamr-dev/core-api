@@ -29,51 +29,31 @@ public class GetEthereumContractAt extends AbstractSignalPathModule {
 	@Override
 	public void init() {
 		addInput(addressParam);
-		addressParam.setUpdateOnChange(true);
+		addInput(abiParam);
 		abiParam.setUpdateOnChange(true);
 		abiParam.setCanConnect(false);
-		addressParam.setDrivingInput(true);
-		addressParam.setCanToggleDrivingInput(false);
 	}
 
 	@Override
 	protected void onConfiguration(Map<String, Object> config) {
 		String address = addressParam.getValue();
-		String oldAddress = (String) config.get("oldAddress");
 		String abiString = MapTraversal.getString(config, "params[1].value");
 
 		ModuleOptions options = ModuleOptions.get(config);
 		ethereumOptions = EthereumModuleOptions.readFrom(options);
 
-		// TODO: check address is valid?
+		abi = new EthereumABI(abiString);
+
+		// TODO: add etherscan lookup
+
+		// parsing failed, ABI is empty or invalid, or etherscan didn't return anything
+		if (abi == null || abi.getFunctions().size() < 1) {
+			abi = new EthereumABI("[{\"type\":\"fallback\",\"payable\":true}]");
+		}
+
+		// TODO: check address is valid? Use web3j utils?
 		if (address.length() > 2) {
-			addInput(abiParam);
 			addOutput(out);
-
-			// if address didn't change, ABI must've changed so onConfiguration is fired
-			if (address.equals(oldAddress)) {
-				abi = new EthereumABI(abiString);
-			} else {
-				// ABI param not yet added to UI => query streamr-web3 for known ABI
-				try {
-					String networkName = ethereumOptions.getNetwork();
-					String responseString = Unirest.get(ethereumOptions.getServer() + "/contract?at=" + address + "&network=" + networkName).asString().getBody();
-					JsonObject response = new JsonParser().parse(responseString).getAsJsonObject();
-					if (response.has("abi")) {
-						JsonArray abiArray = response.getAsJsonArray("abi");
-						abi = new EthereumABI(abiArray);
-						abiParam.receive(abiArray.toString());
-					}
-				} catch (UnirestException e) {
-					throw new RuntimeException(e);
-				}
-			}
-
-			// parsing failed, ABI is empty or invalid, or etherscan didn't return anything
-			if (abi == null || abi.getFunctions().size() < 1) {
-				abi = new EthereumABI("[{\"type\":\"fallback\",\"payable\":true}]");
-			}
-
 			contract = new EthereumContract(address, abi);
 		} else {
 			contract = null;
@@ -83,8 +63,6 @@ public class GetEthereumContractAt extends AbstractSignalPathModule {
 	@Override
 	public Map<String, Object> getConfiguration() {
 		Map<String, Object> config = super.getConfiguration();
-
-		config.put("oldAddress", addressParam.getValue());
 
 		if (contract != null) {
 			config.put("contract", contract.toMap());
@@ -96,8 +74,15 @@ public class GetEthereumContractAt extends AbstractSignalPathModule {
 		return config;
 	}
 
+	/**
+	 * GetContractAt may be activated during run-time when the address is updated.
+	 * The resulting contract should point at the updated address.
+	 */
 	@Override
 	public void sendOutput() {
+		String abiString = abiParam.getValue();
+		EthereumABI abi = new EthereumABI(abiString);
+
 		if (contract != null && !addressParam.getValue().equals(contract.getAddress()) && abi != null) {
 			contract = new EthereumContract(addressParam.getValue(), abi);
 		}
