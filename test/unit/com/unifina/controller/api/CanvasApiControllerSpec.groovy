@@ -9,8 +9,10 @@ import com.unifina.security.AllowRole
 import com.unifina.service.ApiService
 import com.unifina.service.CanvasService
 import com.unifina.service.SignalPathService
+import com.unifina.signalpath.AbstractJavaCodeWrapperModuleException
 import com.unifina.signalpath.JavaCompilerErrorMessage
 import com.unifina.signalpath.ModuleException
+import com.unifina.signalpath.ModuleExceptionMessage
 import com.unifina.signalpath.custom.CompilationErrorMessage
 import grails.converters.JSON
 import grails.test.mixin.Mock
@@ -162,13 +164,16 @@ class CanvasApiControllerSpec extends ControllerSpecification {
 
 	void "show() lets load a canvas in invalid state"() {
 		setup:
-		Map<String, Object> error = new HashMap<>()
-		error.put("line", 5)
-		error.put("msg", "syntax error")
-		List list = new ArrayList()
-		list.add(error)
-		List<CompilationErrorMessage> exceptions = new ArrayList<>()
-		exceptions.add(new JavaCompilerErrorMessage(1, list))
+		List<ModuleExceptionMessage> msgs = new ArrayList<>()
+
+		CompilationErrorMessage msg = new CompilationErrorMessage()
+		msg.addError(10, "syntax error")
+		msg.addError(11, "stupid programmer error")
+		msgs.add(new JavaCompilerErrorMessage(1, msg))
+
+		CompilationErrorMessage msg2 = new CompilationErrorMessage()
+		msg2.addError(100, "syntax terror")
+		msgs.add(new JavaCompilerErrorMessage(2, msg2))
 
 		when:
 		params.id = canvas1.id
@@ -178,9 +183,9 @@ class CanvasApiControllerSpec extends ControllerSpecification {
 		response.status == 200
 		response.json.size() > 0
 		1 * canvasService.authorizedGetById("1", me, Permission.Operation.READ) >> canvas1
-		1 * controller.canvasService.reconstruct(_, _) >> { throw new ModuleException("mocked", null, exceptions) }
-		response.json.compileErrors[0].line == 5
-		response.json.compileErrors[0].message == "syntax error"
+		1 * controller.canvasService.reconstruct(_, _) >> { throw new AbstractJavaCodeWrapperModuleException("mocked", null, msgs) }
+		response.json.compileErrors[0].errors[0].line == 10
+		response.json.compileErrors[0].errors[0].msg == "syntax error"
 	}
 
 	void "save() creates a new canvas and renders it as json"() {
@@ -247,13 +252,16 @@ class CanvasApiControllerSpec extends ControllerSpecification {
 
 	def "update() lets save canvas in invalid state"() {
 		setup:
-		Map<String, Object> error = new HashMap<>()
-		error.put("line", 5)
-		error.put("msg", "syntax error")
-		List list = new ArrayList()
-		list.add(error)
-		List<CompilationErrorMessage> exceptions = new ArrayList<>()
-		exceptions.add(new JavaCompilerErrorMessage(1, list))
+		List<ModuleExceptionMessage> msgs = new ArrayList<>()
+
+		CompilationErrorMessage msg = new CompilationErrorMessage()
+		msg.addError(10, "syntax error")
+		msg.addError(11, "stupid programmer error")
+		msgs.add(new JavaCompilerErrorMessage(1, msg))
+
+		CompilationErrorMessage msg2 = new CompilationErrorMessage()
+		msg2.addError(100, "syntax terror")
+		msgs.add(new JavaCompilerErrorMessage(2, msg2))
 
 		params.id = "1"
 		request.JSON = [
@@ -268,9 +276,9 @@ class CanvasApiControllerSpec extends ControllerSpecification {
 		then:
 		response.status == 200
 		1 * canvasService.authorizedGetById("1", me, Permission.Operation.WRITE) >> canvas1
-		1 * canvasService.updateExisting(canvas1, _, me) >> { throw new ModuleException("mocked", null, exceptions) }
-		response.json.compileErrors[0].line == 5
-		response.json.compileErrors[0].message == "syntax error"
+		1 * canvasService.updateExisting(canvas1, _, me) >> { throw new AbstractJavaCodeWrapperModuleException("mocked", null, msgs) }
+		response.json.compileErrors[0].errors[0].line == 10
+		response.json.compileErrors[0].errors[0].msg == "syntax error"
 	}
 
 

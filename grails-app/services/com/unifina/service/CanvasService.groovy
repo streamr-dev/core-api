@@ -75,6 +75,7 @@ class CanvasService {
 		} catch (ModuleException e) {
 			// Save canvas even if it is in an invalid state. For front-end auto-save.
 			canvas.json = extractJson(canvas.json, command)
+			canvas.name = command.name
 			canvas.save(flush: true, failOnError: true)
 			reconstructException = e
 		}
