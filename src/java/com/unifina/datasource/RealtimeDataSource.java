@@ -3,7 +3,8 @@ package com.unifina.datasource;
 
 import com.streamr.client.protocol.message_layer.StreamMessage;
 import com.streamr.client.utils.StreamPartition;
-import com.unifina.data.ClockTickEvent;
+import com.unifina.data.ClockTick;
+import com.unifina.data.Event;
 import com.unifina.data.RealtimeEventQueue;
 import com.unifina.feed.StreamMessageSource;
 import com.unifina.feed.redis.MultipleRedisMessageSource;
@@ -32,11 +33,11 @@ public class RealtimeDataSource extends DataSource {
 			secTimer.scheduleAtFixedRate(new TimerTask() {
 											 @Override
 											 public void run() {
-												 final ClockTickEvent event = new ClockTickEvent(new Date());
-												 accept(event);
+												 final ClockTick tick = new ClockTick(new Date());
+												 accept(new Event<>(tick, tick.getTimestampAsDate(), 0L, null));
 											 }
 										 },
-				new Date(now.getTime() + (1000 - (now.getTime() % 1000))), // Time till next even second
+				new Date(now.getTime() + (1000 - (now.getTime() % 1000))), // First run on next even second
 				1000);   // Repeat every second
 
 			// Schedule serialization events

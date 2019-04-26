@@ -4,7 +4,6 @@ import com.unifina.api.InvalidAPIKeyException
 import com.unifina.api.InvalidUsernameAndPasswordException
 import com.unifina.api.NotFoundException
 import com.unifina.domain.ExampleType
-
 import com.unifina.domain.data.Stream
 import com.unifina.domain.security.Key
 import com.unifina.domain.security.SecRole
@@ -16,8 +15,8 @@ import com.unifina.security.Userish
 import grails.plugin.springsecurity.SpringSecurityService
 import org.codehaus.groovy.grails.commons.GrailsApplication
 import org.springframework.context.MessageSource
-import org.springframework.security.crypto.password.PasswordEncoder
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder
+import org.springframework.security.crypto.password.PasswordEncoder
 import org.springframework.validation.FieldError
 
 class UserService {
@@ -30,7 +29,7 @@ class UserService {
 	StreamService streamService
 	CanvasService canvasService
 
-	def createUser(Map properties, List<SecRole> roles = null, List<Feed> feeds = null, List<ModulePackage> packages = null) {
+	SecUser createUser(Map properties, List<SecRole> roles = null, List<ModulePackage> packages = null) {
 		def secConf = grailsApplication.config.grails.plugin.springsecurity
 		ClassLoader cl = this.getClass().getClassLoader()
 		SecUser user = cl.loadClass(secConf.userLookup.userDomainClassName).newInstance(properties)
@@ -67,7 +66,6 @@ class UserService {
 		} else {
 			// Save roles, feeds and module packages
 			addRoles(user, roles)
-			setFeeds(user, feeds ?: [])
 			setModulePackages(user, packages ?: [])
 
 			// Transfer permissions that were attached to sign-up invitation before user existed
@@ -114,14 +112,6 @@ class UserService {
 		roles.each { role ->
 			userRoleClass.create user, role
 		}
-	}
-
-	/** Adds/removes Feed read permissions so that user's permissions match given ones */
-	def setFeeds(user, List<Feed> feeds) {
-		List<Feed> existing = permissionService.get(Feed, user)
-		feeds.findAll { !existing.contains(it) }.each { permissionService.systemGrant(user, it) }
-		existing.findAll { !feeds.contains(it) }.each { permissionService.systemRevoke(user, it) }
-		return feeds
 	}
 
 	/** Adds/removes ModulePackage read permissions so that user's permissions match given ones */

@@ -4,7 +4,7 @@ import com.unifina.BeanMockingSpecification
 import com.unifina.api.ValidationException
 
 import com.unifina.domain.data.Stream
-import com.unifina.feed.NoOpStreamListener
+
 import com.unifina.service.StreamService
 import com.unifina.utils.Globals
 import com.unifina.utils.testutils.ModuleTestHelper

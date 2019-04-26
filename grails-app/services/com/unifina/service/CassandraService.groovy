@@ -5,6 +5,8 @@ import com.datastax.driver.core.ResultSet
 import com.datastax.driver.core.Row
 import com.datastax.driver.core.Session
 import com.unifina.domain.data.Stream
+import com.unifina.feed.DataRange
+import com.unifina.feed.util.StreamMessageComparator
 import groovy.transform.CompileStatic
 import org.codehaus.groovy.grails.commons.GrailsApplication
 import org.springframework.beans.factory.DisposableBean
@@ -78,8 +80,8 @@ class CassandraService implements DisposableBean {
 		}
 	}
 
-	StreamMessage getLatestStreamMessage(Stream stream, int partition) {
-		ResultSet resultSet = getSession().execute("SELECT payload FROM stream_data WHERE id = ? AND partition = ? ORDER BY ts DESC, sequence_no DESC LIMIT 1", stream.getId(), partition)
+	private StreamMessage getExtremeStreamMessage(Stream stream, int partition, boolean latest) {
+		ResultSet resultSet = getSession().execute("SELECT payload FROM stream_data WHERE id = ? AND partition = ? ORDER BY ts ${latest ? "DESC" : "ASC"}, sequence_no ${latest ? "DESC" : "ASC"} LIMIT 1", stream.getId(), partition)
 		Row row = resultSet.one()
 		if (row) {
 			return StreamMessage.fromJson(new String(row.getBytes("payload").array(), StandardCharsets.UTF_8))
@@ -88,24 +90,50 @@ class CassandraService implements DisposableBean {
 		}
 	}
 
-	StreamMessage getLatestFromAllPartitions(Stream stream) {
+	private StreamMessage getExtremeFromAllPartitions(Stream stream, boolean latest) {
 		final List<StreamMessage> messages = new ArrayList<>()
 		for (int i = 0; i < stream.getPartitions(); i++) {
-			final StreamMessage msg = getLatestStreamMessage(stream, i)
+			final StreamMessage msg = getExtremeStreamMessage(stream, i, latest)
 			messages.add(msg)
 		}
 		if (messages.size() < 1) {
 			return null
 		}
-		Date now = new Date(0)
-		StreamMessage latest = null
+
+		StreamMessage extreme = null
+		Comparator<StreamMessage> streamMessageComparator = new StreamMessageComparator()
 		for (StreamMessage m : messages) {
-			if (m.getTimestampAsDate().after(now)) {
-				now = m.getTimestampAsDate()
-				latest = m
+			if (extreme == null || streamMessageComparator.compare(m, extreme) == (latest ? 1 : -1)) {
+				extreme = m
 			}
 		}
-		return latest
+		return extreme
+	}
+
+	StreamMessage getLatestStreamMessage(Stream stream, int partition) {
+		return getExtremeStreamMessage(stream, partition, true)
+	}
+
+	StreamMessage getEarliestStreamMessage(Stream stream, int partition) {
+		return getExtremeStreamMessage(stream, partition, false)
+	}
+
+	StreamMessage getLatestFromAllPartitions(Stream stream) {
+		return getExtremeFromAllPartitions(stream, true)
+	}
+
+	StreamMessage getEarliestFromAllPartitions(Stream stream) {
+		return getExtremeFromAllPartitions(stream, false)
+	}
+
+	DataRange getDataRange(Stream stream) {
+		StreamMessage earliest = getEarliestFromAllPartitions(stream)
+		if (!earliest) {
+			return null
+		} else {
+			StreamMessage latest = getLatestFromAllPartitions(stream)
+			return new DataRange(earliest.getTimestampAsDate(), latest.getTimestampAsDate())
+		}
 	}
 
 	void destroy() throws Exception {

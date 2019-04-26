@@ -1,6 +1,7 @@
 package com.unifina.feed;
 
 import com.unifina.data.Event;
+import com.unifina.data.HistoricalEvent;
 import org.apache.log4j.Logger;
 
 import java.io.Closeable;
@@ -17,6 +18,7 @@ public class FeedEventIterator<MessageClass extends ITimestamped>
 
 	private Iterator<MessageClass> contentIterator;
 	private AbstractEventRecipient recipient;
+	private long counter = 0;
 
 	private final Logger log = Logger.getLogger(FeedEventIterator.class);
 
@@ -36,8 +38,13 @@ public class FeedEventIterator<MessageClass extends ITimestamped>
 		if (content==null)
 			return null;
 
-		Event<MessageClass> fe = new Event<>(content, content.getTimestampAsDate(), recipient);
-		fe.iterator = this;
+		Event<MessageClass> fe = new HistoricalEvent<>(
+			content,
+			content.getTimestampAsDate(),
+			counter++,
+			recipient,
+			this
+		);
 		return fe;
 	}
 

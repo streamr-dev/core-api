@@ -521,8 +521,6 @@ class PermissionService {
 			return "canvas"
 		} else if (Dashboard.isAssignableFrom(resourceClass)) {
 			return "dashboard"
-		} else if (Feed.isAssignableFrom(resourceClass)) {
-			return "feed"
 		} else if (ModulePackage.isAssignableFrom(resourceClass)) {
 			return "modulePackage"
 		} else if (Product.isAssignableFrom(resourceClass)) {

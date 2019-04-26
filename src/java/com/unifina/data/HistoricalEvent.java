@@ -10,7 +10,7 @@ public class HistoricalEvent<ContentClass extends ITimestamped> extends Event<Co
 
 	private final FeedEventIterator<ContentClass> iterator;
 
-	public HistoricalEvent(ContentClass content, Date timestamp, long sequenceNumber,  Consumer<Event> consumer, FeedEventIterator<ContentClass> iterator) {
+	public HistoricalEvent(ContentClass content, Date timestamp, long sequenceNumber,  Consumer<ContentClass> consumer, FeedEventIterator<ContentClass> iterator) {
 		super(content, timestamp, sequenceNumber, consumer);
 		this.iterator = iterator;
 	}
@@ -18,6 +18,5 @@ public class HistoricalEvent<ContentClass extends ITimestamped> extends Event<Co
 	public FeedEventIterator<ContentClass> getIterator() {
 		return iterator;
 	}
-
 
 }

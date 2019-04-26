@@ -1,7 +1,6 @@
 package com.unifina.domain.security
 
 import com.unifina.domain.dashboard.Dashboard
-
 import com.unifina.domain.data.Stream
 import com.unifina.domain.marketplace.Product
 import com.unifina.domain.marketplace.Subscription
@@ -28,7 +27,6 @@ class Permission {
 	 */
 	Canvas canvas
 	Dashboard dashboard
-	Feed feed
 	ModulePackage modulePackage
 	Stream stream
 	Product product
@@ -57,7 +55,7 @@ class Permission {
 	/** When does this Permission expire? null == forever valid */
 	Date endsAt
 
-	static belongsTo = [Canvas, Dashboard, Feed, ModulePackage, Stream, Subscription]
+	static belongsTo = [Canvas, Dashboard, ModulePackage, Stream, Subscription]
 
 	static constraints = {
 		user(nullable: true)

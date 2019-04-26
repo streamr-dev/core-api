@@ -26,7 +26,7 @@ import java.security.cert.Certificate;
 /**
  * Eclipse MqttClient wrapper
  */
-public class Mqtt extends AbstractSignalPathModule implements MqttCallback, IEventRecipient, IStartListener, IStopListener {
+public class Mqtt extends AbstractSignalPathModule implements MqttCallback, IStartListener, IStopListener {
 
 	private static final Logger log = Logger.getLogger(Mqtt.class);
 
@@ -197,17 +197,10 @@ public class Mqtt extends AbstractSignalPathModule implements MqttCallback, IEve
 		final MqttMessageEvent event = new MqttMessageEvent(getGlobals().time);
 		event.message = mqttMessage;
 		// push mqtt message into Event queue; it will later call this.receive
-		getGlobals().getDataSource().enqueueEvent(new Event<>(event, event.timestamp, this));
-	}
-
-	@Override
-	public void receive(Event event) {
-		if (event.content instanceof MqttMessageEvent) {
-			sendOutput(((MqttMessageEvent) event.content).message);
+		getGlobals().getDataSource().accept(new Event<>(event, event.timestamp, 0L, (message) -> {
+			sendOutput(message);
 			getPropagator().propagate();
-		} else {
-			super.receive(event);
-		}
+		}));
 	}
 
 	private Propagator getPropagator() {
@@ -217,8 +210,8 @@ public class Mqtt extends AbstractSignalPathModule implements MqttCallback, IEve
 		return asyncPropagator;
 	}
 
-	public void sendOutput(MqttMessage msg) {
-		message.send(new String(msg.getPayload()));
+	public void sendOutput(MqttMessageEvent event) {
+		message.send(new String(event.message.getPayload()));
 	}
 
 	@Override

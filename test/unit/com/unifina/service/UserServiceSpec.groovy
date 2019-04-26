@@ -7,7 +7,7 @@ import com.unifina.api.NotFoundException
 import com.unifina.domain.security.*
 import com.unifina.domain.signalpath.Module
 import com.unifina.domain.signalpath.ModulePackage
-import com.unifina.feed.NoOpStreamListener
+
 import grails.plugin.springsecurity.SpringSecurityService
 import grails.test.mixin.Mock
 import grails.test.mixin.TestFor

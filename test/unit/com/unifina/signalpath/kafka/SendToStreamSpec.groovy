@@ -10,7 +10,6 @@ import com.unifina.datasource.RealtimeDataSource
 
 import com.unifina.domain.data.Stream
 import com.unifina.domain.security.SecUser
-import com.unifina.feed.NoOpStreamListener
 
 import com.unifina.feed.cassandra.CassandraMessageSource
 import com.unifina.feed.map.MapMessageEventRecipient

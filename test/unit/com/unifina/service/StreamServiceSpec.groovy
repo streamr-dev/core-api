@@ -15,7 +15,7 @@ import com.unifina.domain.security.Permission
 import com.unifina.domain.security.SecUser
 import com.unifina.domain.signalpath.Canvas
 import com.unifina.feed.AbstractStreamListener
-import com.unifina.feed.NoOpStreamListener
+
 import grails.test.mixin.Mock
 import grails.test.mixin.TestFor
 import org.codehaus.groovy.grails.commons.DefaultGrailsApplication
@@ -177,7 +177,7 @@ class StreamServiceSpec extends Specification {
 
 		service.createStream(params, new SecUser(username: "me").save(validate: false))
 		then:
-		1 * service.instantiateListener(_ as Stream) >> streamListener
+		1 * service.getStreamListener(_ as Stream) >> streamListener
 		1 * streamListener.addToConfiguration(params.config, _ as Stream)
 	}
 

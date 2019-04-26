@@ -36,7 +36,6 @@ public class SerializerImpl implements Serializer {
 		conf.registerSerializer(JSONObject.Null.class, new JSONElementSerializer(), true);
 		conf.registerSerializer(JSONArray.class, new JSONElementSerializer(), true);
 		conf.registerSerializer(Canvas.class, new DomainClassSerializer(), false);
-		conf.registerSerializer(Feed.class, new DomainClassSerializer(), false);
 		conf.registerSerializer(Module.class, new DomainClassSerializer(), false);
 		conf.registerSerializer(SecUser.class, new DomainClassSerializer(), false);
 		conf.registerSerializer(Stream.class, new DomainClassSerializer(), false);

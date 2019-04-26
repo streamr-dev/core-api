@@ -37,6 +37,8 @@ public class SendToStream extends ModuleWithSideEffects {
 
 	private MessageChainUtil msgChainUtil;
 
+	private long counter = 0;
+
 	@Override
 	public void init() {
 		// Pre-fetch services for more predictable performance
@@ -45,11 +47,6 @@ public class SendToStream extends ModuleWithSideEffects {
 		addInput(streamParameter);
 		streamParameter.setUpdateOnChange(true);
 		msgChainUtil = new MessageChainUtil(getGlobals().getUserId());
-
-		// TODO: don't rely on static ids
-		Feed feedFilter = new Feed();
-		feedFilter.setId(7L);
-		streamParameter.setFeedFilter(feedFilter);
 	}
 
 	private void ensureServices() {
@@ -78,27 +75,8 @@ public class SendToStream extends ModuleWithSideEffects {
 	}
 
 	@Override
-	protected void activateWithoutSideEffects(){
-		Globals globals = getGlobals();
-
-		// Create the message locally and route it to the stream locally, without actually producing to the stream
-		StreamMessage msg = msgChainUtil.getStreamMessage(streamParameter.getValue(), getGlobals().time, inputValuesToMap());
-
-		// Find the Feed implementation for the target Stream
-		AbstractFeed feed = getGlobals().getDataSource().getFeedById(streamParameter.getValue().getFeed().getId());
-
-		// Find the IEventRecipient for this message
-		IEventRecipient eventRecipient = feed.getEventRecipientForMessage(msg);
-
-		if (eventRecipient != null) {
-			Event event = new Event(msg, globals.time, eventRecipient);
-			getGlobals().getDataSource().enqueueEvent(event);
-		}
-	}
-
-	@Override
 	protected String getNotificationAboutActivatingWithoutSideEffects() {
-		return this.getName()+": In historical mode, events written to Stream '" + streamParameter.getValue().getName()+"' are only available within this Canvas.";
+		return this.getName()+": In historical mode, events are not written to stream '" + streamParameter.getValue().getName()+"'.";
 	}
 
 	private Map<String, Object> inputValuesToMap() {
@@ -139,11 +117,6 @@ public class SendToStream extends ModuleWithSideEffects {
 			return;
 
 		authenticateStream(stream);
-
-		if (stream.getFeed().getId() != Feed.KAFKA_ID) {
-			throw new IllegalArgumentException(this.getName()+": Unable to write to stream type: " +
-				stream.getFeed().getName());
-		}
 
 		if (stream.getConfig()==null) {
 			throw new IllegalStateException(this.getName()+": Stream " + stream.getName() +

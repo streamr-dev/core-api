@@ -9,7 +9,7 @@ import com.unifina.domain.data.Stream
 import com.unifina.domain.security.Key
 import com.unifina.domain.security.Permission
 import com.unifina.domain.security.SecUser
-import com.unifina.feed.NoOpStreamListener
+
 import com.unifina.service.*
 import grails.test.mixin.Mock
 import grails.test.mixin.TestFor

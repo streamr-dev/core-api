@@ -4,7 +4,7 @@ package com.unifina.controller.data
 import com.unifina.domain.data.Stream
 import com.unifina.domain.security.SecUser
 import com.unifina.domain.signalpath.Module
-import com.unifina.feed.NoOpStreamListener
+
 import com.unifina.service.StreamService
 import com.unifina.service.PermissionService
 import grails.plugin.springsecurity.SpringSecurityService

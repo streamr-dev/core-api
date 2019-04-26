@@ -64,7 +64,6 @@ public class RealtimeEventQueue extends DataSourceEventQueue {
 
 	@Override
 	public boolean process(Event event) {
-
 		long time = event.getTimestamp().getTime();
 
 		if (firstEvent) {

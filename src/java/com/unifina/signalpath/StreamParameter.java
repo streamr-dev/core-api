@@ -2,6 +2,7 @@ package com.unifina.signalpath;
 
 import com.unifina.domain.data.Stream;
 import com.unifina.exceptions.StreamNotFoundException;
+import com.unifina.service.StreamService;
 import grails.util.Holders;
 
 import java.util.Map;
@@ -10,7 +11,6 @@ import java.util.Map;
 public class StreamParameter extends Parameter<Stream> {
 
 	private boolean checkModuleId = false;
-	private Feed feedFilter = null;
 
 	public StreamParameter(AbstractSignalPathModule owner, String name) {
 		super(owner, name, null, "Stream");
@@ -42,14 +42,9 @@ public class StreamParameter extends Parameter<Stream> {
 		if (value != null) {
 			config.put("value", value.getId());
 			config.put("streamName", value.getName());
-			config.put("feed", value.getFeed().getId());
 			if (checkModuleId) {
 				config.put("checkModuleId", true);
 			}
-		}
-
-		if (feedFilter != null) {
-			config.put("feedFilter", feedFilter.getId());
 		}
 
 		return config;
@@ -70,9 +65,9 @@ public class StreamParameter extends Parameter<Stream> {
 
 	private Stream getStreamById(Object id) {
 		if (id instanceof String) {
-			FeedService fs = getFeedService();
+			StreamService ss = Holders.getApplicationContext().getBean(StreamService.class);
 			try {
-				return fs.getStream((String) id);
+				return ss.getStream((String) id);
 			} catch (StreamNotFoundException e) {
 				throw new ModuleCreationFailedException(e);
 			}
@@ -80,10 +75,6 @@ public class StreamParameter extends Parameter<Stream> {
 			throw new RuntimeException("Numeric stream ids no longer supported");
 		}
 		return (Stream) id;
-	}
-
-	private FeedService getFeedService() {
-		return Holders.getApplicationContext().getBean(FeedService.class);
 	}
 
 	public boolean getCheckModuleId() {
@@ -97,14 +88,6 @@ public class StreamParameter extends Parameter<Stream> {
 	 */
 	public void setCheckModuleId(boolean checkModuleId) {
 		this.checkModuleId = checkModuleId;
-	}
-
-	public Feed getFeedFilter() {
-		return feedFilter;
-	}
-
-	public void setFeedFilter(Feed feedFilter) {
-		this.feedFilter = feedFilter;
 	}
 
 }
