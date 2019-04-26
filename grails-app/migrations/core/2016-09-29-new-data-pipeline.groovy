@@ -5,7 +5,7 @@ databaseChangeLog = {
 		sql("""
 			UPDATE feed SET
 				realtime_feed = 'com.unifina.feed.redis.RedisFeed',
-				backtest_feed = 'com.unifina.feed.cassandra.CassandraMessageSource',
+				backtest_feed = 'com.unifina.feed.cassandra.CassandraHistoricalFeed',
 				discovery_util_class = NULL,
 				key_provider_class = 'com.unifina.feed.StreamrBinaryMessageKeyProvider',
 				message_source_class = 'com.unifina.feed.redis.MultipleRedisMessageSource',
