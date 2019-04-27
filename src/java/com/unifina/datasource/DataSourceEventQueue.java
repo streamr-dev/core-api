@@ -17,6 +17,7 @@ import java.util.Queue;
 public abstract class DataSourceEventQueue {
 	private static final Logger log = Logger.getLogger(DataSourceEventQueue.class);
 	private static final int QUEUE_HARD_LIMIT = 10000;
+	protected static final int CLOCK_TICK_INTERVAL_MILLIS = 1000; // tick every second
 
 	private final MasterClock masterClock;
 	private final List<IDayListener> dayListeners = new ArrayList<>();
@@ -24,8 +25,10 @@ public abstract class DataSourceEventQueue {
 	private Queue<Event> queue;
 	protected final Globals globals;
 	private boolean abort = false;
-	protected long lastHandledTime = 0;
+	protected long lastReportedClockTick = 0;
 	private DateTime nextDay;
+
+	protected EventQueueMetrics eventQueueMetrics = new EventQueueMetrics();
 
 	/**
 	 * sync must be set to true if events are enqueued from multiple threads
@@ -89,7 +92,11 @@ public abstract class DataSourceEventQueue {
 	 */
 	public abstract boolean process(Event event);
 
-	protected abstract EventQueueMetrics retrieveMetricsAndReset();
+	EventQueueMetrics retrieveMetricsAndReset() {
+		EventQueueMetrics returnMetrics = eventQueueMetrics;
+		eventQueueMetrics = new EventQueueMetrics();
+		return returnMetrics;
+	}
 
 	protected abstract void doStop();
 
@@ -98,28 +105,21 @@ public abstract class DataSourceEventQueue {
 	}
 
 	protected void initTimeReporting(long firstTime) {
-		if (lastHandledTime == 0) {
-			lastHandledTime = firstTime;
+		if (lastReportedClockTick == 0) {
+			lastReportedClockTick = firstTime;
 			DateTime now = new DateTime(firstTime, DateTimeZone.UTC);
 			nextDay = now.minusMillis(now.getMillisOfDay()).plusDays(1);
 		}
 	}
 
-	protected void reportTime(long eventTime) {
-		/*
-		 * With event-based clock in historical mode, the time between events can be multiple seconds.
-		 * However each second should be reported. New events may appear in the queue between
-		 * reporting each second, we must check for this!
-		 */
-		int initialQueueSize = queue.size();
-
-		while (lastHandledTime + 1000 <= eventTime && queue.size() == initialQueueSize) {
-			lastHandledTime += 1000;
-			Date d = new Date(lastHandledTime);
+	protected void tickClockIfNecessary(long eventTime) {
+		if (lastReportedClockTick + CLOCK_TICK_INTERVAL_MILLIS <= eventTime) {
+			lastReportedClockTick += CLOCK_TICK_INTERVAL_MILLIS;
+			Date d = new Date(lastReportedClockTick);
 			globals.time = d;
 
 			// Handle possible day turn
-			if (lastHandledTime > nextDay.getMillis()) {
+			if (lastReportedClockTick > nextDay.getMillis()) {
 				int dlCount = dayListeners.size();
 
 				// Report the new day
@@ -158,4 +158,5 @@ public abstract class DataSourceEventQueue {
 	protected Event poll() {
 		return queue.poll();
 	}
+
 }

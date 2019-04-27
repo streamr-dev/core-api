@@ -29,7 +29,7 @@ import grails.test.mixin.support.GrailsUnitTestMixin
 import java.security.AccessControlException
 
 @TestMixin(GrailsUnitTestMixin)
-@Mock([SecUser, Stream, Feed])
+@Mock([SecUser, Stream])
 class SendToStreamSpec extends BeanMockingSpecification {
 
 	static class AllPermissionService extends PermissionService {
@@ -60,24 +60,13 @@ class SendToStreamSpec extends BeanMockingSpecification {
     def setup() {
 		defineBeans {
 			streamService(FakeStreamService)
-			feedService(FeedService)
 			permissionService(AllPermissionService)
 		}
 
 		def user = new SecUser(name: "test user", username: 'test user')
 		user.save(failOnError: true, validate: false)
 
-		def feed = new Feed()
-		feed.id = Feed.KAFKA_ID
-		feed.backtestFeed = CassandraMessageSource.getName()
-		feed.eventRecipientClass = MapMessageEventRecipient.getName()
-		feed.keyProviderClass = StreamMessageKeyProvider.getName()
-		feed.streamListenerClass = NoOpStreamListener.getName()
-		feed.timezone = "UTC"
-		feed.save(validate: false, failOnError: true)
-
 		stream = new Stream()
-		stream.feed = feed
 		stream.id = stream.name = "stream-0"
 		stream.config = [fields: [
 			[name: "strIn", type: "string"],
@@ -86,7 +75,6 @@ class SendToStreamSpec extends BeanMockingSpecification {
 		stream.save(validate: false, failOnError: true)
 
 		Stream uiChannel = new Stream()
-		uiChannel.feed = feed
 		uiChannel.id = uiChannel.name = "uiChannel"
 		uiChannel.save(validate: false, failOnError: true)
 
@@ -203,7 +191,6 @@ class SendToStreamSpec extends BeanMockingSpecification {
 		createModule()
 
 		def s2 = new Stream()
-		s2.feed = Feed.load(Feed.KAFKA_ID)
 		s2.id = s2.name = "stream-1"
 		s2.config = Stream.load("stream-0").config
 		s2.save(validate: false, failOnError: true)
@@ -304,60 +291,4 @@ class SendToStreamSpec extends BeanMockingSpecification {
 		}.test()
 	}
 
-	void "events should be produced to DataSource event queue in historical mode"() {
-		List<Event> enqueuedEvents = []
-		globals.dataSource = new HistoricalDataSource(globals) {
-			@Override
-			void enqueueEvent(Event feedEvent) {
-				super.enqueueEvent(feedEvent)
-				enqueuedEvents.push(feedEvent)
-			}
-		}
-		globals.setRealtime(false)
-		createModule()
-
-		// Create the module that subscribes to our target stream
-		ConfigurableStreamModule sourceModule = new ConfigurableStreamModule()
-		sourceModule.init()
-		sourceModule.getInput("stream").receive(stream)
-		globals.dataSource.register(sourceModule)
-
-		when:
-		Map inputValues = [
-				strIn: ["a", "b", "c", "d"],
-				numIn: [1, 2, 3, 4].collect {it?.doubleValue()},
-		]
-		Map outputValues = [:]
-
-		then:
-		new ModuleTestHelper.Builder(module, inputValues, outputValues)
-				.overrideGlobals { globals }
-				.beforeEachTestCase {
-					globals.time = new Date()
-				}.afterEachTestCase {
-					// No messages have really been sent to the stream
-					assert mockStreamService.sentMessagesByChannel[stream.id] == null
-					// One notification has been sent to the parentSignalPath ui channel
-					assert mockStreamService.sentMessagesByChannel[module.parentSignalPath.uiChannel.id].size() == 1
-
-					// Correct events have been inserted to event queue
-					for (int i=0; i<inputValues.strIn.size(); i++) {
-						Event e = enqueuedEvents.remove(0)
-						assert e != null
-
-						// Values are correct
-						assert e.content.getContent().strIn == inputValues.strIn[i]
-						assert e.content.getContent().numIn == inputValues.numIn[i]
-
-						// Event recipient is correct
-						assert e.recipient.modules.find {it == sourceModule}
-					}
-
-					// No other events have been inserted
-					assert enqueuedEvents.isEmpty()
-
-					mockStreamService.sentMessagesByChannel = [:]
-				}.test()
-
-	}
 }

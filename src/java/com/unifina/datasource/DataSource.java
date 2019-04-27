@@ -123,7 +123,7 @@ public abstract class DataSource implements Consumer<Event>, Closeable {
 			throw new RuntimeException("Error while processing event queue", e);
 		}
 
-		log.info("DataSource has stopped.");
+		log.info("DataSource has stopped. " + retrieveMetricsAndReset());
 	}
 
 	@Override

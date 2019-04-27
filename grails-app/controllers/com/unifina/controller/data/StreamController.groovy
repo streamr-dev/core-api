@@ -1,6 +1,8 @@
 package com.unifina.controller.data
 
 import com.unifina.domain.security.Permission.Operation
+import com.unifina.domain.signalpath.Module
+import com.unifina.signalpath.utils.ConfigurableStreamModule
 import org.apache.commons.lang.exception.ExceptionUtils
 
 
@@ -24,6 +26,8 @@ class StreamController {
 
 	def permissionService
 	def streamService
+
+	private Long cachedStreamModuleId
 
 	def list() {
 		SecUser user = springSecurityService.currentUser
@@ -49,7 +53,7 @@ class StreamController {
 			id: stream.id,
 			name: stream.name,
 			description: stream.description,
-			module: stream.feed.moduleId
+			module: getStreamModuleId()
 		]} as JSON)
 	}
 
@@ -61,15 +65,12 @@ class StreamController {
 
 		if (!justStarted && stream.hasErrors()) { log.info(stream.errors) }
 		if (justStarted || stream.hasErrors()) {
-			return [
-				stream: stream,
-				feeds: permissionService.get(Feed, user),
-				defaultFeed: Feed.findById(Feed.KAFKA_ID)
-			]
+			return [stream: stream]
 		}
 
 		flash.message = "Your stream has been created! " +
 				"You can start pushing realtime messages to the API or upload a message history from a csv file."
+
 		redirect(action: "show", id: stream.id)
 	}
 
@@ -237,5 +238,13 @@ class StreamController {
 		} else {
 			action.call(stream, user)
 		}
+	}
+
+	private Long getStreamModuleId() {
+		if (cachedStreamModuleId == null) {
+			cachedStreamModuleId = Module.findByImplementingClass(ConfigurableStreamModule.getName()).id
+		}
+
+		return cachedStreamModuleId
 	}
 }

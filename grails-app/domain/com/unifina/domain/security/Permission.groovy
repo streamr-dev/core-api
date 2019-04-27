@@ -63,12 +63,11 @@ class Permission {
 		invite(nullable: true)
 		canvas(nullable: true)
 		dashboard(nullable: true)
-		feed(nullable: true)
 		modulePackage(nullable: true)
 		stream(nullable: true)
 		product(nullable: true)
 		canvas(validator: { val, obj ->
-			[obj.canvas, obj.dashboard, obj.feed, obj.modulePackage, obj.stream, obj.product].count { it != null } == 1
+			[obj.canvas, obj.dashboard, obj.modulePackage, obj.stream, obj.product].count { it != null } == 1
 		})
 		subscription(nullable: true)
 		endsAt(nullable: true)
@@ -129,9 +128,6 @@ class Permission {
 		}
 		if (dashboard) {
 			map["dashboard"] = dashboard.id
-		}
-		if (feed) {
-			map["feed"] = feed.id
 		}
 		if (modulePackage) {
 			map["modulePackage"] = modulePackage.id

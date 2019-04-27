@@ -7,29 +7,22 @@ import com.unifina.domain.data.Stream
 import com.unifina.utils.Globals
 import grails.test.mixin.Mock
 
-@Mock([Feed, Stream])
+@Mock([Stream])
 class StreamParameterSpec extends BeanMockingSpecification {
 
 	AbstractSignalPathModule ownerModule
 	StreamParameter streamParameter
 
 	def setup() {
-
-		Feed feed = new Feed()
-		feed.id = 6152
-		feed.save(failOnError: true, validate: false)
-
 		Stream stream = new Stream()
 		stream.id = "stream-id"
 		stream.name = "stream-name"
-		stream.feed = feed
 		stream.save(failOnError: true, validate: false)
 
 		ownerModule = Mock(AbstractSignalPathModule)
 		streamParameter = new StreamParameter(ownerModule, "name")
 		Globals globals = Mock(Globals)
 		ownerModule.getGlobals() >> globals
-		mockBean(FeedService, new FeedService())
 	}
 
 	def "has typeName of 'Stream'"() {

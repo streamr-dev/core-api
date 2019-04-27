@@ -27,17 +27,14 @@ public class SignalPathRunner extends Thread {
 	private boolean running = false;
 	private Throwable thrownOnStartUp;
 
-	public SignalPathRunner(SignalPath signalPath, Globals globals, boolean adhoc) {
-		this(Collections.singleton(signalPath), globals, adhoc);
+	public SignalPathRunner(SignalPath signalPath, Globals globals) {
+		this(Collections.singleton(signalPath), globals);
 	}
 
-	private SignalPathRunner(Collection<SignalPath> signalPaths, Globals globals, boolean adhoc) {
+	private SignalPathRunner(Collection<SignalPath> signalPaths, Globals globals) {
 		this.runnerId = IdGenerator.get();
 		this.globals = globals;
 
-		globals.setDataSource(createDataSource(adhoc, globals));
-		globals.setRealtime(!adhoc);
-		globals.init();
 		for (SignalPath sp : signalPaths) {
 			sp.setGlobals(globals);
 		}
@@ -71,6 +68,7 @@ public class SignalPathRunner extends Thread {
 			log.debug("Waiting for " + runnerId + " to start...");
 			if (target && thrownOnStartUp != null) {
 				log.error("Giving up on waiting because run threw exception.");
+				break;
 			} else {
 				wait(500);
 			}
@@ -167,14 +165,6 @@ public class SignalPathRunner extends Thread {
 				// Delayed-delete the references to allow UI to catch up
 				signalPathService.deleteReferences(sp, true);
 			}
-		}
-	}
-
-	private static DataSource createDataSource(boolean adhoc, Globals globals) {
-		if (adhoc) {
-			return new HistoricalDataSource(globals);
-		} else {
-			return new RealtimeDataSource(globals);
 		}
 	}
 

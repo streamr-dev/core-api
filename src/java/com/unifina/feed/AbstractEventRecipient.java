@@ -25,14 +25,20 @@ public abstract class AbstractEventRecipient<ModuleClass, MessageClass extends I
 
 	private final List<ModuleClass> modules = new ArrayList<>();
 	private final Propagator propagator = new Propagator();
-	private final Class<?> parameterizedClass;
+	private final Class<?> moduleClass;
 
 	public AbstractEventRecipient(Globals globals) {
 		if (globals != null && globals.getDataSource() != null) {
 			globals.getDataSource().addStartListener(this);
 		}
-		ParameterizedType pt = (ParameterizedType) this.getClass().getGenericSuperclass();
-		parameterizedClass = (Class<?>) pt.getActualTypeArguments()[0];
+
+		// Traverse class hierarchy up until we find a class that reveals the ModuleClass generic
+		Class clazz = this.getClass();
+		while (!(clazz.getGenericSuperclass() instanceof ParameterizedType)) {
+			clazz = clazz.getSuperclass();
+		}
+		ParameterizedType pt = (ParameterizedType) clazz.getGenericSuperclass();
+		moduleClass = (Class<?>) pt.getActualTypeArguments()[0];
 	}
 
 	@Override
@@ -41,9 +47,9 @@ public abstract class AbstractEventRecipient<ModuleClass, MessageClass extends I
 	}
 
 	public void register(ModuleClass module) {
-		if (!parameterizedClass.isAssignableFrom(module.getClass())) {
+		if (!moduleClass.isAssignableFrom(module.getClass())) {
 			throw new IllegalArgumentException("Can not register module of type: " + module.getClass() +
-				", required type: " + parameterizedClass + ". Module: " + module);
+				", required type: " + moduleClass + ". Module: " + module);
 		} else if (!modules.contains(module)) {
 			modules.add(module);
 			if (module instanceof AbstractSignalPathModule) {

@@ -13,20 +13,18 @@ import grails.test.mixin.TestFor
 import spock.lang.Specification
 
 @TestFor(StreamController)
-@Mock([SecUser, Stream, Feed, Module, PermissionService, StreamService])
+@Mock([SecUser, Stream, Module, PermissionService, StreamService])
 class StreamControllerSpec extends Specification {
 
-	Feed feed
 	SecUser user
 	Stream stream
 	Module module
 
 	void setup() {
 		module = new Module(id: 1).save(validate: false)
-		feed = new Feed(streamListenerClass: NoOpStreamListener.name, module: module).save(validate: false)
 		user = new SecUser(username: "me", password: "foo").save(validate:false)
 
-		stream = new Stream(name: "dummy", description: "dummy", feed: feed)
+		stream = new Stream(name: "dummy", description: "dummy")
 		stream.id = "dummy"
 		stream.save(validate: false)
 
@@ -49,7 +47,6 @@ class StreamControllerSpec extends Specification {
 		when:
 		params.name = "Test stream"
 		params.description = "Test stream"
-		params.feed = feed.id
 		params.format = "html"
 		request.method = 'POST'
 		controller.create()

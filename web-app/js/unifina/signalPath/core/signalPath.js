@@ -120,8 +120,8 @@ var SignalPath = (function () {
                         }
                     }
                 }
-                if (item.resultType == "stream") { // is stream, specifies module
-                    moduleId = item.feed.module
+                if (item.resultType == 'stream') { // is stream, specifies module
+                    moduleId = 147 // do this properly in new frontend
                     options.params = [{
                         name: 'stream',
                         value: item.id

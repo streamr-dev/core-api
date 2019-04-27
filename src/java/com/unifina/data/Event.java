@@ -13,6 +13,10 @@ public class Event<ContentClass extends ITimestamped> implements Comparable<Even
 	private final Consumer<ContentClass> consumer;
 
 	public Event(ContentClass content, Date timestamp, long sequenceNumber, Consumer<ContentClass> consumer) {
+		if (timestamp == null) {
+			throw new IllegalArgumentException("timestamp can't be null!");
+		}
+
 		this.content = content;
 		this.timestamp = timestamp;
 		this.sequenceNumber = sequenceNumber;

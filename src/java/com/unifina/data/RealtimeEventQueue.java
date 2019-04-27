@@ -14,7 +14,6 @@ public class RealtimeEventQueue extends DataSourceEventQueue {
 	private static final int LOGGING_INTERVAL = 10000; // set to 0 for no logging
 
 	private boolean firstEvent = true;
-	private EventQueueMetrics eventQueueMetrics = new RealTimeEventQueueMetrics();
 
 	public RealtimeEventQueue(Globals globals, DataSource dataSource) {
 		super(true, globals, dataSource);
@@ -74,7 +73,7 @@ public class RealtimeEventQueue extends DataSourceEventQueue {
 		try {
 			// Never go backwards in time
 			if (globals.time == null || time > globals.time.getTime()) {
-				reportTime(time);
+				tickClockIfNecessary(time);
 				globals.time = event.getTimestamp();
 			}
 
@@ -88,13 +87,6 @@ public class RealtimeEventQueue extends DataSourceEventQueue {
 			log.error("Exception while processing event: "+event.toString(), e);
 			return true;
 		}
-	}
-
-	@Override
-	protected EventQueueMetrics retrieveMetricsAndReset() {
-		EventQueueMetrics returnMetrics = eventQueueMetrics;
-		eventQueueMetrics = new RealTimeEventQueueMetrics();
-		return returnMetrics;
 	}
 
 	@Override

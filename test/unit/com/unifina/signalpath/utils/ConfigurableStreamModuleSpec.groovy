@@ -14,10 +14,6 @@ class ConfigurableStreamModuleSpec extends Specification {
 	ConfigurableStreamModule module
 
 	def setup() {
-		defineBeans {
-			feedService(FeedService){ bean -> bean.autowire = true }
-		}
-
 		0.upto(4) {
 			def s = new Stream()
 			s.id = s.name = "stream-" + it

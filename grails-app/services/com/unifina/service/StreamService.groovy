@@ -60,16 +60,10 @@ class StreamService {
 			stream.name = Stream.DEFAULT_NAME
 		}
 
-		// If no feed given, API feed is used
-		if (stream.feed == null) {
-			stream.feed = Feed.load(Feed.KAFKA_ID)
-		}
 		Map config = stream.getStreamConfigAsMap()
 		if (!config.fields) {
 			config.fields = []
 		}
-		AbstractStreamListener streamListener = getStreamListener(stream)
-		streamListener.addToConfiguration(config, stream)
 		stream.config = gson.toJson(config)
 
 		if (!stream.validate()) {
@@ -79,9 +73,6 @@ class StreamService {
 		stream.save(failOnError: true)
 		permissionService.systemGrantAll(user, stream)
 
-		if (streamListener) {
-			streamListener.afterStreamSaved(stream)
-		}
 		return stream
 	}
 

@@ -213,7 +213,7 @@ $(function() {
 
 	function addModuleToCanvas(item) {
 		if (item.resultType == "stream") { // is stream, specifies module
-			SignalPath.addModule(item.feed.module, {
+			SignalPath.addModule(147, { // don't hard-code moduleId 147 in new frontend
 				params: [{
 					name: 'stream',
 					value: item.id

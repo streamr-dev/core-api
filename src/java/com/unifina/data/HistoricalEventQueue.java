@@ -8,7 +8,6 @@ import org.apache.log4j.Logger;
 
 import java.util.Date;
 import java.util.Map;
-import java.util.PriorityQueue;
 import java.util.Queue;
 import java.util.concurrent.PriorityBlockingQueue;
 
@@ -16,7 +15,6 @@ public class HistoricalEventQueue extends DataSourceEventQueue {
 	private static final Logger log = Logger.getLogger(HistoricalEventQueue.class);
 
 	private final int speed;
-	private EventQueueMetrics eventQueueMetrics = new HistoricalEventQueueMetrics();
 
 	public HistoricalEventQueue(Globals globals, DataSource dataSource) {
 		super(false, globals, dataSource);
@@ -25,7 +23,7 @@ public class HistoricalEventQueue extends DataSourceEventQueue {
 
 	@Override
 	protected Queue<Event> createQueue(int capacity) {
-		Queue<Event> queue = new PriorityQueue<>(capacity);
+		Queue<Event> queue = new PriorityBlockingQueue<>(capacity);
 
 		/**
 		 * Queue events at lower and upper bounds of selected playback range to ensure that MasterClock ticks through
@@ -66,9 +64,9 @@ public class HistoricalEventQueue extends DataSourceEventQueue {
 		while (!isEmpty() && !isAborted()) {
 			// Insert time events to the queue if necessary to "tick" the clock every second.
 			// This is needed if there are no actual stream events covering every second.
-			if (peek().getTimestamp().getTime() > lastHandledTime + 1000) {
+			if (peek().getTimestamp().getTime() > lastReportedClockTick + CLOCK_TICK_INTERVAL_MILLIS) {
 				// Insert a time event to the front of the queue, before the next real event
-				Date next = new Date(lastHandledTime + 1000);
+				Date next = new Date(lastReportedClockTick + CLOCK_TICK_INTERVAL_MILLIS);
 				final Event<ClockTick> event = new Event<>(new ClockTick(next), next, 0L, null);
 				enqueue(event);
 			}
@@ -117,10 +115,15 @@ public class HistoricalEventQueue extends DataSourceEventQueue {
 	public boolean process(Event event) {
 		long time = event.getTimestamp().getTime();
 
-		// Never go backwards in time
-		// TODO: this shouldn't be a concern...
+		if (globals.time.getTime() != lastReportedClockTick) {
+			log.warn("Gotcha!");
+		}
+
+		// Events across different streams/producers aren't necessarily ordered in time.
+		// Never report out-of-order time to modules to prevent weird effects.
+		// Instead, always use the latest observed time as globals.time.
 		if (globals.time==null || time > globals.time.getTime()) {
-			reportTime(time);
+			tickClockIfNecessary(time);
 
 			// TimeListeners can post events into the queue, make sure that this event is still the most recent one
 			if (!isEmpty() && event.compareTo(peek()) >= 0) {
@@ -131,16 +134,13 @@ public class HistoricalEventQueue extends DataSourceEventQueue {
 			globals.time = event.getTimestamp();
 		}
 
+		if (globals.time.getTime() != lastReportedClockTick && event.getContent() instanceof ClockTick) {
+			log.warn("Gotcha!");
+		}
+
 		// Handle event
 		event.dispatch();
 		return true;
-	}
-
-	@Override
-	protected EventQueueMetrics retrieveMetricsAndReset() {
-		EventQueueMetrics returnMetrics = eventQueueMetrics;
-		eventQueueMetrics = new HistoricalEventQueueMetrics();
-		return returnMetrics;
 	}
 
 	@Override

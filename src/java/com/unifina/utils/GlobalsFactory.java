@@ -21,15 +21,16 @@ import java.util.Map;
  */
 public class GlobalsFactory {
 	/**
-	 * Instantiate a Globals object. If user == null attempt to fetch currently logged-in user.
+	 * Instantiate a Globals object. Defaults to a non-running context.
 	 */
 	public static Globals createInstance(Map signalPathContext, SecUser user) {
-		if (user == null) {
-			SpringSecurityService springSecurityService = Holders.getApplicationContext().getBean(SpringSecurityService.class);
-			if (springSecurityService != null) {
-				user = (SecUser) springSecurityService.getCurrentUser();
-			}
-		}
-		return new Globals(signalPathContext, user);
+		return createInstance(signalPathContext, user, Globals.Mode.NOT_PLANNING_TO_RUN);
+	}
+
+	/**
+	 * Instantiate a Globals object. Defaults to a realtime context.
+	 */
+	public static Globals createInstance(Map signalPathContext, SecUser user, Globals.Mode mode) {
+		return new Globals(signalPathContext, user, mode);
 	}
 }

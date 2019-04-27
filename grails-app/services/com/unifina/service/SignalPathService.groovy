@@ -95,7 +95,11 @@ class SignalPathService {
 	 * @throws SerializationException if de-serialization fails when resuming from existing state
      */
 	void startLocal(Canvas canvas, Map signalPathContext, SecUser asUser) throws SerializationException {
-		Globals globals = GlobalsFactory.createInstance(signalPathContext, asUser)
+		Globals globals = GlobalsFactory.createInstance(
+			signalPathContext,
+			asUser,
+			canvas.adhoc ? Globals.Mode.HISTORICAL : Globals.Mode.REALTIME
+		)
 		SignalPath sp
 
 		// Instantiate the SignalPath
@@ -119,7 +123,7 @@ class SignalPathService {
 		sp.canvas = canvas
 
 		// Create the runner thread
-		SignalPathRunner runner = new SignalPathRunner(sp, globals, canvas.adhoc)
+		SignalPathRunner runner = new SignalPathRunner(sp, globals)
 
 		runner.addStartListener(new IStartListener() {
 			@Override
@@ -190,10 +194,10 @@ class SignalPathService {
 
 	@CompileStatic
 	List<Canvas> stopAllLocalCanvases() {
-		List canvases = []
+		List<Canvas> canvases = []
 		runners().each { String key, SignalPathRunner runner ->
 			if (stopLocalRunner(key)) {
-				canvases.addAll(runner.getSignalPaths()*.getCanvas())
+				canvases.addAll(runner.getSignalPaths().collect {it.canvas})
 			}
 		}
 		return canvases
@@ -405,7 +409,7 @@ class SignalPathService {
 		runnersById.remove(runner.runnerId)
 	}
 
-	public class ReconstructedResult {
+	class ReconstructedResult {
 		public Map map
 		public SignalPath signalPath
 
