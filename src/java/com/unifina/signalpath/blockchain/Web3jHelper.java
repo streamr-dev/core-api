@@ -59,16 +59,21 @@ public class Web3jHelper {
 			(eg ParamaterizedType references StaticArray5<Uint> for uint[5] or DynamicArray<StaticArray5<Address>> for address[5][])
 	 */
 
+
 	public static TypeReference makeTypeReference(String solidity_type) throws ClassNotFoundException {
+		return makeTypeReference(solidity_type,false);
+	}
+	public static TypeReference makeTypeReference(String solidity_type, final boolean indexed) throws ClassNotFoundException {
 		Matcher m = ARRAY_SUFFIX.matcher(solidity_type);
 		if(!m.find()) {
-			return TypeReference.create(getAtomicTypeClass(solidity_type));
+			final Class tc = getAtomicTypeClass(solidity_type);
+			return createTypeReference(tc, indexed);
 		}
 		String digits = m.group(1);
 		TypeReference baseTr = makeTypeReference(solidity_type.substring(0,solidity_type.length() - m.group(0).length()));
 		TypeReference<?> ref;
 		if (digits == null || digits.equals("")) {
-			ref = new TypeReference<DynamicArray>() {
+			ref = new TypeReference<DynamicArray>(indexed) {
 				@Override
 				public java.lang.reflect.Type getType(){
 					return new ParameterizedType() {
@@ -92,6 +97,10 @@ public class Web3jHelper {
 		}
 		else {
 			ref = new TypeReference.StaticArrayTypeReference<StaticArray>(Integer.parseInt(digits)){
+				@Override
+				public boolean isIndexed(){
+					return indexed;
+				}
 				@Override
 				public java.lang.reflect.Type getType(){
 					return new ParameterizedType() {
@@ -120,6 +129,7 @@ public class Web3jHelper {
 		}
 		return ref;
 	}
+
 
 	public static Type instantiateType(TypeReference ref, Object value) throws NoSuchMethodException, IllegalAccessException, InvocationTargetException, InstantiationException, ClassNotFoundException {
 		Class rc = ref.getClassType();
@@ -228,6 +238,27 @@ public class Web3jHelper {
 		}
 		return tr;
 	}
+	public static Function toWeb3jFunction(EthereumABI.Function fn, List args) throws ClassNotFoundException, NoSuchMethodException, InvocationTargetException, InstantiationException, IllegalAccessException {
+		List<String> solidity_inputtypes = new ArrayList<String>(fn.inputs.size());
+		List<String> solidity_outputtypes = new ArrayList<String>(fn.outputs.size());
+
+		for (int i = 0; i < fn.inputs.size(); i++) {
+			solidity_inputtypes.add(fn.inputs.get(i).type);
+		}
+		for (int i = 0; i < fn.outputs.size(); i++) {
+			solidity_outputtypes.add(fn.outputs.get(i).type);
+		}
+		return Web3jHelper.encodeFunction(fn.name, solidity_inputtypes, args, solidity_outputtypes);
+	}
+
+	public static Event toWeb3jEvent(EthereumABI.Event ev) throws ClassNotFoundException {
+		ArrayList<TypeReference<?>> params = new ArrayList<TypeReference<?>>();
+		for (EthereumABI.Slot s : ev.inputs) {
+			params.add(Web3jHelper.makeTypeReference(s.type, s.indexed));
+		}
+		Event web3jevent = new Event(ev.name, params);
+		return web3jevent;
+	}
 
 
 	public static List<EventValues> extractEventParameters(Event event, TransactionReceipt transactionReceipt) {
@@ -242,6 +273,16 @@ public class Web3jHelper {
 		return values;
 	}
 
+	/*
+		this is based on TypeReference.create(Class c), which doesn't expose the indexed flag
+	 */
+	protected static <T extends Type> TypeReference<T> createTypeReference(final Class<T> cls, boolean indexed) {
+		return new TypeReference<T>(indexed) {
+			public java.lang.reflect.Type getType() {
+				return cls;
+			}
+		};
+	}
 
 	public static BigInteger asBigInteger(Object arg) {
 		if (arg instanceof BigInteger) {

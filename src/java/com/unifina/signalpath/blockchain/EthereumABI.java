@@ -100,6 +100,7 @@ public class EthereumABI implements Serializable {
 	public static class Slot implements Serializable {
 		public String name;
 		public String type;
+		public boolean indexed = false;
 	}
 
 	/** Ethereum contract member function */

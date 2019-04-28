@@ -343,20 +343,21 @@ public class SendEthereumTransaction extends ModuleWithSideEffects {
 				return null;
 			}
 			for (EthereumABI.Event e : abi.getEvents()) {
-				ArrayList<TypeReference<?>> params = new ArrayList<TypeReference<?>>();
-				for (EthereumABI.Slot s : e.inputs) {
-					params.add(Web3jHelper.makeTypeReference(s.type));
-				}
-				Event web3jevent = new Event(e.name, params);
+				Event web3jevent = Web3jHelper.toWeb3jEvent(e);
 				List<EventValues> valueList = Web3jHelper.extractEventParameters(web3jevent, txr);
 				if (valueList == null) {
 					continue;
 				}
 				for (EventValues ev : valueList) {
 					List<Object> objs = new ArrayList<Object>();
-					List<Type> niv = ev.getNonIndexedValues();
-					for (Type t : niv) {
-						objs.add(t.getValue());
+					// indexed and non-indexed event args are saved differently in logs and must be retrieved by different methods
+					// see https://solidity.readthedocs.io/en/v0.5.3/contracts.html#events
+					int nextIndexed=0,nextNonIndexed=0;
+					for(EthereumABI.Slot s : e.inputs){
+						if(s.indexed)
+							objs.add(ev.getIndexedValues().get(nextIndexed++).getValue());
+						else
+							objs.add(ev.getNonIndexedValues().get(nextNonIndexed++).getValue());
 					}
 					events.put(e.name, objs);
 				}
@@ -403,18 +404,11 @@ public class SendEthereumTransaction extends ModuleWithSideEffects {
 
 
 	protected Function createWeb3jFunctionCall() throws InvocationTargetException, NoSuchMethodException, InstantiationException, IllegalAccessException, ClassNotFoundException {
-		List<String> solidity_inputtypes = new ArrayList<String>(chosenFunction.inputs.size());
 		List args = new ArrayList(chosenFunction.inputs.size());
-		List<String> solidity_outputtypes = new ArrayList<String>(chosenFunction.outputs.size());
-
 		for (int i = 0; i < chosenFunction.inputs.size(); i++) {
-			solidity_inputtypes.add(chosenFunction.inputs.get(i).type);
 			args.add(arguments.get(i).getValue());
 		}
-		for (int i = 0; i < chosenFunction.outputs.size(); i++) {
-			solidity_outputtypes.add(chosenFunction.outputs.get(i).type);
-		}
-		return Web3jHelper.encodeFunction(chosenFunction.name, solidity_inputtypes, args, solidity_outputtypes);
+		return Web3jHelper.toWeb3jFunction(chosenFunction,args);
 	}
 
 
@@ -563,23 +557,24 @@ public class SendEthereumTransaction extends ModuleWithSideEffects {
 			}
 
 			Map<String, List<Object>> events = tx.getEvents();
-			if(events != null)
+			if(events != null) {
 				for (EthereumABI.Event ev : abi.getEvents()) {
 					List<Object> args = events.get(ev.name);
 					List<Output<Object>> evOutputs = eventOutputs.get(ev);
 					if (args != null) {
 						if (ev.inputs.size() > 0) {
-						int n = Math.min(evOutputs.size(), args.size());
-						for (int i = 0; i < n; i++) {
-							Object value = args.get(i);
-							Output output = evOutputs.get(i);
-							convertAndSend(output, value);
+							int n = Math.min(evOutputs.size(), args.size());
+							for (int i = 0; i < n; i++) {
+								Object value = args.get(i);
+								Output output = evOutputs.get(i);
+								convertAndSend(output, value);
 							}
 						} else {
 							evOutputs.get(0).send(Boolean.TRUE);
 						}
 					}
 				}
+			}
 		}
 	}
 

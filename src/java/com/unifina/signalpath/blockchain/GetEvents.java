@@ -10,7 +10,9 @@ import org.json.JSONException;
 import org.web3j.abi.EventValues;
 import org.web3j.abi.TypeReference;
 import org.web3j.abi.datatypes.Event;
+import org.web3j.protocol.Web3j;
 import org.web3j.protocol.core.methods.response.TransactionReceipt;
+import org.web3j.protocol.http.HttpService;
 
 import java.io.IOException;
 import java.util.*;
@@ -23,6 +25,7 @@ public class GetEvents extends AbstractSignalPathModule implements ContractEvent
 
 	private final EthereumContractInput contract = new EthereumContractInput(this, "contract");
 	private final ListOutput errors = new ListOutput(this, "errors");
+	private StringOutput txHashOutput = new StringOutput(this, "txHash");
 
 	private Map<String, List<Output>> outputsByEvent; // event name -> [output for each event argument]
 	private Map<String, Event> web3jEvents; // event name -> Web3j.Event object
@@ -31,13 +34,20 @@ public class GetEvents extends AbstractSignalPathModule implements ContractEvent
 
 	private transient ContractEventPoller contractEventPoller;
 	private transient Propagator asyncPropagator;
-
+	private Web3j web3j;
 	@Override
 	public void init() {
 		setPropagationSink(true);
 		addInput(contract);
 		addOutput(errors);
+		addOutput(txHashOutput);
+
 	}
+
+	protected Web3j getWeb3j(){
+		return Web3j.build(new HttpService(ethereumOptions.getRpcUrl()));
+	}
+
 
 	@Override
 	public void initialize() {
@@ -73,14 +83,26 @@ public class GetEvents extends AbstractSignalPathModule implements ContractEvent
 	@Override
 	public void clearState() {}
 
+	static void convertAndSend(Output output, Object value) {
+		if (output instanceof StringOutput) {
+			output.send(value);
+		} else if (output instanceof BooleanOutput) {
+			output.send(Boolean.parseBoolean(value.toString()));
+		} else if (output instanceof TimeSeriesOutput) {
+			output.send(Double.parseDouble(value.toString()));
+		} else {
+			output.send(value);
+		}
+	}
+
 	@Override
 	public void onEvent(JSONArray events) {
 		try {
 			String txHash = events.getJSONObject(0).getString("transactionHash");
+			txHashOutput.send(txHash);
 			log.info(String.format("Received event '%s'", txHash));
 
-			// TODO: web3j
-			TransactionReceipt txr = Web3jHelper.getTransactionReceipt(null, txHash);
+			TransactionReceipt txr = Web3jHelper.getTransactionReceipt(web3j, txHash);
 
 			for (EthereumABI.Event abiEvent : contract.getValue().getABI().getEvents()) {
 				List<Output> eventOutputs = outputsByEvent.get(abiEvent.name);
@@ -91,12 +113,20 @@ public class GetEvents extends AbstractSignalPathModule implements ContractEvent
 				}
 
 				if (abiEvent.inputs.size() > 0) {
-					// TODO: parse events from EventValues
-					int n = Math.min(eventOutputs.size(), valueList.size());
-					for (int i = 0; i < n; i++) {
-						String value = valueList.get(i).getIndexedValues().get(i).toString();
-						Output output = eventOutputs.get(i);
-						EthereumCall.convertAndSend(output, value);
+					for (EventValues ev : valueList) {
+						// indexed and non-indexed event args are saved differently in logs and must be retrieved by different methods
+						// see https://solidity.readthedocs.io/en/v0.5.3/contracts.html#events
+						int nextIndexed=0, nextNonIndexed=0;
+						for(int i=0;i<abiEvent.inputs.size();i++){
+							EthereumABI.Slot s = abiEvent.inputs.get(i);
+							Output output = eventOutputs.get(i);
+							Object value;
+							if(s.indexed)
+								value = ev.getIndexedValues().get(nextIndexed++).getValue();
+							else
+								value = ev.getNonIndexedValues().get(nextNonIndexed++).getValue();
+							convertAndSend(output, value);
+						}
 					}
 				} else {
 					// events with no arguments just get a true sent as a sign of event being triggered
@@ -119,9 +149,9 @@ public class GetEvents extends AbstractSignalPathModule implements ContractEvent
 	@Override
 	protected void onConfiguration(Map<String, Object> config) {
 		super.onConfiguration(config);
-
+		web3j = getWeb3j();
 		outputsByEvent = new HashMap<>();
-
+		web3jEvents = new HashMap<String, Event>();
 		if (contract.hasValue()) {
 			EthereumABI abi = contract.getValue().getABI();
 			for (EthereumABI.Event abiEvent : abi.getEvents()) {
@@ -141,18 +171,13 @@ public class GetEvents extends AbstractSignalPathModule implements ContractEvent
 					addOutput(output);
 				}
 				outputsByEvent.put(abiEvent.name, eventOutputs);
-
-				// cache the web3j Event object
-				ArrayList<TypeReference<?>> params = new ArrayList<TypeReference<?>>();
-				for (EthereumABI.Slot s : abiEvent.inputs) {
-					try {
-						params.add(Web3jHelper.makeTypeReference(s.type));
-					} catch (ClassNotFoundException e) {
-						throw new RuntimeException(e);
-					}
+				try {
+					Event web3jEvent = Web3jHelper.toWeb3jEvent(abiEvent);
+					web3jEvents.put(abiEvent.name, web3jEvent);
 				}
-				Event web3jEvent = new Event(abiEvent.name, params);
-				web3jEvents.put(abiEvent.name, web3jEvent);
+				catch(Exception e){
+					throw new RuntimeException(e);
+				}
 			}
 		}
 
