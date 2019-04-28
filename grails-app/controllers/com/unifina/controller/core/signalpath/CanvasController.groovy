@@ -7,7 +7,7 @@ import com.unifina.domain.signalpath.Canvas
 import com.unifina.service.PermissionService
 import com.unifina.service.SignalPathService
 import com.unifina.utils.Globals
-import com.unifina.utils.GlobalsFactory
+
 import grails.converters.JSON
 import grails.plugin.springsecurity.SpringSecurityService
 import grails.plugin.springsecurity.annotation.Secured
@@ -83,7 +83,7 @@ class CanvasController {
 
 	def reconstruct() {
 		Map json = [signalPathContext: (params.signalPathContext ? JSON.parse(params.signalPathContext) : [:]), signalPathData: JSON.parse(params.signalPathData)]
-		Globals globals = GlobalsFactory.createInstance(json.signalPathContext, null)
+		Globals globals = new Globals(json.signalPathContext, null)
 		SignalPathService.ReconstructedResult result = signalPathService.reconstruct(json, globals)
 		render result.map as JSON
 	}

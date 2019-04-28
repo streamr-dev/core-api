@@ -29,10 +29,9 @@ class ProductStreamsApiControllerSpec extends Specification {
 	}
 
 	void "index() returns 200 and list of streams"() {
-		def feed = new Feed(name: "Feed")
-		def s1 = new Stream(name: "Stream #1", partitions: 5, feed: feed)
-		def s2 = new Stream(name: "Stream #2", partitions: 1, feed: feed)
-		def s3 = new Stream(name: "Stream #3", partitions: 3, feed: feed)
+		def s1 = new Stream(name: "Stream #1", partitions: 5)
+		def s2 = new Stream(name: "Stream #2", partitions: 1)
+		def s3 = new Stream(name: "Stream #3", partitions: 3)
 
 		s1.id = "stream-1"
 		s2.id = "stream-2"

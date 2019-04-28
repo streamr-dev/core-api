@@ -13,7 +13,7 @@ import grails.test.mixin.TestMixin
 import grails.test.mixin.web.ControllerUnitTestMixin
 
 @TestMixin(ControllerUnitTestMixin) // to get JSON converter
-@Mock([Stream, Feed])
+@Mock([Stream])
 class CreateStreamSpec extends BeanMockingSpecification {
 
 	CreateStream module
@@ -26,10 +26,6 @@ class CreateStreamSpec extends BeanMockingSpecification {
 
 		mockBean(StreamService, streamService)
 		globals.getUserId() >> null
-
-		Feed feed = new Feed(streamListenerClass: NoOpStreamListener.canonicalName)
-		feed.id = 7
-		feed.save(failOnError: true, validate: false)
 
 		Stream stream = new Stream(name: "exists")
 		stream.id = "666"

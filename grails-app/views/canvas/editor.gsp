@@ -412,7 +412,6 @@ $(function() {
 	<g:if test="${addStreamId}">
 		addModuleToCanvas({
 			resultType: "stream",
-			feed: { id: 7, name: "API", module: 147 },
 			id: "${addStreamId}"
 		})
 	</g:if>

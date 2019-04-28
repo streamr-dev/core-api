@@ -13,7 +13,7 @@ import com.unifina.signalpath.SignalPath
 import com.unifina.signalpath.simplemath.Divide
 import com.unifina.signalpath.simplemath.Sum
 import com.unifina.utils.Globals
-import com.unifina.utils.GlobalsFactory
+
 import com.unifina.utils.testutils.ModuleTestHelper
 import grails.converters.JSON
 import grails.test.mixin.Mock
@@ -37,7 +37,7 @@ class ForEachSpec extends BeanMockingSpecification {
 	def setup() {
 		module = new ForEach()
 		user = new SecUser().save(validate: false)
-		module.globals = globals = GlobalsFactory.createInstance([:], user)
+		module.globals = globals = new Globals([:], user)
 		module.init()
 
 		permissionService = mockBean(PermissionService, Mock(PermissionService))

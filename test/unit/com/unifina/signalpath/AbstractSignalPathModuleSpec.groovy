@@ -1,6 +1,7 @@
 package com.unifina.signalpath
 
-import com.unifina.BeanMockingSpecification
+
+import com.unifina.ModuleTestingSpecification
 import com.unifina.data.Event
 import com.unifina.datasource.RealtimeDataSource
 import com.unifina.domain.security.SecUser
@@ -13,8 +14,7 @@ import spock.lang.Shared
 
 import java.util.concurrent.TimeUnit
 
-
-class AbstractSignalPathModuleSpec extends BeanMockingSpecification {
+class AbstractSignalPathModuleSpec extends ModuleTestingSpecification {
 	static class Module extends AbstractSignalPathModule {
 		def param = new IntegerParameter(this, "param", 666)
 		def a = new Input<Object>(this, "in2", "Object")
@@ -88,16 +88,15 @@ class AbstractSignalPathModuleSpec extends BeanMockingSpecification {
 
 	@CompileStatic
 	private void setUpModuleWithRuntimeRequestEnv() {
-		globals = new Globals()
-		globals.setDataSource(new RealtimeDataSource(globals) {
+		globals = new Globals([:], (SecUser) Mock(SecUser), Globals.Mode.REALTIME, new RealtimeDataSource(globals) {
 			Event lastFeedEvent
+
 			@Override
-			void enqueueEvent(Event feedEvent) {
-				super.enqueueEvent(feedEvent)
+			void accept(Event feedEvent) {
+				super.accept(feedEvent)
 				lastFeedEvent = feedEvent
 			}
 		})
-		globals.init()
 
 		module = new Module()
 		module.init()

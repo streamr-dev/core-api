@@ -7,7 +7,7 @@ import com.unifina.domain.signalpath.Canvas
 import com.unifina.signalpath.NotificationMessage
 import com.unifina.signalpath.SignalPath
 import com.unifina.utils.Globals
-import com.unifina.utils.GlobalsFactory
+
 import com.unifina.utils.testutils.ModuleTestHelper
 import grails.plugin.springsecurity.SpringSecurityService
 import grails.test.mixin.Mock
@@ -52,7 +52,7 @@ class EmailModuleSpec extends UiChannelMockingSpecification {
 	}
 
 	private void initContext(Map context = [:], SecUser user = new SecUser(username: "username").save(failOnError: true, validate: false)) {
-		globals = GlobalsFactory.createInstance(context, user)
+		globals = new Globals(context, user)
 		globals.time = new Date()
 
 		module.globals = globals

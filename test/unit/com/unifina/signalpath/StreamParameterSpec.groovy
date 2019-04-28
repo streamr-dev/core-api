@@ -95,7 +95,6 @@ class StreamParameterSpec extends BeanMockingSpecification {
 
 		then:
 		streamParameter.getConfiguration().subMap("value", "streamName", "feed", "checkModuleId", "feedFilter") == [
-			feed: 6152,
 			streamName: "stream-name",
 			value: "stream-id"
 		]

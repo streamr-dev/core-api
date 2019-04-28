@@ -5,7 +5,7 @@ import com.unifina.domain.security.SecUser
 import com.unifina.signalpath.AbstractSignalPathModule
 import com.unifina.signalpath.SignalPath
 import com.unifina.utils.Globals
-import com.unifina.utils.GlobalsFactory
+
 import grails.test.mixin.TestMixin
 import grails.test.mixin.support.GrailsUnitTestMixin
 
@@ -26,9 +26,7 @@ class ModuleTestingSpecification extends BeanMockingSpecification {
 	}
 
 	protected Globals mockGlobals(Map context=[:], SecUser user = new SecUser(username: 'user', timezone: "UTC")) {
-		Globals globals = GlobalsFactory.createInstance(context, user)
-		globals.setDataSource(Mock(DataSource))
-		globals.init()
+		Globals globals = new Globals(context, user, Globals.Mode.NOT_PLANNING_TO_RUN, Mock(DataSource))
 		globals.time = new Date(0)
 		return globals
 	}

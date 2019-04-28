@@ -34,8 +34,17 @@ public class FieldDetector {
 	}
 
 	/**
-	 * Returns a list of fields in a MapMessage by fetching an example message from the Stream.
-	 * May return null if the example message couldn't be fetched (Stream is empty for example).
+	 * Returns a list of fields in a StreamMessage based on its content.
+	 * Returns null if the given msg is null. Does not flatten nested Maps.
+	 */
+	public static List<FieldConfig> detectFields(StreamMessage msg) {
+		return detectFields(msg, false);
+	}
+
+	/**
+	 * Returns a list of fields in a StreamMessage based on its content.
+	 * Returns null if the given msg is null. If flatten is true, this will
+	 * flatten nested Map hierarchies to flat maps with dot-separated field names.
      */
 	public static List<FieldConfig> detectFields(StreamMessage msg, boolean flatten) {
 		if (msg == null) {

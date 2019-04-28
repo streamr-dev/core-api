@@ -15,10 +15,9 @@ import grails.test.mixin.Mock
 import grails.test.mixin.TestFor
 
 @TestFor(StreamApiController)
-@Mock([SecUser, Stream, Key, Permission, Feed, PermissionService, StreamService, DashboardService])
+@Mock([SecUser, Stream, Key, Permission, PermissionService, StreamService, DashboardService])
 class StreamApiControllerSpec extends ControllerSpecification {
 
-	Feed feed
 	SecUser me
 
 	def streamService
@@ -43,17 +42,15 @@ class StreamApiControllerSpec extends ControllerSpecification {
 		key.id = "apiKey"
 		key.save(failOnError: true, validate: true)
 
-		feed = new Feed(streamListenerClass: NoOpStreamListener.name, id: 7).save(validate: false)
-
 		def otherUser = new SecUser(username: "other", password: "bar").save(validate: false)
 
 		// First use real streamService to create the streams
 		streamService = mainContext.getBean(StreamService)
 		streamService.permissionService = permissionService
-		streamOne = streamService.createStream([name: "stream", description: "description", feed: feed], me)
-		streamTwoId = streamService.createStream([name: "ztream", feed: feed], me).id
-		streamThreeId = streamService.createStream([name: "atream", feed: feed], me).id
-		streamFourId = streamService.createStream([name: "otherUserStream", feed: feed], otherUser).id
+		streamOne = streamService.createStream([name: "stream", description: "description"], me)
+		streamTwoId = streamService.createStream([name: "ztream"], me).id
+		streamThreeId = streamService.createStream([name: "atream"], me).id
+		streamFourId = streamService.createStream([name: "otherUserStream"], otherUser).id
 
 		controller.streamService = streamService
 	}
@@ -131,7 +128,7 @@ class StreamApiControllerSpec extends ControllerSpecification {
 
 	void "creating stream fails given invalid token"() {
 		when:
-		request.json = [name: "Test stream", description: "Test stream", feed: feed]
+		request.json = [name: "Test stream", description: "Test stream"]
 		request.method = 'POST'
 		unauthenticated() { controller.save() }
 
@@ -142,7 +139,7 @@ class StreamApiControllerSpec extends ControllerSpecification {
 	void "save() calls StreamService.createStream() and returns it.toMap()"() {
 		setup:
 		controller.streamService = streamService = Mock(StreamService)
-		def stream = new Stream(feed: new Feed())
+		def stream = new Stream()
 		stream.id = "test-stream"
 
 

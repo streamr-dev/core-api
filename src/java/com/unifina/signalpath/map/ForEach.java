@@ -8,7 +8,6 @@ import com.unifina.service.SerializationService;
 import com.unifina.service.SignalPathService;
 import com.unifina.signalpath.*;
 import com.unifina.utils.Globals;
-import com.unifina.utils.GlobalsFactory;
 import grails.util.Holders;
 
 import java.io.UnsupportedEncodingException;
@@ -58,7 +57,7 @@ public class ForEach extends AbstractSignalPathModule {
 		SignalPathService signalPathService = Holders.getApplicationContext().getBean(SignalPathService.class);
 
 		// Create a non-run-context Globals for instantiating the temporary SignalPath
-		Globals tempGlobals = GlobalsFactory.createInstance(Collections.emptyMap(), SecUser.loadViaJava(getGlobals().getUserId()));
+		Globals tempGlobals = new Globals(Collections.emptyMap(), SecUser.loadViaJava(getGlobals().getUserId()));
 		SignalPath tempSignalPath = signalPathService.mapToSignalPath(signalPathMap, true, tempGlobals, new SignalPath(false));
 
 		// Find and validate exported endpoints

@@ -4,7 +4,6 @@ import com.unifina.datasource.DataSource
 import com.unifina.datasource.ITimeListener
 import com.unifina.domain.security.SecUser
 import com.unifina.utils.Globals
-import com.unifina.utils.GlobalsFactory
 import spock.lang.Specification
 
 class HistoricalEventQueueSpec extends Specification {
@@ -12,14 +11,11 @@ class HistoricalEventQueueSpec extends Specification {
 	private HistoricalEventQueue createQueue(Date beginDate, Date endDate, speed = 0) {
 		SecUser user = new SecUser()
 
-		Globals globals = GlobalsFactory.createInstance([
+		Globals globals = new Globals([
 			speed: speed,
 			beginDate: beginDate.getTime(),
 			endDate: endDate.getTime()
-		], user)
-		globals.init()
-		globals.setRealtime(false)
-		globals.setDataSource(Mock(DataSource))
+		], user, Globals.Mode.HISTORICAL, Mock(DataSource))
 
 		return new HistoricalEventQueue(globals, globals.getDataSource())
 	}

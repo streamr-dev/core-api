@@ -14,7 +14,7 @@ import com.unifina.exceptions.UnauthorizedStreamException
 import com.unifina.serialization.SerializationException
 import com.unifina.signalpath.*
 import com.unifina.utils.Globals
-import com.unifina.utils.GlobalsFactory
+
 import grails.compiler.GrailsCompileStatic
 import grails.transaction.NotTransactional
 import grails.transaction.Transactional
@@ -95,7 +95,7 @@ class SignalPathService {
 	 * @throws SerializationException if de-serialization fails when resuming from existing state
      */
 	void startLocal(Canvas canvas, Map signalPathContext, SecUser asUser) throws SerializationException {
-		Globals globals = GlobalsFactory.createInstance(
+		Globals globals = new Globals(
 			signalPathContext,
 			asUser,
 			canvas.adhoc ? Globals.Mode.HISTORICAL : Globals.Mode.REALTIME

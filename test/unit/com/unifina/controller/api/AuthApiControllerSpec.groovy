@@ -19,7 +19,7 @@ import org.springframework.context.MessageSource
 import spock.lang.Specification
 
 @TestFor(AuthApiController)
-@Mock([SignupInvite, SignupCodeService, RegistrationCode, SecUser, Key, SecRole, SecUserSecRole, Feed, ModulePackage, Permission, UserService])
+@Mock([SignupInvite, SignupCodeService, RegistrationCode, SecUser, Key, SecRole, SecUserSecRole, ModulePackage, Permission, UserService])
 class AuthApiControllerSpec extends Specification {
 
 	String username = "user@invite.to"
@@ -215,18 +215,6 @@ class AuthApiControllerSpec extends Specification {
 
 	void "submitting registration with valid invite should create user"() {
 		setup:
-		// A feed created with minimum fields required
-		Feed feed = new Feed()
-		feed.id = new Long(7)
-		feed.name = "testFeed"
-		feed.eventRecipientClass = ""
-		feed.keyProviderClass = ""
-		feed.messageSourceClass = ""
-		feed.module = new Module()
-		feed.parserClass = ""
-		feed.streamListenerClass = NoOpStreamListener.name
-		feed.save()
-
 		// A modulePackage created with minimum fields required
 		def modulePackage = new ModulePackage()
 		modulePackage.id = new Long(1)

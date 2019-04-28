@@ -6,7 +6,7 @@ import com.unifina.domain.signalpath.ModulePackage
 import com.unifina.signalpath.AbstractSignalPathModule
 import com.unifina.signalpath.ModuleException
 import com.unifina.utils.Globals
-import com.unifina.utils.GlobalsFactory
+
 import grails.converters.JSON
 import grails.plugin.springsecurity.annotation.Secured
 import grails.util.GrailsUtil
@@ -134,7 +134,7 @@ class ModuleController {
 	// TODO: moved to ModuleApiController in CORE-1642. Remove when new front-end ready.
 	def jsonGetModule() {
 		def user = springSecurityService.currentUser
-		Globals globals = GlobalsFactory.createInstance([:], user)
+		Globals globals = new Globals([:], user)
 		
 		try {
 			Module domainObject = Module.get(params.long("id"))

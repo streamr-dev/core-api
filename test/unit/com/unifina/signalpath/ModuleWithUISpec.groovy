@@ -1,23 +1,20 @@
 package com.unifina.signalpath
 
+import com.unifina.ModuleTestingSpecification
 import com.unifina.datasource.DataSource
 import com.unifina.datasource.IStartListener
-
 import com.unifina.domain.data.Stream
 import com.unifina.domain.security.SecUser
 import com.unifina.domain.signalpath.Canvas
-
 import com.unifina.service.PermissionService
 import com.unifina.service.StreamService
-import com.unifina.utils.GlobalsFactory
 import grails.test.mixin.Mock
 import grails.util.Holders
-import spock.lang.Specification
 
 import java.security.AccessControlException
 
-@Mock([Stream, Feed, SecUser])
-class ModuleWithUISpec extends Specification {
+@Mock([Stream, SecUser])
+class ModuleWithUISpec extends ModuleTestingSpecification {
 
 	Stream uiChannel
 	Canvas canvas
@@ -43,11 +40,6 @@ class ModuleWithUISpec extends Specification {
 		permissionService.canWrite(permittedUser, canvas) >> true
 		permissionService.canWrite(nonPermitterUser, canvas) >> false
 		Holders.getApplicationContext().beanFactory.registerSingleton('permissionService', permissionService)
-
-		Feed feed = new Feed()
-		feed.id = Feed.KAFKA_ID
-		feed.streamListenerClass = NoOpStreamListener.getName()
-		feed.save(validate:false)
 
 		permittedUser.save(failOnError: true, validate: false)
 		nonPermitterUser.save(failOnError: true, validate: false)
@@ -79,9 +71,8 @@ class ModuleWithUISpec extends Specification {
 				return "webcomponent-name"
 			}
 		}
-		module.globals = GlobalsFactory.createInstance([:], user)
+		module.globals = mockGlobals([:], user)
 		module.globals.time = new Date()
-		module.globals.setDataSource(Mock(DataSource))
 		module.parentSignalPath = Mock(SignalPath)
 		module.parentSignalPath.getRootSignalPath() >> module.parentSignalPath
 		module.parentSignalPath.getRuntimePath(_) >> {RuntimeRequest.PathWriter writer ->

@@ -26,32 +26,26 @@ public class MessageRouter {
 	 * Lets the router know that the given Consumer is interested in messages from the
 	 * the given StreamPartition. Such messages are routed to the given Consumer when encountered.
 	 */
-	public void subscribe(Consumer<StreamMessage> consumer, StreamPartition streamPartition) {
-		synchronized (consumersByStreamPartition) {
-			if (!consumersByStreamPartition.containsKey(streamPartition)) {
-				consumersByStreamPartition.put(streamPartition, new ArrayList<>());
-			}
+	public synchronized void subscribe(Consumer<StreamMessage> consumer, StreamPartition streamPartition) {
+		if (!consumersByStreamPartition.containsKey(streamPartition)) {
+			consumersByStreamPartition.put(streamPartition, new ArrayList<>());
 		}
 
 		List<Consumer<StreamMessage>> list = consumersByStreamPartition.get(streamPartition);
 
-		synchronized (list) {
-			if (!list.contains(consumer)) {
-				list.add(consumer);
-			}
+		if (!list.contains(consumer)) {
+			list.add(consumer);
 		}
 	}
 
-	public void unsubscribe(Consumer<StreamMessage> consumer, StreamPartition streamPartition) {
+	public synchronized void unsubscribe(Consumer<StreamMessage> consumer, StreamPartition streamPartition) {
 		List<Consumer<StreamMessage>> list = consumersByStreamPartition.get(streamPartition);
 
 		if (list != null) {
-			synchronized (list) {
-				list.remove(consumer);
-				if (list.isEmpty()) {
-					log.info("unsubscribe: No more consumers for" + streamPartition);
-					consumersByStreamPartition.remove(streamPartition);
-				}
+			list.remove(consumer);
+			if (list.isEmpty()) {
+				log.info("unsubscribe: No more consumers for" + streamPartition);
+				consumersByStreamPartition.remove(streamPartition);
 			}
 		}
 	}

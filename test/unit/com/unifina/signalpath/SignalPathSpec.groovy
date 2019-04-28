@@ -1,11 +1,8 @@
 package com.unifina.signalpath
 
 import com.unifina.BeanMockingSpecification
-import com.unifina.domain.security.SecUser
 import com.unifina.domain.signalpath.Canvas
 import com.unifina.service.ModuleService
-import com.unifina.utils.Globals
-import com.unifina.utils.GlobalsFactory
 
 class SignalPathSpec extends BeanMockingSpecification {
 

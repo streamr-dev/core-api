@@ -35,13 +35,31 @@ public class Globals {
 	public Date time;
 
 	/**
-	 * Construct fake environment, e.g., for testing.
+	 * Creates an "empty" Globals with no settings, no user, Mode.NOT_PLANNING_TO_RUN, and no DataSource.
 	 */
 	public Globals() {
-		this(new HashMap(), null, Mode.NOT_PLANNING_TO_RUN);
+		this(new HashMap(), null, Mode.NOT_PLANNING_TO_RUN, null);
 	}
 
+	/**
+	 * Defaults to Mode.NOT_PLANNING_TO_RUN, no DataSource is created
+	 */
+	public Globals(Map signalPathContext, SecUser user) {
+		this(signalPathContext, user, Mode.NOT_PLANNING_TO_RUN, null);
+	}
+
+	/**
+	 * Will create DataSource based on Mode
+	 */
 	public Globals(Map signalPathContext, SecUser user, Mode mode) {
+		this(signalPathContext, user, mode, null);
+	}
+
+	/**
+	 * Allows a DataSource implementation to be passed explicitly. If it is null,
+	 * a DataSource based on given Mode will be automatically created.
+	 */
+	public Globals(Map signalPathContext, SecUser user, Mode mode, DataSource dataSource) {
 		if (signalPathContext == null) {
 			throw new NullPointerException("signalPathContext can not be null!");
 		}
@@ -52,7 +70,6 @@ public class Globals {
 
 		if (mode.equals(Mode.REALTIME)) {
 			time = new Date();
-			dataSource = new RealtimeDataSource(this);
 		} else if (mode.equals(Mode.HISTORICAL)) {
 			// Parse startDate and endDate
 			try {
@@ -80,9 +97,13 @@ public class Globals {
 				}
 			}
 
-			dataSource = new HistoricalDataSource(this);
+
+		}
+
+		if (dataSource == null && !mode.equals(Mode.NOT_PLANNING_TO_RUN)) {
+			this.dataSource = isRealtime() ? new RealtimeDataSource(this) : new HistoricalDataSource(this);
 		} else {
-			dataSource = null;
+			this.dataSource = dataSource;
 		}
 
 	}
@@ -97,10 +118,6 @@ public class Globals {
 
 	public Date getTime() {
 		return time;
-	}
-
-	public void init() {
-
 	}
 
 	public Date getStartDate() {
