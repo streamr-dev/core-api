@@ -25,8 +25,8 @@ class ModuleTestingSpecification extends BeanMockingSpecification {
 		return module
 	}
 
-	protected Globals mockGlobals(Map context=[:], SecUser user = new SecUser(username: 'user', timezone: "UTC")) {
-		Globals globals = new Globals(context, user, Globals.Mode.NOT_PLANNING_TO_RUN, Mock(DataSource))
+	protected Globals mockGlobals(Map context=[:], SecUser user = new SecUser(username: 'user', timezone: "UTC"), Globals.Mode mode = Globals.Mode.REALTIME) {
+		Globals globals = new Globals(context, user, mode, Mock(DataSource))
 		globals.time = new Date(0)
 		return globals
 	}

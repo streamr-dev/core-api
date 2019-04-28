@@ -1,9 +1,8 @@
 package com.unifina.signalpath
 
 import com.unifina.BeanMockingSpecification
-
 import com.unifina.domain.data.Stream
-
+import com.unifina.service.StreamService
 import com.unifina.utils.Globals
 import grails.test.mixin.Mock
 
@@ -12,12 +11,17 @@ class StreamParameterSpec extends BeanMockingSpecification {
 
 	AbstractSignalPathModule ownerModule
 	StreamParameter streamParameter
+	StreamService streamService
+	Stream stream
 
 	def setup() {
-		Stream stream = new Stream()
+		stream = new Stream()
 		stream.id = "stream-id"
 		stream.name = "stream-name"
 		stream.save(failOnError: true, validate: false)
+
+		streamService = mockBean(StreamService, Mock(StreamService))
+		streamService.getStream(stream.id) >> stream
 
 		ownerModule = Mock(AbstractSignalPathModule)
 		streamParameter = new StreamParameter(ownerModule, "name")
@@ -47,56 +51,45 @@ class StreamParameterSpec extends BeanMockingSpecification {
 
 	def "getConfiguration() has expected content after initialization"() {
 		expect:
-		streamParameter.getConfiguration().subMap("value", "streamName", "feed", "checkModuleId", "feedFilter") == [
+		streamParameter.getConfiguration().subMap(["value"]) == [
 			value: null
 		]
 	}
 
 	def "receive() fetches stream"() {
-		setup:
-		Stream stream = new Stream()
-		stream.id = "stream-id"
-		stream.save(failOnError: true, validate: false)
-
 		when:
-		streamParameter.receive("stream-id")
+		streamParameter.receive(stream.id)
 
 		then:
-		streamParameter.getValue().id == "stream-id"
+		streamParameter.getValue().id == stream.id
 	}
 
 	def "parseValue() fetches stream given valid id"() {
 		when:
-		def result = streamParameter.parseValue("stream-id")
+		Stream result = streamParameter.parseValue(stream.id)
 
 		then:
-		result != null
+		result == stream
 	}
 
 	def "parseValue() returns null given null"() {
-		when:
-		def result = streamParameter.parseValue(null)
-
-		then:
-		result == null
+		expect:
+		streamParameter.parseValue(null) == null
 	}
 
 	def "parseValue() returns null given \"null\""() {
-		when:
-		def result = streamParameter.parseValue("null")
-
-		then:
-		result == null
+		expect:
+		streamParameter.parseValue("null") == null
 	}
 
 	def "getConfiguration() has expected content after receiving stream id"() {
 		when:
-		streamParameter.receive("stream-id")
+		streamParameter.receive(stream.id)
 
 		then:
-		streamParameter.getConfiguration().subMap("value", "streamName", "feed", "checkModuleId", "feedFilter") == [
-			streamName: "stream-name",
-			value: "stream-id"
+		streamParameter.getConfiguration().subMap("streamName", "value") == [
+			streamName: stream.name,
+			value: stream.id
 		]
 	}
 }

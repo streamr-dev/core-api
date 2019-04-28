@@ -12,6 +12,14 @@ public class Event<ContentClass extends ITimestamped> implements Comparable<Even
 	private final ContentClass content;
 	private final Consumer<ContentClass> consumer;
 
+	public Event(ContentClass content, Consumer<ContentClass> consumer) {
+		this(content, content.getTimestampAsDate(), 0L, consumer);
+	}
+
+	public Event(ContentClass content, Date timestamp, Consumer<ContentClass> consumer) {
+		this(content, timestamp, 0L, consumer);
+	}
+
 	public Event(ContentClass content, Date timestamp, long sequenceNumber, Consumer<ContentClass> consumer) {
 		if (timestamp == null) {
 			throw new IllegalArgumentException("timestamp can't be null!");

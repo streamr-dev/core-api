@@ -3,7 +3,6 @@ package com.unifina.signalpath
 
 import com.unifina.ModuleTestingSpecification
 import com.unifina.data.Event
-import com.unifina.datasource.RealtimeDataSource
 import com.unifina.domain.security.SecUser
 import com.unifina.service.PermissionService
 import com.unifina.utils.Globals
@@ -32,6 +31,7 @@ class AbstractSignalPathModuleSpec extends ModuleTestingSpecification {
 	Globals globals
 	SignalPath mockSignalPath
 	PermissionService mockedPermissionService
+	Queue<Event> mockedEventQueue
 
 	@Shared Level oldGlobalsLoggingLevel
 	@Shared Level oldAbstractSignalPathModuleLoggingLevel
@@ -88,15 +88,12 @@ class AbstractSignalPathModuleSpec extends ModuleTestingSpecification {
 
 	@CompileStatic
 	private void setUpModuleWithRuntimeRequestEnv() {
-		globals = new Globals([:], (SecUser) Mock(SecUser), Globals.Mode.REALTIME, new RealtimeDataSource(globals) {
-			Event lastFeedEvent
+		globals = mockGlobals()
 
-			@Override
-			void accept(Event feedEvent) {
-				super.accept(feedEvent)
-				lastFeedEvent = feedEvent
-			}
-		})
+		mockedEventQueue = new ArrayDeque<>()
+		globals.dataSource.accept(_ as Event) >> { Event event ->
+			mockedEventQueue.add(event)
+		}
 
 		module = new Module()
 		module.init()
@@ -108,8 +105,10 @@ class AbstractSignalPathModuleSpec extends ModuleTestingSpecification {
 
 	private RuntimeResponse sendRuntimeRequest(LinkedHashMap<String, Object> msg, SecUser user) {
 		def request = new RuntimeRequest(msg, user, null, "request/1", "request/1", [] as Set)
+		// Will insert an event to the event queue
 		def future = module.onRequest(request, request.getPathReader())
-		module.receive(globals.dataSource.lastFeedEvent)
+		// Dispatch the event from the event queue, executing the future
+		mockedEventQueue.poll().dispatch()
 		return future.get(1, TimeUnit.SECONDS)
 	}
 

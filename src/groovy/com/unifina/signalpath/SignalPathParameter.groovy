@@ -37,6 +37,7 @@ class SignalPathParameter extends StringParameter {
 			order("lastUpdated", "desc")
 		}
 
+		// TODO: check whether this is till needed in new frontend app
 		List possibleValues = signalPaths.collect {[value:it[0], name:it[1]]}
 		
 		if (getValue() == null)

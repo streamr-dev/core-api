@@ -4,6 +4,7 @@ import com.unifina.BeanMockingSpecification
 import com.unifina.domain.security.SecUser
 import com.unifina.domain.signalpath.Canvas
 import com.unifina.domain.signalpath.Module
+import com.unifina.exceptions.NoExportedInputsException
 import com.unifina.service.CanvasService
 import com.unifina.service.ModuleService
 import com.unifina.service.PermissionService
@@ -133,9 +134,10 @@ class ForEachSpec extends BeanMockingSpecification {
 		module.configure(module.getConfiguration())
 
 		then:
+		// gets called in SignalPathParameter#getConfiguration(),
+		// once during module.getConfiguration() and once during module.configure()
 		2 * permissionService.get(_,_,_) >> []
-		RuntimeException e = thrown()
-		e.message.contains("No exported inputs in canvas")
+		thrown(NoExportedInputsException)
 	}
 
 	def "forEach works correctly"() {

@@ -1,50 +1,38 @@
 package com.unifina.signalpath.utils
 
+import com.unifina.ModuleTestingSpecification
 import com.unifina.domain.data.Stream
-
+import com.unifina.service.StreamService
 import com.unifina.utils.Globals
-import com.unifina.utils.testutils.ModuleTestHelper
-import grails.test.mixin.Mock
-import spock.lang.Specification
 
-@Mock(Stream)
-class ConfigurableStreamModuleSpec extends Specification {
+class ConfigurableStreamModuleSpec extends ModuleTestingSpecification {
 
 	Globals globals
 	ConfigurableStreamModule module
+	StreamService streamService
 
 	def setup() {
-		0.upto(4) {
-			def s = new Stream()
-			s.id = s.name = "stream-" + it
-			s.config = [fields: [[name: "out", type: "string"]]]
-			s.save(false)
-		}
+		Stream stream = new Stream()
+		stream.config = [fields: [[name: "out", type: "string"]]]
+
+		streamService = mockBean(StreamService, Mock(StreamService))
+		streamService.getStream(_ as String) >> stream
 
 		module = new ConfigurableStreamModule()
 		module.init()
 		module.name = "streamModule"
-		module.globals = globals = new Globals([:], null)
+		module.globals = globals = mockGlobals()
+	}
+
+	void "configurableStreamModule creates outputs for selected stream on configuration"() {
+		when:
 		module.configure([
 			params: [
 				[name: "stream", value: "stream-0"]
 			],
 		])
-	}
-
-	void "configurableStreamModule gives the right answer"() {
-
-		when:
-		Map inputValues = [
-			stream: ["stream-1", "stream-2", "stream-3", "stream-4"],
-		]
-		Map outputValues = [
-			out: [null, null, null, null] // TODO: is this module supposed to do something?
-		]
 
 		then:
-		new ModuleTestHelper.Builder(module, inputValues, outputValues)
-			.overrideGlobals { globals }
-			.test()
+		module.getOutput("out") != null
 	}
 }

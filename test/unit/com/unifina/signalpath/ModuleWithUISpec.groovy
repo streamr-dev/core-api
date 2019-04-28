@@ -8,6 +8,7 @@ import com.unifina.domain.security.SecUser
 import com.unifina.domain.signalpath.Canvas
 import com.unifina.service.PermissionService
 import com.unifina.service.StreamService
+import com.unifina.utils.Globals
 import grails.test.mixin.Mock
 import grails.util.Holders
 
@@ -71,7 +72,7 @@ class ModuleWithUISpec extends ModuleTestingSpecification {
 				return "webcomponent-name"
 			}
 		}
-		module.globals = mockGlobals([:], user)
+		module.globals = mockGlobals([:], user, Globals.Mode.REALTIME)
 		module.globals.time = new Date()
 		module.parentSignalPath = Mock(SignalPath)
 		module.parentSignalPath.getRootSignalPath() >> module.parentSignalPath

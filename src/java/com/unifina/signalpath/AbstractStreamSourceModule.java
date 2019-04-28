@@ -11,7 +11,6 @@ public abstract class AbstractStreamSourceModule extends AbstractSignalPathModul
 
 	@Override
 	public void init() {
-		streamParameter.setCheckModuleId(true);
 		streamParameter.setUpdateOnChange(true);
 		streamParameter.setDrivingInput(false);
 		streamParameter.setCanToggleDrivingInput(false);

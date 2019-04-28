@@ -79,9 +79,7 @@ class SendToStreamSpec extends BeanMockingSpecification {
 		uiChannel.save(validate: false, failOnError: true)
 
 		mockStreamService = (FakeStreamService) grailsApplication.getMainContext().getBean("streamService")
-		globals = Spy(Globals, constructorArgs: [[:], user])
-		globals.realtime = true
-		globals.dataSource = new RealtimeDataSource()
+		globals = Spy(Globals, constructorArgs: [[:], user, Globals.Mode.REALTIME])
     }
 
 	private void createModule(options = [:]) {

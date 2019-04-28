@@ -18,13 +18,13 @@ class CreateStreamSpec extends BeanMockingSpecification {
 
 	CreateStream module
 	Globals globals = Stub(Globals)
-	StreamService streamService = Mock(StreamService)
+	StreamService streamService
 
 	def setup() {
 		module = new CreateStream()
 		module.init()
 
-		mockBean(StreamService, streamService)
+		streamService = mockBean(StreamService, Mock(StreamService))
 		globals.getUserId() >> null
 
 		Stream stream = new Stream(name: "exists")

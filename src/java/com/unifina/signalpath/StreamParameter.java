@@ -10,8 +10,6 @@ import java.util.Map;
 // This class can also receive Strings for Stream UUID
 public class StreamParameter extends Parameter<Stream> {
 
-	private boolean checkModuleId = false;
-
 	public StreamParameter(AbstractSignalPathModule owner, String name) {
 		super(owner, name, null, "Stream");
 		this.setCanToggleDrivingInput(false);
@@ -42,11 +40,7 @@ public class StreamParameter extends Parameter<Stream> {
 		if (value != null) {
 			config.put("value", value.getId());
 			config.put("streamName", value.getName());
-			if (checkModuleId) {
-				config.put("checkModuleId", true);
-			}
 		}
-
 		return config;
 	}
 
@@ -63,31 +57,16 @@ public class StreamParameter extends Parameter<Stream> {
 		return value == null ? null : value.getId(); // Controls how value and defaultValue are turned to config
 	}
 
-	private Stream getStreamById(Object id) {
-		if (id instanceof String) {
-			StreamService ss = Holders.getApplicationContext().getBean(StreamService.class);
-			try {
-				return ss.getStream((String) id);
-			} catch (StreamNotFoundException e) {
-				throw new ModuleCreationFailedException(e);
-			}
-		} else if (id instanceof Number) {
-			throw new RuntimeException("Numeric stream ids no longer supported");
+	private Stream getStreamById(Object idOrStream) {
+		if (idOrStream instanceof Stream) {
+			return (Stream) idOrStream;
 		}
-		return (Stream) id;
-	}
 
-	public boolean getCheckModuleId() {
-		return checkModuleId;
+		StreamService ss = Holders.getApplicationContext().getBean(StreamService.class);
+		try {
+			return ss.getStream(idOrStream.toString());
+		} catch (StreamNotFoundException e) {
+			throw new ModuleCreationFailedException(e);
+		}
 	}
-
-	/**
-	 * Warns in the UI if such a stream is selected that the current module is
-	 * not the implementing module for that stream. Set this to true on source modules.
-	 * @param checkModuleId
-	 */
-	public void setCheckModuleId(boolean checkModuleId) {
-		this.checkModuleId = checkModuleId;
-	}
-
 }

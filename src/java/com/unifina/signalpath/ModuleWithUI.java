@@ -42,18 +42,8 @@ public abstract class ModuleWithUI extends AbstractSignalPathModule {
 
 		if (getGlobals().isRunContext()) {
 			streamService = Holders.getApplicationContext().getBean(StreamService.class);
-			getGlobals().getDataSource().addStartListener(new IStartListener() {
-				@Override
-				public void onStart() {
-					ModuleWithUI.this.onStart();
-				}
-			});
-			getGlobals().getDataSource().addStopListener(new IStopListener() {
-				@Override
-				public void onStop() {
-					ModuleWithUI.this.onStop();
-				}
-			});
+			getGlobals().getDataSource().addStartListener(ModuleWithUI.this::onStart);
+			getGlobals().getDataSource().addStopListener(ModuleWithUI.this::onStop);
 		}
 	}
 
