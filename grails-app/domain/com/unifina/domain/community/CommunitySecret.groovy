@@ -12,7 +12,7 @@ class CommunitySecret {
 	String name
 	// secret shared by the community that enables automatic join.
 	String secret
-	// communityAddres is an Ethereum address of the community.
+	// communityAddress is an Ethereum address of the community.
 	String communityAddress
 
     static constraints = {
