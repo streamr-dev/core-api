@@ -325,6 +325,8 @@ environments {
  */
 streamr.cassandra.hosts = (System.getProperty("streamr.cassandra.hosts") ? Arrays.asList(System.getProperty("streamr.cassandra.hosts").split(",")) : ["127.0.0.1"])
 streamr.cassandra.keySpace = System.getProperty("streamr.cassandra.keySpace") ?: "streamr_dev"
+streamr.cassandra.username = System.getProperty("streamr.cassandra.username")
+streamr.cassandra.password = System.getProperty("streamr.cassandra.password")
 
 environments {
 	production {
