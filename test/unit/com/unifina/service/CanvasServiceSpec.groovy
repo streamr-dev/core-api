@@ -22,6 +22,7 @@ import grails.test.mixin.TestFor
 import grails.test.mixin.TestMixin
 import grails.test.mixin.web.ControllerUnitTestMixin
 import groovy.json.JsonBuilder
+import org.codehaus.groovy.grails.web.json.JSONElement
 import org.codehaus.groovy.grails.web.mapping.LinkGenerator
 
 @TestMixin(ControllerUnitTestMixin) // "as JSON" converter
@@ -379,18 +380,13 @@ class CanvasServiceSpec extends BeanMockingSpecification {
 		1 * service.signalPathService.reconstruct(_, _) >> { throw new ModuleException("mocked", null, null) }
 		thrown ModuleException
 		myFirstCanvas.name == "canvas"
-		/*
-		myFirstCanvas.json == [
-			name: "canvas",
-			hasExports: false,
-			uiChannel: [
-			    name: "Notifications",
-				id: "666",
-			],
-			modules: [:],
-			settings: [:],
-		]
-		*/
+		!myFirstCanvas.hasExports
+		JSONElement json = JSON.parse(myFirstCanvas.json)
+		json.name == "canvas"
+		json.modules != null
+		json.settings != null
+		json.uiChannel.name == "Notifications"
+		json.uiChannel.id == "666"
 	}
 
 	def "createNew always generates new uiChannels"() {
