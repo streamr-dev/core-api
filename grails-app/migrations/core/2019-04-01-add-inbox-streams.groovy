@@ -5,11 +5,10 @@ import com.unifina.domain.data.Stream
 databaseChangeLog = {
 	changeSet(author: "mthambipillai", id: "add-inbox-field-1") {
 		addColumn(tableName: "stream") {
-			column(name: "inbox", type: "bit") {
+			column(defaultValue: "false", name: "inbox", type: "bit") {
 				constraints(nullable: "false")
 			}
 		}
-		addNotNullConstraint(columnDataType: "bit", columnName: "inbox", defaultNullValue: "0", tableName: "stream")
 	}
 	changeSet(author: "mthambipillai", id: "create-inbox-stream-for-ethereum-users") {
 		grailsChange {
