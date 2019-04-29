@@ -288,6 +288,67 @@ class PermissionServiceSpec extends BeanMockingSpecification {
 		e.message == "Cannot revoke only SHARE permission of ${dashOwned}"
 	}
 
+	void "systemRevoke() on a stream also revokes the associated inbox permissions"() {
+		SecUser publisher = new SecUser()
+		publisher.id = 7L
+		Stream pubInbox = new Stream(name: "publisher", inbox: true)
+		pubInbox.id = "publisher"
+		pubInbox.save(failOnError: true, validate: false)
+		SecUser subscriber = new SecUser(username: "0x26e1ae3f5efe8a01eca8c2e9d3c32702cf4bead6").save(failOnError: true, validate: false)
+		Stream subInbox = new Stream(name: subscriber.username, inbox: true)
+		subInbox.id = subscriber.username
+		subInbox.save(failOnError: true, validate: false)
+		Stream stream = new Stream()
+		stream.id = "stream"
+		setup:
+		new Permission(user: publisher, stream: stream, operation: Operation.WRITE).save(failOnError: true, validate: false)
+
+		Permission parent = new Permission(user: subscriber, stream: stream, operation: Operation.READ).save(failOnError: true, validate: false)
+		new Permission(user: subscriber, stream: pubInbox, operation: Operation.WRITE, parent: parent).save(failOnError: true, validate: false)
+		new Permission(user: publisher, stream: subInbox, operation: Operation.WRITE, parent: parent).save(failOnError: true, validate: false)
+		when:
+		service.systemRevoke(subscriber, stream, Operation.READ)
+		then:
+		!service.canRead(subscriber, stream)
+		!service.canWrite(subscriber, pubInbox)
+		!service.canWrite(publisher, subInbox)
+	}
+
+	void "inbox permissions are maintained after systemRevoke() on a stream if there is another stream with permissions"() {
+		SecUser publisher = new SecUser()
+		publisher.id = 7L
+		Stream pubInbox = new Stream(name: "publisher", inbox: true)
+		pubInbox.id = "publisher"
+		pubInbox.save(failOnError: true, validate: false)
+		SecUser subscriber = new SecUser(username: "0x26e1ae3f5efe8a01eca8c2e9d3c32702cf4bead6").save(failOnError: true, validate: false)
+		Stream subInbox = new Stream(name: subscriber.username, inbox: true)
+		subInbox.id = subscriber.username
+		subInbox.save(failOnError: true, validate: false)
+		Stream stream1 = new Stream()
+		stream1.id = "stream1"
+		Stream stream2 = new Stream()
+		stream2.id = "stream2"
+		setup:
+		new Permission(user: publisher, stream: stream1, operation: Operation.WRITE).save(failOnError: true, validate: false)
+
+		Permission parent1 = new Permission(user: subscriber, stream: stream1, operation: Operation.READ).save(failOnError: true, validate: false)
+		new Permission(user: subscriber, stream: pubInbox, operation: Operation.WRITE, parent: parent1).save(failOnError: true, validate: false)
+		new Permission(user: publisher, stream: subInbox, operation: Operation.WRITE, parent: parent1).save(failOnError: true, validate: false)
+
+		new Permission(user: publisher, stream: stream2, operation: Operation.WRITE).save(failOnError: true, validate: false)
+
+		Permission parent2 = new Permission(user: subscriber, stream: stream2, operation: Operation.READ).save(failOnError: true, validate: false)
+		new Permission(user: subscriber, stream: pubInbox, operation: Operation.WRITE, parent: parent2).save(failOnError: true, validate: false)
+		new Permission(user: publisher, stream: subInbox, operation: Operation.WRITE, parent: parent2).save(failOnError: true, validate: false)
+		when:
+		service.systemRevoke(subscriber, stream1, Operation.READ)
+		then:
+		!service.canRead(subscriber, stream1)
+		service.canRead(subscriber, stream2)
+		service.canWrite(subscriber, pubInbox)
+		service.canWrite(publisher, subInbox)
+	}
+
 	void "cannot revoke only share permission (via cascading READ)"() {
 		setup: "transfer effective 'ownership'"
 		service.systemGrantAll(anotherUser, dashOwned)

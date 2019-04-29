@@ -276,6 +276,14 @@ class PermissionService {
 		String userProp = getUserPropertyName(target)
 		String resourceProp = getResourcePropertyName(resource)
 
+		Permission parentPermission = new Permission(
+			(resourceProp): resource,
+			(userProp): target,
+			operation: operation,
+			subscription: subscription,
+			endsAt: endsAt
+		).save(flush: true, failOnError: true)
+
 		// When a user is granted read access (subscriber) or write access (publisher) to a stream,
 		// we need to set the corresponding inbox stream permissions (see methods comments below).
 		if (userProp == "user" && resourceProp == "stream") {
@@ -283,20 +291,14 @@ class PermissionService {
 			if (!stream.inbox && !stream.uiChannel) {
 				SecUser user = (SecUser) target
 				if (operation == Operation.READ) {
-					grantNewSubscriberInboxStreamPermissions(user, stream, subscription, endsAt)
+					grantNewSubscriberInboxStreamPermissions(user, stream, subscription, endsAt, parentPermission)
 				} else if (operation == Operation.WRITE) {
-					grantNewPublisherInboxStreamPermissions(user, stream, subscription, endsAt)
+					grantNewPublisherInboxStreamPermissions(user, stream, subscription, endsAt, parentPermission)
 				}
 			}
 		}
 
-		return new Permission(
-			(resourceProp): resource,
-			(userProp): target,
-			operation: operation,
-			subscription: subscription,
-			endsAt: endsAt
-		).save(flush: true, failOnError: true)
+		return parentPermission
 	}
 
 	/**
@@ -305,8 +307,9 @@ class PermissionService {
 	 * Also grant every publisher of the stream write permission to the subscriber's inbox streams.
 	 *
 	 */
-	private void grantNewSubscriberInboxStreamPermissions(SecUser subscriber, Stream stream, Subscription subscription, Date endsAt) {
-		grantInboxStreamPermissions(subscriber, stream, Operation.WRITE, subscription, endsAt)
+	private void grantNewSubscriberInboxStreamPermissions(SecUser subscriber, Stream stream,
+														  Subscription subscription, Date endsAt, Permission parent) {
+		grantInboxStreamPermissions(subscriber, stream, Operation.WRITE, subscription, endsAt, parent)
 	}
 
 	/**
@@ -315,11 +318,13 @@ class PermissionService {
 	 * Also grant every subscriber of the stream write permission to the publisher's inbox streams.
 	 *
 	 */
-	private void grantNewPublisherInboxStreamPermissions(SecUser publisher, Stream stream, Subscription subscription, Date endsAt) {
-		grantInboxStreamPermissions(publisher, stream, Operation.READ, subscription, endsAt)
+	private void grantNewPublisherInboxStreamPermissions(SecUser publisher, Stream stream,
+														 Subscription subscription, Date endsAt, Permission parent) {
+		grantInboxStreamPermissions(publisher, stream, Operation.READ, subscription, endsAt, parent)
 	}
 
-	private void grantInboxStreamPermissions(SecUser user, Stream stream, Operation operation, Subscription subscription, Date endsAt) {
+	private void grantInboxStreamPermissions(SecUser user, Stream stream, Operation operation,
+											 Subscription subscription, Date endsAt, Permission parent) {
 		// Need to initialize the service below this way because of circular dependencies issues
 		StreamService streamService = grailsApplication.mainContext.getBean(StreamService)
 		// contains publishers if 'user' is a new subscriber, contains subscribers if 'user' is a new publisher
@@ -328,11 +333,25 @@ class PermissionService {
 		List<Stream> userInboxes = streamService.getInboxStreams([user])
 		List<Stream> otherUsersInboxes = streamService.getInboxStreams(otherUsers)
 		for (Stream inbox: otherUsersInboxes) {
-			systemGrant(user, inbox, Operation.WRITE, subscription, endsAt)
+			new Permission(
+				stream: inbox,
+				user: user,
+				operation: Operation.WRITE,
+				subscription: subscription,
+				endsAt: endsAt,
+				parent: parent
+			).save(flush: true, failOnError: true)
 		}
 		for (SecUser u: otherUsers) {
 			for (Stream userInbox: userInboxes) {
-				systemGrant(u, userInbox, Operation.WRITE, subscription, endsAt)
+				new Permission(
+					stream: userInbox,
+					user: u,
+					operation: Operation.WRITE,
+					subscription: subscription,
+					endsAt: endsAt,
+					parent: parent
+				).save(flush: true, failOnError: true)
 			}
 		}
 	}
@@ -531,10 +550,15 @@ class PermissionService {
 				perm.operation == op
 			}.each { Permission perm ->
 				revoked.add(perm)
+				List<Permission> childPermissions = Permission.findAllByParent(perm)
+				revoked.addAll(childPermissions)
 				try {
 					log.info("performRevoke: Trying to delete permission $perm.id")
 					Permission.withNewTransaction {
 						perm.delete(flush: true)
+						for (Permission childPerm: childPermissions) {
+							childPerm.delete(flush: true)
+						}
 					}
 				} catch (Throwable e) {
 					// several threads could be deleting the same permission, all after first resulting in StaleObjectStateException
