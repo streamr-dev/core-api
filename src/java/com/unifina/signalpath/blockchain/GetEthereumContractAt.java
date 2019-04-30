@@ -40,46 +40,47 @@ public class GetEthereumContractAt extends AbstractSignalPathModule {
 	@Override
 	public void init() {
 		addInput(addressParam);
+		addressParam.setUpdateOnChange(true);
 		addInput(abiParam);
 		abiParam.setUpdateOnChange(true);
 		abiParam.setCanConnect(false);
 	}
 
-	protected String getApiUrl(String network, String address){
+	protected String getApiUrl(String network, String address) {
 		StringBuilder sb = new StringBuilder();
 		sb.append("https://");
-		if(network == null || network.startsWith("main")){
+		if (network == null || network.startsWith("main")) {
 			sb.append("api");
-		}
-		else{
+		} else {
 			sb.append(network);
 		}
-		sb.append("."+ETHERSCAN_IO+ETHERSCAN_IO_QUERY+address);
+		sb.append("." + ETHERSCAN_IO + ETHERSCAN_IO_QUERY + address);
 		return sb.toString();
 	}
+
 	public static String readUtf8StreamToString(InputStream is) throws IOException {
 		ByteArrayOutputStream bos = new ByteArrayOutputStream();
 		byte[] buf = new byte[4096];
 		int len;
-		while((len = is.read(buf)) != -1){
-			bos.write(buf,0,len);
+		while ((len = is.read(buf)) != -1) {
+			bos.write(buf, 0, len);
 		}
 		bos.flush();
 		return new String(bos.toByteArray(), StandardCharsets.UTF_8);
 	}
+
 	protected JsonArray getEthereumAbi(String network, String address) throws IOException {
 		String url = getApiUrl(network, address);
 		URL etherscanapi = new URL(url);
 		URLConnection conn = etherscanapi.openConnection();
-		String json =readUtf8StreamToString(conn.getInputStream());
+		String json = readUtf8StreamToString(conn.getInputStream());
 		JsonParser parser = new JsonParser();
 		JsonObject response = parser.parse(json).getAsJsonObject();
-		if(response.get("status").getAsString().equals("0")){
-			log.info("No ABI found for address "+address + " on Etherscan for network "+ network);
+		if (response.get("status").getAsString().equals("0")) {
+			log.info("No ABI found for address " + address + " on Etherscan for network " + network);
 			return null;
-		}
-		else{
-			log.info("ABI found for address "+address + " on Etherscan for network "+ network);
+		} else {
+			log.info("ABI found for address " + address + " on Etherscan for network " + network);
 			return parser.parse(response.get("result").getAsString()).getAsJsonArray();
 		}
 	}
@@ -92,29 +93,28 @@ public class GetEthereumContractAt extends AbstractSignalPathModule {
 		ethereumOptions = EthereumModuleOptions.readFrom(options);
 		String network = ethereumOptions.getNetwork();
 		//address != 0x0
-		if(address.length() > 2 && !Numeric.toBigInt(address).equals(BigInteger.ZERO)){
-			if(abiString == null || abiString.trim().equals("") || abiString.trim().equals("[]")){
+		if (address.length() > 2 && !Numeric.toBigInt(address).equals(BigInteger.ZERO)) {
+			if (abiString == null || abiString.trim().equals("") || abiString.trim().equals("[]")) {
 				try {
 					//try to pull from etherescan
 					JsonArray etherscan_abi = getEthereumAbi(network, address);
 					abi = new EthereumABI(etherscan_abi);
-					if(etherscan_abi != null){
+					if (etherscan_abi != null) {
 						//how do we make the retrieved ABI appear in ABI field on UI?
-						abiParam.value = etherscan_abi.toString();
+						MapTraversal.getMap(config, "params[1]").put("value", etherscan_abi.toString());
 					}
-				}
-				catch(IOException e){
+				} catch (IOException e) {
 					throw new RuntimeException(e);
 				}
-			}
-			else
+			} else {
 				abi = new EthereumABI(abiString);
+			}
 
 			addOutput(out);
 			contract = new EthereumContract(address, abi);
 		}
 		//address = 0x0
-		else{
+		else {
 			abi = new EthereumABI(abiString);
 			contract = null;
 		}

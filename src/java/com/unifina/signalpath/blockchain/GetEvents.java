@@ -35,6 +35,7 @@ public class GetEvents extends AbstractSignalPathModule implements ContractEvent
 	private transient ContractEventPoller contractEventPoller;
 	private transient Propagator asyncPropagator;
 	private Web3j web3j;
+
 	@Override
 	public void init() {
 		setPropagationSink(true);
@@ -44,7 +45,7 @@ public class GetEvents extends AbstractSignalPathModule implements ContractEvent
 
 	}
 
-	protected Web3j getWeb3j(){
+	protected Web3j getWeb3j() {
 		return Web3j.build(new HttpService(ethereumOptions.getRpcUrl()));
 	}
 
@@ -78,10 +79,12 @@ public class GetEvents extends AbstractSignalPathModule implements ContractEvent
 
 
 	@Override
-	public void sendOutput() {}
+	public void sendOutput() {
+	}
 
 	@Override
-	public void clearState() {}
+	public void clearState() {
+	}
 
 	static void convertAndSend(Output output, Object value) {
 		if (output instanceof StringOutput) {
@@ -109,22 +112,23 @@ public class GetEvents extends AbstractSignalPathModule implements ContractEvent
 				Event web3jEvent = web3jEvents.get(abiEvent.name);
 				List<EventValues> valueList = Web3jHelper.extractEventParameters(web3jEvent, txr);
 				if (valueList == null) {
-					throw new RuntimeException("Failed to get event params");	// TODO: what happens when you throw in poller thread?
+					throw new RuntimeException("Failed to get event params");    // TODO: what happens when you throw in poller thread?
 				}
 
 				if (abiEvent.inputs.size() > 0) {
 					for (EventValues ev : valueList) {
 						// indexed and non-indexed event args are saved differently in logs and must be retrieved by different methods
 						// see https://solidity.readthedocs.io/en/v0.5.3/contracts.html#events
-						int nextIndexed=0, nextNonIndexed=0;
-						for(int i=0;i<abiEvent.inputs.size();i++){
+						int nextIndexed = 0, nextNonIndexed = 0;
+						for (int i = 0; i < abiEvent.inputs.size(); i++) {
 							EthereumABI.Slot s = abiEvent.inputs.get(i);
 							Output output = eventOutputs.get(i);
 							Object value;
-							if(s.indexed)
+							if (s.indexed) {
 								value = ev.getIndexedValues().get(nextIndexed++).getValue();
-							else
+							} else {
 								value = ev.getNonIndexedValues().get(nextNonIndexed++).getValue();
+							}
 							convertAndSend(output, value);
 						}
 					}
@@ -174,8 +178,7 @@ public class GetEvents extends AbstractSignalPathModule implements ContractEvent
 				try {
 					Event web3jEvent = Web3jHelper.toWeb3jEvent(abiEvent);
 					web3jEvents.put(abiEvent.name, web3jEvent);
-				}
-				catch(Exception e){
+				} catch (Exception e) {
 					throw new RuntimeException(e);
 				}
 			}
