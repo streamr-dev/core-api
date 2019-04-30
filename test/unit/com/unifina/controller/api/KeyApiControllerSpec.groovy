@@ -1,6 +1,7 @@
 package com.unifina.controller.api
 
 import com.unifina.ControllerSpecification
+import com.unifina.api.ApiException
 import com.unifina.api.NotFoundException
 import com.unifina.api.NotPermittedException
 import com.unifina.domain.data.Stream
@@ -18,6 +19,7 @@ class KeyApiControllerSpec extends ControllerSpecification {
 	def permissionService
 
 	SecUser me
+	Key userLinkedKey
 
 	def setup() {
 		me = new SecUser(
@@ -26,7 +28,7 @@ class KeyApiControllerSpec extends ControllerSpecification {
 			name: "name",
 		).save(failOnError: true, validate: true)
 
-		def userLinkedKey = new Key(name: 'users key', user: me)
+		userLinkedKey = new Key(name: 'users key', user: me)
 		userLinkedKey.id = "apiKey"
 		userLinkedKey.save(failOnError: true, validate: true)
 
@@ -275,5 +277,225 @@ class KeyApiControllerSpec extends ControllerSpecification {
 		then:
 		response.status == 204
 		Key.get(key.id) == null
+	}
+
+	void "updateUserKey() throws NotFoundException on unknown id"() {
+		when:
+		request.method = "PUT"
+		params.keyId = "XXXX"
+
+		authenticatedAs(me) { controller.updateUserKey() }
+
+		then:
+		thrown(NotFoundException)
+	}
+
+	void "updateUserKey() does not update empty name"() {
+		setup:
+		Key key = new Key(name: "anonymous key")
+		key.id = "key-id-1"
+		key.save(failOnError: true, validate: true)
+
+		controller.permissionService = permissionService = Stub(PermissionService)
+
+		when:
+		request.method = "PUT"
+		params.keyId = key.id
+		request.JSON = [
+			name: ""
+		]
+
+		authenticatedAs(me) { controller.updateUserKey() }
+
+		then:
+		response.status == 200
+		Key.get(key.id).name == "anonymous key"
+	}
+
+	void "updateUserKey() updates name field of user's key"() {
+		setup:
+		SecUser user = new SecUser(
+			username: "address@emailprovider.com",
+			password: "pwd",
+			name: "first last name",
+		)
+		user.id = 1
+		user.save(failOnError: true, validate: true)
+
+		Key key = new Key(name: "key for user", user: user)
+		key.id = "key-1"
+		key.save(failOnError: true, validate: true)
+
+		controller.permissionService = permissionService = Stub(PermissionService)
+		permissionService.canShare(me, userLinkedKey) >> true
+
+		when:
+		request.method = "PUT"
+		params.keyId = userLinkedKey.id
+		request.JSON = [
+			name: "new key name"
+		]
+
+		authenticatedAs(me) { controller.updateUserKey() }
+
+		then:
+		response.status == 200
+		Key.get(userLinkedKey.id).name == "new key name"
+	}
+
+	void "updateStreamKey() throws NotFoundException on unknown id"() {
+		when:
+		request.method = "PUT"
+		params.keyId = "XXXX"
+
+		authenticatedAs(me) { controller.updateStreamKey() }
+
+		then:
+		thrown(NotFoundException)
+	}
+
+	void "updateStreamKey() does not update empty name"() {
+		setup:
+		Stream stream = new Stream(name: "stream")
+		stream.id = "streamId"
+		stream.save(validate: false, failOnError: true)
+
+		Key key = new Key(name: "anonymous key")
+		key.id = "key-id-1"
+		key.save(failOnError: true, validate: true)
+
+		controller.permissionService = permissionService = Stub(PermissionService)
+		permissionService.canShare(me, stream) >> true
+
+		when:
+		request.method = "PUT"
+		params.keyId = key.id
+		request.JSON = [
+			name: ""
+		]
+
+		authenticatedAs(me) { controller.updateStreamKey() }
+
+		then:
+		response.status == 200
+		Key.get(key.id).name == "anonymous key"
+	}
+
+	void "updateStreamKey() updates name field of stream's key"() {
+		setup:
+		Stream stream = new Stream(name: "stream")
+		stream.id = "streamId"
+		stream.save(validate: false, failOnError: true)
+
+		Key key = new Key(name: "anonymous key")
+		key.id = "key-id-1"
+		key.save(failOnError: true, validate: true)
+
+		controller.permissionService = permissionService = Stub(PermissionService)
+		permissionService.canShare(me, stream) >> true
+
+		when:
+		request.method = "PUT"
+		params.keyId = key.id
+		params.streamId = stream.id
+		request.JSON = [
+			name: "new key name"
+		]
+
+		authenticatedAs(me) { controller.updateStreamKey() }
+
+		then:
+		response.status == 200
+		Key.get(key.id).name == "new key name"
+	}
+
+	void "updateStreamKey() responds with 400 for invalid permission"() {
+		setup:
+		Stream stream = new Stream(name: "stream")
+		stream.id = "streamId"
+		stream.save(validate: false, failOnError: true)
+
+		Key key = new Key(name: "anonymous key")
+		key.id = "key-id-1"
+		key.save(failOnError: true, validate: true)
+
+		controller.permissionService = permissionService = Stub(PermissionService)
+
+		when:
+		request.method = "PUT"
+		params.keyId = key.id
+		params.streamId = stream.id
+		request.JSON = [
+			name: "new key name",
+			permission: "XXXXX",
+		]
+
+		authenticatedAs(me) { controller.updateStreamKey() }
+
+		then:
+		thrown(ApiException)
+	}
+
+	void "updateStreamKey() updates read permission for key"() {
+		setup:
+		Stream stream = new Stream(name: "stream")
+		stream.id = "streamId"
+		stream.save(validate: false, failOnError: true)
+
+		Key key = new Key(name: "anonymous key")
+		key.id = "key-id-1"
+		key.save(failOnError: true, validate: true)
+
+		controller.permissionService = Mock(PermissionService)
+		controller.permissionService.canShare(me, stream) >> true
+
+		when:
+		request.method = "PUT"
+		params.keyId = key.id
+		params.streamId = stream.id
+		request.JSON = [
+			name: "new key name",
+			permission: "read",
+		]
+
+		authenticatedAs(me) { controller.updateStreamKey() }
+
+		then:
+		1 * controller.permissionService.grant(me, stream, key, Permission.Operation.READ, false)
+		response.status == 200
+		Key.get(key.id).name == "new key name"
+		response.json.permission == "read"
+	}
+
+	void "updateStreamKey() updates write permission for key"() {
+		setup:
+		Stream stream = new Stream(name: "stream")
+		stream.id = "streamId"
+		stream.save(validate: false, failOnError: true)
+
+		Key key = new Key(name: "anonymous key")
+		key.id = "key-id-1"
+		key.save(failOnError: true, validate: true)
+
+		controller.permissionService = Mock(PermissionService)
+		controller.permissionService.canShare(me, stream) >> true
+
+		when:
+		request.method = "PUT"
+		params.keyId = key.id
+		params.streamId = stream.id
+		request.JSON = [
+			name: "new key name",
+			permission: "write",
+		]
+
+		authenticatedAs(me) { controller.updateStreamKey() }
+
+		then:
+		1 * controller.permissionService.grant(me, stream, key, Permission.Operation.READ, false)
+		1 * controller.permissionService.grant(me, stream, key, Permission.Operation.WRITE, false)
+		response.status == 200
+		Key.get(key.id).name == "new key name"
+		response.json.permission == "write"
 	}
 }

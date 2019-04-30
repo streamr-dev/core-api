@@ -6,14 +6,14 @@ import org.ethereum.crypto.ECKey;
 import org.ethereum.crypto.HashUtil;
 import org.ethereum.util.ByteUtil;
 
+import java.nio.charset.StandardCharsets;
 import java.security.SignatureException;
 
 public class ECRecover {
 	private static final String SIGN_MAGIC = "\u0019Ethereum Signed Message:\n";
 
-	public static byte[] calculateMessageHash(String message) throws DecoderException {
-		String messageHex = "0x" + Hex.encodeHexString(message.getBytes());
-		byte[] messageBytes = Hex.decodeHex(messageHex.replace("0x", "").toCharArray());
+	public static byte[] calculateMessageHash(String message) {
+		byte[] messageBytes = message.getBytes(StandardCharsets.UTF_8);
 		String prefix = SIGN_MAGIC + messageBytes.length;
 		byte[] toHash = ByteUtil.merge(prefix.getBytes(), messageBytes);
 		return HashUtil.sha3(toHash);

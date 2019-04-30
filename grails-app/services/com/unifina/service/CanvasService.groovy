@@ -1,6 +1,7 @@
 package com.unifina.service
 
 import com.unifina.api.*
+import com.unifina.domain.ExampleType
 import com.unifina.domain.dashboard.Dashboard
 import com.unifina.domain.dashboard.DashboardItem
 import com.unifina.domain.data.Stream
@@ -21,6 +22,8 @@ import groovy.json.JsonBuilder
 import groovy.transform.CompileStatic
 import org.codehaus.groovy.grails.web.json.JSONObject
 import org.codehaus.groovy.grails.web.mapping.LinkGenerator
+import org.codehaus.groovy.runtime.InvokerHelper
+import org.codehaus.groovy.runtime.InvokerInvocationException
 
 class CanvasService {
 
@@ -201,8 +204,69 @@ class CanvasService {
 		return grailsLinkGenerator.link(controller: 'canvas', action: 'editor', id: canvas.id, absolute: true)
 	}
 
+	@CompileStatic
+	def addExampleCanvases(SecUser user, List<Canvas> examples) {
+		for (final Canvas example : examples) {
+			switch (example.exampleType) {
+				// Create a copy of the example canvas for the user and grant read/write/share permissions.
+				case ExampleType.COPY:
+					Canvas c = new Canvas()
+					setProperties(c, example.properties)
+					c.id = null
+					c.runner = null
+					c.server = null
+					c.requestUrl = null
+					c.serialization = null
+					c.startedBy = null
+					c.state = Canvas.State.STOPPED
+					c.exampleType = ExampleType.NOT_SET
+
+					Map map = (JSONObject) JSON.parse(example.json)
+					SaveCanvasCommand cmd = new SaveCanvasCommand(
+						name: c.name,
+						modules: map?.getJSONArray("modules") == null ? [] : map?.getJSONArray("modules"),
+						settings: map?.getJSONObject("settings") == null ? [:] : map?.getJSONObject("settings"),
+						adhoc: false,
+					)
+					updateExisting(c, cmd, user,true)
+					break
+				// Grant read permission to example canvas.
+				case ExampleType.SHARE:
+					permissionService.systemGrant(user, example, Permission.Operation.READ)
+					break
+			}
+		}
+	}
+
+	// This code is copied and modified from InvokerHelper
+	private static setProperties(Object object, Map properties) {
+		MetaClass mc = InvokerHelper.getMetaClass(object)
+		Iterator i = properties.entrySet().iterator()
+		while (i.hasNext()) {
+			Object o = i.next()
+			Map.Entry entry = (Map.Entry) o
+			String key = entry.getKey().toString()
+			Object value = entry.getValue()
+			if (value instanceof Collection) { // Do not duplicate references to Hibernate collections
+				continue
+			}
+			setPropertySafe(object, mc, key, value)
+		}
+	}
+	private static setPropertySafe(Object object, MetaClass mc, String key, Object value) {
+		try {
+			mc.setProperty(object, key, value)
+		} catch (MissingPropertyException ignored) {
+		} catch (InvokerInvocationException e) {
+			Throwable cause = e.getCause()
+			if (cause == null || !(cause instanceof IllegalArgumentException)) {
+				throw e
+			}
+		}
+	}
+
 	private boolean hasCanvasPermission(Canvas canvas, SecUser user, Permission.Operation op) {
-		return op == Permission.Operation.READ && canvas.example || permissionService.check(user, canvas, op)
+		return permissionService.check(user, canvas, op)
 	}
 
 	private boolean hasModulePermissionViaDashboard(Canvas canvas, Integer moduleId, String dashboardId, SecUser user, Permission.Operation op) {
@@ -219,7 +283,7 @@ class CanvasService {
 	}
 
 	private SignalPathService.ReconstructedResult constructNewSignalPathMap(Canvas canvas, SaveCanvasCommand command, SecUser user, boolean resetUi) {
-		Map inputSignalPathMap = JSON.parse(canvas.json != null ? canvas.json : "{}")
+		Map inputSignalPathMap = (Map) JSON.parse(canvas.json != null ? canvas.json : "{}")
 
 		inputSignalPathMap.name = command.name
 		inputSignalPathMap.modules = command.modules

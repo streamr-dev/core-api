@@ -1,17 +1,21 @@
 package com.unifina.signalpath.blockchain;
 
 import com.google.gson.*;
+import com.google.gson.reflect.TypeToken;
 import com.unifina.signalpath.*;
 import com.unifina.signalpath.remote.AbstractHttpModule;
 import com.unifina.utils.MapTraversal;
 import org.apache.http.HttpEntity;
+import org.apache.http.HttpResponse;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.methods.HttpRequestBase;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.util.EntityUtils;
 import org.apache.log4j.Logger;
 
+import java.io.IOException;
 import java.io.UnsupportedEncodingException;
+import java.lang.reflect.Type;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -283,18 +287,24 @@ public class EthereumCall extends AbstractHttpModule {
 		public String txHash;
 	}
 
+	/** Get the JSON payload from HttpResponse. Separated for improved testability */
+	public JsonObject parseResponse(HttpResponse httpResponse) throws IOException {
+		if (httpResponse == null) { throw new RuntimeException("No response from server"); }
+
+		HttpEntity entity = httpResponse.getEntity();
+		if (entity == null) { throw new RuntimeException("Empty response from server"); }
+
+		String responseString = EntityUtils.toString(entity, "UTF-8");
+		if (responseString.isEmpty()) { throw new RuntimeException("Empty response from server"); }
+
+		JsonObject response = new JsonParser().parse(responseString).getAsJsonObject();
+		return response;
+	}
+
 	@Override
 	public void sendOutput(HttpTransaction call) {
 		try {
-			if (call.response == null) { throw new RuntimeException("No response from server"); }
-
-			HttpEntity entity = call.response.getEntity();
-			if (entity == null) { throw new RuntimeException("Empty response from server"); }
-
-			String responseString = EntityUtils.toString(entity, "UTF-8");
-			if (responseString.isEmpty()) { throw new RuntimeException("Empty response from server"); }
-
-			JsonObject response = new JsonParser().parse(responseString).getAsJsonObject();
+			JsonObject response = parseResponse(call.response);
 
 			if (response.get("error") != null) { throw new RuntimeException(response.get("error").toString()); }
 			if (response.get("errors") != null) { throw new RuntimeException(response.get("errors").toString()); }
@@ -303,13 +313,13 @@ public class EthereumCall extends AbstractHttpModule {
 				JsonArray resultValues = response.get("results").getAsJsonArray();
 				int n = Math.min(results.size(), resultValues.size());
 				for (int i = 0; i < n; i++) {
-					String result = resultValues.get(i).getAsString();
+					JsonElement result = resultValues.get(i);
 					Output<Object> output = results.get(i);
-					convertAndSend(output, result);
+					EthereumToStreamrTypes.convertAndSend(output, result);
 				}
 			} else {
 				if (gson == null) { gson = new Gson(); }
-				TransactionResponse resp = gson.fromJson(responseString, TransactionResponse.class);
+				TransactionResponse resp = gson.fromJson(response, TransactionResponse.class);
 				valueSent.send(resp.valueSent);
 				valueReceived.send(resp.valueReceived);
 				gasUsed.send(resp.gasUsed);
@@ -324,9 +334,9 @@ public class EthereumCall extends AbstractHttpModule {
 						if (ev.inputs.size() > 0) {
 							int n = Math.min(evOutputs.size(), args.size());
 							for (int i = 0; i < n; i++) {
-								String value = args.get(i).getAsString();
+								JsonElement value = args.get(i);
 								Output output = evOutputs.get(i);
-								convertAndSend(output, value);
+								EthereumToStreamrTypes.convertAndSend(output, value);
 							}
 						} else {
 							evOutputs.get(0).send(Boolean.TRUE);
@@ -340,18 +350,6 @@ public class EthereumCall extends AbstractHttpModule {
 
 		if (call.errors.size() > 0) {
 			errors.send(call.errors);
-		}
-	}
-
-	static void convertAndSend(Output output, String value) {
-		if (output instanceof StringOutput) {
-			output.send(value);
-		} else if (output instanceof BooleanOutput) {
-			output.send(Boolean.parseBoolean(value));
-		} else if (output instanceof TimeSeriesOutput) {
-			output.send(Double.parseDouble(value));
-		} else {
-			output.send(value);
 		}
 	}
 

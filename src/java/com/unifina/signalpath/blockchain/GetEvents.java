@@ -198,4 +198,5 @@ public class GetEvents extends AbstractSignalPathModule implements ContractEvent
 		ethereumOptions.writeNetworkOption(options);
 		return config;
 	}
+
 }

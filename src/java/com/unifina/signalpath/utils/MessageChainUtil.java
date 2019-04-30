@@ -8,9 +8,6 @@ import com.unifina.data.StreamPartitioner;
 import com.unifina.domain.data.Stream;
 import com.unifina.domain.security.SecUser;
 import com.unifina.utils.IdGenerator;
-import org.apache.log4j.Logger;
-
-import java.io.IOException;
 import java.io.Serializable;
 import java.util.Date;
 import java.util.HashMap;
@@ -26,8 +23,6 @@ public class MessageChainUtil implements Serializable {
 	private Long userId;
 	private String msgChainId;
 	private transient SecUser user;
-
-	private static final Logger log = Logger.getLogger(MessageChainUtil.class);
 
 	public MessageChainUtil(Long userId) {
 		this.userId = userId;
