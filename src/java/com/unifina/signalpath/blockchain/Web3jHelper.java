@@ -1,7 +1,6 @@
 package com.unifina.signalpath.blockchain;
 
 import org.apache.log4j.Logger;
-import org.jetbrains.annotations.NotNull;
 import org.web3j.abi.*;
 import org.web3j.abi.datatypes.*;
 import org.web3j.abi.datatypes.generated.AbiTypes;
@@ -96,6 +95,7 @@ public class Web3jHelper {
 			};
 		}
 		else {
+			final Class arrayclass = Class.forName("org.web3j.abi.datatypes.generated.StaticArray" + digits);
 			ref = new TypeReference.StaticArrayTypeReference<StaticArray>(Integer.parseInt(digits)){
 				@Override
 				public boolean isIndexed(){
@@ -111,12 +111,7 @@ public class Web3jHelper {
 
 						@Override
 						public java.lang.reflect.Type getRawType() {
-							try{
-								return Class.forName("org.web3j.abi.datatypes.generated.StaticArray" + getSize());
-							}
-							catch(ClassNotFoundException e){
-								throw new RuntimeException(e);
-							}
+							return arrayclass;
 						}
 
 						@Override
@@ -260,9 +255,11 @@ public class Web3jHelper {
 		return web3jevent;
 	}
 
-
 	public static List<EventValues> extractEventParameters(Event event, TransactionReceipt transactionReceipt) {
 		List<Log> logs = transactionReceipt.getLogs();
+		return extractEventParameters(event,logs);
+	}
+	public static List<EventValues> extractEventParameters(Event event, List<? extends Log> logs) {
 		List<EventValues> values = new ArrayList<>();
 		for (Log log : logs) {
 			EventValues eventValues = Contract.staticExtractEventParameters(event, log);

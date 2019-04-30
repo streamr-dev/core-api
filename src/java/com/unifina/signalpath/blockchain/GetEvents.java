@@ -11,6 +11,7 @@ import org.web3j.abi.EventValues;
 import org.web3j.abi.TypeReference;
 import org.web3j.abi.datatypes.Event;
 import org.web3j.protocol.Web3j;
+import org.web3j.protocol.core.methods.response.Log;
 import org.web3j.protocol.core.methods.response.TransactionReceipt;
 import org.web3j.protocol.http.HttpService;
 
@@ -104,39 +105,8 @@ public class GetEvents extends AbstractSignalPathModule implements ContractEvent
 			String txHash = events.getJSONObject(0).getString("transactionHash");
 			txHashOutput.send(txHash);
 			log.info(String.format("Received event '%s'", txHash));
-
 			TransactionReceipt txr = Web3jHelper.getTransactionReceipt(web3j, txHash);
-
-			for (EthereumABI.Event abiEvent : contract.getValue().getABI().getEvents()) {
-				List<Output> eventOutputs = outputsByEvent.get(abiEvent.name);
-				Event web3jEvent = web3jEvents.get(abiEvent.name);
-				List<EventValues> valueList = Web3jHelper.extractEventParameters(web3jEvent, txr);
-				if (valueList == null) {
-					throw new RuntimeException("Failed to get event params");    // TODO: what happens when you throw in poller thread?
-				}
-
-				if (abiEvent.inputs.size() > 0) {
-					for (EventValues ev : valueList) {
-						// indexed and non-indexed event args are saved differently in logs and must be retrieved by different methods
-						// see https://solidity.readthedocs.io/en/v0.5.3/contracts.html#events
-						int nextIndexed = 0, nextNonIndexed = 0;
-						for (int i = 0; i < abiEvent.inputs.size(); i++) {
-							EthereumABI.Slot s = abiEvent.inputs.get(i);
-							Output output = eventOutputs.get(i);
-							Object value;
-							if (s.indexed) {
-								value = ev.getIndexedValues().get(nextIndexed++).getValue();
-							} else {
-								value = ev.getNonIndexedValues().get(nextNonIndexed++).getValue();
-							}
-							convertAndSend(output, value);
-						}
-					}
-				} else {
-					// events with no arguments just get a true sent as a sign of event being triggered
-					eventOutputs.get(0).send(Boolean.TRUE);
-				}
-			}
+			displayEventsFromLogs(txr.getLogs());
 			asyncPropagator.propagate();
 
 		} catch (JSONException | IOException e) {
@@ -149,6 +119,39 @@ public class GetEvents extends AbstractSignalPathModule implements ContractEvent
 		errors.send(Collections.singletonList(message));
 		asyncPropagator.propagate();
 	}
+
+	protected void displayEventsFromLogs(List<? extends Log> logs){
+		for (EthereumABI.Event abiEvent : contract.getValue().getABI().getEvents()) {
+			List<Output> eventOutputs = outputsByEvent.get(abiEvent.name);
+			Event web3jEvent = web3jEvents.get(abiEvent.name);
+			List<EventValues> valueList = Web3jHelper.extractEventParameters(web3jEvent, logs);
+			if (valueList == null) {
+				throw new RuntimeException("Failed to get event params");	// TODO: what happens when you throw in poller thread?
+			}
+
+			if (abiEvent.inputs.size() > 0) {
+				for (EventValues ev : valueList) {
+					// indexed and non-indexed event args are saved differently in logs and must be retrieved by different methods
+					// see https://solidity.readthedocs.io/en/v0.5.3/contracts.html#events
+					int nextIndexed=0, nextNonIndexed=0;
+					for(int i=0;i<abiEvent.inputs.size();i++){
+						EthereumABI.Slot s = abiEvent.inputs.get(i);
+						Output output = eventOutputs.get(i);
+						Object value;
+						if(s.indexed)
+							value = ev.getIndexedValues().get(nextIndexed++).getValue();
+						else
+							value = ev.getNonIndexedValues().get(nextNonIndexed++).getValue();
+						convertAndSend(output, value);
+					}
+				}
+			} else {
+				// events with no arguments just get a true sent as a sign of event being triggered
+				eventOutputs.get(0).send(Boolean.TRUE);
+			}
+		}
+	}
+
 
 	@Override
 	protected void onConfiguration(Map<String, Object> config) {
