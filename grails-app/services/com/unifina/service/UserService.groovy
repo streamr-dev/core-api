@@ -6,11 +6,15 @@ import com.unifina.api.NotFoundException
 import com.unifina.domain.ExampleType
 import com.unifina.domain.data.Feed
 import com.unifina.domain.data.Stream
+import com.unifina.domain.security.IntegrationKey
 import com.unifina.domain.security.Key
+import com.unifina.domain.security.Permission
 import com.unifina.domain.security.SecRole
 import com.unifina.domain.security.SecUser
+import com.unifina.domain.security.SecUserSecRole
 import com.unifina.domain.signalpath.Canvas
 import com.unifina.domain.signalpath.ModulePackage
+import com.unifina.domain.tour.TourUser
 import com.unifina.exceptions.UserCreationFailedException
 import com.unifina.security.Userish
 import grails.plugin.springsecurity.SpringSecurityService
@@ -149,8 +153,22 @@ class UserService {
 		if (user == null) {
 			throw new NotFoundException("user not found", "User", null)
 		}
-		user.enabled = false
-		user.save(validate: true)
+		TourUser.where {
+			user == user
+		}.deleteAll()
+		IntegrationKey.where {
+			user == user
+		}.deleteAll()
+		Key.where {
+			user == user
+		}.deleteAll()
+		Permission.where {
+			user == user
+		}.deleteAll()
+		SecUserSecRole.where {
+			secUser == user
+		}.deleteAll()
+		user.delete(flush: true)
 	}
 
 	/**

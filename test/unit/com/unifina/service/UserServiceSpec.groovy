@@ -1,12 +1,12 @@
 package com.unifina.service
 
-import com.unifina.api.ApiException
 import com.unifina.api.InvalidUsernameAndPasswordException
 import com.unifina.api.NotFoundException
 import com.unifina.domain.data.Feed
 import com.unifina.domain.security.*
 import com.unifina.domain.signalpath.Module
 import com.unifina.domain.signalpath.ModulePackage
+import com.unifina.domain.tour.TourUser
 import com.unifina.feed.NoOpStreamListener
 import grails.plugin.springsecurity.SpringSecurityService
 import grails.test.mixin.Mock
@@ -18,7 +18,7 @@ import org.springframework.validation.FieldError
 import spock.lang.Specification
 
 @TestFor(UserService)
-@Mock([Feed, Key, SecUser, SecRole, ModulePackage, SecUserSecRole, Module, Permission])
+@Mock([Feed, Key, SecUser, SecRole, ModulePackage, SecUserSecRole, Module, Permission, TourUser, IntegrationKey])
 class UserServiceSpec extends Specification {
 
 	void createData() {
@@ -203,12 +203,16 @@ class UserServiceSpec extends Specification {
 		setup:
 		SecUser user = new SecUser()
 		user.id = 1
+		user.name = "user domain"
+		user.username = "user@domain.com"
+		user.password = "xxx"
+		user.save(validate: true, failOnError: true)
 
 		when:
 		service.delete(user)
 
 		then:
-		user.enabled == false
+		user.get(user.id) == null
 	}
 
 	def "delete user validates parameters"() {
