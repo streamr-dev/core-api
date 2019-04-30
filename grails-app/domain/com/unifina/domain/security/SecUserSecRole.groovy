@@ -42,14 +42,6 @@ class SecUserSecRole implements Serializable {
 		true
 	}
 
-	static void removeAll(SecUser secUser) {
-		executeUpdate 'DELETE FROM SecUserSecRole WHERE secUser=:secUser', [secUser: secUser]
-	}
-
-	static void removeAll(SecRole secRole) {
-		executeUpdate 'DELETE FROM SecUserSecRole WHERE secRole=:secRole', [secRole: secRole]
-	}
-
 	static mapping = {
 		id composite: ['secRole', 'secUser']
 		version false
