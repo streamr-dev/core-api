@@ -34,8 +34,6 @@ class PermissionServiceSpec extends BeanMockingSpecification {
 	Dashboard dashAllowed, dashRestricted, dashOwned, dashPublic
 	Permission dashReadPermission, dashAnonymousReadPermission
 
-	StreamService streamService
-
     def setup() {
 
 		// Users
@@ -69,8 +67,6 @@ class PermissionServiceSpec extends BeanMockingSpecification {
 		dashReadPermission = service.grant(anotherUser, dashAllowed, me, Operation.READ)
 		dashAnonymousReadPermission = service.grantAnonymousAccess(anotherUser, dashPublic)
 		service.grant(anotherUser, dashAllowed, anonymousKey)
-
-		streamService = mockBean(StreamService, Mock(StreamService))
     }
 
 	void "test setup"() {
@@ -204,52 +200,6 @@ class PermissionServiceSpec extends BeanMockingSpecification {
 		service.getPermissionsTo(dashPublic, myKey)[0].operation == Operation.READ
 		service.getPermissionsTo(dashPublic, anotherUserKey).size() == 4
 		service.getPermissionsTo(dashPublic, anonymousKey)[0].operation == Operation.READ
-	}
-
-	void "systemGrant() on an Ethereum user and a stream creates also inbox permissions"() {
-		SecUser publisher1 = new SecUser()
-		publisher1.id = 4L
-		SecUser publisher2 = new SecUser()
-		publisher2.id = 5L
-		SecUser publisher3 = new SecUser()
-		publisher3.id = 6L
-		SecUser subscriber = new SecUser(username: "0x26e1ae3f5efe8a01eca8c2e9d3c32702cf4bead6").save(failOnError: true, validate: false)
-
-		Stream pub1Inbox = new Stream(name: "publisher1", inbox: true)
-		pub1Inbox.id = "publisher1"
-		pub1Inbox.save(failOnError: true, validate: false)
-		Stream pub2Inbox = new Stream(name: "publisher2", inbox: true)
-		pub2Inbox.id = "publisher2"
-		pub2Inbox.save(failOnError: true, validate: false)
-		Stream pub3Inbox = new Stream(name: "publisher3", inbox: true)
-		pub3Inbox.id = "publisher3"
-		pub3Inbox.save(failOnError: true, validate: false)
-		Stream subInbox = new Stream(name: subscriber.username, inbox: true)
-		subInbox.id = subscriber.username
-		subInbox.save(failOnError: true, validate: false)
-
-		Stream stream = new Stream()
-		stream.id = "stream"
-		setup:
-		service.systemGrant(publisher1, stream, Operation.WRITE)
-		service.systemGrant(publisher2, stream, Operation.WRITE)
-		when:
-		// adding a new subscriber
-		service.systemGrant(subscriber, stream, Operation.READ)
-		// adding a new publisher
-		service.systemGrant(publisher3, stream, Operation.WRITE)
-		then:
-		2 * streamService.getInboxStreams([subscriber]) >> [subInbox]
-		1 * streamService.getInboxStreams([publisher1, publisher2]) >> [pub1Inbox, pub2Inbox]
-		1 * streamService.getInboxStreams([publisher3]) >> [pub3Inbox]
-		// assertions after adding a new subscriber
-		service.canWrite(subscriber, pub1Inbox)
-		service.canWrite(subscriber, pub2Inbox)
-		service.canWrite(publisher1, subInbox)
-		service.canWrite(publisher2, subInbox)
-		// assertions after adding a new publisher
-		service.canWrite(subscriber, pub3Inbox)
-		service.canWrite(publisher3, subInbox)
 	}
 
 	void "get throws exceptions on invalid resource"() {

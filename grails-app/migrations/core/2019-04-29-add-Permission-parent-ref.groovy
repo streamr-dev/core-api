@@ -6,11 +6,11 @@ databaseChangeLog = {
 		}
 	}
 	changeSet(author: "mthambipillai", id: "add-Permission-parent-ref-4") {
-		createIndex(indexName: "FKE125C5CFBE20C5D8", tableName: "permission") {
+		createIndex(indexName: "parent_idx", tableName: "permission") {
 			column(name: "parent_id")
 		}
 	}
 	changeSet(author: "mthambipillai", id: "add-Permission-parent-ref-3") {
-		addForeignKeyConstraint(baseColumnNames: "parent_id", baseTableName: "permission", constraintName: "FKE125C5CFBE20C5D8", deferrable: "false", initiallyDeferred: "false", referencedColumnNames: "id", referencedTableName: "permission", referencesUniqueColumn: "false")
+		addForeignKeyConstraint(baseColumnNames: "parent_id", baseTableName: "permission", constraintName: "fk_parent", deferrable: "false", initiallyDeferred: "false", referencedColumnNames: "id", referencedTableName: "permission", referencesUniqueColumn: "false")
 	}
 }
