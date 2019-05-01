@@ -35,6 +35,7 @@ class KeyApiControllerSpec extends ControllerSpecification {
 
 		streamService = mainContext.getBean(StreamService)
 		controller.permissionService = permissionService = grailsApplication.mainContext.getBean(PermissionService)
+		streamService.permissionService = permissionService
 	}
 
 	// CORE-708: User with read permission to stream should not see stream write key in api
