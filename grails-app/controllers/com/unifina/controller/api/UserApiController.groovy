@@ -9,6 +9,7 @@ import grails.converters.JSON
 import grails.plugin.springsecurity.annotation.Secured
 import org.springframework.web.multipart.MultipartFile
 import grails.validation.Validateable
+import com.unifina.service.BalanceService
 
 @Secured(["IS_AUTHENTICATED_ANONYMOUSLY"])
 class UserApiController {
@@ -23,6 +24,7 @@ class UserApiController {
 	def springSecurityService
 	UserService userService
 	UserAvatarImageService userAvatarImageService
+	BalanceService balanceService
 
 	@StreamrApi
 	def update(UpdateProfileCommand cmd) {
@@ -52,6 +54,16 @@ class UserApiController {
 	@StreamrApi
 	def getUserInfo() {
 		render(request.apiUser?.toMap() as JSON)
+	}
+
+	@StreamrApi
+	def getCurrentUserBalance() {
+		Map<String, BigInteger> balances = balanceService.checkBalances(loggedInUser())
+		BigInteger sum = BigInteger.ZERO;
+		for(BigInteger bal : balances.values()){
+			sum = sum.add(bal)
+		}
+		render([sum: sum] as JSON)
 	}
 
 	@StreamrApi

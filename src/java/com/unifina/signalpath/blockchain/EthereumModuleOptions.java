@@ -64,6 +64,14 @@ public class EthereumModuleOptions implements Serializable {
 		}
 	}
 
+	public String getDatacoinAddress(){
+		String address = MapTraversal.getString(Holders.getConfig(), "streamr.ethereum.datacoinAddress");
+		if (address == null) {
+			throw new RuntimeException("No datacoin address found in config");
+		}
+		return address;
+	}
+
 	public String getServer() {
 		String url = MapTraversal.getString(Holders.getConfig(), "streamr.ethereum.networks." + network);
 		if (url == null) {
