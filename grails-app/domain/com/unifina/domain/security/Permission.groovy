@@ -30,7 +30,7 @@ class Permission {
 	ModulePackage modulePackage
 	Stream stream
 	Product product
-	static List<String> resourceFields = ['canvas', 'dashboard', 'feed', 'modulePackage', 'stream', 'product']
+	static List<String> resourceFields = ['canvas', 'dashboard', 'modulePackage', 'stream', 'product']
 
 	/** Type of operation that this ACL item allows e.g. "read" */
 	enum Operation {

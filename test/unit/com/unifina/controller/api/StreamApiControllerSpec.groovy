@@ -20,9 +20,9 @@ class StreamApiControllerSpec extends ControllerSpecification {
 
 	SecUser me
 
-	def streamService
-	def permissionService
-	def apiService
+	StreamService streamService
+	PermissionService permissionService
+	ApiService apiService
 
 	Stream streamOne
 	def streamTwoId
@@ -47,6 +47,7 @@ class StreamApiControllerSpec extends ControllerSpecification {
 		// First use real streamService to create the streams
 		streamService = mainContext.getBean(StreamService)
 		streamService.permissionService = permissionService
+		streamService.cassandraService = mockBean(CassandraService, Mock(CassandraService))
 		streamOne = streamService.createStream([name: "stream", description: "description"], me)
 		streamTwoId = streamService.createStream([name: "ztream"], me).id
 		streamThreeId = streamService.createStream([name: "atream"], me).id
@@ -278,6 +279,7 @@ class StreamApiControllerSpec extends ControllerSpecification {
 		authenticatedAs(me) { controller.delete() }
 
 		then:
+		1 * streamService.cassandraService.deleteAll(streamOne)
 		response.status == 204
 	}
 

@@ -58,7 +58,7 @@ class FieldDetectorSpec extends Specification {
 		msg.getContent() >> [a: [1,2,3], b: [hello: "world", "beast": 666], c: true]
 
 		expect:
-		FieldDetector.detectFields(msg)*.toMap() == [
+		FieldDetector.detectFields(msg, true)*.toMap() == [
 			[name: "a", type: "list"],
 			[name: "b.hello", type: "string"],
 			[name: "b.beast", type: "number"],

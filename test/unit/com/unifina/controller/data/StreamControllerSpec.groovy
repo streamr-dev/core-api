@@ -7,6 +7,7 @@ import com.unifina.domain.signalpath.Module
 
 import com.unifina.service.StreamService
 import com.unifina.service.PermissionService
+import com.unifina.signalpath.utils.ConfigurableStreamModule
 import grails.plugin.springsecurity.SpringSecurityService
 import grails.test.mixin.Mock
 import grails.test.mixin.TestFor
@@ -21,7 +22,7 @@ class StreamControllerSpec extends Specification {
 	Module module
 
 	void setup() {
-		module = new Module(id: 1).save(validate: false)
+		module = new Module(id: 1, implementingClass: ConfigurableStreamModule.getName()).save(validate: false)
 		user = new SecUser(username: "me", password: "foo").save(validate:false)
 
 		stream = new Stream(name: "dummy", description: "dummy")

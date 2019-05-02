@@ -122,29 +122,6 @@ class StreamServiceSpec extends Specification {
 		stream.requireSignedData
 	}
 
-	void "createStream initializes streamListener"() {
-		setup:
-		def service = Spy(StreamService)
-		service.permissionService = Stub(PermissionService)
-		def streamListener = Mock(AbstractStreamListener)
-		def params = [
-				name       : "Test stream",
-				description: "Test stream",
-				config     : [
-						fields: [
-								[name: "profit", type: "number"],
-								[name: "keyword", type: "string"]
-						]
-				]
-		]
-		when:
-
-		service.createStream(params, new SecUser(username: "me").save(validate: false))
-		then:
-		1 * service.getStreamListener(_ as Stream) >> streamListener
-		1 * streamListener.addToConfiguration(params.config, _ as Stream)
-	}
-
 	void "getReadAuthorizedStream throws NotFoundException and does not invoke callback, if streamId doesn't exist"() {
 		def cb = Mock(Closure)
 		when:

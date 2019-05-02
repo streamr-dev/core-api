@@ -1,5 +1,6 @@
 package com.unifina.signalpath.remote
 
+import com.unifina.data.Event
 import com.unifina.datasource.DataSource
 import com.unifina.datasource.DataSourceEventQueue
 import com.unifina.domain.signalpath.Canvas
@@ -86,8 +87,8 @@ class SimpleHttpSpec extends Specification {
 	/** Mocked event queue. Works manually in tests, please call module.receive(queuedEvent) */
 	def mockGlobals = Stub(Globals) {
 		getDataSource() >> Stub(DataSource) {
-			enqueueEvent(_) >> { feedEventList ->
-				transaction = feedEventList[0].content
+			accept(_ as Event<AbstractHttpModule.HttpTransaction>) >> { Event<AbstractHttpModule.HttpTransaction> event ->
+				transaction = event.content
 			}
 		}
 		isRealtime() >> true

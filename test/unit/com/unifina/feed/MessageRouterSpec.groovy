@@ -33,9 +33,6 @@ class MessageRouterSpec extends Specification {
 		def result = router.route(msg)
 		then:
 		result == [c1, c2]
-		1 * c1.accept(msg)
-		1 * c2.accept(msg)
-		0 * c3.accept(msg)
 	}
 
 	def "messages are not routed to unsubscribers"() {
@@ -49,8 +46,6 @@ class MessageRouterSpec extends Specification {
 		def result = router.route(msg)
 		then:
 		result == [c1]
-		1 * c1.accept(msg)
-		0 * c2.accept(msg)
 	}
 
 }
