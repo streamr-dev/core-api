@@ -119,7 +119,7 @@ databaseChangeLog = {
 	include file: 'core/2018-08-30-test-data-for-stream-api-tests.groovy'
 	include file: 'core/2018-09-26-unify-domain.groovy'
 	include file: 'core/2018-09-20-rm-user-timezone.groovy'
-  	include file: 'core/2018-11-27-add-requireSignedData-field.groovy'
+  include file: 'core/2018-11-27-add-requireSignedData-field.groovy'
 	include file: 'core/2018-12-18-change-default-value-require-signed-data.groovy'
 	include file: 'core/2019-01-17-date-created-login.groovy'
 	include file: 'core/2019-01-30-rename-key-provider.groovy'
@@ -127,4 +127,6 @@ databaseChangeLog = {
 	include file: 'core/2019-02-15-user-avatar.groovy'
 	include file: 'core/2019-03-19-stream-canvas-example.groovy'
 	include file: 'core/2019-03-25-rm-canvas-example.groovy'
+	include file: 'core/2019-03-26-new-ethereum-call-module.groovy'
+	include file: 'core/2019-04-08-ethereumj-compilation-web3j-deploy.groovy'
 }
