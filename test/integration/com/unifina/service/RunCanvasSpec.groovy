@@ -33,7 +33,7 @@ class RunCanvasSpec extends IntegrationSpec {
 	}
 
 	def cleanup() {
-		MessageHubFactory.stopAndClearAll() // Do not leave messagehub threads lying around
+
 	}
 
 	@Unroll
