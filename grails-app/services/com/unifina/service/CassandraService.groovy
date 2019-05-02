@@ -1,9 +1,13 @@
 package com.unifina.service
 
+import com.datastax.driver.core.AuthProvider
+import com.datastax.driver.core.Authenticator
 import com.datastax.driver.core.Cluster
+import com.datastax.driver.core.PlainTextAuthProvider
 import com.datastax.driver.core.ResultSet
 import com.datastax.driver.core.Row
 import com.datastax.driver.core.Session
+import com.datastax.driver.core.exceptions.AuthenticationException
 import com.unifina.domain.data.Stream
 import groovy.transform.CompileStatic
 import org.codehaus.groovy.grails.commons.GrailsApplication
@@ -36,11 +40,17 @@ class CassandraService implements DisposableBean {
      */
 	Session getSession() {
 		if (session==null) {
-			Cluster.Builder builder = Cluster.builder();
+			Cluster.Builder builder = Cluster.builder()
 			for (String host : grailsApplication.config["streamr"]["cassandra"]["hosts"]) {
-				builder.addContactPoint(host);
+				builder.addContactPoint(host)
 			}
-			Cluster cluster = builder.build();
+			if (grailsApplication.config["streamr"]["cassandra"]["username"] && grailsApplication.config["streamr"]["cassandra"]["password"]) {
+				builder.withCredentials(
+					grailsApplication.config["streamr"]["cassandra"]["username"].toString(),
+					grailsApplication.config["streamr"]["cassandra"]["password"].toString()
+				)
+			}
+			Cluster cluster = builder.build()
 
 			session = cluster.connect(grailsApplication.config["streamr"]["cassandra"]["keySpace"].toString());
 			session.getCluster().getConfiguration().getQueryOptions().setFetchSize(FETCH_SIZE);

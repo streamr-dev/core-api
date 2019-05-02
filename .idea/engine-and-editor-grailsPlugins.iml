@@ -360,11 +360,6 @@
           <root url="jar://$MAVEN_REPOSITORY$/com/amazonaws/aws-java-sdk/1.11.294/aws-java-sdk-1.11.294.jar!/" />
           <root url="jar://$MAVEN_REPOSITORY$/com/squareup/okhttp3/logging-interceptor/3.8.1/logging-interceptor-3.8.1.jar!/" />
           <root url="jar://$MAVEN_REPOSITORY$/com/squareup/okhttp3/okhttp/3.8.1/okhttp-3.8.1.jar!/" />
-          <root url="jar://$MAVEN_REPOSITORY$/com/github/jnr/jnr-enxio/0.14/jnr-enxio-0.14.jar!/" />
-          <root url="jar://$MAVEN_REPOSITORY$/com/github/jnr/jnr-unixsocket/0.15/jnr-unixsocket-0.15.jar!/" />
-          <root url="jar://$MAVEN_REPOSITORY$/org/web3j/tuples/3.3.1/tuples-3.3.1.jar!/" />
-          <root url="jar://$MAVEN_REPOSITORY$/org/web3j/rlp/3.3.1/rlp-3.3.1.jar!/" />
-          <root url="jar://$MAVEN_REPOSITORY$/org/web3j/crypto/3.3.1/crypto-3.3.1.jar!/" />
           <root url="jar://$USER_HOME$/.sdkman/candidates/grails/2.5.6/dist/grails-web-url-mappings-2.5.6.jar!/" />
           <root url="jar://$USER_HOME$/.sdkman/candidates/grails/2.5.6/lib/opensymphony/sitemesh/jars/sitemesh-2.4.jar!/" />
           <root url="jar://$USER_HOME$/.sdkman/candidates/grails/2.5.6/dist/grails-web-sitemesh-2.5.6.jar!/" />
@@ -375,10 +370,6 @@
           <root url="jar://$USER_HOME$/.sdkman/candidates/grails/2.5.6/lib/org.slf4j/slf4j-api/jars/slf4j-api-1.7.21.jar!/" />
           <root url="jar://$USER_HOME$/.sdkman/candidates/grails/2.5.6/dist/grails-plugin-rest-2.5.6.jar!/" />
           <root url="jar://$USER_HOME$/.sdkman/candidates/grails/2.5.6/lib/org.codehaus.groovy/groovy-all/jars/groovy-all-2.4.10.jar!/" />
-          <root url="jar://$MAVEN_REPOSITORY$/org/bouncycastle/bcprov-jdk15on/1.54/bcprov-jdk15on-1.54.jar!/" />
-          <root url="jar://$MAVEN_REPOSITORY$/org/web3j/utils/3.3.1/utils-3.3.1.jar!/" />
-          <root url="jar://$MAVEN_REPOSITORY$/org/web3j/abi/3.3.1/abi-3.3.1.jar!/" />
-          <root url="jar://$MAVEN_REPOSITORY$/org/web3j/core/3.3.1/core-3.3.1.jar!/" />
           <root url="jar://$MAVEN_REPOSITORY$/org/mapdb/mapdb/2.0-beta12/mapdb-2.0-beta12.jar!/" />
           <root url="jar://$MAVEN_REPOSITORY$/org/springframework/security/spring-security-web/3.2.9.RELEASE/spring-security-web-3.2.9.RELEASE.jar!/" />
           <root url="jar://$MAVEN_REPOSITORY$/org/springframework/security/spring-security-core/3.2.9.RELEASE/spring-security-core-3.2.9.RELEASE.jar!/" />
@@ -480,6 +471,17 @@
           <root url="jar://$MAVEN_REPOSITORY$/org/jetbrains/kotlin/kotlin-stdlib-common/1.2.60/kotlin-stdlib-common-1.2.60.jar!/" />
           <root url="jar://$MAVEN_REPOSITORY$/org/jetbrains/kotlin/kotlin-stdlib/1.2.60/kotlin-stdlib-1.2.60.jar!/" />
           <root url="jar://$MAVEN_REPOSITORY$/com/streamr/client/0.1-SNAPSHOT/client-0.1-SNAPSHOT.jar!/" />
+          <root url="jar://$MAVEN_REPOSITORY$/org/reactivestreams/reactive-streams/1.0.2/reactive-streams-1.0.2.jar!/" />
+          <root url="jar://$MAVEN_REPOSITORY$/io/reactivex/rxjava2/rxjava/2.2.2/rxjava-2.2.2.jar!/" />
+          <root url="jar://$MAVEN_REPOSITORY$/com/github/jnr/jnr-enxio/0.19/jnr-enxio-0.19.jar!/" />
+          <root url="jar://$MAVEN_REPOSITORY$/com/github/jnr/jnr-unixsocket/0.21/jnr-unixsocket-0.21.jar!/" />
+          <root url="jar://$MAVEN_REPOSITORY$/org/web3j/tuples/4.2.0/tuples-4.2.0.jar!/" />
+          <root url="jar://$MAVEN_REPOSITORY$/org/web3j/rlp/4.2.0/rlp-4.2.0.jar!/" />
+          <root url="jar://$MAVEN_REPOSITORY$/org/web3j/crypto/4.2.0/crypto-4.2.0.jar!/" />
+          <root url="jar://$MAVEN_REPOSITORY$/org/bouncycastle/bcprov-jdk15on/1.60/bcprov-jdk15on-1.60.jar!/" />
+          <root url="jar://$MAVEN_REPOSITORY$/org/web3j/utils/4.2.0/utils-4.2.0.jar!/" />
+          <root url="jar://$MAVEN_REPOSITORY$/org/web3j/abi/4.2.0/abi-4.2.0.jar!/" />
+          <root url="jar://$MAVEN_REPOSITORY$/org/web3j/core/4.2.0/core-4.2.0.jar!/" />
         </CLASSES>
         <JAVADOC />
         <SOURCES />
