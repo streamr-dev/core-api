@@ -139,6 +139,7 @@
     "zxcvbn": "^4.4.2"
   },
   "devDependencies": {
+    "ganache-cli": "^6.4.3",
     "timezone-mock": "^1.0.2",
     "web3-fake-provider": "^0.1.0"
   }
