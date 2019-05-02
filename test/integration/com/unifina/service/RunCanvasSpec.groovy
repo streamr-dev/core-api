@@ -32,10 +32,6 @@ class RunCanvasSpec extends IntegrationSpec {
 		stream = Stream.get("run-canvas-spec")
 	}
 
-	def cleanup() {
-
-	}
-
 	@Unroll
 	def "start a canvas, send data to it via StreamService, and receive expected processed output values (#round)"(int round) {
 		def conditions = new PollingConditions()

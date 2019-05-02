@@ -14,10 +14,10 @@ import com.unifina.service.PermissionService
 import com.unifina.signalpath.AbstractSignalPathModule
 import com.unifina.signalpath.ModuleException
 import com.unifina.utils.Globals
+import grails.compiler.GrailsCompileStatic
 import grails.converters.JSON
 import grails.plugin.springsecurity.annotation.Secured
 import grails.util.GrailsUtil
-import groovy.transform.CompileStatic
 
 @Secured(["IS_AUTHENTICATED_ANONYMOUSLY"])
 class ModuleApiController {
@@ -107,7 +107,7 @@ class ModuleApiController {
 		render result as JSON
 	}
 
-	@CompileStatic
+	@GrailsCompileStatic
 	private Map instantiateAndGetConfig(Long id, Map moduleConfig, SecUser user) {
 		Globals globals = new Globals([:], user)
 
