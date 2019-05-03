@@ -142,16 +142,16 @@ class SubscriptionServiceSpec extends BeanMockingSpecification {
 			idInService: address,
 			service: IntegrationKey.Service.ETHEREUM_ID
 		).save(failOnError: true, validate: false)
-		Permission p1 = new Permission(operation: "READ", user: user, stream: s1)
-		Permission p2 = new Permission(operation: "READ", user: user, stream: s2)
+		Permission p1 = new Permission(operation: "READ", user: user, stream: s1).save(failOnError: true, validate: false)
+		Permission p2 = new Permission(operation: "READ", user: user, stream: s2).save(failOnError: true, validate: false)
 
 		when:
 
 		service.onSubscribed(product, address, new Date())
 
 		then:
-		1 * permissionService.systemGrant(user, s1, Permission.Operation.READ) >> p1
-		1 * permissionService.systemGrant(user, s2, Permission.Operation.READ) >> p2
+		1 * permissionService.systemGrant(user, s1, Permission.Operation.READ, _, _) >> p1
+		1 * permissionService.systemGrant(user, s2, Permission.Operation.READ, _, _) >> p2
 		Permission.findAll()*.toInternalMap() as Set == [p1.toInternalMap(), p2.toInternalMap()] as Set
 	}
 
@@ -177,8 +177,8 @@ class SubscriptionServiceSpec extends BeanMockingSpecification {
 		service.onSubscribed(product, address, new Date())
 
 		then:
-		1 * permissionService.systemGrant(user, s1, Permission.Operation.READ) >> p3
-		1 * permissionService.systemGrant(user, s2, Permission.Operation.READ) >> p4
+		1 * permissionService.systemGrant(user, s1, Permission.Operation.READ, _, _) >> p3
+		1 * permissionService.systemGrant(user, s2, Permission.Operation.READ, _, _) >> p4
 		Permission.exists(p1.id)
 		Permission.exists(p2.id)
 	}
@@ -211,8 +211,8 @@ class SubscriptionServiceSpec extends BeanMockingSpecification {
 		service.onSubscribed(product, address, new Date())
 
 		then:
-		1 * permissionService.systemGrant(user, s1, Permission.Operation.READ) >> p3
-		1 * permissionService.systemGrant(user, s2, Permission.Operation.READ) >> p4
+		1 * permissionService.systemGrant(user, s1, Permission.Operation.READ, _, _) >> p3
+		1 * permissionService.systemGrant(user, s2, Permission.Operation.READ, _, _) >> p4
 		!Permission.exists(p1.id)
 		!Permission.exists(p2.id)
 	}
@@ -235,8 +235,8 @@ class SubscriptionServiceSpec extends BeanMockingSpecification {
 		def s = service.subscribeToFreeProduct(product, user, new Date())
 
 		then:
-		1 * permissionService.systemGrant(user, s1, Permission.Operation.READ) >> p1
-		1 * permissionService.systemGrant(user, s2, Permission.Operation.READ) >> p2
+		1 * permissionService.systemGrant(user, s1, Permission.Operation.READ, _, _) >> p1
+		1 * permissionService.systemGrant(user, s2, Permission.Operation.READ, _, _) >> p2
 		s.id != null
 		FreeSubscription.findAll() == [s]
 	}
@@ -253,8 +253,8 @@ class SubscriptionServiceSpec extends BeanMockingSpecification {
 		def sub2 = service.subscribeToFreeProduct(product, user, newDate)
 
 		then:
-		1 * permissionService.systemGrant(user, s1, Permission.Operation.READ) >> p1
-		1 * permissionService.systemGrant(user, s2, Permission.Operation.READ) >> p2
+		1 * permissionService.systemGrant(user, s1, Permission.Operation.READ, _, _) >> p1
+		1 * permissionService.systemGrant(user, s2, Permission.Operation.READ, _, _) >> p2
 		sub2.id == sub1.id
 		Subscription.count() == 1
 		Subscription.findById(sub2.id).endsAt == newDate
@@ -265,15 +265,15 @@ class SubscriptionServiceSpec extends BeanMockingSpecification {
 
 		assert Permission.count() == 0
 
-		Permission p1 = new Permission(operation: "READ", user: user, stream: s1)
-		Permission p2 = new Permission(operation: "READ", user: user, stream: s2)
+		Permission p1 = new Permission(operation: "READ", user: user, stream: s1).save(failOnError: true, validate: false)
+		Permission p2 = new Permission(operation: "READ", user: user, stream: s2).save(failOnError: true, validate: false)
 
 		when:
 		service.subscribeToFreeProduct(product, user, new Date())
 
 		then:
-		1 * permissionService.systemGrant(user, s1, Permission.Operation.READ) >> p1
-		1 * permissionService.systemGrant(user, s2, Permission.Operation.READ) >> p2
+		1 * permissionService.systemGrant(user, s1, Permission.Operation.READ, _, _) >> p1
+		1 * permissionService.systemGrant(user, s2, Permission.Operation.READ, _, _) >> p2
 		Permission.findAll()*.toInternalMap() as Set == [p1.toInternalMap(), p2.toInternalMap()] as Set
 	}
 
@@ -299,8 +299,8 @@ class SubscriptionServiceSpec extends BeanMockingSpecification {
 		service.subscribeToFreeProduct(product, user2, new Date())
 
 		then:
-		1 * permissionService.systemGrant(user2, s1, Permission.Operation.READ) >> p3
-		1 * permissionService.systemGrant(user2, s2, Permission.Operation.READ) >> p4
+		1 * permissionService.systemGrant(user2, s1, Permission.Operation.READ, _, _) >> p3
+		1 * permissionService.systemGrant(user2, s2, Permission.Operation.READ, _, _) >> p4
 		!Permission.exists(p1.id)
 		!Permission.exists(p2.id)
 	}
@@ -384,17 +384,17 @@ class SubscriptionServiceSpec extends BeanMockingSpecification {
 			service: IntegrationKey.Service.ETHEREUM_ID
 		).save(failOnError: true, validate: false)
 
-		Permission p1 = new Permission(operation: "READ", user: user, stream: s1)
-		Permission p2 = new Permission(operation: "READ", user: user, stream: s2)
-		Permission p3 = new Permission(operation: "READ", user: user, stream: s3)
+		Permission p1 = new Permission(operation: "READ", user: user, stream: s1).save(failOnError: true, validate: false)
+		Permission p2 = new Permission(operation: "READ", user: user, stream: s2).save(failOnError: true, validate: false)
+		Permission p3 = new Permission(operation: "READ", user: user, stream: s3).save(failOnError: true, validate: false)
 
 		when:
 		service.afterIntegrationKeyCreated(integrationKey)
 
 		then:
-		1 * permissionService.systemGrant(user, s1, Permission.Operation.READ) >> p1
-		1 * permissionService.systemGrant(user, s2, Permission.Operation.READ) >> p2
-		1 * permissionService.systemGrant(user, s3, Permission.Operation.READ) >> p3
+		1 * permissionService.systemGrant(user, s1, Permission.Operation.READ, _, _) >> p1
+		1 * permissionService.systemGrant(user, s2, Permission.Operation.READ, _, _) >> p2
+		1 * permissionService.systemGrant(user, s3, Permission.Operation.READ, _, _) >> p3
 		Permission.findAll()*.toInternalMap() as Set == [p1.toInternalMap(), p2.toInternalMap(), p3.toInternalMap()] as Set
 	}
 
@@ -439,10 +439,10 @@ class SubscriptionServiceSpec extends BeanMockingSpecification {
 		service.afterProductUpdated(product)
 		then:
 		interaction {
-			p1 = new Permission(operation: "READ", user: user, stream: s3)
-			p4 = new Permission(operation: "READ", user: user2, stream: s2)
-			1 * permissionService.systemGrant(user, s3, Permission.Operation.READ) >> p1
-			1 * permissionService.systemGrant(user2, s2, Permission.Operation.READ) >> p4
+			p1 = new Permission(operation: "READ", user: user, stream: s3).save(failOnError: true, validate: false)
+			p4 = new Permission(operation: "READ", user: user2, stream: s2).save(failOnError: true, validate: false)
+			1 * permissionService.systemGrant(user, s3, Permission.Operation.READ, _, _) >> p1
+			1 * permissionService.systemGrant(user2, s2, Permission.Operation.READ, _, _) >> p4
 		}
 		Permission.findAll()*.toInternalMap() as Set == [p1.toInternalMap(), p2.toInternalMap(),
 														 p3.toInternalMap(), p4.toInternalMap()] as Set
