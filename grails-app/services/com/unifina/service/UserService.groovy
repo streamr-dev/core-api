@@ -6,6 +6,8 @@ import com.unifina.api.NotFoundException
 import com.unifina.domain.ExampleType
 import com.unifina.domain.data.Feed
 import com.unifina.domain.data.Stream
+import com.unifina.domain.marketplace.Product
+import com.unifina.domain.marketplace.Subscription
 import com.unifina.domain.security.IntegrationKey
 import com.unifina.domain.security.Key
 import com.unifina.domain.security.Permission
@@ -14,6 +16,7 @@ import com.unifina.domain.security.SecUser
 import com.unifina.domain.security.SecUserSecRole
 import com.unifina.domain.signalpath.Canvas
 import com.unifina.domain.signalpath.ModulePackage
+import com.unifina.domain.task.Task
 import com.unifina.domain.tour.TourUser
 import com.unifina.exceptions.UserCreationFailedException
 import com.unifina.security.Userish
@@ -33,6 +36,8 @@ class UserService {
 	PermissionService permissionService
 	StreamService streamService
 	CanvasService canvasService
+	SubscriptionService subscriptionService
+	ProductService productService
 
 	def createUser(Map properties, List<SecRole> roles = null, List<Feed> feeds = null, List<ModulePackage> packages = null) {
 		def secConf = grailsApplication.config.grails.plugin.springsecurity
@@ -149,26 +154,28 @@ class UserService {
 		}
 	}
 
-	def delete(SecUser user) {
-		if (user == null) {
+	def delete(SecUser u) {
+		if (u == null) {
 			throw new NotFoundException("user not found", "User", null)
 		}
-		TourUser.where {
-			user == user
-		}.deleteAll()
+		TourUser.executeUpdate("delete TourUser t where t.user = :u", [u: u])
+		Key.executeUpdate("delete Key k where k.user = :u", [u: u])
+		Permission.executeUpdate("delete Permission p where p.user = :u", [u: u])
+		subscriptionService.getSubscriptionsOfUser(u).each { Subscription s ->
+			s.delete(flush: true)
+		}
+		SecUserSecRole.executeUpdate("delete SecUserSecRole s where s.secUser = :u", [u: u])
 		IntegrationKey.where {
-			user == user
-		}.deleteAll()
-		Key.where {
-			user == user
-		}.deleteAll()
-		Permission.where {
-			user == user
-		}.deleteAll()
-		SecUserSecRole.where {
-			secUser == user
-		}.deleteAll()
-		user.delete(flush: true)
+			user == u
+		}.findAll().each { IntegrationKey key ->
+			IntegrationKey account = IntegrationKey.findById(key.id)
+			if (account.service == IntegrationKey.Service.ETHEREUM_ID) {
+				subscriptionService.beforeIntegrationKeyRemoved(account)
+			}
+			account.delete(flush: true)
+		}
+		productService.removeUsersProducts(u.username)
+		u.delete(flush: true)
 	}
 
 	/**
