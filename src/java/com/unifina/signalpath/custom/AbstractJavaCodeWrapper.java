@@ -186,7 +186,6 @@ public abstract class AbstractJavaCodeWrapper extends ModuleWithUI {
 
 		// Register the created class so that it will be cleaned when Globals is destroyed
 		Class<AbstractCustomModule> clazz = (Class<AbstractCustomModule>) classLoader.loadClass(className);
-		//getGlobals().registerDynamicClass(clazz);
 		return clazz;
 	}
 
