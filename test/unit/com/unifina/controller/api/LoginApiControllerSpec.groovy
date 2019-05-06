@@ -68,7 +68,6 @@ class LoginApiControllerSpec extends ControllerSpecification {
 			password: "password",
 			name: "name",
 			email: "email@email.com",
-			timezone: "timezone"
 		).save(failOnError: true, validate: false)
 
 		SessionToken token = new SessionToken(64, user, 3)
@@ -119,7 +118,8 @@ class LoginApiControllerSpec extends ControllerSpecification {
 	def "password-based login should pass"() {
 		SecUser user = new SecUser(
 			username: "username",
-			password: "password"
+			password: "password",
+			enabled: true,
 		).save(failOnError: true, validate: false)
 
 		SessionToken token = new SessionToken(64, user, 3)
@@ -137,6 +137,28 @@ class LoginApiControllerSpec extends ControllerSpecification {
 		1 * sessionService.generateToken(user) >> token
 		response.status == 200
 		response.json == token.toMap()
+	}
+
+	def "password-based login should fail when user account is disabled"() {
+		SecUser user = new SecUser(
+			username: "username",
+			password: "password",
+			enabled: false,
+		).save(failOnError: true, validate: false)
+
+		when:
+		request.method = "POST"
+		request.JSON = [
+			username: user.username,
+			password: user.password
+		]
+		authenticatedAs(me) { controller.password() }
+
+		then:
+		1 * userService.getUserFromUsernameAndPassword(user.username, user.password) >> user
+		0 * sessionService._
+		response.status == 200
+		response.json == [message: "user account is disabled"]
 	}
 
 	def "password-based login should fail"() {

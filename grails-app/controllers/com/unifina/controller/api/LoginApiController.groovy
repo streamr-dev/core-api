@@ -47,6 +47,10 @@ class LoginApiController {
 			throw new InvalidArgumentsException(cmd.errors.getFieldErrors().collect {it.field+" expected."}.join(" "))
 		}
 		SecUser user = userService.getUserFromUsernameAndPassword(cmd.username, cmd.password)
+		if (!user.enabled) {
+			render([message: "user account is disabled"] as JSON)
+			return
+		}
 		SessionToken token = sessionService.generateToken(user)
 		render(token.toMap() as JSON)
 	}
