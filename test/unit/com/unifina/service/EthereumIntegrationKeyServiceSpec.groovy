@@ -2,6 +2,7 @@ package com.unifina.service
 
 import com.unifina.api.ApiException
 import com.unifina.api.CannotRemoveEthereumKeyException
+import com.unifina.api.DisabledUserException
 import com.unifina.api.DuplicateNotAllowedException
 import com.unifina.security.Challenge
 import com.unifina.domain.security.IntegrationKey
@@ -265,6 +266,20 @@ class EthereumIntegrationKeyServiceSpec extends Specification {
 		user.username == me.username
 		IntegrationKey.count == 1
 		SecUser.count == 1
+	}
+
+	void "getOrCreateFromEthereumAddress() throws if user is disabled"() {
+		SecUser user = new SecUser(username: "someoneElse@streamr.com", enabled: false).save(failOnError: true, validate: false)
+		String address = "someEthereumAdddress"
+		new IntegrationKey(
+			user: user,
+			idInService: address,
+			service: IntegrationKey.Service.ETHEREUM_ID
+		).save(failOnError: true, validate: false)
+		when:
+		service.getOrCreateFromEthereumAddress(address)
+		then:
+		thrown(DisabledUserException)
 	}
 
 	void "cannot remove only key of ethereum user"() {

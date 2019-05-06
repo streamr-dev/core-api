@@ -3,6 +3,7 @@ package com.unifina.controller.api
 import com.unifina.ControllerSpecification
 import com.unifina.api.ApiException
 import com.unifina.api.ChallengeVerificationFailedException
+import com.unifina.api.DisabledUserException
 import com.unifina.api.InvalidAPIKeyException
 import com.unifina.api.InvalidArgumentsException
 import com.unifina.api.InvalidUsernameAndPasswordException
@@ -114,6 +115,29 @@ class LoginApiControllerSpec extends ControllerSpecification {
 		then:
 		thrown ChallengeVerificationFailedException
 		1 * challengeService.checkValidChallengeResponse(challenge.getId(), challenge.getChallenge(), signature, address) >> { throw new ChallengeVerificationFailedException() }
+	}
+
+	def "response to challenge should fail (disabled user)"() {
+		String address = "address"
+		String signature = "signature"
+
+		Challenge challenge = new Challenge("id", "challenge", challengeService.TTL_SECONDS)
+
+		when:
+		request.method = "POST"
+		request.JSON = [
+			challenge: [
+				id       : challenge.getId(),
+				challenge: challenge.getChallenge()
+			],
+			signature: signature,
+			address  : address
+		]
+		authenticatedAs(me) { controller.response() }
+
+		then:
+		thrown DisabledUserException
+		1 * ethereumIntegrationKeyService.getOrCreateFromEthereumAddress(address) >> { throw new DisabledUserException()}
 	}
 
 	def "password-based login should pass"() {

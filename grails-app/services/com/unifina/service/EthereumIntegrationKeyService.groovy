@@ -3,6 +3,7 @@ package com.unifina.service
 import com.unifina.api.ApiException
 import com.unifina.api.CannotRemoveEthereumKeyException
 import com.unifina.api.ChallengeVerificationFailedException
+import com.unifina.api.DisabledUserException
 import com.unifina.api.DuplicateNotAllowedException
 import com.unifina.api.NotFoundException
 import com.unifina.domain.security.IntegrationKey
@@ -117,7 +118,11 @@ class EthereumIntegrationKeyService {
 		if (key == null) {
 			return createEthereumUser(address)
 		}
-		return key.user
+		SecUser user = key.user
+		if (user.enabled) {
+			return user
+		}
+		throw new DisabledUserException("Cannot login with disabled user")
 	}
 
 	SecUser createEthereumUser(String address) {
