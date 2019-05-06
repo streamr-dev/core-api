@@ -1,6 +1,6 @@
 package com.unifina.service
 
-import com.unifina.api.ApiException
+import com.unifina.api.DisabledUserException
 import com.unifina.api.InvalidUsernameAndPasswordException
 import com.unifina.api.NotFoundException
 import com.unifina.domain.data.Feed
@@ -176,6 +176,18 @@ class UserServiceSpec extends Specification {
 		thrown(InvalidUsernameAndPasswordException)
 	}
 
+	def "should throw if disabled user (password-based login)"() {
+		String username = "username"
+		String password = "password"
+		PasswordEncoder encoder = new BCryptPasswordEncoder()
+		String hashedPassword = encoder.encode(password)
+		new SecUser(username: username, password: hashedPassword, enabled: false).save(failOnError: true, validate: false)
+		when:
+		service.getUserFromUsernameAndPassword(username, password)
+		then:
+		thrown(DisabledUserException)
+	}
+
 	def "should find user from api key"() {
 		SecUser user = new SecUser(username: "username", password: "password").save(failOnError: true, validate: false)
 		Key key = new Key(name: "key", user: user)
@@ -187,6 +199,18 @@ class UserServiceSpec extends Specification {
 		then:
 		retrievedUser != null
 		retrievedUser.username == user.username
+	}
+
+	def "should throw if disabled user (api key-based login)"() {
+		SecUser user = new SecUser(username: "username", password: "password", enabled: false).save(failOnError: true, validate: false)
+		Key key = new Key(name: "key", user: user)
+		key.id = "myApiKey"
+		key.save(failOnError: true, validate: true)
+
+		when:
+		service.getUserishFromApiKey(key.id)
+		then:
+		thrown(DisabledUserException)
 	}
 
 	def "should find anonymous key from api key"() {

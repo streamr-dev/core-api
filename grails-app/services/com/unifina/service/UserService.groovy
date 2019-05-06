@@ -1,5 +1,6 @@
 package com.unifina.service
 
+import com.unifina.api.DisabledUserException
 import com.unifina.api.InvalidAPIKeyException
 import com.unifina.api.InvalidUsernameAndPasswordException
 import com.unifina.api.NotFoundException
@@ -205,7 +206,10 @@ class UserService {
 		}
 		String dbHash = user.password
 		if (encoder.matches(password, dbHash)) {
-			return user
+			if (user.enabled) {
+				return user
+			}
+			throw new DisabledUserException("Cannot login with disabled user")
 		}else {
 			throw new InvalidUsernameAndPasswordException("Invalid username or password")
 		}
@@ -217,7 +221,10 @@ class UserService {
 			throw new InvalidAPIKeyException("Invalid API key")
 		}
 		if (key.user) { // is a 'real' user
-			return key.user
+			if (key.user.enabled) {
+				return key.user
+			}
+			throw new DisabledUserException("Cannot login with disabled user")
 		}
 		return key // is an anonymous key
 	}
