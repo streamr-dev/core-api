@@ -102,7 +102,9 @@ class CassandraService implements DisposableBean {
 		final List<StreamMessage> messages = new ArrayList<>()
 		for (int i = 0; i < stream.getPartitions(); i++) {
 			final StreamMessage msg = getLatestStreamMessage(stream, i)
-			messages.add(msg)
+			if (msg != null) {
+				messages.add(msg)
+			}
 		}
 		if (messages.size() < 1) {
 			return null

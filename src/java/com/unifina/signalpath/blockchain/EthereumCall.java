@@ -127,12 +127,14 @@ public class EthereumCall extends AbstractHttpModule {
 		if (contract.hasValue()) {
 			abi = contract.getValue().getABI();
 			function.list = abi.getFunctions();
-
+			int eventNum=0;
 			for (EthereumABI.Event ev : abi.getEvents()) {
 				List<Output<Object>> evOutputs = new ArrayList<>();
 				if (ev.inputs.size() > 0) {
+					int argnum=0;
 					for (EthereumABI.Slot arg : ev.inputs) {
-						String displayName = ev.name + "." + (arg.name.length() > 0 ? arg.name : "(" + arg.type + ")");
+						String displayName = ev.name + "." + (arg.name.length() > 0 ? arg.name : "(" + arg.type +eventNum+"_"+argnum+")");
+						argnum++;
 						Output output = EthereumToStreamrTypes.asOutput(arg.type, displayName, this);
 						evOutputs.add(output);
 					}
@@ -142,6 +144,7 @@ public class EthereumCall extends AbstractHttpModule {
 					evOutputs.add(output);
 				}
 				eventOutputs.put(ev, evOutputs);
+				eventNum++;
 			}
 		}
 	}
@@ -360,6 +363,7 @@ public class EthereumCall extends AbstractHttpModule {
 		@Override
 		protected List<PossibleValue> getPossibleValues() {
 			List<PossibleValue> ret = new ArrayList<>();
+
 			for (EthereumABI.Function f : list) {
 				if (f.name.length() < 1) {
 					ret.add(new PossibleValue("(default)", ""));	// fallback function

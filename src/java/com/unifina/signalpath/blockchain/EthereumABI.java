@@ -27,7 +27,7 @@ public class EthereumABI implements Serializable {
 	}
 
 	public EthereumABI(String abiAsJson) {
-		this(abiAsJson == null ? null : new JsonParser().parse(abiAsJson).getAsJsonArray());
+		this(abiAsJson == null || abiAsJson.length() < 1 ? null : new JsonParser().parse(abiAsJson).getAsJsonArray());
 	}
 
 	public EthereumABI(JsonArray jsonArray) {
@@ -69,6 +69,10 @@ public class EthereumABI implements Serializable {
 				throw new RuntimeException("Whoa! Found unknown item type in ABI: "+type);
 			}
 		}
+		if(constructor == null){
+			log.debug("No constructor found. Using empty one.");
+			constructor = new Function();
+		}
 	}
 
 	public Function getConstructor() {
@@ -96,6 +100,7 @@ public class EthereumABI implements Serializable {
 	public static class Slot implements Serializable {
 		public String name;
 		public String type;
+		public boolean indexed = false;
 	}
 
 	/** Ethereum contract member function */
