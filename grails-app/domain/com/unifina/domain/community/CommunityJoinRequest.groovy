@@ -9,9 +9,9 @@ import groovy.transform.ToString
 @ToString
 class CommunityJoinRequest {
 	enum State {
+		PENDING,
 		ACCEPTED,
-		REJECTED,
-		PENDING
+		REJECTED
 	}
 
 	String id

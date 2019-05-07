@@ -20,7 +20,7 @@ databaseChangeLog = {
 			column(name: "member_address", type: "varchar(255)") {
 				constraints(nullable: "false")
 			}
-			column(name: "state", type: "integer") {
+			column(name: "state", type: "integer", defaultValue: 0) {
 				constraints(nullable: "false")
 			}
 			column(name: "user_id", type: "bigint") {
@@ -49,7 +49,7 @@ databaseChangeLog = {
 	}
 	changeSet(author: "kkn", id: "cp-domain-3") {
 		addColumn(tableName: "product") {
-			column(name: "type", type: "integer") {
+			column(name: "type", type: "integer", defaultValue: 0) {
 				constraints(nullable: "false")
 			}
 		}
