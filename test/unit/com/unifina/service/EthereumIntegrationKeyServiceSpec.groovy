@@ -268,20 +268,6 @@ class EthereumIntegrationKeyServiceSpec extends Specification {
 		SecUser.count == 1
 	}
 
-	void "getOrCreateFromEthereumAddress() throws if user is disabled"() {
-		SecUser user = new SecUser(username: "someoneElse@streamr.com", enabled: false).save(failOnError: true, validate: false)
-		String address = "someEthereumAdddress"
-		new IntegrationKey(
-			user: user,
-			idInService: address,
-			service: IntegrationKey.Service.ETHEREUM_ID
-		).save(failOnError: true, validate: false)
-		when:
-		service.getOrCreateFromEthereumAddress(address)
-		then:
-		thrown(DisabledUserException)
-	}
-
 	void "cannot remove only key of ethereum user"() {
 		when:
 		String address = "0x26e1ae3f5efe8a01eca8c2e9d3c32702cf4bead6"

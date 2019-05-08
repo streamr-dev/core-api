@@ -206,10 +206,7 @@ class UserService {
 		}
 		String dbHash = user.password
 		if (encoder.matches(password, dbHash)) {
-			if (user.enabled) {
-				return user
-			}
-			throw new DisabledUserException("Cannot login with disabled user")
+			return user
 		}else {
 			throw new InvalidUsernameAndPasswordException("Invalid username or password")
 		}
@@ -221,10 +218,7 @@ class UserService {
 			throw new InvalidAPIKeyException("Invalid API key")
 		}
 		if (key.user) { // is a 'real' user
-			if (key.user.enabled) {
-				return key.user
-			}
-			throw new DisabledUserException("Cannot login with disabled user")
+			return key.user
 		}
 		return key // is an anonymous key
 	}

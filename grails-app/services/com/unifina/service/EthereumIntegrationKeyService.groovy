@@ -118,11 +118,7 @@ class EthereumIntegrationKeyService {
 		if (key == null) {
 			return createEthereumUser(address)
 		}
-		SecUser user = key.user
-		if (user.enabled) {
-			return user
-		}
-		throw new DisabledUserException("Cannot login with disabled user")
+		return key.user
 	}
 
 	SecUser createEthereumUser(String address) {
