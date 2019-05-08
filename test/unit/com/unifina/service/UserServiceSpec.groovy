@@ -1,6 +1,5 @@
 package com.unifina.service
 
-import com.unifina.api.ApiException
 import com.unifina.api.InvalidUsernameAndPasswordException
 import com.unifina.api.NotFoundException
 import com.unifina.domain.data.Feed
