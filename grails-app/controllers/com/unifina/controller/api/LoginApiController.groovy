@@ -38,9 +38,7 @@ class LoginApiController {
 		challengeService.checkValidChallengeResponse(cmd.challenge?.id,
 			cmd.challenge?.challenge, cmd.signature.toLowerCase(), cmd.address.toLowerCase())
 		SecUser user = ethereumIntegrationKeyService.getOrCreateFromEthereumAddress(cmd.address)
-		if (!user.enabled) {
-			throw new DisabledUserException("Cannot login with disabled user")
-		}
+		assertEnabled(user)
 		SessionToken token = sessionService.generateToken(user)
 		render(token.toMap() as JSON)
 	}
@@ -51,9 +49,7 @@ class LoginApiController {
 			throw new InvalidArgumentsException(cmd.errors.getFieldErrors().collect {it.field+" expected."}.join(" "))
 		}
 		SecUser user = userService.getUserFromUsernameAndPassword(cmd.username, cmd.password)
-		if (!user.enabled) {
-			throw new DisabledUserException("Cannot login with disabled user")
-		}
+		assertEnabled(user)
 		SessionToken token = sessionService.generateToken(user)
 		render(token.toMap() as JSON)
 	}
@@ -65,10 +61,16 @@ class LoginApiController {
 		}
 		// returns either a SecUser or a Key (anonymous key)
 		Userish userish = userService.getUserishFromApiKey(cmd.apiKey)
-		if (userish instanceof SecUser && !((SecUser) userish).enabled) {
-			throw new DisabledUserException("Cannot login with disabled user")
+		if (userish instanceof SecUser) {
+			assertEnabled((SecUser) userish)
 		}
 		SessionToken token = sessionService.generateToken(userish)
 		render(token.toMap() as JSON)
+	}
+
+	private void assertEnabled(SecUser user) {
+		if (!user.enabled) {
+			throw new DisabledUserException("Cannot login with disabled user")
+		}
 	}
 }
