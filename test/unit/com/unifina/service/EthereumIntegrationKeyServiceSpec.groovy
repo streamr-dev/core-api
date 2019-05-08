@@ -1,8 +1,6 @@
 package com.unifina.service
 
-import com.unifina.api.ApiException
 import com.unifina.api.CannotRemoveEthereumKeyException
-import com.unifina.api.DisabledUserException
 import com.unifina.api.DuplicateNotAllowedException
 import com.unifina.security.Challenge
 import com.unifina.domain.security.IntegrationKey
