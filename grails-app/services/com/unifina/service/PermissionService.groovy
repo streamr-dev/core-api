@@ -332,6 +332,7 @@ class PermissionService {
 		List<SecUser> otherUsers = getPermissionsTo(stream, operation)*.user
 		otherUsers.removeIf { it.username == user.username }
 		// Need to initialize the service below this way because of circular dependencies issues
+		// Once we use Grails 3, this could be replaced with Grails Events
 		StreamService streamService = grailsApplication.mainContext.getBean(StreamService)
 		List<Stream> userInboxes = streamService.getInboxStreams([user])
 		List<Stream> otherUsersInboxes = streamService.getInboxStreams(otherUsers)
