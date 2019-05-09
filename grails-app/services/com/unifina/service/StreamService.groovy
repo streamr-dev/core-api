@@ -11,7 +11,6 @@ import com.unifina.data.StreamPartitioner
 import com.unifina.domain.dashboard.DashboardItem
 import com.unifina.domain.data.Feed
 import com.unifina.domain.data.Stream
-import com.unifina.domain.marketplace.Subscription
 import com.unifina.domain.security.IntegrationKey
 import com.unifina.domain.security.Key
 import com.unifina.domain.security.Permission
@@ -325,69 +324,6 @@ class StreamService {
 		for (final Stream example : examples) {
 			// Grant read permission to example stream.
 			permissionService.systemGrant(user, example, Permission.Operation.READ)
-		}
-	}
-
-	void checkAndGrantInboxPermissions(SecUser user, Stream stream, Permission.Operation operation,
-											  Subscription subscription, Date endsAt, Permission parentPermission) {
-		if (!stream.inbox && !stream.uiChannel) {
-			if (operation == Permission.Operation.READ) {
-				grantNewSubscriberInboxStreamPermissions(user, stream, subscription, endsAt, parentPermission)
-			} else if (operation == Permission.Operation.WRITE) {
-				grantNewPublisherInboxStreamPermissions(user, stream, subscription, endsAt, parentPermission)
-			}
-		}
-	}
-
-	/**
-	 *
-	 * Grant the subscriber write permission to the inbox streams of every publisher of the stream.
-	 * Also grant every publisher of the stream write permission to the subscriber's inbox streams.
-	 *
-	 */
-	private void grantNewSubscriberInboxStreamPermissions(SecUser subscriber, Stream stream,
-														  Subscription subscription, Date endsAt, Permission parent) {
-		grantInboxStreamPermissions(subscriber, stream, Permission.Operation.WRITE, subscription, endsAt, parent)
-	}
-
-	/**
-	 *
-	 * Grant the publisher write permission to the inbox streams of every subscriber of the stream.
-	 * Also grant every subscriber of the stream write permission to the publisher's inbox streams.
-	 *
-	 */
-	private void grantNewPublisherInboxStreamPermissions(SecUser publisher, Stream stream,
-														 Subscription subscription, Date endsAt, Permission parent) {
-		grantInboxStreamPermissions(publisher, stream, Permission.Operation.READ, subscription, endsAt, parent)
-	}
-
-	private void grantInboxStreamPermissions(SecUser user, Stream stream, Permission.Operation operation,
-											 Subscription subscription, Date endsAt, Permission parent) {
-		List<SecUser> otherUsers = permissionService.getPermissionsTo(stream, operation)*.user
-		otherUsers.removeIf { it.username == user.username }
-		List<Stream> userInboxes = getInboxStreams([user])
-		List<Stream> otherUsersInboxes = getInboxStreams(otherUsers)
-		for (Stream inbox: otherUsersInboxes) {
-			new Permission(
-				stream: inbox,
-				user: user,
-				operation: Permission.Operation.WRITE,
-				subscription: subscription,
-				endsAt: endsAt,
-				parent: parent
-			).save(flush: true, failOnError: true)
-		}
-		for (SecUser u: otherUsers) {
-			for (Stream userInbox: userInboxes) {
-				new Permission(
-					stream: userInbox,
-					user: u,
-					operation: Permission.Operation.WRITE,
-					subscription: subscription,
-					endsAt: endsAt,
-					parent: parent
-				).save(flush: true, failOnError: true)
-			}
 		}
 	}
 }

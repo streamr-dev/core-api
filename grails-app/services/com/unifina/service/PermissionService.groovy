@@ -287,13 +287,76 @@ class PermissionService {
 		// When a user is granted read access (subscriber) or write access (publisher) to a stream,
 		// we need to set the corresponding inbox stream permissions (see methods comments below).
 		if (userProp == "user" && resourceProp == "stream") {
-			// Need to initialize the service below this way because of circular dependencies issues
-			StreamService streamService = grailsApplication.mainContext.getBean(StreamService)
-			streamService.checkAndGrantInboxPermissions((SecUser) target, (Stream) resource, operation,
+			checkAndGrantInboxPermissions((SecUser) target, (Stream) resource, operation,
 				subscription, endsAt, parentPermission)
 		}
 
 		return parentPermission
+	}
+
+	private void checkAndGrantInboxPermissions(SecUser user, Stream stream, Operation operation,
+									   Subscription subscription, Date endsAt, Permission parentPermission) {
+		if (!stream.inbox && !stream.uiChannel) {
+			if (operation == Operation.READ) {
+				grantNewSubscriberInboxStreamPermissions(user, stream, subscription, endsAt, parentPermission)
+			} else if (operation == Operation.WRITE) {
+				grantNewPublisherInboxStreamPermissions(user, stream, subscription, endsAt, parentPermission)
+			}
+		}
+	}
+
+	/**
+	 *
+	 * Grant the subscriber write permission to the inbox streams of every publisher of the stream.
+	 * Also grant every publisher of the stream write permission to the subscriber's inbox streams.
+	 *
+	 */
+	private void grantNewSubscriberInboxStreamPermissions(SecUser subscriber, Stream stream,
+														  Subscription subscription, Date endsAt, Permission parent) {
+		grantInboxStreamPermissions(subscriber, stream, Operation.WRITE, subscription, endsAt, parent)
+	}
+
+	/**
+	 *
+	 * Grant the publisher write permission to the inbox streams of every subscriber of the stream.
+	 * Also grant every subscriber of the stream write permission to the publisher's inbox streams.
+	 *
+	 */
+	private void grantNewPublisherInboxStreamPermissions(SecUser publisher, Stream stream,
+														 Subscription subscription, Date endsAt, Permission parent) {
+		grantInboxStreamPermissions(publisher, stream, Operation.READ, subscription, endsAt, parent)
+	}
+
+	private void grantInboxStreamPermissions(SecUser user, Stream stream, Operation operation,
+											 Subscription subscription, Date endsAt, Permission parent) {
+		List<SecUser> otherUsers = getPermissionsTo(stream, operation)*.user
+		otherUsers.removeIf { it.username == user.username }
+		// Need to initialize the service below this way because of circular dependencies issues
+		StreamService streamService = grailsApplication.mainContext.getBean(StreamService)
+		List<Stream> userInboxes = streamService.getInboxStreams([user])
+		List<Stream> otherUsersInboxes = streamService.getInboxStreams(otherUsers)
+		for (Stream inbox: otherUsersInboxes) {
+			new Permission(
+				stream: inbox,
+				user: user,
+				operation: Operation.WRITE,
+				subscription: subscription,
+				endsAt: endsAt,
+				parent: parent
+			).save(flush: true, failOnError: true)
+		}
+		for (SecUser u: otherUsers) {
+			for (Stream userInbox: userInboxes) {
+				new Permission(
+					stream: userInbox,
+					user: u,
+					operation: Operation.WRITE,
+					subscription: subscription,
+					endsAt: endsAt,
+					parent: parent
+				).save(flush: true, failOnError: true)
+			}
+		}
 	}
 
 	/**

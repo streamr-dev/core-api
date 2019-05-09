@@ -477,61 +477,6 @@ class StreamServiceSpec extends Specification {
 		results == expectedResults
 	}
 
-	void "checkAndGrantInboxPermissions() creates inbox permissions"() {
-		service.permissionService = Mock(PermissionService)
-		SecUser publisher1 = new SecUser(username: "publisher1").save(failOnError: true, validate: false)
-		IntegrationKey key1 = new IntegrationKey(user: publisher1, service: IntegrationKey.Service.ETHEREUM_ID,
-			idInService: "0x9fe1ae3f5efe2a01eca8c2e9d3c11102cf4bea57").save(failOnError: true, validate: false)
-		SecUser publisher2 = new SecUser(username: "publisher2").save(failOnError: true, validate: false)
-		IntegrationKey key2 = new IntegrationKey(user: publisher2, service: IntegrationKey.Service.ETHEREUM,
-			idInService: "0x26e1ae3f5efe8a01eca8c2e9d3c32702cf4bead6").save(failOnError: true, validate: false)
-		SecUser publisher3 = new SecUser(username: "publisher3").save(failOnError: true, validate: false)
-		IntegrationKey key3 = new IntegrationKey(user: publisher3, service: IntegrationKey.Service.ETHEREUM,
-			idInService: "0xfff1ae3f5efe8a01eca8c25933c32702cf4b1121").save(failOnError: true, validate: false)
-		SecUser subscriber = new SecUser(username: "0x26e1ae3f5efe8a01eca8c2e9d3c32702cf4bead6").save(failOnError: true, validate: false)
-		new IntegrationKey(user: subscriber, service: IntegrationKey.Service.ETHEREUM,
-			idInService: subscriber.username).save(failOnError: true, validate: false)
-
-		Stream pub1Inbox = new Stream(name: key1.idInService, inbox: true)
-		pub1Inbox.id = key1.idInService
-		pub1Inbox.save(failOnError: true, validate: false)
-		Stream pub2Inbox = new Stream(name: key2.idInService, inbox: true)
-		pub2Inbox.id = key2.idInService
-		pub2Inbox.save(failOnError: true, validate: false)
-		Stream pub3Inbox = new Stream(name: key3.idInService, inbox: true)
-		pub3Inbox.id = key3.idInService
-		pub3Inbox.save(failOnError: true, validate: false)
-		Stream subInbox = new Stream(name: subscriber.username, inbox: true)
-		subInbox.id = subscriber.username
-		subInbox.save(failOnError: true, validate: false)
-
-		Stream stream = new Stream()
-		stream.id = "stream"
-		Permission p1 = new Permission(user: publisher1, stream: stream, operation: Permission.Operation.WRITE)
-		Permission p2 = new Permission(user: publisher2, stream: stream, operation: Permission.Operation.WRITE)
-		Permission parent1 = new Permission(user: subscriber, stream: stream, operation: Permission.Operation.READ)
-			.save(failOnError: true, validate: false)
-		Permission parent2 = new Permission(user: publisher3, stream: stream, operation: Permission.Operation.WRITE)
-			.save(failOnError: true, validate: false)
-		when:
-		// adding a new subscriber
-		service.checkAndGrantInboxPermissions(subscriber, stream, Permission.Operation.READ, null, null, parent1)
-
-		// adding a new publisher
-		service.checkAndGrantInboxPermissions(publisher3, stream, Permission.Operation.WRITE, null, null, parent2)
-		then:
-		1 * service.permissionService.getPermissionsTo(stream, Permission.Operation.WRITE) >> [p1, p2]
-		1 * service.permissionService.getPermissionsTo(stream, Permission.Operation.READ) >> [parent1]
-		// assertions after adding a new subscriber
-		Permission.findByUserAndStreamAndOperation(subscriber, pub1Inbox, Permission.Operation.WRITE) != null
-		Permission.findByUserAndStreamAndOperation(subscriber, pub2Inbox, Permission.Operation.WRITE) != null
-		Permission.findByUserAndStreamAndOperation(publisher1, subInbox, Permission.Operation.WRITE) != null
-		Permission.findByUserAndStreamAndOperation(publisher2, subInbox, Permission.Operation.WRITE) != null
-		// assertions after adding a new publisher
-		Permission.findByUserAndStreamAndOperation(subscriber, pub3Inbox, Permission.Operation.WRITE) != null
-		Permission.findByUserAndStreamAndOperation(publisher3, subInbox, Permission.Operation.WRITE) != null
-	}
-
 	void "status ok and has recent messages"() {
 		setup:
 		service.cassandraService = Mock(CassandraService)
