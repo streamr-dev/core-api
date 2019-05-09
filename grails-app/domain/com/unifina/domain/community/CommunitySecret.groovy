@@ -16,9 +16,7 @@ class CommunitySecret {
 	String communityAddress
 
     static constraints = {
-		name(nullable: false)
-		secret(nullable: false)
-		communityAddress(nullable: false, validator: Product.isEthereumAddress)
+		communityAddress(validator: Product.isEthereumAddress)
     }
 	static mapping = {
 		id generator: HexIdGenerator.name
@@ -26,6 +24,10 @@ class CommunitySecret {
 
 	@GrailsCompileStatic
 	Map toMap() {
+		// TODO:
+		//  We probably need to be able to return the secret in the object?
+		//  Especially if it's generated server-side.
+		//  The API should of course only serve the secrets to the community admin.
 		return [
 			id: id,
 			name: name,

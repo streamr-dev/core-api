@@ -27,24 +27,18 @@ class CommunityJoinRequest {
 	Date lastUpdated
 
     static constraints = {
-		user(nullable: false)
-		memberAddress(nullable: false, validator: Product.isEthereumAddress)
-		communityAddress(nullable: false, validator: Product.isEthereumAddress)
-		state(nullable: false)
-		dateCreated(nullable: false)
-		lastUpdated(nullable: false)
+		memberAddress(validator: Product.isEthereumAddress)
+		communityAddress(validator: Product.isEthereumAddress)
     }
 	static mapping = {
 		id generator: HexIdGenerator.name
 		state enumType: "identity", defaultValue: State.PENDING, index: 'state_idx'
-		user fetch: "join"
 	}
 
 	@GrailsCompileStatic
 	Map toMap() {
 		return [
 		    id: id,
-			// TODO: user: user,
 			memberAddress: memberAddress,
 			communityAddress: communityAddress,
 			state: state,
