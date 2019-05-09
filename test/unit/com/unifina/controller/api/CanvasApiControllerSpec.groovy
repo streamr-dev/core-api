@@ -173,7 +173,6 @@ class CanvasApiControllerSpec extends ControllerSpecification {
 		authenticatedAs(me) { controller.show() }
 
 		then:
-		System.out.println(response.json)
 		response.status == 200
 		response.json.size() > 0
 		1 * canvasService.authorizedGetById("1", me, Permission.Operation.READ) >> canvas1
