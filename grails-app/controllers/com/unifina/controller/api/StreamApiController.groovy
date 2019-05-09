@@ -25,6 +25,7 @@ class StreamApiController {
 	]
 
 	private final SimpleDateFormat iso8601 = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'")
+	private final SimpleDateFormat iso8601cal = new SimpleDateFormat("yyyy-MM-dd")
 
 	def streamService
 	def permissionService
@@ -202,5 +203,32 @@ class StreamApiController {
 			ok: status.ok,
 			date: iso8601.format(status.date),
 		] as JSON)
+	}
+
+	@StreamrApi
+	def deleteDataUpTo(String id) {
+		getAuthorizedStream(id, Operation.WRITE) { Stream stream ->
+			Date date = iso8601cal.parse((String) params.date)
+			streamService.deleteDataUpTo(stream, date)
+			render(status: 204)
+		}
+	}
+
+	@StreamrApi
+	def deleteAllData(String id) {
+		getAuthorizedStream(id, Operation.WRITE) { Stream stream ->
+			streamService.deleteAllData(stream)
+			render(status: 204)
+		}
+	}
+
+	@StreamrApi
+	def deleteDataRange(String id) {
+		getAuthorizedStream(id, Operation.WRITE) { Stream stream ->
+			Date start = iso8601cal.parse((String) params.start)
+			Date end = iso8601cal.parse((String) params.end)
+			streamService.deleteDataRange(stream, start, end)
+			render(status: 204)
+		}
 	}
 }

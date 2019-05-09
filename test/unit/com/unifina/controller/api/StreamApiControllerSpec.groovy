@@ -13,7 +13,8 @@ import com.unifina.feed.NoOpStreamListener
 import com.unifina.service.*
 import grails.test.mixin.Mock
 import grails.test.mixin.TestFor
-import org.apache.commons.lang.time.DateUtils
+
+import java.text.SimpleDateFormat
 
 @TestFor(StreamApiController)
 @Mock([SecUser, Stream, Key, Permission, Feed, PermissionService, StreamService, DashboardService])
@@ -387,5 +388,49 @@ class StreamApiControllerSpec extends ControllerSpecification {
 		cal.set(Calendar.MINUTE, minute)
 		cal.set(Calendar.SECOND, second)
 		return cal.getTime()
+	}
+
+	void "deleteDataUpTo deletes stream's data up to given date"() {
+		controller.streamService = Mock(StreamService)
+		Date date = new SimpleDateFormat("yyyy-MM-dd").parse("2019-05-09")
+
+		when:
+		request.method = "DELETE"
+		params.id = streamOne.id
+		params.date = "2019-05-09"
+		authenticatedAs(me) { controller.deleteDataUpTo() }
+
+		then:
+		1 * controller.streamService.deleteDataUpTo(streamOne, date)
+		response.status == 204
+	}
+
+	void "deleteAllData deletes all data from a given stream"() {
+		controller.streamService = Mock(StreamService)
+
+		when:
+		request.method = "DELETE"
+		params.id = streamOne.id
+		authenticatedAs(me) { controller.deleteAllData() }
+
+		then:
+		1 * controller.streamService.deleteAllData(streamOne)
+		response.status == 204
+	}
+
+	void "deleteDataRange deletes streams data from a given date range"() {
+		controller.streamService = Mock(StreamService)
+		Date start = new SimpleDateFormat("yyyy-MM-dd").parse("2019-05-01")
+		Date end = new SimpleDateFormat("yyyy-MM-dd").parse("2019-05-30")
+		when:
+		request.method = "DELETE"
+		params.id = streamOne.id
+		params.start = "2019-05-01"
+		params.end = "2019-05-30"
+		authenticatedAs(me) { controller.deleteDataRange() }
+
+		then:
+		1 * controller.streamService.deleteDataRange(streamOne, start, end)
+		response.status == 204
 	}
 }
