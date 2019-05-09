@@ -14,9 +14,6 @@ import com.unifina.feed.NoOpStreamListener
 import com.unifina.service.*
 import grails.test.mixin.Mock
 import grails.test.mixin.TestFor
-import org.apache.commons.lang.time.DateUtils
-import org.codehaus.groovy.grails.commons.DefaultGrailsApplication
-import org.springframework.context.ApplicationContext
 
 @TestFor(StreamApiController)
 @Mock([SecUser, Stream, Key, Permission, Feed, PermissionService, StreamService, DashboardService, IntegrationKey])
@@ -60,12 +57,6 @@ class StreamApiControllerSpec extends ControllerSpecification {
 		streamFourId = streamService.createStream([name: "otherUserStream", feed: feed], otherUser).id
 
 		controller.streamService = streamService
-
-		// Setup grailsApplication
-		def grailsApplication = new DefaultGrailsApplication()
-		grailsApplication.setMainContext(mainContext)
-
-		permissionService.grailsApplication = grailsApplication
 	}
 
 	void "find all streams of logged in user"() {
