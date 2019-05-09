@@ -176,12 +176,11 @@ public abstract class AbstractJavaCodeWrapper extends ModuleWithUI {
 				sb.append(d.getMessage(null));
 				sb.append("\n");
 
-				CompilationErrorMessage msg = new CompilationErrorMessage();
-				msg.addError(line, d.getMessage(null));
-				msgs.add(new JavaCompilerErrorMessage(hash, msg));
+				final String message = d.getMessage(null);
+				msgs.add(new JavaCompilerErrorMessage(hash, line, message));
 			}
 
-			throw new AbstractJavaCodeWrapperModuleException(sb.toString(), null, msgs);
+			throw new ModuleException(sb.toString(), null, msgs);
 		}
 
 		// Register the created class so that it will be cleaned when Globals is destroyed

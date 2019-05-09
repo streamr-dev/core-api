@@ -379,14 +379,6 @@ class CanvasServiceSpec extends BeanMockingSpecification {
 		then:
 		1 * service.signalPathService.reconstruct(_, _) >> { throw new ModuleException("mocked", null, null) }
 		thrown ModuleException
-		myFirstCanvas.name == "canvas"
-		!myFirstCanvas.hasExports
-		JSONElement json = JSON.parse(myFirstCanvas.json)
-		json.name == "canvas"
-		json.modules != null
-		json.settings != null
-		json.uiChannel.name == "Notifications"
-		json.uiChannel.id == "666"
 	}
 
 	def "createNew always generates new uiChannels"() {

@@ -4,12 +4,10 @@ import java.util.Map;
 
 public abstract class ModuleExceptionMessage {
 	protected int hash;
-	protected Map<String,Object> msg;
 
-	ModuleExceptionMessage(int hash, Map<String, Object> msg) {
+	ModuleExceptionMessage(int hash) {
 		super();
 		this.hash = hash;
-		this.msg = msg;
 	}
 
 	/**

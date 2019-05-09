@@ -9,11 +9,10 @@ import com.unifina.security.AllowRole
 import com.unifina.service.ApiService
 import com.unifina.service.CanvasService
 import com.unifina.service.SignalPathService
-import com.unifina.signalpath.AbstractJavaCodeWrapperModuleException
 import com.unifina.signalpath.JavaCompilerErrorMessage
 import com.unifina.signalpath.ModuleException
 import com.unifina.signalpath.ModuleExceptionMessage
-import com.unifina.signalpath.custom.CompilationErrorMessage
+
 import grails.converters.JSON
 import grails.test.mixin.Mock
 import grails.test.mixin.TestFor
@@ -165,27 +164,29 @@ class CanvasApiControllerSpec extends ControllerSpecification {
 	void "show() lets load a canvas in invalid state"() {
 		setup:
 		List<ModuleExceptionMessage> msgs = new ArrayList<>()
-
-		CompilationErrorMessage msg = new CompilationErrorMessage()
-		msg.addError(10, "syntax error")
-		msg.addError(11, "stupid programmer error")
-		msgs.add(new JavaCompilerErrorMessage(1, msg))
-
-		CompilationErrorMessage msg2 = new CompilationErrorMessage()
-		msg2.addError(100, "syntax terror")
-		msgs.add(new JavaCompilerErrorMessage(2, msg2))
+		msgs.add(new JavaCompilerErrorMessage(1, 11, "stupid programmer error"))
+		msgs.add(new JavaCompilerErrorMessage(1, 10, "syntax error"))
+		msgs.add(new JavaCompilerErrorMessage(2, 100, "syntax terror"))
 
 		when:
 		params.id = canvas1.id
 		authenticatedAs(me) { controller.show() }
 
 		then:
+		System.out.println(response.json)
 		response.status == 200
 		response.json.size() > 0
 		1 * canvasService.authorizedGetById("1", me, Permission.Operation.READ) >> canvas1
-		1 * controller.canvasService.reconstruct(_, _) >> { throw new AbstractJavaCodeWrapperModuleException("mocked", null, msgs) }
-		response.json.compileErrors[0].errors[0].line == 10
-		response.json.compileErrors[0].errors[0].msg == "syntax error"
+		1 * controller.canvasService.reconstruct(_, _) >> { throw new ModuleException("mocked", null, msgs) }
+		response.json.compileErrors[0].hash == 1
+		response.json.compileErrors[0].line == 11
+		response.json.compileErrors[0].message == "stupid programmer error"
+		response.json.compileErrors[1].hash == 1
+		response.json.compileErrors[1].line == 10
+		response.json.compileErrors[1].message == "syntax error"
+		response.json.compileErrors[2].hash == 2
+		response.json.compileErrors[2].line == 100
+		response.json.compileErrors[2].message == "syntax terror"
 	}
 
 	void "save() creates a new canvas and renders it as json"() {
@@ -253,15 +254,9 @@ class CanvasApiControllerSpec extends ControllerSpecification {
 	def "update() lets save canvas in invalid state"() {
 		setup:
 		List<ModuleExceptionMessage> msgs = new ArrayList<>()
-
-		CompilationErrorMessage msg = new CompilationErrorMessage()
-		msg.addError(10, "syntax error")
-		msg.addError(11, "stupid programmer error")
-		msgs.add(new JavaCompilerErrorMessage(1, msg))
-
-		CompilationErrorMessage msg2 = new CompilationErrorMessage()
-		msg2.addError(100, "syntax terror")
-		msgs.add(new JavaCompilerErrorMessage(2, msg2))
+		msgs.add(new JavaCompilerErrorMessage(1, 11, "stupid programmer error"))
+		msgs.add(new JavaCompilerErrorMessage(1, 10, "syntax error"))
+		msgs.add(new JavaCompilerErrorMessage(2, 100, "syntax terror"))
 
 		params.id = "1"
 		request.JSON = [
@@ -276,9 +271,16 @@ class CanvasApiControllerSpec extends ControllerSpecification {
 		then:
 		response.status == 200
 		1 * canvasService.authorizedGetById("1", me, Permission.Operation.WRITE) >> canvas1
-		1 * canvasService.updateExisting(canvas1, _, me) >> { throw new AbstractJavaCodeWrapperModuleException("mocked", null, msgs) }
-		response.json.compileErrors[0].errors[0].line == 10
-		response.json.compileErrors[0].errors[0].msg == "syntax error"
+		1 * canvasService.updateExisting(canvas1, _, me) >> { throw new ModuleException("mocked", null, msgs) }
+		response.json.compileErrors[0].hash == 1
+		response.json.compileErrors[0].line == 11
+		response.json.compileErrors[0].message == "stupid programmer error"
+		response.json.compileErrors[1].hash == 1
+		response.json.compileErrors[1].line == 10
+		response.json.compileErrors[1].message == "syntax error"
+		response.json.compileErrors[2].hash == 2
+		response.json.compileErrors[2].line == 100
+		response.json.compileErrors[2].message == "syntax terror"
 	}
 
 

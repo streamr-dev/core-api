@@ -1,5 +1,6 @@
 package com.unifina.signalpath;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -16,7 +17,16 @@ public class ModuleException extends RuntimeException {
 		return moduleExceptions;
 	}
 
+	/**
+	 * For front-end JSON output.
+	 */
 	public Map<String, Object> toMap() {
-		return new HashMap<>();
+		List<Map<String, Object>> list = new ArrayList<>();
+		for (ModuleExceptionMessage e : getModuleExceptions()) {
+			list.add(e.toMap());
+		}
+		Map<String, Object> result = new HashMap<>();
+		result.put("errors", list);
+		return result;
 	}
 }

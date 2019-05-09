@@ -10,7 +10,6 @@ import com.unifina.domain.security.SecUser
 import com.unifina.domain.signalpath.Canvas
 import com.unifina.exceptions.CanvasUnreachableException
 import com.unifina.serialization.SerializationException
-import com.unifina.signalpath.AbstractJavaCodeWrapperModuleException
 import com.unifina.signalpath.ModuleException
 import com.unifina.signalpath.ModuleWithUI
 import com.unifina.signalpath.UiChannelIterator
@@ -73,11 +72,7 @@ class CanvasService {
 		Exception reconstructException = null
 		try {
 			result = constructNewSignalPathMap(canvas, command, user, resetUi)
-		} catch (AbstractJavaCodeWrapperModuleException e) {
-			// Save canvas even if it is in an invalid state. For front-end auto-save.
-			canvas.json = extractJson(canvas.json, command)
-			canvas.name = command.name
-			canvas.save(flush: true, failOnError: true)
+		} catch (ModuleException e) {
 			reconstructException = e
 		}
 		if (result != null) {

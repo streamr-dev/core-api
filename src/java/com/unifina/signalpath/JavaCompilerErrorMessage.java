@@ -4,8 +4,13 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class JavaCompilerErrorMessage extends ModuleExceptionMessage {
-	public JavaCompilerErrorMessage(final int moduleIdHash, final Map<String, Object> msg) {
-		super(moduleIdHash, msg);
+	private final long line;
+	private final String message;
+
+	public JavaCompilerErrorMessage(final int moduleIdHash, final long line, final String message) {
+		super(moduleIdHash);
+		this.line = line;
+		this.message = message;
 	}
 
 	/**
@@ -15,7 +20,8 @@ public class JavaCompilerErrorMessage extends ModuleExceptionMessage {
 	public Map<String, Object> toMap() {
 		Map<String, Object> result = new HashMap<>();
 		result.put("hash", hash);
-		result.putAll(super.msg);
+		result.put("line", line);
+		result.put("message", message);
 		return result;
 	}
 }
