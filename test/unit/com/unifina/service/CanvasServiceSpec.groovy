@@ -22,7 +22,7 @@ import grails.test.mixin.TestFor
 import grails.test.mixin.TestMixin
 import grails.test.mixin.web.ControllerUnitTestMixin
 import groovy.json.JsonBuilder
-import org.codehaus.groovy.grails.web.json.JSONElement
+import groovy.json.JsonSlurper
 import org.codehaus.groovy.grails.web.mapping.LinkGenerator
 
 @TestMixin(ControllerUnitTestMixin) // "as JSON" converter
@@ -369,14 +369,27 @@ class CanvasServiceSpec extends BeanMockingSpecification {
 		service.signalPathService = Mock(SignalPathService)
 		def cmd = new SaveCanvasCommand(
 			name: "canvas",
-			modules: [],
-			settings: [:]
+			modules: [
+				[id: 22, params: [], inputs: [], outputs: []],
+			],
+			settings: [
+			    foo: "bar",
+			],
 		)
 
 		when:
 		service.updateExisting(myFirstCanvas, cmd, me)
 
 		then:
+		Canvas result = Canvas.findById(myFirstCanvas.id)
+		result.name == "canvas"
+		Map json = new JsonSlurper().parseText(result.json)
+		json.settings.foo == "bar"
+		json.name == "canvas"
+		json.hasExports == false
+		json.uiChannel.name == "Notifications"
+		json.uiChannel.id == "666"
+		json.modules[0].id == 22
 		1 * service.signalPathService.reconstruct(_, _) >> { throw new ModuleException("mocked", null, null) }
 		thrown ModuleException
 	}
