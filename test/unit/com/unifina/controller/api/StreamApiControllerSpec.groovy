@@ -1,6 +1,7 @@
 package com.unifina.controller.api
 
 import com.unifina.ControllerSpecification
+import com.unifina.api.BadRequestException
 import com.unifina.api.NotFoundException
 import com.unifina.api.NotPermittedException
 import com.unifina.api.StreamListParams
@@ -13,7 +14,8 @@ import com.unifina.feed.NoOpStreamListener
 import com.unifina.service.*
 import grails.test.mixin.Mock
 import grails.test.mixin.TestFor
-import org.apache.commons.lang.time.DateUtils
+
+import java.text.SimpleDateFormat
 
 @TestFor(StreamApiController)
 @Mock([SecUser, Stream, Key, Permission, Feed, PermissionService, StreamService, DashboardService])
@@ -30,6 +32,8 @@ class StreamApiControllerSpec extends ControllerSpecification {
 	def streamTwoId
 	def streamThreeId
 	def streamFourId
+
+	SimpleDateFormat iso8601 = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'")
 
 	def setup() {
 		permissionService = mainContext.getBean(PermissionService)
@@ -387,5 +391,123 @@ class StreamApiControllerSpec extends ControllerSpecification {
 		cal.set(Calendar.MINUTE, minute)
 		cal.set(Calendar.SECOND, second)
 		return cal.getTime()
+	}
+
+	// sample dates for testing
+	// 1557478677036 -> 2019-05-10T08:57:57Z
+	// 1557479167606 -> 2019-05-10T09:06:07Z
+
+	void "deleteDataUpTo deletes stream's data up to given date"() {
+		controller.streamService = Mock(StreamService)
+		Date date = iso8601.parse("2019-05-10T08:57:57Z")
+
+		when:
+		request.method = "DELETE"
+		params.id = streamOne.id
+		params.date = "2019-05-10T08:57:57Z"
+		authenticatedAs(me) { controller.deleteDataUpTo() }
+
+		then:
+		1 * controller.streamService.deleteDataUpTo(streamOne, date)
+		response.status == 204
+	}
+
+	void "deleteDataUpTo deletes stream's data up to given date in milliseconds"() {
+		controller.streamService = Mock(StreamService)
+
+		when:
+		request.method = "DELETE"
+		params.id = streamOne.id
+		params.date = "1557478677036"
+		authenticatedAs(me) { controller.deleteDataUpTo() }
+
+		then:
+		1 * controller.streamService.deleteDataUpTo(streamOne, new Date(1557478677036))
+		response.status == 204
+	}
+
+	void "deleteDataUpTo responds with 400 on bad date input"() {
+		controller.streamService = Mock(StreamService)
+
+		when:
+		request.method = "DELETE"
+		params.id = streamOne.id
+		params.date = "2019-05-10T08:57:xxZ"
+		authenticatedAs(me) { controller.deleteDataUpTo() }
+
+		then:
+		0 * controller.streamService._
+		thrown(BadRequestException)
+	}
+
+	void "deleteAllData deletes all data from a given stream"() {
+		controller.streamService = Mock(StreamService)
+
+		when:
+		request.method = "DELETE"
+		params.id = streamOne.id
+		authenticatedAs(me) { controller.deleteAllData() }
+
+		then:
+		1 * controller.streamService.deleteAllData(streamOne)
+		response.status == 204
+	}
+
+	void "deleteDataRange deletes streams data from a given date range in milliseconds"() {
+		controller.streamService = Mock(StreamService)
+		when:
+		request.method = "DELETE"
+		params.id = streamOne.id
+		params.start = "1557478677036"
+		params.end = "1557479167606"
+		authenticatedAs(me) { controller.deleteDataRange() }
+
+		then:
+		1 * controller.streamService.deleteDataRange(streamOne, new Date(1557478677036), new Date(1557479167606))
+		response.status == 204
+	}
+
+	void "deleteDataRange responds with 400 when start date is bad"() {
+		controller.streamService = Mock(StreamService)
+		when:
+		request.method = "DELETE"
+		params.id = streamOne.id
+		params.start = "2019-05-10T08:57:xxZ"
+		params.end = "2019-05-10T09:06:07Z"
+		authenticatedAs(me) { controller.deleteDataRange() }
+
+		then:
+		0 * controller.streamService._
+		thrown(BadRequestException)
+	}
+
+	void "deleteDataRange responds with 400 when end date is bad"() {
+		controller.streamService = Mock(StreamService)
+		when:
+		request.method = "DELETE"
+		params.id = streamOne.id
+		params.start = "2019-05-10T08:57:57Z"
+		params.end = "2019-05-10T09:06:xxZ"
+		authenticatedAs(me) { controller.deleteDataRange() }
+
+		then:
+		0 * controller.streamService._
+		thrown(BadRequestException)
+	}
+
+	void "deleteDataRange deletes streams data from a given date range"() {
+		controller.streamService = Mock(StreamService)
+		Date start = iso8601.parse("2019-05-10T08:57:57Z")
+		Date end = iso8601.parse("2019-05-10T09:06:07Z")
+		when:
+		request.method = "DELETE"
+		params.id = streamOne.id
+		params.start = "2019-05-10T08:57:57Z"
+		params.end = "2019-05-10T09:06:07Z"
+		authenticatedAs(me) { controller.deleteDataRange() }
+
+		then:
+		1 * controller.streamService.deleteDataRange(streamOne, start, end)
+		response.status == 204
 	}
 }

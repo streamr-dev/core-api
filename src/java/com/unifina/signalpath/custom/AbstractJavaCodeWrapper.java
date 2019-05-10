@@ -143,10 +143,7 @@ public abstract class AbstractJavaCodeWrapper extends ModuleWithUI {
 				if (e instanceof ModuleException) {
 					throw (ModuleException) e;
 				}
-				// TODO: How to allow saving of invalid code? If it doesn't get compiled, inputs etc. won't be found
-//				if (!globals.target.save) {
 				throw new RuntimeException(e);
-//				}
 			}
 		}
 	}
@@ -174,22 +171,20 @@ public abstract class AbstractJavaCodeWrapper extends ModuleWithUI {
 				long line = d.getLineNumber()- StringUtils.countMatches(makeImportString(), "\n")-StringUtils.countMatches(getHeader(), "\n");
 
 				sb.append("Line ");
-				sb.append(Long.toString(line));
+				sb.append(line);
 				sb.append(": ");
 				sb.append(d.getMessage(null));
 				sb.append("\n");
 
-				CompilationErrorMessage msg = new CompilationErrorMessage();
-				msg.addError(line, d.getMessage(null));
-				msgs.add(new ModuleExceptionMessage(hash,msg));
+				final String message = d.getMessage(null);
+				msgs.add(new JavaCompilerErrorMessage(hash, line, message));
 			}
 
-			throw new ModuleException(sb.toString(),null,msgs);
+			throw new ModuleException(sb.toString(), null, msgs);
 		}
 
 		// Register the created class so that it will be cleaned when Globals is destroyed
 		Class<AbstractCustomModule> clazz = (Class<AbstractCustomModule>) classLoader.loadClass(className);
-		//getGlobals().registerDynamicClass(clazz);
 		return clazz;
 	}
 

@@ -1,13 +1,23 @@
 package com.unifina.signalpath;
 
+import java.util.LinkedHashMap;
 import java.util.Map;
 
-public class ModuleExceptionMessage {
-	public ModuleExceptionMessage(int hash, Map<String, Object> msg) {
+public abstract class ModuleExceptionMessage {
+	protected int hash;
+
+	ModuleExceptionMessage(int hash) {
 		super();
 		this.hash = hash;
-		this.msg = msg;
 	}
-	private int hash;
-	private Map<String,Object> msg;
+
+	/**
+	 * For front-end JSON output. Override to add
+	 * subclass-specific fields.
+	 */
+	public Map<String, Object> toMap() {
+		Map<String, Object> result = new LinkedHashMap<>();
+		result.put("module", hash);
+		return result;
+	}
 }

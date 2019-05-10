@@ -10,6 +10,7 @@ import com.unifina.domain.security.SecUser
 import com.unifina.domain.signalpath.Canvas
 import com.unifina.exceptions.CanvasUnreachableException
 import com.unifina.serialization.SerializationException
+import com.unifina.signalpath.ModuleException
 import com.unifina.signalpath.ModuleWithUI
 import com.unifina.signalpath.UiChannelIterator
 import com.unifina.task.CanvasDeleteTask
@@ -47,6 +48,14 @@ class CanvasService {
 		return canvas
 	}
 
+	private String extractJson(String json, SaveCanvasCommand cmd) {
+		Map canvasJson = (Map) JSON.parse(json)
+		canvasJson.name = cmd.name
+		canvasJson.modules = cmd.modules
+		canvasJson.settings = cmd.settings
+		return new JsonBuilder(canvasJson).toPrettyString()
+	}
+
 	@CompileStatic
 	void updateExisting(Canvas canvas, SaveCanvasCommand command, SecUser user, boolean resetUi = false) {
 		if (command.name == null || command.name.trim() == "") {
@@ -59,15 +68,23 @@ class CanvasService {
 			throw new InvalidStateException("Cannot update canvas with state " + canvas.state)
 		}
 
-		SignalPathService.ReconstructedResult result = constructNewSignalPathMap(canvas, command, user, resetUi)
-		Map newSignalPathMap = result.map
+		SignalPathService.ReconstructedResult result = null
+		Exception reconstructException = null
+		try {
+			result = constructNewSignalPathMap(canvas, command, user, resetUi)
+		} catch (ModuleException e) {
+			reconstructException = e
+		}
+		if (result != null) {
+			canvas.hasExports = result.map.hasExports
+			canvas.json = new JsonBuilder(result.map).toPrettyString()
+		} else {
+			canvas.json = extractJson(canvas.json, command)
+		}
 
-		canvas.name = newSignalPathMap.name
-		canvas.hasExports = newSignalPathMap.hasExports
-		canvas.json = new JsonBuilder(newSignalPathMap).toPrettyString() // JsonBuilder is more stable than "as JSON"
+		canvas.name = command.name
 		canvas.state = Canvas.State.STOPPED
 		canvas.adhoc = command.isAdhoc()
-
 		// clear serialization
 		canvas.serialization?.delete()
 		canvas.serialization = null
@@ -78,13 +95,18 @@ class CanvasService {
 		}
 
 		// ensure that the UI channel streams are created
-		result.signalPath.setCanvas(canvas)
-		result.signalPath.getModules().each {
-			if (it instanceof ModuleWithUI) {
-				it.ensureUiChannel()
+		if (result != null) {
+			result.signalPath.setCanvas(canvas)
+			result.signalPath.getModules().each {
+				if (it instanceof ModuleWithUI) {
+					it.ensureUiChannel()
+				}
 			}
+			result.signalPath.ensureUiChannel()
 		}
-		result.signalPath.ensureUiChannel()
+		if (reconstructException != null) {
+			throw reconstructException
+		}
 	}
 
 	/**
