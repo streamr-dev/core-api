@@ -6,14 +6,21 @@ import com.unifina.feed.StreamMessageSource;
 import com.unifina.feed.util.MergingIterator;
 import com.unifina.feed.util.StreamMessageComparator;
 import com.unifina.utils.Globals;
+import org.jetbrains.annotations.NotNull;
 
 import java.io.IOException;
 import java.util.Collection;
+import java.util.Iterator;
 import java.util.List;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
-public class CassandraMessageSource extends StreamMessageSource {
+/**
+ * Interleaves historical messages from the given StreamPartitions into one timeline using a
+ * MergingIterator, and starts a Thread that passes messages from that MergingIterator to the
+ * given Consumer (i.e. bridges from "pull" to "push").
+ */
+public class CassandraMessageSource extends StreamMessageSource implements Iterable<StreamMessage> {
 
 	private final MergingIterator<StreamMessage> mergingIterator;
 	private boolean quit = false;
@@ -22,7 +29,7 @@ public class CassandraMessageSource extends StreamMessageSource {
 		super(globals, consumer, streamPartitions);
 
 		List<CassandraHistoricalIterator> iterators = streamPartitions.stream()
-			.map(sp -> new CassandraHistoricalIterator(sp, globals.getStartDate(), globals.getEndDate()))
+			.map(streamPartition -> new CassandraHistoricalIterator(streamPartition, globals.getStartDate(), globals.getEndDate()))
 			.collect(Collectors.toList());
 
 		mergingIterator = new MergingIterator<>(iterators, new StreamMessageComparator());
@@ -41,4 +48,9 @@ public class CassandraMessageSource extends StreamMessageSource {
 		mergingIterator.close();
 	}
 
+	@NotNull
+	@Override
+	public Iterator<StreamMessage> iterator() {
+		return mergingIterator;
+	}
 }

@@ -8,8 +8,9 @@ import org.apache.log4j.Logger;
 
 import java.util.Date;
 import java.util.Map;
-import java.util.Queue;
+import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.PriorityBlockingQueue;
+import java.util.concurrent.TimeUnit;
 
 public class HistoricalEventQueue extends DataSourceEventQueue {
 	private static final Logger log = Logger.getLogger(HistoricalEventQueue.class);
@@ -17,13 +18,13 @@ public class HistoricalEventQueue extends DataSourceEventQueue {
 	private final int speed;
 
 	public HistoricalEventQueue(Globals globals, DataSource dataSource) {
-		super(false, globals, dataSource);
+		super(globals, dataSource);
 		speed = readSpeedConfiguration(globals);
 	}
 
 	@Override
-	protected Queue<Event> createQueue(int capacity) {
-		Queue<Event> queue = new PriorityBlockingQueue<>(capacity);
+	protected BlockingQueue<Event> createQueue(int capacity) {
+		BlockingQueue<Event> queue = new PriorityBlockingQueue<>(capacity);
 
 		/**
 		 * Queue events at lower and upper bounds of selected playback range to ensure that MasterClock ticks through
@@ -36,7 +37,7 @@ public class HistoricalEventQueue extends DataSourceEventQueue {
 	}
 
 	@Override
-	public void doStart() throws Exception {
+	public void runEventLoopUntilAborted() throws Exception {
 		long feedStartTime = System.currentTimeMillis();
 		long eventCounter = 0;
 		long timeSpentProcessing = 0;
@@ -71,7 +72,8 @@ public class HistoricalEventQueue extends DataSourceEventQueue {
 				enqueue(event);
 			}
 
-			Event event = poll();
+			// Queue will never be non-empty
+			Event event = poll(1, TimeUnit.SECONDS);
 			time = event.getTimestamp().getTime();
 
 			// Check if a delay is needed
@@ -91,7 +93,7 @@ public class HistoricalEventQueue extends DataSourceEventQueue {
 			}
 
 			long startTime = System.nanoTime();
-			boolean processed = process(event);
+			boolean processed = dispatch(event);
 			eventQueueMetrics.countEvent(System.nanoTime() - startTime, 0);
 			timeSpentProcessing += System.nanoTime() - startTime;
 			eventCounter++;
@@ -112,12 +114,8 @@ public class HistoricalEventQueue extends DataSourceEventQueue {
 	}
 
 	@Override
-	public boolean process(Event event) {
+	public boolean dispatch(Event event) {
 		long time = event.getTimestamp().getTime();
-
-		if (globals.time.getTime() != lastReportedClockTick) {
-			log.warn("Gotcha!");
-		}
 
 		// Events across different streams/producers aren't necessarily ordered in time.
 		// Never report out-of-order time to modules to prevent weird effects.
@@ -134,18 +132,9 @@ public class HistoricalEventQueue extends DataSourceEventQueue {
 			globals.time = event.getTimestamp();
 		}
 
-		if (globals.time.getTime() != lastReportedClockTick && event.getContent() instanceof ClockTick) {
-			log.warn("Gotcha!");
-		}
-
 		// Handle event
 		event.dispatch();
 		return true;
-	}
-
-	@Override
-	protected void doStop() {
-		// Don't need to do anything
 	}
 
 	private static int readSpeedConfiguration(Globals globals) {

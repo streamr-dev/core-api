@@ -13,16 +13,18 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Queue;
+import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.TimeUnit;
 
 public abstract class DataSourceEventQueue {
 	private static final Logger log = Logger.getLogger(DataSourceEventQueue.class);
+
 	private static final int QUEUE_HARD_LIMIT = 10000;
 	protected static final int CLOCK_TICK_INTERVAL_MILLIS = 1000; // tick every second
 
 	private final MasterClock masterClock;
 	private final List<IDayListener> dayListeners = new ArrayList<>();
-	private final Object syncLock;
-	private Queue<Event> queue;
+	private BlockingQueue<Event> queue;
 	protected final Globals globals;
 	private boolean abort = false;
 	protected long lastReportedClockTick = 0;
@@ -30,11 +32,7 @@ public abstract class DataSourceEventQueue {
 
 	protected EventQueueMetrics eventQueueMetrics = new EventQueueMetrics();
 
-	/**
-	 * sync must be set to true if events are enqueued from multiple threads
-	 */
-	public DataSourceEventQueue(boolean sync, Globals globals, DataSource dataSource) {
-		this.syncLock = sync ? new Object() : null;
+	public DataSourceEventQueue(Globals globals, DataSource dataSource) {
 		this.globals = globals;
 		masterClock = new MasterClock(globals, dataSource);
 		queue = createQueue(QUEUE_HARD_LIMIT);
@@ -55,50 +53,41 @@ public abstract class DataSourceEventQueue {
 	 */
 	public void start() throws Exception {
 		abort = false;
-		doStart();
+		runEventLoopUntilAborted();
 	}
 
 	public void enqueue(Event event) {
-		if (syncLock != null) {
-			synchronized (syncLock) {
-				if (queue.size() <= QUEUE_HARD_LIMIT) {
-					queue.add(event);
-				} else {
-					log.warn("Queue hard limit reached: " + event.toString());
-				}
-				syncLock.notify(); // Notify the SignalPathRunner thread
+		try {
+			boolean success = queue.offer(event, 30, TimeUnit.SECONDS);
+			if (!success) {
+				log.error("enqueue: Timed out while trying to enqueue event " + event);
 			}
-		} else {
-			queue.add(event);
+		} catch (InterruptedException e) {
+			log.error(e);
 		}
 	}
 
 	public void abort() {
 		abort = true;
-		if (syncLock != null) {
-			synchronized (syncLock) {
-				syncLock.notify(); // Notify the SignalPathRunner thread
-			}
-			doStop();
-		}
 	}
 
-	protected abstract Queue<Event> createQueue(int capacity);
+	/**
+	 * Should return a concurrent blocking queue with given max capacity.
+	 */
+	protected abstract BlockingQueue<Event> createQueue(int capacity);
 
-	protected abstract void doStart() throws Exception;
+	protected abstract void runEventLoopUntilAborted() throws Exception;
 
 	/**
-	 * @return True if the event was processed, false if it was not (then it should be returned to the queue).
+	 * @return True if the event was dispatched, false if it was not (then it should be returned to the queue).
 	 */
-	public abstract boolean process(Event event);
+	public abstract boolean dispatch(Event event);
 
 	EventQueueMetrics retrieveMetricsAndReset() {
 		EventQueueMetrics returnMetrics = eventQueueMetrics;
 		eventQueueMetrics = new EventQueueMetrics();
 		return returnMetrics;
 	}
-
-	protected abstract void doStop();
 
 	protected boolean isAborted() {
 		return abort;
@@ -135,28 +124,20 @@ public abstract class DataSourceEventQueue {
 		}
 	}
 
-	protected Object getSyncLock() {
-		return syncLock;
-	}
-
 	protected boolean isEmpty() {
 		return queue.isEmpty();
 	}
 
-	protected Queue<Event> getQueue() {
+	protected BlockingQueue<Event> getQueue() {
 		return queue;
-	}
-
-	protected void setQueue(Queue<Event> queue) {
-		this.queue = queue;
 	}
 
 	protected Event peek() {
 		return queue.peek();
 	}
 
-	protected Event poll() {
-		return queue.poll();
+	protected Event poll(long timeout, TimeUnit timeUnit) throws InterruptedException {
+		return queue.poll(timeout, timeUnit);
 	}
 
 }

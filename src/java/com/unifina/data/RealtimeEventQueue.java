@@ -6,8 +6,9 @@ import com.unifina.exceptions.StreamFieldChangedException;
 import com.unifina.utils.Globals;
 import org.apache.log4j.Logger;
 
-import java.util.ArrayDeque;
-import java.util.Queue;
+import java.util.concurrent.ArrayBlockingQueue;
+import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.TimeUnit;
 
 public class RealtimeEventQueue extends DataSourceEventQueue {
 	private static final Logger log = Logger.getLogger(RealtimeEventQueue.class);
@@ -16,30 +17,36 @@ public class RealtimeEventQueue extends DataSourceEventQueue {
 	private boolean firstEvent = true;
 
 	public RealtimeEventQueue(Globals globals, DataSource dataSource) {
-		super(true, globals, dataSource);
+		super(globals, dataSource);
 	}
 
 	@Override
-	protected Queue<Event> createQueue(int capacity) {
-		return new ArrayDeque<>(capacity);
+	protected BlockingQueue<Event> createQueue(int capacity) {
+		return new ArrayBlockingQueue<>(capacity);
 	}
 
-	protected void doStart() throws Exception {
+	protected void runEventLoopUntilAborted() {
 		log.info("The realtime event queue is starting!");
 
 		int eventCounter = 0;
 		long elapsedTime = 0;
 
 		while (!isAborted()) {
-			Event event = waitForAndPullFeedEvent();
+			Event event = null;
+			try {
+				event = poll(1, TimeUnit.SECONDS);
+			} catch (InterruptedException e) {
+				log.error(e);
+			}
+
 			if (event == null) {
-				log.info("doStart: aborting");
-				return;
+				// Timed out while waiting for new events. Just keep trying until aborted.
+				continue;
 			}
 
 			long startTime = System.nanoTime();
 			long startTimeInMillis = System.currentTimeMillis();
-			process(event);
+			dispatch(event);
 			long now = System.nanoTime();
 
 			eventQueueMetrics.countEvent(now - startTime, startTimeInMillis - event.getTimestamp().getTime());
@@ -59,10 +66,12 @@ public class RealtimeEventQueue extends DataSourceEventQueue {
 			}
 
 		}
+
+		log.info("runEventLoopUntilAborted: aborted.");
 	}
 
 	@Override
-	public boolean process(Event event) {
+	public boolean dispatch(Event event) {
 		long time = event.getTimestamp().getTime();
 
 		if (firstEvent) {
@@ -89,19 +98,4 @@ public class RealtimeEventQueue extends DataSourceEventQueue {
 		}
 	}
 
-	@Override
-	protected void doStop() {
-		// Don't need to do anything
-	}
-
-	private Event waitForAndPullFeedEvent() {
-		synchronized (getSyncLock()) {
-			while (isEmpty() && !isAborted()) {
-				try {
-					getSyncLock().wait();
-				} catch (InterruptedException ignored) {}
-			}
-			return isAborted() ? null : poll();
-		}
-	}
 }
