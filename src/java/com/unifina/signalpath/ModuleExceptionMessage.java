@@ -1,6 +1,6 @@
 package com.unifina.signalpath;
 
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
 
 public abstract class ModuleExceptionMessage {
@@ -12,11 +12,12 @@ public abstract class ModuleExceptionMessage {
 	}
 
 	/**
-	 * For front-end JSON output.
+	 * For front-end JSON output. Override to add
+	 * subclass-specific fields.
 	 */
 	public Map<String, Object> toMap() {
-		Map<String, Object> map = new HashMap<>();
-		map.put("module", hash);
-		return map;
+		Map<String, Object> result = new LinkedHashMap<>();
+		result.put("module", hash);
+		return result;
 	}
 }

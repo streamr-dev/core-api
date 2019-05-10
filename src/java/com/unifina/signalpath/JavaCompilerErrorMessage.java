@@ -1,6 +1,5 @@
 package com.unifina.signalpath;
 
-import java.util.HashMap;
 import java.util.Map;
 
 public class JavaCompilerErrorMessage extends ModuleExceptionMessage {
@@ -19,6 +18,7 @@ public class JavaCompilerErrorMessage extends ModuleExceptionMessage {
 	@Override
 	public Map<String, Object> toMap() {
 		Map<String, Object> result = super.toMap();
+		result.put("type", "compilerError");
 		result.put("line", line);
 		result.put("message", message);
 		return result;

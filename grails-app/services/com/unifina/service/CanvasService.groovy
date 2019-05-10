@@ -76,10 +76,13 @@ class CanvasService {
 			reconstructException = e
 		}
 		if (result != null) {
-			canvas.name = result.map.name
 			canvas.hasExports = result.map.hasExports
 			canvas.json = new JsonBuilder(result.map).toPrettyString()
+		} else {
+			canvas.json = extractJson(canvas.json, command)
 		}
+
+		canvas.name = command.name
 		canvas.state = Canvas.State.STOPPED
 		canvas.adhoc = command.isAdhoc()
 		// clear serialization

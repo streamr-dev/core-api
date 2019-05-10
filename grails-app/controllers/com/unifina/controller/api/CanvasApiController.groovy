@@ -14,11 +14,9 @@ import com.unifina.service.ApiService
 import com.unifina.service.CanvasService
 import com.unifina.service.SignalPathService
 import com.unifina.signalpath.ModuleException
-import com.unifina.signalpath.ModuleExceptionMessage
 import grails.converters.JSON
 import grails.plugin.springsecurity.annotation.Secured
 import grails.transaction.NotTransactional
-import groovy.json.JsonBuilder
 import org.apache.log4j.Logger
 
 @Secured(["IS_AUTHENTICATED_ANONYMOUSLY"])
@@ -59,7 +57,7 @@ class CanvasApiController {
 				canvas.discard()
 			} catch (ModuleException e) {
 				// Load canvas even if it is in an invalid state. For front-end auto-save.
-				def response = canvas.toMap()
+				Map<String, Object> response = canvas.toMap()
 				response.moduleErrors = e.getModuleExceptions()*.toMap()
 				render response as JSON
 			}
@@ -78,7 +76,7 @@ class CanvasApiController {
 		try {
 			canvasService.updateExisting(canvas, readSaveCommand(), request.apiUser)
 		} catch (ModuleException e) {
-			def response = canvas.toMap()
+			Map<String, Object> response = canvas.toMap()
 			response.moduleErrors = e.getModuleExceptions()*.toMap()
 			render response as JSON
 		}
