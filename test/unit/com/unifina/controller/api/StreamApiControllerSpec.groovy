@@ -1,6 +1,7 @@
 package com.unifina.controller.api
 
 import com.unifina.ControllerSpecification
+import com.unifina.api.BadRequestException
 import com.unifina.api.NotFoundException
 import com.unifina.api.NotPermittedException
 import com.unifina.api.StreamListParams
@@ -405,6 +406,20 @@ class StreamApiControllerSpec extends ControllerSpecification {
 		response.status == 204
 	}
 
+	void "deleteDataUpTo responds with 400 on bad date input"() {
+		controller.streamService = Mock(StreamService)
+
+		when:
+		request.method = "DELETE"
+		params.id = streamOne.id
+		params.date = "2019-xx-xx"
+		authenticatedAs(me) { controller.deleteDataUpTo() }
+
+		then:
+		0 * controller.streamService._
+		thrown(BadRequestException)
+	}
+
 	void "deleteAllData deletes all data from a given stream"() {
 		controller.streamService = Mock(StreamService)
 
@@ -432,5 +447,33 @@ class StreamApiControllerSpec extends ControllerSpecification {
 		then:
 		1 * controller.streamService.deleteDataRange(streamOne, start, end)
 		response.status == 204
+	}
+
+	void "deleteDataRange responds with 400 when start date is bad"() {
+		controller.streamService = Mock(StreamService)
+		when:
+		request.method = "DELETE"
+		params.id = streamOne.id
+		params.start = "2019-xx-xx"
+		params.end = "2019-05-30"
+		authenticatedAs(me) { controller.deleteDataRange() }
+
+		then:
+		0 * controller.streamService._
+		thrown(BadRequestException)
+	}
+
+	void "deleteDataRange responds with 400 when end date is bad"() {
+		controller.streamService = Mock(StreamService)
+		when:
+		request.method = "DELETE"
+		params.id = streamOne.id
+		params.start = "2019-05-01"
+		params.end = "2019-xx-xx"
+		authenticatedAs(me) { controller.deleteDataRange() }
+
+		then:
+		0 * controller.streamService._
+		thrown(BadRequestException)
 	}
 }

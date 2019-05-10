@@ -13,6 +13,7 @@ import grails.plugin.springsecurity.annotation.Secured
 import org.apache.commons.lang.time.DateUtils
 import org.springframework.web.multipart.MultipartFile
 
+import java.text.ParseException
 import java.text.SimpleDateFormat
 
 @Secured(["IS_AUTHENTICATED_ANONYMOUSLY"])
@@ -208,7 +209,12 @@ class StreamApiController {
 	@StreamrApi
 	def deleteDataUpTo(String id) {
 		getAuthorizedStream(id, Operation.WRITE) { Stream stream ->
-			Date date = iso8601cal.parse((String) params.date)
+			Date date
+			try {
+				date = iso8601cal.parse((String) params.date)
+			} catch (ParseException e) {
+				throw new BadRequestException(e.getMessage())
+			}
 			streamService.deleteDataUpTo(stream, date)
 			render(status: 204)
 		}
@@ -225,8 +231,18 @@ class StreamApiController {
 	@StreamrApi
 	def deleteDataRange(String id) {
 		getAuthorizedStream(id, Operation.WRITE) { Stream stream ->
-			Date start = iso8601cal.parse((String) params.start)
-			Date end = iso8601cal.parse((String) params.end)
+			Date start
+			try {
+				start = iso8601cal.parse((String) params.start)
+			} catch (ParseException e) {
+				throw new BadRequestException(e.getMessage())
+			}
+			Date end
+			try {
+				end = iso8601cal.parse((String) params.end)
+			} catch (ParseException e) {
+				throw new BadRequestException(e.getMessage())
+			}
 			streamService.deleteDataRange(stream, start, end)
 			render(status: 204)
 		}

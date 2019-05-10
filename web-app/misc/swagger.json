@@ -2516,6 +2516,12 @@
           "204": {
             "description": "Success"
           },
+          "400": {
+            "description": "Input date is malformed",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          },
           "403": {
             "description": "Access denied",
             "schema": {
@@ -2564,6 +2570,12 @@
         "responses": {
           "204": {
             "description": "Success"
+          },
+          "400": {
+            "description": "Input start and/or end date is malformed",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
           },
           "403": {
             "description": "Access denied",

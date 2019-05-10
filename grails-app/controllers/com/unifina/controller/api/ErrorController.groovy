@@ -2,6 +2,7 @@ package com.unifina.controller.api
 
 import com.unifina.api.ApiError
 import com.unifina.api.ApiException
+import com.unifina.api.BadRequestException
 import com.unifina.api.CannotRemoveEthereumKeyException
 import com.unifina.api.CanvasCommunicationException
 import com.unifina.api.ChallengeVerificationFailedException
@@ -29,7 +30,8 @@ class ErrorController {
 		ChallengeVerificationFailedException: { ChallengeVerificationFailedException e -> new ApiError(401, "CHALLENGE_VERIFICATION_FAILED_ERROR", e.message)},
 		DisabledUserException: {DisabledUserException e -> new ApiError(401, "DISABLED_USER_EXCEPTION", e.message)},
 		InvalidUsernameAndPasswordException: { InvalidUsernameAndPasswordException e -> new ApiError(401, "INVALID_USERNAME_PASSWORD_ERROR", e.message)},
-		InvalidAPIKeyException: { InvalidAPIKeyException e -> new ApiError(401, "INVALID_API_KEY_ERROR", e.message)}
+		InvalidAPIKeyException: { InvalidAPIKeyException e -> new ApiError(401, "INVALID_API_KEY_ERROR", e.message)},
+		BadRequestException: { BadRequestException e -> new ApiError(400, "PARAMETER_MISSING", e.message)},
 	]
 
 	@StreamrApi(authenticationLevel = AuthLevel.NONE)
