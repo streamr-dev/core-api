@@ -60,7 +60,7 @@ class CanvasApiController {
 			} catch (ModuleException e) {
 				// Load canvas even if it is in an invalid state. For front-end auto-save.
 				def response = canvas.toMap()
-				response.compileErrors = e.toMap().get("errors")
+				response.moduleErrors = e.getModuleExceptions()*.toMap()
 				render response as JSON
 			}
 		}
@@ -79,7 +79,7 @@ class CanvasApiController {
 			canvasService.updateExisting(canvas, readSaveCommand(), request.apiUser)
 		} catch (ModuleException e) {
 			def response = canvas.toMap()
-			response.compileErrors = e.toMap().get("errors")
+			response.moduleErrors = e.getModuleExceptions()*.toMap()
 			render response as JSON
 		}
 		render canvas.toMap() as JSON

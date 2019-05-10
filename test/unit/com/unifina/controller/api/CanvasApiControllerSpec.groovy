@@ -177,15 +177,15 @@ class CanvasApiControllerSpec extends ControllerSpecification {
 		response.json.size() > 0
 		1 * canvasService.authorizedGetById("1", me, Permission.Operation.READ) >> canvas1
 		1 * controller.canvasService.reconstruct(_, _) >> { throw new ModuleException("mocked", null, msgs) }
-		response.json.compileErrors[0].hash == 1
-		response.json.compileErrors[0].line == 11
-		response.json.compileErrors[0].message == "stupid programmer error"
-		response.json.compileErrors[1].hash == 1
-		response.json.compileErrors[1].line == 10
-		response.json.compileErrors[1].message == "syntax error"
-		response.json.compileErrors[2].hash == 2
-		response.json.compileErrors[2].line == 100
-		response.json.compileErrors[2].message == "syntax terror"
+		response.json.moduleErrors[0].module == 1
+		response.json.moduleErrors[0].line == 11
+		response.json.moduleErrors[0].message == "stupid programmer error"
+		response.json.moduleErrors[1].module == 1
+		response.json.moduleErrors[1].line == 10
+		response.json.moduleErrors[1].message == "syntax error"
+		response.json.moduleErrors[2].module == 2
+		response.json.moduleErrors[2].line == 100
+		response.json.moduleErrors[2].message == "syntax terror"
 	}
 
 	void "save() creates a new canvas and renders it as json"() {
@@ -271,15 +271,15 @@ class CanvasApiControllerSpec extends ControllerSpecification {
 		response.status == 200
 		1 * canvasService.authorizedGetById("1", me, Permission.Operation.WRITE) >> canvas1
 		1 * canvasService.updateExisting(canvas1, _, me) >> { throw new ModuleException("mocked", null, msgs) }
-		response.json.compileErrors[0].hash == 1
-		response.json.compileErrors[0].line == 11
-		response.json.compileErrors[0].message == "stupid programmer error"
-		response.json.compileErrors[1].hash == 1
-		response.json.compileErrors[1].line == 10
-		response.json.compileErrors[1].message == "syntax error"
-		response.json.compileErrors[2].hash == 2
-		response.json.compileErrors[2].line == 100
-		response.json.compileErrors[2].message == "syntax terror"
+		response.json.moduleErrors[0].module == 1
+		response.json.moduleErrors[0].line == 11
+		response.json.moduleErrors[0].message == "stupid programmer error"
+		response.json.moduleErrors[1].module == 1
+		response.json.moduleErrors[1].line == 10
+		response.json.moduleErrors[1].message == "syntax error"
+		response.json.moduleErrors[2].module == 2
+		response.json.moduleErrors[2].line == 100
+		response.json.moduleErrors[2].message == "syntax terror"
 	}
 
 

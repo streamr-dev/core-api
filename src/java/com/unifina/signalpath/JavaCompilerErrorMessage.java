@@ -18,8 +18,7 @@ public class JavaCompilerErrorMessage extends ModuleExceptionMessage {
 	 */
 	@Override
 	public Map<String, Object> toMap() {
-		Map<String, Object> result = new HashMap<>();
-		result.put("hash", hash);
+		Map<String, Object> result = super.toMap();
 		result.put("line", line);
 		result.put("message", message);
 		return result;
