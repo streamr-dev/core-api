@@ -201,6 +201,8 @@ public class SolidityCompileDeploy extends ModuleWithUI implements Pullable<Ethe
 				compilationResult = compile(code);
 				contract = new EthereumContract(null, new EthereumABI(new JsonParser().parse(compilationResult.get("abi").getAsString()).getAsJsonArray()));
 			}
+		} else if (config.get("code") != null) {
+			code = config.get("code").toString();
 		}
 
 		if (contract != null) {
