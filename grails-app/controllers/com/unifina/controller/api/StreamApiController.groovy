@@ -209,12 +209,7 @@ class StreamApiController {
 	@StreamrApi
 	def deleteDataUpTo(String id) {
 		getAuthorizedStream(id, Operation.WRITE) { Stream stream ->
-			Date date
-			try {
-				date = iso8601cal.parse((String) params.date)
-			} catch (ParseException e) {
-				throw new BadRequestException(e.getMessage())
-			}
+			Date date = parseDate((String) params.date)
 			streamService.deleteDataUpTo(stream, date)
 			render(status: 204)
 		}
@@ -231,20 +226,22 @@ class StreamApiController {
 	@StreamrApi
 	def deleteDataRange(String id) {
 		getAuthorizedStream(id, Operation.WRITE) { Stream stream ->
-			Date start
-			try {
-				start = iso8601cal.parse((String) params.start)
-			} catch (ParseException e) {
-				throw new BadRequestException(e.getMessage())
-			}
-			Date end
-			try {
-				end = iso8601cal.parse((String) params.end)
-			} catch (ParseException e) {
-				throw new BadRequestException(e.getMessage())
-			}
+			Date start = parseDate((String) params.start)
+			Date end = parseDate((String) params.end)
 			streamService.deleteDataRange(stream, start, end)
 			render(status: 204)
+		}
+	}
+
+	private Date parseDate(String input) {
+		try {
+			return new Date(Long.parseLong(input))
+		} catch (NumberFormatException e) {
+			try {
+				return iso8601.parse(input)
+			} catch (ParseException pe) {
+				throw new BadRequestException(pe.getMessage())
+			}
 		}
 	}
 }

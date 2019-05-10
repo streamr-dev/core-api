@@ -2507,7 +2507,7 @@
           {
             "in": "query",
             "name": "date",
-            "description": "Delete data up to date yyyy-mm-dd",
+            "description": "Delete data up to date. Format is either milliseconds since epoch or ISO8601 datetime",
             "required": true,
             "type": "string"
           }
@@ -2555,14 +2555,15 @@
           {
             "in": "query",
             "name": "start",
-            "description": "Start date where the data deletion starts yyyy-mm-dd",
+            "description": "Start date where the data deletion starts. Format is either milliseconds since epoch or ISO8601 datetime.",
+
             "required": true,
             "type": "string"
           },
           {
             "in": "query",
             "name": "end",
-            "description": "Delete data up to this date yyyy-mm-dd",
+            "description": "Delete data up to this date. Format is either milliseconds since epoch or ISO8601 datetime.",
             "required": true,
             "type": "string"
           }
