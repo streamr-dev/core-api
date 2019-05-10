@@ -11,7 +11,7 @@ class SecUser implements Userish {
 	Long id
 	String username
 	String password
-	boolean enabled
+	boolean enabled = true
 	boolean accountExpired
 	boolean accountLocked
 	boolean passwordExpired
