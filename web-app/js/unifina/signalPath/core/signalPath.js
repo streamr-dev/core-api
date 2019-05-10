@@ -230,7 +230,7 @@ var SignalPath = (function () {
 				else {
 					if (data.moduleErrors) {
 						for (var i=0;i<data.moduleErrors.length;i++) {
-							getModuleById(data.moduleErrors[i].hash).handleError(data.moduleErrors[i].payload);
+							getModuleById(data.moduleErrors[i].module).handleError(data.moduleErrors[i]);
 						}
 					}
 

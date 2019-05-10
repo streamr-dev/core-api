@@ -12,6 +12,7 @@ import com.unifina.domain.signalpath.Canvas
 import com.unifina.domain.signalpath.Module
 import com.unifina.domain.signalpath.Serialization
 import com.unifina.exceptions.CanvasUnreachableException
+import com.unifina.signalpath.ModuleException
 import com.unifina.signalpath.UiChannelIterator
 import com.unifina.signalpath.charts.Heatmap
 import com.unifina.task.CanvasDeleteTask
@@ -21,6 +22,7 @@ import grails.test.mixin.TestFor
 import grails.test.mixin.TestMixin
 import grails.test.mixin.web.ControllerUnitTestMixin
 import groovy.json.JsonBuilder
+import groovy.json.JsonSlurper
 import org.codehaus.groovy.grails.web.mapping.LinkGenerator
 
 @TestMixin(ControllerUnitTestMixin) // "as JSON" converter
@@ -360,6 +362,36 @@ class CanvasServiceSpec extends BeanMockingSpecification {
 
 		then:
 		thrown(InvalidStateException)
+	}
+
+	def "updateExisting lets save canvas in invalid state"() {
+		setup:
+		service.signalPathService = Mock(SignalPathService)
+		def cmd = new SaveCanvasCommand(
+			name: "canvas",
+			modules: [
+				[id: 22, params: [], inputs: [], outputs: []],
+			],
+			settings: [
+			    foo: "bar",
+			],
+		)
+
+		when:
+		service.updateExisting(myFirstCanvas, cmd, me)
+
+		then:
+		Canvas result = Canvas.findById(myFirstCanvas.id)
+		result.name == "canvas"
+		Map json = new JsonSlurper().parseText(result.json)
+		json.settings.foo == "bar"
+		json.name == "canvas"
+		json.hasExports == false
+		json.uiChannel.name == "Notifications"
+		json.uiChannel.id == "666"
+		json.modules[0].id == 22
+		1 * service.signalPathService.reconstruct(_, _) >> { throw new ModuleException("mocked", null, null) }
+		thrown ModuleException
 	}
 
 	def "createNew always generates new uiChannels"() {
