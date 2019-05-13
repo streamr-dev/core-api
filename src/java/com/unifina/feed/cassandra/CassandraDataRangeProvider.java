@@ -40,11 +40,11 @@ public class CassandraDataRangeProvider implements DataRangeProvider {
 	}
 
 	private DataRange getDataRangeForStreamPartition(Stream stream, Integer partition, Session session) {
-		ResultSet resultSet = session.execute("SELECT ts FROM stream_data WHERE stream = ? AND partition = ? ORDER BY ts ASC LIMIT 1", stream.getId(), partition);
+		ResultSet resultSet = session.execute("SELECT ts FROM stream_data WHERE id = ? AND partition = ? ORDER BY ts ASC LIMIT 1", stream.getId(), partition);
 		Row firstRow = resultSet.one();
 		if (firstRow != null) {
 			Date firstTimestamp = firstRow.getTimestamp("ts");
-			resultSet = session.execute("SELECT ts FROM stream_data WHERE stream = ? AND partition = ? ORDER BY ts DESC LIMIT 1", stream.getId(), partition);
+			resultSet = session.execute("SELECT ts FROM stream_data WHERE id = ? AND partition = ? ORDER BY ts DESC LIMIT 1", stream.getId(), partition);
 			Row lastRow = resultSet.one();
 			Date lastTimestamp = lastRow.getTimestamp("ts");
 			return new DataRange(firstTimestamp, lastTimestamp);

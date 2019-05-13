@@ -27,7 +27,7 @@ public class CassandraDeletingStreamListener implements AbstractStreamListener {
 	public void beforeDelete(Stream stream) {
 		Session session = getSession();
 		for (int partition=0; partition < stream.getPartitions(); partition++) {
-			session.execute("delete from stream_data where stream = ? and partition = ?", stream.getId(), partition);
+			session.execute("delete from stream_data where id = ? and partition = ?", stream.getId(), partition);
 		}
 	}
 }
