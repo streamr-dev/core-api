@@ -101,15 +101,17 @@ class StreamService {
 		task.save(flush: true, failOnError: true)
 	}
 
-	boolean autodetectFields(Stream stream, boolean flattenHierarchies) {
+	boolean autodetectFields(Stream stream, boolean flattenHierarchies, boolean saveFields) {
 		FieldDetector fieldDetector = instantiateDetector(stream)
 		fieldDetector.setFlattenMap(flattenHierarchies)
 		def fields = fieldDetector?.detectFields(stream)
 		if (fields) {
-			Map config = stream.getStreamConfigAsMap()
-			config.fields = fields
-			stream.config = gson.toJson(config)
-			stream.save(flush: true, failOnError: true)
+			if (saveFields) {
+				Map config = stream.getStreamConfigAsMap()
+				config.fields = fields
+				stream.config = gson.toJson(config)
+				stream.save(flush: true, failOnError: true)
+			}
 			return true
 		} else {
 			return false

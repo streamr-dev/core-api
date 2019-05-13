@@ -44,7 +44,8 @@ class UrlMappings {
 		"/api/v1/streams/$resourceId/permissions"(resources: "permissionApi", excludes: ["create", "edit", "update"]) { resourceClass = Stream }
 		"/api/v1/streams/$resourceId/permissions/me"(controller: "permissionApi", action: "getOwnPermissions") { resourceClass = Stream }
 		"/api/v1/streams/$id/fields"(controller: "streamApi", action: "setFields")
-		"/api/v1/streams/$id/detectFields"(controller: "streamApi", action: "detectFields")
+		"/api/v1/streams/$id/detectFields"(method: "POST", controller: "streamApi", action: "detectFields")
+		"/api/v1/streams/$id/detectFields"(method: "GET", controller: "streamApi", action: "detectFields")
 		"/api/v1/streams/$id/range"(controller: "streamApi", action: "range")
 		"/api/v1/streams/$id/uploadCsvFile"(controller: "streamApi", action: "uploadCsvFile")
 		"/api/v1/streams/$id/confirmCsvFileUpload"(controller: "streamApi", action: "confirmCsvFileUpload")

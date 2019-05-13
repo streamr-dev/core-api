@@ -88,8 +88,14 @@ class StreamApiController {
 
 	@StreamrApi
 	def detectFields(String id) {
+		boolean saveFields = false
+		if ("GET".equals(request.method)) {
+			saveFields = false
+		} else if ("POST".equals(request.method)) {
+			saveFields = true
+		}
 		getAuthorizedStream(id, Operation.READ) { Stream stream ->
-			if (streamService.autodetectFields(stream, params.boolean("flatten", false))) {
+			if (streamService.autodetectFields(stream, params.boolean("flatten", false), saveFields)) {
 				render(stream.toMap() as JSON)
 			} else {
 				throw new ApiException(500, "NO_FIELDS_FOUND", "No fields found for Stream (id=$stream.id)")
