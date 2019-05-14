@@ -12,6 +12,7 @@ import com.unifina.domain.security.Permission
 import com.unifina.domain.security.SecUser
 import com.unifina.feed.NoOpStreamListener
 import com.unifina.service.*
+import grails.converters.JSON
 import grails.test.mixin.Mock
 import grails.test.mixin.TestFor
 
@@ -509,5 +510,61 @@ class StreamApiControllerSpec extends ControllerSpecification {
 		then:
 		1 * controller.streamService.deleteDataRange(streamOne, start, end)
 		response.status == 204
+	}
+
+	void "detectFields GET"() {
+		setup:
+		controller.streamService = Mock(StreamService)
+		streamOne.config = ([
+			fields: [
+				[name: "foo", type: "number"],
+				[name: "bar", type: "boolean"],
+			],
+		] as JSON)
+
+		when:
+		request.method = "GET"
+		params.id = streamOne.id
+		params.flatten = false
+		authenticatedAs(me) { controller.detectFields() }
+
+		then:
+		1 * controller.streamService.autodetectFields(streamOne, false, false) >> true
+		response.status == 200
+		response.json.id == streamOne.id
+		response.json.name == "stream"
+		response.json.description == "description"
+		response.json.config.fields[0].name == "foo"
+		response.json.config.fields[0].type == "number"
+		response.json.config.fields[1].name == "bar"
+		response.json.config.fields[1].type == "boolean"
+	}
+
+	void "detectFields POST"() {
+		setup:
+		controller.streamService = Mock(StreamService)
+		streamOne.config = ([
+			fields: [
+				[name: "foo", type: "number"],
+				[name: "bar", type: "boolean"],
+			],
+		] as JSON)
+
+		when:
+		request.method = "POST"
+		params.id = streamOne.id
+		params.flatten = false
+		authenticatedAs(me) { controller.detectFields() }
+
+		then:
+		1 * controller.streamService.autodetectFields(streamOne, false, true) >> true
+		response.status == 200
+		response.json.id == streamOne.id
+		response.json.name == "stream"
+		response.json.description == "description"
+		response.json.config.fields[0].name == "foo"
+		response.json.config.fields[0].type == "number"
+		response.json.config.fields[1].name == "bar"
+		response.json.config.fields[1].type == "boolean"
 	}
 }

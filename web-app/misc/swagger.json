@@ -1873,6 +1873,84 @@
         }
       }
     },
+    "/streams/{id}/detectFields": {
+      "post": {
+        "summary": "Detect stream's field types.",
+        "description": "Automatically detects fields of given Stream by analyzing recent data. Save fields to stream details.",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "description": "ID of the stream",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "in": "query",
+            "name": "flatten",
+            "description": "Flatten hierarchies.",
+            "required": false,
+            "default": false,
+            "type": "boolean"
+          }
+        ],
+        "tags": [
+          "streams"
+        ],
+        "responses": {
+          "200": {
+            "description": "Success. Contains details of the stream."
+          },
+          "403": {
+            "description": "No permissions to stream"
+          },
+          "404": {
+            "description": "Stream not found"
+          },
+          "500": {
+            "description": "No fields found. If stream doesn't contain any data."
+          }
+        }
+      },
+      "get": {
+        "summary": "Detect stream's field types.",
+        "description": "Automatically detects fields of given Stream by analyzing recent data. Do not save fields to stream details.",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "description": "ID of the stream",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "in": "query",
+            "name": "flatten",
+            "description": "Flatten hierarchies.",
+            "required": false,
+            "default": false,
+            "type": "boolean"
+          }
+        ],
+        "tags": [
+          "streams"
+        ],
+        "responses": {
+          "200": {
+            "description": "Success. Contains details of the stream."
+          },
+          "403": {
+            "description": "No permissions to stream"
+          },
+          "404": {
+            "description": "Stream not found"
+          },
+          "500": {
+            "description": "No fields found. If stream doesn't contain any data."
+          }
+        }
+      }
+    },
     "/streams/{id}/data": {
       "post": {
         "summary": "Add new event to stream",
