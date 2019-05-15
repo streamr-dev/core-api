@@ -238,6 +238,177 @@
           }
       }
     },
+    "/communities/{communityAddress}/secrets": {
+      "get": {
+        "summary": "List all community secrets",
+        "description": "List all community secrets.",
+        "tags": [
+          "communities"
+        ],
+        "parameters": [
+          {
+            "name": "communityAddress",
+            "in": "path",
+            "description": "Ethereum address of the community",
+            "required": true,
+            "type": "string",
+            "default": false
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success"
+          },
+          "400": {
+            "description": "Required parameters missing"
+          }
+        }
+      },
+      "post": {
+        "summary": "Create community secret",
+        "description": "Create community secret",
+        "tags": [
+          "communities"
+        ],
+        "parameters": [
+          {
+            "name": "communityAddress",
+            "in": "path",
+            "description": "Ethereum address of the community",
+            "required": true,
+            "type": "string",
+            "default": false
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "description": "Create community secret details",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/CreateCommunitySecret"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success"
+          },
+          "400": {
+            "description": "Required parameters missing"
+          }
+        }
+      }
+    },
+    "/communities/{communityAddress}/secrets/{communitySecretId}": {
+      "get": {
+        "summary": "Find community secret by id",
+        "description": "Find community secret by id.",
+        "tags": [
+          "communities"
+        ],
+        "parameters": [
+          {
+            "name": "communityAddress",
+            "in": "path",
+            "description": "Ethereum address of the community",
+            "required": true,
+            "type": "string",
+            "default": false
+          },
+          {
+            "name": "communitySecretId",
+            "in": "path",
+            "description": "ID of the community secret",
+            "required": true,
+            "type": "string",
+            "default": false
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success"
+          },
+          "400": {
+            "description": "Required parameters missing"
+          },
+          "404": {
+            "description": "Community secret not found"
+          }
+        }
+      },
+      "put": {
+        "summary": "Update community secret",
+        "description": "Update community secret.",
+        "tags": [
+          "communities"
+        ],
+        "parameters": [
+          {
+            "name": "communityAddress",
+            "in": "path",
+            "description": "Ethereum address of the community",
+            "required": true,
+            "type": "string",
+            "default": false
+          },
+          {
+            "name": "communitySecretId",
+            "in": "path",
+            "description": "ID of the community secret",
+            "required": true,
+            "type": "string",
+            "default": false
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Success"
+          },
+          "400": {
+            "description": "Required parameters missing"
+          },
+          "404": {
+            "description": "Community secret not found"
+          }
+        }
+      },
+      "delete": {
+        "summary": "Delete community secret",
+        "description": "Delete community secret.",
+        "tags": [
+          "communities"
+        ],
+        "parameters": [
+          {
+            "name": "communityAddress",
+            "in": "path",
+            "description": "Ethereum address of the community",
+            "required": true,
+            "type": "string",
+            "default": false
+          },
+          {
+            "name": "communitySecretId",
+            "in": "path",
+            "description": "ID of the community secret",
+            "required": true,
+            "type": "string",
+            "default": false
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Success"
+          },
+          "400": {
+            "description": "Required parameters missing"
+          },
+          "404": {
+            "description": "Community secret not found by id"
+          }
+        }
+      }
+    },
     "/login/challenge/{address}": {
       "post": {
         "summary": "Generate challenge",
@@ -4340,6 +4511,23 @@
             "accepted",
             "rejected"
           ]
+        }
+      }
+    },
+    "CreateCommunitySecret": {
+      "type": "object",
+      "required": [
+        "name",
+        "secret"
+      ],
+      "properties": {
+        "name": {
+          "type": "string",
+          "description": "Name of the community secret"
+        },
+        "secret": {
+          "type": "string",
+          "description": "Community join request secret shared by the community."
         }
       }
     },
