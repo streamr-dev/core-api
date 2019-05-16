@@ -266,21 +266,21 @@ environments {
  * Streamr-web3 Ethereum bridge address
  */
 streamr.ethereum.defaultNetwork = "rinkeby"
-streamr.ethereum.networks = System.getProperty("streamr.ethereum.networks") ? new Gson().fromJson(System.getProperty("streamr.ethereum.networks")) : [
+streamr.ethereum.networks = System.getProperty("streamr.ethereum.networks") ? new Gson().fromJson(System.getProperty("streamr.ethereum.networks"), Map) : [
 	ropsten: "http://10.200.10.1:3000",
 	rinkeby: "http://10.200.10.1:3001"
 ]
-streamr.ethereum.rpcUrls = System.getProperty("streamr.ethereum.rpcUrls") ? new Gson().fromJson(System.getProperty("streamr.ethereum.rpcUrls")) : [
+streamr.ethereum.rpcUrls = System.getProperty("streamr.ethereum.rpcUrls") ? new Gson().fromJson(System.getProperty("streamr.ethereum.rpcUrls"), Map) : [
 	ropsten: "http://localhost:8545",
 	rinkeby: "http://localhost:8546"
 ]
 environments {
 	production {
-		streamr.ethereum.networks = System.getProperty("streamr.ethereum.networks") ? new Gson().fromJson(System.getProperty("streamr.ethereum.networks")) : [
+		streamr.ethereum.networks = System.getProperty("streamr.ethereum.networks") ? new Gson().fromJson(System.getProperty("streamr.ethereum.networks"), Map) : [
 			ropsten: "http://ropsten:3000",
 			rinkeby: "http://rinkeby:3001"
 		]
-		streamr.ethereum.rpcUrls = System.getProperty("streamr.ethereum.rpcUrls") ? new Gson().fromJson(System.getProperty("streamr.ethereum.rpcUrls")) : [
+		streamr.ethereum.rpcUrls = System.getProperty("streamr.ethereum.rpcUrls") ? new Gson().fromJson(System.getProperty("streamr.ethereum.rpcUrls"), Map) : [
 			ropsten: "http://94.130.70.249:8545",
 			rinkeby: "http://94.130.70.249:8546"
 		]
