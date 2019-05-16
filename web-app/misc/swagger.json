@@ -34,6 +34,10 @@
       "description": "Start, stop, and manage Canvases"
     },
     {
+      "name": "communities",
+      "description": "Community products"
+    },
+    {
       "name": "dashboards",
       "description": "Dashboards and their items"
     },
@@ -71,6 +75,169 @@
     }
   ],
   "paths": {
+    "/communities/{communityAddress}/joinRequests": {
+      "get": {
+        "summary": "List all community join requests",
+        "description": "List all community join requests.",
+          "tags": [
+            "communities"
+          ],
+          "parameters": [
+            {
+              "name": "communityAddress",
+              "in": "path",
+              "description": "Ethereum address of the community",
+              "required": true,
+              "type": "string",
+              "default": false
+            },
+            {
+              "name": "state",
+              "in": "query",
+              "enum": [
+                "pending",
+                "accepted",
+                "rejected"
+              ],
+              "description": "Filter listing by state of the join request",
+              "required": false,
+              "type": "string",
+              "default": false
+            }
+          ],
+          "responses": {
+            "200": {
+              "description": "Success"
+            },
+            "400": {
+              "description": "Required parameter missing"
+            }
+          }
+      },
+      "post": {
+        "summary": "Create community join request",
+        "description": "Create community join request from given json body",
+          "tags": [
+            "communities"
+          ],
+          "parameters": [
+            {
+              "name": "communityAddress",
+              "in": "path",
+              "description": "Ethereum address of the community",
+              "required": true,
+              "type": "string",
+              "default": false
+            },
+            {
+              "name": "body",
+              "in": "body",
+              "description": "Community join request details",
+              "required": true,
+              "schema": {
+                "$ref": "#/definitions/CreateCommunityJoinRequest"
+              }
+            }
+          ],
+          "responses": {
+            "200": {
+              "description": "Success"
+            },
+            "400": {
+              "description": "Required parameters missing"
+            },
+            "403": {
+              "description": "Given community secret is incorrect"
+            },
+            "404": {
+              "description": "Member address is not owned by the current user"
+            }
+          }
+      }
+    },
+    "/communities/{communityAddress}/joinRequests/{joinRequestId}": {
+      "get": {
+        "summary": "Find community's join request by id",
+        "description": "Find community's join request by join request id.",
+          "tags": [
+            "communities"
+          ],
+          "parameters": [
+            {
+              "name": "communityAddress",
+              "in": "path",
+              "description": "Ethereum address of the community",
+              "required": true,
+              "type": "string",
+              "default": false
+            },
+            {
+              "name": "joinRequestId",
+              "in": "path",
+              "description": "ID of the join request",
+              "required": true,
+              "type": "string",
+              "default": false
+            }
+          ],
+          "responses": {
+            "200": {
+              "description": "Success"
+            },
+            "400": {
+              "description": "Required parameters missing"
+            },
+            "404": {
+              "description": "Community join request not found by id"
+            }
+          }
+      },
+      "put": {
+        "summary": "Update community join request state",
+        "description": "Update state attribute of the community join request.",
+          "tags": [
+            "communities"
+          ],
+          "parameters": [
+            {
+              "name": "communityAddress",
+              "in": "path",
+              "description": "Ethereum address of the community",
+              "required": true,
+              "type": "string",
+              "default": false
+            },
+            {
+              "name": "joinRequestId",
+              "in": "path",
+              "description": "ID of the join request",
+              "required": true,
+              "type": "string",
+              "default": false
+            },
+            {
+              "name": "body",
+              "in": "body",
+              "description": "Community join request state",
+              "required": true,
+              "schema": {
+                "$ref": "#/definitions/UpdateCommunityJoinRequest"
+              }
+            }
+          ],
+          "responses": {
+            "204": {
+              "description": "Success"
+            },
+            "400": {
+              "description": "Required parameters missing"
+            },
+            "404": {
+              "description": "Community join request not found by id"
+            }
+          }
+      }
+    },
     "/login/challenge/{address}": {
       "post": {
         "summary": "Generate challenge",
@@ -4138,6 +4305,44 @@
     }
   },
   "definitions": {
+    "CreateCommunityJoinRequest": {
+      "type": "object",
+      "required": [
+        "memberAddress"
+      ],
+      "properties": {
+        "memberAddress": {
+          "type": "string",
+          "description": "Name of the community join request"
+        },
+        "secret": {
+          "type": "string",
+          "description": "Community join request secret shared by the community. Secret enabled automatic acceptance of the community join request."
+        },
+        "metadata": {
+          "type": "object",
+          "additionalProperties": true,
+          "description": "Application specific key-value pairs."
+        }
+      }
+    },
+    "UpdateCommunityJoinRequest": {
+      "type": "object",
+      "required": [
+        "state"
+      ],
+      "properties": {
+        "state": {
+          "type": "string",
+          "description": "Community join request state",
+          "enum": [
+            "pending",
+            "accepted",
+            "rejected"
+          ]
+        }
+      }
+    },
     "UpdateStreamKeyRequest": {
       "type": "object",
       "required": [
