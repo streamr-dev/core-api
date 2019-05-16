@@ -48,7 +48,7 @@ public class EthereumModuleOptions implements Serializable {
 		ModuleOption networkOption = ModuleOption.createString("network", network);
 
 		// Add all configured networks
-		Map<String, Object> networks = MapTraversal.getMap(Holders.getConfig(), "streamr.ethereum.networks");
+		Map<String, Object> networks = MapTraversal.getMap(Holders.getConfig(), "streamr.ethereum.rpcUrls");
 		for (String network : networks.keySet()) {
 			networkOption.addPossibleValue(network, network);
 		}
