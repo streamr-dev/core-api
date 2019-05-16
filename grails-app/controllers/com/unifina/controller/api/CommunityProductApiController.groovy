@@ -35,7 +35,10 @@ class CommunityProductApiController {
 		if (value == null) {
 			return false
 		}
-		return true
+		if (value.length() != 64) {
+			return false
+		}
+		return value ==~ /^[a-f0-9]{64}$/
 	}
 
 	// curl -v -X GET -H "Authorization: token tester1-api-key" "http://localhost:8081/streamr-core/api/v1/communities/0x6c90aece04198da2d5ca9b956b8f95af8041de37/joinRequests?state=pending"
@@ -62,7 +65,7 @@ class CommunityProductApiController {
 		render(result?.toMap() as JSON)
 	}
 
-	// curl -v -X GET -H "Authorization: token tester1-api-key" http://localhost:8081/streamr-core/api/v1/communities/0x6c90aece04198da2d5ca9b956b8f95af8041de37/joinRequests/community-join-request-id
+	// curl -v -X GET -H "Authorization: token tester1-api-key" http://localhost:8081/streamr-core/api/v1/communities/0x6c90aece04198da2d5ca9b956b8f95af8041de37/joinRequests/917dc3dd98294e8fa8bcdb162badad0b8e1d591b00484166bb5999baf85e253b
 	@StreamrApi
 	def findCommunityJoinRequest(String communityAddress, String joinRequestId) {
 		if (!isCommunityAddress(communityAddress)) {
@@ -78,7 +81,7 @@ class CommunityProductApiController {
 		render(result.toMap() as JSON)
 	}
 
-	// curl -v -X PUT -H "Authorization: token tester1-api-key" -H "Content-Type: application/json" -d '{"state": "ACCEPTED"}' http://localhost:8081/streamr-core/api/v1/communities/0x6c90aece04198da2d5ca9b956b8f95af8041de37/joinRequests/community-join-request-id
+	// curl -v -X PUT -H "Authorization: token tester1-api-key" -H "Content-Type: application/json" -d '{"state": "ACCEPTED"}' http://localhost:8081/streamr-core/api/v1/communities/0x6c90aece04198da2d5ca9b956b8f95af8041de37/joinRequests/917dc3dd98294e8fa8bcdb162badad0b8e1d591b00484166bb5999baf85e253b
 	@StreamrApi
 	def updateCommunityJoinRequest(String communityAddress, String joinRequestId, UpdateCommunityJoinRequestCommand cmd) {
 		if (!isCommunityAddress(communityAddress)) {

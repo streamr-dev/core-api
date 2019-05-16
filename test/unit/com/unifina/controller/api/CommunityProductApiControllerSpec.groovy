@@ -17,7 +17,7 @@ import spock.lang.Specification
 class CommunityProductApiControllerSpec extends Specification {
 	SecUser me
 	final String communityAddress = "0x6c90aece04198da2d5ca9b956b8f95af8041de37"
-	final String communityJoinRequestId = "commmunity-join-request-id"
+	final String communityJoinRequestId = "917dc3dd98294e8fa8bcdb162badad0b8e1d591b00484166bb5999baf85e253b"
 
     def setup() {
 		me = new SecUser(id: 1, name: "firstname lastname", username: "firstname.lastname@address.com", password: "salasana")
@@ -57,9 +57,18 @@ class CommunityProductApiControllerSpec extends Specification {
 		CommunityProductApiController.isValidID(value) == expected
 		where:
 		value | expected
-		null  | false
-		""    | true
-		"x"   | true
+		null | false
+		"" | false
+		"x" | false
+		"\n" | false
+		"AAAABBBBCCCCFFFFAAAABBBBCCCCFFFFAAAABBBBCCCCFFFFAAAABBBBCCCCFFFF" | false
+		"AAAABBBB5678FFFFAAAA4321CCCCFFFFAAAA7777CCCCFFFFAAAABBBBCCCC1234" | false
+		"4d01adc7e9b84534b3b0a95ca4e3745bd25fb7cdd00e4b6fa2c98d1cafea4742abcabc" | false
+		"4d01adc7e9b84534b3b0a95ca4e3745bd25fb7cdd00e4b6fa2c98d1cafea4742" | true
+		"d1cf6acd44ee4219947c3864bfd14c652a03a225230048008d7d5a887291af7f" | true
+		"917dc3dd98294e8fa8bcdb162badad0b8e1d591b00484166bb5999baf85e253b" | true
+		"46457f8b8824450285698c688e971fcd38524b6e260f411d9e666921513678c2" | true
+		"4612ae7ca67a438684fd7f464b933642cb230b1d5a314d7a96f6c79f9d1cca0b" | true
 	}
 
 	void "findCommunityJoinRequests() test"() {
@@ -226,12 +235,12 @@ class CommunityProductApiControllerSpec extends Specification {
 		when:
 		request.method = "GET"
 		params.communityAddress = communityAddress
-		params.joinRequestId = "not-found"
+		params.joinRequestId = communityJoinRequestId // ID not found in DB
 		withFilters(action: "findCommunityJoinRequest") {
 			controller.findCommunityJoinRequest()
 		}
 		then:
-		1 * controller.communityProductService.findCommunityJoinRequest(communityAddress,"not-found") >> null
+		1 * controller.communityProductService.findCommunityJoinRequest(communityAddress, communityJoinRequestId) >> null
 		def e = thrown(NotFoundException)
 		e.statusCode == 404
 		e.code == "NOT_FOUND"
@@ -323,12 +332,12 @@ class CommunityProductApiControllerSpec extends Specification {
 			state: "ACCEPTED",
 		]
 		params.communityAddress = communityAddress
-		params.joinRequestId = "not-found"
+		params.joinRequestId = communityJoinRequestId // ID not found in DB
 		withFilters(action: "updateCommunityJoinRequest") {
 			controller.updateCommunityJoinRequest()
 		}
 		then:
-		1 * controller.communityProductService.updateCommunityJoinRequest(communityAddress, "not-found", _ as UpdateCommunityJoinRequestCommand) >> null
+		1 * controller.communityProductService.updateCommunityJoinRequest(communityAddress, communityJoinRequestId, _ as UpdateCommunityJoinRequestCommand) >> null
 		def e = thrown(NotFoundException)
 		e.statusCode == 404
 		e.code == "NOT_FOUND"
