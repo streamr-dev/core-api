@@ -31,7 +31,7 @@ class CommunityProductApiController {
 	static boolean isCommunityAddress(String value) {
 		return isEthereumAddress(value)
 	}
-	static boolean isJoinRequestId(String value) {
+	static boolean isValidID(String value) {
 		if (value == null) {
 			return false
 		}
@@ -68,7 +68,7 @@ class CommunityProductApiController {
 		if (!isCommunityAddress(communityAddress)) {
 			throw new BadRequestException("community address is not an ethereum address")
 		}
-		if (!isJoinRequestId(joinRequestId)) {
+		if (!isValidID(joinRequestId)) {
 			throw new BadRequestException("join request id not valid")
 		}
 		CommunityJoinRequest result = communityProductService.findCommunityJoinRequest(communityAddress, joinRequestId)
@@ -84,7 +84,7 @@ class CommunityProductApiController {
 		if (!isCommunityAddress(communityAddress)) {
 			throw new BadRequestException("community address is not an ethereum address")
 		}
-		if (!isJoinRequestId(joinRequestId)) {
+		if (!isValidID(joinRequestId)) {
 			throw new BadRequestException("join request id not valid")
 		}
 		if (cmd.errors.getFieldError("state")) {

@@ -52,9 +52,9 @@ class CommunityProductApiControllerSpec extends Specification {
 		"0x1" | false
 	}
 
-	void "isJoinRequestId"(String value, Object expected) {
+	void "isValidID"(String value, Object expected) {
 		expect:
-		CommunityProductApiController.isJoinRequestId(value) == expected
+		CommunityProductApiController.isValidID(value) == expected
 		where:
 		value | expected
 		null  | false
