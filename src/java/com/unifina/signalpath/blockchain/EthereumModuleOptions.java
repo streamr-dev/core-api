@@ -64,6 +64,8 @@ public class EthereumModuleOptions implements Serializable {
 		}
 	}
 
+	// TODO: remove when old Ethereum modules are removed. Should be unused then.
+	@Deprecated
 	public String getServer() {
 		String url = MapTraversal.getString(Holders.getConfig(), "streamr.ethereum.networks." + network);
 		if (url == null) {
