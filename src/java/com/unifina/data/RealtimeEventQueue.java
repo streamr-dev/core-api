@@ -22,11 +22,9 @@ public class RealtimeEventQueue extends DataSourceEventQueue {
 		super(globals, dataSource, capacity);
 	}
 
-	protected void runEventLoopUntilAborted() {
-		log.info("The realtime event queue is starting!");
-
-		int eventCounter = 0;
-		long elapsedTime = 0;
+	@Override
+	protected void runEventLoopUntilDone() {
+		log.info("runEventLoopUntilDone: starting!");
 
 		while (!isAborted()) {
 			Event event = null;
@@ -43,18 +41,43 @@ public class RealtimeEventQueue extends DataSourceEventQueue {
 
 			long startTime = System.nanoTime();
 			long startTimeInMillis = System.currentTimeMillis();
-			dispatch(event);
+
+			long time = event.getTimestamp().getTime();
+
+			if (firstEvent) {
+				firstEvent = false;
+				initTimeReporting((time - (time % 1000)) - 1000);
+			}
+
+			try {
+				// Never go backwards in time
+				if (globals.time == null || time > globals.time.getTime()) {
+					tickClockIfNecessary(time);
+					globals.time = event.getTimestamp();
+				}
+
+				event.dispatch();
+			} catch (StreamFieldChangedException e) {
+				throw e;
+			} catch (Exception e) {
+				// Catch any Exception to prevent crashing the whole thing
+				log.error("Exception while processing event: "+event.toString(), e);
+			}
+
 			long now = System.nanoTime();
 
 			eventQueueMetrics.countEvent(now - startTime, startTimeInMillis - event.getTimestamp().getTime());
 
-			// Report processing
+			// Log some metrics
+			int eventCounter = 0;
+			long elapsedTime = 0;
+
 			if (LOGGING_INTERVAL > 0) {
 				elapsedTime += now - startTime;
 				eventCounter++;
 
 				if (eventCounter >= LOGGING_INTERVAL) {
-					double perEvent = (elapsedTime / eventCounter) / 1000.0;
+					double perEvent = (elapsedTime / (double) eventCounter) / 1000.0;
 					log.info("Processed " + eventCounter + " events in " + elapsedTime + " nanoseconds. " +
 			 				 "That's " + perEvent + " microseconds per event.");
 					eventCounter = 0;
@@ -64,34 +87,7 @@ public class RealtimeEventQueue extends DataSourceEventQueue {
 
 		}
 
-		log.info("runEventLoopUntilAborted: aborted.");
-	}
-
-	private boolean dispatch(Event event) {
-		long time = event.getTimestamp().getTime();
-
-		if (firstEvent) {
-			firstEvent = false;
-			initTimeReporting((time - (time % 1000)) - 1000);
-		}
-
-		try {
-			// Never go backwards in time
-			if (globals.time == null || time > globals.time.getTime()) {
-				tickClockIfNecessary(time);
-				globals.time = event.getTimestamp();
-			}
-
-			event.dispatch();
-
-			return true;
-		} catch (StreamFieldChangedException e) {
-			throw e;
-		} catch (Exception e) {
-			// Catch any Exception to prevent crashing the whole thing
-			log.error("Exception while processing event: "+event.toString(), e);
-			return true;
-		}
+		log.info("runEventLoopUntilDone: aborted.");
 	}
 
 }

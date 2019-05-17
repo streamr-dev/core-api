@@ -65,7 +65,7 @@ public abstract class DataSourceEventQueue {
 		consumingThread = Thread.currentThread();
 
 		try {
-			runEventLoopUntilAborted();
+			runEventLoopUntilDone();
 		} finally {
 			asyncExecutor.shutdownNow();
 		}
@@ -89,13 +89,8 @@ public abstract class DataSourceEventQueue {
 	/**
 	 * Enqueues an event synchronously. Blocks if the queue is full, until the
 	 * event fits into the queue. Throws if no space becomes available before a timeout.
-	 *
-	 * When queueing events from streams, use this method to avoid exhausting
-	 * memory in case processing is slow.
-	 *
-	 * When queuing internal events, use enqueueAsync(Event) instead.
 	 */
-	protected void enqueueSync(Event event) {
+	private void enqueueSync(Event event) {
 		try {
 			boolean success = queue.offer(event, 30, TimeUnit.SECONDS);
 			if (!success) {
@@ -111,21 +106,28 @@ public abstract class DataSourceEventQueue {
 	 * This is useful for internal event queuing, i.e. cases where
 	 * we want to eventually put something in the event queue even if
 	 * it's congested with incoming data.
-	 *
-	 * Don't call this method from threads that listen to stream data
-	 * to avoid exhausting memory.
 	 */
-	protected void enqueueAsync(Event event) {
+	private void enqueueAsync(Event event) {
 		asyncExecutor.submit(() -> {
 			enqueueSync(event);
 		});
 	}
 
+	/**
+	 * Aborts the queue processing at earliest opportunity, and causes the
+	 * call to runEventLoopUntilDone() to exit.
+	 */
 	public void abort() {
 		abort = true;
 	}
 
-	protected abstract void runEventLoopUntilAborted() throws Exception;
+	/**
+	 * Should run the main event loop. The function only returns when
+	 * there is nothing left to do (processing is aborted or finished).
+	 * This should be called from the Thread that is used for event
+	 * processing.
+	 */
+	protected abstract void runEventLoopUntilDone();
 
 	EventQueueMetrics retrieveMetricsAndReset() {
 		EventQueueMetrics returnMetrics = eventQueueMetrics;

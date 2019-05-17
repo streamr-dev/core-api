@@ -17,7 +17,6 @@ public class HistoricalEventQueue extends DataSourceEventQueue {
 	private long realTimeStart;
 	private long eventCounter = 0;
 	private long timeSpentProcessing = 0;
-	private final int capacity;
 
 	public HistoricalEventQueue(Globals globals, DataSource dataSource) {
 		this(globals, dataSource, DEFAULT_CAPACITY);
@@ -27,7 +26,6 @@ public class HistoricalEventQueue extends DataSourceEventQueue {
 		super(globals, dataSource, capacity);
 		speed = readSpeedConfiguration(globals);
 		simTimeStart = globals.getStartDate().getTime() - (globals.getStartDate().getTime() % 1000);
-		this.capacity = capacity;
 
 		/**
 		 * Queue events at lower and upper bounds of selected playback range to ensure that MasterClock
@@ -42,7 +40,7 @@ public class HistoricalEventQueue extends DataSourceEventQueue {
 	}
 
 	@Override
-	public void runEventLoopUntilAborted() {
+	public void runEventLoopUntilDone() {
 		// Set start time.
 		globals.time = new Date(simTimeStart);
 		initTimeReporting(simTimeStart);
