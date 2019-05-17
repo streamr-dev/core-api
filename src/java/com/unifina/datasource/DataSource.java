@@ -26,7 +26,7 @@ import java.util.function.Consumer;
  * The DataSource is started with DataSource#start(), which starts the event loop
  * and blocks until done.
  */
-public abstract class DataSource implements Consumer<Event>, Closeable {
+public abstract class DataSource implements Consumer<Event> {
 	private static final Logger log = Logger.getLogger(DataSource.class);
 
 	private final Set<SignalPath> signalPaths = new HashSet<>();
@@ -130,19 +130,18 @@ public abstract class DataSource implements Consumer<Event>, Closeable {
 			eventQueue.start();
 		} catch (Exception e) {
 			throw new RuntimeException("Error while processing event queue", e);
+		} finally {
+			try {
+				streamMessageSource.close();
+			} catch (Exception e) {
+				log.error("Exception thrown while stopping streamMessageSource", e);
+			}
 		}
 
 		log.info("DataSource has stopped. " + retrieveMetricsAndReset());
 	}
 
-	@Override
-	public void close() {
-		try {
-			streamMessageSource.close();
-		} catch (Exception e) {
-			log.error("Exception thrown while stopping feed", e);
-		}
-
+	public void abort() {
 		// Final serialization requests
 		for (SignalPath signalPath : getSerializableSignalPaths()) {
 			accept(SerializationRequest.makeFeedEvent(signalPath));

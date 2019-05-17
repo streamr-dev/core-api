@@ -22,12 +22,13 @@ public class RedisMessageSource extends StreamMessageSource {
 
 	private final RedisClient client;
 	private final RedisPubSubConnection<byte[], byte[]> connection;
+	private final RedisURI redisURI;
 
 	private static final Logger log = Logger.getLogger(RedisMessageSource.class);
 
 	public RedisMessageSource(Globals globals, Consumer<StreamMessage> consumer, Collection<StreamPartition> streamPartitions, String host, String password) {
 		super(globals, consumer, streamPartitions);
-		RedisURI redisURI = RedisURI.create("redis://" + host);
+		redisURI = RedisURI.create("redis://" + host);
 		if (password != null) {
 			redisURI.setPassword(password);
 		}
@@ -73,6 +74,7 @@ public class RedisMessageSource extends StreamMessageSource {
 	public void close() {
 		connection.close();
 		client.shutdown();
+		log.info("Closed Redis connection to " + redisURI);
 	}
 
 }

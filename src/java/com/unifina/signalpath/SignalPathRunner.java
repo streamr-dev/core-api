@@ -94,15 +94,11 @@ public class SignalPathRunner extends Thread {
 				it.connectionsReady();
 			}
 
-			addStartListener(new IStartListener() {
-				@Override
-				public void onStart() {
-					setRunning(true);
-				}
-			});
+			addStartListener(() -> setRunning(true));
 
 			if (!signalPaths.isEmpty()) {
-				runSignalPaths();
+				// Start feed, blocks until event loop exists
+				globals.getDataSource().start();
 			}
 		} catch (Throwable e) {
 			thrownOnStartUp = e = GrailsUtil.deepSanitize(e);
@@ -131,23 +127,13 @@ public class SignalPathRunner extends Thread {
 
 	public void abort() {
 		log.info("Aborting...");
-		globals.getDataSource().close();
+		globals.getDataSource().abort();
 	}
 
 	private synchronized void setRunning(boolean running) {
 		this.running = running;
 		log.debug("setRunning (" + runnerId + ": " + running);
 		notify();
-	}
-
-	private void runSignalPaths() {
-		// Start feed, blocks until feed is complete
-		try {
-			globals.getDataSource().start();
-		} finally {
-			// Stop the feed, cleanup
-			globals.getDataSource().close();
-		}
 	}
 
 	/**
