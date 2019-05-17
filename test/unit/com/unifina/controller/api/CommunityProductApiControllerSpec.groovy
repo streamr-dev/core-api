@@ -17,7 +17,7 @@ import spock.lang.Specification
 class CommunityProductApiControllerSpec extends Specification {
 	SecUser me
 	final String communityAddress = "0x6c90aece04198da2d5ca9b956b8f95af8041de37"
-	final String communityJoinRequestId = "917dc3dd98294e8fa8bcdb162badad0b8e1d591b00484166bb5999baf85e253b"
+	final String validID = "L-TvrBkyQTS_JK1ABHFEZAaZ3FHq7-TPqMXe9JNz1x6g"
 
     def setup() {
 		me = new SecUser(id: 1, name: "firstname lastname", username: "firstname.lastname@address.com", password: "salasana")
@@ -61,14 +61,12 @@ class CommunityProductApiControllerSpec extends Specification {
 		"" | false
 		"x" | false
 		"\n" | false
-		"AAAABBBBCCCCFFFFAAAABBBBCCCCFFFFAAAABBBBCCCCFFFFAAAABBBBCCCCFFFF" | false
-		"AAAABBBB5678FFFFAAAA4321CCCCFFFFAAAA7777CCCCFFFFAAAABBBBCCCC1234" | false
-		"4d01adc7e9b84534b3b0a95ca4e3745bd25fb7cdd00e4b6fa2c98d1cafea4742abcabc" | false
-		"4d01adc7e9b84534b3b0a95ca4e3745bd25fb7cdd00e4b6fa2c98d1cafea4742" | true
-		"d1cf6acd44ee4219947c3864bfd14c652a03a225230048008d7d5a887291af7f" | true
-		"917dc3dd98294e8fa8bcdb162badad0b8e1d591b00484166bb5999baf85e253b" | true
-		"46457f8b8824450285698c688e971fcd38524b6e260f411d9e666921513678c2" | true
-		"4612ae7ca67a438684fd7f464b933642cb230b1d5a314d7a96f6c79f9d1cca0b" | true
+		"L-TvrBkyQTS_JK1ABHFEZAaZ3FHq7-TPqMXe9JNz1x6gg" | false
+		"L-TvrBkyQTS_JK1ABHFEZAaZ3FHq7-TPqMXe9JNz1x6g" | true
+		"-P88Rnn-SryR9hFTThLn4g_RVMUitQQOedsOiFpsJgMw" | true
+		"24kQ842bRhmFEJVuiP6hhQfqQTOlI8ShCJXkpNoW51VQ" | true
+		"pLHxl9WETeab-T-znW-Sbw-tEtvL57RC6th61_bMiAMQ" | true
+		"491k14P3RwCQHl2u6QyTNwvD7NucjwQJqi_V37dDS_sw" | true
 	}
 
 	void "findCommunityJoinRequests() test"() {
@@ -78,7 +76,7 @@ class CommunityProductApiControllerSpec extends Specification {
 			memberAddress: "0x0000000000000000000000000000000000000001",
 			communityAddress: communityAddress,
 		)
-		r.id = communityJoinRequestId
+		r.id = validID
 		r.save(failOnError: true, validate: true)
 		when:
 		request.method = "GET"
@@ -89,7 +87,7 @@ class CommunityProductApiControllerSpec extends Specification {
 		}
 		then:
 		1 * controller.communityProductService.findCommunityJoinRequests(communityAddress, null) >> [r ]
-		response.json[0].id == communityJoinRequestId
+		response.json[0].id == validID
 		response.json[0].memberAddress == "0x0000000000000000000000000000000000000001"
 		response.json[0].communityAddress == communityAddress
 		response.json[0].state == "PENDING"
@@ -119,7 +117,7 @@ class CommunityProductApiControllerSpec extends Specification {
 			user: me,
 			state: CommunityJoinRequest.State.ACCEPTED,
 		)
-		r.id = communityJoinRequestId
+		r.id = validID
 		r.save(failOnError: true, validate: true)
 		when:
 		request.method = "POST"
@@ -137,7 +135,7 @@ class CommunityProductApiControllerSpec extends Specification {
 		}
 		then:
 		1 * controller.communityProductService.createCommunityJoinRequest(communityAddress, _ as CommunityJoinRequestCommand, me) >> r
-		response.json.id == communityJoinRequestId
+		response.json.id == validID
 		response.json.memberAddress == "0xCCCC000000000000000000000000AAAA0000FFFF"
 		response.json.communityAddress == communityAddress
 		response.json.state == "ACCEPTED"
@@ -183,20 +181,20 @@ class CommunityProductApiControllerSpec extends Specification {
 			user: me,
 			state: CommunityJoinRequest.State.ACCEPTED,
 		)
-		r.id = communityJoinRequestId
+		r.id = validID
 		r.save(failOnError: true, validate: true)
 		when:
 		request.method = "GET"
 		params.communityAddress = communityAddress
-		params.joinRequestId = communityJoinRequestId
+		params.joinRequestId = validID
 		withFilters(action: "findCommunityJoinRequest") {
 			controller.findCommunityJoinRequest()
 		}
 		then:
-		1 * controller.communityProductService.findCommunityJoinRequest(communityAddress, communityJoinRequestId) >> r
+		1 * controller.communityProductService.findCommunityJoinRequest(communityAddress, validID) >> r
 		response.json.memberAddress == "0xCCCC000000000000000000000000AAAA0000FFFF"
 		response.json.communityAddress == communityAddress
-		response.json.id == communityJoinRequestId
+		response.json.id == validID
 		response.json.state == "ACCEPTED"
 		response.status == 200
 	}
@@ -205,7 +203,7 @@ class CommunityProductApiControllerSpec extends Specification {
 		when:
 		request.method = "GET"
 		params.communityAddress = "0x123"
-		params.joinRequestId = communityJoinRequestId
+		params.joinRequestId = validID
 		withFilters(action: "findCommunityJoinRequest") {
 			controller.findCommunityJoinRequest()
 		}
@@ -235,12 +233,12 @@ class CommunityProductApiControllerSpec extends Specification {
 		when:
 		request.method = "GET"
 		params.communityAddress = communityAddress
-		params.joinRequestId = communityJoinRequestId // ID not found in DB
+		params.joinRequestId = validID // ID not found in DB
 		withFilters(action: "findCommunityJoinRequest") {
 			controller.findCommunityJoinRequest()
 		}
 		then:
-		1 * controller.communityProductService.findCommunityJoinRequest(communityAddress, communityJoinRequestId) >> null
+		1 * controller.communityProductService.findCommunityJoinRequest(communityAddress, validID) >> null
 		def e = thrown(NotFoundException)
 		e.statusCode == 404
 		e.code == "NOT_FOUND"
@@ -254,7 +252,7 @@ class CommunityProductApiControllerSpec extends Specification {
 			user: me,
 			state: CommunityJoinRequest.State.PENDING,
 		)
-		r.id = communityJoinRequestId
+		r.id = validID
 		r.save(failOnError: true, validate: true)
 		when:
 		request.method = "PUT"
@@ -262,12 +260,12 @@ class CommunityProductApiControllerSpec extends Specification {
 			state: "ACCEPTED",
 		]
 		params.communityAddress = communityAddress
-		params.joinRequestId = communityJoinRequestId
+		params.joinRequestId = validID
 		withFilters(action: "updateCommunityJoinRequest") {
 			controller.updateCommunityJoinRequest()
 		}
 		then:
-		1 * controller.communityProductService.updateCommunityJoinRequest(communityAddress, communityJoinRequestId, _ as UpdateCommunityJoinRequestCommand) >> r
+		1 * controller.communityProductService.updateCommunityJoinRequest(communityAddress, validID, _ as UpdateCommunityJoinRequestCommand) >> r
 		response.status == 204
 	}
 
@@ -278,7 +276,7 @@ class CommunityProductApiControllerSpec extends Specification {
 			state: "ACCEPTED",
 		]
 		params.communityAddress = "0x123"
-		params.joinRequestId = communityJoinRequestId
+		params.joinRequestId = validID
 		withFilters(action: "updateCommunityJoinRequest") {
 			controller.updateCommunityJoinRequest()
 		}
@@ -296,7 +294,7 @@ class CommunityProductApiControllerSpec extends Specification {
 			state: "ACCEPTXXX",
 		]
 		params.communityAddress = communityAddress
-		params.joinRequestId = communityJoinRequestId
+		params.joinRequestId = validID
 		withFilters(action: "updateCommunityJoinRequest") {
 			controller.updateCommunityJoinRequest()
 		}
@@ -332,12 +330,12 @@ class CommunityProductApiControllerSpec extends Specification {
 			state: "ACCEPTED",
 		]
 		params.communityAddress = communityAddress
-		params.joinRequestId = communityJoinRequestId // ID not found in DB
+		params.joinRequestId = validID // ID not found in DB
 		withFilters(action: "updateCommunityJoinRequest") {
 			controller.updateCommunityJoinRequest()
 		}
 		then:
-		1 * controller.communityProductService.updateCommunityJoinRequest(communityAddress, communityJoinRequestId, _ as UpdateCommunityJoinRequestCommand) >> null
+		1 * controller.communityProductService.updateCommunityJoinRequest(communityAddress, validID, _ as UpdateCommunityJoinRequestCommand) >> null
 		def e = thrown(NotFoundException)
 		e.statusCode == 404
 		e.code == "NOT_FOUND"
