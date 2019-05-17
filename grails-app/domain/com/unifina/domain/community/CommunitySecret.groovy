@@ -1,7 +1,7 @@
 package com.unifina.domain.community
 
 import com.unifina.domain.marketplace.Product
-import com.unifina.utils.HexIdGenerator
+import com.unifina.utils.IdGenerator
 import grails.compiler.GrailsCompileStatic
 import groovy.transform.ToString
 
@@ -19,7 +19,7 @@ class CommunitySecret {
 		communityAddress(validator: Product.isEthereumAddress)
     }
 	static mapping = {
-		id generator: HexIdGenerator.name
+		id generator: IdGenerator.name
 	}
 
 	@GrailsCompileStatic
