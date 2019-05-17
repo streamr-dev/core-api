@@ -1,20 +1,14 @@
 package com.unifina.data;
 
-import com.streamr.client.protocol.message_layer.ITimestamped;
-
 import java.util.Date;
 import java.util.function.Consumer;
 
-public class Event<ContentClass extends ITimestamped> implements Comparable<Event<ContentClass>> {
+public class Event<ContentClass> implements Comparable<Event<ContentClass>> {
 
 	private final Date timestamp;
 	private final long sequenceNumber; // secondary ordering variable
 	private final ContentClass content;
 	private final Consumer<ContentClass> consumer;
-
-	public Event(ContentClass content, Consumer<ContentClass> consumer) {
-		this(content, content.getTimestampAsDate(), 0L, consumer);
-	}
 
 	public Event(ContentClass content, Date timestamp, Consumer<ContentClass> consumer) {
 		this(content, timestamp, 0L, consumer);

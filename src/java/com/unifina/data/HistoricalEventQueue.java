@@ -2,120 +2,107 @@ package com.unifina.data;
 
 import com.unifina.datasource.DataSource;
 import com.unifina.datasource.DataSourceEventQueue;
-import com.unifina.utils.DateRange;
 import com.unifina.utils.Globals;
 import org.apache.log4j.Logger;
 
 import java.util.Date;
 import java.util.Map;
-import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.PriorityBlockingQueue;
 import java.util.concurrent.TimeUnit;
 
 public class HistoricalEventQueue extends DataSourceEventQueue {
 	private static final Logger log = Logger.getLogger(HistoricalEventQueue.class);
 
 	private final int speed;
+	private final long simTimeStart;
+	private long realTimeStart;
+	private long eventCounter = 0;
+	private long timeSpentProcessing = 0;
+	private final int capacity;
 
 	public HistoricalEventQueue(Globals globals, DataSource dataSource) {
-		super(globals, dataSource);
-		speed = readSpeedConfiguration(globals);
+		this(globals, dataSource, DEFAULT_CAPACITY);
 	}
 
-	@Override
-	protected BlockingQueue<Event> createQueue(int capacity) {
-		BlockingQueue<Event> queue = new PriorityBlockingQueue<>(capacity);
+	public HistoricalEventQueue(Globals globals, DataSource dataSource, int capacity) {
+		super(globals, dataSource, capacity);
+		speed = readSpeedConfiguration(globals);
+		simTimeStart = globals.getStartDate().getTime() - (globals.getStartDate().getTime() % 1000);
+		this.capacity = capacity;
 
 		/**
-		 * Queue events at lower and upper bounds of selected playback range to ensure that MasterClock ticks through
-		 * range even in the absence of feed data.
+		 * Queue events at lower and upper bounds of selected playback range to ensure that MasterClock
+		 * ticks through the range even in the absence of feed data.
 		 */
 		queue.add(PlaybackMessage.newStartEvent(globals.getStartDate()));
 		queue.add(PlaybackMessage.newEndEvent(globals.getEndDate()));
+	}
 
-		return queue;
+	private boolean shouldKeepProcessing() {
+		return !isAborted() && (!queue.isEmpty() || !asyncExecutor.getQueue().isEmpty());
 	}
 
 	@Override
-	public void runEventLoopUntilAborted() throws Exception {
-		long feedStartTime = System.currentTimeMillis();
-		long eventCounter = 0;
-		long timeSpentProcessing = 0;
+	public void runEventLoopUntilAborted() {
+		// Set start time.
+		globals.time = new Date(simTimeStart);
+		initTimeReporting(simTimeStart);
+		realTimeStart = System.currentTimeMillis();
 
-		// Set start time
-		globals.time = peek().getTimestamp();
+		while (shouldKeepProcessing()) {
+			Event event = null;
+			try {
+				event = queue.poll(1, TimeUnit.SECONDS);
+			} catch (InterruptedException e) {
+				log.error(e);
+			}
 
-		long time = globals.time.getTime();
+			if (event == null) {
+				// Timed out while waiting for new events. Just keep trying until aborted.
+				continue;
+			}
 
-		DateRange range = null;
-		if (globals.getSignalPathContext().containsKey("timeOfDayFilter")) {
-			String start = ((Map)globals.getSignalPathContext().get("timeOfDayFilter")).get("timeOfDayStart").toString();
-			String end = ((Map)globals.getSignalPathContext().get("timeOfDayFilter")).get("timeOfDayEnd").toString();
-			range = new DateRange(start, end);
-			range.setBaseDate(globals.time);
-		}
-		long todBegin = (range != null ? range.getBeginTime() : 0);
-		long todEnd = (range != null ? range.getEndTime() : 0);
-
-		initTimeReporting(time - (time%1000));
-
-		long simTimeStart = (range==null ? time : Math.max(time,range.getBeginTime()));
-		long realTimeStart = System.currentTimeMillis();
-
-		while (!isEmpty() && !isAborted()) {
-			// Insert time events to the queue if necessary to "tick" the clock every second.
+			// Create time events as needed to fill in the "gaps" between actual events.
 			// This is needed if there are no actual stream events covering every second.
-			if (peek().getTimestamp().getTime() > lastReportedClockTick + CLOCK_TICK_INTERVAL_MILLIS) {
-				// Insert a time event to the front of the queue, before the next real event
+			while (event.getTimestamp().getTime() > lastReportedClockTick + CLOCK_TICK_INTERVAL_MILLIS && !isAborted()) {
+				// Handle time events until the next real event in the queue happens on a reported second
 				Date next = new Date(lastReportedClockTick + CLOCK_TICK_INTERVAL_MILLIS);
-				final Event<ClockTick> event = new Event<>(new ClockTick(next), next, 0L, null);
-				enqueue(event);
+				final Event<ClockTick> clockTickEvent = new Event<>(new ClockTick(next), next, 0L, null);
+				waitIfNecessary(clockTickEvent);
+				handleEvent(clockTickEvent);
 			}
 
-			// Queue will never be non-empty
-			Event event = poll(1, TimeUnit.SECONDS);
-			time = event.getTimestamp().getTime();
-
-			// Check if a delay is needed
-			if (speed != 0 && (range == null || time > todBegin && time < todEnd)) {
-				long realTimeElapsed = System.currentTimeMillis() - realTimeStart;
-				long simTimeMax = realTimeElapsed*speed + simTimeStart;
-				long diff = time - simTimeMax;
-				if (diff > 0) {
-					try {
-						Thread.sleep((int)(diff/speed));
-					} catch (InterruptedException e) {
-						if (isAborted()) {
-							return;
-						}
-					}
-				}
-			}
-
-			long startTime = System.nanoTime();
-			boolean processed = dispatch(event);
-			eventQueueMetrics.countEvent(System.nanoTime() - startTime, 0);
-			timeSpentProcessing += System.nanoTime() - startTime;
-			eventCounter++;
-
-			// If not processed, an event which precedes this event must have been added to the queue. Add the event back to queue.
-			if (!processed) {
-				enqueue(event);
-			}
+			waitIfNecessary(event);
+			handleEvent(event);
 		}
 
 		// Report statistics
-		long feedElapsedTime = System.currentTimeMillis() - feedStartTime;
+		long feedElapsedTime = System.currentTimeMillis() - realTimeStart;
 		log.debug("PERFORMANCE: Processed "+ eventCounter +" events.");
-		if (eventCounter >0) {
+		if (eventCounter > 0) {
 			log.debug("PERFORMANCE: Processing took "+((timeSpentProcessing/ eventCounter)/1000.0)+" microseconds per event.");
 			log.debug("PERFORMANCE: Entire processing took "+feedElapsedTime+" milliseconds or "+((feedElapsedTime*1000)/ eventCounter)+" microseconds per event.");
 		}
 	}
 
-	@Override
-	public boolean dispatch(Event event) {
-		long time = event.getTimestamp().getTime();
+	private void waitIfNecessary(Event event) {
+		final long time = event.getTimestamp().getTime();
+
+		// Check if a delay is needed
+		if (speed != 0) {
+			long realTimeElapsed = System.currentTimeMillis() - realTimeStart;
+			long simTimeMax = realTimeElapsed*speed + simTimeStart;
+			long diff = time - simTimeMax;
+			if (diff > 0) {
+				try {
+					Thread.sleep((int)(diff/speed));
+				} catch (InterruptedException e) { /* ignore */ }
+			}
+		}
+	}
+
+	private void handleEvent(Event event) {
+		final long time = event.getTimestamp().getTime();
+		final long startTime = System.nanoTime();
 
 		// Events across different streams/producers aren't necessarily ordered in time.
 		// Never report out-of-order time to modules to prevent weird effects.
@@ -123,22 +110,21 @@ public class HistoricalEventQueue extends DataSourceEventQueue {
 		if (globals.time==null || time > globals.time.getTime()) {
 			tickClockIfNecessary(time);
 
-			// TimeListeners can post events into the queue, make sure that this event is still the most recent one
-			if (!isEmpty() && event.compareTo(peek()) >= 0) {
-				return false;
-			}
-
 			// Update global time
 			globals.time = event.getTimestamp();
 		}
 
 		// Handle event
 		event.dispatch();
-		return true;
+
+		eventQueueMetrics.countEvent(System.nanoTime() - startTime, 0);
+		timeSpentProcessing += System.nanoTime() - startTime;
+		eventCounter++;
 	}
 
 	private static int readSpeedConfiguration(Globals globals) {
 		Map ctx = globals.getSignalPathContext();
 		return ctx.containsKey("speed") ? Integer.parseInt(ctx.get("speed").toString()) : 0;
 	}
+
 }

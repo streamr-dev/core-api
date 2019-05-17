@@ -12,30 +12,35 @@ import org.joda.time.DateTimeZone;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-import java.util.Queue;
-import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.TimeUnit;
+import java.util.concurrent.*;
 
 public abstract class DataSourceEventQueue {
 	private static final Logger log = Logger.getLogger(DataSourceEventQueue.class);
 
-	private static final int QUEUE_HARD_LIMIT = 10000;
+	protected static final int DEFAULT_CAPACITY = 10000;
 	protected static final int CLOCK_TICK_INTERVAL_MILLIS = 1000; // tick every second
 
 	private final MasterClock masterClock;
 	private final List<IDayListener> dayListeners = new ArrayList<>();
-	private BlockingQueue<Event> queue;
+	protected BlockingQueue<Event> queue;
 	protected final Globals globals;
 	private boolean abort = false;
 	protected long lastReportedClockTick = 0;
 	private DateTime nextDay;
+	protected Thread consumingThread;
+
+	protected ThreadPoolExecutor asyncExecutor;
 
 	protected EventQueueMetrics eventQueueMetrics = new EventQueueMetrics();
 
 	public DataSourceEventQueue(Globals globals, DataSource dataSource) {
+		this(globals, dataSource, DEFAULT_CAPACITY);
+	}
+
+	public DataSourceEventQueue(Globals globals, DataSource dataSource, int capacity) {
 		this.globals = globals;
 		masterClock = new MasterClock(globals, dataSource);
-		queue = createQueue(QUEUE_HARD_LIMIT);
+		queue = new ArrayBlockingQueue<>(capacity);
 	}
 
 	public void addTimeListener(ITimeListener timeListener) {
@@ -53,35 +58,74 @@ public abstract class DataSourceEventQueue {
 	 */
 	public void start() throws Exception {
 		abort = false;
-		runEventLoopUntilAborted();
+		asyncExecutor = new ThreadPoolExecutor(1, 1,
+			0L, TimeUnit.MILLISECONDS,
+			new LinkedBlockingQueue<>());
+
+		consumingThread = Thread.currentThread();
+
+		try {
+			runEventLoopUntilAborted();
+		} finally {
+			asyncExecutor.shutdownNow();
+		}
 	}
 
+	/**
+	 * Enqueues the event into this event queue.
+	 *
+	 * If the method is called from the same Thread which is consuming
+	 * messages from the queue, the event will be async-queued as a failsafe
+	 * to avoid deadlocking the thread in case the queue is full.
+	 */
 	public void enqueue(Event event) {
+		if (Thread.currentThread() == consumingThread) {
+			enqueueAsync(event);
+		} else {
+			enqueueSync(event);
+		}
+	}
+
+	/**
+	 * Enqueues an event synchronously. Blocks if the queue is full, until the
+	 * event fits into the queue. Throws if no space becomes available before a timeout.
+	 *
+	 * When queueing events from streams, use this method to avoid exhausting
+	 * memory in case processing is slow.
+	 *
+	 * When queuing internal events, use enqueueAsync(Event) instead.
+	 */
+	protected void enqueueSync(Event event) {
 		try {
 			boolean success = queue.offer(event, 30, TimeUnit.SECONDS);
 			if (!success) {
-				log.error("enqueue: Timed out while trying to enqueue event " + event);
+				throw new RuntimeException("Timed out while trying to enqueue event " + event);
 			}
 		} catch (InterruptedException e) {
 			log.error(e);
 		}
 	}
 
+	/**
+	 * Non-blocking method to asynchronously queue events.
+	 * This is useful for internal event queuing, i.e. cases where
+	 * we want to eventually put something in the event queue even if
+	 * it's congested with incoming data.
+	 *
+	 * Don't call this method from threads that listen to stream data
+	 * to avoid exhausting memory.
+	 */
+	protected void enqueueAsync(Event event) {
+		asyncExecutor.submit(() -> {
+			enqueueSync(event);
+		});
+	}
+
 	public void abort() {
 		abort = true;
 	}
 
-	/**
-	 * Should return a concurrent blocking queue with given max capacity.
-	 */
-	protected abstract BlockingQueue<Event> createQueue(int capacity);
-
 	protected abstract void runEventLoopUntilAborted() throws Exception;
-
-	/**
-	 * @return True if the event was dispatched, false if it was not (then it should be returned to the queue).
-	 */
-	public abstract boolean dispatch(Event event);
 
 	EventQueueMetrics retrieveMetricsAndReset() {
 		EventQueueMetrics returnMetrics = eventQueueMetrics;
@@ -124,20 +168,16 @@ public abstract class DataSourceEventQueue {
 		}
 	}
 
-	protected boolean isEmpty() {
-		return queue.isEmpty();
-	}
-
 	protected BlockingQueue<Event> getQueue() {
 		return queue;
 	}
 
-	protected Event peek() {
-		return queue.peek();
+	public boolean isFull() {
+		return queue.remainingCapacity() == 0;
 	}
 
-	protected Event poll(long timeout, TimeUnit timeUnit) throws InterruptedException {
-		return queue.poll(timeout, timeUnit);
+	public int remainingCapacity() {
+		return queue.remainingCapacity();
 	}
 
 }

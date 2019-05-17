@@ -6,8 +6,6 @@ import com.unifina.exceptions.StreamFieldChangedException;
 import com.unifina.utils.Globals;
 import org.apache.log4j.Logger;
 
-import java.util.concurrent.ArrayBlockingQueue;
-import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.TimeUnit;
 
 public class RealtimeEventQueue extends DataSourceEventQueue {
@@ -17,12 +15,11 @@ public class RealtimeEventQueue extends DataSourceEventQueue {
 	private boolean firstEvent = true;
 
 	public RealtimeEventQueue(Globals globals, DataSource dataSource) {
-		super(globals, dataSource);
+		this(globals, dataSource, DEFAULT_CAPACITY);
 	}
 
-	@Override
-	protected BlockingQueue<Event> createQueue(int capacity) {
-		return new ArrayBlockingQueue<>(capacity);
+	public RealtimeEventQueue(Globals globals, DataSource dataSource, int capacity) {
+		super(globals, dataSource, capacity);
 	}
 
 	protected void runEventLoopUntilAborted() {
@@ -34,7 +31,7 @@ public class RealtimeEventQueue extends DataSourceEventQueue {
 		while (!isAborted()) {
 			Event event = null;
 			try {
-				event = poll(1, TimeUnit.SECONDS);
+				event = queue.poll(1, TimeUnit.SECONDS);
 			} catch (InterruptedException e) {
 				log.error(e);
 			}
@@ -70,8 +67,7 @@ public class RealtimeEventQueue extends DataSourceEventQueue {
 		log.info("runEventLoopUntilAborted: aborted.");
 	}
 
-	@Override
-	public boolean dispatch(Event event) {
+	private boolean dispatch(Event event) {
 		long time = event.getTimestamp().getTime();
 
 		if (firstEvent) {

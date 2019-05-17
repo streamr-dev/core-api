@@ -1,36 +1,27 @@
 package com.unifina.data;
 
-import com.streamr.client.protocol.message_layer.ITimestamped;
-
 import java.util.Date;
 
-class PlaybackMessage implements ITimestamped {
-	private final String code;
-	private final Date timestamp;
+class PlaybackMessage {
+	public enum PlaybackEvent {
+		START, END
+	}
+	private final PlaybackEvent event;
 
 	static Event<PlaybackMessage> newStartEvent(Date timestamp) {
-		return new Event<>(new PlaybackMessage("start", timestamp), timestamp, 0L, null);
+		return new Event<>(new PlaybackMessage(PlaybackEvent.START), timestamp, 0L, null);
 	}
 
 	static Event<PlaybackMessage> newEndEvent(Date timestamp) {
-		return new Event<>(new PlaybackMessage("end", timestamp), timestamp, 0L, null);
+		return new Event<>(new PlaybackMessage(PlaybackEvent.END), timestamp, 0L, null);
 	}
 
-	private PlaybackMessage(String code, Date timestamp) {
-		this.code = code;
-		this.timestamp = timestamp;
-	}
-
-	@Override
-	public Date getTimestampAsDate() {
-		return timestamp;
+	private PlaybackMessage(PlaybackEvent event) {
+		this.event = event;
 	}
 
 	@Override
 	public String toString() {
-		return "PlaybackMessage{" +
-			"code='" + code + '\'' +
-			", timestamp=" + timestamp +
-			'}';
+		return "PlaybackMessage{event=" + event + "}";
 	}
 }

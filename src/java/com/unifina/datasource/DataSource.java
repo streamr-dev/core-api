@@ -43,7 +43,10 @@ public abstract class DataSource implements Consumer<Event>, Closeable {
 	}
 
 	/**
-	 * Consumed events are added to the event queue.
+	 * Consumed events are added to the event queue. Blocks until there is space in the queue.
+	 * This is intended to be called from Threads producing data from streams.
+	 *
+	 * For non-blocking (and less safe) enqueuing of messages, see DataSourceEventQueue#enqueueAsync(Event).
 	 */
 	@Override
 	public void accept(Event event) {
