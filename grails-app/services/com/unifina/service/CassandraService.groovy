@@ -1,20 +1,17 @@
 package com.unifina.service
 
-import com.datastax.driver.core.AuthProvider
-import com.datastax.driver.core.Authenticator
+
 import com.datastax.driver.core.Cluster
-import com.datastax.driver.core.PlainTextAuthProvider
 import com.datastax.driver.core.ResultSet
 import com.datastax.driver.core.Row
 import com.datastax.driver.core.Session
-import com.datastax.driver.core.exceptions.AuthenticationException
+import com.streamr.client.protocol.message_layer.StreamMessage
 import com.unifina.domain.data.Stream
 import com.unifina.feed.DataRange
 import com.unifina.feed.util.StreamMessageComparator
 import groovy.transform.CompileStatic
 import org.codehaus.groovy.grails.commons.GrailsApplication
 import org.springframework.beans.factory.DisposableBean
-import com.streamr.client.protocol.message_layer.StreamMessage
 
 import javax.annotation.PostConstruct
 import java.nio.ByteBuffer
@@ -104,7 +101,9 @@ class CassandraService implements DisposableBean {
 		final List<StreamMessage> messages = new ArrayList<>()
 		for (int i = 0; i < stream.getPartitions(); i++) {
 			final StreamMessage msg = getExtremeStreamMessage(stream, i, latest)
-			messages.add(msg)
+			if (msg != null) {
+				messages.add(msg)
+			}
 		}
 		if (messages.size() < 1) {
 			return null

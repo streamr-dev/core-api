@@ -13,6 +13,7 @@ import com.unifina.service.ModuleService
 import com.unifina.service.PermissionService
 import com.unifina.signalpath.AbstractSignalPathModule
 import com.unifina.signalpath.ModuleException
+import com.unifina.signalpath.ModuleExceptionMessage
 import com.unifina.utils.Globals
 import grails.compiler.GrailsCompileStatic
 import grails.converters.JSON
@@ -57,18 +58,13 @@ class ModuleApiController {
 			Map iMap = instantiateAndGetConfig(id, moduleConfig, user)
 			render iMap as JSON
 		} catch (Exception e) {
-			def moduleExceptions = []
+			List<ModuleExceptionMessage> moduleExceptions = []
 			def me = e
 
 			// Find a possible ModuleException in the cause hierarchy
 			while (me != null) {
 				if (me instanceof ModuleException) {
-					moduleExceptions = ((ModuleException) me).getModuleExceptions().collect {
-						[
-							hash: it.hash,
-							payload:it.msg
-						]
-					}
+					moduleExceptions = ((ModuleException) me).getModuleExceptions()
 					break
 				} else {
 					me = me.cause
@@ -80,7 +76,7 @@ class ModuleApiController {
 			Map r = [
 				error: true,
 				message: e.message,
-				moduleErrors: moduleExceptions
+				moduleErrors: moduleExceptions*.toMap()
 			]
 			render r as JSON
 		}

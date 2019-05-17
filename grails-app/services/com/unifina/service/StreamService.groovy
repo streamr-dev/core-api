@@ -88,7 +88,7 @@ class StreamService {
 		task.save(flush: true, failOnError: true)
 	}
 
-	boolean autodetectFields(Stream stream, boolean flattenHierarchies) {
+	boolean autodetectFields(Stream stream, boolean flattenHierarchies, boolean saveFields) {
 		StreamMessage latest = cassandraService.getLatestFromAllPartitions(stream)
 
 		if (!latest) {
@@ -98,7 +98,11 @@ class StreamService {
 			Map config = stream.getStreamConfigAsMap()
 			config.fields = fields*.toMap()
 			stream.config = gson.toJson(config)
-			stream.save(flush: true, failOnError: true)
+			if (saveFields) {
+				stream.save(flush: true, failOnError: true)
+			} else {
+				stream.discard()
+			}
 			return true
 		}
 	}

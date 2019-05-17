@@ -1827,7 +1827,7 @@
         }
       }
     },
-    "/api/v1/streams/$streamId/keys/$keyId": {
+    "/streams/$streamId/keys/$keyId": {
       "put": {
         "summary": "Update Stream's Key's name and permission",
         "description": "Update Stream's Key's name and permission.",
@@ -1869,6 +1869,84 @@
           },
           "404": {
             "description": "Not Found"
+          }
+        }
+      }
+    },
+    "/streams/{id}/detectFields": {
+      "post": {
+        "summary": "Detect stream's field types.",
+        "description": "Automatically detects fields of given Stream by analyzing recent data. Save fields to stream details.",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "description": "ID of the stream",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "in": "query",
+            "name": "flatten",
+            "description": "Flatten hierarchies.",
+            "required": false,
+            "default": false,
+            "type": "boolean"
+          }
+        ],
+        "tags": [
+          "streams"
+        ],
+        "responses": {
+          "200": {
+            "description": "Success. Contains details of the stream."
+          },
+          "403": {
+            "description": "No permissions to stream"
+          },
+          "404": {
+            "description": "Stream not found"
+          },
+          "500": {
+            "description": "No fields found. If stream doesn't contain any data."
+          }
+        }
+      },
+      "get": {
+        "summary": "Detect stream's field types.",
+        "description": "Automatically detects fields of given Stream by analyzing recent data. Do not save fields to stream details.",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "description": "ID of the stream",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "in": "query",
+            "name": "flatten",
+            "description": "Flatten hierarchies.",
+            "required": false,
+            "default": false,
+            "type": "boolean"
+          }
+        ],
+        "tags": [
+          "streams"
+        ],
+        "responses": {
+          "200": {
+            "description": "Success. Contains details of the stream."
+          },
+          "403": {
+            "description": "No permissions to stream"
+          },
+          "404": {
+            "description": "Stream not found"
+          },
+          "500": {
+            "description": "No fields found. If stream doesn't contain any data."
           }
         }
       }
@@ -2447,6 +2525,145 @@
           },
           "404": {
             "description": "Stream or permission wasn't found",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          }
+        }
+      }
+    },
+    "/streams/{id}/deleteAllData": {
+      "delete": {
+        "summary": "Delete all data from given stream",
+        "description": "Deletes streams all data.",
+        "tags": [
+          "streams"
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "description": "ID of the stream",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Success"
+          },
+          "403": {
+            "description": "Access denied",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          },
+          "404": {
+            "description": "Stream object wasn't found",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          }
+        }
+      }
+    },
+    "/streams/{id}/deleteDataUpTo": {
+      "delete": {
+        "summary": "Delete data up to given date",
+        "description": "Deletes streams data up to given date.",
+        "tags": [
+          "streams"
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "description": "ID of the stream",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "in": "query",
+            "name": "date",
+            "description": "Delete data up to date. Format is either milliseconds since epoch or ISO8601 datetime",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Success"
+          },
+          "400": {
+            "description": "Input date is malformed",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          },
+          "403": {
+            "description": "Access denied",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          },
+          "404": {
+            "description": "Stream object wasn't found",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          }
+        }
+      }
+    },
+    "/streams/{id}/deleteDataRange": {
+      "delete": {
+        "summary": "Delete data between start and end date parameters",
+        "description": "Deletes streams data starting from given date up to given end date.",
+        "tags": [
+          "streams"
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "description": "ID of the stream",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "in": "query",
+            "name": "start",
+            "description": "Start date where the data deletion starts. Format is either milliseconds since epoch or ISO8601 datetime.",
+
+            "required": true,
+            "type": "string"
+          },
+          {
+            "in": "query",
+            "name": "end",
+            "description": "Delete data up to this date. Format is either milliseconds since epoch or ISO8601 datetime.",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Success"
+          },
+          "400": {
+            "description": "Input start and/or end date is malformed",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          },
+          "403": {
+            "description": "Access denied",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          },
+          "404": {
+            "description": "Stream object wasn't found",
             "schema": {
               "$ref": "#/definitions/Error"
             }

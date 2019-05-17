@@ -1,5 +1,6 @@
 package com.unifina.service
 
+import com.unifina.api.DisabledUserException
 import com.unifina.api.InvalidAPIKeyException
 import com.unifina.api.InvalidUsernameAndPasswordException
 import com.unifina.api.NotFoundException
