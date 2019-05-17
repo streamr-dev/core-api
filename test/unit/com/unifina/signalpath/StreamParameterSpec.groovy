@@ -92,4 +92,12 @@ class StreamParameterSpec extends BeanMockingSpecification {
 			value: stream.id
 		]
 	}
+
+	def "can be configured with null value"() {
+		when:
+		streamParameter.setConfiguration([value: null])
+
+		then:
+		streamParameter.getValue() == null
+	}
 }

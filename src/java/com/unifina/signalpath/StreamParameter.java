@@ -58,7 +58,9 @@ public class StreamParameter extends Parameter<Stream> {
 	}
 
 	private Stream getStreamById(Object idOrStream) {
-		if (idOrStream instanceof Stream) {
+		if (idOrStream == null) {
+			return null;
+		} else if (idOrStream instanceof Stream) {
 			return (Stream) idOrStream;
 		}
 
