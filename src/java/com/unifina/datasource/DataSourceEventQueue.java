@@ -54,7 +54,7 @@ public abstract class DataSourceEventQueue {
 	}
 
 	/**
-	 * The call to this method should block until the queue is aborted or all events have been processed.
+	 * The call to this method blocks until the queue is aborted or all events have been processed.
 	 */
 	public void start() throws Exception {
 		abort = false;

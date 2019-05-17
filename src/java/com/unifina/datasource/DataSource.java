@@ -20,7 +20,11 @@ import java.util.*;
 import java.util.function.Consumer;
 
 /**
- * TODO: write new class description
+ * DataSource wires together SignalPaths and streams of messages and other Events.
+ * There are two types: HistoricalDataSource and RealtimeDataSource.
+ *
+ * The DataSource is started with DataSource#start(), which starts the event loop
+ * and blocks until done.
  */
 public abstract class DataSource implements Consumer<Event>, Closeable {
 	private static final Logger log = Logger.getLogger(DataSource.class);
@@ -35,7 +39,7 @@ public abstract class DataSource implements Consumer<Event>, Closeable {
 	private final MessageRouter router = new MessageRouter();
 
 	private StreamMessageSource streamMessageSource;
-	protected DataSourceEventQueue eventQueue;
+	private DataSourceEventQueue eventQueue;
 
 	public DataSource(Globals globals) {
 		this.globals = globals;
@@ -43,10 +47,7 @@ public abstract class DataSource implements Consumer<Event>, Closeable {
 	}
 
 	/**
-	 * Consumed events are added to the event queue. Blocks until there is space in the queue.
-	 * This is intended to be called from Threads producing data from streams.
-	 *
-	 * For non-blocking (and less safe) enqueuing of messages, see DataSourceEventQueue#enqueueAsync(Event).
+	 * Consumed events are added to the event queue.
 	 */
 	@Override
 	public void accept(Event event) {
@@ -54,10 +55,9 @@ public abstract class DataSource implements Consumer<Event>, Closeable {
 	}
 
 	/**
-	 * Connects a SignalPath to this DataSource. This means connecting to
-	 * all the feeds required by the Modules in the SignalPath and registering
-	 * the Modules with the associated feeds.
-	 * @param sp
+	 * Connects a SignalPath to this DataSource. This has the effect of subscribing the
+	 * DataSource to all the streams required by the Modules in the SignalPath, as well
+	 * as wiring time listeners to the clock.
 	 */
 	public void connectSignalPath(SignalPath sp) {
 		signalPaths.add(sp);
@@ -67,9 +67,11 @@ public abstract class DataSource implements Consumer<Event>, Closeable {
 	}
 
 	/**
-	 * Registers an object with this DataSource.
+	 * Registers an object with this DataSource. The types that have some effect are:
+	 * AbstractStreamSourceModules, ITimeListeners, and IDayListeners. It's safe to call this method
+	 * with other types of arguments, they will be ignored.
 	 */
-	public void register(Object o) {
+	private void register(Object o) {
 		if (o instanceof AbstractStreamSourceModule) {
 			subscribe((AbstractStreamSourceModule) o);
 		}
@@ -97,6 +99,10 @@ public abstract class DataSource implements Consumer<Event>, Closeable {
 		stopListeners.add(stopListener);
 	}
 
+	/**
+	 * Starts the main event loop and blocks until it is stopped.
+	 * This should be called from the event processing Thread.
+	 */
 	public void start() {
 		for (IStartListener startListener : startListeners) {
 			startListener.onStart();
