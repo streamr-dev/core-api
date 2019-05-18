@@ -155,20 +155,9 @@ public class SolidityCompileDeploy extends ModuleWithUI implements Pullable<Ethe
 		String txhash = tx.getTransactionHash();
 		log.debug("TX response: " + txhash);
 
-		TransactionReceipt receipt = null;
-		int retry = 0;
-		while (receipt == null && retry < MAX_RETRIES) {
-			receipt = web3j.ethGetTransactionReceipt(txhash).send().getResult();
-			if (receipt == null) {
-				retry++;
-				log.info("Couldn't get transaction receipt for tx " + txhash + ". Retry " + retry);
-				try {
-					Thread.sleep(SLEEP_BETWEEN_RETRIES_MILLIS);
-				} catch (InterruptedException e) { /* ignore */ }
-			}
-		}
+		TransactionReceipt receipt = Web3jHelper.waitForTransactionReceipt(web3j, txhash, SLEEP_BETWEEN_RETRIES_MILLIS, MAX_RETRIES);
 
-		if (retry >= MAX_RETRIES) {
+		if (receipt == null) {
 			throw new RuntimeException("Couldn't get transaction receipt from Ethereum node. Transaction may not have been broadcasted to the network.");
 		} else {
 			log.info("Got transaction receipt for tx " + txhash + ".");

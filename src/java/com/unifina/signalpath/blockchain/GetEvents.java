@@ -36,7 +36,8 @@ public class GetEvents extends AbstractSignalPathModule implements ContractEvent
 	private transient ContractEventPoller contractEventPoller;
 	private transient Propagator asyncPropagator;
 	private Web3j web3j;
-
+	protected int check_result_max_tries = 100;
+	protected int check_result_waitms = 10000;
 	@Override
 	public void init() {
 		setPropagationSink(true);
@@ -105,7 +106,11 @@ public class GetEvents extends AbstractSignalPathModule implements ContractEvent
 			String txHash = events.getJSONObject(0).getString("transactionHash");
 			txHashOutput.send(txHash);
 			log.info(String.format("Received event '%s'", txHash));
-			TransactionReceipt txr = Web3jHelper.getTransactionReceipt(web3j, txHash);
+			TransactionReceipt txr = Web3jHelper.waitForTransactionReceipt(web3j, txHash, check_result_waitms, check_result_max_tries);
+			if(txr == null){
+				log.error("Couldnt find TransactionReceipt for transaction "+txHash+ " in allotted time");
+				return;
+			}
 			displayEventsFromLogs(txr.getLogs());
 			asyncPropagator.propagate();
 
