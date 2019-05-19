@@ -48,7 +48,7 @@ public class EthereumModuleOptions implements Serializable {
 		ModuleOption networkOption = ModuleOption.createString("network", network);
 
 		// Add all configured networks
-		Map<String, Object> networks = MapTraversal.getMap(Holders.getConfig(), "streamr.ethereum.rpcUrls");
+		Map<String, Object> networks = MapTraversal.getMap(Holders.getConfig(), "streamr.ethereum.networks");
 		for (String network : networks.keySet()) {
 			networkOption.addPossibleValue(network, network);
 		}
@@ -60,24 +60,14 @@ public class EthereumModuleOptions implements Serializable {
 		ModuleOption networkOption = options.getOption("network");
 		if (networkOption != null) {
 			network = networkOption.getString();
-			getServer(); // Throws if the network not valid
+			getRpcUrl(); // Throws if the network not valid
 		}
-	}
-
-	// TODO: remove when old Ethereum modules are removed. Should be unused then.
-	@Deprecated
-	public String getServer() {
-		String url = MapTraversal.getString(Holders.getConfig(), "streamr.ethereum.networks." + network);
-		if (url == null) {
-			throw new RuntimeException("No url found for Ethereum bridge to network " + network);
-		}
-		return url;
 	}
 
 	public String getRpcUrl() {
-		String url = MapTraversal.getString(Holders.getConfig(), "streamr.ethereum.rpcUrls." + network);
+		String url = MapTraversal.getString(Holders.getConfig(), "streamr.ethereum.networks." + network);
 		if (url == null) {
-			throw new RuntimeException("No rpcUrl found for Ethereum bridge to network " + network);
+			throw new RuntimeException("No rpcUrl found for Ethereum network " + network);
 		}
 		return url;
 	}

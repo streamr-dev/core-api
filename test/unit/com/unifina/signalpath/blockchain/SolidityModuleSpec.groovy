@@ -286,14 +286,11 @@ class SolidityModuleSpec extends ModuleTestingSpecification {
         {
             "possibleValues": [
             {
-                "text": "ropsten",
-                "value": "ropsten"
-            },
-            {
-                "text": "rinkeby",
-                "value": "rinkeby"
-            }],
-            "value": "rinkeby",
+                "text": "local",
+                "value": "local"
+            }
+            ],
+            "value": "local",
             "type": "string"
         },
         "gasPriceGWei":

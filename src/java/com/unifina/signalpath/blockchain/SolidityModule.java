@@ -10,6 +10,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Stack;
 
+@Deprecated // replaced by SolidityCompileDeploy
 public class SolidityModule extends ModuleWithUI implements Pullable<EthereumContract> {
 
 	private static final Logger log = Logger.getLogger(SolidityModule.class);
@@ -127,7 +128,7 @@ public class SolidityModule extends ModuleWithUI implements Pullable<EthereumCon
 	}
 	
 	protected StreamrWeb3Interface createWeb3Interface() {
-		return new StreamrWeb3Interface(ethereumOptions.getServer(), ethereumOptions.getGasPriceWei());
+		return new StreamrWeb3Interface(ethereumOptions.getRpcUrl(), ethereumOptions.getGasPriceWei());
 	}
 
 	private void createContractOutput() {
