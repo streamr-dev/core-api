@@ -378,16 +378,12 @@ class SendEthereumTransactionSpec extends ModuleTestingSpecification {
     "network": {
       "possibleValues": [
         {
-          "text": "ropsten",
-          "value": "ropsten"
-        },
-        {
-          "text": "rinkeby",
-          "value": "rinkeby"
+          "text": "local",
+          "value": "local"
         }
       ],
       "type": "string",
-      "value": "rinkeby"
+      "value": "local"
     }
   },
   "canRefresh": false,

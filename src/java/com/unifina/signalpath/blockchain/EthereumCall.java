@@ -25,6 +25,7 @@ import java.util.Map;
 /**
  * Send out a call to specified function in Ethereum block chain
  */
+@Deprecated // replaced by SendEthereumTransaction
 public class EthereumCall extends AbstractHttpModule {
 
 	private EthereumModuleOptions ethereumOptions = new EthereumModuleOptions();
@@ -253,7 +254,7 @@ public class EthereumCall extends AbstractHttpModule {
 				args.put("value", valueWei.toBigInteger().toString());
 			}
 
-			request = new HttpPost(ethereumOptions.getServer() + "/call");
+			request = new HttpPost(ethereumOptions.getRpcUrl() + "/call");
 
 		} else {
 			// fallback function selected: send ether
@@ -263,7 +264,7 @@ public class EthereumCall extends AbstractHttpModule {
 			} else {
 				args.put("value", "0");
 			}
-			request = new HttpPost(ethereumOptions.getServer() + "/send");
+			request = new HttpPost(ethereumOptions.getRpcUrl() + "/send");
 		}
 
 		String jsonString = gson.toJson(args);

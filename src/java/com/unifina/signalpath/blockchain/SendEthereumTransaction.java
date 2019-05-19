@@ -296,26 +296,15 @@ public class SendEthereumTransaction extends ModuleWithSideEffects {
 		 */
 		protected void enqueueConfirmedTx() throws IOException {
 			final FunctionCallResult fncall = this;
-				int tries = 0;
-				while (tries++ < check_result_max_tries) {
-					EthGetTransactionReceipt get = web3j.ethGetTransactionReceipt(web3jTx.getTransactionHash()).send();
-					if ((receipt = get.getResult()) != null) {
-						transaction = web3j.ethGetTransactionByHash(web3jTx.getTransactionHash()).send().getResult();
-						log.info("Receipt found for txHash: " + web3jTx.getTransactionHash());
-						enqueueEvent(fncall);
-						return;
-					}
-					log.info("No receipt found for txHash: " + web3jTx.getTransactionHash());
-					if(tries == check_result_max_tries)
-						continue;
-					try {
-						log.info(". Waiting "+check_result_waitms+"ms");
-						Thread.sleep(check_result_waitms);
-					} catch (InterruptedException e) {
-						throw new RuntimeException(e);
-					}
-				}
+			receipt = Web3jHelper.waitForTransactionReceipt(web3j,web3jTx.getTransactionHash(), check_result_waitms, check_result_max_tries);
+			if (receipt != null) {
+				transaction = web3j.ethGetTransactionByHash(web3jTx.getTransactionHash()).send().getResult();
+				log.info("Receipt found for txHash: " + web3jTx.getTransactionHash());
+				enqueueEvent(fncall);
+			}
+			else{
 				log.error("Couldnt find receipt for txHash: " + web3jTx.getTransactionHash());
+			}
 		}
 
 		@Override

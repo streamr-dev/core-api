@@ -220,19 +220,6 @@ public class Web3jHelper {
 		return c;
 	}
 
-	public static TransactionReceipt getTransactionReceipt(Web3j web3, String txhash) throws IOException {
-		EthGetTransactionReceipt gtr = web3.ethGetTransactionReceipt(txhash).send();
-		if (gtr == null) {
-			log.error("TransactionHash not found: " + txhash);
-			return null;
-		}
-		TransactionReceipt tr = gtr.getResult();
-		if (tr == null) {
-			log.error("TransactionReceipt not found for txhash: " + txhash);
-			return null;
-		}
-		return tr;
-	}
 	public static Function toWeb3jFunction(EthereumABI.Function fn, List args) throws ClassNotFoundException, NoSuchMethodException, InvocationTargetException, InstantiationException, IllegalAccessException {
 		List<String> solidity_inputtypes = new ArrayList<String>(fn.inputs.size());
 		List<String> solidity_outputtypes = new ArrayList<String>(fn.outputs.size());
@@ -322,6 +309,50 @@ public class Web3jHelper {
 		}
 		return (Type) val;
 	}
+
+	public static TransactionReceipt waitForTransactionReceipt(Web3j web3j, String txHash, long waitMsBetweenTries, int tries) throws IOException {
+		try {
+			return waitForTransactionReceipt(web3j, txHash, waitMsBetweenTries, tries, false);
+		}
+		catch(InterruptedException e){
+			log.error("waitForTransactionReceipt threw InterruptedException despite throwInterruptedException = false. This shouldnt happen.");
+			throw new RuntimeException(e);
+		}
+	}
+
+	/**
+	 *
+	 * @param web3j
+	 * @param txHash
+	 * @param waitMsBetweenTries
+	 * @param tries
+	 * @param throwInterruptedException
+	 * @return the TransactionReceipt, or null if none was found in allotted time
+	 * @throws InterruptedException
+	 * @throws IOException
+	 */
+	public static TransactionReceipt waitForTransactionReceipt(Web3j web3j, String txHash, long waitMsBetweenTries, int tries, boolean throwInterruptedException) throws InterruptedException, IOException {
+		TransactionReceipt receipt = null;
+		int retry = 0;
+		while (receipt == null && retry < tries) {
+			receipt = web3j.ethGetTransactionReceipt(txHash).send().getResult();
+			if (receipt == null) {
+				retry++;
+				log.info("Couldn't get transaction receipt for tx " + txHash + ". Retry " + retry);
+				try {
+					Thread.sleep(waitMsBetweenTries);
+				} catch (InterruptedException e) {
+					log.info(e.getMessage());
+					if(throwInterruptedException){
+						throw e;
+					}
+				}
+			}
+		}
+		return receipt;
+	}
+
+
 
 
 	/**
