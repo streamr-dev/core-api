@@ -78,7 +78,7 @@ class CommunitySecretApiController {
 		if (secret == null) {
 			throw new NotFoundException("community secret not found by id")
 		}
-		render(status: 204)
+		render(secret?.toMap() as JSON)
 	}
 
 	@StreamrApi

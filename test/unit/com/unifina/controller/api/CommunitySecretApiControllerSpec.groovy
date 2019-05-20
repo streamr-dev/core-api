@@ -205,7 +205,7 @@ class CommunitySecretApiControllerSpec extends Specification {
 	void "updateCommunitySecret() test"() {
 		setup:
 		CommunitySecret s1 = new CommunitySecret(
-			name: "new name",
+			name: "name",
 			secret: "secret 1",
 			communityAddress: communityAddress,
 		)
@@ -222,8 +222,13 @@ class CommunitySecretApiControllerSpec extends Specification {
 			controller.updateCommunitySecret()
 		}
 		then:
-		1 * controller.communitySecretService.updateCommunitySecret(communityAddress, validID, _ as CommunitySecretCommand) >> s1
-		response.status == 204
+		1 * controller.communitySecretService.updateCommunitySecret(communityAddress, validID, _ as CommunitySecretCommand) >> {
+			s1.name = "new name"
+			return s1
+		}
+		response.status == 200
+		response.json.id  == "1"
+		response.json.name == "new name"
 	}
 
 	void "updateCommunitySecret() bad request on invalid community address"() {
