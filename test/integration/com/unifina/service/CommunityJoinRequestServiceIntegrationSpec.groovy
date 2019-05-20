@@ -1,13 +1,12 @@
 package com.unifina.service
 
-import com.unifina.api.CommunityJoinRequestCommand
 import com.unifina.api.UpdateCommunityJoinRequestCommand
 import com.unifina.domain.community.CommunityJoinRequest
 import com.unifina.domain.security.SecUser
 import spock.lang.Specification
 
-class CommunityProductServiceIntegrationSpec extends Specification {
-	CommunityProductService service = new CommunityProductService()
+class CommunityJoinRequestServiceIntegrationSpec extends Specification {
+	CommunityJoinRequestService service = new CommunityJoinRequestService()
 	SecUser me
 	final String communityAddress = "0x0000000000000000000000000000000000000000"
 
@@ -119,7 +118,7 @@ class CommunityProductServiceIntegrationSpec extends Specification {
 		r.memberAddress == "0xCCCC000000000000000000000000AAAA0000AAAA"
 	}
 
-	void "updateCommunityJoinRequest accepts request"() {
+	void "updateCommunityJoinRequest updates pending state to accepted"() {
 		setup:
 		CommunityJoinRequest r = new CommunityJoinRequest(
 			memberAddress: "0xCCCC000000000000000000000000AAAA0000FFFF",
@@ -136,11 +135,35 @@ class CommunityProductServiceIntegrationSpec extends Specification {
 		)
 
 		when:
-		service.updateCommunityJoinRequest(communityAddress, r.id, cmd)
-
-		def c = CommunityJoinRequest.findById(r.id)
+		def c = service.updateCommunityJoinRequest(communityAddress, r.id, cmd)
 		then:
 		c.state == CommunityJoinRequest.State.ACCEPTED
+		// no changes below
+		c.communityAddress == communityAddress
+		c.memberAddress == "0xCCCC000000000000000000000000AAAA0000FFFF"
+		c.user == me
+	}
+
+	void "updateCommunityJoinRequest updates pending state to rejected"() {
+		setup:
+		CommunityJoinRequest r = new CommunityJoinRequest(
+			memberAddress: "0xCCCC000000000000000000000000AAAA0000FFFF",
+			communityAddress: communityAddress,
+			user: me,
+			state: CommunityJoinRequest.State.PENDING,
+			dateCreated: new Date(),
+			lastUpdated: new Date(),
+		)
+		r.save(failOnError: true, validate: true)
+
+		UpdateCommunityJoinRequestCommand cmd = new UpdateCommunityJoinRequestCommand(
+			state: "REJECTED",
+		)
+
+		when:
+		def c = service.updateCommunityJoinRequest(communityAddress, r.id, cmd)
+		then:
+		c.state == CommunityJoinRequest.State.REJECTED
 		// no changes below
 		c.communityAddress == communityAddress
 		c.memberAddress == "0xCCCC000000000000000000000000AAAA0000FFFF"

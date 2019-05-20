@@ -7,13 +7,14 @@ import com.unifina.api.UpdateCommunityJoinRequestCommand
 import com.unifina.domain.security.SecUser
 import com.unifina.security.StreamrApi
 import com.unifina.domain.community.CommunityJoinRequest
-import com.unifina.service.CommunityProductService
+import com.unifina.service.CommunityJoinRequestService
+import com.unifina.utils.EthereumAddressValidator
 import grails.converters.JSON
 import grails.plugin.springsecurity.annotation.Secured
 
 @Secured(["IS_AUTHENTICATED_ANONYMOUSLY"])
-class CommunityProductApiController {
-	CommunityProductService communityProductService
+class CommunityJoinRequestApiController {
+	CommunityJoinRequestService communityJoinRequestService
 
 	static CommunityJoinRequest.State isState(String value) {
 		if (value == null || value.trim().equals("")) {
@@ -25,11 +26,8 @@ class CommunityProductApiController {
 			return null
 		}
 	}
-	static boolean isEthereumAddress(String value) {
-		return value ==~ /^0x[a-fA-F0-9]{40}$/
-	}
 	static boolean isCommunityAddress(String value) {
-		return isEthereumAddress(value)
+		return EthereumAddressValidator.validate(value)
 	}
 	static boolean isValidID(String value) {
 		if (value == null) {
@@ -48,7 +46,7 @@ class CommunityProductApiController {
 			throw new BadRequestException("community address is not an ethereum address")
 		}
 		CommunityJoinRequest.State st = isState(state)
-		List<CommunityJoinRequest> results = communityProductService.findCommunityJoinRequests(communityAddress, st)
+		List<CommunityJoinRequest> results = communityJoinRequestService.findCommunityJoinRequests(communityAddress, st)
 		render(results*.toMap() as JSON)
 	}
 
@@ -61,7 +59,7 @@ class CommunityProductApiController {
 		if (cmd.errors.getFieldError("memberAddress")) {
 			throw new BadRequestException("memberAddress in json is not an ethereum address")
 		}
-		CommunityJoinRequest result = communityProductService.createCommunityJoinRequest(communityAddress, cmd, loggedInUser())
+		CommunityJoinRequest result = communityJoinRequestService.createCommunityJoinRequest(communityAddress, cmd, loggedInUser())
 		render(result?.toMap() as JSON)
 	}
 
@@ -74,7 +72,7 @@ class CommunityProductApiController {
 		if (!isValidID(joinRequestId)) {
 			throw new BadRequestException("join request id not valid")
 		}
-		CommunityJoinRequest result = communityProductService.findCommunityJoinRequest(communityAddress, joinRequestId)
+		CommunityJoinRequest result = communityJoinRequestService.findCommunityJoinRequest(communityAddress, joinRequestId)
 		if (result == null) {
 			throw new NotFoundException("community join request not found with id: " + joinRequestId)
 		}
@@ -93,11 +91,8 @@ class CommunityProductApiController {
 		if (cmd.errors.getFieldError("state")) {
 			throw new BadRequestException("state in json is not valid")
 		}
-		CommunityJoinRequest result = communityProductService.updateCommunityJoinRequest(communityAddress, joinRequestId, cmd)
-		if (result == null) {
-			throw new NotFoundException("community join request not found with id: " + joinRequestId)
-		}
-		render(status: 204)
+		CommunityJoinRequest result = communityJoinRequestService.updateCommunityJoinRequest(communityAddress, joinRequestId, cmd)
+		render(result?.toMap() as JSON)
 	}
 
 	private SecUser loggedInUser() {

@@ -3,25 +3,23 @@ package com.unifina.service
 import com.unifina.api.ApiException
 import com.unifina.api.CommunityJoinRequestCommand
 import com.unifina.api.NotFoundException
+import com.unifina.api.UpdateCommunityJoinRequestCommand
 import com.unifina.domain.community.CommunityJoinRequest
 import com.unifina.domain.community.CommunitySecret
 import com.unifina.domain.security.IntegrationKey
 import com.unifina.domain.security.SecUser
 import grails.test.mixin.Mock
 import grails.test.mixin.TestFor
-import org.springframework.security.crypto.password.PasswordEncoder
 import spock.lang.Specification
 
-@TestFor(CommunityProductService)
+@TestFor(CommunityJoinRequestService)
 @Mock([SecUser, IntegrationKey, CommunitySecret, CommunityJoinRequest])
-class CommunityProductServiceSpec extends Specification {
+class CommunityJoinRequestServiceSpec extends Specification {
 	SecUser me
 	final String memberAddress = "0xCCCC000000000000000000000000AAAA0000FFFF"
 	final String communityAddress = "0x0000000000000000000000000000000000000000"
 
 	def setup() {
-		service.encoder = Mock(PasswordEncoder)
-
 		me = new SecUser(
 			name: "First Lastname",
 			username: "first@last.com",
@@ -70,7 +68,6 @@ class CommunityProductServiceSpec extends Specification {
 			secret: "secret",
 		)
 		when:
-		1 * service.encoder.matches("secret", "secret") >> true
 		CommunityJoinRequest c = service.createCommunityJoinRequest(communityAddress, cmd, me)
 
 		then:
@@ -83,7 +80,6 @@ class CommunityProductServiceSpec extends Specification {
 			memberAddress: memberAddress,
 		)
 		when:
-		0 * service.encoder._
 		CommunityJoinRequest c = service.createCommunityJoinRequest(communityAddress, cmd, me)
 
 		then:
@@ -98,12 +94,59 @@ class CommunityProductServiceSpec extends Specification {
 		)
 
 		when:
-		1 * service.encoder.matches("wrong", "secret") >> false
 		service.createCommunityJoinRequest(communityAddress, cmd, me)
 
 		then:
 		def e = thrown(ApiException)
 		e.statusCode == 403
 		e.code == "INCORRECT_COMMUNITY_SECRET"
+	}
+
+	void "updateCommunityJoinRequest rejects accepted state"() {
+		setup:
+		CommunityJoinRequest r = new CommunityJoinRequest(
+			memberAddress: "0xCCCC000000000000000000000000AAAA0000FFFF",
+			communityAddress: communityAddress,
+			user: me,
+			state: CommunityJoinRequest.State.ACCEPTED,
+			dateCreated: new Date(),
+			lastUpdated: new Date(),
+		)
+		r.save(failOnError: true, validate: true)
+
+		UpdateCommunityJoinRequestCommand cmd = new UpdateCommunityJoinRequestCommand(
+			state: "ACCEPTED",
+		)
+
+		when:
+		service.updateCommunityJoinRequest(communityAddress, r.id, cmd)
+		then:
+		def e = thrown(ApiException)
+		e.statusCode == 400
+		e.code == "JOIN_REQUEST_ALREADY_ACCEPTED"
+	}
+
+	void "updateCommunityJoinRequest rejects invalid state"() {
+		setup:
+		CommunityJoinRequest r = new CommunityJoinRequest(
+			memberAddress: "0xCCCC000000000000000000000000AAAA0000FFFF",
+			communityAddress: communityAddress,
+			user: me,
+			state: CommunityJoinRequest.State.ACCEPTED,
+			dateCreated: new Date(),
+			lastUpdated: new Date(),
+		)
+		r.save(failOnError: true, validate: true)
+
+		UpdateCommunityJoinRequestCommand cmd = new UpdateCommunityJoinRequestCommand(
+			state: "NOT_IN_OUR_ENUM",
+		)
+
+		when:
+		service.updateCommunityJoinRequest(communityAddress, r.id, cmd)
+		then:
+		def e = thrown(ApiException)
+		e.statusCode == 400
+		e.code == "INVALID_JOIN_REQUEST_STATE"
 	}
 }

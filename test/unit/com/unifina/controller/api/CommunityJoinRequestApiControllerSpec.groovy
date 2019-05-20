@@ -7,14 +7,14 @@ import com.unifina.api.UpdateCommunityJoinRequestCommand
 import com.unifina.domain.community.CommunityJoinRequest
 import com.unifina.domain.security.SecUser
 import com.unifina.filters.UnifinaCoreAPIFilters
-import com.unifina.service.CommunityProductService
+import com.unifina.service.CommunityJoinRequestService
 import grails.test.mixin.Mock
 import grails.test.mixin.TestFor
 import spock.lang.Specification
 
-@TestFor(CommunityProductApiController)
+@TestFor(CommunityJoinRequestApiController)
 @Mock([UnifinaCoreAPIFilters, SecUser, CommunityJoinRequest])
-class CommunityProductApiControllerSpec extends Specification {
+class CommunityJoinRequestApiControllerSpec extends Specification {
 	SecUser me
 	final String communityAddress = "0x6c90aece04198da2d5ca9b956b8f95af8041de37"
 	final String validID = "L-TvrBkyQTS_JK1ABHFEZAaZ3FHq7-TPqMXe9JNz1x6g"
@@ -22,12 +22,12 @@ class CommunityProductApiControllerSpec extends Specification {
     def setup() {
 		me = new SecUser(id: 1, name: "firstname lastname", username: "firstname.lastname@address.com", password: "salasana")
 		me.save(validate: true, failOnError: true)
-		controller.communityProductService = Mock(CommunityProductService)
+		controller.communityJoinRequestService = Mock(CommunityJoinRequestService)
     }
 
 	void "state parameter is null or State"(String value, Object expected) {
 		expect:
-		CommunityProductApiController.isState(value) == expected
+		CommunityJoinRequestApiController.isState(value) == expected
 		where:
 		value      | expected
 		null       | null
@@ -42,7 +42,7 @@ class CommunityProductApiControllerSpec extends Specification {
 
 	void "isCommunityAddress"(String value, Object expected) {
 		expect:
-		CommunityProductApiController.isCommunityAddress(value) == expected
+		CommunityJoinRequestApiController.isCommunityAddress(value) == expected
 		where:
 		value | expected
 		"0x0000000000000000000000000000000000000000" | true
@@ -54,7 +54,7 @@ class CommunityProductApiControllerSpec extends Specification {
 
 	void "isValidID"(String value, Object expected) {
 		expect:
-		CommunityProductApiController.isValidID(value) == expected
+		CommunityJoinRequestApiController.isValidID(value) == expected
 		where:
 		value | expected
 		null | false
@@ -86,7 +86,7 @@ class CommunityProductApiControllerSpec extends Specification {
 			controller.findCommunityJoinRequests()
 		}
 		then:
-		1 * controller.communityProductService.findCommunityJoinRequests(communityAddress, null) >> [r ]
+		1 * controller.communityJoinRequestService.findCommunityJoinRequests(communityAddress, null) >> [r ]
 		response.json[0].id == validID
 		response.json[0].memberAddress == "0x0000000000000000000000000000000000000001"
 		response.json[0].communityAddress == communityAddress
@@ -103,7 +103,7 @@ class CommunityProductApiControllerSpec extends Specification {
 			controller.findCommunityJoinRequests()
 		}
 		then:
-		0 * controller.communityProductService._
+		0 * controller.communityJoinRequestService._
 		def e = thrown(BadRequestException)
 		e.statusCode == 400
 		e.code == "PARAMETER_MISSING"
@@ -134,7 +134,7 @@ class CommunityProductApiControllerSpec extends Specification {
 			controller.createCommunityJoinRequest()
 		}
 		then:
-		1 * controller.communityProductService.createCommunityJoinRequest(communityAddress, _ as CommunityJoinRequestCommand, me) >> r
+		1 * controller.communityJoinRequestService.createCommunityJoinRequest(communityAddress, _ as CommunityJoinRequestCommand, me) >> r
 		response.json.id == validID
 		response.json.memberAddress == "0xCCCC000000000000000000000000AAAA0000FFFF"
 		response.json.communityAddress == communityAddress
@@ -154,7 +154,7 @@ class CommunityProductApiControllerSpec extends Specification {
 			controller.createCommunityJoinRequest()
 		}
 		then:
-		0 * controller.communityProductService._
+		0 * controller.communityJoinRequestService._
 		def e = thrown(BadRequestException)
 		e.statusCode == 400
 		e.code == "PARAMETER_MISSING"
@@ -168,7 +168,7 @@ class CommunityProductApiControllerSpec extends Specification {
 			controller.createCommunityJoinRequest()
 		}
 		then:
-		0 * controller.communityProductService._
+		0 * controller.communityJoinRequestService._
 		def e = thrown(BadRequestException)
 		e.statusCode == 400
 		e.code == "PARAMETER_MISSING"
@@ -191,7 +191,7 @@ class CommunityProductApiControllerSpec extends Specification {
 			controller.findCommunityJoinRequest()
 		}
 		then:
-		1 * controller.communityProductService.findCommunityJoinRequest(communityAddress, validID) >> r
+		1 * controller.communityJoinRequestService.findCommunityJoinRequest(communityAddress, validID) >> r
 		response.json.memberAddress == "0xCCCC000000000000000000000000AAAA0000FFFF"
 		response.json.communityAddress == communityAddress
 		response.json.id == validID
@@ -208,7 +208,7 @@ class CommunityProductApiControllerSpec extends Specification {
 			controller.findCommunityJoinRequest()
 		}
 		then:
-		0 * controller.communityProductService._
+		0 * controller.communityJoinRequestService._
 		def e = thrown(BadRequestException)
 		e.statusCode == 400
 		e.code == "PARAMETER_MISSING"
@@ -223,7 +223,7 @@ class CommunityProductApiControllerSpec extends Specification {
 			controller.findCommunityJoinRequest()
 		}
 		then:
-		0 * controller.communityProductService._
+		0 * controller.communityJoinRequestService._
 		def e = thrown(BadRequestException)
 		e.statusCode == 400
 		e.code == "PARAMETER_MISSING"
@@ -238,7 +238,7 @@ class CommunityProductApiControllerSpec extends Specification {
 			controller.findCommunityJoinRequest()
 		}
 		then:
-		1 * controller.communityProductService.findCommunityJoinRequest(communityAddress, validID) >> null
+		1 * controller.communityJoinRequestService.findCommunityJoinRequest(communityAddress, validID) >> null
 		def e = thrown(NotFoundException)
 		e.statusCode == 404
 		e.code == "NOT_FOUND"
@@ -265,8 +265,15 @@ class CommunityProductApiControllerSpec extends Specification {
 			controller.updateCommunityJoinRequest()
 		}
 		then:
-		1 * controller.communityProductService.updateCommunityJoinRequest(communityAddress, validID, _ as UpdateCommunityJoinRequestCommand) >> r
-		response.status == 204
+		1 * controller.communityJoinRequestService.updateCommunityJoinRequest(communityAddress, validID, _ as UpdateCommunityJoinRequestCommand) >> {
+			r.state = CommunityJoinRequest.State.ACCEPTED
+			return r
+		}
+		response.status == 200
+		response.json.id == validID
+		response.json.state == "ACCEPTED"
+		response.json.memberAddress == "0xCCCC000000000000000000000000AAAA0000FFFF"
+		response.json.communityAddress == communityAddress
 	}
 
 	void "updateCommunityJoinRequest() bad request on invalid community address"() {
@@ -281,7 +288,7 @@ class CommunityProductApiControllerSpec extends Specification {
 			controller.updateCommunityJoinRequest()
 		}
 		then:
-		0 * controller.communityProductService._
+		0 * controller.communityJoinRequestService._
 		def e = thrown(BadRequestException)
 		e.statusCode == 400
 		e.code == "PARAMETER_MISSING"
@@ -299,7 +306,7 @@ class CommunityProductApiControllerSpec extends Specification {
 			controller.updateCommunityJoinRequest()
 		}
 		then:
-		0 * controller.communityProductService._
+		0 * controller.communityJoinRequestService._
 		def e = thrown(BadRequestException)
 		e.statusCode == 400
 		e.code == "PARAMETER_MISSING"
@@ -317,7 +324,7 @@ class CommunityProductApiControllerSpec extends Specification {
 			controller.updateCommunityJoinRequest()
 		}
 		then:
-		0 * controller.communityProductService._
+		0 * controller.communityJoinRequestService._
 		def e = thrown(BadRequestException)
 		e.statusCode == 400
 		e.code == "PARAMETER_MISSING"
@@ -335,7 +342,9 @@ class CommunityProductApiControllerSpec extends Specification {
 			controller.updateCommunityJoinRequest()
 		}
 		then:
-		1 * controller.communityProductService.updateCommunityJoinRequest(communityAddress, validID, _ as UpdateCommunityJoinRequestCommand) >> null
+		1 * controller.communityJoinRequestService.updateCommunityJoinRequest(communityAddress, validID, _ as UpdateCommunityJoinRequestCommand) >> {
+			throw new NotFoundException("mocked: entity not found")
+		}
 		def e = thrown(NotFoundException)
 		e.statusCode == 404
 		e.code == "NOT_FOUND"
