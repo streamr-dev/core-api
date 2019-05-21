@@ -47,13 +47,13 @@ class CommunityJoinRequestServiceSpec extends Specification {
 		secret.save(validate: true, failOnError: true)
     }
 
-	void "createCommunityJoinRequest user doesnt have ethereum id"() {
+	void "create user doesnt have ethereum id"() {
 		setup:
 		CommunityJoinRequestCommand cmd = new CommunityJoinRequestCommand(
 			memberAddress: "0xCCCC00000000000000000000AAAAAAAAAAAAAAAA",
 		)
 		when:
-		service.createCommunityJoinRequest(communityAddress, cmd, me)
+		service.create(communityAddress, cmd, me)
 
 		then:
 		def e = thrown(NotFoundException)
@@ -61,32 +61,32 @@ class CommunityJoinRequestServiceSpec extends Specification {
 		e.code == "NOT_FOUND"
 	}
 
-    void "createCommunityJoinRequest supplied with correct community secret"() {
+    void "create supplied with correct community secret"() {
 		setup:
 		CommunityJoinRequestCommand cmd = new CommunityJoinRequestCommand(
 			memberAddress: memberAddress,
 			secret: "secret",
 		)
 		when:
-		CommunityJoinRequest c = service.createCommunityJoinRequest(communityAddress, cmd, me)
+		CommunityJoinRequest c = service.create(communityAddress, cmd, me)
 
 		then:
 		c.state == CommunityJoinRequest.State.ACCEPTED
     }
 
-	void "createCommunityJoinRequest supplied without community secret"() {
+	void "create supplied without community secret"() {
 		setup:
 		CommunityJoinRequestCommand cmd = new CommunityJoinRequestCommand(
 			memberAddress: memberAddress,
 		)
 		when:
-		CommunityJoinRequest c = service.createCommunityJoinRequest(communityAddress, cmd, me)
+		CommunityJoinRequest c = service.create(communityAddress, cmd, me)
 
 		then:
 		c.state == CommunityJoinRequest.State.PENDING
 	}
 
-	void "createCommunityJoinRequest supplied with incorrect community secret"() {
+	void "create supplied with incorrect community secret"() {
 		setup:
 		CommunityJoinRequestCommand cmd = new CommunityJoinRequestCommand(
 			memberAddress: memberAddress,
@@ -94,7 +94,7 @@ class CommunityJoinRequestServiceSpec extends Specification {
 		)
 
 		when:
-		service.createCommunityJoinRequest(communityAddress, cmd, me)
+		service.create(communityAddress, cmd, me)
 
 		then:
 		def e = thrown(ApiException)

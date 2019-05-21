@@ -92,7 +92,7 @@ class CommunityJoinRequestApiControllerSpec extends Specification {
 		e.code == "PARAMETER_MISSING"
 	}
 
-	void "createCommunityJoinRequest() test"() {
+	void "create() test"() {
 		setup:
 		CommunityJoinRequest r = new CommunityJoinRequest(
 			memberAddress: "0xCCCC000000000000000000000000AAAA0000FFFF",
@@ -113,11 +113,11 @@ class CommunityJoinRequestApiControllerSpec extends Specification {
 			],
 		]
 		params.communityAddress = communityAddress
-		withFilters(action: "createCommunityJoinRequest") {
-			controller.createCommunityJoinRequest()
+		withFilters(action: "create") {
+			controller.create()
 		}
 		then:
-		1 * controller.communityJoinRequestService.createCommunityJoinRequest(communityAddress, _ as CommunityJoinRequestCommand, me) >> r
+		1 * controller.communityJoinRequestService.create(communityAddress, _ as CommunityJoinRequestCommand, me) >> r
 		response.json.id == validID
 		response.json.memberAddress == "0xCCCC000000000000000000000000AAAA0000FFFF"
 		response.json.communityAddress == communityAddress
@@ -125,7 +125,7 @@ class CommunityJoinRequestApiControllerSpec extends Specification {
 		response.status == 200
 	}
 
-	void "createCommunityJoinRequest() bad request when json memberAddress is not an ethereum address"() {
+	void "create() bad request when json memberAddress is not an ethereum address"() {
 		when:
 		request.method = "POST"
 		request.json = [
@@ -133,8 +133,8 @@ class CommunityJoinRequestApiControllerSpec extends Specification {
 			secret: "secret",
 		]
 		params.communityAddress = communityAddress
-		withFilters(action: "createCommunityJoinRequest") {
-			controller.createCommunityJoinRequest()
+		withFilters(action: "create") {
+			controller.create()
 		}
 		then:
 		0 * controller.communityJoinRequestService._
@@ -143,12 +143,12 @@ class CommunityJoinRequestApiControllerSpec extends Specification {
 		e.code == "PARAMETER_MISSING"
 	}
 
-	void "createCommunityJoinRequest() bad request on invalid community address input"() {
+	void "create() bad request on invalid community address input"() {
 		when:
 		request.method = "GET"
 		params.communityAddress = "0x123"
-		withFilters(action: "createCommunityJoinRequest") {
-			controller.createCommunityJoinRequest()
+		withFilters(action: "create") {
+			controller.create()
 		}
 		then:
 		0 * controller.communityJoinRequestService._

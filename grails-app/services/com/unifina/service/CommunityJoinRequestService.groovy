@@ -24,7 +24,7 @@ class CommunityJoinRequestService {
 		}
 	}
 
-	CommunityJoinRequest createCommunityJoinRequest(String communityAddress, CommunityJoinRequestCommand cmd, SecUser user) {
+	CommunityJoinRequest create(String communityAddress, CommunityJoinRequestCommand cmd, SecUser user) {
 		// Backend must check that the given memberAddress is one of the Ethereum IDs bound to the logged in user
 		IntegrationKey key = IntegrationKey.where {
 			(user == user) && (idInService == cmd.memberAddress)
