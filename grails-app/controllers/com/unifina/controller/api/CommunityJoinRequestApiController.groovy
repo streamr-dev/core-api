@@ -4,11 +4,12 @@ import com.unifina.api.BadRequestException
 import com.unifina.api.CommunityJoinRequestCommand
 import com.unifina.api.NotFoundException
 import com.unifina.api.UpdateCommunityJoinRequestCommand
+import com.unifina.domain.community.CommunityJoinRequest
 import com.unifina.domain.security.SecUser
 import com.unifina.security.StreamrApi
-import com.unifina.domain.community.CommunityJoinRequest
 import com.unifina.service.CommunityJoinRequestService
 import com.unifina.utils.EthereumAddressValidator
+import com.unifina.utils.IDValidator
 import grails.converters.JSON
 import grails.plugin.springsecurity.annotation.Secured
 
@@ -30,13 +31,7 @@ class CommunityJoinRequestApiController {
 		return EthereumAddressValidator.validate(value)
 	}
 	static boolean isValidID(String value) {
-		if (value == null) {
-			return false
-		}
-		if (value.length() != 44) {
-			return false
-		}
-		return value ==~ /^[a-zA-Z0-9-_]{44}$/
+		return IDValidator.validate(value)
 	}
 
 	// curl -v -X GET -H "Authorization: token tester1-api-key" "http://localhost:8081/streamr-core/api/v1/communities/0x6c90aece04198da2d5ca9b956b8f95af8041de37/joinRequests?state=pending"
