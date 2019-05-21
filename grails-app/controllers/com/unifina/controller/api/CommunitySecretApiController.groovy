@@ -64,7 +64,7 @@ class CommunitySecretApiController {
 	}
 
 	@StreamrApi
-	def updateCommunitySecret(String communityAddress, String communitySecretId, CommunitySecretCommand cmd) {
+	def update(String communityAddress, String communitySecretId, CommunitySecretCommand cmd) {
 		if (!isCommunityAddress(communityAddress)) {
 			throw new BadRequestException("community address is not an ethereum address")
 		}
@@ -74,7 +74,7 @@ class CommunitySecretApiController {
 		if (cmd.errors.getFieldError("name")) {
 			throw new BadRequestException("name in json is not a valid name")
 		}
-		CommunitySecret secret = communitySecretService.updateCommunitySecret(communityAddress, communitySecretId, cmd)
+		CommunitySecret secret = communitySecretService.update(communityAddress, communitySecretId, cmd)
 		if (secret == null) {
 			throw new NotFoundException("community secret not found by id")
 		}

@@ -80,7 +80,7 @@ class CommunitySecretServiceIntegrationSpec extends Specification {
 		result.communityAddress == communityAddress
 	}
 
-	void "updateCommunitySecret() test"() {
+	void "update() test"() {
 		setup:
 		CommunitySecret s1 = new CommunitySecret(
 			name: "secret 1",
@@ -92,7 +92,7 @@ class CommunitySecretServiceIntegrationSpec extends Specification {
 			name: "new secret name",
 		)
 		when:
-		CommunitySecret result = service.updateCommunitySecret(communityAddress, s1.id, cmd)
+		CommunitySecret result = service.update(communityAddress, s1.id, cmd)
 		then:
 		result.name == "new secret name"
 		result.secret == "secret#1"

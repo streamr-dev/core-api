@@ -28,7 +28,7 @@ class CommunitySecretService {
 		return result
 	}
 
-	CommunitySecret updateCommunitySecret(String communityAddress, String communitySecretId, CommunitySecretCommand cmd) {
+	CommunitySecret update(String communityAddress, String communitySecretId, CommunitySecretCommand cmd) {
 		CommunitySecret result = CommunitySecret.findWhere(communityAddress: communityAddress, id: communitySecretId)
 		if (result == null) {
 			throw new NotFoundException("community secret not found")

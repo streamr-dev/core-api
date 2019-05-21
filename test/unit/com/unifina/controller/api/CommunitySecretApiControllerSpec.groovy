@@ -202,7 +202,7 @@ class CommunitySecretApiControllerSpec extends Specification {
 		e.code == "NOT_FOUND"
 	}
 
-	void "updateCommunitySecret() test"() {
+	void "update() test"() {
 		setup:
 		CommunitySecret s1 = new CommunitySecret(
 			name: "name",
@@ -218,11 +218,11 @@ class CommunitySecretApiControllerSpec extends Specification {
 		request.json = [
 			name: "new name",
 		]
-		withFilters(action: "updateCommunitySecret") {
-			controller.updateCommunitySecret()
+		withFilters(action: "update") {
+			controller.update()
 		}
 		then:
-		1 * controller.communitySecretService.updateCommunitySecret(communityAddress, validID, _ as CommunitySecretCommand) >> {
+		1 * controller.communitySecretService.update(communityAddress, validID, _ as CommunitySecretCommand) >> {
 			s1.name = "new name"
 			return s1
 		}
@@ -231,7 +231,7 @@ class CommunitySecretApiControllerSpec extends Specification {
 		response.json.name == "new name"
 	}
 
-	void "updateCommunitySecret() bad request on invalid community address"() {
+	void "update() bad request on invalid community address"() {
 		when:
 		request.method = "PUT"
 		params.communityAddress = "0x123"
@@ -239,8 +239,8 @@ class CommunitySecretApiControllerSpec extends Specification {
 		request.json = [
 			name: "name",
 		]
-		withFilters(action: "updateCommunitySecret") {
-			controller.updateCommunitySecret()
+		withFilters(action: "update") {
+			controller.update()
 		}
 		then:
 		0 * controller.communitySecretService._
@@ -249,7 +249,7 @@ class CommunitySecretApiControllerSpec extends Specification {
 		e.code == "PARAMETER_MISSING"
 	}
 
-	void "updateCommunitySecret() bad request on invalid community secret id"() {
+	void "update() bad request on invalid community secret id"() {
 		when:
 		request.method = "PUT"
 		params.communityAddress = communityAddress
@@ -257,8 +257,8 @@ class CommunitySecretApiControllerSpec extends Specification {
 		request.json = [
 			name: "name",
 		]
-		withFilters(action: "updateCommunitySecret") {
-			controller.updateCommunitySecret()
+		withFilters(action: "update") {
+			controller.update()
 		}
 		then:
 		0 * controller.communitySecretService._
@@ -267,7 +267,7 @@ class CommunitySecretApiControllerSpec extends Specification {
 		e.code == "PARAMETER_MISSING"
 	}
 
-	void "updateCommunitySecret() bad request on invalid community secret name"() {
+	void "update() bad request on invalid community secret name"() {
 		when:
 		request.method = "PUT"
 		params.communityAddress = communityAddress
@@ -275,8 +275,8 @@ class CommunitySecretApiControllerSpec extends Specification {
 		request.json = [
 			name: "",
 		]
-		withFilters(action: "updateCommunitySecret") {
-			controller.updateCommunitySecret()
+		withFilters(action: "update") {
+			controller.update()
 		}
 		then:
 		0 * controller.communitySecretService._
@@ -285,7 +285,7 @@ class CommunitySecretApiControllerSpec extends Specification {
 		e.code == "PARAMETER_MISSING"
 	}
 
-	void "updateCommunitySecret() not found on when community secret not found by id"() {
+	void "update() not found on when community secret not found by id"() {
 		when:
 		request.method = "PUT"
 		params.communityAddress = communityAddress
@@ -293,11 +293,11 @@ class CommunitySecretApiControllerSpec extends Specification {
 		request.json = [
 			name: "name",
 		]
-		withFilters(action: "updateCommunitySecret") {
-			controller.updateCommunitySecret()
+		withFilters(action: "update") {
+			controller.update()
 		}
 		then:
-		1 * controller.communitySecretService.updateCommunitySecret(communityAddress, validID, _ as CommunitySecretCommand) >> null
+		1 * controller.communitySecretService.update(communityAddress, validID, _ as CommunitySecretCommand) >> null
 		def e = thrown(NotFoundException)
 		e.statusCode == 404
 		e.code == "NOT_FOUND"
