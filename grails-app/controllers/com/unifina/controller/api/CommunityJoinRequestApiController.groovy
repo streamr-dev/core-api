@@ -76,7 +76,7 @@ class CommunityJoinRequestApiController {
 
 	// curl -v -X PUT -H "Authorization: token tester1-api-key" -H "Content-Type: application/json" -d '{"state": "ACCEPTED"}' http://localhost:8081/streamr-core/api/v1/communities/0x6c90aece04198da2d5ca9b956b8f95af8041de37/joinRequests/L-TvrBkyQTS_JK1ABHFEZAaZ3FHq7-TPqMXe9JNz1x6g
 	@StreamrApi
-	def updateCommunityJoinRequest(String communityAddress, String joinRequestId, UpdateCommunityJoinRequestCommand cmd) {
+	def update(String communityAddress, String joinRequestId, UpdateCommunityJoinRequestCommand cmd) {
 		if (!isCommunityAddress(communityAddress)) {
 			throw new BadRequestException("community address is not an ethereum address")
 		}
@@ -86,7 +86,7 @@ class CommunityJoinRequestApiController {
 		if (cmd.errors.getFieldError("state")) {
 			throw new BadRequestException("state in json is not valid")
 		}
-		CommunityJoinRequest result = communityJoinRequestService.updateCommunityJoinRequest(communityAddress, joinRequestId, cmd)
+		CommunityJoinRequest result = communityJoinRequestService.update(communityAddress, joinRequestId, cmd)
 		render(result?.toMap() as JSON)
 	}
 

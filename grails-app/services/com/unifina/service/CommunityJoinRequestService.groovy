@@ -61,7 +61,7 @@ class CommunityJoinRequestService {
 		return c
 	}
 
-	CommunityJoinRequest updateCommunityJoinRequest(String communityAddress, String joinRequestId, UpdateCommunityJoinRequestCommand cmd) {
+	CommunityJoinRequest update(String communityAddress, String joinRequestId, UpdateCommunityJoinRequestCommand cmd) {
 		CommunityJoinRequest c = CommunityJoinRequest.where {
 			(communityAddress == communityAddress) && (id == joinRequestId)
 		}.find()

@@ -227,7 +227,7 @@ class CommunityJoinRequestApiControllerSpec extends Specification {
 		e.code == "NOT_FOUND"
 	}
 
-	void "updateCommunityJoinRequest() test"() {
+	void "update() test"() {
 		setup:
 		CommunityJoinRequest r = new CommunityJoinRequest(
 			memberAddress: "0xCCCC000000000000000000000000AAAA0000FFFF",
@@ -244,11 +244,11 @@ class CommunityJoinRequestApiControllerSpec extends Specification {
 		]
 		params.communityAddress = communityAddress
 		params.joinRequestId = validID
-		withFilters(action: "updateCommunityJoinRequest") {
-			controller.updateCommunityJoinRequest()
+		withFilters(action: "update") {
+			controller.update()
 		}
 		then:
-		1 * controller.communityJoinRequestService.updateCommunityJoinRequest(communityAddress, validID, _ as UpdateCommunityJoinRequestCommand) >> {
+		1 * controller.communityJoinRequestService.update(communityAddress, validID, _ as UpdateCommunityJoinRequestCommand) >> {
 			r.state = CommunityJoinRequest.State.ACCEPTED
 			return r
 		}
@@ -259,7 +259,7 @@ class CommunityJoinRequestApiControllerSpec extends Specification {
 		response.json.communityAddress == communityAddress
 	}
 
-	void "updateCommunityJoinRequest() bad request on invalid community address"() {
+	void "update() bad request on invalid community address"() {
 		when:
 		request.method = "PUT"
 		request.json = [
@@ -267,8 +267,8 @@ class CommunityJoinRequestApiControllerSpec extends Specification {
 		]
 		params.communityAddress = "0x123"
 		params.joinRequestId = validID
-		withFilters(action: "updateCommunityJoinRequest") {
-			controller.updateCommunityJoinRequest()
+		withFilters(action: "update") {
+			controller.update()
 		}
 		then:
 		0 * controller.communityJoinRequestService._
@@ -277,7 +277,7 @@ class CommunityJoinRequestApiControllerSpec extends Specification {
 		e.code == "PARAMETER_MISSING"
 	}
 
-	void "updateCommunityJoinRequest() bad request when state is not valid"() {
+	void "update() bad request when state is not valid"() {
 		when:
 		request.method = "PUT"
 		request.json = [
@@ -285,8 +285,8 @@ class CommunityJoinRequestApiControllerSpec extends Specification {
 		]
 		params.communityAddress = communityAddress
 		params.joinRequestId = validID
-		withFilters(action: "updateCommunityJoinRequest") {
-			controller.updateCommunityJoinRequest()
+		withFilters(action: "update") {
+			controller.update()
 		}
 		then:
 		0 * controller.communityJoinRequestService._
@@ -295,7 +295,7 @@ class CommunityJoinRequestApiControllerSpec extends Specification {
 		e.code == "PARAMETER_MISSING"
 	}
 
-	void "updateCommunityJoinRequest() bad request on invalid community join request id"() {
+	void "update() bad request on invalid community join request id"() {
 		when:
 		request.method = "PUT"
 		request.json = [
@@ -303,8 +303,8 @@ class CommunityJoinRequestApiControllerSpec extends Specification {
 		]
 		params.communityAddress = communityAddress
 		params.joinRequestId = null
-		withFilters(action: "updateCommunityJoinRequest") {
-			controller.updateCommunityJoinRequest()
+		withFilters(action: "update") {
+			controller.update()
 		}
 		then:
 		0 * controller.communityJoinRequestService._
@@ -313,7 +313,7 @@ class CommunityJoinRequestApiControllerSpec extends Specification {
 		e.code == "PARAMETER_MISSING"
 	}
 
-	void "updateCommunityJoinRequest() not found 404 on bad community join request id"() {
+	void "update() not found 404 on bad community join request id"() {
 		when:
 		request.method = "PUT"
 		request.json = [
@@ -321,11 +321,11 @@ class CommunityJoinRequestApiControllerSpec extends Specification {
 		]
 		params.communityAddress = communityAddress
 		params.joinRequestId = validID // ID not found in DB
-		withFilters(action: "updateCommunityJoinRequest") {
-			controller.updateCommunityJoinRequest()
+		withFilters(action: "update") {
+			controller.update()
 		}
 		then:
-		1 * controller.communityJoinRequestService.updateCommunityJoinRequest(communityAddress, validID, _ as UpdateCommunityJoinRequestCommand) >> {
+		1 * controller.communityJoinRequestService.update(communityAddress, validID, _ as UpdateCommunityJoinRequestCommand) >> {
 			throw new NotFoundException("mocked: entity not found")
 		}
 		def e = thrown(NotFoundException)

@@ -102,7 +102,7 @@ class CommunityJoinRequestServiceSpec extends Specification {
 		e.code == "INCORRECT_COMMUNITY_SECRET"
 	}
 
-	void "updateCommunityJoinRequest rejects accepted state"() {
+	void "update rejects accepted state"() {
 		setup:
 		CommunityJoinRequest r = new CommunityJoinRequest(
 			memberAddress: "0xCCCC000000000000000000000000AAAA0000FFFF",
@@ -119,14 +119,14 @@ class CommunityJoinRequestServiceSpec extends Specification {
 		)
 
 		when:
-		service.updateCommunityJoinRequest(communityAddress, r.id, cmd)
+		service.update(communityAddress, r.id, cmd)
 		then:
 		def e = thrown(ApiException)
 		e.statusCode == 400
 		e.code == "JOIN_REQUEST_ALREADY_ACCEPTED"
 	}
 
-	void "updateCommunityJoinRequest rejects invalid state"() {
+	void "update rejects invalid state"() {
 		setup:
 		CommunityJoinRequest r = new CommunityJoinRequest(
 			memberAddress: "0xCCCC000000000000000000000000AAAA0000FFFF",
@@ -143,7 +143,7 @@ class CommunityJoinRequestServiceSpec extends Specification {
 		)
 
 		when:
-		service.updateCommunityJoinRequest(communityAddress, r.id, cmd)
+		service.update(communityAddress, r.id, cmd)
 		then:
 		def e = thrown(ApiException)
 		e.statusCode == 400

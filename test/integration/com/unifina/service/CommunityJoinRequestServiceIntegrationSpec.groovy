@@ -118,7 +118,7 @@ class CommunityJoinRequestServiceIntegrationSpec extends Specification {
 		r.memberAddress == "0xCCCC000000000000000000000000AAAA0000AAAA"
 	}
 
-	void "updateCommunityJoinRequest updates pending state to accepted"() {
+	void "update updates pending state to accepted"() {
 		setup:
 		CommunityJoinRequest r = new CommunityJoinRequest(
 			memberAddress: "0xCCCC000000000000000000000000AAAA0000FFFF",
@@ -135,7 +135,7 @@ class CommunityJoinRequestServiceIntegrationSpec extends Specification {
 		)
 
 		when:
-		def c = service.updateCommunityJoinRequest(communityAddress, r.id, cmd)
+		def c = service.update(communityAddress, r.id, cmd)
 		then:
 		c.state == CommunityJoinRequest.State.ACCEPTED
 		// no changes below
@@ -144,7 +144,7 @@ class CommunityJoinRequestServiceIntegrationSpec extends Specification {
 		c.user == me
 	}
 
-	void "updateCommunityJoinRequest updates pending state to rejected"() {
+	void "update updates pending state to rejected"() {
 		setup:
 		CommunityJoinRequest r = new CommunityJoinRequest(
 			memberAddress: "0xCCCC000000000000000000000000AAAA0000FFFF",
@@ -161,7 +161,7 @@ class CommunityJoinRequestServiceIntegrationSpec extends Specification {
 		)
 
 		when:
-		def c = service.updateCommunityJoinRequest(communityAddress, r.id, cmd)
+		def c = service.update(communityAddress, r.id, cmd)
 		then:
 		c.state == CommunityJoinRequest.State.REJECTED
 		// no changes below

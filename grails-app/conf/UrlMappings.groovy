@@ -121,7 +121,7 @@ class UrlMappings {
 		"/api/v1/communities/$communityAddress/joinRequests"(method: "GET", controller: "communityJoinRequestApi", action: "findAll")
 		"/api/v1/communities/$communityAddress/joinRequests"(method: "POST", controller: "communityJoinRequestApi", action: "create")
 		"/api/v1/communities/$communityAddress/joinRequests/$joinRequestId"(method: "GET", controller: "communityJoinRequestApi", action: "find")
-		"/api/v1/communities/$communityAddress/joinRequests/$joinRequestId"(method: "PUT", controller: "communityJoinRequestApi", action: "updateCommunityJoinRequest")
+		"/api/v1/communities/$communityAddress/joinRequests/$joinRequestId"(method: "PUT", controller: "communityJoinRequestApi", action: "update")
 
 		// Mappings for pages using React Router (the root for the router)
 		"/dashboard/editor/$id**?"(controller: "dashboard", action: "editor")
