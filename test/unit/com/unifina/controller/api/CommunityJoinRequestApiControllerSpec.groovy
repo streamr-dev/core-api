@@ -157,7 +157,7 @@ class CommunityJoinRequestApiControllerSpec extends Specification {
 		e.code == "PARAMETER_MISSING"
 	}
 
-	void "findCommunityJoinRequest() test"() {
+	void "find() test"() {
 		CommunityJoinRequest r = new CommunityJoinRequest(
 			memberAddress: "0xCCCC000000000000000000000000AAAA0000FFFF",
 			communityAddress: communityAddress,
@@ -170,11 +170,11 @@ class CommunityJoinRequestApiControllerSpec extends Specification {
 		request.method = "GET"
 		params.communityAddress = communityAddress
 		params.joinRequestId = validID
-		withFilters(action: "findCommunityJoinRequest") {
-			controller.findCommunityJoinRequest()
+		withFilters(action: "find") {
+			controller.find()
 		}
 		then:
-		1 * controller.communityJoinRequestService.findCommunityJoinRequest(communityAddress, validID) >> r
+		1 * controller.communityJoinRequestService.find(communityAddress, validID) >> r
 		response.json.memberAddress == "0xCCCC000000000000000000000000AAAA0000FFFF"
 		response.json.communityAddress == communityAddress
 		response.json.id == validID
@@ -182,13 +182,13 @@ class CommunityJoinRequestApiControllerSpec extends Specification {
 		response.status == 200
 	}
 
-	void "findCommunityJoinRequest() bad request on invalid community address"() {
+	void "find() bad request on invalid community address"() {
 		when:
 		request.method = "GET"
 		params.communityAddress = "0x123"
 		params.joinRequestId = validID
-		withFilters(action: "findCommunityJoinRequest") {
-			controller.findCommunityJoinRequest()
+		withFilters(action: "find") {
+			controller.find()
 		}
 		then:
 		0 * controller.communityJoinRequestService._
@@ -197,13 +197,13 @@ class CommunityJoinRequestApiControllerSpec extends Specification {
 		e.code == "PARAMETER_MISSING"
 	}
 
-	void "findCommunityJoinRequest() bad request on invalid community join request id"() {
+	void "find() bad request on invalid community join request id"() {
 		when:
 		request.method = "GET"
 		params.communityAddress = communityAddress
 		params.joinRequestId = null
-		withFilters(action: "findCommunityJoinRequest") {
-			controller.findCommunityJoinRequest()
+		withFilters(action: "find") {
+			controller.find()
 		}
 		then:
 		0 * controller.communityJoinRequestService._
@@ -212,16 +212,16 @@ class CommunityJoinRequestApiControllerSpec extends Specification {
 		e.code == "PARAMETER_MISSING"
 	}
 
-	void "findCommunityJoinRequest() not found 404 on bad CommunityJoinRequest id"() {
+	void "find() not found 404 on bad CommunityJoinRequest id"() {
 		when:
 		request.method = "GET"
 		params.communityAddress = communityAddress
 		params.joinRequestId = validID // ID not found in DB
-		withFilters(action: "findCommunityJoinRequest") {
-			controller.findCommunityJoinRequest()
+		withFilters(action: "find") {
+			controller.find()
 		}
 		then:
-		1 * controller.communityJoinRequestService.findCommunityJoinRequest(communityAddress, validID) >> null
+		1 * controller.communityJoinRequestService.find(communityAddress, validID) >> null
 		def e = thrown(NotFoundException)
 		e.statusCode == 404
 		e.code == "NOT_FOUND"

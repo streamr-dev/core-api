@@ -54,7 +54,7 @@ class CommunityJoinRequestService {
 		return c
 	}
 
-	CommunityJoinRequest findCommunityJoinRequest(String communityAddress, String joinRequestId) {
+	CommunityJoinRequest find(String communityAddress, String joinRequestId) {
 		CommunityJoinRequest c = CommunityJoinRequest.where {
 			(communityAddress == communityAddress) && (id == joinRequestId)
 		}.find()

@@ -60,14 +60,14 @@ class CommunityJoinRequestApiController {
 
 	// curl -v -X GET -H "Authorization: token tester1-api-key" http://localhost:8081/streamr-core/api/v1/communities/0x6c90aece04198da2d5ca9b956b8f95af8041de37/joinRequests/L-TvrBkyQTS_JK1ABHFEZAaZ3FHq7-TPqMXe9JNz1x6g
 	@StreamrApi
-	def findCommunityJoinRequest(String communityAddress, String joinRequestId) {
+	def find(String communityAddress, String joinRequestId) {
 		if (!isCommunityAddress(communityAddress)) {
 			throw new BadRequestException("community address is not an ethereum address")
 		}
 		if (!isValidID(joinRequestId)) {
 			throw new BadRequestException("join request id not valid")
 		}
-		CommunityJoinRequest result = communityJoinRequestService.findCommunityJoinRequest(communityAddress, joinRequestId)
+		CommunityJoinRequest result = communityJoinRequestService.find(communityAddress, joinRequestId)
 		if (result == null) {
 			throw new NotFoundException("community join request not found with id: " + joinRequestId)
 		}

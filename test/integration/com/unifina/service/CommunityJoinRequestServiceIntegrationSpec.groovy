@@ -91,7 +91,7 @@ class CommunityJoinRequestServiceIntegrationSpec extends Specification {
 		results.get(0).memberAddress == "0xCCCC000000000000000000000000AAAA0000AAAA"
 	}
 
-	void "findCommunityJoinRequest"() {
+	void "find"() {
 		setup:
 		CommunityJoinRequest r1 = new CommunityJoinRequest(
 			memberAddress: "0xCCCC000000000000000000000000AAAA0000AAAA",
@@ -112,7 +112,7 @@ class CommunityJoinRequestServiceIntegrationSpec extends Specification {
 		)
 		r2.save(failOnError: true, validate: true)
 		when:
-		CommunityJoinRequest r = service.findCommunityJoinRequest(communityAddress, r1.id)
+		CommunityJoinRequest r = service.find(communityAddress, r1.id)
 		then:
 		r.communityAddress == communityAddress
 		r.memberAddress == "0xCCCC000000000000000000000000AAAA0000AAAA"
