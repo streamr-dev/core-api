@@ -134,7 +134,7 @@ class CommunitySecretApiControllerSpec extends Specification {
 		e.code == "PARAMETER_MISSING"
 	}
 
-	void "findCommunitySecret() test"() {
+	void "find() test"() {
 		setup:
 		CommunitySecret s1 = new CommunitySecret(
 			name: "secret 1",
@@ -147,23 +147,23 @@ class CommunitySecretApiControllerSpec extends Specification {
 		request.method = "GET"
 		params.communityAddress = communityAddress
 		params.communitySecretId = validID // ID not found in DB
-		withFilters(action: "findCommunitySecret") {
-			controller.findCommunitySecret()
+		withFilters(action: "find") {
+			controller.find()
 		}
 		then:
-		1 * controller.communitySecretService.findCommunitySecret(communityAddress, validID) >> s1
+		1 * controller.communitySecretService.find(communityAddress, validID) >> s1
 		response.json.id == "1"
 		response.json.name == "secret 1"
 		response.json.communityAddress == communityAddress
 	}
 
-	void "findCommunitySecret() bad request on invalid community address"() {
+	void "find() bad request on invalid community address"() {
 		when:
 		request.method = "GET"
 		params.communityAddress = "0x123"
 		params.communitySecretId = validID
-		withFilters(action: "findCommunitySecret") {
-			controller.findCommunitySecret()
+		withFilters(action: "find") {
+			controller.find()
 		}
 		then:
 		0 * controller.communitySecretService._
@@ -172,13 +172,13 @@ class CommunitySecretApiControllerSpec extends Specification {
 		e.code == "PARAMETER_MISSING"
 	}
 
-	void "findCommunitySecret() bad request on invalid community secret id"() {
+	void "find() bad request on invalid community secret id"() {
 		when:
 		request.method = "GET"
 		params.communityAddress = communityAddress
 		params.communitySecretId = null
-		withFilters(action: "findCommunitySecret") {
-			controller.findCommunitySecret()
+		withFilters(action: "find") {
+			controller.find()
 		}
 		then:
 		0 * controller.communitySecretService._
@@ -187,16 +187,16 @@ class CommunitySecretApiControllerSpec extends Specification {
 		e.code == "PARAMETER_MISSING"
 	}
 
-	void "findCommunitySecret() not found when community secret not found by id"() {
+	void "find() not found when community secret not found by id"() {
 		when:
 		request.method = "GET"
 		params.communityAddress = communityAddress
 		params.communitySecretId = validID // ID not found in DB
-		withFilters(action: "findCommunitySecret") {
-			controller.findCommunitySecret()
+		withFilters(action: "find") {
+			controller.find()
 		}
 		then:
-		1 * controller.communitySecretService.findCommunitySecret(communityAddress, validID) >> null
+		1 * controller.communitySecretService.find(communityAddress, validID) >> null
 		def e = thrown(NotFoundException)
 		e.statusCode == 404
 		e.code == "NOT_FOUND"

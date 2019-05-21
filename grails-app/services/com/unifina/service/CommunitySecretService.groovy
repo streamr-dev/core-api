@@ -21,7 +21,7 @@ class CommunitySecretService {
 		return result
 	}
 
-	CommunitySecret findCommunitySecret(String communityAddress, String communitySecretId) {
+	CommunitySecret find(String communityAddress, String communitySecretId) {
 		CommunitySecret result = CommunitySecret.where {
 			(communityAddress == communityAddress) && (id == communitySecretId)
 		}.find()

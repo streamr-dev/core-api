@@ -49,14 +49,14 @@ class CommunitySecretApiController {
 	}
 
 	@StreamrApi
-	def findCommunitySecret(String communityAddress, String communitySecretId) {
+	def find(String communityAddress, String communitySecretId) {
 		if (!isCommunityAddress(communityAddress)) {
 			throw new BadRequestException("community address is not an ethereum address")
 		}
 		if (!isValidID(communitySecretId)) {
 			throw new BadRequestException("community secret id is not valid")
 		}
-		CommunitySecret secret = communitySecretService.findCommunitySecret(communityAddress, communitySecretId)
+		CommunitySecret secret = communitySecretService.find(communityAddress, communitySecretId)
 		if (secret == null) {
 			throw new NotFoundException("community secret not found by id")
 		}

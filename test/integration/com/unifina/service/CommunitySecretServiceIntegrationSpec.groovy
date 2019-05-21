@@ -52,7 +52,7 @@ class CommunitySecretServiceIntegrationSpec extends Specification {
 		result.secret == "secret"
 	}
 
-	void "findCommunitySecret() test"() {
+	void "find() test"() {
 		setup:
 		CommunitySecret s1 = new CommunitySecret(
 			name: "secret 1",
@@ -73,7 +73,7 @@ class CommunitySecretServiceIntegrationSpec extends Specification {
 		)
 		s3.save(validate: true, failOnError: true)
 		when:
-		CommunitySecret result = service.findCommunitySecret(communityAddress, s1.id)
+		CommunitySecret result = service.find(communityAddress, s1.id)
 		then:
 		result.name == "secret 1"
 		result.secret == "secret#1"
