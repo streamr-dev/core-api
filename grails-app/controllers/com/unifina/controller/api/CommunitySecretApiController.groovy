@@ -28,11 +28,11 @@ class CommunitySecretApiController {
 	}
 
 	@StreamrApi
-	def findCommunitySecrets(String communityAddress) {
+	def findAll(String communityAddress) {
 		if (!isCommunityAddress(communityAddress)) {
 			throw new BadRequestException("community address is not an ethereum address")
 		}
-		List<CommunitySecret> secrets = communitySecretService.findCommunitySecrets(communityAddress)
+		List<CommunitySecret> secrets = communitySecretService.findAll(communityAddress)
 		render(secrets*.toMap() as JSON)
 	}
 

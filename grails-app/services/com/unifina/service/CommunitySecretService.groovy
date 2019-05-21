@@ -8,7 +8,7 @@ import com.unifina.utils.IdGenerator
 class CommunitySecretService {
 	IdGenerator generator = new IdGenerator()
 
-	List<CommunitySecret> findCommunitySecrets(String communityAddress) {
+	List<CommunitySecret> findAll(String communityAddress) {
 		return CommunitySecret.findAllWhere(communityAddress: communityAddress)
 	}
 

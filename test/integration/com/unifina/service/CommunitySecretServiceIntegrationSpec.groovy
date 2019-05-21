@@ -8,7 +8,7 @@ class CommunitySecretServiceIntegrationSpec extends Specification {
 	CommunitySecretService service = new CommunitySecretService()
 	final String communityAddress = "0x0000000000000000000000000000000000000000"
 
-	void "findCommunitySecrets() test"() {
+	void "findAll() test"() {
 		setup:
 		CommunitySecret s1 = new CommunitySecret(
 			name: "secret 1",
@@ -29,7 +29,7 @@ class CommunitySecretServiceIntegrationSpec extends Specification {
 		)
 		s3.save(validate: true, failOnError: true)
 		when:
-		List<CommunitySecret> results = service.findCommunitySecrets(communityAddress)
+		List<CommunitySecret> results = service.findAll(communityAddress)
 		then:
 		results.size() == 2
 		results.containsAll([s1, s2])

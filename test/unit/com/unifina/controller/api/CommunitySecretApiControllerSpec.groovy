@@ -28,7 +28,7 @@ class CommunitySecretApiControllerSpec extends Specification {
 		controller.communitySecretService = Mock(CommunitySecretService)
 	}
 
-	void "findCommunitySecrets() test"() {
+	void "findAll() test"() {
 		setup:
 		CommunitySecret s1 = new CommunitySecret(
 			name: "secret 1",
@@ -47,11 +47,11 @@ class CommunitySecretApiControllerSpec extends Specification {
 		when:
 		request.method = "GET"
 		params.communityAddress = communityAddress
-		withFilters(action: "findCommunitySecrets") {
-			controller.findCommunitySecrets()
+		withFilters(action: "findAll") {
+			controller.findAll()
 		}
 		then:
-		1 * controller.communitySecretService.findCommunitySecrets(communityAddress) >> [s1, s2]
+		1 * controller.communitySecretService.findAll(communityAddress) >> [s1, s2]
 		response.json[0].id == "1"
 		response.json[0].name == "secret 1"
 		response.json[0].communityAddress == communityAddress
@@ -60,12 +60,12 @@ class CommunitySecretApiControllerSpec extends Specification {
 		response.json[1].communityAddress == communityAddress
 	}
 
-	void "findCommunitySecrets() bad request on invalid community address"() {
+	void "findAll() bad request on invalid community address"() {
 		when:
 		request.method = "GET"
 		params.communityAddress = "0x123"
-		withFilters(action: "findCommunitySecrets") {
-			controller.findCommunitySecrets()
+		withFilters(action: "findAll") {
+			controller.findAll()
 		}
 		then:
 		0 * controller.communitySecretService._
