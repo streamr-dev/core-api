@@ -125,7 +125,7 @@ public class SolidityCompileDeploy extends ModuleWithUI implements Pullable<Ethe
 
 	protected String deploy(String bytecode, List<Object> args, BigInteger sendWei) throws IOException, ClassNotFoundException, NoSuchMethodException, InstantiationException, IllegalAccessException, InvocationTargetException {
 		BigInteger gasPrice = BigDecimal.valueOf(ethereumOptions.getGasPriceWei()).toBigInteger();
-		BigInteger nonce = web3j.ethGetTransactionCount(ethereumAccount.getAddress(), DefaultBlockParameterName.LATEST).send().getTransactionCount();
+		BigInteger nonce = web3j.ethGetTransactionCount(ethereumAccount.getAddress(), DefaultBlockParameterName.PENDING).send().getTransactionCount();
 		Credentials credentials = Credentials.create(ethereumAccount.getPrivateKey());
 
 		// convert constructor arguments into web3j "Types" that contain both a Java class and the argument's value

@@ -36,7 +36,7 @@ class Web3jHelperSpec extends ModuleTestingSpecification {
 		Web3jHelper.instantiateType("uint", 123) instanceof Uint
 		Web3jHelper.instantiateType("uint256", 123) instanceof Uint256
 		Web3jHelper.instantiateType("address", "0x123") instanceof Address
-	//	Web3jHelper.instantiateType("address", "0x6e6adf6e579d83f8f1bc388a392c1a130b8f8d0cae6250612eb2aab4e945b1f0") instanceof Address
+		Web3jHelper.instantiateType("address", BigInteger.ONE) instanceof Address
 		Web3jHelper.instantiateType("uint256[]", Arrays.asList(nums)) instanceof DynamicArray
 		Web3jHelper.instantiateType("uint256[3]", Arrays.asList(nums)) instanceof StaticArray
 		Web3jHelper.instantiateType("uint256[]", nums) instanceof DynamicArray

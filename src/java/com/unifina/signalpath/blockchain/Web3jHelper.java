@@ -4,6 +4,7 @@ import org.apache.log4j.Logger;
 import org.web3j.abi.*;
 import org.web3j.abi.datatypes.*;
 import org.web3j.abi.datatypes.generated.AbiTypes;
+import org.web3j.abi.datatypes.generated.Uint160;
 import org.web3j.protocol.Web3j;
 import org.web3j.protocol.core.DefaultBlockParameterName;
 import org.web3j.protocol.core.Response;
@@ -182,7 +183,11 @@ public class Web3jHelper {
 		} else if (Utf8String.class.isAssignableFrom(rc)) {
 			constructorArg = value.toString();
 		} else if (Address.class.isAssignableFrom(rc)) {
-			constructorArg = value.toString();
+			if (value instanceof BigInteger || value instanceof Uint160) {
+				constructorArg = value;
+			} else {
+				constructorArg = value.toString();
+			}
 		} else if (Bool.class.isAssignableFrom(rc)) {
 			if (value instanceof Boolean) {
 				constructorArg = value;

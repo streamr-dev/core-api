@@ -430,7 +430,7 @@ public class SendEthereumTransaction extends ModuleWithSideEffects {
 			} else {
 				BigInteger gasPrice = BigDecimal.valueOf(ethereumOptions.getGasPriceWei()).toBigInteger();
 				EthGetTransactionCount ethGetTransactionCount = web3j.ethGetTransactionCount(
-					ethereumAccount.getAddress(), DefaultBlockParameterName.LATEST).send();
+					ethereumAccount.getAddress(), DefaultBlockParameterName.PENDING).send();
 				BigInteger nonce = ethGetTransactionCount.getTransactionCount();
 				BigInteger valueWei;
 				Credentials credentials = Credentials.create(ethereumAccount.getPrivateKey());
