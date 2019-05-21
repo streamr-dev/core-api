@@ -303,26 +303,26 @@ class CommunitySecretApiControllerSpec extends Specification {
 		e.code == "NOT_FOUND"
 	}
 
-	void "deleteCommunitySecret() test"() {
+	void "delete() test"() {
 		when:
 		request.method = "DELETE"
 		params.communityAddress = communityAddress
 		params.communitySecretId = validID
-		withFilters(action: "deleteCommunitySecret") {
-			controller.deleteCommunitySecret()
+		withFilters(action: "delete") {
+			controller.delete()
 		}
 		then:
-		1 * controller.communitySecretService.deleteCommunitySecret(communityAddress, validID)
+		1 * controller.communitySecretService.delete(communityAddress, validID)
 		response.status == 204
 	}
 
-	void "deleteCommunitySecret() bad request on invalid community address"() {
+	void "delete() bad request on invalid community address"() {
 		when:
 		request.method = "DELETE"
 		params.communityAddress = "0x123"
 		params.communitySecretId = validID
-		withFilters(action: "deleteCommunitySecret") {
-			controller.deleteCommunitySecret()
+		withFilters(action: "delete") {
+			controller.delete()
 		}
 		then:
 		0 * controller.communitySecretService._
@@ -331,13 +331,13 @@ class CommunitySecretApiControllerSpec extends Specification {
 		e.code == "PARAMETER_MISSING"
 	}
 
-	void "deleteCommunitySecret() bad request on invalid community secret id"() {
+	void "delete() bad request on invalid community secret id"() {
 		when:
 		request.method = "DELETE"
 		params.communityAddress = communityAddress
 		params.communitySecretId = null
-		withFilters(action: "deleteCommunitySecret") {
-			controller.deleteCommunitySecret()
+		withFilters(action: "delete") {
+			controller.delete()
 		}
 		then:
 		0 * controller.communitySecretService._
@@ -346,16 +346,16 @@ class CommunitySecretApiControllerSpec extends Specification {
 		e.code == "PARAMETER_MISSING"
 	}
 
-	void "deleteCommunitySecret() not found on non-existing community secret id"() {
+	void "delete() not found on non-existing community secret id"() {
 		when:
 		request.method = "DELETE"
 		params.communityAddress = communityAddress
 		params.communitySecretId = validID
-		withFilters(action: "deleteCommunitySecret") {
-			controller.deleteCommunitySecret()
+		withFilters(action: "delete") {
+			controller.delete()
 		}
 		then:
-		1 * controller.communitySecretService.deleteCommunitySecret(communityAddress, validID) >> {
+		1 * controller.communitySecretService.delete(communityAddress, validID) >> {
 			throw new NotFoundException("mocked: not found!")
 		}
 		def e = thrown(NotFoundException)

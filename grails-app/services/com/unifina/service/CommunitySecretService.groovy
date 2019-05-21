@@ -38,7 +38,7 @@ class CommunitySecretService {
 		return result
 	}
 
-	void deleteCommunitySecret(String communityAddress, String communitySecretId) {
+	void delete(String communityAddress, String communitySecretId) {
 		CommunitySecret result = CommunitySecret.findWhere(communityAddress: communityAddress, id: communitySecretId)
 		if (result == null) {
 			throw new NotFoundException("community secret not found by id")

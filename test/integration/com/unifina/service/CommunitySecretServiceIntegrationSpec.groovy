@@ -99,7 +99,7 @@ class CommunitySecretServiceIntegrationSpec extends Specification {
 		result.communityAddress == communityAddress
 	}
 
-	void "deleteCommunitySecret() test"() {
+	void "delete() test"() {
 		setup:
 		CommunitySecret s1 = new CommunitySecret(
 			name: "secret 1",
@@ -108,7 +108,7 @@ class CommunitySecretServiceIntegrationSpec extends Specification {
 		)
 		s1.save(validate: true, failOnError: true)
 		when:
-		service.deleteCommunitySecret(communityAddress, s1.id)
+		service.delete(communityAddress, s1.id)
 		then:
 		CommunitySecret.findById(s1.id) == null
 	}

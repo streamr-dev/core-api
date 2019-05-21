@@ -82,14 +82,14 @@ class CommunitySecretApiController {
 	}
 
 	@StreamrApi
-	def deleteCommunitySecret(String communityAddress, String communitySecretId) {
+	def delete(String communityAddress, String communitySecretId) {
 		if (!isCommunityAddress(communityAddress)) {
 			throw new BadRequestException("community address is not an ethereum address")
 		}
 		if (!isValidID(communitySecretId)) {
 			throw new BadRequestException("community secret id is not valid")
 		}
-		communitySecretService.deleteCommunitySecret(communityAddress, communitySecretId)
+		communitySecretService.delete(communityAddress, communitySecretId)
 		render(status: 204)
 	}
 }
