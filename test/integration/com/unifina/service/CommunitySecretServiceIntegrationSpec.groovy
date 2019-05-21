@@ -2,6 +2,7 @@ package com.unifina.service
 
 import com.unifina.api.CommunitySecretCommand
 import com.unifina.domain.community.CommunitySecret
+import com.unifina.utils.IdGenerator
 import spock.lang.Specification
 
 class CommunitySecretServiceIntegrationSpec extends Specification {
@@ -37,13 +38,14 @@ class CommunitySecretServiceIntegrationSpec extends Specification {
 
 	void "createCommunitySecret() test"() {
 		setup:
+		service.generator = Mock(IdGenerator)
 		CommunitySecretCommand cmd = new CommunitySecretCommand(
 			name: "community secret",
-			secret: "secret",
 		)
 		when:
 		CommunitySecret result = service.createCommunitySecret(communityAddress, cmd)
 		then:
+		1 * service.generator.generate() >> "secret"
 		result.id != null
 		result.name == "community secret"
 		result.communityAddress == communityAddress
