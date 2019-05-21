@@ -103,17 +103,19 @@ public class GetEvents extends AbstractSignalPathModule implements ContractEvent
 	@Override
 	public void onEvent(JSONArray events) {
 		try {
-			String txHash = events.getJSONObject(0).getString("transactionHash");
-			txHashOutput.send(txHash);
-			log.info(String.format("Received event '%s'", txHash));
-			TransactionReceipt txr = Web3jHelper.waitForTransactionReceipt(web3j, txHash, check_result_waitms, check_result_max_tries);
-			if(txr == null){
-				log.error("Couldnt find TransactionReceipt for transaction "+txHash+ " in allotted time");
-				return;
+			int eventcount = events.length();
+			for(int i=0; i<eventcount; i++) {
+				String txHash = events.getJSONObject(i).getString("transactionHash");
+				txHashOutput.send(txHash);
+				log.info(String.format("Received event '%s'", txHash));
+				TransactionReceipt txr = Web3jHelper.waitForTransactionReceipt(web3j, txHash, check_result_waitms, check_result_max_tries);
+				if (txr == null) {
+					log.error("Couldnt find TransactionReceipt for transaction " + txHash + " in allotted time");
+					return;
+				}
+				displayEventsFromLogs(txr.getLogs());
+				asyncPropagator.propagate();
 			}
-			displayEventsFromLogs(txr.getLogs());
-			asyncPropagator.propagate();
-
 		} catch (JSONException | IOException e) {
 			onError(e.getMessage());
 		}
