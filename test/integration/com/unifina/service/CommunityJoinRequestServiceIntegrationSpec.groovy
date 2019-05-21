@@ -19,7 +19,7 @@ class CommunityJoinRequestServiceIntegrationSpec extends Specification {
 		me.save(validate: true, failOnError: true)
 	}
 
-	void "findCommunityJoinRequests"() {
+	void "findAll"() {
 		setup:
 		CommunityJoinRequest r1 = new CommunityJoinRequest(
 			memberAddress: "0xCCCC000000000000000000000000AAAA0000AAAA",
@@ -49,13 +49,13 @@ class CommunityJoinRequestServiceIntegrationSpec extends Specification {
 		)
 		r3.save(failOnError: true, validate: true)
 		when:
-		List<CommunityJoinRequest> results = service.findCommunityJoinRequests(communityAddress, null)
+		List<CommunityJoinRequest> results = service.findAll(communityAddress, null)
 		then:
 		results.size() == 2
 		results.containsAll([r1, r2])
 	}
 
-	void "findCommunityJoinRequests with state"() {
+	void "findAll with state"() {
 		setup:
 		CommunityJoinRequest r1 = new CommunityJoinRequest(
 			memberAddress: "0xCCCC000000000000000000000000AAAA0000AAAA",
@@ -85,7 +85,7 @@ class CommunityJoinRequestServiceIntegrationSpec extends Specification {
 		)
 		r3.save(failOnError: true, validate: true)
 		when:
-		List<CommunityJoinRequest> results = service.findCommunityJoinRequests(communityAddress, CommunityJoinRequest.State.PENDING)
+		List<CommunityJoinRequest> results = service.findAll(communityAddress, CommunityJoinRequest.State.PENDING)
 		then:
 		results.size() == 1
 		results.get(0).memberAddress == "0xCCCC000000000000000000000000AAAA0000AAAA"

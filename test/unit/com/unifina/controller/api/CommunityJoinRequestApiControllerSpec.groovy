@@ -52,7 +52,7 @@ class CommunityJoinRequestApiControllerSpec extends Specification {
 		"0x1" | false
 	}
 
-	void "findCommunityJoinRequests() test"() {
+	void "findAll() test"() {
 		setup:
 		CommunityJoinRequest r = new CommunityJoinRequest(
 			user: me,
@@ -65,11 +65,11 @@ class CommunityJoinRequestApiControllerSpec extends Specification {
 		request.method = "GET"
 		params.communityAddress = communityAddress
 		params.state = null
-		withFilters(action: "findCommunityJoinRequests") {
-			controller.findCommunityJoinRequests()
+		withFilters(action: "findAll") {
+			controller.findAll()
 		}
 		then:
-		1 * controller.communityJoinRequestService.findCommunityJoinRequests(communityAddress, null) >> [r ]
+		1 * controller.communityJoinRequestService.findAll(communityAddress, null) >> [r ]
 		response.json[0].id == validID
 		response.json[0].memberAddress == "0x0000000000000000000000000000000000000001"
 		response.json[0].communityAddress == communityAddress
@@ -77,13 +77,13 @@ class CommunityJoinRequestApiControllerSpec extends Specification {
 		response.status == 200
     }
 
-	void "findCommunityJoinRequests() bad request on invalid community address input"() {
+	void "findAll() bad request on invalid community address input"() {
 		when:
 		request.method = "GET"
 		params.communityAddress = "0x123"
 		params.state = "APPROVED"
-		withFilters(action: "findCommunityJoinRequests") {
-			controller.findCommunityJoinRequests()
+		withFilters(action: "findAll") {
+			controller.findAll()
 		}
 		then:
 		0 * controller.communityJoinRequestService._

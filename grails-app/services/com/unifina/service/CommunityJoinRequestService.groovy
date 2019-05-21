@@ -15,7 +15,7 @@ class CommunityJoinRequestService {
 		// TODO: Backend produces join message to joinPartStream
 	}
 
-	List<CommunityJoinRequest> findCommunityJoinRequests(String communityAddress, CommunityJoinRequest.State state) {
+	List<CommunityJoinRequest> findAll(String communityAddress, CommunityJoinRequest.State state) {
 		return CommunityJoinRequest.withCriteria {
 			eq("communityAddress", communityAddress)
 			if (state) {

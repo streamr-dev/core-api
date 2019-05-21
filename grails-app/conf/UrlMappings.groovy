@@ -118,7 +118,7 @@ class UrlMappings {
 
 		"/api/v1/cluster/$action"(controller: "clusterApi")
 
-		"/api/v1/communities/$communityAddress/joinRequests"(method: "GET", controller: "communityJoinRequestApi", action: "findCommunityJoinRequests")
+		"/api/v1/communities/$communityAddress/joinRequests"(method: "GET", controller: "communityJoinRequestApi", action: "findAll")
 		"/api/v1/communities/$communityAddress/joinRequests"(method: "POST", controller: "communityJoinRequestApi", action: "createCommunityJoinRequest")
 		"/api/v1/communities/$communityAddress/joinRequests/$joinRequestId"(method: "GET", controller: "communityJoinRequestApi", action: "findCommunityJoinRequest")
 		"/api/v1/communities/$communityAddress/joinRequests/$joinRequestId"(method: "PUT", controller: "communityJoinRequestApi", action: "updateCommunityJoinRequest")

@@ -36,12 +36,12 @@ class CommunityJoinRequestApiController {
 
 	// curl -v -X GET -H "Authorization: token tester1-api-key" "http://localhost:8081/streamr-core/api/v1/communities/0x6c90aece04198da2d5ca9b956b8f95af8041de37/joinRequests?state=pending"
 	@StreamrApi
-    def findCommunityJoinRequests(String communityAddress, String state) {
+    def findAll(String communityAddress, String state) {
 		if (!isCommunityAddress(communityAddress)) {
 			throw new BadRequestException("community address is not an ethereum address")
 		}
 		CommunityJoinRequest.State st = isState(state)
-		List<CommunityJoinRequest> results = communityJoinRequestService.findCommunityJoinRequests(communityAddress, st)
+		List<CommunityJoinRequest> results = communityJoinRequestService.findAll(communityAddress, st)
 		render(results*.toMap() as JSON)
 	}
 
