@@ -12,7 +12,7 @@ class CommunitySecretService {
 		return CommunitySecret.findAllWhere(communityAddress: communityAddress)
 	}
 
-	CommunitySecret createCommunitySecret(String communityAddress, CommunitySecretCommand cmd) {
+	CommunitySecret create(String communityAddress, CommunitySecretCommand cmd) {
 		CommunitySecret result = new CommunitySecret()
 		result.communityAddress = communityAddress
 		result.name = cmd.name

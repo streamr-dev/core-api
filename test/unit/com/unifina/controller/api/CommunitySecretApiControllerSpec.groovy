@@ -74,7 +74,7 @@ class CommunitySecretApiControllerSpec extends Specification {
 		e.code == "PARAMETER_MISSING"
 	}
 
-	void "createCommunitySecret() test"() {
+	void "create() test"() {
 		CommunitySecret secret = new CommunitySecret(
 			name: "secret name",
 			secret: "secret",
@@ -89,17 +89,17 @@ class CommunitySecretApiControllerSpec extends Specification {
 			secret: "secret",
 		]
 		params.communityAddress = communityAddress
-		withFilters(action: "createCommunitySecret") {
-			controller.createCommunitySecret()
+		withFilters(action: "create") {
+			controller.create()
 		}
 		then:
-		1 * controller.communitySecretService.createCommunitySecret(communityAddress, _ as CommunitySecretCommand) >> secret
+		1 * controller.communitySecretService.create(communityAddress, _ as CommunitySecretCommand) >> secret
 		response.json.id == "1"
 		response.json.name == "secret name"
 		response.json.communityAddress == communityAddress
 	}
 
-	void "createCommunitySecret() bad request on invalid community address"() {
+	void "create() bad request on invalid community address"() {
 		when:
 		request.method = "POST"
 		request.json = [
@@ -107,8 +107,8 @@ class CommunitySecretApiControllerSpec extends Specification {
 			secret: "secret",
 		]
 		params.communityAddress = "0x123"
-		withFilters(action: "createCommunitySecret") {
-			controller.createCommunitySecret()
+		withFilters(action: "create") {
+			controller.create()
 		}
 		then:
 		0 * controller.communitySecretService._
@@ -117,15 +117,15 @@ class CommunitySecretApiControllerSpec extends Specification {
 		e.code == "PARAMETER_MISSING"
 	}
 
-	void "createCommunitySecret() bad request on invalid community name"() {
+	void "create() bad request on invalid community name"() {
 		when:
 		request.method = "POST"
 		request.json = [
 			name: "",
 		]
 		params.communityAddress = communityAddress
-		withFilters(action: "createCommunitySecret") {
-			controller.createCommunitySecret()
+		withFilters(action: "create") {
+			controller.create()
 		}
 		then:
 		0 * controller.communitySecretService._

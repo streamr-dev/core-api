@@ -37,14 +37,14 @@ class CommunitySecretApiController {
 	}
 
 	@StreamrApi
-	def createCommunitySecret(String communityAddress, CommunitySecretCommand cmd) {
+	def create(String communityAddress, CommunitySecretCommand cmd) {
 		if (!isCommunityAddress(communityAddress)) {
 			throw new BadRequestException("community address is not an ethereum address")
 		}
 		if (cmd.errors.getFieldError("name")) {
 			throw new BadRequestException("name in json is not a valid name")
 		}
-		CommunitySecret secret = communitySecretService.createCommunitySecret(communityAddress, cmd)
+		CommunitySecret secret = communitySecretService.create(communityAddress, cmd)
 		render(secret.toMap() as JSON)
 	}
 

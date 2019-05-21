@@ -36,14 +36,14 @@ class CommunitySecretServiceIntegrationSpec extends Specification {
 		results.containsAll([s1, s2])
 	}
 
-	void "createCommunitySecret() test"() {
+	void "create() test"() {
 		setup:
 		service.generator = Mock(IdGenerator)
 		CommunitySecretCommand cmd = new CommunitySecretCommand(
 			name: "community secret",
 		)
 		when:
-		CommunitySecret result = service.createCommunitySecret(communityAddress, cmd)
+		CommunitySecret result = service.create(communityAddress, cmd)
 		then:
 		1 * service.generator.generate() >> "secret"
 		result.id != null
