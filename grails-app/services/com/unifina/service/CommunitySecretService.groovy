@@ -3,8 +3,11 @@ package com.unifina.service
 import com.unifina.api.CommunitySecretCommand
 import com.unifina.api.NotFoundException
 import com.unifina.domain.community.CommunitySecret
+import com.unifina.utils.IdGenerator
 
 class CommunitySecretService {
+	IdGenerator generator = new IdGenerator()
+
 	List<CommunitySecret> findCommunitySecrets(String communityAddress) {
 		return CommunitySecret.findAllWhere(communityAddress: communityAddress)
 	}
@@ -13,7 +16,7 @@ class CommunitySecretService {
 		CommunitySecret result = new CommunitySecret()
 		result.communityAddress = communityAddress
 		result.name = cmd.name
-		result.secret = cmd.secret
+		result.secret = generator.generate()
 		result.save(validate: true, failOnError: true)
 		return result
 	}
@@ -28,7 +31,7 @@ class CommunitySecretService {
 	CommunitySecret updateCommunitySecret(String communityAddress, String communitySecretId, CommunitySecretCommand cmd) {
 		CommunitySecret result = CommunitySecret.findWhere(communityAddress: communityAddress, id: communitySecretId)
 		if (result == null) {
-			return null
+			throw new NotFoundException("community secret not found")
 		}
 		result.name = cmd.name
 		result.save(validate: true, failOnError: true)
