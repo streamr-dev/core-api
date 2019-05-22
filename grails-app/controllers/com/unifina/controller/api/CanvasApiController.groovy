@@ -77,6 +77,7 @@ class CanvasApiController {
 			Map<String, Object> response = canvas.toMap()
 			response.moduleErrors = e.getModuleExceptions()*.toMap()
 			render response as JSON
+			return
 		}
 		render canvas.toMap() as JSON
 	}
