@@ -91,6 +91,8 @@ class CassandraService implements DisposableBean {
 	}
 
 	StreamMessage getLatestStreamMessage(Stream stream, int partition) {
+		// TODO: ts >= ? condition added to prevent timeouts of cassandra queries. A more efficient approach to finding
+		// the latest message is needed. (CORE-1724)
 		ResultSet resultSet = getSession()
 			.execute("SELECT payload FROM stream_data WHERE id = ? AND partition = ? AND ts >= ? ORDER BY ts DESC, sequence_no DESC LIMIT 1",
 				stream.getId(), partition, System.currentTimeMillis() - ONE_YEAR_IN_MS)
