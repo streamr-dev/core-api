@@ -178,6 +178,8 @@ log4j.main = {
 		'org.apache.kafka.clients.consumer.ConsumerConfig',
 		'kafka.producer.ProducerConfig',
 		'org.apache.kafka.clients.producer.ProducerConfig'
+
+	debug 'com.datastax.driver.core'
 }
 
 /**
