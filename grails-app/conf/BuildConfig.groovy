@@ -79,7 +79,7 @@ grails.project.dependency.resolution = {
 		compile('org.antlr:ST4:4.0.8')
 		compile('org.postgresql:postgresql:9.4.1208.jre7')
 		compile('biz.paluch.redis:lettuce:3.5.0.Final')
-		compile('com.datastax.cassandra:cassandra-driver-core:3.1.0')
+		compile('com.datastax.cassandra:cassandra-driver-core:3.7.1')
 		compile('com.google.code.findbugs:jsr305:3.0.2')
 		compile('org.jetbrains:annotations:17.0.0')
 		compile('org.ethereum:ethereumj-core:1.12.0-RELEASE') {
