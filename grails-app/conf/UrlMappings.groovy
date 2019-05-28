@@ -39,6 +39,7 @@ class UrlMappings {
 		"/api/v1/canvases/$resourceId/permissions"(resources: "permissionApi", excludes: ["create", "edit", "update"]) { resourceClass = Canvas }
 		"/api/v1/canvases/$resourceId/permissions/me"(controller: "permissionApi", action: "getOwnPermissions") { resourceClass = Canvas }
 		"/api/v1/canvases/$canvasId/modules/$moduleId"(controller: "canvasApi", action: "module") // for internal use
+		"/api/v1/canvases/downloadCsv"(method: "GET", controller: "canvasApi", action: "downloadCsv")
 
 		"/api/v1/streams"(resources: "streamApi", excludes: ["create", "edit"])
 		"/api/v1/streams/$resourceId/permissions"(resources: "permissionApi", excludes: ["create", "edit", "update"]) { resourceClass = Stream }

@@ -526,4 +526,56 @@ class CanvasApiControllerSpec extends ControllerSpecification {
 		1 * controller.signalPathService.runtimeRequest(_, true) >> runtimeResponse
 	}
 
+	void "validateFilename() doesnt accept dot dot paths or slashs"(String filename, Boolean expected) {
+		expect:
+		controller.validateFilename(filename) == expected
+		where:
+		filename | expected
+		null | false
+		"" | false
+		" " | false
+		"\t" | false
+		"\n" | false
+		"../filename.txt" | false
+		"/file.csv" | false
+		"file/name.csv" | false
+		"..data.txt" | false
+		"../../etc/passwd" | false
+		"data.txt" | false // wrong extension
+		"streamr_csv_0.csv" | true
+		"streamr_csv_111112222233333.csv" | true
+		"streamr_csv_6043894978795937897.csv" | true
+		"streamr_csv_1111122222333334444.csv" | true // 19 digits
+		"streamr_csv_11111222223333344444.csv" | false // 20 digits
+	}
+
+	void "downloadCsv() doesnt let users define dot dot slash paths"() {
+		when:
+		params.filename = "../filename.txt"
+		request.method = "GET"
+		authenticatedAs(me) { controller.downloadCsv() }
+		then:
+		def e = thrown(BadRequestException)
+		e.getStatusCode() == 400
+		e.getCode() == "INVALID_PARAMETER"
+		e.getMessage() == "filename contains illegal characters"
+	}
+
+	void "downloadCsv() downloads csv file"() {
+		setup:
+		String data = "file,csv,data\n1,2,3\n"
+		File file = File.createTempFile("streamr_csv_", ".csv")
+		file.write(data)
+		String fileLen = file.length() + ""
+		when:
+		params.filename = file.getName()
+		request.method = "GET"
+		authenticatedAs(me) { controller.downloadCsv() }
+		then:
+		response.getText() == data
+		response.status == 200
+		response.contentType == "text/csv"
+		response.getHeader("Content-Disposition") == "attachment; filename=" + file.getName()
+		response.getHeader("Content-Length") == fileLen
+	}
 }
