@@ -542,11 +542,11 @@ class CanvasApiControllerSpec extends ControllerSpecification {
 		"..data.txt" | false
 		"../../etc/passwd" | false
 		"data.txt" | false // wrong extension
-		"streamr_csv_11111222223333.csv" | false // 14 digits
-		"streamr_csv_111112222233333444440.csv" | false // 21 digits
-		"streamr_csv_111112222233333.csv" | true // 15 digits
+		"streamr_csv_0.csv" | true
+		"streamr_csv_111112222233333.csv" | true
 		"streamr_csv_6043894978795937897.csv" | true
-		"streamr_csv_11111222223333344444.csv" | true // 20 digits
+		"streamr_csv_1111122222333334444.csv" | true // 19 digits
+		"streamr_csv_11111222223333344444.csv" | false // 20 digits
 	}
 
 	void "downloadCsv() doesnt let users define dot dot slash paths"() {

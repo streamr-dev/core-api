@@ -161,7 +161,7 @@ class CanvasApiController {
 		if (filename == null) {
 			return false
 		}
-		return filename ==~ /^streamr_csv_[0-9]{15,20}\.csv$/
+		return filename ==~ /^streamr_csv_[0-9]{1,19}\.csv$/
 	}
 
 	@StreamrApi
