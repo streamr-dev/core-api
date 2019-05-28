@@ -11,7 +11,6 @@ import com.unifina.utils.GlobalsFactory
 import grails.converters.JSON
 import grails.plugin.springsecurity.SpringSecurityService
 import grails.plugin.springsecurity.annotation.Secured
-import org.springframework.util.FileCopyUtils
 
 import java.security.AccessControlException
 
@@ -95,18 +94,11 @@ class CanvasController {
 		render result as JSON
 	}
 
+	/**
+	 * @Deprecated See CanvasApiController#downloadCsv
+	 */
 	def downloadCsv() {
-		String fileName = System.getProperty("java.io.tmpdir") + File.separator + params.filename
-		File file = new File(fileName)
-		if (file.canRead()) {
-			FileInputStream fileInputStream = new FileInputStream(file)
-			response.setContentType("text/csv")
-			response.setHeader("Content-disposition", "attachment; filename="+file.name);
-			FileCopyUtils.copy(fileInputStream, response.outputStream)
-			fileInputStream.close()
-			file.delete()
-		}
-		else throw new FileNotFoundException("File not found: "+params.filename)
+		throw new FileNotFoundException("File not found")
 	}
 
 	def loadBrowser() {
