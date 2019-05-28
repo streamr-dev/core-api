@@ -1827,7 +1827,7 @@
         }
       }
     },
-    "/streams/$streamId/keys/$keyId": {
+    "/streams/{streamId}/keys/{keyId}": {
       "put": {
         "summary": "Update Stream's Key's name and permission",
         "description": "Update Stream's Key's name and permission.",
@@ -3274,6 +3274,47 @@
           },
           "404": {
             "description": "Canvas or permission wasn't found",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          }
+        }
+      }
+    },
+    "/canvases/downloadCsv": {
+      "get": {
+        "summary": "Download CSV file",
+        "produces": [
+          "text/csv"
+        ],
+        "description": "Prompts browser to open save file dialog and downloads CSV file.",
+        "tags": [
+          "canvases"
+        ],
+        "parameters": [
+          {
+            "in": "query",
+            "name": "filename",
+            "description": "Name of the file to download",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "schema": {
+              "type": "file"
+            }
+          },
+          "400": {
+            "description": "Filename parameter contains illegal characters",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          },
+          "404": {
+            "description": "File not found",
             "schema": {
               "$ref": "#/definitions/Error"
             }
