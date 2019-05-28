@@ -94,13 +94,6 @@ class CanvasController {
 		render result as JSON
 	}
 
-	/**
-	 * @Deprecated See CanvasApiController#downloadCsv
-	 */
-	def downloadCsv() {
-		throw new FileNotFoundException("File not found")
-	}
-
 	def loadBrowser() {
 		def result = [
 				browserId: params.browserId,
