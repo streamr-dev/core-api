@@ -6,6 +6,7 @@ import com.unifina.api.ChallengeVerificationFailedException
 import com.unifina.api.DisabledUserException
 import com.unifina.api.DuplicateNotAllowedException
 import com.unifina.api.NotFoundException
+import com.unifina.domain.data.Feed
 import com.unifina.domain.data.Stream
 import com.unifina.domain.security.IntegrationKey
 import com.unifina.domain.security.SecUser
@@ -165,6 +166,10 @@ class EthereumIntegrationKeyService {
 		inboxStream.name = address
 		inboxStream.inbox = true
 		inboxStream.autoConfigure = false
+		// If no feed given, API feed is used
+		if (inboxStream.feed == null) {
+			inboxStream.feed = Feed.load(Feed.KAFKA_ID)
+		}
 		inboxStream.save(failOnError: true, flush: true)
 	}
 

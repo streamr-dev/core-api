@@ -257,6 +257,7 @@ class StreamService {
 	}
 
 	List<Stream> getInboxStreams(List<SecUser> users) {
+		if (users.isEmpty()) return new ArrayList<Stream>()
 		List<IntegrationKey> keys = IntegrationKey.findAll {
 			user.id in users*.id && service in [IntegrationKey.Service.ETHEREUM, IntegrationKey.Service.ETHEREUM_ID]
 		}
