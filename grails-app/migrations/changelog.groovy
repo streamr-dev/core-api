@@ -127,6 +127,8 @@ databaseChangeLog = {
 	include file: 'core/2019-02-15-user-avatar.groovy'
 	include file: 'core/2019-03-19-stream-canvas-example.groovy'
 	include file: 'core/2019-03-25-rm-canvas-example.groovy'
+	include file: 'core/2019-04-01-add-inbox-streams.groovy'
+	include file: 'core/2019-04-29-add-Permission-parent-ref.groovy'
 	include file: 'core/2019-03-26-new-ethereum-call-module.groovy'
 	include file: 'core/2019-04-08-ethereumj-compilation-web3j-deploy.groovy'
 }

@@ -2,6 +2,7 @@ package com.unifina.service
 
 import com.unifina.api.CannotRemoveEthereumKeyException
 import com.unifina.api.DuplicateNotAllowedException
+import com.unifina.domain.data.Stream
 import com.unifina.security.Challenge
 import com.unifina.domain.security.IntegrationKey
 import com.unifina.domain.security.SecUser
@@ -264,6 +265,40 @@ class EthereumIntegrationKeyServiceSpec extends Specification {
 		user.username == me.username
 		IntegrationKey.count == 1
 		SecUser.count == 1
+	}
+
+	void "createEthereumUser() creates inbox stream"() {
+		SecUser someoneElse = new SecUser(username: "someoneElse@streamr.com").save(failOnError: true, validate: false)
+		when:
+		service.createEthereumUser("address")
+		then:
+		1 * userService.createUser(_) >> someoneElse
+		Stream.count == 1
+		Stream.get("address").inbox
+	}
+
+	void "createEthereumID() creates inbox stream"() {
+		service.subscriptionService = Stub(SubscriptionService)
+
+		Challenge ch = new Challenge("id", "foobar", 300)
+		final String signature = "0x50ba6f6df25ba593cb8188df29ca27ea0a7cd38fadc4d40ef9fad455117e190f2a7ec880a76b930071205fee19cf55eb415bd33b2f6cb5f7be36f79f740da6e81b"
+		final String address = "0x10705c0b408eb64860f67a81f5908b51b62a86fc"
+		final String name = "foobar"
+		when:
+		service.createEthereumID(me, name, ch.getId(), ch.getChallenge(), signature)
+		then:
+		1 * challengeService.verifyChallengeAndGetAddress(ch.getId(), ch.getChallenge(), signature) >> address
+		Stream.count == 1
+		Stream.get(address).inbox
+	}
+
+	void "createEthereumAccount() creates inbox stream"() {
+		when:
+		when:
+		service.createEthereumAccount(me, "ethKey", "fa7d31d2fb3ce6f18c629857b7ef5cc3c6264dc48ddf6557cc20cf7a5b361365")
+		then:
+		Stream.count == 1
+		Stream.get("0xf4f683a8502b2796392bedb05dbbcc8c6e582e59").inbox
 	}
 
 	void "cannot remove only key of ethereum user"() {
