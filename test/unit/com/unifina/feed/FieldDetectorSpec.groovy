@@ -3,7 +3,7 @@ package com.unifina.feed
 import com.google.gson.Gson
 import com.google.gson.GsonBuilder
 import com.streamr.client.protocol.message_layer.StreamMessage
-import com.streamr.client.protocol.message_layer.StreamMessageV30
+import com.streamr.client.protocol.message_layer.StreamMessageV31
 import com.unifina.domain.data.Stream
 import spock.lang.Specification
 
@@ -26,8 +26,8 @@ class FieldDetectorSpec extends Specification {
 		detector = new FieldDetector() {
 			@Override
 			protected StreamMessage fetchExampleMessage(Stream stream) {
-				return new StreamMessageV30(stream.id, 0, System.currentTimeMillis(), 0L, "", "", (Long) null, 0L,
-					StreamMessage.ContentType.CONTENT_TYPE_JSON, gson.toJson(mapToReturn),
+				return new StreamMessageV31(stream.id, 0, System.currentTimeMillis(), 0L, "", "", (Long) null, 0L,
+					StreamMessage.ContentType.CONTENT_TYPE_JSON, StreamMessage.EncryptionType.NONE, gson.toJson(mapToReturn),
 					StreamMessage.SignatureType.SIGNATURE_TYPE_NONE, null)
 			}
 		}

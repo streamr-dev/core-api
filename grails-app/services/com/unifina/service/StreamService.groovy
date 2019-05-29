@@ -3,7 +3,7 @@ package com.unifina.service
 import com.google.gson.Gson
 import com.google.gson.GsonBuilder
 import com.streamr.client.protocol.message_layer.StreamMessage
-import com.streamr.client.protocol.message_layer.StreamMessageV30
+import com.streamr.client.protocol.message_layer.StreamMessageV31
 import com.unifina.api.NotFoundException
 import com.unifina.api.NotPermittedException
 import com.unifina.api.ValidationException
@@ -174,8 +174,8 @@ class StreamService {
 			}
 
 			int partition = partitioner.partition(stream, null)
-			StreamMessageV30 msg = new StreamMessageV30(stream.id, partition, date.time, sequenceNumber, publisherId, msgChainId,
-				previousTimestamp, sequenceNumber, StreamMessage.ContentType.CONTENT_TYPE_JSON,
+			StreamMessageV31 msg = new StreamMessageV31(stream.id, partition, date.time, sequenceNumber, publisherId, msgChainId,
+				previousTimestamp, sequenceNumber, StreamMessage.ContentType.CONTENT_TYPE_JSON, StreamMessage.EncryptionType.NONE,
 				gson.toJson(message), StreamMessage.SignatureType.SIGNATURE_TYPE_NONE, null)
 			saveMessage(msg)
 			sequenceNumber++

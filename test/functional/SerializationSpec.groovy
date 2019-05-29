@@ -1,10 +1,9 @@
 import com.streamr.client.protocol.message_layer.StreamMessage
-import com.streamr.client.protocol.message_layer.StreamMessageV30
+import com.streamr.client.protocol.message_layer.StreamMessageV31
 import com.unifina.domain.data.Stream
 import com.unifina.service.SerializationService
 import com.unifina.service.StreamService
 import com.unifina.utils.MapTraversal
-import LoginTester1Spec
 import mixins.CanvasMixin
 import mixins.ConfirmationMixin
 import mixins.StreamMixin
@@ -63,8 +62,8 @@ class SerializationSpec extends LoginTester1Spec implements CanvasMixin, Confirm
 			noNotificationsVisible()
 			Thread.start {
 				for (int i = 0; i < 20; ++i) {
-					StreamMessage msg = new StreamMessageV30(testStream.id, 0, 30L, 0L,
-						"", "", null, 0L, StreamMessage.ContentType.CONTENT_TYPE_JSON,
+					StreamMessage msg = new StreamMessageV31(testStream.id, 0, 30L, 0L,
+						"", "", null, 0L, StreamMessage.ContentType.CONTENT_TYPE_JSON, StreamMessage.EncryptionType.NONE,
 						[a: i, b: (i * 0.5)], StreamMessage.SignatureType.SIGNATURE_TYPE_NONE, null)
 					streamService.sendMessage(msg)
 					sleep(150)
@@ -87,8 +86,8 @@ class SerializationSpec extends LoginTester1Spec implements CanvasMixin, Confirm
 		and: "Data is sent"
 			Thread.start {
 				for (int i = 100; i < 105; ++i) {
-					StreamMessage msg = new StreamMessageV30(testStream.id, 0, 30L, 0L,
-						"", "", null, 0L, StreamMessage.ContentType.CONTENT_TYPE_JSON,
+					StreamMessage msg = new StreamMessageV31(testStream.id, 0, 30L, 0L,
+						"", "", null, 0L, StreamMessage.ContentType.CONTENT_TYPE_JSON, StreamMessage.EncryptionType.NONE,
 						[a: i, b: (i * 0.5)], StreamMessage.SignatureType.SIGNATURE_TYPE_NONE, null)
 					streamService.sendMessage(msg)
 					sleep(150)
@@ -106,8 +105,8 @@ class SerializationSpec extends LoginTester1Spec implements CanvasMixin, Confirm
 		and: "Data is sent"
 			Thread.start {
 				for (int i = 0; i < 20; ++i) {
-					StreamMessage msg = new StreamMessageV30(testStream.id, 0, 30L, 0L,
-						"", "", null, 0L, StreamMessage.ContentType.CONTENT_TYPE_JSON,
+					StreamMessage msg = new StreamMessageV31(testStream.id, 0, 30L, 0L,
+						"", "", null, 0L, StreamMessage.ContentType.CONTENT_TYPE_JSON, StreamMessage.EncryptionType.NONE,
 						[a: i, b: (i * 0.5)], StreamMessage.SignatureType.SIGNATURE_TYPE_NONE, null)
 					streamService.sendMessage(msg)
 					sleep(150)
