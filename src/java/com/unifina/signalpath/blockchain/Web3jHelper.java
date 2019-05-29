@@ -315,15 +315,35 @@ public class Web3jHelper {
 		EthereumModuleOptions ethereumOptions = new EthereumModuleOptions();
 		return Web3j.build(new HttpService(ethereumOptions.getRpcUrl()));
 	}
-
+	
 	/**
-	 * calls operator() getter from contract with public "operator" address:
-	 * address public operator;
-	 *
-	 * @return
+	 * 
+	 * get a public field in Ethereum contract. Returns an Object of the type that is wrapped by Type specified in fieldType.
+	 * 
+	 * For example:
+	 * 
+	 * if contract contains:
+	 * address public owner;
+	 * 
+	 * then 
+	 * getPublicField(web3j, contractAddress, "owner", Address.class) should return a String with the owner address
+	 * 
+	 * if contract contains:
+	 * uint public somenum;
+	 *  
+	 * then 
+	 * getPublicField(web3j, contractAddress, "somenum", Uint.class) should return a BigInteger with the value of somenum
+	 *  
+	 * 
+	 * @param web3j
+	 * @param contractAddress
+	 * @param fieldName
+	 * @param fieldType
+	 * @return 
+	 * @throws IOException
 	 */
-	public static String getOperatorAddress(Web3j web3j, String contractAddress) throws IOException {
-		Function getOperator = new Function("operator", Arrays.<Type>asList(), Arrays.<TypeReference<?>>asList(TypeReference.create(Address.class)));
+	public static Object getPublicField(Web3j web3j, String contractAddress, String fieldName, Class<Type> fieldType) throws IOException {
+		Function getOperator = new Function(fieldName, Arrays.<Type>asList(), Arrays.<TypeReference<?>>asList(TypeReference.create(fieldType)));
 		EthCall response = web3j.ethCall(
 			Transaction.createEthCallTransaction(contractAddress, contractAddress, FunctionEncoder.encode(getOperator)),
 			DefaultBlockParameterName.LATEST).send();
@@ -332,8 +352,9 @@ public class Web3jHelper {
 			throw new RuntimeException(err.getMessage());
 		}
 		List<Type> rslt = FunctionReturnDecoder.decode(response.getValue(), getOperator.getOutputParameters());
-		return ((Address) rslt.iterator().next()).getValue();
+		return rslt.iterator().next().getValue();
 	}
+
 
 	/**
 	 * @param web3j
