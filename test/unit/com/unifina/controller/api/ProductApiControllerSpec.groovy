@@ -2,7 +2,7 @@ package com.unifina.controller.api
 
 import com.google.common.collect.Lists
 import com.streamr.client.protocol.message_layer.StreamMessage
-import com.streamr.client.protocol.message_layer.StreamMessageV30
+import com.streamr.client.protocol.message_layer.StreamMessageV31
 import com.unifina.api.*
 import com.unifina.domain.data.Stream
 import com.unifina.domain.marketplace.Category
@@ -17,7 +17,6 @@ import com.unifina.service.ProductService
 import grails.test.mixin.Mock
 import grails.test.mixin.TestFor
 import org.codehaus.groovy.grails.web.json.JSONArray
-import org.codehaus.groovy.grails.web.json.JSONObject
 import org.springframework.mock.web.MockMultipartFile
 import spock.lang.Specification
 
@@ -72,8 +71,8 @@ class ProductApiControllerSpec extends Specification {
 	}
 
 	StreamMessage buildMsg(String streamId, int streamPartition, Date timestamp, Map content) {
-		return new StreamMessageV30(streamId, streamPartition, timestamp.getTime(), 0, "", "", null, null,
-			StreamMessage.ContentType.CONTENT_TYPE_JSON, content, StreamMessage.SignatureType.SIGNATURE_TYPE_NONE, null)
+		return new StreamMessageV31(streamId, streamPartition, timestamp.getTime(), 0, "", "", null, null,
+			StreamMessage.ContentType.CONTENT_TYPE_JSON, StreamMessage.EncryptionType.NONE, content, StreamMessage.SignatureType.SIGNATURE_TYPE_NONE, null)
 	}
 
 	void "stale products"() {

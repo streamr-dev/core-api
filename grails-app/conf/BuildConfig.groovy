@@ -62,6 +62,8 @@ grails.project.dependency.resolution = {
 
 		// New Grails repo
 		mavenRepo "https://repo.grails.org/grails/plugins"
+
+		mavenRepo "https://oss.sonatype.org/content/groups/public"
 	}
 
 	def gebVersion = "1.0"
@@ -97,7 +99,7 @@ grails.project.dependency.resolution = {
 		compile('org.glassfish.jersey.media:jersey-media-json-jackson:2.27')
 		compile('com.fasterxml.jackson.core:jackson-databind:2.9.6')
 		compile('com.fasterxml.jackson.core:jackson-annotations:2.9.6')
-		compile('com.streamr:client:1.0.0')
+		compile('com.streamr:client:1.1.0-SNAPSHOT')
 
 		runtime('mysql:mysql-connector-java:5.1.20')
 		runtime('commons-net:commons-net:3.3')
