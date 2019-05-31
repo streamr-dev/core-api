@@ -29,7 +29,7 @@ databaseChangeLog = {
 						)
 						sql.execute('INSERT INTO permission (version, operation, stream_id, anonymous, user_id) VALUES (0, "share", ?, b\'0\', ?)',
 							ethereumAddress, userId
-						)eth
+						)
 					}
 				}
 			}
