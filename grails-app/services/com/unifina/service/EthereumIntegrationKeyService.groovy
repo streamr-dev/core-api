@@ -3,16 +3,13 @@ package com.unifina.service
 import com.unifina.api.ApiException
 import com.unifina.api.CannotRemoveEthereumKeyException
 import com.unifina.api.ChallengeVerificationFailedException
-import com.unifina.api.DisabledUserException
 import com.unifina.api.DuplicateNotAllowedException
-import com.unifina.api.InvalidPrivateKeyException
 import com.unifina.api.NotFoundException
 import com.unifina.domain.data.Feed
 import com.unifina.domain.data.Stream
 import com.unifina.domain.security.IntegrationKey
 import com.unifina.domain.security.SecUser
 import com.unifina.security.StringEncryptor
-import com.unifina.utils.EthereumAddressValidator
 import grails.compiler.GrailsCompileStatic
 import grails.converters.JSON
 import groovy.transform.CompileStatic
