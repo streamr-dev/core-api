@@ -17,6 +17,7 @@ class CommunityJoinRequestServiceIntegrationSpec extends Specification {
 			password: "salasana",
 		)
 		me.save(validate: true, failOnError: true)
+		service.ethereumService = Mock(EthereumService)
 	}
 
 	void "findAll"() {
@@ -49,7 +50,7 @@ class CommunityJoinRequestServiceIntegrationSpec extends Specification {
 		)
 		r3.save(failOnError: true, validate: true)
 		when:
-		List<CommunityJoinRequest> results = service.findAll(communityAddress, null)
+		List<CommunityJoinRequest> results = service.findAll(communityAddress, null, me)
 		then:
 		results.size() == 2
 		results.containsAll([r1, r2])
@@ -85,7 +86,7 @@ class CommunityJoinRequestServiceIntegrationSpec extends Specification {
 		)
 		r3.save(failOnError: true, validate: true)
 		when:
-		List<CommunityJoinRequest> results = service.findAll(communityAddress, CommunityJoinRequest.State.PENDING)
+		List<CommunityJoinRequest> results = service.findAll(communityAddress, CommunityJoinRequest.State.PENDING, me)
 		then:
 		results.size() == 1
 		results.get(0).memberAddress == "0xCCCC000000000000000000000000AAAA0000AAAA"

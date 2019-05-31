@@ -1,9 +1,6 @@
 package com.unifina.controller.api
 
-import com.unifina.api.BadRequestException
-import com.unifina.api.CommunityJoinRequestCommand
-import com.unifina.api.NotFoundException
-import com.unifina.api.UpdateCommunityJoinRequestCommand
+import com.unifina.api.*
 import com.unifina.domain.community.CommunityJoinRequest
 import com.unifina.domain.security.SecUser
 import com.unifina.filters.UnifinaCoreAPIFilters
@@ -62,6 +59,7 @@ class CommunityJoinRequestApiControllerSpec extends Specification {
 		r.id = validID
 		r.save(failOnError: true, validate: true)
 		when:
+		request.apiUser = me
 		request.method = "GET"
 		params.communityAddress = communityAddress
 		params.state = null
@@ -69,6 +67,7 @@ class CommunityJoinRequestApiControllerSpec extends Specification {
 			controller.findAll()
 		}
 		then:
+		1 * controller.communityJoinRequestService.checkAccessControl(me, communityAddress) >> true
 		1 * controller.communityJoinRequestService.findAll(communityAddress, null) >> [r ]
 		response.json[0].id == validID
 		response.json[0].memberAddress == "0x0000000000000000000000000000000000000001"
@@ -90,6 +89,22 @@ class CommunityJoinRequestApiControllerSpec extends Specification {
 		def e = thrown(BadRequestException)
 		e.statusCode == 400
 		e.code == "PARAMETER_MISSING"
+	}
+
+	void "findAll() checks access control"() {
+		when:
+		request.apiUser = me
+		request.method = "GET"
+		params.communityAddress = communityAddress
+		params.state = "APPROVED"
+		withFilters(action: "findAll") {
+			controller.findAll()
+		}
+		then:
+		1 * controller.communityJoinRequestService.checkAccessControl(me, communityAddress) >> false
+		def e = thrown(ApiException)
+		e.statusCode == 403
+		e.code == "ACCESS_DENIED"
 	}
 
 	void "create() test"() {
@@ -167,6 +182,7 @@ class CommunityJoinRequestApiControllerSpec extends Specification {
 		r.id = validID
 		r.save(failOnError: true, validate: true)
 		when:
+		request.apiUser = me
 		request.method = "GET"
 		params.communityAddress = communityAddress
 		params.joinRequestId = validID
@@ -174,6 +190,7 @@ class CommunityJoinRequestApiControllerSpec extends Specification {
 			controller.find()
 		}
 		then:
+		1 * controller.communityJoinRequestService.checkAccessControl(me, communityAddress) >> true
 		1 * controller.communityJoinRequestService.find(communityAddress, validID) >> r
 		response.json.memberAddress == "0xCCCC000000000000000000000000AAAA0000FFFF"
 		response.json.communityAddress == communityAddress
@@ -214,6 +231,7 @@ class CommunityJoinRequestApiControllerSpec extends Specification {
 
 	void "find() not found 404 on bad CommunityJoinRequest id"() {
 		when:
+		request.apiUser = me
 		request.method = "GET"
 		params.communityAddress = communityAddress
 		params.joinRequestId = validID // ID not found in DB
@@ -221,10 +239,27 @@ class CommunityJoinRequestApiControllerSpec extends Specification {
 			controller.find()
 		}
 		then:
+		1 * controller.communityJoinRequestService.checkAccessControl(me, communityAddress) >> true
 		1 * controller.communityJoinRequestService.find(communityAddress, validID) >> null
 		def e = thrown(NotFoundException)
 		e.statusCode == 404
 		e.code == "NOT_FOUND"
+	}
+
+	void "find() checks access control"() {
+		when:
+		request.apiUser = me
+		request.method = "GET"
+		params.communityAddress = communityAddress
+		params.joinRequestId = validID // ID not found in DB
+		withFilters(action: "find") {
+			controller.find()
+		}
+		then:
+		1 * controller.communityJoinRequestService.checkAccessControl(me, communityAddress) >> false
+		def e = thrown(ApiException)
+		e.statusCode == 403
+		e.code == "ACCESS_DENIED"
 	}
 
 	void "update() test"() {
@@ -238,6 +273,7 @@ class CommunityJoinRequestApiControllerSpec extends Specification {
 		r.id = validID
 		r.save(failOnError: true, validate: true)
 		when:
+		request.apiUser = me
 		request.method = "PUT"
 		request.json = [
 			state: "ACCEPTED",
@@ -248,6 +284,7 @@ class CommunityJoinRequestApiControllerSpec extends Specification {
 			controller.update()
 		}
 		then:
+		1 * controller.communityJoinRequestService.checkAccessControl(me, communityAddress) >> true
 		1 * controller.communityJoinRequestService.update(communityAddress, validID, _ as UpdateCommunityJoinRequestCommand) >> {
 			r.state = CommunityJoinRequest.State.ACCEPTED
 			return r
@@ -315,6 +352,7 @@ class CommunityJoinRequestApiControllerSpec extends Specification {
 
 	void "update() not found 404 on bad community join request id"() {
 		when:
+		request.apiUser = me
 		request.method = "PUT"
 		request.json = [
 			state: "ACCEPTED",
@@ -325,11 +363,31 @@ class CommunityJoinRequestApiControllerSpec extends Specification {
 			controller.update()
 		}
 		then:
+		1 * controller.communityJoinRequestService.checkAccessControl(me, communityAddress) >> true
 		1 * controller.communityJoinRequestService.update(communityAddress, validID, _ as UpdateCommunityJoinRequestCommand) >> {
 			throw new NotFoundException("mocked: entity not found")
 		}
 		def e = thrown(NotFoundException)
 		e.statusCode == 404
 		e.code == "NOT_FOUND"
+	}
+
+	void "update() checks access control"() {
+		when:
+		request.apiUser = me
+		request.method = "PUT"
+		request.json = [
+			state: "ACCEPTED",
+		]
+		params.communityAddress = communityAddress
+		params.joinRequestId = validID // ID not found in DB
+		withFilters(action: "update") {
+			controller.update()
+		}
+		then:
+		1 * controller.communityJoinRequestService.checkAccessControl(me, communityAddress) >> false
+		def e = thrown(ApiException)
+		e.statusCode == 403
+		e.code == "ACCESS_DENIED"
 	}
 }

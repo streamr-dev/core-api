@@ -10,11 +10,27 @@ import com.unifina.domain.security.IntegrationKey
 import com.unifina.domain.security.SecUser
 
 class CommunityJoinRequestService {
+	StreamService streamService
+	EthereumService ethereumService
+
 	void onApproveJoinRequest(CommunityJoinRequest c) {
 		// TODO: Fetch joinPartStream id from smart contract at address
+		String joinPartStreamID = ethereumService.fetchJoinPartStreamID(c.communityAddress)
 		// TODO: Backend produces join message to joinPartStream
+		/*
+		MessageChainUtil msgChainUtil = new MessageChainUtil(null)
+		StreamMessage msg = msgChainUtil.getStreamMessage(Stream stream, Date timestampAsDate, Map content)
+		streamService.sendMessage(msg)
+		*/
 	}
 
+	boolean checkAccessControl(SecUser user, String communityAddress) {
+		String adminAddress = ethereumService.fetchCommunityAdminsEthereumAddress(communityAddress)
+		IntegrationKey key = IntegrationKey.where {
+			(user == user) && (idInService == adminAddress)
+		}.find()
+		return key != null
+	}
 	List<CommunityJoinRequest> findAll(String communityAddress, CommunityJoinRequest.State state) {
 		return CommunityJoinRequest.withCriteria {
 			eq("communityAddress", communityAddress)

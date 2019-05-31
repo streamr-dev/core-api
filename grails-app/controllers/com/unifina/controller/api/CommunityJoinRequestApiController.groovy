@@ -1,9 +1,6 @@
 package com.unifina.controller.api
 
-import com.unifina.api.BadRequestException
-import com.unifina.api.CommunityJoinRequestCommand
-import com.unifina.api.NotFoundException
-import com.unifina.api.UpdateCommunityJoinRequestCommand
+import com.unifina.api.*
 import com.unifina.domain.community.CommunityJoinRequest
 import com.unifina.domain.security.SecUser
 import com.unifina.security.StreamrApi
@@ -34,12 +31,19 @@ class CommunityJoinRequestApiController {
 		return IDValidator.validate(value)
 	}
 
+	void checkAdminAccessControl(SecUser user, String communityAddress) {
+		if (!communityJoinRequestService.checkAccessControl(user, communityAddress)) {
+			throw new ApiException(403, "ACCESS_DENIED", "required admin role is missing")
+		}
+	}
+
 	// curl -v -X GET -H "Authorization: token tester1-api-key" "http://localhost:8081/streamr-core/api/v1/communities/0x6c90aece04198da2d5ca9b956b8f95af8041de37/joinRequests?state=pending"
 	@StreamrApi
     def findAll(String communityAddress, String state) {
 		if (!isCommunityAddress(communityAddress)) {
 			throw new BadRequestException("community address is not an ethereum address")
 		}
+		checkAdminAccessControl(loggedInUser(), communityAddress)
 		CommunityJoinRequest.State st = isState(state)
 		List<CommunityJoinRequest> results = communityJoinRequestService.findAll(communityAddress, st)
 		render(results*.toMap() as JSON)
@@ -67,6 +71,7 @@ class CommunityJoinRequestApiController {
 		if (!isValidID(joinRequestId)) {
 			throw new BadRequestException("join request id not valid")
 		}
+		checkAdminAccessControl(loggedInUser(), communityAddress)
 		CommunityJoinRequest result = communityJoinRequestService.find(communityAddress, joinRequestId)
 		if (result == null) {
 			throw new NotFoundException("community join request not found with id: " + joinRequestId)
@@ -86,6 +91,7 @@ class CommunityJoinRequestApiController {
 		if (cmd.errors.getFieldError("state")) {
 			throw new BadRequestException("state in json is not valid")
 		}
+		checkAdminAccessControl(loggedInUser(), communityAddress)
 		CommunityJoinRequest result = communityJoinRequestService.update(communityAddress, joinRequestId, cmd)
 		render(result?.toMap() as JSON)
 	}

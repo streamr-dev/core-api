@@ -20,6 +20,7 @@ class CommunityJoinRequestServiceSpec extends Specification {
 	final String communityAddress = "0x0000000000000000000000000000000000000000"
 
 	def setup() {
+		service.ethereumService = Mock(EthereumService)
 		me = new SecUser(
 			name: "First Lastname",
 			username: "first@last.com",
