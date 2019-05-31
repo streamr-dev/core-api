@@ -5,6 +5,7 @@ import com.unifina.api.CannotRemoveEthereumKeyException
 import com.unifina.api.ChallengeVerificationFailedException
 import com.unifina.api.DisabledUserException
 import com.unifina.api.DuplicateNotAllowedException
+import com.unifina.api.InvalidPrivateKeyException
 import com.unifina.api.NotFoundException
 import com.unifina.domain.data.Feed
 import com.unifina.domain.data.Stream
@@ -41,6 +42,7 @@ class EthereumIntegrationKeyService {
 
 	IntegrationKey createEthereumAccount(SecUser user, String name, String privateKey) {
 		privateKey = trimPrivateKey(privateKey)
+		validatePrivateKey(privateKey)
 
 		try {
 			String address = "0x" + getAddress(privateKey)
@@ -189,6 +191,13 @@ class EthereumIntegrationKeyService {
 		String publicKey = Hex.encodeHexString(key.getAddress())
 
 		return publicKey
+	}
+
+	@CompileStatic
+	private static void validatePrivateKey(String privateKey) {
+		if (privateKey.length() != 64) { // must be 256 bits long
+			throw new InvalidPrivateKeyException("The private key must be a hex string of 64 chars (without the 0x prefix).")
+		}
 	}
 
 	void updateKey(SecUser user, String id, String name) {

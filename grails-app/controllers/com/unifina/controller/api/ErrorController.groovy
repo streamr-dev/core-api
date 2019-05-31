@@ -8,6 +8,7 @@ import com.unifina.api.CanvasCommunicationException
 import com.unifina.api.ChallengeVerificationFailedException
 import com.unifina.api.DisabledUserException
 import com.unifina.api.InvalidAPIKeyException
+import com.unifina.api.InvalidPrivateKeyException
 import com.unifina.api.InvalidSessionTokenException
 import com.unifina.api.InvalidStateException
 import com.unifina.api.InvalidUsernameAndPasswordException
@@ -23,6 +24,7 @@ class ErrorController {
 	static final Map<String, Closure<ApiError>> errorMappings = [
 		InvalidStateException: { InvalidStateException e -> new ApiError(500, "STATE_NOT_ALLOWED", e.message) },
 		ValidationException: { ValidationException e -> new ApiError(422, "VALIDATION_ERROR", e.message) },
+		InvalidPrivateKeyException: { InvalidPrivateKeyException e -> new ApiError(422, "VALIDATION_ERROR", e.message) },
 		CanvasUnreachableException: { CanvasUnreachableException e -> new ApiError(500, "CANVAS_UNREACHABLE", e.message) },
 		CanvasCommunicationException: { CanvasCommunicationException e -> new ApiError(503, "CANVAS_COMMUNICATION_ERROR", e.message)},
 		CannotRemoveEthereumKeyException: { CannotRemoveEthereumKeyException e -> new ApiError(409, "ETHEREUM_KEY_REMOVAL_ERROR", e.message)},
