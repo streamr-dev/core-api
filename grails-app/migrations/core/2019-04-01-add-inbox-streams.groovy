@@ -14,7 +14,7 @@ databaseChangeLog = {
 	changeSet(author: "mthambipillai", id: "create-inbox-stream-for-ethereum-users") {
 		grailsChange {
 			change {
-				sql.eachRow('SELECT user_id, id_in_service FROM integration_key WHERE service = \"ETHEREUM_ID\" OR service = \"ETHEREUM\"') { row ->
+				sql.eachRow('SELECT DISTINCT user_id, id_in_service FROM integration_key WHERE service = \"ETHEREUM_ID\" OR service = \"ETHEREUM\"') { row ->
 					String userId = row['user_id']
 					String ethereumAddress = row['id_in_service']
 					Date d = new Date()
