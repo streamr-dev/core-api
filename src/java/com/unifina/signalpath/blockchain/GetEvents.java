@@ -1,6 +1,9 @@
 package com.unifina.signalpath.blockchain;
 
 import com.mashape.unirest.http.exceptions.UnirestException;
+import com.streamr.client.protocol.message_layer.ITimestamped;
+import com.unifina.data.FeedEvent;
+import com.unifina.datasource.DataSource;
 import com.unifina.datasource.IStartListener;
 import com.unifina.datasource.IStopListener;
 import com.unifina.signalpath.*;
@@ -38,6 +41,23 @@ public class GetEvents extends AbstractSignalPathModule implements ContractEvent
 	private Web3j web3j;
 	protected int check_result_max_tries = 100;
 	protected int check_result_waitms = 10000;
+
+	static class LogsResult implements ITimestamped {
+		Date timestamp;
+		List<? extends Log> logs;
+		String txHash;
+
+		public LogsResult(String txHash, Date timestamp, List<? extends Log> logs) {
+			this.timestamp = timestamp;
+			this.logs = logs;
+			this.txHash = txHash;
+		}
+		@Override
+		public Date getTimestampAsDate() {
+			return timestamp;
+		}
+	}
+
 	@Override
 	public void init() {
 		setPropagationSink(true);
@@ -60,7 +80,6 @@ public class GetEvents extends AbstractSignalPathModule implements ContractEvent
 				throw new RuntimeException("Contract input must have a value.");
 			}
 
-			asyncPropagator = new Propagator(this);
 			getGlobals().getDataSource().addStartListener(this);
 			getGlobals().getDataSource().addStopListener(this);
 		}
@@ -78,7 +97,25 @@ public class GetEvents extends AbstractSignalPathModule implements ContractEvent
 	public void onStop() {
 		contractEventPoller.close();
 	}
-
+	private Propagator getPropagator() {
+		if (asyncPropagator == null) {
+			asyncPropagator = new Propagator(this);
+		}
+		return asyncPropagator;
+	}
+	@Override
+	public void receive(FeedEvent event) {
+		if (event.content instanceof LogsResult) {
+			try {
+				displayEventsFromLogs((LogsResult) event.content);
+			} catch (Exception e) {
+				throw new RuntimeException(e);
+			}
+			getPropagator().propagate();
+		} else {
+			super.receive(event);
+		}
+	}
 
 	@Override
 	public void sendOutput() {
@@ -100,21 +137,24 @@ public class GetEvents extends AbstractSignalPathModule implements ContractEvent
 		}
 	}
 
+	protected void enqueueEvent(LogsResult lr){
+		getGlobals().getDataSource().enqueueEvent(new FeedEvent<LogsResult, GetEvents>(lr, lr.getTimestampAsDate(), this));
+	}
+
 	@Override
 	public void onEvent(JSONArray events) {
 		try {
 			int eventcount = events.length();
 			for(int i=0; i<eventcount; i++) {
 				String txHash = events.getJSONObject(i).getString("transactionHash");
-				txHashOutput.send(txHash);
-				log.info(String.format("Received event '%s'", txHash));
+				log.info(String.format("Received event from RPC '%s'", txHash));
 				TransactionReceipt txr = Web3jHelper.waitForTransactionReceipt(web3j, txHash, check_result_waitms, check_result_max_tries);
 				if (txr == null) {
 					log.error("Couldnt find TransactionReceipt for transaction " + txHash + " in allotted time");
 					return;
 				}
-				displayEventsFromLogs(txr.getLogs());
-				asyncPropagator.propagate();
+				long ts = Web3jHelper.getTime(web3j, txr);
+				enqueueEvent(new LogsResult(txHash, new Date(ts), txr.getLogs()));
 			}
 		} catch (JSONException | IOException e) {
 			onError(e.getMessage());
@@ -127,11 +167,14 @@ public class GetEvents extends AbstractSignalPathModule implements ContractEvent
 		asyncPropagator.propagate();
 	}
 
-	protected void displayEventsFromLogs(List<? extends Log> logs){
+	protected void displayEventsFromLogs(LogsResult lr){
+		log.info("Received FeedEvent " + lr.txHash );
+
+		txHashOutput.send(lr.txHash);
 		for (EthereumABI.Event abiEvent : contract.getValue().getABI().getEvents()) {
 			List<Output> eventOutputs = outputsByEvent.get(abiEvent.name);
 			Event web3jEvent = web3jEvents.get(abiEvent.name);
-			List<EventValues> valueList = Web3jHelper.extractEventParameters(web3jEvent, logs);
+			List<EventValues> valueList = Web3jHelper.extractEventParameters(web3jEvent, lr.logs);
 			if (valueList == null) {
 				throw new RuntimeException("Failed to get event params");	// TODO: what happens when you throw in poller thread?
 			}
