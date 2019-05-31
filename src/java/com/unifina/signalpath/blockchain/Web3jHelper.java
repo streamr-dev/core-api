@@ -397,6 +397,13 @@ public class Web3jHelper {
 		return rslt.iterator().next().getValue();
 	}
 
+	/**
+	 *
+	 * @param web3j
+	 * @param tr
+	 * @return the timestamp of the block in which trasnaction occured, or -1 if not found
+	 * @throws IOException
+	 */
 	public static long getTime(Web3j web3j, TransactionReceipt tr) throws IOException {
 		DefaultBlockParameter dbp = DefaultBlockParameter.valueOf(tr.getBlockNumber());
 		EthBlock eb = web3j.ethGetBlockByNumber(dbp, false).send();
