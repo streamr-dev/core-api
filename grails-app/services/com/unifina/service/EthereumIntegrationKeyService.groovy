@@ -196,7 +196,7 @@ class EthereumIntegrationKeyService {
 	@CompileStatic
 	private static void validatePrivateKey(String privateKey) {
 		if (privateKey.length() != 64) { // must be 256 bits long
-			throw new InvalidPrivateKeyException("The private key must be a hex string of 64 chars (without the 0x prefix).")
+			throw new IllegalArgumentException("The private key must be a hex string of 64 chars (without the 0x prefix).")
 		}
 	}
 
