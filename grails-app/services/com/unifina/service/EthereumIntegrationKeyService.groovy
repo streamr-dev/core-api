@@ -73,7 +73,7 @@ class EthereumIntegrationKeyService {
 			throw new ApiException(400, "ADDRESS_RECOVERY_ERROR", e.message)
 		}
 
-		if (IntegrationKey.findByServiceAndIdInService(IntegrationKey.Service.ETHEREUM_ID, address) != null) {
+		if (getEthereumUser(address) != null) {
 			throw new DuplicateNotAllowedException("This Ethereum address is already associated with another Streamr user.")
 		}
 
@@ -121,7 +121,7 @@ class EthereumIntegrationKeyService {
 	}
 
 	SecUser getEthereumUser(String address) {
-		IntegrationKey key = IntegrationKey.findByIdInServiceAndService(address, IntegrationKey.Service.ETHEREUM_ID)
+		IntegrationKey key = IntegrationKey.findByIdInService(address)
 		if (key == null) {
 			return null
 		}

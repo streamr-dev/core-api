@@ -23,6 +23,6 @@ class PaidSubscription extends Subscription {
 
 	@Override
 	SecUser fetchUser() {
-		IntegrationKey.findByServiceAndIdInService(IntegrationKey.Service.ETHEREUM_ID, address)?.user
+		IntegrationKey.findByIdInService(address)?.user
 	}
 }
