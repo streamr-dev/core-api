@@ -40,8 +40,13 @@ class EthereumIntegrationKeyService {
 		validatePrivateKey(privateKey)
 
 		try {
-			String publicKey = "0x" + getPublicKey(privateKey)
+			String address = "0x" + getPublicKey(privateKey)
 			String encryptedPrivateKey = encryptor.encrypt(privateKey, user.id.byteValue())
+
+			if (getEthereumUser(address) != null) {
+				throw new DuplicateNotAllowedException("This Ethereum address is already associated with a Streamr user.")
+			}
+
 			IntegrationKey key = new IntegrationKey(
 				name: name,
 				user: user,
@@ -52,8 +57,6 @@ class EthereumIntegrationKeyService {
 					address   : address
 				] as JSON).toString()
 			).save(flush: true, failOnError: true)
-
-			createUserInboxStream(address)
 
 			subscriptionService.afterIntegrationKeyCreated(key)
 			return key
@@ -120,9 +123,17 @@ class EthereumIntegrationKeyService {
 			idInService == address && service in [IntegrationKey.Service.ETHEREUM, IntegrationKey.Service.ETHEREUM_ID]
 		}
 		if (key == null) {
-			return createEthereumUser(address)
+			return null
 		}
 		return key.user
+	}
+
+	SecUser getOrCreateFromEthereumAddress(String address) {
+		SecUser user = getEthereumUser(address)
+		if (user == null) {
+			user = createEthereumUser(address)
+		}
+		return user
 	}
 
 	SecUser createEthereumUser(String address) {
