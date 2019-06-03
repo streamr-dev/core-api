@@ -75,7 +75,7 @@ class EthereumIntegrationKeyService {
 		}
 
 		if (getEthereumUser(address) != null) {
-			throw new DuplicateNotAllowedException("This Ethereum address is already associated with another Streamr user.")
+			throw new DuplicateNotAllowedException("This Ethereum address is already associated with a Streamr user.")
 		}
 
 		IntegrationKey integrationKey = new IntegrationKey(
