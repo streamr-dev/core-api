@@ -8,7 +8,6 @@ import grails.util.Holders
 @GrailsCompileStatic
 class PaidSubscription extends Subscription {
 	String address
-	def grailsApplication
 
 	static constraints = {
 		address(unique: 'product', validator: Product.isEthereumAddress)
