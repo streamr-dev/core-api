@@ -111,7 +111,7 @@ class EthereumIntegrationKeyService {
 		return encryptor.decrypt((String) json.privateKey, key.user.id.byteValue())
 	}
 
-	List<IntegrationKey> getAllKeysForUser(SecUser user) {
+	List<IntegrationKey> getAllPrivateKeysForUser(SecUser user) {
 		IntegrationKey.findAllByServiceAndUser(IntegrationKey.Service.ETHEREUM, user)
 	}
 

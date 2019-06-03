@@ -125,7 +125,7 @@ class EthereumIntegrationKeyServiceSpec extends Specification {
 		)
 
 		when:
-		def keys = service.getAllKeysForUser(me)
+		def keys = service.getAllPrivateKeysForUser(me)
 		then:
 		keys == [k1, k2]
 	}
