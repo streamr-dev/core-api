@@ -1,27 +1,33 @@
 package com.unifina.service
 
+import com.streamr.client.protocol.message_layer.StreamMessage
 import com.unifina.api.ApiException
 import com.unifina.api.CommunityJoinRequestCommand
 import com.unifina.api.NotFoundException
 import com.unifina.api.UpdateCommunityJoinRequestCommand
 import com.unifina.domain.community.CommunityJoinRequest
 import com.unifina.domain.community.CommunitySecret
+import com.unifina.domain.data.Stream
 import com.unifina.domain.security.IntegrationKey
 import com.unifina.domain.security.SecUser
+import com.unifina.signalpath.utils.MessageChainUtil
 
 class CommunityJoinRequestService {
 	StreamService streamService
 	EthereumService ethereumService
+	MessageChainUtil chain = new MessageChainUtil(null)
 
 	void onApproveJoinRequest(CommunityJoinRequest c) {
-		// TODO: Fetch joinPartStream id from smart contract at address
 		String joinPartStreamID = ethereumService.fetchJoinPartStreamID(c.communityAddress)
-		// TODO: Backend produces join message to joinPartStream
-		/*
-		MessageChainUtil msgChainUtil = new MessageChainUtil(null)
-		StreamMessage msg = msgChainUtil.getStreamMessage(Stream stream, Date timestampAsDate, Map content)
+		// Send join message to joinPartStream
+		Stream s = Stream.findById(joinPartStreamID)
+		if (s == null) {
+			throw new NotFoundException("stream not found by id: " + joinPartStreamID)
+		}
+		Map<String, Object> content = new HashMap<>()
+		content.put("", null)
+		StreamMessage msg = chain.getStreamMessage(s, new Date(), content)
 		streamService.sendMessage(msg)
-		*/
 	}
 
 	boolean checkAccessControl(SecUser user, String communityAddress) {
