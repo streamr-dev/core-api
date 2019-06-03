@@ -4,26 +4,20 @@ import com.google.gson.Gson
 import com.unifina.ModuleTestingSpecification
 import com.unifina.data.FeedEvent
 import com.unifina.datasource.DataSource
-import com.unifina.datasource.DataSourceEventQueue
 import com.unifina.domain.security.IntegrationKey
 import com.unifina.domain.security.SecUser
 import com.unifina.domain.signalpath.Canvas
 import com.unifina.domain.signalpath.Module
-import com.unifina.feed.AbstractFeed
 import com.unifina.service.EthereumIntegrationKeyService
 import com.unifina.signalpath.SignalPath
 import com.unifina.utils.Globals
 import com.unifina.utils.GlobalsFactory
-import com.unifina.utils.testutils.ModuleTestHelper
 import grails.converters.JSON
 import grails.test.mixin.Mock
 import org.web3j.abi.FunctionEncoder
-import org.web3j.abi.TypeEncoder
 import org.web3j.abi.datatypes.DynamicArray
-import org.web3j.abi.datatypes.Type
 import org.web3j.abi.datatypes.Uint
 import org.web3j.protocol.Web3j
-import org.web3j.protocol.core.DefaultBlockParameter
 import org.web3j.protocol.core.DefaultBlockParameterName
 import org.web3j.protocol.core.Request
 import org.web3j.protocol.core.methods.request.Transaction
@@ -34,10 +28,7 @@ import org.web3j.protocol.core.methods.response.EthSendTransaction
 import org.web3j.protocol.core.methods.response.TransactionReceipt
 import org.web3j.protocol.core.methods.response.EthTransaction
 
-import org.web3j.protocol.websocket.events.Log
-
 import java.util.concurrent.CompletableFuture
-import java.util.concurrent.CompletionStage
 import java.util.function.Consumer
 
 @Mock([Canvas, Module,IntegrationKey, SecUser])
@@ -82,7 +73,7 @@ class SendEthereumTransactionSpec extends ModuleTestingSpecification {
 		key.id = "sgKjr1eHQpqTmwz3vK3DqwUK1wFlrfRJa9mnf_xTeFJQ"
 		key.save(failOnError: true, validate: true)
 		mockBean(EthereumIntegrationKeyService.class, Stub(EthereumIntegrationKeyService) {
-			getAllKeysForUser(user) >> [key];
+			getAllPrivateKeysForUser(user) >> [key];
 			decryptPrivateKey(_) >> {k ->
 				Map json = JSON.parse(k[0].json)
 				return (String) json.privateKey;

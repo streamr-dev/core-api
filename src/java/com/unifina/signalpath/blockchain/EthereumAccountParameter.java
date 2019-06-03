@@ -69,7 +69,7 @@ class EthereumAccountParameter extends Parameter<IntegrationKey> {
 	protected List<PossibleValue> getPossibleValues() {
 		EthereumIntegrationKeyService service = Holders.getApplicationContext().getBean(EthereumIntegrationKeyService.class);
 		SecUser user = SecUser.loadViaJava(getOwner().getGlobals().getUserId());
-		Set<IntegrationKey> integrationKeys = new LinkedHashSet<>(service.getAllKeysForUser(user));
+		Set<IntegrationKey> integrationKeys = new LinkedHashSet<>(service.getAllPrivateKeysForUser(user));
 		if (hasValue()) {
 			integrationKeys.add(getValue());
 		}

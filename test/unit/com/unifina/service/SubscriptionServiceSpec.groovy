@@ -21,6 +21,7 @@ class SubscriptionServiceSpec extends BeanMockingSpecification {
 	Stream s1, s2, s3
 	Product product
 	PermissionService permissionService
+	EthereumIntegrationKeyService ethereumIntegrationKeyService
 
 	void setup() {
 		user = new SecUser(username: "me@streamr.com").save(failOnError: true, validate: false)
@@ -33,6 +34,7 @@ class SubscriptionServiceSpec extends BeanMockingSpecification {
 		[s1, s2, s3]*.save(failOnError: true, validate: false)
 		product = new Product(streams: [s1, s2]).save(failOnError: true, validate: false)
 		permissionService = service.permissionService = mockBean(PermissionService, Mock(PermissionService))
+		ethereumIntegrationKeyService = mockBean(EthereumIntegrationKeyService, Mock(EthereumIntegrationKeyService))
 	}
 
 	void "getSubscriptionsOfUser() returns empty if user has no integration keys or free subscriptions"() {
@@ -150,6 +152,7 @@ class SubscriptionServiceSpec extends BeanMockingSpecification {
 		service.onSubscribed(product, address, new Date())
 
 		then:
+		1 * ethereumIntegrationKeyService.getEthereumUser(address) >> user
 		1 * permissionService.systemGrant(user, s1, Permission.Operation.READ, _, _) >> p1
 		1 * permissionService.systemGrant(user, s2, Permission.Operation.READ, _, _) >> p2
 		Permission.findAll()*.toInternalMap() as Set == [p1.toInternalMap(), p2.toInternalMap()] as Set
@@ -177,6 +180,7 @@ class SubscriptionServiceSpec extends BeanMockingSpecification {
 		service.onSubscribed(product, address, new Date())
 
 		then:
+		1 * ethereumIntegrationKeyService.getEthereumUser(address) >> user
 		1 * permissionService.systemGrant(user, s1, Permission.Operation.READ, _, _) >> p3
 		1 * permissionService.systemGrant(user, s2, Permission.Operation.READ, _, _) >> p4
 		Permission.exists(p1.id)
@@ -211,6 +215,7 @@ class SubscriptionServiceSpec extends BeanMockingSpecification {
 		service.onSubscribed(product, address, new Date())
 
 		then:
+		1 * ethereumIntegrationKeyService.getEthereumUser(address) >> user
 		1 * permissionService.systemGrant(user, s1, Permission.Operation.READ, _, _) >> p3
 		1 * permissionService.systemGrant(user, s2, Permission.Operation.READ, _, _) >> p4
 		!Permission.exists(p1.id)
@@ -305,14 +310,6 @@ class SubscriptionServiceSpec extends BeanMockingSpecification {
 		!Permission.exists(p2.id)
 	}
 
-	void "beforeIntegrationKeyRemoved() throws IllegalArgumentException given IntegrationKey with service != ETHEREUM_ID"() {
-		when:
-		service.beforeIntegrationKeyRemoved(new IntegrationKey())
-		then:
-		def e = thrown(IllegalArgumentException)
-		e.message.contains("ETHEREUM_ID")
-	}
-
 	void "beforeIntegrationKeyRemoved() removes all subscription-linked permissions for given integration key"() {
 		String address1 = "0x0000000000000000000000000000000000000000"
 		String address2 = "0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF"
@@ -355,14 +352,6 @@ class SubscriptionServiceSpec extends BeanMockingSpecification {
 		Permission.findAll()*.id == [4L, 5L, 6L, 7L]
 	}
 
-	void "afterIntegrationKeyCreated() throws IllegalArgumentException given IntegrationKey with service != ETHEREUM_ID"() {
-		when:
-		service.afterIntegrationKeyCreated(new IntegrationKey())
-		then:
-		def e = thrown(IllegalArgumentException)
-		e.message.contains("ETHEREUM_ID")
-	}
-
 	void "afterIntegrationKeyCreated() creates subscription-linked permissions for given integration key"() {
 		def date = new Date()
 		def product2 = new Product(streams: [s3]).save(failOnError: true, validate: false)
@@ -392,6 +381,7 @@ class SubscriptionServiceSpec extends BeanMockingSpecification {
 		service.afterIntegrationKeyCreated(integrationKey)
 
 		then:
+		2 * ethereumIntegrationKeyService.getEthereumUser(address) >> user
 		1 * permissionService.systemGrant(user, s1, Permission.Operation.READ, _, _) >> p1
 		1 * permissionService.systemGrant(user, s2, Permission.Operation.READ, _, _) >> p2
 		1 * permissionService.systemGrant(user, s3, Permission.Operation.READ, _, _) >> p3
@@ -441,6 +431,8 @@ class SubscriptionServiceSpec extends BeanMockingSpecification {
 		interaction {
 			p1 = new Permission(operation: "READ", user: user, stream: s3).save(failOnError: true, validate: false)
 			p4 = new Permission(operation: "READ", user: user2, stream: s2).save(failOnError: true, validate: false)
+			1 * ethereumIntegrationKeyService.getEthereumUser(address1) >> user
+			1 * ethereumIntegrationKeyService.getEthereumUser(address2) >> user2
 			1 * permissionService.systemGrant(user, s3, Permission.Operation.READ, _, _) >> p1
 			1 * permissionService.systemGrant(user2, s2, Permission.Operation.READ, _, _) >> p4
 		}

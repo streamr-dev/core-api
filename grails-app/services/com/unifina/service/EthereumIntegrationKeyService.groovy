@@ -57,6 +57,7 @@ class EthereumIntegrationKeyService {
 
 			createUserInboxStream(address)
 
+			subscriptionService.afterIntegrationKeyCreated(key)
 			return key
 		} catch (NumberFormatException e) {
 			throw new IllegalArgumentException("Private key must be a valid hex string!")
@@ -73,8 +74,8 @@ class EthereumIntegrationKeyService {
 			throw new ApiException(400, "ADDRESS_RECOVERY_ERROR", e.message)
 		}
 
-		if (IntegrationKey.findByServiceAndIdInService(IntegrationKey.Service.ETHEREUM_ID, address) != null) {
-			throw new DuplicateNotAllowedException("This Ethereum address is already associated with another Streamr user.")
+		if (getEthereumUser(address) != null) {
+			throw new DuplicateNotAllowedException("This Ethereum address is already associated with a Streamr user.")
 		}
 
 		IntegrationKey integrationKey = new IntegrationKey(
@@ -104,9 +105,7 @@ class EthereumIntegrationKeyService {
 
 		IntegrationKey account = IntegrationKey.findByIdAndUser(integrationKeyId, currentUser)
 		if (account) {
-			if (account.service == IntegrationKey.Service.ETHEREUM_ID) {
-				subscriptionService.beforeIntegrationKeyRemoved(account)
-			}
+			subscriptionService.beforeIntegrationKeyRemoved(account)
 			account.delete(flush: true)
 		}
 	}
@@ -116,12 +115,14 @@ class EthereumIntegrationKeyService {
 		return encryptor.decrypt((String) json.privateKey, key.user.id.byteValue())
 	}
 
-	List<IntegrationKey> getAllKeysForUser(SecUser user) {
+	List<IntegrationKey> getAllPrivateKeysForUser(SecUser user) {
 		IntegrationKey.findAllByServiceAndUser(IntegrationKey.Service.ETHEREUM, user)
 	}
 
 	SecUser getEthereumUser(String address) {
-		IntegrationKey key = IntegrationKey.findByIdInServiceAndService(address, IntegrationKey.Service.ETHEREUM_ID)
+		IntegrationKey key = IntegrationKey.find {
+			idInService == address && service in [IntegrationKey.Service.ETHEREUM, IntegrationKey.Service.ETHEREUM_ID]
+		}
 		if (key == null) {
 			return null
 		}

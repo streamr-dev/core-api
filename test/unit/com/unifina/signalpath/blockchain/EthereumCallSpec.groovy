@@ -4,18 +4,9 @@ import com.google.gson.JsonObject
 import com.unifina.domain.security.IntegrationKey
 import com.unifina.domain.security.SecUser
 import com.unifina.service.EthereumIntegrationKeyService
-import com.unifina.signalpath.BooleanOutput
-import com.unifina.signalpath.StringOutput
-import com.unifina.signalpath.TimeSeriesOutput
 import com.unifina.signalpath.remote.AbstractHttpModule
 import groovy.json.JsonSlurper
-import org.apache.http.Header
-import org.apache.http.HeaderIterator
-import org.apache.http.HttpEntity
 import org.apache.http.HttpResponse
-import org.apache.http.ProtocolVersion
-import org.apache.http.StatusLine
-import org.apache.http.params.HttpParams
 import spock.lang.Specification
 
 class EthereumCallSpec extends Specification {
@@ -112,7 +103,7 @@ class EthereumCallSpec extends Specification {
 		key.save(failOnError: true, validate: true)
 
 		mockBean(EthereumIntegrationKeyService.class, Stub(EthereumIntegrationKeyService) {
-			getAllKeysForUser(user) >> [key]
+			getAllPrivateKeysForUser(user) >> [key]
 		})
 
 		module = new EthereumCall() {
