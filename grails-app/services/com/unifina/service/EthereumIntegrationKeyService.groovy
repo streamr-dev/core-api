@@ -42,16 +42,21 @@ class EthereumIntegrationKeyService {
 		try {
 			String publicKey = "0x" + getPublicKey(privateKey)
 			String encryptedPrivateKey = encryptor.encrypt(privateKey, user.id.byteValue())
-			return new IntegrationKey(
+			IntegrationKey key = new IntegrationKey(
 				name: name,
 				user: user,
 				service: IntegrationKey.Service.ETHEREUM,
-				idInService: publicKey,
+				idInService: address,
 				json: ([
 					privateKey: encryptedPrivateKey,
-					address   : publicKey
+					address   : address
 				] as JSON).toString()
 			).save(flush: true, failOnError: true)
+
+			createUserInboxStream(address)
+
+			subscriptionService.afterIntegrationKeyCreated(key)
+			return key
 		} catch (NumberFormatException e) {
 			throw new IllegalArgumentException("Private key must be a valid hex string!")
 		}
@@ -96,9 +101,7 @@ class EthereumIntegrationKeyService {
 
 		IntegrationKey account = IntegrationKey.findByIdAndUser(integrationKeyId, currentUser)
 		if (account) {
-			if (account.service == IntegrationKey.Service.ETHEREUM_ID) {
-				subscriptionService.beforeIntegrationKeyRemoved(account)
-			}
+			subscriptionService.beforeIntegrationKeyRemoved(account)
 			account.delete(flush: true)
 		}
 	}
@@ -112,8 +115,10 @@ class EthereumIntegrationKeyService {
 		IntegrationKey.findAllByServiceAndUser(IntegrationKey.Service.ETHEREUM, user)
 	}
 
-	SecUser getOrCreateFromEthereumAddress(String address) {
-		IntegrationKey key = IntegrationKey.findByIdInServiceAndService(address, IntegrationKey.Service.ETHEREUM_ID)
+	SecUser getEthereumUser(String address) {
+		IntegrationKey key = IntegrationKey.find {
+			idInService == address && service in [IntegrationKey.Service.ETHEREUM, IntegrationKey.Service.ETHEREUM_ID]
+		}
 		if (key == null) {
 			return createEthereumUser(address)
 		}

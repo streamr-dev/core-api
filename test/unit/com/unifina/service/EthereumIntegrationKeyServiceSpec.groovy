@@ -25,6 +25,7 @@ class EthereumIntegrationKeyServiceSpec extends Specification {
 
 	ChallengeService challengeService
 	UserService userService
+	SubscriptionService subscriptionService
 
 	void setupSpec() {
 		actualPassword = grailsApplication.config.streamr.encryption.password
@@ -40,6 +41,7 @@ class EthereumIntegrationKeyServiceSpec extends Specification {
 		service.init()
 		challengeService = service.challengeService = Mock(ChallengeService)
 		userService = service.userService = Mock(UserService)
+		subscriptionService = service.subscriptionService = Mock(SubscriptionService)
 	}
 
 	void "init() without grailsConfig streamr.encryption.password throws IllegalArgumentException"() {
