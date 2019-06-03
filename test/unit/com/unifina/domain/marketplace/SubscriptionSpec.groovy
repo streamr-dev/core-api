@@ -1,35 +1,40 @@
 package com.unifina.domain.marketplace
 
+import com.unifina.BeanMockingSpecification
 import com.unifina.domain.security.IntegrationKey
 import com.unifina.domain.security.SecUser
+import com.unifina.service.EthereumIntegrationKeyService
 import grails.test.mixin.Mock
-import spock.lang.Specification
 
 @Mock([IntegrationKey])
-class SubscriptionSpec extends Specification {
+class SubscriptionSpec extends BeanMockingSpecification {
 
 	Subscription subscription
+	EthereumIntegrationKeyService ethereumIntegrationKeyService
 
 	void setup() {
 		subscription = new PaidSubscription(address: "0xFAFABCBC00FAFABCBC00FAFABCBC00FAFABCBC00")
+		ethereumIntegrationKeyService = mockBean(EthereumIntegrationKeyService, Mock(EthereumIntegrationKeyService))
 	}
 
-	void "getUser() returns null if no IntegrationKey with address found"() {
+	void "fetchUser() returns null if no IntegrationKey with address found"() {
 		expect:
 		subscription.fetchUser() == null
 	}
 
-	void "getUser() returns user if IntegrationKey with address found and IntegrationKey.service == ETHEREUM_ID"() {
-		setup:
+	void "fetchUser() returns user if IntegrationKey with address found"() {
+		SecUser user = new SecUser(username: "me@streamr.com").save(failOnError: true, validate: false)
 		new IntegrationKey(
-				user: new SecUser(username: "me@streamr.com").save(failOnError: true, validate: false),
-				name: "integration key",
-				service: IntegrationKey.Service.ETHEREUM_ID,
-				json: "{}",
-				idInService: "0xFAFABCBC00FAFABCBC00FAFABCBC00FAFABCBC00"
+			user: user,
+			name: "integration key",
+			service: IntegrationKey.Service.ETHEREUM_ID,
+			json: "{}",
+			idInService: "0xFAFABCBC00FAFABCBC00FAFABCBC00FAFABCBC00"
 		).save(failOnError: true, validate: true)
-
-		expect:
-		subscription.fetchUser() != null
+		when:
+		SecUser fetched = subscription.fetchUser()
+		then:
+		1 * ethereumIntegrationKeyService.getEthereumUser("0xFAFABCBC00FAFABCBC00FAFABCBC00FAFABCBC00") >> user
+		fetched != null
 	}
 }

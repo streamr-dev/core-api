@@ -1,12 +1,14 @@
 package com.unifina.domain.marketplace
 
-import com.unifina.domain.security.IntegrationKey
 import com.unifina.domain.security.SecUser
+import com.unifina.service.EthereumIntegrationKeyService
 import grails.compiler.GrailsCompileStatic
+import grails.util.Holders
 
 @GrailsCompileStatic
 class PaidSubscription extends Subscription {
 	String address
+	def grailsApplication
 
 	static constraints = {
 		address(unique: 'product', validator: Product.isEthereumAddress)
@@ -23,6 +25,6 @@ class PaidSubscription extends Subscription {
 
 	@Override
 	SecUser fetchUser() {
-		IntegrationKey.findByIdInService(address)?.user
+		Holders.getApplicationContext().getBean(EthereumIntegrationKeyService).getEthereumUser(address)
 	}
 }
