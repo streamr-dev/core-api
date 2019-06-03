@@ -61,7 +61,7 @@ class EthereumIntegrationKeyServiceSpec extends Specification {
 
 		then:
 		def e = thrown(IllegalArgumentException)
-		e.message == "Private key must be a valid hex string!"
+		e.message == "The private key must be a hex string of 64 chars (without the 0x prefix)."
 	}
 
 	void "createEthereumAccount creates expected integration key"() {
@@ -115,11 +115,11 @@ class EthereumIntegrationKeyServiceSpec extends Specification {
 		)
 		def k2 = service.createEthereumAccount(me,
 			"ethKey 2",
-			"    " + "fa7d31d2fb3ce6f18c629857b7ef5cc3c6264dc48ddf6557cc20cf7a5b361365" + "	 "
+			"    " + "fa7d31d2fb3ce6f18c629857b7ef5cc3c6264dc48ddf6557cc20cf7a5b361366" + "	 "
 		)
 		def k3 = service.createEthereumAccount(other,
 			"ethKey 3",
-			"    " + "fa7d41d2fb3ce6f18c629857b7ef5cc3c6264dc48ddf6557cc20cf7a5b361365" + "	 "
+			"    " + "fa7d41d2fb3ce6f18c629857b7ef5cc3c6264dc48ddf6557cc20cf7a5b361367" + "	 "
 		)
 
 		when:

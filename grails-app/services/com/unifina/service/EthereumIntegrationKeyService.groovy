@@ -3,13 +3,11 @@ package com.unifina.service
 import com.unifina.api.ApiException
 import com.unifina.api.CannotRemoveEthereumKeyException
 import com.unifina.api.ChallengeVerificationFailedException
-import com.unifina.api.DisabledUserException
 import com.unifina.api.DuplicateNotAllowedException
 import com.unifina.api.NotFoundException
 import com.unifina.domain.security.IntegrationKey
 import com.unifina.domain.security.SecUser
 import com.unifina.security.StringEncryptor
-import com.unifina.utils.EthereumAddressValidator
 import grails.compiler.GrailsCompileStatic
 import grails.converters.JSON
 import groovy.transform.CompileStatic
@@ -39,6 +37,7 @@ class EthereumIntegrationKeyService {
 
 	IntegrationKey createEthereumAccount(SecUser user, String name, String privateKey) {
 		privateKey = trimPrivateKey(privateKey)
+		validatePrivateKey(privateKey)
 
 		try {
 			String publicKey = "0x" + getPublicKey(privateKey)
@@ -158,6 +157,13 @@ class EthereumIntegrationKeyService {
 		String publicKey = Hex.encodeHexString(key.getAddress())
 
 		return publicKey
+	}
+
+	@CompileStatic
+	private static void validatePrivateKey(String privateKey) {
+		if (privateKey.length() != 64) { // must be 256 bits long
+			throw new IllegalArgumentException("The private key must be a hex string of 64 chars (without the 0x prefix).")
+		}
 	}
 
 	void updateKey(SecUser user, String id, String name) {
