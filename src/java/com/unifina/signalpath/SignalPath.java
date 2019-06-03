@@ -4,6 +4,8 @@ import com.unifina.data.FeedEvent;
 import com.unifina.domain.data.Stream;
 import com.unifina.domain.signalpath.Canvas;
 import com.unifina.domain.signalpath.Module;
+import com.unifina.exceptions.CyclicCanvasModuleExceptionMessage;
+import com.unifina.exceptions.ModuleExceptionMessage;
 import com.unifina.serialization.SerializationRequest;
 import com.unifina.service.CanvasService;
 import com.unifina.service.ModuleService;
@@ -241,15 +243,44 @@ public class SignalPath extends ModuleWithUI {
 		super.onConfiguration(config);
 		if (!root && signalPathParameter.hasValue()) {
 			/**
+			 * Check that there are not cyclic dependencies in the hierarchy of canvases
+			 */
+			Canvas myCanvas = signalPathParameter.getCanvas();
+			SignalPath parent = getParentSignalPath();
+			while (parent != null) {
+				if (parent.getCanvas() != null) {
+					if (myCanvas.getId().equals(parent.getCanvas().getId())) {
+						List<ModuleExceptionMessage> messages = new ArrayList<>(1);
+						messages.add(new CyclicCanvasModuleExceptionMessage(hash, "Cyclic canvas dependency detected!"));
+						throw new ModuleException("Cyclic canvas dependency detected!", null, messages);
+					}
+				} else {
+					log.warn("onConfiguration: parent.getCanvas() is null, can't establish its identity for cyclic dependency check");
+				}
+				parent = parent.getParentSignalPath();
+			}
+
+			setCanvas(myCanvas);
+
+			/**
 			 * Reset uiChannels if this is a subcanvas (not the root canvas). Otherwise
 			 * there will be problems if many instances of the same canvas are used
 			 * as subcanvases, as all the instances would produce to same uiChannels.
 			 */
-			Map json = (JSONObject) JSON.parse(signalPathParameter.getCanvas().getJson());
+			Map json = (JSONObject) JSON.parse(myCanvas.getJson());
 			CanvasService canvasService = Holders.getApplicationContext().getBean(CanvasService.class);
 			canvasService.resetUiChannels(json);
 			initFromRepresentation(json);
 		} else {
+			// Do we know the Canvas identity of this SignalPath?
+			if (config.containsKey("canvasId")) {
+				Canvas myCanvas = new Canvas();
+				myCanvas.setId((String) config.get("canvasId"));
+				setCanvas(myCanvas);
+			} else if (root) {
+				log.warn("onConfiguration: root SignalPath created without connected Canvas");
+			}
+
 			initFromRepresentation(config);
 		}
 	}

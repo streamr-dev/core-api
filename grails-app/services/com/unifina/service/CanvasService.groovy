@@ -37,7 +37,7 @@ class CanvasService {
 
 	@CompileStatic
 	Map reconstruct(Canvas canvas, SecUser user) {
-		Map signalPathMap = (JSONObject) JSON.parse(canvas.json)
+		Map signalPathMap = canvas.toSignalPathConfig()
 		return reconstructFrom(signalPathMap, user).map
 	}
 
@@ -305,7 +305,7 @@ class CanvasService {
 	}
 
 	private SignalPathService.ReconstructedResult constructNewSignalPathMap(Canvas canvas, SaveCanvasCommand command, SecUser user, boolean resetUi) {
-		Map inputSignalPathMap = (Map) JSON.parse(canvas.json != null ? canvas.json : "{}")
+		Map inputSignalPathMap = canvas.toSignalPathConfig()
 
 		inputSignalPathMap.name = command.name
 		inputSignalPathMap.modules = command.modules
