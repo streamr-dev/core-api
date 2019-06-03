@@ -45,8 +45,7 @@ abstract class Web3Balance {
 
 	Map<String, BigInteger> getDatacoinBalances(SecUser user) throws InterruptedException, ExecutionException, MessageDecodingException  {
 		def keys =
-			IntegrationKey.findAllByUserAndService(user, IntegrationKey.Service.ETHEREUM | IntegrationKey.Service.ETHEREUM_ID) +
-				IntegrationKey.findAllByUserAndService(user, IntegrationKey.Service.ETHEREUM_ID)
+			IntegrationKey.findAllByUserAndService(user, IntegrationKey.Service.ETHEREUM | IntegrationKey.Service.ETHEREUM_ID);
 		Map<String, BigInteger> rslt = new LinkedHashMap<String, BigInteger>();
 		for(IntegrationKey ik : keys){
 			rslt.put(ik.idInService, getDatacoinBalance(ik.idInService))
