@@ -94,6 +94,18 @@ class Canvas {
 			startedById: startedBy?.id,
 		]
 	}
+
+	/**
+	 * Returns a Map representation of this Canvas to be used in SignalPath#configure(map)
+	 */
+	@CompileStatic
+	Map toSignalPathConfig() {
+		Map map = (JSONObject) JSON.parse(json)
+		map.canvasId = id
+		map.name = name
+		return map
+	}
+
 	@Override
 	String toString() {
 		return String.format("Canvas{id=%s}", id)
