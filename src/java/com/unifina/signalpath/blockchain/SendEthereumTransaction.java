@@ -275,6 +275,13 @@ public class SendEthereumTransaction extends ModuleWithSideEffects {
 		}
 	}
 
+	/*
+	separate function for testing
+	 */
+	protected long getBlockTimeSeconds(TransactionReceipt tr) throws IOException {
+		return Web3jHelper.getBlockTime(web3j, tr);
+	}
+
 	/**
 	 * non constant function call result
 	 */
@@ -298,7 +305,7 @@ public class SendEthereumTransaction extends ModuleWithSideEffects {
 			if (receipt != null) {
 				transaction = web3j.ethGetTransactionByHash(web3jTx.getTransactionHash()).send().getResult();
 				log.info("Receipt found for txHash: " + web3jTx.getTransactionHash());
-				long ts = Web3jHelper.getBlockTime(web3j, receipt);
+				long ts = getBlockTimeSeconds(receipt);
 				if(ts >= 0){
 					Date newts = new Date(ts*1000);
 					log.info("Updating timestamp of TransactionResult from "+timestamp + " to block timestamp "+newts);
