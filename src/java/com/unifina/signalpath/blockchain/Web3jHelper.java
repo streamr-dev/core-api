@@ -1,11 +1,15 @@
 package com.unifina.signalpath.blockchain;
 
 import org.apache.log4j.Logger;
-import org.web3j.abi.*;
+import org.web3j.abi.EventValues;
+import org.web3j.abi.FunctionEncoder;
+import org.web3j.abi.FunctionReturnDecoder;
+import org.web3j.abi.TypeReference;
 import org.web3j.abi.datatypes.*;
 import org.web3j.abi.datatypes.generated.AbiTypes;
 import org.web3j.protocol.Web3j;
 import org.web3j.protocol.core.DefaultBlockParameterName;
+import org.web3j.protocol.core.Request;
 import org.web3j.protocol.core.Response;
 import org.web3j.protocol.core.methods.request.Transaction;
 import org.web3j.protocol.core.methods.response.*;
@@ -317,44 +321,39 @@ public class Web3jHelper {
 	}
 	
 	/**
-	 * 
-	 * get a public field in Ethereum contract. Returns an Object of the type that is wrapped by Type specified in fieldType.
-	 * 
+	 * Get a public field in Ethereum contract. Returns T of a Type&lt;T&gt; specified in fieldType.
+	 *
 	 * For example:
-	 * 
+	 *
 	 * if contract contains:
 	 * address public owner;
-	 * 
+	 *
 	 * then 
-	 * getPublicField(web3j, contractAddress, "owner", Address.class) should return a String with the owner address
-	 * 
+	 * String s = getPublicField(web3j, contractAddress, "owner", Address.class); returns a String type with the owner address
+	 *
 	 * if contract contains:
 	 * uint public somenum;
-	 *  
+	 *
 	 * then 
-	 * getPublicField(web3j, contractAddress, "somenum", Uint.class) should return a BigInteger with the value of somenum
-	 *  
-	 * 
-	 * @param web3j
-	 * @param contractAddress
-	 * @param fieldName
-	 * @param fieldType
-	 * @return 
-	 * @throws IOException
+	 * BigInteger i = getPublicField(web3j, contractAddress, "somenum", Uint.class); returns a BigInteger with the value of somenum
 	 */
-	public static Object getPublicField(Web3j web3j, String contractAddress, String fieldName, Class<Type> fieldType) throws IOException {
-		Function getOperator = new Function(fieldName, Arrays.<Type>asList(), Arrays.<TypeReference<?>>asList(TypeReference.create(fieldType)));
-		EthCall response = web3j.ethCall(
-			Transaction.createEthCallTransaction(contractAddress, contractAddress, FunctionEncoder.encode(getOperator)),
-			DefaultBlockParameterName.LATEST).send();
+	@SuppressWarnings("unchecked")
+	public static <T, X extends Type<T>> T getPublicField(Web3j web3j, String contractAddress, String fieldName, Class<X> fieldType) throws IOException {
+		List<Type> input = Arrays.<Type>asList();
+		List<TypeReference<?>> output = Arrays.<TypeReference<?>>asList(TypeReference.create(fieldType));
+		Function func = new Function(fieldName, input, output);
+		String data = FunctionEncoder.encode(func);
+		Transaction tx = Transaction.createEthCallTransaction(contractAddress, contractAddress, data);
+		Request<?, EthCall> request = web3j.ethCall(tx, DefaultBlockParameterName.LATEST);
+		EthCall response = request.send();
 		Response.Error err = response.getError();
 		if (err != null) {
-			throw new RuntimeException(err.getMessage());
+			throw new Web3jException(err);
 		}
-		List<Type> rslt = FunctionReturnDecoder.decode(response.getValue(), getOperator.getOutputParameters());
-		return rslt.iterator().next().getValue();
+		List<Type> result = FunctionReturnDecoder.decode(response.getValue(), func.getOutputParameters());
+		Type<X> next = result.iterator().next();
+		return (T) next.getValue();
 	}
-
 
 	/**
 	 * @param web3j
