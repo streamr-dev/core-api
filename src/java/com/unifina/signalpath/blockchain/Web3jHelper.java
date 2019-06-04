@@ -401,10 +401,10 @@ public class Web3jHelper {
 	 *
 	 * @param web3j
 	 * @param tr
-	 * @return the timestamp of the block in which trasnaction occured, or -1 if not found
+	 * @return the timestamp (seconds) of the block in which trasnaction occured, or -1 if not found
 	 * @throws IOException
 	 */
-	public static long getTime(Web3j web3j, TransactionReceipt tr) throws IOException {
+	public static long getBlockTime(Web3j web3j, TransactionReceipt tr) throws IOException {
 		DefaultBlockParameter dbp = DefaultBlockParameter.valueOf(tr.getBlockNumber());
 		EthBlock eb = web3j.ethGetBlockByNumber(dbp, false).send();
 		if(eb == null){
@@ -416,7 +416,7 @@ public class Web3jHelper {
 			return -1;
 		}
 		long ts = eb.getBlock().getTimestamp().longValue();
-		log.info("getTime block number: "+tr.getBlockNumber()+ " timestamp: "+ts);
+		log.info("getBlockTime txHash: "+tr.getTransactionHash()+ " block number: "+tr.getBlockNumber()+ " timestamp: "+ts);
 		return ts;
 	}
 

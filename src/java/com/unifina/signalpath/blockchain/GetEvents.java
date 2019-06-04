@@ -1,9 +1,7 @@
 package com.unifina.signalpath.blockchain;
 
-import com.mashape.unirest.http.exceptions.UnirestException;
 import com.streamr.client.protocol.message_layer.ITimestamped;
 import com.unifina.data.FeedEvent;
-import com.unifina.datasource.DataSource;
 import com.unifina.datasource.IStartListener;
 import com.unifina.datasource.IStopListener;
 import com.unifina.signalpath.*;
@@ -11,7 +9,6 @@ import org.apache.log4j.Logger;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.web3j.abi.EventValues;
-import org.web3j.abi.TypeReference;
 import org.web3j.abi.datatypes.Event;
 import org.web3j.protocol.Web3j;
 import org.web3j.protocol.core.methods.response.Log;
@@ -153,8 +150,16 @@ public class GetEvents extends AbstractSignalPathModule implements ContractEvent
 					log.error("Couldnt find TransactionReceipt for transaction " + txHash + " in allotted time");
 					return;
 				}
-				long ts = Web3jHelper.getTime(web3j, txr);
-				enqueueEvent(new LogsResult(txHash, new Date(ts), txr.getLogs()));
+				long blockts = Web3jHelper.getBlockTime(web3j, txr);
+				Date ts;
+				if(blockts < 0){
+					ts = getGlobals().time;
+					log.error("No block timestamp found for txHash "+txHash+ ". Using globals timestamp "+ts);
+				}
+				else{
+					ts = new Date(blockts*1000);
+				}
+				enqueueEvent(new LogsResult(txHash, ts, txr.getLogs()));
 			}
 		} catch (JSONException | IOException e) {
 			onError(e.getMessage());

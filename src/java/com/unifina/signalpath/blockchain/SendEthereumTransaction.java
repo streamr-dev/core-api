@@ -1,6 +1,5 @@
 package com.unifina.signalpath.blockchain;
 
-import com.google.gson.Gson;
 import com.unifina.data.FeedEvent;
 import com.streamr.client.protocol.message_layer.ITimestamped;
 import com.unifina.signalpath.*;
@@ -17,7 +16,6 @@ import org.web3j.protocol.core.Response;
 import org.web3j.protocol.core.methods.request.Transaction;
 import org.web3j.protocol.core.methods.response.*;
 import org.web3j.protocol.http.HttpService;
-import org.web3j.tx.Contract;
 import org.web3j.utils.Numeric;
 
 import java.io.IOException;
@@ -300,6 +298,12 @@ public class SendEthereumTransaction extends ModuleWithSideEffects {
 			if (receipt != null) {
 				transaction = web3j.ethGetTransactionByHash(web3jTx.getTransactionHash()).send().getResult();
 				log.info("Receipt found for txHash: " + web3jTx.getTransactionHash());
+				long ts = Web3jHelper.getBlockTime(web3j, receipt);
+				if(ts >= 0){
+					Date newts = new Date(ts*1000);
+					log.info("Updating timestamp of TransactionResult from "+timestamp + " to block timestamp "+newts);
+					timestamp = newts;
+				}
 				enqueueEvent(fncall);
 			}
 			else{
