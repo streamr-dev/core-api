@@ -27,6 +27,7 @@ class EthereumIntegrationKeyServiceSpec extends Specification {
 	ChallengeService challengeService
 	UserService userService
 	SubscriptionService subscriptionService
+	PermissionService permissionService
 
 	void setupSpec() {
 		actualPassword = grailsApplication.config.streamr.encryption.password
@@ -43,6 +44,7 @@ class EthereumIntegrationKeyServiceSpec extends Specification {
 		challengeService = service.challengeService = Mock(ChallengeService)
 		userService = service.userService = Mock(UserService)
 		subscriptionService = service.subscriptionService = Mock(SubscriptionService)
+		permissionService = service.permissionService = Mock(PermissionService)
 	}
 
 	void "init() without grailsConfig streamr.encryption.password throws IllegalArgumentException"() {
@@ -275,6 +277,7 @@ class EthereumIntegrationKeyServiceSpec extends Specification {
 		service.createEthereumUser("address")
 		then:
 		1 * userService.createUser(_) >> someoneElse
+		1 * permissionService.systemGrantAll(_, _)
 		Stream.count == 1
 		Stream.get("address").inbox
 	}
@@ -289,6 +292,7 @@ class EthereumIntegrationKeyServiceSpec extends Specification {
 		when:
 		service.createEthereumID(me, name, ch.getId(), ch.getChallenge(), signature)
 		then:
+		1 * permissionService.systemGrantAll(_, _)
 		1 * challengeService.verifyChallengeAndGetAddress(ch.getId(), ch.getChallenge(), signature) >> address
 		Stream.count == 1
 		Stream.get(address).inbox
@@ -296,9 +300,9 @@ class EthereumIntegrationKeyServiceSpec extends Specification {
 
 	void "createEthereumAccount() creates inbox stream"() {
 		when:
-		when:
 		service.createEthereumAccount(me, "ethKey", "fa7d31d2fb3ce6f18c629857b7ef5cc3c6264dc48ddf6557cc20cf7a5b361365")
 		then:
+		1 * permissionService.systemGrantAll(_, _)
 		Stream.count == 1
 		Stream.get("0xf4f683a8502b2796392bedb05dbbcc8c6e582e59").inbox
 	}

@@ -29,6 +29,7 @@ class EthereumIntegrationKeyService {
 	SubscriptionService subscriptionService
 	ChallengeService challengeService
 	UserService userService
+	PermissionService permissionService
 
 	@PostConstruct
 	void init() {
@@ -55,7 +56,7 @@ class EthereumIntegrationKeyService {
 				] as JSON).toString()
 			).save(flush: true, failOnError: true)
 
-			createUserInboxStream(address)
+			createUserInboxStream(user, address)
 
 			subscriptionService.afterIntegrationKeyCreated(key)
 			return key
@@ -88,7 +89,7 @@ class EthereumIntegrationKeyService {
 			] as JSON).toString()
 		).save(flush: true)
 
-		createUserInboxStream(address)
+		createUserInboxStream(user, address)
 
 		subscriptionService.afterIntegrationKeyCreated(integrationKey)
 		return integrationKey
@@ -155,12 +156,11 @@ class EthereumIntegrationKeyService {
 				address: address
 			] as JSON).toString()
 		).save(failOnError: true, flush: true)
-		createUserInboxStream(address)
+		createUserInboxStream(user, address)
 		return user
 	}
 
-	@CompileStatic
-	private static void createUserInboxStream(String address) {
+	private void createUserInboxStream(SecUser user, String address) {
 		Stream inboxStream = new Stream()
 		inboxStream.id = address
 		inboxStream.name = address
@@ -171,6 +171,7 @@ class EthereumIntegrationKeyService {
 			inboxStream.feed = Feed.load(Feed.KAFKA_ID)
 		}
 		inboxStream.save(failOnError: true, flush: true)
+		permissionService.systemGrantAll(user, inboxStream)
 	}
 
 	@CompileStatic
