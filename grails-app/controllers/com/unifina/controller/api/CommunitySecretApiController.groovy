@@ -1,11 +1,14 @@
 package com.unifina.controller.api
 
+import com.unifina.api.ApiException
 import com.unifina.api.BadRequestException
 import com.unifina.api.CommunitySecretCommand
 import com.unifina.api.NotFoundException
 import com.unifina.domain.community.CommunitySecret
+import com.unifina.domain.security.SecUser
 import com.unifina.security.StreamrApi
 import com.unifina.service.CommunitySecretService
+import com.unifina.service.CommunityService
 import com.unifina.utils.EthereumAddressValidator
 import grails.converters.JSON
 import grails.plugin.springsecurity.annotation.Secured
@@ -13,6 +16,7 @@ import grails.plugin.springsecurity.annotation.Secured
 @Secured(["IS_AUTHENTICATED_ANONYMOUSLY"])
 class CommunitySecretApiController {
 	CommunitySecretService communitySecretService
+	CommunityService communityService
 
 	static boolean isCommunityAddress(String value) {
 		return EthereumAddressValidator.validate(value)
@@ -27,11 +31,18 @@ class CommunitySecretApiController {
 		return value ==~ /^[a-zA-Z0-9-_]{44}$/
 	}
 
+	void checkAdminAccessControl(SecUser user, String communityAddress) {
+		if (!communityService.checkAdminAccessControl(user, communityAddress)) {
+			throw new ApiException(403, "ACCESS_DENIED", "required admin role is missing")
+		}
+	}
+
 	@StreamrApi
 	def findAll(String communityAddress) {
 		if (!isCommunityAddress(communityAddress)) {
 			throw new BadRequestException("community address is not an ethereum address")
 		}
+		checkAdminAccessControl(loggedInUser(), communityAddress)
 		List<CommunitySecret> secrets = communitySecretService.findAll(communityAddress)
 		render(secrets*.toMap() as JSON)
 	}
@@ -44,6 +55,7 @@ class CommunitySecretApiController {
 		if (cmd.errors.getFieldError("name")) {
 			throw new BadRequestException("name in json is not a valid name")
 		}
+		checkAdminAccessControl(loggedInUser(), communityAddress)
 		CommunitySecret secret = communitySecretService.create(communityAddress, cmd)
 		render(secret.toMap() as JSON)
 	}
@@ -56,6 +68,7 @@ class CommunitySecretApiController {
 		if (!isValidID(communitySecretId)) {
 			throw new BadRequestException("community secret id is not valid")
 		}
+		checkAdminAccessControl(loggedInUser(), communityAddress)
 		CommunitySecret secret = communitySecretService.find(communityAddress, communitySecretId)
 		if (secret == null) {
 			throw new NotFoundException("community secret not found by id")
@@ -74,6 +87,7 @@ class CommunitySecretApiController {
 		if (cmd.errors.getFieldError("name")) {
 			throw new BadRequestException("name in json is not a valid name")
 		}
+		checkAdminAccessControl(loggedInUser(), communityAddress)
 		CommunitySecret secret = communitySecretService.update(communityAddress, communitySecretId, cmd)
 		if (secret == null) {
 			throw new NotFoundException("community secret not found by id")
@@ -89,7 +103,12 @@ class CommunitySecretApiController {
 		if (!isValidID(communitySecretId)) {
 			throw new BadRequestException("community secret id is not valid")
 		}
+		checkAdminAccessControl(loggedInUser(), communityAddress)
 		communitySecretService.delete(communityAddress, communitySecretId)
 		render(status: 204)
+	}
+
+	private SecUser loggedInUser() {
+		return (SecUser) request.apiUser
 	}
 }
