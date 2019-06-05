@@ -70,7 +70,10 @@ class CommunityJoinRequestServiceSpec extends Specification {
 
     void "create supplied with correct community secret"() {
 		setup:
-		StreamMessage msg = new StreamMessageV30(null, null, StreamMessage.ContentType.CONTENT_TYPE_JSON, null, null, null)
+		Map<String, Object> content = new HashMap<>()
+		content.put("type", "join")
+		content.put("addresses", Arrays.asList(memberAddress))
+		StreamMessage msg = new StreamMessageV30(null, null, StreamMessage.ContentType.CONTENT_TYPE_JSON, content, null, null)
 		Stream s = new Stream(name: "stream 1")
 		s.id = "s1"
 		s.save(failOnError: true, validate: true)
@@ -83,7 +86,7 @@ class CommunityJoinRequestServiceSpec extends Specification {
 
 		then:
 		1 * service.ethereumService.fetchJoinPartStreamID(communityAddress) >> s.id
-		1 * service.chain.getStreamMessage(s, _ as Date, _ as Map<String, Object>) >> msg
+		1 * service.chain.getStreamMessage(s, _ as Date, content) >> msg
 		1 * service.streamService.sendMessage(msg)
 		c.state == CommunityJoinRequest.State.ACCEPTED
     }

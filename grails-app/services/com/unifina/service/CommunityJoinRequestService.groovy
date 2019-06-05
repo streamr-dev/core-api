@@ -25,7 +25,8 @@ class CommunityJoinRequestService {
 			throw new NotFoundException("stream not found by id: " + joinPartStreamID)
 		}
 		Map<String, Object> content = new HashMap<>()
-		content.put("", null)
+		content.put("type", "join")
+		content.put("addresses", Arrays.asList(c.memberAddress))
 		StreamMessage msg = chain.getStreamMessage(s, new Date(), content)
 		streamService.sendMessage(msg)
 	}
