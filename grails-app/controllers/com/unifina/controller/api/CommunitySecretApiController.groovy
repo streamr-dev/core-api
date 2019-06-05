@@ -37,6 +37,7 @@ class CommunitySecretApiController {
 		}
 	}
 
+	// curl -v -H "Authorization: token tester1-api-key" http://localhost:8081/streamr-core/api/v1/communities/0x6c90aece04198da2d5ca9b956b8f95af8041de37/secrets
 	@StreamrApi
 	def findAll(String communityAddress) {
 		if (!isCommunityAddress(communityAddress)) {
@@ -47,6 +48,7 @@ class CommunitySecretApiController {
 		render(secrets*.toMap() as JSON)
 	}
 
+	// curl -v -H "Authorization: token tester1-api-key" -H "Content-Type: application/json" -d '{"name":"name"}' http://localhost:8081/streamr-core/api/v1/communities/0x6c90aece04198da2d5ca9b956b8f95af8041de37/secrets
 	@StreamrApi
 	def create(String communityAddress, CommunitySecretCommand cmd) {
 		if (!isCommunityAddress(communityAddress)) {
@@ -60,6 +62,7 @@ class CommunitySecretApiController {
 		render(secret.toMap() as JSON)
 	}
 
+	// curl -v -H "Authorization: token tester1-api-key" http://localhost:8081/streamr-core/api/v1/communities/0x6c90aece04198da2d5ca9b956b8f95af8041de37/secrets/L-TvrBkyQTS_JK1ABHFEZAaZ3FHq7-TPqMXe9JNz1x6g
 	@StreamrApi
 	def find(String communityAddress, String communitySecretId) {
 		if (!isCommunityAddress(communityAddress)) {
@@ -76,6 +79,7 @@ class CommunitySecretApiController {
 		render(secret.toMap() as JSON)
 	}
 
+	// curl -v -X PUT -H "Authorization: token tester1-api-key" -H "Content-Type: application/json" -d '{"name":"new name"}' http://localhost:8081/streamr-core/api/v1/communities/0x6c90aece04198da2d5ca9b956b8f95af8041de37/secrets/L-TvrBkyQTS_JK1ABHFEZAaZ3FHq7-TPqMXe9JNz1x6g
 	@StreamrApi
 	def update(String communityAddress, String communitySecretId, CommunitySecretCommand cmd) {
 		if (!isCommunityAddress(communityAddress)) {
@@ -95,6 +99,7 @@ class CommunitySecretApiController {
 		render(secret?.toMap() as JSON)
 	}
 
+	// curl -v -X DELETE -H "Authorization: token tester1-api-key" http://localhost:8081/streamr-core/api/v1/communities/0x6c90aece04198da2d5ca9b956b8f95af8041de37/secrets/L-TvrBkyQTS_JK1ABHFEZAaZ3FHq7-TPqMXe9JNz1x6g
 	@StreamrApi
 	def delete(String communityAddress, String communitySecretId) {
 		if (!isCommunityAddress(communityAddress)) {
