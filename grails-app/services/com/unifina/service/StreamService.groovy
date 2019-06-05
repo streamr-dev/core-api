@@ -261,9 +261,7 @@ class StreamService {
 		List<IntegrationKey> keys = IntegrationKey.findAll {
 			user.id in users*.id && service in [IntegrationKey.Service.ETHEREUM, IntegrationKey.Service.ETHEREUM_ID]
 		}
-		return Stream.findAll {
-			id in keys*.idInService && inbox == true
-		}
+		return Stream.findAllByIdInListAndInbox(keys*.idInService, true)
 	}
 
 	@CompileStatic
