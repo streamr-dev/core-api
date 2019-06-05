@@ -93,7 +93,7 @@ class CommunityJoinRequestApiControllerSpec extends Specification {
 		e.code == "PARAMETER_MISSING"
 	}
 
-	void "findAll() checks access control"() {
+	void "findAll() checks admin access control"() {
 		when:
 		request.apiUser = me
 		request.method = "GET"
@@ -248,12 +248,12 @@ class CommunityJoinRequestApiControllerSpec extends Specification {
 		e.code == "NOT_FOUND"
 	}
 
-	void "find() checks access control"() {
+	void "find() checks admin access control"() {
 		when:
 		request.apiUser = me
 		request.method = "GET"
 		params.communityAddress = communityAddress
-		params.joinRequestId = validID // ID not found in DB
+		params.joinRequestId = validID
 		withFilters(action: "find") {
 			controller.find()
 		}
@@ -374,7 +374,7 @@ class CommunityJoinRequestApiControllerSpec extends Specification {
 		e.code == "NOT_FOUND"
 	}
 
-	void "update() checks access control"() {
+	void "update() checks admin access control"() {
 		when:
 		request.apiUser = me
 		request.method = "PUT"
@@ -382,7 +382,7 @@ class CommunityJoinRequestApiControllerSpec extends Specification {
 			state: "ACCEPTED",
 		]
 		params.communityAddress = communityAddress
-		params.joinRequestId = validID // ID not found in DB
+		params.joinRequestId = validID
 		withFilters(action: "update") {
 			controller.update()
 		}
