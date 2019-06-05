@@ -1,13 +1,22 @@
 package com.unifina.service
 
+import com.streamr.client.protocol.message_layer.StreamMessage
+import com.streamr.client.protocol.message_layer.StreamMessageV30
 import com.unifina.api.UpdateCommunityJoinRequestCommand
 import com.unifina.domain.community.CommunityJoinRequest
+import com.unifina.domain.data.Feed
+import com.unifina.domain.data.Stream
+import com.unifina.domain.marketplace.Category
 import com.unifina.domain.security.SecUser
+import com.unifina.domain.signalpath.Module
+import com.unifina.domain.signalpath.ModuleCategory
+import com.unifina.signalpath.utils.MessageChainUtil
 import spock.lang.Specification
 
 class CommunityJoinRequestServiceIntegrationSpec extends Specification {
 	CommunityJoinRequestService service = new CommunityJoinRequestService()
 	SecUser me
+	Stream joinPartStream
 	final String communityAddress = "0x0000000000000000000000000000000000000000"
 
 	void setup() {
@@ -17,6 +26,22 @@ class CommunityJoinRequestServiceIntegrationSpec extends Specification {
 			password: "salasana",
 		)
 		me.save(validate: true, failOnError: true)
+
+		Category category = new Category(name: "Category")
+		category.id = "category-id"
+		category.save()
+		ModuleCategory mc = new ModuleCategory(name: "module category")
+		mc.save(failOnError: true, validate: true)
+		Module module = new Module(name: "module name", alternativeNames: "alt names", implementingClass: "x", jsModule: "jsmodule", category: mc, type: "type")
+		module.save(failOnError: true, validate: true)
+		Feed feed = new Feed(name: "feed", eventRecipientClass: "x", keyRecipientClass: "x", messageSourceClass: "x", parserClass: "x", keyProviderClass: "x", streamListenerClass: "x", timezone: "x", module: module)
+		feed.save(validate: true, failOnError: true)
+		joinPartStream = new Stream(name: "join part stream", feed: feed)
+		joinPartStream.id = "jps-1"
+		joinPartStream.save(validate: true, failOnError: true)
+
+		service.chain = Mock(MessageChainUtil)
+		service.streamService = Mock(StreamService)
 		service.ethereumService = Mock(EthereumService)
 	}
 
@@ -50,7 +75,7 @@ class CommunityJoinRequestServiceIntegrationSpec extends Specification {
 		)
 		r3.save(failOnError: true, validate: true)
 		when:
-		List<CommunityJoinRequest> results = service.findAll(communityAddress, null, me)
+		List<CommunityJoinRequest> results = service.findAll(communityAddress, null)
 		then:
 		results.size() == 2
 		results.containsAll([r1, r2])
@@ -86,7 +111,7 @@ class CommunityJoinRequestServiceIntegrationSpec extends Specification {
 		)
 		r3.save(failOnError: true, validate: true)
 		when:
-		List<CommunityJoinRequest> results = service.findAll(communityAddress, CommunityJoinRequest.State.PENDING, me)
+		List<CommunityJoinRequest> results = service.findAll(communityAddress, CommunityJoinRequest.State.PENDING)
 		then:
 		results.size() == 1
 		results.get(0).memberAddress == "0xCCCC000000000000000000000000AAAA0000AAAA"
@@ -138,6 +163,9 @@ class CommunityJoinRequestServiceIntegrationSpec extends Specification {
 		when:
 		def c = service.update(communityAddress, r.id, cmd)
 		then:
+		1 * service.ethereumService.fetchJoinPartStreamID(communityAddress) >> joinPartStream.id
+		1 * service.chain.getStreamMessage(_, _, _) >> new StreamMessageV30(null, null, StreamMessage.ContentType.CONTENT_TYPE_JSON, null, null, null)
+		1 * service.streamService.sendMessage(_)
 		c.state == CommunityJoinRequest.State.ACCEPTED
 		// no changes below
 		c.communityAddress == communityAddress
