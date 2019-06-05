@@ -30,13 +30,6 @@ class CommunityJoinRequestService {
 		streamService.sendMessage(msg)
 	}
 
-	boolean checkAccessControl(SecUser user, String communityAddress) {
-		String adminAddress = ethereumService.fetchCommunityAdminsEthereumAddress(communityAddress)
-		IntegrationKey key = IntegrationKey.where {
-			(user == user) && (idInService == adminAddress)
-		}.find()
-		return key != null
-	}
 	List<CommunityJoinRequest> findAll(String communityAddress, CommunityJoinRequest.State state) {
 		return CommunityJoinRequest.withCriteria {
 			eq("communityAddress", communityAddress)

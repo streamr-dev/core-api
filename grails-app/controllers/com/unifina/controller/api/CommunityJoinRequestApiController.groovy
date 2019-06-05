@@ -5,6 +5,7 @@ import com.unifina.domain.community.CommunityJoinRequest
 import com.unifina.domain.security.SecUser
 import com.unifina.security.StreamrApi
 import com.unifina.service.CommunityJoinRequestService
+import com.unifina.service.CommunityService
 import com.unifina.utils.EthereumAddressValidator
 import com.unifina.utils.IDValidator
 import grails.converters.JSON
@@ -13,6 +14,7 @@ import grails.plugin.springsecurity.annotation.Secured
 @Secured(["IS_AUTHENTICATED_ANONYMOUSLY"])
 class CommunityJoinRequestApiController {
 	CommunityJoinRequestService communityJoinRequestService
+	CommunityService communityService
 
 	static CommunityJoinRequest.State isState(String value) {
 		if (value == null || value.trim().equals("")) {
@@ -32,7 +34,7 @@ class CommunityJoinRequestApiController {
 	}
 
 	void checkAdminAccessControl(SecUser user, String communityAddress) {
-		if (!communityJoinRequestService.checkAccessControl(user, communityAddress)) {
+		if (!communityService.checkAdminAccessControl(user, communityAddress)) {
 			throw new ApiException(403, "ACCESS_DENIED", "required admin role is missing")
 		}
 	}

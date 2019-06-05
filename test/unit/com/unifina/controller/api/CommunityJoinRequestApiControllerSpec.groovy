@@ -5,6 +5,7 @@ import com.unifina.domain.community.CommunityJoinRequest
 import com.unifina.domain.security.SecUser
 import com.unifina.filters.UnifinaCoreAPIFilters
 import com.unifina.service.CommunityJoinRequestService
+import com.unifina.service.CommunityService
 import grails.test.mixin.Mock
 import grails.test.mixin.TestFor
 import spock.lang.Specification
@@ -20,6 +21,7 @@ class CommunityJoinRequestApiControllerSpec extends Specification {
 		me = new SecUser(id: 1, name: "firstname lastname", username: "firstname.lastname@address.com", password: "salasana")
 		me.save(validate: true, failOnError: true)
 		controller.communityJoinRequestService = Mock(CommunityJoinRequestService)
+		controller.communityService = Mock(CommunityService)
     }
 
 	void "state parameter is null or State"(String value, Object expected) {
@@ -67,7 +69,7 @@ class CommunityJoinRequestApiControllerSpec extends Specification {
 			controller.findAll()
 		}
 		then:
-		1 * controller.communityJoinRequestService.checkAccessControl(me, communityAddress) >> true
+		1 * controller.communityService.checkAdminAccessControl(me, communityAddress) >> true
 		1 * controller.communityJoinRequestService.findAll(communityAddress, null) >> [r ]
 		response.json[0].id == validID
 		response.json[0].memberAddress == "0x0000000000000000000000000000000000000001"
@@ -101,7 +103,7 @@ class CommunityJoinRequestApiControllerSpec extends Specification {
 			controller.findAll()
 		}
 		then:
-		1 * controller.communityJoinRequestService.checkAccessControl(me, communityAddress) >> false
+		1 * controller.communityService.checkAdminAccessControl(me, communityAddress) >> false
 		def e = thrown(ApiException)
 		e.statusCode == 403
 		e.code == "ACCESS_DENIED"
@@ -190,7 +192,7 @@ class CommunityJoinRequestApiControllerSpec extends Specification {
 			controller.find()
 		}
 		then:
-		1 * controller.communityJoinRequestService.checkAccessControl(me, communityAddress) >> true
+		1 * controller.communityService.checkAdminAccessControl(me, communityAddress) >> true
 		1 * controller.communityJoinRequestService.find(communityAddress, validID) >> r
 		response.json.memberAddress == "0xCCCC000000000000000000000000AAAA0000FFFF"
 		response.json.communityAddress == communityAddress
@@ -239,7 +241,7 @@ class CommunityJoinRequestApiControllerSpec extends Specification {
 			controller.find()
 		}
 		then:
-		1 * controller.communityJoinRequestService.checkAccessControl(me, communityAddress) >> true
+		1 * controller.communityService.checkAdminAccessControl(me, communityAddress) >> true
 		1 * controller.communityJoinRequestService.find(communityAddress, validID) >> null
 		def e = thrown(NotFoundException)
 		e.statusCode == 404
@@ -256,7 +258,7 @@ class CommunityJoinRequestApiControllerSpec extends Specification {
 			controller.find()
 		}
 		then:
-		1 * controller.communityJoinRequestService.checkAccessControl(me, communityAddress) >> false
+		1 * controller.communityService.checkAdminAccessControl(me, communityAddress) >> false
 		def e = thrown(ApiException)
 		e.statusCode == 403
 		e.code == "ACCESS_DENIED"
@@ -284,7 +286,7 @@ class CommunityJoinRequestApiControllerSpec extends Specification {
 			controller.update()
 		}
 		then:
-		1 * controller.communityJoinRequestService.checkAccessControl(me, communityAddress) >> true
+		1 * controller.communityService.checkAdminAccessControl(me, communityAddress) >> true
 		1 * controller.communityJoinRequestService.update(communityAddress, validID, _ as UpdateCommunityJoinRequestCommand) >> {
 			r.state = CommunityJoinRequest.State.ACCEPTED
 			return r
@@ -363,7 +365,7 @@ class CommunityJoinRequestApiControllerSpec extends Specification {
 			controller.update()
 		}
 		then:
-		1 * controller.communityJoinRequestService.checkAccessControl(me, communityAddress) >> true
+		1 * controller.communityService.checkAdminAccessControl(me, communityAddress) >> true
 		1 * controller.communityJoinRequestService.update(communityAddress, validID, _ as UpdateCommunityJoinRequestCommand) >> {
 			throw new NotFoundException("mocked: entity not found")
 		}
@@ -385,7 +387,7 @@ class CommunityJoinRequestApiControllerSpec extends Specification {
 			controller.update()
 		}
 		then:
-		1 * controller.communityJoinRequestService.checkAccessControl(me, communityAddress) >> false
+		1 * controller.communityService.checkAdminAccessControl(me, communityAddress) >> false
 		def e = thrown(ApiException)
 		e.statusCode == 403
 		e.code == "ACCESS_DENIED"
