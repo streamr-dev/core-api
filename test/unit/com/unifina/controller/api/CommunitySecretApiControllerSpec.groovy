@@ -191,7 +191,7 @@ class CommunitySecretApiControllerSpec extends Specification {
 		request.apiUser = me
 		request.method = "GET"
 		params.communityAddress = communityAddress
-		params.communitySecretId = validID // ID not found in DB
+		params.communitySecretId = validID
 		withFilters(action: "find") {
 			controller.find()
 		}
@@ -337,7 +337,7 @@ class CommunitySecretApiControllerSpec extends Specification {
 		when:
 		request.method = "PUT"
 		params.communityAddress = communityAddress
-		params.communitySecretId = "123"
+		params.communitySecretId = validID
 		request.json = [
 			name: "",
 		]
