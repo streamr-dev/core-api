@@ -93,6 +93,10 @@ class SendEthereumTransactionSpec extends ModuleTestingSpecification {
 			public void sendOutput(SendEthereumTransaction.FunctionCallResult rslt) throws IOException, ClassNotFoundException {
 				super.sendOutput(rslt);
 			}
+			@Override
+			protected long getBlockTimeSeconds(TransactionReceipt tr) throws IOException {
+				return System.currentTimeMillis()/1000;
+			}
 		}
 		module.globals = mockGlobals([:], user)
 //		module.globals = mockGlobals
