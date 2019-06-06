@@ -7,7 +7,6 @@ import com.unifina.utils.IdGenerator
 
 class CommunitySecretService {
 	IdGenerator generator = new IdGenerator()
-	EthereumService ethereumService
 
 	List<CommunitySecret> findAll(String communityAddress) {
 		return CommunitySecret.findAllWhere(communityAddress: communityAddress)
