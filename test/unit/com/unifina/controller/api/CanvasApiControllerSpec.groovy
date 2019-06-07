@@ -9,9 +9,9 @@ import com.unifina.security.AllowRole
 import com.unifina.service.ApiService
 import com.unifina.service.CanvasService
 import com.unifina.service.SignalPathService
-import com.unifina.signalpath.JavaCompilerErrorMessage
+import com.unifina.exceptions.JavaCompilerErrorMessage
 import com.unifina.signalpath.ModuleException
-import com.unifina.signalpath.ModuleExceptionMessage
+import com.unifina.exceptions.ModuleExceptionMessage
 
 import grails.converters.JSON
 import grails.test.mixin.Mock
@@ -187,7 +187,7 @@ class CanvasApiControllerSpec extends ControllerSpecification {
 		response.json.moduleErrors[2].line == 100
 		response.json.moduleErrors[2].message == "syntax terror"
 	}
-
+	
 	void "save() creates a new canvas and renders it as json"() {
 		def newCanvasId
 

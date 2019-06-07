@@ -2,7 +2,6 @@ package com.unifina.controller.api
 
 import com.unifina.api.NotFoundException
 import com.unifina.api.NotPermittedException
-import com.unifina.domain.data.Stream
 import com.unifina.domain.security.Permission
 import com.unifina.domain.security.SecUser
 import com.unifina.domain.signalpath.Module
@@ -14,7 +13,7 @@ import com.unifina.service.ModuleService
 import com.unifina.service.PermissionService
 import com.unifina.signalpath.AbstractSignalPathModule
 import com.unifina.signalpath.ModuleException
-import com.unifina.signalpath.ModuleExceptionMessage
+import com.unifina.exceptions.ModuleExceptionMessage
 import com.unifina.utils.Globals
 import com.unifina.utils.GlobalsFactory
 import grails.compiler.GrailsCompileStatic
