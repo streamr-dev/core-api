@@ -45,6 +45,11 @@ class EthereumIntegrationKeyService {
 		try {
 			String address = "0x" + getAddress(privateKey)
 			String encryptedPrivateKey = encryptor.encrypt(privateKey, user.id.byteValue())
+
+			if (getEthereumUser(address) != null) {
+				throw new DuplicateNotAllowedException("This Ethereum address is already associated with a Streamr user.")
+			}
+			
 			IntegrationKey key = new IntegrationKey(
 				name: name,
 				user: user,
