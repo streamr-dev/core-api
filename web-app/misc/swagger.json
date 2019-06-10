@@ -5125,8 +5125,7 @@
       "type": "object",
       "required": [
         "name",
-        "username",
-        "timezone"
+        "username"
       ],
       "properties": {
         "name": {
@@ -5136,13 +5135,22 @@
         },
         "username": {
           "type": "string",
-          "description": "The username (email address)",
+          "description": "The username (email address or Ethereum address)",
           "example": "someone@somewhere.com"
         },
-        "timezone": {
+        "imageUrlSmall": {
           "type": "string",
-          "description": "User's timezone setting.",
-          "example": "Europe/Helsinki"
+          "description": "URL of the user's avatar image (small)"
+        },
+        "imageUrlLarge": {
+          "type": "string",
+          "description": "URL of the user's avatar image (small)"
+        },
+        "lastLogin": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Date and time of the user's previous login",
+          "example": "2019-06-10T23:20:00Z"
         }
       }
     },
