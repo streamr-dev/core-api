@@ -1,9 +1,10 @@
 package com.unifina.service
 
 import com.streamr.client.protocol.message_layer.StreamMessage
-import com.streamr.client.protocol.message_layer.StreamMessageV30
+import com.streamr.client.protocol.message_layer.StreamMessageV31
 import com.unifina.api.NotFoundException
 import com.unifina.api.NotPermittedException
+import com.unifina.domain.ExampleType
 import com.unifina.domain.dashboard.Dashboard
 import com.unifina.domain.dashboard.DashboardItem
 import com.unifina.domain.data.Feed
@@ -50,6 +51,30 @@ class StreamServiceSpec extends Specification {
 
 		service.grailsApplication = grailsApplication
 		me.save(validate: false, failOnError: true)
+	}
+
+	def "add example shared streams"() {
+		setup:
+		service.permissionService = Mock(PermissionService)
+		List<Stream> streams = []
+		Stream s0 = new Stream(
+			name: "example stream",
+			feed: feed,
+			exampleType: ExampleType.SHARE
+		).save(failOnError: true)
+		streams << s0
+		Stream s1 = new Stream(
+			name: "example 2 stream",
+			feed: feed,
+			exampleType: ExampleType.SHARE
+		).save(failOnError: true)
+		streams << s1
+
+		when:
+		service.addExampleStreams(me, streams)
+		then:
+		1 * service.permissionService.systemGrant(me, s0, Permission.Operation.READ)
+		1 * service.permissionService.systemGrant(me, s1, Permission.Operation.READ)
 	}
 
 	void "createStream replaces empty name with default value"() {
@@ -424,6 +449,34 @@ class StreamServiceSpec extends Specification {
 		addresses == validAddresses
 	}
 
+	void "getInboxStreams() returns all inbox streams of the users"() {
+		SecUser user1 = new SecUser(id: 1, username: "u1").save(failOnError: true, validate: false)
+		IntegrationKey key1 = new IntegrationKey(user: user1, service: IntegrationKey.Service.ETHEREUM_ID,
+			idInService: "0x9fe1ae3f5efe2a01eca8c2e9d3c11102cf4bea57").save(failOnError: true, validate: false)
+		SecUser user2 = new SecUser(id: 2, username: "u2").save(failOnError: true, validate: false)
+		IntegrationKey key2 = new IntegrationKey(user: user2, service: IntegrationKey.Service.ETHEREUM,
+			idInService: "0x26e1ae3f5efe8a01eca8c2e9d3c32702cf4bead6").save(failOnError: true, validate: false)
+		IntegrationKey key3 = new IntegrationKey(user: user2, service: IntegrationKey.Service.ETHEREUM,
+			idInService: "0xfff1ae3f5efe8a01eca8c25933c32702cf4b1121").save(failOnError: true, validate: false)
+		SecUser user3 = new SecUser(id: 3, username: "u3").save(failOnError: true, validate: false)
+
+		Stream s1 = new Stream(name: key1.idInService, inbox: true)
+		s1.id = key1.idInService
+		s1.save(failOnError: true, validate: false)
+		Stream s2 = new Stream(name: key1.idInService, inbox: true)
+		s2.id = key2.idInService
+		s2.save(failOnError: true, validate: false)
+		Stream s3 = new Stream(name: key1.idInService, inbox: true)
+		s3.id = key3.idInService
+		s3.save(failOnError: true, validate: false)
+
+		Set<Stream> expectedResults = [s1, s2, s3]
+		when:
+		Set<Stream> results = service.getInboxStreams([user1, user2, user3])
+		then:
+		results == expectedResults
+	}
+
 	void "status ok and has recent messages"() {
 		setup:
 		service.cassandraService = Mock(CassandraService)
@@ -433,8 +486,8 @@ class StreamServiceSpec extends Specification {
 		Date timestamp = newDate(2019, 1, 15, 11, 12, 06)
 		long expected = timestamp.getTime()
 		Date threshold = newDate(2019, 1, 14, 10, 50, 0)
-		StreamMessage msg = new StreamMessageV30("s1", 0, timestamp.getTime(), 0L, "publisherId", "1", 0L, 0L,
-			StreamMessage.ContentType.CONTENT_TYPE_JSON, "", StreamMessage.SignatureType.SIGNATURE_TYPE_NONE, "")
+		StreamMessage msg = new StreamMessageV31("s1", 0, timestamp.getTime(), 0L, "publisherId", "1", 0L, 0L,
+			StreamMessage.ContentType.CONTENT_TYPE_JSON, StreamMessage.EncryptionType.NONE, "", StreamMessage.SignatureType.SIGNATURE_TYPE_NONE, "")
 
 		when:
 		StreamService.StreamStatus status = service.status(s, threshold)
@@ -468,8 +521,8 @@ class StreamServiceSpec extends Specification {
 
 		Date timestamp = newDate(2019, 1, 10, 12, 12, 06)
 		long expected = timestamp.getTime()
-		StreamMessage msg = new StreamMessageV30("s1", 0, timestamp.getTime(), 0L, "publisherId", "1", 0L, 0L,
-			StreamMessage.ContentType.CONTENT_TYPE_JSON, "", StreamMessage.SignatureType.SIGNATURE_TYPE_NONE, "")
+		StreamMessage msg = new StreamMessageV31("s1", 0, timestamp.getTime(), 0L, "publisherId", "1", 0L, 0L,
+			StreamMessage.ContentType.CONTENT_TYPE_JSON, StreamMessage.EncryptionType.NONE, "", StreamMessage.SignatureType.SIGNATURE_TYPE_NONE, "")
 		Date threshold = newDate(2019, 1, 15, 0, 0, 0)
 
 		when:

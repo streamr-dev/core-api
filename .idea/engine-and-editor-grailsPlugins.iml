@@ -88,26 +88,19 @@
     <content url="file://$USER_HOME$/.grails/2.5.6/projects/streamr-core/plugins/zipped-resources-1.0">
       <sourceFolder url="file://$USER_HOME$/.grails/2.5.6/projects/streamr-core/plugins/zipped-resources-1.0/grails-app/i18n" isTestSource="false" />
     </content>
-    <orderEntry type="inheritedJdk" />
+    <orderEntry type="jdk" jdkName="1.8" jdkType="JavaSDK" />
     <orderEntry type="sourceFolder" forTests="false" />
     <orderEntry type="module-library" exported="">
       <library name="Grails User Library (engine-and-editor-grailsPlugins)">
         <CLASSES>
-          <root url="jar://$MAVEN_REPOSITORY$/org/javassist/javassist/3.15.0-GA/javassist-3.15.0-GA.jar!/" />
           <root url="jar://$MAVEN_REPOSITORY$/org/iq80/leveldb/leveldb-api/0.7/leveldb-api-0.7.jar!/" />
           <root url="jar://$MAVEN_REPOSITORY$/org/iq80/leveldb/leveldb/0.7/leveldb-0.7.jar!/" />
-          <root url="jar://$MAVEN_REPOSITORY$/org/ethereum/solcJ-all/0.4.8/solcJ-all-0.4.8.jar!/" />
           <root url="jar://$MAVEN_REPOSITORY$/org/ethereum/leveldbjni-all/1.18.3/leveldbjni-all-1.18.3.jar!/" />
-          <root url="jar://$MAVEN_REPOSITORY$/org/codehaus/jackson/jackson-core-asl/1.9.13/jackson-core-asl-1.9.13.jar!/" />
-          <root url="jar://$MAVEN_REPOSITORY$/org/codehaus/jackson/jackson-mapper-asl/1.9.13/jackson-mapper-asl-1.9.13.jar!/" />
           <root url="jar://$MAVEN_REPOSITORY$/org/apache/commons/commons-lang3/3.4/commons-lang3-3.4.jar!/" />
           <root url="jar://$MAVEN_REPOSITORY$/org/apache/commons/commons-collections4/4.0/commons-collections4-4.0.jar!/" />
           <root url="jar://$MAVEN_REPOSITORY$/io/netty/netty-all/4.0.30.Final/netty-all-4.0.30.Final.jar!/" />
           <root url="jar://$MAVEN_REPOSITORY$/com/typesafe/config/1.2.1/config-1.2.1.jar!/" />
-          <root url="jar://$MAVEN_REPOSITORY$/com/madgag/spongycastle/prov/1.53.0.0/prov-1.53.0.0.jar!/" />
-          <root url="jar://$MAVEN_REPOSITORY$/com/madgag/spongycastle/core/1.53.0.0/core-1.53.0.0.jar!/" />
           <root url="jar://$MAVEN_REPOSITORY$/com/googlecode/json-simple/json-simple/1.1.1/json-simple-1.1.1.jar!/" />
-          <root url="jar://$MAVEN_REPOSITORY$/com/google/code/findbugs/jsr305/3.0.0/jsr305-3.0.0.jar!/" />
           <root url="jar://$MAVEN_REPOSITORY$/org/grails/grails-datastore-simple/3.1.4.RELEASE/grails-datastore-simple-3.1.4.RELEASE.jar!/" />
           <root url="jar://$MAVEN_REPOSITORY$/org/grails/grails-datastore-gorm/3.1.4.RELEASE/grails-datastore-gorm-3.1.4.RELEASE.jar!/" />
           <root url="jar://$USER_HOME$/.sdkman/candidates/grails/2.5.6/lib/javax.transaction/jta/jars/jta-1.1.jar!/" />
@@ -198,18 +191,11 @@
           <root url="jar://$MAVEN_REPOSITORY$/com/amazonaws/aws-java-sdk-cognitosync/1.11.294/aws-java-sdk-cognitosync-1.11.294.jar!/" />
           <root url="jar://$MAVEN_REPOSITORY$/com/cedarsoftware/json-io/2.4.1/json-io-2.4.1.jar!/" />
           <root url="jar://$MAVEN_REPOSITORY$/com/cedarsoftware/java-util/1.8.0/java-util-1.8.0.jar!/" />
-          <root url="jar://$MAVEN_REPOSITORY$/org/ethereum/ethereumj-core/1.4.3-RELEASE/ethereumj-core-1.4.3-RELEASE.jar!/" />
-          <root url="jar://$MAVEN_REPOSITORY$/com/github/jnr/jnr-constants/0.9.0/jnr-constants-0.9.0.jar!/" />
-          <root url="jar://$MAVEN_REPOSITORY$/com/github/jnr/jnr-posix/3.0.27/jnr-posix-3.0.27.jar!/" />
           <root url="jar://$MAVEN_REPOSITORY$/com/github/jnr/jnr-x86asm/1.0.2/jnr-x86asm-1.0.2.jar!/" />
           <root url="jar://$MAVEN_REPOSITORY$/org/ow2/asm/asm-util/5.0.3/asm-util-5.0.3.jar!/" />
           <root url="jar://$MAVEN_REPOSITORY$/org/ow2/asm/asm-tree/5.0.3/asm-tree-5.0.3.jar!/" />
           <root url="jar://$MAVEN_REPOSITORY$/org/ow2/asm/asm-analysis/5.0.3/asm-analysis-5.0.3.jar!/" />
           <root url="jar://$MAVEN_REPOSITORY$/org/ow2/asm/asm-commons/5.0.3/asm-commons-5.0.3.jar!/" />
-          <root url="jar://$MAVEN_REPOSITORY$/com/github/jnr/jffi/1.2.10/jffi-1.2.10.jar!/" />
-          <root url="jar://$MAVEN_REPOSITORY$/com/github/jnr/jnr-ffi/2.0.7/jnr-ffi-2.0.7.jar!/" />
-          <root url="jar://$MAVEN_REPOSITORY$/io/dropwizard/metrics/metrics-core/3.1.2/metrics-core-3.1.2.jar!/" />
-          <root url="jar://$MAVEN_REPOSITORY$/com/datastax/cassandra/cassandra-driver-core/3.1.0/cassandra-driver-core-3.1.0.jar!/" />
           <root url="jar://$MAVEN_REPOSITORY$/com/google/guava/guava/17.0/guava-17.0.jar!/" />
           <root url="jar://$MAVEN_REPOSITORY$/io/netty/netty-codec/4.0.37.Final/netty-codec-4.0.37.Final.jar!/" />
           <root url="jar://$MAVEN_REPOSITORY$/io/netty/netty-handler/4.0.37.Final/netty-handler-4.0.37.Final.jar!/" />
@@ -360,11 +346,6 @@
           <root url="jar://$MAVEN_REPOSITORY$/com/amazonaws/aws-java-sdk/1.11.294/aws-java-sdk-1.11.294.jar!/" />
           <root url="jar://$MAVEN_REPOSITORY$/com/squareup/okhttp3/logging-interceptor/3.8.1/logging-interceptor-3.8.1.jar!/" />
           <root url="jar://$MAVEN_REPOSITORY$/com/squareup/okhttp3/okhttp/3.8.1/okhttp-3.8.1.jar!/" />
-          <root url="jar://$MAVEN_REPOSITORY$/com/github/jnr/jnr-enxio/0.14/jnr-enxio-0.14.jar!/" />
-          <root url="jar://$MAVEN_REPOSITORY$/com/github/jnr/jnr-unixsocket/0.15/jnr-unixsocket-0.15.jar!/" />
-          <root url="jar://$MAVEN_REPOSITORY$/org/web3j/tuples/3.3.1/tuples-3.3.1.jar!/" />
-          <root url="jar://$MAVEN_REPOSITORY$/org/web3j/rlp/3.3.1/rlp-3.3.1.jar!/" />
-          <root url="jar://$MAVEN_REPOSITORY$/org/web3j/crypto/3.3.1/crypto-3.3.1.jar!/" />
           <root url="jar://$USER_HOME$/.sdkman/candidates/grails/2.5.6/dist/grails-web-url-mappings-2.5.6.jar!/" />
           <root url="jar://$USER_HOME$/.sdkman/candidates/grails/2.5.6/lib/opensymphony/sitemesh/jars/sitemesh-2.4.jar!/" />
           <root url="jar://$USER_HOME$/.sdkman/candidates/grails/2.5.6/dist/grails-web-sitemesh-2.5.6.jar!/" />
@@ -375,11 +356,6 @@
           <root url="jar://$USER_HOME$/.sdkman/candidates/grails/2.5.6/lib/org.slf4j/slf4j-api/jars/slf4j-api-1.7.21.jar!/" />
           <root url="jar://$USER_HOME$/.sdkman/candidates/grails/2.5.6/dist/grails-plugin-rest-2.5.6.jar!/" />
           <root url="jar://$USER_HOME$/.sdkman/candidates/grails/2.5.6/lib/org.codehaus.groovy/groovy-all/jars/groovy-all-2.4.10.jar!/" />
-          <root url="jar://$MAVEN_REPOSITORY$/org/bouncycastle/bcprov-jdk15on/1.54/bcprov-jdk15on-1.54.jar!/" />
-          <root url="jar://$MAVEN_REPOSITORY$/org/web3j/utils/3.3.1/utils-3.3.1.jar!/" />
-          <root url="jar://$MAVEN_REPOSITORY$/org/web3j/abi/3.3.1/abi-3.3.1.jar!/" />
-          <root url="jar://$MAVEN_REPOSITORY$/org/web3j/core/3.3.1/core-3.3.1.jar!/" />
-          <root url="jar://$MAVEN_REPOSITORY$/org/mapdb/mapdb/2.0-beta12/mapdb-2.0-beta12.jar!/" />
           <root url="jar://$MAVEN_REPOSITORY$/org/springframework/security/spring-security-web/3.2.9.RELEASE/spring-security-web-3.2.9.RELEASE.jar!/" />
           <root url="jar://$MAVEN_REPOSITORY$/org/springframework/security/spring-security-core/3.2.9.RELEASE/spring-security-core-3.2.9.RELEASE.jar!/" />
           <root url="jar://$MAVEN_REPOSITORY$/org/liquibase/liquibase-core/2.0.5/liquibase-core-2.0.5.jar!/" />
@@ -397,7 +373,6 @@
           <root url="jar://$MAVEN_REPOSITORY$/org/grails/grails-datastore-gorm-hibernate/3.1.4.RELEASE/grails-datastore-gorm-hibernate-3.1.4.RELEASE.jar!/" />
           <root url="jar://$MAVEN_REPOSITORY$/net/sf/ehcache/ehcache/2.9.0/ehcache-2.9.0.jar!/" />
           <root url="jar://$MAVEN_REPOSITORY$/org/hibernate/hibernate-ehcache/3.6.10.Final/hibernate-ehcache-3.6.10.Final.jar!/" />
-          <root url="jar://$MAVEN_REPOSITORY$/com/github/jnr/jffi/1.2.10/jffi-1.2.10-native.jar!/" />
           <root url="jar://$USER_HOME$/.sdkman/candidates/grails/2.5.6/dist/grails-resources-2.5.6.jar!/" />
           <root url="jar://$USER_HOME$/.sdkman/candidates/grails/2.5.6/lib/com.h2database/h2/jars/h2-1.3.176.jar!/" />
           <root url="jar://$USER_HOME$/.sdkman/candidates/grails/2.5.6/lib/xalan/serializer/jars/serializer-2.7.2.jar!/" />
@@ -408,7 +383,6 @@
           <root url="jar://$MAVEN_REPOSITORY$/org/mozilla/rhino/1.7R4/rhino-1.7R4.jar!/" />
           <root url="jar://$MAVEN_REPOSITORY$/com/sun/mail/javax.mail/1.5.1/javax.mail-1.5.1.jar!/" />
           <root url="jar://$MAVEN_REPOSITORY$/joda-time/joda-time/2.9.3/joda-time-2.9.3.jar!/" />
-          <root url="jar://$MAVEN_REPOSITORY$/org/objenesis/objenesis/2.5.1/objenesis-2.5.1.jar!/" />
           <root url="jar://$MAVEN_REPOSITORY$/de/ruedigermoeller/fst/2.56/fst-2.56.jar!/" />
           <root url="jar://$MAVEN_REPOSITORY$/com/opencsv/opencsv/3.3/opencsv-3.3.jar!/" />
           <root url="jar://$USER_HOME$/.sdkman/candidates/grails/2.5.6/lib/commons-codec/commons-codec/jars/commons-codec-1.6.jar!/" />
@@ -476,10 +450,39 @@
           <root url="jar://$MAVEN_REPOSITORY$/com/squareup/moshi/moshi/1.6.0/moshi-1.6.0.jar!/" />
           <root url="jar://$MAVEN_REPOSITORY$/org/apache/logging/log4j/log4j-api/2.7/log4j-api-2.7.jar!/" />
           <root url="jar://$MAVEN_REPOSITORY$/org/apache/logging/log4j/log4j-core/2.7/log4j-core-2.7.jar!/" />
-          <root url="jar://$MAVEN_REPOSITORY$/org/jetbrains/annotations/13.0/annotations-13.0.jar!/" />
           <root url="jar://$MAVEN_REPOSITORY$/org/jetbrains/kotlin/kotlin-stdlib-common/1.2.60/kotlin-stdlib-common-1.2.60.jar!/" />
           <root url="jar://$MAVEN_REPOSITORY$/org/jetbrains/kotlin/kotlin-stdlib/1.2.60/kotlin-stdlib-1.2.60.jar!/" />
-          <root url="jar://$MAVEN_REPOSITORY$/com/streamr/client/0.1-SNAPSHOT/client-0.1-SNAPSHOT.jar!/" />
+          <root url="jar://$MAVEN_REPOSITORY$/org/reactivestreams/reactive-streams/1.0.2/reactive-streams-1.0.2.jar!/" />
+          <root url="jar://$MAVEN_REPOSITORY$/io/reactivex/rxjava2/rxjava/2.2.2/rxjava-2.2.2.jar!/" />
+          <root url="jar://$MAVEN_REPOSITORY$/com/github/jnr/jnr-enxio/0.19/jnr-enxio-0.19.jar!/" />
+          <root url="jar://$MAVEN_REPOSITORY$/com/github/jnr/jnr-unixsocket/0.21/jnr-unixsocket-0.21.jar!/" />
+          <root url="jar://$MAVEN_REPOSITORY$/org/web3j/tuples/4.2.0/tuples-4.2.0.jar!/" />
+          <root url="jar://$MAVEN_REPOSITORY$/org/web3j/rlp/4.2.0/rlp-4.2.0.jar!/" />
+          <root url="jar://$MAVEN_REPOSITORY$/org/web3j/crypto/4.2.0/crypto-4.2.0.jar!/" />
+          <root url="jar://$MAVEN_REPOSITORY$/org/bouncycastle/bcprov-jdk15on/1.60/bcprov-jdk15on-1.60.jar!/" />
+          <root url="jar://$MAVEN_REPOSITORY$/org/web3j/utils/4.2.0/utils-4.2.0.jar!/" />
+          <root url="jar://$MAVEN_REPOSITORY$/org/web3j/abi/4.2.0/abi-4.2.0.jar!/" />
+          <root url="jar://$MAVEN_REPOSITORY$/org/web3j/core/4.2.0/core-4.2.0.jar!/" />
+          <root url="jar://$MAVEN_REPOSITORY$/org/ethereum/solcJ-all/0.4.25/solcJ-all-0.4.25.jar!/" />
+          <root url="jar://$MAVEN_REPOSITORY$/org/ethereum/rocksdbjni/5.9.2/rocksdbjni-5.9.2.jar!/" />
+          <root url="jar://$MAVEN_REPOSITORY$/com/madgag/spongycastle/prov/1.58.0.0/prov-1.58.0.0.jar!/" />
+          <root url="jar://$MAVEN_REPOSITORY$/com/madgag/spongycastle/core/1.58.0.0/core-1.58.0.0.jar!/" />
+          <root url="jar://$MAVEN_REPOSITORY$/com/googlecode/concurrent-locks/concurrent-locks/1.0.0/concurrent-locks-1.0.0.jar!/" />
+          <root url="jar://$MAVEN_REPOSITORY$/org/javassist/javassist/3.21.0-GA/javassist-3.21.0-GA.jar!/" />
+          <root url="jar://$MAVEN_REPOSITORY$/org/cache2k/cache2k-core/1.2.1.Final/cache2k-core-1.2.1.Final.jar!/" />
+          <root url="jar://$MAVEN_REPOSITORY$/org/cache2k/cache2k-api/1.2.1.Final/cache2k-api-1.2.1.Final.jar!/" />
+          <root url="jar://$MAVEN_REPOSITORY$/org/objenesis/objenesis/3.0.1/objenesis-3.0.1.jar!/" />
+          <root url="jar://$MAVEN_REPOSITORY$/com/streamr/client/1.0.0/client-1.0.0.jar!/" />
+          <root url="jar://$MAVEN_REPOSITORY$/org/ethereum/ethereumj-core/1.12.0-RELEASE/ethereumj-core-1.12.0-RELEASE.jar!/" />
+          <root url="jar://$MAVEN_REPOSITORY$/org/jetbrains/annotations/17.0.0/annotations-17.0.0.jar!/" />
+          <root url="jar://$MAVEN_REPOSITORY$/com/google/code/findbugs/jsr305/3.0.2/jsr305-3.0.2.jar!/" />
+          <root url="jar://$MAVEN_REPOSITORY$/com/github/jnr/jnr-constants/0.9.9/jnr-constants-0.9.9.jar!/" />
+          <root url="jar://$MAVEN_REPOSITORY$/com/github/jnr/jnr-posix/3.0.44/jnr-posix-3.0.44.jar!/" />
+          <root url="jar://$MAVEN_REPOSITORY$/com/github/jnr/jffi/1.2.16/jffi-1.2.16.jar!/" />
+          <root url="jar://$MAVEN_REPOSITORY$/com/github/jnr/jnr-ffi/2.1.7/jnr-ffi-2.1.7.jar!/" />
+          <root url="jar://$MAVEN_REPOSITORY$/io/dropwizard/metrics/metrics-core/3.2.2/metrics-core-3.2.2.jar!/" />
+          <root url="jar://$MAVEN_REPOSITORY$/com/datastax/cassandra/cassandra-driver-core/3.7.1/cassandra-driver-core-3.7.1.jar!/" />
+          <root url="jar://$MAVEN_REPOSITORY$/com/github/jnr/jffi/1.2.16/jffi-1.2.16-native.jar!/" />
         </CLASSES>
         <JAVADOC />
         <SOURCES />

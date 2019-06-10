@@ -1,9 +1,6 @@
 package com.unifina.controller.api
 
-import com.unifina.api.CanvasListParams
-import com.unifina.api.SaveCanvasCommand
-import com.unifina.api.StartCanvasAsAdminParams
-import com.unifina.api.ValidationException
+import com.unifina.api.*
 import com.unifina.domain.security.Permission.Operation
 import com.unifina.domain.security.SecUser
 import com.unifina.domain.signalpath.Canvas
@@ -13,10 +10,12 @@ import com.unifina.security.StreamrApi
 import com.unifina.service.ApiService
 import com.unifina.service.CanvasService
 import com.unifina.service.SignalPathService
+import com.unifina.signalpath.ModuleException
 import grails.converters.JSON
 import grails.plugin.springsecurity.annotation.Secured
 import grails.transaction.NotTransactional
 import org.apache.log4j.Logger
+import org.springframework.util.FileCopyUtils
 
 @Secured(["IS_AUTHENTICATED_ANONYMOUSLY"])
 class CanvasApiController {
@@ -47,12 +46,19 @@ class CanvasApiController {
 			render result as JSON
 		}
 		else {
-			Map result = canvasService.reconstruct(canvas, request.apiUser)
-			// Need to discard this change below to prevent auto-update
-			canvas.json = result as JSON
-			render canvas.toMap() as JSON
-			// Prevent auto-update of the canvas
-			canvas.discard()
+			try {
+				Map result = canvasService.reconstruct(canvas, request.apiUser)
+				// Need to discard this change below to prevent auto-update
+				canvas.json = result as JSON
+				render canvas.toMap() as JSON
+				// Prevent auto-update of the canvas
+				canvas.discard()
+			} catch (ModuleException e) {
+				// Load canvas even if it is in an invalid state. For front-end auto-save.
+				Map<String, Object> response = canvas.toMap()
+				response.moduleErrors = e.getModuleExceptions()*.toMap()
+				render response as JSON
+			}
 		}
 	}
 
@@ -65,7 +71,13 @@ class CanvasApiController {
 	@StreamrApi
 	def update(String id) {
 		Canvas canvas = canvasService.authorizedGetById(id, request.apiUser, Operation.WRITE)
-		canvasService.updateExisting(canvas, readSaveCommand(), request.apiUser)
+		try {
+			canvasService.updateExisting(canvas, readSaveCommand(), request.apiUser)
+		} catch (ModuleException e) {
+			Map<String, Object> response = canvas.toMap()
+			response.moduleErrors = e.getModuleExceptions()*.toMap()
+			render response as JSON
+		}
 		render canvas.toMap() as JSON
 	}
 
@@ -145,4 +157,30 @@ class CanvasApiController {
 		return command
 	}
 
+	boolean validateFilename(String filename) {
+		if (filename == null) {
+			return false
+		}
+		return filename ==~ /^streamr_csv_[0-9]{1,19}\.csv$/
+	}
+
+	@StreamrApi
+	def downloadCsv() {
+		if (!validateFilename(params.filename)) {
+			throw new BadRequestException("INVALID_PARAMETER", "filename contains illegal characters")
+		}
+		String fileName = System.getProperty("java.io.tmpdir") + File.separator + params.filename
+		File file = new File(fileName)
+		if (file.canRead()) {
+			FileInputStream fileInputStream = new FileInputStream(file)
+			response.setContentType("text/csv")
+			response.setHeader("Content-Disposition", "attachment; filename=" + file.name);
+			response.setHeader("Content-Length", file.length() + "")
+			FileCopyUtils.copy(fileInputStream, response.outputStream)
+			fileInputStream.close()
+			file.delete()
+		} else {
+			throw new NotFoundException("File not found: " + params.filename)
+		}
+	}
 }

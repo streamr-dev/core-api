@@ -1,9 +1,13 @@
 package com.unifina.service
 
+import com.datastax.driver.core.AuthProvider
+import com.datastax.driver.core.Authenticator
 import com.datastax.driver.core.Cluster
+import com.datastax.driver.core.PlainTextAuthProvider
 import com.datastax.driver.core.ResultSet
 import com.datastax.driver.core.Row
 import com.datastax.driver.core.Session
+import com.datastax.driver.core.exceptions.AuthenticationException
 import com.unifina.domain.data.Stream
 import groovy.transform.CompileStatic
 import org.codehaus.groovy.grails.commons.GrailsApplication
@@ -22,6 +26,8 @@ class CassandraService implements DisposableBean {
 
 	private static final int FETCH_SIZE = 5000;
 
+	static final long ONE_YEAR_IN_MS = 365 * 24 * 60 * 60 * 1000
+
 	// Thread-safe
 	private Session session
 
@@ -36,11 +42,17 @@ class CassandraService implements DisposableBean {
      */
 	Session getSession() {
 		if (session==null) {
-			Cluster.Builder builder = Cluster.builder();
+			Cluster.Builder builder = Cluster.builder()
 			for (String host : grailsApplication.config["streamr"]["cassandra"]["hosts"]) {
-				builder.addContactPoint(host);
+				builder.addContactPoint(host)
 			}
-			Cluster cluster = builder.build();
+			if (grailsApplication.config["streamr"]["cassandra"]["username"] && grailsApplication.config["streamr"]["cassandra"]["password"]) {
+				builder.withCredentials(
+					grailsApplication.config["streamr"]["cassandra"]["username"].toString(),
+					grailsApplication.config["streamr"]["cassandra"]["password"].toString()
+				)
+			}
+			Cluster cluster = builder.build()
 
 			session = cluster.connect(grailsApplication.config["streamr"]["cassandra"]["keySpace"].toString());
 			session.getCluster().getConfiguration().getQueryOptions().setFetchSize(FETCH_SIZE);
@@ -79,7 +91,11 @@ class CassandraService implements DisposableBean {
 	}
 
 	StreamMessage getLatestStreamMessage(Stream stream, int partition) {
-		ResultSet resultSet = getSession().execute("SELECT payload FROM stream_data WHERE id = ? AND partition = ? ORDER BY ts DESC, sequence_no DESC LIMIT 1", stream.getId(), partition)
+		// TODO: ts >= ? condition added to prevent timeouts of cassandra queries. A more efficient approach to finding
+		// the latest message is needed. (CORE-1724)
+		ResultSet resultSet = getSession()
+			.execute("SELECT payload FROM stream_data WHERE id = ? AND partition = ? AND ts >= ? ORDER BY ts DESC, sequence_no DESC LIMIT 1",
+				stream.getId(), partition, System.currentTimeMillis() - ONE_YEAR_IN_MS)
 		Row row = resultSet.one()
 		if (row) {
 			return StreamMessage.fromJson(new String(row.getBytes("payload").array(), StandardCharsets.UTF_8))
@@ -92,7 +108,9 @@ class CassandraService implements DisposableBean {
 		final List<StreamMessage> messages = new ArrayList<>()
 		for (int i = 0; i < stream.getPartitions(); i++) {
 			final StreamMessage msg = getLatestStreamMessage(stream, i)
-			messages.add(msg)
+			if (msg != null) {
+				messages.add(msg)
+			}
 		}
 		if (messages.size() < 1) {
 			return null

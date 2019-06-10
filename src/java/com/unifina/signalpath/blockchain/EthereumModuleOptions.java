@@ -60,22 +60,14 @@ public class EthereumModuleOptions implements Serializable {
 		ModuleOption networkOption = options.getOption("network");
 		if (networkOption != null) {
 			network = networkOption.getString();
-			getServer(); // Throws if the network not valid
+			getRpcUrl(); // Throws if the network not valid
 		}
-	}
-
-	public String getServer() {
-		String url = MapTraversal.getString(Holders.getConfig(), "streamr.ethereum.networks." + network);
-		if (url == null) {
-			throw new RuntimeException("No url found for Ethereum bridge to network " + network);
-		}
-		return url;
 	}
 
 	public String getRpcUrl() {
-		String url = MapTraversal.getString(Holders.getConfig(), "streamr.ethereum.rpcUrls." + network);
+		String url = MapTraversal.getString(Holders.getConfig(), "streamr.ethereum.networks." + network);
 		if (url == null) {
-			throw new RuntimeException("No rpcUrl found for Ethereum bridge to network " + network);
+			throw new RuntimeException("No rpcUrl found for Ethereum network " + network);
 		}
 		return url;
 	}

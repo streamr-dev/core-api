@@ -9,6 +9,10 @@ import com.unifina.security.AllowRole
 import com.unifina.service.ApiService
 import com.unifina.service.CanvasService
 import com.unifina.service.SignalPathService
+import com.unifina.exceptions.JavaCompilerErrorMessage
+import com.unifina.signalpath.ModuleException
+import com.unifina.exceptions.ModuleExceptionMessage
+
 import grails.converters.JSON
 import grails.test.mixin.Mock
 import grails.test.mixin.TestFor
@@ -157,6 +161,33 @@ class CanvasApiControllerSpec extends ControllerSpecification {
 		1 * controller.signalPathService.runtimeRequest(_, false) >> [success:true, json:JSON.parse(canvas1.json)]
 	}
 
+	void "show() lets load a canvas in invalid state"() {
+		setup:
+		List<ModuleExceptionMessage> msgs = new ArrayList<>()
+		msgs.add(new JavaCompilerErrorMessage(1, 11, "stupid programmer error"))
+		msgs.add(new JavaCompilerErrorMessage(1, 10, "syntax error"))
+		msgs.add(new JavaCompilerErrorMessage(2, 100, "syntax terror"))
+
+		when:
+		params.id = canvas1.id
+		authenticatedAs(me) { controller.show() }
+
+		then:
+		response.status == 200
+		response.json.size() > 0
+		1 * canvasService.authorizedGetById("1", me, Permission.Operation.READ) >> canvas1
+		1 * controller.canvasService.reconstruct(_, _) >> { throw new ModuleException("mocked", null, msgs) }
+		response.json.moduleErrors[0].module == 1
+		response.json.moduleErrors[0].line == 11
+		response.json.moduleErrors[0].message == "stupid programmer error"
+		response.json.moduleErrors[1].module == 1
+		response.json.moduleErrors[1].line == 10
+		response.json.moduleErrors[1].message == "syntax error"
+		response.json.moduleErrors[2].module == 2
+		response.json.moduleErrors[2].line == 100
+		response.json.moduleErrors[2].message == "syntax terror"
+	}
+	
 	void "save() creates a new canvas and renders it as json"() {
 		def newCanvasId
 
@@ -218,6 +249,39 @@ class CanvasApiControllerSpec extends ControllerSpecification {
 		thrown NotPermittedException
 		1 * canvasService.authorizedGetById(canvas2.id, me, Permission.Operation.WRITE) >> { throw new NotPermittedException("mock") }
 	}
+
+	def "update() lets save canvas in invalid state"() {
+		setup:
+		List<ModuleExceptionMessage> msgs = new ArrayList<>()
+		msgs.add(new JavaCompilerErrorMessage(1, 11, "stupid programmer error"))
+		msgs.add(new JavaCompilerErrorMessage(1, 10, "syntax error"))
+		msgs.add(new JavaCompilerErrorMessage(2, 100, "syntax terror"))
+
+		params.id = "1"
+		request.JSON = [
+			name: "broken canvas",
+			modules: [],
+		]
+		request.method = "PUT"
+
+		when:
+		authenticatedAs(me) { controller.update() }
+
+		then:
+		response.status == 200
+		1 * canvasService.authorizedGetById("1", me, Permission.Operation.WRITE) >> canvas1
+		1 * canvasService.updateExisting(canvas1, _, me) >> { throw new ModuleException("mocked", null, msgs) }
+		response.json.moduleErrors[0].module == 1
+		response.json.moduleErrors[0].line == 11
+		response.json.moduleErrors[0].message == "stupid programmer error"
+		response.json.moduleErrors[1].module == 1
+		response.json.moduleErrors[1].line == 10
+		response.json.moduleErrors[1].message == "syntax error"
+		response.json.moduleErrors[2].module == 2
+		response.json.moduleErrors[2].line == 100
+		response.json.moduleErrors[2].message == "syntax terror"
+	}
+
 
 	void "delete() must authorize and delete the canvas"() {
 		when:
@@ -462,4 +526,56 @@ class CanvasApiControllerSpec extends ControllerSpecification {
 		1 * controller.signalPathService.runtimeRequest(_, true) >> runtimeResponse
 	}
 
+	void "validateFilename() doesnt accept dot dot paths or slashs"(String filename, Boolean expected) {
+		expect:
+		controller.validateFilename(filename) == expected
+		where:
+		filename | expected
+		null | false
+		"" | false
+		" " | false
+		"\t" | false
+		"\n" | false
+		"../filename.txt" | false
+		"/file.csv" | false
+		"file/name.csv" | false
+		"..data.txt" | false
+		"../../etc/passwd" | false
+		"data.txt" | false // wrong extension
+		"streamr_csv_0.csv" | true
+		"streamr_csv_111112222233333.csv" | true
+		"streamr_csv_6043894978795937897.csv" | true
+		"streamr_csv_1111122222333334444.csv" | true // 19 digits
+		"streamr_csv_11111222223333344444.csv" | false // 20 digits
+	}
+
+	void "downloadCsv() doesnt let users define dot dot slash paths"() {
+		when:
+		params.filename = "../filename.txt"
+		request.method = "GET"
+		authenticatedAs(me) { controller.downloadCsv() }
+		then:
+		def e = thrown(BadRequestException)
+		e.getStatusCode() == 400
+		e.getCode() == "INVALID_PARAMETER"
+		e.getMessage() == "filename contains illegal characters"
+	}
+
+	void "downloadCsv() downloads csv file"() {
+		setup:
+		String data = "file,csv,data\n1,2,3\n"
+		File file = File.createTempFile("streamr_csv_", ".csv")
+		file.write(data)
+		String fileLen = file.length() + ""
+		when:
+		params.filename = file.getName()
+		request.method = "GET"
+		authenticatedAs(me) { controller.downloadCsv() }
+		then:
+		response.getText() == data
+		response.status == 200
+		response.contentType == "text/csv"
+		response.getHeader("Content-Disposition") == "attachment; filename=" + file.getName()
+		response.getHeader("Content-Length") == fileLen
+	}
 }

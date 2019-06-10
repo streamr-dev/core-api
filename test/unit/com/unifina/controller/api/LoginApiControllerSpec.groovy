@@ -3,6 +3,7 @@ package com.unifina.controller.api
 import com.unifina.ControllerSpecification
 import com.unifina.api.ApiException
 import com.unifina.api.ChallengeVerificationFailedException
+import com.unifina.api.DisabledUserException
 import com.unifina.api.InvalidAPIKeyException
 import com.unifina.api.InvalidArgumentsException
 import com.unifina.api.InvalidUsernameAndPasswordException
@@ -116,6 +117,34 @@ class LoginApiControllerSpec extends ControllerSpecification {
 		1 * challengeService.checkValidChallengeResponse(challenge.getId(), challenge.getChallenge(), signature, address) >> { throw new ChallengeVerificationFailedException() }
 	}
 
+	def "response to challenge should fail if disabled user"() {
+		String address = "address"
+		String signature = "signature"
+
+		Challenge challenge = new Challenge("id", "challenge", challengeService.TTL_SECONDS)
+
+		SecUser user = new SecUser(
+			enabled: false
+		).save(failOnError: true, validate: false)
+
+		when:
+		request.method = "POST"
+		request.JSON = [
+			challenge: [
+				id       : challenge.getId(),
+				challenge: challenge.getChallenge()
+			],
+			signature: signature,
+			address  : address
+		]
+		authenticatedAs(me) { controller.response() }
+
+		then:
+		1 * challengeService.checkValidChallengeResponse(challenge.getId(), challenge.getChallenge(), signature, address)
+		1 * ethereumIntegrationKeyService.getOrCreateFromEthereumAddress(address) >> user
+		thrown DisabledUserException
+	}
+
 	def "password-based login should pass"() {
 		SecUser user = new SecUser(
 			username: "username",
@@ -154,6 +183,26 @@ class LoginApiControllerSpec extends ControllerSpecification {
 		then:
 		1 * userService.getUserFromUsernameAndPassword(username, password) >> { throw new InvalidUsernameAndPasswordException() }
 		thrown InvalidUsernameAndPasswordException
+	}
+
+	def "password-based login should fail if disabled user"() {
+		SecUser user = new SecUser(
+			username: "username",
+			password: "password",
+			enabled: false,
+		).save(failOnError: true, validate: false)
+
+		when:
+		request.method = "POST"
+		request.JSON = [
+			username: user.username,
+			password: user.password
+		]
+		authenticatedAs(me) { controller.password() }
+
+		then:
+		1 * userService.getUserFromUsernameAndPassword(user.username, user.password) >> user
+		thrown DisabledUserException
 	}
 
 	def "apikey-based login should pass"() {
@@ -216,6 +265,25 @@ class LoginApiControllerSpec extends ControllerSpecification {
 		then:
 		1 * userService.getUserishFromApiKey(apiKey) >> { throw new InvalidAPIKeyException() }
 		thrown InvalidAPIKeyException
+	}
+
+	def "apikey-based login should fail if disabled user"() {
+		SecUser user = new SecUser(
+			enabled: false,
+		).save(failOnError: true, validate: false)
+
+		String apiKey = "apiKey"
+
+		when:
+		request.method = "POST"
+		request.JSON = [
+			apiKey: apiKey
+		]
+		authenticatedAs(me) { controller.apikey() }
+
+		then:
+		1 * userService.getUserishFromApiKey(apiKey) >> user
+		thrown DisabledUserException
 	}
 
 	def "apikey-based login should return 400 if no api key provided"() {

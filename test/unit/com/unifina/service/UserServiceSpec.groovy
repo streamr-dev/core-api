@@ -1,6 +1,5 @@
 package com.unifina.service
 
-import com.unifina.api.ApiException
 import com.unifina.api.InvalidUsernameAndPasswordException
 import com.unifina.api.NotFoundException
 import com.unifina.domain.data.Feed
@@ -65,6 +64,8 @@ class UserServiceSpec extends Specification {
 		grailsApplication.mainContext.getBean("springSecurityService").grailsApplication = grailsApplication
 		grailsApplication.mainContext.getBean("springSecurityService").passwordEncoder = grailsApplication.mainContext.getBean("passwordEncoder")
 		permissionService = service.permissionService = Mock(PermissionService)
+		service.streamService = Mock(StreamService)
+		service.canvasService = Mock(CanvasService)
 	}
 
 	def "the user is created when called, with default roles if none supplied"() {

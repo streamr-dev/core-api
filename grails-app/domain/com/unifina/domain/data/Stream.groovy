@@ -1,5 +1,6 @@
 package com.unifina.domain.data
 
+import com.unifina.domain.ExampleType
 import com.unifina.domain.marketplace.Product
 import com.unifina.domain.security.Permission
 import com.unifina.domain.signalpath.Canvas
@@ -27,11 +28,16 @@ class Stream implements Comparable {
 	String uiChannelPath
 	Canvas uiChannelCanvas
 
+	Boolean inbox = false
+
 	Boolean requireSignedData = false
 	// Always try to autoconfigure field names and types
 	Boolean autoConfigure = true
 	// Historical data storage period (days)
 	Integer storageDays = DEFAULT_STORAGE_DAYS
+
+	// exampleType marks this Stream as an example for new users.
+	ExampleType exampleType = ExampleType.NOT_SET
 
 	static hasMany = [
 		permissions: Permission,
@@ -59,9 +65,11 @@ class Stream implements Comparable {
 		uiChannel defaultValue: "false"
 		uiChannelPath index: "ui_channel_path_idx"
 		config type: 'text'
+		inbox defaultValue: "false"
 		requireSignedData defaultValue: "false"
 		autoConfigure defaultValue: "true"
 		storageDays defaultValue: DEFAULT_STORAGE_DAYS
+		exampleType enumType: "identity", defaultValue: ExampleType.NOT_SET, index: 'example_type_idx'
 	}
 
 	@Override
@@ -79,9 +87,12 @@ class Stream implements Comparable {
 			config: config == null || config.empty ? config : JSON.parse(config),
 			description: description,
 			uiChannel: uiChannel,
+			inbox: inbox,
 			dateCreated: dateCreated,
 			lastUpdated: lastUpdated,
-			requireSignedData: requireSignedData
+			requireSignedData: requireSignedData,
+			autoConfigure: autoConfigure,
+			storageDays: storageDays
 		]
 	}
 
@@ -94,6 +105,7 @@ class Stream implements Comparable {
 			feed: feed.toMap(),
 			description: description,
 			uiChannel: uiChannel,
+			inbox: inbox,
 			dateCreated: dateCreated,
 			lastUpdated: lastUpdated,
 			requireSignedData: requireSignedData

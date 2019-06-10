@@ -39,12 +39,14 @@ class UrlMappings {
 		"/api/v1/canvases/$resourceId/permissions"(resources: "permissionApi", excludes: ["create", "edit", "update"]) { resourceClass = Canvas }
 		"/api/v1/canvases/$resourceId/permissions/me"(controller: "permissionApi", action: "getOwnPermissions") { resourceClass = Canvas }
 		"/api/v1/canvases/$canvasId/modules/$moduleId"(controller: "canvasApi", action: "module") // for internal use
+		"/api/v1/canvases/downloadCsv"(method: "GET", controller: "canvasApi", action: "downloadCsv")
 
 		"/api/v1/streams"(resources: "streamApi", excludes: ["create", "edit"])
 		"/api/v1/streams/$resourceId/permissions"(resources: "permissionApi", excludes: ["create", "edit", "update"]) { resourceClass = Stream }
 		"/api/v1/streams/$resourceId/permissions/me"(controller: "permissionApi", action: "getOwnPermissions") { resourceClass = Stream }
 		"/api/v1/streams/$id/fields"(controller: "streamApi", action: "setFields")
-		"/api/v1/streams/$id/detectFields"(controller: "streamApi", action: "detectFields")
+		"/api/v1/streams/$id/detectFields"(method: "POST", controller: "streamApi", action: "detectFields")
+		"/api/v1/streams/$id/detectFields"(method: "GET", controller: "streamApi", action: "detectFields")
 		"/api/v1/streams/$id/range"(controller: "streamApi", action: "range")
 		"/api/v1/streams/$id/uploadCsvFile"(controller: "streamApi", action: "uploadCsvFile")
 		"/api/v1/streams/$id/confirmCsvFileUpload"(controller: "streamApi", action: "confirmCsvFileUpload")
@@ -52,6 +54,10 @@ class UrlMappings {
 		"/api/v1/streams/$id/publishers"(controller: "streamApi", action: "publishers")
 		"/api/v1/streams/$id/status"(controller: "streamApi", action: "status")
 		"/api/v1/streams/$resourceId/keys"(resources: "keyApi", excludes: ["create", "edit", "update"]) { resourceClass = Stream }
+		"/api/v1/streams/$streamId/keys/$keyId"(method: "PUT", controller: "keyApi", action: "updateStreamKey")
+		"/api/v1/streams/$id/deleteDataUpTo"(method: "DELETE", controller: "streamApi", action: "deleteDataUpTo")
+		"/api/v1/streams/$id/deleteAllData"(method: "DELETE", controller: "streamApi", action: "deleteAllData")
+		"/api/v1/streams/$id/deleteDataRange"(method: "DELETE", controller: "streamApi", action: "deleteDataRange")
 
 		"/api/v1/dashboards"(resources: "dashboardApi", excludes: ["create", "edit"])
 		"/api/v1/dashboards/$dashboardId/items"(resources: "dashboardItemApi", excludes: ["create", "edit"])
@@ -70,6 +76,7 @@ class UrlMappings {
 		"/api/v1/users/me"(method: "DELETE", controller: "userApi", action: "delete")
 
 		"/api/v1/users/me/keys"(resources: "keyApi", excludes: ["create", "edit", "update"]) { resourceClass = SecUser }
+		"/api/v1/users/me/keys/$keyId"(method: "PUT", controller: "keyApi", action: "updateUserKey")
 		"/api/v1/users/me/products"(controller: "productApi", action: "index") { operation = Permission.Operation.SHARE }
 		"/api/v1/users/me/changePassword"(controller: "userApi", action: "changePassword")
 		"/api/v1/users/me/image"(controller: "userApi", action: "uploadAvatarImage")
@@ -83,6 +90,7 @@ class UrlMappings {
 
 		"/api/v1/login/challenge/$address"(controller: "loginApi", action: "challenge")
 		"/api/v1/login/$action"(controller: "loginApi")
+		"/api/v1/logout"(controller: "logoutApi", action: "logout")
 
 		"/api/v1/categories"(resources: "categoryApi")
 

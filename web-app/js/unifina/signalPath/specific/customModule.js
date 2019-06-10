@@ -168,10 +168,8 @@ SignalPath.CustomModule = function(data,canvas,prot) {
 	}
 
 	pub.handleError = prot.handleError = function(error) {
-		if (error.type=="compilationErrors") {
-			for (var i=0;i<error.errors.length;i++) {
-				editor.setGutterMarker(error.errors[i].line-1, "breakpoints", makeMarker());
-			}
+		if (error.type=="compilerError") {
+			editor.setGutterMarker(error.line-1, "breakpoints", makeMarker());
 		}
 	}
 	

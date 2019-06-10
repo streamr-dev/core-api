@@ -3,7 +3,7 @@ package com.unifina.service
 import com.google.gson.Gson
 import com.google.gson.GsonBuilder
 import com.streamr.client.protocol.message_layer.StreamMessage
-import com.streamr.client.protocol.message_layer.StreamMessageV30
+import com.streamr.client.protocol.message_layer.StreamMessageV31
 import com.unifina.api.NotFoundException
 import com.unifina.api.NotPermittedException
 import com.unifina.api.ValidationException
@@ -101,7 +101,7 @@ class StreamService {
 		task.save(flush: true, failOnError: true)
 	}
 
-	boolean autodetectFields(Stream stream, boolean flattenHierarchies) {
+	boolean autodetectFields(Stream stream, boolean flattenHierarchies, boolean saveFields) {
 		FieldDetector fieldDetector = instantiateDetector(stream)
 		fieldDetector.setFlattenMap(flattenHierarchies)
 		def fields = fieldDetector?.detectFields(stream)
@@ -109,7 +109,11 @@ class StreamService {
 			Map config = stream.getStreamConfigAsMap()
 			config.fields = fields
 			stream.config = gson.toJson(config)
-			stream.save(flush: true, failOnError: true)
+			if (saveFields) {
+				stream.save(flush: true, failOnError: true)
+			} else {
+				stream.discard()
+			}
 			return true
 		} else {
 			return false
@@ -170,8 +174,8 @@ class StreamService {
 			}
 
 			int partition = partitioner.partition(stream, null)
-			StreamMessageV30 msg = new StreamMessageV30(stream.id, partition, date.time, sequenceNumber, publisherId, msgChainId,
-				previousTimestamp, sequenceNumber, StreamMessage.ContentType.CONTENT_TYPE_JSON,
+			StreamMessageV31 msg = new StreamMessageV31(stream.id, partition, date.time, sequenceNumber, publisherId, msgChainId,
+				previousTimestamp, sequenceNumber, StreamMessage.ContentType.CONTENT_TYPE_JSON, StreamMessage.EncryptionType.NONE,
 				gson.toJson(message), StreamMessage.SignatureType.SIGNATURE_TYPE_NONE, null)
 			saveMessage(msg)
 			sequenceNumber++
@@ -211,7 +215,6 @@ class StreamService {
 			Class clazz = getClass().getClassLoader().loadClass(stream.feed.fieldDetectorClass)
 			return clazz.newInstance()
 		}
-
 	}
 
 	@CompileStatic
@@ -251,6 +254,14 @@ class StreamService {
 		}
 
 		return keys*.idInService as Set
+	}
+
+	List<Stream> getInboxStreams(List<SecUser> users) {
+		if (users.isEmpty()) return new ArrayList<Stream>()
+		List<IntegrationKey> keys = IntegrationKey.findAll {
+			user.id in users*.id && service in [IntegrationKey.Service.ETHEREUM, IntegrationKey.Service.ETHEREUM_ID]
+		}
+		return Stream.findAllByIdInListAndInbox(keys*.idInService, true)
 	}
 
 	@CompileStatic
@@ -308,5 +319,13 @@ class StreamService {
 			return new StreamStatus(false, msg.getTimestampAsDate())
 		}
 		return new StreamStatus(true, msg.getTimestampAsDate())
+	}
+
+	@CompileStatic
+	def addExampleStreams(SecUser user, List<Stream> examples) {
+		for (final Stream example : examples) {
+			// Grant read permission to example stream.
+			permissionService.systemGrant(user, example, Permission.Operation.READ)
+		}
 	}
 }

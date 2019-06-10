@@ -178,6 +178,8 @@ log4j.main = {
 		'org.apache.kafka.clients.consumer.ConsumerConfig',
 		'kafka.producer.ProducerConfig',
 		'org.apache.kafka.clients.producer.ProducerConfig'
+
+	debug 'com.datastax.driver.core'
 }
 
 /**
@@ -263,29 +265,23 @@ environments {
 }
 
 /**
- * Streamr-web3 Ethereum bridge address
+ * Ethereum networks configuration (RPC urls)
+ *
+ * Can be configured via JVM system properties. Example command line flags:
+ *
+ * -Dstreamr.ethereum.defaultNetwork=someNetwork
+ * -Dstreamr.ethereum.networks.someNetwork=http://some-network-rpc-url
+ * -Dstreamr.ethereum.networks.anotherNetwork=http://some-network-rpc-url
  */
-streamr.ethereum.defaultNetwork = "rinkeby"
-streamr.ethereum.networks = System.getProperty("streamr.ethereum.networks") ? new Gson().fromJson(System.getProperty("streamr.ethereum.networks")) : [
-	ropsten: "http://localhost:3000",
-	rinkeby: "http://localhost:3001"
-]
-streamr.ethereum.rpcUrls = System.getProperty("streamr.ethereum.rpcUrls") ? new Gson().fromJson(System.getProperty("streamr.ethereum.rpcUrls")) : [
-	ropsten: "http://localhost:8545",
-	rinkeby: "http://localhost:8546"
-]
-environments {
-	production {
-		streamr.ethereum.networks = System.getProperty("streamr.ethereum.networks") ? new Gson().fromJson(System.getProperty("streamr.ethereum.networks")) : [
-			ropsten: "http://ropsten:3000",
-			rinkeby: "http://rinkeby:3001"
-		]
-		streamr.ethereum.rpcUrls = System.getProperty("streamr.ethereum.rpcUrls") ? new Gson().fromJson(System.getProperty("streamr.ethereum.rpcUrls")) : [
-			ropsten: "http://94.130.70.249:8545",
-			rinkeby: "http://94.130.70.249:8546"
-		]
-	}
-}
+streamr.ethereum.defaultNetwork = System.getProperty("streamr.ethereum.defaultNetwork") ?: "local"
+streamr.ethereum.networks = System.getProperties().findAll {key, val-> key.toString().startsWith("streamr.ethereum.networks.")}.isEmpty() ?
+	// Default value
+	[local: "http://localhost:8545"] :
+	// Else collect system properties to Map
+	System.getProperties().findAll {key, val-> key.toString().startsWith("streamr.ethereum.networks.")}
+		.collectEntries {key, val ->
+			[(key.toString().replace("streamr.ethereum.networks.", "")): val]
+		}
 
 /**
  * Kafka config
@@ -325,6 +321,8 @@ environments {
  */
 streamr.cassandra.hosts = (System.getProperty("streamr.cassandra.hosts") ? Arrays.asList(System.getProperty("streamr.cassandra.hosts").split(",")) : ["127.0.0.1"])
 streamr.cassandra.keySpace = System.getProperty("streamr.cassandra.keySpace") ?: "streamr_dev"
+streamr.cassandra.username = System.getProperty("streamr.cassandra.username")
+streamr.cassandra.password = System.getProperty("streamr.cassandra.password")
 
 environments {
 	production {

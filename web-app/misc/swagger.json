@@ -1827,6 +1827,130 @@
         }
       }
     },
+    "/streams/{streamId}/keys/{keyId}": {
+      "put": {
+        "summary": "Update Stream's Key's name and permission",
+        "description": "Update Stream's Key's name and permission.",
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "description": "UpdateStreamKeyRequest object",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/UpdateStreamKeyRequest"
+            }
+          },
+          {
+            "in": "path",
+            "name": "streamId",
+            "description": "ID of the stream",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "in": "path",
+            "name": "keyId",
+            "description": "ID of the key to be updated",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "tags": [
+          "streams",
+          "keys"
+        ],
+        "responses": {
+          "200": {
+            "description": "Success"
+          },
+          "400": {
+            "description": "Invalid Request"
+          },
+          "404": {
+            "description": "Not Found"
+          }
+        }
+      }
+    },
+    "/streams/{id}/detectFields": {
+      "post": {
+        "summary": "Detect stream's field types.",
+        "description": "Automatically detects fields of given Stream by analyzing recent data. Save fields to stream details.",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "description": "ID of the stream",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "in": "query",
+            "name": "flatten",
+            "description": "Flatten hierarchies.",
+            "required": false,
+            "default": false,
+            "type": "boolean"
+          }
+        ],
+        "tags": [
+          "streams"
+        ],
+        "responses": {
+          "200": {
+            "description": "Success. Contains details of the stream."
+          },
+          "403": {
+            "description": "No permissions to stream"
+          },
+          "404": {
+            "description": "Stream not found"
+          },
+          "500": {
+            "description": "No fields found. If stream doesn't contain any data."
+          }
+        }
+      },
+      "get": {
+        "summary": "Detect stream's field types.",
+        "description": "Automatically detects fields of given Stream by analyzing recent data. Do not save fields to stream details.",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "description": "ID of the stream",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "in": "query",
+            "name": "flatten",
+            "description": "Flatten hierarchies.",
+            "required": false,
+            "default": false,
+            "type": "boolean"
+          }
+        ],
+        "tags": [
+          "streams"
+        ],
+        "responses": {
+          "200": {
+            "description": "Success. Contains details of the stream."
+          },
+          "403": {
+            "description": "No permissions to stream"
+          },
+          "404": {
+            "description": "Stream not found"
+          },
+          "500": {
+            "description": "No fields found. If stream doesn't contain any data."
+          }
+        }
+      }
+    },
     "/streams/{id}/data": {
       "post": {
         "summary": "Add new event to stream",
@@ -2401,6 +2525,145 @@
           },
           "404": {
             "description": "Stream or permission wasn't found",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          }
+        }
+      }
+    },
+    "/streams/{id}/deleteAllData": {
+      "delete": {
+        "summary": "Delete all data from given stream",
+        "description": "Deletes streams all data.",
+        "tags": [
+          "streams"
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "description": "ID of the stream",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Success"
+          },
+          "403": {
+            "description": "Access denied",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          },
+          "404": {
+            "description": "Stream object wasn't found",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          }
+        }
+      }
+    },
+    "/streams/{id}/deleteDataUpTo": {
+      "delete": {
+        "summary": "Delete data up to given date",
+        "description": "Deletes streams data up to given date.",
+        "tags": [
+          "streams"
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "description": "ID of the stream",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "in": "query",
+            "name": "date",
+            "description": "Delete data up to date. Format is either milliseconds since epoch or ISO8601 datetime",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Success"
+          },
+          "400": {
+            "description": "Input date is malformed",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          },
+          "403": {
+            "description": "Access denied",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          },
+          "404": {
+            "description": "Stream object wasn't found",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          }
+        }
+      }
+    },
+    "/streams/{id}/deleteDataRange": {
+      "delete": {
+        "summary": "Delete data between start and end date parameters",
+        "description": "Deletes streams data starting from given date up to given end date.",
+        "tags": [
+          "streams"
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "description": "ID of the stream",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "in": "query",
+            "name": "start",
+            "description": "Start date where the data deletion starts. Format is either milliseconds since epoch or ISO8601 datetime.",
+
+            "required": true,
+            "type": "string"
+          },
+          {
+            "in": "query",
+            "name": "end",
+            "description": "Delete data up to this date. Format is either milliseconds since epoch or ISO8601 datetime.",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Success"
+          },
+          "400": {
+            "description": "Input start and/or end date is malformed",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          },
+          "403": {
+            "description": "Access denied",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          },
+          "404": {
+            "description": "Stream object wasn't found",
             "schema": {
               "$ref": "#/definitions/Error"
             }
@@ -3018,6 +3281,47 @@
         }
       }
     },
+    "/canvases/downloadCsv": {
+      "get": {
+        "summary": "Download CSV file",
+        "produces": [
+          "text/csv"
+        ],
+        "description": "Prompts browser to open save file dialog and downloads CSV file.",
+        "tags": [
+          "canvases"
+        ],
+        "parameters": [
+          {
+            "in": "query",
+            "name": "filename",
+            "description": "Name of the file to download",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "schema": {
+              "type": "file"
+            }
+          },
+          "400": {
+            "description": "Filename parameter contains illegal characters",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          },
+          "404": {
+            "description": "File not found",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          }
+        }
+      }
+    },
     "/dashboards": {
       "get": {
         "summary": "List dashboards",
@@ -3612,6 +3916,43 @@
             }
           }
         }
+      },
+      "put": {
+        "summary": "Update User's Key's name",
+        "description": "Update User's Key's name.",
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "description": "UpdateUserKeyRequest object",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/UpdateUserKeyRequest"
+            }
+          },
+          {
+            "in": "path",
+            "name": "id",
+            "description": "ID of the key to be updated",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "tags": [
+          "users",
+          "keys"
+        ],
+        "responses": {
+          "200": {
+            "description": "Success"
+          },
+          "400": {
+            "description": "Invalid Request"
+          },
+          "404": {
+            "description": "Not Found"
+          }
+        }
       }
     },
     "/modules/{id}": {
@@ -3719,7 +4060,7 @@
             "description": "Success"
           }
         }
-      },
+      }
     }
   },
   "parameters": {
@@ -3797,6 +4138,36 @@
     }
   },
   "definitions": {
+    "UpdateStreamKeyRequest": {
+      "type": "object",
+      "required": [
+        "name"
+      ],
+      "properties": {
+        "permission": {
+          "type": "string",
+          "description": "Permission type. Either 'read' or 'write'."
+        },
+        "name": {
+          "type": "string",
+          "description": "Name of the Key.",
+          "example": "Name of my Stream's Key"
+        }
+      }
+    },
+    "UpdateUserKeyRequest": {
+      "type": "object",
+      "required": [
+        "name"
+      ],
+      "properties": {
+        "name": {
+          "type": "string",
+          "description": "Name of the Key.",
+          "example": "Name of my own key"
+        }
+      }
+    },
     "Stream": {
       "type": "object",
       "required": [

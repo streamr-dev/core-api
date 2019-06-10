@@ -11,7 +11,6 @@ import com.unifina.utils.GlobalsFactory
 import grails.converters.JSON
 import grails.plugin.springsecurity.SpringSecurityService
 import grails.plugin.springsecurity.annotation.Secured
-import org.springframework.util.FileCopyUtils
 
 import java.security.AccessControlException
 
@@ -95,20 +94,6 @@ class CanvasController {
 		render result as JSON
 	}
 
-	def downloadCsv() {
-		String fileName = System.getProperty("java.io.tmpdir") + File.separator + params.filename
-		File file = new File(fileName)
-		if (file.canRead()) {
-			FileInputStream fileInputStream = new FileInputStream(file)
-			response.setContentType("text/csv")
-			response.setHeader("Content-disposition", "attachment; filename="+file.name);
-			FileCopyUtils.copy(fileInputStream, response.outputStream)
-			fileInputStream.close()
-			file.delete()
-		}
-		else throw new FileNotFoundException("File not found: "+params.filename)
-	}
-
 	def loadBrowser() {
 		def result = [
 				browserId: params.browserId,
@@ -132,17 +117,11 @@ class CanvasController {
 
 		def canvases = []
 		if (params.browserId == 'examplesLoadBrowser') {
-			// bypass Permission check; examples are public (make sure example-bit can't be set through API!)
-			canvases = Canvas.withCriteria {
-				eq "example", true
-				order "dateCreated", "asc"
-				maxResults max
-				firstResult offset
-			}
+			// Example canvases functionality removed. Always return an empty list.
+			canvases = []
 		} else if (params.browserId == 'archiveLoadBrowser') {
 			def user = springSecurityService.currentUser
 			canvases = permissionService.get(Canvas, user, Operation.READ) {
-				eq "example", false
 				eq "adhoc", false
 				order "lastUpdated", "desc"
 				maxResults max

@@ -1,6 +1,6 @@
 package com.unifina.controller.api
 
-import com.unifina.api.ApiException
+import com.unifina.api.DisabledUserException
 import com.unifina.api.InvalidArgumentsException
 import com.unifina.domain.security.SecUser
 import com.unifina.security.Challenge
@@ -14,7 +14,6 @@ import com.unifina.service.SessionService
 import com.unifina.service.UserService
 import grails.converters.JSON
 import grails.plugin.springsecurity.annotation.Secured
-import grails.validation.Validateable
 
 @Secured(["IS_AUTHENTICATED_ANONYMOUSLY"])
 class LoginApiController {
@@ -39,6 +38,7 @@ class LoginApiController {
 		challengeService.checkValidChallengeResponse(cmd.challenge?.id,
 			cmd.challenge?.challenge, cmd.signature.toLowerCase(), cmd.address.toLowerCase())
 		SecUser user = ethereumIntegrationKeyService.getOrCreateFromEthereumAddress(cmd.address)
+		assertEnabled(user)
 		SessionToken token = sessionService.generateToken(user)
 		render(token.toMap() as JSON)
 	}
@@ -49,6 +49,7 @@ class LoginApiController {
 			throw new InvalidArgumentsException(cmd.errors.getFieldErrors().collect {it.field+" expected."}.join(" "))
 		}
 		SecUser user = userService.getUserFromUsernameAndPassword(cmd.username, cmd.password)
+		assertEnabled(user)
 		SessionToken token = sessionService.generateToken(user)
 		render(token.toMap() as JSON)
 	}
@@ -60,7 +61,16 @@ class LoginApiController {
 		}
 		// returns either a SecUser or a Key (anonymous key)
 		Userish userish = userService.getUserishFromApiKey(cmd.apiKey)
+		if (userish instanceof SecUser) {
+			assertEnabled((SecUser) userish)
+		}
 		SessionToken token = sessionService.generateToken(userish)
 		render(token.toMap() as JSON)
+	}
+
+	private void assertEnabled(SecUser user) {
+		if (!user.enabled) {
+			throw new DisabledUserException("Cannot login with disabled user")
+		}
 	}
 }
