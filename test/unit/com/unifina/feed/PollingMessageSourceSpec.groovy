@@ -48,7 +48,7 @@ class PollingMessageSourceSpec extends Specification {
 		sources[0].subscribe("foo")
 		then:
 		conditions.within(2) {
-			assert counter >= 10 && counter < 20
+			assert counter >= 100 && counter < 200
 		}
 	}
 

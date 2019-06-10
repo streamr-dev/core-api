@@ -1,6 +1,7 @@
 import com.google.gson.Gson
 import com.unifina.data.KafkaPartitioner
 import com.unifina.service.NodeService
+import org.web3j.crypto.Credentials
 
 /*****
  * This config file gets merged with the application config file.
