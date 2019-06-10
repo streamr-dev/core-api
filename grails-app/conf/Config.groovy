@@ -283,6 +283,9 @@ streamr.ethereum.networks = System.getProperties().findAll {key, val-> key.toStr
 			[(key.toString().replace("streamr.ethereum.networks.", "")): val]
 		}
 
+// Ethereum identity of this instance. Don't use this silly development private key for anything.
+streamr.ethereum.nodePrivateKey = System.getProperty("streamr.ethereum.nodePrivateKey", "0123456789ABCDEF0123456789ABCDEF0123456789ABCDEF0123456789ABCDEF")
+
 /**
  * Kafka config
  */
