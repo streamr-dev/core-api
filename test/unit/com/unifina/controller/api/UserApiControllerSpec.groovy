@@ -171,7 +171,7 @@ class UserApiControllerSpec extends ControllerSpecification {
 
 	void "uploadAvatarImage() returns 200 and renders user"() {
 		controller.userAvatarImageService = Mock(UserAvatarImageService)
-		request.apiUser = new SecUser()
+		request.apiUser = new SecUser(username: "foo@ƒoo.bar")
 		request.method = "POST"
 		request.requestURI = "/api/v1/users/me/image"
 		def bytes = new byte[16]
@@ -184,7 +184,7 @@ class UserApiControllerSpec extends ControllerSpecification {
 
 		then:
 		response.status == 200
-		response.json == ((SecUser) request.apiUser).toMap()
+		response.json.username == request.apiUser.username
 	}
 
 	void "submitting an invalid current password won't let the password be changed"() {
