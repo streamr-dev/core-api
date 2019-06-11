@@ -8,6 +8,7 @@ import org.web3j.abi.TypeReference;
 import org.web3j.abi.datatypes.*;
 import org.web3j.abi.datatypes.generated.AbiTypes;
 import org.web3j.protocol.Web3j;
+import org.web3j.protocol.core.DefaultBlockParameter;
 import org.web3j.protocol.core.DefaultBlockParameterName;
 import org.web3j.protocol.core.Request;
 import org.web3j.protocol.core.Response;
@@ -315,6 +316,48 @@ public class Web3jHelper {
 		return (Type) val;
 	}
 
+	public static TransactionReceipt waitForTransactionReceipt(Web3j web3j, String txHash, long waitMsBetweenTries, int tries) throws IOException {
+		try {
+			return waitForTransactionReceipt(web3j, txHash, waitMsBetweenTries, tries, false);
+		}
+		catch(InterruptedException e){
+			log.error("waitForTransactionReceipt threw InterruptedException despite throwInterruptedException = false. This shouldnt happen.");
+			throw new RuntimeException(e);
+		}
+	}
+
+	/**
+	 *
+	 * @param web3j
+	 * @param txHash
+	 * @param waitMsBetweenTries
+	 * @param tries
+	 * @param throwInterruptedException
+	 * @return the TransactionReceipt, or null if none was found in allotted time
+	 * @throws InterruptedException
+	 * @throws IOException
+	 */
+	public static TransactionReceipt waitForTransactionReceipt(Web3j web3j, String txHash, long waitMsBetweenTries, int tries, boolean throwInterruptedException) throws InterruptedException, IOException {
+		TransactionReceipt receipt = null;
+		int retry = 0;
+		while (receipt == null && retry < tries) {
+			receipt = web3j.ethGetTransactionReceipt(txHash).send().getResult();
+			if (receipt == null) {
+				retry++;
+				log.info("Couldn't get transaction receipt for tx " + txHash + ". Retry " + retry);
+				try {
+					Thread.sleep(waitMsBetweenTries);
+				} catch (InterruptedException e) {
+					log.info(e.getMessage());
+					if(throwInterruptedException){
+						throw e;
+					}
+				}
+			}
+		}
+		return receipt;
+	}
+
 	public static Web3j getWeb3jConnectionFromConfig(){
 		EthereumModuleOptions ethereumOptions = new EthereumModuleOptions();
 		return Web3j.build(new HttpService(ethereumOptions.getRpcUrl()));
@@ -353,6 +396,29 @@ public class Web3jHelper {
 		List<Type> result = FunctionReturnDecoder.decode(response.getValue(), func.getOutputParameters());
 		Type<X> next = result.iterator().next();
 		return (T) next.getValue();
+	}
+
+	/**
+	 *
+	 * @param web3j
+	 * @param tr
+	 * @return the timestamp (seconds) of the block in which trasnaction occured, or -1 if not found
+	 * @throws IOException
+	 */
+	public static long getBlockTime(Web3j web3j, TransactionReceipt tr) throws IOException {
+		DefaultBlockParameter dbp = DefaultBlockParameter.valueOf(tr.getBlockNumber());
+		EthBlock eb = web3j.ethGetBlockByNumber(dbp, false).send();
+		if(eb == null){
+			log.error("Error fetching block "+dbp);
+			return -1;
+		}
+		if(eb.hasError()) {
+			log.error("Error fetching block "+dbp+  ". Error = "+eb.getError());
+			return -1;
+		}
+		long ts = eb.getBlock().getTimestamp().longValue();
+		log.info("getBlockTime txHash: "+tr.getTransactionHash()+ " block number: "+tr.getBlockNumber()+ " timestamp: "+ts);
+		return ts;
 	}
 
 	/**
