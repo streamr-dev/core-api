@@ -136,7 +136,7 @@ public abstract class DataSource implements Consumer<Event> {
 						// Enqueue an end event, which when processed, aborts the event queue.
 						DataSource.this.accept(new Event<>(
 							null,
-							globals.getEndDate(),
+							globals.getEndDate() != null ? globals.getEndDate() : new Date(),
 							(nul) -> eventQueue.abort()
 						));
 					}
@@ -146,10 +146,10 @@ public abstract class DataSource implements Consumer<Event> {
 		}
 
 		try {
-			// Enqueue a start event to set the time and log a message
+			// Enqueue a start event to set the start time
 			accept(new Event<>(
 				null,
-				globals.getStartDate(),
+				globals.getStartDate() != null ? globals.getStartDate() : new Date(),
 				(nul) -> log.info("Event queue running.")
 			));
 			eventQueue.start();
@@ -157,6 +157,7 @@ public abstract class DataSource implements Consumer<Event> {
 			throw new RuntimeException("Error while processing event queue", e);
 		} finally {
 			try {
+				eventQueue.abort();
 				streamMessageSource.close();
 			} catch (Exception e) {
 				log.error("Exception thrown while stopping streamMessageSource", e);
