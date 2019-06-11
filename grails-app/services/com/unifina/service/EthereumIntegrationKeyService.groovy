@@ -49,7 +49,7 @@ class EthereumIntegrationKeyService {
 			if (getEthereumUser(address) != null) {
 				throw new DuplicateNotAllowedException("This Ethereum address is already associated with a Streamr user.")
 			}
-			
+
 			IntegrationKey key = new IntegrationKey(
 				name: name,
 				user: user,
@@ -126,13 +126,13 @@ class EthereumIntegrationKeyService {
 	}
 
 	SecUser getEthereumUser(String address) {
-		IntegrationKey key = IntegrationKey.find {
+		List<IntegrationKey> keys = IntegrationKey.findAll {
 			idInService == address && service in [IntegrationKey.Service.ETHEREUM, IntegrationKey.Service.ETHEREUM_ID]
 		}
-		if (key == null) {
+		if (keys == null || keys.isEmpty()) {
 			return null
 		}
-		return key.user
+		return keys.first().user
 	}
 
 	SecUser getOrCreateFromEthereumAddress(String address) {
