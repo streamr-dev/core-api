@@ -25,6 +25,8 @@ class CassandraService implements DisposableBean {
 
 	private static final int FETCH_SIZE = 5000;
 
+	static final long ONE_YEAR_IN_MS = 365 * 24 * 60 * 60 * 1000
+
 	// Thread-safe
 	private Session session
 
@@ -88,7 +90,16 @@ class CassandraService implements DisposableBean {
 	}
 
 	private StreamMessage getExtremeStreamMessage(Stream stream, int partition, boolean latest) {
-		ResultSet resultSet = getSession().execute("SELECT payload FROM stream_data WHERE id = ? AND partition = ? ORDER BY ts ${latest ? "DESC" : "ASC"}, sequence_no ${latest ? "DESC" : "ASC"} LIMIT 1", stream.getId(), partition)
+		ResultSet resultSet
+		if (latest) {
+			// TODO: ts >= ? condition added to prevent timeouts of cassandra queries. A more efficient approach to finding
+			// the latest message is needed. (CORE-1724)
+			resultSet = getSession()
+				.execute("SELECT payload FROM stream_data WHERE id = ? AND partition = ? AND ts >= ? ORDER BY ts DESC, sequence_no DESC LIMIT 1",
+					stream.getId(), partition, System.currentTimeMillis() - ONE_YEAR_IN_MS)
+		} else {
+			resultSet = getSession().execute("SELECT payload FROM stream_data WHERE id = ? AND partition = ? ORDER BY ts ASC, sequence_no ASC LIMIT 1", stream.getId(), partition)
+		}
 		Row row = resultSet.one()
 		if (row) {
 			return StreamMessage.fromJson(new String(row.getBytes("payload").array(), StandardCharsets.UTF_8))

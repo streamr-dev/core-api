@@ -13,7 +13,7 @@ import com.unifina.service.ModuleService
 import com.unifina.service.PermissionService
 import com.unifina.signalpath.AbstractSignalPathModule
 import com.unifina.signalpath.ModuleException
-import com.unifina.signalpath.ModuleExceptionMessage
+import com.unifina.exceptions.ModuleExceptionMessage
 import com.unifina.utils.Globals
 import grails.compiler.GrailsCompileStatic
 import grails.converters.JSON

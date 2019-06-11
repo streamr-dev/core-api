@@ -3,7 +3,7 @@ package com.unifina.signalpath.utils;
 import com.streamr.client.protocol.message_layer.MessageID;
 import com.streamr.client.protocol.message_layer.MessageRef;
 import com.streamr.client.protocol.message_layer.StreamMessage;
-import com.streamr.client.protocol.message_layer.StreamMessageV30;
+import com.streamr.client.protocol.message_layer.StreamMessageV31;
 import com.unifina.data.StreamPartitioner;
 import com.unifina.domain.data.Stream;
 import com.unifina.domain.security.SecUser;
@@ -62,7 +62,7 @@ public class MessageChainUtil implements Serializable {
 		String publisherId = getUser().getPublisherId();
 		MessageID msgId = new MessageID(stream.getId(), streamPartition, timestamp, sequenceNumber, publisherId, msgChainId);
 		MessageRef prevMsgRef = this.getPreviousMessageRef(key);
-		StreamMessage msg = new StreamMessageV30(msgId, prevMsgRef, StreamMessage.ContentType.CONTENT_TYPE_JSON,
+		StreamMessage msg = new StreamMessageV31(msgId, prevMsgRef, StreamMessage.ContentType.CONTENT_TYPE_JSON, StreamMessage.EncryptionType.NONE,
 				content, StreamMessage.SignatureType.SIGNATURE_TYPE_NONE, null);
 		previousTimestamps.put(key, timestamp);
 		previousSequenceNumbers.put(key, sequenceNumber);

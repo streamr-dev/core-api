@@ -61,7 +61,7 @@ class SendEthereumTransactionSpec extends ModuleTestingSpecification {
 		key.id = "sgKjr1eHQpqTmwz3vK3DqwUK1wFlrfRJa9mnf_xTeFJQ"
 		key.save(failOnError: true, validate: true)
 		mockBean(EthereumIntegrationKeyService.class, Stub(EthereumIntegrationKeyService) {
-			getAllKeysForUser(user) >> [key];
+			getAllPrivateKeysForUser(user) >> [key];
 			decryptPrivateKey(_) >> {k ->
 				Map json = JSON.parse(k[0].json)
 				return (String) json.privateKey;
@@ -80,6 +80,10 @@ class SendEthereumTransactionSpec extends ModuleTestingSpecification {
 			@Override
 			public void sendOutput(SendEthereumTransaction.FunctionCallResult rslt) throws IOException, ClassNotFoundException {
 				super.sendOutput(rslt);
+			}
+			@Override
+			protected long getBlockTimeSeconds(TransactionReceipt tr) throws IOException {
+				return System.currentTimeMillis()/1000;
 			}
 		}
 		module.globals = mockGlobals([:], user)
@@ -356,16 +360,12 @@ class SendEthereumTransactionSpec extends ModuleTestingSpecification {
     "network": {
       "possibleValues": [
         {
-          "text": "ropsten",
-          "value": "ropsten"
-        },
-        {
-          "text": "rinkeby",
-          "value": "rinkeby"
+          "text": "local",
+          "value": "local"
         }
       ],
       "type": "string",
-      "value": "rinkeby"
+      "value": "local"
     }
   },
   "canRefresh": false,

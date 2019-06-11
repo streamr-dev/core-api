@@ -1,5 +1,7 @@
 package com.unifina.signalpath;
 
+import com.unifina.exceptions.ModuleExceptionMessage;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -7,7 +9,7 @@ import java.util.Map;
 
 public class ModuleException extends RuntimeException {
 	private List<ModuleExceptionMessage> moduleExceptions;
-	
+
     public ModuleException(String message, Throwable cause, List<ModuleExceptionMessage> moduleExceptions) {
         super(message, cause);
         this.moduleExceptions = moduleExceptions;

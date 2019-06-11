@@ -1,20 +1,12 @@
 package com.unifina.feed
 
-import com.google.gson.Gson
-import com.google.gson.GsonBuilder
+
 import com.streamr.client.protocol.message_layer.StreamMessage
 import spock.lang.Specification
-
-import java.text.DateFormat
 
 class FieldDetectorSpec extends Specification {
 
 	StreamMessage msg
-
-	private Gson gson = new GsonBuilder()
-		.serializeNulls()
-		.setDateFormat(DateFormat.LONG)
-		.create()
 
 	def setup() {
 		msg = Mock(StreamMessage)

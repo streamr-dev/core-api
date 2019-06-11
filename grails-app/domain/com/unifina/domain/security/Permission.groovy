@@ -54,6 +54,8 @@ class Permission {
 	Subscription subscription
 	/** When does this Permission expire? null == forever valid */
 	Date endsAt
+	/** This permission may have been created due to another permission, keep track */
+	Permission parent
 
 	static belongsTo = [Canvas, Dashboard, ModulePackage, Stream, Subscription]
 
@@ -71,6 +73,7 @@ class Permission {
 		})
 		subscription(nullable: true)
 		endsAt(nullable: true)
+		parent(nullable: true)
 	}
 
 	static mapping = {
@@ -140,6 +143,9 @@ class Permission {
 		}
 		if (endsAt) {
 			map["endsAt"] = endsAt
+		}
+		if (parent) {
+			map["parent"] = parent.id
 		}
 		return map
 	}

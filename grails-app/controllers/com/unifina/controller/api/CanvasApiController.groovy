@@ -1,9 +1,6 @@
 package com.unifina.controller.api
 
-import com.unifina.api.CanvasListParams
-import com.unifina.api.SaveCanvasCommand
-import com.unifina.api.StartCanvasAsAdminParams
-import com.unifina.api.ValidationException
+import com.unifina.api.*
 import com.unifina.domain.security.Permission.Operation
 import com.unifina.domain.security.SecUser
 import com.unifina.domain.signalpath.Canvas
@@ -18,6 +15,7 @@ import grails.converters.JSON
 import grails.plugin.springsecurity.annotation.Secured
 import grails.transaction.NotTransactional
 import org.apache.log4j.Logger
+import org.springframework.util.FileCopyUtils
 
 @Secured(["IS_AUTHENTICATED_ANONYMOUSLY"])
 class CanvasApiController {
@@ -159,4 +157,30 @@ class CanvasApiController {
 		return command
 	}
 
+	boolean validateFilename(String filename) {
+		if (filename == null) {
+			return false
+		}
+		return filename ==~ /^streamr_csv_[0-9]{1,19}\.csv$/
+	}
+
+	@StreamrApi
+	def downloadCsv() {
+		if (!validateFilename(params.filename)) {
+			throw new BadRequestException("INVALID_PARAMETER", "filename contains illegal characters")
+		}
+		String fileName = System.getProperty("java.io.tmpdir") + File.separator + params.filename
+		File file = new File(fileName)
+		if (file.canRead()) {
+			FileInputStream fileInputStream = new FileInputStream(file)
+			response.setContentType("text/csv")
+			response.setHeader("Content-Disposition", "attachment; filename=" + file.name);
+			response.setHeader("Content-Length", file.length() + "")
+			FileCopyUtils.copy(fileInputStream, response.outputStream)
+			fileInputStream.close()
+			file.delete()
+		} else {
+			throw new NotFoundException("File not found: " + params.filename)
+		}
+	}
 }

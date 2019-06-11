@@ -1,8 +1,7 @@
 import com.streamr.client.protocol.message_layer.StreamMessage
-import com.streamr.client.protocol.message_layer.StreamMessageV30
+import com.streamr.client.protocol.message_layer.StreamMessageV31
 import com.unifina.domain.data.Stream
 import com.unifina.service.StreamService
-import LoginTester1Spec
 import mixins.CanvasMixin
 import mixins.ListPageMixin
 import mixins.StreamMixin
@@ -302,8 +301,8 @@ class CanvasSpec extends LoginTester1Spec implements CanvasMixin, ListPageMixin,
 		String uniqueText = "test-"+System.currentTimeMillis()
 		SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS")
 		Date date = df.parse("2015-02-23 18:30:00.011")
-		StreamMessageV30 msg = new StreamMessageV30(testStream.id, 0, date.getTime(), 0L, "", "", null, 0L,
-			StreamMessage.ContentType.CONTENT_TYPE_JSON, '["temperature": 24, "rpm": 100, "text": '+uniqueText+']',
+		StreamMessage msg = new StreamMessageV31(testStream.id, 0, date.getTime(), 0L, "", "", null, 0L,
+			StreamMessage.ContentType.CONTENT_TYPE_JSON, StreamMessage.EncryptionType.NONE, '["temperature": 24, "rpm": 100, "text": '+uniqueText+']',
 			StreamMessage.SignatureType.SIGNATURE_TYPE_NONE, null)
 		streamService.saveMessage(msg)
 

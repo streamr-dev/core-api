@@ -1,6 +1,7 @@
 import com.google.gson.Gson
 import com.unifina.data.KafkaPartitioner
 import com.unifina.service.NodeService
+import org.web3j.crypto.Credentials
 
 /*****
  * This config file gets merged with the application config file.
@@ -178,6 +179,8 @@ log4j.main = {
 		'org.apache.kafka.clients.consumer.ConsumerConfig',
 		'kafka.producer.ProducerConfig',
 		'org.apache.kafka.clients.producer.ProducerConfig'
+
+	debug 'com.datastax.driver.core'
 }
 
 /**
@@ -254,29 +257,26 @@ environments {
 }
 
 /**
- * Streamr-web3 Ethereum bridge address
+ * Ethereum networks configuration (RPC urls)
+ *
+ * Can be configured via JVM system properties. Example command line flags:
+ *
+ * -Dstreamr.ethereum.defaultNetwork=someNetwork
+ * -Dstreamr.ethereum.networks.someNetwork=http://some-network-rpc-url
+ * -Dstreamr.ethereum.networks.anotherNetwork=http://some-network-rpc-url
  */
-streamr.ethereum.defaultNetwork = "rinkeby"
-streamr.ethereum.networks = System.getProperty("streamr.ethereum.networks") ? new Gson().fromJson(System.getProperty("streamr.ethereum.networks")) : [
-	ropsten: "http://10.200.10.1:3000",
-	rinkeby: "http://10.200.10.1:3001"
-]
-streamr.ethereum.rpcUrls = System.getProperty("streamr.ethereum.rpcUrls") ? new Gson().fromJson(System.getProperty("streamr.ethereum.rpcUrls")) : [
-	ropsten: "http://localhost:8545",
-	rinkeby: "http://localhost:8546"
-]
-environments {
-	production {
-		streamr.ethereum.networks = System.getProperty("streamr.ethereum.networks") ? new Gson().fromJson(System.getProperty("streamr.ethereum.networks")) : [
-			ropsten: "http://ropsten:3000",
-			rinkeby: "http://rinkeby:3001"
-		]
-		streamr.ethereum.rpcUrls = System.getProperty("streamr.ethereum.rpcUrls") ? new Gson().fromJson(System.getProperty("streamr.ethereum.rpcUrls")) : [
-			ropsten: "http://94.130.70.249:8545",
-			rinkeby: "http://94.130.70.249:8546"
-		]
-	}
-}
+streamr.ethereum.defaultNetwork = System.getProperty("streamr.ethereum.defaultNetwork") ?: "local"
+streamr.ethereum.networks = System.getProperties().findAll {key, val-> key.toString().startsWith("streamr.ethereum.networks.")}.isEmpty() ?
+	// Default value
+	[local: "http://localhost:8545"] :
+	// Else collect system properties to Map
+	System.getProperties().findAll {key, val-> key.toString().startsWith("streamr.ethereum.networks.")}
+		.collectEntries {key, val ->
+			[(key.toString().replace("streamr.ethereum.networks.", "")): val]
+		}
+
+// Ethereum identity of this instance. Don't use this silly development private key for anything.
+streamr.ethereum.nodePrivateKey = System.getProperty("streamr.ethereum.nodePrivateKey", "0123456789ABCDEF0123456789ABCDEF0123456789ABCDEF0123456789ABCDEF")
 
 /**
  * Kafka config

@@ -27,6 +27,8 @@ class Stream implements Comparable {
 	String uiChannelPath
 	Canvas uiChannelCanvas
 
+	Boolean inbox = false
+
 	Boolean requireSignedData = false
 	// Always try to autoconfigure field names and types
 	Boolean autoConfigure = true
@@ -61,6 +63,7 @@ class Stream implements Comparable {
 		uiChannel defaultValue: "false"
 		uiChannelPath index: "ui_channel_path_idx"
 		config type: 'text'
+		inbox defaultValue: "false"
 		requireSignedData defaultValue: "false"
 		autoConfigure defaultValue: "true"
 		storageDays defaultValue: DEFAULT_STORAGE_DAYS
@@ -82,6 +85,7 @@ class Stream implements Comparable {
 			config: config == null || config.empty ? config : JSON.parse(config),
 			description: description,
 			uiChannel: uiChannel,
+			inbox: inbox,
 			dateCreated: dateCreated,
 			lastUpdated: lastUpdated,
 			requireSignedData: requireSignedData,
@@ -98,6 +102,7 @@ class Stream implements Comparable {
 			name: name,
 			description: description,
 			uiChannel: uiChannel,
+			inbox: inbox,
 			dateCreated: dateCreated,
 			lastUpdated: lastUpdated,
 			requireSignedData: requireSignedData

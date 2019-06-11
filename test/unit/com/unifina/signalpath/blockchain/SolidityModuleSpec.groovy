@@ -22,7 +22,7 @@ class SolidityModuleSpec extends ModuleTestingSpecification {
 		key.save(failOnError: true, validate: true)
 
 		mockBean(EthereumIntegrationKeyService.class, Stub(EthereumIntegrationKeyService) {
-			getAllKeysForUser(user) >> [key]
+			getAllPrivateKeysForUser(user) >> [key]
 		})
 
 		module = new SolidityModuleWithMockedWeb3(applyConfig.contract)
@@ -286,14 +286,11 @@ class SolidityModuleSpec extends ModuleTestingSpecification {
         {
             "possibleValues": [
             {
-                "text": "ropsten",
-                "value": "ropsten"
-            },
-            {
-                "text": "rinkeby",
-                "value": "rinkeby"
-            }],
-            "value": "rinkeby",
+                "text": "local",
+                "value": "local"
+            }
+            ],
+            "value": "local",
             "type": "string"
         },
         "gasPriceGWei":

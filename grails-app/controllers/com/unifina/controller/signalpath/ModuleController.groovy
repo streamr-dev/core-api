@@ -5,7 +5,7 @@ import com.unifina.domain.signalpath.ModuleCategory
 import com.unifina.domain.signalpath.ModulePackage
 import com.unifina.signalpath.AbstractSignalPathModule
 import com.unifina.signalpath.ModuleException
-import com.unifina.signalpath.ModuleExceptionMessage
+import com.unifina.exceptions.ModuleExceptionMessage
 import com.unifina.utils.Globals
 
 import grails.converters.JSON

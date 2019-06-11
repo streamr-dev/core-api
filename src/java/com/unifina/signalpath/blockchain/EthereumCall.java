@@ -255,7 +255,7 @@ public class EthereumCall extends AbstractHttpModule {
 				args.put("value", valueWei.toBigInteger().toString());
 			}
 
-			request = new HttpPost(ethereumOptions.getServer() + "/call");
+			request = new HttpPost(ethereumOptions.getRpcUrl() + "/call");
 
 		} else {
 			// fallback function selected: send ether
@@ -265,7 +265,7 @@ public class EthereumCall extends AbstractHttpModule {
 			} else {
 				args.put("value", "0");
 			}
-			request = new HttpPost(ethereumOptions.getServer() + "/send");
+			request = new HttpPost(ethereumOptions.getRpcUrl() + "/send");
 		}
 
 		String jsonString = gson.toJson(args);

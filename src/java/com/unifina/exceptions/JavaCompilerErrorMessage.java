@@ -1,15 +1,18 @@
-package com.unifina.signalpath;
+package com.unifina.exceptions;
 
 import java.util.Map;
 
 public class JavaCompilerErrorMessage extends ModuleExceptionMessage {
 	private final long line;
-	private final String message;
 
-	public JavaCompilerErrorMessage(final int moduleIdHash, final long line, final String message) {
-		super(moduleIdHash);
+	public JavaCompilerErrorMessage(final int moduleId, final long line, String message) {
+		super(moduleId, message);
 		this.line = line;
-		this.message = message;
+	}
+
+	@Override
+	protected String getType() {
+		return "compilerError";
 	}
 
 	/**
@@ -18,9 +21,7 @@ public class JavaCompilerErrorMessage extends ModuleExceptionMessage {
 	@Override
 	public Map<String, Object> toMap() {
 		Map<String, Object> result = super.toMap();
-		result.put("type", "compilerError");
 		result.put("line", line);
-		result.put("message", message);
 		return result;
 	}
 }

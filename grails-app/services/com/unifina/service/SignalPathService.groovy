@@ -105,7 +105,7 @@ class SignalPathService {
 		// Instantiate the SignalPath
 		if (canvas.serialization == null || canvas.adhoc) {
 			log.info("Creating new signalPath connections (canvasId=$canvas.id)")
-			sp = mapToSignalPath(new Gson().fromJson(canvas.json, Map.class), false, globals, new SignalPath(true))
+			sp = mapToSignalPath(canvas.toSignalPathConfig(), false, globals, new SignalPath(true))
 		} else {
 			log.info("De-serializing existing signalPath (canvasId=$canvas.id)")
 			sp = (SignalPath) serializationService.deserialize(canvas.serialization.bytes)

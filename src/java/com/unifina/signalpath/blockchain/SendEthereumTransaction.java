@@ -17,7 +17,10 @@ import org.web3j.protocol.Web3j;
 import org.web3j.protocol.core.DefaultBlockParameterName;
 import org.web3j.protocol.core.Response;
 import org.web3j.protocol.core.methods.request.Transaction;
-import org.web3j.protocol.core.methods.response.*;
+import org.web3j.protocol.core.methods.response.EthCall;
+import org.web3j.protocol.core.methods.response.EthGetTransactionCount;
+import org.web3j.protocol.core.methods.response.EthSendTransaction;
+import org.web3j.protocol.core.methods.response.TransactionReceipt;
 import org.web3j.protocol.http.HttpService;
 import org.web3j.utils.Numeric;
 
@@ -273,6 +276,13 @@ public class SendEthereumTransaction extends ModuleWithSideEffects {
 		}
 	}
 
+	/*
+	separate function for testing
+	 */
+	protected long getBlockTimeSeconds(TransactionReceipt tr) throws IOException {
+		return Web3jHelper.getBlockTime(web3j, tr);
+	}
+
 	/**
 	 * non constant function call result
 	 */
@@ -292,26 +302,21 @@ public class SendEthereumTransaction extends ModuleWithSideEffects {
 		 */
 		protected void enqueueConfirmedTx() throws IOException {
 			final FunctionCallResult fncall = this;
-				int tries = 0;
-				while (tries++ < check_result_max_tries) {
-					EthGetTransactionReceipt get = web3j.ethGetTransactionReceipt(web3jTx.getTransactionHash()).send();
-					if ((receipt = get.getResult()) != null) {
-						transaction = web3j.ethGetTransactionByHash(web3jTx.getTransactionHash()).send().getResult();
-						log.info("Receipt found for txHash: " + web3jTx.getTransactionHash());
-						enqueueEvent(fncall);
-						return;
-					}
-					log.info("No receipt found for txHash: " + web3jTx.getTransactionHash());
-					if(tries == check_result_max_tries)
-						continue;
-					try {
-						log.info(". Waiting "+check_result_waitms+"ms");
-						Thread.sleep(check_result_waitms);
-					} catch (InterruptedException e) {
-						throw new RuntimeException(e);
-					}
+			receipt = Web3jHelper.waitForTransactionReceipt(web3j,web3jTx.getTransactionHash(), check_result_waitms, check_result_max_tries);
+			if (receipt != null) {
+				transaction = web3j.ethGetTransactionByHash(web3jTx.getTransactionHash()).send().getResult();
+				log.info("Receipt found for txHash: " + web3jTx.getTransactionHash());
+				long ts = getBlockTimeSeconds(receipt);
+				if(ts >= 0){
+					Date newts = new Date(ts*1000);
+					log.info("Updating timestamp of TransactionResult from "+timestamp + " to block timestamp "+newts);
+					timestamp = newts;
 				}
+				enqueueEvent(fncall);
+			}
+			else{
 				log.error("Couldnt find receipt for txHash: " + web3jTx.getTransactionHash());
+			}
 		}
 
 		@Override
@@ -418,7 +423,7 @@ public class SendEthereumTransaction extends ModuleWithSideEffects {
 			} else {
 				BigInteger gasPrice = BigDecimal.valueOf(ethereumOptions.getGasPriceWei()).toBigInteger();
 				EthGetTransactionCount ethGetTransactionCount = web3j.ethGetTransactionCount(
-					ethereumAccount.getAddress(), DefaultBlockParameterName.LATEST).send();
+					ethereumAccount.getAddress(), DefaultBlockParameterName.PENDING).send();
 				BigInteger nonce = ethGetTransactionCount.getTransactionCount();
 				BigInteger valueWei;
 				Credentials credentials = Credentials.create(ethereumAccount.getPrivateKey());
