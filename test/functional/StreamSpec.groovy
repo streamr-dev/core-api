@@ -1,5 +1,5 @@
 import com.streamr.client.protocol.message_layer.StreamMessage
-import com.streamr.client.protocol.message_layer.StreamMessageV30
+import com.streamr.client.protocol.message_layer.StreamMessageV31
 import com.unifina.domain.data.Stream
 import com.unifina.service.StreamService
 import LoginTester1Spec
@@ -92,8 +92,8 @@ class StreamSpec extends LoginTester1Spec implements ConfirmationMixin, StreamMi
 		when: "Produce an event into the stream and click autodetect button"
 			Stream testStream = new Stream()
 			testStream.id = streamId
-			StreamMessage msg = new StreamMessageV30(testStream.id, 0, 30L, 0L,
-				"", "", null, 0L, StreamMessage.ContentType.CONTENT_TYPE_JSON,
+			StreamMessage msg = new StreamMessageV31(testStream.id, 0, 30L, 0L,
+				"", "", null, 0L, StreamMessage.ContentType.CONTENT_TYPE_JSON, StreamMessage.EncryptionType.NONE,
 				[foo: "bar", "xyz": 45.5], StreamMessage.SignatureType.SIGNATURE_TYPE_NONE, null)
 			streamService.sendMessage(msg)
 			sleep(1000)

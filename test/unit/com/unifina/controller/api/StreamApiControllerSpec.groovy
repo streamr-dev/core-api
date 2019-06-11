@@ -7,6 +7,7 @@ import com.unifina.api.NotPermittedException
 import com.unifina.api.StreamListParams
 import com.unifina.domain.data.Feed
 import com.unifina.domain.data.Stream
+import com.unifina.domain.security.IntegrationKey
 import com.unifina.domain.security.Key
 import com.unifina.domain.security.Permission
 import com.unifina.domain.security.SecUser
@@ -15,11 +16,10 @@ import com.unifina.service.*
 import grails.converters.JSON
 import grails.test.mixin.Mock
 import grails.test.mixin.TestFor
-
 import java.text.SimpleDateFormat
 
 @TestFor(StreamApiController)
-@Mock([SecUser, Stream, Key, Permission, Feed, PermissionService, StreamService, DashboardService])
+@Mock([SecUser, Stream, Key, Permission, Feed, PermissionService, StreamService, DashboardService, IntegrationKey])
 class StreamApiControllerSpec extends ControllerSpecification {
 
 	Feed feed

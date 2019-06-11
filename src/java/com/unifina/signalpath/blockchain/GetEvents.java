@@ -1,6 +1,7 @@
 package com.unifina.signalpath.blockchain;
 
-import com.mashape.unirest.http.exceptions.UnirestException;
+import com.streamr.client.protocol.message_layer.ITimestamped;
+import com.unifina.data.FeedEvent;
 import com.unifina.datasource.IStartListener;
 import com.unifina.datasource.IStopListener;
 import com.unifina.signalpath.*;
@@ -8,7 +9,6 @@ import org.apache.log4j.Logger;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.web3j.abi.EventValues;
-import org.web3j.abi.TypeReference;
 import org.web3j.abi.datatypes.Event;
 import org.web3j.protocol.Web3j;
 import org.web3j.protocol.core.methods.response.Log;
@@ -36,6 +36,24 @@ public class GetEvents extends AbstractSignalPathModule implements ContractEvent
 	private transient ContractEventPoller contractEventPoller;
 	private transient Propagator asyncPropagator;
 	private Web3j web3j;
+	protected int check_result_max_tries = 100;
+	protected int check_result_waitms = 10000;
+
+	static class LogsResult implements ITimestamped {
+		Date timestamp;
+		List<? extends Log> logs;
+		String txHash;
+
+		public LogsResult(String txHash, Date timestamp, List<? extends Log> logs) {
+			this.timestamp = timestamp;
+			this.logs = logs;
+			this.txHash = txHash;
+		}
+		@Override
+		public Date getTimestampAsDate() {
+			return timestamp;
+		}
+	}
 
 	@Override
 	public void init() {
@@ -59,7 +77,6 @@ public class GetEvents extends AbstractSignalPathModule implements ContractEvent
 				throw new RuntimeException("Contract input must have a value.");
 			}
 
-			asyncPropagator = new Propagator(this);
 			getGlobals().getDataSource().addStartListener(this);
 			getGlobals().getDataSource().addStopListener(this);
 		}
@@ -77,7 +94,25 @@ public class GetEvents extends AbstractSignalPathModule implements ContractEvent
 	public void onStop() {
 		contractEventPoller.close();
 	}
-
+	private Propagator getPropagator() {
+		if (asyncPropagator == null) {
+			asyncPropagator = new Propagator(this);
+		}
+		return asyncPropagator;
+	}
+	@Override
+	public void receive(FeedEvent event) {
+		if (event.content instanceof LogsResult) {
+			try {
+				displayEventsFromLogs((LogsResult) event.content);
+			} catch (Exception e) {
+				throw new RuntimeException(e);
+			}
+			getPropagator().propagate();
+		} else {
+			super.receive(event);
+		}
+	}
 
 	@Override
 	public void sendOutput() {
@@ -99,16 +134,33 @@ public class GetEvents extends AbstractSignalPathModule implements ContractEvent
 		}
 	}
 
+	protected void enqueueEvent(LogsResult lr){
+		getGlobals().getDataSource().enqueueEvent(new FeedEvent<LogsResult, GetEvents>(lr, lr.getTimestampAsDate(), this));
+	}
+
 	@Override
 	public void onEvent(JSONArray events) {
 		try {
-			String txHash = events.getJSONObject(0).getString("transactionHash");
-			txHashOutput.send(txHash);
-			log.info(String.format("Received event '%s'", txHash));
-			TransactionReceipt txr = Web3jHelper.getTransactionReceipt(web3j, txHash);
-			displayEventsFromLogs(txr.getLogs());
-			asyncPropagator.propagate();
-
+			int eventcount = events.length();
+			for(int i=0; i<eventcount; i++) {
+				String txHash = events.getJSONObject(i).getString("transactionHash");
+				log.info(String.format("Received event from RPC '%s'", txHash));
+				TransactionReceipt txr = Web3jHelper.waitForTransactionReceipt(web3j, txHash, check_result_waitms, check_result_max_tries);
+				if (txr == null) {
+					log.error("Couldnt find TransactionReceipt for transaction " + txHash + " in allotted time");
+					return;
+				}
+				long blockts = Web3jHelper.getBlockTime(web3j, txr);
+				Date ts;
+				if(blockts < 0){
+					ts = getGlobals().time;
+					log.error("No block timestamp found for txHash "+txHash+ ". Using globals timestamp "+ts);
+				}
+				else{
+					ts = new Date(blockts*1000);
+				}
+				enqueueEvent(new LogsResult(txHash, ts, txr.getLogs()));
+			}
 		} catch (JSONException | IOException e) {
 			onError(e.getMessage());
 		}
@@ -120,11 +172,14 @@ public class GetEvents extends AbstractSignalPathModule implements ContractEvent
 		asyncPropagator.propagate();
 	}
 
-	protected void displayEventsFromLogs(List<? extends Log> logs){
+	protected void displayEventsFromLogs(LogsResult lr){
+		log.info("Received FeedEvent " + lr.txHash );
+
+		txHashOutput.send(lr.txHash);
 		for (EthereumABI.Event abiEvent : contract.getValue().getABI().getEvents()) {
 			List<Output> eventOutputs = outputsByEvent.get(abiEvent.name);
 			Event web3jEvent = web3jEvents.get(abiEvent.name);
-			List<EventValues> valueList = Web3jHelper.extractEventParameters(web3jEvent, logs);
+			List<EventValues> valueList = Web3jHelper.extractEventParameters(web3jEvent, lr.logs);
 			if (valueList == null) {
 				throw new RuntimeException("Failed to get event params");	// TODO: what happens when you throw in poller thread?
 			}

@@ -2,7 +2,7 @@ package com.unifina.signalpath.kafka
 
 import com.streamr.client.protocol.message_layer.MessageRef
 import com.streamr.client.protocol.message_layer.StreamMessage
-import com.streamr.client.protocol.message_layer.StreamMessageV30
+import com.streamr.client.protocol.message_layer.StreamMessageV31
 import com.unifina.BeanMockingSpecification
 import com.unifina.data.FeedEvent
 import com.unifina.datasource.HistoricalDataSource
@@ -120,7 +120,7 @@ class SendToStreamSpec extends BeanMockingSpecification {
 		assert messages.get(0).sequenceNumber == 0L
 		MessageRef previous = null
 		messages.each {
-			MessageRef ref = ((StreamMessageV30) it).previousMessageRef
+			MessageRef ref = ((StreamMessageV31) it).previousMessageRef
 			if (ref == null) {
 				assert previous == null
 			} else {

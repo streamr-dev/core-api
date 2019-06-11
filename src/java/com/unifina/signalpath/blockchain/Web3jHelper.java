@@ -4,7 +4,9 @@ import org.apache.log4j.Logger;
 import org.web3j.abi.*;
 import org.web3j.abi.datatypes.*;
 import org.web3j.abi.datatypes.generated.AbiTypes;
+import org.web3j.abi.datatypes.generated.Uint160;
 import org.web3j.protocol.Web3j;
+import org.web3j.protocol.core.DefaultBlockParameter;
 import org.web3j.protocol.core.DefaultBlockParameterName;
 import org.web3j.protocol.core.Response;
 import org.web3j.protocol.core.methods.request.Transaction;
@@ -32,7 +34,7 @@ public class Web3jHelper {
 
 	/**
 	 * @param solidity_type ABI json type description
-	 * @param value Compatible value (will be coerced if necessary)
+	 * @param value         Compatible value (will be coerced if necessary)
 	 * @return Web3j Type (= Solidity type PLUS its value)
 	 */
 	public static Type instantiateType(String solidity_type, Object value) throws InvocationTargetException, NoSuchMethodException, InstantiationException, IllegalAccessException, ClassNotFoundException {
@@ -51,30 +53,34 @@ public class Web3jHelper {
 		}
 		return new Function(fnname, encoded_input, encoded_output);
 	}
-	/*
-		Web3j uses a TypeReference to indicate the Solidity type.
-		In the case of atomic types (uint, bytes, etc), the TypeReference just wraps a Class (implementing org.web3j.abi.datatypes.Type).
-		In the case of arrays, the TypeReference wraps a java.lang.reflect.ParamaterizedType to indicate the array type
-			(eg ParamaterizedType references StaticArray5<Uint> for uint[5] or DynamicArray<StaticArray5<Address>> for address[5][])
+
+	/**
+	 * Convert solidity type into a Web3j type
+	 * Web3j uses a TypeReference to indicate the Solidity type.
+	 * In the case of atomic types (uint, bytes, etc), the TypeReference just wraps a Class (implementing org.web3j.abi.datatypes.Type).
+	 * In the case of arrays, the TypeReference wraps a java.lang.reflect.ParamaterizedType to indicate the array type
+	 * (eg ParamaterizedType references StaticArray5<Uint> for uint[5] or DynamicArray<StaticArray5<Address>> for address[5][])
+	 *
+	 * @param solidity_type e.g. "int" or "uint[5]"
+	 * @return e.g. Int or StaticArray5<Uint>
 	 */
-
-
 	public static TypeReference makeTypeReference(String solidity_type) throws ClassNotFoundException {
-		return makeTypeReference(solidity_type,false);
+		return makeTypeReference(solidity_type, false);
 	}
+
 	public static TypeReference makeTypeReference(String solidity_type, final boolean indexed) throws ClassNotFoundException {
 		Matcher m = ARRAY_SUFFIX.matcher(solidity_type);
-		if(!m.find()) {
+		if (!m.find()) {
 			final Class tc = getAtomicTypeClass(solidity_type);
 			return createTypeReference(tc, indexed);
 		}
 		String digits = m.group(1);
-		TypeReference baseTr = makeTypeReference(solidity_type.substring(0,solidity_type.length() - m.group(0).length()));
+		TypeReference baseTr = makeTypeReference(solidity_type.substring(0, solidity_type.length() - m.group(0).length()));
 		TypeReference<?> ref;
 		if (digits == null || digits.equals("")) {
 			ref = new TypeReference<DynamicArray>(indexed) {
 				@Override
-				public java.lang.reflect.Type getType(){
+				public java.lang.reflect.Type getType() {
 					return new ParameterizedType() {
 						@Override
 						public java.lang.reflect.Type[] getActualTypeArguments() {
@@ -93,16 +99,16 @@ public class Web3jHelper {
 					};
 				}
 			};
-		}
-		else {
+		} else {
 			final Class arrayclass = Class.forName("org.web3j.abi.datatypes.generated.StaticArray" + digits);
-			ref = new TypeReference.StaticArrayTypeReference<StaticArray>(Integer.parseInt(digits)){
+			ref = new TypeReference.StaticArrayTypeReference<StaticArray>(Integer.parseInt(digits)) {
 				@Override
-				public boolean isIndexed(){
+				public boolean isIndexed() {
 					return indexed;
 				}
+
 				@Override
-				public java.lang.reflect.Type getType(){
+				public java.lang.reflect.Type getType() {
 					return new ParameterizedType() {
 						@Override
 						public java.lang.reflect.Type[] getActualTypeArguments() {
@@ -125,10 +131,10 @@ public class Web3jHelper {
 		return ref;
 	}
 
-
+	/** Web3j Type contains a type (as in Java class) as well as the value */
 	public static Type instantiateType(TypeReference ref, Object value) throws NoSuchMethodException, IllegalAccessException, InvocationTargetException, InstantiationException, ClassNotFoundException {
 		Class rc = ref.getClassType();
-		if(Array.class.isAssignableFrom(rc)){
+		if (Array.class.isAssignableFrom(rc)) {
 			List values;
 			if (value instanceof List) {
 				values = (List) value;
@@ -151,16 +157,16 @@ public class Web3jHelper {
 			for (Object o : values) {
 				TypeReference elementTR;
 				//array of arrays
-				if(subtype instanceof ParameterizedType){
+				if (subtype instanceof ParameterizedType) {
 					elementTR = new TypeReference<Array>() {
 						@Override
-						public java.lang.reflect.Type getType(){
+						public java.lang.reflect.Type getType() {
 							return subtype;
 						}
 					};
 				}
 				//array of basic types
-				else{
+				else {
 					elementTR = TypeReference.create((Class) subtype);
 				}
 				transformedList.add(instantiateType(elementTR, o));
@@ -182,7 +188,11 @@ public class Web3jHelper {
 		} else if (Utf8String.class.isAssignableFrom(rc)) {
 			constructorArg = value.toString();
 		} else if (Address.class.isAssignableFrom(rc)) {
-			constructorArg = value.toString();
+			if (value instanceof BigInteger || value instanceof Uint160) {
+				constructorArg = value;
+			} else {
+				constructorArg = value.toString();
+			}
 		} else if (Bool.class.isAssignableFrom(rc)) {
 			if (value instanceof Boolean) {
 				constructorArg = value;
@@ -199,12 +209,12 @@ public class Web3jHelper {
 	}
 
 	/**
-	 * This is a helper method that only works for atomic types (uint, bytes, etc). Array types must be wrapped by a java.lang.reflect.ParamaterizedType
-	 * @param type
-	 * @return
+	 * Helper method that only works for atomic types (uint, bytes, etc). Array types must be wrapped by a java.lang.reflect.ParamaterizedType
+	 *
+	 * @param type name in Solidity
+	 * @return org.web3j.abi.datatypes class describing the web3j type
 	 * @throws ClassNotFoundException
 	 */
-
 	protected static Class getAtomicTypeClass(String type) throws ClassNotFoundException {
 		Matcher m = ARRAY_SUFFIX.matcher(type);
 		if (m.find()) {
@@ -220,19 +230,6 @@ public class Web3jHelper {
 		return c;
 	}
 
-	public static TransactionReceipt getTransactionReceipt(Web3j web3, String txhash) throws IOException {
-		EthGetTransactionReceipt gtr = web3.ethGetTransactionReceipt(txhash).send();
-		if (gtr == null) {
-			log.error("TransactionHash not found: " + txhash);
-			return null;
-		}
-		TransactionReceipt tr = gtr.getResult();
-		if (tr == null) {
-			log.error("TransactionReceipt not found for txhash: " + txhash);
-			return null;
-		}
-		return tr;
-	}
 	public static Function toWeb3jFunction(EthereumABI.Function fn, List args) throws ClassNotFoundException, NoSuchMethodException, InvocationTargetException, InstantiationException, IllegalAccessException {
 		List<String> solidity_inputtypes = new ArrayList<String>(fn.inputs.size());
 		List<String> solidity_outputtypes = new ArrayList<String>(fn.outputs.size());
@@ -257,8 +254,9 @@ public class Web3jHelper {
 
 	public static List<EventValues> extractEventParameters(Event event, TransactionReceipt transactionReceipt) {
 		List<Log> logs = transactionReceipt.getLogs();
-		return extractEventParameters(event,logs);
+		return extractEventParameters(event, logs);
 	}
+
 	public static List<EventValues> extractEventParameters(Event event, List<? extends Log> logs) {
 		List<EventValues> values = new ArrayList<>();
 		for (Log log : logs) {
@@ -270,8 +268,8 @@ public class Web3jHelper {
 		return values;
 	}
 
-	/*
-		this is based on TypeReference.create(Class c), which doesn't expose the indexed flag
+	/**
+	 * Based on TypeReference.create(Class c), which doesn't expose the indexed flag
 	 */
 	protected static <T extends Type> TypeReference<T> createTypeReference(final Class<T> cls, boolean indexed) {
 		return new TypeReference<T>(indexed) {
@@ -307,30 +305,130 @@ public class Web3jHelper {
 
 	/**
 	 * get item (i,j,k...) from a multi-dimensional Web3j array
+	 *
 	 * @param array
 	 * @param indices
 	 * @return
 	 */
 
-	public static Type web3jArrayGet(Array array,int... indices){
+	public static Type web3jArrayGet(Array array, int... indices) {
 		Array ar = array;
-		Object val=null;
-		for(int d=0;d<indices.length;d++){
+		Object val = null;
+		for (int d = 0; d < indices.length; d++) {
 			val = ar.getValue().get(indices[d]);
-			if(d < indices.length -1)
+			if (d < indices.length - 1) {
 				ar = (Array) val;
+			}
 		}
 		return (Type) val;
 	}
 
+	public static TransactionReceipt waitForTransactionReceipt(Web3j web3j, String txHash, long waitMsBetweenTries, int tries) throws IOException {
+		try {
+			return waitForTransactionReceipt(web3j, txHash, waitMsBetweenTries, tries, false);
+		} catch (InterruptedException e) {
+			log.error("waitForTransactionReceipt threw InterruptedException despite throwInterruptedException = false. This shouldnt happen.");
+			throw new RuntimeException(e);
+		}
+	}
 
 	/**
 	 * @param web3j
-	 * @param erc20address   address of ERC20 or 0x0 for ETH balance
-	 * @param holderAddress
-	 * @return token balance in wei
-	 * @throws ExecutionException
+	 * @param txHash
+	 * @param waitMsBetweenTries
+	 * @param tries
+	 * @param throwInterruptedException
+	 * @return the TransactionReceipt, or null if none was found in allotted time
 	 * @throws InterruptedException
+	 * @throws IOException
+	 */
+	public static TransactionReceipt waitForTransactionReceipt(Web3j web3j, String txHash, long waitMsBetweenTries, int tries, boolean throwInterruptedException) throws InterruptedException, IOException {
+		TransactionReceipt receipt = null;
+		int retry = 0;
+		while (receipt == null && retry < tries) {
+			receipt = web3j.ethGetTransactionReceipt(txHash).send().getResult();
+			if (receipt == null) {
+				retry++;
+				log.info("Couldn't get transaction receipt for tx " + txHash + ". Retry " + retry);
+				try {
+					Thread.sleep(waitMsBetweenTries);
+				} catch (InterruptedException e) {
+					log.info(e.getMessage());
+					if (throwInterruptedException) {
+						throw e;
+					}
+				}
+			}
+		}
+		return receipt;
+	}
+
+	/**
+	 * get a public field in Ethereum contract. Returns an Object of the type that is wrapped by Type specified in fieldType.
+	 * <p>
+	 * For example:
+	 * <p>
+	 * if contract contains:
+	 * address public owner;
+	 * <p>
+	 * then
+	 * getPublicField(web3j, contractAddress, "owner", Address.class) should return a String with the owner address
+	 * <p>
+	 * if contract contains:
+	 * uint public somenum;
+	 * <p>
+	 * then
+	 * getPublicField(web3j, contractAddress, "somenum", Uint.class) should return a BigInteger with the value of somenum
+	 *
+	 * @param web3j
+	 * @param contractAddress
+	 * @param fieldName
+	 * @param fieldType
+	 * @return
+	 * @throws IOException
+	 */
+	public static Object getPublicField(Web3j web3j, String contractAddress, String fieldName, Class<Type> fieldType) throws IOException {
+		Function getOperator = new Function(fieldName, Arrays.<Type>asList(), Arrays.<TypeReference<?>>asList(TypeReference.create(fieldType)));
+		EthCall response = web3j.ethCall(
+			Transaction.createEthCallTransaction(contractAddress, contractAddress, FunctionEncoder.encode(getOperator)),
+			DefaultBlockParameterName.LATEST).send();
+		Response.Error err = response.getError();
+		if (err != null) {
+			throw new RuntimeException(err.getMessage());
+		}
+		List<Type> rslt = FunctionReturnDecoder.decode(response.getValue(), getOperator.getOutputParameters());
+		return rslt.iterator().next().getValue();
+	}
+
+	/**
+	 * @param web3j
+	 * @param tr
+	 * @return the timestamp (seconds) of the block in which trasnaction occured, or -1 if not found
+	 * @throws IOException
+	 */
+	public static long getBlockTime(Web3j web3j, TransactionReceipt tr) throws IOException {
+		DefaultBlockParameter dbp = DefaultBlockParameter.valueOf(tr.getBlockNumber());
+		EthBlock eb = web3j.ethGetBlockByNumber(dbp, false).send();
+		if (eb == null) {
+			log.error("Error fetching block " + dbp);
+			return -1;
+		}
+		if (eb.hasError()) {
+			log.error("Error fetching block " + dbp + ". Error = " + eb.getError());
+			return -1;
+		}
+		long ts = eb.getBlock().getTimestamp().longValue();
+		log.info("getBlockTime txHash: " + tr.getTransactionHash() + " block number: " + tr.getBlockNumber() + " timestamp: " + ts);
+		return ts;
+	}
+
+	/**
+	 * @param web3j
+	 * @param erc20address  address of the ERC20 token, or 0x0 for ETH balance
+	 * @param holderAddress address to check
+	 * @return token balance in wei
+	 * @throws ExecutionException   if web3j call fails
+	 * @throws InterruptedException if web3j call fails
 	 */
 	public static BigInteger getERC20Balance(Web3j web3j, String erc20address, String holderAddress) throws ExecutionException, InterruptedException {
 		Address tokenAddress = new Address(erc20address);

@@ -13,6 +13,7 @@ import org.web3j.crypto.TransactionEncoder;
 import org.web3j.protocol.Web3j;
 import org.web3j.protocol.core.DefaultBlockParameterName;
 import org.web3j.protocol.core.methods.response.EthSendTransaction;
+import org.web3j.protocol.core.methods.response.TransactionReceipt;
 import org.web3j.protocol.http.HttpService;
 import org.web3j.utils.Numeric;
 
@@ -27,6 +28,9 @@ import java.util.*;
 public class SolidityCompileDeploy extends ModuleWithUI implements Pullable<EthereumContract>, Serializable {
 
 	private static final Logger log = Logger.getLogger(SolidityCompileDeploy.class);
+
+	private static final int MAX_RETRIES = 60;
+	private static final long SLEEP_BETWEEN_RETRIES_MILLIS = 3000;
 
 	private final EthereumAccountParameter ethereumAccount = new EthereumAccountParameter(this, "ethAccount");
 	private Output<EthereumContract> contractOutput = null;
@@ -121,7 +125,7 @@ public class SolidityCompileDeploy extends ModuleWithUI implements Pullable<Ethe
 
 	protected String deploy(String bytecode, List<Object> args, BigInteger sendWei) throws IOException, ClassNotFoundException, NoSuchMethodException, InstantiationException, IllegalAccessException, InvocationTargetException {
 		BigInteger gasPrice = BigDecimal.valueOf(ethereumOptions.getGasPriceWei()).toBigInteger();
-		BigInteger nonce = web3j.ethGetTransactionCount(ethereumAccount.getAddress(), DefaultBlockParameterName.LATEST).send().getTransactionCount();
+		BigInteger nonce = web3j.ethGetTransactionCount(ethereumAccount.getAddress(), DefaultBlockParameterName.PENDING).send().getTransactionCount();
 		Credentials credentials = Credentials.create(ethereumAccount.getPrivateKey());
 
 		// convert constructor arguments into web3j "Types" that contain both a Java class and the argument's value
@@ -150,8 +154,15 @@ public class SolidityCompileDeploy extends ModuleWithUI implements Pullable<Ethe
 		EthSendTransaction tx = web3j.ethSendRawTransaction(hexValue).send();
 		String txhash = tx.getTransactionHash();
 		log.debug("TX response: " + txhash);
-		String address = web3j.ethGetTransactionReceipt(txhash).send().getResult().getContractAddress();
-		return address;
+
+		TransactionReceipt receipt = Web3jHelper.waitForTransactionReceipt(web3j, txhash, SLEEP_BETWEEN_RETRIES_MILLIS, MAX_RETRIES);
+
+		if (receipt == null) {
+			throw new RuntimeException("Couldn't get transaction receipt from Ethereum node. Transaction may not have been broadcasted to the network.");
+		} else {
+			log.info("Got transaction receipt for tx " + txhash + ".");
+			return receipt.getContractAddress();
+		}
 	}
 
 	protected BigInteger getGasLimit() {

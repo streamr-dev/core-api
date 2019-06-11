@@ -26,6 +26,7 @@ class IntegrationKey implements Serializable {
 	}
 
 	static constraints = {
+		idInService unique: true
 	}
 
 	enum Service {

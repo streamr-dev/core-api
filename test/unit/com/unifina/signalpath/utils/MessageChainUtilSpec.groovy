@@ -1,10 +1,9 @@
 package com.unifina.signalpath.utils
 
-import com.streamr.client.protocol.message_layer.StreamMessageV30
+import com.streamr.client.protocol.message_layer.StreamMessageV31
 import com.unifina.domain.data.Stream
 import com.unifina.domain.security.SecUser
 import grails.test.mixin.Mock
-import org.apache.commons.codec.digest.DigestUtils
 import spock.lang.Specification
 
 @Mock([SecUser])
@@ -26,9 +25,9 @@ class MessageChainUtilSpec extends Specification {
 	void "chains correctly messages with same timestamp"() {
 		Date date = new Date()
 		when:
-		StreamMessageV30 msg1 = msgChainUtil.getStreamMessage(stream, date, content)
-		StreamMessageV30 msg2 = msgChainUtil.getStreamMessage(stream, date, content)
-		StreamMessageV30 msg3 = msgChainUtil.getStreamMessage(stream, date, content)
+		StreamMessageV31 msg1 = msgChainUtil.getStreamMessage(stream, date, content)
+		StreamMessageV31 msg2 = msgChainUtil.getStreamMessage(stream, date, content)
+		StreamMessageV31 msg3 = msgChainUtil.getStreamMessage(stream, date, content)
 		then:
 		msg1.getStreamId() == stream.getId()
 		msg1.getPublisherId() == hashedUsername
@@ -55,9 +54,9 @@ class MessageChainUtilSpec extends Specification {
 		Date date2 = new Date(date1.getTime()+1000)
 		Date date3 = new Date(date2.getTime()+1000)
 		when:
-		StreamMessageV30 msg1 = msgChainUtil.getStreamMessage(stream, date1, content)
-		StreamMessageV30 msg2 = msgChainUtil.getStreamMessage(stream, date2, content)
-		StreamMessageV30 msg3 = msgChainUtil.getStreamMessage(stream, date3, content)
+		StreamMessageV31 msg1 = msgChainUtil.getStreamMessage(stream, date1, content)
+		StreamMessageV31 msg2 = msgChainUtil.getStreamMessage(stream, date2, content)
+		StreamMessageV31 msg3 = msgChainUtil.getStreamMessage(stream, date3, content)
 		then:
 		msg1.getStreamId() == stream.getId()
 		msg1.getPublisherId() == hashedUsername
@@ -86,10 +85,10 @@ class MessageChainUtilSpec extends Specification {
 		Stream stream2 = new Stream()
 		stream2.id = "streamId2"
 		when:
-		StreamMessageV30 msg1 = msgChainUtil.getStreamMessage(stream, date1, content)
-		StreamMessageV30 msg2 = msgChainUtil.getStreamMessage(stream2, date2, content)
-		StreamMessageV30 msg3 = msgChainUtil.getStreamMessage(stream, date3, content)
-		StreamMessageV30 msg4 = msgChainUtil.getStreamMessage(stream2, date2, content)
+		StreamMessageV31 msg1 = msgChainUtil.getStreamMessage(stream, date1, content)
+		StreamMessageV31 msg2 = msgChainUtil.getStreamMessage(stream2, date2, content)
+		StreamMessageV31 msg3 = msgChainUtil.getStreamMessage(stream, date3, content)
+		StreamMessageV31 msg4 = msgChainUtil.getStreamMessage(stream2, date2, content)
 		then:
 		msg1.getStreamId() == stream.getId()
 		msg1.getPublisherId() == hashedUsername

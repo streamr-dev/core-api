@@ -1,7 +1,7 @@
 package com.unifina.service
 
 import com.streamr.client.protocol.message_layer.StreamMessage
-import com.streamr.client.protocol.message_layer.StreamMessageV30
+import com.streamr.client.protocol.message_layer.StreamMessageV31
 import com.unifina.domain.data.Stream
 import com.unifina.domain.security.SecUser
 import com.unifina.domain.signalpath.Canvas
@@ -49,15 +49,15 @@ class RunCanvasSpec extends IntegrationSpec {
 
 		// Produce data
 		(1..100).each {
-			StreamMessage msg = new StreamMessageV30(stream.id, 0, System.currentTimeMillis(), 0L,
-				"", "", null, 0L, StreamMessage.ContentType.CONTENT_TYPE_JSON,
+			StreamMessage msg = new StreamMessageV31(stream.id, 0, System.currentTimeMillis(), 0L,
+				"", "", null, 0L, StreamMessage.ContentType.CONTENT_TYPE_JSON, StreamMessage.EncryptionType.NONE,
 				[numero: it, areWeDoneYet: false], StreamMessage.SignatureType.SIGNATURE_TYPE_NONE, null)
 			streamService.sendMessage(msg)
 		}
 
 		// Terminator data package to know when we're done
-		StreamMessage msg = new StreamMessageV30(stream.id, 0, System.currentTimeMillis(), 0L,
-			"", "", null, 0L, StreamMessage.ContentType.CONTENT_TYPE_JSON,
+		StreamMessage msg = new StreamMessageV31(stream.id, 0, System.currentTimeMillis(), 0L,
+			"", "", null, 0L, StreamMessage.ContentType.CONTENT_TYPE_JSON, StreamMessage.EncryptionType.NONE,
 			[numero: 0, areWeDoneYet: true], StreamMessage.SignatureType.SIGNATURE_TYPE_NONE, null)
 		streamService.sendMessage(msg)
 
