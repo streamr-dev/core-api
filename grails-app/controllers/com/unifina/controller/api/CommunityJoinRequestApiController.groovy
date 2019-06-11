@@ -35,7 +35,7 @@ class CommunityJoinRequestApiController {
 
 	void checkAdminAccessControl(SecUser user, String communityAddress) {
 		if (!communityService.checkAdminAccessControl(user, communityAddress)) {
-			throw new ApiException(403, "ACCESS_DENIED", "required admin role is missing")
+			throw new ApiException(403, "ACCESS_DENIED", "User is not the admin of the community")
 		}
 	}
 
