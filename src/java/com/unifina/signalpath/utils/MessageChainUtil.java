@@ -21,11 +21,17 @@ public class MessageChainUtil implements Serializable {
 	private Map<String,Long> previousSequenceNumbers = new HashMap<>();
 
 	private Long userId;
+	private String publisherId;
 	private String msgChainId;
 	private transient SecUser user;
 
 	public MessageChainUtil(Long userId) {
 		this.userId = userId;
+		this.msgChainId = IdGenerator.getShort();
+	}
+
+	public MessageChainUtil(String publisherId) {
+		this.publisherId = publisherId;
 		this.msgChainId = IdGenerator.getShort();
 	}
 
@@ -59,8 +65,14 @@ public class MessageChainUtil implements Serializable {
 		String key = stream.getId()+streamPartition;
 		long timestamp = timestampAsDate.getTime();
 		long sequenceNumber = getNextSequenceNumber(key, timestamp);
-		String publisherId = getUser().getPublisherId();
-		MessageID msgId = new MessageID(stream.getId(), streamPartition, timestamp, sequenceNumber, publisherId, msgChainId);
+		String pid = null;
+		if (this.userId != null) {
+			pid = getUser().getPublisherId();
+		}
+		if (this.publisherId != null) {
+			pid = this.publisherId;
+		}
+		MessageID msgId = new MessageID(stream.getId(), streamPartition, timestamp, sequenceNumber, pid, msgChainId);
 		MessageRef prevMsgRef = this.getPreviousMessageRef(key);
 		StreamMessage msg = new StreamMessageV31(msgId, prevMsgRef, StreamMessage.ContentType.CONTENT_TYPE_JSON, StreamMessage.EncryptionType.NONE,
 				content, StreamMessage.SignatureType.SIGNATURE_TYPE_NONE, null);

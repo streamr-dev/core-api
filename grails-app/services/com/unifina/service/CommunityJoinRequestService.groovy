@@ -11,11 +11,13 @@ import com.unifina.domain.data.Stream
 import com.unifina.domain.security.IntegrationKey
 import com.unifina.domain.security.SecUser
 import com.unifina.signalpath.utils.MessageChainUtil
+import com.unifina.utils.MapTraversal
+import grails.util.Holders
+import org.web3j.crypto.Credentials
 
 class CommunityJoinRequestService {
 	StreamService streamService
 	EthereumService ethereumService
-	MessageChainUtil chain = new MessageChainUtil(null)
 
 	void onApproveJoinRequest(CommunityJoinRequest c) {
 		String joinPartStreamID = ethereumService.fetchJoinPartStreamID(c.communityAddress)
@@ -27,6 +29,9 @@ class CommunityJoinRequestService {
 		Map<String, Object> content = new HashMap<>()
 		content.put("type", "join")
 		content.put("addresses", Arrays.asList(c.memberAddress))
+		String nodePrivateKey = MapTraversal.getString(Holders.getConfig(), "streamr.ethereum.nodePrivateKey")
+		Credentials credentials = Credentials.create(nodePrivateKey)
+		MessageChainUtil chain = new MessageChainUtil(credentials.getAddress())
 		StreamMessage msg = chain.getStreamMessage(s, new Date(), content)
 		streamService.sendMessage(msg)
 	}

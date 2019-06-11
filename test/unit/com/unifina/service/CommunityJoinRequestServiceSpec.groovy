@@ -1,7 +1,6 @@
 package com.unifina.service
 
 import com.streamr.client.protocol.message_layer.StreamMessage
-import com.streamr.client.protocol.message_layer.StreamMessageV30
 import com.unifina.api.ApiException
 import com.unifina.api.CommunityJoinRequestCommand
 import com.unifina.api.NotFoundException
@@ -11,7 +10,6 @@ import com.unifina.domain.community.CommunitySecret
 import com.unifina.domain.data.Stream
 import com.unifina.domain.security.IntegrationKey
 import com.unifina.domain.security.SecUser
-import com.unifina.signalpath.utils.MessageChainUtil
 import grails.test.mixin.Mock
 import grails.test.mixin.TestFor
 import spock.lang.Specification
@@ -25,7 +23,6 @@ class CommunityJoinRequestServiceSpec extends Specification {
 
 	def setup() {
 		service.ethereumService = Mock(EthereumService)
-		service.chain = Mock(MessageChainUtil)
 		service.streamService = Mock(StreamService)
 		me = new SecUser(
 			name: "First Lastname",
@@ -70,10 +67,6 @@ class CommunityJoinRequestServiceSpec extends Specification {
 
     void "create supplied with correct community secret"() {
 		setup:
-		Map<String, Object> content = new HashMap<>()
-		content.put("type", "join")
-		content.put("addresses", Arrays.asList(memberAddress))
-		StreamMessage msg = new StreamMessageV30(null, null, StreamMessage.ContentType.CONTENT_TYPE_JSON, content, null, null)
 		Stream s = new Stream(name: "stream 1")
 		s.id = "s1"
 		s.save(failOnError: true, validate: true)
@@ -86,8 +79,7 @@ class CommunityJoinRequestServiceSpec extends Specification {
 
 		then:
 		1 * service.ethereumService.fetchJoinPartStreamID(communityAddress) >> s.id
-		1 * service.chain.getStreamMessage(s, _ as Date, content) >> msg
-		1 * service.streamService.sendMessage(msg)
+		1 * service.streamService.sendMessage(_ as StreamMessage)
 		c.state == CommunityJoinRequest.State.ACCEPTED
     }
 
