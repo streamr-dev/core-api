@@ -14,7 +14,6 @@ import org.apache.log4j.Logger;
 import java.io.IOException;
 import java.nio.charset.Charset;
 import java.util.Collection;
-import java.util.function.Consumer;
 
 public class RedisMessageSource extends StreamMessageSource {
 
@@ -26,7 +25,7 @@ public class RedisMessageSource extends StreamMessageSource {
 
 	private static final Logger log = Logger.getLogger(RedisMessageSource.class);
 
-	public RedisMessageSource(Globals globals, Consumer<StreamMessage> consumer, Collection<StreamPartition> streamPartitions, String host, String password) {
+	public RedisMessageSource(Globals globals, StreamMessageConsumer consumer, Collection<StreamPartition> streamPartitions, String host, String password) {
 		super(globals, consumer, streamPartitions);
 		redisURI = RedisURI.create("redis://" + host);
 		if (password != null) {

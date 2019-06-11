@@ -14,8 +14,8 @@ import java.util.function.Consumer;
  */
 public abstract class StreamMessageSource implements Closeable {
 	protected final Globals globals;
-	protected final Consumer<StreamMessage> consumer;
-	private final Collection<StreamPartition> streamPartitions;
+	protected final StreamMessageConsumer consumer;
+	protected final Collection<StreamPartition> streamPartitions;
 
 	/**
 	 * Creates an instance of this StreamMessageSource. The constructor should not block.
@@ -24,10 +24,17 @@ public abstract class StreamMessageSource implements Closeable {
 	 * @param consumer
 	 * @param streamPartitions The set of StreamPartitions to subscribe to.
 	 */
-	public StreamMessageSource(Globals globals, Consumer<StreamMessage> consumer, Collection<StreamPartition> streamPartitions) {
+	public StreamMessageSource(Globals globals, StreamMessageConsumer consumer, Collection<StreamPartition> streamPartitions) {
 		this.globals = globals;
 		this.consumer = consumer;
 		this.streamPartitions = streamPartitions;
+	}
+
+	public abstract static class StreamMessageConsumer implements Consumer<StreamMessage> {
+		/**
+		 * Signals that there will be no further messages from the message source.
+		 */
+		public abstract void done();
 	}
 
 }

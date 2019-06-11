@@ -40,7 +40,16 @@ public abstract class DataSourceEventQueue {
 	public DataSourceEventQueue(Globals globals, DataSource dataSource, int capacity) {
 		this.globals = globals;
 		masterClock = new MasterClock(globals, dataSource);
-		queue = new ArrayBlockingQueue<>(capacity);
+		queue = createQueue(capacity);
+	}
+
+	/**
+	 * The default implementation is an ArrayBlockingQueue.
+	 * @param capacity The hard capacity limit of the queue. After reaching this size the queue should block on offer.
+	 * @return
+	 */
+	protected BlockingQueue<Event> createQueue(int capacity) {
+		return new ArrayBlockingQueue<>(capacity);
 	}
 
 	public void addTimeListener(ITimeListener timeListener) {
@@ -172,6 +181,10 @@ public abstract class DataSourceEventQueue {
 
 	protected BlockingQueue<Event> getQueue() {
 		return queue;
+	}
+
+	public int size() {
+		return queue.size();
 	}
 
 	public boolean isFull() {

@@ -2,13 +2,23 @@ package com.unifina.data;
 
 import com.unifina.datasource.DataSource;
 import com.unifina.datasource.DataSourceEventQueue;
+import com.unifina.utils.BoundedPriorityBlockingQueue;
 import com.unifina.utils.Globals;
 import org.apache.log4j.Logger;
 
 import java.util.Date;
+import java.util.Iterator;
 import java.util.Map;
+import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.PriorityBlockingQueue;
 import java.util.concurrent.TimeUnit;
 
+/**
+ * DataSourceEventQueue for historical playbacks. Main difference to RealtimeEventQueue:
+ *
+ * - Uses a PriorityQueue as the underlying queue. This is to make sure all events are
+ *   processed in proper order.
+ */
 public class HistoricalEventQueue extends DataSourceEventQueue {
 	private static final Logger log = Logger.getLogger(HistoricalEventQueue.class);
 
@@ -26,17 +36,14 @@ public class HistoricalEventQueue extends DataSourceEventQueue {
 		super(globals, dataSource, capacity);
 		speed = readSpeedConfiguration(globals);
 		simTimeStart = globals.getStartDate().getTime() - (globals.getStartDate().getTime() % 1000);
-
-		/**
-		 * Queue events at lower and upper bounds of selected playback range to ensure that MasterClock
-		 * ticks through the range even in the absence of feed data.
-		 */
-		queue.add(PlaybackMessage.newStartEvent(globals.getStartDate()));
-		queue.add(PlaybackMessage.newEndEvent(globals.getEndDate()));
 	}
 
-	private boolean shouldKeepProcessing() {
-		return !isAborted() && (!queue.isEmpty() || !asyncExecutor.getQueue().isEmpty());
+	/**
+	 * @return A PriorityQueue instead of a normal queue
+	 */
+	@Override
+	protected BlockingQueue<Event> createQueue(int capacity) {
+		return new BoundedPriorityBlockingQueue<>(capacity);
 	}
 
 	@Override
@@ -46,7 +53,7 @@ public class HistoricalEventQueue extends DataSourceEventQueue {
 		initTimeReporting(simTimeStart);
 		realTimeStart = System.currentTimeMillis();
 
-		while (shouldKeepProcessing()) {
+		while (!isAborted()) {
 			Event event = null;
 			try {
 				event = queue.poll(1, TimeUnit.SECONDS);

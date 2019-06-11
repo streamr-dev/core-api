@@ -15,7 +15,6 @@ import com.unifina.signalpath.StopRequest;
 import com.unifina.utils.Globals;
 import org.apache.log4j.Logger;
 
-import java.io.Closeable;
 import java.util.*;
 import java.util.function.Consumer;
 
@@ -117,16 +116,42 @@ public abstract class DataSource implements Consumer<Event> {
 		try {
 			streamMessageSource = createStreamMessageSource(
 				allStreamPartitions,
-				// Route StreamMessages to consumers registered with the router
-				streamMessage -> router.route(streamMessage).forEach(consumer ->
-						accept(new Event<>(streamMessage, streamMessage.getTimestampAsDate(), streamMessage.getSequenceNumber(), consumer)))
-			);
+				new StreamMessageSource.StreamMessageConsumer() {
+					@Override
+					public void accept(StreamMessage streamMessage) {
+						// Consult the router to find consumers who need to receive this StreamMessage
+						router.route(streamMessage)
+							.forEach(routedConsumer ->
+								// Enqueue an event for each consumer registered with the router
+								DataSource.this.accept(new Event<>(
+									streamMessage,
+									streamMessage.getTimestampAsDate(),
+									streamMessage.getSequenceNumber(),
+									routedConsumer
+								)));
+					}
+
+					@Override
+					public void done() {
+						// Enqueue an end event, which when processed, aborts the event queue.
+						DataSource.this.accept(new Event<>(
+							null,
+							globals.getEndDate(),
+							(nul) -> eventQueue.abort()
+						));
+					}
+				});
 		} catch (Exception e) {
 			throw new RuntimeException("Error while creating StreamMessageSource", e);
 		}
 
 		try {
-			// Main event loop, blocks until stopped
+			// Enqueue a start event to set the time and log a message
+			accept(new Event<>(
+				null,
+				globals.getStartDate(),
+				(nul) -> log.info("Event queue running.")
+			));
 			eventQueue.start();
 		} catch (Exception e) {
 			throw new RuntimeException("Error while processing event queue", e);
@@ -167,7 +192,7 @@ public abstract class DataSource implements Consumer<Event> {
 		return eventQueue.retrieveMetricsAndReset();
 	}
 
-	protected abstract StreamMessageSource createStreamMessageSource(Collection<StreamPartition> streamPartitions, Consumer<StreamMessage> consumer);
+	protected abstract StreamMessageSource createStreamMessageSource(Collection<StreamPartition> streamPartitions, StreamMessageSource.StreamMessageConsumer consumer);
 	protected abstract DataSourceEventQueue createEventQueue();
 
 	protected Iterable<SignalPath> getSerializableSignalPaths() {

@@ -25,7 +25,7 @@ public class CassandraMessageSource extends StreamMessageSource implements Itera
 	private final MergingIterator<StreamMessage> mergingIterator;
 	private boolean quit = false;
 
-	public CassandraMessageSource(Globals globals, Consumer<StreamMessage> consumer, Collection<StreamPartition> streamPartitions) {
+	public CassandraMessageSource(Globals globals, StreamMessageConsumer consumer, Collection<StreamPartition> streamPartitions) {
 		super(globals, consumer, streamPartitions);
 
 		List<CassandraHistoricalIterator> iterators = streamPartitions.stream()
@@ -37,6 +37,7 @@ public class CassandraMessageSource extends StreamMessageSource implements Itera
 			while (mergingIterator.hasNext() && !quit) {
 				consumer.accept(mergingIterator.next());
 			}
+			consumer.done();
 		});
 		reporterThread.setName("CassandraMessageSource-" + System.currentTimeMillis());
 		reporterThread.start();
