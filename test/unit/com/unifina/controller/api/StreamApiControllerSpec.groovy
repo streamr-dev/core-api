@@ -335,7 +335,6 @@ class StreamApiControllerSpec extends ControllerSpecification {
 		Date timestamp = newDate(2019, 1, 19, 2, 0, 3)
 
 		when:
-		params.days = 2
 		params.id = streamOne.id
 		request.method = "GET"
 		authenticatedAs(me) { controller.status() }
@@ -354,7 +353,6 @@ class StreamApiControllerSpec extends ControllerSpecification {
 		controller.streamService = Mock(StreamService)
 
 		when:
-		params.days = 2
 		params.id = streamOne.id
 		request.method = "GET"
 		authenticatedAs(me) { controller.status() }
@@ -372,7 +370,6 @@ class StreamApiControllerSpec extends ControllerSpecification {
 		controller.streamService = Mock(StreamService)
 
 		when:
-		params.days = 2
 		params.id = "not-found"
 		request.method = "GET"
 		authenticatedAs(me) { controller.status() }

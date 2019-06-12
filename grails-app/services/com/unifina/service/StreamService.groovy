@@ -310,9 +310,24 @@ class StreamService {
 		}
 	}
 
+	private Date addThresholdHours(Date date, int hours) {
+		Calendar calendar = Calendar.getInstance()
+		calendar.setTime(date)
+		calendar.add(Calendar.HOUR_OF_DAY, -hours)
+		return calendar.getTime()
+	}
+
 	@CompileStatic
-	StreamStatus status(Stream s, Date threshold) {
+	StreamStatus status(Stream s, Date now) {
+		Date threshold = addThresholdHours(now, s.inactivityThresholdHours)
 		StreamMessage msg = cassandraService.getLatestFromAllPartitions(s)
+		if (s.inactivityThresholdHours == 0) {
+			if (msg == null) {
+				return new StreamStatus(true, null)
+			} else {
+				return new StreamStatus(true, msg.getTimestampAsDate())
+			}
+		}
 		if (msg == null) {
 			return new StreamStatus(false, null)
 		} else if (msg != null && msg.getTimestampAsDate().before(threshold)) {

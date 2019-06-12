@@ -10,7 +10,6 @@ import com.unifina.security.StreamrApi
 import com.unifina.service.StreamService
 import grails.converters.JSON
 import grails.plugin.springsecurity.annotation.Secured
-import org.apache.commons.lang.time.DateUtils
 import org.springframework.web.multipart.MultipartFile
 
 import java.text.ParseException
@@ -198,9 +197,7 @@ class StreamApiController {
 			throw new NotFoundException("Stream not found.", "Stream", (String) params.id)
 		}
 
-		int days = params.int("days", 2)
-		Date threshold = DateUtils.addDays(new Date(), -days)
-		StreamService.StreamStatus status = streamService.status(s, threshold)
+		StreamService.StreamStatus status = streamService.status(s, new Date())
 		response.status = 200
 		if (status.date == null) {
 			render([ok: status.ok ] as JSON)

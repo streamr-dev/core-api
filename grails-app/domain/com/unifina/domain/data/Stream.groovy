@@ -10,6 +10,7 @@ import groovy.transform.CompileStatic
 class Stream implements Comparable {
 	public final static String DEFAULT_NAME = "Untitled Stream"
 	public final static Integer DEFAULT_STORAGE_DAYS = 365
+	public final static Integer DEFAULT_INACTIVITY_THRESHOLD_HOURS = 48
 	String id
 	Integer partitions = 1
 
@@ -35,7 +36,8 @@ class Stream implements Comparable {
 	Boolean autoConfigure = true
 	// Historical data storage period (days)
 	Integer storageDays = DEFAULT_STORAGE_DAYS
-
+	// inactivityThresholdHours is the inactivity period for a stream in hours
+	Integer inactivityThresholdHours = DEFAULT_INACTIVITY_THRESHOLD_HOURS
 	// exampleType marks this Stream as an example for new users.
 	ExampleType exampleType = ExampleType.NOT_SET
 

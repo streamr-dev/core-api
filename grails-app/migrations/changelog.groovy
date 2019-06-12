@@ -132,4 +132,5 @@ databaseChangeLog = {
 	include file: 'core/2019-03-26-new-ethereum-call-module.groovy'
 	include file: 'core/2019-04-08-ethereumj-compilation-web3j-deploy.groovy'
 	include file: 'core/2019-06-03-unique-ethereum-addresses.groovy'
+	include file: 'core/2019-06-12-stream-inactivity.groovy'
 }
