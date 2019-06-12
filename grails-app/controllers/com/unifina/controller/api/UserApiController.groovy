@@ -2,6 +2,7 @@ package com.unifina.controller.api
 
 import com.unifina.api.ApiException
 import com.unifina.domain.security.SecUser
+import com.unifina.security.AuthLevel
 import com.unifina.security.StreamrApi
 import com.unifina.service.UserAvatarImageService
 import com.unifina.service.UserService
@@ -49,9 +50,9 @@ class UserApiController {
 		render(status: 204, body: "")
 	}
 
-	@StreamrApi
+	@StreamrApi(authenticationLevel = AuthLevel.KEY)
 	def getUserInfo() {
-		render(request.apiUser?.toMap() as JSON)
+		render((request.apiUser ?: request.apiKey)?.toMap() as JSON)
 	}
 
 	@StreamrApi

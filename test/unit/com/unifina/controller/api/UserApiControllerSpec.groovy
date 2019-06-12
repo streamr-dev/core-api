@@ -3,6 +3,7 @@ package com.unifina.controller.api
 import com.unifina.ControllerSpecification
 import com.unifina.api.ApiException
 import com.unifina.api.InvalidUsernameAndPasswordException
+import com.unifina.domain.security.Key
 import com.unifina.domain.security.SecUser
 import com.unifina.service.UserAvatarImageService
 import com.unifina.service.UserService
@@ -11,7 +12,7 @@ import grails.test.mixin.TestFor
 import org.springframework.mock.web.MockMultipartFile
 
 @TestFor(UserApiController)
-@Mock(SecUser)
+@Mock([SecUser, Key])
 class UserApiControllerSpec extends ControllerSpecification {
 
 	SecUser me
@@ -56,6 +57,16 @@ class UserApiControllerSpec extends ControllerSpecification {
 		response.json.username == me.username
 		!response.json.hasProperty("password")
 		!response.json.hasProperty("id")
+	}
+
+	void "authenticated anonymous key gets back the key info from /me"() {
+		Key key = new Key(name: 'anonymous-key')
+		when:
+		authenticatedAs(key) { controller.getUserInfo() }
+		then:
+		response.json.name == key.name
+		response.json.id == key.id
+		!response.json.hasProperty("password")
 	}
 
 	void "delete user account"() {
@@ -171,7 +182,7 @@ class UserApiControllerSpec extends ControllerSpecification {
 
 	void "uploadAvatarImage() returns 200 and renders user"() {
 		controller.userAvatarImageService = Mock(UserAvatarImageService)
-		request.apiUser = new SecUser()
+		request.apiUser = new SecUser(username: "foo@ƒoo.bar")
 		request.method = "POST"
 		request.requestURI = "/api/v1/users/me/image"
 		def bytes = new byte[16]
@@ -184,7 +195,7 @@ class UserApiControllerSpec extends ControllerSpecification {
 
 		then:
 		response.status == 200
-		response.json == ((SecUser) request.apiUser).toMap()
+		response.json.username == request.apiUser.username
 	}
 
 	void "submitting an invalid current password won't let the password be changed"() {

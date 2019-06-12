@@ -64,6 +64,7 @@ class SecUser implements Userish {
 			username : username,
 			imageUrlSmall : imageUrlSmall,
 			imageUrlLarge : imageUrlLarge,
+			lastLogin: lastLogin
 		]
 	}
 

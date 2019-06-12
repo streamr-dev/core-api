@@ -245,16 +245,14 @@ class AuthApiControllerSpec extends Specification {
 		params.tosConfirmed = true
 		request.method = 'POST'
 		controller.register()
+
 		then: "should create user"
 		SecUser.findByUsername(username)
 		SecUser.findByUsername(username).password == 'fooBar123!-encoded'
 		response.status == 200
-		response.json == [
-			name: "Name",
-			username: "user@invite.to",
-			imageUrlSmall: null,
-			imageUrlLarge: null,
-		]
+		response.json.name == "Name"
+		response.json.username == "user@invite.to"
+
 		then: "welcome email should be sent"
 		controller.mailService.mailSent
 	}
