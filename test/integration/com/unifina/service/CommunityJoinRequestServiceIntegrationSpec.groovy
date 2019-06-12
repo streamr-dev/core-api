@@ -1,7 +1,6 @@
 package com.unifina.service
 
-import com.streamr.client.protocol.message_layer.StreamMessage
-import com.streamr.client.protocol.message_layer.StreamMessageV30
+
 import com.unifina.api.UpdateCommunityJoinRequestCommand
 import com.unifina.domain.community.CommunityJoinRequest
 import com.unifina.domain.data.Feed
@@ -10,7 +9,6 @@ import com.unifina.domain.marketplace.Category
 import com.unifina.domain.security.SecUser
 import com.unifina.domain.signalpath.Module
 import com.unifina.domain.signalpath.ModuleCategory
-import com.unifina.signalpath.utils.MessageChainUtil
 import spock.lang.Specification
 
 class CommunityJoinRequestServiceIntegrationSpec extends Specification {
@@ -40,7 +38,6 @@ class CommunityJoinRequestServiceIntegrationSpec extends Specification {
 		joinPartStream.id = "jps-1"
 		joinPartStream.save(validate: true, failOnError: true)
 
-		service.chain = Mock(MessageChainUtil)
 		service.streamService = Mock(StreamService)
 		service.ethereumService = Mock(EthereumService)
 	}
@@ -164,7 +161,6 @@ class CommunityJoinRequestServiceIntegrationSpec extends Specification {
 		def c = service.update(communityAddress, r.id, cmd)
 		then:
 		1 * service.ethereumService.fetchJoinPartStreamID(communityAddress) >> joinPartStream.id
-		1 * service.chain.getStreamMessage(_, _, _) >> new StreamMessageV30(null, null, StreamMessage.ContentType.CONTENT_TYPE_JSON, null, null, null)
 		1 * service.streamService.sendMessage(_)
 		c.state == CommunityJoinRequest.State.ACCEPTED
 		// no changes below
