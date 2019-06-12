@@ -4,8 +4,8 @@ import com.unifina.datasource.DataSource;
 import com.unifina.datasource.DataSourceEventQueue;
 import com.unifina.feed.AbstractFeed;
 import com.unifina.feed.AbstractHistoricalFeed;
+import com.unifina.utils.DateRange;
 import com.unifina.utils.Globals;
-import com.unifina.utils.TimeOfDayUtil;
 import org.apache.log4j.Logger;
 
 import java.util.*;
@@ -30,6 +30,7 @@ public class HistoricalEventQueue extends DataSourceEventQueue {
 
 	@Override
 	protected Queue<FeedEvent> initQueue() {
+		// In historical mode, events are ordered primarily by timestamp and secondarily by "ticket" (counter)
 		// Not thread-safe! It should not matter because currently everything runs in a single thread.
 		return new PriorityQueue<>();
 	}
@@ -53,8 +54,8 @@ public class HistoricalEventQueue extends DataSourceEventQueue {
 		// Init global time if it has not already been initialized
 		if (globals.time == null) {
 			// Take the beginDate from signalPathContext if defined
-			if (globals.getSignalPathContext().containsKey("beginDate")) {
-				globals.time = (Date) globals.getSignalPathContext().get("beginDate");
+			if (globals.getStartDate() != null) {
+				globals.time = globals.getStartDate();
 			} else {
 				// Otherwise get it from the first event
 				globals.time = peek().timestamp;
@@ -73,28 +74,35 @@ public class HistoricalEventQueue extends DataSourceEventQueue {
 		 */
 		long time = globals.time.getTime();
 
-		TimeOfDayUtil todUtil = null;
+		DateRange range = null;
 		if (globals.getSignalPathContext().containsKey("timeOfDayFilter")) {
 			String start = ((Map)globals.getSignalPathContext().get("timeOfDayFilter")).get("timeOfDayStart").toString();
 			String end = ((Map)globals.getSignalPathContext().get("timeOfDayFilter")).get("timeOfDayEnd").toString();
-			todUtil = new TimeOfDayUtil(start, end, globals.getUserTimeZone());
-			todUtil.setBaseDate(globals.time);
+			range = new DateRange(start, end);
+			range.setBaseDate(globals.time);
 		}
-		long todBegin = (todUtil != null ? todUtil.getBeginTime() : 0);
-		long todEnd = (todUtil != null ? todUtil.getEndTime() : 0);
+		long todBegin = (range != null ? range.getBeginTime() : 0);
+		long todEnd = (range != null ? range.getEndTime() : 0);
 
-		// Subtract one second so the first reported time will be the first second
-		initTimeReporting(time - (time%1000) - 1000);
+		initTimeReporting(time - (time%1000));
 
-		long simTimeStart = (todUtil==null ? time : Math.max(time,todUtil.getBeginTime()));
+		long simTimeStart = (range==null ? time : Math.max(time,range.getBeginTime()));
 		long realTimeStart = System.currentTimeMillis();
 
 		while (!isEmpty() && !isAborted()) {
+			// Insert time events to the queue if necessary to "tick" the clock every second.
+			// This is needed if there are no actual stream events covering every second.
+			if (peek().timestamp.getTime() > lastHandledTime + 1000) {
+				// Insert a time event to the front of the queue, before the next real event
+				final ClockTickEvent event = new ClockTickEvent(new Date(lastHandledTime + 1000));
+				enqueue(event);
+			}
+
 			FeedEvent event = poll();
 			time = event.timestamp.getTime();
 
 			// Check if a delay is needed
-			if (speed != 0 && time > todBegin && time < todEnd) {
+			if (speed != 0 && (range == null || time > todBegin && time < todEnd)) {
 				long realTimeElapsed = System.currentTimeMillis() - realTimeStart;
 				long simTimeMax = realTimeElapsed*speed + simTimeStart;
 				long diff = time - simTimeMax;

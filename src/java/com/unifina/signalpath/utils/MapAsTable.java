@@ -16,7 +16,6 @@ public class MapAsTable extends ModuleWithUI {
 
 	public MapAsTable() {
 		super();
-		resendAll = false;
 		resendLast = 1;
 	}
 

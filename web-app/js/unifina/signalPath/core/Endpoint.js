@@ -10,7 +10,9 @@ SignalPath.Endpoint = function(json, parentDiv, module, type, pub) {
 	function createDiv() {
 
 		// Create connection div
-		var div = $("<div class='endpoint "+pub.type+" "+pub.json.type+"'></div>");
+		var div = $("<div/>", {
+			class: 'endpoint ' + pub.type + ' ' + pub.json.type,
+		})
 		div.data("spObject",pub);
 		pub.div = div;
 

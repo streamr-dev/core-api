@@ -1,6 +1,8 @@
 package com.unifina.service
 
+import com.unifina.BeanMockingSpecification
 import com.unifina.api.*
+import com.unifina.domain.ExampleType
 import com.unifina.domain.dashboard.Dashboard
 import com.unifina.domain.dashboard.DashboardItem
 import com.unifina.domain.data.Stream
@@ -10,34 +12,43 @@ import com.unifina.domain.signalpath.Canvas
 import com.unifina.domain.signalpath.Module
 import com.unifina.domain.signalpath.Serialization
 import com.unifina.exceptions.CanvasUnreachableException
+import com.unifina.signalpath.ModuleException
 import com.unifina.signalpath.UiChannelIterator
 import com.unifina.signalpath.charts.Heatmap
 import com.unifina.task.CanvasDeleteTask
 import grails.converters.JSON
-import grails.plugin.springsecurity.SpringSecurityService
 import grails.test.mixin.Mock
 import grails.test.mixin.TestFor
 import grails.test.mixin.TestMixin
 import grails.test.mixin.web.ControllerUnitTestMixin
 import groovy.json.JsonBuilder
+import groovy.json.JsonSlurper
 import org.codehaus.groovy.grails.web.mapping.LinkGenerator
-import spock.lang.Specification
 
 @TestMixin(ControllerUnitTestMixin) // "as JSON" converter
 @TestFor(CanvasService)
-@Mock([SecUser, Canvas, Module, Stream, ModuleService, StreamService, SpringSecurityService, SignalPathService, PermissionService, Permission, Serialization, Dashboard, DashboardItem])
-class CanvasServiceSpec extends Specification {
+@Mock([SecUser, Canvas, Module, Permission, Serialization, Dashboard, DashboardItem])
+class CanvasServiceSpec extends BeanMockingSpecification {
 
 	SecUser me
 	SecUser someoneElse
 	Canvas myFirstCanvas
 	List<Canvas> canvases = []
-
 	Module moduleWithUi
 
+	String json = new JsonBuilder([
+		modules: [],
+		settings: [:],
+	]).toPrettyString()
+
 	def setup() {
-		service.permissionService = Mock(PermissionService)
-		service.dashboardService = Mock(DashboardService)
+		service.permissionService = mockBean(PermissionService, Mock(PermissionService))
+		service.permissionService.canWrite(_,_) >> true
+		service.dashboardService = mockBean(DashboardService, Mock(DashboardService))
+		service.streamService = mockBean(StreamService, Mock(StreamService))
+		service.streamService.createStream(_,_,_) >> new Stream()
+		mockBean(ModuleService, new ModuleService())
+		service.signalPathService = mockBean(SignalPathService, new SignalPathService())
 
 		moduleWithUi = new Module(implementingClass: Heatmap.name).save(validate: false)
 
@@ -68,50 +79,126 @@ class CanvasServiceSpec extends Specification {
 
 		canvases << new Canvas(
 			name: "my_canvas_2",
-			json: "{}",
+			json: json,
 		).save(failOnError: true)
 
 		canvases << new Canvas(
 			name: "my_canvas_3",
-			json: "{}",
 			adhoc: false,
-			state: Canvas.State.RUNNING
+			state: Canvas.State.RUNNING,
+			json: json,
 		).save(failOnError: true)
 
 		canvases << new Canvas(
 			name: "my_canvas_4",
-			json: "{}",
 			adhoc: true,
-			state: Canvas.State.RUNNING
+			state: Canvas.State.RUNNING,
+			json: json,
 		).save(failOnError: true)
 
 		canvases << new Canvas(
 			name: "my_canvas_5",
-			json: "{}",
 			adhoc: true,
-			state: Canvas.State.STOPPED
+			state: Canvas.State.STOPPED,
+			json: json,
 		).save(failOnError: true)
 
 		canvases << new Canvas(
 			name: "my_canvas_6",
-			json: "{}",
 			adhoc: false,
-			state: Canvas.State.STOPPED
+			state: Canvas.State.STOPPED,
+			json: json,
 		).save(failOnError: true)
 
 		someoneElse = new SecUser(username: "someone@someone.com").save(validate: false)
 
 		canvases << new Canvas(
 			name: "someoneElses_canvas_1",
-			json: "{}",
 			adhoc: false,
-			state: Canvas.State.STOPPED
+			state: Canvas.State.STOPPED,
+			json: json,
 		).save(failOnError: true)
 
 		canvases << new Canvas(
 			name: "someoneElses_canvas_2",
-			json: "{}",
+			json: json,
 		).save(failOnError: true)
+	}
+
+	def "add example shared canvases"() {
+		setup:
+		service.permissionService = Mock(PermissionService)
+		Canvas c0 = new Canvas(
+			name: "example canvas",
+			exampleType: ExampleType.SHARE
+		).save(failOnError: true)
+		canvases << c0
+		Canvas c1 = new Canvas(
+			name: "example 2 canvas",
+			exampleType: ExampleType.SHARE
+		).save(failOnError: true)
+		canvases << c1
+
+		when:
+		service.addExampleCanvases(me, canvases)
+		then:
+		1 * service.permissionService.systemGrant(me, c0, Permission.Operation.READ)
+		1 * service.permissionService.systemGrant(me, c1, Permission.Operation.READ)
+		notThrown(RuntimeException)
+	}
+
+	def "add example copy canvases"() {
+		setup:
+		service.permissionService = Mock(PermissionService)
+		service.streamService = Mock(StreamService)
+		Canvas c0 = new Canvas(
+			name: "example canvas",
+			exampleType: ExampleType.COPY,
+			json: json,
+		)
+		c0.id = "c0"
+		c0.save(failOnError: true)
+		canvases << c0
+		Canvas c1 = new Canvas(
+			name: "example 2 canvas",
+			exampleType: ExampleType.COPY,
+			json: json,
+		)
+		c1.id = "c1"
+		c1.save(failOnError: true)
+		canvases << c1
+
+		when:
+		service.addExampleCanvases(me, canvases)
+		then:
+		notThrown(RuntimeException)
+	}
+
+	def "add example copy and share canvases"() {
+		setup:
+		service.permissionService = Mock(PermissionService)
+		service.streamService = Mock(StreamService)
+		Canvas c0 = new Canvas(
+			name: "example canvas",
+			exampleType: ExampleType.COPY,
+			json: json,
+		)
+		c0.id = "c0"
+		c0.save(failOnError: true)
+		canvases << c0
+		Canvas c1 = new Canvas(
+			name: "example 2 canvas",
+			exampleType: ExampleType.SHARE,
+			json: json,
+		)
+		c1.id = "c1"
+		c1.save(failOnError: true)
+		canvases << c1
+
+		when:
+		service.addExampleCanvases(me, canvases)
+		then:
+		notThrown(RuntimeException)
 	}
 
 	def "createNew() throws error when given null command object"() {
@@ -130,6 +217,14 @@ class CanvasServiceSpec extends Specification {
 		thrown(ValidationException)
 	}
 
+	def "createNew() replaces empty name with default value"() {
+		when:
+		Canvas c = service.createNew(new SaveCanvasCommand(name: "", modules: []), me)
+
+		then:
+		c.name == "Untitled Canvas"
+	}
+
 	def "createNew() creates a new Canvas"() {
 		def command = new SaveCanvasCommand(name: "my_new_canvas", modules: [])
 
@@ -143,7 +238,6 @@ class CanvasServiceSpec extends Specification {
 		c.json != null // TODO: JSON Schema validation
 		c.state == Canvas.State.STOPPED
 		!c.hasExports
-		!c.example
 
 		c.runner == null
 		c.server == null
@@ -268,6 +362,36 @@ class CanvasServiceSpec extends Specification {
 
 		then:
 		thrown(InvalidStateException)
+	}
+
+	def "updateExisting lets save canvas in invalid state"() {
+		setup:
+		service.signalPathService = Mock(SignalPathService)
+		def cmd = new SaveCanvasCommand(
+			name: "canvas",
+			modules: [
+				[id: 22, params: [], inputs: [], outputs: []],
+			],
+			settings: [
+			    foo: "bar",
+			],
+		)
+
+		when:
+		service.updateExisting(myFirstCanvas, cmd, me)
+
+		then:
+		Canvas result = Canvas.findById(myFirstCanvas.id)
+		result.name == "canvas"
+		Map json = new JsonSlurper().parseText(result.json)
+		json.settings.foo == "bar"
+		json.name == "canvas"
+		json.hasExports == false
+		json.uiChannel.name == "Notifications"
+		json.uiChannel.id == "666"
+		json.modules[0].id == 22
+		1 * service.signalPathService.reconstruct(_, _) >> { throw new ModuleException("mocked", null, null) }
+		thrown ModuleException
 	}
 
 	def "createNew always generates new uiChannels"() {
@@ -470,42 +594,6 @@ class CanvasServiceSpec extends Specification {
 		1 * service.permissionService.check(me, myFirstCanvas, Permission.Operation.READ) >> false
 	}
 
-	def "authorizedGetById() grants read access to examples to anyone without checking permissions"() {
-		myFirstCanvas.example = true
-
-		when:
-		def canvas = service.authorizedGetById(myFirstCanvas.id, null, Permission.Operation.READ)
-
-		then:
-		canvas == myFirstCanvas
-		0 * service.permissionService._
-	}
-
-	def "authorizedGetById() does not grant write or share permission to examples unless permitted by PermissionService"() {
-		myFirstCanvas.example = true
-
-		when:
-		service.authorizedGetById(myFirstCanvas.id, me, Permission.Operation.WRITE)
-
-		then:
-		thrown(NotPermittedException)
-		1 * service.permissionService.check(me, myFirstCanvas, Permission.Operation.WRITE) >> false
-
-		when:
-		service.authorizedGetById(myFirstCanvas.id, me, Permission.Operation.SHARE)
-
-		then:
-		thrown(NotPermittedException)
-		1 * service.permissionService.check(me, myFirstCanvas, Permission.Operation.SHARE) >> false
-
-		when:
-		def canvas = service.authorizedGetById(myFirstCanvas.id, me, Permission.Operation.SHARE)
-
-		then:
-		canvas == myFirstCanvas
-		1 * service.permissionService.check(me, myFirstCanvas, Permission.Operation.SHARE) >> true
-	}
-
 	def "authorizedGetById() throws NotFoundException if no canvas exists"() {
 		when:
 		service.authorizedGetById("foo", me, Permission.Operation.READ)
@@ -576,17 +664,6 @@ class CanvasServiceSpec extends Specification {
 		thrown(NotPermittedException)
 	}
 
-	def "authorizedGetModuleOnCanvas() grants read access to examples to anyone without checking permissions"() {
-		myFirstCanvas.example = true
-
-		when:
-		def module = service.authorizedGetModuleOnCanvas(myFirstCanvas.id, 1, null, null, Permission.Operation.READ)
-
-		then:
-		module == JSON.parse(myFirstCanvas.json).modules.find {it.hash == 1}
-		0 * service.permissionService._
-	}
-
 	def "authorizedGetModuleOnCanvas() throws NotFoundException if no canvas exists"() {
 		when:
 		service.authorizedGetModuleOnCanvas("foo", 1, null, me, Permission.Operation.READ)
@@ -614,13 +691,13 @@ class CanvasServiceSpec extends Specification {
 	}
 
 	def "getCanvasURL() returns a link for the canvas"() {
-		service.linkGenerator = Mock(LinkGenerator)
+		service.grailsLinkGenerator = Mock(LinkGenerator)
 
 		when:
 		def link = service.getCanvasURL(myFirstCanvas)
 
 		then:
-		1 * service.linkGenerator.link([controller: 'canvas', action: 'editor', id: myFirstCanvas.id, absolute: true]) >> "https://www.streamr.com/canvas/editor/1"
+		1 * service.grailsLinkGenerator.link([controller: 'canvas', action: 'editor', id: myFirstCanvas.id, absolute: true]) >> "https://www.streamr.com/canvas/editor/1"
 		link == "https://www.streamr.com/canvas/editor/1"
 	}
 

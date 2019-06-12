@@ -53,8 +53,37 @@ describe('web3Provider', () => {
         })
     })
     describe('getWeb3', () => {
-        it('must return the same instance every time', () => {
-            assert(getWeb3() === getWeb3())
+        let oldGlobalWeb3
+        let oldGlobalEthereum
+
+        beforeEach(() => {
+            oldGlobalWeb3 = global.web3
+            oldGlobalEthereum = global.ethereum
+            global.web3 = undefined
+            global.ethereum = undefined
+        })
+
+        afterEach(() => {
+            global.web3 = oldGlobalWeb3
+            global.ethereum = oldGlobalEthereum
+        })
+
+        it('must return the web3 object without a provider when metamask does not provide it', () => {
+            const web3 = getWeb3()
+            expect(web3.currentProvider).toEqual(null)
+        })
+        it('must return the web3 object with the window.web3.currentProvider provider if it is available/defined', () => {
+            // 'legacy' metamask web3 injection scenario
+            global.web3 = new Web3()
+            global.web3.currentProvider = new StreamrWeb3.providers.HttpProvider('http://boop:1337')
+            const web3 = getWeb3()
+            assert.equal(web3.currentProvider.host, 'http://boop:1337')
+        })
+        it('must return the web3 object with the window.ethereum provider if it is available/defined', () => {
+            // permissioned metamask provider injection scenario
+            global.ethereum = new StreamrWeb3.providers.HttpProvider('http://vitalik:300')
+            const web3 = getWeb3()
+            assert.equal(web3.currentProvider.host, 'http://vitalik:300')
         })
     })
 })

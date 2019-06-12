@@ -12,12 +12,9 @@
   },
   "repository": "https://github.com/streamr-dev/engine-and-editor",
   "scripts": {
-    "test": "npm run test-old; npm run test-new",
+    "test": "npm run test-old && npm run test-new",
     "test-old": "mocha web-app/js/unifina/test --recursive",
     "test-new": "node ./node_modules/.bin/jest ./web-app/react-app/tests",
-    "test-jenkins": "npm run test-old-jenkins; npm run test-new-jenkins",
-    "test-old-jenkins": "mocha web-app/js/unifina/test --recursive --reporter mocha-junit-reporter --reporter-options mochaFile=./test-old-report.xml",
-    "test-new-jenkins": "JEST_JUNIT_OUTPUT=test-new-report.xml jest ./web-app/react-app/tests --ci --testResultsProcessor=\"jest-junit\"",
     "build": "NODE_ENV=production webpack",
     "build-dev": "webpack",
     "clean": "rm -rf node_modules/",
@@ -114,7 +111,6 @@
     "react-helmet": "^5.1.3",
     "react-notification-system-redux": "^1.2.0",
     "react-redux": "^5.0.5",
-    "react-responsive": "^5.0.0",
     "react-router-dom": "^4.2.2",
     "react-select": "^1.2.1",
     "react-shortcuts": "^2.0.0",
@@ -134,7 +130,7 @@
     "underscore": "*",
     "url-loader": "^1.0.1",
     "uuid": "latest",
-    "web3": "^1.0.0-beta.30",
+    "web3": "^1.0.0-beta.36",
     "webpack": "^2.6.0",
     "webpack-dev-server": "^2.4.5",
     "webpack-notifier": "^1.5.0",
@@ -143,6 +139,8 @@
     "zxcvbn": "^4.4.2"
   },
   "devDependencies": {
+    "ganache-cli": "^6.4.3",
+    "timezone-mock": "^1.0.2",
     "web3-fake-provider": "^0.1.0"
   }
 }

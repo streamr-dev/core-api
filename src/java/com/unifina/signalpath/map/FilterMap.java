@@ -22,10 +22,10 @@ public class FilterMap extends AbstractSignalPathModule {
 		} else {
 			Map<String, Object> newMap = new LinkedHashMap<>();
 
-			for (String key : (List<String>) keys.getValue()) {
-				Object value = sourceMap.get(key);
+			for (Object key : keys.getValue()) {
+				Object value = sourceMap.get(key.toString());
 				if (value != null) {
-					newMap.put(key, value);
+					newMap.put(key.toString(), value);
 				}
 			}
 

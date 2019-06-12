@@ -1,4 +1,8 @@
 
 module.exports = exports = {
-    extends: 'streamr'
+    extends: 'streamr',
+    globals: {
+        $: true,
+        Highcharts: true
+    }
 }

@@ -22,7 +22,7 @@ class ExportCSVSpec extends UiChannelMockingSpecification {
 		module.getInput("generated-input-1").setDisplayName("in1")
 		module.getInput("generated-input-2").setDisplayName("in2")
 		module.getInput("generated-input-3").setDisplayName("in3")
-		globals = new Globals([:], new SecUser(timezone: "EST").save(failOnError: true, validate: false))
+		globals = new Globals([:], new SecUser(username: 'user').save(failOnError: true, validate: false))
 	}
 
 	private boolean testForFileContentAndUiMessages(String s, Map channelMessages) {
@@ -170,6 +170,7 @@ class ExportCSVSpec extends UiChannelMockingSpecification {
 				timeFormat: [value: "ISO_8601_LOCAL"]
 			]
 		], new SignalPath(true), globals)
+		module.getInput("timezone").receive(TimeZone.getTimeZone("EST"))
 
 		then:
 		testForFileContentAndUiMessages(

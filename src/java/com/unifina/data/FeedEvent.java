@@ -1,11 +1,9 @@
 package com.unifina.data;
 
 import java.util.Date;
-import java.util.Iterator;
-
 import com.unifina.feed.AbstractFeed;
 import com.unifina.feed.FeedEventIterator;
-import com.unifina.feed.ITimestamped;
+import com.streamr.client.protocol.message_layer.ITimestamped;
 
 public class FeedEvent<MessageClass extends ITimestamped, EventRecipientClass extends IEventRecipient>
 		implements Comparable<FeedEvent<MessageClass, EventRecipientClass>> {

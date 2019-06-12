@@ -12,15 +12,13 @@ import org.apache.log4j.Logger;
  * - Preprocess raw feed data (Message -> MessageClass) to avoid repeating the same work in each feed proxy
  * @author Henri
  *
- * @param <RawMessageClass>
  * @param <MessageClass>
  * @param <KeyClass>
  */
-public class MessageHub<RawMessageClass, MessageClass, KeyClass> extends Thread implements MessageRecipient {
+public class MessageHub<MessageClass, KeyClass> extends Thread implements MessageRecipient {
 	private static final Logger log = Logger.getLogger(MessageHub.class);
 
 	private final MessageSource source;
-	private final MessageParser<RawMessageClass, MessageClass> parser;
 	private final IFeedCache cache;
 
 	private final BlockingQueue<Message> queue = new ArrayBlockingQueue<>(1000*1000);
@@ -37,21 +35,20 @@ public class MessageHub<RawMessageClass, MessageClass, KeyClass> extends Thread 
 
 	private boolean quit = false;
 
-	
-	MessageHub(MessageSource source, MessageParser<RawMessageClass, MessageClass> parser, IFeedCache cache) {
+
+	MessageHub(MessageSource source, IFeedCache cache) {
 		this.source = source;
-		this.parser = parser;
 		this.cache = cache;
 
 		source.setRecipient(this);
 		if (cache != null) {
 			addRecipient(cache);
 		}
-		
+
 		setName("MsgHub_" + source.getClass().getSimpleName());
 		// not safe to start Thread in constructor! Started in FeedFactory
 	}
-	
+
 	@Override
 	public void run() {
 		while (!quit) {
@@ -63,11 +60,11 @@ public class MessageHub<RawMessageClass, MessageClass, KeyClass> extends Thread 
 			} catch (InterruptedException e) {
 				throw new RuntimeException(e);
 			}
-			
+
 			ParsedMessage<MessageClass, KeyClass> parsedMessage = null;
 			try {
 				// Preprocess here to avoid repeating something in each feed proxy
-				parsedMessage = new ParsedMessage<>(m.counter, parser.parse((RawMessageClass) m.message), m.checkCounter);
+				parsedMessage = new ParsedMessage<>(m.message);
 			} catch (Exception e) {
 				log.error("Failed to parse message " + m.message.toString(), e);
 			}
@@ -124,12 +121,8 @@ public class MessageHub<RawMessageClass, MessageClass, KeyClass> extends Thread 
 		return source;
 	}
 
-	public MessageParser<RawMessageClass, MessageClass> getParser() {
-		return parser;
-	}
-
 	// Escalate session state to proxies
-	
+
 	public void sessionBroken() {
 		for (MessageRecipient p : proxiesByPriority) {
 			p.sessionBroken();
@@ -166,23 +159,23 @@ public class MessageHub<RawMessageClass, MessageClass, KeyClass> extends Thread 
 				proxiesByKey.put(key, new ArrayList<MessageRecipient>());
 			}
 		}
-		
+
 		List<MessageRecipient> list = proxiesByKey.get(key);
-		
+
 		synchronized (list) {
 			if (!list.contains(proxy)) {
 				list.add(proxy);
 			}
-			
+
 			Collections.sort(list, proxyPriorityComparator);
-			
+
 			source.subscribe(key);
 		}
 	}
-	
+
 	public void unsubscribe(Object key, MessageRecipient proxy) {
 		List<MessageRecipient> list = proxiesByKey.get(key);
-		
+
 		if (list != null) {
 			synchronized (list) {
 				list.remove(proxy);

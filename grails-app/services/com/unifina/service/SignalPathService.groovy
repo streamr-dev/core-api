@@ -15,7 +15,6 @@ import com.unifina.serialization.SerializationException
 import com.unifina.signalpath.*
 import com.unifina.utils.Globals
 import com.unifina.utils.GlobalsFactory
-import com.unifina.utils.NetworkInterfaceUtils
 import grails.compiler.GrailsCompileStatic
 import grails.transaction.NotTransactional
 import grails.transaction.Transactional
@@ -24,6 +23,7 @@ import groovy.transform.CompileStatic
 import org.apache.log4j.Logger
 
 import java.security.AccessControlException
+import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.Future
 import java.util.concurrent.TimeUnit
 import java.util.concurrent.TimeoutException
@@ -39,6 +39,9 @@ class SignalPathService {
 	StreamService streamService
 	PermissionService permissionService
 	ApiService apiService
+	NodeService nodeService
+
+	Map<String, SignalPathRunner> runnersById = new ConcurrentHashMap<>()
 
 	private static final Logger log = Logger.getLogger(SignalPathService.class)
 
@@ -77,9 +80,9 @@ class SignalPathService {
 	 * Potentially modifies the config given as parameter.
 	 */
 	@CompileStatic
-	Map reconstruct(Map config, Globals globals) {
+	ReconstructedResult reconstruct(Map config, Globals globals) {
 		SignalPath sp = mapToSignalPath(config, true, globals, new SignalPath(true))
-		return signalPathToMap(sp)
+		return new ReconstructedResult(signalPathToMap(sp), sp)
 	}
 
 	@Transactional
@@ -98,7 +101,7 @@ class SignalPathService {
 		// Instantiate the SignalPath
 		if (canvas.serialization == null || canvas.adhoc) {
 			log.info("Creating new signalPath connections (canvasId=$canvas.id)")
-			sp = mapToSignalPath(new Gson().fromJson(canvas.json, Map.class), false, globals, new SignalPath(true))
+			sp = mapToSignalPath(canvas.toSignalPathConfig(), false, globals, new SignalPath(true))
 		} else {
 			log.info("De-serializing existing signalPath (canvasId=$canvas.id)")
 			sp = (SignalPath) serializationService.deserialize(canvas.serialization.bytes)
@@ -137,7 +140,7 @@ class SignalPathService {
 
 		def port = Holders.getConfig().streamr.cluster.internalPort
 		def protocol = Holders.getConfig().streamr.cluster.internalProtocol
-		canvas.server = NetworkInterfaceUtils.getIPAddress(grailsApplication.config.streamr.ip.address.prefixes ?: []).getHostAddress()
+		canvas.server = nodeService.getIPAddress()
 
 		// Form an internal url that Streamr nodes will use to directly address this machine and the canvas that runs on it
 		canvas.requestUrl = protocol + "://" + canvas.server + ":" + port + grailsLinkGenerator.link(uri: "/api/v1/canvases/$canvas.id", absolute: false)
@@ -180,18 +183,15 @@ class SignalPathService {
 	}
 
 	@GrailsCompileStatic
-	List<SignalPath> getRunningSignalPaths() {
+	Set<SignalPath> getRunningSignalPaths() {
 		List<List<SignalPath>> signalPaths = runners().values()*.signalPaths
-		return (List<SignalPath>) signalPaths.flatten()
+		return signalPaths.flatten() as Set<SignalPath>
 	}
 
 	@CompileStatic
 	List<Canvas> stopAllLocalCanvases() {
-		// Copy list to prevent ConcurrentModificationException
-		Map<String, SignalPathRunner> copyOfRunners = [:]
-		copyOfRunners.putAll(runners())
 		List canvases = []
-		copyOfRunners.each { String key, SignalPathRunner runner ->
+		runners().each { String key, SignalPathRunner runner ->
 			if (stopLocalRunner(key)) {
 				canvases.addAll(runner.getSignalPaths()*.getCanvas())
 			}
@@ -386,21 +386,32 @@ class SignalPathService {
 
 	@CompileStatic
 	private Map<String, SignalPathRunner> runners() {
-		(servletContext["signalPathRunners"]) as Map<String, SignalPathRunner>
+		// Return a copy
+		return new HashMap<String, SignalPathRunner>(runnersById)
 	}
 
 	@CompileStatic
 	private SignalPathRunner getRunner(String runnerId) {
-		runners().get(runnerId)
+		return runnersById[runnerId]
 	}
 
 	@CompileStatic
 	private void addRunner(SignalPathRunner runner) {
-		runners().put(runner.runnerId, runner)
+		runnersById[runner.runnerId] = runner
 	}
 
 	@CompileStatic
 	private void removeRunner(SignalPathRunner runner) {
-		runners().remove(runner.runnerId)
+		runnersById.remove(runner.runnerId)
+	}
+
+	public class ReconstructedResult {
+		public Map map
+		public SignalPath signalPath
+
+		ReconstructedResult(Map map, SignalPath signalPath) {
+			this.map = map
+			this.signalPath = signalPath
+		}
 	}
 }

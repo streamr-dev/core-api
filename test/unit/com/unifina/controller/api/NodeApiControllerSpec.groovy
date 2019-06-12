@@ -6,11 +6,11 @@ import com.unifina.api.node.NodeRequestDispatcher
 import com.unifina.domain.security.SecUser
 import com.unifina.domain.signalpath.Canvas
 import com.unifina.service.CanvasService
+import com.unifina.service.NodeService
 import com.unifina.service.SerializationService
 import com.unifina.service.SignalPathService
 import com.unifina.service.TaskService
 import com.unifina.signalpath.SignalPath
-import com.unifina.utils.NetworkInterfaceUtils
 import grails.test.mixin.Mock
 import grails.test.mixin.TestFor
 import spock.lang.Specification
@@ -24,6 +24,8 @@ class NodeApiControllerSpec extends Specification {
 	def setup() {
 		user1 = new SecUser(username: "user1@streamr.com").save(failOnError: true, validate: false)
 		user2 = new SecUser(username: "user2@streamr.com").save(failOnError: true, validate: false)
+
+		controller.nodeService = Mock(NodeService)
 	}
 
 	void "index lists streamr nodes"() {
@@ -38,10 +40,30 @@ class NodeApiControllerSpec extends Specification {
 		response.json == ['192.168.1.51', '192.168.1.53']
 	}
 
+	void "ip() returns node IP address"() {
+		when:
+		request.method = "GET"
+		controller.ip()
+
+		then:
+		1 * controller.nodeService.getIPAddress() >> "1.2.3.4"
+		response.json["ip"] == "1.2.3.4"
+	}
+
+	void "config returns the Grails config as flattened json"() {
+		when:
+		request.method = "GET"
+		controller.config()
+
+		then:
+		response.json.size() > 0
+		response.json["streamr.nodes"] != null
+	}
+
 	void "shutdown must stop all TaskWorkers, stop local Canvases and start them remotely"() {
 		def canvases = [
-				new Canvas(state: Canvas.State.RUNNING, json: "{}"),
-				new Canvas(state: Canvas.State.RUNNING, json: "{}")
+				new Canvas(state: Canvas.State.RUNNING),
+				new Canvas(state: Canvas.State.RUNNING)
 		]
 		canvases*.save(validate:false)
 
@@ -69,9 +91,9 @@ class NodeApiControllerSpec extends Specification {
 
 	void "shutdown must not create start tasks for adhoc canvases"() {
 		def canvases = [
-				new Canvas(state: Canvas.State.RUNNING, json: "{}"),
-				new Canvas(state: Canvas.State.RUNNING, json: "{}"),
-				new Canvas(state: Canvas.State.RUNNING, json: "{}", adhoc: true)
+				new Canvas(state: Canvas.State.RUNNING),
+				new Canvas(state: Canvas.State.RUNNING),
+				new Canvas(state: Canvas.State.RUNNING, adhoc: true)
 		]
 		canvases*.save(validate:false)
 
@@ -98,7 +120,7 @@ class NodeApiControllerSpec extends Specification {
 	void "canvases lists empty canvases if nothing running and nothing marked as running in DB"() {
 		setup:
 		controller.signalPathService = Stub(SignalPathService) {
-			getRunningSignalPaths() >> []
+			getRunningSignalPaths() >> ([] as Set<SignalPath>)
 		}
 
 		when:
@@ -117,17 +139,17 @@ class NodeApiControllerSpec extends Specification {
 	void "canvases lists canvases according to whether they are really running and according to DB"() {
 		setup: "setup Canvases"
 		def canvases = [
-			new Canvas(name: "Canvas #1", state: Canvas.State.RUNNING, json: "{}", server: "10.0.0.5"),
-			new Canvas(name: "Canvas #2", state: Canvas.State.RUNNING, json: "{}", server: "10.0.0.5"),
-			new Canvas(name: "Canvas #3", state: Canvas.State.RUNNING, json: "{}", server: "10.0.0.5"),
-			new Canvas(name: "Canvas #4", state: Canvas.State.STOPPED, json: "{}", server: "10.0.0.5"),
-			new Canvas(name: "Canvas #5", state: Canvas.State.STOPPED, json: "{}", server: "10.0.0.5"),
-			new Canvas(name: "Canvas #6", state: Canvas.State.RUNNING, json: "{}", server: "10.0.0.6"),
+			new Canvas(name: "Canvas #1", state: Canvas.State.RUNNING, server: "10.0.0.5"),
+			new Canvas(name: "Canvas #2", state: Canvas.State.RUNNING, server: "10.0.0.5"),
+			new Canvas(name: "Canvas #3", state: Canvas.State.RUNNING, server: "10.0.0.5"),
+			new Canvas(name: "Canvas #4", state: Canvas.State.STOPPED, server: "10.0.0.5"),
+			new Canvas(name: "Canvas #5", state: Canvas.State.STOPPED, server: "10.0.0.5"),
+			new Canvas(name: "Canvas #6", state: Canvas.State.RUNNING, server: "10.0.0.6"),
 		]
 		canvases.eachWithIndex { Canvas c, int index -> c.id = "canvas-${index+1}" }
 		canvases*.save(failOnError: true, validate: false)
 
-		def unsavedCanvas = new Canvas(name: "unsaved canvas", json: "{}")
+		def unsavedCanvas = new Canvas(name: "unsaved canvas")
 		unsavedCanvas.id = "non-existing-canvas-id"
 
 		and: "setup SignalPaths"
@@ -141,23 +163,20 @@ class NodeApiControllerSpec extends Specification {
 		runningCanvas4.canvas = unsavedCanvas
 
 		controller.signalPathService = Stub(SignalPathService) {
-			getRunningSignalPaths() >> [
+			getRunningSignalPaths() >> ([
 				runningCanvas1,
 				runningCanvas2,
 				runningCanvas3,
 				runningCanvas4
-			]
+			] as Set<SignalPath>)
 		}
-
-		and:
-		GroovySpy(NetworkInterfaceUtils, global: true)
 
 		when:
 		request.method = "GET"
 		controller.canvases()
 
 		then:
-		1 * NetworkInterfaceUtils.getIPAddress(_) >> Inet4Address.getByName("10.0.0.5")
+		1 * controller.nodeService.getIPAddress() >> "10.0.0.5"
 
 		and:
 		response.status == 200
@@ -170,7 +189,7 @@ class NodeApiControllerSpec extends Specification {
 	void "canvasSizes returns empty map if nothing running"() {
 		setup:
 		controller.signalPathService = Stub(SignalPathService) {
-			getRunningSignalPaths() >> []
+			getRunningSignalPaths() >> ([] as Set)
 		}
 
 		when:
@@ -185,8 +204,8 @@ class NodeApiControllerSpec extends Specification {
 	void "canvasSizes uses serializationService#serialize to determine canvas size"() {
 		setup: "setup Canvases"
 		def canvases = [
-			new Canvas(name: "Canvas #1", state: Canvas.State.RUNNING, json: "{}", server: "10.0.0.5"),
-			new Canvas(name: "Canvas #2", state: Canvas.State.RUNNING, json: "{}", server: "10.0.0.5")
+			new Canvas(name: "Canvas #1", state: Canvas.State.RUNNING, server: "10.0.0.5"),
+			new Canvas(name: "Canvas #2", state: Canvas.State.RUNNING, server: "10.0.0.5")
 		]
 		canvases.eachWithIndex { Canvas c, int index -> c.id = "canvas-${index+1}" }
 		canvases*.save(failOnError: true, validate: false)
@@ -198,22 +217,22 @@ class NodeApiControllerSpec extends Specification {
 		runningCanvas2.canvas = canvases[1]
 
 		controller.signalPathService = Stub(SignalPathService) {
-			getRunningSignalPaths() >> [
+			getRunningSignalPaths() >> ([
 				runningCanvas1,
 				runningCanvas2,
-			]
+			] as Set<SignalPath>)
 		}
 
-		def serialziationService = controller.serializationService = Mock(SerializationService)
+		def serializationService = controller.serializationService = Mock(SerializationService)
 
 		when:
 		request.method = "GET"
 		controller.canvasSizes()
 
 		then:
-		1 * serialziationService.serialize(runningCanvas1) >> new byte[256]
-		1 * serialziationService.serialize(runningCanvas2) >> new byte[666]
-		0 * serialziationService._
+		1 * serializationService.serialize(runningCanvas1) >> new byte[256]
+		1 * serializationService.serialize(runningCanvas2) >> new byte[666]
+		0 * serializationService._
 
 		and:
 		response.status == 200
@@ -225,9 +244,9 @@ class NodeApiControllerSpec extends Specification {
 
 	void "shutdownNode invokes shutdown() if given ipAddress is of current machine"() {
 		def canvases = [
-			new Canvas(state: Canvas.State.RUNNING, json: "{}"),
-			new Canvas(state: Canvas.State.RUNNING, json: "{}"),
-			new Canvas(state: Canvas.State.RUNNING, json: "{}", adhoc: true)
+			new Canvas(state: Canvas.State.RUNNING,),
+			new Canvas(state: Canvas.State.RUNNING,),
+			new Canvas(state: Canvas.State.RUNNING, adhoc: true)
 		]
 		canvases*.save(validate:false)
 
@@ -237,10 +256,11 @@ class NodeApiControllerSpec extends Specification {
 
 		when:
 		request.method = "POST"
-		params.nodeIp = "127.0.0.1"
+		params.nodeIp = "1.2.3.4"
 		controller.shutdownNode()
 
 		then:
+		1 * controller.nodeService.isIpAddressOfCurrentNode("1.2.3.4") >> true
 		1 * controller.signalPathService.getUsersOfRunningCanvases() >> ["1": user1, "2": user2, "3": user1]
 		1 * controller.signalPathService.stopAllLocalCanvases() >> {
 			canvases*.state = Canvas.State.STOPPED
@@ -289,10 +309,11 @@ class NodeApiControllerSpec extends Specification {
 
 		when:
 		request.method = "GET"
-		params.nodeIp = "127.0.0.1"
+		params.nodeIp = "1.2.3.4"
 		controller.canvasesNode()
 
 		then:
+		1 * controller.nodeService.isIpAddressOfCurrentNode("1.2.3.4") >> true
 		response.status == 200
 		response.json.keySet() == ["ok", "shouldBeRunning", "shouldNotBeRunning"] as Set
 	}

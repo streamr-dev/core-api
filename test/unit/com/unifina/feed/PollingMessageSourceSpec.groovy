@@ -48,7 +48,7 @@ class PollingMessageSourceSpec extends Specification {
 		sources[0].subscribe("foo")
 		then:
 		conditions.within(2) {
-			assert counter >= 10 && counter < 20
+			assert counter >= 100 && counter < 200
 		}
 	}
 
@@ -62,7 +62,8 @@ class PollingMessageSourceSpec extends Specification {
 				return new Poller() {
 					@Override
 					List<Message<String,String>> poll() {
-						return [new Message<String, String>("foo", msgCounter++, "")]
+						msgCounter++
+						return [new Message<String, String>("foo", "")]
 					}
 
 					@Override
@@ -243,5 +244,5 @@ class PollingMessageSourceSpec extends Specification {
 			assert counter1 >= 5 && counter1 < counter0
 		}
 	}
-	
+
 }

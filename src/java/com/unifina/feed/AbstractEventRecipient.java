@@ -11,6 +11,7 @@ import com.unifina.datasource.IStartListener;
 import com.unifina.signalpath.AbstractSignalPathModule;
 import com.unifina.signalpath.Propagator;
 import com.unifina.utils.Globals;
+import com.streamr.client.protocol.message_layer.ITimestamped;
 
 /**
  * An AbstractEventRecipient receives FeedEvents and updates the outputs
@@ -26,7 +27,7 @@ public abstract class AbstractEventRecipient<ModuleClass, MessageClass extends I
 	private final List<ModuleClass> modules = new ArrayList<>();
 	private final Propagator propagator = new Propagator();
 	private final Class<?> parameterizedClass;
-	
+
 	public AbstractEventRecipient(Globals globals) {
 		if (globals != null && globals.getDataSource() != null) {
 			globals.getDataSource().addStartListener(this);
@@ -34,12 +35,12 @@ public abstract class AbstractEventRecipient<ModuleClass, MessageClass extends I
 		ParameterizedType pt = (ParameterizedType) this.getClass().getGenericSuperclass();
 		parameterizedClass = (Class<?>) pt.getActualTypeArguments()[0];
 	}
-	
+
 	@Override
 	public void onStart() {
 		propagator.initialize();
 	}
-	
+
 	public void register(ModuleClass module) {
 		if (!parameterizedClass.isAssignableFrom(module.getClass())) {
 			throw new IllegalArgumentException("Can not register module of type: " + module.getClass() +
@@ -52,23 +53,23 @@ public abstract class AbstractEventRecipient<ModuleClass, MessageClass extends I
 			}
 		}
 	}
-	
+
 	@Override
 	public void receive(FeedEvent event) {
 		sendOutputFromModules(event);
 		propagator.propagate();
 	}
-	
+
 	protected List<ModuleClass> getModules() {
 		return Collections.unmodifiableList(modules);
 	}
-	
+
 	/**
-	 * This method should process the event, then if necessary, loop through each 
-	 * registered module and send appropriate values from the outputs of connected 
+	 * This method should process the event, then if necessary, loop through each
+	 * registered module and send appropriate values from the outputs of connected
 	 * modules. Propagation will take place immediately after calling this method.
 	 * @param event
 	 */
 	protected abstract void sendOutputFromModules(FeedEvent<MessageClass, ? extends IEventRecipient> event);
-	
+
 }

@@ -13,7 +13,7 @@ trait StreamMixin {
 
 	def createStream(streamName) {
 		to StreamCreatePage
-		name << streamName
+		name.value(streamName)
 		nextButton.click()
 		waitFor { at StreamShowPage }
 	}

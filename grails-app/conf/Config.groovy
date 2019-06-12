@@ -1,5 +1,7 @@
 import com.google.gson.Gson
 import com.unifina.data.KafkaPartitioner
+import com.unifina.service.NodeService
+import org.web3j.crypto.Credentials
 
 /*****
  * This config file gets merged with the application config file.
@@ -177,6 +179,8 @@ log4j.main = {
 		'org.apache.kafka.clients.consumer.ConsumerConfig',
 		'kafka.producer.ProducerConfig',
 		'org.apache.kafka.clients.producer.ProducerConfig'
+
+	debug 'com.datastax.driver.core'
 }
 
 /**
@@ -211,7 +215,7 @@ environments {
 /**
  * API & CORS config
  */
-cors.url.pattern = ['/api/*', '/contact/send', '/profile/*', '/logout/*', '/login/*']
+cors.url.pattern = ['/api/*', '/contact/send', '/profile/*', '/logout/*', '/login/*', '/j_spring_security_check', '/canvas', '/logout', '/j_spring_security_logout']
 streamr.apiKey.revokeNotificationStream = "revoked-api-keys"
 
 /**
@@ -227,12 +231,6 @@ unifina.reports.recipient = "henri.pihkala@streamr.com"
 unifina.task.workers = 1
 unifina.task.messageQueue = "streamr-tasks"
 
-environments {
-	development {
-		unifina.task.workers = 0
-	}
-}
-
 /**
  * Data feed config
  */
@@ -243,14 +241,9 @@ unifina.feed.cachedir = System.getProperty("java.io.tmpdir")
 
 
 /**
- * Aid IP address discovery by defining acceptable IP address prefixes (or empty if anything goes)
+ * Node IP address config. Autodetected if not set.
  */
-streamr.ip.address.prefixes = System.getProperty("streamr.ip.address.prefixes") ? Arrays.asList(System.getProperty("streamr.ip.address.prefixes").split(",")) : ["192.168.10.", "192.168.", "10.", "172.18."]
-environments {
-	production {
-		streamr.ip.address.prefixes = []
-	}
-}
+streamr.node.ip = System.getProperty("streamr.node.ip")
 
 /**
  * UI update server address
@@ -265,37 +258,34 @@ environments {
 /**
  * HTTP API server address
  */
-streamr.http.api.server = System.getProperty("streamr.http.api.server") ?: "http://127.0.0.1:8890/api/v1"
+streamr.http.api.url = System.getProperty("streamr.http.api.url") ?: "http://127.0.0.1:8081/streamr-core/api/v1"
 environments {
 	production {
-		streamr.http.api.server = System.getProperty("streamr.http.api.server") ?: "${prodBaseUrl}/api/v1"
+		streamr.http.api.url = System.getProperty("streamr.http.api.url") ?: "${prodBaseUrl}/api/v1"
 	}
 }
 
 /**
- * Streamr-web3 Ethereum bridge address
+ * Ethereum networks configuration (RPC urls)
+ *
+ * Can be configured via JVM system properties. Example command line flags:
+ *
+ * -Dstreamr.ethereum.defaultNetwork=someNetwork
+ * -Dstreamr.ethereum.networks.someNetwork=http://some-network-rpc-url
+ * -Dstreamr.ethereum.networks.anotherNetwork=http://some-network-rpc-url
  */
-streamr.ethereum.defaultNetwork = "rinkeby"
-streamr.ethereum.networks = System.getProperty("streamr.ethereum.networks") ? new Gson().fromJson(System.getProperty("streamr.ethereum.networks")) : [
-	ropsten: "http://localhost:3000",
-	rinkeby: "http://localhost:3001"
-]
-streamr.ethereum.rpcUrls = System.getProperty("streamr.ethereum.rpcUrls") ? new Gson().fromJson(System.getProperty("streamr.ethereum.rpcUrls")) : [
-	ropsten: "http://localhost:8545",
-	rinkeby: "http://localhost:8546"
-]
-environments {
-	production {
-		streamr.ethereum.networks = System.getProperty("streamr.ethereum.networks") ? new Gson().fromJson(System.getProperty("streamr.ethereum.networks")) : [
-			ropsten: "http://ropsten:3000",
-			rinkeby: "http://rinkeby:3001"
-		]
-		streamr.ethereum.rpcUrls = System.getProperty("streamr.ethereum.rpcUrls") ? new Gson().fromJson(System.getProperty("streamr.ethereum.rpcUrls")) : [
-			ropsten: "http://ropsten:8545",
-			rinkeby: "http://rinkeby:8546"
-		]
-	}
-}
+streamr.ethereum.defaultNetwork = System.getProperty("streamr.ethereum.defaultNetwork") ?: "local"
+streamr.ethereum.networks = System.getProperties().findAll {key, val-> key.toString().startsWith("streamr.ethereum.networks.")}.isEmpty() ?
+	// Default value
+	[local: "http://localhost:8545"] :
+	// Else collect system properties to Map
+	System.getProperties().findAll {key, val-> key.toString().startsWith("streamr.ethereum.networks.")}
+		.collectEntries {key, val ->
+			[(key.toString().replace("streamr.ethereum.networks.", "")): val]
+		}
+
+// Ethereum identity of this instance. Don't use this silly development private key for anything.
+streamr.ethereum.nodePrivateKey = System.getProperty("streamr.ethereum.nodePrivateKey", "0123456789ABCDEF0123456789ABCDEF0123456789ABCDEF0123456789ABCDEF")
 
 /**
  * Kafka config
@@ -335,6 +325,8 @@ environments {
  */
 streamr.cassandra.hosts = (System.getProperty("streamr.cassandra.hosts") ? Arrays.asList(System.getProperty("streamr.cassandra.hosts").split(",")) : ["127.0.0.1"])
 streamr.cassandra.keySpace = System.getProperty("streamr.cassandra.keySpace") ?: "streamr_dev"
+streamr.cassandra.username = System.getProperty("streamr.cassandra.username")
+streamr.cassandra.password = System.getProperty("streamr.cassandra.password")
 
 environments {
 	production {
@@ -491,7 +483,7 @@ streamr.signup.requireCaptcha = (System.getProperty("streamr.signup.requireCaptc
 /**
  * Streamr engine-and-editor nodes
  */
-streamr.nodes = System.getProperty("streamr.nodes") ? Arrays.asList(System.getProperty("streamr.nodes").split(",")) : ["127.0.0.1"]
+streamr.nodes = System.getProperty("streamr.nodes") ? Arrays.asList(System.getProperty("streamr.nodes").split(",")) : [new NodeService().getIPAddress([streamr: [node: [ip: System.getProperty("streamr.node.ip")]]])]
 
 /**
  * Miscellaneous

@@ -1,6 +1,6 @@
 package com.unifina.utils.testutils;
 
-import com.unifina.data.StreamrBinaryMessage;
+import com.streamr.client.protocol.message_layer.StreamMessage;
 import com.unifina.domain.data.Feed;
 import com.unifina.feed.Message;
 import com.unifina.feed.MessageRecipient;
@@ -32,8 +32,8 @@ public class FakeMessageSource implements MessageSource {
 		throw new UnsupportedOperationException();
 	}
 
-	public void handleMessage(StreamrBinaryMessage rawMsg) {
-		Message msg = new Message<>(rawMsg.getStreamId()+"-"+rawMsg.getPartition(), offset++, rawMsg, false);
+	public void handleMessage(StreamMessage rawMsg) {
+		Message msg = new Message<>(rawMsg.getStreamId()+"-"+rawMsg.getStreamPartition(), rawMsg);
 		recipient.receive(msg);
 	}
 

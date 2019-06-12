@@ -39,28 +39,24 @@ class PermissionServiceIntegrationSpec extends IntegrationSpec {
 			username: "me-permission-service-integration-spec@streamr.com",
 			name: "me",
 			password: "foo",
-			timezone: "Europe/Helsinki",
 		).save(failOnError: true)
 
 		anotherUser = new SecUser(
 			username: "him-permission-service-integration-spec@streamr.com",
 			name: "him",
 			password: "bar",
-			timezone: "Europe/Helsinki",
 		).save(failOnError: true)
 
 		stranger = new SecUser(
 			username: "stranger-permission-service-integration-spec@streamr.com",
 			name: "stranger",
 			password: "x",
-			timezone: "Europe/Helsinki",
 		).save(failOnError: true)
 
 		someone = new SecUser(
 			username: "someone-service-integration-spec@streamr.com",
 			name: "someone",
 			password: "x",
-			timezone: "Europe/Helsinki",
 		).save(failOnError: true)
 
 		// Keys

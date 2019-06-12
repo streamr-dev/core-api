@@ -22,7 +22,7 @@ type Props = AuthFlowProps & {
 
 class ForgotPasswordPage extends React.Component<Props> {
     submit = () => {
-        const url = createLink('auth/forgotPassword')
+        const url = createLink('api/v1/passwords/tokens')
         const { email: username } = this.props.form
 
         return post(url, {

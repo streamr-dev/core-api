@@ -1,6 +1,7 @@
 package com.unifina.signalpath.custom;
 
-import com.unifina.datasource.ITimeListener;
+import com.unifina.exceptions.JavaCompilerErrorMessage;
+import com.unifina.exceptions.ModuleExceptionMessage;
 import com.unifina.security.UserJavaClassLoader;
 import com.unifina.service.SerializationService;
 import com.unifina.signalpath.*;
@@ -28,7 +29,6 @@ public abstract class AbstractJavaCodeWrapper extends ModuleWithUI {
 	@Override
 	public void init() {
 		super.init();
-		resendAll = false;
 		resendLast = 0;
 	}
 
@@ -81,7 +81,7 @@ public abstract class AbstractJavaCodeWrapper extends ModuleWithUI {
 	public void onDay(Date day) {
 		instance.onDay(day);
 	}
-	
+
 	protected List<String> getImports() {
 		return Arrays.asList(new String[] {
 			"com.unifina.signalpath.custom.*",
@@ -117,11 +117,11 @@ public abstract class AbstractJavaCodeWrapper extends ModuleWithUI {
 		}
 		return result.toString();
 	}
-	
+
 	protected abstract String getHeader();
 	protected abstract String getDefaultCode();
 	protected abstract String getFooter();
-	
+
 	@Override
 	public Map<String,Object> getConfiguration() {
 		Map<String,Object> config = super.getConfiguration();
@@ -145,10 +145,7 @@ public abstract class AbstractJavaCodeWrapper extends ModuleWithUI {
 				if (e instanceof ModuleException) {
 					throw (ModuleException) e;
 				}
-				// TODO: How to allow saving of invalid code? If it doesn't get compiled, inputs etc. won't be found
-//				if (!globals.target.save) {
 				throw new RuntimeException(e);
-//				}
 			}
 		}
 	}
@@ -176,22 +173,20 @@ public abstract class AbstractJavaCodeWrapper extends ModuleWithUI {
 				long line = d.getLineNumber()- StringUtils.countMatches(makeImportString(), "\n")-StringUtils.countMatches(getHeader(), "\n");
 
 				sb.append("Line ");
-				sb.append(Long.toString(line));
+				sb.append(line);
 				sb.append(": ");
 				sb.append(d.getMessage(null));
 				sb.append("\n");
 
-				CompilationErrorMessage msg = new CompilationErrorMessage();
-				msg.addError(line, d.getMessage(null));
-				msgs.add(new ModuleExceptionMessage(hash,msg));
+				final String message = d.getMessage(null);
+				msgs.add(new JavaCompilerErrorMessage(hash, line, message));
 			}
 
-			throw new ModuleException(sb.toString(),null,msgs);
+			throw new ModuleException(sb.toString(), null, msgs);
 		}
 
 		// Register the created class so that it will be cleaned when Globals is destroyed
 		Class<AbstractCustomModule> clazz = (Class<AbstractCustomModule>) classLoader.loadClass(className);
-		//getGlobals().registerDynamicClass(clazz);
 		return clazz;
 	}
 

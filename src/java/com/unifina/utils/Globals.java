@@ -14,12 +14,9 @@ import java.util.TimeZone;
 
 public class Globals {
 	private final SimpleDateFormat dateFormatUTC = new SimpleDateFormat("yyyy-MM-dd");
-	private final SimpleDateFormat dateTimeFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS");
 
 	private final Map signalPathContext;
 	private final Long userId;
-	private final TimeZone userTimeZone;
-	private final TimezoneConverter tzConverter;
 	private DataSource dataSource = null;
 	private Date startDate = null;
 	private Date endDate = null;
@@ -34,19 +31,13 @@ public class Globals {
 	public Globals() {
 		this(new HashMap(), null);
 	}
-	
+
 	public Globals(Map signalPathContext, SecUser user) {
 		if (signalPathContext == null) {
 			throw new NullPointerException("signalPathContext can not be null!");
 		}
-		
 		this.signalPathContext = signalPathContext;
 		this.userId = user != null ? user.getId() : null;
-		
-		String tzString = resolveTimezoneString(user);
-		this.userTimeZone = TimeZone.getTimeZone(tzString);
-		this.tzConverter = new TimezoneConverter(tzString);
-		this.dateTimeFormat.setTimeZone(this.userTimeZone);
 		this.dateFormatUTC.setTimeZone(TimeZone.getTimeZone("UTC"));
 	}
 
@@ -61,7 +52,7 @@ public class Globals {
 	public Date getTime() {
 		return time;
 	}
-	
+
 	public void init() {
 		try {
 			time = startDate = new Date(MapTraversal.getLong(signalPathContext, "beginDate"));
@@ -77,32 +68,24 @@ public class Globals {
 				time = startDate;
 			} else {
 				// As a fallback, set time to midnight today
-				time = TimeOfDayUtil.getMidnight(new Date());
+				time = DateRange.getMidnight(new Date());
 			}
 
 			// Interpret endDate as one millisecond to the next midnight
 			// Change this if the possibility to enter a time range is added
 			endDate = MapTraversal.getDate(signalPathContext, "endDate", dateFormatUTC);
 			if (endDate != null) {
-				endDate = new Date(TimeOfDayUtil.getMidnight(endDate).getTime() + 24 * 60 * 60 * 1000 - 1);
+				endDate = new Date(DateRange.getMidnight(endDate).getTime() + 24 * 60 * 60 * 1000 - 1);
 			}
 		}
 	}
-	
+
 	public Date getStartDate() {
 		return startDate;
 	}
-	
+
 	public Date getEndDate() {
 		return endDate;
-	}
-	
-	public TimezoneConverter getTzConverter() {
-		return tzConverter;
-	}
-	
-	public TimeZone getUserTimeZone() {
-		return userTimeZone;
 	}
 
 	public void setRealtime(boolean realtime) {
@@ -120,14 +103,14 @@ public class Globals {
 	public boolean isSerializationEnabled() {
 		return MapTraversal.getBoolean(signalPathContext, "serializationEnabled");
 	}
-	
+
 	public DataSource getDataSource() {
 		if (System.getSecurityManager() != null) {
 			AccessController.checkPermission(new DataSourcePermission());
 		}
 		return dataSource;
 	}
-	
+
 	public void setDataSource(DataSource dataSource) {
 		if (System.getSecurityManager() != null) {
 			AccessController.checkPermission(new DataSourcePermission());
@@ -149,13 +132,5 @@ public class Globals {
      */
 	public boolean isRunContext() {
 		return getDataSource() != null;
-	}
-
-	public String formatDateTime(Date date) {
-		return dateTimeFormat.format(date);
-	}
-
-	private static String resolveTimezoneString(SecUser user) {
-		return user != null && user.getTimezone() != null ? user.getTimezone() : "UTC";
 	}
 }

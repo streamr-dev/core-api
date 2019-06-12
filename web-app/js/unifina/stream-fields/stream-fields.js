@@ -31,11 +31,34 @@
 		render: function() {
 			var $types = $("<select name='field_type' class='form-control input-sm'></select>")
 			$types.append(TYPES.map(function(type) {
-				return $("<option value='"+type+"'>"+type+"</option>")
+				return $('<option/>', {
+					value: type,
+					text: type,
+				})
 			}))
-			$(this.el).html('<td class="name"><input type="text" class="form-control input-sm" name="field_name" value="'+this.model.get('name')+'"></td><td class="types">'+this.model.get('type')+'</td><td><span class="btn btn-sm delete fa fa-trash-o delete-field-button"></span></td>');
+			var input = $('<input/>', {
+				type: 'text',
+				class: 'form-control input-sm',
+				name: 'field_name',
+				value: this.model.get('name'),
+			})
+			var td1 = $('<td/>', {
+                class: 'name',
+            }).append(input)
+			var span = $('<span/>', {
+				class: 'btn btn-sm delete fa fa-trash-o delete-field-button',
+			})
+			var td2 = $('<td/>', {
+			    class: 'types',
+            })
+			var td3 = $('<td/>')
+				.append(span)
+			$(this.el).empty()
+				.append(td1)
+				.append(td2)
+				.append(td3)
 			$types.val(this.model.get('type'))
-			$(this.el).find("td.types").html($types)
+			$(this.el).find("td.types").empty().append($types)
 			return this; // for chainable calls, like .render().el
 		},
 		update: function() {

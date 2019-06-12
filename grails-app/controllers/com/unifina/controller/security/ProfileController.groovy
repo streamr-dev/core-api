@@ -1,33 +1,36 @@
 package com.unifina.controller.security
 
-import com.unifina.domain.data.Stream
-import com.unifina.domain.security.Key
-import com.unifina.domain.security.Permission
 import com.unifina.domain.security.SecUser
-import com.unifina.service.StreamService
 import grails.converters.JSON
 import grails.plugin.springsecurity.annotation.Secured
 
 @Secured(["IS_AUTHENTICATED_FULLY"])
 class ProfileController {
 
-	def grailsApplication
 	def springSecurityService
 	def userService
-	def permissionService
-	def streamService
-	
+
 	static defaultAction = "edit"
+
+	static allowedMethods = [
+		update: "POST",
+		changePwd: "POST",
+	]
 
 	def edit() {
 		def currentUser = SecUser.get(springSecurityService.currentUser.id)
 		[user: currentUser]
 	}
-	
+
+	/**
+	 * @Deprecated See ProfileApiController.update
+	 * 21.02.2019. Remove when new front end is deployed.
+	 */
 	def update() {
 		SecUser user = SecUser.get(springSecurityService.currentUser.id)
-		user.properties = params
-		user.name = params.name // for some reason not updated by above row
+
+		// Only these user fields can be updated!
+		user.name = params.name ?: user.name
 
 		user = user.save(failOnError: true)
 		if (user.hasErrors()) {
@@ -38,63 +41,44 @@ class ProfileController {
 		}
 	}
 
-	def regenerateApiKey() {
-		SecUser user = SecUser.get(springSecurityService.currentUser.id)
-		List<Key> oldKeys = Key.findAllByUser(user)
-
-		// Revoke old keys
-		Stream revokeNotificationStream = new Stream()
-		revokeNotificationStream.id = grailsApplication.config.streamr.apiKey.revokeNotificationStream
-		for (Key oldKey : oldKeys) {
-			oldKey.delete()
-			streamService.sendMessage(revokeNotificationStream, [
-				action: "revoked",
-				user: user.id,
-				key: oldKey.id
-			], 60)
-		}
-
-		new Key(name: 'Key for ' + user.username, user: user).save(validate: true, failOnError: true, flush: true)
-		log.info("User $user.username regenerated api key!")
-
-		render ([success: true] as JSON)
-	}
-	
+	/*
+	 * @Deprecated See ProfileApiController.changePassword
+	 * 20.02.2019. Remove when new front end is deployed.
+	 */
 	def changePwd(ChangePasswordCommand cmd) {
 		def user = SecUser.get(springSecurityService.currentUser.id)
 		if (request.method == 'GET') {
 			return [user:user]
-		}
-		else {
+		} else {
 			if (!cmd.validate()) {
 				flash.error = "Password not changed!"
 				return render(view: 'changePwd', model: [cmd: cmd, user:user])
-			}
-			else {
+			} else {
 				user.password = springSecurityService.encodePassword(cmd.password)
 				user.save(flush:true, failOnError:true)
-				
+
 				springSecurityService.reauthenticate user.username
-				
+
 				log.info("User $user.username changed password!")
-				
+
 				flash.message = "Password changed!"
 				redirect(action:"edit")
 			}
 		}
 	}
-	
 }
 
+/**
+ * @Deprecated See above!
+ */
 class ChangePasswordCommand {
-	
+
 	def springSecurityService
 	def userService
-	
+
 	String currentpassword
 	String password
 	String password2
-	Integer pwdStrength
 
 	static constraints = {
 		currentpassword validator: {String pwd, ChangePasswordCommand cmd->

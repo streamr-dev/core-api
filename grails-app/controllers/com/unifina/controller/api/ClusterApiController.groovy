@@ -1,46 +1,32 @@
 package com.unifina.controller.api
 
-import com.streamr.api.client.CanvasesPerNode
-import com.streamr.api.client.StreamrClient
-import com.unifina.domain.signalpath.Canvas
 import com.unifina.security.AllowRole
 import com.unifina.security.StreamrApi
+import com.unifina.service.ClusterService
 import grails.compiler.GrailsCompileStatic
 import grails.converters.JSON
 import grails.plugin.springsecurity.annotation.Secured
-import org.codehaus.groovy.grails.commons.GrailsApplication
 
 import javax.ws.rs.core.HttpHeaders
 
 @Secured(["IS_AUTHENTICATED_ANONYMOUSLY"])
 class ClusterApiController {
 	static allowedMethods = [
-		index: "GET",
+		canvases: "GET",
 		shutdown: "POST",
+		repair  : "POST",
 	]
 
-	GrailsApplication grailsApplication
-	StreamrClient client
+	ClusterService clusterService
 
 	@GrailsCompileStatic
 	@StreamrApi(allowRoles = AllowRole.ADMIN)
-	def index() {
-		List<Canvas> dead = new ArrayList<Canvas>()
-		List<Canvas> ghost = new ArrayList<Canvas>()
+	def canvases() {
 		String token = request.getHeader(HttpHeaders.AUTHORIZATION)
-
-		for (String ip : getStreamrNodes()) {
-			CanvasesPerNode canvases = client.canvasesPerNode(token, ip)
-			if (canvases.shouldBeRunning != null) {
-				dead.addAll(canvases.shouldBeRunning)
-			}
-			if (canvases.shouldNotBeRunning != null) {
-				ghost.addAll(canvases.shouldNotBeRunning)
-			}
-		}
+		ClusterService.Canvases canvases = clusterService.getCanvases(token)
 		render([
-			dead: dead,
-			ghost: ghost
+			dead: canvases.dead,
+			ghost: canvases.ghost,
 		] as JSON)
 	}
 
@@ -48,18 +34,19 @@ class ClusterApiController {
 	@StreamrApi(allowRoles = AllowRole.ADMIN)
 	def shutdown() {
 		String token = request.getHeader(HttpHeaders.AUTHORIZATION)
-		List<Map<String, Object>> nodeResults = new ArrayList<Map<String, Object>>()
-
-		for (String ip : getStreamrNodes()) {
-			List<Map<String, Object>> result = client.shutdown(token, ip)
-			nodeResults.addAll(result)
-		}
+		ClusterService.Nodes result = clusterService.shutdown(token)
 		render([
-			nodeResults: nodeResults
+			nodeResults: result.nodes,
 		] as JSON)
 	}
 
-	private List<String> getStreamrNodes() {
-		(List<String>) grailsApplication.config.streamr.nodes
+	@GrailsCompileStatic
+	@StreamrApi(allowRoles = AllowRole.ADMIN)
+	def repair() {
+		String token = request.getHeader(HttpHeaders.AUTHORIZATION)
+		List<Map<String, Object>> nodes = clusterService.repair(token)
+		render([
+		    restartedNodes: nodes,
+		] as JSON)
 	}
 }

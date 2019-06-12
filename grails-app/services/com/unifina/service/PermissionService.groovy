@@ -5,6 +5,7 @@ import com.unifina.domain.dashboard.Dashboard
 import com.unifina.domain.data.Feed
 import com.unifina.domain.data.Stream
 import com.unifina.domain.marketplace.Product
+import com.unifina.domain.marketplace.Subscription
 import com.unifina.domain.security.Key
 import com.unifina.domain.security.Permission
 import com.unifina.domain.security.Permission.Operation
@@ -31,6 +32,8 @@ import java.security.AccessControlException
 class PermissionService {
 	// Cascade revocations to "higher" rights to ensure meaningful combinations (e.g. WRITE without READ makes no sense)
 	private static final Map<String, List<Operation>> ALSO_REVOKE = [read: [Operation.WRITE, Operation.SHARE]]
+
+	def grailsApplication
 
 	/**
 	 * Check whether user is allowed to read a resource
@@ -104,6 +107,14 @@ class PermissionService {
 	List<Permission> getPermissionsTo(resource) {
 		String resourceProp = getResourcePropertyName(resource)
 		return Permission.findAllWhere([(resourceProp): resource])
+	}
+
+	/**
+	 * List all Permissions with some Operation right granted on a resource
+	 */
+	List<Permission> getPermissionsTo(resource, Operation op) {
+		String resourceProp = getResourcePropertyName(resource)
+		return Permission.findAllWhere([(resourceProp): resource, "operation": op])
 	}
 
 	/**
@@ -257,15 +268,96 @@ class PermissionService {
      * @return granted permission
      */
 	Permission systemGrant(Userish target, resource, Operation operation=Operation.READ) {
+		return systemGrant(target, resource, operation, null, null)
+	}
+
+	Permission systemGrant(Userish target, resource, Operation operation=Operation.READ, Subscription subscription, Date endsAt) {
 		target = target.resolveToUserish()
 		String userProp = getUserPropertyName(target)
 		String resourceProp = getResourcePropertyName(resource)
 
-		return new Permission(
+		Permission parentPermission = new Permission(
 			(resourceProp): resource,
 			(userProp): target,
 			operation: operation,
+			subscription: subscription,
+			endsAt: endsAt
 		).save(flush: true, failOnError: true)
+
+		// When a user is granted read access (subscriber) or write access (publisher) to a stream,
+		// we need to set the corresponding inbox stream permissions (see methods comments below).
+		if (userProp == "user" && resourceProp == "stream") {
+			checkAndGrantInboxPermissions((SecUser) target, (Stream) resource, operation,
+				subscription, endsAt, parentPermission)
+		}
+
+		return parentPermission
+	}
+
+	private void checkAndGrantInboxPermissions(SecUser user, Stream stream, Operation operation,
+									   Subscription subscription, Date endsAt, Permission parentPermission) {
+		if (!stream.inbox && !stream.uiChannel) {
+			if (operation == Operation.READ) {
+				grantNewSubscriberInboxStreamPermissions(user, stream, subscription, endsAt, parentPermission)
+			} else if (operation == Operation.WRITE) {
+				grantNewPublisherInboxStreamPermissions(user, stream, subscription, endsAt, parentPermission)
+			}
+		}
+	}
+
+	/**
+	 *
+	 * Grant the subscriber write permission to the inbox streams of every publisher of the stream.
+	 * Also grant every publisher of the stream write permission to the subscriber's inbox streams.
+	 *
+	 */
+	private void grantNewSubscriberInboxStreamPermissions(SecUser subscriber, Stream stream,
+														  Subscription subscription, Date endsAt, Permission parent) {
+		grantInboxStreamPermissions(subscriber, stream, Operation.WRITE, subscription, endsAt, parent)
+	}
+
+	/**
+	 *
+	 * Grant the publisher write permission to the inbox streams of every subscriber of the stream.
+	 * Also grant every subscriber of the stream write permission to the publisher's inbox streams.
+	 *
+	 */
+	private void grantNewPublisherInboxStreamPermissions(SecUser publisher, Stream stream,
+														 Subscription subscription, Date endsAt, Permission parent) {
+		grantInboxStreamPermissions(publisher, stream, Operation.READ, subscription, endsAt, parent)
+	}
+
+	private void grantInboxStreamPermissions(SecUser user, Stream stream, Operation operation,
+											 Subscription subscription, Date endsAt, Permission parent) {
+		List<SecUser> otherUsers = getPermissionsTo(stream, operation)*.user
+		otherUsers.removeIf { it.username == user.username }
+		// Need to initialize the service below this way because of circular dependencies issues
+		// Once we use Grails 3, this could be replaced with Grails Events
+		StreamService streamService = grailsApplication.mainContext.getBean(StreamService)
+		List<Stream> userInboxes = streamService.getInboxStreams([user])
+		List<Stream> otherUsersInboxes = streamService.getInboxStreams(otherUsers)
+		for (Stream inbox: otherUsersInboxes) {
+			new Permission(
+				stream: inbox,
+				user: user,
+				operation: Operation.WRITE,
+				subscription: subscription,
+				endsAt: endsAt,
+				parent: parent
+			).save(flush: true, failOnError: true)
+		}
+		for (SecUser u: otherUsers) {
+			for (Stream userInbox: userInboxes) {
+				new Permission(
+					stream: userInbox,
+					user: u,
+					operation: Operation.WRITE,
+					subscription: subscription,
+					endsAt: endsAt,
+					parent: parent
+				).save(flush: true, failOnError: true)
+			}
+		}
 	}
 
 	/**
@@ -462,10 +554,15 @@ class PermissionService {
 				perm.operation == op
 			}.each { Permission perm ->
 				revoked.add(perm)
+				List<Permission> childPermissions = Permission.findAllByParent(perm)
+				revoked.addAll(childPermissions)
 				try {
 					log.info("performRevoke: Trying to delete permission $perm.id")
 					Permission.withNewTransaction {
 						perm.delete(flush: true)
+						for (Permission childPerm: childPermissions) {
+							childPerm.delete(flush: true)
+						}
 					}
 				} catch (Throwable e) {
 					// several threads could be deleting the same permission, all after first resulting in StaleObjectStateException

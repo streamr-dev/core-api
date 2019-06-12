@@ -26,7 +26,7 @@ type Props = AuthFlowProps & {
 
 class SignupPage extends React.Component<Props> {
     submit = () => {
-        const url = createLink('auth/signup')
+        const url = createLink('api/v1/signups')
         const { email: username } = this.props.form
 
         return post(url, {

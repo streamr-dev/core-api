@@ -66,7 +66,6 @@ export default class StreamrWidget extends Component<Props> {
                     stream: this.stream,
                     authKey: subscriptionOptions.authKey,
                     partition: subscriptionOptions.partition,
-                    resend_all: !!(subscriptionOptions.resend_all || (options.uiResendAll && options.uiResendAll.value)),
                     resend_last: subscriptionOptions.resend_last || (options.uiResendLast && options.uiResendLast.value),
                     resend_from: subscriptionOptions.resend_from,
                     resend_from_time: subscriptionOptions.resend_from_time,

@@ -1,7 +1,7 @@
 package com.unifina.domain.security
 
-import com.unifina.utils.EmailValidator
 import com.unifina.security.Userish
+import com.unifina.utils.UsernameValidator
 
 class SignupInvite implements Userish {
 	String code
@@ -13,11 +13,16 @@ class SignupInvite implements Userish {
 
     static constraints = {
 		code blank: false, unique: true
-		username blank: false, validator: EmailValidator.validate
+		username blank: false, validator: UsernameValidator.validate
     }
 
 	@Override
 	Userish resolveToUserish() {
 		return this
+	}
+
+	// Cannot use @Override because of bug in Grails 2.3 and later
+	String getClassAndId() {
+		return "SignupInvite"+id.toString()
 	}
 }

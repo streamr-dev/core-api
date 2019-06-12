@@ -1,6 +1,5 @@
 (function(exports) {
-
-function StreamrTable(parent, options) {
+    function StreamrTable(parent, options) {
 	this.$parent = $(parent)
     this.options = options
 
@@ -62,27 +61,42 @@ StreamrTable.prototype.setHeaders = function(headers) {
     }
 }
 
-StreamrTable.prototype.addRow = function (row, rowId, op) {
-	if (op != "append") { op = "prepend" }
-	var rowIdString = (rowId != null) ? " id='" + rowId + "'" : "";
-	var newRow = $("<tr"+ rowIdString +"></tr>");
-	for (var i = 0; i < row.length; i++) {
-		var content = row[i] == null ? "" :
-					  row[i] instanceof Object ? JSON.stringify(row[i]) : row[i];
-		newRow.append("<td>" + content + "</td>");
-	}
-	this.tableBody[op](newRow);
+StreamrTable.prototype.addRow = function(row, rowId, op) {
+    if (op != 'append') {
+        op = 'prepend'
+    }
+    var newRow = $('<tr/>', {
+        id: rowId != null ? rowId : '',
+    })
+    for (var i = 0; i < row.length; i++) {
+        var content
+        if (row[i] == null) {
+            content = ''
+        } else {
+            if (row[i] instanceof Object) {
+                if (row[i].__streamr_date) {
+                    content = moment(new Date(row[i].__streamr_date).getTime()).format('YYYY-MM-DD HH:mm:ss')
+                }
+            } else {
+                content = row[i]
+            }
+        }
+        newRow.append($('<td/>', {
+            text: content,
+        }))
+    }
+    this.tableBody[op](newRow)
 }
 
 StreamrTable.prototype.receiveResponse = function (d) {
 	// New row message
 	if (d.nr) {
-		this.addRow(d.nr, d.id);
-		// Remove last row(s) if table full
-	    	while ($(this.tableBody).children().length > (this.options.maxRows || Infinity)) {
-			$(this.tableBody).children().last().remove()
-		}
-	} else if (d.nc) {
+      this.addRow(d.nr, d.id);
+      // Remove last row(s) if table full
+      while ($(this.tableBody).children().length > (this.options.maxRows || Infinity)) {
+          $(this.tableBody).children().last().remove()
+      }
+  } else if (d.nc) {
 	    // New contents: 2d array that replaces existing contents
 		this.tableBody.empty();
 		for (var i in d.nc) {

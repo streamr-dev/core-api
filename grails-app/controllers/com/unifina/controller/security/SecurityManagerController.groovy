@@ -12,6 +12,6 @@ class SecurityManagerController {
 			List rules = ((ProfilingSecurityManager)sm).getRules()
 			render rules.join("<br>")
 		}
-		else render "SecurityManager is not an instance of ProfilingSecurityManager"
+		else render "SecurityManager is of type: ${sm?.getClass()}"
 	}
 }

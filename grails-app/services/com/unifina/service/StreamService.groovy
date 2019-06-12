@@ -2,14 +2,16 @@ package com.unifina.service
 
 import com.google.gson.Gson
 import com.google.gson.GsonBuilder
+import com.streamr.client.protocol.message_layer.StreamMessage
+import com.streamr.client.protocol.message_layer.StreamMessageV31
 import com.unifina.api.NotFoundException
 import com.unifina.api.NotPermittedException
 import com.unifina.api.ValidationException
 import com.unifina.data.StreamPartitioner
-import com.unifina.data.StreamrBinaryMessage
 import com.unifina.domain.dashboard.DashboardItem
 import com.unifina.domain.data.Feed
 import com.unifina.domain.data.Stream
+import com.unifina.domain.security.IntegrationKey
 import com.unifina.domain.security.Key
 import com.unifina.domain.security.Permission
 import com.unifina.domain.security.SecUser
@@ -19,7 +21,6 @@ import com.unifina.feed.AbstractStreamListener
 import com.unifina.feed.DataRange
 import com.unifina.feed.DataRangeProvider
 import com.unifina.feed.FieldDetector
-import com.unifina.feed.redis.StreamrBinaryMessageWithKafkaMetadata
 import com.unifina.signalpath.RuntimeRequest
 import com.unifina.task.DelayedDeleteStreamTask
 import com.unifina.utils.CSVImporter
@@ -28,8 +29,6 @@ import grails.converters.JSON
 import groovy.transform.CompileStatic
 import org.springframework.util.Assert
 
-import javax.annotation.Nullable
-import java.nio.charset.Charset
 import java.text.DateFormat
 
 class StreamService {
@@ -48,11 +47,6 @@ class StreamService {
 		.setDateFormat(DateFormat.LONG)
 		.create()
 
-	private static final Charset utf8 = Charset.forName("UTF-8")
-
-	// https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number/MIN_SAFE_INTEGER
-	private static final Long MINIMUM_SAFE_INTEGER_IN_JAVASCRIPT = -9007199254740991L
-
 	Stream getStream(String id) {
 		return Stream.get(id)
 	}
@@ -65,6 +59,9 @@ class StreamService {
 		Stream stream = new Stream(params)
 		stream.id = id
 		stream.config = params.config
+		if (stream.name == null || stream.name.trim() == "") {
+			stream.name = Stream.DEFAULT_NAME
+		}
 
 		// If no feed given, API feed is used
 		if (stream.feed == null) {
@@ -104,7 +101,7 @@ class StreamService {
 		task.save(flush: true, failOnError: true)
 	}
 
-	boolean autodetectFields(Stream stream, boolean flattenHierarchies) {
+	boolean autodetectFields(Stream stream, boolean flattenHierarchies, boolean saveFields) {
 		FieldDetector fieldDetector = instantiateDetector(stream)
 		fieldDetector.setFlattenMap(flattenHierarchies)
 		def fields = fieldDetector?.detectFields(stream)
@@ -112,7 +109,11 @@ class StreamService {
 			Map config = stream.getStreamConfigAsMap()
 			config.fields = fields
 			stream.config = gson.toJson(config)
-			stream.save(flush: true, failOnError: true)
+			if (saveFields) {
+				stream.save(flush: true, failOnError: true)
+			} else {
+				stream.discard()
+			}
 			return true
 		} else {
 			return false
@@ -121,37 +122,12 @@ class StreamService {
 
 	// Ref to Kafka will be abstracted out when Feed abstraction is reworked
 
-	void sendMessage(Stream stream, String partitionKey, long timestamp, byte[] content, byte contentType, int ttl=0) {
-		int streamPartition = partitioner.partition(stream, partitionKey)
-		StreamrBinaryMessage msg = new StreamrBinaryMessage(stream.id, streamPartition, timestamp, ttl, contentType, content)
-
-		String kafkaPartitionKey = "${stream.id}-$streamPartition"
+	void sendMessage(StreamMessage msg) {
+		String kafkaPartitionKey = "${msg.getStreamId()}-${msg.getStreamPartition()}"
 		kafkaService.sendMessage(msg, kafkaPartitionKey)
 	}
 
-	@CompileStatic
-	void sendMessage(Stream stream, Map message, int ttl=0) {
-		String str = gson.toJson(message)
-		sendMessage(stream, null, System.currentTimeMillis(), str.getBytes(utf8), StreamrBinaryMessage.CONTENT_TYPE_JSON, ttl);
-	}
-
-	@CompileStatic
-	void sendMessage(Stream stream, long timestamp, Map message, int ttl=0) {
-		String str = gson.toJson(message)
-		sendMessage(stream, null, timestamp, str.getBytes(utf8), StreamrBinaryMessage.CONTENT_TYPE_JSON, ttl);
-	}
-
-	@CompileStatic
-	void sendMessage(Stream stream, @Nullable String partitionKey, Map message, int ttl=0) {
-		String str = gson.toJson(message)
-		sendMessage(stream, partitionKey, System.currentTimeMillis(), str.getBytes(utf8), StreamrBinaryMessage.CONTENT_TYPE_JSON, ttl);
-	}
-
-	void saveMessage(Stream stream, String partitionKey, long timestamp, Map message, int ttl, long messageNumber, Long previousMessageNumber) {
-		int streamPartition = partitioner.partition(stream, partitionKey)
-		String str = gson.toJson(message)
-		// Fake Kafka partition to be 0 (does not matter)
-		StreamrBinaryMessageWithKafkaMetadata msg = new StreamrBinaryMessageWithKafkaMetadata(stream.id, streamPartition, timestamp, ttl, StreamrBinaryMessage.CONTENT_TYPE_JSON, str.getBytes(utf8), 0, messageNumber, previousMessageNumber)
+	void saveMessage(StreamMessage msg) {
 		cassandraService.save(msg)
 	}
 
@@ -180,15 +156,10 @@ class StreamService {
      * @return Autocreated Stream field config as a Map (can be written to stream.config as JSON)
      */
 	@CompileStatic
-	public Map importCsv(CSVImporter csv, Stream stream) {
-		/**
-		 * Batch-imported rows have negative Kafka offsets to avoid collisions with messages actually produced
-		 * to the stream via Kafka.
-		 */
-		List<Long> latestOffsetByPartition = (0..stream.getPartitions()-1).collect { Integer partition ->
-			StreamrBinaryMessageWithKafkaMetadata msg = cassandraService.getLatestBeforeOffset(stream, partition, 0)
-			return msg ? msg.offset : MINIMUM_SAFE_INTEGER_IN_JAVASCRIPT
-		}
+	public Map importCsv(CSVImporter csv, Stream stream, String publisherId) {
+		long sequenceNumber = 0L
+		Long previousTimestamp = null
+		String msgChainId = IdGenerator.getShort()
 
 		for (CSVImporter.LineValues line : csv) {
 			Date date = line.getTimestamp()
@@ -203,9 +174,12 @@ class StreamService {
 			}
 
 			int partition = partitioner.partition(stream, null)
-			long offset = latestOffsetByPartition[partition] + 1
-			latestOffsetByPartition[partition] = offset
-			saveMessage(stream, null, date.time, message, 0, offset, offset > MINIMUM_SAFE_INTEGER_IN_JAVASCRIPT ? offset-1 : null)
+			StreamMessageV31 msg = new StreamMessageV31(stream.id, partition, date.time, sequenceNumber, publisherId, msgChainId,
+				previousTimestamp, sequenceNumber, StreamMessage.ContentType.CONTENT_TYPE_JSON, StreamMessage.EncryptionType.NONE,
+				gson.toJson(message), StreamMessage.SignatureType.SIGNATURE_TYPE_NONE, null)
+			saveMessage(msg)
+			sequenceNumber++
+			previousTimestamp = date.time
 		}
 
 		// Autocreate the stream config based on fields in the csv schema
@@ -241,7 +215,6 @@ class StreamService {
 			Class clazz = getClass().getClassLoader().loadClass(stream.feed.fieldDetectorClass)
 			return clazz.newInstance()
 		}
-
 	}
 
 	@CompileStatic
@@ -270,6 +243,25 @@ class StreamService {
 				throw new NotPermittedException(user?.username, "Stream", id, Permission.Operation.READ.id)
 			}
 		}
+	}
+
+	Set<String> getStreamEthereumPublishers(Stream stream) {
+		// This approach might be slow if there are a lot of allowed writers to the Stream
+		List<SecUser> writers = permissionService.getPermissionsTo(stream, Permission.Operation.WRITE)*.user
+
+		List<IntegrationKey> keys = IntegrationKey.findAll {
+			user.id in writers*.id && service in [IntegrationKey.Service.ETHEREUM, IntegrationKey.Service.ETHEREUM_ID]
+		}
+
+		return keys*.idInService as Set
+	}
+
+	List<Stream> getInboxStreams(List<SecUser> users) {
+		if (users.isEmpty()) return new ArrayList<Stream>()
+		List<IntegrationKey> keys = IntegrationKey.findAll {
+			user.id in users*.id && service in [IntegrationKey.Service.ETHEREUM, IntegrationKey.Service.ETHEREUM_ID]
+		}
+		return Stream.findAllByIdInListAndInbox(keys*.idInService, true)
 	}
 
 	@CompileStatic
@@ -307,5 +299,33 @@ class StreamService {
 		RuntimeRequest.PathReader reader = new RuntimeRequest.PathReader(path.substring(1))
 		reader.readCanvasId()
 		return reader.readModuleId()
+	}
+
+	static class StreamStatus {
+		Boolean ok
+		Date date
+		StreamStatus(Boolean ok, Date date) {
+			this.ok = ok
+			this.date = date
+		}
+	}
+
+	@CompileStatic
+	StreamStatus status(Stream s, Date threshold) {
+		StreamMessage msg = cassandraService.getLatestFromAllPartitions(s)
+		if (msg == null) {
+			return new StreamStatus(false, null)
+		} else if (msg != null && msg.getTimestampAsDate().before(threshold)) {
+			return new StreamStatus(false, msg.getTimestampAsDate())
+		}
+		return new StreamStatus(true, msg.getTimestampAsDate())
+	}
+
+	@CompileStatic
+	def addExampleStreams(SecUser user, List<Stream> examples) {
+		for (final Stream example : examples) {
+			// Grant read permission to example stream.
+			permissionService.systemGrant(user, example, Permission.Operation.READ)
+		}
 	}
 }

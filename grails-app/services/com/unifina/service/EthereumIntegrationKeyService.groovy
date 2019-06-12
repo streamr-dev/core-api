@@ -1,9 +1,12 @@
 package com.unifina.service
 
 import com.unifina.api.ApiException
+import com.unifina.api.CannotRemoveEthereumKeyException
+import com.unifina.api.ChallengeVerificationFailedException
 import com.unifina.api.DuplicateNotAllowedException
-import com.unifina.crypto.ECRecover
-import com.unifina.domain.security.Challenge
+import com.unifina.api.NotFoundException
+import com.unifina.domain.data.Feed
+import com.unifina.domain.data.Stream
 import com.unifina.domain.security.IntegrationKey
 import com.unifina.domain.security.SecUser
 import com.unifina.security.StringEncryptor
@@ -12,6 +15,7 @@ import grails.converters.JSON
 import groovy.transform.CompileStatic
 import org.apache.commons.codec.DecoderException
 import org.apache.commons.codec.binary.Hex
+import org.apache.commons.lang.RandomStringUtils
 import org.ethereum.crypto.ECKey
 import org.springframework.util.Assert
 
@@ -23,6 +27,9 @@ class EthereumIntegrationKeyService {
 	def grailsApplication
 	StringEncryptor encryptor
 	SubscriptionService subscriptionService
+	ChallengeService challengeService
+	UserService userService
+	PermissionService permissionService
 
 	@PostConstruct
 	void init() {
@@ -33,46 +40,49 @@ class EthereumIntegrationKeyService {
 
 	IntegrationKey createEthereumAccount(SecUser user, String name, String privateKey) {
 		privateKey = trimPrivateKey(privateKey)
+		validatePrivateKey(privateKey)
 
 		try {
-			String publicKey = "0x" + getPublicKey(privateKey)
+			String address = "0x" + getAddress(privateKey)
 			String encryptedPrivateKey = encryptor.encrypt(privateKey, user.id.byteValue())
-			return new IntegrationKey(
-					name: name,
-					user: user,
-					service: IntegrationKey.Service.ETHEREUM,
-					idInService: publicKey,
-					json: ([
-							privateKey: encryptedPrivateKey,
-							address   : publicKey
-					] as JSON).toString()
+
+			if (getEthereumUser(address) != null) {
+				throw new DuplicateNotAllowedException("This Ethereum address is already associated with a Streamr user.")
+			}
+
+			IntegrationKey key = new IntegrationKey(
+				name: name,
+				user: user,
+				service: IntegrationKey.Service.ETHEREUM,
+				idInService: address,
+				json: ([
+					privateKey: encryptedPrivateKey,
+					address   : address
+				] as JSON).toString()
 			).save(flush: true, failOnError: true)
+
+			createUserInboxStream(user, address)
+
+			subscriptionService.afterIntegrationKeyCreated(key)
+			return key
 		} catch (NumberFormatException e) {
 			throw new IllegalArgumentException("Private key must be a valid hex string!")
 		}
 	}
 
 	IntegrationKey createEthereumID(SecUser user, String name, String challengeID, String challenge, String signature) {
-		def dbChallenge = Challenge.get(challengeID)
-		def invalidChallenge = dbChallenge == null || challenge != dbChallenge.challenge
-		if (invalidChallenge) {
-			throw new ApiException(400, "INVALID_CHALLENGE", "challenge validation failed")
-		}
-
-		def message = challenge
 		String address
 		try {
-			byte[] messageHash = ECRecover.calculateMessageHash(message)
-			address = ECRecover.recoverAddress(messageHash, signature)
+			address = challengeService.verifyChallengeAndGetAddress(challengeID, challenge, signature)
+		} catch (ChallengeVerificationFailedException e) {
+			throw e
 		} catch (SignatureException | DecoderException e) {
 			throw new ApiException(400, "ADDRESS_RECOVERY_ERROR", e.message)
 		}
 
-		if (IntegrationKey.findByServiceAndIdInService(IntegrationKey.Service.ETHEREUM_ID, address) != null) {
-			throw new DuplicateNotAllowedException("This Ethereum address is already associated with another Streamr user.")
+		if (getEthereumUser(address) != null) {
+			throw new DuplicateNotAllowedException("This Ethereum address is already associated with a Streamr user.")
 		}
-
-		dbChallenge.delete()
 
 		IntegrationKey integrationKey = new IntegrationKey(
 			name: name,
@@ -80,9 +90,11 @@ class EthereumIntegrationKeyService {
 			service: IntegrationKey.Service.ETHEREUM_ID.toString(),
 			idInService: address,
 			json: ([
-				address: new String(address)
+				address: address
 			] as JSON).toString()
 		).save(flush: true)
+
+		createUserInboxStream(user, address)
 
 		subscriptionService.afterIntegrationKeyCreated(integrationKey)
 		return integrationKey
@@ -90,6 +102,13 @@ class EthereumIntegrationKeyService {
 
 	@GrailsCompileStatic
 	void delete(String integrationKeyId, SecUser currentUser) {
+		if (currentUser.isEthereumUser()) {
+			int nbKeys = IntegrationKey.countByUserAndService(currentUser, IntegrationKey.Service.ETHEREUM_ID)
+			if (nbKeys <= 1) {
+				throw new CannotRemoveEthereumKeyException("Cannot remove only Ethereum key.")
+			}
+		}
+
 		IntegrationKey account = IntegrationKey.findByIdAndUser(integrationKeyId, currentUser)
 		if (account) {
 			subscriptionService.beforeIntegrationKeyRemoved(account)
@@ -102,8 +121,62 @@ class EthereumIntegrationKeyService {
 		return encryptor.decrypt((String) json.privateKey, key.user.id.byteValue())
 	}
 
-	List<IntegrationKey> getAllKeysForUser(SecUser user) {
+	List<IntegrationKey> getAllPrivateKeysForUser(SecUser user) {
 		IntegrationKey.findAllByServiceAndUser(IntegrationKey.Service.ETHEREUM, user)
+	}
+
+	SecUser getEthereumUser(String address) {
+		List<IntegrationKey> keys = IntegrationKey.findAll {
+			idInService == address && service in [IntegrationKey.Service.ETHEREUM, IntegrationKey.Service.ETHEREUM_ID]
+		}
+		if (keys == null || keys.isEmpty()) {
+			return null
+		}
+		return keys.first().user
+	}
+
+	SecUser getOrCreateFromEthereumAddress(String address) {
+		SecUser user = getEthereumUser(address)
+		if (user == null) {
+			user = createEthereumUser(address)
+		}
+		return user
+	}
+
+	SecUser createEthereumUser(String address) {
+		SecUser user = userService.createUser([
+			username       : address,
+			password       : RandomStringUtils.random(32),
+			name           : address,
+			enabled        : true,
+			accountLocked  : false,
+			passwordExpired: false
+		])
+		new IntegrationKey(
+			name: address,
+			user: user,
+			service: IntegrationKey.Service.ETHEREUM_ID,
+			idInService: address,
+			json: ([
+				address: address
+			] as JSON).toString()
+		).save(failOnError: true, flush: true)
+		createUserInboxStream(user, address)
+		return user
+	}
+
+	private void createUserInboxStream(SecUser user, String address) {
+		Stream inboxStream = new Stream()
+		inboxStream.id = address
+		inboxStream.name = address
+		inboxStream.inbox = true
+		inboxStream.autoConfigure = false
+		// If no feed given, API feed is used
+		if (inboxStream.feed == null) {
+			inboxStream.feed = Feed.load(Feed.KAFKA_ID)
+		}
+		inboxStream.save(failOnError: true, flush: true)
+		permissionService.systemGrantAll(user, inboxStream)
 	}
 
 	@CompileStatic
@@ -116,11 +189,27 @@ class EthereumIntegrationKeyService {
 	}
 
 	@CompileStatic
-	private static String getPublicKey(String privateKey) {
+	private static String getAddress(String privateKey) {
 		BigInteger pk = new BigInteger(privateKey, 16)
 		ECKey key = ECKey.fromPrivate(pk)
 		String publicKey = Hex.encodeHexString(key.getAddress())
 
 		return publicKey
+	}
+
+	@CompileStatic
+	private static void validatePrivateKey(String privateKey) {
+		if (privateKey.length() != 64) { // must be 256 bits long
+			throw new IllegalArgumentException("The private key must be a hex string of 64 chars (without the 0x prefix).")
+		}
+	}
+
+	void updateKey(SecUser user, String id, String name) {
+		IntegrationKey key = IntegrationKey.findByIdAndUser(id, user)
+		if (key == null) {
+			throw new NotFoundException("integration key not found", "IntegrationKey", id)
+		}
+		key.name = name
+		key.save(failOnError: true, validate: true)
 	}
 }

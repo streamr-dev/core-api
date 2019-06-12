@@ -98,10 +98,6 @@ class RegisterSpec extends GebReportingSpec implements LoginMixin, RegisterMixin
 			waitFor { password2.displayed }
 			password2 = pwd
 			nextButton.click()
-			waitFor { timezone.displayed }
-			timezone << "Europe/Zurich"
-			timezoneFirstResult.click()
-			nextButton.click()
 			waitFor {
 				agreeCheckbox.displayed
 				nextButton.click()

@@ -62,6 +62,8 @@ grails.project.dependency.resolution = {
 
 		// New Grails repo
 		mavenRepo "https://repo.grails.org/grails/plugins"
+
+		mavenRepo "https://oss.sonatype.org/content/groups/public"
 	}
 
 	def gebVersion = "1.0"
@@ -79,14 +81,17 @@ grails.project.dependency.resolution = {
 		compile('org.antlr:ST4:4.0.8')
 		compile('org.postgresql:postgresql:9.4.1208.jre7')
 		compile('biz.paluch.redis:lettuce:3.5.0.Final')
-		compile('com.datastax.cassandra:cassandra-driver-core:3.1.0')
-		compile('org.ethereum:ethereumj-core:1.4.3-RELEASE') {
+		compile('com.datastax.cassandra:cassandra-driver-core:3.7.1')
+		compile('com.google.code.findbugs:jsr305:3.0.2')
+		compile('org.jetbrains:annotations:17.0.0')
+		compile('org.ethereum:ethereumj-core:1.12.0-RELEASE') {
 			excludes('ch.qos.logback:logback-classic:*')
 			excludes('org.springframework:spring-core:*')
 			excludes('org.springframework:spring-context:*')
 			excludes('org.springframework:spring-orm:*')
 		}
-		compile('org.web3j:core:3.3.1')
+
+		compile('org.web3j:core:4.2.0')
 		compile('com.amazonaws:aws-java-sdk:1.11.294')
 		compile('org.imgscalr:imgscalr-lib:4.2')
 		compile('org.glassfish.jersey.core:jersey-client:2.27')
@@ -94,6 +99,7 @@ grails.project.dependency.resolution = {
 		compile('org.glassfish.jersey.media:jersey-media-json-jackson:2.27')
 		compile('com.fasterxml.jackson.core:jackson-databind:2.9.6')
 		compile('com.fasterxml.jackson.core:jackson-annotations:2.9.6')
+		compile('com.streamr:client:1.1.0-SNAPSHOT')
 
 		runtime('mysql:mysql-connector-java:5.1.20')
 		runtime('commons-net:commons-net:3.3')

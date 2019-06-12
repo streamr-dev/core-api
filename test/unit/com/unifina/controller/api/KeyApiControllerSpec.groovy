@@ -1,41 +1,43 @@
 package com.unifina.controller.api
 
+import com.unifina.ControllerSpecification
+import com.unifina.api.ApiException
 import com.unifina.api.NotFoundException
 import com.unifina.api.NotPermittedException
 import com.unifina.domain.data.Stream
+import com.unifina.domain.security.IntegrationKey
 import com.unifina.domain.security.Key
 import com.unifina.domain.security.Permission
 import com.unifina.domain.security.SecUser
-import com.unifina.filters.UnifinaCoreAPIFilters
 import com.unifina.service.PermissionService
-import com.unifina.service.UserService
-import grails.plugin.springsecurity.SpringSecurityService
+import com.unifina.service.StreamService
 import grails.test.mixin.Mock
 import grails.test.mixin.TestFor
-import grails.test.mixin.web.FiltersUnitTestMixin
-import spock.lang.Specification
 
 @TestFor(KeyApiController)
-@Mock([Key, Permission, SecUser, Stream, UnifinaCoreAPIFilters, SpringSecurityService, UserService, PermissionService])
-class KeyApiControllerSpec extends Specification {
+@Mock([Key, Permission, SecUser, Stream, PermissionService, StreamService, IntegrationKey])
+class KeyApiControllerSpec extends ControllerSpecification {
 
 	def permissionService
+	StreamService streamService
 
-	SecUser loggedInUser
+	SecUser me
+	Key userLinkedKey
 
-	void setup() {
-		loggedInUser = new SecUser(
-			username: "user@user.com",
+	def setup() {
+		me = new SecUser(
+			username: "me@me.com",
 			password: "pwd",
 			name: "name",
-			timezone: "Europe/Helsinki"
 		).save(failOnError: true, validate: true)
 
-		def userLinkedKey = new Key(name: 'users key', user: loggedInUser)
+		userLinkedKey = new Key(name: 'users key', user: me)
 		userLinkedKey.id = "apiKey"
 		userLinkedKey.save(failOnError: true, validate: true)
 
+		streamService = mainContext.getBean(StreamService)
 		controller.permissionService = permissionService = grailsApplication.mainContext.getBean(PermissionService)
+		streamService.permissionService = permissionService
 	}
 
 	// CORE-708: User with read permission to stream should not see stream write key in api
@@ -43,20 +45,13 @@ class KeyApiControllerSpec extends Specification {
 		Stream s = new Stream(name: "stream")
 		s.id = "streamId"
 		s.save(failOnError: true, validate: false)
-		permissionService.systemGrant(loggedInUser, s, Permission.Operation.READ)
+		permissionService.systemGrant(me, s, Permission.Operation.READ)
 
 		when:
-		request.addHeader("Authorization", "Token apiKey")
-		request.method = "GET"
-		request.requestURI = "/api/v1/streams/streamId/keys"
-
 		params.resourceClass = Stream
 		params.resourceId = "streamId"
 
-		withFilters([action: 'index']) {
-			controller.index()
-		}
-
+		authenticatedAs(me) { controller.index() }
 
 		then:
 		thrown(NotPermittedException)
@@ -64,39 +59,31 @@ class KeyApiControllerSpec extends Specification {
 
 	void "save() creates user-linked for logged in user"() {
 		when:
-		request.addHeader("Authorization", "Token apiKey")
 		request.method = "POST"
-		request.requestURI = "/api/v1/users/me/keys"
 		request.JSON = [
-				name: "key name"
+			name: "key name"
 		]
 		params.resourceClass = SecUser
-		withFilters([action: 'save']) {
-			controller.save()
-		}
+		authenticatedAs(me) { controller.save() }
 
 		then:
 		response.status == 200
 		response.json == [
-		    id: "1",
+			id: "1",
 			name: "key name",
-			user: loggedInUser.username
+			user: me.username
 		]
 	}
 
 	void "save() throws NotFoundException (404) if given resource does not exist"() {
 		when:
-		request.addHeader("Authorization", "Token apiKey")
 		request.method = "POST"
-		request.requestURI = "/api/v1/streams/streamId/keys"
 		request.JSON = [
-				name: "key name"
+			name: "key name"
 		]
 		params.id = "streamId"
 		params.resourceClass = Stream
-		withFilters([action: 'save']) {
-			controller.save()
-		}
+		authenticatedAs(me) { controller.save() }
 
 		then:
 		thrown(NotFoundException)
@@ -108,21 +95,17 @@ class KeyApiControllerSpec extends Specification {
 		stream.id = "streamId"
 		stream.save(validate: false, failOnError: true)
 
-		permissionService.systemGrant(loggedInUser, stream, Permission.Operation.WRITE)
+		permissionService.systemGrant(me, stream, Permission.Operation.WRITE)
 
 		when:
-		request.addHeader("Authorization", "Token apiKey")
 		request.method = "POST"
-		request.requestURI = "/api/v1/streams/streamId/keys"
 		request.JSON = [
-				name: "key name"
+			name: "key name"
 		]
 		params.id = stream.id
 		params.resourceClass = Stream
 		params.resourceId = stream.id
-		withFilters([action: 'save']) {
-			controller.save()
-		}
+		authenticatedAs(me) { controller.save() }
 
 		then:
 		thrown(NotPermittedException)
@@ -134,22 +117,18 @@ class KeyApiControllerSpec extends Specification {
 		stream.id = "streamId"
 		stream.save(validate: false, failOnError: true)
 
-		permissionService.systemGrant(loggedInUser, stream, Permission.Operation.SHARE)
+		permissionService.systemGrant(me, stream, Permission.Operation.SHARE)
 
 		when:
-		request.addHeader("Authorization", "Token apiKey")
 		request.method = "POST"
-		request.requestURI = "/api/v1/streams/streamId/keys"
 		request.JSON = [
-				name: "key name",
-				permission: "read"
+			name: "key name",
+			permission: "read"
 		]
 		params.id = stream.id
 		params.resourceClass = Stream
 		params.resourceId = stream.id
-		withFilters([action: 'save']) {
-			controller.save()
-		}
+		authenticatedAs(me) { controller.save() }
 
 		then:
 		response.status == 200
@@ -171,30 +150,26 @@ class KeyApiControllerSpec extends Specification {
 		stream.id = "streamId"
 		stream.save(validate: false, failOnError: true)
 
-		permissionService.systemGrant(loggedInUser, stream, Permission.Operation.SHARE)
+		permissionService.systemGrant(me, stream, Permission.Operation.SHARE)
 
 		when:
-		request.addHeader("Authorization", "Token apiKey")
 		request.method = "POST"
-		request.requestURI = "/api/v1/streams/streamId/keys"
 		request.JSON = [
-				name: "key name",
-				permission: "write"
+			name: "key name",
+			permission: "write"
 		]
 		params.id = stream.id
 		params.resourceClass = Stream
 		params.resourceId = stream.id
-		withFilters([action: 'save']) {
-			controller.save()
-		}
+		authenticatedAs(me) { controller.save() }
 
 		then:
 		response.status == 200
 		response.json == [
-				id: "1",
-				name: "key name",
-				permission: "write",
-				user: null
+			id: "1",
+			name: "key name",
+			permission: "write",
+			user: null
 		]
 
 		and:
@@ -205,12 +180,8 @@ class KeyApiControllerSpec extends Specification {
 
 	void "delete() throws NotFoundException if given keyId doesn't exist"() {
 		when:
-		request.addHeader("Authorization", "Token apiKey")
 		request.method = "DELETE"
-		request.requestURI = "/api/v1/users/me/keys/keyId"
-		withFilters([action: 'delete']) {
-			controller.delete()
-		}
+		authenticatedAs(me) { controller.delete() }
 
 		then:
 		thrown(NotFoundException)
@@ -219,40 +190,31 @@ class KeyApiControllerSpec extends Specification {
 	void "delete() throws NotPermittedException if attempting to delete user-linked key as other user"() {
 		setup:
 		SecUser user2 = new SecUser(
-			username: "user2@user.com",
+			username: "user2@me.com",
 			password: "pwd",
 			name: "name",
-			timezone: "Europe/Helsinki"
 		).save(validate: true, failOnError: true)
 
 		Key otherKey = new Key(name: "user2's key", user: user2).save(failOnError: true, validate: true)
 
 		when:
-		request.addHeader("Authorization", "Token apiKey")
 		request.method = "DELETE"
-		request.requestURI = "/api/v1/users/me/keys/${otherKey.id}"
 		params.id = otherKey.id
 		params.resourceClass = SecUser
-		withFilters([action: 'delete']) {
-			controller.delete()
-		}
+		authenticatedAs(me) { controller.delete() }
 
 		then:
 		thrown(NotPermittedException)
 	}
 
 	void "delete() deletes key if deleting user-linked key as said user"() {
-		Key key = new Key(name: "user's key", user: loggedInUser).save(failOnError: true, validate: true)
+		Key key = new Key(name: "me's key", user: me).save(failOnError: true, validate: true)
 
 		when:
-		request.addHeader("Authorization", "Token apiKey")
 		request.method = "DELETE"
-		request.requestURI = "/api/v1/keys/${key.id}"
 		params.id = key.id
 		params.resourceClass = SecUser
-		withFilters([action: 'delete']) {
-			controller.delete()
-		}
+		authenticatedAs(me) { controller.delete() }
 
 		then:
 		response.status == 204
@@ -261,18 +223,14 @@ class KeyApiControllerSpec extends Specification {
 
 	void "delete() does not permit deleting the user's only api key"() {
 		expect:
-		loggedInUser.keys.size() == 1
+		me.keys.size() == 1
 
 		when:
-		def key = loggedInUser.keys.iterator().next()
-		request.addHeader("Authorization", "Token apiKey")
+		def key = me.keys.iterator().next()
 		request.method = "DELETE"
-		request.requestURI = "/api/v1/users/me/keys/${key.id}"
 		params.id = key.id
 		params.resourceClass = SecUser
-		withFilters([action: 'delete']) {
-			controller.delete()
-		}
+		authenticatedAs(me) { controller.delete() }
 
 		then:
 		thrown(NotPermittedException)
@@ -287,19 +245,15 @@ class KeyApiControllerSpec extends Specification {
 		Key key = new Key(name: "anonymous key").save(failOnError: true, validate: true)
 
 		controller.permissionService = permissionService = Stub(PermissionService)
-		permissionService.get(Stream, loggedInUser, Permission.Operation.SHARE) >> [stream]
+		permissionService.get(Stream, me, Permission.Operation.SHARE) >> [stream]
 		permissionService.canRead(key, stream) >> false
 
 		when:
-		request.addHeader("Authorization", "Token apiKey")
 		request.method = "DELETE"
-		request.requestURI = "/api/v1/streams/${stream.id}/keys/${key.id}"
 		params.id = key.id
 		params.resourceClass = Stream
 		params.resourceId = stream.id
-		withFilters([action: 'delete']) {
-			controller.delete()
-		}
+		authenticatedAs(me) { controller.delete() }
 
 		then:
 		thrown(NotPermittedException)
@@ -314,23 +268,239 @@ class KeyApiControllerSpec extends Specification {
 		Key key = new Key(name: "anonymous key").save(failOnError: true, validate: true)
 
 		controller.permissionService = permissionService = Stub(PermissionService)
-		permissionService.canShare(loggedInUser, stream) >> true
+		permissionService.canShare(me, stream) >> true
 
 		assert Key.get(key.id) != null
 
 		when:
-		request.addHeader("Authorization", "Token apiKey")
 		request.method = "DELETE"
-		request.requestURI = "/api/v1/streams/${stream.id}/keys/${key.id}"
 		params.id = key.id
 		params.resourceClass = Stream
 		params.resourceId = stream.id
-		withFilters([action: 'delete']) {
-			controller.delete()
-		}
+		authenticatedAs(me) { controller.delete() }
 
 		then:
 		response.status == 204
 		Key.get(key.id) == null
+	}
+
+	void "updateUserKey() throws NotFoundException on unknown id"() {
+		when:
+		request.method = "PUT"
+		params.keyId = "XXXX"
+
+		authenticatedAs(me) { controller.updateUserKey() }
+
+		then:
+		thrown(NotFoundException)
+	}
+
+	void "updateUserKey() does not update empty name"() {
+		setup:
+		Key key = new Key(name: "anonymous key")
+		key.id = "key-id-1"
+		key.save(failOnError: true, validate: true)
+
+		controller.permissionService = permissionService = Stub(PermissionService)
+
+		when:
+		request.method = "PUT"
+		params.keyId = key.id
+		request.JSON = [
+			name: ""
+		]
+
+		authenticatedAs(me) { controller.updateUserKey() }
+
+		then:
+		response.status == 200
+		Key.get(key.id).name == "anonymous key"
+	}
+
+	void "updateUserKey() updates name field of user's key"() {
+		setup:
+		SecUser user = new SecUser(
+			username: "address@emailprovider.com",
+			password: "pwd",
+			name: "first last name",
+		)
+		user.id = 1
+		user.save(failOnError: true, validate: true)
+
+		Key key = new Key(name: "key for user", user: user)
+		key.id = "key-1"
+		key.save(failOnError: true, validate: true)
+
+		controller.permissionService = permissionService = Stub(PermissionService)
+		permissionService.canShare(me, userLinkedKey) >> true
+
+		when:
+		request.method = "PUT"
+		params.keyId = userLinkedKey.id
+		request.JSON = [
+			name: "new key name"
+		]
+
+		authenticatedAs(me) { controller.updateUserKey() }
+
+		then:
+		response.status == 200
+		Key.get(userLinkedKey.id).name == "new key name"
+	}
+
+	void "updateStreamKey() throws NotFoundException on unknown id"() {
+		when:
+		request.method = "PUT"
+		params.keyId = "XXXX"
+
+		authenticatedAs(me) { controller.updateStreamKey() }
+
+		then:
+		thrown(NotFoundException)
+	}
+
+	void "updateStreamKey() does not update empty name"() {
+		setup:
+		Stream stream = new Stream(name: "stream")
+		stream.id = "streamId"
+		stream.save(validate: false, failOnError: true)
+
+		Key key = new Key(name: "anonymous key")
+		key.id = "key-id-1"
+		key.save(failOnError: true, validate: true)
+
+		controller.permissionService = permissionService = Stub(PermissionService)
+		permissionService.canShare(me, stream) >> true
+
+		when:
+		request.method = "PUT"
+		params.keyId = key.id
+		request.JSON = [
+			name: ""
+		]
+
+		authenticatedAs(me) { controller.updateStreamKey() }
+
+		then:
+		response.status == 200
+		Key.get(key.id).name == "anonymous key"
+	}
+
+	void "updateStreamKey() updates name field of stream's key"() {
+		setup:
+		Stream stream = new Stream(name: "stream")
+		stream.id = "streamId"
+		stream.save(validate: false, failOnError: true)
+
+		Key key = new Key(name: "anonymous key")
+		key.id = "key-id-1"
+		key.save(failOnError: true, validate: true)
+
+		controller.permissionService = permissionService = Stub(PermissionService)
+		permissionService.canShare(me, stream) >> true
+
+		when:
+		request.method = "PUT"
+		params.keyId = key.id
+		params.streamId = stream.id
+		request.JSON = [
+			name: "new key name"
+		]
+
+		authenticatedAs(me) { controller.updateStreamKey() }
+
+		then:
+		response.status == 200
+		Key.get(key.id).name == "new key name"
+	}
+
+	void "updateStreamKey() responds with 400 for invalid permission"() {
+		setup:
+		Stream stream = new Stream(name: "stream")
+		stream.id = "streamId"
+		stream.save(validate: false, failOnError: true)
+
+		Key key = new Key(name: "anonymous key")
+		key.id = "key-id-1"
+		key.save(failOnError: true, validate: true)
+
+		controller.permissionService = permissionService = Stub(PermissionService)
+
+		when:
+		request.method = "PUT"
+		params.keyId = key.id
+		params.streamId = stream.id
+		request.JSON = [
+			name: "new key name",
+			permission: "XXXXX",
+		]
+
+		authenticatedAs(me) { controller.updateStreamKey() }
+
+		then:
+		thrown(ApiException)
+	}
+
+	void "updateStreamKey() updates read permission for key"() {
+		setup:
+		Stream stream = new Stream(name: "stream")
+		stream.id = "streamId"
+		stream.save(validate: false, failOnError: true)
+
+		Key key = new Key(name: "anonymous key")
+		key.id = "key-id-1"
+		key.save(failOnError: true, validate: true)
+
+		controller.permissionService = Mock(PermissionService)
+		controller.permissionService.canShare(me, stream) >> true
+
+		when:
+		request.method = "PUT"
+		params.keyId = key.id
+		params.streamId = stream.id
+		request.JSON = [
+			name: "new key name",
+			permission: "read",
+		]
+
+		authenticatedAs(me) { controller.updateStreamKey() }
+
+		then:
+		1 * controller.permissionService.grant(me, stream, key, Permission.Operation.READ, false)
+		response.status == 200
+		Key.get(key.id).name == "new key name"
+		response.json.permission == "read"
+	}
+
+	void "updateStreamKey() updates write permission for key"() {
+		setup:
+		Stream stream = new Stream(name: "stream")
+		stream.id = "streamId"
+		stream.save(validate: false, failOnError: true)
+
+		Key key = new Key(name: "anonymous key")
+		key.id = "key-id-1"
+		key.save(failOnError: true, validate: true)
+
+		controller.permissionService = Mock(PermissionService)
+		controller.permissionService.canShare(me, stream) >> true
+
+		when:
+		request.method = "PUT"
+		params.keyId = key.id
+		params.streamId = stream.id
+		request.JSON = [
+			name: "new key name",
+			permission: "write",
+		]
+
+		authenticatedAs(me) { controller.updateStreamKey() }
+
+		then:
+		1 * controller.permissionService.grant(me, stream, key, Permission.Operation.READ, false)
+		1 * controller.permissionService.grant(me, stream, key, Permission.Operation.WRITE, false)
+		response.status == 200
+		Key.get(key.id).name == "new key name"
+		response.json.permission == "write"
 	}
 }

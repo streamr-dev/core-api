@@ -1,8 +1,13 @@
 package com.unifina.feed
 
+import com.google.gson.Gson
+import com.google.gson.GsonBuilder
+import com.streamr.client.protocol.message_layer.StreamMessage
+import com.streamr.client.protocol.message_layer.StreamMessageV31
 import com.unifina.domain.data.Stream
-import com.unifina.feed.map.MapMessage
 import spock.lang.Specification
+
+import java.text.DateFormat
 
 class FieldDetectorSpec extends Specification {
 
@@ -10,12 +15,20 @@ class FieldDetectorSpec extends Specification {
 	FieldDetector detector
 	Map mapToReturn
 
+	private Gson gson = new GsonBuilder()
+		.serializeNulls()
+		.setDateFormat(DateFormat.LONG)
+		.create()
+
 	def setup() {
 		stream = new Stream()
+		stream.id = "stream-id"
 		detector = new FieldDetector() {
 			@Override
-			protected MapMessage fetchExampleMessage(Stream stream) {
-				return new MapMessage(null, mapToReturn)
+			protected StreamMessage fetchExampleMessage(Stream stream) {
+				return new StreamMessageV31(stream.id, 0, System.currentTimeMillis(), 0L, "", "", (Long) null, 0L,
+					StreamMessage.ContentType.CONTENT_TYPE_JSON, StreamMessage.EncryptionType.NONE, gson.toJson(mapToReturn),
+					StreamMessage.SignatureType.SIGNATURE_TYPE_NONE, null)
 			}
 		}
 	}

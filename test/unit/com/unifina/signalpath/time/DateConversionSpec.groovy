@@ -16,8 +16,8 @@ class DateConversionSpec extends Specification {
 
 	DateConversion module
 
-	private void initContext(String timezone="UTC", String username="username") {
-		initContextWithUser(new SecUser(timezone:timezone, username: username).save(failOnError: true, validate: false))
+	private void initContext(String username="username") {
+		initContextWithUser(new SecUser(username: username).save(failOnError: true, validate: false))
 	}
 
 	private void initContextWithUser(SecUser user) {
@@ -28,25 +28,29 @@ class DateConversionSpec extends Specification {
 	}
 
 	void "dateConversion gives the right answer"() {
-		initContext(TimeZone.getDefault().ID, "username2") // to/from system timezone
+		initContext("username2")
 		when:
 		module.getInput("format").receive("yyyy-MM-dd HH:mm:ss")
+		Calendar cal = Calendar.getInstance(TimeZone.getTimeZone("UTC"))
+		cal.setTimeInMillis(1444905310000)
+		SimpleDateFormat df = new SimpleDateFormat(format)
+		df.setTimeZone(TimeZone.getTimeZone("UTC"))
 		Map inputValues = [
 			date: [
-				new Date(2015 - 1900, 9, 15, 10, 35, 10),
-				"2000-01-01 12:45:55",
-				Double.valueOf(1000 * 60 * 15) // +15 minutes to epoch
+				df.format(cal.getTime()), // Thu Oct 15 10:35:10 UTC 2015 -> EEE MMM dd HH:mm:ss z yyyy
+				"2000-01-01 12:45:55", // Sat Jan 01 12:45:55 UTC 2000
+				Double.valueOf(1000 * 60 * 15) // +15 minutes to epoch: Thu Jan 01 00:15:00 UTC 1970
 			],
 		]
 		Map outputValues = [
 			date: [
 				"2015-10-15 10:35:10",
 				"2000-01-01 12:45:55",
-				new Date(1000 * 60 * 15).format(format),
+				df.format(new Date(1000 * 60 * 15)),
 			],
 			ts: [
-				new Date(2015 - 1900, 9, 15, 10, 35, 10).getTime(),
-				new Date(2000 - 1900, 0, 1, 12, 45, 55).getTime(),
+				1444905310000,
+				946730755000,
 				1000 * 60 * 15
 			].collect { it?.doubleValue() },
 			dayOfWeek: ["Thu", "Sat", "Thu"],
@@ -55,7 +59,7 @@ class DateConversionSpec extends Specification {
 			days: [15, 1, 1].collect { it?.doubleValue() },
 			hours: [10,
 					12,
-					new Date(1000 * 60 * 15).format("HH").toInteger()
+					0
 			].collect { it?.doubleValue() },
 			minutes: [35, 45, 15].collect { it?.doubleValue() },
 			seconds: [10, 55, 0].collect { it?.doubleValue() },
@@ -72,12 +76,12 @@ class DateConversionSpec extends Specification {
 		Date date = new Date()
 		module.getInput("date").receive(date);
 		module.sendOutput()
-		
+
 		then: "the time is sent out"
 		module.getOutput("ts").getValue() == date.getTime()
 		module.getOutput("date").getValue() == null
 	}
-	
+
 	void "timestamp output must be correct from ts input"() {
 		initContext()
 
@@ -85,12 +89,12 @@ class DateConversionSpec extends Specification {
 		Date date = new Date()
 		module.getInput("date").receive((Double)date.getTime());
 		module.sendOutput()
-		
+
 		then: "the time is sent out"
 		module.getOutput("ts").getValue() == date.getTime()
 		module.getOutput("date").getValue() == null
 	}
-	
+
 	void "timestamp output must be correct from string input (daylight saving)"() {
 		initContext()
 
@@ -100,12 +104,12 @@ class DateConversionSpec extends Specification {
 		module.getInput("format").receive("yyyy-MM-dd HH:mm:ss")
 		module.getInput("date").receive("2015-07-15 06:32:00")
 		module.sendOutput()
-		
+
 		then: "the time is sent out"
 		module.getOutput("ts").getValue() == df.parse("2015-07-15 09:32:00").getTime()
 		module.getOutput("date").getValue() == null
 	}
-	
+
 	void "timestamp output must be correct from string input (no daylight saving)"() {
 		initContext()
 
@@ -115,12 +119,12 @@ class DateConversionSpec extends Specification {
 		module.getInput("format").receive("yyyy-MM-dd HH:mm:ss")
 		module.getInput("date").receive("2015-01-15 06:32:00")
 		module.sendOutput()
-		
+
 		then: "the time is sent out"
 		module.getOutput("ts").getValue() == df.parse("2015-01-15 08:32:00").getTime()
 		module.getOutput("date").getValue() == null
 	}
-	
+
 	def testRuntimeException(Closure c){
 		try {
 			c();
@@ -129,7 +133,7 @@ class DateConversionSpec extends Specification {
 			return true
 		}
 	}
-	
+
 	void "must throw exception when the given string is not in right format"() {
 		initContext()
 
@@ -139,7 +143,7 @@ class DateConversionSpec extends Specification {
 		then: "it throws exception"
 		testRuntimeException{module.sendOutput()}
 	}
-	
+
 	void "string output must be correct from date input (daylight saving)"() {
 		initContext()
 
@@ -150,20 +154,20 @@ class DateConversionSpec extends Specification {
 		module.getOutput("date").connect(new Input<Object>(new DateConversion(), "in", "Object"))
 		module.getInput("date").receive(date)
 		module.sendOutput()
-		
+
 		then: "the time is sent out with the default format"
 		module.getOutput("date").getValue() == "2015-07-15 06:32:00 UTC"
-		
+
 		when: "time is set and asked with a format"
 		date = df.parse("2015-07-15 09:32:00")
 		module.getInput("format").receive("yyyy/MM/dd HH:mm")
 		module.getInput("date").receive(date)
 		module.sendOutput()
-		
+
 		then: "the time is sent out"
 		module.getOutput("date").getValue() == "2015/07/15 06:32"
 	}
-	
+
 	void "string output must be correct from date input (no daylight saving)"() {
 		initContext()
 
@@ -174,20 +178,20 @@ class DateConversionSpec extends Specification {
 		module.getOutput("date").connect(new Input<Object>(new DateConversion(), "in", "Object"))
 		module.getInput("date").receive(date)
 		module.sendOutput()
-		
+
 		then: "the time is sent out with the default format"
 		module.getOutput("date").getValue() == "2015-01-15 07:32:00 UTC"
-		
+
 		when: "time is set and asked with a format"
 		date = df.parse("2015-01-15 09:32:00")
 		module.getInput("format").receive("yyyy/MM/dd HH:mm")
 		module.getInput("date").receive(date)
 		module.sendOutput()
-		
+
 		then: "the time is sent out"
 		module.getOutput("date").getValue() == "2015/01/15 07:32"
 	}
-	
+
 	void "string output must be correct from ts input (daylight saving)"() {
 		initContext()
 
@@ -198,20 +202,20 @@ class DateConversionSpec extends Specification {
 		module.getOutput("date").connect(new Input<Object>(new DateConversion(), "in", "Object"))
 		module.getInput("date").receive((Double)date.getTime())
 		module.sendOutput()
-		
+
 		then: "the time is sent out with the default format"
 		module.getOutput("date").getValue() == "2015-07-15 06:32:00 UTC"
-		
+
 		when: "time is set and asked with a format"
 		date = df.parse("2015-07-15 09:32:00")
 		module.getInput("format").receive("yyyy/MM/dd HH:mm")
 		module.getInput("date").receive((Double)date.getTime())
 		module.sendOutput()
-		
+
 		then: "the time is sent out"
 		module.getOutput("date").getValue() == "2015/07/15 06:32"
 	}
-	
+
 	void "string output must be correct from ts input (no daylight saving)"() {
 		initContext()
 
@@ -222,20 +226,20 @@ class DateConversionSpec extends Specification {
 		module.getOutput("date").connect(new Input<Object>(new DateConversion(), "in", "Object"))
 		module.getInput("date").receive((Double)date.getTime())
 		module.sendOutput()
-		
+
 		then: "the time is sent out with the default format"
 		module.getOutput("date").getValue() == "2015-01-15 07:32:00 UTC"
-		
+
 		when: "time is set and asked with a format"
 		date = df.parse("2015-01-15 09:32:00")
 		module.getInput("format").receive("yyyy/MM/dd HH:mm")
 		module.getInput("date").receive((Double)date.getTime())
 		module.sendOutput()
-		
+
 		then: "the time is sent out"
 		module.getOutput("date").getValue() == "2015/01/15 07:32"
 	}
-	
+
 	void "years, months etc. outputs must work correctly from date input (daylight saving)"() {
 		initContext()
 
@@ -245,7 +249,7 @@ class DateConversionSpec extends Specification {
 		Date date = df.parse("2015-07-15 09:32:00.600")
 		module.getInput("date").receive(date)
 		module.sendOutput()
-		
+
 		then: "the values are correct"
 		module.getOutput("dayOfWeek").getValue() == "Wed"
 		module.getOutput("years").getValue() == 2015
@@ -256,7 +260,7 @@ class DateConversionSpec extends Specification {
 		module.getOutput("seconds").getValue() == 0
 		module.getOutput("milliseconds").getValue() == 600
 	}
-	
+
 	void "years, months etc. outputs must work correctly from date input (no daylight saving)"() {
 		initContext()
 
@@ -266,11 +270,11 @@ class DateConversionSpec extends Specification {
 		Date date = df.parse("2015-01-15 09:32:00.600")
 		module.getInput("date").receive(date)
 		module.sendOutput()
-		
+
 		then: "the values are correct"
 		module.getOutput("hours").getValue() == 7
 	}
-	
+
 	void "years, months etc. outputs must work correctly from ts input with a different timezone (daylight saving)"() {
 		initContext()
 
@@ -279,13 +283,13 @@ class DateConversionSpec extends Specification {
 		when: "time is set and asked"
 		Date date = df.parse("2015-07-15 09:32:00")
 		module.getInput("date").receive((Double)date.getTime())
-		module.getInput("timezone").receive("America/Argentina/Buenos_Aires") // Argentina, used because there's no daylight saving time there
+		module.getInput("timezone").receive(TimeZone.getTimeZone("America/Argentina/Buenos_Aires")) // Argentina, used because there's no daylight saving time there
 		module.sendOutput()
-		
+
 		then: "the values are correct"
 		module.getOutput("hours").getValue() == 3
 	}
-	
+
 	void "years, months etc. outputs must work correctly from ts input with a different timezone (no daylight saving)"() {
 		initContext()
 
@@ -294,9 +298,9 @@ class DateConversionSpec extends Specification {
 		when: "time is set and asked"
 		Date date = df.parse("2015-01-15 09:32:00")
 		module.getInput("date").receive((Double)date.getTime())
-		module.getInput("timezone").receive("America/Argentina/Buenos_Aires") // Argentina, used because there's no daylight saving time there
+		module.getInput("timezone").receive(TimeZone.getTimeZone("America/Argentina/Buenos_Aires")) // Argentina, used because there's no daylight saving time there
 		module.sendOutput()
-		
+
 		then: "the values are correct"
 		module.getOutput("hours").getValue() == 4
 	}
@@ -305,5 +309,5 @@ class DateConversionSpec extends Specification {
 		expect:
 			initContextWithUser(null)
 	}
-	
+
 }

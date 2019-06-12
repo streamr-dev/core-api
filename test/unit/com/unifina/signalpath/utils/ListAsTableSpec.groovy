@@ -4,6 +4,7 @@ import com.unifina.UiChannelMockingSpecification
 import com.unifina.domain.security.SecUser
 import com.unifina.signalpath.RuntimeRequest
 import com.unifina.signalpath.RuntimeResponse
+import com.unifina.signalpath.SignalPath
 import com.unifina.utils.testutils.ModuleTestHelper
 import grails.test.mixin.Mock
 
@@ -17,7 +18,7 @@ class ListAsTableSpec extends UiChannelMockingSpecification {
 		mockServicesForUiChannels()
 		module = setupModule(new ListAsTable(), [
 			uiChannel: [id: "table"],
-		])
+		], new SignalPath(true), mockGlobals([:], new SecUser(username: 'user').save(failOnError: true, validate: false)))
 	}
 
 	def "initial headers are set correctly"() {

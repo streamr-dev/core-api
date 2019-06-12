@@ -7,6 +7,7 @@ import org.apache.log4j.Logger;
 import java.io.Closeable;
 import java.io.IOException;
 import java.util.Iterator;
+import com.streamr.client.protocol.message_layer.ITimestamped;
 
 /**
  * A helper class to apply a static recipient and iterator to FeedEvents,
@@ -19,15 +20,15 @@ public class FeedEventIterator<MessageClass extends ITimestamped, EventRecipient
 	private Iterator<MessageClass> contentIterator;
 	private EventRecipientClass recipient;
 	private AbstractHistoricalFeed feed;
-	
+
 	private final Logger log = Logger.getLogger(FeedEventIterator.class);
-	
+
 	public FeedEventIterator(Iterator<MessageClass> contentIterator, AbstractHistoricalFeed feed, EventRecipientClass recipient) {
 		this.contentIterator = contentIterator;
 		this.recipient = recipient;
 		this.feed = feed;
 	}
-	
+
 	@Override
 	public boolean hasNext() {
 		return contentIterator.hasNext();
@@ -39,7 +40,7 @@ public class FeedEventIterator<MessageClass extends ITimestamped, EventRecipient
 		if (content==null)
 			return null;
 
-		FeedEvent<MessageClass, EventRecipientClass> fe = new FeedEvent<>(content, content.getTimestamp(), recipient);
+		FeedEvent<MessageClass, EventRecipientClass> fe = new FeedEvent<>(content, content.getTimestampAsDate(), recipient);
 		fe.feed = feed;
 		fe.iterator = this;
 		return fe;

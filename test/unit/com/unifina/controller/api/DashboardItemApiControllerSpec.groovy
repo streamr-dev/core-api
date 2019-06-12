@@ -1,24 +1,19 @@
 package com.unifina.controller.api
 
+import com.unifina.ControllerSpecification
 import com.unifina.api.SaveDashboardItemCommand
 import com.unifina.domain.dashboard.Dashboard
 import com.unifina.domain.dashboard.DashboardItem
 import com.unifina.domain.security.Key
 import com.unifina.domain.security.SecUser
 import com.unifina.domain.signalpath.Canvas
-import com.unifina.filters.UnifinaCoreAPIFilters
 import com.unifina.service.DashboardService
-import com.unifina.service.UserService
-import grails.plugin.springsecurity.SpringSecurityService
 import grails.test.mixin.Mock
 import grails.test.mixin.TestFor
-import grails.test.mixin.web.FiltersUnitTestMixin
-import groovy.json.JsonBuilder
-import spock.lang.Specification
 
 @TestFor(DashboardItemApiController)
-@Mock([Canvas, Dashboard, DashboardItem, Key, SecUser, UnifinaCoreAPIFilters, UserService, SpringSecurityService])
-class DashboardItemApiControllerSpec extends Specification {
+@Mock([Canvas, Dashboard, DashboardItem, Key, SecUser])
+class DashboardItemApiControllerSpec extends ControllerSpecification {
 
 	DashboardService dashboardService
 	SecUser me
@@ -41,31 +36,27 @@ class DashboardItemApiControllerSpec extends Specification {
 	def "index() lists dashboard items"() {
 		when:
 		params.dashboardId = 3
-		request.addHeader("Authorization", "Token myApiKey")
-		request.requestURI = "/api/v1/dashboards/3/items"
-		withFilters(action: "index") {
-			controller.index()
-		}
+		authenticatedAs(me) { controller.index() }
 
 		then:
 		response.status == 200
 		response.json == [
-				[
-						id          : "2",
-						dashboard   : dashboards[2].id,
-						title       : "dashboard-3-item",
-						canvas      : "1",
-						module      : 2,
-						webcomponent: "streamr-chart",
-				],
-				[
-						id          : "3",
-						dashboard   : dashboards[2].id,
-						title       : "dashboard-3-item",
-						canvas      : "1",
-						module      : 3,
-						webcomponent: "streamr-chart",
-				]
+			[
+				id          : "2",
+				dashboard   : dashboards[2].id,
+				title       : "dashboard-3-item",
+				canvas      : "1",
+				module      : 2,
+				webcomponent: "streamr-chart",
+			],
+			[
+				id          : "3",
+				dashboard   : dashboards[2].id,
+				title       : "dashboard-3-item",
+				canvas      : "1",
+				module      : 3,
+				webcomponent: "streamr-chart",
+			]
 		]
 		1 * dashboardService.findById("3", me) >> dashboards[2]
 		0 * dashboardService._
@@ -75,21 +66,17 @@ class DashboardItemApiControllerSpec extends Specification {
 		when:
 		params.dashboardId = 3
 		params.id = 2
-		request.addHeader("Authorization", "Token myApiKey")
-		request.requestURI = "/api/v1/dashboards/3/items/2"
-		withFilters(action: "index") {
-			controller.show()
-		}
+		authenticatedAs(me) { controller.show() }
 
 		then:
 		response.status == 200
 		response.json == [
-				id          : "2",
-				dashboard   : dashboards[2].id,
-				title       : "dashboard-3-item",
-				canvas      : "1",
-				module      : 2,
-				webcomponent: "streamr-chart"
+			id          : "2",
+			dashboard   : dashboards[2].id,
+			title       : "dashboard-3-item",
+			canvas      : "1",
+			module      : 2,
+			webcomponent: "streamr-chart"
 		]
 		1 * dashboardService.findDashboardItem("3", "2", me) >> dashboards[2].items[0]
 		0 * dashboardService._
@@ -99,25 +86,21 @@ class DashboardItemApiControllerSpec extends Specification {
 		when:
 		params.dashboardId = 3
 		request.JSON = [
-				title : "new-dashboard-item",
-				canvas: "canvas",
-				module: 1
+			title : "new-dashboard-item",
+			canvas: "canvas",
+			module: 1
 		]
-		request.addHeader("Authorization", "Token myApiKey")
-		request.requestURI = "/api/v1/dashboards/3/items/"
-		withFilters(action: "save") {
-			controller.save()
-		}
+		authenticatedAs(me) { controller.save() }
 
 		then:
 		response.status == 200
 		response.json == [
-				id          : "32",
-				dashboard   : "3",
-				title       : "new-dashboard-item",
-				canvas      : "canvas",
-				module      : 1,
-				webcomponent: "streamr-chart",
+			id          : "32",
+			dashboard   : "3",
+			title       : "new-dashboard-item",
+			canvas      : "canvas",
+			module      : 1,
+			webcomponent: "streamr-chart",
 		]
 		1 * dashboardService.addDashboardItem("3", _, me) >> { String dashboardId, SaveDashboardItemCommand command, SecUser user ->
 			def item = new DashboardItem(command.properties)
@@ -133,25 +116,21 @@ class DashboardItemApiControllerSpec extends Specification {
 		params.dashboardId = 3
 		params.id = 2
 		request.JSON = [
-				title : "updated-dashboard-item",
-				canvas: "canvas",
-				module: 1
+			title : "updated-dashboard-item",
+			canvas: "canvas",
+			module: 1
 		]
-		request.addHeader("Authorization", "Token myApiKey")
-		request.requestURI = "/api/v1/dashboards/3/items/2"
-		withFilters(action: "update") {
-			controller.update()
-		}
+		authenticatedAs(me) { controller.update() }
 
 		then:
 		response.status == 200
 		response.json == [
-				id          : "2",
-				dashboard   : "3",
-				title       : "updated-dashboard-item",
-				canvas      : "canvas",
-				module      : 1,
-				webcomponent: "streamr-chart"
+			id          : "2",
+			dashboard   : "3",
+			title       : "updated-dashboard-item",
+			canvas      : "canvas",
+			module      : 1,
+			webcomponent: "streamr-chart"
 		]
 		1 * dashboardService.updateDashboardItem("3", "2", _, me) >> { String dashboardId, String itemId, SaveDashboardItemCommand command, SecUser user ->
 			def item = DashboardItem.get(itemId)
@@ -165,11 +144,7 @@ class DashboardItemApiControllerSpec extends Specification {
 		when:
 		params.dashboardId = 3
 		params.id = 2
-		request.addHeader("Authorization", "Token myApiKey")
-		request.requestURI = "/api/v1/dashboards/3/items/2"
-		withFilters(action: "delete") {
-			controller.delete()
-		}
+		authenticatedAs(me) { controller.delete() }
 
 		then:
 		response.status == 204

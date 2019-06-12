@@ -16,6 +16,7 @@ before_install:
 - sdk install grails 2.5.6
 - sed -i 's/git@github.com:/https:\/\/github.com\//' .gitmodules
 - git submodule update --init --recursive
+- npm i -g npm@6.4.0
 addons:
   chrome: stable
 env:
@@ -34,43 +35,60 @@ jobs:
     - FRONT_END_TEST=true
     script: "./travis_scripts/fe_unit_test.sh"
   - stage: Integration tests
-    script: "./travis_scripts/integration_test.sh"
-  - stage: Build war
+    script: "travis_retry ./travis_scripts/integration_test.sh"
+  - stage: Build war Staging
     script: "./travis_scripts/build_war.sh"
+    env:
+    - WS_URL="wss://ee-staging.streamr.com/api/v1/ws"
     deploy:
-      - provider: s3 #staging
-        access_key_id: AKIAI3FGPGMK3EREJJTQ
-        secret_access_key:
-          secure: VHz9wZb/IuYsfVko6q5zUzkfg2Impn9wrhfWJB5KQtHu73eozlbd6okkwl324dwS6TwB/oo7PdVyQL4ugLGvGlgbN6T4z/5KwQ/roS/z6ycKHIspeFZiiU7TYPTboOwOhWhV0ze+FmQD/E8I49J6mTOkwW2Y0rHA5awMQHz5LSWsF5heTlo3NAeQO2ynPW+Ely6HNoSP39a/d84gUJ+VTlkIivoQr7QwEe0JWrpvncMVkGvTinH+2oWeLwAkRFD2e9tu8jr9f182JfA0m6SHCJaCTp0e+3Uv4BQZ2NM/xtMgjjBDBvCZG4ZbO06+U2NwPe2nI4IQBj/23NXdTn1D4O1/7xYzk1H/mSzOYNFe7ATpfp7fOanJI6TB0Hq+jY+xHrQcD66sPPJPg8qkf8TuDRpsQqWVbHxmfQT0L3pDFajwG18kwtJ3LBwynwDcsZeGpAWQLXKYvVRVGDbKb+sZBq/qJKjDc0lJ0C/Ml6MNbJS8OP8b68nP6/sJ/N3Hbb9MQu+xhei3FCCrWqarE7fgpWT+oTHjNEC1ceUUMV+2rEb5fskSwipchHVADrIAqtiUPvNiKMp4Iom306OfmljBR85pA238AHGy1X7DOfEM0hSg9FkWWxZI/4d2GL+wfk5bhVVwlnFUrd4azco5l7W172I97PhpMqcRnaHrzpvGvj4=
-        bucket: eu-west-1-stg-streamr-vault
-        upload-dir: engine-editor/releases
-        acl: private
-        region: eu-west-1
-        skip_cleanup: true
-        local_dir: build
-      - provider: codedeploy
-        access_key_id: AKIAI3FGPGMK3EREJJTQ
-        secret_access_key:
-          secure: VHz9wZb/IuYsfVko6q5zUzkfg2Impn9wrhfWJB5KQtHu73eozlbd6okkwl324dwS6TwB/oo7PdVyQL4ugLGvGlgbN6T4z/5KwQ/roS/z6ycKHIspeFZiiU7TYPTboOwOhWhV0ze+FmQD/E8I49J6mTOkwW2Y0rHA5awMQHz5LSWsF5heTlo3NAeQO2ynPW+Ely6HNoSP39a/d84gUJ+VTlkIivoQr7QwEe0JWrpvncMVkGvTinH+2oWeLwAkRFD2e9tu8jr9f182JfA0m6SHCJaCTp0e+3Uv4BQZ2NM/xtMgjjBDBvCZG4ZbO06+U2NwPe2nI4IQBj/23NXdTn1D4O1/7xYzk1H/mSzOYNFe7ATpfp7fOanJI6TB0Hq+jY+xHrQcD66sPPJPg8qkf8TuDRpsQqWVbHxmfQT0L3pDFajwG18kwtJ3LBwynwDcsZeGpAWQLXKYvVRVGDbKb+sZBq/qJKjDc0lJ0C/Ml6MNbJS8OP8b68nP6/sJ/N3Hbb9MQu+xhei3FCCrWqarE7fgpWT+oTHjNEC1ceUUMV+2rEb5fskSwipchHVADrIAqtiUPvNiKMp4Iom306OfmljBR85pA238AHGy1X7DOfEM0hSg9FkWWxZI/4d2GL+wfk5bhVVwlnFUrd4azco5l7W172I97PhpMqcRnaHrzpvGvj4=
-        bucket: eu-west-1-stg-streamr-vault
-        key: engine-editor/releases/ee.tar
-        application: staging-engine-editor-codedeploy
-        deployment_group: staging-engine-editor-deployment-group
-        region: eu-west-1
-      - provider: s3 #production
-        access_key_id: AKIAI7LEOVJBY6ZEH44Q
-        secret_access_key:
-          secure: iKwr8sXvSmzDpv6GIl4q0m9beVNa4IDd/cYrF1gTB9oOESDFT9Q1EqiVeFUZGVQnKWcbvUmHbGu+f8AhF7AMpST6eeGm+h35m/Y1gBxehmFM4yf/kJkA2lj34/Xzy+3N8XpHnFGSF5alya0uEKV2wgQ7qUYvw/SkNA67VdwlzQSEbTu+yHYWP/PYuddTTePjQj3J8vJLwMoOSWsMl3n32nsFOx4cCCerzsfaA7F1JYJwTleyd71iFinQGRGjIaYJGQOGVjCmEZRuHLZEZNXCkEeFneoBhymYtoXsLVXkyf5VkibApTnKYaA8wXRCtI+Ow1zfTl8KzxFOiQ/zbtjtGb375TbwKOTBOQTJk7Heh99gdSAA+uhtnia2TvuqwZD+W8Ge7NW21/tJzQS9dPWM8rFtyK0BL7cYH4SLW4QtHTnwlg99jiHqR/RjtvPiVNxX6R23922n9ORJUmY81lsjgN74eq6stwyIl4HvbgiVqEd6w6+uUd4p2GLeFFN7w/Kn+W2V8VY/aUKwz2Mg/KfTd+l3kyPmlb9ITx4z39A4mmIislWD00SpnHvDYOBYUWCByzhDrMPFMY4RAQL8SCwjU/XKqbueFYUJncqW9aZm3N9Zcm2UcTnmfxHbnCN1Z/5gWXxIp5WbwxY6yt29p8UxHU8eGfHzWeIl+2fH0HT6bgU=
-        bucket: eu-west-1-streamr-vault
-        upload-dir: engine-editor/releases
-        acl: private
-        region: eu-west-1
-        skip_cleanup: true
-        local_dir: build
-    if: branch = master
-  - stage: Build docker
-    script: "./travis_scripts/docker_build.sh"
-    if: "(NOT type IN (pull_request)) AND (branch = master)"
+    - provider: s3
+      access_key_id: AKIAI3FGPGMK3EREJJTQ
+      secret_access_key:
+        secure: VHz9wZb/IuYsfVko6q5zUzkfg2Impn9wrhfWJB5KQtHu73eozlbd6okkwl324dwS6TwB/oo7PdVyQL4ugLGvGlgbN6T4z/5KwQ/roS/z6ycKHIspeFZiiU7TYPTboOwOhWhV0ze+FmQD/E8I49J6mTOkwW2Y0rHA5awMQHz5LSWsF5heTlo3NAeQO2ynPW+Ely6HNoSP39a/d84gUJ+VTlkIivoQr7QwEe0JWrpvncMVkGvTinH+2oWeLwAkRFD2e9tu8jr9f182JfA0m6SHCJaCTp0e+3Uv4BQZ2NM/xtMgjjBDBvCZG4ZbO06+U2NwPe2nI4IQBj/23NXdTn1D4O1/7xYzk1H/mSzOYNFe7ATpfp7fOanJI6TB0Hq+jY+xHrQcD66sPPJPg8qkf8TuDRpsQqWVbHxmfQT0L3pDFajwG18kwtJ3LBwynwDcsZeGpAWQLXKYvVRVGDbKb+sZBq/qJKjDc0lJ0C/Ml6MNbJS8OP8b68nP6/sJ/N3Hbb9MQu+xhei3FCCrWqarE7fgpWT+oTHjNEC1ceUUMV+2rEb5fskSwipchHVADrIAqtiUPvNiKMp4Iom306OfmljBR85pA238AHGy1X7DOfEM0hSg9FkWWxZI/4d2GL+wfk5bhVVwlnFUrd4azco5l7W172I97PhpMqcRnaHrzpvGvj4=
+      bucket: eu-west-1-stg-streamr-vault
+      upload-dir: engine-editor/releases
+      acl: private
+      region: eu-west-1
+      skip_cleanup: true
+      local_dir: build
+    - provider: codedeploy
+      access_key_id: AKIAI3FGPGMK3EREJJTQ
+      secret_access_key:
+        secure: VHz9wZb/IuYsfVko6q5zUzkfg2Impn9wrhfWJB5KQtHu73eozlbd6okkwl324dwS6TwB/oo7PdVyQL4ugLGvGlgbN6T4z/5KwQ/roS/z6ycKHIspeFZiiU7TYPTboOwOhWhV0ze+FmQD/E8I49J6mTOkwW2Y0rHA5awMQHz5LSWsF5heTlo3NAeQO2ynPW+Ely6HNoSP39a/d84gUJ+VTlkIivoQr7QwEe0JWrpvncMVkGvTinH+2oWeLwAkRFD2e9tu8jr9f182JfA0m6SHCJaCTp0e+3Uv4BQZ2NM/xtMgjjBDBvCZG4ZbO06+U2NwPe2nI4IQBj/23NXdTn1D4O1/7xYzk1H/mSzOYNFe7ATpfp7fOanJI6TB0Hq+jY+xHrQcD66sPPJPg8qkf8TuDRpsQqWVbHxmfQT0L3pDFajwG18kwtJ3LBwynwDcsZeGpAWQLXKYvVRVGDbKb+sZBq/qJKjDc0lJ0C/Ml6MNbJS8OP8b68nP6/sJ/N3Hbb9MQu+xhei3FCCrWqarE7fgpWT+oTHjNEC1ceUUMV+2rEb5fskSwipchHVADrIAqtiUPvNiKMp4Iom306OfmljBR85pA238AHGy1X7DOfEM0hSg9FkWWxZI/4d2GL+wfk5bhVVwlnFUrd4azco5l7W172I97PhpMqcRnaHrzpvGvj4=
+      bucket: eu-west-1-stg-streamr-vault
+      key: engine-editor/releases/ee-${TRAVIS_JOB_ID}.tar
+      application: eu-west-1-stg-ee-codedeploy
+      deployment_group: eu-west-1-stg-ee-deployment-group
+      region: eu-west-1
+    if: NOT type IN (pull_request)
+  - stage: Build docker dev
+    env:
+    - OWNER=streamr
+    - IMAGE_NAME=engine-and-editor
+    - TAG=dev
+    script:
+    - grails clean
+    - npm install
+    - grails test war
+    - docker build -f Dockerfile.dev -t $OWNER/$IMAGE_NAME:$TAG .
+    deploy:
+    - provider: script
+      script: bash travis_scripts/deploy_docker.sh staging
+    if: NOT type IN (pull_request)
+  - stage: Build docker Staging
+    env:
+    - OWNER=streamr
+    - IMAGE_NAME=engine-and-editor
+    - TAG=stg
+    script:
+    - grails clean
+    - npm install
+    - grails war
+    - docker build -f Dockerfile.stg -t $OWNER/$IMAGE_NAME:$TAG .
+    deploy:
+    - provider: script
+      script: bash travis_scripts/deploy_docker.sh staging
+    if: NOT type IN (pull_request)
 after_failure: "./travis-after-failure.sh"
 notifications:
   slack:

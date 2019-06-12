@@ -16,8 +16,7 @@ import java.util.List;
 
 /**
  * A Thread that instantiates and runs a list of SignalPaths.
- * Identified by a runnerId, by which this runner can be looked up from the
- * servletContext["signalPathRunners"] map.
+ * Identified by a runnerId, by which this runner can be looked up from signalPathService.
  */
 public class SignalPathRunner extends Thread {
 	private static final Logger log = Logger.getLogger(SignalPathRunner.class);
@@ -71,10 +70,14 @@ public class SignalPathRunner extends Thread {
 		while (getRunning() != target && i++ < 60) {
 			log.debug("Waiting for " + runnerId + " to start...");
 			if (target && thrownOnStartUp != null) {
-				log.info("Giving up on waiting because run threw exception.");
+				log.error("Giving up on waiting because run threw exception.");
 			} else {
 				wait(500);
 			}
+		}
+
+		if (getRunning() != target) {
+			log.error("Timed out while waiting for runner to " + (target ? "start" : "stop"));
 		}
 	}
 

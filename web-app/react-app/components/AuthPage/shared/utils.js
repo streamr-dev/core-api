@@ -24,7 +24,7 @@ export const post = (url: string, data: FormFields, successWithError: boolean, x
             if (successWithError && data.error) {
                 reject(new Error(data.error))
             } else {
-                resolve()
+                resolve(data)
             }
         }, ({ response: { data } }) => {
             reject(new Error(data.error || 'Something went wrong'))

@@ -1,5 +1,7 @@
 package com.unifina.service
 
+import com.unifina.api.InvalidUsernameAndPasswordException
+import com.unifina.api.NotFoundException
 import com.unifina.domain.data.Feed
 import com.unifina.domain.security.*
 import com.unifina.domain.signalpath.Module
@@ -9,6 +11,8 @@ import grails.plugin.springsecurity.SpringSecurityService
 import grails.test.mixin.Mock
 import grails.test.mixin.TestFor
 import org.springframework.security.authentication.encoding.PlaintextPasswordEncoder
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder
+import org.springframework.security.crypto.password.PasswordEncoder
 import org.springframework.validation.FieldError
 import spock.lang.Specification
 
@@ -60,12 +64,14 @@ class UserServiceSpec extends Specification {
 		grailsApplication.mainContext.getBean("springSecurityService").grailsApplication = grailsApplication
 		grailsApplication.mainContext.getBean("springSecurityService").passwordEncoder = grailsApplication.mainContext.getBean("passwordEncoder")
 		permissionService = service.permissionService = Mock(PermissionService)
+		service.streamService = Mock(StreamService)
+		service.canvasService = Mock(CanvasService)
 	}
 
-    def "the user is created when called, with default roles if none supplied"() {
+	def "the user is created when called, with default roles if none supplied"() {
 		when:
 		createData()
-		SecUser user = service.createUser([username: "test@test.com", name:"test", password: "test", timezone:"Europe/Minsk", enabled:true, accountLocked:false, passwordExpired:false])
+		SecUser user = service.createUser([username: "test@test.com", name:"test", password: "test", enabled:true, accountLocked:false, passwordExpired:false])
 
 		then:
 		SecUser.count() == 1
@@ -78,7 +84,7 @@ class UserServiceSpec extends Specification {
 	def "default API key is created for user"() {
 		when:
 		createData()
-		SecUser user = service.createUser([username: "test@test.com", name:"test", password: "test", timezone:"Europe/Minsk", enabled:true, accountLocked:false, passwordExpired:false])
+		SecUser user = service.createUser([username: "test@test.com", name:"test", password: "test", enabled:true, accountLocked:false, passwordExpired:false])
 
 		then:
 		user.getKeys().size() == 1
@@ -91,10 +97,9 @@ class UserServiceSpec extends Specification {
 			username       : "test@test.com",
 			name           : "test",
 			password       : "test",
-			timezone       : "Europe/Minsk",
 			enabled        : true,
 			accountLocked  : false,
-			passwordExpired: false
+			passwordExpired: false,
 		],
 			SecRole.findAllByAuthorityInList(["ROLE_USER"]),
 			new ArrayList<Feed>(),
@@ -105,16 +110,16 @@ class UserServiceSpec extends Specification {
 		user.getAuthorities().size() == 1
 		user.getAuthorities().toArray()[0].authority == "ROLE_USER"
 
-		1 * permissionService.get(Feed, {it.id == 1} as SecUser) >> []
-		1 * permissionService.get(ModulePackage, {it.id == 1} as SecUser) >> []
-		1 * permissionService.systemGrant({ it.id == 1} as SecUser, { it.id == 1} as ModulePackage)
-		1 * permissionService.systemGrant({ it.id == 1} as SecUser, { it.id == 2} as ModulePackage)
-    }
+		1 * permissionService.get(Feed, { it.id == 1 } as SecUser) >> []
+		1 * permissionService.get(ModulePackage, { it.id == 1 } as SecUser) >> []
+		1 * permissionService.systemGrant({ it.id == 1 } as SecUser, { it.id == 1 } as ModulePackage)
+		1 * permissionService.systemGrant({ it.id == 1 } as SecUser, { it.id == 2 } as ModulePackage)
+	}
 
 	def "it should fail if the default roles, feeds of modulePackages are not found"() {
 		when:
 		// The data has not been created
-		SecUser user = service.createUser([username: "test@test.com", name: "test", password: "test", timezone: "Europe/Minsk", enabled: true, accountLocked: false, passwordExpired: false])
+		SecUser user = service.createUser([username: "test@test.com", name: "test", password: "test", enabled: true, accountLocked: false, passwordExpired: false])
 
 		then:
 		thrown RuntimeException
@@ -142,5 +147,74 @@ class UserServiceSpec extends Specification {
 		checkedErrors.get(1).getField() == "password"
 		checkedErrors.get(1).getRejectedValue() == "***"
 		checkedErrors.get(1).getArguments() == ['null', 'null', '***']
+	}
+
+	def "should find user from both username and password"() {
+		String username = "username"
+		String password = "password"
+		PasswordEncoder encoder = new BCryptPasswordEncoder()
+		String hashedPassword = encoder.encode(password)
+		new SecUser(username: username, password: hashedPassword).save(failOnError: true, validate: false)
+		when:
+		SecUser retrievedUser = service.getUserFromUsernameAndPassword(username, password)
+		then:
+		retrievedUser != null
+		retrievedUser.username == username
+	}
+
+	def "should throw if wrong password"() {
+		String username = "username"
+		String password = "password"
+		String wrongPassword = "wrong"
+		PasswordEncoder encoder = new BCryptPasswordEncoder()
+		String hashedPassword = encoder.encode(password)
+		new SecUser(username: username, password: hashedPassword).save(failOnError: true, validate: false)
+		when:
+		service.getUserFromUsernameAndPassword(username, wrongPassword)
+		then:
+		thrown(InvalidUsernameAndPasswordException)
+	}
+
+	def "should find user from api key"() {
+		SecUser user = new SecUser(username: "username", password: "password").save(failOnError: true, validate: false)
+		Key key = new Key(name: "key", user: user)
+		key.id = "myApiKey"
+		key.save(failOnError: true, validate: true)
+
+		when:
+		SecUser retrievedUser = (SecUser) service.getUserishFromApiKey(key.id)
+		then:
+		retrievedUser != null
+		retrievedUser.username == user.username
+	}
+
+	def "should find anonymous key from api key"() {
+		Key key = new Key(id: "myApiKey").save(failOnError: true, validate: false)
+
+		when:
+		Key retrievedKey = (Key) service.getUserishFromApiKey(key.id)
+		then:
+		retrievedKey != null
+		retrievedKey.id == retrievedKey.id
+	}
+
+	def "delete user"() {
+		setup:
+		SecUser user = new SecUser()
+		user.id = 1
+
+		when:
+		service.delete(user)
+
+		then:
+		user.enabled == false
+	}
+
+	def "delete user validates parameters"() {
+		when:
+		service.delete(null)
+
+		then:
+		thrown NotFoundException
 	}
 }

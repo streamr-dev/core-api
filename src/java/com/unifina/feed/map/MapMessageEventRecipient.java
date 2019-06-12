@@ -1,5 +1,6 @@
 package com.unifina.feed.map;
 
+import com.streamr.client.protocol.message_layer.StreamMessage;
 import com.unifina.data.FeedEvent;
 import com.unifina.data.IEventRecipient;
 import com.unifina.domain.data.Stream;
@@ -10,17 +11,18 @@ import com.unifina.signalpath.Output;
 import com.unifina.signalpath.TimeSeriesOutput;
 import com.unifina.utils.Globals;
 
+import java.io.IOException;
 import java.util.*;
 
 /**
- * This class receives FeedEvents with MapMessage content. It sends out
- * the values in the MapMessage if the receiving module has an output
+ * This class receives FeedEvents with StreamMessage content. It sends out
+ * the values in the StreamMessage if the receiving module has an output
  * with a corresponding name. Other values are ignored.
  *
  * Note that the type of value is unchecked and must match with the output type.
  * @author Henri
  */
-public class MapMessageEventRecipient extends StreamEventRecipient<AbstractSignalPathModule, MapMessage> {
+public class MapMessageEventRecipient extends StreamEventRecipient<AbstractSignalPathModule, StreamMessage> {
 
 	private Map<String, List<Output>> outputsByName = null;
 
@@ -29,12 +31,17 @@ public class MapMessageEventRecipient extends StreamEventRecipient<AbstractSigna
 	}
 
 	@Override
-	protected void sendOutputFromModules(FeedEvent<MapMessage, ? extends IEventRecipient> event) {
+	protected void sendOutputFromModules(FeedEvent<StreamMessage, ? extends IEventRecipient> event) {
 		if (outputsByName == null) {
 			initCacheMap();
 		}
 
-		Map msg = event.content.payload;
+		Map msg;
+		try {
+			msg = event.content.getContent();
+		} catch (IOException e) {
+			msg = new HashMap();
+		}
 
 		for (String name : outputsByName.keySet()) {
 			if (msg.containsKey(name)) {

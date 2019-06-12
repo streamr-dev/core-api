@@ -4,7 +4,7 @@ import com.unifina.data.FeedEvent;
 import com.unifina.data.IEventRecipient;
 import com.unifina.datasource.IStartListener;
 import com.unifina.datasource.IStopListener;
-import com.unifina.feed.ITimestamped;
+import com.streamr.client.protocol.message_layer.ITimestamped;
 import com.unifina.signalpath.*;
 
 import com.unifina.utils.IdGenerator;
@@ -255,7 +255,7 @@ public class Mqtt extends AbstractSignalPathModule implements MqttCallback, IEve
 		}
 
 		@Override
-		public Date getTimestamp() {
+		public Date getTimestampAsDate() {
 			return timestamp;
 		}
 	}

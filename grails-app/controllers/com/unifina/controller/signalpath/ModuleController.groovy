@@ -5,6 +5,7 @@ import com.unifina.domain.signalpath.ModuleCategory
 import com.unifina.domain.signalpath.ModulePackage
 import com.unifina.signalpath.AbstractSignalPathModule
 import com.unifina.signalpath.ModuleException
+import com.unifina.exceptions.ModuleExceptionMessage
 import com.unifina.utils.Globals
 import com.unifina.utils.GlobalsFactory
 import grails.converters.JSON
@@ -76,7 +77,8 @@ class ModuleController {
 
 		render mods as JSON
 	}
-	
+
+	// TODO: moved to ModuleApiController in CORE-1642. Remove when new front-end ready.
 	def jsonGetModuleTree() {
 		def categories = ModuleCategory.findAllByParentIsNullAndHideIsNull([sort:"sortOrder"])
 
@@ -94,6 +96,7 @@ class ModuleController {
 		render result as JSON
 	}
 
+	// TODO: moved to ModuleApiController in CORE-1642. Remove when new front-end ready.
 	private Map moduleTreeRecurse(ModuleCategory category, Set<Long> allowedPackageIds, boolean modulesFirst=false) {
 		def item = [:]
 		item.data = category.name
@@ -129,6 +132,7 @@ class ModuleController {
 		return item
 	}
 
+	// TODO: moved to ModuleApiController in CORE-1642. Remove when new front-end ready.
 	def jsonGetModule() {
 		def user = springSecurityService.currentUser
 		Globals globals = GlobalsFactory.createInstance([:], user)
@@ -154,23 +158,22 @@ class ModuleController {
 
 			render iMap as JSON
 		} catch (Exception e) {
-			def moduleExceptions = []
+			List<ModuleExceptionMessage> moduleExceptions = []
 			def me = e
-			
+
 			// Find a possible ModuleException in the cause hierarchy
-			while (me!=null) {
+			while (me != null) {
 				if (me instanceof ModuleException) {
-					moduleExceptions = ((ModuleException)me).getModuleExceptions().collect {
-						[hash:it.hash, payload:it.msg]
-					}
+					moduleExceptions = ((ModuleException) me).getModuleExceptions()
 					break
+				} else {
+					me = me.cause
 				}
-				else me = me.cause
 			}
-		 
+
 			e = GrailsUtil.deepSanitize(e)
 			log.error("Exception while creating module!",e)
-			Map r = [error:true, message:e.message, moduleErrors:moduleExceptions]
+			Map r = [error:true, message:e.message, moduleErrors:moduleExceptions*.toMap()]
 			render r as JSON
 		}
 	}

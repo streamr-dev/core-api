@@ -20,11 +20,13 @@ class IntegrationKey implements Serializable {
 	static mapping = {
 		id generator: IdGenerator.name // Note: doesn't apply in unit tests
 		json type: 'text'
+		user lazy: false
 		idInService(index: "id_in_service_and_service_idx")
 		service(index: "id_in_service_and_service_idx")
 	}
 
 	static constraints = {
+		idInService unique: true
 	}
 
 	enum Service {

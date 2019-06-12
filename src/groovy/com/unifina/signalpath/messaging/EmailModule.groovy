@@ -84,7 +84,7 @@ This email was sent by one of your running Canvases on Streamr.
 Message:
 {0}
 
-Event Timestamp:
+Event Timestamp (UTC):
 {1,date,yyyy-MM-dd HH:mm:ss.SSS}
 
 Input Values:
@@ -95,8 +95,8 @@ To view, edit, or stop the Canvas that sent this message, click the below link:
 
 		MessageFormat mf = new MessageFormat(body)
 		for (Format format : mf.getFormats()) {
-			if (format instanceof SimpleDateFormat && globals.userId != null) {
-				((SimpleDateFormat) format).setTimeZone(globals.userTimeZone)
+			if (format instanceof SimpleDateFormat) {
+				((SimpleDateFormat) format).setTimeZone(TimeZone.getTimeZone("UTC"))
 			}
 		}
 		String warning = ""

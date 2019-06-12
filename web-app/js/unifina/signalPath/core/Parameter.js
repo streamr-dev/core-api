@@ -117,11 +117,21 @@
 		// Show search if no value is selected
 		if(!this.data.value)
 			this.showInput()
-		var search = $("<input type='text' class='parameterInput streamSearch form-control' value='"+(this.data.streamName || "")+"'>");
+		var search = $("<input/>", {
+			type: 'text',
+			class: 'parameterInput streamSearch form-control',
+			value: this.data.streamName || '',
+		})
 		this.search = search
 		this.span.append(search);
 
-		this.label = $("<span class='streamName'><a href='#'>"+this.data.streamName+"</a></span>");
+		this.label = $('<span/>', {
+			class: 'streamName',
+		})
+			.append($('<a/>', {
+				href: '#',
+				text: this.data.streamName,
+			}))
 		this.span.append(this.label);
 
 		this.label.click(function(e) {

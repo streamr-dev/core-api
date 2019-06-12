@@ -57,7 +57,6 @@ class SubscriptionService {
 	 * Should be invoked before an `IntegrationKey` is removed
 	 */
 	void beforeIntegrationKeyRemoved(IntegrationKey key) {
-		verifyIsEthereumID(key)
 		List<Subscription> subscriptions = PaidSubscription.findAllByAddress(key.idInService)
 		subscriptions.each {
 			deletePermissions(it)
@@ -68,7 +67,6 @@ class SubscriptionService {
 	 * Should be invoked after an `IntegrationKey` is added
 	 */
 	void afterIntegrationKeyCreated(IntegrationKey key) {
-		verifyIsEthereumID(key)
 		List<Subscription> subscriptions = PaidSubscription.findAllByAddress(key.idInService)
 		subscriptions.each {
 			createPermissions(it)
@@ -99,7 +97,7 @@ class SubscriptionService {
 	}
 
 	private static void deletePermissions(Subscription subscription) {
-		streamPermissionsFor(subscription)*.delete()
+		streamPermissionsFor(subscription)*.delete(flush: true)
 	}
 
 	private static void deletePermissions(Subscription subscription, Set<Stream> streams) {
@@ -115,22 +113,12 @@ class SubscriptionService {
 		SecUser user = subscription.fetchUser()
 		if (user) {
 			streams.collect { Stream stream ->
-				Permission permission = permissionService.systemGrant(user, stream, Permission.Operation.READ)
-				permission.subscription = subscription
-				permission.endsAt = subscription.endsAt
-				permission.save(failOnError: true)
+				permissionService.systemGrant(user, stream, Permission.Operation.READ, subscription, subscription.endsAt)
 			}
 		}
 	}
 
 	private static Set<Permission> streamPermissionsFor(Subscription subscription) {
 		Permission.findAllBySubscriptionAndStreamIsNotNull(subscription) as Set
-	}
-
-
-	private static void verifyIsEthereumID(IntegrationKey key) {
-		if (key.service != IntegrationKey.Service.ETHEREUM_ID) {
-			throw new IllegalArgumentException("key.service != ETHEREUM_ID")
-		}
 	}
 }

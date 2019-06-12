@@ -24,23 +24,6 @@
 		</div>
 	</div>
 
-	<r:script>
-		$(function() {
-			new ConfirmButton("#regenerateApiKeyButton", {
-				title: "${message(code: "profile.regenerateAPIKeyConfirm.title")}",
-				message: "${message(code: "profile.regenerateAPIKeyConfirm.message")}"
-			}, function(result) {
-				if(result) {
-					$.post("${ createLink(action: 'regenerateApiKey') }", {}, function(response) {
-						if(response.success) {
-							location.reload()
-						}
-					})
-				}
-			})
-		})
-	</r:script>
-
 	<webpack:jsBundle name="commons"/>
 	<webpack:jsBundle name="profilePage"/>
 

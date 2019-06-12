@@ -48,7 +48,11 @@ ModuleBrowser.prototype.renderModules = function(element,list){
 				_this.categoryName += " > "+ module.data
 			}
 			// var title = $("<h"+(level+1)+" id='"+module.metadata.id+"' style='padding-left:"+((level-1)*20)+"px;'>"+module.data+"</h"+(level+1)+">")
-			var title = $("<"+h+" id='category"+module.metadata.id+"' style='padding-left:"+((_this.level-1)*20)+"px;'>"+_this.categoryName+"</"+h+">")
+			var title = $('<' + h + '/>', {
+				id: 'category' + module.metadata.id,
+				style: 'padding-left:' + ((_this.level-1)*20) + 'px',
+				text: _this.categoryName,
+			})
 			element.append(title)
 			_this.renderModules(element, module.children)
 		}

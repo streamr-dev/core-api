@@ -14,6 +14,7 @@ import grails.util.Holders;
 import org.apache.log4j.Logger;
 import org.codehaus.groovy.runtime.InvokerHelper;
 
+import java.io.IOException;
 import java.io.Serializable;
 import java.lang.reflect.Field;
 import java.security.AccessControlException;
@@ -94,12 +95,12 @@ public abstract class AbstractSignalPathModule implements IEventRecipient, IDayL
 
 		/**
 		 * Execute in a privileged block so that also user defined
-		 * untrusted modules can benefit from auto-initialization of IO. 
+		 * untrusted modules can benefit from auto-initialization of IO.
 		 */
         AccessController.doPrivileged(
 	        new PrivilegedAction<Object>() {
 	            public Object run() {
-	            	
+
 					// Loop through class hierarchy and collect declared fields
 					List<Field> fieldList = new ArrayList<>();
 					Class clazz = AbstractSignalPathModule.this.getClass();
@@ -109,7 +110,7 @@ public abstract class AbstractSignalPathModule implements IEventRecipient, IDayL
 					} while (clazz != null);
 
 					Field[] fields = fieldList.toArray(new Field[fieldList.size()]);
-	    			
+
 	    			// Sort by field name
 	    			Arrays.sort(fields, new Comparator<Field>() {
 						@Override
@@ -570,8 +571,8 @@ public abstract class AbstractSignalPathModule implements IEventRecipient, IDayL
 	 * @param request The RuntimeRequest, which should contain at least the key "type", holding a String and indicating the type of request
 	 */
 	public Future<RuntimeResponse> onRequest(final RuntimeRequest request, RuntimeRequest.PathReader path) {
-		// Add event to message queue, don't do it right away 
-		FeedEvent<RuntimeRequest, AbstractSignalPathModule> fe = new FeedEvent<>(request, getGlobals().isRealtime() ? request.getTimestamp() : getGlobals().time, this);
+		// Add event to message queue, don't do it right away
+		FeedEvent<RuntimeRequest, AbstractSignalPathModule> fe = new FeedEvent<>(request, getGlobals().isRealtime() ? request.getTimestampAsDate() : getGlobals().time, this);
 
 		final RuntimeResponse response = new RuntimeResponse();
 		response.put("request", request);

@@ -1,5 +1,6 @@
 package com.unifina.service
 
+import com.streamr.client.protocol.message_layer.StreamMessage
 import com.unifina.api.*
 import com.unifina.domain.data.Stream
 import com.unifina.domain.marketplace.Product
@@ -14,7 +15,51 @@ class ProductService {
 	ApiService apiService
 	PermissionService permissionService
 	SubscriptionService subscriptionService
+	CassandraService cassandraService
 	Random random = ThreadLocalRandom.current()
+
+	static class StreamWithLatestMessage {
+		Stream stream
+		StreamMessage latestMessage
+		StreamWithLatestMessage(Stream s, StreamMessage latest) {
+			this.stream = s
+			this.latestMessage = latest
+		}
+		String toString() {
+			return String.format("StreamWithLatestMessage[stream=%s, latestMessage=%s]", stream, latestMessage)
+		}
+	}
+
+	static class StaleProduct {
+		Product product
+		final List<StreamWithLatestMessage> streams = new ArrayList<>()
+		StaleProduct(Product p) {
+			this.product = p
+		}
+		String toString() {
+			return String.format("StaleProduct[product=%s, streams=%s]", product, streams.toString())
+		}
+	}
+
+	List<StaleProduct> findStaleProducts(List<Product> products, final Date threshold) {
+		final List<StaleProduct> staleProducts = new ArrayList<>()
+		for (Product p : products) {
+			StaleProduct stale = new StaleProduct(p)
+			for (Stream s : p.getStreams()) {
+				StreamMessage msg = cassandraService.getLatestFromAllPartitions(s)
+				if (msg != null && msg.getTimestampAsDate().before(threshold)) {
+					stale.streams.add(new StreamWithLatestMessage(s, msg))
+				} else if (msg == null) {
+					stale.streams.add(new StreamWithLatestMessage(s, null))
+				}
+			}
+			if (!stale.streams.isEmpty()) {
+				staleProducts.add(stale)
+			}
+		}
+
+		return staleProducts
+	}
 
 	List<Product> relatedProducts(Product product, int maxResults, SecUser user) {
 		// find Product.owner's other products
@@ -64,6 +109,9 @@ class ProductService {
 
 	Product create(CreateProductCommand command, SecUser currentUser)
 			throws ValidationException, NotPermittedException {
+		if (command.name == null || command.name.trim() == "") {
+			command.name = Product.DEFAULT_NAME
+		}
 		if (!command.validate()) {
 			throw new ValidationException(command.errors)
 		}

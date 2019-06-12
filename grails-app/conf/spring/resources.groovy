@@ -30,6 +30,6 @@ beans = {
 	)
 
 	streamrClient(StreamrClientProvider,
-		(String) grailsApplication.config.streamr.http.api.server
+		(String) grailsApplication.config.streamr.http.api.url
 	)
 }

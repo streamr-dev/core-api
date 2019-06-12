@@ -3,10 +3,13 @@ package com.unifina.signalpath
 import com.unifina.BeanMockingSpecification
 import com.unifina.domain.security.SecUser
 import com.unifina.domain.signalpath.Canvas
+import com.unifina.exceptions.CyclicCanvasModuleExceptionMessage
 import com.unifina.service.ModuleService
 import com.unifina.utils.Globals
 import com.unifina.utils.GlobalsFactory
+import grails.test.mixin.Mock
 
+@Mock(Canvas)
 class SignalPathSpec extends BeanMockingSpecification {
 
 	def setup() {
@@ -52,6 +55,34 @@ class SignalPathSpec extends BeanMockingSpecification {
 		signalPath.setParentSignalPath(top)
 		then:
 		signalPath.getRootSignalPath() == top
+	}
+
+	def "cyclic dependency detection"() {
+		Canvas rootCanvas = new Canvas()
+		rootCanvas.id = "root"
+		rootCanvas.save(validate: false)
+
+		SignalPath rootSignalPath = new SignalPath(true)
+		rootSignalPath.init()
+		rootSignalPath.configure([canvasId: rootCanvas.id])
+
+		SignalPath subSignalPath = new SignalPath(false)
+		subSignalPath.init()
+		subSignalPath.setParentSignalPath(rootSignalPath)
+
+		when:
+		subSignalPath.configure([
+			hash: 123,
+			params: [
+		    	[name: "canvas", value: "root"]
+			]
+		])
+
+		then:
+		ModuleException ex = thrown()
+
+		ex.getModuleExceptions()[0] instanceof CyclicCanvasModuleExceptionMessage
+		ex.getModuleExceptions()[0].getModuleId() == 123
 	}
 
 }

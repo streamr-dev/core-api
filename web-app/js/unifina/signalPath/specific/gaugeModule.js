@@ -51,7 +51,10 @@ SignalPath.GaugeModule = function(data,canvas,prot) {
 		if (area==null || area.length==0) {
 			// Create the chart area
 			var areaId = "chartArea_"+(new Date()).getTime();
-			area = $("<div id='"+areaId+"' class='chartDrawArea'></div>");
+			area = $('<div/>', {
+				id: areaId,
+				class: 'chartDrawArea',
+			})
 			prot.body.append(area);
 			
 			resizeChart(prot.div.width(),prot.div.height());
