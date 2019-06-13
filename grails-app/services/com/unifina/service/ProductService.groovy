@@ -41,12 +41,23 @@ class ProductService {
 		}
 	}
 
-	List<StaleProduct> findStaleProducts(List<Product> products, final Date threshold) {
+	private Date addThresholdHours(Date date, int hours) {
+		Calendar calendar = Calendar.getInstance()
+		calendar.setTime(date)
+		calendar.add(Calendar.HOUR_OF_DAY, -hours)
+		return calendar.getTime()
+	}
+
+	List<StaleProduct> findStaleProducts(List<Product> products, final Date now) {
 		final List<StaleProduct> staleProducts = new ArrayList<>()
 		for (Product p : products) {
 			StaleProduct stale = new StaleProduct(p)
 			for (Stream s : p.getStreams()) {
-				StreamMessage msg = cassandraService.getLatestFromAllPartitions(s)
+				if (s.inactivityThresholdHours == 0) {
+					continue
+				}
+				final StreamMessage msg = cassandraService.getLatestFromAllPartitions(s)
+				final Date threshold = addThresholdHours(now, s.inactivityThresholdHours)
 				if (msg != null && msg.getTimestampAsDate().before(threshold)) {
 					stale.streams.add(new StreamWithLatestMessage(s, msg))
 				} else if (msg == null) {

@@ -13,7 +13,6 @@ import com.unifina.domain.security.Permission
 import com.unifina.domain.security.SecUser
 import grails.test.mixin.Mock
 import grails.test.mixin.TestFor
-import org.apache.commons.lang.time.DateUtils
 import spock.lang.Specification
 import spock.lang.Unroll
 
@@ -75,7 +74,7 @@ class ProductServiceSpec extends Specification {
 	}
 
 	Stream newStream(String id, String name) {
-		Stream s = new Stream(name: name)
+		Stream s = new Stream(name: name, inactivityThresholdHours: 48)
 		s.id = id
 		return s
 	}
@@ -107,6 +106,10 @@ class ProductServiceSpec extends Specification {
 		Stream s5 = newStream("s5", "Time Stream") // This stream has a message two hours ago
 		Product e = newProduct("e", "Time machine", s5)
 		StreamMessage m5 = buildMsg("s5", 1, newDate(2*60*60*1000), new HashMap())
+		// Not stale product. inactivityThresholdHours 0.
+		Stream s12 = newStream("s12", "Never stale stream") // No messages
+		s12.inactivityThresholdHours = 0
+		Product j = newProduct("j", "Not stale product", s12)
 
 		// Stale streams and products
 		// Stale product 1
@@ -163,8 +166,7 @@ class ProductServiceSpec extends Specification {
 		service.cassandraService = Mock(CassandraService)
 
 		when:
-		Date threshold = DateUtils.addDays(new Date(), -2)
-		List<ProductService.StaleProduct> results = service.findStaleProducts(Lists.newArrayList(a, b, c, d, e, f, g, h, i), threshold)
+		List<ProductService.StaleProduct> results = service.findStaleProducts(Lists.newArrayList(a, b, c, d, e, f, g, h, i, j), new Date())
 
 		then:
 		1 * service.cassandraService.getLatestFromAllPartitions(s1) >> m1
