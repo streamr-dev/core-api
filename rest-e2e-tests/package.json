@@ -9,12 +9,12 @@
   "author": "",
   "license": "AGPL",
   "dependencies": {
-    "ajv": "^6.4.0",
-    "chai": "^4.1.2",
-    "ethereumjs-util": "^5.1.5",
-    "keythereum": "^1.0.3",
-    "mocha": "^5.1.0",
-    "node-fetch": "^2.1.2",
-    "web3": "^1.0.0-beta.34"
+    "ajv": "^6.10.0",
+    "chai": "^4.2.0",
+    "ethereumjs-util": "^6.1.0",
+    "keythereum": "^1.0.4",
+    "mocha": "^6.1.4",
+    "node-fetch": "^2.6.0",
+    "web3": "^1.0.0-beta.55"
   }
 }
