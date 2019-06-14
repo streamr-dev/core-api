@@ -220,7 +220,7 @@ describe('Subscriptions API', () => {
             const signedChallenge = web3.eth.accounts.sign(challenge.challenge, privateKey)
 
             await submitChallenge(challenge, signedChallenge.signature)
-        }, 5000)
+        })
 
         it('requires authentication', async () => {
             const response = await Streamr.api.v1.subscriptions

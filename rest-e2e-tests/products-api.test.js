@@ -935,7 +935,7 @@ describe('Products API', () => {
                     .withAuthToken(AUTH_TOKEN)
                     .call()
                 json = await response.json()
-            }, 5000)
+            })
 
             it('responds with 200', () => {
                 assert.equal(response.status, 200)
