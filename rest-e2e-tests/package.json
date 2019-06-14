@@ -12,6 +12,7 @@
     "ajv": "^6.10.0",
     "chai": "^4.2.0",
     "ethereumjs-util": "^6.1.0",
+    "form-data": "^2.3.3",
     "keythereum": "^1.0.4",
     "mocha": "^6.1.4",
     "node-fetch": "^2.6.0",
