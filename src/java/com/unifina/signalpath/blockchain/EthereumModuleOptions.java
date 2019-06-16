@@ -9,8 +9,7 @@ import java.io.Serializable;
 import java.util.Map;
 
 public class EthereumModuleOptions implements Serializable {
-	private String network = "ropsten";
-	//MapTraversal.getString(Holders.getConfig(), "streamr.ethereum.defaultNetwork");
+	private String network = MapTraversal.getString(Holders.getConfig(), "streamr.ethereum.defaultNetwork");
 	private double gasPriceWei = 20e9; // 20 Gwei
 
 	void writeTo(ModuleOptions options) {

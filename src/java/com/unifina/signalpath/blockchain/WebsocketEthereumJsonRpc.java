@@ -47,6 +47,7 @@ public class WebsocketEthereumJsonRpc extends EthereumJsonRpc {
 	public WebsocketEthereumJsonRpc(String url, JsonRpcResponseHandler handler) throws URISyntaxException, IOException, DeploymentException {
 		super(url,handler);
 		wsEndpoint = new EthereumRpcEndpoint();
+		open();
 	}
 
 	public void rpcCall(String method, List params, int callId){

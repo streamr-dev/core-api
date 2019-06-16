@@ -31,6 +31,7 @@ class ContractEventPoller implements Closeable, Runnable, JsonRpcResponseHandler
 	private final String contractAddress;
 	private final EventsListener listener;
 	private String filterId;
+	private boolean keepPolling = false;
 
 
 	ContractEventPoller(String rpcUrl, String contractAddress, EventsListener listener) throws DeploymentException, IOException, URISyntaxException {
@@ -42,7 +43,7 @@ class ContractEventPoller implements Closeable, Runnable, JsonRpcResponseHandler
 	@Override
 	public void run() {
 		newFilter();
-		while (filterId != null) {
+		while (keepPolling) {
 			pollChanges();
 			try {
 				Thread.sleep(POLL_INTERVAL_IN_MS);
@@ -66,6 +67,7 @@ class ContractEventPoller implements Closeable, Runnable, JsonRpcResponseHandler
 		List params = singletonList(singletonMap("address", contractAddress));
 		try {
 			rpc.rpcCall("eth_newFilter", params, ID_ADDFILTER);
+			keepPolling = true;
 		} catch (Exception e) {
 			listener.onError(e.getMessage());
 			throw new RuntimeException(e);
@@ -87,6 +89,10 @@ class ContractEventPoller implements Closeable, Runnable, JsonRpcResponseHandler
 
 	}
 	private synchronized void pollChanges() {
+		if(filterId == null){
+			log.info("pollChanges called before filter is set. Doing nothing.");
+			return;
+		}
 		try {
 			log.info(String.format("Polling filter '%s'.", filterId));
 			rpc.rpcCall("eth_getFilterChanges", singletonList(filterId), ID_POLLFILTER);
@@ -149,6 +155,7 @@ class ContractEventPoller implements Closeable, Runnable, JsonRpcResponseHandler
 			listener.onError("Unable to uninstall filter " + id);
 			throw new RuntimeException("Unable to uninstall filter " + id);
 		}
+		keepPolling = false;
 	}
 
 	private static boolean filterDoesNotExist(int code) {
@@ -160,8 +167,8 @@ class ContractEventPoller implements Closeable, Runnable, JsonRpcResponseHandler
 		int id = resp.getInt("id");
 		switch(id){
 			case ID_ADDFILTER: processAddFilterResponse(resp); return;
-			case ID_POLLFILTER: processPollChangesResponse(resp); return;
 			case ID_REMOVEFILTER: processUninstallFilterResponse(resp); return;
+			case ID_POLLFILTER: processPollChangesResponse(resp); return;
 		}
 		throw new RuntimeException("Unknown RPC id "+id);
 	}

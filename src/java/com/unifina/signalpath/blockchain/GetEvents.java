@@ -86,7 +86,7 @@ public class GetEvents extends AbstractSignalPathModule implements EventsListene
 
 	@Override
 	public void onStart() {
-		String rpcUrl = ethereumOptions.getRpcUrl();
+		String rpcUrl = ethereumOptions.getWebsocketRpcUri();
 		String contractAddress = contract.getValue().getAddress();
 		try {
 			contractEventPoller = new ContractEventPoller(rpcUrl, contractAddress, this);
