@@ -35,7 +35,7 @@ class ContractEventPoller implements Closeable, Runnable, JsonRpcResponseHandler
 
 
 	ContractEventPoller(String rpcUrl, String contractAddress, EventsListener listener) throws DeploymentException, IOException, URISyntaxException {
-		this.rpc = new WebsocketEthereumJsonRpc(rpcUrl, this);
+		this.rpc = rpcUrl.startsWith("http") ? new HttpEthereumJsonRpc(rpcUrl, this) : new WebsocketEthereumJsonRpc(rpcUrl, this);
 		this.contractAddress = contractAddress;
 		this.listener = listener;
 	}

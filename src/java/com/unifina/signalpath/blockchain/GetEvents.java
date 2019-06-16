@@ -87,6 +87,10 @@ public class GetEvents extends AbstractSignalPathModule implements EventsListene
 	@Override
 	public void onStart() {
 		String rpcUrl = ethereumOptions.getWebsocketRpcUri();
+		if(rpcUrl == null){
+			rpcUrl = ethereumOptions.getRpcUrl();
+			log.warn("No websockets URI found in config for network "+ethereumOptions.getNetwork()+". Trying to run GetEvents over https RPC: "+rpcUrl);
+		}
 		String contractAddress = contract.getValue().getAddress();
 		try {
 			contractEventPoller = new ContractEventPoller(rpcUrl, contractAddress, this);
