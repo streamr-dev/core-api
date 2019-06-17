@@ -4,11 +4,14 @@ import com.unifina.signalpath.ModuleOption;
 import com.unifina.signalpath.ModuleOptions;
 import com.unifina.utils.MapTraversal;
 import grails.util.Holders;
+import org.apache.log4j.Logger;
 
 import java.io.Serializable;
 import java.util.Map;
 
 public class EthereumModuleOptions implements Serializable {
+	private static final Logger log = Logger.getLogger(EthereumModuleOptions.class);
+
 	private String network = MapTraversal.getString(Holders.getConfig(), "streamr.ethereum.defaultNetwork");
 	private double gasPriceWei = 20e9; // 20 Gwei
 
@@ -74,7 +77,7 @@ public class EthereumModuleOptions implements Serializable {
 	public String getWebsocketRpcUri() {
 		String url = MapTraversal.getString(Holders.getConfig(), "streamr.ethereum.wss." + network);
 		if (url == null) {
-			throw new RuntimeException("No rpcUrl found for Ethereum network " + network);
+			log.warn("No websockets URI found for Ethereum network " + network);
 		}
 		return url;
 	}

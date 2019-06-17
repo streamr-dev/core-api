@@ -221,6 +221,9 @@ public class GetEvents extends AbstractSignalPathModule implements EventsListene
 	@Override
 	protected void onConfiguration(Map<String, Object> config) {
 		super.onConfiguration(config);
+		ModuleOptions options = ModuleOptions.get(config);
+		ethereumOptions = EthereumModuleOptions.readFrom(options);
+
 		web3j = getWeb3j();
 		outputsByEvent = new HashMap<>();
 		web3jEvents = new HashMap<String, Event>();
@@ -252,8 +255,6 @@ public class GetEvents extends AbstractSignalPathModule implements EventsListene
 			}
 		}
 
-		ModuleOptions options = ModuleOptions.get(config);
-		ethereumOptions = EthereumModuleOptions.readFrom(options);
 	}
 
 	@Override

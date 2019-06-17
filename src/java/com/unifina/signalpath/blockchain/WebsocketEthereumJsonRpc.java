@@ -28,13 +28,12 @@ public class WebsocketEthereumJsonRpc extends EthereumJsonRpc {
 
 		@OnOpen
 		public void onOpen(Session session) {
-			log.info("opening websocket");
-		//	userSession = session;
+			log.info("opening websocket "+session);
 		}
 
 		@OnMessage
 		public void onMessage(String message) {
-			JSONObject jso = new JSONObject((message));
+			JSONObject jso = new JSONObject(message);
 			handler.processResponse(jso);
 		}
 
@@ -50,6 +49,7 @@ public class WebsocketEthereumJsonRpc extends EthereumJsonRpc {
 		open();
 	}
 
+	@Override
 	public void rpcCall(String method, List params, int callId){
 		wsEndpoint.sendMessage(formRequestBody(method, params, callId));
 	}
