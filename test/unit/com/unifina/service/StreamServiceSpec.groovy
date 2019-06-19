@@ -460,7 +460,7 @@ class StreamServiceSpec extends Specification {
 			idInService: "0x26e1ae3f5efe8a01eca8c2e9d3c32702cf4bead6").save(failOnError: true, validate: false)
 		SecUser user3 = new SecUser(id: 3, username: "u3").save(failOnError: true, validate: false)
 
-		// User with key but no write permission - this key should not be returned by the query
+		// User with key but no read permission - this key should not be returned by the query
 		SecUser userWithKeyButNoPermission = new SecUser(id: 4, username: "u4").save(failOnError: true, validate: false)
 		new IntegrationKey(user: userWithKeyButNoPermission, service: IntegrationKey.Service.ETHEREUM_ID,
 			idInService: "0x12345e3f5efe8a01eca8c2e9d3c32702cf4bead6").save(failOnError: true, validate: false)
