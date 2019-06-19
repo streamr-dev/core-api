@@ -23,7 +23,11 @@ public class WebsocketEthereumJsonRpc extends EthereumJsonRpc {
 
 		@OnClose
 		public void onClose(Session session) throws IOException {
-			session.close();
+			log.info("session "+session + "was closed");
+		}
+		@OnError
+		public void onError(Session session, Throwable t){
+			log.error("session "+session+ " reported error "+t.getMessage());
 		}
 
 		@OnOpen
@@ -58,11 +62,10 @@ public class WebsocketEthereumJsonRpc extends EthereumJsonRpc {
 	public void open() throws URISyntaxException, IOException, DeploymentException {
 		WebSocketContainer container = ContainerProvider.getWebSocketContainer();
 		userSession = container.connectToServer(wsEndpoint, new URI(url));
-		wsEndpoint.onOpen(userSession);
 	}
 
 	public void close() throws IOException {
-		wsEndpoint.onClose(userSession);
+		userSession.close();
 	}
 }
 
