@@ -18,6 +18,7 @@ node_modules
 .slcache/
 plugin.xml
 hs_err_pid*
+replay_pid*
 web-app/webpack-bundles/*
 npm-debug.log*
 tomcat.8081
