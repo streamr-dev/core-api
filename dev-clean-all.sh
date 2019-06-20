@@ -9,10 +9,8 @@ fi
 
 files=(
 target
-node_modules
 .slcache
 "$HOME/.grails"
-"$HOME/.m2"
 )
 
 for file in "${files[@]}"; do

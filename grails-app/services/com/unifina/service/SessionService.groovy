@@ -19,15 +19,9 @@ class SessionService {
 	private static final Logger log = Logger.getLogger(SessionService)
 
 	void updateUsersLoginDate(SecUser user, Date date) {
-		Date originalDate = user.lastLogin
-		user.lastLogin = date
-		try {
-			user.save(failOnError: true, validate: false, flush: true)
-		} catch (StaleObjectStateException e) {
-			log.info("Exception ignored while updating user login date: ${e}")
-			// rollback field to make the instance not-dirty
-			user.lastLogin = originalDate
-		}
+		// Using update query to avoid StaleObjectStateException in case of concurrent logins.
+		// Not unit testable, but there's coverage in end-to-end tests.
+		SecUser.executeUpdate("update SecUser u set u.lastLogin = ? where u.id = ?", [date, user.id])
 	}
 
 	SessionToken generateToken(Userish userish) {

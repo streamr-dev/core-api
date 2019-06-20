@@ -18,27 +18,13 @@ class SessionServiceSpec extends Specification {
 
 	void setup() {
 		keyValueStoreService = service.keyValueStoreService = Mock(KeyValueStoreService)
-	}
 
-	void "updateUsersLoginDate()"() {
-		SecUser user = new SecUser().save(failOnError: true, validate: false)
-		Date date = new Date(1547210776)
-		when:
-		service.updateUsersLoginDate(user, date)
-		then:
-		SecUser.get(user.id).lastLogin == date
-	}
-
-	void "updateUsersLoginDate() ignores StaleObjectStateException"() {
-		SecUser user = new SecUser(lastLogin: new Date(0)).save(failOnError: true, validate: false)
-		Date date = new Date(1547210776)
-		user.metaClass.save = {Map args->
-			throw new StaleObjectStateException(user.class.name, 123L)
+		// Must mock executeUpdate(String,List) because HQL is not supported in unit test GORM
+		// Used in SessionService#updateUsersLoginDate()
+		def secUserMock = mockFor(SecUser)
+		secUserMock.demand.static.executeUpdate(1) {String s, List p->
+			SecUser.get(p[1]).lastLogin = p[0]
 		}
-		when:
-		service.updateUsersLoginDate(user, date)
-		then:
-		SecUser.get(user.id).lastLogin.equals(new Date(0))
 	}
 
 	void "generateToken() should generate session token from user"() {
