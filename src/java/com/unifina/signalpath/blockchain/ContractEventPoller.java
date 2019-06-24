@@ -35,15 +35,14 @@ class ContractEventPoller implements Closeable, Runnable, JsonRpcResponseHandler
 
 
 	ContractEventPoller(String rpcUrl, String contractAddress, EventsListener listener) {
-		if(rpcUrl.startsWith("http")){
+		if (rpcUrl.startsWith("http")) {
 			rpc = new HttpEthereumJsonRpc(rpcUrl, this);
-		}
-		else{
+		} else {
 			rpc = new WebsocketEthereumJsonRpc(rpcUrl, this);
 			try {
 				boolean opened = ((WebsocketEthereumJsonRpc) rpc).openConnectionRetryIfFail();
-				if(!opened){
-					throw new RuntimeException("Couldnt open connection to "+rpcUrl);
+				if (!opened) {
+					throw new RuntimeException("Couldnt open connection to " + rpcUrl);
 				}
 			} catch (InterruptedException e) {
 				throw new RuntimeException(e);
@@ -101,16 +100,16 @@ class ContractEventPoller implements Closeable, Runnable, JsonRpcResponseHandler
 			filterId, contractAddress, id));
 
 	}
+
 	private synchronized void pollChanges() {
-		if(filterId == null){
+		if (filterId == null) {
 			log.info("pollChanges called before filter is set. Doing nothing.");
 			return;
 		}
 		try {
 			log.info(String.format("Polling filter '%s'.", filterId));
 			rpc.rpcCall("eth_getFilterChanges", singletonList(filterId), ID_POLLFILTER);
-		}
-		catch (HttpEthereumJsonRpc.ErrorObjectException e) {
+		} catch (HttpEthereumJsonRpc.ErrorObjectException e) {
 			if (filterDoesNotExist(e.getCode())) {
 				log.info("Resetting filter...");
 				filterId = null;
@@ -120,12 +119,12 @@ class ContractEventPoller implements Closeable, Runnable, JsonRpcResponseHandler
 			}
 		} catch (HttpEthereumJsonRpc.RPCException | JSONException e) {
 			listener.onError(e.getMessage());
-		}
-		catch(Exception e){
+		} catch (Exception e) {
 			listener.onError(e.getMessage());
 			throw new RuntimeException(e);
 		}
 	}
+
 	/**
 	 * https://github.com/ethereum/wiki/wiki/JSON-RPC#eth_getfilterchanges
 	 */
@@ -148,13 +147,13 @@ class ContractEventPoller implements Closeable, Runnable, JsonRpcResponseHandler
 
 		try {
 			rpc.rpcCall("eth_uninstallFilter", singletonList(id), ID_REMOVEFILTER);
-		}
-		catch(Exception e){
+		} catch (Exception e) {
 			listener.onError(e.getMessage());
 			throw new RuntimeException(e);
 		}
 
 	}
+
 	private void processUninstallFilterResponse(JSONObject response) {
 		boolean result;
 
@@ -178,11 +177,17 @@ class ContractEventPoller implements Closeable, Runnable, JsonRpcResponseHandler
 	@Override
 	public void processResponse(JSONObject resp) {
 		int id = resp.getInt("id");
-		switch(id){
-			case ID_ADDFILTER: processAddFilterResponse(resp); return;
-			case ID_REMOVEFILTER: processUninstallFilterResponse(resp); return;
-			case ID_POLLFILTER: processPollChangesResponse(resp); return;
+		switch (id) {
+			case ID_ADDFILTER:
+				processAddFilterResponse(resp);
+				return;
+			case ID_REMOVEFILTER:
+				processUninstallFilterResponse(resp);
+				return;
+			case ID_POLLFILTER:
+				processPollChangesResponse(resp);
+				return;
 		}
-		throw new RuntimeException("Unknown RPC id "+id);
+		throw new RuntimeException("Unknown RPC id " + id);
 	}
 }
