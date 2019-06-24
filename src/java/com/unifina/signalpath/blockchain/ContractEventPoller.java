@@ -34,8 +34,21 @@ class ContractEventPoller implements Closeable, Runnable, JsonRpcResponseHandler
 	private boolean keepPolling = false;
 
 
-	ContractEventPoller(String rpcUrl, String contractAddress, EventsListener listener) throws DeploymentException, IOException, URISyntaxException {
-		this.rpc = rpcUrl.startsWith("http") ? new HttpEthereumJsonRpc(rpcUrl, this) : new WebsocketEthereumJsonRpc(rpcUrl, this);
+	ContractEventPoller(String rpcUrl, String contractAddress, EventsListener listener) {
+		if(rpcUrl.startsWith("http")){
+			rpc = new HttpEthereumJsonRpc(rpcUrl, this);
+		}
+		else{
+			rpc = new WebsocketEthereumJsonRpc(rpcUrl, this);
+			try {
+				boolean opened = ((WebsocketEthereumJsonRpc) rpc).openConnectionRetryIfFail();
+				if(!opened){
+					throw new RuntimeException("Couldnt open connection to "+rpcUrl);
+				}
+			} catch (InterruptedException e) {
+				throw new RuntimeException(e);
+			}
+		}
 		this.contractAddress = contractAddress;
 		this.listener = listener;
 	}
