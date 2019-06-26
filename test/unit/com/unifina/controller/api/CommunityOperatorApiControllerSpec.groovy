@@ -17,7 +17,7 @@ class CommunityOperatorApiControllerSpec extends Specification {
 		controller.communityOperatorService = Mock(CommunityOperatorService)
     }
 
-    void "test stats()"() {
+    void "test stats"() {
 		when:
 		request.method = "GET"
 		params.communityAddress = communityAddress
@@ -30,7 +30,7 @@ class CommunityOperatorApiControllerSpec extends Specification {
 		response.status == 200
     }
 
-	void "test stats() service returns 500 internal server error"() {
+	void "test stats service returns 500 internal server error"() {
 		when:
 		request.method = "GET"
 		params.communityAddress = communityAddress
@@ -43,7 +43,7 @@ class CommunityOperatorApiControllerSpec extends Specification {
 		response.text == ""
 	}
 
-	void "stats() bad request on invalid community address input"() {
+	void "stats bad request on invalid community address input"() {
 		when:
 		request.method = "GET"
 		params.communityAddress = "0x123"
@@ -57,7 +57,7 @@ class CommunityOperatorApiControllerSpec extends Specification {
 		e.code == "PARAMETER_MISSING"
 	}
 
-	void "test members()"() {
+	void "test members"() {
 		when:
 		request.method = "GET"
 		params.communityAddress = communityAddress
@@ -70,7 +70,7 @@ class CommunityOperatorApiControllerSpec extends Specification {
 		response.status == 200
 	}
 
-	void "members() bad request on invalid community address input"() {
+	void "members bad request on invalid community address input"() {
 		when:
 		request.method = "GET"
 		params.communityAddress = "0x123"
@@ -84,7 +84,7 @@ class CommunityOperatorApiControllerSpec extends Specification {
 		e.code == "PARAMETER_MISSING"
 	}
 
-	void "test memberStats()"() {
+	void "test memberStats"() {
 		when:
 		request.method = "GET"
 		params.communityAddress = communityAddress
@@ -98,7 +98,7 @@ class CommunityOperatorApiControllerSpec extends Specification {
 		response.status == 200
 	}
 
-	void "memberStats() bad request on invalid community address input"() {
+	void "memberStats bad request on invalid community address input"() {
 		when:
 		request.method = "GET"
 		params.communityAddress = "0x123"
@@ -112,7 +112,7 @@ class CommunityOperatorApiControllerSpec extends Specification {
 		e.code == "PARAMETER_MISSING"
 	}
 
-	void "memberStats() bad request on invalid member address input"() {
+	void "memberStats bad request on invalid member address input"() {
 		when:
 		request.method = "GET"
 		params.communityAddress = communityAddress

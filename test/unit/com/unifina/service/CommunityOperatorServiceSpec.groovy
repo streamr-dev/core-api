@@ -26,7 +26,7 @@ class CommunityOperatorServiceSpec extends Specification {
 		service.client = Mock(HttpClient)
 	}
 
-	void "test execute()"() {
+	void "test execute"() {
 		setup:
 		String expected = """{"result":[]}"""
 		when:
@@ -43,7 +43,7 @@ class CommunityOperatorServiceSpec extends Specification {
 		result.statusCode == 200
 	}
 
-	void "test execute() http response entity is null"() {
+	void "test execute http response entity is null"() {
 		setup:
 		String expected = ""
 		when:
@@ -58,7 +58,7 @@ class CommunityOperatorServiceSpec extends Specification {
 		result.statusCode == 400
 	}
 
-	void "test execute() returns 400"() {
+	void "test execute returns 400"() {
 		setup:
 		String expected = """{"error":"bad community address format"}"""
 		when:
@@ -86,7 +86,7 @@ class CommunityOperatorServiceSpec extends Specification {
 		e.statusCode == 500
 	}
 
-	void "test execute() returns 404"() {
+	void "test execute returns 404"() {
 		setup:
 		String expected = """{"error":"community address not found"}"""
 		when:
@@ -103,7 +103,7 @@ class CommunityOperatorServiceSpec extends Specification {
 		result.statusCode == 404
 	}
 
-	void "test execute() returns 500"() {
+	void "test execute returns 500"() {
 		setup:
 		String expected = ""
 		when:
@@ -117,7 +117,7 @@ class CommunityOperatorServiceSpec extends Specification {
 		result.statusCode == 500
 	}
 
-	void "test execute() returns unknown status code"() {
+	void "test execute returns unknown status code"() {
 		setup:
 		String expected = ""
 		when:
