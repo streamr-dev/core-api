@@ -28,7 +28,7 @@ class CommunityOperatorService {
 		int statusCode
 	}
 
-	protected ProxyResponse execute(String url) {
+	protected ProxyResponse proxy(String url) {
 		ProxyResponse result = new ProxyResponse()
 		CloseableHttpResponse response
 		try {
@@ -55,16 +55,16 @@ class CommunityOperatorService {
 
 	ProxyResponse stats(String communityAddress) {
 		String url = String.format("%s%s%s", baseUrl, communityAddress, "/stats")
-		return execute(url)
+		return proxy(url)
 	}
 
 	ProxyResponse members(String communityAddress) {
 		String url = String.format("%s%s%s", baseUrl, communityAddress, "/members")
-		return execute(url)
+		return proxy(url)
 	}
 
 	ProxyResponse memberStats(String communityAddress, String memberAddress) {
 		String url = String.format("%s%s%s%s", baseUrl, communityAddress, "/members/", memberAddress)
-		return execute(url)
+		return proxy(url)
 	}
 }

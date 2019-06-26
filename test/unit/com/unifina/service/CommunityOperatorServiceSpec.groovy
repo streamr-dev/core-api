@@ -30,7 +30,7 @@ class CommunityOperatorServiceSpec extends Specification {
 		setup:
 		String expected = """{"result":[]}"""
 		when:
-		CommunityOperatorService.ProxyResponse result = service.execute(url)
+		CommunityOperatorService.ProxyResponse result = service.proxy(url)
 		then:
 		1 * service.client.execute(_ as HttpGet) >> response
 		1 * response.getStatusLine() >> status
@@ -47,7 +47,7 @@ class CommunityOperatorServiceSpec extends Specification {
 		setup:
 		String expected = ""
 		when:
-		CommunityOperatorService.ProxyResponse result = service.execute(url)
+		CommunityOperatorService.ProxyResponse result = service.proxy(url)
 		then:
 		1 * service.client.execute(_ as HttpGet) >> response
 		1 * response.getStatusLine() >> status
@@ -62,7 +62,7 @@ class CommunityOperatorServiceSpec extends Specification {
 		setup:
 		String expected = """{"error":"bad community address format"}"""
 		when:
-		CommunityOperatorService.ProxyResponse result = service.execute(url)
+		CommunityOperatorService.ProxyResponse result = service.proxy(url)
 		then:
 		1 * service.client.execute(_ as HttpGet) >> response
 		1 * response.getStatusLine() >> status
@@ -77,7 +77,7 @@ class CommunityOperatorServiceSpec extends Specification {
 
 	void "test community server not responding"() {
 		when:
-		service.execute(url)
+		service.proxy(url)
 		then:
 		1 * service.client.execute(_ as HttpGet) >> { throw new ConnectException("mocked: server down") }
 		def e = thrown(ProxyException)
@@ -90,7 +90,7 @@ class CommunityOperatorServiceSpec extends Specification {
 		setup:
 		String expected = """{"error":"community address not found"}"""
 		when:
-		CommunityOperatorService.ProxyResponse result = service.execute(url)
+		CommunityOperatorService.ProxyResponse result = service.proxy(url)
 		then:
 		1 * service.client.execute(_ as HttpGet) >> response
 		1 * response.getStatusLine() >> status
@@ -107,7 +107,7 @@ class CommunityOperatorServiceSpec extends Specification {
 		setup:
 		String expected = ""
 		when:
-		CommunityOperatorService.ProxyResponse result = service.execute(url)
+		CommunityOperatorService.ProxyResponse result = service.proxy(url)
 		then:
 		1 * service.client.execute(_ as HttpGet) >> response
 		1 * response.getStatusLine() >> status
@@ -121,7 +121,7 @@ class CommunityOperatorServiceSpec extends Specification {
 		setup:
 		String expected = ""
 		when:
-		CommunityOperatorService.ProxyResponse result = service.execute(url)
+		CommunityOperatorService.ProxyResponse result = service.proxy(url)
 		then:
 		1 * service.client.execute(_ as HttpGet) >> response
 		1 * response.getStatusLine() >> status
