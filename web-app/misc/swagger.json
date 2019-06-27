@@ -409,6 +409,113 @@
         }
       }
     },
+    "/communities/{communityAddress}/stats": {
+      "get": {
+        "summary": "Proxy calls to to community product server.",
+        "description": "Return operator stats",
+        "tags": [
+          "communities"
+        ],
+        "parameters": [
+          {
+            "name": "communityAddress",
+            "in": "path",
+            "description": "Ethereum address of the community",
+            "required": true,
+            "type": "string",
+            "default": false
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success"
+          },
+          "400": {
+            "description": "Required parameters missing"
+          },
+          "404": {
+            "description": "Community stats not found by community address"
+          },
+          "500": {
+            "description": "Community product server is not responding"
+          }
+        }
+      }
+    },
+    "/communities/{communityAddress}/members": {
+      "get": {
+        "summary": "Proxy calls to to community product server.",
+        "description": "Return a list of members",
+        "tags": [
+          "communities"
+        ],
+        "parameters": [
+          {
+            "name": "communityAddress",
+            "in": "path",
+            "description": "Ethereum address of the community",
+            "required": true,
+            "type": "string",
+            "default": false
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success"
+          },
+          "400": {
+            "description": "Required parameters missing"
+          },
+          "404": {
+            "description": "Community stats not found by community address"
+          },
+          "500": {
+            "description": "Community product server is not responding"
+          }
+        }
+      }
+    },
+    "/communities/{communityAddress}/members/{memberAddress}": {
+      "get": {
+        "summary": "Proxy calls to to community product server.",
+        "description": "Return stats for individiual members",
+        "tags": [
+          "communities"
+        ],
+        "parameters": [
+          {
+            "name": "communityAddress",
+            "in": "path",
+            "description": "Ethereum address of the community",
+            "required": true,
+            "type": "string",
+            "default": false
+          },
+          {
+            "name": "memberAddress",
+            "in": "path",
+            "description": "Ethereum address of the member",
+            "required": true,
+            "type": "string",
+            "default": false
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success"
+          },
+          "400": {
+            "description": "Required parameters missing"
+          },
+          "404": {
+            "description": "Community stats not found by community or member address"
+          },
+          "500": {
+            "description": "Community product server is not responding"
+          }
+        }
+      }
+    },
     "/login/challenge/{address}": {
       "post": {
         "summary": "Generate challenge",
