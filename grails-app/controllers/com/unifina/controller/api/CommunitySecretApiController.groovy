@@ -39,7 +39,7 @@ class CommunitySecretApiController {
 
 	// curl -v -H "Authorization: token tester1-api-key" http://localhost:8081/streamr-core/api/v1/communities/0x6c90aece04198da2d5ca9b956b8f95af8041de37/secrets
 	@StreamrApi
-	def findAll(String communityAddress) {
+	def index(String communityAddress) {
 		if (!isCommunityAddress(communityAddress)) {
 			throw new BadRequestException("community address is not an ethereum address")
 		}
@@ -64,15 +64,15 @@ class CommunitySecretApiController {
 
 	// curl -v -H "Authorization: token tester1-api-key" http://localhost:8081/streamr-core/api/v1/communities/0x6c90aece04198da2d5ca9b956b8f95af8041de37/secrets/L-TvrBkyQTS_JK1ABHFEZAaZ3FHq7-TPqMXe9JNz1x6g
 	@StreamrApi
-	def find(String communityAddress, String communitySecretId) {
+	def show(String communityAddress, String id) {
 		if (!isCommunityAddress(communityAddress)) {
 			throw new BadRequestException("community address is not an ethereum address")
 		}
-		if (!isValidID(communitySecretId)) {
+		if (!isValidID(id)) {
 			throw new BadRequestException("community secret id is not valid")
 		}
 		checkAdminAccessControl(loggedInUser(), communityAddress)
-		CommunitySecret secret = communitySecretService.find(communityAddress, communitySecretId)
+		CommunitySecret secret = communitySecretService.find(communityAddress, id)
 		if (secret == null) {
 			throw new NotFoundException("community secret not found by id")
 		}
@@ -81,18 +81,18 @@ class CommunitySecretApiController {
 
 	// curl -v -X PUT -H "Authorization: token tester1-api-key" -H "Content-Type: application/json" -d '{"name":"new name"}' http://localhost:8081/streamr-core/api/v1/communities/0x6c90aece04198da2d5ca9b956b8f95af8041de37/secrets/L-TvrBkyQTS_JK1ABHFEZAaZ3FHq7-TPqMXe9JNz1x6g
 	@StreamrApi
-	def update(String communityAddress, String communitySecretId, CommunitySecretCommand cmd) {
+	def update(String communityAddress, String id, CommunitySecretCommand cmd) {
 		if (!isCommunityAddress(communityAddress)) {
 			throw new BadRequestException("community address is not an ethereum address")
 		}
-		if (!isValidID(communitySecretId)) {
+		if (!isValidID(id)) {
 			throw new BadRequestException("community secret id is not valid")
 		}
 		if (cmd.errors.getFieldError("name")) {
 			throw new BadRequestException("name in json is not a valid name")
 		}
 		checkAdminAccessControl(loggedInUser(), communityAddress)
-		CommunitySecret secret = communitySecretService.update(communityAddress, communitySecretId, cmd)
+		CommunitySecret secret = communitySecretService.update(communityAddress, id, cmd)
 		if (secret == null) {
 			throw new NotFoundException("community secret not found by id")
 		}
@@ -101,15 +101,15 @@ class CommunitySecretApiController {
 
 	// curl -v -X DELETE -H "Authorization: token tester1-api-key" http://localhost:8081/streamr-core/api/v1/communities/0x6c90aece04198da2d5ca9b956b8f95af8041de37/secrets/L-TvrBkyQTS_JK1ABHFEZAaZ3FHq7-TPqMXe9JNz1x6g
 	@StreamrApi
-	def delete(String communityAddress, String communitySecretId) {
+	def delete(String communityAddress, String id) {
 		if (!isCommunityAddress(communityAddress)) {
 			throw new BadRequestException("community address is not an ethereum address")
 		}
-		if (!isValidID(communitySecretId)) {
+		if (!isValidID(id)) {
 			throw new BadRequestException("community secret id is not valid")
 		}
 		checkAdminAccessControl(loggedInUser(), communityAddress)
-		communitySecretService.delete(communityAddress, communitySecretId)
+		communitySecretService.delete(communityAddress, id)
 		render(status: 204)
 	}
 

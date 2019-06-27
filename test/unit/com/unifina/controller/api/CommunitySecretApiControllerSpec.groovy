@@ -35,7 +35,7 @@ class CommunitySecretApiControllerSpec extends Specification {
 		controller.communityService = Mock(CommunityService)
 	}
 
-	void "findAll() test"() {
+	void "index() test"() {
 		setup:
 		CommunitySecret s1 = new CommunitySecret(
 			name: "secret 1",
@@ -55,8 +55,8 @@ class CommunitySecretApiControllerSpec extends Specification {
 		request.apiUser = me
 		request.method = "GET"
 		params.communityAddress = communityAddress
-		withFilters(action: "findAll") {
-			controller.findAll()
+		withFilters(action: "index") {
+			controller.index()
 		}
 		then:
 		1 * controller.communityService.checkAdminAccessControl(me, communityAddress) >> true
@@ -69,12 +69,12 @@ class CommunitySecretApiControllerSpec extends Specification {
 		response.json[1].communityAddress == communityAddress
 	}
 
-	void "findAll() bad request on invalid community address"() {
+	void "index() bad request on invalid community address"() {
 		when:
 		request.method = "GET"
 		params.communityAddress = "0x123"
-		withFilters(action: "findAll") {
-			controller.findAll()
+		withFilters(action: "index") {
+			controller.index()
 		}
 		then:
 		0 * controller.communitySecretService._
@@ -83,13 +83,13 @@ class CommunitySecretApiControllerSpec extends Specification {
 		e.code == "PARAMETER_MISSING"
 	}
 
-	void "findAll() checks admin access control"() {
+	void "index() checks admin access control"() {
 		when:
 		request.apiUser = me
 		request.method = "GET"
 		params.communityAddress = communityAddress
-		withFilters(action: "findAll") {
-			controller.findAll()
+		withFilters(action: "index") {
+			controller.index()
 		}
 		then:
 		1 * controller.communityService.checkAdminAccessControl(me, communityAddress) >> false
@@ -178,7 +178,7 @@ class CommunitySecretApiControllerSpec extends Specification {
 		e.code == "ACCESS_DENIED"
 	}
 
-	void "find() test"() {
+	void "show() test"() {
 		setup:
 		CommunitySecret s1 = new CommunitySecret(
 			name: "secret 1",
@@ -191,9 +191,9 @@ class CommunitySecretApiControllerSpec extends Specification {
 		request.apiUser = me
 		request.method = "GET"
 		params.communityAddress = communityAddress
-		params.communitySecretId = validID
-		withFilters(action: "find") {
-			controller.find()
+		params.id = validID
+		withFilters(action: "show") {
+			controller.show()
 		}
 		then:
 		1 * controller.communityService.checkAdminAccessControl(me, communityAddress) >> true
@@ -203,13 +203,13 @@ class CommunitySecretApiControllerSpec extends Specification {
 		response.json.communityAddress == communityAddress
 	}
 
-	void "find() bad request on invalid community address"() {
+	void "show() bad request on invalid community address"() {
 		when:
 		request.method = "GET"
 		params.communityAddress = "0x123"
-		params.communitySecretId = validID
-		withFilters(action: "find") {
-			controller.find()
+		params.id = validID
+		withFilters(action: "show") {
+			controller.show()
 		}
 		then:
 		0 * controller.communitySecretService._
@@ -218,13 +218,13 @@ class CommunitySecretApiControllerSpec extends Specification {
 		e.code == "PARAMETER_MISSING"
 	}
 
-	void "find() bad request on invalid community secret id"() {
+	void "show() bad request on invalid community secret id"() {
 		when:
 		request.method = "GET"
 		params.communityAddress = communityAddress
-		params.communitySecretId = null
-		withFilters(action: "find") {
-			controller.find()
+		params.id = null
+		withFilters(action: "show") {
+			controller.show()
 		}
 		then:
 		0 * controller.communitySecretService._
@@ -233,14 +233,14 @@ class CommunitySecretApiControllerSpec extends Specification {
 		e.code == "PARAMETER_MISSING"
 	}
 
-	void "find() not found when community secret not found by id"() {
+	void "show() not found when community secret not found by id"() {
 		when:
 		request.apiUser = me
 		request.method = "GET"
 		params.communityAddress = communityAddress
-		params.communitySecretId = validID // ID not found in DB
-		withFilters(action: "find") {
-			controller.find()
+		params.id = validID // ID not found in DB
+		withFilters(action: "show") {
+			controller.show()
 		}
 		then:
 		1 * controller.communityService.checkAdminAccessControl(me, communityAddress) >> true
@@ -250,14 +250,14 @@ class CommunitySecretApiControllerSpec extends Specification {
 		e.code == "NOT_FOUND"
 	}
 
-	void "find() checks admin access control"() {
+	void "show() checks admin access control"() {
 		when:
 		request.apiUser = me
 		request.method = "GET"
 		params.communityAddress = communityAddress
-		params.communitySecretId = validID
-		withFilters(action: "find") {
-			controller.find()
+		params.id = validID
+		withFilters(action: "show") {
+			controller.show()
 		}
 		then:
 		1 * controller.communityService.checkAdminAccessControl(me, communityAddress) >> false
@@ -279,7 +279,7 @@ class CommunitySecretApiControllerSpec extends Specification {
 		request.apiUser = me
 		request.method = "PUT"
 		params.communityAddress = communityAddress
-		params.communitySecretId = validID // ID not found in DB
+		params.id = validID // ID not found in DB
 		request.json = [
 			name: "new name",
 		]
@@ -301,7 +301,7 @@ class CommunitySecretApiControllerSpec extends Specification {
 		when:
 		request.method = "PUT"
 		params.communityAddress = "0x123"
-		params.communitySecretId = "123"
+		params.id = "123"
 		request.json = [
 			name: "name",
 		]
@@ -319,7 +319,7 @@ class CommunitySecretApiControllerSpec extends Specification {
 		when:
 		request.method = "PUT"
 		params.communityAddress = communityAddress
-		params.communitySecretId = null
+		params.id = null
 		request.json = [
 			name: "name",
 		]
@@ -337,7 +337,7 @@ class CommunitySecretApiControllerSpec extends Specification {
 		when:
 		request.method = "PUT"
 		params.communityAddress = communityAddress
-		params.communitySecretId = validID
+		params.id = validID
 		request.json = [
 			name: "",
 		]
@@ -356,7 +356,7 @@ class CommunitySecretApiControllerSpec extends Specification {
 		request.apiUser = me
 		request.method = "PUT"
 		params.communityAddress = communityAddress
-		params.communitySecretId = validID // ID not found in DB
+		params.id = validID // ID not found in DB
 		request.json = [
 			name: "name",
 		]
@@ -376,7 +376,7 @@ class CommunitySecretApiControllerSpec extends Specification {
 		request.apiUser = me
 		request.method = "PUT"
 		params.communityAddress = communityAddress
-		params.communitySecretId = validID
+		params.id = validID
 		request.json = [
 			name: "name",
 		]
@@ -395,7 +395,7 @@ class CommunitySecretApiControllerSpec extends Specification {
 		request.apiUser = me
 		request.method = "DELETE"
 		params.communityAddress = communityAddress
-		params.communitySecretId = validID
+		params.id = validID
 		withFilters(action: "delete") {
 			controller.delete()
 		}
@@ -409,7 +409,7 @@ class CommunitySecretApiControllerSpec extends Specification {
 		when:
 		request.method = "DELETE"
 		params.communityAddress = "0x123"
-		params.communitySecretId = validID
+		params.id = validID
 		withFilters(action: "delete") {
 			controller.delete()
 		}
@@ -424,7 +424,7 @@ class CommunitySecretApiControllerSpec extends Specification {
 		when:
 		request.method = "DELETE"
 		params.communityAddress = communityAddress
-		params.communitySecretId = null
+		params.id = null
 		withFilters(action: "delete") {
 			controller.delete()
 		}
@@ -440,7 +440,7 @@ class CommunitySecretApiControllerSpec extends Specification {
 		request.apiUser = me
 		request.method = "DELETE"
 		params.communityAddress = communityAddress
-		params.communitySecretId = validID
+		params.id = validID
 		withFilters(action: "delete") {
 			controller.delete()
 		}
@@ -459,7 +459,7 @@ class CommunitySecretApiControllerSpec extends Specification {
 		request.apiUser = me
 		request.method = "DELETE"
 		params.communityAddress = communityAddress
-		params.communitySecretId = validID
+		params.id = validID
 		withFilters(action: "delete") {
 			controller.delete()
 		}

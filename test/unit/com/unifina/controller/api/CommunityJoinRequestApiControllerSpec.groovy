@@ -65,8 +65,8 @@ class CommunityJoinRequestApiControllerSpec extends Specification {
 		request.method = "GET"
 		params.communityAddress = communityAddress
 		params.state = null
-		withFilters(action: "findAll") {
-			controller.findAll()
+		withFilters(action: "index") {
+			controller.index()
 		}
 		then:
 		1 * controller.communityService.checkAdminAccessControl(me, communityAddress) >> true
@@ -83,8 +83,8 @@ class CommunityJoinRequestApiControllerSpec extends Specification {
 		request.method = "GET"
 		params.communityAddress = "0x123"
 		params.state = "APPROVED"
-		withFilters(action: "findAll") {
-			controller.findAll()
+		withFilters(action: "index") {
+			controller.index()
 		}
 		then:
 		0 * controller.communityJoinRequestService._
@@ -99,8 +99,8 @@ class CommunityJoinRequestApiControllerSpec extends Specification {
 		request.method = "GET"
 		params.communityAddress = communityAddress
 		params.state = "APPROVED"
-		withFilters(action: "findAll") {
-			controller.findAll()
+		withFilters(action: "index") {
+			controller.index()
 		}
 		then:
 		1 * controller.communityService.checkAdminAccessControl(me, communityAddress) >> false
@@ -174,7 +174,7 @@ class CommunityJoinRequestApiControllerSpec extends Specification {
 		e.code == "PARAMETER_MISSING"
 	}
 
-	void "find() test"() {
+	void "show() test"() {
 		CommunityJoinRequest r = new CommunityJoinRequest(
 			memberAddress: "0xCCCC000000000000000000000000AAAA0000FFFF",
 			communityAddress: communityAddress,
@@ -187,9 +187,9 @@ class CommunityJoinRequestApiControllerSpec extends Specification {
 		request.apiUser = me
 		request.method = "GET"
 		params.communityAddress = communityAddress
-		params.joinRequestId = validID
-		withFilters(action: "find") {
-			controller.find()
+		params.id = validID
+		withFilters(action: "show") {
+			controller.show()
 		}
 		then:
 		1 * controller.communityService.checkAdminAccessControl(me, communityAddress) >> true
@@ -201,13 +201,13 @@ class CommunityJoinRequestApiControllerSpec extends Specification {
 		response.status == 200
 	}
 
-	void "find() bad request on invalid community address"() {
+	void "show() bad request on invalid community address"() {
 		when:
 		request.method = "GET"
 		params.communityAddress = "0x123"
-		params.joinRequestId = validID
-		withFilters(action: "find") {
-			controller.find()
+		params.id = validID
+		withFilters(action: "show") {
+			controller.show()
 		}
 		then:
 		0 * controller.communityJoinRequestService._
@@ -216,13 +216,13 @@ class CommunityJoinRequestApiControllerSpec extends Specification {
 		e.code == "PARAMETER_MISSING"
 	}
 
-	void "find() bad request on invalid community join request id"() {
+	void "show() bad request on invalid community join request id"() {
 		when:
 		request.method = "GET"
 		params.communityAddress = communityAddress
-		params.joinRequestId = null
-		withFilters(action: "find") {
-			controller.find()
+		params.id = null
+		withFilters(action: "show") {
+			controller.show()
 		}
 		then:
 		0 * controller.communityJoinRequestService._
@@ -231,14 +231,14 @@ class CommunityJoinRequestApiControllerSpec extends Specification {
 		e.code == "PARAMETER_MISSING"
 	}
 
-	void "find() not found 404 on bad CommunityJoinRequest id"() {
+	void "show() not found 404 on bad CommunityJoinRequest id"() {
 		when:
 		request.apiUser = me
 		request.method = "GET"
 		params.communityAddress = communityAddress
-		params.joinRequestId = validID // ID not found in DB
-		withFilters(action: "find") {
-			controller.find()
+		params.id = validID // ID not found in DB
+		withFilters(action: "show") {
+			controller.show()
 		}
 		then:
 		1 * controller.communityService.checkAdminAccessControl(me, communityAddress) >> true
@@ -248,14 +248,14 @@ class CommunityJoinRequestApiControllerSpec extends Specification {
 		e.code == "NOT_FOUND"
 	}
 
-	void "find() checks admin access control"() {
+	void "show() checks admin access control"() {
 		when:
 		request.apiUser = me
 		request.method = "GET"
 		params.communityAddress = communityAddress
-		params.joinRequestId = validID
-		withFilters(action: "find") {
-			controller.find()
+		params.id = validID
+		withFilters(action: "show") {
+			controller.show()
 		}
 		then:
 		1 * controller.communityService.checkAdminAccessControl(me, communityAddress) >> false
@@ -281,7 +281,7 @@ class CommunityJoinRequestApiControllerSpec extends Specification {
 			state: "ACCEPTED",
 		]
 		params.communityAddress = communityAddress
-		params.joinRequestId = validID
+		params.id = validID
 		withFilters(action: "update") {
 			controller.update()
 		}
@@ -305,7 +305,7 @@ class CommunityJoinRequestApiControllerSpec extends Specification {
 			state: "ACCEPTED",
 		]
 		params.communityAddress = "0x123"
-		params.joinRequestId = validID
+		params.id = validID
 		withFilters(action: "update") {
 			controller.update()
 		}
@@ -323,7 +323,7 @@ class CommunityJoinRequestApiControllerSpec extends Specification {
 			state: "ACCEPTXXX",
 		]
 		params.communityAddress = communityAddress
-		params.joinRequestId = validID
+		params.id = validID
 		withFilters(action: "update") {
 			controller.update()
 		}
@@ -341,7 +341,7 @@ class CommunityJoinRequestApiControllerSpec extends Specification {
 			state: "ACCEPTED",
 		]
 		params.communityAddress = communityAddress
-		params.joinRequestId = null
+		params.id = null
 		withFilters(action: "update") {
 			controller.update()
 		}
@@ -360,7 +360,7 @@ class CommunityJoinRequestApiControllerSpec extends Specification {
 			state: "ACCEPTED",
 		]
 		params.communityAddress = communityAddress
-		params.joinRequestId = validID // ID not found in DB
+		params.id = validID // ID not found in DB
 		withFilters(action: "update") {
 			controller.update()
 		}
@@ -382,7 +382,7 @@ class CommunityJoinRequestApiControllerSpec extends Specification {
 			state: "ACCEPTED",
 		]
 		params.communityAddress = communityAddress
-		params.joinRequestId = validID
+		params.id = validID
 		withFilters(action: "update") {
 			controller.update()
 		}
@@ -407,7 +407,7 @@ class CommunityJoinRequestApiControllerSpec extends Specification {
 		request.apiUser = me
 		request.method = "DELETE"
 		params.communityAddress = communityAddress
-		params.joinRequestId = validID
+		params.id = validID
 		withFilters(action: "delete") {
 			controller.delete()
 		}
@@ -421,7 +421,7 @@ class CommunityJoinRequestApiControllerSpec extends Specification {
 		when:
 		request.method = "DELETE"
 		params.communityAddress = "0x123"
-		params.joinRequestId = validID
+		params.id = validID
 		withFilters(action: "delete") {
 			controller.delete()
 		}
@@ -436,7 +436,7 @@ class CommunityJoinRequestApiControllerSpec extends Specification {
 		when:
 		request.method = "DELETE"
 		params.communityAddress = communityAddress
-		params.joinRequestId = "0x123"
+		params.id = "0x123"
 		withFilters(action: "delete") {
 			controller.delete()
 		}
@@ -452,7 +452,7 @@ class CommunityJoinRequestApiControllerSpec extends Specification {
 		request.apiUser = me
 		request.method = "DELETE"
 		params.communityAddress = communityAddress
-		params.joinRequestId = validID // ID not found in DB
+		params.id = validID // ID not found in DB
 		withFilters(action: "delete") {
 			controller.delete()
 		}
@@ -471,7 +471,7 @@ class CommunityJoinRequestApiControllerSpec extends Specification {
 		request.apiUser = me
 		request.method = "DELETE"
 		params.communityAddress = communityAddress
-		params.joinRequestId = validID
+		params.id = validID
 		withFilters(action: "delete") {
 			controller.delete()
 		}
