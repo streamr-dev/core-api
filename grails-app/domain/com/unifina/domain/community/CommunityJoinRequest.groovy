@@ -41,7 +41,7 @@ class CommunityJoinRequest {
 		    id: id,
 			memberAddress: memberAddress,
 			communityAddress: communityAddress,
-			state: state,
+			state: state?.toString(),
 			dateCreated: dateCreated,
 			lastUpdated: lastUpdated,
 		]

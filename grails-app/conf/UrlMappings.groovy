@@ -118,6 +118,19 @@ class UrlMappings {
 
 		"/api/v1/cluster/$action"(controller: "clusterApi")
 
+		"/api/v1/communities/$communityAddress/joinRequests"(method: "GET", controller: "communityJoinRequestApi", action: "findAll")
+		"/api/v1/communities/$communityAddress/joinRequests"(method: "POST", controller: "communityJoinRequestApi", action: "create")
+		"/api/v1/communities/$communityAddress/joinRequests/$joinRequestId"(method: "GET", controller: "communityJoinRequestApi", action: "find")
+		"/api/v1/communities/$communityAddress/joinRequests/$joinRequestId"(method: "PUT", controller: "communityJoinRequestApi", action: "update")
+		"/api/v1/communities/$communityAddress/secrets"(method: "GET", controller: "communitySecretApi", action: "findAll")
+		"/api/v1/communities/$communityAddress/secrets"(method: "POST", controller: "communitySecretApi", action: "create")
+		"/api/v1/communities/$communityAddress/secrets/$communitySecretId"(method: "GET", controller: "communitySecretApi", action: "find")
+		"/api/v1/communities/$communityAddress/secrets/$communitySecretId"(method: "PUT", controller: "communitySecretApi", action: "update")
+		"/api/v1/communities/$communityAddress/secrets/$communitySecretId"(method: "DELETE", controller: "communitySecretApi", action: "delete")
+		"/api/v1/communities/$communityAddress/stats"(method: "GET", controller: "communityOperatorApi", action: "stats")
+		"/api/v1/communities/$communityAddress/members"(method: "GET", controller: "communityOperatorApi", action: "members")
+		"/api/v1/communities/$communityAddress/members/$memberAddress"(method: "GET", controller: "communityOperatorApi", action: "memberStats")
+
 		// Mappings for pages using React Router (the root for the router)
 		"/dashboard/editor/$id**?"(controller: "dashboard", action: "editor")
 	}
