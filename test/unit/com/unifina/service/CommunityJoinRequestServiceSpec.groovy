@@ -15,7 +15,7 @@ import grails.test.mixin.TestFor
 import spock.lang.Specification
 
 @TestFor(CommunityJoinRequestService)
-@Mock([SecUser, IntegrationKey, CommunitySecret, CommunityJoinRequest])
+@Mock([SecUser, IntegrationKey, CommunityJoinRequest, CommunitySecret])
 class CommunityJoinRequestServiceSpec extends Specification {
 	SecUser me
 	final String memberAddress = "0xCCCC000000000000000000000000AAAA0000FFFF"
@@ -49,7 +49,7 @@ class CommunityJoinRequestServiceSpec extends Specification {
 		)
 		secret.id = "secret-id"
 		secret.save(validate: true, failOnError: true)
-    }
+	}
 
 	void "create user doesnt have ethereum id"() {
 		setup:

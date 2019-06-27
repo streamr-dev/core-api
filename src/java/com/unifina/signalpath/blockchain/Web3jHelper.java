@@ -1,10 +1,7 @@
 package com.unifina.signalpath.blockchain;
 
 import org.apache.log4j.Logger;
-import org.web3j.abi.EventValues;
-import org.web3j.abi.FunctionEncoder;
-import org.web3j.abi.FunctionReturnDecoder;
-import org.web3j.abi.TypeReference;
+import org.web3j.abi.*;
 import org.web3j.abi.datatypes.*;
 import org.web3j.abi.datatypes.generated.AbiTypes;
 import org.web3j.protocol.Web3j;
@@ -226,6 +223,19 @@ public class Web3jHelper {
 		return c;
 	}
 
+	public static TransactionReceipt getTransactionReceipt(Web3j web3, String txhash) throws IOException {
+		EthGetTransactionReceipt gtr = web3.ethGetTransactionReceipt(txhash).send();
+		if (gtr == null) {
+			log.error("TransactionHash not found: " + txhash);
+			return null;
+		}
+		TransactionReceipt tr = gtr.getResult();
+		if (tr == null) {
+			log.error("TransactionReceipt not found for txhash: " + txhash);
+			return null;
+		}
+		return tr;
+	}
 	public static Function toWeb3jFunction(EthereumABI.Function fn, List args) throws ClassNotFoundException, NoSuchMethodException, InvocationTargetException, InstantiationException, IllegalAccessException {
 		List<String> solidity_inputtypes = new ArrayList<String>(fn.inputs.size());
 		List<String> solidity_outputtypes = new ArrayList<String>(fn.outputs.size());
@@ -362,7 +372,7 @@ public class Web3jHelper {
 		EthereumModuleOptions ethereumOptions = new EthereumModuleOptions();
 		return Web3j.build(new HttpService(ethereumOptions.getRpcUrl()));
 	}
-	
+
 	/**
 	 * Get a public field in Ethereum contract. Returns T of a Type&lt;T&gt; specified in fieldType.
 	 *
@@ -371,13 +381,13 @@ public class Web3jHelper {
 	 * if contract contains:
 	 * address public owner;
 	 *
-	 * then 
+	 * then
 	 * String s = getPublicField(web3j, contractAddress, "owner", Address.class); returns a String type with the owner address
 	 *
 	 * if contract contains:
 	 * uint public somenum;
 	 *
-	 * then 
+	 * then
 	 * BigInteger i = getPublicField(web3j, contractAddress, "somenum", Uint.class); returns a BigInteger with the value of somenum
 	 */
 	@SuppressWarnings("unchecked")
