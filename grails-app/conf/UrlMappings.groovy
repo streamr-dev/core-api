@@ -127,6 +127,9 @@ class UrlMappings {
 		"/api/v1/communities/$communityAddress/secrets/$communitySecretId"(method: "GET", controller: "communitySecretApi", action: "find")
 		"/api/v1/communities/$communityAddress/secrets/$communitySecretId"(method: "PUT", controller: "communitySecretApi", action: "update")
 		"/api/v1/communities/$communityAddress/secrets/$communitySecretId"(method: "DELETE", controller: "communitySecretApi", action: "delete")
+		"/api/v1/communities/$communityAddress/stats"(method: "GET", controller: "communityOperatorApi", action: "stats")
+		"/api/v1/communities/$communityAddress/members"(method: "GET", controller: "communityOperatorApi", action: "members")
+		"/api/v1/communities/$communityAddress/members/$memberAddress"(method: "GET", controller: "communityOperatorApi", action: "memberStats")
 
 		// Mappings for pages using React Router (the root for the router)
 		"/dashboard/editor/$id**?"(controller: "dashboard", action: "editor")
