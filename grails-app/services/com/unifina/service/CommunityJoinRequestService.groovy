@@ -19,16 +19,20 @@ class CommunityJoinRequestService {
 	StreamService streamService
 	EthereumService ethereumService
 
-	void onApproveJoinRequest(CommunityJoinRequest c) {
+	private void onApproveJoinRequest(CommunityJoinRequest c) {
 		String joinPartStreamID = ethereumService.fetchJoinPartStreamID(c.communityAddress)
-		// Send join message to joinPartStream
+		Map<String, Object> msg = new HashMap<>()
+		msg.put("type", "join")
+		msg.put("addresses", Arrays.asList(c.memberAddress))
+		sendMessage(joinPartStreamID, msg)
+	}
+
+	// Send message to joinPartStream
+	private void sendMessage(String joinPartStreamID, HashMap<String, Object> content) {
 		Stream s = Stream.findById(joinPartStreamID)
 		if (s == null) {
 			throw new NotFoundException("stream not found by id: " + joinPartStreamID)
 		}
-		Map<String, Object> content = new HashMap<>()
-		content.put("type", "join")
-		content.put("addresses", Arrays.asList(c.memberAddress))
 		String nodePrivateKey = MapTraversal.getString(Holders.getConfig(), "streamr.ethereum.nodePrivateKey")
 		Credentials credentials = Credentials.create(nodePrivateKey)
 		MessageChainUtil chain = new MessageChainUtil(credentials.getAddress())
@@ -105,5 +109,24 @@ class CommunityJoinRequestService {
 		}
 		c.save(validate: true, failOnError: true)
 		return c
+	}
+
+	void delete(String communityAddress, String joinRequestId) {
+		CommunityJoinRequest c = CommunityJoinRequest.where {
+			(communityAddress == communityAddress) && (id == joinRequestId)
+		}.find()
+		if (c == null) {
+			String fmt = "Community join request not found by community address: '%s' and join request id: '%s'"
+			String message = String.format(fmt, communityAddress, joinRequestId)
+			throw new NotFoundException(message)
+		}
+
+		String joinPartStreamID = ethereumService.fetchJoinPartStreamID(c.communityAddress)
+		Map<String, Object> msg = new HashMap<>()
+		msg.put("type", "part")
+		msg.put("addresses", Arrays.asList(c.memberAddress))
+		sendMessage(joinPartStreamID, msg)
+
+		c.delete()
 	}
 }

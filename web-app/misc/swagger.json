@@ -236,6 +236,42 @@
               "description": "Community join request not found by id"
             }
           }
+      },
+      "delete": {
+        "summary": "Delete community join request",
+        "description": "Delete community join request.",
+          "tags": [
+            "communities"
+          ],
+          "parameters": [
+            {
+              "name": "communityAddress",
+              "in": "path",
+              "description": "Ethereum address of the community",
+              "required": true,
+              "type": "string",
+              "default": false
+            },
+            {
+              "name": "joinRequestId",
+              "in": "path",
+              "description": "ID of the join request",
+              "required": true,
+              "type": "string",
+              "default": false
+            }
+          ],
+          "responses": {
+            "204": {
+              "description": "Success"
+            },
+            "400": {
+              "description": "Required parameters missing"
+            },
+            "404": {
+              "description": "Community join request not found by id"
+            }
+          }
       }
     },
     "/communities/{communityAddress}/secrets": {

@@ -392,4 +392,93 @@ class CommunityJoinRequestApiControllerSpec extends Specification {
 		e.statusCode == 403
 		e.code == "ACCESS_DENIED"
 	}
+
+	void "delete() test"() {
+		setup:
+		CommunityJoinRequest r = new CommunityJoinRequest(
+			memberAddress: "0xCCCC000000000000000000000000AAAA0000FFFF",
+			communityAddress: communityAddress,
+			user: me,
+			state: CommunityJoinRequest.State.ACCEPTED,
+		)
+		r.id = validID
+		r.save(failOnError: true, validate: true)
+		when:
+		request.apiUser = me
+		request.method = "DELETE"
+		params.communityAddress = communityAddress
+		params.joinRequestId = validID
+		withFilters(action: "delete") {
+			controller.delete()
+		}
+		then:
+		1 * controller.communityService.checkAdminAccessControl(me, communityAddress) >> true
+		1 * controller.communityJoinRequestService.delete(communityAddress, validID)
+		response.status == 204
+	}
+
+	void "delete() bad request on invalid community address"() {
+		when:
+		request.method = "DELETE"
+		params.communityAddress = "0x123"
+		params.joinRequestId = validID
+		withFilters(action: "delete") {
+			controller.delete()
+		}
+		then:
+		0 * controller.communityJoinRequestService._
+		def e = thrown(BadRequestException)
+		e.statusCode == 400
+		e.code == "PARAMETER_MISSING"
+	}
+
+	void "delete() bad request on invalid community join request id"() {
+		when:
+		request.method = "DELETE"
+		params.communityAddress = communityAddress
+		params.joinRequestId = "0x123"
+		withFilters(action: "delete") {
+			controller.delete()
+		}
+		then:
+		0 * controller.communityJoinRequestService._
+		def e = thrown(BadRequestException)
+		e.statusCode == 400
+		e.code == "PARAMETER_MISSING"
+	}
+
+	void "delete() not found 404 on bad community join request id"() {
+		when:
+		request.apiUser = me
+		request.method = "DELETE"
+		params.communityAddress = communityAddress
+		params.joinRequestId = validID // ID not found in DB
+		withFilters(action: "delete") {
+			controller.delete()
+		}
+		then:
+		1 * controller.communityService.checkAdminAccessControl(me, communityAddress) >> true
+		1 * controller.communityJoinRequestService.delete(communityAddress, validID) >> {
+			throw new NotFoundException("mocked: entity not found")
+		}
+		def e = thrown(NotFoundException)
+		e.statusCode == 404
+		e.code == "NOT_FOUND"
+	}
+
+	void "delete() checks admin access control"() {
+		when:
+		request.apiUser = me
+		request.method = "DELETE"
+		params.communityAddress = communityAddress
+		params.joinRequestId = validID
+		withFilters(action: "delete") {
+			controller.delete()
+		}
+		then:
+		1 * controller.communityService.checkAdminAccessControl(me, communityAddress) >> false
+		def e = thrown(ApiException)
+		e.statusCode == 403
+		e.code == "ACCESS_DENIED"
+	}
 }

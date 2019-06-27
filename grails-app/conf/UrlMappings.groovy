@@ -122,6 +122,7 @@ class UrlMappings {
 		"/api/v1/communities/$communityAddress/joinRequests"(method: "POST", controller: "communityJoinRequestApi", action: "create")
 		"/api/v1/communities/$communityAddress/joinRequests/$joinRequestId"(method: "GET", controller: "communityJoinRequestApi", action: "find")
 		"/api/v1/communities/$communityAddress/joinRequests/$joinRequestId"(method: "PUT", controller: "communityJoinRequestApi", action: "update")
+		"/api/v1/communities/$communityAddress/joinRequests/$joinRequestId"(method: "DELETE", controller: "communityJoinRequestApi", action: "delete")
 		"/api/v1/communities/$communityAddress/secrets"(method: "GET", controller: "communitySecretApi", action: "findAll")
 		"/api/v1/communities/$communityAddress/secrets"(method: "POST", controller: "communitySecretApi", action: "create")
 		"/api/v1/communities/$communityAddress/secrets/$communitySecretId"(method: "GET", controller: "communitySecretApi", action: "find")

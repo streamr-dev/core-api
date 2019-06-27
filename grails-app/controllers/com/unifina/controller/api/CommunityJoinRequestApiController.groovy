@@ -98,6 +98,20 @@ class CommunityJoinRequestApiController {
 		render(result?.toMap() as JSON)
 	}
 
+	// curl -v -X PUT -H "Authorization: token tester1-api-key" http://localhost:8081/streamr-core/api/v1/communities/0x6c90aece04198da2d5ca9b956b8f95af8041de37/joinRequests/L-TvrBkyQTS_JK1ABHFEZAaZ3FHq7-TPqMXe9JNz1x6g
+	@StreamrApi
+	def delete(String communityAddress, String joinRequestId) {
+		if (!isCommunityAddress(communityAddress)) {
+			throw new BadRequestException("community address is not an ethereum address")
+		}
+		if (!isValidID(joinRequestId)) {
+			throw new BadRequestException("join request id not valid")
+		}
+		checkAdminAccessControl(loggedInUser(), communityAddress)
+		communityJoinRequestService.delete(communityAddress, joinRequestId)
+		render(status: 204)
+	}
+
 	private SecUser loggedInUser() {
 		return (SecUser) request.apiUser
 	}

@@ -1,6 +1,6 @@
 package com.unifina.service
 
-
+import com.unifina.api.NotFoundException
 import com.unifina.api.UpdateCommunityJoinRequestCommand
 import com.unifina.domain.community.CommunityJoinRequest
 import com.unifina.domain.data.Feed
@@ -193,5 +193,32 @@ class CommunityJoinRequestServiceIntegrationSpec extends Specification {
 		c.communityAddress == communityAddress
 		c.memberAddress == "0xCCCC000000000000000000000000AAAA0000FFFF"
 		c.user == me
+	}
+
+	void "delete test"() {
+		setup:
+		CommunityJoinRequest r = new CommunityJoinRequest(
+			memberAddress: "0xCCCC000000000000000000000000AAAA0000FFFF",
+			communityAddress: communityAddress,
+			user: me,
+			state: CommunityJoinRequest.State.PENDING,
+			dateCreated: new Date(),
+			lastUpdated: new Date(),
+		)
+		r.save(failOnError: true, validate: true)
+		when:
+		service.delete(communityAddress, r.id)
+		then:
+		1 * service.ethereumService.fetchJoinPartStreamID(communityAddress) >> joinPartStream.id
+		1 * service.streamService.sendMessage(_)
+		CommunityJoinRequest.findById(r.id) == null
+	}
+
+	void "delete throws NotFoundException"() {
+		when:
+		service.delete("not-found", "not-found")
+		then:
+		def e = thrown(NotFoundException)
+		e.statusCode == 404
 	}
 }
