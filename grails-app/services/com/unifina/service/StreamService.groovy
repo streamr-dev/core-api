@@ -256,6 +256,17 @@ class StreamService {
 		return keys*.idInService as Set
 	}
 
+	Set<String> getStreamEthereumSubscribers(Stream stream) {
+		// This approach might be slow if there are a lot of allowed readers to the Stream
+		List<SecUser> readers = permissionService.getPermissionsTo(stream, Permission.Operation.READ)*.user
+
+		List<IntegrationKey> keys = IntegrationKey.findAll {
+			user.id in readers*.id && service in [IntegrationKey.Service.ETHEREUM, IntegrationKey.Service.ETHEREUM_ID]
+		}
+
+		return keys*.idInService as Set
+	}
+
 	List<Stream> getInboxStreams(List<SecUser> users) {
 		if (users.isEmpty()) return new ArrayList<Stream>()
 		List<IntegrationKey> keys = IntegrationKey.findAll {

@@ -178,6 +178,14 @@ class StreamApiController {
 		}
 	}
 
+	@StreamrApi
+	def subscribers(String id) {
+		getAuthorizedStream(id, Operation.WRITE) { Stream stream ->
+			Set<String> subscriberAddresses = streamService.getStreamEthereumSubscribers(stream)
+			render([addresses: subscriberAddresses] as JSON)
+		}
+	}
+
 	private def getAuthorizedStream(String id, Operation op, Closure action) {
 		def stream = Stream.get(id)
 		if (stream == null) {
