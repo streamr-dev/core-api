@@ -191,9 +191,9 @@ class StreamApiController {
 	def publisher(String id, String address) {
 		getAuthorizedStream(id, Operation.READ) { Stream stream ->
 			if(streamService.isStreamEthereumPublisher(stream, address)) {
-				response.status = 200
+				render(status: 200)
 			} else {
-				response.status = 404
+				render(status: 404)
 			}
 		}
 	}
@@ -202,9 +202,9 @@ class StreamApiController {
 	def subscriber(String id, String address) {
 		getAuthorizedStream(id, Operation.WRITE) { Stream stream ->
 			if(streamService.isStreamEthereumSubscriber(stream, address)) {
-				response.status = 200
+				render(status: 200)
 			} else {
-				response.status = 404
+				render(status: 404)
 			}
 		}
 	}
