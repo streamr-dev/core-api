@@ -187,7 +187,8 @@ class ContractEventPoller implements Closeable, Runnable, JsonRpcResponseHandler
 			case ID_POLLFILTER:
 				processPollChangesResponse(resp);
 				return;
+			default:
+				throw new RuntimeException("Unknown RPC id " + id);
 		}
-		throw new RuntimeException("Unknown RPC id " + id);
 	}
 }

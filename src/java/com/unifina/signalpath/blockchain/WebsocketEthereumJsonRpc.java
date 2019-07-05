@@ -1,15 +1,11 @@
 package com.unifina.signalpath.blockchain;
 
-import com.google.gson.JsonParser;
-import org.apache.log4j.Logger;
-
-import javax.websocket.*;
-import javax.websocket.Session;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.List;
-
+import javax.websocket.*;
+import org.apache.log4j.Logger;
 import org.json.JSONObject;
 
 public class WebsocketEthereumJsonRpc extends EthereumJsonRpc {
