@@ -54,6 +54,6 @@ public class EventQueueMetrics {
 
 	@Override
 	public String toString() {
-		return String.format("[EventQueueMetrics: events: %s, eventsPerSecond: %s, meanProcessingDelay: %s", numOfEvents, eventsPerSecond(), meanProcessingDelay());
+		return String.format("[EventQueueMetrics: events: %d, eventsPerSecond: %.1f, meanProcessingDelay: %.2f", numOfEvents, eventsPerSecond(), meanProcessingDelay());
 	}
 }
