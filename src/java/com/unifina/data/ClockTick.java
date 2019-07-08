@@ -9,14 +9,14 @@ import java.util.Date;
  */
 public class ClockTick implements ITimestamped {
 
-	private final Date timestamp;
+	private final long timestamp;
 
 	public ClockTick(Date timestamp) {
-		this.timestamp = timestamp;
+		this.timestamp = timestamp.getTime();
 	}
 
 	@Override
 	public Date getTimestampAsDate() {
-		return timestamp;
+		return new Date(timestamp);
 	}
 }
