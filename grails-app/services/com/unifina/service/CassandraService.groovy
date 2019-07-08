@@ -25,7 +25,7 @@ class CassandraService implements DisposableBean {
 
 	private static final int FETCH_SIZE = 5000;
 
-	static final long ONE_YEAR_IN_MS = 365 * 24 * 60 * 60 * 1000
+	static final long ONE_YEAR_IN_MS = 365L * 24L * 60L * 60L * 1000L
 
 	// Thread-safe
 	private Session session
@@ -148,10 +148,10 @@ class CassandraService implements DisposableBean {
 
 	DataRange getDataRange(Stream stream) {
 		StreamMessage earliest = getEarliestFromAllPartitions(stream)
-		if (!earliest) {
+		StreamMessage latest = getLatestFromAllPartitions(stream)
+		if (!earliest || !latest) {
 			return null
 		} else {
-			StreamMessage latest = getLatestFromAllPartitions(stream)
 			return new DataRange(earliest.getTimestampAsDate(), latest.getTimestampAsDate())
 		}
 	}
