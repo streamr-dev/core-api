@@ -5,11 +5,8 @@ import com.streamr.client.utils.StreamPartition;
 import com.unifina.domain.data.Stream;
 import com.unifina.signalpath.AbstractStreamSourceModule;
 import com.unifina.utils.Globals;
-import com.streamr.client.protocol.message_layer.ITimestamped;
-import org.hibernate.id.Configurable;
 
 import java.util.Collection;
-import java.util.Set;
 
 public abstract class StreamEventRecipient extends AbstractEventRecipient<AbstractStreamSourceModule, StreamMessage> {
 
