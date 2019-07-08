@@ -51,11 +51,11 @@ public class FieldDetector {
 			return null;
 		}
 
-		Map map;
+		Map<String, Object> map;
 		try {
 			map = msg.getContent();
 		} catch (IOException e) {
-			map = new HashMap();
+			map = new HashMap<>();
 		}
 
 		if (flatten) {
@@ -63,8 +63,8 @@ public class FieldDetector {
 		}
 
 		List<FieldConfig> fields = new ArrayList<>();
-		for (Object key : map.keySet()) {
-			fields.add(new FieldConfig(key.toString(), detectType(map.get(key))));
+		for (String key : map.keySet()) {
+			fields.add(new FieldConfig(key, detectType(map.get(key))));
 		}
 		return fields;
 	}
