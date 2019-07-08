@@ -13,7 +13,7 @@ public class SerializationRequest implements ITimestamped {
 
 	private Date timestamp;
 
-	public SerializationRequest(Date timestamp) {
+	private SerializationRequest(Date timestamp) {
 		this.timestamp = timestamp;
 	}
 
@@ -23,7 +23,7 @@ public class SerializationRequest implements ITimestamped {
 			SignalPathService service = Holders.getApplicationContext().getBean(SignalPathService.class);
 			service.saveState(signalPath);
 		});
-	} 
+	}
 
 	@Override
 	public Date getTimestampAsDate() {
