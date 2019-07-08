@@ -77,6 +77,9 @@ public abstract class DataSourceEventQueue {
 			runEventLoopUntilDone();
 		} finally {
 			asyncExecutor.shutdownNow();
+
+			// Report statistics
+			log.debug(eventQueueMetrics.toString());
 		}
 	}
 

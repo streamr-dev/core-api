@@ -10,7 +10,6 @@ import java.util.concurrent.TimeUnit;
 
 public class RealtimeEventQueue extends DataSourceEventQueue {
 	private static final Logger log = Logger.getLogger(RealtimeEventQueue.class);
-	private static final int LOGGING_INTERVAL = 10000; // set to 0 for no logging
 
 	private boolean firstEvent = true;
 
@@ -67,23 +66,6 @@ public class RealtimeEventQueue extends DataSourceEventQueue {
 			long now = System.nanoTime();
 
 			eventQueueMetrics.countEvent(now - startTime, startTimeInMillis - event.getTimestamp().getTime());
-
-			// Log some metrics
-			int eventCounter = 0;
-			long elapsedTime = 0;
-
-			if (LOGGING_INTERVAL > 0) {
-				elapsedTime += now - startTime;
-				eventCounter++;
-
-				if (eventCounter >= LOGGING_INTERVAL) {
-					double perEvent = (elapsedTime / (double) eventCounter) / 1000.0;
-					log.info(String.format("Processed %d events in %d nanoseconds. That's %s microseconds per event.", eventCounter, elapsedTime, perEvent));
-					eventCounter = 0;
-					elapsedTime = 0;
-				}
-			}
-
 		}
 
 		log.info("runEventLoopUntilDone: aborted.");

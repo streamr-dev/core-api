@@ -79,14 +79,6 @@ public class HistoricalEventQueue extends DataSourceEventQueue {
 			waitIfNecessary(event);
 			handleEvent(event);
 		}
-
-		// Report statistics
-		long feedElapsedTime = System.currentTimeMillis() - realTimeStart;
-		log.debug("PERFORMANCE: Processed "+ eventCounter +" events.");
-		if (eventCounter > 0) {
-			log.debug("PERFORMANCE: Processing took "+((timeSpentProcessing/ eventCounter)/1000.0)+" microseconds per event.");
-			log.debug("PERFORMANCE: Entire processing took "+feedElapsedTime+" milliseconds or "+((feedElapsedTime*1000)/ eventCounter)+" microseconds per event.");
-		}
 	}
 
 	private void waitIfNecessary(Event event) {
