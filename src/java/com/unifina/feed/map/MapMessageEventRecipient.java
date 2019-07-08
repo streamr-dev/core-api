@@ -41,26 +41,29 @@ public class MapMessageEventRecipient extends StreamEventRecipient {
 			msg = new HashMap();
 		}
 
-		for (String name : outputsByName.keySet()) {
-			if (msg.containsKey(name)) {
-				Object val = msg.get(name);
+		for (Map.Entry<String, List<Output>> entry : outputsByName.entrySet()) {
+			String fieldName = entry.getKey();
+			List<Output> outputs = entry.getValue();
+
+			if (msg.containsKey(fieldName)) {
+				Object fieldValue = msg.get(fieldName);
 
 				// Null values are just not sent
-				if (val == null) {
+				if (fieldValue == null) {
 					continue;
 				}
 
-				for (Output o : outputsByName.get(name)) {
+				for (Output o : outputs) {
 					// Convert all numbers to doubles
 					if (o instanceof TimeSeriesOutput) {
 						try {
-							o.send(((Number) val).doubleValue());
+							o.send(((Number) fieldValue).doubleValue());
 						} catch (ClassCastException e) {
-							final String s = String.format("Stream field configuration has changed: cannot convert value '%s' to number", val);
+							final String s = String.format("Stream field configuration has changed: cannot convert value '%s' to number", fieldValue);
 							throw new StreamFieldChangedException(s);
 						}
 					} else {
-						o.send(val);
+						o.send(fieldValue);
 					}
 				}
 			}
