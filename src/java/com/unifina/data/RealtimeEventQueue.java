@@ -79,7 +79,6 @@ public class RealtimeEventQueue extends DataSourceEventQueue {
 				if (eventCounter >= LOGGING_INTERVAL) {
 					double perEvent = (elapsedTime / (double) eventCounter) / 1000.0;
 					log.info(String.format("Processed %d events in %d nanoseconds. That's %s microseconds per event.", eventCounter, elapsedTime, perEvent));
-			 				 "That's " + perEvent + " microseconds per event.");
 					eventCounter = 0;
 					elapsedTime = 0;
 				}
