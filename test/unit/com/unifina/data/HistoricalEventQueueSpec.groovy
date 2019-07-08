@@ -134,8 +134,9 @@ class HistoricalEventQueueSpec extends Specification {
 		queue.start() // If there's a problem, this may get deadlocked
 
 		then:
-		eventsProcessed.get() == eventsAdded
-		extraEventsProcessed == 100
+		new PollingConditions().within(2) {
+			eventsProcessed.get() == eventsAdded && extraEventsProcessed == 100
+		}
 	}
 
 	void "observes speed"() {
