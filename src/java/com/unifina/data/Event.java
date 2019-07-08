@@ -3,6 +3,11 @@ package com.unifina.data;
 import java.util.Date;
 import java.util.function.Consumer;
 
+/**
+ * An Event is a wrapper class used for async dispatch of content to an attached Consumer.
+ * Event have a natural ordering based on the (timestamp, sequenceNumber) pair.
+ * @param <ContentClass> This is the type of the content, which is arbitrary. The generic is there to ensure that the content and Consumer are compatible.
+ */
 public class Event<ContentClass> implements Comparable<Event<ContentClass>> {
 
 	private final Date timestamp;
