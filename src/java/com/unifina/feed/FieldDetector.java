@@ -1,10 +1,8 @@
 package com.unifina.feed;
 
 import com.streamr.client.protocol.message_layer.StreamMessage;
-import com.unifina.domain.data.Stream;
 import com.unifina.utils.MapTraversal;
 import org.apache.log4j.Logger;
-import org.jetbrains.annotations.NotNull;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -63,8 +61,8 @@ public class FieldDetector {
 		}
 
 		List<FieldConfig> fields = new ArrayList<>();
-		for (String key : map.keySet()) {
-			fields.add(new FieldConfig(key, detectType(map.get(key))));
+		for (Map.Entry<String, Object> entry : map.entrySet()) {
+			fields.add(new FieldConfig(entry.getKey(), detectType(entry.getValue())));
 		}
 		return fields;
 	}
