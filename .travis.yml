@@ -4,7 +4,6 @@ jdk:
 - openjdk8
 services:
 - docker
-- mysql
 branches:
   only:
   - master
@@ -35,6 +34,8 @@ jobs:
     script: "./travis_scripts/fe_unit_test.sh"
   - stage: Integration tests
     script: "travis_retry ./travis_scripts/integration_test.sh"
+  - stage: REST API tests
+    script: ./travis_scripts/rest_e2e_test.sh
   - stage: Build war Staging
     script: "./travis_scripts/build_war.sh"
     env:
