@@ -19,8 +19,6 @@ import java.util.function.Predicate;
  */
 public class BoundedPriorityBlockingQueue<E> extends PriorityBlockingQueue<E> {
 
-	private static final Logger log = Logger.getLogger(BoundedPriorityBlockingQueue.class);
-
 	// This should always hold: semaphore.availablePermits() == maxSize - this.size()
 	private final Semaphore semaphore;
 
@@ -32,12 +30,7 @@ public class BoundedPriorityBlockingQueue<E> extends PriorityBlockingQueue<E> {
 	@Override
 	public synchronized boolean offer(E e, long timeout, @NotNull TimeUnit unit) {
 		try {
-			if (semaphore.availablePermits() == 0) {
-				log.info("queue looks full, might block");
-			}
-			long startTime = System.currentTimeMillis();
 			if (semaphore.tryAcquire(timeout, unit)) {
-				log.info("Acquiring semaphore took "+(System.currentTimeMillis()-startTime+" millis. Remaining permits: "+semaphore.availablePermits()));
 				super.offer(e);
 				return true;
 			} else {
