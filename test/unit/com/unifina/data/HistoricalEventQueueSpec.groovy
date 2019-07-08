@@ -139,7 +139,7 @@ class HistoricalEventQueueSpec extends Specification {
 		queue.start() // If there's a problem, this may get deadlocked
 
 		then:
-		new PollingConditions().within(5) {
+		new PollingConditions().within(20) {
 			eventsProcessed.get() == eventsAdded && extraEventsProcessed == 100
 		}
 	}
