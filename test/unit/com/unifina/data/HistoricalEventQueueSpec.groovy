@@ -5,6 +5,7 @@ import com.unifina.datasource.DataSource
 import com.unifina.datasource.ITimeListener
 import com.unifina.domain.security.SecUser
 import com.unifina.utils.Globals
+import org.apache.log4j.Logger
 import spock.lang.Specification
 import spock.util.concurrent.PollingConditions
 
@@ -12,6 +13,8 @@ import java.util.concurrent.atomic.AtomicInteger
 import java.util.function.Consumer
 
 class HistoricalEventQueueSpec extends Specification {
+
+	private static final Logger log = Logger.getLogger(HistoricalEventQueueSpec)
 
 	private HistoricalEventQueue createQueue(Date beginDate, Date endDate, int speed = 0, int capacity = 100, boolean addEndEvent = true) {
 		SecUser user = new SecUser()
@@ -115,9 +118,11 @@ class HistoricalEventQueueSpec extends Specification {
 			@Override
 			void accept(Integer integer) {
 				for (int i=0; i<100; i++) {
-					queue.enqueue(new Event<Integer>(null, new Date(0), new Consumer<Integer>() {
+					log.info("Trying to enqueue extra event $i")
+					queue.enqueue(new Event<Integer>(i, new Date(0), new Consumer<Integer>() {
 						@Override
 						void accept(Integer ii) {
+							log.info("Extra event was dispatched: $ii")
 							extraEventsProcessed++
 						}
 					}))
@@ -134,7 +139,7 @@ class HistoricalEventQueueSpec extends Specification {
 		queue.start() // If there's a problem, this may get deadlocked
 
 		then:
-		new PollingConditions().within(2) {
+		new PollingConditions().within(5) {
 			eventsProcessed.get() == eventsAdded && extraEventsProcessed == 100
 		}
 	}
