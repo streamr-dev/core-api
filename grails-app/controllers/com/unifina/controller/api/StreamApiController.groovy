@@ -179,6 +179,36 @@ class StreamApiController {
 		}
 	}
 
+	@StreamrApi
+	def subscribers(String id) {
+		getAuthorizedStream(id, Operation.WRITE) { Stream stream ->
+			Set<String> subscriberAddresses = streamService.getStreamEthereumSubscribers(stream)
+			render([addresses: subscriberAddresses] as JSON)
+		}
+	}
+
+	@StreamrApi
+	def publisher(String id, String address) {
+		getAuthorizedStream(id, Operation.READ) { Stream stream ->
+			if(streamService.isStreamEthereumPublisher(stream, address)) {
+				render(status: 200)
+			} else {
+				render(status: 404)
+			}
+		}
+	}
+
+	@StreamrApi
+	def subscriber(String id, String address) {
+		getAuthorizedStream(id, Operation.WRITE) { Stream stream ->
+			if(streamService.isStreamEthereumSubscriber(stream, address)) {
+				render(status: 200)
+			} else {
+				render(status: 404)
+			}
+		}
+	}
+
 	private def getAuthorizedStream(String id, Operation op, Closure action) {
 		def stream = Stream.get(id)
 		if (stream == null) {

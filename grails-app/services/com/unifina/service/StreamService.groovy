@@ -225,6 +225,33 @@ class StreamService {
 		return keys*.idInService as Set
 	}
 
+	boolean isStreamEthereumPublisher(Stream stream, String ethereumAddress) {
+		IntegrationKey key = IntegrationKey.findByIdInService(ethereumAddress)
+		if (key == null || key.user == null) {
+			return false
+		}
+		return permissionService.canWrite(key.user, stream)
+	}
+
+	Set<String> getStreamEthereumSubscribers(Stream stream) {
+		// This approach might be slow if there are a lot of allowed readers to the Stream
+		List<SecUser> readers = permissionService.getPermissionsTo(stream, Permission.Operation.READ)*.user
+
+		List<IntegrationKey> keys = IntegrationKey.findAll {
+			user.id in readers*.id && service in [IntegrationKey.Service.ETHEREUM, IntegrationKey.Service.ETHEREUM_ID]
+		}
+
+		return keys*.idInService as Set
+	}
+
+	boolean isStreamEthereumSubscriber(Stream stream, String ethereumAddress) {
+		IntegrationKey key = IntegrationKey.findByIdInService(ethereumAddress)
+		if (key == null || key.user == null) {
+			return false
+		}
+		return permissionService.canRead(key.user, stream)
+	}
+
 	List<Stream> getInboxStreams(List<SecUser> users) {
 		if (users.isEmpty()) return new ArrayList<Stream>()
 		List<IntegrationKey> keys = IntegrationKey.findAll {

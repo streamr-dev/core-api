@@ -52,6 +52,9 @@ class UrlMappings {
 		"/api/v1/streams/$id/confirmCsvFileUpload"(controller: "streamApi", action: "confirmCsvFileUpload")
 		"/api/v1/streams/$id/dataFiles"(controller: "streamApi", action: "dataFiles")
 		"/api/v1/streams/$id/publishers"(controller: "streamApi", action: "publishers")
+		"/api/v1/streams/$id/publisher/$address"(controller: "streamApi", action: "publisher")
+		"/api/v1/streams/$id/subscribers"(controller: "streamApi", action: "subscribers")
+		"/api/v1/streams/$id/subscriber/$address"(controller: "streamApi", action: "subscriber")
 		"/api/v1/streams/$id/status"(controller: "streamApi", action: "status")
 		"/api/v1/streams/$resourceId/keys"(resources: "keyApi", excludes: ["create", "edit", "update"]) { resourceClass = Stream }
 		"/api/v1/streams/$streamId/keys/$keyId"(method: "PUT", controller: "keyApi", action: "updateStreamKey")

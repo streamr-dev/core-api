@@ -239,6 +239,7 @@ class PermissionServiceSpec extends BeanMockingSpecification {
 		publisher3.id = 6L
 		SecUser subscriber = new SecUser(username: "0x26e1ae3f5efe8a01eca8c2e9d3c32702cf4bead6").save(failOnError: true, validate: false)
 
+
 		Stream pub1Inbox = new Stream(name: "publisher1", inbox: true)
 		pub1Inbox.id = "publisher1"
 		pub1Inbox.save(failOnError: true, validate: false)
@@ -257,6 +258,7 @@ class PermissionServiceSpec extends BeanMockingSpecification {
 		setup:
 		service.systemGrant(publisher1, stream, Operation.WRITE)
 		service.systemGrant(publisher2, stream, Operation.WRITE)
+
 		when:
 		// adding a new subscriber
 		service.systemGrant(subscriber, stream, Operation.READ)
@@ -274,6 +276,21 @@ class PermissionServiceSpec extends BeanMockingSpecification {
 		// assertions after adding a new publisher
 		service.canWrite(subscriber, pub3Inbox)
 		service.canWrite(publisher3, subInbox)
+	}
+
+	void "inbox stream permissions also work when anonymous keys have permissions to the stream"() {
+		SecUser subscriber = new SecUser(username: "0x26e1ae3f5efe8a01eca8c2e9d3c32702cf4bead6").save(failOnError: true, validate: false)
+		Key anonKey = new Key()
+		anonKey.id = 1L
+		anonKey.save(failOnError: true, validate: false)
+		Stream stream = new Stream()
+		stream.id = "stream"
+		setup:
+		service.systemGrant(anonKey, stream, Operation.WRITE)
+		when:
+		service.systemGrant(subscriber, stream, Operation.READ)
+		then:
+		noExceptionThrown()
 	}
 
 	void "cannot revoke only share permission"() {

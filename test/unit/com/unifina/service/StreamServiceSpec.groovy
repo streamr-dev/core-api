@@ -372,6 +372,87 @@ class StreamServiceSpec extends Specification {
 		addresses == validAddresses
 	}
 
+	void "isStreamEthereumPublisher should return true iff user has write permission to the stream"() {
+		setup:
+		service.permissionService = Mock(PermissionService)
+		SecUser user1 = new SecUser(id: 1, username: "u1").save(failOnError: true, validate: false)
+		String address1 = "0x9fe1ae3f5efe2a01eca8c2e9d3c11102cf4bea57"
+		new IntegrationKey(user: user1, service: IntegrationKey.Service.ETHEREUM_ID,
+			idInService: address1).save(failOnError: true, validate: false)
+		SecUser user2 = new SecUser(id: 2, username: "u2").save(failOnError: true, validate: false)
+		String address2 = "0x26e1ae3f5efe8a01eca8c2e9d3c32702cf4bead6"
+		new IntegrationKey(user: user2, service: IntegrationKey.Service.ETHEREUM,
+			idInService: address2).save(failOnError: true, validate: false)
+		Stream stream = new Stream(name: "name")
+		stream.id = "streamId"
+		stream.save(failOnError: true, validate: false)
+		when:
+		boolean result1 = service.isStreamEthereumPublisher(stream, address1)
+		boolean result2 = service.isStreamEthereumPublisher(stream, address2)
+		then:
+		1 * service.permissionService.canWrite(user1, stream) >> true
+		result1
+		1 * service.permissionService.canWrite(user2, stream) >> false
+		!result2
+	}
+
+	void "getStreamEthereumSubscribers should return Ethereum addresses of users with read permission to the Stream"() {
+		setup:
+		service.permissionService = Mock(PermissionService)
+		SecUser user1 = new SecUser(id: 1, username: "u1").save(failOnError: true, validate: false)
+		IntegrationKey key1 = new IntegrationKey(user: user1, service: IntegrationKey.Service.ETHEREUM_ID,
+			idInService: "0x9fe1ae3f5efe2a01eca8c2e9d3c11102cf4bea57").save(failOnError: true, validate: false)
+		SecUser user2 = new SecUser(id: 2, username: "u2").save(failOnError: true, validate: false)
+		IntegrationKey key2 = new IntegrationKey(user: user2, service: IntegrationKey.Service.ETHEREUM,
+			idInService: "0x26e1ae3f5efe8a01eca8c2e9d3c32702cf4bead6").save(failOnError: true, validate: false)
+		SecUser user3 = new SecUser(id: 3, username: "u3").save(failOnError: true, validate: false)
+
+		// User with key but no read permission - this key should not be returned by the query
+		SecUser userWithKeyButNoPermission = new SecUser(id: 4, username: "u4").save(failOnError: true, validate: false)
+		new IntegrationKey(user: userWithKeyButNoPermission, service: IntegrationKey.Service.ETHEREUM_ID,
+			idInService: "0x12345e3f5efe8a01eca8c2e9d3c32702cf4bead6").save(failOnError: true, validate: false)
+
+		Set<String> validAddresses = new HashSet<String>()
+		validAddresses.add(key1.idInService)
+		validAddresses.add(key2.idInService)
+		Permission p1 = new Permission(user: user1)
+		Permission p2 = new Permission(user: user2)
+		Permission p3 = new Permission(user: user3)
+		List<Permission> perms = [p1, p2, p3]
+		Stream stream = new Stream(name: "name")
+		stream.id = "streamId"
+		stream.save(failOnError: true, validate: false)
+		when:
+		Set<String> addresses = service.getStreamEthereumSubscribers(stream)
+		then:
+		1 * service.permissionService.getPermissionsTo(stream, Permission.Operation.READ) >> perms
+		addresses == validAddresses
+	}
+
+	void "isStreamEthereumSubscriber should return true iff user has read permission to the stream"() {
+		setup:
+		service.permissionService = Mock(PermissionService)
+		SecUser user1 = new SecUser(id: 1, username: "u1").save(failOnError: true, validate: false)
+		String address1 = "0x9fe1ae3f5efe2a01eca8c2e9d3c11102cf4bea57"
+		new IntegrationKey(user: user1, service: IntegrationKey.Service.ETHEREUM_ID,
+			idInService: address1).save(failOnError: true, validate: false)
+		SecUser user2 = new SecUser(id: 2, username: "u2").save(failOnError: true, validate: false)
+		String address2 = "0x26e1ae3f5efe8a01eca8c2e9d3c32702cf4bead6"
+		new IntegrationKey(user: user2, service: IntegrationKey.Service.ETHEREUM,
+			idInService: address2).save(failOnError: true, validate: false)
+		Stream stream = new Stream(name: "name")
+		stream.id = "streamId"
+		stream.save(failOnError: true, validate: false)
+		when:
+		boolean result1 = service.isStreamEthereumSubscriber(stream, address1)
+		boolean result2 = service.isStreamEthereumSubscriber(stream, address2)
+		then:
+		1 * service.permissionService.canRead(user1, stream) >> true
+		result1
+		1 * service.permissionService.canRead(user2, stream) >> false
+		!result2
+	}
+
 	void "getInboxStreams() returns all inbox streams of the users"() {
 		SecUser user1 = new SecUser(id: 1, username: "u1").save(failOnError: true, validate: false)
 		IntegrationKey key1 = new IntegrationKey(user: user1, service: IntegrationKey.Service.ETHEREUM_ID,

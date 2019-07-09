@@ -14,13 +14,15 @@ import org.web3j.protocol.core.methods.response.Log;
 import org.web3j.protocol.core.methods.response.TransactionReceipt;
 import org.web3j.protocol.http.HttpService;
 
+import javax.websocket.DeploymentException;
 import java.io.IOException;
+import java.net.URISyntaxException;
 import java.util.*;
 
 /**
  * Get events sent out by given contract in the given transaction
  */
-public class GetEvents extends AbstractSignalPathModule implements ContractEventPoller.Listener, IStartListener, IStopListener {
+public class GetEvents extends AbstractSignalPathModule implements EventsListener, IStartListener, IStopListener {
 	private static final Logger log = Logger.getLogger(GetEvents.class);
 
 	private final EthereumContractInput contract = new EthereumContractInput(this, "contract");
@@ -83,9 +85,17 @@ public class GetEvents extends AbstractSignalPathModule implements ContractEvent
 
 	@Override
 	public void onStart() {
-		String rpcUrl = ethereumOptions.getRpcUrl();
+		String rpcUrl = ethereumOptions.getWebsocketRpcUri();
+		if(rpcUrl == null){
+			rpcUrl = ethereumOptions.getRpcUrl();
+			log.warn("No websockets URI found in config for network "+ethereumOptions.getNetwork()+". Trying to run GetEvents over https RPC: "+rpcUrl);
+		}
 		String contractAddress = contract.getValue().getAddress();
-		contractEventPoller = new ContractEventPoller(rpcUrl, contractAddress, this);
+		try {
+			contractEventPoller = new ContractEventPoller(rpcUrl, contractAddress, this);
+		} catch (Exception e) {
+			throw new RuntimeException(e);
+		}
 		new Thread(contractEventPoller, "ContractEventPoller-Thread").start();
 	}
 
@@ -205,6 +215,9 @@ public class GetEvents extends AbstractSignalPathModule implements ContractEvent
 	@Override
 	protected void onConfiguration(Map<String, Object> config) {
 		super.onConfiguration(config);
+		ModuleOptions options = ModuleOptions.get(config);
+		ethereumOptions = EthereumModuleOptions.readFrom(options);
+
 		web3j = getWeb3j();
 		outputsByEvent = new HashMap<>();
 		web3jEvents = new HashMap<>();
@@ -236,8 +249,6 @@ public class GetEvents extends AbstractSignalPathModule implements ContractEvent
 			}
 		}
 
-		ModuleOptions options = ModuleOptions.get(config);
-		ethereumOptions = EthereumModuleOptions.readFrom(options);
 	}
 
 	@Override

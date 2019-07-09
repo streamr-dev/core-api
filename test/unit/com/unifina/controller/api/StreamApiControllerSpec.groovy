@@ -327,6 +327,85 @@ class StreamApiControllerSpec extends ControllerSpecification {
 		]
 	}
 
+	void "return 200 if valid publisher"() {
+		setup:
+		controller.streamService = streamService = Mock(StreamService)
+		String address = "0x26e1ae3f5efe8a01eca8c2e9d3c32702cf4bead6"
+		when:
+		params.id = streamOne.id
+		params.address = address
+		request.method = "GET"
+		authenticatedAs(me) { controller.publisher() }
+
+		then:
+		1 * streamService.isStreamEthereumPublisher(streamOne, address) >> true
+		response.status == 200
+	}
+
+	void "return 404 if invalid publisher"() {
+		setup:
+		controller.streamService = streamService = Mock(StreamService)
+		String address = "0x26e1ae3f5efe8a01eca8c2e9d3c32702cf4bead6"
+		when:
+		params.id = streamOne.id
+		params.address = address
+		request.method = "GET"
+		authenticatedAs(me) { controller.publisher() }
+
+		then:
+		1 * streamService.isStreamEthereumPublisher(streamOne, address) >> false
+		response.status == 404
+	}
+
+	void "returns set of subscriber addresses"() {
+		setup:
+		controller.streamService = streamService = Mock(StreamService)
+		Set<String> addresses = new HashSet<String>()
+		addresses.add('0x26e1ae3f5efe8a01eca8c2e9d3c32702cf4bead6')
+		addresses.add('0x0181ae2f5efe8947eca8c2e9d3f32702cf4be7dd')
+		when:
+		params.id = streamOne.id
+		request.method = "GET"
+		authenticatedAs(me) { controller.subscribers() }
+
+		then:
+		1 * streamService.getStreamEthereumSubscribers(streamOne) >> addresses
+		response.status == 200
+		response.json == [
+			'addresses': addresses.toArray()
+		]
+	}
+
+	void "return 200 if valid subscriber"() {
+		setup:
+		controller.streamService = streamService = Mock(StreamService)
+		String address = "0x26e1ae3f5efe8a01eca8c2e9d3c32702cf4bead6"
+		when:
+		params.id = streamOne.id
+		params.address = address
+		request.method = "GET"
+		authenticatedAs(me) { controller.subscriber() }
+
+		then:
+		1 * streamService.isStreamEthereumSubscriber(streamOne, address) >> true
+		response.status == 200
+	}
+
+	void "return 404 if invalid subscriber"() {
+		setup:
+		controller.streamService = streamService = Mock(StreamService)
+		String address = "0x26e1ae3f5efe8a01eca8c2e9d3c32702cf4bead6"
+		when:
+		params.id = streamOne.id
+		params.address = address
+		request.method = "GET"
+		authenticatedAs(me) { controller.subscriber() }
+
+		then:
+		1 * streamService.isStreamEthereumSubscriber(streamOne, address) >> false
+		response.status == 404
+	}
+
 	void "streams status"() {
 		setup:
 		controller.streamService = Mock(StreamService)

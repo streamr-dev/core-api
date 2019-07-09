@@ -431,7 +431,6 @@
           <root url="jar://$MAVEN_REPOSITORY$/org/cache2k/cache2k-core/1.2.1.Final/cache2k-core-1.2.1.Final.jar!/" />
           <root url="jar://$MAVEN_REPOSITORY$/org/cache2k/cache2k-api/1.2.1.Final/cache2k-api-1.2.1.Final.jar!/" />
           <root url="jar://$MAVEN_REPOSITORY$/org/objenesis/objenesis/3.0.1/objenesis-3.0.1.jar!/" />
-          <root url="jar://$MAVEN_REPOSITORY$/com/streamr/client/1.0.0/client-1.0.0.jar!/" />
           <root url="jar://$MAVEN_REPOSITORY$/org/ethereum/ethereumj-core/1.12.0-RELEASE/ethereumj-core-1.12.0-RELEASE.jar!/" />
           <root url="jar://$MAVEN_REPOSITORY$/org/jetbrains/annotations/17.0.0/annotations-17.0.0.jar!/" />
           <root url="jar://$MAVEN_REPOSITORY$/com/google/code/findbugs/jsr305/3.0.2/jsr305-3.0.2.jar!/" />
@@ -442,6 +441,7 @@
           <root url="jar://$MAVEN_REPOSITORY$/io/dropwizard/metrics/metrics-core/3.2.2/metrics-core-3.2.2.jar!/" />
           <root url="jar://$MAVEN_REPOSITORY$/com/datastax/cassandra/cassandra-driver-core/3.7.1/cassandra-driver-core-3.7.1.jar!/" />
           <root url="jar://$MAVEN_REPOSITORY$/com/github/jnr/jffi/1.2.16/jffi-1.2.16-native.jar!/" />
+          <root url="jar://$MAVEN_REPOSITORY$/com/streamr/client/1.1.0/client-1.1.0.jar!/" />
         </CLASSES>
         <JAVADOC />
         <SOURCES>

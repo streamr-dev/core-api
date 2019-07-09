@@ -7,7 +7,10 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import javax.websocket.DeploymentException;
 import java.io.Closeable;
+import java.io.IOException;
+import java.net.URISyntaxException;
 import java.util.List;
 
 import static java.util.Collections.singletonList;
@@ -16,22 +19,35 @@ import static java.util.Collections.singletonMap;
 /**
  * Poll Ethereum events of a contract via JSON RPC (https://github.com/ethereum/wiki/wiki/JSON-RPC) using filters.
  */
-class ContractEventPoller implements Closeable, Runnable {
+class ContractEventPoller implements Closeable, Runnable, JsonRpcResponseHandler {
 	private static final Logger log = Logger.getLogger(ContractEventPoller.class);
 	private static final int POLL_INTERVAL_IN_MS = 3000;
 
+	private static final int ID_ADDFILTER = 1;
+	private static final int ID_REMOVEFILTER = 2;
+	private static final int ID_POLLFILTER = 3;
+
 	private final EthereumJsonRpc rpc;
 	private final String contractAddress;
-	private final Listener listener;
+	private final EventsListener listener;
 	private String filterId;
+	private boolean keepPolling = false;
 
-	interface Listener {
-		void onEvent(JSONArray events);
-		void onError(String message);
-	}
 
-	ContractEventPoller(String rpcUrl, String contractAddress, Listener listener) {
-		this.rpc = new EthereumJsonRpc(rpcUrl);
+	ContractEventPoller(String rpcUrl, String contractAddress, EventsListener listener) {
+		if (rpcUrl.startsWith("http")) {
+			rpc = new HttpEthereumJsonRpc(rpcUrl, this);
+		} else {
+			rpc = new WebsocketEthereumJsonRpc(rpcUrl, this);
+			try {
+				boolean opened = ((WebsocketEthereumJsonRpc) rpc).openConnectionRetryIfFail();
+				if (!opened) {
+					throw new RuntimeException("Couldnt open connection to " + rpcUrl);
+				}
+			} catch (InterruptedException e) {
+				throw new RuntimeException(e);
+			}
+		}
 		this.contractAddress = contractAddress;
 		this.listener = listener;
 	}
@@ -39,7 +55,7 @@ class ContractEventPoller implements Closeable, Runnable {
 	@Override
 	public void run() {
 		newFilter();
-		while (filterId != null) {
+		while (keepPolling) {
 			pollChanges();
 			try {
 				Thread.sleep(POLL_INTERVAL_IN_MS);
@@ -62,11 +78,16 @@ class ContractEventPoller implements Closeable, Runnable {
 	private void newFilter() {
 		List params = singletonList(singletonMap("address", contractAddress));
 		try {
-			filterId = rpc.rpcCall("eth_newFilter", params).getString("result");
-		} catch (JSONException e) {
+			rpc.rpcCall("eth_newFilter", params, ID_ADDFILTER);
+			keepPolling = true;
+		} catch (Exception e) {
+			listener.onError(e.getMessage());
 			throw new RuntimeException(e);
 		}
+	}
 
+	protected void processAddFilterResponse(JSONObject resp) {
+		filterId = resp.getString("result");
 		// Logging
 		String id = null;
 		if (listener instanceof AbstractSignalPathModule) {
@@ -77,20 +98,18 @@ class ContractEventPoller implements Closeable, Runnable {
 		}
 		log.info(String.format("Filter '%s' created. Listening to contract '%s' on canvas '%s'.",
 			filterId, contractAddress, id));
+
 	}
 
-	/**
-	 * https://github.com/ethereum/wiki/wiki/JSON-RPC#eth_getfilterchanges
-	 */
 	private synchronized void pollChanges() {
-		log.info(String.format("Polling filter '%s'.", filterId));
+		if (filterId == null) {
+			log.info("pollChanges called before filter is set. Doing nothing.");
+			return;
+		}
 		try {
-			JSONObject response = rpc.rpcCall("eth_getFilterChanges", singletonList(filterId));
-			JSONArray jsonArray = response.getJSONArray("result");
-			if (jsonArray.length() != 0) {
-				listener.onEvent(jsonArray);
-			}
-		} catch (EthereumJsonRpc.ErrorObjectError e) {
+			log.info(String.format("Polling filter '%s'.", filterId));
+			rpc.rpcCall("eth_getFilterChanges", singletonList(filterId), ID_POLLFILTER);
+		} catch (HttpEthereumJsonRpc.ErrorObjectException e) {
 			if (filterDoesNotExist(e.getCode())) {
 				log.info("Resetting filter...");
 				filterId = null;
@@ -98,8 +117,21 @@ class ContractEventPoller implements Closeable, Runnable {
 			} else {
 				listener.onError(e.getMessage());
 			}
-		} catch (EthereumJsonRpc.Error | JSONException e) {
+		} catch (HttpEthereumJsonRpc.RPCException | JSONException e) {
 			listener.onError(e.getMessage());
+		} catch (Exception e) {
+			listener.onError(e.getMessage());
+			throw new RuntimeException(e);
+		}
+	}
+
+	/**
+	 * https://github.com/ethereum/wiki/wiki/JSON-RPC#eth_getfilterchanges
+	 */
+	private synchronized void processPollChangesResponse(JSONObject response) {
+		JSONArray jsonArray = response.getJSONArray("result");
+		if (jsonArray.length() != 0) {
+			listener.onEvent(jsonArray);
 		}
 	}
 
@@ -114,20 +146,49 @@ class ContractEventPoller implements Closeable, Runnable {
 		filterId = null;
 
 		try {
-			result = rpc.rpcCall("eth_uninstallFilter", singletonList(id)).getBoolean("result");
-		} catch (JSONException e) {
+			rpc.rpcCall("eth_uninstallFilter", singletonList(id), ID_REMOVEFILTER);
+		} catch (Exception e) {
+			listener.onError(e.getMessage());
 			throw new RuntimeException(e);
 		}
 
+	}
+
+	private void processUninstallFilterResponse(JSONObject response) {
+		boolean result;
+
+		// avoid race condition where another close() enters while rpcCall is executing
+		String id = filterId;
+		filterId = null;
+		result = response.getBoolean("result");
 		if (result) {
 			log.info(String.format("Filter '%s' uninstalled.", id));
 		} else {
 			listener.onError("Unable to uninstall filter " + id);
 			throw new RuntimeException("Unable to uninstall filter " + id);
 		}
+		keepPolling = false;
 	}
 
 	private static boolean filterDoesNotExist(int code) {
 		return code == -32000;
+	}
+
+	@Override
+	public void processResponse(JSONObject resp) {
+		int id = resp.getInt("id");
+		switch (id) {
+			case ID_ADDFILTER:
+				processAddFilterResponse(resp);
+				return;
+			case ID_REMOVEFILTER:
+				processUninstallFilterResponse(resp);
+				return;
+			case ID_POLLFILTER:
+				processPollChangesResponse(resp);
+				return;
+			default:
+				throw new RuntimeException("Unknown RPC id " + id);
+		}
 	}
 }
