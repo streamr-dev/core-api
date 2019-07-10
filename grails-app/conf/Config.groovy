@@ -234,25 +234,22 @@ unifina.task.messageQueue = "streamr-tasks"
 /**
  * Node IP address config. Autodetected if not set.
  */
-streamr.node.ip = System.getProperty("streamr.node.ip")
+streamr.engine.node.ip = System.getProperty("streamr.engine.node.ip")
 
 /**
- * UI update server address
+ * Streamr API URLs
  */
-streamr.ui.server = System.getProperty("streamr.ui.server") ?: "ws://127.0.0.1:8890/api/v1/ws"
+streamr.api.websocket.url = System.getProperty("streamr.api.websocket.url") ?: "ws://127.0.0.1:8890/api/v1/ws?"
 environments {
 	production {
-		streamr.ui.server = System.getProperty("streamr.ui.server") ?: "${prodBaseUrl.replaceFirst("http", "ws")}/api/v1/ws"
+		streamr.api.websocket.url = System.getProperty("streamr.api.websocket.url") ?: "${prodBaseUrl.replaceFirst("http", "ws")}/api/v1/ws"
 	}
 }
 
-/**
- * HTTP API server address
- */
-streamr.http.api.url = System.getProperty("streamr.http.api.url") ?: "http://127.0.0.1:8081/streamr-core/api/v1"
+streamr.api.http.url = System.getProperty("streamr.api.http.url") ?: "http://127.0.0.1:8081/streamr-core/api/v1"
 environments {
 	production {
-		streamr.http.api.url = System.getProperty("streamr.http.api.url") ?: "${prodBaseUrl}/api/v1"
+		streamr.api.http.url = System.getProperty("streamr.api.http.url") ?: "${prodBaseUrl}/api/v1"
 	}
 }
 
@@ -474,7 +471,7 @@ streamr.signup.requireCaptcha = (System.getProperty("streamr.signup.requireCaptc
 /**
  * Streamr engine-and-editor nodes
  */
-streamr.nodes = System.getProperty("streamr.nodes") ? Arrays.asList(System.getProperty("streamr.nodes").split(",")) : [new NodeService().getIPAddress([streamr: [node: [ip: System.getProperty("streamr.node.ip")]]])]
+streamr.nodes = System.getProperty("streamr.nodes") ? Arrays.asList(System.getProperty("streamr.nodes").split(",")) : [new NodeService().getIPAddress([streamr: [node: [ip: System.getProperty("streamr.engine.node.ip")]]])]
 
 /**
  * Miscellaneous

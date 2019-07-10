@@ -5,8 +5,8 @@ import com.streamr.client.utils.StreamPartition;
 import com.unifina.data.ClockTick;
 import com.unifina.data.Event;
 import com.unifina.data.RealtimeEventQueue;
+import com.unifina.feed.RealtimeMessageSource;
 import com.unifina.feed.StreamMessageSource;
-import com.unifina.feed.redis.MultipleRedisMessageSource;
 import com.unifina.serialization.SerializationRequest;
 import com.unifina.service.SerializationService;
 import com.unifina.signalpath.SignalPath;
@@ -63,7 +63,7 @@ public class RealtimeDataSource extends DataSource {
 
 	@Override
 	protected StreamMessageSource createStreamMessageSource(Collection<StreamPartition> streamPartitions, StreamMessageSource.StreamMessageConsumer consumer) {
-		return new MultipleRedisMessageSource(globals, consumer, streamPartitions);
+		return new RealtimeMessageSource(globals, consumer, streamPartitions);
 	}
 
 	@Override

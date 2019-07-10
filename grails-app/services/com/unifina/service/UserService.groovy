@@ -1,6 +1,6 @@
 package com.unifina.service
 
-import com.unifina.api.DisabledUserException
+
 import com.unifina.api.InvalidAPIKeyException
 import com.unifina.api.InvalidUsernameAndPasswordException
 import com.unifina.api.NotFoundException
@@ -211,5 +211,26 @@ class UserService {
 			return key.user
 		}
 		return key // is an anonymous key
+	}
+
+	/**
+	 * Returns an API key for the given user. This is used
+	 * by Canvases to subscribe to the Streams required by the Canvas.
+	 *
+	 * Currently, the key is chosen arbitrarily. It would be better
+	 * if the user could specify which key to use to run their Canvases
+	 * by marking one key as "default", or offering a choice
+	 * in Canvas run settings.
+	 */
+	String getApiKeyForUser(Long userId) {
+		Key key = Key.where {
+			user.id == userId
+		}.find()
+
+		if (!key) {
+			throw new RuntimeException("User does not have an API key! This should not happen!")
+		} else {
+			return key.id
+		}
 	}
 }

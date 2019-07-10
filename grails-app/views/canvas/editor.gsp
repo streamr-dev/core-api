@@ -110,8 +110,7 @@ $(function() {
 			Streamr.showInfo(data.msg)
 		},
 		connectionOptions: {
-			url: "${grailsApplication.config.streamr.ui.server}",
-			path: "${grailsApplication.config.streamr.ui.serverPath}",
+			url: "${grailsApplication.config.streamr.api.websocket.url}",
 			authKey: "${key.id}",
 			autoConnect: true,
 			autoDisconnect: true
