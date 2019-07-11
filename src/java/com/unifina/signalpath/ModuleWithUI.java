@@ -79,7 +79,6 @@ public abstract class ModuleWithUI extends AbstractSignalPathModule {
 	public String getUiChannelName() {
 		return getUiChannel().getName();
 	}
-
 	/**
 	 * Override this method if a webcomponent is available for this module. The
 	 * default implementation returns null, which means there is no webcomponent.

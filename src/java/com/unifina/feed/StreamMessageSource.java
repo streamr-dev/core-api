@@ -3,8 +3,6 @@ package com.unifina.feed;
 import com.streamr.client.StreamrClient;
 import com.streamr.client.authentication.ApiKeyAuthenticationMethod;
 import com.streamr.client.options.StreamrClientOptions;
-import com.streamr.client.protocol.control_layer.ControlLayerAdapter;
-import com.streamr.client.protocol.control_layer.ControlMessage;
 import com.streamr.client.protocol.message_layer.StreamMessage;
 import com.streamr.client.rest.Stream;
 import com.streamr.client.utils.StreamPartition;
@@ -12,6 +10,7 @@ import com.unifina.service.UserService;
 import com.unifina.utils.Globals;
 import com.unifina.utils.MapTraversal;
 import grails.util.Holders;
+import org.apache.log4j.Logger;
 
 import java.io.Closeable;
 import java.util.Collection;
@@ -23,6 +22,9 @@ import java.util.function.Consumer;
  * when messages are received.
  */
 public abstract class StreamMessageSource implements Closeable {
+
+	private static final Logger log = Logger.getLogger(StreamMessageSource.class);
+
 	protected final Globals globals;
 	protected final StreamMessageConsumer consumer;
 	protected final Collection<StreamPartition> streamPartitions;
@@ -77,6 +79,11 @@ public abstract class StreamMessageSource implements Closeable {
 			streamrClient.disconnect();
 			throw new RuntimeException("Failed to subscribe to streams!", e);
 		}
+	}
+
+	public void close() {
+		streamrClient.disconnect();
+		log.info("Closed Streamr connection to " + streamrClient.getOptions().getWebsocketApiUrl());
 	}
 
 	public abstract static class StreamMessageConsumer implements Consumer<StreamMessage> {

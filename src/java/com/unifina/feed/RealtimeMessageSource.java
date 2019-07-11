@@ -25,10 +25,4 @@ public class RealtimeMessageSource extends StreamMessageSource {
 		}
 	}
 
-	@Override
-	public void close() {
-		streamrClient.disconnect();
-		log.info("Closed Streamr connection to " + streamrClient.getOptions().getWebsocketApiUrl());
-	}
-
 }

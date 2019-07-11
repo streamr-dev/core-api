@@ -10,6 +10,10 @@ import java.util.NoSuchElementException;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.TimeUnit;
 
+/**
+ * A MessageHandler which buffers received StreamMessages and exposes a blocking
+ * Iterator interface to retrieve messages from the buffer.
+ */
 public class IterableMessageHandler implements MessageHandler, Iterator<StreamMessage> {
 
 	private final ArrayBlockingQueue<Object> queue; // holds StreamMessages or DoneMarker
@@ -38,13 +42,13 @@ public class IterableMessageHandler implements MessageHandler, Iterator<StreamMe
 				log.error(String.format("onMessage: the queue is full and no space was made within %d sec. The message will be dropped.", queueOfferTimeoutSeconds));
 			}
 		} catch (InterruptedException e) {
-			log.error(e);
+			log.error("Sleep interrupted while offering!", e);
 		}
 	}
 
 	@Override
 	public void done(Subscription sub) {
-		log.info("done() called on sub: "+sub.getId());
+		log.info("Subscription done: "+sub.getId());
 		queue.add(new DoneMarker());
 	}
 
@@ -68,7 +72,9 @@ public class IterableMessageHandler implements MessageHandler, Iterator<StreamMe
 		if (next instanceof DoneMarker) {
 			throw new NoSuchElementException("No more messages!");
 		} else {
-			return (StreamMessage) next;
+			StreamMessage result = (StreamMessage) next;
+			next = null;
+			return result;
 		}
 	}
 
@@ -84,7 +90,7 @@ public class IterableMessageHandler implements MessageHandler, Iterator<StreamMe
 				throw new RuntimeException("Timed out while waiting for messages");
 			}
 		} catch (InterruptedException e) {
-			log.error(e);
+			log.error("Sleep interrupted while polling!", e);
 		}
 	}
 

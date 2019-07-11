@@ -7,6 +7,7 @@ import com.unifina.feed.util.IterableMessageHandler;
 import com.unifina.feed.util.MergingIterator;
 import com.unifina.feed.util.StreamMessageComparator;
 import com.unifina.utils.Globals;
+import org.apache.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.IOException;
@@ -21,6 +22,8 @@ import java.util.List;
  * given Consumer (i.e. bridges from "pull" to "push").
  */
 public class HistoricalMessageSource extends StreamMessageSource implements Iterable<StreamMessage> {
+
+	private static final Logger log = Logger.getLogger(HistoricalMessageSource.class);
 
 	private final MergingIterator<StreamMessage> mergingIterator;
 	private boolean quit = false;
@@ -54,7 +57,8 @@ public class HistoricalMessageSource extends StreamMessageSource implements Iter
 	}
 
 	@Override
-	public void close() throws IOException {
+	public void close() {
+		super.close();
 		quit = true; // signals the reporterThread to stop
 		mergingIterator.close();
 	}

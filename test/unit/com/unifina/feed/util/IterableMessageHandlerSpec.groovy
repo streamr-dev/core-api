@@ -43,11 +43,15 @@ class IterableMessageHandlerSpec extends Specification {
 		!iterator.hasNext()
 	}
 
-	def "next() returns a received message"() {
+	def "next() returns received messages"() {
 		iterator.onMessage(sub, msg)
+		StreamMessage msg2 = Mock(StreamMessage)
+		iterator.onMessage(sub, msg2)
 
 		expect:
+		iterator.hasNext()
 		iterator.next().is(msg)
+		iterator.next().is(msg2)
 	}
 
 	def "next() throws if there are no more messages"() {
@@ -158,12 +162,12 @@ class IterableMessageHandlerSpec extends Specification {
 			iterator.done(sub)
 		}
 		when:
-		StreamMessage sm = iterator.next()
-		long elapsedTime = System.currentTimeMillis() - startTime
+		iterator.next() // throws, don't add lines after this in the when block
+
 		then:
-		sm == null
-		elapsedTime > ASYNC_DELAY_MILLIS
-		elapsedTime < EARLY_RETURN_TIME_MILLIS
+		thrown(NoSuchElementException)
+		System.currentTimeMillis() - startTime > ASYNC_DELAY_MILLIS
+		System.currentTimeMillis() - startTime < EARLY_RETURN_TIME_MILLIS
 	}
 
 }
