@@ -1,21 +1,23 @@
 package com.unifina.signalpath.kafka;
 
-import com.streamr.client.protocol.message_layer.StreamMessage;
-import com.unifina.data.Event;
+import com.streamr.client.StreamrClient;
 import com.unifina.domain.data.Stream;
 import com.unifina.domain.security.SecUser;
 import com.unifina.service.PermissionService;
-import com.unifina.service.StreamService;
+import com.unifina.service.StreamrClientService;
 import com.unifina.signalpath.*;
-import com.unifina.signalpath.utils.MessageChainUtil;
-import com.unifina.utils.Globals;
 import grails.converters.JSON;
 import grails.util.Holders;
+import org.apache.log4j.Logger;
 import org.codehaus.groovy.grails.web.json.JSONArray;
 import org.codehaus.groovy.grails.web.json.JSONObject;
 
+import java.io.IOException;
 import java.security.AccessControlException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * This module (only) supports sending messages to Kafka/json streams (feed id 7)
@@ -24,39 +26,27 @@ import java.util.*;
  */
 public class SendToStream extends ModuleWithSideEffects {
 
-	protected StreamParameter streamParameter = new StreamParameter(this, "stream");
-	transient protected JSONObject streamConfig = null;
+	private StreamParameter streamParameter = new StreamParameter(this, "stream");
 
-	transient protected PermissionService permissionService = null;
-	transient protected StreamService streamService = null;
+	transient private StreamrClient streamrClient = null;
+	transient private com.streamr.client.rest.Stream cachedStream = null;
 
-	protected boolean historicalWarningShown = false;
-	private String lastStreamId = null;
 	private boolean sendOnlyNewValues = false;
 	private List<Input> fieldInputs = new ArrayList<>();
 
-	private MessageChainUtil msgChainUtil;
-
-	private long counter = 0;
+	private static final Logger log = Logger.getLogger(SendToStream.class);
 
 	@Override
 	public void init() {
-		// Pre-fetch services for more predictable performance
-		ensureServices();
-
 		addInput(streamParameter);
 		streamParameter.setUpdateOnChange(true);
-		msgChainUtil = new MessageChainUtil(getGlobals().getUserId());
 	}
 
-	private void ensureServices() {
-		// will be null after deserialization
-		if (streamService == null) {
-			streamService = Holders.getApplicationContext().getBean(StreamService.class);
+	private StreamrClient getStreamrClient() {
+		if (streamrClient == null) {
+			streamrClient = Holders.getApplicationContext().getBean(StreamrClientService.class).getAuthenticatedInstance(getGlobals().getUserId());
 		}
-		if (permissionService == null) {
-			permissionService = Holders.getApplicationContext().getBean(PermissionService.class);
-		}
+		return streamrClient;
 	}
 
 	@Override
@@ -67,11 +57,14 @@ public class SendToStream extends ModuleWithSideEffects {
 
 	@Override
 	public void activateWithSideEffects(){
-		ensureServices();
 		Stream stream = streamParameter.getValue();
-		authenticateStream(stream);
-		StreamMessage msg = msgChainUtil.getStreamMessage(stream, getGlobals().time, inputValuesToMap());
-		streamService.sendMessage(msg);
+		try {
+			com.streamr.client.rest.Stream s = cacheStream(stream);
+			streamrClient.publish(s, inputValuesToMap(), getGlobals().getTime());
+		} catch (Exception e) {
+			log.error("Failed to publish: ", e);
+		}
+
 	}
 
 	@Override
@@ -89,9 +82,7 @@ public class SendToStream extends ModuleWithSideEffects {
 	}
 
 	@Override
-	public void clearState() {
-		msgChainUtil = new MessageChainUtil(getGlobals().getUserId());
-	}
+	public void clearState() {}
 
 	@Override
 	public Map<String, Object> getConfiguration() {
@@ -116,14 +107,17 @@ public class SendToStream extends ModuleWithSideEffects {
 		if (stream==null)
 			return;
 
-		authenticateStream(stream);
+		// Fail when configuring if the stream is not writable
+		if (getGlobals().isRunContext()) {
+			checkWriteAccess(stream);
+		}
 
 		if (stream.getConfig()==null) {
 			throw new IllegalStateException(this.getName()+": Stream " + stream.getName() +
 				" is not properly configured!");
 		}
 
-		streamConfig = (JSONObject) JSON.parse(stream.getConfig());
+		JSONObject streamConfig = (JSONObject) JSON.parse(stream.getConfig());
 
 		JSONArray fields = streamConfig.getJSONArray("fields");
 
@@ -159,20 +153,18 @@ public class SendToStream extends ModuleWithSideEffects {
 			this.setName(streamConfig.get("name").toString());
 	}
 
-	private void authenticateStream(Stream stream) {
-		// Only check write access in run context to avoid exception when eg. loading and reconstructing canvas
-		if (getGlobals().isRunContext() && !stream.getId().equals(lastStreamId) ) {
-			if (permissionService == null) {
-				permissionService = Holders.getApplicationContext().getBean(PermissionService.class);
-			}
+	private com.streamr.client.rest.Stream cacheStream(Stream stream) throws IOException {
+		if (cachedStream == null || !stream.getId().equals(cachedStream.getId()) ) {
+			cachedStream = getStreamrClient().getStream(stream.getId());
+		}
+		return cachedStream;
+	}
 
-			SecUser user = SecUser.getViaJava(getGlobals().getUserId());
-			if (permissionService.canWrite(user, stream)) {
-				lastStreamId = stream.getId();
-			} else {
-				throw new AccessControlException(this.getName() + ": User " + user.getUsername() +
-					" does not have write access to Stream " + stream.getName());
-			}
+	private void checkWriteAccess(Stream stream) {
+		SecUser user = SecUser.getViaJava(getGlobals().getUserId());
+		if (!Holders.getApplicationContext().getBean(PermissionService.class).canWrite(user, stream)) {
+			throw new AccessControlException(this.getName() + ": User " + user.getUsername() +
+				" does not have write access to Stream " + stream.getName());
 		}
 	}
 
