@@ -542,7 +542,9 @@ public class SendEthereumTransaction extends ModuleWithSideEffects {
 			}
 		} else if (rslt instanceof TransactionResult) {
 			TransactionResult tx = (TransactionResult) rslt;
-			txHash.send(tx.getTransactionHash());
+			if (tx.getTransactionHash() != null) {
+				txHash.send(tx.getTransactionHash());
+			}
 
 			TransactionReceipt txreceipt = tx.getTransactionReceipt();
 			if(txreceipt != null){
