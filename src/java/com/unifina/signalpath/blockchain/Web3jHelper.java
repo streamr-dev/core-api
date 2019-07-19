@@ -4,13 +4,14 @@ import org.apache.log4j.Logger;
 import org.web3j.abi.*;
 import org.web3j.abi.datatypes.*;
 import org.web3j.abi.datatypes.generated.AbiTypes;
-import org.web3j.abi.datatypes.generated.Uint160;
 import org.web3j.protocol.Web3j;
 import org.web3j.protocol.core.DefaultBlockParameter;
 import org.web3j.protocol.core.DefaultBlockParameterName;
+import org.web3j.protocol.core.Request;
 import org.web3j.protocol.core.Response;
 import org.web3j.protocol.core.methods.request.Transaction;
 import org.web3j.protocol.core.methods.response.*;
+import org.web3j.protocol.http.HttpService;
 import org.web3j.tx.Contract;
 import org.web3j.utils.Numeric;
 
@@ -184,11 +185,7 @@ public class Web3jHelper {
 		} else if (Utf8String.class.isAssignableFrom(rc)) {
 			constructorArg = value.toString();
 		} else if (Address.class.isAssignableFrom(rc)) {
-			if (value instanceof BigInteger || value instanceof Uint160) {
-				constructorArg = value;
-			} else {
-				constructorArg = value.toString();
-			}
+			constructorArg = value.toString();
 		} else if (Bool.class.isAssignableFrom(rc)) {
 			if (value instanceof Boolean) {
 				constructorArg = value;
@@ -226,6 +223,19 @@ public class Web3jHelper {
 		return c;
 	}
 
+	public static TransactionReceipt getTransactionReceipt(Web3j web3, String txhash) throws IOException {
+		EthGetTransactionReceipt gtr = web3.ethGetTransactionReceipt(txhash).send();
+		if (gtr == null) {
+			log.error("TransactionHash not found: " + txhash);
+			return null;
+		}
+		TransactionReceipt tr = gtr.getResult();
+		if (tr == null) {
+			log.error("TransactionReceipt not found for txhash: " + txhash);
+			return null;
+		}
+		return tr;
+	}
 	public static Function toWeb3jFunction(EthereumABI.Function fn, List args) throws ClassNotFoundException, NoSuchMethodException, InvocationTargetException, InstantiationException, IllegalAccessException {
 		List<String> solidity_inputtypes = new ArrayList<String>(fn.inputs.size());
 		List<String> solidity_outputtypes = new ArrayList<String>(fn.outputs.size());
@@ -358,9 +368,13 @@ public class Web3jHelper {
 		return receipt;
 	}
 
+	public static Web3j getWeb3jConnectionFromConfig(){
+		EthereumModuleOptions ethereumOptions = new EthereumModuleOptions();
+		return Web3j.build(new HttpService(ethereumOptions.getRpcUrl()));
+	}
+
 	/**
-	 *
-	 * get a public field in Ethereum contract. Returns an Object of the type that is wrapped by Type specified in fieldType.
+	 * Get a public field in Ethereum contract. Returns T of a Type&lt;T&gt; specified in fieldType.
 	 *
 	 * For example:
 	 *
@@ -368,33 +382,30 @@ public class Web3jHelper {
 	 * address public owner;
 	 *
 	 * then
-	 * getPublicField(web3j, contractAddress, "owner", Address.class) should return a String with the owner address
+	 * String s = getPublicField(web3j, contractAddress, "owner", Address.class); returns a String type with the owner address
 	 *
 	 * if contract contains:
 	 * uint public somenum;
 	 *
 	 * then
-	 * getPublicField(web3j, contractAddress, "somenum", Uint.class) should return a BigInteger with the value of somenum
-	 *
-	 *
-	 * @param web3j
-	 * @param contractAddress
-	 * @param fieldName
-	 * @param fieldType
-	 * @return
-	 * @throws IOException
+	 * BigInteger i = getPublicField(web3j, contractAddress, "somenum", Uint.class); returns a BigInteger with the value of somenum
 	 */
-	public static Object getPublicField(Web3j web3j, String contractAddress, String fieldName, Class<Type> fieldType) throws IOException {
-		Function getOperator = new Function(fieldName, Arrays.<Type>asList(), Arrays.<TypeReference<?>>asList(TypeReference.create(fieldType)));
-		EthCall response = web3j.ethCall(
-			Transaction.createEthCallTransaction(contractAddress, contractAddress, FunctionEncoder.encode(getOperator)),
-			DefaultBlockParameterName.LATEST).send();
+	@SuppressWarnings("unchecked")
+	public static <T, X extends Type<T>> T getPublicField(Web3j web3j, String contractAddress, String fieldName, Class<X> fieldType) throws IOException {
+		List<Type> input = Arrays.<Type>asList();
+		List<TypeReference<?>> output = Arrays.<TypeReference<?>>asList(TypeReference.create(fieldType));
+		Function func = new Function(fieldName, input, output);
+		String data = FunctionEncoder.encode(func);
+		Transaction tx = Transaction.createEthCallTransaction(contractAddress, contractAddress, data);
+		Request<?, EthCall> request = web3j.ethCall(tx, DefaultBlockParameterName.LATEST);
+		EthCall response = request.send();
 		Response.Error err = response.getError();
 		if (err != null) {
-			throw new RuntimeException(err.getMessage());
+			throw new Web3jException(err);
 		}
-		List<Type> rslt = FunctionReturnDecoder.decode(response.getValue(), getOperator.getOutputParameters());
-		return rslt.iterator().next().getValue();
+		List<Type> result = FunctionReturnDecoder.decode(response.getValue(), func.getOutputParameters());
+		Type<X> next = result.iterator().next();
+		return (T) next.getValue();
 	}
 
 	/**
@@ -419,8 +430,6 @@ public class Web3jHelper {
 		log.info("getBlockTime txHash: "+tr.getTransactionHash()+ " block number: "+tr.getBlockNumber()+ " timestamp: "+ts);
 		return ts;
 	}
-
-
 
 	/**
 	 * @param web3j

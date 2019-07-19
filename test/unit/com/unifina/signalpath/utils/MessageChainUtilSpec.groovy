@@ -21,6 +21,36 @@ class MessageChainUtilSpec extends Specification {
 		hashedUsername = user.getPublisherId()
 	}
 
+	void "construct with publisher id"() {
+		setup:
+		Date date = new Date()
+		String address = "0xacfcc76b85614c416468cbabc7990afd9ab8d1a1"
+		msgChainUtil = new MessageChainUtil(address)
+		hashedUsername = address
+		when:
+		StreamMessageV31 msg1 = msgChainUtil.getStreamMessage(stream, date, content)
+		StreamMessageV31 msg2 = msgChainUtil.getStreamMessage(stream, date, content)
+		StreamMessageV31 msg3 = msgChainUtil.getStreamMessage(stream, date, content)
+		then:
+		msg1.getStreamId() == stream.getId()
+		msg1.getPublisherId() == hashedUsername
+		msg1.getTimestamp() == date.getTime()
+		msg1.getSequenceNumber() == 0
+		msg1.getPreviousMessageRef() == null
+		msg1.getContent() == content
+		msg2.getStreamId() == stream.getId()
+		msg2.getPublisherId() == hashedUsername
+		msg2.getTimestamp() == date.getTime()
+		msg2.getSequenceNumber() == 1
+		msg2.getPreviousMessageRef().timestamp == date.getTime()
+		msg2.getPreviousMessageRef().sequenceNumber == 0
+		msg3.getStreamId() == stream.getId()
+		msg3.getPublisherId() == hashedUsername
+		msg3.getTimestamp() == date.getTime()
+		msg3.getSequenceNumber() == 2
+		msg3.getPreviousMessageRef().timestamp == date.getTime()
+		msg3.getPreviousMessageRef().sequenceNumber == 1
+	}
 
 	void "chains correctly messages with same timestamp"() {
 		Date date = new Date()
