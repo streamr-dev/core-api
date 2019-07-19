@@ -1,7 +1,7 @@
 package mixins
 
 import com.unifina.service.CassandraService
-import com.unifina.service.KafkaService
+
 import com.unifina.service.StreamService
 import pages.StreamCreatePage
 import pages.StreamListPage
@@ -27,8 +27,6 @@ trait StreamMixin {
 	static StreamService createStreamService() {
 		GrailsApplication grailsApplication = new DefaultGrailsApplication() // for config
 		StreamService streamService = new StreamService()
-		streamService.kafkaService = new KafkaService()
-		streamService.kafkaService.grailsApplication = grailsApplication
 		streamService.cassandraService = new CassandraService()
 		streamService.cassandraService.grailsApplication = grailsApplication
 		return streamService
@@ -54,18 +52,18 @@ trait StreamMixin {
 		}
 		waitFor {$("#no-history-message").displayed}
 	}
-	
+
 	def deleteFields() {
 		$(".delete-field-button").allElements().each {
 			it.click()
 		}
 	}
-	
+
 	def openStream(name){
 		$(".table .tbody .tr .td", text:contains(name))[0].click()
 		waitFor { at StreamShowPage }
 	}
-	
+
 	void emptyStream(name){
 		to StreamListPage
 		openStream(name)
@@ -74,9 +72,9 @@ trait StreamMixin {
 		waitFor { $("button.save").displayed }
 		deleteFields()
 		$("button.save").click()
-		waitFor { at StreamShowPage }	
+		waitFor { at StreamShowPage }
 	}
-	
+
 	void streamExists(name){
 		at StreamListPage
 		waitFor {

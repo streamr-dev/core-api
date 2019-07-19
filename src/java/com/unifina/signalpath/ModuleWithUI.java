@@ -14,6 +14,7 @@ import com.unifina.utils.MapTraversal;
 import grails.util.Holders;
 import org.apache.log4j.Logger;
 
+import java.io.IOException;
 import java.io.Serializable;
 import java.security.AccessControlException;
 import java.util.HashMap;
@@ -26,10 +27,9 @@ public abstract class ModuleWithUI extends AbstractSignalPathModule {
 	protected int resendLast = 0;
 
 	private transient StreamService streamService;
+	transient private com.streamr.client.rest.Stream cachedStream = null;
 
 	private static final Logger log = Logger.getLogger(ModuleWithUI.class);
-
-	private MessageChainUtil msgChainUtil;
 
 	public ModuleWithUI() {
 		super();
@@ -38,22 +38,14 @@ public abstract class ModuleWithUI extends AbstractSignalPathModule {
 	@Override
 	public void initialize() {
 		super.initialize();
-		msgChainUtil = new MessageChainUtil(getGlobals().getUserId());
 
 		if (getGlobals().isRunContext()) {
-			streamService = Holders.getApplicationContext().getBean(StreamService.class);
 			getGlobals().getDataSource().addStartListener(ModuleWithUI.this::onStart);
-			getGlobals().getDataSource().addStopListener(ModuleWithUI.this::onStop);
 		}
 	}
 
 	protected void onStart() {
 		getUiChannel().initialize();
-	}
-
-	protected void onStop() {
-		// The UI channel streams get deleted along with the canvas, so no need to clean them up explicitly
-		msgChainUtil = new MessageChainUtil(getGlobals().getUserId());
 	}
 
 	private StreamService getStreamService() {
@@ -63,10 +55,15 @@ public abstract class ModuleWithUI extends AbstractSignalPathModule {
 		return streamService;
 	}
 
-	public void pushToUiChannel(Map content) {
+	public void pushToUiChannel(Map<String, Object> content) {
 		Stream stream = getUiChannel().getStream();
-		StreamMessage msg = msgChainUtil.getStreamMessage(stream, getGlobals().time, content);
-		getStreamService().sendMessage(msg);
+
+		try {
+			com.streamr.client.rest.Stream s = cacheStream(stream);
+			getGlobals().getStreamrClient().publish(s, content, getGlobals().getTime());
+		} catch (Exception e) {
+			log.error("Failed to publish to UI channel: ", e);
+		}
 	}
 
 	public UiChannel getUiChannel() {
@@ -127,6 +124,13 @@ public abstract class ModuleWithUI extends AbstractSignalPathModule {
 
 	public void ensureUiChannel() {
 		uiChannel.initialize();
+	}
+
+	private com.streamr.client.rest.Stream cacheStream(Stream stream) throws IOException {
+		if (cachedStream == null || !stream.getId().equals(cachedStream.getId()) ) {
+			cachedStream = getGlobals().getStreamrClient().getStream(stream.getId());
+		}
+		return cachedStream;
 	}
 
 	public class UiChannel implements Serializable {

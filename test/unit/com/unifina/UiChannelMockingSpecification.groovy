@@ -1,11 +1,12 @@
 package com.unifina
 
-import com.streamr.client.protocol.message_layer.StreamMessage
+import com.streamr.client.StreamrClient
 import com.unifina.domain.data.Stream
 import com.unifina.domain.security.SecUser
 import com.unifina.domain.signalpath.Canvas
 import com.unifina.service.PermissionService
 import com.unifina.service.StreamService
+import com.unifina.service.StreamrClientService
 import grails.test.mixin.TestMixin
 import grails.test.mixin.support.GrailsUnitTestMixin
 
@@ -28,18 +29,23 @@ class UiChannelMockingSpecification extends ModuleTestingSpecification {
 			s.uiChannelCanvas = canvas
 			return s
 		}
-		streamService.sendMessage(_) >> {StreamMessage msg->
-			String c = msg.getStreamId()
-			if (!sentMessagesByStreamId.containsKey(c)) {
-				sentMessagesByStreamId.put(c, new ArrayList<Map>())
-			}
-			sentMessagesByStreamId.get(c).add(msg.getContent())
-		}
 		streamService.createStream(_, _, _) >> { Map params, SecUser user, String id->
 			Stream s = new Stream(params)
 			s.id = id
 			return s
 		}
+
+		StreamrClient streamrClient = Mock(StreamrClient)
+		streamrClient.publish(_, _, _) >> {com.streamr.client.rest.Stream stream, Map<String, Object> message, Date timestamp ->
+			if (!sentMessagesByStreamId.containsKey(stream.getId())) {
+				sentMessagesByStreamId.put(stream.getId(), new ArrayList<Map>())
+			}
+			sentMessagesByStreamId.get(stream.getId()).add(message)
+		}
+
+		StreamrClientService streamrClientService = mockBean(StreamrClientService, Mock(StreamrClientService))
+		streamrClientService.getAuthenticatedInstance(_) >> streamrClient
+
 
 		PermissionService permissionService = Mock(PermissionService)
 		mockBean(PermissionService, permissionService)

@@ -24,13 +24,14 @@ import com.unifina.utils.CSVImporter
 import com.unifina.utils.IdGenerator
 import grails.converters.JSON
 import groovy.transform.CompileStatic
+import org.codehaus.groovy.grails.commons.GrailsApplication
 
 import java.text.DateFormat
 
 class StreamService {
 
-	def grailsApplication
-	KafkaService kafkaService
+	GrailsApplication grailsApplication
+
 	CassandraService cassandraService
 	PermissionService permissionService
 
@@ -106,11 +107,6 @@ class StreamService {
 	}
 
 	// Ref to Kafka will be abstracted out when refactoring stream access to happen via data-api
-
-	void sendMessage(StreamMessage msg) {
-		String kafkaPartitionKey = "${msg.getStreamId()}-${msg.getStreamPartition()}"
-		kafkaService.sendMessage(msg, kafkaPartitionKey)
-	}
 
 	void saveMessage(StreamMessage msg) {
 		cassandraService.save(msg)

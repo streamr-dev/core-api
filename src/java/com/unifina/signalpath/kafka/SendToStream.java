@@ -44,7 +44,7 @@ public class SendToStream extends ModuleWithSideEffects {
 
 	private StreamrClient getStreamrClient() {
 		if (streamrClient == null) {
-			streamrClient = Holders.getApplicationContext().getBean(StreamrClientService.class).getAuthenticatedInstance(getGlobals().getUserId());
+			streamrClient = getGlobals().getStreamrClient();
 		}
 		return streamrClient;
 	}

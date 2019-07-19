@@ -14,7 +14,7 @@ import com.unifina.task.AbstractTask
 class TaskService {
 
 	private static final Logger log = Logger.getLogger(TaskService)
-	
+
 	GrailsApplication grailsApplication
 	def kafkaService
 
@@ -29,14 +29,14 @@ class TaskService {
 		task.save(failOnError:true)
 		return task
 	}
-	
+
     AbstractTask getTaskInstance(Task task) {
 		ClassLoader cl = this.getClass().getClassLoader()
 		Map config = JSON.parse(task.config)
 		AbstractTask t = (AbstractTask) cl.loadClass(task.implementingClass).newInstance(task, config, grailsApplication)
 		return t
     }
-	
+
 	/**
 	 * Deletes the Tasks from database if the whole group is marked complete.
 	 * @param task
@@ -45,7 +45,7 @@ class TaskService {
 	boolean deleteGroupIfComplete(String taskGroupId) {
 		int unitCount = Task.countByTaskGroupId(taskGroupId)
 		int readyCount = Task.countByTaskGroupIdAndComplete(taskGroupId,true)
-		
+
 		if (unitCount==0 || readyCount < unitCount)
 			return false
 		else {
@@ -56,7 +56,7 @@ class TaskService {
 			return true
 		}
 	}
-	
+
 	void setComplete(Task task) {
 //		Task.withTransaction() {
 			task = task.attach()
@@ -67,7 +67,7 @@ class TaskService {
 			log.info("Task $task.id complete.")
 //		}
 	}
-	
+
 	void skipTask(Task task, boolean available=true) {
 		task = task.attach()
 		if (!task.complete) {
@@ -76,7 +76,7 @@ class TaskService {
 			task.save(flush:true, failOnError:true)
 		}
 	}
-	
+
 	void setStatus(Task task, AbstractTask taskImpl) {
 //		Task.withTransaction() {
 			task = task.attach()
@@ -85,11 +85,11 @@ class TaskService {
 			task.save(flush:true)
 //		}
 	}
-	
+
 	void setProgress(Task task, int progress) {
 		Task.executeUpdate("update Task t set t.progress = ? where t.id = ?", [progress, task.id])
 	}
-	
+
 	void setError(Task task, Throwable throwable) {
 //		Task.withTransaction() {
 			task = task.attach()
@@ -98,7 +98,7 @@ class TaskService {
 			task.save(flush:true)
 //		}
 	}
-	
+
 	/**
 	 * Gets the number of available tasks before the given task
 	 * @param taskGroupId
@@ -108,7 +108,7 @@ class TaskService {
 		List result = Task.executeQuery("select count(t.id) from Task t where t.id < ? and (t.runAfter is null OR t.runAfter < ?)", [task.id, new Date()])
 		return result[0] ?: 0
 	}
-	
+
 	/**
 	 * Gets the number of available tasks before the first task of the given taskGroupId
 	 * @param taskGroupId
@@ -118,7 +118,7 @@ class TaskService {
 		List result = Task.executeQuery("select count(t.id) from Task t where available = true and (t.runAfter is null OR t.runAfter < :runAfter) and t.id < (select min(me.id) from Task me where me.taskGroupId in (:ids))", [ids:taskGroupIds, runAfter:new Date()])
 		return result[0] ?: 0
 	}
-	
+
 	/**
 	 * Returns the task group progress as integer percentage between 0 and 100
 	 * @param taskGroupIds
@@ -133,13 +133,13 @@ class TaskService {
 			}
 			'in'("taskGroupId",taskGroupIds)
 		}
-		
+
 		if (rows.size()==0)
 			return 100
-		
+
 		// How many of the given task groups had no tasks left?
 		Map resultsByTaskGroup = [:]
-		
+
 		rows.each {resultsByTaskGroup.put(it[0], it)}
 
 		double progressSum = taskGroupIds.sum {
@@ -149,20 +149,19 @@ class TaskService {
 			else return row[1]/(100D*row[2]) // sum(progress) / rowCount
 		}
 		double maxProgress = taskGroupIds.size()
-		
+
 		return 100D * progressSum / maxProgress
-		
+
 	}
-	
+
 	void abortTask(Task task) {
 		skipTask(task,false)
-		kafkaService.sendMessage(grailsApplication.config.unifina.task.messageQueue, task.id, [type:"abort",id:task.id])
 	}
-	
+
 	/**
 	 * Deletes all available Tasks in a task group and signals the unavailable
 	 * but incomplete Tasks to abort. Returns a list of the latter.
-	 * If the list is empty, then all Tasks in this group are either complete or 
+	 * If the list is empty, then all Tasks in this group are either complete or
 	 * have been deleted.
 	 * @param taskGroupId
 	 */
