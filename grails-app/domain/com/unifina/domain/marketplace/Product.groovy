@@ -29,7 +29,7 @@ class Product {
 	// The below fields exist in the domain object for speed & query support, but the ground truth is in the smart contract.
 	String ownerAddress
 	String beneficiaryAddress
-	Long pricePerSecond
+	Long pricePerSecond = 0
 	Currency priceCurrency = Currency.DATA
 	Long minimumSubscriptionInSeconds = 0
 	Long blockNumber = 0
@@ -97,6 +97,7 @@ class Product {
 	Map toMap() {
 		[
 		    id: id,
+			type: type.toString(),
 			name: name,
 			description: description,
 			imageUrl: imageUrl,
@@ -122,6 +123,7 @@ class Product {
 	Map toSummaryMap() {
 		[
 			id: id,
+			type: type.toString(),
 			name: name,
 			description: description,
 			imageUrl: imageUrl,
