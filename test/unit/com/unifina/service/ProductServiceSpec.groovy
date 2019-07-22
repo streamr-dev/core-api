@@ -381,6 +381,24 @@ class ProductServiceSpec extends Specification {
 		product.dateCreated == product.lastUpdated
 	}
 
+	void "create() can create community products"() {
+		setupStreams()
+		service.permissionService = Stub(PermissionService)
+
+		def validCommand = new CreateProductCommand(type: "COMMUNITY")
+		def user = new SecUser()
+		user.name = "Arnold Schwarzenegger"
+
+		when:
+		def product = service.create(validCommand, user)
+
+		then:
+		Product.findAll() == [product]
+
+		and:
+		product.toMap().type == "COMMUNITY"
+	}
+
 	void "update() throws ValidationException if command object does not pass validation"() {
 		when:
 		service.update("product-id", new UpdateProductCommand(), new SecUser())
