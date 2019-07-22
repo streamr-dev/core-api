@@ -69,11 +69,7 @@ class Product {
 		previewConfigJson(nullable: true)
 		ownerAddress(nullable: true, validator: isEthereumAddressOrIsNull)
 		beneficiaryAddress(nullable: true, validator: isEthereumAddressOrIsNull)
-		pricePerSecond(min: 0L, validator: { Long price, p ->
-			price == 0 ?
-				p.ownerAddress == null && p.beneficiaryAddress == null :
-				p.ownerAddress != null && p.beneficiaryAddress != null
-		})
+		pricePerSecond(min: 0L)
 		minimumSubscriptionInSeconds(min: 0L)
 		blockNumber(min: 0L)
 		blockIndex(min: 0L)
