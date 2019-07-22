@@ -62,38 +62,7 @@ class UpdateProductCommandSpec extends Specification {
 		)
 	}
 
-	void "updateProduct() updates only non-blockchain fields of free Product"() {
-		product.state = Product.State.NOT_DEPLOYED
-		product.pricePerSecond = 0
-
-		when:
-		command.updateProduct(product)
-
-		then:
-		product.toMap() == [
-			id: "product-id",
-			state: "NOT_DEPLOYED",
-			created: null,
-			updated: null,
-			owner: "John Doe",
-			name: "new name",
-			description: "new description",
-			imageUrl: "image.jpg",
-			thumbnailUrl: "thumb.jpg",
-			category: "new-category-id",
-			streams: ["new-stream-id"],
-			previewStream: "new-stream-id",
-			previewConfigJson: "{newConfig: true}",
-			ownerAddress: "0x0",
-			beneficiaryAddress: "0x0",
-			pricePerSecond: "0",
-			isFree: true,
-			priceCurrency: "DATA",
-			minimumSubscriptionInSeconds: 0L,
-		]
-	}
-
-	void "updateProduct() updates only non-blockchain fields of deployed paid Product"() {
+	void "updateProduct() updates only non-blockchain fields of deployed Products"() {
 		product.state = Product.State.DEPLOYED
 
 		when:
@@ -102,6 +71,7 @@ class UpdateProductCommandSpec extends Specification {
 		then:
 		product.toMap() == [
 		    id: "product-id",
+			type: "NORMAL",
 			state: "DEPLOYED",
 			created: null,
 			updated: null,
@@ -123,7 +93,7 @@ class UpdateProductCommandSpec extends Specification {
 		]
 	}
 
-	void "updateProduct() updates non-blockchain and blockchain fields of undeployed paid Product"() {
+	void "updateProduct() updates non-blockchain and blockchain fields of undeployed Products"() {
 		product.state = Product.State.NOT_DEPLOYED
 
 		when:
@@ -132,6 +102,7 @@ class UpdateProductCommandSpec extends Specification {
 		then:
 		product.toMap() == [
 			id: "product-id",
+			type: "NORMAL",
 			state: "NOT_DEPLOYED",
 			created: null,
 			updated: null,
@@ -151,16 +122,5 @@ class UpdateProductCommandSpec extends Specification {
 			priceCurrency: "USD",
 			minimumSubscriptionInSeconds: 10L
 		]
-	}
-
-	void "updateProduct() throws InvalidStateException if trying to set price = 0 of undeployed paid Product"() {
-		product.state = Product.State.NOT_DEPLOYED
-
-		when:
-		command.pricePerSecond = 0
-		command.updateProduct(product)
-
-		then:
-		thrown(InvalidStateException)
 	}
 }

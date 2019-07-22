@@ -47,6 +47,7 @@ class UpdateProductCommand {
 		product.previewStream = previewStream
 		product.previewConfigJson = previewConfigJson
 
+		// These fields can only be changed by the user in NOT_DEPLOYED state
 		if (product.state == Product.State.NOT_DEPLOYED) {
 			product.ownerAddress = ownerAddress
 			product.beneficiaryAddress = beneficiaryAddress
