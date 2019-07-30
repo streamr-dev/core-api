@@ -58,6 +58,7 @@ class Stream implements Comparable {
 		uiChannelCanvas(nullable:true)
 		autoConfigure(nullable: false)
 		storageDays(nullable: false, min: 0)
+		inactivityThresholdHours(nullable: false, min: 0)
 	}
 
 	static mapping = {
@@ -75,7 +76,7 @@ class Stream implements Comparable {
 	}
 
 	@Override
-	public String toString() {
+	String toString() {
 		return name
 	}
 
@@ -94,7 +95,8 @@ class Stream implements Comparable {
 			lastUpdated: lastUpdated,
 			requireSignedData: requireSignedData,
 			autoConfigure: autoConfigure,
-			storageDays: storageDays
+			storageDays: storageDays,
+			inactivityThresholdHours: inactivityThresholdHours,
 		]
 	}
 
@@ -115,24 +117,37 @@ class Stream implements Comparable {
 	}
 
 	@Override
-	public int compareTo(Object arg0) {
+	int compareTo(Object arg0) {
 		if (!(arg0 instanceof Stream)) return 0
 		else return arg0.name.compareTo(this.name)
 	}
 
 	@Override
-	public int hashCode() {
+	int hashCode() {
 		return id.hashCode()
 	}
 
 	@Override
-	public boolean equals(Object obj) {
+	boolean equals(Object obj) {
 		return obj instanceof Stream && obj.id == this.id
 	}
 
-	public Map<String, Object> getStreamConfigAsMap() {
+	Map<String, Object> getStreamConfigAsMap() {
 		if (config!=null)
 			return ((Map)JSON.parse(config));
 		else return [:]
+	}
+
+	boolean isStale(Date now, Date latestDataTimestamp) {
+		if (inactivityThresholdHours == 0) {
+			return false
+		} else {
+			Calendar calendar = Calendar.getInstance()
+			calendar.setTime(now)
+			calendar.add(Calendar.HOUR_OF_DAY, -inactivityThresholdHours)
+			Date threshold = calendar.getTime()
+
+			return latestDataTimestamp.before(threshold)
+		}
 	}
 }

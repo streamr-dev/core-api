@@ -76,6 +76,9 @@ class StreamApiController {
 			if (newStream.storageDays != null) {
 				stream.storageDays = newStream.storageDays
 			}
+			if (newStream.inactivityThresholdHours != null) {
+				stream.inactivityThresholdHours = newStream.inactivityThresholdHours
+			}
 			if (stream.validate()) {
 				stream.save(failOnError: true)
 				render(status: 204)

@@ -222,7 +222,7 @@ class StreamApiControllerSpec extends ControllerSpecification {
 		when:
 		params.id = streamOne.id
 		request.method = "PUT"
-		request.json = '{name: "newName", description: "newDescription", autoConfigure: false, requireSignedData: true, storageDays: 24 }'
+		request.json = '{name: "newName", description: "newDescription", autoConfigure: false, requireSignedData: true, storageDays: 24, inactivityThresholdHours: 99 }'
 		authenticatedAs(me) { controller.update() }
 
 		then:
@@ -236,13 +236,14 @@ class StreamApiControllerSpec extends ControllerSpecification {
 		stream.autoConfigure == false
 		stream.requireSignedData == true
 		stream.storageDays == 24
+		stream.inactivityThresholdHours == 99
 	}
 
 	void "update a Stream of logged in user but do not update undefined fields"() {
 		when:
 		params.id = streamOne.id
 		request.method = "PUT"
-		request.json = '{name: "newName", description: "newDescription", autoConfigure: null, requireSignedData: null, storageDays: null }'
+		request.json = '{name: "newName", description: "newDescription", autoConfigure: null, requireSignedData: null, storageDays: null, inactivityThresholdHours: null }'
 		authenticatedAs(me) { controller.update() }
 
 		then:
@@ -256,6 +257,7 @@ class StreamApiControllerSpec extends ControllerSpecification {
 		stream.autoConfigure == true
 		stream.requireSignedData == false
 		stream.storageDays == Stream.DEFAULT_STORAGE_DAYS
+		stream.inactivityThresholdHours == Stream.DEFAULT_INACTIVITY_THRESHOLD_HOURS
 	}
 
 	void "cannot update non-existent Stream"() {
