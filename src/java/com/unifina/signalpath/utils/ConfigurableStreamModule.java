@@ -7,9 +7,7 @@ import grails.converters.JSON;
 import org.codehaus.groovy.grails.web.json.JSONArray;
 import org.codehaus.groovy.grails.web.json.JSONObject;
 
-import java.util.HashSet;
 import java.util.Map;
-import java.util.Set;
 
 /**
  * This module creates inputs and outputs on configuration time
@@ -42,8 +40,12 @@ public class ConfigurableStreamModule extends AbstractStreamSourceModule impleme
 		super.onConfiguration(config);
 		
 		Stream stream = getStream();
+		if (stream == null) {
+			return;
+		}
 		if (stream.getConfig() == null) {
-			throw new IllegalStateException("Stream "+stream.getName()+" is not properly configured!");
+			String msg = String.format("Stream %s is not properly configured!", stream.getName());
+			throw new IllegalStateException(msg);
 		}
 		streamConfig = (JSONObject)JSON.parse(stream.getConfig());
 
