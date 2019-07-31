@@ -20,9 +20,13 @@ class CommunityJoinRequestService {
 	EthereumService ethereumService
 
 	private void onApproveJoinRequest(CommunityJoinRequest c) {
+		doMessage(c, "join")
+	}
+
+	private void doMessage(CommunityJoinRequest c, String type) {
 		String joinPartStreamID = ethereumService.fetchJoinPartStreamID(c.communityAddress)
 		Map<String, Object> msg = new HashMap<>()
-		msg.put("type", "join")
+		msg.put("type", type)
 		msg.put("addresses", Arrays.asList(c.memberAddress))
 		sendMessage(joinPartStreamID, msg)
 	}
@@ -121,12 +125,7 @@ class CommunityJoinRequestService {
 			throw new NotFoundException(message)
 		}
 
-		String joinPartStreamID = ethereumService.fetchJoinPartStreamID(c.communityAddress)
-		Map<String, Object> msg = new HashMap<>()
-		msg.put("type", "part")
-		msg.put("addresses", Arrays.asList(c.memberAddress))
-		sendMessage(joinPartStreamID, msg)
-
+		doMessage(c, "part")
 		c.delete()
 	}
 }
