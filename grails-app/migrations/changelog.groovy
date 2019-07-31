@@ -134,4 +134,5 @@ databaseChangeLog = {
 	include file: 'core/2019-04-12-cp-domain.groovy'
 	include file: 'core/2019-06-03-unique-ethereum-addresses.groovy'
 	include file: 'core/2019-06-12-stream-inactivity.groovy'
+	include file: 'core/2019-07-29-enable-stream-module.groovy'
 }
