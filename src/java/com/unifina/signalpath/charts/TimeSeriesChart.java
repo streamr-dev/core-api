@@ -8,7 +8,7 @@ import java.util.Map;
 
 public class TimeSeriesChart extends Chart {
 
-	private int tsInputCount = 10;
+	private int tsInputCount = 2;
 	private boolean barify = false;
 	private boolean overnightBreak = true;
 	private Integer range = null;
