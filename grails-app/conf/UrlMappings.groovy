@@ -83,7 +83,7 @@ class UrlMappings {
 		"/api/v1/users/me/products"(controller: "productApi", action: "index") { operation = Permission.Operation.SHARE }
 		"/api/v1/users/me/changePassword"(controller: "userApi", action: "changePassword")
 		"/api/v1/users/me/image"(controller: "userApi", action: "uploadAvatarImage")
-
+		"/api/v1/users/me/balance"(method: "GET", controller: "userApi", action: "getCurrentUserBalance")
 		"/api/v1/integration_keys"(resources: "integrationKeyApi")
 
 		"/api/v1/canvases/($path**)/request"(controller: "canvasApi", action: "runtimeRequest") // for internal use, runtime requests to canvases
