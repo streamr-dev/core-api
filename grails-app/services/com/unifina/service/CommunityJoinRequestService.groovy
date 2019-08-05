@@ -8,7 +8,9 @@ import com.unifina.api.UpdateCommunityJoinRequestCommand
 import com.unifina.domain.community.CommunityJoinRequest
 import com.unifina.domain.community.CommunitySecret
 import com.unifina.domain.data.Stream
+import com.unifina.domain.marketplace.Product
 import com.unifina.domain.security.IntegrationKey
+import com.unifina.domain.security.Permission
 import com.unifina.domain.security.SecUser
 import com.unifina.signalpath.utils.MessageChainUtil
 import com.unifina.utils.MapTraversal
@@ -18,9 +20,25 @@ import org.web3j.crypto.Credentials
 class CommunityJoinRequestService {
 	StreamService streamService
 	EthereumService ethereumService
+	PermissionService permissionService
 
 	private void onApproveJoinRequest(CommunityJoinRequest c) {
+		for (Stream s : findStreams(c)) {
+			permissionService.systemGrant(c.user, s, Permission.Operation.WRITE)
+		}
 		doMessage(c, "join")
+	}
+
+	protected Set<Stream> findStreams(CommunityJoinRequest c) {
+		List<Product> products = Product.withCriteria {
+			eq("type", Product.Type.COMMUNITY)
+			eq("beneficiaryAddress", c.communityAddress)
+		}
+		Set<Stream> streams = new HashSet<>()
+		for (Product p : products) {
+			streams.addAll(p.streams)
+		}
+		return streams
 	}
 
 	private void doMessage(CommunityJoinRequest c, String type) {
@@ -44,6 +62,17 @@ class CommunityJoinRequestService {
 		streamService.sendMessage(msg)
 	}
 
+	Set<SecUser> findCommunityMembers(String communityAddress) {
+		List<CommunityJoinRequest> requests = CommunityJoinRequest.withCriteria {
+			eq("communityAddress", communityAddress)
+		}
+		Set<SecUser> users = new HashSet<>()
+		for (CommunityJoinRequest c : requests) {
+			users.add(c.user)
+		}
+		return users
+	}
+
 	List<CommunityJoinRequest> findAll(String communityAddress, CommunityJoinRequest.State state) {
 		return CommunityJoinRequest.withCriteria {
 			eq("communityAddress", communityAddress)
@@ -55,8 +84,9 @@ class CommunityJoinRequestService {
 
 	CommunityJoinRequest create(String communityAddress, CommunityJoinRequestCommand cmd, SecUser user) {
 		// Backend must check that the given memberAddress is one of the Ethereum IDs bound to the logged in user
-		IntegrationKey key = IntegrationKey.where {
-			(user == user) && (idInService == cmd.memberAddress)
+		IntegrationKey key = IntegrationKey.withCriteria {
+			eq("user", user)
+			eq("idInService", cmd.memberAddress)
 		}.find()
 		if (key == null) {
 			throw new NotFoundException("given member address is not owned by the user")
@@ -68,8 +98,9 @@ class CommunityJoinRequestService {
 		c.memberAddress = cmd.memberAddress
 		if (cmd.secret) { // validate secret if it is given
 			// Find CommunitySecret by communityAddress
-			CommunitySecret secret = CommunitySecret.where {
-				communityAddress == communityAddress && secret == cmd.secret
+			CommunitySecret secret = CommunitySecret.withCriteria {
+				eq("communityAddress", communityAddress)
+				eq("secret", cmd.secret)
 			}.find()
 			if (secret) { // validated!
 				c.state = CommunityJoinRequest.State.ACCEPTED
@@ -84,15 +115,17 @@ class CommunityJoinRequestService {
 	}
 
 	CommunityJoinRequest find(String communityAddress, String joinRequestId) {
-		CommunityJoinRequest c = CommunityJoinRequest.where {
-			(communityAddress == communityAddress) && (id == joinRequestId)
+		CommunityJoinRequest c = CommunityJoinRequest.withCriteria {
+			eq("communityAddress", communityAddress)
+			eq("id", joinRequestId)
 		}.find()
 		return c
 	}
 
 	CommunityJoinRequest update(String communityAddress, String joinRequestId, UpdateCommunityJoinRequestCommand cmd) {
-		CommunityJoinRequest c = CommunityJoinRequest.where {
-			(communityAddress == communityAddress) && (id == joinRequestId)
+		CommunityJoinRequest c = CommunityJoinRequest.withCriteria {
+			eq("communityAddress", communityAddress)
+			eq("id", joinRequestId)
 		}.find()
 		if (c == null) {
 			throw new NotFoundException("community join request not found")
@@ -116,8 +149,9 @@ class CommunityJoinRequestService {
 	}
 
 	void delete(String communityAddress, String joinRequestId) {
-		CommunityJoinRequest c = CommunityJoinRequest.where {
-			(communityAddress == communityAddress) && (id == joinRequestId)
+		CommunityJoinRequest c = CommunityJoinRequest.withCriteria {
+			eq("communityAddress", communityAddress)
+			eq("id", joinRequestId)
 		}.find()
 		if (c == null) {
 			String fmt = "Community join request not found by community address: '%s' and join request id: '%s'"
@@ -125,6 +159,9 @@ class CommunityJoinRequestService {
 			throw new NotFoundException(message)
 		}
 
+		for (Stream s : findStreams(c)) {
+			permissionService.systemRevoke(c.user, s, Permission.Operation.WRITE)
+		}
 		doMessage(c, "part")
 		c.delete()
 	}
