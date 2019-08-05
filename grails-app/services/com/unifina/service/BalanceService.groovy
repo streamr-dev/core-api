@@ -17,45 +17,41 @@ import java.util.concurrent.ExecutionException
 import com.unifina.utils.MapTraversal;
 
 class BalanceService {
+	Web3jHelperService web3jHelperService
+
 	protected EthereumModuleOptions ethereumOptions;
-	protected Web3j web3j;
+	protected web3j;
+
+	private String dataCoinAddress;
+
 	@PostConstruct
 	void init() {
 		ethereumOptions = new EthereumModuleOptions()
 		final HttpService httpService = new HttpService(ethereumOptions.getRpcUrl())
 		web3j = Web3j.build(httpService)
-	}
-
-	String getDatacoinAddress(){
-		String address = MapTraversal.getString(Holders.getConfig(), "streamr.ethereum.datacoinAddress");
-		if (address == null) {
+		dataCoinAddress = MapTraversal.getString(Holders.getConfig(), "streamr.ethereum.datacoinAddress");
+		if (dataCoinAddress == null) {
 			throw new RuntimeException("No datacoin address found in config");
 		}
-		return address;
 	}
 
 	Map<String, BigInteger> getDatacoinBalances(SecUser user) throws InterruptedException, ExecutionException, MessageDecodingException {
-		String datacoinAddress = getDatacoinAddress()
 		def keys =
 			IntegrationKey.findAllByUserAndServiceInList(user, [IntegrationKey.Service.ETHEREUM, IntegrationKey.Service.ETHEREUM_ID]);
-		Map<String, BigInteger> rslt = new LinkedHashMap<String, BigInteger>();
-		for (IntegrationKey ik : keys) {
-			rslt.put(ik.idInService, Web3jHelper.getERC20Balance(web3j, datacoinAddress, ik.idInService))
-		}
-		return rslt;
-	}
 
-	@CompileStatic
-	Map<String, BigInteger> checkBalances(SecUser user) throws ApiException {
-		try {
-			return getDatacoinBalances(user)
-		} catch (ExecutionException e) {
-			throw new ApiException(500, "BALANCE_ERROR", e.getCause().getMessage())
-		} catch (MessageDecodingException e) {
-			throw new ApiException(500, "BALANCE_ERROR", e.getCause().getMessage())
-		} catch (InterruptedException e) {
-			throw new ApiException(500, "BALANCE_DECODING_ERROR", e.getMessage())
+		Map<String, BigInteger> result = new LinkedHashMap<String, BigInteger>();
+		for (IntegrationKey ik : keys) {
+			try {
+				result.put(ik.idInService, web3jHelperService.getERC20Balance(web3j, dataCoinAddress, ik.idInService))
+			} catch (ExecutionException e) {
+				throw new ApiException(500, "BALANCE_ERROR", e.getMessage())
+			} catch (RuntimeException e) {
+				throw new ApiException(500, "BALANCE_ERROR", e.getMessage())
+			} catch (InterruptedException e) {
+				throw new ApiException(500, "BALANCE_ERROR", e.getMessage())
+			}
 		}
+		return result;
 	}
 }
 

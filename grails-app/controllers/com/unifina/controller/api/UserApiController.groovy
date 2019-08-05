@@ -66,7 +66,7 @@ class UserApiController {
 
 	@StreamrApi
 	def getCurrentUserBalance() {
-		Map<String, BigInteger> balances = balanceService.checkBalances(loggedInUser())
+		Map<String, BigInteger> balances = balanceService.getDatacoinBalances(loggedInUser())
 		BigInteger sum = BigInteger.ZERO;
 		for(BigInteger bal : balances.values()){
 			sum = sum.add(bal)
