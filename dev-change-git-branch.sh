@@ -18,5 +18,4 @@ for file in "${files[@]}"; do
 done
 grails clean-all
 grails compile
-echo "Run \"Build -> Rebuild Project\" from IntelliJ IDEA"
 
