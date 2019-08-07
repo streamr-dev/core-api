@@ -26,7 +26,7 @@ class CommunityJoinRequestService {
 		for (Stream s : findStreams(c)) {
 			permissionService.systemGrant(c.user, s, Permission.Operation.WRITE)
 		}
-		doMessage(c, "join")
+		sendMessage(c, "join")
 	}
 
 	protected Set<Stream> findStreams(CommunityJoinRequest c) {
@@ -41,19 +41,19 @@ class CommunityJoinRequestService {
 		return streams
 	}
 
-	private void doMessage(CommunityJoinRequest c, String type) {
+	private void sendMessage(CommunityJoinRequest c, String type) {
 		String joinPartStreamID = ethereumService.fetchJoinPartStreamID(c.communityAddress)
 		Map<String, Object> msg = new HashMap<>()
 		msg.put("type", type)
 		msg.put("addresses", Arrays.asList(c.memberAddress))
-		sendMessage(joinPartStreamID, msg)
+		sendMessageToStream(joinPartStreamID, msg)
 	}
 
 	// Send message to joinPartStream
-	private void sendMessage(String joinPartStreamID, HashMap<String, Object> content) {
+	private void sendMessageToStream(String joinPartStreamID, HashMap<String, Object> content) {
 		Stream s = Stream.findById(joinPartStreamID)
 		if (s == null) {
-			throw new NotFoundException("stream not found by id: " + joinPartStreamID)
+			throw new NotFoundException(String.format("Stream not found by id: %s", joinPartStreamID))
 		}
 		String nodePrivateKey = MapTraversal.getString(Holders.getConfig(), "streamr.ethereum.nodePrivateKey")
 		Credentials credentials = Credentials.create(nodePrivateKey)
@@ -89,7 +89,7 @@ class CommunityJoinRequestService {
 			eq("idInService", cmd.memberAddress)
 		}.find()
 		if (key == null) {
-			throw new NotFoundException("given member address is not owned by the user")
+			throw new NotFoundException("Given member address is not owned by the user")
 		}
 		// Create CommunityJoinRequest
 		CommunityJoinRequest c = new CommunityJoinRequest()
@@ -106,7 +106,7 @@ class CommunityJoinRequestService {
 				c.state = CommunityJoinRequest.State.ACCEPTED
 				onApproveJoinRequest(c)
 			} else {
-				throw new ApiException(403, "INCORRECT_COMMUNITY_SECRET", "incorrect community secret")
+				throw new ApiException(403, "INCORRECT_COMMUNITY_SECRET", "Incorrect community secret")
 			}
 		} else { // request stays in pending state
 		}
@@ -128,18 +128,18 @@ class CommunityJoinRequestService {
 			eq("id", joinRequestId)
 		}.find()
 		if (c == null) {
-			throw new NotFoundException("community join request not found")
+			throw new NotFoundException("Community join request not found")
 		}
 		CommunityJoinRequest.State newState
 		try {
 			newState = CommunityJoinRequest.State.valueOf(cmd.state)
 		} catch (IllegalArgumentException e) {
-			throw new ApiException(400, "INVALID_JOIN_REQUEST_STATE", "unknown community join request state")
+			throw new ApiException(400, "INVALID_JOIN_REQUEST_STATE", "Unknown community join request state")
 		}
 		if (c.state == CommunityJoinRequest.State.PENDING && (newState == CommunityJoinRequest.State.ACCEPTED || newState == CommunityJoinRequest.State.REJECTED)) {
 			c.state = newState
 		} else {
-			throw new ApiException(400, "JOIN_REQUEST_ALREADY_ACCEPTED", "community join request has been already accepted")
+			throw new ApiException(400, "JOIN_REQUEST_ALREADY_ACCEPTED", "Community join request has been already accepted")
 		}
 		if (c.state == CommunityJoinRequest.State.ACCEPTED) {
 			onApproveJoinRequest(c)
@@ -162,7 +162,7 @@ class CommunityJoinRequestService {
 		for (Stream s : findStreams(c)) {
 			permissionService.systemRevoke(c.user, s, Permission.Operation.WRITE)
 		}
-		doMessage(c, "part")
+		sendMessage(c, "part")
 		c.delete()
 	}
 }

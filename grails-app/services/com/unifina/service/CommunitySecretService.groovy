@@ -31,7 +31,7 @@ class CommunitySecretService {
 	CommunitySecret update(String communityAddress, String communitySecretId, CommunitySecretCommand cmd) {
 		CommunitySecret result = CommunitySecret.findWhere(communityAddress: communityAddress, id: communitySecretId)
 		if (result == null) {
-			throw new NotFoundException("community secret not found")
+			throw new NotFoundException("Community secret not found")
 		}
 		result.name = cmd.name
 		result.save(validate: true, failOnError: true)
@@ -41,7 +41,7 @@ class CommunitySecretService {
 	void delete(String communityAddress, String communitySecretId) {
 		CommunitySecret result = CommunitySecret.findWhere(communityAddress: communityAddress, id: communitySecretId)
 		if (result == null) {
-			throw new NotFoundException("community secret not found by id")
+			throw new NotFoundException("Community secret not found")
 		}
 		result.delete(flush: true)
 	}
