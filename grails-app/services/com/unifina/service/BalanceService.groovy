@@ -44,11 +44,11 @@ class BalanceService {
 			try {
 				result.put(ik.idInService, web3jHelperService.getERC20Balance(web3j, dataCoinAddress, ik.idInService))
 			} catch (ExecutionException e) {
-				throw new ApiException(500, "BALANCE_ERROR", e.getMessage())
+				throw new ApiException(500, "BALANCE_ERROR_EXECUTION_EXCEPTION", e.getMessage())
 			} catch (RuntimeException e) {
-				throw new ApiException(500, "BALANCE_ERROR", e.getMessage())
+				throw new ApiException(500, "BALANCE_ERROR_RUNTIME_EXCEPTION", e.getMessage())
 			} catch (InterruptedException e) {
-				throw new ApiException(500, "BALANCE_ERROR", e.getMessage())
+				throw new ApiException(500, "BALANCE_ERROR_INTERRUPTED_EXCEPTION", e.getMessage())
 			}
 		}
 		return result;

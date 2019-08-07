@@ -68,29 +68,46 @@ class BalanceServiceSpec extends Specification {
 		result == [:]
 	}
 
-	// TODO: test errors
 	void "check balance when underlying Web3j API throws InterruptedException"() {
+		new IntegrationKey(
+			user: me,
+			service: IntegrationKey.Service.ETHEREUM,
+			idInService: address,
+		).save(validate: false)
+
 		when:
-		service.checkBalance(address)
+		service.getDatacoinBalances(me)
 
 		then:
-		1 * service.web3.checkBalance(address) >> { throw new InterruptedException("mock: thread interrupted") }
+		1 * service.web3jHelperService.getERC20Balance(_, _, address) >> { throw new InterruptedException("mock: thread interrupted") }
 		thrown(ApiException)
 	}
 	void "check balance when underlying Web3j API throws ExecutionException"() {
+		new IntegrationKey(
+			user: me,
+			service: IntegrationKey.Service.ETHEREUM,
+			idInService: address,
+		).save(validate: false)
+
 		when:
-		service.checkBalance(address)
+		service.getDatacoinBalances(me)
 
 		then:
-		1 * service.web3.checkBalance(address) >> { throw new ExecutionException("mock: execution aborted", new Exception("root cause")) }
+		1 * service.web3jHelperService.getERC20Balance(_, _, address) >> { throw new ExecutionException("mock: execution aborted", new Exception("root cause")) }
 		thrown(ApiException)
 	}
 	void "check balance when underlying Web3j API throws MessageDecodingException"() {
+		new IntegrationKey(
+			user: me,
+			service: IntegrationKey.Service.ETHEREUM,
+			idInService: address,
+		).save(validate: false)
+
 		when:
-		service.checkBalance(address)
+		service.getDatacoinBalances(me)
 
 		then:
-		1 * service.web3.checkBalance(address) >> { throw new MessageDecodingException("mock: message decoding", new Exception("root cause")) }
+		1 * service.web3jHelperService.getERC20Balance(_, _, address) >> { throw new MessageDecodingException("mock: message decoding", new Exception("root cause")) }
 		thrown(ApiException)
 	}
 }
