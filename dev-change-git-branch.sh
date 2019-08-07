@@ -17,4 +17,5 @@ for file in "${files[@]}"; do
 	rm -rf "$file"
 done
 grails clean-all
+grails compile
 
