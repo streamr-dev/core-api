@@ -14,22 +14,11 @@ import com.unifina.service.ProductService
 import grails.compiler.GrailsCompileStatic
 import grails.converters.JSON
 import grails.plugin.springsecurity.annotation.Secured
+import org.apache.commons.lang.time.DateUtils
 import org.springframework.web.multipart.MultipartFile
 
 @Secured(["IS_AUTHENTICATED_ANONYMOUSLY"])
 class ProductApiController {
-
-	static allowedMethods = [
-		setDeploying: "POST",
-		setDeployed: "POST",
-		setUndeploying: "POST",
-		setUndeployed: "POST",
-		setPricing: "POST",
-		uploadImage: "POST",
-		deployFree: "POST",
-		undeployFree: "POST"
-	]
-
 	ApiService apiService
 	FreeProductService freeProductService
 	ProductService productService
