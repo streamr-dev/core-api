@@ -39,8 +39,12 @@ public class ConfigurableStreamModule extends AbstractStreamSourceModule {
 		super.onConfiguration(config);
 		
 		Stream stream = getStream();
+		if (stream == null) {
+			return;
+		}
 		if (stream.getConfig() == null) {
-			throw new IllegalStateException("Stream "+stream.getName()+" is not properly configured!");
+			String msg = String.format("Stream %s is not properly configured!", stream.getName());
+			throw new IllegalStateException(msg);
 		}
 		streamConfig = (JSONObject)JSON.parse(stream.getConfig());
 

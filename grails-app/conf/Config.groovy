@@ -1,8 +1,5 @@
-import com.google.gson.Gson
 import com.unifina.data.KafkaPartitioner
 import com.unifina.service.NodeService
-import org.web3j.crypto.Credentials
-
 /*****
  * This config file gets merged with the application config file.
  * The application config file can override anything defined here.
@@ -182,6 +179,11 @@ log4j.main = {
 
 	debug 'com.datastax.driver.core'
 }
+
+/**
+ * Community Product Server configuration
+ */
+streamr.cps.url = System.getProperty("streamr.cps.url") ?: "http://localhost:8080/communities/"
 
 /**
  * Streamr cluster config
