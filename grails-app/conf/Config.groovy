@@ -183,7 +183,7 @@ log4j.main = {
 /**
  * Community Product Server configuration
  */
-streamr.cps.url = System.getProperty("streamr.cps.url") ?: "http://localhost:8080/communities/"
+streamr.cps.url = System.getProperty("streamr.cps.url") ?: "http://localhost:8085/communities/"
 
 /**
  * Streamr cluster config
