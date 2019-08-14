@@ -1,19 +1,19 @@
 package com.unifina.controller.api
 
 import com.unifina.api.*
-import com.unifina.domain.data.Stream
 import com.unifina.domain.marketplace.Product
 import com.unifina.domain.security.Permission
 import com.unifina.domain.security.SecUser
 import com.unifina.security.AllowRole
 import com.unifina.security.AuthLevel
 import com.unifina.security.StreamrApi
-import com.unifina.service.*
+import com.unifina.service.ApiService
+import com.unifina.service.FreeProductService
+import com.unifina.service.ProductImageService
+import com.unifina.service.ProductService
 import grails.compiler.GrailsCompileStatic
 import grails.converters.JSON
 import grails.plugin.springsecurity.annotation.Secured
-import org.apache.commons.lang.time.DateUtils
-import org.codehaus.groovy.grails.web.json.JSONArray
 import org.springframework.web.multipart.MultipartFile
 
 @Secured(["IS_AUTHENTICATED_ANONYMOUSLY"])
@@ -39,9 +39,7 @@ class ProductApiController {
 	@StreamrApi(allowRoles = AllowRole.ADMIN)
 	def staleProducts() {
 		List<Product> products = productService.list(new ProductListParams(publicAccess: true), loggedInUser())
-		int days = params.int("days", 2)
-		Date threshold = DateUtils.addDays(new Date(), -days)
-		List<ProductService.StaleProduct> results = productService.findStaleProducts(products, threshold)
+		List<ProductService.StaleProduct> results = productService.findStaleProducts(products, new Date())
 		return render(results as JSON)
 	}
 

@@ -16,6 +16,7 @@ class ProductService {
 	PermissionService permissionService
 	SubscriptionService subscriptionService
 	CassandraService cassandraService
+	CommunityJoinRequestService communityJoinRequestService
 	Random random = ThreadLocalRandom.current()
 
 	static class StreamWithLatestMessage {
@@ -41,13 +42,16 @@ class ProductService {
 		}
 	}
 
-	List<StaleProduct> findStaleProducts(List<Product> products, final Date threshold) {
+	List<StaleProduct> findStaleProducts(List<Product> products, final Date now) {
 		final List<StaleProduct> staleProducts = new ArrayList<>()
 		for (Product p : products) {
 			StaleProduct stale = new StaleProduct(p)
 			for (Stream s : p.getStreams()) {
-				StreamMessage msg = cassandraService.getLatestFromAllPartitions(s)
-				if (msg != null && msg.getTimestampAsDate().before(threshold)) {
+				if (s.inactivityThresholdHours == 0) {
+					continue
+				}
+				final StreamMessage msg = cassandraService.getLatestFromAllPartitions(s)
+				if (msg != null && s.isStale(now, msg.getTimestampAsDate())) {
 					stale.streams.add(new StreamWithLatestMessage(s, msg))
 				} else if (msg == null) {
 					stale.streams.add(new StreamWithLatestMessage(s, null))
@@ -148,12 +152,28 @@ class ProductService {
 		permissionService.verifyShare(currentUser, stream)
 		product.streams.add(stream)
 		product.save(failOnError: true)
+		if (product.type == Product.Type.COMMUNITY) {
+			Set<SecUser> users = communityJoinRequestService.findCommunityMembers(product.beneficiaryAddress)
+			for (SecUser u : users) {
+				if (!permissionService.canWrite(u, stream)) {
+					permissionService.systemGrant(u, stream, Permission.Operation.WRITE)
+				}
+			}
+		}
 		subscriptionService.afterProductUpdated(product)
 	}
 
 	void removeStreamFromProduct(Product product, Stream stream) {
 		product.streams.remove(stream)
 		product.save(failOnError: true)
+		if (product.type == Product.Type.COMMUNITY) {
+			Set<SecUser> users = communityJoinRequestService.findCommunityMembers(product.beneficiaryAddress)
+			for (SecUser u : users) {
+				if (permissionService.canWrite(u, stream)) {
+					permissionService.systemRevoke(u, stream, Permission.Operation.WRITE)
+				}
+			}
+		}
 		subscriptionService.afterProductUpdated(product)
 	}
 

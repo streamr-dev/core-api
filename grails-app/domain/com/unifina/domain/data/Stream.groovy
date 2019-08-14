@@ -10,6 +10,7 @@ import groovy.transform.CompileStatic
 class Stream implements Comparable {
 	public final static String DEFAULT_NAME = "Untitled Stream"
 	public final static Integer DEFAULT_STORAGE_DAYS = 365
+	public final static Integer DEFAULT_INACTIVITY_THRESHOLD_HOURS = 48
 	String id
 	Integer partitions = 1
 
@@ -34,7 +35,8 @@ class Stream implements Comparable {
 	Boolean autoConfigure = true
 	// Historical data storage period (days)
 	Integer storageDays = DEFAULT_STORAGE_DAYS
-
+	// inactivityThresholdHours is the inactivity period for a stream in hours
+	Integer inactivityThresholdHours = DEFAULT_INACTIVITY_THRESHOLD_HOURS
 	// exampleType marks this Stream as an example for new users.
 	ExampleType exampleType = ExampleType.NOT_SET
 
@@ -55,6 +57,7 @@ class Stream implements Comparable {
 		uiChannelCanvas(nullable:true)
 		autoConfigure(nullable: false)
 		storageDays(nullable: false, min: 0)
+		inactivityThresholdHours(nullable: false, min: 0)
 	}
 
 	static mapping = {
@@ -71,7 +74,7 @@ class Stream implements Comparable {
 	}
 
 	@Override
-	public String toString() {
+	String toString() {
 		return name
 	}
 
@@ -90,7 +93,8 @@ class Stream implements Comparable {
 			lastUpdated: lastUpdated,
 			requireSignedData: requireSignedData,
 			autoConfigure: autoConfigure,
-			storageDays: storageDays
+			storageDays: storageDays,
+			inactivityThresholdHours: inactivityThresholdHours,
 		]
 	}
 
@@ -110,24 +114,37 @@ class Stream implements Comparable {
 	}
 
 	@Override
-	public int compareTo(Object arg0) {
+	int compareTo(Object arg0) {
 		if (!(arg0 instanceof Stream)) return 0
 		else return arg0.name.compareTo(this.name)
 	}
 
 	@Override
-	public int hashCode() {
+	int hashCode() {
 		return id.hashCode()
 	}
 
 	@Override
-	public boolean equals(Object obj) {
+	boolean equals(Object obj) {
 		return obj instanceof Stream && obj.id == this.id
 	}
 
-	public Map<String, Object> getStreamConfigAsMap() {
+	Map<String, Object> getStreamConfigAsMap() {
 		if (config!=null)
 			return ((Map)JSON.parse(config));
 		else return [:]
+	}
+
+	boolean isStale(Date now, Date latestDataTimestamp) {
+		if (inactivityThresholdHours == 0) {
+			return false
+		} else {
+			Calendar calendar = Calendar.getInstance()
+			calendar.setTime(now)
+			calendar.add(Calendar.HOUR_OF_DAY, -inactivityThresholdHours)
+			Date threshold = calendar.getTime()
+
+			return latestDataTimestamp.before(threshold)
+		}
 	}
 }

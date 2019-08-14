@@ -127,8 +127,7 @@ class ProductApiControllerSpec extends Specification {
 		List<ProductService.StaleProduct> products = Lists.newArrayList(a, b, c, d, e, f, g, h)
 
 		when:
-		params.days = 2
-		withFilters(action: "stale") {
+		withFilters(action: "staleProducts") {
 			controller.staleProducts()
 		}
 

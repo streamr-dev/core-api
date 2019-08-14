@@ -13,7 +13,6 @@ import com.unifina.domain.security.Permission
 import com.unifina.domain.security.SecUser
 import grails.test.mixin.Mock
 import grails.test.mixin.TestFor
-import org.apache.commons.lang.time.DateUtils
 import spock.lang.Specification
 import spock.lang.Unroll
 
@@ -75,7 +74,7 @@ class ProductServiceSpec extends Specification {
 	}
 
 	Stream newStream(String id, String name) {
-		Stream s = new Stream(name: name)
+		Stream s = new Stream(name: name, inactivityThresholdHours: 48)
 		s.id = id
 		return s
 	}
@@ -107,6 +106,10 @@ class ProductServiceSpec extends Specification {
 		Stream s5 = newStream("s5", "Time Stream") // This stream has a message two hours ago
 		Product e = newProduct("e", "Time machine", s5)
 		StreamMessage m5 = buildMsg("s5", 1, newDate(2*60*60*1000), new HashMap())
+		// Not stale product. inactivityThresholdHours 0.
+		Stream s12 = newStream("s12", "Never stale stream") // No messages
+		s12.inactivityThresholdHours = 0
+		Product j = newProduct("j", "Not stale product", s12)
 
 		// Stale streams and products
 		// Stale product 1
@@ -163,8 +166,7 @@ class ProductServiceSpec extends Specification {
 		service.cassandraService = Mock(CassandraService)
 
 		when:
-		Date threshold = DateUtils.addDays(new Date(), -2)
-		List<ProductService.StaleProduct> results = service.findStaleProducts(Lists.newArrayList(a, b, c, d, e, f, g, h, i), threshold)
+		List<ProductService.StaleProduct> results = service.findStaleProducts(Lists.newArrayList(a, b, c, d, e, f, g, h, i, j), new Date())
 
 		then:
 		1 * service.cassandraService.getLatestFromAllPartitions(s1) >> m1
@@ -1037,5 +1039,81 @@ class ProductServiceSpec extends Specification {
 		})
 		then:
 		thrown(NotPermittedException)
+	}
+
+	void "add stream to product and grant community product stream permissions"() {
+		setup:
+		service.subscriptionService = Stub(SubscriptionService)
+		service.permissionService = Mock(PermissionService)
+		service.communityJoinRequestService = Mock(CommunityJoinRequestService)
+		setupStreams()
+		SecUser user = new SecUser(
+			username: "user@domain.com",
+			name: "Firstname Lastname",
+			password: "salasana"
+		)
+		user.id = 1
+		user.save(failOnError: true, validate: false)
+		Product product = new Product(
+			name: "name",
+			description: "description",
+			ownerAddress: "0x0000000000000000000000000000000000000000",
+			beneficiaryAddress: "0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF",
+			streams: s1 != null ? [s1, s2, s3] : [],
+			pricePerSecond: 10,
+			category: category,
+			state: Product.State.NOT_DEPLOYED,
+			blockNumber: 40000,
+			blockIndex: 30,
+			owner: user,
+			type: Product.Type.COMMUNITY,
+		)
+		product.id = "product-id"
+		product.save(failOnError: true, validate: true)
+
+		when:
+		service.addStreamToProduct(product, s1, user)
+		then:
+		1 * service.communityJoinRequestService.findCommunityMembers("0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF") >> [user]
+		1 * service.permissionService.canWrite(user, s1) >> false
+		1 * service.permissionService.systemGrant(user, s1, Permission.Operation.WRITE)
+	}
+
+	void "remove stream from product and revoke community product stream permissions"() {
+		setup:
+		service.subscriptionService = Stub(SubscriptionService)
+		service.permissionService = Mock(PermissionService)
+		service.communityJoinRequestService = Mock(CommunityJoinRequestService)
+		setupStreams()
+		SecUser user = new SecUser(
+			username: "user@domain.com",
+			name: "Firstname Lastname",
+			password: "salasana"
+		)
+		user.id = 1
+		user.save(failOnError: true, validate: false)
+		Product product = new Product(
+			name: "name",
+			description: "description",
+			ownerAddress: "0x0000000000000000000000000000000000000000",
+			beneficiaryAddress: "0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF",
+			streams: s1 != null ? [s1, s2, s3] : [],
+			pricePerSecond: 10,
+			category: category,
+			state: Product.State.NOT_DEPLOYED,
+			blockNumber: 40000,
+			blockIndex: 30,
+			owner: user,
+			type: Product.Type.COMMUNITY,
+		)
+		product.id = "product-id"
+		product.save(failOnError: true, validate: true)
+
+		when:
+		service.removeStreamFromProduct(product, s1)
+		then:
+		1 * service.communityJoinRequestService.findCommunityMembers("0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF") >> [user]
+		1 * service.permissionService.canWrite(user, s1) >> true
+		1 * service.permissionService.systemRevoke(user, s1, Permission.Operation.WRITE)
 	}
 }
