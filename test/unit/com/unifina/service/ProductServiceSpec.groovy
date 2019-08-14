@@ -1038,4 +1038,80 @@ class ProductServiceSpec extends Specification {
 		then:
 		thrown(NotPermittedException)
 	}
+
+	void "add stream to product and grant community product stream permissions"() {
+		setup:
+		service.subscriptionService = Stub(SubscriptionService)
+		service.permissionService = Mock(PermissionService)
+		service.communityJoinRequestService = Mock(CommunityJoinRequestService)
+		setupStreams()
+		SecUser user = new SecUser(
+			username: "user@domain.com",
+			name: "Firstname Lastname",
+			password: "salasana"
+		)
+		user.id = 1
+		user.save(failOnError: true, validate: false)
+		Product product = new Product(
+			name: "name",
+			description: "description",
+			ownerAddress: "0x0000000000000000000000000000000000000000",
+			beneficiaryAddress: "0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF",
+			streams: s1 != null ? [s1, s2, s3] : [],
+			pricePerSecond: 10,
+			category: category,
+			state: Product.State.NOT_DEPLOYED,
+			blockNumber: 40000,
+			blockIndex: 30,
+			owner: user,
+			type: Product.Type.COMMUNITY,
+		)
+		product.id = "product-id"
+		product.save(failOnError: true, validate: true)
+
+		when:
+		service.addStreamToProduct(product, s1, user)
+		then:
+		1 * service.communityJoinRequestService.findCommunityMembers("0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF") >> [user]
+		1 * service.permissionService.canWrite(user, s1) >> false
+		1 * service.permissionService.systemGrant(user, s1, Permission.Operation.WRITE)
+	}
+
+	void "remove stream from product and revoke community product stream permissions"() {
+		setup:
+		service.subscriptionService = Stub(SubscriptionService)
+		service.permissionService = Mock(PermissionService)
+		service.communityJoinRequestService = Mock(CommunityJoinRequestService)
+		setupStreams()
+		SecUser user = new SecUser(
+			username: "user@domain.com",
+			name: "Firstname Lastname",
+			password: "salasana"
+		)
+		user.id = 1
+		user.save(failOnError: true, validate: false)
+		Product product = new Product(
+			name: "name",
+			description: "description",
+			ownerAddress: "0x0000000000000000000000000000000000000000",
+			beneficiaryAddress: "0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF",
+			streams: s1 != null ? [s1, s2, s3] : [],
+			pricePerSecond: 10,
+			category: category,
+			state: Product.State.NOT_DEPLOYED,
+			blockNumber: 40000,
+			blockIndex: 30,
+			owner: user,
+			type: Product.Type.COMMUNITY,
+		)
+		product.id = "product-id"
+		product.save(failOnError: true, validate: true)
+
+		when:
+		service.removeStreamFromProduct(product, s1)
+		then:
+		1 * service.communityJoinRequestService.findCommunityMembers("0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF") >> [user]
+		1 * service.permissionService.canWrite(user, s1) >> true
+		1 * service.permissionService.systemRevoke(user, s1, Permission.Operation.WRITE)
+	}
 }
