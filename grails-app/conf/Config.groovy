@@ -39,41 +39,6 @@ grails.mime.types = [ // the first one is the default format
 					  xml:           ['text/xml', 'application/xml']
 ]
 
-// URL Mapping Cache Max Size, defaults to 5000
-//grails.urlmapping.cache.maxsize = 1000
-
-// What URL patterns should be processed by the resources plugin
-grails.resources.adhoc.patterns = ['/images/*', '/css/*', '/js/*', '/plugins/*', "/js/polymer/*", "/js/leaflet", "/misc/*"]
-grails.resources.adhoc.includes = ['/images/**', '/css/**', '/js/**', '/plugins/**', '/misc/**']
-
-grails.resources.processing.enabled = true
-
-environments {
-	development {
-		grails.resources.mappers.bundle.excludes = ['**/*.*']
-		grails.resources.mappers.hashandcache.excludes = ['**/*.*']
-		grails.resources.mappers.zip.excludes = ['**/*.*']
-		grails.resources.processing.excludes = ['**/*.js']
-		grails.resources.mappers.uglifyjs.excludes = ['**/*.*']
-	}
-	test {
-		grails.resources.processing.enabled = false
-		grails.resources.mappers.bundle.excludes = ['**/*.*']
-		grails.resources.mappers.hashandcache.excludes = ['**/*.*']
-		grails.resources.mappers.zip.excludes = ['**/*.*']
-		grails.resources.processing.excludes = ['**/*.js']
-		grails.resources.mappers.uglifyjs.excludes = ['**/*.*']
-	}
-	production {
-		grails.resources.mappers.uglifyjs.excludes = ['**/*.min.js', '**/*-min.js', '**/*.bundle.js', '**/*-compressed.js']
-	}
-}
-
-// See WebpackTagLib.groovy
-webpack.bundle.dir = System.getProperty("webpack.bundle.location") ?: '/webpack-bundles'
-webpack.jsFiles.metadataKey = 'webpack.jsFiles'
-webpack.cssFiles.metadataKey = 'webpack.cssFiles'
-
 environments {
 	test {
 		grails.reload.enabled = true
@@ -197,11 +162,6 @@ environments {
 		streamr.cluster.internalPort = System.getProperty("streamr.cluster.internalPort") ? Integer.parseInt(System.getProperty("streamr.cluster.internalPort")) : 8080
 	}
 }
-
-/**
- * Tour config
- */
-streamr.tours.enabled = true
 
 /**
  * Migration config
@@ -378,10 +338,6 @@ grails.plugin.springsecurity.adh.errorPage = null
 grails.plugin.springsecurity.securityConfigType = 'Annotation'
 
 grails.plugin.springsecurity.controllerAnnotations.staticRules = [
-	'/user/**':           ['ROLE_ADMIN'],
-	'/register/**':       ['IS_AUTHENTICATED_ANONYMOUSLY'],
-	'/webcomponents/*':   ['IS_AUTHENTICATED_ANONYMOUSLY'],
-	'/webpack-bundles/*': ['IS_AUTHENTICATED_ANONYMOUSLY'],
 	'/*':                 ['IS_AUTHENTICATED_ANONYMOUSLY']
 ]
 

@@ -1,4 +1,4 @@
 #!/bin/bash
 
-curl --silent -d @"web-app/misc/swagger.json" -H "Content-Type: application/json" "http://online.swagger.io/validator/debug" | python -m json.tool
+curl --silent -d @"docs/swagger.json" -H "Content-Type: application/json" "http://online.swagger.io/validator/debug" | python -m json.tool
 

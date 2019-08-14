@@ -1,1 +1,0 @@
-markdown/getting_started.md
