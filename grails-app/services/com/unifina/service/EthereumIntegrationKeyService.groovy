@@ -8,6 +8,7 @@ import com.unifina.api.NotFoundException
 import com.unifina.domain.data.Feed
 import com.unifina.domain.data.Stream
 import com.unifina.domain.security.IntegrationKey
+import com.unifina.domain.security.Permission
 import com.unifina.domain.security.SecUser
 import com.unifina.security.StringEncryptor
 import grails.compiler.GrailsCompileStatic
@@ -108,6 +109,7 @@ class EthereumIntegrationKeyService {
 		IntegrationKey account = IntegrationKey.findByIdAndUser(integrationKeyId, currentUser)
 		if (account) {
 			subscriptionService.beforeIntegrationKeyRemoved(account)
+			deleteInboxStream(account.idInService)
 			account.delete(flush: true)
 		}
 	}
@@ -162,6 +164,11 @@ class EthereumIntegrationKeyService {
 	}
 
 	private void createUserInboxStream(SecUser user, String address) {
+		Stream existing = Stream.get(address)
+		if (existing != null && existing.inbox) {
+			// The inbox stream already exists.
+			return
+		}
 		Stream inboxStream = new Stream()
 		inboxStream.id = address
 		inboxStream.name = address
@@ -173,6 +180,14 @@ class EthereumIntegrationKeyService {
 		}
 		inboxStream.save(failOnError: true, flush: true)
 		permissionService.systemGrantAll(user, inboxStream)
+	}
+
+	private void deleteInboxStream(String address) {
+		Stream stream = Stream.get(address)
+		if (stream && stream.inbox) {
+			Permission.findAllByStream(Stream.get(address))*.delete(flush: true)
+			stream.delete(flush: true)
+		}
 	}
 
 	@CompileStatic
