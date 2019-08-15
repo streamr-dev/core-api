@@ -46,9 +46,7 @@ class EthereumIntegrationKeyService {
 			String address = "0x" + getAddress(privateKey)
 			String encryptedPrivateKey = encryptor.encrypt(privateKey, user.id.byteValue())
 
-			if (getEthereumUser(address) != null) {
-				throw new DuplicateNotAllowedException("This Ethereum address is already associated with a Streamr user.")
-			}
+			assertUnique(address)
 
 			IntegrationKey key = new IntegrationKey(
 				name: name,
@@ -80,9 +78,7 @@ class EthereumIntegrationKeyService {
 			throw new ApiException(400, "ADDRESS_RECOVERY_ERROR", e.message)
 		}
 
-		if (getEthereumUser(address) != null) {
-			throw new DuplicateNotAllowedException("This Ethereum address is already associated with a Streamr user.")
-		}
+		assertUnique(address)
 
 		IntegrationKey integrationKey = new IntegrationKey(
 			name: name,
@@ -201,6 +197,14 @@ class EthereumIntegrationKeyService {
 	private static void validatePrivateKey(String privateKey) {
 		if (privateKey.length() != 64) { // must be 256 bits long
 			throw new IllegalArgumentException("The private key must be a hex string of 64 chars (without the 0x prefix).")
+		}
+	}
+
+	private void assertUnique(String address) {
+		SecUser existingUser = getEthereumUser(address)
+		if (existingUser != null) {
+			log.error("The Ethereum address " + address + " is already associated with the Streamr user: " + existingUser.id)
+			throw new DuplicateNotAllowedException("The Ethereum address " + address + " is already associated with a Streamr user.")
 		}
 	}
 
