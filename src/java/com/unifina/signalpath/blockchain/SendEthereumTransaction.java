@@ -38,8 +38,6 @@ public class SendEthereumTransaction extends ModuleWithSideEffects {
 
 	private ListOutput errors = new ListOutput(this, "errors");
 	private TimeSeriesInput ether = new TimeSeriesInput(this, "ether");
-	private TimeSeriesInput gasLimit = new TimeSeriesInput(this, "gas limit");
-
 	private Input<Object> trigger = new Input<>(this, "trigger", "Object");        // shown if there are no inputs
 
 	private EthereumABI abi;
@@ -84,8 +82,6 @@ public class SendEthereumTransaction extends ModuleWithSideEffects {
 		trigger.setDrivingInput(true);
 		trigger.setRequiresConnection(false);
 		ether.setRequiresConnection(false);
-		gasLimit.setRequiresConnection(false);
-		gasLimit.setInitialValue(getDefaultGasLimit().doubleValue());
 		addOutput(errors);
 	}
 
@@ -207,7 +203,6 @@ public class SendEthereumTransaction extends ModuleWithSideEffects {
 			if (chosenFunction.payable) {
 				addInput(ether);
 			}
-			addInput(gasLimit);
 			// non-constant functions modify contract state,
 			// 	 and thus require a transaction to be written into blockchain block (eth_sendTransaction)
 			// this takes time (module is async) and result can NOT be returned,
@@ -416,11 +411,6 @@ public class SendEthereumTransaction extends ModuleWithSideEffects {
 		return Web3jHelper.toWeb3jFunction(chosenFunction,args);
 	}
 
-
-	protected Long getDefaultGasLimit() {
-		return 6000000l;
-	}
-
 	@Override
 	protected void activateWithSideEffects() {
 		EthereumContract c = contract.getValue();
@@ -455,7 +445,7 @@ public class SendEthereumTransaction extends ModuleWithSideEffects {
 				} else {
 					valueWei = BigInteger.ZERO;
 				}
-				BigInteger gasLimitBigint = BigInteger.valueOf(gasLimit.value.longValue());
+				BigInteger gasLimitBigint = BigInteger.valueOf(ethereumOptions.getGasLimit());
 				RawTransaction rawTransaction = RawTransaction.createTransaction(nonce, gasPrice, gasLimitBigint, c.getAddress(), valueWei, encodeFnCall);
 				byte[] signedMessage = TransactionEncoder.signMessage(rawTransaction, credentials);
 				String hexValue = Numeric.toHexString(signedMessage);
