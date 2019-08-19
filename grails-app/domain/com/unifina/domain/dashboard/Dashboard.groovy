@@ -37,6 +37,8 @@ class Dashboard {
 				id        : id,
 				name      : name,
 				numOfItems: items == null ? 0 : items.size(),
+				created: dateCreated,
+				updated: lastUpdated
 		]
 	}
 
@@ -46,7 +48,9 @@ class Dashboard {
 				id    : id,
 				name  : name,
 				items : items == null ? [] : items.collect { DashboardItem it -> it.toMap() },
-				layout: layout ? JSON.parse(layout) : [:]
+				layout: layout ? JSON.parse(layout) : [:],
+				created: dateCreated,
+				updated: lastUpdated
 		]
 	}
 }
