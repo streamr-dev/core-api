@@ -8,6 +8,7 @@ import com.unifina.domain.security.Permission
 import com.unifina.domain.security.SecUser
 import grails.compiler.GrailsCompileStatic
 
+import java.text.SimpleDateFormat
 import java.util.concurrent.ThreadLocalRandom
 
 @GrailsCompileStatic
@@ -28,6 +29,15 @@ class ProductService {
 		}
 		String toString() {
 			return String.format("StreamWithLatestMessage[stream=%s, latestMessage=%s]", stream, latestMessage)
+		}
+		String formatDate() {
+			if (latestMessage == null) {
+				return "stream contains no data"
+			}
+			SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss z")
+			df.setTimeZone(TimeZone.getTimeZone("UTC"))
+			String date = df.format(latestMessage.getTimestampAsDate())
+			return String.format("no data since %s", date)
 		}
 	}
 
@@ -63,6 +73,13 @@ class ProductService {
 		}
 
 		return staleProducts
+	}
+
+	Map<SecUser, List<ProductService.StaleProduct>> findStaleProductsByOwner(SecUser user) {
+		List<Product> products = list(new ProductListParams(publicAccess: true), user)
+		List<ProductService.StaleProduct> staleProducts = findStaleProducts(products, new Date())
+		Map<SecUser, List<ProductService.StaleProduct>> staleProductsByOwner = staleProducts.groupBy { StaleProduct sp -> sp.product.owner }
+		return staleProductsByOwner
 	}
 
 	List<Product> relatedProducts(Product product, int maxResults, SecUser user) {
