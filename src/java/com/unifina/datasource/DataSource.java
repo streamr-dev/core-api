@@ -31,8 +31,10 @@ public abstract class DataSource implements Consumer<Event> {
 	private final Set<SignalPath> signalPaths = new HashSet<>();
 	private final List<IStartListener> startListeners = new ArrayList<>();
 	private final List<IStopListener> stopListeners = new ArrayList<>();
-	protected final Globals globals;
 	private boolean started = false;
+
+	// DataSource and Globals always have a 1-to-1 relationship.
+	protected final Globals globals;
 
 	private final Map<Collection<StreamPartition>, MapMessageEventRecipient> eventRecipientsByStreamPartitions = new HashMap<>();
 	private final MessageRouter router = new MessageRouter();
