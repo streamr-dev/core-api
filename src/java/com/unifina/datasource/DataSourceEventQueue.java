@@ -3,6 +3,7 @@ package com.unifina.datasource;
 import com.unifina.data.ClockTick;
 import com.unifina.data.Event;
 import com.unifina.data.EventQueueMetrics;
+import com.unifina.exceptions.StreamFieldChangedException;
 import com.unifina.feed.MasterClock;
 import com.unifina.utils.Globals;
 import org.apache.log4j.Logger;
@@ -14,7 +15,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.concurrent.*;
 
-public abstract class DataSourceEventQueue {
+public class DataSourceEventQueue {
 	private static final Logger log = Logger.getLogger(DataSourceEventQueue.class);
 
 	protected static final int DEFAULT_CAPACITY = 10000;
@@ -25,22 +26,22 @@ public abstract class DataSourceEventQueue {
 	protected BlockingQueue<Event> queue;
 	protected final Globals globals;
 	private boolean abort = false;
-	protected long lastReportedClockTick = 0;
+	private final boolean measureLatency;
+	protected long lastReportedClockTick = Long.MIN_VALUE;
 	private DateTime nextDay;
-	protected Thread consumingThread;
-
-	protected ThreadPoolExecutor asyncExecutor;
-
-	protected EventQueueMetrics eventQueueMetrics = new EventQueueMetrics();
+	private Thread consumingThread;
+	private ThreadPoolExecutor asyncExecutor;
+	private EventQueueMetrics eventQueueMetrics = new EventQueueMetrics();
 
 	public DataSourceEventQueue(Globals globals, DataSource dataSource) {
-		this(globals, dataSource, DEFAULT_CAPACITY);
+		this(globals, dataSource, DEFAULT_CAPACITY, true);
 	}
 
-	public DataSourceEventQueue(Globals globals, DataSource dataSource, int capacity) {
+	public DataSourceEventQueue(Globals globals, DataSource dataSource, int capacity, boolean measureLatency) {
 		this.globals = globals;
-		masterClock = new MasterClock(globals, dataSource);
-		queue = createQueue(capacity);
+		this.masterClock = new MasterClock(globals, dataSource);
+		this.queue = createQueue(capacity);
+		this.measureLatency = measureLatency;
 	}
 
 	/**
@@ -74,8 +75,11 @@ public abstract class DataSourceEventQueue {
 		consumingThread = Thread.currentThread();
 
 		try {
+			log.info("Starting event loop!");
 			runEventLoopUntilDone();
 		} finally {
+			log.info("Event loop stopped.");
+
 			asyncExecutor.shutdownNow();
 
 			// Report statistics
@@ -126,6 +130,19 @@ public abstract class DataSourceEventQueue {
 	}
 
 	/**
+	 * Blocks up to 1 second, waiting for an event to be available in
+	 * the queue. Returns null if there wasn't one.
+	 */
+	protected Event pollUntilTimeout() {
+		try {
+			return queue.poll(1, TimeUnit.SECONDS);
+		} catch (InterruptedException e) {
+			log.error(e);
+			return null;
+		}
+	}
+
+	/**
 	 * Aborts the queue processing at earliest opportunity, and causes the
 	 * call to runEventLoopUntilDone() to exit.
 	 */
@@ -139,7 +156,18 @@ public abstract class DataSourceEventQueue {
 	 * This should be called from the Thread that is used for event
 	 * processing.
 	 */
-	protected abstract void runEventLoopUntilDone();
+	protected void runEventLoopUntilDone() {
+		while (!isAborted()) {
+			Event event = pollUntilTimeout();
+
+			if (event == null) {
+				// Timed out while waiting for new events. Just keep trying until aborted.
+				continue;
+			}
+
+			handleEvent(event);
+		}
+	}
 
 	EventQueueMetrics retrieveMetricsAndReset() {
 		EventQueueMetrics returnMetrics = eventQueueMetrics;
@@ -151,15 +179,21 @@ public abstract class DataSourceEventQueue {
 		return abort;
 	}
 
+	private boolean isTimeReportingInitialized() {
+		return lastReportedClockTick > Long.MIN_VALUE;
+	}
+
 	protected void initTimeReporting(long firstTime) {
-		if (lastReportedClockTick == 0) {
+		if (!isTimeReportingInitialized()) {
 			lastReportedClockTick = firstTime;
+			globals.time = new Date(firstTime);
+
 			DateTime now = new DateTime(firstTime, DateTimeZone.UTC);
 			nextDay = now.minusMillis(now.getMillisOfDay()).plusDays(1);
 		}
 	}
 
-	protected void tickClockIfNecessary(long eventTime) {
+	private void tickClockIfNecessary(long eventTime) {
 		if (lastReportedClockTick + CLOCK_TICK_INTERVAL_MILLIS <= eventTime) {
 			lastReportedClockTick += CLOCK_TICK_INTERVAL_MILLIS;
 			Date d = new Date(lastReportedClockTick);
@@ -180,6 +214,45 @@ public abstract class DataSourceEventQueue {
 			final ClockTick tick = new ClockTick(d);
 			masterClock.accept(tick);
 		}
+	}
+
+	/**
+	 * Ticks the clock, dispatches the event, and updates the eventQueueMetrics.
+	 */
+	protected void handleEvent(Event event) {
+
+		// Start timers for metrics calculation
+		final long eventTime = event.getTimestamp().getTime();
+		final long startTimeMillis = System.currentTimeMillis();
+		final long startTimeNanos = System.nanoTime();
+
+		try {
+			if (!isTimeReportingInitialized()) {
+				long time = event.getTimestamp().getTime();
+				initTimeReporting((time - (time % 1000)) - 1000);
+			}
+
+			// Events across different streams/producers aren't necessarily ordered in time.
+			// Never report out-of-order time to modules to prevent weird effects.
+			// Instead, always use the latest observed time as globals.time.
+			if (eventTime > globals.time.getTime()) {
+				tickClockIfNecessary(eventTime);
+
+				// Update global time
+				globals.time = event.getTimestamp();
+			}
+
+			// Handle event
+			event.dispatch();
+		} catch (StreamFieldChangedException e) {
+			log.error("StreamFieldChangedException thrown, stopping the queue by escalating the error!");
+			throw e;
+		} catch (Exception e) {
+			// Catch any Exception to prevent crashing the whole thing
+			log.error("Exception while processing event: "+event.toString(), e);
+		}
+
+		eventQueueMetrics.countEvent(System.nanoTime() - startTimeNanos, measureLatency ? startTimeMillis - eventTime : 0);
 	}
 
 	protected BlockingQueue<Event> getQueue() {

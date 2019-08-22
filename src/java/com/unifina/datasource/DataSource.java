@@ -194,7 +194,10 @@ public abstract class DataSource implements Consumer<Event> {
 	}
 
 	protected abstract StreamMessageSource createStreamMessageSource(Collection<StreamPartition> streamPartitions, StreamMessageSource.StreamMessageConsumer consumer);
-	protected abstract DataSourceEventQueue createEventQueue();
+
+	protected DataSourceEventQueue createEventQueue() {
+		return new DataSourceEventQueue(globals, this);
+	}
 
 	protected Iterable<SignalPath> getSerializableSignalPaths() {
 		List<SignalPath> serializableSps = new ArrayList<>();

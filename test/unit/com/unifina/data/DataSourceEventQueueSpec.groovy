@@ -1,6 +1,7 @@
 package com.unifina.data
 
 import com.unifina.datasource.DataSource
+import com.unifina.datasource.DataSourceEventQueue
 import com.unifina.domain.security.SecUser
 import com.unifina.utils.Globals
 import spock.lang.Specification
@@ -8,18 +9,18 @@ import spock.util.concurrent.PollingConditions
 
 import java.util.function.Consumer
 
-class RealtimeEventQueueSpec extends Specification {
+class DataSourceEventQueueSpec extends Specification {
 
-	private RealtimeEventQueue createQueue(int capacity = 100) {
+	private DataSourceEventQueue createQueue(int capacity = 100) {
 		SecUser user = new SecUser()
 
 		Globals globals = new Globals([:], user, Globals.Mode.REALTIME, Mock(DataSource))
 
-		return new RealtimeEventQueue(globals, globals.getDataSource(), capacity)
+		return new DataSourceEventQueue(globals, globals.getDataSource(), capacity, false)
 	}
 
 	void "basic queue operation"() {
-		RealtimeEventQueue queue = createQueue()
+		DataSourceEventQueue queue = createQueue()
 		int eventsProcessed = 0
 
 		when:
@@ -55,7 +56,7 @@ class RealtimeEventQueueSpec extends Specification {
 	}
 
 	void "on event, adding more events to a full queue won't deadlock the system"() {
-		RealtimeEventQueue queue = createQueue()
+		DataSourceEventQueue queue = createQueue()
 
 		int eventsProcessed = 0
 		int extraEventsProcessed = 0
