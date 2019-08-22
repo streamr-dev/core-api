@@ -30,7 +30,7 @@ public abstract class DataSource {
 	private final Set<SignalPath> signalPaths = new HashSet<>();
 	private final List<IStartListener> startListeners = new ArrayList<>();
 	private final List<IStopListener> stopListeners = new ArrayList<>();
-	private boolean started = false;
+	private boolean running = false;
 
 	// DataSource and Globals always have a 1-to-1 relationship.
 	protected final Globals globals;
@@ -38,7 +38,6 @@ public abstract class DataSource {
 	private final Map<Collection<StreamPartition>, MapMessageEventRecipient> eventRecipientsByStreamPartitions = new HashMap<>();
 	private final MessageRouter router = new MessageRouter();
 
-	private StreamMessageSource streamMessageSource;
 	private DataSourceEventQueue eventQueue;
 
 	public DataSource(Globals globals) {
@@ -89,7 +88,7 @@ public abstract class DataSource {
 	 */
 	public void addStartListener(IStartListener startListener) {
 		startListeners.add(startListener);
-		if (started) {
+		if (running) {
 			startListener.onStart();
 		}
 	}
@@ -107,12 +106,11 @@ public abstract class DataSource {
 			startListener.onStart();
 		}
 
-		started = true;
-
 		// Collect all the required StreamPartitions
 		Set<StreamPartition> allStreamPartitions = new HashSet<>();
 		eventRecipientsByStreamPartitions.keySet().forEach((streamPartitions -> allStreamPartitions.addAll(streamPartitions)));
 
+		final StreamMessageSource streamMessageSource;
 		try {
 			streamMessageSource = createStreamMessageSource(
 				allStreamPartitions,
@@ -150,7 +148,10 @@ public abstract class DataSource {
 			enqueue(new Event<>(
 				null,
 				globals.getStartDate() != null ? globals.getStartDate() : new Date(),
-				(nul) -> log.info("Event queue running.")
+				(nul) -> {
+					running = true;
+					log.info("Event queue running.");
+				}
 			));
 			eventQueue.start();
 		} catch (Exception e) {
@@ -158,9 +159,16 @@ public abstract class DataSource {
 		} finally {
 			try {
 				eventQueue.abort();
-				streamMessageSource.close();
 			} catch (Exception e) {
-				log.error("Exception thrown while stopping streamMessageSource", e);
+				log.error("Exception thrown while aborting eventQueue (ignored)", e);
+			}
+
+			if (streamMessageSource != null) {
+				try {
+					streamMessageSource.close();
+				} catch (Exception e) {
+					log.error("Exception thrown while closing StreamMessageSource (ignored)", e);
+				}
 			}
 		}
 
@@ -176,7 +184,7 @@ public abstract class DataSource {
 		// Add stop request to queue
 		Date stopTime = globals.getTime() != null ? globals.getTime() : new Date();
 		enqueue(new Event<>(new StopRequest(stopTime), stopTime, 0L, (stopRequest) -> {
-			started = false;
+			running = false;
 			eventQueue.abort();
 
 			for (IStopListener it : stopListeners) {
