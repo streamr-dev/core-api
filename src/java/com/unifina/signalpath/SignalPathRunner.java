@@ -1,6 +1,7 @@
 package com.unifina.signalpath;
 
-import com.unifina.datasource.*;
+import com.unifina.datasource.IStartListener;
+import com.unifina.datasource.IStopListener;
 import com.unifina.domain.signalpath.Canvas;
 import com.unifina.service.SignalPathService;
 import com.unifina.utils.Globals;
@@ -9,13 +10,8 @@ import grails.util.GrailsUtil;
 import grails.util.Holders;
 import org.apache.log4j.Logger;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
-
 /**
- * A Thread that instantiates and runs a list of SignalPaths.
+ * A Thread that instantiates and runs a SignalPath.
  * Identified by a runnerId, by which this runner can be looked up from signalPathService.
  */
 public class SignalPathRunner extends Thread {
@@ -23,23 +19,17 @@ public class SignalPathRunner extends Thread {
 
 	private final String runnerId;
 	private final Globals globals;
-	private final List<SignalPath> signalPaths;
+	private final SignalPath signalPath;
 	private boolean running = false;
 	private Throwable thrownOnStartUp;
 
 	public SignalPathRunner(SignalPath signalPath, Globals globals) {
-		this(Collections.singleton(signalPath), globals);
-	}
-
-	private SignalPathRunner(Collection<SignalPath> signalPaths, Globals globals) {
 		this.runnerId = IdGenerator.get();
 		this.globals = globals;
+		this.signalPath = signalPath;
 
-		for (SignalPath sp : signalPaths) {
-			sp.setGlobals(globals);
-		}
-		this.signalPaths = Collections.unmodifiableList(new ArrayList<>(signalPaths));
-		setName(buildThreadName(this.signalPaths));
+		signalPath.setGlobals(globals);
+		setName(buildThreadName(signalPath));
 	}
 
 	public String getRunnerId() {
@@ -50,8 +40,8 @@ public class SignalPathRunner extends Thread {
 		return globals;
 	}
 
-	public List<SignalPath> getSignalPaths() {
-		return signalPaths;
+	public SignalPath getSignalPath() {
+		return signalPath;
 	}
 
 	public synchronized boolean getRunning() {
@@ -90,27 +80,21 @@ public class SignalPathRunner extends Thread {
 	@Override
 	public void run() {
 		try {
-			for (SignalPath it : signalPaths) {
-				it.connectionsReady();
-			}
-
+			signalPath.connectionsReady();
 			addStartListener(() -> setRunning(true));
 
-			if (!signalPaths.isEmpty()) {
-				// Start feed, blocks until event loop exists
-				globals.getDataSource().start();
-			}
+			// Start feed, blocks until event loop exists
+			globals.getDataSource().start();
 		} catch (Throwable e) {
 			thrownOnStartUp = e = GrailsUtil.deepSanitize(e);
 			log.error("Error while running SignalPaths", e);
-			pushErrorToUiChannels(e, signalPaths);
+			pushErrorToUiChannels(e, signalPath);
 		}
 
-		for (SignalPath sp : signalPaths) {
-			sp.pushToUiChannel(new DoneMessage());
-			if (getGlobals().isAdhoc()) {
-				sp.pushToUiChannel(new ByeMessage());
-			}
+		signalPath.pushToUiChannel(new DoneMessage());
+
+		if (getGlobals().isAdhoc()) {
+			signalPath.pushToUiChannel(new ByeMessage());
 		}
 
 		// Cleanup
@@ -140,36 +124,28 @@ public class SignalPathRunner extends Thread {
 	 * Aborts the data feed and releases all resources
 	 */
 	private void destroyMe() {
-		for (SignalPath signalPath : signalPaths) {
-			signalPath.destroy();
-		}
+		signalPath.destroy();
+
 		SignalPathService signalPathService = Holders.getApplicationContext().getBean(SignalPathService.class);
 		signalPathService.updateState(runnerId, Canvas.State.STOPPED);
 
 		if (globals.isAdhoc()) {
-			for (SignalPath sp : getSignalPaths()) {
-				// Delayed-delete the references to allow UI to catch up
-				signalPathService.deleteReferences(sp, true);
-			}
+			// Delayed-delete the references to allow UI to catch up
+			signalPathService.deleteReferences(signalPath, true);
 		}
 	}
 
-	private static String buildThreadName(List<SignalPath> signalPaths) {
+	private static String buildThreadName(SignalPath signalPath) {
 		StringBuilder nameBuilder = new StringBuilder("SignalPathRunner [");
-		for (int i=0; i < signalPaths.size(); i++) {
-			if (i > 0) {
-				nameBuilder.append(", ");
-			}
-			Canvas canvas = signalPaths.get(i).getCanvas();
-			String canvasId = canvas != null ? canvas.getId() : "(canvas is null)";
-			nameBuilder.append(canvasId);
-		}
+		Canvas canvas = signalPath.getCanvas();
+		String canvasId = canvas != null ? canvas.getId() : "(canvas is null)";
+		nameBuilder.append(canvasId);
 		nameBuilder.append("]");
 		return nameBuilder.toString();
 	}
 
 
-	private static void pushErrorToUiChannels(Throwable e, List<SignalPath> signalPaths) {
+	private static void pushErrorToUiChannels(Throwable e, SignalPath signalPath) {
 		StringBuilder sb = new StringBuilder(e.getMessage());
 		while (e.getCause() != null) {
 			e = e.getCause();
@@ -178,8 +154,6 @@ public class SignalPathRunner extends Thread {
 			sb.append(e.getMessage());
 		}
 
-		for (SignalPath sp : signalPaths) {
-			sp.pushToUiChannel(new ErrorMessage(sb.toString()));
-		}
+		signalPath.pushToUiChannel(new ErrorMessage(sb.toString()));
 	}
 }

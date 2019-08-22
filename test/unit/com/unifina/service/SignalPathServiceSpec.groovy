@@ -114,7 +114,7 @@ class SignalPathServiceSpec extends Specification {
 		service.runtimeRequest(new RuntimeRequest([type: 'stopRequest'], me, c1, "canvases/$c1.id", "canvases/$c1.id", new HashSet<>()))
 
 		then:
-		1 * runner.getSignalPaths() >> [sp]
+		1 * runner.getSignalPath() >> sp
 		1 * sp.getCanvas() >> c1
 		1 * service.permissionService.canWrite(me, c1) >> true
 		1 * service.stopLocal(c1) >> false
