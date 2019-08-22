@@ -16,7 +16,6 @@ import com.unifina.utils.Globals;
 import org.apache.log4j.Logger;
 
 import java.util.*;
-import java.util.function.Consumer;
 
 /**
  * DataSource wires together SignalPaths and streams of messages and other Events.
@@ -25,7 +24,7 @@ import java.util.function.Consumer;
  * The DataSource is started with DataSource#start(), which starts the event loop
  * and blocks until done.
  */
-public abstract class DataSource implements Consumer<Event> {
+public abstract class DataSource {
 	private static final Logger log = Logger.getLogger(DataSource.class);
 
 	private final Set<SignalPath> signalPaths = new HashSet<>();
@@ -48,10 +47,9 @@ public abstract class DataSource implements Consumer<Event> {
 	}
 
 	/**
-	 * Consumed events are added to the event queue.
+	 * Adds an event to the event queue.
 	 */
-	@Override
-	public void accept(Event event) {
+	public void enqueue(Event event) {
 		eventQueue.enqueue(event);
 	}
 
@@ -125,7 +123,7 @@ public abstract class DataSource implements Consumer<Event> {
 						router.route(streamMessage)
 							.forEach(routedConsumer ->
 								// Enqueue an event for each consumer registered with the router
-								DataSource.this.accept(new Event<>(
+								DataSource.this.enqueue(new Event<>(
 									streamMessage,
 									streamMessage.getTimestampAsDate(),
 									streamMessage.getSequenceNumber(),
@@ -136,7 +134,7 @@ public abstract class DataSource implements Consumer<Event> {
 					@Override
 					public void done() {
 						// Enqueue an end event, which when processed, aborts the event queue.
-						DataSource.this.accept(new Event<>(
+						DataSource.this.enqueue(new Event<>(
 							null,
 							globals.getEndDate() != null ? globals.getEndDate() : new Date(),
 							(nul) -> eventQueue.abort()
@@ -149,7 +147,7 @@ public abstract class DataSource implements Consumer<Event> {
 
 		try {
 			// Enqueue a start event to set the start time
-			accept(new Event<>(
+			enqueue(new Event<>(
 				null,
 				globals.getStartDate() != null ? globals.getStartDate() : new Date(),
 				(nul) -> log.info("Event queue running.")
@@ -172,12 +170,12 @@ public abstract class DataSource implements Consumer<Event> {
 	public void abort() {
 		// Final serialization requests
 		for (SignalPath signalPath : getSerializableSignalPaths()) {
-			accept(SerializationRequest.makeFeedEvent(signalPath));
+			enqueue(SerializationRequest.makeFeedEvent(signalPath));
 		}
 
 		// Add stop request to queue
 		Date stopTime = globals.getTime() != null ? globals.getTime() : new Date();
-		accept(new Event<>(new StopRequest(stopTime), stopTime, 0L, (stopRequest) -> {
+		enqueue(new Event<>(new StopRequest(stopTime), stopTime, 0L, (stopRequest) -> {
 			started = false;
 			eventQueue.abort();
 

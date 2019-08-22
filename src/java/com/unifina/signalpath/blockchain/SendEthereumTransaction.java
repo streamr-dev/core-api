@@ -464,7 +464,7 @@ public class SendEthereumTransaction extends ModuleWithSideEffects {
 	 * it asynchronously.
 	 */
 	private void enqueueEvent(FunctionCallResult fc){
-		getGlobals().getDataSource().accept(
+		getGlobals().getDataSource().enqueue(
 			new com.unifina.data.Event<>(fc, fc.timestamp, (event) -> {
 				try {
 					sendOutput(event);

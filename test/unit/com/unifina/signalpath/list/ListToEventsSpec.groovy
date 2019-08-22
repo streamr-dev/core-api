@@ -28,7 +28,7 @@ class ListToEventsSpec extends ModuleTestingSpecification {
 		module.globals = mockGlobals()
 
 		eventsSentToEventQueue = []
-		module.globals.dataSource.accept(_ as Event) >> { Event<ListToEvents.QueuedItem> e->
+		module.globals.dataSource.enqueue(_ as Event) >> { Event<ListToEvents.QueuedItem> e->
 			eventsSentToEventQueue.add(e)
 		}
 

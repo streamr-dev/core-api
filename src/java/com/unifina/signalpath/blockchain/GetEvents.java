@@ -14,9 +14,7 @@ import org.web3j.protocol.core.methods.response.Log;
 import org.web3j.protocol.core.methods.response.TransactionReceipt;
 import org.web3j.protocol.http.HttpService;
 
-import javax.websocket.DeploymentException;
 import java.io.IOException;
-import java.net.URISyntaxException;
 import java.util.*;
 
 /**
@@ -131,7 +129,7 @@ public class GetEvents extends AbstractSignalPathModule implements EventsListene
 	}
 
 	protected void enqueueEvent(LogsResult lr){
-		getGlobals().getDataSource().accept(
+		getGlobals().getDataSource().enqueue(
 			new com.unifina.data.Event<>(lr, lr.getTimestampAsDate(), (event) -> {
 				try {
 					sendOutput(event);

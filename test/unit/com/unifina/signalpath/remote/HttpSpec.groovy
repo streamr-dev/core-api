@@ -83,7 +83,7 @@ class HttpSpec extends Specification {
 	/** Mocked event queue. Works manually in tests, please call module.receive(queuedEvent) */
 	def mockGlobals = Stub(Globals) {
 		getDataSource() >> Stub(DataSource) {
-			accept(_ as Event<AbstractHttpModule.HttpTransaction>) >> { Event<AbstractHttpModule.HttpTransaction> event ->
+			enqueue(_ as Event<AbstractHttpModule.HttpTransaction>) >> { Event<AbstractHttpModule.HttpTransaction> event ->
 				transaction = event.content
 			}
 		}

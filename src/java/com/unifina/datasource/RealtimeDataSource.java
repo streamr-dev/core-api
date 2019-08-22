@@ -31,7 +31,7 @@ public class RealtimeDataSource extends DataSource {
 											 @Override
 											 public void run() {
 												 final ClockTick tick = new ClockTick(new Date());
-												 accept(new Event<>(tick, tick.getTimestampAsDate(), 0L, null));
+												 enqueue(new Event<>(tick, tick.getTimestampAsDate(), 0L, null));
 											 }
 										 },
 				new Date(now.getTime() + (1000 - (now.getTime() % 1000))), // First run on next even second
@@ -46,7 +46,7 @@ public class RealtimeDataSource extends DataSource {
 					secTimer.scheduleAtFixedRate(new TimerTask() {
 						@Override
 						public void run() {
-							accept(SerializationRequest.makeFeedEvent(signalPath));
+							enqueue(SerializationRequest.makeFeedEvent(signalPath));
 						}
 					}, serializationIntervalInMs, serializationIntervalInMs);
 				}
