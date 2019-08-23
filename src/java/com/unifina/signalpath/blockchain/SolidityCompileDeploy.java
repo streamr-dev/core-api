@@ -5,8 +5,11 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.unifina.signalpath.*;
 import com.unifina.utils.MapTraversal;
+import jdk.internal.org.objectweb.asm.TypeReference;
 import org.apache.log4j.Logger;
 import org.ethereum.solidity.compiler.SolidityCompiler;
+import org.web3j.abi.TypeDecoder;
+import org.web3j.abi.TypeEncoder;
 import org.web3j.crypto.Credentials;
 import org.web3j.crypto.RawTransaction;
 import org.web3j.crypto.TransactionEncoder;
@@ -134,7 +137,7 @@ public class SolidityCompileDeploy extends ModuleWithUI implements Pullable<Ethe
 		List<org.web3j.abi.datatypes.Type> argTypes = new ArrayList<>(argCount);
 		for (int i = 0; i < argCount; i++) {
 			String argType = constructor.inputs.get(i).type;
-			argTypes.add(Web3jHelper.instantiateType(argType, args.get(i)));
+			argTypes.add(TypeDecoder.instantiateType(argType, args.get(i)));
 		}
 		String encodedArgs = org.web3j.abi.FunctionEncoder.encodeConstructor(argTypes);
 		String txBytes = bytecode + encodedArgs;
