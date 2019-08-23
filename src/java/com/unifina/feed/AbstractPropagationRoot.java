@@ -13,20 +13,20 @@ import java.util.List;
 import java.util.function.Consumer;
 
 /**
- * An PropagationRoot consumes events and updates the outputs of registered
+ * An AbstractPropagationRoot consumes events and updates the outputs of registered
  * AbstractSignalPathModules accordingly. It then uses a Propagator to
  * propagate those values further into graph of connected modules.
  *
  * @param <ModuleClass> The type of AbstractSignalPathModule supported
  * @param <MessageClass> The type if consumed events supported
  */
-public abstract class PropagationRoot<ModuleClass, MessageClass extends ITimestamped> implements Consumer<MessageClass>, IStartListener {
+public abstract class AbstractPropagationRoot<ModuleClass, MessageClass extends ITimestamped> implements Consumer<MessageClass>, IStartListener {
 
 	private final List<ModuleClass> modules = new ArrayList<>();
 	private final Propagator propagator = new Propagator();
 	private final Class<?> moduleClass;
 
-	PropagationRoot(DataSource dataSource) {
+	AbstractPropagationRoot(DataSource dataSource) {
 		if (dataSource != null) {
 			dataSource.addStartListener(this);
 		}

@@ -61,6 +61,11 @@ public class RealtimeDataSource extends DataSource {
 	}
 
 	@Override
+	protected DataSourceEventQueue createEventQueue() {
+		return new RealtimeEventQueue(globals, this);
+	}
+
+	@Override
 	protected StreamMessageSource createStreamMessageSource(Collection<StreamPartition> streamPartitions, StreamMessageSource.StreamMessageConsumer consumer) {
 		return new MultipleRedisMessageSource(globals, consumer, streamPartitions);
 	}

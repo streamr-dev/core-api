@@ -6,7 +6,7 @@ import com.unifina.datasource.ITimeListener;
 
 import java.util.Date;
 
-public class TimePropagationRoot extends PropagationRoot<ITimeListener, ITimestamped> {
+public class TimePropagationRoot extends AbstractPropagationRoot<ITimeListener, ITimestamped> {
 
 	public TimePropagationRoot(DataSource dataSource) {
 		super(dataSource);

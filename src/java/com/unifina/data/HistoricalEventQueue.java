@@ -42,22 +42,20 @@ public class HistoricalEventQueue extends DataSourceEventQueue {
 	}
 
 	@Override
-	protected void runEventLoopUntilDone() {
+	protected void beforeStart() {
 		// Set start time to simulation start time
 		initTimeReporting(simTimeStart);
 		// Remember wall-clock time to control playback speed
 		realTimeStart = System.currentTimeMillis();
-
-		super.runEventLoopUntilDone();
 	}
 
 	@Override
-	protected void handleEvent(Event event) {
+	protected void beforeEvent(Event event) {
 		// Create time events as needed to fill in the "gaps" between actual events.
 		// This is needed if there are no actual stream events covering every second.
-		while (event.getTimestamp().getTime() > lastReportedClockTick + CLOCK_TICK_INTERVAL_MILLIS && !isAborted()) {
+		while (event.getTimestamp().getTime() > getLastReportedClockTick() + CLOCK_TICK_INTERVAL_MILLIS && !isAborted()) {
 			// Handle time events until the next real event in the queue happens on a reported second
-			Date next = new Date(lastReportedClockTick + CLOCK_TICK_INTERVAL_MILLIS);
+			Date next = new Date(getLastReportedClockTick() + CLOCK_TICK_INTERVAL_MILLIS);
 			final Event<ClockTick> clockTickEvent = new Event<>(new ClockTick(next), next, 0L, null);
 			sleepIfNecessary(clockTickEvent);
 			super.handleEvent(clockTickEvent);

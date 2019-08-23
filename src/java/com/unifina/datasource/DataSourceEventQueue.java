@@ -13,12 +13,16 @@ import org.joda.time.DateTimeZone;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-import java.util.concurrent.*;
+import java.util.concurrent.ArrayBlockingQueue;
+import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 
 public class DataSourceEventQueue {
 	private static final Logger log = Logger.getLogger(DataSourceEventQueue.class);
 
 	protected static final int DEFAULT_CAPACITY = 10000;
+	protected static final int ASYNC_QUEUE_CAPACITY = 10000;
 	protected static final int CLOCK_TICK_INTERVAL_MILLIS = 1000; // tick every second
 
 	private final TimePropagationRoot masterClock;
@@ -27,7 +31,7 @@ public class DataSourceEventQueue {
 	protected final Globals globals;
 	private boolean abort = false;
 	private final boolean measureLatency;
-	protected long lastReportedClockTick = Long.MIN_VALUE;
+	private long lastReportedClockTick = Long.MIN_VALUE;
 	private DateTime nextDay;
 	private Thread consumingThread;
 	private ThreadPoolExecutor asyncExecutor;
@@ -68,15 +72,33 @@ public class DataSourceEventQueue {
 	 */
 	public void start() throws Exception {
 		abort = false;
+
+		// Single threaded executor to maintain the order of events
 		asyncExecutor = new ThreadPoolExecutor(1, 1,
 			0L, TimeUnit.MILLISECONDS,
-			new LinkedBlockingQueue<>());
+			new ArrayBlockingQueue<>(ASYNC_QUEUE_CAPACITY),
+			// Reject handled, called when the queue is at capacity
+			(r, executor) -> {
+				log.error("Async executor queue is full, and an event was dropped!");
+			});
 
 		consumingThread = Thread.currentThread();
 
 		try {
+			beforeStart();
 			log.info("Starting event loop!");
-			runEventLoopUntilDone();
+
+			while (!isAborted()) {
+				Event event = pollUntilTimeout();
+
+				if (event == null) {
+					// Timed out while waiting for new events. Just keep trying until aborted.
+					continue;
+				}
+
+				beforeEvent(event);
+				handleEvent(event);
+			}
 		} finally {
 			abort = true;
 			log.info("Event loop stopped.");
@@ -120,21 +142,19 @@ public class DataSourceEventQueue {
 
 	/**
 	 * Non-blocking method to asynchronously queue events.
-	 * This is useful for internal event queuing, i.e. cases where
-	 * we want to eventually put something in the event queue even if
-	 * it's congested with incoming data.
+	 * This should only be called when the calling Thread is the same
+	 * as the consuming Thread (this happens when the processing of an
+	 * event produces more events into the queue) to prevent a deadlock.
 	 */
 	private void enqueueAsync(Event event) {
-		asyncExecutor.submit(() -> {
-			enqueueSync(event);
-		});
+		asyncExecutor.submit(() -> enqueueSync(event));
 	}
 
 	/**
 	 * Blocks up to 1 second, waiting for an event to be available in
 	 * the queue. Returns null if there wasn't one.
 	 */
-	protected Event pollUntilTimeout() {
+	private Event pollUntilTimeout() {
 		try {
 			return queue.poll(1, TimeUnit.SECONDS);
 		} catch (InterruptedException e) {
@@ -144,30 +164,22 @@ public class DataSourceEventQueue {
 	}
 
 	/**
+	 * Gets called immediately before the event loop starts.
+	 */
+	protected void beforeStart() {}
+
+	/**
+	 * Gets called immediately before the event is handled.
+	 */
+	protected void beforeEvent(Event event) {}
+
+
+	/**
 	 * Aborts the queue processing at earliest opportunity, and causes the
 	 * call to runEventLoopUntilDone() to exit.
 	 */
 	public void abort() {
 		abort = true;
-	}
-
-	/**
-	 * Should run the main event loop. The function only returns when
-	 * there is nothing left to do (processing is aborted or finished).
-	 * This should be called from the Thread that is used for event
-	 * processing.
-	 */
-	protected void runEventLoopUntilDone() {
-		while (!isAborted()) {
-			Event event = pollUntilTimeout();
-
-			if (event == null) {
-				// Timed out while waiting for new events. Just keep trying until aborted.
-				continue;
-			}
-
-			handleEvent(event);
-		}
 	}
 
 	EventQueueMetrics retrieveMetricsAndReset() {
@@ -220,7 +232,7 @@ public class DataSourceEventQueue {
 	/**
 	 * Ticks the clock, dispatches the event, and updates the eventQueueMetrics.
 	 */
-	protected void handleEvent(Event event) {
+	protected final void handleEvent(Event event) {
 
 		// Start timers for metrics calculation
 		final long eventTime = event.getTimestamp().getTime();
@@ -270,6 +282,10 @@ public class DataSourceEventQueue {
 
 	public int remainingCapacity() {
 		return queue.remainingCapacity();
+	}
+
+	protected long getLastReportedClockTick() {
+		return lastReportedClockTick;
 	}
 
 }

@@ -7,7 +7,6 @@ import com.unifina.signalpath.AbstractSignalPathModule;
 import com.unifina.signalpath.Output;
 import com.unifina.signalpath.TimeSeriesOutput;
 import com.unifina.signalpath.utils.ConfigurableStreamModule;
-import com.unifina.utils.Globals;
 
 import java.io.IOException;
 import java.util.*;
@@ -20,7 +19,7 @@ import java.util.*;
  *
  * Note that the value type is unchecked and must match with the output type.
  */
-public class StreamPropagationRoot extends PropagationRoot<ConfigurableStreamModule, StreamMessage> {
+public class StreamPropagationRoot extends AbstractPropagationRoot<ConfigurableStreamModule, StreamMessage> {
 
 	private Map<String, List<Output>> outputsByName = null;
 

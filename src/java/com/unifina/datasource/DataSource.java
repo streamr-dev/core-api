@@ -5,8 +5,8 @@ import com.streamr.client.utils.StreamPartition;
 import com.unifina.data.Event;
 import com.unifina.data.EventQueueMetrics;
 import com.unifina.feed.MessageRouter;
-import com.unifina.feed.StreamPropagationRoot;
 import com.unifina.feed.StreamMessageSource;
+import com.unifina.feed.StreamPropagationRoot;
 import com.unifina.serialization.SerializationRequest;
 import com.unifina.signalpath.AbstractSignalPathModule;
 import com.unifina.signalpath.SignalPath;
@@ -198,9 +198,7 @@ public abstract class DataSource {
 
 	protected abstract StreamMessageSource createStreamMessageSource(Collection<StreamPartition> streamPartitions, StreamMessageSource.StreamMessageConsumer consumer);
 
-	protected DataSourceEventQueue createEventQueue() {
-		return new DataSourceEventQueue(globals, this);
-	}
+	protected abstract DataSourceEventQueue createEventQueue();
 
 	protected Iterable<SignalPath> getSerializableSignalPaths() {
 		List<SignalPath> serializableSps = new ArrayList<>();
