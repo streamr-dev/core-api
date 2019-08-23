@@ -2,6 +2,8 @@ package com.unifina.signalpath.blockchain
 
 import com.unifina.ModuleTestingSpecification
 import com.unifina.security.StreamrApi
+import org.web3j.abi.TypeDecoder
+import org.web3j.abi.TypeReference
 import org.web3j.abi.datatypes.Address
 import org.web3j.abi.datatypes.Bool
 import org.web3j.abi.datatypes.BytesType
@@ -26,28 +28,28 @@ class Web3jHelperSpec extends ModuleTestingSpecification {
 		byte[][][] twoDimBytesArray = [bytesArray, bytesArray, bytesArray]
 		Object[][] twoDimIntarray = [nums, nums, nums]
 
-		Type twoDarray = Web3jHelper.instantiateType("uint[][3]", twoDimIntarray)
+		Type twoDarray = TypeDecoder.instantiateType("uint[][3]", twoDimIntarray)
 
 		then:
-		Web3jHelper.instantiateType("bool", false) instanceof Bool
-		Web3jHelper.instantiateType("bool", 1) instanceof Bool
-		Web3jHelper.instantiateType("int", -123) instanceof Int
-		Web3jHelper.instantiateType("int256", -123) instanceof Int256
-		Web3jHelper.instantiateType("uint", 123) instanceof Uint
-		Web3jHelper.instantiateType("uint256", 123) instanceof Uint256
-		Web3jHelper.instantiateType("address", "0x123") instanceof Address
-		Web3jHelper.instantiateType("address", BigInteger.ONE) instanceof Address
-		Web3jHelper.instantiateType("uint256[]", Arrays.asList(nums)) instanceof DynamicArray
-		Web3jHelper.instantiateType("uint256[3]", Arrays.asList(nums)) instanceof StaticArray
-		Web3jHelper.instantiateType("uint256[]", nums) instanceof DynamicArray
-		Web3jHelper.instantiateType("uint256[3]", nums) instanceof StaticArray
-		Web3jHelper.instantiateType("bytes" + bytes.length, bytes) instanceof BytesType
-		Web3jHelper.instantiateType("bytes[]", Arrays.asList(bytesArray)) instanceof DynamicArray
-		Web3jHelper.instantiateType("bytes[3]", Arrays.asList(bytesArray)) instanceof StaticArray
-		Web3jHelper.instantiateType("uint[][]", twoDimIntarray) instanceof DynamicArray
-		Web3jHelper.instantiateType("uint[3][]", twoDimIntarray) instanceof DynamicArray
+		TypeDecoder.instantiateType("bool", false) instanceof Bool
+		TypeDecoder.instantiateType("bool", 1) instanceof Bool
+		TypeDecoder.instantiateType("int", -123) instanceof Int
+		TypeDecoder.instantiateType("int256", -123) instanceof Int256
+		TypeDecoder.instantiateType("uint", 123) instanceof Uint
+		TypeDecoder.instantiateType("uint256", 123) instanceof Uint256
+		TypeDecoder.instantiateType("address", "0x123") instanceof Address
+		TypeDecoder.instantiateType("address", BigInteger.ONE) instanceof Address
+		TypeDecoder.instantiateType("uint256[]", Arrays.asList(nums)) instanceof DynamicArray
+		TypeDecoder.instantiateType("uint256[3]", Arrays.asList(nums)) instanceof StaticArray
+		TypeDecoder.instantiateType("uint256[]", nums) instanceof DynamicArray
+		TypeDecoder.instantiateType("uint256[3]", nums) instanceof StaticArray
+		TypeDecoder.instantiateType("bytes" + bytes.length, bytes) instanceof BytesType
+		TypeDecoder.instantiateType("bytes[]", Arrays.asList(bytesArray)) instanceof DynamicArray
+		TypeDecoder.instantiateType("bytes[3]", Arrays.asList(bytesArray)) instanceof StaticArray
+		TypeDecoder.instantiateType("uint[][]", twoDimIntarray) instanceof DynamicArray
+		TypeDecoder.instantiateType("uint[3][]", twoDimIntarray) instanceof DynamicArray
 		Web3jHelper.web3jArrayGet((StaticArray) twoDarray, 0,1).getValue().equals(BigInteger.valueOf(2))
-		Web3jHelper.instantiateType("bytes[][3]", twoDimBytesArray) instanceof StaticArray
+		TypeDecoder.instantiateType("bytes[][3]", twoDimBytesArray) instanceof StaticArray
 
 
 	}
