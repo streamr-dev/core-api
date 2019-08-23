@@ -20,9 +20,7 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * This module (only) supports sending messages to Kafka/json streams (feed id 7)
- *
- * // TODO: partitioning key
+ * This module sends messages to streams.
  */
 public class SendToStream extends ModuleWithSideEffects {
 
@@ -32,7 +30,9 @@ public class SendToStream extends ModuleWithSideEffects {
 	transient private com.streamr.client.rest.Stream cachedStream = null;
 
 	private boolean sendOnlyNewValues = false;
+
 	private List<Input> fieldInputs = new ArrayList<>();
+	private Input<Object> partitionKey = null; // Only set if the Stream has multiple partitions
 
 	private static final Logger log = Logger.getLogger(SendToStream.class);
 
@@ -60,6 +60,7 @@ public class SendToStream extends ModuleWithSideEffects {
 		Stream stream = streamParameter.getValue();
 		try {
 			com.streamr.client.rest.Stream s = cacheStream(stream);
+			// TODO: read partitionKey
 			streamrClient.publish(s, inputValuesToMap(), getGlobals().getTime());
 		} catch (Exception e) {
 			log.error("Failed to publish: ", e);
@@ -127,7 +128,6 @@ public class SendToStream extends ModuleWithSideEffects {
 			String type = j.getString("type");
 			String name = j.getString("name");
 
-			// TODO: add other types
 			if (type.equalsIgnoreCase("number")) {
 				input = new TimeSeriesInput(this, name);
 				((TimeSeriesInput) input).setCanHaveInitialValue(false);
@@ -151,6 +151,11 @@ public class SendToStream extends ModuleWithSideEffects {
 
 		if (streamConfig.containsKey("name"))
 			this.setName(streamConfig.get("name").toString());
+
+		if (stream.getPartitions() > 1) {
+			partitionKey = new Input<>(this, "partitionKey", "Object");
+			addInput(partitionKey);
+		}
 	}
 
 	private com.streamr.client.rest.Stream cacheStream(Stream stream) throws IOException {
