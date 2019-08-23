@@ -35,8 +35,8 @@ public class GetEvents extends AbstractSignalPathModule implements EventsListene
 	private transient ContractEventPoller contractEventPoller;
 	private transient Propagator asyncPropagator;
 	private Web3j web3j;
-	protected int check_result_max_tries = 100;
-	protected int check_result_waitms = 10000;
+	private static final int CHECK_RESULT_MAX_TRIES = 100;
+	private static final int CHECK_RESULT_WAIT_MS = 10000;
 
 	static class LogsResult implements ITimestamped {
 		Date timestamp;
@@ -128,7 +128,7 @@ public class GetEvents extends AbstractSignalPathModule implements EventsListene
 		}
 	}
 
-	protected void enqueueEvent(LogsResult lr){
+	private void enqueueEvent(LogsResult lr){
 		getGlobals().getDataSource().enqueue(
 			new com.unifina.data.Event<>(lr, lr.getTimestampAsDate(), (event) -> {
 				try {
@@ -147,7 +147,7 @@ public class GetEvents extends AbstractSignalPathModule implements EventsListene
 			for(int i=0; i<eventcount; i++) {
 				String txHash = events.getJSONObject(i).getString("transactionHash");
 				log.info(String.format("Received event from RPC '%s'", txHash));
-				TransactionReceipt txr = Web3jHelper.waitForTransactionReceipt(web3j, txHash, check_result_waitms, check_result_max_tries);
+				TransactionReceipt txr = Web3jHelper.waitForTransactionReceipt(web3j, txHash, CHECK_RESULT_WAIT_MS, CHECK_RESULT_MAX_TRIES);
 				if (txr == null) {
 					log.error("Couldnt find TransactionReceipt for transaction " + txHash + " in allotted time");
 					return;

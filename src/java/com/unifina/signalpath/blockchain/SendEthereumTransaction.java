@@ -51,8 +51,8 @@ public class SendEthereumTransaction extends ModuleWithSideEffects {
 	private FunctionNameParameter function = new FunctionNameParameter(this, "function");
 	private List<Input<Object>> arguments = new ArrayList<>();
 
-	private int check_result_max_tries = 100;
-	private int check_result_waitms = 10000;
+	private static final int CHECK_RESULT_MAX_TRIES = 100;
+	private static final int CHECK_RESULT_WAIT_MS = 10000;
 
 	// constant function outputs
 	private List<Output<Object>> results = new ArrayList<>();
@@ -302,7 +302,7 @@ public class SendEthereumTransaction extends ModuleWithSideEffects {
 		 */
 		protected void enqueueConfirmedTx() throws IOException {
 			final FunctionCallResult fncall = this;
-			receipt = Web3jHelper.waitForTransactionReceipt(web3j,web3jTx.getTransactionHash(), check_result_waitms, check_result_max_tries);
+			receipt = Web3jHelper.waitForTransactionReceipt(web3j,web3jTx.getTransactionHash(), CHECK_RESULT_WAIT_MS, CHECK_RESULT_MAX_TRIES);
 			if (receipt != null) {
 				transaction = web3j.ethGetTransactionByHash(web3jTx.getTransactionHash()).send().getResult();
 				log.info("Receipt found for txHash: " + web3jTx.getTransactionHash());

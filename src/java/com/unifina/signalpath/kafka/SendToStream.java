@@ -1,21 +1,22 @@
 package com.unifina.signalpath.kafka;
 
 import com.streamr.client.protocol.message_layer.StreamMessage;
-import com.unifina.data.Event;
 import com.unifina.domain.data.Stream;
 import com.unifina.domain.security.SecUser;
 import com.unifina.service.PermissionService;
 import com.unifina.service.StreamService;
 import com.unifina.signalpath.*;
 import com.unifina.signalpath.utils.MessageChainUtil;
-import com.unifina.utils.Globals;
 import grails.converters.JSON;
 import grails.util.Holders;
 import org.codehaus.groovy.grails.web.json.JSONArray;
 import org.codehaus.groovy.grails.web.json.JSONObject;
 
 import java.security.AccessControlException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * This module (only) supports sending messages to Kafka/json streams (feed id 7)
@@ -24,20 +25,16 @@ import java.util.*;
  */
 public class SendToStream extends ModuleWithSideEffects {
 
-	protected StreamParameter streamParameter = new StreamParameter(this, "stream");
-	transient protected JSONObject streamConfig = null;
+	private StreamParameter streamParameter = new StreamParameter(this, "stream");
 
 	transient protected PermissionService permissionService = null;
 	transient protected StreamService streamService = null;
 
-	protected boolean historicalWarningShown = false;
 	private String lastStreamId = null;
 	private boolean sendOnlyNewValues = false;
 	private List<Input> fieldInputs = new ArrayList<>();
 
 	private MessageChainUtil msgChainUtil;
-
-	private long counter = 0;
 
 	@Override
 	public void init() {
@@ -123,9 +120,8 @@ public class SendToStream extends ModuleWithSideEffects {
 				" is not properly configured!");
 		}
 
-		streamConfig = (JSONObject) JSON.parse(stream.getConfig());
-
-		JSONArray fields = streamConfig.getJSONArray("fields");
+		final JSONObject streamConfig = (JSONObject) JSON.parse(stream.getConfig());
+		final JSONArray fields = streamConfig.getJSONArray("fields");
 
 		for (Object o : fields) {
 			Input input = null;
