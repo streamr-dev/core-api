@@ -67,7 +67,7 @@ public class RealtimeDataSource extends DataSource {
 
 	@Override
 	protected StreamMessageSource createStreamMessageSource(Collection<StreamPartition> streamPartitions, StreamMessageSource.StreamMessageConsumer consumer) {
-		return new MultipleRedisMessageSource(globals, consumer, streamPartitions);
+		return new MultipleRedisMessageSource(consumer, streamPartitions);
 	}
 
 }

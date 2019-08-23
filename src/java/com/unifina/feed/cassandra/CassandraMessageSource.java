@@ -12,7 +12,6 @@ import java.io.IOException;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
-import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
 /**
@@ -26,7 +25,7 @@ public class CassandraMessageSource extends StreamMessageSource implements Itera
 	private boolean quit = false;
 
 	public CassandraMessageSource(Globals globals, StreamMessageConsumer consumer, Collection<StreamPartition> streamPartitions) {
-		super(globals, consumer, streamPartitions);
+		super(consumer, streamPartitions);
 
 		List<CassandraHistoricalIterator> iterators = streamPartitions.stream()
 			.map(streamPartition -> new CassandraHistoricalIterator(streamPartition, globals.getStartDate(), globals.getEndDate()))

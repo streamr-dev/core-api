@@ -2,7 +2,6 @@ package com.unifina.feed;
 
 import com.streamr.client.protocol.message_layer.StreamMessage;
 import com.streamr.client.utils.StreamPartition;
-import com.unifina.utils.Globals;
 
 import java.io.Closeable;
 import java.util.Collection;
@@ -13,19 +12,16 @@ import java.util.function.Consumer;
  * when messages are received.
  */
 public abstract class StreamMessageSource implements Closeable {
-	protected final Globals globals;
 	protected final StreamMessageConsumer consumer;
 	protected final Collection<StreamPartition> streamPartitions;
 
 	/**
 	 * Creates an instance of this StreamMessageSource. The constructor should not block.
 	 * Messages can be reported to the consumer as soon as they are available.
-	 * @param globals
 	 * @param consumer
 	 * @param streamPartitions The set of StreamPartitions to subscribe to.
 	 */
-	public StreamMessageSource(Globals globals, StreamMessageConsumer consumer, Collection<StreamPartition> streamPartitions) {
-		this.globals = globals;
+	public StreamMessageSource(StreamMessageConsumer consumer, Collection<StreamPartition> streamPartitions) {
 		this.consumer = consumer;
 		this.streamPartitions = streamPartitions;
 	}

@@ -2,7 +2,6 @@ package com.unifina.feed.redis;
 
 import com.streamr.client.utils.StreamPartition;
 import com.unifina.feed.StreamMessageSource;
-import com.unifina.utils.Globals;
 import com.unifina.utils.MapTraversal;
 import grails.util.Holders;
 import org.springframework.util.Assert;
@@ -20,8 +19,8 @@ import java.util.Map;
 public class MultipleRedisMessageSource extends StreamMessageSource {
 	private final Map<String, RedisMessageSource> messageSourceByHost = new HashMap<>();
 
-	public MultipleRedisMessageSource(Globals globals, StreamMessageConsumer consumer, Collection<StreamPartition> streamPartitions) {
-		super(globals, consumer, streamPartitions);
+	public MultipleRedisMessageSource(StreamMessageConsumer consumer, Collection<StreamPartition> streamPartitions) {
+		super(consumer, streamPartitions);
 
 		List<String> hosts = MapTraversal.getList(Holders.getConfig(), "streamr.redis.hosts");
 		String password = MapTraversal.getString(Holders.getConfig(), "streamr.redis.password");
@@ -31,7 +30,7 @@ public class MultipleRedisMessageSource extends StreamMessageSource {
 		Assert.notNull(password, "streamr.redis.password is null!");
 
 		for (String host : hosts) {
-			RedisMessageSource messageSource = new RedisMessageSource(globals, consumer, streamPartitions, host, password);
+			RedisMessageSource messageSource = new RedisMessageSource(consumer, streamPartitions, host, password);
 			messageSourceByHost.put(host, messageSource);
 		}
 	}

@@ -8,7 +8,6 @@ import com.lambdaworks.redis.pubsub.RedisPubSubConnection;
 import com.streamr.client.protocol.message_layer.StreamMessage;
 import com.streamr.client.utils.StreamPartition;
 import com.unifina.feed.StreamMessageSource;
-import com.unifina.utils.Globals;
 import org.apache.log4j.Logger;
 
 import java.io.IOException;
@@ -25,8 +24,8 @@ public class RedisMessageSource extends StreamMessageSource {
 
 	private static final Logger log = Logger.getLogger(RedisMessageSource.class);
 
-	public RedisMessageSource(Globals globals, StreamMessageConsumer consumer, Collection<StreamPartition> streamPartitions, String host, String password) {
-		super(globals, consumer, streamPartitions);
+	public RedisMessageSource(StreamMessageConsumer consumer, Collection<StreamPartition> streamPartitions, String host, String password) {
+		super(consumer, streamPartitions);
 		redisURI = RedisURI.create("redis://" + host);
 		if (password != null) {
 			redisURI.setPassword(password);
