@@ -17,7 +17,7 @@ class PropagatorSpec extends ModuleTestingSpecification {
 	}
 
 	def "Propagator should activate interdependent modules in originSet"() {
-		TimePropagationRoot masterClock = new TimePropagationRoot(globals, Mock(DataSource))
+		TimePropagationRoot masterClock = new TimePropagationRoot(Mock(DataSource))
 
 		Count count = setupModule(new Count())
 		ClockModule clock = setupModule(new ClockModule())
@@ -39,7 +39,7 @@ class PropagatorSpec extends ModuleTestingSpecification {
 	}
 
 	def "Propagator should activate interdependent modules in originSet, more complex case with indirect dependencies"() {
-		TimePropagationRoot masterClock = new TimePropagationRoot(globals, Mock(DataSource))
+		TimePropagationRoot masterClock = new TimePropagationRoot(Mock(DataSource))
 
 		Count count = setupModule(new Count())
 		ClockModule clock = setupModule(new ClockModule())

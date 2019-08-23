@@ -35,7 +35,7 @@ public abstract class DataSource {
 	// DataSource and Globals always have a 1-to-1 relationship.
 	protected final Globals globals;
 
-	private final Map<StreamPartition, StreamPropagationRoot> eventRecipientByStreamPartition = new HashMap<>();
+	private final Map<StreamPartition, StreamPropagationRoot> propagationRootByStreamPartition = new HashMap<>();
 	private final MessageRouter router = new MessageRouter();
 
 	private DataSourceEventQueue eventQueue;
@@ -109,7 +109,7 @@ public abstract class DataSource {
 		final StreamMessageSource streamMessageSource;
 		try {
 			streamMessageSource = createStreamMessageSource(
-				eventRecipientByStreamPartition.keySet(), // All the subscribed StreamPartitions
+				propagationRootByStreamPartition.keySet(), // All the subscribed StreamPartitions
 				new StreamMessageSource.StreamMessageConsumer() {
 					@Override
 					public void accept(StreamMessage streamMessage) {
@@ -221,15 +221,15 @@ public abstract class DataSource {
 
 		for (StreamPartition sp : streamPartitions) {
 
-			// Create and register the event recipient for this StreamPartition if it doesn't already exist
-			StreamPropagationRoot recipient = eventRecipientByStreamPartition.get(sp);
-			if (recipient == null) {
-				recipient = new StreamPropagationRoot(this);
-				eventRecipientByStreamPartition.put(sp, recipient);
-				router.subscribe(recipient, sp);
+			// Create and register the propagation root for this StreamPartition if it doesn't already exist
+			StreamPropagationRoot root = propagationRootByStreamPartition.get(sp);
+			if (root == null) {
+				root = new StreamPropagationRoot(this);
+				propagationRootByStreamPartition.put(sp, root);
+				router.subscribe(root, sp);
 			}
 
-			recipient.register(module);
+			root.register(module);
 		}
 	}
 

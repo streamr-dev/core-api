@@ -39,7 +39,7 @@ public class DataSourceEventQueue {
 
 	public DataSourceEventQueue(Globals globals, DataSource dataSource, int capacity, boolean measureLatency) {
 		this.globals = globals;
-		this.masterClock = new TimePropagationRoot(globals, dataSource);
+		this.masterClock = new TimePropagationRoot(dataSource);
 		this.queue = createQueue(capacity);
 		this.measureLatency = measureLatency;
 	}
