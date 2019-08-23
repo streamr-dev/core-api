@@ -3,14 +3,16 @@ package com.unifina.signalpath.utils;
 import com.streamr.client.utils.StreamPartition;
 import com.unifina.domain.data.Stream;
 import com.unifina.signalpath.*;
+import com.unifina.utils.MapTraversal;
 import grails.converters.JSON;
 import org.codehaus.groovy.grails.web.json.JSONArray;
 import org.codehaus.groovy.grails.web.json.JSONObject;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.List;
+import java.util.Collections;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 /**
  * This module creates inputs and outputs on configuration time
@@ -26,7 +28,8 @@ import java.util.Map;
 public class ConfigurableStreamModule extends AbstractSignalPathModule {
 
 	private final StreamParameter streamParameter = new StreamParameter(this, "stream");
-	transient protected JSONObject streamConfig = null;
+
+	private Collection<Integer> selectedPartitions = Collections.emptyList();
 
 	@Override
 	public void init() {
@@ -40,25 +43,11 @@ public class ConfigurableStreamModule extends AbstractSignalPathModule {
 		return streamParameter.getValue();
 	}
 
-	/**
-	 * TODO: add mechanism for selecting which partitions are needed.
-	 * Current implementation wants all partitions.
-	 */
-
-	public Collection<Integer> getPartitions() {
-		List<Integer> arr = new ArrayList<>(getStream().getPartitions());
-		for (int i=0; i<getStream().getPartitions(); i++) {
-			arr.add(i);
-		}
-		return arr;
-	}
-
 	public Collection<StreamPartition> getStreamPartitions() {
-		List<StreamPartition> arr = new ArrayList<>(getStream().getPartitions());
-		for (int i=0; i<getStream().getPartitions(); i++) {
-			arr.add(new StreamPartition(getStream().getId(), i));
-		}
-		return arr;
+		return selectedPartitions.stream()
+			.map((partition) -> new StreamPartition(getStream().getId(), partition))
+			.collect(Collectors.toList());
+
 	}
 
 	@Override
@@ -67,9 +56,7 @@ public class ConfigurableStreamModule extends AbstractSignalPathModule {
 	}
 
 	@Override
-	public void clearState() {
-
-	}
+	public void clearState() {}
 
 	@Override
 	protected void onConfiguration(Map<String, Object> config) {
@@ -83,8 +70,8 @@ public class ConfigurableStreamModule extends AbstractSignalPathModule {
 			String msg = String.format("Stream %s is not properly configured!", stream.getName());
 			throw new IllegalStateException(msg);
 		}
-		streamConfig = (JSONObject)JSON.parse(stream.getConfig());
 
+		JSONObject streamConfig = (JSONObject)JSON.parse(stream.getConfig());
 		JSONArray fields = streamConfig.getJSONArray("fields");
 
 		for (Object o : fields) {
@@ -114,8 +101,27 @@ public class ConfigurableStreamModule extends AbstractSignalPathModule {
 			}
 		}
 
-		if (streamConfig.containsKey("name"))
+		if (streamConfig.containsKey("name")) {
 			this.setName(streamConfig.get("name").toString());
+		}
+
+		if (config.containsKey("partitions")) {
+			selectedPartitions = MapTraversal.getList(config, "partitions");
+		} else {
+			// Default to all partitions selected
+			selectedPartitions = new ArrayList<>(getStream().getPartitions());
+			for (int i=0; i<getStream().getPartitions(); i++) {
+				selectedPartitions.add(i);
+			}
+		}
 	}
 
+	@Override
+	public Map<String, Object> getConfiguration() {
+		Map<String, Object> config = super.getConfiguration();
+
+		config.put("partitions", selectedPartitions);
+
+		return config;
+	}
 }
