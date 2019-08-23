@@ -14,21 +14,21 @@ class FieldDetectorSpec extends Specification {
 
 	def "returns null given no message"() {
 		expect:
-		FieldDetector.detectFields(null) == null
+		FieldDetector.detectFields(null, false) == null
 	}
 
 	def "detects 0 fields given empty message"() {
 		msg.getContent() >> [:]
 
 		expect:
-		FieldDetector.detectFields(msg) == []
+		FieldDetector.detectFields(msg, false) == []
 	}
 
 	def "detects simple fields given flat message"() {
 		msg.getContent() >> [a: 666, b: 312.0, c: "sss", d: true]
 
 		expect:
-		FieldDetector.detectFields(msg)*.toMap() == [
+		FieldDetector.detectFields(msg, false)*.toMap() == [
 			[name: "a", type: "number"],
 			[name: "b", type: "number"],
 			[name: "c", type: "string"],
@@ -40,7 +40,7 @@ class FieldDetectorSpec extends Specification {
 		msg.getContent() >> [a: [1,2,3], b: [hello: "world"]]
 
 		expect:
-		FieldDetector.detectFields(msg)*.toMap() == [
+		FieldDetector.detectFields(msg, false)*.toMap() == [
 			[name: "a", type: "list"],
 			[name: "b", type: "map"],
 		]
