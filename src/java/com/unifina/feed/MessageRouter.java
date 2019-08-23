@@ -7,6 +7,10 @@ import org.apache.log4j.Logger;
 import java.util.*;
 import java.util.function.Consumer;
 
+/**
+ * A helper class which maintains a List of Consumers for each StreamPartition
+ * and routes StreamMessages to them.
+ */
 public class MessageRouter {
 
 	private static final Logger log = Logger.getLogger(MessageRouter.class);

@@ -4,7 +4,7 @@ import com.unifina.data.ClockTick;
 import com.unifina.data.Event;
 import com.unifina.data.EventQueueMetrics;
 import com.unifina.exceptions.StreamFieldChangedException;
-import com.unifina.feed.MasterClock;
+import com.unifina.feed.TimePropagationRoot;
 import com.unifina.utils.Globals;
 import org.apache.log4j.Logger;
 import org.joda.time.DateTime;
@@ -21,7 +21,7 @@ public class DataSourceEventQueue {
 	protected static final int DEFAULT_CAPACITY = 10000;
 	protected static final int CLOCK_TICK_INTERVAL_MILLIS = 1000; // tick every second
 
-	private final MasterClock masterClock;
+	private final TimePropagationRoot masterClock;
 	private final List<IDayListener> dayListeners = new ArrayList<>();
 	protected BlockingQueue<Event> queue;
 	protected final Globals globals;
@@ -39,7 +39,7 @@ public class DataSourceEventQueue {
 
 	public DataSourceEventQueue(Globals globals, DataSource dataSource, int capacity, boolean measureLatency) {
 		this.globals = globals;
-		this.masterClock = new MasterClock(globals, dataSource);
+		this.masterClock = new TimePropagationRoot(globals, dataSource);
 		this.queue = createQueue(capacity);
 		this.measureLatency = measureLatency;
 	}
@@ -78,6 +78,7 @@ public class DataSourceEventQueue {
 			log.info("Starting event loop!");
 			runEventLoopUntilDone();
 		} finally {
+			abort = true;
 			log.info("Event loop stopped.");
 
 			asyncExecutor.shutdownNow();

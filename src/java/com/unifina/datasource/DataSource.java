@@ -5,13 +5,13 @@ import com.streamr.client.utils.StreamPartition;
 import com.unifina.data.Event;
 import com.unifina.data.EventQueueMetrics;
 import com.unifina.feed.MessageRouter;
+import com.unifina.feed.StreamPropagationRoot;
 import com.unifina.feed.StreamMessageSource;
-import com.unifina.feed.map.MapMessageEventRecipient;
 import com.unifina.serialization.SerializationRequest;
 import com.unifina.signalpath.AbstractSignalPathModule;
-import com.unifina.signalpath.AbstractStreamSourceModule;
 import com.unifina.signalpath.SignalPath;
 import com.unifina.signalpath.StopRequest;
+import com.unifina.signalpath.utils.ConfigurableStreamModule;
 import com.unifina.utils.Globals;
 import org.apache.log4j.Logger;
 
@@ -35,7 +35,7 @@ public abstract class DataSource {
 	// DataSource and Globals always have a 1-to-1 relationship.
 	protected final Globals globals;
 
-	private final Map<Collection<StreamPartition>, MapMessageEventRecipient> eventRecipientsByStreamPartitions = new HashMap<>();
+	private final Map<StreamPartition, StreamPropagationRoot> eventRecipientByStreamPartition = new HashMap<>();
 	private final MessageRouter router = new MessageRouter();
 
 	private DataSourceEventQueue eventQueue;
@@ -70,8 +70,8 @@ public abstract class DataSource {
 	 * with other types of arguments, they will be ignored.
 	 */
 	private void register(Object o) {
-		if (o instanceof AbstractStreamSourceModule) {
-			subscribe((AbstractStreamSourceModule) o);
+		if (o instanceof ConfigurableStreamModule) {
+			subscribe((ConfigurableStreamModule) o);
 		}
 		if (o instanceof ITimeListener) {
 			eventQueue.addTimeListener((ITimeListener) o);
@@ -106,14 +106,10 @@ public abstract class DataSource {
 			startListener.onStart();
 		}
 
-		// Collect all the required StreamPartitions
-		Set<StreamPartition> allStreamPartitions = new HashSet<>();
-		eventRecipientsByStreamPartitions.keySet().forEach((streamPartitions -> allStreamPartitions.addAll(streamPartitions)));
-
 		final StreamMessageSource streamMessageSource;
 		try {
 			streamMessageSource = createStreamMessageSource(
-				allStreamPartitions,
+				eventRecipientByStreamPartition.keySet(), // All the subscribed StreamPartitions
 				new StreamMessageSource.StreamMessageConsumer() {
 					@Override
 					public void accept(StreamMessage streamMessage) {
@@ -135,7 +131,7 @@ public abstract class DataSource {
 						DataSource.this.enqueue(new Event<>(
 							null,
 							globals.getEndDate() != null ? globals.getEndDate() : new Date(),
-							(nul) -> eventQueue.abort()
+							(nul) -> abort()
 						));
 					}
 				});
@@ -157,10 +153,19 @@ public abstract class DataSource {
 		} catch (Exception e) {
 			throw new RuntimeException("Error while processing event queue", e);
 		} finally {
-			try {
-				eventQueue.abort();
-			} catch (Exception e) {
-				log.error("Exception thrown while aborting eventQueue (ignored)", e);
+			running = false;
+
+			// Final serialization requests
+			for (SignalPath signalPath : getSerializableSignalPaths()) {
+				SerializationRequest.makeFeedEvent(signalPath).dispatch();
+			}
+
+			for (IStopListener it : stopListeners) {
+				try {
+					it.onStop();
+				} catch (Exception e) {
+					log.error("Exception thrown while stopping feed", e);
+				}
 			}
 
 			if (streamMessageSource != null) {
@@ -176,23 +181,13 @@ public abstract class DataSource {
 	}
 
 	public void abort() {
-		// Final serialization requests
-		for (SignalPath signalPath : getSerializableSignalPaths()) {
-			enqueue(SerializationRequest.makeFeedEvent(signalPath));
-		}
-
 		// Add stop request to queue
 		Date stopTime = globals.getTime() != null ? globals.getTime() : new Date();
 		enqueue(new Event<>(new StopRequest(stopTime), stopTime, 0L, (stopRequest) -> {
-			running = false;
-			eventQueue.abort();
-
-			for (IStopListener it : stopListeners) {
-				try {
-					it.onStop();
-				} catch (Exception e) {
-					log.error("Exception thrown while stopping feed", e);
-				}
+			try {
+				eventQueue.abort();
+			} catch (Exception e) {
+				log.error("Exception thrown while aborting eventQueue (ignored)", e);
 			}
 		}));
 	}
@@ -217,21 +212,25 @@ public abstract class DataSource {
 		return serializableSps;
 	}
 
-	private void subscribe(AbstractStreamSourceModule module) {
+	/**
+	 * For each subscribed StreamPartition, there is a StreamPropagationRoot which contains the
+	 * set of modules subscribed to that StreamPartition and acts as a propagation root.
+	 */
+	private void subscribe(ConfigurableStreamModule module) {
 		Collection<StreamPartition> streamPartitions = module.getStreamPartitions();
 
-		// Create and register the event recipient for this StreamPartition if it doesn't already exist
-		MapMessageEventRecipient recipient = eventRecipientsByStreamPartitions.get(streamPartitions);
+		for (StreamPartition sp : streamPartitions) {
 
-		if (recipient == null) {
-			recipient = new MapMessageEventRecipient(globals, module.getStream(), streamPartitions);
-			eventRecipientsByStreamPartitions.put(streamPartitions, recipient);
-			for (StreamPartition streamPartition : streamPartitions) {
-				router.subscribe(recipient, streamPartition);
+			// Create and register the event recipient for this StreamPartition if it doesn't already exist
+			StreamPropagationRoot recipient = eventRecipientByStreamPartition.get(sp);
+			if (recipient == null) {
+				recipient = new StreamPropagationRoot(this);
+				eventRecipientByStreamPartition.put(sp, recipient);
+				router.subscribe(recipient, sp);
 			}
-		}
 
-		recipient.register(module);
+			recipient.register(module);
+		}
 	}
 
 }

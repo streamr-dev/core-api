@@ -4,21 +4,12 @@ import com.streamr.client.protocol.message_layer.MessageRef
 import com.streamr.client.protocol.message_layer.StreamMessage
 import com.streamr.client.protocol.message_layer.StreamMessageV31
 import com.unifina.BeanMockingSpecification
-import com.unifina.data.Event
-import com.unifina.datasource.HistoricalDataSource
-import com.unifina.datasource.RealtimeDataSource
-
 import com.unifina.domain.data.Stream
 import com.unifina.domain.security.SecUser
-
-import com.unifina.feed.cassandra.CassandraMessageSource
-import com.unifina.feed.map.MapMessageEventRecipient
 import com.unifina.security.Userish
-
 import com.unifina.service.PermissionService
 import com.unifina.service.StreamService
 import com.unifina.signalpath.SignalPath
-import com.unifina.signalpath.utils.ConfigurableStreamModule
 import com.unifina.utils.Globals
 import com.unifina.utils.testutils.FakeStreamService
 import com.unifina.utils.testutils.ModuleTestHelper

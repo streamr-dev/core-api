@@ -1,6 +1,6 @@
 package com.unifina.service
 
-import com.google.gson.Gson
+
 import com.unifina.api.CanvasCommunicationException
 import com.unifina.datasource.IStartListener
 import com.unifina.datasource.IStopListener
@@ -14,7 +14,6 @@ import com.unifina.exceptions.UnauthorizedStreamException
 import com.unifina.serialization.SerializationException
 import com.unifina.signalpath.*
 import com.unifina.utils.Globals
-
 import grails.compiler.GrailsCompileStatic
 import grails.transaction.NotTransactional
 import grails.transaction.Transactional

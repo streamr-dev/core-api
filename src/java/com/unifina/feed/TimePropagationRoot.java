@@ -3,15 +3,13 @@ package com.unifina.feed;
 import com.streamr.client.protocol.message_layer.ITimestamped;
 import com.unifina.datasource.DataSource;
 import com.unifina.datasource.ITimeListener;
-import com.unifina.utils.Globals;
 
 import java.util.Date;
 
-public class MasterClock extends AbstractEventRecipient<ITimeListener, ITimestamped> {
-	public MasterClock(Globals globals, DataSource dataSource) {
-		super(globals);
-		// globals.dataSource is not yet set
-		dataSource.addStartListener(this);
+public class TimePropagationRoot extends PropagationRoot<ITimeListener, ITimestamped> {
+
+	public TimePropagationRoot(DataSource dataSource) {
+		super(dataSource);
 	}
 
 	@Override
