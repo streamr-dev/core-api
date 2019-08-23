@@ -26,6 +26,11 @@ class ModuleTestingSpecification extends BeanMockingSpecification {
 	}
 
 	protected Globals mockGlobals(Map context=[:], SecUser user = new SecUser(username: 'user', timezone: "UTC"), Globals.Mode mode = Globals.Mode.REALTIME) {
+		if (mode == Globals.Mode.HISTORICAL) {
+			context.beginDate = context.beginDate ?: new Date().getTime()
+			context.endDate = context.endDate ?: new Date().getTime()
+		}
+
 		Globals globals = new Globals(context, user, mode, Mock(DataSource))
 		globals.time = new Date(0)
 		return globals
