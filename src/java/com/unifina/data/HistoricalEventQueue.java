@@ -63,9 +63,6 @@ public class HistoricalEventQueue extends DataSourceEventQueue {
 
 		// Sleep if we're not running at full speed and it's time to sleep
 		sleepIfNecessary(event);
-
-		// Then handle the event normally
-		super.handleEvent(event);
 	}
 
 	private void sleepIfNecessary(Event event) {
