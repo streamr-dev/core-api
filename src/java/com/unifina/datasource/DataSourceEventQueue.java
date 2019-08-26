@@ -22,14 +22,14 @@ public class DataSourceEventQueue {
 	private static final Logger log = Logger.getLogger(DataSourceEventQueue.class);
 
 	protected static final int DEFAULT_CAPACITY = 10000;
-	protected static final int ASYNC_QUEUE_CAPACITY = 10000;
+	private static final int ASYNC_QUEUE_CAPACITY = 10000;
 	protected static final int CLOCK_TICK_INTERVAL_MILLIS = 1000; // tick every second
 
 	private final TimePropagationRoot masterClock;
 	private final List<IDayListener> dayListeners = new ArrayList<>();
 	protected BlockingQueue<Event> queue;
 	protected final Globals globals;
-	private boolean abort = false;
+	private boolean aborted = false;
 	private final boolean measureLatency;
 	private long lastReportedClockTick = Long.MIN_VALUE;
 	private DateTime nextDay;
@@ -51,7 +51,6 @@ public class DataSourceEventQueue {
 	/**
 	 * The default implementation is an ArrayBlockingQueue.
 	 * @param capacity The hard capacity limit of the queue. After reaching this size the queue should block on offer.
-	 * @return
 	 */
 	protected BlockingQueue<Event> createQueue(int capacity) {
 		return new ArrayBlockingQueue<>(capacity);
@@ -71,7 +70,7 @@ public class DataSourceEventQueue {
 	 * The call to this method blocks until the queue is aborted or all events have been processed.
 	 */
 	public void start() throws Exception {
-		abort = false;
+		aborted = false;
 
 		// Single threaded executor to maintain the order of events
 		asyncExecutor = new ThreadPoolExecutor(1, 1,
@@ -100,7 +99,7 @@ public class DataSourceEventQueue {
 				handleEvent(event);
 			}
 		} finally {
-			abort = true;
+			aborted = true;
 			log.info("Event loop stopped.");
 
 			asyncExecutor.shutdownNow();
@@ -118,10 +117,12 @@ public class DataSourceEventQueue {
 	 * to avoid deadlocking the thread in case the queue is full.
 	 */
 	public void enqueue(Event event) {
-		if (Thread.currentThread() == consumingThread) {
-			enqueueAsync(event);
-		} else {
-			enqueueSync(event);
+		if (!aborted) {
+			if (Thread.currentThread() == consumingThread) {
+				enqueueAsync(event);
+			} else {
+				enqueueSync(event);
+			}
 		}
 	}
 
@@ -146,7 +147,7 @@ public class DataSourceEventQueue {
 	 * as the consuming Thread (this happens when the processing of an
 	 * event produces more events into the queue) to prevent a deadlock.
 	 */
-	private void enqueueAsync(Event event) {
+	private void enqueueAsync(final Event event) {
 		asyncExecutor.submit(() -> enqueueSync(event));
 	}
 
@@ -175,11 +176,12 @@ public class DataSourceEventQueue {
 
 
 	/**
-	 * Aborts the queue processing at earliest opportunity, and causes the
-	 * call to runEventLoopUntilDone() to exit.
+	 * Aborts the queue processing as soon as possible, and causes the
+	 * call to start() to exit. Any events remaining in the queue,
+	 * or on their way to the queue, will be discarded.
 	 */
 	public void abort() {
-		abort = true;
+		aborted = true;
 	}
 
 	EventQueueMetrics retrieveMetricsAndReset() {
@@ -189,7 +191,7 @@ public class DataSourceEventQueue {
 	}
 
 	protected boolean isAborted() {
-		return abort;
+		return aborted;
 	}
 
 	private boolean isTimeReportingInitialized() {
