@@ -212,4 +212,26 @@ class HistoricalEventQueueSpec extends Specification {
 		endTime - startTime < 5000
 	}
 
+	void "should stop soon after abort, even while ticking time towards a distant future event"() {
+		HistoricalEventQueue queue = createQueue(
+			new Date(0L),
+			new Date(10 * 1000L), // 10 sec
+			1
+		)
+
+		when:
+		long startTime = System.currentTimeMillis()
+		// Abort in 2 sec
+		Thread.start {
+			Thread.sleep(2000)
+			queue.abort()
+		}
+		queue.start() // this will run for 10 sec if the abort doesn't work properly
+		long endTime = System.currentTimeMillis()
+
+		then:
+		endTime - startTime > 2000
+		endTime - startTime < 5000
+	}
+
 }

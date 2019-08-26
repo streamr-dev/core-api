@@ -10,7 +10,6 @@ import com.unifina.feed.StreamPropagationRoot;
 import com.unifina.serialization.SerializationRequest;
 import com.unifina.signalpath.AbstractSignalPathModule;
 import com.unifina.signalpath.SignalPath;
-import com.unifina.signalpath.StopRequest;
 import com.unifina.signalpath.utils.ConfigurableStreamModule;
 import com.unifina.utils.Globals;
 import org.apache.log4j.Logger;
@@ -181,15 +180,7 @@ public abstract class DataSource {
 	}
 
 	public void abort() {
-		// Add stop request to queue
-		Date stopTime = globals.getTime() != null ? globals.getTime() : new Date();
-		enqueue(new Event<>(new StopRequest(stopTime), stopTime, 0L, (stopRequest) -> {
-			try {
-				eventQueue.abort();
-			} catch (Exception e) {
-				log.error("Exception thrown while aborting eventQueue (ignored)", e);
-			}
-		}));
+		eventQueue.abort();
 	}
 
 	public EventQueueMetrics retrieveMetricsAndReset() {

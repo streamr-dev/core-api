@@ -55,7 +55,7 @@ public class SignalPathRunner extends Thread {
 	public synchronized void waitRunning(boolean target) throws InterruptedException {
 		int i = 0;
 		while (getRunning() != target && i++ < 60) {
-			log.debug("Waiting for " + runnerId + " to start...");
+			log.debug(String.format("Waiting for %s to %s...", runnerId, target ? "start" : "stop"));
 			if (target && thrownOnStartUp != null) {
 				log.error("Giving up on waiting because run threw exception.");
 				break;
