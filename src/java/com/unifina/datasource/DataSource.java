@@ -154,7 +154,7 @@ public abstract class DataSource {
 		} finally {
 			running = false;
 
-			// Final serialization requests
+			// Final serialization of SignalPaths is dispatched explicitly, as event queue is now stopped.
 			for (SignalPath signalPath : getSerializableSignalPaths()) {
 				SerializationRequest.makeFeedEvent(signalPath).dispatch();
 			}
