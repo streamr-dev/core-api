@@ -591,7 +591,7 @@ public abstract class AbstractSignalPathModule implements IDayListener, Serializ
 			futureTask.run();
 		});
 
-		getGlobals().getDataSource().accept(fe);
+		getGlobals().getDataSource().enqueue(fe);
 		return futureTask;
 	}
 

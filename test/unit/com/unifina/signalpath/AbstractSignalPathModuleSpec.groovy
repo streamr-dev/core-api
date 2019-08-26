@@ -91,7 +91,7 @@ class AbstractSignalPathModuleSpec extends ModuleTestingSpecification {
 		globals = mockGlobals()
 
 		mockedEventQueue = new ArrayDeque<>()
-		globals.dataSource.accept(_ as Event) >> { Event event ->
+		globals.dataSource.enqueue(_ as Event) >> { Event event ->
 			mockedEventQueue.add(event)
 		}
 

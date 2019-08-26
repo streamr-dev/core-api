@@ -1,6 +1,5 @@
 package com.unifina.utils;
 
-import org.apache.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -13,6 +12,10 @@ import java.util.function.Predicate;
 /**
  * Partial implementation of a bounded priority queue. The implementation extends a PriorityBlockingQueue,
  * adding blocking behavior with the help of a Semaphore.
+ *
+ * Rolled own implementation because none were available in commonly used libraries.
+ *
+ * Also tried this, but it was buggy and caused segfaults: https://github.com/gakesson/ConcurrencyUtils/blob/c5794c5b7c0ada763549cadfbbbd345713ace79a/BoundedPriorityBlockingQueue.java
  *
  * NOTE: only offer(E, long, TimeUnit) and poll(long, TimeUnit) are implemented properly.
  * DO NOT USE other methods to manipulate the queue!

@@ -5,8 +5,13 @@ import com.streamr.client.utils.StreamPartition;
 import org.apache.log4j.Logger;
 
 import java.util.*;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.function.Consumer;
 
+/**
+ * A helper class which maintains a List of Consumers for each StreamPartition
+ * and routes StreamMessages to them.
+ */
 public class MessageRouter {
 
 	private static final Logger log = Logger.getLogger(MessageRouter.class);
@@ -28,7 +33,9 @@ public class MessageRouter {
 	 */
 	public synchronized void subscribe(Consumer<StreamMessage> consumer, StreamPartition streamPartition) {
 		if (!consumersByStreamPartition.containsKey(streamPartition)) {
-			consumersByStreamPartition.put(streamPartition, new ArrayList<>());
+			// CopyOnWriteArray is chosen because it avoids synchronization on read/traversal (for speed).
+			// This choice contains the assumption that reads far outweigh writes to this list.
+			consumersByStreamPartition.put(streamPartition, new CopyOnWriteArrayList<>());
 		}
 
 		List<Consumer<StreamMessage>> list = consumersByStreamPartition.get(streamPartition);

@@ -13,13 +13,6 @@ import groovy.json.JsonSlurper
 
 @Secured(["IS_AUTHENTICATED_ANONYMOUSLY"])
 class IntegrationKeyApiController {
-	static allowedMethods = [
-		index: "GET",
-		save: "POST",
-		delete: "DELETE",
-		update: "PUT",
-	]
-
 	EthereumIntegrationKeyService ethereumIntegrationKeyService
 
 	@StreamrApi

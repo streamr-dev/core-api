@@ -27,7 +27,6 @@ class UpdateProductCommand {
 	static constraints = {
 		name(blank: false)
 		description(blank: false)
-		streams(maxSize: 1000)
 		previewStream(nullable: true)
 		previewConfigJson(nullable: true)
 

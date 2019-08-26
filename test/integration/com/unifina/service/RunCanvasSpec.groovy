@@ -77,6 +77,6 @@ class RunCanvasSpec extends IntegrationSpec {
 	}
 
 	static def modules(CanvasService canvasService, Canvas canvas) {
-		canvasService.signalPathService.runnersById[canvas.runner].signalPaths[0].mods
+		canvasService.signalPathService.runnersById[canvas.runner].signalPath.mods
 	}
 }

@@ -1,7 +1,6 @@
-import com.google.gson.Gson
 import com.unifina.data.KafkaPartitioner
 import com.unifina.service.NodeService
-import org.web3j.crypto.Credentials
+import com.unifina.utils.PropertiesUtil
 
 /*****
  * This config file gets merged with the application config file.
@@ -184,6 +183,11 @@ log4j.main = {
 }
 
 /**
+ * Community Product Server configuration
+ */
+streamr.cps.url = System.getProperty("streamr.cps.url") ?: "http://localhost:8085/communities/"
+
+/**
  * Streamr cluster config
  */
 streamr.cluster.internalPort = System.getProperty("streamr.cluster.internalPort") ? Integer.parseInt(System.getProperty("streamr.cluster.internalPort")) : 8081
@@ -263,15 +267,8 @@ environments {
  * -Dstreamr.ethereum.networks.anotherNetwork=http://some-network-rpc-url
  */
 streamr.ethereum.defaultNetwork = System.getProperty("streamr.ethereum.defaultNetwork") ?: "local"
-streamr.ethereum.networks = System.getProperties().findAll {key, val-> key.toString().startsWith("streamr.ethereum.networks.")}.isEmpty() ?
-	// Default value
-	[local: "http://localhost:8545"] :
-	// Else collect system properties to Map
-	System.getProperties().findAll {key, val-> key.toString().startsWith("streamr.ethereum.networks.")}
-		.collectEntries {key, val ->
-			[(key.toString().replace("streamr.ethereum.networks.", "")): val]
-		}
-
+streamr.ethereum.networks = PropertiesUtil.matchingPropertiesToMap("streamr.ethereum.networks.", System.getProperties()) ?: [local: "http://localhost:8545"]
+streamr.ethereum.wss = PropertiesUtil.matchingPropertiesToMap("streamr.ethereum.wss.", System.getProperties()) ?: [local: "ws://localhost:8545"]
 // Ethereum identity of this instance. Don't use this silly development private key for anything.
 streamr.ethereum.nodePrivateKey = System.getProperty("streamr.ethereum.nodePrivateKey", "0123456789ABCDEF0123456789ABCDEF0123456789ABCDEF0123456789ABCDEF")
 

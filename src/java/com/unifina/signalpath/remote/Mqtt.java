@@ -197,7 +197,7 @@ public class Mqtt extends AbstractSignalPathModule implements MqttCallback, ISta
 		final MqttMessageEvent event = new MqttMessageEvent(getGlobals().time);
 		event.message = mqttMessage;
 		// push mqtt message into Event queue; it will later call this.receive
-		getGlobals().getDataSource().accept(new Event<>(event, event.timestamp, 0L, (message) -> {
+		getGlobals().getDataSource().enqueue(new Event<>(event, event.timestamp, 0L, (message) -> {
 			sendOutput(message);
 			getPropagator().propagate();
 		}));

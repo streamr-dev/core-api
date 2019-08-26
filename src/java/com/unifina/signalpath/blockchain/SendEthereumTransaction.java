@@ -51,8 +51,8 @@ public class SendEthereumTransaction extends ModuleWithSideEffects {
 	private FunctionNameParameter function = new FunctionNameParameter(this, "function");
 	private List<Input<Object>> arguments = new ArrayList<>();
 
-	private int check_result_max_tries = 100;
-	private int check_result_waitms = 10000;
+	private static final int CHECK_RESULT_MAX_TRIES = 100;
+	private static final int CHECK_RESULT_WAIT_MS = 10000;
 
 	// constant function outputs
 	private List<Output<Object>> results = new ArrayList<>();
@@ -302,7 +302,7 @@ public class SendEthereumTransaction extends ModuleWithSideEffects {
 		 */
 		protected void enqueueConfirmedTx() throws IOException {
 			final FunctionCallResult fncall = this;
-			receipt = Web3jHelper.waitForTransactionReceipt(web3j,web3jTx.getTransactionHash(), check_result_waitms, check_result_max_tries);
+			receipt = Web3jHelper.waitForTransactionReceipt(web3j,web3jTx.getTransactionHash(), CHECK_RESULT_WAIT_MS, CHECK_RESULT_MAX_TRIES);
 			if (receipt != null) {
 				transaction = web3j.ethGetTransactionByHash(web3jTx.getTransactionHash()).send().getResult();
 				log.info("Receipt found for txHash: " + web3jTx.getTransactionHash());
@@ -393,11 +393,6 @@ public class SendEthereumTransaction extends ModuleWithSideEffects {
 		return Web3jHelper.toWeb3jFunction(chosenFunction,args);
 	}
 
-
-	protected BigInteger getGasLimit() {
-		return BigInteger.valueOf(6000000l);
-	}
-
 	@Override
 	protected void activateWithSideEffects() {
 		EthereumContract c = contract.getValue();
@@ -432,8 +427,8 @@ public class SendEthereumTransaction extends ModuleWithSideEffects {
 				} else {
 					valueWei = BigInteger.ZERO;
 				}
-
-				RawTransaction rawTransaction = RawTransaction.createTransaction(nonce, gasPrice, getGasLimit(), c.getAddress(), valueWei, encodeFnCall);
+				BigInteger gasLimitBigint = BigInteger.valueOf(ethereumOptions.getGasLimit());
+				RawTransaction rawTransaction = RawTransaction.createTransaction(nonce, gasPrice, gasLimitBigint, c.getAddress(), valueWei, encodeFnCall);
 				byte[] signedMessage = TransactionEncoder.signMessage(rawTransaction, credentials);
 				String hexValue = Numeric.toHexString(signedMessage);
 				CompletableFuture<EthSendTransaction> cf = web3j.ethSendRawTransaction(hexValue).sendAsync();
@@ -464,7 +459,7 @@ public class SendEthereumTransaction extends ModuleWithSideEffects {
 	 * it asynchronously.
 	 */
 	private void enqueueEvent(FunctionCallResult fc){
-		getGlobals().getDataSource().accept(
+		getGlobals().getDataSource().enqueue(
 			new com.unifina.data.Event<>(fc, fc.timestamp, (event) -> {
 				try {
 					sendOutput(event);
@@ -531,7 +526,9 @@ public class SendEthereumTransaction extends ModuleWithSideEffects {
 			}
 		} else if (rslt instanceof TransactionResult) {
 			TransactionResult tx = (TransactionResult) rslt;
-			txHash.send(tx.getTransactionHash());
+			if (tx.getTransactionHash() != null) {
+				txHash.send(tx.getTransactionHash());
+			}
 
 			TransactionReceipt txreceipt = tx.getTransactionReceipt();
 			if(txreceipt != null){

@@ -34,6 +34,10 @@
       "description": "Start, stop, and manage Canvases"
     },
     {
+      "name": "communities",
+      "description": "Community products"
+    },
+    {
       "name": "dashboards",
       "description": "Dashboards and their items"
     },
@@ -71,6 +75,483 @@
     }
   ],
   "paths": {
+    "/communities/{communityAddress}/joinRequests": {
+      "get": {
+        "summary": "List all community join requests",
+        "description": "List all community join requests.",
+          "tags": [
+            "communities"
+          ],
+          "parameters": [
+            {
+              "name": "communityAddress",
+              "in": "path",
+              "description": "Ethereum address of the community",
+              "required": true,
+              "type": "string",
+              "default": false
+            },
+            {
+              "name": "state",
+              "in": "query",
+              "enum": [
+                "pending",
+                "accepted",
+                "rejected"
+              ],
+              "description": "Filter listing by state of the join request",
+              "required": false,
+              "type": "string",
+              "default": false
+            }
+          ],
+          "responses": {
+            "200": {
+              "description": "Success"
+            },
+            "400": {
+              "description": "Required parameter missing"
+            }
+          }
+      },
+      "post": {
+        "summary": "Create community join request",
+        "description": "Create community join request from given json body",
+          "tags": [
+            "communities"
+          ],
+          "parameters": [
+            {
+              "name": "communityAddress",
+              "in": "path",
+              "description": "Ethereum address of the community",
+              "required": true,
+              "type": "string",
+              "default": false
+            },
+            {
+              "name": "body",
+              "in": "body",
+              "description": "Community join request details",
+              "required": true,
+              "schema": {
+                "$ref": "#/definitions/CreateCommunityJoinRequest"
+              }
+            }
+          ],
+          "responses": {
+            "200": {
+              "description": "Success"
+            },
+            "400": {
+              "description": "Required parameters missing"
+            },
+            "403": {
+              "description": "Given community secret is incorrect"
+            },
+            "404": {
+              "description": "Member address is not owned by the current user"
+            }
+          }
+      }
+    },
+    "/communities/{communityAddress}/joinRequests/{joinRequestId}": {
+      "get": {
+        "summary": "Find community's join request by id",
+        "description": "Find community's join request by join request id.",
+          "tags": [
+            "communities"
+          ],
+          "parameters": [
+            {
+              "name": "communityAddress",
+              "in": "path",
+              "description": "Ethereum address of the community",
+              "required": true,
+              "type": "string",
+              "default": false
+            },
+            {
+              "name": "joinRequestId",
+              "in": "path",
+              "description": "ID of the join request",
+              "required": true,
+              "type": "string",
+              "default": false
+            }
+          ],
+          "responses": {
+            "200": {
+              "description": "Success"
+            },
+            "400": {
+              "description": "Required parameters missing"
+            },
+            "404": {
+              "description": "Community join request not found by id"
+            }
+          }
+      },
+      "put": {
+        "summary": "Update community join request state",
+        "description": "Update state attribute of the community join request.",
+          "tags": [
+            "communities"
+          ],
+          "parameters": [
+            {
+              "name": "communityAddress",
+              "in": "path",
+              "description": "Ethereum address of the community",
+              "required": true,
+              "type": "string",
+              "default": false
+            },
+            {
+              "name": "joinRequestId",
+              "in": "path",
+              "description": "ID of the join request",
+              "required": true,
+              "type": "string",
+              "default": false
+            },
+            {
+              "name": "body",
+              "in": "body",
+              "description": "Community join request state",
+              "required": true,
+              "schema": {
+                "$ref": "#/definitions/UpdateCommunityJoinRequest"
+              }
+            }
+          ],
+          "responses": {
+            "204": {
+              "description": "Success"
+            },
+            "400": {
+              "description": "Required parameters missing"
+            },
+            "404": {
+              "description": "Community join request not found by id"
+            }
+          }
+      },
+      "delete": {
+        "summary": "Delete community join request",
+        "description": "Delete community join request.",
+          "tags": [
+            "communities"
+          ],
+          "parameters": [
+            {
+              "name": "communityAddress",
+              "in": "path",
+              "description": "Ethereum address of the community",
+              "required": true,
+              "type": "string",
+              "default": false
+            },
+            {
+              "name": "joinRequestId",
+              "in": "path",
+              "description": "ID of the join request",
+              "required": true,
+              "type": "string",
+              "default": false
+            }
+          ],
+          "responses": {
+            "204": {
+              "description": "Success"
+            },
+            "400": {
+              "description": "Required parameters missing"
+            },
+            "404": {
+              "description": "Community join request not found by id"
+            }
+          }
+      }
+    },
+    "/communities/{communityAddress}/secrets": {
+      "get": {
+        "summary": "List all community secrets",
+        "description": "List all community secrets.",
+        "tags": [
+          "communities"
+        ],
+        "parameters": [
+          {
+            "name": "communityAddress",
+            "in": "path",
+            "description": "Ethereum address of the community",
+            "required": true,
+            "type": "string",
+            "default": false
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success"
+          },
+          "400": {
+            "description": "Required parameters missing"
+          }
+        }
+      },
+      "post": {
+        "summary": "Create community secret",
+        "description": "Create community secret",
+        "tags": [
+          "communities"
+        ],
+        "parameters": [
+          {
+            "name": "communityAddress",
+            "in": "path",
+            "description": "Ethereum address of the community",
+            "required": true,
+            "type": "string",
+            "default": false
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "description": "Create community secret details",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/CreateCommunitySecret"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success"
+          },
+          "400": {
+            "description": "Required parameters missing"
+          }
+        }
+      }
+    },
+    "/communities/{communityAddress}/secrets/{communitySecretId}": {
+      "get": {
+        "summary": "Find community secret by id",
+        "description": "Find community secret by id.",
+        "tags": [
+          "communities"
+        ],
+        "parameters": [
+          {
+            "name": "communityAddress",
+            "in": "path",
+            "description": "Ethereum address of the community",
+            "required": true,
+            "type": "string",
+            "default": false
+          },
+          {
+            "name": "communitySecretId",
+            "in": "path",
+            "description": "ID of the community secret",
+            "required": true,
+            "type": "string",
+            "default": false
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success"
+          },
+          "400": {
+            "description": "Required parameters missing"
+          },
+          "404": {
+            "description": "Community secret not found"
+          }
+        }
+      },
+      "put": {
+        "summary": "Update community secret",
+        "description": "Update community secret.",
+        "tags": [
+          "communities"
+        ],
+        "parameters": [
+          {
+            "name": "communityAddress",
+            "in": "path",
+            "description": "Ethereum address of the community",
+            "required": true,
+            "type": "string",
+            "default": false
+          },
+          {
+            "name": "communitySecretId",
+            "in": "path",
+            "description": "ID of the community secret",
+            "required": true,
+            "type": "string",
+            "default": false
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Success"
+          },
+          "400": {
+            "description": "Required parameters missing"
+          },
+          "404": {
+            "description": "Community secret not found"
+          }
+        }
+      },
+      "delete": {
+        "summary": "Delete community secret",
+        "description": "Delete community secret.",
+        "tags": [
+          "communities"
+        ],
+        "parameters": [
+          {
+            "name": "communityAddress",
+            "in": "path",
+            "description": "Ethereum address of the community",
+            "required": true,
+            "type": "string",
+            "default": false
+          },
+          {
+            "name": "communitySecretId",
+            "in": "path",
+            "description": "ID of the community secret",
+            "required": true,
+            "type": "string",
+            "default": false
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Success"
+          },
+          "400": {
+            "description": "Required parameters missing"
+          },
+          "404": {
+            "description": "Community secret not found by id"
+          }
+        }
+      }
+    },
+    "/communities/{communityAddress}/stats": {
+      "get": {
+        "summary": "Proxy calls to to community product server.",
+        "description": "Return operator stats",
+        "tags": [
+          "communities"
+        ],
+        "parameters": [
+          {
+            "name": "communityAddress",
+            "in": "path",
+            "description": "Ethereum address of the community",
+            "required": true,
+            "type": "string",
+            "default": false
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success"
+          },
+          "400": {
+            "description": "Required parameters missing"
+          },
+          "404": {
+            "description": "Community stats not found by community address"
+          },
+          "500": {
+            "description": "Community product server is not responding"
+          }
+        }
+      }
+    },
+    "/communities/{communityAddress}/members": {
+      "get": {
+        "summary": "Proxy calls to to community product server.",
+        "description": "Return a list of members",
+        "tags": [
+          "communities"
+        ],
+        "parameters": [
+          {
+            "name": "communityAddress",
+            "in": "path",
+            "description": "Ethereum address of the community",
+            "required": true,
+            "type": "string",
+            "default": false
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success"
+          },
+          "400": {
+            "description": "Required parameters missing"
+          },
+          "404": {
+            "description": "Community stats not found by community address"
+          },
+          "500": {
+            "description": "Community product server is not responding"
+          }
+        }
+      }
+    },
+    "/communities/{communityAddress}/members/{memberAddress}": {
+      "get": {
+        "summary": "Proxy calls to to community product server.",
+        "description": "Return stats for individiual members",
+        "tags": [
+          "communities"
+        ],
+        "parameters": [
+          {
+            "name": "communityAddress",
+            "in": "path",
+            "description": "Ethereum address of the community",
+            "required": true,
+            "type": "string",
+            "default": false
+          },
+          {
+            "name": "memberAddress",
+            "in": "path",
+            "description": "Ethereum address of the member",
+            "required": true,
+            "type": "string",
+            "default": false
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success"
+          },
+          "400": {
+            "description": "Required parameters missing"
+          },
+          "404": {
+            "description": "Community stats not found by community or member address"
+          },
+          "500": {
+            "description": "Community product server is not responding"
+          }
+        }
+      }
+    },
     "/login/challenge/{address}": {
       "post": {
         "summary": "Generate challenge",
@@ -4138,6 +4619,61 @@
     }
   },
   "definitions": {
+    "CreateCommunityJoinRequest": {
+      "type": "object",
+      "required": [
+        "memberAddress"
+      ],
+      "properties": {
+        "memberAddress": {
+          "type": "string",
+          "description": "Name of the community join request"
+        },
+        "secret": {
+          "type": "string",
+          "description": "Community join request secret shared by the community. Secret enabled automatic acceptance of the community join request."
+        },
+        "metadata": {
+          "type": "object",
+          "additionalProperties": true,
+          "description": "Application specific key-value pairs."
+        }
+      }
+    },
+    "UpdateCommunityJoinRequest": {
+      "type": "object",
+      "required": [
+        "state"
+      ],
+      "properties": {
+        "state": {
+          "type": "string",
+          "description": "Community join request state",
+          "enum": [
+            "pending",
+            "accepted",
+            "rejected"
+          ]
+        }
+      }
+    },
+    "CreateCommunitySecret": {
+      "type": "object",
+      "required": [
+        "name",
+        "secret"
+      ],
+      "properties": {
+        "name": {
+          "type": "string",
+          "description": "Name of the community secret"
+        },
+        "secret": {
+          "type": "string",
+          "description": "Community join request secret shared by the community."
+        }
+      }
+    },
     "UpdateStreamKeyRequest": {
       "type": "object",
       "required": [
@@ -4176,7 +4712,8 @@
       "properties": {
         "id": {
           "type": "string",
-          "description": "Unique identifier for this stream."
+          "description": "Unique identifier for this stream.",
+          "example": "ln2g8OKHSdr7BcL-rcnh2r"
         },
         "name": {
           "type": "string",
@@ -4193,15 +4730,48 @@
         },
         "uiChannel": {
           "type": "boolean",
-          "description": "Indicates whether this stream is an UI channel: a stream used internally to push updates to UI widgets."
+          "description": "Indicates whether this stream is an UI channel: a stream used internally to push updates to UI widgets.",
+          "example": false
         },
         "partitions": {
           "type": "integer",
-          "description": "Number of partitions in this stream. Defaults to 1 (unpartitioned)."
+          "description": "Number of partitions in this stream. Defaults to 1 (unpartitioned).",
+          "example": 1
         },
         "requireSignedData": {
           "type": "boolean",
-          "description": "If true, all messages in this stream must be cryptographically signed. Client's should not accept unsigned messages."
+          "description": "If true, all messages in this stream must be cryptographically signed. Client's should not accept unsigned messages.",
+          "example": false
+        },
+        "inbox": {
+          "type": "boolean",
+          "description": "If true, this stream is a user's inbox.",
+          "example": false
+        },
+        "dateCreated": {
+          "type": "string",
+          "description": "ISO-8601 timestamp of when stream was created.",
+          "example": "2018-02-21T12:26:18Z"
+        },
+        "lastUpdated": {
+          "type": "string",
+          "description": "ISO-8601 timestamp of when stream details were updated.",
+          "example": "2018-02-21T12:26:18Z"
+        },
+        "autoConfigure": {
+          "type": "boolean",
+          "description": "If true, always try to automatically configure field names and types.",
+          "example": true
+        },
+        "storageDays": {
+          "type": "integer",
+          "description": "Historical data storage period (days)",
+          "example": 365
+        },
+        "inactivityThresholdHours": {
+          "type": "integer",
+          "description": "Inactivity period for a stream in hours.",
+          "example": 48
         }
       }
     },

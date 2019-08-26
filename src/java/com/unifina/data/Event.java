@@ -42,6 +42,7 @@ public class Event<ContentClass> implements Comparable<Event<ContentClass>> {
 	}
 
 	public void dispatch() {
+		// In special cases (such as when ticking the clock) the consumer may be null, so check
 		if (consumer != null) {
 			consumer.accept(this.getContent());
 		}

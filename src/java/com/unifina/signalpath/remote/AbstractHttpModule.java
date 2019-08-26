@@ -284,7 +284,7 @@ public abstract class AbstractHttpModule extends ModuleWithSideEffects implement
 				response.responseTime = System.currentTimeMillis() - startTime;
 				response.timestamp = getGlobals().isRealtime() ? new Date() : getGlobals().time;
 				if (async) {
-					getGlobals().getDataSource().accept(new Event<>(response, response.timestamp, 0L, (r) -> {
+					getGlobals().getDataSource().enqueue(new Event<>(response, response.timestamp, 0L, (r) -> {
 						sendOutput(r);
 						getPropagator().propagate();
 					}));

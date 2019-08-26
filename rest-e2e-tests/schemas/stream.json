@@ -15,7 +15,8 @@
     "requireSignedData",
     "inbox",
     "autoConfigure",
-    "storageDays"
+    "storageDays",
+    "inactivityThresholdHours"
   ],
   "properties": {
     "id": {
@@ -72,6 +73,11 @@
     },
     "storageDays": {
       "description": "How many days is data stored for",
+      "type": "integer",
+      "minimum": 0
+    },
+    "inactivityThresholdHours": {
+      "description": "inactivity period for a stream in hours",
       "type": "integer",
       "minimum": 0
     }

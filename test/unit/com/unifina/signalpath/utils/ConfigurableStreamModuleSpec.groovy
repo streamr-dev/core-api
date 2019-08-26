@@ -14,6 +14,7 @@ class ConfigurableStreamModuleSpec extends ModuleTestingSpecification {
 	def setup() {
 		Stream stream = new Stream()
 		stream.config = [fields: [[name: "out", type: "string"]]]
+		stream.partitions = 3
 
 		streamService = mockBean(StreamService, Mock(StreamService))
 		streamService.getStream(_ as String) >> stream
@@ -24,7 +25,7 @@ class ConfigurableStreamModuleSpec extends ModuleTestingSpecification {
 		module.globals = globals = mockGlobals()
 	}
 
-	void "configurableStreamModule creates outputs for selected stream on configuration"() {
+	void "it creates outputs for selected stream on configuration"() {
 		when:
 		module.configure([
 			params: [
@@ -34,5 +35,30 @@ class ConfigurableStreamModuleSpec extends ModuleTestingSpecification {
 
 		then:
 		module.getOutput("out") != null
+	}
+
+	void "it selects all partitions by default"() {
+		when:
+		module.configure([
+			params: [
+				[name: "stream", value: "stream-0"]
+			],
+		])
+
+		then:
+		module.getConfiguration().partitions == [0, 1, 2]
+	}
+
+	void "it reads partitions from config"() {
+		when:
+		module.configure([
+			params: [
+				[name: "stream", value: "stream-0"]
+			],
+			partitions: [0, 2]
+		])
+
+		then:
+		module.getConfiguration().partitions == [0, 2]
 	}
 }

@@ -11,12 +11,6 @@ import javax.ws.rs.core.HttpHeaders
 
 @Secured(["IS_AUTHENTICATED_ANONYMOUSLY"])
 class ClusterApiController {
-	static allowedMethods = [
-		canvases: "GET",
-		shutdown: "POST",
-		repair  : "POST",
-	]
-
 	ClusterService clusterService
 
 	@GrailsCompileStatic

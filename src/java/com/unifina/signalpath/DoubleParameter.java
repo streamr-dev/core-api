@@ -9,7 +9,14 @@ public class DoubleParameter extends Parameter<Double> {
 	
 	@Override
 	public Double parseValue(String s) {
-		return Double.parseDouble(s);
+		Double result;
+		try {
+			result = Double.parseDouble(s);
+		} catch (NumberFormatException e) {
+			String msg = String.format("Module %s's parameter '%s' cannot parse value '%s'", getOwner().getDisplayName(), getName(), s);
+			throw new RuntimeException(msg, e);
+		}
+		return result;
 	}
 	
 }

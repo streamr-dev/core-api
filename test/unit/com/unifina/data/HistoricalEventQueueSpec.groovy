@@ -29,7 +29,7 @@ class HistoricalEventQueueSpec extends Specification {
 
 		if (addEndEvent) {
 			// Abort queue after this last event has been processed
-			queue.enqueue(new Event(null, endDate, new Consumer() {
+			queue.enqueue(new Event("aborts the queue", endDate, new Consumer() {
 				@Override
 				void accept(Object o) {
 					queue.abort()
@@ -105,19 +105,22 @@ class HistoricalEventQueueSpec extends Specification {
 	void "on event, adding more events to a full queue won't deadlock the system"() {
 		HistoricalEventQueue queue = createQueue(
 			new Date(0),
-			new Date(200 * 1000)
+			new Date(200 * 1000),
+			0,
+			100,
+			false
 		)
 
 		int extraEventsProcessed = 0
 
 		// Add an event that adds more events
-		queue.enqueue(new Event<Integer>(0, new Date(0), new Consumer<Integer>() {
+		queue.enqueue(new Event<String>("adds more events", new Date(0), new Consumer<String>() {
 			@Override
-			void accept(Integer integer) {
+			void accept(String s) {
 				for (int i=0; i<100; i++) {
-					queue.enqueue(new Event<Integer>(i, new Date(0), new Consumer<Integer>() {
+					queue.enqueue(new Event<String>("async-" + i, new Date(0), new Consumer<String>() {
 						@Override
-						void accept(Integer ii) {
+						void accept(String ss) {
 							extraEventsProcessed++
 						}
 					}))
@@ -131,11 +134,21 @@ class HistoricalEventQueueSpec extends Specification {
 		int eventsAdded = fillUpQueueWithCountingEvents(queue, eventsProcessed, new Date(100 * 1000), 1)
 
 		when:
-		queue.start() // If there's a problem, this may get deadlocked
+		Thread runnerThread = Thread.start {
+			queue.start() // If there's a problem, this may get deadlocked
+		}
 
 		then:
 		new PollingConditions().within(20) {
 			eventsProcessed.get() == eventsAdded && extraEventsProcessed == 100
+		}
+
+		when:
+		queue.abort()
+
+		then:
+		new PollingConditions().within(5) {
+			!runnerThread.isAlive()
 		}
 	}
 
@@ -192,6 +205,28 @@ class HistoricalEventQueueSpec extends Specification {
 			queue.abort()
 		}
 		queue.start()
+		long endTime = System.currentTimeMillis()
+
+		then:
+		endTime - startTime > 2000
+		endTime - startTime < 5000
+	}
+
+	void "should stop soon after abort, even while ticking time towards a distant future event"() {
+		HistoricalEventQueue queue = createQueue(
+			new Date(0L),
+			new Date(10 * 1000L), // 10 sec
+			1
+		)
+
+		when:
+		long startTime = System.currentTimeMillis()
+		// Abort in 2 sec
+		Thread.start {
+			Thread.sleep(2000)
+			queue.abort()
+		}
+		queue.start() // this will run for 10 sec if the abort doesn't work properly
 		long endTime = System.currentTimeMillis()
 
 		then:

@@ -14,6 +14,8 @@ class Product {
 	String imageUrl
 	String thumbnailUrl
 
+	// Type of the product is either normal or community product.
+	Type type = Type.NORMAL
 	Category category
 	State state = State.NOT_DEPLOYED
 	Stream previewStream
@@ -38,6 +40,11 @@ class Product {
 		streams: Stream
 	]
 
+	enum Type {
+		NORMAL,
+		COMMUNITY
+	}
+
 	enum State {
 		NOT_DEPLOYED,
 		DEPLOYING,
@@ -56,7 +63,7 @@ class Product {
 		imageUrl(nullable: true)
 		thumbnailUrl(nullable: true)
 		category(nullable: true)
-		streams(maxSize: 1000)
+		type(nullable: false)
 		previewStream(nullable: true, validator: { Stream s, p -> s == null || s in p.streams })
 		previewConfigJson(nullable: true)
 		ownerAddress(nullable: true, validator: isEthereumAddressOrIsNull)
@@ -75,6 +82,7 @@ class Product {
 	static mapping = {
 		id generator: HexIdGenerator.name // Note: doesn't apply in unit tests
 		description type: 'text'
+		type enumType: "identity", defaultValue: Type.NORMAL, index: 'type_idx'
 		previewConfigJson type: 'text'
 		imageUrl length: 2048
 		score index: "score_idx"

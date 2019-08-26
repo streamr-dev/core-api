@@ -32,7 +32,6 @@ public abstract class StreamMessageSource implements Closeable {
 	/**
 	 * Creates an instance of this StreamMessageSource. The constructor should not block.
 	 * Messages can be reported to the consumer as soon as they are available.
-	 * @param globals
 	 * @param consumer
 	 * @param streamPartitions The set of StreamPartitions to subscribe to.
 	 */

@@ -86,13 +86,10 @@ public class Globals {
 				// Use UTC timezone for beginDate and endDate
 				startDate = MapTraversal.getDate(signalPathContext, "beginDate", dateFormatUTC);
 
-				if (isRealtime()) {
-					time = new Date();
-				} else if (startDate!=null) {
-					time = startDate;
+				if (startDate == null) {
+					throw new IllegalArgumentException("beginDate not specified!");
 				} else {
-					// As a fallback, set time to midnight today
-					time = DateRange.getMidnight(new Date());
+					time = startDate;
 				}
 
 				// Interpret endDate as one millisecond to the next midnight
@@ -102,8 +99,6 @@ public class Globals {
 					endDate = new Date(DateRange.getMidnight(endDate).getTime() + 24 * 60 * 60 * 1000 - 1);
 				}
 			}
-
-
 		}
 
 		if (dataSource == null && !mode.equals(Mode.NOT_PLANNING_TO_RUN)) {

@@ -28,7 +28,7 @@ public class ListToEvents extends AbstractSignalPathModule {
 		// enqueue the items, send out and propagate in event handler
 		for (int i=0; i<inList.size(); i++) {
 			QueuedItem queuedItem = new QueuedItem(inList.get(i), getGlobals().time);
-			getGlobals().getDataSource().accept(new Event<>(queuedItem, queuedItem.timestamp, i, it -> {
+			getGlobals().getDataSource().enqueue(new Event<>(queuedItem, queuedItem.timestamp, i, it -> {
 				out.send(it.item);
 				getPropagator().propagate();
 			}));

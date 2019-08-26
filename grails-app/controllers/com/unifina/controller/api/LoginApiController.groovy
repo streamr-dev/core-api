@@ -17,8 +17,6 @@ import grails.plugin.springsecurity.annotation.Secured
 
 @Secured(["IS_AUTHENTICATED_ANONYMOUSLY"])
 class LoginApiController {
-
-	static allowedMethods = [challenge: "POST", response: "POST", password: "POST", apikey: "POST"]
 	ChallengeService challengeService
 	SessionService sessionService
 	EthereumIntegrationKeyService ethereumIntegrationKeyService

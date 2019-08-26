@@ -1,35 +1,34 @@
 package com.unifina.feed;
 
+import com.streamr.client.protocol.message_layer.ITimestamped;
+import com.unifina.datasource.DataSource;
+import com.unifina.datasource.IStartListener;
+import com.unifina.signalpath.AbstractSignalPathModule;
+import com.unifina.signalpath.Propagator;
+
 import java.lang.reflect.ParameterizedType;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.function.Consumer;
 
-import com.unifina.datasource.IStartListener;
-import com.unifina.signalpath.AbstractSignalPathModule;
-import com.unifina.signalpath.Propagator;
-import com.unifina.utils.Globals;
-import com.streamr.client.protocol.message_layer.ITimestamped;
-
 /**
- * An AbstractEventRecipient receives FeedEvents and updates the outputs
- * of registered AbstractSignalPathModules accordingly. It then handles the
- * propagation of events from those outputs through the SignalPaths in which
- * those modules reside.
- * @author Henri
+ * An AbstractPropagationRoot consumes events and updates the outputs of registered
+ * AbstractSignalPathModules accordingly. It then uses a Propagator to
+ * propagate those values further into graph of connected modules.
  *
- * @param <ModuleClass> The type of objects than can be registered
+ * @param <ModuleClass> The type of AbstractSignalPathModule supported
+ * @param <MessageClass> The type if consumed events supported
  */
-public abstract class AbstractEventRecipient<ModuleClass, MessageClass extends ITimestamped> implements Consumer<MessageClass>, IStartListener {
+public abstract class AbstractPropagationRoot<ModuleClass, MessageClass extends ITimestamped> implements Consumer<MessageClass>, IStartListener {
 
 	private final List<ModuleClass> modules = new ArrayList<>();
 	private final Propagator propagator = new Propagator();
 	private final Class<?> moduleClass;
 
-	public AbstractEventRecipient(Globals globals) {
-		if (globals != null && globals.getDataSource() != null) {
-			globals.getDataSource().addStartListener(this);
+	AbstractPropagationRoot(DataSource dataSource) {
+		if (dataSource != null) {
+			dataSource.addStartListener(this);
 		}
 
 		// Traverse class hierarchy up until we find a class that reveals the ModuleClass generic
@@ -73,7 +72,6 @@ public abstract class AbstractEventRecipient<ModuleClass, MessageClass extends I
 	 * This method should process the event, then if necessary, loop through each
 	 * registered module and send appropriate values from the outputs of connected
 	 * modules. Propagation will take place immediately after calling this method.
-	 * @param event
 	 */
 	protected abstract void sendOutputFromModules(MessageClass event);
 

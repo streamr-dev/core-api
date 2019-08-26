@@ -96,7 +96,7 @@ class SendEthereumTransactionSpec extends ModuleTestingSpecification {
 
 	/** Mocked event queue. Works manually in tests, please call module.receive(queuedEvent) */
 	def mockDatasource= Stub(DataSource) {
-		accept(_ as Event<SendEthereumTransaction.FunctionCallResult>) >> { Event<SendEthereumTransaction.FunctionCallResult> event ->
+		enqueue(_ as Event<SendEthereumTransaction.FunctionCallResult>) >> { Event<SendEthereumTransaction.FunctionCallResult> event ->
 			functionCallResult = event.content
 			// Immediately dispatch the event
 			event.dispatch()

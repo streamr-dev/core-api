@@ -22,7 +22,7 @@ class MqttSpec extends Specification {
 		/** Mocked event queue. Immediately dispatches events */
 		mockGlobals = Stub(Globals) {
 			getDataSource() >> Stub(DataSource) {
-				accept(_ as Event) >> { Event e ->
+				enqueue(_ as Event) >> { Event e ->
 					e.dispatch()
 				}
 			}

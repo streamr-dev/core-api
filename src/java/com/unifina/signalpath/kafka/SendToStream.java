@@ -4,7 +4,6 @@ import com.streamr.client.StreamrClient;
 import com.unifina.domain.data.Stream;
 import com.unifina.domain.security.SecUser;
 import com.unifina.service.PermissionService;
-import com.unifina.service.StreamrClientService;
 import com.unifina.signalpath.*;
 import grails.converters.JSON;
 import grails.util.Holders;
@@ -118,9 +117,8 @@ public class SendToStream extends ModuleWithSideEffects {
 				" is not properly configured!");
 		}
 
-		JSONObject streamConfig = (JSONObject) JSON.parse(stream.getConfig());
-
-		JSONArray fields = streamConfig.getJSONArray("fields");
+		final JSONObject streamConfig = (JSONObject) JSON.parse(stream.getConfig());
+		final JSONArray fields = streamConfig.getJSONArray("fields");
 
 		for (Object o : fields) {
 			Input input = null;

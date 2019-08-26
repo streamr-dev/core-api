@@ -301,11 +301,18 @@ class StreamService {
 	}
 
 	@CompileStatic
-	StreamStatus status(Stream s, Date threshold) {
+	StreamStatus status(Stream s, Date now) {
 		StreamMessage msg = cassandraService.getLatestFromAllPartitions(s)
+		if (s.inactivityThresholdHours == 0) {
+			if (msg == null) {
+				return new StreamStatus(true, null)
+			} else {
+				return new StreamStatus(true, msg.getTimestampAsDate())
+			}
+		}
 		if (msg == null) {
 			return new StreamStatus(false, null)
-		} else if (msg != null && msg.getTimestampAsDate().before(threshold)) {
+		} else if (msg != null && s.isStale(now, msg.getTimestampAsDate())) {
 			return new StreamStatus(false, msg.getTimestampAsDate())
 		}
 		return new StreamStatus(true, msg.getTimestampAsDate())
