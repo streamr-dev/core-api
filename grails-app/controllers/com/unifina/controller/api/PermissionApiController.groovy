@@ -13,7 +13,6 @@ import com.unifina.service.PermissionService
 import com.unifina.service.SignupCodeService
 import com.unifina.utils.EthereumAddressValidator
 import grails.converters.JSON
-import grails.plugin.mail.MailService
 import grails.plugin.springsecurity.annotation.Secured
 
 @Secured(["IS_AUTHENTICATED_ANONYMOUSLY"])
@@ -22,7 +21,7 @@ class PermissionApiController {
 	PermissionService permissionService
 	SignupCodeService signupCodeService
 	EthereumIntegrationKeyService ethereumIntegrationKeyService
-	MailService mailService
+	def mailService
 
 	/**
 	 * Execute a Controller action using a domain class with access control ("resource")
