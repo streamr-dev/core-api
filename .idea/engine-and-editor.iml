@@ -194,9 +194,6 @@
           <root url="jar://$MAVEN_REPOSITORY$/org/apache/httpcomponents/httpcore/4.4.4/httpcore-4.4.4.jar!/" />
           <root url="jar://$MAVEN_REPOSITORY$/org/apache/httpcomponents/httpclient/4.5.2/httpclient-4.5.2.jar!/" />
           <root url="jar://$MAVEN_REPOSITORY$/com/mashape/unirest/unirest-java/1.4.9/unirest-java-1.4.9.jar!/" />
-          <root url="jar://$MAVEN_REPOSITORY$/net/jpountz/lz4/lz4/1.2.0/lz4-1.2.0.jar!/" />
-          <root url="jar://$MAVEN_REPOSITORY$/org/xerial/snappy/snappy-java/1.1.1.7/snappy-java-1.1.1.7.jar!/" />
-          <root url="jar://$MAVEN_REPOSITORY$/org/apache/kafka/kafka-clients/0.9.0.1/kafka-clients-0.9.0.1.jar!/" />
           <root url="jar://$MAVEN_REPOSITORY$/com/udojava/EvalEx/1.6/EvalEx-1.6.jar!/" />
           <root url="jar://$MAVEN_REPOSITORY$/log4j/log4j/1.2.16/log4j-1.2.16.jar!/" />
           <root url="jar://$USER_HOME$/.sdkman/candidates/grails/2.5.6/dist/grails-plugin-converters-2.5.6.jar!/" />
@@ -441,6 +438,7 @@
           <root url="jar://$MAVEN_REPOSITORY$/com/datastax/cassandra/cassandra-driver-core/3.7.1/cassandra-driver-core-3.7.1.jar!/" />
           <root url="jar://$MAVEN_REPOSITORY$/com/github/jnr/jffi/1.2.16/jffi-1.2.16-native.jar!/" />
           <root url="jar://$MAVEN_REPOSITORY$/com/streamr/client/1.1.0/client-1.1.0.jar!/" />
+          <root url="jar://$MAVEN_REPOSITORY$/org/xerial/snappy/snappy-java/1.1.4/snappy-java-1.1.4.jar!/" />
         </CLASSES>
         <JAVADOC />
         <SOURCES>

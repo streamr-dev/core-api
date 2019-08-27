@@ -33,7 +33,6 @@ trait StreamMixin {
 	}
 
 	static void cleanupStreamService(StreamService streamService) {
-		streamService.kafkaService.destroy()
 		streamService.cassandraService.destroy()
 	}
 

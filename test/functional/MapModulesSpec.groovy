@@ -37,7 +37,7 @@ class MapModulesSpec extends LoginTester1Spec implements CanvasMixin, Confirmati
 		setCanvasName(getClass().simpleName + new Date().getTime())
 		startCanvas(true)
 
-		and: "data produced to Kafka topic"
+		and: "data produced to a stream"
 		produceAllDataToStream()
 
 		then: "TableAsMap for map shows correct key-count pairs"
@@ -58,7 +58,7 @@ class MapModulesSpec extends LoginTester1Spec implements CanvasMixin, Confirmati
 		setCanvasName(getClass().simpleName + new Date().getTime())
 		startCanvas(true)
 
-		and: "data produced to Kafka topic"
+		and: "data produced to a stream"
 		produceAllDataToStream()
 
 		then: "TableAsMap for map shows correct key-count pairs"
@@ -124,7 +124,7 @@ class MapModulesSpec extends LoginTester1Spec implements CanvasMixin, Confirmati
 		setCanvasName(getClass().simpleName + new Date().getTime())
 		startCanvas(true)
 
-		and: "data produced to Kafka topic"
+		and: "data produced to a stream"
 		produceAllDataToStream()
 
 		then:

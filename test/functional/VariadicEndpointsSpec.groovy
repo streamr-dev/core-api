@@ -57,7 +57,7 @@ class VariadicEndpointsSpec extends LoginTester1Spec implements CanvasMixin, Con
 		startCanvas(true)
 
 
-		and: "data produced to Kafka"
+		and: "data produced to a stream"
 		produceAllDataToStream()
 
 		then:
@@ -123,7 +123,7 @@ class VariadicEndpointsSpec extends LoginTester1Spec implements CanvasMixin, Con
 		startCanvas(true)
 
 
-		and: "data produced to Kafka"
+		and: "data produced to a stream"
 		produceAllDataToStream()
 
  		then:
@@ -215,7 +215,7 @@ class VariadicEndpointsSpec extends LoginTester1Spec implements CanvasMixin, Con
 		startCanvas(true)
 
 
-		and: "data produced to Kafka"
+		and: "data produced to a stream"
 		produceAllDataToStream()
 
 		then:

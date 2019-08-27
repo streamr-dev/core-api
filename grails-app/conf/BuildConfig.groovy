@@ -73,7 +73,6 @@ grails.project.dependency.resolution = {
 
 		compile('log4j:log4j:1.2.16')
 		compile('com.udojava:EvalEx:1.6')
-		compile('org.apache.kafka:kafka-clients:0.9.0.1')
 		compile('com.mashape.unirest:unirest-java:1.4.9')
 		compile('org.eclipse.paho:org.eclipse.paho.client.mqttv3:1.1.1')
 		compile('org.antlr:ST4:4.0.8')

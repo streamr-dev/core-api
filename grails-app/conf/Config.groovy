@@ -1,4 +1,3 @@
-import com.unifina.data.KafkaPartitioner
 import com.unifina.service.NodeService
 import com.unifina.utils.PropertiesUtil
 
@@ -172,12 +171,7 @@ log4j.main = {
 		'org.grails.datastore.mapping.core.DatastoreUtils'
 
 	warn 'org.mortbay.log',
-		'org.apache.zookeeper',
-		'org.codehaus.groovy.grails.domain.GrailsDomainClassCleaner',
-		'kafka.consumer.ConsumerConfig',
-		'org.apache.kafka.clients.consumer.ConsumerConfig',
-		'kafka.producer.ProducerConfig',
-		'org.apache.kafka.clients.producer.ProducerConfig'
+		'org.codehaus.groovy.grails.domain.GrailsDomainClassCleaner'
 
 	debug 'com.datastax.driver.core'
 }
@@ -271,27 +265,6 @@ streamr.ethereum.networks = PropertiesUtil.matchingPropertiesToMap("streamr.ethe
 streamr.ethereum.wss = PropertiesUtil.matchingPropertiesToMap("streamr.ethereum.wss.", System.getProperties()) ?: [local: "ws://localhost:8545"]
 // Ethereum identity of this instance. Don't use this silly development private key for anything.
 streamr.ethereum.nodePrivateKey = System.getProperty("streamr.ethereum.nodePrivateKey", "0123456789ABCDEF0123456789ABCDEF0123456789ABCDEF0123456789ABCDEF")
-
-/**
- * Kafka config
- */
-streamr.kafka.bootstrap.servers = System.getProperty("streamr.kafka.bootstrap.servers") ?: "127.0.0.1:9092"
-streamr.kafka.producer.type = "async"
-streamr.kafka.queue.buffering.max.ms = "100"
-streamr.kafka.retry.backoff.ms = "500"
-streamr.kafka.value.serializer = org.apache.kafka.common.serialization.ByteArraySerializer.getName()
-streamr.kafka.key.serializer = org.apache.kafka.common.serialization.StringSerializer.getName()
-streamr.kafka.partitioner.class = KafkaPartitioner.class.getName()
-streamr.kafka.request.required.acks = "0"
-streamr.kafka.dataTopic = "data-dev"
-
-environments {
-	production {
-		streamr.kafka.dataTopic = "data-prod"
-		streamr.kafka.bootstrap.servers = System.getProperty("streamr.kafka.bootstrap.servers") ?: "kafka1:9092"
-		streamr.kafka.zookeeper.connect = System.getProperty("streamr.kafka.zookeeper.connect") ?: "zk1:2181"
-	}
-}
 
 /**
  * Redis config

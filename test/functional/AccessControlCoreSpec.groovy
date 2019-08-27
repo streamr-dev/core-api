@@ -36,7 +36,6 @@ class AccessControlCoreSpec extends LoginTester2Spec implements ConfirmationMixi
 			!navbar.navAdminLink
 
 		expect:
-		checkDenied "kafka/collect"
 		checkDenied "taskWorker/status"
 		checkDenied "securityManager"
 
@@ -51,11 +50,6 @@ class AccessControlCoreSpec extends LoginTester2Spec implements ConfirmationMixi
 
 		when: "navigating to protected resource"
 			go "savedSignalPath/load/1"
-		then: "must go to login page"
-			at LoginPage
-
-		when: "navigating to admin-only resource"
-			go "kafka/collect"
 		then: "must go to login page"
 			at LoginPage
 	}
