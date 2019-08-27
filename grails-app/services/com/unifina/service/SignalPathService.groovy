@@ -1,6 +1,7 @@
 package com.unifina.service
 
 import com.google.gson.Gson
+import com.unifina.api.BadRequestException
 import com.unifina.api.CanvasCommunicationException
 import com.unifina.datasource.IStartListener
 import com.unifina.datasource.IStopListener
@@ -10,6 +11,7 @@ import com.unifina.domain.security.SecUser
 import com.unifina.domain.signalpath.Canvas
 import com.unifina.domain.signalpath.Serialization
 import com.unifina.exceptions.CanvasUnreachableException
+import com.unifina.exceptions.InvalidStreamConfigException
 import com.unifina.exceptions.UnauthorizedStreamException
 import com.unifina.serialization.SerializationException
 import com.unifina.signalpath.*
@@ -111,8 +113,12 @@ class SignalPathService {
 		// can be problematic when collaborating on shared canvas; though even then it makes sense to force
 		//   explicit read rights sharing to streams on that canvas
 		for (Stream s in sp.getStreams()) {
+			boolean streamModuleHasNoStreamAssociated = s == null
+			if (streamModuleHasNoStreamAssociated) {
+				throw new InvalidStreamConfigException("Stream Module doesn't have a Stream associated to it.")
+			}
 			if (!permissionService.canRead(asUser, s)) {
-				throw new UnauthorizedStreamException(canvas, s, asUser);
+				throw new UnauthorizedStreamException(canvas, s, asUser)
 			}
 		}
 

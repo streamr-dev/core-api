@@ -9,6 +9,7 @@ import com.unifina.domain.security.Permission
 import com.unifina.domain.security.SecUser
 import com.unifina.domain.signalpath.Canvas
 import com.unifina.exceptions.CanvasUnreachableException
+import com.unifina.exceptions.InvalidStreamConfigException
 import com.unifina.serialization.SerializationException
 import com.unifina.signalpath.ModuleException
 import com.unifina.signalpath.ModuleWithUI
@@ -145,6 +146,8 @@ class CanvasService {
 			log.error("De-serialization failure caused by (BELOW)", ex.cause)
 			String msg = "Could not load (deserialize) previous state of canvas $canvas.id."
 			throw new ApiException(500, "LOADING_PREVIOUS_STATE_FAILED", msg)
+		} catch (InvalidStreamConfigException e) {
+			throw new BadRequestException(e.getMessage())
 		}
 	}
 
