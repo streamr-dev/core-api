@@ -22,7 +22,7 @@ class PermissionApiController {
 	PermissionService permissionService
 	SignupCodeService signupCodeService
 	EthereumIntegrationKeyService ethereumIntegrationKeyService
-	def mailService
+	MailService mailService
 
 	/**
 	 * Execute a Controller action using a domain class with access control ("resource")
@@ -150,6 +150,32 @@ class PermissionApiController {
 	def delete(String id) {
 		usePermission(params.resourceClass, params.resourceId, id as Long) { p, res ->
 			// share-permission has been tested in usePermission (calls useResource)
+			permissionService.systemRevoke(p)
+			render status: 204
+		}
+	}
+
+	private usePermission0(Class resourceClass, resourceId, Long permissionId, Closure action) {
+		if (!resourceClass) { throw new IllegalArgumentException("Missing resource class") }
+		if (!grailsApplication.isDomainClass(resourceClass)) { throw new IllegalArgumentException("${resourceClass.simpleName} is not a domain class!") }
+		def res = resourceClass.get(resourceId)
+		if (!res) {
+			throw new NotFoundException(resourceClass.simpleName, resourceId.toString())
+		}
+
+		useResource(resourceClass, resourceId, false) { resource ->
+			def p = permissionService.getPermissionsTo(resource).find { it.id == permissionId }
+			if (!p) {
+				throw new NotFoundException("permissions", permissionId.toString())
+			} else {
+				action(p, resource)
+			}
+		}
+	}
+
+	@StreamrApi(authenticationLevel = AuthLevel.NONE)
+	def remove(String id) {
+		usePermission0(params.resourceClass, params.resourceId, id as Long) { p, res ->
 			permissionService.systemRevoke(p)
 			render status: 204
 		}

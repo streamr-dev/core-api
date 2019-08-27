@@ -38,12 +38,14 @@ class UrlMappings {
 		"/api/v1/canvases/$id/stop"(controller: "canvasApi", action: "stop")
 		"/api/v1/canvases/$resourceId/permissions"(resources: "permissionApi", excludes: ["create", "edit", "update"]) { resourceClass = Canvas }
 		"/api/v1/canvases/$resourceId/permissions/me"(controller: "permissionApi", action: "getOwnPermissions") { resourceClass = Canvas }
+		"/api/v1/canvases/$resourceId/permissions/remove/$id"(controller: "permissionApi", action: "remove") { resourceClass = Canvas }
 		"/api/v1/canvases/$canvasId/modules/$moduleId"(controller: "canvasApi", action: "module") // for internal use
 		"/api/v1/canvases/downloadCsv"(method: "GET", controller: "canvasApi", action: "downloadCsv")
 
 		"/api/v1/streams"(resources: "streamApi", excludes: ["create", "edit"])
 		"/api/v1/streams/$resourceId/permissions"(resources: "permissionApi", excludes: ["create", "edit", "update"]) { resourceClass = Stream }
 		"/api/v1/streams/$resourceId/permissions/me"(controller: "permissionApi", action: "getOwnPermissions") { resourceClass = Stream }
+		"/api/v1/streams/$resourceId/permissions/remove/$id"(controller: "permissionApi", action: "remove") { resourceClass = Stream }
 		"/api/v1/streams/$id/fields"(method: "POST", controller: "streamApi", action: "setFields")
 		"/api/v1/streams/$id/detectFields"(method: "POST", controller: "streamApi", action: "detectFields")
 		"/api/v1/streams/$id/detectFields"(method: "GET", controller: "streamApi", action: "detectFields")
@@ -66,6 +68,7 @@ class UrlMappings {
 		"/api/v1/dashboards/$dashboardId/items"(resources: "dashboardItemApi", excludes: ["create", "edit"])
 		"/api/v1/dashboards/$resourceId/permissions"(resources: "permissionApi", excludes: ["create", "edit", "update"]) { resourceClass = Dashboard }
 		"/api/v1/dashboards/$resourceId/permissions/me"(controller: "permissionApi", action: "getOwnPermissions") { resourceClass = Dashboard }
+		"/api/v1/dashboards/$resourceId/permissions/remove/$id"(controller: "permissionApi", action: "remove") { resourceClass = Dashboard }
 
 		"/api/v1/metrics"(resources: "metricsApi")
 
