@@ -52,7 +52,7 @@ class ProductApiController {
 					try {
 						mailService.sendMail {
 							from grailsApplication.config.unifina.email.sender
-							to "kare.nuorteva@streamr.com" // TODO: to owner.username
+							to owner.username
 							subject "Problem with your products on Streamr Marketplace"
 							html g.render(template: "/emails/email_stale_product_notification", model: [user: owner, staleProducts: ownersProducts])
 						}
