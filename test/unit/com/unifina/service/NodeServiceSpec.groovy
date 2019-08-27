@@ -18,7 +18,7 @@ class NodeServiceSpec extends Specification {
 		grailsApplication.config.streamr.engine.node.ip = "1.2.3.4"
 
 		expect:
-		nodeService.getIPAddress([streamr: [node: [ip: "1.2.3.4"]]]) == "1.2.3.4"
+		nodeService.getIPAddress([streamr: [engine: [node: [ip: "1.2.3.4"]]]]) == "1.2.3.4"
 	}
 
 	void "getIpAddress() returns the first IPv4 address it finds"() {

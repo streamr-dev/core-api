@@ -2,6 +2,8 @@ package com.unifina.service
 
 import com.streamr.client.StreamrClient
 import com.streamr.client.authentication.ApiKeyAuthenticationMethod
+import com.streamr.client.authentication.AuthenticationMethod
+import com.streamr.client.authentication.EthereumAuthenticationMethod
 import com.streamr.client.options.StreamrClientOptions
 import com.unifina.domain.security.Key
 import com.unifina.utils.MapTraversal
@@ -10,26 +12,49 @@ import grails.util.Holders
 class StreamrClientService {
 
 	UserService userService
+	StreamrClient instanceForThisEngineNode
 
+	/**
+	 * Returns a StreamrClient instance, authenticated with one of the provided user's
+	 * API keys. This method fetches from the centralized database an API key to be
+	 * used with the StreamrClient.
+	 *
+	 * Whoever calls this should take care of closing the client when it is no longer needed.
+	 */
 	StreamrClient getAuthenticatedInstance(Long userIdToAuthenticate) {
+		// Uses superpowers to get an API key for the user to authenticate the data
+		return createInstance(new ApiKeyAuthenticationMethod(getApiKeyForUser(userIdToAuthenticate)))
+	}
 
-		StreamrClientOptions options = new StreamrClientOptions(
-			// Uses superpowers to get an API key for the user to authenticate the data
-			new ApiKeyAuthenticationMethod(getApiKeyForUser(userIdToAuthenticate))
-		)
+	/**
+	 * Returns a shared StreamrClient instance authenticated with the private key
+	 * of this Engine node. Other services needing to publish messages as this node
+	 * may use this instance to do so.
+	 *
+	 * This is a long running instance which should not be closed as long as this
+	 * application is running. Whoever calls this method should not close the instance.
+	 */
+	StreamrClient getInstanceForThisEngineNode() {
+		if (!instanceForThisEngineNode) {
+			String nodePrivateKey = MapTraversal.getString(Holders.getConfig(), "streamr.ethereum.nodePrivateKey")
+			instanceForThisEngineNode = createInstance(new EthereumAuthenticationMethod(nodePrivateKey))
+		}
+		return instanceForThisEngineNode
+	}
+
+	private static StreamrClient createInstance(AuthenticationMethod authenticationMethod) {
+		StreamrClientOptions options = new StreamrClientOptions(authenticationMethod)
 
 		options.setRestApiUrl(MapTraversal.getString(Holders.getConfig(), "streamr.api.http.url"))
 
+		// TODO: Remove this bit when Melchior adds this to the Java client
 		String wsUrl = MapTraversal.getString(Holders.getConfig(), "streamr.api.websocket.url")
-
-		// TODO: Remove when Melchior adds this to the Java client
 		if (!wsUrl.contains("controlLayerVersion") && !wsUrl.contains("messageLayerVersion")) {
 			if (!wsUrl.contains("?")) {
 				wsUrl += "?"
 			}
 			wsUrl += "&controlLayerVersion=1&messageLayerVersion=31"
 		}
-
 		options.setWebsocketApiUrl(wsUrl)
 		// options.setWebsocketApiUrl(MapTraversal.getString(Holders.getConfig(), "streamr.api.websocket.url"));
 

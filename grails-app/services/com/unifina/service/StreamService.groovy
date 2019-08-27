@@ -106,8 +106,6 @@ class StreamService {
 		}
 	}
 
-	// Ref to Kafka will be abstracted out when refactoring stream access to happen via data-api
-
 	void saveMessage(StreamMessage msg) {
 		cassandraService.save(msg)
 	}

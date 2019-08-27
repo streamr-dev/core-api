@@ -36,6 +36,12 @@ class UiChannelMockingSpecification extends ModuleTestingSpecification {
 		}
 
 		StreamrClient streamrClient = Mock(StreamrClient)
+		streamrClient.getStream(_) >> {String streamId ->
+			com.streamr.client.rest.Stream stream = new com.streamr.client.rest.Stream("mock stream name", "mock description")
+			stream.setId(streamId)
+			stream.setPartitions(1)
+			return stream
+		}
 		streamrClient.publish(_, _, _) >> {com.streamr.client.rest.Stream stream, Map<String, Object> message, Date timestamp ->
 			if (!sentMessagesByStreamId.containsKey(stream.getId())) {
 				sentMessagesByStreamId.put(stream.getId(), new ArrayList<Map>())
@@ -45,7 +51,6 @@ class UiChannelMockingSpecification extends ModuleTestingSpecification {
 
 		StreamrClientService streamrClientService = mockBean(StreamrClientService, Mock(StreamrClientService))
 		streamrClientService.getAuthenticatedInstance(_) >> streamrClient
-
 
 		PermissionService permissionService = Mock(PermissionService)
 		mockBean(PermissionService, permissionService)
