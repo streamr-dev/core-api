@@ -4,9 +4,7 @@ import com.streamr.client.StreamrClient;
 import com.streamr.client.protocol.message_layer.StreamMessage;
 import com.streamr.client.rest.Stream;
 import com.streamr.client.utils.StreamPartition;
-import com.unifina.service.StreamrClientService;
 import com.unifina.utils.Globals;
-import grails.util.Holders;
 import org.apache.log4j.Logger;
 
 import java.io.Closeable;
@@ -40,8 +38,8 @@ public abstract class StreamMessageSource implements Closeable {
 		this.consumer = consumer;
 		this.streamPartitions = streamPartitions;
 
-		StreamrClientService streamrClientService = Holders.getApplicationContext().getBean(StreamrClientService.class);
-		streamrClient = streamrClientService.getAuthenticatedInstance(globals.getUserId());
+		// Use the shared StreamrClient instance connected to this run context
+		streamrClient = globals.getStreamrClient();
 
 		// Fetch Stream objects based on required StreamPartitions
 		try {
@@ -52,15 +50,11 @@ public abstract class StreamMessageSource implements Closeable {
 				}
 			}
 		} catch (Exception e) {
-			streamrClient.disconnect();
 			throw new RuntimeException("Failed to subscribe to streams!", e);
 		}
 	}
 
-	public void close() {
-		streamrClient.disconnect();
-		log.info("Closed Streamr connection to " + streamrClient.getOptions().getWebsocketApiUrl());
-	}
+	public abstract void close();
 
 	public abstract static class StreamMessageConsumer implements Consumer<StreamMessage> {
 		/**

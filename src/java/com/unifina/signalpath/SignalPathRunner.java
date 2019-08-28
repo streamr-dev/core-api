@@ -10,6 +10,8 @@ import grails.util.GrailsUtil;
 import grails.util.Holders;
 import org.apache.log4j.Logger;
 
+import java.util.function.Function;
+
 /**
  * A Thread that instantiates and runs a SignalPath.
  * Identified by a runnerId, by which this runner can be looked up from signalPathService.
@@ -124,14 +126,23 @@ public class SignalPathRunner extends Thread {
 	 * Aborts the data feed and releases all resources
 	 */
 	private void destroyMe() {
-		signalPath.destroy();
-
 		SignalPathService signalPathService = Holders.getApplicationContext().getBean(SignalPathService.class);
-		signalPathService.updateState(runnerId, Canvas.State.STOPPED);
+		safeRun(signalPath::destroy);
+		safeRun(() -> signalPathService.updateState(runnerId, Canvas.State.STOPPED));
 
 		if (globals.isAdhoc()) {
 			// Delayed-delete the references to allow UI to catch up
-			signalPathService.deleteReferences(signalPath, true);
+			safeRun(() -> signalPathService.deleteReferences(signalPath, true));
+		}
+
+		safeRun(globals::destroy);
+	}
+
+	private void safeRun(Runnable r) {
+		try {
+			r.run();
+		} catch (Exception e) {
+			log.error(e);
 		}
 	}
 

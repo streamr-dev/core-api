@@ -9,6 +9,7 @@ import com.unifina.security.permission.DataSourcePermission;
 import com.unifina.security.permission.StreamrClientPermission;
 import com.unifina.service.StreamrClientService;
 import grails.util.Holders;
+import org.apache.log4j.Logger;
 
 import java.security.AccessController;
 import java.text.SimpleDateFormat;
@@ -39,6 +40,8 @@ public class Globals {
 	public Date time;
 
 	private transient StreamrClient streamrClient;
+
+	private static final Logger log = Logger.getLogger(Globals.class);
 
 	/**
 	 * Creates an "empty" Globals with no settings, no user, Mode.NOT_PLANNING_TO_RUN, and no DataSource.
@@ -181,9 +184,16 @@ public class Globals {
 		}
 
 		if (streamrClient == null) {
+			// MUST clean this up by calling globals.destroy() when globals is no longer needed
 			streamrClient = Holders.getApplicationContext().getBean(StreamrClientService.class).getAuthenticatedInstance(getUserId());
-			getDataSource().addStopListener(streamrClient::disconnect);
 		}
 		return streamrClient;
+	}
+
+	public void destroy() {
+		if (streamrClient != null) {
+			streamrClient.disconnect();
+			log.info("Closed Streamr connection to " + streamrClient.getOptions().getWebsocketApiUrl());
+		}
 	}
 }

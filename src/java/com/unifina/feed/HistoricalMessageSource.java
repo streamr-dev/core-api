@@ -57,7 +57,6 @@ public class HistoricalMessageSource extends StreamMessageSource implements Iter
 
 	@Override
 	public void close() {
-		super.close();
 		quit = true; // signals the reporterThread to stop
 		mergingIterator.close();
 	}
