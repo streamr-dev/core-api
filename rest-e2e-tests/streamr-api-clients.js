@@ -11,7 +11,7 @@ class StreamrApiRequest {
         }
 
         this.logging = options.logging || false
-        this.authToken = null
+        this.authHeader = null
         this.contentType = null
         this.queryParams = ''
     }
@@ -22,8 +22,13 @@ class StreamrApiRequest {
         return this
     }
 
-    withAuthToken(authToken) {
-        this.authToken = `Token ${authToken}`
+    withApiKey(apiKey) {
+        this.authHeader = `Token ${apiKey}`
+        return this
+    }
+
+    withSessionToken(sessionToken) {
+        this.authHeader = `Bearer ${sessionToken}`
         return this
     }
 
@@ -62,8 +67,8 @@ class StreamrApiRequest {
         if (this.body && this.contentType) {
             headers['Content-type'] = this.contentType
         }
-        if (this.authToken) {
-            headers['Authorization'] = this.authToken
+        if (this.authHeader) {
+            headers['Authorization'] = this.authHeader
         }
 
         if (this.logging) {

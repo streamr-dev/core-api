@@ -1,8 +1,8 @@
 package com.unifina.feed.util;
 
 import com.streamr.client.MessageHandler;
-import com.streamr.client.Subscription;
 import com.streamr.client.protocol.message_layer.StreamMessage;
+import com.streamr.client.subs.Subscription;
 import org.apache.log4j.Logger;
 
 import java.util.Iterator;

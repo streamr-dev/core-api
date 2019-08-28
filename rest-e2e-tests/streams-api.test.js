@@ -20,7 +20,7 @@ describe('Streams API', () => {
             .create({
                 name: 'stream-id-' + Date.now()
             })
-            .withAuthToken(AUTH_TOKEN)
+            .withApiKey(AUTH_TOKEN)
             .execute()
         streamId = response.id
     })
@@ -55,7 +55,7 @@ describe('Streams API', () => {
                         type: 'object'
                     }
                 ])
-                .withAuthToken(AUTH_TOKEN)
+                .withApiKey(AUTH_TOKEN)
                 .call()
 
             await assertResponseIsError(response, 404, 'NOT_FOUND')
@@ -73,7 +73,7 @@ describe('Streams API', () => {
                         type: 'object'
                     }
                 ])
-                .withAuthToken(AUTH_TOKEN_2)
+                .withApiKey(AUTH_TOKEN_2)
                 .call()
 
             await assertResponseIsError(response, 403, 'FORBIDDEN', 'write')
@@ -94,7 +94,7 @@ describe('Streams API', () => {
                             type: 'object'
                         }
                     ])
-                    .withAuthToken(AUTH_TOKEN)
+                    .withApiKey(AUTH_TOKEN)
                     .call()
             })
 
@@ -130,7 +130,7 @@ describe('Streams API', () => {
         it('validates existence of Stream', async () => {
             const response = await Streamr.api.v1.streams
                 .uploadCsvFile('non-existing-id', fs.createReadStream('./test-data/test-csv.csv'))
-                .withAuthToken(AUTH_TOKEN)
+                .withApiKey(AUTH_TOKEN)
                 .call()
 
             await assertResponseIsError(response, 404, 'NOT_FOUND')
@@ -139,7 +139,7 @@ describe('Streams API', () => {
         it('requires WRITE permission on Stream', async () => {
             const response = await Streamr.api.v1.streams
                 .uploadCsvFile(streamId, fs.createReadStream('./test-data/test-csv.csv'))
-                .withAuthToken(AUTH_TOKEN_2)
+                .withApiKey(AUTH_TOKEN_2)
                 .call()
 
             await assertResponseIsError(response, 403, 'FORBIDDEN', 'write')
@@ -148,7 +148,7 @@ describe('Streams API', () => {
         it('validates that file is CSV', async () => {
             const response = await Streamr.api.v1.streams
                 .uploadCsvFile(streamId, fs.createReadStream('./test-data/file.txt'))
-                .withAuthToken(AUTH_TOKEN)
+                .withApiKey(AUTH_TOKEN)
                 .call()
 
             await assertResponseIsError(response, 400, 'NOT_RECOGNIZED_AS_CSV')
@@ -160,7 +160,7 @@ describe('Streams API', () => {
             before(async () => {
                 response = await Streamr.api.v1.streams
                     .uploadCsvFile(streamId, fs.createReadStream('./test-data/test-csv.csv'))
-                    .withAuthToken(AUTH_TOKEN)
+                    .withApiKey(AUTH_TOKEN)
                     .call()
             })
 
@@ -206,7 +206,7 @@ describe('Streams API', () => {
                     timestampColumnIndex: '0',
                     dateFormat: 'unix'
                 })
-                .withAuthToken(AUTH_TOKEN)
+                .withApiKey(AUTH_TOKEN)
                 .call()
 
             await assertResponseIsError(response, 404, 'NOT_FOUND')
@@ -219,7 +219,7 @@ describe('Streams API', () => {
                     timestampColumnIndex: '0',
                     dateFormat: 'unix'
                 })
-                .withAuthToken(AUTH_TOKEN_2)
+                .withApiKey(AUTH_TOKEN_2)
                 .call()
 
             await assertResponseIsError(response, 403, 'FORBIDDEN', 'write')
@@ -231,7 +231,7 @@ describe('Streams API', () => {
             before(async () => {
                 const uploadResponse = await Streamr.api.v1.streams
                     .uploadCsvFile(streamId, fs.createReadStream('./test-data/test-csv.csv'))
-                    .withAuthToken(AUTH_TOKEN)
+                    .withApiKey(AUTH_TOKEN)
                     .call()
                 const uploadJson = await uploadResponse.json()
 
@@ -241,7 +241,7 @@ describe('Streams API', () => {
                         timestampColumnIndex: 0,
                         dateFormat: 'unix'
                     })
-                    .withAuthToken(AUTH_TOKEN)
+                    .withApiKey(AUTH_TOKEN)
                     .call()
             })
 

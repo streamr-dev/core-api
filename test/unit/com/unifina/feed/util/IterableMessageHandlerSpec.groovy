@@ -1,7 +1,8 @@
 package com.unifina.feed.util
 
-import com.streamr.client.Subscription
+
 import com.streamr.client.protocol.message_layer.StreamMessage
+import com.streamr.client.subs.Subscription
 import spock.lang.Specification
 
 class IterableMessageHandlerSpec extends Specification {

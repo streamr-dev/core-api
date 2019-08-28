@@ -3,14 +3,10 @@ const StreamrClient = require('streamr-client')
 const assert = require('chai').assert
 const fs = require('fs')
 const initStreamrApi = require('./streamr-api-clients')
-const SchemaValidator = require('./schema-validator')
-const assertResponseIsError = require('./test-utilities.js').assertResponseIsError
 
 const REST_URL = 'http://localhost:8081/streamr-core/api/v1'
 const WS_URL = 'ws://localhost:8890/api/v1/ws'
 const LOGGING_ENABLED = false
-
-const API_KEY = 'tester1-api-key'
 
 const Streamr = initStreamrApi(REST_URL, LOGGING_ENABLED)
 
@@ -25,32 +21,80 @@ const pollCondition = async (condition, timeout = 10*1000, interval = 100) => {
     return result
 }
 
-// Depends on a pre-existing canvas and stream
 // The tests should be run sequentially
-describe('Canvas API', () => {
+describe('Canvas API', function() {
 
     let streamrClient
+    let sessionToken
+    let stream
+    let canvas
 
-    before(() => {
+    // sets timeout on before and all test cases in this suite
+    this.timeout(10 * 1000)
+
+    before(async () => {
+        // Generate a new user to isolate the test and not require any pre-existing resources
+        const freshUser = StreamrClient.generateEthereumAccount()
+
+        // Print private key to console in case you need to debug by logging in as this user (import to MetaMask, log in with Ethereum)
+        console.log(`User created: ${JSON.stringify(freshUser)}`)
+
         streamrClient = new StreamrClient({
             url: WS_URL,
             restUrl: REST_URL,
             auth: {
-                apiKey: API_KEY,
+                privateKey: freshUser.privateKey,
+            },
+        })
+        await streamrClient.connect()
+
+        sessionToken = await streamrClient.session.getSessionToken()
+
+        // Create a unique stream for this test
+        stream = await streamrClient.createStream({
+            name: `canvas-api.test.js-${Date.now()}`,
+            config: {
+                fields: [
+                    {
+                        name: 'numero',
+                        type: 'number',
+                    }
+                ]
             }
         })
+        assert(stream.id != null)
+
+        // Create a unique canvas for this test. Canvas structure is this:
+        /*
+          Stream------->Multiply------>Sum
+          Constant(2)-->
+         */
+        const canvasTemplate = JSON.parse(fs.readFileSync('./test-data/canvas-api.test.js-canvas.json'))
+        canvasTemplate.name = `canvas-api.test.js-${Date.now()}`
+        // Configure the newly created stream onto the Stream module
+        canvasTemplate.modules[0].params[0].value = stream.id
+
+        const canvasResponse = await Streamr.api.v1.canvases
+            .create(canvasTemplate)
+            .withSessionToken(sessionToken)
+            .call()
+
+        canvas = await canvasResponse.json()
+        assert.equal(canvasResponse.status, 200, JSON.stringify(canvas))
     })
 
-    after(() => {
-        streamrClient.disconnect()
+    after(async () => {
+        if (streamrClient.isConnected()) {
+            await streamrClient.disconnect()
+        }
     })
 
     describe('POST /api/v1/canvases/:id/start', () => {
 
         it('starts the canvas', async () => {
             const response = await Streamr.api.v1.canvases
-                .start('run-canvas-spec')
-                .withAuthToken(API_KEY)
+                .start(canvas.id)
+                .withSessionToken(sessionToken)
                 .call()
 
             const json = await response.json()
@@ -60,18 +104,15 @@ describe('Canvas API', () => {
 
     })
 
-    describe('Canvases receive data', function() {
-        // sets timeout on before and all test cases in this suite
-        this.timeout(10 * 1000)
+    describe('Canvases receive data', () => {
 
         before('Produce data to stream', async () => {
             await sleep(5000) // Allow time for canvas to start properly
 
             const promises = []
             for (let i=1; i<=100; i++) {
-                promises.push(streamrClient.publish('run-canvas-spec', {
+                promises.push(streamrClient.publish(stream.id, {
                     numero: i,
-                    areWeDoneYet: false,
                 }))
             }
             await Promise.all(promises)
@@ -84,8 +125,8 @@ describe('Canvas API', () => {
                 let json
                 await pollCondition(async () => {
                     response = await Streamr.api.v1.canvases
-                        .getRuntimeState('run-canvas-spec', 'modules/0')
-                        .withAuthToken(API_KEY)
+                        .getRuntimeState(canvas.id, 'modules/0')
+                        .withSessionToken(sessionToken)
                         .call()
 
                     json = await response.json()
@@ -105,8 +146,8 @@ describe('Canvas API', () => {
                 let json
                 await pollCondition(async () => {
                     response = await Streamr.api.v1.canvases
-                        .getRuntimeState('run-canvas-spec', 'modules/1')
-                        .withAuthToken(API_KEY)
+                        .getRuntimeState(canvas.id, 'modules/1')
+                        .withSessionToken(sessionToken)
                         .call()
 
                     json = await response.json()
@@ -129,8 +170,8 @@ describe('Canvas API', () => {
 
         it('stops the canvas', async () => {
             const response = await Streamr.api.v1.canvases
-                .stop('run-canvas-spec')
-                .withAuthToken(API_KEY)
+                .stop(canvas.id)
+                .withSessionToken(sessionToken)
                 .call()
 
             const json = await response.json()
