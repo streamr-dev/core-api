@@ -238,7 +238,7 @@ class StreamApiController {
 	@StreamrApi
 	def deleteDataUpTo(String id) {
 		getAuthorizedStream(id, Operation.WRITE) { Stream stream ->
-			Date date = parseDate((String) params.date)
+			Date date = parseDate(String.valueOf(request.JSON.date))
 			streamService.deleteDataUpTo(stream, date)
 			render(status: 204)
 		}
@@ -255,8 +255,8 @@ class StreamApiController {
 	@StreamrApi
 	def deleteDataRange(String id) {
 		getAuthorizedStream(id, Operation.WRITE) { Stream stream ->
-			Date start = parseDate((String) params.start)
-			Date end = parseDate((String) params.end)
+			Date start = parseDate(String.valueOf(request.JSON.start))
+			Date end = parseDate(String.valueOf(request.JSON.end))
 			streamService.deleteDataRange(stream, start, end)
 			render(status: 204)
 		}
