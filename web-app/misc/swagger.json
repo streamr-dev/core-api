@@ -3066,9 +3066,16 @@
           {
             "in": "query",
             "name": "date",
-            "description": "Delete data up to date. Format is either milliseconds since epoch or ISO8601 datetime",
+            "description": "Delete data up to date. Format is either milliseconds (integer) since epoch or ISO8601 datetime (string).",
             "required": true,
             "type": "string"
+          },
+          {
+            "in": "query",
+            "name": "date",
+            "description": "Delete data up to date. Format is either milliseconds (integer) since epoch or ISO8601 datetime (string).",
+            "required": true,
+            "type": "integer"
           }
         ],
         "responses": {
@@ -3114,17 +3121,30 @@
           {
             "in": "query",
             "name": "start",
-            "description": "Start date where the data deletion starts. Format is either milliseconds since epoch or ISO8601 datetime.",
-
+            "description": "Start date where the data deletion starts. Format is either milliseconds (integer) since epoch or ISO8601 datetime (string).",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "in": "query",
+            "name": "start",
+            "description": "Start date where the data deletion starts. Format is either milliseconds (integer) since epoch or ISO8601 datetime (string)",
+            "required": true,
+            "type": "integer"
+          },
+          {
+            "in": "query",
+            "name": "end",
+            "description": "Delete data up to this date. Format is either milliseconds (integer) since epoch or ISO8601 datetime (string).",
             "required": true,
             "type": "string"
           },
           {
             "in": "query",
             "name": "end",
-            "description": "Delete data up to this date. Format is either milliseconds since epoch or ISO8601 datetime.",
+            "description": "Delete data up to this date. Format is either milliseconds (integer) since epoch or ISO8601 datetime (string).",
             "required": true,
-            "type": "string"
+            "type": "integer"
           }
         ],
         "responses": {
