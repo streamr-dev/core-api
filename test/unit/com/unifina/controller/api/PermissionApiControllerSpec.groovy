@@ -248,6 +248,21 @@ class PermissionApiControllerSpec extends ControllerSpecification {
 		1 * permissionService._
 	}
 
+	void "remove removes permission to resource"() {
+		setup:
+		params.id = canvasPermission.id
+		params.resourceClass = Canvas
+		params.resourceId = canvasShared.id
+
+		when:
+		authenticatedAs(me) { controller.remove("${canvasPermission.id}") }
+
+		then:
+		response.status == 204
+		1 * permissionService.getPermissionsTo(_) >> [canvasPermission, *ownerPermissions]
+		1 * permissionService.systemRevoke(canvasPermission)
+	}
+
 	void "can't give both 'user' and 'anonymous' arguments"() {
 		params.id = canvasOwned.id
 		params.resourceClass = Canvas
