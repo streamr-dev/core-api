@@ -154,7 +154,7 @@ class PermissionApiController {
 		}
 	}
 
-	private usePermission0(Class resourceClass, resourceId, Long permissionId, Closure action) {
+	private usePermissionResource(Class resourceClass, resourceId, Long permissionId, Closure action) {
 		if (!resourceClass) { throw new IllegalArgumentException("Missing resource class") }
 		if (!grailsApplication.isDomainClass(resourceClass)) { throw new IllegalArgumentException("${resourceClass.simpleName} is not a domain class!") }
 		def res = resourceClass.get(resourceId)
@@ -174,7 +174,7 @@ class PermissionApiController {
 
 	@StreamrApi(authenticationLevel = AuthLevel.NONE)
 	def remove(String id) {
-		usePermission0(params.resourceClass, params.resourceId, id as Long) { p, res ->
+		usePermissionResource(params.resourceClass, params.resourceId, id as Long) { p, res ->
 			permissionService.systemRevoke(p)
 			render status: 204
 		}
