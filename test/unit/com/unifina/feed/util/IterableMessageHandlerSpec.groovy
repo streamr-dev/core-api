@@ -75,7 +75,7 @@ class IterableMessageHandlerSpec extends Specification {
 		iterator.onMessage(sub, msg)
 		long elapsedTime = System.currentTimeMillis() - startTime
 		then:
-		elapsedTime > ASYNC_DELAY_MILLIS
+		elapsedTime >= ASYNC_DELAY_MILLIS
 		elapsedTime < EARLY_RETURN_TIME_MILLIS
 	}
 
@@ -88,7 +88,7 @@ class IterableMessageHandlerSpec extends Specification {
 		iterator.onMessage(sub, msg)
 		then:
 		notThrown(RuntimeException)
-		System.currentTimeMillis() - startTime > 1000
+		System.currentTimeMillis() - startTime >= 1000
 	}
 
 	def "hasNext() throws on timeout when queue is empty"() {
@@ -98,7 +98,7 @@ class IterableMessageHandlerSpec extends Specification {
 		iterator.hasNext()
 		then:
 		thrown(RuntimeException)
-		System.currentTimeMillis() - startTime > 1000
+		System.currentTimeMillis() - startTime >= 1000
 	}
 
 	def "next() throws on timeout when queue is empty"() {
@@ -108,7 +108,7 @@ class IterableMessageHandlerSpec extends Specification {
 		iterator.next()
 		then:
 		thrown(RuntimeException)
-		System.currentTimeMillis() - startTime > 1000
+		System.currentTimeMillis() - startTime >= 1000
 	}
 
 	def "hasNext() blocks until there are messages but returns soon after"() {
@@ -122,7 +122,7 @@ class IterableMessageHandlerSpec extends Specification {
 		long elapsedTime = System.currentTimeMillis() - startTime
 		then:
 		hasNext
-		elapsedTime > ASYNC_DELAY_MILLIS
+		elapsedTime >= ASYNC_DELAY_MILLIS
 		elapsedTime < EARLY_RETURN_TIME_MILLIS
 	}
 
@@ -137,7 +137,7 @@ class IterableMessageHandlerSpec extends Specification {
 		long elapsedTime = System.currentTimeMillis() - startTime
 		then:
 		next.is(msg)
-		elapsedTime > ASYNC_DELAY_MILLIS
+		elapsedTime >= ASYNC_DELAY_MILLIS
 		elapsedTime < EARLY_RETURN_TIME_MILLIS
 	}
 
@@ -152,7 +152,7 @@ class IterableMessageHandlerSpec extends Specification {
 		long elapsedTime = System.currentTimeMillis() - startTime
 		then:
 		!hasNext
-		elapsedTime > ASYNC_DELAY_MILLIS
+		elapsedTime >= ASYNC_DELAY_MILLIS
 		elapsedTime < EARLY_RETURN_TIME_MILLIS
 	}
 
@@ -167,7 +167,7 @@ class IterableMessageHandlerSpec extends Specification {
 
 		then:
 		thrown(NoSuchElementException)
-		System.currentTimeMillis() - startTime > ASYNC_DELAY_MILLIS
+		System.currentTimeMillis() - startTime >= ASYNC_DELAY_MILLIS
 		System.currentTimeMillis() - startTime < EARLY_RETURN_TIME_MILLIS
 	}
 
