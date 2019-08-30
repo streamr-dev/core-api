@@ -30,7 +30,7 @@ describe('Canvas API', function() {
     let canvas
 
     // sets timeout on before and all test cases in this suite
-    this.timeout(10 * 1000)
+    this.timeout(30 * 1000)
 
     before(async () => {
         // Generate a new user to isolate the test and not require any pre-existing resources
