@@ -4,9 +4,7 @@ jdk:
 - openjdk8
 services:
 - docker
-branches:
-  only:
-  - master
+if: (type = push AND branch = master) OR type = pull_request # build whitelisted branches and all PRs
 git:
   submodules: false
 before_install:
