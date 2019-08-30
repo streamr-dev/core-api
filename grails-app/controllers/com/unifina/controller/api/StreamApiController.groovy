@@ -17,13 +17,6 @@ import java.text.SimpleDateFormat
 
 @Secured(["IS_AUTHENTICATED_ANONYMOUSLY"])
 class StreamApiController {
-
-	static allowedMethods = [
-		"setFields": "POST",
-		"uploadCsvFile": "POST",
-		"confirmCsvFileUpload": "POST"
-	]
-
 	private final SimpleDateFormat iso8601 = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'")
 	private final SimpleDateFormat iso8601cal = new SimpleDateFormat("yyyy-MM-dd")
 
