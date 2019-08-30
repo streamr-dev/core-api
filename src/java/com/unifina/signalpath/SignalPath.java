@@ -353,7 +353,7 @@ public class SignalPath extends ModuleWithUI {
 						if (!input.wasReady()) {
 							notReady.append(input.toString());
 							notReady.append("\n");
-							pushToUiChannel(new ModuleWarningMessage("Input was never ready: " + input.getEffectiveName(), input.getOwner().getHash()));
+							pushToUiChannel(new ModuleWarningMessage("Input never received data: " + input.getEffectiveName(), input.getOwner().getHash()));
 						}
 					}
 					log.debug("Module had non-ready inputs: " + notReady);
