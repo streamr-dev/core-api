@@ -10,7 +10,9 @@ const LOGGING_ENABLED = false
 
 const Streamr = initStreamrApi(REST_URL, LOGGING_ENABLED)
 
-const pollCondition = async (condition, timeout = 10*1000, interval = 100) => {
+const TIMEOUT = 30 * 1000
+
+const pollCondition = async (condition, timeout = TIMEOUT, interval = 100) => {
     let timeElapsed = 0
     let result
     while (!result && timeElapsed < timeout) {
@@ -30,7 +32,7 @@ describe('Canvas API', function() {
     let canvas
 
     // sets timeout on before and all test cases in this suite
-    this.timeout(30 * 1000)
+    this.timeout(TIMEOUT)
 
     before(async () => {
         // Generate a new user to isolate the test and not require any pre-existing resources
@@ -107,7 +109,8 @@ describe('Canvas API', function() {
     describe('Canvases receive data', () => {
 
         before('Produce data to stream', async () => {
-            await sleep(5000) // Allow time for canvas to start properly
+            // Allow time for canvas to start properly. If values don't make it to the canvas, this may be the reason.
+            await sleep(15 * 1000)
 
             const promises = []
             for (let i=1; i<=100; i++) {
