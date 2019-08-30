@@ -27,13 +27,10 @@ jobs:
     env:
     - BACKEND_END_TEST=true
     script: "./travis_scripts/unit_test.sh"
-  - env:
-    - FRONT_END_TEST=true
-    script: "./travis_scripts/fe_unit_test.sh"
   - stage: Integration tests
     script: "travis_retry ./travis_scripts/integration_test.sh"
   - stage: REST API tests
-    script: ./travis_scripts/rest_e2e_test.sh
+    script: "./travis_scripts/rest_e2e_test.sh"
   - stage: Build war Staging
     script: "./travis_scripts/build_war.sh"
     env:
