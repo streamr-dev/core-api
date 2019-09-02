@@ -16,7 +16,7 @@ while true; do http_code=$(curl -s -o /dev/null -w "%{http_code}" http://localho
 
 # TODO: remove, show data-api logs for debugging
 $TRAVIS_BUILD_DIR/streamr-docker-dev/streamr-docker-dev/bin.sh restart data-api
-$TRAVIS_BUILD_DIR/streamr-docker-dev/streamr-docker-dev/bin.sh log -f data-api &
+$TRAVIS_BUILD_DIR/streamr-docker-dev/streamr-docker-dev/bin.sh log -f &
 
 # Wait for data-api to come up
 while true; do http_code=$(curl -s -o /dev/null -w "%{http_code}" http://localhost:8890/); if [ $http_code = 404 ]; then echo "Data-api up and running"; break; else echo "Data API not receiving connections"; sleep 5s; fi; done
