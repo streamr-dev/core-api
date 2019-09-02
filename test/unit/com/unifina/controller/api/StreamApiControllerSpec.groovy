@@ -222,7 +222,7 @@ class StreamApiControllerSpec extends ControllerSpecification {
 		when:
 		params.id = streamOne.id
 		request.method = "PUT"
-		request.json = '{name: "newName", description: "newDescription", autoConfigure: false, requireSignedData: true, storageDays: 24 }'
+		request.json = '{name: "newName", description: "newDescription", autoConfigure: false, requireSignedData: true, storageDays: 24, inactivityThresholdHours: 99 }'
 		authenticatedAs(me) { controller.update() }
 
 		then:
@@ -236,13 +236,14 @@ class StreamApiControllerSpec extends ControllerSpecification {
 		stream.autoConfigure == false
 		stream.requireSignedData == true
 		stream.storageDays == 24
+		stream.inactivityThresholdHours == 99
 	}
 
 	void "update a Stream of logged in user but do not update undefined fields"() {
 		when:
 		params.id = streamOne.id
 		request.method = "PUT"
-		request.json = '{name: "newName", description: "newDescription", autoConfigure: null, requireSignedData: null, storageDays: null }'
+		request.json = '{name: "newName", description: "newDescription", autoConfigure: null, requireSignedData: null, storageDays: null, inactivityThresholdHours: null }'
 		authenticatedAs(me) { controller.update() }
 
 		then:
@@ -256,6 +257,7 @@ class StreamApiControllerSpec extends ControllerSpecification {
 		stream.autoConfigure == true
 		stream.requireSignedData == false
 		stream.storageDays == Stream.DEFAULT_STORAGE_DAYS
+		stream.inactivityThresholdHours == Stream.DEFAULT_INACTIVITY_THRESHOLD_HOURS
 	}
 
 	void "cannot update non-existent Stream"() {
@@ -414,7 +416,6 @@ class StreamApiControllerSpec extends ControllerSpecification {
 		Date timestamp = newDate(2019, 1, 19, 2, 0, 3)
 
 		when:
-		params.days = 2
 		params.id = streamOne.id
 		request.method = "GET"
 		authenticatedAs(me) { controller.status() }
@@ -433,7 +434,6 @@ class StreamApiControllerSpec extends ControllerSpecification {
 		controller.streamService = Mock(StreamService)
 
 		when:
-		params.days = 2
 		params.id = streamOne.id
 		request.method = "GET"
 		authenticatedAs(me) { controller.status() }
@@ -451,7 +451,6 @@ class StreamApiControllerSpec extends ControllerSpecification {
 		controller.streamService = Mock(StreamService)
 
 		when:
-		params.days = 2
 		params.id = "not-found"
 		request.method = "GET"
 		authenticatedAs(me) { controller.status() }
@@ -484,7 +483,7 @@ class StreamApiControllerSpec extends ControllerSpecification {
 		when:
 		request.method = "DELETE"
 		params.id = streamOne.id
-		params.date = "2019-05-10T08:57:57Z"
+		request.JSON.date = "2019-05-10T08:57:57Z"
 		authenticatedAs(me) { controller.deleteDataUpTo() }
 
 		then:
@@ -498,7 +497,7 @@ class StreamApiControllerSpec extends ControllerSpecification {
 		when:
 		request.method = "DELETE"
 		params.id = streamOne.id
-		params.date = "1557478677036"
+		request.JSON.date = 1557478677036
 		authenticatedAs(me) { controller.deleteDataUpTo() }
 
 		then:
@@ -512,7 +511,7 @@ class StreamApiControllerSpec extends ControllerSpecification {
 		when:
 		request.method = "DELETE"
 		params.id = streamOne.id
-		params.date = "2019-05-10T08:57:xxZ"
+		request.JSON.date = "2019-05-10T08:57:xxZ"
 		authenticatedAs(me) { controller.deleteDataUpTo() }
 
 		then:
@@ -538,8 +537,8 @@ class StreamApiControllerSpec extends ControllerSpecification {
 		when:
 		request.method = "DELETE"
 		params.id = streamOne.id
-		params.start = "1557478677036"
-		params.end = "1557479167606"
+		request.JSON.start = 1557478677036
+		request.JSON.end = 1557479167606
 		authenticatedAs(me) { controller.deleteDataRange() }
 
 		then:
@@ -552,8 +551,8 @@ class StreamApiControllerSpec extends ControllerSpecification {
 		when:
 		request.method = "DELETE"
 		params.id = streamOne.id
-		params.start = "2019-05-10T08:57:xxZ"
-		params.end = "2019-05-10T09:06:07Z"
+		request.JSON.start = "2019-05-10T08:57:xxZ"
+		request.JSON.end = "2019-05-10T09:06:07Z"
 		authenticatedAs(me) { controller.deleteDataRange() }
 
 		then:
@@ -566,8 +565,8 @@ class StreamApiControllerSpec extends ControllerSpecification {
 		when:
 		request.method = "DELETE"
 		params.id = streamOne.id
-		params.start = "2019-05-10T08:57:57Z"
-		params.end = "2019-05-10T09:06:xxZ"
+		request.JSON.start = "2019-05-10T08:57:57Z"
+		request.JSON.end = "2019-05-10T09:06:xxZ"
 		authenticatedAs(me) { controller.deleteDataRange() }
 
 		then:
@@ -582,8 +581,8 @@ class StreamApiControllerSpec extends ControllerSpecification {
 		when:
 		request.method = "DELETE"
 		params.id = streamOne.id
-		params.start = "2019-05-10T08:57:57Z"
-		params.end = "2019-05-10T09:06:07Z"
+		request.JSON.start = "2019-05-10T08:57:57Z"
+		request.JSON.end = "2019-05-10T09:06:07Z"
 		authenticatedAs(me) { controller.deleteDataRange() }
 
 		then:

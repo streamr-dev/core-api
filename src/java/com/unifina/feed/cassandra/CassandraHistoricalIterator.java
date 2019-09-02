@@ -26,8 +26,8 @@ public class CassandraHistoricalIterator implements Iterator<StreamMessage>, Clo
 
 	private static final Logger log = Logger.getLogger(CassandraHistoricalIterator.class);
 
-	private static final int PREFETCH_WHEN_REMAINING = 4500;
-	private static final int FETCH_SIZE = 5000;
+	private static final int PREFETCH_WHEN_REMAINING = 256;
+	private static final int FETCH_SIZE = 256;
 
 	public CassandraHistoricalIterator(Stream stream, Integer partition, Date startDate, Date endDate) {
 		this.stream = stream;

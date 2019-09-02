@@ -411,11 +411,6 @@ public class SendEthereumTransaction extends ModuleWithSideEffects {
 		return Web3jHelper.toWeb3jFunction(chosenFunction,args);
 	}
 
-
-	protected BigInteger getGasLimit() {
-		return BigInteger.valueOf(6000000l);
-	}
-
 	@Override
 	protected void activateWithSideEffects() {
 		EthereumContract c = contract.getValue();
@@ -450,8 +445,8 @@ public class SendEthereumTransaction extends ModuleWithSideEffects {
 				} else {
 					valueWei = BigInteger.ZERO;
 				}
-
-				RawTransaction rawTransaction = RawTransaction.createTransaction(nonce, gasPrice, getGasLimit(), c.getAddress(), valueWei, encodeFnCall);
+				BigInteger gasLimitBigint = BigInteger.valueOf(ethereumOptions.getGasLimit());
+				RawTransaction rawTransaction = RawTransaction.createTransaction(nonce, gasPrice, gasLimitBigint, c.getAddress(), valueWei, encodeFnCall);
 				byte[] signedMessage = TransactionEncoder.signMessage(rawTransaction, credentials);
 				String hexValue = Numeric.toHexString(signedMessage);
 				CompletableFuture<EthSendTransaction> cf = web3j.ethSendRawTransaction(hexValue).sendAsync();

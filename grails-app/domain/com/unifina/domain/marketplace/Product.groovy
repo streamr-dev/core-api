@@ -64,7 +64,6 @@ class Product {
 		thumbnailUrl(nullable: true)
 		category(nullable: true)
 		type(nullable: false)
-		streams(maxSize: 1000)
 		previewStream(nullable: true, validator: { Stream s, p -> s == null || s in p.streams })
 		previewConfigJson(nullable: true)
 		ownerAddress(nullable: true, validator: isEthereumAddressOrIsNull)
