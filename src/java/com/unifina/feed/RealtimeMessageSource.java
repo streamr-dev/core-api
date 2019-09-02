@@ -24,11 +24,7 @@ public class RealtimeMessageSource extends StreamMessageSource {
 			subscriptions.add(streamrClient.subscribe(
 				streamsByStreamId.get(sp.getStreamId()),
 				sp.getPartition(),
-				(subscription, streamMessage) -> {
-					// TODO: remove logging
-					log.info("Message received: " + streamMessage.getSerializedContent());
-					consumer.accept(streamMessage);
-				},
+				(subscription, streamMessage) -> consumer.accept(streamMessage),
 				null // no resend
 			));
 		}

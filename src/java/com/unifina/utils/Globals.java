@@ -183,15 +183,6 @@ public class Globals {
 		if (streamrClient == null) {
 			// MUST clean this up by calling globals.destroy() when globals is no longer needed
 			streamrClient = Holders.getApplicationContext().getBean(StreamrClientService.class).getAuthenticatedInstance(getUserId());
-
-			// TODO: remove
-			Timer timer = new Timer();
-			timer.schedule(new TimerTask() {
-				@Override
-				public void run() {
-					log.info("StreamrClient state: " + streamrClient.getState());
-				}
-			}, 0, 1000);
 		}
 		return streamrClient;
 	}
