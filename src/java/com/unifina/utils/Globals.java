@@ -13,10 +13,7 @@ import org.apache.log4j.Logger;
 
 import java.security.AccessController;
 import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.TimeZone;
+import java.util.*;
 
 
 public class Globals {
@@ -186,6 +183,15 @@ public class Globals {
 		if (streamrClient == null) {
 			// MUST clean this up by calling globals.destroy() when globals is no longer needed
 			streamrClient = Holders.getApplicationContext().getBean(StreamrClientService.class).getAuthenticatedInstance(getUserId());
+
+			// TODO: remove
+			Timer timer = new Timer();
+			timer.schedule(new TimerTask() {
+				@Override
+				public void run() {
+					log.info("StreamrClient state: " + streamrClient.getState());
+				}
+			}, 0, 1000);
 		}
 		return streamrClient;
 	}

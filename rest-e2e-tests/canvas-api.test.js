@@ -112,13 +112,12 @@ describe('Canvas API', function() {
             // Allow time for canvas to start properly. If values don't make it to the canvas, this may be the reason.
             await sleep(15 * 1000)
 
-            const promises = []
             for (let i=1; i<=100; i++) {
-                promises.push(streamrClient.publish(stream.id, {
+                await streamrClient.publish(stream.id, {
                     numero: i,
-                }))
+                })
+                console.log(`Published message ${i}`)
             }
-            await Promise.all(promises)
         })
 
         describe('POST /api/v1/canvases/:canvasId/modules/:moduleId/request', () => {
