@@ -173,7 +173,8 @@ log4j.main = {
 	warn 'org.mortbay.log',
 		'org.codehaus.groovy.grails.domain.GrailsDomainClassCleaner'
 
-	debug 'com.datastax.driver.core'
+	debug 'com.datastax.driver.core',
+		'com.streamr.client' // TODO: remove when problems solved
 }
 
 /**
