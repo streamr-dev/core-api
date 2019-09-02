@@ -483,7 +483,7 @@ class StreamApiControllerSpec extends ControllerSpecification {
 		when:
 		request.method = "DELETE"
 		params.id = streamOne.id
-		params.date = "2019-05-10T08:57:57Z"
+		request.JSON.date = "2019-05-10T08:57:57Z"
 		authenticatedAs(me) { controller.deleteDataUpTo() }
 
 		then:
@@ -497,7 +497,7 @@ class StreamApiControllerSpec extends ControllerSpecification {
 		when:
 		request.method = "DELETE"
 		params.id = streamOne.id
-		params.date = "1557478677036"
+		request.JSON.date = 1557478677036
 		authenticatedAs(me) { controller.deleteDataUpTo() }
 
 		then:
@@ -511,7 +511,7 @@ class StreamApiControllerSpec extends ControllerSpecification {
 		when:
 		request.method = "DELETE"
 		params.id = streamOne.id
-		params.date = "2019-05-10T08:57:xxZ"
+		request.JSON.date = "2019-05-10T08:57:xxZ"
 		authenticatedAs(me) { controller.deleteDataUpTo() }
 
 		then:
@@ -537,8 +537,8 @@ class StreamApiControllerSpec extends ControllerSpecification {
 		when:
 		request.method = "DELETE"
 		params.id = streamOne.id
-		params.start = "1557478677036"
-		params.end = "1557479167606"
+		request.JSON.start = 1557478677036
+		request.JSON.end = 1557479167606
 		authenticatedAs(me) { controller.deleteDataRange() }
 
 		then:
@@ -551,8 +551,8 @@ class StreamApiControllerSpec extends ControllerSpecification {
 		when:
 		request.method = "DELETE"
 		params.id = streamOne.id
-		params.start = "2019-05-10T08:57:xxZ"
-		params.end = "2019-05-10T09:06:07Z"
+		request.JSON.start = "2019-05-10T08:57:xxZ"
+		request.JSON.end = "2019-05-10T09:06:07Z"
 		authenticatedAs(me) { controller.deleteDataRange() }
 
 		then:
@@ -565,8 +565,8 @@ class StreamApiControllerSpec extends ControllerSpecification {
 		when:
 		request.method = "DELETE"
 		params.id = streamOne.id
-		params.start = "2019-05-10T08:57:57Z"
-		params.end = "2019-05-10T09:06:xxZ"
+		request.JSON.start = "2019-05-10T08:57:57Z"
+		request.JSON.end = "2019-05-10T09:06:xxZ"
 		authenticatedAs(me) { controller.deleteDataRange() }
 
 		then:
@@ -581,8 +581,8 @@ class StreamApiControllerSpec extends ControllerSpecification {
 		when:
 		request.method = "DELETE"
 		params.id = streamOne.id
-		params.start = "2019-05-10T08:57:57Z"
-		params.end = "2019-05-10T09:06:07Z"
+		request.JSON.start = "2019-05-10T08:57:57Z"
+		request.JSON.end = "2019-05-10T09:06:07Z"
 		authenticatedAs(me) { controller.deleteDataRange() }
 
 		then:
