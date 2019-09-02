@@ -238,14 +238,14 @@ streamr.engine.node.ip = System.getProperty("streamr.engine.node.ip")
 /**
  * Streamr API URLs
  */
-streamr.api.websocket.url = System.getProperty("streamr.api.websocket.url") ?: "ws://127.0.0.1:8890/api/v1/ws?"
+streamr.api.websocket.url = System.getProperty("streamr.api.websocket.url") ?: "ws://localhost:8890/api/v1/ws"
 environments {
 	production {
 		streamr.api.websocket.url = System.getProperty("streamr.api.websocket.url") ?: "${prodBaseUrl.replaceFirst("http", "ws")}/api/v1/ws"
 	}
 }
 
-streamr.api.http.url = System.getProperty("streamr.api.http.url") ?: "http://127.0.0.1:8081/streamr-core/api/v1"
+streamr.api.http.url = System.getProperty("streamr.api.http.url") ?: "http://localhost:8081/streamr-core/api/v1"
 environments {
 	production {
 		streamr.api.http.url = System.getProperty("streamr.api.http.url") ?: "${prodBaseUrl}/api/v1"

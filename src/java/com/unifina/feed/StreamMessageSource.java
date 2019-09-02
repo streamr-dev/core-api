@@ -41,6 +41,9 @@ public abstract class StreamMessageSource implements Closeable {
 		// Use the shared StreamrClient instance connected to this run context
 		streamrClient = globals.getStreamrClient();
 
+		log.info("Using StreamrClient configured with websocket url " + streamrClient.getOptions().getWebsocketApiUrl());
+		log.info("StreamrClient state: " + streamrClient.getState());
+
 		// Fetch Stream objects based on required StreamPartitions
 		try {
 			for (StreamPartition sp : streamPartitions) {

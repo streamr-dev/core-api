@@ -18,9 +18,9 @@ public class RealtimeMessageSource extends StreamMessageSource {
 	public RealtimeMessageSource(Globals globals, StreamMessageConsumer consumer, Collection<StreamPartition> streamPartitions) {
 		super(globals, consumer, streamPartitions);
 
-		log.info("Connecting to Streamr on " + streamrClient.getOptions().getWebsocketApiUrl());
-
 		for (StreamPartition sp : streamPartitions) {
+			log.info("Subscribing to stream " + sp.getStreamId() + " partition " + sp.getPartition());
+
 			subscriptions.add(streamrClient.subscribe(
 				streamsByStreamId.get(sp.getStreamId()),
 				sp.getPartition(),
