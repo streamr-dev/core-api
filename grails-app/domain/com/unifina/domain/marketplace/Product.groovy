@@ -29,7 +29,7 @@ class Product {
 	// The below fields exist in the domain object for speed & query support, but the ground truth is in the smart contract.
 	String ownerAddress
 	String beneficiaryAddress
-	Long pricePerSecond
+	Long pricePerSecond = 0
 	Currency priceCurrency = Currency.DATA
 	Long minimumSubscriptionInSeconds = 0
 	Long blockNumber = 0
@@ -68,11 +68,7 @@ class Product {
 		previewConfigJson(nullable: true)
 		ownerAddress(nullable: true, validator: isEthereumAddressOrIsNull)
 		beneficiaryAddress(nullable: true, validator: isEthereumAddressOrIsNull)
-		pricePerSecond(min: 0L, validator: { Long price, p ->
-			price == 0 ?
-				p.ownerAddress == null && p.beneficiaryAddress == null :
-				p.ownerAddress != null && p.beneficiaryAddress != null
-		})
+		pricePerSecond(min: 0L)
 		minimumSubscriptionInSeconds(min: 0L)
 		blockNumber(min: 0L)
 		blockIndex(min: 0L)
@@ -96,6 +92,7 @@ class Product {
 	Map toMap() {
 		[
 		    id: id,
+			type: type.toString(),
 			name: name,
 			description: description,
 			imageUrl: imageUrl,
@@ -121,6 +118,7 @@ class Product {
 	Map toSummaryMap() {
 		[
 			id: id,
+			type: type.toString(),
 			name: name,
 			description: description,
 			imageUrl: imageUrl,

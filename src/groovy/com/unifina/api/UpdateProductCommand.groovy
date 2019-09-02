@@ -46,10 +46,8 @@ class UpdateProductCommand {
 		product.previewStream = previewStream
 		product.previewConfigJson = previewConfigJson
 
-		if (product.pricePerSecond > 0 && product.state == Product.State.NOT_DEPLOYED) {
-			if (pricePerSecond == 0) {
-				throw new InvalidStateException("Cannot update paid Product (price > 0) to be free (price = 0)")
-			}
+		// These fields can only be changed by the user in NOT_DEPLOYED state
+		if (product.state == Product.State.NOT_DEPLOYED) {
 			product.ownerAddress = ownerAddress
 			product.beneficiaryAddress = beneficiaryAddress
 			product.pricePerSecond = pricePerSecond

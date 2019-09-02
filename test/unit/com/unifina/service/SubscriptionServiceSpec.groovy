@@ -223,6 +223,9 @@ class SubscriptionServiceSpec extends BeanMockingSpecification {
 	}
 
 	void "subscribeToFreeProduct() throws ProductNotFreeException if given non-free Product"() {
+		product.pricePerSecond = 1
+		product.priceCurrency = Product.Currency.DATA
+
 		when:
 		service.subscribeToFreeProduct(product, user, new Date())
 		then:
