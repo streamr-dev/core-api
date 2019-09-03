@@ -2,6 +2,9 @@ package com.unifina.security.permission;
 
 import java.security.Permission;
 
+/**
+ * Used to restrict access to the StreamrClient from untrusted code.
+ */
 public class StreamrClientPermission extends Permission {
 
 	private static final long serialVersionUID = 41249824197214897L;
