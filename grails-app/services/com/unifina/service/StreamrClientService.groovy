@@ -44,20 +44,8 @@ class StreamrClientService {
 
 	private static StreamrClient createInstance(AuthenticationMethod authenticationMethod) {
 		StreamrClientOptions options = new StreamrClientOptions(authenticationMethod)
-
 		options.setRestApiUrl(MapTraversal.getString(Holders.getConfig(), "streamr.api.http.url"))
-
-		// TODO: Remove this bit when Melchior adds this to the Java client
-		String wsUrl = MapTraversal.getString(Holders.getConfig(), "streamr.api.websocket.url")
-		if (!wsUrl.contains("controlLayerVersion") && !wsUrl.contains("messageLayerVersion")) {
-			if (!wsUrl.contains("?")) {
-				wsUrl += "?"
-			}
-			wsUrl += "&controlLayerVersion=1&messageLayerVersion=31"
-		}
-		options.setWebsocketApiUrl(wsUrl)
-		// options.setWebsocketApiUrl(MapTraversal.getString(Holders.getConfig(), "streamr.api.websocket.url"));
-
+		options.setWebsocketApiUrl(MapTraversal.getString(Holders.getConfig(), "streamr.api.websocket.url"));
 		return new StreamrClient(options)
 	}
 
