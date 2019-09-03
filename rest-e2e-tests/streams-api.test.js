@@ -35,7 +35,7 @@ describe('Streams API', () => {
                     },
                     {
                         name: 'user',
-                        type: 'object'
+                        type: 'map'
                     }
                 ])
                 .call()
@@ -52,7 +52,7 @@ describe('Streams API', () => {
                     },
                     {
                         name: 'user',
-                        type: 'object'
+                        type: 'map'
                     }
                 ])
                 .withApiKey(AUTH_TOKEN)
@@ -70,7 +70,7 @@ describe('Streams API', () => {
                     },
                     {
                         name: 'user',
-                        type: 'object'
+                        type: 'map'
                     }
                 ])
                 .withApiKey(AUTH_TOKEN_2)
@@ -91,7 +91,7 @@ describe('Streams API', () => {
                         },
                         {
                             name: 'user',
-                            type: 'object'
+                            type: 'map'
                         }
                     ])
                     .withApiKey(AUTH_TOKEN)
@@ -111,7 +111,7 @@ describe('Streams API', () => {
                     },
                     {
                         name: 'user',
-                        type: 'object'
+                        type: 'map'
                     }
                 ])
             })
@@ -164,7 +164,7 @@ describe('Streams API', () => {
                     .call()
             })
 
-            it('responds with 500', () => {
+            it('responds with 200', () => {
                 assert.equal(response.status, 200)
             })
 

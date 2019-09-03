@@ -116,7 +116,6 @@ describe('Canvas API', function() {
                 await streamrClient.publish(stream.id, {
                     numero: i,
                 })
-                console.log(`Published message ${i}`)
             }
         })
 
