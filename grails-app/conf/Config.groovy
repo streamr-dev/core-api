@@ -442,7 +442,7 @@ streamr.signup.requireCaptcha = (System.getProperty("streamr.signup.requireCaptc
 /**
  * Streamr engine-and-editor nodes
  */
-streamr.nodes = System.getProperty("streamr.nodes") ? Arrays.asList(System.getProperty("streamr.nodes").split(",")) : [new NodeService().getIPAddress([streamr: [node: [ip: System.getProperty("streamr.engine.node.ip")]]])]
+streamr.engine.nodes = System.getProperty("streamr.engine.nodes") ? Arrays.asList(System.getProperty("streamr.engine.nodes").split(",")) : [new NodeService().getIPAddress([streamr: [node: [ip: System.getProperty("streamr.engine.node.ip")]]])]
 
 /**
  * Miscellaneous
