@@ -2,7 +2,7 @@
 
 [![Build Status](https://travis-ci.org/streamr-dev/engine-and-editor.svg?branch=master)](https://travis-ci.org/streamr-dev/engine-and-editor)
 
-Web application containing the backend for Streamr Core, facilitating thins like:
+Web application containing the backend for Streamr Core, facilitating things like:
 - Creating streams
 - Creating and running canvases
 - Creating dashboards
@@ -41,7 +41,7 @@ You might also want to run the [Core UI](https://github.com/streamr-dev/streamr-
 npm install
 ```
 
-4. Run `streamr-docker-dev start 1` if you are using the recommended tool streamr-docker-dev. Otherwise make sure all services dependencies are running and the the web applications is properly configured to connect to them.
+4. Run `streamr-docker-dev start 1` if you are using the recommended tool streamr-docker-dev. Otherwise make sure all service dependencies are running and the the web applications is properly configured to connect to them.
 
 5. Start the web application
 ```
@@ -56,8 +56,7 @@ The project uses [Travis CI](https://travis-ci.org/streamr-dev/engine-and-editor
 
 ## Docker
 
-A [Docker image](https://hub.docker.com/r/streamr/engine-and-editor/) is automatically built and pushed to DockerHub when commits
-are pushed to branch `master`.
+A [Docker image](https://hub.docker.com/r/streamr/engine-and-editor/) is automatically built and pushed to DockerHub when commits are pushed to branch `master`.
 
 ## IDE
 
@@ -76,7 +75,7 @@ These are also available as pre-shared run configurations if you use IntelliJ ID
 
 This codebase comprises two logical parts:
 
-- API which allows users to manage to create streams, canvases, products, and other Streamr resources. The API controllers and services are mainly written in Groovy and use the Grails web framework.
+- API which allows users to create and manage streams, canvases, products, and other Streamr resources. The API controllers and services are mainly written in Groovy and use the Grails web framework.
 - The Engine is written mostly in Java and is responsible for executing canvases (user-defined processes which process, analyze and act upon real-time event data. The APIs, on the other hand, is responsible for API(s), rendered web pages and other front-facing functionality.
 
 When you run the app with `grails run-app`, most changes to source code files are automatically hot reloaded into the running JVM process.
