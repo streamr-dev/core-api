@@ -4,6 +4,8 @@ import com.streamr.client.StreamrClient
 import com.streamr.client.authentication.ApiKeyAuthenticationMethod
 import com.streamr.client.authentication.AuthenticationMethod
 import com.streamr.client.authentication.EthereumAuthenticationMethod
+import com.streamr.client.options.EncryptionOptions
+import com.streamr.client.options.SigningOptions
 import com.streamr.client.options.StreamrClientOptions
 import com.unifina.domain.security.Key
 import com.unifina.utils.MapTraversal
@@ -43,10 +45,13 @@ class StreamrClientService {
 	}
 
 	private static StreamrClient createInstance(AuthenticationMethod authenticationMethod) {
-		StreamrClientOptions options = new StreamrClientOptions(authenticationMethod)
-		options.setRestApiUrl(MapTraversal.getString(Holders.getConfig(), "streamr.api.http.url"))
-		options.setWebsocketApiUrl(MapTraversal.getString(Holders.getConfig(), "streamr.api.websocket.url"));
-		return new StreamrClient(options)
+		return new StreamrClient(new StreamrClientOptions(
+			authenticationMethod,
+			SigningOptions.getDefault(),
+			EncryptionOptions.getDefault(),
+			MapTraversal.getString(Holders.getConfig(), "streamr.api.websocket.url"),
+			MapTraversal.getString(Holders.getConfig(), "streamr.api.http.url")
+		))
 	}
 
 	/**
