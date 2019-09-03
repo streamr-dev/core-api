@@ -152,6 +152,12 @@ class PermissionApiController {
 			permissionService.systemRevoke(p)
 			render status: 204
 		}
+
+		usePermissionResource(params.resourceClass, params.resourceId, id as Long) { p, res ->
+			permissionService.systemRevoke(p)
+			render status: 204
+		}
+
 	}
 
 	private usePermissionResource(Class resourceClass, resourceId, Long permissionId, Closure action) {
@@ -169,14 +175,6 @@ class PermissionApiController {
 			} else {
 				action(p, resource)
 			}
-		}
-	}
-
-	@StreamrApi(authenticationLevel = AuthLevel.NONE)
-	def remove(String id) {
-		usePermissionResource(params.resourceClass, params.resourceId, id as Long) { p, res ->
-			permissionService.systemRevoke(p)
-			render status: 204
 		}
 	}
 }
