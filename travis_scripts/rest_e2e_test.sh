@@ -9,7 +9,7 @@ sudo ifconfig docker0 10.200.10.1/24
 # Start everything except engine-and-editor
 $TRAVIS_BUILD_DIR/streamr-docker-dev/streamr-docker-dev/bin.sh start 1
 
-# TODO: needed?
+# Allow time for services to start
 echo "Sleeping for 30 seconds..." && sleep 30
 
 # Start engine-and-editor in the background
