@@ -14,6 +14,13 @@ import org.apache.http.util.EntityUtils
 
 import java.nio.charset.StandardCharsets
 
+/**
+ * Engine and editor proxies the following endpoints to the Community Product server:
+ *
+ * GET /communities/{communityAddress}/stats: returns Operator stats.
+ * GET /communities/{communityAddress}/members: returns list of members
+ * GET /communities/{communityAddress}/members/{memberAddress}: returns individual member stats (such as balances and withdraw proofs)
+ */
 class CommunityOperatorService {
 	String baseUrl
 	HttpClient client
