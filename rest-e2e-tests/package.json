@@ -18,10 +18,9 @@
     "mocha": "^6.1.4",
     "node-fetch": "^2.6.0",
     "sleep-promise": "^8.0.1",
-    "streamr-client": "^2.2.0",
+    "streamr-client": "^2.2.1",
     "web3": "^1.0.0-beta.55"
   },
   "devDependencies": {
-    "babel-runtime": "^6.26.0"
   }
 }
