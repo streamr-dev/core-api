@@ -77,7 +77,7 @@ class StreamApiController {
 			}
 			if (stream.validate()) {
 				stream.save(failOnError: true)
-				render(status: 204)
+				render(stream.toMap() as JSON)
 			} else {
 				throw new ValidationException(stream.errors)
 			}

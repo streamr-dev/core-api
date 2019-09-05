@@ -2257,8 +2257,11 @@
           }
         ],
         "responses": {
-          "204": {
-            "description": "Success (no content)"
+          "200": {
+            "description": "Success",
+            "schema": {
+              "$ref": "#/definitions/Stream"
+            }
           },
           "403": {
             "description": "Forbidden",
