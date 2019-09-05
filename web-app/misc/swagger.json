@@ -79,199 +79,199 @@
       "get": {
         "summary": "List all community join requests",
         "description": "List all community join requests.",
-          "tags": [
-            "communities"
-          ],
-          "parameters": [
-            {
-              "name": "communityAddress",
-              "in": "path",
-              "description": "Ethereum address of the community",
-              "required": true,
-              "type": "string",
-              "default": false
-            },
-            {
-              "name": "state",
-              "in": "query",
-              "enum": [
-                "pending",
-                "accepted",
-                "rejected"
-              ],
-              "description": "Filter listing by state of the join request",
-              "required": false,
-              "type": "string",
-              "default": false
-            }
-          ],
-          "responses": {
-            "200": {
-              "description": "Success"
-            },
-            "400": {
-              "description": "Required parameter missing"
-            }
+        "tags": [
+          "communities"
+        ],
+        "parameters": [
+          {
+            "name": "communityAddress",
+            "in": "path",
+            "description": "Ethereum address of the community",
+            "required": true,
+            "type": "string",
+            "default": false
+          },
+          {
+            "name": "state",
+            "in": "query",
+            "enum": [
+              "pending",
+              "accepted",
+              "rejected"
+            ],
+            "description": "Filter listing by state of the join request",
+            "required": false,
+            "type": "string",
+            "default": false
           }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success"
+          },
+          "400": {
+            "description": "Required parameter missing"
+          }
+        }
       },
       "post": {
         "summary": "Create community join request",
         "description": "Create community join request from given json body",
-          "tags": [
-            "communities"
-          ],
-          "parameters": [
-            {
-              "name": "communityAddress",
-              "in": "path",
-              "description": "Ethereum address of the community",
-              "required": true,
-              "type": "string",
-              "default": false
-            },
-            {
-              "name": "body",
-              "in": "body",
-              "description": "Community join request details",
-              "required": true,
-              "schema": {
-                "$ref": "#/definitions/CreateCommunityJoinRequest"
-              }
-            }
-          ],
-          "responses": {
-            "200": {
-              "description": "Success"
-            },
-            "400": {
-              "description": "Required parameters missing"
-            },
-            "403": {
-              "description": "Given community secret is incorrect"
-            },
-            "404": {
-              "description": "Member address is not owned by the current user"
+        "tags": [
+          "communities"
+        ],
+        "parameters": [
+          {
+            "name": "communityAddress",
+            "in": "path",
+            "description": "Ethereum address of the community",
+            "required": true,
+            "type": "string",
+            "default": false
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "description": "Community join request details",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/CreateCommunityJoinRequest"
             }
           }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success"
+          },
+          "400": {
+            "description": "Required parameters missing"
+          },
+          "403": {
+            "description": "Given community secret is incorrect"
+          },
+          "404": {
+            "description": "Member address is not owned by the current user"
+          }
+        }
       }
     },
     "/communities/{communityAddress}/joinRequests/{joinRequestId}": {
       "get": {
         "summary": "Find community's join request by id",
         "description": "Find community's join request by join request id.",
-          "tags": [
-            "communities"
-          ],
-          "parameters": [
-            {
-              "name": "communityAddress",
-              "in": "path",
-              "description": "Ethereum address of the community",
-              "required": true,
-              "type": "string",
-              "default": false
-            },
-            {
-              "name": "joinRequestId",
-              "in": "path",
-              "description": "ID of the join request",
-              "required": true,
-              "type": "string",
-              "default": false
-            }
-          ],
-          "responses": {
-            "200": {
-              "description": "Success"
-            },
-            "400": {
-              "description": "Required parameters missing"
-            },
-            "404": {
-              "description": "Community join request not found by id"
-            }
+        "tags": [
+          "communities"
+        ],
+        "parameters": [
+          {
+            "name": "communityAddress",
+            "in": "path",
+            "description": "Ethereum address of the community",
+            "required": true,
+            "type": "string",
+            "default": false
+          },
+          {
+            "name": "joinRequestId",
+            "in": "path",
+            "description": "ID of the join request",
+            "required": true,
+            "type": "string",
+            "default": false
           }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success"
+          },
+          "400": {
+            "description": "Required parameters missing"
+          },
+          "404": {
+            "description": "Community join request not found by id"
+          }
+        }
       },
       "put": {
         "summary": "Update community join request state",
         "description": "Update state attribute of the community join request.",
-          "tags": [
-            "communities"
-          ],
-          "parameters": [
-            {
-              "name": "communityAddress",
-              "in": "path",
-              "description": "Ethereum address of the community",
-              "required": true,
-              "type": "string",
-              "default": false
-            },
-            {
-              "name": "joinRequestId",
-              "in": "path",
-              "description": "ID of the join request",
-              "required": true,
-              "type": "string",
-              "default": false
-            },
-            {
-              "name": "body",
-              "in": "body",
-              "description": "Community join request state",
-              "required": true,
-              "schema": {
-                "$ref": "#/definitions/UpdateCommunityJoinRequest"
-              }
-            }
-          ],
-          "responses": {
-            "204": {
-              "description": "Success"
-            },
-            "400": {
-              "description": "Required parameters missing"
-            },
-            "404": {
-              "description": "Community join request not found by id"
+        "tags": [
+          "communities"
+        ],
+        "parameters": [
+          {
+            "name": "communityAddress",
+            "in": "path",
+            "description": "Ethereum address of the community",
+            "required": true,
+            "type": "string",
+            "default": false
+          },
+          {
+            "name": "joinRequestId",
+            "in": "path",
+            "description": "ID of the join request",
+            "required": true,
+            "type": "string",
+            "default": false
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "description": "Community join request state",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/UpdateCommunityJoinRequest"
             }
           }
+        ],
+        "responses": {
+          "204": {
+            "description": "Success"
+          },
+          "400": {
+            "description": "Required parameters missing"
+          },
+          "404": {
+            "description": "Community join request not found by id"
+          }
+        }
       },
       "delete": {
         "summary": "Delete community join request",
         "description": "Delete community join request.",
-          "tags": [
-            "communities"
-          ],
-          "parameters": [
-            {
-              "name": "communityAddress",
-              "in": "path",
-              "description": "Ethereum address of the community",
-              "required": true,
-              "type": "string",
-              "default": false
-            },
-            {
-              "name": "joinRequestId",
-              "in": "path",
-              "description": "ID of the join request",
-              "required": true,
-              "type": "string",
-              "default": false
-            }
-          ],
-          "responses": {
-            "204": {
-              "description": "Success"
-            },
-            "400": {
-              "description": "Required parameters missing"
-            },
-            "404": {
-              "description": "Community join request not found by id"
-            }
+        "tags": [
+          "communities"
+        ],
+        "parameters": [
+          {
+            "name": "communityAddress",
+            "in": "path",
+            "description": "Ethereum address of the community",
+            "required": true,
+            "type": "string",
+            "default": false
+          },
+          {
+            "name": "joinRequestId",
+            "in": "path",
+            "description": "ID of the join request",
+            "required": true,
+            "type": "string",
+            "default": false
           }
+        ],
+        "responses": {
+          "204": {
+            "description": "Success"
+          },
+          "400": {
+            "description": "Required parameters missing"
+          },
+          "404": {
+            "description": "Community join request not found by id"
+          }
+        }
       }
     },
     "/communities/{communityAddress}/secrets": {
@@ -2311,52 +2311,6 @@
         }
       }
     },
-    "/streams/{streamId}/keys/{keyId}": {
-      "put": {
-        "summary": "Update Stream's Key's name and permission",
-        "description": "Update Stream's Key's name and permission.",
-        "parameters": [
-          {
-            "name": "body",
-            "in": "body",
-            "description": "UpdateStreamKeyRequest object",
-            "required": true,
-            "schema": {
-              "$ref": "#/definitions/UpdateStreamKeyRequest"
-            }
-          },
-          {
-            "in": "path",
-            "name": "streamId",
-            "description": "ID of the stream",
-            "required": true,
-            "type": "string"
-          },
-          {
-            "in": "path",
-            "name": "keyId",
-            "description": "ID of the key to be updated",
-            "required": true,
-            "type": "string"
-          }
-        ],
-        "tags": [
-          "streams",
-          "keys"
-        ],
-        "responses": {
-          "200": {
-            "description": "Success"
-          },
-          "400": {
-            "description": "Invalid Request"
-          },
-          "404": {
-            "description": "Not Found"
-          }
-        }
-      }
-    },
     "/streams/{id}/detectFields": {
       "post": {
         "summary": "Detect stream's field types.",
@@ -2887,6 +2841,50 @@
       }
     },
     "/streams/{streamId}/keys/{id}": {
+      "put": {
+        "summary": "Update Stream's Key's name and permission",
+        "description": "Update Stream's Key's name and permission.",
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "description": "UpdateStreamKeyRequest object",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/UpdateStreamKeyRequest"
+            }
+          },
+          {
+            "in": "path",
+            "name": "streamId",
+            "description": "ID of the stream",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "in": "path",
+            "name": "id",
+            "description": "ID of the key to be updated",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "tags": [
+          "streams",
+          "keys"
+        ],
+        "responses": {
+          "200": {
+            "description": "Success"
+          },
+          "400": {
+            "description": "Invalid Request"
+          },
+          "404": {
+            "description": "Not Found"
+          }
+        }
+      },
       "delete": {
         "summary": "Delete a key",
         "description": "Deletes an API key from the given Stream.\n Requires 'share' permission or ownership.",
@@ -3118,7 +3116,6 @@
             "in": "query",
             "name": "start",
             "description": "Start date where the data deletion starts. Format is either milliseconds since epoch or ISO8601 datetime.",
-
             "required": true,
             "type": "string"
           },
