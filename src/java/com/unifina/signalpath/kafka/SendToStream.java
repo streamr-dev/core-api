@@ -59,8 +59,12 @@ public class SendToStream extends ModuleWithSideEffects {
 		Stream stream = streamParameter.getValue();
 		try {
 			com.streamr.client.rest.Stream s = cacheStream(stream);
-			// TODO: read partitionKey
-			streamrClient.publish(s, inputValuesToMap(), getGlobals().getTime());
+			streamrClient.publish(
+				s,
+				inputValuesToMap(),
+				getGlobals().getTime(),
+				partitionKey != null && partitionKey.getValue() != null ? partitionKey.getValue().toString() : null
+			);
 		} catch (Exception e) {
 			log.error("Failed to publish: ", e);
 		}
@@ -76,7 +80,11 @@ public class SendToStream extends ModuleWithSideEffects {
 		Map msg = new LinkedHashMap<>();
 		Iterable<Input> inputs = sendOnlyNewValues ? getDrivingInputs() : fieldInputs;
 		for (Input i : inputs) {
-			msg.put(i.getName(), i.getValue());
+			if (i == partitionKey) {
+				continue;
+			} else {
+				msg.put(i.getName(), i.getValue());
+			}
 		}
 		return msg;
 	}
@@ -152,6 +160,8 @@ public class SendToStream extends ModuleWithSideEffects {
 
 		if (stream.getPartitions() > 1) {
 			partitionKey = new Input<>(this, "partitionKey", "Object");
+			partitionKey.setCanToggleDrivingInput(false);
+			partitionKey.setRequiresConnection(false);
 			addInput(partitionKey);
 		}
 	}

@@ -36,7 +36,6 @@ class SendToStreamSpec extends BeanMockingSpecification {
 		permissionService = mockBean(PermissionService, Mock(PermissionService))
 		streamService = mockBean(StreamService, Mock(StreamService))
 
-
 		stream = new Stream()
 		stream.id = stream.name = "stream-0"
 		stream.config = [fields: [
@@ -79,15 +78,14 @@ class SendToStreamSpec extends BeanMockingSpecification {
 		new ModuleTestHelper.Builder(module, inputValues, outputValues)
 			.overrideGlobals { globals }
 			.afterEachTestCase {
-				assert streamrClient.sentMessagesByChannel == [
-					"stream-0": [
-						[strIn:"a", numIn:1.0],
-						[strIn:"b", numIn:2.0],
-						[strIn:"c", numIn:3.0],
-						[strIn:"d", numIn:4.0]
-					]
+				def sentMessagesByStream = streamrClient.getAndClearSentMessages()
+				assert sentMessagesByStream.keySet().asList() == [stream.id]
+				assert sentMessagesByStream[stream.id]*.payload == [
+					[strIn:"a", numIn:1.0],
+					[strIn:"b", numIn:2.0],
+					[strIn:"c", numIn:3.0],
+					[strIn:"d", numIn:4.0]
 				]
-				streamrClient.sentMessagesByChannel = [:]
 			}.test()
 	}
 
@@ -144,17 +142,16 @@ class SendToStreamSpec extends BeanMockingSpecification {
 		new ModuleTestHelper.Builder(module, inputValues, outputValues)
 			.overrideGlobals { globals }
 			.afterEachTestCase {
-				assert streamrClient.sentMessagesByChannel == [
-					"stream-0": [
-						[strIn:"a", numIn:1.0],
-						[strIn:"b", numIn:2.0],
-					],
-					"stream-1": [
-						[strIn:"c", numIn:3.0],
-						[strIn:"d", numIn:4.0],
-					]
+				def sentMessagesByStream = streamrClient.getAndClearSentMessages()
+				assert sentMessagesByStream.keySet() == [stream.id, s2.id].toSet()
+				assert sentMessagesByStream[stream.id]*.payload == [
+					[strIn:"a", numIn:1.0],
+					[strIn:"b", numIn:2.0],
 				]
-				streamrClient.sentMessagesByChannel = [:]
+				assert sentMessagesByStream[s2.id]*.payload == [
+					[strIn:"c", numIn:3.0],
+					[strIn:"d", numIn:4.0],
+				]
 			}.test()
 	}
 
@@ -173,16 +170,15 @@ class SendToStreamSpec extends BeanMockingSpecification {
 		new ModuleTestHelper.Builder(module, inputValues, outputValues)
 			.overrideGlobals { globals }
 			.afterEachTestCase {
-				assert streamrClient.sentMessagesByChannel == [
-					"stream-0": [
-						[strIn: "a", numIn: 1.0],
-						[strIn: "a", numIn: 2.0],
-						[strIn: "c", numIn: 2.0],
-						[strIn: "d", numIn: 4.0],
-						[strIn: "f", numIn: 6.0]
-					]
+				def sentMessagesByStream = streamrClient.getAndClearSentMessages()
+				assert sentMessagesByStream.keySet().asList() == [stream.id]
+				assert sentMessagesByStream[stream.id]*.payload == [
+					[strIn: "a", numIn: 1.0],
+					[strIn: "a", numIn: 2.0],
+					[strIn: "c", numIn: 2.0],
+					[strIn: "d", numIn: 4.0],
+					[strIn: "f", numIn: 6.0]
 				]
-				streamrClient.sentMessagesByChannel = [:]
 		}.test()
 	}
 
@@ -201,17 +197,58 @@ class SendToStreamSpec extends BeanMockingSpecification {
 		new ModuleTestHelper.Builder(module, inputValues, outputValues)
 			.overrideGlobals { globals }
 			.afterEachTestCase {
-				assert streamrClient.sentMessagesByChannel == [
-					"stream-0": [
-						[strIn: "a", numIn: 1.0],
-						[numIn: 2.0],
-						[strIn: "c"],
-						[strIn: "d", numIn: 4.0],
-						[strIn: "f", numIn: 6.0]
-					]
+				def sentMessagesByStream = streamrClient.getAndClearSentMessages()
+				assert sentMessagesByStream.keySet().asList() == [stream.id]
+				assert sentMessagesByStream[stream.id]*.payload == [
+					[strIn: "a", numIn: 1.0],
+					[numIn: 2.0],
+					[strIn: "c"],
+					[strIn: "d", numIn: 4.0],
+					[strIn: "f", numIn: 6.0]
 				]
-				streamrClient.sentMessagesByChannel = [:]
 		}.test()
+	}
+
+	void "SendToStream exposes a partitionKey input when the stream has multiple partitions"() {
+		stream.partitions = 10
+		stream.save(validate: false)
+
+		permissionService.canWrite(_, _) >> true
+		createModule()
+
+		expect:
+		module.getInput("partitionKey") != null
+	}
+
+	void "SendToStream passes the partitionKey to StreamrClient when available"() {
+		stream.partitions = 10
+		stream.save(validate: false)
+
+		permissionService.canWrite(_, _) >> true
+		createModule()
+
+		Map inputValues = [
+			strIn: ["a", "b", "c", "d"],
+			numIn: [1, 2, 3, 4].collect {it?.doubleValue()},
+			partitionKey: ["x", "y", "z", null]
+		]
+		Map outputValues = [:]
+
+		expect:
+		new ModuleTestHelper.Builder(module, inputValues, outputValues)
+			.overrideGlobals { globals }
+			.afterEachTestCase {
+				def sentMessagesByStream = streamrClient.getAndClearSentMessages()
+				assert sentMessagesByStream.keySet().asList() == [stream.id]
+				assert sentMessagesByStream[stream.id]*.payload == [
+					[strIn:"a", numIn:1.0],
+					[strIn:"b", numIn:2.0],
+					[strIn:"c", numIn:3.0],
+					[strIn:"d", numIn:4.0]
+				]
+				// last non-null value "z" lingers in the input if sendOnlyNewValues is false
+				assert sentMessagesByStream[stream.id]*.partitionKey == ["x", "y", "z", "z"]
+			}.test()
 	}
 
 }
