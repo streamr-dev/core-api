@@ -177,8 +177,7 @@ public class SolidityCompileDeploy extends ModuleWithUI implements Pullable<Ethe
 	@Override
 	protected void onConfiguration(Map<String, Object> config) {
 		super.onConfiguration(config);
-		ModuleOptions options = ModuleOptions.get(config);
-		ethereumOptions = EthereumModuleOptions.readFrom(options);
+
 		// the button to send "deploy" message shouldn't be visible after deployment
 		// onConfiguration may still be triggered by parameter changes
 		if (contract != null && contract.isDeployed()) {
@@ -187,6 +186,9 @@ public class SolidityCompileDeploy extends ModuleWithUI implements Pullable<Ethe
 			}
 			return;
 		}
+
+		ModuleOptions options = ModuleOptions.get(config);
+		ethereumOptions = EthereumModuleOptions.readFrom(options);
 		web3j = getWeb3j();
 		boolean compileRequested = config.containsKey("compile");
 		boolean deployRequested = config.containsKey("deploy");
