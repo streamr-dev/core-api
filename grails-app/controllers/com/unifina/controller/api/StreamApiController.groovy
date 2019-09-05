@@ -60,6 +60,9 @@ class StreamApiController {
 			stream.name = newStream.name
 			stream.description = newStream.description
 			stream.config = readConfig()
+			if (newStream.partitions != null) {
+				stream.partitions = newStream.partitions
+			}
 			if (newStream.autoConfigure != null) {
 				stream.autoConfigure = newStream.autoConfigure
 			}
