@@ -105,9 +105,15 @@ public class SendEthereumTransaction extends ModuleWithSideEffects {
 		//String stringconfig = new Gson().toJson(config);
 		ModuleOptions options = ModuleOptions.get(config);
 		ethereumOptions = EthereumModuleOptions.readFrom(options);
+		if(contract.hasValue()){
+			String network = contract.getValue().getNetwork();
+			if(network != null) {
+				log.info("Setting ethereumOptions.network = " + network + ", passed from Contract");
+				ethereumOptions.setNetwork(network);
+			}
+		}
 		web3j = getWeb3j();
 		updateInterface();
-
 		// Find the function input config and configure it manually.
 		// The input is not yet configured, so otherwise it won't hold the correct value yet.
 		if (config.containsKey("params")) {

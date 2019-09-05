@@ -34,6 +34,9 @@ public class EthereumModuleOptions implements Serializable {
 	public String getNetwork() {
 		return network;
 	}
+	public void setNetwork(String network) {
+		this.network = network;
+	}
 
 	public double getGasPriceWei() {
 		return gasPriceWei;

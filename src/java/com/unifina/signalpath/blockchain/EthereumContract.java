@@ -10,16 +10,22 @@ import java.util.Map;
 
 public class EthereumContract implements Serializable {
 
+	public static final String KEY_ABI = "abi";
+	public static final String KEY_ADDRESS = "address";
+	public static final String KEY_NETWORK = "network";
+
 	private String address;
 	private EthereumABI abi;
+	private String network;
 
 	/**
 	 * Constructor for deployed contracts that already have an address.
 	 * isDeployed() will return true.
      */
-	public EthereumContract(String address, EthereumABI abi) {
+	public EthereumContract(String address, EthereumABI abi, String network) {
 		this(abi);
 		this.address = address;
+		this.network = network;
 	}
 
 	/**
@@ -34,6 +40,14 @@ public class EthereumContract implements Serializable {
 		return address;
 	}
 
+	public String getNetwork() {
+		return network;
+	}
+
+	public void setNetwork(String network) {
+		this.network = network;
+	}
+
 	public EthereumABI getABI() {
 		return abi;
 	}
@@ -45,18 +59,24 @@ public class EthereumContract implements Serializable {
 	public Map<String, Object> toMap() {
 		Map<String, Object> map = new LinkedHashMap<>();
 		if (address != null) {
-			map.put("address", address);
+			map.put(KEY_ADDRESS, address);
 		}
-		map.put("abi", getABI().toList());
+		if (network != null) {
+			map.put(KEY_NETWORK, network);
+		}
+		map.put(KEY_ABI, getABI().toList());
 		return map;
 	}
 
 	public static EthereumContract fromMap(Map<String, Object> map) {
 		List abiList = null;
 		try {
-			abiList = (List) map.get("abi");
+			abiList = (List) map.get(KEY_ABI);
 		} catch (Exception e) {
 		}
-		return new EthereumContract(MapTraversal.getString(map, "address"), new EthereumABI(abiList));
+		String address = MapTraversal.getString(map, KEY_ADDRESS);
+		String network = MapTraversal.getString(map, KEY_NETWORK);
+
+		return new EthereumContract(address, new EthereumABI(abiList),network);
 	}
 }

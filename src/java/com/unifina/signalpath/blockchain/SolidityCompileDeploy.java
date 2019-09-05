@@ -177,7 +177,8 @@ public class SolidityCompileDeploy extends ModuleWithUI implements Pullable<Ethe
 	@Override
 	protected void onConfiguration(Map<String, Object> config) {
 		super.onConfiguration(config);
-
+		ModuleOptions options = ModuleOptions.get(config);
+		ethereumOptions = EthereumModuleOptions.readFrom(options);
 		// the button to send "deploy" message shouldn't be visible after deployment
 		// onConfiguration may still be triggered by parameter changes
 		if (contract != null && contract.isDeployed()) {
@@ -186,9 +187,6 @@ public class SolidityCompileDeploy extends ModuleWithUI implements Pullable<Ethe
 			}
 			return;
 		}
-
-		ModuleOptions options = ModuleOptions.get(config);
-		ethereumOptions = EthereumModuleOptions.readFrom(options);
 		web3j = getWeb3j();
 		boolean compileRequested = config.containsKey("compile");
 		boolean deployRequested = config.containsKey("deploy");
@@ -211,13 +209,14 @@ public class SolidityCompileDeploy extends ModuleWithUI implements Pullable<Ethe
 			boolean hasDeployer = ethereumAccount.getAddress() != null;
 			if (hasCode && hasDeployer) {
 				compilationResult = compile(code);
-				contract = new EthereumContract(null, new EthereumABI(new JsonParser().parse(compilationResult.get("abi").getAsString()).getAsJsonArray()));
+				contract = new EthereumContract(null, new EthereumABI(new JsonParser().parse(compilationResult.get("abi").getAsString()).getAsJsonArray()),null);
 			}
 		} else if (config.get("code") != null) {
 			code = config.get("code").toString();
 		}
 
 		if (contract != null) {
+			contract.setNetwork(ethereumOptions.getNetwork());
 			if (deployRequested && compilationResult != null) {
 				// transform Streamr params into list of constructor arguments
 				Stack<Object> args = new Stack<>();
@@ -239,7 +238,7 @@ public class SolidityCompileDeploy extends ModuleWithUI implements Pullable<Ethe
 				String bytecode = compilationResult.get("bin").getAsString();
 				try {
 					String address = deploy(bytecode, args, sendWei);
-					contract = new EthereumContract(address, contract.getABI());
+					contract = new EthereumContract(address, contract.getABI(), ethereumOptions.getNetwork());
 				} catch (Exception e) {
 					throw new RuntimeException(e);
 				}

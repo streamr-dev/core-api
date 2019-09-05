@@ -223,7 +223,13 @@ public class GetEvents extends AbstractSignalPathModule implements EventsListene
 		super.onConfiguration(config);
 		ModuleOptions options = ModuleOptions.get(config);
 		ethereumOptions = EthereumModuleOptions.readFrom(options);
-
+		if(contract.hasValue()){
+			String network = contract.getValue().getNetwork();
+			if(network != null) {
+				log.info("Setting ethereumOptions.network = " + network + ", passed from Contract");
+				ethereumOptions.setNetwork(network);
+			}
+		}
 		web3j = getWeb3j();
 		outputsByEvent = new HashMap<>();
 		web3jEvents = new HashMap<String, Event>();

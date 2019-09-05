@@ -92,6 +92,9 @@ public class GetEthereumContractAt extends AbstractSignalPathModule {
 		ModuleOptions options = ModuleOptions.get(config);
 		ethereumOptions = EthereumModuleOptions.readFrom(options);
 		String network = ethereumOptions.getNetwork();
+		if(contract != null){
+			contract.setNetwork(network);
+		}
 		//address != 0x0
 		if (address.length() > 2 && !Numeric.toBigInt(address).equals(BigInteger.ZERO)) {
 			if (abiString == null || abiString.trim().equals("") || abiString.trim().equals("[]")) {
@@ -111,7 +114,7 @@ public class GetEthereumContractAt extends AbstractSignalPathModule {
 			}
 
 			addOutput(out);
-			contract = new EthereumContract(address, abi);
+			contract = new EthereumContract(address, abi, ethereumOptions.getNetwork());
 		}
 		//address = 0x0
 		else {
@@ -149,7 +152,7 @@ public class GetEthereumContractAt extends AbstractSignalPathModule {
 		EthereumABI abi = new EthereumABI(abiString);
 
 		if (contract != null && !addressParam.getValue().equals(contract.getAddress()) && abi != null) {
-			contract = new EthereumContract(addressParam.getValue(), abi);
+			contract = new EthereumContract(addressParam.getValue(), abi, ethereumOptions.getNetwork());
 		}
 
 		if (contract != null) {
