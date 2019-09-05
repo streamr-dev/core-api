@@ -125,6 +125,14 @@ public class SendToStream extends ModuleWithSideEffects {
 				" is not properly configured!");
 		}
 
+		// Add the partitionKey input if the stream has multiple partitions
+		if (stream.getPartitions() > 1) {
+			partitionKey = new Input<>(this, "partitionKey", "Object");
+			partitionKey.setCanToggleDrivingInput(false);
+			partitionKey.setRequiresConnection(false);
+			addInput(partitionKey);
+		}
+
 		final JSONObject streamConfig = (JSONObject) JSON.parse(stream.getConfig());
 		final JSONArray fields = streamConfig.getJSONArray("fields");
 
@@ -155,14 +163,8 @@ public class SendToStream extends ModuleWithSideEffects {
 			}
 		}
 
-		if (streamConfig.containsKey("name"))
+		if (streamConfig.containsKey("name")) {
 			this.setName(streamConfig.get("name").toString());
-
-		if (stream.getPartitions() > 1) {
-			partitionKey = new Input<>(this, "partitionKey", "Object");
-			partitionKey.setCanToggleDrivingInput(false);
-			partitionKey.setRequiresConnection(false);
-			addInput(partitionKey);
 		}
 	}
 
