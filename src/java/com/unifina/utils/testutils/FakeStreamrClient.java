@@ -37,7 +37,7 @@ public class FakeStreamrClient extends StreamrClient {
 		return result;
 	}
 
-	class SentMessage {
+	static class SentMessage {
 		public Map<String, Object> payload;
 		public Date timestamp;
 		public String partitionKey;
