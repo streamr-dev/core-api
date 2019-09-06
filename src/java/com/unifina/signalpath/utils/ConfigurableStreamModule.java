@@ -1,44 +1,67 @@
 package com.unifina.signalpath.utils;
 
-import com.unifina.data.IStreamRequirement;
+import com.streamr.client.utils.StreamPartition;
 import com.unifina.domain.data.Stream;
 import com.unifina.signalpath.*;
+import com.unifina.utils.MapTraversal;
 import grails.converters.JSON;
 import org.codehaus.groovy.grails.web.json.JSONArray;
 import org.codehaus.groovy.grails.web.json.JSONObject;
 
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 /**
  * This module creates inputs and outputs on configuration time
- * with regard to a streamConfig given in the database.
- * 
- * The streamConfig must be a JSON message with a key "fields": a list of
+ * with regard to a field config for a Stream.
+ *
+ * The fields config must be a JSON message with a key "fields": a list of
  * (name,type) pairs.
- * 
+ *
  * The sreamConfig can also define a key "name", which is used as the module name.
- * 
- * This module works well with the MapMessageEventRecipient event recipient class.
- * @author Henri
+ *
+ * Output from this module is written via StreamPropagationRoot.
  */
-public class ConfigurableStreamModule extends AbstractStreamSourceModule implements IStreamRequirement {
+public class ConfigurableStreamModule extends AbstractSignalPathModule {
 
-	transient protected JSONObject streamConfig = null;
+	private final StreamParameter streamParameter = new StreamParameter(this, "stream");
+
+	private Collection<Integer> selectedPartitions = Collections.emptyList();
+
+	@Override
+	public void init() {
+		streamParameter.setUpdateOnChange(true);
+		streamParameter.setDrivingInput(false);
+		streamParameter.setCanToggleDrivingInput(false);
+		addInput(streamParameter);
+	}
+
+	public Stream getStream() {
+		return streamParameter.getValue();
+	}
+
+	public Collection<StreamPartition> getStreamPartitions() {
+		return selectedPartitions.stream()
+			.map((partition) -> new StreamPartition(getStream().getId(), partition))
+			.collect(Collectors.toList());
+
+	}
 
 	@Override
 	public void sendOutput() {
-
+		// StreamPropagationRoot sends values to the outputs of this module
 	}
 
 	@Override
-	public void clearState() {
-
-	}
+	public void clearState() {}
 
 	@Override
 	protected void onConfiguration(Map<String, Object> config) {
 		super.onConfiguration(config);
-		
+
 		Stream stream = getStream();
 		if (stream == null) {
 			return;
@@ -47,10 +70,10 @@ public class ConfigurableStreamModule extends AbstractStreamSourceModule impleme
 			String msg = String.format("Stream %s is not properly configured!", stream.getName());
 			throw new IllegalStateException(msg);
 		}
-		streamConfig = (JSONObject)JSON.parse(stream.getConfig());
 
+		JSONObject streamConfig = (JSONObject)JSON.parse(stream.getConfig());
 		JSONArray fields = streamConfig.getJSONArray("fields");
-		
+
 		for (Object o : fields) {
 			JSONObject j = (JSONObject)o;
 			String type = j.getString("type");
@@ -77,9 +100,28 @@ public class ConfigurableStreamModule extends AbstractStreamSourceModule impleme
 				addOutput(output);
 			}
 		}
-		
-		if (streamConfig.containsKey("name"))
+
+		if (streamConfig.containsKey("name")) {
 			this.setName(streamConfig.get("name").toString());
+		}
+
+		if (config.containsKey("partitions")) {
+			selectedPartitions = MapTraversal.getList(config, "partitions");
+		} else {
+			// Default to all partitions selected
+			selectedPartitions = new ArrayList<>(getStream().getPartitions());
+			for (int i=0; i<getStream().getPartitions(); i++) {
+				selectedPartitions.add(i);
+			}
+		}
 	}
 
+	@Override
+	public Map<String, Object> getConfiguration() {
+		Map<String, Object> config = super.getConfiguration();
+
+		config.put("partitions", selectedPartitions);
+
+		return config;
+	}
 }

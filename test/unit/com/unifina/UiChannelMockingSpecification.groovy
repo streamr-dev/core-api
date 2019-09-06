@@ -18,8 +18,7 @@ class UiChannelMockingSpecification extends ModuleTestingSpecification {
 	Map<String, List<Map>> sentMessagesByStreamId = [:]
 
 	protected void mockServicesForUiChannels(Canvas canvas = new Canvas()) {
-		StreamService streamService = Mock(StreamService)
-		mockBean(StreamService, streamService)
+		StreamService streamService = mockBean(StreamService, Mock(StreamService))
 
 		streamService.getStream(_) >> {String streamId->
 			Stream s = new Stream()

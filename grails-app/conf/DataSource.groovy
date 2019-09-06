@@ -32,7 +32,7 @@ hibernate {
 environments {
     development {
         dataSource {
-			logSql = true
+			logSql = Boolean.parseBoolean(System.getProperty('logSql') ?: 'false')
 			formatSql = true
 			username = System.getProperty('streamr.database.user', 'root')
 			password = System.getProperty('streamr.database.password', 'password')

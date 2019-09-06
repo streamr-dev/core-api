@@ -2,7 +2,7 @@ package com.unifina.service
 
 import com.unifina.api.NotPermittedException
 import com.unifina.domain.dashboard.Dashboard
-import com.unifina.domain.data.Feed
+
 import com.unifina.domain.data.Stream
 import com.unifina.domain.marketplace.Product
 import com.unifina.domain.marketplace.Subscription
@@ -610,8 +610,6 @@ class PermissionService {
 			return "canvas"
 		} else if (Dashboard.isAssignableFrom(resourceClass)) {
 			return "dashboard"
-		} else if (Feed.isAssignableFrom(resourceClass)) {
-			return "feed"
 		} else if (ModulePackage.isAssignableFrom(resourceClass)) {
 			return "modulePackage"
 		} else if (Product.isAssignableFrom(resourceClass)) {

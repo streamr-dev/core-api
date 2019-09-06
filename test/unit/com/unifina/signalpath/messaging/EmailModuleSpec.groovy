@@ -7,7 +7,7 @@ import com.unifina.domain.signalpath.Canvas
 import com.unifina.signalpath.NotificationMessage
 import com.unifina.signalpath.SignalPath
 import com.unifina.utils.Globals
-import com.unifina.utils.GlobalsFactory
+
 import com.unifina.utils.testutils.ModuleTestHelper
 import grails.plugin.springsecurity.SpringSecurityService
 import grails.test.mixin.Mock
@@ -51,8 +51,8 @@ class EmailModuleSpec extends UiChannelMockingSpecification {
 		module.canvasService = cs
 	}
 
-	private void initContext(Map context = [:], SecUser user = new SecUser(username: "username").save(failOnError: true, validate: false)) {
-		globals = GlobalsFactory.createInstance(context, user)
+	private void initContext(Globals.Mode mode = Globals.Mode.REALTIME, Map context = [:], SecUser user = new SecUser(username: "username").save(failOnError: true, validate: false)) {
+		globals = mockGlobals(context, user, mode)
 		globals.time = new Date()
 
 		module.globals = globals
@@ -71,8 +71,7 @@ class EmailModuleSpec extends UiChannelMockingSpecification {
 
 	void "emailModule sends the correct email"() {
 		initContext()
-		globals.realtime = true
-		globals.dataSource = new RealtimeDataSource()
+
 		when:
 		Map inputValues = [
 			subject: ["Subject"],
@@ -116,7 +115,7 @@ https://www.streamr.com/canvas/editor/1
 
 	void "module should send an email for a realtime datasource"() {
 		initContext()
-		globals.realtime = true
+
 		def df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS")
 		df.setTimeZone(TimeZone.getTimeZone("UTC"))
 
@@ -154,8 +153,7 @@ https://www.streamr.com/canvas/editor/1
 	}
 
 	void "module should send a notification for a non-realtime datasource"() {
-		initContext()
-		globals.realtime = false
+		initContext(Globals.Mode.HISTORICAL)
 
 		when:
 			module.sub.receive("Test subject")
@@ -173,7 +171,6 @@ https://www.streamr.com/canvas/editor/1
 	void "If trying to send emails too often send notification to warn about it"() {
 		setup:
 			initContext()
-			globals.realtime = true
 
 		when: "sent two emails very often"
 			globals.time = new Date(0)
@@ -202,10 +199,9 @@ https://www.streamr.com/canvas/editor/1
 			getSentMessagesByStreamId()[module.parentSignalPath.getUiChannel().getId()].size() == 1
 	}
 
-	void "if too emails are sent too frequently, the next one contains a warning about it"() {
+	void "if emails are sent too frequently, the next one contains a warning about it"() {
 		setup: "two emails sent frequently"
 			initContext()
-			globals.realtime = true
 
 			globals.time = new Date(0)
 			module.sub.receive("Test subject")
@@ -237,7 +233,7 @@ https://www.streamr.com/canvas/editor/1
 
 	void "EmailModule can be instantiated without a user"() {
 		expect:
-			initContext([:], null)
+			initContext(Globals.Mode.REALTIME, [:], null)
 	}
 
 }
