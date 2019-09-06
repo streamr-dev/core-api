@@ -45,6 +45,7 @@ public class Web3jHelper {
 		}
 		return tr;
 	}
+
 	public static Function toWeb3jFunction(EthereumABI.Function fn, List args) throws ClassNotFoundException, NoSuchMethodException, InvocationTargetException, InstantiationException, IllegalAccessException {
 		List<String> solidity_inputtypes = new ArrayList<String>(fn.inputs.size());
 		List<String> solidity_outputtypes = new ArrayList<String>(fn.outputs.size());
@@ -69,8 +70,9 @@ public class Web3jHelper {
 
 	public static List<EventValues> extractEventParameters(Event event, TransactionReceipt transactionReceipt) {
 		List<Log> logs = transactionReceipt.getLogs();
-		return extractEventParameters(event,logs);
+		return extractEventParameters(event, logs);
 	}
+
 	public static List<EventValues> extractEventParameters(Event event, List<? extends Log> logs) {
 		List<EventValues> values = new ArrayList<>();
 		for (Log log : logs) {
@@ -84,18 +86,20 @@ public class Web3jHelper {
 
 	/**
 	 * get item (i,j,k...) from a multi-dimensional Web3j array
+	 *
 	 * @param array
 	 * @param indices
 	 * @return
 	 */
 
-	public static Type web3jArrayGet(Array array,int... indices){
+	public static Type web3jArrayGet(Array array, int... indices) {
 		Array ar = array;
-		Object val=null;
-		for(int d=0;d<indices.length;d++){
+		Object val = null;
+		for (int d = 0; d < indices.length; d++) {
 			val = ar.getValue().get(indices[d]);
-			if(d < indices.length -1)
+			if (d < indices.length - 1) {
 				ar = (Array) val;
+			}
 		}
 		return (Type) val;
 	}
@@ -103,15 +107,13 @@ public class Web3jHelper {
 	public static TransactionReceipt waitForTransactionReceipt(Web3j web3j, String txHash, long waitMsBetweenTries, int tries) throws IOException {
 		try {
 			return waitForTransactionReceipt(web3j, txHash, waitMsBetweenTries, tries, false);
-		}
-		catch(InterruptedException e){
+		} catch (InterruptedException e) {
 			log.error("waitForTransactionReceipt threw InterruptedException despite throwInterruptedException = false. This shouldnt happen.");
 			throw new RuntimeException(e);
 		}
 	}
 
 	/**
-	 *
 	 * @param web3j
 	 * @param txHash
 	 * @param waitMsBetweenTries
@@ -133,7 +135,7 @@ public class Web3jHelper {
 					Thread.sleep(waitMsBetweenTries);
 				} catch (InterruptedException e) {
 					log.info(e.getMessage());
-					if(throwInterruptedException){
+					if (throwInterruptedException) {
 						throw e;
 					}
 				}
@@ -142,25 +144,25 @@ public class Web3jHelper {
 		return receipt;
 	}
 
-	public static Web3j getWeb3jConnectionFromConfig(){
+	public static Web3j getWeb3jConnectionFromConfig() {
 		EthereumModuleOptions ethereumOptions = new EthereumModuleOptions();
 		return Web3j.build(new HttpService(ethereumOptions.getRpcUrl()));
 	}
 
 	/**
 	 * Get a public field in Ethereum contract. Returns T of a Type&lt;T&gt; specified in fieldType.
-	 *
+	 * <p>
 	 * For example:
-	 *
+	 * <p>
 	 * if contract contains:
 	 * address public owner;
-	 *
+	 * <p>
 	 * then
 	 * String s = getPublicField(web3j, contractAddress, "owner", Address.class); returns a String type with the owner address
-	 *
+	 * <p>
 	 * if contract contains:
 	 * uint public somenum;
-	 *
+	 * <p>
 	 * then
 	 * BigInteger i = getPublicField(web3j, contractAddress, "somenum", Uint.class); returns a BigInteger with the value of somenum
 	 */
@@ -183,7 +185,6 @@ public class Web3jHelper {
 	}
 
 	/**
-	 *
 	 * @param web3j
 	 * @param tr
 	 * @return the timestamp (seconds) of the block in which trasnaction occured, or -1 if not found
@@ -192,22 +193,22 @@ public class Web3jHelper {
 	public static long getBlockTime(Web3j web3j, TransactionReceipt tr) throws IOException {
 		DefaultBlockParameter dbp = DefaultBlockParameter.valueOf(tr.getBlockNumber());
 		EthBlock eb = web3j.ethGetBlockByNumber(dbp, false).send();
-		if(eb == null){
-			log.error("Error fetching block "+dbp);
+		if (eb == null) {
+			log.error("Error fetching block " + dbp);
 			return -1;
 		}
-		if(eb.hasError()) {
-			log.error("Error fetching block "+dbp+  ". Error = "+eb.getError());
+		if (eb.hasError()) {
+			log.error("Error fetching block " + dbp + ". Error = " + eb.getError());
 			return -1;
 		}
 		long ts = eb.getBlock().getTimestamp().longValue();
-		log.info("getBlockTime txHash: "+tr.getTransactionHash()+ " block number: "+tr.getBlockNumber()+ " timestamp: "+ts);
+		log.info("getBlockTime txHash: " + tr.getTransactionHash() + " block number: " + tr.getBlockNumber() + " timestamp: " + ts);
 		return ts;
 	}
 
 	/**
 	 * @param web3j
-	 * @param erc20address   address of ERC20 or 0x0 for ETH balance
+	 * @param erc20address  address of ERC20 or 0x0 for ETH balance
 	 * @param holderAddress
 	 * @return token balance in wei
 	 * @throws ExecutionException

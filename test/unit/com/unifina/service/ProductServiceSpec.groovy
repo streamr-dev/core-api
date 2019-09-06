@@ -217,12 +217,12 @@ class ProductServiceSpec extends Specification {
 
 	void "create() throws ValidationException if command object does not pass validation"() {
 		when:
-		service.create(new CreateProductCommand(), new SecUser())
+		service.create(new CreateProductCommand(pricePerSecond: -1), new SecUser())
 		then:
 		thrown(ValidationException)
 	}
 
-	void "create() creates and returns Product with correct info and NEW state"() {
+	void "create() creates and returns Product with correct info and NOT_DEPLOYED state"() {
 		setupStreams()
 		service.permissionService = Stub(PermissionService)
 
@@ -248,6 +248,7 @@ class ProductServiceSpec extends Specification {
 		and:
 		product.toMap() == [
 			id: "1",
+			type: "NORMAL",
 			name: "Product",
 			description: "Description of Product.",
 			imageUrl: null,
@@ -341,20 +342,11 @@ class ProductServiceSpec extends Specification {
 		Product.count() == 0
 	}
 
-	void "create() creates and returns Product when name is empty and description/category are null"() {
+	void "create() with an empty command object creates a product with default values"() {
 		setupStreams()
 		service.permissionService = Stub(PermissionService)
 
-		def validCommand = new CreateProductCommand(
-			name: "",
-			description: null,
-			category: null,
-			streams: [s1, s2, s3],
-			ownerAddress: "0x0000000000000000000000000000000000000000",
-			beneficiaryAddress: "0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF",
-			pricePerSecond: 10,
-			minimumSubscriptionInSeconds: 1
-		)
+		def validCommand = new CreateProductCommand()
 		def user = new SecUser()
 		user.name = "Arnold Schwarzenegger"
 
@@ -367,27 +359,46 @@ class ProductServiceSpec extends Specification {
 		and:
 		product.toMap() == [
 			id: "1",
+			type: "NORMAL",
 			name: "Untitled Product",
 			description: null,
 			imageUrl: null,
 			thumbnailUrl: null,
 			category: null,
-			streams: ["stream-1", "stream-2", "stream-3"],
+			streams: [],
 			state: "NOT_DEPLOYED",
 			previewStream: null,
 			previewConfigJson: null,
 			created: product.dateCreated,
 			updated: product.lastUpdated,
-			ownerAddress: "0x0000000000000000000000000000000000000000",
-			beneficiaryAddress: "0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF",
-			pricePerSecond: "10",
-			isFree: false,
+			ownerAddress: null,
+			beneficiaryAddress: null,
+			pricePerSecond: "0",
+			isFree: true,
 			priceCurrency: "DATA",
-			minimumSubscriptionInSeconds: 1,
+			minimumSubscriptionInSeconds: 0,
 			owner: "Arnold Schwarzenegger"
 		]
 		product.dateCreated != null
 		product.dateCreated == product.lastUpdated
+	}
+
+	void "create() can create community products"() {
+		setupStreams()
+		service.permissionService = Stub(PermissionService)
+
+		def validCommand = new CreateProductCommand(type: "COMMUNITY")
+		def user = new SecUser()
+		user.name = "Arnold Schwarzenegger"
+
+		when:
+		def product = service.create(validCommand, user)
+
+		then:
+		Product.findAll() == [product]
+
+		and:
+		product.toMap().type == "COMMUNITY"
 	}
 
 	void "update() throws ValidationException if command object does not pass validation"() {
@@ -537,6 +548,7 @@ class ProductServiceSpec extends Specification {
 		and:
 		updatedProduct.toMap() == [
 				id: "product-id",
+				type: "NORMAL",
 				name: "updated name",
 				description: "updated description",
 				imageUrl: null,
@@ -945,6 +957,7 @@ class ProductServiceSpec extends Specification {
 		and:
 		product.toMap() == [
 				id: "product-id",
+				type: "NORMAL",
 				name: "name",
 				description: "description",
 				imageUrl: null,

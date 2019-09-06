@@ -50,7 +50,7 @@ class CommunitySecretApiController {
 
 	// curl -v -H "Authorization: token tester1-api-key" -H "Content-Type: application/json" -d '{"name":"name"}' http://localhost:8081/streamr-core/api/v1/communities/0x6c90aece04198da2d5ca9b956b8f95af8041de37/secrets
 	@StreamrApi
-	def create(String communityAddress, CommunitySecretCommand cmd) {
+	def save(String communityAddress, CommunitySecretCommand cmd) {
 		if (!isCommunityAddress(communityAddress)) {
 			throw new BadRequestException("community address is not an ethereum address")
 		}

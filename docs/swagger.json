@@ -5227,18 +5227,15 @@
     },
     "CreateProduct": {
       "type": "object",
-      "required": [
-        "name",
-        "description",
-        "category",
-        "streams",
-        "ownerAddress",
-        "beneficiaryAddress",
-        "pricePerSecond",
-        "priceCurrency",
-        "minimumSubscriptionInSeconds"
-      ],
       "properties": {
+        "type": {
+          "type": "string",
+          "description": "Type of Product",
+          "enum": [
+            "NORMAL",
+            "COMMUNITY"
+          ]
+        },
         "name": {
           "type": "string",
           "example": "USD/ETH exchange rate"
@@ -5407,6 +5404,7 @@
       "type": "object",
       "required": [
         "id",
+        "type",
         "state",
         "created",
         "updated",
@@ -5428,6 +5426,14 @@
           "type": "string",
           "description": "unique identifier",
           "example": "11o6bc2HTs6W8oFRpMugmwTeodGTOxSzKQCIHeK_qDnA"
+        },
+        "type": {
+          "type": "string",
+          "description": "Type of Product",
+          "enum": [
+            "NORMAL",
+            "COMMUNITY"
+          ]
         },
         "state": {
           "type": "string",
