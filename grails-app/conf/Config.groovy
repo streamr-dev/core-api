@@ -13,6 +13,9 @@ environments {
 	production {
 		grails.serverURL = prodBaseUrl
 	}
+	development {
+		grails.serverURL = "http://localhost"
+	}
 }
 
 /**
