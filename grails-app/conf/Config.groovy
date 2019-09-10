@@ -330,12 +330,14 @@ grails.plugin.springsecurity.rememberMe.cookieName = 'streamr_remember_me'
 grails.plugin.springsecurity.rememberMe.key = System.getProperty("grails.plugin.springsecurity.rememberMe.key") ?: 'IfYouCanDreamItYouCanStreamIt'
 grails.plugin.springsecurity.password.algorithm = 'bcrypt'
 grails.plugin.springsecurity.logout.postOnly = false
-grails.plugin.springsecurity.successHandler.defaultTargetUrl = '/canvas'
+grails.plugin.springsecurity.successHandler.defaultTargetUrl = null
+grails.plugin.springsecurity.auth.loginFormUrl = null
+grails.plugin.springsecurity.auth.ajaxLoginFormUrl = null
 grails.plugin.springsecurity.ui.encodePassword = true
 grails.plugin.springsecurity.ui.password.minLength = 8
 
 // Due to https://jira.grails.org/browse/GPSPRINGSECURITYCORE-253 errorPage needs to be
-// set to null and 403 mapped in UnifinaCorePluginUrlMappings
+// set to null and 403 mapped in UrlMappings
 grails.plugin.springsecurity.adh.errorPage = null
 
 grails.plugin.springsecurity.securityConfigType = 'Annotation'
