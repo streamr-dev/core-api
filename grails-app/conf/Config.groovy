@@ -330,9 +330,9 @@ grails.plugin.springsecurity.rememberMe.cookieName = 'streamr_remember_me'
 grails.plugin.springsecurity.rememberMe.key = System.getProperty("grails.plugin.springsecurity.rememberMe.key") ?: 'IfYouCanDreamItYouCanStreamIt'
 grails.plugin.springsecurity.password.algorithm = 'bcrypt'
 grails.plugin.springsecurity.logout.postOnly = false
-grails.plugin.springsecurity.successHandler.defaultTargetUrl = null
-grails.plugin.springsecurity.auth.loginFormUrl = null
-grails.plugin.springsecurity.auth.ajaxLoginFormUrl = null
+grails.plugin.springsecurity.successHandler.defaultTargetUrl = '/'
+grails.plugin.springsecurity.auth.loginFormUrl = '/'
+grails.plugin.springsecurity.auth.ajaxLoginFormUrl = '/'
 grails.plugin.springsecurity.ui.encodePassword = true
 grails.plugin.springsecurity.ui.password.minLength = 8
 
