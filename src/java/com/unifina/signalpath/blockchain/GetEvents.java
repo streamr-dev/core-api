@@ -267,7 +267,6 @@ public class GetEvents extends AbstractSignalPathModule implements EventsListene
 	public Map<String, Object> getConfiguration() {
 		Map<String, Object> config = super.getConfiguration();
 		ModuleOptions options = ModuleOptions.get(config);
-		ethereumOptions.writeNetworkOption(options);
 		return config;
 	}
 

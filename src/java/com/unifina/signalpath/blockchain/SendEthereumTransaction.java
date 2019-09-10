@@ -90,8 +90,8 @@ public class SendEthereumTransaction extends ModuleWithSideEffects {
 		Map<String, Object> config = super.getConfiguration();
 
 		ModuleOptions options = ModuleOptions.get(config);
-		ethereumOptions.writeTo(options);
-
+		ethereumOptions.writeGasPriceOption(options);
+		ethereumOptions.writeGasLimitOption(options);
 		return config;
 	}
 
