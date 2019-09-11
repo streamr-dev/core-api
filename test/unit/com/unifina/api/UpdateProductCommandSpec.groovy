@@ -62,15 +62,32 @@ class UpdateProductCommandSpec extends Specification {
 		)
 	}
 
-	void "updateProduct() updates only non-blockchain fields of deployed Products"() {
+	void "updateProduct() throws when trying to update on-chain fields on a deployed paid product"() {
 		product.state = Product.State.DEPLOYED
+		product.pricePerSecond = 5
+
+		when:
+		command.updateProduct(product)
+
+		then:
+		thrown(FieldCannotBeUpdatedException)
+	}
+
+	void "updateProduct() updates all off-chain fields on a deployed paid product"() {
+		product.state = Product.State.DEPLOYED
+		product.pricePerSecond = 5
+
+		// Don't provide any of the on-chain fields
+		UpdateProductCommand.onChainFields.each {
+			command[it] = null
+		}
 
 		when:
 		command.updateProduct(product)
 
 		then:
 		product.toMap() == [
-		    id: "product-id",
+			id: "product-id",
 			type: "NORMAL",
 			state: "DEPLOYED",
 			created: null,
@@ -93,8 +110,9 @@ class UpdateProductCommandSpec extends Specification {
 		]
 	}
 
-	void "updateProduct() updates non-blockchain and blockchain fields of undeployed Products"() {
+	void "updateProduct() updates both on-chain and off-chain fields on non-deployed paid Products"() {
 		product.state = Product.State.NOT_DEPLOYED
+		product.pricePerSecond = 5
 
 		when:
 		command.updateProduct(product)
@@ -123,4 +141,50 @@ class UpdateProductCommandSpec extends Specification {
 			minimumSubscriptionInSeconds: 10L
 		]
 	}
+
+	void "updateProduct() updates both on-chain and off-chain fields on deployed free Products"() {
+		product.state = Product.State.DEPLOYED
+		product.pricePerSecond = 0
+		command.pricePerSecond = 0
+
+		when:
+		command.updateProduct(product)
+
+		then:
+		product.toMap() == [
+			id: "product-id",
+			type: "NORMAL",
+			state: "DEPLOYED",
+			created: null,
+			updated: null,
+			owner: "John Doe",
+			name: "new name",
+			description: "new description",
+			imageUrl: "image.jpg",
+			thumbnailUrl: "thumb.jpg",
+			category: "new-category-id",
+			streams: ["new-stream-id"],
+			previewStream: "new-stream-id",
+			previewConfigJson: "{newConfig: true}",
+			ownerAddress: "0xA",
+			beneficiaryAddress: "0xF",
+			pricePerSecond: "0",
+			isFree: true,
+			priceCurrency: "USD",
+			minimumSubscriptionInSeconds: 10L
+		]
+	}
+
+	void "updateProduct() throws when trying to change a free product to paid product when in deployed state"() {
+		product.state = Product.State.DEPLOYED
+		product.pricePerSecond = 0
+		command.pricePerSecond = 5
+
+		when:
+		command.updateProduct(product)
+
+		then:
+		thrown(FieldCannotBeUpdatedException)
+	}
+
 }
