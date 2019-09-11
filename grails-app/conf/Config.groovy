@@ -199,15 +199,6 @@ unifina.task.workers = 1
 unifina.task.messageQueue = "streamr-tasks"
 
 /**
- * Data feed config
- */
-// Cache data files locally?
-unifina.feed.useCache = false
-// Base dir for caching
-unifina.feed.cachedir = System.getProperty("java.io.tmpdir")
-
-
-/**
  * Node IP address config. Autodetected if not set.
  */
 streamr.node.ip = System.getProperty("streamr.node.ip")

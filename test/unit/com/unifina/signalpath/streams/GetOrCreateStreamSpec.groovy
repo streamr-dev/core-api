@@ -26,13 +26,12 @@ class GetOrCreateStreamSpec extends ModuleTestingSpecification {
 		streamExistsWithFields.id = "111-333-111"
 		streamExistsWithFields.config = "{'fields': [{'name': 'x', 'type': 'number'}, {'name': 'y', 'type': 'string'}]}"
 
-		streamService = Mock(StreamService)
+		streamService = mockBean(StreamService, Mock(StreamService))
 		streamService.createStream(_, _) >> {params, user ->
 			Stream s = new Stream()
 			s.id = params.name
 			return s
 		}
-		mockBean(StreamService, streamService)
 
 		permissionService = Mock(PermissionService)
 		permissionService.get(_, _, _, _, _) >> {clazz, user, ops, includeAnonymous, NameFilteringClosure filter ->

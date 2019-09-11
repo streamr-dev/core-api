@@ -1,11 +1,9 @@
 package com.unifina.signalpath
 
-import com.unifina.domain.security.SecUser
-import com.unifina.utils.GlobalsFactory
+import com.unifina.ModuleTestingSpecification
 import com.unifina.utils.window.WindowListener
-import spock.lang.Specification
 
-class AbstractModuleWithWindowSpec extends Specification {
+class AbstractModuleWithWindowSpec extends ModuleTestingSpecification {
 
 	private WindowingModule makeModule(boolean minSamples = true, Map config = [:], int dimensions = 1) {
 		Map<Object, WindowListener<Double>> windowListeners = [:]
@@ -14,8 +12,7 @@ class AbstractModuleWithWindowSpec extends Specification {
 		}
 
 		WindowingModule m = new WindowingModule(minSamples, dimensions, windowListeners, Mock(AbstractModuleWithWindow))
-		m.globals = GlobalsFactory.createInstance([:], new SecUser())
-		m.globals.time = new Date(0)
+		m.globals = mockGlobals()
 		m.init()
 		m.configure(config)
 		m.connectionsReady()

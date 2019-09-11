@@ -1,26 +1,28 @@
 package com.unifina.signalpath.remote
 
+import com.unifina.ModuleTestingSpecification
+import com.unifina.domain.security.SecUser
 import com.unifina.signalpath.ModuleOption
 import com.unifina.signalpath.ModuleOptions
 import com.unifina.signalpath.ModuleWithSideEffects
 import com.unifina.utils.Globals
 import com.unifina.utils.testutils.ModuleTestHelper
-import spock.lang.Specification
 
 import java.sql.ResultSet
 import java.sql.ResultSetMetaData
 import java.sql.Statement
 
-class SqlSpec extends Specification {
+class SqlSpec extends ModuleTestingSpecification {
 	Sql module
 	List result
+	Globals globals
 
 	void setup() {
 		TestableSql.statement = Stub(Statement) {
 			execute(_) >> { true }
 			getResultSet() >> { getMockCursor(result) }
 		}
-		module = new TestableSql();
+		module = new TestableSql()
 		module.init()
 		module.configure([
 			params: [
@@ -31,6 +33,8 @@ class SqlSpec extends Specification {
 				[name: "password", value: "pass"],
 			]
 		])
+
+		globals = mockGlobals([:], new SecUser(), Globals.Mode.REALTIME)
 	}
 
 	private def getMockCursor(List<Map> results) {
@@ -64,10 +68,7 @@ class SqlSpec extends Specification {
 
 		then:
 		new ModuleTestHelper.Builder(module, inputValues, outputValues)
-				.overrideGlobals { Globals globals ->
-			globals.setRealtime(true)
-			return globals
-		}.test()
+				.overrideGlobals { globals }.test()
 	}
 
 	void "SQL module builds the connection URL correctly"() {
@@ -89,10 +90,9 @@ class SqlSpec extends Specification {
 
 		then:
 		new ModuleTestHelper.Builder(module, inputValues, outputValues)
-				.overrideGlobals { Globals globals ->
-			globals.setRealtime(false)
-			return globals
-		}.test()
+				.overrideGlobals {
+					return mockGlobals([:], new SecUser(), Globals.Mode.HISTORICAL)
+				}.test()
 
 		0 * TestableSql.statement.execute(_)
 	}
@@ -117,9 +117,8 @@ class SqlSpec extends Specification {
 
 		then:
 		new ModuleTestHelper.Builder(module, inputValues, outputValues)
-				.overrideGlobals { Globals globals ->
-			globals.setRealtime(false)
-			return globals
-		}.test()
+				.overrideGlobals {
+					return mockGlobals([:], new SecUser(), Globals.Mode.HISTORICAL)
+				}.test()
 	}
 }
