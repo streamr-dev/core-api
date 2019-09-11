@@ -5,6 +5,9 @@ import com.unifina.signalpath.ModuleOptions;
 import com.unifina.utils.MapTraversal;
 import grails.util.Holders;
 import org.apache.log4j.Logger;
+import org.web3j.protocol.Web3j;
+import org.web3j.protocol.http.HttpService;
+import org.web3j.protocol.websocket.WebSocketService;
 
 import java.io.Serializable;
 import java.util.Map;
@@ -15,6 +18,8 @@ public class EthereumModuleOptions implements Serializable {
 	private String network = MapTraversal.getString(Holders.getConfig(), "streamr.ethereum.defaultNetwork");
 	private double gasPriceWei = 20e9; // 20 Gwei
 	private int gasLimit = 6000000;
+
+	public enum RpcConectionMethod {ws,http};
 
 	public void writeTo(ModuleOptions options) {
 		writeNetworkOption(options);
@@ -79,6 +84,7 @@ public class EthereumModuleOptions implements Serializable {
 		options.add(networkOption);
 	}
 
+
 	public void readNetworkOption(ModuleOptions options) {
 		ModuleOption networkOption = options.getOption("network");
 		if (networkOption != null) {
@@ -100,5 +106,41 @@ public class EthereumModuleOptions implements Serializable {
 			log.warn("No websockets URI found for Ethereum network " + network);
 		}
 		return url;
+	}
+	public Web3j getWeb3j() {
+		return getWeb3j(RpcConectionMethod.http);
+	}
+
+	public Web3j getWeb3j(RpcConectionMethod preferredMethod){
+		Web3j web3j;
+		int start = preferredMethod.ordinal();
+		int len = RpcConectionMethod.values().length;
+		//cycle thru all connection methods starting with preferredMethod
+		for(int i=0;i<len;i++){
+			RpcConectionMethod method  = RpcConectionMethod.values()[start + i % len];
+			web3j = getWeb3jUsingMethod(method);
+			if(web3j != null){
+				log.info("Created RPC using connection method: "+method);
+				return web3j;
+			}
+		}
+		return null;
+	}
+	private Web3j getWeb3jUsingMethod(RpcConectionMethod preferredMethod){
+		String url;
+		switch(preferredMethod){
+			case http:
+				if((url = getRpcUrl()) == null){
+					log.warn("No http RPC URL specified");
+				}
+				return Web3j.build(new HttpService(url));
+			case ws :
+				if((url = getWebsocketRpcUri()) == null){
+					log.warn("No ws RPC URL specified");
+				}
+				return Web3j.build(new WebSocketService(url,true));
+			default:
+				return null;
+		}
 	}
 }

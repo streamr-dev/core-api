@@ -96,7 +96,7 @@ public class SendEthereumTransaction extends ModuleWithSideEffects {
 	}
 
 	protected Web3j getWeb3j(){
-		return Web3j.build(new HttpService(ethereumOptions.getRpcUrl()));
+		return ethereumOptions.getWeb3j();
 	}
 
 	@Override

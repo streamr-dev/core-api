@@ -171,7 +171,7 @@ public class SolidityCompileDeploy extends ModuleWithUI implements Pullable<Ethe
 	}
 
 	protected Web3j getWeb3j() {
-		return Web3j.build(new HttpService(ethereumOptions.getRpcUrl()));
+		return ethereumOptions.getWeb3jUsingMethod(EthereumModuleOptions.RpcConectionMethod.http);
 	}
 
 	@Override
