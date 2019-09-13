@@ -92,7 +92,7 @@ public class GetEthereumContractAt extends AbstractSignalPathModule {
 		ModuleOptions options = ModuleOptions.get(config);
 		ethereumOptions = EthereumModuleOptions.readFrom(options);
 		String network = ethereumOptions.getNetwork();
-		if(contract != null){
+		if (contract != null) {
 			contract.setNetwork(network);
 		}
 		//address != 0x0

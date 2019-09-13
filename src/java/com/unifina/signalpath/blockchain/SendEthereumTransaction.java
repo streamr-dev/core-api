@@ -95,7 +95,7 @@ public class SendEthereumTransaction extends ModuleWithSideEffects {
 		return config;
 	}
 
-	protected Web3j getWeb3j(){
+	protected Web3j getWeb3j() {
 		return Web3j.build(new HttpService(ethereumOptions.getRpcUrl()));
 	}
 
@@ -105,9 +105,9 @@ public class SendEthereumTransaction extends ModuleWithSideEffects {
 		//String stringconfig = new Gson().toJson(config);
 		ModuleOptions options = ModuleOptions.get(config);
 		ethereumOptions = EthereumModuleOptions.readFrom(options);
-		if(contract.hasValue()){
+		if (contract.hasValue()) {
 			String network = contract.getValue().getNetwork();
-			if(network != null) {
+			if (network != null) {
 				log.info("Setting ethereumOptions.network = " + network + ", passed from Contract");
 				ethereumOptions.setNetwork(network);
 			}
@@ -304,22 +304,22 @@ public class SendEthereumTransaction extends ModuleWithSideEffects {
 		/**
 		 * fetch tx data and populate transaction and receipt when done.
 		 * run this from a worker thread (eg async submit tx handler)
+		 * @throws IOException if Ethereum requests fail (network problem to Ethereum client)
 		 */
 		protected void enqueueConfirmedTx() throws IOException {
 			final FunctionCallResult fncall = this;
-			receipt = Web3jHelper.waitForTransactionReceipt(web3j,web3jTx.getTransactionHash(), check_result_waitms, check_result_max_tries);
+			receipt = Web3jHelper.waitForTransactionReceipt(web3j, web3jTx.getTransactionHash(), check_result_waitms, check_result_max_tries);
 			if (receipt != null) {
 				transaction = web3j.ethGetTransactionByHash(web3jTx.getTransactionHash()).send().getResult();
 				log.info("Receipt found for txHash: " + web3jTx.getTransactionHash());
 				long ts = getBlockTimeSeconds(receipt);
-				if(ts >= 0){
-					Date newts = new Date(ts*1000);
-					log.info("Updating timestamp of TransactionResult from "+timestamp + " to block timestamp "+newts);
+				if (ts >= 0) {
+					Date newts = new Date(ts * 1000);
+					log.info("Updating timestamp of TransactionResult from " + timestamp + " to block timestamp " + newts);
 					timestamp = newts;
 				}
 				enqueueEvent(fncall);
-			}
-			else{
+			} else {
 				log.error("Couldnt find receipt for txHash: " + web3jTx.getTransactionHash());
 			}
 		}
@@ -333,11 +333,11 @@ public class SendEthereumTransaction extends ModuleWithSideEffects {
 			return web3jTx.getTransactionHash();
 		}
 
-		public org.web3j.protocol.core.methods.response.Transaction getTransaction(){
+		public org.web3j.protocol.core.methods.response.Transaction getTransaction() {
 			return transaction;
 		}
 
-		public TransactionReceipt getTransactionReceipt(){
+		public TransactionReceipt getTransactionReceipt() {
 			return receipt;
 		}
 
@@ -358,12 +358,13 @@ public class SendEthereumTransaction extends ModuleWithSideEffects {
 					List<Object> objs = new ArrayList<Object>();
 					// indexed and non-indexed event args are saved differently in logs and must be retrieved by different methods
 					// see https://solidity.readthedocs.io/en/v0.5.3/contracts.html#events
-					int nextIndexed=0,nextNonIndexed=0;
-					for(EthereumABI.Slot s : e.inputs){
-						if(s.indexed)
+					int nextIndexed = 0, nextNonIndexed = 0;
+					for (EthereumABI.Slot s : e.inputs) {
+						if (s.indexed) {
 							objs.add(ev.getIndexedValues().get(nextIndexed++).getValue());
-						else
+						} else {
 							objs.add(ev.getNonIndexedValues().get(nextNonIndexed++).getValue());
+						}
 					}
 					events.put(e.name, objs);
 				}
@@ -414,7 +415,7 @@ public class SendEthereumTransaction extends ModuleWithSideEffects {
 		for (int i = 0; i < chosenFunction.inputs.size(); i++) {
 			args.add(arguments.get(i).getValue());
 		}
-		return Web3jHelper.toWeb3jFunction(chosenFunction,args);
+		return Web3jHelper.toWeb3jFunction(chosenFunction, args);
 	}
 
 	@Override
@@ -484,38 +485,40 @@ public class SendEthereumTransaction extends ModuleWithSideEffects {
 	}
 
 	// push the response into Streamr's event queue
-	protected void enqueueEvent(FunctionCallResult fc){
+	protected void enqueueEvent(FunctionCallResult fc) {
 		getGlobals().getDataSource().enqueueEvent(new FeedEvent<FunctionCallResult, SendEthereumTransaction>(fc, fc.timestamp, this));
 	}
 
 	/**
 	 * format the list as an array of Strings
+	 *
 	 * @param l
 	 * @return
 	 */
-	public static List stringifyTypeList(List l){
+	public static List stringifyTypeList(List l) {
 		ArrayList<String> printed = new ArrayList<String>(l.size());
-		for(Object o : l){
+		for (Object o : l) {
 			printed.add(typeToString(o));
 		}
 		return printed;
 	}
 
-	public static String typeToString(Object o){
-		if(!(o instanceof List)) {
-			if(o instanceof Type){
+	public static String typeToString(Object o) {
+		if (!(o instanceof List)) {
+			if (o instanceof Type) {
 				return ((Type) o).getValue().toString();
-			}
-			else
+			} else {
 				return o.toString();
+			}
 		}
 		StringBuilder sb = new StringBuilder();
 		List l = (List) o;
 		sb.append("[");
-		int i=0;
-		for(Object li : l){
-			if(i++ > 0)
+		int i = 0;
+		for (Object li : l) {
+			if (i++ > 0) {
 				sb.append(",");
+			}
 			sb.append(typeToString(li));
 		}
 		sb.append("]");
@@ -536,8 +539,9 @@ public class SendEthereumTransaction extends ModuleWithSideEffects {
 			int n = Math.min(results.size(), txResults.size());
 			for (int i = 0; i < n; i++) {
 				Object val = txResults.get(i).getValue();
-				if(val instanceof List)
+				if (val instanceof List) {
 					val = stringifyTypeList((List) val);
+				}
 				Output<Object> output = results.get(i);
 				convertAndSend(output, val);
 			}
@@ -548,19 +552,19 @@ public class SendEthereumTransaction extends ModuleWithSideEffects {
 			}
 
 			TransactionReceipt txreceipt = tx.getTransactionReceipt();
-			if(txreceipt != null){
+			if (txreceipt != null) {
 				gasUsed.send(txreceipt.getGasUsed().longValue());
 				blockNumber.send(txreceipt.getBlockNumber().longValue());
 			}
 			org.web3j.protocol.core.methods.response.Transaction txconfirm = tx.getTransaction();
-			if(txconfirm != null){
+			if (txconfirm != null) {
 				gasPrice.send(txconfirm.getGasPrice().longValue());
 				valueSent.send(new BigDecimal(txconfirm.getValue()).divide(BigDecimal.TEN.pow(18)).doubleValue());
 				nonce.send(txconfirm.getNonce().longValue());
 			}
 
 			Map<String, List<Object>> events = tx.getEvents();
-			if(events != null) {
+			if (events != null) {
 				for (EthereumABI.Event ev : abi.getEvents()) {
 					List<Object> args = events.get(ev.name);
 					List<Output<Object>> evOutputs = eventOutputs.get(ev);
