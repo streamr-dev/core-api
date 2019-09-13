@@ -69,14 +69,9 @@ public class EthereumContract implements Serializable {
 	}
 
 	public static EthereumContract fromMap(Map<String, Object> map) {
-		List abiList = null;
-		try {
-			abiList = (List) map.get(KEY_ABI);
-		} catch (Exception e) {
-		}
-		String address = MapTraversal.getString(map, KEY_ADDRESS);
-		String network = MapTraversal.getString(map, KEY_NETWORK);
-
-		return new EthereumContract(address, new EthereumABI(abiList),network);
+		List abiList = (List) map.get(KEY_ABI);
+		String address = (String) map.get(KEY_ADDRESS);
+		String network = (String) map.get(KEY_NETWORK);
+		return new EthereumContract(address, new EthereumABI(abiList), network);
 	}
 }
