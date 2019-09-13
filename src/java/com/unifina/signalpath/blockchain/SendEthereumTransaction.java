@@ -462,17 +462,14 @@ public class SendEthereumTransaction extends ModuleWithSideEffects {
 					public void accept(EthSendTransaction tx) {
 						log.debug("TX response: " + tx.getRawResponse());
 						TransactionResult tr = new TransactionResult(getGlobals().time, fn, tx);
-
-						//enqueue the txHash only when submitted, before result from blockchain
-						//enqueueEvent(tr);
-
 						try {
-							//if tx submit had error, don't wait to confirm tx
-							if(tr.getError() != null)
-								enqueueEvent(tr);
-							else
-							//enqueue the result from blockchain, when tx finishes
+							// put the result from blockchain to Streamr event queue when tx finishes
+							if (tr.getError() == null) {
 								tr.enqueueConfirmedTx();
+							} else {
+								// if tx submit had error, don't wait to confirm tx
+								enqueueEvent(tr);
+							}
 						} catch (IOException e) {
 							throw new RuntimeException(e);
 						}
