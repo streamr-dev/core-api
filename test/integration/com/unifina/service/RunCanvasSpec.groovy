@@ -5,7 +5,7 @@ import com.streamr.client.protocol.message_layer.StreamMessageV31
 import com.unifina.domain.data.Stream
 import com.unifina.domain.security.SecUser
 import com.unifina.domain.signalpath.Canvas
-import com.unifina.feed.FeedFactory
+
 import grails.test.spock.IntegrationSpec
 import spock.lang.Unroll
 import spock.util.concurrent.PollingConditions
@@ -30,10 +30,6 @@ class RunCanvasSpec extends IntegrationSpec {
 	def setup() {
 		user = SecUser.load(1L)
 		stream = Stream.get("run-canvas-spec")
-	}
-
-	def cleanup() {
-		FeedFactory.stopAndClearAll() // Do not leave messagehub threads lying around
 	}
 
 	@Unroll
@@ -81,6 +77,6 @@ class RunCanvasSpec extends IntegrationSpec {
 	}
 
 	static def modules(CanvasService canvasService, Canvas canvas) {
-		canvasService.signalPathService.runnersById[canvas.runner].signalPaths[0].mods
+		canvasService.signalPathService.runnersById[canvas.runner].signalPath.mods
 	}
 }

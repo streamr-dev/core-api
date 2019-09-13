@@ -16,7 +16,7 @@ import com.unifina.signalpath.UiChannelIterator
 import com.unifina.task.CanvasDeleteTask
 import com.unifina.task.CanvasStartTask
 import com.unifina.utils.Globals
-import com.unifina.utils.GlobalsFactory
+
 import grails.converters.JSON
 import grails.transaction.Transactional
 import groovy.json.JsonBuilder
@@ -322,7 +322,7 @@ class CanvasService {
 	 * Rebuild JSON to check it is ok and up-to-date
 	 */
 	private SignalPathService.ReconstructedResult reconstructFrom(Map signalPathMap, SecUser user) {
-		Globals globals = GlobalsFactory.createInstance(signalPathMap.settings ?: [:], user)
+		Globals globals = new Globals(signalPathMap.settings ?: [:], user)
 		return signalPathService.reconstruct(signalPathMap, globals)
 	}
 

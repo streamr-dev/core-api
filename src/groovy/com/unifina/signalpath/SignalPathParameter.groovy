@@ -19,7 +19,7 @@ class SignalPathParameter extends StringParameter {
 	@Override
 	Map<String,Object> getConfiguration() {
 		Map<String,Object> config = super.getConfiguration()
-		
+
 		if (getValue() != null) {
 			config.put("value", getValue())
 			config.put("defaultValue", getValue())
@@ -37,11 +37,12 @@ class SignalPathParameter extends StringParameter {
 			order("lastUpdated", "desc")
 		}
 
+		// TODO: fetching the canvases and passing them in possibleValues can be dropped after CORE-1779 and PLATFORM-1021 are both done
 		List possibleValues = signalPaths.collect {[value:it[0], name:it[1]]}
-		
+
 		if (getValue() == null)
 			possibleValues.add(0, [value:null, name: "Select >>"])
-			
+
 		config.put("possibleValues", possibleValues)
 
 		return config

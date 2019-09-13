@@ -1,17 +1,11 @@
 package com.unifina.controller.security
 
-import com.unifina.domain.data.Feed
-import com.unifina.domain.security.Key
-import com.unifina.domain.security.Permission
-import com.unifina.domain.security.SecRole
-import com.unifina.domain.security.SecUserSecRole
-import com.unifina.domain.security.SignupInvite
+import com.unifina.domain.security.*
 import com.unifina.domain.signalpath.ModulePackage
 import com.unifina.exceptions.UserCreationFailedException
 import grails.converters.JSON
 import grails.plugin.springsecurity.SpringSecurityUtils
 import grails.plugin.springsecurity.annotation.Secured
-import grails.plugin.springsecurity.authentication.dao.NullSaltSource
 import org.springframework.dao.DataIntegrityViolationException
 
 @Secured(["ROLE_ADMIN"])
@@ -25,17 +19,16 @@ class UserController {
 	static defaultAction = 'userSearch'
 
 	def create() {
-		def user = lookupUserClass().newInstance(params)
+		SecUser user = lookupUserClass().newInstance(params)
 		[user: user, authorityList: sortedRoles()]
 	}
 
     def save() {
 		List<SecRole> roles = SecRole.findAllByAuthorityInList(params.list("role"))
-		List<Feed> feeds = Feed.findAllByIdInList(params.list("feed").collect{ Long.parseLong(it) })
 		List<ModulePackage> packages = ModulePackage.findAllByIdInList(params.list("modulePackage").collect{ Long.parseLong(it) })
-		def user
+		SecUser user
         try {
-            user = userService.createUser(params, roles, feeds, packages)
+            user = userService.createUser(params, roles, packages)
 			redirect action: 'search'
         } catch (UserCreationFailedException e) {
 			flash.error = e.getMessage()
@@ -158,8 +151,6 @@ class UserController {
 
 		def roles = SecRole.findAllByAuthorityInList(params.list("role"))
 		userService.addRoles(user, roles)
-		def feeds = Feed.findAllByIdInList(params.list("feed").collect{ Long.parseLong(it) })
-		userService.setFeeds(user, feeds)
 		def packages = ModulePackage.findAllByIdInList(params.list("modulePackage").collect{ Long.parseLong(it) })
 		userService.setModulePackages(user, packages)
 		userCache.removeUserFromCache user[usernameFieldName]

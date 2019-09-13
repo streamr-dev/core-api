@@ -1,11 +1,9 @@
 package com.unifina.signalpath.remote
 
-import com.unifina.data.FeedEvent
+
+import com.unifina.data.Event
 import com.unifina.datasource.DataSource
-import com.unifina.datasource.DataSourceEventQueue
 import com.unifina.signalpath.Input
-import com.unifina.signalpath.StringInput
-import com.unifina.signalpath.StringParameter
 import com.unifina.utils.Globals
 import com.unifina.utils.testutils.ModuleTestHelper
 import org.eclipse.paho.client.mqttv3.MqttClient
@@ -15,10 +13,22 @@ import spock.lang.Specification
 
 class MqttSpec extends Specification {
 	Mqtt module
+	Globals mockGlobals
 
 	def setup() {
 		module = new TestableMqtt()
 		module.init()
+
+		/** Mocked event queue. Immediately dispatches events */
+		mockGlobals = Stub(Globals) {
+			getDataSource() >> Stub(DataSource) {
+				enqueue(_ as Event) >> { Event e ->
+					e.dispatch()
+				}
+			}
+			isRealtime() >> true
+		}
+		mockGlobals.time = new Date()
 	}
 
 	def cleanup() {
@@ -29,17 +39,6 @@ class MqttSpec extends Specification {
 	def mockClient = Stub(MqttClient) {
 
 	}
-
-	/** Mocked event queue. Works manually in tests, please call module.receive(queuedEvent) */
-	def mockGlobals = Stub(Globals) {
-		getDataSource() >> Stub(DataSource) {
-			enqueueEvent(_) >> { feedEvent ->
-				event = feedEvent[0]
-			}
-		}
-		isRealtime() >> true
-	}
-	FeedEvent event
 
 	void "module outputs the messages"() {
 		TestableMqtt.mqttClient = mockClient
@@ -56,7 +55,6 @@ class MqttSpec extends Specification {
 		module.initialize()
 		module.onStart()
 		module.messageArrived(topic, new MqttMessage(msg.getBytes()))
-		module.receive(event)
 		module.onStop()
 
 		then:

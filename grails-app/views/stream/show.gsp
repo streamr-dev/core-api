@@ -101,9 +101,6 @@
 								${stream.description}
 							</ui:labeled>
 
-							<ui:labeled label="${message(code:"stream.type.label")}">
-								${stream.feed.name}
-							</ui:labeled>
 						</div>
 					</div>
 				</div>
