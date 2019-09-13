@@ -73,39 +73,35 @@ public class SolidityCompileDeploy extends ModuleWithUI implements Pullable<Ethe
 		return config;
 	}
 
-	protected SolidityCompiler.Option[] getSolcOptions() {
-		SolidityCompiler.Option[] opts = {SolidityCompiler.Options.ABI, SolidityCompiler.Options.BIN};
-		return opts;
-	}
-
 	/**
-	 * choose the "main" contract from a list of compiled contract,
-	 * default implements simple heuristic: it chooses the one with the biggest bytecode
+	 * Choose the "main" contract from a list of compiled contracts
+	 *   using a simple heuristic: it chooses the one with the biggest bytecode
+	 *
 	 * @param contracts
 	 * @return
 	 */
-	protected JsonObject chooseMainContract(Set<Map.Entry<String, JsonElement>> contracts){
-		JsonObject longestcode=null;
-		int maxcodelen=0;
-		String name=null;
-		for(Map.Entry<String, JsonElement> e : contracts){
-			JsonObject rslt = e.getValue().getAsJsonObject();
-			int codelen = rslt.get("bin").getAsString().length();
-			if(codelen > maxcodelen){
-				longestcode = rslt;
-				maxcodelen = codelen;
+	protected JsonObject chooseMainContract(JsonObject contracts) {
+		JsonObject result = null;
+		int maxBytecodeSize = 0;
+		String name = null;
+		for (Map.Entry<String, JsonElement> e : contracts.entrySet()) {
+			JsonObject contract = e.getValue().getAsJsonObject();
+			int bytecodeSize = contract.get("bin").getAsString().length();
+			if (bytecodeSize > maxBytecodeSize) {
+				maxBytecodeSize = bytecodeSize;
 				name = e.getKey();
+				result = contract;
 			}
 		}
-		log.info("Chose contract "+name+" with length "+maxcodelen + " as the main contract");
-		return longestcode;
+		log.info("Chose contract " + name + " with length " + maxBytecodeSize + " as the main contract");
+		return result;
 	}
 
 	protected JsonObject compile(String solidity_code) {
 		String result = null;
 		String errors = null;
 		try {
-			SolidityCompiler.Result res = SolidityCompiler.compile(solidity_code.getBytes(StandardCharsets.UTF_8), true, getSolcOptions());
+			SolidityCompiler.Result res = SolidityCompiler.compile(solidity_code.getBytes(StandardCharsets.UTF_8), true, SolidityCompiler.Options.ABI, SolidityCompiler.Options.BIN);
 			if (res.isFailed()) {
 				errors = res.errors;
 			} else {
@@ -118,9 +114,7 @@ public class SolidityCompileDeploy extends ModuleWithUI implements Pullable<Ethe
 			throw new RuntimeException("Error compiling contract: " + errors);
 		}
 
-		Set<Map.Entry<String, JsonElement>> entries = new JsonParser().parse(result).getAsJsonObject().get("contracts").getAsJsonObject().entrySet();
-
-		//in case of many contracts, pick the one with the longest bytecode
+		JsonObject entries = new JsonParser().parse(result).getAsJsonObject().get("contracts").getAsJsonObject();
 		return chooseMainContract(entries);
 	}
 
