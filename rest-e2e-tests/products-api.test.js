@@ -68,6 +68,7 @@ describe('Products API', () => {
 
         genericProductBody = {
             name: 'Product',
+            type: 'NORMAL',
             description: 'Description of the product.',
             category: 'satellite-id',
             streams: [
@@ -98,13 +99,13 @@ describe('Products API', () => {
             await assertResponseIsError(response, 401, 'NOT_AUTHENTICATED')
         })
 
-        it('validates body', async () => {
+        it('succeeds with empty body', async () => {
             const body = {}
             const response = await Streamr.api.v1.products
                 .create(body)
                 .withAuthToken(AUTH_TOKEN)
                 .call()
-            await assertResponseIsError(response, 422, 'VALIDATION_ERROR')
+            assert.equal(response.status, 200)
         })
 
         it('validates existence of category (in body)', async () => {
@@ -178,6 +179,7 @@ describe('Products API', () => {
 
                 assert.deepEqual(json, {
                     name: 'Product',
+                    type: 'NORMAL',
                     description: 'Description of the product.',
                     imageUrl: null,
                     thumbnailUrl: null,
@@ -329,6 +331,7 @@ describe('Products API', () => {
 
                 assert.deepEqual(json, {
                     id: createdProductId,
+                    type: 'NORMAL',
                     name: 'Product (updated)',
                     description: 'Description of the product.',
                     imageUrl: null,

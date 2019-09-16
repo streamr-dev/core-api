@@ -53,7 +53,7 @@ class CommunityJoinRequestApiController {
 
 	// curl -v -H "Authorization: token tester1-api-key" -H "Content-Type: application/json" -d '{"memberAddress": "0x9334f0aa74d2744b97b0b1be6896788ee46f4aaa", metadata: {"foo":"bar"}}' http://localhost:8081/streamr-core/api/v1/communities/0x6c90aece04198da2d5ca9b956b8f95af8041de37/joinRequests
 	@StreamrApi
-	def create(String communityAddress, CommunityJoinRequestCommand cmd) {
+	def save(String communityAddress, CommunityJoinRequestCommand cmd) {
 		if (!isCommunityAddress(communityAddress)) {
 			throw new BadRequestException("community address is not an ethereum address")
 		}

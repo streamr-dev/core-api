@@ -89,7 +89,7 @@ grails.project.dependency.resolution = {
 			excludes('org.springframework:spring-orm:*')
 		}
 
-		compile('org.web3j:core:4.2.0')
+		compile('org.web3j:core:4.4.1')
 		compile('com.amazonaws:aws-java-sdk:1.11.294')
 		compile('org.imgscalr:imgscalr-lib:4.2')
 		compile('org.glassfish.jersey.core:jersey-client:2.27')

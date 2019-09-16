@@ -3,7 +3,6 @@ package com.unifina.service
 import com.unifina.api.NotFoundException
 import com.unifina.api.UpdateCommunityJoinRequestCommand
 import com.unifina.domain.community.CommunityJoinRequest
-import com.unifina.domain.data.Feed
 import com.unifina.domain.data.Stream
 import com.unifina.domain.marketplace.Category
 import com.unifina.domain.marketplace.Product
@@ -18,7 +17,6 @@ class CommunityJoinRequestServiceIntegrationSpec extends Specification {
 	SecUser me
 	Stream joinPartStream
 	Category category
-	Feed feed
 	final String communityAddress = "0x0000000000000000000000000000000000000000"
 
 	void setup() {
@@ -36,9 +34,8 @@ class CommunityJoinRequestServiceIntegrationSpec extends Specification {
 		mc.save(failOnError: true, validate: true)
 		Module module = new Module(name: "module name", alternativeNames: "alt names", implementingClass: "x", jsModule: "jsmodule", category: mc, type: "type")
 		module.save(failOnError: true, validate: true)
-		feed = new Feed(name: "feed", eventRecipientClass: "x", keyRecipientClass: "x", messageSourceClass: "x", parserClass: "x", keyProviderClass: "x", streamListenerClass: "x", timezone: "x", module: module)
-		feed.save(validate: true, failOnError: true)
-		joinPartStream = new Stream(name: "join part stream", feed: feed)
+
+		joinPartStream = new Stream(name: "join part stream")
 		joinPartStream.id = "jps-1"
 		joinPartStream.save(validate: true, failOnError: true)
 
@@ -202,10 +199,10 @@ class CommunityJoinRequestServiceIntegrationSpec extends Specification {
 
 	void "delete test"() {
 		setup:
-		Stream s1 = new Stream(name: "stream-1", feed: feed)
-		Stream s2 = new Stream(name: "stream-2", feed: feed)
-		Stream s3 = new Stream(name: "stream-3", feed: feed)
-		Stream s4 = new Stream(name: "stream-4", feed: feed)
+		Stream s1 = new Stream(name: "stream-1")
+		Stream s2 = new Stream(name: "stream-2")
+		Stream s3 = new Stream(name: "stream-3")
+		Stream s4 = new Stream(name: "stream-4")
 		[s1, s2, s3, s4].eachWithIndex { Stream stream, int i -> stream.id = "stream-${i+1}" } // assign ids
 		[s1, s2, s3, s4]*.save(failOnError: true, validate: true)
 

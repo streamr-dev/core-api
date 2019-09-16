@@ -1,5 +1,4 @@
 <%@ page import="com.unifina.domain.signalpath.ModulePackage" %>
-<%@ page import="com.unifina.domain.data.Feed" %>
 
 <html>
 
@@ -59,15 +58,6 @@
 			${p.name.encodeAsHTML()}
 		</div>
 		</g:each>
-
-		<h2>Feeds</h2>
-		<g:each var="f" in="${Feed.list()}">
-		<div>
-			<g:checkBox name="feed" value="${f.id}" checked="false"/>
-			${f.name?.encodeAsHTML() ?: f.id}
-		</div>
-		</g:each>
-
 
 <div style='float:left; margin-top: 10px; '>
 <s2ui:submitButton elementId='create' form='userCreateForm' messageCode='default.button.create.label'/>

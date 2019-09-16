@@ -2308,52 +2308,6 @@
         }
       }
     },
-    "/streams/{streamId}/keys/{keyId}": {
-      "put": {
-        "summary": "Update Stream's Key's name and permission",
-        "description": "Update Stream's Key's name and permission.",
-        "parameters": [
-          {
-            "name": "body",
-            "in": "body",
-            "description": "UpdateStreamKeyRequest object",
-            "required": true,
-            "schema": {
-              "$ref": "#/definitions/UpdateStreamKeyRequest"
-            }
-          },
-          {
-            "in": "path",
-            "name": "streamId",
-            "description": "ID of the stream",
-            "required": true,
-            "type": "string"
-          },
-          {
-            "in": "path",
-            "name": "keyId",
-            "description": "ID of the key to be updated",
-            "required": true,
-            "type": "string"
-          }
-        ],
-        "tags": [
-          "streams",
-          "keys"
-        ],
-        "responses": {
-          "200": {
-            "description": "Success"
-          },
-          "400": {
-            "description": "Invalid Request"
-          },
-          "404": {
-            "description": "Not Found"
-          }
-        }
-      }
-    },
     "/streams/{id}/detectFields": {
       "post": {
         "summary": "Detect stream's field types.",
@@ -2884,6 +2838,50 @@
       }
     },
     "/streams/{streamId}/keys/{id}": {
+      "put": {
+        "summary": "Update Stream's Key's name and permission",
+        "description": "Update Stream's Key's name and permission.",
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "description": "UpdateStreamKeyRequest object",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/UpdateStreamKeyRequest"
+            }
+          },
+          {
+            "in": "path",
+            "name": "streamId",
+            "description": "ID of the stream",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "in": "path",
+            "name": "id",
+            "description": "ID of the key to be updated",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "tags": [
+          "streams",
+          "keys"
+        ],
+        "responses": {
+          "200": {
+            "description": "Success"
+          },
+          "400": {
+            "description": "Invalid Request"
+          },
+          "404": {
+            "description": "Not Found"
+          }
+        }
+      },
       "delete": {
         "summary": "Delete a key",
         "description": "Deletes an API key from the given Stream.\n Requires 'share' permission or ownership.",
@@ -3064,11 +3062,13 @@
             "type": "string"
           },
           {
-            "in": "query",
-            "name": "date",
-            "description": "Delete data up to date. Format is either milliseconds since epoch or ISO8601 datetime",
+            "in": "body",
+            "name": "body",
+            "description": "Delete data up to date. Format is either milliseconds (integer) since epoch or ISO8601 datetime (string).",
             "required": true,
-            "type": "string"
+            "schema": {
+              "$ref": "#/definitions/DeleteDate"
+            }
           }
         ],
         "responses": {
@@ -3112,19 +3112,13 @@
             "type": "string"
           },
           {
-            "in": "query",
-            "name": "start",
-            "description": "Start date where the data deletion starts. Format is either milliseconds since epoch or ISO8601 datetime.",
-
+            "in": "body",
+            "name": "body",
+            "description": "Start date where the data deletion starts. Format is either milliseconds (integer) since epoch or ISO8601 datetime (string).",
             "required": true,
-            "type": "string"
-          },
-          {
-            "in": "query",
-            "name": "end",
-            "description": "Delete data up to this date. Format is either milliseconds since epoch or ISO8601 datetime.",
-            "required": true,
-            "type": "string"
+            "schema":  {
+              "$ref": "#/definitions/DeleteDateRange"
+            }
           }
         ],
         "responses": {
@@ -4619,6 +4613,35 @@
     }
   },
   "definitions": {
+    "DeleteDate": {
+      "type": "object",
+      "required": [
+        "date"
+      ],
+      "properties": {
+        "date": {
+          "type": "string",
+           "description": "Delete data up to date. Format is either milliseconds (integer) since epoch or ISO8601 datetime (string)."
+        }
+      }
+    },
+    "DeleteDateRange": {
+      "type": "object",
+      "required": [
+        "start",
+        "end"
+      ],
+      "properties": {
+        "start": {
+          "type": "string",
+           "description": "Start date where the data deletion starts. Format is either milliseconds (integer) since epoch or ISO8601 datetime (string)."
+        },
+        "end": {
+          "type": "string",
+           "description": "Delete data up to this date. Format is either milliseconds (integer) since epoch or ISO8601 datetime (string)."
+        }
+      }
+    },
     "CreateCommunityJoinRequest": {
       "type": "object",
       "required": [
@@ -5204,18 +5227,15 @@
     },
     "CreateProduct": {
       "type": "object",
-      "required": [
-        "name",
-        "description",
-        "category",
-        "streams",
-        "ownerAddress",
-        "beneficiaryAddress",
-        "pricePerSecond",
-        "priceCurrency",
-        "minimumSubscriptionInSeconds"
-      ],
       "properties": {
+        "type": {
+          "type": "string",
+          "description": "Type of Product",
+          "enum": [
+            "NORMAL",
+            "COMMUNITY"
+          ]
+        },
         "name": {
           "type": "string",
           "example": "USD/ETH exchange rate"
@@ -5384,6 +5404,7 @@
       "type": "object",
       "required": [
         "id",
+        "type",
         "state",
         "created",
         "updated",
@@ -5405,6 +5426,14 @@
           "type": "string",
           "description": "unique identifier",
           "example": "11o6bc2HTs6W8oFRpMugmwTeodGTOxSzKQCIHeK_qDnA"
+        },
+        "type": {
+          "type": "string",
+          "description": "Type of Product",
+          "enum": [
+            "NORMAL",
+            "COMMUNITY"
+          ]
         },
         "state": {
           "type": "string",

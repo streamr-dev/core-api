@@ -1,24 +1,22 @@
 package com.unifina.signalpath.kafka;
 
 import com.streamr.client.protocol.message_layer.StreamMessage;
-import com.unifina.data.FeedEvent;
-import com.unifina.data.IEventRecipient;
-import com.unifina.domain.data.Feed;
 import com.unifina.domain.data.Stream;
 import com.unifina.domain.security.SecUser;
-import com.unifina.feed.AbstractFeed;
 import com.unifina.service.PermissionService;
 import com.unifina.service.StreamService;
 import com.unifina.signalpath.*;
 import com.unifina.signalpath.utils.MessageChainUtil;
-import com.unifina.utils.Globals;
 import grails.converters.JSON;
 import grails.util.Holders;
 import org.codehaus.groovy.grails.web.json.JSONArray;
 import org.codehaus.groovy.grails.web.json.JSONObject;
 
 import java.security.AccessControlException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * This module (only) supports sending messages to Kafka/json streams (feed id 7)
@@ -27,13 +25,11 @@ import java.util.*;
  */
 public class SendToStream extends ModuleWithSideEffects {
 
-	protected StreamParameter streamParameter = new StreamParameter(this, "stream");
-	transient protected JSONObject streamConfig = null;
+	private StreamParameter streamParameter = new StreamParameter(this, "stream");
 
 	transient protected PermissionService permissionService = null;
 	transient protected StreamService streamService = null;
 
-	protected boolean historicalWarningShown = false;
 	private String lastStreamId = null;
 	private boolean sendOnlyNewValues = false;
 	private List<Input> fieldInputs = new ArrayList<>();
@@ -48,11 +44,6 @@ public class SendToStream extends ModuleWithSideEffects {
 		addInput(streamParameter);
 		streamParameter.setUpdateOnChange(true);
 		msgChainUtil = new MessageChainUtil(getGlobals().getUserId());
-
-		// TODO: don't rely on static ids
-		Feed feedFilter = new Feed();
-		feedFilter.setId(7L);
-		streamParameter.setFeedFilter(feedFilter);
 	}
 
 	private void ensureServices() {
@@ -81,27 +72,8 @@ public class SendToStream extends ModuleWithSideEffects {
 	}
 
 	@Override
-	protected void activateWithoutSideEffects(){
-		Globals globals = getGlobals();
-
-		// Create the message locally and route it to the stream locally, without actually producing to the stream
-		StreamMessage msg = msgChainUtil.getStreamMessage(streamParameter.getValue(), getGlobals().time, inputValuesToMap());
-
-		// Find the Feed implementation for the target Stream
-		AbstractFeed feed = getGlobals().getDataSource().getFeedById(streamParameter.getValue().getFeed().getId());
-
-		// Find the IEventRecipient for this message
-		IEventRecipient eventRecipient = feed.getEventRecipientForMessage(msg);
-
-		if (eventRecipient != null) {
-			FeedEvent event = new FeedEvent(msg, globals.time, eventRecipient);
-			getGlobals().getDataSource().enqueueEvent(event);
-		}
-	}
-
-	@Override
 	protected String getNotificationAboutActivatingWithoutSideEffects() {
-		return this.getName()+": In historical mode, events written to Stream '" + streamParameter.getValue().getName()+"' are only available within this Canvas.";
+		return this.getName()+": In historical mode, events are not written to stream '" + streamParameter.getValue().getName()+"'.";
 	}
 
 	private Map<String, Object> inputValuesToMap() {
@@ -143,19 +115,13 @@ public class SendToStream extends ModuleWithSideEffects {
 
 		authenticateStream(stream);
 
-		if (stream.getFeed().getId() != Feed.KAFKA_ID) {
-			throw new IllegalArgumentException(this.getName()+": Unable to write to stream type: " +
-				stream.getFeed().getName());
-		}
-
 		if (stream.getConfig()==null) {
 			throw new IllegalStateException(this.getName()+": Stream " + stream.getName() +
 				" is not properly configured!");
 		}
 
-		streamConfig = (JSONObject) JSON.parse(stream.getConfig());
-
-		JSONArray fields = streamConfig.getJSONArray("fields");
+		final JSONObject streamConfig = (JSONObject) JSON.parse(stream.getConfig());
+		final JSONArray fields = streamConfig.getJSONArray("fields");
 
 		for (Object o : fields) {
 			Input input = null;

@@ -1,7 +1,6 @@
 package com.unifina.domain.security
 
 import com.unifina.domain.dashboard.Dashboard
-import com.unifina.domain.data.Feed
 import com.unifina.domain.data.Stream
 import com.unifina.domain.marketplace.Product
 import com.unifina.domain.marketplace.Subscription
@@ -28,11 +27,10 @@ class Permission {
 	 */
 	Canvas canvas
 	Dashboard dashboard
-	Feed feed
 	ModulePackage modulePackage
 	Stream stream
 	Product product
-	static List<String> resourceFields = ['canvas', 'dashboard', 'feed', 'modulePackage', 'stream', 'product']
+	static List<String> resourceFields = ['canvas', 'dashboard', 'modulePackage', 'stream', 'product']
 
 	/** Type of operation that this ACL item allows e.g. "read" */
 	enum Operation {
@@ -56,10 +54,10 @@ class Permission {
 	Subscription subscription
 	/** When does this Permission expire? null == forever valid */
 	Date endsAt
-
+	/** This permission may have been created due to another permission, keep track */
 	Permission parent
 
-	static belongsTo = [Canvas, Dashboard, Feed, ModulePackage, Stream, Subscription]
+	static belongsTo = [Canvas, Dashboard, ModulePackage, Stream, Subscription]
 
 	static constraints = {
 		user(nullable: true)
@@ -67,12 +65,11 @@ class Permission {
 		invite(nullable: true)
 		canvas(nullable: true)
 		dashboard(nullable: true)
-		feed(nullable: true)
 		modulePackage(nullable: true)
 		stream(nullable: true)
 		product(nullable: true)
 		canvas(validator: { val, obj ->
-			[obj.canvas, obj.dashboard, obj.feed, obj.modulePackage, obj.stream, obj.product].count { it != null } == 1
+			[obj.canvas, obj.dashboard, obj.modulePackage, obj.stream, obj.product].count { it != null } == 1
 		})
 		subscription(nullable: true)
 		endsAt(nullable: true)
@@ -134,9 +131,6 @@ class Permission {
 		}
 		if (dashboard) {
 			map["dashboard"] = dashboard.id
-		}
-		if (feed) {
-			map["feed"] = feed.id
 		}
 		if (modulePackage) {
 			map["modulePackage"] = modulePackage.id

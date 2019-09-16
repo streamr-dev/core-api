@@ -15,7 +15,6 @@ class Stream implements Comparable {
 	Integer partitions = 1
 
 	String name = DEFAULT_NAME
-	Feed feed
 	String config
 	String description
 
@@ -64,7 +63,6 @@ class Stream implements Comparable {
 	static mapping = {
 		id generator: 'assigned'
 		name index: "name_idx"
-		feed lazy: false
 		uiChannel defaultValue: "false"
 		uiChannelPath index: "ui_channel_path_idx"
 		config type: 'text'
@@ -80,13 +78,13 @@ class Stream implements Comparable {
 		return name
 	}
 
+	// TODO: in PR phase, coordinate with frontend to remove dependency on stream.feed.* (maybe used in Editor)
 	@CompileStatic
 	Map toMap() {
 		[
 			id: id,
 			partitions: partitions,
 			name: name,
-			feed: feed.toMap(),
 			config: config == null || config.empty ? config : JSON.parse(config),
 			description: description,
 			uiChannel: uiChannel,
@@ -106,7 +104,6 @@ class Stream implements Comparable {
 			id: id,
 			partitions: partitions,
 			name: name,
-			feed: feed.toMap(),
 			description: description,
 			uiChannel: uiChannel,
 			inbox: inbox,

@@ -7,7 +7,7 @@ import com.unifina.api.NotPermittedException
 import com.unifina.domain.ExampleType
 import com.unifina.domain.dashboard.Dashboard
 import com.unifina.domain.dashboard.DashboardItem
-import com.unifina.domain.data.Feed
+
 import com.unifina.domain.data.Stream
 import com.unifina.domain.security.IntegrationKey
 import com.unifina.domain.security.Key
@@ -15,7 +15,7 @@ import com.unifina.domain.security.Permission
 import com.unifina.domain.security.SecUser
 import com.unifina.domain.signalpath.Canvas
 import com.unifina.feed.AbstractStreamListener
-import com.unifina.feed.NoOpStreamListener
+
 import grails.test.mixin.Mock
 import grails.test.mixin.TestFor
 import org.codehaus.groovy.grails.commons.DefaultGrailsApplication
@@ -25,20 +25,15 @@ import spock.lang.Specification
  * See the API for {@link grails.test.mixin.support.GrailsUnitTestMixin} for usage instructions
  */
 @TestFor(StreamService)
-@Mock([Canvas, Dashboard, DashboardItem, Stream, Feed, SecUser, Key, IntegrationKey, Permission, PermissionService])
+@Mock([Canvas, Dashboard, DashboardItem, Stream, SecUser, Key, IntegrationKey, Permission, PermissionService])
 class StreamServiceSpec extends Specification {
 
-	Feed feed
 	KafkaService kafkaService = Stub(KafkaService)
 	DashboardService dashboardService = Mock(DashboardService)
 
 	SecUser me = new SecUser(username: "me")
 
 	def setup() {
-		feed = new Feed(
-				streamListenerClass: NoOpStreamListener.name
-		).save(validate: false)
-
 		// Setup application context
 		def applicationContext = Stub(ApplicationContext) {
 			getBean(KafkaService) >> kafkaService
@@ -59,13 +54,11 @@ class StreamServiceSpec extends Specification {
 		List<Stream> streams = []
 		Stream s0 = new Stream(
 			name: "example stream",
-			feed: feed,
 			exampleType: ExampleType.SHARE
 		).save(failOnError: true)
 		streams << s0
 		Stream s1 = new Stream(
 			name: "example 2 stream",
-			feed: feed,
 			exampleType: ExampleType.SHARE
 		).save(failOnError: true)
 		streams << s1
@@ -79,7 +72,7 @@ class StreamServiceSpec extends Specification {
 
 	void "createStream replaces empty name with default value"() {
 		when:
-		Stream s = service.createStream([name: "", feed: feed], me)
+		Stream s = service.createStream([name: ""], me)
 
 		then:
 		s.name == "Untitled Stream"
@@ -87,7 +80,7 @@ class StreamServiceSpec extends Specification {
 
 	void "createStream results in persisted Stream"() {
 		when:
-		service.createStream([name: "name", feed: feed], me)
+		service.createStream([name: "name"], me)
 
 		then:
 		Stream.count() == 1
@@ -96,7 +89,7 @@ class StreamServiceSpec extends Specification {
 
 	void "createStream results in all permissions for Stream"() {
 		when:
-		def stream = service.createStream([name: "name", feed: feed], me)
+		def stream = service.createStream([name: "name"], me)
 
 		then:
 		Permission.findAllByStream(stream)*.toMap() == [
@@ -107,13 +100,10 @@ class StreamServiceSpec extends Specification {
 	}
 
 	void "createStream uses its params"() {
-		setup:
-		def feed = new Feed(id: 0, streamListenerClass: "com.unifina.feed.kafka.KafkaStreamListener").save(validate: false)
 		when:
 		def params = [
 				name       : "Test stream",
 				description: "Test stream",
-				feed       : feed,
 				config     : [
 						fields: [
 								[name: "profit", type: "number"],
@@ -129,74 +119,7 @@ class StreamServiceSpec extends Specification {
 		def stream = Stream.findAll().get(0)
 		stream.name == "Test stream"
 		stream.description == "Test stream"
-		stream.feed == feed
 		stream.requireSignedData
-	}
-
-	void "createStream uses Feed.KAFKA_ID as default value for feed"() {
-		setup:
-		def feed = new Feed(streamListenerClass: "com.unifina.feed.kafka.KafkaStreamListener")
-		feed.id = Feed.KAFKA_ID
-		feed.save(validate: false)
-		when:
-		def params = [
-				name       : "Test stream",
-				description: "Test stream",
-				config     : [
-						fields: [
-								[name: "profit", type: "number"],
-								[name: "keyword", type: "string"]
-						]
-				]
-		]
-		service.createStream(params, new SecUser(username: "me").save(validate: false))
-		then:
-		Stream.count() == 1
-		def stream = Stream.findAll().get(0)
-		stream.feed == feed
-		!stream.requireSignedData
-	}
-
-	void "createStream initializes streamListener"() {
-		setup:
-		def service = Spy(StreamService)
-		service.permissionService = Stub(PermissionService)
-		def streamListener = Mock(AbstractStreamListener)
-		def params = [
-				name       : "Test stream",
-				description: "Test stream",
-				feed       : feed,
-				config     : [
-						fields: [
-								[name: "profit", type: "number"],
-								[name: "keyword", type: "string"]
-						]
-				]
-		]
-		when:
-
-		service.createStream(params, new SecUser(username: "me").save(validate: false))
-		then:
-		1 * service.instantiateListener(_ as Stream) >> streamListener
-		1 * streamListener.addToConfiguration(params.config, _ as Stream)
-	}
-
-	void "createStream throws exception if feed has no streamListenerClass"() {
-		when:
-		def params = [
-				name       : "Test stream",
-				description: "Test stream",
-				feed       : new Feed().save(validate: false),
-				config     : [
-						fields: [
-								[name: "profit", type: "number"],
-								[name: "keyword", type: "string"]
-						]
-				]
-		]
-		service.createStream(params, new SecUser(username: "me").save(validate: false))
-		then:
-		thrown IllegalArgumentException
 	}
 
 	void "getReadAuthorizedStream throws NotFoundException and does not invoke callback, if streamId doesn't exist"() {
