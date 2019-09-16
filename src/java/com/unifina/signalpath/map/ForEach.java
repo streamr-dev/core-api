@@ -3,12 +3,12 @@ package com.unifina.signalpath.map;
 import com.google.gson.Gson;
 import com.unifina.domain.security.SecUser;
 import com.unifina.domain.signalpath.Canvas;
+import com.unifina.exceptions.NoExportedInputsException;
 import com.unifina.service.CanvasService;
 import com.unifina.service.SerializationService;
 import com.unifina.service.SignalPathService;
 import com.unifina.signalpath.*;
 import com.unifina.utils.Globals;
-import com.unifina.utils.GlobalsFactory;
 import grails.util.Holders;
 
 import java.io.UnsupportedEncodingException;
@@ -58,14 +58,14 @@ public class ForEach extends AbstractSignalPathModule {
 		SignalPathService signalPathService = Holders.getApplicationContext().getBean(SignalPathService.class);
 
 		// Create a non-run-context Globals for instantiating the temporary SignalPath
-		Globals tempGlobals = GlobalsFactory.createInstance(Collections.emptyMap(), SecUser.loadViaJava(getGlobals().getUserId()));
+		Globals tempGlobals = new Globals(Collections.emptyMap(), SecUser.loadViaJava(getGlobals().getUserId()));
 		SignalPath tempSignalPath = signalPathService.mapToSignalPath(signalPathMap, true, tempGlobals, new SignalPath(false));
 
 		// Find and validate exported endpoints
 		List<Input> exportedInputs = tempSignalPath.getExportedInputs();
 		List<Output> exportedOutputs = tempSignalPath.getExportedOutputs();
 		if (exportedInputs.isEmpty()) {
-			throw new RuntimeException("No exported inputs in canvas '" + canvas.getId() + "'. Need at least one.");
+			throw new NoExportedInputsException("No exported inputs in canvas '" + canvas.getId() + "'. Need at least one.");
 		}
 
 		// Steal endpoints

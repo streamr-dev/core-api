@@ -5,6 +5,7 @@
   "type": "object",
   "required": [
     "id",
+    "type",
     "name",
     "description",
     "imageUrl",
@@ -26,6 +27,14 @@
     "id": {
       "description": "Unique identifier for a product",
       "$ref": "#/definitions/resourceIdentifier"
+    },
+    "type": {
+      "description": "Type of product",
+      "type": "string",
+      "enum": [
+        "NORMAL",
+        "COMMUNITY"
+      ]
     },
     "name": {
       "description": "Name of the product",

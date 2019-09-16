@@ -7,7 +7,9 @@ import grails.validation.Validateable
 
 @Validateable
 class CreateProductCommand {
-	String name
+	Product.Type type = Product.Type.NORMAL
+
+	String name = Product.DEFAULT_NAME
 	String description
 
 	Category category
@@ -18,11 +20,11 @@ class CreateProductCommand {
 
 	String ownerAddress
 	String beneficiaryAddress
-	Long pricePerSecond
+	Long pricePerSecond = 0
 	Product.Currency priceCurrency = Product.Currency.DATA
 	Long minimumSubscriptionInSeconds = 0
 
 	static constraints = {
-		importFrom(Product, exclude: ["name"])
+		importFrom(Product)
 	}
 }

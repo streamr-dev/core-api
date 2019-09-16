@@ -1,6 +1,5 @@
 package com.unifina.utils.testutils;
 
-import com.google.gson.Gson;
 import com.unifina.datasource.ITimeListener;
 import com.unifina.serialization.Serializer;
 import com.unifina.serialization.SerializerImpl;
@@ -16,7 +15,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.*;
 
-import static com.unifina.feed.MasterClock.isTimeToTick;
+import static com.unifina.feed.TimePropagationRoot.isTimeToTick;
 
 
 /**

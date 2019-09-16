@@ -2,7 +2,7 @@ package com.unifina.feed.cassandra;
 
 import com.datastax.driver.core.*;
 import com.streamr.client.protocol.message_layer.StreamMessage;
-import com.unifina.domain.data.Stream;
+import com.streamr.client.utils.StreamPartition;
 import com.unifina.service.CassandraService;
 import grails.util.Holders;
 import org.apache.log4j.Logger;
@@ -14,8 +14,7 @@ import java.util.Iterator;
 
 public class CassandraHistoricalIterator implements Iterator<StreamMessage>, Closeable {
 
-	private final Stream stream;
-	private final Integer partition;
+	private final StreamPartition streamPartition;
 	private final Date startDate;
 	private final Date endDate;
 	private final CassandraService cassandraService;
@@ -29,9 +28,8 @@ public class CassandraHistoricalIterator implements Iterator<StreamMessage>, Clo
 	private static final int PREFETCH_WHEN_REMAINING = 256;
 	private static final int FETCH_SIZE = 256;
 
-	public CassandraHistoricalIterator(Stream stream, Integer partition, Date startDate, Date endDate) {
-		this.stream = stream;
-		this.partition = partition;
+	public CassandraHistoricalIterator(StreamPartition streamPartition, Date startDate, Date endDate) {
+		this.streamPartition = streamPartition;
 		this.startDate = startDate;
 		this.endDate = endDate;
 		this.cassandraService = Holders.getApplicationContext().getBean(CassandraService.class);
@@ -48,7 +46,7 @@ public class CassandraHistoricalIterator implements Iterator<StreamMessage>, Clo
 	private void connect() {
 		session = getSession();
 		session.getCluster().getConfiguration().getQueryOptions().setFetchSize(FETCH_SIZE);
-		Statement s = new SimpleStatement("SELECT payload FROM stream_data WHERE id = ? AND partition = ? AND ts >= ? and ts <= ? ORDER BY ts ASC", stream.getId(), partition, startDate, endDate);
+		Statement s = new SimpleStatement("SELECT payload FROM stream_data WHERE id = ? AND partition = ? AND ts >= ? and ts <= ? ORDER BY ts ASC", streamPartition.getStreamId(), streamPartition.getPartition(), startDate, endDate);
 		s.setIdempotent(true);
 		resultSet = session.execute(s);
 	}

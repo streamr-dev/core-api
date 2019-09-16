@@ -1,12 +1,15 @@
 package com.unifina.signalpath.blockchain;
 
-import com.unifina.data.FeedEvent;
 import com.streamr.client.protocol.message_layer.ITimestamped;
 import com.unifina.signalpath.*;
 import com.unifina.utils.MapTraversal;
 import org.apache.log4j.Logger;
-import org.web3j.abi.*;
-import org.web3j.abi.datatypes.*;
+import org.web3j.abi.EventValues;
+import org.web3j.abi.FunctionEncoder;
+import org.web3j.abi.FunctionReturnDecoder;
+import org.web3j.abi.datatypes.Event;
+import org.web3j.abi.datatypes.Function;
+import org.web3j.abi.datatypes.Type;
 import org.web3j.crypto.Credentials;
 import org.web3j.crypto.RawTransaction;
 import org.web3j.crypto.TransactionEncoder;
@@ -14,7 +17,10 @@ import org.web3j.protocol.Web3j;
 import org.web3j.protocol.core.DefaultBlockParameterName;
 import org.web3j.protocol.core.Response;
 import org.web3j.protocol.core.methods.request.Transaction;
-import org.web3j.protocol.core.methods.response.*;
+import org.web3j.protocol.core.methods.response.EthCall;
+import org.web3j.protocol.core.methods.response.EthGetTransactionCount;
+import org.web3j.protocol.core.methods.response.EthSendTransaction;
+import org.web3j.protocol.core.methods.response.TransactionReceipt;
 import org.web3j.protocol.http.HttpService;
 import org.web3j.utils.Numeric;
 
@@ -24,10 +30,9 @@ import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
-import java.util.function.Consumer;
 
 /**
- * Send out a call to specified function in Ethereum block chain
+ * Send out a call to specified function in Ethereum blockchain
  */
 public class SendEthereumTransaction extends ModuleWithSideEffects {
 
@@ -46,8 +51,8 @@ public class SendEthereumTransaction extends ModuleWithSideEffects {
 	private FunctionNameParameter function = new FunctionNameParameter(this, "function");
 	private List<Input<Object>> arguments = new ArrayList<>();
 
-	protected int check_result_max_tries = 100;
-	protected int check_result_waitms = 10000;
+	private static final int CHECK_RESULT_MAX_TRIES = 100;
+	private static final int CHECK_RESULT_WAIT_MS = 10000;
 
 	// constant function outputs
 	private List<Output<Object>> results = new ArrayList<>();
@@ -57,7 +62,6 @@ public class SendEthereumTransaction extends ModuleWithSideEffects {
 	private Map<EthereumABI.Event, List<Output<Object>>> eventOutputs;        // outputs for each event separately
 
 	private TimeSeriesOutput valueSent = new TimeSeriesOutput(this, "spentEth");
-	//private TimeSeriesOutput valueReceived = new TimeSeriesOutput(this, "targetChangeWei");
 	private TimeSeriesOutput gasUsed = new TimeSeriesOutput(this, "gasUsed");
 	private TimeSeriesOutput gasPrice = new TimeSeriesOutput(this, "gasPriceWei");
 	private TimeSeriesOutput blockNumber = new TimeSeriesOutput(this, "blockNumber");
@@ -65,7 +69,6 @@ public class SendEthereumTransaction extends ModuleWithSideEffects {
 
 
 	private static final Logger log = Logger.getLogger(SendEthereumTransaction.class);
-	private static final int ETHEREUM_TRANSACTION_DEFAULT_TIMEOUT_SECONDS = 1800;
 
 	private Web3j web3j;
 
@@ -102,7 +105,6 @@ public class SendEthereumTransaction extends ModuleWithSideEffects {
 	@Override
 	protected void onConfiguration(Map<String, Object> config) {
 		super.onConfiguration(config);
-		//String stringconfig = new Gson().toJson(config);
 		ModuleOptions options = ModuleOptions.get(config);
 		ethereumOptions = EthereumModuleOptions.readFrom(options);
 		web3j = getWeb3j();
@@ -215,7 +217,6 @@ public class SendEthereumTransaction extends ModuleWithSideEffects {
 			}
 
 			addOutput(valueSent);
-//			addOutput(valueReceived);
 			addOutput(gasUsed);
 			addOutput(gasPrice);
 			addOutput(blockNumber);
@@ -301,7 +302,7 @@ public class SendEthereumTransaction extends ModuleWithSideEffects {
 		 */
 		protected void enqueueConfirmedTx() throws IOException {
 			final FunctionCallResult fncall = this;
-			receipt = Web3jHelper.waitForTransactionReceipt(web3j,web3jTx.getTransactionHash(), check_result_waitms, check_result_max_tries);
+			receipt = Web3jHelper.waitForTransactionReceipt(web3j,web3jTx.getTransactionHash(), CHECK_RESULT_WAIT_MS, CHECK_RESULT_MAX_TRIES);
 			if (receipt != null) {
 				transaction = web3j.ethGetTransactionByHash(web3jTx.getTransactionHash()).send().getResult();
 				log.info("Receipt found for txHash: " + web3jTx.getTransactionHash());
@@ -365,25 +366,6 @@ public class SendEthereumTransaction extends ModuleWithSideEffects {
 			return events;
 		}
 
-	}
-
-	/**
-	 * Asynchronously handle server response, call comes from event queue
-	 *
-	 * @param event containing HttpTransaction created within sendOutput
-	 */
-	@Override
-	public void receive(FeedEvent event) {
-		if (event.content instanceof FunctionCallResult) {
-			try {
-				sendOutput((FunctionCallResult) event.content);
-			} catch (Exception e) {
-				throw new RuntimeException(e);
-			}
-			getPropagator().propagate();
-		} else {
-			super.receive(event);
-		}
 	}
 
 	private transient Propagator asyncPropagator;
@@ -450,25 +432,20 @@ public class SendEthereumTransaction extends ModuleWithSideEffects {
 				byte[] signedMessage = TransactionEncoder.signMessage(rawTransaction, credentials);
 				String hexValue = Numeric.toHexString(signedMessage);
 				CompletableFuture<EthSendTransaction> cf = web3j.ethSendRawTransaction(hexValue).sendAsync();
-				cf.thenAccept(new Consumer<EthSendTransaction>() {
-					@Override
-					public void accept(EthSendTransaction tx) {
-						log.debug("TX response: " + tx.getRawResponse());
-						TransactionResult tr = new TransactionResult(getGlobals().time, fn, tx);
+				cf.thenAccept(tx -> {
+					log.debug("TX response: " + tx.getRawResponse());
+					TransactionResult tr = new TransactionResult(getGlobals().time, fn, tx);
 
-						//enqueue the txHash only when submitted, before result from blockchain
-						//enqueueEvent(tr);
-
-						try {
-							//if tx submit had error, don't wait to confirm tx
-							if(tr.getError() != null)
-								enqueueEvent(tr);
-							else
+					try {
+						//if tx submit had error, don't wait to confirm tx
+						if (tr.getError() != null) {
+							enqueueEvent(tr);
+						} else {
 							//enqueue the result from blockchain, when tx finishes
-								tr.enqueueConfirmedTx();
-						} catch (IOException e) {
-							throw new RuntimeException(e);
+							tr.enqueueConfirmedTx();
 						}
+					} catch (IOException e) {
+						throw new RuntimeException(e);
 					}
 				});
 			}
@@ -477,9 +454,21 @@ public class SendEthereumTransaction extends ModuleWithSideEffects {
 		}
 	}
 
-	// push the response into Streamr's event queue
-	protected void enqueueEvent(FunctionCallResult fc){
-		getGlobals().getDataSource().enqueueEvent(new FeedEvent<FunctionCallResult, SendEthereumTransaction>(fc, fc.timestamp, this));
+	/**
+	 * Push the response into Streamr's event queue, and handle
+	 * it asynchronously.
+	 */
+	private void enqueueEvent(FunctionCallResult fc){
+		getGlobals().getDataSource().enqueue(
+			new com.unifina.data.Event<>(fc, fc.timestamp, (event) -> {
+				try {
+					sendOutput(event);
+				} catch (Exception e) {
+					throw new RuntimeException(e);
+				}
+				getPropagator().propagate();
+			})
+		);
 	}
 
 	/**
@@ -630,10 +619,4 @@ public class SendEthereumTransaction extends ModuleWithSideEffects {
 		}
 	}
 
-	/**
-	 * Streamr-web3 ethereum bridge can be running on a local machine
-	 */
-	protected boolean localAddressesAreAllowed() {
-		return true;
-	}
 }

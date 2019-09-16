@@ -98,7 +98,7 @@ class CommunitySecretApiControllerSpec extends Specification {
 		e.code == "ACCESS_DENIED"
 	}
 
-	void "create() test"() {
+	void "save() test"() {
 		CommunitySecret secret = new CommunitySecret(
 			name: "secret name",
 			secret: "secret",
@@ -114,8 +114,8 @@ class CommunitySecretApiControllerSpec extends Specification {
 			secret: "secret",
 		]
 		params.communityAddress = communityAddress
-		withFilters(action: "create") {
-			controller.create()
+		withFilters(action: "save") {
+			controller.save()
 		}
 		then:
 		1 * controller.communityService.checkAdminAccessControl(me, communityAddress) >> true
@@ -125,7 +125,7 @@ class CommunitySecretApiControllerSpec extends Specification {
 		response.json.communityAddress == communityAddress
 	}
 
-	void "create() bad request on invalid community address"() {
+	void "save() bad request on invalid community address"() {
 		when:
 		request.method = "POST"
 		request.json = [
@@ -133,8 +133,8 @@ class CommunitySecretApiControllerSpec extends Specification {
 			secret: "secret",
 		]
 		params.communityAddress = "0x123"
-		withFilters(action: "create") {
-			controller.create()
+		withFilters(action: "save") {
+			controller.save()
 		}
 		then:
 		0 * controller.communitySecretService._
@@ -143,15 +143,15 @@ class CommunitySecretApiControllerSpec extends Specification {
 		e.code == "PARAMETER_MISSING"
 	}
 
-	void "create() bad request on invalid community name"() {
+	void "save() bad request on invalid community name"() {
 		when:
 		request.method = "POST"
 		request.json = [
 			name: "",
 		]
 		params.communityAddress = communityAddress
-		withFilters(action: "create") {
-			controller.create()
+		withFilters(action: "save") {
+			controller.save()
 		}
 		then:
 		0 * controller.communitySecretService._
@@ -160,7 +160,7 @@ class CommunitySecretApiControllerSpec extends Specification {
 		e.code == "PARAMETER_MISSING"
 	}
 
-	void "create() checks admin access control"() {
+	void "save() checks admin access control"() {
 		when:
 		request.apiUser = me
 		request.method = "POST"
@@ -168,8 +168,8 @@ class CommunitySecretApiControllerSpec extends Specification {
 			name: "community name",
 		]
 		params.communityAddress = communityAddress
-		withFilters(action: "create") {
-			controller.create()
+		withFilters(action: "save") {
+			controller.save()
 		}
 		then:
 		1 * controller.communityService.checkAdminAccessControl(me, communityAddress) >> false

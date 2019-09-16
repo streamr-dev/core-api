@@ -2,35 +2,30 @@ package com.unifina.signalpath.streams
 
 import com.unifina.BeanMockingSpecification
 import com.unifina.api.ValidationException
-import com.unifina.domain.data.Feed
+
 import com.unifina.domain.data.Stream
-import com.unifina.feed.NoOpStreamListener
+
 import com.unifina.service.StreamService
 import com.unifina.utils.Globals
 import com.unifina.utils.testutils.ModuleTestHelper
 import grails.test.mixin.Mock
 import grails.test.mixin.TestMixin
 import grails.test.mixin.web.ControllerUnitTestMixin
-import spock.lang.Specification
 
 @TestMixin(ControllerUnitTestMixin) // to get JSON converter
-@Mock([Stream, Feed])
+@Mock([Stream])
 class CreateStreamSpec extends BeanMockingSpecification {
 
 	CreateStream module
 	Globals globals = Stub(Globals)
-	StreamService streamService = Mock(StreamService)
+	StreamService streamService
 
 	def setup() {
 		module = new CreateStream()
 		module.init()
 
-		mockBean(StreamService, streamService)
+		streamService = mockBean(StreamService, Mock(StreamService))
 		globals.getUserId() >> null
-
-		Feed feed = new Feed(streamListenerClass: NoOpStreamListener.canonicalName)
-		feed.id = 7
-		feed.save(failOnError: true, validate: false)
 
 		Stream stream = new Stream(name: "exists")
 		stream.id = "666"
