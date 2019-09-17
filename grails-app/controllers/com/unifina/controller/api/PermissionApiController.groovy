@@ -147,17 +147,10 @@ class PermissionApiController {
 
 	@StreamrApi(authenticationLevel = AuthLevel.NONE)
 	def delete(String id) {
-		usePermission(params.resourceClass, params.resourceId, id as Long) { p, res ->
-			// share-permission has been tested in usePermission (calls useResource)
-			permissionService.systemRevoke(p)
-			render status: 204
-		}
-
 		usePermissionResource(params.resourceClass, params.resourceId, id as Long) { p, res ->
 			permissionService.systemRevoke(p)
 			render status: 204
 		}
-
 	}
 
 	private usePermissionResource(Class resourceClass, resourceId, Long permissionId, Closure action) {
