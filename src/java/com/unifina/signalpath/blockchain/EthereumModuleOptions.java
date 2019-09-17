@@ -16,7 +16,7 @@ public class EthereumModuleOptions implements Serializable {
 	private double gasPriceWei = 20e9; // 20 Gwei
 	private int gasLimit = 6000000;
 
-	void writeTo(ModuleOptions options) {
+	public void writeTo(ModuleOptions options) {
 		writeNetworkOption(options);
 		writeGasPriceOption(options);
 		writeGasLimitOption(options);
@@ -34,6 +34,9 @@ public class EthereumModuleOptions implements Serializable {
 	public String getNetwork() {
 		return network;
 	}
+	public void setNetwork(String network) {
+		this.network = network;
+	}
 
 	public double getGasPriceWei() {
 		return gasPriceWei;
@@ -42,29 +45,29 @@ public class EthereumModuleOptions implements Serializable {
 		return gasLimit;
 	}
 
-	private void writeGasPriceOption(ModuleOptions options) {
+	public void writeGasPriceOption(ModuleOptions options) {
 		options.add(ModuleOption.createDouble("gasPriceGWei", gasPriceWei / 1e9));
 	}
 
-	private void readGasPriceOption(ModuleOptions options) {
+	public void readGasPriceOption(ModuleOptions options) {
 		ModuleOption gasPriceGWeiOption = options.getOption("gasPriceGWei");
 		if (gasPriceGWeiOption != null) {
 			gasPriceWei = gasPriceGWeiOption.getDouble() * 1e9;
 		}
 	}
 
-	private void writeGasLimitOption(ModuleOptions options) {
+	public void writeGasLimitOption(ModuleOptions options) {
 		options.add(ModuleOption.createInt("gasLimit", gasLimit));
 	}
 
-	private void readGasLimitOption(ModuleOptions options) {
+	public void readGasLimitOption(ModuleOptions options) {
 		ModuleOption gasLimitOption = options.getOption("gasLimit");
 		if (gasLimitOption != null) {
 			gasLimit = gasLimitOption.getInt();
 		}
 	}
 
-	void writeNetworkOption(ModuleOptions options) {
+	public void writeNetworkOption(ModuleOptions options) {
 		ModuleOption networkOption = ModuleOption.createString("network", network);
 
 		// Add all configured networks
@@ -76,7 +79,7 @@ public class EthereumModuleOptions implements Serializable {
 		options.add(networkOption);
 	}
 
-	private void readNetworkOption(ModuleOptions options) {
+	public void readNetworkOption(ModuleOptions options) {
 		ModuleOption networkOption = options.getOption("network");
 		if (networkOption != null) {
 			network = networkOption.getString();
