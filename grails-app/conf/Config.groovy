@@ -276,14 +276,10 @@ environments {
 // mainnet Marketplace: 0xA10151D088f6f2705a05d6c83719e99E079A61C1
 streamr.ethereum.defaultNetwork = System.getProperty("streamr.ethereum.defaultNetwork") ?: "local"
 streamr.ethereum.networks = PropertiesUtil.matchingPropertiesToMap("streamr.ethereum.networks.", System.getProperties()) ?: [
-	local: "http://localhost:8545",
-	rinkeby: "https://rinkeby.infura.io/v3/117d24d0fef1434fbd14567435a363d9",
-	mainnet: "https://mainnet.infura.io/v3/117d24d0fef1434fbd14567435a363d9",
+	local: "http://localhost:8545"
 ]
 streamr.ethereum.wss = PropertiesUtil.matchingPropertiesToMap("streamr.ethereum.wss.", System.getProperties()) ?: [
-	local: "ws://localhost:8545",
-	rinkeby: "wss://rinkeby.infura.io/ws/v3/117d24d0fef1434fbd14567435a363d9",
-	mainnet: "wss://mainnet.infura.io/ws/v3/117d24d0fef1434fbd14567435a363d9",
+	local: "ws://localhost:8545"
 ]
 // Ethereum identity of this instance. Don't use this silly development private key for anything.
 streamr.ethereum.nodePrivateKey = System.getProperty("streamr.ethereum.nodePrivateKey", "0123456789ABCDEF0123456789ABCDEF0123456789ABCDEF0123456789ABCDEF")
