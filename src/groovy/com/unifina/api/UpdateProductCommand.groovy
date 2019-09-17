@@ -3,6 +3,8 @@ package com.unifina.api
 import com.unifina.domain.data.Stream
 import com.unifina.domain.marketplace.Category
 import com.unifina.domain.marketplace.Product
+import com.unifina.domain.security.SecUser
+import com.unifina.service.PermissionService
 import grails.compiler.GrailsCompileStatic
 import grails.validation.Validateable
 
@@ -16,6 +18,7 @@ class UpdateProductCommand {
 	Category category
 	Stream previewStream
 	String previewConfigJson
+	String pendingChanges
 
 	// Below are used only when updating NOT_DEPLOYED product
 	String ownerAddress
@@ -24,13 +27,16 @@ class UpdateProductCommand {
 	Product.Currency priceCurrency
 	Long minimumSubscriptionInSeconds
 
+	PermissionService permissionService
+
 	public static final List<String> offChainFields = [
 		"name",
 		"description",
 		"streams",
 		"category",
 		"previewStream",
-		"previewConfigJson"
+		"previewConfigJson",
+		"pendingChanges"
 	]
 
 	public static final List<String> onChainFields = [
@@ -46,16 +52,18 @@ class UpdateProductCommand {
 		description(blank: false)
 		previewStream(nullable: true)
 		previewConfigJson(nullable: true)
+		pendingChanges(nullable: true)
 
 		ownerAddress(nullable: true, validator: Product.isEthereumAddressOrIsNull)
 		beneficiaryAddress(nullable: true, validator: Product.isEthereumAddressOrIsNull)
 		pricePerSecond(nullable: true)
 		priceCurrency(nullable: true)
 		minimumSubscriptionInSeconds(nullable: true)
+		permissionService(nullable: true)
 	}
 
 	@GrailsCompileStatic
-	void updateProduct(Product product) {
+	void updateProduct(Product product, SecUser user) {
 		// Always update off-chain fields if given
 		offChainFields.forEach { String fieldName ->
 			product[fieldName] = this[fieldName]
@@ -77,6 +85,12 @@ class UpdateProductCommand {
 		onChainFields.forEach { String fieldName ->
 			if (this[fieldName] != null) {
 				product[fieldName] = this[fieldName]
+			}
+		}
+
+		if (pendingChanges != null) {
+			if (!permissionService.canShare(user, product)) {
+				throw new FieldCannotBeUpdatedException("User doesn't have permission to share product.")
 			}
 		}
 	}

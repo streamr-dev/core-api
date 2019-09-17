@@ -137,4 +137,5 @@ databaseChangeLog = {
 	include file: 'core/2019-06-12-stream-inactivity.groovy'
 	include file: 'core/2019-07-29-enable-stream-module.groovy'
 	include file: 'core/2019-08-27-rm-modwt.groovy'
+	include file: 'core/2019-09-13-product-pendingchanges.groovy'
 }
