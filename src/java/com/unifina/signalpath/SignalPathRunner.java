@@ -10,8 +10,6 @@ import grails.util.GrailsUtil;
 import grails.util.Holders;
 import org.apache.log4j.Logger;
 
-import java.util.function.Function;
-
 /**
  * A Thread that instantiates and runs a SignalPath.
  * Identified by a runnerId, by which this runner can be looked up from signalPathService.
@@ -88,15 +86,16 @@ public class SignalPathRunner extends Thread {
 			// Start feed, blocks until event loop exists
 			globals.getDataSource().start();
 		} catch (Throwable e) {
-			thrownOnStartUp = e = GrailsUtil.deepSanitize(e);
+			final Throwable sanitized = GrailsUtil.deepSanitize(e);
+			thrownOnStartUp = sanitized;
 			log.error("Error while running SignalPaths", e);
-			pushErrorToUiChannels(e, signalPath);
+			safeRun(() -> pushErrorToUiChannels(sanitized, signalPath));
 		}
 
-		signalPath.pushToUiChannel(new DoneMessage());
+		safeRun(() -> signalPath.pushToUiChannel(new DoneMessage()));
 
 		if (getGlobals().isAdhoc()) {
-			signalPath.pushToUiChannel(new ByeMessage());
+			safeRun(() -> signalPath.pushToUiChannel(new ByeMessage()));
 		}
 
 		// Cleanup
