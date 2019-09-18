@@ -87,7 +87,7 @@ jobs:
       region: eu-west-1
       on:
         branch: CORE-1683-engine-use-api
-  if: NOT type IN (pull_request)
+    if: NOT type IN (pull_request)
   - stage: Build docker dev
     env:
     - OWNER=streamr
