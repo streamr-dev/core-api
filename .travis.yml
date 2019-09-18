@@ -49,6 +49,8 @@ jobs:
       region: eu-west-1
       skip_cleanup: true
       local_dir: build
+      on:
+        branch: master
     - provider: codedeploy
       access_key_id: AKIAI3FGPGMK3EREJJTQ
       secret_access_key:
@@ -58,6 +60,8 @@ jobs:
       application: eu-west-1-stg-ee-codedeploy
       deployment_group: eu-west-1-stg-ee-deployment-group
       region: eu-west-1
+      on:
+        branch: master
     if: NOT type IN (pull_request)
   - stage: Build war Lisboa
     script: "./travis_scripts/build_war.sh"
@@ -87,7 +91,7 @@ jobs:
       region: eu-west-1
       on:
         branch: CORE-1683-engine-use-api
-  if: NOT type IN (pull_request)
+    if: NOT type IN (pull_request)
   - stage: Build docker dev
     env:
     - OWNER=streamr
@@ -101,6 +105,8 @@ jobs:
     deploy:
     - provider: script
       script: bash travis_scripts/deploy_docker.sh staging
+      on:
+        branch: master
     if: NOT type IN (pull_request)
   - stage: Build docker Staging
     env:
@@ -115,6 +121,8 @@ jobs:
     deploy:
     - provider: script
       script: bash travis_scripts/deploy_docker.sh staging
+      on:
+        branch: master
     if: NOT type IN (pull_request)
 after_failure: "./travis-after-failure.sh"
 notifications:
