@@ -5373,6 +5373,11 @@
         "minimumSubscriptionInSeconds": {
           "type": "integer",
           "description": "Minimum subscription length (in seconds)"
+        },
+        "pendingChanges": {
+          "type": "string",
+          "description": "Pending changes that are not published to blockchain",
+          "example": "{\"ownerAddress\":\"0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF\"}"
         }
       }
     },
@@ -5530,6 +5535,11 @@
         "minimumSubscriptionInSeconds": {
           "type": "integer",
           "description": "Minimum subscription length (in seconds)"
+        },
+        "pendingChanges": {
+          "type": "string",
+          "description": "Pending changes that are not published to blockchain",
+          "example": "{\"ownerAddress\":\"0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF\"}"
         }
       }
     },
