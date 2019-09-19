@@ -120,8 +120,8 @@ class UrlMappings {
 
 		"/api/v1/cluster/$action"(controller: "clusterApi")
 
-		"/api/v1/communities/$communityAddress/joinRequests"(resources: "communityJoinRequestApi", excludes: ["create"])
-		"/api/v1/communities/$communityAddress/secrets"(resources: "communitySecretApi", excludes: ["create"])
+		"/api/v1/communities/$communityAddress/joinRequests"(resources: "communityJoinRequestApi", excludes: ["create", "edit"])
+		"/api/v1/communities/$communityAddress/secrets"(resources: "communitySecretApi", excludes: ["create", "edit"])
 		"/api/v1/communities/$communityAddress/stats"(method: "GET", controller: "communityOperatorApi", action: "stats")
 		"/api/v1/communities/$communityAddress/members"(method: "GET", controller: "communityOperatorApi", action: "members")
 		"/api/v1/communities/$communityAddress/members/$memberAddress"(method: "GET", controller: "communityOperatorApi", action: "memberStats")

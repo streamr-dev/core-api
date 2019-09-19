@@ -7,6 +7,7 @@ import com.unifina.api.CannotRemoveEthereumKeyException
 import com.unifina.api.CanvasCommunicationException
 import com.unifina.api.ChallengeVerificationFailedException
 import com.unifina.api.DisabledUserException
+import com.unifina.api.FieldCannotBeUpdatedException
 import com.unifina.api.InvalidAPIKeyException
 import com.unifina.api.InvalidSessionTokenException
 import com.unifina.api.InvalidStateException
@@ -32,6 +33,7 @@ class ErrorController {
 		InvalidUsernameAndPasswordException: { InvalidUsernameAndPasswordException e -> new ApiError(401, "INVALID_USERNAME_PASSWORD_ERROR", e.message)},
 		InvalidAPIKeyException: { InvalidAPIKeyException e -> new ApiError(401, "INVALID_API_KEY_ERROR", e.message)},
 		BadRequestException: { BadRequestException e -> new ApiError(400, "PARAMETER_MISSING", e.message)},
+		FieldCannotBeUpdatedException: { FieldCannotBeUpdatedException e -> new ApiError(422, "FIELD_CANNOT_BE_UPDATED", e.message)}
 	]
 
 	@StreamrApi(authenticationLevel = AuthLevel.NONE)

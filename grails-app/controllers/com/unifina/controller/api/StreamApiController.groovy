@@ -241,7 +241,7 @@ class StreamApiController {
 	@StreamrApi
 	def deleteDataUpTo(String id) {
 		getAuthorizedStream(id, Operation.WRITE) { Stream stream ->
-			Date date = parseDate((String) params.date)
+			Date date = parseDate(String.valueOf(request.JSON.date), "date")
 			streamService.deleteDataUpTo(stream, date)
 			render(status: 204)
 		}
@@ -258,21 +258,22 @@ class StreamApiController {
 	@StreamrApi
 	def deleteDataRange(String id) {
 		getAuthorizedStream(id, Operation.WRITE) { Stream stream ->
-			Date start = parseDate((String) params.start)
-			Date end = parseDate((String) params.end)
+			Date start = parseDate(String.valueOf(request.JSON.start), "start")
+			Date end = parseDate(String.valueOf(request.JSON.end), "end")
 			streamService.deleteDataRange(stream, start, end)
 			render(status: 204)
 		}
 	}
 
-	private Date parseDate(String input) {
+	private Date parseDate(String input, String field) {
 		try {
 			return new Date(Long.parseLong(input))
 		} catch (NumberFormatException e) {
 			try {
 				return iso8601.parse(input)
 			} catch (ParseException pe) {
-				throw new BadRequestException(pe.getMessage())
+				String msg = String.format("Unable to parse a date from field '%s' with value '%s'", field, input)
+				throw new BadRequestException(msg)
 			}
 		}
 	}

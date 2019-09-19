@@ -109,7 +109,7 @@ class CommunityJoinRequestApiControllerSpec extends Specification {
 		e.code == "ACCESS_DENIED"
 	}
 
-	void "create() test"() {
+	void "save() test"() {
 		setup:
 		CommunityJoinRequest r = new CommunityJoinRequest(
 			memberAddress: "0xCCCC000000000000000000000000AAAA0000FFFF",
@@ -130,8 +130,8 @@ class CommunityJoinRequestApiControllerSpec extends Specification {
 			],
 		]
 		params.communityAddress = communityAddress
-		withFilters(action: "create") {
-			controller.create()
+		withFilters(action: "save") {
+			controller.save()
 		}
 		then:
 		1 * controller.communityJoinRequestService.create(communityAddress, _ as CommunityJoinRequestCommand, me) >> r
@@ -142,7 +142,7 @@ class CommunityJoinRequestApiControllerSpec extends Specification {
 		response.status == 200
 	}
 
-	void "create() bad request when json memberAddress is not an ethereum address"() {
+	void "save() bad request when json memberAddress is not an ethereum address"() {
 		when:
 		request.method = "POST"
 		request.json = [
@@ -150,8 +150,8 @@ class CommunityJoinRequestApiControllerSpec extends Specification {
 			secret: "secret",
 		]
 		params.communityAddress = communityAddress
-		withFilters(action: "create") {
-			controller.create()
+		withFilters(action: "save") {
+			controller.save()
 		}
 		then:
 		0 * controller.communityJoinRequestService._
@@ -160,12 +160,12 @@ class CommunityJoinRequestApiControllerSpec extends Specification {
 		e.code == "PARAMETER_MISSING"
 	}
 
-	void "create() bad request on invalid community address input"() {
+	void "save() bad request on invalid community address input"() {
 		when:
 		request.method = "GET"
 		params.communityAddress = "0x123"
-		withFilters(action: "create") {
-			controller.create()
+		withFilters(action: "save") {
+			controller.save()
 		}
 		then:
 		0 * controller.communityJoinRequestService._
