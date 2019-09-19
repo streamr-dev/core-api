@@ -142,28 +142,14 @@
 		var onSel = function(item) {
 			_this.hideInput()
 			if (item) {
-				// If the current module corresponds to the selected feed module and the new one
-				// does not, the module needs to be replaced
-				if (_this.parameter.module && _this.data.checkModuleId && _this.parameter.module.getModuleId() != item.feed.module) {
-					bootbox.confirm("This stream is implemented by a different module. Replace current module? This will break current connections.", function(result) {
-						if (result)
-							SignalPath.replaceModule(_this.parameter.module, item.feed.module,{params:[{name:"stream", value:item.id}]});
-					});
-				}
-				// Handle same module implementation
-				else {
-					_this.data.value = item.id
-					_this.label.find("a").text(item.name)
-					_this.data.streamName = item.name
-				}
+				_this.data.value = item.id
+				_this.label.find("a").text(item.name)
+				_this.data.streamName = item.name
 			}
 			$(_this).trigger('change')
 		}
 
 		var searchParams = {}
-
-		if (this.data.feedFilter)
-			searchParams.feed = this.data.feedFilter
 
 		this.streamrSearch = new StreamrSearch(search, [{
 			name: "stream"

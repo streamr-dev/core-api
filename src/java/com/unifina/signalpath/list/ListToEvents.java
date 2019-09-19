@@ -1,7 +1,6 @@
 package com.unifina.signalpath.list;
 
-import com.unifina.data.FeedEvent;
-import com.unifina.data.IEventRecipient;
+import com.unifina.data.Event;
 import com.streamr.client.protocol.message_layer.ITimestamped;
 import com.unifina.signalpath.*;
 
@@ -11,7 +10,7 @@ import java.util.List;
 /**
  * Sends out incoming List items one by one as separate events
  */
-public class ListToEvents extends AbstractSignalPathModule implements IEventRecipient {
+public class ListToEvents extends AbstractSignalPathModule {
 	private final ListInput in = new ListInput(this, "list");
 	private final Output<Object> out = new Output<>(this, "item", "Object");
 
@@ -26,20 +25,13 @@ public class ListToEvents extends AbstractSignalPathModule implements IEventReci
 		List inList = in.getValue();
 		if (inList.size() < 1) { return; }
 
-		// enqueue the items, send out in receive() below
-		for (Object item : inList) {
-			QueuedItem queuedItem = new QueuedItem(item, getGlobals().time);
-			getGlobals().getDataSource().enqueueEvent(new FeedEvent<>(queuedItem, queuedItem.timestamp, this));
-		}
-	}
-
-	@Override
-	public void receive(FeedEvent event) {
-		if (event.content instanceof QueuedItem) {
-			out.send(((QueuedItem)event.content).item);
-			getPropagator().propagate();
-		} else {
-			super.receive(event);
+		// enqueue the items, send out and propagate in event handler
+		for (int i=0; i<inList.size(); i++) {
+			QueuedItem queuedItem = new QueuedItem(inList.get(i), getGlobals().time);
+			getGlobals().getDataSource().enqueue(new Event<>(queuedItem, queuedItem.timestamp, i, it -> {
+				out.send(it.item);
+				getPropagator().propagate();
+			}));
 		}
 	}
 

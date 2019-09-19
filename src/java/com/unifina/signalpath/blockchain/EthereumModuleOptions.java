@@ -84,8 +84,7 @@ public class EthereumModuleOptions implements Serializable {
 		options.add(networkOption);
 	}
 
-
-	public void readNetworkOption(ModuleOptions options) {
+  public void readNetworkOption(ModuleOptions options) {
 		ModuleOption networkOption = options.getOption("network");
 		if (networkOption != null) {
 			network = networkOption.getString();

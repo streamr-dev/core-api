@@ -1,13 +1,9 @@
 package com.unifina.service
 
-import com.unifina.api.ApiException
-import com.unifina.api.CannotRemoveEthereumKeyException
-import com.unifina.api.ChallengeVerificationFailedException
-import com.unifina.api.DuplicateNotAllowedException
-import com.unifina.api.NotFoundException
-import com.unifina.domain.data.Feed
+import com.unifina.api.*
 import com.unifina.domain.data.Stream
 import com.unifina.domain.security.IntegrationKey
+import com.unifina.domain.security.Permission
 import com.unifina.domain.security.SecUser
 import com.unifina.security.StringEncryptor
 import grails.compiler.GrailsCompileStatic
@@ -108,6 +104,7 @@ class EthereumIntegrationKeyService {
 		IntegrationKey account = IntegrationKey.findByIdAndUser(integrationKeyId, currentUser)
 		if (account) {
 			subscriptionService.beforeIntegrationKeyRemoved(account)
+			deleteInboxStream(account.idInService)
 			account.delete(flush: true)
 		}
 	}
@@ -162,17 +159,27 @@ class EthereumIntegrationKeyService {
 	}
 
 	private void createUserInboxStream(SecUser user, String address) {
+		Stream existing = Stream.get(address)
+		if (existing != null && existing.inbox) {
+			// The inbox stream already exists.
+			return
+		}
 		Stream inboxStream = new Stream()
 		inboxStream.id = address
 		inboxStream.name = address
 		inboxStream.inbox = true
 		inboxStream.autoConfigure = false
-		// If no feed given, API feed is used
-		if (inboxStream.feed == null) {
-			inboxStream.feed = Feed.load(Feed.KAFKA_ID)
-		}
+
 		inboxStream.save(failOnError: true, flush: true)
 		permissionService.systemGrantAll(user, inboxStream)
+	}
+
+	private void deleteInboxStream(String address) {
+		Stream stream = Stream.get(address)
+		if (stream && stream.inbox) {
+			Permission.findAllByStream(Stream.get(address))*.delete(flush: true)
+			stream.delete(flush: true)
+		}
 	}
 
 	@CompileStatic

@@ -1,6 +1,5 @@
 <html>
 <%@ page import="com.unifina.domain.signalpath.ModulePackage" %>
-<%@ page import="com.unifina.domain.data.Feed" %>
 
 <sec:ifNotSwitched>
 	<sec:ifAllGranted roles='ROLE_SWITCH_USER'>
@@ -29,7 +28,6 @@ def tabData = []
 tabData << [name: 'userinfo', icon: 'icon_user', messageCode: 'spring.security.ui.user.info']
 tabData << [name: 'roles',    icon: 'icon_role', messageCode: 'spring.security.ui.user.roles']
 tabData << [name: 'packages',    icon: 'icon_role', messageCode: 'unifina.modulePackages.label']
-tabData << [name: 'feeds',    icon: 'icon_role', messageCode: 'unifina.feeds.label']
 boolean isOpenId = grails.util.Holders.getPluginManager().hasGrailsPlugin('springSecurityOpenid')
 if (isOpenId) {
 	tabData << [name: 'openIds', icon: 'icon_role', messageCode: 'spring.security.ui.user.openIds']
@@ -81,14 +79,6 @@ if (isOpenId) {
 		<div>
 			<g:checkBox name="modulePackage" value="${p.id}" checked="${userModulePackages.contains(p)}" />
 			${p.name.encodeAsHTML()}
-		</div>
-		</g:each>
-
-	<h2>Feeds</h2>
-		<g:each var="f" in="${Feed.list()}">
-		<div>
-			<g:checkBox name="feed" value="${f.id}" checked="${userFeeds.contains(f)}"/>
-			${f.name?.encodeAsHTML() ?: f.id}
 		</div>
 		</g:each>
 

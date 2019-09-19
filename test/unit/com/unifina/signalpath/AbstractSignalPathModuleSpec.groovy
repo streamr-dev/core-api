@@ -1,22 +1,19 @@
 package com.unifina.signalpath
 
-import com.unifina.BeanMockingSpecification
-import com.unifina.data.FeedEvent
-import com.unifina.datasource.RealtimeDataSource
+
+import com.unifina.ModuleTestingSpecification
+import com.unifina.data.Event
 import com.unifina.domain.security.SecUser
 import com.unifina.service.PermissionService
 import com.unifina.utils.Globals
-import grails.test.mixin.support.GrailsUnitTestMixin
 import groovy.transform.CompileStatic
 import org.apache.log4j.Level
 import org.apache.log4j.Logger
 import spock.lang.Shared
-import spock.lang.Specification
 
 import java.util.concurrent.TimeUnit
 
-
-class AbstractSignalPathModuleSpec extends BeanMockingSpecification {
+class AbstractSignalPathModuleSpec extends ModuleTestingSpecification {
 	static class Module extends AbstractSignalPathModule {
 		def param = new IntegerParameter(this, "param", 666)
 		def a = new Input<Object>(this, "in2", "Object")
@@ -34,6 +31,7 @@ class AbstractSignalPathModuleSpec extends BeanMockingSpecification {
 	Globals globals
 	SignalPath mockSignalPath
 	PermissionService mockedPermissionService
+	Queue<Event> mockedEventQueue
 
 	@Shared Level oldGlobalsLoggingLevel
 	@Shared Level oldAbstractSignalPathModuleLoggingLevel
@@ -90,16 +88,12 @@ class AbstractSignalPathModuleSpec extends BeanMockingSpecification {
 
 	@CompileStatic
 	private void setUpModuleWithRuntimeRequestEnv() {
-		globals = new Globals()
-		globals.setDataSource(new RealtimeDataSource(globals) {
-			FeedEvent lastFeedEvent
-			@Override
-			void enqueueEvent(FeedEvent feedEvent) {
-				super.enqueueEvent(feedEvent)
-				lastFeedEvent = feedEvent
-			}
-		})
-		globals.init()
+		globals = mockGlobals()
+
+		mockedEventQueue = new ArrayDeque<>()
+		globals.dataSource.enqueue(_ as Event) >> { Event event ->
+			mockedEventQueue.add(event)
+		}
 
 		module = new Module()
 		module.init()
@@ -111,8 +105,10 @@ class AbstractSignalPathModuleSpec extends BeanMockingSpecification {
 
 	private RuntimeResponse sendRuntimeRequest(LinkedHashMap<String, Object> msg, SecUser user) {
 		def request = new RuntimeRequest(msg, user, null, "request/1", "request/1", [] as Set)
+		// Will insert an event to the event queue
 		def future = module.onRequest(request, request.getPathReader())
-		module.receive(globals.dataSource.lastFeedEvent)
+		// Dispatch the event from the event queue, executing the future
+		mockedEventQueue.poll().dispatch()
 		return future.get(1, TimeUnit.SECONDS)
 	}
 

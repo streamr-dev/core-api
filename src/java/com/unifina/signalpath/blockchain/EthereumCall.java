@@ -23,9 +23,10 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * Send out a call to specified function in Ethereum block chain
+ * Send out a call to specified function in Ethereum block chain.
+ * Deprecated, replaced by SendEthereumTransaction.java.
  */
-@Deprecated // replaced by SendEthereumTransaction
+@Deprecated
 public class EthereumCall extends AbstractHttpModule {
 
 	private EthereumModuleOptions ethereumOptions = new EthereumModuleOptions();
