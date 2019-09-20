@@ -63,7 +63,7 @@ class ConfigurableStreamModuleSpec extends ModuleTestingSpecification {
 		module.getConfiguration().partitions == [0, 2]
 	}
 
-	void "onConfiguration"() {
+	void "when stream modules stream is not defined"() {
 		when:
 		module.configure([
 			params: [
