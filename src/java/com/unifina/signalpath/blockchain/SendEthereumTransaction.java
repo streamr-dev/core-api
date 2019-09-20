@@ -98,7 +98,7 @@ public class SendEthereumTransaction extends ModuleWithSideEffects {
 		return config;
 	}
 
-	protected Web3j getWeb3j(){
+	protected Web3j getWeb3j() {
 		return ethereumOptions.getWeb3j();
 	}
 
@@ -305,6 +305,7 @@ public class SendEthereumTransaction extends ModuleWithSideEffects {
 		/**
 		 * fetch tx data and populate transaction and receipt when done.
 		 * run this from a worker thread (eg async submit tx handler)
+		 *
 		 * @throws IOException if Ethereum requests fail (network problem to Ethereum client)
 		 */
 		protected void enqueueConfirmedTx() throws IOException {
@@ -465,7 +466,7 @@ public class SendEthereumTransaction extends ModuleWithSideEffects {
 	 * Push the response into Streamr's event queue, and handle
 	 * it asynchronously.
 	 */
-	private void enqueueEvent(FunctionCallResult fc){
+	private void enqueueEvent(FunctionCallResult fc) {
 		getGlobals().getDataSource().enqueue(
 			new com.unifina.data.Event<>(fc, fc.timestamp, (event) -> {
 				try {

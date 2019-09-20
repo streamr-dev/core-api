@@ -5,7 +5,6 @@ import com.unifina.signalpath.ModuleWithSideEffects;
 import com.unifina.signalpath.StringInput;
 import com.unifina.signalpath.TimeSeriesOutput;
 import org.web3j.protocol.Web3j;
-import org.web3j.protocol.core.DefaultBlockParameter;
 import org.web3j.protocol.core.DefaultBlockParameterName;
 
 import java.io.IOException;
@@ -20,7 +19,7 @@ public class GetEthBalance extends ModuleWithSideEffects {
 
 	private Web3j web3j;
 	protected Web3j getWeb3j() {
-		return ethereumOptions.getWeb3j(EthereumModuleOptions.RpcConectionMethod.http);
+		return ethereumOptions.getWeb3j(EthereumModuleOptions.RpcConnectionMethod.HTTP);
 	}
 
 	@Override
@@ -34,7 +33,6 @@ public class GetEthBalance extends ModuleWithSideEffects {
 	@Override
 	protected void onConfiguration(Map<String, Object> config) {
 		super.onConfiguration(config);
-		//String stringconfig = new Gson().toJson(config);
 		ModuleOptions options = ModuleOptions.get(config);
 		ethereumOptions = EthereumModuleOptions.readFrom(options);
 		web3j = getWeb3j();

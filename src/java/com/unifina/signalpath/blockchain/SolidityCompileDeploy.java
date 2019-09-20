@@ -15,7 +15,6 @@ import org.web3j.protocol.Web3j;
 import org.web3j.protocol.core.DefaultBlockParameterName;
 import org.web3j.protocol.core.methods.response.EthSendTransaction;
 import org.web3j.protocol.core.methods.response.TransactionReceipt;
-import org.web3j.protocol.http.HttpService;
 import org.web3j.utils.Numeric;
 
 import java.io.IOException;
@@ -165,7 +164,7 @@ public class SolidityCompileDeploy extends ModuleWithUI implements Pullable<Ethe
 	}
 
 	protected Web3j getWeb3j() {
-		return ethereumOptions.getWeb3j(EthereumModuleOptions.RpcConectionMethod.http);
+		return ethereumOptions.getWeb3j(EthereumModuleOptions.RpcConnectionMethod.HTTP);
 	}
 
 	@Override
