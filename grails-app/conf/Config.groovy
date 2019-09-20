@@ -179,7 +179,9 @@ log4j.main = {
 		'kafka.producer.ProducerConfig',
 		'org.apache.kafka.clients.producer.ProducerConfig'
 
-	debug 'com.datastax.driver.core'
+	debug 'com.datastax.driver.core',
+		'com.unifina.datasource.DataSource',
+		'com.unifina.signalpath.utils.ConfigurableStreamModule'
 }
 
 /**

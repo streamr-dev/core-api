@@ -207,6 +207,7 @@ public abstract class DataSource {
 	 */
 	private void subscribe(ConfigurableStreamModule module) {
 		Collection<StreamPartition> streamPartitions = module.getStreamPartitions();
+		log.debug("Registering ConfigurableStreamModule with streamPartitions: " + streamPartitions);
 
 		for (StreamPartition sp : streamPartitions) {
 
@@ -216,6 +217,7 @@ public abstract class DataSource {
 				root = new StreamPropagationRoot(this);
 				propagationRootByStreamPartition.put(sp, root);
 				router.subscribe(root, sp);
+				log.debug("Created new propagation root for: " + sp);
 			}
 
 			root.register(module);

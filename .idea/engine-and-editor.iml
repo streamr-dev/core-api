@@ -414,13 +414,6 @@
           <root url="jar://$MAVEN_REPOSITORY$/io/reactivex/rxjava2/rxjava/2.2.2/rxjava-2.2.2.jar!/" />
           <root url="jar://$MAVEN_REPOSITORY$/com/github/jnr/jnr-enxio/0.19/jnr-enxio-0.19.jar!/" />
           <root url="jar://$MAVEN_REPOSITORY$/com/github/jnr/jnr-unixsocket/0.21/jnr-unixsocket-0.21.jar!/" />
-          <root url="jar://$MAVEN_REPOSITORY$/org/web3j/tuples/4.2.0/tuples-4.2.0.jar!/" />
-          <root url="jar://$MAVEN_REPOSITORY$/org/web3j/rlp/4.2.0/rlp-4.2.0.jar!/" />
-          <root url="jar://$MAVEN_REPOSITORY$/org/web3j/crypto/4.2.0/crypto-4.2.0.jar!/" />
-          <root url="jar://$MAVEN_REPOSITORY$/org/bouncycastle/bcprov-jdk15on/1.60/bcprov-jdk15on-1.60.jar!/" />
-          <root url="jar://$MAVEN_REPOSITORY$/org/web3j/utils/4.2.0/utils-4.2.0.jar!/" />
-          <root url="jar://$MAVEN_REPOSITORY$/org/web3j/abi/4.2.0/abi-4.2.0.jar!/" />
-          <root url="jar://$MAVEN_REPOSITORY$/org/web3j/core/4.2.0/core-4.2.0.jar!/" />
           <root url="jar://$MAVEN_REPOSITORY$/org/ethereum/solcJ-all/0.4.25/solcJ-all-0.4.25.jar!/" />
           <root url="jar://$MAVEN_REPOSITORY$/org/ethereum/rocksdbjni/5.9.2/rocksdbjni-5.9.2.jar!/" />
           <root url="jar://$MAVEN_REPOSITORY$/com/madgag/spongycastle/prov/1.58.0.0/prov-1.58.0.0.jar!/" />
@@ -441,6 +434,13 @@
           <root url="jar://$MAVEN_REPOSITORY$/com/datastax/cassandra/cassandra-driver-core/3.7.1/cassandra-driver-core-3.7.1.jar!/" />
           <root url="jar://$MAVEN_REPOSITORY$/com/github/jnr/jffi/1.2.16/jffi-1.2.16-native.jar!/" />
           <root url="jar://$MAVEN_REPOSITORY$/com/streamr/client/1.1.0/client-1.1.0.jar!/" />
+          <root url="jar://$MAVEN_REPOSITORY$/org/web3j/tuples/4.4.1/tuples-4.4.1.jar!/" />
+          <root url="jar://$MAVEN_REPOSITORY$/org/web3j/rlp/4.4.1/rlp-4.4.1.jar!/" />
+          <root url="jar://$MAVEN_REPOSITORY$/org/web3j/crypto/4.4.1/crypto-4.4.1.jar!/" />
+          <root url="jar://$MAVEN_REPOSITORY$/org/bouncycastle/bcprov-jdk15on/1.61/bcprov-jdk15on-1.61.jar!/" />
+          <root url="jar://$MAVEN_REPOSITORY$/org/web3j/utils/4.4.1/utils-4.4.1.jar!/" />
+          <root url="jar://$MAVEN_REPOSITORY$/org/web3j/abi/4.4.1/abi-4.4.1.jar!/" />
+          <root url="jar://$MAVEN_REPOSITORY$/org/web3j/core/4.4.1/core-4.4.1.jar!/" />
         </CLASSES>
         <JAVADOC />
         <SOURCES>
