@@ -218,7 +218,7 @@ class CommunityJoinRequestServiceIntegrationSpec extends Specification {
 			blockNumber: 40000,
 			blockIndex: 30,
 			owner: me,
-			type: Product.Type.COMMUNITY,
+			type: Product.Type.community,
 		)
 		product.save(failOnError: true, validate: true)
 

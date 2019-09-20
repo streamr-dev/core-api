@@ -152,7 +152,7 @@ class ProductService {
 		permissionService.verifyShare(currentUser, stream)
 		product.streams.add(stream)
 		product.save(failOnError: true)
-		if (product.type == Product.Type.COMMUNITY) {
+		if (product.type == Product.Type.community) {
 			Set<SecUser> users = communityJoinRequestService.findCommunityMembers(product.beneficiaryAddress)
 			for (SecUser u : users) {
 				if (!permissionService.canWrite(u, stream)) {
@@ -166,7 +166,7 @@ class ProductService {
 	void removeStreamFromProduct(Product product, Stream stream) {
 		product.streams.remove(stream)
 		product.save(failOnError: true)
-		if (product.type == Product.Type.COMMUNITY) {
+		if (product.type == Product.Type.community) {
 			Set<SecUser> users = communityJoinRequestService.findCommunityMembers(product.beneficiaryAddress)
 			for (SecUser u : users) {
 				if (permissionService.canWrite(u, stream)) {

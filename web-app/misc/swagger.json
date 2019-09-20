@@ -5232,8 +5232,8 @@
           "type": "string",
           "description": "Type of Product",
           "enum": [
-            "NORMAL",
-            "COMMUNITY"
+            "normal",
+            "community"
           ]
         },
         "name": {
@@ -5431,8 +5431,8 @@
           "type": "string",
           "description": "Type of Product",
           "enum": [
-            "NORMAL",
-            "COMMUNITY"
+            "normal",
+            "community"
           ]
         },
         "state": {

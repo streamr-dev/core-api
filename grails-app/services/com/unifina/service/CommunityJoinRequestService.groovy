@@ -31,7 +31,7 @@ class CommunityJoinRequestService {
 
 	protected Set<Stream> findStreams(CommunityJoinRequest c) {
 		List<Product> products = Product.withCriteria {
-			eq("type", Product.Type.COMMUNITY)
+			eq("type", Product.Type.community)
 			eq("beneficiaryAddress", c.communityAddress)
 		}
 		Set<Stream> streams = new HashSet<>()

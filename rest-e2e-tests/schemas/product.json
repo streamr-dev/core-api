@@ -32,8 +32,8 @@
       "description": "Type of product",
       "type": "string",
       "enum": [
-        "NORMAL",
-        "COMMUNITY"
+        "normal",
+        "community"
       ]
     },
     "name": {

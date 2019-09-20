@@ -7,7 +7,7 @@ import grails.validation.Validateable
 
 @Validateable
 class CreateProductCommand {
-	Product.Type type = Product.Type.NORMAL
+	Product.Type type = Product.Type.normal
 
 	String name = Product.DEFAULT_NAME
 	String description

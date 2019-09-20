@@ -156,7 +156,7 @@ class CommunityJoinRequestServiceSpec extends Specification {
 			blockNumber: 40000,
 			blockIndex: 30,
 			owner: user,
-			type: Product.Type.COMMUNITY,
+			type: Product.Type.community,
 		)
 		product.id = "product-id"
 		product.save(failOnError: true, validate: true)
@@ -207,7 +207,7 @@ class CommunityJoinRequestServiceSpec extends Specification {
 			blockNumber: 40000,
 			blockIndex: 30,
 			owner: user,
-			type: Product.Type.COMMUNITY,
+			type: Product.Type.community,
 		)
 		product.id = "product-id"
 		product.save(failOnError: true, validate: true)
@@ -280,7 +280,7 @@ class CommunityJoinRequestServiceSpec extends Specification {
 			blockNumber: 40000,
 			blockIndex: 30,
 			owner: user,
-			type: Product.Type.COMMUNITY,
+			type: Product.Type.community,
 		)
 		product.id = "product-id"
 		product.save(failOnError: true, validate: true)

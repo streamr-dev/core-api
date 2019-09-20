@@ -15,7 +15,7 @@ class Product {
 	String thumbnailUrl
 
 	// Type of the product is either normal or community product.
-	Type type = Type.NORMAL
+	Type type = Type.normal
 	Category category
 	State state = State.NOT_DEPLOYED
 	Stream previewStream
@@ -40,9 +40,11 @@ class Product {
 		streams: Stream
 	]
 
+	// TODO: goal is, grails should accept { "type": "community" } in the CreateProductCommand
+	// TODO: lazy fix was to allow lower-case only, better would be to be case-insensitive
 	enum Type {
-		NORMAL,
-		COMMUNITY
+		normal,
+		community
 	}
 
 	enum State {
@@ -78,7 +80,7 @@ class Product {
 	static mapping = {
 		id generator: HexIdGenerator.name // Note: doesn't apply in unit tests
 		description type: 'text'
-		type enumType: "identity", defaultValue: Type.NORMAL, index: 'type_idx'
+		type enumType: "identity", defaultValue: Type.normal, index: 'type_idx'
 		previewConfigJson type: 'text'
 		imageUrl length: 2048
 		score index: "score_idx"

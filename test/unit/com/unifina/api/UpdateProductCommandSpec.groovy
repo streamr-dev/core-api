@@ -88,7 +88,7 @@ class UpdateProductCommandSpec extends Specification {
 		then:
 		product.toMap() == [
 			id: "product-id",
-			type: "NORMAL",
+			type: "normal",
 			state: "DEPLOYED",
 			created: null,
 			updated: null,
@@ -120,7 +120,7 @@ class UpdateProductCommandSpec extends Specification {
 		then:
 		product.toMap() == [
 			id: "product-id",
-			type: "NORMAL",
+			type: "normal",
 			state: "NOT_DEPLOYED",
 			created: null,
 			updated: null,
@@ -153,7 +153,7 @@ class UpdateProductCommandSpec extends Specification {
 		then:
 		product.toMap() == [
 			id: "product-id",
-			type: "NORMAL",
+			type: "normal",
 			state: "DEPLOYED",
 			created: null,
 			updated: null,
