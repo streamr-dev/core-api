@@ -27,8 +27,6 @@ class UpdateProductCommand {
 	Product.Currency priceCurrency
 	Long minimumSubscriptionInSeconds
 
-	PermissionService permissionService
-
 	public static final List<String> offChainFields = [
 		"name",
 		"description",
@@ -59,11 +57,10 @@ class UpdateProductCommand {
 		pricePerSecond(nullable: true)
 		priceCurrency(nullable: true)
 		minimumSubscriptionInSeconds(nullable: true)
-		permissionService(nullable: true)
 	}
 
 	@GrailsCompileStatic
-	void updateProduct(Product product, SecUser user) {
+	void updateProduct(Product product, SecUser user, PermissionService permissionService) {
 		// Always update off-chain fields if given
 		offChainFields.forEach { String fieldName ->
 			product[fieldName] = this[fieldName]
