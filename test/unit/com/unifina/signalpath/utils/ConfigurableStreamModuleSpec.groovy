@@ -2,6 +2,7 @@ package com.unifina.signalpath.utils
 
 import com.unifina.ModuleTestingSpecification
 import com.unifina.domain.data.Stream
+import com.unifina.exceptions.InvalidStreamConfigException
 import com.unifina.service.StreamService
 import com.unifina.utils.Globals
 
@@ -60,5 +61,18 @@ class ConfigurableStreamModuleSpec extends ModuleTestingSpecification {
 
 		then:
 		module.getConfiguration().partitions == [0, 2]
+	}
+
+	void "onConfiguration"() {
+		when:
+		module.configure([
+			params: [
+				[name: "stream", value: ""]
+			],
+		])
+
+		then:
+		1 * streamService.getStream(_ as String) >> null
+		thrown(InvalidStreamConfigException)
 	}
 }

@@ -2,6 +2,7 @@ package com.unifina.signalpath.utils;
 
 import com.streamr.client.utils.StreamPartition;
 import com.unifina.domain.data.Stream;
+import com.unifina.exceptions.InvalidStreamConfigException;
 import com.unifina.signalpath.*;
 import com.unifina.utils.MapTraversal;
 import grails.converters.JSON;
@@ -63,6 +64,9 @@ public class ConfigurableStreamModule extends AbstractSignalPathModule {
 		super.onConfiguration(config);
 
 		Stream stream = getStream();
+		if (stream == null && getGlobals().isRunContext()) {
+			throw new InvalidStreamConfigException("Stream Module doesn't have a Stream associated to it.");
+		}
 		if (stream == null) {
 			return;
 		}
