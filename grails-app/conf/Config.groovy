@@ -269,18 +269,9 @@ environments {
  * -Dstreamr.ethereum.networks.someNetwork=http://some-network-rpc-url
  * -Dstreamr.ethereum.networks.anotherNetwork=http://some-network-rpc-url
  */
-// default network restricted in infura.io to following addresses, see https://infura.io/project/117d24d0fef1434fbd14567435a363d9
-// rinkeby "DATAcoin": 0x8e3877Fe5551f9c14BC9b062bbae9D84bC2F5d4E
-// rinkeby Marketplace: 0x0af64558670a3b761B57e465Cb80B62254b39619
-// mainnet DATAcoin: 0x0Cf0Ee63788A0849fE5297F3407f701E122cC023
-// mainnet Marketplace: 0xA10151D088f6f2705a05d6c83719e99E079A61C1
 streamr.ethereum.defaultNetwork = System.getProperty("streamr.ethereum.defaultNetwork") ?: "local"
-streamr.ethereum.networks = PropertiesUtil.matchingPropertiesToMap("streamr.ethereum.networks.", System.getProperties()) ?: [
-	local: "http://localhost:8545"
-]
-streamr.ethereum.wss = PropertiesUtil.matchingPropertiesToMap("streamr.ethereum.wss.", System.getProperties()) ?: [
-	local: "ws://localhost:8545"
-]
+streamr.ethereum.networks = PropertiesUtil.matchingPropertiesToMap("streamr.ethereum.networks.", System.getProperties()) ?: [ local: "http://localhost:8545" ]
+streamr.ethereum.wss = PropertiesUtil.matchingPropertiesToMap("streamr.ethereum.wss.", System.getProperties()) ?: [ local: "ws://localhost:8545" ]
 // Ethereum identity of this instance. Don't use this silly development private key for anything.
 streamr.ethereum.nodePrivateKey = System.getProperty("streamr.ethereum.nodePrivateKey", "0123456789ABCDEF0123456789ABCDEF0123456789ABCDEF0123456789ABCDEF")
 
