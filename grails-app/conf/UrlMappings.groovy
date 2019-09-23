@@ -7,12 +7,7 @@ import com.unifina.domain.signalpath.Canvas
 
 class UrlMappings {
 	static mappings = {
-
-		"/**"(redirect: [uri: "https://www.streamr.com/core/", permanent: true])
-
-		// 403 would be handled by Spring Security Core by default, but due to
-		// https://jira.grails.org/browse/GPSPRINGSECURITYCORE-253 it needs to be specified explicitly
-		"403"(controller: "login", action: "denied")
+		
 		"500"(controller: "error", action: "index", exception: Exception)
 
 		// API v1 url mappings
