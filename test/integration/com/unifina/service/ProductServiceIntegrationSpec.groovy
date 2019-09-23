@@ -1,6 +1,6 @@
 package com.unifina.service
 
-import com.unifina.domain.data.Feed
+
 import com.unifina.domain.data.Stream
 import com.unifina.domain.marketplace.Category
 import com.unifina.domain.marketplace.FreeSubscription
@@ -20,7 +20,6 @@ class ProductServiceIntegrationSpec extends IntegrationSpec {
 	Product product
 	ModuleCategory mc
 	Module module
-	Feed feed
 	SecUser troll
 	SecUser user
 	Product p1
@@ -43,21 +42,11 @@ class ProductServiceIntegrationSpec extends IntegrationSpec {
 			type: "type"
 		)
 		module.save(failOnError: true, validate: true)
-		feed = new Feed(
-			name: "feed name",
-			eventRecipientClass: "x",
-			streamListenerClass: "x",
-			keyProviderClass: "x",
-			messageSourceClass: "x",
-			parserClass: "x",
-			timezone: "Europe/Helsinki",
-			module: module
-		)
-		feed.save(failOnError: true, validate: false)
-		s1 = new Stream(name: "stream-1", feed: feed)
-		s2 = new Stream(name: "stream-2", feed: feed)
-		s3 = new Stream(name: "stream-3", feed: feed)
-		s4 = new Stream(name: "stream-4", feed: feed)
+
+		s1 = new Stream(name: "stream-1")
+		s2 = new Stream(name: "stream-2")
+		s3 = new Stream(name: "stream-3")
+		s4 = new Stream(name: "stream-4")
 		[s1, s2, s3, s4].eachWithIndex { Stream s, int i -> s.id = "stream-id-${i+1}" }
 		[s1, s2, s3, s4]*.save(failOnError: true, validate: true)
 
@@ -132,6 +121,5 @@ class ProductServiceIntegrationSpec extends IntegrationSpec {
 		Category.get(category.id) != null
 		ModuleCategory.get(mc.id) != null
 		Module.get(module.id) != null
-		Feed.get(feed.id) != null
 	}
 }

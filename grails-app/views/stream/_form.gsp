@@ -17,25 +17,3 @@
 		</span>
 	</g:hasErrors>
 </ui:labeled>
-
-<g:if test="${feeds.size() > 1}">
-	<ui:labeled label="${message(code: 'stream.feed.label')}">
-		<g:select
-				class="form-control input-lg"
-				name="feed"
-				optionValue="name"
-				optionKey="id"
-				from="${feeds}"
-				value="${defaultFeed.id}"
-		/>
-
-		<g:hasErrors bean="${stream}" field="feed">
-			<span class="text-danger">
-				<g:renderErrors bean="${stream}" field="feed" as="list"/>
-			</span>
-		</g:hasErrors>
-	</ui:labeled>
-</g:if>
-<g:else>
-	<input type="hidden" name="feed" value="${defaultFeed.id}">
-</g:else>

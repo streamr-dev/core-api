@@ -1,41 +1,37 @@
 package com.unifina.signalpath.list
 
-import com.unifina.data.FeedEvent;
-import com.unifina.datasource.DataSource;
-import com.unifina.datasource.DataSourceEventQueue
+import com.unifina.ModuleTestingSpecification
+import com.unifina.data.Event
 import com.unifina.signalpath.AbstractSignalPathModule
 import com.unifina.signalpath.TimeSeriesInput
-import com.unifina.utils.Globals
 import com.unifina.utils.testutils.ModuleTestHelper
-import spock.lang.Specification;
 
-public class ListToEventsSpec extends Specification {
+class ListToEventsSpec extends ModuleTestingSpecification {
 	ListToEvents module
 	Map<String, List<List>> inputs
 	Map<String, List> outputs
 	List queue
-
-	/** Mocked event queue. Works manually in tests, please call module.receive(queuedEvent) */
-	List actualQueue = []
-	def mockGlobals = Stub(Globals) {
-		getDataSource() >> Stub(DataSource) {
-			enqueueEvent(_) >> { feedEvent ->
-				actualQueue.add(feedEvent.content[0].item)
-			}
-		}
-		isRealtime() >> true
-	}
+	List<Event<ListToEvents.QueuedItem>> eventsSentToEventQueue
 
 	private boolean test() {
 		return new ModuleTestHelper.Builder(module, inputs, outputs)
-			.overrideGlobals { mockGlobals }
 			.onModuleInstanceChange { newInstance -> module = newInstance }
-			.afterEachTestCase { assert actualQueue == queue; actualQueue = [] }
+			.afterEachTestCase {
+				assert eventsSentToEventQueue.collect {it.content.item} == queue
+				eventsSentToEventQueue = []
+			}
 			.test()
 	}
 
 	def setup() {
 		module = new ListToEvents()
+		module.globals = mockGlobals()
+
+		eventsSentToEventQueue = []
+		module.globals.dataSource.enqueue(_ as Event) >> { Event<ListToEvents.QueuedItem> e->
+			eventsSentToEventQueue.add(e)
+		}
+
 		module.init()
 		module.configure(module.configuration)
 	}
@@ -56,7 +52,7 @@ public class ListToEventsSpec extends Specification {
 		test()
 	}
 
-	void "receive(Packet) sends output and propagates"() {
+	void "propagates values when queued events are dispatched"() {
 		AbstractSignalPathModule target = new AbstractSignalPathModule() {
 			TimeSeriesInput input = new TimeSeriesInput(this, "in")
 
@@ -72,9 +68,12 @@ public class ListToEventsSpec extends Specification {
 		}
 		target.init()
 		module.getOutput("item").connect(target.getInput("in"))
+		module.getInput("list").receive([1])
 
 		when:
-		module.receive(new FeedEvent(new ListToEvents.QueuedItem(1, new Date(0)), new Date(0), module))
+		module.sendOutput() // queues events
+		eventsSentToEventQueue*.dispatch() // handles them
+
 		then:
 		module.getOutput("item").getValue() == 1
 		target.getInput("in").getValue() == 1

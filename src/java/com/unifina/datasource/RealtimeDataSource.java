@@ -1,63 +1,43 @@
 package com.unifina.datasource;
 
 
-import com.unifina.data.FeedEvent;
-import com.unifina.data.RealtimeEventQueue;
-import com.unifina.data.ClockTickEvent;
-import com.unifina.feed.AbstractFeed;
+import com.streamr.client.utils.StreamPartition;
+import com.unifina.data.ClockTick;
+import com.unifina.data.Event;
+import com.unifina.feed.StreamMessageSource;
+import com.unifina.feed.redis.MultipleRedisMessageSource;
 import com.unifina.serialization.SerializationRequest;
 import com.unifina.service.SerializationService;
 import com.unifina.signalpath.SignalPath;
-import com.unifina.signalpath.StopRequest;
 import com.unifina.utils.Globals;
 import grails.util.Holders;
-import org.apache.log4j.Logger;
 
+import java.util.Collection;
 import java.util.Date;
 import java.util.Timer;
 import java.util.TimerTask;
 
 public class RealtimeDataSource extends DataSource {
-	private static final Logger log = Logger.getLogger(RealtimeDataSource.class);
 
 	private final Timer secTimer = new Timer();
-	private final RealtimeEventQueue eventQueue;
-	private boolean abort = false;
 
 	public RealtimeDataSource(Globals globals) {
-		super(false, globals);
-		eventQueue = new RealtimeEventQueue(globals, this);
-	}
+		super(globals);
 
-	@Override
-	protected DataSourceEventQueue getEventQueue() {
-		return eventQueue;
-	}
-
-	@Override
-	protected void onSubscribedToFeed(AbstractFeed feed) {}
-
-	@Override
-	protected void doStartFeed() throws Exception {
-		if (!abort) {
-			for (AbstractFeed it : getFeeds()) {
-				it.startFeed();
-			}
-
+		// Schedule some timed events on start
+		addStartListener(() -> {
 			final Date now = new Date();
 			secTimer.scheduleAtFixedRate(new TimerTask() {
-				 	@Override
-				 	public void run() {
-					 	if (eventQueue.isEmpty()) {
-							final ClockTickEvent event = new ClockTickEvent(new Date());
-							eventQueue.enqueue(event);
-					 	}
-					}
-			 	},
-				new Date(now.getTime() + (1000 - (now.getTime() % 1000))), // Time till next even second
+											 @Override
+											 public void run() {
+												 final ClockTick tick = new ClockTick(new Date());
+												 enqueue(new Event<>(tick, tick.getTimestampAsDate(), 0L, null));
+											 }
+										 },
+				new Date(now.getTime() + (1000 - (now.getTime() % 1000))), // First run on next even second
 				1000);   // Repeat every second
 
-			// Serialization
+			// Schedule serialization events
 			SerializationService serializationService = Holders.getApplicationContext().getBean(SerializationService.class);
 			long serializationIntervalInMs = serializationService.serializationIntervalInMillis();
 
@@ -66,43 +46,28 @@ public class RealtimeDataSource extends DataSource {
 					secTimer.scheduleAtFixedRate(new TimerTask() {
 						@Override
 						public void run() {
-							eventQueue.enqueue(SerializationRequest.makeFeedEvent(signalPath));
+							enqueue(SerializationRequest.makeFeedEvent(signalPath));
 						}
 					}, serializationIntervalInMs, serializationIntervalInMs);
 				}
 			}
+		});
 
-			// This will block indefinitely until the feed is stopped!
-			eventQueue.start();
-		}
-
-		log.info("RealtimeDataSource has stopped.");
+		// Cleanup timed events on stop
+		addStopListener(() -> {
+			secTimer.cancel();
+			secTimer.purge();
+		});
 	}
 
 	@Override
-	protected void doStopFeed() throws Exception {
-		log.info("Stopping RealtimeDataSource...");
-		abort = true;
-		secTimer.cancel();
-		secTimer.purge();
-
-		for (AbstractFeed it : getFeeds()) {
-			try {
-				it.stopFeed();
-			} catch (Exception e) {
-				log.error(e);
-			}
-		}
-
-		// Final serialization requests
-		for (SignalPath signalPath : getSerializableSignalPaths()) {
-			eventQueue.enqueue(SerializationRequest.makeFeedEvent(signalPath));
-		}
-
-		// Stop request
-		Date date = new Date();
-		eventQueue.enqueue(new FeedEvent<>(new StopRequest(date), date, eventQueue));
+	protected DataSourceEventQueue createEventQueue() {
+		return new RealtimeEventQueue(globals, this);
 	}
 
+	@Override
+	protected StreamMessageSource createStreamMessageSource(Collection<StreamPartition> streamPartitions, StreamMessageSource.StreamMessageConsumer consumer) {
+		return new MultipleRedisMessageSource(consumer, streamPartitions);
+	}
 
 }

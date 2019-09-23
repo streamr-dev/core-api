@@ -1,6 +1,7 @@
 package com.unifina.controller.api
 
 import com.unifina.api.BadRequestException
+import com.unifina.security.AuthLevel
 import com.unifina.security.StreamrApi
 import com.unifina.service.CommunityOperatorService
 import com.unifina.utils.EthereumAddressValidator
@@ -16,7 +17,7 @@ class CommunityOperatorApiController {
 		return EthereumAddressValidator.validate(value)
 	}
 
-	@StreamrApi
+	@StreamrApi(authenticationLevel = AuthLevel.NONE)
 	def stats(String communityAddress) {
 		if (!isCommunityAddress(communityAddress)) {
 			throw new BadRequestException("Community address is not an ethereum address")
@@ -26,7 +27,7 @@ class CommunityOperatorApiController {
 		render(text: result.body, contentType: "application/json", encoding: "UTF-8")
 	}
 
-	@StreamrApi
+	@StreamrApi(authenticationLevel = AuthLevel.NONE)
 	def members(String communityAddress) {
 		if (!isCommunityAddress(communityAddress)) {
 			throw new BadRequestException("Community address is not an ethereum address")
@@ -36,7 +37,7 @@ class CommunityOperatorApiController {
 		render(text: result.body, contentType: "application/json", encoding: "UTF-8")
 	}
 
-	@StreamrApi
+	@StreamrApi(authenticationLevel = AuthLevel.NONE)
 	def memberStats(String communityAddress, String memberAddress) {
 		if (!isCommunityAddress(communityAddress)) {
 			throw new BadRequestException("Community address is not an ethereum address")

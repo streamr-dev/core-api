@@ -1,7 +1,6 @@
 package com.unifina.signalpath.blockchain;
 
 import com.streamr.client.protocol.message_layer.ITimestamped;
-import com.unifina.data.FeedEvent;
 import com.unifina.datasource.IStartListener;
 import com.unifina.datasource.IStopListener;
 import com.unifina.signalpath.*;
@@ -15,9 +14,7 @@ import org.web3j.protocol.core.methods.response.Log;
 import org.web3j.protocol.core.methods.response.TransactionReceipt;
 import org.web3j.protocol.http.HttpService;
 
-import javax.websocket.DeploymentException;
 import java.io.IOException;
-import java.net.URISyntaxException;
 import java.util.*;
 
 /**
@@ -38,8 +35,8 @@ public class GetEvents extends AbstractSignalPathModule implements EventsListene
 	private transient ContractEventPoller contractEventPoller;
 	private transient Propagator asyncPropagator;
 	private Web3j web3j;
-	protected int check_result_max_tries = 100;
-	protected int check_result_waitms = 10000;
+	private static final int CHECK_RESULT_MAX_TRIES = 100;
+	private static final int CHECK_RESULT_WAIT_MS = 10000;
 
 	static class LogsResult implements ITimestamped {
 		Date timestamp;
@@ -51,6 +48,7 @@ public class GetEvents extends AbstractSignalPathModule implements EventsListene
 			this.logs = logs;
 			this.txHash = txHash;
 		}
+
 		@Override
 		public Date getTimestampAsDate() {
 			return timestamp;
@@ -70,7 +68,6 @@ public class GetEvents extends AbstractSignalPathModule implements EventsListene
 		return Web3j.build(new HttpService(ethereumOptions.getRpcUrl()));
 	}
 
-
 	@Override
 	public void initialize() {
 		super.initialize();
@@ -87,9 +84,9 @@ public class GetEvents extends AbstractSignalPathModule implements EventsListene
 	@Override
 	public void onStart() {
 		String rpcUrl = ethereumOptions.getWebsocketRpcUri();
-		if(rpcUrl == null){
+		if (rpcUrl == null) {
 			rpcUrl = ethereumOptions.getRpcUrl();
-			log.warn("No websockets URI found in config for network "+ethereumOptions.getNetwork()+". Trying to run GetEvents over https RPC: "+rpcUrl);
+			log.warn("No websockets URI found in config for network " + ethereumOptions.getNetwork() + ". Trying to run GetEvents over https RPC: " + rpcUrl);
 		}
 		String contractAddress = contract.getValue().getAddress();
 		try {
@@ -104,24 +101,12 @@ public class GetEvents extends AbstractSignalPathModule implements EventsListene
 	public void onStop() {
 		contractEventPoller.close();
 	}
+
 	private Propagator getPropagator() {
 		if (asyncPropagator == null) {
 			asyncPropagator = new Propagator(this);
 		}
 		return asyncPropagator;
-	}
-	@Override
-	public void receive(FeedEvent event) {
-		if (event.content instanceof LogsResult) {
-			try {
-				displayEventsFromLogs((LogsResult) event.content);
-			} catch (Exception e) {
-				throw new RuntimeException(e);
-			}
-			getPropagator().propagate();
-		} else {
-			super.receive(event);
-		}
 	}
 
 	@Override
@@ -144,30 +129,37 @@ public class GetEvents extends AbstractSignalPathModule implements EventsListene
 		}
 	}
 
-	protected void enqueueEvent(LogsResult lr){
-		getGlobals().getDataSource().enqueueEvent(new FeedEvent<LogsResult, GetEvents>(lr, lr.getTimestampAsDate(), this));
+	private void enqueueEvent(LogsResult lr){
+		getGlobals().getDataSource().enqueue(
+			new com.unifina.data.Event<>(lr, lr.getTimestampAsDate(), event -> {
+				try {
+					displayEventsFromLogs(event);
+				} catch (Exception e) {
+					throw new RuntimeException(e);
+				}
+				getPropagator().propagate();
+			}));
 	}
 
 	@Override
 	public void onEvent(JSONArray events) {
 		try {
 			int eventcount = events.length();
-			for(int i=0; i<eventcount; i++) {
+			for (int i = 0; i < eventcount; i++) {
 				String txHash = events.getJSONObject(i).getString("transactionHash");
 				log.info(String.format("Received event from RPC '%s'", txHash));
-				TransactionReceipt txr = Web3jHelper.waitForTransactionReceipt(web3j, txHash, check_result_waitms, check_result_max_tries);
+				TransactionReceipt txr = Web3jHelper.waitForTransactionReceipt(web3j, txHash, CHECK_RESULT_WAIT_MS, CHECK_RESULT_MAX_TRIES);
 				if (txr == null) {
 					log.error("Couldnt find TransactionReceipt for transaction " + txHash + " in allotted time");
 					return;
 				}
 				long blockts = Web3jHelper.getBlockTime(web3j, txr);
 				Date ts;
-				if(blockts < 0){
+				if (blockts < 0) {
 					ts = getGlobals().time;
-					log.error("No block timestamp found for txHash "+txHash+ ". Using globals timestamp "+ts);
-				}
-				else{
-					ts = new Date(blockts*1000);
+					log.error("No block timestamp found for txHash " + txHash + ". Using globals timestamp " + ts);
+				} else {
+					ts = new Date(blockts * 1000);
 				}
 				enqueueEvent(new LogsResult(txHash, ts, txr.getLogs()));
 			}
@@ -182,8 +174,8 @@ public class GetEvents extends AbstractSignalPathModule implements EventsListene
 		asyncPropagator.propagate();
 	}
 
-	protected void displayEventsFromLogs(LogsResult lr){
-		log.info("Received FeedEvent " + lr.txHash );
+	protected void displayEventsFromLogs(LogsResult lr) {
+		log.info("Received FeedEvent " + lr.txHash);
 
 		txHashOutput.send(lr.txHash);
 		for (EthereumABI.Event abiEvent : contract.getValue().getABI().getEvents()) {
@@ -191,22 +183,23 @@ public class GetEvents extends AbstractSignalPathModule implements EventsListene
 			Event web3jEvent = web3jEvents.get(abiEvent.name);
 			List<EventValues> valueList = Web3jHelper.extractEventParameters(web3jEvent, lr.logs);
 			if (valueList == null) {
-				throw new RuntimeException("Failed to get event params");	// TODO: what happens when you throw in poller thread?
+				throw new RuntimeException("Failed to get event params");    // TODO: what happens when you throw in poller thread?
 			}
 
 			if (abiEvent.inputs.size() > 0) {
 				for (EventValues ev : valueList) {
 					// indexed and non-indexed event args are saved differently in logs and must be retrieved by different methods
 					// see https://solidity.readthedocs.io/en/v0.5.3/contracts.html#events
-					int nextIndexed=0, nextNonIndexed=0;
-					for(int i=0;i<abiEvent.inputs.size();i++){
+					int nextIndexed = 0, nextNonIndexed = 0;
+					for (int i = 0; i < abiEvent.inputs.size(); i++) {
 						EthereumABI.Slot s = abiEvent.inputs.get(i);
 						Output output = eventOutputs.get(i);
 						Object value;
-						if(s.indexed)
+						if (s.indexed) {
 							value = ev.getIndexedValues().get(nextIndexed++).getValue();
-						else
+						} else {
 							value = ev.getNonIndexedValues().get(nextNonIndexed++).getValue();
+						}
 						convertAndSend(output, value);
 					}
 				}
@@ -223,16 +216,16 @@ public class GetEvents extends AbstractSignalPathModule implements EventsListene
 		super.onConfiguration(config);
 		ModuleOptions options = ModuleOptions.get(config);
 		ethereumOptions = EthereumModuleOptions.readFrom(options);
-		if(contract.hasValue()){
+		if (contract.hasValue()) {
 			String network = contract.getValue().getNetwork();
-			if(network != null) {
+			if (network != null) {
 				log.info("Setting ethereumOptions.network = " + network + ", passed from Contract");
 				ethereumOptions.setNetwork(network);
 			}
 		}
 		web3j = getWeb3j();
 		outputsByEvent = new HashMap<>();
-		web3jEvents = new HashMap<String, Event>();
+		web3jEvents = new HashMap<>();
 		if (contract.hasValue()) {
 			EthereumABI abi = contract.getValue().getABI();
 			for (EthereumABI.Event abiEvent : abi.getEvents()) {

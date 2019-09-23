@@ -14,6 +14,7 @@ import java.util.List;
 import java.util.Map;
 
 /** Grails side of the streamr-web3 node.js Ethereum bridge */
+@Deprecated
 public class StreamrWeb3Interface implements Serializable {
 
 	private static final Logger log = Logger.getLogger(StreamrWeb3Interface.class);

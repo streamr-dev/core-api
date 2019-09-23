@@ -53,7 +53,6 @@
 				    <g:each in="${streams}" var="stream">
 				        <ui:tr link="${ createLink(action:'show', id: stream.id) }" data-id="${stream.id }">
 				            <ui:td>${fieldValue(bean: stream, field: "name")}</ui:td>
-				            <ui:td>${fieldValue(bean: stream.feed, field: "name")}</ui:td>
 				            <ui:td class="hidden-xs">${fieldValue(bean: stream, field: "description")}</ui:td>
 							<ui:td class="hidden-xs" id="streamLastUpdated-${stream.id}">
 								<g:javascript>

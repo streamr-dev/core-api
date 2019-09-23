@@ -1,7 +1,6 @@
 package com.unifina.signalpath.remote;
 
-import com.unifina.data.FeedEvent;
-import com.unifina.data.IEventRecipient;
+import com.unifina.data.Event;
 import com.unifina.datasource.IStopListener;
 import com.streamr.client.protocol.message_layer.ITimestamped;
 import com.unifina.signalpath.*;
@@ -38,7 +37,7 @@ import java.util.concurrent.TimeUnit;
  *
  * Crucial benefit over simply doing Unirest.post: not blocking the whole canvas (Streamr thread) while request is pending
  */
-public abstract class AbstractHttpModule extends ModuleWithSideEffects implements IEventRecipient, IStopListener {
+public abstract class AbstractHttpModule extends ModuleWithSideEffects implements IStopListener {
 
 	private static final Logger log = Logger.getLogger(AbstractHttpModule.class);
 
@@ -255,7 +254,7 @@ public abstract class AbstractHttpModule extends ModuleWithSideEffects implement
 				.setSocketTimeout(timeoutMillis).build();
 		request.setConfig(requestConfig);
 
-		// if async: push server response into FeedEvent queue; it will later call this.receive
+		// if async: push server response into Event queue; it will later call this.receive
 		final AbstractHttpModule self = this;
 		final CountDownLatch latch = new CountDownLatch(1);
 		final long startTime = System.currentTimeMillis();
@@ -285,7 +284,10 @@ public abstract class AbstractHttpModule extends ModuleWithSideEffects implement
 				response.responseTime = System.currentTimeMillis() - startTime;
 				response.timestamp = getGlobals().isRealtime() ? new Date() : getGlobals().time;
 				if (async) {
-					getGlobals().getDataSource().enqueueEvent(new FeedEvent<>(response, response.timestamp, self));
+					getGlobals().getDataSource().enqueue(new Event<>(response, response.timestamp, 0L, (r) -> {
+						sendOutput(r);
+						getPropagator().propagate();
+					}));
 				} else {
 					latch.countDown();	// goto latch.await() below
 				}
@@ -325,20 +327,6 @@ public abstract class AbstractHttpModule extends ModuleWithSideEffects implement
 
 	protected boolean localAddressesAreAllowed() {
 		return false;
-	}
-
-	/**
-	 * Asynchronously handle server response, call comes from event queue
-	 * @param event containing HttpTransaction created within sendOutput
-	 */
-	@Override
-	public void receive(FeedEvent event) {
-		if (event.content instanceof HttpTransaction) {
-			sendOutput((HttpTransaction) event.content);
-			getPropagator().propagate();
-		} else {
-			super.receive(event);
-		}
 	}
 
 	private Propagator getPropagator() {
