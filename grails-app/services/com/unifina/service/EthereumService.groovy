@@ -9,7 +9,7 @@ class EthereumService {
 	String fetchJoinPartStreamID(String communityAddress) {
 		Web3j web3j = Web3jHelper.getWeb3jConnectionFromConfig()
 		try {
-			return Web3jHelper.getPublicField(web3j, communityAddress, "getJoinPartStream", Utf8String.class)
+			return Web3jHelper.getPublicField(web3j, communityAddress, "joinPartStream", Utf8String.class)
 		} catch (IOException e) {
 			throw new RuntimeException(e)
 		}

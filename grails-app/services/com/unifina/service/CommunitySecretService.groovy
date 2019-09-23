@@ -16,7 +16,7 @@ class CommunitySecretService {
 		CommunitySecret result = new CommunitySecret()
 		result.communityAddress = communityAddress
 		result.name = cmd.name
-		result.secret = generator.generate()
+		result.secret = cmd.secret ?: generator.generate()
 		result.save(validate: true, failOnError: true)
 		return result
 	}

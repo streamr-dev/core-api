@@ -1,5 +1,6 @@
 package com.unifina.signalpath.utils
 
+import com.streamr.client.utils.StreamPartition
 import com.unifina.ModuleTestingSpecification
 import com.unifina.domain.data.Stream
 import com.unifina.service.StreamService
@@ -10,9 +11,10 @@ class ConfigurableStreamModuleSpec extends ModuleTestingSpecification {
 	Globals globals
 	ConfigurableStreamModule module
 	StreamService streamService
+	Stream stream
 
 	def setup() {
-		Stream stream = new Stream()
+		stream = new Stream()
 		stream.config = [fields: [[name: "out", type: "string"]]]
 		stream.partitions = 3
 
@@ -60,5 +62,18 @@ class ConfigurableStreamModuleSpec extends ModuleTestingSpecification {
 
 		then:
 		module.getConfiguration().partitions == [0, 2]
+	}
+
+	void "getStreamPartitions() defaults to all partitions if no partitions are selected"() {
+		when:
+		module.configure([
+			params: [
+				[name: "stream", value: "stream-0"]
+			],
+			partitions: []
+		])
+
+		then:
+		module.getStreamPartitions().size() == 3
 	}
 }

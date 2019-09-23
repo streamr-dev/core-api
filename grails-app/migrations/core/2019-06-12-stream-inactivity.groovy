@@ -7,4 +7,11 @@ databaseChangeLog = {
 			}
 		}
 	}
+	changeSet(author: "kkn", id: "stream-inactivity-2") {
+		grailsChange {
+			change {
+				sql.execute('update stream set inactivity_threshold_hours = 48 where inactivity_threshold_hours = 0')
+			}
+		}
+	}
 }
