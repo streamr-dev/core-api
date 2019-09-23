@@ -23,6 +23,7 @@ jobs:
   include:
   - stage: Unit tests
     script: grails test-app -unit
+  - stage: Validate swagger
     script: .travis_scripts/validate_swagger.sh
   - stage: Integration tests
     script: travis_retry .travis_scripts/integration_test.sh
