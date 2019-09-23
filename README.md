@@ -2,19 +2,17 @@
 
 [![Build Status](https://travis-ci.org/streamr-dev/engine-and-editor.svg?branch=master)](https://travis-ci.org/streamr-dev/engine-and-editor)
 
-Web application containing and serving the Streamr Engine and Editor. Streamr Engine is an event processing system for real-time data. Streamr Editor is a visual programming environment for creating processes (called Canvases) that run on the Engine. 
+Web application containing and serving the Streamr Engine, Marketplace and Core. Streamr Engine is an event processing system for real-time data. Streamr Core is a visual programming environment for creating processes (called Canvases) that run on the Engine. 
 
-Streamr Engine and Editor is built on top of the Java VM and Grails web framework. The current implementation runs on the centralised (cloud) version of Streamr infrastructure, detailed in the section *Dependencies* (below). 
+Streamr Engine and Core is built on top of the Java VM and Grails web framework. The current implementation runs on the centralised (cloud) version of Streamr infrastructure. 
 
 ## Dependencies
 
 ### Tools
 - Grails 2.5.6
-- node.js ^8.0.0
-- npm
-- [Chrome Driver](https://code.google.com/p/selenium/wiki/ChromeDriver) and Google Chrome
+- Java 8
 
-A convenient way of installing and managing multiple versions of Grails is [SDKMAN!](http://sdkman.io/install.html). And for node.js there is [nvm](https://github.com/creationix/nvm).
+A convenient way of installing and managing multiple versions of Grails is [SDKMAN!](http://sdkman.io/install.html).
 
 ### Service dependencies
 
@@ -30,22 +28,11 @@ Additional services are required to run this web application. The easiest way to
 
 1. Ensure you have the dependencies listed under *Dependencies > Tools* installed.
 
-2. You need to place the `chromedriver` executeble in your `PATH`, and set an environment variable `CHROMEDRIVER` to point to the executable.
+2. Clone this repo
 
-3. Clone this repo
+3. Run `streamr-docker-dev start 1` if you are using the recommended tool streamr-docker-dev. Otherwise make sure all services dependencies are running and the the web applications is properly configured to connect to them.
 
-4. Fetch all git submodules 
-```
-git submodule update --init --recursive
-```
-5. Install front-end dependencies
-```
-npm install
-```
-
-6. Run `streamr-docker-dev start 1` if you are using the recommended tool streamr-docker-dev. Otherwise make sure all services dependencies are running and the the web applications is properly configured to connect to them.
-
-7. Start the web application
+4. Start the web application
 ```
 grails run-app
 ```
@@ -54,7 +41,7 @@ grails run-app
 A [Docker image](https://hub.docker.com/r/streamr/broker/) is automatically built and pushed to DockerHub when commits
 are pushed to branch `master`.
 
-Currently project has no CI system configured nor are any .jar artifacts published to central repositories.
+Currently project doesn't publish any .jar artifacts to central repositories.
 
 ## Developing
 
@@ -63,33 +50,14 @@ We provide sensible default configurations for IntelliJ IDEA but project can be 
 ### Testing
 
 - To run unit, integration, and end-to-end (functional) use `grails test-app`
-- To run front-end JavaScript tests use `npm test`
 - To run back-end unit tests only, use `grails test-app -unit`
 - To run back-end integration tests only, use `grails test-app -integration`
-- To run functional tests only, use `grails test-app -functional`
 
 These are also available as pre-shared run configurations if you use IntelliJ IDEA.
 
-### Front-end
-
-#### Building
-
-The UI is increasingly implemented with JavaScript libraries React and Redux and compiled with Webpack. The source files must first be transpiled and compiled into bundle file(s). This happens by running `npm run build` in the root directory. Normally, when running the Grails app the build command is run automatically, and needs not to be cared of.
-
-#### Running the dev server
-
-When developing the UI, it's much more handy to run the development server in the background. This happens with `npm run dev`. 
-The dev server updates bundle files on-the-fly as changes are detected in source files.
-
-#### Extra
-
-Normally the bundles are always written into files, where Grails knows to take them from. However, if you want to use the files straight from the memory of the Webpack dev server (for increased building speed), is that possible with the following commands:
- 1) Run grails with `grails run-app -Dwebpack.bundle.location=http://localhost:9000` (9000 is the default port of the dev server)
- 2) Run Webpack dev server with `NO_FILES=true npm run dev` to prevent it from writing the files 
-
 ### Back-end
 
-The back-end consists of two logical parts. The Engine is written mostly in Java and is responsible for executing arbitrary user-defined Canvases that process, analyze and act upon real-time event data. The Editor, on the other hand, is responsible for API(s), rendered web pages and other front-facing functionality. It is mostly written in Groovy and utilizes facilities provided by the Grails framework.
+The back-end consists of two logical parts. The Engine is written mostly in Java and is responsible for executing arbitrary user-defined Canvases that process, analyze and act upon real-time event data. The Editor, on the other hand, is responsible for API(s). It is mostly written in Groovy and utilizes facilities provided by the Grails framework.
 
 When you run the Engine+Editor web app with `grails run-app` or `grails test run-app`, most changes to source code files are automatically hot reloaded into the running JVM process.
 

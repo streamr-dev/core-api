@@ -1,9 +1,4 @@
-import org.grails.plugin.resource.mapper.MapperPhase
-
-
 class CorsResourceMapper {
-	static phase = MapperPhase.ALTERNATEREPRESENTATION
-	
 	/**
 	 * Add Access-Control-Allow-Origin header to all resources
 	 */
