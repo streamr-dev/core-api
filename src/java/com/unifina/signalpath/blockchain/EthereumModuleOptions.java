@@ -143,7 +143,7 @@ public class EthereumModuleOptions implements Serializable {
 		String url;
 		switch(method){
 			case HTTP:
-				if((url = getRpcUrl()) == null){
+				if ((url = getRpcUrl()) == null) {
 					log.warn("No http RPC URL specified");
 					return null;
 				}
