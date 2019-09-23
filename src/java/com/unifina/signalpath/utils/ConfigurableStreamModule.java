@@ -38,6 +38,7 @@ public class ConfigurableStreamModule extends AbstractSignalPathModule {
 		streamParameter.setUpdateOnChange(true);
 		streamParameter.setDrivingInput(false);
 		streamParameter.setCanToggleDrivingInput(false);
+		streamParameter.setCanConnect(false);
 		addInput(streamParameter);
 	}
 
