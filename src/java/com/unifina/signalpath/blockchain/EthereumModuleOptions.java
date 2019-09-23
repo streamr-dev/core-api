@@ -126,17 +126,25 @@ public class EthereumModuleOptions implements Serializable {
 		}
 		return null;
 	}
-	private Web3j getWeb3jUsingMethod(RpcConectionMethod preferredMethod){
+
+	/**
+	 *
+	 * @param method the connection method
+	 * @return a Web3j connector, or null if it can't create
+	 */
+	private Web3j getWeb3jUsingMethod(RpcConectionMethod method){
 		String url;
-		switch(preferredMethod){
+		switch(method){
 			case http:
 				if((url = getRpcUrl()) == null){
 					log.warn("No http RPC URL specified");
+					return null;
 				}
 				return Web3j.build(new HttpService(url));
 			case ws :
 				if((url = getWebsocketRpcUri()) == null){
 					log.warn("No ws RPC URL specified");
+					return null;
 				}
 				return Web3j.build(new WebSocketService(url,true));
 			default:
