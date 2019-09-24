@@ -166,7 +166,7 @@ class StreamApiController {
 		}
 	}
 
-	@StreamrApi
+	@StreamrApi(authenticationLevel = AuthLevel.NONE)
 	def publishers(String id) {
 		getAuthorizedStream(id, Operation.READ) { Stream stream ->
 			Set<String> publisherAddresses = streamService.getStreamEthereumPublishers(stream)
@@ -174,7 +174,7 @@ class StreamApiController {
 		}
 	}
 
-	@StreamrApi
+	@StreamrApi(authenticationLevel = AuthLevel.NONE)
 	def subscribers(String id) {
 		getAuthorizedStream(id, Operation.WRITE) { Stream stream ->
 			Set<String> subscriberAddresses = streamService.getStreamEthereumSubscribers(stream)
@@ -182,7 +182,7 @@ class StreamApiController {
 		}
 	}
 
-	@StreamrApi
+	@StreamrApi(authenticationLevel = AuthLevel.NONE)
 	def publisher(String id, String address) {
 		getAuthorizedStream(id, Operation.READ) { Stream stream ->
 			if(streamService.isStreamEthereumPublisher(stream, address)) {
@@ -193,7 +193,7 @@ class StreamApiController {
 		}
 	}
 
-	@StreamrApi
+	@StreamrApi(authenticationLevel = AuthLevel.NONE)
 	def subscriber(String id, String address) {
 		getAuthorizedStream(id, Operation.WRITE) { Stream stream ->
 			if(streamService.isStreamEthereumSubscriber(stream, address)) {

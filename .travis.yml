@@ -14,11 +14,7 @@ before_install:
 - echo sdkman_auto_answer=true > ~/.sdkman/etc/config
 - source "/home/travis/.sdkman/bin/sdkman-init.sh"
 - sdk install grails 2.5.6
-- sed -i 's/git@github.com:/https:\/\/github.com\//' .gitmodules
-- git submodule update --init --recursive
-- npm i -g npm@6.4.0
-addons:
-  chrome: stable
+- npm i -g npm@6.4.1
 env:
   global:
   - secure: Icz6PgvdiMvqiC1yMBknaSMqHvvthOo0hUrVCTGA8pWXaqofX5fKNVI8GL4kvRK7a+YpEZ7SCvHH1cgEfBx8jC+Wc0XjGfBZXH1C1gyo8X1keCcJQVRyhxXkrjaeOLF0Cas8m9MdgAqJlwDcAXkWh426kvpAbU1SbNkkSCX3Ksp6M43LVUEbtkdOCf0GxavfgsGL5S9fk7WUf7hU4+HqL/UbbM+XMTz9hgajI5zzyRPiFwMPLGohNfopLKZvRWL/2IDY4ldVEzRi8koxIYrhO68o5RJJsptw+Gfaf3mzmgDGP9jU/cWYxsrfWogtVGFOiB2nDA+opbDU79vwHCpP5dcZJUEDvgOMVA0aTRT6Mc6hXM07wiL9noJwrSqoudkXianDDJqCKja+myKNi4wVWpisZV0HfF3nWeiKoxBaQdlCc7UUadS4OYK30Xll/Z9Z3ebWWGRmdKRSeD+QmM4j8VMu/t624AX/Q0laAS7/6BKOjMaDUqm3Q7plNWTSQWRmVUFzaH0xRL1DPLIbz/8Z8D1IVOfnq6k2FYTtVnjKQdHH65ddtqZMwtsSJsS9fQRYOm3ly0avPvDNnNeEYEuhY5lF8Tiw1lwh+BHOhiQLAPi7dqTiV/I2ImgdFH6a8wr/KICSquaSRWzwWnod3Jstrz9WWQW+K9JKu4deIRUOEx4=
@@ -26,18 +22,15 @@ env:
 jobs:
   include:
   - stage: Unit tests
-    env:
-    - BACKEND_END_TEST=true
-    script: "./travis_scripts/unit_test.sh"
-  - env:
-    - FRONT_END_TEST=true
-    script: "./travis_scripts/fe_unit_test.sh"
+    script: grails test-app -unit
+  - stage: Validate swagger
+    script: .travis_scripts/validate_swagger.sh
   - stage: Integration tests
-    script: "travis_retry ./travis_scripts/integration_test.sh"
+    script: travis_retry .travis_scripts/integration_test.sh
   - stage: REST API tests
-    script: ./travis_scripts/rest_e2e_test.sh
+    script: .travis_scripts/rest_e2e_test.sh
   - stage: Build war Staging
-    script: "./travis_scripts/build_war.sh"
+    script: .travis_scripts/build_war.sh
     env:
     - WS_URL="wss://ee-staging.streamr.com/api/v1/ws"
     deploy:
@@ -67,13 +60,11 @@ jobs:
     - IMAGE_NAME=engine-and-editor
     - TAG=dev
     script:
-    - grails clean
-    - npm install
     - grails test war
-    - docker build -f Dockerfile.dev -t $OWNER/$IMAGE_NAME:$TAG .
+    - docker build -f docker/Dockerfile.dev -t $OWNER/$IMAGE_NAME:$TAG .
     deploy:
     - provider: script
-      script: bash travis_scripts/deploy_docker.sh staging
+      script: .travis_scripts/deploy_docker.sh staging
     if: NOT type IN (pull_request)
   - stage: Build docker Staging
     env:
@@ -81,15 +72,13 @@ jobs:
     - IMAGE_NAME=engine-and-editor
     - TAG=stg
     script:
-    - grails clean
-    - npm install
     - grails war
-    - docker build -f Dockerfile.stg -t $OWNER/$IMAGE_NAME:$TAG .
+    - docker build -f docker/Dockerfile.stg -t $OWNER/$IMAGE_NAME:$TAG .
     deploy:
     - provider: script
-      script: bash travis_scripts/deploy_docker.sh staging
+      script: .travis_scripts/deploy_docker.sh staging
     if: NOT type IN (pull_request)
-after_failure: "./travis-after-failure.sh"
+after_failure: .travis_scripts/after_test_failure.sh
 notifications:
   slack:
     secure: rX8I0YHsgA0mvjlKhQ+69ZsO8mww0xYV/wc2VolQaBXIZ5Jcj4A82cLRAAyhoJxEP7tZUFhVBMkwmMSHnL4AvGG5JREialedQltAww/0/kTACxCc62/bxnbV+YDapxP4VIpOdL+/La+gWt4FsoW6oKavwMkNgPuNE65+IGK3ay2+G+BTfjldWkBLcBa8MAsKXp3XQdt04eyh3b3HBUk04rgotIPB+ndSW97NUTdj8LifiKFYV8n5c5LOLRWTgP68t1ktjPCWvjHzjwWRlSnxRcdXkj870mjCdH/l8WI93YzZE4g2auUjWFV8MzbGfObnCQ9McaoVwhiUt4IjpI51Iuc0qUwpoIfMk0J3BobZWcehXFilQknOTF9y5LqRplHND5Om3Dw8DdKWCzZVFw8S3dd5oBgKgxuOt01KD4lpQ/5nJZzmykrKMNWa7NkbYw6pLHVSaIMu4WVycZLnnyz4Rt/LZIdq7IH38QT0DDR9aG7CMgomnzAvgfSkte7lMdfeOo+uMsu2JA0MXOd1BYfEzwWCRh7QWhr5UgZXPX9sFReal/TtEODh71ZMI945iQVDNaEh3ypuBdraiFSR7SZbLTdvZEVbzCC2kS6JKBdUsUVTroWSyIl+gJUsXoyZ88c1YmFBMdj6jDSyzz4Ig4uBRwMEcx0aqtwDnQrvEtNhzKY=

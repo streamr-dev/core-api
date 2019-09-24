@@ -1,1 +1,0 @@
-<g:img dir="images" file="streamr-logo-old.png" plugin="unifina-core" />
