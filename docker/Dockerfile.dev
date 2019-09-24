@@ -13,7 +13,7 @@ COPY docker/wait-for-it.sh /usr/local/tomcat/bin/wait-for-it.sh
 
 # Copy pre-built ROOT.war into container as streamr-core.war
 COPY target/ROOT.war /usr/local/tomcat/webapps/streamr-core.war
-ENV CP_URL http://community-product:8085/communities/
+ENV CP_URL http://localhost:8085/communities/
 ENV CATALINA_OPTS -Dstreamr.database.user=root \
     -Dstreamr.database.password=password \
     -Dstreamr.database.host=mysql \
