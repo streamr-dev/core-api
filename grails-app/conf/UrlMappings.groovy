@@ -7,24 +7,8 @@ import com.unifina.domain.signalpath.Canvas
 
 class UrlMappings {
 	static mappings = {
-		"/$controller/$action?/$id?"{
-			constraints {
-				// apply constraints here
-			}
-		}
-
-		"/"(controller:"canvas")
-
-		// 403 would be handled by Spring Security Core by default, but due to
-		// https://jira.grails.org/browse/GPSPRINGSECURITYCORE-253 it needs to be specified explicitly
-		"403"(controller: "login", action: "denied")
+		
 		"500"(controller: "error", action: "index", exception: Exception)
-
-		"/login/auth"(controller: "auth", action: "index")
-		"/login/full"(controller: "auth", action: "fullAuth")
-		"/register/$action**?"(controller: "auth", action: "index")
-
-		"/webcomponents/$view"(controller: "webcomponents", action: "index")
 
 		// API v1 url mappings
 		"/api/v1/signups"(method: "POST", controller: "authApi", action: "signup")
@@ -125,8 +109,5 @@ class UrlMappings {
 		"/api/v1/communities/$communityAddress/stats"(method: "GET", controller: "communityOperatorApi", action: "stats")
 		"/api/v1/communities/$communityAddress/members"(method: "GET", controller: "communityOperatorApi", action: "members")
 		"/api/v1/communities/$communityAddress/members/$memberAddress"(method: "GET", controller: "communityOperatorApi", action: "memberStats")
-
-		// Mappings for pages using React Router (the root for the router)
-		"/dashboard/editor/$id**?"(controller: "dashboard", action: "editor")
 	}
 }

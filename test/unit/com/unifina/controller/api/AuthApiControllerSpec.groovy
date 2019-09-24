@@ -282,6 +282,6 @@ class AuthApiControllerSpec extends Specification {
 		then:
 		controller.mailService.mailSent
 		// The text of the html contains the link
-		controller.mailService.html.contains("register/resetPassword")
+		controller.mailService.html.contains("/resetPassword?t=")
 		response.json.emailSent	}
 }
