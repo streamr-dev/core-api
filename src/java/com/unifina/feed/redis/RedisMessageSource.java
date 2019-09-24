@@ -58,7 +58,9 @@ public class RedisMessageSource extends StreamMessageSource {
 			}
 		});
 
+		log.debug("Attempting to subscribe to streamPartitions: " + streamPartitions);
 		for (StreamPartition sp : streamPartitions) {
+			log.debug("Subscribing to: " + sp);
 			connection.subscribe(streamPartitionToChannelBytes(sp));
 		}
 	}

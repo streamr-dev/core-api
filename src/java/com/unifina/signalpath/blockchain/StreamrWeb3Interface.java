@@ -14,6 +14,7 @@ import java.util.List;
 import java.util.Map;
 
 /** Grails side of the streamr-web3 node.js Ethereum bridge */
+@Deprecated
 public class StreamrWeb3Interface implements Serializable {
 
 	private static final Logger log = Logger.getLogger(StreamrWeb3Interface.class);
@@ -58,7 +59,7 @@ public class StreamrWeb3Interface implements Serializable {
 				}
 			}
 			// TODO: bring returned.errors to UI somehow? They're warnings probably since compilation was successful
-			return new EthereumContract(mainContract.address, new EthereumABI(mainContract.abi));
+			return new EthereumContract(mainContract.address, new EthereumABI(mainContract.abi), null);
 		} else {
 			// TODO java 8: String.join
 			throw new RuntimeException(new Gson().toJson(returned.errors));
@@ -112,7 +113,7 @@ public class StreamrWeb3Interface implements Serializable {
 			// TODO: bring returned.errors to UI somehow? They're warnings probably since compilation was successful
 			// TODO: handle several contracts returned?
 			ContractMetadata c = returned.contracts.get(0);
-			return new EthereumContract(c.address, new EthereumABI(c.abi));
+			return new EthereumContract(c.address, new EthereumABI(c.abi), null);
 		} else {
 			// TODO java 8: String.join
 			throw new RuntimeException(new Gson().toJson(returned.errors));

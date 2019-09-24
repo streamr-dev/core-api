@@ -1,48 +1,21 @@
-OWNER=streamr
-IMAGE_NAME=engine-and-editor
-VCS_REF=`git rev-parse --short HEAD`
-IMAGE_VERSION=0.2.$(TRAVIS_BUILD_NUMBER)
-QNAME=$(OWNER)/$(IMAGE_NAME)
+version := $(shell git describe --tags --always --dirty="-dev")
+date := $(shell date -u '+%Y-%m-%dT%H:%M:%SZ')
 
-GIT_TAG=$(QNAME):$(VCS_REF)
-BUILD_TAG=$(QNAME):$(IMAGE_VERSION)
-LATEST_TAG=$(QNAME):latest
+.SHELLFLAGS := -c # Run commands in a -c flag
+.ONESHELL: ; # recipes execute in same shell
+#.SILENT: ; # no need for @
+.NOTPARALLEL: ; # wait for this target to finish
+.EXPORT_ALL_VARIABLES: ; # send all vars to shell
+#.DEFAULT_GOAL := xxx
 
-unit-test:
-	grails clean
-	grails test-app -unit
+.PHONY: test-unit
+test-unit:
+	grails test-app -unit --stacktrace
 
-integration-test:
-	sudo /etc/init.d/mysql stop
-	npm install
-	git clone https://github.com/streamr-dev/streamr-docker-dev.git
-	$(TRAVIS_BUILD_DIR)/streamr-docker-dev/streamr-docker-dev/bin.sh start 1
-	grails clean
-	grails test-app -integration
+.PHONY: test-integration
+test-integration:
+	grails test-app -integration --stacktrace
 
-build-war:
-	grails clean
-	npm install
-	npm run build
-	grails prod war
-	mkdir build
-	cp $(PWD)/target/ROOT.war $(PWD)/build
-
-docker-build:
-	docker build \
-		--build-arg VCS_REF=$(VCS_REF) \
-		--build-arg IMAGE_VERSION=$(IMAGE_VERSION) \
-		-t $(GIT_TAG) .
-
-docker-lint:
-	docker run -it --rm -v "$(PWD)/Dockerfile:/Dockerfile:ro" redcoolbeans/dockerlint
-
-docker-tag:
-	docker tag $(GIT_TAG) $(BUILD_TAG)
-	docker tag $(GIT_TAG) $(LATEST_TAG)
-
-docker-login:
-	@docker login -u "$(DOCKER_USER)" -p "$(DOCKER_PASS)"
-
-docker-push: docker-login
-	docker push $(LATEST_TAG)
+.PHONY: test-rest
+test-rest:
+	cd rest-e2e-tests && $(HOME)/.nvm/versions/node/v8.12.0/bin/npm test
