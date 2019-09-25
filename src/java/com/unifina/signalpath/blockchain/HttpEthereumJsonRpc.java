@@ -18,7 +18,7 @@ class HttpEthereumJsonRpc extends EthereumJsonRpc{
 	}
 
 	@Override
-	public void rpcCall(String method, List params, int callId) throws HttpStatusException, ErrorObjectException, com.mashape.unirest.http.exceptions.UnirestException {
+	public void rpcCall(String method, List params, int callId) throws HttpStatusException, com.mashape.unirest.http.exceptions.UnirestException {
 			HttpResponse<JsonNode> response = formRequest(method, params, callId).asJson();
 
 			if (statusCodeIsNot2XX(response.getStatus())) {
@@ -26,9 +26,6 @@ class HttpEthereumJsonRpc extends EthereumJsonRpc{
 			}
 
 			JSONObject responseJson = response.getBody().getObject();
-			if (responseJson.opt("error") != null) {
-				throw new ErrorObjectException(responseJson.optJSONObject("error"));
-			}
 			handler.processResponse(responseJson);
 	}
 
@@ -43,29 +40,9 @@ class HttpEthereumJsonRpc extends EthereumJsonRpc{
 		return code / 100 != 2;
 	}
 
-	abstract class RPCException extends Exception {
-		private RPCException(String message) {
-			super(String.format("JSON RPC error with server '%s': %s", url, message));
-		}
-	}
-
-
 	class HttpStatusException extends RPCException {
 		private HttpStatusException(int statusCode, JsonNode body) {
 			super(String.format("unexpected status code %d with content %s", statusCode, body));
-		}
-	}
-
-	class ErrorObjectException extends RPCException {
-		private final JSONObject errorObject;
-
-		private ErrorObjectException(JSONObject errorObject) {
-			super("response contained error object " + errorObject);
-			this.errorObject = errorObject;
-		}
-
-		public int getCode() {
-			return errorObject.optInt("code");
 		}
 	}
 }

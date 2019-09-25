@@ -116,15 +116,7 @@ class ContractEventPoller implements Closeable, Runnable, JsonRpcResponseHandler
 		try {
 			log.info(String.format("Polling filter '%s'.", filterId));
 			rpc.rpcCall("eth_getFilterChanges", singletonList(filterId), ID_POLLFILTER);
-		} catch (HttpEthereumJsonRpc.ErrorObjectException e) {
-			if (RPC_CODE_NO_FILTER == e.getCode()) {
-				log.info("Resetting filter...");
-				filterId = null;
-				newFilter();
-			} else {
-				listener.onError(e.getMessage());
-			}
-		} catch (HttpEthereumJsonRpc.RPCException | JSONException e) {
+		}  catch (HttpEthereumJsonRpc.RPCException | JSONException e) {
 			listener.onError(e.getMessage());
 		} catch (Exception e) {
 			listener.onError(e.getMessage());
@@ -176,6 +168,9 @@ class ContractEventPoller implements Closeable, Runnable, JsonRpcResponseHandler
 		}
 	}
 
+	/*
+		handles both error and non-error RPC json resposnes
+	 */
 	@Override
 	public void processResponse(JSONObject resp) {
 		if(resp.has("error")){
