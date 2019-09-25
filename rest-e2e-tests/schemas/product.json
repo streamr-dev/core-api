@@ -152,6 +152,14 @@
       "description": "Username of the owner",
       "type": "string",
       "maxLength": 255
+    },
+    "pendingChanges": {
+      "description": "Contains (JSON Object) fields and new values of on-chain fields that are not yet published",
+      "type": [
+        "null",
+        "string"
+      ],
+      "maxLength": 255
     }
   },
   "additionalProperties": false,
