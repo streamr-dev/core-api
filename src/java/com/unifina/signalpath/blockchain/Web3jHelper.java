@@ -30,6 +30,23 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class Web3jHelper {
+
+	public static class BlockchainException extends Exception{
+		public BlockchainException(String msg){
+			super(msg);
+		}
+	};
+	public static class BlockTimestampIsNullException extends BlockchainException{
+		public BlockTimestampIsNullException(String msg){
+			super(msg);
+		}
+	};
+	public static class BlockWasNullException extends BlockchainException{
+		public BlockWasNullException(String msg){
+			super(msg);
+		}
+	};
+
 	private static final Logger log = Logger.getLogger(Web3jHelper.class);
 
 	public static TransactionReceipt getTransactionReceipt(Web3j web3, String txhash) throws IOException {
@@ -187,21 +204,37 @@ public class Web3jHelper {
 	/**
 	 * @param web3j
 	 * @param tr
-	 * @return the timestamp (seconds) of the block in which trasnaction occured, or -1 if not found
+	 * @return the timestamp (seconds) of the block in which trasnaction occured
 	 * @throws IOException
+	 * @throws BlockchainException
+	 *
 	 */
-	public static long getBlockTime(Web3j web3j, TransactionReceipt tr) throws IOException {
+
+	public static long getBlockTime(Web3j web3j, TransactionReceipt tr) throws IOException, BlockchainException {
 		DefaultBlockParameter dbp = DefaultBlockParameter.valueOf(tr.getBlockNumber());
 		EthBlock eb = web3j.ethGetBlockByNumber(dbp, false).send();
 		if (eb == null) {
-			log.error("Error fetching block " + dbp);
-			return -1;
+			throw new IOException("Error sending ethGetBlockByNumber for block " + dbp);
 		}
 		if (eb.hasError()) {
-			log.error("Error fetching block " + dbp + ". Error = " + eb.getError());
-			return -1;
+			String err = "Error fetching block " + dbp + ". Error = " + eb.getError();
+			log.error(err);
+			throw new BlockchainException(err);
 		}
-		long ts = eb.getBlock().getTimestamp().longValue();
+		EthBlock.Block block = eb.getBlock();
+		if(block == null){
+			String err = "getBlock() returned null block for txHash " + tr.getTransactionHash();
+			log.error(err);
+			throw new BlockWasNullException(err);
+		}
+		BigInteger timestamp = block.getTimestamp();
+		if(timestamp == null){
+			String err = "getBlock() returned null timestamp for block: "+block+", re txHash: " + tr.getTransactionHash();
+			log.error(err);
+			throw new BlockTimestampIsNullException(err);
+		}
+
+		long ts = timestamp.longValue();
 		log.info("getBlockTime txHash: " + tr.getTransactionHash() + " block number: " + tr.getBlockNumber() + " timestamp: " + ts);
 		return ts;
 	}
