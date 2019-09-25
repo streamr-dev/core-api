@@ -143,9 +143,9 @@ public class GetEvents extends AbstractSignalPathModule implements EventsListene
 
 	@Override
 	public void onEvent(JSONArray events) {
-		try {
-			int eventcount = events.length();
-			for (int i = 0; i < eventcount; i++) {
+		int eventcount = events.length();
+		for (int i = 0; i < eventcount; i++) {
+			try {
 				String txHash = events.getJSONObject(i).getString("transactionHash");
 				log.info(String.format("Received event from RPC '%s'", txHash));
 				TransactionReceipt txr = Web3jHelper.waitForTransactionReceipt(web3j, txHash, CHECK_RESULT_WAIT_MS, CHECK_RESULT_MAX_TRIES);
@@ -154,6 +154,7 @@ public class GetEvents extends AbstractSignalPathModule implements EventsListene
 					return;
 				}
 				long blockts = Web3jHelper.getBlockTime(web3j, txr);
+
 				Date ts;
 				if (blockts < 0) {
 					ts = getGlobals().time;
@@ -162,9 +163,9 @@ public class GetEvents extends AbstractSignalPathModule implements EventsListene
 					ts = new Date(blockts * 1000);
 				}
 				enqueueEvent(new LogsResult(txHash, ts, txr.getLogs()));
+			} catch (JSONException | IOException | Web3jHelper.BlockchainException e) {
+				onError(e.getMessage());
 			}
-		} catch (JSONException | IOException | Web3jHelper.BlockchainException e) {
-			onError(e.getMessage());
 		}
 	}
 
