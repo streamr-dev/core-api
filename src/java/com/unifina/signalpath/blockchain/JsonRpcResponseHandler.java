@@ -7,5 +7,6 @@ processes raw JSON response
  */
 
 public interface JsonRpcResponseHandler {
+	public void init();
 	public void processResponse(JSONObject resp);
 }

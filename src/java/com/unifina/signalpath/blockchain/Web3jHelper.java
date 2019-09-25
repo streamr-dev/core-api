@@ -201,7 +201,18 @@ public class Web3jHelper {
 			log.error("Error fetching block " + dbp + ". Error = " + eb.getError());
 			return -1;
 		}
-		long ts = eb.getBlock().getTimestamp().longValue();
+		EthBlock.Block block = eb.getBlock();
+		if(block == null){
+			log.error("getBlock() returned null block for txHash " + tr.getTransactionHash());
+			return -1;
+		}
+		BigInteger timestamp = block.getTimestamp();
+		if(timestamp == null){
+			log.error("getBlock() returned null timestamp for block: "+block+", re txHash: " + tr.getTransactionHash());
+			return -1;
+		}
+
+		long ts = timestamp.longValue();
 		log.info("getBlockTime txHash: " + tr.getTransactionHash() + " block number: " + tr.getBlockNumber() + " timestamp: " + ts);
 		return ts;
 	}

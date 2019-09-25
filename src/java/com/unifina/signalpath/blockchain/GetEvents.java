@@ -171,7 +171,7 @@ public class GetEvents extends AbstractSignalPathModule implements EventsListene
 	@Override
 	public void onError(String message) {
 		errors.send(Collections.singletonList(message));
-		asyncPropagator.propagate();
+		getPropagator().propagate();
 	}
 
 	protected void displayEventsFromLogs(LogsResult lr) {

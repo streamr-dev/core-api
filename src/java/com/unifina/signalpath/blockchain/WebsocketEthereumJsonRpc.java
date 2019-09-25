@@ -107,6 +107,7 @@ public class WebsocketEthereumJsonRpc extends EthereumJsonRpc {
 			log.info("Trying to establish websocket connection to " + url + ". Attempt number " + attempts);
 			try {
 				openConnection();
+				handler.init();
 			} catch (URISyntaxException e) {
 				log.error(e);
 				return false;
