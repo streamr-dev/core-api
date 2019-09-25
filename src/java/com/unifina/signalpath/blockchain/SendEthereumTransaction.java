@@ -308,13 +308,19 @@ public class SendEthereumTransaction extends ModuleWithSideEffects {
 		 *
 		 * @throws IOException if Ethereum requests fail (network problem to Ethereum client)
 		 */
-		protected void enqueueConfirmedTx() throws IOException, Web3jHelper.BlockchainException {
+		protected void enqueueConfirmedTx() throws IOException {
 			final FunctionCallResult fncall = this;
 			receipt = Web3jHelper.waitForTransactionReceipt(web3j, web3jTx.getTransactionHash(), CHECK_RESULT_WAIT_MS, CHECK_RESULT_MAX_TRIES);
 			if (receipt != null) {
 				transaction = web3j.ethGetTransactionByHash(web3jTx.getTransactionHash()).send().getResult();
 				log.info("Receipt found for txHash: " + web3jTx.getTransactionHash());
-				long ts = getBlockTimeSeconds(receipt);
+				long ts = -1;
+				try{
+					ts = getBlockTimeSeconds(receipt);
+				}
+				catch(Web3jHelper.BlockchainException e){
+					log.error(e.getMessage());
+				}
 				if (ts >= 0) {
 					Date newts = new Date(ts * 1000);
 					log.info("Updating timestamp of TransactionResult from " + timestamp + " to block timestamp " + newts);
@@ -454,8 +460,6 @@ public class SendEthereumTransaction extends ModuleWithSideEffects {
 						}
 					} catch (IOException e) {
 						throw new RuntimeException(e);
-					} catch (Web3jHelper.BlockchainException e) {
-						log.error(e.getMessage());
 					}
 				});
 			}
