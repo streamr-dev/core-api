@@ -139,23 +139,9 @@ log4j.main = {
 		'org.grails.datastore.mapping.core.DatastoreUtils'
 
 	warn 'org.mortbay.log',
-<<<<<<< HEAD
 		'org.codehaus.groovy.grails.domain.GrailsDomainClassCleaner'
 
-	debug 'com.datastax.driver.core',
-		'com.streamr.client' // TODO: remove when problems solved
-=======
-		'org.apache.zookeeper',
-		'org.codehaus.groovy.grails.domain.GrailsDomainClassCleaner',
-		'kafka.consumer.ConsumerConfig',
-		'org.apache.kafka.clients.consumer.ConsumerConfig',
-		'kafka.producer.ProducerConfig',
-		'org.apache.kafka.clients.producer.ProducerConfig'
-
-	debug 'com.datastax.driver.core',
-		'com.unifina.datasource.DataSource',
-		'com.unifina.signalpath.utils.ConfigurableStreamModule'
->>>>>>> origin/master
+	debug 'com.datastax.driver.core'
 }
 
 /**
