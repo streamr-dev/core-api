@@ -30,6 +30,23 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class Web3jHelper {
+
+	public static class BlockchainException extends Exception{
+		public BlockchainException(String msg){
+			super(msg);
+		}
+	};
+	public static class BlockTimestampIsNullException extends BlockchainException{
+		public BlockTimestampIsNullException(String msg){
+			super(msg);
+		}
+	};
+	public static class BlockWasNullException extends BlockchainException{
+		public BlockWasNullException(String msg){
+			super(msg);
+		}
+	};
+
 	private static final Logger log = Logger.getLogger(Web3jHelper.class);
 
 	public static TransactionReceipt getTransactionReceipt(Web3j web3, String txhash) throws IOException {
@@ -183,23 +200,6 @@ public class Web3jHelper {
 		Type<X> next = result.iterator().next();
 		return (T) next.getValue();
 	}
-
-	public static class BlockchainException extends Exception{
-		public BlockchainException(String msg){
-			super(msg);
-		}
-	};
-	public static class BlockTimestampIsNullException extends BlockchainException{
-		public BlockTimestampIsNullException(String msg){
-			super(msg);
-		}
-	};
-	public static class BlockWasNullException extends BlockchainException{
-		public BlockWasNullException(String msg){
-			super(msg);
-		}
-	};
-
 
 	/**
 	 * @param web3j
