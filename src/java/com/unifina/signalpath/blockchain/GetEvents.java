@@ -163,7 +163,7 @@ public class GetEvents extends AbstractSignalPathModule implements EventsListene
 				}
 				enqueueEvent(new LogsResult(txHash, ts, txr.getLogs()));
 			}
-		} catch (JSONException | IOException e) {
+		} catch (JSONException | IOException | Web3jHelper.BlockchainException e) {
 			onError(e.getMessage());
 		}
 	}

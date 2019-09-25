@@ -32,6 +32,7 @@ class ContractEventPoller implements Closeable, Runnable, JsonRpcResponseHandler
 	private final String contractAddress;
 	private final EventsListener listener;
 	private String filterId;
+	//keepPolling starts true, and only turns false when close() is called
 	private boolean keepPolling = true;
 
 
@@ -86,7 +87,7 @@ class ContractEventPoller implements Closeable, Runnable, JsonRpcResponseHandler
 		List params = singletonList(singletonMap("address", contractAddress));
 		try {
 			rpc.rpcCall("eth_newFilter", params, ID_ADDFILTER);
-			log.info("adding new filter");
+			log.info("adding new filter to contract address " + contractAddress);
 		} catch (Exception e) {
 			listener.onError(e.getMessage());
 			throw new RuntimeException(e);

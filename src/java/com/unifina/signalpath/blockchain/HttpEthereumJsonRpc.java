@@ -14,6 +14,7 @@ import java.util.List;
 class HttpEthereumJsonRpc extends EthereumJsonRpc{
 	HttpEthereumJsonRpc(String url, JsonRpcResponseHandler handler) {
 		super(url, handler);
+		//in the case of ContractEventPoller, handler.init() installs filter
 		handler.init();
 	}
 
