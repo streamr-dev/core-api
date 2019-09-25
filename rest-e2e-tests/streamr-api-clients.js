@@ -224,6 +224,20 @@ class Streams {
             .methodAndPath('POST', `streams/${id}/confirmCsvFileUpload`)
             .withBody(body)
     }
+
+    makePublic(id) {
+        return new StreamrApiRequest(this.options)
+            .methodAndPath('POST', `streams/${id}/permissions`)
+            .withBody({
+                anonymous: true,
+                operation: 'read'
+            })
+    }
+
+    getPublishers(id) {
+        return new StreamrApiRequest(this.options)
+            .methodAndPath('GET', `streams/${id}/publishers`)
+    }
 }
 
 class Subscriptions {
