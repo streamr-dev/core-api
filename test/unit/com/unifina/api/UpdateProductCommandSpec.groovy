@@ -190,7 +190,7 @@ class UpdateProductCommandSpec extends Specification {
 		thrown(FieldCannotBeUpdatedException)
 	}
 
-	void "updateProduct() checks share permission when pendingChanges field is given"() {
+	void "updateProduct() throws when pendingChanges field is given and user doesn't have share permission"() {
 		setup:
 		command = new UpdateProductCommand(
 			name: "new name",
@@ -204,6 +204,22 @@ class UpdateProductCommandSpec extends Specification {
 		then:
 		1 * permissionService.canShare(_, product) >> false
 		thrown(FieldCannotBeUpdatedException)
+	}
+
+	void "updateProduct() updates pendingChanges if it is given and user has share permission"() {
+		setup:
+		command = new UpdateProductCommand(
+			name: "new name",
+			description: "new description",
+			pendingChanges: '''{"name":"new name","description":"new description"}'''
+		)
+		product.pricePerSecond = 5
+
+		when:
+		command.updateProduct(product, new SecUser(), permissionService)
+		then:
+		1 * permissionService.canShare(_, product) >> true
+		product.pendingChanges == '''{"name":"new name","description":"new description"}'''
 	}
 
 	void "updateProduct() doesn't check sharing permission when pendingChanges is not given"() {
