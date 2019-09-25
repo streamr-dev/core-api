@@ -7,7 +7,7 @@ import com.unifina.utils.PropertiesUtil
  * The application config file can override anything defined here.
  */
 
-def prodBaseUrl = System.getProperty("streamr.url") ?: "https://www.streamr.com"
+def prodBaseUrl = System.getProperty("streamr.url") ?: "https://streamr.network"
 
 environments {
 	production {
