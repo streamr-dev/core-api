@@ -25,6 +25,25 @@ describe('Streams API', () => {
         streamId = response.id
     })
 
+    describe('GET /api/v1/streams/:id/publishers', () => {
+        it('requires authentication for private streams', async () => {
+            const response = await Streamr.api.v1.streams.getPublishers(streamId).call()
+            assert.equal(response.status, 403)
+        })
+        it('does not require authentication for public streams', async () => {
+            const publicStreamResponse = await Streamr.api.v1.streams
+                .create({
+                    name: 'stream-id-' + Date.now()
+                })
+                .withAuthToken(AUTH_TOKEN)
+                .execute()
+            const permResponse = await Streamr.api.v1.streams.makePublic(publicStreamResponse.id).withAuthToken(AUTH_TOKEN).call()
+            assert.equal(permResponse.status, 201)
+            const response = await Streamr.api.v1.streams.getPublishers(publicStreamResponse.id).call()
+            assert.equal(response.status, 200)
+        })
+    })
+
     describe('POST /api/v1/streams/:id/fields', () => {
         it('requires authentication', async () => {
             const response = await Streamr.api.v1.streams

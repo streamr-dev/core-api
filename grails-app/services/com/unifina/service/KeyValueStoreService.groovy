@@ -28,7 +28,7 @@ class KeyValueStoreService {
 		getConnection().expireat(key, date)
 	}
 
-	private RedisAsyncConnection<String, String> getConnection() {
+	private synchronized RedisAsyncConnection<String, String> getConnection() {
 		if (connection == null) {
 			List<String> hosts = MapTraversal.getList(Holders.getConfig(), "streamr.redis.hosts");
 			String password = MapTraversal.getString(Holders.getConfig(), "streamr.redis.password");

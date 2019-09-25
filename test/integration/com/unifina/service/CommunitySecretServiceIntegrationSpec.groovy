@@ -36,7 +36,7 @@ class CommunitySecretServiceIntegrationSpec extends Specification {
 		results.containsAll([s1, s2])
 	}
 
-	void "create() test"() {
+	void "create() test with generated secret"() {
 		setup:
 		service.generator = Mock(IdGenerator)
 		CommunitySecretCommand cmd = new CommunitySecretCommand(
@@ -50,6 +50,23 @@ class CommunitySecretServiceIntegrationSpec extends Specification {
 		result.name == "community secret"
 		result.communityAddress == communityAddress
 		result.secret == "secret"
+	}
+
+	void "create() test with given secret"() {
+		setup:
+		service.generator = Mock(IdGenerator)
+		CommunitySecretCommand cmd = new CommunitySecretCommand(
+			name: "community secret",
+			secret: "mySecret"
+		)
+		when:
+		CommunitySecret result = service.create(communityAddress, cmd)
+		then:
+		0 * service.generator.generate()
+		result.id != null
+		result.name == "community secret"
+		result.communityAddress == communityAddress
+		result.secret == "mySecret"
 	}
 
 	void "find() test"() {

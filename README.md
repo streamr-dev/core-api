@@ -13,11 +13,12 @@ The application uses the Grails web framework and runs on Java VM.
 ## Dependencies
 
 ### Tools
+- Java 8
 - Grails 2.5.6
 - node.js ^8.0.0
 - npm
 
-A convenient way of installing and managing multiple versions of Grails is [SDKMAN!](http://sdkman.io/install.html). And for node.js there is [nvm](https://github.com/creationix/nvm).
+A convenient way of installing and managing multiple versions of Grails is [SDKMAN!](http://sdkman.io/install.html).
 
 ### Service dependencies
 
@@ -36,19 +37,14 @@ You might also want to run the [Core UI](https://github.com/streamr-dev/streamr-
 
 2. Clone this repo
 
-3. Install npm dependencies
-```
-npm install
-```
+3. Run `streamr-docker-dev start 1` if you are using the recommended tool streamr-docker-dev. Otherwise make sure all services dependencies are running and the the web applications is properly configured to connect to them.
 
-4. Run `streamr-docker-dev start 1` if you are using the recommended tool streamr-docker-dev. Otherwise make sure all service dependencies are running and the the web applications is properly configured to connect to them.
-
-5. Start the web application
+4. Start the backend application
 ```
 grails run-app
 ```
 
-6. (Optional) Start the [Core frontend](https://github.com/streamr-dev/streamr-platform) if you need it.
+5. (Optional) Start the [Core frontend](https://github.com/streamr-dev/streamr-platform) if you need it.
 
 ## CI
 
@@ -79,7 +75,6 @@ This codebase comprises two logical parts:
 - The Engine is written mostly in Java and is responsible for executing canvases (user-defined processes which process, analyze and act upon real-time event data. The APIs, on the other hand, is responsible for API(s), rendered web pages and other front-facing functionality.
 
 When you run the app with `grails run-app`, most changes to source code files are automatically hot reloaded into the running JVM process.
-
 
 #### Useful resources
 - [Grails 2.5.6 Framework Reference Documentation (single page)](https://grails.github.io/grails2-doc/2.5.6/guide/single.html)

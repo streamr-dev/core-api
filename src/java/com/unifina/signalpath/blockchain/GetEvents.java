@@ -143,9 +143,9 @@ public class GetEvents extends AbstractSignalPathModule implements EventsListene
 
 	@Override
 	public void onEvent(JSONArray events) {
-		try {
-			int eventcount = events.length();
-			for (int i = 0; i < eventcount; i++) {
+		int eventcount = events.length();
+		for (int i = 0; i < eventcount; i++) {
+			try {
 				String txHash = events.getJSONObject(i).getString("transactionHash");
 				log.info(String.format("Received event from RPC '%s'", txHash));
 				TransactionReceipt txr = Web3jHelper.waitForTransactionReceipt(web3j, txHash, CHECK_RESULT_WAIT_MS, CHECK_RESULT_MAX_TRIES);
@@ -153,7 +153,16 @@ public class GetEvents extends AbstractSignalPathModule implements EventsListene
 					log.error("Couldnt find TransactionReceipt for transaction " + txHash + " in allotted time");
 					return;
 				}
-				long blockts = Web3jHelper.getBlockTime(web3j, txr);
+				long blockts = -1;
+				try {
+					 blockts = Web3jHelper.getBlockTime(web3j, txr);
+				}
+				catch (Web3jHelper.BlockchainException e){
+					// log but dont propagate err if getBlockTime fails. this happens often
+					// TODO maybe wait until block is present in RPC
+					log.error(e.getMessage());
+				}
+
 				Date ts;
 				if (blockts < 0) {
 					ts = getGlobals().time;
@@ -162,16 +171,17 @@ public class GetEvents extends AbstractSignalPathModule implements EventsListene
 					ts = new Date(blockts * 1000);
 				}
 				enqueueEvent(new LogsResult(txHash, ts, txr.getLogs()));
+			} catch (JSONException | IOException e) {
+				onError(e.getMessage());
 			}
-		} catch (JSONException | IOException e) {
-			onError(e.getMessage());
+
 		}
 	}
 
 	@Override
 	public void onError(String message) {
 		errors.send(Collections.singletonList(message));
-		asyncPropagator.propagate();
+		getPropagator().propagate();
 	}
 
 	protected void displayEventsFromLogs(LogsResult lr) {

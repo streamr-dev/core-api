@@ -1,0 +1,15 @@
+#!/bin/bash
+
+files=(
+tomcat.8081/work
+target
+.slcache
+"$HOME/.grails"
+)
+
+for file in "${files[@]}"; do
+	rm -rf "$file"
+done
+grails clean-all
+grails compile
+

@@ -17,7 +17,7 @@ class OembedApiController {
 		def width = params.maxwidth ? Double.parseDouble(params.maxwidth) : 400d
 		def height = params.maxheight ? Double.parseDouble(params.maxheight) : 300d
 		def format = params.format ? params.format.toLowerCase() : "json"
-		def regex = /^https?:\/\/(www\.)?streamr\.com\/canvas\/embed\/([a-zA-Z0-9\-\_])+/
+		def regex = /^https?:\/\/(www\.)?streamr\.(com|network)\/canvas\/embed\/([a-zA-Z0-9\-\_])+/
 		if (!url.find(regex)) {
 			throw new ApiException(404, "INVALID_URL", "Invalid url")
 		}

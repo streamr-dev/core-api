@@ -20,6 +20,7 @@ class Product {
 	State state = State.NOT_DEPLOYED
 	Stream previewStream
 	String previewConfigJson
+	String pendingChanges
 
 	Date dateCreated
 	Date lastUpdated
@@ -66,6 +67,7 @@ class Product {
 		type(nullable: false)
 		previewStream(nullable: true, validator: { Stream s, p -> s == null || s in p.streams })
 		previewConfigJson(nullable: true)
+		pendingChanges(nullable: true)
 		ownerAddress(nullable: true, validator: isEthereumAddressOrIsNull)
 		beneficiaryAddress(nullable: true, validator: isEthereumAddressOrIsNull)
 		pricePerSecond(min: 0L)
@@ -89,8 +91,8 @@ class Product {
 	}
 
 	@GrailsCompileStatic
-	Map toMap() {
-		[
+	Map toMap(boolean isOwner = false) {
+		def map = [
 		    id: id,
 			type: type.toString(),
 			name: name,
@@ -112,6 +114,10 @@ class Product {
 			minimumSubscriptionInSeconds: minimumSubscriptionInSeconds,
 			owner: owner.name
 		]
+		if (isOwner) {
+			map.put("pendingChanges", pendingChanges)
+		}
+		return map
 	}
 
 	@GrailsCompileStatic
