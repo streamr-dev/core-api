@@ -153,7 +153,15 @@ public class GetEvents extends AbstractSignalPathModule implements EventsListene
 					log.error("Couldnt find TransactionReceipt for transaction " + txHash + " in allotted time");
 					return;
 				}
-				long blockts = Web3jHelper.getBlockTime(web3j, txr);
+				long blockts = -1;
+				try {
+					 blockts = Web3jHelper.getBlockTime(web3j, txr);
+				}
+				catch (Web3jHelper.BlockchainException e){
+					// log but dont propagate err if getBlockTime fails. this happens often
+					// TODO maybe wait until block is present in RPC
+					log.error(e.getMessage());
+				}
 
 				Date ts;
 				if (blockts < 0) {
@@ -163,9 +171,10 @@ public class GetEvents extends AbstractSignalPathModule implements EventsListene
 					ts = new Date(blockts * 1000);
 				}
 				enqueueEvent(new LogsResult(txHash, ts, txr.getLogs()));
-			} catch (JSONException | IOException | Web3jHelper.BlockchainException e) {
+			} catch (JSONException | IOException e) {
 				onError(e.getMessage());
 			}
+
 		}
 	}
 
