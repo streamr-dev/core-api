@@ -7,8 +7,8 @@ const assertResponseIsError = require('./test-utilities.js').assertResponseIsErr
 const URL = 'http://localhost:8081/streamr-core/api/v1/'
 const LOGGING_ENABLED = false
 
-const AUTH_TOKEN = 'stream-api-tester-key'
-const AUTH_TOKEN_2 = 'stream-api-tester2-key'
+const API_KEY = 'stream-api-tester-key'
+const API_KEY_2 = 'stream-api-tester2-key'
 
 const Streamr = initStreamrApi(URL, LOGGING_ENABLED)
 
@@ -20,7 +20,7 @@ describe('Streams API', () => {
             .create({
                 name: 'stream-id-' + Date.now()
             })
-            .withApiKey(AUTH_TOKEN)
+            .withApiKey(API_KEY)
             .execute()
         streamId = response.id
     })
@@ -35,9 +35,9 @@ describe('Streams API', () => {
                 .create({
                     name: 'stream-id-' + Date.now()
                 })
-                .withAuthToken(AUTH_TOKEN)
+                .withApiKey(API_KEY)
                 .execute()
-            const permResponse = await Streamr.api.v1.streams.makePublic(publicStreamResponse.id).withAuthToken(AUTH_TOKEN).call()
+            const permResponse = await Streamr.api.v1.streams.makePublic(publicStreamResponse.id).withApiKey(API_KEY).call()
             assert.equal(permResponse.status, 201)
             const response = await Streamr.api.v1.streams.getPublishers(publicStreamResponse.id).call()
             assert.equal(response.status, 200)
@@ -74,7 +74,7 @@ describe('Streams API', () => {
                         type: 'map'
                     }
                 ])
-                .withApiKey(AUTH_TOKEN)
+                .withApiKey(API_KEY)
                 .call()
 
             await assertResponseIsError(response, 404, 'NOT_FOUND')
@@ -92,7 +92,7 @@ describe('Streams API', () => {
                         type: 'map'
                     }
                 ])
-                .withApiKey(AUTH_TOKEN_2)
+                .withApiKey(API_KEY_2)
                 .call()
 
             await assertResponseIsError(response, 403, 'FORBIDDEN', 'write')
@@ -113,7 +113,7 @@ describe('Streams API', () => {
                             type: 'map'
                         }
                     ])
-                    .withApiKey(AUTH_TOKEN)
+                    .withApiKey(API_KEY)
                     .call()
             })
 
@@ -149,7 +149,7 @@ describe('Streams API', () => {
         it('validates existence of Stream', async () => {
             const response = await Streamr.api.v1.streams
                 .uploadCsvFile('non-existing-id', fs.createReadStream('./test-data/test-csv.csv'))
-                .withApiKey(AUTH_TOKEN)
+                .withApiKey(API_KEY)
                 .call()
 
             await assertResponseIsError(response, 404, 'NOT_FOUND')
@@ -158,7 +158,7 @@ describe('Streams API', () => {
         it('requires WRITE permission on Stream', async () => {
             const response = await Streamr.api.v1.streams
                 .uploadCsvFile(streamId, fs.createReadStream('./test-data/test-csv.csv'))
-                .withApiKey(AUTH_TOKEN_2)
+                .withApiKey(API_KEY_2)
                 .call()
 
             await assertResponseIsError(response, 403, 'FORBIDDEN', 'write')
@@ -167,7 +167,7 @@ describe('Streams API', () => {
         it('validates that file is CSV', async () => {
             const response = await Streamr.api.v1.streams
                 .uploadCsvFile(streamId, fs.createReadStream('./test-data/file.txt'))
-                .withApiKey(AUTH_TOKEN)
+                .withApiKey(API_KEY)
                 .call()
 
             await assertResponseIsError(response, 400, 'NOT_RECOGNIZED_AS_CSV')
@@ -179,7 +179,7 @@ describe('Streams API', () => {
             before(async () => {
                 response = await Streamr.api.v1.streams
                     .uploadCsvFile(streamId, fs.createReadStream('./test-data/test-csv.csv'))
-                    .withApiKey(AUTH_TOKEN)
+                    .withApiKey(API_KEY)
                     .call()
             })
 
@@ -225,7 +225,7 @@ describe('Streams API', () => {
                     timestampColumnIndex: '0',
                     dateFormat: 'unix'
                 })
-                .withApiKey(AUTH_TOKEN)
+                .withApiKey(API_KEY)
                 .call()
 
             await assertResponseIsError(response, 404, 'NOT_FOUND')
@@ -238,7 +238,7 @@ describe('Streams API', () => {
                     timestampColumnIndex: '0',
                     dateFormat: 'unix'
                 })
-                .withApiKey(AUTH_TOKEN_2)
+                .withApiKey(API_KEY_2)
                 .call()
 
             await assertResponseIsError(response, 403, 'FORBIDDEN', 'write')
@@ -250,7 +250,7 @@ describe('Streams API', () => {
             before(async () => {
                 const uploadResponse = await Streamr.api.v1.streams
                     .uploadCsvFile(streamId, fs.createReadStream('./test-data/test-csv.csv'))
-                    .withApiKey(AUTH_TOKEN)
+                    .withApiKey(API_KEY)
                     .call()
                 const uploadJson = await uploadResponse.json()
 
@@ -260,7 +260,7 @@ describe('Streams API', () => {
                         timestampColumnIndex: 0,
                         dateFormat: 'unix'
                     })
-                    .withApiKey(AUTH_TOKEN)
+                    .withApiKey(API_KEY)
                     .call()
             })
 
