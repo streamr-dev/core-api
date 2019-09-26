@@ -60,6 +60,9 @@ class StreamApiController {
 			stream.name = newStream.name
 			stream.description = newStream.description
 			stream.config = readConfig()
+			if (newStream.partitions != null) {
+				stream.partitions = newStream.partitions
+			}
 			if (newStream.autoConfigure != null) {
 				stream.autoConfigure = newStream.autoConfigure
 			}
@@ -74,7 +77,7 @@ class StreamApiController {
 			}
 			if (stream.validate()) {
 				stream.save(failOnError: true)
-				render(status: 204)
+				render(stream.toMap() as JSON)
 			} else {
 				throw new ValidationException(stream.errors)
 			}

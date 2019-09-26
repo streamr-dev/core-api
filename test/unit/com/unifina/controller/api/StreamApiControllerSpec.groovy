@@ -219,11 +219,16 @@ class StreamApiControllerSpec extends ControllerSpecification {
 		when:
 		params.id = streamOne.id
 		request.method = "PUT"
-		request.json = '{name: "newName", description: "newDescription", autoConfigure: false, requireSignedData: true, storageDays: 24, inactivityThresholdHours: 99 }'
+		request.json = '{name: "newName", description: "newDescription", autoConfigure: false, requireSignedData: true, storageDays: 24, inactivityThresholdHours: 99, partitions: 5 }'
 		authenticatedAs(me) { controller.update() }
 
 		then:
-		response.status == 204
+		response.status == 200
+		response.json.name == "newName"
+		response.json.description == "newDescription"
+		response.json.storageDays == 24
+		response.json.inactivityThresholdHours == 99
+		response.json.partitions == 5
 
 		then:
 		def stream = streamOne
@@ -234,6 +239,7 @@ class StreamApiControllerSpec extends ControllerSpecification {
 		stream.requireSignedData == true
 		stream.storageDays == 24
 		stream.inactivityThresholdHours == 99
+		stream.partitions == 5
 	}
 
 	void "update a Stream of logged in user but do not update undefined fields"() {
@@ -244,7 +250,12 @@ class StreamApiControllerSpec extends ControllerSpecification {
 		authenticatedAs(me) { controller.update() }
 
 		then:
-		response.status == 204
+		response.status == 200
+		response.json.name == "newName"
+		response.json.description == "newDescription"
+		response.json.storageDays == Stream.DEFAULT_STORAGE_DAYS
+		response.json.inactivityThresholdHours == Stream.DEFAULT_INACTIVITY_THRESHOLD_HOURS
+		response.json.partitions == 1
 
 		then:
 		def stream = streamOne

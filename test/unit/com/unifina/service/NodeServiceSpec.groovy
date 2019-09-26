@@ -11,14 +11,14 @@ class NodeServiceSpec extends Specification {
 	void setup() {
 		nodeService = Spy(NodeService)
 		nodeService.grailsApplication = grailsApplication
-		grailsApplication.config.streamr.node.ip = null
+		grailsApplication.config.streamr.engine.node.ip = null
 	}
 
 	void "getIpAddress() returns a configured IP address if given"() {
-		grailsApplication.config.streamr.node.ip = "1.2.3.4"
+		grailsApplication.config.streamr.engine.node.ip = "1.2.3.4"
 
 		expect:
-		nodeService.getIPAddress([streamr: [node: [ip: "1.2.3.4"]]]) == "1.2.3.4"
+		nodeService.getIPAddress([streamr: [engine: [node: [ip: "1.2.3.4"]]]]) == "1.2.3.4"
 	}
 
 	void "getIpAddress() returns the first IPv4 address it finds"() {

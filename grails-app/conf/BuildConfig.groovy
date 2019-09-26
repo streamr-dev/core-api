@@ -67,7 +67,6 @@ grails.project.dependency.resolution = {
 
 		compile('log4j:log4j:1.2.16')
 		compile('com.udojava:EvalEx:1.6')
-		compile('org.apache.kafka:kafka-clients:0.9.0.1')
 		compile('com.mashape.unirest:unirest-java:1.4.9')
 		compile('org.eclipse.paho:org.eclipse.paho.client.mqttv3:1.1.1')
 		compile('org.antlr:ST4:4.0.8')
@@ -94,7 +93,7 @@ grails.project.dependency.resolution = {
 		compile('org.glassfish.jersey.media:jersey-media-json-jackson:2.27')
 		compile('com.fasterxml.jackson.core:jackson-databind:2.9.6')
 		compile('com.fasterxml.jackson.core:jackson-annotations:2.9.6')
-		compile('com.streamr:client:1.1.0')
+		compile('com.streamr:client:1.1.6')
 
 		runtime('mysql:mysql-connector-java:5.1.20')
 		runtime('commons-net:commons-net:3.3')

@@ -30,7 +30,7 @@ class NodeApiControllerSpec extends Specification {
 
 	void "index lists streamr nodes"() {
 		setup:
-		config.streamr.nodes = ['192.168.1.51', '192.168.1.53']
+		config.streamr.engine.nodes = ['192.168.1.51', '192.168.1.53']
 
 		when:
 		request.method = "GET"
@@ -57,7 +57,7 @@ class NodeApiControllerSpec extends Specification {
 
 		then:
 		response.json.size() > 0
-		response.json["streamr.nodes"] != null
+		response.json["streamr.engine.nodes"] != null
 	}
 
 	void "shutdown must stop all TaskWorkers, stop local Canvases and start them remotely"() {
@@ -288,7 +288,7 @@ class NodeApiControllerSpec extends Specification {
 
 	void "shutdownNode performs shutdown API request on other node if given allowed ip"() {
 		setup:
-		grailsApplication.config.streamr.nodes = ["192.168.13.55"]
+		grailsApplication.config.streamr.engine.nodes = ["192.168.13.55"]
 		def nodeRequestDispatcher = controller.nodeRequestDispatcher = Mock(NodeRequestDispatcher)
 
 		when:
@@ -331,7 +331,7 @@ class NodeApiControllerSpec extends Specification {
 
 	void "canvasesNode performs shutdown API request on other node if given allowed ip"() {
 		setup:
-		grailsApplication.config.streamr.nodes = ["192.168.13.55"]
+		grailsApplication.config.streamr.engine.nodes = ["192.168.13.55"]
 		def nodeRequestDispatcher = controller.nodeRequestDispatcher = Mock(NodeRequestDispatcher)
 
 		when:

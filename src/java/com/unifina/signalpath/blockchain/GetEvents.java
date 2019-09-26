@@ -129,7 +129,7 @@ public class GetEvents extends AbstractSignalPathModule implements EventsListene
 		}
 	}
 
-	private void enqueueEvent(LogsResult lr){
+	private void enqueueEvent(LogsResult lr) {
 		getGlobals().getDataSource().enqueue(
 			new com.unifina.data.Event<>(lr, lr.getTimestampAsDate(), event -> {
 				try {
@@ -185,7 +185,7 @@ public class GetEvents extends AbstractSignalPathModule implements EventsListene
 	}
 
 	protected void displayEventsFromLogs(LogsResult lr) {
-		log.info("Received FeedEvent " + lr.txHash);
+		log.info("Received LogsResult for tx " + lr.txHash);
 
 		txHashOutput.send(lr.txHash);
 		for (EthereumABI.Event abiEvent : contract.getValue().getABI().getEvents()) {
@@ -193,7 +193,7 @@ public class GetEvents extends AbstractSignalPathModule implements EventsListene
 			Event web3jEvent = web3jEvents.get(abiEvent.name);
 			List<EventValues> valueList = Web3jHelper.extractEventParameters(web3jEvent, lr.logs);
 			if (valueList == null) {
-				throw new RuntimeException("Failed to get event params");    // TODO: what happens when you throw in poller thread?
+				throw new RuntimeException("Failed to get event params");
 			}
 
 			if (abiEvent.inputs.size() > 0) {

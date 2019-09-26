@@ -3,7 +3,6 @@ package com.unifina.service
 import com.google.gson.Gson
 import com.google.gson.GsonBuilder
 import com.streamr.client.protocol.message_layer.StreamMessage
-import com.streamr.client.protocol.message_layer.StreamMessageV31
 import com.unifina.api.NotFoundException
 import com.unifina.api.NotPermittedException
 import com.unifina.api.ValidationException
@@ -16,23 +15,22 @@ import com.unifina.domain.security.Permission
 import com.unifina.domain.security.SecUser
 import com.unifina.domain.signalpath.Canvas
 import com.unifina.domain.task.Task
-import com.unifina.feed.AbstractStreamListener
 import com.unifina.feed.DataRange
 import com.unifina.feed.FieldDetector
 
 import com.unifina.signalpath.RuntimeRequest
 import com.unifina.task.DelayedDeleteStreamTask
-import com.unifina.utils.CSVImporter
 import com.unifina.utils.IdGenerator
 import grails.converters.JSON
 import groovy.transform.CompileStatic
+import org.codehaus.groovy.grails.commons.GrailsApplication
 
 import java.text.DateFormat
 
 class StreamService {
 
-	def grailsApplication
-	KafkaService kafkaService
+	GrailsApplication grailsApplication
+
 	CassandraService cassandraService
 	PermissionService permissionService
 
@@ -107,13 +105,6 @@ class StreamService {
 		}
 	}
 
-	// Ref to Kafka will be abstracted out when refactoring stream access to happen via data-api
-
-	void sendMessage(StreamMessage msg) {
-		String kafkaPartitionKey = "${msg.getStreamId()}-${msg.getStreamPartition()}"
-		kafkaService.sendMessage(msg, kafkaPartitionKey)
-	}
-
 	void saveMessage(StreamMessage msg) {
 		cassandraService.save(msg)
 	}
@@ -134,57 +125,6 @@ class StreamService {
 	@CompileStatic
 	void deleteAllData(Stream stream) {
 		cassandraService.deleteAll(stream)
-	}
-
-	/**
-	 * Imports data from a csv file into a Stream.
-	 * @param csv
-	 * @param stream
-     * @return Autocreated Stream field config as a Map (can be written to stream.config as JSON)
-     */
-	@CompileStatic
-	Map importCsv(CSVImporter csv, Stream stream, String publisherId) {
-		long sequenceNumber = 0L
-		Long previousTimestamp = null
-		String msgChainId = IdGenerator.getShort()
-
-		for (CSVImporter.LineValues line : csv) {
-			Date date = line.getTimestamp()
-
-			// Write all fields into the message except for the timestamp column
-			Map message = [:]
-			for (int i=0; i<line.values.length; i++) {
-				if (i!=line.schema.timestampColumnIndex && line.values[i]!=null) {
-					String name = line.schema.entries[i].name
-					message[name] = line.values[i]
-				}
-			}
-
-			int partition = partitioner.partition(stream, null)
-			StreamMessageV31 msg = new StreamMessageV31(stream.id, partition, date.time, sequenceNumber, publisherId, msgChainId,
-				previousTimestamp, sequenceNumber, StreamMessage.ContentType.CONTENT_TYPE_JSON, StreamMessage.EncryptionType.NONE,
-				gson.toJson(message), StreamMessage.SignatureType.SIGNATURE_TYPE_NONE, null)
-			saveMessage(msg)
-			sequenceNumber++
-			previousTimestamp = date.time
-		}
-
-		// Autocreate the stream config based on fields in the csv schema
-		Map config = (Map) (stream.config ? JSON.parse(stream.config) : [:])
-
-		List fields = []
-
-		// The primary timestamp column is implicit, so don't include it in streamConfig
-		for (int i=0; i < csv.schema.entries.length; i++) {
-			if (i != csv.getSchema().timestampColumnIndex) {
-				CSVImporter.SchemaEntry e = csv.getSchema().entries[i]
-				if (e!=null)
-					fields << [name:e.name, type:e.type]
-			}
-		}
-
-		config.fields = fields
-		return config
 	}
 
 	@CompileStatic

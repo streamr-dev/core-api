@@ -310,7 +310,7 @@ public class SendEthereumTransaction extends ModuleWithSideEffects {
 		 */
 		protected void enqueueConfirmedTx() throws IOException {
 			final FunctionCallResult fncall = this;
-			receipt = Web3jHelper.waitForTransactionReceipt(web3j, web3jTx.getTransactionHash(), CHECK_RESULT_WAIT_MS, CHECK_RESULT_MAX_TRIES);
+			receipt = Web3jHelper.waitForTransactionReceipt(web3j,web3jTx.getTransactionHash(), CHECK_RESULT_WAIT_MS, CHECK_RESULT_MAX_TRIES);
 			if (receipt != null) {
 				transaction = web3j.ethGetTransactionByHash(web3jTx.getTransactionHash()).send().getResult();
 				log.info("Receipt found for txHash: " + web3jTx.getTransactionHash());

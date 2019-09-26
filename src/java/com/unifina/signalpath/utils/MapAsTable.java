@@ -44,16 +44,16 @@ public class MapAsTable extends ModuleWithUI {
 	}
 
 	private void sendMessages(Map<String, Object> value) {
-		Map<String, Map<String, Object>> message = new HashMap<>();
+		Map<String, Object> message = new HashMap<>();
 		message.put("nm", value);
 		pushToUiChannel(message);
 	}
 
-	private Map<String, Map<String, List<String>>> buildHeaderMessage() {
+	private Map<String, Object> buildHeaderMessage() {
 		Map<String, List<String>> headerDef = new HashMap<>();
 		headerDef.put("headers", Arrays.asList("key", "value"));
 
-		Map<String, Map<String, List<String>>> message = new HashMap<>();
+		Map<String, Object> message = new HashMap<>();
 		message.put("hdr", headerDef);
 		return message;
 	}
