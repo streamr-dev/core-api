@@ -3,6 +3,7 @@ package com.unifina.security;
 import org.apache.commons.lang.RandomStringUtils;
 import org.joda.time.DateTime;
 
+import java.security.SecureRandom;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -25,7 +26,7 @@ public class Challenge {
 	}
 
 	public Challenge(String text, int length, int ttlSeconds) {
-		this.id = RandomStringUtils.randomAlphanumeric(length);
+		this.id = RandomStringUtils.random(length, 0, 0, true, true, null, new SecureRandom());
 		this.challenge = text + id;
 		this.expiration = new DateTime().plusSeconds(ttlSeconds).toDate();
 	}

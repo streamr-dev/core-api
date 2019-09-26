@@ -3,6 +3,7 @@ package com.unifina.security;
 import org.apache.commons.lang.RandomStringUtils;
 import org.joda.time.DateTime;
 
+import java.security.SecureRandom;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -25,7 +26,7 @@ public class SessionToken {
 	}
 
 	public SessionToken(int tokenLength, Userish user, int ttlHours) {
-		this.token = RandomStringUtils.randomAlphanumeric(tokenLength);
+		this.token = RandomStringUtils.random(tokenLength, 0, 0, true, true, null, new SecureRandom());
 		this.user = user;
 		this.expiration = new DateTime().plusHours(ttlHours).toDate();
 	}
