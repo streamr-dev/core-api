@@ -60,7 +60,7 @@ jobs:
         branch: master
     if: NOT type IN (pull_request)
   - stage: Build war Lisboa
-    script: "./travis_scripts/build_war.sh"
+    script: .travis_scripts/build_war.sh
     env:
     - WS_URL="wss://ee-lisboa.streamr.com/api/v1/ws"
     deploy:
