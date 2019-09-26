@@ -9,12 +9,12 @@ import com.unifina.security.AuthLevel
 import com.unifina.security.StreamrApi
 import com.unifina.service.ApiService
 import com.unifina.service.FreeProductService
+import com.unifina.service.PermissionService
 import com.unifina.service.ProductImageService
 import com.unifina.service.ProductService
 import grails.compiler.GrailsCompileStatic
 import grails.converters.JSON
 import grails.plugin.springsecurity.annotation.Secured
-import org.apache.commons.lang.time.DateUtils
 import org.springframework.web.multipart.MultipartFile
 
 @Secured(["IS_AUTHENTICATED_ANONYMOUSLY"])
@@ -23,6 +23,7 @@ class ProductApiController {
 	FreeProductService freeProductService
 	ProductService productService
 	ProductImageService productImageService
+	PermissionService permissionService
 
 	@GrailsCompileStatic
 	@StreamrApi(allowRoles = AllowRole.ADMIN)
@@ -54,7 +55,8 @@ class ProductApiController {
 	@StreamrApi(authenticationLevel = AuthLevel.NONE)
 	def show(String id) {
 		Product product = productService.findById(id, loggedInUser(), Permission.Operation.READ)
-		render(product.toMap() as JSON)
+		boolean isProductOwner = permissionService.canShare(loggedInUser(), product)
+		render(product.toMap(isProductOwner) as JSON)
 	}
 
 	@GrailsCompileStatic

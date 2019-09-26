@@ -74,6 +74,19 @@ class OembedApiControllerSpec extends Specification {
 		response.json.url == url
 	}
 
+	void "index accepts streamr.network"() {
+		def url = "https://streamr.network/canvas/embed/a"
+		def encodedUrl = URLEncoder.encode(url, "UTF-8")
+
+		when:
+		request.method = "GET"
+		params.url = encodedUrl
+		controller.index()
+		then:
+		response.status == 200
+		response.json.url == url
+	}
+
 	void "index fails with an invalid url"() {
 		when:
 		request.method = "GET"

@@ -99,7 +99,7 @@ public class SendEthereumTransaction extends ModuleWithSideEffects {
 	}
 
 	protected Web3j getWeb3j() {
-		return Web3j.build(new HttpService(ethereumOptions.getRpcUrl()));
+		return ethereumOptions.getWeb3j();
 	}
 
 	@Override
@@ -285,7 +285,7 @@ public class SendEthereumTransaction extends ModuleWithSideEffects {
 	/*
 	separate function for testing
 	 */
-	protected long getBlockTimeSeconds(TransactionReceipt tr) throws IOException {
+	protected long getBlockTimeSeconds(TransactionReceipt tr) throws IOException, Web3jHelper.BlockchainException {
 		return Web3jHelper.getBlockTime(web3j, tr);
 	}
 
@@ -305,6 +305,7 @@ public class SendEthereumTransaction extends ModuleWithSideEffects {
 		/**
 		 * fetch tx data and populate transaction and receipt when done.
 		 * run this from a worker thread (eg async submit tx handler)
+		 *
 		 * @throws IOException if Ethereum requests fail (network problem to Ethereum client)
 		 */
 		protected void enqueueConfirmedTx() throws IOException {
@@ -313,7 +314,13 @@ public class SendEthereumTransaction extends ModuleWithSideEffects {
 			if (receipt != null) {
 				transaction = web3j.ethGetTransactionByHash(web3jTx.getTransactionHash()).send().getResult();
 				log.info("Receipt found for txHash: " + web3jTx.getTransactionHash());
-				long ts = getBlockTimeSeconds(receipt);
+				long ts = -1;
+				try{
+					ts = getBlockTimeSeconds(receipt);
+				}
+				catch(Web3jHelper.BlockchainException e){
+					log.error(e.getMessage());
+				}
 				if (ts >= 0) {
 					Date newts = new Date(ts * 1000);
 					log.info("Updating timestamp of TransactionResult from " + timestamp + " to block timestamp " + newts);
@@ -465,7 +472,7 @@ public class SendEthereumTransaction extends ModuleWithSideEffects {
 	 * Push the response into Streamr's event queue, and handle
 	 * it asynchronously.
 	 */
-	private void enqueueEvent(FunctionCallResult fc){
+	private void enqueueEvent(FunctionCallResult fc) {
 		getGlobals().getDataSource().enqueue(
 			new com.unifina.data.Event<>(fc, fc.timestamp, (event) -> {
 				try {
