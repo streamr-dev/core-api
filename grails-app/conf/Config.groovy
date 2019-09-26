@@ -8,12 +8,11 @@ import com.unifina.utils.PropertiesUtil
 
 def prodBaseUrl = System.getProperty("streamr.url") ?: "https://streamr.network"
 
+grails.serverURL = "http://localhost"
+
 environments {
 	production {
 		grails.serverURL = prodBaseUrl
-	}
-	development {
-		grails.serverURL = "http://localhost"
 	}
 }
 
