@@ -67,13 +67,13 @@ class PermissionApiControllerSpec extends ControllerSpecification {
 		streamShared = newStream("shared", other)
 		streamRestricted = newStream("restricted", other)
 
-		canvasPermission = new Permission(id: 1, user: me, clazz: Canvas.name, stringId: canvasShared.id, operation: Operation.SHARE).save(validate: false)
-		streamPermission = new Permission(id: 2, user: me, clazz: Stream.name, longId: streamShared.id, operation: Operation.SHARE).save(validate: false)
-		canvasAnonPermission = new Permission(id: 3, anonymous: true, clazz: Canvas.name, stringId: canvasPublic.id, operation: Operation.READ).save(validate: false)
+		canvasPermission = new Permission(id: 1, user: me, clazz: Canvas.name, operation: Operation.SHARE).save(validate: false)
+		streamPermission = new Permission(id: 2, user: me, clazz: Stream.name, operation: Operation.SHARE).save(validate: false)
+		canvasAnonPermission = new Permission(id: 3, anonymous: true, clazz: Canvas.name, operation: Operation.READ).save(validate: false)
 
 		// read permission allows opening stream/canvas but not opening sharing-dialog for that stream/canvas
-		new Permission(user: me, clazz: Canvas.name, stringId: canvasRestricted.id, operation: Operation.READ).save(validate: false)
-		new Permission(user: me, clazz: Stream.name, longId: streamRestricted.id, operation: Operation.READ).save(validate: false)
+		new Permission(user: me, clazz: Canvas.name, operation: Operation.READ).save(validate: false)
+		new Permission(user: me, clazz: Stream.name, operation: Operation.READ).save(validate: false)
 
 		// returned from API, for resource owner, together with granted permissions
 		ownerPermissions = [
@@ -232,6 +232,27 @@ class PermissionApiControllerSpec extends ControllerSpecification {
 		response.status == 201
 		response.json.user == ethUser.username
 		response.json.operation == "read"
+	}
+
+	void "user with share permission to resource can delete another user's permission to same resource"() {
+		setup:
+		params.id = canvasPermission.id
+		params.resourceClass = Canvas
+		params.resourceId = canvasShared.id
+
+		when:
+		authenticatedAs(me) { controller.delete("${canvasPermission.id}") }
+		then:
+		true
+	}
+
+	void "user without share permission to resource can't delete another user's permission to same resource"() {
+	}
+
+	void "user without share permission to resource can delete their own permission to resource"() {
+	}
+
+	void "user with share permission to resource can't delete another user's permission to another resource"() {
 	}
 
 	void "delete revokes permissions"() {
