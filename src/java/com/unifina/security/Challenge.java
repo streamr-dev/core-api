@@ -1,5 +1,6 @@
 package com.unifina.security;
 
+import com.unifina.utils.AlphanumericStringGenerator;
 import org.apache.commons.lang.RandomStringUtils;
 import org.joda.time.DateTime;
 
@@ -26,7 +27,7 @@ public class Challenge {
 	}
 
 	public Challenge(String text, int length, int ttlSeconds) {
-		this.id = RandomStringUtils.random(length, 0, 0, true, true, null, new SecureRandom());
+		this.id = AlphanumericStringGenerator.getRandomAlphanumericString(length);
 		this.challenge = text + id;
 		this.expiration = new DateTime().plusSeconds(ttlSeconds).toDate();
 	}
