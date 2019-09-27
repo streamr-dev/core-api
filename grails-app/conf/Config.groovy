@@ -1,20 +1,20 @@
 import com.unifina.service.NodeService
 import com.unifina.utils.PropertiesUtil
 
-/*****
- * This config file gets merged with the application config file.
- * The application config file can override anything defined here.
+/**
+ * Base URL
  */
-
-def prodBaseUrl = System.getProperty("streamr.url") ?: "https://streamr.network"
-
-grails.serverURL = "http://localhost"
-
+// Write it to a variable to allow it to be referenced elsewhere in this file
+def baseUrl
 environments {
+	development {
+		baseUrl = System.getProperty("streamr.url") ?: "http://localhost"
+	}
 	production {
-		grails.serverURL = prodBaseUrl
+		baseUrl = System.getProperty("streamr.url") ?: "https://streamr.network"
 	}
 }
+grails.serverURL = baseUrl
 
 /**
  * Grails configuration
@@ -199,19 +199,8 @@ streamr.engine.node.ip = System.getProperty("streamr.engine.node.ip")
 /**
  * Streamr API URLs
  */
-streamr.api.websocket.url = System.getProperty("streamr.api.websocket.url") ?: "ws://localhost:8890/api/v1/ws"
-environments {
-	production {
-		streamr.api.websocket.url = System.getProperty("streamr.api.websocket.url") ?: "${prodBaseUrl.replaceFirst("http", "ws")}/api/v1/ws"
-	}
-}
-
-streamr.api.http.url = System.getProperty("streamr.api.http.url") ?: "http://localhost:8081/streamr-core/api/v1"
-environments {
-	production {
-		streamr.api.http.url = System.getProperty("streamr.api.http.url") ?: "${prodBaseUrl}/api/v1"
-	}
-}
+streamr.api.websocket.url = System.getProperty("streamr.api.websocket.url") ?: "${baseUrl.replaceFirst("http", "ws")}/api/v1/ws"
+streamr.api.http.url = System.getProperty("streamr.api.http.url") ?: "${baseUrl}/api/v1"
 
 /**
  * Ethereum networks configuration (RPC urls)
