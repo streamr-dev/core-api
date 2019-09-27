@@ -6,12 +6,12 @@ import com.unifina.domain.security.IntegrationKey
 import com.unifina.domain.security.Permission
 import com.unifina.domain.security.SecUser
 import com.unifina.security.StringEncryptor
+import com.unifina.utils.AlphanumericStringGenerator
 import grails.compiler.GrailsCompileStatic
 import grails.converters.JSON
 import groovy.transform.CompileStatic
 import org.apache.commons.codec.DecoderException
 import org.apache.commons.codec.binary.Hex
-import org.apache.commons.lang.RandomStringUtils
 import org.ethereum.crypto.ECKey
 import org.springframework.util.Assert
 
@@ -139,7 +139,7 @@ class EthereumIntegrationKeyService {
 	SecUser createEthereumUser(String address) {
 		SecUser user = userService.createUser([
 			username       : address,
-			password       : RandomStringUtils.random(32),
+			password       : AlphanumericStringGenerator.getRandomAlphanumericString(32),
 			name           : address,
 			enabled        : true,
 			accountLocked  : false,
