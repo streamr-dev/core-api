@@ -5,11 +5,8 @@ import com.unifina.utils.PropertiesUtil
  * Base URL
  */
 // Write it to a variable to allow it to be referenced elsewhere in this file
-def baseUrl
+def baseUrl = System.getProperty("streamr.url") ?: "http://localhost"
 environments {
-	development {
-		baseUrl = System.getProperty("streamr.url") ?: "http://localhost"
-	}
 	production {
 		baseUrl = System.getProperty("streamr.url") ?: "https://streamr.network"
 	}
