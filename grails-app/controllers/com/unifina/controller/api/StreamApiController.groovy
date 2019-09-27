@@ -89,7 +89,7 @@ class StreamApiController {
 		}
 	}
 
-	@StreamrApi(authenticationLevel = AuthLevel.KEY)
+	@StreamrApi
 	def detectFields(String id) {
 		boolean saveFields = false
 		if ("GET".equals(request.method)) {
