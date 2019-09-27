@@ -58,12 +58,16 @@ class StreamrClientService {
 	}
 
 	private StreamrClient createInstance(AuthenticationMethod authenticationMethod) {
+		String websocketUrl = MapTraversal.getString(Holders.getConfig(), "streamr.api.websocket.url")
+		String restUrl = MapTraversal.getString(Holders.getConfig(), "streamr.api.http.url")
+		log.info(String.format("Creating StreamrClient instance. Websocket: %s, REST: %s", websocketUrl, restUrl))
+
 		StreamrClientOptions options = new StreamrClientOptions(
 			authenticationMethod,
 			SigningOptions.getDefault(),
 			EncryptionOptions.getDefault(),
-			MapTraversal.getString(Holders.getConfig(), "streamr.api.websocket.url"),
-			MapTraversal.getString(Holders.getConfig(), "streamr.api.http.url")
+			websocketUrl,
+			restUrl
 		)
 		return clientConstructor.newInstance(options)
 	}
