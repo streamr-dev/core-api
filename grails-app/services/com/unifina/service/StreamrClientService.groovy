@@ -11,10 +11,23 @@ import com.unifina.domain.security.Key
 import com.unifina.utils.MapTraversal
 import grails.util.Holders
 
+import java.lang.reflect.Constructor
+
 class StreamrClientService {
 
-	UserService userService
 	StreamrClient instanceForThisEngineNode
+	Constructor<StreamrClient> clientConstructor
+
+	StreamrClientService() {
+		clientConstructor = StreamrClient.class.getConstructor(StreamrClientOptions)
+	}
+
+	/**
+	 * Useful for testing, this constructor allows the StreamrClient class to be injected
+	 */
+	StreamrClientService(Class<StreamrClient> streamrClientClass) {
+		clientConstructor = streamrClientClass.getConstructor(StreamrClientOptions)
+	}
 
 	/**
 	 * Returns a StreamrClient instance, authenticated with one of the provided user's
@@ -44,34 +57,35 @@ class StreamrClientService {
 		return instanceForThisEngineNode
 	}
 
-	private static StreamrClient createInstance(AuthenticationMethod authenticationMethod) {
-		return new StreamrClient(new StreamrClientOptions(
+	private StreamrClient createInstance(AuthenticationMethod authenticationMethod) {
+		StreamrClientOptions options = new StreamrClientOptions(
 			authenticationMethod,
 			SigningOptions.getDefault(),
 			EncryptionOptions.getDefault(),
 			MapTraversal.getString(Holders.getConfig(), "streamr.api.websocket.url"),
 			MapTraversal.getString(Holders.getConfig(), "streamr.api.http.url")
-		))
+		)
+		return clientConstructor.newInstance(options)
 	}
 
 	/**
 	 * Returns an API key for the given user. This is used
 	 * by Canvases to subscribe to the Streams required by the Canvas.
 	 *
-	 * Currently, the key is chosen arbitrarily. It would be better
+	 * Currently, the first returned key is chosen. It would be better
 	 * if the user could specify which key to use to run their Canvases
 	 * by marking one key as "default", or offering a choice
 	 * in Canvas run settings.
 	 */
 	private String getApiKeyForUser(Long userId) {
-		Key key = Key.where {
+		List<Key> keys = Key.where {
 			user.id == userId
-		}.find()
+		}.findAll()
 
-		if (!key) {
-			throw new RuntimeException("User does not have an API key! This should not happen!")
+		if (keys.isEmpty()) {
+			throw new IllegalStateException("User does not have an API key! This should not happen!")
 		} else {
-			return key.id
+			return keys[0].id
 		}
 	}
 }

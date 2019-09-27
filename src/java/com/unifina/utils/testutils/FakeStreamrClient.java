@@ -12,8 +12,11 @@ public class FakeStreamrClient extends StreamrClient {
 
 	private Map<String, List<SentMessage>> sentMessagesByChannel = new HashMap<>();
 
+	StreamrClientOptions optionsPassedToConstructor;
+
 	public FakeStreamrClient(StreamrClientOptions options) {
-		super(options);
+		super(new StreamrClientOptions()); // Default options won't connect anywhere immediately, good for unit tests
+		optionsPassedToConstructor = options;
 	}
 
 	@Override
@@ -49,5 +52,9 @@ public class FakeStreamrClient extends StreamrClient {
 			this.partitionKey = partitionKey;
 			this.groupKeyHex = groupKeyHex;
 		}
+	}
+
+	public StreamrClientOptions getOptionsPassedToConstructor() {
+		return optionsPassedToConstructor;
 	}
 }
