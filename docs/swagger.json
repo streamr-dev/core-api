@@ -4769,6 +4769,11 @@
           "description": "If true, all messages in this stream must be cryptographically signed. Client's should not accept unsigned messages.",
           "example": false
         },
+        "requireEncryptedData": {
+          "type": "boolean",
+          "description": "If true, all data in this stream must be encrypted.",
+          "example": false
+        },
         "inbox": {
           "type": "boolean",
           "description": "If true, this stream is a user's inbox.",
