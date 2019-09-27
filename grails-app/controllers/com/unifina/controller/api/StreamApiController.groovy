@@ -69,6 +69,9 @@ class StreamApiController {
 			if (newStream.requireSignedData != null) {
 				stream.requireSignedData = newStream.requireSignedData
 			}
+			if (newStream.requireEncryptedData != null) {
+				stream.requireEncryptedData = newStream.requireEncryptedData
+			}
 			if (newStream.storageDays != null) {
 				stream.storageDays = newStream.storageDays
 			}

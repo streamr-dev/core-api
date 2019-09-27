@@ -31,6 +31,8 @@ class Stream implements Comparable {
 	Boolean inbox = false
 
 	Boolean requireSignedData = false
+	// Stream requires data to be encrypted
+	Boolean requireEncryptedData = false
 	// Always try to autoconfigure field names and types
 	Boolean autoConfigure = true
 	// Historical data storage period (days)
@@ -92,6 +94,7 @@ class Stream implements Comparable {
 			dateCreated: dateCreated,
 			lastUpdated: lastUpdated,
 			requireSignedData: requireSignedData,
+			requireEncryptedData: requireEncryptedData,
 			autoConfigure: autoConfigure,
 			storageDays: storageDays,
 			inactivityThresholdHours: inactivityThresholdHours,
@@ -109,7 +112,8 @@ class Stream implements Comparable {
 			inbox: inbox,
 			dateCreated: dateCreated,
 			lastUpdated: lastUpdated,
-			requireSignedData: requireSignedData
+			requireSignedData: requireSignedData,
+			requireEncryptedData: requireEncryptedData,
 		]
 	}
 
