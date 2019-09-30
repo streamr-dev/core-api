@@ -13,16 +13,19 @@ COPY docker/wait-for-it.sh /usr/local/tomcat/bin/wait-for-it.sh
 
 # Copy pre-built ROOT.war into container as streamr-core.war
 COPY target/ROOT.war /usr/local/tomcat/webapps/streamr-core.war
+
+# Default values for ENV variables
+ENV STREAMR_URL http://localhost
 ENV CP_URL http://localhost:8085/communities/
+
+# Flags to pass to the JVM
 ENV CATALINA_OPTS -Dstreamr.database.user=root \
     -Dstreamr.database.password=password \
     -Dstreamr.database.host=mysql \
     -Dstreamr.database.name=core_test\
-    -Dstreamr.kafka.bootstrap.servers=kafka:9092 \
-    -Dstreamr.api.websocket.url=ws://127.0.0.1:8890/api/v1/ws \
-    -Dstreamr.http.api.server=http://127.0.0.1:8890/api/v1 \
     -Dstreamr.redis.hosts=redis \
     -Dstreamr.cassandra.hosts=cassandra \
+    -Dstreamr.url=${STREAMR_URL} \
     -Dstreamr.cps.url=${CP_URL}
 EXPOSE 8081
 # Wait for MySQL server, MySQL dumps, and Cassandra to be ready
