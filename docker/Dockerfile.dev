@@ -15,8 +15,8 @@ COPY docker/wait-for-it.sh /usr/local/tomcat/bin/wait-for-it.sh
 COPY target/ROOT.war /usr/local/tomcat/webapps/streamr-core.war
 
 # Default values for ENV variables
-ENV STREAMR_URL http://localhost
-ENV CP_URL http://localhost:8085/communities/
+ENV STREAMR_URL http://10.200.10.1
+ENV CP_URL http://10.200.10.1:8085/communities/
 
 # Flags to pass to the JVM
 ENV CATALINA_OPTS -Dstreamr.database.user=root \
