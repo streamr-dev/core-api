@@ -55,6 +55,44 @@ class DataSourceEventQueueSpec extends Specification {
 		})
 	}
 
+	void "if the queue is aborted before it is started, it should abort immediately after starting"() {
+		DataSourceEventQueue queue = createQueue()
+		int eventsProcessed = 0
+		boolean stopProducer = false
+
+		when:
+		queue.abort()
+		Thread consumerThread = Thread.start {
+			queue.start()
+		}
+
+		Thread producerThread = Thread.start {
+			// Enqueue events
+			for (int i=0; i<1000 && !stopProducer; i++) {
+				queue.enqueue(new Event<Integer>(i, new Date(i * 1000), new Consumer<Integer>() {
+					@Override
+					void accept(Integer integer) {
+						eventsProcessed++
+					}
+				}))
+			}
+		}
+
+		then:
+		new PollingConditions().within(2, {
+			!consumerThread.isAlive()
+			eventsProcessed < 1000
+		})
+
+		when:
+		stopProducer = true
+
+		then:
+		new PollingConditions().within(2, {
+			!producerThread.isAlive()
+		})
+	}
+
 	void "on event, adding more events to a full queue won't deadlock the system"() {
 		DataSourceEventQueue queue = createQueue()
 
