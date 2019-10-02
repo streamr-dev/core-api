@@ -81,7 +81,7 @@ jobs:
       secret_access_key:
         secure: h4tMVVTqRfYz8B4mNX6PWknLHiNdUeXaNTJQ87ZJfEgtfHUQBkOjLvar93HLlsrbDOr49K9c1evYK2nyYtaNiW9Q0TCUySJZNiPlgM5DdKyPLdMN4XrUfCvmP0BIxeaDollfnbtGkvvTyUpaoJvsqyhmoAkAEyHJWJ+SfRYcg4ktvrQJQY0yDiuHpAdduAZDbV4qbwhFZc3VMauCP5dPEwHARwLK3QklTwkKVOZjE1rwvWlZPGus4JQ+Eo3wAXdobeDzxZTOK9IxL9bJKRZJpPXazo2/taN56G6iUVjJT3HUNudO3BC5fuTJm2TnnM7o/TKHMM2LZ1L0j/gsuT6n9oi9X6sl0UizcSFeyrRRO8N6875wsvcYtaL8KdjpERw19Bd4ZNHXVZHFkNhHTnUA6HjOB57ic4TT8lODs2kUgUeqNFn7rvSdwPNm8cbnBSbFRJMiDi5ofbKhdu5qAxZ3fx8SsuciZaXCflNzmoPKqRUSgHhc17WAi65wPdPufCuFjB01BcayN66QmRApdeAcKF8dkvKQF2/IY/RBhw7LQ5mfvGpWDLiF/NnCkPxX19LBHx92jSYlfuy1BLCs2OWXs5YQLrISjuiDlHm7IvN7KGLNaCtCxyxXxJCVvzOxpLpdQF/hAvgV6BGu5AB+lS2GNg3vnx8vAZaMpV2NTWc1xL0=
       bucket: eu-west-1-lx-streamr-vault
-      key: engine-editor/releases/ee.tar
+      key: engine-editor/releases/ee-${TRAVIS_JOB_ID}.tar
       application: eu-west-1-lx-ee-codedeploy
       deployment_group: eu-west-1-lx-ee-deployment-group
       region: eu-west-1
