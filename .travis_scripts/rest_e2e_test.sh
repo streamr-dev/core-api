@@ -23,6 +23,6 @@ while true; do http_code=$(curl -s -o /dev/null -w "%{http_code}" http://localho
 "$TRAVIS_BUILD_DIR/streamr-docker-dev/streamr-docker-dev/bin.sh" log -f &
 
 # Wait for data-api to come up
-while true; do http_code=$(curl -s -o /dev/null -w "%{http_code}" http://localhost:8890/); if [ "$http_code" = 404 ]; then echo "Data-api up and running"; break; else echo "Data API not receiving connections"; sleep 5s; fi; done
+while true; do http_code=$(curl -s -o /dev/null -w "%{http_code}" http://localhost:8891/); if [ "$http_code" = 404 ]; then echo "Data-api up and running"; break; else echo "Data API not receiving connections"; sleep 5s; fi; done
 
 (cd rest-e2e-tests && npm test)
