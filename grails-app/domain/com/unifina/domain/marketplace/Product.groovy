@@ -5,6 +5,7 @@ import com.unifina.domain.security.Permission
 import com.unifina.domain.security.SecUser
 import com.unifina.utils.HexIdGenerator
 import grails.compiler.GrailsCompileStatic
+import groovy.json.JsonSlurper
 
 class Product {
 	public final static String DEFAULT_NAME = "Untitled Product"
@@ -114,8 +115,9 @@ class Product {
 			minimumSubscriptionInSeconds: minimumSubscriptionInSeconds,
 			owner: owner.name
 		]
-		if (isOwner) {
-			map.put("pendingChanges", pendingChanges)
+		if (isOwner && pendingChanges != null) {
+			JsonSlurper slurper = new JsonSlurper()
+			map.put("pendingChanges", (HashMap<String, Serializable>) slurper.parseText(pendingChanges))
 		}
 		return map
 	}

@@ -148,7 +148,7 @@ class ProductSpec extends Specification {
 		product.id = "product-id"
 
 		when:
-		product.pendingChanges = "pending-changes"
+		product.pendingChanges = '{"name":"new name"}'
 
 		then:
 		product.toMap(true) == [
@@ -172,7 +172,7 @@ class ProductSpec extends Specification {
 			isFree: false,
 			priceCurrency: "DATA",
 			minimumSubscriptionInSeconds: 0L,
-			pendingChanges: "pending-changes",
+			pendingChanges: [name:"new name"],
 		]
 	}
 }

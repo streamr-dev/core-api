@@ -195,7 +195,7 @@ class UpdateProductCommandSpec extends Specification {
 		command = new UpdateProductCommand(
 			name: "new name",
 			description: "new description",
-			pendingChanges: '''{"name":"new name","description":"new description"}'''
+			pendingChanges: [name:"new name",description:"new description"]
 		)
 		product.pricePerSecond = 5
 
@@ -211,7 +211,7 @@ class UpdateProductCommandSpec extends Specification {
 		command = new UpdateProductCommand(
 			name: "new name",
 			description: "new description",
-			pendingChanges: '''{"name":"new name","description":"new description"}'''
+			pendingChanges: [name:"new name",description:"new description"]
 		)
 		product.pricePerSecond = 5
 
