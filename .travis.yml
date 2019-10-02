@@ -6,7 +6,7 @@ services:
 - docker
 node_js:
 - "8.9.3"
-if: (type = push AND (branch = master OR branch = CORE-1683-engine-use-api)) OR type = pull_request # build whitelisted branches and all PRs
+if: (type = push AND branch = master) OR type = pull_request # build whitelisted branches and all PRs
 git:
   submodules: false
 before_install:
@@ -75,7 +75,7 @@ jobs:
       skip_cleanup: true
       local_dir: build
       on:
-        branch: CORE-1683-engine-use-api
+        branch: master
     - provider: codedeploy
       access_key_id: AKIAJBAGP3WA5UXQ3AZQ
       secret_access_key:
@@ -86,7 +86,7 @@ jobs:
       deployment_group: eu-west-1-lx-ee-deployment-group
       region: eu-west-1
       on:
-        branch: CORE-1683-engine-use-api
+        branch: master
     if: NOT type IN (pull_request)
   - stage: Build docker dev
     env:
