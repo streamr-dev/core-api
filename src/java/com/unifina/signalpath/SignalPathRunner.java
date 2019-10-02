@@ -86,15 +86,16 @@ public class SignalPathRunner extends Thread {
 			// Start feed, blocks until event loop exists
 			globals.getDataSource().start();
 		} catch (Throwable e) {
-			thrownOnStartUp = e = GrailsUtil.deepSanitize(e);
+			final Throwable sanitized = GrailsUtil.deepSanitize(e);
+			thrownOnStartUp = sanitized;
 			log.error("Error while running SignalPaths", e);
-			pushErrorToUiChannels(e, signalPath);
+			safeRun(() -> pushErrorToUiChannels(sanitized, signalPath));
 		}
 
-		signalPath.pushToUiChannel(new DoneMessage());
+		safeRun(() -> signalPath.pushToUiChannel(new DoneMessage()));
 
 		if (getGlobals().isAdhoc()) {
-			signalPath.pushToUiChannel(new ByeMessage());
+			safeRun(() -> signalPath.pushToUiChannel(new ByeMessage()));
 		}
 
 		// Cleanup
@@ -124,14 +125,23 @@ public class SignalPathRunner extends Thread {
 	 * Aborts the data feed and releases all resources
 	 */
 	private void destroyMe() {
-		signalPath.destroy();
-
 		SignalPathService signalPathService = Holders.getApplicationContext().getBean(SignalPathService.class);
-		signalPathService.updateState(runnerId, Canvas.State.STOPPED);
+		safeRun(signalPath::destroy);
+		safeRun(() -> signalPathService.updateState(runnerId, Canvas.State.STOPPED));
 
 		if (globals.isAdhoc()) {
 			// Delayed-delete the references to allow UI to catch up
-			signalPathService.deleteReferences(signalPath, true);
+			safeRun(() -> signalPathService.deleteReferences(signalPath, true));
+		}
+
+		safeRun(globals::destroy);
+	}
+
+	private void safeRun(Runnable r) {
+		try {
+			r.run();
+		} catch (Exception e) {
+			log.error(e);
 		}
 	}
 

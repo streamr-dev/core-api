@@ -24,7 +24,7 @@ function assertIsSubscription(data) {
 async function createProductAndReturnId(productBody) {
     const json = await Streamr.api.v1.products
         .create(productBody)
-        .withAuthToken(AUTH_TOKEN)
+        .withApiKey(AUTH_TOKEN)
         .execute()
     return json.id
 }
@@ -32,7 +32,7 @@ async function createProductAndReturnId(productBody) {
 async function createSubscription(subscriptionBody) {
     await Streamr.api.v1.subscriptions
         .create(subscriptionBody)
-        .withAuthToken(DEVOPS_USER_TOKEN)
+        .withApiKey(DEVOPS_USER_TOKEN)
         .execute()
 }
 
@@ -51,7 +51,7 @@ async function submitChallenge(challenge, signature) {
             challenge: challenge,
             signature: signature
         })
-        .withAuthToken(AUTH_TOKEN_2)
+        .withApiKey(AUTH_TOKEN_2)
         .execute()
     return json
 }
@@ -103,7 +103,7 @@ describe('Subscriptions API', () => {
             const body = {}
             const response = await Streamr.api.v1.subscriptions
                 .create(body)
-                .withAuthToken(AUTH_TOKEN)
+                .withApiKey(AUTH_TOKEN)
                 .call()
             await assertResponseIsError(response, 422, 'VALIDATION_ERROR')
         })
@@ -115,7 +115,7 @@ describe('Subscriptions API', () => {
             }
             const response = await Streamr.api.v1.subscriptions
                 .create(body)
-                .withAuthToken(AUTH_TOKEN)
+                .withApiKey(AUTH_TOKEN)
                 .call()
             await assertResponseIsError(response, 422, 'VALIDATION_ERROR', 'product')
         })
@@ -129,7 +129,7 @@ describe('Subscriptions API', () => {
                 }
                 const response = await Streamr.api.v1.subscriptions
                     .create(body)
-                    .withAuthToken(AUTH_TOKEN)
+                    .withApiKey(AUTH_TOKEN)
                     .call()
                 await assertResponseIsError(response, 403, 'FORBIDDEN', 'DevOps role required')
             })
@@ -142,7 +142,7 @@ describe('Subscriptions API', () => {
                 }
                 const response = await Streamr.api.v1.subscriptions
                     .create(body)
-                    .withAuthToken(DEVOPS_USER_TOKEN)
+                    .withApiKey(DEVOPS_USER_TOKEN)
                     .call()
                 assert.equal(response.status, 204)
             })
@@ -156,7 +156,7 @@ describe('Subscriptions API', () => {
                 }
                 const response = await Streamr.api.v1.subscriptions
                     .create(body)
-                    .withAuthToken(AUTH_TOKEN)
+                    .withApiKey(AUTH_TOKEN)
                     .call()
                 await assertResponseIsError(response, 400, 'PRODUCT_IS_NOT_FREE')
             })
@@ -168,7 +168,7 @@ describe('Subscriptions API', () => {
                 }
                 const response = await Streamr.api.v1.subscriptions
                     .create(body)
-                    .withAuthToken(AUTH_TOKEN)
+                    .withApiKey(AUTH_TOKEN)
                     .call()
                 assert.equal(response.status, 204)
             })
@@ -236,7 +236,7 @@ describe('Subscriptions API', () => {
             before(async () => {
                 response = await Streamr.api.v1.subscriptions
                     .list()
-                    .withAuthToken(AUTH_TOKEN_2)
+                    .withApiKey(AUTH_TOKEN_2)
                     .call()
                 json = await response.json()
             })

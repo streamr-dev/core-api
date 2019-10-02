@@ -19,7 +19,7 @@ class NodeService {
 		}
 
 		// Check for a configured IP address
-		String configuredIp = MapTraversal.getString(config, "streamr.node.ip")
+		String configuredIp = MapTraversal.getString(config, "streamr.engine.node.ip")
 		if (configuredIp) {
 			cachedIp = configuredIp
 		} else {
@@ -34,11 +34,11 @@ class NodeService {
 			if (addresses.size() == 1) {
 				cachedIp = addresses[0].hostAddress
 			} else if (addresses.size() > 1) {
-				log.warn("Multiple IPs found: ${addresses*.hostAddress}. By default the first one will be used. To select another aaddress, please set the streamr.node.ip system property.")
+				log.warn("Multiple IPs found: ${addresses*.hostAddress}. By default the first one will be used. To select another aaddress, please set the streamr.engine.node.ip system property.")
 				cachedIp = addresses[0].hostAddress
 			} else {
 				// Fallback to localhost
-				log.warn("IP address could not be detected, falling back to 127.0.0.1. To specify an IP address for this node, please set the streamr.node.ip system property.")
+				log.warn("IP address could not be detected, falling back to 127.0.0.1. To specify an IP address for this node, please set the streamr.engine.node.ip system property.")
 				cachedIp = "127.0.0.1"
 			}
 		}

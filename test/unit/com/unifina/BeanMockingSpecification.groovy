@@ -32,6 +32,10 @@ class BeanMockingSpecification extends Specification {
 		Holders.getApplicationContext().getBean(clazz)
 	}
 
+	protected <T> T mockBean(Class<T> clazz) {
+		return mockBean(clazz, Mock(clazz))
+	}
+
 	protected <T> T mockBean(Class<T> clazz, T instance) {
 		String name = clazz.getName().substring(0,1).toLowerCase() + clazz.getName().substring(1)
 		Holders.getApplicationContext().beanFactory.registerSingleton(name, instance)

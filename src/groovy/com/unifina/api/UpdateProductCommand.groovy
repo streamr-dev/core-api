@@ -7,6 +7,7 @@ import com.unifina.domain.security.SecUser
 import com.unifina.service.PermissionService
 import grails.compiler.GrailsCompileStatic
 import grails.validation.Validateable
+import groovy.json.JsonBuilder
 
 @Validateable
 class UpdateProductCommand {
@@ -18,7 +19,7 @@ class UpdateProductCommand {
 	Category category
 	Stream previewStream
 	String previewConfigJson
-	String pendingChanges
+	Map<String, Object> pendingChanges
 
 	// Below are used only when updating NOT_DEPLOYED product
 	String ownerAddress
@@ -88,6 +89,8 @@ class UpdateProductCommand {
 		if (pendingChanges != null) {
 			if (!permissionService.canShare(user, product)) {
 				throw new FieldCannotBeUpdatedException("User doesn't have permission to share product.")
+			} else {
+				product.pendingChanges = new JsonBuilder(pendingChanges).toString()
 			}
 		}
 	}

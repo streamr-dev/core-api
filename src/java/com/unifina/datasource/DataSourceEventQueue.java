@@ -70,8 +70,6 @@ public class DataSourceEventQueue {
 	 * The call to this method blocks until the queue is aborted or all events have been processed.
 	 */
 	public void start() throws Exception {
-		aborted = false;
-
 		// Single threaded executor to maintain the order of events
 		asyncExecutor = new ThreadPoolExecutor(1, 1,
 			0L, TimeUnit.MILLISECONDS,

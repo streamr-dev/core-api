@@ -2,6 +2,7 @@ package com.unifina.controller.api
 
 import com.unifina.api.ApiException
 import grails.test.mixin.TestFor
+import grails.util.Holders
 import spock.lang.Specification
 
 @TestFor(OembedApiController)
@@ -20,7 +21,8 @@ class OembedApiControllerSpec extends Specification {
 		response.json.width == 400
 		response.json.height == 300
 		response.json.provider_name == "Streamr"
-		response.json.provider_url == "https://www.streamr.com"
+		response.json.provider_url instanceof String
+		response.json.provider_url == Holders.grailsApplication.config.grails.serverURL
 		response.json.type == "rich"
 		response.json.version == "1.0"
 		response.json.html.matches(/\s*<iframe.*>\s*/)
@@ -85,6 +87,19 @@ class OembedApiControllerSpec extends Specification {
 		then:
 		response.status == 200
 		response.json.url == url
+	}
+
+	void "index accepts editor links, and changes them to embed links"() {
+		def url = "https://streamr.network/canvas/editor/a"
+		def encodedUrl = URLEncoder.encode(url, "UTF-8")
+
+		when:
+		request.method = "GET"
+		params.url = encodedUrl
+		controller.index()
+		then:
+		response.status == 200
+		response.json.url == url.replace("editor", "embed")
 	}
 
 	void "index fails with an invalid url"() {

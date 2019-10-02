@@ -66,6 +66,6 @@ class ClusterService {
 	}
 
 	private List<String> getStreamrNodes() {
-		(List<String>) grailsApplication.config.streamr.nodes
+		(List<String>) grailsApplication.config.streamr.engine.nodes
 	}
 }

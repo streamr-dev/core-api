@@ -28,7 +28,6 @@ import spock.lang.Specification
 @Mock([Canvas, Dashboard, DashboardItem, Stream, SecUser, Key, IntegrationKey, Permission, PermissionService])
 class StreamServiceSpec extends Specification {
 
-	KafkaService kafkaService = Stub(KafkaService)
 	DashboardService dashboardService = Mock(DashboardService)
 
 	SecUser me = new SecUser(username: "me")
@@ -36,7 +35,6 @@ class StreamServiceSpec extends Specification {
 	def setup() {
 		// Setup application context
 		def applicationContext = Stub(ApplicationContext) {
-			getBean(KafkaService) >> kafkaService
 			getBean(DashboardService) >> dashboardService
 		}
 

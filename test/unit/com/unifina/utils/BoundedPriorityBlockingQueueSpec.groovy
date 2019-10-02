@@ -100,7 +100,7 @@ class BoundedPriorityBlockingQueueSpec extends Specification {
 			}
 		}
 		Thread consumer = Thread.start {
-			while (!stop) {
+			while (!stop || !queue.isEmpty()) { // finish processing the queue even if stop is signaled
 				if (queue.poll(1, TimeUnit.SECONDS)) {
 					consumed++
 				} else {

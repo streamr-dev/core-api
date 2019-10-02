@@ -139,4 +139,6 @@ databaseChangeLog = {
 	include file: 'core/2019-08-27-rm-modwt.groovy'
 	include file: 'core/2019-09-13-product-pendingchanges.groovy'
 	include file: 'core/2019-09-11-getethbalance-module.groovy'
+	include file: 'core/2019-09-27-stream-require-encrypted-data.groovy'
+	include file: 'core/2019-09-27-alter-pending-changes.groovy'
 }

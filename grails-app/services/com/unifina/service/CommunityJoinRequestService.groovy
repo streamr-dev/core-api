@@ -1,6 +1,6 @@
 package com.unifina.service
 
-import com.streamr.client.protocol.message_layer.StreamMessage
+import com.streamr.client.StreamrClient
 import com.unifina.api.ApiException
 import com.unifina.api.CommunityJoinRequestCommand
 import com.unifina.api.NotFoundException
@@ -12,15 +12,11 @@ import com.unifina.domain.marketplace.Product
 import com.unifina.domain.security.IntegrationKey
 import com.unifina.domain.security.Permission
 import com.unifina.domain.security.SecUser
-import com.unifina.signalpath.utils.MessageChainUtil
-import com.unifina.utils.MapTraversal
-import grails.util.Holders
-import org.web3j.crypto.Credentials
 
 class CommunityJoinRequestService {
-	StreamService streamService
 	EthereumService ethereumService
 	PermissionService permissionService
+	StreamrClientService streamrClientService
 
 	private void onApproveJoinRequest(CommunityJoinRequest c) {
 		for (Stream s : findStreams(c)) {
@@ -49,17 +45,18 @@ class CommunityJoinRequestService {
 		sendMessageToStream(joinPartStreamID, msg)
 	}
 
-	// Send message to joinPartStream
+	/**
+	 * Sends a message to joinPartStream using the credentials of this Engine node
+	 */
 	private void sendMessageToStream(String joinPartStreamID, HashMap<String, Object> content) {
-		Stream s = Stream.findById(joinPartStreamID)
-		if (s == null) {
+		StreamrClient client = streamrClientService.getInstanceForThisEngineNode()
+		com.streamr.client.rest.Stream stream = client.getStream(joinPartStreamID)
+
+		if (stream == null) {
 			throw new NotFoundException(String.format("Stream not found by id: %s", joinPartStreamID))
 		}
-		String nodePrivateKey = MapTraversal.getString(Holders.getConfig(), "streamr.ethereum.nodePrivateKey")
-		Credentials credentials = Credentials.create(nodePrivateKey)
-		MessageChainUtil chain = new MessageChainUtil(credentials.getAddress())
-		StreamMessage msg = chain.getStreamMessage(s, new Date(), content)
-		streamService.sendMessage(msg)
+
+		client.publish(stream, content)
 	}
 
 	Set<SecUser> findCommunityMembers(String communityAddress) {

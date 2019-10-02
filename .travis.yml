@@ -4,9 +4,9 @@ jdk:
 - openjdk8
 services:
 - docker
-branches:
-  only:
-  - master
+node_js:
+- "8.9.3"
+if: (type = push AND (branch = master OR branch = CORE-1683-engine-use-api)) OR type = pull_request # build whitelisted branches and all PRs
 git:
   submodules: false
 before_install:
@@ -15,6 +15,7 @@ before_install:
 - source "/home/travis/.sdkman/bin/sdkman-init.sh"
 - sdk install grails 2.5.6
 - npm i -g npm@6.4.1
+- "echo Using node version: `node --version`"
 env:
   global:
   - secure: Icz6PgvdiMvqiC1yMBknaSMqHvvthOo0hUrVCTGA8pWXaqofX5fKNVI8GL4kvRK7a+YpEZ7SCvHH1cgEfBx8jC+Wc0XjGfBZXH1C1gyo8X1keCcJQVRyhxXkrjaeOLF0Cas8m9MdgAqJlwDcAXkWh426kvpAbU1SbNkkSCX3Ksp6M43LVUEbtkdOCf0GxavfgsGL5S9fk7WUf7hU4+HqL/UbbM+XMTz9hgajI5zzyRPiFwMPLGohNfopLKZvRWL/2IDY4ldVEzRi8koxIYrhO68o5RJJsptw+Gfaf3mzmgDGP9jU/cWYxsrfWogtVGFOiB2nDA+opbDU79vwHCpP5dcZJUEDvgOMVA0aTRT6Mc6hXM07wiL9noJwrSqoudkXianDDJqCKja+myKNi4wVWpisZV0HfF3nWeiKoxBaQdlCc7UUadS4OYK30Xll/Z9Z3ebWWGRmdKRSeD+QmM4j8VMu/t624AX/Q0laAS7/6BKOjMaDUqm3Q7plNWTSQWRmVUFzaH0xRL1DPLIbz/8Z8D1IVOfnq6k2FYTtVnjKQdHH65ddtqZMwtsSJsS9fQRYOm3ly0avPvDNnNeEYEuhY5lF8Tiw1lwh+BHOhiQLAPi7dqTiV/I2ImgdFH6a8wr/KICSquaSRWzwWnod3Jstrz9WWQW+K9JKu4deIRUOEx4=
@@ -44,6 +45,8 @@ jobs:
       region: eu-west-1
       skip_cleanup: true
       local_dir: build
+      on:
+        branch: master
     - provider: codedeploy
       access_key_id: AKIAI3FGPGMK3EREJJTQ
       secret_access_key:
@@ -53,6 +56,37 @@ jobs:
       application: eu-west-1-stg-ee-codedeploy
       deployment_group: eu-west-1-stg-ee-deployment-group
       region: eu-west-1
+      on:
+        branch: master
+    if: NOT type IN (pull_request)
+  - stage: Build war Lisboa
+    script: .travis_scripts/build_war.sh
+    env:
+    - WS_URL="wss://ee-lisboa.streamr.com/api/v1/ws"
+    deploy:
+    - provider: s3
+      access_key_id: AKIAJBAGP3WA5UXQ3AZQ
+      secret_access_key:
+        secure: h4tMVVTqRfYz8B4mNX6PWknLHiNdUeXaNTJQ87ZJfEgtfHUQBkOjLvar93HLlsrbDOr49K9c1evYK2nyYtaNiW9Q0TCUySJZNiPlgM5DdKyPLdMN4XrUfCvmP0BIxeaDollfnbtGkvvTyUpaoJvsqyhmoAkAEyHJWJ+SfRYcg4ktvrQJQY0yDiuHpAdduAZDbV4qbwhFZc3VMauCP5dPEwHARwLK3QklTwkKVOZjE1rwvWlZPGus4JQ+Eo3wAXdobeDzxZTOK9IxL9bJKRZJpPXazo2/taN56G6iUVjJT3HUNudO3BC5fuTJm2TnnM7o/TKHMM2LZ1L0j/gsuT6n9oi9X6sl0UizcSFeyrRRO8N6875wsvcYtaL8KdjpERw19Bd4ZNHXVZHFkNhHTnUA6HjOB57ic4TT8lODs2kUgUeqNFn7rvSdwPNm8cbnBSbFRJMiDi5ofbKhdu5qAxZ3fx8SsuciZaXCflNzmoPKqRUSgHhc17WAi65wPdPufCuFjB01BcayN66QmRApdeAcKF8dkvKQF2/IY/RBhw7LQ5mfvGpWDLiF/NnCkPxX19LBHx92jSYlfuy1BLCs2OWXs5YQLrISjuiDlHm7IvN7KGLNaCtCxyxXxJCVvzOxpLpdQF/hAvgV6BGu5AB+lS2GNg3vnx8vAZaMpV2NTWc1xL0=
+      bucket: eu-west-1-lx-streamr-vault
+      upload-dir: engine-editor/releases
+      acl: private
+      region: eu-west-1
+      skip_cleanup: true
+      local_dir: build
+      on:
+        branch: CORE-1683-engine-use-api
+    - provider: codedeploy
+      access_key_id: AKIAJBAGP3WA5UXQ3AZQ
+      secret_access_key:
+        secure: h4tMVVTqRfYz8B4mNX6PWknLHiNdUeXaNTJQ87ZJfEgtfHUQBkOjLvar93HLlsrbDOr49K9c1evYK2nyYtaNiW9Q0TCUySJZNiPlgM5DdKyPLdMN4XrUfCvmP0BIxeaDollfnbtGkvvTyUpaoJvsqyhmoAkAEyHJWJ+SfRYcg4ktvrQJQY0yDiuHpAdduAZDbV4qbwhFZc3VMauCP5dPEwHARwLK3QklTwkKVOZjE1rwvWlZPGus4JQ+Eo3wAXdobeDzxZTOK9IxL9bJKRZJpPXazo2/taN56G6iUVjJT3HUNudO3BC5fuTJm2TnnM7o/TKHMM2LZ1L0j/gsuT6n9oi9X6sl0UizcSFeyrRRO8N6875wsvcYtaL8KdjpERw19Bd4ZNHXVZHFkNhHTnUA6HjOB57ic4TT8lODs2kUgUeqNFn7rvSdwPNm8cbnBSbFRJMiDi5ofbKhdu5qAxZ3fx8SsuciZaXCflNzmoPKqRUSgHhc17WAi65wPdPufCuFjB01BcayN66QmRApdeAcKF8dkvKQF2/IY/RBhw7LQ5mfvGpWDLiF/NnCkPxX19LBHx92jSYlfuy1BLCs2OWXs5YQLrISjuiDlHm7IvN7KGLNaCtCxyxXxJCVvzOxpLpdQF/hAvgV6BGu5AB+lS2GNg3vnx8vAZaMpV2NTWc1xL0=
+      bucket: eu-west-1-lx-streamr-vault
+      key: engine-editor/releases/ee.tar
+      application: eu-west-1-lx-ee-codedeploy
+      deployment_group: eu-west-1-lx-ee-deployment-group
+      region: eu-west-1
+      on:
+        branch: CORE-1683-engine-use-api
     if: NOT type IN (pull_request)
   - stage: Build docker dev
     env:
@@ -65,6 +99,8 @@ jobs:
     deploy:
     - provider: script
       script: .travis_scripts/deploy_docker.sh staging
+      on:
+        branch: master
     if: NOT type IN (pull_request)
   - stage: Build docker Staging
     env:
@@ -77,6 +113,8 @@ jobs:
     deploy:
     - provider: script
       script: .travis_scripts/deploy_docker.sh staging
+      on:
+        branch: master
     if: NOT type IN (pull_request)
 after_failure: .travis_scripts/after_test_failure.sh
 notifications:
