@@ -140,7 +140,7 @@ class EthereumIntegrationKeyService {
 		SecUser user = userService.createUser([
 			username       : address,
 			password       : AlphanumericStringGenerator.getRandomAlphanumericString(32),
-			name           : address,
+			name           : "Anonymous User",
 			enabled        : true,
 			accountLocked  : false,
 			passwordExpired: false
