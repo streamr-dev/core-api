@@ -11,6 +11,7 @@ import com.unifina.domain.security.Key
 import com.unifina.domain.security.Permission
 import com.unifina.domain.security.SecUser
 import com.unifina.exceptions.UnexpectedApiResponseException
+import com.unifina.security.Userish
 import grails.compiler.GrailsCompileStatic
 import grails.converters.JSON
 import groovy.transform.CompileStatic
@@ -71,7 +72,7 @@ class ApiService {
 	 * Fetch a domain object by id while authorizing that current user has required permission
 	 */
 	@GrailsCompileStatic
-	<T> T authorizedGetById(Class<T> domainClass, String id, SecUser currentUser, Permission.Operation operation)
+	<T> T authorizedGetById(Class<T> domainClass, String id, Userish currentUser, Permission.Operation operation)
 			throws NotFoundException, NotPermittedException {
 		T domainObject = getByIdAndThrowIfNotFound(domainClass, id)
 		permissionService.verify(currentUser, domainObject, operation)
