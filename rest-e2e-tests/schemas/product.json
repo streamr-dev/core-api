@@ -159,7 +159,7 @@
         "null",
         "string"
       ],
-      "maxLength": 255
+      "maxLength": 65535
     }
   },
   "additionalProperties": false,

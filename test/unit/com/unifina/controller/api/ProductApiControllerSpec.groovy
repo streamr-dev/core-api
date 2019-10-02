@@ -249,6 +249,7 @@ class ProductApiControllerSpec extends Specification {
 	}
 
 	void "update() invokes productService#update"() {
+		controller.permissionService = Mock(PermissionService)
 		def productService = controller.productService = Mock(ProductService)
 
 		def user = request.apiUser = new SecUser()
@@ -261,9 +262,11 @@ class ProductApiControllerSpec extends Specification {
 		}
 		then:
 		1 * productService.update("product-id", _ as UpdateProductCommand, user) >> product
+		1 * controller.permissionService.canShare(_, _) >> false
 	}
 
 	void "update() returns 200 and renders a product"() {
+		controller.permissionService = Mock(PermissionService)
 		controller.productService = Stub(ProductService) {
 			update("product-id", _, _) >> product
 		}
@@ -279,6 +282,7 @@ class ProductApiControllerSpec extends Specification {
 		then:
 		response.status == 200
 		response.json == product.toMap()
+		1 * controller.permissionService.canShare(_, _) >> false
 	}
 
 	void "setDeploying() invokes productService#findById() and productService#transitionToDeploying()"() {
