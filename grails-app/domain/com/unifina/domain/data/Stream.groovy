@@ -70,6 +70,7 @@ class Stream implements Comparable {
 		config type: 'text'
 		inbox defaultValue: "false"
 		requireSignedData defaultValue: "false"
+		requireEncryptedData defaultValue: "false"
 		autoConfigure defaultValue: "true"
 		storageDays defaultValue: DEFAULT_STORAGE_DAYS
 		exampleType enumType: "identity", defaultValue: ExampleType.NOT_SET, index: 'example_type_idx'
