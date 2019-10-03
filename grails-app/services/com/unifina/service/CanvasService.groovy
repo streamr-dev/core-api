@@ -20,6 +20,7 @@ import com.unifina.utils.Globals
 import grails.converters.JSON
 import grails.transaction.Transactional
 import groovy.json.JsonBuilder
+import groovy.json.JsonSlurper
 import groovy.transform.CompileStatic
 import org.codehaus.groovy.grails.web.json.JSONObject
 import org.codehaus.groovy.grails.web.mapping.LinkGenerator
@@ -49,7 +50,7 @@ class CanvasService {
 	}
 
 	private String extractJson(String json, SaveCanvasCommand cmd) {
-		Map canvasJson = (Map) JSON.parse(json)
+		Map canvasJson = new JsonSlurper().parseText(json)
 		canvasJson.name = cmd.name
 		canvasJson.modules = cmd.modules
 		canvasJson.settings = cmd.settings
