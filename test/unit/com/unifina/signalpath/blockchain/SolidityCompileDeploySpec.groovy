@@ -206,7 +206,7 @@ class SolidityCompileDeploySpec extends ModuleTestingSpecification {
 		when:
 		applyConfig.contract.abi[2].payable = true
 		applyConfig.code = payable_constructor
-		applyConfig << [deploy: false]
+		applyConfig.remove("deploy")
 		module = new ModifiedSolidityCompileDeploy(null)
 		module.onConfiguration(applyConfig)
 		byte[] bytes = serializationService.serialize(module)
