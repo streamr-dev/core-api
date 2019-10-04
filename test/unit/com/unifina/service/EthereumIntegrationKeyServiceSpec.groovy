@@ -84,7 +84,8 @@ class EthereumIntegrationKeyServiceSpec extends Specification {
 			name   : "ethKey",
 			service: "ETHEREUM",
 			json   : [
-				address: "0xf4f683a8502b2796392bedb05dbbcc8c6e582e59"
+				address: "0xf4f683a8502b2796392bedb05dbbcc8c6e582e59",
+				privateKeyPlaintext: "fa7d31d2fb3ce6f18c629857b7ef5cc3c6264dc48ddf6557cc20cf7a5b361365"
 			]
 		]
 	}
