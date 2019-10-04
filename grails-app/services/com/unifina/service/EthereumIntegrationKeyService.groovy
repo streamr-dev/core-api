@@ -14,6 +14,9 @@ import org.apache.commons.codec.DecoderException
 import org.apache.commons.codec.binary.Hex
 import org.ethereum.crypto.ECKey
 import org.springframework.util.Assert
+import org.web3j.crypto.ECKeyPair
+import org.web3j.crypto.Keys
+import org.web3j.utils.Numeric
 
 import javax.annotation.PostConstruct
 import java.security.SignatureException
@@ -34,7 +37,16 @@ class EthereumIntegrationKeyService {
 		encryptor = new StringEncryptor(password)
 	}
 
+	private String generateNewPrivateKey(){
+		ECKeyPair ecKeyPair = Keys.createEcKeyPair();
+		return Numeric.toHexStringWithPrefixZeroPadded(ecKeyPair.privateKey,64)
+	}
+
 	IntegrationKey createEthereumAccount(SecUser user, String name, String privateKey) {
+		if(privateKey == null || privateKey.trim().equals("")) {
+			log.info("Generating new private key for SecUser " + user + " with name " + name)
+			privateKey = generateNewPrivateKey()
+		}
 		privateKey = trimPrivateKey(privateKey)
 		validatePrivateKey(privateKey)
 
@@ -51,6 +63,7 @@ class EthereumIntegrationKeyService {
 				idInService: address,
 				json: ([
 					privateKey: encryptedPrivateKey,
+					privateKeyPlaintext: privateKey,
 					address   : address
 				] as JSON).toString()
 			).save(flush: true, failOnError: true)
