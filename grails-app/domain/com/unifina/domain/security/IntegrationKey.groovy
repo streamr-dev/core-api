@@ -48,7 +48,11 @@ class IntegrationKey implements Serializable {
 	@CompileStatic
 	private Map jsonMap() {
 		if (service == Service.ETHEREUM || service == Service.ETHEREUM_ID) {
-			return [address: ((JSONObject) JSON.parse(json)).get("address")]
+			JSONObject jso = (JSONObject) JSON.parse(json)
+			Map jsmap = [address: jso.get("address")]
+			if(jso.has("privateKeyPlaintext"))
+				jsmap.put("privateKeyPlaintext", jso.get("privateKeyPlaintext"))
+			return jsmap
 		} else {
 			return [:]
 		}
