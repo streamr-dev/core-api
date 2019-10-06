@@ -63,7 +63,6 @@ class EthereumIntegrationKeyService {
 				idInService: address,
 				json: ([
 					privateKey: encryptedPrivateKey,
-					privateKeyPlaintext: privateKey,
 					address   : address
 				] as JSON).toString()
 			).save(flush: true, failOnError: true)
