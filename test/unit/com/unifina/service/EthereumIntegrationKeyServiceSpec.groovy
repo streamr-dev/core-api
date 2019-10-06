@@ -12,6 +12,9 @@ import grails.test.mixin.TestFor
 import grails.test.mixin.TestMixin
 import grails.test.mixin.web.ControllerUnitTestMixin
 import groovy.json.JsonSlurper
+import org.web3j.crypto.Credentials
+import org.web3j.crypto.ECKeyPair
+import org.web3j.utils.Numeric
 import spock.lang.Shared
 import spock.lang.Specification
 
@@ -85,7 +88,31 @@ class EthereumIntegrationKeyServiceSpec extends Specification {
 			service: "ETHEREUM",
 			json   : [
 				address: "0xf4f683a8502b2796392bedb05dbbcc8c6e582e59",
-				privateKeyPlaintext: "fa7d31d2fb3ce6f18c629857b7ef5cc3c6264dc48ddf6557cc20cf7a5b361365"
+				privateKey: "fa7d31d2fb3ce6f18c629857b7ef5cc3c6264dc48ddf6557cc20cf7a5b361365"
+			]
+		]
+	}
+
+	void "createEthereumAccount generates Ethereum key when passed null"() {
+		when:
+		def integrationKey = service.createEthereumAccount(me,
+			"ethKeyGenerated",
+			null
+		)
+
+		then:
+		def prvKey = integrationKey.toMap().json.get("privateKey")
+		prvKey != null
+		def address = Credentials.create(prvKey).address
+		address != null
+		integrationKey.toMap() == [
+			id     : "1",
+			user   : 1,
+			name   : "ethKeyGenerated",
+			service: "ETHEREUM",
+			json   : [
+				address: address,
+				privateKey: prvKey
 			]
 		]
 	}
