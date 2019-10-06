@@ -3534,6 +3534,9 @@
               "$ref": "#/definitions/Canvas"
             }
           },
+          "400": {
+            "description": "Canvas is not properly configured"
+          },
           "403": {
             "description": "Not authorized to start canvas"
           },
