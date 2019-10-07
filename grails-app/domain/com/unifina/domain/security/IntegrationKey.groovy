@@ -1,8 +1,10 @@
 package com.unifina.domain.security
 
 import com.unifina.security.StringEncryptor
+import com.unifina.service.EthereumIntegrationKeyService
 import com.unifina.utils.IdGenerator
 import grails.converters.JSON
+import grails.util.Holders
 import groovy.transform.CompileStatic
 import org.codehaus.groovy.grails.web.json.JSONObject
 import org.springframework.util.Assert
@@ -10,8 +12,7 @@ import org.springframework.util.Assert
 import javax.annotation.PostConstruct
 
 class IntegrationKey implements Serializable {
-	def transient grailsApplication
-	transient StringEncryptor encryptor
+	private transient EthereumIntegrationKeyService keyService
 	String id
 	SecUser user
 	String name
@@ -22,11 +23,10 @@ class IntegrationKey implements Serializable {
 	Date dateCreated
 	Date lastUpdated
 
-	@PostConstruct
-	void init() {
-		String password = grailsApplication.config["streamr"]["encryption"]["password"]
-		Assert.notNull(password, "streamr.encryption.password not set!")
-		encryptor = new StringEncryptor(password)
+	EthereumIntegrationKeyService getEthereumIntegrationKeyService(){
+		if(keyService == null)
+			keyService = Holders.getApplicationContext().getBean(EthereumIntegrationKeyService.class)
+		return keyService
 	}
 
 	static mapping = {
@@ -63,7 +63,7 @@ class IntegrationKey implements Serializable {
 			JSONObject jso = (JSONObject) JSON.parse(json)
 			Map jsmap = [address: jso.get("address")]
 			if(service == Service.ETHEREUM) {
-				String decryptedPrivateKey = encryptor.decrypt(jso.getString("privateKey"), user.id.byteValue())
+				String decryptedPrivateKey = getEthereumIntegrationKeyService().decryptPrivateKey(this)
 				jsmap.put("privateKey", decryptedPrivateKey)
 			}
 			return jsmap
