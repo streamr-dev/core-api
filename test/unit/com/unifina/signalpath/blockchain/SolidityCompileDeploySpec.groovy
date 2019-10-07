@@ -206,6 +206,7 @@ class SolidityCompileDeploySpec extends ModuleTestingSpecification {
 		when:
 		applyConfig.contract.abi[2].payable = true
 		applyConfig.code = payable_constructor
+		applyConfig.remove("deploy")
 		module = new ModifiedSolidityCompileDeploy(null)
 		module.onConfiguration(applyConfig)
 		byte[] bytes = serializationService.serialize(module)
@@ -213,6 +214,30 @@ class SolidityCompileDeploySpec extends ModuleTestingSpecification {
 
 		then:
 		module.pullValue(module.getOutput("contract")) != null
+	}
+
+	void "compile works with null ethAccount"() {
+		when:
+		applyConfig.params[0].value = null
+		// set ethereum account
+		module.inputs[0].setConfiguration(applyConfig.params[0])
+		module.onConfiguration(applyConfig)
+
+		then:
+		module.pullValue(module.getOutput("contract")) != null
+	}
+
+	void "deploy doesn't work with null ethAccount"() {
+		when:
+		applyConfig.params[0].value = null
+		applyConfig << [deploy: true]
+		// set ethereum account
+		module.inputs[0].setConfiguration(applyConfig.params[0])
+		module.onConfiguration(applyConfig)
+
+		then:
+		def e = thrown(RuntimeException)
+		e.message.contains("no private key is selected")
 	}
 
 	static Map applyConfig = new Gson().fromJson('''
