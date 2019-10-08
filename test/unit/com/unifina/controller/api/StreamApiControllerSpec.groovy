@@ -22,6 +22,7 @@ import java.text.SimpleDateFormat
 class StreamApiControllerSpec extends ControllerSpecification {
 
 	SecUser me
+	Key key
 
 	StreamService streamService
 	PermissionService permissionService
@@ -43,7 +44,7 @@ class StreamApiControllerSpec extends ControllerSpecification {
 		me = new SecUser(username: "me", password: "foo")
 		me.save(validate: false)
 
-		Key key = new Key(name: "key", user: me)
+		key = new Key(name: "key", user: me)
 		key.id = "apiKey"
 		key.save(failOnError: true, validate: true)
 
@@ -321,6 +322,32 @@ class StreamApiControllerSpec extends ControllerSpecification {
 
 		then:
 		thrown NotPermittedException
+	}
+
+	void "can set fields"() {
+		when:
+		params.id = streamOne.id
+		request.method = "POST"
+		request.JSON = ["field1": "string"]
+		authenticatedAs(me) { controller.setFields()}
+
+		then:
+		1 * apiService.authorizedGetById(Stream, streamOne.id, me, Permission.Operation.WRITE) >> streamOne
+		streamOne.config == '{"fields":{"field1":"string"}}'
+		response.status == 200
+	}
+
+	void "can set fields with key"() {
+		when:
+		params.id = streamOne.id
+		request.method = "POST"
+		request.JSON = ["field1": "string"]
+		authenticatedAs(key) { controller.setFields()}
+
+		then:
+		1 * apiService.authorizedGetById(Stream, streamOne.id, key, Permission.Operation.WRITE) >> streamOne
+		streamOne.config == '{"fields":{"field1":"string"}}'
+		response.status == 200
 	}
 
 	void "returns set of publisher addresses"() {

@@ -7,6 +7,7 @@ import org.apache.http.HttpEntity
 import org.apache.http.HttpHeaders
 import org.apache.http.StatusLine
 import org.apache.http.client.HttpClient
+import org.apache.http.client.config.RequestConfig
 import org.apache.http.client.methods.CloseableHttpResponse
 import org.apache.http.client.methods.HttpGet
 import org.apache.http.impl.client.HttpClientBuilder
@@ -25,9 +26,19 @@ class CommunityOperatorService {
 	String baseUrl
 	HttpClient client
 
+	private static final TIMEOUT_SECONDS = 10
+
 	CommunityOperatorService() {
 		this.baseUrl = MapTraversal.getString(Holders.getConfig(), "streamr.cps.url");
-		this.client = HttpClientBuilder.create().build()
+		RequestConfig config = RequestConfig.custom()
+			.setConnectTimeout(TIMEOUT_SECONDS * 1000)
+			.setConnectionRequestTimeout(TIMEOUT_SECONDS * 1000)
+			.setSocketTimeout(TIMEOUT_SECONDS * 1000)
+			.build()
+
+		this.client = HttpClientBuilder.create()
+			.setDefaultRequestConfig(config)
+			.build()
 	}
 
 	static class ProxyResponse {
