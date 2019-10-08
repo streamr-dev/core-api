@@ -1,40 +1,16 @@
 package com.unifina.security;
 
-import java.io.ByteArrayOutputStream;
-import java.io.File;
-import java.io.IOException;
-import java.io.OutputStream;
-import java.io.UnsupportedEncodingException;
-import java.net.MalformedURLException;
-import java.net.URI;
-import java.net.URL;
-import java.net.URLClassLoader;
-import java.net.URLDecoder;
+import org.apache.commons.lang.StringUtils;
+import org.apache.log4j.Logger;
+
+import javax.tools.*;
+import javax.tools.JavaFileObject.Kind;
+import java.io.*;
+import java.net.*;
 import java.security.CodeSource;
 import java.security.Policy;
 import java.security.cert.Certificate;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
-import javax.tools.Diagnostic;
-import javax.tools.DiagnosticCollector;
-import javax.tools.FileObject;
-import javax.tools.ForwardingJavaFileManager;
-import javax.tools.JavaCompiler;
-import javax.tools.JavaFileObject;
-import javax.tools.JavaFileObject.Kind;
-import javax.tools.SimpleJavaFileObject;
-import javax.tools.StandardJavaFileManager;
-import javax.tools.ToolProvider;
-
-import org.apache.commons.lang.StringUtils;
-import org.apache.log4j.Logger;
+import java.util.*;
 
 /**
  * Used to compile and load user-defined Groovy scripts at runtime.
@@ -232,7 +208,7 @@ public class UserJavaClassLoader extends URLClassLoader {
 	    }
 	}
 
-	public class ClassFileManager extends ForwardingJavaFileManager {
+	public static class ClassFileManager extends ForwardingJavaFileManager {
 		/**
 		* JavaClassObject that will store the
 		* compiled bytecode of our class. They are stored in

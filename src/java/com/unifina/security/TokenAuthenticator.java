@@ -15,7 +15,7 @@ public class TokenAuthenticator {
 		TOKEN,
 		BEARER
 	}
-	private class AuthorizationHeader {
+	private static class AuthorizationHeader {
 
 		private HeaderType headerType;
 		private String headerValue;
