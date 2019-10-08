@@ -1,5 +1,7 @@
 package com.unifina.service
 
+import com.google.gson.Gson
+import com.google.gson.GsonBuilder
 import com.unifina.api.*
 import com.unifina.domain.ExampleType
 import com.unifina.domain.dashboard.Dashboard
@@ -16,10 +18,9 @@ import com.unifina.signalpath.UiChannelIterator
 import com.unifina.task.CanvasDeleteTask
 import com.unifina.task.CanvasStartTask
 import com.unifina.utils.Globals
-
+import com.unifina.utils.NullJsonSerializer
 import grails.converters.JSON
 import grails.transaction.Transactional
-import groovy.json.JsonBuilder
 import groovy.json.JsonSlurper
 import groovy.transform.CompileStatic
 import org.codehaus.groovy.grails.web.json.JSONObject
@@ -28,6 +29,11 @@ import org.codehaus.groovy.runtime.InvokerHelper
 import org.codehaus.groovy.runtime.InvokerInvocationException
 
 class CanvasService {
+	private final static Gson gson = new GsonBuilder()
+		.serializeNulls()
+		.setPrettyPrinting()
+		.registerTypeAdapter(JSONObject.Null, new NullJsonSerializer())
+		.create()
 
 	SignalPathService signalPathService
 	TaskService taskService
@@ -54,7 +60,7 @@ class CanvasService {
 		canvasJson.name = cmd.name
 		canvasJson.modules = cmd.modules
 		canvasJson.settings = cmd.settings
-		return new JsonBuilder(canvasJson).toPrettyString()
+		return gson.toJson(canvasJson)
 	}
 
 	@CompileStatic
@@ -78,7 +84,7 @@ class CanvasService {
 		}
 		if (result != null) {
 			canvas.hasExports = result.map.hasExports
-			canvas.json = new JsonBuilder(result.map).toPrettyString()
+			canvas.json = gson.toJson(result.map)
 		} else {
 			canvas.json = extractJson(canvas.json, command)
 		}
