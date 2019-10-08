@@ -6,7 +6,7 @@ import org.apache.log4j.Logger;
 
 public class RealtimeEventQueue extends DataSourceEventQueue {
 
-	private static final long AGE_WARNING_THRESHOLD_MS = 1000;
+	private static final long AGE_WARNING_THRESHOLD_MS = 5000;
 
 	private static final Logger log = Logger.getLogger(RealtimeEventQueue.class);
 
