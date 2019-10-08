@@ -1,15 +1,11 @@
 package com.unifina.domain.security
 
-import com.unifina.security.StringEncryptor
 import com.unifina.service.EthereumIntegrationKeyService
 import com.unifina.utils.IdGenerator
 import grails.converters.JSON
 import grails.util.Holders
 import groovy.transform.CompileStatic
 import org.codehaus.groovy.grails.web.json.JSONObject
-import org.springframework.util.Assert
-
-import javax.annotation.PostConstruct
 
 class IntegrationKey implements Serializable {
 	private transient EthereumIntegrationKeyService keyService
