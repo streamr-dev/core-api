@@ -46,8 +46,8 @@ public abstract class AbstractHttpModule extends ModuleWithSideEffects implement
 	protected static final String BODY_FORMAT_PLAIN = "text/plain";
 	protected static final String BODY_FORMAT_XML = "application/xml";
 
-	public static int DEFAULT_TIMEOUT_SECONDS = 5;
-	public static int MAX_CONNECTIONS = 10;
+	public static final int DEFAULT_TIMEOUT_SECONDS = 5;
+	public static final int MAX_CONNECTIONS = 10;
 
 	protected String bodyContentType = BODY_FORMAT_JSON;
 	protected boolean trustSelfSigned = false;
