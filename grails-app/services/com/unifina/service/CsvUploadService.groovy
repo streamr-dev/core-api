@@ -65,7 +65,10 @@ class CsvUploadService {
 			stream.config = (newStreamConfig as JSON)
 			return stream.save()
 		} finally {
-			file.delete()
+			boolean fileDeleted = file.delete()
+			if (!fileDeleted) {
+				log.error(String.format("error deleting uploaded csv file: %s", filePath))
+			}
 			idToFilePath.remove(instructions.fileId)
 		}
 	}
