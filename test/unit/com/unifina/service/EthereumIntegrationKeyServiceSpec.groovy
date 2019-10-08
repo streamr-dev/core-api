@@ -99,11 +99,11 @@ class EthereumIntegrationKeyServiceSpec extends Specification {
 			"ethKeyGenerated",
 			null
 		)
+		def prvKey = integrationKey.toMap().json.get("privateKey")
+		def address = Credentials.create(prvKey).address
 
 		then:
-		def prvKey = integrationKey.toMap().json.get("privateKey")
 		prvKey != null
-		def address = Credentials.create(prvKey).address
 		address != null
 		integrationKey.toMap() == [
 			id     : "1",
