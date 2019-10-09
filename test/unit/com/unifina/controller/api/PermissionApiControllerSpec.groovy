@@ -2,6 +2,7 @@ package com.unifina.controller.api
 
 import com.unifina.ControllerSpecification
 import com.unifina.api.InvalidArgumentsException
+import com.unifina.api.NotFoundException
 import com.unifina.api.NotPermittedException
 import com.unifina.domain.data.Stream
 import com.unifina.domain.security.Key
@@ -82,14 +83,6 @@ class PermissionApiControllerSpec extends ControllerSpecification {
 			new Permission(id: null, user: me, operation: Operation.SHARE)
 		]
     }
-
-	void "validate setup"() {
-		expect:
-		Canvas.count() == 4
-		Stream.count() == 3
-		Permission.count() == 5
-		SecUser.count() == 2
-	}
 
     void "index returns list of permissions to shared resource (string id)"() {
 		params.id = canvasShared.id
@@ -236,23 +229,133 @@ class PermissionApiControllerSpec extends ControllerSpecification {
 
 	void "user with share permission to resource can delete another user's permission to same resource"() {
 		setup:
-		params.id = canvasPermission.id
+		controller.permissionService = new PermissionService()
+
+		SecUser user = new SecUser(name: "name", username: "me@me.com", password: "x")
+		user.id = 10
+		user.save(validate: true, failOnError: true)
+
+		Canvas resource = new Canvas()
+		resource.id = "canvas-id-1"
+		resource.save(validate: true, failOnError: true)
+
+		Permission sharePermission = new Permission(user: user, canvas: resource, operation: Operation.SHARE)
+		sharePermission.save(validate: true, failOnError: true)
+
+		SecUser another = new SecUser(name: "another", username: "another@com", password: "x")
+		another.id = 20
+		another.save(validate: true, failOnError: true)
+
+		Permission permission = new Permission(user: another, canvas: resource, operation: Operation.READ)
+		permission.save(validate: true, failOnError: true)
+
+		params.id = permission.id
 		params.resourceClass = Canvas
-		params.resourceId = canvasShared.id
+		params.resourceId = resource.id
+		request.apiUser = user
 
 		when:
-		authenticatedAs(me) { controller.delete("${canvasPermission.id}") }
+		authenticatedAs(user) { controller.delete() }
+
 		then:
-		true
+		response.status == 204
+		Permission.findById(permission.id) == null
 	}
 
 	void "user without share permission to resource can't delete another user's permission to same resource"() {
+		setup:
+		controller.permissionService = new PermissionService()
+
+		SecUser user = new SecUser(name: "name", username: "me@me.com", password: "x")
+		user.id = 10
+		user.save(validate: true, failOnError: true)
+
+		Canvas resource = new Canvas()
+		resource.id = "canvas-id-1"
+		resource.save(validate: true, failOnError: true)
+
+		SecUser another = new SecUser(name: "another", username: "another@com", password: "x")
+		another.id = 20
+		another.save(validate: true, failOnError: true)
+
+		Permission permission = new Permission(user: another, canvas: resource, operation: Operation.READ)
+		permission.save(validate: true, failOnError: true)
+
+		params.id = permission.id
+		params.resourceClass = Canvas
+		params.resourceId = resource.id
+		request.apiUser = user
+
+		when:
+		authenticatedAs(user) { controller.delete() }
+		then:
+		response.status == 403
+		Permission.findById(permission.id) != null
 	}
 
 	void "user without share permission to resource can delete their own permission to resource"() {
+		setup:
+		controller.permissionService = new PermissionService()
+
+		SecUser user = new SecUser(name: "name", username: "me@me.com", password: "x")
+		user.id = 10
+		user.save(validate: true, failOnError: true)
+
+		Canvas resource = new Canvas()
+		resource.id = "canvas-id-1"
+		resource.save(validate: true, failOnError: true)
+
+		Permission permission = new Permission(user: user, canvas: resource, operation: Operation.READ)
+		permission.save(validate: true, failOnError: true)
+
+		params.id = permission.id
+		params.resourceClass = Canvas
+		params.resourceId = resource.id
+		request.apiUser = user
+
+		when:
+		authenticatedAs(user) { controller.delete() }
+		then:
+		response.status == 204
+		Permission.findById(permission.id) == null
 	}
 
 	void "user with share permission to resource can't delete another user's permission to another resource"() {
+		setup:
+		controller.permissionService = new PermissionService()
+
+		SecUser user = new SecUser(name: "name", username: "me@me.com", password: "x")
+		user.id = 10
+		user.save(validate: true, failOnError: true)
+
+		Canvas resource = new Canvas()
+		resource.id = "canvas-id-1"
+		resource.save(validate: true, failOnError: true)
+
+		Permission permission = new Permission(user: user, canvas: resource, operation: Operation.SHARE)
+		permission.save(validate: true, failOnError: true)
+
+		SecUser another = new SecUser(name: "another", username: "another@com", password: "x")
+		another.id = 20
+		another.save(validate: true, failOnError: true)
+
+		Canvas anotherResource = new Canvas()
+		anotherResource.id = "another-canvas-id-2"
+		anotherResource.save(validate: true, failOnError: true)
+
+		Permission anotherPermission = new Permission(user: user, canvas: resource, operation: Operation.SHARE)
+		anotherPermission.save(validate: true, failOnError: true)
+
+		params.id = anotherPermission.id
+		params.resourceClass = Canvas
+		params.resourceId = anotherResource.id
+		request.apiUser = user
+
+		when:
+		authenticatedAs(user) { controller.delete() }
+		then:
+		thrown(NotFoundException)
+		Permission.findById(anotherPermission.id) != null
 	}
 
 	void "delete revokes permissions"() {
@@ -261,7 +364,7 @@ class PermissionApiControllerSpec extends ControllerSpecification {
 		params.resourceId = canvasShared.id
 
 		when:
-		authenticatedAs(me) { controller.delete("${canvasPermission.id}") }
+		authenticatedAs(me) { controller.delete() }
 		then:
 		response.status == 204
 		1 * permissionService.getPermissionsTo(_) >> [canvasPermission, *ownerPermissions]

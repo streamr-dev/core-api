@@ -3,11 +3,13 @@ package com.unifina.controller.api
 import com.unifina.api.InvalidArgumentsException
 import com.unifina.api.NotFoundException
 import com.unifina.api.NotPermittedException
+import com.unifina.domain.security.Permission
 import com.unifina.domain.security.Permission.Operation
 import com.unifina.domain.security.SecUser
 import com.unifina.domain.security.SignupInvite
 import com.unifina.security.AuthLevel
 import com.unifina.security.StreamrApi
+import com.unifina.security.Userish
 import com.unifina.service.EthereumIntegrationKeyService
 import com.unifina.service.PermissionService
 import com.unifina.service.SignupCodeService
@@ -147,27 +149,32 @@ class PermissionApiController {
 
 	@StreamrApi(authenticationLevel = AuthLevel.NONE)
 	def delete(String id) {
-		usePermissionResource(params.resourceClass, params.resourceId, id as Long) { p, res ->
-			permissionService.systemRevoke(p)
-			render status: 204
+		if (!params.resourceClass) {
+			throw new IllegalArgumentException("Missing resource class")
 		}
-	}
-
-	private usePermissionResource(Class resourceClass, resourceId, Long permissionId, Closure action) {
-		if (!resourceClass) { throw new IllegalArgumentException("Missing resource class") }
-		if (!grailsApplication.isDomainClass(resourceClass)) { throw new IllegalArgumentException("${resourceClass.simpleName} is not a domain class!") }
-		def res = resourceClass.get(resourceId)
-		if (!res) {
-			throw new NotFoundException(resourceClass.simpleName, resourceId.toString())
+		if (!grailsApplication.isDomainClass(params.resourceClass)) {
+			throw new IllegalArgumentException("${params.resourceClass.simpleName} is not a domain class!")
 		}
-
-		useResource(resourceClass, resourceId, false) { resource ->
-			def p = permissionService.getPermissionsTo(resource).find { it.id == permissionId }
-			if (!p) {
-				throw new NotFoundException("permissions", permissionId.toString())
-			} else {
-				action(p, resource)
-			}
+		def resource = params.resourceClass.get(params.resourceId)
+		if (!resource) {
+			throw new NotFoundException(params.resourceClass.simpleName, params.resourceId.toString())
+		}
+		Permission permission = permissionService.getPermissionsTo(resource).find { it.id.toString() == id.toString() }
+		if (!permission) {
+			throw new NotFoundException("permissions", id.toString())
+		}
+		Userish user = request.apiUser ?: request.apiKey
+		if (permissionService.canShare(user, resource)) {
+			// user with share permission to resource can delete another user's permission to same resource
+			permissionService.systemRevoke(permission)
+			render(status: 204)
+		} else if (permission.user == user) {
+			// user without share permission to resource can delete their own permission to resource
+			permissionService.systemRevoke(permission)
+			render(status: 204)
+		} else {
+			// user without share permission to resource can't delete another user's permission to same resource
+			render(status: 403)
 		}
 	}
 }
