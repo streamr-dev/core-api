@@ -128,6 +128,11 @@ class ProductService {
 		product.owner = currentUser
 		product.save(failOnError: true)
 		permissionService.systemGrantAll(currentUser, product)
+		if (product.isFree()) {
+			product.streams.each { stream ->
+				permissionService.systemGrantAnonymousAccess(stream, Permission.Operation.READ)
+			}
+		}
 		return product
 	}
 
@@ -141,8 +146,18 @@ class ProductService {
 		}
 
 		Product product = findById(id, currentUser, Permission.Operation.WRITE)
+		if (product.isFree()) {
+			product.streams.each { stream ->
+				permissionService.systemRevokeAnonymousAccess(stream, Permission.Operation.READ)
+			}
+		}
 		command.updateProduct(product, currentUser, permissionService)
 		product.save(failOnError: true)
+		if (product.isFree()) {
+			product.streams.each { stream ->
+				permissionService.systemGrantAnonymousAccess(stream, Permission.Operation.READ)
+			}
+		}
 		subscriptionService.afterProductUpdated(product)
 		return product
 	}
@@ -152,6 +167,9 @@ class ProductService {
 		permissionService.verifyShare(currentUser, stream)
 		product.streams.add(stream)
 		product.save(failOnError: true)
+		if (product.isFree()) {
+			permissionService.systemGrantAnonymousAccess(stream, Permission.Operation.READ)
+		}
 		if (product.type == Product.Type.COMMUNITY) {
 			Set<SecUser> users = communityJoinRequestService.findCommunityMembers(product.beneficiaryAddress)
 			for (SecUser u : users) {
@@ -166,6 +184,9 @@ class ProductService {
 	void removeStreamFromProduct(Product product, Stream stream) {
 		product.streams.remove(stream)
 		product.save(failOnError: true)
+		if (product.isFree()) {
+			permissionService.systemRevokeAnonymousAccess(stream, Permission.Operation.READ)
+		}
 		if (product.type == Product.Type.COMMUNITY) {
 			Set<SecUser> users = communityJoinRequestService.findCommunityMembers(product.beneficiaryAddress)
 			for (SecUser u : users) {
