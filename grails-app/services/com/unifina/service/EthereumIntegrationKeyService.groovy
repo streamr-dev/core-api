@@ -34,18 +34,24 @@ class EthereumIntegrationKeyService {
 
 	@PostConstruct
 	void init() {
-		getStringEncryptor()
+		initStringEncryptor()
 	}
 
-	String getPassword() {
+	private String getPassword() {
 		String password = Holders.getGrailsApplication().getConfig()["streamr"]["encryption"]["password"]
 		Assert.notNull(password, "streamr.encryption.password not set!")
 		return password
 	}
 
+	//always instantiates
+	private initStringEncryptor(){
+		encryptor = new StringEncryptor(getPassword())
+	}
+
+	// instantiates only if encryptor doesn't exist
 	private StringEncryptor getStringEncryptor() {
 		if (encryptor == null) {
-			encryptor = new StringEncryptor(getPassword())
+			initStringEncryptor()
 		}
 		return encryptor;
 	}
