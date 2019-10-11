@@ -16,10 +16,6 @@ public class StringEncryptor {
 		this.password = password;
 	}
 
-	public String getPassword(){
-		return password;
-	}
-
 	public String encrypt(String plaintext, byte[] salt) {
 		return encoder(salt).encrypt(plaintext);
 	}
