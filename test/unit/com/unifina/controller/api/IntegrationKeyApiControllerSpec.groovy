@@ -20,6 +20,8 @@ class IntegrationKeyApiControllerSpec extends ControllerSpecification {
 	SecUser someoneElse
 
 	def setup() {
+		EthereumIntegrationKeyService ethereumIntegrationKeyService = new EthereumIntegrationKeyService()
+		mockBean(EthereumIntegrationKeyService.class, ethereumIntegrationKeyService)
 		me = new SecUser().save(failOnError: true, validate: false)
 		someoneElse = new SecUser().save(failOnError: true, validate: false)
 
@@ -32,21 +34,21 @@ class IntegrationKeyApiControllerSpec extends ControllerSpecification {
 			user: me,
 			service: IntegrationKey.Service.ETHEREUM,
 			idInService: "0x0000000000000000000",
-			json: "{ address: '0x0000000000000000000' }"
+			json: '{"address": "0xa3d1f77acff0060f7213d7bf3c7fec78df847de1", "privateKey": "84de2689ce72c6cd95f15e776eec62369ec7a57e7833ae5454ae05b22d71bb5517360b69f2e5e5879f7c3de8d520361980c50029b18bb7a19d34b2ca4ecc2cac56082e93a9a2e5392665a5943b4acc45bdb29f8c854a901fb25f4476b34f2c25"}'
 		).save(validate: true, failOnError: true)
 		new IntegrationKey(
 			name: "my-integration-key-2",
 			user: me,
 			service: IntegrationKey.Service.ETHEREUM_ID,
 			idInService: "0x0000000000000000000",
-			json: "{ address: '0x0000000000000000000' }"
+			json: '{"address": "0xa3d1f77acff0060f7213d7bf3c7fec78df847de1", "privateKey": "84de2689ce72c6cd95f15e776eec62369ec7a57e7833ae5454ae05b22d71bb5517360b69f2e5e5879f7c3de8d520361980c50029b18bb7a19d34b2ca4ecc2cac56082e93a9a2e5392665a5943b4acc45bdb29f8c854a901fb25f4476b34f2c25"}'
 		).save(validate: true, failOnError: true)
 		new IntegrationKey(
 			name: "not-my-integration-key",
 			user: someoneElse,
 			service: IntegrationKey.Service.ETHEREUM,
 			idInService: "0x0000000000000000000",
-			json: "{ address: '0x0000000000000000000' }"
+			json: '{"address": "0xa3d1f77acff0060f7213d7bf3c7fec78df847de1", "privateKey": "84de2689ce72c6cd95f15e776eec62369ec7a57e7833ae5454ae05b22d71bb5517360b69f2e5e5879f7c3de8d520361980c50029b18bb7a19d34b2ca4ecc2cac56082e93a9a2e5392665a5943b4acc45bdb29f8c854a901fb25f4476b34f2c25"}'
 		).save(validate: true, failOnError: true)
 	}
 

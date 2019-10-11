@@ -9,6 +9,7 @@ import com.unifina.security.StringEncryptor
 import com.unifina.utils.AlphanumericStringGenerator
 import grails.compiler.GrailsCompileStatic
 import grails.converters.JSON
+import grails.util.Holders
 import groovy.transform.CompileStatic
 import org.apache.commons.codec.DecoderException
 import org.apache.commons.codec.binary.Hex
@@ -32,9 +33,20 @@ class EthereumIntegrationKeyService {
 
 	@PostConstruct
 	void init() {
-		String password = grailsApplication.config["streamr"]["encryption"]["password"]
+		getStringEncryptor()
+	}
+
+	String getPassword() {
+		String password = Holders.getGrailsApplication().getConfig()["streamr"]["encryption"]["password"]
 		Assert.notNull(password, "streamr.encryption.password not set!")
-		encryptor = new StringEncryptor(password)
+		return password
+	}
+
+	private StringEncryptor getStringEncryptor() {
+		if (encryptor == null) {
+			encryptor = new StringEncryptor(getPassword())
+		}
+		return encryptor;
 	}
 
 	private String generateNewPrivateKey(){
@@ -52,7 +64,7 @@ class EthereumIntegrationKeyService {
 
 		try {
 			String address = "0x" + getAddress(privateKey)
-			String encryptedPrivateKey = encryptor.encrypt(privateKey, user.id.byteValue())
+			String encryptedPrivateKey = getStringEncryptor().encrypt(privateKey, user.id.byteValue())
 
 			assertUnique(address)
 
@@ -123,7 +135,7 @@ class EthereumIntegrationKeyService {
 
 	String decryptPrivateKey(IntegrationKey key) {
 		Map json = JSON.parse(key.json)
-		return encryptor.decrypt((String) json.privateKey, key.user.id.byteValue())
+		return getStringEncryptor().decrypt((String) json.privateKey, key.user.id.byteValue())
 	}
 
 	List<IntegrationKey> getAllPrivateKeysForUser(SecUser user) {
