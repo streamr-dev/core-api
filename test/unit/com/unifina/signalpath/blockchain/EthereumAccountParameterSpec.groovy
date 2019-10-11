@@ -21,7 +21,7 @@ class EthereumAccountParameterSpec extends BeanMockingSpecification {
 	void setup() {
 		def module = new Multiply()
 		def keyService = new EthereumIntegrationKeyService()
-		keyService.encryptor = encryptor = new StringEncryptor("pasword")
+		keyService.encryptor = encryptor = new StringEncryptor("password")
 		mockBean(EthereumIntegrationKeyService, keyService)
 		module.globals = new Globals()
 		parameter = new EthereumAccountParameter(module, "ethAccount")
@@ -97,7 +97,7 @@ class EthereumAccountParameterSpec extends BeanMockingSpecification {
 		IntegrationKey key = new IntegrationKey(name: "key", service: IntegrationKey.Service.ETHEREUM, user: user, idInService: "0xffff")
 
 		key.id = "account-1"
-		key.json = '{ "privateKey": "0x0000", "address": "0xffff"}'
+		key.json = '{"address": "0xa3d1f77acff0060f7213d7bf3c7fec78df847de1", "privateKey": "84de2689ce72c6cd95f15e776eec62369ec7a57e7833ae5454ae05b22d71bb5517360b69f2e5e5879f7c3de8d520361980c50029b18bb7a19d34b2ca4ecc2cac56082e93a9a2e5392665a5943b4acc45bdb29f8c854a901fb25f4476b34f2c25"}'
 		key.save(failOnError: true, validate: true)
 
 		Globals globals = new Globals([:], new SecUser())
@@ -107,7 +107,7 @@ class EthereumAccountParameterSpec extends BeanMockingSpecification {
 		parameter.getOwner().setGlobals(globals)
 
 		then:
-		parameter.getAddress() == "0xffff"
+		parameter.getAddress() == "0xa3d1f77acff0060f7213d7bf3c7fec78df847de1"
 	}
 
 	void "getPrivateKey() throws exception, after configuration, if not logged in as user"() {

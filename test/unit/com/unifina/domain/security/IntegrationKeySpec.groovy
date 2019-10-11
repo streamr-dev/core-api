@@ -1,13 +1,16 @@
 package com.unifina.domain.security
 
+import com.unifina.BeanMockingSpecification
 import com.unifina.service.EthereumIntegrationKeyService
 import grails.test.mixin.Mock
 import grails.test.mixin.TestFor
-import spock.lang.Specification
-
-@TestFor(EthereumIntegrationKeyService)
+@TestFor(IntegrationKey)
 @Mock([SecUser])
-class IntegrationKeySpec extends Specification {
+class IntegrationKeySpec extends BeanMockingSpecification {
+	def setup() {
+		EthereumIntegrationKeyService ethereumIntegrationKeyService = new EthereumIntegrationKeyService()
+		mockBean(EthereumIntegrationKeyService.class, ethereumIntegrationKeyService)
+	}
 	def "toMap().json for Ethereum integration key"() {
 		def key = new IntegrationKey(
 			user: new SecUser(username: "me@me.com").save(failOnError: true, validate: false),

@@ -51,10 +51,10 @@ class EthereumIntegrationKeyServiceSpec extends Specification {
 		permissionService = service.permissionService = Mock(PermissionService)
 	}
 
-	void "init() without grailsConfig streamr.encryption.password throws IllegalArgumentException"() {
+	void "getPassword() without grailsConfig streamr.encryption.password throws IllegalArgumentException"() {
 		when:
 		grailsApplication.config.streamr.encryption.password = null
-		service.init()
+		service.getPassword()
 
 		then:
 		def e = thrown(IllegalArgumentException)
