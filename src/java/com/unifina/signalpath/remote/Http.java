@@ -35,6 +35,12 @@ public class Http extends AbstractHttpModule {
 	private StringParameter URL = new StringParameter(this, "URL", "");
 	private MapParameter headers = new MapParameter(this, "headers");
 	private MapParameter queryParams = new MapParameter(this, "params");
+	private DataTypeParameter dataType = new DataTypeParameter(this, "dataType", "auto", Arrays.asList(
+		new PossibleValue("auto", null),
+		new PossibleValue("binary", "binary"),
+		new PossibleValue("text", "text"),
+		new PossibleValue("json", "json")
+	));
 
 	private Input<Object> body = new Input<>(this, "body", "Object");
 	private MapOutput responseHeaders = new MapOutput(this, "headers");
@@ -50,6 +56,7 @@ public class Http extends AbstractHttpModule {
 		addInput(URL);
 		addInput(queryParams);
 		addInput(headers);
+		addInput(dataType);
 		addInput(body);
 		addOutput(errors);
 		addOutput(responseData);
@@ -139,15 +146,27 @@ public class Http extends AbstractHttpModule {
 			try {
 				// entity is null for bodyless response 204, and that's not an error
 				HttpEntity entity = call.response.getEntity();
+
 				if (entity != null) {
-					if (isOctetStream(entity)) {
+					String dt = dataType.getValue();
+
+					if (dt == null) {
+						dt = getDataType(entity);
+					}
+
+					if (dt.equals("binary")) {
 						responseData.send(EntityUtils.toByteArray(entity));
 					} else {
 						String responseString = EntityUtils.toString(entity, "UTF-8");
-						if (responseString.isEmpty()) {
-							call.errors.add("Empty response from server");
+
+						if (dt.equals("text")) {
+							responseData.send(responseString);
 						} else {
-							responseData.send(JsonParser.jsonStringToOutputObject(responseString));
+							if (responseString.isEmpty()) {
+								call.errors.add("Empty response from server");
+							} else {
+								responseData.send(JsonParser.jsonStringToOutputObject(responseString));
+							}
 						}
 					}
 				}
@@ -170,9 +189,19 @@ public class Http extends AbstractHttpModule {
 		}
 	}
 
-	private static boolean isOctetStream(HttpEntity entity) {
+	private static String getDataType(HttpEntity entity) {
 		ContentType contentType = ContentType.get(entity);
-		return contentType != null && contentType.getMimeType().equals(ContentType.APPLICATION_OCTET_STREAM.getMimeType());
+		String mimeType = contentType == null ? "" : contentType.getMimeType();
+
+		if (mimeType == "" || mimeType.equals(ContentType.APPLICATION_JSON.getMimeType())) {
+			return "json";
+		}
+
+		if (mimeType.equals(ContentType.APPLICATION_OCTET_STREAM.getMimeType())) {
+			return "binary";
+		}
+
+		return "text";
 	}
 
 	@Override
