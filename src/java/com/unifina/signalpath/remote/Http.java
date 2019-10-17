@@ -37,7 +37,6 @@ public class Http extends AbstractHttpModule {
 	private MapParameter queryParams = new MapParameter(this, "params");
 	private DataTypeParameter dataType = new DataTypeParameter(this, "dataType", "auto", Arrays.asList(
 		new PossibleValue("auto", null),
-		new PossibleValue("binary", "binary"),
 		new PossibleValue("text", "text"),
 		new PossibleValue("json", "json")
 	));
@@ -149,24 +148,19 @@ public class Http extends AbstractHttpModule {
 
 				if (entity != null) {
 					String dt = dataType.getValue();
+					String responseString = EntityUtils.toString(entity, "UTF-8");
 
 					if (dt == null) {
 						dt = getDataType(entity);
 					}
 
-					if ("binary".equals(dt)) {
-						responseData.send(EntityUtils.toByteArray(entity));
+					if ("text".equals(dt)) {
+						responseData.send(responseString);
 					} else {
-						String responseString = EntityUtils.toString(entity, "UTF-8");
-
-						if ("text".equals(dt)) {
-							responseData.send(responseString);
+						if (responseString.isEmpty()) {
+							call.errors.add("Empty response from server");
 						} else {
-							if (responseString.isEmpty()) {
-								call.errors.add("Empty response from server");
-							} else {
-								responseData.send(JsonParser.jsonStringToOutputObject(responseString));
-							}
+							responseData.send(JsonParser.jsonStringToOutputObject(responseString));
 						}
 					}
 				}
@@ -195,10 +189,6 @@ public class Http extends AbstractHttpModule {
 
 		if (mimeType == "" || mimeType.equals(ContentType.APPLICATION_JSON.getMimeType())) {
 			return "json";
-		}
-
-		if (mimeType.equals(ContentType.APPLICATION_OCTET_STREAM.getMimeType())) {
-			return "binary";
 		}
 
 		return "text";
