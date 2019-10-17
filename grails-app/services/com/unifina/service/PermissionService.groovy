@@ -124,7 +124,7 @@ class PermissionService {
 		userish = userish?.resolveToUserish()
 		String resourceProp = getResourcePropertyName(resource)
 
-		return Permission.withCriteria {
+		List directPermissions = Permission.withCriteria {
 			eq(resourceProp, resource)
 			or {
 				eq("anonymous", true)
@@ -138,6 +138,13 @@ class PermissionService {
 				gt("endsAt", new Date())
 			}
 		}.toList()
+
+		// Special case of UI channels: they inherit permissions from the associated canvas
+		if (resource instanceof Stream && resource.uiChannel) {
+			directPermissions.addAll(getPermissionsTo(resource.uiChannelCanvas, userish))
+		}
+
+		return directPermissions
 	}
 
 	/** Overload to allow leaving out the anonymous-include-flag but including the filter */

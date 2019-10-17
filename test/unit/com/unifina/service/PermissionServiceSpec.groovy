@@ -24,7 +24,7 @@ import java.security.AccessControlException
  */
 @TestMixin(GrailsUnitTestMixin)
 @TestFor(PermissionService)
-@Mock([SecUser, Key, SignupInvite, Module, ModulePackage, Permission, Dashboard, Canvas])
+@Mock([SecUser, Key, SignupInvite, Module, ModulePackage, Permission, Dashboard, Canvas, Stream])
 class PermissionServiceSpec extends BeanMockingSpecification {
 
 	SecUser me, anotherUser, stranger
@@ -170,7 +170,7 @@ class PermissionServiceSpec extends BeanMockingSpecification {
 		all.size() == allOperations.size()
 	}
 
-	void "getSingleUserPermissionsTo returns permissions for single user"() {
+	void "getPermissionsTo(resource, userish) returns permissions for single user"() {
 		expect:
 		service.getPermissionsTo(dashOwned, me).size() == 3
 		service.getPermissionsTo(dashOwned, anotherUser) == []
@@ -190,7 +190,21 @@ class PermissionServiceSpec extends BeanMockingSpecification {
 		service.getPermissionsTo(dashPublic, null)[0].operation == Operation.READ
 	}
 
-	void "getSingleUserPermissionsTo returns permissions for key"() {
+	void "getPermissionsTo(resource, userish) returns correct UI channel permissions via associated canvas"() {
+		Canvas canvas = new Canvas().save(validate: false)
+		service.systemGrantAll(me, canvas)
+
+		// User has indirect permissions to this UI channel stream via the canvas
+		Stream stream = new Stream(name: "ui channel", uiChannel: true, uiChannelCanvas: canvas).save(validate:false)
+
+		expect:
+		service.getPermissionsTo(stream, me).size() == 3
+		service.canRead(me, stream)
+		service.canWrite(me, stream)
+		service.canShare(me, stream)
+	}
+
+	void "getPermissionsTo(resource, userish) returns permissions for key"() {
 		expect:
 		service.getPermissionsTo(dashOwned, myKey).size() == 3
 		service.getPermissionsTo(dashOwned, anotherUserKey) == []
