@@ -12,13 +12,18 @@ import com.unifina.domain.marketplace.Product
 import com.unifina.domain.security.IntegrationKey
 import com.unifina.domain.security.Permission
 import com.unifina.domain.security.SecUser
+import org.apache.log4j.Logger
 
 class CommunityJoinRequestService {
+
+	private static final Logger log = Logger.getLogger(CommunityJoinRequestService)
+
 	EthereumService ethereumService
 	PermissionService permissionService
 	StreamrClientService streamrClientService
 
 	private void onApproveJoinRequest(CommunityJoinRequest c) {
+		log.debug("onApproveJoinRequest: approved JoinRequest for address ${c.memberAddress} to community ${c.communityAddress}")
 		for (Stream s : findStreams(c)) {
 			permissionService.systemGrant(c.user, s, Permission.Operation.WRITE)
 		}
@@ -37,26 +42,29 @@ class CommunityJoinRequestService {
 		return streams
 	}
 
-	private void sendMessage(CommunityJoinRequest c, String type) {
-		String joinPartStreamID = ethereumService.fetchJoinPartStreamID(c.communityAddress)
-		Map<String, Object> msg = new HashMap<>()
-		msg.put("type", type)
-		msg.put("addresses", Arrays.asList(c.memberAddress))
-		sendMessageToStream(joinPartStreamID, msg)
-	}
-
 	/**
 	 * Sends a message to joinPartStream using the credentials of this Engine node
 	 */
-	private void sendMessageToStream(String joinPartStreamID, HashMap<String, Object> content) {
+	private void sendMessage(CommunityJoinRequest c, String type) {
+		log.debug("sendMessage: fetching joinPartStreamID for community ${c.communityAddress}")
+		String joinPartStreamID = ethereumService.fetchJoinPartStreamID(c.communityAddress)
+		log.debug("sendMessage: got joinPartStreamID for community ${c.communityAddress}: ${joinPartStreamID}")
+		Map<String, Object> msg = new HashMap<>()
+		msg.put("type", type)
+		msg.put("addresses", Arrays.asList(c.memberAddress))
+
 		StreamrClient client = streamrClientService.getInstanceForThisEngineNode()
+		log.debug("sendMessage: StreamrClient state is ${client.getState()}, websocket url: ${client.getOptions().getWebsocketApiUrl()}")
+
 		com.streamr.client.rest.Stream stream = client.getStream(joinPartStreamID)
 
 		if (stream == null) {
 			throw new NotFoundException(String.format("Stream not found by id: %s", joinPartStreamID))
 		}
 
-		client.publish(stream, content)
+		log.debug("sendMessage: publishing message to stream ${stream.getId()}: ${msg}")
+		client.publish(stream, msg)
+		log.debug("sendMessage: done")
 	}
 
 	Set<SecUser> findCommunityMembers(String communityAddress) {
