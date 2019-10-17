@@ -1,6 +1,7 @@
 package com.unifina.service
 
 import com.streamr.client.StreamrClient
+import com.streamr.client.options.StreamrClientOptions
 import com.unifina.api.NotFoundException
 import com.unifina.api.UpdateCommunityJoinRequestCommand
 import com.unifina.domain.community.CommunityJoinRequest
@@ -44,6 +45,7 @@ class CommunityJoinRequestServiceIntegrationSpec extends Specification {
 		service.streamrClientService = Mock(StreamrClientService)
 		streamrClientMock = Mock(StreamrClient)
 		streamrClientMock.getStream(joinPartStream.id) >> joinPartStream
+		streamrClientMock.getOptions() >> Mock(StreamrClientOptions)
 		service.streamrClientService.getInstanceForThisEngineNode() >> streamrClientMock
 
 		service.ethereumService = Mock(EthereumService)
