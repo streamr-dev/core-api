@@ -140,6 +140,7 @@ log4j.main = {
 	warn 'org.mortbay.log',
 		'org.codehaus.groovy.grails.domain.GrailsDomainClassCleaner'
 
+	// Turn on debug logging for a few classes to debug join issue in prod
 	debug 'com.streamr.client',
 		'com.unifina.service.CommunityJoinRequestService',
 		'com.unifina.service.StreamrClientService'
