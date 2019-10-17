@@ -154,12 +154,12 @@ public class Http extends AbstractHttpModule {
 						dt = getDataType(entity);
 					}
 
-					if (dt.equals("binary")) {
+					if ("binary".equals(dt)) {
 						responseData.send(EntityUtils.toByteArray(entity));
 					} else {
 						String responseString = EntityUtils.toString(entity, "UTF-8");
 
-						if (dt.equals("text")) {
+						if ("text".equals(dt)) {
 							responseData.send(responseString);
 						} else {
 							if (responseString.isEmpty()) {
