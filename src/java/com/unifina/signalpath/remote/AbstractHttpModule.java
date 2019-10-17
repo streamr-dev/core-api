@@ -212,7 +212,7 @@ public abstract class AbstractHttpModule extends ModuleWithSideEffects implement
 			if (getRootSignalPath() != null && getRootSignalPath().getCanvas() != null) {
 				canvasId = getRootSignalPath().getCanvas().getId();
 			}
-			log.info("HTTP request " + request.toString() + " from canvas " + canvasId);
+			log.debug("HTTP request " + request.toString() + " from canvas " + canvasId);
 		} catch (Exception e) {
 			response.errors.add("Constructing HTTP request failed");
 			response.errors.add(e.getMessage());
@@ -294,17 +294,16 @@ public abstract class AbstractHttpModule extends ModuleWithSideEffects implement
 			}
 		});
 
-		// TODO: remove
 		if (!hasDebugLogged && getRootSignalPath() != null && getRootSignalPath().getCanvas() != null) {
 			hasDebugLogged = true;
-			log.info("Created HttpClient from canvas " + getRootSignalPath().getCanvas().getId());
+			log.debug("Created HttpClient from canvas " + getRootSignalPath().getCanvas().getId());
 			Set<Thread> threads = Thread.getAllStackTraces().keySet();
 			for (Thread t : threads) {
 				if (t.getName().startsWith("I/O dispatcher")) {
-					log.info(t.getName());
+					log.debug(t.getName());
 				}
 			}
-			log.info("end of threads.");
+			log.debug("end of threads.");
 		}
 
 		if (!isAsync) {

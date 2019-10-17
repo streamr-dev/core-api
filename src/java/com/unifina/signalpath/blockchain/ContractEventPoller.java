@@ -115,7 +115,7 @@ class ContractEventPoller implements Closeable, Runnable, JsonRpcResponseHandler
 			return;
 		}
 		try {
-			log.info(String.format("Polling filter '%s'.", filterId));
+			log.debug(String.format("Polling filter '%s'.", filterId));
 			rpc.rpcCall("eth_getFilterChanges", singletonList(filterId), ID_POLLFILTER);
 		}  catch (HttpEthereumJsonRpc.RPCException | JSONException e) {
 			listener.onError(e.getMessage());

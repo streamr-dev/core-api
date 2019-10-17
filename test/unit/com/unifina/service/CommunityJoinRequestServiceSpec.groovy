@@ -1,6 +1,7 @@
 package com.unifina.service
 
 import com.streamr.client.StreamrClient
+import com.streamr.client.options.StreamrClientOptions
 import com.unifina.BeanMockingSpecification
 import com.unifina.api.ApiException
 import com.unifina.api.CommunityJoinRequestCommand
@@ -38,6 +39,7 @@ class CommunityJoinRequestServiceSpec extends BeanMockingSpecification {
 
 		streamrClientMock = Mock(StreamrClient)
 		streamrClientMock.getStream(joinPartStream.id) >> joinPartStream
+		streamrClientMock.getOptions() >> Mock(StreamrClientOptions)
 		service.streamrClientService.getInstanceForThisEngineNode() >> streamrClientMock
 
 		me = new SecUser(
