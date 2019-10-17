@@ -66,6 +66,11 @@ class ErrorController {
 			apiError = new ApiError(500, exception.class.simpleName, exception.getMessage())
 		}
 
+		// Log internal errors
+		if (apiError.statusCode == 500) {
+			log.error("Unexpected error occurred, returning status code 500", exception)
+		}
+
 		response.status = apiError.statusCode
 		render(apiError.toMap() as JSON)
 	}

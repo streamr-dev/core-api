@@ -121,6 +121,9 @@ log4j.main = {
 		info 'stdout'
 	}
 
+	// No need to log all exceptions thrown in API calls. For example, InvalidAPIKeyExceptions easily pollute the logs.
+	fatal 'org.codehaus.groovy.grails.web.errors.GrailsExceptionResolver'
+
 	error 'org.codehaus.groovy.grails.web.servlet',  //  controllers
 		'org.codehaus.groovy.grails.web.pages', //  GSP
 		'org.codehaus.groovy.grails.web.sitemesh', //  layouts
