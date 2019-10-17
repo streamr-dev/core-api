@@ -25,12 +25,15 @@ class CommunityJoinRequestService {
 	private void onApproveJoinRequest(CommunityJoinRequest c) {
 		log.debug("onApproveJoinRequest: approved JoinRequest for address ${c.memberAddress} to community ${c.communityAddress}")
 		for (Stream s : findStreams(c)) {
+			log.debug(String.format("granting write permission to %s for %s", s, c.user))
 			permissionService.systemGrant(c.user, s, Permission.Operation.WRITE)
 		}
 		sendMessage(c, "join")
+		log.debug("exiting onApproveJoinRequest")
 	}
 
 	protected Set<Stream> findStreams(CommunityJoinRequest c) {
+		log.debug(String.format("entering findStreams(%s)", c))
 		List<Product> products = Product.withCriteria {
 			eq("type", Product.Type.COMMUNITY)
 			eq("beneficiaryAddress", c.communityAddress)
@@ -39,6 +42,7 @@ class CommunityJoinRequestService {
 		for (Product p : products) {
 			streams.addAll(p.streams)
 		}
+		log.debug(String.format("exiting findStreams(): %s", streams))
 		return streams
 	}
 
@@ -48,7 +52,7 @@ class CommunityJoinRequestService {
 	private void sendMessage(CommunityJoinRequest c, String type) {
 		log.debug("sendMessage: fetching joinPartStreamID for community ${c.communityAddress}")
 		String joinPartStreamID = ethereumService.fetchJoinPartStreamID(c.communityAddress)
-		log.debug("sendMessage: got joinPartStreamID for community ${c.communityAddress}: ${joinPartStreamID}")
+		log.debug(String.format("sending message to join part stream id: '%s', community address: '%s'", joinPartStreamID, c.communityAddress))
 		Map<String, Object> msg = new HashMap<>()
 		msg.put("type", type)
 		msg.put("addresses", Arrays.asList(c.memberAddress))
@@ -64,7 +68,7 @@ class CommunityJoinRequestService {
 
 		log.debug("sendMessage: publishing message to stream ${stream.getId()}: ${msg}")
 		client.publish(stream, msg)
-		log.debug("sendMessage: done")
+		log.debug("exiting sendMessage")
 	}
 
 	Set<SecUser> findCommunityMembers(String communityAddress) {
