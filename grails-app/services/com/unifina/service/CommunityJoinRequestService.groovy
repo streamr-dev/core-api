@@ -22,17 +22,17 @@ class CommunityJoinRequestService {
 	private static final Logger log = LogManager.getLogger(CommunityJoinRequestService.class)
 
 	private void onApproveJoinRequest(CommunityJoinRequest c) {
-		log.info(String.format("entering onApproveJoinRequest(%s", c))
+		log.debug(String.format("entering onApproveJoinRequest(%s", c))
 		for (Stream s : findStreams(c)) {
-			log.info(String.format("granting write permission to %s for %s", s, c.user))
+			log.debug(String.format("granting write permission to %s for %s", s, c.user))
 			permissionService.systemGrant(c.user, s, Permission.Operation.WRITE)
 		}
 		sendMessage(c, "join")
-		log.info("exiting onApproveJoinRequest")
+		log.debug("exiting onApproveJoinRequest")
 	}
 
 	protected Set<Stream> findStreams(CommunityJoinRequest c) {
-		log.info(String.format("entering findStreams(%s)", c))
+		log.debug(String.format("entering findStreams(%s)", c))
 		List<Product> products = Product.withCriteria {
 			eq("type", Product.Type.COMMUNITY)
 			eq("beneficiaryAddress", c.communityAddress)
@@ -41,26 +41,26 @@ class CommunityJoinRequestService {
 		for (Product p : products) {
 			streams.addAll(p.streams)
 		}
-		log.info(String.format("exiting findStreams(): %s", streams))
+		log.debug(String.format("exiting findStreams(): %s", streams))
 		return streams
 	}
 
 	private void sendMessage(CommunityJoinRequest c, String type) {
-		log.info(String.format("entering sendMessage(%s, %s)", c, type))
+		log.debug(String.format("entering sendMessage(%s, %s)", c, type))
 		String joinPartStreamID = ethereumService.fetchJoinPartStreamID(c.communityAddress)
-		log.info(String.format("sending message to join part stream id: '%s', community address: '%s'", joinPartStreamID, c.communityAddress))
+		log.debug(String.format("sending message to join part stream id: '%s', community address: '%s'", joinPartStreamID, c.communityAddress))
 		Map<String, Object> msg = new HashMap<>()
 		msg.put("type", type)
 		msg.put("addresses", Arrays.asList(c.memberAddress))
 		sendMessageToStream(joinPartStreamID, msg)
-		log.info("exiting sendMessage")
+		log.debug("exiting sendMessage")
 	}
 
 	/**
 	 * Sends a message to joinPartStream using the credentials of this Engine node
 	 */
 	private void sendMessageToStream(String joinPartStreamID, HashMap<String, Object> content) {
-		log.info(String.format("entering sendMessageToStream(%s, %s)", joinPartStreamID, content))
+		log.debug(String.format("entering sendMessageToStream(%s, %s)", joinPartStreamID, content))
 		StreamrClient client = streamrClientService.getInstanceForThisEngineNode()
 		com.streamr.client.rest.Stream stream = client.getStream(joinPartStreamID)
 
@@ -69,7 +69,7 @@ class CommunityJoinRequestService {
 		}
 
 		client.publish(stream, content)
-		log.info("exiting sendMessageToStream")
+		log.debug("exiting sendMessageToStream")
 	}
 
 	Set<SecUser> findCommunityMembers(String communityAddress) {
