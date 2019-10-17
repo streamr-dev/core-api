@@ -63,7 +63,7 @@ class ErrorController {
 		}
 
 		// Log internal errors
-		if (apiError.statusCode == 500) {
+		if (apiError.statusCode >= 500 && apiError.statusCode < 600) {
 			log.error("Unexpected error occurred, returning status code 500", exception)
 		}
 
