@@ -40,11 +40,7 @@ class ErrorController {
 	def index() {
 		try {
 			Exception exception = request.exception.cause ?: request.exception
-			if (request.isApiAction) {
-				renderAsJson(exception)
-			} else {
-				[exception: exception]
-			}
+			renderAsJson(exception)
 		} catch (Exception e) {
 			// Avoid infinite loop by catching any "error while showing error" -type of situation
 			log.error("Failed to render exception!", e)
