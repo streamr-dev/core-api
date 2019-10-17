@@ -208,4 +208,18 @@ public class Http extends AbstractHttpModule {
 	protected String getDummyNotificationMessage() {
 		return "HTTP " + verb.getValue() + " request sent to " + URL.getValue();
 	}
+
+	public static class DataTypeParameter extends StringParameter {
+		private List<PossibleValue> possibleValues;
+
+		public DataTypeParameter(AbstractSignalPathModule owner, String name, String defaultValue, List<PossibleValue> options) {
+			super(owner, name, defaultValue);
+			possibleValues = options;
+		}
+
+		@Override
+		protected List<PossibleValue> getPossibleValues() {
+			return possibleValues;
+		}
+	}
 }

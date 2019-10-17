@@ -345,20 +345,6 @@ public abstract class AbstractHttpModule extends ModuleWithSideEffects implement
 	@Override
 	public void clearState() {}
 
-	public static class DataTypeParameter extends StringParameter {
-		private List<PossibleValue> possibleValues;
-
-		public DataTypeParameter(AbstractSignalPathModule owner, String name, String defaultValue, List<PossibleValue> options) {
-			super(owner, name, defaultValue);
-			possibleValues = options;
-		}
-
-		@Override
-		protected List<PossibleValue> getPossibleValues() {
-			return possibleValues;
-		}
-	}
-
 	public static class VerbParameter extends StringParameter {
 		public VerbParameter(AbstractSignalPathModule owner, String name) {
 			super(owner, name, "POST"); //this.getValueList()[0]);
