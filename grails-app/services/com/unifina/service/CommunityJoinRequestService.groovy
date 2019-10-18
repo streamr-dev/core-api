@@ -52,6 +52,14 @@ class CommunityJoinRequestService {
 	private void sendMessage(CommunityJoinRequest c, String type) {
 		log.debug("sendMessage: fetching joinPartStreamID for community ${c.communityAddress}")
 		String joinPartStreamID = ethereumService.fetchJoinPartStreamID(c.communityAddress)
+		Stream jps = Stream.findById(joinPartStreamID)
+		if (jps == null) {
+			throw new NotFoundException(String.format("Join part stream %s not found", joinPartStreamID))
+		}
+		if (!permissionService.canWrite(c.user, jps)) {
+			log.debug(String.format("Granting write permission for %s to %s", c.user, jps))
+			permissionService.systemGrant(c.user, jps, Permission.Operation.WRITE)
+		}
 		log.debug(String.format("sending message to join part stream id: '%s', community address: '%s'", joinPartStreamID, c.communityAddress))
 		Map<String, Object> msg = new HashMap<>()
 		msg.put("type", type)

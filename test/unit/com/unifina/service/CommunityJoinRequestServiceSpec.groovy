@@ -19,7 +19,7 @@ import grails.test.mixin.Mock
 import grails.test.mixin.TestFor
 
 @TestFor(CommunityJoinRequestService)
-@Mock([SecUser, IntegrationKey, CommunityJoinRequest, CommunitySecret])
+@Mock([SecUser, IntegrationKey, CommunityJoinRequest, CommunitySecret, Stream])
 class CommunityJoinRequestServiceSpec extends BeanMockingSpecification {
 
 	private static final String memberAddress = "0xCCCC000000000000000000000000AAAA0000FFFF"
@@ -28,6 +28,7 @@ class CommunityJoinRequestServiceSpec extends BeanMockingSpecification {
 	SecUser me
 	StreamrClient streamrClientMock
 	com.streamr.client.rest.Stream joinPartStream
+	Stream jps
 
 	def setup() {
 		service.ethereumService = mockBean(EthereumService)
@@ -36,6 +37,9 @@ class CommunityJoinRequestServiceSpec extends BeanMockingSpecification {
 
 		joinPartStream = new com.streamr.client.rest.Stream("join part stream", "")
 		joinPartStream.setId("joinPartStream")
+		jps = new Stream(name: "join part stream")
+		jps.id = "joinPartStream"
+		jps.save(validate: true, failOnError: true)
 
 		streamrClientMock = Mock(StreamrClient)
 		streamrClientMock.getStream(joinPartStream.id) >> joinPartStream
