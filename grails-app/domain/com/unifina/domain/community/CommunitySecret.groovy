@@ -23,15 +23,17 @@ class CommunitySecret {
 	}
 
 	@GrailsCompileStatic
-	Map toMap() {
-		// TODO:
-		//  We probably need to be able to return the secret in the object?
-		//  Especially if it's generated server-side.
-		//  The API should of course only serve the secrets to the community admin.
-		return [
-			id: id,
-			name: name,
-			communityAddress: communityAddress,
-		]
-	}
+	Map toMap() { [
+		id: id,
+		name: name,
+		communityAddress: communityAddress,
+	] }
+
+	@GrailsCompileStatic
+	Map toMapWithSecret() { [
+		id: id,
+		name: name,
+		communityAddress: communityAddress,
+		secret: secret,
+	] }
 }
