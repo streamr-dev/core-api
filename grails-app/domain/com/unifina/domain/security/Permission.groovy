@@ -149,4 +149,9 @@ class Permission {
 		}
 		return map
 	}
+
+	@Override
+	String toString() {
+		return toInternalMap().toString()
+	}
 }
