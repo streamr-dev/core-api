@@ -39,7 +39,7 @@ public class IterableMessageHandler implements MessageHandler, Iterator<StreamMe
 		try {
 			boolean success = queue.offer(streamMessage, queueOfferTimeoutSeconds, TimeUnit.SECONDS);
 			if (!success) {
-				log.error(String.format("onMessage: the queue is full and no space was made within %d sec. The message will be dropped.", queueOfferTimeoutSeconds));
+				log.error(String.format("onMessage: the queue for Subscription('%s', %d) is full and no space was made within %d sec. The message will be dropped.", subscription.getStreamId(), subscription.getPartition(), queueOfferTimeoutSeconds));
 			}
 		} catch (InterruptedException e) {
 			log.error("Sleep interrupted while offering!", e);
