@@ -365,7 +365,7 @@ class CommunitySecretApiControllerSpec extends Specification {
 		}
 		then:
 		1 * controller.communityService.checkAdminAccessControl(me, communityAddress) >> true
-		1 * controller.communitySecretService.update(communityAddress, validID, _ as CommunitySecretCommand) >> null
+		1 * controller.communitySecretService.update(communityAddress, validID, _ as CommunitySecretCommand) >> { throw new NotFoundException("Community secret not found") }
 		def e = thrown(NotFoundException)
 		e.statusCode == 404
 		e.code == "NOT_FOUND"
