@@ -509,11 +509,11 @@ class PermissionService {
 		}
 	}
 
-	private static boolean hasPermission(Userish userish, resource, Operation op) {
+	private boolean hasPermission(Userish userish, resource, Operation op) {
 		userish = userish?.resolveToUserish()
 		String resourceProp = getResourcePropertyName(resource)
 
-		def p = Permission.withCriteria {
+		List<Permission> p = Permission.withCriteria {
 			eq(resourceProp, resource)
 			eq("operation", op)
 			or {
@@ -528,6 +528,11 @@ class PermissionService {
 				gt("endsAt", new Date())
 			}
 		}
+		// Special case of UI channels: they inherit permissions from the associated canvas
+		if (resource instanceof Stream && resource.uiChannel) {
+			p.addAll(getPermissionsTo(resource.uiChannelCanvas, userish))
+		}
+
 		return !p.empty
 	}
 
