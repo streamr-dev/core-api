@@ -8,12 +8,14 @@ public class AuthenticationResult {
 	private final SecUser secUser;
 	private final boolean keyMissing;
 	private final boolean lastAuthenticationMalformed;
+	private final boolean failed;
 
-	public AuthenticationResult(boolean keyMissing, boolean lastAuthenticationMalformed) {
+	public AuthenticationResult(boolean keyMissing, boolean lastAuthenticationMalformed, boolean failed) {
 		this.key = null;
 		this.secUser = null;
 		this.keyMissing = keyMissing;
 		this.lastAuthenticationMalformed = lastAuthenticationMalformed;
+		this.failed = failed;
 	}
 
 	public AuthenticationResult(SecUser secUser) {
@@ -21,6 +23,7 @@ public class AuthenticationResult {
 		this.secUser = secUser;
 		this.keyMissing = false;
 		this.lastAuthenticationMalformed = false;
+		this.failed = false;
 	}
 
 	public AuthenticationResult(Key key) {
@@ -28,6 +31,7 @@ public class AuthenticationResult {
 		this.key = key.getUser() != null ? null : key;
 		this.keyMissing = false;
 		this.lastAuthenticationMalformed = false;
+		this.failed = false;
 	}
 
 	public Key getKey() {
@@ -48,11 +52,11 @@ public class AuthenticationResult {
 
 	public boolean guarantees(AuthLevel level) {
 		if (level == AuthLevel.USER) {
-			return getSecUser() != null;
+			return !failed && getSecUser() != null;
 		} else if (level == AuthLevel.KEY) {
-			return getSecUser() != null || getKey() != null;
+			return !failed && (getSecUser() != null || getKey() != null);
 		} else if (level == AuthLevel.NONE) {
-			return true;
+			return !failed;
 		} else {
 			throw new RuntimeException("Unexpected authLevel: " + level);
 		}
