@@ -19,12 +19,13 @@ import grails.test.mixin.support.GrailsUnitTestMixin
 
 import java.security.AccessControlException
 
-/**
- * See the API for {@link grails.test.mixin.support.GrailsUnitTestMixin} for usage instructions
+/*
+	If you get weird test failures, it may be due to spotty GORM and mocked criteria queries.
+	You might want to try PermissionServiceIntegrationSpec instead.
  */
 @TestMixin(GrailsUnitTestMixin)
 @TestFor(PermissionService)
-@Mock([SecUser, Key, SignupInvite, Module, ModulePackage, Permission, Dashboard, Canvas, Stream])
+@Mock([SecUser, Key, SignupInvite, Module, ModulePackage, Permission, Dashboard, Canvas])
 class PermissionServiceSpec extends BeanMockingSpecification {
 
 	SecUser me, anotherUser, stranger

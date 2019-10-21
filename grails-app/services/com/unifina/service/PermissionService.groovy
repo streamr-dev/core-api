@@ -528,9 +528,10 @@ class PermissionService {
 				gt("endsAt", new Date())
 			}
 		}
+
 		// Special case of UI channels: they inherit permissions from the associated canvas
-		if (resource instanceof Stream && resource.uiChannel) {
-			p.addAll(getPermissionsTo(resource.uiChannelCanvas, userish))
+		if (p.empty && resource instanceof Stream && resource.uiChannel) {
+			return hasPermission(userish, resource.uiChannelCanvas, op)
 		}
 
 		return !p.empty
