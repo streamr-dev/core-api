@@ -33,7 +33,12 @@ class CommunitySecretService {
 		if (result == null) {
 			throw new NotFoundException("Community secret not found")
 		}
-		result.name = cmd.name
+		if (cmd.name) {
+			result.name = cmd.name
+		}
+		if (cmd.secret) {
+			result.secret = cmd.secret
+		}
 		result.save(validate: true, failOnError: true)
 		return result
 	}

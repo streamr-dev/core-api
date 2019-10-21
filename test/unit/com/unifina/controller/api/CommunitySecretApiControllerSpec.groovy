@@ -39,7 +39,7 @@ class CommunitySecretApiControllerSpec extends Specification {
 		setup:
 		CommunitySecret s1 = new CommunitySecret(
 			name: "secret 1",
-			secret: "secret 1",
+			secret: "secret1",
 			communityAddress: communityAddress,
 		)
 		s1.id = "1"
@@ -122,6 +122,7 @@ class CommunitySecretApiControllerSpec extends Specification {
 		1 * controller.communitySecretService.create(communityAddress, _ as CommunitySecretCommand) >> secret
 		response.json.id == "1"
 		response.json.name == "secret name"
+		response.json.secret == "secret"
 		response.json.communityAddress == communityAddress
 	}
 
@@ -182,7 +183,7 @@ class CommunitySecretApiControllerSpec extends Specification {
 		setup:
 		CommunitySecret s1 = new CommunitySecret(
 			name: "secret 1",
-			secret: "secret 1",
+			secret: "secret1",
 			communityAddress: communityAddress,
 		)
 		s1.id = "1"
@@ -200,6 +201,7 @@ class CommunitySecretApiControllerSpec extends Specification {
 		1 * controller.communitySecretService.find(communityAddress, validID) >> s1
 		response.json.id == "1"
 		response.json.name == "secret 1"
+		response.json.secret == "secret1"
 		response.json.communityAddress == communityAddress
 	}
 
@@ -290,11 +292,13 @@ class CommunitySecretApiControllerSpec extends Specification {
 		1 * controller.communityService.checkAdminAccessControl(me, communityAddress) >> true
 		1 * controller.communitySecretService.update(communityAddress, validID, _ as CommunitySecretCommand) >> {
 			s1.name = "new name"
+			s1.secret = "new secret"
 			return s1
 		}
 		response.status == 200
 		response.json.id  == "1"
 		response.json.name == "new name"
+		response.json.secret == "new secret"
 	}
 
 	void "update() bad request on invalid community address"() {
