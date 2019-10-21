@@ -93,10 +93,7 @@ class CommunitySecretApiController {
 		}
 		checkAdminAccessControl(loggedInUser(), communityAddress)
 		CommunitySecret secret = communitySecretService.update(communityAddress, id, cmd)
-		if (secret == null) {
-			throw new NotFoundException("community secret not found by id")
-		}
-		render(secret?.toMap() as JSON)
+		render(secret.toMap() as JSON)
 	}
 
 	// curl -v -X DELETE -H "Authorization: token tester1-api-key" http://localhost:8081/streamr-core/api/v1/communities/0x6c90aece04198da2d5ca9b956b8f95af8041de37/secrets/L-TvrBkyQTS_JK1ABHFEZAaZ3FHq7-TPqMXe9JNz1x6g
