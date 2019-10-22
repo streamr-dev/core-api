@@ -25,7 +25,7 @@ class CommunityJoinRequestService {
 	private void onApproveJoinRequest(CommunityJoinRequest c) {
 		log.debug("onApproveJoinRequest: approved JoinRequest for address ${c.memberAddress} to community ${c.communityAddress}")
 		for (Stream s : findStreams(c)) {
-			log.debug(String.format("granting write permission to %s for %s", s, c.user))
+			log.debug(String.format("granting write permission to %s (%s) for %s", s.name, s.id, c.user.username))
 			permissionService.systemGrant(c.user, s, Permission.Operation.WRITE)
 		}
 		sendMessage(c, "join")
