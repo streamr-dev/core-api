@@ -31,19 +31,6 @@ describe('Login API', () => {
         })
     }
 
-    function getStreamPermissions(streamId, sessionToken) {
-        const headers = {
-            'Content-Type': 'application/json',
-        }
-        if (sessionToken) {
-            headers.Authorization = 'Bearer '+sessionToken
-        }
-        return fetch(`${URL}/streams/${streamId}/permissions/me`, {
-            method: 'GET',
-            headers
-        })
-    }
-
     function sleep(ms) {
         return new Promise(resolve => setTimeout(() => resolve(), ms))
     }
@@ -59,16 +46,6 @@ describe('Login API', () => {
             const response = await loginWithApiKey(API_KEY)
             const json = await response.json()
             assert(json.token != null, 'session token was null!')
-        }).timeout(TIMEOUT)
-
-        it('responds with status 401 when wrong token even if endpoint does not require authentication', async () => {
-            const response = await getStreamPermissions('some-stream-id', 'wrong-token')
-            assert.equal(response.status, 401)
-        }).timeout(TIMEOUT)
-
-        it('responds with status 404 when no token provided if endpoint does not require authentication', async () => {
-            const response = await getStreamPermissions('some-stream-id')
-            assert.equal(response.status, 404)
         }).timeout(TIMEOUT)
 
         it('updates the user\'s lastLogin field', async () => {
