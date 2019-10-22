@@ -205,6 +205,7 @@ class Products {
 class Streams {
     constructor(options) {
         this.options = options
+        this.permissions = new Permissions('streams', options)
     }
 
     create(body) {
