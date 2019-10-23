@@ -40,11 +40,7 @@ class ErrorController {
 	def index() {
 		try {
 			Exception exception = request.exception.cause ?: request.exception
-			if (request.isApiAction) {
-				renderAsJson(exception)
-			} else {
-				[exception: exception]
-			}
+			renderAsJson(exception)
 		} catch (Exception e) {
 			// Avoid infinite loop by catching any "error while showing error" -type of situation
 			log.error("Failed to render exception!", e)
@@ -64,6 +60,11 @@ class ErrorController {
 			apiError = ((ApiException) exception).asApiError()
 		} else {
 			apiError = new ApiError(500, exception.class.simpleName, exception.getMessage())
+		}
+
+		// Log internal errors
+		if (apiError.statusCode >= 500 && apiError.statusCode < 600) {
+			log.error("Unexpected error occurred, returning status code 500", exception)
 		}
 
 		response.status = apiError.statusCode
