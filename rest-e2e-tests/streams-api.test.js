@@ -25,6 +25,43 @@ describe('Streams API', () => {
         streamId = response.id
     })
 
+    describe('GET /api/v1/streams/:id/permissions/me', () => {
+        it('responds with status 404 when authenticated but stream does not exist', async () => {
+            const response = await Streamr.api.v1.streams.permissions
+                .getOwnPermissions('non-existing-stream-id')
+                .withApiKey(API_KEY)
+                .call()
+            assert.equal(response.status, 404)
+        })
+        it('succeeds with authentication', async () => {
+            const response = await Streamr.api.v1.streams.permissions
+                .getOwnPermissions(streamId)
+                .withApiKey(API_KEY)
+                .call()
+            assert.equal(response.status, 200)
+        })
+        it('succeeds with no authentication', async () => {
+            const response = await Streamr.api.v1.streams.permissions
+                .getOwnPermissions(streamId)
+                .call()
+            assert.equal(response.status, 200)
+        })
+        it('responds with status 401 when wrong token even if endpoint does not require authentication', async () => {
+            const response = await Streamr.api.v1.streams.permissions
+                .getOwnPermissions(streamId)
+                .withSessionToken('wrong-token')
+                .call()
+            assert.equal(response.status, 401)
+        })
+        it('responds with status 401 when wrong API key even if endpoint does not require authentication', async () => {
+            const response = await Streamr.api.v1.streams.permissions
+                .getOwnPermissions(streamId)
+                .withApiKey('wrong-api-key')
+                .call()
+            assert.equal(response.status, 401)
+        })
+    })
+
     describe('GET /api/v1/streams/:id/publishers', () => {
         it('requires authentication for private streams', async () => {
             const response = await Streamr.api.v1.streams.getPublishers(streamId).call()
