@@ -1,5 +1,6 @@
 package com.unifina.domain.data
 
+
 import com.unifina.domain.ExampleType
 import com.unifina.domain.marketplace.Product
 import com.unifina.domain.security.Permission
@@ -31,6 +32,8 @@ class Stream implements Comparable {
 	Boolean inbox = false
 
 	Boolean requireSignedData = false
+	// Stream requires data to be encrypted
+	Boolean requireEncryptedData = false
 	// Always try to autoconfigure field names and types
 	Boolean autoConfigure = true
 	// Historical data storage period (days)
@@ -68,6 +71,7 @@ class Stream implements Comparable {
 		config type: 'text'
 		inbox defaultValue: "false"
 		requireSignedData defaultValue: "false"
+		requireEncryptedData defaultValue: "false"
 		autoConfigure defaultValue: "true"
 		storageDays defaultValue: DEFAULT_STORAGE_DAYS
 		exampleType enumType: "identity", defaultValue: ExampleType.NOT_SET, index: 'example_type_idx'
@@ -92,6 +96,7 @@ class Stream implements Comparable {
 			dateCreated: dateCreated,
 			lastUpdated: lastUpdated,
 			requireSignedData: requireSignedData,
+			requireEncryptedData: requireEncryptedData,
 			autoConfigure: autoConfigure,
 			storageDays: storageDays,
 			inactivityThresholdHours: inactivityThresholdHours,
@@ -109,7 +114,8 @@ class Stream implements Comparable {
 			inbox: inbox,
 			dateCreated: dateCreated,
 			lastUpdated: lastUpdated,
-			requireSignedData: requireSignedData
+			requireSignedData: requireSignedData,
+			requireEncryptedData: requireEncryptedData,
 		]
 	}
 

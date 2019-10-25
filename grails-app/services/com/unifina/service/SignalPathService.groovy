@@ -1,6 +1,5 @@
 package com.unifina.service
 
-
 import com.unifina.api.CanvasCommunicationException
 import com.unifina.datasource.IStartListener
 import com.unifina.datasource.IStopListener
@@ -115,7 +114,7 @@ class SignalPathService {
 		//   explicit read rights sharing to streams on that canvas
 		for (Stream s in sp.getStreams()) {
 			if (!permissionService.canRead(asUser, s)) {
-				throw new UnauthorizedStreamException(canvas, s, asUser);
+				throw new UnauthorizedStreamException(canvas, s, asUser)
 			}
 		}
 
@@ -287,7 +286,7 @@ class SignalPathService {
 			throw new CanvasUnreachableException("Canvas id does not match the canvas found in runner. This should not happen.")
 		}
 		// All good - check if this is a stop request, which has special handling
-		else if (req.type=="stopRequest") {
+		else if (req.type == "stopRequest") {
 			if (!permissionService.canWrite(req.getUser(), req.getCanvas()) && !req.getUser()?.isAdmin()) {
 				throw new AccessControlException("stopRequest requires write permission!");
 			}
@@ -301,12 +300,10 @@ class SignalPathService {
 		// Else route the request to the SignalPath or the target module within
 		else {
 			RuntimeRequest.PathReader pathReader = req.getPathReader()
-
 			// Consume the already-processed parts of the path and double-sanity-check canvas id
 			if (pathReader.readCanvasId() != req.getCanvas().getId()) {
 				throw new IllegalStateException("Unexpected path: ${req.getPath()}")
 			}
-
 			Future<RuntimeResponse> future = spr.signalPath.onRequest(req, pathReader)
 
 			try {
@@ -392,7 +389,7 @@ class SignalPathService {
 		runnersById.remove(runner.runnerId)
 	}
 
-	class ReconstructedResult {
+	public class ReconstructedResult {
 		public Map map
 		public SignalPath signalPath
 

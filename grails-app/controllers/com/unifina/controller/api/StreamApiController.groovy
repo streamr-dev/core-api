@@ -2,11 +2,13 @@ package com.unifina.controller.api
 
 import com.unifina.api.*
 import com.unifina.domain.data.Stream
+import com.unifina.domain.security.Key
 import com.unifina.domain.security.Permission.Operation
 import com.unifina.domain.security.SecUser
 import com.unifina.feed.DataRange
 import com.unifina.security.AuthLevel
 import com.unifina.security.StreamrApi
+import com.unifina.security.Userish
 import com.unifina.service.StreamService
 import grails.converters.JSON
 import grails.plugin.springsecurity.annotation.Secured
@@ -60,11 +62,17 @@ class StreamApiController {
 			stream.name = newStream.name
 			stream.description = newStream.description
 			stream.config = readConfig()
+			if (newStream.partitions != null) {
+				stream.partitions = newStream.partitions
+			}
 			if (newStream.autoConfigure != null) {
 				stream.autoConfigure = newStream.autoConfigure
 			}
 			if (newStream.requireSignedData != null) {
 				stream.requireSignedData = newStream.requireSignedData
+			}
+			if (newStream.requireEncryptedData != null) {
+				stream.requireEncryptedData = newStream.requireEncryptedData
 			}
 			if (newStream.storageDays != null) {
 				stream.storageDays = newStream.storageDays
@@ -74,7 +82,7 @@ class StreamApiController {
 			}
 			if (stream.validate()) {
 				stream.save(failOnError: true)
-				render(status: 204)
+				render(stream.toMap() as JSON)
 			} else {
 				throw new ValidationException(stream.errors)
 			}
@@ -98,9 +106,10 @@ class StreamApiController {
 		}
 	}
 
-	@StreamrApi
+	@StreamrApi(authenticationLevel = AuthLevel.KEY)
 	def setFields(String id) {
-		def stream = apiService.authorizedGetById(Stream, id, (SecUser) request.apiUser, Operation.WRITE)
+		Userish u = request.apiUser != null ? (SecUser) request.apiUser : (Key) request.apiKey
+		Stream stream = apiService.authorizedGetById(Stream, id, u, Operation.WRITE)
 		def givenFields = request.JSON
 
 		Map config = stream.config ? JSON.parse(stream.config) : [:]

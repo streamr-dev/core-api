@@ -1,22 +1,17 @@
-import com.unifina.data.KafkaPartitioner
 import com.unifina.service.NodeService
 import com.unifina.utils.PropertiesUtil
 
-/*****
- * This config file gets merged with the application config file.
- * The application config file can override anything defined here.
+/**
+ * Base URL
  */
-
-def prodBaseUrl = System.getProperty("streamr.url") ?: "https://www.streamr.com"
-
+// Write it to a variable to allow it to be referenced elsewhere in this file
+def baseUrl = System.getProperty("streamr.url") ?: "http://localhost"
 environments {
 	production {
-		grails.serverURL = prodBaseUrl
-	}
-	development {
-		grails.serverURL = "http://localhost"
+		baseUrl = System.getProperty("streamr.url") ?: "https://streamr.network"
 	}
 }
+grails.serverURL = baseUrl
 
 /**
  * Grails configuration
@@ -126,6 +121,9 @@ log4j.main = {
 		info 'stdout'
 	}
 
+	// No need to log all exceptions thrown in API calls. For example, InvalidAPIKeyExceptions easily pollute the logs.
+	fatal 'org.codehaus.groovy.grails.web.errors.GrailsExceptionResolver'
+
 	error 'org.codehaus.groovy.grails.web.servlet',  //  controllers
 		'org.codehaus.groovy.grails.web.pages', //  GSP
 		'org.codehaus.groovy.grails.web.sitemesh', //  layouts
@@ -140,16 +138,12 @@ log4j.main = {
 		'org.grails.datastore.mapping.core.DatastoreUtils'
 
 	warn 'org.mortbay.log',
-		'org.apache.zookeeper',
-		'org.codehaus.groovy.grails.domain.GrailsDomainClassCleaner',
-		'kafka.consumer.ConsumerConfig',
-		'org.apache.kafka.clients.consumer.ConsumerConfig',
-		'kafka.producer.ProducerConfig',
-		'org.apache.kafka.clients.producer.ProducerConfig'
+		'org.codehaus.groovy.grails.domain.GrailsDomainClassCleaner'
 
-	debug 'com.datastax.driver.core',
-		'com.unifina.datasource.DataSource',
-		'com.unifina.signalpath.utils.ConfigurableStreamModule'
+	// Turn on debug logging for a few classes to debug join issue in prod
+	debug 'com.streamr.client',
+		'com.unifina.service.CommunityJoinRequestService',
+		'com.unifina.service.StreamrClientService'
 }
 
 /**
@@ -203,27 +197,13 @@ unifina.task.messageQueue = "streamr-tasks"
 /**
  * Node IP address config. Autodetected if not set.
  */
-streamr.node.ip = System.getProperty("streamr.node.ip")
+streamr.engine.node.ip = System.getProperty("streamr.engine.node.ip")
 
 /**
- * UI update server address
+ * Streamr API URLs
  */
-streamr.ui.server = System.getProperty("streamr.ui.server") ?: "ws://127.0.0.1:8890/api/v1/ws"
-environments {
-	production {
-		streamr.ui.server = System.getProperty("streamr.ui.server") ?: "${prodBaseUrl.replaceFirst("http", "ws")}/api/v1/ws"
-	}
-}
-
-/**
- * HTTP API server address
- */
-streamr.http.api.url = System.getProperty("streamr.http.api.url") ?: "http://127.0.0.1:8081/streamr-core/api/v1"
-environments {
-	production {
-		streamr.http.api.url = System.getProperty("streamr.http.api.url") ?: "${prodBaseUrl}/api/v1"
-	}
-}
+streamr.api.websocket.url = System.getProperty("streamr.api.websocket.url") ?: "${baseUrl.replaceFirst("http", "ws")}/api/v1/ws"
+streamr.api.http.url = System.getProperty("streamr.api.http.url") ?: "${baseUrl}/api/v1"
 
 /**
  * Ethereum networks configuration (RPC urls)
@@ -239,27 +219,6 @@ streamr.ethereum.networks = PropertiesUtil.matchingPropertiesToMap("streamr.ethe
 streamr.ethereum.wss = PropertiesUtil.matchingPropertiesToMap("streamr.ethereum.wss.", System.getProperties()) ?: [ local: "ws://localhost:8545" ]
 // Ethereum identity of this instance. Don't use this silly development private key for anything.
 streamr.ethereum.nodePrivateKey = System.getProperty("streamr.ethereum.nodePrivateKey", "0123456789ABCDEF0123456789ABCDEF0123456789ABCDEF0123456789ABCDEF")
-
-/**
- * Kafka config
- */
-streamr.kafka.bootstrap.servers = System.getProperty("streamr.kafka.bootstrap.servers") ?: "127.0.0.1:9092"
-streamr.kafka.producer.type = "async"
-streamr.kafka.queue.buffering.max.ms = "100"
-streamr.kafka.retry.backoff.ms = "500"
-streamr.kafka.value.serializer = org.apache.kafka.common.serialization.ByteArraySerializer.getName()
-streamr.kafka.key.serializer = org.apache.kafka.common.serialization.StringSerializer.getName()
-streamr.kafka.partitioner.class = KafkaPartitioner.class.getName()
-streamr.kafka.request.required.acks = "0"
-streamr.kafka.dataTopic = "data-dev"
-
-environments {
-	production {
-		streamr.kafka.dataTopic = "data-prod"
-		streamr.kafka.bootstrap.servers = System.getProperty("streamr.kafka.bootstrap.servers") ?: "kafka1:9092"
-		streamr.kafka.zookeeper.connect = System.getProperty("streamr.kafka.zookeeper.connect") ?: "zk1:2181"
-	}
-}
 
 /**
  * Redis config
@@ -434,7 +393,7 @@ streamr.signup.requireCaptcha = (System.getProperty("streamr.signup.requireCaptc
 /**
  * Streamr engine-and-editor nodes
  */
-streamr.nodes = System.getProperty("streamr.nodes") ? Arrays.asList(System.getProperty("streamr.nodes").split(",")) : [new NodeService().getIPAddress([streamr: [node: [ip: System.getProperty("streamr.node.ip")]]])]
+streamr.engine.nodes = System.getProperty("streamr.engine.nodes") ? Arrays.asList(System.getProperty("streamr.engine.nodes").split(",")) : [new NodeService().getIPAddress([streamr: [node: [ip: System.getProperty("streamr.engine.node.ip")]]])]
 
 /**
  * Miscellaneous

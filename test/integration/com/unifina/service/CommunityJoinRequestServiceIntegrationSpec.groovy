@@ -1,5 +1,7 @@
 package com.unifina.service
 
+import com.streamr.client.StreamrClient
+import com.streamr.client.options.StreamrClientOptions
 import com.unifina.api.NotFoundException
 import com.unifina.api.UpdateCommunityJoinRequestCommand
 import com.unifina.domain.community.CommunityJoinRequest
@@ -12,12 +14,14 @@ import com.unifina.domain.signalpath.Module
 import com.unifina.domain.signalpath.ModuleCategory
 import spock.lang.Specification
 
+// This is an integration test because Grails doesn't support criteria queries in unit tests
 class CommunityJoinRequestServiceIntegrationSpec extends Specification {
 	CommunityJoinRequestService service = new CommunityJoinRequestService()
 	SecUser me
-	Stream joinPartStream
+	com.streamr.client.rest.Stream joinPartStream
 	Category category
 	final String communityAddress = "0x0000000000000000000000000000000000000000"
+	StreamrClient streamrClientMock
 
 	void setup() {
 		me = new SecUser(
@@ -35,11 +39,15 @@ class CommunityJoinRequestServiceIntegrationSpec extends Specification {
 		Module module = new Module(name: "module name", alternativeNames: "alt names", implementingClass: "x", jsModule: "jsmodule", category: mc, type: "type")
 		module.save(failOnError: true, validate: true)
 
-		joinPartStream = new Stream(name: "join part stream")
-		joinPartStream.id = "jps-1"
-		joinPartStream.save(validate: true, failOnError: true)
+		joinPartStream = new com.streamr.client.rest.Stream("join part stream", "")
+		joinPartStream.setId("joinPartStream")
 
-		service.streamService = Mock(StreamService)
+		service.streamrClientService = Mock(StreamrClientService)
+		streamrClientMock = Mock(StreamrClient)
+		streamrClientMock.getStream(joinPartStream.id) >> joinPartStream
+		streamrClientMock.getOptions() >> Mock(StreamrClientOptions)
+		service.streamrClientService.getInstanceForThisEngineNode() >> streamrClientMock
+
 		service.ethereumService = Mock(EthereumService)
 		service.permissionService = Mock(PermissionService)
 	}
@@ -163,7 +171,7 @@ class CommunityJoinRequestServiceIntegrationSpec extends Specification {
 		def c = service.update(communityAddress, r.id, cmd)
 		then:
 		1 * service.ethereumService.fetchJoinPartStreamID(communityAddress) >> joinPartStream.id
-		1 * service.streamService.sendMessage(_)
+		1 * streamrClientMock.publish(_, [type: "join", addresses: [r.memberAddress]])
 		c.state == CommunityJoinRequest.State.ACCEPTED
 		// no changes below
 		c.communityAddress == communityAddress
@@ -235,7 +243,7 @@ class CommunityJoinRequestServiceIntegrationSpec extends Specification {
 		service.delete(communityAddress, r.id)
 		then:
 		1 * service.ethereumService.fetchJoinPartStreamID(communityAddress) >> joinPartStream.id
-		1 * service.streamService.sendMessage(_)
+		1 * streamrClientMock.publish(_, [type: "part", addresses: [r.memberAddress]])
 		1 * service.permissionService.systemRevoke(me, s1, Permission.Operation.WRITE)
 		1 * service.permissionService.systemRevoke(me, s2, Permission.Operation.WRITE)
 		1 * service.permissionService.systemRevoke(me, s3, Permission.Operation.WRITE)

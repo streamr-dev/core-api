@@ -1,6 +1,6 @@
 package com.unifina.service
 
-import com.streamr.client.protocol.message_layer.StreamMessage
+import com.streamr.client.StreamrClient
 import com.unifina.api.ApiException
 import com.unifina.api.CommunityJoinRequestCommand
 import com.unifina.api.NotFoundException
@@ -12,24 +12,28 @@ import com.unifina.domain.marketplace.Product
 import com.unifina.domain.security.IntegrationKey
 import com.unifina.domain.security.Permission
 import com.unifina.domain.security.SecUser
-import com.unifina.signalpath.utils.MessageChainUtil
-import com.unifina.utils.MapTraversal
-import grails.util.Holders
-import org.web3j.crypto.Credentials
+import org.apache.log4j.Logger
 
 class CommunityJoinRequestService {
-	StreamService streamService
+
+	private static final Logger log = Logger.getLogger(CommunityJoinRequestService)
+
 	EthereumService ethereumService
 	PermissionService permissionService
+	StreamrClientService streamrClientService
 
 	private void onApproveJoinRequest(CommunityJoinRequest c) {
+		log.debug("onApproveJoinRequest: approved JoinRequest for address ${c.memberAddress} to community ${c.communityAddress}")
 		for (Stream s : findStreams(c)) {
+			log.debug(String.format("granting write permission to %s (%s) for %s", s.name, s.id, c.user.username))
 			permissionService.systemGrant(c.user, s, Permission.Operation.WRITE)
 		}
 		sendMessage(c, "join")
+		log.debug("exiting onApproveJoinRequest")
 	}
 
 	protected Set<Stream> findStreams(CommunityJoinRequest c) {
+		log.debug(String.format("entering findStreams(%s)", c))
 		List<Product> products = Product.withCriteria {
 			eq("type", Product.Type.COMMUNITY)
 			eq("beneficiaryAddress", c.communityAddress)
@@ -38,28 +42,33 @@ class CommunityJoinRequestService {
 		for (Product p : products) {
 			streams.addAll(p.streams)
 		}
+		log.debug(String.format("exiting findStreams(): %s", streams))
 		return streams
 	}
 
+	/**
+	 * Sends a message to joinPartStream using the credentials of this Engine node
+	 */
 	private void sendMessage(CommunityJoinRequest c, String type) {
+		log.debug("sendMessage: fetching joinPartStreamID for community ${c.communityAddress}")
 		String joinPartStreamID = ethereumService.fetchJoinPartStreamID(c.communityAddress)
+		log.debug(String.format("sending message to join part stream id: '%s', community address: '%s'", joinPartStreamID, c.communityAddress))
 		Map<String, Object> msg = new HashMap<>()
 		msg.put("type", type)
 		msg.put("addresses", Arrays.asList(c.memberAddress))
-		sendMessageToStream(joinPartStreamID, msg)
-	}
 
-	// Send message to joinPartStream
-	private void sendMessageToStream(String joinPartStreamID, HashMap<String, Object> content) {
-		Stream s = Stream.findById(joinPartStreamID)
-		if (s == null) {
+		StreamrClient client = streamrClientService.getInstanceForThisEngineNode()
+		log.debug("sendMessage: StreamrClient state is ${client.getState()}, websocket url: ${client.getOptions().getWebsocketApiUrl()}")
+
+		com.streamr.client.rest.Stream stream = client.getStream(joinPartStreamID)
+
+		if (stream == null) {
 			throw new NotFoundException(String.format("Stream not found by id: %s", joinPartStreamID))
 		}
-		String nodePrivateKey = MapTraversal.getString(Holders.getConfig(), "streamr.ethereum.nodePrivateKey")
-		Credentials credentials = Credentials.create(nodePrivateKey)
-		MessageChainUtil chain = new MessageChainUtil(credentials.getAddress())
-		StreamMessage msg = chain.getStreamMessage(s, new Date(), content)
-		streamService.sendMessage(msg)
+
+		log.debug("sendMessage: publishing message to stream ${stream.getId()}: ${msg}")
+		client.publish(stream, msg)
+		log.debug("exiting sendMessage")
 	}
 
 	Set<SecUser> findCommunityMembers(String communityAddress) {

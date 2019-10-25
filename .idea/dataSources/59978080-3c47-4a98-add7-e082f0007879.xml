@@ -9,15 +9,14 @@
     </root>
     <schema id="2" parent="1" name="core_dev">
       <Current>1</Current>
-      <Collation>utf8_general_ci</Collation>
       <Visible>1</Visible>
+      <Collation>utf8_general_ci</Collation>
     </schema>
     <schema id="3" parent="1" name="core_test">
       <Collation>utf8_general_ci</Collation>
     </schema>
     <schema id="4" parent="1" name="information_schema">
       <Collation>utf8_general_ci</Collation>
-      <Substituted>1</Substituted>
     </schema>
     <schema id="5" parent="1" name="mysql">
       <Collation>latin1_swedish_ci</Collation>

@@ -2,27 +2,34 @@
 
 [![Build Status](https://travis-ci.org/streamr-dev/engine-and-editor.svg?branch=master)](https://travis-ci.org/streamr-dev/engine-and-editor)
 
-Web application containing and serving the Streamr Engine, Marketplace and Core. Streamr Engine is an event processing system for real-time data. Streamr Core is a visual programming environment for creating processes (called Canvases) that run on the Engine. 
+Web application containing the backend for Streamr Core, facilitating things like:
+- Creating streams
+- Creating and running canvases
+- Creating dashboards
+- Creating products for the Streamr Marketplace 
 
-Streamr Engine and Core is built on top of the Java VM and Grails web framework. The current implementation runs on the centralised (cloud) version of Streamr infrastructure. 
+The application uses the Grails web framework and runs on Java VM. 
 
 ## Dependencies
 
 ### Tools
-- Grails 2.5.6
 - Java 8
+- Grails 2.5.6
+- node.js ^8.0.0
+- npm
 
 A convenient way of installing and managing multiple versions of Grails is [SDKMAN!](http://sdkman.io/install.html).
 
 ### Service dependencies
 
-Additional services are required to run this web application. The easiest way to get them up and running (for development purposes) is to use the [streamr-docker-dev](https://github.com/streamr-dev/streamr-docker-dev) tool we provide.
+Additional services are required to run this web application. The easiest way to get them all up and running (for development purposes) is to use the [streamr-docker-dev](https://github.com/streamr-dev/streamr-docker-dev) tool we provide.
 
 - MySQL
-- Kafka
-- Zookeeper
 - Redis
-- [Streamr Cloud Broker](https://github.com/streamr-dev/cloud-broker)
+- Cassandra
+- A Streamr Network consisting of [broker nodes](https://github.com/streamr-dev/broker)
+
+You might also want to run the [Core UI](https://github.com/streamr-dev/streamr-platform). 
 
 ## Building and running
 
@@ -32,35 +39,42 @@ Additional services are required to run this web application. The easiest way to
 
 3. Run `streamr-docker-dev start 1` if you are using the recommended tool streamr-docker-dev. Otherwise make sure all services dependencies are running and the the web applications is properly configured to connect to them.
 
-4. Start the web application
+4. Start the backend application
 ```
 grails run-app
 ```
 
-## Publishing
-A [Docker image](https://hub.docker.com/r/streamr/broker/) is automatically built and pushed to DockerHub when commits
-are pushed to branch `master`.
+5. (Optional) Start the [Core frontend](https://github.com/streamr-dev/streamr-platform) if you need it.
 
-Currently project doesn't publish any .jar artifacts to central repositories.
+## CI
 
-## Developing
+The project uses [Travis CI](https://travis-ci.org/streamr-dev/engine-and-editor) to automatically run tests for each commit to `master` and pull requests.
+
+## Docker
+
+A [Docker image](https://hub.docker.com/r/streamr/engine-and-editor/) is automatically built and pushed to DockerHub when commits are pushed to branch `master`.
+
+## IDE
 
 We provide sensible default configurations for IntelliJ IDEA but project can be developed with other IDEs as well.
 
 ### Testing
 
-- To run unit, integration, and end-to-end (functional) use `grails test-app`
-- To run back-end unit tests only, use `grails test-app -unit`
-- To run back-end integration tests only, use `grails test-app -integration`
+- To run unit and integration tests use `grails test-app`
+- To run unit tests only, use `grails test-app -unit`
+- To run integration tests only, use `grails test-app -integration`
+- To run end-to-end REST API tests, do `cd rest-e2e-tests && npm install && npm test`
 
 These are also available as pre-shared run configurations if you use IntelliJ IDEA.
 
-### Back-end
+### Core API & Engine
 
-The back-end consists of two logical parts. The Engine is written mostly in Java and is responsible for executing arbitrary user-defined Canvases that process, analyze and act upon real-time event data. The Editor, on the other hand, is responsible for API(s). It is mostly written in Groovy and utilizes facilities provided by the Grails framework.
+This codebase comprises two logical parts:
 
-When you run the Engine+Editor web app with `grails run-app` or `grails test run-app`, most changes to source code files are automatically hot reloaded into the running JVM process.
+- API which allows users to create and manage streams, canvases, products, and other Streamr resources. The API controllers and services are mainly written in Groovy and use the Grails web framework.
+- The Engine is written mostly in Java and is responsible for executing canvases (user-defined processes which process, analyze and act upon real-time event data. The APIs, on the other hand, is responsible for API(s), rendered web pages and other front-facing functionality.
 
+When you run the app with `grails run-app`, most changes to source code files are automatically hot reloaded into the running JVM process.
 
 #### Useful resources
 - [Grails 2.5.6 Framework Reference Documentation (single page)](https://grails.github.io/grails2-doc/2.5.6/guide/single.html)
@@ -70,7 +84,7 @@ When you run the Engine+Editor web app with `grails run-app` or `grails test run
 
 ### Coding your own modules
 
-There are already modules that allow running code on canvas, e.g. JavaModule and Javascript module. They are, however, "last resort" patches for cases where the existing modules don't offer the required functionality, but the functionality also isn't reusable enough to warrant developing a custom module.
+There are already modules that allow running code on canvas, e.g. JavaModule. They are, however, "last resort" patches for cases where the existing modules don't offer the required functionality, but the functionality also isn't reusable enough to warrant developing a custom module.
 
 If the required functionality is complex, or if it depends on libraries or external code, you'll need to set up the development environment following the above steps. Upside is of course, after it's done, you also get IDE support (we use [IntelliJ IDEA](https://www.jetbrains.com/idea/)), and you can write unit tests etc.
 

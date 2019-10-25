@@ -5,6 +5,7 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.unifina.signalpath.*;
 import com.unifina.utils.MapTraversal;
+import jdk.nashorn.internal.codegen.CompilationException;
 import org.apache.log4j.Logger;
 import org.ethereum.solidity.compiler.SolidityCompiler;
 import org.web3j.abi.TypeDecoder;
@@ -15,7 +16,6 @@ import org.web3j.protocol.Web3j;
 import org.web3j.protocol.core.DefaultBlockParameterName;
 import org.web3j.protocol.core.methods.response.EthSendTransaction;
 import org.web3j.protocol.core.methods.response.TransactionReceipt;
-import org.web3j.protocol.http.HttpService;
 import org.web3j.utils.Numeric;
 
 import java.io.IOException;
@@ -43,6 +43,11 @@ public class SolidityCompileDeploy extends ModuleWithUI implements Pullable<Ethe
 	private EthereumModuleOptions ethereumOptions = new EthereumModuleOptions();
 	private Web3j web3j;
 
+	public static class CompilationException extends Exception{
+		public CompilationException(String msg){
+			super(msg);
+		}
+	}
 	@Override
 	public void init() {
 		addInput(ethereumAccount);
@@ -97,23 +102,14 @@ public class SolidityCompileDeploy extends ModuleWithUI implements Pullable<Ethe
 		return result;
 	}
 
-	protected JsonObject compile(String solidity_code) {
+	protected JsonObject compile(String solidity_code) throws IOException, CompilationException {
 		String result = null;
-		String errors = null;
-		try {
-			SolidityCompiler.Result res = SolidityCompiler.compile(solidity_code.getBytes(StandardCharsets.UTF_8), true, SolidityCompiler.Options.ABI, SolidityCompiler.Options.BIN);
-			if (res.isFailed()) {
-				errors = res.errors;
-			} else {
-				result = res.output;
-			}
-		} catch (IOException e) {
-			errors = e.getLocalizedMessage();
+		SolidityCompiler.Result res = SolidityCompiler.compile(solidity_code.getBytes(StandardCharsets.UTF_8), true, SolidityCompiler.Options.ABI, SolidityCompiler.Options.BIN);
+		if (res.isFailed()) {
+			throw new CompilationException(res.errors);
+		} else {
+			result = res.output;
 		}
-		if (errors != null) {
-			throw new RuntimeException("Error compiling contract: " + errors);
-		}
-
 		JsonObject entries = new JsonParser().parse(result).getAsJsonObject().get("contracts").getAsJsonObject();
 		return chooseMainContract(entries);
 	}
@@ -165,7 +161,7 @@ public class SolidityCompileDeploy extends ModuleWithUI implements Pullable<Ethe
 	}
 
 	protected Web3j getWeb3j() {
-		return Web3j.build(new HttpService(ethereumOptions.getRpcUrl()));
+		return ethereumOptions.getWeb3j(EthereumModuleOptions.RpcConnectionMethod.HTTP);
 	}
 
 	@Override
@@ -202,18 +198,29 @@ public class SolidityCompileDeploy extends ModuleWithUI implements Pullable<Ethe
 			}
 
 			boolean hasCode = code != null && !code.trim().isEmpty();
-			boolean hasDeployer = ethereumAccount.getAddress() != null;
-			if (hasCode && hasDeployer) {
-				compilationResult = compile(code);
+			if (hasCode) {
+				try {
+					compilationResult = compile(code);
+				} catch (IOException e) {
+					throw new RuntimeException(e);
+				} catch (CompilationException e) {
+					throw new RuntimeException(e);
+				}
 				contract = new EthereumContract(null, new EthereumABI(new JsonParser().parse(compilationResult.get("abi").getAsString()).getAsJsonArray()), null);
 			}
 		} else if (config.get("code") != null) {
 			code = config.get("code").toString();
 		}
-
-		if (contract != null) {
-			contract.setNetwork(ethereumOptions.getNetwork());
-			if (deployRequested && compilationResult != null) {
+		if (contract == null) {
+			return;
+		}
+		contract.setNetwork(ethereumOptions.getNetwork());
+		if (deployRequested) {
+			if (compilationResult == null) {
+				throw new RuntimeException("Can't deploy contract because contract is not compiled. Doing nothing.");
+			} else if (ethereumAccount.getPrivateKey() == null) {
+				throw new RuntimeException("Can't deploy contract because no private key is selected to sign. Doing nothing.");
+			} else {
 				// transform Streamr params into list of constructor arguments
 				Stack<Object> args = new Stack<>();
 				List<Map> params = (List) config.get("params");
@@ -239,9 +246,9 @@ public class SolidityCompileDeploy extends ModuleWithUI implements Pullable<Ethe
 					throw new RuntimeException(e);
 				}
 			}
-			createContractOutput();
-			createParameters(contract.getABI());
 		}
+		createContractOutput();
+		createParameters(contract.getABI());
 	}
 
 	private void createContractOutput() {

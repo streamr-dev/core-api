@@ -4,14 +4,17 @@ import com.unifina.domain.data.Stream
 import com.unifina.domain.marketplace.Category
 import com.unifina.domain.marketplace.Product
 import com.unifina.domain.security.SecUser
+import com.unifina.service.PermissionService
 import spock.lang.Specification
 
 class UpdateProductCommandSpec extends Specification {
 
 	Product product
 	UpdateProductCommand command
+	PermissionService permissionService
 
 	void setup() {
+		permissionService = Mock(PermissionService)
 		// Set up Product
 		Category category = new Category(name: "category")
 		category.id = 'category-id'
@@ -67,7 +70,7 @@ class UpdateProductCommandSpec extends Specification {
 		product.pricePerSecond = 5
 
 		when:
-		command.updateProduct(product)
+		command.updateProduct(product, new SecUser(), permissionService)
 
 		then:
 		thrown(FieldCannotBeUpdatedException)
@@ -83,7 +86,7 @@ class UpdateProductCommandSpec extends Specification {
 		}
 
 		when:
-		command.updateProduct(product)
+		command.updateProduct(product, new SecUser(), permissionService)
 
 		then:
 		product.toMap() == [
@@ -115,7 +118,7 @@ class UpdateProductCommandSpec extends Specification {
 		product.pricePerSecond = 5
 
 		when:
-		command.updateProduct(product)
+		command.updateProduct(product, new SecUser(), permissionService)
 
 		then:
 		product.toMap() == [
@@ -148,7 +151,7 @@ class UpdateProductCommandSpec extends Specification {
 		command.pricePerSecond = 0
 
 		when:
-		command.updateProduct(product)
+		command.updateProduct(product, new SecUser(), permissionService)
 
 		then:
 		product.toMap() == [
@@ -181,10 +184,55 @@ class UpdateProductCommandSpec extends Specification {
 		command.pricePerSecond = 5
 
 		when:
-		command.updateProduct(product)
+		command.updateProduct(product, new SecUser(), permissionService)
 
 		then:
 		thrown(FieldCannotBeUpdatedException)
 	}
 
+	void "updateProduct() throws when pendingChanges field is given and user doesn't have share permission"() {
+		setup:
+		command = new UpdateProductCommand(
+			name: "new name",
+			description: "new description",
+			pendingChanges: [name:"new name",description:"new description"]
+		)
+		product.pricePerSecond = 5
+
+		when:
+		command.updateProduct(product, new SecUser(), permissionService)
+		then:
+		1 * permissionService.canShare(_, product) >> false
+		thrown(FieldCannotBeUpdatedException)
+	}
+
+	void "updateProduct() updates pendingChanges if it is given and user has share permission"() {
+		setup:
+		command = new UpdateProductCommand(
+			name: "new name",
+			description: "new description",
+			pendingChanges: [name:"new name",description:"new description"]
+		)
+		product.pricePerSecond = 5
+
+		when:
+		command.updateProduct(product, new SecUser(), permissionService)
+		then:
+		1 * permissionService.canShare(_, product) >> true
+		product.pendingChanges == '''{"name":"new name","description":"new description"}'''
+	}
+
+	void "updateProduct() doesn't check sharing permission when pendingChanges is not given"() {
+		setup:
+		command = new UpdateProductCommand(
+			name: "new name",
+			description: "new description",
+		)
+		product.pricePerSecond = 5
+
+		when:
+		command.updateProduct(product, new SecUser(), permissionService)
+		then:
+		0 * permissionService.canShare(_, product)
+	}
 }

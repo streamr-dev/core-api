@@ -12,6 +12,7 @@ import com.unifina.domain.security.SecUser
 import com.unifina.filters.UnifinaCoreAPIFilters
 import com.unifina.service.ApiService
 import com.unifina.service.FreeProductService
+import com.unifina.service.PermissionService
 import com.unifina.service.ProductImageService
 import com.unifina.service.ProductService
 import grails.test.mixin.Mock
@@ -187,6 +188,7 @@ class ProductApiControllerSpec extends Specification {
 	}
 
 	void "show() invokes productService#findById"() {
+		controller.permissionService = Mock(PermissionService)
 		def productService = controller.productService = Mock(ProductService)
 
 		params.id = "product-id"
@@ -196,9 +198,11 @@ class ProductApiControllerSpec extends Specification {
 		}
 		then:
 		1 * productService.findById('product-id', _, Permission.Operation.READ) >> product
+		1 * controller.permissionService.canShare(_, _) >> false
 	}
 
 	void "show() returns 200 and renders a product"() {
+		controller.permissionService = Mock(PermissionService)
 		controller.productService = Stub(ProductService) {
 			findById("product-id", _, Permission.Operation.READ) >> product
 		}
@@ -245,6 +249,7 @@ class ProductApiControllerSpec extends Specification {
 	}
 
 	void "update() invokes productService#update"() {
+		controller.permissionService = Mock(PermissionService)
 		def productService = controller.productService = Mock(ProductService)
 
 		def user = request.apiUser = new SecUser()
@@ -257,9 +262,11 @@ class ProductApiControllerSpec extends Specification {
 		}
 		then:
 		1 * productService.update("product-id", _ as UpdateProductCommand, user) >> product
+		1 * controller.permissionService.canShare(_, _) >> false
 	}
 
 	void "update() returns 200 and renders a product"() {
+		controller.permissionService = Mock(PermissionService)
 		controller.productService = Stub(ProductService) {
 			update("product-id", _, _) >> product
 		}
@@ -275,6 +282,7 @@ class ProductApiControllerSpec extends Specification {
 		then:
 		response.status == 200
 		response.json == product.toMap()
+		1 * controller.permissionService.canShare(_, _) >> false
 	}
 
 	void "setDeploying() invokes productService#findById() and productService#transitionToDeploying()"() {

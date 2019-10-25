@@ -4,8 +4,8 @@ package com.unifina.datasource;
 import com.streamr.client.utils.StreamPartition;
 import com.unifina.data.ClockTick;
 import com.unifina.data.Event;
+import com.unifina.feed.RealtimeMessageSource;
 import com.unifina.feed.StreamMessageSource;
-import com.unifina.feed.redis.MultipleRedisMessageSource;
 import com.unifina.serialization.SerializationRequest;
 import com.unifina.service.SerializationService;
 import com.unifina.signalpath.SignalPath;
@@ -61,13 +61,13 @@ public class RealtimeDataSource extends DataSource {
 	}
 
 	@Override
-	protected DataSourceEventQueue createEventQueue() {
-		return new RealtimeEventQueue(globals, this);
+	protected StreamMessageSource createStreamMessageSource(Collection<StreamPartition> streamPartitions, StreamMessageSource.StreamMessageConsumer consumer) {
+		return new RealtimeMessageSource(globals, consumer, streamPartitions);
 	}
 
 	@Override
-	protected StreamMessageSource createStreamMessageSource(Collection<StreamPartition> streamPartitions, StreamMessageSource.StreamMessageConsumer consumer) {
-		return new MultipleRedisMessageSource(consumer, streamPartitions);
+	protected DataSourceEventQueue createEventQueue() {
+		return new RealtimeEventQueue(globals, this);
 	}
 
 }

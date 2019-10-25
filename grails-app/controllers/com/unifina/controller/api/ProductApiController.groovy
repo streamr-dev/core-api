@@ -7,10 +7,7 @@ import com.unifina.domain.security.SecUser
 import com.unifina.security.AllowRole
 import com.unifina.security.AuthLevel
 import com.unifina.security.StreamrApi
-import com.unifina.service.ApiService
-import com.unifina.service.FreeProductService
-import com.unifina.service.ProductImageService
-import com.unifina.service.ProductService
+import com.unifina.service.*
 import grails.compiler.GrailsCompileStatic
 import grails.converters.JSON
 import grails.plugin.mail.MailService
@@ -25,9 +22,9 @@ class ProductApiController {
 	ProductService productService
 	ProductImageService productImageService
 	MailService mailService
+	PermissionService permissionService
 
 	private static final Logger log = Logger.getLogger(ProductApiController)
-
 
 	@GrailsCompileStatic
 	@StreamrApi(allowRoles = AllowRole.ADMIN)
@@ -86,7 +83,8 @@ class ProductApiController {
 	@StreamrApi(authenticationLevel = AuthLevel.NONE)
 	def show(String id) {
 		Product product = productService.findById(id, loggedInUser(), Permission.Operation.READ)
-		render(product.toMap() as JSON)
+		boolean isProductOwner = permissionService.canShare(loggedInUser(), product)
+		render(product.toMap(isProductOwner) as JSON)
 	}
 
 	@GrailsCompileStatic
@@ -100,7 +98,8 @@ class ProductApiController {
 	@StreamrApi(authenticationLevel = AuthLevel.USER)
 	def update(String id, UpdateProductCommand command) {
 		Product product = productService.update(id, command, loggedInUser())
-		render(product.toMap() as JSON)
+		boolean isProductOwner = permissionService.canShare(loggedInUser(), product)
+		render(product.toMap(isProductOwner) as JSON)
 	}
 
 	@GrailsCompileStatic

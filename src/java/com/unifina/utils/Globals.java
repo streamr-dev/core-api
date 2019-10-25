@@ -1,17 +1,19 @@
 package com.unifina.utils;
 
+import com.streamr.client.StreamrClient;
 import com.unifina.datasource.DataSource;
 import com.unifina.datasource.HistoricalDataSource;
 import com.unifina.datasource.RealtimeDataSource;
 import com.unifina.domain.security.SecUser;
 import com.unifina.security.permission.DataSourcePermission;
+import com.unifina.security.permission.StreamrClientPermission;
+import com.unifina.service.StreamrClientService;
+import grails.util.Holders;
+import org.apache.log4j.Logger;
 
 import java.security.AccessController;
 import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.TimeZone;
+import java.util.*;
 
 
 public class Globals {
@@ -33,6 +35,10 @@ public class Globals {
 	private IdGenerator idGenerator = new IdGenerator();
 
 	public Date time;
+
+	private transient StreamrClient streamrClient;
+
+	private static final Logger log = Logger.getLogger(Globals.class);
 
 	/**
 	 * Creates an "empty" Globals with no settings, no user, Mode.NOT_PLANNING_TO_RUN, and no DataSource.
@@ -156,5 +162,35 @@ public class Globals {
      */
 	public boolean isRunContext() {
 		return !mode.equals(Mode.NOT_PLANNING_TO_RUN);
+	}
+
+	/**
+	 * Returns a StreamrClient instance shared by this run context. The client is
+	 * authenticated as the current user. It is mainly intended for producing
+	 * messages to UI channels and other streams. It is automatically closed when
+	 * the DataSource is stopped.
+	 */
+	public StreamrClient getStreamrClient() {
+		// Don't allow fetching the client from custom modules
+		if (System.getSecurityManager() != null) {
+			AccessController.checkPermission(new StreamrClientPermission());
+		}
+
+		if (!isRunContext() || getDataSource() == null) {
+			throw new IllegalStateException("Not in run context, or the DataSource is not set!");
+		}
+
+		if (streamrClient == null) {
+			// MUST clean this up by calling globals.destroy() when globals is no longer needed
+			streamrClient = Holders.getApplicationContext().getBean(StreamrClientService.class).getAuthenticatedInstance(getUserId());
+		}
+		return streamrClient;
+	}
+
+	public void destroy() {
+		if (streamrClient != null) {
+			streamrClient.disconnect();
+			log.info("Closed Streamr connection to " + streamrClient.getOptions().getWebsocketApiUrl());
+		}
 	}
 }

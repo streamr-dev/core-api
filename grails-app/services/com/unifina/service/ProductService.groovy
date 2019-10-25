@@ -158,7 +158,7 @@ class ProductService {
 		}
 
 		Product product = findById(id, currentUser, Permission.Operation.WRITE)
-		command.updateProduct(product)
+		command.updateProduct(product, currentUser, permissionService)
 		product.save(failOnError: true)
 		subscriptionService.afterProductUpdated(product)
 		return product

@@ -119,4 +119,60 @@ class ProductSpec extends Specification {
 		then:
 		p.errors.errorCount == 0
 	}
+	void "pendingChanges field is shown to the owner"() {
+		setup:
+		Category category = new Category(name: "category")
+		category.id = 'category-id'
+
+		Stream stream = new Stream(name: "stream")
+		stream.id = "stream-id"
+
+		Product product = new Product(
+			name: "name",
+			description: "description",
+			imageUrl: "image.jpg",
+			thumbnailUrl: "thumb.jpg",
+			category: category,
+			state: Product.State.DEPLOYED,
+			previewStream: stream,
+			streams: [stream],
+			previewConfigJson: "{}",
+			score: 5,
+			owner: new SecUser(name: "John Doe"),
+			ownerAddress: "0x0",
+			beneficiaryAddress: "0x0",
+			pricePerSecond: 5,
+			priceCurrency: Product.Currency.DATA,
+			minimumSubscriptionInSeconds: 0
+		)
+		product.id = "product-id"
+
+		when:
+		product.pendingChanges = '{"name":"new name"}'
+
+		then:
+		product.toMap(true) == [
+			id: "product-id",
+			type: "NORMAL",
+			state: "DEPLOYED",
+			created: null,
+			updated: null,
+			owner: "John Doe",
+			name: "name",
+			description: "description",
+			imageUrl: "image.jpg",
+			thumbnailUrl: "thumb.jpg",
+			category: "category-id",
+			streams: ["stream-id"],
+			previewStream: "stream-id",
+			previewConfigJson: "{}",
+			ownerAddress: "0x0",
+			beneficiaryAddress: "0x0",
+			pricePerSecond: "5",
+			isFree: false,
+			priceCurrency: "DATA",
+			minimumSubscriptionInSeconds: 0L,
+			pendingChanges: [name:"new name"],
+		]
+	}
 }

@@ -22,7 +22,7 @@ class ClusterServiceSpec extends Specification {
 		key.save(failOnError: true, validate: false)
 
 		service.streamrClient = Mock(StreamrClient)
-		config.streamr.nodes = ["10.0.0.5", "10.0.0.6"]
+		config.streamr.engine.nodes = ["10.0.0.5", "10.0.0.6"]
 	}
 
 	void "getCanvases dead"() {
