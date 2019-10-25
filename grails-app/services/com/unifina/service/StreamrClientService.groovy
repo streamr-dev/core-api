@@ -10,10 +10,13 @@ import com.streamr.client.options.StreamrClientOptions
 import com.unifina.domain.security.Key
 import com.unifina.utils.MapTraversal
 import grails.util.Holders
+import org.apache.log4j.Logger
 
 import java.lang.reflect.Constructor
 
 class StreamrClientService {
+
+	private static final Logger log = Logger.getLogger(StreamrClientService)
 
 	StreamrClient instanceForThisEngineNode
 	Constructor<StreamrClient> clientConstructor
@@ -52,7 +55,9 @@ class StreamrClientService {
 	StreamrClient getInstanceForThisEngineNode() {
 		if (!instanceForThisEngineNode) {
 			String nodePrivateKey = MapTraversal.getString(Holders.getConfig(), "streamr.ethereum.nodePrivateKey")
+			log.debug("Creating StreamrClient instance for this Engine node. Using private key ${nodePrivateKey?.substring(0,2)}...")
 			instanceForThisEngineNode = createInstance(new EthereumAuthenticationMethod(nodePrivateKey))
+			log.debug("StreamrClient instance created. State: ${instanceForThisEngineNode.getState()}")
 		}
 		return instanceForThisEngineNode
 	}

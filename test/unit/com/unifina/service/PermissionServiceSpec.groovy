@@ -19,8 +19,9 @@ import grails.test.mixin.support.GrailsUnitTestMixin
 
 import java.security.AccessControlException
 
-/**
- * See the API for {@link grails.test.mixin.support.GrailsUnitTestMixin} for usage instructions
+/*
+	If you get weird test failures, it may be due to spotty GORM and mocked criteria queries.
+	You might want to try PermissionServiceIntegrationSpec instead.
  */
 @TestMixin(GrailsUnitTestMixin)
 @TestFor(PermissionService)
@@ -170,7 +171,7 @@ class PermissionServiceSpec extends BeanMockingSpecification {
 		all.size() == allOperations.size()
 	}
 
-	void "getSingleUserPermissionsTo returns permissions for single user"() {
+	void "getPermissionsTo(resource, userish) returns permissions for single user"() {
 		expect:
 		service.getPermissionsTo(dashOwned, me).size() == 3
 		service.getPermissionsTo(dashOwned, anotherUser) == []
@@ -190,7 +191,7 @@ class PermissionServiceSpec extends BeanMockingSpecification {
 		service.getPermissionsTo(dashPublic, null)[0].operation == Operation.READ
 	}
 
-	void "getSingleUserPermissionsTo returns permissions for key"() {
+	void "getPermissionsTo(resource, userish) returns permissions for key"() {
 		expect:
 		service.getPermissionsTo(dashOwned, myKey).size() == 3
 		service.getPermissionsTo(dashOwned, anotherUserKey) == []
