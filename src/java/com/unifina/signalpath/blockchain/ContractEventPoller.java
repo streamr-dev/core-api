@@ -44,13 +44,9 @@ class ContractEventPoller implements Closeable, Runnable, JsonRpcResponseHandler
 			rpc = new HttpEthereumJsonRpc(rpcUrl, this);
 		} else {
 			rpc = new WebsocketEthereumJsonRpc(rpcUrl, this);
-			try {
-				boolean opened = ((WebsocketEthereumJsonRpc) rpc).openConnectionRetryIfFail();
-				if (!opened) {
-					throw new RuntimeException("Couldnt open connection to " + rpcUrl);
-				}
-			} catch (InterruptedException e) {
-				throw new RuntimeException(e);
+			boolean opened = ((WebsocketEthereumJsonRpc) rpc).openConnectionRetryIfFail();
+			if (!opened) {
+				throw new RuntimeException("Couldnt open connection to " + rpcUrl);
 			}
 		}
 	}
