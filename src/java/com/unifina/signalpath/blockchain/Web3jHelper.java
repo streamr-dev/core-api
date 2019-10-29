@@ -1,9 +1,11 @@
 package com.unifina.signalpath.blockchain;
 
 import org.apache.log4j.Logger;
-import org.web3j.abi.*;
+import org.web3j.abi.EventValues;
+import org.web3j.abi.FunctionEncoder;
+import org.web3j.abi.FunctionReturnDecoder;
+import org.web3j.abi.TypeReference;
 import org.web3j.abi.datatypes.*;
-import org.web3j.abi.datatypes.generated.AbiTypes;
 import org.web3j.protocol.Web3j;
 import org.web3j.protocol.core.DefaultBlockParameter;
 import org.web3j.protocol.core.DefaultBlockParameterName;
@@ -13,21 +15,15 @@ import org.web3j.protocol.core.methods.request.Transaction;
 import org.web3j.protocol.core.methods.response.*;
 import org.web3j.protocol.http.HttpService;
 import org.web3j.tx.Contract;
-import org.web3j.utils.Numeric;
 
 import java.io.IOException;
-import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.ParameterizedType;
-import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 public class Web3jHelper {
 
@@ -194,11 +190,17 @@ public class Web3jHelper {
 		EthCall response = request.send();
 		Response.Error err = response.getError();
 		if (err != null) {
+			log.error(String.format("getPublicField() error: message: '%s', code: '%d', data: '%s', contract address: '%s'", err.getMessage(), err.getCode(), err.getData(), contractAddress));
 			throw new Web3jException(err);
 		}
 		List<Type> result = FunctionReturnDecoder.decode(response.getValue(), func.getOutputParameters());
-		Type<X> next = result.iterator().next();
-		return (T) next.getValue();
+		Iterator<Type> i = result.iterator();
+		if (i.hasNext()) {
+			Type<X> next = i.next();
+			return (T) next.getValue();
+		}
+		log.info(String.format("public field '%s' not found in contract '%s'", fieldName, contractAddress));
+		return null;
 	}
 
 	/**
