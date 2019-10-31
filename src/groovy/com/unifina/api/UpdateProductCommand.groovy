@@ -47,14 +47,7 @@ class UpdateProductCommand {
 	]
 
 	static constraints = {
-		name(blank: false)
-		description(blank: false)
-		previewStream(nullable: true)
-		previewConfigJson(nullable: true)
-		pendingChanges(nullable: true)
-
-		ownerAddress(nullable: true, validator: Product.isEthereumAddressOrIsNull)
-		beneficiaryAddress(nullable: true, validator: Product.isEthereumAddressOrIsNull)
+		importFrom(Product)
 		pricePerSecond(nullable: true)
 		priceCurrency(nullable: true)
 		minimumSubscriptionInSeconds(nullable: true)
