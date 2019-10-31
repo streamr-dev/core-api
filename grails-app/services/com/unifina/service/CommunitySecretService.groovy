@@ -1,5 +1,6 @@
 package com.unifina.service
 
+import com.unifina.api.BadRequestException
 import com.unifina.api.CommunitySecretCommand
 import com.unifina.api.NotFoundException
 import com.unifina.domain.community.CommunitySecret
@@ -37,7 +38,7 @@ class CommunitySecretService {
 			result.name = cmd.name
 		}
 		if (cmd.secret) {
-			result.secret = cmd.secret
+			throw new BadRequestException("Can't change the secret, please create a new community secret")
 		}
 		result.save(validate: true, failOnError: true)
 		return result

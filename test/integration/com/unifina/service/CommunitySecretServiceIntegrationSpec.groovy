@@ -1,5 +1,6 @@
 package com.unifina.service
 
+import com.unifina.api.BadRequestException
 import com.unifina.api.CommunitySecretCommand
 import com.unifina.api.NotFoundException
 import com.unifina.domain.community.CommunitySecret
@@ -131,9 +132,7 @@ class CommunitySecretServiceIntegrationSpec extends Specification {
 		when:
 		CommunitySecret result = service.update(communityAddress, s1.id, cmd)
 		then:
-		result.name == "secret 1"
-		result.secret == "new secret"
-		result.communityAddress == communityAddress
+		thrown BadRequestException
 	}
 
 	void "update() both name and secret"() {
@@ -151,9 +150,7 @@ class CommunitySecretServiceIntegrationSpec extends Specification {
 		when:
 		CommunitySecret result = service.update(communityAddress, s1.id, cmd)
 		then:
-		result.name == "new secret name"
-		result.secret == "new secret"
-		result.communityAddress == communityAddress
+		thrown BadRequestException
 	}
 
 	void "update() fails for bad id"() {

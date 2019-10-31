@@ -23,17 +23,15 @@ class CommunitySecret {
 	}
 
 	@GrailsCompileStatic
-	Map toMap() { [
-		id: id,
-		name: name,
-		communityAddress: communityAddress,
-	] }
-
-	@GrailsCompileStatic
-	Map toMapWithSecret() { [
-		id: id,
-		name: name,
-		communityAddress: communityAddress,
-		secret: secret,
-	] }
+	Map toMap(boolean includeSecret = false) {
+		def map = [
+			id: id,
+			name: name,
+			communityAddress: communityAddress,
+		]
+		if (includeSecret) {
+			map.secret = secret
+		}
+		return map
+	}
 }

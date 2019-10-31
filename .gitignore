@@ -14,4 +14,3 @@ replay_pid*
 /.slcache/
 /tomcat.8081/
 /rest-e2e-tests/node_modules/
-web-app/webpack-bundles
