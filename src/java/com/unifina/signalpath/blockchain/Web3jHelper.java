@@ -164,6 +164,7 @@ public class Web3jHelper {
 
 	/**
 	 * Get a public field in Ethereum contract. Returns T of a Type&lt;T&gt; specified in fieldType.
+	 * @return Web3j.Type return value from eth_call (Solidity type + value), or null if bad address or fieldName
 	 * <p>
 	 * For example:
 	 * <p>
@@ -199,6 +200,7 @@ public class Web3jHelper {
 			Type<X> next = i.next();
 			return (T) next.getValue();
 		}
+		// "Note: If an invalid function call is made, or a null result is obtained, the return value will be an instance of Collections.emptyList()" https://web3j.readthedocs.io/en/latest/transactions.html
 		log.info(String.format("public field '%s' not found in contract '%s'", fieldName, contractAddress));
 		return null;
 	}
