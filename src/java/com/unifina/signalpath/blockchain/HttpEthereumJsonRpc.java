@@ -11,7 +11,7 @@ import org.json.JSONObject;
 
 import java.util.List;
 
-class HttpEthereumJsonRpc extends EthereumJsonRpc{
+class HttpEthereumJsonRpc extends EthereumJsonRpc {
 	HttpEthereumJsonRpc(String url, JsonRpcResponseHandler handler) {
 		super(url, handler);
 		//in the case of ContractEventPoller, handler.init() installs filter
@@ -20,21 +20,21 @@ class HttpEthereumJsonRpc extends EthereumJsonRpc{
 
 	@Override
 	public void rpcCall(String method, List params, int callId) throws HttpStatusException, com.mashape.unirest.http.exceptions.UnirestException {
-			HttpResponse<JsonNode> response = formRequest(method, params, callId).asJson();
+		HttpResponse<JsonNode> response = formRequest(method, params, callId).asJson();
 
-			if (statusCodeIsNot2XX(response.getStatus())) {
-				throw new HttpStatusException(response.getStatus(), response.getBody());
-			}
+		if (statusCodeIsNot2XX(response.getStatus())) {
+			throw new HttpStatusException(response.getStatus(), response.getBody());
+		}
 
-			JSONObject responseJson = response.getBody().getObject();
-			handler.processResponse(responseJson);
+		JSONObject responseJson = response.getBody().getObject();
+		handler.processResponse(responseJson);
 	}
 
 
 	private RequestBodyEntity formRequest(String method, List params, int callId) {
-		return Unirest. post(url)
-				.header("Content-Type", "application/json")
-				.body(formRequestBody(method, params, callId));
+		return Unirest.post(url)
+			.header("Content-Type", "application/json")
+			.body(formRequestBody(method, params, callId));
 	}
 
 	private static boolean statusCodeIsNot2XX(int code) {

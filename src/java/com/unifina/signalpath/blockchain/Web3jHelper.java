@@ -76,6 +76,7 @@ public class Web3jHelper {
 		return FunctionEncoder.makeFunction(fn.name, solidity_inputtypes, args, solidity_outputtypes);
 	}
 
+	/** Create a new Web3j.Event with desired types and empty values */
 	public static Event toWeb3jEvent(EthereumABI.Event ev) throws ClassNotFoundException {
 		ArrayList<TypeReference<?>> params = new ArrayList<TypeReference<?>>();
 		for (EthereumABI.Slot s : ev.inputs) {

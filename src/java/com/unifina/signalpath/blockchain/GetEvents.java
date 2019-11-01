@@ -155,10 +155,9 @@ public class GetEvents extends AbstractSignalPathModule implements EventsListene
 				}
 				long blockts = -1;
 				try {
-					 blockts = Web3jHelper.getBlockTime(web3j, txr);
-				}
-				catch (Web3jHelper.BlockchainException e){
-					// log but dont propagate err if getBlockTime fails. this happens often
+					blockts = Web3jHelper.getBlockTime(web3j, txr);
+				} catch (Web3jHelper.BlockchainException e) {
+					// log but don't (re)throw if getBlockTime fails. This happens often. Just use current time.
 					// TODO maybe wait until block is present in RPC
 					log.error(e.getMessage());
 				}
@@ -212,7 +211,7 @@ public class GetEvents extends AbstractSignalPathModule implements EventsListene
 						}
 						convertAndSend(output, value);
 					}
-				} else{
+				} else {
 					// events with no arguments just get a true sent as a sign of event being triggered
 					eventOutputs.get(0).send(Boolean.TRUE);
 				}

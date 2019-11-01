@@ -52,7 +52,7 @@ class ContractEventPoller implements Closeable, Runnable, JsonRpcResponseHandler
 	}
 
 	@Override
-	public void init(){
+	public void init() {
 		newFilter();
 	}
 
