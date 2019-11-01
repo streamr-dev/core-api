@@ -1,15 +1,16 @@
 package com.unifina.signalpath.text;
 
 import com.unifina.signalpath.*;
+
 import javax.xml.bind.DatatypeConverter;
 import java.util.*;
 
 public class DecodeByteArrayToString extends AbstractSignalPathModule {
 
-	private ByteArrayInput in = new ByteArrayInput(this, "in");
-	private StringOutput out = new StringOutput(this, "out");
-	private StringOutput error = new StringOutput(this, "error");
 	private DecodeParameter decodeType = new DecodeParameter(this, "decodeType", DecodeParameter.HEX);
+	private ByteArrayInput in = new ByteArrayInput(this, "in");
+	private StringOutput error = new StringOutput(this, "error");
+	private StringOutput out = new StringOutput(this, "out");
 
 	@Override
 	public void init() {
@@ -24,17 +25,18 @@ public class DecodeByteArrayToString extends AbstractSignalPathModule {
 
 	@Override
 	public void sendOutput() {
-
 		try {
-			switch (decodeType.getValue()){
-				case DecodeParameter.BASE64: out.send(DatatypeConverter.printBase64Binary(in.getValue()));
+			switch (decodeType.getValue()) {
+				case DecodeParameter.BASE64:
+					out.send(DatatypeConverter.printBase64Binary(in.getValue()));
 					break;
+				case DecodeParameter.HEX:
 				default:
-				case DecodeParameter.HEX: out.send(DatatypeConverter.printHexBinary(in.getValue()));
+					out.send(DatatypeConverter.printHexBinary(in.getValue()));
 					break;
 			}
-		} catch (Exception e ){
-			error.send("Failed to parse byte array");
+		} catch (IllegalArgumentException e) {
+			error.send("Input was null");
 		}
 	}
 
@@ -44,7 +46,6 @@ public class DecodeByteArrayToString extends AbstractSignalPathModule {
 	}
 
 	public static class DecodeParameter extends StringParameter {
-
 		public static final String BASE64 = "base64";
 		public static final String HEX = "hex";
 
@@ -53,10 +54,10 @@ public class DecodeByteArrayToString extends AbstractSignalPathModule {
 		}
 
 		@Override
-		protected List<PossibleValue> getPossibleValues(){
+		protected List<PossibleValue> getPossibleValues() {
 			return Arrays.asList(
-					new PossibleValue("base64", BASE64),
-					new PossibleValue("hex", HEX)
+				new PossibleValue("base64", BASE64),
+				new PossibleValue("hex", HEX)
 			);
 		}
 	}

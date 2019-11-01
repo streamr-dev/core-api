@@ -6,19 +6,8 @@ import com.unifina.utils.testutils.ModuleTestHelper
 import javax.xml.bind.DatatypeConverter
 
 public class DecodeStringToByteArraySpec extends Specification {
-
-	def module
-
-	def setup() {
-		module = null
-	}
-
-	def cleanup() {
-
-	}
-
 	void "Decode String To Byte Array works properly with default decode type base64"() {
-		module = new DecodeStringToByteArray()
+		def module = new DecodeStringToByteArray()
 		module.init()
 		when:
 		Map inputValues = [
@@ -29,14 +18,12 @@ public class DecodeStringToByteArraySpec extends Specification {
 		]
 		then:
 		new ModuleTestHelper.Builder(module, inputValues, outputValues)
-		.customEquality { expected, actual ->
-			Arrays.equals(expected, actual)
-		}
-		.test()
+			.customEquality { List expected, List actual -> Arrays.equals(expected, actual) }
+			.test()
 	}
 
 	void "Decode String To Byte Array works properly with hex decode type"() {
-		module = new DecodeStringToByteArray()
+		def module = new DecodeStringToByteArray()
 		module.init()
 		module.getInput('decodeType').receive('hex')
 		when:
@@ -48,9 +35,7 @@ public class DecodeStringToByteArraySpec extends Specification {
 		]
 		then:
 		new ModuleTestHelper.Builder(module, inputValues, outputValues)
-				.customEquality { expected, actual ->
-			Arrays.equals(expected, actual)
-		}
-		.test()
+			.customEquality { List expected, List actual -> Arrays.equals(expected, actual) }
+			.test()
 	}
 }

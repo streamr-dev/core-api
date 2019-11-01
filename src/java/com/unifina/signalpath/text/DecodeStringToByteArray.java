@@ -1,15 +1,16 @@
 package com.unifina.signalpath.text;
 
 import com.unifina.signalpath.*;
+
 import javax.xml.bind.DatatypeConverter;
 import java.util.*;
 
 public class DecodeStringToByteArray extends AbstractSignalPathModule {
 
-	private StringInput in = new StringInput(this, "in");
-	private ByteArrayOutput out = new ByteArrayOutput(this, "out");
-	private StringOutput error = new StringOutput(this, "error");
 	private DecodeParameter decodeType = new DecodeParameter(this, "decodeType", DecodeParameter.BASE64);
+	private StringInput in = new StringInput(this, "in");
+	private StringOutput error = new StringOutput(this, "error");
+	private ByteArrayOutput out = new ByteArrayOutput(this, "out");
 
 	@Override
 	public void init() {
@@ -25,15 +26,17 @@ public class DecodeStringToByteArray extends AbstractSignalPathModule {
 	@Override
 	public void sendOutput() {
 		try {
-			switch (decodeType.getValue()){
-				case DecodeParameter.HEX: out.send(DatatypeConverter.parseHexBinary(in.getValue()));
+			switch (decodeType.getValue()) {
+				case DecodeParameter.HEX:
+					out.send(DatatypeConverter.parseHexBinary(in.getValue()));
 					break;
+				case DecodeParameter.BASE64:
 				default:
-				case DecodeParameter.BASE64: out.send(DatatypeConverter.parseBase64Binary(in.getValue()));
+					out.send(DatatypeConverter.parseBase64Binary(in.getValue()));
 					break;
 			}
-		} catch (Exception e ){
-			error.send("Failed to parse : '" + in.getValue() + "'");
+		} catch (IllegalArgumentException e) {
+			error.send("Failed to parse: '" + in.getValue() + "'");
 		}
 	}
 
@@ -51,10 +54,10 @@ public class DecodeStringToByteArray extends AbstractSignalPathModule {
 		}
 
 		@Override
-		protected List<PossibleValue> getPossibleValues(){
+		protected List<PossibleValue> getPossibleValues() {
 			return Arrays.asList(
-					new PossibleValue("base64", BASE64),
-					new PossibleValue("hex", HEX)
+				new PossibleValue("base64", BASE64),
+				new PossibleValue("hex", HEX)
 			);
 		}
 	}
