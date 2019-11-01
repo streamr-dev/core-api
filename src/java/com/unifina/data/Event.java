@@ -38,7 +38,7 @@ public class Event<ContentClass> implements Comparable<Event<ContentClass>> {
 
 	@Override
 	public String toString() {
-		return timestamp + " - content: " + content;
+		return "Event[timestamp=" + timestamp + ",content=" + content + ']';
 	}
 
 	public void dispatch() {
