@@ -48,6 +48,7 @@ class UpdateProductCommand {
 
 	static constraints = {
 		importFrom(Product)
+		// List all onChainFields as nullable
 		ownerAddress(nullable: true, validator: Product.isEthereumAddressOrIsNull)
 		beneficiaryAddress(nullable: true, validator: Product.isEthereumAddressOrIsNull)
 		pricePerSecond(nullable: true)
