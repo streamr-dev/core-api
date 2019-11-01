@@ -48,6 +48,8 @@ class UpdateProductCommand {
 
 	static constraints = {
 		importFrom(Product)
+		ownerAddress(nullable: true, validator: Product.isEthereumAddressOrIsNull)
+		beneficiaryAddress(nullable: true, validator: Product.isEthereumAddressOrIsNull)
 		pricePerSecond(nullable: true)
 		priceCurrency(nullable: true)
 		minimumSubscriptionInSeconds(nullable: true)
