@@ -8,7 +8,7 @@ import com.unifina.domain.community.CommunitySecret
 import com.unifina.domain.security.SecUser
 import com.unifina.filters.UnifinaCoreAPIFilters
 import com.unifina.service.CommunitySecretService
-import com.unifina.service.CommunityService
+import com.unifina.service.EthereumService
 import grails.test.mixin.Mock
 import grails.test.mixin.TestFor
 import spock.lang.Specification
@@ -32,7 +32,7 @@ class CommunitySecretApiControllerSpec extends Specification {
 		secret.save(validate: true, failOnError: true)
 
 		controller.communitySecretService = Mock(CommunitySecretService)
-		controller.communityService = Mock(CommunityService)
+		controller.ethereumService = Mock(EthereumService)
 	}
 
 	void "index() test"() {
@@ -59,7 +59,8 @@ class CommunitySecretApiControllerSpec extends Specification {
 			controller.index()
 		}
 		then:
-		1 * controller.communityService.checkAdminAccessControl(me, communityAddress) >> true
+		1 * controller.ethereumService.fetchCommunityAdminsEthereumAddress(communityAddress) >> "adminAddress"
+		1 * controller.ethereumService.hasEthereumAddress(me, "adminAddress") >> true
 		1 * controller.communitySecretService.findAll(communityAddress) >> [s1, s2]
 		response.json[0].id == "1"
 		response.json[0].name == "secret 1"
@@ -92,10 +93,11 @@ class CommunitySecretApiControllerSpec extends Specification {
 			controller.index()
 		}
 		then:
-		1 * controller.communityService.checkAdminAccessControl(me, communityAddress) >> false
+		1 * controller.ethereumService.fetchCommunityAdminsEthereumAddress(communityAddress) >> "adminAddress"
+		1 * controller.ethereumService.hasEthereumAddress(me, "adminAddress") >> false
 		def e = thrown(ApiException)
 		e.statusCode == 403
-		e.code == "ACCESS_DENIED"
+		e.code == "FORBIDDEN"
 	}
 
 	void "save() test"() {
@@ -118,7 +120,8 @@ class CommunitySecretApiControllerSpec extends Specification {
 			controller.save()
 		}
 		then:
-		1 * controller.communityService.checkAdminAccessControl(me, communityAddress) >> true
+		1 * controller.ethereumService.fetchCommunityAdminsEthereumAddress(communityAddress) >> "adminAddress"
+		1 * controller.ethereumService.hasEthereumAddress(me, "adminAddress") >> true
 		1 * controller.communitySecretService.create(communityAddress, _ as CommunitySecretCommand) >> secret
 		response.json.id == "1"
 		response.json.name == "secret name"
@@ -139,6 +142,24 @@ class CommunitySecretApiControllerSpec extends Specification {
 		}
 		then:
 		0 * controller.communitySecretService._
+		def e = thrown(BadRequestException)
+		e.statusCode == 400
+		e.code == "PARAMETER_MISSING"
+	}
+
+	void "save() bad request on non-community address"() {
+		when:
+		request.method = "POST"
+		params.communityAddress = communityAddress
+		request.json = [
+			name: "secret name",
+			secret: "secret",
+		]
+		withFilters(action: "save") {
+			controller.save()
+		}
+		then:
+		1 * controller.ethereumService.fetchCommunityAdminsEthereumAddress(communityAddress) >> null
 		def e = thrown(BadRequestException)
 		e.statusCode == 400
 		e.code == "PARAMETER_MISSING"
@@ -173,10 +194,11 @@ class CommunitySecretApiControllerSpec extends Specification {
 			controller.save()
 		}
 		then:
-		1 * controller.communityService.checkAdminAccessControl(me, communityAddress) >> false
+		1 * controller.ethereumService.fetchCommunityAdminsEthereumAddress(communityAddress) >> "adminAddress"
+		1 * controller.ethereumService.hasEthereumAddress(me, "adminAddress") >> false
 		def e = thrown(ApiException)
 		e.statusCode == 403
-		e.code == "ACCESS_DENIED"
+		e.code == "FORBIDDEN"
 	}
 
 	void "show() test"() {
@@ -197,7 +219,8 @@ class CommunitySecretApiControllerSpec extends Specification {
 			controller.show()
 		}
 		then:
-		1 * controller.communityService.checkAdminAccessControl(me, communityAddress) >> true
+		1 * controller.ethereumService.fetchCommunityAdminsEthereumAddress(communityAddress) >> "adminAddress"
+		1 * controller.ethereumService.hasEthereumAddress(me, "adminAddress") >> true
 		1 * controller.communitySecretService.find(communityAddress, validID) >> s1
 		response.json.id == "1"
 		response.json.name == "secret 1"
@@ -215,6 +238,21 @@ class CommunitySecretApiControllerSpec extends Specification {
 		}
 		then:
 		0 * controller.communitySecretService._
+		def e = thrown(BadRequestException)
+		e.statusCode == 400
+		e.code == "PARAMETER_MISSING"
+	}
+
+	void "show() bad request on non-community address"() {
+		when:
+		request.method = "GET"
+		params.communityAddress = communityAddress
+		params.id = validID
+		withFilters(action: "show") {
+			controller.show()
+		}
+		then:
+		1 * controller.ethereumService.fetchCommunityAdminsEthereumAddress(communityAddress) >> null
 		def e = thrown(BadRequestException)
 		e.statusCode == 400
 		e.code == "PARAMETER_MISSING"
@@ -245,7 +283,8 @@ class CommunitySecretApiControllerSpec extends Specification {
 			controller.show()
 		}
 		then:
-		1 * controller.communityService.checkAdminAccessControl(me, communityAddress) >> true
+		1 * controller.ethereumService.fetchCommunityAdminsEthereumAddress(communityAddress) >> "adminAddress"
+		1 * controller.ethereumService.hasEthereumAddress(me, "adminAddress") >> true
 		1 * controller.communitySecretService.find(communityAddress, validID) >> null
 		def e = thrown(NotFoundException)
 		e.statusCode == 404
@@ -262,10 +301,11 @@ class CommunitySecretApiControllerSpec extends Specification {
 			controller.show()
 		}
 		then:
-		1 * controller.communityService.checkAdminAccessControl(me, communityAddress) >> false
+		1 * controller.ethereumService.fetchCommunityAdminsEthereumAddress(communityAddress) >> "adminAddress"
+		1 * controller.ethereumService.hasEthereumAddress(me, "adminAddress") >> false
 		def e = thrown(ApiException)
 		e.statusCode == 403
-		e.code == "ACCESS_DENIED"
+		e.code == "FORBIDDEN"
 	}
 
 	void "update() test"() {
@@ -289,7 +329,8 @@ class CommunitySecretApiControllerSpec extends Specification {
 			controller.update()
 		}
 		then:
-		1 * controller.communityService.checkAdminAccessControl(me, communityAddress) >> true
+		1 * controller.ethereumService.fetchCommunityAdminsEthereumAddress(communityAddress) >> "adminAddress"
+		1 * controller.ethereumService.hasEthereumAddress(me, "adminAddress") >> true
 		1 * controller.communitySecretService.update(communityAddress, validID, _ as CommunitySecretCommand) >> {
 			s1.name = "new name"
 			s1.secret = "new secret"
@@ -314,6 +355,24 @@ class CommunitySecretApiControllerSpec extends Specification {
 		}
 		then:
 		0 * controller.communitySecretService._
+		def e = thrown(BadRequestException)
+		e.statusCode == 400
+		e.code == "PARAMETER_MISSING"
+	}
+
+	void "update() bad request on non-community address"() {
+		when:
+		request.method = "PUT"
+		params.communityAddress = communityAddress
+		params.id = "123"
+		request.json = [
+			name: "name",
+		]
+		withFilters(action: "update") {
+			controller.update()
+		}
+		then:
+		1 * controller.ethereumService.fetchCommunityAdminsEthereumAddress(communityAddress) >> null
 		def e = thrown(BadRequestException)
 		e.statusCode == 400
 		e.code == "PARAMETER_MISSING"
@@ -368,7 +427,8 @@ class CommunitySecretApiControllerSpec extends Specification {
 			controller.update()
 		}
 		then:
-		1 * controller.communityService.checkAdminAccessControl(me, communityAddress) >> true
+		1 * controller.ethereumService.fetchCommunityAdminsEthereumAddress(communityAddress) >> "adminAddress"
+		1 * controller.ethereumService.hasEthereumAddress(me, "adminAddress") >> true
 		1 * controller.communitySecretService.update(communityAddress, validID, _ as CommunitySecretCommand) >> { throw new NotFoundException("Community secret not found") }
 		def e = thrown(NotFoundException)
 		e.statusCode == 404
@@ -388,10 +448,11 @@ class CommunitySecretApiControllerSpec extends Specification {
 			controller.update()
 		}
 		then:
-		1 * controller.communityService.checkAdminAccessControl(me, communityAddress) >> false
+		1 * controller.ethereumService.fetchCommunityAdminsEthereumAddress(communityAddress) >> "adminAddress"
+		1 * controller.ethereumService.hasEthereumAddress(me, "adminAddress") >> false
 		def e = thrown(ApiException)
 		e.statusCode == 403
-		e.code == "ACCESS_DENIED"
+		e.code == "FORBIDDEN"
 	}
 
 	void "delete() test"() {
@@ -404,7 +465,8 @@ class CommunitySecretApiControllerSpec extends Specification {
 			controller.delete()
 		}
 		then:
-		1 * controller.communityService.checkAdminAccessControl(me, communityAddress) >> true
+		1 * controller.ethereumService.fetchCommunityAdminsEthereumAddress(communityAddress) >> "adminAddress"
+		1 * controller.ethereumService.hasEthereumAddress(me, "adminAddress") >> true
 		1 * controller.communitySecretService.delete(communityAddress, validID)
 		response.status == 204
 	}
@@ -419,6 +481,21 @@ class CommunitySecretApiControllerSpec extends Specification {
 		}
 		then:
 		0 * controller.communitySecretService._
+		def e = thrown(BadRequestException)
+		e.statusCode == 400
+		e.code == "PARAMETER_MISSING"
+	}
+
+	void "delete() bad request on non-community address"() {
+		when:
+		request.method = "DELETE"
+		params.communityAddress = communityAddress
+		params.id = validID
+		withFilters(action: "delete") {
+			controller.delete()
+		}
+		then:
+		1 * controller.ethereumService.fetchCommunityAdminsEthereumAddress(communityAddress) >> null
 		def e = thrown(BadRequestException)
 		e.statusCode == 400
 		e.code == "PARAMETER_MISSING"
@@ -449,7 +526,8 @@ class CommunitySecretApiControllerSpec extends Specification {
 			controller.delete()
 		}
 		then:
-		1 * controller.communityService.checkAdminAccessControl(me, communityAddress) >> true
+		1 * controller.ethereumService.fetchCommunityAdminsEthereumAddress(communityAddress) >> "adminAddress"
+		1 * controller.ethereumService.hasEthereumAddress(me, "adminAddress") >> true
 		1 * controller.communitySecretService.delete(communityAddress, validID) >> {
 			throw new NotFoundException("mocked: not found!")
 		}
@@ -468,9 +546,10 @@ class CommunitySecretApiControllerSpec extends Specification {
 			controller.delete()
 		}
 		then:
-		1 * controller.communityService.checkAdminAccessControl(me, communityAddress) >> false
+		1 * controller.ethereumService.fetchCommunityAdminsEthereumAddress(communityAddress) >> "adminAddress"
+		1 * controller.ethereumService.hasEthereumAddress(me, "adminAddress") >> false
 		def e = thrown(ApiException)
 		e.statusCode == 403
-		e.code == "ACCESS_DENIED"
+		e.code == "FORBIDDEN"
 	}
 }
