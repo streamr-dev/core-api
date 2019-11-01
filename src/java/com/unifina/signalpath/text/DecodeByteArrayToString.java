@@ -20,7 +20,6 @@ public class DecodeByteArrayToString extends AbstractSignalPathModule {
 		addOutput(error);
 		in.setCanConnect(true);
 		decodeType.setCanConnect(false);
-		decodeType.setUpdateOnChange(true);
 	}
 
 	@Override
