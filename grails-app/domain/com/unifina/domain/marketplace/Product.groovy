@@ -5,6 +5,7 @@ import com.unifina.domain.security.Permission
 import com.unifina.domain.security.SecUser
 import com.unifina.utils.HexIdGenerator
 import grails.compiler.GrailsCompileStatic
+import groovy.json.JsonSlurper
 
 class Product {
 	public final static String DEFAULT_NAME = "Untitled Product"
@@ -20,6 +21,7 @@ class Product {
 	State state = State.NOT_DEPLOYED
 	Stream previewStream
 	String previewConfigJson
+	String pendingChanges
 
 	Date dateCreated
 	Date lastUpdated
@@ -29,7 +31,7 @@ class Product {
 	// The below fields exist in the domain object for speed & query support, but the ground truth is in the smart contract.
 	String ownerAddress
 	String beneficiaryAddress
-	Long pricePerSecond
+	Long pricePerSecond = 0
 	Currency priceCurrency = Currency.DATA
 	Long minimumSubscriptionInSeconds = 0
 	Long blockNumber = 0
@@ -66,13 +68,10 @@ class Product {
 		type(nullable: false)
 		previewStream(nullable: true, validator: { Stream s, p -> s == null || s in p.streams })
 		previewConfigJson(nullable: true)
+		pendingChanges(nullable: true)
 		ownerAddress(nullable: true, validator: isEthereumAddressOrIsNull)
 		beneficiaryAddress(nullable: true, validator: isEthereumAddressOrIsNull)
-		pricePerSecond(min: 0L, validator: { Long price, p ->
-			price == 0 ?
-				p.ownerAddress == null && p.beneficiaryAddress == null :
-				p.ownerAddress != null && p.beneficiaryAddress != null
-		})
+		pricePerSecond(min: 0L)
 		minimumSubscriptionInSeconds(min: 0L)
 		blockNumber(min: 0L)
 		blockIndex(min: 0L)
@@ -93,9 +92,10 @@ class Product {
 	}
 
 	@GrailsCompileStatic
-	Map toMap() {
-		[
+	Map toMap(boolean isOwner = false) {
+		def map = [
 		    id: id,
+			type: type.toString(),
 			name: name,
 			description: description,
 			imageUrl: imageUrl,
@@ -115,12 +115,18 @@ class Product {
 			minimumSubscriptionInSeconds: minimumSubscriptionInSeconds,
 			owner: owner.name
 		]
+		if (isOwner && pendingChanges != null) {
+			JsonSlurper slurper = new JsonSlurper()
+			map.put("pendingChanges", (HashMap<String, Serializable>) slurper.parseText(pendingChanges))
+		}
+		return map
 	}
 
 	@GrailsCompileStatic
 	Map toSummaryMap() {
 		[
 			id: id,
+			type: type.toString(),
 			name: name,
 			description: description,
 			imageUrl: imageUrl,

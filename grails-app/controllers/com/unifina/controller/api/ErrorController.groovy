@@ -7,6 +7,7 @@ import com.unifina.api.CannotRemoveEthereumKeyException
 import com.unifina.api.CanvasCommunicationException
 import com.unifina.api.ChallengeVerificationFailedException
 import com.unifina.api.DisabledUserException
+import com.unifina.api.FieldCannotBeUpdatedException
 import com.unifina.api.InvalidAPIKeyException
 import com.unifina.api.InvalidSessionTokenException
 import com.unifina.api.InvalidStateException
@@ -32,17 +33,14 @@ class ErrorController {
 		InvalidUsernameAndPasswordException: { InvalidUsernameAndPasswordException e -> new ApiError(401, "INVALID_USERNAME_PASSWORD_ERROR", e.message)},
 		InvalidAPIKeyException: { InvalidAPIKeyException e -> new ApiError(401, "INVALID_API_KEY_ERROR", e.message)},
 		BadRequestException: { BadRequestException e -> new ApiError(400, "PARAMETER_MISSING", e.message)},
+		FieldCannotBeUpdatedException: { FieldCannotBeUpdatedException e -> new ApiError(422, "FIELD_CANNOT_BE_UPDATED", e.message)}
 	]
 
 	@StreamrApi(authenticationLevel = AuthLevel.NONE)
 	def index() {
 		try {
 			Exception exception = request.exception.cause ?: request.exception
-			if (request.isApiAction) {
-				renderAsJson(exception)
-			} else {
-				[exception: exception]
-			}
+			renderAsJson(exception)
 		} catch (Exception e) {
 			// Avoid infinite loop by catching any "error while showing error" -type of situation
 			log.error("Failed to render exception!", e)
@@ -62,6 +60,11 @@ class ErrorController {
 			apiError = ((ApiException) exception).asApiError()
 		} else {
 			apiError = new ApiError(500, exception.class.simpleName, exception.getMessage())
+		}
+
+		// Log internal errors
+		if (apiError.statusCode >= 500 && apiError.statusCode < 600) {
+			log.error("Unexpected error occurred on request to ${request?.getMethod()} ${request?.getRequestURL()}, returning status code 500", exception)
 		}
 
 		response.status = apiError.statusCode

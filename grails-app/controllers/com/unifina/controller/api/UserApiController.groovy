@@ -14,14 +14,6 @@ import com.unifina.service.BalanceService
 
 @Secured(["IS_AUTHENTICATED_ANONYMOUSLY"])
 class UserApiController {
-	static allowedMethods = [
-		update: "PUT",
-		changePassword: "POST",
-		getUserInfo: "GET",
-		delete: "DELETE",
-		uploadAvatarImage: "POST",
-	]
-
 	def springSecurityService
 	UserService userService
 	UserAvatarImageService userAvatarImageService

@@ -1,9 +1,11 @@
 package com.unifina.service
 
 import com.unifina.domain.dashboard.Dashboard
+import com.unifina.domain.data.Stream
 import com.unifina.domain.security.Key
 import com.unifina.domain.security.Permission
 import com.unifina.domain.security.SecUser
+import com.unifina.domain.signalpath.Canvas
 import grails.test.spock.IntegrationSpec
 import grails.util.Holders
 
@@ -26,9 +28,13 @@ class PermissionServiceIntegrationSpec extends IntegrationSpec {
 	Dashboard dashAllowed, dashRestricted, dashOwned, dashPublic
 	Permission dashReadPermission, dashAnonymousReadPermission
 
+	Canvas canvas
+	// User has indirect permissions to this UI channel stream via the canvas
+	Stream stream
+
 	void setup() {
 		service = Holders.getApplicationContext().getBean(PermissionService)
-
+		//stream?.delete(flush: true)
 		SecUser.findByUsername("me-permission-service-integration-spec@streamr.com")?.delete(flush: true)
 		SecUser.findByUsername("him-permission-service-integration-spec@streamr.com")?.delete(flush: true)
 		SecUser.findByUsername("stranger-permission-service-integration-spec@streamr.com")?.delete(flush: true)
@@ -79,6 +85,11 @@ class PermissionServiceIntegrationSpec extends IntegrationSpec {
 		dashReadPermission = service.grant(anotherUser, dashAllowed, me, Permission.Operation.READ)
 		dashAnonymousReadPermission = service.grantAnonymousAccess(anotherUser, dashPublic)
 		service.grant(anotherUser, dashAllowed, anonymousKey)
+
+		canvas = new Canvas().save(validate: true, failOnError: true)
+		stream = new Stream(name: "ui channel", uiChannel: true, uiChannelCanvas: canvas)
+		stream.id = "stream-id"
+		stream.save(validate: true, failOnError: true)
 	}
 
 	void cleanup() {
@@ -86,6 +97,7 @@ class PermissionServiceIntegrationSpec extends IntegrationSpec {
 		Permission.findAllByDashboard(dashRestricted)*.delete(flush: true)
 		Permission.findAllByDashboard(dashOwned)*.delete(flush: true)
 		Permission.findAllByDashboard(dashPublic)*.delete(flush: true)
+		Permission.findAllByCanvas(canvas)*.delete(flush: true)
 
 		dashAllowed?.delete(flush: true)
 		dashRestricted?.delete(flush: true)
@@ -100,6 +112,9 @@ class PermissionServiceIntegrationSpec extends IntegrationSpec {
 		anotherUser?.delete(flush: true)
 		stranger?.delete(flush: true)
 		someone?.delete(flush: true)
+
+		stream?.delete(flush: true)
+		stream.uiChannelCanvas?.delete(flush: true)
 	}
 
 
@@ -284,5 +299,15 @@ class PermissionServiceIntegrationSpec extends IntegrationSpec {
 		service.get(Dashboard, myKey) as Set == [dashOwned, dashAllowed] as Set
 		service.get(Dashboard, anotherUserKey) as Set == [dashAllowed, dashRestricted, dashPublic] as Set
 		service.get(Dashboard, anonymousKey) as Set == [dashAllowed] as Set
+	}
+
+	void "getPermissionsTo(resource, userish) returns correct UI channel permissions via associated canvas"() {
+		service.systemGrantAll(me, canvas)
+
+		expect:
+		service.getPermissionsTo(stream, me).size() == 3
+		service.canRead(me, stream)
+		service.canWrite(me, stream)
+		service.canShare(me, stream)
 	}
 }

@@ -12,6 +12,7 @@ import grails.test.mixin.Mock
 import grails.test.mixin.TestFor
 import grails.test.mixin.TestMixin
 import grails.test.mixin.web.ControllerUnitTestMixin
+import grails.util.Holders
 import spock.lang.Specification
 
 import javax.servlet.http.HttpServletResponse
@@ -105,7 +106,7 @@ class ApiServiceSpec extends Specification {
 		when:
 		service.addLinkHintToHeader(params, 1000, [action: "index", controller: "dashboardApi"], response)
 		then:
-		1 * response.addHeader("Link", '<http://localhost:8080/api/v1/dashboards?max=1000&offset=1150&grantedAccess=true&publicAccess=true&name=dashboard>; rel="more"')
+		1 * response.addHeader("Link", '<'+ Holders.grailsApplication.config.grails.serverURL+'/api/v1/dashboards?max=1000&offset=1150&grantedAccess=true&publicAccess=true&name=dashboard>; rel="more"')
 	}
 
 	void "getByIdAndThrowIfNotFound() throws NotFoundException if domain object cannot be found"() {

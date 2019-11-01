@@ -1,5 +1,6 @@
 package com.unifina.service
 
+import com.unifina.api.BadRequestException
 import com.unifina.api.CommunitySecretCommand
 import com.unifina.api.NotFoundException
 import com.unifina.domain.community.CommunitySecret
@@ -16,7 +17,7 @@ class CommunitySecretService {
 		CommunitySecret result = new CommunitySecret()
 		result.communityAddress = communityAddress
 		result.name = cmd.name
-		result.secret = generator.generate()
+		result.secret = cmd.secret ?: generator.generate()
 		result.save(validate: true, failOnError: true)
 		return result
 	}
@@ -31,9 +32,14 @@ class CommunitySecretService {
 	CommunitySecret update(String communityAddress, String communitySecretId, CommunitySecretCommand cmd) {
 		CommunitySecret result = CommunitySecret.findWhere(communityAddress: communityAddress, id: communitySecretId)
 		if (result == null) {
-			throw new NotFoundException("community secret not found")
+			throw new NotFoundException("Community secret not found")
 		}
-		result.name = cmd.name
+		if (cmd.name) {
+			result.name = cmd.name
+		}
+		if (cmd.secret) {
+			throw new BadRequestException("Can't change the secret, please create a new community secret")
+		}
 		result.save(validate: true, failOnError: true)
 		return result
 	}
@@ -41,7 +47,7 @@ class CommunitySecretService {
 	void delete(String communityAddress, String communitySecretId) {
 		CommunitySecret result = CommunitySecret.findWhere(communityAddress: communityAddress, id: communitySecretId)
 		if (result == null) {
-			throw new NotFoundException("community secret not found by id")
+			throw new NotFoundException("Community secret not found")
 		}
 		result.delete(flush: true)
 	}

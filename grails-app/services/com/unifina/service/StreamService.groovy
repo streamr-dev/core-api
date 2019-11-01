@@ -3,13 +3,11 @@ package com.unifina.service
 import com.google.gson.Gson
 import com.google.gson.GsonBuilder
 import com.streamr.client.protocol.message_layer.StreamMessage
-import com.streamr.client.protocol.message_layer.StreamMessageV31
 import com.unifina.api.NotFoundException
 import com.unifina.api.NotPermittedException
 import com.unifina.api.ValidationException
 import com.unifina.data.StreamPartitioner
 import com.unifina.domain.dashboard.DashboardItem
-import com.unifina.domain.data.Feed
 import com.unifina.domain.data.Stream
 import com.unifina.domain.security.IntegrationKey
 import com.unifina.domain.security.Key
@@ -17,25 +15,22 @@ import com.unifina.domain.security.Permission
 import com.unifina.domain.security.SecUser
 import com.unifina.domain.signalpath.Canvas
 import com.unifina.domain.task.Task
-import com.unifina.feed.AbstractStreamListener
 import com.unifina.feed.DataRange
-import com.unifina.feed.DataRangeProvider
 import com.unifina.feed.FieldDetector
+
 import com.unifina.signalpath.RuntimeRequest
 import com.unifina.task.DelayedDeleteStreamTask
-import com.unifina.utils.CSVImporter
 import com.unifina.utils.IdGenerator
 import grails.converters.JSON
 import groovy.transform.CompileStatic
-import org.springframework.util.Assert
+import org.codehaus.groovy.grails.commons.GrailsApplication
 
 import java.text.DateFormat
 
 class StreamService {
 
-	def grailsApplication
-	FeedService feedService
-	KafkaService kafkaService
+	GrailsApplication grailsApplication
+
 	CassandraService cassandraService
 	PermissionService permissionService
 
@@ -63,16 +58,10 @@ class StreamService {
 			stream.name = Stream.DEFAULT_NAME
 		}
 
-		// If no feed given, API feed is used
-		if (stream.feed == null) {
-			stream.feed = Feed.load(Feed.KAFKA_ID)
-		}
 		Map config = stream.getStreamConfigAsMap()
 		if (!config.fields) {
 			config.fields = []
 		}
-		AbstractStreamListener streamListener = instantiateListener(stream)
-		streamListener.addToConfiguration(config, stream)
 		stream.config = gson.toJson(config)
 
 		if (!stream.validate()) {
@@ -82,15 +71,11 @@ class StreamService {
 		stream.save(failOnError: true)
 		permissionService.systemGrantAll(user, stream)
 
-		if (streamListener) {
-			streamListener.afterStreamSaved(stream)
-		}
 		return stream
 	}
 
 	void deleteStream(Stream stream) {
-		AbstractStreamListener streamListener = instantiateListener(stream)
-		streamListener.beforeDelete(stream)
+		cassandraService.deleteAll(stream)
 		stream.delete(flush:true)
 	}
 
@@ -102,12 +87,14 @@ class StreamService {
 	}
 
 	boolean autodetectFields(Stream stream, boolean flattenHierarchies, boolean saveFields) {
-		FieldDetector fieldDetector = instantiateDetector(stream)
-		fieldDetector.setFlattenMap(flattenHierarchies)
-		def fields = fieldDetector?.detectFields(stream)
-		if (fields) {
+		StreamMessage latest = cassandraService.getLatestFromAllPartitions(stream)
+
+		if (!latest) {
+			return false
+		} else {
+			List<FieldDetector.FieldConfig> fields = FieldDetector.detectFields(latest, flattenHierarchies)
 			Map config = stream.getStreamConfigAsMap()
-			config.fields = fields
+			config.fields = fields*.toMap()
 			stream.config = gson.toJson(config)
 			if (saveFields) {
 				stream.save(flush: true, failOnError: true)
@@ -115,16 +102,7 @@ class StreamService {
 				stream.discard()
 			}
 			return true
-		} else {
-			return false
 		}
-	}
-
-	// Ref to Kafka will be abstracted out when Feed abstraction is reworked
-
-	void sendMessage(StreamMessage msg) {
-		String kafkaPartitionKey = "${msg.getStreamId()}-${msg.getStreamPartition()}"
-		kafkaService.sendMessage(msg, kafkaPartitionKey)
 	}
 
 	void saveMessage(StreamMessage msg) {
@@ -149,78 +127,9 @@ class StreamService {
 		cassandraService.deleteAll(stream)
 	}
 
-	/**
-	 * Imports data from a csv file into a Stream.
-	 * @param csv
-	 * @param stream
-     * @return Autocreated Stream field config as a Map (can be written to stream.config as JSON)
-     */
-	@CompileStatic
-	public Map importCsv(CSVImporter csv, Stream stream, String publisherId) {
-		long sequenceNumber = 0L
-		Long previousTimestamp = null
-		String msgChainId = IdGenerator.getShort()
-
-		for (CSVImporter.LineValues line : csv) {
-			Date date = line.getTimestamp()
-
-			// Write all fields into the message except for the timestamp column
-			Map message = [:]
-			for (int i=0; i<line.values.length; i++) {
-				if (i!=line.schema.timestampColumnIndex && line.values[i]!=null) {
-					String name = line.schema.entries[i].name
-					message[name] = line.values[i]
-				}
-			}
-
-			int partition = partitioner.partition(stream, null)
-			StreamMessageV31 msg = new StreamMessageV31(stream.id, partition, date.time, sequenceNumber, publisherId, msgChainId,
-				previousTimestamp, sequenceNumber, StreamMessage.ContentType.CONTENT_TYPE_JSON, StreamMessage.EncryptionType.NONE,
-				gson.toJson(message), StreamMessage.SignatureType.SIGNATURE_TYPE_NONE, null)
-			saveMessage(msg)
-			sequenceNumber++
-			previousTimestamp = date.time
-		}
-
-		// Autocreate the stream config based on fields in the csv schema
-		Map config = (Map) (stream.config ? JSON.parse(stream.config) : [:])
-
-		List fields = []
-
-		// The primary timestamp column is implicit, so don't include it in streamConfig
-		for (int i=0; i < csv.schema.entries.length; i++) {
-			if (i != csv.getSchema().timestampColumnIndex) {
-				CSVImporter.SchemaEntry e = csv.getSchema().entries[i]
-				if (e!=null)
-					fields << [name:e.name, type:e.type]
-			}
-		}
-
-		config.fields = fields
-		return config
-	}
-
-	// TODO: move to FeedService
-	public AbstractStreamListener instantiateListener(Stream stream) {
-		Assert.notNull(stream.feed.streamListenerClass, "feed's streamListenerClass is unexpectedly null")
-		Class clazz = getClass().getClassLoader().loadClass(stream.feed.streamListenerClass)
-		return clazz.newInstance()
-	}
-
-	// TODO: move to FeedService
-	private FieldDetector instantiateDetector(Stream stream) {
-		if (stream.feed.fieldDetectorClass == null) {
-			return null
-		} else {
-			Class clazz = getClass().getClassLoader().loadClass(stream.feed.fieldDetectorClass)
-			return clazz.newInstance()
-		}
-	}
-
 	@CompileStatic
 	DataRange getDataRange(Stream stream) {
-		DataRangeProvider provider = feedService.instantiateDataRangeProvider(stream.feed)
-		return provider?.getDataRange(stream)
+		return cassandraService.getDataRange(stream)
 	}
 
 	@CompileStatic
@@ -338,11 +247,18 @@ class StreamService {
 	}
 
 	@CompileStatic
-	StreamStatus status(Stream s, Date threshold) {
+	StreamStatus status(Stream s, Date now) {
 		StreamMessage msg = cassandraService.getLatestFromAllPartitions(s)
+		if (s.inactivityThresholdHours == 0) {
+			if (msg == null) {
+				return new StreamStatus(true, null)
+			} else {
+				return new StreamStatus(true, msg.getTimestampAsDate())
+			}
+		}
 		if (msg == null) {
 			return new StreamStatus(false, null)
-		} else if (msg != null && msg.getTimestampAsDate().before(threshold)) {
+		} else if (msg != null && s.isStale(now, msg.getTimestampAsDate())) {
 			return new StreamStatus(false, msg.getTimestampAsDate())
 		}
 		return new StreamStatus(true, msg.getTimestampAsDate())

@@ -3,6 +3,7 @@ package com.unifina.service
 import com.unifina.api.CannotRemoveEthereumKeyException
 import com.unifina.api.DuplicateNotAllowedException
 import com.unifina.domain.data.Stream
+import com.unifina.domain.security.Permission
 import com.unifina.security.Challenge
 import com.unifina.domain.security.IntegrationKey
 import com.unifina.domain.security.SecUser
@@ -192,6 +193,30 @@ class EthereumIntegrationKeyServiceSpec extends Specification {
 		service.delete("integration-key", me)
 		then:
 		IntegrationKey.count() == 0
+	}
+
+	void "delete() deletes corresponding inbox stream and its permissions"() {
+		service.subscriptionService = Stub(SubscriptionService)
+
+		def integrationKey = new IntegrationKey(user: me)
+		integrationKey.id = "integration-key"
+		integrationKey.idInService = "address"
+		integrationKey.save(failOnError: true, validate: false)
+		Stream inbox = new Stream()
+		inbox.id = "address"
+		inbox.inbox = true
+		inbox.save(failOnError: true, validate: false)
+		Permission perm = new Permission()
+		perm.stream = inbox
+		perm.user = me
+		perm.save(failOnError: true, validate: false)
+
+		when:
+		service.delete("integration-key", me)
+		then:
+		IntegrationKey.count() == 0
+		Stream.get("address") == null
+		Permission.findAllByStream(inbox) == []
 	}
 
 	void "delete() invokes subscriptionService#beforeIntegrationKeyRemoved for Ethereum IDs"() {

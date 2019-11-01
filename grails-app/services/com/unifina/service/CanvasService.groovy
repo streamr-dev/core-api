@@ -9,6 +9,7 @@ import com.unifina.domain.security.Permission
 import com.unifina.domain.security.SecUser
 import com.unifina.domain.signalpath.Canvas
 import com.unifina.exceptions.CanvasUnreachableException
+import com.unifina.exceptions.InvalidStreamConfigException
 import com.unifina.serialization.SerializationException
 import com.unifina.signalpath.ModuleException
 import com.unifina.signalpath.ModuleWithUI
@@ -16,7 +17,7 @@ import com.unifina.signalpath.UiChannelIterator
 import com.unifina.task.CanvasDeleteTask
 import com.unifina.task.CanvasStartTask
 import com.unifina.utils.Globals
-import com.unifina.utils.GlobalsFactory
+
 import grails.converters.JSON
 import grails.transaction.Transactional
 import groovy.json.JsonBuilder
@@ -145,6 +146,8 @@ class CanvasService {
 			log.error("De-serialization failure caused by (BELOW)", ex.cause)
 			String msg = "Could not load (deserialize) previous state of canvas $canvas.id."
 			throw new ApiException(500, "LOADING_PREVIOUS_STATE_FAILED", msg)
+		} catch (InvalidStreamConfigException e) {
+			throw new BadRequestException(e.getMessage())
 		}
 	}
 
@@ -322,7 +325,7 @@ class CanvasService {
 	 * Rebuild JSON to check it is ok and up-to-date
 	 */
 	private SignalPathService.ReconstructedResult reconstructFrom(Map signalPathMap, SecUser user) {
-		Globals globals = GlobalsFactory.createInstance(signalPathMap.settings ?: [:], user)
+		Globals globals = new Globals(signalPathMap.settings ?: [:], user)
 		return signalPathService.reconstruct(signalPathMap, globals)
 	}
 

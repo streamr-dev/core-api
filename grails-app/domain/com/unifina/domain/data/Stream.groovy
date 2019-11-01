@@ -1,5 +1,6 @@
 package com.unifina.domain.data
 
+
 import com.unifina.domain.ExampleType
 import com.unifina.domain.marketplace.Product
 import com.unifina.domain.security.Permission
@@ -10,11 +11,11 @@ import groovy.transform.CompileStatic
 class Stream implements Comparable {
 	public final static String DEFAULT_NAME = "Untitled Stream"
 	public final static Integer DEFAULT_STORAGE_DAYS = 365
+	public final static Integer DEFAULT_INACTIVITY_THRESHOLD_HOURS = 48
 	String id
 	Integer partitions = 1
 
 	String name = DEFAULT_NAME
-	Feed feed
 	String config
 	String description
 
@@ -31,11 +32,14 @@ class Stream implements Comparable {
 	Boolean inbox = false
 
 	Boolean requireSignedData = false
+	// Stream requires data to be encrypted
+	Boolean requireEncryptedData = false
 	// Always try to autoconfigure field names and types
 	Boolean autoConfigure = true
 	// Historical data storage period (days)
 	Integer storageDays = DEFAULT_STORAGE_DAYS
-
+	// inactivityThresholdHours is the inactivity period for a stream in hours
+	Integer inactivityThresholdHours = DEFAULT_INACTIVITY_THRESHOLD_HOURS
 	// exampleType marks this Stream as an example for new users.
 	ExampleType exampleType = ExampleType.NOT_SET
 
@@ -56,34 +60,35 @@ class Stream implements Comparable {
 		uiChannelCanvas(nullable:true)
 		autoConfigure(nullable: false)
 		storageDays(nullable: false, min: 0)
+		inactivityThresholdHours(nullable: false, min: 0)
 	}
 
 	static mapping = {
 		id generator: 'assigned'
 		name index: "name_idx"
-		feed lazy: false
 		uiChannel defaultValue: "false"
 		uiChannelPath index: "ui_channel_path_idx"
 		config type: 'text'
 		inbox defaultValue: "false"
 		requireSignedData defaultValue: "false"
+		requireEncryptedData defaultValue: "false"
 		autoConfigure defaultValue: "true"
 		storageDays defaultValue: DEFAULT_STORAGE_DAYS
 		exampleType enumType: "identity", defaultValue: ExampleType.NOT_SET, index: 'example_type_idx'
 	}
 
 	@Override
-	public String toString() {
+	String toString() {
 		return name
 	}
 
+	// TODO: in PR phase, coordinate with frontend to remove dependency on stream.feed.* (maybe used in Editor)
 	@CompileStatic
 	Map toMap() {
 		[
 			id: id,
 			partitions: partitions,
 			name: name,
-			feed: feed.toMap(),
 			config: config == null || config.empty ? config : JSON.parse(config),
 			description: description,
 			uiChannel: uiChannel,
@@ -91,8 +96,10 @@ class Stream implements Comparable {
 			dateCreated: dateCreated,
 			lastUpdated: lastUpdated,
 			requireSignedData: requireSignedData,
+			requireEncryptedData: requireEncryptedData,
 			autoConfigure: autoConfigure,
-			storageDays: storageDays
+			storageDays: storageDays,
+			inactivityThresholdHours: inactivityThresholdHours,
 		]
 	}
 
@@ -102,35 +109,48 @@ class Stream implements Comparable {
 			id: id,
 			partitions: partitions,
 			name: name,
-			feed: feed.toMap(),
 			description: description,
 			uiChannel: uiChannel,
 			inbox: inbox,
 			dateCreated: dateCreated,
 			lastUpdated: lastUpdated,
-			requireSignedData: requireSignedData
+			requireSignedData: requireSignedData,
+			requireEncryptedData: requireEncryptedData,
 		]
 	}
 
 	@Override
-	public int compareTo(Object arg0) {
+	int compareTo(Object arg0) {
 		if (!(arg0 instanceof Stream)) return 0
 		else return arg0.name.compareTo(this.name)
 	}
 
 	@Override
-	public int hashCode() {
+	int hashCode() {
 		return id.hashCode()
 	}
 
 	@Override
-	public boolean equals(Object obj) {
+	boolean equals(Object obj) {
 		return obj instanceof Stream && obj.id == this.id
 	}
 
-	public Map<String, Object> getStreamConfigAsMap() {
+	Map<String, Object> getStreamConfigAsMap() {
 		if (config!=null)
 			return ((Map)JSON.parse(config));
 		else return [:]
+	}
+
+	boolean isStale(Date now, Date latestDataTimestamp) {
+		if (inactivityThresholdHours == 0) {
+			return false
+		} else {
+			Calendar calendar = Calendar.getInstance()
+			calendar.setTime(now)
+			calendar.add(Calendar.HOUR_OF_DAY, -inactivityThresholdHours)
+			Date threshold = calendar.getTime()
+
+			return latestDataTimestamp.before(threshold)
+		}
 	}
 }

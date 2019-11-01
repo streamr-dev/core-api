@@ -7,7 +7,7 @@ import com.unifina.api.NotPermittedException
 import com.unifina.domain.ExampleType
 import com.unifina.domain.dashboard.Dashboard
 import com.unifina.domain.dashboard.DashboardItem
-import com.unifina.domain.data.Feed
+
 import com.unifina.domain.data.Stream
 import com.unifina.domain.security.IntegrationKey
 import com.unifina.domain.security.Key
@@ -15,7 +15,7 @@ import com.unifina.domain.security.Permission
 import com.unifina.domain.security.SecUser
 import com.unifina.domain.signalpath.Canvas
 import com.unifina.feed.AbstractStreamListener
-import com.unifina.feed.NoOpStreamListener
+
 import grails.test.mixin.Mock
 import grails.test.mixin.TestFor
 import org.codehaus.groovy.grails.commons.DefaultGrailsApplication
@@ -25,23 +25,16 @@ import spock.lang.Specification
  * See the API for {@link grails.test.mixin.support.GrailsUnitTestMixin} for usage instructions
  */
 @TestFor(StreamService)
-@Mock([Canvas, Dashboard, DashboardItem, Stream, Feed, SecUser, Key, IntegrationKey, Permission, PermissionService])
+@Mock([Canvas, Dashboard, DashboardItem, Stream, SecUser, Key, IntegrationKey, Permission, PermissionService])
 class StreamServiceSpec extends Specification {
 
-	Feed feed
-	KafkaService kafkaService = Stub(KafkaService)
 	DashboardService dashboardService = Mock(DashboardService)
 
 	SecUser me = new SecUser(username: "me")
 
 	def setup() {
-		feed = new Feed(
-				streamListenerClass: NoOpStreamListener.name
-		).save(validate: false)
-
 		// Setup application context
 		def applicationContext = Stub(ApplicationContext) {
-			getBean(KafkaService) >> kafkaService
 			getBean(DashboardService) >> dashboardService
 		}
 
@@ -59,13 +52,11 @@ class StreamServiceSpec extends Specification {
 		List<Stream> streams = []
 		Stream s0 = new Stream(
 			name: "example stream",
-			feed: feed,
 			exampleType: ExampleType.SHARE
 		).save(failOnError: true)
 		streams << s0
 		Stream s1 = new Stream(
 			name: "example 2 stream",
-			feed: feed,
 			exampleType: ExampleType.SHARE
 		).save(failOnError: true)
 		streams << s1
@@ -79,7 +70,7 @@ class StreamServiceSpec extends Specification {
 
 	void "createStream replaces empty name with default value"() {
 		when:
-		Stream s = service.createStream([name: "", feed: feed], me)
+		Stream s = service.createStream([name: ""], me)
 
 		then:
 		s.name == "Untitled Stream"
@@ -87,7 +78,7 @@ class StreamServiceSpec extends Specification {
 
 	void "createStream results in persisted Stream"() {
 		when:
-		service.createStream([name: "name", feed: feed], me)
+		service.createStream([name: "name"], me)
 
 		then:
 		Stream.count() == 1
@@ -96,7 +87,7 @@ class StreamServiceSpec extends Specification {
 
 	void "createStream results in all permissions for Stream"() {
 		when:
-		def stream = service.createStream([name: "name", feed: feed], me)
+		def stream = service.createStream([name: "name"], me)
 
 		then:
 		Permission.findAllByStream(stream)*.toMap() == [
@@ -107,13 +98,10 @@ class StreamServiceSpec extends Specification {
 	}
 
 	void "createStream uses its params"() {
-		setup:
-		def feed = new Feed(id: 0, streamListenerClass: "com.unifina.feed.kafka.KafkaStreamListener").save(validate: false)
 		when:
 		def params = [
 				name       : "Test stream",
 				description: "Test stream",
-				feed       : feed,
 				config     : [
 						fields: [
 								[name: "profit", type: "number"],
@@ -129,74 +117,7 @@ class StreamServiceSpec extends Specification {
 		def stream = Stream.findAll().get(0)
 		stream.name == "Test stream"
 		stream.description == "Test stream"
-		stream.feed == feed
 		stream.requireSignedData
-	}
-
-	void "createStream uses Feed.KAFKA_ID as default value for feed"() {
-		setup:
-		def feed = new Feed(streamListenerClass: "com.unifina.feed.kafka.KafkaStreamListener")
-		feed.id = Feed.KAFKA_ID
-		feed.save(validate: false)
-		when:
-		def params = [
-				name       : "Test stream",
-				description: "Test stream",
-				config     : [
-						fields: [
-								[name: "profit", type: "number"],
-								[name: "keyword", type: "string"]
-						]
-				]
-		]
-		service.createStream(params, new SecUser(username: "me").save(validate: false))
-		then:
-		Stream.count() == 1
-		def stream = Stream.findAll().get(0)
-		stream.feed == feed
-		!stream.requireSignedData
-	}
-
-	void "createStream initializes streamListener"() {
-		setup:
-		def service = Spy(StreamService)
-		service.permissionService = Stub(PermissionService)
-		def streamListener = Mock(AbstractStreamListener)
-		def params = [
-				name       : "Test stream",
-				description: "Test stream",
-				feed       : feed,
-				config     : [
-						fields: [
-								[name: "profit", type: "number"],
-								[name: "keyword", type: "string"]
-						]
-				]
-		]
-		when:
-
-		service.createStream(params, new SecUser(username: "me").save(validate: false))
-		then:
-		1 * service.instantiateListener(_ as Stream) >> streamListener
-		1 * streamListener.addToConfiguration(params.config, _ as Stream)
-	}
-
-	void "createStream throws exception if feed has no streamListenerClass"() {
-		when:
-		def params = [
-				name       : "Test stream",
-				description: "Test stream",
-				feed       : new Feed().save(validate: false),
-				config     : [
-						fields: [
-								[name: "profit", type: "number"],
-								[name: "keyword", type: "string"]
-						]
-				]
-		]
-		service.createStream(params, new SecUser(username: "me").save(validate: false))
-		then:
-		thrown IllegalArgumentException
 	}
 
 	void "getReadAuthorizedStream throws NotFoundException and does not invoke callback, if streamId doesn't exist"() {
@@ -561,17 +482,17 @@ class StreamServiceSpec extends Specification {
 	void "status ok and has recent messages"() {
 		setup:
 		service.cassandraService = Mock(CassandraService)
-		Stream s = new Stream([name: "Stream 1"])
+		Stream s = new Stream([name: "Stream 1", inactivityThresholdHours: 48])
 		s.id = "s1"
 
-		Date timestamp = newDate(2019, 1, 15, 11, 12, 06)
+		Date now = newDate(2019, 1, 15, 11, 12, 06)
+		Date timestamp = newDate(2019, 1, 14, 11, 12, 06)
 		long expected = timestamp.getTime()
-		Date threshold = newDate(2019, 1, 14, 10, 50, 0)
 		StreamMessage msg = new StreamMessageV31("s1", 0, timestamp.getTime(), 0L, "publisherId", "1", 0L, 0L,
 			StreamMessage.ContentType.CONTENT_TYPE_JSON, StreamMessage.EncryptionType.NONE, "", StreamMessage.SignatureType.SIGNATURE_TYPE_NONE, "")
 
 		when:
-		StreamService.StreamStatus status = service.status(s, threshold)
+		StreamService.StreamStatus status = service.status(s, now)
 
 		then:
 		1 * service.cassandraService.getLatestFromAllPartitions(s) >> msg
@@ -582,7 +503,7 @@ class StreamServiceSpec extends Specification {
 	void "status not ok, no messages in stream"() {
 		setup:
 		service.cassandraService = Mock(CassandraService)
-		Stream s = new Stream([name: "Stream 1"])
+		Stream s = new Stream([name: "Stream 1", inactivityThresholdHours: 48])
 		s.id = "s1"
 
 		when:
@@ -597,22 +518,57 @@ class StreamServiceSpec extends Specification {
 	void "status stream has messages, but stream is stale"() {
 		setup:
 		service.cassandraService = Mock(CassandraService)
-		Stream s = new Stream([name: "Stream 1"])
+		Stream s = new Stream([name: "Stream 1", inactivityThresholdHours: 48])
 		s.id = "s1"
 
 		Date timestamp = newDate(2019, 1, 10, 12, 12, 06)
 		long expected = timestamp.getTime()
 		StreamMessage msg = new StreamMessageV31("s1", 0, timestamp.getTime(), 0L, "publisherId", "1", 0L, 0L,
 			StreamMessage.ContentType.CONTENT_TYPE_JSON, StreamMessage.EncryptionType.NONE, "", StreamMessage.SignatureType.SIGNATURE_TYPE_NONE, "")
-		Date threshold = newDate(2019, 1, 15, 0, 0, 0)
+		Date now = newDate(2019, 1, 15, 0, 0, 0)
 
 		when:
-		StreamService.StreamStatus status = service.status(s, threshold)
+		StreamService.StreamStatus status = service.status(s, now)
 
 		then:
 		1 * service.cassandraService.getLatestFromAllPartitions(s) >> msg
 		status.ok == false
 		status.date.getTime() == expected
+	}
+
+	void "status inactivity threshold hours is zero and stream has messages"() {
+		setup:
+		service.cassandraService = Mock(CassandraService)
+		Stream s = new Stream([name: "Stream 1", inactivityThresholdHours: 0])
+		s.id = "s1"
+
+		Date timestamp = new Date()
+		long expected = timestamp.getTime()
+		StreamMessage msg = new StreamMessageV31("s1", 0, timestamp.getTime(), 0L, "publisherId", "1", 0L, 0L,
+			StreamMessage.ContentType.CONTENT_TYPE_JSON, StreamMessage.EncryptionType.NONE, "", StreamMessage.SignatureType.SIGNATURE_TYPE_NONE, "")
+
+		when:
+		StreamService.StreamStatus status = service.status(s, new Date())
+
+		then:
+		1 * service.cassandraService.getLatestFromAllPartitions(s) >> msg
+		status.ok == true
+		status.date.getTime() == expected
+	}
+
+	void "status inactivity threshold hours is zero and stream has no messages"() {
+		setup:
+		service.cassandraService = Mock(CassandraService)
+		Stream s = new Stream([name: "Stream 1", inactivityThresholdHours: 0])
+		s.id = "s1"
+
+		when:
+		StreamService.StreamStatus status = service.status(s, new Date())
+
+		then:
+		1 * service.cassandraService.getLatestFromAllPartitions(s) >> null
+		status.ok == true
+		status.date == null
 	}
 
 	Date newDate(int year, int month, int date, int hour, int minute, int second) {

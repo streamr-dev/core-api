@@ -1,6 +1,8 @@
 package com.unifina.service
 
+import com.unifina.api.BadRequestException
 import com.unifina.api.CommunitySecretCommand
+import com.unifina.api.NotFoundException
 import com.unifina.domain.community.CommunitySecret
 import com.unifina.utils.IdGenerator
 import spock.lang.Specification
@@ -36,7 +38,7 @@ class CommunitySecretServiceIntegrationSpec extends Specification {
 		results.containsAll([s1, s2])
 	}
 
-	void "create() test"() {
+	void "create() test with generated secret"() {
 		setup:
 		service.generator = Mock(IdGenerator)
 		CommunitySecretCommand cmd = new CommunitySecretCommand(
@@ -50,6 +52,23 @@ class CommunitySecretServiceIntegrationSpec extends Specification {
 		result.name == "community secret"
 		result.communityAddress == communityAddress
 		result.secret == "secret"
+	}
+
+	void "create() test with given secret"() {
+		setup:
+		service.generator = Mock(IdGenerator)
+		CommunitySecretCommand cmd = new CommunitySecretCommand(
+			name: "community secret",
+			secret: "mySecret"
+		)
+		when:
+		CommunitySecret result = service.create(communityAddress, cmd)
+		then:
+		0 * service.generator.generate()
+		result.id != null
+		result.name == "community secret"
+		result.communityAddress == communityAddress
+		result.secret == "mySecret"
 	}
 
 	void "find() test"() {
@@ -80,7 +99,7 @@ class CommunitySecretServiceIntegrationSpec extends Specification {
 		result.communityAddress == communityAddress
 	}
 
-	void "update() test"() {
+	void "update() only name"() {
 		setup:
 		CommunitySecret s1 = new CommunitySecret(
 			name: "secret 1",
@@ -97,6 +116,59 @@ class CommunitySecretServiceIntegrationSpec extends Specification {
 		result.name == "new secret name"
 		result.secret == "secret#1"
 		result.communityAddress == communityAddress
+	}
+
+	void "update() only secret"() {
+		setup:
+		CommunitySecret s1 = new CommunitySecret(
+			name: "secret 1",
+			secret: "secret#1",
+			communityAddress: communityAddress,
+		)
+		s1.save(validate: true, failOnError: true)
+		CommunitySecretCommand cmd = new CommunitySecretCommand(
+			secret: "new secret",
+		)
+		when:
+		CommunitySecret result = service.update(communityAddress, s1.id, cmd)
+		then:
+		thrown BadRequestException
+	}
+
+	void "update() both name and secret"() {
+		setup:
+		CommunitySecret s1 = new CommunitySecret(
+			name: "secret 1",
+			secret: "secret#1",
+			communityAddress: communityAddress,
+		)
+		s1.save(validate: true, failOnError: true)
+		CommunitySecretCommand cmd = new CommunitySecretCommand(
+			name: "new secret name",
+			secret: "new secret",
+		)
+		when:
+		CommunitySecret result = service.update(communityAddress, s1.id, cmd)
+		then:
+		thrown BadRequestException
+	}
+
+	void "update() fails for bad id"() {
+		setup:
+		CommunitySecret s1 = new CommunitySecret(
+			name: "secret 1",
+			secret: "secret#1",
+			communityAddress: communityAddress,
+		)
+		s1.save(validate: true, failOnError: true)
+		CommunitySecretCommand cmd = new CommunitySecretCommand(
+			name: "new secret name",
+			secret: "new secret",
+		)
+		when:
+		CommunitySecret result = service.update(communityAddress, "invalid id", cmd)
+		then:
+		thrown NotFoundException
 	}
 
 	void "delete() test"() {

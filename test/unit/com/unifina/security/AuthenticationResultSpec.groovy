@@ -46,7 +46,7 @@ class AuthenticationResultSpec extends Specification {
 	@Unroll
 	void "does not guarantee level #level when constructed with nothing"(AuthLevel level) {
 		expect:
-		!new AuthenticationResult(false, false).guarantees(level)
+		!new AuthenticationResult(false, false, false).guarantees(level)
 
 		where:
 		level << [AuthLevel.KEY, AuthLevel.USER]
@@ -54,7 +54,12 @@ class AuthenticationResultSpec extends Specification {
 
 	void "guarantees level NONE when constructed with nothing"() {
 		expect:
-		new AuthenticationResult(false, false).guarantees(AuthLevel.NONE)
+		new AuthenticationResult(false, false, false).guarantees(AuthLevel.NONE)
+	}
+
+	void "does not guarantee level NONE when authentication failed"() {
+		expect:
+		!new AuthenticationResult(false, false, true).guarantees(AuthLevel.NONE)
 	}
 
 	void "hasOneOfRoles() returns false given empty array of roles"() {

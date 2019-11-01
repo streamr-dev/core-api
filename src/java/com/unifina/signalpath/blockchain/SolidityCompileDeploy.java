@@ -5,8 +5,10 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.unifina.signalpath.*;
 import com.unifina.utils.MapTraversal;
+import jdk.nashorn.internal.codegen.CompilationException;
 import org.apache.log4j.Logger;
 import org.ethereum.solidity.compiler.SolidityCompiler;
+import org.web3j.abi.TypeDecoder;
 import org.web3j.crypto.Credentials;
 import org.web3j.crypto.RawTransaction;
 import org.web3j.crypto.TransactionEncoder;
@@ -14,7 +16,6 @@ import org.web3j.protocol.Web3j;
 import org.web3j.protocol.core.DefaultBlockParameterName;
 import org.web3j.protocol.core.methods.response.EthSendTransaction;
 import org.web3j.protocol.core.methods.response.TransactionReceipt;
-import org.web3j.protocol.http.HttpService;
 import org.web3j.utils.Numeric;
 
 import java.io.IOException;
@@ -42,6 +43,11 @@ public class SolidityCompileDeploy extends ModuleWithUI implements Pullable<Ethe
 	private EthereumModuleOptions ethereumOptions = new EthereumModuleOptions();
 	private Web3j web3j;
 
+	public static class CompilationException extends Exception{
+		public CompilationException(String msg){
+			super(msg);
+		}
+	}
 	@Override
 	public void init() {
 		addInput(ethereumAccount);
@@ -72,54 +78,39 @@ public class SolidityCompileDeploy extends ModuleWithUI implements Pullable<Ethe
 		return config;
 	}
 
-	protected SolidityCompiler.Option[] getSolcOptions() {
-		SolidityCompiler.Option[] opts = {SolidityCompiler.Options.ABI, SolidityCompiler.Options.BIN};
-		return opts;
-	}
-
 	/**
-	 * choose the "main" contract from a list of compiled contract,
-	 * default implements simple heuristic: it chooses the one with the biggest bytecode
+	 * Choose the "main" contract from a list of compiled contracts
+	 *   using a simple heuristic: it chooses the one with the biggest bytecode
+	 *
 	 * @param contracts
 	 * @return
 	 */
-	protected JsonObject chooseMainContract(Set<Map.Entry<String, JsonElement>> contracts){
-		JsonObject longestcode=null;
-		int maxcodelen=0;
-		String name=null;
-		for(Map.Entry<String, JsonElement> e : contracts){
-			JsonObject rslt = e.getValue().getAsJsonObject();
-			int codelen = rslt.get("bin").getAsString().length();
-			if(codelen > maxcodelen){
-				longestcode = rslt;
-				maxcodelen = codelen;
+	protected JsonObject chooseMainContract(JsonObject contracts) {
+		JsonObject result = null;
+		int maxBytecodeSize = 0;
+		String name = null;
+		for (Map.Entry<String, JsonElement> e : contracts.entrySet()) {
+			JsonObject contract = e.getValue().getAsJsonObject();
+			int bytecodeSize = contract.get("bin").getAsString().length();
+			if (bytecodeSize > maxBytecodeSize) {
+				maxBytecodeSize = bytecodeSize;
 				name = e.getKey();
+				result = contract;
 			}
 		}
-		log.info("Chose contract "+name+" with length "+maxcodelen + " as the main contract");
-		return longestcode;
+		log.info("Chose contract " + name + " with length " + maxBytecodeSize + " as the main contract");
+		return result;
 	}
 
-	protected JsonObject compile(String solidity_code) {
+	protected JsonObject compile(String solidity_code) throws IOException, CompilationException {
 		String result = null;
-		String errors = null;
-		try {
-			SolidityCompiler.Result res = SolidityCompiler.compile(solidity_code.getBytes(StandardCharsets.UTF_8), true, getSolcOptions());
-			if (res.isFailed()) {
-				errors = res.errors;
-			} else {
-				result = res.output;
-			}
-		} catch (IOException e) {
-			errors = e.getLocalizedMessage();
+		SolidityCompiler.Result res = SolidityCompiler.compile(solidity_code.getBytes(StandardCharsets.UTF_8), true, SolidityCompiler.Options.ABI, SolidityCompiler.Options.BIN);
+		if (res.isFailed()) {
+			throw new CompilationException(res.errors);
+		} else {
+			result = res.output;
 		}
-		if (errors != null) {
-			throw new RuntimeException("Error compiling contract: " + errors);
-		}
-
-		Set<Map.Entry<String, JsonElement>> entries = new JsonParser().parse(result).getAsJsonObject().get("contracts").getAsJsonObject().entrySet();
-
-		//in case of many contracts, pick the one with the longest bytecode
+		JsonObject entries = new JsonParser().parse(result).getAsJsonObject().get("contracts").getAsJsonObject();
 		return chooseMainContract(entries);
 	}
 
@@ -134,7 +125,7 @@ public class SolidityCompileDeploy extends ModuleWithUI implements Pullable<Ethe
 		List<org.web3j.abi.datatypes.Type> argTypes = new ArrayList<>(argCount);
 		for (int i = 0; i < argCount; i++) {
 			String argType = constructor.inputs.get(i).type;
-			argTypes.add(Web3jHelper.instantiateType(argType, args.get(i)));
+			argTypes.add(TypeDecoder.instantiateType(argType, args.get(i)));
 		}
 		String encodedArgs = org.web3j.abi.FunctionEncoder.encodeConstructor(argTypes);
 		String txBytes = bytecode + encodedArgs;
@@ -170,7 +161,7 @@ public class SolidityCompileDeploy extends ModuleWithUI implements Pullable<Ethe
 	}
 
 	protected Web3j getWeb3j() {
-		return Web3j.build(new HttpService(ethereumOptions.getRpcUrl()));
+		return ethereumOptions.getWeb3j(EthereumModuleOptions.RpcConnectionMethod.HTTP);
 	}
 
 	@Override
@@ -207,17 +198,29 @@ public class SolidityCompileDeploy extends ModuleWithUI implements Pullable<Ethe
 			}
 
 			boolean hasCode = code != null && !code.trim().isEmpty();
-			boolean hasDeployer = ethereumAccount.getAddress() != null;
-			if (hasCode && hasDeployer) {
-				compilationResult = compile(code);
-				contract = new EthereumContract(null, new EthereumABI(new JsonParser().parse(compilationResult.get("abi").getAsString()).getAsJsonArray()));
+			if (hasCode) {
+				try {
+					compilationResult = compile(code);
+				} catch (IOException e) {
+					throw new RuntimeException(e);
+				} catch (CompilationException e) {
+					throw new RuntimeException(e);
+				}
+				contract = new EthereumContract(null, new EthereumABI(new JsonParser().parse(compilationResult.get("abi").getAsString()).getAsJsonArray()), null);
 			}
 		} else if (config.get("code") != null) {
 			code = config.get("code").toString();
 		}
-
-		if (contract != null) {
-			if (deployRequested && compilationResult != null) {
+		if (contract == null) {
+			return;
+		}
+		contract.setNetwork(ethereumOptions.getNetwork());
+		if (deployRequested) {
+			if (compilationResult == null) {
+				throw new RuntimeException("Can't deploy contract because contract is not compiled. Doing nothing.");
+			} else if (ethereumAccount.getPrivateKey() == null) {
+				throw new RuntimeException("Can't deploy contract because no private key is selected to sign. Doing nothing.");
+			} else {
 				// transform Streamr params into list of constructor arguments
 				Stack<Object> args = new Stack<>();
 				List<Map> params = (List) config.get("params");
@@ -238,14 +241,14 @@ public class SolidityCompileDeploy extends ModuleWithUI implements Pullable<Ethe
 				String bytecode = compilationResult.get("bin").getAsString();
 				try {
 					String address = deploy(bytecode, args, sendWei);
-					contract = new EthereumContract(address, contract.getABI());
+					contract = new EthereumContract(address, contract.getABI(), ethereumOptions.getNetwork());
 				} catch (Exception e) {
 					throw new RuntimeException(e);
 				}
 			}
-			createContractOutput();
-			createParameters(contract.getABI());
 		}
+		createContractOutput();
+		createParameters(contract.getABI());
 	}
 
 	private void createContractOutput() {

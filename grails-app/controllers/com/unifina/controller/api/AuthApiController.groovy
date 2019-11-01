@@ -10,14 +10,10 @@ import com.unifina.service.SignupCodeService
 import com.unifina.service.UserService
 import com.unifina.utils.EmailValidator
 import grails.converters.JSON
-import grails.plugin.mail.MailService
 import grails.plugin.springsecurity.SpringSecurityService
-import grails.plugin.springsecurity.SpringSecurityUtils
 import grails.plugin.springsecurity.annotation.Secured
 import grails.plugin.springsecurity.authentication.dao.NullSaltSource
 import org.springframework.security.authentication.dao.SaltSource
-import org.springframework.security.web.savedrequest.RequestCache
-import org.springframework.security.web.savedrequest.SavedRequest
 
 @Secured(["IS_AUTHENTICATED_ANONYMOUSLY"])
 class AuthApiController {
@@ -27,13 +23,6 @@ class AuthApiController {
 	SignupCodeService signupCodeService
 	SaltSource saltSource
 	SpringSecurityService springSecurityService
-
-	static allowedMethods = [
-		signup        : "POST",
-		register      : "POST",
-		forgotPassword: "POST",
-		resetPassword : "POST",
-	]
 
 	@StreamrApi(authenticationLevel = AuthLevel.NONE)
 	def signup(EmailCommand cmd) {

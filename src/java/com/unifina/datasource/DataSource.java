@@ -1,23 +1,27 @@
 package com.unifina.datasource;
 
-import com.unifina.data.*;
-import com.unifina.domain.data.Feed;
-import com.unifina.feed.AbstractFeed;
-import com.unifina.service.FeedService;
+import com.streamr.client.protocol.message_layer.StreamMessage;
+import com.streamr.client.utils.StreamPartition;
+import com.unifina.data.Event;
+import com.unifina.data.EventQueueMetrics;
+import com.unifina.feed.MessageRouter;
+import com.unifina.feed.StreamMessageSource;
+import com.unifina.feed.StreamPropagationRoot;
+import com.unifina.serialization.SerializationRequest;
 import com.unifina.signalpath.AbstractSignalPathModule;
 import com.unifina.signalpath.SignalPath;
+import com.unifina.signalpath.utils.ConfigurableStreamModule;
 import com.unifina.utils.Globals;
-import grails.util.Holders;
 import org.apache.log4j.Logger;
 
 import java.util.*;
 
 /**
- * DataSource is a class global to the current run context. It handles
- * the creation of data feeds either explicitly (via DataSource#connectFeed(feed))
- * or implicitly according to a SignalPath's needs (via DataSource#connectSignalPath(signalPath)).
+ * DataSource wires together SignalPaths and streams of messages and other Events.
+ * There are two types: HistoricalDataSource and RealtimeDataSource.
  *
- * @author Henri
+ * The DataSource is started with DataSource#start(), which starts the event loop
+ * and blocks until done.
  */
 public abstract class DataSource {
 	private static final Logger log = Logger.getLogger(DataSource.class);
@@ -25,22 +29,32 @@ public abstract class DataSource {
 	private final Set<SignalPath> signalPaths = new HashSet<>();
 	private final List<IStartListener> startListeners = new ArrayList<>();
 	private final List<IStopListener> stopListeners = new ArrayList<>();
-	private final Map<Long, AbstractFeed> feedById = new HashMap<>();
-	private final Globals globals;
-	private final boolean isHistoricalFeed;
-	private boolean started = false;
+	private boolean running = false;
 
+	// DataSource and Globals always have a 1-to-1 relationship.
+	protected final Globals globals;
 
-	public DataSource(boolean isHistoricalFeed, Globals globals) {
-		this.isHistoricalFeed = isHistoricalFeed;
+	private final Map<StreamPartition, StreamPropagationRoot> propagationRootByStreamPartition = new HashMap<>();
+	private final MessageRouter router = new MessageRouter();
+
+	private DataSourceEventQueue eventQueue;
+
+	public DataSource(Globals globals) {
 		this.globals = globals;
+		this.eventQueue = createEventQueue();
 	}
 
 	/**
-	 * Connects a SignalPath to this DataSource. This means connecting to
-	 * all the feeds required by the Modules in the SignalPath and registering
-	 * the Modules with the associated feeds.
-	 * @param sp
+	 * Adds an event to the event queue.
+	 */
+	public void enqueue(Event event) {
+		eventQueue.enqueue(event);
+	}
+
+	/**
+	 * Connects a SignalPath to this DataSource. This has the effect of subscribing the
+	 * DataSource to all the streams required by the Modules in the SignalPath, as well
+	 * as wiring time listeners to the clock.
 	 */
 	public void connectSignalPath(SignalPath sp) {
 		signalPaths.add(sp);
@@ -50,20 +64,19 @@ public abstract class DataSource {
 	}
 
 	/**
-	 * Registers an object with this DataSource.
+	 * Registers an object with this DataSource. The types that have some effect are:
+	 * AbstractStreamSourceModules, ITimeListeners, and IDayListeners. It's safe to call this method
+	 * with other types of arguments, they will be ignored.
 	 */
-	public void register(Object o) {
-		if (o instanceof IStreamRequirement) {
-			subscribeToFeed(o, ((IStreamRequirement) o).getStream().getFeed());
-		} else if (o instanceof IFeedRequirement) {
-			subscribeToFeed(o, ((IFeedRequirement) o).getFeed());
+	private void register(Object o) {
+		if (o instanceof ConfigurableStreamModule) {
+			subscribe((ConfigurableStreamModule) o);
 		}
-
 		if (o instanceof ITimeListener) {
-			getEventQueue().addTimeListener((ITimeListener) o);
+			eventQueue.addTimeListener((ITimeListener) o);
 		}
 		if (o instanceof IDayListener) {
-			getEventQueue().addDayListener((IDayListener) o);
+			eventQueue.addDayListener((IDayListener) o);
 		}
 	}
 
@@ -74,7 +87,7 @@ public abstract class DataSource {
 	 */
 	public void addStartListener(IStartListener startListener) {
 		startListeners.add(startListener);
-		if (started) {
+		if (running) {
 			startListener.onStart();
 		}
 	}
@@ -83,69 +96,100 @@ public abstract class DataSource {
 		stopListeners.add(stopListener);
 	}
 
-	public void startFeed() {
+	/**
+	 * Starts the main event loop and blocks until it is stopped.
+	 * This should be called from the event processing Thread.
+	 */
+	public void start() {
 		for (IStartListener startListener : startListeners) {
 			startListener.onStart();
 		}
 
+		final StreamMessageSource streamMessageSource;
 		try {
-			started = true;
-			doStartFeed();
-		} catch (Exception e) {
-			log.error("Exception thrown while running feed", e);
-			throw new RuntimeException("Error while running feed", e);
-		}
-	}
+			streamMessageSource = createStreamMessageSource(
+				propagationRootByStreamPartition.keySet(), // All the subscribed StreamPartitions
+				new StreamMessageSource.StreamMessageConsumer() {
+					@Override
+					public void accept(StreamMessage streamMessage) {
+						// Consult the router to find consumers who need to receive this StreamMessage
+						router.route(streamMessage)
+							.forEach(routedConsumer ->
+								// Enqueue an event for each consumer registered with the router
+								DataSource.this.enqueue(new Event<>(
+									streamMessage,
+									streamMessage.getTimestampAsDate(),
+									streamMessage.getSequenceNumber(),
+									routedConsumer
+								)));
+					}
 
-	public void stopFeed() {
-		// re-throw if exception happened, but only after all listeners have had chance to clean up
-		Exception stopException = null;
-		try {
-			doStopFeed();
+					@Override
+					public void done() {
+						// Enqueue an end event, which when processed, aborts the event queue.
+						DataSource.this.enqueue(new Event<>(
+							null,
+							globals.getEndDate() != null ? globals.getEndDate() : new Date(),
+							(nul) -> abort()
+						));
+					}
+				});
 		} catch (Exception e) {
-			log.error("Exception thrown while stopping feed", e);
-			stopException = e;
+			throw new RuntimeException("Error while creating StreamMessageSource", e);
 		}
-		for (IStopListener it : stopListeners) {
-			try {
-				it.onStop();
-			} catch (Exception e) {
-				log.error("Exception thrown while stopping feed", e);
-				stopException = e;
+
+		try {
+			// Enqueue a start event to set the start time
+			enqueue(new Event<>(
+				null,
+				globals.getStartDate() != null ? globals.getStartDate() : new Date(),
+				(nul) -> {
+					running = true;
+					log.info("Event queue running.");
+				}
+			));
+			eventQueue.start();
+		} catch (Exception e) {
+			throw new RuntimeException("Error while processing event queue", e);
+		} finally {
+			running = false;
+
+			// Final serialization of SignalPaths is dispatched explicitly, as event queue is now stopped.
+			for (SignalPath signalPath : getSerializableSignalPaths()) {
+				SerializationRequest.makeFeedEvent(signalPath).dispatch();
+			}
+
+			for (IStopListener it : stopListeners) {
+				try {
+					it.onStop();
+				} catch (Exception e) {
+					log.error("Exception thrown while stopping feed", e);
+				}
+			}
+
+			if (streamMessageSource != null) {
+				try {
+					streamMessageSource.close();
+				} catch (Exception e) {
+					log.error("Exception thrown while closing StreamMessageSource (ignored)", e);
+				}
 			}
 		}
 
-		if (stopException != null) {
-			throw new RuntimeException("Error while stopping feed", stopException);
-		}
+		log.info("DataSource has stopped. " + retrieveMetricsAndReset());
 	}
 
-	/**
-	 * Enqueue an event into event queue
-	 */
-	public void enqueueEvent(FeedEvent feedEvent) {
-		getEventQueue().enqueue(feedEvent);
-	}
-
-	public AbstractFeed getFeedById(Long id) {
-		return feedById.get(id);
+	public void abort() {
+		eventQueue.abort();
 	}
 
 	public EventQueueMetrics retrieveMetricsAndReset() {
-		return getEventQueue().retrieveMetricsAndReset();
+		return eventQueue.retrieveMetricsAndReset();
 	}
 
-	protected abstract DataSourceEventQueue getEventQueue();
+	protected abstract StreamMessageSource createStreamMessageSource(Collection<StreamPartition> streamPartitions, StreamMessageSource.StreamMessageConsumer consumer);
 
-	protected abstract void onSubscribedToFeed(AbstractFeed feed);
-
-	protected abstract void doStartFeed() throws Exception;
-
-	protected abstract void doStopFeed() throws Exception;
-
-	protected Collection<AbstractFeed> getFeeds() {
-		return feedById.values();
-	}
+	protected abstract DataSourceEventQueue createEventQueue();
 
 	protected Iterable<SignalPath> getSerializableSignalPaths() {
 		List<SignalPath> serializableSps = new ArrayList<>();
@@ -157,31 +201,27 @@ public abstract class DataSource {
 		return serializableSps;
 	}
 
-	private void subscribeToFeed(Object subscriber, Feed feedDomain) {
-		AbstractFeed feed = createFeed(feedDomain);
-		try {
-			log.debug("subscribeToFeed: subscriber " + subscriber + " subscribing to feed " + feedDomain.getName());
-			feed.subscribe(subscriber);
-		} catch (Exception e) {
-			throw new RuntimeException("Failed to subscribe " + subscriber + " to feed " + feed, e);
+	/**
+	 * For each subscribed StreamPartition, there is a StreamPropagationRoot which contains the
+	 * set of modules subscribed to that StreamPartition and acts as a propagation root.
+	 */
+	private void subscribe(ConfigurableStreamModule module) {
+		Collection<StreamPartition> streamPartitions = module.getStreamPartitions();
+		log.debug("Registering ConfigurableStreamModule with streamPartitions: " + streamPartitions);
+
+		for (StreamPartition sp : streamPartitions) {
+
+			// Create and register the propagation root for this StreamPartition if it doesn't already exist
+			StreamPropagationRoot root = propagationRootByStreamPartition.get(sp);
+			if (root == null) {
+				root = new StreamPropagationRoot(this);
+				propagationRootByStreamPartition.put(sp, root);
+				router.subscribe(root, sp);
+				log.debug("Created new propagation root for: " + sp);
+			}
+
+			root.register(module);
 		}
-		onSubscribedToFeed(feed);
 	}
 
-	private AbstractFeed createFeed(Feed domain) {
-		// Feed implementation already instantiated?
-		AbstractFeed feed = feedById.get(domain.getId());
-		if (feed == null) {
-			log.debug("createFeed: Instantiating new feed described by domain object "+domain+(isHistoricalFeed ? " in historical mode" : " in realtime mode"));
-
-			FeedService feedService = Holders.getApplicationContext().getBean(FeedService.class);
-			feed = feedService.instantiateFeed(domain, isHistoricalFeed, globals);
-			feed.setEventQueue(getEventQueue());
-			feedById.put(domain.getId(), feed);
-		} else {
-			log.debug("createFeed: Feed " + feed + " exists, using that instance.");
-		}
-
-		return feed;
-	}
 }

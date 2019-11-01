@@ -110,8 +110,7 @@ $(function() {
 			Streamr.showInfo(data.msg)
 		},
 		connectionOptions: {
-			url: "${grailsApplication.config.streamr.ui.server}",
-			path: "${grailsApplication.config.streamr.ui.serverPath}",
+			url: "${grailsApplication.config.streamr.api.websocket.url}",
 			authKey: "${key.id}",
 			autoConnect: true,
 			autoDisconnect: true
@@ -213,7 +212,7 @@ $(function() {
 
 	function addModuleToCanvas(item) {
 		if (item.resultType == "stream") { // is stream, specifies module
-			SignalPath.addModule(item.feed.module, {
+			SignalPath.addModule(147, { // don't hard-code moduleId 147 in new frontend
 				params: [{
 					name: 'stream',
 					value: item.id
@@ -412,7 +411,6 @@ $(function() {
 	<g:if test="${addStreamId}">
 		addModuleToCanvas({
 			resultType: "stream",
-			feed: { id: 7, name: "API", module: 147 },
 			id: "${addStreamId}"
 		})
 	</g:if>

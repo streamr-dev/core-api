@@ -5,7 +5,7 @@ import com.unifina.domain.community.CommunityJoinRequest
 import com.unifina.domain.security.SecUser
 import com.unifina.filters.UnifinaCoreAPIFilters
 import com.unifina.service.CommunityJoinRequestService
-import com.unifina.service.CommunityService
+import com.unifina.service.EthereumService
 import grails.test.mixin.Mock
 import grails.test.mixin.TestFor
 import spock.lang.Specification
@@ -21,7 +21,7 @@ class CommunityJoinRequestApiControllerSpec extends Specification {
 		me = new SecUser(id: 1, name: "firstname lastname", username: "firstname.lastname@address.com", password: "salasana")
 		me.save(validate: true, failOnError: true)
 		controller.communityJoinRequestService = Mock(CommunityJoinRequestService)
-		controller.communityService = Mock(CommunityService)
+		controller.ethereumService = Mock(EthereumService)
     }
 
 	void "state parameter is null or State"(String value, Object expected) {
@@ -69,8 +69,9 @@ class CommunityJoinRequestApiControllerSpec extends Specification {
 			controller.index()
 		}
 		then:
-		1 * controller.communityService.checkAdminAccessControl(me, communityAddress) >> true
-		1 * controller.communityJoinRequestService.findAll(communityAddress, null) >> [r ]
+		1 * controller.ethereumService.fetchCommunityAdminsEthereumAddress(communityAddress) >> "adminAddress"
+		1 * controller.ethereumService.hasEthereumAddress(me, "adminAddress") >> true
+		1 * controller.communityJoinRequestService.findAll(communityAddress, null) >> [r]
 		response.json[0].id == validID
 		response.json[0].memberAddress == "0x0000000000000000000000000000000000000001"
 		response.json[0].communityAddress == communityAddress
@@ -103,13 +104,14 @@ class CommunityJoinRequestApiControllerSpec extends Specification {
 			controller.index()
 		}
 		then:
-		1 * controller.communityService.checkAdminAccessControl(me, communityAddress) >> false
+		1 * controller.ethereumService.fetchCommunityAdminsEthereumAddress(communityAddress) >> "adminAddress"
+		1 * controller.ethereumService.hasEthereumAddress(me, "adminAddress") >> false
 		def e = thrown(ApiException)
 		e.statusCode == 403
-		e.code == "ACCESS_DENIED"
+		e.code == "FORBIDDEN"
 	}
 
-	void "create() test"() {
+	void "save() test"() {
 		setup:
 		CommunityJoinRequest r = new CommunityJoinRequest(
 			memberAddress: "0xCCCC000000000000000000000000AAAA0000FFFF",
@@ -130,8 +132,8 @@ class CommunityJoinRequestApiControllerSpec extends Specification {
 			],
 		]
 		params.communityAddress = communityAddress
-		withFilters(action: "create") {
-			controller.create()
+		withFilters(action: "save") {
+			controller.save()
 		}
 		then:
 		1 * controller.communityJoinRequestService.create(communityAddress, _ as CommunityJoinRequestCommand, me) >> r
@@ -142,7 +144,7 @@ class CommunityJoinRequestApiControllerSpec extends Specification {
 		response.status == 200
 	}
 
-	void "create() bad request when json memberAddress is not an ethereum address"() {
+	void "save() bad request when json memberAddress is not an ethereum address"() {
 		when:
 		request.method = "POST"
 		request.json = [
@@ -150,8 +152,8 @@ class CommunityJoinRequestApiControllerSpec extends Specification {
 			secret: "secret",
 		]
 		params.communityAddress = communityAddress
-		withFilters(action: "create") {
-			controller.create()
+		withFilters(action: "save") {
+			controller.save()
 		}
 		then:
 		0 * controller.communityJoinRequestService._
@@ -160,12 +162,12 @@ class CommunityJoinRequestApiControllerSpec extends Specification {
 		e.code == "PARAMETER_MISSING"
 	}
 
-	void "create() bad request on invalid community address input"() {
+	void "save() bad request on invalid community address input"() {
 		when:
 		request.method = "GET"
 		params.communityAddress = "0x123"
-		withFilters(action: "create") {
-			controller.create()
+		withFilters(action: "save") {
+			controller.save()
 		}
 		then:
 		0 * controller.communityJoinRequestService._
@@ -192,7 +194,8 @@ class CommunityJoinRequestApiControllerSpec extends Specification {
 			controller.show()
 		}
 		then:
-		1 * controller.communityService.checkAdminAccessControl(me, communityAddress) >> true
+		1 * controller.ethereumService.fetchCommunityAdminsEthereumAddress(communityAddress) >> "adminAddress"
+		1 * controller.ethereumService.hasEthereumAddress(me, "adminAddress") >> true
 		1 * controller.communityJoinRequestService.find(communityAddress, validID) >> r
 		response.json.memberAddress == "0xCCCC000000000000000000000000AAAA0000FFFF"
 		response.json.communityAddress == communityAddress
@@ -241,7 +244,8 @@ class CommunityJoinRequestApiControllerSpec extends Specification {
 			controller.show()
 		}
 		then:
-		1 * controller.communityService.checkAdminAccessControl(me, communityAddress) >> true
+		1 * controller.ethereumService.fetchCommunityAdminsEthereumAddress(communityAddress) >> "adminAddress"
+		1 * controller.ethereumService.hasEthereumAddress(me, "adminAddress") >> true
 		1 * controller.communityJoinRequestService.find(communityAddress, validID) >> null
 		def e = thrown(NotFoundException)
 		e.statusCode == 404
@@ -258,10 +262,11 @@ class CommunityJoinRequestApiControllerSpec extends Specification {
 			controller.show()
 		}
 		then:
-		1 * controller.communityService.checkAdminAccessControl(me, communityAddress) >> false
+		1 * controller.ethereumService.fetchCommunityAdminsEthereumAddress(communityAddress) >> "adminAddress"
+		1 * controller.ethereumService.hasEthereumAddress(me, "adminAddress") >> false
 		def e = thrown(ApiException)
 		e.statusCode == 403
-		e.code == "ACCESS_DENIED"
+		e.code == "FORBIDDEN"
 	}
 
 	void "update() test"() {
@@ -286,7 +291,8 @@ class CommunityJoinRequestApiControllerSpec extends Specification {
 			controller.update()
 		}
 		then:
-		1 * controller.communityService.checkAdminAccessControl(me, communityAddress) >> true
+		1 * controller.ethereumService.fetchCommunityAdminsEthereumAddress(communityAddress) >> "adminAddress"
+		1 * controller.ethereumService.hasEthereumAddress(me, "adminAddress") >> true
 		1 * controller.communityJoinRequestService.update(communityAddress, validID, _ as UpdateCommunityJoinRequestCommand) >> {
 			r.state = CommunityJoinRequest.State.ACCEPTED
 			return r
@@ -365,7 +371,8 @@ class CommunityJoinRequestApiControllerSpec extends Specification {
 			controller.update()
 		}
 		then:
-		1 * controller.communityService.checkAdminAccessControl(me, communityAddress) >> true
+		1 * controller.ethereumService.fetchCommunityAdminsEthereumAddress(communityAddress) >> "adminAddress"
+		1 * controller.ethereumService.hasEthereumAddress(me, "adminAddress") >> true
 		1 * controller.communityJoinRequestService.update(communityAddress, validID, _ as UpdateCommunityJoinRequestCommand) >> {
 			throw new NotFoundException("mocked: entity not found")
 		}
@@ -387,10 +394,11 @@ class CommunityJoinRequestApiControllerSpec extends Specification {
 			controller.update()
 		}
 		then:
-		1 * controller.communityService.checkAdminAccessControl(me, communityAddress) >> false
+		1 * controller.ethereumService.fetchCommunityAdminsEthereumAddress(communityAddress) >> "adminAddress"
+		1 * controller.ethereumService.hasEthereumAddress(me, "adminAddress") >> false
 		def e = thrown(ApiException)
 		e.statusCode == 403
-		e.code == "ACCESS_DENIED"
+		e.code == "FORBIDDEN"
 	}
 
 	void "delete() test"() {
@@ -412,7 +420,8 @@ class CommunityJoinRequestApiControllerSpec extends Specification {
 			controller.delete()
 		}
 		then:
-		1 * controller.communityService.checkAdminAccessControl(me, communityAddress) >> true
+		1 * controller.ethereumService.fetchCommunityAdminsEthereumAddress(communityAddress) >> "adminAddress"
+		1 * controller.ethereumService.hasEthereumAddress(me, "adminAddress") >> true
 		1 * controller.communityJoinRequestService.delete(communityAddress, validID)
 		response.status == 204
 	}
@@ -457,7 +466,8 @@ class CommunityJoinRequestApiControllerSpec extends Specification {
 			controller.delete()
 		}
 		then:
-		1 * controller.communityService.checkAdminAccessControl(me, communityAddress) >> true
+		1 * controller.ethereumService.fetchCommunityAdminsEthereumAddress(communityAddress) >> "adminAddress"
+		1 * controller.ethereumService.hasEthereumAddress(me, "adminAddress") >> true
 		1 * controller.communityJoinRequestService.delete(communityAddress, validID) >> {
 			throw new NotFoundException("mocked: entity not found")
 		}
@@ -476,9 +486,10 @@ class CommunityJoinRequestApiControllerSpec extends Specification {
 			controller.delete()
 		}
 		then:
-		1 * controller.communityService.checkAdminAccessControl(me, communityAddress) >> false
+		1 * controller.ethereumService.fetchCommunityAdminsEthereumAddress(communityAddress) >> "adminAddress"
+		1 * controller.ethereumService.hasEthereumAddress(me, "adminAddress") >> false
 		def e = thrown(ApiException)
 		e.statusCode == 403
-		e.code == "ACCESS_DENIED"
+		e.code == "FORBIDDEN"
 	}
 }

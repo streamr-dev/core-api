@@ -17,7 +17,14 @@ public class IntegerParameter extends Parameter<Integer> {
 	
 	@Override
 	public Integer parseValue(String s) {
-		return (int) Double.parseDouble(s);
+		Integer result;
+		try {
+			result = (int) Double.parseDouble(s);
+		} catch (NumberFormatException e) {
+			String msg = String.format("Module %s's parameter '%s' cannot parse value '%s'", getOwner().getDisplayName(), getName(), s);
+			throw new RuntimeException(msg, e);
+		}
+		return result;
 	}
 	
 	@Override

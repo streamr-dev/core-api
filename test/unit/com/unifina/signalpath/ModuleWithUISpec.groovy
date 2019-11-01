@@ -1,35 +1,32 @@
 package com.unifina.signalpath
 
-import com.unifina.datasource.DataSource
+import com.streamr.client.StreamrClient
+import com.unifina.ModuleTestingSpecification
 import com.unifina.datasource.IStartListener
-import com.unifina.domain.data.Feed
 import com.unifina.domain.data.Stream
 import com.unifina.domain.security.SecUser
 import com.unifina.domain.signalpath.Canvas
-import com.unifina.feed.NoOpStreamListener
 import com.unifina.service.PermissionService
 import com.unifina.service.StreamService
-import com.unifina.utils.GlobalsFactory
+import com.unifina.service.StreamrClientService
+import com.unifina.utils.Globals
 import grails.test.mixin.Mock
-import grails.util.Holders
-import spock.lang.Specification
 
 import java.security.AccessControlException
 
-@Mock([Stream, Feed, SecUser])
-class ModuleWithUISpec extends Specification {
+@Mock([Stream, SecUser])
+class ModuleWithUISpec extends ModuleTestingSpecification {
 
 	Stream uiChannel
 	Canvas canvas
 	ModuleWithUI module
 	PermissionService permissionService
 	StreamService streamService
+	StreamrClient streamrClient
 	SecUser permittedUser = new SecUser(username: 'permittedUser')
 	SecUser nonPermitterUser = new SecUser(username: 'nonPermittedUser')
 
 	def setup() {
-		streamService = Mock(StreamService)
-
 		canvas = new Canvas()
 
 		uiChannel = new Stream()
@@ -37,25 +34,18 @@ class ModuleWithUISpec extends Specification {
 		uiChannel.id = "uiChannel-id"
 		uiChannel.uiChannelCanvas = canvas
 
-		Holders.getApplicationContext().beanFactory.registerSingleton('streamService', streamService)
+		streamService = mockBean(StreamService, Mock(StreamService))
+		permissionService = mockBean(PermissionService, Mock(PermissionService))
+		StreamrClientService streamrClientService = mockBean(StreamrClientService, Mock(StreamrClientService))
 
-		permissionService = Mock(PermissionService)
+		streamrClient = Mock(StreamrClient)
+		streamrClientService.getAuthenticatedInstance(_) >> streamrClient
+
 		permissionService.canWrite(permittedUser, canvas) >> true
 		permissionService.canWrite(nonPermitterUser, canvas) >> false
-		Holders.getApplicationContext().beanFactory.registerSingleton('permissionService', permissionService)
-
-		Feed feed = new Feed()
-		feed.id = Feed.KAFKA_ID
-		feed.streamListenerClass = NoOpStreamListener.getName()
-		feed.save(validate:false)
 
 		permittedUser.save(failOnError: true, validate: false)
 		nonPermitterUser.save(failOnError: true, validate: false)
-	}
-
-	def cleanup() {
-		Holders.getApplicationContext().beanFactory.destroySingleton("streamService")
-		Holders.getApplicationContext().beanFactory.destroySingleton("permissionService")
 	}
 
 	private ModuleWithUI createModule(Map config, SecUser user=permittedUser) {
@@ -79,9 +69,8 @@ class ModuleWithUISpec extends Specification {
 				return "webcomponent-name"
 			}
 		}
-		module.globals = GlobalsFactory.createInstance([:], user)
+		module.globals = mockGlobals([:], user, Globals.Mode.REALTIME)
 		module.globals.time = new Date()
-		module.globals.setDataSource(Mock(DataSource))
 		module.parentSignalPath = Mock(SignalPath)
 		module.parentSignalPath.getRootSignalPath() >> module.parentSignalPath
 		module.parentSignalPath.getRuntimePath(_) >> {RuntimeRequest.PathWriter writer ->
@@ -224,6 +213,6 @@ class ModuleWithUISpec extends Specification {
 		when:
 		module.pushToUiChannel(msg)
 		then:
-		1 * streamService.sendMessage(_)
+		1 * streamrClient.publish(_, msg, _)
 	}
 }

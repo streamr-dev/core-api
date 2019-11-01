@@ -7,7 +7,6 @@ import com.unifina.domain.signalpath.Canvas
 
 class UrlMappings {
 	static mappings = {
-
 		"500"(controller: "error", action: "index", exception: Exception)
 
 		// API v1 url mappings

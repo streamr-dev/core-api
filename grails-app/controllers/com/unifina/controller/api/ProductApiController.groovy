@@ -1,47 +1,35 @@
 package com.unifina.controller.api
 
 import com.unifina.api.*
-import com.unifina.domain.data.Stream
 import com.unifina.domain.marketplace.Product
 import com.unifina.domain.security.Permission
 import com.unifina.domain.security.SecUser
 import com.unifina.security.AllowRole
 import com.unifina.security.AuthLevel
 import com.unifina.security.StreamrApi
-import com.unifina.service.*
+import com.unifina.service.ApiService
+import com.unifina.service.FreeProductService
+import com.unifina.service.PermissionService
+import com.unifina.service.ProductImageService
+import com.unifina.service.ProductService
 import grails.compiler.GrailsCompileStatic
 import grails.converters.JSON
 import grails.plugin.springsecurity.annotation.Secured
-import org.apache.commons.lang.time.DateUtils
-import org.codehaus.groovy.grails.web.json.JSONArray
 import org.springframework.web.multipart.MultipartFile
 
 @Secured(["IS_AUTHENTICATED_ANONYMOUSLY"])
 class ProductApiController {
-
-	static allowedMethods = [
-		setDeploying: "POST",
-		setDeployed: "POST",
-		setUndeploying: "POST",
-		setUndeployed: "POST",
-		setPricing: "POST",
-		uploadImage: "POST",
-		deployFree: "POST",
-		undeployFree: "POST"
-	]
-
 	ApiService apiService
 	FreeProductService freeProductService
 	ProductService productService
 	ProductImageService productImageService
+	PermissionService permissionService
 
 	@GrailsCompileStatic
 	@StreamrApi(allowRoles = AllowRole.ADMIN)
 	def staleProducts() {
 		List<Product> products = productService.list(new ProductListParams(publicAccess: true), loggedInUser())
-		int days = params.int("days", 2)
-		Date threshold = DateUtils.addDays(new Date(), -days)
-		List<ProductService.StaleProduct> results = productService.findStaleProducts(products, threshold)
+		List<ProductService.StaleProduct> results = productService.findStaleProducts(products, new Date())
 		return render(results as JSON)
 	}
 
@@ -67,7 +55,8 @@ class ProductApiController {
 	@StreamrApi(authenticationLevel = AuthLevel.NONE)
 	def show(String id) {
 		Product product = productService.findById(id, loggedInUser(), Permission.Operation.READ)
-		render(product.toMap() as JSON)
+		boolean isProductOwner = permissionService.canShare(loggedInUser(), product)
+		render(product.toMap(isProductOwner) as JSON)
 	}
 
 	@GrailsCompileStatic
@@ -81,7 +70,8 @@ class ProductApiController {
 	@StreamrApi(authenticationLevel = AuthLevel.USER)
 	def update(String id, UpdateProductCommand command) {
 		Product product = productService.update(id, command, loggedInUser())
-		render(product.toMap() as JSON)
+		boolean isProductOwner = permissionService.canShare(loggedInUser(), product)
+		render(product.toMap(isProductOwner) as JSON)
 	}
 
 	@GrailsCompileStatic

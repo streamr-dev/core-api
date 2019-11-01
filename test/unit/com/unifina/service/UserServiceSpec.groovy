@@ -2,11 +2,11 @@ package com.unifina.service
 
 import com.unifina.api.InvalidUsernameAndPasswordException
 import com.unifina.api.NotFoundException
-import com.unifina.domain.data.Feed
+
 import com.unifina.domain.security.*
 import com.unifina.domain.signalpath.Module
 import com.unifina.domain.signalpath.ModulePackage
-import com.unifina.feed.NoOpStreamListener
+
 import grails.plugin.springsecurity.SpringSecurityService
 import grails.test.mixin.Mock
 import grails.test.mixin.TestFor
@@ -17,23 +17,10 @@ import org.springframework.validation.FieldError
 import spock.lang.Specification
 
 @TestFor(UserService)
-@Mock([Feed, Key, SecUser, SecRole, ModulePackage, SecUserSecRole, Module, Permission])
+@Mock([Key, SecUser, SecRole, ModulePackage, SecUserSecRole, Module, Permission])
 class UserServiceSpec extends Specification {
 
 	void createData() {
-		// A feed created with minimum fields required
-		Feed feed = new Feed()
-		feed.id = new Long(7)
-		feed.name = "testFeed"
-		feed.eventRecipientClass = ""
-		feed.keyProviderClass = ""
-		feed.messageSourceClass = ""
-		feed.module = new Module()
-		feed.parserClass = ""
-		feed.timezone = "Europe/Minsk"
-		feed.streamListenerClass = NoOpStreamListener.name
-		feed.save(failOnError: true)
-
 		// A modulePackage created with minimum fields required
 		def modulePackage = new ModulePackage()
 		modulePackage.id = new Long(1)
@@ -90,7 +77,7 @@ class UserServiceSpec extends Specification {
 		user.getKeys().size() == 1
 	}
 
-	def "if the roles, feeds and modulePackages are given, it should use them"() {
+	def "if the roles and modulePackages are given, it should use them"() {
 		when:
 		createData()
 		SecUser user = service.createUser([
@@ -102,7 +89,6 @@ class UserServiceSpec extends Specification {
 			passwordExpired: false,
 		],
 			SecRole.findAllByAuthorityInList(["ROLE_USER"]),
-			new ArrayList<Feed>(),
 			ModulePackage.findAllByIdInList([new Long(1), new Long(2)])
 		)
 
@@ -110,16 +96,15 @@ class UserServiceSpec extends Specification {
 		user.getAuthorities().size() == 1
 		user.getAuthorities().toArray()[0].authority == "ROLE_USER"
 
-		1 * permissionService.get(Feed, { it.id == 1 } as SecUser) >> []
 		1 * permissionService.get(ModulePackage, { it.id == 1 } as SecUser) >> []
 		1 * permissionService.systemGrant({ it.id == 1 } as SecUser, { it.id == 1 } as ModulePackage)
 		1 * permissionService.systemGrant({ it.id == 1 } as SecUser, { it.id == 2 } as ModulePackage)
 	}
 
-	def "it should fail if the default roles, feeds of modulePackages are not found"() {
+	def "it should fail if the default roles or modulePackages are not found"() {
 		when:
 		// The data has not been created
-		SecUser user = service.createUser([username: "test@test.com", name: "test", password: "test", enabled: true, accountLocked: false, passwordExpired: false])
+		service.createUser([username: "test@test.com", name: "test", password: "test", enabled: true, accountLocked: false, passwordExpired: false])
 
 		then:
 		thrown RuntimeException

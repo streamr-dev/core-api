@@ -13,7 +13,6 @@ import com.unifina.domain.security.Permission
 import com.unifina.domain.security.SecUser
 import grails.test.mixin.Mock
 import grails.test.mixin.TestFor
-import org.apache.commons.lang.time.DateUtils
 import spock.lang.Specification
 import spock.lang.Unroll
 
@@ -75,7 +74,7 @@ class ProductServiceSpec extends Specification {
 	}
 
 	Stream newStream(String id, String name) {
-		Stream s = new Stream(name: name)
+		Stream s = new Stream(name: name, inactivityThresholdHours: 48)
 		s.id = id
 		return s
 	}
@@ -107,6 +106,10 @@ class ProductServiceSpec extends Specification {
 		Stream s5 = newStream("s5", "Time Stream") // This stream has a message two hours ago
 		Product e = newProduct("e", "Time machine", s5)
 		StreamMessage m5 = buildMsg("s5", 1, newDate(2*60*60*1000), new HashMap())
+		// Not stale product. inactivityThresholdHours 0.
+		Stream s12 = newStream("s12", "Never stale stream") // No messages
+		s12.inactivityThresholdHours = 0
+		Product j = newProduct("j", "Not stale product", s12)
 
 		// Stale streams and products
 		// Stale product 1
@@ -163,8 +166,7 @@ class ProductServiceSpec extends Specification {
 		service.cassandraService = Mock(CassandraService)
 
 		when:
-		Date threshold = DateUtils.addDays(new Date(), -2)
-		List<ProductService.StaleProduct> results = service.findStaleProducts(Lists.newArrayList(a, b, c, d, e, f, g, h, i), threshold)
+		List<ProductService.StaleProduct> results = service.findStaleProducts(Lists.newArrayList(a, b, c, d, e, f, g, h, i, j), new Date())
 
 		then:
 		1 * service.cassandraService.getLatestFromAllPartitions(s1) >> m1
@@ -215,12 +217,12 @@ class ProductServiceSpec extends Specification {
 
 	void "create() throws ValidationException if command object does not pass validation"() {
 		when:
-		service.create(new CreateProductCommand(), new SecUser())
+		service.create(new CreateProductCommand(pricePerSecond: -1), new SecUser())
 		then:
 		thrown(ValidationException)
 	}
 
-	void "create() creates and returns Product with correct info and NEW state"() {
+	void "create() creates and returns Product with correct info and NOT_DEPLOYED state"() {
 		setupStreams()
 		service.permissionService = Stub(PermissionService)
 
@@ -246,6 +248,7 @@ class ProductServiceSpec extends Specification {
 		and:
 		product.toMap() == [
 			id: "1",
+			type: "NORMAL",
 			name: "Product",
 			description: "Description of Product.",
 			imageUrl: null,
@@ -339,20 +342,11 @@ class ProductServiceSpec extends Specification {
 		Product.count() == 0
 	}
 
-	void "create() creates and returns Product when name is empty and description/category are null"() {
+	void "create() with an empty command object creates a product with default values"() {
 		setupStreams()
 		service.permissionService = Stub(PermissionService)
 
-		def validCommand = new CreateProductCommand(
-			name: "",
-			description: null,
-			category: null,
-			streams: [s1, s2, s3],
-			ownerAddress: "0x0000000000000000000000000000000000000000",
-			beneficiaryAddress: "0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF",
-			pricePerSecond: 10,
-			minimumSubscriptionInSeconds: 1
-		)
+		def validCommand = new CreateProductCommand()
 		def user = new SecUser()
 		user.name = "Arnold Schwarzenegger"
 
@@ -365,27 +359,46 @@ class ProductServiceSpec extends Specification {
 		and:
 		product.toMap() == [
 			id: "1",
+			type: "NORMAL",
 			name: "Untitled Product",
 			description: null,
 			imageUrl: null,
 			thumbnailUrl: null,
 			category: null,
-			streams: ["stream-1", "stream-2", "stream-3"],
+			streams: [],
 			state: "NOT_DEPLOYED",
 			previewStream: null,
 			previewConfigJson: null,
 			created: product.dateCreated,
 			updated: product.lastUpdated,
-			ownerAddress: "0x0000000000000000000000000000000000000000",
-			beneficiaryAddress: "0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF",
-			pricePerSecond: "10",
-			isFree: false,
+			ownerAddress: null,
+			beneficiaryAddress: null,
+			pricePerSecond: "0",
+			isFree: true,
 			priceCurrency: "DATA",
-			minimumSubscriptionInSeconds: 1,
+			minimumSubscriptionInSeconds: 0,
 			owner: "Arnold Schwarzenegger"
 		]
 		product.dateCreated != null
 		product.dateCreated == product.lastUpdated
+	}
+
+	void "create() can create community products"() {
+		setupStreams()
+		service.permissionService = Stub(PermissionService)
+
+		def validCommand = new CreateProductCommand(type: "COMMUNITY")
+		def user = new SecUser()
+		user.name = "Arnold Schwarzenegger"
+
+		when:
+		def product = service.create(validCommand, user)
+
+		then:
+		Product.findAll() == [product]
+
+		and:
+		product.toMap().type == "COMMUNITY"
 	}
 
 	void "update() throws ValidationException if command object does not pass validation"() {
@@ -535,6 +548,7 @@ class ProductServiceSpec extends Specification {
 		and:
 		updatedProduct.toMap() == [
 				id: "product-id",
+				type: "NORMAL",
 				name: "updated name",
 				description: "updated description",
 				imageUrl: null,
@@ -943,6 +957,7 @@ class ProductServiceSpec extends Specification {
 		and:
 		product.toMap() == [
 				id: "product-id",
+				type: "NORMAL",
 				name: "name",
 				description: "description",
 				imageUrl: null,
@@ -1037,5 +1052,81 @@ class ProductServiceSpec extends Specification {
 		})
 		then:
 		thrown(NotPermittedException)
+	}
+
+	void "add stream to product and grant community product stream permissions"() {
+		setup:
+		service.subscriptionService = Stub(SubscriptionService)
+		service.permissionService = Mock(PermissionService)
+		service.communityJoinRequestService = Mock(CommunityJoinRequestService)
+		setupStreams()
+		SecUser user = new SecUser(
+			username: "user@domain.com",
+			name: "Firstname Lastname",
+			password: "salasana"
+		)
+		user.id = 1
+		user.save(failOnError: true, validate: false)
+		Product product = new Product(
+			name: "name",
+			description: "description",
+			ownerAddress: "0x0000000000000000000000000000000000000000",
+			beneficiaryAddress: "0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF",
+			streams: s1 != null ? [s1, s2, s3] : [],
+			pricePerSecond: 10,
+			category: category,
+			state: Product.State.NOT_DEPLOYED,
+			blockNumber: 40000,
+			blockIndex: 30,
+			owner: user,
+			type: Product.Type.COMMUNITY,
+		)
+		product.id = "product-id"
+		product.save(failOnError: true, validate: true)
+
+		when:
+		service.addStreamToProduct(product, s1, user)
+		then:
+		1 * service.communityJoinRequestService.findCommunityMembers("0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF") >> [user]
+		1 * service.permissionService.canWrite(user, s1) >> false
+		1 * service.permissionService.systemGrant(user, s1, Permission.Operation.WRITE)
+	}
+
+	void "remove stream from product and revoke community product stream permissions"() {
+		setup:
+		service.subscriptionService = Stub(SubscriptionService)
+		service.permissionService = Mock(PermissionService)
+		service.communityJoinRequestService = Mock(CommunityJoinRequestService)
+		setupStreams()
+		SecUser user = new SecUser(
+			username: "user@domain.com",
+			name: "Firstname Lastname",
+			password: "salasana"
+		)
+		user.id = 1
+		user.save(failOnError: true, validate: false)
+		Product product = new Product(
+			name: "name",
+			description: "description",
+			ownerAddress: "0x0000000000000000000000000000000000000000",
+			beneficiaryAddress: "0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF",
+			streams: s1 != null ? [s1, s2, s3] : [],
+			pricePerSecond: 10,
+			category: category,
+			state: Product.State.NOT_DEPLOYED,
+			blockNumber: 40000,
+			blockIndex: 30,
+			owner: user,
+			type: Product.Type.COMMUNITY,
+		)
+		product.id = "product-id"
+		product.save(failOnError: true, validate: true)
+
+		when:
+		service.removeStreamFromProduct(product, s1)
+		then:
+		1 * service.communityJoinRequestService.findCommunityMembers("0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF") >> [user]
+		1 * service.permissionService.canWrite(user, s1) >> true
+		1 * service.permissionService.systemRevoke(user, s1, Permission.Operation.WRITE)
 	}
 }

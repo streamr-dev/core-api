@@ -15,7 +15,7 @@ public class TokenAuthenticator {
 		TOKEN,
 		BEARER
 	}
-	private class AuthorizationHeader {
+	private static class AuthorizationHeader {
 
 		private HeaderType headerType;
 		private String headerValue;
@@ -38,10 +38,10 @@ public class TokenAuthenticator {
 		try {
 			header = parseAuthorizationHeader(request.getHeader("Authorization"));
 		} catch (AuthenticationMalformedException e) {
-			return new AuthenticationResult(false, true);
+			return new AuthenticationResult(false, true, true);
 		}
 		if (header == null) {
-			return new AuthenticationResult(true, false);
+			return new AuthenticationResult(true, false, false);
 		}
 		if (header.getHeaderType().equals(HeaderType.TOKEN)) {
 			AuthenticationResult res = getResultFromApiKey(header.getHeaderValue());
@@ -50,7 +50,7 @@ public class TokenAuthenticator {
 			AuthenticationResult res = getResultFromSessionToken(header.getHeaderValue());
 			return res;
 		}
-		return new AuthenticationResult(true, false);
+		return new AuthenticationResult(true, false, true);
 	}
 
 	public AuthorizationHeader parseAuthorizationHeader(String s) {
@@ -85,7 +85,7 @@ public class TokenAuthenticator {
 
 	private AuthenticationResult getResultFromSessionToken(String token) {
 		if (token == null) {
-			return new AuthenticationResult(true, false);
+			return new AuthenticationResult(true, false, true);
 		}
 		try {
 			Userish userish = sessionService.getUserishFromToken(token);
@@ -97,19 +97,19 @@ public class TokenAuthenticator {
 				throw new InvalidSessionTokenException("Invalid token: "+token);
 			}
 		} catch (InvalidSessionTokenException e) {
-			return new AuthenticationResult(false, false);
+			return new AuthenticationResult(false, false, true);
 		}
 	}
 
 	public AuthenticationResult getResultFromApiKey(String apiKey) {
 		if (apiKey == null) {
-			return new AuthenticationResult(true, false);
+			return new AuthenticationResult(true, false, true);
 		}
 		Key keyObject = (Key) InvokerHelper.invokeMethod(Key.class, "get", apiKey);
 		if (keyObject != null) {
 			return new AuthenticationResult(keyObject);
 		}
-		return new AuthenticationResult(false, false);
+		return new AuthenticationResult(false, false, true);
 	}
 
 	private static class AuthenticationMalformedException extends RuntimeException {

@@ -1,5 +1,3 @@
-def env = System.getenv()
-
 grails.server.port.http = '8081'
 grails.servlet.version = "3.0" // Change depending on target container compliance (2.5 or 3.0)
 grails.tomcat.nio = true
@@ -27,8 +25,7 @@ grails.project.fork = [
 		forkReserve:false,
 		daemon:true,
 		jvmArgs: [
-			"-Djava.awt.headless=true",
-			"-Dwebdriver.chrome.driver="+env["CHROMEDRIVER"]
+			"-Djava.awt.headless=true"
 		]
 	]
 ]
@@ -64,21 +61,19 @@ grails.project.dependency.resolution = {
 		mavenRepo "https://repo.grails.org/grails/plugins"
 	}
 
-	def gebVersion = "1.0"
-	def seleniumVersion = "2.53.0"
-
 	dependencies {
 		// specify dependencies here under either 'build', 'compile', 'runtime', 'test' or 'provided' scopes eg.
 		// https://stackoverflow.com/questions/8751508/grails-buildconfig-groovy-difference-between-build-compile-and-runtime
 
 		compile('log4j:log4j:1.2.16')
 		compile('com.udojava:EvalEx:1.6')
-		compile('org.apache.kafka:kafka-clients:0.9.0.1')
 		compile('com.mashape.unirest:unirest-java:1.4.9')
 		compile('org.eclipse.paho:org.eclipse.paho.client.mqttv3:1.1.1')
 		compile('org.antlr:ST4:4.0.8')
 		compile('org.postgresql:postgresql:9.4.1208.jre7')
-		compile('biz.paluch.redis:lettuce:3.5.0.Final')
+		compile('biz.paluch.redis:lettuce:3.5.0.Final') {
+			excludes('com.google.guava:guava:*')
+		}
 		compile('com.datastax.cassandra:cassandra-driver-core:3.7.1')
 		compile('com.google.code.findbugs:jsr305:3.0.2')
 		compile('org.jetbrains:annotations:17.0.0')
@@ -89,15 +84,16 @@ grails.project.dependency.resolution = {
 			excludes('org.springframework:spring-orm:*')
 		}
 
-		compile('org.web3j:core:4.2.0')
+		compile('org.web3j:core:4.4.1')
 		compile('com.amazonaws:aws-java-sdk:1.11.294')
 		compile('org.imgscalr:imgscalr-lib:4.2')
+		compile('commons-io:commons-io:2.4')
 		compile('org.glassfish.jersey.core:jersey-client:2.27')
 		compile('org.glassfish.jersey.inject:jersey-hk2:2.27')
 		compile('org.glassfish.jersey.media:jersey-media-json-jackson:2.27')
 		compile('com.fasterxml.jackson.core:jackson-databind:2.9.6')
 		compile('com.fasterxml.jackson.core:jackson-annotations:2.9.6')
-		compile('com.streamr:client:1.1.0')
+		compile('com.streamr:client:1.1.7')
 
 		runtime('mysql:mysql-connector-java:5.1.20')
 		runtime('commons-net:commons-net:3.3')
@@ -108,10 +104,6 @@ grails.project.dependency.resolution = {
 		runtime('joda-time:joda-time:2.9.3')
 
 		test('cglib:cglib:3.2.6')
-		test("org.seleniumhq.selenium:selenium-firefox-driver:$seleniumVersion")
-		test("org.seleniumhq.selenium:selenium-chrome-driver:$seleniumVersion")
-		test("org.seleniumhq.selenium:selenium-support:$seleniumVersion")
-		test("org.gebish:geb-spock:$gebVersion")
 	}
 
 	plugins {
@@ -121,8 +113,6 @@ grails.project.dependency.resolution = {
 
 		compile(":mail:1.0.7")
 		compile(":cache-headers:1.1.7")
-		compile(":uglify-js-minified-resources:0.1.1")
-		compile(":remote-control:2.0")
 
 		runtime(':hibernate:3.6.10.19') // or :hibernate4:4.3.10
 		runtime(":cors:1.1.8") {
@@ -131,12 +121,8 @@ grails.project.dependency.resolution = {
 		}
 		runtime(':database-migration:1.4.0')
 		runtime(":spring-security-core:2.0.0")
-		runtime(":resources:1.2.14")
-		runtime(":cached-resources:1.0")
-		runtime(":zipped-resources:1.0")
 
 		test(":plastic-criteria:1.6.7")
-		test(":geb:$gebVersion")
 		test(":rest-client-builder:2.1.1")
 	}
 }

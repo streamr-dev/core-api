@@ -24,8 +24,7 @@ $(document).ready(function() {
 			Streamr.showInfo(data.msg)
 		},
 		connectionOptions: {
-			url: "${grailsApplication.config.streamr.ui.server}",
-			path: "${grailsApplication.config.streamr.ui.serverPath}",
+			url: "${grailsApplication.config.streamr.api.websocket.url}",
 			autoConnect: true,
 			autoDisconnect: true
 		},
