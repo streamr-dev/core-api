@@ -23,8 +23,16 @@ class EthereumAccountParameter extends Parameter<IntegrationKey> {
 	public IntegrationKey parseValue(String id) {
 		IntegrationKey key = (IntegrationKey) InvokerHelper.invokeStaticMethod(IntegrationKey.class, "findByIdAndService",
 				new Object[]{id, "ETHEREUM"});
-		// Ensure the IntegrationKey is not a Hibernate proxy
-		key = (IntegrationKey) GrailsHibernateUtil.unwrapIfProxy(key);
+
+		if (key != null) {
+			// Ensure the IntegrationKey is not a Hibernate proxy
+			key = (IntegrationKey) GrailsHibernateUtil.unwrapIfProxy(key);
+
+			// make a call to the method in order to force the initialization of object, to avoid leaking a GORM proxy object
+			// see https://streamr.atlassian.net/browse/CORE-1550
+			key.getJson();
+		}
+
 		return key;
 	}
 
@@ -61,7 +69,7 @@ class EthereumAccountParameter extends Parameter<IntegrationKey> {
 	protected List<PossibleValue> getPossibleValues() {
 		EthereumIntegrationKeyService service = Holders.getApplicationContext().getBean(EthereumIntegrationKeyService.class);
 		SecUser user = SecUser.loadViaJava(getOwner().getGlobals().getUserId());
-		Set<IntegrationKey> integrationKeys = new LinkedHashSet<>(service.getAllKeysForUser(user));
+		Set<IntegrationKey> integrationKeys = new LinkedHashSet<>(service.getAllPrivateKeysForUser(user));
 		if (hasValue()) {
 			integrationKeys.add(getValue());
 		}

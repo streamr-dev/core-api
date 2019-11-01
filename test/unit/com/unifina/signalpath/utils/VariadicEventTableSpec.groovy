@@ -4,12 +4,14 @@ import com.unifina.UiChannelMockingSpecification
 import com.unifina.domain.security.SecUser
 import com.unifina.signalpath.SignalPath
 import com.unifina.utils.testutils.ModuleTestHelper
+import grails.test.mixin.Mock
 import grails.test.mixin.TestMixin
 import grails.test.mixin.support.GrailsUnitTestMixin
 
 import java.text.SimpleDateFormat
 
 @TestMixin(GrailsUnitTestMixin)
+@Mock(SecUser)
 class VariadicEventTableSpec extends UiChannelMockingSpecification {
 
 	SimpleDateFormat dateFormat
@@ -17,7 +19,8 @@ class VariadicEventTableSpec extends UiChannelMockingSpecification {
 
 	def setup() {
 		mockServicesForUiChannels()
-		module = setupModule(new VariadicEventTable(), [uiChannel: [id: "uiChannel"]])
+		SecUser user = new SecUser(username: 'user').save(failOnError: true, validate: false)
+		module = setupModule(new VariadicEventTable(), [uiChannel: [id: "uiChannel"]], new SignalPath(true), mockGlobals([:], user))
 
 		// Call getInput to make sure the inputs exist
 		module.getInput("in1")
@@ -39,10 +42,10 @@ class VariadicEventTableSpec extends UiChannelMockingSpecification {
 		Map channelMessages = [
 			uiChannel: [
 				[hdr: [headers: ["timestamp", "outputForin1", "outputForin2", "outputForin3"], title: null]],
-				[nr: [dateFormat.format(new Date(0)), "a", "1", null]],
-				[nr: [dateFormat.format(new Date(60 * 1000)), "b", "2", null]],
-				[nr: [dateFormat.format(new Date(60 * 1000 * 2)), "c", "3", "hello"]],
-				[nr: [dateFormat.format(new Date(60 * 1000 * 3)), "d", "4", "world"]],
+				[nr: [[__streamr_date: 0], "a", "1", null]],
+				[nr: [[__streamr_date: 60 * 1000], "b", "2", null]],
+				[nr: [[__streamr_date: 60 * 1000 * 2], "c", "3", "hello"]],
+				[nr: [[__streamr_date: 60 * 1000 * 3], "d", "4", "world"]],
 			]
 		]
 

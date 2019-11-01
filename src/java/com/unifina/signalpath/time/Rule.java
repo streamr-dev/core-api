@@ -48,8 +48,8 @@ abstract class Rule implements Serializable {
 	private final Double value;
 	private final Calendar cal;
 
-	final HashMap<Integer, Integer> startTargets = new HashMap<>();
-	final HashMap<Integer, Integer> endTargets = new HashMap<>();
+	final LinkedHashMap<Integer, Integer> startTargets = new LinkedHashMap<>();
+	final LinkedHashMap<Integer, Integer> endTargets = new LinkedHashMap<>();
 
 	private Rule(int intervalType, Map<String, Object> config, TimeZone timeZone) {
 		this.intervalType = intervalType;
@@ -92,7 +92,7 @@ abstract class Rule implements Serializable {
 
 	static Date getNext(Calendar cal, Map<Integer, Integer> targets) {
 		cal = (Calendar) cal.clone();
-		targets = new HashMap<>(targets);
+		targets = new LinkedHashMap<>(targets);
 
 		int target;
 		List<Integer> fields = null;

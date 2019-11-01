@@ -1,39 +1,16 @@
 package com.unifina.security;
 
-import java.io.ByteArrayOutputStream;
-import java.io.File;
-import java.io.IOException;
-import java.io.OutputStream;
-import java.io.UnsupportedEncodingException;
-import java.net.MalformedURLException;
-import java.net.URI;
-import java.net.URL;
-import java.net.URLClassLoader;
-import java.net.URLDecoder;
-import java.security.CodeSource;
-import java.security.cert.Certificate;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
-import javax.tools.Diagnostic;
-import javax.tools.DiagnosticCollector;
-import javax.tools.FileObject;
-import javax.tools.ForwardingJavaFileManager;
-import javax.tools.JavaCompiler;
-import javax.tools.JavaFileObject;
-import javax.tools.JavaFileObject.Kind;
-import javax.tools.SimpleJavaFileObject;
-import javax.tools.StandardJavaFileManager;
-import javax.tools.ToolProvider;
-
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
+
+import javax.tools.*;
+import javax.tools.JavaFileObject.Kind;
+import java.io.*;
+import java.net.*;
+import java.security.CodeSource;
+import java.security.Policy;
+import java.security.cert.Certificate;
+import java.util.*;
 
 /**
  * Used to compile and load user-defined Groovy scripts at runtime.
@@ -43,17 +20,17 @@ import org.apache.log4j.Logger;
  *
  */
 public class UserJavaClassLoader extends URLClassLoader {
-	
+
 	protected ClassLoader delegate;
-	
+
 	Map<String,Class> cache = new HashMap<>();
-	
+
 	DiagnosticCollector<JavaFileObject> diagnostics = null;
-	
-	private CodeSource cs; 
-	
+
+	private CodeSource cs;
+
 	private static final Logger log = Logger.getLogger(UserJavaClassLoader.class);
-	
+
 	public UserJavaClassLoader(ClassLoader parent) {
 		super(new URL[0], parent);
 		this.delegate = parent;
@@ -71,6 +48,16 @@ public class UserJavaClassLoader extends URLClassLoader {
 	}
 
 	public boolean parseClass(String name, String source) {
+		// Sanity check that the security measures are in place
+		if (!(System.getSecurityManager() instanceof MySecurityManager)) {
+			throw new SecurityException("SecurityManager is not an instance of MySecurityManager. Instead, it is: "
+					+ (System.getSecurityManager() != null ? System.getSecurityManager().getClass() : "null"));
+		}
+		if (!(Policy.getPolicy() instanceof MyPolicy)) {
+			throw new SecurityException("SecurityManager is not an instance of MySecurityManager. Instead, it is: "
+					+ (System.getSecurityManager() != null ? System.getSecurityManager().getClass() : "null"));
+		}
+
         // We get an instance of JavaCompiler. Then
         // we create a file manager
         // (our custom implementation of it)
@@ -78,18 +65,18 @@ public class UserJavaClassLoader extends URLClassLoader {
         ClassFileManager fileManager = new
             ClassFileManager(compiler
                 .getStandardFileManager(null, null, null));
-		
+
         // Dynamic compiling requires specifying
         // a list of "files" to compile. In our case
         // this is a list containing one "file" which is in our case
         // our own implementation (see details below)
         List<JavaFileObject> jfiles = new ArrayList<JavaFileObject>();
         jfiles.add(new CharSequenceJavaFileObject(name, source));
-	    
+
         // Create a classpath using current classloader hierarchy
 		 ClassLoader cl = getClass().getClassLoader();
 		 Set<String> urls = new HashSet<>();
-		 
+
 		 while (cl!=null && cl instanceof URLClassLoader) {
 			 URL[] clUrls = ((URLClassLoader)cl).getURLs();
 			 for (URL url : clUrls) {
@@ -102,18 +89,18 @@ public class UserJavaClassLoader extends URLClassLoader {
 			 }
 			 cl = cl.getParent();
 		 }
-	    
+
 		 String cp = StringUtils.join(urls.toArray(),File.pathSeparator);
-		 
+
 		 List<String> optionList = new ArrayList<String>();
-		 
+
 		 // set compiler's classpath to be same as the runtime's
 		 optionList.addAll(Arrays.asList("-classpath",cp));
-		 
+
 		 diagnostics = new DiagnosticCollector<JavaFileObject>();
-		 
+
 		 JavaCompiler.CompilationTask task = compiler.getTask(null,fileManager,diagnostics,optionList,null,jfiles);
-	    
+
 	    boolean success = task.call();
 
 	    if (success) {
@@ -123,17 +110,17 @@ public class UserJavaClassLoader extends URLClassLoader {
 				cache.put(ob.getName(),clazz);
 	    	}
 	    }
-	    
+
 	    return success;
 	}
-	
+
 	public List<Diagnostic<? extends JavaFileObject>> getDiagnostics() {
 		if (diagnostics==null)
 			return null;
 		else return diagnostics.getDiagnostics();
 	}
-	
-	public class CharSequenceJavaFileObject extends SimpleJavaFileObject {
+
+	public static class CharSequenceJavaFileObject extends SimpleJavaFileObject {
 
 	    /**
 	    * CharSequence representing the source code to be compiled
@@ -167,11 +154,11 @@ public class UserJavaClassLoader extends URLClassLoader {
 	        return content;
 	    }
 	}
-	
-	public class JavaClassObject extends SimpleJavaFileObject {
+
+	public static class JavaClassObject extends SimpleJavaFileObject {
 
 		private String name;
-		
+
 	    /**
 	    * Byte code created by the compiler will be stored in this
 	    * ByteArrayOutputStream so that we can later get the
@@ -209,7 +196,7 @@ public class UserJavaClassLoader extends URLClassLoader {
 	    public String getName() {
 	    	return name;
 	    }
-	    
+
 	    /**
 	    * Will provide the compiler with an output stream that leads
 	    * to our byte array. This way the compiler will write everything
@@ -220,14 +207,14 @@ public class UserJavaClassLoader extends URLClassLoader {
 	        return bos;
 	    }
 	}
-	
-	public class ClassFileManager extends ForwardingJavaFileManager {
+
+	public static class ClassFileManager extends ForwardingJavaFileManager {
 		/**
 		* JavaClassObject that will store the
-		* compiled bytecode of our class. They are stored in 
+		* compiled bytecode of our class. They are stored in
 		*/
 		private HashMap<String, JavaClassObject> classObjectByName = new HashMap<>();
-		
+
 		/**
 		* Will initialize the manager with the specified
 		* standard java file manager
@@ -238,11 +225,11 @@ public class UserJavaClassLoader extends URLClassLoader {
 		    standardManager) {
 		    super(standardManager);
 		}
-		
+
 		public Collection<JavaClassObject> getClassObjects() {
 			return classObjectByName.values();
 		}
-		
+
 		/**
 		* Gives the compiler an instance of the JavaClassObject
 		* so that the compiler can write the byte code into it.
@@ -256,5 +243,5 @@ public class UserJavaClassLoader extends URLClassLoader {
 			return jclassObject;
 		}
 	}
-	
+
 }

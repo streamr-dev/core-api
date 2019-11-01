@@ -1,10 +1,8 @@
 package com.unifina.signalpath.utils;
 
 import com.unifina.service.SerializationService;
-import com.unifina.signalpath.Input;
-import com.unifina.signalpath.ModuleOption;
-import com.unifina.signalpath.ModuleOptions;
-import com.unifina.signalpath.ModuleWithUI;
+import com.unifina.signalpath.*;
+import com.unifina.signalpath.time.TimezoneParameter;
 import com.unifina.signalpath.variadic.InputInstantiator;
 import com.unifina.signalpath.variadic.VariadicInput;
 import com.unifina.utils.RFC4180CSVWriter;
@@ -20,6 +18,8 @@ public class ExportCSV extends ModuleWithUI {
 	public static final long MIN_MS_BETWEEN_UI_UPDATES = 1000;
 
 	private static final Logger log = Logger.getLogger(ExportCSV.class);
+
+	TimezoneParameter tz = new TimezoneParameter(this, "timezone", TimeZone.getTimeZone("UTC"));
 
 	private final VariadicInput<Object> ins = new VariadicInput<>(this, new InputInstantiator.SimpleObject());
 
@@ -37,6 +37,7 @@ public class ExportCSV extends ModuleWithUI {
 	}
 
 	ExportCSV(Context context) {
+		addInput(tz);
 		this.context = context;
 		resendLast = 1;
 	}
@@ -47,7 +48,7 @@ public class ExportCSV extends ModuleWithUI {
 			openCsvWriter();
 		}
 		if (timeFormatter == null) {
-			timeFormatter = timeFormat.getTimeFormatter(getGlobals().getUserTimeZone());
+			timeFormatter = timeFormat.getTimeFormatter(tz.getValue());
 		}
 
 		List<Object> row = new ArrayList<>();
@@ -145,7 +146,7 @@ public class ExportCSV extends ModuleWithUI {
 	public void afterDeserialization(SerializationService serializationService) {
 		super.afterDeserialization(serializationService);
 		openCsvWriter();
-		timeFormatter = timeFormat.getTimeFormatter(getGlobals().getUserTimeZone());
+		timeFormatter = timeFormat.getTimeFormatter(tz.getValue());
 	}
 
 	private void openCsvWriter() {

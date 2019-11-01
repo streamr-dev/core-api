@@ -1,6 +1,9 @@
 package com.unifina.service
 
+import com.unifina.BeanMockingSpecification
+import com.unifina.api.NotPermittedException
 import com.unifina.domain.dashboard.Dashboard
+import com.unifina.domain.data.Stream
 import com.unifina.domain.security.Key
 import com.unifina.domain.security.Permission
 import com.unifina.domain.security.Permission.Operation
@@ -13,17 +16,17 @@ import grails.test.mixin.Mock
 import grails.test.mixin.TestFor
 import grails.test.mixin.TestMixin
 import grails.test.mixin.support.GrailsUnitTestMixin
-import spock.lang.Specification
 
 import java.security.AccessControlException
 
-/**
- * See the API for {@link grails.test.mixin.support.GrailsUnitTestMixin} for usage instructions
+/*
+	If you get weird test failures, it may be due to spotty GORM and mocked criteria queries.
+	You might want to try PermissionServiceIntegrationSpec instead.
  */
 @TestMixin(GrailsUnitTestMixin)
 @TestFor(PermissionService)
 @Mock([SecUser, Key, SignupInvite, Module, ModulePackage, Permission, Dashboard, Canvas])
-class PermissionServiceSpec extends Specification {
+class PermissionServiceSpec extends BeanMockingSpecification {
 
 	SecUser me, anotherUser, stranger
 	Key myKey, anotherUserKey, anonymousKey
@@ -31,6 +34,8 @@ class PermissionServiceSpec extends Specification {
 
 	Dashboard dashAllowed, dashRestricted, dashOwned, dashPublic
 	Permission dashReadPermission, dashAnonymousReadPermission
+
+	StreamService streamService
 
     def setup() {
 
@@ -65,6 +70,8 @@ class PermissionServiceSpec extends Specification {
 		dashReadPermission = service.grant(anotherUser, dashAllowed, me, Operation.READ)
 		dashAnonymousReadPermission = service.grantAnonymousAccess(anotherUser, dashPublic)
 		service.grant(anotherUser, dashAllowed, anonymousKey)
+
+		streamService = mockBean(StreamService, Mock(StreamService))
     }
 
 	void "test setup"() {
@@ -82,6 +89,7 @@ class PermissionServiceSpec extends Specification {
 	void "access granted to permitted Dashboard"() {
 		expect:
 		service.canRead(me, dashAllowed)
+		service.verifyRead(me, dashAllowed)
 	}
 
 	void "access denied to non-permitted Dashboard"() {
@@ -93,7 +101,6 @@ class PermissionServiceSpec extends Specification {
 		expect:
 		service.canRead(myKey, dashAllowed)
 	}
-
 
 	void "access denied through key to non-permitted Dashboard"() {
 		expect:
@@ -144,7 +151,27 @@ class PermissionServiceSpec extends Specification {
 		service.getPermissionsTo(dashRestricted)[0].user == anotherUser
 	}
 
-	void "getSingleUserPermissionsTo returns permissions for single user"() {
+	void "getPermissionsTo with Operation returns all permissions for the given resource"() {
+		setup:
+		List<Permission> beforeRead = service.getPermissionsTo(dashOwned, Operation.READ)
+		List<Permission> beforeWrite = service.getPermissionsTo(dashOwned, Operation.WRITE)
+		Permission perm = service.grant(me, dashOwned, stranger, Operation.READ)
+		List<Permission> afterRead = service.getPermissionsTo(dashOwned, Operation.READ)
+		List<Permission> afterWrite = service.getPermissionsTo(dashOwned, Operation.WRITE)
+		List<Permission> all = service.getPermissionsTo(dashOwned)
+		List<Permission> allOperations = new ArrayList<Permission>()
+		Operation.values().collect { Operation op ->
+			allOperations.addAll(service.getPermissionsTo(dashOwned, op))
+		}
+		expect:
+		!beforeRead.contains(perm)
+		afterRead.contains(perm)
+		beforeRead.size() + 1 == afterRead.size()
+		beforeWrite.size() == afterWrite.size()
+		all.size() == allOperations.size()
+	}
+
+	void "getPermissionsTo(resource, userish) returns permissions for single user"() {
 		expect:
 		service.getPermissionsTo(dashOwned, me).size() == 3
 		service.getPermissionsTo(dashOwned, anotherUser) == []
@@ -164,7 +191,7 @@ class PermissionServiceSpec extends Specification {
 		service.getPermissionsTo(dashPublic, null)[0].operation == Operation.READ
 	}
 
-	void "getSingleUserPermissionsTo returns permissions for key"() {
+	void "getPermissionsTo(resource, userish) returns permissions for key"() {
 		expect:
 		service.getPermissionsTo(dashOwned, myKey).size() == 3
 		service.getPermissionsTo(dashOwned, anotherUserKey) == []
@@ -180,100 +207,16 @@ class PermissionServiceSpec extends Specification {
 		service.getPermissionsTo(dashPublic, anonymousKey)[0].operation == Operation.READ
 	}
 
-	void "retrieve all readable Dashboards correctly"() {
-		expect:
-		service.get(Dashboard, me) as Set == [dashOwned, dashAllowed] as Set
-		service.get(Dashboard, anotherUser) as Set == [dashAllowed, dashRestricted, dashPublic] as Set
-		service.get(Dashboard, stranger) == []
-	}
-
-	void "retrieve all readable Dashboards correctly with keys"() {
-		expect:
-		service.get(Dashboard, myKey) as Set == [dashOwned, dashAllowed] as Set
-		service.get(Dashboard, anotherUserKey) as Set == [dashAllowed, dashRestricted, dashPublic] as Set
-		service.get(Dashboard, anonymousKey) as Set == [dashAllowed] as Set
-	}
-
-	void "getAll lists public resources"() {
-		expect:
-		service.getAll(Dashboard, me) as Set == [dashOwned, dashPublic, dashAllowed] as Set
-		service.getAll(Dashboard, anotherUser) as Set == [dashAllowed, dashRestricted, dashPublic] as Set
-		service.getAll(Dashboard, stranger) == [dashPublic]
-	}
-
-	void "getAll lists public resources with keys"() {
-		expect:
-		service.getAll(Dashboard, myKey) as Set == [dashOwned, dashPublic, dashAllowed] as Set
-		service.getAll(Dashboard, anotherUserKey) as Set == [dashAllowed, dashRestricted, dashPublic] as Set
-		service.getAll(Dashboard, anonymousKey) as Set == [dashPublic, dashAllowed] as Set
-	}
-
 	void "get throws exceptions on invalid resource"() {
 		when:
 		service.get(java.lang.Object, me)
 		then:
-		thrown MissingMethodException
+		thrown(IllegalArgumentException)
 
 		when:
 		service.get(null, me)
 		then:
-		thrown NullPointerException
-	}
-
-	void "getAll returns public resources on bad/null user"() {
-		expect:
-		service.get(Dashboard, new SecUser()) == []
-		service.get(Dashboard, null) == []
-		service.getAll(Dashboard, new SecUser()) == [dashPublic]
-		service.getAll(Dashboard, null) == [dashPublic]
-	}
-
-	void "granting and revoking read rights"() {
-		when:
-		service.grant(me, dashOwned, stranger)
-		then:
-		service.get(Dashboard, stranger) == [dashOwned]
-
-		when:
-		service.revoke(me, dashOwned, stranger)
-		then:
-		service.get(Dashboard, stranger) == []
-	}
-
-	void "granting and revoking write rights"() {
-		when:
-		service.grant(me, dashOwned, stranger, Operation.WRITE)
-		then:
-		service.get(Dashboard, stranger, Operation.WRITE) == [dashOwned]
-
-		when:
-		service.revoke(me, dashOwned, stranger, Operation.WRITE)
-		then:
-		service.get(Dashboard, stranger, Operation.WRITE) == []
-
-		when: "revoking read also revokes write"
-		service.grant(me, dashOwned, stranger, Operation.WRITE)
-		service.revoke(me, dashOwned, stranger)
-		then:
-		service.get(Dashboard, stranger, Operation.WRITE) == []
-	}
-
-	void "granting and revoking share rights"() {
-		when:
-		service.grant(me, dashOwned, stranger, Operation.SHARE)
-		then:
-		service.get(Dashboard, stranger, Operation.SHARE) == [dashOwned]
-
-		when:
-		service.revoke(me, dashOwned, stranger, Operation.SHARE)
-		then:
-		service.get(Dashboard, stranger, Operation.SHARE) == []
-
-		when: "revoking read also revokes share"
-		service.grant(me, dashOwned, stranger, Operation.SHARE)
-		service.revoke(me, dashOwned, stranger)
-		then:
-		service.get(Dashboard, stranger, Operation.SHARE) == []
+		thrown(NullPointerException)
 	}
 
 	void "grant and revoke throw for non-'share'-access users"() {
@@ -288,6 +231,73 @@ class PermissionServiceSpec extends Specification {
 		thrown AccessControlException
 	}
 
+	// Test disabled due to commit 405677f6c2cd4ab0ad5f67a9aa2f813ab6d49194
+	// TODO: re-enable
+	/*
+	void "systemGrant() on an Ethereum user and a stream creates also inbox permissions"() {
+		SecUser publisher1 = new SecUser()
+		publisher1.id = 4L
+		SecUser publisher2 = new SecUser()
+		publisher2.id = 5L
+		SecUser publisher3 = new SecUser()
+		publisher3.id = 6L
+		SecUser subscriber = new SecUser(username: "0x26e1ae3f5efe8a01eca8c2e9d3c32702cf4bead6").save(failOnError: true, validate: false)
+
+
+		Stream pub1Inbox = new Stream(name: "publisher1", inbox: true)
+		pub1Inbox.id = "publisher1"
+		pub1Inbox.save(failOnError: true, validate: false)
+		Stream pub2Inbox = new Stream(name: "publisher2", inbox: true)
+		pub2Inbox.id = "publisher2"
+		pub2Inbox.save(failOnError: true, validate: false)
+		Stream pub3Inbox = new Stream(name: "publisher3", inbox: true)
+		pub3Inbox.id = "publisher3"
+		pub3Inbox.save(failOnError: true, validate: false)
+		Stream subInbox = new Stream(name: subscriber.username, inbox: true)
+		subInbox.id = subscriber.username
+		subInbox.save(failOnError: true, validate: false)
+
+		Stream stream = new Stream()
+		stream.id = "stream"
+		setup:
+		service.systemGrant(publisher1, stream, Operation.WRITE)
+		service.systemGrant(publisher2, stream, Operation.WRITE)
+
+		when:
+		// adding a new subscriber
+		service.systemGrant(subscriber, stream, Operation.READ)
+		// adding a new publisher
+		service.systemGrant(publisher3, stream, Operation.WRITE)
+		then:
+		2 * streamService.getInboxStreams([subscriber]) >> [subInbox]
+		1 * streamService.getInboxStreams([publisher1, publisher2]) >> [pub1Inbox, pub2Inbox]
+		1 * streamService.getInboxStreams([publisher3]) >> [pub3Inbox]
+		// assertions after adding a new subscriber
+		service.canWrite(subscriber, pub1Inbox)
+		service.canWrite(subscriber, pub2Inbox)
+		service.canWrite(publisher1, subInbox)
+		service.canWrite(publisher2, subInbox)
+		// assertions after adding a new publisher
+		service.canWrite(subscriber, pub3Inbox)
+		service.canWrite(publisher3, subInbox)
+	}
+	 */
+
+	void "inbox stream permissions also work when anonymous keys have permissions to the stream"() {
+		SecUser subscriber = new SecUser(username: "0x26e1ae3f5efe8a01eca8c2e9d3c32702cf4bead6").save(failOnError: true, validate: false)
+		Key anonKey = new Key()
+		anonKey.id = 1L
+		anonKey.save(failOnError: true, validate: false)
+		Stream stream = new Stream()
+		stream.id = "stream"
+		setup:
+		service.systemGrant(anonKey, stream, Operation.WRITE)
+		when:
+		service.systemGrant(subscriber, stream, Operation.READ)
+		then:
+		noExceptionThrown()
+	}
+
 	void "cannot revoke only share permission"() {
 		setup: "transfer effective 'ownership'"
 		service.systemGrantAll(anotherUser, dashOwned)
@@ -298,6 +308,67 @@ class PermissionServiceSpec extends Specification {
 		then:
 		def e = thrown(AccessControlException)
 		e.message == "Cannot revoke only SHARE permission of ${dashOwned}"
+	}
+
+	void "systemRevoke() on a stream also revokes the associated inbox permissions"() {
+		SecUser publisher = new SecUser()
+		publisher.id = 7L
+		Stream pubInbox = new Stream(name: "publisher", inbox: true)
+		pubInbox.id = "publisher"
+		pubInbox.save(failOnError: true, validate: false)
+		SecUser subscriber = new SecUser(username: "0x26e1ae3f5efe8a01eca8c2e9d3c32702cf4bead6").save(failOnError: true, validate: false)
+		Stream subInbox = new Stream(name: subscriber.username, inbox: true)
+		subInbox.id = subscriber.username
+		subInbox.save(failOnError: true, validate: false)
+		Stream stream = new Stream()
+		stream.id = "stream"
+		setup:
+		new Permission(user: publisher, stream: stream, operation: Operation.WRITE).save(failOnError: true, validate: false)
+
+		Permission parent = new Permission(user: subscriber, stream: stream, operation: Operation.READ).save(failOnError: true, validate: false)
+		new Permission(user: subscriber, stream: pubInbox, operation: Operation.WRITE, parent: parent).save(failOnError: true, validate: false)
+		new Permission(user: publisher, stream: subInbox, operation: Operation.WRITE, parent: parent).save(failOnError: true, validate: false)
+		when:
+		service.systemRevoke(subscriber, stream, Operation.READ)
+		then:
+		!service.canRead(subscriber, stream)
+		!service.canWrite(subscriber, pubInbox)
+		!service.canWrite(publisher, subInbox)
+	}
+
+	void "inbox permissions are maintained after systemRevoke() on a stream if there is another stream with permissions"() {
+		SecUser publisher = new SecUser()
+		publisher.id = 7L
+		Stream pubInbox = new Stream(name: "publisher", inbox: true)
+		pubInbox.id = "publisher"
+		pubInbox.save(failOnError: true, validate: false)
+		SecUser subscriber = new SecUser(username: "0x26e1ae3f5efe8a01eca8c2e9d3c32702cf4bead6").save(failOnError: true, validate: false)
+		Stream subInbox = new Stream(name: subscriber.username, inbox: true)
+		subInbox.id = subscriber.username
+		subInbox.save(failOnError: true, validate: false)
+		Stream stream1 = new Stream()
+		stream1.id = "stream1"
+		Stream stream2 = new Stream()
+		stream2.id = "stream2"
+		setup:
+		new Permission(user: publisher, stream: stream1, operation: Operation.WRITE).save(failOnError: true, validate: false)
+
+		Permission parent1 = new Permission(user: subscriber, stream: stream1, operation: Operation.READ).save(failOnError: true, validate: false)
+		new Permission(user: subscriber, stream: pubInbox, operation: Operation.WRITE, parent: parent1).save(failOnError: true, validate: false)
+		new Permission(user: publisher, stream: subInbox, operation: Operation.WRITE, parent: parent1).save(failOnError: true, validate: false)
+
+		new Permission(user: publisher, stream: stream2, operation: Operation.WRITE).save(failOnError: true, validate: false)
+
+		Permission parent2 = new Permission(user: subscriber, stream: stream2, operation: Operation.READ).save(failOnError: true, validate: false)
+		new Permission(user: subscriber, stream: pubInbox, operation: Operation.WRITE, parent: parent2).save(failOnError: true, validate: false)
+		new Permission(user: publisher, stream: subInbox, operation: Operation.WRITE, parent: parent2).save(failOnError: true, validate: false)
+		when:
+		service.systemRevoke(subscriber, stream1, Operation.READ)
+		then:
+		!service.canRead(subscriber, stream1)
+		service.canRead(subscriber, stream2)
+		service.canWrite(subscriber, pubInbox)
+		service.canWrite(publisher, subInbox)
 	}
 
 	void "cannot revoke only share permission (via cascading READ)"() {
@@ -322,34 +393,6 @@ class PermissionServiceSpec extends Specification {
 		then:
 		def e = thrown(AccessControlException)
 		e.message == "Cannot revoke only SHARE permission of ${dashOwned}"
-	}
-
-	void "default revocation is all access"() {
-		setup:
-		service.grant(me, dashOwned, stranger, Operation.READ)
-		service.grant(me, dashOwned, stranger, Operation.SHARE)
-		when:
-		service.revoke(me, dashOwned, stranger)
-		then: "by default, revoke all access"
-		service.get(Dashboard, stranger) == []
-		service.get(Dashboard, stranger, Operation.SHARE) == []
-	}
-
-	void "granting works (roughly) idempotently"() {
-		expect:
-		service.get(Dashboard, stranger) == []
-		when: "double-granting still has the same effect: there exists a permission for user to resource"
-		service.grant(me, dashOwned, stranger)
-		service.grant(me, dashOwned, stranger)
-		then: "now you see it..."
-		service.get(Dashboard, stranger) == [dashOwned]
-		when:
-		service.grant(me, dashOwned, stranger)
-		service.grant(me, dashOwned, stranger)
-		service.grant(me, dashOwned, stranger)
-		service.revoke(me, dashOwned, stranger)
-		then: "now you don't."
-		service.get(Dashboard, stranger) == []
 	}
 
 	void "signup invitation can be granted and revoked of permissions just like normal users"() {
@@ -383,5 +426,50 @@ class PermissionServiceSpec extends Specification {
 		service.canRead(stranger, dashPublic)
 		!service.canWrite(stranger, dashPublic)
 		!service.canShare(stranger, dashPublic)
+	}
+
+	void "verify does not throw if permission exists"() {
+		when:
+		service.verify(stranger, dashPublic, Operation.READ)
+		then:
+		notThrown(NotPermittedException)
+	}
+
+	void "verify throws if permission does not exist"() {
+		when:
+		service.verify(stranger, dashPublic, Operation.WRITE)
+		then:
+		def e = thrown(NotPermittedException)
+		e.message == "stranger does not have permission to write Dashboard (id 4)"
+	}
+
+	void "systemRevokeAnonymousAccess() revokes anonymous access on a resource"() {
+		assert Permission.exists(dashAnonymousReadPermission.id)
+		assert service.canRead(null, dashPublic)
+
+		when:
+		service.systemRevokeAnonymousAccess(dashPublic)
+
+		then:
+		!Permission.exists(dashAnonymousReadPermission.id)
+		!service.canRead(null, dashPublic)
+	}
+
+	void "check() returns false if permission with endsAt set in past"() {
+		def p = service.systemGrant(stranger, dashOwned, Operation.READ)
+		p.endsAt = new Date(0)
+		p.save(failOnError: true)
+
+		expect:
+		!service.check(stranger, dashOwned, Operation.READ)
+	}
+
+	void "check() returns true if permission with endsAt set in future"() {
+		def p = service.systemGrant(stranger, dashOwned, Operation.READ)
+		p.endsAt = new Date(System.currentTimeMillis() + 60000)
+		p.save(failOnError: true)
+
+		expect:
+		service.check(stranger, dashOwned, Operation.READ)
 	}
 }

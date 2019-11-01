@@ -1,0 +1,99 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Stream",
+  "description": "A description of a data stream",
+  "type": "object",
+  "required": [
+    "id",
+    "partitions",
+    "name",
+    "description",
+    "uiChannel",
+    "config",
+    "dateCreated",
+    "lastUpdated",
+    "requireSignedData",
+    "requireEncryptedData",
+    "inbox",
+    "autoConfigure",
+    "storageDays",
+    "inactivityThresholdHours"
+  ],
+  "properties": {
+    "id": {
+      "description": "Unique identifier for a stream",
+      "$ref": "#/definitions/resourceIdentifier"
+    },
+    "partitions": {
+      "description": "Number of partitions in this stream",
+      "type": "integer",
+      "minimum": 1
+    },
+    "name": {
+      "description": "Name of the stream",
+      "type": "string",
+      "maxLength": 255
+    },
+    "description": {
+      "description": "Description of this stream",
+      "type": [
+        "null",
+        "string"
+      ],
+      "maxLength": 255
+    },
+    "uiChannel": {
+      "description": "Is this a uiChannel stream?",
+      "type": "boolean"
+    },
+    "config": {
+      "description": "Configuration of this stream",
+      "type": "object"
+    },
+    "dateCreated": {
+      "description": "Timestamp of when this stream was created",
+      "type": "string",
+      "format": "date-time"
+    },
+    "lastUpdated": {
+      "description": "Timestamp of when this stream was last updated",
+      "type": "string",
+      "format": "date-time"
+    },
+    "requireSignedData": {
+      "description": "Does this stream require data to be signed?",
+      "type": "boolean"
+    },
+    "requireEncryptedData": {
+      "description": "Does this stream require data to be encrypted?",
+      "type": "boolean"
+    },
+    "inbox": {
+      "description": "Is this an inbox stream?",
+      "type": "boolean"
+    },
+    "autoConfigure": {
+      "description": "Is stream automatically configured?",
+      "type": "boolean"
+    },
+    "storageDays": {
+      "description": "How many days is data stored for",
+      "type": "integer",
+      "minimum": 0
+    },
+    "inactivityThresholdHours": {
+      "description": "inactivity period for a stream in hours",
+      "type": "integer",
+      "minimum": 0
+    }
+  },
+  "additionalProperties": false,
+  "definitions": {
+    "resourceIdentifier": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 255,
+      "pattern": "^[a-zA-Z0-9-_]+$"
+    }
+  }
+}

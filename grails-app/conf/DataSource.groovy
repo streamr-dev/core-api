@@ -32,6 +32,8 @@ hibernate {
 environments {
     development {
         dataSource {
+			logSql = Boolean.parseBoolean(System.getProperty('logSql') ?: 'false')
+			formatSql = true
 			username = System.getProperty('streamr.database.user', 'root')
 			password = System.getProperty('streamr.database.password', 'password')
 			url = "jdbc:mysql://${System.getProperty('streamr.database.host', '127.0.0.1:3306')}/${System.getProperty('streamr.database.name', 'core_dev')}?useLegacyDatetimeCode=false"

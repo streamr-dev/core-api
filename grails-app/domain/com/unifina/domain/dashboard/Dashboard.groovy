@@ -6,9 +6,9 @@ import com.unifina.domain.security.Permission
 import groovy.transform.CompileStatic
 
 class Dashboard {
-
+	public final static String DEFAULT_NAME = "Untitled Dashboard"
 	String id
-	String name
+	String name = DEFAULT_NAME
 
 	Date dateCreated
 	Date lastUpdated
@@ -28,6 +28,7 @@ class Dashboard {
 	static mapping = {
 		items cascade: "all-delete-orphan"
 		id generator: IdGenerator.name
+		layout type: "text"
 	}
 
 	@CompileStatic
@@ -36,6 +37,8 @@ class Dashboard {
 				id        : id,
 				name      : name,
 				numOfItems: items == null ? 0 : items.size(),
+				created: dateCreated,
+				updated: lastUpdated
 		]
 	}
 
@@ -45,7 +48,9 @@ class Dashboard {
 				id    : id,
 				name  : name,
 				items : items == null ? [] : items.collect { DashboardItem it -> it.toMap() },
-				layout: layout ? JSON.parse(layout) : [:]
+				layout: layout ? JSON.parse(layout) : [:],
+				created: dateCreated,
+				updated: lastUpdated
 		]
 	}
 }

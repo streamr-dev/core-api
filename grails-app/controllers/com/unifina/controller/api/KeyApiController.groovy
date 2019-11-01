@@ -1,7 +1,9 @@
 package com.unifina.controller.api
 
+import com.unifina.api.ApiException
 import com.unifina.api.NotFoundException
 import com.unifina.api.NotPermittedException
+import com.unifina.domain.data.Stream
 import com.unifina.domain.security.Key
 import com.unifina.domain.security.Permission
 import com.unifina.domain.security.SecUser
@@ -10,6 +12,7 @@ import com.unifina.security.StreamrApi
 import com.unifina.service.PermissionService
 import grails.converters.JSON
 import grails.plugin.springsecurity.annotation.Secured
+import groovy.json.JsonSlurper
 
 @Secured(["IS_AUTHENTICATED_ANONYMOUSLY"])
 class KeyApiController {
@@ -21,7 +24,7 @@ class KeyApiController {
 	 * Checks Permissions for current user first, and blocks the action if access hasn't been granted
 	 * @param action Closure that takes up to one argument: the specified resource
 	 */
-	private useResource(Class resourceClass, resourceId, boolean requireSharePermission=true, Closure action) {
+	private useResource(Class resourceClass, resourceId, boolean requireSharePermission = true, Closure action) {
 		if (!grailsApplication.isDomainClass(resourceClass)) {
 			throw new IllegalArgumentException("${resourceClass.simpleName} is not a domain class!")
 		}
@@ -44,13 +47,13 @@ class KeyApiController {
 
 	@StreamrApi(authenticationLevel = AuthLevel.USER)
 	def index() {
-		useResource(params.resourceClass, params.resourceId) {res ->
+		useResource(params.resourceClass, params.resourceId) { res ->
 			if (res instanceof SecUser) {
 				render res.keys*.toMap() as JSON
 			} else {
 				Map permissionsByKey = permissionService.getPermissionsTo(res)
-						.findAll { it.key != null }
-						.groupBy { it.key }
+					.findAll { it.key != null }
+					.groupBy { it.key }
 
 				List keys = permissionsByKey.collect { key, permissions ->
 					Map map = key.toMap()
@@ -67,7 +70,7 @@ class KeyApiController {
 
 	@StreamrApi(authenticationLevel = AuthLevel.USER)
 	def save() {
-		useResource(params.resourceClass, params.resourceId) {res ->
+		useResource(params.resourceClass, params.resourceId) { res ->
 			Key key = new Key(request.JSON)
 			key.user = res instanceof SecUser ? res : null
 			key.save(failOnError: true, validate: true)
@@ -123,4 +126,75 @@ class KeyApiController {
 		}
 	}
 
+	@StreamrApi(authenticationLevel = AuthLevel.USER)
+	def updateUserKey() {
+		Key k = Key.get(params.keyId)
+		if (k == null) {
+			throw new NotFoundException(k.toString(), params.keyId)
+		}
+		Map json = new JsonSlurper().parseText((String) request.JSON)
+		if (json.name != null && json.name.trim() != "") {
+			useResource(SecUser, params.keyId) { res ->
+				k.name = json.name.trim()
+				k.save(flush: true, failOnError: true)
+			}
+		}
+		response.status = 200
+		render(k.toMap() as JSON)
+	}
+
+
+	private boolean hasPermission(Permission.Operation operation, Set<Permission> permissions) {
+		for (Permission p : permissions) {
+			if (p.operation == operation) {
+				return true
+			}
+		}
+		return false
+	}
+
+	@StreamrApi(authenticationLevel = AuthLevel.USER)
+	def updateStreamKey() {
+		Key k = Key.get(params.keyId)
+		if (k == null) {
+			throw new NotFoundException(k.toString(), params.keyId)
+		}
+		Map json = new JsonSlurper().parseText((String) request.JSON)
+		String permission = request.JSON?.permission
+		if (permission && permission != "read" && permission != "write") {
+			throw new ApiException(400, "INVALID_PARAMETER", "permission field in json should be 'read' or 'write'.")
+		}
+		if (json.name != null && json.name.trim() != "") {
+			useResource(Stream, params.streamId) { res ->
+				k.name = json.name.trim()
+				if (permission) {
+					Permission.Operation operation = Permission.Operation.fromString(permission)
+					SecUser user = request.apiUser
+					boolean logIfDenied = false
+					if (operation == Permission.Operation.READ) {
+						if (!hasPermission(Permission.Operation.READ, k.getPermissions())) {
+							permissionService.grant(user, res, k, Permission.Operation.READ, logIfDenied)
+						}
+						if (hasPermission(Permission.Operation.WRITE, k.getPermissions())) {
+							permissionService.revoke(user, res, k, Permission.Operation.WRITE, logIfDenied)
+						}
+					} else if (operation == Permission.Operation.WRITE) {
+						if (!hasPermission(Permission.Operation.READ, k.getPermissions())) {
+							permissionService.grant(user, res, k, Permission.Operation.READ, logIfDenied)
+						}
+						if (!hasPermission(Permission.Operation.WRITE, k.getPermissions())) {
+							permissionService.grant(user, res, k, Permission.Operation.WRITE, logIfDenied)
+						}
+					}
+				}
+				k.save(flush: true, failOnError: true)
+			}
+		}
+		response.status = 200
+		Map result = k.toMap()
+		if (permission) {
+			result["permission"] = permission
+		}
+		render(result as JSON)
+	}
 }

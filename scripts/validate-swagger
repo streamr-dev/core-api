@@ -1,0 +1,10 @@
+#!/bin/bash
+
+JSON=$(curl --silent --fail -d @"docs/swagger.json" -H "Content-Type: application/json" "http://online.swagger.io/validator/debug")
+CURL_EXIT_CODE=$?
+if [ $CURL_EXIT_CODE -ne 0 ]; then
+	echo "validate-swagger: error while uploading swagger.json to online.swagger.io" 1>&2
+	exit $CURL_EXIT_CODE
+fi
+echo "$JSON" | python -m json.tool
+

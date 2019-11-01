@@ -1,17 +1,22 @@
 package com.unifina.signalpath.charts
 
 import com.unifina.UiChannelMockingSpecification
+import com.unifina.domain.security.SecUser
+import com.unifina.signalpath.SignalPath
 import com.unifina.utils.testutils.ModuleTestHelper
+import grails.test.mixin.Mock
 import grails.test.mixin.TestMixin
 import grails.test.mixin.support.GrailsUnitTestMixin
 
 @TestMixin(GrailsUnitTestMixin)
+@Mock([SecUser])
 class TimeSeriesChartSpec extends UiChannelMockingSpecification {
 
 	TimeSeriesChart module
 
 	def setup() {
 		mockServicesForUiChannels()
+		SecUser user = new SecUser(username: 'user').save(failOnError: true, validate: false)
 		module = setupModule(new TimeSeriesChart(), [
 				uiChannel: [id: "timeSeries"],
 				options: [
@@ -19,7 +24,7 @@ class TimeSeriesChartSpec extends UiChannelMockingSpecification {
 						overnightBreak: [value: false]
 				],
 				barify: false
-		])
+		], new SignalPath(true), mockGlobals([:], user))
 	}
 
 	void "timeSeriesChart sends correct data to uiChannel"() {

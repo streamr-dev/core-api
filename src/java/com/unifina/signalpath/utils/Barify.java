@@ -1,13 +1,13 @@
 package com.unifina.signalpath.utils;
 
-import java.io.Serializable;
-import java.util.Date;
-
 import com.unifina.datasource.ITimeListener;
 import com.unifina.signalpath.AbstractSignalPathModule;
 import com.unifina.signalpath.IntegerParameter;
 import com.unifina.signalpath.TimeSeriesInput;
 import com.unifina.signalpath.TimeSeriesOutput;
+
+import java.io.Serializable;
+import java.util.Date;
 
 public class Barify extends AbstractSignalPathModule implements ITimeListener {
 	
@@ -102,7 +102,7 @@ public class Barify extends AbstractSignalPathModule implements ITimeListener {
 		return barLength.getValue();
 	}
 
-	class Bar implements Serializable {
+	static class Bar implements Serializable {
 		public Date start;
 		public Double open;
 		public Double high;

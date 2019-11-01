@@ -1,23 +1,16 @@
-# macOS
 .DS_Store
+hs_err_pid*
+replay_pid*
 
 # IntelliJ IDEA
-.idea/workspace.xml
-.idea/tasks.xml
-.idea/dictionaries
-.idea/httpRequests
-
-## File-based project format:
-*.iws
-out/
+/.idea/workspace.xml
+/.idea/tasks.xml
+/.idea/dictionaries
+/.idea/httpRequests
+/out/
 
 # project files
-target
-node_modules
-
-.slcache/
-plugin.xml
-hs_err_pid*
-web-app/js/unifina/webpack-bundles/*
-npm-debug.log*
-tomcat.8081
+/target/
+/.slcache/
+/tomcat.8081/
+/rest-e2e-tests/node_modules/

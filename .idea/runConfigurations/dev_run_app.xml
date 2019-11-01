@@ -2,6 +2,7 @@
   <configuration default="false" name="dev run-app" type="GrailsRunConfigurationType" factoryName="Grails" singleton="true">
     <setting name="vmparams" value="" />
     <setting name="cmdLine" value="run-app --stacktrace" />
+    <env name="AWS_PROFILE" value="automation-user-streamr-dev" />
     <setting name="passParentEnv" value="true" />
     <setting name="grailsApplicationRoot" value="$PROJECT_DIR$" />
     <setting name="launchBrowser" value="false" />

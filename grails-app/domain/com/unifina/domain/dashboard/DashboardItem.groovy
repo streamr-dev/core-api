@@ -32,7 +32,7 @@ class DashboardItem {
 				title       : title,
 				canvas      : canvas?.id,
 				module      : module,
-				webcomponent: webcomponent.toString()
+				webcomponent: webcomponent.getName()
 		]
 	}
 }

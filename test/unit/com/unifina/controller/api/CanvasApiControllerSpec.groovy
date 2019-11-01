@@ -1,29 +1,26 @@
 package com.unifina.controller.api
 
-import com.unifina.api.CanvasListParams
-import com.unifina.api.ListParams
-import com.unifina.api.NotPermittedException
-import com.unifina.api.SaveCanvasCommand
-import com.unifina.domain.security.Key
-import com.unifina.domain.security.Permission
-import com.unifina.domain.security.SecUser
+import com.unifina.ControllerSpecification
+import com.unifina.api.*
+import com.unifina.domain.security.*
 import com.unifina.domain.signalpath.Canvas
 import com.unifina.exceptions.CanvasUnreachableException
-import com.unifina.filters.UnifinaCoreAPIFilters
+import com.unifina.security.AllowRole
 import com.unifina.service.ApiService
 import com.unifina.service.CanvasService
 import com.unifina.service.SignalPathService
-import com.unifina.service.UserService
+import com.unifina.exceptions.JavaCompilerErrorMessage
+import com.unifina.signalpath.ModuleException
+import com.unifina.exceptions.ModuleExceptionMessage
+
 import grails.converters.JSON
-import grails.plugin.springsecurity.SpringSecurityService
 import grails.test.mixin.Mock
 import grails.test.mixin.TestFor
 import groovy.json.JsonBuilder
-import spock.lang.Specification
 
 @TestFor(CanvasApiController)
-@Mock([SecUser, Permission, Canvas, Key, UnifinaCoreAPIFilters])
-class CanvasApiControllerSpec extends Specification {
+@Mock([SecUser, SecUserSecRole, Permission, Canvas, Key])
+class CanvasApiControllerSpec extends ControllerSpecification {
 
 	ApiService apiService
 	CanvasService canvasService
@@ -32,14 +29,7 @@ class CanvasApiControllerSpec extends Specification {
 	Canvas canvas2
 	Canvas canvas3
 
-	// This gets the real services injected into the filters
-	// From https://github.com/grails/grails-core/issues/9191
-	static doWithSpring = {
-		springSecurityService(SpringSecurityService)
-		userService(UserService)
-	}
-
-	void setup() {
+	def setup() {
 		controller.canvasService = canvasService = Mock(CanvasService)
 		controller.signalPathService = Mock(SignalPathService)
 		controller.apiService = apiService = Mock(ApiService)
@@ -82,13 +72,16 @@ class CanvasApiControllerSpec extends Specification {
 		assert Canvas.count() == 3
 	}
 
+	void "check annotations"() {
+		when:
+		Map<String, List<AllowRole>> actionRoles = [startAsAdmin: [AllowRole.ADMIN]]
+		then:
+		getInvalidAnnotations(CanvasApiController, actionRoles) == new HashSet()
+	}
+
 	void "index() renders authorized canvases as a list"() {
 		when:
-		request.addHeader("Authorization", "Token myApiKey")
-		request.requestURI = "/api/v1/canvases"
-		withFilters(action: "index") {
-			controller.index()
-		}
+		authenticatedAs(me) { controller.index() }
 
 		then:
 		response.status == 200
@@ -102,11 +95,7 @@ class CanvasApiControllerSpec extends Specification {
 	void "index() adds name param to filter criteria"() {
 		when:
 		params.name = "Foo"
-		request.addHeader("Authorization", "Token myApiKey")
-		request.requestURI = "/api/v1/canvases"
-		withFilters(action: "index") {
-			controller.index()
-		}
+		authenticatedAs(me) { controller.index() }
 
 		then:
 		response.status == 200
@@ -120,11 +109,7 @@ class CanvasApiControllerSpec extends Specification {
 	void "index() adds adhoc param to filter criteria"() {
 		when:
 		params.adhoc = "true"
-		request.addHeader("Authorization", "Token myApiKey")
-		request.requestURI = "/api/v1/canvases"
-		withFilters(action: "index") {
-			controller.index()
-		}
+		authenticatedAs(me) { controller.index() }
 
 		then:
 		response.status == 200
@@ -138,11 +123,7 @@ class CanvasApiControllerSpec extends Specification {
 	void "index() adds state param to filter criteria"() {
 		when:
 		params.state = "RUNNING"
-		request.addHeader("Authorization", "Token myApiKey")
-		request.requestURI = "/api/v1/canvases"
-		withFilters(action: "index") {
-			controller.index()
-		}
+		authenticatedAs(me) { controller.index() }
 
 		then:
 		response.status == 200
@@ -156,11 +137,7 @@ class CanvasApiControllerSpec extends Specification {
 	void "show() authorizes, reconstructs and renders the canvas as json"() {
 		when:
 		params.id = "1"
-		request.addHeader("Authorization", "Token myApiKey")
-		request.requestURI = "/api/v1/canvases/$params.id"
-		withFilters(action: "show") {
-			controller.show()
-		}
+		authenticatedAs(me) { controller.show() }
 
 		then:
 		response.status == 200
@@ -174,11 +151,7 @@ class CanvasApiControllerSpec extends Specification {
 		when:
 		params.id = canvas1.id
 		params.runtime = true
-		request.addHeader("Authorization", "Token myApiKey")
-		request.requestURI = "/api/v1/canvases/$params.id"
-		withFilters(action: "show") {
-			controller.show()
-		}
+		authenticatedAs(me) { controller.show() }
 
 		then:
 		response.status == 200
@@ -188,20 +161,42 @@ class CanvasApiControllerSpec extends Specification {
 		1 * controller.signalPathService.runtimeRequest(_, false) >> [success:true, json:JSON.parse(canvas1.json)]
 	}
 
+	void "show() lets load a canvas in invalid state"() {
+		setup:
+		List<ModuleExceptionMessage> msgs = new ArrayList<>()
+		msgs.add(new JavaCompilerErrorMessage(1, 11, "stupid programmer error"))
+		msgs.add(new JavaCompilerErrorMessage(1, 10, "syntax error"))
+		msgs.add(new JavaCompilerErrorMessage(2, 100, "syntax terror"))
+
+		when:
+		params.id = canvas1.id
+		authenticatedAs(me) { controller.show() }
+
+		then:
+		response.status == 200
+		response.json.size() > 0
+		1 * canvasService.authorizedGetById("1", me, Permission.Operation.READ) >> canvas1
+		1 * controller.canvasService.reconstruct(_, _) >> { throw new ModuleException("mocked", null, msgs) }
+		response.json.moduleErrors[0].module == 1
+		response.json.moduleErrors[0].line == 11
+		response.json.moduleErrors[0].message == "stupid programmer error"
+		response.json.moduleErrors[1].module == 1
+		response.json.moduleErrors[1].line == 10
+		response.json.moduleErrors[1].message == "syntax error"
+		response.json.moduleErrors[2].module == 2
+		response.json.moduleErrors[2].line == 100
+		response.json.moduleErrors[2].message == "syntax terror"
+	}
+	
 	void "save() creates a new canvas and renders it as json"() {
 		def newCanvasId
 
 		when:
-		request.addHeader("Authorization", "Token myApiKey")
 		request.JSON = [
 			name: "brand new Canvas",
 			modules: [],
 		]
-		request.method = "POST"
-		request.requestURI = "/api/v1/canvases"
-		withFilters(action: "save") {
-			controller.save()
-		}
+		authenticatedAs(me) { controller.save() }
 
 		then:
 		response.status == 200
@@ -209,7 +204,7 @@ class CanvasApiControllerSpec extends Specification {
 		1 * canvasService.createNew(_, me) >> { SaveCanvasCommand command, SecUser user ->
 			assert command.name == "brand new Canvas"
 			assert command.modules == []
-			def c = new Canvas(json: "{}").save(validate: false)
+			def c = new Canvas().save(validate: false)
 			newCanvasId = c.id
 			return c
 		}
@@ -217,17 +212,13 @@ class CanvasApiControllerSpec extends Specification {
 
 	void "update() authorizes, updates and renders the canvas as json"() {
 		when:
-		request.addHeader("Authorization", "Token myApiKey")
 		params.id = "1"
 		request.JSON = [
 			name: "updated, new name",
 			modules: [],
 		]
 		request.method = "PUT"
-		request.requestURI = "/api/v1/canvases/$params.id"
-		withFilters(action: "update") {
-			controller.update()
-		}
+		authenticatedAs(me) { controller.update() }
 
 		then:
 		response.status == 200
@@ -243,17 +234,13 @@ class CanvasApiControllerSpec extends Specification {
 		Map originalProperties = canvas2.properties
 
 		when:
-		request.addHeader("Authorization", "Token myApiKey")
 		params.id = canvas2.id
 		request.JSON = [
 			name: "me me me",
 			modules: []
 		]
 		request.method = "PUT"
-		request.requestURI = "/api/v1/canvases/$params.id"
-		withFilters(action: "update") {
-			controller.update()
-		}
+		authenticatedAs(me) { controller.update() }
 
 		then: "canvas must be unchanged"
 		originalProperties == canvas2.properties
@@ -263,15 +250,44 @@ class CanvasApiControllerSpec extends Specification {
 		1 * canvasService.authorizedGetById(canvas2.id, me, Permission.Operation.WRITE) >> { throw new NotPermittedException("mock") }
 	}
 
+	def "update() lets save canvas in invalid state"() {
+		setup:
+		List<ModuleExceptionMessage> msgs = new ArrayList<>()
+		msgs.add(new JavaCompilerErrorMessage(1, 11, "stupid programmer error"))
+		msgs.add(new JavaCompilerErrorMessage(1, 10, "syntax error"))
+		msgs.add(new JavaCompilerErrorMessage(2, 100, "syntax terror"))
+
+		params.id = "1"
+		request.JSON = [
+			name: "broken canvas",
+			modules: [],
+		]
+		request.method = "PUT"
+
+		when:
+		authenticatedAs(me) { controller.update() }
+
+		then:
+		response.status == 200
+		1 * canvasService.authorizedGetById("1", me, Permission.Operation.WRITE) >> canvas1
+		1 * canvasService.updateExisting(canvas1, _, me) >> { throw new ModuleException("mocked", null, msgs) }
+		response.json.moduleErrors[0].module == 1
+		response.json.moduleErrors[0].line == 11
+		response.json.moduleErrors[0].message == "stupid programmer error"
+		response.json.moduleErrors[1].module == 1
+		response.json.moduleErrors[1].line == 10
+		response.json.moduleErrors[1].message == "syntax error"
+		response.json.moduleErrors[2].module == 2
+		response.json.moduleErrors[2].line == 100
+		response.json.moduleErrors[2].message == "syntax terror"
+	}
+
+
 	void "delete() must authorize and delete the canvas"() {
 		when:
-		request.addHeader("Authorization", "Token myApiKey")
 		params.id = "1"
 		request.method = "DELETE"
-		request.requestURI = "/api/v1/canvases/$params.id"
-		withFilters(action: "delete") {
-			controller.delete()
-		}
+		authenticatedAs(me) { controller.delete() }
 
 		then:
 		response.status == 204
@@ -281,13 +297,9 @@ class CanvasApiControllerSpec extends Specification {
 
 	void "delete() must not delete the canvas if authorization fails"() {
 		when:
-		request.addHeader("Authorization", "Token myApiKey")
 		params.id = "2"
 		request.method = "DELETE"
-		request.requestURI = "/api/v1/canvases/$params.id"
-		withFilters(action: "delete") {
-			controller.delete()
-		}
+		authenticatedAs(me) { controller.delete() }
 
 		then:
 		thrown NotPermittedException
@@ -297,13 +309,9 @@ class CanvasApiControllerSpec extends Specification {
 
 	void "start() must authorize and start a canvas"() {
 		when:
-		request.addHeader("Authorization", "Token myApiKey")
 		params.id = "1"
 		request.method = "POST"
-		request.requestURI = "/api/v1/canvases/$params.id/start"
-		withFilters(action: "start") {
-			controller.start()
-		}
+		authenticatedAs(me) { controller.start() }
 
 		then:
 		response.status == 200
@@ -314,14 +322,10 @@ class CanvasApiControllerSpec extends Specification {
 
 	void "start() must authorize and be able to start a Canvas with clearing enabled"() {
 		when:
-		request.addHeader("Authorization", "Token myApiKey")
 		params.id = "1"
 		request.JSON = [clearState: true]
 		request.method = "POST"
-		request.requestURI = "/api/v1/canvases/$params.id/start"
-		withFilters(action: "start") {
-			controller.start()
-		}
+		authenticatedAs(me) { controller.start() }
 
 		then:
 		response.status == 200
@@ -334,13 +338,9 @@ class CanvasApiControllerSpec extends Specification {
 		Map originalProperties = canvas2.properties
 
 		when:
-		request.addHeader("Authorization", "Token myApiKey")
 		params.id = canvas2.id
 		request.method = "POST"
-		request.requestURI = "/api/v1/canvases/$params.id/start"
-		withFilters(action: "start") {
-			controller.start()
-		}
+		authenticatedAs(me) { controller.start() }
 
 		then: "canvas must be unchanged"
 		originalProperties == canvas2.properties
@@ -350,15 +350,64 @@ class CanvasApiControllerSpec extends Specification {
 		1 * canvasService.authorizedGetById(canvas2.id, me, Permission.Operation.WRITE) >> {throw new NotPermittedException("mock")}
 	}
 
-	void "stop() must authorize and stop a canvas"() {
+	void "startAsAdmin() requires parameter startedBy to be given"() {
+		setup:
+		def adminRole = new SecRole(authority: "ROLE_ADMIN").save(failOnError: true, validate: false)
+		new SecUserSecRole(secUser: me, secRole: adminRole).save(failOnError: true, validate: false)
+
 		when:
-		request.addHeader("Authorization", "Token myApiKey")
 		params.id = "1"
 		request.method = "POST"
-		request.requestURI = "/api/v1/canvases/$params.id/stop"
-		withFilters(action: "stop") {
-			controller.stop()
-		}
+		authenticatedAs(me) { controller.startAsAdmin() }
+
+		then:
+		def e = thrown(ValidationException)
+		e.message.contains("nullable")
+	}
+
+	void "startAsAdmin() requires parameter startedBy to be an existing user id"() {
+		setup:
+		def adminRole = new SecRole(authority: "ROLE_ADMIN").save(failOnError: true, validate: false)
+		new SecUserSecRole(secUser: me, secRole: adminRole).save(failOnError: true, validate: false)
+
+		when:
+		params.id = "1"
+		params.startedBy = 6
+		request.method = "POST"
+		authenticatedAs(me) { controller.startAsAdmin() }
+
+		then:
+		def e = thrown(ValidationException)
+		e.message.contains("typeMismatch") // typeMismatch means Grails didn't find SecUser for id
+	}
+
+	void "startAsAdmin() starts a Canvas if user is admin"() {
+		setup:
+		def adminRole = new SecRole(authority: "ROLE_ADMIN").save(failOnError: true, validate: false)
+		new SecUserSecRole(secUser: me, secRole: adminRole).save(failOnError: true, validate: false)
+
+		def someoneElse = new SecUser(username: "someoneElse@streamr.com").save(failOnError: true, validate: false)
+
+		when:
+		params.id = "1"
+		params.startedBy = someoneElse.id
+		request.method = "POST"
+		authenticatedAs(me) { controller.startAsAdmin() }
+
+		then:
+		1 * apiService.getByIdAndThrowIfNotFound(Canvas, "1") >> canvas1
+		1 * canvasService.start(canvas1, false, someoneElse)
+
+		and:
+		response.status == 200
+		response.json?.size() > 0
+	}
+
+	void "stop() must authorize and stop a canvas"() {
+		when:
+		params.id = "1"
+		request.method = "POST"
+		authenticatedAs(me) { controller.stop() }
 
 		then:
 		response.status == 200
@@ -371,13 +420,9 @@ class CanvasApiControllerSpec extends Specification {
 		canvas1.adhoc = true
 
 		when:
-		request.addHeader("Authorization", "Token myApiKey")
 		params.id = "1"
 		request.method = "POST"
-		request.requestURI = "/api/v1/canvases/$params.id/stop"
-		withFilters(action: "stop") {
-			controller.stop()
-		}
+		authenticatedAs(me) { controller.stop() }
 
 		then:
 		response.status == 204
@@ -389,13 +434,9 @@ class CanvasApiControllerSpec extends Specification {
 		Map originalProperties = canvas2.properties
 
 		when:
-		request.addHeader("Authorization", "Token myApiKey")
 		params.id = canvas2.id
 		request.method = "POST"
-		request.requestURI = "/api/v1/canvases/$params.id/stop"
-		withFilters(action: "stop") {
-			controller.stop()
-		}
+		authenticatedAs(me) { controller.stop() }
 
 		then: "canvas must be unchanged"
 		originalProperties == canvas2.properties
@@ -407,13 +448,9 @@ class CanvasApiControllerSpec extends Specification {
 
 	void "stop() must throw an exception if the canvas can't be reached"() {
 		when:
-		request.addHeader("Authorization", "Token myApiKey")
 		params.id = "1"
 		request.method = "POST"
-		request.requestURI = "/api/v1/canvases/$params.id/stop"
-		withFilters(action: "stop") {
-			controller.stop()
-		}
+		authenticatedAs(me) { controller.stop() }
 
 		then:
 		thrown(CanvasUnreachableException)
@@ -426,15 +463,11 @@ class CanvasApiControllerSpec extends Specification {
 		def result = JSON.parse(canvas1.json).modules.find {it.hash == 1}
 
 		when:
-		request.addHeader("Authorization", "Token myApiKey")
 		params.canvasId = "1"
 		params.moduleId = 1
 		params.dashboardId = "2"
 		request.method = "GET"
-		request.requestURI = "/api/v1/canvases/$params.id/modules/"
-		withFilters(action: "module") {
-			controller.module()
-		}
+		authenticatedAs(me) { controller.module() }
 
 		then:
 		response.status == 200
@@ -446,16 +479,12 @@ class CanvasApiControllerSpec extends Specification {
 		def result = JSON.parse(canvas1.json).modules.find {it.hash == 1}
 
 		when:
-		request.addHeader("Authorization", "Token myApiKey")
 		params.canvasId = "1"
 		params.moduleId = 1
 		params.dashboardId = "2"
 		params.runtime = true
 		request.method = "GET"
-		request.requestURI = "/api/v1/canvases/$params.id/modules/$params.moduleId"
-		withFilters(action: "module") {
-			controller.module()
-		}
+		authenticatedAs(me) { controller.module() }
 
 		then:
 		response.status == 200
@@ -467,15 +496,11 @@ class CanvasApiControllerSpec extends Specification {
 		def runtimeResponse = [foo: 'bar']
 
 		when:
-		request.addHeader("Authorization", "Token myApiKey")
 		params.id = canvas1.id
 		params.path = canvas1.id
 		request.JSON = [bar: 'foo']
 		request.method = "POST"
-		request.requestURI = "/api/v1/canvases/$params.id/request"
-		withFilters(action: "runtimeRequest") {
-			controller.runtimeRequest()
-		}
+		authenticatedAs(me) { controller.runtimeRequest() }
 
 		then:
 		response.status == 200
@@ -488,16 +513,12 @@ class CanvasApiControllerSpec extends Specification {
 		def runtimeResponse = [foo: 'bar']
 
 		when:
-		request.addHeader("Authorization", "Token myApiKey")
 		params.id = canvas1.id
 		params.path = canvas1.id
 		params.local = "true"
 		request.JSON = [bar: 'foo']
 		request.method = "POST"
-		request.requestURI = "/api/v1/canvases/$params.id/request"
-		withFilters(action: "runtimeRequest") {
-			controller.runtimeRequest()
-		}
+		authenticatedAs(me) { controller.runtimeRequest() }
 
 		then:
 		response.status == 200
@@ -505,4 +526,56 @@ class CanvasApiControllerSpec extends Specification {
 		1 * controller.signalPathService.runtimeRequest(_, true) >> runtimeResponse
 	}
 
+	void "validateFilename() doesnt accept dot dot paths or slashs"(String filename, Boolean expected) {
+		expect:
+		controller.validateFilename(filename) == expected
+		where:
+		filename | expected
+		null | false
+		"" | false
+		" " | false
+		"\t" | false
+		"\n" | false
+		"../filename.txt" | false
+		"/file.csv" | false
+		"file/name.csv" | false
+		"..data.txt" | false
+		"../../etc/passwd" | false
+		"data.txt" | false // wrong extension
+		"streamr_csv_0.csv" | true
+		"streamr_csv_111112222233333.csv" | true
+		"streamr_csv_6043894978795937897.csv" | true
+		"streamr_csv_1111122222333334444.csv" | true // 19 digits
+		"streamr_csv_11111222223333344444.csv" | false // 20 digits
+	}
+
+	void "downloadCsv() doesnt let users define dot dot slash paths"() {
+		when:
+		params.filename = "../filename.txt"
+		request.method = "GET"
+		authenticatedAs(me) { controller.downloadCsv() }
+		then:
+		def e = thrown(BadRequestException)
+		e.getStatusCode() == 400
+		e.getCode() == "INVALID_PARAMETER"
+		e.getMessage() == "filename contains illegal characters"
+	}
+
+	void "downloadCsv() downloads csv file"() {
+		setup:
+		String data = "file,csv,data\n1,2,3\n"
+		File file = File.createTempFile("streamr_csv_", ".csv")
+		file.write(data)
+		String fileLen = file.length() + ""
+		when:
+		params.filename = file.getName()
+		request.method = "GET"
+		authenticatedAs(me) { controller.downloadCsv() }
+		then:
+		response.getText() == data
+		response.status == 200
+		response.contentType == "text/csv"
+		response.getHeader("Content-Disposition") == "attachment; filename=" + file.getName()
+		response.getHeader("Content-Length") == fileLen
+	}
 }

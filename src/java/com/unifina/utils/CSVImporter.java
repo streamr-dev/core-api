@@ -1,24 +1,20 @@
 package com.unifina.utils;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.util.*;
-
+import com.opencsv.CSVParser;
+import com.unifina.api.ApiException;
+import com.unifina.utils.CSVImporter.LineValues;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.LineIterator;
 import org.apache.log4j.Logger;
-
-import com.opencsv.CSVParser;
-import com.unifina.utils.CSVImporter.LineValues;
-import org.grails.datastore.mapping.model.types.Simple;
 import org.joda.time.DateTimeZone;
-import org.joda.time.format.*;
+import org.joda.time.format.DateTimeFormatter;
+import org.joda.time.format.DateTimeFormatterBuilder;
+import org.joda.time.format.ISODateTimeFormat;
+
+import java.io.*;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.*;
 
 public class CSVImporter implements Iterable<LineValues> {
 
@@ -49,7 +45,7 @@ public class CSVImporter implements Iterable<LineValues> {
 				String value = (String) field.get("type");
 				fieldMap.put(name, value);
 			}
-		
+
 		try {
 			schema = new Schema(is, fieldMap, timestampIndex, format, timeZone, ignoreEmptyFields);
 		} finally {
@@ -81,12 +77,12 @@ public class CSVImporter implements Iterable<LineValues> {
 			throw new RuntimeException(e);
 		}
 	}
-	
+
 	public Schema getSchema() {
 		return schema;
 	}
-	
-	public class LineValuesIterator implements Iterator<LineValues> {
+
+	public static class LineValuesIterator implements Iterator<LineValues> {
 		private LineIterator it;
 		private Schema schema;
 
@@ -120,14 +116,14 @@ public class CSVImporter implements Iterable<LineValues> {
 
 		@Override
 		public void remove() {}
-		
+
 		public void close() {
 			it.close();
 		}
 	}
-	
+
 	public class Schema {
-		
+
 		public final CSVParser[] parsersToTry = {
 				new CSVParser(','),
 				new CSVParser('\t'),
@@ -161,17 +157,17 @@ public class CSVImporter implements Iterable<LineValues> {
 
 			detect(is);
 		}
-		
+
 		private void detect(InputStream is) throws IOException {
 			BufferedReader reader = new BufferedReader(new InputStreamReader(is));
-			
+
 			try {
 				int lineCount = 0;
 				int undetectedSchemaEntries = Integer.MAX_VALUE;
 			    String line;
-			    
+
 			    while (undetectedSchemaEntries > 0 && (line = reader.readLine()) != null) {
-			    	
+
 			    	// Try to detect separator format and parse headers from first line
 			    	if (lineCount==0) {
 			    		headers = detectHeaders(line);
@@ -196,14 +192,14 @@ public class CSVImporter implements Iterable<LineValues> {
 			    					if (entries[i].dateTimeParser !=null && timestampColumnIndex==null)
 			    						timestampColumnIndex = i;
 			    				}
-			    				
+
 			    			}
 			    		}
 			    	}
-			    	
+
 			    	lineCount++;
 			    }
-				
+
 			    if (undetectedSchemaEntries>0) {
 			    	StringBuilder sb = new StringBuilder("Format could not be detected for the following columns: ");
 			    	for (int i=0;i<headers.length;i++) {
@@ -220,16 +216,16 @@ public class CSVImporter implements Iterable<LineValues> {
 		    	reader.close();
 		    }
 		}
-		
+
 		private String[] detectHeaders(String line) throws IOException {
     		int parserIdx = 0;
     		String[] headers = null;
-    		
+
     		while ((headers==null || headers.length<2) && parserIdx < parsersToTry.length) {
 				parser = parsersToTry[parserIdx++];
 				headers = parser.parseLine(line);
 			}
-			
+
 			if (headers.length<2) {
 				throw new CSVImporterException("Sorry, couldn't determine format of csv file!");
 			}
@@ -237,7 +233,7 @@ public class CSVImporter implements Iterable<LineValues> {
 				return headers;
 			}
 		}
-		
+
 		private SchemaEntry detectEntry(String value, String name) {
 			if (value == null || value.length() == 0)
 				return null;
@@ -267,7 +263,7 @@ public class CSVImporter implements Iterable<LineValues> {
 			}
 
 		}
-		
+
 		LineValues parseLine(String line, int lineNumber) throws IOException, ParseException {
 			String[] values = parser.parseLine(line);
 			Object[] parsed = new Object[values.length];
@@ -310,55 +306,61 @@ public class CSVImporter implements Iterable<LineValues> {
 			} catch (NumberFormatException e) {
 				throw new CSVImporterException("Invalid value '"+values[i]+"' in column '"+entries[i].name+"', detected column type was: "+entries[i].type + ".", lineNumber);
 			}
-			
+
 			return new LineValues(schema, parsed);
 		}
-		
+
 		private void setTimeStampColumnIndex(int index){
 			this.timestampColumnIndex = index;
 		}
-		
+
 		private void setDateFormat(String format){
 			this.format = format;
 		}
 
-
+		public Map toMap() {
+			Map map = new HashMap<String, Object>();
+			map.put("timestampColumnIndex", timestampColumnIndex);
+			map.put("timeZone", timeZone);
+			map.put("headers", headers);
+			return map;
+		}
 	}
-	
-	public class SchemaEntry {
+
+	public static class SchemaEntry {
 
 		public String name;
 		public String type;
 		public CustomDateTimeParser dateTimeParser;
-		
+
 		public SchemaEntry(String name, String type) {
 			this.name = name;
 			this.type = type;
 		}
-		
+
 		public SchemaEntry(String name, CustomDateTimeParser dateTimeParser) {
 			this.name = name;
 			this.type = "timestamp";
 			this.dateTimeParser = dateTimeParser;
 		}
-		
+
 	}
-	
-	public class LineValues {
+
+	public static class LineValues {
 		public Schema schema;
 		public Object[] values;
-		
+
 		public LineValues(Schema schema, Object[] values) {
 			this.schema = schema;
 			this.values = values;
 		}
-		
+
 		public Date getTimestamp() {
 			return (Date) values[schema.timestampColumnIndex];
 		}
 	}
 
-	public class CustomDateTimeParser {
+	public static class CustomDateTimeParser {
 
 		private DateTimeFormatter jodaFormatter;
 		private SimpleDateFormat simpleFormatter;
@@ -420,13 +422,13 @@ public class CSVImporter implements Iterable<LineValues> {
 		}
 	}
 
-	public class CSVImporterException extends RuntimeException {
-		public CSVImporterException(String message) {
-			super(message);
+	public static class CSVImporterException extends ApiException {
+		CSVImporterException(String message) {
+			super(400, "NOT_RECOGNIZED_AS_CSV", message);
 		}
 
-		public CSVImporterException(String message, int lineNumber) {
-			super(message + " (Line: " + lineNumber + ")");
+		CSVImporterException(String message, int lineNumber) {
+			super(400, "NOT_RECOGNIZED_AS_CSV", message + " (Line: " + lineNumber + ")");
 		}
 	}
 }

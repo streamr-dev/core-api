@@ -18,7 +18,7 @@ class PassThroughSpec extends Specification {
 			in: (1..100).collect { it?.doubleValue() },
 		]
 		Map outputValues = [
-			out : (1..100).collect { it?.doubleValue() },
+			out: (1..100).collect { it?.doubleValue() },
 		]
 
 		then:

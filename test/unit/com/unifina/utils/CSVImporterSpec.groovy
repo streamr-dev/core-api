@@ -216,6 +216,7 @@ class CSVImporterSpec extends Specification {
 
 	void "should accept timezone ids with custom format"() {
 		when:
+		Locale.setDefault(Locale.US);
 		readFile("test-files/timezone-id.csv", null, null, "E MMM dd HH:mm:ss zzz yyyy")
 
 		then: "Doesn't have any problem"

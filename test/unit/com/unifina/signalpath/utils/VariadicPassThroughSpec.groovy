@@ -18,7 +18,7 @@ class VariadicPassThroughSpec extends ModuleTestingSpecification {
 		module.getOutput("output-b")
 		module.getOutput("output-c")
 		module.getOutput("output-d")
-		setupModule(module)
+		setupModule(module, [:], null)
 	}
 
 	void "passThrough gives the right answer"() {

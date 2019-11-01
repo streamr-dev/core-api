@@ -1,30 +1,44 @@
 package com.unifina.domain.security
 
 import com.unifina.security.Userish
+import com.unifina.utils.EthereumAddressValidator
+import com.unifina.utils.UsernameValidator
 import groovy.transform.CompileStatic
+import org.apache.commons.codec.digest.DigestUtils
 
 class SecUser implements Userish {
 
 	Long id
 	String username
 	String password
-	boolean enabled
+	boolean enabled = true
 	boolean accountExpired
 	boolean accountLocked
 	boolean passwordExpired
-	
+
 	String name
-	String timezone
 
 	Set<Key> keys
 	Set<Permission> permissions
 
+	// dateCreated is the date when account is created.
+	Date dateCreated
+	// lastLogin is the date when last successful login was made.
+	Date lastLogin = new Date()
+	// Users avatar images.
+	String imageUrlSmall
+	String imageUrlLarge
+
 	static hasMany = [permissions: Permission, keys: Key]
-	
+
 	static constraints = {
-		username blank: false, unique: true, email: true
+		username blank: false, unique: true, validator: UsernameValidator.validate
 		password blank: false
 		name blank: false
+		dateCreated nullable: true
+		lastLogin nullable: true
+		imageUrlSmall nullable: true
+		imageUrlLarge nullable: true
 	}
 
 	static mapping = {
@@ -36,11 +50,21 @@ class SecUser implements Userish {
 		SecUserSecRole.findAllBySecUser(this).collect { it.secRole } as Set
 	}
 
+	boolean isDevOps() {
+		"ROLE_DEV_OPS" in authorities*.authority
+	}
+
+	boolean isAdmin() {
+		"ROLE_ADMIN" in authorities*.authority
+	}
+
 	Map toMap() {
 		return [
-			name           : name,
-			username       : username,
-			timezone       : timezone,
+			name : name,
+			username : username,
+			imageUrlSmall : imageUrlSmall,
+			imageUrlLarge : imageUrlLarge,
+			lastLogin: lastLogin
 		]
 	}
 
@@ -77,5 +101,18 @@ class SecUser implements Userish {
 	@CompileStatic
 	static SecUser getViaJava(Long userId) {
 		SecUser.get(userId)
+	}
+
+	//TODO: Once all users are defined with their ethereum public key we can remove this
+	boolean isEthereumUser() {
+		return EthereumAddressValidator.validate(username)
+	}
+
+	String getPublisherId() {
+		if (isEthereumUser()) {
+			return username
+		}
+		// 'username' is the email address of the user. For privacy concerns, the publisher id is the hash of the email address.
+		return DigestUtils.sha256Hex(username)
 	}
 }

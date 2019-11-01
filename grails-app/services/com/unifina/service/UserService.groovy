@@ -1,34 +1,61 @@
 package com.unifina.service
 
-import com.unifina.domain.data.Feed
+
+import com.unifina.api.InvalidAPIKeyException
+import com.unifina.api.InvalidUsernameAndPasswordException
+import com.unifina.api.NotFoundException
+import com.unifina.domain.ExampleType
+import com.unifina.domain.data.Stream
 import com.unifina.domain.security.Key
 import com.unifina.domain.security.SecRole
 import com.unifina.domain.security.SecUser
+import com.unifina.domain.signalpath.Canvas
 import com.unifina.domain.signalpath.ModulePackage
 import com.unifina.exceptions.UserCreationFailedException
+import com.unifina.security.Userish
+import grails.plugin.springsecurity.SpringSecurityService
+import org.codehaus.groovy.grails.commons.GrailsApplication
+import org.springframework.context.MessageSource
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder
+import org.springframework.security.crypto.password.PasswordEncoder
 import org.springframework.validation.FieldError
 
 class UserService {
 
-	def grailsApplication
-	def springSecurityService
-	def permissionService
+	MessageSource messageSource
 
-	def createUser(Map properties, List<SecRole> roles = null, List<Feed> feeds = null, List<ModulePackage> packages = null) {
+	GrailsApplication grailsApplication
+	SpringSecurityService springSecurityService
+	PermissionService permissionService
+	StreamService streamService
+	CanvasService canvasService
+
+	SecUser createUser(Map properties, List<SecRole> roles = null, List<ModulePackage> packages = null) {
 		def secConf = grailsApplication.config.grails.plugin.springsecurity
 		ClassLoader cl = this.getClass().getClassLoader()
 		SecUser user = cl.loadClass(secConf.userLookup.userDomainClassName).newInstance(properties)
 
 		// Encode the password
-		if (user.password == null) { throw new UserCreationFailedException("The password is empty!") }
+		if (user.password == null) {
+			throw new UserCreationFailedException("The password is empty!")
+		}
 		user.password = springSecurityService.encodePassword(user.password)
-		
+
 		// When created, the account is always enabled
 		user.enabled = true
 
 		if (!user.validate()) {
-			log.warn(checkErrors(user.errors.getAllErrors()))
-			throw new UserCreationFailedException("Registration user validation failed: " + checkErrors(user.errors.getAllErrors()))
+			def errors = checkErrors(user.errors.getAllErrors())
+			log.warn(errors)
+			def errorStrings = errors.collect { e ->
+				if (e.getCode() == "unique") {
+					"Email already in use."
+				} else {
+					e.toString()
+				}
+
+			}
+			throw new UserCreationFailedException("Registration failed:\n" + errorStrings.join(",\n"))
 		}
 
 		// Users must have at least one API key
@@ -40,12 +67,30 @@ class UserService {
 		} else {
 			// Save roles, feeds and module packages
 			addRoles(user, roles)
-			setFeeds(user, feeds ?: [])
 			setModulePackages(user, packages ?: [])
 
 			// Transfer permissions that were attached to sign-up invitation before user existed
 			permissionService.transferInvitePermissionsTo(user)
 		}
+
+		try {
+			List<Canvas> canvasExamples = Canvas.createCriteria().list {
+				ne("exampleType", ExampleType.NOT_SET)
+			}
+			canvasService.addExampleCanvases(user, canvasExamples)
+		} catch (RuntimeException e) {
+			log.error("error while adding example canvases: ", e)
+		}
+
+		try {
+			List<Stream> streamExamples = Stream.createCriteria().list {
+				eq("exampleType", ExampleType.SHARE)
+			}
+			streamService.addExampleStreams(user, streamExamples)
+		} catch (RuntimeException e) {
+			log.error("error while adding example streams: ", e)
+		}
+
 		log.info("Created user for " + user.username)
 
 		return user
@@ -70,14 +115,6 @@ class UserService {
 		}
 	}
 
-	/** Adds/removes Feed read permissions so that user's permissions match given ones */
-	def setFeeds(user, List<Feed> feeds) {
-		List<Feed> existing = permissionService.get(Feed, user)
-		feeds.findAll { !existing.contains(it) }.each { permissionService.systemGrant(user, it) }
-		existing.findAll { !feeds.contains(it) }.each { permissionService.systemRevoke(user, it) }
-		return feeds
-	}
-
 	/** Adds/removes ModulePackage read permissions so that user's permissions match given ones */
 	def setModulePackages(user, List<ModulePackage> packages) {
 		List<ModulePackage> existing = permissionService.get(ModulePackage, user)
@@ -88,8 +125,8 @@ class UserService {
 
 	def passwordValidator = { String password, command ->
 		// Check password score
-		if (command.pwdStrength < 1) {
-			return ['command.password.error.strength']
+		if (command.password != null && command.password.size() < 8) {
+			return ['command.password.error.length', 8]
 		}
 	}
 
@@ -97,6 +134,14 @@ class UserService {
 		if (command.password != command.password2) {
 			return 'command.password2.error.mismatch'
 		}
+	}
+
+	def delete(SecUser user) {
+		if (user == null) {
+			throw new NotFoundException("user not found", "User", null)
+		}
+		user.enabled = false
+		user.save(validate: true)
 	}
 
 	/**
@@ -125,7 +170,9 @@ class UserService {
 		toBeCensoredList.each {
 			List arguments = Arrays.asList(it.getArguments())
 			int index = arguments.indexOf(it.getRejectedValue())
-			arguments.set(index, "***")
+			if (index >= 0 && index < arguments.size()) {
+				arguments.set(index, "***")
+			}
 			FieldError fieldError = new FieldError(
 				it.getObjectName(), it.getField(), "***", it.isBindingFailure(),
 				it.getCodes(), arguments.toArray(), it.getDefaultMessage()
@@ -133,5 +180,36 @@ class UserService {
 			finalErrors.add(fieldError)
 		}
 		return finalErrors
+	}
+
+	List beautifyErrors(List<FieldError> errorList) {
+		checkErrors(errorList).collect { FieldError it ->
+			messageSource.getMessage(it, null)
+		}
+	}
+
+	SecUser getUserFromUsernameAndPassword(String username, String password) throws InvalidUsernameAndPasswordException {
+		PasswordEncoder encoder = new BCryptPasswordEncoder()
+		SecUser user = SecUser.findByUsername(username)
+		if (user == null) {
+			throw new InvalidUsernameAndPasswordException("Invalid username or password")
+		}
+		String dbHash = user.password
+		if (encoder.matches(password, dbHash)) {
+			return user
+		}else {
+			throw new InvalidUsernameAndPasswordException("Invalid username or password")
+		}
+	}
+
+	Userish getUserishFromApiKey(String apiKey) throws InvalidAPIKeyException {
+		Key key = Key.get(apiKey)
+		if (!key) {
+			throw new InvalidAPIKeyException("Invalid API key")
+		}
+		if (key.user) { // is a 'real' user
+			return key.user
+		}
+		return key // is an anonymous key
 	}
 }

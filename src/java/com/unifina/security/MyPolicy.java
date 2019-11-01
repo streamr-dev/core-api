@@ -71,7 +71,7 @@ public class MyPolicy extends Policy {
 	 *
 	 * This will lead to failure eg. when trying to use JMX monitoring on the JVM process.
 	 */
-	class RMICompatibleAllowingPermissionCollection extends PermissionCollection {
+	static class RMICompatibleAllowingPermissionCollection extends PermissionCollection {
 
 		@Override
 		public void add(Permission permission) {

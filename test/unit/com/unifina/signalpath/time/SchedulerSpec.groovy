@@ -2,30 +2,23 @@ package com.unifina.signalpath.time
 
 import com.unifina.UiChannelMockingSpecification
 import com.unifina.domain.security.SecUser
-import com.unifina.utils.Globals
-import com.unifina.utils.GlobalsFactory
+import com.unifina.signalpath.SignalPath
 import com.unifina.utils.testutils.ModuleTestHelper
 import grails.test.mixin.Mock
-import grails.test.mixin.support.GrailsUnitTestMixin
 
 import java.text.SimpleDateFormat
 
 @Mock(SecUser)
 class SchedulerSpec extends UiChannelMockingSpecification {
-	Scheduler module
-	SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss")
-	TimeZone UTC = TimeZone.getTimeZone("UTC")
-
 	def setup() {
 		mockServicesForUiChannels()
-		TimeZone Helsinki = TimeZone.getTimeZone("Europe/Helsinki")
-
-		df.setTimeZone(Helsinki)
 	}
 
 	void "Scheduler works as expected"() {
 		when:
-		module = setupModule(new Scheduler(), [
+		Scheduler module = new Scheduler()
+		SecUser user = new SecUser(username: 'user').save(failOnError: true, validate: false)
+		module = setupModule(module, [
 			uiChannel: [id: "schedulerChannel"],
 			schedule: [
 				defaultValue: 100,
@@ -35,7 +28,7 @@ class SchedulerSpec extends UiChannelMockingSpecification {
 					[value: 30, intervalType: 1, startDate:[hour:15, minute:29], endDate:[hour: 0, minute:15]]  // 15:30 - 00:15
 				]
 			]
-		])
+		], new SignalPath(true), mockGlobals([:], user))
 
 		Map inputValues = [:]
 		Map outputValues = [
@@ -50,12 +43,15 @@ class SchedulerSpec extends UiChannelMockingSpecification {
 				[activeRules:[]]
 			]
 		]
+
+		SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss z")
+		df.setTimeZone(TimeZone.getTimeZone("EEST"))
 		Map<Integer, Date> ticks = [
-			1: "2015-04-05 07:05:00",
-			2: "2015-04-05 11:30:00",
-			3: "2015-04-05 18:29:00",
-			4: "2015-04-05 18:30:00",
-			5: "2015-04-06 03:15:00"
+			1: "2015-04-05 07:05:00 EEST",
+			2: "2015-04-05 11:30:00 EEST",
+			3: "2015-04-05 18:29:00 EEST",
+			4: "2015-04-05 18:30:00 EEST",
+			5: "2015-04-06 03:15:00 EEST"
 		].collectEntries() { Integer key, String value -> [(key): df.parse(value)] }
 
 		then:

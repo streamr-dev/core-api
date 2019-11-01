@@ -25,7 +25,6 @@ public class VariadicEventTable extends ModuleWithUI {
 		super();
 
 		// More sensible defaults, in line with default maxRows
-		resendAll = false;
 		resendLast = 20;
 	}
 
@@ -45,7 +44,9 @@ public class VariadicEventTable extends ModuleWithUI {
 		HashMap<String, Object> msg = new HashMap<String, Object>();
 		ArrayList<Object> nr = new ArrayList<>(2);
 		msg.put("nr", nr);
-		nr.add(getGlobals().formatDateTime(getGlobals().time));
+		Map<String, Object> dateObject = new HashMap<>();
+		dateObject.put("__streamr_date", getGlobals().time.getTime());
+		nr.add(dateObject);
 
 		for (Input<Object> i : ins.getEndpoints()) {
 			if (i.hasValue() && (!showOnlyNewValues || getDrivingInputs().contains(i))) {

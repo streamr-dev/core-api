@@ -19,7 +19,7 @@ class FilterSpec extends Specification {
 			pass: [0, 0, 1, 0, 1, 0, 0, 1, 1, 0].collect { it?.doubleValue() },
 		]
 		Map outputValues = [
-			out : [null, null, 3, 3, 5, 5, 5, 8, 9, 9].collect { it?.doubleValue() },
+			out: [null, null, 3, 3, 5, 5, 5, 8, 9, 9].collect { it?.doubleValue() },
 		]
 
 		then:

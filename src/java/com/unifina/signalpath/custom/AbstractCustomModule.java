@@ -18,11 +18,11 @@ public abstract class AbstractCustomModule extends ModuleWithUI {
 		if (df == null) {
 			df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS");
 		}
-		String t = null;
+		Long t = new Long(0);
 		if (getGlobals().time != null)
-			t = df.format(getGlobals().getTzConverter().getFakeLocalTime(getGlobals().time));
+			t = getGlobals().time.getTime();
 
-		final HashMap<String, String> msg = new HashMap<>();
+		final Map<String, Object> msg = new HashMap<>();
 		msg.put("type", "debug");
 		msg.put("msg", s != null ? s.toString() : null);
 		msg.put("t", t);

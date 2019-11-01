@@ -1,26 +1,27 @@
 package com.unifina.controller.api
 
-import com.unifina.api.NotPermittedException
+import com.unifina.ControllerSpecification
 import com.unifina.api.InvalidArgumentsException
+import com.unifina.api.NotPermittedException
 import com.unifina.domain.data.Stream
 import com.unifina.domain.security.Key
 import com.unifina.domain.security.Permission
 import com.unifina.domain.security.Permission.Operation
 import com.unifina.domain.security.SecUser
 import com.unifina.domain.signalpath.Canvas
+import com.unifina.service.EthereumIntegrationKeyService
 import com.unifina.service.PermissionService
-import com.unifina.service.UserService
-import com.unifina.filters.UnifinaCoreAPIFilters
+import com.unifina.service.SignupCodeService
+import com.unifina.signalpath.messaging.MockMailService
 import grails.converters.JSON
 import grails.test.mixin.Mock
 import grails.test.mixin.TestFor
-import grails.test.mixin.web.FiltersUnitTestMixin
-import spock.lang.Specification
 
 @TestFor(PermissionApiController)
-@Mock([Permission, Key, Stream, SecUser, Canvas, UnifinaCoreAPIFilters, UserService])
-class PermissionApiControllerSpec extends Specification {
+@Mock([Permission, Key, Stream, SecUser, Canvas])
+class PermissionApiControllerSpec extends ControllerSpecification {
 	def permissionService
+	EthereumIntegrationKeyService ethereumIntegrationKeyService
 
 	// Canvas and Stream chosen because one has string id and one has long id
 	Canvas canvasOwned, canvasShared, canvasRestricted, canvasPublic
@@ -32,6 +33,9 @@ class PermissionApiControllerSpec extends Specification {
 
 	def setup() {
 		controller.permissionService = permissionService = Mock(PermissionService)
+		controller.ethereumIntegrationKeyService = ethereumIntegrationKeyService = Mock(EthereumIntegrationKeyService)
+		controller.mailService = new MockMailService()
+		controller.signupCodeService = new SignupCodeService()
 
 		me = new SecUser(id: 1, username: "me").save(validate: false)
 		other = new SecUser(id: 2, username: "other").save(validate: false)
@@ -88,14 +92,12 @@ class PermissionApiControllerSpec extends Specification {
 	}
 
     void "index returns list of permissions to shared resource (string id)"() {
-		request.addHeader("Authorization", "Token myApiKey")
-		request.requestURI = "/api/v1/canvases/${canvasShared.id}/permissions"
 		params.id = canvasShared.id
 		params.resourceClass = Canvas
 		params.resourceId = canvasShared.id
 
 		when:
-		withFilters(action: "index") { controller.index() }
+		authenticatedAs(me) { controller.index() }
 		then:
 		response.status == 200
 		response.json.size() == 4
@@ -109,14 +111,12 @@ class PermissionApiControllerSpec extends Specification {
     }
 
 	void "index returns list of permissions to shared resource (Stream using id)"() {
-		request.addHeader("Authorization", "Token myApiKey")
-		request.requestURI = "/api/v1/streams/${streamShared.id}/permissions"
 		params.id = streamShared.id
 		params.resourceClass = Stream
 		params.resourceId = streamShared.id
 
 		when:
-		withFilters(action: "index") { controller.index() }
+		authenticatedAs(me) { controller.index() }
 		then:
 		response.status == 200
 		response.json.size() == 4
@@ -130,14 +130,12 @@ class PermissionApiControllerSpec extends Specification {
 	}
 
 	void "show returns one specific permission row to shared resource (string id)"() {
-		request.addHeader("Authorization", "Token myApiKey")
-		request.requestURI = "/api/v1/canvases/${canvasShared.id}/permissions/${canvasPermission.id}"
 		params.id = canvasPermission.id
 		params.resourceClass = Canvas
 		params.resourceId = canvasShared.id
 
 		when:
-		withFilters(action: "show") { controller.show("${canvasPermission.id}") }
+		authenticatedAs(me) { controller.show("${canvasPermission.id}") }
 		then:
 		response.status == 200
 		response.json.id == 1
@@ -150,14 +148,12 @@ class PermissionApiControllerSpec extends Specification {
 	}
 
 	void "show returns one specific permission row to shared resource (Stream using id)"() {
-		request.addHeader("Authorization", "Token myApiKey")
-		request.requestURI = "/api/v1/streams/${streamShared.id}/permissions/${streamPermission.id}"
 		params.id = streamPermission.id
 		params.resourceClass = Stream
 		params.resourceId = streamShared.id
 
 		when:
-		withFilters(action: "show") { controller.show("${streamPermission.id}") }
+		authenticatedAs(me) { controller.show("${streamPermission.id}") }
 		then:
 		response.status == 200
 		response.json.id == 2
@@ -170,41 +166,35 @@ class PermissionApiControllerSpec extends Specification {
 	}
 
 	void "index won't show list of permissions without 'share' permission (string id)"() {
-		request.addHeader("Authorization", "Token myApiKey")
-		request.requestURI = "/api/v1/canvases/allowed/permissions"
 		params.id = canvasRestricted.id
 		params.resourceClass = Canvas
 		params.resourceId = canvasRestricted.id
 
 		when:
-		withFilters(action: "index") { controller.index() }
+		authenticatedAs(me) { controller.index() }
 		then:
 		thrown NotPermittedException
 	}
 
 	void "index won't show list of permissions without 'share' permission (Stream using id)"() {
-		request.addHeader("Authorization", "Token myApiKey")
-		request.requestURI = "/api/v1/streams/${streamRestricted.id}/permissions"
 		params.id = streamRestricted.id
 		params.resourceClass = Stream
 		params.resourceId = streamRestricted.id
 
 		when:
-		withFilters(action: "index") { controller.index() }
+		authenticatedAs(me) { controller.index() }
 		then:
 		thrown NotPermittedException
 	}
 
 	void "save grants Permissions"() {
-		request.addHeader("Authorization", "Token myApiKey")
-		request.requestURI = "/api/v1/canvases/${canvasOwned.id}/permissions"
 		params.id = canvasOwned.id
 		params.resourceClass = Canvas
 		params.resourceId = canvasOwned.id
 
 		when:
 		request.JSON = [user: other.username, operation: "read"] as JSON
-		withFilters(action: "save") { controller.save() }
+		authenticatedAs(me) { controller.save() }
 		then:
 		1 * permissionService.canShare(me, _) >> true
 		1 * permissionService.grant(me, _, _, Operation.READ) >> new Permission(user: other, operation: Operation.READ)
@@ -213,15 +203,44 @@ class PermissionApiControllerSpec extends Specification {
 		response.json.operation == "read"
 	}
 
+	void "save sends an email if the user has no account yet"() {
+		setup:
+		params.resourceClass = Canvas
+		params.resourceId = canvasOwned.id
+		when:
+		request.JSON = [anonymous: false, user: "test@tester.test", operation: "read"] as JSON
+		authenticatedAs(me) { controller.save() }
+		then:
+		controller.mailService.mailSent
+		1 * permissionService.canShare(me, _) >> true
+		1 * permissionService.grant(me, _, _, Operation.READ) >> new Permission(user: other, operation: Operation.READ)
+	}
+
+	void "save() creates a new user with permission if unknown ethereum address provided"() {
+		setup:
+		SecUser ethUser = new SecUser(id: 3, username: "0xa50E97f6a98dD992D9eCb8207c2Aa58F54970729")
+		params.id = canvasOwned.id
+		params.resourceClass = Canvas
+		params.resourceId = canvasOwned.id
+		when:
+		request.JSON = [user: ethUser.username, operation: "read"] as JSON
+		authenticatedAs(me) { controller.save() }
+		then:
+		1 * ethereumIntegrationKeyService.createEthereumUser(ethUser.username) >> ethUser
+		1 * permissionService.canShare(me, _) >> true
+		1 * permissionService.grant(me, _, _, Operation.READ) >> new Permission(user: ethUser, operation: Operation.READ)
+		response.status == 201
+		response.json.user == ethUser.username
+		response.json.operation == "read"
+	}
+
 	void "delete revokes permissions"() {
-		request.addHeader("Authorization", "Token myApiKey")
-		request.requestURI = "/api/v1/canvases/${canvasShared.id}/permissions/${canvasPermission.id}"
 		params.id = canvasPermission.id
 		params.resourceClass = Canvas
 		params.resourceId = canvasShared.id
 
 		when:
-		withFilters(action: "delete") { controller.delete("${canvasPermission.id}") }
+		authenticatedAs(me) { controller.delete("${canvasPermission.id}") }
 		then:
 		response.status == 204
 		1 * permissionService.canShare(me, _) >> true
@@ -230,28 +249,24 @@ class PermissionApiControllerSpec extends Specification {
 	}
 
 	void "can't give both 'user' and 'anonymous' arguments"() {
-		request.addHeader("Authorization", "Token myApiKey")
-		request.requestURI = "/api/v1/canvases/${canvasOwned.id}/permissions"
 		params.id = canvasOwned.id
 		params.resourceClass = Canvas
 		params.resourceId = canvasOwned.id
 
 		when:
 		request.JSON = [anonymous: true, user: other.username, operation: "read"] as JSON
-		withFilters(action: "save") { controller.save() }
+		authenticatedAs(me) { controller.save() }
 		then:
 		thrown InvalidArgumentsException
 	}
 
 	void "getOwnPermissions giver owner permissions for own canvas"() {
-		request.addHeader("Authorization", "Token myApiKey")
-		request.requestURI = "/api/v1/canvases/${canvasOwned.id}/permissions/me"
 		params.id = canvasOwned.id
 		params.resourceClass = Canvas
 		params.resourceId = canvasOwned.id
 
 		when:
-		withFilters(action: "index") { controller.getOwnPermissions() }
+		authenticatedAs(me) { controller.getOwnPermissions() }
 		then:
 		response.status == 200
 		response.json*.operation == ownerPermissions*.toMap()*.operation
@@ -261,14 +276,12 @@ class PermissionApiControllerSpec extends Specification {
 	}
 
 	void "getOwnPermissions lists granted permissions for shared canvas"() {
-		request.addHeader("Authorization", "Token myApiKey")
-		request.requestURI = "/api/v1/canvases/${canvasShared.id}/permissions/me"
 		params.id = canvasShared.id
 		params.resourceClass = Canvas
 		params.resourceId = canvasShared.id
 
 		when:
-		withFilters(action: "index") { controller.getOwnPermissions() }
+		authenticatedAs(me) { controller.getOwnPermissions() }
 		then:
 		response.status == 200
 		response.json == [[id: 1, operation: "share", user: "me"]]

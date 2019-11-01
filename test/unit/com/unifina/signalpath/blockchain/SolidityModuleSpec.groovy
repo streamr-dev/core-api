@@ -16,13 +16,13 @@ class SolidityModuleSpec extends ModuleTestingSpecification {
 
 	def setup() {
 		// mock the key for ethereum account
-		SecUser user = new SecUser(name: "name", username: "name@name.com", password: "pass", timezone: "UTC").save(failOnError: true, validate: false)
-		IntegrationKey key = new IntegrationKey(service: IntegrationKey.Service.ETHEREUM, name: "test key", json: '{"privateKey":"lol","address":"0x1234"}', user: user)
+		SecUser user = new SecUser(name: "name", username: "name@name.com", password: "pass").save(failOnError: true, validate: false)
+		IntegrationKey key = new IntegrationKey(service: IntegrationKey.Service.ETHEREUM, name: "test key", json: '{"privateKey":"lol","address":"0x1234"}', user: user, idInService: "0x1234")
 		key.id = "sgKjr1eHQpqTmwz3vK3DqwUK1wFlrfRJa9mnf_xTeFJQ"
 		key.save(failOnError: true, validate: true)
 
 		mockBean(EthereumIntegrationKeyService.class, Stub(EthereumIntegrationKeyService) {
-			getAllKeysForUser(user) >> [key]
+			getAllPrivateKeysForUser(user) >> [key]
 		})
 
 		module = new SolidityModuleWithMockedWeb3(applyConfig.contract)
@@ -282,23 +282,15 @@ class SolidityModuleSpec extends ModuleTestingSpecification {
             "value": 0,
             "type": "int"
         },
-        "uiResendAll":
-        {
-            "value": false,
-            "type": "boolean"
-        },
         "network":
         {
             "possibleValues": [
             {
-                "text": "ropsten",
-                "value": "ropsten"
-            },
-            {
-                "text": "rinkeby",
-                "value": "rinkeby"
-            }],
-            "value": "rinkeby",
+                "text": "local",
+                "value": "local"
+            }
+            ],
+            "value": "local",
             "type": "string"
         },
         "gasPriceGWei":

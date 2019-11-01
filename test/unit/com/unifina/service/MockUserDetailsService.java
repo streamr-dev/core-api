@@ -1,13 +1,13 @@
 package com.unifina.service;
 
-import java.util.ArrayList;
-import java.util.Collection;
-
 import org.springframework.dao.DataAccessException;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
+
+import java.util.ArrayList;
+import java.util.Collection;
 
 public class MockUserDetailsService implements UserDetailsService {
 	
@@ -17,7 +17,7 @@ public class MockUserDetailsService implements UserDetailsService {
 		return new MockUserDetails(username);
 	}
 
-	class MockUserDetails implements UserDetails {
+	static class MockUserDetails implements UserDetails {
 
 		private String username;
 

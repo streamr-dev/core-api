@@ -5,6 +5,9 @@ import com.unifina.security.AuthLevel
 import com.unifina.security.StreamrApi
 import grails.converters.JSON
 import grails.plugin.springsecurity.annotation.Secured
+import grails.util.Holder
+import grails.util.Holders
+import org.codehaus.groovy.grails.commons.GrailsApplication
 
 import java.text.DecimalFormat
 
@@ -17,14 +20,14 @@ class OembedApiController {
 		def width = params.maxwidth ? Double.parseDouble(params.maxwidth) : 400d
 		def height = params.maxheight ? Double.parseDouble(params.maxheight) : 300d
 		def format = params.format ? params.format.toLowerCase() : "json"
-		def regex = /^https?:\/\/(www\.)?streamr\.com\/canvas\/embed\/([a-zA-Z0-9\-\_])+/
+		def regex = /^https?:\/\/(www\.)?streamr\.(com|network)\/canvas\/(embed|editor)\/([a-zA-Z0-9\-\_])+/
 		if (!url.find(regex)) {
 			throw new ApiException(404, "INVALID_URL", "Invalid url")
 		}
 		DecimalFormat df = new DecimalFormat()
 		df.setDecimalSeparatorAlwaysShown(false) // To translate 200.0 to 200 but to keep 2.23 as 2.23
 		def map = [
-				url   : url,
+				url   : url.replace("editor", "embed"),
 				width : width,
 				height: height,
 				html: "" +
@@ -36,7 +39,7 @@ class OembedApiController {
 				type: "rich",
 				version: "1.0",
 				provider_name: "Streamr",
-				provider_url: "https://www.streamr.com"
+				provider_url: Holders.grailsApplication.config.grails.serverURL
 				// We could also send the title and author of the canvas
 		]
 		if (format == "json") {

@@ -1,6 +1,6 @@
 package com.unifina.signalpath.list
 
-import com.unifina.api.SaveCanvasCommand
+import com.unifina.BeanMockingSpecification
 import com.unifina.domain.security.SecUser
 import com.unifina.domain.signalpath.Canvas
 import com.unifina.domain.signalpath.Module
@@ -11,33 +11,37 @@ import com.unifina.service.SignalPathService
 import com.unifina.signalpath.simplemath.Divide
 import com.unifina.signalpath.simplemath.Sum
 import com.unifina.utils.Globals
-import com.unifina.utils.GlobalsFactory
+
 import com.unifina.utils.testutils.ModuleTestHelper
-import grails.plugin.springsecurity.SpringSecurityService
+import grails.converters.JSON
 import grails.test.mixin.Mock
 import grails.test.mixin.TestMixin
 import grails.test.mixin.web.ControllerUnitTestMixin
-import spock.lang.Specification
 
 @TestMixin(ControllerUnitTestMixin) // "as JSON" converter
-@Mock([Canvas, Module, SecUser, ModuleService, SpringSecurityService, SignalPathService, CanvasService, PermissionService])
-class ForEachItemSpec extends Specification {
-
-	CanvasService canvasService
+@Mock([Canvas, Module, SecUser])
+class ForEachItemSpec extends BeanMockingSpecification {
 
 	Globals globals
 	ForEachItem module
 	SecUser user
+	PermissionService permissionService
+	SignalPathService signalPathService
+	ModuleService moduleService
+	CanvasService canvasService
 
 	def modulesJson
 
 	def setup() {
-		canvasService = mainContext.getBean(CanvasService)
-		canvasService.signalPathService = mainContext.getBean(SignalPathService)
 		module = new ForEachItem()
-		module.globals = globals = GlobalsFactory.createInstance([:], user)
-		module.init()
 		user = new SecUser().save(failOnError: true, validate: false)
+		module.globals = globals = new Globals([:], user)
+		module.init()
+
+		permissionService = mockBean(PermissionService, Mock(PermissionService))
+		signalPathService = mockBean(SignalPathService, new SignalPathService())
+		moduleService = mockBean(ModuleService, new ModuleService())
+		canvasService = mockBean(CanvasService, Mock(CanvasService))
 
 		def divideModule = new Module(implementingClass: Divide.canonicalName).save(failOnError: true, validate: false)
 		def sumModule = new Module(implementingClass: Sum.canonicalName).save(failOnError: true, validate: false)
@@ -111,9 +115,16 @@ class ForEachItemSpec extends Specification {
 		]
 	}
 
+	Canvas createCanvas(String name, List modules, SecUser user) {
+		Canvas canvas = new Canvas()
+		canvas.name = name
+		canvas.json = [modules:modules] as JSON
+		canvas.save(validate: false)
+		return canvas
+	}
+
 	def "throws RuntimeException if canvas has no exported inputs"() {
-		def command = new SaveCanvasCommand(name: "canvas-wo-exported-inputs", modules: [])
-		def canvas = canvasService.createNew(command, user)
+		def canvas = createCanvas("canvas-wo-exported-inputs", [], user)
 
 		when:
 		module.getInput("canvas").receive(canvas.id)
@@ -125,8 +136,7 @@ class ForEachItemSpec extends Specification {
 	}
 
 	def "forEachItem works correctly with state clearing"() {
-		def command = new SaveCanvasCommand(name: "sub-canvas", modules: modulesJson)
-		def canvas = canvasService.createNew(command, user)
+		def canvas = createCanvas("sub-canvas", modulesJson, user)
 
 		module.getInput("canvas").receive(canvas.id)
 		module.configure(module.getConfiguration())
@@ -151,8 +161,7 @@ class ForEachItemSpec extends Specification {
 	}
 
 	def "forEachItem works correctly w/o state clearing"() {
-		def command = new SaveCanvasCommand(name: "sub-canvas", modules: modulesJson)
-		def canvas = canvasService.createNew(command, user)
+		def canvas = createCanvas("sub-canvas", modulesJson, user)
 
 		module.getInput("keepState").receive(true)
 		module.getInput("canvas").receive(canvas.id)

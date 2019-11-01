@@ -1,10 +1,10 @@
 package com.unifina.signalpath.map
 
-import com.unifina.api.SaveCanvasCommand
-import com.unifina.domain.security.Permission
+import com.unifina.BeanMockingSpecification
 import com.unifina.domain.security.SecUser
 import com.unifina.domain.signalpath.Canvas
 import com.unifina.domain.signalpath.Module
+import com.unifina.exceptions.NoExportedInputsException
 import com.unifina.service.CanvasService
 import com.unifina.service.ModuleService
 import com.unifina.service.PermissionService
@@ -14,33 +14,37 @@ import com.unifina.signalpath.SignalPath
 import com.unifina.signalpath.simplemath.Divide
 import com.unifina.signalpath.simplemath.Sum
 import com.unifina.utils.Globals
-import com.unifina.utils.GlobalsFactory
+
 import com.unifina.utils.testutils.ModuleTestHelper
-import grails.plugin.springsecurity.SpringSecurityService
+import grails.converters.JSON
 import grails.test.mixin.Mock
 import grails.test.mixin.TestMixin
 import grails.test.mixin.web.ControllerUnitTestMixin
-import spock.lang.Specification
 
 @TestMixin(ControllerUnitTestMixin)
-@Mock([Canvas, Module, SecUser, ModuleService, Permission, SpringSecurityService, SignalPathService, CanvasService, PermissionService])
-class ForEachSpec extends Specification {
-
-	CanvasService canvasService
+@Mock([Canvas, Module, SecUser])
+class ForEachSpec extends BeanMockingSpecification {
 
 	Globals globals
 	ForEach module
 	SecUser user
+	PermissionService permissionService
+	SignalPathService signalPathService
+	ModuleService moduleService
+	CanvasService canvasService
 
 	def modulesJson
 
 	def setup() {
-		canvasService = mainContext.getBean(CanvasService)
-		canvasService.signalPathService = mainContext.getBean(SignalPathService)
 		module = new ForEach()
-		module.globals = globals = GlobalsFactory.createInstance([:], user)
+		user = new SecUser().save(validate: false)
+		module.globals = globals = new Globals([:], user)
 		module.init()
-		user = new SecUser().save(failOnError: true, validate: false)
+
+		permissionService = mockBean(PermissionService, Mock(PermissionService))
+		signalPathService = mockBean(SignalPathService, new SignalPathService())
+		moduleService = mockBean(ModuleService, new ModuleService())
+		canvasService = mockBean(CanvasService, Mock(CanvasService))
 
 		def divideModule = new Module(implementingClass: Divide.canonicalName).save(failOnError: true, validate: false)
 		def sumModule = new Module(implementingClass: Sum.canonicalName).save(failOnError: true, validate: false)
@@ -114,22 +118,30 @@ class ForEachSpec extends Specification {
 		]
 	}
 
+	Canvas createCanvas(String name, List modules, SecUser user) {
+		Canvas canvas = new Canvas()
+		canvas.name = name
+		canvas.json = [modules:modules] as JSON
+		canvas.save(validate: false)
+		return canvas
+	}
+
 	def "throws RuntimeException if canvas has no exported inputs"() {
-		def command = new SaveCanvasCommand(name: "canvas-wo-exported-inputs", modules: [])
-		def canvas = canvasService.createNew(command, user)
+		def canvas = createCanvas("canvas-wo-exported-inputs", [], user)
 
 		when:
 		module.getInput("canvas").receive(canvas.id)
 		module.configure(module.getConfiguration())
 
 		then:
-		RuntimeException e = thrown()
-		e.message.contains("canvas")
+		// gets called in SignalPathParameter#getConfiguration(),
+		// once during module.getConfiguration() and once during module.configure()
+		2 * permissionService.get(_,_,_) >> []
+		thrown(NoExportedInputsException)
 	}
 
 	def "forEach works correctly"() {
-		def command = new SaveCanvasCommand(name: "sub-canvas", modules: modulesJson)
-		def canvas = canvasService.createNew(command, user)
+		def canvas = createCanvas("sub-canvas", modulesJson, user)
 
 		module.getInput("canvas").receive(canvas.id)
 		module.configure(module.getConfiguration())
@@ -164,8 +176,7 @@ class ForEachSpec extends Specification {
 
 	def "forEach handles displayName correctly"() {
 		modulesJson[1].outputs[0].displayName = "outout"
-		def command = new SaveCanvasCommand(name: "sub-canvas", modules: modulesJson)
-		def canvas = canvasService.createNew(command, user)
+		def canvas = createCanvas("sub-canvas", modulesJson, user)
 
 		module.getInput("canvas").receive(canvas.id)
 		module.configure(module.getConfiguration())
@@ -199,8 +210,7 @@ class ForEachSpec extends Specification {
 	}
 
 	def "modules inside ForEach report correct runtime path"() {
-		def command = new SaveCanvasCommand(name: "sub-canvas", modules: modulesJson)
-		def canvas = canvasService.createNew(command, user)
+		def canvas = createCanvas("sub-canvas", modulesJson, user)
 
 		module.setHash(5)
 		module.setParentSignalPath(Mock(SignalPath))

@@ -8,6 +8,7 @@ import java.util.*;
 
 public class Scheduler extends ModuleWithUI implements ITimeListener {
 
+	private final TimezoneParameter tz = new TimezoneParameter(this, "timezone", TimeZone.getTimeZone("UTC"));
 	private final TimeSeriesOutput out = new TimeSeriesOutput(this, "value");
 
 	private final List<Rule> rules = new ArrayList<>();
@@ -17,6 +18,7 @@ public class Scheduler extends ModuleWithUI implements ITimeListener {
 	@Override
 	public void init() {
 		resendLast = 1;
+		addInput(tz);
 		addOutput(out);
 	}
 
@@ -79,7 +81,7 @@ public class Scheduler extends ModuleWithUI implements ITimeListener {
 
 			rules.clear();
 			for (Map<String, Object> ruleConfig : ruleConfigList) {
-				rules.add(Rule.instantiateRule(ruleConfig, getGlobals().getUserTimeZone()));
+				rules.add(Rule.instantiateRule(ruleConfig, tz.getValue()));
 			}
 		}
 	}

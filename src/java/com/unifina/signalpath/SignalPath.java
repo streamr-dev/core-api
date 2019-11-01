@@ -1,13 +1,14 @@
 package com.unifina.signalpath;
 
-import com.unifina.data.FeedEvent;
 import com.unifina.domain.data.Stream;
 import com.unifina.domain.signalpath.Canvas;
 import com.unifina.domain.signalpath.Module;
-import com.unifina.serialization.SerializationRequest;
+import com.unifina.exceptions.CyclicCanvasModuleExceptionMessage;
+import com.unifina.exceptions.ModuleExceptionMessage;
 import com.unifina.service.CanvasService;
 import com.unifina.service.ModuleService;
 import com.unifina.service.SerializationService;
+import com.unifina.signalpath.utils.ConfigurableStreamModule;
 import com.unifina.utils.Globals;
 import grails.converters.JSON;
 import grails.util.Holders;
@@ -17,6 +18,8 @@ import org.codehaus.groovy.grails.web.json.JSONObject;
 import javax.validation.constraints.NotNull;
 import java.io.Serializable;
 import java.util.*;
+
+import static java.util.stream.Collectors.toSet;
 
 public class SignalPath extends ModuleWithUI {
 
@@ -50,18 +53,6 @@ public class SignalPath extends ModuleWithUI {
 	public SignalPath(boolean isRoot) {
 		this();
 		this.root = isRoot;
-	}
-
-	@Deprecated
-	public SignalPath(Map iData, boolean isRoot, Globals globals) {
-		super();
-		this.root = isRoot;
-		this.setGlobals(globals);
-		setInitPriority(10);
-		canRefresh = true;
-
-		// Backwards compatibility, TODO: remove this constructor eventually
-		initFromRepresentation(iData);
 	}
 
 	public boolean isRoot() {
@@ -251,15 +242,44 @@ public class SignalPath extends ModuleWithUI {
 		super.onConfiguration(config);
 		if (!root && signalPathParameter.hasValue()) {
 			/**
+			 * Check that there are not cyclic dependencies in the hierarchy of canvases
+			 */
+			Canvas myCanvas = signalPathParameter.getCanvas();
+			SignalPath parent = getParentSignalPath();
+			while (parent != null) {
+				if (parent.getCanvas() != null) {
+					if (myCanvas.getId().equals(parent.getCanvas().getId())) {
+						List<ModuleExceptionMessage> messages = new ArrayList<>(1);
+						messages.add(new CyclicCanvasModuleExceptionMessage(hash, "Cyclic canvas dependency detected!"));
+						throw new ModuleException("Cyclic canvas dependency detected!", null, messages);
+					}
+				} else {
+					log.warn("onConfiguration: parent.getCanvas() is null, can't establish its identity for cyclic dependency check");
+				}
+				parent = parent.getParentSignalPath();
+			}
+
+			setCanvas(myCanvas);
+
+			/**
 			 * Reset uiChannels if this is a subcanvas (not the root canvas). Otherwise
 			 * there will be problems if many instances of the same canvas are used
 			 * as subcanvases, as all the instances would produce to same uiChannels.
 			 */
-			Map json = (JSONObject) JSON.parse(signalPathParameter.getCanvas().getJson());
+			Map json = (JSONObject) JSON.parse(myCanvas.getJson());
 			CanvasService canvasService = Holders.getApplicationContext().getBean(CanvasService.class);
 			canvasService.resetUiChannels(json);
 			initFromRepresentation(json);
 		} else {
+			// Do we know the Canvas identity of this SignalPath?
+			if (config.containsKey("canvasId")) {
+				Canvas myCanvas = new Canvas();
+				myCanvas.setId((String) config.get("canvasId"));
+				setCanvas(myCanvas);
+			} else if (root) {
+				log.warn("onConfiguration: root SignalPath created without connected Canvas");
+			}
+
 			initFromRepresentation(config);
 		}
 	}
@@ -308,15 +328,6 @@ public class SignalPath extends ModuleWithUI {
 	}
 
 	@Override
-	public void receive(FeedEvent event) {
-		if (event.content instanceof SerializationRequest) {
-			((SerializationRequest) event.content).serialize(this);
-		} else {
-			super.receive(event);
-		}
-	}
-
-	@Override
 	public void destroy() {
 		super.destroy();
 
@@ -342,7 +353,7 @@ public class SignalPath extends ModuleWithUI {
 						if (!input.wasReady()) {
 							notReady.append(input.toString());
 							notReady.append("\n");
-							pushToUiChannel(new ModuleWarningMessage("Input was never ready: " + input.getEffectiveName(), input.getOwner().getHash()));
+							pushToUiChannel(new ModuleWarningMessage("Input never received data: " + input.getEffectiveName(), input.getOwner().getHash()));
 						}
 					}
 					log.debug("Module had non-ready inputs: " + notReady);
@@ -391,7 +402,18 @@ public class SignalPath extends ModuleWithUI {
 		}
 	}
 
-	class InputConnection {
+	/**
+	 * Get streams on this canvas, NOT including subcanvases
+	 * @return Streams on this canvas
+	 */
+	public Set<Stream> getStreams() {
+		return mods.stream()
+			.filter(mod -> mod instanceof ConfigurableStreamModule)
+			.map(mod -> ((ConfigurableStreamModule)mod).getStream())
+			.collect(toSet());
+	}
+
+	static class InputConnection {
 		public Input input;
 		public String connectedTo;
 
@@ -401,7 +423,7 @@ public class SignalPath extends ModuleWithUI {
 		}
 	}
 
-	class ModuleConfig implements Serializable {
+	static class ModuleConfig implements Serializable {
 		public AbstractSignalPathModule module;
 		public Map config;
 

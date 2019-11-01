@@ -1,18 +1,17 @@
-import com.google.gson.Gson
-import com.unifina.data.KafkaPartitioner
+import com.unifina.service.NodeService
+import com.unifina.utils.PropertiesUtil
 
-/*****
- * This config file gets merged with the application config file.
- * The application config file can override anything defined here.
+/**
+ * Base URL
  */
-
-def prodBaseUrl = System.getProperty("streamr.url") ?: "https://www.streamr.com"
-
+// Write it to a variable to allow it to be referenced elsewhere in this file
+def baseUrl = System.getProperty("streamr.url") ?: "http://localhost"
 environments {
 	production {
-		grails.serverURL = prodBaseUrl
+		baseUrl = System.getProperty("streamr.url") ?: "https://streamr.network"
 	}
 }
+grails.serverURL = baseUrl
 
 /**
  * Grails configuration
@@ -37,36 +36,6 @@ grails.mime.types = [ // the first one is the default format
 					  hal:           ['application/hal+json','application/hal+xml'],
 					  xml:           ['text/xml', 'application/xml']
 ]
-
-// URL Mapping Cache Max Size, defaults to 5000
-//grails.urlmapping.cache.maxsize = 1000
-
-// What URL patterns should be processed by the resources plugin
-grails.resources.adhoc.patterns = ['/images/*', '/css/*', '/js/*', '/plugins/*', "/js/polymer/*", "/js/leaflet", "/misc/*"]
-grails.resources.adhoc.includes = ['/images/**', '/css/**', '/js/**', '/plugins/**', '/misc/**']
-
-grails.resources.processing.enabled = true
-
-environments {
-	development {
-		grails.resources.mappers.bundle.excludes = ['**/*.*']
-		grails.resources.mappers.hashandcache.excludes = ['**/*.*']
-		grails.resources.mappers.zip.excludes = ['**/*.*']
-		grails.resources.processing.excludes = ['**/*.js']
-		grails.resources.mappers.uglifyjs.excludes = ['**/*.*']
-	}
-	test {
-		grails.resources.processing.enabled = false
-		grails.resources.mappers.bundle.excludes = ['**/*.*']
-		grails.resources.mappers.hashandcache.excludes = ['**/*.*']
-		grails.resources.mappers.zip.excludes = ['**/*.*']
-		grails.resources.processing.excludes = ['**/*.js']
-		grails.resources.mappers.uglifyjs.excludes = ['**/*.*']
-	}
-	production {
-		grails.resources.mappers.uglifyjs.excludes = ['**/*.min.js', '**/*-min.js', '**/*.bundle.js', '**/*-compressed.js']
-	}
-}
 
 environments {
 	test {
@@ -152,6 +121,9 @@ log4j.main = {
 		info 'stdout'
 	}
 
+	// No need to log all exceptions thrown in API calls. For example, InvalidAPIKeyExceptions easily pollute the logs.
+	fatal 'org.codehaus.groovy.grails.web.errors.GrailsExceptionResolver'
+
 	error 'org.codehaus.groovy.grails.web.servlet',  //  controllers
 		'org.codehaus.groovy.grails.web.pages', //  GSP
 		'org.codehaus.groovy.grails.web.sitemesh', //  layouts
@@ -166,13 +138,18 @@ log4j.main = {
 		'org.grails.datastore.mapping.core.DatastoreUtils'
 
 	warn 'org.mortbay.log',
-		'org.apache.zookeeper',
-		'org.codehaus.groovy.grails.domain.GrailsDomainClassCleaner',
-		'kafka.consumer.ConsumerConfig',
-		'org.apache.kafka.clients.consumer.ConsumerConfig',
-		'kafka.producer.ProducerConfig',
-		'org.apache.kafka.clients.producer.ProducerConfig'
+		'org.codehaus.groovy.grails.domain.GrailsDomainClassCleaner'
+
+	// Turn on debug logging for a few classes to debug join issue in prod
+	debug 'com.streamr.client',
+		'com.unifina.service.CommunityJoinRequestService',
+		'com.unifina.service.StreamrClientService'
 }
+
+/**
+ * Community Product Server configuration
+ */
+streamr.cps.url = System.getProperty("streamr.cps.url") ?: "http://localhost:8085/communities/"
 
 /**
  * Streamr cluster config
@@ -184,11 +161,6 @@ environments {
 		streamr.cluster.internalPort = System.getProperty("streamr.cluster.internalPort") ? Integer.parseInt(System.getProperty("streamr.cluster.internalPort")) : 8080
 	}
 }
-
-/**
- * Tour config
- */
-streamr.tours.enabled = true
 
 /**
  * Migration config
@@ -206,8 +178,7 @@ environments {
 /**
  * API & CORS config
  */
-cors.url.pattern = ['/api/*', '/contact/send']
-cors.headers = ['Access-Control-Allow-Origin': '*']
+cors.url.pattern = ['/api/*', '/contact/send', '/profile/*', '/logout/*', '/login/*', '/j_spring_security_check', '/canvas', '/logout', '/j_spring_security_logout']
 streamr.apiKey.revokeNotificationStream = "revoked-api-keys"
 
 /**
@@ -223,96 +194,31 @@ unifina.reports.recipient = "henri.pihkala@streamr.com"
 unifina.task.workers = 1
 unifina.task.messageQueue = "streamr-tasks"
 
-environments {
-	development {
-		unifina.task.workers = 0
-	}
-}
+/**
+ * Node IP address config. Autodetected if not set.
+ */
+streamr.engine.node.ip = System.getProperty("streamr.engine.node.ip")
 
 /**
- * Data feed config
+ * Streamr API URLs
  */
-// Cache data files locally?
-unifina.feed.useCache = false
-// Base dir for caching
-unifina.feed.cachedir = System.getProperty("java.io.tmpdir")
-
+streamr.api.websocket.url = System.getProperty("streamr.api.websocket.url") ?: "${baseUrl.replaceFirst("http", "ws")}/api/v1/ws"
+streamr.api.http.url = System.getProperty("streamr.api.http.url") ?: "${baseUrl}/api/v1"
 
 /**
- * Aid IP address discovery by defining acceptable IP address prefixes (or empty if anything goes)
+ * Ethereum networks configuration (RPC urls)
+ *
+ * Can be configured via JVM system properties. Example command line flags:
+ *
+ * -Dstreamr.ethereum.defaultNetwork=someNetwork
+ * -Dstreamr.ethereum.networks.someNetwork=http://some-network-rpc-url
+ * -Dstreamr.ethereum.networks.anotherNetwork=http://some-network-rpc-url
  */
-streamr.ip.address.prefixes = System.getProperty("streamr.ip.address.prefixes") ? Arrays.asList(System.getProperty("streamr.ip.address.prefixes").split(",")) : ["192.168.10.", "192.168.", "10.", "172.18."]
-environments {
-	production {
-		streamr.ip.address.prefixes = []
-	}
-}
-
-/**
- * UI update server address
- */
-streamr.ui.server = System.getProperty("streamr.ui.server") ?: "ws://127.0.0.1:8890/api/v1/ws"
-environments {
-	production {
-		streamr.ui.server = System.getProperty("streamr.ui.server") ?: "${prodBaseUrl.replaceFirst("http", "ws")}/api/v1/ws"
-	}
-}
-
-/**
- * HTTP API server address
- */
-streamr.http.api.server = System.getProperty("streamr.http.api.server") ?: "http://127.0.0.1:8890/api/v1"
-environments {
-	production {
-		streamr.http.api.server = System.getProperty("streamr.http.api.server") ?: "${prodBaseUrl}/api/v1"
-	}
-}
-
-/**
- * Streamr-web3 Ethereum bridge address
- */
-streamr.ethereum.defaultNetwork = "rinkeby"
-streamr.ethereum.networks = System.getProperty("streamr.ethereum.networks") ? new Gson().fromJson(System.getProperty("streamr.ethereum.networks")) : [
-	ropsten: "http://localhost:3000",
-	rinkeby: "http://localhost:3001"
-]
-streamr.ethereum.rpcUrls = System.getProperty("streamr.ethereum.rpcUrls") ? new Gson().fromJson(System.getProperty("streamr.ethereum.rpcUrls")) : [
-	ropsten: "http://localhost:8545",
-	rinkeby: "http://localhost:8546"
-]
-environments {
-	production {
-		streamr.ethereum.networks = System.getProperty("streamr.ethereum.networks") ? new Gson().fromJson(System.getProperty("streamr.ethereum.networks")) : [
-			ropsten: "http://ropsten:3000",
-			rinkeby: "http://rinkeby:3001"
-		]
-		streamr.ethereum.rpcUrls = System.getProperty("streamr.ethereum.rpcUrls") ? new Gson().fromJson(System.getProperty("streamr.ethereum.rpcUrls")) : [
-			ropsten: "http://ropsten:8545",
-			rinkeby: "http://rinkeby:8546"
-		]
-	}
-}
-
-/**
- * Kafka config
- */
-streamr.kafka.bootstrap.servers = System.getProperty("streamr.kafka.bootstrap.servers") ?: "127.0.0.1:9092"
-streamr.kafka.producer.type = "async"
-streamr.kafka.queue.buffering.max.ms = "100"
-streamr.kafka.retry.backoff.ms = "500"
-streamr.kafka.value.serializer = org.apache.kafka.common.serialization.ByteArraySerializer.getName()
-streamr.kafka.key.serializer = org.apache.kafka.common.serialization.StringSerializer.getName()
-streamr.kafka.partitioner.class = KafkaPartitioner.class.getName()
-streamr.kafka.request.required.acks = "0"
-streamr.kafka.dataTopic = "data-dev"
-
-environments {
-	production {
-		streamr.kafka.dataTopic = "data-prod"
-		streamr.kafka.bootstrap.servers = System.getProperty("streamr.kafka.bootstrap.servers") ?: "kafka1:9092"
-		streamr.kafka.zookeeper.connect = System.getProperty("streamr.kafka.zookeeper.connect") ?: "zk1:2181"
-	}
-}
+streamr.ethereum.defaultNetwork = System.getProperty("streamr.ethereum.defaultNetwork") ?: "local"
+streamr.ethereum.networks = PropertiesUtil.matchingPropertiesToMap("streamr.ethereum.networks.", System.getProperties()) ?: [ local: "http://localhost:8545" ]
+streamr.ethereum.wss = PropertiesUtil.matchingPropertiesToMap("streamr.ethereum.wss.", System.getProperties()) ?: [ local: "ws://localhost:8545" ]
+// Ethereum identity of this instance. Don't use this silly development private key for anything.
+streamr.ethereum.nodePrivateKey = System.getProperty("streamr.ethereum.nodePrivateKey", "0123456789ABCDEF0123456789ABCDEF0123456789ABCDEF0123456789ABCDEF")
 
 /**
  * Redis config
@@ -331,6 +237,8 @@ environments {
  */
 streamr.cassandra.hosts = (System.getProperty("streamr.cassandra.hosts") ? Arrays.asList(System.getProperty("streamr.cassandra.hosts").split(",")) : ["127.0.0.1"])
 streamr.cassandra.keySpace = System.getProperty("streamr.cassandra.keySpace") ?: "streamr_dev"
+streamr.cassandra.username = System.getProperty("streamr.cassandra.username")
+streamr.cassandra.password = System.getProperty("streamr.cassandra.password")
 
 environments {
 	production {
@@ -374,23 +282,21 @@ grails.plugin.springsecurity.rememberMe.cookieName = 'streamr_remember_me'
 grails.plugin.springsecurity.rememberMe.key = System.getProperty("grails.plugin.springsecurity.rememberMe.key") ?: 'IfYouCanDreamItYouCanStreamIt'
 grails.plugin.springsecurity.password.algorithm = 'bcrypt'
 grails.plugin.springsecurity.logout.postOnly = false
-grails.plugin.springsecurity.successHandler.defaultTargetUrl = '/canvas'
+grails.plugin.springsecurity.successHandler.defaultTargetUrl = '/'
+grails.plugin.springsecurity.auth.loginFormUrl = '/'
+grails.plugin.springsecurity.auth.ajaxLoginFormUrl = '/'
 grails.plugin.springsecurity.ui.encodePassword = true
 grails.plugin.springsecurity.ui.password.minLength = 8
 
 // Due to https://jira.grails.org/browse/GPSPRINGSECURITYCORE-253 errorPage needs to be
-// set to null and 403 mapped in UnifinaCorePluginUrlMappings
+// set to null and 403 mapped in UrlMappings
 grails.plugin.springsecurity.adh.errorPage = null
 
 grails.plugin.springsecurity.securityConfigType = 'Annotation'
 
 grails.plugin.springsecurity.controllerAnnotations.staticRules = [
-	'/user/**':            ['ROLE_ADMIN'],
-	'/register/**':				 ['IS_AUTHENTICATED_ANONYMOUSLY'],
-	'/webcomponents/*':				 ['IS_AUTHENTICATED_ANONYMOUSLY'],
-	'/*':				 ['IS_AUTHENTICATED_ANONYMOUSLY']
+	'/*':                 ['IS_AUTHENTICATED_ANONYMOUSLY']
 ]
-
 
 /**
  * Email config
@@ -409,13 +315,13 @@ grails {
 
 		environments {
 			development {
-				host = "127.0.0.1"
-				port = 25
+				host = System.getProperty("grails.mail.host") ?: "127.0.0.1"
+				port = System.getProperty("grails.mail.port") ?: 25
 				props = []
 			}
 			test {
-				host = "127.0.0.1"
-				port = 25
+				host = System.getProperty("grails.mail.host") ?: "127.0.0.1"
+				port = System.getProperty("grails.mail.port") ?: 25
 				props = []
 			}
 		}
@@ -460,9 +366,34 @@ environments {
 }
 
 /**
+ * S3 File upload
+ */
+streamr.fileUpload.s3.region = System.getProperty("streamr.fileUpload.s3.region") ?: "eu-west-1"
+streamr.fileUpload.s3.bucket = System.getProperty("streamr.fileUpload.s3.bucket") ?: "streamr-dev-public"
+
+environments {
+	production {
+		streamr.fileUpload.s3.region = System.getProperty("streamr.fileUpload.s3.region") ?: "eu-west-1"
+		streamr.fileUpload.s3.bucket = System.getProperty("streamr.fileUpload.s3.bucket") ?: "streamr-public"
+	}
+}
+
+streamr.metrics.numberOfSessions = "Tomcat:type=Manager,context=/streamr-core,host=localhost"
+environments {
+	production {
+		streamr.metrics.numberOfSessions = "Catalina:type=Manager,context=/,host=localhost"
+	}
+}
+
+/**
  * Signup Configs
  */
-streamr.signup.requireInvite = (System.getProperty("streamr.signup.requireInvite") ? Boolean.parseBoolean(System.getProperty("streamr.signup.requireInvite")) : false)
+streamr.signup.requireCaptcha = (System.getProperty("streamr.signup.requireCaptcha") ? Boolean.parseBoolean(System.getProperty("streamr.signup.requireCaptcha")) : false)
+
+/**
+ * Streamr engine-and-editor nodes
+ */
+streamr.engine.nodes = System.getProperty("streamr.engine.nodes") ? Arrays.asList(System.getProperty("streamr.engine.nodes").split(",")) : [new NodeService().getIPAddress([streamr: [node: [ip: System.getProperty("streamr.engine.node.ip")]]])]
 
 /**
  * Miscellaneous

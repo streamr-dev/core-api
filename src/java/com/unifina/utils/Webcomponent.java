@@ -19,12 +19,8 @@ public enum Webcomponent {
 		this.name = name;
 	}
 
-	String getName() {
+	public String getName() {
 		return name;
-	}
-
-	public String toString() {
-		return getName();
 	}
 
 	public static Webcomponent getByName(String s) {

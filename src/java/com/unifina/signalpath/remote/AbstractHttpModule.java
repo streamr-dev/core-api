@@ -1,9 +1,8 @@
 package com.unifina.signalpath.remote;
 
-import com.unifina.data.FeedEvent;
-import com.unifina.data.IEventRecipient;
+import com.unifina.data.Event;
 import com.unifina.datasource.IStopListener;
-import com.unifina.feed.ITimestamped;
+import com.streamr.client.protocol.message_layer.ITimestamped;
 import com.unifina.signalpath.*;
 import com.unifina.utils.MapTraversal;
 import org.apache.http.HttpHeaders;
@@ -38,7 +37,7 @@ import java.util.concurrent.TimeUnit;
  *
  * Crucial benefit over simply doing Unirest.post: not blocking the whole canvas (Streamr thread) while request is pending
  */
-public abstract class AbstractHttpModule extends ModuleWithSideEffects implements IEventRecipient, IStopListener {
+public abstract class AbstractHttpModule extends ModuleWithSideEffects implements IStopListener {
 
 	private static final Logger log = Logger.getLogger(AbstractHttpModule.class);
 
@@ -47,8 +46,8 @@ public abstract class AbstractHttpModule extends ModuleWithSideEffects implement
 	protected static final String BODY_FORMAT_PLAIN = "text/plain";
 	protected static final String BODY_FORMAT_XML = "application/xml";
 
-	public static int DEFAULT_TIMEOUT_SECONDS = 5;
-	public static int MAX_CONNECTIONS = 10;
+	public static final int DEFAULT_TIMEOUT_SECONDS = 5;
+	public static final int MAX_CONNECTIONS = 10;
 
 	protected String bodyContentType = BODY_FORMAT_JSON;
 	protected boolean trustSelfSigned = false;
@@ -112,7 +111,8 @@ public abstract class AbstractHttpModule extends ModuleWithSideEffects implement
 	}
 
 	@Override
-	public void finalize() {
+	protected void finalize() throws Throwable {
+		super.finalize();
 		stopClient();
 	}
 
@@ -213,7 +213,7 @@ public abstract class AbstractHttpModule extends ModuleWithSideEffects implement
 			if (getRootSignalPath() != null && getRootSignalPath().getCanvas() != null) {
 				canvasId = getRootSignalPath().getCanvas().getId();
 			}
-			log.info("HTTP request " + request.toString() + " from canvas " + canvasId);
+			log.debug("HTTP request " + request.toString() + " from canvas " + canvasId);
 		} catch (Exception e) {
 			response.errors.add("Constructing HTTP request failed");
 			response.errors.add(e.getMessage());
@@ -255,7 +255,7 @@ public abstract class AbstractHttpModule extends ModuleWithSideEffects implement
 				.setSocketTimeout(timeoutMillis).build();
 		request.setConfig(requestConfig);
 
-		// if async: push server response into FeedEvent queue; it will later call this.receive
+		// if async: push server response into Event queue; it will later call this.receive
 		final AbstractHttpModule self = this;
 		final CountDownLatch latch = new CountDownLatch(1);
 		final long startTime = System.currentTimeMillis();
@@ -285,24 +285,26 @@ public abstract class AbstractHttpModule extends ModuleWithSideEffects implement
 				response.responseTime = System.currentTimeMillis() - startTime;
 				response.timestamp = getGlobals().isRealtime() ? new Date() : getGlobals().time;
 				if (async) {
-					getGlobals().getDataSource().enqueueEvent(new FeedEvent<>(response, response.timestamp, self));
+					getGlobals().getDataSource().enqueue(new Event<>(response, response.timestamp, 0L, (r) -> {
+						sendOutput(r);
+						getPropagator().propagate();
+					}));
 				} else {
 					latch.countDown();	// goto latch.await() below
 				}
 			}
 		});
 
-		// TODO: remove
 		if (!hasDebugLogged && getRootSignalPath() != null && getRootSignalPath().getCanvas() != null) {
 			hasDebugLogged = true;
-			log.info("Created HttpClient from canvas " + getRootSignalPath().getCanvas().getId());
+			log.debug("Created HttpClient from canvas " + getRootSignalPath().getCanvas().getId());
 			Set<Thread> threads = Thread.getAllStackTraces().keySet();
 			for (Thread t : threads) {
 				if (t.getName().startsWith("I/O dispatcher")) {
-					log.info(t.getName());
+					log.debug(t.getName());
 				}
 			}
-			log.info("end of threads.");
+			log.debug("end of threads.");
 		}
 
 		if (!isAsync) {
@@ -325,20 +327,6 @@ public abstract class AbstractHttpModule extends ModuleWithSideEffects implement
 
 	protected boolean localAddressesAreAllowed() {
 		return false;
-	}
-
-	/**
-	 * Asynchronously handle server response, call comes from event queue
-	 * @param event containing HttpTransaction created within sendOutput
-	 */
-	@Override
-	public void receive(FeedEvent event) {
-		if (event.content instanceof HttpTransaction) {
-			sendOutput((HttpTransaction) event.content);
-			getPropagator().propagate();
-		} else {
-			super.receive(event);
-		}
 	}
 
 	private Propagator getPropagator() {
@@ -397,7 +385,7 @@ public abstract class AbstractHttpModule extends ModuleWithSideEffects implement
 		}
 
 		@Override
-		public Date getTimestamp() {
+		public Date getTimestampAsDate() {
 			return timestamp;
 		}
 	}

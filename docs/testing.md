@@ -48,48 +48,27 @@ Service dependencies are automatically injected into integration tests by using 
 
 ### Tips
 
-#### Injecting services and beans
+#### Mocking services and beans
 
-At least in unit tests, you can inject services (and other beans) in test setup using `defineBeans(Closure)`:
-```groovy
-class FooSpec extends spock.lang.Specification {
-    def barService
-    def userService
-
-    def setup() {
-        defineBeans {
-            barService(HashMapBackedBarService)
-            userService(UserService) { it.autowire = true }
-        }
-    }
-    ...
-}
-```
-
-The optional closure `{ it.autowire = true }` automatically injects the services used by `UserService` itself.
-
-#### Injecting mock/stub or instances of services and beans
+In unit tests, you can inject mocks (or any instances you want) of services (and other beans) in test setup using `mockBean`:
 
 ```groovy
-import org.codehaus.groovy.grails.commons.DefaultGrailsApplication
-import org.springframework.context.ApplicationContext
+class FooSpec extends BeanMockingSpecification {
 
-class FooSpec extends spock.lang.Specification {
-    KafkaService kafkaService = Mock(KafkaService)
-	FeedFileService feedFileService = Mock(FeedFileService)
+	ExampleService exampleService
 
     def setup() {
-        // Setup application context
-		def applicationContext = Stub(ApplicationContext) {
-			getBean(KafkaService) >> kafkaService
-			getBean(FeedFileService) >> feedFileService
-		}
-        
-        // Setup grailsApplication
-		def grailsApplication = new DefaultGrailsApplication()
-		grailsApplication.setMainContext(applicationContext)
+        exampleService = mockBean(ExampleService) // or mockBean(ExampleService, myCustomInstance)
     }
-    ...
+    
+    def "exampleService gets called"() {
+        when:
+        // call your method under test
+    
+        then:
+        // Assert method calls as you would for any other Spock mocks
+        1 * exampleService.myMethodName(/* args */) >> optionalReturnValue
+    }
 }
 ```
 

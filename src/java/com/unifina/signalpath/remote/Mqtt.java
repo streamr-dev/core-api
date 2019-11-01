@@ -1,10 +1,9 @@
 package com.unifina.signalpath.remote;
 
-import com.unifina.data.FeedEvent;
-import com.unifina.data.IEventRecipient;
+import com.unifina.data.Event;
 import com.unifina.datasource.IStartListener;
 import com.unifina.datasource.IStopListener;
-import com.unifina.feed.ITimestamped;
+import com.streamr.client.protocol.message_layer.ITimestamped;
 import com.unifina.signalpath.*;
 
 import com.unifina.utils.IdGenerator;
@@ -14,15 +13,12 @@ import org.eclipse.paho.client.mqttv3.persist.MemoryPersistence;
 import org.apache.log4j.Logger;
 
 import javax.net.SocketFactory;
-import javax.net.ssl.SSLSocketFactory;
 import java.io.ByteArrayInputStream;
 import java.util.*;
 
 import javax.net.ssl.SSLContext;
-import javax.net.ssl.TrustManager;
 import javax.net.ssl.TrustManagerFactory;
 import java.security.KeyStore;
-import java.security.cert.X509Certificate;
 import java.security.cert.CertificateFactory;
 import java.io.InputStream;
 import java.security.cert.Certificate;
@@ -30,7 +26,7 @@ import java.security.cert.Certificate;
 /**
  * Eclipse MqttClient wrapper
  */
-public class Mqtt extends AbstractSignalPathModule implements MqttCallback, IEventRecipient, IStartListener, IStopListener {
+public class Mqtt extends AbstractSignalPathModule implements MqttCallback, IStartListener, IStopListener {
 
 	private static final Logger log = Logger.getLogger(Mqtt.class);
 
@@ -200,18 +196,11 @@ public class Mqtt extends AbstractSignalPathModule implements MqttCallback, IEve
 	public void messageArrived(String topic, MqttMessage mqttMessage) throws Exception {
 		final MqttMessageEvent event = new MqttMessageEvent(getGlobals().time);
 		event.message = mqttMessage;
-		// push mqtt message into FeedEvent queue; it will later call this.receive
-		getGlobals().getDataSource().enqueueEvent(new FeedEvent<>(event, event.timestamp, this));
-	}
-
-	@Override
-	public void receive(FeedEvent event) {
-		if (event.content instanceof MqttMessageEvent) {
-			sendOutput(((MqttMessageEvent) event.content).message);
+		// push mqtt message into Event queue; it will later call this.receive
+		getGlobals().getDataSource().enqueue(new Event<>(event, event.timestamp, 0L, (message) -> {
+			sendOutput(message);
 			getPropagator().propagate();
-		} else {
-			super.receive(event);
-		}
+		}));
 	}
 
 	private Propagator getPropagator() {
@@ -221,8 +210,8 @@ public class Mqtt extends AbstractSignalPathModule implements MqttCallback, IEve
 		return asyncPropagator;
 	}
 
-	public void sendOutput(MqttMessage msg) {
-		message.send(new String(msg.getPayload()));
+	public void sendOutput(MqttMessageEvent event) {
+		message.send(new String(event.message.getPayload()));
 	}
 
 	@Override
@@ -255,7 +244,7 @@ public class Mqtt extends AbstractSignalPathModule implements MqttCallback, IEve
 		}
 
 		@Override
-		public Date getTimestamp() {
+		public Date getTimestampAsDate() {
 			return timestamp;
 		}
 	}

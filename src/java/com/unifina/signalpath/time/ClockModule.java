@@ -5,13 +5,15 @@ import com.unifina.signalpath.*;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.TimeZone;
 
 public class ClockModule extends AbstractSignalPathModule implements ITimeListener {
 
+	private final TimezoneParameter tz = new TimezoneParameter(this, "timezone", TimeZone.getTimeZone("UTC"));
 	private final StringParameter format = new StringParameter(this, "format", "yyyy-MM-dd HH:mm:ss z");
 	private final EnumParameter<TimeUnit> tickUnit = new EnumParameter<>(this, "unit", TimeUnit.values());
 	private final IntegerParameter tickRate = new NonZeroIntegerParameter(this, "rate", 1);
-	
+
 	private final StringOutput date = new StringOutput(this, "date");
 	private final TimeSeriesOutput ts = new TimeSeriesOutput(this,"timestamp");
 
@@ -21,14 +23,15 @@ public class ClockModule extends AbstractSignalPathModule implements ITimeListen
 		format.setCanToggleDrivingInput(false);
 		tickUnit.setCanToggleDrivingInput(false);
 		tickRate.setCanToggleDrivingInput(false);
+		addInput(tz);
 	}
 
 	@Override
 	public void sendOutput() {}
-	
+
 	@Override
 	public void clearState() {}
-	
+
 	@Override
 	public void setTime(Date timestamp) {
 		updateDateFormatIfNecessary(format.getValue());
@@ -44,7 +47,7 @@ public class ClockModule extends AbstractSignalPathModule implements ITimeListen
 	private void updateDateFormatIfNecessary(String format) {
 		if (df == null) {
 			df = new SimpleDateFormat(format);
-			df.setTimeZone(getGlobals().getUserTimeZone());
+			df.setTimeZone(tz.getValue());
 		} else if (!df.toPattern().equals(format)) {
 			df.applyPattern(format);
 		}

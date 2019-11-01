@@ -1,1 +1,0 @@
-../../../../web-app/js/unifina/streamr-client/README.md

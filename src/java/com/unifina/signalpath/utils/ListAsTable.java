@@ -19,7 +19,6 @@ public class ListAsTable extends ModuleWithUI {
 
 	public ListAsTable() {
 		super();
-		resendAll = false;
 		resendLast = 1;
 	}
 

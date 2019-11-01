@@ -30,10 +30,6 @@ class TimeOfDaySpec extends Specification {
 		new ModuleTestHelper.Builder(module, inputValues, outputValues)
 			.ticks(ticks)
 			.extraIterationsAfterInput(5)
-			.overrideGlobals { g ->
-				g.init()
-				g
-			}
 			.beforeEachTestCase { module.onDay(Date.parse("yyyy-MM-dd HH:mm", "2015-11-01 12:00")) }
 			.test()
 	}

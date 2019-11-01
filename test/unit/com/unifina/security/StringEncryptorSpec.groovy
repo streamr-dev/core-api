@@ -11,8 +11,8 @@ class StringEncryptorSpec extends Specification {
 
 		when:
 		// NOTE: if the below line throws java.security.InvalidKeyException: Illegal key size,
-		// you need to install the Java Cryptography Extension (JCE) Unlimited Strength Jurisdiction Policy Files 7
-		// from http://www.oracle.com/technetwork/java/javase/downloads/jce-7-download-432124.html
+		// you need to install the Java Cryptography Extension (JCE) Unlimited Strength Jurisdiction Policy Files 8
+		// from http://www.oracle.com/technetwork/java/javase/downloads/jce8-download-2133166.html
 		String encrypted = encryptor.encrypt("Hello world!", salt)
 		then:
 		encrypted != "Hello world!"

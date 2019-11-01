@@ -1,0 +1,25 @@
+{
+  "name": "rest-e2e-tests",
+  "version": "1.0.0",
+  "description": "End-to-end tests for Streamr Engine and Editor REST API endpoints",
+  "main": "index.js",
+  "scripts": {
+    "test": "mocha *.test.js --recursive --timeout 5000"
+  },
+  "author": "",
+  "license": "AGPL",
+  "dependencies": {
+    "ajv": "^6.10.0",
+    "async-wait-until": "^1.2.4",
+    "chai": "^4.2.0",
+    "ethereumjs-util": "^6.1.0",
+    "form-data": "^2.3.3",
+    "keythereum": "^1.0.4",
+    "mocha": "^6.1.4",
+    "node-fetch": "^2.6.0",
+    "sleep-promise": "^8.0.1",
+    "streamr-client": "^2.2.1",
+    "web3": "^1.0.0-beta.55"
+  },
+  "devDependencies": {}
+}

@@ -45,7 +45,7 @@ public class GetOrCreateStream extends CreateStream {
 		}
 	}
 
-	class NameFilteringClosure extends Closure {
+	static class NameFilteringClosure extends Closure {
 
 		private String name;
 

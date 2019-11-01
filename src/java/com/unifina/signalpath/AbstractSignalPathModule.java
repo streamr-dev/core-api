@@ -1,7 +1,6 @@
 package com.unifina.signalpath;
 
-import com.unifina.data.FeedEvent;
-import com.unifina.data.IEventRecipient;
+import com.unifina.data.Event;
 import com.unifina.datasource.IDayListener;
 import com.unifina.domain.signalpath.Module;
 import com.unifina.security.permission.ConnectionTraversalPermission;
@@ -32,7 +31,7 @@ import java.util.concurrent.FutureTask;
  * - Call module.setConfiguration()
  * - Call module.connectionsReady() -> module.initialize()
  */
-public abstract class AbstractSignalPathModule implements IEventRecipient, IDayListener, Serializable {
+public abstract class AbstractSignalPathModule implements IDayListener, Serializable {
 
 	private SignalPath parentSignalPath;
 	private Integer initPriority = 50;
@@ -94,12 +93,12 @@ public abstract class AbstractSignalPathModule implements IEventRecipient, IDayL
 
 		/**
 		 * Execute in a privileged block so that also user defined
-		 * untrusted modules can benefit from auto-initialization of IO. 
+		 * untrusted modules can benefit from auto-initialization of IO.
 		 */
         AccessController.doPrivileged(
 	        new PrivilegedAction<Object>() {
 	            public Object run() {
-	            	
+
 					// Loop through class hierarchy and collect declared fields
 					List<Field> fieldList = new ArrayList<>();
 					Class clazz = AbstractSignalPathModule.this.getClass();
@@ -109,7 +108,7 @@ public abstract class AbstractSignalPathModule implements IEventRecipient, IDayL
 					} while (clazz != null);
 
 					Field[] fields = fieldList.toArray(new Field[fieldList.size()]);
-	    			
+
 	    			// Sort by field name
 	    			Arrays.sort(fields, new Comparator<Field>() {
 						@Override
@@ -561,7 +560,7 @@ public abstract class AbstractSignalPathModule implements IEventRecipient, IDayL
 	/**
 	 * This method is used to serve requests from the UI to individual modules.
 	 * The default implementation inserts the requests into the global event queue
-	 * as a FeedEvent. It returns a Future that will hold the RuntimeResponse that
+	 * as a Event. It returns a Future that will hold the RuntimeResponse that
 	 * results when the event is processed from the queue.
 	 * <p/>
 	 * This method is not intended to be subclassed. To implement handling of requests,
@@ -570,31 +569,30 @@ public abstract class AbstractSignalPathModule implements IEventRecipient, IDayL
 	 * @param request The RuntimeRequest, which should contain at least the key "type", holding a String and indicating the type of request
 	 */
 	public Future<RuntimeResponse> onRequest(final RuntimeRequest request, RuntimeRequest.PathReader path) {
-		// Add event to message queue, don't do it right away 
-		FeedEvent<RuntimeRequest, AbstractSignalPathModule> fe = new FeedEvent<>(request, getGlobals().isRealtime() ? request.getTimestamp() : getGlobals().time, this);
+		final AbstractSignalPathModule recipient = resolveRuntimeRequestRecipient(request, path);
 
 		final RuntimeResponse response = new RuntimeResponse();
 		response.put("request", request);
 
-		final AbstractSignalPathModule recipient = resolveRuntimeRequestRecipient(request, path);
-
-		FutureTask<RuntimeResponse> future = new FutureTask<>(new Runnable() {
-			@Override
-			public void run() {
-				try {
-					recipient.handleRequest(request, response);
-				} catch (AccessControlException e) {
-					String error = "Unauthenticated request! Type: " + request.getType() + ", Msg: " + e.getMessage();
-					log.error(error);
-					response.setSuccess(false);
-					response.put("error", error);
-				}
+		final FutureTask<RuntimeResponse> futureTask = new FutureTask<>(() -> {
+			try {
+				recipient.handleRequest(request, response);
+			} catch (AccessControlException e) {
+				String error = "Unauthenticated request! Type: " + request.getType() + ", Msg: " + e.getMessage();
+				log.error(error);
+				response.setSuccess(false);
+				response.put("error", error);
 			}
 		}, response);
-		request.setFuture(future);
+		request.setFuture(futureTask);
 
-		getGlobals().getDataSource().enqueueEvent(fe);
-		return future;
+		// Run the FutureTask when it pops from the event queue
+		Event<RuntimeRequest> fe = new Event<>(request, getGlobals().isRealtime() ? request.getTimestampAsDate() : getGlobals().time, 0L, (runtimeRequest) -> {
+			futureTask.run();
+		});
+
+		getGlobals().getDataSource().enqueue(fe);
+		return futureTask;
 	}
 
 	/**
@@ -620,16 +618,6 @@ public abstract class AbstractSignalPathModule implements IEventRecipient, IDayL
 			return parentSignalPath.getRuntimePath(writer).writeModuleId(getHash());
 		} else {
 			return writer;
-		}
-	}
-
-	@Override
-	public void receive(FeedEvent event) {
-		if (event.content instanceof RuntimeRequest) {
-			RuntimeRequest request = (RuntimeRequest) event.content;
-			((FutureTask) request.getFuture()).run();
-		} else {
-			log.warn("receive: Unidentified FeedEvent content: " + event.content);
 		}
 	}
 

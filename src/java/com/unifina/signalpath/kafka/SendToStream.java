@@ -1,21 +1,17 @@
 package com.unifina.signalpath.kafka;
 
-import com.unifina.data.FeedEvent;
-import com.unifina.data.IEventRecipient;
-import com.unifina.domain.data.Feed;
+import com.streamr.client.StreamrClient;
 import com.unifina.domain.data.Stream;
 import com.unifina.domain.security.SecUser;
-import com.unifina.feed.AbstractFeed;
-import com.unifina.feed.StreamrMessage;
 import com.unifina.service.PermissionService;
-import com.unifina.service.StreamService;
 import com.unifina.signalpath.*;
-import com.unifina.utils.Globals;
 import grails.converters.JSON;
 import grails.util.Holders;
+import org.apache.log4j.Logger;
 import org.codehaus.groovy.grails.web.json.JSONArray;
 import org.codehaus.groovy.grails.web.json.JSONObject;
 
+import java.io.IOException;
 import java.security.AccessControlException;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
@@ -23,45 +19,33 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * This module (only) supports sending messages to Kafka/json streams (feed id 7)
- *
- * // TODO: partitioning key
+ * This module sends messages to streams.
  */
 public class SendToStream extends ModuleWithSideEffects {
 
-	protected StreamParameter streamParameter = new StreamParameter(this, "stream");
-	transient protected JSONObject streamConfig = null;
+	private StreamParameter streamParameter = new StreamParameter(this, "stream");
 
-	transient protected PermissionService permissionService = null;
-	transient protected StreamService streamService = null;
+	transient private StreamrClient streamrClient = null;
+	transient private com.streamr.client.rest.Stream cachedStream = null;
 
-	protected boolean historicalWarningShown = false;
-	private String lastStreamId = null;
 	private boolean sendOnlyNewValues = false;
+
 	private List<Input> fieldInputs = new ArrayList<>();
+	private Input<Object> partitionKey = null; // Only set if the Stream has multiple partitions
+
+	private static final Logger log = Logger.getLogger(SendToStream.class);
 
 	@Override
 	public void init() {
-		// Pre-fetch services for more predictable performance
-		ensureServices();
-		
 		addInput(streamParameter);
 		streamParameter.setUpdateOnChange(true);
-
-		// TODO: don't rely on static ids
-		Feed feedFilter = new Feed();
-		feedFilter.setId(7L);
-		streamParameter.setFeedFilter(feedFilter);
 	}
 
-	private void ensureServices() {
-		// will be null after deserialization
-		if (streamService == null) {
-			streamService = Holders.getApplicationContext().getBean(StreamService.class);
+	private StreamrClient getStreamrClient() {
+		if (streamrClient == null) {
+			streamrClient = getGlobals().getStreamrClient();
 		}
-		if (permissionService == null) {
-			permissionService = Holders.getApplicationContext().getBean(PermissionService.class);
-		}
+		return streamrClient;
 	}
 
 	@Override
@@ -71,42 +55,36 @@ public class SendToStream extends ModuleWithSideEffects {
 	}
 
 	@Override
-	public void activateWithSideEffects() {
-		ensureServices();
+	public void activateWithSideEffects(){
 		Stream stream = streamParameter.getValue();
-		authenticateStream(stream);
-		streamService.sendMessage(stream, inputValuesToMap());
-	}
-
-	@Override
-	protected void activateWithoutSideEffects() {
-		Globals globals = getGlobals();
-
-		// Create the message locally and route it to the stream locally, without actually producing to the stream
-		StreamrMessage msg = new StreamrMessage(streamParameter.getValue().getId(), 0, globals.time, inputValuesToMap()); // TODO: fix hard-coded partition
-
-		// Find the Feed implementation for the target Stream
-		AbstractFeed feed = getGlobals().getDataSource().getFeedById(streamParameter.getValue().getFeed().getId());
-
-		// Find the IEventRecipient for this message
-		IEventRecipient eventRecipient = feed.getEventRecipientForMessage(msg);
-
-		if (eventRecipient != null) {
-			FeedEvent event = new FeedEvent(msg, globals.time, eventRecipient);
-			getGlobals().getDataSource().enqueueEvent(event);
+		try {
+			com.streamr.client.rest.Stream s = cacheStream(stream);
+			streamrClient.publish(
+				s,
+				inputValuesToMap(),
+				getGlobals().getTime(),
+				partitionKey != null && partitionKey.getValue() != null ? partitionKey.getValue().toString() : null
+			);
+		} catch (Exception e) {
+			log.error("Failed to publish: ", e);
 		}
+
 	}
 
 	@Override
 	protected String getNotificationAboutActivatingWithoutSideEffects() {
-		return this.getName()+": In historical mode, events written to Stream '" + streamParameter.getValue().getName()+"' are only available within this Canvas.";
+		return this.getName()+": In historical mode, events are not written to stream '" + streamParameter.getValue().getName()+"'.";
 	}
 
 	private Map<String, Object> inputValuesToMap() {
 		Map msg = new LinkedHashMap<>();
 		Iterable<Input> inputs = sendOnlyNewValues ? getDrivingInputs() : fieldInputs;
 		for (Input i : inputs) {
-			msg.put(i.getName(), i.getValue());
+			if (i == partitionKey) {
+				continue;
+			} else {
+				msg.put(i.getName(), i.getValue());
+			}
 		}
 		return msg;
 	}
@@ -137,11 +115,9 @@ public class SendToStream extends ModuleWithSideEffects {
 		if (stream==null)
 			return;
 
-		authenticateStream(stream);
-
-		if (stream.getFeed().getId() != Feed.KAFKA_ID) {
-			throw new IllegalArgumentException(this.getName()+": Unable to write to stream type: " +
-				stream.getFeed().getName());
+		// Fail when configuring if the stream is not writable
+		if (getGlobals().isRunContext()) {
+			checkWriteAccess(stream);
 		}
 
 		if (stream.getConfig()==null) {
@@ -149,9 +125,16 @@ public class SendToStream extends ModuleWithSideEffects {
 				" is not properly configured!");
 		}
 
-		streamConfig = (JSONObject) JSON.parse(stream.getConfig());
+		// Add the partitionKey input if the stream has multiple partitions
+		if (stream.getPartitions() > 1) {
+			partitionKey = new Input<>(this, "partitionKey", "Object");
+			partitionKey.setCanToggleDrivingInput(false);
+			partitionKey.setRequiresConnection(false);
+			addInput(partitionKey);
+		}
 
-		JSONArray fields = streamConfig.getJSONArray("fields");
+		final JSONObject streamConfig = (JSONObject) JSON.parse(stream.getConfig());
+		final JSONArray fields = streamConfig.getJSONArray("fields");
 
 		for (Object o : fields) {
 			Input input = null;
@@ -159,7 +142,6 @@ public class SendToStream extends ModuleWithSideEffects {
 			String type = j.getString("type");
 			String name = j.getString("name");
 
-			// TODO: add other types
 			if (type.equalsIgnoreCase("number")) {
 				input = new TimeSeriesInput(this, name);
 				((TimeSeriesInput) input).setCanHaveInitialValue(false);
@@ -181,24 +163,23 @@ public class SendToStream extends ModuleWithSideEffects {
 			}
 		}
 
-		if (streamConfig.containsKey("name"))
+		if (streamConfig.containsKey("name")) {
 			this.setName(streamConfig.get("name").toString());
+		}
 	}
 
-	private void authenticateStream(Stream stream) {
-		// Only check write access in run context to avoid exception when eg. loading and reconstructing canvas
-		if (getGlobals().isRunContext() && !stream.getId().equals(lastStreamId) ) {
-			if (permissionService == null) {
-				permissionService = Holders.getApplicationContext().getBean(PermissionService.class);
-			}
+	private com.streamr.client.rest.Stream cacheStream(Stream stream) throws IOException {
+		if (cachedStream == null || !stream.getId().equals(cachedStream.getId()) ) {
+			cachedStream = getStreamrClient().getStream(stream.getId());
+		}
+		return cachedStream;
+	}
 
-			SecUser user = SecUser.getViaJava(getGlobals().getUserId());
-			if (permissionService.canWrite(user, stream)) {
-				lastStreamId = stream.getId();
-			} else {
-				throw new AccessControlException(this.getName() + ": User " + user.getUsername() +
-					" does not have write access to Stream " + stream.getName());
-			}
+	private void checkWriteAccess(Stream stream) {
+		SecUser user = SecUser.getViaJava(getGlobals().getUserId());
+		if (!Holders.getApplicationContext().getBean(PermissionService.class).canWrite(user, stream)) {
+			throw new AccessControlException(this.getName() + ": User " + user.getUsername() +
+				" does not have write access to Stream " + stream.getName());
 		}
 	}
 
