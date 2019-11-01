@@ -1,5 +1,7 @@
 package com.unifina.service
 
+import com.unifina.domain.security.IntegrationKey
+import com.unifina.domain.security.SecUser
 import com.unifina.signalpath.blockchain.Web3jHelper
 import org.apache.log4j.LogManager
 import org.apache.log4j.Logger
@@ -21,8 +23,8 @@ class EthereumService {
 	}
 
 	/**
-	 * Calls operator() getter from contract with public "operator" address:
-	 * address public operator;
+	 * Calls owner() getter from Community contract
+	 * @return community admin's address, or null if communityAddress is faulty
 	 */
 	String fetchCommunityAdminsEthereumAddress(String communityAddress) {
 		Web3j web3j = Web3jHelper.getWeb3jConnectionFromConfig()
@@ -32,5 +34,14 @@ class EthereumService {
 			log.error("fetch community admins ethereum address error", e)
 			throw new RuntimeException(e)
 		}
+	}
+
+	/** Checks if given user has registered the given Ethereum address in their Streamr profile */
+	boolean hasEthereumAddress(SecUser user, String ethereumAddress) {
+		// TODO: should we check that service == "ETHEREUM"?
+		IntegrationKey key = IntegrationKey.where {
+			(user == user) && (idInService == ethereumAddress)
+		}.find()
+		return key != null
 	}
 }
