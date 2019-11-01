@@ -18,7 +18,7 @@ public class DecodeStringToByteArraySpec extends Specification {
 		]
 		then:
 		new ModuleTestHelper.Builder(module, inputValues, outputValues)
-			.customEquality { List expected, List actual -> Arrays.equals(expected, actual) }
+			.customEquality { byte[] expected, byte[] actual -> Arrays.equals(expected, actual) }
 			.test()
 	}
 
@@ -35,7 +35,7 @@ public class DecodeStringToByteArraySpec extends Specification {
 		]
 		then:
 		new ModuleTestHelper.Builder(module, inputValues, outputValues)
-			.customEquality { List expected, List actual -> Arrays.equals(expected, actual) }
+			.customEquality { byte[] expected, byte[] actual -> Arrays.equals(expected, actual) }
 			.test()
 	}
 }
