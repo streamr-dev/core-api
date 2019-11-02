@@ -23,10 +23,12 @@ public class ListToEvents extends AbstractSignalPathModule {
 	@Override
 	public void sendOutput() {
 		List inList = in.getValue();
-		if (inList.size() < 1) { return; }
+		if (inList.size() < 1) {
+			return;
+		}
 
 		// enqueue the items, send out and propagate in event handler
-		for (int i=0; i<inList.size(); i++) {
+		for (int i = 0; i < inList.size(); i++) {
 			QueuedItem queuedItem = new QueuedItem(inList.get(i), getGlobals().time);
 			getGlobals().getDataSource().enqueue(new Event<>(queuedItem, queuedItem.timestamp, i, it -> {
 				out.send(it.item);
@@ -36,6 +38,7 @@ public class ListToEvents extends AbstractSignalPathModule {
 	}
 
 	private transient Propagator listItemPropagator;
+
 	private Propagator getPropagator() {
 		if (listItemPropagator == null) {
 			listItemPropagator = new Propagator(this);
