@@ -293,10 +293,13 @@ class PermissionService {
 
 		// When a user is granted read access (subscriber) or write access (publisher) to a stream,
 		// we need to set the corresponding inbox stream permissions (see methods comments below).
+		// TODO: re-enable after fixing permission table bloat issue
+		/*
 		if (userProp == "user" && resourceProp == "stream") {
 			checkAndGrantInboxPermissions((SecUser) target, (Stream) resource, operation,
 				subscription, endsAt, parentPermission)
 		}
+		 */
 
 		return parentPermission
 	}

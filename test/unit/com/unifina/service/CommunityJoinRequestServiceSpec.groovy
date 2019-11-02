@@ -181,6 +181,61 @@ class CommunityJoinRequestServiceSpec extends BeanMockingSpecification {
 		c.state == CommunityJoinRequest.State.ACCEPTED
 	}
 
+	void "create doesn't set permissions if they already exist"() {
+		setup:
+		SecUser user = new SecUser(
+			username: "user@domain.com",
+			name: "Firstname Lastname",
+			password: "salasana"
+		)
+		user.id = 1
+		user.save(failOnError: true, validate: false)
+
+		CommunityJoinRequestCommand cmd = new CommunityJoinRequestCommand(
+			memberAddress: memberAddress,
+			secret: "secret",
+		)
+		Stream s1 = new Stream(name: "stream-1")
+		Stream s2 = new Stream(name: "stream-2")
+		Stream s3 = new Stream(name: "stream-3")
+		Stream s4 = new Stream(name: "stream-4")
+		[s1, s2, s3, s4].eachWithIndex { Stream stream, int i -> stream.id = "stream-${i+1}" } // assign ids
+		[s1, s2, s3, s4]*.save(failOnError: true, validate: false)
+
+		Category category = new Category(name: "Category")
+		category.id = "category-id"
+		category.save()
+
+		Product product = new Product(
+			name: "name",
+			description: "description",
+			ownerAddress: "0x0000000000000000000000000000000000000000",
+			beneficiaryAddress: communityAddress,
+			streams: [s1, s2, s3, s4],
+			pricePerSecond: 10,
+			category: category,
+			state: Product.State.NOT_DEPLOYED,
+			blockNumber: 40000,
+			blockIndex: 30,
+			owner: user,
+			type: Product.Type.COMMUNITY,
+		)
+		product.id = "product-id"
+		product.save(failOnError: true, validate: true)
+
+		when:
+		CommunityJoinRequest c = service.create(communityAddress, cmd, me)
+
+		then:
+		1 * service.ethereumService.fetchJoinPartStreamID(communityAddress) >> joinPartStream.id
+		1 * streamrClientMock.publish(_, [type: "join", "addresses": [memberAddress]])
+		1 * service.permissionService.canWrite(user, s1) >> true
+		1 * service.permissionService.canWrite(user, s2) >> true
+		1 * service.permissionService.systemGrant(user, s3, Permission.Operation.WRITE)
+		1 * service.permissionService.systemGrant(user, s4, Permission.Operation.WRITE)
+		c.state == CommunityJoinRequest.State.ACCEPTED
+	}
+
 	void "findStreams"() {
 		setup:
 		SecUser user = new SecUser(

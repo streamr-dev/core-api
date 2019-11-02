@@ -1,7 +1,10 @@
 package com.unifina.signalpath.blockchain;
 
 import org.apache.log4j.Logger;
-import org.web3j.abi.*;
+import org.web3j.abi.EventValues;
+import org.web3j.abi.FunctionEncoder;
+import org.web3j.abi.FunctionReturnDecoder;
+import org.web3j.abi.TypeReference;
 import org.web3j.abi.datatypes.*;
 import org.web3j.protocol.Web3j;
 import org.web3j.protocol.core.DefaultBlockParameter;
@@ -20,7 +23,9 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
-import java.util.concurrent.TimeoutException;
+import java.util.concurrent.
+  
+  Exception;
 
 public class Web3jHelper {
 
@@ -165,6 +170,7 @@ public class Web3jHelper {
 
 	/**
 	 * Get a public field in Ethereum contract. Returns T of a Type&lt;T&gt; specified in fieldType.
+	 * @return Web3j.Type return value from eth_call (Solidity type + value), or null if bad address or fieldName
 	 * <p>
 	 * For example:
 	 * <p>
@@ -191,11 +197,18 @@ public class Web3jHelper {
 		EthCall response = request.send();
 		Response.Error err = response.getError();
 		if (err != null) {
+			log.error(String.format("getPublicField() error: message: '%s', code: '%d', data: '%s', contract address: '%s'", err.getMessage(), err.getCode(), err.getData(), contractAddress));
 			throw new Web3jException(err);
 		}
 		List<Type> result = FunctionReturnDecoder.decode(response.getValue(), func.getOutputParameters());
-		Type<X> next = result.iterator().next();
-		return (T) next.getValue();
+		Iterator<Type> i = result.iterator();
+		if (i.hasNext()) {
+			Type<X> next = i.next();
+			return (T) next.getValue();
+		}
+		// "Note: If an invalid function call is made, or a null result is obtained, the return value will be an instance of Collections.emptyList()" https://web3j.readthedocs.io/en/latest/transactions.html
+		log.info(String.format("public field '%s' not found in contract '%s'", fieldName, contractAddress));
+		return null;
 	}
 
 	/**
