@@ -3,7 +3,6 @@ package com.unifina.signalpath.blockchain;
 import org.apache.log4j.Logger;
 import org.web3j.abi.*;
 import org.web3j.abi.datatypes.*;
-import org.web3j.abi.datatypes.generated.AbiTypes;
 import org.web3j.protocol.Web3j;
 import org.web3j.protocol.core.DefaultBlockParameter;
 import org.web3j.protocol.core.DefaultBlockParameterName;
@@ -13,21 +12,15 @@ import org.web3j.protocol.core.methods.request.Transaction;
 import org.web3j.protocol.core.methods.response.*;
 import org.web3j.protocol.http.HttpService;
 import org.web3j.tx.Contract;
-import org.web3j.utils.Numeric;
 
 import java.io.IOException;
-import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.ParameterizedType;
-import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Iterator;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
+import java.util.concurrent.TimeoutException;
 
 public class Web3jHelper {
 
@@ -122,9 +115,9 @@ public class Web3jHelper {
 		return (Type) val;
 	}
 
-	public static TransactionReceipt waitForTransactionReceipt(Web3j web3j, String txHash, long waitMsBetweenTries, int tries) throws IOException {
+	public static TransactionReceipt waitForTransactionReceipt(Web3j web3j, String txHash, long waitMsBetweenTries, int retries) throws IOException, TimeoutException {
 		try {
-			return waitForTransactionReceipt(web3j, txHash, waitMsBetweenTries, tries, false);
+			return waitForTransactionReceipt(web3j, txHash, waitMsBetweenTries, retries, false);
 		} catch (InterruptedException e) {
 			log.error("waitForTransactionReceipt threw InterruptedException despite throwInterruptedException = false. This shouldnt happen.");
 			throw new RuntimeException(e);
@@ -135,19 +128,19 @@ public class Web3jHelper {
 	 * @param web3j
 	 * @param txHash
 	 * @param waitMsBetweenTries
-	 * @param tries
+	 * @param retries before throwing TimeoutException
 	 * @param throwInterruptedException
 	 * @return the TransactionReceipt, or null if none was found in allotted time
 	 * @throws InterruptedException
 	 * @throws IOException
+	 * @throws TimeoutException if retries don't get result
 	 */
-	public static TransactionReceipt waitForTransactionReceipt(Web3j web3j, String txHash, long waitMsBetweenTries, int tries, boolean throwInterruptedException) throws InterruptedException, IOException {
+	public static TransactionReceipt waitForTransactionReceipt(Web3j web3j, String txHash, long waitMsBetweenTries, int retries, boolean throwInterruptedException) throws InterruptedException, IOException, TimeoutException {
 		TransactionReceipt receipt = null;
 		int retry = 0;
-		while (receipt == null && retry < tries) {
-			receipt = web3j.ethGetTransactionReceipt(txHash).send().getResult();
-			if (receipt == null) {
-				retry++;
+		receipt = web3j.ethGetTransactionReceipt(txHash).send().getResult();
+		while (receipt == null) {
+			if (retry++ < retries) {
 				log.info("Couldn't get transaction receipt for tx " + txHash + ". Retry " + retry);
 				try {
 					Thread.sleep(waitMsBetweenTries);
@@ -157,13 +150,16 @@ public class Web3jHelper {
 						throw e;
 					}
 				}
+			} else {
+				throw new TimeoutException();
 			}
+			receipt = web3j.ethGetTransactionReceipt(txHash).send().getResult();
 		}
 		return receipt;
 	}
 
 	public static Web3j getWeb3jConnectionFromConfig() {
-		EthereumModuleOptions ethereumOptions = new EthereumModuleOptions();
+		EthereumOptions ethereumOptions = new EthereumOptions();
 		return Web3j.build(new HttpService(ethereumOptions.getRpcUrl()));
 	}
 

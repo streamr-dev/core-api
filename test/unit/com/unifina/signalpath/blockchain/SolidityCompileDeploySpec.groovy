@@ -22,43 +22,50 @@ import java.lang.reflect.InvocationTargetException
 
 @Mock([IntegrationKey, SecUser])
 class SolidityCompileDeploySpec extends ModuleTestingSpecification {
-	public static final String TXHASH = "0x123";
-	public static final String DEPLOY_ADDRESS = "0x60f78aa68266c87fecec6dcb27672455111bb347";
+	public static final String TXHASH = "0x63b3da644d940bd945b784db40a4c15b8fbea30ede94d48c565c9defab2cafae"
+	public static final String DEPLOY_ADDRESS = "0x60f78aa68266c87fecec6dcb27672455111bb347"
 	SolidityCompileDeploy module
 
 
-
-	public static class ModifiedSolidityCompileDeploy extends SolidityCompileDeploy{
+	public static class ModifiedSolidityCompileDeploy extends SolidityCompileDeploy {
 		def deployArgs
 		def sentWei
 		def mockWeb3j
 
-		public ModifiedSolidityCompileDeploy(Web3j web3j){
+		public ModifiedSolidityCompileDeploy(Web3j web3j) {
 			mockWeb3j = web3j
 		}
 
 		@Override
 		protected Web3j getWeb3j() {
-			return mockWeb3j;
+			return mockWeb3j
 		}
+
 		@Override
 		protected String deploy(String bytecode, List<Object> args, BigInteger sendWei) throws IOException, ClassNotFoundException, NoSuchMethodException, InstantiationException, IllegalAccessException, InvocationTargetException {
-			deployArgs = args;
-			sentWei = sendWei;
-			super.deploy(bytecode,args,sendWei);
+			deployArgs = args
+			sentWei = sendWei
+			super.deploy(bytecode, args, sendWei)
 		}
 
 	}
+
 	def setup() {
 		// mock the key for ethereum account
 		SecUser user = new SecUser(name: "name", username: "name@name.com", password: "pass").save(failOnError: true, validate: false)
-		IntegrationKey key = new IntegrationKey(service: IntegrationKey.Service.ETHEREUM, name: "test key", json: '{"privateKey":"0x5e98cce00cff5dea6b454889f359a4ec06b9fa6b88e9d69b86de8e1c81887da0","address":"0x1234"}', user: user, idInService: "0x1234")
+		IntegrationKey key = new IntegrationKey(
+			service: IntegrationKey.Service.ETHEREUM,
+			name: "test key",
+			json: '{"privateKey":"0x5e98cce00cff5dea6b454889f359a4ec06b9fa6b88e9d69b86de8e1c81887da0","address":"0xa3d1F77ACfF0060F7213D7BF3c7fEC78df847De1"}',
+			user: user,
+			idInService: "0xa3d1F77ACfF0060F7213D7BF3c7fEC78df847De1"
+		)
 		key.id = "sgKjr1eHQpqTmwz3vK3DqwUK1wFlrfRJa9mnf_xTeFJQ"
 		key.save(failOnError: true, validate: true)
 
 		mockBean(EthereumIntegrationKeyService.class, Stub(EthereumIntegrationKeyService) {
 			getAllPrivateKeysForUser(user) >> [key];
-			decryptPrivateKey(_) >> {k ->
+			decryptPrivateKey(_) >> { k ->
 				Map json = JSON.parse(k[0].json)
 				return (String) json.privateKey;
 			}
@@ -75,11 +82,11 @@ class SolidityCompileDeploySpec extends ModuleTestingSpecification {
 
 	def mockWeb3j = Stub(Web3j) {
 		ethGetTransactionCount(_, _) >> { String address, DefaultBlockParameterName latest ->
-			return new Request(){
+			return new Request() {
 				public EthGetTransactionCount send() throws IOException {
-					return new EthGetTransactionCount(){
+					return new EthGetTransactionCount() {
 						@Override
-						public BigInteger getTransactionCount(){
+						public BigInteger getTransactionCount() {
 							return 1;
 						}
 					};
@@ -87,11 +94,11 @@ class SolidityCompileDeploySpec extends ModuleTestingSpecification {
 			};
 		}
 		ethSendRawTransaction(_) >> { String bytesHex ->
-			return new Request(){
+			return new Request() {
 				public EthSendTransaction send() throws IOException {
-					return new EthSendTransaction(){
+					return new EthSendTransaction() {
 						@Override
-						public String getTransactionHash(){
+						public String getTransactionHash() {
 							return TXHASH;
 						}
 					};
@@ -99,11 +106,11 @@ class SolidityCompileDeploySpec extends ModuleTestingSpecification {
 			};
 		}
 		ethGetTransactionReceipt(_) >> { String txHash ->
-			return new Request(){
+			return new Request() {
 				public EthGetTransactionReceipt send() throws IOException {
-					return new EthGetTransactionReceipt(){
+					return new EthGetTransactionReceipt() {
 						@Override
-						public TransactionReceipt getResult(){
+						public TransactionReceipt getResult() {
 							return new TransactionReceipt() {
 								@Override
 								public String getContractAddress() {
@@ -422,8 +429,8 @@ class SolidityCompileDeploySpec extends ModuleTestingSpecification {
 }
 	''', Map.class)
 
-	final static String unpayable_constructor=applyConfig.code
-	final static String payable_constructor=applyConfig.code.replaceFirst(/\/\*payable\*\//, " payable ")
+	final static String unpayable_constructor = applyConfig.code
+	final static String payable_constructor = applyConfig.code.replaceFirst(/\/\*payable\*\//, " payable ")
 
 
 	static Map initialEthInputConfig = new Gson().fromJson('''{

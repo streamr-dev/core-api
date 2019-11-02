@@ -15,9 +15,7 @@ import java.util.Map;
 public class EthereumModuleOptions implements Serializable {
 	private static final Logger log = Logger.getLogger(EthereumModuleOptions.class);
 
-	private String network = MapTraversal.getString(Holders.getConfig(), "streamr.ethereum.defaultNetwork");
-	private double gasPriceWei = 20e9; // 20 Gwei
-	private int gasLimit = 6000000;
+	private EthereumOptions opts = new EthereumOptions();
 
 	public enum RpcConnectionMethod {
 		WS,
@@ -38,47 +36,47 @@ public class EthereumModuleOptions implements Serializable {
 		return ethOpts;
 	}
 
-
-	public String getNetwork() {
-		return network;
+	public EthereumOptions getEthereumOptions() {
+		return EthereumOptions.fromMap(opts.toMap());
 	}
 
-	public void setNetwork(String network) {
-		this.network = network;
-	}
-
-	public double getGasPriceWei() {
-		return gasPriceWei;
+	public long getGasPriceWei() {
+		return opts.gasPriceWei;
 	}
 
 	public long getGasLimit() {
-		return gasLimit;
+		return opts.gasLimit;
+	}
+
+	public String getNetwork() {
+		return opts.network;
 	}
 
 	public void writeGasPriceOption(ModuleOptions options) {
-		options.add(ModuleOption.createDouble("gasPriceGWei", gasPriceWei / 1e9));
+		options.add(ModuleOption.createDouble("gasPriceGWei", opts.gasPriceWei / 1e9));
 	}
 
 	public void readGasPriceOption(ModuleOptions options) {
 		ModuleOption gasPriceGWeiOption = options.getOption("gasPriceGWei");
 		if (gasPriceGWeiOption != null) {
-			gasPriceWei = gasPriceGWeiOption.getDouble() * 1e9;
+			opts.gasPriceWei = Math.round(gasPriceGWeiOption.getDouble() * 1e9);
 		}
 	}
 
+	// TODO: we probably need a BigInteger in ModuleOptions that is transmitted as a String
 	public void writeGasLimitOption(ModuleOptions options) {
-		options.add(ModuleOption.createInt("gasLimit", gasLimit));
+		options.add(ModuleOption.createInt("gasLimit", (int) opts.gasLimit));
 	}
 
 	public void readGasLimitOption(ModuleOptions options) {
 		ModuleOption gasLimitOption = options.getOption("gasLimit");
 		if (gasLimitOption != null) {
-			gasLimit = gasLimitOption.getInt();
+			opts.gasLimit = gasLimitOption.getInt();
 		}
 	}
 
 	public void writeNetworkOption(ModuleOptions options) {
-		ModuleOption networkOption = ModuleOption.createString("network", network);
+		ModuleOption networkOption = ModuleOption.createString("network", opts.network);
 
 		// Add all configured networks
 		Map<String, Object> networks = MapTraversal.getMap(Holders.getConfig(), "streamr.ethereum.networks");
@@ -92,70 +90,8 @@ public class EthereumModuleOptions implements Serializable {
 	public void readNetworkOption(ModuleOptions options) {
 		ModuleOption networkOption = options.getOption("network");
 		if (networkOption != null) {
-			network = networkOption.getString();
-			getRpcUrl(); // Throws if the network not valid
-		}
-	}
-
-	public String getRpcUrl() {
-		String url = MapTraversal.getString(Holders.getConfig(), "streamr.ethereum.networks." + network);
-		if (url == null) {
-			throw new RuntimeException("No rpcUrl found for Ethereum network " + network);
-		}
-		return url;
-	}
-
-	public String getWebsocketRpcUri() {
-		String url = MapTraversal.getString(Holders.getConfig(), "streamr.ethereum.wss." + network);
-		if (url == null) {
-			log.warn("No websockets URI found for Ethereum network " + network);
-		}
-		return url;
-	}
-
-	public Web3j getWeb3j() {
-		return getWeb3j(RpcConnectionMethod.HTTP);
-	}
-
-	public Web3j getWeb3j(RpcConnectionMethod preferredMethod) {
-		Web3j web3j;
-		int start = preferredMethod.ordinal();
-		int len = RpcConnectionMethod.values().length;
-
-		// cycle through all connection methods starting with preferredMethod
-		for (int i = 0; i < len; i++) {
-			RpcConnectionMethod method = RpcConnectionMethod.values()[start + i % len];
-			web3j = getWeb3jUsingMethod(method);
-			if (web3j != null) {
-				log.info("Created RPC using connection method: " + method);
-				return web3j;
-			}
-		}
-		return null;
-	}
-
-	/**
-	 *
-	 * @param method the connection method
-	 * @return a Web3j connector, or null if it can't create
-	 */
-	private Web3j getWeb3jUsingMethod(RpcConnectionMethod method){
-		String url;
-		switch(method){
-			case HTTP:
-				if ((url = getRpcUrl()) == null) {
-					log.warn("No http RPC URL specified");
-					return null;
-				}
-				return Web3j.build(new HttpService(url));
-			case WS:
-				if ((url = getWebsocketRpcUri()) == null) {
-					log.warn("No ws RPC URL specified");
-					return null;
-				}
-				return Web3j.build(new WebSocketService(url, true));
-			default:
-				return null;
+			opts.network = networkOption.getString();
+			opts.getRpcUrl(); // Throws if the network not valid
 		}
 	}
 }

@@ -3,8 +3,10 @@ package com.unifina.signalpath.blockchain;
 import com.google.gson.Gson;
 import com.google.gson.JsonElement;
 import com.unifina.signalpath.*;
+import org.web3j.abi.datatypes.Type;
 
 import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Maps Ethereum types to Streamr types
@@ -89,6 +91,75 @@ public class EthereumToStreamrTypes {
 			output.send(value.getAsNumber().doubleValue());
 		} else {
 			output.send(value.getAsString());
+		}
+	}
+
+	public static void convertAndSend(Output output, Object value) {
+		if (output instanceof ListOutput) {
+			List val = (List) value;
+			if (isWeb3TypeList(val)) {
+				val = convertList(val);
+			}
+			output.send(val);
+		} else if (output instanceof StringOutput) {
+			output.send(value);
+		} else if (output instanceof BooleanOutput) {
+			output.send(Boolean.parseBoolean(value.toString()));
+		} else if (output instanceof TimeSeriesOutput) {
+			output.send(Double.parseDouble(value.toString()));
+		} else {
+			output.send(value);
+		}
+	}
+
+	/** @return if List is a List of Web3j Types (solidity type + value) */
+	public static boolean isWeb3TypeList(List list) {
+		if (list == null || list.size() == 0) {
+			return false;
+		}
+		if (list.get(0) instanceof Type) {
+			return true;
+		}
+		if (list.get(0) instanceof List) {
+			List inner = (List) list.get(0);
+			return isWeb3TypeList(inner);
+		}
+		return false;
+	}
+
+	/**
+	 * Format the list as an array of Strings
+	 * TODO: should instead convert into List of Streamr types (nested Lists, Maps, numbers, strings, booleans)
+	 *
+	 * @param l list of web3j Types (solidity type + value)
+	 * @return list of Strings
+	 */
+	public static List<String> convertList(List<Type> l) {
+		ArrayList<String> printed = new ArrayList<String>(l.size());
+		for (Object o : l) {
+			printed.add(typeToString(o));
+		}
+		return printed;
+	}
+
+	public static String typeToString(Object o) {
+		if (o instanceof List) {
+			StringBuilder sb = new StringBuilder();
+			List l = (List) o;
+			sb.append("[");
+			int i = 0;
+			for (Object li : l) {
+				if (i++ > 0) {
+					sb.append(",");
+				}
+				sb.append(typeToString(li));
+			}
+			sb.append("]");
+			return sb.toString();
+		} else if (o instanceof Type) {
+			return ((Type) o).getValue().toString();
+		} else {
+			return o.toString();
 		}
 	}
 }

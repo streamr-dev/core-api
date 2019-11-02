@@ -1,13 +1,10 @@
 package com.unifina.signalpath.blockchain;
 
 import com.google.gson.*;
-import com.mashape.unirest.http.Unirest;
-import com.mashape.unirest.http.exceptions.UnirestException;
 import com.unifina.signalpath.AbstractSignalPathModule;
 import com.unifina.signalpath.ModuleOptions;
 import com.unifina.signalpath.StringParameter;
 import com.unifina.utils.MapTraversal;
-import grails.util.Holders;
 import org.apache.log4j.Logger;
 import org.web3j.utils.Numeric;
 
@@ -15,7 +12,6 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.math.BigInteger;
-import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLConnection;
 import java.nio.charset.StandardCharsets;
@@ -27,8 +23,6 @@ import java.util.Map;
 public class GetEthereumContractAt extends AbstractSignalPathModule {
 	private static final Logger log = Logger.getLogger(GetEthereumContractAt.class);
 
-	protected final String ETHERSCAN_IO = "etherscan.io";
-	protected final String ETHERSCAN_IO_QUERY = "/api?module=contract&action=getabi&address=";
 	private StringParameter addressParam = new StringParameter(this, "address", "0x");
 	private StringParameter abiParam = new StringParameter(this, "ABI", "[]");
 	private EthereumContractOutput out = new EthereumContractOutput(this, "contract");
@@ -46,16 +40,15 @@ public class GetEthereumContractAt extends AbstractSignalPathModule {
 		abiParam.setCanConnect(false);
 	}
 
-	protected String getApiUrl(String network, String address) {
-		StringBuilder sb = new StringBuilder();
-		sb.append("https://");
-		if (network == null || network.startsWith("main")) {
-			sb.append("api");
-		} else {
-			sb.append(network);
-		}
-		sb.append("." + ETHERSCAN_IO + ETHERSCAN_IO_QUERY + address);
-		return sb.toString();
+	/**
+	 * Example: https://api.etherscan.io/api?module=contract&action=getabi&address=0xA10151D088f6f2705a05d6c83719e99E079A61C1
+	 * @param network name: "homestead"="mainnet"=null, "rinkeby", "ropsten", "kovan", "goerli"
+	 * @param address of the contract (ENS name doesn't work as for 2019-11-02)
+	 * @return URL for fetching the ABI for a contract from Etherscan
+	 */
+	public static String getEtherscanAbiQueryUrl(String network, String address) {
+		boolean useMainNet = network == null || network.startsWith("main") || network == "homestead";
+		return "https://" + (useMainNet ? "api" : network) + ".etherscan.io/api?module=contract&action=getabi&address=" + address;
 	}
 
 	public static String readUtf8StreamToString(InputStream is) throws IOException {
@@ -70,9 +63,9 @@ public class GetEthereumContractAt extends AbstractSignalPathModule {
 	}
 
 	protected JsonArray getEthereumAbi(String network, String address) throws IOException {
-		String url = getApiUrl(network, address);
-		URL etherscanapi = new URL(url);
-		URLConnection conn = etherscanapi.openConnection();
+		String url = getEtherscanAbiQueryUrl(network, address);
+		URL etherscanApi = new URL(url);
+		URLConnection conn = etherscanApi.openConnection();
 		String json = readUtf8StreamToString(conn.getInputStream());
 		JsonParser parser = new JsonParser();
 		JsonObject response = parser.parse(json).getAsJsonObject();
@@ -87,37 +80,33 @@ public class GetEthereumContractAt extends AbstractSignalPathModule {
 
 	@Override
 	protected void onConfiguration(Map<String, Object> config) {
-		String address = addressParam.getValue();
-		String abiString = MapTraversal.getString(config, "params[1].value");
 		ModuleOptions options = ModuleOptions.get(config);
 		ethereumOptions = EthereumModuleOptions.readFrom(options);
-		String network = ethereumOptions.getNetwork();
-		if (contract != null) {
-			contract.setNetwork(network);
-		}
-		//address != 0x0
+
+		String address = addressParam.getValue();
+		String abiString = MapTraversal.getString(config, "params[1].value");
+
 		if (address.length() > 2 && !Numeric.toBigInt(address).equals(BigInteger.ZERO)) {
 			if (abiString == null || abiString.trim().equals("") || abiString.trim().equals("[]")) {
 				try {
-					//try to pull from etherescan
-					JsonArray etherscan_abi = getEthereumAbi(network, address);
-					abi = new EthereumABI(etherscan_abi);
-					if (etherscan_abi != null) {
-						//how do we make the retrieved ABI appear in ABI field on UI?
-						MapTraversal.getMap(config, "params[1]").put("value", etherscan_abi.toString());
+					JsonArray etherscanAbi = getEthereumAbi(ethereumOptions.getNetwork(), address);
+					abi = new EthereumABI(etherscanAbi);
+					if (etherscanAbi != null) {
+						// TODO: how do we make the retrieved ABI appear in ABI field on UI? Check if this already works
+						MapTraversal.getMap(config, "params[1]").put("value", etherscanAbi.toString());
 					}
 				} catch (IOException e) {
-					throw new RuntimeException(e);
+					throw new RuntimeException("Error connecting to Etherscan", e);
 				}
 			} else {
 				abi = new EthereumABI(abiString);
 			}
 
 			addOutput(out);
-			contract = new EthereumContract(address, abi, ethereumOptions.getNetwork());
-		}
-		//address = 0x0
-		else {
+
+			EthereumOptions opts = ethereumOptions.getEthereumOptions();
+			contract = new EthereumContract(abi, address, opts);
+		} else {
 			abi = new EthereumABI(abiString);
 			contract = null;
 		}
@@ -132,12 +121,12 @@ public class GetEthereumContractAt extends AbstractSignalPathModule {
 	public Map<String, Object> getConfiguration() {
 		Map<String, Object> config = super.getConfiguration();
 
+		ModuleOptions options = ModuleOptions.get(config);
+		ethereumOptions.writeTo(options);
+
 		if (contract != null) {
 			config.put("contract", contract.toMap());
 		}
-
-		ModuleOptions options = ModuleOptions.get(config);
-		ethereumOptions.writeNetworkOption(options);
 
 		return config;
 	}
@@ -145,14 +134,20 @@ public class GetEthereumContractAt extends AbstractSignalPathModule {
 	/**
 	 * GetContractAt may be activated during run-time when the address is updated.
 	 * The resulting contract should point at the updated address.
+	 * Changing ABI during runtime to something invalid will break this updating mechanism.
 	 */
 	@Override
 	public void sendOutput() {
 		String abiString = abiParam.getValue();
-		EthereumABI abi = new EthereumABI(abiString);
+		String address = addressParam.getValue();
 
-		if (contract != null && !addressParam.getValue().equals(contract.getAddress()) && abi != null) {
-			contract = new EthereumContract(addressParam.getValue(), abi, ethereumOptions.getNetwork());
+		try {
+			EthereumABI abi = new EthereumABI(abiString);
+			if (contract != null && !address.equals(contract.getAddress())) {
+				contract = new EthereumContract(abi, address, ethereumOptions.getEthereumOptions());
+			}
+		} catch (JsonSyntaxException | IllegalStateException e) {
+			log.error("Failed to parse ABI string: " + abiString, e);
 		}
 
 		if (contract != null) {

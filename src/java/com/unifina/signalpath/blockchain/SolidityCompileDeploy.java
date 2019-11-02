@@ -5,7 +5,6 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.unifina.signalpath.*;
 import com.unifina.utils.MapTraversal;
-import jdk.nashorn.internal.codegen.CompilationException;
 import org.apache.log4j.Logger;
 import org.ethereum.solidity.compiler.SolidityCompiler;
 import org.web3j.abi.TypeDecoder;
@@ -16,6 +15,7 @@ import org.web3j.protocol.Web3j;
 import org.web3j.protocol.core.DefaultBlockParameterName;
 import org.web3j.protocol.core.methods.response.EthSendTransaction;
 import org.web3j.protocol.core.methods.response.TransactionReceipt;
+import org.web3j.protocol.http.HttpService;
 import org.web3j.utils.Numeric;
 
 import java.io.IOException;
@@ -25,6 +25,7 @@ import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
+import java.util.concurrent.TimeoutException;
 
 public class SolidityCompileDeploy extends ModuleWithUI implements Pullable<EthereumContract>, Serializable {
 
@@ -41,7 +42,6 @@ public class SolidityCompileDeploy extends ModuleWithUI implements Pullable<Ethe
 	private DoubleParameter sendEtherParam = new DoubleParameter(this, "initial ETH", 0.0);
 
 	private EthereumModuleOptions ethereumOptions = new EthereumModuleOptions();
-	private Web3j web3j;
 
 	public static class CompilationException extends Exception{
 		public CompilationException(String msg){
@@ -115,7 +115,7 @@ public class SolidityCompileDeploy extends ModuleWithUI implements Pullable<Ethe
 	}
 
 	protected String deploy(String bytecode, List<Object> args, BigInteger sendWei) throws IOException, ClassNotFoundException, NoSuchMethodException, InstantiationException, IllegalAccessException, InvocationTargetException {
-		BigInteger gasPrice = BigDecimal.valueOf(ethereumOptions.getGasPriceWei()).toBigInteger();
+		BigInteger gasPrice = BigInteger.valueOf(ethereumOptions.getGasPriceWei());
 		BigInteger nonce = web3j.ethGetTransactionCount(ethereumAccount.getAddress(), DefaultBlockParameterName.PENDING).send().getTransactionCount();
 		Credentials credentials = Credentials.create(ethereumAccount.getPrivateKey());
 
@@ -142,26 +142,29 @@ public class SolidityCompileDeploy extends ModuleWithUI implements Pullable<Ethe
 		});
 		*/
 		// synchronous deploy:
-		EthSendTransaction tx = web3j.ethSendRawTransaction(hexValue).send();
+		EthSendTransaction tx = getWeb3j().ethSendRawTransaction(hexValue).send();
 		String txhash = tx.getTransactionHash();
 		log.debug("TX response: " + txhash);
 
-		TransactionReceipt receipt = Web3jHelper.waitForTransactionReceipt(web3j, txhash, SLEEP_BETWEEN_RETRIES_MILLIS, MAX_RETRIES);
-
-		if (receipt == null) {
-			throw new RuntimeException("Couldn't get transaction receipt from Ethereum node. Transaction may not have been broadcasted to the network.");
-		} else {
+		try {
+			TransactionReceipt receipt = Web3jHelper.waitForTransactionReceipt(getWeb3j(), txhash, SLEEP_BETWEEN_RETRIES_MILLIS, MAX_RETRIES);
 			log.info("Got transaction receipt for tx " + txhash + ".");
 			return receipt.getContractAddress();
+		} catch (TimeoutException e) {
+			throw new RuntimeException("Couldn't get transaction receipt from Ethereum node. Transaction may not have been broadcasted to the network.", e);
 		}
+	}
+
+	private transient Web3j web3j;
+	protected Web3j getWeb3j() {
+		if (web3j == null && ethereumOptions != null) {
+			web3j = ethereumOptions.getEthereumOptions().getWeb3j();
+		}
+		return web3j;
 	}
 
 	protected BigInteger getGasLimit() {
 		return BigInteger.valueOf(6000000l);
-	}
-
-	protected Web3j getWeb3j() {
-		return ethereumOptions.getWeb3j(EthereumModuleOptions.RpcConnectionMethod.HTTP);
 	}
 
 	@Override
@@ -179,7 +182,8 @@ public class SolidityCompileDeploy extends ModuleWithUI implements Pullable<Ethe
 
 		ModuleOptions options = ModuleOptions.get(config);
 		ethereumOptions = EthereumModuleOptions.readFrom(options);
-		web3j = getWeb3j();
+		EthereumOptions opts = ethereumOptions.getEthereumOptions();
+		web3j = opts.getWeb3j();
 		boolean compileRequested = config.containsKey("compile");
 		boolean deployRequested = config.containsKey("deploy");
 
@@ -206,7 +210,9 @@ public class SolidityCompileDeploy extends ModuleWithUI implements Pullable<Ethe
 				} catch (CompilationException e) {
 					throw new RuntimeException(e);
 				}
-				contract = new EthereumContract(null, new EthereumABI(new JsonParser().parse(compilationResult.get("abi").getAsString()).getAsJsonArray()), null);
+				String abiJsonString = compilationResult.get("abi").getAsString();
+				EthereumABI abi = new EthereumABI(abiJsonString);
+				contract = new EthereumContract(abi, opts);
 			}
 		} else if (config.get("code") != null) {
 			code = config.get("code").toString();
@@ -214,7 +220,7 @@ public class SolidityCompileDeploy extends ModuleWithUI implements Pullable<Ethe
 		if (contract == null) {
 			return;
 		}
-		contract.setNetwork(ethereumOptions.getNetwork());
+
 		if (deployRequested) {
 			if (compilationResult == null) {
 				throw new RuntimeException("Can't deploy contract because contract is not compiled. Doing nothing.");
@@ -241,12 +247,13 @@ public class SolidityCompileDeploy extends ModuleWithUI implements Pullable<Ethe
 				String bytecode = compilationResult.get("bin").getAsString();
 				try {
 					String address = deploy(bytecode, args, sendWei);
-					contract = new EthereumContract(address, contract.getABI(), ethereumOptions.getNetwork());
+					contract = new EthereumContract(contract.getABI(), address, opts);
 				} catch (Exception e) {
 					throw new RuntimeException(e);
 				}
 			}
 		}
+
 		createContractOutput();
 		createParameters(contract.getABI());
 	}
