@@ -46,7 +46,7 @@ class CommunitySecretApiControllerSpec extends Specification {
 		s1.save(validate: true, failOnError: true)
 		CommunitySecret s2 = new CommunitySecret(
 			name: "secret 2",
-			secret: "secret 2",
+			secret: "secret2",
 			communityAddress: communityAddress,
 		)
 		s2.id = "2"
@@ -64,9 +64,11 @@ class CommunitySecretApiControllerSpec extends Specification {
 		1 * controller.communitySecretService.findAll(communityAddress) >> [s1, s2]
 		response.json[0].id == "1"
 		response.json[0].name == "secret 1"
+		response.json[0].secret == "secret1"
 		response.json[0].communityAddress == communityAddress
 		response.json[1].id == "2"
 		response.json[1].name == "secret 2"
+		response.json[1].secret == "secret2"
 		response.json[1].communityAddress == communityAddress
 	}
 
