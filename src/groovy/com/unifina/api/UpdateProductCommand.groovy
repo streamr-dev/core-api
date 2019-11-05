@@ -47,12 +47,8 @@ class UpdateProductCommand {
 	]
 
 	static constraints = {
-		name(blank: false)
-		description(blank: false)
-		previewStream(nullable: true)
-		previewConfigJson(nullable: true)
-		pendingChanges(nullable: true)
-
+		importFrom(Product)
+		// List all onChainFields as nullable
 		ownerAddress(nullable: true, validator: Product.isEthereumAddressOrIsNull)
 		beneficiaryAddress(nullable: true, validator: Product.isEthereumAddressOrIsNull)
 		pricePerSecond(nullable: true)
