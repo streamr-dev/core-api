@@ -18,6 +18,7 @@ COPY target/ROOT.war /usr/local/tomcat/webapps/streamr-core.war
 ENV STREAMR_URL http://10.200.10.1
 ENV CP_URL http://10.200.10.1:8085/communities/
 ENV ETHEREUM_NETWORKS_LOCAL http://10.200.10.1:8545
+ENV SMTP_HOST smtp
 
 # Flags to pass to the JVM
 ENV CATALINA_OPTS -Dstreamr.database.user=root \
@@ -28,7 +29,8 @@ ENV CATALINA_OPTS -Dstreamr.database.user=root \
     -Dstreamr.cassandra.hosts=cassandra \
     -Dstreamr.url=${STREAMR_URL} \
     -Dstreamr.cps.url=${CP_URL} \
-    -Dstreamr.ethereum.networks.local=${ETHEREUM_NETWORKS_LOCAL}
+    -Dstreamr.ethereum.networks.local=${ETHEREUM_NETWORKS_LOCAL} \
+    -Dgrails.mail.host=${SMTP_HOST}
 
 EXPOSE 8081
 # Wait for MySQL server, MySQL dumps, and Cassandra to be ready
