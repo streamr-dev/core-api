@@ -88,8 +88,7 @@
             "in": "path",
             "description": "Ethereum address of the community",
             "required": true,
-            "type": "string",
-            "default": false
+            "type": "string"
           },
           {
             "name": "state",
@@ -101,8 +100,7 @@
             ],
             "description": "Filter listing by state of the join request",
             "required": false,
-            "type": "string",
-            "default": false
+            "type": "string"
           }
         ],
         "responses": {
@@ -126,8 +124,7 @@
             "in": "path",
             "description": "Ethereum address of the community",
             "required": true,
-            "type": "string",
-            "default": false
+            "type": "string"
           },
           {
             "name": "body",
@@ -168,16 +165,14 @@
             "in": "path",
             "description": "Ethereum address of the community",
             "required": true,
-            "type": "string",
-            "default": false
+            "type": "string"
           },
           {
             "name": "joinRequestId",
             "in": "path",
             "description": "ID of the join request",
             "required": true,
-            "type": "string",
-            "default": false
+            "type": "string"
           }
         ],
         "responses": {
@@ -204,16 +199,14 @@
             "in": "path",
             "description": "Ethereum address of the community",
             "required": true,
-            "type": "string",
-            "default": false
+            "type": "string"
           },
           {
             "name": "joinRequestId",
             "in": "path",
             "description": "ID of the join request",
             "required": true,
-            "type": "string",
-            "default": false
+            "type": "string"
           },
           {
             "name": "body",
@@ -249,16 +242,14 @@
             "in": "path",
             "description": "Ethereum address of the community",
             "required": true,
-            "type": "string",
-            "default": false
+            "type": "string"
           },
           {
             "name": "joinRequestId",
             "in": "path",
             "description": "ID of the join request",
             "required": true,
-            "type": "string",
-            "default": false
+            "type": "string"
           }
         ],
         "responses": {
@@ -287,8 +278,7 @@
             "in": "path",
             "description": "Ethereum address of the community",
             "required": true,
-            "type": "string",
-            "default": false
+            "type": "string"
           }
         ],
         "responses": {
@@ -312,8 +302,7 @@
             "in": "path",
             "description": "Ethereum address of the community",
             "required": true,
-            "type": "string",
-            "default": false
+            "type": "string"
           },
           {
             "name": "body",
@@ -327,7 +316,10 @@
         ],
         "responses": {
           "200": {
-            "description": "Success"
+            "description": "Success",
+            "schema": {
+              "$ref": "#/definitions/CommunitySecret"
+            }
           },
           "400": {
             "description": "Required parameters missing"
@@ -348,21 +340,22 @@
             "in": "path",
             "description": "Ethereum address of the community",
             "required": true,
-            "type": "string",
-            "default": false
+            "type": "string"
           },
           {
             "name": "communitySecretId",
             "in": "path",
             "description": "ID of the community secret",
             "required": true,
-            "type": "string",
-            "default": false
+            "type": "string"
           }
         ],
         "responses": {
           "200": {
-            "description": "Success"
+            "description": "Success",
+            "schema": {
+              "$ref": "#/definitions/CommunitySecret"
+            }
           },
           "400": {
             "description": "Required parameters missing"
@@ -374,7 +367,7 @@
       },
       "put": {
         "summary": "Update community secret",
-        "description": "Update community secret.",
+        "description": "Update community secret details.\n\nNote: you can't update the secret itself; to do that you'll need to create a new secret.",
         "tags": [
           "communities"
         ],
@@ -384,21 +377,38 @@
             "in": "path",
             "description": "Ethereum address of the community",
             "required": true,
-            "type": "string",
-            "default": false
+            "type": "string"
           },
           {
             "name": "communitySecretId",
             "in": "path",
             "description": "ID of the community secret",
             "required": true,
-            "type": "string",
-            "default": false
+            "type": "string"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "description": "Updated community secret details",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "name": {
+                  "type": "string",
+                  "example": "Renamed passphrase",
+                  "description": "Name of the community secret"
+                }
+              }
+            }
           }
         ],
         "responses": {
-          "204": {
-            "description": "Success"
+          "200": {
+            "description": "Success",
+            "schema": {
+              "$ref": "#/definitions/CommunitySecret"
+            }
           },
           "400": {
             "description": "Required parameters missing"
@@ -420,16 +430,14 @@
             "in": "path",
             "description": "Ethereum address of the community",
             "required": true,
-            "type": "string",
-            "default": false
+            "type": "string"
           },
           {
             "name": "communitySecretId",
             "in": "path",
             "description": "ID of the community secret",
             "required": true,
-            "type": "string",
-            "default": false
+            "type": "string"
           }
         ],
         "responses": {
@@ -458,8 +466,7 @@
             "in": "path",
             "description": "Ethereum address of the community",
             "required": true,
-            "type": "string",
-            "default": false
+            "type": "string"
           }
         ],
         "responses": {
@@ -491,8 +498,7 @@
             "in": "path",
             "description": "Ethereum address of the community",
             "required": true,
-            "type": "string",
-            "default": false
+            "type": "string"
           }
         ],
         "responses": {
@@ -524,16 +530,14 @@
             "in": "path",
             "description": "Ethereum address of the community",
             "required": true,
-            "type": "string",
-            "default": false
+            "type": "string"
           },
           {
             "name": "memberAddress",
             "in": "path",
             "description": "Ethereum address of the member",
             "required": true,
-            "type": "string",
-            "default": false
+            "type": "string"
           }
         ],
         "responses": {
@@ -4627,7 +4631,7 @@
       "properties": {
         "date": {
           "type": "string",
-           "description": "Delete data up to date. Format is either milliseconds (integer) since epoch or ISO8601 datetime (string)."
+          "description": "Delete data up to date. Format is either milliseconds (integer) since epoch or ISO8601 datetime (string)."
         }
       }
     },
@@ -4640,11 +4644,11 @@
       "properties": {
         "start": {
           "type": "string",
-           "description": "Start date where the data deletion starts. Format is either milliseconds (integer) since epoch or ISO8601 datetime (string)."
+          "description": "Start date where the data deletion starts. Format is either milliseconds (integer) since epoch or ISO8601 datetime (string)."
         },
         "end": {
           "type": "string",
-           "description": "Delete data up to this date. Format is either milliseconds (integer) since epoch or ISO8601 datetime (string)."
+          "description": "Delete data up to this date. Format is either milliseconds (integer) since epoch or ISO8601 datetime (string)."
         }
       }
     },
@@ -4695,10 +4699,41 @@
       "properties": {
         "name": {
           "type": "string",
+          "example": "Generic passphrase",
           "description": "Name of the community secret"
         },
         "secret": {
           "type": "string",
+          "example": "hunter2",
+          "description": "Community join request secret shared by the community."
+        }
+      }
+    },
+    "CommunitySecret": {
+      "type": "object",
+      "required": [
+        "name",
+        "secret"
+      ],
+      "properties": {
+        "id": {
+          "type": "string",
+          "example": "1234567",
+          "description": "id of the community secret object"
+        },
+        "name": {
+          "type": "string",
+          "example": "Generic passphrase",
+          "description": "Name of the community secret"
+        },
+        "communityAddress": {
+          "type": "string",
+          "example": "0x0000000000000000000000000000000000000001",
+          "description": "Ethereum address of the community"
+        },
+        "secret": {
+          "type": "string",
+          "example": "hunter2",
           "description": "Community join request secret shared by the community."
         }
       }
