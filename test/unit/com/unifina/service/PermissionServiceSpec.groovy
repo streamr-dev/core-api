@@ -231,9 +231,6 @@ class PermissionServiceSpec extends BeanMockingSpecification {
 		thrown AccessControlException
 	}
 
-	// Test disabled due to commit 405677f6c2cd4ab0ad5f67a9aa2f813ab6d49194
-	// TODO: re-enable
-	/*
 	void "systemGrant() on an Ethereum user and a stream creates also inbox permissions"() {
 		SecUser publisher1 = new SecUser()
 		publisher1.id = 4L
@@ -281,7 +278,6 @@ class PermissionServiceSpec extends BeanMockingSpecification {
 		service.canWrite(subscriber, pub3Inbox)
 		service.canWrite(publisher3, subInbox)
 	}
-	 */
 
 	void "inbox stream permissions also work when anonymous keys have permissions to the stream"() {
 		SecUser subscriber = new SecUser(username: "0x26e1ae3f5efe8a01eca8c2e9d3c32702cf4bead6").save(failOnError: true, validate: false)
