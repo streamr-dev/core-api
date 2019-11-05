@@ -205,6 +205,8 @@ streamr.engine.node.ip = System.getProperty("streamr.engine.node.ip")
 streamr.api.websocket.url = System.getProperty("streamr.api.websocket.url") ?: "${baseUrl.replaceFirst("http", "ws")}/api/v1/ws"
 streamr.api.http.url = System.getProperty("streamr.api.http.url") ?: "${baseUrl}/api/v1"
 
+streamr.ethereum.datacoinAddress = System.getProperty("streamr.ethereum.datacoinAddress", "0x0cf0ee63788a0849fe5297f3407f701e122cc023")
+
 /**
  * Ethereum networks configuration (RPC urls)
  *

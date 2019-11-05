@@ -7,7 +7,6 @@ import com.unifina.domain.signalpath.Canvas
 
 class UrlMappings {
 	static mappings = {
-		
 		"500"(controller: "error", action: "index", exception: Exception)
 
 		// API v1 url mappings
@@ -67,6 +66,7 @@ class UrlMappings {
 		"/api/v1/users/me/products"(method: "GET", controller: "productApi", action: "index") { operation = Permission.Operation.SHARE }
 		"/api/v1/users/me/changePassword"(method: "POST", controller: "userApi", action: "changePassword")
 		"/api/v1/users/me/image"(method: "POST", controller: "userApi", action: "uploadAvatarImage")
+		"/api/v1/users/me/balance"(method: "GET", controller: "userApi", action: "getCurrentUserBalance")
 
 		"/api/v1/integration_keys"(resources: "integrationKeyApi")
 
