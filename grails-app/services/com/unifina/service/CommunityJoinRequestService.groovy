@@ -25,8 +25,12 @@ class CommunityJoinRequestService {
 	private void onApproveJoinRequest(CommunityJoinRequest c) {
 		log.debug("onApproveJoinRequest: approved JoinRequest for address ${c.memberAddress} to community ${c.communityAddress}")
 		for (Stream s : findStreams(c)) {
-			log.debug(String.format("granting write permission to %s (%s) for %s", s.name, s.id, c.user.username))
-			permissionService.systemGrant(c.user, s, Permission.Operation.WRITE)
+			if (permissionService.canWrite(c.user, s)) {
+				log.debug(String.format("user %s already has write permission to %s (%s), skipping grant", c.user.username, s.name, s.id))
+			} else {
+				log.debug(String.format("granting write permission to %s (%s) for %s", s.name, s.id, c.user.username))
+				permissionService.systemGrant(c.user, s, Permission.Operation.WRITE)
+			}
 		}
 		sendMessage(c, "join")
 		log.debug("exiting onApproveJoinRequest")
@@ -92,6 +96,9 @@ class CommunityJoinRequestService {
 	}
 
 	CommunityJoinRequest create(String communityAddress, CommunityJoinRequestCommand cmd, SecUser user) {
+		// TODO CORE-1834: check if user already has a PENDING request
+		// TODO CORE-1834: OR if user already has a write permission to the stream
+
 		// Backend must check that the given memberAddress is one of the Ethereum IDs bound to the logged in user
 		IntegrationKey key = IntegrationKey.withCriteria {
 			eq("user", user)
@@ -100,24 +107,29 @@ class CommunityJoinRequestService {
 		if (key == null) {
 			throw new NotFoundException("Given member address is not owned by the user")
 		}
+
 		// Create CommunityJoinRequest
 		CommunityJoinRequest c = new CommunityJoinRequest()
 		c.user = user
 		c.communityAddress = communityAddress
 		c.memberAddress = cmd.memberAddress
-		if (cmd.secret) { // validate secret if it is given
+
+		// validate secret if it is given
+		if (cmd.secret) {
 			// Find CommunitySecret by communityAddress
 			CommunitySecret secret = CommunitySecret.withCriteria {
 				eq("communityAddress", communityAddress)
 				eq("secret", cmd.secret)
 			}.find()
-			if (secret) { // validated!
+			if (secret) {
 				c.state = CommunityJoinRequest.State.ACCEPTED
 				onApproveJoinRequest(c)
 			} else {
 				throw new ApiException(403, "INCORRECT_COMMUNITY_SECRET", "Incorrect community secret")
 			}
-		} else { // request stays in pending state
+		} else {
+			// request stays in pending state,
+			//   waiting for a manual approval (PUT request) from community admin
 		}
 		c.save(validate: true, failOnError: true)
 		return c
