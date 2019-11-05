@@ -17,6 +17,7 @@ COPY target/ROOT.war /usr/local/tomcat/webapps/streamr-core.war
 # Default values for ENV variables
 ENV STREAMR_URL http://10.200.10.1
 ENV CP_URL http://10.200.10.1:8085/communities/
+ENV ETHEREUM_NETWORKS_LOCAL http://10.200.10.1:8545
 
 # Flags to pass to the JVM
 ENV CATALINA_OPTS -Dstreamr.database.user=root \
@@ -26,7 +27,9 @@ ENV CATALINA_OPTS -Dstreamr.database.user=root \
     -Dstreamr.redis.hosts=redis \
     -Dstreamr.cassandra.hosts=cassandra \
     -Dstreamr.url=${STREAMR_URL} \
-    -Dstreamr.cps.url=${CP_URL}
+    -Dstreamr.cps.url=${CP_URL} \
+    -Dstreamr.ethereum.networks.local=${ETHEREUM_NETWORKS_LOCAL}
+
 EXPOSE 8081
 # Wait for MySQL server, MySQL dumps, and Cassandra to be ready
 CMD ["sh", "-c", "wait-for-it.sh mysql:3306 --timeout=120 && while ! mysql --user=root --host=mysql --password=password core_test -e \"SELECT 1;\"; do echo 'waiting for db'; sleep 1; done && wait-for-it.sh cassandra:9042 --timeout=120 && catalina.sh run"]
