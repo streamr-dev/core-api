@@ -96,6 +96,9 @@ class CommunityJoinRequestService {
 	}
 
 	CommunityJoinRequest create(String communityAddress, CommunityJoinRequestCommand cmd, SecUser user) {
+		// TODO CORE-1834: check if user already has a PENDING request
+		// TODO CORE-1834: OR if user already has a write permission to the stream
+
 		// Backend must check that the given memberAddress is one of the Ethereum IDs bound to the logged in user
 		IntegrationKey key = IntegrationKey.withCriteria {
 			eq("user", user)
@@ -104,24 +107,29 @@ class CommunityJoinRequestService {
 		if (key == null) {
 			throw new NotFoundException("Given member address is not owned by the user")
 		}
+
 		// Create CommunityJoinRequest
 		CommunityJoinRequest c = new CommunityJoinRequest()
 		c.user = user
 		c.communityAddress = communityAddress
 		c.memberAddress = cmd.memberAddress
-		if (cmd.secret) { // validate secret if it is given
+
+		// validate secret if it is given
+		if (cmd.secret) {
 			// Find CommunitySecret by communityAddress
 			CommunitySecret secret = CommunitySecret.withCriteria {
 				eq("communityAddress", communityAddress)
 				eq("secret", cmd.secret)
 			}.find()
-			if (secret) { // validated!
+			if (secret) {
 				c.state = CommunityJoinRequest.State.ACCEPTED
 				onApproveJoinRequest(c)
 			} else {
 				throw new ApiException(403, "INCORRECT_COMMUNITY_SECRET", "Incorrect community secret")
 			}
-		} else { // request stays in pending state
+		} else {
+			// request stays in pending state,
+			//   waiting for a manual approval (PUT request) from community admin
 		}
 		c.save(validate: true, failOnError: true)
 		return c

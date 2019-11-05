@@ -19,4 +19,9 @@ public class ClockTick implements ITimestamped {
 	public Date getTimestampAsDate() {
 		return new Date(timestamp);
 	}
+
+	@Override
+	public String toString() {
+		return "ClockTick[timestamp=" + timestamp + ']';
+	}
 }
