@@ -207,7 +207,7 @@ public class DataSourceEventQueue {
 	}
 
 	private void tickClockIfNecessary(long eventTime) {
-		if (lastReportedClockTick + CLOCK_TICK_INTERVAL_MILLIS <= eventTime) {
+		while (lastReportedClockTick + CLOCK_TICK_INTERVAL_MILLIS <= eventTime) {
 			lastReportedClockTick += CLOCK_TICK_INTERVAL_MILLIS;
 			Date d = new Date(lastReportedClockTick);
 			globals.time = d;

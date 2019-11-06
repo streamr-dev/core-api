@@ -1,7 +1,6 @@
-package com.unifina.data
+package com.unifina.datasource
 
-import com.unifina.datasource.DataSource
-import com.unifina.datasource.DataSourceEventQueue
+import com.unifina.data.Event
 import com.unifina.domain.security.SecUser
 import com.unifina.utils.Globals
 import spock.lang.Specification
@@ -147,4 +146,43 @@ class DataSourceEventQueueSpec extends Specification {
 		})
 	}
 
+	void "timer drift"() {
+		DataSourceEventQueue queue = createQueue()
+		int eventsProcessed = 0
+
+		when:
+		Thread consumerThread = Thread.start {
+			queue.start()
+		}
+
+		Thread producerThread = Thread.start {
+			queue.enqueue(new Event<Integer>(1, new Date(10000), new Consumer<Integer>() {
+				@Override
+				void accept(Integer integer) {
+					eventsProcessed++
+				}
+			}))
+			queue.enqueue(new Event<Integer>(2, new Date(20000), new Consumer<Integer>() {
+				@Override
+				void accept(Integer integer) {
+					eventsProcessed++
+				}
+			}))
+		}
+
+		then:
+		new PollingConditions().within(10, {
+			eventsProcessed == 2
+			!producerThread.isAlive()
+		})
+		queue.getLastReportedClockTick() == 20000
+
+		when:
+		queue.abort()
+
+		then:
+		new PollingConditions().within(5, {
+			!consumerThread.isAlive()
+		})
+	}
 }
