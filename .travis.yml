@@ -5,7 +5,7 @@ jdk:
 services:
 - docker
 node_js:
-- "8.9.3"
+- "8.12.0"
 if: (type = push AND branch = master) OR type = pull_request # build whitelisted branches and all PRs
 git:
   submodules: false
