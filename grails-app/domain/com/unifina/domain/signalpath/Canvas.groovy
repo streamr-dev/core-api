@@ -7,7 +7,6 @@ import com.unifina.domain.security.SecUser
 import com.unifina.utils.IdGenerator
 import grails.converters.JSON
 import groovy.transform.CompileStatic
-import org.codehaus.groovy.grails.web.json.JSONObject
 
 class Canvas {
 	public final static String DEFAULT_NAME = "Untitled Canvas"
@@ -78,7 +77,7 @@ class Canvas {
 
 	@CompileStatic
 	Map toMap() {
-		Map map = (JSONObject) JSON.parse(json)
+		Map map = (Map) JSON.parse(json)
 		return [
 			id: id,
 			name: name,
@@ -100,7 +99,7 @@ class Canvas {
 	 */
 	@CompileStatic
 	Map toSignalPathConfig() {
-		Map map = (JSONObject) JSON.parse(json)
+		Map map = (Map) JSON.parse(json)
 		map.canvasId = id
 		map.name = name
 		return map

@@ -265,7 +265,6 @@
           <root url="jar://$MAVEN_REPOSITORY$/com/amazonaws/aws-java-sdk-sagemaker/1.11.294/aws-java-sdk-sagemaker-1.11.294.jar!/" />
           <root url="jar://$USER_HOME$/.sdkman/candidates/grails/2.5.6/dist/grails-core-2.5.6.jar!/" />
           <root url="jar://$USER_HOME$/.sdkman/candidates/grails/2.5.6/dist/grails-plugin-databinding-2.5.6.jar!/" />
-          <root url="jar://$USER_HOME$/.sdkman/candidates/grails/2.5.6/lib/com.google.code.gson/gson/jars/gson-2.2.4.jar!/" />
           <root url="jar://$USER_HOME$/.sdkman/candidates/grails/2.5.6/lib/org.springframework/spring-expression/jars/spring-expression-4.1.9.RELEASE.jar!/" />
           <root url="jar://$USER_HOME$/.sdkman/candidates/grails/2.5.6/lib/org.springframework/spring-aop/jars/spring-aop-4.1.9.RELEASE.jar!/" />
           <root url="jar://$USER_HOME$/.sdkman/candidates/grails/2.5.6/lib/org.springframework/spring-context/jars/spring-context-4.1.9.RELEASE.jar!/" />
@@ -410,13 +409,14 @@
           <root url="jar://$MAVEN_REPOSITORY$/org/xerial/snappy/snappy-java/1.1.4/snappy-java-1.1.4.jar!/" />
           <root url="jar://$MAVEN_REPOSITORY$/org/web3j/abi/4.4.1/abi-4.4.1.jar!/" />
           <root url="jar://$MAVEN_REPOSITORY$/org/web3j/core/4.4.1/core-4.4.1.jar!/" />
+          <root url="jar://$MAVEN_REPOSITORY$/com/streamr/client/1.1.6/client-1.1.6.jar!/" />
           <root url="jar://$MAVEN_REPOSITORY$/org/web3j/tuples/4.4.1/tuples-4.4.1.jar!/" />
           <root url="jar://$MAVEN_REPOSITORY$/org/web3j/rlp/4.4.1/rlp-4.4.1.jar!/" />
           <root url="jar://$MAVEN_REPOSITORY$/org/web3j/crypto/4.4.1/crypto-4.4.1.jar!/" />
           <root url="jar://$MAVEN_REPOSITORY$/org/bouncycastle/bcprov-jdk15on/1.61/bcprov-jdk15on-1.61.jar!/" />
           <root url="jar://$MAVEN_REPOSITORY$/org/web3j/utils/4.4.1/utils-4.4.1.jar!/" />
           <root url="jar://$MAVEN_REPOSITORY$/com/google/guava/guava/19.0/guava-19.0.jar!/" />
-          <root url="jar://$MAVEN_REPOSITORY$/com/streamr/client/1.1.7/client-1.1.7.jar!/" />
+          <root url="jar://$MAVEN_REPOSITORY$/com/google/code/gson/gson/2.8.5/gson-2.8.5.jar!/" />
         </CLASSES>
         <JAVADOC />
         <SOURCES>

@@ -55,14 +55,14 @@ class CanvasApiControllerSpec extends ControllerSpecification {
 
 		canvas2 = new Canvas(
 			name: "not mine",
-			json: '{name: "not mine", modules: []}',
+			json: '{"name": "not mine", "modules": []}',
 			state: Canvas.State.STOPPED,
 			hasExports: false
 		).save(validate: true, failOnError: true)
 
 		canvas3 = new Canvas(
 			name: "not mine but example",
-			json: '{name: "not mine but example", modules: []}',
+			json: '{"name": "not mine but example", "modules": []}',
 			state: Canvas.State.STOPPED,
 			example: true,
 			hasExports: false
@@ -187,7 +187,7 @@ class CanvasApiControllerSpec extends ControllerSpecification {
 		response.json.moduleErrors[2].line == 100
 		response.json.moduleErrors[2].message == "syntax terror"
 	}
-	
+
 	void "save() creates a new canvas and renders it as json"() {
 		def newCanvasId
 
