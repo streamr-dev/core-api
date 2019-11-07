@@ -146,9 +146,24 @@ class DataSourceEventQueueSpec extends Specification {
 		})
 	}
 
-	void "timer drift"() {
+	void "every full second between subsequent event timestamps is being reported"() {
+		setup:
 		DataSourceEventQueue queue = createQueue()
+		ITimeListener timeListener = Mock(ITimeListener)
+		queue.addTimeListener(timeListener)
 		int eventsProcessed = 0
+		11 * timeListener.tickRateInSec() >> 1
+		1 * timeListener.setTime(new Date(10000))
+		1 * timeListener.setTime(new Date(11000))
+		1 * timeListener.setTime(new Date(12000))
+		1 * timeListener.setTime(new Date(13000))
+		1 * timeListener.setTime(new Date(14000))
+		1 * timeListener.setTime(new Date(15000))
+		1 * timeListener.setTime(new Date(16000))
+		1 * timeListener.setTime(new Date(17000))
+		1 * timeListener.setTime(new Date(18000))
+		1 * timeListener.setTime(new Date(19000))
+		1 * timeListener.setTime(new Date(20000))
 
 		when:
 		Thread consumerThread = Thread.start {
@@ -162,7 +177,7 @@ class DataSourceEventQueueSpec extends Specification {
 					eventsProcessed++
 				}
 			}))
-			queue.enqueue(new Event<Integer>(2, new Date(20000), new Consumer<Integer>() {
+			queue.enqueue(new Event<Integer>(2, new Date(20100), new Consumer<Integer>() {
 				@Override
 				void accept(Integer integer) {
 					eventsProcessed++
@@ -172,10 +187,8 @@ class DataSourceEventQueueSpec extends Specification {
 
 		then:
 		new PollingConditions().within(10, {
-			eventsProcessed == 2
-			!producerThread.isAlive()
+			eventsProcessed == 2 && !producerThread.isAlive()
 		})
-		queue.getLastReportedClockTick() == 20000
 
 		when:
 		queue.abort()
