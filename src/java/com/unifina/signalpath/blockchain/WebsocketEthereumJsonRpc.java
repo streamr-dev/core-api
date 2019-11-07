@@ -114,6 +114,7 @@ public class WebsocketEthereumJsonRpc extends EthereumJsonRpc {
 					log.error("Thread was interrupted while sleeping.");
 					//why is this thread interrupted in E&E when sleeping?
 					log.error(ie.getMessage());
+					Thread.interrupted();
 				}
 				continue;
 			}
