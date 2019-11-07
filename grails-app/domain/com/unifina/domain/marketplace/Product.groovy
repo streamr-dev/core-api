@@ -148,6 +148,10 @@ class Product {
 		]
 	}
 
+	boolean isFree() {
+		return pricePerSecond == 0
+	}
+
 	static isEthereumAddressOrIsNull = { String value ->
 		value == null || Product.isEthereumAddress(value)
 	}

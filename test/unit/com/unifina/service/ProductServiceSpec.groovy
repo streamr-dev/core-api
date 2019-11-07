@@ -64,6 +64,31 @@ class ProductServiceSpec extends Specification {
 		product.save(failOnError: true, validate: true)
 	}
 
+	private void setupFreeProduct(Product.State state = Product.State.NOT_DEPLOYED) {
+		SecUser user = new SecUser(
+			username: "user@domain.com",
+			name: "Firstname Lastname",
+			password: "salasana"
+		)
+		user.id = 1
+		user.save(failOnError: true, validate: false)
+		product = new Product(
+			name: "name",
+			description: "description",
+			ownerAddress: "0x0000000000000000000000000000000000000000",
+			beneficiaryAddress: "0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF",
+			streams: s1 != null ? [s1, s2, s3] : [],
+			pricePerSecond: 0,
+			category: category,
+			state: state,
+			blockNumber: 40000,
+			blockIndex: 30,
+			owner: user
+		)
+		product.id = "product-id"
+		product.save(failOnError: true, validate: true)
+	}
+
 	Product newProduct(String id, String name, Stream... s) {
 		Product p = new Product(
 			name: name,
@@ -318,6 +343,30 @@ class ProductServiceSpec extends Specification {
 		1 * permissionService.verifyShare(me, s3)
 	}
 
+	void "create() adds anonymous read permission for free products streams"() {
+		setupStreams()
+		def permissionService = service.permissionService = Mock(PermissionService)
+
+		def validCommand = new CreateProductCommand(
+			name: "Product",
+			description: "Description of Product.",
+			category: category,
+			streams: [s1, s2, s3],
+			ownerAddress: "0x0000000000000000000000000000000000000000",
+			beneficiaryAddress: "0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF",
+			pricePerSecond: 0,
+			minimumSubscriptionInSeconds: 0,
+		)
+		def me = new SecUser(username: "me@streamr.com")
+
+		when:
+		service.create(validCommand, me)
+		then:
+		1 * permissionService.systemGrantAnonymousAccess(s1, Permission.Operation.READ)
+		1 * permissionService.systemGrantAnonymousAccess(s2, Permission.Operation.READ)
+		1 * permissionService.systemGrantAnonymousAccess(s3, Permission.Operation.READ)
+	}
+
 	void "create() does not save if permissionService#verifyShare throws"() {
 		setupStreams()
 		service.permissionService = new PermissionService()
@@ -436,6 +485,39 @@ class ProductServiceSpec extends Specification {
 		then:
 		1 * permissionService.verifyShare(user, s2)
 		1 * permissionService.verifyShare(user, s4)
+	}
+
+	void "update() revokes and grants anonymous read permission for free products streams"() {
+		setupStreams()
+		setupFreeProduct()
+
+		service.subscriptionService = Stub(SubscriptionService)
+		service.apiService = Stub(ApiService) {
+			authorizedGetById(Product, _, _, _) >> product
+		}
+		def permissionService = service.permissionService = Mock(PermissionService)
+
+		def validCommand = new UpdateProductCommand(
+			name: "updated name",
+			description: "updated description",
+			category: category,
+			streams: [s2, s4],
+			pricePerSecond: 0,
+			ownerAddress: "0xCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC",
+			beneficiaryAddress: "0xCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC",
+			priceCurrency: Product.Currency.DATA,
+			minimumSubscriptionInSeconds: 0
+		)
+		def user = new SecUser(username: "me@streamr.com")
+
+		when:
+		service.update("product-id", validCommand, user)
+		then:
+		1 * permissionService.systemRevokeAnonymousAccess(s1, Permission.Operation.READ)
+		1 * permissionService.systemRevokeAnonymousAccess(s2, Permission.Operation.READ)
+		1 * permissionService.systemRevokeAnonymousAccess(s3, Permission.Operation.READ)
+		1 * permissionService.systemGrantAnonymousAccess(s2, Permission.Operation.READ)
+		1 * permissionService.systemGrantAnonymousAccess(s4, Permission.Operation.READ)
 	}
 
 	void "update() does not save if permissionService#verifyShare throws"() {
@@ -599,6 +681,21 @@ class ProductServiceSpec extends Specification {
 		product.streams.contains(s4)
 	}
 
+	void "addStreamToProduct() grants anonymous read permission for free products stream"() {
+		setupStreams()
+		setupFreeProduct()
+		assert !product.streams.contains(s4)
+
+		service.subscriptionService = Stub(SubscriptionService)
+		service.permissionService = Mock(PermissionService)
+		def user = new SecUser()
+
+		when:
+		service.addStreamToProduct(product, s4, user)
+		then:
+		1 * service.permissionService.systemGrantAnonymousAccess(s4, Permission.Operation.READ)
+	}
+
 	void "addStreamToProduct() invokes subscriptionService#afterProductUpdated"() {
 		setupStreams()
 		setupProduct()
@@ -622,6 +719,19 @@ class ProductServiceSpec extends Specification {
 		service.removeStreamFromProduct(product, s1)
 		then:
 		!product.streams.contains(s1)
+	}
+
+	void "removeStreamFromProduct() revokes anonymous read access from free products stream"() {
+		setupStreams()
+		setupFreeProduct()
+		service.subscriptionService = Stub(SubscriptionService)
+		service.permissionService = Mock(PermissionService)
+		assert product.streams.contains(s1)
+
+		when:
+		service.removeStreamFromProduct(product, s1)
+		then:
+		1 * service.permissionService.systemRevokeAnonymousAccess(s1, Permission.Operation.READ)
 	}
 
 	void "removeStreamFromProduct() invokes subscriptionService#afterProductUpdated"() {
