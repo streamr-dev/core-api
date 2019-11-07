@@ -99,8 +99,6 @@ public class WebsocketEthereumJsonRpc extends EthereumJsonRpc {
 			log.info("Trying to establish websocket connection to " + url + ". Attempt number " + attempts);
 			try {
 				openConnection();
-				//in the case of ContractEventPoller, handler.init() installs filter
-				handler.init();
 			} catch (URISyntaxException e) {
 				log.error(e);
 				return false;
@@ -139,6 +137,8 @@ public class WebsocketEthereumJsonRpc extends EthereumJsonRpc {
 			e.printStackTrace();
 			throw e;
 		}
+		//in the case of ContractEventPoller, handler.init() installs filter
+		handler.init();
 		log.info("Websocket connection established to " + url);
 	}
 
