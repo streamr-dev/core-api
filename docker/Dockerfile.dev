@@ -30,8 +30,10 @@ ENV CATALINA_OPTS -Dstreamr.database.user=root \
     -Dstreamr.url=${STREAMR_URL} \
     -Dstreamr.cps.url=${CP_URL} \
     -Dstreamr.ethereum.networks.local=${ETHEREUM_NETWORKS_LOCAL} \
-    -Dgrails.mail.host=${SMTP_HOST}
-
+    -Dgrails.mail.host=${SMTP_HOST} \
+    -Dstreamr.fileUpload.s3.bucket=${S3_BUCKET} \
+    -Daws.accessKeyId=${AWS_ACCESS_KEY_ID} \
+    -Daws.secretKey=\'${AWS_SECRET_ACCESS_KEY}\'
 EXPOSE 8081
 # Wait for MySQL server, MySQL dumps, and Cassandra to be ready
 CMD ["sh", "-c", "wait-for-it.sh mysql:3306 --timeout=120 && while ! mysql --user=root --host=mysql --password=password core_test -e \"SELECT 1;\"; do echo 'waiting for db'; sleep 1; done && wait-for-it.sh cassandra:9042 --timeout=120 && catalina.sh run"]
