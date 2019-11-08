@@ -12,7 +12,7 @@
     "ajv": "6.10.2",
     "async-wait-until": "1.2.4",
     "chai": "4.2.0",
-    "ethereumjs-util": "6.1.0",
+    "ethereumjs-util": "6.2.0",
     "form-data": "3.0.0",
     "keythereum": "1.0.4",
     "mocha": "6.2.2",
