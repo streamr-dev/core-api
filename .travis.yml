@@ -5,7 +5,7 @@ jdk:
 services:
 - docker
 node_js:
-- "8.9.3"
+- "10.16.3"
 if: (type = push AND branch = master) OR type = pull_request # build whitelisted branches and all PRs
 git:
   submodules: false
@@ -14,7 +14,7 @@ before_install:
 - echo sdkman_auto_answer=true > ~/.sdkman/etc/config
 - source "/home/travis/.sdkman/bin/sdkman-init.sh"
 - sdk install grails 2.5.6
-- npm i -g npm@6.4.1
+- npm i -g npm@6.9.0
 - "echo Using node version: `node --version`"
 env:
   global:
