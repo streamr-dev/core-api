@@ -37,7 +37,7 @@ class PermissionApiControllerSpec extends ControllerSpecification {
 		controller.mailService = new MockMailService()
 		controller.signupCodeService = new SignupCodeService()
 
-		me = new SecUser(id: 1, username: "me").save(validate: false)
+		me = new SecUser(id: 1, username: "me@me.net").save(validate: false)
 		other = new SecUser(id: 2, username: "other").save(validate: false)
 
 		def meKey = new Key(name: "meKey", user: me)
@@ -102,7 +102,7 @@ class PermissionApiControllerSpec extends ControllerSpecification {
 		response.status == 200
 		response.json.size() == 4
 		response.json[0].id == canvasPermission.id
-		response.json[0].user == "me"
+		response.json[0].user == "me@me.net"
 		response.json[0].operation == "share"
 		// matching with _ instead of canvasOwned because it's not "the same" after saving and get(id):ing
 		1 * permissionService.getPermissionsTo(_) >> [canvasPermission, *ownerPermissions]
@@ -121,7 +121,7 @@ class PermissionApiControllerSpec extends ControllerSpecification {
 		response.status == 200
 		response.json.size() == 4
 		response.json[0].id == streamPermission.id
-		response.json[0].user == "me"
+		response.json[0].user == "me@me.net"
 		response.json[0].operation == "share"
 		// matching with _ instead of streamOwned because it's not "the same" after saving and get(id):ing
 		1 * permissionService.getPermissionsTo(_) >> [streamPermission, *ownerPermissions]
@@ -139,7 +139,7 @@ class PermissionApiControllerSpec extends ControllerSpecification {
 		then:
 		response.status == 200
 		response.json.id == 1
-		response.json.user == "me"
+		response.json.user == "me@me.net"
 		response.json.operation == "share"
 		// matching with _ instead of canvasOwned because it's not "the same" after saving and get(id):ing
 		1 * permissionService.getPermissionsTo(_) >> [canvasPermission, *ownerPermissions]
@@ -157,7 +157,7 @@ class PermissionApiControllerSpec extends ControllerSpecification {
 		then:
 		response.status == 200
 		response.json.id == 2
-		response.json.user == "me"
+		response.json.user == "me@me.net"
 		response.json.operation == "share"
 		// matching with _ instead of streamOwned because it's not "the same" after saving and get(id):ing
 		1 * permissionService.getPermissionsTo(_) >> [streamPermission, *ownerPermissions]
@@ -216,6 +216,19 @@ class PermissionApiControllerSpec extends ControllerSpecification {
 		1 * permissionService.grant(me, _, _, Operation.READ) >> new Permission(user: other, operation: Operation.READ)
 	}
 
+	void "save sends an email if the user has an account"() {
+		setup:
+		params.resourceClass = Canvas
+		params.resourceId = canvasOwned.id
+		when:
+		request.JSON = [anonymous: false, user: "me@me.net", operation: "read"] as JSON
+		authenticatedAs(me) { controller.save() }
+		then:
+		controller.mailService.mailSent
+		1 * permissionService.canShare(me, _) >> true
+		1 * permissionService.grant(me, _, _, Operation.READ) >> new Permission(user: other, operation: Operation.READ)
+	}
+
 	void "save() creates a new user with permission if unknown ethereum address provided"() {
 		setup:
 		SecUser ethUser = new SecUser(id: 3, username: "0xa50E97f6a98dD992D9eCb8207c2Aa58F54970729")
@@ -226,6 +239,7 @@ class PermissionApiControllerSpec extends ControllerSpecification {
 		request.JSON = [user: ethUser.username, operation: "read"] as JSON
 		authenticatedAs(me) { controller.save() }
 		then:
+		!controller.mailService.mailSent
 		1 * ethereumIntegrationKeyService.createEthereumUser(ethUser.username) >> ethUser
 		1 * permissionService.canShare(me, _) >> true
 		1 * permissionService.grant(me, _, _, Operation.READ) >> new Permission(user: ethUser, operation: Operation.READ)
@@ -284,7 +298,7 @@ class PermissionApiControllerSpec extends ControllerSpecification {
 		authenticatedAs(me) { controller.getOwnPermissions() }
 		then:
 		response.status == 200
-		response.json == [[id: 1, operation: "share", user: "me"]]
+		response.json == [[id: 1, operation: "share", user: "me@me.net"]]
 
 		1 * permissionService.getPermissionsTo(_, me) >> [canvasPermission]
 		0 * permissionService._
