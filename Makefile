@@ -1,5 +1,6 @@
 version := $(shell git describe --tags --always --dirty="-dev")
 date := $(shell date -u '+%Y-%m-%dT%H:%M:%SZ')
+node_version := 10.16.3
 
 .SHELLFLAGS := -c # Run commands in a -c flag
 .ONESHELL: ; # recipes execute in same shell
@@ -18,4 +19,4 @@ test-integration:
 
 .PHONY: test-rest
 test-rest:
-	cd rest-e2e-tests && $(HOME)/.nvm/versions/node/v8.12.0/bin/npm test
+	cd rest-e2e-tests && $(HOME)/.nvm/versions/node/v$(node_version)/bin/npm test
