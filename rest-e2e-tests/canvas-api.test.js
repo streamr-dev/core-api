@@ -131,7 +131,6 @@ describe('Canvas API', function() {
                         .call()
 
                     json = await response.json()
-                    console.log(`json.json.outputs[0].value === ${json.json.outputs[0].value}`)
                     return json.json.outputs[0].value === 100
                 })
 
@@ -152,7 +151,6 @@ describe('Canvas API', function() {
                         .call()
 
                     json = await response.json()
-                    console.log(`json.json.outputs[0].value === ${json.json.outputs[0].value}`)
                     return json.json.outputs[0].value === 10100 // sum(1:100) * 2
                 })
 

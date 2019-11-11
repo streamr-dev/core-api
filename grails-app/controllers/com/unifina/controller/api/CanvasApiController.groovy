@@ -1,5 +1,7 @@
 package com.unifina.controller.api
 
+import com.google.gson.Gson
+import com.google.gson.GsonBuilder
 import com.unifina.api.*
 import com.unifina.domain.security.Permission.Operation
 import com.unifina.domain.security.SecUser
@@ -11,10 +13,12 @@ import com.unifina.service.ApiService
 import com.unifina.service.CanvasService
 import com.unifina.service.SignalPathService
 import com.unifina.signalpath.ModuleException
+import com.unifina.utils.NullJsonSerializer
 import grails.converters.JSON
 import grails.plugin.springsecurity.annotation.Secured
 import grails.transaction.NotTransactional
 import org.apache.log4j.Logger
+import org.codehaus.groovy.grails.web.json.JSONObject
 import org.springframework.util.FileCopyUtils
 
 @Secured(["IS_AUTHENTICATED_ANONYMOUSLY"])
@@ -23,6 +27,11 @@ class CanvasApiController {
 	CanvasService canvasService
 	SignalPathService signalPathService
 	ApiService apiService
+
+	private static final Gson gson = new GsonBuilder()
+		.serializeNulls()
+		.registerTypeAdapter(JSONObject.Null, new NullJsonSerializer())
+		.create()
 
 	private static final Logger log = Logger.getLogger(CanvasApiController)
 
@@ -76,9 +85,10 @@ class CanvasApiController {
 		} catch (ModuleException e) {
 			Map<String, Object> response = canvas.toMap()
 			response.moduleErrors = e.getModuleExceptions()*.toMap()
-			render response as JSON
+			render gson.toJson(response)
+			return
 		}
-		render canvas.toMap() as JSON
+		render gson.toJson(canvas.toMap())
 	}
 
 	@StreamrApi

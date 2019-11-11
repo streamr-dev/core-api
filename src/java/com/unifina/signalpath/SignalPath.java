@@ -13,7 +13,6 @@ import com.unifina.utils.Globals;
 import grails.converters.JSON;
 import grails.util.Holders;
 import org.apache.log4j.Logger;
-import org.codehaus.groovy.grails.web.json.JSONObject;
 
 import javax.validation.constraints.NotNull;
 import java.io.Serializable;
@@ -266,7 +265,7 @@ public class SignalPath extends ModuleWithUI {
 			 * there will be problems if many instances of the same canvas are used
 			 * as subcanvases, as all the instances would produce to same uiChannels.
 			 */
-			Map json = (JSONObject) JSON.parse(myCanvas.getJson());
+			Map json = (Map) JSON.parse(myCanvas.getJson());
 			CanvasService canvasService = Holders.getApplicationContext().getBean(CanvasService.class);
 			canvasService.resetUiChannels(json);
 			initFromRepresentation(json);
