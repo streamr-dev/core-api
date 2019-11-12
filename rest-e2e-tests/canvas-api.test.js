@@ -27,6 +27,26 @@ const pollCondition = async (condition, timeout = TIMEOUT, interval = 100) => {
     return result
 }
 
+async function CreateClientUser() {
+    // Generate a new user to isolate the test and not require any pre-existing resources
+    const freshUser = StreamrClient.generateEthereumAccount()
+
+    // Print private key to console in case you need to debug by logging in as this user (import to MetaMask, log in with Ethereum)
+    console.log(`User created: ${JSON.stringify(freshUser)}`)
+
+    const client = new StreamrClient({
+        url: WS_URL,
+        restUrl: REST_URL,
+        auth: {
+            privateKey: freshUser.privateKey,
+        },
+    })
+    await client.connect()
+
+    const sessionToken = await client.session.getSessionToken()
+    return { client, sessionToken }
+}
+
 // The tests should be run sequentially
 describe('Canvas API', function() {
 
@@ -39,22 +59,9 @@ describe('Canvas API', function() {
     this.timeout(TIMEOUT)
 
     before(async () => {
-        // Generate a new user to isolate the test and not require any pre-existing resources
-        const freshUser = StreamrClient.generateEthereumAccount()
-
-        // Print private key to console in case you need to debug by logging in as this user (import to MetaMask, log in with Ethereum)
-        console.log(`User created: ${JSON.stringify(freshUser)}`)
-
-        streamrClient = new StreamrClient({
-            url: WS_URL,
-            restUrl: REST_URL,
-            auth: {
-                privateKey: freshUser.privateKey,
-            },
-        })
-        await streamrClient.connect()
-
-        sessionToken = await streamrClient.session.getSessionToken()
+        const created = await CreateClientUser()
+        streamrClient = created.client
+        sessionToken = created.sessionToken
 
         // Create a unique stream for this test
         stream = await streamrClient.createStream({
@@ -294,5 +301,77 @@ describe('Canvas API', function() {
             // last message is our message
             assert.equal(messages[messages.length - 1].nr[1], `${NUM_MESSAGES + 1}.0`)
         })
+    })
+})
+
+describe('clock -> table canvas', function() {
+    let streamrClient
+    let sessionToken
+    let canvas
+
+    // sets timeout on before and all test cases in this suite
+    this.timeout(TIMEOUT)
+
+    before(async () => {
+        const created = await CreateClientUser()
+        streamrClient = created.client
+        sessionToken = created.sessionToken
+    })
+
+    before(async () => {
+        const canvasTemplate = JSON.parse(fs.readFileSync('./test-data/canvas-api.test.js-canvas-clock.json'))
+        canvasTemplate.name = `canvas-api.test.js-${Date.now()}`
+
+        const canvasResponse = await Streamr.api.v1.canvases
+            .create(canvasTemplate)
+            .withSessionToken(sessionToken)
+            .call()
+
+        canvas = await canvasResponse.json()
+        assert.equal(canvasResponse.status, 200)
+    })
+
+    it('starts sending uiChannel messages', (done) => {
+        const table = canvas.modules.find(({ name }) => name === 'Table')
+        const messages = []
+        subscription = streamrClient.subscribe({
+            stream: table.uiChannel.id,
+        }, (msg) => {
+            messages.push(msg)
+            if (msg.nr) {
+                // end after first new row message
+                streamrClient.unsubscribe(subscription)
+            }
+        })
+
+        subscription.once('unsubscribed', () => {
+            assert.ok(messages.filter(({ nr }) => nr).length, 'got at least one new row message')
+            done()
+        })
+
+        subscription.once('error', (error) => {
+            throw error
+        })
+
+        Streamr.api.v1.canvases
+            .start(canvas.id)
+            .withSessionToken(sessionToken)
+            .call()
+            .then((r1) => {
+                assert.equal(r1.status, 200)
+            })
+    })
+
+    after(async () => {
+        if (canvas) {
+            await Streamr.api.v1.canvases
+                .stop(canvas.id)
+                .withSessionToken(sessionToken)
+                .call()
+                .catch(console.warn) // ignore
+        }
+        if (streamrClient.isConnected()) {
+            await streamrClient.disconnect()
+        }
     })
 })
