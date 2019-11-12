@@ -1,11 +1,13 @@
 package com.unifina.service
 
 import com.unifina.domain.dashboard.Dashboard
+import com.unifina.domain.dashboard.DashboardItem
 import com.unifina.domain.data.Stream
 import com.unifina.domain.security.Key
 import com.unifina.domain.security.Permission
 import com.unifina.domain.security.SecUser
 import com.unifina.domain.signalpath.Canvas
+import com.unifina.utils.Webcomponent
 import grails.test.spock.IntegrationSpec
 import grails.util.Holders
 
@@ -32,9 +34,15 @@ class PermissionServiceIntegrationSpec extends IntegrationSpec {
 	// User has indirect permissions to this UI channel stream via the canvas
 	Stream stream
 
+	Dashboard dashboard
+	DashboardItem item
+	// User has indirect permissions to this UI channel stream via the dashboard
+	Stream dashboardStream
+	Canvas dashboardCanvas
+	Canvas uiChannel
+
 	void setup() {
 		service = Holders.getApplicationContext().getBean(PermissionService)
-		//stream?.delete(flush: true)
 		SecUser.findByUsername("me-permission-service-integration-spec@streamr.com")?.delete(flush: true)
 		SecUser.findByUsername("him-permission-service-integration-spec@streamr.com")?.delete(flush: true)
 		SecUser.findByUsername("stranger-permission-service-integration-spec@streamr.com")?.delete(flush: true)
@@ -90,6 +98,27 @@ class PermissionServiceIntegrationSpec extends IntegrationSpec {
 		stream = new Stream(name: "ui channel", uiChannel: true, uiChannelCanvas: canvas)
 		stream.id = "stream-id"
 		stream.save(validate: true, failOnError: true)
+
+		dashboardCanvas = new Canvas()
+		dashboardCanvas.save(validate: true, failOnError: true)
+		uiChannel = new Canvas()
+		uiChannel.save(validate: true, failOnError: true)
+		dashboard = new Dashboard(name: "dashboard")
+		dashboard.save(validate: true, failOnError: true)
+		dashboardStream = new Stream(name: "ui channel", uiChannel: true, uiChannelCanvas: uiChannel, uiChannelPath: "/canvases/" + uiChannel.id + "/modules/2")
+		dashboardStream.id = "stream-id-2"
+		dashboardStream.save(validate: true, failOnError: true)
+
+		item = new DashboardItem(
+			title: "dashboard-item",
+			canvas: dashboardCanvas,
+			stream: dashboardStream,
+			module: 2,
+			webcomponent: Webcomponent.STREAMR_CHART,
+			dashboard: dashboard,
+		)
+		item.id = "dashboard-id-1"
+		item.save(validate: true, failOnError: true)
 	}
 
 	void cleanup() {
@@ -97,7 +126,9 @@ class PermissionServiceIntegrationSpec extends IntegrationSpec {
 		Permission.findAllByDashboard(dashRestricted)*.delete(flush: true)
 		Permission.findAllByDashboard(dashOwned)*.delete(flush: true)
 		Permission.findAllByDashboard(dashPublic)*.delete(flush: true)
+		Permission.findAllByDashboard(dashboard)*.delete(flush: true)
 		Permission.findAllByCanvas(canvas)*.delete(flush: true)
+		Permission.findAllByCanvas(dashboardCanvas)*.delete(flush: true)
 
 		dashAllowed?.delete(flush: true)
 		dashRestricted?.delete(flush: true)
@@ -108,13 +139,18 @@ class PermissionServiceIntegrationSpec extends IntegrationSpec {
 		anotherUserKey?.delete(flush: true)
 		anonymousKey?.delete(flush: true)
 
+		Stream.deleteAll(stream, dashboardStream)
+		stream.uiChannelCanvas?.delete(flush: true)
+		dashboard.removeFromItems(item)
+		dashboard.save()
+		item?.delete(flush: true)
+		dashboardStream.uiChannelCanvas?.delete(flush: true)
+		dashboard?.delete(flush: true)
+
 		me?.delete(flush: true)
 		anotherUser?.delete(flush: true)
 		stranger?.delete(flush: true)
 		someone?.delete(flush: true)
-
-		stream?.delete(flush: true)
-		stream.uiChannelCanvas?.delete(flush: true)
 	}
 
 
@@ -309,5 +345,13 @@ class PermissionServiceIntegrationSpec extends IntegrationSpec {
 		service.canRead(me, stream)
 		service.canWrite(me, stream)
 		service.canShare(me, stream)
+	}
+
+	void "getPermissionsTo(resource, userish) returns correct UI channel read permissions via associated dashboard"() {
+		service.systemGrantAll(me, dashboard)
+
+		expect:
+		service.getPermissionsTo(dashboardStream, me).size() == 1
+		service.canRead(me, dashboardStream)
 	}
 }
