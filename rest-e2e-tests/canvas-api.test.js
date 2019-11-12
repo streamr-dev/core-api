@@ -304,13 +304,14 @@ describe('Canvas API', function() {
     })
 })
 
-describe('clock -> table canvas', function() {
+
+function TestClockTable() {
     let streamrClient
     let sessionToken
     let canvas
 
     // sets timeout on before and all test cases in this suite
-    this.timeout(TIMEOUT)
+    this.timeout(9000)
 
     before(async () => {
         const created = await CreateClientUser()
@@ -363,15 +364,24 @@ describe('clock -> table canvas', function() {
     })
 
     after(async () => {
-        if (canvas) {
+        if (canvas && sessionToken) {
             await Streamr.api.v1.canvases
                 .stop(canvas.id)
                 .withSessionToken(sessionToken)
                 .call()
                 .catch(console.warn) // ignore
         }
-        if (streamrClient.isConnected()) {
+        if (streamrClient && streamrClient.isConnected()) {
             await streamrClient.disconnect()
         }
     })
+}
+
+describe('clock -> table canvas', () => {
+    // repeat test a number of times since it seems to fail intermittently
+    describe('1st time', TestClockTable)
+    describe('2nd time', TestClockTable)
+    describe('3rd time', TestClockTable)
+    describe('4th time', TestClockTable)
+    describe('5th time', TestClockTable)
 })
