@@ -12,6 +12,10 @@ const Streamr = initStreamrApi(REST_URL, LOGGING_ENABLED)
 
 const TIMEOUT = 30 * 1000
 
+const NUM_MESSAGES = 50
+
+const WAIT_TIME = 15000
+
 const pollCondition = async (condition, timeout = TIMEOUT, interval = 100) => {
     let timeElapsed = 0
     let result
@@ -107,20 +111,42 @@ describe('Canvas API', function() {
     })
 
     describe('Canvases receive data', () => {
+        let messages = []
+        let subscription
+
+        before((done) => {
+            const table = canvas.modules.find(({ name }) => name === 'Table')
+            subscription = streamrClient.subscribe({
+                stream: table.uiChannel.id,
+            }, (msg) => {
+                messages.push(msg)
+            })
+            subscription.once('subscribed', () => done())
+        })
+
+        after((done) => {
+            subscription.once('unsubscribed', done)
+            streamrClient.unsubscribe(subscription)
+        })
 
         before('Produce data to stream', async () => {
             // Allow time for canvas to start properly. If values don't make it to the canvas, this may be the reason.
-            await sleep(15 * 1000)
+            await sleep(WAIT_TIME)
 
-            for (let i=1; i<=100; i++) {
+            for (let i = 1; i <= NUM_MESSAGES; i++) {
                 await streamrClient.publish(stream.id, {
                     numero: i,
                 })
             }
+            await sleep(WAIT_TIME / 5)
+        })
+
+        it('received messages on uiChannel', async () => {
+            // should have NUM_MESSAGES new row messages
+            assert.equal(messages.filter(({ nr }) => nr).length, NUM_MESSAGES)
         })
 
         describe('POST /api/v1/canvases/:canvasId/modules/:moduleId/request', () => {
-
             it('Shows correct output values on the Stream module', async () => {
                 let response
                 let json
@@ -131,13 +157,13 @@ describe('Canvas API', function() {
                         .call()
 
                     json = await response.json()
-                    return json.json.outputs[0].value === 100
+                    return json.json.outputs[0].value === NUM_MESSAGES
                 })
 
                 assert.equal(response.status, 200, JSON.stringify(json))
                 assert.equal(json.json.name, 'Stream', 'Unexpected name on module!')
                 assert.equal(json.json.outputs[0].name, 'numero', 'Unexpected name on output!')
-                assert.equal(json.json.outputs[0].value, 100, 'Stream module did not output the correct values')
+                assert.equal(json.json.outputs[0].value, NUM_MESSAGES, 'Stream module did not output the correct values')
                 assert(json.success)
             })
 
@@ -151,14 +177,15 @@ describe('Canvas API', function() {
                         .call()
 
                     json = await response.json()
-                    return json.json.outputs[0].value === 10100 // sum(1:100) * 2
+                    return json.json.inputs[0].value === NUM_MESSAGES * 2
                 })
 
                 assert.equal(response.status, 200, JSON.stringify(json))
                 assert.equal(json.json.name, 'Sum', 'Unexpected name on module!')
                 assert.equal(json.json.inputs[0].name, 'in', 'Unexpected name on input!')
-                assert.equal(json.json.inputs[0].value, 200, 'Sum module did not receive the correct values!')
-                assert.equal(json.json.outputs[0].value, 10100, 'Sum module did not output the correct value!')
+                assert.equal(json.json.inputs[0].value, NUM_MESSAGES * 2, 'Sum module did not receive the correct values!')
+                // sum(1:NUM_MESSAGES) * 2
+                assert.equal(json.json.outputs[0].value, NUM_MESSAGES * (NUM_MESSAGES + 1), 'Sum module did not output the correct value!')
                 assert(json.success)
             })
         })
@@ -180,4 +207,63 @@ describe('Canvas API', function() {
 
     })
 
+    describe('restarting canvas', () => {
+        const messages = []
+        let subscription
+        before('cycle start/stop, subscribe, start', async () => {
+            let done
+            const p = new Promise((resolve) => done = (err) => err ? reject(err) : resolve())
+            const r1 = await Streamr.api.v1.canvases
+                .start(canvas.id)
+                .withSessionToken(sessionToken)
+                .call()
+            assert.equal(r1.status, 200)
+            const r2 = await Streamr.api.v1.canvases
+                .stop(canvas.id)
+                .withSessionToken(sessionToken)
+                .call()
+            assert.equal(r2.status, 200)
+
+            const table = canvas.modules.find(({ name }) => name === 'Table')
+            subscription = streamrClient.subscribe({
+                stream: table.uiChannel.id,
+            }, (msg) => {
+                messages.push(msg)
+            })
+
+            // wait for subscription before starting again
+            subscription.once('subscribed', async () => {
+                // restart for second time
+                const r3 = await Streamr.api.v1.canvases
+                    .start(canvas.id)
+                    .withSessionToken(sessionToken)
+                    .call()
+                assert.equal(r3.status, 200)
+                done()
+            })
+            return p
+        })
+
+        after((done) => {
+            subscription.once('unsubscribed', done)
+            streamrClient.unsubscribe(subscription)
+        })
+
+        after(async () => {
+            await Streamr.api.v1.canvases
+                .stop(canvas.id)
+                .withSessionToken(sessionToken)
+                .call()
+        })
+
+
+        it('can get new messages', async () => {
+            await streamrClient.publish(stream.id, {
+                numero: NUM_MESSAGES + 1,
+            })
+            await sleep(WAIT_TIME / 5)
+            // last message is our message
+            assert.equal(messages[messages.length - 1].nr[1], `${NUM_MESSAGES + 1}.0`)
+        })
+    })
 })
