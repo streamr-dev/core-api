@@ -44,13 +44,9 @@ class ContractEventPoller implements Closeable, Runnable, JsonRpcResponseHandler
 			rpc = new HttpEthereumJsonRpc(rpcUrl, this);
 		} else {
 			rpc = new WebsocketEthereumJsonRpc(rpcUrl, this);
-			try {
-				boolean opened = ((WebsocketEthereumJsonRpc) rpc).openConnectionRetryIfFail();
-				if (!opened) {
-					throw new RuntimeException("Couldnt open connection to " + rpcUrl);
-				}
-			} catch (InterruptedException e) {
-				throw new RuntimeException(e);
+			boolean opened = ((WebsocketEthereumJsonRpc) rpc).openConnectionRetryIfFail();
+			if (!opened) {
+				throw new RuntimeException("Couldnt open connection to " + rpcUrl);
 			}
 		}
 	}
@@ -117,11 +113,9 @@ class ContractEventPoller implements Closeable, Runnable, JsonRpcResponseHandler
 		try {
 			log.debug(String.format("Polling filter '%s'.", filterId));
 			rpc.rpcCall("eth_getFilterChanges", singletonList(filterId), ID_POLLFILTER);
-		}  catch (HttpEthereumJsonRpc.RPCException | JSONException e) {
+		}  catch (Exception e) {
 			listener.onError(e.getMessage());
-		} catch (Exception e) {
-			listener.onError(e.getMessage());
-			throw new RuntimeException(e);
+			log.error("pollChanges threw exception. This might be normal if websocket connection is reopening. Error: " + e.getMessage());
 		}
 	}
 
@@ -151,7 +145,6 @@ class ContractEventPoller implements Closeable, Runnable, JsonRpcResponseHandler
 			listener.onError(e.getMessage());
 			throw new RuntimeException(e);
 		}
-
 	}
 
 	private void processUninstallFilterResponse(JSONObject response) {
