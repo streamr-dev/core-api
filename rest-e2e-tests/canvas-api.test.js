@@ -209,6 +209,7 @@ describe('Canvas API', function() {
 
     describe('restarting canvas', () => {
         const messages = []
+        let resentMessages
         let subscription
         before('cycle start/stop, subscribe, start', async () => {
             let done
@@ -231,6 +232,10 @@ describe('Canvas API', function() {
                 messages.push(msg)
             })
 
+            subscription.once('resent', () => {
+                resentMessages = messages.slice()
+            })
+
             // wait for subscription before starting again
             subscription.once('subscribed', async () => {
                 // restart for second time
@@ -244,6 +249,7 @@ describe('Canvas API', function() {
             return p
         })
 
+
         after((done) => {
             subscription.once('unsubscribed', done)
             streamrClient.unsubscribe(subscription)
@@ -256,6 +262,19 @@ describe('Canvas API', function() {
                 .call()
         })
 
+        it('gets uiResendLast resent messages', (done) => {
+            if (!resentMessages) {
+                // wait for resent if no resent event yet
+                subscription.once('resent', () => {
+                    assert.equal(resentMessages && resentMessages.length, table.options.uiResendLast.value)
+                    done()
+                })
+                return
+            }
+
+            assert.equal(resentMessages && resentMessages.length, table.options.uiResendLast.value)
+            done()
+        })
 
         it('can get new messages', async () => {
             await streamrClient.publish(stream.id, {
