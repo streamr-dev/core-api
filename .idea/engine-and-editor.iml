@@ -409,7 +409,6 @@
           <root url="jar://$MAVEN_REPOSITORY$/org/xerial/snappy/snappy-java/1.1.4/snappy-java-1.1.4.jar!/" />
           <root url="jar://$MAVEN_REPOSITORY$/org/web3j/abi/4.4.1/abi-4.4.1.jar!/" />
           <root url="jar://$MAVEN_REPOSITORY$/org/web3j/core/4.4.1/core-4.4.1.jar!/" />
-          <root url="jar://$MAVEN_REPOSITORY$/com/streamr/client/1.1.6/client-1.1.6.jar!/" />
           <root url="jar://$MAVEN_REPOSITORY$/org/web3j/tuples/4.4.1/tuples-4.4.1.jar!/" />
           <root url="jar://$MAVEN_REPOSITORY$/org/web3j/rlp/4.4.1/rlp-4.4.1.jar!/" />
           <root url="jar://$MAVEN_REPOSITORY$/org/web3j/crypto/4.4.1/crypto-4.4.1.jar!/" />
@@ -417,6 +416,7 @@
           <root url="jar://$MAVEN_REPOSITORY$/org/web3j/utils/4.4.1/utils-4.4.1.jar!/" />
           <root url="jar://$MAVEN_REPOSITORY$/com/google/guava/guava/19.0/guava-19.0.jar!/" />
           <root url="jar://$MAVEN_REPOSITORY$/com/google/code/gson/gson/2.8.5/gson-2.8.5.jar!/" />
+          <root url="jar://$MAVEN_REPOSITORY$/com/streamr/client/1.1.7/client-1.1.7.jar!/" />
         </CLASSES>
         <JAVADOC />
         <SOURCES>
