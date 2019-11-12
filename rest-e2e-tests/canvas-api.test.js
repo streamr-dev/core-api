@@ -121,6 +121,9 @@ describe('Canvas API', function() {
             }, (msg) => {
                 messages.push(msg)
             })
+            subscription.once('error', (error) => {
+                throw error
+            })
             subscription.once('subscribed', () => done())
         })
 
@@ -234,6 +237,13 @@ describe('Canvas API', function() {
 
             subscription.once('resent', () => {
                 resentMessages = messages.slice()
+            })
+            subscription.once('error', (error) => {
+                throw error
+            })
+
+            subscription.once('no_resend', () => {
+                throw new Error('should not have no_resend')
             })
 
             // wait for subscription before starting again
