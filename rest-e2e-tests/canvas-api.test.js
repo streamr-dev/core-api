@@ -303,7 +303,10 @@ describe('Canvas API', function() {
             })
             await sleep(WAIT_TIME / 5)
             // last message is our message
-            assert.equal(messages[messages.length - 1].nr[1], `${NUM_MESSAGES + 1}.0`)
+            const lastMessage = messages[messages.length - 1]
+            assert.ok(lastMessage, 'has last message')
+            assert.ok(lastMessage.nr, 'last message is new row')
+            assert.equal(lastMessage.nr[1], `${NUM_MESSAGES + 1}.0`)
         })
     })
 })
