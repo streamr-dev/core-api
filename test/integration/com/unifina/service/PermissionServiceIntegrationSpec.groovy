@@ -6,10 +6,14 @@ import com.unifina.domain.security.Key
 import com.unifina.domain.security.Permission
 import com.unifina.domain.security.SecUser
 import com.unifina.domain.signalpath.Canvas
+import com.unifina.utils.IdGenerator
 import grails.test.spock.IntegrationSpec
 import grails.util.Holders
+import org.apache.commons.codec.binary.Hex
+import org.web3j.crypto.WalletUtils
 
 import java.security.AccessControlException
+import java.security.SecureRandom
 
 /*
 	Ideally these tests would reside in {PermissionServiceSpec} as unit tests. However, due to spotty mocking of GORM,
@@ -309,5 +313,40 @@ class PermissionServiceIntegrationSpec extends IntegrationSpec {
 		service.canRead(me, stream)
 		service.canWrite(me, stream)
 		service.canShare(me, stream)
+	}
+
+	void "granting permissions results in correct number of inbox stream permissions"() {
+		EthereumIntegrationKeyService ethereumIntegrationKeyService = Holders.grailsApplication.mainContext.getBean(EthereumIntegrationKeyService)
+		List<SecUser> readers = (1..10).collect {
+			ethereumIntegrationKeyService.createEthereumUser(ethereumIntegrationKeyService.generateAccount().getAddress())
+		}
+		List<SecUser> writers = (1..20).collect {
+			ethereumIntegrationKeyService.createEthereumUser(ethereumIntegrationKeyService.generateAccount().getAddress())
+		}
+		Stream manyToManyStream = new Stream(name: "many-to-many stream")
+		manyToManyStream.id = IdGenerator.getShort()
+		manyToManyStream.save(validate: false)
+
+		when:
+		writers.each { service.systemGrant(it, manyToManyStream, Permission.Operation.WRITE) }
+
+		then:
+		Permission.countByStream(manyToManyStream) == writers.size()
+
+		when:
+		readers.each { service.systemGrant(it, manyToManyStream, Permission.Operation.READ) }
+		List<Permission> parentPermissions = Permission.findAllByStream(manyToManyStream)
+
+		then:
+		parentPermissions.size() == writers.size() + readers.size()
+		Permission.countByParentInList(parentPermissions) == writers.size() * readers.size() * 2
+
+		when: // there are expired subscriptions
+		readers.each { service.systemGrant(it, manyToManyStream, Permission.Operation.READ, null, new Date(0)) }
+		parentPermissions = Permission.findAllByStream(manyToManyStream)
+
+		then: // expired permissions don't add to the permission bloat
+		parentPermissions.size() == writers.size() + 2 * readers.size()
+		Permission.countByParentInList(parentPermissions) == writers.size() * readers.size() * 2
 	}
 }

@@ -14,6 +14,10 @@ import org.apache.commons.codec.DecoderException
 import org.apache.commons.codec.binary.Hex
 import org.ethereum.crypto.ECKey
 import org.springframework.util.Assert
+import org.web3j.crypto.Credentials
+import org.web3j.crypto.ECKeyPair
+import org.web3j.crypto.Keys
+import org.web3j.utils.Numeric
 
 import javax.annotation.PostConstruct
 import java.security.SignatureException
@@ -207,6 +211,11 @@ class EthereumIntegrationKeyService {
 		}
 	}
 
+	@CompileStatic
+	static Credentials generateAccount() {
+		return Credentials.create(Keys.createEcKeyPair())
+	}
+
 	private void assertUnique(String address) {
 		SecUser existingUser = getEthereumUser(address)
 		if (existingUser != null) {
@@ -223,4 +232,5 @@ class EthereumIntegrationKeyService {
 		key.name = name
 		key.save(failOnError: true, validate: true)
 	}
+
 }
