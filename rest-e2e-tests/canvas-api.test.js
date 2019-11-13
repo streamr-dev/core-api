@@ -223,7 +223,7 @@ describe('Canvas API', function() {
         let subscription
         before('cycle start/stop, subscribe, start', async () => {
             let done
-            const p = new Promise((resolve) => done = (err) => err ? reject(err) : resolve())
+            const p = new Promise((resolve, reject) => done = (err) => err ? reject(err) : resolve())
             const r1 = await Streamr.api.v1.canvases
                 .start(canvas.id)
                 .withSessionToken(sessionToken)
@@ -238,6 +238,9 @@ describe('Canvas API', function() {
             const table = canvas.modules.find(({ name }) => name === 'Table')
             subscription = streamrClient.subscribe({
                 stream: table.uiChannel.id,
+                resend: {
+                    last: table.options.uiResendLast.value,
+                },
             }, (msg) => {
                 messages.push(msg)
             })
@@ -280,6 +283,7 @@ describe('Canvas API', function() {
         })
 
         it('gets uiResendLast resent messages', (done) => {
+            const table = canvas.modules.find(({ name }) => name === 'Table')
             if (!resentMessages) {
                 // wait for resent if no resent event yet
                 subscription.once('resent', () => {
@@ -309,6 +313,7 @@ function TestClockTable() {
     let streamrClient
     let sessionToken
     let canvas
+    let subscription
 
     // sets timeout on before and all test cases in this suite
     this.timeout(9000)
