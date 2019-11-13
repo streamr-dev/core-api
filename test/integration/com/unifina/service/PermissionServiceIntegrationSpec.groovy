@@ -37,9 +37,8 @@ class PermissionServiceIntegrationSpec extends IntegrationSpec {
 	Dashboard dashboard
 	DashboardItem item
 	// User has indirect permissions to this UI channel stream via the dashboard
-	Stream dashboardStream
-	Canvas dashboardCanvas
-	Canvas uiChannel
+	Stream uiChannelStream
+	Canvas uiChannelCanvas
 
 	void setup() {
 		service = Holders.getApplicationContext().getBean(PermissionService)
@@ -99,26 +98,25 @@ class PermissionServiceIntegrationSpec extends IntegrationSpec {
 		stream.id = "stream-id"
 		stream.save(validate: true, failOnError: true)
 
-		dashboardCanvas = new Canvas()
-		dashboardCanvas.save(validate: true, failOnError: true)
-		uiChannel = new Canvas()
-		uiChannel.save(validate: true, failOnError: true)
+		uiChannelCanvas = new Canvas()
+		uiChannelCanvas.save(validate: true, failOnError: true)
 		dashboard = new Dashboard(name: "dashboard")
 		dashboard.save(validate: true, failOnError: true)
-		dashboardStream = new Stream(name: "ui channel", uiChannel: true, uiChannelCanvas: uiChannel, uiChannelPath: "/canvases/" + uiChannel.id + "/modules/2")
-		dashboardStream.id = "stream-id-2"
-		dashboardStream.save(validate: true, failOnError: true)
+		uiChannelStream = new Stream(name: "ui channel", uiChannel: true, uiChannelCanvas: uiChannelCanvas, uiChannelPath: "/canvases/" + uiChannelCanvas.id + "/modules/2")
+		uiChannelStream.id = "stream-id-2"
+		uiChannelStream.save(validate: true, failOnError: true)
 
 		item = new DashboardItem(
 			title: "dashboard-item",
-			canvas: dashboardCanvas,
-			stream: dashboardStream,
+			canvas: uiChannelCanvas,
+			stream: uiChannelStream,
 			module: 2,
 			webcomponent: Webcomponent.STREAMR_CHART,
 			dashboard: dashboard,
 		)
 		item.id = "dashboard-id-1"
 		item.save(validate: true, failOnError: true)
+		dashboard.addToItems(item)
 	}
 
 	void cleanup() {
@@ -128,7 +126,7 @@ class PermissionServiceIntegrationSpec extends IntegrationSpec {
 		Permission.findAllByDashboard(dashPublic)*.delete(flush: true)
 		Permission.findAllByDashboard(dashboard)*.delete(flush: true)
 		Permission.findAllByCanvas(canvas)*.delete(flush: true)
-		Permission.findAllByCanvas(dashboardCanvas)*.delete(flush: true)
+		Permission.findAllByCanvas(uiChannelCanvas)*.delete(flush: true)
 
 		dashAllowed?.delete(flush: true)
 		dashRestricted?.delete(flush: true)
@@ -139,12 +137,12 @@ class PermissionServiceIntegrationSpec extends IntegrationSpec {
 		anotherUserKey?.delete(flush: true)
 		anonymousKey?.delete(flush: true)
 
-		Stream.deleteAll(stream, dashboardStream)
+		Stream.deleteAll(stream, uiChannelStream)
 		stream.uiChannelCanvas?.delete(flush: true)
 		dashboard.removeFromItems(item)
 		dashboard.save()
 		item?.delete(flush: true)
-		dashboardStream.uiChannelCanvas?.delete(flush: true)
+		uiChannelStream.uiChannelCanvas?.delete(flush: true)
 		dashboard?.delete(flush: true)
 
 		me?.delete(flush: true)
@@ -351,7 +349,7 @@ class PermissionServiceIntegrationSpec extends IntegrationSpec {
 		service.systemGrantAll(me, dashboard)
 
 		expect:
-		service.getPermissionsTo(dashboardStream, me).size() == 1
-		service.canRead(me, dashboardStream)
+		service.getPermissionsTo(uiChannelStream, me).size() == 1
+		service.canRead(me, uiChannelStream)
 	}
 }
