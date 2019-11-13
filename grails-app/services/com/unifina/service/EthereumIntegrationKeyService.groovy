@@ -15,9 +15,7 @@ import org.apache.commons.codec.binary.Hex
 import org.ethereum.crypto.ECKey
 import org.springframework.util.Assert
 import org.web3j.crypto.Credentials
-import org.web3j.crypto.ECKeyPair
 import org.web3j.crypto.Keys
-import org.web3j.utils.Numeric
 
 import javax.annotation.PostConstruct
 import java.security.SignatureException
