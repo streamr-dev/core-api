@@ -2,7 +2,7 @@ package com.unifina.service
 
 import com.unifina.api.NotPermittedException
 import com.unifina.domain.dashboard.Dashboard
-
+import com.unifina.domain.dashboard.DashboardItem
 import com.unifina.domain.data.Stream
 import com.unifina.domain.marketplace.Product
 import com.unifina.domain.marketplace.Subscription
@@ -17,7 +17,6 @@ import com.unifina.security.Userish
 import groovy.transform.CompileStatic
 
 import java.security.AccessControlException
-
 /**
  * Check, get, grant, and revoke permissions. Maintains Access Control Lists (ACLs) to resources.
  *
@@ -138,6 +137,28 @@ class PermissionService {
 				gt("endsAt", new Date())
 			}
 		}.toList()
+
+		if (resource instanceof Stream && resource.uiChannel && resource.uiChannelCanvas != null && resource.uiChannelPath != null) {
+			Canvas canvas = resource.uiChannelCanvas
+			// TODO: parse module id
+			List<DashboardItem> items = DashboardItem.findAllByCanvas(canvas)
+			List permissions = Permission.withCriteria {
+				'in'("dashboard", items.collect { it.dashboard } )
+				eq("operation", Operation.READ)
+				or {
+					eq("anonymous", true)
+					if (isNotNullAndIdNotNull(userish)) {
+						String userProp = getUserPropertyName(userish)
+						eq(userProp, userish)
+					}
+				}
+				or {
+					isNull("endsAt")
+					gt("endsAt", new Date())
+				}
+			}.toList()
+			directPermissions.addAll(permissions)
+		}
 
 		// Special case of UI channels: they inherit permissions from the associated canvas
 		if (resource instanceof Stream && resource.uiChannel) {
@@ -533,11 +554,11 @@ class PermissionService {
 		}
 
 		// Special case of UI channels: they inherit permissions from the associated canvas
-		if (p.empty && resource instanceof Stream && resource.uiChannel) {
+		if (p.isEmpty() && resource instanceof Stream && resource.uiChannel) {
 			return hasPermission(userish, resource.uiChannelCanvas, op)
 		}
 
-		return !p.empty
+		return !p.isEmpty()
 	}
 
 	/**
