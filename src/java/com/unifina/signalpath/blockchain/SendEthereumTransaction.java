@@ -403,8 +403,9 @@ public class SendEthereumTransaction extends ModuleWithSideEffects {
 		List args = new ArrayList(chosenFunction.inputs.size());
 		for (int i = 0; i < chosenFunction.inputs.size(); i++) {
 			Object arg = arguments.get(i).getValue();
-			if(arg instanceof Double || arg instanceof Float)
+			if (arg instanceof Double || arg instanceof Float) {
 				arg = BigDecimal.valueOf(((Number) arg).doubleValue());
+			}
 			args.add(arg);
 		}
 		return Web3jHelper.toWeb3jFunction(chosenFunction, args);
