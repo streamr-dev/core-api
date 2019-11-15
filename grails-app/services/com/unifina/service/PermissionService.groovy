@@ -140,24 +140,10 @@ class PermissionService {
 
 		if (resource instanceof Stream && resource.uiChannel && resource.uiChannelCanvas != null && resource.uiChannelPath != null) {
 			Canvas canvas = resource.uiChannelCanvas
-			// TODO: parse module id
-			List<DashboardItem> items = DashboardItem.findAllByCanvas(canvas)
-			List permissions = Permission.withCriteria {
-				'in'("dashboard", items.collect { it.dashboard } )
-				eq("operation", Operation.READ)
-				or {
-					eq("anonymous", true)
-					if (isNotNullAndIdNotNull(userish)) {
-						String userProp = getUserPropertyName(userish)
-						eq(userProp, userish)
-					}
-				}
-				or {
-					isNull("endsAt")
-					gt("endsAt", new Date())
-				}
-			}.toList()
-			directPermissions.addAll(permissions)
+			Permission permission = hasTransitiveDashboardPermissions(canvas, userish)
+			if (permission != null) {
+				directPermissions.add(permission)
+			}
 		}
 
 		// Special case of UI channels: they inherit permissions from the associated canvas
@@ -166,6 +152,27 @@ class PermissionService {
 		}
 
 		return directPermissions
+	}
+
+	private Permission hasTransitiveDashboardPermissions(Canvas canvas, Userish userish) {
+		// TODO: parse module id
+		List<DashboardItem> items = DashboardItem.findAllByCanvas(canvas)
+		Permission permission = Permission.withCriteria(uniqueResult: true) {
+			'in'("dashboard", items.collect { it.dashboard })
+			eq("operation", Operation.READ)
+			or {
+				eq("anonymous", true)
+				if (isNotNullAndIdNotNull(userish)) {
+					String userProp = getUserPropertyName(userish)
+					eq(userProp, userish)
+				}
+			}
+			or {
+				isNull("endsAt")
+				gt("endsAt", new Date())
+			}
+		}
+		return permission
 	}
 
 	/** Overload to allow leaving out the anonymous-include-flag but including the filter */
@@ -555,7 +562,15 @@ class PermissionService {
 
 		// Special case of UI channels: they inherit permissions from the associated canvas
 		if (p.isEmpty() && resource instanceof Stream && resource.uiChannel) {
-			return hasPermission(userish, resource.uiChannelCanvas, op)
+			if (hasPermission(userish, resource.uiChannelCanvas, op)) {
+				return true
+			}
+		}
+		if (p.isEmpty() && resource instanceof Stream && resource.uiChannel) {
+			Permission permission = hasTransitiveDashboardPermissions(resource.uiChannelCanvas, userish)
+			if (permission != null) {
+				return true
+			}
 		}
 
 		return !p.isEmpty()
