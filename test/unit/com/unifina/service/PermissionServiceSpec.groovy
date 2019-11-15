@@ -171,6 +171,25 @@ class PermissionServiceSpec extends BeanMockingSpecification {
 		all.size() == allOperations.size()
 	}
 
+	void "getNonExpiredPermissionsTo with Operation returns all non-expired permissions for the given resource"() {
+		Dashboard testDash = new Dashboard(id: "testdash", name:"testdash").save(validate:false)
+		// craft an expired permission
+		service.systemGrant(me, testDash, Operation.WRITE, null, new Date(0))
+		setup:
+		List<Permission> beforeRead = service.getNonExpiredPermissionsTo(dashOwned, Operation.READ)
+		List<Permission> beforeWrite = service.getNonExpiredPermissionsTo(dashOwned, Operation.WRITE)
+		Permission perm = service.grant(me, dashOwned, stranger, Operation.READ)
+		List<Permission> afterRead = service.getNonExpiredPermissionsTo(dashOwned, Operation.READ)
+		List<Permission> afterWrite = service.getNonExpiredPermissionsTo(dashOwned, Operation.WRITE)
+		List<Permission> testDashPerms = service.getNonExpiredPermissionsTo(testDash, Operation.WRITE)
+		expect:
+		!beforeRead.contains(perm)
+		afterRead.contains(perm)
+		beforeRead.size() + 1 == afterRead.size()
+		beforeWrite.size() == afterWrite.size()
+		testDashPerms.isEmpty()
+	}
+
 	void "getPermissionsTo(resource, userish) returns permissions for single user"() {
 		expect:
 		service.getPermissionsTo(dashOwned, me).size() == 3
