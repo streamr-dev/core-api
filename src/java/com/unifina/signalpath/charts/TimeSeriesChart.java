@@ -45,9 +45,6 @@ public class TimeSeriesChart extends Chart {
 				it.seriesName = newName;
 			}
 		}
-		if (getGlobals().isRunContext()) {
-			pushToUiChannel(getInitMessage());
-		}
 	}
 
 	protected InitMessage getInitMessage() {
@@ -85,6 +82,11 @@ public class TimeSeriesChart extends Chart {
 		}
 
 		return conn;
+	}
+
+	@Override
+	protected void sendHeaders() {
+		pushToUiChannel(getInitMessage());
 	}
 
 	@Override

@@ -62,6 +62,9 @@ class TimeSeriesChartSpec extends UiChannelMockingSpecification {
 		new ModuleTestHelper.Builder(module, inputValues, outputValues)
 			.timeToFurtherPerIteration(1000)
 			.uiChannelMessages(channelMessages, getSentMessagesByStreamId())
+			.afterEachTestCase {
+				module.headersSent = false
+			}
 			.test()
 	}
 }

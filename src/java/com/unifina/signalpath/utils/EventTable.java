@@ -11,6 +11,7 @@ public class EventTable extends ModuleWithUI {
 
 	int eventTableInputCount = 1;
 	int maxRows = 20;
+	private boolean headersSent = false;
 
 	public EventTable() {
 		super();
@@ -20,18 +21,17 @@ public class EventTable extends ModuleWithUI {
 	}
 
 	@Override
-	public void initialize() {
-		super.initialize();
-
-		if (getGlobals().isRunContext()) {
+	public void sendOutput() {
+		/*
+		 * Headers must be sent before first message but after DataSourceEventQueue#initTimeReporting has adjusted
+		 * globals.time.
+		 */
+		if (!headersSent) {
 			Map<String, Object> hdrMsg = new HashMap<String, Object>();
 			hdrMsg.put("hdr", getHeaderDefinition());
 			pushToUiChannel(hdrMsg);
+			headersSent = true;
 		}
-	}
-
-	@Override
-	public void sendOutput() {
 		HashMap<String, Object> msg = new HashMap<String, Object>();
 		ArrayList<Object> nr = new ArrayList<>(2);
 		msg.put("nr", nr);
@@ -51,6 +51,7 @@ public class EventTable extends ModuleWithUI {
 
 	@Override
 	public void clearState() {
+		headersSent = false;
 	}
 
 	public Input<Object> createAndAddInput(String name) {

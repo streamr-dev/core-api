@@ -9,6 +9,7 @@ import java.util.Map;
 
 public abstract class Chart extends ModuleWithUI {
 	private String dataGrouping = "min/max";
+	protected boolean headersSent = false;
 
 	@Override
 	public void init() {
@@ -17,17 +18,18 @@ public abstract class Chart extends ModuleWithUI {
 	}
 
 	@Override
-	public void initialize() {
-		super.initialize();
-	}
-
-	@Override
 	public void sendOutput() {
+		if (!headersSent) {
+			sendHeaders();
+			headersSent = true;
+		}
 		Date timestamp = getGlobals().time;
 		if (timestamp != null) {
 			record();
 		}
 	}
+
+	protected abstract void sendHeaders();
 
 	protected abstract void record();
 
