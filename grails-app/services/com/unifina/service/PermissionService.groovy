@@ -155,7 +155,6 @@ class PermissionService {
 	}
 
 	private Permission hasTransitiveDashboardPermissions(Canvas canvas, Userish userish) {
-		// TODO: parse module id
 		List<DashboardItem> items = DashboardItem.findAllByCanvas(canvas)
 		Permission permission = Permission.withCriteria(uniqueResult: true) {
 			'in'("dashboard", items.collect { it.dashboard })
