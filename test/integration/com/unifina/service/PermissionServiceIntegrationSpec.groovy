@@ -138,7 +138,8 @@ class PermissionServiceIntegrationSpec extends IntegrationSpec {
 		anonymousKey?.delete(flush: true)
 
 		dashboard?.delete(flush: true)
-		Stream.deleteAll(stream, uiChannelStream)
+		stream.delete(flush: true)
+		uiChannelStream.delete(flush: true)
 		stream.uiChannelCanvas?.delete(flush: true)
 		uiChannelStream.uiChannelCanvas?.delete(flush: true)
 
