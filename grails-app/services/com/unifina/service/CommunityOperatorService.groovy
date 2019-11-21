@@ -24,20 +24,16 @@ import java.nio.charset.StandardCharsets
  */
 class CommunityOperatorService {
 	String baseUrl
-	HttpClient client
+	RequestConfig config
 
 	private static final TIMEOUT_SECONDS = 10
 
 	CommunityOperatorService() {
 		this.baseUrl = MapTraversal.getString(Holders.getConfig(), "streamr.cps.url");
-		RequestConfig config = RequestConfig.custom()
+		this.config = RequestConfig.custom()
 			.setConnectTimeout(TIMEOUT_SECONDS * 1000)
 			.setConnectionRequestTimeout(TIMEOUT_SECONDS * 1000)
 			.setSocketTimeout(TIMEOUT_SECONDS * 1000)
-			.build()
-
-		this.client = HttpClientBuilder.create()
-			.setDefaultRequestConfig(config)
 			.build()
 	}
 
@@ -47,6 +43,9 @@ class CommunityOperatorService {
 	}
 
 	protected ProxyResponse proxy(String url) {
+		HttpClient client = HttpClientBuilder.create()
+			.setDefaultRequestConfig(config)
+			.build()
 		ProxyResponse result = new ProxyResponse()
 		CloseableHttpResponse response
 		try {
@@ -65,24 +64,33 @@ class CommunityOperatorService {
 			}
 		} finally {
 			if (response != null) {
-				response.close()
+				try {
+					response.close()
+				} catch (IOException e) {
+					log.info("Failed to close http client response to cps.", e)
+				}
+			}
+			try {
+				client.close()
+			} catch (IOException e) {
+				log.info("Failed to close http client to cps.", e)
 			}
 		}
 		return result
 	}
 
 	ProxyResponse stats(String communityAddress) {
-		String url = String.format("%s%s%s", baseUrl, communityAddress, "/stats")
+		String url = String.format("%s%s/stats", baseUrl, communityAddress)
 		return proxy(url)
 	}
 
 	ProxyResponse members(String communityAddress) {
-		String url = String.format("%s%s%s", baseUrl, communityAddress, "/members")
+		String url = String.format("%s%s/members", baseUrl, communityAddress)
 		return proxy(url)
 	}
 
 	ProxyResponse memberStats(String communityAddress, String memberAddress) {
-		String url = String.format("%s%s%s%s", baseUrl, communityAddress, "/members/", memberAddress)
+		String url = String.format("%s%s/members/%s", baseUrl, communityAddress, memberAddress)
 		return proxy(url)
 	}
 }
