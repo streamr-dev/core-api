@@ -87,35 +87,22 @@ jobs:
       region: eu-west-1
       on:
         branch: master
-    if: NOT type IN (pull_request)
-  - stage: Build docker dev
-    env:
-    - OWNER=streamr
-    - IMAGE_NAME=engine-and-editor
-    - TAG=dev
+  - stage: Build Docker Dev/Nightly
+    if: tag IS blank AND NOT type IN (pull_request)
+    install: true
     script:
-    - grails test war
-    - docker build -f docker/Dockerfile.dev -t $OWNER/$IMAGE_NAME:$TAG .
+    - docker build -t $OWNER/$IMAGE_NAME:taggit .
     deploy:
     - provider: script
-      script: .travis_scripts/deploy_docker.sh staging
-      on:
-        branch: master
-    if: NOT type IN (pull_request)
-  - stage: Build docker Staging
-    env:
-    - OWNER=streamr
-    - IMAGE_NAME=engine-and-editor
-    - TAG=stg
+      script: .travis_scripts/build_docker.sh dev
+  - stage: Build Docker Production
+    if: tag IS present AND NOT type IN (pull_request)
+    install: true
     script:
-    - grails war
-    - docker build -f docker/Dockerfile.stg -t $OWNER/$IMAGE_NAME:$TAG .
+    - docker build -t $OWNER/$IMAGE_NAME:taggit .
     deploy:
     - provider: script
-      script: .travis_scripts/deploy_docker.sh staging
-      on:
-        branch: master
-    if: NOT type IN (pull_request)
+      script: .travis_scripts/build_docker.sh production
 after_failure: .travis_scripts/after_test_failure.sh
 notifications:
   slack:
