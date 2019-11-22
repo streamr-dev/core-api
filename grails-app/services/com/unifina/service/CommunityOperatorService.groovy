@@ -14,7 +14,6 @@ import org.apache.http.impl.client.HttpClientBuilder
 import org.apache.http.util.EntityUtils
 
 import java.nio.charset.StandardCharsets
-
 /**
  * Engine and editor proxies the following endpoints to the Community Product server:
  *
@@ -42,10 +41,7 @@ class CommunityOperatorService {
 		int statusCode
 	}
 
-	protected ProxyResponse proxy(String url) {
-		HttpClient client = HttpClientBuilder.create()
-			.setDefaultRequestConfig(config)
-			.build()
+	protected ProxyResponse proxy(HttpClient client, String url) {
 		ProxyResponse result = new ProxyResponse()
 		CloseableHttpResponse response
 		try {
@@ -80,17 +76,26 @@ class CommunityOperatorService {
 	}
 
 	ProxyResponse stats(String communityAddress) {
+		HttpClient client = HttpClientBuilder.create()
+			.setDefaultRequestConfig(config)
+			.build()
 		String url = String.format("%s%s/stats", baseUrl, communityAddress)
-		return proxy(url)
+		return proxy(client, url)
 	}
 
 	ProxyResponse members(String communityAddress) {
+		HttpClient client = HttpClientBuilder.create()
+			.setDefaultRequestConfig(config)
+			.build()
 		String url = String.format("%s%s/members", baseUrl, communityAddress)
-		return proxy(url)
+		return proxy(client, url)
 	}
 
 	ProxyResponse memberStats(String communityAddress, String memberAddress) {
+		HttpClient client = HttpClientBuilder.create()
+			.setDefaultRequestConfig(config)
+			.build()
 		String url = String.format("%s%s/members/%s", baseUrl, communityAddress, memberAddress)
-		return proxy(url)
+		return proxy(client, url)
 	}
 }
