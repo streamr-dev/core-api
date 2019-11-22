@@ -18,21 +18,24 @@ class CommunityOperatorServiceSpec extends Specification {
 	CloseableHttpResponse response
 	HttpEntity entity
 	StatusLine status
+	HttpClient client
+
+	private static interface CloseableHttpClient extends HttpClient, Closeable {}
 
 	void setup() {
 		response = Mock(CloseableHttpResponse)
 		entity = Mock(HttpEntity)
 		status = Mock(StatusLine)
-		service.client = Mock(HttpClient)
+		client = Mock(CloseableHttpClient)
 	}
 
 	void "test execute"() {
 		setup:
 		String expected = """{"result":[]}"""
 		when:
-		CommunityOperatorService.ProxyResponse result = service.proxy(url)
+		CommunityOperatorService.ProxyResponse result = service.proxy(client, url)
 		then:
-		1 * service.client.execute(_ as HttpGet) >> response
+		1 * client.execute(_ as HttpGet) >> response
 		1 * response.getStatusLine() >> status
 		1 * status.getStatusCode() >> 200
 		1 * response.getEntity() >> entity
@@ -47,9 +50,9 @@ class CommunityOperatorServiceSpec extends Specification {
 		setup:
 		String expected = ""
 		when:
-		CommunityOperatorService.ProxyResponse result = service.proxy(url)
+		CommunityOperatorService.ProxyResponse result = service.proxy(client, url)
 		then:
-		1 * service.client.execute(_ as HttpGet) >> response
+		1 * client.execute(_ as HttpGet) >> response
 		1 * response.getStatusLine() >> status
 		1 * status.getStatusCode() >> 400
 		1 * response.getEntity() >> null
@@ -62,9 +65,9 @@ class CommunityOperatorServiceSpec extends Specification {
 		setup:
 		String expected = """{"error":"bad community address format"}"""
 		when:
-		CommunityOperatorService.ProxyResponse result = service.proxy(url)
+		CommunityOperatorService.ProxyResponse result = service.proxy(client, url)
 		then:
-		1 * service.client.execute(_ as HttpGet) >> response
+		1 * client.execute(_ as HttpGet) >> response
 		1 * response.getStatusLine() >> status
 		1 * status.getStatusCode() >> 400
 		1 * response.getEntity() >> entity
@@ -77,9 +80,9 @@ class CommunityOperatorServiceSpec extends Specification {
 
 	void "test community server not responding"() {
 		when:
-		service.proxy(url)
+		service.proxy(client, url)
 		then:
-		1 * service.client.execute(_ as HttpGet) >> { throw new ConnectException("mocked: server down") }
+		1 * client.execute(_ as HttpGet) >> { throw new ConnectException("mocked: server down") }
 		def e = thrown(ProxyException)
 		e.message == "Community server is not responding"
 		e.code == "PROXY_ERROR"
@@ -90,9 +93,9 @@ class CommunityOperatorServiceSpec extends Specification {
 		setup:
 		String expected = """{"error":"community address not found"}"""
 		when:
-		CommunityOperatorService.ProxyResponse result = service.proxy(url)
+		CommunityOperatorService.ProxyResponse result = service.proxy(client, url)
 		then:
-		1 * service.client.execute(_ as HttpGet) >> response
+		1 * client.execute(_ as HttpGet) >> response
 		1 * response.getStatusLine() >> status
 		1 * status.getStatusCode() >> 404
 		1 * response.getEntity() >> entity
@@ -107,9 +110,9 @@ class CommunityOperatorServiceSpec extends Specification {
 		setup:
 		String expected = ""
 		when:
-		CommunityOperatorService.ProxyResponse result = service.proxy(url)
+		CommunityOperatorService.ProxyResponse result = service.proxy(client, url)
 		then:
-		1 * service.client.execute(_ as HttpGet) >> response
+		1 * client.execute(_ as HttpGet) >> response
 		1 * response.getStatusLine() >> status
 		1 * status.getStatusCode() >> 500
 		1 * response.close()
@@ -121,9 +124,9 @@ class CommunityOperatorServiceSpec extends Specification {
 		setup:
 		String expected = ""
 		when:
-		CommunityOperatorService.ProxyResponse result = service.proxy(url)
+		CommunityOperatorService.ProxyResponse result = service.proxy(client, url)
 		then:
-		1 * service.client.execute(_ as HttpGet) >> response
+		1 * client.execute(_ as HttpGet) >> response
 		1 * response.getStatusLine() >> status
 		1 * status.getStatusCode() >> 418
 		1 * response.close()
