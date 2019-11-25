@@ -1,5 +1,6 @@
 package com.unifina.datasource
 
+
 import com.unifina.data.Event
 import com.unifina.domain.security.SecUser
 import com.unifina.utils.Globals
@@ -149,21 +150,22 @@ class DataSourceEventQueueSpec extends Specification {
 	void "every full second between subsequent event timestamps is being reported"() {
 		setup:
 		DataSourceEventQueue queue = createQueue()
-		ITimeListener timeListener = Mock(ITimeListener)
-		queue.addTimeListener(timeListener)
+		long baseTime = queue.globals.getTime().getTime()
+		long firstExpectedSec = baseTime - (baseTime % 1000) + 1000
+		List<Long> reportedTimes = []
+
+		queue.addTimeListener(new ITimeListener() {
+			@Override
+			void setTime(Date time) {
+				reportedTimes.push(time.getTime())
+			}
+
+			@Override
+			int tickRateInSec() {
+				return 1
+			}
+		})
 		int eventsProcessed = 0
-		11 * timeListener.tickRateInSec() >> 1
-		1 * timeListener.setTime(new Date(10000))
-		1 * timeListener.setTime(new Date(11000))
-		1 * timeListener.setTime(new Date(12000))
-		1 * timeListener.setTime(new Date(13000))
-		1 * timeListener.setTime(new Date(14000))
-		1 * timeListener.setTime(new Date(15000))
-		1 * timeListener.setTime(new Date(16000))
-		1 * timeListener.setTime(new Date(17000))
-		1 * timeListener.setTime(new Date(18000))
-		1 * timeListener.setTime(new Date(19000))
-		1 * timeListener.setTime(new Date(20000))
 
 		when:
 		Thread consumerThread = Thread.start {
@@ -171,13 +173,13 @@ class DataSourceEventQueueSpec extends Specification {
 		}
 
 		Thread producerThread = Thread.start {
-			queue.enqueue(new Event<Integer>(1, new Date(10000), new Consumer<Integer>() {
+			queue.enqueue(new Event<Integer>(1, new Date(firstExpectedSec + 10000), new Consumer<Integer>() {
 				@Override
 				void accept(Integer integer) {
 					eventsProcessed++
 				}
 			}))
-			queue.enqueue(new Event<Integer>(2, new Date(20100), new Consumer<Integer>() {
+			queue.enqueue(new Event<Integer>(2, new Date(firstExpectedSec + 20100), new Consumer<Integer>() {
 				@Override
 				void accept(Integer integer) {
 					eventsProcessed++
@@ -189,6 +191,7 @@ class DataSourceEventQueueSpec extends Specification {
 		new PollingConditions().within(10, {
 			eventsProcessed == 2 && !producerThread.isAlive()
 		})
+		reportedTimes == (firstExpectedSec..(firstExpectedSec + 20000)).step(1000)
 
 		when:
 		queue.abort()
@@ -197,5 +200,32 @@ class DataSourceEventQueueSpec extends Specification {
 		new PollingConditions().within(5, {
 			!consumerThread.isAlive()
 		})
+	}
+
+	void "first reported time tick can't be less than the initial globals.time"() {
+		DataSourceEventQueue queue = createQueue()
+		Long minTime = queue.globals.time.getTime() // initialized to current system time when the Globals object is created
+		List<Long> reportedTimes = []
+
+		when:
+		queue.addTimeListener(new ITimeListener() {
+			@Override
+			void setTime(Date time) {
+				reportedTimes.add(time.getTime())
+			}
+
+			@Override
+			int tickRateInSec() {
+				return 1
+			}
+		})
+
+		queue.handleEvent(new Event<Integer>(0, new Date(minTime - 1000), 0, null))
+		queue.handleEvent(new Event<Integer>(0, new Date(minTime), 0, null))
+		queue.handleEvent(new Event<Integer>(0, new Date(minTime + 1000), 0, null))
+
+		then:
+		!reportedTimes.isEmpty()
+		reportedTimes.count { it < minTime } == 0
 	}
 }

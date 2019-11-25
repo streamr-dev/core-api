@@ -30,7 +30,7 @@ public class HistoricalEventQueue extends DataSourceEventQueue {
 	public HistoricalEventQueue(Globals globals, DataSource dataSource, int capacity) {
 		super(globals, dataSource, capacity, false);
 		speed = readSpeedConfiguration(globals);
-		simTimeStart = globals.getStartDate().getTime() - (globals.getStartDate().getTime() % 1000);
+		simTimeStart = globals.getTime().getTime();
 	}
 
 	/**
@@ -43,8 +43,6 @@ public class HistoricalEventQueue extends DataSourceEventQueue {
 
 	@Override
 	protected void beforeStart() {
-		// Set start time to simulation start time
-		initTimeReporting(simTimeStart);
 		// Remember wall-clock time to control playback speed
 		realTimeStart = System.currentTimeMillis();
 	}
