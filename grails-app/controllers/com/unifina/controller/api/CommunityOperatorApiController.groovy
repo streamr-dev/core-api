@@ -1,9 +1,10 @@
 package com.unifina.controller.api
 
 import com.unifina.api.BadRequestException
+import com.unifina.cps.CommunityOperatorService
+import com.unifina.cps.CommunityOperatorServiceImpl
 import com.unifina.security.AuthLevel
 import com.unifina.security.StreamrApi
-import com.unifina.service.CommunityOperatorService
 import com.unifina.utils.EthereumAddressValidator
 import grails.plugin.springsecurity.annotation.Secured
 
@@ -22,7 +23,7 @@ class CommunityOperatorApiController {
 		if (!isCommunityAddress(communityAddress)) {
 			throw new BadRequestException("Community address is not an ethereum address")
 		}
-		CommunityOperatorService.ProxyResponse result = communityOperatorService.stats(communityAddress)
+		CommunityOperatorServiceImpl.ProxyResponse result = communityOperatorService.stats(communityAddress)
 		response.status = result.statusCode
 		render(text: result.body, contentType: "application/json", encoding: "UTF-8")
 	}
@@ -32,7 +33,7 @@ class CommunityOperatorApiController {
 		if (!isCommunityAddress(communityAddress)) {
 			throw new BadRequestException("Community address is not an ethereum address")
 		}
-		CommunityOperatorService.ProxyResponse result = communityOperatorService.members(communityAddress)
+		CommunityOperatorServiceImpl.ProxyResponse result = communityOperatorService.members(communityAddress)
 		response.status = result.statusCode
 		render(text: result.body, contentType: "application/json", encoding: "UTF-8")
 	}
@@ -45,7 +46,7 @@ class CommunityOperatorApiController {
 		if (!isMemberAddress(memberAddress)) {
 			throw new BadRequestException("Member address is not an ethereum address")
 		}
-		CommunityOperatorService.ProxyResponse result = communityOperatorService.memberStats(communityAddress, memberAddress)
+		CommunityOperatorServiceImpl.ProxyResponse result = communityOperatorService.memberStats(communityAddress, memberAddress)
 		response.status = result.statusCode
 		render(text: result.body, contentType: "application/json", encoding: "UTF-8")
 	}
