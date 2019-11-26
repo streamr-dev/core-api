@@ -110,8 +110,7 @@ public class CommunityOperatorServiceImpl implements CommunityOperatorService {
 	}
 
 	public ProxyResponse members(String communityAddress) {
-		//String url = String.format("%s%s/members", baseUrl, communityAddress);
-		String url = "http://localhost:4444";
+		String url = String.format("%s%s/members", baseUrl, communityAddress);
 		return proxy(url);
 	}
 
