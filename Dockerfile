@@ -9,7 +9,7 @@ RUN apk add openjdk8
 RUN apk add bash mysql-client curl
 RUN sed -i "s/port=\"8080\"/port=\"8081\"/g" /usr/local/tomcat/conf/server.xml
 # Copy wait-for-it.sh script
-COPY docker/wait-for-it.sh /usr/local/tomcat/bin/wait-for-it.sh
+COPY scripts/wait-for-it.sh /usr/local/tomcat/bin/wait-for-it.sh
 
 # Copy pre-built ROOT.war into container as streamr-core.war
 COPY target/ROOT.war /usr/local/tomcat/webapps/streamr-core.war
