@@ -65,6 +65,7 @@ jobs:
     if: tag IS blank
     install: true
     script:
+    - grails prod war
     - docker build -t $OWNER/$IMAGE_NAME:taggit .
     deploy:
     - provider: script
@@ -73,6 +74,7 @@ jobs:
     if: tag IS present
     install: true
     script:
+    - grails prod war
     - docker build -t $OWNER/$IMAGE_NAME:taggit .
     deploy:
     - provider: script

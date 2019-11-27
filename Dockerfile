@@ -9,7 +9,6 @@ RUN apk add openjdk8
 RUN apk add bash mysql-client
 RUN sed -i 's/port="8080"/port="8081"/g' /usr/local/tomcat/conf/server.xml
 COPY scripts/wait-for-it.sh /usr/local/tomcat/bin/wait-for-it.sh
-RUN grails prod war
 COPY target/ROOT.war /usr/local/tomcat/webapps/streamr-core.war
 
 # Default values for ENV variables
