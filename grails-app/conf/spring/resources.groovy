@@ -1,5 +1,4 @@
 import com.streamr.api.client.StreamrClientProvider
-import com.unifina.cps.CommunityOperatorServiceImpl
 import com.unifina.provider.S3FileUploadProvider
 import com.unifina.security.RedirectAppendingAuthenticationEntryPoint
 import com.unifina.utils.AjaxAwareRequestMatcher
@@ -32,13 +31,5 @@ beans = {
 
 	streamrClient(StreamrClientProvider,
 		(String) grailsApplication.config.streamr.api.http.url
-	)
-
-	communityOperatorService(CommunityOperatorServiceImpl,
-		(Integer) grailsApplication.config.streamr.cps.connectTimeout,
-		(Integer) grailsApplication.config.streamr.cps.connectionRequestTimeout,
-		(Integer) grailsApplication.config.streamr.cps.socketTimeout,
-		(Integer) grailsApplication.config.streamr.cps.maxConnTotal,
-		(Integer) grailsApplication.config.streamr.cps.maxConnPerRoute
 	)
 }

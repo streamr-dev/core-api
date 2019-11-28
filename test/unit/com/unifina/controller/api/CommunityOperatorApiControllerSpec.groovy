@@ -2,7 +2,7 @@ package com.unifina.controller.api
 
 import com.unifina.api.BadRequestException
 import com.unifina.filters.UnifinaCoreAPIFilters
-import com.unifina.cps.CommunityOperatorServiceImpl
+import com.unifina.service.CommunityOperatorService
 import grails.test.mixin.Mock
 import grails.test.mixin.TestFor
 import spock.lang.Specification
@@ -14,7 +14,7 @@ class CommunityOperatorApiControllerSpec extends Specification {
 	final String memberAddress = "0x7d01bfdf15198da2d5ca9b956c8f95af0041de38"
 
     def setup() {
-		controller.communityOperatorService = Mock(CommunityOperatorServiceImpl)
+		controller.communityOperatorService = Mock(CommunityOperatorService)
     }
 
     void "test stats"() {
@@ -25,7 +25,7 @@ class CommunityOperatorApiControllerSpec extends Specification {
 			controller.stats()
 		}
 		then:
-		1 * controller.communityOperatorService.stats(communityAddress) >> new CommunityOperatorServiceImpl.ProxyResponse(statusCode: 200, body: """{"stats":[]}""")
+		1 * controller.communityOperatorService.stats(communityAddress) >> new CommunityOperatorService.ProxyResponse(statusCode: 200, body: """{"stats":[]}""")
 		response.json == [stats: []]
 		response.status == 200
     }
@@ -38,7 +38,7 @@ class CommunityOperatorApiControllerSpec extends Specification {
 			controller.stats()
 		}
 		then:
-		1 * controller.communityOperatorService.stats(communityAddress) >> new CommunityOperatorServiceImpl.ProxyResponse(statusCode: 500)
+		1 * controller.communityOperatorService.stats(communityAddress) >> new CommunityOperatorService.ProxyResponse(statusCode: 500)
 		response.status == 500
 		response.text == ""
 	}
@@ -65,7 +65,7 @@ class CommunityOperatorApiControllerSpec extends Specification {
 			controller.members()
 		}
 		then:
-		1 * controller.communityOperatorService.members(communityAddress) >> new CommunityOperatorServiceImpl.ProxyResponse(statusCode: 200, body: """{"members":[]}""")
+		1 * controller.communityOperatorService.members(communityAddress) >> new CommunityOperatorService.ProxyResponse(statusCode: 200, body: """{"members":[]}""")
 		response.json == [members: []]
 		response.status == 200
 	}
@@ -93,7 +93,7 @@ class CommunityOperatorApiControllerSpec extends Specification {
 			controller.memberStats()
 		}
 		then:
-		1 * controller.communityOperatorService.memberStats(communityAddress, memberAddress) >> new CommunityOperatorServiceImpl.ProxyResponse(statusCode: 200, body: """{"memberStats":[]}""")
+		1 * controller.communityOperatorService.memberStats(communityAddress, memberAddress) >> new CommunityOperatorService.ProxyResponse(statusCode: 200, body: """{"memberStats":[]}""")
 		response.json == [memberStats: []]
 		response.status == 200
 	}

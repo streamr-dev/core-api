@@ -1,25 +1,21 @@
-package com.unifina.cps;
+package com.unifina.service
 
-import com.unifina.api.ProxyException;
-import com.unifina.utils.MapTraversal;
-import grails.util.Holders;
-import org.apache.http.HttpEntity;
-import org.apache.http.HttpHeaders;
-import org.apache.http.StatusLine;
-import org.apache.http.client.config.RequestConfig;
-import org.apache.http.client.methods.CloseableHttpResponse;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.impl.client.HttpClientBuilder;
-import org.apache.http.util.EntityUtils;
-import org.apache.log4j.LogManager;
-import org.apache.log4j.Logger;
+import com.unifina.api.ProxyException
+import com.unifina.utils.MapTraversal
+import grails.util.Holders
+import org.apache.http.HttpEntity
+import org.apache.http.HttpHeaders
+import org.apache.http.StatusLine
+import org.apache.http.client.config.RequestConfig
+import org.apache.http.client.methods.CloseableHttpResponse
+import org.apache.http.client.methods.HttpGet
+import org.apache.http.impl.client.CloseableHttpClient
+import org.apache.http.impl.client.HttpClientBuilder
+import org.apache.http.util.EntityUtils
+import org.apache.log4j.LogManager
+import org.apache.log4j.Logger
 
-import java.io.IOException;
-import java.net.ConnectException;
-import java.net.SocketTimeoutException;
-import java.nio.charset.StandardCharsets;
-
+import java.nio.charset.StandardCharsets
 /**
  * Engine and editor proxies the following endpoints to the Community Product server:
  * <p>
@@ -27,17 +23,19 @@ import java.nio.charset.StandardCharsets;
  * GET /communities/{communityAddress}/members: returns list of members
  * GET /communities/{communityAddress}/members/{memberAddress}: returns individual member stats (such as balances and withdraw proofs)
  */
-public class CommunityOperatorServiceImpl implements CommunityOperatorService {
-	private static final Logger log = LogManager.getLogger(CommunityOperatorServiceImpl.class);
+public class CommunityOperatorService {
+	private static final Logger log = LogManager.getLogger(CommunityOperatorService.class);
 	private String baseUrl;
 	private CloseableHttpClient client;
 
-	public CommunityOperatorServiceImpl() {
-		this(20 * 1000, 50 * 1000, 20 * 1000, 100, 100);
-	}
-
-	public CommunityOperatorServiceImpl(int connectTimeout, int connectionRequestTimeout, int socketTimeout, int maxConnTotal, int maxConnPerRoute) {
-		this.baseUrl = MapTraversal.getString(Holders.getConfig(), "streamr.cps.url");
+	CommunityOperatorService() {
+		ConfigObject conf = Holders.getConfig()
+		this.baseUrl = MapTraversal.getString(conf, "streamr.cps.url");
+		int connectTimeout = MapTraversal.getInteger(conf, "streamr.cps.connectTimeout")
+		int connectionRequestTimeout = MapTraversal.getInteger(conf, "streamr.cps.connectionRequestTimeout")
+		int socketTimeout = MapTraversal.getInteger(conf, "streamr.cps.socketTimeout")
+		int maxConnTotal = MapTraversal.getInteger(conf, "streamr.cps.maxConnTotal")
+		int maxConnPerRoute = MapTraversal.getInteger(conf, "streamr.cps.maxConnPerRoute")
 		RequestConfig config = RequestConfig.custom()
 			.setConnectTimeout(connectTimeout)
 			.setConnectionRequestTimeout(connectionRequestTimeout)
@@ -120,23 +118,7 @@ public class CommunityOperatorServiceImpl implements CommunityOperatorService {
 	}
 
 	public static class ProxyResponse {
-		private String body = "";
-		private int statusCode;
-
-		public String getBody() {
-			return body;
-		}
-
-		public void setBody(String body) {
-			this.body = body;
-		}
-
-		public int getStatusCode() {
-			return statusCode;
-		}
-
-		public void setStatusCode(int statusCode) {
-			this.statusCode = statusCode;
-		}
+		String body = "";
+		int statusCode;
 	}
 }

@@ -1,4 +1,4 @@
-package com.unifina.cps
+package com.unifina.service
 
 import com.unifina.api.ProxyException
 import org.apache.log4j.Level
@@ -9,14 +9,14 @@ import spock.lang.Specification
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
 
-class CommunityOperatorServiceImplSpec extends Specification {
+class CommunityOperatorServiceSpec extends Specification {
 	private URI httpBinEndpoint = URI.create("http://127.0.0.1:0")
 	private final HttpBin httpBin = new HttpBin(httpBinEndpoint)
-	private CommunityOperatorServiceImpl service
+	private CommunityOperatorService service
 
 	void setup() {
 		Logger.getRootLogger().setLevel(Level.OFF)
-		Logger.getLogger(CommunityOperatorServiceImpl.class).setLevel(Level.ALL)
+		Logger.getLogger(CommunityOperatorService.class).setLevel(Level.ALL)
 		httpBin.start()
 		httpBinEndpoint = new URI(
 			httpBinEndpoint.getScheme(),
@@ -27,7 +27,7 @@ class CommunityOperatorServiceImplSpec extends Specification {
 			httpBinEndpoint.getQuery(),
 			httpBinEndpoint.getFragment()
 		)
-		service = new CommunityOperatorServiceImpl()
+		service = new CommunityOperatorService()
 	}
 
 	void cleanup() {
@@ -40,7 +40,7 @@ class CommunityOperatorServiceImplSpec extends Specification {
 		String url = httpBinEndpoint.toString() + "/stream/1"
 		String expected = """{"args":{},"headers":{"Accept":"application/json","Connection":"keep-alive","User-Agent"""
 		when:
-		CommunityOperatorServiceImpl.ProxyResponse result = service.proxy(url)
+		CommunityOperatorService.ProxyResponse result = service.proxy(url)
 		then:
 		result.body.startsWith(expected)
 		result.statusCode == 200
@@ -50,7 +50,7 @@ class CommunityOperatorServiceImplSpec extends Specification {
 		setup:
 		String url = httpBinEndpoint.toString() + "/status/400"
 		when:
-		CommunityOperatorServiceImpl.ProxyResponse result = service.proxy(url)
+		CommunityOperatorService.ProxyResponse result = service.proxy(url)
 		then:
 		result.body == ""
 		result.statusCode == 400
@@ -75,7 +75,7 @@ class CommunityOperatorServiceImplSpec extends Specification {
 		setup:
 		String url = httpBinEndpoint.toString() + "/status/404"
 		when:
-		CommunityOperatorServiceImpl.ProxyResponse result = service.proxy(url)
+		CommunityOperatorService.ProxyResponse result = service.proxy(url)
 		then:
 		result.body == ""
 		result.statusCode == 404
@@ -85,18 +85,18 @@ class CommunityOperatorServiceImplSpec extends Specification {
 		setup:
 		String url = httpBinEndpoint.toString() + "/status/500"
 		when:
-		CommunityOperatorServiceImpl.ProxyResponse result = service.proxy(url)
+		CommunityOperatorService.ProxyResponse result = service.proxy(url)
 		then:
 		result.body == ""
 		result.statusCode == 500
 	}
 
 	static class Runner implements Runnable {
-		CommunityOperatorServiceImpl service
+		CommunityOperatorService service
 		String url
-		CommunityOperatorServiceImpl.ProxyResponse response
+		CommunityOperatorService.ProxyResponse response
 
-		Runner(CommunityOperatorServiceImpl service, String url) {
+		Runner(CommunityOperatorService service, String url) {
 			this.service = service
 			this.url = url
 		}
@@ -126,18 +126,5 @@ class CommunityOperatorServiceImplSpec extends Specification {
 		for (int i = 0; i < size; i++) {
 			assert results.get(i).response.statusCode == 200
 		}
-	}
-
-	void "test socket read timeout"() {
-		setup:
-		String url = httpBinEndpoint.toString() + "/delay/3"
-		service = new CommunityOperatorServiceImpl(1000, 5000, 1000, 1, 1);
-		when:
-		service.proxy(url)
-
-		then:
-		def e = thrown(ProxyException)
-		e.getStatusCode() == 504
-		e.getMessage() == "Community server gateway timeout"
 	}
 }
