@@ -248,6 +248,45 @@ class PermissionApiControllerSpec extends ControllerSpecification {
 		response.json.operation == "read"
 	}
 
+	void "save sends an email for read permission"() {
+		setup:
+		params.resourceClass = Canvas
+		params.resourceId = canvasOwned.id
+		when:
+		request.JSON = [anonymous: false, user: "me@me.net", operation: "read"] as JSON
+		authenticatedAs(me) { controller.save() }
+		then:
+		controller.mailService.mailSent
+		1 * permissionService.canShare(me, _) >> true
+		1 * permissionService.grant(me, _, _, Operation.READ) >> new Permission(user: other, operation: Operation.READ)
+	}
+
+	void "save does not send an email for write permission"() {
+		setup:
+		params.resourceClass = Canvas
+		params.resourceId = canvasOwned.id
+		when:
+		request.JSON = [anonymous: false, user: "me@me.net", operation: "write"] as JSON
+		authenticatedAs(me) { controller.save() }
+		then:
+		!controller.mailService.mailSent
+		1 * permissionService.canShare(me, _) >> true
+		1 * permissionService.grant(me, _, _, Operation.WRITE) >> new Permission(user: other, operation: Operation.WRITE)
+	}
+
+	void "save does not send an email for share permission"() {
+		setup:
+		params.resourceClass = Canvas
+		params.resourceId = canvasOwned.id
+		when:
+		request.JSON = [anonymous: false, user: "me@me.net", operation: "share"] as JSON
+		authenticatedAs(me) { controller.save() }
+		then:
+		!controller.mailService.mailSent
+		1 * permissionService.canShare(me, _) >> true
+		1 * permissionService.grant(me, _, _, Operation.SHARE) >> new Permission(user: other, operation: Operation.SHARE)
+	}
+
 	void "delete revokes permissions"() {
 		params.id = canvasPermission.id
 		params.resourceClass = Canvas
