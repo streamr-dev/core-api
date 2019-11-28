@@ -195,9 +195,9 @@ public class GetEvents extends AbstractSignalPathModule implements EventsListene
 			if (valueList == null) {
 				throw new RuntimeException("Failed to get event params");
 			}
-
-			if (abiEvent.inputs.size() > 0) {
-				for (EventValues ev : valueList) {
+			//valueList contains only the events of type abiEvent
+			for (EventValues ev : valueList) {
+				if (abiEvent.inputs.size() > 0) {
 					// indexed and non-indexed event args are saved differently in logs and must be retrieved by different methods
 					// see https://solidity.readthedocs.io/en/v0.5.3/contracts.html#events
 					int nextIndexed = 0, nextNonIndexed = 0;
@@ -212,10 +212,10 @@ public class GetEvents extends AbstractSignalPathModule implements EventsListene
 						}
 						convertAndSend(output, value);
 					}
+				} else{
+					// events with no arguments just get a true sent as a sign of event being triggered
+					eventOutputs.get(0).send(Boolean.TRUE);
 				}
-			} else {
-				// events with no arguments just get a true sent as a sign of event being triggered
-				eventOutputs.get(0).send(Boolean.TRUE);
 			}
 		}
 	}
