@@ -345,9 +345,11 @@ class PermissionServiceIntegrationSpec extends IntegrationSpec {
 
 	void "getPermissionsTo(resource, userish) returns correct UI channel read permissions via associated dashboard"() {
 		service.systemGrantAll(me, dashboard)
+		def permissions = service.getPermissionsTo(uiChannelStream, me)
 
 		expect:
-		service.getPermissionsTo(uiChannelStream, me).size() == 1
+		permissions.size() == 1
+		permissions.get(0).operation == Permission.Operation.READ
 		service.canRead(me, uiChannelStream)
 	}
 }

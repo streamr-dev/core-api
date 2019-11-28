@@ -138,17 +138,14 @@ class PermissionService {
 			}
 		}.toList()
 
+		// Special case of UI channels: they inherit permissions from the associated canvas
 		if (resource instanceof Stream && resource.uiChannel && resource.uiChannelCanvas != null && resource.uiChannelPath != null) {
 			Canvas canvas = resource.uiChannelCanvas
+			directPermissions.addAll(getPermissionsTo(canvas, userish))
 			Permission permission = hasTransitiveDashboardPermissions(canvas, userish)
 			if (permission != null) {
 				directPermissions.add(permission)
 			}
-		}
-
-		// Special case of UI channels: they inherit permissions from the associated canvas
-		if (resource instanceof Stream && resource.uiChannel) {
-			directPermissions.addAll(getPermissionsTo(resource.uiChannelCanvas, userish))
 		}
 
 		return directPermissions
@@ -564,8 +561,6 @@ class PermissionService {
 			if (hasPermission(userish, resource.uiChannelCanvas, op)) {
 				return true
 			}
-		}
-		if (p.isEmpty() && resource instanceof Stream && resource.uiChannel) {
 			Permission permission = hasTransitiveDashboardPermissions(resource.uiChannelCanvas, userish)
 			if (permission != null) {
 				return true
