@@ -278,8 +278,6 @@ class PermissionApiControllerSpec extends ControllerSpecification {
 
 	void "user without share permission to resource can't delete another user's permission to same resource"() {
 		setup:
-		controller.permissionService = new PermissionService()
-
 		SecUser user = new SecUser(name: "name", username: "me@me.com", password: "x")
 		user.id = 10
 		user.save(validate: true, failOnError: true)
@@ -303,14 +301,15 @@ class PermissionApiControllerSpec extends ControllerSpecification {
 		when:
 		authenticatedAs(user) { controller.delete() }
 		then:
-		response.status == 403
-		Permission.findById(permission.id) != null
+		1 * permissionService.getPermissionsTo(resource) >> [ permission ]
+		1 * permissionService.canShare(user, resource) >> false
+		0 * permissionService._
+		def e = thrown(NotPermittedException)
+		e.statusCode == 403
 	}
 
 	void "user without share permission to resource can delete their own permission to resource"() {
 		setup:
-		controller.permissionService = new PermissionService()
-
 		SecUser user = new SecUser(name: "name", username: "me@me.com", password: "x")
 		user.id = 10
 		user.save(validate: true, failOnError: true)
@@ -330,14 +329,14 @@ class PermissionApiControllerSpec extends ControllerSpecification {
 		when:
 		authenticatedAs(user) { controller.delete() }
 		then:
+		1 * permissionService.getPermissionsTo(resource) >> [ permission ]
+		1 * permissionService.systemRevoke(permission)
+		0 * permissionService._
 		response.status == 204
-		Permission.findById(permission.id) == null
 	}
 
 	void "user with share permission to resource can't delete another user's permission to another resource"() {
 		setup:
-		controller.permissionService = new PermissionService()
-
 		SecUser user = new SecUser(name: "name", username: "me@me.com", password: "x")
 		user.id = 10
 		user.save(validate: true, failOnError: true)
@@ -368,8 +367,9 @@ class PermissionApiControllerSpec extends ControllerSpecification {
 		when:
 		authenticatedAs(user) { controller.delete() }
 		then:
+		1 * permissionService.getPermissionsTo(anotherResource) >> []
+		0 * permissionService._
 		thrown(NotFoundException)
-		Permission.findById(anotherPermission.id) != null
 	}
 
 	void "delete revokes permissions"() {

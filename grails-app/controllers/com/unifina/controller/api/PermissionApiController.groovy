@@ -233,17 +233,17 @@ class PermissionApiController {
 			throw new NotFoundException("permissions", id.toString())
 		}
 		Userish user = request.apiUser ?: request.apiKey
-		if (permissionService.canShare(user, resource)) {
-			// user with share permission to resource can delete another user's permission to same resource
+		if (permission.user == user) {
+			// user without share permission to resource can delete their own permission to resource
 			permissionService.systemRevoke(permission)
 			render(status: 204)
-		} else if (permission.user == user) {
-			// user without share permission to resource can delete their own permission to resource
+		} else if (permissionService.canShare(user, resource)) {
+			// user with share permission to resource can delete another user's permission to same resource
 			permissionService.systemRevoke(permission)
 			render(status: 204)
 		} else {
 			// user without share permission to resource can't delete another user's permission to same resource
-			render(status: 403)
+			throw new NotPermittedException("User without share permission to resource can't delete another user's permission to same resource.")
 		}
 	}
 }
