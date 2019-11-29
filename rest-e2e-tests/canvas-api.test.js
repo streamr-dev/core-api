@@ -11,7 +11,7 @@ const LOGGING_ENABLED = false
 
 const Streamr = initStreamrApi(REST_URL, LOGGING_ENABLED)
 
-const TIMEOUT = 60 * 1000
+const TIMEOUT = 30 * 1000
 
 const NUM_MESSAGES = 50
 
@@ -216,7 +216,7 @@ describe('Canvas API', function() {
         })
     })
 
-    describe('restarting canvas', () => {
+    function TestRestartingCanvas() {
         const messages = []
         let resentMessages
         let subscription
@@ -322,6 +322,14 @@ describe('Canvas API', function() {
             }
             messageEmitter.on('message', onMessage)
         })
+    }
+
+    describe('restarting canvas', () => {
+        describe('1st time', TestRestartingCanvas)
+        describe('2nd time', TestRestartingCanvas)
+        describe('3rd time', TestRestartingCanvas)
+        describe('4th time', TestRestartingCanvas)
+        describe('5th time', TestRestartingCanvas)
     })
 })
 
