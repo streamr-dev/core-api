@@ -2,6 +2,7 @@ const sleep = require('sleep-promise')
 const StreamrClient = require('streamr-client')
 const assert = require('chai').assert
 const fs = require('fs')
+const Emitter = require('events')
 const initStreamrApi = require('./streamr-api-clients')
 
 const REST_URL = 'http://localhost:8081/streamr-core/api/v1'
@@ -203,7 +204,6 @@ describe('Canvas API', function() {
     })
 
     describe('POST /api/v1/canvases/:id/stop', () => {
-
         it('stops the canvas', async () => {
             const response = await Streamr.api.v1.canvases
                 .stop(canvas.id)
@@ -214,13 +214,14 @@ describe('Canvas API', function() {
             assert.equal(response.status, 200, JSON.stringify(json))
             assert.equal(json.state, 'STOPPED')
         })
-
     })
 
     describe('restarting canvas', () => {
         const messages = []
         let resentMessages
         let subscription
+        const messageEmitter = new Emitter()
+
         before('cycle start/stop, subscribe, start', async () => {
             let done
             const p = new Promise((resolve, reject) => done = (err) => err ? reject(err) : resolve())
@@ -243,11 +244,13 @@ describe('Canvas API', function() {
                 },
             }, (msg) => {
                 messages.push(msg)
+                messageEmitter.emit('message', msg)
             })
 
             subscription.once('resent', () => {
                 resentMessages = messages.slice()
             })
+
             subscription.once('error', (error) => {
                 throw error
             })
@@ -269,6 +272,9 @@ describe('Canvas API', function() {
             return p
         })
 
+        afterEach(() => {
+            messageEmitter.removeAllListeners('message')
+        })
 
         after((done) => {
             subscription.once('unsubscribed', done)
@@ -297,16 +303,24 @@ describe('Canvas API', function() {
             done()
         })
 
-        it('can get new messages', async () => {
-            await streamrClient.publish(stream.id, {
+        it('can get new messages', (done) => {
+            streamrClient.publish(stream.id, {
                 numero: NUM_MESSAGES + 1,
             })
-            await sleep(WAIT_TIME / 5)
-            // last message is our message
-            const lastMessage = messages[messages.length - 1]
-            assert.ok(lastMessage, 'has last message')
-            assert.ok(lastMessage.nr, 'last message is new row')
-            assert.equal(lastMessage.nr[1], `${NUM_MESSAGES + 1}.0`)
+
+            const expected = `${NUM_MESSAGES + 1}.0`
+
+            const onMessage = (msg) => {
+                // check for message we just published
+                if (msg && msg.nr && msg.nr[1] === expected) {
+                    // success, got message before timeout
+                    messageEmitter.removeListener('message', onMessage) // clean up
+                    done()
+                    return
+                }
+                // ignore other messages
+            }
+            messageEmitter.on('message', onMessage)
         })
     })
 })
