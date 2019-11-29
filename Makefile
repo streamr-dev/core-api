@@ -20,3 +20,11 @@ test-integration:
 .PHONY: test-rest
 test-rest:
 	cd rest-e2e-tests && $(HOME)/.nvm/versions/node/v$(node_version)/bin/npm test
+
+.PHONY: build-war
+build-war:
+	grails prod war
+
+.PHONY: build-docker
+build-docker: build-war
+	docker build -t streamr-dev/engine-and-editor:dev .
