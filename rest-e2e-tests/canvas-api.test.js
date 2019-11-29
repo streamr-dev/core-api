@@ -267,6 +267,9 @@ describe('Canvas API', function() {
                     .withSessionToken(sessionToken)
                     .call()
                 assert.equal(r3.status, 200)
+
+                // reduce flakiness by allowing the subscriptions of the canvas some time to get set up
+                await sleep(5000)
                 done()
             })
             return p
@@ -293,13 +296,15 @@ describe('Canvas API', function() {
             if (!resentMessages) {
                 // wait for resent if no resent event yet
                 subscription.once('resent', () => {
-                    assert.equal(resentMessages && resentMessages.length, table.options.uiResendLast.value)
+                    assert.equal(resentMessages && resentMessages.length, table.options.uiResendLast.value,
+                        `Resent messages (waited): ${resentMessages.map((msg) => JSON.stringify(msg))}`)
                     done()
                 })
                 return
             }
 
-            assert.equal(resentMessages && resentMessages.length, table.options.uiResendLast.value)
+            assert.equal(resentMessages && resentMessages.length, table.options.uiResendLast.value,
+                `Resent messages (didn't wait): ${resentMessages.map((msg) => JSON.stringify(msg))}`)
             done()
         })
 
@@ -313,8 +318,10 @@ describe('Canvas API', function() {
                     messageEmitter.removeListener('message', onMessage) // clean up
                     done()
                     return
+                } else {
+                    // Ignore other messages or log them for debugging
+                    // console.log(`Got other message: ${JSON.stringify(msg)}`)
                 }
-                // ignore other messages
             }
             messageEmitter.on('message', onMessage)
 
