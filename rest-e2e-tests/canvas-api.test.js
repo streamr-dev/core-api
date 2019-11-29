@@ -304,10 +304,6 @@ describe('Canvas API', function() {
         })
 
         it('can get new messages', (done) => {
-            streamrClient.publish(stream.id, {
-                numero: NUM_MESSAGES + 1,
-            })
-
             const expected = `${NUM_MESSAGES + 1}.0`
 
             const onMessage = (msg) => {
@@ -321,6 +317,10 @@ describe('Canvas API', function() {
                 // ignore other messages
             }
             messageEmitter.on('message', onMessage)
+
+            streamrClient.publish(stream.id, {
+                numero: NUM_MESSAGES + 1,
+            })
         })
     }
 
