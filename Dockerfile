@@ -15,6 +15,7 @@ COPY target/ROOT.war /usr/local/tomcat/webapps/streamr-core.war
 ENV DB_USER root
 ENV DB_PASS password
 ENV DB_HOST mysql
+ENV DB_PORT 3306
 ENV DB_NAME core_test
 ENV SMTP_HOST smtp
 ENV SMTP_PORT 25
