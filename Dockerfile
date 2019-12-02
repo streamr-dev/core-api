@@ -39,7 +39,7 @@ ENV JAVA_OPTS \
 	-Djava.awt.headless=true \
 	-server \
 	-Xms128M \
-	-Xmx256M \
+	-Xmx512M \
 	-XX:+UseG1GC
 ENV CATALINA_OPTS \
 	-Dstreamr.database.user=$DB_USER \
@@ -53,7 +53,6 @@ ENV CATALINA_OPTS \
 	-Dstreamr.api.websocket.url=$WS_SERVER \
 	-Dstreamr.http.api.server=$HTTPS_API_SERVER  \
 	-Dstreamr.url=$STREAMR_URL \
-	-Dmarketplace.url=$MARKETPLACE_URL \
 	-Daws.accessKeyId=$AWS_ACCESS_KEY_ID \
 	-Daws.secretKey=$AWS_SECRET_KEY \
 	-Dstreamr.fileUpload.s3.bucket=$FILEUPLOAD_S3_BUCKET \
