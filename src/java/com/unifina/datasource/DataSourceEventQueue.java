@@ -46,6 +46,11 @@ public class DataSourceEventQueue {
 		this.masterClock = new TimePropagationRoot(dataSource);
 		this.queue = createQueue(capacity);
 		this.measureLatency = measureLatency;
+
+		// globals.getTime() is the start time of the run. The first reported tick should be the next full second.
+		lastReportedClockTick = globals.getTime().getTime() - globals.getTime().getTime() % 1000;
+		DateTime now = new DateTime(globals.getTime(), DateTimeZone.UTC);
+		nextDay = now.minusMillis(now.getMillisOfDay()).plusDays(1);
 	}
 
 	/**
@@ -192,20 +197,6 @@ public class DataSourceEventQueue {
 		return aborted;
 	}
 
-	private boolean isTimeReportingInitialized() {
-		return lastReportedClockTick > Long.MIN_VALUE;
-	}
-
-	protected void initTimeReporting(long firstTime) {
-		if (!isTimeReportingInitialized()) {
-			lastReportedClockTick = firstTime;
-			globals.time = new Date(firstTime);
-
-			DateTime now = new DateTime(firstTime, DateTimeZone.UTC);
-			nextDay = now.minusMillis(now.getMillisOfDay()).plusDays(1);
-		}
-	}
-
 	private void tickClockIfNecessary(long eventTime) {
 		while (lastReportedClockTick + CLOCK_TICK_INTERVAL_MILLIS <= eventTime) {
 			lastReportedClockTick += CLOCK_TICK_INTERVAL_MILLIS;
@@ -240,11 +231,6 @@ public class DataSourceEventQueue {
 		final long startTimeNanos = System.nanoTime();
 
 		try {
-			if (!isTimeReportingInitialized()) {
-				long time = event.getTimestamp().getTime();
-				initTimeReporting((time - (time % 1000)) - 1000);
-			}
-
 			// Events across different streams/producers aren't necessarily ordered in time.
 			// Never report out-of-order time to modules to prevent weird effects.
 			// Instead, always use the latest observed time as globals.time.
