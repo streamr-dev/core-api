@@ -51,7 +51,7 @@ ENV CATALINA_OPTS \
 	-Dstreamr.cassandra.hosts=$CASSANDRA_HOST \
 	-Dstreamr.redis.hosts=$REDIS_HOSTS \
 	-Dstreamr.api.websocket.url=$WS_SERVER \
-	-Dstreamr.http.api.server=$HTTPS_API_SERVER  \
+	-Dstreamr.api.http.url=$HTTPS_API_SERVER  \
 	-Dstreamr.url=$STREAMR_URL \
 	-Daws.accessKeyId=$AWS_ACCESS_KEY_ID \
 	-Daws.secretKey=$AWS_SECRET_KEY \
