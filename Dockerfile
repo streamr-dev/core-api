@@ -21,9 +21,10 @@ ENV SMTP_HOST smtp
 ENV SMTP_PORT 25
 ENV CASSANDRA_HOST cassandra
 ENV CASSANDRA_PORT 9042
+ENV CASSANDRA_KEYSPACE streamr_dev
 ENV REDIS_HOSTS redis
-ENV WS_SERVER ws://engine-and-editor/api/v1/ws
-ENV HTTPS_API_SERVER http://engine-and-editor/api/v1
+ENV WS_SERVER ws://10.200.10.1/api/v1/ws
+ENV HTTPS_API_SERVER http://10.200.10.1/api/v1
 ENV STREAMR_URL http://localhost
 ENV MARKETPLACE_URL http://localhost
 ENV AWS_ACCESS_KEY_ID TODO
@@ -33,6 +34,7 @@ ENV FILEUPLOAD_S3_REGION eu-west-1
 ENV CPS_URL http://community-product:8085/communities/
 ENV ETHEREUM_DEFAULT_NETWORK local
 ENV ETHEREUM_NETWORKS_LOCAL http://ganache:8545
+ENV STREAMR_ENCRYPTION_PASSWORD password
 
 # Flags to pass to the JVM
 ENV JAVA_OPTS \
@@ -49,6 +51,7 @@ ENV CATALINA_OPTS \
 	-Dgrails.mail.host=$SMTP_HOST \
 	-Dgrails.mail.port=$SMTP_PORT \
 	-Dstreamr.cassandra.hosts=$CASSANDRA_HOST \
+	-Dstreamr.cassandra.keySpace=$CASSANDRA_KEYSPACE \
 	-Dstreamr.redis.hosts=$REDIS_HOSTS \
 	-Dstreamr.api.websocket.url=$WS_SERVER \
 	-Dstreamr.api.http.url=$HTTPS_API_SERVER  \
@@ -59,7 +62,8 @@ ENV CATALINA_OPTS \
 	-Dstreamr.fileUpload.s3.region=$FILEUPLOAD_S3_REGION \
 	-Dstreamr.cps.url=$CPS_URL \
 	-Dstreamr.ethereum.defaultNetwork=$ETHEREUM_DEFAULT_NETWORK \
-	-Dstreamr.ethereum.networks.local=$ETHEREUM_NETWORKS_LOCAL
+	-Dstreamr.ethereum.networks.local=$ETHEREUM_NETWORKS_LOCAL \
+	-Dstreamr.encryption.password=$STREAMR_ENCRYPTION_PASSWORD
 
 EXPOSE 8081
 # Wait for MySQL server and Cassandra to be ready
