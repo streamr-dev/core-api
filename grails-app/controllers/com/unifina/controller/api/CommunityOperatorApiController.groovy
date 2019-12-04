@@ -49,4 +49,11 @@ class CommunityOperatorApiController {
 		response.status = result.statusCode
 		render(text: result.body, contentType: "application/json", encoding: "UTF-8")
 	}
+
+	@StreamrApi(authenticationLevel = AuthLevel.NONE)
+	def summary() {
+		CommunityOperatorService.ProxyResponse result = communityOperatorService.summary()
+		response.status = result.statusCode
+		render(text: result.body, contentType: "application/json", encoding: "UTF-8")
+	}
 }

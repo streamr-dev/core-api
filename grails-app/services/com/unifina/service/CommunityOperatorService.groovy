@@ -121,6 +121,10 @@ public class CommunityOperatorService implements InitializingBean {
 		return proxy(url);
 	}
 
+	public ProxyResponse summary() {
+		return proxy(baseUrl);
+	}
+
 	public static class ProxyResponse {
 		String body = "";
 		int statusCode;
