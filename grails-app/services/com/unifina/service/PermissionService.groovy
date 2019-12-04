@@ -153,6 +153,9 @@ class PermissionService {
 
 	private Permission hasTransitiveDashboardPermissions(Canvas canvas, Userish userish) {
 		List<DashboardItem> items = DashboardItem.findAllByCanvas(canvas)
+		if (items.isEmpty()) {
+			return null
+		}
 		Permission permission = Permission.withCriteria(uniqueResult: true) {
 			'in'("dashboard", items.collect { it.dashboard })
 			eq("operation", Operation.READ)
