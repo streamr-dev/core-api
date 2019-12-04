@@ -94,7 +94,7 @@ class PermissionServiceIntegrationSpec extends IntegrationSpec {
 		service.grant(anotherUser, dashAllowed, anonymousKey)
 
 		canvas = new Canvas().save(validate: true, failOnError: true)
-		stream = new Stream(name: "ui channel", uiChannel: true, uiChannelCanvas: canvas)
+		stream = new Stream(name: "ui channel", uiChannel: true, uiChannelCanvas: canvas, uiChannelPath: "/canvases/" + canvas.id + "/modules/2")
 		stream.id = "stream-id"
 		stream.save(validate: true, failOnError: true)
 
