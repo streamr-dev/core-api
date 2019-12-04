@@ -16,7 +16,7 @@ class CommunityOperatorServiceSpec extends Specification {
 
 	void setup() {
 		Logger.getRootLogger().setLevel(Level.OFF)
-		Logger.getLogger(CommunityOperatorService.class).setLevel(Level.ALL)
+		Logger.getLogger(CommunityOperatorService.class).setLevel(Level.OFF)
 		httpBin.start()
 		httpBinEndpoint = new URI(
 			httpBinEndpoint.getScheme(),
@@ -28,6 +28,7 @@ class CommunityOperatorServiceSpec extends Specification {
 			httpBinEndpoint.getFragment()
 		)
 		service = new CommunityOperatorService()
+		service.grailsApplication = getGrailsApplication()
 	}
 
 	void cleanup() {
@@ -37,6 +38,7 @@ class CommunityOperatorServiceSpec extends Specification {
 
 	void "test execute"() {
 		setup:
+		service.afterPropertiesSet()
 		String url = httpBinEndpoint.toString() + "/stream/1"
 		String expected = """{"args":{},"headers":{"Accept":"application/json","Connection":"keep-alive","User-Agent"""
 		when:
@@ -48,6 +50,7 @@ class CommunityOperatorServiceSpec extends Specification {
 
 	void "test execute returns 400"() {
 		setup:
+		service.afterPropertiesSet()
 		String url = httpBinEndpoint.toString() + "/status/400"
 		when:
 		CommunityOperatorService.ProxyResponse result = service.proxy(url)
@@ -58,6 +61,7 @@ class CommunityOperatorServiceSpec extends Specification {
 
 	void "test community server not responding"() {
 		setup:
+		service.afterPropertiesSet()
 		ProxyException e
 		when:
 		try {
@@ -73,6 +77,7 @@ class CommunityOperatorServiceSpec extends Specification {
 
 	void "test execute returns 404"() {
 		setup:
+		service.afterPropertiesSet()
 		String url = httpBinEndpoint.toString() + "/status/404"
 		when:
 		CommunityOperatorService.ProxyResponse result = service.proxy(url)
@@ -83,6 +88,7 @@ class CommunityOperatorServiceSpec extends Specification {
 
 	void "test execute returns 500"() {
 		setup:
+		service.afterPropertiesSet()
 		String url = httpBinEndpoint.toString() + "/status/500"
 		when:
 		CommunityOperatorService.ProxyResponse result = service.proxy(url)
@@ -109,6 +115,7 @@ class CommunityOperatorServiceSpec extends Specification {
 
 	void "test connection pool is configured"() {
 		setup:
+		service.afterPropertiesSet()
 		String url = httpBinEndpoint.toString() + "/delay/4"
 		int size = 10
 
@@ -126,5 +133,21 @@ class CommunityOperatorServiceSpec extends Specification {
 		for (int i = 0; i < size; i++) {
 			assert results.get(i).response.statusCode == 200
 		}
+	}
+
+	void "test socket read timeout"() {
+		setup:
+		grailsApplication.config.streamr.cps.connectTimeout = 1000
+		grailsApplication.config.streamr.cps.connectionRequestTimeout = 5000
+		grailsApplication.config.streamr.cps.socketTimeout = 1000
+		service.afterPropertiesSet()
+		String url = httpBinEndpoint.toString() + "/delay/3"
+		when:
+		service.proxy(url)
+
+		then:
+		def e = thrown(ProxyException)
+		e.getStatusCode() == 504
+		e.getMessage() == "Community server gateway timeout"
 	}
 }
