@@ -68,13 +68,13 @@ class PermissionApiControllerSpec extends ControllerSpecification {
 		streamShared = newStream("shared", other)
 		streamRestricted = newStream("restricted", other)
 
-		canvasPermission = new Permission(id: 1, user: me, clazz: Canvas.name, operation: Operation.SHARE).save(validate: false)
-		streamPermission = new Permission(id: 2, user: me, clazz: Stream.name, operation: Operation.SHARE).save(validate: false)
-		canvasAnonPermission = new Permission(id: 3, anonymous: true, clazz: Canvas.name, operation: Operation.READ).save(validate: false)
+		canvasPermission = new Permission(id: 1, user: me, clazz: Canvas.name, stringId: canvasShared.id, operation: Operation.SHARE).save(validate: false)
+		streamPermission = new Permission(id: 2, user: me, clazz: Stream.name, longId: streamShared.id, operation: Operation.SHARE).save(validate: false)
+		canvasAnonPermission = new Permission(id: 3, anonymous: true, clazz: Canvas.name, stringId: canvasPublic.id, operation: Operation.READ).save(validate: false)
 
 		// read permission allows opening stream/canvas but not opening sharing-dialog for that stream/canvas
-		new Permission(user: me, clazz: Canvas.name, operation: Operation.READ).save(validate: false)
-		new Permission(user: me, clazz: Stream.name, operation: Operation.READ).save(validate: false)
+		new Permission(user: me, clazz: Canvas.name, stringId: canvasRestricted.id, operation: Operation.READ).save(validate: false)
+		new Permission(user: me, clazz: Stream.name, longId: streamRestricted.id, operation: Operation.READ).save(validate: false)
 
 		// returned from API, for resource owner, together with granted permissions
 		ownerPermissions = [
@@ -239,6 +239,45 @@ class PermissionApiControllerSpec extends ControllerSpecification {
 		response.status == 201
 		response.json.user == ethUser.username
 		response.json.operation == "read"
+	}
+
+	void "save sends an email for read permission"() {
+		setup:
+		params.resourceClass = Canvas
+		params.resourceId = canvasOwned.id
+		when:
+		request.JSON = [anonymous: false, user: "me@me.net", operation: "read"] as JSON
+		authenticatedAs(me) { controller.save() }
+		then:
+		controller.mailService.mailSent
+		1 * permissionService.canShare(me, _) >> true
+		1 * permissionService.grant(me, _, _, Operation.READ) >> new Permission(user: other, operation: Operation.READ)
+	}
+
+	void "save does not send an email for write permission"() {
+		setup:
+		params.resourceClass = Canvas
+		params.resourceId = canvasOwned.id
+		when:
+		request.JSON = [anonymous: false, user: "me@me.net", operation: "write"] as JSON
+		authenticatedAs(me) { controller.save() }
+		then:
+		!controller.mailService.mailSent
+		1 * permissionService.canShare(me, _) >> true
+		1 * permissionService.grant(me, _, _, Operation.WRITE) >> new Permission(user: other, operation: Operation.WRITE)
+	}
+
+	void "save does not send an email for share permission"() {
+		setup:
+		params.resourceClass = Canvas
+		params.resourceId = canvasOwned.id
+		when:
+		request.JSON = [anonymous: false, user: "me@me.net", operation: "share"] as JSON
+		authenticatedAs(me) { controller.save() }
+		then:
+		!controller.mailService.mailSent
+		1 * permissionService.canShare(me, _) >> true
+		1 * permissionService.grant(me, _, _, Operation.SHARE) >> new Permission(user: other, operation: Operation.SHARE)
 	}
 
 	void "user with share permission to resource can delete another user's permission to same resource"() {
