@@ -98,4 +98,11 @@ class CommunityOperatorService {
 		String url = String.format("%s%s/members/%s", baseUrl, communityAddress, memberAddress)
 		return proxy(client, url)
 	}
+
+	ProxyResponse summary(String communityAddress, String memberAddress) {
+		HttpClient client = HttpClientBuilder.create()
+			.setDefaultRequestConfig(config)
+			.build()
+		return proxy(client, baseUrl)
+	}
 }
