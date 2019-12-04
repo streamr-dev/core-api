@@ -8,7 +8,7 @@
           "name": "numero",
           "canConnect": true,
           "noRepeat": false,
-          "id": "myId_0_1453815974997",
+          "id": "ep_zYI9pHCPTDm4z33iC_ch4Q",
           "type": "Double",
           "export": false,
           "longName": "Stream.numero"
@@ -19,7 +19,7 @@
           "name": "areWeDoneYet",
           "canConnect": true,
           "noRepeat": false,
-          "id": "myId_0_1453815975004",
+          "id": "ep_QCnGbntbQkuBxKn-YTRovg",
           "type": "Boolean",
           "export": false,
           "longName": "Stream.areWeDoneYet"
@@ -217,7 +217,7 @@
       },
       "inputs": [
         {
-          "sourceId": "myId_0_1453815974997",
+          "sourceId": "ep_zYI9pHCPTDm4z33iC_ch4Q",
           "canToggleDrivingInput": true,
           "drivingInput": true,
           "type": "Double",
@@ -313,11 +313,102 @@
       "type": "module",
       "canClearState": true,
       "hash": 3
+    },
+    {
+      "outputs": [],
+      "inputs": [
+        {
+          "sourceId": "ep_zYI9pHCPTDm4z33iC_ch4Q",
+          "canToggleDrivingInput": false,
+          "displayName": "numero",
+          "drivingInput": true,
+          "type": "Object",
+          "connected": true,
+          "requiresConnection": false,
+          "name": "endpoint-1573446921385",
+          "canConnect": true,
+          "id": "3874698d-4ece-41b6-b686-9848b725a261",
+          "jsClass": "VariadicInput",
+          "variadic": {
+            "isLast": false,
+            "index": 1
+          },
+          "acceptedTypes": [
+            "Object"
+          ],
+          "export": false,
+          "longName": "Table.numero"
+        },
+        {
+          "canToggleDrivingInput": false,
+          "displayName": "in2",
+          "drivingInput": true,
+          "type": "Object",
+          "connected": false,
+          "requiresConnection": false,
+          "name": "endpoint-9a04ee06-c51f-45ca-8f79-ead8e91b2606",
+          "canConnect": true,
+          "id": "9a04ee06-c51f-45ca-8f79-ead8e91b2606",
+          "jsClass": "VariadicInput",
+          "variadic": {
+            "isLast": true,
+            "index": 2
+          },
+          "acceptedTypes": [
+            "Object"
+          ],
+          "export": false,
+          "longName": "Table.in2"
+        }
+      ],
+      "uiChannel": {
+        "webcomponent": "streamr-table",
+        "name": "Table",
+        "id": "bgZJPowgTVywNbnKCxGFtw"
+      },
+      "canRefresh": false,
+      "params": [],
+      "jsModule": "TableModule",
+      "type": "module event-table-module",
+      "canClearState": true,
+      "layout": {
+        "width": "250px",
+        "position": {
+          "top": "167px",
+          "left": "1022px"
+        },
+        "height": "251px"
+      },
+      "tableConfig": {
+        "headers": [
+          "timestamp",
+          "numero"
+        ],
+        "title": "Table"
+      },
+      "name": "Table",
+      "options": {
+        "maxRows": {
+          "type": "int",
+          "value": 20
+        },
+        "showOnlyNewValues": {
+          "type": "boolean",
+          "value": true
+        },
+        "uiResendLast": {
+          "type": "int",
+          "value": 20
+        }
+      },
+      "id": 527,
+      "hash": 4
     }
   ],
+  "settings": {},
   "uiChannel": {
     "webcomponent": null,
     "name": "Notifications",
-    "id": "K2bPJOACRG6y-jv2GG0S8w"
+    "id": "iwJp1XpaTD6aRS8jba_Pyw"
   }
 }

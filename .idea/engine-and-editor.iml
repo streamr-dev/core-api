@@ -416,7 +416,7 @@
           <root url="jar://$MAVEN_REPOSITORY$/org/web3j/utils/4.4.1/utils-4.4.1.jar!/" />
           <root url="jar://$MAVEN_REPOSITORY$/com/google/guava/guava/19.0/guava-19.0.jar!/" />
           <root url="jar://$MAVEN_REPOSITORY$/com/google/code/gson/gson/2.8.5/gson-2.8.5.jar!/" />
-          <root url="jar://$MAVEN_REPOSITORY$/com/streamr/client/1.2.1/client-1.2.1.jar!/" />
+          <root url="jar://$MAVEN_REPOSITORY$/com/streamr/client/1.2.2/client-1.2.2.jar!/" />
         </CLASSES>
         <JAVADOC />
         <SOURCES>
