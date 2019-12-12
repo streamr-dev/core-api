@@ -1,5 +1,7 @@
 #!/bin/bash
 
+set -e
+
 sudo /etc/init.d/mysql stop
 (cd rest-e2e-tests && npm install)
 git clone https://github.com/streamr-dev/streamr-docker-dev.git

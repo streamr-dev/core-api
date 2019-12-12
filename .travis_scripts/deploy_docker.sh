@@ -1,5 +1,7 @@
 #!/bin/bash
 
+set -e
+
 # Script for logging in to Docker service and to tag and push docker images
 if [ -z "$1" ]; then
 	echo "deploy_docker.sh: docker build target not defined error: use 'dev' or 'production'" 1>&2
