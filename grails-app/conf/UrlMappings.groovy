@@ -110,5 +110,6 @@ class UrlMappings {
 		"/api/v1/communities/$communityAddress/stats"(method: "GET", controller: "communityOperatorApi", action: "stats")
 		"/api/v1/communities/$communityAddress/members"(method: "GET", controller: "communityOperatorApi", action: "members")
 		"/api/v1/communities/$communityAddress/members/$memberAddress"(method: "GET", controller: "communityOperatorApi", action: "memberStats")
+		"/api/v1/communities"(method: "GET", controller: "communityOperatorApi", action: "summary")
 	}
 }
