@@ -218,6 +218,8 @@ class SubscriptionServiceSpec extends BeanMockingSpecification {
 		1 * ethereumIntegrationKeyService.getEthereumUser(address) >> user
 		1 * permissionService.systemGrant(user, s1, Permission.Operation.READ, _, _) >> p3
 		1 * permissionService.systemGrant(user, s2, Permission.Operation.READ, _, _) >> p4
+		1 * permissionService.systemRevoke(p1) >> { p1.delete(flush: true) }
+		1 * permissionService.systemRevoke(p2) >> { p2.delete(flush: true) }
 		!Permission.exists(p1.id)
 		!Permission.exists(p2.id)
 	}
@@ -309,6 +311,8 @@ class SubscriptionServiceSpec extends BeanMockingSpecification {
 		then:
 		1 * permissionService.systemGrant(user2, s1, Permission.Operation.READ, _, _) >> p3
 		1 * permissionService.systemGrant(user2, s2, Permission.Operation.READ, _, _) >> p4
+		1 * permissionService.systemRevoke(p1) >> { p1.delete(flush: true) }
+		1 * permissionService.systemRevoke(p2) >> { p2.delete(flush: true) }
 		!Permission.exists(p1.id)
 		!Permission.exists(p2.id)
 	}
@@ -333,11 +337,11 @@ class SubscriptionServiceSpec extends BeanMockingSpecification {
 
 		setup: "create permissions"
 		Subscription sub1 = new PaidSubscription(product: product, address: address1).save(failOnError: true, validate: false)
-		new Permission(stream: s1, subscription: sub1, endsAt: new Date()).save(failOnError: true, validate: false)
-		new Permission(stream: s2, subscription: sub1, endsAt: new Date()).save(failOnError: true, validate: false)
+		Permission p1 = new Permission(stream: s1, subscription: sub1, endsAt: new Date()).save(failOnError: true, validate: false)
+		Permission p2 = new Permission(stream: s2, subscription: sub1, endsAt: new Date()).save(failOnError: true, validate: false)
 
 		Subscription sub2 = new PaidSubscription(product: product2, address: address1).save(failOnError: true, validate: false)
-		new Permission(stream: s3, subscription: sub2, endsAt: new Date()).save(failOnError: true, validate: false)
+		Permission p3 = new Permission(stream: s3, subscription: sub2, endsAt: new Date()).save(failOnError: true, validate: false)
 
 		Subscription sub3 = new PaidSubscription(product: product, address: address2).save(failOnError: true, validate: false)
 		new Permission(stream: s1, subscription: sub3, endsAt: new Date()).save(failOnError: true, validate: false)
@@ -352,6 +356,9 @@ class SubscriptionServiceSpec extends BeanMockingSpecification {
 		when:
 		service.beforeIntegrationKeyRemoved(integrationKey)
 		then:
+		1 * permissionService.systemRevoke(p1) >> { p1.delete(flush: true) }
+		1 * permissionService.systemRevoke(p2) >> { p2.delete(flush: true) }
+		1 * permissionService.systemRevoke(p3) >> { p3.delete(flush: true) }
 		Permission.findAll()*.id == [4L, 5L, 6L, 7L]
 	}
 
