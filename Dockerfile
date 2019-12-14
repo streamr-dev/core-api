@@ -31,9 +31,8 @@ ENV AWS_ACCESS_KEY_ID TODO
 ENV AWS_SECRET_KEY TODO
 ENV FILEUPLOAD_S3_BUCKET streamr-dev-public
 ENV FILEUPLOAD_S3_REGION eu-west-1
-ENV CPS_URL http://community-product:8085/communities/
-ENV ETHEREUM_DEFAULT_NETWORK local
-ENV ETHEREUM_NETWORKS_LOCAL http://ganache:8545
+ENV CPS_URL http://10.200.10.1:8085/communities/
+ENV ETHEREUM_SERVER_URL http://10.200.10.1:8545
 ENV STREAMR_ENCRYPTION_PASSWORD password
 
 # Flags to pass to the JVM
@@ -61,8 +60,7 @@ ENV CATALINA_OPTS \
 	-Dstreamr.fileUpload.s3.bucket=$FILEUPLOAD_S3_BUCKET \
 	-Dstreamr.fileUpload.s3.region=$FILEUPLOAD_S3_REGION \
 	-Dstreamr.cps.url=$CPS_URL \
-	-Dstreamr.ethereum.defaultNetwork=$ETHEREUM_DEFAULT_NETWORK \
-	-Dstreamr.ethereum.networks.local=$ETHEREUM_NETWORKS_LOCAL \
+	-Dstreamr.ethereum.networks.local=$ETHEREUM_SERVER_URL \
 	-Dstreamr.encryption.password=$STREAMR_ENCRYPTION_PASSWORD
 
 EXPOSE 8081
