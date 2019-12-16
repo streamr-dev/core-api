@@ -31,15 +31,15 @@ build-war-dev: clean
 
 .PHONY: docker-build-dev
 docker-build-dev: build-war-dev
-	docker build -t streamr-dev/engine-and-editor:dev .
+	docker build -t streamr/engine-and-editor:dev .
 
 .PHONY: docker-push-dev
 docker-push-dev: docker-build-dev
-	docker push streamr-dev/engine-and-editor:dev
+	docker push streamr/engine-and-editor:dev
 
 .PHONY: docker-run-dev
 docker-run-dev:
-	docker run -i -t -d --rm -p 8081:8081/tcp streamr-dev/engine-and-editor:dev
+	docker run -i -t -d --rm -p 8081:8081/tcp streamr/engine-and-editor:dev
 
 # Auxiliary targets
 
