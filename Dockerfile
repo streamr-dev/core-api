@@ -4,9 +4,13 @@ FROM tomcat:7.0-jre8-alpine
 # Install dependencies
 #   bash: required by wait_for_it.sh script
 #   mysql-client: required for checking that mysql is up and running
-RUN apk update
-RUN apk add openjdk8
-RUN apk add bash mysql-client
+#   curl: container healthcheck
+RUN apk update && apk add \
+    openjdk8 \
+    bash \
+    mysql-client \
+    curl \
+    && rm -rf /var/cache/apk/*
 RUN sed -i 's/port="8080"/port="8081"/g' /usr/local/tomcat/conf/server.xml
 COPY scripts/wait-for-it.sh /usr/local/tomcat/bin/wait-for-it.sh
 COPY target/ROOT.war /usr/local/tomcat/webapps/streamr-core.war
@@ -65,6 +69,7 @@ ENV CATALINA_OPTS \
 	-Dstreamr.ethereum.networks.local=$ETHEREUM_NETWORKS_LOCAL \
 	-Dstreamr.encryption.password=$STREAMR_ENCRYPTION_PASSWORD
 
+HEALTHCHECK --interval=5m --timeout=3s --start-period=100s --retries=3 CMD /usr/bin/curl -s http://localhost:8081/streamr-core/api/v1/products || exit 1
 EXPOSE 8081
 # Wait for MySQL server and Cassandra to be ready
 CMD ["sh", "-c", "wait-for-it.sh $DB_HOST:$DB_PORT --timeout=120 && while ! mysql --user=$DB_USER --host=$DB_HOST --password=$DB_PASS $DB_NAME -e \"SELECT 1;\"; do echo 'waiting for db'; sleep 1; done && wait-for-it.sh $CASSANDRA_HOST:$CASSANDRA_PORT --timeout=120 && catalina.sh run"]
