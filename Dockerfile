@@ -31,9 +31,8 @@ ENV AWS_ACCESS_KEY_ID TODO
 ENV AWS_SECRET_KEY TODO
 ENV FILEUPLOAD_S3_BUCKET streamr-dev-public
 ENV FILEUPLOAD_S3_REGION eu-west-1
-ENV CPS_URL http://community-product:8085/communities/
-ENV ETHEREUM_DEFAULT_NETWORK local
-ENV ETHEREUM_NETWORKS_LOCAL http://ganache:8545
+ENV CPS_URL http://10.200.10.1:8085/communities/
+ENV ETHEREUM_SERVER_URL http://10.200.10.1:8545
 ENV STREAMR_ENCRYPTION_PASSWORD password
 
 # Flags to pass to the JVM
@@ -43,7 +42,6 @@ ENV JAVA_OPTS \
 	-Xms128M \
 	-Xmx512M \
 	-XX:+UseG1GC
-
 
 EXPOSE 8081
 # Wait for MySQL server and Cassandra to be ready
