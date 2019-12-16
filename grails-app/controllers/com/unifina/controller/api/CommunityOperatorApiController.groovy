@@ -1,9 +1,9 @@
 package com.unifina.controller.api
 
 import com.unifina.api.BadRequestException
+import com.unifina.service.CommunityOperatorService
 import com.unifina.security.AuthLevel
 import com.unifina.security.StreamrApi
-import com.unifina.service.CommunityOperatorService
 import com.unifina.utils.EthereumAddressValidator
 import grails.plugin.springsecurity.annotation.Secured
 
@@ -46,6 +46,13 @@ class CommunityOperatorApiController {
 			throw new BadRequestException("Member address is not an ethereum address")
 		}
 		CommunityOperatorService.ProxyResponse result = communityOperatorService.memberStats(communityAddress, memberAddress)
+		response.status = result.statusCode
+		render(text: result.body, contentType: "application/json", encoding: "UTF-8")
+	}
+
+	@StreamrApi(authenticationLevel = AuthLevel.NONE)
+	def summary() {
+		CommunityOperatorService.ProxyResponse result = communityOperatorService.summary()
 		response.status = result.statusCode
 		render(text: result.body, contentType: "application/json", encoding: "UTF-8")
 	}

@@ -151,6 +151,20 @@ log4j.main = {
  */
 streamr.cps.url = System.getProperty("streamr.cps.url") ?: "http://localhost:8085/communities/"
 
+// CPS Apache HTTP Client configuration
+
+// Timeout in milliseconds until a connection is established
+streamr.cps.connectTimeout = 60 * 1000
+//  Timeout in milliseconds used when requesting a connection from the connection manager
+streamr.cps.connectionRequestTimeout = 60 * 1000
+// Defines the socket timeout (SO_TIMEOUT) in milliseconds, which is the timeout for waiting for data or, put differently, a maximum period inactivity between two consecutive data packets).
+// A timeout value of zero is interpreted as an infinite timeout. A negative value is interpreted as undefined (system default if applicable).
+streamr.cps.socketTimeout = 60 * 1000
+// Maximum number of connections in the pool
+streamr.cps.maxConnTotal = 400
+// Maximum number of connections per route
+streamr.cps.maxConnPerRoute = 200
+
 /**
  * Streamr cluster config
  */

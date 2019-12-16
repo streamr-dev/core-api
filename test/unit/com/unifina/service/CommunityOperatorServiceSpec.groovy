@@ -1,89 +1,75 @@
 package com.unifina.service
 
 import com.unifina.api.ProxyException
-import grails.test.mixin.TestFor
-import org.apache.commons.io.IOUtils
-import org.apache.http.HttpEntity
-import org.apache.http.StatusLine
-import org.apache.http.client.HttpClient
-import org.apache.http.client.methods.CloseableHttpResponse
-import org.apache.http.client.methods.HttpGet
+import org.apache.log4j.Level
+import org.apache.log4j.Logger
+import org.gaul.httpbin.HttpBin
 import spock.lang.Specification
 
-import java.nio.charset.StandardCharsets
+import java.util.concurrent.ExecutorService
+import java.util.concurrent.Executors
 
-@TestFor(CommunityOperatorService)
 class CommunityOperatorServiceSpec extends Specification {
-	final String url = "http://localhost:8080/communities/"
-	CloseableHttpResponse response
-	HttpEntity entity
-	StatusLine status
-	HttpClient client
-
-	private static interface CloseableHttpClient extends HttpClient, Closeable {}
+	private URI httpBinEndpoint = URI.create("http://127.0.0.1:0")
+	private final HttpBin httpBin = new HttpBin(httpBinEndpoint)
+	private CommunityOperatorService service
 
 	void setup() {
-		response = Mock(CloseableHttpResponse)
-		entity = Mock(HttpEntity)
-		status = Mock(StatusLine)
-		client = Mock(CloseableHttpClient)
+		Logger.getRootLogger().setLevel(Level.OFF)
+		Logger.getLogger(CommunityOperatorService.class).setLevel(Level.OFF)
+		httpBin.start()
+		httpBinEndpoint = new URI(
+			httpBinEndpoint.getScheme(),
+			httpBinEndpoint.getUserInfo(),
+			httpBinEndpoint.getHost(),
+			httpBin.getPort(),
+			httpBinEndpoint.getPath(),
+			httpBinEndpoint.getQuery(),
+			httpBinEndpoint.getFragment()
+		)
+		service = new CommunityOperatorService()
+		service.grailsApplication = getGrailsApplication()
+	}
+
+	void cleanup() {
+		service.close()
+		httpBin.stop()
 	}
 
 	void "test execute"() {
 		setup:
-		String expected = """{"result":[]}"""
+		service.afterPropertiesSet()
+		String url = httpBinEndpoint.toString() + "/stream/1"
+		String expected = """{"args":{},"headers":{"Accept":"application/json","Connection":"keep-alive","User-Agent"""
 		when:
-		CommunityOperatorService.ProxyResponse result = service.proxy(client, url)
+		CommunityOperatorService.ProxyResponse result = service.proxy(url)
 		then:
-		1 * client.execute(_ as HttpGet) >> response
-		1 * response.getStatusLine() >> status
-		1 * status.getStatusCode() >> 200
-		1 * response.getEntity() >> entity
-		2 * entity.getContentLength() >> (long) expected.length()
-		1 * entity.getContent() >> IOUtils.toInputStream(expected, StandardCharsets.UTF_8)
-		1 * response.close()
-		result.body == expected
+		result.body.startsWith(expected)
 		result.statusCode == 200
-	}
-
-	void "test execute http response entity is null"() {
-		setup:
-		String expected = ""
-		when:
-		CommunityOperatorService.ProxyResponse result = service.proxy(client, url)
-		then:
-		1 * client.execute(_ as HttpGet) >> response
-		1 * response.getStatusLine() >> status
-		1 * status.getStatusCode() >> 400
-		1 * response.getEntity() >> null
-		1 * response.close()
-		result.body == expected
-		result.statusCode == 400
 	}
 
 	void "test execute returns 400"() {
 		setup:
-		String expected = """{"error":"bad community address format"}"""
+		service.afterPropertiesSet()
+		String url = httpBinEndpoint.toString() + "/status/400"
 		when:
-		CommunityOperatorService.ProxyResponse result = service.proxy(client, url)
+		CommunityOperatorService.ProxyResponse result = service.proxy(url)
 		then:
-		1 * client.execute(_ as HttpGet) >> response
-		1 * response.getStatusLine() >> status
-		1 * status.getStatusCode() >> 400
-		1 * response.getEntity() >> entity
-		2 * entity.getContentLength() >> (long) expected.length()
-		1 * entity.getContent() >> IOUtils.toInputStream(expected, StandardCharsets.UTF_8)
-		1 * response.close()
-		result.body == expected
+		result.body == ""
 		result.statusCode == 400
 	}
 
 	void "test community server not responding"() {
+		setup:
+		service.afterPropertiesSet()
+		ProxyException e
 		when:
-		service.proxy(client, url)
+		try {
+			service.proxy("http://localhost:1")
+		} catch (ProxyException err) {
+			e = err
+		}
 		then:
-		1 * client.execute(_ as HttpGet) >> { throw new ConnectException("mocked: server down") }
-		def e = thrown(ProxyException)
 		e.message == "Community server is not responding"
 		e.code == "PROXY_ERROR"
 		e.statusCode == 500
@@ -91,46 +77,77 @@ class CommunityOperatorServiceSpec extends Specification {
 
 	void "test execute returns 404"() {
 		setup:
-		String expected = """{"error":"community address not found"}"""
+		service.afterPropertiesSet()
+		String url = httpBinEndpoint.toString() + "/status/404"
 		when:
-		CommunityOperatorService.ProxyResponse result = service.proxy(client, url)
+		CommunityOperatorService.ProxyResponse result = service.proxy(url)
 		then:
-		1 * client.execute(_ as HttpGet) >> response
-		1 * response.getStatusLine() >> status
-		1 * status.getStatusCode() >> 404
-		1 * response.getEntity() >> entity
-		2 * entity.getContentLength() >> (long) expected.length()
-		1 * entity.getContent() >> IOUtils.toInputStream(expected, StandardCharsets.UTF_8)
-		1 * response.close()
-		result.body == expected
+		result.body == ""
 		result.statusCode == 404
 	}
 
 	void "test execute returns 500"() {
 		setup:
-		String expected = ""
+		service.afterPropertiesSet()
+		String url = httpBinEndpoint.toString() + "/status/500"
 		when:
-		CommunityOperatorService.ProxyResponse result = service.proxy(client, url)
+		CommunityOperatorService.ProxyResponse result = service.proxy(url)
 		then:
-		1 * client.execute(_ as HttpGet) >> response
-		1 * response.getStatusLine() >> status
-		1 * status.getStatusCode() >> 500
-		1 * response.close()
-		result.body == expected
+		result.body == ""
 		result.statusCode == 500
 	}
 
-	void "test execute returns unknown status code"() {
+	static class Runner implements Runnable {
+		CommunityOperatorService service
+		String url
+		CommunityOperatorService.ProxyResponse response
+
+		Runner(CommunityOperatorService service, String url) {
+			this.service = service
+			this.url = url
+		}
+
+		@Override
+		void run() {
+			response = service.proxy(url)
+		}
+	}
+
+	void "test connection pool is configured"() {
 		setup:
-		String expected = ""
+		service.afterPropertiesSet()
+		String url = httpBinEndpoint.toString() + "/delay/4"
+		int size = 10
+
 		when:
-		CommunityOperatorService.ProxyResponse result = service.proxy(client, url)
+		List<Runner> results = new ArrayList<>()
+		ExecutorService executor = Executors.newFixedThreadPool(size);
+		for (int i = 0; i < size; i++) {
+			Runner runner = new Runner(service, url)
+			results.add(runner)
+			executor.execute(runner)
+		}
+		executor.shutdown()
+		while (!executor.isTerminated()) {}
 		then:
-		1 * client.execute(_ as HttpGet) >> response
-		1 * response.getStatusLine() >> status
-		1 * status.getStatusCode() >> 418
-		1 * response.close()
-		result.body == expected
-		result.statusCode == 418
+		for (int i = 0; i < size; i++) {
+			assert results.get(i).response.statusCode == 200
+		}
+	}
+
+	void "test socket read timeout"() {
+		setup:
+		grailsApplication.config.streamr.cps.connectTimeout = 1000
+		grailsApplication.config.streamr.cps.connectionRequestTimeout = 5000
+		grailsApplication.config.streamr.cps.socketTimeout = 1000
+		service.afterPropertiesSet()
+		String url = httpBinEndpoint.toString() + "/delay/3"
+		when:
+		service.proxy(url)
+
+		then:
+		def e = thrown(ProxyException)
+		e.getStatusCode() == 504
+		e.getMessage() == "Community server gateway timeout"
 	}
 }
