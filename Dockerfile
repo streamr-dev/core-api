@@ -45,7 +45,11 @@ ENV JAVA_OPTS \
 	-server \
 	-Xms128M \
 	-Xmx512M \
-	-XX:+UseG1GC
+	-XX:+UseG1GC \
+    -Dcom.sun.management.jmxremote=true \
+    -Dcom.sun.management.jmxremote.authenticate=false \
+    -Dcom.sun.management.jmxremote.port=9090 \
+    -Dcom.sun.management.jmxremote.ssl=false
 
 HEALTHCHECK --interval=5m --timeout=3s --start-period=100s --retries=3 CMD /usr/bin/curl -s http://localhost:8081/streamr-core/api/v1/products || exit 1
 EXPOSE 8081
