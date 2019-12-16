@@ -1,6 +1,6 @@
 <component name="ProjectRunConfigurationManager">
   <configuration default="false" name="dev run-app" type="GrailsRunConfigurationType" factoryName="Grails" singleton="true">
-    <setting name="vmparams" value="" />
+    <setting name="vmparams" value="-XX:+UseG1GC -Djava.awt.headless=true -server -Xms512M -Xmx2048M -Dcom.sun.management.jmxremote=true -Dcom.sun.management.jmxremote.authenticate=false -Dcom.sun.management.jmxremote.port=9090 -Dcom.sun.management.jmxremote.ssl=false" />
     <setting name="cmdLine" value="run-app --stacktrace" />
     <env name="AWS_PROFILE" value="automation-user-streamr-dev" />
     <setting name="passParentEnv" value="true" />
@@ -9,6 +9,6 @@
     <setting name="launchBrowserUrl" value="" />
     <setting name="depsClasspath" value="false" />
     <extension name="coverage" enabled="false" merge="false" sample_coverage="true" runner="idea" />
-    <method />
+    <method v="2" />
   </configuration>
 </component>
