@@ -524,6 +524,11 @@ class PermissionService {
 		}
 	}
 
+	public void cleanUpExpiredPermissions() {
+		Date now = new Date()
+		Permission.deleteAll(Permission.findAllByEndsAtLessThan(now))
+	}
+
 	private boolean hasPermission(Userish userish, resource, Operation op) {
 		userish = userish?.resolveToUserish()
 		String resourceProp = getResourcePropertyName(resource)

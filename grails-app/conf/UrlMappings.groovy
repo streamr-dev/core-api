@@ -50,6 +50,8 @@ class UrlMappings {
 		"/api/v1/dashboards/$resourceId/permissions"(resources: "permissionApi", excludes: ["create", "edit", "update"]) { resourceClass = Dashboard }
 		"/api/v1/dashboards/$resourceId/permissions/me"(controller: "permissionApi", action: "getOwnPermissions") { resourceClass = Dashboard }
 
+		"/api/v1/permissions/cleanup"(method: "DELETE", controller: "permissionApi", action: "cleanup")
+
 		"/api/v1/metrics"(resources: "metricsApi")
 
 		"/api/v1/modules"(resources: "moduleApi")
