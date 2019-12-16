@@ -42,27 +42,7 @@ ENV JAVA_OPTS \
 	-Xms128M \
 	-Xmx512M \
 	-XX:+UseG1GC
-ENV CATALINA_OPTS \
-	-Dstreamr.database.user=$DB_USER \
-	-Dstreamr.database.password=$DB_PASS \
-	-Dstreamr.database.host=$DB_HOST \
-	-Dstreamr.database.name=$DB_NAME \
-	-Dgrails.mail.host=$SMTP_HOST \
-	-Dgrails.mail.port=$SMTP_PORT \
-	-Dstreamr.cassandra.hosts=$CASSANDRA_HOST \
-	-Dstreamr.cassandra.keySpace=$CASSANDRA_KEYSPACE \
-	-Dstreamr.redis.hosts=$REDIS_HOSTS \
-	-Dstreamr.api.websocket.url=$WS_SERVER \
-	-Dstreamr.api.http.url=$HTTPS_API_SERVER  \
-	-Dstreamr.url=$STREAMR_URL \
-	-Daws.accessKeyId=$AWS_ACCESS_KEY_ID \
-	-Daws.secretKey=$AWS_SECRET_KEY \
-	-Dstreamr.fileUpload.s3.bucket=$FILEUPLOAD_S3_BUCKET \
-	-Dstreamr.fileUpload.s3.region=$FILEUPLOAD_S3_REGION \
-	-Dstreamr.cps.url=$CPS_URL \
-	-Dstreamr.ethereum.networks.local=$ETHEREUM_SERVER_URL \
-	-Dstreamr.encryption.password=$STREAMR_ENCRYPTION_PASSWORD
 
 EXPOSE 8081
 # Wait for MySQL server and Cassandra to be ready
-CMD ["sh", "-c", "wait-for-it.sh $DB_HOST:$DB_PORT --timeout=120 && while ! mysql --user=$DB_USER --host=$DB_HOST --password=$DB_PASS $DB_NAME -e \"SELECT 1;\"; do echo 'waiting for db'; sleep 1; done && wait-for-it.sh $CASSANDRA_HOST:$CASSANDRA_PORT --timeout=120 && catalina.sh run"]
+CMD ["sh", "-c", "wait-for-it.sh $DB_HOST:$DB_PORT --timeout=120 && while ! mysql --user=$DB_USER --host=$DB_HOST --password=$DB_PASS $DB_NAME -e \"SELECT 1;\"; do echo 'waiting for db'; sleep 1; done && wait-for-it.sh $CASSANDRA_HOST:$CASSANDRA_PORT --timeout=120 && CATALINA_OPTS='-Dstreamr.database.user=$DB_USER -Dstreamr.database.password=$DB_PASS -Dstreamr.database.host=$DB_HOST -Dstreamr.database.name=$DB_NAME -Dgrails.mail.host=$SMTP_HOST -Dgrails.mail.port=$SMTP_PORT -Dstreamr.cassandra.hosts=$CASSANDRA_HOST -Dstreamr.cassandra.keySpace=$CASSANDRA_KEYSPACE -Dstreamr.redis.hosts=$REDIS_HOSTS -Dstreamr.api.websocket.url=$WS_SERVER -Dstreamr.api.http.url=$HTTPS_API_SERVER  -Dstreamr.url=$STREAMR_URL -Daws.accessKeyId=$AWS_ACCESS_KEY_ID -Daws.secretKey=$AWS_SECRET_KEY -Dstreamr.fileUpload.s3.bucket=$FILEUPLOAD_S3_BUCKET -Dstreamr.fileUpload.s3.region=$FILEUPLOAD_S3_REGION -Dstreamr.cps.url=$CPS_URL -Dstreamr.ethereum.defaultNetwork=$ETHEREUM_DEFAULT_NETWORK -Dstreamr.ethereum.networks.local=$ETHEREUM_NETWORKS_LOCAL -Dstreamr.encryption.password=$STREAMR_ENCRYPTION_PASSWORD' catalina.sh run"]
