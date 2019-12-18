@@ -59,7 +59,7 @@ class Stream implements Comparable {
 	static belongsTo = Product
 
 	static constraints = {
-		partitions(nullable: false, min: 1)
+		partitions(nullable: false, min: 1, max: 100)
 		name(blank:false)
 		config(nullable:true)
 		description(nullable:true)
