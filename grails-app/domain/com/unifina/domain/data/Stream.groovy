@@ -9,11 +9,19 @@ import grails.converters.JSON
 import groovy.transform.CompileStatic
 
 class Stream implements Comparable {
+	public final static Integer DEFAULT_PARTITIONS = 1
 	public final static String DEFAULT_NAME = "Untitled Stream"
+	public final static boolean DEFAULT_UI_CHANNEL = false
+	public final static boolean DEFAULT_INBOX = false
+	public final static boolean DEFAULT_REQUIRE_SIGNED_DATA = false
+	public final static boolean DEFAULT_REQUIRE_ENCRYPTED_DATA = false
+	public final static boolean DEFAULT_AUTO_CONFIGURE = true
 	public final static Integer DEFAULT_STORAGE_DAYS = 365
 	public final static Integer DEFAULT_INACTIVITY_THRESHOLD_HOURS = 48
+	public final static ExampleType DEFAULT_EXAMPLE_TYPE = ExampleType.NOT_SET
+
 	String id
-	Integer partitions = 1
+	Integer partitions = DEFAULT_PARTITIONS
 
 	String name = DEFAULT_NAME
 	String config
@@ -25,23 +33,23 @@ class Stream implements Comparable {
 	Date dateCreated
 	Date lastUpdated
 
-	Boolean uiChannel = false
+	Boolean uiChannel = DEFAULT_UI_CHANNEL
 	String uiChannelPath
 	Canvas uiChannelCanvas
 
-	Boolean inbox = false
+	Boolean inbox = DEFAULT_INBOX
 
-	Boolean requireSignedData = false
+	Boolean requireSignedData = DEFAULT_REQUIRE_SIGNED_DATA
 	// Stream requires data to be encrypted
-	Boolean requireEncryptedData = false
+	Boolean requireEncryptedData = DEFAULT_REQUIRE_ENCRYPTED_DATA
 	// Always try to autoconfigure field names and types
-	Boolean autoConfigure = true
+	Boolean autoConfigure = DEFAULT_AUTO_CONFIGURE
 	// Historical data storage period (days)
 	Integer storageDays = DEFAULT_STORAGE_DAYS
 	// inactivityThresholdHours is the inactivity period for a stream in hours
 	Integer inactivityThresholdHours = DEFAULT_INACTIVITY_THRESHOLD_HOURS
 	// exampleType marks this Stream as an example for new users.
-	ExampleType exampleType = ExampleType.NOT_SET
+	ExampleType exampleType = DEFAULT_EXAMPLE_TYPE
 
 	static hasMany = [
 		permissions: Permission,
@@ -51,6 +59,7 @@ class Stream implements Comparable {
 	static belongsTo = Product
 
 	static constraints = {
+		partitions(nullable: false, min: 1)
 		name(blank:false)
 		config(nullable:true)
 		description(nullable:true)
