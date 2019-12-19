@@ -1,5 +1,5 @@
 language: groovy
-sudo: required
+os: linux
 jdk:
 - openjdk8
 services:
