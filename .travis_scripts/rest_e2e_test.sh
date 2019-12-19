@@ -18,7 +18,7 @@ nohup grails test run-app --non-interactive &
 
 # Wait for EE to come up
 while true; do
-	http_code=$(curl -s -o /dev/null -w "%{http_code}" http://localhost:8081/streamr-core/api/v1/users/me)
+	http_code=$(curl -s -o /dev/null -w "%{http_code}" http://localhost/api/v1/users/me)
 	if [ "$http_code" -eq 401 ]; then
 		echo "EE up and running"
 		break
