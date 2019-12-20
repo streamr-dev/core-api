@@ -9,7 +9,7 @@ sudo ifconfig docker0 10.200.10.1/24
 
 # Start everything except engine-and-editor
 #"$TRAVIS_BUILD_DIR/streamr-docker-dev/streamr-docker-dev/bin.sh" start 1
-(cd "$TRAVIS_BUILD_DIR/streamr-docker-dev" && docker-compose --verbose --log-level=DEBUG cassandra init_keyspace mysql redis smtp nginx tracker broker-node-storage-1 broker-node-no-storage-1 broker-node-no-storage-2)
+(cd "$TRAVIS_BUILD_DIR/streamr-docker-dev" && docker-compose --verbose --log-level=DEBUG up -d cassandra init_keyspace mysql redis smtp nginx tracker broker-node-storage-1 broker-node-no-storage-1 broker-node-no-storage-2)
 # Print app output to console
 "$TRAVIS_BUILD_DIR/streamr-docker-dev/streamr-docker-dev/bin.sh" log -f &
 #(cd "$TRAVIS_BUILD_DIR/streamr-docker-dev" && docker-compose logs -f &)
