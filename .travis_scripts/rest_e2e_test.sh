@@ -12,7 +12,7 @@ sudo ifconfig docker0 10.200.10.1/24
 
 # Print app output to console
 #"$TRAVIS_BUILD_DIR/streamr-docker-dev/streamr-docker-dev/bin.sh" log -f &
-(cd "$TRAVIS_BUILD_DIR" && docker-compose logs -f &)
+(cd "$TRAVIS_BUILD_DIR/streamr-docker-dev" && docker-compose logs -f &)
 
 # Allow time for services to start
 echo "Sleeping for 30 seconds..." && sleep 30
