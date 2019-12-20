@@ -15,7 +15,6 @@ before_install:
 - source "/home/travis/.sdkman/bin/sdkman-init.sh"
 - sdk install grails 2.5.6
 - npm i -g npm@6.9.0
-- echo "docker-compose version: $(docker-compose --version)"
 env:
   global:
   - OWNER=streamr

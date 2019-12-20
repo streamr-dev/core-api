@@ -10,6 +10,9 @@ sudo ifconfig docker0 10.200.10.1/24
 # Start everything except engine-and-editor
 "$TRAVIS_BUILD_DIR/streamr-docker-dev/streamr-docker-dev/bin.sh" start 1
 
+# Print app output to console
+"$TRAVIS_BUILD_DIR/streamr-docker-dev/streamr-docker-dev/bin.sh" log -f &
+
 # Allow time for services to start
 echo "Sleeping for 30 seconds..." && sleep 30
 
@@ -27,9 +30,6 @@ while true; do
 		sleep 5s
 	fi
 done
-
-# Print app output to console
-"$TRAVIS_BUILD_DIR/streamr-docker-dev/streamr-docker-dev/bin.sh" log -f &
 
 # Wait for network to come up
 while true; do
