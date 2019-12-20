@@ -6,7 +6,7 @@ services:
 - docker
 node_js:
 - "10.16.3"
-if: (type = push AND branch = master) OR type = pull_request # build whitelisted branches and all PRs
+if: (branch = master) OR type = pull_request # build whitelisted branches and all PRs
 git:
   submodules: false
 before_install:
