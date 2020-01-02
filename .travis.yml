@@ -1,5 +1,6 @@
 language: groovy
-sudo: required
+os: linux
+dist: xenial
 jdk:
 - openjdk8
 services:
@@ -15,7 +16,6 @@ before_install:
 - source "/home/travis/.sdkman/bin/sdkman-init.sh"
 - sdk install grails 2.5.6
 - npm i -g npm@6.9.0
-- "echo Using node version: `node --version`"
 env:
   global:
   - OWNER=streamr
