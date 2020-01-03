@@ -1,5 +1,7 @@
 #!/bin/bash
 
+set -e
+
 grails prod war
 mkdir build
 cp "$(pwd)/target/ROOT.war" "$(pwd)/build"

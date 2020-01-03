@@ -1,12 +1,13 @@
 language: groovy
-sudo: required
+os: linux
+dist: xenial
 jdk:
 - openjdk8
 services:
 - docker
 node_js:
 - "10.16.3"
-if: (type = push AND branch = master) OR type = pull_request # build whitelisted branches and all PRs
+if: (branch = master) OR type = pull_request # build whitelisted branches and all PRs
 git:
   submodules: false
 before_install:
@@ -15,7 +16,6 @@ before_install:
 - source "/home/travis/.sdkman/bin/sdkman-init.sh"
 - sdk install grails 2.5.6
 - npm i -g npm@6.9.0
-- "echo Using node version: `node --version`"
 env:
   global:
   - OWNER=streamr
@@ -66,7 +66,8 @@ jobs:
     install: true
     script:
     - grails test war
-    - docker build -t $OWNER/$IMAGE_NAME:taggit .
+    - docker build -t $OWNER/$IMAGE_NAME:local .
+    - .travis_scripts/smoke_test.sh
     deploy:
     - provider: script
       script: .travis_scripts/deploy_docker.sh dev
@@ -75,11 +76,15 @@ jobs:
     install: true
     script:
     - grails prod war
-    - docker build -t $OWNER/$IMAGE_NAME:taggit .
+    - docker build -t $OWNER/$IMAGE_NAME:local .
+    - .travis_scripts/smoke_test.sh
     deploy:
     - provider: script
       script: .travis_scripts/deploy_docker.sh production
-after_failure: .travis_scripts/after_test_failure.sh
+after_failure:
+  - docker-compose logs engine-and-editor
+  - docker ps
+  - .travis_scripts/after_test_failure.sh
 notifications:
   slack:
     secure: rX8I0YHsgA0mvjlKhQ+69ZsO8mww0xYV/wc2VolQaBXIZ5Jcj4A82cLRAAyhoJxEP7tZUFhVBMkwmMSHnL4AvGG5JREialedQltAww/0/kTACxCc62/bxnbV+YDapxP4VIpOdL+/La+gWt4FsoW6oKavwMkNgPuNE65+IGK3ay2+G+BTfjldWkBLcBa8MAsKXp3XQdt04eyh3b3HBUk04rgotIPB+ndSW97NUTdj8LifiKFYV8n5c5LOLRWTgP68t1ktjPCWvjHzjwWRlSnxRcdXkj870mjCdH/l8WI93YzZE4g2auUjWFV8MzbGfObnCQ9McaoVwhiUt4IjpI51Iuc0qUwpoIfMk0J3BobZWcehXFilQknOTF9y5LqRplHND5Om3Dw8DdKWCzZVFw8S3dd5oBgKgxuOt01KD4lpQ/5nJZzmykrKMNWa7NkbYw6pLHVSaIMu4WVycZLnnyz4Rt/LZIdq7IH38QT0DDR9aG7CMgomnzAvgfSkte7lMdfeOo+uMsu2JA0MXOd1BYfEzwWCRh7QWhr5UgZXPX9sFReal/TtEODh71ZMI945iQVDNaEh3ypuBdraiFSR7SZbLTdvZEVbzCC2kS6JKBdUsUVTroWSyIl+gJUsXoyZ88c1YmFBMdj6jDSyzz4Ig4uBRwMEcx0aqtwDnQrvEtNhzKY=
