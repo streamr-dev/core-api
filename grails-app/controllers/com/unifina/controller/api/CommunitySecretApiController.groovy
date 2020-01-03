@@ -42,7 +42,7 @@ class CommunitySecretApiController {
 			throw new BadRequestException("Community address is not of a Community smart contract")
 		}
 		if (!ethereumService.hasEthereumAddress(user, adminAddress)) {
-			throw new NotPermittedException(user?.username, "community", communityAddress, "manage secrets")
+			throw new NotPermittedException(user?.username, "community", communityAddress, "manage")
 		}
 	}
 
