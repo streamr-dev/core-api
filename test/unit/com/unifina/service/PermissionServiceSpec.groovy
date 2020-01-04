@@ -487,4 +487,32 @@ class PermissionServiceSpec extends BeanMockingSpecification {
 		expect:
 		service.check(stranger, dashOwned, Operation.READ)
 	}
+
+	void "cleanUpExpiredPermissions() deletes permissions that already ended"() {
+		SecUser testUser = new SecUser(username: "testUser", password: "foo").save(validate:false)
+		Stream testStream = new Stream(name: "testStream")
+		testStream.id = "testStream"
+		testStream.save(validate: false)
+
+		assert Permission.findAllByStream(testStream).size() == 0
+
+		when:
+		Permission p1 = service.systemGrant(testUser, testStream, Operation.READ)
+		p1.endsAt = new Date(0)
+		p1.save(failOnError: true)
+		Permission p2 = service.systemGrant(testUser, testStream, Operation.WRITE)
+		p2.endsAt = new Date(System.currentTimeMillis() + 60000)
+		p2.save(failOnError: true)
+
+		then:
+		Permission.findAllByStream(testStream).size() == 2
+
+		when:
+		service.cleanUpExpiredPermissions()
+
+		then:
+		Permission.findAllByStream(testStream).size() == 1
+		!service.canRead(testUser, testStream)
+		service.canWrite(testUser, testStream)
+	}
 }
