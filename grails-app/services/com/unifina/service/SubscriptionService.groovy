@@ -96,8 +96,10 @@ class SubscriptionService {
 		return subscription
 	}
 
-	private static void deletePermissions(Subscription subscription) {
-		streamPermissionsFor(subscription)*.delete(flush: true)
+	private void deletePermissions(Subscription subscription) {
+		for (Permission p: streamPermissionsFor(subscription)) {
+			permissionService.systemRevoke(p)
+		}
 	}
 
 	private static void deletePermissions(Subscription subscription, Set<Stream> streams) {

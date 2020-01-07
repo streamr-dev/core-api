@@ -171,6 +171,25 @@ class PermissionServiceSpec extends BeanMockingSpecification {
 		all.size() == allOperations.size()
 	}
 
+	void "getNonExpiredPermissionsTo with Operation returns all non-expired permissions for the given resource"() {
+		Dashboard testDash = new Dashboard(id: "testdash", name:"testdash").save(validate:false)
+		// craft an expired permission
+		service.systemGrant(me, testDash, Operation.WRITE, null, new Date(0))
+		setup:
+		List<Permission> beforeRead = service.getNonExpiredPermissionsTo(dashOwned, Operation.READ)
+		List<Permission> beforeWrite = service.getNonExpiredPermissionsTo(dashOwned, Operation.WRITE)
+		Permission perm = service.grant(me, dashOwned, stranger, Operation.READ)
+		List<Permission> afterRead = service.getNonExpiredPermissionsTo(dashOwned, Operation.READ)
+		List<Permission> afterWrite = service.getNonExpiredPermissionsTo(dashOwned, Operation.WRITE)
+		List<Permission> testDashPerms = service.getNonExpiredPermissionsTo(testDash, Operation.WRITE)
+		expect:
+		!beforeRead.contains(perm)
+		afterRead.contains(perm)
+		beforeRead.size() + 1 == afterRead.size()
+		beforeWrite.size() == afterWrite.size()
+		testDashPerms.isEmpty()
+	}
+
 	void "getPermissionsTo(resource, userish) returns permissions for single user"() {
 		expect:
 		service.getPermissionsTo(dashOwned, me).size() == 3
@@ -231,9 +250,6 @@ class PermissionServiceSpec extends BeanMockingSpecification {
 		thrown AccessControlException
 	}
 
-	// Test disabled due to commit 405677f6c2cd4ab0ad5f67a9aa2f813ab6d49194
-	// TODO: re-enable
-	/*
 	void "systemGrant() on an Ethereum user and a stream creates also inbox permissions"() {
 		SecUser publisher1 = new SecUser()
 		publisher1.id = 4L
@@ -281,7 +297,6 @@ class PermissionServiceSpec extends BeanMockingSpecification {
 		service.canWrite(subscriber, pub3Inbox)
 		service.canWrite(publisher3, subInbox)
 	}
-	 */
 
 	void "inbox stream permissions also work when anonymous keys have permissions to the stream"() {
 		SecUser subscriber = new SecUser(username: "0x26e1ae3f5efe8a01eca8c2e9d3c32702cf4bead6").save(failOnError: true, validate: false)
@@ -471,5 +486,33 @@ class PermissionServiceSpec extends BeanMockingSpecification {
 
 		expect:
 		service.check(stranger, dashOwned, Operation.READ)
+	}
+
+	void "cleanUpExpiredPermissions() deletes permissions that already ended"() {
+		SecUser testUser = new SecUser(username: "testUser", password: "foo").save(validate:false)
+		Stream testStream = new Stream(name: "testStream")
+		testStream.id = "testStream"
+		testStream.save(validate: false)
+
+		assert Permission.findAllByStream(testStream).size() == 0
+
+		when:
+		Permission p1 = service.systemGrant(testUser, testStream, Operation.READ)
+		p1.endsAt = new Date(0)
+		p1.save(failOnError: true)
+		Permission p2 = service.systemGrant(testUser, testStream, Operation.WRITE)
+		p2.endsAt = new Date(System.currentTimeMillis() + 60000)
+		p2.save(failOnError: true)
+
+		then:
+		Permission.findAllByStream(testStream).size() == 2
+
+		when:
+		service.cleanUpExpiredPermissions()
+
+		then:
+		Permission.findAllByStream(testStream).size() == 1
+		!service.canRead(testUser, testStream)
+		service.canWrite(testUser, testStream)
 	}
 }

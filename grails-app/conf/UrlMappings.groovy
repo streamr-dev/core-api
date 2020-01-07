@@ -50,6 +50,8 @@ class UrlMappings {
 		"/api/v1/dashboards/$resourceId/permissions"(resources: "permissionApi", excludes: ["create", "edit", "update"]) { resourceClass = Dashboard }
 		"/api/v1/dashboards/$resourceId/permissions/me"(controller: "permissionApi", action: "getOwnPermissions") { resourceClass = Dashboard }
 
+		"/api/v1/permissions/cleanup"(method: "DELETE", controller: "permissionApi", action: "cleanup")
+
 		"/api/v1/metrics"(resources: "metricsApi")
 
 		"/api/v1/modules"(resources: "moduleApi")
@@ -110,5 +112,6 @@ class UrlMappings {
 		"/api/v1/communities/$communityAddress/stats"(method: "GET", controller: "communityOperatorApi", action: "stats")
 		"/api/v1/communities/$communityAddress/members"(method: "GET", controller: "communityOperatorApi", action: "members")
 		"/api/v1/communities/$communityAddress/members/$memberAddress"(method: "GET", controller: "communityOperatorApi", action: "memberStats")
+		"/api/v1/communities"(method: "GET", controller: "communityOperatorApi", action: "summary")
 	}
 }
