@@ -10,6 +10,7 @@ import com.unifina.domain.security.Permission.Operation
 import com.unifina.domain.security.SecUser
 import com.unifina.domain.security.SignupInvite
 import com.unifina.domain.signalpath.Canvas
+import com.unifina.security.AllowRole
 import com.unifina.security.AuthLevel
 import com.unifina.security.StreamrApi
 import com.unifina.security.Userish
@@ -248,5 +249,11 @@ class PermissionApiController {
 			// user without share permission to resource can't delete another user's permission to same resource
 			throw new NotPermittedException("User without share permission to resource can't delete another user's permission to same resource.")
 		}
+	}
+
+	@StreamrApi(allowRoles = AllowRole.DEVOPS)
+	def cleanup() {
+		permissionService.cleanUpExpiredPermissions()
+		render status: 200
 	}
 }
