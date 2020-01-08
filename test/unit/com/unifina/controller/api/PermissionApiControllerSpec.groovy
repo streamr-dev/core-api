@@ -406,7 +406,7 @@ class PermissionApiControllerSpec extends ControllerSpecification {
 		when:
 		authenticatedAs(user) { controller.delete() }
 		then:
-		1 * permissionService.getPermissionsTo(anotherResource) >> []
+		1 * permissionService.getPermissionsTo(anotherResource) >> [anotherPermission]
 		0 * permissionService._
 		thrown(NotFoundException)
 	}

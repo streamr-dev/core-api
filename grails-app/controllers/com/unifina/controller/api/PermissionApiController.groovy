@@ -232,7 +232,18 @@ class PermissionApiController {
 		if (!resource) {
 			throw new NotFoundException(params.resourceClass.simpleName, params.resourceId.toString())
 		}
-		Permission permission = permissionService.getPermissionsTo(resource).find { it.id.toString() == id.toString() }
+		def to = permissionService.getPermissionsTo(resource)
+		Permission permission = to.find {
+			if (Canvas.isAssignableFrom(params.resourceClass)) {
+
+			} else if (Stream.isAssignableFrom(params.resourceClass)) {
+
+			} else if (Dashboard.isAssignableFrom(params.resourceClass)) {
+
+			} else if ()
+
+			return it."${resource.getClass().getSimpleName().toLowerCase()}".id == resource.id
+		}
 		if (!permission) {
 			throw new NotFoundException("permissions", id.toString())
 		}
