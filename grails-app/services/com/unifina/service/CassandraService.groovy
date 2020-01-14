@@ -25,7 +25,7 @@ class CassandraService implements DisposableBean {
 
 	private static final int FETCH_SIZE = 5000;
 
-	static final long ONE_YEAR_IN_MS = 365L * 24L * 60L * 60L * 1000L
+	static final long ONE_WEEK_IN_MS = 7L * 24L * 60L * 60L * 1000L
 
 	// Thread-safe
 	private Session session
@@ -96,7 +96,7 @@ class CassandraService implements DisposableBean {
 			// the latest message is needed. (CORE-1724)
 			resultSet = getSession()
 				.execute("SELECT payload FROM stream_data WHERE id = ? AND partition = ? AND ts >= ? ORDER BY ts DESC, sequence_no DESC LIMIT 1",
-					stream.getId(), partition, System.currentTimeMillis() - ONE_YEAR_IN_MS)
+					stream.getId(), partition, System.currentTimeMillis() - ONE_WEEK_IN_MS)
 		} else {
 			resultSet = getSession().execute("SELECT payload FROM stream_data WHERE id = ? AND partition = ? ORDER BY ts ASC, sequence_no ASC LIMIT 1", stream.getId(), partition)
 		}
