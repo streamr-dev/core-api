@@ -1,10 +1,8 @@
 package com.unifina.signalpath.blockchain.templates;
 
-import com.unifina.signalpath.blockchain.SolidityModule;
-import com.unifina.utils.MapTraversal;
-import grails.util.Holders;
+import com.unifina.signalpath.blockchain.SolidityCompileDeploy;
 
-public class BinaryBetting extends SolidityModule {
+public class BinaryBetting extends SolidityCompileDeploy {
 	@Override
 	public String getCodeTemplate() {
 		return  "pragma solidity ^0.4.6;\n" +

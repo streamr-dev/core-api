@@ -199,9 +199,7 @@ class SolidityCompileDeploySpec extends ModuleTestingSpecification {
 
 	void "Contract can be pulled after serialisation/deserialisation"() {
 		def serializationService = new SerializationService()
-		// Use the classloader of this class, otherwise the deserializer won't find SolidityModuleWithMockedWeb3
 		serializationService.serializer = new SerializerImpl(this.getClass().getClassLoader())
-//		serializationService.serializer = new SerializerImpl(SolidityCompileDeploy.class.getClassLoader())
 
 		when:
 		applyConfig.contract.abi[2].payable = true

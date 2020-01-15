@@ -1,10 +1,8 @@
 package com.unifina.signalpath.blockchain.templates;
 
-import com.unifina.signalpath.blockchain.SolidityModule;
-import com.unifina.utils.MapTraversal;
-import grails.util.Holders;
+import com.unifina.signalpath.blockchain.SolidityCompileDeploy;
 
-public class PayByUse extends SolidityModule {
+public class PayByUse extends SolidityCompileDeploy {
 	@Override
 	public String getCodeTemplate() {
 		//   + These are supplied to constructor, so they show up on canvas already
