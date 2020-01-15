@@ -21,11 +21,11 @@ public class ApiError {
 		this.headers = headers;
 	}
 
-	public void addEntry(String key, String value) {
+	public void addToBody(String key, String value) {
 		body.put(key, value);
 	}
 
-	/** JSON object that is returned as message body */
+	/** @return Map that is turned into HTTP response body JSON object */
 	public Map<String, String> toMap() {
 		return body;
 	}
