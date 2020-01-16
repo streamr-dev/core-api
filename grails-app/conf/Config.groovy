@@ -233,7 +233,7 @@ streamr.ethereum.datacoinAddress = System.getProperty("streamr.ethereum.datacoin
 streamr.ethereum.networks = PropertiesUtil.matchingPropertiesToMap("streamr.ethereum.networks.", System.getProperties()) ?: [ local: "http://localhost:8545" ]
 streamr.ethereum.wss = PropertiesUtil.matchingPropertiesToMap("streamr.ethereum.wss.", System.getProperties()) ?: [ local: "ws://localhost:8545" ]
 // Ethereum identity of this instance. Don't use this silly development private key for anything.
-streamr.ethereum.nodePrivateKey = System.getProperty("streamr.ethereum.nodePrivateKey", "0123456789ABCDEF0123456789ABCDEF0123456789ABCDEF0123456789ABCDEF")
+streamr.ethereum.nodePrivateKey = "".equals(System.getProperty("streamr.ethereum.nodePrivateKey", "")) ? "0123456789ABCDEF0123456789ABCDEF0123456789ABCDEF0123456789ABCDEF" : System.getProperty("streamr.ethereum.nodePrivateKey")
 streamr.ethereum.defaultNetwork = System.getProperty("streamr.ethereum.defaultNetwork") ?: streamr.ethereum.networks.keySet().first()
 
 /**
