@@ -144,11 +144,11 @@ class ProductService {
 		Product product = new Product(command.properties)
 		product.owner = currentUser
 		product.save(failOnError: true)
-		permissionService.systemGrantAll(currentUser, product)
+		permissionService.systemGrantAllProduct(currentUser, product)
 		// A stream that is added when creating a new free product should inherit read access for anonymous user
 		if (product.isFree()) {
 			product.streams.each { stream ->
-				permissionService.systemGrantAnonymousAccess(stream, Permission.Operation.READ)
+				permissionService.systemGrantAnonymousAccess(stream, Permission.Operation.PRODUCT_GET)
 			}
 		}
 		return product
@@ -165,17 +165,17 @@ class ProductService {
 
 		// A stream that is added when editing an existing free product should inherit read access for anonymous user
 		// Revoke public read permissions and grant them back after update
-		Product product = findById(id, currentUser, Permission.Operation.WRITE)
+		Product product = findById(id, currentUser, Permission.Operation.PRODUCT_EDIT)
 		if (product.isFree()) {
 			product.streams.each { stream ->
-				permissionService.systemRevokeAnonymousAccess(stream, Permission.Operation.READ)
+				permissionService.systemRevokeAnonymousAccess(stream, Permission.Operation.PRODUCT_GET)
 			}
 		}
 		command.updateProduct(product, currentUser, permissionService)
 		product.save(failOnError: true)
 		if (product.isFree()) {
 			product.streams.each { stream ->
-				permissionService.systemGrantAnonymousAccess(stream, Permission.Operation.READ)
+				permissionService.systemGrantAnonymousAccess(stream, Permission.Operation.PRODUCT_GET)
 			}
 		}
 		subscriptionService.afterProductUpdated(product)
@@ -184,18 +184,18 @@ class ProductService {
 
 	void addStreamToProduct(Product product, Stream stream, SecUser currentUser)
 			throws ValidationException, NotPermittedException {
-		permissionService.verifyShare(currentUser, stream)
+		permissionService.verifyShareStream(currentUser, stream)
 		product.streams.add(stream)
 		product.save(failOnError: true)
 		// A stream that is added when editing an existing free product should inherit read access for anonymous user
 		if (product.isFree()) {
-			permissionService.systemGrantAnonymousAccess(stream, Permission.Operation.READ)
+			permissionService.systemGrantAnonymousAccess(stream, Permission.Operation.STREAM_GET)
 		}
 		if (product.type == Product.Type.COMMUNITY) {
 			Set<SecUser> users = communityJoinRequestService.findCommunityMembers(product.beneficiaryAddress)
 			for (SecUser u : users) {
-				if (!permissionService.canWrite(u, stream)) {
-					permissionService.systemGrant(u, stream, Permission.Operation.WRITE)
+				if (!permissionService.canWriteStream(u, stream)) {
+					permissionService.systemGrant(u, stream, Permission.Operation.STREAM_EDIT)
 				}
 			}
 		}
@@ -207,13 +207,13 @@ class ProductService {
 		product.save(failOnError: true)
 		// A stream that is removed when editing an existing free product should revoke read access for anonymous user
 		if (product.isFree()) {
-			permissionService.systemRevokeAnonymousAccess(stream, Permission.Operation.READ)
+			permissionService.systemRevokeAnonymousAccess(stream, Permission.Operation.STREAM_GET)
 		}
 		if (product.type == Product.Type.COMMUNITY) {
 			Set<SecUser> users = communityJoinRequestService.findCommunityMembers(product.beneficiaryAddress)
 			for (SecUser u : users) {
-				if (permissionService.canWrite(u, stream)) {
-					permissionService.systemRevoke(u, stream, Permission.Operation.WRITE)
+				if (permissionService.canWriteStream(u, stream)) {
+					permissionService.systemRevoke(u, stream, Permission.Operation.STREAM_EDIT)
 				}
 			}
 		}

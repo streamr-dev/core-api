@@ -66,6 +66,11 @@ class PermissionService {
 		return check(userish, resource, Operation.STREAM_EDIT)
 	}
 
+	@CompileStatic
+	boolean canWriteProduct(Userish userish, Stream resource) {
+		return check(userish, resource, Operation.PRODUCT_EDIT)
+	}
+
 	/**
 	 * Check whether user is allowed to share a resource
 	 */
@@ -315,6 +320,12 @@ class PermissionService {
 
 	List<Permission> systemGrantAllDashboard(Userish target, Object resource) {
 		Operation.dashboardOperations().collect { Operation op ->
+			systemGrant(target, resource, op)
+		}
+	}
+
+	List<Permission> systemGrantAllProduct(Userish target, Object resource) {
+		Operation.productOperations().collect { Operation op ->
 			systemGrant(target, resource, op)
 		}
 	}
