@@ -45,7 +45,6 @@
     </content>
     <orderEntry type="jdk" jdkName="1.8" jdkType="JavaSDK" />
     <orderEntry type="sourceFolder" forTests="false" />
-    <orderEntry type="module" module-name="engine-and-editor-grailsPlugins" />
     <orderEntry type="module-library" exported="">
       <library name="Grails User Library (engine-and-editor)">
         <CLASSES>
@@ -473,5 +472,6 @@
         <jarDirectory url="file://$MODULE_DIR$/lib" recursive="false" />
       </library>
     </orderEntry>
+    <orderEntry type="module" module-name="engine-and-editor-grailsPlugins" />
   </component>
 </module>

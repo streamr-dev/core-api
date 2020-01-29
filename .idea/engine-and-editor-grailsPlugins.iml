@@ -7,9 +7,9 @@
     <facet type="web" name="GrailsWeb">
       <configuration>
         <webroots>
-          <root url="file://$USER_HOME$/.grails/2.5.6/projects/streamr-core/plugins/mail-1.0.7/grails-app/views" relative="/" />
-          <root url="file://$USER_HOME$/.grails/2.5.6/projects/streamr-core/plugins/database-migration-1.4.0/grails-app/views" relative="/" />
           <root url="file://$USER_HOME$/.grails/2.5.6/projects/streamr-core/plugins/spring-security-core-2.0.0/grails-app/views" relative="/" />
+          <root url="file://$USER_HOME$/.grails/2.5.6/projects/streamr-core/plugins/database-migration-1.4.0/grails-app/views" relative="/" />
+          <root url="file://$USER_HOME$/.grails/2.5.6/projects/streamr-core/plugins/mail-1.0.7/grails-app/views" relative="/" />
         </webroots>
         <sourceRoots />
       </configuration>
@@ -23,7 +23,7 @@
       </configuration>
     </facet>
   </component>
-  <component name="NewModuleRootManager" LANGUAGE_LEVEL="JDK_1_8" inherit-compiler-output="true">
+  <component name="NewModuleRootManager" inherit-compiler-output="true">
     <exclude-output />
     <content url="file://$USER_HOME$/.grails/2.5.6/projects/streamr-core/plugins/cache-headers-1.1.7">
       <sourceFolder url="file://$USER_HOME$/.grails/2.5.6/projects/streamr-core/plugins/cache-headers-1.1.7/grails-app/services" isTestSource="false" />
