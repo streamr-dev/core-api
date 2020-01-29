@@ -36,7 +36,81 @@ class Permission {
 	enum Operation {
 		READ("read"),
 		WRITE("write"),
-		SHARE("share")
+		SHARE("share"),
+
+		/*
+			Stream
+
+			read -> get, subscribe
+			write -> edit, publish, delete
+			share -> share
+		*/
+		// Fetch stream details
+		STREAM_GET("stream_get"),
+		// Edit stream details
+		STREAM_EDIT("stream_edit"),
+		// Delete stream
+		STREAM_DELETE("stream_delete"),
+		// Publish to stream
+		STREAM_PUBLISH("stream_publish"),
+		// Subscribe to stream
+		STREAM_SUBSCRIBE("stream_subscribe"),
+		// Edit user permissions to stream
+		STREAM_SHARE("stream_share"),
+
+		/*
+			Canvas
+
+			read -> get, interact
+			write -> edit, startstop, delete
+			share -> share
+		*/
+		// Open canvas
+		CANVAS_GET("canvas_get"),
+		// Edit canvas
+		CANVAS_EDIT("canvas_edit"),
+		// Delete canvas
+		CANVAS_DELETE("canvas_delete"),
+		// Start and stop canvas
+		CANVAS_STARTSTOP("canvas_startstop"),
+		// Interact with runtime widgets (buttons, switches, etc.)
+		CANVAS_INTERACT("canvas_interact"),
+		// Edit user permissions to canvas
+		CANVAS_SHARE("canvas_share"),
+
+		/*
+			Dasboard
+
+			read -> get, interact
+			write -> edit, delete
+			share -> share
+		*/
+		// Open dashboard
+		DASHBOARD_GET("dashboard_get"),
+		// Edit dashboard
+		DASHBOARD_EDIT("dashboard_edit"),
+		// Delete dashboard
+		DASHBOARD_DELETE("dashboard_delete"),
+		// Interact with runtime widgets (buttons, switches, etc.)
+		DASHBOARD_INTERACT("dashboard_interact"),
+		// Edit user permissions to dashboard
+		DASHBOARD_SHARE("dashboard_share"),
+
+		/*
+			Product
+
+			read -> get
+			write -> edit, delete
+			share -> share
+		*/
+		// Open product
+		PRODUCT_GET("product_get"),
+		// Edit product
+		PRODUCT_EDIT("product_edit"),
+		// Delete product
+		PRODUCT_DELETE("product_delete"),
+		// Edit user permissions to product
+		PRODUCT_SHARE("product_share")
 
 		String id
 
@@ -47,7 +121,52 @@ class Permission {
 		static fromString(String operationId) {
 			return Operation.enumConstants.find { it.id == operationId }
 		}
+		static List<Permission.Operation> operations() {
+			return [
+				READ,
+				WRITE,
+				SHARE,
+			]
+		}
+		static List<Permission.Operation> streamOperations() {
+			return [
+				STREAM_GET,
+				STREAM_EDIT,
+				STREAM_DELETE,
+				STREAM_PUBLISH,
+				STREAM_SUBSCRIBE,
+				STREAM_SHARE,
+			]
+		}
+		static List<Permission.Operation> canvasOperations() {
+			return [
+				CANVAS_GET,
+				CANVAS_EDIT,
+				CANVAS_DELETE,
+				CANVAS_STARTSTOP,
+				CANVAS_INTERACT,
+				CANVAS_SHARE,
+			]
+		}
+		static List<Permission.Operation> dashboardOperations() {
+			return [
+				DASHBOARD_GET,
+				DASHBOARD_EDIT,
+				DASHBOARD_DELETE,
+				DASHBOARD_INTERACT,
+				DASHBOARD_SHARE,
+			]
+		}
+		static List<Permission.Operation> productOperations() {
+			return [
+				PRODUCT_GET,
+				PRODUCT_EDIT,
+				PRODUCT_DELETE,
+				PRODUCT_SHARE,
+			]
+		}
 	}
+
 	Operation operation = Operation.READ
 
 	/** Is this a Permission of a Subscription? **/

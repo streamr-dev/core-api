@@ -7,15 +7,12 @@ import com.unifina.api.NotPermittedException
 import com.unifina.domain.ExampleType
 import com.unifina.domain.dashboard.Dashboard
 import com.unifina.domain.dashboard.DashboardItem
-
 import com.unifina.domain.data.Stream
 import com.unifina.domain.security.IntegrationKey
 import com.unifina.domain.security.Key
 import com.unifina.domain.security.Permission
 import com.unifina.domain.security.SecUser
 import com.unifina.domain.signalpath.Canvas
-import com.unifina.feed.AbstractStreamListener
-
 import grails.test.mixin.Mock
 import grails.test.mixin.TestFor
 import org.codehaus.groovy.grails.commons.DefaultGrailsApplication
@@ -64,8 +61,8 @@ class StreamServiceSpec extends Specification {
 		when:
 		service.addExampleStreams(me, streams)
 		then:
-		1 * service.permissionService.systemGrant(me, s0, Permission.Operation.READ)
-		1 * service.permissionService.systemGrant(me, s1, Permission.Operation.READ)
+		1 * service.permissionService.systemGrant(me, s0, Permission.Operation.STREAM_GET)
+		1 * service.permissionService.systemGrant(me, s1, Permission.Operation.STREAM_GET)
 	}
 
 	void "createStream replaces empty name with default value"() {
@@ -91,9 +88,12 @@ class StreamServiceSpec extends Specification {
 
 		then:
 		Permission.findAllByStream(stream)*.toMap() == [
-			[id: 1, user: "me", operation: "read"],
-			[id: 2, user: "me", operation: "write"],
-			[id: 3, user: "me", operation: "share"],
+			[id: 1, user: "me", operation: "stream_get"],
+			[id: 2, user: "me", operation: "stream_edit"],
+			[id: 3, user: "me", operation: "stream_delete"],
+			[id: 4, user: "me", operation: "stream_publish"],
+			[id: 5, user: "me", operation: "stream_subscribe"],
+			[id: 6, user: "me", operation: "stream_share"],
 		]
 	}
 
@@ -144,7 +144,7 @@ class StreamServiceSpec extends Specification {
 		service.getReadAuthorizedStream("streamId", user, null, cb)
 		then:
 		thrown(NotPermittedException)
-		1 * service.permissionService.canRead(user, stream) >> false
+		1 * service.permissionService.canReadStream(user, stream) >> false
 		0 * cb._
 	}
 
@@ -163,7 +163,7 @@ class StreamServiceSpec extends Specification {
 		service.getReadAuthorizedStream("streamId", null, key, cb)
 		then:
 		thrown(NotPermittedException)
-		1 * service.permissionService.canRead(key, stream) >> false
+		1 * service.permissionService.canReadStream(key, stream) >> false
 		0 * cb._
 	}
 
@@ -181,7 +181,7 @@ class StreamServiceSpec extends Specification {
 		when:
 		service.getReadAuthorizedStream("streamId", null, key, cb)
 		then:
-		1 * service.permissionService.canRead(key, stream) >> true
+		1 * service.permissionService.canReadStream(key, stream) >> true
 		1 * cb.call(stream)
 	}
 
@@ -199,7 +199,7 @@ class StreamServiceSpec extends Specification {
 		when:
 		service.getReadAuthorizedStream("streamId", user, null, cb)
 		then:
-		1 * service.permissionService.canRead(user, stream) >> true
+		1 * service.permissionService.canReadStream(user, stream) >> true
 		1 * cb.call(stream)
 	}
 
@@ -214,7 +214,7 @@ class StreamServiceSpec extends Specification {
 		when:
 		service.getReadAuthorizedStream("streamId", null, null, cb)
 		then:
-		1 * service.permissionService.canRead(null, stream) >> true
+		1 * service.permissionService.canReadStream(null, stream) >> true
 		1 * cb.call(stream)
 	}
 
@@ -236,8 +236,8 @@ class StreamServiceSpec extends Specification {
 		when:
 		service.getReadAuthorizedStream("streamId", user, null, cb)
 		then:
-		1 * service.permissionService.canRead(user, stream) >> false
-		1 * service.permissionService.canRead(user, canvas) >> true
+		1 * service.permissionService.canReadStream(user, stream) >> false
+		1 * service.permissionService.canReadCanvas(user, canvas) >> true
 		1 * cb.call(stream)
 	}
 
@@ -260,8 +260,8 @@ class StreamServiceSpec extends Specification {
 		service.getReadAuthorizedStream("streamId", user, null, cb)
 		then:
 		thrown(NotPermittedException)
-		1 * service.permissionService.canRead(user, stream) >> false
-		1 * service.permissionService.canRead(user, canvas) >> false
+		1 * service.permissionService.canReadStream(user, stream) >> false
+		1 * service.permissionService.canReadCanvas(user, canvas) >> false
 		0 * cb._
 	}
 
@@ -295,9 +295,9 @@ class StreamServiceSpec extends Specification {
 		when:
 		service.getReadAuthorizedStream("streamId", user, null, cb)
 		then:
-		1 * service.permissionService.canRead(user, stream) >> false
-		1 * service.permissionService.canRead(user, canvas) >> false
-		1 * dashboardService.authorizedGetDashboardItem(dashboard.id, dashboardItem.id, user, Permission.Operation.READ) >> dashboardItem
+		1 * service.permissionService.canReadStream(user, stream) >> false
+		1 * service.permissionService.canReadCanvas(user, canvas) >> false
+		1 * dashboardService.authorizedGetDashboardItem(dashboard.id, dashboardItem.id, user, Permission.Operation.DASHBOARD_GET) >> dashboardItem
 		1 * cb.call(stream)
 	}
 
@@ -331,9 +331,9 @@ class StreamServiceSpec extends Specification {
 		service.getReadAuthorizedStream("streamId", user, null, cb)
 		then:
 		thrown(NotPermittedException)
-		1 * service.permissionService.canRead(user, stream) >> false
-		1 * service.permissionService.canRead(user, canvas) >> false
-		1 * dashboardService.authorizedGetDashboardItem(dashboard.id, dashboardItem.id, user, Permission.Operation.READ) >> null
+		1 * service.permissionService.canReadStream(user, stream) >> false
+		1 * service.permissionService.canReadCanvas(user, canvas) >> false
+		1 * dashboardService.authorizedGetDashboardItem(dashboard.id, dashboardItem.id, user, Permission.Operation.DASHBOARD_GET) >> null
 		0 * cb._
 	}
 
@@ -366,7 +366,7 @@ class StreamServiceSpec extends Specification {
 		when:
 		Set<String> addresses = service.getStreamEthereumPublishers(stream)
 		then:
-		1 * service.permissionService.getPermissionsTo(stream, Permission.Operation.WRITE) >> perms
+		1 * service.permissionService.getPermissionsTo(stream, Permission.Operation.STREAM_EDIT) >> perms
 		addresses == validAddresses
 	}
 
@@ -388,13 +388,13 @@ class StreamServiceSpec extends Specification {
 		boolean result1 = service.isStreamEthereumPublisher(stream, address1)
 		boolean result2 = service.isStreamEthereumPublisher(stream, address2)
 		then:
-		1 * service.permissionService.canWrite(user1, stream) >> true
+		1 * service.permissionService.canWriteStream(user1, stream) >> true
 		result1
-		1 * service.permissionService.canWrite(user2, stream) >> false
+		1 * service.permissionService.canWriteStream(user2, stream) >> false
 		!result2
 	}
 
-	void "getStreamEthereumSubscribers should return Ethereum addresses of users with read permission to the Stream"() {
+	void "getStreamEthereumSubscribers should return Ethereum addresses of users with stream_get permission to the Stream"() {
 		setup:
 		service.permissionService = Mock(PermissionService)
 		SecUser user1 = new SecUser(id: 1, username: "u1").save(failOnError: true, validate: false)
@@ -423,11 +423,11 @@ class StreamServiceSpec extends Specification {
 		when:
 		Set<String> addresses = service.getStreamEthereumSubscribers(stream)
 		then:
-		1 * service.permissionService.getPermissionsTo(stream, Permission.Operation.READ) >> perms
+		1 * service.permissionService.getPermissionsTo(stream, Permission.Operation.STREAM_GET) >> perms
 		addresses == validAddresses
 	}
 
-	void "isStreamEthereumSubscriber should return true iff user has read permission to the stream"() {
+	void "isStreamEthereumSubscriber should return true iff user has stream_get permission to the stream"() {
 		setup:
 		service.permissionService = Mock(PermissionService)
 		SecUser user1 = new SecUser(id: 1, username: "u1").save(failOnError: true, validate: false)
@@ -445,9 +445,9 @@ class StreamServiceSpec extends Specification {
 		boolean result1 = service.isStreamEthereumSubscriber(stream, address1)
 		boolean result2 = service.isStreamEthereumSubscriber(stream, address2)
 		then:
-		1 * service.permissionService.canRead(user1, stream) >> true
+		1 * service.permissionService.canReadStream(user1, stream) >> true
 		result1
-		1 * service.permissionService.canRead(user2, stream) >> false
+		1 * service.permissionService.canReadStream(user2, stream) >> false
 		!result2
 	}
 

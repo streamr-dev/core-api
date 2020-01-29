@@ -39,62 +39,75 @@ class PermissionService {
 	 * Check whether user is allowed to read a resource
 	 */
 	@CompileStatic
-	boolean canRead(Userish userish, resource)  {
+	boolean canRead(Userish userish, Object resource)  {
 		return check(userish, resource, Operation.READ)
 	}
 
-	/**
-	 * Throws an exception if user is not allowed to read a resource
-	 */
 	@CompileStatic
-	void verifyRead(Userish userish, resource) throws NotPermittedException {
-		verify(userish, resource, Operation.READ)
+	boolean canReadStream(Userish userish, Stream resource)  {
+		return check(userish, resource, Operation.STREAM_GET)
+	}
+
+	@CompileStatic
+	boolean canReadCanvas(Userish userish, Canvas resource)  {
+		return check(userish, resource, Operation.CANVAS_GET)
 	}
 
 	/**
 	 * Check whether user is allowed to write a resource
 	 */
-
 	@CompileStatic
-	boolean canWrite(Userish userish, resource) {
+	boolean canWrite(Userish userish, Object resource) {
 		return check(userish, resource, Operation.WRITE)
 	}
 
-	/**
-	 * Throws an exception if user is not allowed to write a resource
-	 */
 	@CompileStatic
-	void verifyWrite(Userish userish, resource) throws NotPermittedException {
-		verify(userish, resource, Operation.WRITE)
+	boolean canWriteStream(Userish userish, Stream resource) {
+		return check(userish, resource, Operation.STREAM_EDIT)
 	}
 
 	/**
 	 * Check whether user is allowed to share a resource
 	 */
 	@CompileStatic
-	boolean canShare(Userish userish, resource) {
+	boolean canShare(Userish userish, Object resource) {
 		return check(userish, resource, Operation.SHARE)
+	}
+
+	@CompileStatic
+	boolean canShareStream(Userish userish, Stream resource) {
+		return check(userish, resource, Operation.STREAM_SHARE)
+	}
+
+	@CompileStatic
+	boolean canShareDashboard(Userish userish, Dashboard resource) {
+		return check(userish, resource, Operation.DASHBOARD_SHARE)
 	}
 
 	/**
 	 * Throws an exception if user is not allowed to share a resource
 	 */
 	@CompileStatic
-	void verifyShare(Userish userish, resource) throws NotPermittedException {
+	void verifyShare(Userish userish, Object resource) throws NotPermittedException {
 		verify(userish, resource, Operation.SHARE)
+	}
+
+	@CompileStatic
+	void verifyShareStream(Userish userish, Stream resource) throws NotPermittedException {
+		verify(userish, resource, Operation.STREAM_SHARE)
 	}
 
 	/**
 	 * Check whether user is allowed to perform specified operation on a resource
 	 */
-	boolean check(Userish userish, resource, Operation op) {
+	boolean check(Userish userish, Object resource, Operation op) {
 		return resource?.id != null && hasPermission(userish, resource, op)
 	}
 
 	/**
 	 * Throws an exception if user is not allowed to perform specified operation on a resource.
 	 */
-	void verify(Userish userish, resource, Operation op) throws NotPermittedException {
+	void verify(Userish userish, Object resource, Operation op) throws NotPermittedException {
 		if (!check(userish, resource, op)) {
 			SecUser user = userish?.resolveToUserish()
 			throw new NotPermittedException(user?.username, resource.class.simpleName, resource.id, op.id)
@@ -104,7 +117,7 @@ class PermissionService {
 	/**
 	 * List all Permissions granted on a resource
 	 */
-	List<Permission> getPermissionsTo(resource) {
+	List<Permission> getPermissionsTo(Object resource) {
 		String resourceProp = getResourcePropertyName(resource)
 		return Permission.findAllWhere([(resourceProp): resource])
 	}
@@ -112,7 +125,7 @@ class PermissionService {
 	/**
 	 * List all Permissions with some Operation right granted on a resource
 	 */
-	List<Permission> getPermissionsTo(resource, Operation op) {
+	List<Permission> getPermissionsTo(Object resource, Operation op) {
 		String resourceProp = getResourcePropertyName(resource)
 		return Permission.findAllWhere([(resourceProp): resource, "operation": op])
 	}
@@ -120,7 +133,7 @@ class PermissionService {
 	/**
 	 * List all Permissions that have not expired yet with some Operation right granted on a resource
 	 */
-	List<Permission> getNonExpiredPermissionsTo(resource, Operation op) {
+	List<Permission> getNonExpiredPermissionsTo(Object resource, Operation op) {
 		// TODO: find a way to do this in a single query instead of filtering results
 		List<Permission> results = []
 		Date now = new Date()
@@ -135,7 +148,7 @@ class PermissionService {
 	/**
 	 * List all Permissions granted on a resource to a Userish
 	 */
-	List<Permission> getPermissionsTo(resource, Userish userish) {
+	List<Permission> getPermissionsTo(Object resource, Userish userish) {
 		userish = userish?.resolveToUserish()
 		String resourceProp = getResourcePropertyName(resource)
 
@@ -255,12 +268,25 @@ class PermissionService {
      */
 	@CompileStatic
 	Permission grant(SecUser grantor,
-					 resource,
+					 Object resource,
 					 Userish target,
 					 Operation operation=Operation.READ,
 					 boolean logIfDenied=true) throws AccessControlException, IllegalArgumentException {
 		// TODO CORE-498: check grantor himself has the right he's granting? (e.g. "write")
 		if (!canShare(grantor, resource)) {
+			throwAccessControlException(grantor, resource, logIfDenied)
+		}
+		return systemGrant(target, resource, operation)
+	}
+
+	@CompileStatic
+	Permission grantDashboard(SecUser grantor,
+					 Dashboard resource,
+					 Userish target,
+					 Operation operation,
+					 boolean logIfDenied=true) throws AccessControlException, IllegalArgumentException {
+		// TODO CORE-498: check grantor himself has the right he's granting? (e.g. "write")
+		if (!canShareDashboard(grantor, resource)) {
 			throwAccessControlException(grantor, resource, logIfDenied)
 		}
 		return systemGrant(target, resource, operation)
@@ -275,8 +301,20 @@ class PermissionService {
 	 * @return granted permissions (size == 3)
 	 */
 	@CompileStatic
-	List<Permission> systemGrantAll(Userish target, resource) {
-		Operation.values().collect { Operation op ->
+	List<Permission> systemGrantAll(Userish target, Object resource) {
+		Operation.operations().collect { Operation op ->
+			systemGrant(target, resource, op)
+		}
+	}
+
+	List<Permission> systemGrantAllStream(Userish target, Object resource) {
+		Operation.streamOperations().collect { Operation op ->
+			systemGrant(target, resource, op)
+		}
+	}
+
+	List<Permission> systemGrantAllDashboard(Userish target, Object resource) {
+		Operation.dashboardOperations().collect { Operation op ->
 			systemGrant(target, resource, op)
 		}
 	}
@@ -289,11 +327,11 @@ class PermissionService {
 	 *
      * @return granted permission
      */
-	Permission systemGrant(Userish target, resource, Operation operation=Operation.READ) {
+	Permission systemGrant(Userish target, Object resource, Operation operation=Operation.READ) {
 		return systemGrant(target, resource, operation, null, null)
 	}
 
-	Permission systemGrant(Userish target, resource, Operation operation=Operation.READ, Subscription subscription, Date endsAt) {
+	Permission systemGrant(Userish target, Object resource, Operation operation=Operation.READ, Subscription subscription, Date endsAt) {
 		if (target == null) {
 			throw new IllegalArgumentException("Permission grant target can't be null");
 		}
@@ -399,7 +437,7 @@ class PermissionService {
 	 */
 	@CompileStatic
 	Permission grantAnonymousAccess(SecUser grantor,
-									resource,
+									Object resource,
 									Operation operation=Operation.READ,
 									boolean logIfDenied=true) throws AccessControlException, IllegalArgumentException {
 		if (!canShare(grantor, resource)) {
@@ -458,7 +496,7 @@ class PermissionService {
      * @return Permissions that were deleted
      */
 	@CompileStatic
-	List<Permission> systemRevoke(Userish target, resource, Operation operation=Operation.READ) {
+	List<Permission> systemRevoke(Userish target, Object resource, Operation operation=Operation.READ) {
 		return performRevoke(false, target, resource, operation)
 	}
 
@@ -470,7 +508,7 @@ class PermissionService {
 	 * @return Permissions that were deleted
 	 */
 	@CompileStatic
-	List<Permission> systemRevokeAnonymousAccess(resource, Operation operation=Operation.READ) {
+	List<Permission> systemRevokeAnonymousAccess(Object resource, Operation operation=Operation.READ) {
 		return performRevoke(true, null, resource, operation)
 	}
 
@@ -532,7 +570,7 @@ class PermissionService {
 		Permission.deleteAll(Permission.findAllByEndsAtLessThan(now))
 	}
 
-	private boolean hasPermission(Userish userish, resource, Operation op) {
+	private boolean hasPermission(Userish userish, Object resource, Operation op) {
 		userish = userish?.resolveToUserish()
 		String resourceProp = getResourcePropertyName(resource)
 
@@ -563,7 +601,7 @@ class PermissionService {
 	/**
 	 * Find Permissions that will be revoked, and cascade according to alsoRevoke map
 	 */
-	private List<Permission> performRevoke(boolean anonymous, Userish target, resource, Operation operation) {
+	private List<Permission> performRevoke(boolean anonymous, Userish target, Object resource, Operation operation) {
 		target = target?.resolveToUserish()
 		String resourceProp = getResourcePropertyName(resource)
 
@@ -613,7 +651,7 @@ class PermissionService {
 		return revoked
 	}
 
-	private static boolean hasOneOrLessSharePermissionsLeft(resource) {
+	private static boolean hasOneOrLessSharePermissionsLeft(Object resource) {
 		String resourceProp = getResourcePropertyName(resource)
 		def criteria = Permission.createCriteria()
 		def n = criteria.count {
@@ -623,7 +661,7 @@ class PermissionService {
 		return n <= 1
 	}
 
-	private void throwAccessControlException(SecUser violator, resource, boolean loggingEnabled) {
+	private void throwAccessControlException(SecUser violator, Object resource, boolean loggingEnabled) {
 		if (loggingEnabled) {
 			log.warn("${violator?.username}(id ${violator?.id}) tried to modify sharing of $resource without SHARE Permission!")
 		}

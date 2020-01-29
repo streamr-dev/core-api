@@ -1,6 +1,5 @@
 package com.unifina.domain.data
 
-
 import com.unifina.domain.ExampleType
 import com.unifina.domain.marketplace.Product
 import com.unifina.domain.security.Permission

@@ -86,12 +86,6 @@ class PermissionServiceSpec extends BeanMockingSpecification {
 		invite.username == anotherUser.username
 	}
 
-	void "access granted to permitted Dashboard"() {
-		expect:
-		service.canRead(me, dashAllowed)
-		service.verifyRead(me, dashAllowed)
-	}
-
 	void "access denied to non-permitted Dashboard"() {
 		expect:
 		!service.canRead(me, dashRestricted)

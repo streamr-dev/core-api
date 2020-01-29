@@ -69,7 +69,7 @@ class StreamService {
 		}
 
 		stream.save(failOnError: true)
-		permissionService.systemGrantAll(user, stream)
+		permissionService.systemGrantAllStream(user, stream)
 
 		return stream
 	}
@@ -143,20 +143,20 @@ class StreamService {
 			if (isDirectPermissionToStream(key, stream)) {
 				action.call(stream)
 			} else {
-				throw new NotPermittedException(null, "Stream", id, Permission.Operation.READ.id)
+				throw new NotPermittedException(null, "Stream", id, Permission.Operation.STREAM_GET.id)
 			}
 		} else {
 			if (isDirectPermissionToStream(user, stream) || isPermissionToStreamsUiChannelCanvas(user, stream) || isPermissionToStreamViaDashboard(user, stream)) {
 				action.call(stream)
 			} else {
-				throw new NotPermittedException(user?.username, "Stream", id, Permission.Operation.READ.id)
+				throw new NotPermittedException(user?.username, "Stream", id, Permission.Operation.STREAM_GET.id)
 			}
 		}
 	}
 
 	Set<String> getStreamEthereumPublishers(Stream stream) {
 		// This approach might be slow if there are a lot of allowed writers to the Stream
-		List<SecUser> writers = permissionService.getPermissionsTo(stream, Permission.Operation.WRITE)*.user
+		List<SecUser> writers = permissionService.getPermissionsTo(stream, Permission.Operation.STREAM_EDIT)*.user
 
 		List<IntegrationKey> keys = IntegrationKey.findAll {
 			user.id in writers*.id && service in [IntegrationKey.Service.ETHEREUM, IntegrationKey.Service.ETHEREUM_ID]
@@ -170,12 +170,12 @@ class StreamService {
 		if (key == null || key.user == null) {
 			return false
 		}
-		return permissionService.canWrite(key.user, stream)
+		return permissionService.canWriteStream(key.user, stream)
 	}
 
 	Set<String> getStreamEthereumSubscribers(Stream stream) {
 		// This approach might be slow if there are a lot of allowed readers to the Stream
-		List<SecUser> readers = permissionService.getPermissionsTo(stream, Permission.Operation.READ)*.user
+		List<SecUser> readers = permissionService.getPermissionsTo(stream, Permission.Operation.STREAM_GET)*.user
 
 		List<IntegrationKey> keys = IntegrationKey.findAll {
 			user.id in readers*.id && service in [IntegrationKey.Service.ETHEREUM, IntegrationKey.Service.ETHEREUM_ID]
@@ -189,7 +189,7 @@ class StreamService {
 		if (key == null || key.user == null) {
 			return false
 		}
-		return permissionService.canRead(key.user, stream)
+		return permissionService.canReadStream(key.user, stream)
 	}
 
 	List<Stream> getInboxStreams(List<SecUser> users) {
@@ -202,17 +202,17 @@ class StreamService {
 
 	@CompileStatic
 	private boolean isDirectPermissionToStream(SecUser user, Stream stream) {
-		return permissionService.canRead(user, stream)
+		return permissionService.canReadStream(user, stream)
 	}
 
 	@CompileStatic
 	private boolean isDirectPermissionToStream(Key key, Stream stream) {
-		return permissionService.canRead(key, stream)
+		return permissionService.canReadStream(key, stream)
 	}
 
 	@CompileStatic
 	private boolean isPermissionToStreamsUiChannelCanvas(SecUser user, Stream stream) {
-		return stream.uiChannel && stream.uiChannelCanvas && permissionService.canRead(user, stream.uiChannelCanvas)
+		return stream.uiChannel && stream.uiChannelCanvas && permissionService.canReadCanvas(user, stream.uiChannelCanvas)
 	}
 
 	private boolean isPermissionToStreamViaDashboard(SecUser user, Stream stream) {
@@ -222,7 +222,7 @@ class StreamService {
 			int moduleId = parseModuleId(stream.uiChannelPath)
 			List<DashboardItem> matchedItems = DashboardItem.findAllByCanvasAndModule(canvas, moduleId)
 			for (DashboardItem item : matchedItems) {
-				if (dashboardService.authorizedGetDashboardItem(item.dashboard.id, item.id, user, Permission.Operation.READ)) {
+				if (dashboardService.authorizedGetDashboardItem(item.dashboard.id, item.id, user, Permission.Operation.DASHBOARD_GET)) {
 					return true
 				}
 			}
@@ -268,7 +268,7 @@ class StreamService {
 	def addExampleStreams(SecUser user, List<Stream> examples) {
 		for (final Stream example : examples) {
 			// Grant read permission to example stream.
-			permissionService.systemGrant(user, example, Permission.Operation.READ)
+			permissionService.systemGrant(user, example, Permission.Operation.STREAM_GET)
 		}
 	}
 }

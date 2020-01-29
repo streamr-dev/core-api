@@ -57,7 +57,7 @@ class StreamApiController {
 
 	@StreamrApi
 	def update(String id) {
-		getAuthorizedStream(id, Operation.WRITE) { Stream stream ->
+		getAuthorizedStream(id, Operation.STREAM_GET) { Stream stream ->
 			Stream newStream = new Stream(request.JSON)
 			stream.name = newStream.name
 			stream.description = newStream.description
@@ -97,7 +97,7 @@ class StreamApiController {
 		} else if ("POST".equals(request.method)) {
 			saveFields = true
 		}
-		getAuthorizedStream(id, Operation.READ) { Stream stream ->
+		getAuthorizedStream(id, Operation.STREAM_GET) { Stream stream ->
 			if (streamService.autodetectFields(stream, params.boolean("flatten", false), saveFields)) {
 				render(stream.toMap() as JSON)
 			} else {
@@ -123,7 +123,7 @@ class StreamApiController {
 
 	@StreamrApi
 	def dataFiles(String id) {
-		getAuthorizedStream(id) { stream ->
+		getAuthorizedStream(id, Operation.STREAM_GET) { stream ->
 			DataRange dataRange = streamService.getDataRange(stream)
 			render([dataRange: dataRange, stream:stream] as JSON)
 		}
@@ -160,7 +160,7 @@ class StreamApiController {
 
 	@StreamrApi
 	def delete(String id) {
-		getAuthorizedStream(id, Operation.WRITE) { Stream stream ->
+		getAuthorizedStream(id, Operation.STREAM_DELETE) { Stream stream ->
 			streamService.deleteStream(stream)
 			render(status: 204)
 		}
@@ -168,7 +168,7 @@ class StreamApiController {
 
 	@StreamrApi
 	def range(String id) {
-		getAuthorizedStream(id, Operation.READ) { Stream stream ->
+		getAuthorizedStream(id, Operation.STREAM_GET) { Stream stream ->
 			DataRange dataRange = streamService.getDataRange(stream)
 			Map dataRangeMap = [beginDate: dataRange?.beginDate, endDate: dataRange?.endDate]
 			render dataRangeMap as JSON
@@ -177,7 +177,7 @@ class StreamApiController {
 
 	@StreamrApi(authenticationLevel = AuthLevel.NONE)
 	def publishers(String id) {
-		getAuthorizedStream(id, Operation.READ) { Stream stream ->
+		getAuthorizedStream(id, Operation.STREAM_GET) { Stream stream ->
 			Set<String> publisherAddresses = streamService.getStreamEthereumPublishers(stream)
 			render([addresses: publisherAddresses] as JSON)
 		}
@@ -185,7 +185,7 @@ class StreamApiController {
 
 	@StreamrApi(authenticationLevel = AuthLevel.NONE)
 	def subscribers(String id) {
-		getAuthorizedStream(id, Operation.WRITE) { Stream stream ->
+		getAuthorizedStream(id, Operation.STREAM_EDIT) { Stream stream ->
 			Set<String> subscriberAddresses = streamService.getStreamEthereumSubscribers(stream)
 			render([addresses: subscriberAddresses] as JSON)
 		}
@@ -193,7 +193,7 @@ class StreamApiController {
 
 	@StreamrApi(authenticationLevel = AuthLevel.NONE)
 	def publisher(String id, String address) {
-		getAuthorizedStream(id, Operation.READ) { Stream stream ->
+		getAuthorizedStream(id, Operation.STREAM_GET) { Stream stream ->
 			if(streamService.isStreamEthereumPublisher(stream, address)) {
 				render(status: 200)
 			} else {
@@ -204,7 +204,7 @@ class StreamApiController {
 
 	@StreamrApi(authenticationLevel = AuthLevel.NONE)
 	def subscriber(String id, String address) {
-		getAuthorizedStream(id, Operation.WRITE) { Stream stream ->
+		getAuthorizedStream(id, Operation.STREAM_EDIT) { Stream stream ->
 			if(streamService.isStreamEthereumSubscriber(stream, address)) {
 				render(status: 200)
 			} else {
@@ -246,7 +246,7 @@ class StreamApiController {
 
 	@StreamrApi
 	def deleteDataUpTo(String id) {
-		getAuthorizedStream(id, Operation.WRITE) { Stream stream ->
+		getAuthorizedStream(id, Operation.STREAM_EDIT) { Stream stream ->
 			Date date = parseDate(String.valueOf(request.JSON.date), "date")
 			streamService.deleteDataUpTo(stream, date)
 			render(status: 204)
@@ -255,7 +255,7 @@ class StreamApiController {
 
 	@StreamrApi
 	def deleteAllData(String id) {
-		getAuthorizedStream(id, Operation.WRITE) { Stream stream ->
+		getAuthorizedStream(id, Operation.STREAM_EDIT) { Stream stream ->
 			streamService.deleteAllData(stream)
 			render(status: 204)
 		}
@@ -263,7 +263,7 @@ class StreamApiController {
 
 	@StreamrApi
 	def deleteDataRange(String id) {
-		getAuthorizedStream(id, Operation.WRITE) { Stream stream ->
+		getAuthorizedStream(id, Operation.STREAM_EDIT) { Stream stream ->
 			Date start = parseDate(String.valueOf(request.JSON.start), "start")
 			Date end = parseDate(String.valueOf(request.JSON.end), "end")
 			streamService.deleteDataRange(stream, start, end)
