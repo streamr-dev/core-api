@@ -330,6 +330,12 @@ class PermissionService {
 		}
 	}
 
+	List<Permission> systemGrantAllCanvas(Userish target, Object resource) {
+		Operation.canvasOperations().collect { Operation op ->
+			systemGrant(target, resource, op)
+		}
+	}
+
 	/**
 	 * Grant Permission to a Userish (as sudo/system)
 	 *

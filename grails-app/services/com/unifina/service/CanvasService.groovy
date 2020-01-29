@@ -99,7 +99,7 @@ class CanvasService {
 		boolean isNewCanvas = canvas.id == null
 		canvas.save(flush: true, failOnError: true)
 		if (isNewCanvas) {
-			permissionService.systemGrantAll(user, canvas)
+			permissionService.systemGrantAllCanvas(user, canvas)
 		}
 
 		// ensure that the UI channel streams are created
@@ -264,7 +264,7 @@ class CanvasService {
 					break
 				// Grant read permission to example canvas.
 				case ExampleType.SHARE:
-					permissionService.systemGrant(user, example, Permission.Operation.READ)
+					permissionService.systemGrant(user, example, Permission.Operation.CANVAS_GET)
 					break
 			}
 		}
