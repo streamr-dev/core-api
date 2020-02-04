@@ -142,14 +142,14 @@ log4j.main = {
 
 	// Turn on debug logging for a few classes to debug join issue in prod
 	debug 'com.streamr.client',
-		'com.unifina.service.CommunityJoinRequestService',
+		'com.unifina.service.DataUnionJoinRequestService',
 		'com.unifina.service.StreamrClientService'
 }
 
 /**
- * Community Product Server configuration
+ * Data Union Server configuration
  */
-streamr.cps.url = System.getProperty("streamr.cps.url") ?: "http://localhost:8085/communities/"
+streamr.cps.url = System.getProperty("streamr.cps.url") ?: "http://localhost:8085/dataunions/"
 
 // CPS Apache HTTP Client configuration
 

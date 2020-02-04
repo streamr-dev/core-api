@@ -5,7 +5,7 @@ import groovy.transform.ToString
 
 @ToString
 @Validateable
-class CommunitySecretCommand {
+class DataUnionSecretCommand {
 	String name
 	String secret
 

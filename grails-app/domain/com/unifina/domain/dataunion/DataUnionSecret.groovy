@@ -1,4 +1,4 @@
-package com.unifina.domain.community
+package com.unifina.domain.dataunion
 
 import com.unifina.domain.marketplace.Product
 import com.unifina.utils.IdGenerator
@@ -6,17 +6,17 @@ import grails.compiler.GrailsCompileStatic
 import groovy.transform.ToString
 
 @ToString
-class CommunitySecret {
+class DataUnionSecret {
 	String id
 	// name to display for users.
 	String name
-	// secret shared by the community that enables automatic join.
+	// secret that enables automatic joins to the data union.
 	String secret
-	// communityAddress is an Ethereum address of the community.
-	String communityAddress
+	// contractAddress is an Ethereum address of the data union smart contract.
+	String contractAddress
 
     static constraints = {
-		communityAddress(validator: Product.isEthereumAddress)
+		contractAddress(validator: Product.isEthereumAddress)
     }
 	static mapping = {
 		id generator: IdGenerator.name
@@ -26,7 +26,7 @@ class CommunitySecret {
 	Map toMap() { [
 		id: id,
 		name: name,
-		communityAddress: communityAddress,
+		contractAddress: contractAddress,
 		secret: secret,
 	] }
 
