@@ -96,9 +96,9 @@ class UserServiceSpec extends Specification {
 		user.getAuthorities().size() == 1
 		user.getAuthorities().toArray()[0].authority == "ROLE_USER"
 
-		1 * permissionService.get(ModulePackage, { it.id == 1 } as SecUser) >> []
-		1 * permissionService.systemGrant({ it.id == 1 } as SecUser, { it.id == 1 } as ModulePackage)
-		1 * permissionService.systemGrant({ it.id == 1 } as SecUser, { it.id == 2 } as ModulePackage)
+		1 * permissionService.get(ModulePackage, { it.id == 1 } as SecUser, Permission.Operation.READ) >> []
+		1 * permissionService.systemGrant({ it.id == 1 } as SecUser, { it.id == 1 } as ModulePackage, Permission.Operation.READ)
+		1 * permissionService.systemGrant({ it.id == 1 } as SecUser, { it.id == 2 } as ModulePackage, Permission.Operation.READ)
 	}
 
 	def "it should fail if the default roles or modulePackages are not found"() {

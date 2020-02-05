@@ -73,7 +73,7 @@ class DashboardService {
 			item.save(failOnError: true)
 		}
 		dashboard.save(failOnError: true)
-		permissionService.systemGrantAllDashboard(user, dashboard)
+		permissionService.systemGrantAll(user, dashboard)
 		return dashboard
 	}
 

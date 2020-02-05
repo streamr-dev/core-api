@@ -32,14 +32,14 @@ class DashboardServiceSpec extends Specification {
 				d.addToItems(new DashboardItem(title: "item2", webcomponent: Webcomponent.STREAMR_HEATMAP).save(validate: false, failOnError: true))
 				d.addToItems(new DashboardItem(title: "item3", webcomponent: Webcomponent.STREAMR_MAP).save(validate: false, failOnError: true))
 			}
-			permissionService.systemGrantAllDashboard(user, d)
+			permissionService.systemGrantAll(user, d)
 		}
 
 		(1..3).each {
 			def d = new Dashboard(name: "not-my-dashboard-$it").save(failOnError: true)
-			permissionService.systemGrantAllDashboard(otherUser, d)
+			permissionService.systemGrantAll(otherUser, d)
 			if (it == 2) {
-				permissionService.grantDashboard(otherUser, d, user, Permission.Operation.DASHBOARD_GET)
+				permissionService.systemGrant(user, d, Permission.Operation.DASHBOARD_GET)
 			}
 		}
 	}

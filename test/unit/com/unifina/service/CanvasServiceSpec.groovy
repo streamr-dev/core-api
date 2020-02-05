@@ -257,7 +257,7 @@ class CanvasServiceSpec extends BeanMockingSpecification {
 		service.createNew(command, me)
 
 		then:
-		1 * service.permissionService.systemGrantAllCanvas(me, _ as Canvas)
+		1 * service.permissionService.systemGrantAll(me, _ as Canvas)
 	}
 
 	def "createNew() creates a new adhoc Canvas when given adhoc setting"() {

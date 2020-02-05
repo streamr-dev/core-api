@@ -30,9 +30,6 @@ import java.security.AccessControlException
  * 			TODO: discuss... current implementation with ALSO_REVOKE but no ALSO_GRANT is conservative but unsymmetric
  */
 class PermissionService {
-	// Cascade revocations to "higher" rights to ensure meaningful combinations (e.g. WRITE without READ makes no sense)
-	private static final Map<String, List<Operation>> ALSO_REVOKE = [read: [Operation.WRITE, Operation.SHARE]]
-
 	def grailsApplication
 
 	/**
@@ -53,6 +50,11 @@ class PermissionService {
 		return check(userish, resource, Operation.CANVAS_GET)
 	}
 
+	@CompileStatic
+	boolean canReadDashboard(Userish userish, Dashboard resource)  {
+		return check(userish, resource, Operation.DASHBOARD_GET)
+	}
+
 	/**
 	 * Check whether user is allowed to write a resource
 	 */
@@ -69,6 +71,11 @@ class PermissionService {
 	@CompileStatic
 	boolean canWriteProduct(Userish userish, Stream resource) {
 		return check(userish, resource, Operation.PRODUCT_EDIT)
+	}
+
+	@CompileStatic
+	boolean canWriteDashboard(Userish userish, Dashboard resource) {
+		return check(userish, resource, Operation.DASHBOARD_EDIT)
 	}
 
 	/**
@@ -174,7 +181,21 @@ class PermissionService {
 
 		// Special case of UI channels: they inherit permissions from the associated canvas
 		if (resource instanceof Stream && resource.uiChannel) {
-			directPermissions.addAll(getPermissionsTo(resource.uiChannelCanvas, userish))
+			List<Permission> permissions = getPermissionsTo(resource.uiChannelCanvas, userish)
+			Map<Operation, Operation> canvasToStream = [
+				(Operation.CANVAS_GET): Operation.STREAM_GET,
+				(Operation.CANVAS_EDIT): Operation.STREAM_EDIT,
+				(Operation.CANVAS_DELETE): Operation.STREAM_DELETE,
+				//(Operation.CANVAS_STARTSTOP): Operation.STREAM_,
+				//(Operation.CANVAS_INTERACT): Operation.STREAM_,
+				(Operation.CANVAS_SHARE): Operation.STREAM_SHARE,
+			]
+			for (Permission p : permissions) {
+				Operation op = canvasToStream[p.operation]
+				if (op != null) {
+					directPermissions.add(new Permission(stream: resource, operation: op))
+				}
+			}
 		}
 
 		return directPermissions
@@ -190,18 +211,6 @@ class PermissionService {
 	@CompileStatic
 	<T> List<T> getAll(Class<T> resourceClass, Userish userish, Operation op, Closure resourceFilter = {}) {
 		return get(resourceClass, userish, op, true, resourceFilter)
-	}
-
-	/** Overload to allow leaving out the op but including the filter */
-	@CompileStatic
-	<T> List<T> get(Class<T> resourceClass, Userish userish, Closure resourceFilter = {}) {
-		return get(resourceClass, userish, Operation.READ, false, resourceFilter)
-	}
-
-	/** Convenience overload, adding a flag for public resources may look cryptic */
-	@CompileStatic
-	<T> List<T> getAll(Class<T> resourceClass, Userish userish, Closure resourceFilter = {}) {
-		return get(resourceClass, userish, Operation.READ, true, resourceFilter)
 	}
 
 	/**
@@ -275,23 +284,11 @@ class PermissionService {
 	Permission grant(SecUser grantor,
 					 Object resource,
 					 Userish target,
-					 Operation operation=Operation.READ,
-					 boolean logIfDenied=true) throws AccessControlException, IllegalArgumentException {
-		// TODO CORE-498: check grantor himself has the right he's granting? (e.g. "write")
-		if (!canShare(grantor, resource)) {
-			throwAccessControlException(grantor, resource, logIfDenied)
-		}
-		return systemGrant(target, resource, operation)
-	}
-
-	@CompileStatic
-	Permission grantDashboard(SecUser grantor,
-					 Dashboard resource,
-					 Userish target,
 					 Operation operation,
 					 boolean logIfDenied=true) throws AccessControlException, IllegalArgumentException {
 		// TODO CORE-498: check grantor himself has the right he's granting? (e.g. "write")
-		if (!canShareDashboard(grantor, resource)) {
+		Operation shareOp = Permission.Operation.shareOperation(resource)
+		if (!check(grantor, resource, shareOp)) {
 			throwAccessControlException(grantor, resource, logIfDenied)
 		}
 		return systemGrant(target, resource, operation)
@@ -307,31 +304,7 @@ class PermissionService {
 	 */
 	@CompileStatic
 	List<Permission> systemGrantAll(Userish target, Object resource) {
-		Operation.operations().collect { Operation op ->
-			systemGrant(target, resource, op)
-		}
-	}
-
-	List<Permission> systemGrantAllStream(Userish target, Object resource) {
-		Operation.streamOperations().collect { Operation op ->
-			systemGrant(target, resource, op)
-		}
-	}
-
-	List<Permission> systemGrantAllDashboard(Userish target, Object resource) {
-		Operation.dashboardOperations().collect { Operation op ->
-			systemGrant(target, resource, op)
-		}
-	}
-
-	List<Permission> systemGrantAllProduct(Userish target, Object resource) {
-		Operation.productOperations().collect { Operation op ->
-			systemGrant(target, resource, op)
-		}
-	}
-
-	List<Permission> systemGrantAllCanvas(Userish target, Object resource) {
-		Operation.canvasOperations().collect { Operation op ->
+		Operation.operationsFor(resource).collect { Operation op ->
 			systemGrant(target, resource, op)
 		}
 	}
@@ -344,13 +317,16 @@ class PermissionService {
 	 *
      * @return granted permission
      */
-	Permission systemGrant(Userish target, Object resource, Operation operation=Operation.READ) {
+	Permission systemGrant(Userish target, Object resource, Operation operation) {
 		return systemGrant(target, resource, operation, null, null)
 	}
 
-	Permission systemGrant(Userish target, Object resource, Operation operation=Operation.READ, Subscription subscription, Date endsAt) {
+	Permission systemGrant(Userish target, Object resource, Operation operation, Subscription subscription, Date endsAt) {
 		if (target == null) {
-			throw new IllegalArgumentException("Permission grant target can't be null");
+			throw new IllegalArgumentException("Permission grant target can't be null")
+		}
+		if (operation == null) {
+			throw new IllegalArgumentException("Operation can't be null")
 		}
 		target = target.resolveToUserish()
 		String userProp = getUserPropertyName(target)
@@ -377,9 +353,9 @@ class PermissionService {
 	private void checkAndGrantInboxPermissions(SecUser user, Stream stream, Operation operation,
 									   Subscription subscription, Date endsAt, Permission parentPermission) {
 		if (!stream.inbox && !stream.uiChannel) {
-			if (operation == Operation.READ) {
+			if (operation == Operation.STREAM_GET) {
 				grantNewSubscriberInboxStreamPermissions(user, stream, subscription, endsAt, parentPermission)
-			} else if (operation == Operation.WRITE) {
+			} else if (operation == Operation.STREAM_EDIT) {
 				grantNewPublisherInboxStreamPermissions(user, stream, subscription, endsAt, parentPermission)
 			}
 		}
@@ -393,7 +369,7 @@ class PermissionService {
 	 */
 	private void grantNewSubscriberInboxStreamPermissions(SecUser subscriber, Stream stream,
 														  Subscription subscription, Date endsAt, Permission parent) {
-		grantInboxStreamPermissions(subscriber, stream, Operation.WRITE, subscription, endsAt, parent)
+		grantInboxStreamPermissions(subscriber, stream, Operation.STREAM_EDIT, subscription, endsAt, parent)
 	}
 
 	/**
@@ -404,7 +380,7 @@ class PermissionService {
 	 */
 	private void grantNewPublisherInboxStreamPermissions(SecUser publisher, Stream stream,
 														 Subscription subscription, Date endsAt, Permission parent) {
-		grantInboxStreamPermissions(publisher, stream, Operation.READ, subscription, endsAt, parent)
+		grantInboxStreamPermissions(publisher, stream, Operation.STREAM_GET, subscription, endsAt, parent)
 	}
 
 	private void grantInboxStreamPermissions(SecUser user, Stream stream, Operation operation,
@@ -420,7 +396,7 @@ class PermissionService {
 			new Permission(
 				stream: inbox,
 				user: user,
-				operation: Operation.WRITE,
+				operation: Operation.STREAM_EDIT,
 				subscription: subscription,
 				endsAt: endsAt,
 				parent: parent
@@ -431,7 +407,7 @@ class PermissionService {
 				new Permission(
 					stream: userInbox,
 					user: u,
-					operation: Operation.WRITE,
+					operation: Operation.STREAM_EDIT,
 					subscription: subscription,
 					endsAt: endsAt,
 					parent: parent
@@ -455,9 +431,10 @@ class PermissionService {
 	@CompileStatic
 	Permission grantAnonymousAccess(SecUser grantor,
 									Object resource,
-									Operation operation=Operation.READ,
+									Operation operation,
 									boolean logIfDenied=true) throws AccessControlException, IllegalArgumentException {
-		if (!canShare(grantor, resource)) {
+		Operation shareOp = Permission.Operation.shareOperation(resource)
+		if (!check(grantor, resource, shareOp)) {
 			throwAccessControlException(grantor, resource, logIfDenied)
 		}
 		return systemGrantAnonymousAccess(resource, operation)
@@ -470,7 +447,7 @@ class PermissionService {
 	 *
 	 * @return granted permission
 	 */
-	Permission systemGrantAnonymousAccess(resource, Operation operation=Operation.READ) {
+	Permission systemGrantAnonymousAccess(Object resource, Operation operation) {
 		String resourceProp = getResourcePropertyName(resource)
 		return new Permission(
 			(resourceProp): resource,
@@ -493,11 +470,15 @@ class PermissionService {
      */
 	@CompileStatic
 	List<Permission> revoke(SecUser revoker,
-							resource,
+							Object resource,
 							Userish target,
-							Operation operation=Operation.READ,
-							boolean logIfDenied=true) throws AccessControlException {
-		if (!canShare(revoker, resource)) {
+							Operation operation,
+							boolean logIfDenied = true) throws AccessControlException {
+		if (operation == null) {
+			throw new IllegalArgumentException("Operation can't be null")
+		}
+		Operation shareOp = Permission.Operation.shareOperation(resource)
+		if (!check(revoker, resource, shareOp)) {
 			throwAccessControlException(revoker, resource, logIfDenied)
 		}
 		return systemRevoke(target, resource, operation)
@@ -513,8 +494,12 @@ class PermissionService {
      * @return Permissions that were deleted
      */
 	@CompileStatic
-	List<Permission> systemRevoke(Userish target, Object resource, Operation operation=Operation.READ) {
-		return performRevoke(false, target, resource, operation)
+	List<Permission> systemRevoke(Userish target, Object resource, Operation operation) {
+		if (operation == null) {
+			throw new IllegalArgumentException("Operation can't be null")
+		}
+		boolean anonymous = false
+		return performRevoke(anonymous, target, resource, operation)
 	}
 
 	/**
@@ -525,8 +510,13 @@ class PermissionService {
 	 * @return Permissions that were deleted
 	 */
 	@CompileStatic
-	List<Permission> systemRevokeAnonymousAccess(Object resource, Operation operation=Operation.READ) {
-		return performRevoke(true, null, resource, operation)
+	List<Permission> systemRevokeAnonymousAccess(Object resource, Operation operation) {
+		if (operation == null) {
+			throw new IllegalArgumentException("Operation can't be null")
+		}
+		boolean anonymous = true
+		Userish target = null
+		return performRevoke(anonymous, target, resource, operation)
 	}
 
 	/**
@@ -609,7 +599,19 @@ class PermissionService {
 
 		// Special case of UI channels: they inherit permissions from the associated canvas
 		if (p.empty && resource instanceof Stream && resource.uiChannel) {
-			return hasPermission(userish, resource.uiChannelCanvas, op)
+			Map<Operation, Operation> streamToCanvas = [
+				(Operation.STREAM_GET): Operation.CANVAS_GET,
+				(Operation.STREAM_EDIT): Operation.CANVAS_EDIT,
+				(Operation.STREAM_DELETE): Operation.CANVAS_DELETE,
+				//(Operation.STREAM_): Operation.CANVAS_STARTSTOP,
+				//(Operation.STREAM_): Operation.CANVAS_INTERACT,
+				(Operation.STREAM_SHARE): Operation.CANVAS_SHARE,
+			]
+			Operation o = streamToCanvas[op]
+			if (o == null) {
+				return false
+			}
+			return hasPermission(userish, resource.uiChannelCanvas, o)
 		}
 
 		return !p.empty
@@ -633,7 +635,7 @@ class PermissionService {
 		}.toList()
 
 		// Prevent revocation of only/last share permission to prevent inaccessible resources
-		if (hasOneOrLessSharePermissionsLeft(resource) && Operation.SHARE in permissionList*.operation) {
+		if (hasOneOrLessSharePermissionsLeft(resource) && !Operation.shareOperations().disjoint(permissionList*.operation)) {
 			throw new AccessControlException("Cannot revoke only SHARE permission of ${resource}")
 		}
 
@@ -668,12 +670,21 @@ class PermissionService {
 		return revoked
 	}
 
+	// Cascade revocations to "higher" rights to ensure meaningful combinations (e.g. WRITE without READ makes no sense)
+	private static final Map<String, List<Operation>> ALSO_REVOKE = [
+		read: [Operation.WRITE, Operation.SHARE],
+		stream_get: [Operation.STREAM_EDIT, Operation.STREAM_SHARE],
+		canvas_get: [Operation.CANVAS_EDIT, Operation.CANVAS_SHARE],
+		dashboard_get: [Operation.DASHBOARD_EDIT, Operation.DASHBOARD_SHARE],
+		product_get: [Operation.PRODUCT_EDIT, Operation.PRODUCT_SHARE],
+	]
+
 	private static boolean hasOneOrLessSharePermissionsLeft(Object resource) {
 		String resourceProp = getResourcePropertyName(resource)
 		def criteria = Permission.createCriteria()
 		def n = criteria.count {
 			eq(resourceProp, resource)
-			eq("operation", Operation.SHARE)
+			'in'("operation", Operation.shareOperations())
 		}
 		return n <= 1
 	}

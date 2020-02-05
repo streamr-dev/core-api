@@ -144,7 +144,7 @@ class ProductService {
 		Product product = new Product(command.properties)
 		product.owner = currentUser
 		product.save(failOnError: true)
-		permissionService.systemGrantAllProduct(currentUser, product)
+		permissionService.systemGrantAll(currentUser, product)
 		// A stream that is added when creating a new free product should inherit read access for anonymous user
 		if (product.isFree()) {
 			product.streams.each { stream ->
@@ -244,7 +244,7 @@ class ProductService {
 		product.setProperties(command.properties)
 		product.state = Product.State.DEPLOYED
 		product.save(failOnError: true)
-		permissionService.systemGrantAnonymousAccess(product)
+		permissionService.systemGrantAnonymousAccess(product, Permission.Operation.READ)
 		return true
 	}
 
@@ -289,7 +289,7 @@ class ProductService {
 		product.setProperties(command.properties)
 		product.state = Product.State.NOT_DEPLOYED
 		product.save(failOnError: true)
-		permissionService.systemRevokeAnonymousAccess(product)
+		permissionService.systemRevokeAnonymousAccess(product, Permission.Operation.PRODUCT_GET)
 		return true
 	}
 

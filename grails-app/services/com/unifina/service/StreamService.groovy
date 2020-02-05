@@ -69,7 +69,7 @@ class StreamService {
 		}
 
 		stream.save(failOnError: true)
-		permissionService.systemGrantAllStream(user, stream)
+		permissionService.systemGrantAll(user, stream)
 
 		return stream
 	}

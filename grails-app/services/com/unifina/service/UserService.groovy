@@ -7,6 +7,7 @@ import com.unifina.api.NotFoundException
 import com.unifina.domain.ExampleType
 import com.unifina.domain.data.Stream
 import com.unifina.domain.security.Key
+import com.unifina.domain.security.Permission
 import com.unifina.domain.security.SecRole
 import com.unifina.domain.security.SecUser
 import com.unifina.domain.signalpath.Canvas
@@ -117,9 +118,9 @@ class UserService {
 
 	/** Adds/removes ModulePackage read permissions so that user's permissions match given ones */
 	def setModulePackages(user, List<ModulePackage> packages) {
-		List<ModulePackage> existing = permissionService.get(ModulePackage, user)
-		packages.findAll { !existing.contains(it) }.each { permissionService.systemGrant(user, it) }
-		existing.findAll { !packages.contains(it) }.each { permissionService.systemRevoke(user, it) }
+		List<ModulePackage> existing = permissionService.get(ModulePackage, user, Permission.Operation.READ)
+		packages.findAll { !existing.contains(it) }.each { permissionService.systemGrant(user, it, Permission.Operation.READ) }
+		existing.findAll { !packages.contains(it) }.each { permissionService.systemRevoke(user, it, Permission.Operation.READ) }
 		return packages
 	}
 

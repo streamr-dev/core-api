@@ -37,11 +37,14 @@ class KeyApiController {
 
 			if (!res) {
 				throw new NotFoundException(resourceClass.simpleName, resourceId.toString())
-			} else if (requireSharePermission && !permissionService.canShare(request.apiUser, res)) {
-				throw new NotPermittedException(request?.apiUser?.username, resourceClass.simpleName, resourceId.toString(), "share")
-			} else {
-				action(res)
 			}
+
+			Permission.Operation shareOp = Permission.Operation.shareOperation(res)
+			if (requireSharePermission && !permissionService.check(request.apiUser, res, shareOp)) {
+				throw new NotPermittedException(request?.apiUser?.username, resourceClass.simpleName, resourceId.toString(), "share")
+			}
+
+			action(res)
 		}
 	}
 

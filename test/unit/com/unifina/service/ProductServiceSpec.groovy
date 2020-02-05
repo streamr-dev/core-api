@@ -316,7 +316,7 @@ class ProductServiceSpec extends Specification {
 		when:
 		service.create(validCommand, me)
 		then:
-		1 * permissionService.systemGrantAllProduct(me, _ as Product)
+		1 * permissionService.systemGrantAll(me, _ as Product)
 	}
 
 	void "create() verifies streams via permissionService#verifyShare"() {
@@ -897,7 +897,7 @@ class ProductServiceSpec extends Specification {
 		})
 
 		then:
-		1 * permissionService.systemRevokeAnonymousAccess(product)
+		1 * permissionService.systemRevokeAnonymousAccess(product, Permission.Operation.PRODUCT_GET)
 	}
 
 	void "markAsDeployed() throws ValidationException if command object does not pass validation"() {
@@ -1110,7 +1110,7 @@ class ProductServiceSpec extends Specification {
 		})
 
 		then:
-		1 * permissionService.systemGrantAnonymousAccess(product)
+		1 * permissionService.systemGrantAnonymousAccess(product, Permission.Operation.READ)
 	}
 
 	void "updatePricing() updates product price etc"() {

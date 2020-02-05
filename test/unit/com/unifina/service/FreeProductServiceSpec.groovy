@@ -79,7 +79,7 @@ class FreeProductServiceSpec extends Specification {
 		when:
 		service.deployFreeProduct(freeProduct)
 		then:
-		1 * permissionService.systemGrantAnonymousAccess(freeProduct)
+		1 * permissionService.systemGrantAnonymousAccess(freeProduct, Permission.Operation.PRODUCT_GET)
 	}
 
 	void "deployFreeProduct grants anonymous READ access to the streams of Product"() {
@@ -88,9 +88,9 @@ class FreeProductServiceSpec extends Specification {
 		when:
 		service.deployFreeProduct(freeProduct)
 		then:
-		1 * permissionService.systemGrantAnonymousAccess(s1, Permission.Operation.READ)
-		1 * permissionService.systemGrantAnonymousAccess(s2, Permission.Operation.READ)
-		1 * permissionService.systemGrantAnonymousAccess(s3, Permission.Operation.READ)
+		1 * permissionService.systemGrantAnonymousAccess(s1, Permission.Operation.PRODUCT_GET)
+		1 * permissionService.systemGrantAnonymousAccess(s2, Permission.Operation.PRODUCT_GET)
+		1 * permissionService.systemGrantAnonymousAccess(s3, Permission.Operation.PRODUCT_GET)
 	}
 
 	void "undeployFreeProduct throws ProductNotFreeException when given paid Product"() {
@@ -128,7 +128,7 @@ class FreeProductServiceSpec extends Specification {
 		when:
 		service.undeployFreeProduct(freeProduct)
 		then:
-		1 * permissionService.systemRevokeAnonymousAccess(freeProduct)
+		1 * permissionService.systemRevokeAnonymousAccess(freeProduct, Permission.Operation.PRODUCT_GET)
 	}
 
 	void "undeployFreeProduct revokes anonymous READ access to the streams of Product"() {
@@ -140,8 +140,8 @@ class FreeProductServiceSpec extends Specification {
 		when:
 		service.undeployFreeProduct(freeProduct)
 		then:
-		1 * permissionService.systemRevokeAnonymousAccess(s1, Permission.Operation.READ)
-		1 * permissionService.systemRevokeAnonymousAccess(s2, Permission.Operation.READ)
-		1 * permissionService.systemRevokeAnonymousAccess(s3, Permission.Operation.READ)
+		1 * permissionService.systemRevokeAnonymousAccess(s1, Permission.Operation.PRODUCT_GET)
+		1 * permissionService.systemRevokeAnonymousAccess(s2, Permission.Operation.PRODUCT_GET)
+		1 * permissionService.systemRevokeAnonymousAccess(s3, Permission.Operation.PRODUCT_GET)
 	}
 }

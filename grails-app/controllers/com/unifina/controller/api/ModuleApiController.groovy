@@ -28,7 +28,7 @@ class ModuleApiController {
 
 	@StreamrApi
 	def index() {
-		Set<ModulePackage> allowedPackages = permissionService.getAll(ModulePackage, request.apiUser) ?: new HashSet<>()
+		Set<ModulePackage> allowedPackages = permissionService.getAll(ModulePackage, request.apiUser, Permission.Operation.DASHBOARD_GET, {}) ?: new HashSet<>()
 		List<Module> mods = []
 
 		if (!allowedPackages.isEmpty()) {
@@ -89,7 +89,7 @@ class ModuleApiController {
 
 		def categories = ModuleCategory.findAllByParentIsNullAndHideIsNull([sort:"sortOrder"])
 
-		Set<ModulePackage> allowedPackages = permissionService.getAll(ModulePackage, user) ?: new HashSet<>()
+		Set<ModulePackage> allowedPackages = permissionService.getAll(ModulePackage, user, Permission.Operation.READ) ?: new HashSet<>()
 
 		Set<Long> allowedPackageIds = allowedPackages.collect { it.id } as Set
 

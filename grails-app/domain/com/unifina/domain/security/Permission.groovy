@@ -6,6 +6,7 @@ import com.unifina.domain.marketplace.Product
 import com.unifina.domain.marketplace.Subscription
 import com.unifina.domain.signalpath.Canvas
 import com.unifina.domain.signalpath.ModulePackage
+import groovy.transform.CompileStatic
 
 /**
  * Access Control List (ACL) item, grants a user a specific type of access to a resource (e.g. X can read Dashboard 1)
@@ -121,6 +122,49 @@ class Permission {
 		static fromString(String operationId) {
 			return Operation.enumConstants.find { it.id == operationId }
 		}
+
+		static List<Permission.Operation> operationsFor(Object resource) {
+			if (resource == null) {
+				return Collections.emptyList()
+			}
+			Class<?> resourceClass = resource.getClass()
+			if (Canvas.isAssignableFrom(resourceClass)) {
+				return canvasOperations()
+			} else if (Stream.isAssignableFrom(resourceClass)) {
+				return streamOperations()
+			} else if (Dashboard.isAssignableFrom(resourceClass)) {
+				return dashboardOperations()
+			} else if (Product.isAssignableFrom(resourceClass)) {
+				return productOperations()
+			}
+			return operations()
+		}
+
+		@CompileStatic
+		static Operation shareOperation(Object resource) {
+			Class<?> resourceClass = resource.getClass()
+			if (Canvas.isAssignableFrom(resourceClass)) {
+				return Operation.CANVAS_SHARE
+			} else if (Stream.isAssignableFrom(resourceClass)) {
+				return Operation.STREAM_SHARE
+			} else if (Dashboard.isAssignableFrom(resourceClass)) {
+				return Operation.DASHBOARD_SHARE
+			} else if (Product.isAssignableFrom(resourceClass)) {
+				return Operation.PRODUCT_SHARE
+			}
+			return Operation.SHARE
+		}
+
+		static List<Permission.Operation> shareOperations() {
+			return [
+				Operation.CANVAS_SHARE,
+				Operation.DASHBOARD_SHARE,
+				Operation.PRODUCT_SHARE,
+				Operation.SHARE,
+				Operation.STREAM_SHARE,
+			]
+		}
+
 		static List<Permission.Operation> operations() {
 			return [
 				READ,

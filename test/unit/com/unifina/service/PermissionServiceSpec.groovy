@@ -67,9 +67,9 @@ class PermissionServiceSpec extends BeanMockingSpecification {
 		service.systemGrantAll(anotherUser, canvas)
 
 		// Set up the Permissions to the allowed resources
-		dashReadPermission = service.grant(anotherUser, dashAllowed, me, Operation.READ)
-		dashAnonymousReadPermission = service.grantAnonymousAccess(anotherUser, dashPublic)
-		service.grant(anotherUser, dashAllowed, anonymousKey)
+		dashReadPermission = service.systemGrant(me, dashAllowed, Operation.DASHBOARD_GET)
+		dashAnonymousReadPermission = service.systemGrantAnonymousAccess(dashPublic, Operation.DASHBOARD_GET)
+		service.systemGrant(anonymousKey, dashAllowed, Operation.DASHBOARD_GET)
 
 		streamService = mockBean(StreamService, Mock(StreamService))
     }
@@ -80,7 +80,7 @@ class PermissionServiceSpec extends BeanMockingSpecification {
 		Key.count() == 3
 		Dashboard.count() == 4
 		Canvas.count() == 1
-		Permission.count() == 18
+		Permission.count() == 29
 
 		and: "anotherUser has an invitation"
 		invite.username == anotherUser.username
@@ -88,70 +88,70 @@ class PermissionServiceSpec extends BeanMockingSpecification {
 
 	void "access denied to non-permitted Dashboard"() {
 		expect:
-		!service.canRead(me, dashRestricted)
+		!service.canReadDashboard(me, dashRestricted)
 	}
 
 	void "access granted through key to permitted Dashboard"() {
 		expect:
-		service.canRead(myKey, dashAllowed)
+		service.canReadDashboard(myKey, dashAllowed)
 	}
 
 	void "access denied through key to non-permitted Dashboard"() {
 		expect:
-		!service.canRead(myKey, dashRestricted)
+		!service.canReadDashboard(myKey, dashRestricted)
 	}
 
 	void "access granted through anonymous key to permitted Dashboard"() {
 		expect:
-		service.canRead(anonymousKey, dashAllowed)
+		service.canReadDashboard(anonymousKey, dashAllowed)
 	}
 
-	void "access denies through anonymous key to non-permitted Dashboard"() {
+	void "access denied through anonymous key to non-permitted Dashboard"() {
 		expect:
-		!service.canRead(anonymousKey, dashRestricted)
+		!service.canReadDashboard(anonymousKey, dashRestricted)
 	}
 
 	void "non-permitted third-parties have no access to resources"() {
 		expect:
-		!service.canRead(stranger, dashAllowed)
-		!service.canRead(stranger, dashRestricted)
-		!service.canRead(stranger, dashOwned)
+		!service.canReadDashboard(stranger, dashAllowed)
+		!service.canReadDashboard(stranger, dashRestricted)
+		!service.canReadDashboard(stranger, dashOwned)
 	}
 
 	void "canRead returns false on bad inputs"() {
 		expect:
-		!service.canRead(null, dashAllowed)
-		!service.canRead(me, new Dashboard())
-		!service.canRead(me, null)
+		!service.canReadDashboard(null, dashAllowed)
+		!service.canReadDashboard(me, new Dashboard())
+		!service.canReadDashboard(me, null)
 	}
 
 	void "canRead returns false on bad inputs using keys"() {
 		expect:
-		!service.canRead(null, dashAllowed)
-		!service.canRead(myKey, new Dashboard())
-		!service.canRead(anonymousKey, new Dashboard())
-		!service.canRead(myKey, null)
+		!service.canReadDashboard(null, dashAllowed)
+		!service.canReadDashboard(myKey, new Dashboard())
+		!service.canReadDashboard(anonymousKey, new Dashboard())
+		!service.canReadDashboard(myKey, null)
 	}
 
 	void "getPermissionsTo returns all permissions for the given resource"() {
 		setup:
-		def perm = service.grant(me, dashOwned, stranger, Operation.READ)
+		def perm = service.systemGrant(stranger, dashOwned, Operation.DASHBOARD_GET)
 		expect:
-		service.getPermissionsTo(dashOwned).size() == 4
+		service.getPermissionsTo(dashOwned).size() == 6
 		service.getPermissionsTo(dashOwned).contains(perm)
-		service.getPermissionsTo(dashAllowed).size() == 5
+		service.getPermissionsTo(dashAllowed).size() == 7
 		service.getPermissionsTo(dashAllowed).contains(dashReadPermission)
-		service.getPermissionsTo(dashRestricted).size() == 3
+		service.getPermissionsTo(dashRestricted).size() == 5
 		service.getPermissionsTo(dashRestricted)[0].user == anotherUser
 	}
 
 	void "getPermissionsTo with Operation returns all permissions for the given resource"() {
 		setup:
-		List<Permission> beforeRead = service.getPermissionsTo(dashOwned, Operation.READ)
-		List<Permission> beforeWrite = service.getPermissionsTo(dashOwned, Operation.WRITE)
-		Permission perm = service.grant(me, dashOwned, stranger, Operation.READ)
-		List<Permission> afterRead = service.getPermissionsTo(dashOwned, Operation.READ)
-		List<Permission> afterWrite = service.getPermissionsTo(dashOwned, Operation.WRITE)
+		List<Permission> beforeRead = service.getPermissionsTo(dashOwned, Operation.DASHBOARD_GET)
+		List<Permission> beforeWrite = service.getPermissionsTo(dashOwned, Operation.DASHBOARD_EDIT)
+		Permission perm = service.systemGrant(stranger, dashOwned, Operation.DASHBOARD_GET)
+		List<Permission> afterRead = service.getPermissionsTo(dashOwned, Operation.DASHBOARD_GET)
+		List<Permission> afterWrite = service.getPermissionsTo(dashOwned, Operation.DASHBOARD_EDIT)
 		List<Permission> all = service.getPermissionsTo(dashOwned)
 		List<Permission> allOperations = new ArrayList<Permission>()
 		Operation.values().collect { Operation op ->
@@ -168,14 +168,14 @@ class PermissionServiceSpec extends BeanMockingSpecification {
 	void "getNonExpiredPermissionsTo with Operation returns all non-expired permissions for the given resource"() {
 		Dashboard testDash = new Dashboard(id: "testdash", name:"testdash").save(validate:false)
 		// craft an expired permission
-		service.systemGrant(me, testDash, Operation.WRITE, null, new Date(0))
+		service.systemGrant(me, testDash, Operation.DASHBOARD_EDIT, null, new Date(0))
 		setup:
-		List<Permission> beforeRead = service.getNonExpiredPermissionsTo(dashOwned, Operation.READ)
-		List<Permission> beforeWrite = service.getNonExpiredPermissionsTo(dashOwned, Operation.WRITE)
-		Permission perm = service.grant(me, dashOwned, stranger, Operation.READ)
-		List<Permission> afterRead = service.getNonExpiredPermissionsTo(dashOwned, Operation.READ)
-		List<Permission> afterWrite = service.getNonExpiredPermissionsTo(dashOwned, Operation.WRITE)
-		List<Permission> testDashPerms = service.getNonExpiredPermissionsTo(testDash, Operation.WRITE)
+		List<Permission> beforeRead = service.getNonExpiredPermissionsTo(dashOwned, Operation.DASHBOARD_GET)
+		List<Permission> beforeWrite = service.getNonExpiredPermissionsTo(dashOwned, Operation.DASHBOARD_EDIT)
+		Permission perm = service.systemGrant(stranger, dashOwned, Operation.DASHBOARD_GET)
+		List<Permission> afterRead = service.getNonExpiredPermissionsTo(dashOwned, Operation.DASHBOARD_GET)
+		List<Permission> afterWrite = service.getNonExpiredPermissionsTo(dashOwned, Operation.DASHBOARD_EDIT)
+		List<Permission> testDashPerms = service.getNonExpiredPermissionsTo(testDash, Operation.DASHBOARD_EDIT)
 		expect:
 		!beforeRead.contains(perm)
 		afterRead.contains(perm)
@@ -186,60 +186,60 @@ class PermissionServiceSpec extends BeanMockingSpecification {
 
 	void "getPermissionsTo(resource, userish) returns permissions for single user"() {
 		expect:
-		service.getPermissionsTo(dashOwned, me).size() == 3
+		service.getPermissionsTo(dashOwned, me).size() == Operation.dashboardOperations().size()
 		service.getPermissionsTo(dashOwned, anotherUser) == []
 		service.getPermissionsTo(dashOwned, stranger) == []
 		service.getPermissionsTo(dashOwned, null) == []
-		service.getPermissionsTo(dashAllowed, me)[0].operation == Operation.READ
-		service.getPermissionsTo(dashAllowed, anotherUser).size() == 3
+		service.getPermissionsTo(dashAllowed, me)[0].operation == Operation.DASHBOARD_GET
+		service.getPermissionsTo(dashAllowed, anotherUser).size() == 5
 		service.getPermissionsTo(dashAllowed, stranger) == []
 		service.getPermissionsTo(dashAllowed, null) == []
 		service.getPermissionsTo(dashRestricted, me) == []
-		service.getPermissionsTo(dashRestricted, anotherUser).size() == 3
+		service.getPermissionsTo(dashRestricted, anotherUser).size() == 5
 		service.getPermissionsTo(dashRestricted, stranger) == []
 		service.getPermissionsTo(dashRestricted, null) == []
-		service.getPermissionsTo(dashPublic, me)[0].operation == Operation.READ
-		service.getPermissionsTo(dashPublic, anotherUser).size() == 4
-		service.getPermissionsTo(dashPublic, stranger)[0].operation == Operation.READ
-		service.getPermissionsTo(dashPublic, null)[0].operation == Operation.READ
+		service.getPermissionsTo(dashPublic, me)[0].operation == Operation.DASHBOARD_GET
+		service.getPermissionsTo(dashPublic, anotherUser).size() == 6
+		service.getPermissionsTo(dashPublic, stranger)[0].operation == Operation.DASHBOARD_GET
+		service.getPermissionsTo(dashPublic, null)[0].operation == Operation.DASHBOARD_GET
 	}
 
 	void "getPermissionsTo(resource, userish) returns permissions for key"() {
 		expect:
-		service.getPermissionsTo(dashOwned, myKey).size() == 3
+		service.getPermissionsTo(dashOwned, myKey).size() == Operation.dashboardOperations().size()
 		service.getPermissionsTo(dashOwned, anotherUserKey) == []
 		service.getPermissionsTo(dashOwned, anonymousKey) == []
-		service.getPermissionsTo(dashAllowed, myKey)[0].operation == Operation.READ
-		service.getPermissionsTo(dashAllowed, anotherUserKey).size() == 3
-		service.getPermissionsTo(dashAllowed, anonymousKey)[0].operation == Operation.READ
+		service.getPermissionsTo(dashAllowed, myKey)[0].operation == Operation.DASHBOARD_GET
+		service.getPermissionsTo(dashAllowed, anotherUserKey).size() == 5
+		service.getPermissionsTo(dashAllowed, anonymousKey)[0].operation == Operation.DASHBOARD_GET
 		service.getPermissionsTo(dashRestricted, myKey) == []
-		service.getPermissionsTo(dashRestricted, anotherUserKey).size() == 3
+		service.getPermissionsTo(dashRestricted, anotherUserKey).size() == 5
 		service.getPermissionsTo(dashRestricted, anonymousKey) == []
-		service.getPermissionsTo(dashPublic, myKey)[0].operation == Operation.READ
-		service.getPermissionsTo(dashPublic, anotherUserKey).size() == 4
-		service.getPermissionsTo(dashPublic, anonymousKey)[0].operation == Operation.READ
+		service.getPermissionsTo(dashPublic, myKey)[0].operation == Operation.DASHBOARD_GET
+		service.getPermissionsTo(dashPublic, anotherUserKey).size() == 6
+		service.getPermissionsTo(dashPublic, anonymousKey)[0].operation == Operation.DASHBOARD_GET
 	}
 
 	void "get throws exceptions on invalid resource"() {
 		when:
-		service.get(java.lang.Object, me)
+		service.get(java.lang.Object, me, Permission.Operation.READ)
 		then:
 		thrown(IllegalArgumentException)
 
 		when:
-		service.get(null, me)
+		service.get(null, me, Permission.Operation.READ)
 		then:
 		thrown(NullPointerException)
 	}
 
 	void "grant and revoke throw for non-'share'-access users"() {
 		when:
-		service.grant(me, dashAllowed, stranger)
+		service.grant(me, dashAllowed, stranger, Permission.Operation.READ)
 		then:
 		thrown AccessControlException
 
 		when:
-		service.revoke(stranger, dashRestricted, me)
+		service.revoke(stranger, dashRestricted, me, Permission.Operation.READ)
 		then:
 		thrown AccessControlException
 	}
@@ -270,26 +270,26 @@ class PermissionServiceSpec extends BeanMockingSpecification {
 		Stream stream = new Stream()
 		stream.id = "stream"
 		setup:
-		service.systemGrant(publisher1, stream, Operation.WRITE)
-		service.systemGrant(publisher2, stream, Operation.WRITE)
+		service.systemGrant(publisher1, stream, Operation.STREAM_EDIT)
+		service.systemGrant(publisher2, stream, Operation.STREAM_EDIT)
 
 		when:
 		// adding a new subscriber
-		service.systemGrant(subscriber, stream, Operation.READ)
+		service.systemGrant(subscriber, stream, Operation.STREAM_GET)
 		// adding a new publisher
-		service.systemGrant(publisher3, stream, Operation.WRITE)
+		service.systemGrant(publisher3, stream, Operation.STREAM_EDIT)
 		then:
 		2 * streamService.getInboxStreams([subscriber]) >> [subInbox]
 		1 * streamService.getInboxStreams([publisher1, publisher2]) >> [pub1Inbox, pub2Inbox]
 		1 * streamService.getInboxStreams([publisher3]) >> [pub3Inbox]
 		// assertions after adding a new subscriber
-		service.canWrite(subscriber, pub1Inbox)
-		service.canWrite(subscriber, pub2Inbox)
-		service.canWrite(publisher1, subInbox)
-		service.canWrite(publisher2, subInbox)
+		service.canWriteStream(subscriber, pub1Inbox)
+		service.canWriteStream(subscriber, pub2Inbox)
+		service.canWriteStream(publisher1, subInbox)
+		service.canWriteStream(publisher2, subInbox)
 		// assertions after adding a new publisher
-		service.canWrite(subscriber, pub3Inbox)
-		service.canWrite(publisher3, subInbox)
+		service.canWriteStream(subscriber, pub3Inbox)
+		service.canWriteStream(publisher3, subInbox)
 	}
 
 	void "inbox stream permissions also work when anonymous keys have permissions to the stream"() {
@@ -300,9 +300,9 @@ class PermissionServiceSpec extends BeanMockingSpecification {
 		Stream stream = new Stream()
 		stream.id = "stream"
 		setup:
-		service.systemGrant(anonKey, stream, Operation.WRITE)
+		service.systemGrant(anonKey, stream, Operation.STREAM_EDIT)
 		when:
-		service.systemGrant(subscriber, stream, Operation.READ)
+		service.systemGrant(subscriber, stream, Operation.STREAM_GET)
 		then:
 		noExceptionThrown()
 	}
@@ -310,10 +310,10 @@ class PermissionServiceSpec extends BeanMockingSpecification {
 	void "cannot revoke only share permission"() {
 		setup: "transfer effective 'ownership'"
 		service.systemGrantAll(anotherUser, dashOwned)
-		service.systemRevoke(me, dashOwned, Operation.SHARE)
+		service.systemRevoke(me, dashOwned, Operation.DASHBOARD_SHARE)
 
 		when:
-		service.systemRevoke(anotherUser, dashOwned, Operation.SHARE)
+		service.systemRevoke(anotherUser, dashOwned, Operation.DASHBOARD_SHARE)
 		then:
 		def e = thrown(AccessControlException)
 		e.message == "Cannot revoke only SHARE permission of ${dashOwned}"
@@ -383,10 +383,10 @@ class PermissionServiceSpec extends BeanMockingSpecification {
 	void "cannot revoke only share permission (via cascading READ)"() {
 		setup: "transfer effective 'ownership'"
 		service.systemGrantAll(anotherUser, dashOwned)
-		service.systemRevoke(me, dashOwned, Operation.SHARE)
+		service.systemRevoke(me, dashOwned, Operation.DASHBOARD_SHARE)
 
 		when:
-		service.systemRevoke(anotherUser, dashOwned, Operation.READ)
+		service.systemRevoke(anotherUser, dashOwned, Operation.DASHBOARD_GET)
 		then:
 		def e = thrown(AccessControlException)
 		e.message == "Cannot revoke only SHARE permission of ${dashOwned}"
@@ -395,10 +395,10 @@ class PermissionServiceSpec extends BeanMockingSpecification {
 	void "cannot revoke only share permission (via cascading WRITE)"() {
 		setup: "transfer effective 'ownership'"
 		service.systemGrantAll(anotherUser, dashOwned)
-		service.systemRevoke(me, dashOwned, Operation.SHARE)
+		service.systemRevoke(me, dashOwned, Operation.DASHBOARD_SHARE)
 
 		when:
-		service.systemRevoke(anotherUser, dashOwned, Operation.WRITE)
+		service.systemRevoke(anotherUser, dashOwned, Operation.DASHBOARD_EDIT)
 		then:
 		def e = thrown(AccessControlException)
 		e.message == "Cannot revoke only SHARE permission of ${dashOwned}"
@@ -409,77 +409,77 @@ class PermissionServiceSpec extends BeanMockingSpecification {
 		!service.getPermissionsTo(dashOwned).find { it.invite == invite }
 
 		when:
-		service.grant(me, dashOwned, invite)
+		service.systemGrant(invite, dashOwned, Operation.DASHBOARD_GET)
 		then:
 		service.getPermissionsTo(dashOwned).find { it.invite == invite }
 
 		when:
-		service.revoke(me, dashOwned, invite)
+		service.systemRevoke(invite, dashOwned, Operation.DASHBOARD_GET)
 		then:
 		!service.getPermissionsTo(dashOwned).find { it.invite == invite }
 	}
 
 	void "signup invitations are converted correctly"() {
 		expect:
-		!service.canRead(anotherUser, dashOwned)
+		!service.canReadDashboard(anotherUser, dashOwned)
 
 		when: "pretend anotherUser was just created"
-		service.grant(me, dashOwned, invite)
+		service.systemGrant(invite, dashOwned, Operation.DASHBOARD_GET)
 		service.transferInvitePermissionsTo(anotherUser)
 		then:
-		service.canRead(anotherUser, dashOwned)
+		service.canReadDashboard(anotherUser, dashOwned)
 	}
 
 	void "stranger can read public resources with anonymous read access"() {
 		expect: "... but not more than read"
-		service.canRead(stranger, dashPublic)
-		!service.canWrite(stranger, dashPublic)
-		!service.canShare(stranger, dashPublic)
+		service.canReadDashboard(stranger, dashPublic)
+		!service.canWriteDashboard(stranger, dashPublic)
+		!service.canShareDashboard(stranger, dashPublic)
 	}
 
 	void "verify does not throw if permission exists"() {
 		when:
-		service.verify(stranger, dashPublic, Operation.READ)
+		service.verify(stranger, dashPublic, Operation.DASHBOARD_GET)
 		then:
 		notThrown(NotPermittedException)
 	}
 
 	void "verify throws if permission does not exist"() {
 		when:
-		service.verify(stranger, dashPublic, Operation.WRITE)
+		service.verify(stranger, dashPublic, Operation.DASHBOARD_EDIT)
 		then:
 		def e = thrown(NotPermittedException)
-		e.message == "stranger does not have permission to write Dashboard (id 4)"
+		e.message == "stranger does not have permission to dashboard_edit Dashboard (id 4)"
 	}
 
 	void "systemRevokeAnonymousAccess() revokes anonymous access on a resource"() {
 		assert Permission.exists(dashAnonymousReadPermission.id)
-		assert service.canRead(null, dashPublic)
+		assert service.canReadDashboard(null, dashPublic)
 
 		when:
-		service.systemRevokeAnonymousAccess(dashPublic)
+		service.systemRevokeAnonymousAccess(dashPublic, Operation.DASHBOARD_GET)
 
 		then:
 		!Permission.exists(dashAnonymousReadPermission.id)
-		!service.canRead(null, dashPublic)
+		!service.canReadDashboard(null, dashPublic)
 	}
 
 	void "check() returns false if permission with endsAt set in past"() {
-		def p = service.systemGrant(stranger, dashOwned, Operation.READ)
+		def p = service.systemGrant(stranger, dashOwned, Operation.DASHBOARD_GET)
 		p.endsAt = new Date(0)
 		p.save(failOnError: true)
 
 		expect:
-		!service.check(stranger, dashOwned, Operation.READ)
+		!service.check(stranger, dashOwned, Operation.DASHBOARD_GET)
 	}
 
 	void "check() returns true if permission with endsAt set in future"() {
-		def p = service.systemGrant(stranger, dashOwned, Operation.READ)
+		def p = service.systemGrant(stranger, dashOwned, Operation.DASHBOARD_GET)
 		p.endsAt = new Date(System.currentTimeMillis() + 60000)
 		p.save(failOnError: true)
 
 		expect:
-		service.check(stranger, dashOwned, Operation.READ)
+		service.check(stranger, dashOwned, Operation.DASHBOARD_GET)
 	}
 
 	void "cleanUpExpiredPermissions() deletes permissions that already ended"() {
@@ -491,10 +491,10 @@ class PermissionServiceSpec extends BeanMockingSpecification {
 		assert Permission.findAllByStream(testStream).size() == 0
 
 		when:
-		Permission p1 = service.systemGrant(testUser, testStream, Operation.READ)
+		Permission p1 = service.systemGrant(testUser, testStream, Operation.STREAM_GET)
 		p1.endsAt = new Date(0)
 		p1.save(failOnError: true)
-		Permission p2 = service.systemGrant(testUser, testStream, Operation.WRITE)
+		Permission p2 = service.systemGrant(testUser, testStream, Operation.STREAM_EDIT)
 		p2.endsAt = new Date(System.currentTimeMillis() + 60000)
 		p2.save(failOnError: true)
 
@@ -506,7 +506,7 @@ class PermissionServiceSpec extends BeanMockingSpecification {
 
 		then:
 		Permission.findAllByStream(testStream).size() == 1
-		!service.canRead(testUser, testStream)
-		service.canWrite(testUser, testStream)
+		!service.canReadStream(testUser, testStream)
+		service.canWriteStream(testUser, testStream)
 	}
 }

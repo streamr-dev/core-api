@@ -9,11 +9,8 @@ import com.unifina.domain.signalpath.Canvas
 import com.unifina.utils.IdGenerator
 import grails.test.spock.IntegrationSpec
 import grails.util.Holders
-import org.apache.commons.codec.binary.Hex
-import org.web3j.crypto.WalletUtils
 
 import java.security.AccessControlException
-import java.security.SecureRandom
 
 /*
 	Ideally these tests would reside in {PermissionServiceSpec} as unit tests. However, due to spotty mocking of GORM,
@@ -86,9 +83,9 @@ class PermissionServiceIntegrationSpec extends IntegrationSpec {
 		service.systemGrantAll(anotherUser, dashPublic)
 
 		// Set up the Permissions to the allowed resources
-		dashReadPermission = service.grant(anotherUser, dashAllowed, me, Permission.Operation.READ)
-		dashAnonymousReadPermission = service.grantAnonymousAccess(anotherUser, dashPublic)
-		service.grant(anotherUser, dashAllowed, anonymousKey)
+		dashReadPermission = service.systemGrant(me, dashAllowed, Permission.Operation.DASHBOARD_GET)
+		dashAnonymousReadPermission = service.systemGrantAnonymousAccess(dashPublic, Permission.Operation.DASHBOARD_GET)
+		service.grant(anotherUser, dashAllowed, anonymousKey, Permission.Operation.DASHBOARD_GET)
 
 		canvas = new Canvas().save(validate: true, failOnError: true)
 		stream = new Stream(name: "ui channel", uiChannel: true, uiChannelCanvas: canvas)
@@ -121,139 +118,138 @@ class PermissionServiceIntegrationSpec extends IntegrationSpec {
 		stream.uiChannelCanvas?.delete(flush: true)
 	}
 
-
 	void "get closure filtering works as expected"() {
 		expect:
-		service.get(Dashboard, me) { like("name", "%ll%") } == [dashAllowed]
-		service.get(Dashboard, me, Permission.Operation.SHARE) == [dashOwned]
-		service.get(Dashboard, me, Permission.Operation.SHARE) { like("name", "%ll%") } == []
+		service.get(Dashboard, me, Permission.Operation.DASHBOARD_GET) { like("name", "%ll%") } == [dashAllowed]
+		service.get(Dashboard, me, Permission.Operation.DASHBOARD_SHARE) == [dashOwned]
+		service.get(Dashboard, me, Permission.Operation.DASHBOARD_SHARE) { like("name", "%ll%") } == []
 	}
 
 	void "sharing read rights to others"() {
 		when:
-		service.grant(me, dashOwned, stranger, Permission.Operation.READ)
-		service.grant(me, dashOwned, stranger, Permission.Operation.SHARE)
+		service.grant(me, dashOwned, stranger, Permission.Operation.DASHBOARD_GET)
+		service.grant(me, dashOwned, stranger, Permission.Operation.DASHBOARD_SHARE)
 		then:
-		service.get(Dashboard, stranger) == [dashOwned]
-		service.get(Dashboard, stranger, Permission.Operation.SHARE) == [dashOwned]
+		service.get(Dashboard, stranger, Permission.Operation.DASHBOARD_GET) == [dashOwned]
+		service.get(Dashboard, stranger, Permission.Operation.DASHBOARD_SHARE) == [dashOwned]
 
 		expect:
-		!(dashOwned in service.get(Dashboard, anotherUser))
+		!(dashOwned in service.get(Dashboard, anotherUser, Permission.Operation.DASHBOARD_GET))
 
 		when: "stranger shares read access"
-		service.grant(stranger, dashOwned, anotherUser)
+		service.grant(stranger, dashOwned, anotherUser, Permission.Operation.DASHBOARD_GET)
 		then:
-		dashOwned in service.get(Dashboard, anotherUser)
+		dashOwned in service.get(Dashboard, anotherUser, Permission.Operation.DASHBOARD_GET)
 		!(dashOwned in service.get(Dashboard, anotherUser, Permission.Operation.SHARE))
 
 		when:
-		service.revoke(stranger, dashOwned, anotherUser)
+		service.revoke(stranger, dashOwned, anotherUser, Permission.Operation.DASHBOARD_GET)
 		then:
-		!(dashOwned in service.get(Dashboard, anotherUser))
+		!(dashOwned in service.get(Dashboard, anotherUser, Permission.Operation.DASHBOARD_GET))
 
 		when: "of course, it's silly to revoke 'share' access since it might already been re-shared..."
-		service.revoke(me, dashOwned, stranger)
-		service.grant(stranger, dashOwned, anotherUser)
+		service.revoke(me, dashOwned, stranger, Permission.Operation.DASHBOARD_GET)
+		service.grant(stranger, dashOwned, anotherUser, Permission.Operation.DASHBOARD_SHARE)
 		then:
 		thrown AccessControlException
 	}
 
 	void "default revocation is all access"() {
 		setup:
-		service.grant(me, dashOwned, stranger, Permission.Operation.READ)
-		service.grant(me, dashOwned, stranger, Permission.Operation.SHARE)
+		service.grant(me, dashOwned, stranger, Permission.Operation.DASHBOARD_GET)
+		service.grant(me, dashOwned, stranger, Permission.Operation.DASHBOARD_SHARE)
 		when:
-		service.revoke(me, dashOwned, stranger)
+		service.revoke(me, dashOwned, stranger, Permission.Operation.DASHBOARD_GET)
 		then: "by default, revoke all access"
-		service.get(Dashboard, stranger) == []
-		service.get(Dashboard, stranger, Permission.Operation.SHARE) == []
+		service.get(Dashboard, stranger, Permission.Operation.DASHBOARD_GET) == []
+		service.get(Dashboard, stranger, Permission.Operation.DASHBOARD_SHARE) == []
 	}
 
 	void "revocation is granular"() {
 		setup:
-		service.grant(me, dashOwned, stranger, Permission.Operation.READ)
-		service.grant(me, dashOwned, stranger, Permission.Operation.SHARE)
+		service.grant(me, dashOwned, stranger, Permission.Operation.DASHBOARD_GET)
+		service.grant(me, dashOwned, stranger, Permission.Operation.DASHBOARD_SHARE)
 		when:
-		service.revoke(me, dashOwned, stranger, Permission.Operation.SHARE)
+		service.revoke(me, dashOwned, stranger, Permission.Operation.DASHBOARD_SHARE)
 		then: "only 'share' access is revoked"
-		service.get(Dashboard, stranger) == [dashOwned]
-		service.get(Dashboard, stranger, Permission.Operation.SHARE) == []
+		service.get(Dashboard, stranger, Permission.Operation.DASHBOARD_GET) == [dashOwned]
+		service.get(Dashboard, stranger, Permission.Operation.DASHBOARD_SHARE) == []
 	}
 
 	void "get does not return expired permissions"() {
-		def p1 = service.systemGrant(someone, dashRestricted, Permission.Operation.READ)
-		def p2 = service.systemGrant(someone, dashOwned, Permission.Operation.READ)
+		def p1 = service.systemGrant(someone, dashRestricted, Permission.Operation.DASHBOARD_GET)
+		def p2 = service.systemGrant(someone, dashOwned, Permission.Operation.DASHBOARD_GET)
 		p1.endsAt = new Date(System.currentTimeMillis() - 1000*60000)
 		p2.endsAt = new Date(0)
 		p1.save(failOnError: true)
 		p2.save(failOnError: true)
 
 		expect:
-		service.get(Dashboard, someone, Permission.Operation.READ) == []
+		service.get(Dashboard, someone, Permission.Operation.DASHBOARD_GET) == []
 	}
 
 	void "get returns non-expired permissions"() {
-		def p1 = service.systemGrant(someone, dashRestricted, Permission.Operation.READ)
-		def p2 = service.systemGrant(someone, dashOwned, Permission.Operation.READ)
+		def p1 = service.systemGrant(someone, dashRestricted, Permission.Operation.DASHBOARD_GET)
+		def p2 = service.systemGrant(someone, dashOwned, Permission.Operation.DASHBOARD_GET)
 		p1.endsAt = new Date(System.currentTimeMillis() + 10000)
 		p2.endsAt = new Date(System.currentTimeMillis() + 1000000)
 		p1.save(failOnError: true)
 		p2.save(failOnError: true)
 
 		expect:
-		service.get(Dashboard, someone, Permission.Operation.READ) as Set == [dashOwned, dashRestricted] as Set
+		service.get(Dashboard, someone, Permission.Operation.DASHBOARD_GET) as Set == [dashOwned, dashRestricted] as Set
 	}
 
 	void "getAll lists public resources"() {
 		expect:
-		service.getAll(Dashboard, me) as Set == [dashOwned, dashPublic, dashAllowed] as Set
-		service.getAll(Dashboard, anotherUser) as Set == [dashAllowed, dashRestricted, dashPublic] as Set
-		service.getAll(Dashboard, stranger) == [dashPublic]
+		service.getAll(Dashboard, me, Permission.Operation.DASHBOARD_GET) as Set == [dashOwned, dashPublic, dashAllowed] as Set
+		service.getAll(Dashboard, anotherUser, Permission.Operation.DASHBOARD_GET) as Set == [dashAllowed, dashRestricted, dashPublic] as Set
+		service.getAll(Dashboard, stranger, Permission.Operation.DASHBOARD_GET) == [dashPublic]
 	}
 
 	void "getAll lists public resources with keys"() {
 		expect:
-		service.getAll(Dashboard, myKey) as Set == [dashOwned, dashPublic, dashAllowed] as Set
-		service.getAll(Dashboard, anotherUserKey) as Set == [dashAllowed, dashRestricted, dashPublic] as Set
-		service.getAll(Dashboard, anonymousKey) as Set == [dashPublic, dashAllowed] as Set
+		service.getAll(Dashboard, myKey, Permission.Operation.DASHBOARD_GET) as Set == [dashOwned, dashPublic, dashAllowed] as Set
+		service.getAll(Dashboard, anotherUserKey, Permission.Operation.DASHBOARD_GET) as Set == [dashAllowed, dashRestricted, dashPublic] as Set
+		service.getAll(Dashboard, anonymousKey, Permission.Operation.DASHBOARD_GET) as Set == [dashPublic, dashAllowed] as Set
 	}
 
 	void "getAll returns public resources on bad/null user"() {
 		expect:
-		service.get(Dashboard, new SecUser()) == []
-		service.get(Dashboard, null) == []
-		service.getAll(Dashboard, new SecUser()) == [dashPublic]
-		service.getAll(Dashboard, null) == [dashPublic]
+		service.get(Dashboard, new SecUser(), Permission.Operation.DASHBOARD_GET) == []
+		service.get(Dashboard, null, Permission.Operation.DASHBOARD_GET) == []
+		service.getAll(Dashboard, new SecUser(), Permission.Operation.DASHBOARD_GET) == [dashPublic]
+		service.getAll(Dashboard, null, Permission.Operation.DASHBOARD_GET) == [dashPublic]
 	}
 
 	void "granting and revoking read rights"() {
 		when:
-		service.grant(me, dashOwned, stranger)
+		service.grant(me, dashOwned, stranger, Permission.Operation.DASHBOARD_GET)
 		then:
-		service.get(Dashboard, stranger) == [dashOwned]
+		service.get(Dashboard, stranger, Permission.Operation.DASHBOARD_GET) == [dashOwned]
 
 		when:
-		service.revoke(me, dashOwned, stranger)
+		service.revoke(me, dashOwned, stranger, Permission.Operation.DASHBOARD_GET)
 		then:
-		service.get(Dashboard, stranger) == []
+		service.get(Dashboard, stranger, Permission.Operation.DASHBOARD_GET) == []
 	}
 
 	void "granting and revoking write rights"() {
 		when:
-		service.grant(me, dashOwned, stranger, Permission.Operation.WRITE)
+		service.grant(me, dashOwned, stranger, Permission.Operation.DASHBOARD_EDIT)
 		then:
-		service.get(Dashboard, stranger, Permission.Operation.WRITE) == [dashOwned]
+		service.get(Dashboard, stranger, Permission.Operation.DASHBOARD_EDIT) == [dashOwned]
 
 		when:
-		service.revoke(me, dashOwned, stranger, Permission.Operation.WRITE)
+		service.revoke(me, dashOwned, stranger, Permission.Operation.DASHBOARD_EDIT)
 		then:
-		service.get(Dashboard, stranger, Permission.Operation.WRITE) == []
+		service.get(Dashboard, stranger, Permission.Operation.DASHBOARD_EDIT) == []
 
 		when: "revoking read also revokes write"
-		service.grant(me, dashOwned, stranger, Permission.Operation.WRITE)
-		service.revoke(me, dashOwned, stranger)
+		service.grant(me, dashOwned, stranger, Permission.Operation.DASHBOARD_EDIT)
+		service.revoke(me, dashOwned, stranger, Permission.Operation.DASHBOARD_GET)
 		then:
-		service.get(Dashboard, stranger, Permission.Operation.WRITE) == []
+		service.get(Dashboard, stranger, Permission.Operation.DASHBOARD_EDIT) == []
 	}
 
 	void "granting and revoking share rights"() {
@@ -269,50 +265,50 @@ class PermissionServiceIntegrationSpec extends IntegrationSpec {
 
 		when: "revoking read also revokes share"
 		service.grant(me, dashOwned, stranger, Permission.Operation.SHARE)
-		service.revoke(me, dashOwned, stranger)
+		service.revoke(me, dashOwned, stranger, Permission.Operation.READ)
 		then:
 		service.get(Dashboard, stranger, Permission.Operation.SHARE) == []
 	}
 
 	void "granting works (roughly) idempotently"() {
 		expect:
-		service.get(Dashboard, stranger) == []
+		service.get(Dashboard, stranger, Permission.Operation.DASHBOARD_GET) == []
 		when: "double-granting still has the same effect: there exists a permission for user to resource"
-		service.grant(me, dashOwned, stranger)
-		service.grant(me, dashOwned, stranger)
+		service.grant(me, dashOwned, stranger, Permission.Operation.DASHBOARD_GET)
+		service.grant(me, dashOwned, stranger, Permission.Operation.DASHBOARD_GET)
 		then: "now you see it..."
-		service.get(Dashboard, stranger) == [dashOwned]
+		service.get(Dashboard, stranger, Permission.Operation.DASHBOARD_GET) == [dashOwned]
 		when:
-		service.grant(me, dashOwned, stranger)
-		service.grant(me, dashOwned, stranger)
-		service.grant(me, dashOwned, stranger)
-		service.revoke(me, dashOwned, stranger)
+		service.grant(me, dashOwned, stranger, Permission.Operation.DASHBOARD_GET)
+		service.grant(me, dashOwned, stranger, Permission.Operation.DASHBOARD_GET)
+		service.grant(me, dashOwned, stranger, Permission.Operation.DASHBOARD_GET)
+		service.revoke(me, dashOwned, stranger, Permission.Operation.DASHBOARD_GET)
 		then: "now you don't."
-		service.get(Dashboard, stranger) == []
+		service.get(Dashboard, stranger, Permission.Operation.DASHBOARD_GET) == []
 	}
 
 	void "retrieve all readable Dashboards correctly"() {
 		expect:
-		service.get(Dashboard, me) as Set == [dashOwned, dashAllowed] as Set
-		service.get(Dashboard, anotherUser) as Set == [dashAllowed, dashRestricted, dashPublic] as Set
-		service.get(Dashboard, stranger) == []
+		service.get(Dashboard, me, Permission.Operation.DASHBOARD_GET) as Set == [dashOwned, dashAllowed] as Set
+		service.get(Dashboard, anotherUser, Permission.Operation.DASHBOARD_GET) as Set == [dashAllowed, dashRestricted, dashPublic] as Set
+		service.get(Dashboard, stranger, Permission.Operation.DASHBOARD_GET) == []
 	}
 
 	void "retrieve all readable Dashboards correctly with keys"() {
 		expect:
-		service.get(Dashboard, myKey) as Set == [dashOwned, dashAllowed] as Set
-		service.get(Dashboard, anotherUserKey) as Set == [dashAllowed, dashRestricted, dashPublic] as Set
-		service.get(Dashboard, anonymousKey) as Set == [dashAllowed] as Set
+		service.get(Dashboard, myKey, Permission.Operation.DASHBOARD_GET) as Set == [dashOwned, dashAllowed] as Set
+		service.get(Dashboard, anotherUserKey, Permission.Operation.DASHBOARD_GET) as Set == [dashAllowed, dashRestricted, dashPublic] as Set
+		service.get(Dashboard, anonymousKey, Permission.Operation.DASHBOARD_GET) as Set == [dashAllowed] as Set
 	}
 
 	void "getPermissionsTo(resource, userish) returns correct UI channel permissions via associated canvas"() {
 		service.systemGrantAll(me, canvas)
 
 		expect:
-		service.getPermissionsTo(stream, me).size() == 3
-		service.canRead(me, stream)
-		service.canWrite(me, stream)
-		service.canShare(me, stream)
+		service.getPermissionsTo(stream, me).size() == 4
+		service.canReadStream(me, stream)
+		service.canWriteStream(me, stream)
+		service.canShareStream(me, stream)
 	}
 
 	void "granting permissions results in correct number of inbox stream permissions"() {
@@ -328,13 +324,13 @@ class PermissionServiceIntegrationSpec extends IntegrationSpec {
 		manyToManyStream.save(validate: false)
 
 		when:
-		writers.each { service.systemGrant(it, manyToManyStream, Permission.Operation.WRITE) }
+		writers.each { service.systemGrant(it, manyToManyStream, Permission.Operation.STREAM_EDIT) }
 
 		then:
 		Permission.countByStream(manyToManyStream) == writers.size()
 
 		when:
-		readers.each { service.systemGrant(it, manyToManyStream, Permission.Operation.READ) }
+		readers.each { service.systemGrant(it, manyToManyStream, Permission.Operation.STREAM_GET) }
 		List<Permission> parentPermissions = Permission.findAllByStream(manyToManyStream)
 
 		then:
@@ -342,7 +338,7 @@ class PermissionServiceIntegrationSpec extends IntegrationSpec {
 		Permission.countByParentInList(parentPermissions) == writers.size() * readers.size() * 2
 
 		when: // there are expired subscriptions
-		readers.each { service.systemGrant(it, manyToManyStream, Permission.Operation.READ, null, new Date(0)) }
+		readers.each { service.systemGrant(it, manyToManyStream, Permission.Operation.STREAM_GET, null, new Date(0)) }
 		parentPermissions = Permission.findAllByStream(manyToManyStream)
 
 		then: // expired permissions don't add to the permission bloat

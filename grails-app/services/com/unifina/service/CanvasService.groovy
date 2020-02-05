@@ -99,7 +99,7 @@ class CanvasService {
 		boolean isNewCanvas = canvas.id == null
 		canvas.save(flush: true, failOnError: true)
 		if (isNewCanvas) {
-			permissionService.systemGrantAllCanvas(user, canvas)
+			permissionService.systemGrantAll(user, canvas)
 		}
 
 		// ensure that the UI channel streams are created
