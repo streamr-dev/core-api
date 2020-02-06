@@ -109,7 +109,7 @@ class StreamApiController {
 	@StreamrApi(authenticationLevel = AuthLevel.KEY)
 	def setFields(String id) {
 		Userish u = request.apiUser != null ? (SecUser) request.apiUser : (Key) request.apiKey
-		Stream stream = apiService.authorizedGetById(Stream, id, u, Operation.WRITE)
+		Stream stream = apiService.authorizedGetById(Stream, id, u, Operation.STREAM_EDIT)
 		def givenFields = request.JSON
 
 		Map config = stream.config ? JSON.parse(stream.config) : [:]
