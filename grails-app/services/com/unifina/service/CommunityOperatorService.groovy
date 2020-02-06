@@ -63,9 +63,9 @@ public class CommunityOperatorService implements InitializingBean {
 			try {
 				response = client.execute(req);
 			} catch (ConnectException e) {
-				String msg = "Community server is not responding";
+				String msg = "Community server is busy or not responding";
 				log.error(msg, e);
-				throw new ProxyException(msg);
+				throw new ProxyException(503, msg, ["Retry-After": "60"]);	// 1 minute
 			} catch (SocketTimeoutException e) {
 				String msg = "Community server gateway timeout";
 				log.error(msg, e);

@@ -22,9 +22,9 @@ public class NotFoundException extends ApiException {
 	public ApiError asApiError() {
 		ApiError e = super.asApiError();
 		if (type != null && id != null) {
-			e.addEntry("type", type);
-			e.addEntry("fault", "id");
-			e.addEntry("id", id);
+			e.addToBody("type", type);
+			e.addToBody("fault", "id");
+			e.addToBody("id", id);
 		}
 		return e;
 	}
