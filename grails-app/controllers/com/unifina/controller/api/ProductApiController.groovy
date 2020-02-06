@@ -65,7 +65,7 @@ class ProductApiController {
 	@GrailsCompileStatic
 	@StreamrApi(authenticationLevel = AuthLevel.NONE)
 	def related() {
-		Product product = productService.findById((String) params.id, loggedInUser(), Permission.Operation.READ)
+		Product product = productService.findById((String) params.id, loggedInUser(), Permission.Operation.PRODUCT_GET)
 		int max = Math.min(params.int('max', 3), 10)
 		def related = productService.relatedProducts(product, max, loggedInUser())
 		render(related*.toSummaryMap() as JSON)
@@ -82,7 +82,7 @@ class ProductApiController {
 	@GrailsCompileStatic
 	@StreamrApi(authenticationLevel = AuthLevel.NONE)
 	def show(String id) {
-		Product product = productService.findById(id, loggedInUser(), Permission.Operation.READ)
+		Product product = productService.findById(id, loggedInUser(), Permission.Operation.PRODUCT_GET)
 		boolean isProductOwner = permissionService.canShare(loggedInUser(), product)
 		render(product.toMap(isProductOwner) as JSON)
 	}
@@ -105,7 +105,7 @@ class ProductApiController {
 	@GrailsCompileStatic
 	@StreamrApi(authenticationLevel = AuthLevel.USER)
 	def setDeploying(String id) {
-		Product product = productService.findById(id, loggedInUser(), Permission.Operation.WRITE)
+		Product product = productService.findById(id, loggedInUser(), Permission.Operation.PRODUCT_EDIT)
 		productService.transitionToDeploying(product)
 		render(product.toMap() as JSON)
 	}
@@ -129,7 +129,7 @@ class ProductApiController {
 	@GrailsCompileStatic
 	@StreamrApi(authenticationLevel = AuthLevel.USER)
 	def deployFree(String id) {
-		Product product = productService.findById(id, loggedInUser(), Permission.Operation.SHARE)
+		Product product = productService.findById(id, loggedInUser(), Permission.Operation.PRODUCT_SHARE)
 		freeProductService.deployFreeProduct(product)
 		render(product.toMap() as JSON)
 	}
@@ -137,7 +137,7 @@ class ProductApiController {
 	@GrailsCompileStatic
 	@StreamrApi(authenticationLevel = AuthLevel.USER)
 	def undeployFree(String id) {
-		Product product = productService.findById(id, loggedInUser(), Permission.Operation.SHARE)
+		Product product = productService.findById(id, loggedInUser(), Permission.Operation.PRODUCT_SHARE)
 		freeProductService.undeployFreeProduct(product)
 		render(product.toMap() as JSON)
 	}
@@ -145,7 +145,7 @@ class ProductApiController {
 	@GrailsCompileStatic
 	@StreamrApi(authenticationLevel = AuthLevel.USER)
 	def setUndeploying(String id) {
-		Product product = productService.findById(id, loggedInUser(), Permission.Operation.WRITE)
+		Product product = productService.findById(id, loggedInUser(), Permission.Operation.PRODUCT_EDIT)
 		productService.transitionToUndeploying(product)
 		render(product.toMap() as JSON)
 	}
@@ -161,7 +161,7 @@ class ProductApiController {
 	@GrailsCompileStatic
 	@StreamrApi(authenticationLevel = AuthLevel.USER)
 	def uploadImage(String id) {
-		Product product = productService.findById(id, loggedInUser(), Permission.Operation.WRITE)
+		Product product = productService.findById(id, loggedInUser(), Permission.Operation.PRODUCT_EDIT)
 		MultipartFile file = getUploadedFile()
 		productImageService.replaceImage(product, file.bytes, file.getOriginalFilename())
 		render(product.toMap() as JSON)
