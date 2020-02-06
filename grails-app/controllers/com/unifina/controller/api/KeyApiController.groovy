@@ -89,8 +89,14 @@ class KeyApiController {
 				permissionService.grant(request.apiUser, res, key, operation, false)
 
 				// If granting write, grant also read
-				if (operation == Permission.Operation.WRITE) {
-					permissionService.grant(request.apiUser, res, key, Permission.Operation.READ, false)
+				if (Stream.isAssignableFrom(params.resourceClass)) {
+					if (operation == Permission.Operation.STREAM_EDIT) {
+						permissionService.grant(request.apiUser, res, key, Permission.Operation.STREAM_GET, false)
+					}
+				} else {
+					if (operation == Permission.Operation.WRITE) {
+						permissionService.grant(request.apiUser, res, key, Permission.Operation.READ, false)
+					}
 				}
 
 				response["permission"] = permission
@@ -164,8 +170,8 @@ class KeyApiController {
 		}
 		Map json = new JsonSlurper().parseText((String) request.JSON)
 		String permission = request.JSON?.permission
-		if (permission && permission != "read" && permission != "write") {
-			throw new ApiException(400, "INVALID_PARAMETER", "permission field in json should be 'read' or 'write'.")
+		if (permission && permission != "stream_get" && permission != "stream_edit") {
+			throw new ApiException(400, "INVALID_PARAMETER", "permission field in json should be 'stream_get' or 'stream_edit'.")
 		}
 		if (json.name != null && json.name.trim() != "") {
 			useResource(Stream, params.streamId) { res ->
@@ -174,19 +180,19 @@ class KeyApiController {
 					Permission.Operation operation = Permission.Operation.fromString(permission)
 					SecUser user = request.apiUser
 					boolean logIfDenied = false
-					if (operation == Permission.Operation.READ) {
-						if (!hasPermission(Permission.Operation.READ, k.getPermissions())) {
-							permissionService.grant(user, res, k, Permission.Operation.READ, logIfDenied)
+					if (operation == Permission.Operation.STREAM_GET) {
+						if (!hasPermission(Permission.Operation.STREAM_GET, k.getPermissions())) {
+							permissionService.grant(user, res, k, Permission.Operation.STREAM_GET, logIfDenied)
 						}
-						if (hasPermission(Permission.Operation.WRITE, k.getPermissions())) {
-							permissionService.revoke(user, res, k, Permission.Operation.WRITE, logIfDenied)
+						if (hasPermission(Permission.Operation.STREAM_EDIT, k.getPermissions())) {
+							permissionService.revoke(user, res, k, Permission.Operation.STREAM_EDIT, logIfDenied)
 						}
-					} else if (operation == Permission.Operation.WRITE) {
-						if (!hasPermission(Permission.Operation.READ, k.getPermissions())) {
-							permissionService.grant(user, res, k, Permission.Operation.READ, logIfDenied)
+					} else if (operation == Permission.Operation.STREAM_EDIT) {
+						if (!hasPermission(Permission.Operation.STREAM_GET, k.getPermissions())) {
+							permissionService.grant(user, res, k, Permission.Operation.STREAM_GET, logIfDenied)
 						}
-						if (!hasPermission(Permission.Operation.WRITE, k.getPermissions())) {
-							permissionService.grant(user, res, k, Permission.Operation.WRITE, logIfDenied)
+						if (!hasPermission(Permission.Operation.STREAM_EDIT, k.getPermissions())) {
+							permissionService.grant(user, res, k, Permission.Operation.STREAM_EDIT, logIfDenied)
 						}
 					}
 				}

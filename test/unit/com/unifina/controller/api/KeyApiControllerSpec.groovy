@@ -45,7 +45,7 @@ class KeyApiControllerSpec extends ControllerSpecification {
 		Stream s = new Stream(name: "stream")
 		s.id = "streamId"
 		s.save(failOnError: true, validate: false)
-		permissionService.systemGrant(me, s, Permission.Operation.READ)
+		permissionService.systemGrant(me, s, Permission.Operation.STREAM_GET)
 
 		when:
 		params.resourceClass = Stream
@@ -95,7 +95,7 @@ class KeyApiControllerSpec extends ControllerSpecification {
 		stream.id = "streamId"
 		stream.save(validate: false, failOnError: true)
 
-		permissionService.systemGrant(me, stream, Permission.Operation.WRITE)
+		permissionService.systemGrant(me, stream, Permission.Operation.STREAM_EDIT)
 
 		when:
 		request.method = "POST"
@@ -117,13 +117,13 @@ class KeyApiControllerSpec extends ControllerSpecification {
 		stream.id = "streamId"
 		stream.save(validate: false, failOnError: true)
 
-		permissionService.systemGrant(me, stream, Permission.Operation.SHARE)
+		permissionService.systemGrant(me, stream, Permission.Operation.STREAM_SHARE)
 
 		when:
 		request.method = "POST"
 		request.JSON = [
 			name: "key name",
-			permission: "read"
+			permission: "stream_get"
 		]
 		params.id = stream.id
 		params.resourceClass = Stream
@@ -135,13 +135,13 @@ class KeyApiControllerSpec extends ControllerSpecification {
 		response.json == [
 			id: "1",
 			name: "key name",
-			permission: "read",
+			permission: "stream_get",
 			user: null
 		]
 
 		and:
 		Permission.findAllByKey(Key.get(1)).size() == 1
-		permissionService.canRead(Key.get(1), Stream.get(stream.id))
+		permissionService.canReadStream(Key.get(1), Stream.get(stream.id))
 	}
 
 	void "save() with write permission also creates read permission"() {
@@ -150,13 +150,13 @@ class KeyApiControllerSpec extends ControllerSpecification {
 		stream.id = "streamId"
 		stream.save(validate: false, failOnError: true)
 
-		permissionService.systemGrant(me, stream, Permission.Operation.SHARE)
+		permissionService.systemGrant(me, stream, Permission.Operation.STREAM_SHARE)
 
 		when:
 		request.method = "POST"
 		request.JSON = [
 			name: "key name",
-			permission: "write"
+			permission: "stream_edit"
 		]
 		params.id = stream.id
 		params.resourceClass = Stream
@@ -168,14 +168,14 @@ class KeyApiControllerSpec extends ControllerSpecification {
 		response.json == [
 			id: "1",
 			name: "key name",
-			permission: "write",
+			permission: "stream_edit",
 			user: null
 		]
 
 		and:
 		Permission.findAllByKey(Key.get(1)).size() == 2
-		permissionService.canRead(Key.get(1), Stream.get(stream.id))
-		permissionService.canWrite(Key.get(1), Stream.get(stream.id))
+		permissionService.canReadStream(Key.get(1), Stream.get(stream.id))
+		permissionService.canWriteStream(Key.get(1), Stream.get(stream.id))
 	}
 
 	void "delete() throws NotFoundException if given keyId doesn't exist"() {
@@ -245,8 +245,7 @@ class KeyApiControllerSpec extends ControllerSpecification {
 		Key key = new Key(name: "anonymous key").save(failOnError: true, validate: true)
 
 		controller.permissionService = permissionService = Stub(PermissionService)
-		permissionService.get(Stream, me, Permission.Operation.SHARE) >> [stream]
-		permissionService.canRead(key, stream) >> false
+		permissionService.check(me, stream, Permission.Operation.STREAM_SHARE) >> false
 
 		when:
 		request.method = "DELETE"
@@ -268,7 +267,7 @@ class KeyApiControllerSpec extends ControllerSpecification {
 		Key key = new Key(name: "anonymous key").save(failOnError: true, validate: true)
 
 		controller.permissionService = permissionService = Stub(PermissionService)
-		permissionService.canShare(me, stream) >> true
+		permissionService.check(me, stream, Permission.Operation.STREAM_SHARE) >> true
 
 		assert Key.get(key.id) != null
 
@@ -370,7 +369,7 @@ class KeyApiControllerSpec extends ControllerSpecification {
 		key.save(failOnError: true, validate: true)
 
 		controller.permissionService = permissionService = Stub(PermissionService)
-		permissionService.canShare(me, stream) >> true
+		permissionService.check(me, stream, Permission.Operation.STREAM_SHARE) >> true
 
 		when:
 		request.method = "PUT"
@@ -397,7 +396,7 @@ class KeyApiControllerSpec extends ControllerSpecification {
 		key.save(failOnError: true, validate: true)
 
 		controller.permissionService = permissionService = Stub(PermissionService)
-		permissionService.canShare(me, stream) >> true
+		permissionService.check(me, stream, Permission.Operation.STREAM_SHARE) >> true
 
 		when:
 		request.method = "PUT"
@@ -452,7 +451,6 @@ class KeyApiControllerSpec extends ControllerSpecification {
 		key.save(failOnError: true, validate: true)
 
 		controller.permissionService = Mock(PermissionService)
-		controller.permissionService.canShare(me, stream) >> true
 
 		when:
 		request.method = "PUT"
@@ -460,16 +458,17 @@ class KeyApiControllerSpec extends ControllerSpecification {
 		params.streamId = stream.id
 		request.JSON = [
 			name: "new key name",
-			permission: "read",
+			permission: "stream_get",
 		]
 
 		authenticatedAs(me) { controller.updateStreamKey() }
 
 		then:
-		1 * controller.permissionService.grant(me, stream, key, Permission.Operation.READ, false)
+		1 * controller.permissionService.check(me, stream, Permission.Operation.STREAM_SHARE) >> true
+		1 * controller.permissionService.grant(me, stream, key, Permission.Operation.STREAM_GET, false)
 		response.status == 200
 		Key.get(key.id).name == "new key name"
-		response.json.permission == "read"
+		response.json.permission == "stream_get"
 	}
 
 	void "updateStreamKey() updates write permission for key"() {
@@ -483,7 +482,6 @@ class KeyApiControllerSpec extends ControllerSpecification {
 		key.save(failOnError: true, validate: true)
 
 		controller.permissionService = Mock(PermissionService)
-		controller.permissionService.canShare(me, stream) >> true
 
 		when:
 		request.method = "PUT"
@@ -491,16 +489,17 @@ class KeyApiControllerSpec extends ControllerSpecification {
 		params.streamId = stream.id
 		request.JSON = [
 			name: "new key name",
-			permission: "write",
+			permission: "stream_edit",
 		]
 
 		authenticatedAs(me) { controller.updateStreamKey() }
 
 		then:
-		1 * controller.permissionService.grant(me, stream, key, Permission.Operation.READ, false)
-		1 * controller.permissionService.grant(me, stream, key, Permission.Operation.WRITE, false)
+		1 * controller.permissionService.check(me, stream, Permission.Operation.STREAM_SHARE) >> true
+		1 * controller.permissionService.grant(me, stream, key, Permission.Operation.STREAM_GET, false)
+		1 * controller.permissionService.grant(me, stream, key, Permission.Operation.STREAM_EDIT, false)
 		response.status == 200
 		Key.get(key.id).name == "new key name"
-		response.json.permission == "write"
+		response.json.permission == "stream_edit"
 	}
 }
