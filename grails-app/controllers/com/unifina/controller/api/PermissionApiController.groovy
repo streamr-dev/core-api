@@ -232,27 +232,23 @@ class PermissionApiController {
 		if (!resource) {
 			throw new NotFoundException(params.resourceClass.simpleName, params.resourceId.toString())
 		}
-		def to = permissionService.getPermissionsTo(resource)
-		Permission permission = to.find {
-			if (Canvas.isAssignableFrom(params.resourceClass)) {
-
-			} else if (Stream.isAssignableFrom(params.resourceClass)) {
-
-			} else if (Dashboard.isAssignableFrom(params.resourceClass)) {
-
-			} else if ()
-
-			return it."${resource.getClass().getSimpleName().toLowerCase()}".id == resource.id
-		}
-		if (!permission) {
+		def permissions = permissionService.getPermissionsTo(resource)
+		if (permissions.isEmpty()) {
 			throw new NotFoundException("permissions", id.toString())
 		}
 		Userish user = request.apiUser ?: request.apiKey
-		if (permission.user == user) {
+		Permission permission = permissions.find {
+			return it.id == Long.valueOf(id)
+		}
+		if (permission == null) {
+			throw new NotFoundException("permission", id.toString())
+		}
+		boolean canShare = permissionService.canShare(user, resource)
+		if (!canShare && permission.user == user) {
 			// user without share permission to resource can delete their own permission to resource
 			permissionService.systemRevoke(permission)
 			render(status: 204)
-		} else if (permissionService.canShare(user, resource)) {
+		} else if (canShare) {
 			// user with share permission to resource can delete another user's permission to same resource
 			permissionService.systemRevoke(permission)
 			render(status: 204)

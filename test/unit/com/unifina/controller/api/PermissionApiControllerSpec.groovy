@@ -2,7 +2,6 @@ package com.unifina.controller.api
 
 import com.unifina.ControllerSpecification
 import com.unifina.api.InvalidArgumentsException
-import com.unifina.api.NotFoundException
 import com.unifina.api.NotPermittedException
 import com.unifina.domain.data.Stream
 import com.unifina.domain.security.Key
@@ -370,6 +369,7 @@ class PermissionApiControllerSpec extends ControllerSpecification {
 		then:
 		1 * permissionService.getPermissionsTo(resource) >> [ permission ]
 		1 * permissionService.systemRevoke(permission)
+		1 * permissionService.canShare(user, resource) >> false
 		0 * permissionService._
 		response.status == 204
 	}
@@ -395,7 +395,7 @@ class PermissionApiControllerSpec extends ControllerSpecification {
 		anotherResource.id = "another-canvas-id-2"
 		anotherResource.save(validate: true, failOnError: true)
 
-		Permission anotherPermission = new Permission(user: user, canvas: resource, operation: Operation.SHARE)
+		Permission anotherPermission = new Permission(user: me, canvas: anotherResource, operation: Operation.SHARE)
 		anotherPermission.save(validate: true, failOnError: true)
 
 		params.id = anotherPermission.id
@@ -407,8 +407,9 @@ class PermissionApiControllerSpec extends ControllerSpecification {
 		authenticatedAs(user) { controller.delete() }
 		then:
 		1 * permissionService.getPermissionsTo(anotherResource) >> [anotherPermission]
+		1 * permissionService.canShare(user, anotherResource) >> false
 		0 * permissionService._
-		thrown(NotFoundException)
+		thrown(NotPermittedException)
 	}
 
 	void "delete revokes permissions"() {
