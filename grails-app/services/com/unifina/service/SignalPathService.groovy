@@ -252,10 +252,10 @@ class SignalPathService {
 		if (user?.isAdmin()) {
 			canvas = Canvas.get(pathReader.readCanvasId())
 		} else {
-			canvas = canvasService.authorizedGetById(pathReader.readCanvasId(), user, Permission.Operation.READ)
+			canvas = canvasService.authorizedGetById(pathReader.readCanvasId(), user, Permission.Operation.CANVAS_GET)
 		}
 		Set<Permission.Operation> checkedOperations = new HashSet<>()
-		checkedOperations.add(Permission.Operation.READ)
+		checkedOperations.add(Permission.Operation.CANVAS_GET)
 
 		return new RuntimeRequest(msg, user, canvas, path, originalPath, checkedOperations)
 	}
@@ -287,7 +287,7 @@ class SignalPathService {
 		}
 		// All good - check if this is a stop request, which has special handling
 		else if (req.type == "stopRequest") {
-			if (!permissionService.canWrite(req.getUser(), req.getCanvas()) && !req.getUser()?.isAdmin()) {
+			if (!permissionService.canWriteCanvas(req.getUser(), req.getCanvas()) && !req.getUser()?.isAdmin()) {
 				throw new AccessControlException("stopRequest requires write permission!");
 			}
 

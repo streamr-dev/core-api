@@ -78,6 +78,11 @@ class PermissionService {
 		return check(userish, resource, Operation.DASHBOARD_EDIT)
 	}
 
+	@CompileStatic
+	boolean canWriteCanvas(Userish userish, Canvas resource) {
+		return check(userish, resource, Operation.CANVAS_EDIT)
+	}
+
 	/**
 	 * Check whether user is allowed to share a resource
 	 */

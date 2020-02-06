@@ -116,7 +116,7 @@ class SignalPathServiceSpec extends Specification {
 		then:
 		1 * runner.getSignalPath() >> sp
 		1 * sp.getCanvas() >> c1
-		1 * service.permissionService.canWrite(me, c1) >> true
+		1 * service.permissionService.canWriteCanvas(me, c1) >> true
 		1 * service.stopLocal(c1) >> false
 		thrown(CanvasUnreachableException)
 	}
@@ -126,10 +126,10 @@ class SignalPathServiceSpec extends Specification {
 		RuntimeRequest req = service.buildRuntimeRequest([type: 'test'], "canvases/$c1.id", me)
 
 		then:
-		1 * canvasService.authorizedGetById(c1.id, me, Permission.Operation.READ) >> c1
+		1 * canvasService.authorizedGetById(c1.id, me, Permission.Operation.CANVAS_GET) >> c1
 		req.getType() == 'test'
 		req.get("type") == 'test'
-		req.getCheckedOperations().contains(Permission.Operation.READ)
+		req.getCheckedOperations().contains(Permission.Operation.CANVAS_GET)
 		req.getPath() == "canvases/$c1.id"
 		req.getOriginalPath() == req.getPath()
 		req.getUser() == me
@@ -142,7 +142,7 @@ class SignalPathServiceSpec extends Specification {
 		then:
 		req.getType() == 'test'
 		req.get("type") == 'test'
-		req.getCheckedOperations().contains(Permission.Operation.READ)
+		req.getCheckedOperations().contains(Permission.Operation.CANVAS_GET)
 		req.getPath() == "canvases/$c1.id"
 		req.getOriginalPath() == req.getPath()
 		req.getUser() == admin
@@ -153,10 +153,10 @@ class SignalPathServiceSpec extends Specification {
 		RuntimeRequest req = service.buildRuntimeRequest([type: 'test'], "canvases/$c1.id", null)
 
 		then:
-		1 * canvasService.authorizedGetById(c1.id, null, Permission.Operation.READ) >> c1
+		1 * canvasService.authorizedGetById(c1.id, null, Permission.Operation.CANVAS_GET) >> c1
 		req.getType() == 'test'
 		req.get("type") == 'test'
-		req.getCheckedOperations().contains(Permission.Operation.READ)
+		req.getCheckedOperations().contains(Permission.Operation.CANVAS_GET)
 		req.getPath() == "canvases/$c1.id"
 		req.getOriginalPath() == req.getPath()
 		req.getUser() == null
@@ -312,7 +312,7 @@ class SignalPathServiceSpec extends Specification {
 		noExceptionThrown()
 
 		and:
-		1 * permissionService.canWrite(user, canvas) >> true
+		1 * permissionService.canWriteCanvas(user, canvas) >> true
 
 		and:
 		response == [type: "stopRequest"]
