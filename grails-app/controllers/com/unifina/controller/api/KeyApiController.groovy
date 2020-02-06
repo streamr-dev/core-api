@@ -60,9 +60,15 @@ class KeyApiController {
 
 				List keys = permissionsByKey.collect { key, permissions ->
 					Map map = key.toMap()
-					map["permission"] = permissions.find {
-						it.operation == Permission.Operation.WRITE
-					}?.operation?.id ?: Permission.Operation.READ.id
+					if (Stream.isAssignableFrom(params.resourceClass)) {
+						map["permission"] = permissions.find {
+							it.operation == Permission.Operation.STREAM_EDIT
+						}?.operation?.id ?: Permission.Operation.STREAM_GET.id
+					} else {
+						map["permission"] = permissions.find {
+							it.operation == Permission.Operation.WRITE
+						}?.operation?.id ?: Permission.Operation.READ.id
+					}
 					return map
 				}
 

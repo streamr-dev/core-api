@@ -123,6 +123,7 @@ class Permission {
 			return Operation.enumConstants.find { it.id == operationId }
 		}
 
+		@CompileStatic
 		static List<Permission.Operation> operationsFor(Object resource) {
 			if (resource == null) {
 				return Collections.emptyList()
