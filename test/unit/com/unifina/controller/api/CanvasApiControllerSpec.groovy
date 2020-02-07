@@ -291,7 +291,7 @@ class CanvasApiControllerSpec extends ControllerSpecification {
 
 		then:
 		response.status == 204
-		1 * canvasService.authorizedGetById("1", me, Permission.Operation.CANVAS_EDIT) >> canvas1
+		1 * canvasService.authorizedGetById("1", me, Permission.Operation.CANVAS_DELETE) >> canvas1
 		1 * canvasService.deleteCanvas(canvas1, me)
 	}
 
@@ -303,7 +303,7 @@ class CanvasApiControllerSpec extends ControllerSpecification {
 
 		then:
 		thrown NotPermittedException
-		1 * canvasService.authorizedGetById("2", me, Permission.Operation.CANVAS_EDIT) >> { throw new NotPermittedException("mock") }
+		1 * canvasService.authorizedGetById("2", me, Permission.Operation.CANVAS_DELETE) >> { throw new NotPermittedException("mock") }
 		Canvas.get("2") != null
 	}
 
@@ -316,7 +316,7 @@ class CanvasApiControllerSpec extends ControllerSpecification {
 		then:
 		response.status == 200
 		response.json?.size() > 0
-		1 * canvasService.authorizedGetById("1", me, Permission.Operation.CANVAS_EDIT) >> canvas1
+		1 * canvasService.authorizedGetById("1", me, Permission.Operation.CANVAS_STARTSTOP) >> canvas1
 		1 * canvasService.start(canvas1, false, me)
 	}
 
@@ -330,7 +330,7 @@ class CanvasApiControllerSpec extends ControllerSpecification {
 		then:
 		response.status == 200
 		response.json?.size() > 0
-		1 * canvasService.authorizedGetById("1", me, Permission.Operation.CANVAS_EDIT) >> canvas1
+		1 * canvasService.authorizedGetById("1", me, Permission.Operation.CANVAS_STARTSTOP) >> canvas1
 		1 * canvasService.start(canvas1, true, me)
 	}
 
@@ -347,7 +347,7 @@ class CanvasApiControllerSpec extends ControllerSpecification {
 
 		and: "exception must not be swallowed"
 		thrown NotPermittedException
-		1 * canvasService.authorizedGetById(canvas2.id, me, Permission.Operation.CANVAS_EDIT) >> {throw new NotPermittedException("mock")}
+		1 * canvasService.authorizedGetById(canvas2.id, me, Permission.Operation.CANVAS_STARTSTOP) >> {throw new NotPermittedException("mock")}
 	}
 
 	void "startAsAdmin() requires parameter startedBy to be given"() {
@@ -412,7 +412,7 @@ class CanvasApiControllerSpec extends ControllerSpecification {
 		then:
 		response.status == 200
 		response.json?.size() > 0
-		1 * canvasService.authorizedGetById("1", me, Permission.Operation.CANVAS_EDIT) >> canvas1
+		1 * canvasService.authorizedGetById("1", me, Permission.Operation.CANVAS_STARTSTOP) >> canvas1
 		1 * canvasService.stop(canvas1, me)
 	}
 
@@ -426,7 +426,7 @@ class CanvasApiControllerSpec extends ControllerSpecification {
 
 		then:
 		response.status == 204
-		1 * canvasService.authorizedGetById("1", me, Permission.Operation.CANVAS_EDIT) >> canvas1
+		1 * canvasService.authorizedGetById("1", me, Permission.Operation.CANVAS_STARTSTOP) >> canvas1
 		1 * canvasService.stop(canvas1, me)
 	}
 
@@ -443,7 +443,7 @@ class CanvasApiControllerSpec extends ControllerSpecification {
 
 		and: "exception must not be swallowed"
 		thrown NotPermittedException
-		1 * canvasService.authorizedGetById(canvas2.id, me, Permission.Operation.CANVAS_EDIT) >> {throw new NotPermittedException("mock")}
+		1 * canvasService.authorizedGetById(canvas2.id, me, Permission.Operation.CANVAS_STARTSTOP) >> {throw new NotPermittedException("mock")}
 	}
 
 	void "stop() must throw an exception if the canvas can't be reached"() {
@@ -454,7 +454,7 @@ class CanvasApiControllerSpec extends ControllerSpecification {
 
 		then:
 		thrown(CanvasUnreachableException)
-		1 * canvasService.authorizedGetById("1", me, Permission.Operation.CANVAS_EDIT) >> canvas1
+		1 * canvasService.authorizedGetById("1", me, Permission.Operation.CANVAS_STARTSTOP) >> canvas1
 		1 * canvasService.stop(canvas1, me) >> { throw new CanvasUnreachableException("Test message") }
 
 	}

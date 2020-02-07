@@ -93,7 +93,7 @@ class CanvasApiController {
 
 	@StreamrApi
 	def delete(String id) {
-		Canvas canvas = canvasService.authorizedGetById(id, request.apiUser, Operation.CANVAS_EDIT)
+		Canvas canvas = canvasService.authorizedGetById(id, request.apiUser, Operation.CANVAS_DELETE)
 		canvasService.deleteCanvas(canvas, request.apiUser)
 		response.status = 204
 		render ""
@@ -101,7 +101,7 @@ class CanvasApiController {
 
 	@StreamrApi
 	def start(String id) {
-		Canvas canvas = canvasService.authorizedGetById(id, request.apiUser, Operation.CANVAS_EDIT)
+		Canvas canvas = canvasService.authorizedGetById(id, request.apiUser, Operation.CANVAS_STARTSTOP)
 		canvasService.start(canvas, request.JSON?.clearState ?: false, request.apiUser)
 		render canvas.toMap() as JSON
 	}
@@ -120,7 +120,7 @@ class CanvasApiController {
 	@StreamrApi
 	@NotTransactional
 	def stop(String id) {
-		Canvas canvas = canvasService.authorizedGetById(id, request.apiUser, Operation.CANVAS_EDIT)
+		Canvas canvas = canvasService.authorizedGetById(id, request.apiUser, Operation.CANVAS_STARTSTOP)
 		// Updates canvas in another thread, so canvas needs to be refreshed
 		canvasService.stop(canvas, request.apiUser)
 		if (canvas.adhoc) {
