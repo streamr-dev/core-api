@@ -9,4 +9,12 @@ databaseChangeLog = {
 			}
 		}
 	}
+
+	changeSet(author: "hpihkala", id: "rename-community-tables-2") {
+		grailsChange {
+			change {
+				sql.execute('ALTER TABLE `data_union_secret` CHANGE `community_address` `contract_address` VARCHAR(255)  CHARACTER SET utf8  COLLATE utf8_general_ci  NOT NULL  DEFAULT \'\'')
+			}
+		}
+	}
 }
