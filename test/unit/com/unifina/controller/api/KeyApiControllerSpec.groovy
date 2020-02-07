@@ -89,7 +89,7 @@ class KeyApiControllerSpec extends ControllerSpecification {
 		thrown(NotFoundException)
 	}
 
-	void "save() throws AccessControlException if current user does not have share permission on given resource"() {
+	void "save() throws AccessControlException if current user does not have stream_share permission on given resource"() {
 		setup:
 		Stream stream = new Stream()
 		stream.id = "streamId"
@@ -123,7 +123,7 @@ class KeyApiControllerSpec extends ControllerSpecification {
 		request.method = "POST"
 		request.JSON = [
 			name: "key name",
-			permission: "stream_get"
+			permission: "stream_publish"
 		]
 		params.id = stream.id
 		params.resourceClass = Stream
@@ -135,16 +135,18 @@ class KeyApiControllerSpec extends ControllerSpecification {
 		response.json == [
 			id: "1",
 			name: "key name",
-			permission: "stream_get",
+			permission: "stream_publish",
 			user: null
 		]
 
 		and:
-		Permission.findAllByKey(Key.get(1)).size() == 1
+		Permission.findAllByKey(Key.get(1)).size() == 3
 		permissionService.canReadStream(Key.get(1), Stream.get(stream.id))
+		permissionService.canSubscribeStream(Key.get(1), Stream.get(stream.id))
+		permissionService.canPublishStream(Key.get(1), Stream.get(stream.id))
 	}
 
-	void "save() with write permission also creates read permission"() {
+	void "save() with stream_subscribe permission also creates stream_get permission"() {
 		setup:
 		Stream stream = new Stream()
 		stream.id = "streamId"
@@ -156,7 +158,7 @@ class KeyApiControllerSpec extends ControllerSpecification {
 		request.method = "POST"
 		request.JSON = [
 			name: "key name",
-			permission: "stream_edit"
+			permission: "stream_subscribe"
 		]
 		params.id = stream.id
 		params.resourceClass = Stream
@@ -168,14 +170,14 @@ class KeyApiControllerSpec extends ControllerSpecification {
 		response.json == [
 			id: "1",
 			name: "key name",
-			permission: "stream_edit",
+			permission: "stream_subscribe",
 			user: null
 		]
 
 		and:
 		Permission.findAllByKey(Key.get(1)).size() == 2
 		permissionService.canReadStream(Key.get(1), Stream.get(stream.id))
-		permissionService.canWriteStream(Key.get(1), Stream.get(stream.id))
+		permissionService.canSubscribeStream(Key.get(1), Stream.get(stream.id))
 	}
 
 	void "delete() throws NotFoundException if given keyId doesn't exist"() {
@@ -440,7 +442,7 @@ class KeyApiControllerSpec extends ControllerSpecification {
 		thrown(ApiException)
 	}
 
-	void "updateStreamKey() updates read permission for key"() {
+	void "updateStreamKey() updates stream_subscribe permission for key"() {
 		setup:
 		Stream stream = new Stream(name: "stream")
 		stream.id = "streamId"
@@ -458,7 +460,7 @@ class KeyApiControllerSpec extends ControllerSpecification {
 		params.streamId = stream.id
 		request.JSON = [
 			name: "new key name",
-			permission: "stream_get",
+			permission: "stream_subscribe",
 		]
 
 		authenticatedAs(me) { controller.updateStreamKey() }
@@ -466,12 +468,14 @@ class KeyApiControllerSpec extends ControllerSpecification {
 		then:
 		1 * controller.permissionService.check(me, stream, Permission.Operation.STREAM_SHARE) >> true
 		1 * controller.permissionService.grant(me, stream, key, Permission.Operation.STREAM_GET, false)
+		1 * controller.permissionService.grant(me, stream, key, Permission.Operation.STREAM_SUBSCRIBE, false)
+		0 * controller.permissionService._
 		response.status == 200
 		Key.get(key.id).name == "new key name"
-		response.json.permission == "stream_get"
+		response.json.permission == "stream_subscribe"
 	}
 
-	void "updateStreamKey() updates write permission for key"() {
+	void "updateStreamKey() updates stream_publish permission for key"() {
 		setup:
 		Stream stream = new Stream(name: "stream")
 		stream.id = "streamId"
@@ -489,7 +493,7 @@ class KeyApiControllerSpec extends ControllerSpecification {
 		params.streamId = stream.id
 		request.JSON = [
 			name: "new key name",
-			permission: "stream_edit",
+			permission: "stream_publish",
 		]
 
 		authenticatedAs(me) { controller.updateStreamKey() }
@@ -497,9 +501,49 @@ class KeyApiControllerSpec extends ControllerSpecification {
 		then:
 		1 * controller.permissionService.check(me, stream, Permission.Operation.STREAM_SHARE) >> true
 		1 * controller.permissionService.grant(me, stream, key, Permission.Operation.STREAM_GET, false)
-		1 * controller.permissionService.grant(me, stream, key, Permission.Operation.STREAM_EDIT, false)
+		1 * controller.permissionService.grant(me, stream, key, Permission.Operation.STREAM_SUBSCRIBE, false)
+		1 * controller.permissionService.grant(me, stream, key, Permission.Operation.STREAM_PUBLISH, false)
+		0 * controller.permissionService._
 		response.status == 200
 		Key.get(key.id).name == "new key name"
-		response.json.permission == "stream_edit"
+		response.json.permission == "stream_publish"
+	}
+
+	void "updateStreamKey() revokes stream_publish when updating from stream_publish to stream_subscibe"() {
+		setup:
+		Stream stream = new Stream(name: "stream")
+		stream.id = "streamId"
+		stream.save(validate: false, failOnError: true)
+
+		Key key = new Key(name: "anonymous key")
+		key.id = "key-id-1"
+		key.save(failOnError: true, validate: true)
+
+		// stream_publish permissions
+		permissionService.systemGrant(key, stream, Permission.Operation.STREAM_SHARE)
+		permissionService.systemGrant(key, stream, Permission.Operation.STREAM_PUBLISH)
+		permissionService.systemGrant(key, stream, Permission.Operation.STREAM_GET)
+		permissionService.systemGrant(key, stream, Permission.Operation.STREAM_SUBSCRIBE)
+
+		controller.permissionService = Mock(PermissionService)
+
+		when:
+		request.method = "PUT"
+		params.keyId = key.id
+		params.streamId = stream.id
+		request.JSON = [
+			name: "new key name",
+			permission: "stream_subscribe",
+		]
+
+		authenticatedAs(me) { controller.updateStreamKey() }
+
+		then:
+		1 * controller.permissionService.check(me, stream, Permission.Operation.STREAM_SHARE) >> true
+		1 * controller.permissionService.revoke(me, stream, key, Permission.Operation.STREAM_PUBLISH, false)
+		0 * controller.permissionService._
+		response.status == 200
+		Key.get(key.id).name == "new key name"
+		response.json.permission == "stream_subscribe"
 	}
 }

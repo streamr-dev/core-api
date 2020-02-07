@@ -101,6 +101,16 @@ class PermissionService {
 		return check(userish, resource, Operation.DASHBOARD_SHARE)
 	}
 
+	@CompileStatic
+	boolean canSubscribeStream(Userish userish, Stream resource) {
+		return check(userish, resource, Operation.STREAM_SUBSCRIBE)
+	}
+
+	@CompileStatic
+	boolean canPublishStream(Userish userish, Stream resource) {
+		return check(userish, resource, Operation.STREAM_PUBLISH)
+	}
+
 	/**
 	 * Throws an exception if user is not allowed to share a resource
 	 */
