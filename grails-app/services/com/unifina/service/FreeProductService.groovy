@@ -26,7 +26,8 @@ class FreeProductService {
 		permissionService.systemGrantAnonymousAccess(product, Permission.Operation.PRODUCT_GET)
 
 		product.streams.each {
-			permissionService.systemGrantAnonymousAccess(it, Permission.Operation.PRODUCT_GET)
+			permissionService.systemGrantAnonymousAccess(it, Permission.Operation.STREAM_GET)
+			permissionService.systemGrantAnonymousAccess(it, Permission.Operation.STREAM_SUBSCRIBE)
 		}
 	}
 
@@ -42,7 +43,8 @@ class FreeProductService {
 		permissionService.systemRevokeAnonymousAccess(product, Permission.Operation.PRODUCT_GET)
 
 		product.streams.each {
-			permissionService.systemRevokeAnonymousAccess(it, Permission.Operation.PRODUCT_GET)
+			permissionService.systemRevokeAnonymousAccess(it, Permission.Operation.STREAM_GET)
+			permissionService.systemRevokeAnonymousAccess(it, Permission.Operation.STREAM_SUBSCRIBE)
 		}
 	}
 
