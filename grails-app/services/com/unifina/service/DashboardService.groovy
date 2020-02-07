@@ -44,7 +44,7 @@ class DashboardService {
 	 */
 	@CompileStatic
 	void deleteById(String id, SecUser user) throws NotFoundException, NotPermittedException {
-		def dashboard = authorizedGetById(id, user, Permission.Operation.DASHBOARD_EDIT)
+		def dashboard = authorizedGetById(id, user, Permission.Operation.DASHBOARD_DELETE)
 		dashboard.delete()
 	}
 
@@ -87,7 +87,7 @@ class DashboardService {
 	 * @return
 	 */
 	Dashboard update(String id, SaveDashboardCommand validCommand, SecUser user) throws NotFoundException, NotPermittedException {
-		Dashboard dashboard = authorizedGetById(id, user, Operation.DASHBOARD_GET)
+		Dashboard dashboard = authorizedGetById(id, user, Operation.DASHBOARD_EDIT)
 
 		def properties = validCommand.properties.subMap(["name", "layout"])
 		dashboard.setProperties(properties)
