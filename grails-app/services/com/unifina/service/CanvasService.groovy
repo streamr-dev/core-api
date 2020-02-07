@@ -265,6 +265,7 @@ class CanvasService {
 				// Grant read permission to example canvas.
 				case ExampleType.SHARE:
 					permissionService.systemGrant(user, example, Permission.Operation.CANVAS_GET)
+					permissionService.systemGrant(user, example, Permission.Operation.CANVAS_INTERACT)
 					break
 			}
 		}
