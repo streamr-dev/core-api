@@ -122,14 +122,6 @@ class StreamApiController {
 	}
 
 	@StreamrApi
-	def dataFiles(String id) {
-		getAuthorizedStream(id, Operation.STREAM_GET) { stream ->
-			DataRange dataRange = streamService.getDataRange(stream)
-			render([dataRange: dataRange, stream:stream] as JSON)
-		}
-	}
-
-	@StreamrApi
 	def uploadCsvFile(String id) {
 		// Copy multipart contents to temporary file
 		MultipartFile multipartFile = request.getFile("file")
