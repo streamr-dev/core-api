@@ -367,7 +367,7 @@
       },
       "put": {
         "summary": "Update secret",
-        "description": "Update secret details.\n\nNote: you can't update the secret itself; to do that you'll need to create a new secret.",
+        "description": "Most useful for changing the name of the secret. Note that the randomly generated secret itself cannot be changed.",
         "tags": [
           "dataunions"
         ],
