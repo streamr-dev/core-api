@@ -126,7 +126,7 @@ class Permission {
 		@CompileStatic
 		static List<Permission.Operation> operationsFor(Object resource) {
 			if (resource == null) {
-				return Collections.emptyList()
+				throw new IllegalArgumentException("Unknown resource: " + resource)
 			}
 			Class<?> resourceClass = resource.getClass()
 			if (Canvas.isAssignableFrom(resourceClass)) {
@@ -138,41 +138,36 @@ class Permission {
 			} else if (Product.isAssignableFrom(resourceClass)) {
 				return productOperations()
 			}
-			return operations()
+			throw new IllegalArgumentException("Unknown resource: " + resource)
 		}
 
 		@CompileStatic
 		static Operation shareOperation(Object resource) {
+			if (resource == null) {
+				throw new IllegalArgumentException("Unknown resource: " + resource)
+			}
 			Class<?> resourceClass = resource.getClass()
 			if (Canvas.isAssignableFrom(resourceClass)) {
-				return Operation.CANVAS_SHARE
+				return CANVAS_SHARE
 			} else if (Stream.isAssignableFrom(resourceClass)) {
-				return Operation.STREAM_SHARE
+				return STREAM_SHARE
 			} else if (Dashboard.isAssignableFrom(resourceClass)) {
-				return Operation.DASHBOARD_SHARE
+				return DASHBOARD_SHARE
 			} else if (Product.isAssignableFrom(resourceClass)) {
-				return Operation.PRODUCT_SHARE
+				return PRODUCT_SHARE
 			}
-			return Operation.SHARE
+			throw new IllegalArgumentException("Unknown resource: " + resource)
 		}
 
 		static List<Permission.Operation> shareOperations() {
 			return [
-				Operation.CANVAS_SHARE,
-				Operation.DASHBOARD_SHARE,
-				Operation.PRODUCT_SHARE,
-				Operation.SHARE,
-				Operation.STREAM_SHARE,
+				CANVAS_SHARE,
+				DASHBOARD_SHARE,
+				PRODUCT_SHARE,
+				STREAM_SHARE,
 			]
 		}
 
-		static List<Permission.Operation> operations() {
-			return [
-				READ,
-				WRITE,
-				SHARE,
-			]
-		}
 		static List<Permission.Operation> streamOperations() {
 			return [
 				STREAM_GET,
@@ -212,6 +207,7 @@ class Permission {
 		}
 	}
 
+	// TODO: Replace with null?
 	Operation operation = Operation.READ
 
 	/** Is this a Permission of a Subscription? **/

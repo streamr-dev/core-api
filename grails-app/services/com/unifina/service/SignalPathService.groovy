@@ -287,7 +287,7 @@ class SignalPathService {
 		}
 		// All good - check if this is a stop request, which has special handling
 		else if (req.type == "stopRequest") {
-			if (!permissionService.canWriteCanvas(req.getUser(), req.getCanvas()) && !req.getUser()?.isAdmin()) {
+			if (!permissionService.check(req.getUser(), req.getCanvas(), Permission.Operation.CANVAS_STARTSTOP) && !req.getUser()?.isAdmin()) {
 				throw new AccessControlException("stopRequest requires write permission!");
 			}
 

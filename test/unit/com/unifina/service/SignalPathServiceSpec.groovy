@@ -116,7 +116,7 @@ class SignalPathServiceSpec extends Specification {
 		then:
 		1 * runner.getSignalPath() >> sp
 		1 * sp.getCanvas() >> c1
-		1 * service.permissionService.canWriteCanvas(me, c1) >> true
+		1 * service.permissionService.check(me, c1, Permission.Operation.CANVAS_STARTSTOP) >> true
 		1 * service.stopLocal(c1) >> false
 		thrown(CanvasUnreachableException)
 	}
@@ -312,7 +312,7 @@ class SignalPathServiceSpec extends Specification {
 		noExceptionThrown()
 
 		and:
-		1 * permissionService.canWriteCanvas(user, canvas) >> true
+		1 * permissionService.check(user, canvas, Permission.Operation.CANVAS_STARTSTOP) >> true
 
 		and:
 		response == [type: "stopRequest"]

@@ -140,13 +140,15 @@ class StreamService {
 		}
 
 		if (key != null) {
-			if (isDirectPermissionToStream(key, stream)) {
+			if (permissionService.check(key, stream, Permission.Operation.STREAM_GET)) {
 				action.call(stream)
 			} else {
 				throw new NotPermittedException(null, "Stream", id, Permission.Operation.STREAM_GET.id)
 			}
 		} else {
-			if (isDirectPermissionToStream(user, stream) || isPermissionToStreamsUiChannelCanvas(user, stream) || isPermissionToStreamViaDashboard(user, stream)) {
+			boolean hasPermissionToStream = permissionService.check(user, stream, Permission.Operation.STREAM_GET)
+			boolean hasPermissionToStreamsUiChannelCanvas = stream.uiChannel && stream.uiChannelCanvas && permissionService.check(user, stream.uiChannelCanvas, Permission.Operation.CANVAS_GET)
+			if (hasPermissionToStream || hasPermissionToStreamsUiChannelCanvas || isPermissionToStreamViaDashboard(user, stream)) {
 				action.call(stream)
 			} else {
 				throw new NotPermittedException(user?.username, "Stream", id, Permission.Operation.STREAM_GET.id)
@@ -156,7 +158,7 @@ class StreamService {
 
 	Set<String> getStreamEthereumPublishers(Stream stream) {
 		// This approach might be slow if there are a lot of allowed writers to the Stream
-		List<SecUser> writers = permissionService.getPermissionsTo(stream, Permission.Operation.STREAM_EDIT)*.user
+		List<SecUser> writers = permissionService.getPermissionsTo(stream, Permission.Operation.STREAM_PUBLISH)*.user
 
 		List<IntegrationKey> keys = IntegrationKey.findAll {
 			user.id in writers*.id && service in [IntegrationKey.Service.ETHEREUM, IntegrationKey.Service.ETHEREUM_ID]
@@ -170,12 +172,12 @@ class StreamService {
 		if (key == null || key.user == null) {
 			return false
 		}
-		return permissionService.canWriteStream(key.user, stream)
+		return permissionService.check(key.user, stream, Permission.Operation.STREAM_PUBLISH)
 	}
 
 	Set<String> getStreamEthereumSubscribers(Stream stream) {
 		// This approach might be slow if there are a lot of allowed readers to the Stream
-		List<SecUser> readers = permissionService.getPermissionsTo(stream, Permission.Operation.STREAM_GET)*.user
+		List<SecUser> readers = permissionService.getPermissionsTo(stream, Permission.Operation.STREAM_SUBSCRIBE)*.user
 
 		List<IntegrationKey> keys = IntegrationKey.findAll {
 			user.id in readers*.id && service in [IntegrationKey.Service.ETHEREUM, IntegrationKey.Service.ETHEREUM_ID]
@@ -189,7 +191,7 @@ class StreamService {
 		if (key == null || key.user == null) {
 			return false
 		}
-		return permissionService.canReadStream(key.user, stream)
+		return permissionService.check(key.user, stream, Permission.Operation.STREAM_SUBSCRIBE)
 	}
 
 	List<Stream> getInboxStreams(List<SecUser> users) {
@@ -198,21 +200,6 @@ class StreamService {
 			user.id in users*.id && service in [IntegrationKey.Service.ETHEREUM, IntegrationKey.Service.ETHEREUM_ID]
 		}
 		return Stream.findAllByIdInListAndInbox(keys*.idInService, true)
-	}
-
-	@CompileStatic
-	private boolean isDirectPermissionToStream(SecUser user, Stream stream) {
-		return permissionService.canReadStream(user, stream)
-	}
-
-	@CompileStatic
-	private boolean isDirectPermissionToStream(Key key, Stream stream) {
-		return permissionService.canReadStream(key, stream)
-	}
-
-	@CompileStatic
-	private boolean isPermissionToStreamsUiChannelCanvas(SecUser user, Stream stream) {
-		return stream.uiChannel && stream.uiChannelCanvas && permissionService.canReadCanvas(user, stream.uiChannelCanvas)
 	}
 
 	private boolean isPermissionToStreamViaDashboard(SecUser user, Stream stream) {
@@ -269,6 +256,7 @@ class StreamService {
 		for (final Stream example : examples) {
 			// Grant read permission to example stream.
 			permissionService.systemGrant(user, example, Permission.Operation.STREAM_GET)
+			permissionService.systemGrant(user, example, Permission.Operation.STREAM_SUBSCRIBE)
 		}
 	}
 }

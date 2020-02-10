@@ -270,26 +270,26 @@ class PermissionServiceSpec extends BeanMockingSpecification {
 		Stream stream = new Stream()
 		stream.id = "stream"
 		setup:
-		service.systemGrant(publisher1, stream, Operation.STREAM_EDIT)
-		service.systemGrant(publisher2, stream, Operation.STREAM_EDIT)
+		service.systemGrant(publisher1, stream, Operation.STREAM_PUBLISH)
+		service.systemGrant(publisher2, stream, Operation.STREAM_PUBLISH)
 
 		when:
 		// adding a new subscriber
-		service.systemGrant(subscriber, stream, Operation.STREAM_GET)
+		service.systemGrant(subscriber, stream, Operation.STREAM_SUBSCRIBE)
 		// adding a new publisher
-		service.systemGrant(publisher3, stream, Operation.STREAM_EDIT)
+		service.systemGrant(publisher3, stream, Operation.STREAM_PUBLISH)
 		then:
 		2 * streamService.getInboxStreams([subscriber]) >> [subInbox]
 		1 * streamService.getInboxStreams([publisher1, publisher2]) >> [pub1Inbox, pub2Inbox]
 		1 * streamService.getInboxStreams([publisher3]) >> [pub3Inbox]
 		// assertions after adding a new subscriber
-		service.canWriteStream(subscriber, pub1Inbox)
-		service.canWriteStream(subscriber, pub2Inbox)
-		service.canWriteStream(publisher1, subInbox)
-		service.canWriteStream(publisher2, subInbox)
+		service.check(subscriber, pub1Inbox, Permission.Operation.STREAM_PUBLISH)
+		service.check(subscriber, pub2Inbox, Permission.Operation.STREAM_PUBLISH)
+		service.check(publisher1, subInbox, Permission.Operation.STREAM_PUBLISH)
+		service.check(publisher2, subInbox, Permission.Operation.STREAM_PUBLISH)
 		// assertions after adding a new publisher
-		service.canWriteStream(subscriber, pub3Inbox)
-		service.canWriteStream(publisher3, subInbox)
+		service.check(subscriber, pub3Inbox, Permission.Operation.STREAM_PUBLISH)
+		service.check(publisher3, subInbox, Permission.Operation.STREAM_PUBLISH)
 	}
 
 	void "inbox stream permissions also work when anonymous keys have permissions to the stream"() {

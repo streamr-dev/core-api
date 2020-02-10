@@ -115,11 +115,6 @@ class PermissionService {
 	 * Throws an exception if user is not allowed to share a resource
 	 */
 	@CompileStatic
-	void verifyShare(Userish userish, Object resource) throws NotPermittedException {
-		verify(userish, resource, Operation.SHARE)
-	}
-
-	@CompileStatic
 	void verifyShareStream(Userish userish, Stream resource) throws NotPermittedException {
 		verify(userish, resource, Operation.STREAM_SHARE)
 	}
@@ -368,9 +363,9 @@ class PermissionService {
 	private void checkAndGrantInboxPermissions(SecUser user, Stream stream, Operation operation,
 									   Subscription subscription, Date endsAt, Permission parentPermission) {
 		if (!stream.inbox && !stream.uiChannel) {
-			if (operation == Operation.STREAM_GET) {
+			if (operation == Operation.STREAM_SUBSCRIBE) {
 				grantNewSubscriberInboxStreamPermissions(user, stream, subscription, endsAt, parentPermission)
-			} else if (operation == Operation.STREAM_EDIT) {
+			} else if (operation == Operation.STREAM_PUBLISH) {
 				grantNewPublisherInboxStreamPermissions(user, stream, subscription, endsAt, parentPermission)
 			}
 		}
@@ -384,7 +379,7 @@ class PermissionService {
 	 */
 	private void grantNewSubscriberInboxStreamPermissions(SecUser subscriber, Stream stream,
 														  Subscription subscription, Date endsAt, Permission parent) {
-		grantInboxStreamPermissions(subscriber, stream, Operation.STREAM_EDIT, subscription, endsAt, parent)
+		grantInboxStreamPermissions(subscriber, stream, Operation.STREAM_PUBLISH, subscription, endsAt, parent)
 	}
 
 	/**
@@ -395,7 +390,7 @@ class PermissionService {
 	 */
 	private void grantNewPublisherInboxStreamPermissions(SecUser publisher, Stream stream,
 														 Subscription subscription, Date endsAt, Permission parent) {
-		grantInboxStreamPermissions(publisher, stream, Operation.STREAM_GET, subscription, endsAt, parent)
+		grantInboxStreamPermissions(publisher, stream, Operation.STREAM_SUBSCRIBE, subscription, endsAt, parent)
 	}
 
 	private void grantInboxStreamPermissions(SecUser user, Stream stream, Operation operation,
@@ -411,7 +406,7 @@ class PermissionService {
 			new Permission(
 				stream: inbox,
 				user: user,
-				operation: Operation.STREAM_EDIT,
+				operation: Operation.STREAM_PUBLISH,
 				subscription: subscription,
 				endsAt: endsAt,
 				parent: parent
@@ -422,7 +417,7 @@ class PermissionService {
 				new Permission(
 					stream: userInbox,
 					user: u,
-					operation: Operation.STREAM_EDIT,
+					operation: Operation.STREAM_PUBLISH,
 					subscription: subscription,
 					endsAt: endsAt,
 					parent: parent

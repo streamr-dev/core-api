@@ -138,7 +138,7 @@ class ProductService {
 		}
 
 		command.streams.each {
-			permissionService.verifyShare(currentUser, it)
+			permissionService.verify(currentUser, it, Permission.Operation.STREAM_SHARE)
 		}
 
 		Product product = new Product(command.properties)
@@ -148,7 +148,8 @@ class ProductService {
 		// A stream that is added when creating a new free product should inherit read access for anonymous user
 		if (product.isFree()) {
 			product.streams.each { stream ->
-				permissionService.systemGrantAnonymousAccess(stream, Permission.Operation.PRODUCT_GET)
+				permissionService.systemGrantAnonymousAccess(stream, Permission.Operation.STREAM_GET)
+				permissionService.systemGrantAnonymousAccess(stream, Permission.Operation.STREAM_SUBSCRIBE)
 			}
 		}
 		return product
@@ -160,7 +161,7 @@ class ProductService {
 		}
 
 		command.streams.each {
-			permissionService.verifyShare(currentUser, it)
+			permissionService.verify(currentUser, it, Permission.Operation.STREAM_SHARE)
 		}
 
 		// A stream that is added when editing an existing free product should inherit read access for anonymous user
@@ -168,14 +169,16 @@ class ProductService {
 		Product product = findById(id, currentUser, Permission.Operation.PRODUCT_EDIT)
 		if (product.isFree()) {
 			product.streams.each { stream ->
-				permissionService.systemRevokeAnonymousAccess(stream, Permission.Operation.PRODUCT_GET)
+				permissionService.systemRevokeAnonymousAccess(stream, Permission.Operation.STREAM_GET)
+				permissionService.systemRevokeAnonymousAccess(stream, Permission.Operation.STREAM_SUBSCRIBE)
 			}
 		}
 		command.updateProduct(product, currentUser, permissionService)
 		product.save(failOnError: true)
 		if (product.isFree()) {
 			product.streams.each { stream ->
-				permissionService.systemGrantAnonymousAccess(stream, Permission.Operation.PRODUCT_GET)
+				permissionService.systemGrantAnonymousAccess(stream, Permission.Operation.STREAM_GET)
+				permissionService.systemGrantAnonymousAccess(stream, Permission.Operation.STREAM_SUBSCRIBE)
 			}
 		}
 		subscriptionService.afterProductUpdated(product)
@@ -190,12 +193,13 @@ class ProductService {
 		// A stream that is added when editing an existing free product should inherit read access for anonymous user
 		if (product.isFree()) {
 			permissionService.systemGrantAnonymousAccess(stream, Permission.Operation.STREAM_GET)
+			permissionService.systemGrantAnonymousAccess(stream, Permission.Operation.STREAM_SUBSCRIBE)
 		}
 		if (product.type == Product.Type.COMMUNITY) {
 			Set<SecUser> users = communityJoinRequestService.findCommunityMembers(product.beneficiaryAddress)
 			for (SecUser u : users) {
-				if (!permissionService.canWriteStream(u, stream)) {
-					permissionService.systemGrant(u, stream, Permission.Operation.STREAM_EDIT)
+				if (!permissionService.check(u, stream, Permission.Operation.STREAM_PUBLISH)) {
+					permissionService.systemGrant(u, stream, Permission.Operation.STREAM_PUBLISH)
 				}
 			}
 		}
@@ -208,12 +212,13 @@ class ProductService {
 		// A stream that is removed when editing an existing free product should revoke read access for anonymous user
 		if (product.isFree()) {
 			permissionService.systemRevokeAnonymousAccess(stream, Permission.Operation.STREAM_GET)
+			permissionService.systemRevokeAnonymousAccess(stream, Permission.Operation.STREAM_SUBSCRIBE)
 		}
 		if (product.type == Product.Type.COMMUNITY) {
 			Set<SecUser> users = communityJoinRequestService.findCommunityMembers(product.beneficiaryAddress)
 			for (SecUser u : users) {
-				if (permissionService.canWriteStream(u, stream)) {
-					permissionService.systemRevoke(u, stream, Permission.Operation.STREAM_EDIT)
+				if (permissionService.check(u, stream, Permission.Operation.STREAM_PUBLISH)) {
+					permissionService.systemRevoke(u, stream, Permission.Operation.STREAM_PUBLISH)
 				}
 			}
 		}
@@ -244,7 +249,7 @@ class ProductService {
 		product.setProperties(command.properties)
 		product.state = Product.State.DEPLOYED
 		product.save(failOnError: true)
-		permissionService.systemGrantAnonymousAccess(product, Permission.Operation.READ)
+		permissionService.systemGrantAnonymousAccess(product, Permission.Operation.PRODUCT_GET)
 		return true
 	}
 
