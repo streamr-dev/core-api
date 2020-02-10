@@ -676,18 +676,8 @@ class PermissionService {
 			}
 		}
 		revokeOp(operation)
-		ALSO_REVOKE.get(operation.id).each(revokeOp)
 		return revoked
 	}
-
-	// Cascade revocations to "higher" rights to ensure meaningful combinations (e.g. WRITE without READ makes no sense)
-	private static final Map<String, List<Operation>> ALSO_REVOKE = [
-		read: [Operation.WRITE, Operation.SHARE],
-		stream_get: [Operation.STREAM_EDIT, Operation.STREAM_SHARE],
-		canvas_get: [Operation.CANVAS_EDIT, Operation.CANVAS_SHARE],
-		dashboard_get: [Operation.DASHBOARD_EDIT, Operation.DASHBOARD_SHARE],
-		product_get: [Operation.PRODUCT_EDIT, Operation.PRODUCT_SHARE],
-	]
 
 	private static boolean hasOneOrLessSharePermissionsLeft(Object resource) {
 		String resourceProp = getResourcePropertyName(resource)
