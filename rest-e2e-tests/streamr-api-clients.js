@@ -338,6 +338,17 @@ class Permissions {
     }
 }
 
+class DataUnions {
+    constructor(options) {
+        this.options = options
+    }
+
+    list() {
+        return new StreamrApiRequest(this.options)
+            .methodAndPath('GET', 'dataunions')
+    }
+}
+
 module.exports = (baseUrl, logging) => {
     const options = {
         baseUrl,
@@ -353,7 +364,8 @@ module.exports = (baseUrl, logging) => {
                 login: new Login(options),
                 products: new Products(options),
                 streams: new Streams(options),
-                subscriptions: new Subscriptions(options)
+                subscriptions: new Subscriptions(options),
+                dataunions: new DataUnions(options),
             }
         }
     }

@@ -114,12 +114,12 @@ class UrlMappings {
 		"/api/v1/dataunions/$contractAddress/members/$memberAddress"(method: "GET", controller: "dataUnionOperatorApi", action: "memberStats")
 		"/api/v1/dataunions"(method: "GET", controller: "dataUnionOperatorApi", action: "summary")
 
-		// Deprecated, remove after data unions launched
-		"/api/v1/dataunions/$contractAddress/joinRequests"(resources: "dataUnionJoinRequestApi", excludes: ["create", "edit"])
-		"/api/v1/dataunions/$contractAddress/secrets"(resources: "dataUnionSecretApi", excludes: ["create", "edit"])
-		"/api/v1/dataunions/$contractAddress/stats"(method: "GET", controller: "dataUnionOperatorApi", action: "stats")
-		"/api/v1/dataunions/$contractAddress/members"(method: "GET", controller: "dataUnionOperatorApi", action: "members")
-		"/api/v1/dataunions/$contractAddress/members/$memberAddress"(method: "GET", controller: "dataUnionOperatorApi", action: "memberStats")
-		"/api/v1/dataunions"(method: "GET", controller: "dataUnionOperatorApi", action: "summary")
+		// Deprecated aliases of the above, remove once no one is calling them
+		"/api/v1/communities/$contractAddress/joinRequests"(resources: "dataUnionJoinRequestApi", excludes: ["create", "edit"])
+		"/api/v1/communities/$contractAddress/secrets"(resources: "dataUnionSecretApi", excludes: ["create", "edit"])
+		"/api/v1/communities/$contractAddress/stats"(method: "GET", controller: "dataUnionOperatorApi", action: "stats")
+		"/api/v1/communities/$contractAddress/members"(method: "GET", controller: "dataUnionOperatorApi", action: "members")
+		"/api/v1/communities/$contractAddress/members/$memberAddress"(method: "GET", controller: "dataUnionOperatorApi", action: "memberStats")
+		"/api/v1/communities"(method: "GET", controller: "dataUnionOperatorApi", action: "summary")
 	}
 }
