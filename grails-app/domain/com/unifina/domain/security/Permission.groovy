@@ -6,9 +6,12 @@ import com.unifina.domain.marketplace.Product
 import com.unifina.domain.marketplace.Subscription
 import com.unifina.domain.signalpath.Canvas
 import groovy.transform.CompileStatic
+import groovy.transform.EqualsAndHashCode
+
 /**
  * Access Control List (ACL) item, grants a user a specific type of access to a resource (e.g. X can read Dashboard 1)
  */
+@EqualsAndHashCode(includes="anonymous,user,key,invite,canvas,dashboard,stream,product,operation,subscription,endsAt,parent")
 class Permission {
 
 	/** Permission can be global, that is, let (also) anonymous users execute the operation */

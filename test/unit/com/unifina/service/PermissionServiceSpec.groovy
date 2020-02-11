@@ -152,7 +152,7 @@ class PermissionServiceSpec extends BeanMockingSpecification {
 		List<Permission> afterWrite = service.getPermissionsTo(dashOwned, Operation.DASHBOARD_EDIT)
 		List<Permission> all = service.getPermissionsTo(dashOwned)
 		List<Permission> allOperations = new ArrayList<Permission>()
-		Operation.values().collect { Operation op ->
+		Operation.dashboardOperations().collect { Operation op ->
 			allOperations.addAll(service.getPermissionsTo(dashOwned, op))
 		}
 		expect:

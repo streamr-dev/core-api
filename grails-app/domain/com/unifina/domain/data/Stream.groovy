@@ -6,7 +6,9 @@ import com.unifina.domain.security.Permission
 import com.unifina.domain.signalpath.Canvas
 import grails.converters.JSON
 import groovy.transform.CompileStatic
+import groovy.transform.EqualsAndHashCode
 
+@EqualsAndHashCode(includes="id")
 class Stream implements Comparable {
 	public final static String DEFAULT_NAME = "Untitled Stream"
 	public final static Integer DEFAULT_STORAGE_DAYS = 365

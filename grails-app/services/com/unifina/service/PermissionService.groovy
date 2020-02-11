@@ -22,9 +22,6 @@ import java.security.AccessControlException
  * 		- anonymous Permissions: checked, and listed for resource, but permitted resources not listed for user
  * 		- Permission owners and grant/revoke targets can be SecUsers or SignupInvites
  * 			=> getUserPropertyName
- * 		- combinations of read/write/share (RWS) should be restricted, e.g. to disallow write without read?
- * 			=> ALSO_REVOKE
- * 			TODO: discuss... current implementation with ALSO_REVOKE but no ALSO_GRANT is conservative but unsymmetric
  */
 class PermissionService {
 	def grailsApplication
@@ -171,7 +168,7 @@ class PermissionService {
 		userish = userish?.resolveToUserish()
 		String resourceProp = getResourcePropertyName(resource)
 
-		List directPermissions = Permission.withCriteria {
+		List<Permission> directPermissions = Permission.withCriteria {
 			eq(resourceProp, resource)
 			or {
 				eq("anonymous", true)
@@ -187,26 +184,29 @@ class PermissionService {
 		}.toList()
 
 		// Special case of UI channels: they inherit permissions from the associated canvas
+		Set<Permission> syntheticPermissions = new HashSet<>()
 		if (resource instanceof Stream && resource.uiChannel) {
 			List<Permission> permissions = getPermissionsTo(resource.uiChannelCanvas, userish)
-			Map<Operation, Operation> canvasToStream = [
-				(Operation.CANVAS_GET): Operation.STREAM_GET,
-				(Operation.CANVAS_EDIT): Operation.STREAM_EDIT,
-				(Operation.CANVAS_DELETE): Operation.STREAM_DELETE,
-				//(Operation.CANVAS_STARTSTOP): Operation.STREAM_,
-				//(Operation.CANVAS_INTERACT): Operation.STREAM_,
-				(Operation.CANVAS_SHARE): Operation.STREAM_SHARE,
-			]
 			for (Permission p : permissions) {
-				Operation op = canvasToStream[p.operation]
-				if (op != null) {
-					directPermissions.add(new Permission(stream: resource, operation: op))
+				Set<Operation> operations = CANVAS_TO_STREAM[p.operation]
+				if (operations != null) {
+					for (Operation op : operations) {
+						syntheticPermissions.add(new Permission(stream: resource, operation: op))
+					}
 				}
 			}
 		}
-
+		directPermissions.addAll(syntheticPermissions)
 		return directPermissions
 	}
+
+	// Maps canvas operations to stream operations
+	private final static Map<Operation, Set<Operation>> CANVAS_TO_STREAM = [
+		(Operation.CANVAS_GET): [Operation.STREAM_GET, Operation.STREAM_SUBSCRIBE],
+		(Operation.CANVAS_EDIT): [Operation.STREAM_DELETE],
+		(Operation.CANVAS_DELETE): [Operation.STREAM_DELETE],
+		(Operation.CANVAS_STARTSTOP): [Operation.STREAM_PUBLISH],
+	]
 
 	/** Overload to allow leaving out the anonymous-include-flag but including the filter */
 	@CompileStatic
@@ -584,13 +584,17 @@ class PermissionService {
 		Permission.deleteAll(Permission.findAllByEndsAtLessThan(now))
 	}
 
-	private boolean hasPermission(Userish userish, Object resource, Operation op) {
+	private boolean hasPermission(Userish userish, Object resource, Operation ...op) {
 		userish = userish?.resolveToUserish()
 		String resourceProp = getResourcePropertyName(resource)
 
 		List<Permission> p = Permission.withCriteria {
 			eq(resourceProp, resource)
-			eq("operation", op)
+			if (op.length == 1) {
+				eq("operation", op[0])
+			} else if (op.length > 1) {
+				'in'("operation", Arrays.asList(op))
+			}
 			or {
 				eq("anonymous", true)
 				if (isNotNullAndIdNotNull(userish)) {
@@ -606,23 +610,22 @@ class PermissionService {
 
 		// Special case of UI channels: they inherit permissions from the associated canvas
 		if (p.empty && resource instanceof Stream && resource.uiChannel) {
-			Map<Operation, Operation> streamToCanvas = [
-				(Operation.STREAM_GET): Operation.CANVAS_GET,
-				(Operation.STREAM_EDIT): Operation.CANVAS_EDIT,
-				(Operation.STREAM_DELETE): Operation.CANVAS_DELETE,
-				//(Operation.STREAM_): Operation.CANVAS_STARTSTOP,
-				//(Operation.STREAM_): Operation.CANVAS_INTERACT,
-				(Operation.STREAM_SHARE): Operation.CANVAS_SHARE,
-			]
-			Operation o = streamToCanvas[op]
-			if (o == null) {
-				return false
+			Set<Operation> operations = STREAM_TO_CANVAS[p.operation]
+			if (operations != null) {
+				return hasPermission(userish, resource.uiChannelCanvas, operations.toArray())
 			}
-			return hasPermission(userish, resource.uiChannelCanvas, o)
 		}
 
 		return !p.empty
 	}
+
+	// map stream operations to canvas operations
+	private final static Map<Operation, Set<Operation>> STREAM_TO_CANVAS = [
+		(Operation.STREAM_GET): [Operation.CANVAS_GET],
+		(Operation.STREAM_SUBSCRIBE): [Operation.CANVAS_GET],
+		(Operation.STREAM_DELETE): [Operation.CANVAS_EDIT, Operation.CANVAS_DELETE],
+		(Operation.STREAM_PUBLISH): [Operation.CANVAS_STARTSTOP],
+	]
 
 	/**
 	 * Find Permissions that will be revoked, and cascade according to alsoRevoke map
