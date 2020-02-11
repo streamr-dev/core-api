@@ -2,7 +2,6 @@ package com.unifina.service
 
 import com.unifina.api.NotPermittedException
 import com.unifina.domain.dashboard.Dashboard
-
 import com.unifina.domain.data.Stream
 import com.unifina.domain.marketplace.Product
 import com.unifina.domain.marketplace.Subscription
@@ -12,12 +11,10 @@ import com.unifina.domain.security.Permission.Operation
 import com.unifina.domain.security.SecUser
 import com.unifina.domain.security.SignupInvite
 import com.unifina.domain.signalpath.Canvas
-import com.unifina.domain.signalpath.ModulePackage
 import com.unifina.security.Userish
 import groovy.transform.CompileStatic
 
 import java.security.AccessControlException
-
 /**
  * Check, get, grant, and revoke permissions. Maintains Access Control Lists (ACLs) to resources.
  *
@@ -712,8 +709,6 @@ class PermissionService {
 			return "canvas"
 		} else if (Dashboard.isAssignableFrom(resourceClass)) {
 			return "dashboard"
-		} else if (ModulePackage.isAssignableFrom(resourceClass)) {
-			return "modulePackage"
 		} else if (Product.isAssignableFrom(resourceClass)) {
 			return "product"
 		} else if (Stream.isAssignableFrom(resourceClass)) {

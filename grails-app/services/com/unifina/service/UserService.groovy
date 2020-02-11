@@ -1,17 +1,14 @@
 package com.unifina.service
 
-
 import com.unifina.api.InvalidAPIKeyException
 import com.unifina.api.InvalidUsernameAndPasswordException
 import com.unifina.api.NotFoundException
 import com.unifina.domain.ExampleType
 import com.unifina.domain.data.Stream
 import com.unifina.domain.security.Key
-import com.unifina.domain.security.Permission
 import com.unifina.domain.security.SecRole
 import com.unifina.domain.security.SecUser
 import com.unifina.domain.signalpath.Canvas
-import com.unifina.domain.signalpath.ModulePackage
 import com.unifina.exceptions.UserCreationFailedException
 import com.unifina.security.Userish
 import grails.plugin.springsecurity.SpringSecurityService
@@ -31,7 +28,7 @@ class UserService {
 	StreamService streamService
 	CanvasService canvasService
 
-	SecUser createUser(Map properties, List<SecRole> roles = null, List<ModulePackage> packages = null) {
+	SecUser createUser(Map properties, List<SecRole> roles = null) {
 		def secConf = grailsApplication.config.grails.plugin.springsecurity
 		ClassLoader cl = this.getClass().getClassLoader()
 		SecUser user = cl.loadClass(secConf.userLookup.userDomainClassName).newInstance(properties)
@@ -68,7 +65,6 @@ class UserService {
 		} else {
 			// Save roles, feeds and module packages
 			addRoles(user, roles)
-			setModulePackages(user, packages ?: [])
 
 			// Transfer permissions that were attached to sign-up invitation before user existed
 			permissionService.transferInvitePermissionsTo(user)
@@ -114,14 +110,6 @@ class UserService {
 		roles.each { role ->
 			userRoleClass.create user, role
 		}
-	}
-
-	/** Adds/removes ModulePackage read permissions so that user's permissions match given ones */
-	def setModulePackages(user, List<ModulePackage> packages) {
-		List<ModulePackage> existing = permissionService.get(ModulePackage, user, Permission.Operation.READ)
-		packages.findAll { !existing.contains(it) }.each { permissionService.systemGrant(user, it, Permission.Operation.READ) }
-		existing.findAll { !packages.contains(it) }.each { permissionService.systemRevoke(user, it, Permission.Operation.READ) }
-		return packages
 	}
 
 	def passwordValidator = { String password, command ->

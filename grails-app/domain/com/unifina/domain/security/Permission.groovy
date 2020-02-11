@@ -5,9 +5,7 @@ import com.unifina.domain.data.Stream
 import com.unifina.domain.marketplace.Product
 import com.unifina.domain.marketplace.Subscription
 import com.unifina.domain.signalpath.Canvas
-import com.unifina.domain.signalpath.ModulePackage
 import groovy.transform.CompileStatic
-
 /**
  * Access Control List (ACL) item, grants a user a specific type of access to a resource (e.g. X can read Dashboard 1)
  */
@@ -28,10 +26,9 @@ class Permission {
 	 */
 	Canvas canvas
 	Dashboard dashboard
-	ModulePackage modulePackage
 	Stream stream
 	Product product
-	static List<String> resourceFields = ['canvas', 'dashboard', 'modulePackage', 'stream', 'product']
+	static List<String> resourceFields = ['canvas', 'dashboard', 'stream', 'product']
 
 	/** Type of operation that this ACL item allows e.g. "read" */
 	enum Operation {
@@ -217,7 +214,7 @@ class Permission {
 	/** This permission may have been created due to another permission, keep track */
 	Permission parent
 
-	static belongsTo = [Canvas, Dashboard, ModulePackage, Stream, Subscription]
+	static belongsTo = [Canvas, Dashboard, Stream, Subscription]
 
 	static constraints = {
 		user(nullable: true)
@@ -225,11 +222,10 @@ class Permission {
 		invite(nullable: true)
 		canvas(nullable: true)
 		dashboard(nullable: true)
-		modulePackage(nullable: true)
 		stream(nullable: true)
 		product(nullable: true)
 		canvas(validator: { val, obj ->
-			[obj.canvas, obj.dashboard, obj.modulePackage, obj.stream, obj.product].count { it != null } == 1
+			[obj.canvas, obj.dashboard, obj.stream, obj.product].count { it != null } == 1
 		})
 		subscription(nullable: true)
 		endsAt(nullable: true)
@@ -291,9 +287,6 @@ class Permission {
 		}
 		if (dashboard) {
 			map["dashboard"] = dashboard.id
-		}
-		if (modulePackage) {
-			map["modulePackage"] = modulePackage.id
 		}
 		if (stream) {
 			map["stream"] = stream.id

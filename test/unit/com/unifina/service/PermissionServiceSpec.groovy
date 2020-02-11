@@ -11,21 +11,19 @@ import com.unifina.domain.security.SecUser
 import com.unifina.domain.security.SignupInvite
 import com.unifina.domain.signalpath.Canvas
 import com.unifina.domain.signalpath.Module
-import com.unifina.domain.signalpath.ModulePackage
 import grails.test.mixin.Mock
 import grails.test.mixin.TestFor
 import grails.test.mixin.TestMixin
 import grails.test.mixin.support.GrailsUnitTestMixin
 
 import java.security.AccessControlException
-
 /*
 	If you get weird test failures, it may be due to spotty GORM and mocked criteria queries.
 	You might want to try PermissionServiceIntegrationSpec instead.
  */
 @TestMixin(GrailsUnitTestMixin)
 @TestFor(PermissionService)
-@Mock([SecUser, Key, SignupInvite, Module, ModulePackage, Permission, Dashboard, Canvas])
+@Mock([SecUser, Key, SignupInvite, Module, Permission, Dashboard, Canvas])
 class PermissionServiceSpec extends BeanMockingSpecification {
 
 	SecUser me, anotherUser, stranger

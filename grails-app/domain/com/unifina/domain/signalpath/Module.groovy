@@ -9,32 +9,30 @@ class Module implements Comparable {
 	String jsModule
 	String type
 	Boolean hide
-	ModulePackage modulePackage
 	String jsonHelp
 	String webcomponent
 
 	static belongsTo = [category: ModuleCategory]
-	
+
     static constraints = {
 		name()
 		implementingClass()
 		jsModule()
 		type()
 		hide(nullable:true)
-		modulePackage(nullable:true)
 		jsonHelp(nullable:true)
 		alternativeNames(nullable:true)
 		webcomponent(nullable:true)
     }
-	
+
 	static mapping = {
 		jsonHelp type: 'text'
 	}
-	
+
 	String toString() {
 		return name
 	}
-	
+
 	/**
 	 * Keep this consistent with equals
 	 * (return 0 if and only if there is an equals relationship as well)
