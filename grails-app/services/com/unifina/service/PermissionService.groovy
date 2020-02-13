@@ -27,11 +27,6 @@ class PermissionService {
 	def grailsApplication
 
 	@CompileStatic
-	boolean canWriteCanvas(Userish userish, Canvas resource) {
-		return check(userish, resource, Operation.CANVAS_EDIT)
-	}
-
-	@CompileStatic
 	boolean canShareStream(Userish userish, Stream resource) {
 		return check(userish, resource, Operation.STREAM_SHARE)
 	}
