@@ -87,49 +87,49 @@ class PermissionServiceSpec extends BeanMockingSpecification {
 
 	void "access denied to non-permitted Dashboard"() {
 		expect:
-		!service.canReadDashboard(me, dashRestricted)
+		!service.check(me, dashRestricted, Permission.Operation.DASHBOARD_GET)
 	}
 
 	void "access granted through key to permitted Dashboard"() {
 		expect:
-		service.canReadDashboard(myKey, dashAllowed)
+		service.check(myKey, dashAllowed, Permission.Operation.DASHBOARD_GET)
 	}
 
 	void "access denied through key to non-permitted Dashboard"() {
 		expect:
-		!service.canReadDashboard(myKey, dashRestricted)
+		!service.check(myKey, dashRestricted, Permission.Operation.DASHBOARD_GET)
 	}
 
 	void "access granted through anonymous key to permitted Dashboard"() {
 		expect:
-		service.canReadDashboard(anonymousKey, dashAllowed)
+		service.check(anonymousKey, dashAllowed, Permission.Operation.DASHBOARD_GET)
 	}
 
 	void "access denied through anonymous key to non-permitted Dashboard"() {
 		expect:
-		!service.canReadDashboard(anonymousKey, dashRestricted)
+		!service.check(anonymousKey, dashRestricted, Permission.Operation.DASHBOARD_GET)
 	}
 
 	void "non-permitted third-parties have no access to resources"() {
 		expect:
-		!service.canReadDashboard(stranger, dashAllowed)
-		!service.canReadDashboard(stranger, dashRestricted)
-		!service.canReadDashboard(stranger, dashOwned)
+		!service.check(stranger, dashAllowed, Permission.Operation.DASHBOARD_GET)
+		!service.check(stranger, dashRestricted, Permission.Operation.DASHBOARD_GET)
+		!service.check(stranger, dashOwned, Permission.Operation.DASHBOARD_GET)
 	}
 
 	void "canRead returns false on bad inputs"() {
 		expect:
-		!service.canReadDashboard(null, dashAllowed)
-		!service.canReadDashboard(me, new Dashboard())
-		!service.canReadDashboard(me, null)
+		!service.check(null, dashAllowed, Permission.Operation.DASHBOARD_GET)
+		!service.check(me, new Dashboard(), Permission.Operation.DASHBOARD_GET)
+		!service.check(me, null, Permission.Operation.DASHBOARD_GET)
 	}
 
 	void "canRead returns false on bad inputs using keys"() {
 		expect:
-		!service.canReadDashboard(null, dashAllowed)
-		!service.canReadDashboard(myKey, new Dashboard())
-		!service.canReadDashboard(anonymousKey, new Dashboard())
-		!service.canReadDashboard(myKey, null)
+		!service.check(null, dashAllowed, Permission.Operation.DASHBOARD_GET)
+		!service.check(myKey, new Dashboard(), Permission.Operation.DASHBOARD_GET)
+		!service.check(anonymousKey, new Dashboard(), Permission.Operation.DASHBOARD_GET)
+		!service.check(myKey, null, Permission.Operation.DASHBOARD_GET)
 	}
 
 	void "getPermissionsTo returns all permissions for the given resource"() {
@@ -384,18 +384,18 @@ class PermissionServiceSpec extends BeanMockingSpecification {
 
 	void "signup invitations are converted correctly"() {
 		expect:
-		!service.canReadDashboard(anotherUser, dashOwned)
+		!service.check(anotherUser, dashOwned, Permission.Operation.DASHBOARD_GET)
 
 		when: "pretend anotherUser was just created"
 		service.systemGrant(invite, dashOwned, Operation.DASHBOARD_GET)
 		service.transferInvitePermissionsTo(anotherUser)
 		then:
-		service.canReadDashboard(anotherUser, dashOwned)
+		service.check(anotherUser, dashOwned, Permission.Operation.DASHBOARD_GET)
 	}
 
 	void "stranger can read public resources with anonymous read access"() {
 		expect: "... but not more than read"
-		service.canReadDashboard(stranger, dashPublic)
+		service.check(stranger, dashPublic, Permission.Operation.DASHBOARD_GET)
 		!service.canWriteDashboard(stranger, dashPublic)
 		!service.canShareDashboard(stranger, dashPublic)
 	}
@@ -417,14 +417,14 @@ class PermissionServiceSpec extends BeanMockingSpecification {
 
 	void "systemRevokeAnonymousAccess() revokes anonymous access on a resource"() {
 		assert Permission.exists(dashAnonymousReadPermission.id)
-		assert service.canReadDashboard(null, dashPublic)
+		assert service.check(null, dashPublic, Permission.Operation.DASHBOARD_GET)
 
 		when:
 		service.systemRevokeAnonymousAccess(dashPublic, Operation.DASHBOARD_GET)
 
 		then:
 		!Permission.exists(dashAnonymousReadPermission.id)
-		!service.canReadDashboard(null, dashPublic)
+		!service.check(null, dashPublic, Permission.Operation.DASHBOARD_GET)
 	}
 
 	void "check() returns false if permission with endsAt set in past"() {

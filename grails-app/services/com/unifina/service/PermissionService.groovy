@@ -26,10 +26,6 @@ import java.security.AccessControlException
 class PermissionService {
 	def grailsApplication
 
-	@CompileStatic
-	boolean canReadDashboard(Userish userish, Dashboard resource)  {
-		return check(userish, resource, Operation.DASHBOARD_GET)
-	}
 
 	@CompileStatic
 	boolean canWriteStream(Userish userish, Stream resource) {
