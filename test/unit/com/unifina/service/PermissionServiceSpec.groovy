@@ -397,7 +397,7 @@ class PermissionServiceSpec extends BeanMockingSpecification {
 		expect: "... but not more than read"
 		service.check(stranger, dashPublic, Permission.Operation.DASHBOARD_GET)
 		!service.check(stranger, dashPublic, Permission.Operation.DASHBOARD_EDIT)
-		!service.canShareDashboard(stranger, dashPublic)
+		!service.check(stranger, dashPublic, Permission.Operation.DASHBOARD_SHARE)
 	}
 
 	void "verify does not throw if permission exists"() {
