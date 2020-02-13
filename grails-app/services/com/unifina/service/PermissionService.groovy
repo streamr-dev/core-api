@@ -61,14 +61,6 @@ class PermissionService {
 		return check(userish, resource, Operation.CANVAS_EDIT)
 	}
 
-	/**
-	 * Check whether user is allowed to share a resource
-	 */
-	@CompileStatic
-	boolean canShare(Userish userish, Object resource) {
-		return check(userish, resource, Operation.SHARE)
-	}
-
 	@CompileStatic
 	boolean canShareStream(Userish userish, Stream resource) {
 		return check(userish, resource, Operation.STREAM_SHARE)
@@ -524,7 +516,8 @@ class PermissionService {
 	List<Permission> revoke(SecUser revoker, Permission permission, boolean logIfDenied=true)
 			throws AccessControlException {
 		Object resource = getResourceFromPermission(permission)
-		if (!canShare(revoker, resource)) {
+		Permission.Operation shareOp = Operation.shareOperation(resource)
+		if (!check(revoker, resource, shareOp)) {
 			throwAccessControlException(revoker, resource, logIfDenied)
 		}
 		return systemRevoke(permission)

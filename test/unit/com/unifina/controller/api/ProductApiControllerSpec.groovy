@@ -198,7 +198,7 @@ class ProductApiControllerSpec extends Specification {
 		}
 		then:
 		1 * productService.findById('product-id', _, Permission.Operation.PRODUCT_GET) >> product
-		1 * controller.permissionService.canShare(_, _) >> false
+		1 * controller.permissionService.check(_, _, Permission.Operation.PRODUCT_SHARE) >> false
 	}
 
 	void "show() returns 200 and renders a product"() {
@@ -262,7 +262,7 @@ class ProductApiControllerSpec extends Specification {
 		}
 		then:
 		1 * productService.update("product-id", _ as UpdateProductCommand, user) >> product
-		1 * controller.permissionService.canShare(_, _) >> false
+		1 * controller.permissionService.check(_, _, Permission.Operation.PRODUCT_SHARE) >> false
 	}
 
 	void "update() returns 200 and renders a product"() {
@@ -282,7 +282,7 @@ class ProductApiControllerSpec extends Specification {
 		then:
 		response.status == 200
 		response.json == product.toMap()
-		1 * controller.permissionService.canShare(_, _) >> false
+		1 * controller.permissionService.check(_, _, Permission.Operation.PRODUCT_SHARE) >> false
 	}
 
 	void "setDeploying() invokes productService#findById() and productService#transitionToDeploying()"() {

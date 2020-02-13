@@ -83,7 +83,7 @@ class ProductApiController {
 	@StreamrApi(authenticationLevel = AuthLevel.NONE)
 	def show(String id) {
 		Product product = productService.findById(id, loggedInUser(), Permission.Operation.PRODUCT_GET)
-		boolean isProductOwner = permissionService.canShare(loggedInUser(), product)
+		boolean isProductOwner = permissionService.check(loggedInUser(), product, Permission.Operation.PRODUCT_SHARE)
 		render(product.toMap(isProductOwner) as JSON)
 	}
 
@@ -98,7 +98,7 @@ class ProductApiController {
 	@StreamrApi(authenticationLevel = AuthLevel.USER)
 	def update(String id, UpdateProductCommand command) {
 		Product product = productService.update(id, command, loggedInUser())
-		boolean isProductOwner = permissionService.canShare(loggedInUser(), product)
+		boolean isProductOwner = permissionService.check(loggedInUser(), product, Permission.Operation.PRODUCT_SHARE)
 		render(product.toMap(isProductOwner) as JSON)
 	}
 

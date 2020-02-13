@@ -333,7 +333,7 @@ class KeyApiControllerSpec extends ControllerSpecification {
 		key.save(failOnError: true, validate: true)
 
 		controller.permissionService = permissionService = Stub(PermissionService)
-		permissionService.canShare(me, userLinkedKey) >> true
+		permissionService.check(me, userLinkedKey) >> true
 
 		when:
 		request.method = "PUT"

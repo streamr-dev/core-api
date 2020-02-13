@@ -5,6 +5,7 @@ import com.unifina.api.NotFoundException
 import com.unifina.api.NotPermittedException
 import com.unifina.domain.dashboard.Dashboard
 import com.unifina.domain.data.Stream
+import com.unifina.domain.security.Permission
 import com.unifina.domain.security.Permission.Operation
 import com.unifina.domain.security.SecUser
 import com.unifina.domain.security.SignupInvite
@@ -38,9 +39,10 @@ class PermissionApiController {
 		if (!grailsApplication.isDomainClass(resourceClass)) { throw new IllegalArgumentException("${resourceClass.simpleName} is not a domain class!") }
 
 		def res = resourceClass.get(resourceId)
+		Permission.Operation shareOp = Permission.Operation.shareOperation(res)
 		if (!res) {
 			throw new NotFoundException(resourceClass.simpleName, resourceId.toString())
-		} else if (requireSharePermission && !permissionService.canShare(request.apiUser ?: request.apiKey, res)) {
+		} else if (requireSharePermission && !permissionService.check(request.apiUser ?: request.apiKey, res, shareOp)) {
 			throw new NotPermittedException(request?.apiUser?.username, resourceClass.simpleName, resourceId.toString(), "share")
 		} else {
 			action(res)
@@ -127,7 +129,7 @@ class PermissionApiController {
 		if (!anonymous && !username) { throw new InvalidArgumentsException("Must specify either 'user' or 'anonymous'!") }
 
 		Operation op = Operation.fromString request.JSON.operation
-		if (!op) { throw new InvalidArgumentsException("Invalid operation '$opId'. Try e.g. 'read' instead.", "operation", opId) }
+		if (!op) { throw new InvalidArgumentsException("Invalid operation '$opId'.", "operation", opId) }
 
 		if (anonymous) {
 			useResource(params.resourceClass, params.resourceId) { res ->
@@ -142,7 +144,7 @@ class PermissionApiController {
 			def user = SecUser.findByUsername(username)
 
 			if (user) {
-				if (op == Operation.READ) { // quick fix for sending only one email
+				if (op == Operation.STREAM_GET || op == Operation.CANVAS_GET || op == Operation.DASHBOARD_GET) { // quick fix for sending only one email
 					if (EmailValidator.validate(user.username)) {
 						String sharer = request.apiUser?.username ?: "Streamr user"
 						String resource = resource(params.resourceClass)
