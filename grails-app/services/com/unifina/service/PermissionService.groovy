@@ -27,11 +27,6 @@ class PermissionService {
 	def grailsApplication
 
 	@CompileStatic
-	boolean canWriteProduct(Userish userish, Stream resource) {
-		return check(userish, resource, Operation.PRODUCT_EDIT)
-	}
-
-	@CompileStatic
 	boolean canWriteDashboard(Userish userish, Dashboard resource) {
 		return check(userish, resource, Operation.DASHBOARD_EDIT)
 	}
