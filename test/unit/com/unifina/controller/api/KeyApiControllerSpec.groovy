@@ -143,7 +143,7 @@ class KeyApiControllerSpec extends ControllerSpecification {
 		Permission.findAllByKey(Key.get(1)).size() == 3
 		permissionService.check(Key.get(1), Stream.get(stream.id), Permission.Operation.STREAM_GET)
 		permissionService.check(Key.get(1), Stream.get(stream.id), Permission.Operation.STREAM_SUBSCRIBE)
-		permissionService.canPublishStream(Key.get(1), Stream.get(stream.id))
+		permissionService.check(Key.get(1), Stream.get(stream.id), Permission.Operation.STREAM_PUBLISH)
 	}
 
 	void "save() with stream_subscribe permission also creates stream_get permission"() {

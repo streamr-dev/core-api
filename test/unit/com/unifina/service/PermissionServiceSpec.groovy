@@ -328,8 +328,8 @@ class PermissionServiceSpec extends BeanMockingSpecification {
 		service.systemRevoke(subscriber, stream, Operation.STREAM_SUBSCRIBE)
 		then:
 		!service.check(subscriber, stream, Permission.Operation.STREAM_SUBSCRIBE)
-		!service.canPublishStream(subscriber, pubInbox)
-		!service.canPublishStream(publisher, subInbox)
+		!service.check(subscriber, pubInbox, Permission.Operation.STREAM_PUBLISH)
+		!service.check(publisher, subInbox, Permission.Operation.STREAM_PUBLISH)
 	}
 
 	void "inbox permissions are maintained after systemRevoke() on a stream if there is another stream with permissions"() {
@@ -363,8 +363,8 @@ class PermissionServiceSpec extends BeanMockingSpecification {
 		then:
 		!service.check(subscriber, stream1, Permission.Operation.STREAM_SUBSCRIBE)
 		service.check(subscriber, stream2, Permission.Operation.STREAM_SUBSCRIBE)
-		service.canPublishStream(subscriber, pubInbox)
-		service.canPublishStream(publisher, subInbox)
+		service.check(subscriber, pubInbox, Permission.Operation.STREAM_PUBLISH)
+		service.check(publisher, subInbox, Permission.Operation.STREAM_PUBLISH)
 	}
 
 	void "signup invitation can be granted and revoked of permissions just like normal users"() {

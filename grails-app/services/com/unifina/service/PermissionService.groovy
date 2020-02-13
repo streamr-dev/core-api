@@ -27,11 +27,6 @@ import java.security.AccessControlException
 class PermissionService {
 	def grailsApplication
 
-	@CompileStatic
-	boolean canPublishStream(Userish userish, Stream resource) {
-		return check(userish, resource, Operation.STREAM_PUBLISH)
-	}
-
 	/**
 	 * Throws an exception if user is not allowed to share a resource
 	 */
