@@ -26,12 +26,6 @@ import java.security.AccessControlException
 class PermissionService {
 	def grailsApplication
 
-
-	@CompileStatic
-	boolean canWriteStream(Userish userish, Stream resource) {
-		return check(userish, resource, Operation.STREAM_EDIT)
-	}
-
 	@CompileStatic
 	boolean canWriteProduct(Userish userish, Stream resource) {
 		return check(userish, resource, Operation.PRODUCT_EDIT)
