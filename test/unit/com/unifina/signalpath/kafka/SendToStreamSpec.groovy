@@ -3,6 +3,7 @@ package com.unifina.signalpath.kafka
 import com.streamr.client.options.StreamrClientOptions
 import com.unifina.BeanMockingSpecification
 import com.unifina.domain.data.Stream
+import com.unifina.domain.security.Permission
 import com.unifina.domain.security.SecUser
 import com.unifina.service.PermissionService
 import com.unifina.service.StreamService
@@ -65,7 +66,7 @@ class SendToStreamSpec extends BeanMockingSpecification {
 	}
 
 	void "SendToStream sends correct data to StreamrClient"() {
-		permissionService.canWrite(_, _) >> true
+		permissionService.check(_, _, Permission.Operation.STREAM_PUBLISH) >> true
 		createModule()
 
 		Map inputValues = [
@@ -95,7 +96,7 @@ class SendToStreamSpec extends BeanMockingSpecification {
 
 		then:
 		1 * globals.isRunContext() >> true
-		1 * permissionService.canWrite(_, _) >> false
+		1 * permissionService.check(_, _, Permission.Operation.STREAM_PUBLISH) >> false
 		thrown(AccessControlException)
 	}
 
@@ -105,7 +106,7 @@ class SendToStreamSpec extends BeanMockingSpecification {
 
 		then:
 		1 * globals.isRunContext() >> true
-		1 * permissionService.canWrite(_, _) >> true
+		1 * permissionService.check(_, _, Permission.Operation.STREAM_PUBLISH) >> true
 		notThrown(AccessControlException)
 	}
 
@@ -115,12 +116,12 @@ class SendToStreamSpec extends BeanMockingSpecification {
 
 		then:
 		1 * globals.isRunContext() >> false
-		0 * permissionService.canWrite(_, _)
+		0 * permissionService.check(_, _, Permission.Operation.STREAM_PUBLISH)
 		notThrown(AccessControlException)
 	}
 
 	void "Changing stream parameter during run time re-routes messages to new stream"() {
-		permissionService.canWrite(_, _) >> true
+		permissionService.check(_, _, Permission.Operation.STREAM_PUBLISH) >> true
 		createModule()
 
 		def s2 = new Stream()
@@ -156,7 +157,7 @@ class SendToStreamSpec extends BeanMockingSpecification {
 	}
 
 	void "SendToStream by default sends old values along with new values"() {
-		permissionService.canWrite(_, _) >> true
+		permissionService.check(_, _, Permission.Operation.STREAM_PUBLISH) >> true
 		createModule()
 
 		when:
@@ -183,7 +184,7 @@ class SendToStreamSpec extends BeanMockingSpecification {
 	}
 
 	void "SendToStream can be configured to send only new values"() {
-		permissionService.canWrite(_, _) >> true
+		permissionService.check(_, _, Permission.Operation.STREAM_PUBLISH) >> true
 		createModule([sendOnlyNewValues: [value: true]])
 
 		when:
@@ -213,7 +214,7 @@ class SendToStreamSpec extends BeanMockingSpecification {
 		stream.partitions = 10
 		stream.save(validate: false)
 
-		permissionService.canWrite(_, _) >> true
+		permissionService.check(_, _, Permission.Operation.STREAM_PUBLISH) >> true
 		createModule()
 
 		expect:
@@ -224,7 +225,7 @@ class SendToStreamSpec extends BeanMockingSpecification {
 		stream.partitions = 10
 		stream.save(validate: false)
 
-		permissionService.canWrite(_, _) >> true
+		permissionService.check(_, _, Permission.Operation.STREAM_PUBLISH) >> true
 		createModule()
 
 		Map inputValues = [

@@ -25,11 +25,11 @@ class CommunityJoinRequestService {
 	private void onApproveJoinRequest(CommunityJoinRequest c) {
 		log.debug("onApproveJoinRequest: approved JoinRequest for address ${c.memberAddress} to community ${c.communityAddress}")
 		for (Stream s : findStreams(c)) {
-			if (permissionService.canWrite(c.user, s)) {
+			if (permissionService.check(c.user, s, Permission.Operation.STREAM_PUBLISH)) {
 				log.debug(String.format("user %s already has write permission to %s (%s), skipping grant", c.user.username, s.name, s.id))
 			} else {
 				log.debug(String.format("granting write permission to %s (%s) for %s", s.name, s.id, c.user.username))
-				permissionService.systemGrant(c.user, s, Permission.Operation.WRITE)
+				permissionService.systemGrant(c.user, s, Permission.Operation.STREAM_PUBLISH)
 			}
 		}
 		sendMessage(c, "join")

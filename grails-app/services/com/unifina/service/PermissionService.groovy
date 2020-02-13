@@ -41,14 +41,6 @@ class PermissionService {
 		return check(userish, resource, Operation.DASHBOARD_GET)
 	}
 
-	/**
-	 * Check whether user is allowed to write a resource
-	 */
-	@CompileStatic
-	boolean canWrite(Userish userish, Object resource) {
-		return check(userish, resource, Operation.WRITE)
-	}
-
 	@CompileStatic
 	boolean canWriteStream(Userish userish, Stream resource) {
 		return check(userish, resource, Operation.STREAM_EDIT)
