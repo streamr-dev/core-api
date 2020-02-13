@@ -113,7 +113,7 @@ class SignalPathService {
 		// can be problematic when collaborating on shared canvas; though even then it makes sense to force
 		//   explicit read rights sharing to streams on that canvas
 		for (Stream s in sp.getStreams()) {
-			if (!permissionService.canReadStream(asUser, s)) {
+			if (!permissionService.check(userish, resource, Permission.Operation.STREAM_GET)) {
 				throw new UnauthorizedStreamException(canvas, s, asUser)
 			}
 		}

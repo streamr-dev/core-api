@@ -469,7 +469,7 @@ class PermissionServiceSpec extends BeanMockingSpecification {
 
 		then:
 		Permission.findAllByStream(testStream).size() == 1
-		!service.canReadStream(testUser, testStream)
+		!service.check(testUser, testStream, Operation.STREAM_GET)
 		service.canWriteStream(testUser, testStream)
 	}
 }

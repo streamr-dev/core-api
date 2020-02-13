@@ -27,11 +27,6 @@ class PermissionService {
 	def grailsApplication
 
 	@CompileStatic
-	boolean canReadStream(Userish userish, Stream resource)  {
-		return check(userish, resource, Operation.STREAM_GET)
-	}
-
-	@CompileStatic
 	boolean canReadCanvas(Userish userish, Canvas resource)  {
 		return check(userish, resource, Operation.CANVAS_GET)
 	}

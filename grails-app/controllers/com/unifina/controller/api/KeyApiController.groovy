@@ -94,14 +94,14 @@ class KeyApiController {
 
 				// Grant extra permissions depending on whether we're creating a publish or subscribe key
 				if (operation == Permission.Operation.STREAM_PUBLISH) {
-					if (!permissionService.canReadStream(request.apiUser, res)) {
+					if (!permissionService.check(request.apiUser, res, Permission.Operation.STREAM_GET)) {
 						permissionService.grant(request.apiUser, res, key, Permission.Operation.STREAM_GET, false)
 					}
 					if (!permissionService.canSubscribeStream(request.apiUser, res)) {
 						permissionService.grant(request.apiUser, res, key, Permission.Operation.STREAM_SUBSCRIBE, false)
 					}
 				} else if (operation == Permission.Operation.STREAM_SUBSCRIBE) {
-					if (!permissionService.canReadStream(request.apiUser, res)) {
+					if (!permissionService.check(request.apiUser, res, Permission.Operation.STREAM_GET)) {
 						permissionService.grant(request.apiUser, res, key, Permission.Operation.STREAM_GET, false)
 					}
 				} else {

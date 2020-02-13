@@ -141,7 +141,7 @@ class KeyApiControllerSpec extends ControllerSpecification {
 
 		and:
 		Permission.findAllByKey(Key.get(1)).size() == 3
-		permissionService.canReadStream(Key.get(1), Stream.get(stream.id))
+		permissionService.check(Key.get(1), Stream.get(stream.id), Permission.Operation.STREAM_GET)
 		permissionService.canSubscribeStream(Key.get(1), Stream.get(stream.id))
 		permissionService.canPublishStream(Key.get(1), Stream.get(stream.id))
 	}
@@ -176,7 +176,7 @@ class KeyApiControllerSpec extends ControllerSpecification {
 
 		and:
 		Permission.findAllByKey(Key.get(1)).size() == 2
-		permissionService.canReadStream(Key.get(1), Stream.get(stream.id))
+		permissionService.check(Key.get(1), Stream.get(stream.id), Permission.Operation.STREAM_GET)
 		permissionService.canSubscribeStream(Key.get(1), Stream.get(stream.id))
 	}
 
