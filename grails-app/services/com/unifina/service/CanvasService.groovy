@@ -186,7 +186,7 @@ class CanvasService {
 		def canvas = Canvas.get(id)
 		if (!canvas) {
 			throw new NotFoundException("Canvas", id)
-		} else if (!hasCanvasPermission(canvas, user, op)) {
+		} else if (!permissionService.check(user, canvas, op)) {
 			throw new NotPermittedException(user?.username, "Canvas", id, op.id)
 		} else {
 			return canvas
@@ -210,7 +210,7 @@ class CanvasService {
 
 		if (!canvas) {
 			throw new NotFoundException("Canvas", canvasId)
-		} else if (!hasCanvasPermission(canvas, user, op) && !hasModulePermissionViaDashboard(canvas, moduleId, dashboardId, user, op)) {
+		} else if (!permissionService.check(user, canvas, op) && !hasModulePermissionViaDashboard(canvas, moduleId, dashboardId, user, op)) {
 			throw new NotPermittedException(user?.username, "Canvas", canvasId, op.id)
 		} else {
 			Map canvasMap = canvas.toMap()
@@ -296,10 +296,6 @@ class CanvasService {
 				throw e
 			}
 		}
-	}
-
-	private boolean hasCanvasPermission(Canvas canvas, SecUser user, Permission.Operation op) {
-		return permissionService.check(user, canvas, op)
 	}
 
 	private boolean hasModulePermissionViaDashboard(Canvas canvas, Integer moduleId, String dashboardId, SecUser user, Permission.Operation op) {

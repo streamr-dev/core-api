@@ -26,14 +26,6 @@ import java.security.AccessControlException
 class PermissionService {
 	def grailsApplication
 
-	/**
-	 * Check whether user is allowed to read a resource
-	 */
-	@CompileStatic
-	boolean canRead(Userish userish, Object resource)  {
-		return check(userish, resource, Operation.READ)
-	}
-
 	@CompileStatic
 	boolean canReadStream(Userish userish, Stream resource)  {
 		return check(userish, resource, Operation.STREAM_GET)
@@ -584,17 +576,13 @@ class PermissionService {
 		Permission.deleteAll(Permission.findAllByEndsAtLessThan(now))
 	}
 
-	private boolean hasPermission(Userish userish, Object resource, Operation ...op) {
+	private boolean hasPermission(Userish userish, Object resource, Operation op) {
 		userish = userish?.resolveToUserish()
 		String resourceProp = getResourcePropertyName(resource)
 
 		List<Permission> p = Permission.withCriteria {
 			eq(resourceProp, resource)
-			if (op.length == 1) {
-				eq("operation", op[0])
-			} else if (op.length > 1) {
-				'in'("operation", Arrays.asList(op))
-			}
+			eq("operation", op)
 			or {
 				eq("anonymous", true)
 				if (isNotNullAndIdNotNull(userish)) {
@@ -612,7 +600,11 @@ class PermissionService {
 		if (p.empty && resource instanceof Stream && resource.uiChannel) {
 			Set<Operation> operations = STREAM_TO_CANVAS[p.operation]
 			if (operations != null) {
-				return hasPermission(userish, resource.uiChannelCanvas, operations.toArray())
+				for (Operation oper : operations) {
+					if (hasPermission(userish, resource.uiChannelCanvas, oper)) {
+						return true
+					}
+				}
 			}
 		}
 
@@ -628,7 +620,7 @@ class PermissionService {
 	]
 
 	/**
-	 * Find Permissions that will be revoked, and cascade according to alsoRevoke map
+	 * Find Permissions that will be revoked
 	 */
 	private List<Permission> performRevoke(boolean anonymous, Userish target, Object resource, Operation operation) {
 		target = target?.resolveToUserish()
@@ -645,7 +637,10 @@ class PermissionService {
 		}.toList()
 
 		// Prevent revocation of only/last share permission to prevent inaccessible resources
-		if (hasOneOrLessSharePermissionsLeft(resource) && !Operation.shareOperations().disjoint(permissionList*.operation)) {
+		def left = hasOneOrLessSharePermissionsLeft(resource)
+		def right = Operation.shareOperation(resource) in permissionList*.operation
+		def cond = left && right
+		if (cond) {
 			throw new AccessControlException("Cannot revoke only SHARE permission of ${resource}")
 		}
 
@@ -682,9 +677,10 @@ class PermissionService {
 	private static boolean hasOneOrLessSharePermissionsLeft(Object resource) {
 		String resourceProp = getResourcePropertyName(resource)
 		def criteria = Permission.createCriteria()
+		Permission.Operation shareOp = Operation.shareOperation(resource)
 		def n = criteria.count {
 			eq(resourceProp, resource)
-			'in'("operation", Operation.shareOperations())
+			eq("operation", shareOp)
 		}
 		return n <= 1
 	}

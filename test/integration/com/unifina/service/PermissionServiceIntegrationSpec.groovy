@@ -99,6 +99,7 @@ class PermissionServiceIntegrationSpec extends IntegrationSpec {
 		Permission.findAllByDashboard(dashOwned)*.delete(flush: true)
 		Permission.findAllByDashboard(dashPublic)*.delete(flush: true)
 		Permission.findAllByCanvas(canvas)*.delete(flush: true)
+		Permission.findAllByStream(stream)*.delete(flush: true)
 
 		dashAllowed?.delete(flush: true)
 		dashRestricted?.delete(flush: true)
@@ -140,7 +141,7 @@ class PermissionServiceIntegrationSpec extends IntegrationSpec {
 		service.grant(stranger, dashOwned, anotherUser, Permission.Operation.DASHBOARD_GET)
 		then:
 		dashOwned in service.get(Dashboard, anotherUser, Permission.Operation.DASHBOARD_GET)
-		!(dashOwned in service.get(Dashboard, anotherUser, Permission.Operation.SHARE))
+		!(dashOwned in service.get(Dashboard, anotherUser, Permission.Operation.DASHBOARD_SHARE))
 
 		when:
 		service.revoke(stranger, dashOwned, anotherUser, Permission.Operation.DASHBOARD_GET)
@@ -148,8 +149,7 @@ class PermissionServiceIntegrationSpec extends IntegrationSpec {
 		!(dashOwned in service.get(Dashboard, anotherUser, Permission.Operation.DASHBOARD_GET))
 
 		when: "of course, it's silly to revoke 'share' access since it might already been re-shared..."
-		service.revoke(me, dashOwned, stranger, Permission.Operation.DASHBOARD_GET)
-		service.grant(stranger, dashOwned, anotherUser, Permission.Operation.DASHBOARD_SHARE)
+		service.revoke(me, dashOwned, stranger, Permission.Operation.DASHBOARD_SHARE)
 		then:
 		thrown AccessControlException
 	}
@@ -254,20 +254,9 @@ class PermissionServiceIntegrationSpec extends IntegrationSpec {
 
 	void "granting and revoking share rights"() {
 		when:
-		service.grant(me, dashOwned, stranger, Permission.Operation.SHARE)
+		service.grant(me, dashOwned, stranger, Permission.Operation.DASHBOARD_SHARE)
 		then:
-		service.get(Dashboard, stranger, Permission.Operation.SHARE) == [dashOwned]
-
-		when:
-		service.revoke(me, dashOwned, stranger, Permission.Operation.SHARE)
-		then:
-		service.get(Dashboard, stranger, Permission.Operation.SHARE) == []
-
-		when: "revoking read also revokes share"
-		service.grant(me, dashOwned, stranger, Permission.Operation.SHARE)
-		service.revoke(me, dashOwned, stranger, Permission.Operation.READ)
-		then:
-		service.get(Dashboard, stranger, Permission.Operation.SHARE) == []
+		service.get(Dashboard, stranger, Permission.Operation.DASHBOARD_SHARE) == [dashOwned]
 	}
 
 	void "granting works (roughly) idempotently"() {
@@ -304,11 +293,27 @@ class PermissionServiceIntegrationSpec extends IntegrationSpec {
 	void "getPermissionsTo(resource, userish) returns correct UI channel permissions via associated canvas"() {
 		service.systemGrantAll(me, canvas)
 
+		def to = service.getPermissionsTo(stream, me)
+		println("final permissions: " + to)
 		expect:
-		service.getPermissionsTo(stream, me).size() == 4
-		service.canReadStream(me, stream)
-		service.canWriteStream(me, stream)
-		service.canShareStream(me, stream)
+		to.size() == 4
+		service.check(me, stream, Permission.Operation.STREAM_GET)
+		service.check(me, stream, Permission.Operation.STREAM_PUBLISH)
+		service.check(me, stream, Permission.Operation.STREAM_SUBSCRIBE)
+		service.check(me, stream, Permission.Operation.STREAM_DELETE)
+	}
+
+	void "cannot revoke only share permission"() {
+		setup:
+		service.systemGrant(me, stream, Permission.Operation.STREAM_EDIT)
+		service.systemGrant(me, stream, Permission.Operation.STREAM_GET)
+		service.systemGrant(me, stream, Permission.Operation.STREAM_SHARE)
+
+		when:
+		service.systemRevoke(me, stream, Permission.Operation.STREAM_SHARE)
+		then:
+		def e = thrown(AccessControlException)
+		e.message == "Cannot revoke only SHARE permission of ${stream}"
 	}
 
 	void "granting permissions results in correct number of inbox stream permissions"() {
@@ -324,13 +329,13 @@ class PermissionServiceIntegrationSpec extends IntegrationSpec {
 		manyToManyStream.save(validate: false)
 
 		when:
-		writers.each { service.systemGrant(it, manyToManyStream, Permission.Operation.STREAM_EDIT) }
+		writers.each { service.systemGrant(it, manyToManyStream, Permission.Operation.STREAM_PUBLISH) }
 
 		then:
 		Permission.countByStream(manyToManyStream) == writers.size()
 
 		when:
-		readers.each { service.systemGrant(it, manyToManyStream, Permission.Operation.STREAM_GET) }
+		readers.each { service.systemGrant(it, manyToManyStream, Permission.Operation.STREAM_SUBSCRIBE) }
 		List<Permission> parentPermissions = Permission.findAllByStream(manyToManyStream)
 
 		then:
@@ -338,7 +343,7 @@ class PermissionServiceIntegrationSpec extends IntegrationSpec {
 		Permission.countByParentInList(parentPermissions) == writers.size() * readers.size() * 2
 
 		when: // there are expired subscriptions
-		readers.each { service.systemGrant(it, manyToManyStream, Permission.Operation.STREAM_GET, null, new Date(0)) }
+		readers.each { service.systemGrant(it, manyToManyStream, Permission.Operation.STREAM_SUBSCRIBE, null, new Date(0)) }
 		parentPermissions = Permission.findAllByStream(manyToManyStream)
 
 		then: // expired permissions don't add to the permission bloat

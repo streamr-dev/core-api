@@ -27,7 +27,9 @@ class ModuleWithUISpec extends ModuleTestingSpecification {
 	SecUser nonPermitterUser = new SecUser(username: 'nonPermittedUser')
 
 	def setup() {
-		canvas = new Canvas()
+		canvas = new Canvas(name: "canvas")
+		canvas.id = "canvas-id-1"
+		canvas.save(failOnError: true, validate: true)
 
 		uiChannel = new Stream()
 		uiChannel.name = "TestModule"
@@ -35,20 +37,19 @@ class ModuleWithUISpec extends ModuleTestingSpecification {
 		uiChannel.uiChannelCanvas = canvas
 
 		streamService = mockBean(StreamService, Mock(StreamService))
-		permissionService = mockBean(PermissionService, Mock(PermissionService))
+		permissionService = new PermissionService()
+		permissionService = mockBean(PermissionService, permissionService)
 		StreamrClientService streamrClientService = mockBean(StreamrClientService, Mock(StreamrClientService))
 
 		streamrClient = Mock(StreamrClient)
 		streamrClientService.getAuthenticatedInstance(_) >> streamrClient
 
-		permissionService.canWrite(permittedUser, canvas) >> true
-		permissionService.canWrite(nonPermitterUser, canvas) >> false
-
 		permittedUser.save(failOnError: true, validate: false)
 		nonPermitterUser.save(failOnError: true, validate: false)
+		permissionService.systemGrantAll(permittedUser, canvas)
 	}
 
-	private ModuleWithUI createModule(Map config, SecUser user=permittedUser) {
+	private ModuleWithUI createModule(Map config, SecUser user) {
 		module = new ModuleWithUI() {
 			@Override
 			void sendOutput() {
@@ -86,7 +87,7 @@ class ModuleWithUISpec extends ModuleTestingSpecification {
 
 	def "onConfiguration must create an ui channel if an id is not configured"() {
 		when:
-		createModule([:])
+		createModule([:], permittedUser)
 
 		then: "config contains the id"
 		module.getUiChannel().getId() != null
@@ -102,7 +103,7 @@ class ModuleWithUISpec extends ModuleTestingSpecification {
 		IStartListener listener
 
 		when:
-		createModule([uiChannel:[id:'uiChannel-id']])
+		createModule([uiChannel:[id:'uiChannel-id']], permittedUser)
 		then:
 		module.getUiChannel().getId() == 'uiChannel-id'
 
@@ -127,7 +128,7 @@ class ModuleWithUISpec extends ModuleTestingSpecification {
 		uiChannel.id = "stream-loaded-by-uiChannelPath"
 
 		when:
-		createModule([uiChannel:[id:'nonexistent']])
+		createModule([uiChannel:[id:'nonexistent']], permittedUser)
 		then:
 		module.getUiChannel().getId() == 'nonexistent'
 
@@ -154,7 +155,7 @@ class ModuleWithUISpec extends ModuleTestingSpecification {
 		IStartListener listener
 
 		when:
-		createModule([uiChannel:[id:'nonexistent']])
+		createModule([uiChannel:[id:'nonexistent']], permittedUser)
 		then:
 		module.getUiChannel().getId() == 'nonexistent'
 
@@ -195,7 +196,7 @@ class ModuleWithUISpec extends ModuleTestingSpecification {
 
 	def "pushToUiChannel must send the message via streamService"() {
 		IStartListener listener
-		createModule([uiChannel:[id:'uiChannel-id']])
+		createModule([uiChannel:[id:'uiChannel-id']], permittedUser)
 		Map msg = [foo: "bar"]
 
 		when:

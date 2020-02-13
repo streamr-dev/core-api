@@ -17,6 +17,7 @@ import grails.test.mixin.TestMixin
 import grails.test.mixin.support.GrailsUnitTestMixin
 
 import java.security.AccessControlException
+
 /*
 	If you get weird test failures, it may be due to spotty GORM and mocked criteria queries.
 	You might want to try PermissionServiceIntegrationSpec instead.
@@ -220,24 +221,24 @@ class PermissionServiceSpec extends BeanMockingSpecification {
 
 	void "get throws exceptions on invalid resource"() {
 		when:
-		service.get(java.lang.Object, me, Permission.Operation.READ)
+		service.get(java.lang.Object, me, Permission.Operation.DASHBOARD_GET)
 		then:
 		thrown(IllegalArgumentException)
 
 		when:
-		service.get(null, me, Permission.Operation.READ)
+		service.get(null, me, Permission.Operation.DASHBOARD_GET)
 		then:
 		thrown(NullPointerException)
 	}
 
 	void "grant and revoke throw for non-'share'-access users"() {
 		when:
-		service.grant(me, dashAllowed, stranger, Permission.Operation.READ)
+		service.grant(me, dashAllowed, stranger, Permission.Operation.DASHBOARD_GET)
 		then:
 		thrown AccessControlException
 
 		when:
-		service.revoke(stranger, dashRestricted, me, Permission.Operation.READ)
+		service.revoke(stranger, dashRestricted, me, Permission.Operation.DASHBOARD_GET)
 		then:
 		thrown AccessControlException
 	}
@@ -305,18 +306,6 @@ class PermissionServiceSpec extends BeanMockingSpecification {
 		noExceptionThrown()
 	}
 
-	void "cannot revoke only share permission"() {
-		setup: "transfer effective 'ownership'"
-		service.systemGrantAll(anotherUser, dashOwned)
-		service.systemRevoke(me, dashOwned, Operation.DASHBOARD_SHARE)
-
-		when:
-		service.systemRevoke(anotherUser, dashOwned, Operation.DASHBOARD_SHARE)
-		then:
-		def e = thrown(AccessControlException)
-		e.message == "Cannot revoke only SHARE permission of ${dashOwned}"
-	}
-
 	void "systemRevoke() on a stream also revokes the associated inbox permissions"() {
 		SecUser publisher = new SecUser()
 		publisher.id = 7L
@@ -330,17 +319,17 @@ class PermissionServiceSpec extends BeanMockingSpecification {
 		Stream stream = new Stream()
 		stream.id = "stream"
 		setup:
-		new Permission(user: publisher, stream: stream, operation: Operation.WRITE).save(failOnError: true, validate: false)
+		new Permission(user: publisher, stream: stream, operation: Operation.STREAM_PUBLISH).save(failOnError: true, validate: false)
 
-		Permission parent = new Permission(user: subscriber, stream: stream, operation: Operation.READ).save(failOnError: true, validate: false)
-		new Permission(user: subscriber, stream: pubInbox, operation: Operation.WRITE, parent: parent).save(failOnError: true, validate: false)
-		new Permission(user: publisher, stream: subInbox, operation: Operation.WRITE, parent: parent).save(failOnError: true, validate: false)
+		Permission parent = new Permission(user: subscriber, stream: stream, operation: Operation.STREAM_SUBSCRIBE).save(failOnError: true, validate: false)
+		new Permission(user: subscriber, stream: pubInbox, operation: Operation.STREAM_PUBLISH, parent: parent).save(failOnError: true, validate: false)
+		new Permission(user: publisher, stream: subInbox, operation: Operation.STREAM_PUBLISH, parent: parent).save(failOnError: true, validate: false)
 		when:
-		service.systemRevoke(subscriber, stream, Operation.READ)
+		service.systemRevoke(subscriber, stream, Operation.STREAM_SUBSCRIBE)
 		then:
-		!service.canRead(subscriber, stream)
-		!service.canWrite(subscriber, pubInbox)
-		!service.canWrite(publisher, subInbox)
+		!service.canSubscribeStream(subscriber, stream)
+		!service.canPublishStream(subscriber, pubInbox)
+		!service.canPublishStream(publisher, subInbox)
 	}
 
 	void "inbox permissions are maintained after systemRevoke() on a stream if there is another stream with permissions"() {
@@ -358,48 +347,24 @@ class PermissionServiceSpec extends BeanMockingSpecification {
 		Stream stream2 = new Stream()
 		stream2.id = "stream2"
 		setup:
-		new Permission(user: publisher, stream: stream1, operation: Operation.WRITE).save(failOnError: true, validate: false)
+		new Permission(user: publisher, stream: stream1, operation: Operation.STREAM_PUBLISH).save(failOnError: true, validate: false)
 
-		Permission parent1 = new Permission(user: subscriber, stream: stream1, operation: Operation.READ).save(failOnError: true, validate: false)
-		new Permission(user: subscriber, stream: pubInbox, operation: Operation.WRITE, parent: parent1).save(failOnError: true, validate: false)
-		new Permission(user: publisher, stream: subInbox, operation: Operation.WRITE, parent: parent1).save(failOnError: true, validate: false)
+		Permission parent1 = new Permission(user: subscriber, stream: stream1, operation: Operation.STREAM_SUBSCRIBE).save(failOnError: true, validate: false)
+		new Permission(user: subscriber, stream: pubInbox, operation: Operation.STREAM_PUBLISH, parent: parent1).save(failOnError: true, validate: false)
+		new Permission(user: publisher, stream: subInbox, operation: Operation.STREAM_PUBLISH, parent: parent1).save(failOnError: true, validate: false)
 
-		new Permission(user: publisher, stream: stream2, operation: Operation.WRITE).save(failOnError: true, validate: false)
+		new Permission(user: publisher, stream: stream2, operation: Operation.STREAM_PUBLISH).save(failOnError: true, validate: false)
 
-		Permission parent2 = new Permission(user: subscriber, stream: stream2, operation: Operation.READ).save(failOnError: true, validate: false)
-		new Permission(user: subscriber, stream: pubInbox, operation: Operation.WRITE, parent: parent2).save(failOnError: true, validate: false)
-		new Permission(user: publisher, stream: subInbox, operation: Operation.WRITE, parent: parent2).save(failOnError: true, validate: false)
+		Permission parent2 = new Permission(user: subscriber, stream: stream2, operation: Operation.STREAM_SUBSCRIBE).save(failOnError: true, validate: false)
+		new Permission(user: subscriber, stream: pubInbox, operation: Operation.STREAM_PUBLISH, parent: parent2).save(failOnError: true, validate: false)
+		new Permission(user: publisher, stream: subInbox, operation: Operation.STREAM_PUBLISH, parent: parent2).save(failOnError: true, validate: false)
 		when:
-		service.systemRevoke(subscriber, stream1, Operation.READ)
+		service.systemRevoke(subscriber, stream1, Operation.STREAM_SUBSCRIBE)
 		then:
-		!service.canRead(subscriber, stream1)
-		service.canRead(subscriber, stream2)
-		service.canWrite(subscriber, pubInbox)
-		service.canWrite(publisher, subInbox)
-	}
-
-	void "cannot revoke only share permission (via cascading READ)"() {
-		setup: "transfer effective 'ownership'"
-		service.systemGrantAll(anotherUser, dashOwned)
-		service.systemRevoke(me, dashOwned, Operation.DASHBOARD_SHARE)
-
-		when:
-		service.systemRevoke(anotherUser, dashOwned, Operation.DASHBOARD_GET)
-		then:
-		def e = thrown(AccessControlException)
-		e.message == "Cannot revoke only SHARE permission of ${dashOwned}"
-	}
-
-	void "cannot revoke only share permission (via cascading WRITE)"() {
-		setup: "transfer effective 'ownership'"
-		service.systemGrantAll(anotherUser, dashOwned)
-		service.systemRevoke(me, dashOwned, Operation.DASHBOARD_SHARE)
-
-		when:
-		service.systemRevoke(anotherUser, dashOwned, Operation.DASHBOARD_EDIT)
-		then:
-		def e = thrown(AccessControlException)
-		e.message == "Cannot revoke only SHARE permission of ${dashOwned}"
+		!service.canSubscribeStream(subscriber, stream1)
+		service.canSubscribeStream(subscriber, stream2)
+		service.canPublishStream(subscriber, pubInbox)
+		service.canPublishStream(publisher, subInbox)
 	}
 
 	void "signup invitation can be granted and revoked of permissions just like normal users"() {
