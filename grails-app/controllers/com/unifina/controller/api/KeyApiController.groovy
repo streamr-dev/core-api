@@ -97,7 +97,7 @@ class KeyApiController {
 					if (!permissionService.check(request.apiUser, res, Permission.Operation.STREAM_GET)) {
 						permissionService.grant(request.apiUser, res, key, Permission.Operation.STREAM_GET, false)
 					}
-					if (!permissionService.canSubscribeStream(request.apiUser, res)) {
+					if (!permissionService.check(request.apiUser, res, Permission.Operation.STREAM_SUBSCRIBE)) {
 						permissionService.grant(request.apiUser, res, key, Permission.Operation.STREAM_SUBSCRIBE, false)
 					}
 				} else if (operation == Permission.Operation.STREAM_SUBSCRIBE) {

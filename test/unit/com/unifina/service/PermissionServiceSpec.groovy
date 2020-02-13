@@ -327,7 +327,7 @@ class PermissionServiceSpec extends BeanMockingSpecification {
 		when:
 		service.systemRevoke(subscriber, stream, Operation.STREAM_SUBSCRIBE)
 		then:
-		!service.canSubscribeStream(subscriber, stream)
+		!service.check(subscriber, stream, Permission.Operation.STREAM_SUBSCRIBE)
 		!service.canPublishStream(subscriber, pubInbox)
 		!service.canPublishStream(publisher, subInbox)
 	}
@@ -361,8 +361,8 @@ class PermissionServiceSpec extends BeanMockingSpecification {
 		when:
 		service.systemRevoke(subscriber, stream1, Operation.STREAM_SUBSCRIBE)
 		then:
-		!service.canSubscribeStream(subscriber, stream1)
-		service.canSubscribeStream(subscriber, stream2)
+		!service.check(subscriber, stream1, Permission.Operation.STREAM_SUBSCRIBE)
+		service.check(subscriber, stream2, Permission.Operation.STREAM_SUBSCRIBE)
 		service.canPublishStream(subscriber, pubInbox)
 		service.canPublishStream(publisher, subInbox)
 	}

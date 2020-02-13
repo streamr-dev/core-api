@@ -15,6 +15,7 @@ import com.unifina.security.Userish
 import groovy.transform.CompileStatic
 
 import java.security.AccessControlException
+
 /**
  * Check, get, grant, and revoke permissions. Maintains Access Control Lists (ACLs) to resources.
  *
@@ -25,11 +26,6 @@ import java.security.AccessControlException
  */
 class PermissionService {
 	def grailsApplication
-
-	@CompileStatic
-	boolean canSubscribeStream(Userish userish, Stream resource) {
-		return check(userish, resource, Operation.STREAM_SUBSCRIBE)
-	}
 
 	@CompileStatic
 	boolean canPublishStream(Userish userish, Stream resource) {

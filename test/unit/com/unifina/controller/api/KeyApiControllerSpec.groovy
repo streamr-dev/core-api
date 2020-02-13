@@ -142,7 +142,7 @@ class KeyApiControllerSpec extends ControllerSpecification {
 		and:
 		Permission.findAllByKey(Key.get(1)).size() == 3
 		permissionService.check(Key.get(1), Stream.get(stream.id), Permission.Operation.STREAM_GET)
-		permissionService.canSubscribeStream(Key.get(1), Stream.get(stream.id))
+		permissionService.check(Key.get(1), Stream.get(stream.id), Permission.Operation.STREAM_SUBSCRIBE)
 		permissionService.canPublishStream(Key.get(1), Stream.get(stream.id))
 	}
 
@@ -177,7 +177,7 @@ class KeyApiControllerSpec extends ControllerSpecification {
 		and:
 		Permission.findAllByKey(Key.get(1)).size() == 2
 		permissionService.check(Key.get(1), Stream.get(stream.id), Permission.Operation.STREAM_GET)
-		permissionService.canSubscribeStream(Key.get(1), Stream.get(stream.id))
+		permissionService.check(Key.get(1), Stream.get(stream.id), Permission.Operation.STREAM_SUBSCRIBE)
 	}
 
 	void "delete() throws NotFoundException if given keyId doesn't exist"() {
