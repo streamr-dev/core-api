@@ -28,14 +28,6 @@ class PermissionService {
 	def grailsApplication
 
 	/**
-	 * Throws an exception if user is not allowed to share a resource
-	 */
-	@CompileStatic
-	void verifyShareStream(Userish userish, Stream resource) throws NotPermittedException {
-		verify(userish, resource, Operation.STREAM_SHARE)
-	}
-
-	/**
 	 * Check whether user is allowed to perform specified operation on a resource
 	 */
 	boolean check(Userish userish, Object resource, Operation op) {
