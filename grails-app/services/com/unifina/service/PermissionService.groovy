@@ -560,10 +560,7 @@ class PermissionService {
 		}.toList()
 
 		// Prevent revocation of only/last share permission to prevent inaccessible resources
-		def left = hasOneOrLessSharePermissionsLeft(resource)
-		def right = Operation.shareOperation(resource) in permissionList*.operation
-		def cond = left && right
-		if (cond) {
+		if (hasOneOrLessSharePermissionsLeft(resource) && Operation.shareOperation(resource) in permissionList*.operation) {
 			throw new AccessControlException("Cannot revoke only SHARE permission of ${resource}")
 		}
 

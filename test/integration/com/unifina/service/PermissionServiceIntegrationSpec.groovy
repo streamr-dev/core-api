@@ -293,10 +293,8 @@ class PermissionServiceIntegrationSpec extends IntegrationSpec {
 	void "getPermissionsTo(resource, userish) returns correct UI channel permissions via associated canvas"() {
 		service.systemGrantAll(me, canvas)
 
-		def to = service.getPermissionsTo(stream, me)
-		println("final permissions: " + to)
 		expect:
-		to.size() == 4
+		service.getPermissionsTo(stream, me).size() == 4
 		service.check(me, stream, Permission.Operation.STREAM_GET)
 		service.check(me, stream, Permission.Operation.STREAM_PUBLISH)
 		service.check(me, stream, Permission.Operation.STREAM_SUBSCRIBE)
