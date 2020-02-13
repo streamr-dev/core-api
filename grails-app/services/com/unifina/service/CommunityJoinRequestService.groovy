@@ -181,7 +181,7 @@ class CommunityJoinRequestService {
 		}
 
 		for (Stream s : findStreams(c)) {
-			permissionService.systemRevoke(c.user, s, Permission.Operation.WRITE)
+			permissionService.systemRevoke(c.user, s, Permission.Operation.STREAM_PUBLISH)
 		}
 		sendMessage(c, "part")
 		c.delete()

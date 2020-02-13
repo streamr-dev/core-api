@@ -28,7 +28,7 @@ class CsvUploadService {
 	Map<String, String> idToFilePath = new HashMap<>()
 
 	Map uploadCsvFile(File file, String streamId, SecUser user) throws NotFoundException, NotPermittedException {
-		Stream stream = apiService.authorizedGetById(Stream, streamId, user, Permission.Operation.WRITE)
+		Stream stream = apiService.authorizedGetById(Stream, streamId, user, Permission.Operation.STREAM_PUBLISH)
 
 		Map config = (Map) (stream.config ? JSON.parse(stream.config) : [:])
 		List fields = (List) (config.fields ? config.fields : [])
@@ -48,7 +48,7 @@ class CsvUploadService {
 
 	Stream parseAndConsumeCsvFile(CsvParseInstructions instructions, String streamId, SecUser user)
 			throws NotFoundException, NotPermittedException {
-		Stream stream = apiService.authorizedGetById(Stream, streamId, user, Permission.Operation.WRITE)
+		Stream stream = apiService.authorizedGetById(Stream, streamId, user, Permission.Operation.STREAM_PUBLISH)
 
 		Map config = (Map) (stream.config ? JSON.parse(stream.config) : [:])
 		List fields = (List) (config.fields ? config.fields : [])

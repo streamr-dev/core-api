@@ -36,7 +36,6 @@ class Permission {
 	/** Type of operation that this ACL item allows e.g. "read" */
 	enum Operation {
 		READ("read"),
-		WRITE("write"),
 		SHARE("share"),
 
 		/*
