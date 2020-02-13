@@ -27,11 +27,6 @@ class PermissionService {
 	def grailsApplication
 
 	@CompileStatic
-	boolean canShareStream(Userish userish, Stream resource) {
-		return check(userish, resource, Operation.STREAM_SHARE)
-	}
-
-	@CompileStatic
 	boolean canShareDashboard(Userish userish, Dashboard resource) {
 		return check(userish, resource, Operation.DASHBOARD_SHARE)
 	}
