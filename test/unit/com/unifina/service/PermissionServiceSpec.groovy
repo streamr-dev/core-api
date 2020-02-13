@@ -396,7 +396,7 @@ class PermissionServiceSpec extends BeanMockingSpecification {
 	void "stranger can read public resources with anonymous read access"() {
 		expect: "... but not more than read"
 		service.check(stranger, dashPublic, Permission.Operation.DASHBOARD_GET)
-		!service.canWriteDashboard(stranger, dashPublic)
+		!service.check(stranger, dashPublic, Permission.Operation.DASHBOARD_EDIT)
 		!service.canShareDashboard(stranger, dashPublic)
 	}
 

@@ -27,11 +27,6 @@ class PermissionService {
 	def grailsApplication
 
 	@CompileStatic
-	boolean canWriteDashboard(Userish userish, Dashboard resource) {
-		return check(userish, resource, Operation.DASHBOARD_EDIT)
-	}
-
-	@CompileStatic
 	boolean canWriteCanvas(Userish userish, Canvas resource) {
 		return check(userish, resource, Operation.CANVAS_EDIT)
 	}
