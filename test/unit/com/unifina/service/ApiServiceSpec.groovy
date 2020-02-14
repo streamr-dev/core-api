@@ -24,7 +24,7 @@ class ApiServiceSpec extends Specification {
 
 	void "list() returns streams with share permission"() {
 		def permissionService = service.permissionService = Mock(PermissionService)
-		ListParams listParams = new DashboardListParams(operation: Permission.Operation.SHARE, publicAccess: true)
+		ListParams listParams = new DashboardListParams(operation: Permission.Operation.DASHBOARD_SHARE, publicAccess: true)
 		SecUser me = new SecUser(username: "me@me.com")
 
 		when:
@@ -32,7 +32,7 @@ class ApiServiceSpec extends Specification {
 
 		then:
 		list.size() == 3
-		1 * permissionService.get(Dashboard, me, Permission.Operation.SHARE, true, _) >> [
+		1 * permissionService.get(Dashboard, me, Permission.Operation.DASHBOARD_SHARE, true, _) >> [
 			new Dashboard(), new Dashboard(), new Dashboard()
 		]
 	}
