@@ -8,7 +8,7 @@ git clone https://github.com/streamr-dev/streamr-docker-dev.git
 sudo ifconfig docker0 10.200.10.1/24
 
 # Start everything except engine-and-editor
-"$TRAVIS_BUILD_DIR/streamr-docker-dev/streamr-docker-dev/bin.sh" start 1
+"$TRAVIS_BUILD_DIR/streamr-docker-dev/streamr-docker-dev/bin.sh" start
 # Print app output to console
 "$TRAVIS_BUILD_DIR/streamr-docker-dev/streamr-docker-dev/bin.sh" log -f &
 
