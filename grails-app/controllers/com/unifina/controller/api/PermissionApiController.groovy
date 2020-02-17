@@ -9,6 +9,7 @@ import com.unifina.domain.security.Permission.Operation
 import com.unifina.domain.security.SecUser
 import com.unifina.domain.security.SignupInvite
 import com.unifina.domain.signalpath.Canvas
+import com.unifina.security.AllowRole
 import com.unifina.security.AuthLevel
 import com.unifina.security.StreamrApi
 import com.unifina.service.EthereumIntegrationKeyService
@@ -139,8 +140,9 @@ class PermissionApiController {
 		} else {
 			// incoming "username" is either SecUser.username or SignupInvite.username (possibly of a not yet created SignupInvite)
 			def user = SecUser.findByUsername(username)
-			if (op == Operation.READ) { // quick fix for sending only one email
-				if (user) {
+
+			if (user) {
+				if (op == Operation.READ) { // quick fix for sending only one email
 					if (EmailValidator.validate(user.username)) {
 						String sharer = request.apiUser?.username ?: "Streamr user"
 						String resource = resource(params.resourceClass)
@@ -154,51 +156,50 @@ class PermissionApiController {
 							html g.render(
 								template: "/emails/email_share_resource",
 								model: [
-									sharer: sharer,
+									sharer  : sharer,
 									resource: resource,
-									name: name,
-									link: link,
+									name    : name,
+									link    : link,
 								],
 								plugin: "unifina-core"
 							)
 						}
 					}
+				}
+			} else {
+				if (EthereumAddressValidator.validate(username)) {
+					user = ethereumIntegrationKeyService.createEthereumUser(username)
 				} else {
-					if (EthereumAddressValidator.validate(username)) {
-						user = ethereumIntegrationKeyService.createEthereumUser(username)
-					} else {
-						def invite = SignupInvite.findByUsername(username)
-						if (!invite) {
-							invite = signupCodeService.create(username)
-							String sharer = request.apiUser?.username ?: "Streamr user"
-							String resource = resource(params.resourceClass)
-							String name = resourceName(params.resourceClass, params.resourceId)
-							String emailSubject = emailSubject(sharer, resource)
-							mailService.sendMail {
-								from grailsApplication.config.unifina.email.sender
-								to invite.username
-								subject emailSubject
-								html g.render(
-									template: "/emails/email_share_resource_invite",
-									model: [
-										invite: invite,
-										sharer: sharer,
-										resource: resource,
-										name: name,
-									],
-									plugin: "unifina-core"
-								)
-							}
-							invite.sent = true
-							invite.save()
+					def invite = SignupInvite.findByUsername(username)
+					if (!invite) {
+						invite = signupCodeService.create(username)
+						String sharer = request.apiUser?.username ?: "Streamr user"
+						String resource = resource(params.resourceClass)
+						String name = resourceName(params.resourceClass, params.resourceId)
+						String emailSubject = emailSubject(sharer, resource)
+						mailService.sendMail {
+							from grailsApplication.config.unifina.email.sender
+							to invite.username
+							subject emailSubject
+							html g.render(
+								template: "/emails/email_share_resource_invite",
+								model: [
+									invite: invite,
+									sharer: sharer,
+									resource: resource,
+									name: name,
+								],
+								plugin: "unifina-core"
+							)
 						}
-
-						// permissionService handles SecUsers and SignupInvitations equally
-						user = invite
+						invite.sent = true
+						invite.save()
 					}
+
+					// permissionService handles SecUsers and SignupInvitations equally
+					user = invite
 				}
 			}
-
 
 			useResource(params.resourceClass, params.resourceId) { res ->
 				def grantor = request.apiUser
@@ -224,5 +225,11 @@ class PermissionApiController {
 			permissionService.systemRevoke(p)
 			render status: 204
 		}
+	}
+
+	@StreamrApi(allowRoles = AllowRole.DEVOPS)
+	def cleanup() {
+		permissionService.cleanUpExpiredPermissions()
+		render status: 200
 	}
 }

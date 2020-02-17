@@ -342,4 +342,14 @@ class PermissionApiControllerSpec extends ControllerSpecification {
 		1 * permissionService.getPermissionsTo(_, me) >> [canvasPermission]
 		0 * permissionService._
 	}
+
+	void "cleanup calls service to delete expired permissions"() {
+		when:
+		request.method = "DELETE"
+		authenticatedAs(me) { controller.cleanup() }
+
+		then:
+		1 * permissionService.cleanUpExpiredPermissions()
+		response.status == 200
+	}
 }

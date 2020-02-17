@@ -294,6 +294,9 @@ class PermissionService {
 	}
 
 	Permission systemGrant(Userish target, resource, Operation operation=Operation.READ, Subscription subscription, Date endsAt) {
+		if (target == null) {
+			throw new IllegalArgumentException("Permission grant target can't be null");
+		}
 		target = target.resolveToUserish()
 		String userProp = getUserPropertyName(target)
 		String resourceProp = getResourcePropertyName(resource)
@@ -522,6 +525,11 @@ class PermissionService {
 			p.user = user
 			p.save(flush: true, failOnError: true)
 		}
+	}
+
+	public void cleanUpExpiredPermissions() {
+		Date now = new Date()
+		Permission.deleteAll(Permission.findAllByEndsAtLessThan(now))
 	}
 
 	private boolean hasPermission(Userish userish, resource, Operation op) {

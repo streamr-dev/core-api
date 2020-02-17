@@ -1,7 +1,5 @@
 package com.unifina.api;
 
-import java.util.Map;
-
 public class InvalidArgumentsException extends ApiException {
 	/** Name of the faulty argument */
 	private String fault;
@@ -21,8 +19,8 @@ public class InvalidArgumentsException extends ApiException {
 	public ApiError asApiError() {
 		ApiError e = super.asApiError();
 		if (fault != null && value != null) {
-			e.addEntry("fault", fault);
-			e.addEntry(fault, value);
+			e.addToBody("fault", fault);
+			e.addToBody(fault, value);
 		}
 		return e;
 	}

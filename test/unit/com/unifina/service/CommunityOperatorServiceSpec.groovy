@@ -70,9 +70,10 @@ class CommunityOperatorServiceSpec extends Specification {
 			e = err
 		}
 		then:
-		e.message == "Community server is not responding"
+		e.message == "Community server is busy or not responding"
 		e.code == "PROXY_ERROR"
-		e.statusCode == 500
+		e.statusCode == 503
+		e.extraHeaders == ["Retry-After": "60"]
 	}
 
 	void "test execute returns 404"() {
