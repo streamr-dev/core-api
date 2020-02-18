@@ -9,8 +9,7 @@ git clone --branch cleanup https://github.com/streamr-dev/streamr-docker-dev.git
 
 sed -i -e "s#${OWNER}/${IMAGE_NAME}:dev#${OWNER}/${IMAGE_NAME}:local#g" "$TRAVIS_BUILD_DIR/streamr-docker-dev/docker-compose.override.yml"
 
-"$TRAVIS_BUILD_DIR/streamr-docker-dev/streamr-docker-dev/bin.sh" start
-"$TRAVIS_BUILD_DIR/streamr-docker-dev/streamr-docker-dev/bin.sh" wait
+"$TRAVIS_BUILD_DIR/streamr-docker-dev/streamr-docker-dev/bin.sh" start --wait
 
 wait_time=10
 for ((i = 0; i < 5; i++)); do
