@@ -3,8 +3,7 @@
 sudo /etc/init.d/mysql stop
 (cd rest-e2e-tests && npm install)
 
-# TODO: remove "--branch cleanup" before merging
-git clone --branch cleanup https://github.com/streamr-dev/streamr-docker-dev.git
+git clone https://github.com/streamr-dev/streamr-docker-dev.git
 
 # same as streamr-docker-dev bind-ip
 sudo ifconfig docker0 10.200.10.1/24
