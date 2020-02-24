@@ -4,8 +4,7 @@ set -e
 
 sudo ifconfig docker0 10.200.10.1/24
 
-# TODO: remove "--branch cleanup" before merging
-git clone --branch cleanup https://github.com/streamr-dev/streamr-docker-dev.git
+git clone https://github.com/streamr-dev/streamr-docker-dev.git
 
 sed -i -e "s#${OWNER}/${IMAGE_NAME}:dev#${OWNER}/${IMAGE_NAME}:local#g" "$TRAVIS_BUILD_DIR/streamr-docker-dev/docker-compose.override.yml"
 
