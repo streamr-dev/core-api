@@ -35,8 +35,6 @@ class Permission {
 
 	/** Type of operation that this ACL item allows e.g. "read" */
 	enum Operation {
-		READ("read"),
-
 		/*
 			Stream
 
@@ -205,8 +203,7 @@ class Permission {
 		}
 	}
 
-	// TODO: Replace with null?
-	Operation operation = Operation.READ
+	Operation operation
 
 	/** Is this a Permission of a Subscription? **/
 	Subscription subscription

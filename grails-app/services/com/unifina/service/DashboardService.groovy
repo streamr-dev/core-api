@@ -250,7 +250,7 @@ class DashboardService {
 
 		if (item) {
 			Set<Operation> checkedOperations = new HashSet<>()
-			checkedOperations.add(Operation.READ)
+			checkedOperations.add(Operation.DASHBOARD_GET)
 			RuntimeRequest request = new RuntimeRequest(msg, user, canvas, path.replace("dashboards/$dashboard.id/", ""), path, checkedOperations)
 			return request
 		} else {
