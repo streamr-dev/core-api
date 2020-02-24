@@ -148,10 +148,11 @@ class PermissionServiceIntegrationSpec extends IntegrationSpec {
 		then:
 		!(dashOwned in service.get(Dashboard, anotherUser, Permission.Operation.DASHBOARD_GET))
 
-		// TODO: when: "of course, it's silly to revoke 'share' access since it might already been re-shared..."
-		//service.revoke(me, dashOwned, stranger, Permission.Operation.DASHBOARD_SHARE)
-		//then:
-		//thrown AccessControlException
+		when: "of course, it's silly to revoke 'dashboard_share' access since it might already been re-shared..."
+		service.revoke(me, dashOwned, stranger, Permission.Operation.DASHBOARD_SHARE)
+		service.grant(stranger, dashOwned, anotherUser, Permission.Operation.DASHBOARD_SHARE)
+		then:
+		thrown AccessControlException
 	}
 
 	void "default revocation is all access"() {
@@ -162,7 +163,7 @@ class PermissionServiceIntegrationSpec extends IntegrationSpec {
 		service.revoke(me, dashOwned, stranger, Permission.Operation.DASHBOARD_GET)
 		then: "by default, revoke all access"
 		service.get(Dashboard, stranger, Permission.Operation.DASHBOARD_GET) == []
-		//TODO: service.get(Dashboard, stranger, Permission.Operation.DASHBOARD_SHARE) == []
+		service.get(Dashboard, stranger, Permission.Operation.DASHBOARD_SHARE) == [dashOwned]
 	}
 
 	void "revocation is granular"() {
@@ -232,24 +233,6 @@ class PermissionServiceIntegrationSpec extends IntegrationSpec {
 		service.revoke(me, dashOwned, stranger, Permission.Operation.DASHBOARD_GET)
 		then:
 		service.get(Dashboard, stranger, Permission.Operation.DASHBOARD_GET) == []
-	}
-
-	void "granting and revoking write rights"() {
-		when:
-		service.grant(me, dashOwned, stranger, Permission.Operation.DASHBOARD_EDIT)
-		then:
-		service.get(Dashboard, stranger, Permission.Operation.DASHBOARD_EDIT) == [dashOwned]
-
-		when:
-		service.revoke(me, dashOwned, stranger, Permission.Operation.DASHBOARD_EDIT)
-		then:
-		service.get(Dashboard, stranger, Permission.Operation.DASHBOARD_EDIT) == []
-
-		// TODO: when: "revoking read also revokes write"
-		//service.grant(me, dashOwned, stranger, Permission.Operation.DASHBOARD_EDIT)
-		//service.revoke(me, dashOwned, stranger, Permission.Operation.DASHBOARD_GET)
-		//then:
-		//service.get(Dashboard, stranger, Permission.Operation.DASHBOARD_EDIT) == []
 	}
 
 	void "granting and revoking share rights"() {
