@@ -521,7 +521,7 @@ class PermissionService {
 
 		// Special case of UI channels: they inherit permissions from the associated canvas
 		if (p.empty && resource instanceof Stream && resource.uiChannel) {
-			Set<Operation> operations = STREAM_TO_CANVAS[p.operation]
+			Set<Operation> operations = STREAM_TO_CANVAS[op]
 			if (operations != null) {
 				for (Operation oper : operations) {
 					if (hasPermission(userish, resource.uiChannelCanvas, oper)) {
