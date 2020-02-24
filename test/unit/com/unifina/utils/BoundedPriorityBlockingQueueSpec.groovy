@@ -100,20 +100,15 @@ class BoundedPriorityBlockingQueueSpec extends Specification {
 			}
 		}
 		Thread consumer = Thread.start {
-			while (!stop || !queue.isEmpty()) { // finish processing the queue even if stop is signaled
+			while (producer.isAlive() || !queue.isEmpty()) { // finish processing the queue even if stop is signaled
 				if (queue.poll(1, TimeUnit.SECONDS)) {
 					consumed++
-				} else {
-					throw new RuntimeException("poll timed out!")
 				}
 
 				if (queue.size() > 5) {
 					throw new RuntimeException("queue capacity violated!")
 				}
 			}
-
-			// "Drain" the queue after stopping
-			consumed += queue.size()
 		}
 
 		Thread.sleep(1000)
