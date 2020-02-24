@@ -9,19 +9,11 @@ import grails.converters.JSON
 import groovy.transform.CompileStatic
 
 class Stream implements Comparable {
-	public final static Integer DEFAULT_PARTITIONS = 1
 	public final static String DEFAULT_NAME = "Untitled Stream"
-	public final static boolean DEFAULT_UI_CHANNEL = false
-	public final static boolean DEFAULT_INBOX = false
-	public final static boolean DEFAULT_REQUIRE_SIGNED_DATA = false
-	public final static boolean DEFAULT_REQUIRE_ENCRYPTED_DATA = false
-	public final static boolean DEFAULT_AUTO_CONFIGURE = true
 	public final static Integer DEFAULT_STORAGE_DAYS = 365
 	public final static Integer DEFAULT_INACTIVITY_THRESHOLD_HOURS = 48
-	public final static ExampleType DEFAULT_EXAMPLE_TYPE = ExampleType.NOT_SET
-
 	String id
-	Integer partitions = DEFAULT_PARTITIONS
+	Integer partitions = 1
 
 	String name = DEFAULT_NAME
 	String config
@@ -33,23 +25,23 @@ class Stream implements Comparable {
 	Date dateCreated
 	Date lastUpdated
 
-	Boolean uiChannel = DEFAULT_UI_CHANNEL
+	Boolean uiChannel = false
 	String uiChannelPath
 	Canvas uiChannelCanvas
 
-	Boolean inbox = DEFAULT_INBOX
+	Boolean inbox = false
 
-	Boolean requireSignedData = DEFAULT_REQUIRE_SIGNED_DATA
+	Boolean requireSignedData = false
 	// Stream requires data to be encrypted
-	Boolean requireEncryptedData = DEFAULT_REQUIRE_ENCRYPTED_DATA
+	Boolean requireEncryptedData = false
 	// Always try to autoconfigure field names and types
-	Boolean autoConfigure = DEFAULT_AUTO_CONFIGURE
+	Boolean autoConfigure = true
 	// Historical data storage period (days)
 	Integer storageDays = DEFAULT_STORAGE_DAYS
 	// inactivityThresholdHours is the inactivity period for a stream in hours
 	Integer inactivityThresholdHours = DEFAULT_INACTIVITY_THRESHOLD_HOURS
 	// exampleType marks this Stream as an example for new users.
-	ExampleType exampleType = DEFAULT_EXAMPLE_TYPE
+	ExampleType exampleType = ExampleType.NOT_SET
 
 	static hasMany = [
 		permissions: Permission,
