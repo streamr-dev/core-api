@@ -31,4 +31,31 @@ class PermissionSpec extends Specification {
 		then:
 		noExceptionThrown()
 	}
+
+	void "permission fromString() accepts lowercase or uppercase string"(String input, Permission.Operation result) {
+		expect:
+		Permission.Operation.fromString(input) == result
+		where:
+		input|result
+		"product_get"|Permission.Operation.PRODUCT_GET
+		"PRODUCT_GET"|Permission.Operation.PRODUCT_GET
+		"PrOdUcT_gEt"|Permission.Operation.PRODUCT_GET
+	}
+
+	void "permission fromString() throws IllegalArgumentException on invalid input"() {
+		when:
+		Permission.Operation.fromString(null)
+		then:
+		thrown(IllegalArgumentException)
+
+		when:
+		Permission.Operation.fromString("")
+		then:
+		thrown(IllegalArgumentException)
+
+		when:
+		Permission.Operation.fromString("WRITE")
+		then:
+		thrown(IllegalArgumentException)
+	}
 }

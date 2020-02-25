@@ -115,8 +115,12 @@ class Permission {
 			this.id = id
 		}
 
-		static fromString(String operationId) {
-			return Operation.enumConstants.find { it.id == operationId }
+		static Operation fromString(String operationId) {
+			if (operationId == null || "".equals(operationId)) {
+				throw new IllegalArgumentException("Permission operation cannot be null or empty.")
+			}
+			operationId = operationId.toUpperCase()
+			return Operation.valueOf(operationId)
 		}
 
 		@CompileStatic
