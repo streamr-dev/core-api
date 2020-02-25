@@ -145,4 +145,5 @@ databaseChangeLog = {
 	include file: 'core/2019-11-02-rm-old-ethereum-modules.groovy'
 	include file: 'core/2020-01-24-new-permissions.groovy'
 	include file: 'core/2020-02-11-rm-module-package-domain-class.groovy'
+	include file: 'core/2020-02-25-test-data-products-permissions.groovy'
 }
