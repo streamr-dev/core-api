@@ -125,11 +125,17 @@ class PermissionApiController {
 		// request.JSON.user is either SecUser.username or SignupInvite.username (possibly of a not yet created SignupInvite)
 		boolean anonymous = request.JSON.anonymous as boolean
 		String username = request.JSON.user
-		if (anonymous && username) { throw new InvalidArgumentsException("Can't specify user for anonymous permission! Leave out either 'user' or 'anonymous' parameter.", "anonymous", anonymous as String) }
-		if (!anonymous && !username) { throw new InvalidArgumentsException("Must specify either 'user' or 'anonymous'!") }
+		if (anonymous && username) {
+			throw new InvalidArgumentsException("Can't specify user for anonymous permission! Leave out either 'user' or 'anonymous' parameter.", "anonymous", anonymous as String)
+		}
+		if (!anonymous && !username) {
+			throw new InvalidArgumentsException("Must specify either 'user' or 'anonymous'!")
+		}
 
-		Operation op = Operation.fromString request.JSON.operation
-		if (!op) { throw new InvalidArgumentsException("Invalid operation '$opId'.", "operation", opId) }
+		Operation op = Operation.fromString(request.JSON.operation)
+		if (!op) {
+			throw new InvalidArgumentsException("Invalid operation '$op'.", "operation", op)
+		}
 
 		if (anonymous) {
 			useResource(params.resourceClass, params.resourceId) { res ->
