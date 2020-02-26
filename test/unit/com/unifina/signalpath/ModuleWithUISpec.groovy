@@ -4,6 +4,7 @@ import com.streamr.client.StreamrClient
 import com.unifina.ModuleTestingSpecification
 import com.unifina.datasource.IStartListener
 import com.unifina.domain.data.Stream
+import com.unifina.domain.security.Permission
 import com.unifina.domain.security.SecUser
 import com.unifina.domain.signalpath.Canvas
 import com.unifina.service.PermissionService
@@ -37,8 +38,7 @@ class ModuleWithUISpec extends ModuleTestingSpecification {
 		uiChannel.uiChannelCanvas = canvas
 
 		streamService = mockBean(StreamService, Mock(StreamService))
-		permissionService = new PermissionService()
-		permissionService = mockBean(PermissionService, permissionService)
+		permissionService = mockBean(PermissionService, Mock(PermissionService))
 		StreamrClientService streamrClientService = mockBean(StreamrClientService, Mock(StreamrClientService))
 
 		streamrClient = Mock(StreamrClient)
@@ -120,6 +120,7 @@ class ModuleWithUISpec extends ModuleTestingSpecification {
 		1 * streamService.getStream("uiChannel-id") >> uiChannel
 		module.getUiChannel().getStream() == uiChannel
 		and: "a new Stream is not created"
+		1 * permissionService.check(permittedUser, uiChannel, Permission.Operation.STREAM_PUBLISH) >> true
 		0 * streamService.createStream(_, _, _)
 	}
 
@@ -148,6 +149,7 @@ class ModuleWithUISpec extends ModuleTestingSpecification {
 		module.getUiChannel().getStream() == uiChannel
 		module.getUiChannel().getId() == "stream-loaded-by-uiChannelPath"
 		and: "a new Stream is not created"
+		1 * permissionService.check(permittedUser, uiChannel, Permission.Operation.STREAM_PUBLISH) >> true
 		0 * streamService.createStream(_, _, _)
 	}
 
@@ -173,6 +175,7 @@ class ModuleWithUISpec extends ModuleTestingSpecification {
 		then: "the Stream object is not found by uiChannelPath"
 		1 * streamService.getStreamByUiChannelPath(_) >> null
 		then: "the Stream object is created"
+		1 * permissionService.check(permittedUser, uiChannel, Permission.Operation.STREAM_PUBLISH) >> true
 		1 * streamService.createStream([name: uiChannel.name, uiChannel: true, uiChannelPath: "/canvases/id/modules/1", uiChannelCanvas: canvas], permittedUser, "nonexistent") >> uiChannel
 	}
 
@@ -191,6 +194,7 @@ class ModuleWithUISpec extends ModuleTestingSpecification {
 		listener.onStart()
 		then: "the Stream object is loaded"
 		1 * streamService.getStream("uiChannel-id") >> uiChannel
+		1 * permissionService.check(_, _, Permission.Operation.STREAM_PUBLISH) >> false
 		thrown(AccessControlException)
 	}
 
@@ -209,6 +213,7 @@ class ModuleWithUISpec extends ModuleTestingSpecification {
 		when: "start listener is called"
 		listener.onStart()
 		then: "the Stream object is loaded"
+		1 * permissionService.check(permittedUser, uiChannel, Permission.Operation.STREAM_PUBLISH) >> true
 		1 * streamService.getStream("uiChannel-id") >> uiChannel
 
 		when:

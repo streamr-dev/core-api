@@ -205,7 +205,7 @@ public abstract class ModuleWithUI extends AbstractSignalPathModule {
 
 			// User must have write permission to related Canvas in order to write to the UI channel
 			PermissionService permissionService = Holders.getApplicationContext().getBean(PermissionService.class);
-			if (!permissionService.check(user, stream.getUiChannelCanvas(), Permission.Operation.CANVAS_EDIT)) {
+			if (!permissionService.check(user, stream, Permission.Operation.STREAM_PUBLISH)) {
 				throw new AccessControlException(ModuleWithUI.this.getName() + ": User " + user.getUsername() +
 						" does not have write access to UI Channel Stream " + stream.getId());
 			}

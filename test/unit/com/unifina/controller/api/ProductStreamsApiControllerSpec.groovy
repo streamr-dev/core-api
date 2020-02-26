@@ -127,7 +127,7 @@ class ProductStreamsApiControllerSpec extends Specification {
 			controller.delete()
 		}
 		then:
-		1 * productService.findById("product-id", user, Permission.Operation.PRODUCT_EDIT) >> product
+		1 * productService.findById("product-id", user, Permission.Operation.PRODUCT_DELETE) >> product
 		1 * productService.removeStreamFromProduct(product, _ as Stream)
 	}
 

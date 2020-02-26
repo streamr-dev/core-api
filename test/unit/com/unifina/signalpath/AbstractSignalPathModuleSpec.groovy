@@ -138,7 +138,7 @@ class AbstractSignalPathModuleSpec extends ModuleTestingSpecification {
 		then:
 		response == new RuntimeResponse(true, [request: msg])
 		module.param.value == -123
-		1 * mockedPermissionService.check(_, _, Permission.Operation.CANVAS_INTERACT) >> true
+		1 * mockedPermissionService.check(_, _, Permission.Operation.CANVAS_EDIT) >> true
 		0 * module.parentSignalPath.pushToUiChannel(_)
 	}
 

@@ -650,7 +650,7 @@ public abstract class AbstractSignalPathModule implements IDayListener, Serializ
 				}
 
 				PermissionService permissionService = Holders.getApplicationContext().getBean(PermissionService.class);
-				if (!permissionService.check(request.getUser(), request.getCanvas(), Permission.Operation.CANVAS_INTERACT)) {
+				if (!permissionService.check(request.getUser(), request.getCanvas(), Permission.Operation.CANVAS_EDIT)) {
 					throw new AccessControlException("Unauthenticated parameter change request. Cannot write!");
 				}
 

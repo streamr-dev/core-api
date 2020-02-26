@@ -116,6 +116,7 @@ class SubscriptionService {
 		if (user) {
 			streams.collect { Stream stream ->
 				permissionService.systemGrant(user, stream, Permission.Operation.STREAM_SUBSCRIBE, subscription, subscription.endsAt)
+				permissionService.systemGrant(user, stream, Permission.Operation.STREAM_GET, subscription, subscription.endsAt)
 			}
 		}
 	}

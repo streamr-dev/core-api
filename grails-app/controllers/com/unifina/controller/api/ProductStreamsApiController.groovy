@@ -39,7 +39,7 @@ class ProductStreamsApiController {
 	@GrailsCompileStatic
 	@StreamrApi(authenticationLevel = AuthLevel.USER)
 	def delete(String productId, String id) {
-		Product product = productService.findById(productId, loggedInUser(), Permission.Operation.PRODUCT_EDIT)
+		Product product = productService.findById(productId, loggedInUser(), Permission.Operation.PRODUCT_DELETE)
 		Stream stream = apiService.getByIdAndThrowIfNotFound(Stream, id)
 		productService.removeStreamFromProduct(product, stream)
 		render(status: 204)
