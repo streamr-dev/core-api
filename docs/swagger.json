@@ -3156,7 +3156,7 @@
     "/subscriptions": {
       "get": {
         "summary": "Fetch subscriptions of user",
-        "description": "Fetch a list of all the subscriptions of a user (based on auth token)",
+        "description": "Fetch a list of all the subscriptions of the authenticated user",
         "tags": [
           "subscriptions"
         ],
@@ -5825,7 +5825,17 @@
         "endsAt": {
           "type": "string",
           "description": "ISO-8601 datetime",
+          "example": "2020-02-21T12:26:18Z"
+        },
+        "dateCreated": {
+          "type": "string",
+          "description": "ISO-8601 datetime",
           "example": "2018-02-21T12:26:18Z"
+        },
+        "lastUpdated": {
+          "type": "string",
+          "description": "ISO-8601 datetime",
+          "example": "2019-02-21T12:26:18Z"
         },
         "product": {
           "$ref": "#/definitions/Product"

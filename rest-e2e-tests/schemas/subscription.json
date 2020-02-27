@@ -21,6 +21,16 @@
     "product": {
       "description": "Product of subscription",
       "$ref": "Product"
+    },
+    "dateCreated": {
+      "description": "When this subscription was created",
+      "type": "string",
+      "format": "date-time"
+    },
+    "lastUpdated": {
+      "description": "When this subscription was last updated",
+      "type": "string",
+      "format": "date-time"
     }
   },
   "additionalProperties": false,
