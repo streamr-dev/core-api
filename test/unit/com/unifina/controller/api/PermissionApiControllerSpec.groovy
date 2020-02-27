@@ -12,6 +12,7 @@ import com.unifina.domain.signalpath.Canvas
 import com.unifina.service.EthereumIntegrationKeyService
 import com.unifina.service.PermissionService
 import com.unifina.service.SignupCodeService
+import com.unifina.service.StreamService
 import com.unifina.signalpath.messaging.MockMailService
 import grails.converters.JSON
 import grails.test.mixin.Mock
@@ -22,6 +23,7 @@ import grails.test.mixin.TestFor
 class PermissionApiControllerSpec extends ControllerSpecification {
 	def permissionService
 	EthereumIntegrationKeyService ethereumIntegrationKeyService
+	StreamService streamService
 
 	// Canvas and Stream chosen because one has string id and one has long id
 	Canvas canvasOwned, canvasShared, canvasRestricted, canvasPublic
@@ -34,6 +36,7 @@ class PermissionApiControllerSpec extends ControllerSpecification {
 	def setup() {
 		controller.permissionService = permissionService = Mock(PermissionService)
 		controller.ethereumIntegrationKeyService = ethereumIntegrationKeyService = Mock(EthereumIntegrationKeyService)
+		controller.streamService = streamService = Mock(StreamService)
 		controller.mailService = new MockMailService()
 		controller.signupCodeService = new SignupCodeService()
 
@@ -124,6 +127,7 @@ class PermissionApiControllerSpec extends ControllerSpecification {
 		response.json[0].user == "me@me.net"
 		response.json[0].operation == "share"
 		// matching with _ instead of streamOwned because it's not "the same" after saving and get(id):ing
+		1 * streamService.getStream(streamShared.id) >> streamShared
 		1 * permissionService.getPermissionsTo(_) >> [streamPermission, *ownerPermissions]
 		1 * permissionService.canShare(me, _) >> true
 		0 * permissionService._
@@ -160,6 +164,7 @@ class PermissionApiControllerSpec extends ControllerSpecification {
 		response.json.user == "me@me.net"
 		response.json.operation == "share"
 		// matching with _ instead of streamOwned because it's not "the same" after saving and get(id):ing
+		1 * streamService.getStream(streamShared.id) >> streamShared
 		1 * permissionService.getPermissionsTo(_) >> [streamPermission, *ownerPermissions]
 		1 * permissionService.canShare(me, _) >> true
 		0 * permissionService._
@@ -184,6 +189,7 @@ class PermissionApiControllerSpec extends ControllerSpecification {
 		when:
 		authenticatedAs(me) { controller.index() }
 		then:
+		1 * streamService.getStream(streamRestricted.id) >> streamRestricted
 		thrown NotPermittedException
 	}
 

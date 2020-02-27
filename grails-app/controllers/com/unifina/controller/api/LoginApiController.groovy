@@ -35,7 +35,7 @@ class LoginApiController {
 		}
 		challengeService.checkValidChallengeResponse(cmd.challenge?.id,
 			cmd.challenge?.challenge, cmd.signature.toLowerCase(), cmd.address.toLowerCase())
-		SecUser user = ethereumIntegrationKeyService.getOrCreateFromEthereumAddress(cmd.address)
+		SecUser user = ethereumIntegrationKeyService.getOrCreateFromEthereumAddress(cmd.address.toLowerCase())
 		assertEnabled(user)
 		SessionToken token = sessionService.generateToken(user)
 		render(token.toMap() as JSON)
