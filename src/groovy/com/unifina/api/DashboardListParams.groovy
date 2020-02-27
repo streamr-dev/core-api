@@ -10,7 +10,7 @@ class DashboardListParams extends ListParams {
 
 	DashboardListParams() {
 		super()
-		operation = Permission.Operation.DASHBOARD_GET
+		operation = Permission.Operation.DASHBOARD_SHARE
 	}
 
 	static constraints = {

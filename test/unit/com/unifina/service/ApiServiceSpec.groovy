@@ -48,7 +48,7 @@ class ApiServiceSpec extends Specification {
 
 		then:
 		list.size() == 3
-		1 * permissionService.get(Dashboard, me, Permission.Operation.DASHBOARD_GET, true, _) >> [
+		1 * permissionService.get(Dashboard, me, Permission.Operation.DASHBOARD_SHARE, true, _) >> [
 			new Dashboard(), new Dashboard(), new Dashboard()
 		]
 	}

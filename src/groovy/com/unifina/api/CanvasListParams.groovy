@@ -13,7 +13,7 @@ class CanvasListParams extends ListParams {
 
 	CanvasListParams() {
 		super()
-		operation = Permission.Operation.CANVAS_GET
+		operation = Permission.Operation.CANVAS_SHARE
 	}
 
 	static constraints = {
