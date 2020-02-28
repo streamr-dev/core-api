@@ -167,8 +167,8 @@ class EthereumIntegrationKeyService {
 			return
 		}
 		Stream inboxStream = new Stream()
-		inboxStream.id = address
-		inboxStream.name = address
+		inboxStream.id = address.toLowerCase()
+		inboxStream.name = address.toLowerCase()
 		inboxStream.inbox = true
 		inboxStream.autoConfigure = false
 
