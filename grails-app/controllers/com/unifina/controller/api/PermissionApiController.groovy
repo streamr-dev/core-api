@@ -40,7 +40,7 @@ class PermissionApiController {
 		if (!grailsApplication.isDomainClass(resourceClass)) { throw new IllegalArgumentException("${resourceClass.simpleName} is not a domain class!") }
 
 		def res
-		if (resourceClass.equals(Stream.class)) {
+		if (Stream.isAssignableFrom(resourceClass)) {
 			res = streamService.getStream(resourceId)
 		} else {
 			res = resourceClass.get(resourceId)
