@@ -62,7 +62,9 @@ class StreamServiceSpec extends Specification {
 		service.addExampleStreams(me, streams)
 		then:
 		1 * service.permissionService.systemGrant(me, s0, Permission.Operation.STREAM_GET)
+		1 * service.permissionService.systemGrant(me, s0, Permission.Operation.STREAM_SUBSCRIBE)
 		1 * service.permissionService.systemGrant(me, s1, Permission.Operation.STREAM_GET)
+		1 * service.permissionService.systemGrant(me, s1, Permission.Operation.STREAM_SUBSCRIBE)
 	}
 
 	void "createStream replaces empty name with default value"() {
@@ -144,7 +146,6 @@ class StreamServiceSpec extends Specification {
 		service.getReadAuthorizedStream("streamId", user, null, cb)
 		then:
 		thrown(NotPermittedException)
-		1 * service.permissionService.check(user, stream, Permission.Operation.STREAM_GET) >> false
 		0 * cb._
 	}
 
@@ -163,7 +164,7 @@ class StreamServiceSpec extends Specification {
 		service.getReadAuthorizedStream("streamId", null, key, cb)
 		then:
 		thrown(NotPermittedException)
-		1 * service.permissionService.check(key, stream, Permission.Operation.STREAM_GET) >> false
+		1 * service.permissionService.check(key, stream, Permission.Operation.STREAM_SUBSCRIBE) >> false
 		0 * cb._
 	}
 
@@ -181,7 +182,7 @@ class StreamServiceSpec extends Specification {
 		when:
 		service.getReadAuthorizedStream("streamId", null, key, cb)
 		then:
-		1 * service.permissionService.check(key, stream, Permission.Operation.STREAM_GET) >> true
+		1 * service.permissionService.check(key, stream, Permission.Operation.STREAM_SUBSCRIBE) >> true
 		1 * cb.call(stream)
 	}
 
@@ -199,7 +200,7 @@ class StreamServiceSpec extends Specification {
 		when:
 		service.getReadAuthorizedStream("streamId", user, null, cb)
 		then:
-		1 * service.permissionService.check(user, stream, Permission.Operation.STREAM_GET) >> true
+		1 * service.permissionService.check(user, stream, Permission.Operation.STREAM_SUBSCRIBE) >> true
 		1 * cb.call(stream)
 	}
 
@@ -214,7 +215,7 @@ class StreamServiceSpec extends Specification {
 		when:
 		service.getReadAuthorizedStream("streamId", null, null, cb)
 		then:
-		1 * service.permissionService.check(null, stream, Permission.Operation.STREAM_GET) >> true
+		1 * service.permissionService.check(null, stream, Permission.Operation.STREAM_SUBSCRIBE) >> true
 		1 * cb.call(stream)
 	}
 
@@ -236,8 +237,7 @@ class StreamServiceSpec extends Specification {
 		when:
 		service.getReadAuthorizedStream("streamId", user, null, cb)
 		then:
-		1 * service.permissionService.check(user, stream, Permission.Operation.STREAM_GET) >> false
-		1 * service.permissionService.check(user, canvas, Permission.Operation.CANVAS_GET) >> true
+		1 * service.permissionService.check(user, stream, Permission.Operation.STREAM_SUBSCRIBE) >> true
 		1 * cb.call(stream)
 	}
 
@@ -260,8 +260,7 @@ class StreamServiceSpec extends Specification {
 		service.getReadAuthorizedStream("streamId", user, null, cb)
 		then:
 		thrown(NotPermittedException)
-		1 * service.permissionService.check(user, stream, Permission.Operation.STREAM_GET) >> false
-		1 * service.permissionService.check(user, canvas, Permission.Operation.CANVAS_GET) >> false
+		1 * service.permissionService.check(user, stream, Permission.Operation.STREAM_SUBSCRIBE) >> false
 		0 * cb._
 	}
 
@@ -295,8 +294,7 @@ class StreamServiceSpec extends Specification {
 		when:
 		service.getReadAuthorizedStream("streamId", user, null, cb)
 		then:
-		1 * service.permissionService.check(user, stream, Permission.Operation.STREAM_GET) >> false
-		1 * service.permissionService.check(user, canvas, Permission.Operation.CANVAS_GET) >> false
+		1 * service.permissionService.check(user, stream, Permission.Operation.STREAM_SUBSCRIBE) >> false
 		1 * dashboardService.authorizedGetDashboardItem(dashboard.id, dashboardItem.id, user, Permission.Operation.DASHBOARD_GET) >> dashboardItem
 		1 * cb.call(stream)
 	}
@@ -331,8 +329,7 @@ class StreamServiceSpec extends Specification {
 		service.getReadAuthorizedStream("streamId", user, null, cb)
 		then:
 		thrown(NotPermittedException)
-		1 * service.permissionService.check(user, stream, Permission.Operation.STREAM_GET) >> false
-		1 * service.permissionService.check(user, canvas, Permission.Operation.CANVAS_GET) >> false
+		1 * service.permissionService.check(user, stream, Permission.Operation.STREAM_SUBSCRIBE) >> false
 		1 * dashboardService.authorizedGetDashboardItem(dashboard.id, dashboardItem.id, user, Permission.Operation.DASHBOARD_GET) >> null
 		0 * cb._
 	}
