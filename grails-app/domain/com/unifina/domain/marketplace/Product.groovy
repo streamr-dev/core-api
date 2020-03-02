@@ -15,7 +15,7 @@ class Product {
 	String imageUrl
 	String thumbnailUrl
 
-	// Type of the product is either normal or community product.
+	// Type of the product is either normal or data union.
 	Type type = Type.NORMAL
 	Category category
 	State state = State.NOT_DEPLOYED
@@ -44,7 +44,7 @@ class Product {
 
 	enum Type {
 		NORMAL,
-		COMMUNITY
+		DATAUNION
 	}
 
 	enum State {
