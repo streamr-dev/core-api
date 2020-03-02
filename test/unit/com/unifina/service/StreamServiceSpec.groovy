@@ -43,6 +43,22 @@ class StreamServiceSpec extends Specification {
 		me.save(validate: false, failOnError: true)
 	}
 
+	def "getStream for inbox stream is case-insensitive"() {
+		Stream s = new Stream()
+		s.id = "0x26e1ae3f5efe8a01eca8c2e9d3c32702cf4bead6"
+		s.inbox = true
+		s.name = "0x26e1ae3f5efe8a01eca8c2e9d3c32702cf4bead6"
+		s.save(validate: false)
+
+		when:
+		Stream queried1 = service.getStream(s.id)
+		Stream queried2 = service.getStream("0x" + s.id.substring(2).toUpperCase())
+
+		then:
+		queried1.id == s.id
+		queried2.id == s.id
+	}
+
 	def "add example shared streams"() {
 		setup:
 		service.permissionService = Mock(PermissionService)
@@ -383,12 +399,16 @@ class StreamServiceSpec extends Specification {
 		stream.save(failOnError: true, validate: false)
 		when:
 		boolean result1 = service.isStreamEthereumPublisher(stream, address1)
+		// ensuring lookup doesn't depend on case
+		boolean result1b = service.isStreamEthereumPublisher(stream, address1.toUpperCase())
 		boolean result2 = service.isStreamEthereumPublisher(stream, address2)
+		// ensuring lookup doesn't depend on case
+		boolean result2b = service.isStreamEthereumPublisher(stream, address2.toUpperCase())
 		then:
-		1 * service.permissionService.check(user1, stream, Permission.Operation.STREAM_PUBLISH) >> true
-		result1
-		1 * service.permissionService.check(user2, stream, Permission.Operation.STREAM_PUBLISH) >> false
-		!result2
+		2 * service.permissionService.check(user1, stream, Permission.Operation.STREAM_PUBLISH) >> true
+		result1 && result1b
+		2 * service.permissionService.check(user2, stream, Permission.Operation.STREAM_PUBLISH) >> false
+		!result2 && !result2b
 	}
 
 	void "getStreamEthereumSubscribers should return Ethereum addresses of users with stream_get permission to the Stream"() {
@@ -440,12 +460,14 @@ class StreamServiceSpec extends Specification {
 		stream.save(failOnError: true, validate: false)
 		when:
 		boolean result1 = service.isStreamEthereumSubscriber(stream, address1)
+		boolean result1b = service.isStreamEthereumSubscriber(stream, address1.toUpperCase())
 		boolean result2 = service.isStreamEthereumSubscriber(stream, address2)
+		boolean result2b = service.isStreamEthereumSubscriber(stream, address2.toUpperCase())
 		then:
-		1 * service.permissionService.check(user1, stream, Permission.Operation.STREAM_SUBSCRIBE) >> true
-		result1
-		1 * service.permissionService.check(user2, stream, Permission.Operation.STREAM_SUBSCRIBE) >> false
-		!result2
+		2 * service.permissionService.check(user1, stream, Permission.Operation.STREAM_SUBSCRIBE) >> true
+		result1 && result1b
+		2 * service.permissionService.check(user2, stream, Permission.Operation.STREAM_SUBSCRIBE) >> false
+		!result2 && !result2b
 	}
 
 	void "getInboxStreams() returns all inbox streams of the users"() {
