@@ -5,6 +5,7 @@ import com.unifina.api.BadRequestException
 import com.unifina.api.NotFoundException
 import com.unifina.api.NotPermittedException
 import com.unifina.api.StreamListParams
+import com.unifina.api.ValidationException
 import com.unifina.domain.data.Stream
 import com.unifina.domain.security.IntegrationKey
 import com.unifina.domain.security.Key
@@ -216,11 +217,38 @@ class StreamApiControllerSpec extends ControllerSpecification {
 		response.status == 401
 	}
 
-	void "update a Stream of logged in user"() {
-		when:
-		params.id = streamOne.id
+	void "update validates fields"() {
+		setup:
 		request.method = "PUT"
-		request.json = '{name: "newName", description: "newDescription", autoConfigure: false, requireSignedData: true, storageDays: 24, inactivityThresholdHours: 99, partitions: 5, requireEncryptedData: true }'
+		params.id = streamOne.id
+		request.JSON = [
+			name: "name",
+			partitions: -4,
+		]
+
+		when:
+		authenticatedAs(me) { controller.update() }
+
+		then:
+		thrown ValidationException
+	}
+
+	void "update a Stream of logged in user"() {
+		setup:
+		request.method = "PUT"
+		params.id = streamOne.id
+		request.JSON = [
+			name: "newName",
+			description: "newDescription",
+			autoConfigure: false,
+			requireSignedData: true,
+			storageDays: 24,
+			inactivityThresholdHours: 99,
+			partitions: 5,
+			requireEncryptedData: true,
+		]
+
+		when:
 		authenticatedAs(me) { controller.update() }
 
 		then:
@@ -245,10 +273,20 @@ class StreamApiControllerSpec extends ControllerSpecification {
 	}
 
 	void "update a Stream of logged in user but do not update undefined fields"() {
-		when:
-		params.id = streamOne.id
+		setup:
 		request.method = "PUT"
-		request.json = '{name: "newName", description: "newDescription", autoConfigure: null, requireSignedData: null, storageDays: null, inactivityThresholdHours: null, requireEncryptedData: null }'
+		params.id = streamOne.id
+		request.json = [
+			name: "newName",
+			description: "newDescription",
+			autoConfigure: null,
+			requireSignedData: null,
+			storageDays: null,
+			inactivityThresholdHours: null,
+			requireEncryptedData: null
+		]
+
+		when:
 		authenticatedAs(me) { controller.update() }
 
 		then:
@@ -272,10 +310,13 @@ class StreamApiControllerSpec extends ControllerSpecification {
 	}
 
 	void "cannot update non-existent Stream"() {
-		when:
-		params.id = "666-666-666"
+		setup:
 		request.method = "PUT"
-		request.json = '{name: "newName", description: "newDescription"}'
+		params.id = "666-666-666"
+		request.json = [
+			name: "some new name",
+		]
+		when:
 		authenticatedAs(me) { controller.update() }
 
 		then:
@@ -283,10 +324,14 @@ class StreamApiControllerSpec extends ControllerSpecification {
 	}
 
 	void "cannot update other user's Stream"() {
-		when:
-		params.id = streamFourId
+		setup:
 		request.method = "PUT"
-		request.json = '{name: "newName", description: "newDescription"}'
+		params.id = streamFourId
+		request.json = [
+			name: "newName",
+			description: "newDescription"
+		]
+		when:
 		authenticatedAs(me) { controller.update() }
 
 		then:
