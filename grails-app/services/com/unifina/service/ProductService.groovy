@@ -187,7 +187,7 @@ class ProductService {
 
 	void addStreamToProduct(Product product, Stream stream, SecUser currentUser)
 			throws ValidationException, NotPermittedException {
-		permissionService.check(currentUser, stream, Permission.Operation.STREAM_SHARE)
+		permissionService.verify(currentUser, stream, Permission.Operation.STREAM_SHARE)
 		product.streams.add(stream)
 		product.save(failOnError: true)
 		// A stream that is added when editing an existing free product should inherit read access for anonymous user
