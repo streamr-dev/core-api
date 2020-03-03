@@ -34,8 +34,8 @@
       "description": "Start, stop, and manage Canvases"
     },
     {
-      "name": "communities",
-      "description": "Community products"
+      "name": "dataunions",
+      "description": "Data Unions"
     },
     {
       "name": "dashboards",
@@ -75,18 +75,18 @@
     }
   ],
   "paths": {
-    "/communities/{communityAddress}/joinRequests": {
+    "/dataunions/{contractAddress}/joinRequests": {
       "get": {
-        "summary": "List all community join requests",
-        "description": "List all community join requests.",
+        "summary": "List all join requests",
+        "description": "List all join requests for this data union.",
         "tags": [
-          "communities"
+          "dataunions"
         ],
         "parameters": [
           {
-            "name": "communityAddress",
+            "name": "contractAddress",
             "in": "path",
-            "description": "Ethereum address of the community",
+            "description": "Ethereum address of the data union smart contract",
             "required": true,
             "type": "string"
           },
@@ -113,26 +113,26 @@
         }
       },
       "post": {
-        "summary": "Create community join request",
-        "description": "Create community join request from given json body",
+        "summary": "Create join request",
+        "description": "Create data union join request from given json body",
         "tags": [
-          "communities"
+          "dataunions"
         ],
         "parameters": [
           {
-            "name": "communityAddress",
+            "name": "contractAddress",
             "in": "path",
-            "description": "Ethereum address of the community",
+            "description": "Ethereum address of the data union smart contract",
             "required": true,
             "type": "string"
           },
           {
             "name": "body",
             "in": "body",
-            "description": "Community join request details",
+            "description": "Data union join request details",
             "required": true,
             "schema": {
-              "$ref": "#/definitions/CreateCommunityJoinRequest"
+              "$ref": "#/definitions/CreateDataUnionJoinRequest"
             }
           }
         ],
@@ -144,7 +144,7 @@
             "description": "Required parameters missing"
           },
           "403": {
-            "description": "Given community secret is incorrect"
+            "description": "Given secret is incorrect"
           },
           "404": {
             "description": "Member address is not owned by the current user"
@@ -152,18 +152,18 @@
         }
       }
     },
-    "/communities/{communityAddress}/joinRequests/{joinRequestId}": {
+    "/dataunions/{contractAddress}/joinRequests/{joinRequestId}": {
       "get": {
-        "summary": "Find community's join request by id",
-        "description": "Find community's join request by join request id.",
+        "summary": "Find join request by id",
+        "description": "Find data union join request by join request id.",
         "tags": [
-          "communities"
+          "dataunions"
         ],
         "parameters": [
           {
-            "name": "communityAddress",
+            "name": "contractAddress",
             "in": "path",
-            "description": "Ethereum address of the community",
+            "description": "Ethereum address of the data union smart contract",
             "required": true,
             "type": "string"
           },
@@ -183,21 +183,21 @@
             "description": "Required parameters missing"
           },
           "404": {
-            "description": "Community join request not found by id"
+            "description": "Join request not found by id"
           }
         }
       },
       "put": {
-        "summary": "Update community join request state",
-        "description": "Update state attribute of the community join request.",
+        "summary": "Update join request state",
+        "description": "Update state attribute of the join request.",
         "tags": [
-          "communities"
+          "dataunions"
         ],
         "parameters": [
           {
-            "name": "communityAddress",
+            "name": "contractAddress",
             "in": "path",
-            "description": "Ethereum address of the community",
+            "description": "Ethereum address of the data union smart contract",
             "required": true,
             "type": "string"
           },
@@ -211,10 +211,10 @@
           {
             "name": "body",
             "in": "body",
-            "description": "Community join request state",
+            "description": "Data union join request state",
             "required": true,
             "schema": {
-              "$ref": "#/definitions/UpdateCommunityJoinRequest"
+              "$ref": "#/definitions/UpdateDataUnionJoinRequest"
             }
           }
         ],
@@ -226,21 +226,21 @@
             "description": "Required parameters missing"
           },
           "404": {
-            "description": "Community join request not found by id"
+            "description": "Join request not found by id"
           }
         }
       },
       "delete": {
-        "summary": "Delete community join request",
-        "description": "Delete community join request.",
+        "summary": "Delete join request",
+        "description": "Delete data union join request.",
         "tags": [
-          "communities"
+          "dataunions"
         ],
         "parameters": [
           {
-            "name": "communityAddress",
+            "name": "contractAddress",
             "in": "path",
-            "description": "Ethereum address of the community",
+            "description": "Ethereum address of the data union smart contract",
             "required": true,
             "type": "string"
           },
@@ -260,23 +260,23 @@
             "description": "Required parameters missing"
           },
           "404": {
-            "description": "Community join request not found by id"
+            "description": "Join request not found by id"
           }
         }
       }
     },
-    "/communities/{communityAddress}/secrets": {
+    "/dataunions/{contractAddress}/secrets": {
       "get": {
-        "summary": "List all community secrets",
-        "description": "List all community secrets.",
+        "summary": "List all data union secrets",
+        "description": "List all secrets for this data union.",
         "tags": [
-          "communities"
+          "dataunions"
         ],
         "parameters": [
           {
-            "name": "communityAddress",
+            "name": "contractAddress",
             "in": "path",
-            "description": "Ethereum address of the community",
+            "description": "Ethereum address of the data union smart contract",
             "required": true,
             "type": "string"
           }
@@ -291,26 +291,26 @@
         }
       },
       "post": {
-        "summary": "Create community secret",
-        "description": "Create community secret",
+        "summary": "Create secret",
+        "description": "Create data union secret",
         "tags": [
-          "communities"
+          "dataunions"
         ],
         "parameters": [
           {
-            "name": "communityAddress",
+            "name": "contractAddress",
             "in": "path",
-            "description": "Ethereum address of the community",
+            "description": "Ethereum address of the data union smart contract",
             "required": true,
             "type": "string"
           },
           {
             "name": "body",
             "in": "body",
-            "description": "Create community secret details",
+            "description": "Create data union secret details",
             "required": true,
             "schema": {
-              "$ref": "#/definitions/CreateCommunitySecret"
+              "$ref": "#/definitions/CreateDataUnionSecret"
             }
           }
         ],
@@ -318,7 +318,7 @@
           "200": {
             "description": "Success",
             "schema": {
-              "$ref": "#/definitions/CommunitySecret"
+              "$ref": "#/definitions/DataUnionSecret"
             }
           },
           "400": {
@@ -327,25 +327,25 @@
         }
       }
     },
-    "/communities/{communityAddress}/secrets/{communitySecretId}": {
+    "/dataunions/{contractAddress}/secrets/{dataUnionSecretId}": {
       "get": {
-        "summary": "Find community secret by id",
-        "description": "Find community secret by id.",
+        "summary": "Find secret by id",
+        "description": "Find data union secret by id.",
         "tags": [
-          "communities"
+          "dataunions"
         ],
         "parameters": [
           {
-            "name": "communityAddress",
+            "name": "contractAddress",
             "in": "path",
-            "description": "Ethereum address of the community",
+            "description": "Ethereum address of the data union smart contract",
             "required": true,
             "type": "string"
           },
           {
-            "name": "communitySecretId",
+            "name": "dataUnionSecretId",
             "in": "path",
-            "description": "ID of the community secret",
+            "description": "ID of the data union secret",
             "required": true,
             "type": "string"
           }
@@ -354,42 +354,42 @@
           "200": {
             "description": "Success",
             "schema": {
-              "$ref": "#/definitions/CommunitySecret"
+              "$ref": "#/definitions/DataUnionSecret"
             }
           },
           "400": {
             "description": "Required parameters missing"
           },
           "404": {
-            "description": "Community secret not found"
+            "description": "Secret not found"
           }
         }
       },
       "put": {
-        "summary": "Update community secret",
-        "description": "Update community secret details.\n\nNote: you can't update the secret itself; to do that you'll need to create a new secret.",
+        "summary": "Update secret",
+        "description": "Most useful for changing the name of the secret. Note that the randomly generated secret itself cannot be changed.",
         "tags": [
-          "communities"
+          "dataunions"
         ],
         "parameters": [
           {
-            "name": "communityAddress",
+            "name": "contractAddress",
             "in": "path",
-            "description": "Ethereum address of the community",
+            "description": "Ethereum address of the data union smart contract",
             "required": true,
             "type": "string"
           },
           {
-            "name": "communitySecretId",
+            "name": "dataUnionSecretId",
             "in": "path",
-            "description": "ID of the community secret",
+            "description": "ID of the secret",
             "required": true,
             "type": "string"
           },
           {
             "name": "body",
             "in": "body",
-            "description": "Updated community secret details",
+            "description": "Updated data union secret details",
             "required": true,
             "schema": {
               "type": "object",
@@ -397,7 +397,7 @@
                 "name": {
                   "type": "string",
                   "example": "Renamed passphrase",
-                  "description": "Name of the community secret"
+                  "description": "Name of the secret"
                 }
               }
             }
@@ -407,35 +407,35 @@
           "200": {
             "description": "Success",
             "schema": {
-              "$ref": "#/definitions/CommunitySecret"
+              "$ref": "#/definitions/DataUnionSecret"
             }
           },
           "400": {
             "description": "Required parameters missing"
           },
           "404": {
-            "description": "Community secret not found"
+            "description": "Secret not found"
           }
         }
       },
       "delete": {
-        "summary": "Delete community secret",
-        "description": "Delete community secret.",
+        "summary": "Delete secret",
+        "description": "Delete data union secret.",
         "tags": [
-          "communities"
+          "dataunions"
         ],
         "parameters": [
           {
-            "name": "communityAddress",
+            "name": "contractAddress",
             "in": "path",
-            "description": "Ethereum address of the community",
+            "description": "Ethereum address of the data union smart contract",
             "required": true,
             "type": "string"
           },
           {
-            "name": "communitySecretId",
+            "name": "dataUnionSecretId",
             "in": "path",
-            "description": "ID of the community secret",
+            "description": "ID of the secret",
             "required": true,
             "type": "string"
           }
@@ -448,23 +448,23 @@
             "description": "Required parameters missing"
           },
           "404": {
-            "description": "Community secret not found by id"
+            "description": "Secret not found by id"
           }
         }
       }
     },
-    "/communities/{communityAddress}/stats": {
+    "/dataunions/{contractAddress}/stats": {
       "get": {
-        "summary": "Proxy calls to to community product server.",
+        "summary": "Proxy calls to to data union server.",
         "description": "Return operator stats",
         "tags": [
-          "communities"
+          "dataunions"
         ],
         "parameters": [
           {
-            "name": "communityAddress",
+            "name": "contractAddress",
             "in": "path",
-            "description": "Ethereum address of the community",
+            "description": "Ethereum address of the data union smart contract",
             "required": true,
             "type": "string"
           }
@@ -477,26 +477,26 @@
             "description": "Required parameters missing"
           },
           "404": {
-            "description": "Community stats not found by community address"
+            "description": "Stats not found by data union address"
           },
           "500": {
-            "description": "Community product server is not responding"
+            "description": "Data union server is not responding"
           }
         }
       }
     },
-    "/communities/{communityAddress}/members": {
+    "/dataunions/{contractAddress}/members": {
       "get": {
-        "summary": "Proxy calls to to community product server.",
+        "summary": "Proxy calls to to data union server.",
         "description": "Return a list of members",
         "tags": [
-          "communities"
+          "dataunions"
         ],
         "parameters": [
           {
-            "name": "communityAddress",
+            "name": "contractAddress",
             "in": "path",
-            "description": "Ethereum address of the community",
+            "description": "Ethereum address of the data union smart contract",
             "required": true,
             "type": "string"
           }
@@ -509,26 +509,26 @@
             "description": "Required parameters missing"
           },
           "404": {
-            "description": "Community stats not found by community address"
+            "description": "Stats not found by data union address"
           },
           "500": {
-            "description": "Community product server is not responding"
+            "description": "Data union server is not responding"
           }
         }
       }
     },
-    "/communities/{communityAddress}/members/{memberAddress}": {
+    "/dataunions/{contractAddress}/members/{memberAddress}": {
       "get": {
-        "summary": "Proxy calls to to community product server.",
-        "description": "Return stats for individiual members",
+        "summary": "Proxy calls to to data union server.",
+        "description": "Return stats for individual members",
         "tags": [
-          "communities"
+          "dataunions"
         ],
         "parameters": [
           {
-            "name": "communityAddress",
+            "name": "contractAddress",
             "in": "path",
-            "description": "Ethereum address of the community",
+            "description": "Ethereum address of the data union smart contract",
             "required": true,
             "type": "string"
           },
@@ -548,10 +548,10 @@
             "description": "Required parameters missing"
           },
           "404": {
-            "description": "Community stats not found by community or member address"
+            "description": "Stats not found by data union or member address"
           },
           "500": {
-            "description": "Community product server is not responding"
+            "description": "Data union server is not responding"
           }
         }
       }
@@ -4652,7 +4652,7 @@
         }
       }
     },
-    "CreateCommunityJoinRequest": {
+    "CreateDataUnionJoinRequest": {
       "type": "object",
       "required": [
         "memberAddress"
@@ -4660,11 +4660,11 @@
       "properties": {
         "memberAddress": {
           "type": "string",
-          "description": "Name of the community join request"
+          "description": "Ethereum address of the member to join"
         },
         "secret": {
           "type": "string",
-          "description": "Community join request secret shared by the community. Secret enabled automatic acceptance of the community join request."
+          "description": "A secret shared by the data union. The join request is automatically accepted if a valid secret is provided."
         },
         "metadata": {
           "type": "object",
@@ -4673,7 +4673,7 @@
         }
       }
     },
-    "UpdateCommunityJoinRequest": {
+    "UpdateDataUnionJoinRequest": {
       "type": "object",
       "required": [
         "state"
@@ -4681,7 +4681,7 @@
       "properties": {
         "state": {
           "type": "string",
-          "description": "Community join request state",
+          "description": "Join request state",
           "enum": [
             "pending",
             "accepted",
@@ -4690,7 +4690,7 @@
         }
       }
     },
-    "CreateCommunitySecret": {
+    "CreateDataUnionSecret": {
       "type": "object",
       "required": [
         "name",
@@ -4699,17 +4699,17 @@
       "properties": {
         "name": {
           "type": "string",
-          "example": "Generic passphrase",
-          "description": "Name of the community secret"
+          "example": "Secret used in my app versions v1.0 - v1.2",
+          "description": "Name of the data union secret"
         },
         "secret": {
           "type": "string",
           "example": "hunter2",
-          "description": "Community join request secret shared by the community."
+          "description": "Data union join requests containing this secret will be automatically accepted."
         }
       }
     },
-    "CommunitySecret": {
+    "DataUnionSecret": {
       "type": "object",
       "required": [
         "name",
@@ -4719,22 +4719,22 @@
         "id": {
           "type": "string",
           "example": "1234567",
-          "description": "id of the community secret object"
+          "description": "id of the secret"
         },
         "name": {
           "type": "string",
-          "example": "Generic passphrase",
-          "description": "Name of the community secret"
-        },
-        "communityAddress": {
-          "type": "string",
-          "example": "0x0000000000000000000000000000000000000001",
-          "description": "Ethereum address of the community"
+          "example": "Secret used in my app versions v1.0 - v1.2",
+          "description": "Name of the data union secret"
         },
         "secret": {
           "type": "string",
           "example": "hunter2",
-          "description": "Community join request secret shared by the community."
+          "description": "Data union join requests containing this secret will be automatically accepted."
+        },
+        "contractAddress": {
+          "type": "string",
+          "example": "0x0000000000000000000000000000000000000001",
+          "description": "Ethereum address of the data union smart contract"
         }
       }
     },
@@ -5279,7 +5279,7 @@
           "description": "Type of Product",
           "enum": [
             "NORMAL",
-            "COMMUNITY"
+            "DATAUNION"
           ]
         },
         "name": {
@@ -5483,7 +5483,7 @@
           "description": "Type of Product",
           "enum": [
             "NORMAL",
-            "COMMUNITY"
+            "DATAUNION"
           ]
         },
         "state": {

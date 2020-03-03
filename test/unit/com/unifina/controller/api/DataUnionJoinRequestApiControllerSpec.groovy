@@ -1,32 +1,32 @@
 package com.unifina.controller.api
 
 import com.unifina.api.*
-import com.unifina.domain.community.CommunityJoinRequest
+import com.unifina.domain.dataunion.DataUnionJoinRequest
 import com.unifina.domain.security.SecUser
 import com.unifina.filters.UnifinaCoreAPIFilters
-import com.unifina.service.CommunityJoinRequestService
+import com.unifina.service.DataUnionJoinRequestService
 import com.unifina.service.EthereumService
 import grails.test.mixin.Mock
 import grails.test.mixin.TestFor
 import spock.lang.Specification
 
-@TestFor(CommunityJoinRequestApiController)
-@Mock([UnifinaCoreAPIFilters, SecUser, CommunityJoinRequest])
-class CommunityJoinRequestApiControllerSpec extends Specification {
+@TestFor(DataUnionJoinRequestApiController)
+@Mock([UnifinaCoreAPIFilters, SecUser, DataUnionJoinRequest])
+class DataUnionJoinRequestApiControllerSpec extends Specification {
 	SecUser me
-	final String communityAddress = "0x6c90aece04198da2d5ca9b956b8f95af8041de37"
+	final String contractAddress = "0x6c90aece04198da2d5ca9b956b8f95af8041de37"
 	final String validID = "L-TvrBkyQTS_JK1ABHFEZAaZ3FHq7-TPqMXe9JNz1x6g"
 
     def setup() {
 		me = new SecUser(id: 1, name: "firstname lastname", username: "firstname.lastname@address.com", password: "salasana")
 		me.save(validate: true, failOnError: true)
-		controller.communityJoinRequestService = Mock(CommunityJoinRequestService)
+		controller.dataUnionJoinRequestService = Mock(DataUnionJoinRequestService)
 		controller.ethereumService = Mock(EthereumService)
     }
 
 	void "state parameter is null or State"(String value, Object expected) {
 		expect:
-		CommunityJoinRequestApiController.isState(value) == expected
+		DataUnionJoinRequestApiController.isState(value) == expected
 		where:
 		value      | expected
 		null       | null
@@ -34,14 +34,14 @@ class CommunityJoinRequestApiControllerSpec extends Specification {
 		" "        | null
 		"\t"       | null
 		"abcxyz"   | null
-		"accepted" | CommunityJoinRequest.State.ACCEPTED
-		"rejected" | CommunityJoinRequest.State.REJECTED
-		"pending"  | CommunityJoinRequest.State.PENDING
+		"accepted" | DataUnionJoinRequest.State.ACCEPTED
+		"rejected" | DataUnionJoinRequest.State.REJECTED
+		"pending"  | DataUnionJoinRequest.State.PENDING
 	}
 
-	void "isCommunityAddress"(String value, Object expected) {
+	void "isDataUnionAddress"(String value, Object expected) {
 		expect:
-		CommunityJoinRequestApiController.isCommunityAddress(value) == expected
+		DataUnionJoinRequestApiController.isDataUnionAddress(value) == expected
 		where:
 		value | expected
 		"0x0000000000000000000000000000000000000000" | true
@@ -53,42 +53,42 @@ class CommunityJoinRequestApiControllerSpec extends Specification {
 
 	void "findAll() test"() {
 		setup:
-		CommunityJoinRequest r = new CommunityJoinRequest(
+		DataUnionJoinRequest r = new DataUnionJoinRequest(
 			user: me,
 			memberAddress: "0x0000000000000000000000000000000000000001",
-			communityAddress: communityAddress,
+			contractAddress: contractAddress,
 		)
 		r.id = validID
 		r.save(failOnError: true, validate: true)
 		when:
 		request.apiUser = me
 		request.method = "GET"
-		params.communityAddress = communityAddress
+		params.contractAddress = contractAddress
 		params.state = null
 		withFilters(action: "index") {
 			controller.index()
 		}
 		then:
-		1 * controller.ethereumService.fetchCommunityAdminsEthereumAddress(communityAddress) >> "adminAddress"
+		1 * controller.ethereumService.fetchDataUnionAdminsEthereumAddress(contractAddress) >> "adminAddress"
 		1 * controller.ethereumService.hasEthereumAddress(me, "adminAddress") >> true
-		1 * controller.communityJoinRequestService.findAll(communityAddress, null) >> [r]
+		1 * controller.dataUnionJoinRequestService.findAll(contractAddress, null) >> [r]
 		response.json[0].id == validID
 		response.json[0].memberAddress == "0x0000000000000000000000000000000000000001"
-		response.json[0].communityAddress == communityAddress
+		response.json[0].contractAddress == contractAddress
 		response.json[0].state == "PENDING"
 		response.status == 200
     }
 
-	void "findAll() bad request on invalid community address input"() {
+	void "findAll() bad request on invalid contract address input"() {
 		when:
 		request.method = "GET"
-		params.communityAddress = "0x123"
+		params.contractAddress = "0x123"
 		params.state = "APPROVED"
 		withFilters(action: "index") {
 			controller.index()
 		}
 		then:
-		0 * controller.communityJoinRequestService._
+		0 * controller.dataUnionJoinRequestService._
 		def e = thrown(BadRequestException)
 		e.statusCode == 400
 		e.code == "PARAMETER_MISSING"
@@ -98,13 +98,13 @@ class CommunityJoinRequestApiControllerSpec extends Specification {
 		when:
 		request.apiUser = me
 		request.method = "GET"
-		params.communityAddress = communityAddress
+		params.contractAddress = contractAddress
 		params.state = "APPROVED"
 		withFilters(action: "index") {
 			controller.index()
 		}
 		then:
-		1 * controller.ethereumService.fetchCommunityAdminsEthereumAddress(communityAddress) >> "adminAddress"
+		1 * controller.ethereumService.fetchDataUnionAdminsEthereumAddress(contractAddress) >> "adminAddress"
 		1 * controller.ethereumService.hasEthereumAddress(me, "adminAddress") >> false
 		def e = thrown(ApiException)
 		e.statusCode == 403
@@ -113,11 +113,11 @@ class CommunityJoinRequestApiControllerSpec extends Specification {
 
 	void "save() test"() {
 		setup:
-		CommunityJoinRequest r = new CommunityJoinRequest(
+		DataUnionJoinRequest r = new DataUnionJoinRequest(
 			memberAddress: "0xCCCC000000000000000000000000AAAA0000FFFF",
-			communityAddress: communityAddress,
+			contractAddress: contractAddress,
 			user: me,
-			state: CommunityJoinRequest.State.ACCEPTED,
+			state: DataUnionJoinRequest.State.ACCEPTED,
 		)
 		r.id = validID
 		r.save(failOnError: true, validate: true)
@@ -131,15 +131,15 @@ class CommunityJoinRequestApiControllerSpec extends Specification {
 				foo: "bar",
 			],
 		]
-		params.communityAddress = communityAddress
+		params.contractAddress = contractAddress
 		withFilters(action: "save") {
 			controller.save()
 		}
 		then:
-		1 * controller.communityJoinRequestService.create(communityAddress, _ as CommunityJoinRequestCommand, me) >> r
+		1 * controller.dataUnionJoinRequestService.create(contractAddress, _ as DataUnionJoinRequestCommand, me) >> r
 		response.json.id == validID
 		response.json.memberAddress == "0xCCCC000000000000000000000000AAAA0000FFFF"
-		response.json.communityAddress == communityAddress
+		response.json.contractAddress == contractAddress
 		response.json.state == "ACCEPTED"
 		response.status == 200
 	}
@@ -151,102 +151,102 @@ class CommunityJoinRequestApiControllerSpec extends Specification {
 			memberAddress: "0x123",
 			secret: "secret",
 		]
-		params.communityAddress = communityAddress
+		params.contractAddress = contractAddress
 		withFilters(action: "save") {
 			controller.save()
 		}
 		then:
-		0 * controller.communityJoinRequestService._
+		0 * controller.dataUnionJoinRequestService._
 		def e = thrown(BadRequestException)
 		e.statusCode == 400
 		e.code == "PARAMETER_MISSING"
 	}
 
-	void "save() bad request on invalid community address input"() {
+	void "save() bad request on invalid contract address input"() {
 		when:
 		request.method = "GET"
-		params.communityAddress = "0x123"
+		params.contractAddress = "0x123"
 		withFilters(action: "save") {
 			controller.save()
 		}
 		then:
-		0 * controller.communityJoinRequestService._
+		0 * controller.dataUnionJoinRequestService._
 		def e = thrown(BadRequestException)
 		e.statusCode == 400
 		e.code == "PARAMETER_MISSING"
 	}
 
 	void "show() test"() {
-		CommunityJoinRequest r = new CommunityJoinRequest(
+		DataUnionJoinRequest r = new DataUnionJoinRequest(
 			memberAddress: "0xCCCC000000000000000000000000AAAA0000FFFF",
-			communityAddress: communityAddress,
+			contractAddress: contractAddress,
 			user: me,
-			state: CommunityJoinRequest.State.ACCEPTED,
+			state: DataUnionJoinRequest.State.ACCEPTED,
 		)
 		r.id = validID
 		r.save(failOnError: true, validate: true)
 		when:
 		request.apiUser = me
 		request.method = "GET"
-		params.communityAddress = communityAddress
+		params.contractAddress = contractAddress
 		params.id = validID
 		withFilters(action: "show") {
 			controller.show()
 		}
 		then:
-		1 * controller.ethereumService.fetchCommunityAdminsEthereumAddress(communityAddress) >> "adminAddress"
+		1 * controller.ethereumService.fetchDataUnionAdminsEthereumAddress(contractAddress) >> "adminAddress"
 		1 * controller.ethereumService.hasEthereumAddress(me, "adminAddress") >> true
-		1 * controller.communityJoinRequestService.find(communityAddress, validID) >> r
+		1 * controller.dataUnionJoinRequestService.find(contractAddress, validID) >> r
 		response.json.memberAddress == "0xCCCC000000000000000000000000AAAA0000FFFF"
-		response.json.communityAddress == communityAddress
+		response.json.contractAddress == contractAddress
 		response.json.id == validID
 		response.json.state == "ACCEPTED"
 		response.status == 200
 	}
 
-	void "show() bad request on invalid community address"() {
+	void "show() bad request on invalid contract address"() {
 		when:
 		request.method = "GET"
-		params.communityAddress = "0x123"
+		params.contractAddress = "0x123"
 		params.id = validID
 		withFilters(action: "show") {
 			controller.show()
 		}
 		then:
-		0 * controller.communityJoinRequestService._
+		0 * controller.dataUnionJoinRequestService._
 		def e = thrown(BadRequestException)
 		e.statusCode == 400
 		e.code == "PARAMETER_MISSING"
 	}
 
-	void "show() bad request on invalid community join request id"() {
+	void "show() bad request on invalid join request id"() {
 		when:
 		request.method = "GET"
-		params.communityAddress = communityAddress
+		params.contractAddress = contractAddress
 		params.id = null
 		withFilters(action: "show") {
 			controller.show()
 		}
 		then:
-		0 * controller.communityJoinRequestService._
+		0 * controller.dataUnionJoinRequestService._
 		def e = thrown(BadRequestException)
 		e.statusCode == 400
 		e.code == "PARAMETER_MISSING"
 	}
 
-	void "show() not found 404 on bad CommunityJoinRequest id"() {
+	void "show() not found 404 on bad DataUnionJoinRequest id"() {
 		when:
 		request.apiUser = me
 		request.method = "GET"
-		params.communityAddress = communityAddress
+		params.contractAddress = contractAddress
 		params.id = validID // ID not found in DB
 		withFilters(action: "show") {
 			controller.show()
 		}
 		then:
-		1 * controller.ethereumService.fetchCommunityAdminsEthereumAddress(communityAddress) >> "adminAddress"
+		1 * controller.ethereumService.fetchDataUnionAdminsEthereumAddress(contractAddress) >> "adminAddress"
 		1 * controller.ethereumService.hasEthereumAddress(me, "adminAddress") >> true
-		1 * controller.communityJoinRequestService.find(communityAddress, validID) >> null
+		1 * controller.dataUnionJoinRequestService.find(contractAddress, validID) >> null
 		def e = thrown(NotFoundException)
 		e.statusCode == 404
 		e.code == "NOT_FOUND"
@@ -256,13 +256,13 @@ class CommunityJoinRequestApiControllerSpec extends Specification {
 		when:
 		request.apiUser = me
 		request.method = "GET"
-		params.communityAddress = communityAddress
+		params.contractAddress = contractAddress
 		params.id = validID
 		withFilters(action: "show") {
 			controller.show()
 		}
 		then:
-		1 * controller.ethereumService.fetchCommunityAdminsEthereumAddress(communityAddress) >> "adminAddress"
+		1 * controller.ethereumService.fetchDataUnionAdminsEthereumAddress(contractAddress) >> "adminAddress"
 		1 * controller.ethereumService.hasEthereumAddress(me, "adminAddress") >> false
 		def e = thrown(ApiException)
 		e.statusCode == 403
@@ -271,11 +271,11 @@ class CommunityJoinRequestApiControllerSpec extends Specification {
 
 	void "update() test"() {
 		setup:
-		CommunityJoinRequest r = new CommunityJoinRequest(
+		DataUnionJoinRequest r = new DataUnionJoinRequest(
 			memberAddress: "0xCCCC000000000000000000000000AAAA0000FFFF",
-			communityAddress: communityAddress,
+			contractAddress: contractAddress,
 			user: me,
-			state: CommunityJoinRequest.State.PENDING,
+			state: DataUnionJoinRequest.State.PENDING,
 		)
 		r.id = validID
 		r.save(failOnError: true, validate: true)
@@ -285,38 +285,38 @@ class CommunityJoinRequestApiControllerSpec extends Specification {
 		request.json = [
 			state: "ACCEPTED",
 		]
-		params.communityAddress = communityAddress
+		params.contractAddress = contractAddress
 		params.id = validID
 		withFilters(action: "update") {
 			controller.update()
 		}
 		then:
-		1 * controller.ethereumService.fetchCommunityAdminsEthereumAddress(communityAddress) >> "adminAddress"
+		1 * controller.ethereumService.fetchDataUnionAdminsEthereumAddress(contractAddress) >> "adminAddress"
 		1 * controller.ethereumService.hasEthereumAddress(me, "adminAddress") >> true
-		1 * controller.communityJoinRequestService.update(communityAddress, validID, _ as UpdateCommunityJoinRequestCommand) >> {
-			r.state = CommunityJoinRequest.State.ACCEPTED
+		1 * controller.dataUnionJoinRequestService.update(contractAddress, validID, _ as UpdateDataUnionJoinRequestCommand) >> {
+			r.state = DataUnionJoinRequest.State.ACCEPTED
 			return r
 		}
 		response.status == 200
 		response.json.id == validID
 		response.json.state == "ACCEPTED"
 		response.json.memberAddress == "0xCCCC000000000000000000000000AAAA0000FFFF"
-		response.json.communityAddress == communityAddress
+		response.json.contractAddress == contractAddress
 	}
 
-	void "update() bad request on invalid community address"() {
+	void "update() bad request on invalid contract address"() {
 		when:
 		request.method = "PUT"
 		request.json = [
 			state: "ACCEPTED",
 		]
-		params.communityAddress = "0x123"
+		params.contractAddress = "0x123"
 		params.id = validID
 		withFilters(action: "update") {
 			controller.update()
 		}
 		then:
-		0 * controller.communityJoinRequestService._
+		0 * controller.dataUnionJoinRequestService._
 		def e = thrown(BadRequestException)
 		e.statusCode == 400
 		e.code == "PARAMETER_MISSING"
@@ -328,52 +328,52 @@ class CommunityJoinRequestApiControllerSpec extends Specification {
 		request.json = [
 			state: "ACCEPTXXX",
 		]
-		params.communityAddress = communityAddress
+		params.contractAddress = contractAddress
 		params.id = validID
 		withFilters(action: "update") {
 			controller.update()
 		}
 		then:
-		0 * controller.communityJoinRequestService._
+		0 * controller.dataUnionJoinRequestService._
 		def e = thrown(BadRequestException)
 		e.statusCode == 400
 		e.code == "PARAMETER_MISSING"
 	}
 
-	void "update() bad request on invalid community join request id"() {
+	void "update() bad request on invalid join request id"() {
 		when:
 		request.method = "PUT"
 		request.json = [
 			state: "ACCEPTED",
 		]
-		params.communityAddress = communityAddress
+		params.contractAddress = contractAddress
 		params.id = null
 		withFilters(action: "update") {
 			controller.update()
 		}
 		then:
-		0 * controller.communityJoinRequestService._
+		0 * controller.dataUnionJoinRequestService._
 		def e = thrown(BadRequestException)
 		e.statusCode == 400
 		e.code == "PARAMETER_MISSING"
 	}
 
-	void "update() not found 404 on bad community join request id"() {
+	void "update() not found 404 on bad join request id"() {
 		when:
 		request.apiUser = me
 		request.method = "PUT"
 		request.json = [
 			state: "ACCEPTED",
 		]
-		params.communityAddress = communityAddress
+		params.contractAddress = contractAddress
 		params.id = validID // ID not found in DB
 		withFilters(action: "update") {
 			controller.update()
 		}
 		then:
-		1 * controller.ethereumService.fetchCommunityAdminsEthereumAddress(communityAddress) >> "adminAddress"
+		1 * controller.ethereumService.fetchDataUnionAdminsEthereumAddress(contractAddress) >> "adminAddress"
 		1 * controller.ethereumService.hasEthereumAddress(me, "adminAddress") >> true
-		1 * controller.communityJoinRequestService.update(communityAddress, validID, _ as UpdateCommunityJoinRequestCommand) >> {
+		1 * controller.dataUnionJoinRequestService.update(contractAddress, validID, _ as UpdateDataUnionJoinRequestCommand) >> {
 			throw new NotFoundException("mocked: entity not found")
 		}
 		def e = thrown(NotFoundException)
@@ -388,13 +388,13 @@ class CommunityJoinRequestApiControllerSpec extends Specification {
 		request.json = [
 			state: "ACCEPTED",
 		]
-		params.communityAddress = communityAddress
+		params.contractAddress = contractAddress
 		params.id = validID
 		withFilters(action: "update") {
 			controller.update()
 		}
 		then:
-		1 * controller.ethereumService.fetchCommunityAdminsEthereumAddress(communityAddress) >> "adminAddress"
+		1 * controller.ethereumService.fetchDataUnionAdminsEthereumAddress(contractAddress) >> "adminAddress"
 		1 * controller.ethereumService.hasEthereumAddress(me, "adminAddress") >> false
 		def e = thrown(ApiException)
 		e.statusCode == 403
@@ -403,72 +403,72 @@ class CommunityJoinRequestApiControllerSpec extends Specification {
 
 	void "delete() test"() {
 		setup:
-		CommunityJoinRequest r = new CommunityJoinRequest(
+		DataUnionJoinRequest r = new DataUnionJoinRequest(
 			memberAddress: "0xCCCC000000000000000000000000AAAA0000FFFF",
-			communityAddress: communityAddress,
+			contractAddress: contractAddress,
 			user: me,
-			state: CommunityJoinRequest.State.ACCEPTED,
+			state: DataUnionJoinRequest.State.ACCEPTED,
 		)
 		r.id = validID
 		r.save(failOnError: true, validate: true)
 		when:
 		request.apiUser = me
 		request.method = "DELETE"
-		params.communityAddress = communityAddress
+		params.contractAddress = contractAddress
 		params.id = validID
 		withFilters(action: "delete") {
 			controller.delete()
 		}
 		then:
-		1 * controller.ethereumService.fetchCommunityAdminsEthereumAddress(communityAddress) >> "adminAddress"
+		1 * controller.ethereumService.fetchDataUnionAdminsEthereumAddress(contractAddress) >> "adminAddress"
 		1 * controller.ethereumService.hasEthereumAddress(me, "adminAddress") >> true
-		1 * controller.communityJoinRequestService.delete(communityAddress, validID)
+		1 * controller.dataUnionJoinRequestService.delete(contractAddress, validID)
 		response.status == 204
 	}
 
-	void "delete() bad request on invalid community address"() {
+	void "delete() bad request on invalid contract address"() {
 		when:
 		request.method = "DELETE"
-		params.communityAddress = "0x123"
+		params.contractAddress = "0x123"
 		params.id = validID
 		withFilters(action: "delete") {
 			controller.delete()
 		}
 		then:
-		0 * controller.communityJoinRequestService._
+		0 * controller.dataUnionJoinRequestService._
 		def e = thrown(BadRequestException)
 		e.statusCode == 400
 		e.code == "PARAMETER_MISSING"
 	}
 
-	void "delete() bad request on invalid community join request id"() {
+	void "delete() bad request on invalid join request id"() {
 		when:
 		request.method = "DELETE"
-		params.communityAddress = communityAddress
+		params.contractAddress = contractAddress
 		params.id = "0x123"
 		withFilters(action: "delete") {
 			controller.delete()
 		}
 		then:
-		0 * controller.communityJoinRequestService._
+		0 * controller.dataUnionJoinRequestService._
 		def e = thrown(BadRequestException)
 		e.statusCode == 400
 		e.code == "PARAMETER_MISSING"
 	}
 
-	void "delete() not found 404 on bad community join request id"() {
+	void "delete() not found 404 on bad join request id"() {
 		when:
 		request.apiUser = me
 		request.method = "DELETE"
-		params.communityAddress = communityAddress
+		params.contractAddress = contractAddress
 		params.id = validID // ID not found in DB
 		withFilters(action: "delete") {
 			controller.delete()
 		}
 		then:
-		1 * controller.ethereumService.fetchCommunityAdminsEthereumAddress(communityAddress) >> "adminAddress"
+		1 * controller.ethereumService.fetchDataUnionAdminsEthereumAddress(contractAddress) >> "adminAddress"
 		1 * controller.ethereumService.hasEthereumAddress(me, "adminAddress") >> true
-		1 * controller.communityJoinRequestService.delete(communityAddress, validID) >> {
+		1 * controller.dataUnionJoinRequestService.delete(contractAddress, validID) >> {
 			throw new NotFoundException("mocked: entity not found")
 		}
 		def e = thrown(NotFoundException)
@@ -480,13 +480,13 @@ class CommunityJoinRequestApiControllerSpec extends Specification {
 		when:
 		request.apiUser = me
 		request.method = "DELETE"
-		params.communityAddress = communityAddress
+		params.contractAddress = contractAddress
 		params.id = validID
 		withFilters(action: "delete") {
 			controller.delete()
 		}
 		then:
-		1 * controller.ethereumService.fetchCommunityAdminsEthereumAddress(communityAddress) >> "adminAddress"
+		1 * controller.ethereumService.fetchDataUnionAdminsEthereumAddress(contractAddress) >> "adminAddress"
 		1 * controller.ethereumService.hasEthereumAddress(me, "adminAddress") >> false
 		def e = thrown(ApiException)
 		e.statusCode == 403

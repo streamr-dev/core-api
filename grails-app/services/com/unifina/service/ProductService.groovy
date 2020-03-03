@@ -17,7 +17,7 @@ class ProductService {
 	PermissionService permissionService
 	SubscriptionService subscriptionService
 	CassandraService cassandraService
-	CommunityJoinRequestService communityJoinRequestService
+	DataUnionJoinRequestService dataUnionJoinRequestService
 	Random random = ThreadLocalRandom.current()
 
 	static class StreamWithLatestMessage {
@@ -195,8 +195,8 @@ class ProductService {
 			permissionService.systemGrantAnonymousAccess(stream, Permission.Operation.STREAM_GET)
 			permissionService.systemGrantAnonymousAccess(stream, Permission.Operation.STREAM_SUBSCRIBE)
 		}
-		if (product.type == Product.Type.COMMUNITY) {
-			Set<SecUser> users = communityJoinRequestService.findCommunityMembers(product.beneficiaryAddress)
+		if (product.type == Product.Type.DATAUNION) {
+			Set<SecUser> users = dataUnionJoinRequestService.findMembers(product.beneficiaryAddress)
 			for (SecUser u : users) {
 				if (!permissionService.check(u, stream, Permission.Operation.STREAM_PUBLISH)) {
 					permissionService.systemGrant(u, stream, Permission.Operation.STREAM_PUBLISH)
@@ -214,8 +214,8 @@ class ProductService {
 			permissionService.systemRevokeAnonymousAccess(stream, Permission.Operation.STREAM_GET)
 			permissionService.systemRevokeAnonymousAccess(stream, Permission.Operation.STREAM_SUBSCRIBE)
 		}
-		if (product.type == Product.Type.COMMUNITY) {
-			Set<SecUser> users = communityJoinRequestService.findCommunityMembers(product.beneficiaryAddress)
+		if (product.type == Product.Type.DATAUNION) {
+			Set<SecUser> users = dataUnionJoinRequestService.findMembers(product.beneficiaryAddress)
 			for (SecUser u : users) {
 				if (permissionService.check(u, stream, Permission.Operation.STREAM_PUBLISH)) {
 					permissionService.systemRevoke(u, stream, Permission.Operation.STREAM_PUBLISH)

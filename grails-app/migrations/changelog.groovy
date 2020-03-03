@@ -143,6 +143,7 @@ databaseChangeLog = {
 	include file: 'core/2019-09-27-stream-require-encrypted-data.groovy'
 	include file: 'core/2019-09-27-alter-pending-changes.groovy'
 	include file: 'core/2019-11-02-rm-old-ethereum-modules.groovy'
+	include file: 'core/2020-01-24-rename-community-to-data-union.groovy'
 	include file: 'core/2020-01-24-new-permissions.groovy'
 	include file: 'core/2020-02-11-rm-module-package-domain-class.groovy'
 	include file: 'core/2020-02-25-test-data-products-permissions.groovy'

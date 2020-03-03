@@ -33,7 +33,7 @@
       "type": "string",
       "enum": [
         "NORMAL",
-        "COMMUNITY"
+        "DATAUNION"
       ]
     },
     "name": {

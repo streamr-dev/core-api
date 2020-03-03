@@ -4,11 +4,11 @@ import com.streamr.client.StreamrClient
 import com.streamr.client.options.StreamrClientOptions
 import com.unifina.BeanMockingSpecification
 import com.unifina.api.ApiException
-import com.unifina.api.CommunityJoinRequestCommand
+import com.unifina.api.DataUnionJoinRequestCommand
 import com.unifina.api.NotFoundException
-import com.unifina.api.UpdateCommunityJoinRequestCommand
-import com.unifina.domain.community.CommunityJoinRequest
-import com.unifina.domain.community.CommunitySecret
+import com.unifina.api.UpdateDataUnionJoinRequestCommand
+import com.unifina.domain.dataunion.DataUnionJoinRequest
+import com.unifina.domain.dataunion.DataUnionSecret
 import com.unifina.domain.data.Stream
 import com.unifina.domain.marketplace.Category
 import com.unifina.domain.marketplace.Product
@@ -18,12 +18,12 @@ import com.unifina.domain.security.SecUser
 import grails.test.mixin.Mock
 import grails.test.mixin.TestFor
 
-@TestFor(CommunityJoinRequestService)
-@Mock([SecUser, IntegrationKey, CommunityJoinRequest, CommunitySecret])
-class CommunityJoinRequestServiceSpec extends BeanMockingSpecification {
+@TestFor(DataUnionJoinRequestService)
+@Mock([SecUser, IntegrationKey, DataUnionJoinRequest, DataUnionSecret])
+class DataUnionJoinRequestServiceSpec extends BeanMockingSpecification {
 
 	private static final String memberAddress = "0xCCCC000000000000000000000000AAAA0000FFFF"
-	private static final String communityAddress = "0x0000000000000000000000000000000000000000"
+	private static final String contractAddress = "0x0000000000000000000000000000000000000000"
 
 	SecUser me
 	StreamrClient streamrClientMock
@@ -60,10 +60,10 @@ class CommunityJoinRequestServiceSpec extends BeanMockingSpecification {
 		key.id = "key-id"
 		key.save(validate: true, failOnError: true)
 
-		CommunitySecret secret = new CommunitySecret(
-			name: "name of the community secret",
+		DataUnionSecret secret = new DataUnionSecret(
+			name: "name of the secret",
 			secret: "secret",
-			communityAddress: communityAddress,
+			contractAddress: contractAddress,
 		)
 		secret.id = "secret-id"
 		secret.save(validate: true, failOnError: true)
@@ -71,11 +71,11 @@ class CommunityJoinRequestServiceSpec extends BeanMockingSpecification {
 
 	void "create user doesnt have ethereum id"() {
 		setup:
-		CommunityJoinRequestCommand cmd = new CommunityJoinRequestCommand(
+		DataUnionJoinRequestCommand cmd = new DataUnionJoinRequestCommand(
 			memberAddress: "0xCCCC00000000000000000000AAAAAAAAAAAAAAAA",
 		)
 		when:
-		service.create(communityAddress, cmd, me)
+		service.create(contractAddress, cmd, me)
 
 		then:
 		def e = thrown(NotFoundException)
@@ -83,47 +83,47 @@ class CommunityJoinRequestServiceSpec extends BeanMockingSpecification {
 		e.code == "NOT_FOUND"
 	}
 
-    void "create supplied with correct community secret"() {
+    void "create supplied with correct secret"() {
 		setup:
-		CommunityJoinRequestCommand cmd = new CommunityJoinRequestCommand(
+		DataUnionJoinRequestCommand cmd = new DataUnionJoinRequestCommand(
 			memberAddress: memberAddress,
 			secret: "secret",
 		)
 		when:
-		CommunityJoinRequest c = service.create(communityAddress, cmd, me)
+		DataUnionJoinRequest c = service.create(contractAddress, cmd, me)
 
 		then:
-		1 * service.ethereumService.fetchJoinPartStreamID(communityAddress) >> joinPartStream.id
+		1 * service.ethereumService.fetchJoinPartStreamID(contractAddress) >> joinPartStream.id
 		1 * streamrClientMock.publish(_, [type: "join", "addresses": [memberAddress]])
-		c.state == CommunityJoinRequest.State.ACCEPTED
+		c.state == DataUnionJoinRequest.State.ACCEPTED
     }
 
-	void "create supplied without community secret"() {
+	void "create supplied without secret"() {
 		setup:
-		CommunityJoinRequestCommand cmd = new CommunityJoinRequestCommand(
+		DataUnionJoinRequestCommand cmd = new DataUnionJoinRequestCommand(
 			memberAddress: memberAddress,
 		)
 		when:
-		CommunityJoinRequest c = service.create(communityAddress, cmd, me)
+		DataUnionJoinRequest c = service.create(contractAddress, cmd, me)
 
 		then:
-		c.state == CommunityJoinRequest.State.PENDING
+		c.state == DataUnionJoinRequest.State.PENDING
 	}
 
-	void "create supplied with incorrect community secret"() {
+	void "create supplied with incorrect secret"() {
 		setup:
-		CommunityJoinRequestCommand cmd = new CommunityJoinRequestCommand(
+		DataUnionJoinRequestCommand cmd = new DataUnionJoinRequestCommand(
 			memberAddress: memberAddress,
 			secret: "wrong",
 		)
 
 		when:
-		service.create(communityAddress, cmd, me)
+		service.create(contractAddress, cmd, me)
 
 		then:
 		def e = thrown(ApiException)
 		e.statusCode == 403
-		e.code == "INCORRECT_COMMUNITY_SECRET"
+		e.code == "INCORRECT_SECRET"
 	}
 
 	void "create sets permissions"() {
@@ -136,7 +136,7 @@ class CommunityJoinRequestServiceSpec extends BeanMockingSpecification {
 		user.id = 1
 		user.save(failOnError: true, validate: false)
 
-		CommunityJoinRequestCommand cmd = new CommunityJoinRequestCommand(
+		DataUnionJoinRequestCommand cmd = new DataUnionJoinRequestCommand(
 			memberAddress: memberAddress,
 			secret: "secret",
 		)
@@ -155,7 +155,7 @@ class CommunityJoinRequestServiceSpec extends BeanMockingSpecification {
 			name: "name",
 			description: "description",
 			ownerAddress: "0x0000000000000000000000000000000000000000",
-			beneficiaryAddress: communityAddress,
+			beneficiaryAddress: contractAddress,
 			streams: [s1, s2, s3, s4],
 			pricePerSecond: 10,
 			category: category,
@@ -163,22 +163,22 @@ class CommunityJoinRequestServiceSpec extends BeanMockingSpecification {
 			blockNumber: 40000,
 			blockIndex: 30,
 			owner: user,
-			type: Product.Type.COMMUNITY,
+			type: Product.Type.DATAUNION,
 		)
 		product.id = "product-id"
 		product.save(failOnError: true, validate: true)
 
 		when:
-		CommunityJoinRequest c = service.create(communityAddress, cmd, me)
+		DataUnionJoinRequest c = service.create(contractAddress, cmd, me)
 
 		then:
-		1 * service.ethereumService.fetchJoinPartStreamID(communityAddress) >> joinPartStream.id
+		1 * service.ethereumService.fetchJoinPartStreamID(contractAddress) >> joinPartStream.id
 		1 * streamrClientMock.publish(_, [type: "join", "addresses": [memberAddress]])
 		1 * service.permissionService.systemGrant(user, s1, Permission.Operation.STREAM_PUBLISH)
 		1 * service.permissionService.systemGrant(user, s2, Permission.Operation.STREAM_PUBLISH)
 		1 * service.permissionService.systemGrant(user, s3, Permission.Operation.STREAM_PUBLISH)
 		1 * service.permissionService.systemGrant(user, s4, Permission.Operation.STREAM_PUBLISH)
-		c.state == CommunityJoinRequest.State.ACCEPTED
+		c.state == DataUnionJoinRequest.State.ACCEPTED
 	}
 
 	void "create doesn't set permissions if they already exist"() {
@@ -191,7 +191,7 @@ class CommunityJoinRequestServiceSpec extends BeanMockingSpecification {
 		user.id = 1
 		user.save(failOnError: true, validate: false)
 
-		CommunityJoinRequestCommand cmd = new CommunityJoinRequestCommand(
+		DataUnionJoinRequestCommand cmd = new DataUnionJoinRequestCommand(
 			memberAddress: memberAddress,
 			secret: "secret",
 		)
@@ -210,7 +210,7 @@ class CommunityJoinRequestServiceSpec extends BeanMockingSpecification {
 			name: "name",
 			description: "description",
 			ownerAddress: "0x0000000000000000000000000000000000000000",
-			beneficiaryAddress: communityAddress,
+			beneficiaryAddress: contractAddress,
 			streams: [s1, s2, s3, s4],
 			pricePerSecond: 10,
 			category: category,
@@ -218,22 +218,22 @@ class CommunityJoinRequestServiceSpec extends BeanMockingSpecification {
 			blockNumber: 40000,
 			blockIndex: 30,
 			owner: user,
-			type: Product.Type.COMMUNITY,
+			type: Product.Type.DATAUNION,
 		)
 		product.id = "product-id"
 		product.save(failOnError: true, validate: true)
 
 		when:
-		CommunityJoinRequest c = service.create(communityAddress, cmd, me)
+		DataUnionJoinRequest c = service.create(contractAddress, cmd, me)
 
 		then:
-		1 * service.ethereumService.fetchJoinPartStreamID(communityAddress) >> joinPartStream.id
+		1 * service.ethereumService.fetchJoinPartStreamID(contractAddress) >> joinPartStream.id
 		1 * streamrClientMock.publish(_, [type: "join", "addresses": [memberAddress]])
 		1 * service.permissionService.check(user, s1, Permission.Operation.STREAM_PUBLISH) >> true
 		1 * service.permissionService.check(user, s2, Permission.Operation.STREAM_PUBLISH) >> true
 		1 * service.permissionService.systemGrant(user, s3, Permission.Operation.STREAM_PUBLISH)
 		1 * service.permissionService.systemGrant(user, s4, Permission.Operation.STREAM_PUBLISH)
-		c.state == CommunityJoinRequest.State.ACCEPTED
+		c.state == DataUnionJoinRequest.State.ACCEPTED
 	}
 
 	void "findStreams"() {
@@ -261,7 +261,7 @@ class CommunityJoinRequestServiceSpec extends BeanMockingSpecification {
 			name: "name",
 			description: "description",
 			ownerAddress: "0x0000000000000000000000000000000000000000",
-			beneficiaryAddress: communityAddress,
+			beneficiaryAddress: contractAddress,
 			streams: [s1, s2, s3, s1],
 			pricePerSecond: 10,
 			category: category,
@@ -269,13 +269,13 @@ class CommunityJoinRequestServiceSpec extends BeanMockingSpecification {
 			blockNumber: 40000,
 			blockIndex: 30,
 			owner: user,
-			type: Product.Type.COMMUNITY,
+			type: Product.Type.DATAUNION,
 		)
 		product.id = "product-id"
 		product.save(failOnError: true, validate: true)
 
 		when:
-		Set<Stream> streams = service.findStreams(new CommunityJoinRequest(communityAddress:  communityAddress))
+		Set<Stream> streams = service.findStreams(new DataUnionJoinRequest(contractAddress:  contractAddress))
 		then:
 		streams.size() == 3
 		streams.contains(s1)
@@ -283,23 +283,23 @@ class CommunityJoinRequestServiceSpec extends BeanMockingSpecification {
 		streams.contains(s3)
 	}
 
-	void "findCommunityMembers"() {
+	void "findMembers"() {
 		setup:
-		CommunityJoinRequest c1 = new CommunityJoinRequest(
+		DataUnionJoinRequest c1 = new DataUnionJoinRequest(
 			user: new SecUser(),
 			memberAddress: "0x0000000000000000000000000000000000000000",
-			communityAddress: communityAddress,
+			contractAddress: contractAddress,
 		)
 		c1.save()
-		CommunityJoinRequest c2 = new CommunityJoinRequest(
+		DataUnionJoinRequest c2 = new DataUnionJoinRequest(
 			user: new SecUser(),
 			memberAddress: "0x0000000000000000000000000000000000000000",
-			communityAddress: communityAddress,
+			contractAddress: contractAddress,
 		)
 		c2.save()
 
 		when:
-		Set<SecUser> members = service.findCommunityMembers(communityAddress)
+		Set<SecUser> members = service.findMembers(contractAddress)
 
 		then:
 		members.size() == 2
@@ -330,7 +330,7 @@ class CommunityJoinRequestServiceSpec extends BeanMockingSpecification {
 			name: "name",
 			description: "description",
 			ownerAddress: "0x0000000000000000000000000000000000000000",
-			beneficiaryAddress: communityAddress,
+			beneficiaryAddress: contractAddress,
 			streams: [s1, s2, s3, s4],
 			pricePerSecond: 10,
 			category: category,
@@ -338,29 +338,29 @@ class CommunityJoinRequestServiceSpec extends BeanMockingSpecification {
 			blockNumber: 40000,
 			blockIndex: 30,
 			owner: user,
-			type: Product.Type.COMMUNITY,
+			type: Product.Type.DATAUNION,
 		)
 		product.id = "product-id"
 		product.save(failOnError: true, validate: true)
 
-		CommunityJoinRequest r = new CommunityJoinRequest(
+		DataUnionJoinRequest r = new DataUnionJoinRequest(
 			memberAddress: "0xCCCC000000000000000000000000AAAA0000FFFF",
-			communityAddress: communityAddress,
+			contractAddress: contractAddress,
 			user: me,
-			state: CommunityJoinRequest.State.PENDING,
+			state: DataUnionJoinRequest.State.PENDING,
 			dateCreated: new Date(),
 			lastUpdated: new Date(),
 		)
 		r.save(failOnError: true, validate: true)
 
-		UpdateCommunityJoinRequestCommand cmd = new UpdateCommunityJoinRequestCommand(
+		UpdateDataUnionJoinRequestCommand cmd = new UpdateDataUnionJoinRequestCommand(
 			state: "ACCEPTED",
 		)
 
 		when:
-		service.update(communityAddress, r.id, cmd)
+		service.update(contractAddress, r.id, cmd)
 		then:
-		1 * service.ethereumService.fetchJoinPartStreamID(communityAddress) >> joinPartStream.id
+		1 * service.ethereumService.fetchJoinPartStreamID(contractAddress) >> joinPartStream.id
 		1 * streamrClientMock.publish(_, [type: "join", "addresses": [memberAddress]])
 		1 * service.permissionService.systemGrant(user, s1, Permission.Operation.STREAM_PUBLISH)
 		1 * service.permissionService.systemGrant(user, s2, Permission.Operation.STREAM_PUBLISH)
@@ -370,22 +370,22 @@ class CommunityJoinRequestServiceSpec extends BeanMockingSpecification {
 
 	void "update rejects accepted state"() {
 		setup:
-		CommunityJoinRequest r = new CommunityJoinRequest(
+		DataUnionJoinRequest r = new DataUnionJoinRequest(
 			memberAddress: "0xCCCC000000000000000000000000AAAA0000FFFF",
-			communityAddress: communityAddress,
+			contractAddress: contractAddress,
 			user: me,
-			state: CommunityJoinRequest.State.ACCEPTED,
+			state: DataUnionJoinRequest.State.ACCEPTED,
 			dateCreated: new Date(),
 			lastUpdated: new Date(),
 		)
 		r.save(failOnError: true, validate: true)
 
-		UpdateCommunityJoinRequestCommand cmd = new UpdateCommunityJoinRequestCommand(
+		UpdateDataUnionJoinRequestCommand cmd = new UpdateDataUnionJoinRequestCommand(
 			state: "ACCEPTED",
 		)
 
 		when:
-		service.update(communityAddress, r.id, cmd)
+		service.update(contractAddress, r.id, cmd)
 		then:
 		def e = thrown(ApiException)
 		e.statusCode == 400
@@ -394,22 +394,22 @@ class CommunityJoinRequestServiceSpec extends BeanMockingSpecification {
 
 	void "update rejects invalid state"() {
 		setup:
-		CommunityJoinRequest r = new CommunityJoinRequest(
+		DataUnionJoinRequest r = new DataUnionJoinRequest(
 			memberAddress: "0xCCCC000000000000000000000000AAAA0000FFFF",
-			communityAddress: communityAddress,
+			contractAddress: contractAddress,
 			user: me,
-			state: CommunityJoinRequest.State.ACCEPTED,
+			state: DataUnionJoinRequest.State.ACCEPTED,
 			dateCreated: new Date(),
 			lastUpdated: new Date(),
 		)
 		r.save(failOnError: true, validate: true)
 
-		UpdateCommunityJoinRequestCommand cmd = new UpdateCommunityJoinRequestCommand(
+		UpdateDataUnionJoinRequestCommand cmd = new UpdateDataUnionJoinRequestCommand(
 			state: "NOT_IN_OUR_ENUM",
 		)
 
 		when:
-		service.update(communityAddress, r.id, cmd)
+		service.update(contractAddress, r.id, cmd)
 		then:
 		def e = thrown(ApiException)
 		e.statusCode == 400

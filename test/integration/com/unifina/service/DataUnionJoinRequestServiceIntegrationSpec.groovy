@@ -3,8 +3,8 @@ package com.unifina.service
 import com.streamr.client.StreamrClient
 import com.streamr.client.options.StreamrClientOptions
 import com.unifina.api.NotFoundException
-import com.unifina.api.UpdateCommunityJoinRequestCommand
-import com.unifina.domain.community.CommunityJoinRequest
+import com.unifina.api.UpdateDataUnionJoinRequestCommand
+import com.unifina.domain.dataunion.DataUnionJoinRequest
 import com.unifina.domain.data.Stream
 import com.unifina.domain.marketplace.Category
 import com.unifina.domain.marketplace.Product
@@ -15,12 +15,12 @@ import com.unifina.domain.signalpath.ModuleCategory
 import spock.lang.Specification
 
 // This is an integration test because Grails doesn't support criteria queries in unit tests
-class CommunityJoinRequestServiceIntegrationSpec extends Specification {
-	CommunityJoinRequestService service = new CommunityJoinRequestService()
+class DataUnionJoinRequestServiceIntegrationSpec extends Specification {
+	DataUnionJoinRequestService service = new DataUnionJoinRequestService()
 	SecUser me
 	com.streamr.client.rest.Stream joinPartStream
 	Category category
-	final String communityAddress = "0x0000000000000000000000000000000000000000"
+	final String contractAddress = "0x0000000000000000000000000000000000000000"
 	StreamrClient streamrClientMock
 
 	void setup() {
@@ -54,35 +54,35 @@ class CommunityJoinRequestServiceIntegrationSpec extends Specification {
 
 	void "findAll"() {
 		setup:
-		CommunityJoinRequest r1 = new CommunityJoinRequest(
+		DataUnionJoinRequest r1 = new DataUnionJoinRequest(
 			memberAddress: "0xCCCC000000000000000000000000AAAA0000AAAA",
-			communityAddress: communityAddress,
+			contractAddress: contractAddress,
 			user: me,
-			state: CommunityJoinRequest.State.PENDING,
+			state: DataUnionJoinRequest.State.PENDING,
 			dateCreated: new Date(),
 			lastUpdated: new Date(),
 		)
 		r1.save(failOnError: true, validate: true)
-		CommunityJoinRequest r2 = new CommunityJoinRequest(
+		DataUnionJoinRequest r2 = new DataUnionJoinRequest(
 			memberAddress: "0xCCCC000000000000000000000000AAAA0000FFFF",
-			communityAddress: communityAddress,
+			contractAddress: contractAddress,
 			user: me,
-			state: CommunityJoinRequest.State.ACCEPTED,
+			state: DataUnionJoinRequest.State.ACCEPTED,
 			dateCreated: new Date(),
 			lastUpdated: new Date(),
 		)
 		r2.save(failOnError: true, validate: true)
-		CommunityJoinRequest r3 = new CommunityJoinRequest(
+		DataUnionJoinRequest r3 = new DataUnionJoinRequest(
 			memberAddress: "0xCCCC000000000000000000000000AAAA0000CCCC",
-			communityAddress: "0x000000FF00000FF000FF00000FF00000FF0000FF",
+			contractAddress: "0x000000FF00000FF000FF00000FF00000FF0000FF",
 			user: me,
-			state: CommunityJoinRequest.State.REJECTED,
+			state: DataUnionJoinRequest.State.REJECTED,
 			dateCreated: new Date(),
 			lastUpdated: new Date(),
 		)
 		r3.save(failOnError: true, validate: true)
 		when:
-		List<CommunityJoinRequest> results = service.findAll(communityAddress, null)
+		List<DataUnionJoinRequest> results = service.findAll(contractAddress, null)
 		then:
 		results.size() == 2
 		results.containsAll([r1, r2])
@@ -90,35 +90,35 @@ class CommunityJoinRequestServiceIntegrationSpec extends Specification {
 
 	void "findAll with state"() {
 		setup:
-		CommunityJoinRequest r1 = new CommunityJoinRequest(
+		DataUnionJoinRequest r1 = new DataUnionJoinRequest(
 			memberAddress: "0xCCCC000000000000000000000000AAAA0000AAAA",
-			communityAddress: communityAddress,
+			contractAddress: contractAddress,
 			user: me,
-			state: CommunityJoinRequest.State.PENDING,
+			state: DataUnionJoinRequest.State.PENDING,
 			dateCreated: new Date(),
 			lastUpdated: new Date(),
 		)
 		r1.save(failOnError: true, validate: true)
-		CommunityJoinRequest r2 = new CommunityJoinRequest(
+		DataUnionJoinRequest r2 = new DataUnionJoinRequest(
 			memberAddress: "0xCCCC000000000000000000000000AAAA0000FFFF",
-			communityAddress: communityAddress,
+			contractAddress: contractAddress,
 			user: me,
-			state: CommunityJoinRequest.State.ACCEPTED,
+			state: DataUnionJoinRequest.State.ACCEPTED,
 			dateCreated: new Date(),
 			lastUpdated: new Date(),
 		)
 		r2.save(failOnError: true, validate: true)
-		CommunityJoinRequest r3 = new CommunityJoinRequest(
+		DataUnionJoinRequest r3 = new DataUnionJoinRequest(
 			memberAddress: "0xCCCC000000000000000000000000AAAA0000CCCC",
-			communityAddress: "0x0000000000000000000000000000000000000000",
+			contractAddress: "0x0000000000000000000000000000000000000000",
 			user: me,
-			state: CommunityJoinRequest.State.REJECTED,
+			state: DataUnionJoinRequest.State.REJECTED,
 			dateCreated: new Date(),
 			lastUpdated: new Date(),
 		)
 		r3.save(failOnError: true, validate: true)
 		when:
-		List<CommunityJoinRequest> results = service.findAll(communityAddress, CommunityJoinRequest.State.PENDING)
+		List<DataUnionJoinRequest> results = service.findAll(contractAddress, DataUnionJoinRequest.State.PENDING)
 		then:
 		results.size() == 1
 		results.get(0).memberAddress == "0xCCCC000000000000000000000000AAAA0000AAAA"
@@ -126,81 +126,81 @@ class CommunityJoinRequestServiceIntegrationSpec extends Specification {
 
 	void "find"() {
 		setup:
-		CommunityJoinRequest r1 = new CommunityJoinRequest(
+		DataUnionJoinRequest r1 = new DataUnionJoinRequest(
 			memberAddress: "0xCCCC000000000000000000000000AAAA0000AAAA",
-			communityAddress: communityAddress,
+			contractAddress: contractAddress,
 			user: me,
-			state: CommunityJoinRequest.State.PENDING,
+			state: DataUnionJoinRequest.State.PENDING,
 			dateCreated: new Date(),
 			lastUpdated: new Date(),
 		)
 		r1.save(failOnError: true, validate: true)
-		CommunityJoinRequest r2 = new CommunityJoinRequest(
+		DataUnionJoinRequest r2 = new DataUnionJoinRequest(
 			memberAddress: "0xCCCC000000000000000000000000AAAA0000FFFF",
-			communityAddress: communityAddress,
+			contractAddress: contractAddress,
 			user: me,
-			state: CommunityJoinRequest.State.PENDING,
+			state: DataUnionJoinRequest.State.PENDING,
 			dateCreated: new Date(),
 			lastUpdated: new Date(),
 		)
 		r2.save(failOnError: true, validate: true)
 		when:
-		CommunityJoinRequest r = service.find(communityAddress, r1.id)
+		DataUnionJoinRequest r = service.find(contractAddress, r1.id)
 		then:
-		r.communityAddress == communityAddress
+		r.contractAddress == contractAddress
 		r.memberAddress == "0xCCCC000000000000000000000000AAAA0000AAAA"
 	}
 
 	void "update updates pending state to accepted"() {
 		setup:
-		CommunityJoinRequest r = new CommunityJoinRequest(
+		DataUnionJoinRequest r = new DataUnionJoinRequest(
 			memberAddress: "0xCCCC000000000000000000000000AAAA0000FFFF",
-			communityAddress: communityAddress,
+			contractAddress: contractAddress,
 			user: me,
-			state: CommunityJoinRequest.State.PENDING,
+			state: DataUnionJoinRequest.State.PENDING,
 			dateCreated: new Date(),
 			lastUpdated: new Date(),
 		)
 		r.save(failOnError: true, validate: true)
 
-		UpdateCommunityJoinRequestCommand cmd = new UpdateCommunityJoinRequestCommand(
+		UpdateDataUnionJoinRequestCommand cmd = new UpdateDataUnionJoinRequestCommand(
 			state: "ACCEPTED",
 		)
 
 		when:
-		def c = service.update(communityAddress, r.id, cmd)
+		def c = service.update(contractAddress, r.id, cmd)
 		then:
-		1 * service.ethereumService.fetchJoinPartStreamID(communityAddress) >> joinPartStream.id
+		1 * service.ethereumService.fetchJoinPartStreamID(contractAddress) >> joinPartStream.id
 		1 * streamrClientMock.publish(_, [type: "join", addresses: [r.memberAddress]])
-		c.state == CommunityJoinRequest.State.ACCEPTED
+		c.state == DataUnionJoinRequest.State.ACCEPTED
 		// no changes below
-		c.communityAddress == communityAddress
+		c.contractAddress == contractAddress
 		c.memberAddress == "0xCCCC000000000000000000000000AAAA0000FFFF"
 		c.user == me
 	}
 
 	void "update updates pending state to rejected"() {
 		setup:
-		CommunityJoinRequest r = new CommunityJoinRequest(
+		DataUnionJoinRequest r = new DataUnionJoinRequest(
 			memberAddress: "0xCCCC000000000000000000000000AAAA0000FFFF",
-			communityAddress: communityAddress,
+			contractAddress: contractAddress,
 			user: me,
-			state: CommunityJoinRequest.State.PENDING,
+			state: DataUnionJoinRequest.State.PENDING,
 			dateCreated: new Date(),
 			lastUpdated: new Date(),
 		)
 		r.save(failOnError: true, validate: true)
 
-		UpdateCommunityJoinRequestCommand cmd = new UpdateCommunityJoinRequestCommand(
+		UpdateDataUnionJoinRequestCommand cmd = new UpdateDataUnionJoinRequestCommand(
 			state: "REJECTED",
 		)
 
 		when:
-		def c = service.update(communityAddress, r.id, cmd)
+		def c = service.update(contractAddress, r.id, cmd)
 		then:
-		c.state == CommunityJoinRequest.State.REJECTED
+		c.state == DataUnionJoinRequest.State.REJECTED
 		// no changes below
-		c.communityAddress == communityAddress
+		c.contractAddress == contractAddress
 		c.memberAddress == "0xCCCC000000000000000000000000AAAA0000FFFF"
 		c.user == me
 	}
@@ -218,7 +218,7 @@ class CommunityJoinRequestServiceIntegrationSpec extends Specification {
 			name: "name",
 			description: "description",
 			ownerAddress: "0x0000000000000000000000000000000000000000",
-			beneficiaryAddress: communityAddress,
+			beneficiaryAddress: contractAddress,
 			streams: [s1, s2, s3, s4],
 			pricePerSecond: 10,
 			category: category,
@@ -226,29 +226,29 @@ class CommunityJoinRequestServiceIntegrationSpec extends Specification {
 			blockNumber: 40000,
 			blockIndex: 30,
 			owner: me,
-			type: Product.Type.COMMUNITY,
+			type: Product.Type.DATAUNION,
 		)
 		product.save(failOnError: true, validate: true)
 
-		CommunityJoinRequest r = new CommunityJoinRequest(
+		DataUnionJoinRequest r = new DataUnionJoinRequest(
 			memberAddress: "0xCCCC000000000000000000000000AAAA0000FFFF",
-			communityAddress: communityAddress,
+			contractAddress: contractAddress,
 			user: me,
-			state: CommunityJoinRequest.State.PENDING,
+			state: DataUnionJoinRequest.State.PENDING,
 			dateCreated: new Date(),
 			lastUpdated: new Date(),
 		)
 		r.save(failOnError: true, validate: true)
 		when:
-		service.delete(communityAddress, r.id)
+		service.delete(contractAddress, r.id)
 		then:
-		1 * service.ethereumService.fetchJoinPartStreamID(communityAddress) >> joinPartStream.id
+		1 * service.ethereumService.fetchJoinPartStreamID(contractAddress) >> joinPartStream.id
 		1 * streamrClientMock.publish(_, [type: "part", addresses: [r.memberAddress]])
 		1 * service.permissionService.systemRevoke(me, s1, Permission.Operation.STREAM_PUBLISH)
 		1 * service.permissionService.systemRevoke(me, s2, Permission.Operation.STREAM_PUBLISH)
 		1 * service.permissionService.systemRevoke(me, s3, Permission.Operation.STREAM_PUBLISH)
 		1 * service.permissionService.systemRevoke(me, s4, Permission.Operation.STREAM_PUBLISH)
-		CommunityJoinRequest.findById(r.id) == null
+		DataUnionJoinRequest.findById(r.id) == null
 	}
 
 	void "delete throws NotFoundException"() {

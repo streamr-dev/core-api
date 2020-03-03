@@ -9,14 +9,14 @@ import spock.lang.Specification
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
 
-class CommunityOperatorServiceSpec extends Specification {
+class DataUnionOperatorServiceSpec extends Specification {
 	private URI httpBinEndpoint = URI.create("http://127.0.0.1:0")
 	private final HttpBin httpBin = new HttpBin(httpBinEndpoint)
-	private CommunityOperatorService service
+	private DataUnionOperatorService service
 
 	void setup() {
 		Logger.getRootLogger().setLevel(Level.OFF)
-		Logger.getLogger(CommunityOperatorService.class).setLevel(Level.OFF)
+		Logger.getLogger(DataUnionOperatorService.class).setLevel(Level.OFF)
 		httpBin.start()
 		httpBinEndpoint = new URI(
 			httpBinEndpoint.getScheme(),
@@ -27,7 +27,7 @@ class CommunityOperatorServiceSpec extends Specification {
 			httpBinEndpoint.getQuery(),
 			httpBinEndpoint.getFragment()
 		)
-		service = new CommunityOperatorService()
+		service = new DataUnionOperatorService()
 		service.grailsApplication = getGrailsApplication()
 	}
 
@@ -42,7 +42,7 @@ class CommunityOperatorServiceSpec extends Specification {
 		String url = httpBinEndpoint.toString() + "/stream/1"
 		String expected = """{"args":{},"headers":{"Accept":"application/json","Connection":"keep-alive","User-Agent"""
 		when:
-		CommunityOperatorService.ProxyResponse result = service.proxy(url)
+		DataUnionOperatorService.ProxyResponse result = service.proxy(url)
 		then:
 		result.body.startsWith(expected)
 		result.statusCode == 200
@@ -53,13 +53,13 @@ class CommunityOperatorServiceSpec extends Specification {
 		service.afterPropertiesSet()
 		String url = httpBinEndpoint.toString() + "/status/400"
 		when:
-		CommunityOperatorService.ProxyResponse result = service.proxy(url)
+		DataUnionOperatorService.ProxyResponse result = service.proxy(url)
 		then:
 		result.body == ""
 		result.statusCode == 400
 	}
 
-	void "test community server not responding"() {
+	void "test server not responding"() {
 		setup:
 		service.afterPropertiesSet()
 		ProxyException e
@@ -70,7 +70,7 @@ class CommunityOperatorServiceSpec extends Specification {
 			e = err
 		}
 		then:
-		e.message == "Community server is busy or not responding"
+		e.message == "Data Union server is busy or not responding"
 		e.code == "PROXY_ERROR"
 		e.statusCode == 503
 		e.extraHeaders == ["Retry-After": "60"]
@@ -81,7 +81,7 @@ class CommunityOperatorServiceSpec extends Specification {
 		service.afterPropertiesSet()
 		String url = httpBinEndpoint.toString() + "/status/404"
 		when:
-		CommunityOperatorService.ProxyResponse result = service.proxy(url)
+		DataUnionOperatorService.ProxyResponse result = service.proxy(url)
 		then:
 		result.body == ""
 		result.statusCode == 404
@@ -92,18 +92,18 @@ class CommunityOperatorServiceSpec extends Specification {
 		service.afterPropertiesSet()
 		String url = httpBinEndpoint.toString() + "/status/500"
 		when:
-		CommunityOperatorService.ProxyResponse result = service.proxy(url)
+		DataUnionOperatorService.ProxyResponse result = service.proxy(url)
 		then:
 		result.body == ""
 		result.statusCode == 500
 	}
 
 	static class Runner implements Runnable {
-		CommunityOperatorService service
+		DataUnionOperatorService service
 		String url
-		CommunityOperatorService.ProxyResponse response
+		DataUnionOperatorService.ProxyResponse response
 
-		Runner(CommunityOperatorService service, String url) {
+		Runner(DataUnionOperatorService service, String url) {
 			this.service = service
 			this.url = url
 		}
@@ -149,6 +149,6 @@ class CommunityOperatorServiceSpec extends Specification {
 		then:
 		def e = thrown(ProxyException)
 		e.getStatusCode() == 504
-		e.getMessage() == "Community server gateway timeout"
+		e.getMessage() == "Data Union server gateway timeout"
 	}
 }

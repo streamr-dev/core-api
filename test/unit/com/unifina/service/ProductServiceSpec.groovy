@@ -297,7 +297,7 @@ class ProductServiceSpec extends Specification {
 		product.dateCreated == product.lastUpdated
 	}
 
-	void "create() invokes permissionService#systemGrantAllProduct"() {
+	void "create() invokes permissionService#systemGrant"() {
 		setupStreams()
 		def permissionService = service.permissionService = Mock(PermissionService)
 
@@ -435,11 +435,11 @@ class ProductServiceSpec extends Specification {
 		product.dateCreated == product.lastUpdated
 	}
 
-	void "create() can create community products"() {
+	void "create() can create data unions"() {
 		setupStreams()
 		service.permissionService = Stub(PermissionService)
 
-		def validCommand = new CreateProductCommand(type: "COMMUNITY")
+		def validCommand = new CreateProductCommand(type: "DATAUNION")
 		def user = new SecUser()
 		user.name = "Arnold Schwarzenegger"
 
@@ -450,7 +450,7 @@ class ProductServiceSpec extends Specification {
 		Product.findAll() == [product]
 
 		and:
-		product.toMap().type == "COMMUNITY"
+		product.toMap().type == "DATAUNION"
 	}
 
 	void "update() throws ValidationException if command object does not pass validation"() {
@@ -1179,11 +1179,11 @@ class ProductServiceSpec extends Specification {
 		thrown(NotPermittedException)
 	}
 
-	void "add stream to product and grant community product stream permissions"() {
+	void "add stream to product and grant data union product stream permissions"() {
 		setup:
 		service.subscriptionService = Stub(SubscriptionService)
 		service.permissionService = Mock(PermissionService)
-		service.communityJoinRequestService = Mock(CommunityJoinRequestService)
+		service.dataUnionJoinRequestService = Mock(DataUnionJoinRequestService)
 		setupStreams()
 		SecUser user = new SecUser(
 			username: "user@domain.com",
@@ -1204,7 +1204,7 @@ class ProductServiceSpec extends Specification {
 			blockNumber: 40000,
 			blockIndex: 30,
 			owner: user,
-			type: Product.Type.COMMUNITY,
+			type: Product.Type.DATAUNION,
 		)
 		product.id = "product-id"
 		product.save(failOnError: true, validate: true)
@@ -1212,16 +1212,16 @@ class ProductServiceSpec extends Specification {
 		when:
 		service.addStreamToProduct(product, s1, user)
 		then:
-		1 * service.communityJoinRequestService.findCommunityMembers("0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF") >> [user]
+		1 * service.dataUnionJoinRequestService.findMembers("0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF") >> [user]
 		1 * service.permissionService.check(user, s1, Permission.Operation.STREAM_PUBLISH) >> false
 		1 * service.permissionService.systemGrant(user, s1, Permission.Operation.STREAM_PUBLISH)
 	}
 
-	void "remove stream from product and revoke community product stream permissions"() {
+	void "remove stream from product and revoke data union stream permissions"() {
 		setup:
 		service.subscriptionService = Stub(SubscriptionService)
 		service.permissionService = Mock(PermissionService)
-		service.communityJoinRequestService = Mock(CommunityJoinRequestService)
+		service.dataUnionJoinRequestService = Mock(DataUnionJoinRequestService)
 		setupStreams()
 		SecUser user = new SecUser(
 			username: "user@domain.com",
@@ -1242,7 +1242,7 @@ class ProductServiceSpec extends Specification {
 			blockNumber: 40000,
 			blockIndex: 30,
 			owner: user,
-			type: Product.Type.COMMUNITY,
+			type: Product.Type.DATAUNION,
 		)
 		product.id = "product-id"
 		product.save(failOnError: true, validate: true)
@@ -1250,7 +1250,7 @@ class ProductServiceSpec extends Specification {
 		when:
 		service.removeStreamFromProduct(product, s1)
 		then:
-		1 * service.communityJoinRequestService.findCommunityMembers("0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF") >> [user]
+		1 * service.dataUnionJoinRequestService.findMembers("0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF") >> [user]
 		1 * service.permissionService.check(user, s1, Permission.Operation.STREAM_PUBLISH) >> true
 		1 * service.permissionService.systemRevoke(user, s1, Permission.Operation.STREAM_PUBLISH)
 	}

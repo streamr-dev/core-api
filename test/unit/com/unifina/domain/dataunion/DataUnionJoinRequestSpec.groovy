@@ -1,13 +1,13 @@
-package com.unifina.domain.community
+package com.unifina.domain.dataunion
 
 import com.unifina.domain.security.SecUser
 import grails.test.mixin.TestFor
 import spock.lang.Specification
 
 
-@TestFor(CommunityJoinRequest)
-class CommunityJoinRequestSpec extends Specification {
-	CommunityJoinRequest req
+@TestFor(DataUnionJoinRequest)
+class DataUnionJoinRequestSpec extends Specification {
+	DataUnionJoinRequest req
 	SecUser me
 
     def setup() {
@@ -17,18 +17,18 @@ class CommunityJoinRequestSpec extends Specification {
 			password: "123",
 			name: "Streamr User",
 		)
-		req = new CommunityJoinRequest(
+		req = new DataUnionJoinRequest(
 			id: "1",
 			user: me,
 			memberAddress: "0xfffFFffFfffFffffFFFFffffFFFFfffFFFFfffFf",
-			communityAddress: "0x0123456789abcdefABCDEF000000000000000000",
-			state: CommunityJoinRequest.State.PENDING,
+			contractAddress: "0x0123456789abcdefABCDEF000000000000000000",
+			state: DataUnionJoinRequest.State.PENDING,
 			dateCreated: new Date(),
 			lastUpdated: new Date(),
 		)
     }
 
-	void "valid CommunityJoinRequest validates ok"() {
+	void "valid DataUnionJoinRequest validates ok"() {
 		setup:
 		req.dateCreated = new Date()
 		req.lastUpdated = new Date()
@@ -78,30 +78,30 @@ class CommunityJoinRequestSpec extends Specification {
 		req.errors.fieldErrors.get(0).field == "memberAddress"
 	}
 
-	void "communityAddress must be an Ethereum address"() {
+	void "contractAddress must be an Ethereum address"() {
 		setup:
 		req.dateCreated = new Date()
 		req.lastUpdated = new Date()
 		when:
-		req.communityAddress = "x"
+		req.contractAddress = "x"
 		def result = req.validate()
 		then:
 		!result
 		req.errors.errorCount == 1
-		req.errors.fieldErrors.get(0).field == "communityAddress"
+		req.errors.fieldErrors.get(0).field == "contractAddress"
 	}
 
-	void "communityAddress cannot be null"() {
+	void "contractAddress cannot be null"() {
 		setup:
 		req.dateCreated = new Date()
 		req.lastUpdated = new Date()
 		when:
-		req.communityAddress = null
+		req.contractAddress = null
 		def result = req.validate()
 		then:
 		!result
 		req.errors.errorCount == 1
-		req.errors.fieldErrors.get(0).field == "communityAddress"
+		req.errors.fieldErrors.get(0).field == "contractAddress"
 	}
 
 	void "state cannot be null"() {
