@@ -678,7 +678,7 @@ class ProductServiceSpec extends Specification {
 		when:
 		service.addStreamToProduct(product, s4, user)
 		then:
-		1 * permissionService.check(user, s4, Permission.Operation.STREAM_SHARE)
+		1 * permissionService.verify(user, s4, Permission.Operation.STREAM_SHARE)
 	}
 
 	void "addStreamToProduct() adds Stream to Product"() {
