@@ -240,7 +240,7 @@ class Streams {
             .methodAndPath('POST', `streams/${id}/permissions`)
             .withBody({
                 anonymous: true,
-                operation: 'read'
+                operation: 'stream_get'
             })
     }
 

@@ -12,7 +12,7 @@ class StreamListParams extends ListParams {
 
 	StreamListParams() {
 		super()
-		operation = Permission.Operation.STREAM_SHARE
+		operation = Permission.Operation.STREAM_GET
 	}
 
 	static constraints = {

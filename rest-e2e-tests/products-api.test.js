@@ -1078,7 +1078,7 @@ describe('Products API', () => {
             await assertResponseIsError(response, 404, 'NOT_FOUND', 'Product')
         })
 
-        it('requires product_edit permission on Product', async () => {
+        it('requires product_delete permission on Product', async () => {
             const response = await Streamr.api.v1.products
                 .removeStream(createdProductId, streamId3)
                 .withApiKey(AUTH_TOKEN_2)
@@ -1087,7 +1087,7 @@ describe('Products API', () => {
 
             assert.equal(response.status, 403)
             assert.equal(json.code, 'FORBIDDEN')
-            assert.equal(json.operation, 'product_edit')
+            assert.equal(json.operation, 'product_delete')
         })
 
         it('requires existing Stream', async () => {
@@ -1156,7 +1156,7 @@ describe('Products API', () => {
             })
 
             it('responds with expected Permissions', () => {
-                assert.equal(json.length, 3)
+                assert.equal(json.length, 4)
                 json.forEach(p => assertIsPermission(p))
                 assert.deepEqual(json.map(p => p.operation), ['product_get', 'product_edit', 'product_delete', 'product_share'])
             })

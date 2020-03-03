@@ -16,7 +16,7 @@ class ProductListParams extends ListParams {
 
 	ProductListParams() {
 		super()
-		operation = Permission.Operation.PRODUCT_SHARE
+		operation = Permission.Operation.PRODUCT_GET
 	}
 
 	static constraints = {
