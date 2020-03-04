@@ -3,9 +3,12 @@
 set -e
 
 sudo ifconfig docker0 10.200.10.1/24
+
 git clone https://github.com/streamr-dev/streamr-docker-dev.git
+
 sed -i -e "s#${OWNER}/${IMAGE_NAME}:dev#${OWNER}/${IMAGE_NAME}:local#g" "$TRAVIS_BUILD_DIR/streamr-docker-dev/docker-compose.override.yml"
-"$TRAVIS_BUILD_DIR/streamr-docker-dev/streamr-docker-dev/bin.sh" start 5
+
+"$TRAVIS_BUILD_DIR/streamr-docker-dev/streamr-docker-dev/bin.sh" start --wait
 
 wait_time=10
 for ((i = 0; i < 5; i++)); do

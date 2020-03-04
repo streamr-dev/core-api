@@ -15,6 +15,7 @@ import com.unifina.security.StreamrApi
 import com.unifina.service.EthereumIntegrationKeyService
 import com.unifina.service.PermissionService
 import com.unifina.service.SignupCodeService
+import com.unifina.service.StreamService
 import com.unifina.utils.EmailValidator
 import com.unifina.utils.EthereumAddressValidator
 import grails.converters.JSON
@@ -26,6 +27,7 @@ class PermissionApiController {
 	PermissionService permissionService
 	SignupCodeService signupCodeService
 	EthereumIntegrationKeyService ethereumIntegrationKeyService
+	StreamService streamService
 	def mailService
 
 	/**
@@ -37,7 +39,12 @@ class PermissionApiController {
 		if (!resourceClass) { throw new IllegalArgumentException("Missing resource class") }
 		if (!grailsApplication.isDomainClass(resourceClass)) { throw new IllegalArgumentException("${resourceClass.simpleName} is not a domain class!") }
 
-		def res = resourceClass.get(resourceId)
+		def res
+		if (Stream.isAssignableFrom(resourceClass)) {
+			res = streamService.getStream(resourceId)
+		} else {
+			res = resourceClass.get(resourceId)
+		}
 		if (!res) {
 			throw new NotFoundException(resourceClass.simpleName, resourceId.toString())
 		} else if (requireSharePermission && !permissionService.canShare(request.apiUser ?: request.apiKey, res)) {
@@ -140,8 +147,9 @@ class PermissionApiController {
 		} else {
 			// incoming "username" is either SecUser.username or SignupInvite.username (possibly of a not yet created SignupInvite)
 			def user = SecUser.findByUsername(username)
-			if (op == Operation.READ) { // quick fix for sending only one email
-				if (user) {
+
+			if (user) {
+				if (op == Operation.READ) { // quick fix for sending only one email
 					if (EmailValidator.validate(user.username)) {
 						String sharer = request.apiUser?.username ?: "Streamr user"
 						String resource = resource(params.resourceClass)
@@ -155,51 +163,50 @@ class PermissionApiController {
 							html g.render(
 								template: "/emails/email_share_resource",
 								model: [
-									sharer: sharer,
+									sharer  : sharer,
 									resource: resource,
-									name: name,
-									link: link,
+									name    : name,
+									link    : link,
 								],
 								plugin: "unifina-core"
 							)
 						}
 					}
+				}
+			} else {
+				if (EthereumAddressValidator.validate(username)) {
+					user = ethereumIntegrationKeyService.createEthereumUser(username)
 				} else {
-					if (EthereumAddressValidator.validate(username)) {
-						user = ethereumIntegrationKeyService.createEthereumUser(username)
-					} else {
-						def invite = SignupInvite.findByUsername(username)
-						if (!invite) {
-							invite = signupCodeService.create(username)
-							String sharer = request.apiUser?.username ?: "Streamr user"
-							String resource = resource(params.resourceClass)
-							String name = resourceName(params.resourceClass, params.resourceId)
-							String emailSubject = emailSubject(sharer, resource)
-							mailService.sendMail {
-								from grailsApplication.config.unifina.email.sender
-								to invite.username
-								subject emailSubject
-								html g.render(
-									template: "/emails/email_share_resource_invite",
-									model: [
-										invite: invite,
-										sharer: sharer,
-										resource: resource,
-										name: name,
-									],
-									plugin: "unifina-core"
-								)
-							}
-							invite.sent = true
-							invite.save()
+					def invite = SignupInvite.findByUsername(username)
+					if (!invite) {
+						invite = signupCodeService.create(username)
+						String sharer = request.apiUser?.username ?: "Streamr user"
+						String resource = resource(params.resourceClass)
+						String name = resourceName(params.resourceClass, params.resourceId)
+						String emailSubject = emailSubject(sharer, resource)
+						mailService.sendMail {
+							from grailsApplication.config.unifina.email.sender
+							to invite.username
+							subject emailSubject
+							html g.render(
+								template: "/emails/email_share_resource_invite",
+								model: [
+									invite: invite,
+									sharer: sharer,
+									resource: resource,
+									name: name,
+								],
+								plugin: "unifina-core"
+							)
 						}
-
-						// permissionService handles SecUsers and SignupInvitations equally
-						user = invite
+						invite.sent = true
+						invite.save()
 					}
+
+					// permissionService handles SecUsers and SignupInvitations equally
+					user = invite
 				}
 			}
-
 
 			useResource(params.resourceClass, params.resourceId) { res ->
 				def grantor = request.apiUser

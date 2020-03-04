@@ -19,14 +19,14 @@ import org.springframework.beans.factory.InitializingBean
 import java.nio.charset.StandardCharsets
 
 /**
- * Engine and editor proxies the following endpoints to the Community Product server:
+ * Engine and editor proxies the following endpoints to the Data Union server:
  * <p>
- * GET /communities/{communityAddress}/stats: returns Operator stats.
- * GET /communities/{communityAddress}/members: returns list of members
- * GET /communities/{communityAddress}/members/{memberAddress}: returns individual member stats (such as balances and withdraw proofs)
+ * GET /dataunions/{contractAddress}/stats: returns Operator stats.
+ * GET /dataunions/{contractAddress}/members: returns list of members
+ * GET /dataunions/{contractAddress}/members/{memberAddress}: returns individual member stats (such as balances and withdraw proofs)
  */
-public class CommunityOperatorService implements InitializingBean {
-	private static final Logger log = LogManager.getLogger(CommunityOperatorService.class);
+public class DataUnionOperatorService implements InitializingBean {
+	private static final Logger log = LogManager.getLogger(DataUnionOperatorService.class);
 	private String baseUrl;
 	private CloseableHttpClient client;
 	GrailsApplication grailsApplication
@@ -63,11 +63,11 @@ public class CommunityOperatorService implements InitializingBean {
 			try {
 				response = client.execute(req);
 			} catch (ConnectException e) {
-				String msg = "Community server is not responding";
+				String msg = "Data Union server is busy or not responding";
 				log.error(msg, e);
-				throw new ProxyException(msg);
+				throw new ProxyException(503, msg, ["Retry-After": "60"]);	// 1 minute
 			} catch (SocketTimeoutException e) {
-				String msg = "Community server gateway timeout";
+				String msg = "Data Union server gateway timeout";
 				log.error(msg, e);
 				throw new ProxyException(504, msg);
 			} catch (IOException e) {
@@ -95,7 +95,7 @@ public class CommunityOperatorService implements InitializingBean {
 			}
 		}
 		long total = System.currentTimeMillis() - start;
-		log.info("CommunityOperatorServiceImpl.proxy() execution took " + total + " ms");
+		log.info("DataUnionOperatorServiceImpl.proxy() execution took " + total + " ms");
 		log.debug("exiting proxy");
 		return result;
 	}
@@ -106,18 +106,18 @@ public class CommunityOperatorService implements InitializingBean {
 		}
 	}
 
-	public ProxyResponse stats(String communityAddress) {
-		String url = String.format("%s%s/stats", baseUrl, communityAddress);
+	public ProxyResponse stats(String contractAddress) {
+		String url = String.format("%s%s/stats", baseUrl, contractAddress);
 		return proxy(url);
 	}
 
-	public ProxyResponse members(String communityAddress) {
-		String url = String.format("%s%s/members", baseUrl, communityAddress);
+	public ProxyResponse members(String contractAddress) {
+		String url = String.format("%s%s/members", baseUrl, contractAddress);
 		return proxy(url);
 	}
 
-	public ProxyResponse memberStats(String communityAddress, String memberAddress) {
-		String url = String.format("%s%s/members/%s", baseUrl, communityAddress, memberAddress);
+	public ProxyResponse memberStats(String contractAddress, String memberAddress) {
+		String url = String.format("%s%s/members/%s", baseUrl, contractAddress, memberAddress);
 		return proxy(url);
 	}
 

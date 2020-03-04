@@ -67,6 +67,13 @@ class ErrorController {
 			log.error("Unexpected error occurred on request to ${request?.getMethod()} ${request?.getRequestURL()}, returning status code 500", exception)
 		}
 
+		def extraHeaders = apiError.getHeaders()
+		if (extraHeaders != null) {
+			extraHeaders.each { key, value ->
+				response.setHeader(key, value)
+			}
+		}
+
 		response.status = apiError.statusCode
 		render(apiError.toMap() as JSON)
 	}

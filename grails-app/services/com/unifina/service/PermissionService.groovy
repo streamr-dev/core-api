@@ -321,6 +321,9 @@ class PermissionService {
 	}
 
 	Permission systemGrant(Userish target, resource, Operation operation=Operation.READ, Subscription subscription, Date endsAt) {
+		if (target == null) {
+			throw new IllegalArgumentException("Permission grant target can't be null");
+		}
 		target = target.resolveToUserish()
 		String userProp = getUserPropertyName(target)
 		String resourceProp = getResourcePropertyName(resource)

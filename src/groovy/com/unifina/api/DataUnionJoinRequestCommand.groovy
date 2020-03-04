@@ -6,7 +6,7 @@ import groovy.transform.ToString
 
 @Validateable
 @ToString
-class CommunityJoinRequestCommand {
+class DataUnionJoinRequestCommand {
 	String memberAddress
 	String secret
 	Map<String, Object> metadata

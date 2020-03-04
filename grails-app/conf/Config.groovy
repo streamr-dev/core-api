@@ -139,17 +139,12 @@ log4j.main = {
 
 	warn 'org.mortbay.log',
 		'org.codehaus.groovy.grails.domain.GrailsDomainClassCleaner'
-
-	// Turn on debug logging for a few classes to debug join issue in prod
-	debug 'com.streamr.client',
-		'com.unifina.service.CommunityJoinRequestService',
-		'com.unifina.service.StreamrClientService'
 }
 
 /**
- * Community Product Server configuration
+ * Data Union Server configuration
  */
-streamr.cps.url = System.getProperty("streamr.cps.url") ?: "http://localhost:8085/communities/"
+streamr.cps.url = System.getProperty("streamr.cps.url") ?: "http://localhost:8085/dataunions/"
 
 // CPS Apache HTTP Client configuration
 
@@ -233,7 +228,7 @@ streamr.ethereum.datacoinAddress = System.getProperty("streamr.ethereum.datacoin
 streamr.ethereum.networks = PropertiesUtil.matchingPropertiesToMap("streamr.ethereum.networks.", System.getProperties()) ?: [ local: "http://localhost:8545" ]
 streamr.ethereum.wss = PropertiesUtil.matchingPropertiesToMap("streamr.ethereum.wss.", System.getProperties()) ?: [ local: "ws://localhost:8545" ]
 // Ethereum identity of this instance. Don't use this silly development private key for anything.
-streamr.ethereum.nodePrivateKey = System.getProperty("streamr.ethereum.nodePrivateKey", "0123456789ABCDEF0123456789ABCDEF0123456789ABCDEF0123456789ABCDEF")
+streamr.ethereum.nodePrivateKey = "".equals(System.getProperty("streamr.ethereum.nodePrivateKey", "")) ? "0123456789ABCDEF0123456789ABCDEF0123456789ABCDEF0123456789ABCDEF" : System.getProperty("streamr.ethereum.nodePrivateKey")
 streamr.ethereum.defaultNetwork = System.getProperty("streamr.ethereum.defaultNetwork") ?: streamr.ethereum.networks.keySet().first()
 
 /**

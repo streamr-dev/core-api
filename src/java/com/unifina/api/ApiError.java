@@ -8,24 +8,32 @@ import java.util.Map;
  */
 public class ApiError {
 	private final int statusCode;
-	private final Map<String, String> map = new HashMap<>();
+	private final Map<String, String> body = new HashMap<>();
+	private final Map<String, String> headers;
 
 	public ApiError(int statusCode, String code, String message) {
+		this(statusCode, code, message, null);
+	}
+	public ApiError(int statusCode, String code, String message, Map<String, String> headers) {
 		this.statusCode = statusCode;
-		map.put("code", code);
-		map.put("message", message);
+		body.put("code", code);
+		body.put("message", message);
+		this.headers = headers;
 	}
 
-	public void addEntry(String key, String value) {
-		map.put(key, value);
+	public void addToBody(String key, String value) {
+		body.put(key, value);
 	}
 
-	/** JSON object that is returned as message body */
+	/** @return Map that is turned into HTTP response body JSON object */
 	public Map<String, String> toMap() {
-		return map;
+		return body;
 	}
 
 	public int getStatusCode() {
 		return statusCode;
+	}
+	public Map<String, String> getHeaders() {
+		return headers;
 	}
 }
