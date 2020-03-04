@@ -1,4 +1,4 @@
-package com.unifina.domain.community
+package com.unifina.domain.dataunion
 
 import com.unifina.domain.marketplace.Product
 import com.unifina.domain.security.SecUser
@@ -7,7 +7,7 @@ import grails.compiler.GrailsCompileStatic
 import groovy.transform.ToString
 
 @ToString
-class CommunityJoinRequest {
+class DataUnionJoinRequest {
 	enum State {
 		PENDING,
 		ACCEPTED,
@@ -15,12 +15,12 @@ class CommunityJoinRequest {
 	}
 
 	String id
-	// user requesting to join a community.
+	// user requesting to join the data union.
 	SecUser user
-	// memberAddress is an Ethereum address of the member requesting to join community.
+	// memberAddress is an Ethereum address of the member requesting to join the data union.
 	String memberAddress
-	// communityAddress is an Ethereum address of the community to join.
-	String communityAddress
+	// contractAddress is the Ethereum address of the data union to join.
+	String contractAddress
 	// state of the join request.
 	State state = State.PENDING
 	Date dateCreated
@@ -28,7 +28,7 @@ class CommunityJoinRequest {
 
     static constraints = {
 		memberAddress(validator: Product.isEthereumAddress)
-		communityAddress(validator: Product.isEthereumAddress)
+		contractAddress(validator: Product.isEthereumAddress)
     }
 	static mapping = {
 		id generator: IdGenerator.name
@@ -40,7 +40,7 @@ class CommunityJoinRequest {
 		return [
 		    id: id,
 			memberAddress: memberAddress,
-			communityAddress: communityAddress,
+			contractAddress: contractAddress,
 			state: state?.toString(),
 			dateCreated: dateCreated,
 			lastUpdated: lastUpdated,

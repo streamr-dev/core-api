@@ -17,6 +17,7 @@ import com.unifina.security.Userish
 import com.unifina.service.EthereumIntegrationKeyService
 import com.unifina.service.PermissionService
 import com.unifina.service.SignupCodeService
+import com.unifina.service.StreamService
 import com.unifina.utils.EmailValidator
 import com.unifina.utils.EthereumAddressValidator
 import grails.converters.JSON
@@ -28,6 +29,7 @@ class PermissionApiController {
 	PermissionService permissionService
 	SignupCodeService signupCodeService
 	EthereumIntegrationKeyService ethereumIntegrationKeyService
+	StreamService streamService
 	def mailService
 
 	/**
@@ -39,7 +41,12 @@ class PermissionApiController {
 		if (!resourceClass) { throw new IllegalArgumentException("Missing resource class") }
 		if (!grailsApplication.isDomainClass(resourceClass)) { throw new IllegalArgumentException("${resourceClass.simpleName} is not a domain class!") }
 
-		def res = resourceClass.get(resourceId)
+		def res
+		if (Stream.isAssignableFrom(resourceClass)) {
+			res = streamService.getStream(resourceId)
+		} else {
+			res = resourceClass.get(resourceId)
+		}
 		if (!res) {
 			throw new NotFoundException(resourceClass.simpleName, resourceId.toString())
 		} else if (requireSharePermission && !permissionService.canShare(request.apiUser ?: request.apiKey, res)) {

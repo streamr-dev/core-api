@@ -20,6 +20,7 @@ import com.unifina.feed.FieldDetector
 
 import com.unifina.signalpath.RuntimeRequest
 import com.unifina.task.DelayedDeleteStreamTask
+import com.unifina.utils.EthereumAddressValidator
 import com.unifina.utils.IdGenerator
 import grails.converters.JSON
 import groovy.transform.CompileStatic
@@ -43,6 +44,12 @@ class StreamService {
 		.create()
 
 	Stream getStream(String id) {
+		if (EthereumAddressValidator.validate(id)) {
+			Stream inboxStream = Stream.get(id.toLowerCase())
+			if (inboxStream.inbox) {
+				return inboxStream
+			}
+		}
 		return Stream.get(id)
 	}
 
@@ -162,11 +169,13 @@ class StreamService {
 			user.id in writers*.id && service in [IntegrationKey.Service.ETHEREUM, IntegrationKey.Service.ETHEREUM_ID]
 		}
 
-		return keys*.idInService as Set
+		return keys*.idInService*.toLowerCase() as Set
 	}
 
 	boolean isStreamEthereumPublisher(Stream stream, String ethereumAddress) {
-		IntegrationKey key = IntegrationKey.findByIdInService(ethereumAddress)
+		IntegrationKey key = IntegrationKey.find {
+			idInService =~ ethereumAddress
+		}
 		if (key == null || key.user == null) {
 			return false
 		}
@@ -181,11 +190,13 @@ class StreamService {
 			user.id in readers*.id && service in [IntegrationKey.Service.ETHEREUM, IntegrationKey.Service.ETHEREUM_ID]
 		}
 
-		return keys*.idInService as Set
+		return keys*.idInService*.toLowerCase() as Set
 	}
 
 	boolean isStreamEthereumSubscriber(Stream stream, String ethereumAddress) {
-		IntegrationKey key = IntegrationKey.findByIdInService(ethereumAddress)
+		IntegrationKey key = IntegrationKey.find {
+			idInService =~ ethereumAddress
+		}
 		if (key == null || key.user == null) {
 			return false
 		}
