@@ -15,7 +15,6 @@ import com.unifina.security.Userish
 import groovy.transform.CompileStatic
 
 import java.security.AccessControlException
-
 /**
  * Check, get, grant, and revoke permissions. Maintains Access Control Lists (ACLs) to resources.
  *
@@ -98,8 +97,12 @@ class PermissionService {
 		}.toList()
 
 		// Special case of UI channels: they inherit permissions from the associated canvas
-		Set<Permission> syntheticPermissions = new HashSet<>()
 		if (resource instanceof Stream && resource.uiChannel) {
+			Set<Permission> syntheticPermissions = new HashSet<>()
+			Permission permission = hasTransitiveDashboardPermissions(resource.uiChannelCanvas, userish)
+			if (permission != null) {
+				syntheticPermissions.add(new Permission(canvas: resource.uiChannelCanvas, operation: permission.operation))
+			}
 			List<Permission> permissions = getPermissionsTo(resource.uiChannelCanvas, userish)
 			for (Permission p : permissions) {
 				Set<Operation> operations = CANVAS_TO_STREAM[p.operation]
@@ -109,8 +112,8 @@ class PermissionService {
 					}
 				}
 			}
+			directPermissions.addAll(syntheticPermissions)
 		}
-		directPermissions.addAll(syntheticPermissions)
 		return directPermissions
 	}
 
@@ -121,6 +124,34 @@ class PermissionService {
 		(Operation.CANVAS_DELETE): [Operation.STREAM_DELETE],
 		(Operation.CANVAS_STARTSTOP): [Operation.STREAM_PUBLISH],
 	]
+
+	private Permission hasTransitiveDashboardPermissions(Canvas canvas, Userish userish) {
+		/*
+		List<DashboardItem> items = DashboardItem.findAllByCanvas(canvas)
+		if (items.isEmpty()) {
+			return null
+		}
+		*/
+		List<Permission> permissions = Permission.withCriteria() {
+			//'in'("dashboard", items.collect { it.dashboard })
+			eq("operation", Operation.CANVAS_GET)
+			or {
+				eq("anonymous", true)
+				if (isNotNullAndIdNotNull(userish)) {
+					String userProp = getUserPropertyName(userish)
+					eq(userProp, userish)
+				}
+			}
+			or {
+				isNull("endsAt")
+				gt("endsAt", new Date())
+			}
+		}
+		if (permissions.isEmpty()) {
+			return null
+		}
+		return permissions.get(0)
+	}
 
 	/** Overload to allow leaving out the anonymous-include-flag but including the filter */
 	@CompileStatic
@@ -520,7 +551,14 @@ class PermissionService {
 		}
 
 		// Special case of UI channels: they inherit permissions from the associated canvas
-		if (p.empty && resource instanceof Stream && resource.uiChannel) {
+		if (p.isEmpty() && resource instanceof Stream && resource.uiChannel) {
+			//if (hasPermission(userish, resource.uiChannelCanvas, op)) {
+			//	return true
+			//}
+			Permission permission = hasTransitiveDashboardPermissions(resource.uiChannelCanvas, userish)
+			if (permission != null) {
+				return true
+			}
 			Set<Operation> operations = STREAM_TO_CANVAS[op]
 			if (operations != null) {
 				for (Operation oper : operations) {
@@ -531,7 +569,7 @@ class PermissionService {
 			}
 		}
 
-		return !p.empty
+		return !p.isEmpty()
 	}
 
 	// map stream operations to canvas operations
