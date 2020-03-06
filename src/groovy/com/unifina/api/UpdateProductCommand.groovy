@@ -20,6 +20,8 @@ class UpdateProductCommand {
 	Stream previewStream
 	String previewConfigJson
 	Map<String, Object> pendingChanges
+	Product.Contact contact = new Product.Contact()
+	Product.TermsOfUse termsOfUse = new Product.TermsOfUse()
 
 	// Below are used only when updating NOT_DEPLOYED product
 	String ownerAddress
@@ -35,7 +37,9 @@ class UpdateProductCommand {
 		"category",
 		"previewStream",
 		"previewConfigJson",
-		"pendingChanges"
+		"pendingChanges",
+		"contact",
+		"termsOfUse",
 	]
 
 	public static final List<String> onChainFields = [

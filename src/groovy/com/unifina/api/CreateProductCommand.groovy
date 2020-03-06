@@ -23,6 +23,8 @@ class CreateProductCommand {
 	Long pricePerSecond = 0
 	Product.Currency priceCurrency = Product.Currency.DATA
 	Long minimumSubscriptionInSeconds = 0
+	Product.Contact contact = new Product.Contact()
+	Product.TermsOfUse termsOfUse = new Product.TermsOfUse()
 
 	static constraints = {
 		importFrom(Product)
