@@ -227,6 +227,8 @@ class DataUnionJoinRequestServiceIntegrationSpec extends Specification {
 			blockIndex: 30,
 			owner: me,
 			type: Product.Type.DATAUNION,
+			contact: new Product.Contact(),
+			termsOfUse: new Product.TermsOfUse(),
 		)
 		product.save(failOnError: true, validate: true)
 
