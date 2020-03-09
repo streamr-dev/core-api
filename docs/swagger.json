@@ -3123,7 +3123,7 @@
             "name": "body",
             "description": "Start date where the data deletion starts. Format is either milliseconds (integer) since epoch or ISO8601 datetime (string).",
             "required": true,
-            "schema":  {
+            "schema": {
               "$ref": "#/definitions/DeleteDateRange"
             }
           }
