@@ -160,10 +160,110 @@
         "string"
       ],
       "maxLength": 65535
+    },
+    "contact": {
+      "description": "Product's contact details",
+      "type": [ "object", "null" ],
+      "properties": {
+        "email": {
+          "description": "Product's email addresss.",
+          "oneOf": [
+            { "type": "null" },
+            { "$ref": "#/definitions/emailAddress" }
+          ]
+        },
+        "url": {
+          "description": "Product's url address for contact.",
+          "maxLength": 2048,
+          "oneOf": [
+            { "type": "null" },
+            { "type": "string" }
+          ]
+        },
+        "social1": {
+          "description": "Product's social media link 1.",
+          "maxLength": 2048,
+          "oneOf": [
+            { "type": "null" },
+            { "type": "string" }
+          ]
+        },
+        "social2": {
+          "description": "Product's social media link 2.",
+          "maxLength": 2048,
+          "oneOf": [
+            { "type": "null" },
+            { "type": "string" }
+          ]
+        },
+        "social3": {
+          "description": "Product's social media link 3.",
+          "maxLength": 2048,
+          "oneOf": [
+            { "type": "null" },
+            { "type": "string" }
+          ]
+        },
+        "social4": {
+          "description": "Product's social media link 4.",
+          "maxLength": 2048,
+          "oneOf": [
+            { "type": "null" },
+            { "type": "string" }
+          ]
+        }
+      }
+    },
+    "termsOfUse": {
+      "description": "Product's legal terms of use.",
+      "type": [ "object", "null" ],
+      "properties": {
+        "commercialUse": {
+          "description": "Terms of use for commercial use.",
+          "type": "boolean",
+          "default": true
+        },
+        "redistribution": {
+          "description": "Terms of use for redistribution",
+          "type": "boolean",
+          "default": true
+        },
+        "reselling": {
+          "description": "Terms of use for reselling.",
+          "type": "boolean",
+          "default": true
+        },
+        "storage": {
+          "description": "Terms of use for storage.",
+          "type": "boolean",
+          "default": true
+        },
+        "termsName": {
+          "description": "Name of the custom terms of use document's link.",
+          "maxLength": 100,
+          "oneOf": [
+            { "type": "null" },
+            { "type": "string" }
+          ]
+        },
+        "termsUrl": {
+          "description": "URL address for custom terms of use document.",
+          "maxLength": 2048,
+          "oneOf": [
+            { "type": "null" },
+            { "type": "string" }
+          ]
+        }
+      }
     }
   },
   "additionalProperties": false,
   "definitions": {
+    "emailAddress": {
+      "type": "string",
+      "maxLength": 255,
+      "pattern": ".+@.+\\..+"
+    },
     "ethereumAddress": {
       "type": "string",
       "pattern": "^0x[a-fA-F0-9]{40}$"

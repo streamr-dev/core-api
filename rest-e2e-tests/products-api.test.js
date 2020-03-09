@@ -80,6 +80,22 @@ describe('Products API', () => {
             pricePerSecond: 5,
             priceCurrency: 'USD',
             minimumSubscriptionInSeconds: 60,
+            contact: {
+                email: 'contact@streamr.network',
+                url: 'https://streamr.network',
+                social1: 'https://github.com/streamr-dev',
+                social2: 'https://twitter.com/streamr',
+                social3: 'https://www.youtube.com/channel/UCGWEA61RueG-9DV53s-ZyJQ',
+                social4: 'https://medium.com/streamrblog'
+            },
+            termsOfUse: {
+                commercialUse: true,
+                redistribution: true,
+                reselling: true,
+                storage: true,
+                termsName: 'Terms of Use',
+                termsUrl: 'https://streamr.network/termsofuse.html',
+            },
         }
     })
 
@@ -197,7 +213,23 @@ describe('Products API', () => {
                     isFree: false,
                     priceCurrency: 'USD',
                     minimumSubscriptionInSeconds: 60,
-                    owner: 'Product API Test User'
+                    owner: 'Product API Test User',
+                    contact: {
+                        email: 'contact@streamr.network',
+                        url: 'https://streamr.network',
+                        social1: 'https://github.com/streamr-dev',
+                        social2: 'https://twitter.com/streamr',
+                        social3: 'https://www.youtube.com/channel/UCGWEA61RueG-9DV53s-ZyJQ',
+                        social4: 'https://medium.com/streamrblog'
+                    },
+                    termsOfUse: {
+                        commercialUse: true,
+                        redistribution: true,
+                        reselling: true,
+                        storage: true,
+                        termsName: 'Terms of Use',
+                        termsUrl: 'https://streamr.network/termsofuse.html',
+                    },
                 })
             })
         })
@@ -262,7 +294,23 @@ describe('Products API', () => {
             beneficiaryAddress: '0xCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC',
             pricePerSecond: 4556,
             priceCurrency: 'DATA',
-            minimumSubscriptionInSeconds: 30000
+            minimumSubscriptionInSeconds: 30000,
+            contact: {
+                email: 'contact@streamr.network',
+                url: 'https://streamr.network',
+                social1: 'https://github.com/streamr-dev',
+                social2: 'https://twitter.com/streamr',
+                social3: 'https://www.youtube.com/channel/UCGWEA61RueG-9DV53s-ZyJQ',
+                social4: 'https://medium.com/streamrblog'
+            },
+            termsOfUse: {
+                commercialUse: true,
+                redistribution: true,
+                reselling: true,
+                storage: true,
+                termsName: 'Terms of Use',
+                termsUrl: 'https://streamr.network/termsofuse.html',
+            },
         }
 
         let createdProductId
@@ -350,7 +398,23 @@ describe('Products API', () => {
                     isFree: false,
                     priceCurrency: 'DATA',
                     minimumSubscriptionInSeconds: 30000,
-                    owner: 'Product API Test User'
+                    owner: 'Product API Test User',
+                    contact: {
+                        email: 'contact@streamr.network',
+                        url: 'https://streamr.network',
+                        social1: 'https://github.com/streamr-dev',
+                        social2: 'https://twitter.com/streamr',
+                        social3: 'https://www.youtube.com/channel/UCGWEA61RueG-9DV53s-ZyJQ',
+                        social4: 'https://medium.com/streamrblog'
+                    },
+                    termsOfUse: {
+                        commercialUse: true,
+                        redistribution: true,
+                        reselling: true,
+                        storage: true,
+                        termsName: 'Terms of Use',
+                        termsUrl: 'https://streamr.network/termsofuse.html',
+                    },
                 })
             })
         })
