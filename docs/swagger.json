@@ -5342,6 +5342,12 @@
         "minimumSubscriptionInSeconds": {
           "type": "integer",
           "description": "Minimum subscription length (in seconds)"
+        },
+        "contact": {
+          "$ref": "#/definitions/ProductContact"
+        },
+        "termsOfUse": {
+          "$ref": "#/definitions/ProductTermsOfUse"
         }
       }
     },
@@ -5424,6 +5430,12 @@
           "type": "object",
           "description": "JSON Object of pending changes that are not published to blockchain",
           "example": "{\"ownerAddress\":\"0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF\"}"
+        },
+        "contact": {
+          "$ref": "#/definitions/ProductContact"
+        },
+        "termsOfUse": {
+          "$ref": "#/definitions/ProductTermsOfUse"
         }
       }
     },
@@ -5586,6 +5598,98 @@
           "type": "string",
           "description": "Pending changes that are not published to blockchain",
           "example": "{\"ownerAddress\":\"0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF\"}"
+        },
+        "contact": {
+          "$ref": "#/definitions/ProductContact"
+        },
+        "termsOfUse": {
+          "$ref": "#/definitions/ProductTermsOfUse"
+        }
+      }
+    },
+    "ProductContact": {
+      "type": "object",
+      "description": "Product's contact details",
+      "properties": {
+        "email": {
+          "description": "Product's email addresss.",
+          "type": "string",
+          "maxLength": 255,
+          "example": "firstname.lastname@streamr.network"
+        },
+        "url": {
+          "description": "Product's url address for contact.",
+          "type": "string",
+          "maxLength": 2048,
+          "example": "https://streamr.network"
+        },
+        "social1": {
+          "description": "Product's social media link 1.",
+          "type": "string",
+          "maxLength": 2048,
+          "example": "https://github.com/streamr-dev"
+        },
+        "social2": {
+          "description": "Product's social media link 2.",
+          "type": "string",
+          "maxLength": 2048,
+          "example": "https://twitter.com/streamr"
+        },
+        "social3": {
+          "description": "Product's social media link 3.",
+          "type": "string",
+          "maxLength": 2048,
+          "example": "https://www.youtube.com/channel/UCGWEA61RueG-9DV53s-ZyJQ"
+        },
+        "social4": {
+          "description": "Product's social media link 4.",
+          "type": "string",
+          "maxLength": 2048,
+          "example": "https://medium.com/streamrblog"
+        }
+      }
+    },
+    "ProductTermsOfUse": {
+      "type": "object",
+      "description": "Product's legal terms of use.",
+      "required": [
+        "commercialUse",
+        "redistribution",
+        "reselling",
+        "storage"
+      ],
+      "properties": {
+        "commercialUse": {
+          "description": "Terms of use for commercial use.",
+          "type": "boolean",
+          "default": true
+        },
+        "redistribution": {
+          "description": "Terms of use for redistribution",
+          "type": "boolean",
+          "default": true
+        },
+        "reselling": {
+          "description": "Terms of use for reselling.",
+          "type": "boolean",
+          "default": true
+        },
+        "storage": {
+          "description": "Terms of use for storage.",
+          "type": "boolean",
+          "default": true
+        },
+        "termsName": {
+          "description": "Name of the custom terms of use document's link.",
+          "type": "string",
+          "example": "Custom terms of use for Product by Company",
+          "maxLength": 100
+        },
+        "termsUrl": {
+          "description": "URL address for custom terms of use document.",
+          "type": "string",
+          "example": "https://streamr.network/termsofuse.html",
+          "maxLength": 2048
         }
       }
     },
