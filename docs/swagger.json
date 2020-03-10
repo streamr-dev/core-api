@@ -800,14 +800,32 @@
             "name": "operation",
             "type": "string",
             "enum": [
-              "READ",
-              "WRITE",
-              "SHARE"
+              "stream_get",
+              "stream_edit",
+              "stream_delete",
+              "stream_publish",
+              "stream_subscribe",
+              "stream_share",
+              "canvas_get",
+              "canvas_edit",
+              "canvas_delete",
+              "canvas_startstop",
+              "canvas_interact",
+              "canvas_share",
+              "dashboard_get",
+              "dashboard_edit",
+              "dashboard_delete",
+              "dashboard_interact",
+              "dashboard_share",
+              "product_get",
+              "product_edit",
+              "product_delete",
+              "product_share"
             ],
             "in": "query",
             "description": "Filter results by Permission (access level)",
             "required": false,
-            "default": "READ"
+            "default": "product_get"
           },
           {
             "name": "categories",
@@ -928,7 +946,7 @@
     "/users/me/products": {
       "get": {
         "summary": "List my products",
-        "description": "Lists products that current user has SHARE permission on",
+        "description": "Lists products that current user has product_share permission on",
         "tags": [
           "products"
         ],
@@ -2141,14 +2159,17 @@
             "name": "operation",
             "type": "string",
             "enum": [
-              "READ",
-              "WRITE",
-              "SHARE"
+              "stream_get",
+              "stream_edit",
+              "stream_delete",
+              "stream_publish",
+              "stream_subscribe",
+              "stream_share"
             ],
             "in": "query",
             "description": "Filter results by Permission (access level)",
             "required": false,
-            "default": "READ"
+            "default": "stream_get"
           }
         ],
         "tags": [
@@ -3338,14 +3359,17 @@
             "name": "operation",
             "type": "string",
             "enum": [
-              "READ",
-              "WRITE",
-              "SHARE"
+              "canvas_get",
+              "canvas_edit",
+              "canvas_delete",
+              "canvas_startstop",
+              "canvas_interact",
+              "canvas_share"
             ],
             "in": "query",
             "description": "Filter results by Permission (access level)",
             "required": false,
-            "default": "READ"
+            "default": "canvas_get"
           }
         ],
         "responses": {
@@ -3882,14 +3906,16 @@
             "name": "operation",
             "type": "string",
             "enum": [
-              "READ",
-              "WRITE",
-              "SHARE"
+              "dashboard_get",
+              "dashboard_edit",
+              "dashboard_delete",
+              "dashboard_interact",
+              "dashboard_share"
             ],
             "in": "query",
             "description": "Filter results by Permission (access level)",
             "required": false,
-            "default": "READ"
+            "default": "dashboard_get"
           }
         ],
         "tags": [
@@ -4548,80 +4574,6 @@
       }
     }
   },
-  "parameters": {
-    "search": {
-      "name": "search",
-      "type": "string",
-      "in": "query",
-      "description": "Filter by search term in name or description",
-      "required": false
-    },
-    "sortBy": {
-      "name": "sortBy",
-      "type": "string",
-      "in": "query",
-      "description": "Sort the returned results by the given field.",
-      "required": false,
-      "default": "id"
-    },
-    "order": {
-      "name": "order",
-      "type": "string",
-      "enum": [
-        "asc",
-        "desc"
-      ],
-      "in": "query",
-      "description": "Control whether the results are sorted in ascending or descending order. Used with parameter `sortBy`.",
-      "required": false,
-      "default": "asc"
-    },
-    "max": {
-      "name": "max",
-      "type": "integer",
-      "in": "query",
-      "description": "Maximum number of returned results (capped at 100)",
-      "required": false,
-      "default": 100
-    },
-    "offset": {
-      "name": "offset",
-      "type": "integer",
-      "in": "query",
-      "description": "Skip the first (offset) results. Used together with max for paging.",
-      "required": false,
-      "default": 0
-    },
-    "grantedAccess": {
-      "name": "grantedAccess",
-      "type": "boolean",
-      "in": "query",
-      "description": "If false, excludes resources that user has been granted specific permission to from results.",
-      "required": false,
-      "default": true
-    },
-    "publicAccess": {
-      "name": "publicAccess",
-      "type": "boolean",
-      "in": "query",
-      "description": "If true, includes publicly available resources in the results.",
-      "required": false,
-      "default": false
-    },
-    "operation": {
-      "name": "operation",
-      "type": "string",
-      "enum": [
-        "READ",
-        "WRITE",
-        "SHARE"
-      ],
-      "in": "query",
-      "description": "Filter results by Permission (access level)",
-      "required": false,
-      "default": "READ"
-    }
-  },
   "definitions": {
     "DeleteDate": {
       "type": "object",
@@ -4746,7 +4698,7 @@
       "properties": {
         "permission": {
           "type": "string",
-          "description": "Permission type. Either 'read' or 'write'."
+          "description": "Permission type."
         },
         "name": {
           "type": "string",
@@ -5182,8 +5134,8 @@
         },
         "operation": {
           "type": "string",
-          "description": "User rights that this permission enables, e.g. 'read', 'write', 'share'",
-          "example": "read"
+          "description": "User rights that this permission enables, e.g. 'stream_get', 'product_edit', 'dashboard_share'",
+          "example": "stream_edit"
         }
       }
     },
