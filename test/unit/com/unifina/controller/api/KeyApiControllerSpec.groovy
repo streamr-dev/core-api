@@ -41,7 +41,7 @@ class KeyApiControllerSpec extends ControllerSpecification {
 	}
 
 	// CORE-708: User with read permission to stream should not see stream write key in api
-	void "index() does not authorize if only up to READ permission"() {
+	void "index() does not authorize if only up to stream_get permission"() {
 		Stream s = new Stream(name: "stream")
 		s.id = "streamId"
 		s.save(failOnError: true, validate: false)

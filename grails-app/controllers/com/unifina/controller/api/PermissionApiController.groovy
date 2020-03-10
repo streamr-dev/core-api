@@ -85,7 +85,6 @@ class PermissionApiController {
 	def getOwnPermissions() {
 		useResource(params.resourceClass, params.resourceId, false) { res ->
 			def permissionsTo = permissionService.getPermissionsTo(res, request.apiUser ?: request.apiKey)
-			//println(permissionsTo*.toString())
 			def perms = permissionsTo*.toMap()
 			render(perms as JSON)
 		}

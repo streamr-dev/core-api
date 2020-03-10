@@ -89,7 +89,7 @@ class FreeProductServiceSpec extends Specification {
 		0 * permissionService._
 	}
 
-	void "deployFreeProduct grants anonymous READ access to the streams of Product"() {
+	void "deployFreeProduct grants anonymous stream_get and stream_subscribe access to the streams of Product"() {
 		def permissionService = service.permissionService = Mock(PermissionService)
 
 		when:
@@ -150,7 +150,7 @@ class FreeProductServiceSpec extends Specification {
 		0 * permissionService._
 	}
 
-	void "undeployFreeProduct revokes anonymous READ access to the streams of Product"() {
+	void "undeployFreeProduct revokes anonymous stream_get and stream_subscribe access to the streams of Product"() {
 		def permissionService = service.permissionService = Mock(PermissionService)
 
 		freeProduct.state = Product.State.DEPLOYED

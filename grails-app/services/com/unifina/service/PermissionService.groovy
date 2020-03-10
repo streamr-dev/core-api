@@ -247,7 +247,7 @@ class PermissionService {
 	}
 
 	/**
-	 * Grants all Permissions (READ, WRITE, SHARE) to a Userish (as sudo/system)
+	 * Grants all permissions to a Userish on given resource (as sudo/system)
 	 *
 	 * @param target Userish that will receive the access
 	 * @param resource to be given permission on
@@ -411,14 +411,14 @@ class PermissionService {
 	/**
 	 * As a SecUser, revoke a Permission from a Userish
 	 *
-	 * @param revoker user attempting to revoke permission (needs SHARE permission)
+	 * @param revoker user attempting to revoke permission (needs *_share permission)
 	 * @param resource to be revoked from target
 	 * @param target Userish user whose Permission is revoked
-	 * @param operation or access level to be revoked (cascades to "higher" operations, e.g. READ also revokes SHARE)
+	 * @param operation or access level to be revoked
 	 *
 	 * @returns Permissions that were deleted
 	 *
-	 * @throws AccessControlException if revoker doesn't have SHARE permission on resource
+	 * @throws AccessControlException if revoker doesn't have *_share permission on resource
      */
 	@CompileStatic
 	List<Permission> revoke(SecUser revoker,
@@ -441,7 +441,7 @@ class PermissionService {
 	 *
 	 * @param target Userish whose Permission is revoked
 	 * @param resource to be revoked from target
-	 * @param operation or access level to be revoked (cascades to "higher" operations, e.g. READ also revokes SHARE)
+	 * @param operation or access level to be revoked
 	 *
      * @return Permissions that were deleted
      */
