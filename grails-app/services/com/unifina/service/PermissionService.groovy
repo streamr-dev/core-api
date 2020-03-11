@@ -100,15 +100,34 @@ class PermissionService {
 		if (resource instanceof Stream && resource.uiChannel) {
 			Set<Permission> syntheticPermissions = new HashSet<>()
 			Permission permission = hasTransitiveDashboardPermissions(resource.uiChannelCanvas, userish)
+			Key key = null
+			SecUser user = null
+			if (userish instanceof Key) {
+				key = userish
+			} else if (userish instanceof SecUser) {
+				user = userish
+			}
 			if (permission != null) {
-				syntheticPermissions.add(new Permission(canvas: resource.uiChannelCanvas, operation: permission.operation))
+				Permission sp = new Permission(
+					canvas: resource.uiChannelCanvas,
+					operation: permission.operation,
+					key: key,
+					user: user,
+				)
+				syntheticPermissions.add(sp)
 			}
 			List<Permission> permissions = getPermissionsTo(resource.uiChannelCanvas, userish)
 			for (Permission p : permissions) {
 				Set<Operation> operations = CANVAS_TO_STREAM[p.operation]
 				if (operations != null) {
 					for (Operation op : operations) {
-						syntheticPermissions.add(new Permission(stream: resource, operation: op))
+						Permission sp = new Permission(
+							stream: resource,
+							operation: op,
+							key: key,
+							user: user,
+						)
+						syntheticPermissions.add(sp)
 					}
 				}
 			}
