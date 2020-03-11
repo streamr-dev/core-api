@@ -295,12 +295,17 @@ class PermissionServiceIntegrationSpec extends IntegrationSpec {
 		service.systemGrantAll(me, canvas)
 
 		expect:
-		service.getPermissionsTo(stream, me).size() == 5
-		service.check(me, uiChannelStream, Permission.Operation.CANVAS_GET)
+		service.getPermissionsTo(stream, me).size() == 9
+		service.check(me, canvas, Permission.Operation.CANVAS_GET)
+
 		service.check(me, stream, Permission.Operation.STREAM_GET)
 		service.check(me, stream, Permission.Operation.STREAM_PUBLISH)
 		service.check(me, stream, Permission.Operation.STREAM_SUBSCRIBE)
 		service.check(me, stream, Permission.Operation.STREAM_DELETE)
+		service.check(me, stream, Permission.Operation.CANVAS_GET)
+		service.check(me, stream, Permission.Operation.CANVAS_DELETE)
+		service.check(me, stream, Permission.Operation.CANVAS_STARTSTOP)
+		service.check(me, stream, Permission.Operation.CANVAS_EDIT)
 	}
 
 	void "getPermissionsTo(resource, userish) returns correct UI channel read permissions via associated dashboard"() {

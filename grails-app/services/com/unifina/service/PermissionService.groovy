@@ -25,6 +25,22 @@ import java.security.AccessControlException
  */
 class PermissionService {
 	def grailsApplication
+	// Map canvas operations to stream operations
+	private static Map<Operation, List<Operation>> CANVAS_TO_STREAM
+	// Map stream operations to canvas operations
+	private static Map<Operation, List<Operation>> STREAM_TO_CANVAS
+
+	static {
+		List impliedUIChannelPermissions = [
+			[Operation.CANVAS_GET, Operation.STREAM_GET],
+			[Operation.CANVAS_GET, Operation.STREAM_SUBSCRIBE],
+			[Operation.CANVAS_EDIT, Operation.STREAM_DELETE],
+			[Operation.CANVAS_DELETE, Operation.STREAM_DELETE],
+			[Operation.CANVAS_STARTSTOP, Operation.STREAM_PUBLISH],
+		]
+		CANVAS_TO_STREAM = impliedUIChannelPermissions.groupBy { it[0] }
+		STREAM_TO_CANVAS = impliedUIChannelPermissions.groupBy { it[1] }
+	}
 
 	/**
 	 * Check whether user is allowed to perform specified operation on a resource
@@ -118,9 +134,12 @@ class PermissionService {
 			}
 			List<Permission> permissions = getPermissionsTo(resource.uiChannelCanvas, userish)
 			for (Permission p : permissions) {
-				Set<Operation> operations = CANVAS_TO_STREAM[p.operation]
-				if (operations != null) {
-					for (Operation op : operations) {
+				List<Operation> operations = CANVAS_TO_STREAM[p.operation]
+				if (operations == null) {
+					continue
+				}
+				for (List<Operation> ops : operations) {
+					for (Operation op : ops) {
 						Permission sp = new Permission(
 							stream: resource,
 							operation: op,
@@ -135,14 +154,6 @@ class PermissionService {
 		}
 		return directPermissions
 	}
-
-	// Maps canvas operations to stream operations
-	private final static Map<Operation, Set<Operation>> CANVAS_TO_STREAM = [
-		(Operation.CANVAS_GET): [Operation.STREAM_GET, Operation.STREAM_SUBSCRIBE],
-		(Operation.CANVAS_EDIT): [Operation.STREAM_DELETE],
-		(Operation.CANVAS_DELETE): [Operation.STREAM_DELETE],
-		(Operation.CANVAS_STARTSTOP): [Operation.STREAM_PUBLISH],
-	]
 
 	private Permission hasTransitiveDashboardPermissions(Canvas canvas, Userish userish) {
 		/*
@@ -578,7 +589,7 @@ class PermissionService {
 			if (permission != null) {
 				return true
 			}
-			Set<Operation> operations = STREAM_TO_CANVAS[op]
+			List<Operation> operations = STREAM_TO_CANVAS[op]
 			if (operations != null) {
 				for (Operation oper : operations) {
 					if (hasPermission(userish, resource.uiChannelCanvas, oper)) {
@@ -590,14 +601,6 @@ class PermissionService {
 
 		return !p.isEmpty()
 	}
-
-	// map stream operations to canvas operations
-	private final static Map<Operation, Set<Operation>> STREAM_TO_CANVAS = [
-		(Operation.STREAM_GET): [Operation.CANVAS_GET],
-		(Operation.STREAM_SUBSCRIBE): [Operation.CANVAS_GET],
-		(Operation.STREAM_DELETE): [Operation.CANVAS_EDIT, Operation.CANVAS_DELETE],
-		(Operation.STREAM_PUBLISH): [Operation.CANVAS_STARTSTOP],
-	]
 
 	/**
 	 * Find Permissions that will be revoked
