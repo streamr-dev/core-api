@@ -295,7 +295,8 @@ class PermissionServiceIntegrationSpec extends IntegrationSpec {
 		service.systemGrantAll(me, canvas)
 
 		expect:
-		service.getPermissionsTo(stream, me).size() == 4
+		service.getPermissionsTo(stream, me).size() == 5
+		service.check(me, uiChannelStream, Permission.Operation.CANVAS_GET)
 		service.check(me, stream, Permission.Operation.STREAM_GET)
 		service.check(me, stream, Permission.Operation.STREAM_PUBLISH)
 		service.check(me, stream, Permission.Operation.STREAM_SUBSCRIBE)
