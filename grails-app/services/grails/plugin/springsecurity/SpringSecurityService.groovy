@@ -14,6 +14,7 @@
  */
 package grails.plugin.springsecurity
 
+import com.unifina.domain.security.SecUser
 import grails.plugin.springsecurity.userdetails.GrailsUser
 import grails.transaction.Transactional
 import org.springframework.security.core.Authentication
@@ -77,14 +78,14 @@ class SpringSecurityService {
 			return null
 		}
 
-		def User = getClassForName(securityConfig.userLookup.userDomainClassName)
+		def User = new SecUser()
 
 		if (principal instanceof GrailsUser) {
 			User.get principal.id
 		}
 		else {
 			User.createCriteria().get {
-				eq securityConfig.userLookup.usernamePropertyName, principal.username
+				eq "username", principal.username
 				cache true
 			}
 		}
@@ -117,7 +118,7 @@ class SpringSecurityService {
 		// load() requires an id, so this only works if there's an id property in the principal
 		Assert.isInstanceOf GrailsUser, principal
 
-		getClassForName(securityConfig.userLookup.userDomainClassName).load(currentUserId)
+		new SecUser().load(currentUserId)
 	}
 
 	/**

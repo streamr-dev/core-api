@@ -9,6 +9,7 @@ import com.unifina.domain.data.Stream
 import com.unifina.domain.security.Key
 import com.unifina.domain.security.SecRole
 import com.unifina.domain.security.SecUser
+import com.unifina.domain.security.SecUserSecRole
 import com.unifina.domain.signalpath.Canvas
 import com.unifina.domain.signalpath.ModulePackage
 import com.unifina.exceptions.UserCreationFailedException
@@ -31,10 +32,7 @@ class UserService {
 	CanvasService canvasService
 
 	SecUser createUser(Map properties, List<SecRole> roles = null, List<ModulePackage> packages = null) {
-		def secConf = grailsApplication.config.grails.plugin.springsecurity
-		ClassLoader cl = this.getClass().getClassLoader()
-		SecUser user = cl.loadClass(secConf.userLookup.userDomainClassName).newInstance(properties)
-
+		SecUser user = new SecUser(properties)
 		// Encode the password
 		if (user.password == null) {
 			throw new UserCreationFailedException("The password is empty!")
@@ -98,20 +96,16 @@ class UserService {
 
 	def addRoles(user, List<SecRole> roles = null) {
 		def secConf = grailsApplication.config.grails.plugin.springsecurity
-		ClassLoader cl = this.getClass().getClassLoader()
-
-		def userRoleClass = cl.loadClass(secConf.userLookup.authorityJoinClassName)
-		def roleClass = cl.loadClass(secConf.authority.className)
 
 		if (roles == null) {
-			roles = roleClass.findAllByAuthorityInList(secConf.ui.register.defaultRoleNames)
+			roles = SecRole.class.findAllByAuthorityInList(secConf.ui.register.defaultRoleNames)
 			if (roles.size() != secConf.ui.register.defaultRoleNames.size()) {
 				throw new RuntimeException("Roles not found: " + secConf.ui.register.defaultRoleNames)
 			}
 		}
 
 		roles.each { role ->
-			userRoleClass.create user, role
+			new SecUserSecRole().create(user, role)
 		}
 	}
 

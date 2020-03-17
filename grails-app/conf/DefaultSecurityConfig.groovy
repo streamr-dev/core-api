@@ -71,8 +71,6 @@ security {
 
 	// user and role class properties
 	userLookup {
-		userDomainClassName = null // must be set if using UserDetailsService
-		usernamePropertyName = 'username'
 		enabledPropertyName = 'enabled'
 		passwordPropertyName = 'password'
 		authoritiesPropertyName = 'authorities'
@@ -82,7 +80,6 @@ security {
 		authorityJoinClassName = null // must be set if using UserDetailsService
 	}
 	authority {
-		className = null // must be set if using UserDetailsService
 		nameField = 'authority'
 		groupAuthorityNameField = null //must be set if using authority groups
 	}
