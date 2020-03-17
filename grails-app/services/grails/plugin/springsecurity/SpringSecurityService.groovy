@@ -31,8 +31,6 @@ import javax.servlet.http.HttpServletRequest
  */
 class SpringSecurityService {
 
-	protected static final List<String> NO_SALT = ['bcrypt', 'pbkdf2']
-
 	/** dependency injection for authenticationTrustResolver */
 	def authenticationTrustResolver
 
@@ -125,11 +123,9 @@ class SpringSecurityService {
 	/**
 	 * Encode the password using the configured PasswordEncoder.
 	 */
-	String encodePassword(String password, salt = null) {
-		if (securityConfig.password.algorithm in NO_SALT) {
-			salt = null
-		}
-		passwordEncoder.encodePassword password, salt
+	String encodePassword(String password, String salt = null) {
+		salt = null // bcrypt has no salt
+		return passwordEncoder.encodePassword(password, salt)
 	}
 
 	/**

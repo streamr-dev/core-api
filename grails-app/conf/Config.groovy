@@ -284,8 +284,6 @@ environments {
  * Spring security config
  */
 grails.plugin.springsecurity.ui.register.defaultRoleNames = ["ROLE_USER", "ROLE_LIVE"]
-grails.plugin.springsecurity.password.algorithm = 'bcrypt'
-
 grails.plugin.springsecurity.securityConfigType = 'Annotation'
 grails.plugin.springsecurity.controllerAnnotations.staticRules = [
 	'/*': ['IS_AUTHENTICATED_ANONYMOUSLY']

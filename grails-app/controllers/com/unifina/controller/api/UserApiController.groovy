@@ -38,7 +38,8 @@ class UserApiController {
 			throw new ApiException(400, "PASSWORD_CHANGE_FAILED", "Password not changed!")
 		}
 		SecUser user = loggedInUser()
-		user.password = springSecurityService.encodePassword(cmd.password)
+		String salt = null
+		user.password = springSecurityService.encodePassword(cmd.password, salt)
 		user.save(flush: true, failOnError: true)
 		log.info("User $user.username changed password!")
 		render(status: 204, body: "")
@@ -113,7 +114,8 @@ class ChangePasswordCommand {
 			}
 			def encodedPassword = user.password
 			def encoder = cmd.springSecurityService.passwordEncoder
-			return encoder.isPasswordValid(encodedPassword, pwd, null /*salt*/)
+			String salt = null
+			return encoder.isPasswordValid(encodedPassword, pwd, salt)
 		}
 		password validator: {String password, ChangePasswordCommand command ->
 			return command.userService.passwordValidator(password, command)

@@ -18,7 +18,7 @@ class UserApiControllerSpec extends ControllerSpecification {
 	SecUser me
 
 	def springSecurityService = [
-		encodePassword: { pw ->
+		encodePassword: { pw, salt ->
 			return pw+"-encoded"
 		},
 		passwordEncoder: [
@@ -29,11 +29,12 @@ class UserApiControllerSpec extends ControllerSpecification {
 	]
 
 	def setup() {
+		String salt = null
 		me = new SecUser(
 			name: "me",
 			username: "me@too.com",
 			enabled: true,
-			password: springSecurityService.encodePassword("foobar123!"),
+			password: springSecurityService.encodePassword("foobar123!", salt),
 		)
 		me.id = 1
 		me.save(validate: false)
