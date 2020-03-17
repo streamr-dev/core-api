@@ -306,8 +306,6 @@
           <root url="jar://$USER_HOME$/.sdkman/candidates/grails/2.5.6/lib/org.slf4j/slf4j-api/jars/slf4j-api-1.7.21.jar!/" />
           <root url="jar://$USER_HOME$/.sdkman/candidates/grails/2.5.6/dist/grails-plugin-rest-2.5.6.jar!/" />
           <root url="jar://$USER_HOME$/.sdkman/candidates/grails/2.5.6/lib/org.codehaus.groovy/groovy-all/jars/groovy-all-2.4.10.jar!/" />
-          <root url="jar://$MAVEN_REPOSITORY$/org/springframework/security/spring-security-web/3.2.9.RELEASE/spring-security-web-3.2.9.RELEASE.jar!/" />
-          <root url="jar://$MAVEN_REPOSITORY$/org/springframework/security/spring-security-core/3.2.9.RELEASE/spring-security-core-3.2.9.RELEASE.jar!/" />
           <root url="jar://$MAVEN_REPOSITORY$/org/liquibase/liquibase-core/2.0.5/liquibase-core-2.0.5.jar!/" />
           <root url="jar://$MAVEN_REPOSITORY$/org/hibernate/hibernate-commons-annotations/3.2.0.Final/hibernate-commons-annotations-3.2.0.Final.jar!/" />
           <root url="jar://$MAVEN_REPOSITORY$/org/hibernate/hibernate-entitymanager/3.6.10.Final/hibernate-entitymanager-3.6.10.Final.jar!/" />
@@ -425,6 +423,8 @@
           <root url="jar://$MAVEN_REPOSITORY$/org/eclipse/jetty/jetty-client/9.2.28.v20190418/jetty-client-9.2.28.v20190418.jar!/" />
           <root url="jar://$MAVEN_REPOSITORY$/org/gaul/httpbin/1.3.0/httpbin-1.3.0.jar!/" />
           <root url="jar://$MAVEN_REPOSITORY$/com/streamr/client/1.2.5/client-1.2.5.jar!/" />
+          <root url="jar://$MAVEN_REPOSITORY$/org/springframework/security/spring-security-web/3.2.9.RELEASE/spring-security-web-3.2.9.RELEASE.jar!/" />
+          <root url="jar://$MAVEN_REPOSITORY$/org/springframework/security/spring-security-core/3.2.9.RELEASE/spring-security-core-3.2.9.RELEASE.jar!/" />
         </CLASSES>
         <JAVADOC />
         <SOURCES>

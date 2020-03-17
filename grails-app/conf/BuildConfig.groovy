@@ -83,6 +83,8 @@ grails.project.dependency.resolution = {
 			excludes('org.springframework:spring-context:*')
 			excludes('org.springframework:spring-orm:*')
 		}
+		compile('org.springframework.security:spring-security-core:3.2.9.RELEASE')
+		compile('org.springframework.security:spring-security-web:3.2.9.RELEASE')
 
 		compile('org.web3j:core:4.4.1')
 		compile('com.amazonaws:aws-java-sdk:1.11.294')
@@ -125,7 +127,6 @@ grails.project.dependency.resolution = {
 			excludes('spring-security-web')
 		}
 		runtime(':database-migration:1.4.0')
-		runtime(":spring-security-core:2.0.0")
 
 		test(":plastic-criteria:1.6.7")
 		test(":rest-client-builder:2.1.1")
