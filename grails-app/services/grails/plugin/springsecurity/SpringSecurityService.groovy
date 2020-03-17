@@ -15,6 +15,7 @@
 package grails.plugin.springsecurity
 
 import com.unifina.domain.security.SecUser
+import com.unifina.domain.security.SecUserSecRole
 import grails.plugin.springsecurity.userdetails.GrailsUser
 import grails.transaction.Transactional
 import org.springframework.security.core.Authentication
@@ -190,7 +191,7 @@ class SpringSecurityService {
 		}
 
 		// remove the role grant from all users
-		getClassForName(conf.userLookup.authorityJoinClassName).removeAll role
+		SecUserSecRole.class.removeAll role
 
 		role.delete(flush: true)
 	}

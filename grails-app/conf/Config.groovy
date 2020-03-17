@@ -284,7 +284,6 @@ environments {
  * Spring security config
  */
 grails.plugin.springsecurity.ui.register.defaultRoleNames = ["ROLE_USER", "ROLE_LIVE"]
-grails.plugin.springsecurity.userLookup.authorityJoinClassName = 'com.unifina.domain.security.SecUserSecRole'
 grails.plugin.springsecurity.password.algorithm = 'bcrypt'
 
 grails.plugin.springsecurity.securityConfigType = 'Annotation'

@@ -77,7 +77,6 @@ security {
 		accountExpiredPropertyName = 'accountExpired'
 		accountLockedPropertyName = 'accountLocked'
 		passwordExpiredPropertyName = 'passwordExpired'
-		authorityJoinClassName = null // must be set if using UserDetailsService
 	}
 	authority {
 		nameField = 'authority'
