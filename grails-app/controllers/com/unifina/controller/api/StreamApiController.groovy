@@ -11,7 +11,7 @@ import com.unifina.security.StreamrApi
 import com.unifina.security.Userish
 import com.unifina.service.StreamService
 import grails.converters.JSON
-import grails.plugin.springsecurity.annotation.Secured
+import com.unifina.security.Secured
 import org.springframework.web.multipart.MultipartFile
 
 import java.text.ParseException

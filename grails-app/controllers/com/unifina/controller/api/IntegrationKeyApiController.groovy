@@ -8,7 +8,7 @@ import com.unifina.domain.security.SecUser
 import com.unifina.security.StreamrApi
 import com.unifina.service.EthereumIntegrationKeyService
 import grails.converters.JSON
-import grails.plugin.springsecurity.annotation.Secured
+import com.unifina.security.Secured
 import groovy.json.JsonSlurper
 
 @Secured(["IS_AUTHENTICATED_ANONYMOUSLY"])

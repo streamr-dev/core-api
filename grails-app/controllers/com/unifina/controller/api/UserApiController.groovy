@@ -7,7 +7,7 @@ import com.unifina.security.StreamrApi
 import com.unifina.service.UserAvatarImageService
 import com.unifina.service.UserService
 import grails.converters.JSON
-import grails.plugin.springsecurity.annotation.Secured
+import com.unifina.security.Secured
 import org.springframework.web.multipart.MultipartFile
 import grails.validation.Validateable
 import com.unifina.service.BalanceService

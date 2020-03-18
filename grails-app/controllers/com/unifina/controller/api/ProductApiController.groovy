@@ -11,7 +11,7 @@ import com.unifina.service.*
 import grails.compiler.GrailsCompileStatic
 import grails.converters.JSON
 import grails.plugin.mail.MailService
-import grails.plugin.springsecurity.annotation.Secured
+import com.unifina.security.Secured
 import org.apache.log4j.Logger
 import org.springframework.web.multipart.MultipartFile
 

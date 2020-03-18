@@ -13,7 +13,7 @@ import com.unifina.service.DataUnionSecretService
 import com.unifina.service.EthereumService
 import com.unifina.utils.EthereumAddressValidator
 import grails.converters.JSON
-import grails.plugin.springsecurity.annotation.Secured
+import com.unifina.security.Secured
 
 @Secured(["IS_AUTHENTICATED_ANONYMOUSLY"])
 class DataUnionSecretApiController {

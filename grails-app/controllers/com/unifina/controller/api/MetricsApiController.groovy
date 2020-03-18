@@ -5,7 +5,7 @@ import com.unifina.security.StreamrApi
 import com.unifina.service.MetricsService
 import grails.compiler.GrailsCompileStatic
 import grails.converters.JSON
-import grails.plugin.springsecurity.annotation.Secured
+import com.unifina.security.Secured
 
 @GrailsCompileStatic
 @Secured(["IS_AUTHENTICATED_ANONYMOUSLY"])

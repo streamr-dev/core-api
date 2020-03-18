@@ -2,7 +2,7 @@ package com.unifina.controller.api
 
 import com.unifina.security.StreamrApi
 import com.unifina.service.ProductService
-import grails.plugin.springsecurity.annotation.Secured
+import com.unifina.security.Secured
 
 @Secured(["IS_AUTHENTICATED_ANONYMOUSLY"])
 class RemoveUsersProductsController {

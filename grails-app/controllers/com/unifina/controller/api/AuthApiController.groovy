@@ -11,7 +11,7 @@ import com.unifina.service.UserService
 import com.unifina.utils.EmailValidator
 import grails.converters.JSON
 import com.unifina.service.SpringSecurityService
-import grails.plugin.springsecurity.annotation.Secured
+import com.unifina.security.Secured
 
 @Secured(["IS_AUTHENTICATED_ANONYMOUSLY"])
 class AuthApiController {

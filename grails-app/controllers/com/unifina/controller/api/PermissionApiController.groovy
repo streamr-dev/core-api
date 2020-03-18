@@ -19,7 +19,7 @@ import com.unifina.service.StreamService
 import com.unifina.utils.EmailValidator
 import com.unifina.utils.EthereumAddressValidator
 import grails.converters.JSON
-import grails.plugin.springsecurity.annotation.Secured
+import com.unifina.security.Secured
 
 @Secured(["IS_AUTHENTICATED_ANONYMOUSLY"])
 class PermissionApiController {

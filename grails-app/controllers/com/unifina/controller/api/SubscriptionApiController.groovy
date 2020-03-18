@@ -9,7 +9,7 @@ import com.unifina.security.StreamrApi
 import com.unifina.service.SubscriptionService
 import grails.compiler.GrailsCompileStatic
 import grails.converters.JSON
-import grails.plugin.springsecurity.annotation.Secured
+import com.unifina.security.Secured
 
 @Secured(["IS_AUTHENTICATED_ANONYMOUSLY"])
 class SubscriptionApiController {
