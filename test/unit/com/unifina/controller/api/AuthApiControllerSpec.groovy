@@ -2,7 +2,6 @@ package com.unifina.controller.api
 
 
 import com.unifina.domain.security.*
-import com.unifina.domain.signalpath.Module
 import com.unifina.domain.signalpath.ModulePackage
 
 import com.unifina.service.CanvasService
@@ -11,7 +10,7 @@ import com.unifina.service.SignupCodeService
 import com.unifina.service.StreamService
 import com.unifina.service.UserService
 import com.unifina.signalpath.messaging.MockMailService
-import grails.plugin.springsecurity.SpringSecurityService
+import com.unifina.service.SpringSecurityService
 import grails.test.mixin.Mock
 import grails.test.mixin.TestFor
 import org.codehaus.groovy.grails.commons.GrailsApplication

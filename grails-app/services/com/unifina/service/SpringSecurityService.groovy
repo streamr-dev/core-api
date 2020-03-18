@@ -12,7 +12,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package grails.plugin.springsecurity
+package com.unifina.service
 
 import com.unifina.domain.security.SecUser
 import grails.plugin.springsecurity.userdetails.GrailsUser

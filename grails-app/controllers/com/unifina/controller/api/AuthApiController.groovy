@@ -10,7 +10,7 @@ import com.unifina.service.SignupCodeService
 import com.unifina.service.UserService
 import com.unifina.utils.EmailValidator
 import grails.converters.JSON
-import grails.plugin.springsecurity.SpringSecurityService
+import com.unifina.service.SpringSecurityService
 import grails.plugin.springsecurity.annotation.Secured
 
 @Secured(["IS_AUTHENTICATED_ANONYMOUSLY"])

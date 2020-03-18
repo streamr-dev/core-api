@@ -14,7 +14,6 @@ import com.unifina.domain.signalpath.Canvas
 import com.unifina.domain.signalpath.ModulePackage
 import com.unifina.exceptions.UserCreationFailedException
 import com.unifina.security.Userish
-import grails.plugin.springsecurity.SpringSecurityService
 import org.codehaus.groovy.grails.commons.GrailsApplication
 import org.springframework.context.MessageSource
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder
