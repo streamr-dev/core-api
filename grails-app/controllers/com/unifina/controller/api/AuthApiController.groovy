@@ -12,8 +12,6 @@ import com.unifina.utils.EmailValidator
 import grails.converters.JSON
 import grails.plugin.springsecurity.SpringSecurityService
 import grails.plugin.springsecurity.annotation.Secured
-import grails.plugin.springsecurity.authentication.dao.NullSaltSource
-import org.springframework.security.authentication.dao.SaltSource
 
 @Secured(["IS_AUTHENTICATED_ANONYMOUSLY"])
 class AuthApiController {
@@ -21,7 +19,6 @@ class AuthApiController {
 	def mailService
 	UserService userService
 	SignupCodeService signupCodeService
-	SaltSource saltSource
 	SpringSecurityService springSecurityService
 
 	@StreamrApi(authenticationLevel = AuthLevel.NONE)
@@ -171,7 +168,7 @@ class AuthApiController {
 			return render([success: false, error: userService.beautifyErrors(command.errors.getAllErrors())] as JSON)
 		}
 
-		String salt = saltSource instanceof NullSaltSource ? null : registrationCode.username
+		String salt = null
 		RegistrationCode.withTransaction { status ->
 			user.password = springSecurityService.encodePassword(command.password, salt)
 			user.save()

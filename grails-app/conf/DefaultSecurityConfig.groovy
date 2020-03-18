@@ -12,10 +12,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import grails.plugin.springsecurity.SecurityConfigType
-import grails.plugin.springsecurity.SpringSecurityUtils
-import grails.plugin.springsecurity.authentication.GrailsAnonymousAuthenticationToken
 
+import grails.plugin.springsecurity.SecurityConfigType
+import grails.plugin.springsecurity.authentication.GrailsAnonymousAuthenticationToken
 import org.springframework.security.authentication.RememberMeAuthenticationToken
 import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter
@@ -108,7 +107,6 @@ security {
 	successHandler {
 		defaultTargetUrl = '/'
 		alwaysUseDefault = false
-		targetUrlParameter = SpringSecurityUtils.DEFAULT_TARGET_PARAMETER // 'spring-security-redirect'
 		ajaxSuccessUrl = '/login/ajaxSuccess'
 		useReferer = false
 	}
@@ -128,12 +126,6 @@ security {
 	sessionFixationPrevention {
 		migrate = true
 		alwaysCreateSession = false
-	}
-
-	/** daoAuthenticationProvider **/
-	dao {
-		reflectionSaltSourceProperty = null // if null, don't use salt source
-		hideUserNotFoundExceptions = true
 	}
 
 	/** anonymousProcessingFilter */
@@ -176,9 +168,6 @@ security {
 	// see http://docs.oracle.com/javase/7/docs/technotes/guides/security/StandardNames.html
 	password {
 		encodeHashAsBase64 = false
-		bcrypt {
-			logrounds = 10
-		}
 		hash {
 			iterations = 10000
 		}
