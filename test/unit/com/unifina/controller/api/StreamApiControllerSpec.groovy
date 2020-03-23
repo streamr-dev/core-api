@@ -5,29 +5,29 @@ import com.unifina.api.BadRequestException
 import com.unifina.api.NotFoundException
 import com.unifina.api.NotPermittedException
 import com.unifina.api.StreamListParams
-import com.unifina.domain.data.Feed
+import com.unifina.api.ValidationException
 import com.unifina.domain.data.Stream
 import com.unifina.domain.security.IntegrationKey
 import com.unifina.domain.security.Key
 import com.unifina.domain.security.Permission
 import com.unifina.domain.security.SecUser
-import com.unifina.feed.NoOpStreamListener
 import com.unifina.service.*
 import grails.converters.JSON
 import grails.test.mixin.Mock
 import grails.test.mixin.TestFor
+
 import java.text.SimpleDateFormat
 
 @TestFor(StreamApiController)
-@Mock([SecUser, Stream, Key, Permission, Feed, PermissionService, StreamService, DashboardService, IntegrationKey])
+@Mock([SecUser, Stream, Key, Permission, PermissionService, StreamService, DashboardService, IntegrationKey])
 class StreamApiControllerSpec extends ControllerSpecification {
 
-	Feed feed
 	SecUser me
+	Key key
 
-	def streamService
-	def permissionService
-	def apiService
+	StreamService streamService
+	PermissionService permissionService
+	ApiService apiService
 
 	Stream streamOne
 	def streamTwoId
@@ -45,21 +45,20 @@ class StreamApiControllerSpec extends ControllerSpecification {
 		me = new SecUser(username: "me", password: "foo")
 		me.save(validate: false)
 
-		Key key = new Key(name: "key", user: me)
+		key = new Key(name: "key", user: me)
 		key.id = "apiKey"
 		key.save(failOnError: true, validate: true)
-
-		feed = new Feed(streamListenerClass: NoOpStreamListener.name, id: 7).save(validate: false)
 
 		def otherUser = new SecUser(username: "other", password: "bar").save(validate: false)
 
 		// First use real streamService to create the streams
 		streamService = mainContext.getBean(StreamService)
 		streamService.permissionService = permissionService
-		streamOne = streamService.createStream([name: "stream", description: "description", feed: feed], me)
-		streamTwoId = streamService.createStream([name: "ztream", feed: feed], me).id
-		streamThreeId = streamService.createStream([name: "atream", feed: feed], me).id
-		streamFourId = streamService.createStream([name: "otherUserStream", feed: feed], otherUser).id
+		streamService.cassandraService = mockBean(CassandraService, Mock(CassandraService))
+		streamOne = streamService.createStream([name: "stream", description: "description"], me)
+		streamTwoId = streamService.createStream([name: "ztream"], me).id
+		streamThreeId = streamService.createStream([name: "atream"], me).id
+		streamFourId = streamService.createStream([name: "otherUserStream"], otherUser).id
 
 		controller.streamService = streamService
 	}
@@ -137,7 +136,7 @@ class StreamApiControllerSpec extends ControllerSpecification {
 
 	void "creating stream fails given invalid token"() {
 		when:
-		request.json = [name: "Test stream", description: "Test stream", feed: feed]
+		request.json = [name: "Test stream", description: "Test stream"]
 		request.method = 'POST'
 		unauthenticated() { controller.save() }
 
@@ -148,7 +147,7 @@ class StreamApiControllerSpec extends ControllerSpecification {
 	void "save() calls StreamService.createStream() and returns it.toMap()"() {
 		setup:
 		controller.streamService = streamService = Mock(StreamService)
-		def stream = new Stream(feed: new Feed())
+		def stream = new Stream()
 		stream.id = "test-stream"
 
 
@@ -218,15 +217,47 @@ class StreamApiControllerSpec extends ControllerSpecification {
 		response.status == 401
 	}
 
-	void "update a Stream of logged in user"() {
-		when:
-		params.id = streamOne.id
+	void "update validates fields"() {
+		setup:
 		request.method = "PUT"
-		request.json = '{name: "newName", description: "newDescription", autoConfigure: false, requireSignedData: true, storageDays: 24, inactivityThresholdHours: 99 }'
+		params.id = streamOne.id
+		request.JSON = [
+			name: "name",
+			partitions: -4,
+		]
+
+		when:
 		authenticatedAs(me) { controller.update() }
 
 		then:
-		response.status == 204
+		thrown ValidationException
+	}
+
+	void "update a Stream of logged in user"() {
+		setup:
+		request.method = "PUT"
+		params.id = streamOne.id
+		request.JSON = [
+			name: "newName",
+			description: "newDescription",
+			autoConfigure: false,
+			requireSignedData: true,
+			storageDays: 24,
+			inactivityThresholdHours: 99,
+			partitions: 5,
+			requireEncryptedData: true,
+		]
+
+		when:
+		authenticatedAs(me) { controller.update() }
+
+		then:
+		response.status == 200
+		response.json.name == "newName"
+		response.json.description == "newDescription"
+		response.json.storageDays == 24
+		response.json.inactivityThresholdHours == 99
+		response.json.partitions == 5
 
 		then:
 		def stream = streamOne
@@ -235,19 +266,36 @@ class StreamApiControllerSpec extends ControllerSpecification {
 		stream.config == null
 		stream.autoConfigure == false
 		stream.requireSignedData == true
+		stream.requireEncryptedData == true
 		stream.storageDays == 24
 		stream.inactivityThresholdHours == 99
+		stream.partitions == 5
 	}
 
 	void "update a Stream of logged in user but do not update undefined fields"() {
-		when:
-		params.id = streamOne.id
+		setup:
 		request.method = "PUT"
-		request.json = '{name: "newName", description: "newDescription", autoConfigure: null, requireSignedData: null, storageDays: null, inactivityThresholdHours: null }'
+		params.id = streamOne.id
+		request.json = [
+			name: "newName",
+			description: "newDescription",
+			autoConfigure: null,
+			requireSignedData: null,
+			storageDays: null,
+			inactivityThresholdHours: null,
+			requireEncryptedData: null
+		]
+
+		when:
 		authenticatedAs(me) { controller.update() }
 
 		then:
-		response.status == 204
+		response.status == 200
+		response.json.name == "newName"
+		response.json.description == "newDescription"
+		response.json.storageDays == Stream.DEFAULT_STORAGE_DAYS
+		response.json.inactivityThresholdHours == Stream.DEFAULT_INACTIVITY_THRESHOLD_HOURS
+		response.json.partitions == 1
 
 		then:
 		def stream = streamOne
@@ -256,15 +304,19 @@ class StreamApiControllerSpec extends ControllerSpecification {
 		stream.config == null
 		stream.autoConfigure == true
 		stream.requireSignedData == false
+		stream.requireEncryptedData == false
 		stream.storageDays == Stream.DEFAULT_STORAGE_DAYS
 		stream.inactivityThresholdHours == Stream.DEFAULT_INACTIVITY_THRESHOLD_HOURS
 	}
 
 	void "cannot update non-existent Stream"() {
-		when:
-		params.id = "666-666-666"
+		setup:
 		request.method = "PUT"
-		request.json = '{name: "newName", description: "newDescription"}'
+		params.id = "666-666-666"
+		request.json = [
+			name: "some new name",
+		]
+		when:
 		authenticatedAs(me) { controller.update() }
 
 		then:
@@ -272,10 +324,14 @@ class StreamApiControllerSpec extends ControllerSpecification {
 	}
 
 	void "cannot update other user's Stream"() {
-		when:
-		params.id = streamFourId
+		setup:
 		request.method = "PUT"
-		request.json = '{name: "newName", description: "newDescription"}'
+		params.id = streamFourId
+		request.json = [
+			name: "newName",
+			description: "newDescription"
+		]
+		when:
 		authenticatedAs(me) { controller.update() }
 
 		then:
@@ -289,6 +345,7 @@ class StreamApiControllerSpec extends ControllerSpecification {
 		authenticatedAs(me) { controller.delete() }
 
 		then:
+		1 * streamService.cassandraService.deleteAll(streamOne)
 		response.status == 204
 	}
 
@@ -310,6 +367,32 @@ class StreamApiControllerSpec extends ControllerSpecification {
 
 		then:
 		thrown NotPermittedException
+	}
+
+	void "can set fields"() {
+		when:
+		params.id = streamOne.id
+		request.method = "POST"
+		request.JSON = ["field1": "string"]
+		authenticatedAs(me) { controller.setFields()}
+
+		then:
+		1 * apiService.authorizedGetById(Stream, streamOne.id, me, Permission.Operation.WRITE) >> streamOne
+		streamOne.config == '{"fields":{"field1":"string"}}'
+		response.status == 200
+	}
+
+	void "can set fields with key"() {
+		when:
+		params.id = streamOne.id
+		request.method = "POST"
+		request.JSON = ["field1": "string"]
+		authenticatedAs(key) { controller.setFields()}
+
+		then:
+		1 * apiService.authorizedGetById(Stream, streamOne.id, key, Permission.Operation.WRITE) >> streamOne
+		streamOne.config == '{"fields":{"field1":"string"}}'
+		response.status == 200
 	}
 
 	void "returns set of publisher addresses"() {
@@ -483,7 +566,7 @@ class StreamApiControllerSpec extends ControllerSpecification {
 		when:
 		request.method = "DELETE"
 		params.id = streamOne.id
-		params.date = "2019-05-10T08:57:57Z"
+		request.JSON.date = "2019-05-10T08:57:57Z"
 		authenticatedAs(me) { controller.deleteDataUpTo() }
 
 		then:
@@ -497,7 +580,7 @@ class StreamApiControllerSpec extends ControllerSpecification {
 		when:
 		request.method = "DELETE"
 		params.id = streamOne.id
-		params.date = "1557478677036"
+		request.JSON.date = 1557478677036
 		authenticatedAs(me) { controller.deleteDataUpTo() }
 
 		then:
@@ -511,7 +594,7 @@ class StreamApiControllerSpec extends ControllerSpecification {
 		when:
 		request.method = "DELETE"
 		params.id = streamOne.id
-		params.date = "2019-05-10T08:57:xxZ"
+		request.JSON.date = "2019-05-10T08:57:xxZ"
 		authenticatedAs(me) { controller.deleteDataUpTo() }
 
 		then:
@@ -537,8 +620,8 @@ class StreamApiControllerSpec extends ControllerSpecification {
 		when:
 		request.method = "DELETE"
 		params.id = streamOne.id
-		params.start = "1557478677036"
-		params.end = "1557479167606"
+		request.JSON.start = 1557478677036
+		request.JSON.end = 1557479167606
 		authenticatedAs(me) { controller.deleteDataRange() }
 
 		then:
@@ -551,8 +634,8 @@ class StreamApiControllerSpec extends ControllerSpecification {
 		when:
 		request.method = "DELETE"
 		params.id = streamOne.id
-		params.start = "2019-05-10T08:57:xxZ"
-		params.end = "2019-05-10T09:06:07Z"
+		request.JSON.start = "2019-05-10T08:57:xxZ"
+		request.JSON.end = "2019-05-10T09:06:07Z"
 		authenticatedAs(me) { controller.deleteDataRange() }
 
 		then:
@@ -565,8 +648,8 @@ class StreamApiControllerSpec extends ControllerSpecification {
 		when:
 		request.method = "DELETE"
 		params.id = streamOne.id
-		params.start = "2019-05-10T08:57:57Z"
-		params.end = "2019-05-10T09:06:xxZ"
+		request.JSON.start = "2019-05-10T08:57:57Z"
+		request.JSON.end = "2019-05-10T09:06:xxZ"
 		authenticatedAs(me) { controller.deleteDataRange() }
 
 		then:
@@ -581,8 +664,8 @@ class StreamApiControllerSpec extends ControllerSpecification {
 		when:
 		request.method = "DELETE"
 		params.id = streamOne.id
-		params.start = "2019-05-10T08:57:57Z"
-		params.end = "2019-05-10T09:06:07Z"
+		request.JSON.start = "2019-05-10T08:57:57Z"
+		request.JSON.end = "2019-05-10T09:06:07Z"
 		authenticatedAs(me) { controller.deleteDataRange() }
 
 		then:

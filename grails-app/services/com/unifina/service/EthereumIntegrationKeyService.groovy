@@ -1,23 +1,21 @@
 package com.unifina.service
 
-import com.unifina.api.ApiException
-import com.unifina.api.CannotRemoveEthereumKeyException
-import com.unifina.api.ChallengeVerificationFailedException
-import com.unifina.api.DuplicateNotAllowedException
-import com.unifina.api.NotFoundException
-import com.unifina.domain.data.Feed
+import com.unifina.api.*
 import com.unifina.domain.data.Stream
 import com.unifina.domain.security.IntegrationKey
+import com.unifina.domain.security.Permission
 import com.unifina.domain.security.SecUser
 import com.unifina.security.StringEncryptor
+import com.unifina.utils.AlphanumericStringGenerator
 import grails.compiler.GrailsCompileStatic
 import grails.converters.JSON
 import groovy.transform.CompileStatic
 import org.apache.commons.codec.DecoderException
 import org.apache.commons.codec.binary.Hex
-import org.apache.commons.lang.RandomStringUtils
 import org.ethereum.crypto.ECKey
 import org.springframework.util.Assert
+import org.web3j.crypto.Credentials
+import org.web3j.crypto.Keys
 
 import javax.annotation.PostConstruct
 import java.security.SignatureException
@@ -46,9 +44,7 @@ class EthereumIntegrationKeyService {
 			String address = "0x" + getAddress(privateKey)
 			String encryptedPrivateKey = encryptor.encrypt(privateKey, user.id.byteValue())
 
-			if (getEthereumUser(address) != null) {
-				throw new DuplicateNotAllowedException("This Ethereum address is already associated with a Streamr user.")
-			}
+			assertUnique(address)
 
 			IntegrationKey key = new IntegrationKey(
 				name: name,
@@ -80,9 +76,7 @@ class EthereumIntegrationKeyService {
 			throw new ApiException(400, "ADDRESS_RECOVERY_ERROR", e.message)
 		}
 
-		if (getEthereumUser(address) != null) {
-			throw new DuplicateNotAllowedException("This Ethereum address is already associated with a Streamr user.")
-		}
+		assertUnique(address)
 
 		IntegrationKey integrationKey = new IntegrationKey(
 			name: name,
@@ -112,6 +106,7 @@ class EthereumIntegrationKeyService {
 		IntegrationKey account = IntegrationKey.findByIdAndUser(integrationKeyId, currentUser)
 		if (account) {
 			subscriptionService.beforeIntegrationKeyRemoved(account)
+			deleteInboxStream(account.idInService)
 			account.delete(flush: true)
 		}
 	}
@@ -146,8 +141,8 @@ class EthereumIntegrationKeyService {
 	SecUser createEthereumUser(String address) {
 		SecUser user = userService.createUser([
 			username       : address,
-			password       : RandomStringUtils.random(32),
-			name           : address,
+			password       : AlphanumericStringGenerator.getRandomAlphanumericString(32),
+			name           : "Anonymous User",
 			enabled        : true,
 			accountLocked  : false,
 			passwordExpired: false
@@ -166,17 +161,27 @@ class EthereumIntegrationKeyService {
 	}
 
 	private void createUserInboxStream(SecUser user, String address) {
+		Stream existing = Stream.get(address)
+		if (existing != null && existing.inbox) {
+			// The inbox stream already exists.
+			return
+		}
 		Stream inboxStream = new Stream()
-		inboxStream.id = address
-		inboxStream.name = address
+		inboxStream.id = address.toLowerCase()
+		inboxStream.name = address.toLowerCase()
 		inboxStream.inbox = true
 		inboxStream.autoConfigure = false
-		// If no feed given, API feed is used
-		if (inboxStream.feed == null) {
-			inboxStream.feed = Feed.load(Feed.KAFKA_ID)
-		}
+
 		inboxStream.save(failOnError: true, flush: true)
 		permissionService.systemGrantAll(user, inboxStream)
+	}
+
+	private void deleteInboxStream(String address) {
+		Stream stream = Stream.get(address)
+		if (stream && stream.inbox) {
+			Permission.findAllByStream(Stream.get(address))*.delete(flush: true)
+			stream.delete(flush: true)
+		}
 	}
 
 	@CompileStatic
@@ -204,6 +209,19 @@ class EthereumIntegrationKeyService {
 		}
 	}
 
+	@CompileStatic
+	static Credentials generateAccount() {
+		return Credentials.create(Keys.createEcKeyPair())
+	}
+
+	private void assertUnique(String address) {
+		SecUser existingUser = getEthereumUser(address)
+		if (existingUser != null) {
+			log.error("The Ethereum address " + address + " is already associated with the Streamr user: " + existingUser.id)
+			throw new DuplicateNotAllowedException("The Ethereum address " + address + " is already associated with a Streamr user.")
+		}
+	}
+
 	void updateKey(SecUser user, String id, String name) {
 		IntegrationKey key = IntegrationKey.findByIdAndUser(id, user)
 		if (key == null) {
@@ -212,4 +230,5 @@ class EthereumIntegrationKeyService {
 		key.name = name
 		key.save(failOnError: true, validate: true)
 	}
+
 }

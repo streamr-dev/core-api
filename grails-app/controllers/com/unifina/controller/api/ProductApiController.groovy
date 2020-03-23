@@ -7,33 +7,24 @@ import com.unifina.domain.security.SecUser
 import com.unifina.security.AllowRole
 import com.unifina.security.AuthLevel
 import com.unifina.security.StreamrApi
-import com.unifina.service.ApiService
-import com.unifina.service.FreeProductService
-import com.unifina.service.ProductImageService
-import com.unifina.service.ProductService
+import com.unifina.service.*
 import grails.compiler.GrailsCompileStatic
 import grails.converters.JSON
+import grails.plugin.mail.MailService
 import grails.plugin.springsecurity.annotation.Secured
+import org.apache.log4j.Logger
 import org.springframework.web.multipart.MultipartFile
 
 @Secured(["IS_AUTHENTICATED_ANONYMOUSLY"])
 class ProductApiController {
-
-	static allowedMethods = [
-		setDeploying: "POST",
-		setDeployed: "POST",
-		setUndeploying: "POST",
-		setUndeployed: "POST",
-		setPricing: "POST",
-		uploadImage: "POST",
-		deployFree: "POST",
-		undeployFree: "POST"
-	]
-
 	ApiService apiService
 	FreeProductService freeProductService
 	ProductService productService
 	ProductImageService productImageService
+	MailService mailService
+	PermissionService permissionService
+
+	private static final Logger log = Logger.getLogger(ProductApiController)
 
 	@GrailsCompileStatic
 	@StreamrApi(allowRoles = AllowRole.ADMIN)
@@ -43,6 +34,33 @@ class ProductApiController {
 		return render(results as JSON)
 	}
 
+	@StreamrApi(allowRoles = AllowRole.ADMIN)
+	def emailStaleProductOwners() {
+		Boolean dryRun = params.boolean("dry_run") ?: false
+		Map<SecUser, List<ProductService.StaleProduct>> staleProductsByOwner = productService.findStaleProductsByOwner(loggedInUser())
+		for (Map.Entry<SecUser, List<ProductService.StaleProduct>> entry : staleProductsByOwner.entrySet()) {
+			SecUser owner = entry.getKey()
+			List<ProductService.StaleProduct> ownersProducts = entry.getValue()
+			if (!owner.isEthereumUser()) {
+				if (dryRun) {
+					log.info(String.format("dry run: sending stale product email to %s", owner.username))
+				} else {
+					log.info(String.format("sending stale product email to %s", owner.username))
+					try {
+						mailService.sendMail {
+							from grailsApplication.config.unifina.email.sender
+							to owner.username
+							subject "Problem with your products on Streamr Marketplace"
+							html g.render(template: "/emails/email_stale_product_notification", model: [user: owner, staleProducts: ownersProducts])
+						}
+					} catch (Exception e) {
+						log.error(String.format("send stale product email to %s failed: ", owner.username), e)
+					}
+				}
+			}
+		}
+		return render(status: 204)
+	}
 
 	@GrailsCompileStatic
 	@StreamrApi(authenticationLevel = AuthLevel.NONE)
@@ -65,7 +83,8 @@ class ProductApiController {
 	@StreamrApi(authenticationLevel = AuthLevel.NONE)
 	def show(String id) {
 		Product product = productService.findById(id, loggedInUser(), Permission.Operation.READ)
-		render(product.toMap() as JSON)
+		boolean isProductOwner = permissionService.canShare(loggedInUser(), product)
+		render(product.toMap(isProductOwner) as JSON)
 	}
 
 	@GrailsCompileStatic
@@ -79,7 +98,8 @@ class ProductApiController {
 	@StreamrApi(authenticationLevel = AuthLevel.USER)
 	def update(String id, UpdateProductCommand command) {
 		Product product = productService.update(id, command, loggedInUser())
-		render(product.toMap() as JSON)
+		boolean isProductOwner = permissionService.canShare(loggedInUser(), product)
+		render(product.toMap(isProductOwner) as JSON)
 	}
 
 	@GrailsCompileStatic

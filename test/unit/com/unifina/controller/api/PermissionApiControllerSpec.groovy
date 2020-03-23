@@ -12,6 +12,7 @@ import com.unifina.domain.signalpath.Canvas
 import com.unifina.service.EthereumIntegrationKeyService
 import com.unifina.service.PermissionService
 import com.unifina.service.SignupCodeService
+import com.unifina.service.StreamService
 import com.unifina.signalpath.messaging.MockMailService
 import grails.converters.JSON
 import grails.test.mixin.Mock
@@ -22,6 +23,7 @@ import grails.test.mixin.TestFor
 class PermissionApiControllerSpec extends ControllerSpecification {
 	def permissionService
 	EthereumIntegrationKeyService ethereumIntegrationKeyService
+	StreamService streamService
 
 	// Canvas and Stream chosen because one has string id and one has long id
 	Canvas canvasOwned, canvasShared, canvasRestricted, canvasPublic
@@ -34,10 +36,11 @@ class PermissionApiControllerSpec extends ControllerSpecification {
 	def setup() {
 		controller.permissionService = permissionService = Mock(PermissionService)
 		controller.ethereumIntegrationKeyService = ethereumIntegrationKeyService = Mock(EthereumIntegrationKeyService)
+		controller.streamService = streamService = Mock(StreamService)
 		controller.mailService = new MockMailService()
 		controller.signupCodeService = new SignupCodeService()
 
-		me = new SecUser(id: 1, username: "me").save(validate: false)
+		me = new SecUser(id: 1, username: "me@me.net").save(validate: false)
 		other = new SecUser(id: 2, username: "other").save(validate: false)
 
 		def meKey = new Key(name: "meKey", user: me)
@@ -102,7 +105,7 @@ class PermissionApiControllerSpec extends ControllerSpecification {
 		response.status == 200
 		response.json.size() == 4
 		response.json[0].id == canvasPermission.id
-		response.json[0].user == "me"
+		response.json[0].user == "me@me.net"
 		response.json[0].operation == "share"
 		// matching with _ instead of canvasOwned because it's not "the same" after saving and get(id):ing
 		1 * permissionService.getPermissionsTo(_) >> [canvasPermission, *ownerPermissions]
@@ -121,9 +124,10 @@ class PermissionApiControllerSpec extends ControllerSpecification {
 		response.status == 200
 		response.json.size() == 4
 		response.json[0].id == streamPermission.id
-		response.json[0].user == "me"
+		response.json[0].user == "me@me.net"
 		response.json[0].operation == "share"
 		// matching with _ instead of streamOwned because it's not "the same" after saving and get(id):ing
+		1 * streamService.getStream(streamShared.id) >> streamShared
 		1 * permissionService.getPermissionsTo(_) >> [streamPermission, *ownerPermissions]
 		1 * permissionService.canShare(me, _) >> true
 		0 * permissionService._
@@ -139,7 +143,7 @@ class PermissionApiControllerSpec extends ControllerSpecification {
 		then:
 		response.status == 200
 		response.json.id == 1
-		response.json.user == "me"
+		response.json.user == "me@me.net"
 		response.json.operation == "share"
 		// matching with _ instead of canvasOwned because it's not "the same" after saving and get(id):ing
 		1 * permissionService.getPermissionsTo(_) >> [canvasPermission, *ownerPermissions]
@@ -157,9 +161,10 @@ class PermissionApiControllerSpec extends ControllerSpecification {
 		then:
 		response.status == 200
 		response.json.id == 2
-		response.json.user == "me"
+		response.json.user == "me@me.net"
 		response.json.operation == "share"
 		// matching with _ instead of streamOwned because it's not "the same" after saving and get(id):ing
+		1 * streamService.getStream(streamShared.id) >> streamShared
 		1 * permissionService.getPermissionsTo(_) >> [streamPermission, *ownerPermissions]
 		1 * permissionService.canShare(me, _) >> true
 		0 * permissionService._
@@ -184,6 +189,7 @@ class PermissionApiControllerSpec extends ControllerSpecification {
 		when:
 		authenticatedAs(me) { controller.index() }
 		then:
+		1 * streamService.getStream(streamRestricted.id) >> streamRestricted
 		thrown NotPermittedException
 	}
 
@@ -216,6 +222,19 @@ class PermissionApiControllerSpec extends ControllerSpecification {
 		1 * permissionService.grant(me, _, _, Operation.READ) >> new Permission(user: other, operation: Operation.READ)
 	}
 
+	void "save sends an email if the user has an account"() {
+		setup:
+		params.resourceClass = Canvas
+		params.resourceId = canvasOwned.id
+		when:
+		request.JSON = [anonymous: false, user: "me@me.net", operation: "read"] as JSON
+		authenticatedAs(me) { controller.save() }
+		then:
+		controller.mailService.mailSent
+		1 * permissionService.canShare(me, _) >> true
+		1 * permissionService.grant(me, _, _, Operation.READ) >> new Permission(user: other, operation: Operation.READ)
+	}
+
 	void "save() creates a new user with permission if unknown ethereum address provided"() {
 		setup:
 		SecUser ethUser = new SecUser(id: 3, username: "0xa50E97f6a98dD992D9eCb8207c2Aa58F54970729")
@@ -226,12 +245,52 @@ class PermissionApiControllerSpec extends ControllerSpecification {
 		request.JSON = [user: ethUser.username, operation: "read"] as JSON
 		authenticatedAs(me) { controller.save() }
 		then:
+		!controller.mailService.mailSent
 		1 * ethereumIntegrationKeyService.createEthereumUser(ethUser.username) >> ethUser
 		1 * permissionService.canShare(me, _) >> true
 		1 * permissionService.grant(me, _, _, Operation.READ) >> new Permission(user: ethUser, operation: Operation.READ)
 		response.status == 201
 		response.json.user == ethUser.username
 		response.json.operation == "read"
+	}
+
+	void "save sends an email for read permission"() {
+		setup:
+		params.resourceClass = Canvas
+		params.resourceId = canvasOwned.id
+		when:
+		request.JSON = [anonymous: false, user: "me@me.net", operation: "read"] as JSON
+		authenticatedAs(me) { controller.save() }
+		then:
+		controller.mailService.mailSent
+		1 * permissionService.canShare(me, _) >> true
+		1 * permissionService.grant(me, _, _, Operation.READ) >> new Permission(user: other, operation: Operation.READ)
+	}
+
+	void "save does not send an email for write permission"() {
+		setup:
+		params.resourceClass = Canvas
+		params.resourceId = canvasOwned.id
+		when:
+		request.JSON = [anonymous: false, user: "me@me.net", operation: "write"] as JSON
+		authenticatedAs(me) { controller.save() }
+		then:
+		!controller.mailService.mailSent
+		1 * permissionService.canShare(me, _) >> true
+		1 * permissionService.grant(me, _, _, Operation.WRITE) >> new Permission(user: other, operation: Operation.WRITE)
+	}
+
+	void "save does not send an email for share permission"() {
+		setup:
+		params.resourceClass = Canvas
+		params.resourceId = canvasOwned.id
+		when:
+		request.JSON = [anonymous: false, user: "me@me.net", operation: "share"] as JSON
+		authenticatedAs(me) { controller.save() }
+		then:
+		!controller.mailService.mailSent
+		1 * permissionService.canShare(me, _) >> true
+		1 * permissionService.grant(me, _, _, Operation.SHARE) >> new Permission(user: other, operation: Operation.SHARE)
 	}
 
 	void "delete revokes permissions"() {
@@ -284,9 +343,19 @@ class PermissionApiControllerSpec extends ControllerSpecification {
 		authenticatedAs(me) { controller.getOwnPermissions() }
 		then:
 		response.status == 200
-		response.json == [[id: 1, operation: "share", user: "me"]]
+		response.json == [[id: 1, operation: "share", user: "me@me.net"]]
 
 		1 * permissionService.getPermissionsTo(_, me) >> [canvasPermission]
 		0 * permissionService._
+	}
+
+	void "cleanup calls service to delete expired permissions"() {
+		when:
+		request.method = "DELETE"
+		authenticatedAs(me) { controller.cleanup() }
+
+		then:
+		1 * permissionService.cleanUpExpiredPermissions()
+		response.status == 200
 	}
 }

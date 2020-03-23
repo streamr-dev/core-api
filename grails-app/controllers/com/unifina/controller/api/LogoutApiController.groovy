@@ -8,8 +8,6 @@ import grails.plugin.springsecurity.annotation.Secured
 
 @Secured(["IS_AUTHENTICATED_ANONYMOUSLY"])
 class LogoutApiController {
-
-	static allowedMethods = [logout: "POST"]
 	SessionService sessionService
 
 	@StreamrApi

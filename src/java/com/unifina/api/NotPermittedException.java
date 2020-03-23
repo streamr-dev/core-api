@@ -35,14 +35,14 @@ public class NotPermittedException extends ApiException {
 	public ApiError asApiError() {
 		ApiError e = super.asApiError();
 		if (type != null && id != null) {
-			e.addEntry("user", user != null ? user : "<not authenticated>");
-			e.addEntry("resource", type);
-			e.addEntry("id", id);
+			e.addToBody("user", user != null ? user : "<not authenticated>");
+			e.addToBody("resource", type);
+			e.addToBody("id", id);
 			if (op == null) {
-				e.addEntry("fault", "id");
+				e.addToBody("fault", "id");
 			} else {
-				e.addEntry("fault", "operation");
-				e.addEntry("operation", op);
+				e.addToBody("fault", "operation");
+				e.addToBody("operation", op);
 			}
 		}
 		return e;

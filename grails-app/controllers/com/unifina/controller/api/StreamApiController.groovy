@@ -2,11 +2,13 @@ package com.unifina.controller.api
 
 import com.unifina.api.*
 import com.unifina.domain.data.Stream
+import com.unifina.domain.security.Key
 import com.unifina.domain.security.Permission.Operation
 import com.unifina.domain.security.SecUser
 import com.unifina.feed.DataRange
 import com.unifina.security.AuthLevel
 import com.unifina.security.StreamrApi
+import com.unifina.security.Userish
 import com.unifina.service.StreamService
 import grails.converters.JSON
 import grails.plugin.springsecurity.annotation.Secured
@@ -17,13 +19,6 @@ import java.text.SimpleDateFormat
 
 @Secured(["IS_AUTHENTICATED_ANONYMOUSLY"])
 class StreamApiController {
-
-	static allowedMethods = [
-		"setFields": "POST",
-		"uploadCsvFile": "POST",
-		"confirmCsvFileUpload": "POST"
-	]
-
 	private final SimpleDateFormat iso8601 = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'")
 	private final SimpleDateFormat iso8601cal = new SimpleDateFormat("yyyy-MM-dd")
 
@@ -67,11 +62,17 @@ class StreamApiController {
 			stream.name = newStream.name
 			stream.description = newStream.description
 			stream.config = readConfig()
+			if (newStream.partitions != null) {
+				stream.partitions = newStream.partitions
+			}
 			if (newStream.autoConfigure != null) {
 				stream.autoConfigure = newStream.autoConfigure
 			}
 			if (newStream.requireSignedData != null) {
 				stream.requireSignedData = newStream.requireSignedData
+			}
+			if (newStream.requireEncryptedData != null) {
+				stream.requireEncryptedData = newStream.requireEncryptedData
 			}
 			if (newStream.storageDays != null) {
 				stream.storageDays = newStream.storageDays
@@ -81,7 +82,7 @@ class StreamApiController {
 			}
 			if (stream.validate()) {
 				stream.save(failOnError: true)
-				render(status: 204)
+				render(stream.toMap() as JSON)
 			} else {
 				throw new ValidationException(stream.errors)
 			}
@@ -105,9 +106,10 @@ class StreamApiController {
 		}
 	}
 
-	@StreamrApi
+	@StreamrApi(authenticationLevel = AuthLevel.KEY)
 	def setFields(String id) {
-		def stream = apiService.authorizedGetById(Stream, id, (SecUser) request.apiUser, Operation.WRITE)
+		Userish u = request.apiUser != null ? (SecUser) request.apiUser : (Key) request.apiKey
+		Stream stream = apiService.authorizedGetById(Stream, id, u, Operation.WRITE)
 		def givenFields = request.JSON
 
 		Map config = stream.config ? JSON.parse(stream.config) : [:]
@@ -173,7 +175,7 @@ class StreamApiController {
 		}
 	}
 
-	@StreamrApi
+	@StreamrApi(authenticationLevel = AuthLevel.NONE)
 	def publishers(String id) {
 		getAuthorizedStream(id, Operation.READ) { Stream stream ->
 			Set<String> publisherAddresses = streamService.getStreamEthereumPublishers(stream)
@@ -181,7 +183,7 @@ class StreamApiController {
 		}
 	}
 
-	@StreamrApi
+	@StreamrApi(authenticationLevel = AuthLevel.NONE)
 	def subscribers(String id) {
 		getAuthorizedStream(id, Operation.WRITE) { Stream stream ->
 			Set<String> subscriberAddresses = streamService.getStreamEthereumSubscribers(stream)
@@ -189,7 +191,7 @@ class StreamApiController {
 		}
 	}
 
-	@StreamrApi
+	@StreamrApi(authenticationLevel = AuthLevel.NONE)
 	def publisher(String id, String address) {
 		getAuthorizedStream(id, Operation.READ) { Stream stream ->
 			if(streamService.isStreamEthereumPublisher(stream, address)) {
@@ -200,7 +202,7 @@ class StreamApiController {
 		}
 	}
 
-	@StreamrApi
+	@StreamrApi(authenticationLevel = AuthLevel.NONE)
 	def subscriber(String id, String address) {
 		getAuthorizedStream(id, Operation.WRITE) { Stream stream ->
 			if(streamService.isStreamEthereumSubscriber(stream, address)) {
@@ -245,7 +247,7 @@ class StreamApiController {
 	@StreamrApi
 	def deleteDataUpTo(String id) {
 		getAuthorizedStream(id, Operation.WRITE) { Stream stream ->
-			Date date = parseDate((String) params.date)
+			Date date = parseDate(String.valueOf(request.JSON.date), "date")
 			streamService.deleteDataUpTo(stream, date)
 			render(status: 204)
 		}
@@ -262,21 +264,22 @@ class StreamApiController {
 	@StreamrApi
 	def deleteDataRange(String id) {
 		getAuthorizedStream(id, Operation.WRITE) { Stream stream ->
-			Date start = parseDate((String) params.start)
-			Date end = parseDate((String) params.end)
+			Date start = parseDate(String.valueOf(request.JSON.start), "start")
+			Date end = parseDate(String.valueOf(request.JSON.end), "end")
 			streamService.deleteDataRange(stream, start, end)
 			render(status: 204)
 		}
 	}
 
-	private Date parseDate(String input) {
+	private Date parseDate(String input, String field) {
 		try {
 			return new Date(Long.parseLong(input))
 		} catch (NumberFormatException e) {
 			try {
 				return iso8601.parse(input)
 			} catch (ParseException pe) {
-				throw new BadRequestException(pe.getMessage())
+				String msg = String.format("Unable to parse a date from field '%s' with value '%s'", field, input)
+				throw new BadRequestException(msg)
 			}
 		}
 	}

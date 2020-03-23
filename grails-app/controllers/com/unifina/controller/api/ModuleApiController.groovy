@@ -15,7 +15,6 @@ import com.unifina.signalpath.AbstractSignalPathModule
 import com.unifina.signalpath.ModuleException
 import com.unifina.exceptions.ModuleExceptionMessage
 import com.unifina.utils.Globals
-import com.unifina.utils.GlobalsFactory
 import grails.compiler.GrailsCompileStatic
 import grails.converters.JSON
 import grails.plugin.springsecurity.annotation.Secured
@@ -106,7 +105,7 @@ class ModuleApiController {
 
 	@GrailsCompileStatic
 	private Map instantiateAndGetConfig(Long id, Map moduleConfig, SecUser user) {
-		Globals globals = GlobalsFactory.createInstance([:], user)
+		Globals globals = new Globals([:], user)
 
 		Module domainObject = Module.get(id)
 		if (domainObject == null) {

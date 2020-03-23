@@ -1,5 +1,7 @@
 package com.unifina.service
 
+import com.google.gson.Gson
+import com.google.gson.GsonBuilder
 import com.unifina.api.*
 import com.unifina.domain.ExampleType
 import com.unifina.domain.dashboard.Dashboard
@@ -9,6 +11,7 @@ import com.unifina.domain.security.Permission
 import com.unifina.domain.security.SecUser
 import com.unifina.domain.signalpath.Canvas
 import com.unifina.exceptions.CanvasUnreachableException
+import com.unifina.exceptions.InvalidStreamConfigException
 import com.unifina.serialization.SerializationException
 import com.unifina.signalpath.ModuleException
 import com.unifina.signalpath.ModuleWithUI
@@ -16,10 +19,10 @@ import com.unifina.signalpath.UiChannelIterator
 import com.unifina.task.CanvasDeleteTask
 import com.unifina.task.CanvasStartTask
 import com.unifina.utils.Globals
-import com.unifina.utils.GlobalsFactory
+import com.unifina.utils.NullJsonSerializer
 import grails.converters.JSON
 import grails.transaction.Transactional
-import groovy.json.JsonBuilder
+import groovy.json.JsonSlurper
 import groovy.transform.CompileStatic
 import org.codehaus.groovy.grails.web.json.JSONObject
 import org.codehaus.groovy.grails.web.mapping.LinkGenerator
@@ -27,6 +30,11 @@ import org.codehaus.groovy.runtime.InvokerHelper
 import org.codehaus.groovy.runtime.InvokerInvocationException
 
 class CanvasService {
+	private final static Gson gson = new GsonBuilder()
+		.serializeNulls()
+		.setPrettyPrinting()
+		.registerTypeAdapter(JSONObject.Null, new NullJsonSerializer())
+		.create()
 
 	SignalPathService signalPathService
 	TaskService taskService
@@ -49,11 +57,11 @@ class CanvasService {
 	}
 
 	private String extractJson(String json, SaveCanvasCommand cmd) {
-		Map canvasJson = (Map) JSON.parse(json)
+		Map canvasJson = new JsonSlurper().parseText(json)
 		canvasJson.name = cmd.name
 		canvasJson.modules = cmd.modules
 		canvasJson.settings = cmd.settings
-		return new JsonBuilder(canvasJson).toPrettyString()
+		return gson.toJson(canvasJson)
 	}
 
 	@CompileStatic
@@ -77,7 +85,7 @@ class CanvasService {
 		}
 		if (result != null) {
 			canvas.hasExports = result.map.hasExports
-			canvas.json = new JsonBuilder(result.map).toPrettyString()
+			canvas.json = gson.toJson(result.map)
 		} else {
 			canvas.json = extractJson(canvas.json, command)
 		}
@@ -145,6 +153,8 @@ class CanvasService {
 			log.error("De-serialization failure caused by (BELOW)", ex.cause)
 			String msg = "Could not load (deserialize) previous state of canvas $canvas.id."
 			throw new ApiException(500, "LOADING_PREVIOUS_STATE_FAILED", msg)
+		} catch (InvalidStreamConfigException e) {
+			throw new BadRequestException(e.getMessage())
 		}
 	}
 
@@ -322,7 +332,7 @@ class CanvasService {
 	 * Rebuild JSON to check it is ok and up-to-date
 	 */
 	private SignalPathService.ReconstructedResult reconstructFrom(Map signalPathMap, SecUser user) {
-		Globals globals = GlobalsFactory.createInstance(signalPathMap.settings ?: [:], user)
+		Globals globals = new Globals(signalPathMap.settings ?: [:], user)
 		return signalPathService.reconstruct(signalPathMap, globals)
 	}
 

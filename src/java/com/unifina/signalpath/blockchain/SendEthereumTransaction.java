@@ -1,12 +1,15 @@
 package com.unifina.signalpath.blockchain;
 
-import com.unifina.data.FeedEvent;
 import com.streamr.client.protocol.message_layer.ITimestamped;
 import com.unifina.signalpath.*;
 import com.unifina.utils.MapTraversal;
 import org.apache.log4j.Logger;
-import org.web3j.abi.*;
-import org.web3j.abi.datatypes.*;
+import org.web3j.abi.EventValues;
+import org.web3j.abi.FunctionEncoder;
+import org.web3j.abi.FunctionReturnDecoder;
+import org.web3j.abi.datatypes.Event;
+import org.web3j.abi.datatypes.Function;
+import org.web3j.abi.datatypes.Type;
 import org.web3j.crypto.Credentials;
 import org.web3j.crypto.RawTransaction;
 import org.web3j.crypto.TransactionEncoder;
@@ -14,7 +17,10 @@ import org.web3j.protocol.Web3j;
 import org.web3j.protocol.core.DefaultBlockParameterName;
 import org.web3j.protocol.core.Response;
 import org.web3j.protocol.core.methods.request.Transaction;
-import org.web3j.protocol.core.methods.response.*;
+import org.web3j.protocol.core.methods.response.EthCall;
+import org.web3j.protocol.core.methods.response.EthGetTransactionCount;
+import org.web3j.protocol.core.methods.response.EthSendTransaction;
+import org.web3j.protocol.core.methods.response.TransactionReceipt;
 import org.web3j.protocol.http.HttpService;
 import org.web3j.utils.Numeric;
 
@@ -24,10 +30,9 @@ import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
-import java.util.function.Consumer;
 
 /**
- * Send out a call to specified function in Ethereum block chain
+ * Send out a call to specified function in Ethereum blockchain
  */
 public class SendEthereumTransaction extends ModuleWithSideEffects {
 
@@ -46,8 +51,8 @@ public class SendEthereumTransaction extends ModuleWithSideEffects {
 	private FunctionNameParameter function = new FunctionNameParameter(this, "function");
 	private List<Input<Object>> arguments = new ArrayList<>();
 
-	protected int check_result_max_tries = 100;
-	protected int check_result_waitms = 10000;
+	private static final int CHECK_RESULT_MAX_TRIES = 100;
+	private static final int CHECK_RESULT_WAIT_MS = 10000;
 
 	// constant function outputs
 	private List<Output<Object>> results = new ArrayList<>();
@@ -57,7 +62,6 @@ public class SendEthereumTransaction extends ModuleWithSideEffects {
 	private Map<EthereumABI.Event, List<Output<Object>>> eventOutputs;        // outputs for each event separately
 
 	private TimeSeriesOutput valueSent = new TimeSeriesOutput(this, "spentEth");
-	//private TimeSeriesOutput valueReceived = new TimeSeriesOutput(this, "targetChangeWei");
 	private TimeSeriesOutput gasUsed = new TimeSeriesOutput(this, "gasUsed");
 	private TimeSeriesOutput gasPrice = new TimeSeriesOutput(this, "gasPriceWei");
 	private TimeSeriesOutput blockNumber = new TimeSeriesOutput(this, "blockNumber");
@@ -65,7 +69,6 @@ public class SendEthereumTransaction extends ModuleWithSideEffects {
 
 
 	private static final Logger log = Logger.getLogger(SendEthereumTransaction.class);
-	private static final int ETHEREUM_TRANSACTION_DEFAULT_TIMEOUT_SECONDS = 1800;
 
 	private Web3j web3j;
 
@@ -90,24 +93,29 @@ public class SendEthereumTransaction extends ModuleWithSideEffects {
 		Map<String, Object> config = super.getConfiguration();
 
 		ModuleOptions options = ModuleOptions.get(config);
-		ethereumOptions.writeTo(options);
-
+		ethereumOptions.writeGasPriceOption(options);
+		ethereumOptions.writeGasLimitOption(options);
 		return config;
 	}
 
-	protected Web3j getWeb3j(){
-		return Web3j.build(new HttpService(ethereumOptions.getRpcUrl()));
+	protected Web3j getWeb3j() {
+		return ethereumOptions.getWeb3j();
 	}
 
 	@Override
 	protected void onConfiguration(Map<String, Object> config) {
 		super.onConfiguration(config);
-		//String stringconfig = new Gson().toJson(config);
 		ModuleOptions options = ModuleOptions.get(config);
 		ethereumOptions = EthereumModuleOptions.readFrom(options);
+		if (contract.hasValue()) {
+			String network = contract.getValue().getNetwork();
+			if (network != null) {
+				log.info("Setting ethereumOptions.network = " + network + ", passed from Contract");
+				ethereumOptions.setNetwork(network);
+			}
+		}
 		web3j = getWeb3j();
 		updateInterface();
-
 		// Find the function input config and configure it manually.
 		// The input is not yet configured, so otherwise it won't hold the correct value yet.
 		if (config.containsKey("params")) {
@@ -215,7 +223,6 @@ public class SendEthereumTransaction extends ModuleWithSideEffects {
 			}
 
 			addOutput(valueSent);
-//			addOutput(valueReceived);
 			addOutput(gasUsed);
 			addOutput(gasPrice);
 			addOutput(blockNumber);
@@ -278,7 +285,7 @@ public class SendEthereumTransaction extends ModuleWithSideEffects {
 	/*
 	separate function for testing
 	 */
-	protected long getBlockTimeSeconds(TransactionReceipt tr) throws IOException {
+	protected long getBlockTimeSeconds(TransactionReceipt tr) throws IOException, Web3jHelper.BlockchainException {
 		return Web3jHelper.getBlockTime(web3j, tr);
 	}
 
@@ -298,22 +305,29 @@ public class SendEthereumTransaction extends ModuleWithSideEffects {
 		/**
 		 * fetch tx data and populate transaction and receipt when done.
 		 * run this from a worker thread (eg async submit tx handler)
+		 *
+		 * @throws IOException if Ethereum requests fail (network problem to Ethereum client)
 		 */
 		protected void enqueueConfirmedTx() throws IOException {
 			final FunctionCallResult fncall = this;
-			receipt = Web3jHelper.waitForTransactionReceipt(web3j,web3jTx.getTransactionHash(), check_result_waitms, check_result_max_tries);
+			receipt = Web3jHelper.waitForTransactionReceipt(web3j,web3jTx.getTransactionHash(), CHECK_RESULT_WAIT_MS, CHECK_RESULT_MAX_TRIES);
 			if (receipt != null) {
 				transaction = web3j.ethGetTransactionByHash(web3jTx.getTransactionHash()).send().getResult();
 				log.info("Receipt found for txHash: " + web3jTx.getTransactionHash());
-				long ts = getBlockTimeSeconds(receipt);
-				if(ts >= 0){
-					Date newts = new Date(ts*1000);
-					log.info("Updating timestamp of TransactionResult from "+timestamp + " to block timestamp "+newts);
+				long ts = -1;
+				try{
+					ts = getBlockTimeSeconds(receipt);
+				}
+				catch(Web3jHelper.BlockchainException e){
+					log.error(e.getMessage());
+				}
+				if (ts >= 0) {
+					Date newts = new Date(ts * 1000);
+					log.info("Updating timestamp of TransactionResult from " + timestamp + " to block timestamp " + newts);
 					timestamp = newts;
 				}
 				enqueueEvent(fncall);
-			}
-			else{
+			} else {
 				log.error("Couldnt find receipt for txHash: " + web3jTx.getTransactionHash());
 			}
 		}
@@ -327,11 +341,11 @@ public class SendEthereumTransaction extends ModuleWithSideEffects {
 			return web3jTx.getTransactionHash();
 		}
 
-		public org.web3j.protocol.core.methods.response.Transaction getTransaction(){
+		public org.web3j.protocol.core.methods.response.Transaction getTransaction() {
 			return transaction;
 		}
 
-		public TransactionReceipt getTransactionReceipt(){
+		public TransactionReceipt getTransactionReceipt() {
 			return receipt;
 		}
 
@@ -352,12 +366,13 @@ public class SendEthereumTransaction extends ModuleWithSideEffects {
 					List<Object> objs = new ArrayList<Object>();
 					// indexed and non-indexed event args are saved differently in logs and must be retrieved by different methods
 					// see https://solidity.readthedocs.io/en/v0.5.3/contracts.html#events
-					int nextIndexed=0,nextNonIndexed=0;
-					for(EthereumABI.Slot s : e.inputs){
-						if(s.indexed)
+					int nextIndexed = 0, nextNonIndexed = 0;
+					for (EthereumABI.Slot s : e.inputs) {
+						if (s.indexed) {
 							objs.add(ev.getIndexedValues().get(nextIndexed++).getValue());
-						else
+						} else {
 							objs.add(ev.getNonIndexedValues().get(nextNonIndexed++).getValue());
+						}
 					}
 					events.put(e.name, objs);
 				}
@@ -365,25 +380,6 @@ public class SendEthereumTransaction extends ModuleWithSideEffects {
 			return events;
 		}
 
-	}
-
-	/**
-	 * Asynchronously handle server response, call comes from event queue
-	 *
-	 * @param event containing HttpTransaction created within sendOutput
-	 */
-	@Override
-	public void receive(FeedEvent event) {
-		if (event.content instanceof FunctionCallResult) {
-			try {
-				sendOutput((FunctionCallResult) event.content);
-			} catch (Exception e) {
-				throw new RuntimeException(e);
-			}
-			getPropagator().propagate();
-		} else {
-			super.receive(event);
-		}
 	}
 
 	private transient Propagator asyncPropagator;
@@ -406,14 +402,13 @@ public class SendEthereumTransaction extends ModuleWithSideEffects {
 	protected Function createWeb3jFunctionCall() throws InvocationTargetException, NoSuchMethodException, InstantiationException, IllegalAccessException, ClassNotFoundException {
 		List args = new ArrayList(chosenFunction.inputs.size());
 		for (int i = 0; i < chosenFunction.inputs.size(); i++) {
-			args.add(arguments.get(i).getValue());
+			Object arg = arguments.get(i).getValue();
+			if (arg instanceof Double || arg instanceof Float) {
+				arg = BigDecimal.valueOf(((Number) arg).doubleValue());
+			}
+			args.add(arg);
 		}
-		return Web3jHelper.toWeb3jFunction(chosenFunction,args);
-	}
-
-
-	protected BigInteger getGasLimit() {
-		return BigInteger.valueOf(6000000l);
+		return Web3jHelper.toWeb3jFunction(chosenFunction, args);
 	}
 
 	@Override
@@ -450,30 +445,25 @@ public class SendEthereumTransaction extends ModuleWithSideEffects {
 				} else {
 					valueWei = BigInteger.ZERO;
 				}
-
-				RawTransaction rawTransaction = RawTransaction.createTransaction(nonce, gasPrice, getGasLimit(), c.getAddress(), valueWei, encodeFnCall);
+				BigInteger gasLimitBigint = BigInteger.valueOf(ethereumOptions.getGasLimit());
+				RawTransaction rawTransaction = RawTransaction.createTransaction(nonce, gasPrice, gasLimitBigint, c.getAddress(), valueWei, encodeFnCall);
 				byte[] signedMessage = TransactionEncoder.signMessage(rawTransaction, credentials);
 				String hexValue = Numeric.toHexString(signedMessage);
 				CompletableFuture<EthSendTransaction> cf = web3j.ethSendRawTransaction(hexValue).sendAsync();
-				cf.thenAccept(new Consumer<EthSendTransaction>() {
-					@Override
-					public void accept(EthSendTransaction tx) {
-						log.debug("TX response: " + tx.getRawResponse());
-						TransactionResult tr = new TransactionResult(getGlobals().time, fn, tx);
+				cf.thenAccept(tx -> {
+					log.debug("TX response: " + tx.getRawResponse());
+					TransactionResult tr = new TransactionResult(getGlobals().time, fn, tx);
 
-						//enqueue the txHash only when submitted, before result from blockchain
-						//enqueueEvent(tr);
-
-						try {
-							//if tx submit had error, don't wait to confirm tx
-							if(tr.getError() != null)
-								enqueueEvent(tr);
-							else
-							//enqueue the result from blockchain, when tx finishes
-								tr.enqueueConfirmedTx();
-						} catch (IOException e) {
-							throw new RuntimeException(e);
+					try {
+						// put the result from blockchain to Streamr event queue when tx finishes
+						if (tr.getError() == null) {
+							tr.enqueueConfirmedTx();
+						} else {
+							// if tx submit had error, don't wait to confirm tx
+							enqueueEvent(tr);
 						}
+					} catch (IOException e) {
+						throw new RuntimeException(e);
 					}
 				});
 			}
@@ -482,39 +472,53 @@ public class SendEthereumTransaction extends ModuleWithSideEffects {
 		}
 	}
 
-	// push the response into Streamr's event queue
-	protected void enqueueEvent(FunctionCallResult fc){
-		getGlobals().getDataSource().enqueueEvent(new FeedEvent<FunctionCallResult, SendEthereumTransaction>(fc, fc.timestamp, this));
+	/**
+	 * Push the response into Streamr's event queue, and handle
+	 * it asynchronously.
+	 */
+	private void enqueueEvent(FunctionCallResult fc) {
+		getGlobals().getDataSource().enqueue(
+			new com.unifina.data.Event<>(fc, fc.timestamp, (event) -> {
+				try {
+					sendOutput(event);
+				} catch (Exception e) {
+					throw new RuntimeException(e);
+				}
+				getPropagator().propagate();
+			})
+		);
 	}
 
 	/**
 	 * format the list as an array of Strings
+	 *
 	 * @param l
 	 * @return
 	 */
-	public static List stringifyTypeList(List l){
+	public static List stringifyTypeList(List l) {
 		ArrayList<String> printed = new ArrayList<String>(l.size());
-		for(Object o : l){
+		for (Object o : l) {
 			printed.add(typeToString(o));
 		}
 		return printed;
 	}
 
-	public static String typeToString(Object o){
-		if(!(o instanceof List)) {
-			if(o instanceof Type){
+	public static String typeToString(Object o) {
+		if (!(o instanceof List)) {
+			if (o instanceof Type) {
 				return ((Type) o).getValue().toString();
-			}
-			else
+			} else {
 				return o.toString();
+			}
 		}
 		StringBuilder sb = new StringBuilder();
 		List l = (List) o;
 		sb.append("[");
-		int i=0;
-		for(Object li : l){
-			if(i++ > 0)
+		int i = 0;
+		for (Object li : l) {
+			if (i++ > 0) {
 				sb.append(",");
+			}
 			sb.append(typeToString(li));
 		}
 		sb.append("]");
@@ -535,8 +539,9 @@ public class SendEthereumTransaction extends ModuleWithSideEffects {
 			int n = Math.min(results.size(), txResults.size());
 			for (int i = 0; i < n; i++) {
 				Object val = txResults.get(i).getValue();
-				if(val instanceof List)
+				if (val instanceof List) {
 					val = stringifyTypeList((List) val);
+				}
 				Output<Object> output = results.get(i);
 				convertAndSend(output, val);
 			}
@@ -547,19 +552,19 @@ public class SendEthereumTransaction extends ModuleWithSideEffects {
 			}
 
 			TransactionReceipt txreceipt = tx.getTransactionReceipt();
-			if(txreceipt != null){
+			if (txreceipt != null) {
 				gasUsed.send(txreceipt.getGasUsed().longValue());
 				blockNumber.send(txreceipt.getBlockNumber().longValue());
 			}
 			org.web3j.protocol.core.methods.response.Transaction txconfirm = tx.getTransaction();
-			if(txconfirm != null){
+			if (txconfirm != null) {
 				gasPrice.send(txconfirm.getGasPrice().longValue());
 				valueSent.send(new BigDecimal(txconfirm.getValue()).divide(BigDecimal.TEN.pow(18)).doubleValue());
 				nonce.send(txconfirm.getNonce().longValue());
 			}
 
 			Map<String, List<Object>> events = tx.getEvents();
-			if(events != null) {
+			if (events != null) {
 				for (EthereumABI.Event ev : abi.getEvents()) {
 					List<Object> args = events.get(ev.name);
 					List<Output<Object>> evOutputs = eventOutputs.get(ev);
@@ -635,10 +640,4 @@ public class SendEthereumTransaction extends ModuleWithSideEffects {
 		}
 	}
 
-	/**
-	 * Streamr-web3 ethereum bridge can be running on a local machine
-	 */
-	protected boolean localAddressesAreAllowed() {
-		return true;
-	}
 }

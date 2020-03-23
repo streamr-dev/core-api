@@ -22,6 +22,7 @@ import static java.util.Collections.singletonMap;
 class ContractEventPoller implements Closeable, Runnable, JsonRpcResponseHandler {
 	private static final Logger log = Logger.getLogger(ContractEventPoller.class);
 	private static final int POLL_INTERVAL_IN_MS = 3000;
+	public static final int RPC_CODE_NO_FILTER = -32000;
 
 	private static final int ID_ADDFILTER = 1;
 	private static final int ID_REMOVEFILTER = 2;
@@ -31,30 +32,32 @@ class ContractEventPoller implements Closeable, Runnable, JsonRpcResponseHandler
 	private final String contractAddress;
 	private final EventsListener listener;
 	private String filterId;
-	private boolean keepPolling = false;
+	//keepPolling starts true, and only turns false when close() is called
+	private boolean keepPolling = true;
 
 
 	ContractEventPoller(String rpcUrl, String contractAddress, EventsListener listener) {
+		this.contractAddress = contractAddress;
+		this.listener = listener;
+
 		if (rpcUrl.startsWith("http")) {
 			rpc = new HttpEthereumJsonRpc(rpcUrl, this);
 		} else {
 			rpc = new WebsocketEthereumJsonRpc(rpcUrl, this);
-			try {
-				boolean opened = ((WebsocketEthereumJsonRpc) rpc).openConnectionRetryIfFail();
-				if (!opened) {
-					throw new RuntimeException("Couldnt open connection to " + rpcUrl);
-				}
-			} catch (InterruptedException e) {
-				throw new RuntimeException(e);
+			boolean opened = ((WebsocketEthereumJsonRpc) rpc).openConnectionRetryIfFail();
+			if (!opened) {
+				throw new RuntimeException("Couldnt open connection to " + rpcUrl);
 			}
 		}
-		this.contractAddress = contractAddress;
-		this.listener = listener;
+	}
+
+	@Override
+	public void init(){
+		newFilter();
 	}
 
 	@Override
 	public void run() {
-		newFilter();
 		while (keepPolling) {
 			pollChanges();
 			try {
@@ -70,6 +73,7 @@ class ContractEventPoller implements Closeable, Runnable, JsonRpcResponseHandler
 		if (filterId != null) {
 			uninstallFilter();
 		}
+		keepPolling = false;
 	}
 
 	/**
@@ -79,7 +83,7 @@ class ContractEventPoller implements Closeable, Runnable, JsonRpcResponseHandler
 		List params = singletonList(singletonMap("address", contractAddress));
 		try {
 			rpc.rpcCall("eth_newFilter", params, ID_ADDFILTER);
-			keepPolling = true;
+			log.info("adding new filter to contract address " + contractAddress);
 		} catch (Exception e) {
 			listener.onError(e.getMessage());
 			throw new RuntimeException(e);
@@ -107,21 +111,11 @@ class ContractEventPoller implements Closeable, Runnable, JsonRpcResponseHandler
 			return;
 		}
 		try {
-			log.info(String.format("Polling filter '%s'.", filterId));
+			log.debug(String.format("Polling filter '%s'.", filterId));
 			rpc.rpcCall("eth_getFilterChanges", singletonList(filterId), ID_POLLFILTER);
-		} catch (HttpEthereumJsonRpc.ErrorObjectException e) {
-			if (filterDoesNotExist(e.getCode())) {
-				log.info("Resetting filter...");
-				filterId = null;
-				newFilter();
-			} else {
-				listener.onError(e.getMessage());
-			}
-		} catch (HttpEthereumJsonRpc.RPCException | JSONException e) {
+		}  catch (Exception e) {
 			listener.onError(e.getMessage());
-		} catch (Exception e) {
-			listener.onError(e.getMessage());
-			throw new RuntimeException(e);
+			log.error("pollChanges threw exception. This might be normal if websocket connection is reopening. Error: " + e.getMessage());
 		}
 	}
 
@@ -151,7 +145,6 @@ class ContractEventPoller implements Closeable, Runnable, JsonRpcResponseHandler
 			listener.onError(e.getMessage());
 			throw new RuntimeException(e);
 		}
-
 	}
 
 	private void processUninstallFilterResponse(JSONObject response) {
@@ -164,18 +157,26 @@ class ContractEventPoller implements Closeable, Runnable, JsonRpcResponseHandler
 		if (result) {
 			log.info(String.format("Filter '%s' uninstalled.", id));
 		} else {
+			log.error("Unable to uninstall filter " + id);
 			listener.onError("Unable to uninstall filter " + id);
-			throw new RuntimeException("Unable to uninstall filter " + id);
 		}
-		keepPolling = false;
 	}
 
-	private static boolean filterDoesNotExist(int code) {
-		return code == -32000;
-	}
-
+	/*
+		handles both error and non-error RPC json resposnes
+	 */
 	@Override
 	public void processResponse(JSONObject resp) {
+		if(resp.has("error")){
+			log.error("RPC err: "+ resp);
+			JSONObject err = resp.getJSONObject("error");
+			if (RPC_CODE_NO_FILTER == err.getInt("code")){
+				log.warn("Seen missing filter error. Resetting filter.");
+				newFilter();
+			}
+			return;
+		}
+
 		int id = resp.getInt("id");
 		switch (id) {
 			case ID_ADDFILTER:

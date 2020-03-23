@@ -5,6 +5,7 @@
   "type": "object",
   "required": [
     "id",
+    "type",
     "name",
     "description",
     "imageUrl",
@@ -26,6 +27,14 @@
     "id": {
       "description": "Unique identifier for a product",
       "$ref": "#/definitions/resourceIdentifier"
+    },
+    "type": {
+      "description": "Type of product",
+      "type": "string",
+      "enum": [
+        "NORMAL",
+        "DATAUNION"
+      ]
     },
     "name": {
       "description": "Name of the product",
@@ -143,6 +152,14 @@
       "description": "Username of the owner",
       "type": "string",
       "maxLength": 255
+    },
+    "pendingChanges": {
+      "description": "Contains (JSON Object) fields and new values of on-chain fields that are not yet published",
+      "type": [
+        "null",
+        "string"
+      ],
+      "maxLength": 65535
     }
   },
   "additionalProperties": false,

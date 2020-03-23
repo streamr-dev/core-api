@@ -8,6 +8,7 @@ import com.unifina.domain.security.Permission
 import com.unifina.domain.security.SecUser
 import grails.compiler.GrailsCompileStatic
 
+import java.text.SimpleDateFormat
 import java.util.concurrent.ThreadLocalRandom
 
 @GrailsCompileStatic
@@ -16,7 +17,7 @@ class ProductService {
 	PermissionService permissionService
 	SubscriptionService subscriptionService
 	CassandraService cassandraService
-	CommunityJoinRequestService communityJoinRequestService
+	DataUnionJoinRequestService dataUnionJoinRequestService
 	Random random = ThreadLocalRandom.current()
 
 	static class StreamWithLatestMessage {
@@ -28,6 +29,15 @@ class ProductService {
 		}
 		String toString() {
 			return String.format("StreamWithLatestMessage[stream=%s, latestMessage=%s]", stream, latestMessage)
+		}
+		String formatDate() {
+			if (latestMessage == null) {
+				return "stream contains no data"
+			}
+			SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss z")
+			df.setTimeZone(TimeZone.getTimeZone("UTC"))
+			String date = df.format(latestMessage.getTimestampAsDate())
+			return String.format("no data since %s", date)
 		}
 	}
 
@@ -63,6 +73,13 @@ class ProductService {
 		}
 
 		return staleProducts
+	}
+
+	Map<SecUser, List<ProductService.StaleProduct>> findStaleProductsByOwner(SecUser user) {
+		List<Product> products = list(new ProductListParams(publicAccess: true), user)
+		List<ProductService.StaleProduct> staleProducts = findStaleProducts(products, new Date())
+		Map<SecUser, List<ProductService.StaleProduct>> staleProductsByOwner = staleProducts.groupBy { StaleProduct sp -> sp.product.owner }
+		return staleProductsByOwner
 	}
 
 	List<Product> relatedProducts(Product product, int maxResults, SecUser user) {
@@ -128,6 +145,12 @@ class ProductService {
 		product.owner = currentUser
 		product.save(failOnError: true)
 		permissionService.systemGrantAll(currentUser, product)
+		// A stream that is added when creating a new free product should inherit read access for anonymous user
+		if (product.isFree()) {
+			product.streams.each { stream ->
+				permissionService.systemGrantAnonymousAccess(stream, Permission.Operation.READ)
+			}
+		}
 		return product
 	}
 
@@ -140,9 +163,21 @@ class ProductService {
 			permissionService.verifyShare(currentUser, it)
 		}
 
+		// A stream that is added when editing an existing free product should inherit read access for anonymous user
+		// Revoke public read permissions and grant them back after update
 		Product product = findById(id, currentUser, Permission.Operation.WRITE)
-		command.updateProduct(product)
+		if (product.isFree()) {
+			product.streams.each { stream ->
+				permissionService.systemRevokeAnonymousAccess(stream, Permission.Operation.READ)
+			}
+		}
+		command.updateProduct(product, currentUser, permissionService)
 		product.save(failOnError: true)
+		if (product.isFree()) {
+			product.streams.each { stream ->
+				permissionService.systemGrantAnonymousAccess(stream, Permission.Operation.READ)
+			}
+		}
 		subscriptionService.afterProductUpdated(product)
 		return product
 	}
@@ -152,8 +187,12 @@ class ProductService {
 		permissionService.verifyShare(currentUser, stream)
 		product.streams.add(stream)
 		product.save(failOnError: true)
-		if (product.type == Product.Type.COMMUNITY) {
-			Set<SecUser> users = communityJoinRequestService.findCommunityMembers(product.beneficiaryAddress)
+		// A stream that is added when editing an existing free product should inherit read access for anonymous user
+		if (product.isFree()) {
+			permissionService.systemGrantAnonymousAccess(stream, Permission.Operation.READ)
+		}
+		if (product.type == Product.Type.DATAUNION) {
+			Set<SecUser> users = dataUnionJoinRequestService.findMembers(product.beneficiaryAddress)
 			for (SecUser u : users) {
 				if (!permissionService.canWrite(u, stream)) {
 					permissionService.systemGrant(u, stream, Permission.Operation.WRITE)
@@ -166,8 +205,12 @@ class ProductService {
 	void removeStreamFromProduct(Product product, Stream stream) {
 		product.streams.remove(stream)
 		product.save(failOnError: true)
-		if (product.type == Product.Type.COMMUNITY) {
-			Set<SecUser> users = communityJoinRequestService.findCommunityMembers(product.beneficiaryAddress)
+		// A stream that is removed when editing an existing free product should revoke read access for anonymous user
+		if (product.isFree()) {
+			permissionService.systemRevokeAnonymousAccess(stream, Permission.Operation.READ)
+		}
+		if (product.type == Product.Type.DATAUNION) {
+			Set<SecUser> users = dataUnionJoinRequestService.findMembers(product.beneficiaryAddress)
 			for (SecUser u : users) {
 				if (permissionService.canWrite(u, stream)) {
 					permissionService.systemRevoke(u, stream, Permission.Operation.WRITE)

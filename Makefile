@@ -1,48 +1,52 @@
-OWNER=streamr
-IMAGE_NAME=engine-and-editor
-VCS_REF=`git rev-parse --short HEAD`
-IMAGE_VERSION=0.2.$(TRAVIS_BUILD_NUMBER)
-QNAME=$(OWNER)/$(IMAGE_NAME)
+version := $(shell git describe --tags --always --dirty="-dev")
+date := $(shell date -u '+%Y-%m-%dT%H:%M:%SZ')
+node_version := 10.16.3
 
-GIT_TAG=$(QNAME):$(VCS_REF)
-BUILD_TAG=$(QNAME):$(IMAGE_VERSION)
-LATEST_TAG=$(QNAME):latest
+.SHELLFLAGS := -c # Run commands in a -c flag
+.ONESHELL: ; # recipes execute in same shell
+#.SILENT: ; # no need for @
+.NOTPARALLEL: ; # wait for this target to finish
+.EXPORT_ALL_VARIABLES: ; # send all vars to shell
+.DEFAULT_GOAL := test-unit
 
-unit-test:
-	grails clean
-	grails test-app -unit
+# Testing targets
 
-integration-test:
-	sudo /etc/init.d/mysql stop
-	npm install
-	git clone https://github.com/streamr-dev/streamr-docker-dev.git
-	$(TRAVIS_BUILD_DIR)/streamr-docker-dev/streamr-docker-dev/bin.sh start 1
-	grails clean
-	grails test-app -integration
+.PHONY: test-unit
+test-unit:
+	grails test-app -unit --stacktrace
 
-build-war:
-	grails clean
-	npm install
-	npm run build
-	grails prod war
-	mkdir build
-	cp $(PWD)/target/ROOT.war $(PWD)/build
+.PHONY: test-integration
+test-integration:
+	grails test-app -integration --stacktrace
 
-docker-build:
-	docker build \
-		--build-arg VCS_REF=$(VCS_REF) \
-		--build-arg IMAGE_VERSION=$(IMAGE_VERSION) \
-		-t $(GIT_TAG) .
+.PHONY: test-rest
+test-rest:
+	cd rest-e2e-tests && $(HOME)/.nvm/versions/node/v$(node_version)/bin/npm test
 
-docker-lint:
-	docker run -it --rm -v "$(PWD)/Dockerfile:/Dockerfile:ro" redcoolbeans/dockerlint
+# Development targets
 
-docker-tag:
-	docker tag $(GIT_TAG) $(BUILD_TAG)
-	docker tag $(GIT_TAG) $(LATEST_TAG)
+.PHONY: build-war-dev
+build-war-dev: clean
+	grails test war
 
+.PHONY: docker-build-dev
+docker-build-dev: build-war-dev
+	docker build -t streamr/engine-and-editor:dev .
+
+.PHONY: docker-push-dev
+docker-push-dev: docker-build-dev
+	docker push streamr/engine-and-editor:dev
+
+.PHONY: docker-run-dev
+docker-run-dev:
+	docker run -i -t -d --rm -p 8081:8081/tcp streamr/engine-and-editor:dev
+
+# Auxiliary targets
+
+.PHONY: docker-login
 docker-login:
-	@docker login -u "$(DOCKER_USER)" -p "$(DOCKER_PASS)"
+	docker login -u DOCKER_USER -p DOCKER_PASS
 
-docker-push: docker-login
-	docker push $(LATEST_TAG)
+.PHONY: clean
+clean:
+	rm -rf target

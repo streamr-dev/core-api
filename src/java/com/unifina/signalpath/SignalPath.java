@@ -1,20 +1,18 @@
 package com.unifina.signalpath;
 
-import com.unifina.data.FeedEvent;
 import com.unifina.domain.data.Stream;
 import com.unifina.domain.signalpath.Canvas;
 import com.unifina.domain.signalpath.Module;
 import com.unifina.exceptions.CyclicCanvasModuleExceptionMessage;
 import com.unifina.exceptions.ModuleExceptionMessage;
-import com.unifina.serialization.SerializationRequest;
 import com.unifina.service.CanvasService;
 import com.unifina.service.ModuleService;
 import com.unifina.service.SerializationService;
+import com.unifina.signalpath.utils.ConfigurableStreamModule;
 import com.unifina.utils.Globals;
 import grails.converters.JSON;
 import grails.util.Holders;
 import org.apache.log4j.Logger;
-import org.codehaus.groovy.grails.web.json.JSONObject;
 
 import javax.validation.constraints.NotNull;
 import java.io.Serializable;
@@ -267,7 +265,7 @@ public class SignalPath extends ModuleWithUI {
 			 * there will be problems if many instances of the same canvas are used
 			 * as subcanvases, as all the instances would produce to same uiChannels.
 			 */
-			Map json = (JSONObject) JSON.parse(myCanvas.getJson());
+			Map json = (Map) JSON.parse(myCanvas.getJson());
 			CanvasService canvasService = Holders.getApplicationContext().getBean(CanvasService.class);
 			canvasService.resetUiChannels(json);
 			initFromRepresentation(json);
@@ -329,15 +327,6 @@ public class SignalPath extends ModuleWithUI {
 	}
 
 	@Override
-	public void receive(FeedEvent event) {
-		if (event.content instanceof SerializationRequest) {
-			((SerializationRequest) event.content).serialize(this);
-		} else {
-			super.receive(event);
-		}
-	}
-
-	@Override
 	public void destroy() {
 		super.destroy();
 
@@ -363,7 +352,7 @@ public class SignalPath extends ModuleWithUI {
 						if (!input.wasReady()) {
 							notReady.append(input.toString());
 							notReady.append("\n");
-							pushToUiChannel(new ModuleWarningMessage("Input was never ready: " + input.getEffectiveName(), input.getOwner().getHash()));
+							pushToUiChannel(new ModuleWarningMessage("Input never received data: " + input.getEffectiveName(), input.getOwner().getHash()));
 						}
 					}
 					log.debug("Module had non-ready inputs: " + notReady);
@@ -418,8 +407,8 @@ public class SignalPath extends ModuleWithUI {
 	 */
 	public Set<Stream> getStreams() {
 		return mods.stream()
-			.filter(mod -> mod instanceof AbstractStreamSourceModule)
-			.map(mod -> ((AbstractStreamSourceModule)mod).getStream())
+			.filter(mod -> mod instanceof ConfigurableStreamModule)
+			.map(mod -> ((ConfigurableStreamModule)mod).getStream())
 			.collect(toSet());
 	}
 

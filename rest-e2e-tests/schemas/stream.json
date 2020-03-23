@@ -9,11 +9,11 @@
     "name",
     "description",
     "uiChannel",
-    "feed",
     "config",
     "dateCreated",
     "lastUpdated",
     "requireSignedData",
+    "requireEncryptedData",
     "inbox",
     "autoConfigure",
     "storageDays",
@@ -46,10 +46,6 @@
       "description": "Is this a uiChannel stream?",
       "type": "boolean"
     },
-    "feed": {
-      "description": "Feed information of this stream",
-      "$ref": "#/definitions/feed"
-    },
     "config": {
       "description": "Configuration of this stream",
       "type": "object"
@@ -66,6 +62,10 @@
     },
     "requireSignedData": {
       "description": "Does this stream require data to be signed?",
+      "type": "boolean"
+    },
+    "requireEncryptedData": {
+      "description": "Does this stream require data to be encrypted?",
       "type": "boolean"
     },
     "inbox": {
@@ -94,32 +94,6 @@
       "minLength": 1,
       "maxLength": 255,
       "pattern": "^[a-zA-Z0-9-_]+$"
-    },
-    "feed": {
-      "type": "object",
-      "required": [
-        "id",
-        "name",
-        "module"
-      ],
-      "properties": {
-        "id": {
-          "description": "Unique identifier for a feed",
-          "type": "integer",
-          "minimumValue": 7,
-          "maximumValue": 7
-        },
-        "name": {
-          "description": "Name of the feed",
-          "type": "string",
-          "maxLength": 255
-        },
-        "module": {
-          "description": "Module identifier for the feed",
-          "type": "integer",
-          "minimum": 1
-        }
-      }
     }
   }
 }

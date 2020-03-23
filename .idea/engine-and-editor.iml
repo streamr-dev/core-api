@@ -39,7 +39,6 @@
       <sourceFolder url="file://$MODULE_DIR$/grails-app/taglib" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/test/unit" isTestSource="true" />
       <sourceFolder url="file://$MODULE_DIR$/test/integration" isTestSource="true" />
-      <sourceFolder url="file://$MODULE_DIR$/test/functional" isTestSource="true" />
       <sourceFolder url="file://$MODULE_DIR$/grails-app/utils" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/grails-app/conf" isTestSource="false" />
       <excludeFolder url="file://$MODULE_DIR$/target" />
@@ -63,8 +62,6 @@
           <root url="jar://$MAVEN_REPOSITORY$/org/grails/grails-datastore-gorm/3.1.4.RELEASE/grails-datastore-gorm-3.1.4.RELEASE.jar!/" />
           <root url="jar://$USER_HOME$/.sdkman/candidates/grails/2.5.6/lib/javax.transaction/jta/jars/jta-1.1.jar!/" />
           <root url="jar://$MAVEN_REPOSITORY$/org/grails/grails-datastore-core/3.1.4.RELEASE/grails-datastore-core-3.1.4.RELEASE.jar!/" />
-          <root url="jar://$MAVEN_REPOSITORY$/io/remotecontrol/remote-transport-http/0.7/remote-transport-http-0.7.jar!/" />
-          <root url="jar://$MAVEN_REPOSITORY$/io/remotecontrol/remote-core/0.7/remote-core-0.7.jar!/" />
           <root url="jar://$MAVEN_REPOSITORY$/javax/mail/javax.mail-api/1.5.1/javax.mail-api-1.5.1.jar!/" />
           <root url="jar://$MAVEN_REPOSITORY$/javax/activation/activation/1.1/activation-1.1.jar!/" />
           <root url="jar://$MAVEN_REPOSITORY$/commons-io/commons-io/2.4/commons-io-2.4.jar!/" />
@@ -154,7 +151,6 @@
           <root url="jar://$MAVEN_REPOSITORY$/org/ow2/asm/asm-tree/5.0.3/asm-tree-5.0.3.jar!/" />
           <root url="jar://$MAVEN_REPOSITORY$/org/ow2/asm/asm-analysis/5.0.3/asm-analysis-5.0.3.jar!/" />
           <root url="jar://$MAVEN_REPOSITORY$/org/ow2/asm/asm-commons/5.0.3/asm-commons-5.0.3.jar!/" />
-          <root url="jar://$MAVEN_REPOSITORY$/com/google/guava/guava/17.0/guava-17.0.jar!/" />
           <root url="jar://$MAVEN_REPOSITORY$/io/netty/netty-codec/4.0.37.Final/netty-codec-4.0.37.Final.jar!/" />
           <root url="jar://$MAVEN_REPOSITORY$/io/netty/netty-handler/4.0.37.Final/netty-handler-4.0.37.Final.jar!/" />
           <root url="jar://$MAVEN_REPOSITORY$/io/netty/netty-buffer/4.0.37.Final/netty-buffer-4.0.37.Final.jar!/" />
@@ -194,9 +190,6 @@
           <root url="jar://$MAVEN_REPOSITORY$/org/apache/httpcomponents/httpcore/4.4.4/httpcore-4.4.4.jar!/" />
           <root url="jar://$MAVEN_REPOSITORY$/org/apache/httpcomponents/httpclient/4.5.2/httpclient-4.5.2.jar!/" />
           <root url="jar://$MAVEN_REPOSITORY$/com/mashape/unirest/unirest-java/1.4.9/unirest-java-1.4.9.jar!/" />
-          <root url="jar://$MAVEN_REPOSITORY$/net/jpountz/lz4/lz4/1.2.0/lz4-1.2.0.jar!/" />
-          <root url="jar://$MAVEN_REPOSITORY$/org/xerial/snappy/snappy-java/1.1.1.7/snappy-java-1.1.1.7.jar!/" />
-          <root url="jar://$MAVEN_REPOSITORY$/org/apache/kafka/kafka-clients/0.9.0.1/kafka-clients-0.9.0.1.jar!/" />
           <root url="jar://$MAVEN_REPOSITORY$/com/udojava/EvalEx/1.6/EvalEx-1.6.jar!/" />
           <root url="jar://$MAVEN_REPOSITORY$/log4j/log4j/1.2.16/log4j-1.2.16.jar!/" />
           <root url="jar://$USER_HOME$/.sdkman/candidates/grails/2.5.6/dist/grails-plugin-converters-2.5.6.jar!/" />
@@ -272,7 +265,6 @@
           <root url="jar://$MAVEN_REPOSITORY$/com/amazonaws/aws-java-sdk-sagemaker/1.11.294/aws-java-sdk-sagemaker-1.11.294.jar!/" />
           <root url="jar://$USER_HOME$/.sdkman/candidates/grails/2.5.6/dist/grails-core-2.5.6.jar!/" />
           <root url="jar://$USER_HOME$/.sdkman/candidates/grails/2.5.6/dist/grails-plugin-databinding-2.5.6.jar!/" />
-          <root url="jar://$USER_HOME$/.sdkman/candidates/grails/2.5.6/lib/com.google.code.gson/gson/jars/gson-2.2.4.jar!/" />
           <root url="jar://$USER_HOME$/.sdkman/candidates/grails/2.5.6/lib/org.springframework/spring-expression/jars/spring-expression-4.1.9.RELEASE.jar!/" />
           <root url="jar://$USER_HOME$/.sdkman/candidates/grails/2.5.6/lib/org.springframework/spring-aop/jars/spring-aop-4.1.9.RELEASE.jar!/" />
           <root url="jar://$USER_HOME$/.sdkman/candidates/grails/2.5.6/lib/org.springframework/spring-context/jars/spring-context-4.1.9.RELEASE.jar!/" />
@@ -338,7 +330,6 @@
           <root url="jar://$USER_HOME$/.sdkman/candidates/grails/2.5.6/lib/org.springframework/spring-aspects/jars/spring-aspects-4.1.9.RELEASE.jar!/" />
           <root url="jar://$USER_HOME$/.sdkman/candidates/grails/2.5.6/lib/org.aspectj/aspectjrt/jars/aspectjrt-1.8.7.jar!/" />
           <root url="jar://$USER_HOME$/.sdkman/candidates/grails/2.5.6/lib/org.aspectj/aspectjweaver/jars/aspectjweaver-1.8.7.jar!/" />
-          <root url="jar://$MAVEN_REPOSITORY$/org/mozilla/rhino/1.7R4/rhino-1.7R4.jar!/" />
           <root url="jar://$MAVEN_REPOSITORY$/com/sun/mail/javax.mail/1.5.1/javax.mail-1.5.1.jar!/" />
           <root url="jar://$MAVEN_REPOSITORY$/joda-time/joda-time/2.9.3/joda-time-2.9.3.jar!/" />
           <root url="jar://$MAVEN_REPOSITORY$/de/ruedigermoeller/fst/2.56/fst-2.56.jar!/" />
@@ -349,24 +340,6 @@
           <root url="jar://$MAVEN_REPOSITORY$/mysql/mysql-connector-java/5.1.20/mysql-connector-java-5.1.20.jar!/" />
           <root url="jar://$USER_HOME$/.sdkman/candidates/grails/2.5.6/lib/javax.servlet/javax.servlet-api/jars/javax.servlet-api-3.0.1.jar!/" />
           <root url="jar://$MAVEN_REPOSITORY$/org/grails/grails-datastore-rest-client/3.1.4.RELEASE/grails-datastore-rest-client-3.1.4.RELEASE.jar!/" />
-          <root url="jar://$MAVEN_REPOSITORY$/org/gebish/geb-test-common/1.0/geb-test-common-1.0.jar!/" />
-          <root url="jar://$MAVEN_REPOSITORY$/org/jodd/jodd-log/3.7.1/jodd-log-3.7.1.jar!/" />
-          <root url="jar://$MAVEN_REPOSITORY$/org/jodd/jodd-core/3.7.1/jodd-core-3.7.1.jar!/" />
-          <root url="jar://$MAVEN_REPOSITORY$/org/jodd/jodd-lagarto/3.7.1/jodd-lagarto-3.7.1.jar!/" />
-          <root url="jar://$MAVEN_REPOSITORY$/org/gebish/geb-exceptions/1.0/geb-exceptions-1.0.jar!/" />
-          <root url="jar://$MAVEN_REPOSITORY$/org/gebish/geb-implicit-assertions/1.0/geb-implicit-assertions-1.0.jar!/" />
-          <root url="jar://$MAVEN_REPOSITORY$/org/gebish/geb-waiting/1.0/geb-waiting-1.0.jar!/" />
-          <root url="jar://$MAVEN_REPOSITORY$/org/gebish/geb-ast/1.0/geb-ast-1.0.jar!/" />
-          <root url="jar://$MAVEN_REPOSITORY$/org/gebish/geb-core/1.0/geb-core-1.0.jar!/" />
-          <root url="jar://$MAVEN_REPOSITORY$/org/gebish/geb-spock/1.0/geb-spock-1.0.jar!/" />
-          <root url="jar://$MAVEN_REPOSITORY$/org/seleniumhq/selenium/selenium-support/2.53.0/selenium-support-2.53.0.jar!/" />
-          <root url="jar://$MAVEN_REPOSITORY$/org/seleniumhq/selenium/selenium-chrome-driver/2.53.0/selenium-chrome-driver-2.53.0.jar!/" />
-          <root url="jar://$MAVEN_REPOSITORY$/org/apache/commons/commons-exec/1.3/commons-exec-1.3.jar!/" />
-          <root url="jar://$MAVEN_REPOSITORY$/net/java/dev/jna/jna-platform/4.1.0/jna-platform-4.1.0.jar!/" />
-          <root url="jar://$MAVEN_REPOSITORY$/net/java/dev/jna/jna/4.1.0/jna-4.1.0.jar!/" />
-          <root url="jar://$MAVEN_REPOSITORY$/org/seleniumhq/selenium/selenium-api/2.53.0/selenium-api-2.53.0.jar!/" />
-          <root url="jar://$MAVEN_REPOSITORY$/org/seleniumhq/selenium/selenium-remote-driver/2.53.0/selenium-remote-driver-2.53.0.jar!/" />
-          <root url="jar://$MAVEN_REPOSITORY$/org/seleniumhq/selenium/selenium-firefox-driver/2.53.0/selenium-firefox-driver-2.53.0.jar!/" />
           <root url="jar://$MAVEN_REPOSITORY$/org/apache/ant/ant-launcher/1.9.6/ant-launcher-1.9.6.jar!/" />
           <root url="jar://$MAVEN_REPOSITORY$/org/apache/ant/ant/1.9.6/ant-1.9.6.jar!/" />
           <root url="jar://$MAVEN_REPOSITORY$/cglib/cglib/3.2.6/cglib-3.2.6.jar!/" />
@@ -414,13 +387,6 @@
           <root url="jar://$MAVEN_REPOSITORY$/io/reactivex/rxjava2/rxjava/2.2.2/rxjava-2.2.2.jar!/" />
           <root url="jar://$MAVEN_REPOSITORY$/com/github/jnr/jnr-enxio/0.19/jnr-enxio-0.19.jar!/" />
           <root url="jar://$MAVEN_REPOSITORY$/com/github/jnr/jnr-unixsocket/0.21/jnr-unixsocket-0.21.jar!/" />
-          <root url="jar://$MAVEN_REPOSITORY$/org/web3j/tuples/4.2.0/tuples-4.2.0.jar!/" />
-          <root url="jar://$MAVEN_REPOSITORY$/org/web3j/rlp/4.2.0/rlp-4.2.0.jar!/" />
-          <root url="jar://$MAVEN_REPOSITORY$/org/web3j/crypto/4.2.0/crypto-4.2.0.jar!/" />
-          <root url="jar://$MAVEN_REPOSITORY$/org/bouncycastle/bcprov-jdk15on/1.60/bcprov-jdk15on-1.60.jar!/" />
-          <root url="jar://$MAVEN_REPOSITORY$/org/web3j/utils/4.2.0/utils-4.2.0.jar!/" />
-          <root url="jar://$MAVEN_REPOSITORY$/org/web3j/abi/4.2.0/abi-4.2.0.jar!/" />
-          <root url="jar://$MAVEN_REPOSITORY$/org/web3j/core/4.2.0/core-4.2.0.jar!/" />
           <root url="jar://$MAVEN_REPOSITORY$/org/ethereum/solcJ-all/0.4.25/solcJ-all-0.4.25.jar!/" />
           <root url="jar://$MAVEN_REPOSITORY$/org/ethereum/rocksdbjni/5.9.2/rocksdbjni-5.9.2.jar!/" />
           <root url="jar://$MAVEN_REPOSITORY$/com/madgag/spongycastle/prov/1.58.0.0/prov-1.58.0.0.jar!/" />
@@ -440,7 +406,25 @@
           <root url="jar://$MAVEN_REPOSITORY$/io/dropwizard/metrics/metrics-core/3.2.2/metrics-core-3.2.2.jar!/" />
           <root url="jar://$MAVEN_REPOSITORY$/com/datastax/cassandra/cassandra-driver-core/3.7.1/cassandra-driver-core-3.7.1.jar!/" />
           <root url="jar://$MAVEN_REPOSITORY$/com/github/jnr/jffi/1.2.16/jffi-1.2.16-native.jar!/" />
-          <root url="jar://$MAVEN_REPOSITORY$/com/streamr/client/1.1.0/client-1.1.0.jar!/" />
+          <root url="jar://$MAVEN_REPOSITORY$/org/xerial/snappy/snappy-java/1.1.4/snappy-java-1.1.4.jar!/" />
+          <root url="jar://$MAVEN_REPOSITORY$/org/web3j/abi/4.4.1/abi-4.4.1.jar!/" />
+          <root url="jar://$MAVEN_REPOSITORY$/org/web3j/core/4.4.1/core-4.4.1.jar!/" />
+          <root url="jar://$MAVEN_REPOSITORY$/org/web3j/tuples/4.4.1/tuples-4.4.1.jar!/" />
+          <root url="jar://$MAVEN_REPOSITORY$/org/web3j/rlp/4.4.1/rlp-4.4.1.jar!/" />
+          <root url="jar://$MAVEN_REPOSITORY$/org/web3j/crypto/4.4.1/crypto-4.4.1.jar!/" />
+          <root url="jar://$MAVEN_REPOSITORY$/org/bouncycastle/bcprov-jdk15on/1.61/bcprov-jdk15on-1.61.jar!/" />
+          <root url="jar://$MAVEN_REPOSITORY$/org/web3j/utils/4.4.1/utils-4.4.1.jar!/" />
+          <root url="jar://$MAVEN_REPOSITORY$/com/google/guava/guava/19.0/guava-19.0.jar!/" />
+          <root url="jar://$MAVEN_REPOSITORY$/com/google/code/gson/gson/2.8.5/gson-2.8.5.jar!/" />
+          <root url="jar://$MAVEN_REPOSITORY$/org/eclipse/jetty/jetty-server/9.2.28.v20190418/jetty-server-9.2.28.v20190418.jar!/" />
+          <root url="jar://$MAVEN_REPOSITORY$/org/eclipse/jetty/jetty-security/9.2.28.v20190418/jetty-security-9.2.28.v20190418.jar!/" />
+          <root url="jar://$MAVEN_REPOSITORY$/org/eclipse/jetty/jetty-servlet/9.2.28.v20190418/jetty-servlet-9.2.28.v20190418.jar!/" />
+          <root url="jar://$MAVEN_REPOSITORY$/org/eclipse/jetty/jetty-io/9.2.28.v20190418/jetty-io-9.2.28.v20190418.jar!/" />
+          <root url="jar://$MAVEN_REPOSITORY$/org/eclipse/jetty/jetty-util/9.2.28.v20190418/jetty-util-9.2.28.v20190418.jar!/" />
+          <root url="jar://$MAVEN_REPOSITORY$/org/eclipse/jetty/jetty-http/9.2.28.v20190418/jetty-http-9.2.28.v20190418.jar!/" />
+          <root url="jar://$MAVEN_REPOSITORY$/org/eclipse/jetty/jetty-client/9.2.28.v20190418/jetty-client-9.2.28.v20190418.jar!/" />
+          <root url="jar://$MAVEN_REPOSITORY$/org/gaul/httpbin/1.3.0/httpbin-1.3.0.jar!/" />
+          <root url="jar://$MAVEN_REPOSITORY$/com/streamr/client/1.2.5/client-1.2.5.jar!/" />
         </CLASSES>
         <JAVADOC />
         <SOURCES>

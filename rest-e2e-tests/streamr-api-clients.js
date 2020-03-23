@@ -6,8 +6,12 @@ const FormData = require('form-data')
 class StreamrApiRequest {
     constructor(options) {
         this.baseUrl = options.baseUrl || 'https://www.streamr.com/api/v1/'
+        if (!this.baseUrl.endsWith('/')) {
+            this.baseUrl += '/'
+        }
+
         this.logging = options.logging || false
-        this.authToken = null
+        this.authHeader = null
         this.contentType = null
         this.queryParams = ''
     }
@@ -18,8 +22,13 @@ class StreamrApiRequest {
         return this
     }
 
-    withAuthToken(authToken) {
-        this.authToken = `Token ${authToken}`
+    withApiKey(apiKey) {
+        this.authHeader = `Token ${apiKey}`
+        return this
+    }
+
+    withSessionToken(sessionToken) {
+        this.authHeader = `Bearer ${sessionToken}`
         return this
     }
 
@@ -58,8 +67,8 @@ class StreamrApiRequest {
         if (this.body && this.contentType) {
             headers['Content-type'] = this.contentType
         }
-        if (this.authToken) {
-            headers['Authorization'] = this.authToken
+        if (this.authHeader) {
+            headers['Authorization'] = this.authHeader
         }
 
         if (this.logging) {
@@ -196,6 +205,7 @@ class Products {
 class Streams {
     constructor(options) {
         this.options = options
+        this.permissions = new Permissions('streams', options)
     }
 
     create(body) {
@@ -223,6 +233,55 @@ class Streams {
         return new StreamrApiRequest(this.options)
             .methodAndPath('POST', `streams/${id}/confirmCsvFileUpload`)
             .withBody(body)
+    }
+
+    makePublic(id) {
+        return new StreamrApiRequest(this.options)
+            .methodAndPath('POST', `streams/${id}/permissions`)
+            .withBody({
+                anonymous: true,
+                operation: 'read'
+            })
+    }
+
+    getPublishers(id) {
+        return new StreamrApiRequest(this.options)
+            .methodAndPath('GET', `streams/${id}/publishers`)
+    }
+}
+
+class Canvases {
+    constructor(options) {
+        this.options = options
+    }
+
+    create(body) {
+        return new StreamrApiRequest(this.options)
+            .methodAndPath('POST', 'canvases')
+            .withBody(body)
+    }
+
+    get(id) {
+        return new StreamrApiRequest(this.options)
+            .methodAndPath('GET', `canvases/${id}`)
+    }
+
+    start(id) {
+        return new StreamrApiRequest(this.options)
+            .methodAndPath('POST', `canvases/${id}/start`)
+    }
+
+    stop(id) {
+        return new StreamrApiRequest(this.options)
+            .methodAndPath('POST', `canvases/${id}/stop`)
+    }
+
+    getRuntimeState(id, path) {
+        return new StreamrApiRequest(this.options)
+            .methodAndPath('POST', `canvases/${id}/${path}/request`)
+            .withBody({
+                type: 'json'
+            })
     }
 }
 
@@ -279,6 +338,17 @@ class Permissions {
     }
 }
 
+class DataUnions {
+    constructor(options) {
+        this.options = options
+    }
+
+    list() {
+        return new StreamrApiRequest(this.options)
+            .methodAndPath('GET', 'dataunions')
+    }
+}
+
 module.exports = (baseUrl, logging) => {
     const options = {
         baseUrl,
@@ -288,12 +358,14 @@ module.exports = (baseUrl, logging) => {
     return {
         api: {
             v1: {
+                canvases: new Canvases(options),
                 categories: new Categories(options),
                 integration_keys: new IntegrationKeys(options),
                 login: new Login(options),
                 products: new Products(options),
                 streams: new Streams(options),
-                subscriptions: new Subscriptions(options)
+                subscriptions: new Subscriptions(options),
+                dataunions: new DataUnions(options),
             }
         }
     }

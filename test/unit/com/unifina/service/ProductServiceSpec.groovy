@@ -64,6 +64,31 @@ class ProductServiceSpec extends Specification {
 		product.save(failOnError: true, validate: true)
 	}
 
+	private void setupFreeProduct(Product.State state = Product.State.NOT_DEPLOYED) {
+		SecUser user = new SecUser(
+			username: "user@domain.com",
+			name: "Firstname Lastname",
+			password: "salasana"
+		)
+		user.id = 1
+		user.save(failOnError: true, validate: false)
+		product = new Product(
+			name: "name",
+			description: "description",
+			ownerAddress: "0x0000000000000000000000000000000000000000",
+			beneficiaryAddress: "0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF",
+			streams: s1 != null ? [s1, s2, s3] : [],
+			pricePerSecond: 0,
+			category: category,
+			state: state,
+			blockNumber: 40000,
+			blockIndex: 30,
+			owner: user
+		)
+		product.id = "product-id"
+		product.save(failOnError: true, validate: true)
+	}
+
 	Product newProduct(String id, String name, Stream... s) {
 		Product p = new Product(
 			name: name,
@@ -217,12 +242,12 @@ class ProductServiceSpec extends Specification {
 
 	void "create() throws ValidationException if command object does not pass validation"() {
 		when:
-		service.create(new CreateProductCommand(), new SecUser())
+		service.create(new CreateProductCommand(pricePerSecond: -1), new SecUser())
 		then:
 		thrown(ValidationException)
 	}
 
-	void "create() creates and returns Product with correct info and NEW state"() {
+	void "create() creates and returns Product with correct info and NOT_DEPLOYED state"() {
 		setupStreams()
 		service.permissionService = Stub(PermissionService)
 
@@ -248,6 +273,7 @@ class ProductServiceSpec extends Specification {
 		and:
 		product.toMap() == [
 			id: "1",
+			type: "NORMAL",
 			name: "Product",
 			description: "Description of Product.",
 			imageUrl: null,
@@ -317,6 +343,30 @@ class ProductServiceSpec extends Specification {
 		1 * permissionService.verifyShare(me, s3)
 	}
 
+	void "create() adds anonymous read permission for free products streams"() {
+		setupStreams()
+		def permissionService = service.permissionService = Mock(PermissionService)
+
+		def validCommand = new CreateProductCommand(
+			name: "Product",
+			description: "Description of Product.",
+			category: category,
+			streams: [s1, s2, s3],
+			ownerAddress: "0x0000000000000000000000000000000000000000",
+			beneficiaryAddress: "0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF",
+			pricePerSecond: 0,
+			minimumSubscriptionInSeconds: 0,
+		)
+		def me = new SecUser(username: "me@streamr.com")
+
+		when:
+		service.create(validCommand, me)
+		then:
+		1 * permissionService.systemGrantAnonymousAccess(s1, Permission.Operation.READ)
+		1 * permissionService.systemGrantAnonymousAccess(s2, Permission.Operation.READ)
+		1 * permissionService.systemGrantAnonymousAccess(s3, Permission.Operation.READ)
+	}
+
 	void "create() does not save if permissionService#verifyShare throws"() {
 		setupStreams()
 		service.permissionService = new PermissionService()
@@ -341,20 +391,11 @@ class ProductServiceSpec extends Specification {
 		Product.count() == 0
 	}
 
-	void "create() creates and returns Product when name is empty and description/category are null"() {
+	void "create() with an empty command object creates a product with default values"() {
 		setupStreams()
 		service.permissionService = Stub(PermissionService)
 
-		def validCommand = new CreateProductCommand(
-			name: "",
-			description: null,
-			category: null,
-			streams: [s1, s2, s3],
-			ownerAddress: "0x0000000000000000000000000000000000000000",
-			beneficiaryAddress: "0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF",
-			pricePerSecond: 10,
-			minimumSubscriptionInSeconds: 1
-		)
+		def validCommand = new CreateProductCommand()
 		def user = new SecUser()
 		user.name = "Arnold Schwarzenegger"
 
@@ -367,27 +408,46 @@ class ProductServiceSpec extends Specification {
 		and:
 		product.toMap() == [
 			id: "1",
+			type: "NORMAL",
 			name: "Untitled Product",
 			description: null,
 			imageUrl: null,
 			thumbnailUrl: null,
 			category: null,
-			streams: ["stream-1", "stream-2", "stream-3"],
+			streams: [],
 			state: "NOT_DEPLOYED",
 			previewStream: null,
 			previewConfigJson: null,
 			created: product.dateCreated,
 			updated: product.lastUpdated,
-			ownerAddress: "0x0000000000000000000000000000000000000000",
-			beneficiaryAddress: "0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF",
-			pricePerSecond: "10",
-			isFree: false,
+			ownerAddress: null,
+			beneficiaryAddress: null,
+			pricePerSecond: "0",
+			isFree: true,
 			priceCurrency: "DATA",
-			minimumSubscriptionInSeconds: 1,
+			minimumSubscriptionInSeconds: 0,
 			owner: "Arnold Schwarzenegger"
 		]
 		product.dateCreated != null
 		product.dateCreated == product.lastUpdated
+	}
+
+	void "create() can create data unions"() {
+		setupStreams()
+		service.permissionService = Stub(PermissionService)
+
+		def validCommand = new CreateProductCommand(type: "DATAUNION")
+		def user = new SecUser()
+		user.name = "Arnold Schwarzenegger"
+
+		when:
+		def product = service.create(validCommand, user)
+
+		then:
+		Product.findAll() == [product]
+
+		and:
+		product.toMap().type == "DATAUNION"
 	}
 
 	void "update() throws ValidationException if command object does not pass validation"() {
@@ -425,6 +485,39 @@ class ProductServiceSpec extends Specification {
 		then:
 		1 * permissionService.verifyShare(user, s2)
 		1 * permissionService.verifyShare(user, s4)
+	}
+
+	void "update() revokes and grants anonymous read permission for free products streams"() {
+		setupStreams()
+		setupFreeProduct()
+
+		service.subscriptionService = Stub(SubscriptionService)
+		service.apiService = Stub(ApiService) {
+			authorizedGetById(Product, _, _, _) >> product
+		}
+		def permissionService = service.permissionService = Mock(PermissionService)
+
+		def validCommand = new UpdateProductCommand(
+			name: "updated name",
+			description: "updated description",
+			category: category,
+			streams: [s2, s4],
+			pricePerSecond: 0,
+			ownerAddress: "0xCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC",
+			beneficiaryAddress: "0xCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC",
+			priceCurrency: Product.Currency.DATA,
+			minimumSubscriptionInSeconds: 0
+		)
+		def user = new SecUser(username: "me@streamr.com")
+
+		when:
+		service.update("product-id", validCommand, user)
+		then:
+		1 * permissionService.systemRevokeAnonymousAccess(s1, Permission.Operation.READ)
+		1 * permissionService.systemRevokeAnonymousAccess(s2, Permission.Operation.READ)
+		1 * permissionService.systemRevokeAnonymousAccess(s3, Permission.Operation.READ)
+		1 * permissionService.systemGrantAnonymousAccess(s2, Permission.Operation.READ)
+		1 * permissionService.systemGrantAnonymousAccess(s4, Permission.Operation.READ)
 	}
 
 	void "update() does not save if permissionService#verifyShare throws"() {
@@ -537,6 +630,7 @@ class ProductServiceSpec extends Specification {
 		and:
 		updatedProduct.toMap() == [
 				id: "product-id",
+				type: "NORMAL",
 				name: "updated name",
 				description: "updated description",
 				imageUrl: null,
@@ -587,6 +681,21 @@ class ProductServiceSpec extends Specification {
 		product.streams.contains(s4)
 	}
 
+	void "addStreamToProduct() grants anonymous read permission for free products stream"() {
+		setupStreams()
+		setupFreeProduct()
+		assert !product.streams.contains(s4)
+
+		service.subscriptionService = Stub(SubscriptionService)
+		service.permissionService = Mock(PermissionService)
+		def user = new SecUser()
+
+		when:
+		service.addStreamToProduct(product, s4, user)
+		then:
+		1 * service.permissionService.systemGrantAnonymousAccess(s4, Permission.Operation.READ)
+	}
+
 	void "addStreamToProduct() invokes subscriptionService#afterProductUpdated"() {
 		setupStreams()
 		setupProduct()
@@ -610,6 +719,19 @@ class ProductServiceSpec extends Specification {
 		service.removeStreamFromProduct(product, s1)
 		then:
 		!product.streams.contains(s1)
+	}
+
+	void "removeStreamFromProduct() revokes anonymous read access from free products stream"() {
+		setupStreams()
+		setupFreeProduct()
+		service.subscriptionService = Stub(SubscriptionService)
+		service.permissionService = Mock(PermissionService)
+		assert product.streams.contains(s1)
+
+		when:
+		service.removeStreamFromProduct(product, s1)
+		then:
+		1 * service.permissionService.systemRevokeAnonymousAccess(s1, Permission.Operation.READ)
 	}
 
 	void "removeStreamFromProduct() invokes subscriptionService#afterProductUpdated"() {
@@ -945,6 +1067,7 @@ class ProductServiceSpec extends Specification {
 		and:
 		product.toMap() == [
 				id: "product-id",
+				type: "NORMAL",
 				name: "name",
 				description: "description",
 				imageUrl: null,
@@ -1041,11 +1164,11 @@ class ProductServiceSpec extends Specification {
 		thrown(NotPermittedException)
 	}
 
-	void "add stream to product and grant community product stream permissions"() {
+	void "add stream to product and grant data union product stream permissions"() {
 		setup:
 		service.subscriptionService = Stub(SubscriptionService)
 		service.permissionService = Mock(PermissionService)
-		service.communityJoinRequestService = Mock(CommunityJoinRequestService)
+		service.dataUnionJoinRequestService = Mock(DataUnionJoinRequestService)
 		setupStreams()
 		SecUser user = new SecUser(
 			username: "user@domain.com",
@@ -1066,7 +1189,7 @@ class ProductServiceSpec extends Specification {
 			blockNumber: 40000,
 			blockIndex: 30,
 			owner: user,
-			type: Product.Type.COMMUNITY,
+			type: Product.Type.DATAUNION,
 		)
 		product.id = "product-id"
 		product.save(failOnError: true, validate: true)
@@ -1074,16 +1197,16 @@ class ProductServiceSpec extends Specification {
 		when:
 		service.addStreamToProduct(product, s1, user)
 		then:
-		1 * service.communityJoinRequestService.findCommunityMembers("0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF") >> [user]
+		1 * service.dataUnionJoinRequestService.findMembers("0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF") >> [user]
 		1 * service.permissionService.canWrite(user, s1) >> false
 		1 * service.permissionService.systemGrant(user, s1, Permission.Operation.WRITE)
 	}
 
-	void "remove stream from product and revoke community product stream permissions"() {
+	void "remove stream from product and revoke data union stream permissions"() {
 		setup:
 		service.subscriptionService = Stub(SubscriptionService)
 		service.permissionService = Mock(PermissionService)
-		service.communityJoinRequestService = Mock(CommunityJoinRequestService)
+		service.dataUnionJoinRequestService = Mock(DataUnionJoinRequestService)
 		setupStreams()
 		SecUser user = new SecUser(
 			username: "user@domain.com",
@@ -1104,7 +1227,7 @@ class ProductServiceSpec extends Specification {
 			blockNumber: 40000,
 			blockIndex: 30,
 			owner: user,
-			type: Product.Type.COMMUNITY,
+			type: Product.Type.DATAUNION,
 		)
 		product.id = "product-id"
 		product.save(failOnError: true, validate: true)
@@ -1112,7 +1235,7 @@ class ProductServiceSpec extends Specification {
 		when:
 		service.removeStreamFromProduct(product, s1)
 		then:
-		1 * service.communityJoinRequestService.findCommunityMembers("0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF") >> [user]
+		1 * service.dataUnionJoinRequestService.findMembers("0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF") >> [user]
 		1 * service.permissionService.canWrite(user, s1) >> true
 		1 * service.permissionService.systemRevoke(user, s1, Permission.Operation.WRITE)
 	}

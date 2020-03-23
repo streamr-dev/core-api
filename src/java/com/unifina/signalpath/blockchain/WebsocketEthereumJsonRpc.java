@@ -50,14 +50,10 @@ public class WebsocketEthereumJsonRpc extends EthereumJsonRpc {
 			CloseReason.CloseCode code = reason.getCloseCode();
 			log.info("session " + session + "was closed. CloseReason: " + reason);
 			if (reconnectOnError && code.getCode() != CloseReason.CloseCodes.NORMAL_CLOSURE.getCode()) {
-				try {
-					log.info("Trying reconnect");
-					if (!openConnectionRetryIfFail()) {
-						String err = "Couldnt reestablish connection to " + url;
-						throw new RuntimeException(err);
-					}
-				} catch (InterruptedException e) {
-					throw new RuntimeException(e);
+				log.info("Trying reconnect");
+				if (!openConnectionRetryIfFail()) {
+					String err = "Couldnt reestablish connection to " + url;
+					throw new RuntimeException(err);
 				}
 			}
 		}
@@ -66,14 +62,10 @@ public class WebsocketEthereumJsonRpc extends EthereumJsonRpc {
 		public void onError(Session session, Throwable t) {
 			log.error("session " + session + " reported error " + t.getMessage());
 			if (reconnectOnError) {
-				try {
-					log.info("Trying reconnect");
-					if (!openConnectionRetryIfFail()) {
-						String err = "Couldnt reestablish connection to " + url;
-						throw new RuntimeException(err);
-					}
-				} catch (InterruptedException e) {
-					throw new RuntimeException(e);
+				log.info("Trying reconnect");
+				if (!openConnectionRetryIfFail()) {
+					String err = "Couldnt reestablish connection to " + url;
+					throw new RuntimeException(err);
 				}
 			}
 		}
@@ -100,7 +92,7 @@ public class WebsocketEthereumJsonRpc extends EthereumJsonRpc {
 		wsEndpoint = new EthereumRpcEndpoint();
 	}
 
-	public boolean openConnectionRetryIfFail() throws InterruptedException {
+	public boolean openConnectionRetryIfFail() {
 		int attempts = 0;
 		while (attemptReconnectionMaxTries < 0 || attempts < attemptReconnectionMaxTries) {
 			attempts++;
@@ -110,10 +102,18 @@ public class WebsocketEthereumJsonRpc extends EthereumJsonRpc {
 			} catch (URISyntaxException e) {
 				log.error(e);
 				return false;
-			} catch (IOException | DeploymentException e) {
+			} catch (IOException | DeploymentException | RuntimeException e) {
 				log.error(e);
 				log.info("Waiting " + attemptReconnectionWaittimeMs + "ms");
-				Thread.sleep(attemptReconnectionWaittimeMs);
+				try {
+					Thread.sleep(attemptReconnectionWaittimeMs);
+				}
+				catch(InterruptedException ie){
+					log.error("Thread was interrupted while sleeping.");
+					//why is this thread interrupted in E&E when sleeping?
+					log.error(ie.getMessage());
+					Thread.currentThread().interrupt();
+				}
 				continue;
 			}
 			return true;
@@ -137,6 +137,8 @@ public class WebsocketEthereumJsonRpc extends EthereumJsonRpc {
 			e.printStackTrace();
 			throw e;
 		}
+		//in the case of ContractEventPoller, handler.init() installs filter
+		handler.init();
 		log.info("Websocket connection established to " + url);
 	}
 

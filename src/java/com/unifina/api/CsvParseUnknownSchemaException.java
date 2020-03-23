@@ -14,8 +14,8 @@ public class CsvParseUnknownSchemaException extends ApiException {
 	@Override
 	public ApiError asApiError() {
 		ApiError apiError = super.asApiError();
-		apiError.addEntry("fileUrl", fileUrl);
-		apiError.addEntry("schema", schema);
+		apiError.addToBody("fileUrl", fileUrl);
+		apiError.addToBody("schema", schema);
 		return apiError;
 	}
 }

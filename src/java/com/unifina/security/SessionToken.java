@@ -1,6 +1,6 @@
 package com.unifina.security;
 
-import org.apache.commons.lang.RandomStringUtils;
+import com.unifina.utils.AlphanumericStringGenerator;
 import org.joda.time.DateTime;
 
 import java.text.DateFormat;
@@ -25,7 +25,7 @@ public class SessionToken {
 	}
 
 	public SessionToken(int tokenLength, Userish user, int ttlHours) {
-		this.token = RandomStringUtils.randomAlphanumeric(tokenLength);
+		this.token = AlphanumericStringGenerator.getRandomAlphanumericString(tokenLength);
 		this.user = user;
 		this.expiration = new DateTime().plusHours(ttlHours).toDate();
 	}

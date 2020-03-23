@@ -19,17 +19,6 @@ import org.codehaus.groovy.grails.web.mapping.LinkGenerator
 
 @Secured(["IS_AUTHENTICATED_ANONYMOUSLY"])
 class NodeApiController {
-
-	static allowedMethods = [
-		index: "GET",
-		config: "GET",
-		canvases: "GET",
-		canvasSizes: "GET",
-		shutdown: "POST",
-		shutdownNode: "POST",
-		canvasesNode: "GET"
-	]
-
 	GrailsApplication grailsApplication
 	CanvasService canvasService
 	LinkGenerator grailsLinkGenerator
@@ -145,7 +134,7 @@ class NodeApiController {
 	}
 
 	private List<String> getStreamrNodes() {
-		(List<String>) grailsApplication.config.streamr.nodes
+		(List<String>) grailsApplication.config.streamr.engine.nodes
 	}
 
 	@GrailsCompileStatic

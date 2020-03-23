@@ -114,7 +114,7 @@ class SignalPathServiceSpec extends Specification {
 		service.runtimeRequest(new RuntimeRequest([type: 'stopRequest'], me, c1, "canvases/$c1.id", "canvases/$c1.id", new HashSet<>()))
 
 		then:
-		1 * runner.getSignalPaths() >> [sp]
+		1 * runner.getSignalPath() >> sp
 		1 * sp.getCanvas() >> c1
 		1 * service.permissionService.canWrite(me, c1) >> true
 		1 * service.stopLocal(c1) >> false
@@ -198,9 +198,9 @@ class SignalPathServiceSpec extends Specification {
 		sp3.setCanvas(c3)
 
 		service.runnersById = [
-		    "runner-id-1": new SignalPathRunner(sp1, new Globals([:], someoneElse), false),
-			"runner-id-2": new SignalPathRunner(sp2, new Globals([:], me), false),
-			"runner-id-3": new SignalPathRunner(sp3, new Globals([:], someoneElse), false),
+		    "runner-id-1": new SignalPathRunner(sp1, new Globals([:], someoneElse)),
+			"runner-id-2": new SignalPathRunner(sp2, new Globals([:], me)),
+			"runner-id-3": new SignalPathRunner(sp3, new Globals([:], someoneElse)),
 		]
 
 		expect:
@@ -238,9 +238,9 @@ class SignalPathServiceSpec extends Specification {
 		sp3.setName("sp3")
 
 		service.runnersById = [
-			"runner-id-1": new SignalPathRunner(sp1, new Globals([:], me), false),
-			"runner-id-2": new SignalPathRunner(sp2, new Globals([:], me), false),
-			"runner-id-3": new SignalPathRunner(sp3, new Globals([:], me), false),
+			"runner-id-1": new SignalPathRunner(sp1, new Globals([:], me)),
+			"runner-id-2": new SignalPathRunner(sp2, new Globals([:], me)),
+			"runner-id-3": new SignalPathRunner(sp3, new Globals([:], me)),
 		]
 
 		expect:
@@ -256,7 +256,7 @@ class SignalPathServiceSpec extends Specification {
 
 		service.permissionService = new PermissionService()
 		service.runnersById = [
-			"runner-id": new SignalPathRunner(sp, new Globals(), false),
+			"runner-id": new SignalPathRunner(sp, new Globals()),
 		]
 
 		def request = new RuntimeRequest(
@@ -288,7 +288,7 @@ class SignalPathServiceSpec extends Specification {
 
 		def permissionService = service.permissionService = Mock(PermissionService)
 		service.runnersById = [
-			"runner-id": new SignalPathRunner(sp, new Globals(), false) {
+			"runner-id": new SignalPathRunner(sp, new Globals()) {
 				@Override
 				void abort() {
 					isAborted = true
@@ -341,7 +341,7 @@ class SignalPathServiceSpec extends Specification {
 
 		service.permissionService = new PermissionService()
 		service.runnersById = [
-			"runner-id": new SignalPathRunner(sp, new Globals(), false) {
+			"runner-id": new SignalPathRunner(sp, new Globals()) {
 				@Override
 				void abort() {
 					isAborted = true

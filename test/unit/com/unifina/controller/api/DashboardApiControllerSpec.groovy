@@ -105,7 +105,9 @@ class DashboardApiControllerSpec extends ControllerSpecification {
 			id    : "1",
 			items : [],
 			name  : "dashboard-1",
-			layout: [:]
+			layout: [:],
+			created: null,
+			updated: null
 		]
 
 		1 * dashboardService.findById("1", me) >> dashboards[0]
@@ -140,7 +142,9 @@ class DashboardApiControllerSpec extends ControllerSpecification {
 				],
 			],
 			layout: [:],
-			name  : "dashboard-3"
+			name  : "dashboard-3",
+			created: null,
+			updated: null
 		]
 		1 * dashboardService.findById("3", me) >> dashboards[2]
 		0 * dashboardService._

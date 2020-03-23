@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <dataSource name="core_dev@127.0.0.1">
-  <database-model serializer="dbm" dbms="MYSQL" family-id="MYSQL" format-version="4.15">
+  <database-model serializer="dbm" dbms="MYSQL" family-id="MYSQL" format-version="4.17">
     <root id="1">
       <ServerVersion>5.7.22</ServerVersion>
       <DefaultEngine>InnoDB</DefaultEngine>
@@ -10,14 +10,12 @@
     <schema id="2" parent="1" name="core_dev">
       <Current>1</Current>
       <Collation>utf8_general_ci</Collation>
-      <Visible>1</Visible>
     </schema>
     <schema id="3" parent="1" name="core_test">
       <Collation>utf8_general_ci</Collation>
     </schema>
     <schema id="4" parent="1" name="information_schema">
       <Collation>utf8_general_ci</Collation>
-      <Substituted>1</Substituted>
     </schema>
     <schema id="5" parent="1" name="mysql">
       <Collation>latin1_swedish_ci</Collation>

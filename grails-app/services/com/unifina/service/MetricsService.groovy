@@ -1,8 +1,7 @@
 package com.unifina.service
 
+
 import com.unifina.data.EventQueueMetrics
-import com.unifina.data.HistoricalEventQueueMetrics
-import com.unifina.data.RealTimeEventQueueMetrics
 import grails.compiler.GrailsCompileStatic
 import org.codehaus.groovy.grails.commons.GrailsApplication
 
@@ -25,15 +24,16 @@ class MetricsService {
 
 	@GrailsCompileStatic
 	EventProcessingMetrics fetchEventProcessingMetrics() {
-		List<EventQueueMetrics> metrics = signalPathService.runningSignalPaths
-			*.getGlobals()
-			*.getDataSource()
-			*.retrieveMetricsAndReset()
+		List<List<EventQueueMetrics>> metrics = [true, false].collect { realtime ->
+			signalPathService.runningSignalPaths
+				.findAll { it.globals.isRealtime() == realtime }
+				.collect { it.globals.dataSource.retrieveMetricsAndReset() }
+		}
 
 		return new EventProcessingMetrics(
-			RealTimeEventQueueMetrics.aggregateEventsPerSecond(metrics),
-			RealTimeEventQueueMetrics.aggregateMeanProcessingDelay(metrics),
-			HistoricalEventQueueMetrics.aggregateEventsPerSecond(metrics)
+			EventQueueMetrics.aggregateEventsPerSecond(metrics[0]),
+			EventQueueMetrics.aggregateMeanProcessingDelay(metrics[0]),
+			EventQueueMetrics.aggregateEventsPerSecond(metrics[1]) // for historical only events per sec
 		)
 	}
 

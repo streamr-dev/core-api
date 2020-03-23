@@ -1,35 +1,27 @@
 package com.unifina.datasource;
 
+import com.streamr.client.utils.StreamPartition;
 import com.unifina.data.HistoricalEventQueue;
-import com.unifina.feed.AbstractFeed;
+import com.unifina.feed.HistoricalMessageSource;
+import com.unifina.feed.StreamMessageSource;
 import com.unifina.utils.Globals;
+
+import java.util.Collection;
 
 public class HistoricalDataSource extends DataSource {
 
-	private final HistoricalEventQueue eventQueue;
-	
 	public HistoricalDataSource(Globals globals) {
-		super(true, globals);
-		eventQueue = new HistoricalEventQueue(globals, this);
+		super(globals);
 	}
 
 	@Override
-	protected DataSourceEventQueue getEventQueue() {
-		return eventQueue;
+	protected StreamMessageSource createStreamMessageSource(Collection<StreamPartition> streamPartitions, StreamMessageSource.StreamMessageConsumer consumer) {
+		return new HistoricalMessageSource(globals, consumer, streamPartitions);
 	}
 
 	@Override
-	protected void onSubscribedToFeed(AbstractFeed feed) {
-		eventQueue.addFeed(feed);
+	protected DataSourceEventQueue createEventQueue() {
+		return new HistoricalEventQueue(globals, this);
 	}
 
-	@Override
-	protected void doStartFeed() throws Exception {
-		eventQueue.start();
-	}
-	
-	@Override
-	protected void doStopFeed() throws Exception {
-		eventQueue.abort();
-	}
 }

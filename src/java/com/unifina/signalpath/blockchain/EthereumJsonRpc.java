@@ -15,7 +15,11 @@ public abstract class EthereumJsonRpc {
 		this.url = url;
 		this.handler = handler;
 	}
-
+	abstract class RPCException extends Exception {
+		protected RPCException(String message) {
+			super(String.format("JSON RPC error with server '%s': %s", url, message));
+		}
+	}
 	/*
 		implementation should call handler.processResponse()
 	 */

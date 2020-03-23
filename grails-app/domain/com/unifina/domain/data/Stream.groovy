@@ -1,5 +1,6 @@
 package com.unifina.domain.data
 
+
 import com.unifina.domain.ExampleType
 import com.unifina.domain.marketplace.Product
 import com.unifina.domain.security.Permission
@@ -15,7 +16,6 @@ class Stream implements Comparable {
 	Integer partitions = 1
 
 	String name = DEFAULT_NAME
-	Feed feed
 	String config
 	String description
 
@@ -32,6 +32,8 @@ class Stream implements Comparable {
 	Boolean inbox = false
 
 	Boolean requireSignedData = false
+	// Stream requires data to be encrypted
+	Boolean requireEncryptedData = false
 	// Always try to autoconfigure field names and types
 	Boolean autoConfigure = true
 	// Historical data storage period (days)
@@ -49,6 +51,7 @@ class Stream implements Comparable {
 	static belongsTo = Product
 
 	static constraints = {
+		partitions(nullable: false, min: 1, max: 100)
 		name(blank:false)
 		config(nullable:true)
 		description(nullable:true)
@@ -64,12 +67,12 @@ class Stream implements Comparable {
 	static mapping = {
 		id generator: 'assigned'
 		name index: "name_idx"
-		feed lazy: false
 		uiChannel defaultValue: "false"
 		uiChannelPath index: "ui_channel_path_idx"
 		config type: 'text'
 		inbox defaultValue: "false"
 		requireSignedData defaultValue: "false"
+		requireEncryptedData defaultValue: "false"
 		autoConfigure defaultValue: "true"
 		storageDays defaultValue: DEFAULT_STORAGE_DAYS
 		exampleType enumType: "identity", defaultValue: ExampleType.NOT_SET, index: 'example_type_idx'
@@ -80,13 +83,13 @@ class Stream implements Comparable {
 		return name
 	}
 
+	// TODO: in PR phase, coordinate with frontend to remove dependency on stream.feed.* (maybe used in Editor)
 	@CompileStatic
 	Map toMap() {
 		[
 			id: id,
 			partitions: partitions,
 			name: name,
-			feed: feed.toMap(),
 			config: config == null || config.empty ? config : JSON.parse(config),
 			description: description,
 			uiChannel: uiChannel,
@@ -94,6 +97,7 @@ class Stream implements Comparable {
 			dateCreated: dateCreated,
 			lastUpdated: lastUpdated,
 			requireSignedData: requireSignedData,
+			requireEncryptedData: requireEncryptedData,
 			autoConfigure: autoConfigure,
 			storageDays: storageDays,
 			inactivityThresholdHours: inactivityThresholdHours,
@@ -106,13 +110,13 @@ class Stream implements Comparable {
 			id: id,
 			partitions: partitions,
 			name: name,
-			feed: feed.toMap(),
 			description: description,
 			uiChannel: uiChannel,
 			inbox: inbox,
 			dateCreated: dateCreated,
 			lastUpdated: lastUpdated,
-			requireSignedData: requireSignedData
+			requireSignedData: requireSignedData,
+			requireEncryptedData: requireEncryptedData,
 		]
 	}
 

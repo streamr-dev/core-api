@@ -7,7 +7,7 @@ import com.unifina.security.PackageAccessHelper
 import com.unifina.service.SerializationService
 import com.unifina.signalpath.ModuleException
 import com.unifina.utils.Globals
-import com.unifina.utils.GlobalsFactory
+
 import com.unifina.utils.testutils.ModuleTestHelper
 import com.unifina.utils.testutils.TestHelperException
 import grails.test.mixin.TestMixin
@@ -50,7 +50,7 @@ class SimpleJavaCodeWrapperSpec extends Specification {
 		}
 
 		module = new SimpleJavaCodeWrapper()
-		globals = module.globals = module.globals = GlobalsFactory.createInstance([:], new SecUser())
+		globals = module.globals = module.globals = new Globals([:], new SecUser())
 		module.init()
 		module.hash = 666
 		module.configure(module.getConfiguration())
@@ -112,44 +112,6 @@ class SimpleJavaCodeWrapperSpec extends Specification {
 				"@Override\n" +
 				"public void sendOutput() {\n" +
 				"Object user = getGlobals().getDataSource();\n" +
-				"sum += in.value;\n" +
-				"out.send(sum);\n" +
-				"}\n" +
-				"\n" +
-				"@Override\n" +
-				"public void clearState() {\n" +
-				"sum = 0D;\n" +
-				"}\n"
-		])
-
-		when:
-		Map inputValues = [
-			in: [0,1,2,3,4,5,6,7,8,9,10].collect {it?.doubleValue()},
-		]
-		Map outputValues = [
-			out: [0,1,3,6,10,15,21,28,36,45,55].collect {it?.doubleValue()},
-		]
-
-		new ModuleTestHelper.Builder(module, inputValues, outputValues)
-			.overrideGlobals { globals }
-			.test()
-		then:
-		def e = thrown(TestHelperException)
-		e.cause.getClass() == AccessControlException
-		e.cause.getMessage().contains("DataSource")
-	}
-
-	void "it throws AccessDeniedException if trying to set data source"() {
-		setup:
-		module.configure([
-			code: "\n" +
-				"TimeSeriesInput in = new TimeSeriesInput(this,\"in\");\n" +
-				"TimeSeriesOutput out = new TimeSeriesOutput(this,\"out\");\n" +
-				"private double sum = 0D;\n" +
-				"\n" +
-				"@Override\n" +
-				"public void sendOutput() {\n" +
-				"getGlobals().setDataSource(null);\n" +
 				"sum += in.value;\n" +
 				"out.send(sum);\n" +
 				"}\n" +

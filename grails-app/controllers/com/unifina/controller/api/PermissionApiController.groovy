@@ -3,17 +3,22 @@ package com.unifina.controller.api
 import com.unifina.api.InvalidArgumentsException
 import com.unifina.api.NotFoundException
 import com.unifina.api.NotPermittedException
+import com.unifina.domain.dashboard.Dashboard
+import com.unifina.domain.data.Stream
 import com.unifina.domain.security.Permission.Operation
 import com.unifina.domain.security.SecUser
 import com.unifina.domain.security.SignupInvite
+import com.unifina.domain.signalpath.Canvas
+import com.unifina.security.AllowRole
 import com.unifina.security.AuthLevel
 import com.unifina.security.StreamrApi
 import com.unifina.service.EthereumIntegrationKeyService
 import com.unifina.service.PermissionService
 import com.unifina.service.SignupCodeService
+import com.unifina.service.StreamService
+import com.unifina.utils.EmailValidator
 import com.unifina.utils.EthereumAddressValidator
 import grails.converters.JSON
-import grails.plugin.mail.MailService
 import grails.plugin.springsecurity.annotation.Secured
 
 @Secured(["IS_AUTHENTICATED_ANONYMOUSLY"])
@@ -22,6 +27,7 @@ class PermissionApiController {
 	PermissionService permissionService
 	SignupCodeService signupCodeService
 	EthereumIntegrationKeyService ethereumIntegrationKeyService
+	StreamService streamService
 	def mailService
 
 	/**
@@ -33,7 +39,12 @@ class PermissionApiController {
 		if (!resourceClass) { throw new IllegalArgumentException("Missing resource class") }
 		if (!grailsApplication.isDomainClass(resourceClass)) { throw new IllegalArgumentException("${resourceClass.simpleName} is not a domain class!") }
 
-		def res = resourceClass.get(resourceId)
+		def res
+		if (Stream.isAssignableFrom(resourceClass)) {
+			res = streamService.getStream(resourceId)
+		} else {
+			res = resourceClass.get(resourceId)
+		}
 		if (!res) {
 			throw new NotFoundException(resourceClass.simpleName, resourceId.toString())
 		} else if (requireSharePermission && !permissionService.canShare(request.apiUser ?: request.apiKey, res)) {
@@ -75,6 +86,41 @@ class PermissionApiController {
 		}
 	}
 
+	private String resource(Class<?> resourceClass) {
+		if (Canvas.isAssignableFrom(resourceClass)) {
+			return "canvas"
+		} else if (Stream.isAssignableFrom(resourceClass)) {
+			return "stream"
+		} else if (Dashboard.isAssignableFrom(resourceClass)) {
+			return "dashboard"
+		}
+		throw new IllegalArgumentException("Unexpected resource class: " + resourceClass)
+	}
+
+	private String resourceName(Class<?> resourceClass, resourceId) {
+		def res = resourceClass.get(resourceId)
+		if (!res) {
+			return ""
+		}
+		return res.name
+	}
+
+	private String emailSubject(String sharer, String resource) {
+		String subject = grailsApplication.config.unifina.email.shareInvite.subject
+		return subject.replace("%USER%", sharer).replace("%RESOURCE%", resource)
+	}
+
+	private String link(Class<?> resourceClass, resourceId) {
+		if (Canvas.isAssignableFrom(resourceClass)) {
+			return "/canvas/editor/" + resourceId
+		} else if (Stream.isAssignableFrom(resourceClass)) {
+			return "/core/stream/show/" + resourceId
+		} else if (Dashboard.isAssignableFrom(resourceClass)) {
+			return "/dashboard/editor/" + resourceId
+		}
+		throw new IllegalArgumentException("Unexpected resource class: " + resourceClass)
+	}
+
 	@StreamrApi(authenticationLevel = AuthLevel.NONE)
 	def save() {
 		if (!request.hasProperty("JSON")) {
@@ -101,22 +147,55 @@ class PermissionApiController {
 		} else {
 			// incoming "username" is either SecUser.username or SignupInvite.username (possibly of a not yet created SignupInvite)
 			def user = SecUser.findByUsername(username)
-			if (!user) {
+
+			if (user) {
+				if (op == Operation.READ) { // quick fix for sending only one email
+					if (EmailValidator.validate(user.username)) {
+						String sharer = request.apiUser?.username ?: "Streamr user"
+						String resource = resource(params.resourceClass)
+						String name = resourceName(params.resourceClass, params.resourceId)
+						String emailSubject = emailSubject(sharer, resource)
+						String link = link(params.resourceClass, params.resourceId)
+						mailService.sendMail {
+							from grailsApplication.config.unifina.email.sender
+							to user.username
+							subject emailSubject
+							html g.render(
+								template: "/emails/email_share_resource",
+								model: [
+									sharer  : sharer,
+									resource: resource,
+									name    : name,
+									link    : link,
+								],
+								plugin: "unifina-core"
+							)
+						}
+					}
+				}
+			} else {
 				if (EthereumAddressValidator.validate(username)) {
 					user = ethereumIntegrationKeyService.createEthereumUser(username)
-				}else {
+				} else {
 					def invite = SignupInvite.findByUsername(username)
 					if (!invite) {
 						invite = signupCodeService.create(username)
-						def sharer = request.apiUser?.username ?: "A friend"    // TODO: get default from config?
-						// TODO: react to MailSendException if invite.username is not valid a e-mail address
+						String sharer = request.apiUser?.username ?: "Streamr user"
+						String resource = resource(params.resourceClass)
+						String name = resourceName(params.resourceClass, params.resourceId)
+						String emailSubject = emailSubject(sharer, resource)
 						mailService.sendMail {
 							from grailsApplication.config.unifina.email.sender
 							to invite.username
-							subject grailsApplication.config.unifina.email.shareInvite.subject.replace("%USER%", sharer)
+							subject emailSubject
 							html g.render(
-								template: "/emails/email_share_invite",
-								model: [invite: invite, sharer: sharer],
+								template: "/emails/email_share_resource_invite",
+								model: [
+									invite: invite,
+									sharer: sharer,
+									resource: resource,
+									name: name,
+								],
 								plugin: "unifina-core"
 							)
 						}
@@ -153,5 +232,11 @@ class PermissionApiController {
 			permissionService.systemRevoke(p)
 			render status: 204
 		}
+	}
+
+	@StreamrApi(allowRoles = AllowRole.DEVOPS)
+	def cleanup() {
+		permissionService.cleanUpExpiredPermissions()
+		render status: 200
 	}
 }
