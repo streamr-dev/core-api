@@ -9,7 +9,7 @@ databaseChangeLog = {
 					sql.eachRow('SELECT user_id FROM integration_key WHERE id_in_service = :address', [address:publisherInboxAddress]) { userRow ->
 						// for each user with an inbox stream
 						String publisherId = userRow['user_id']
-						sql.eachRow('SELECT stream_id FROM permission WHERE stream_id IS NOT NULL AND user_id = :user_id AND operation = \"write\" AND inbox = b\'0\'', [user_id:publisherId]) { streamRow ->
+						sql.eachRow('SELECT stream_id FROM permission WHERE stream_id IS NOT NULL AND user_id = :user_id AND operation = \"write\"', [user_id:publisherId]) { streamRow ->
 							// for each stream to which the user can publish
 							String streamId = streamRow['stream_id']
 							sql.eachRow('SELECT user_id FROM permission WHERE stream_id = :stream_id AND operation = \"read\"', [stream_id:streamId]) { subscriberRow ->
