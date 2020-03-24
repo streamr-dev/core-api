@@ -1,7 +1,7 @@
 import com.streamr.api.client.StreamrClientProvider
 import com.unifina.provider.S3FileUploadProvider
 import com.unifina.utils.CustomEditorRegistrar
-import grails.plugin.springsecurity.authentication.encoding.BCryptPasswordEncoder
+import com.unifina.security.BCryptPasswordEncoder
 
 // Place your Spring DSL code here
 beans = {

@@ -18,7 +18,6 @@ import com.unifina.domain.security.SecUser
 import grails.plugin.springsecurity.userdetails.GrailsUser
 import org.springframework.security.core.Authentication
 import org.springframework.security.core.context.SecurityContextHolder as SCH
-import org.springframework.util.Assert
 
 /**
  * Utility methods.
@@ -32,9 +31,6 @@ class SpringSecurityService {
 
 	/** dependency injection for grailsApplication */
 	def grailsApplication
-
-	/** dependency injection for the password encoder */
-	def passwordEncoder
 
 	/**
 	 * Get the currently logged in user's principal. If not authenticated and the
@@ -64,47 +60,15 @@ class SpringSecurityService {
 			return null
 		}
 
-		def User = new SecUser()
-
+		def user = new SecUser()
 		if (principal instanceof GrailsUser) {
-			User.get principal.id
-		}
-		else {
-			User.createCriteria().get {
+			return user.get(principal.id)
+		} else {
+			return user.createCriteria().get {
 				eq "username", principal.username
 				cache true
 			}
 		}
-	}
-
-	def getCurrentUserId() {
-		def principal = getPrincipal()
-		principal instanceof GrailsUser ? principal.id : null
-	}
-
-	/**
-	 * Get a proxy for the domain class instance associated with the current authentication. Use this when you
-	 * want the user only for its id, e.g. as a proxy for the foreign key in queries like "CreditCard.findAllByUser(user)"
-	 *
-	 * @return the proxy
-	 */
-	def loadCurrentUser() {
-		if (!isLoggedIn()) {
-			return null
-		}
-
-		// load() requires an id, so this only works if there's an id property in the principal
-		Assert.isInstanceOf GrailsUser, principal
-
-		new SecUser().load(currentUserId)
-	}
-
-	/**
-	 * Encode the password using the configured PasswordEncoder.
-	 */
-	String encodePassword(String password, String salt = null) {
-		salt = null // bcrypt has no salt
-		return passwordEncoder.encodePassword(password, salt)
 	}
 
 	/**
