@@ -236,7 +236,6 @@
     <inspection_tool class="EqualsReplaceableByObjectsCall" enabled="false" level="WEAK WARNING" enabled_by_default="false" />
     <inspection_tool class="EqualsWhichDoesntCheckParameterClass" enabled="false" level="WARNING" enabled_by_default="false" />
     <inspection_tool class="EqualsWithItself" enabled="false" level="WARNING" enabled_by_default="false" />
-    <inspection_tool class="Eslint" enabled="false" level="ERROR" enabled_by_default="false" />
     <inspection_tool class="ExceptionCaughtLocallyJS" enabled="false" level="WARNING" enabled_by_default="false" />
     <inspection_tool class="ExcessiveLambdaUsage" enabled="false" level="WARNING" enabled_by_default="false" />
     <inspection_tool class="ExcessiveRangeCheck" enabled="false" level="WARNING" enabled_by_default="false" />
