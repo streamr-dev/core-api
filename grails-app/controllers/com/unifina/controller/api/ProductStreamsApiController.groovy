@@ -22,7 +22,7 @@ class ProductStreamsApiController {
 	@StreamrApi(authenticationLevel = AuthLevel.NONE)
 	def index(String productId) {
 		// TODO: should be done by StreamApiController#index? But different permission requirements. The aforementioned
-		// requires product_get permission on Stream just to show information.
+		// requires stream_get permission on Stream just to show information.
 		Product product = productService.findById(productId, loggedInUser(), Permission.Operation.PRODUCT_GET)
 		render(product.streams*.toMap() as JSON)
 	}
