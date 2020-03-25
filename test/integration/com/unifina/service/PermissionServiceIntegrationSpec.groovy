@@ -308,9 +308,9 @@ class PermissionServiceIntegrationSpec extends IntegrationSpec {
 		def permissions = service.getPermissionsTo(uiChannelStream, me)
 
 		expect:
-		permissions.size() == 1
-		permissions.get(0).operation == Permission.Operation.CANVAS_GET
-		service.check(me, uiChannelStream, Permission.Operation.DASHBOARD_GET)
+		permissions.size() == 2
+		service.check(me, uiChannelStream, Permission.Operation.STREAM_GET)
+		service.check(me, uiChannelStream, Permission.Operation.STREAM_SUBSCRIBE)
 	}
 
 	void "cannot revoke only share permission"() {
