@@ -288,7 +288,7 @@ grails.plugin.springsecurity.securityConfigType = 'Annotation'
 grails.plugin.springsecurity.controllerAnnotations.staticRules = [
 	'/*': ['IS_AUTHENTICATED_ANONYMOUSLY']
 ]
-grails.plugin.springsecurity.password.bcrypt.logrounds = 10
+security.password.bcrypt.logrounds = 10
 
 /**
  * Email config
