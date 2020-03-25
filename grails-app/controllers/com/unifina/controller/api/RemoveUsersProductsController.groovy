@@ -2,7 +2,6 @@ package com.unifina.controller.api
 
 import com.unifina.security.StreamrApi
 import com.unifina.service.ProductService
-import com.unifina.security.Secured
 
 class RemoveUsersProductsController {
 	ProductService productService

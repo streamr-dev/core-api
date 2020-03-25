@@ -17,7 +17,6 @@ import com.unifina.exceptions.ModuleExceptionMessage
 import com.unifina.utils.Globals
 import grails.compiler.GrailsCompileStatic
 import grails.converters.JSON
-import com.unifina.security.Secured
 import grails.util.GrailsUtil
 
 class ModuleApiController {

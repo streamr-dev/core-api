@@ -4,7 +4,6 @@ import com.unifina.api.ApiException
 import com.unifina.security.AuthLevel
 import com.unifina.security.StreamrApi
 import grails.converters.JSON
-import com.unifina.security.Secured
 import grails.util.Holders
 
 import java.text.DecimalFormat

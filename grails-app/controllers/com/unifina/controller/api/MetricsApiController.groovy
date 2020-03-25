@@ -5,7 +5,6 @@ import com.unifina.security.StreamrApi
 import com.unifina.service.MetricsService
 import grails.compiler.GrailsCompileStatic
 import grails.converters.JSON
-import com.unifina.security.Secured
 
 @GrailsCompileStatic
 class MetricsApiController {

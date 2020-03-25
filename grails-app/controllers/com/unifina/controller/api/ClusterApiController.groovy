@@ -5,7 +5,6 @@ import com.unifina.security.StreamrApi
 import com.unifina.service.ClusterService
 import grails.compiler.GrailsCompileStatic
 import grails.converters.JSON
-import com.unifina.security.Secured
 
 import javax.ws.rs.core.HttpHeaders
 

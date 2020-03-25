@@ -15,7 +15,6 @@ import com.unifina.service.SignalPathService
 import com.unifina.signalpath.ModuleException
 import com.unifina.utils.NullJsonSerializer
 import grails.converters.JSON
-import com.unifina.security.Secured
 import grails.transaction.NotTransactional
 import org.apache.log4j.Logger
 import org.codehaus.groovy.grails.web.json.JSONObject

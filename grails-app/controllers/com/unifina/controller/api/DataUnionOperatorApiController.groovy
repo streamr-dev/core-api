@@ -5,7 +5,6 @@ import com.unifina.service.DataUnionOperatorService
 import com.unifina.security.AuthLevel
 import com.unifina.security.StreamrApi
 import com.unifina.utils.EthereumAddressValidator
-import com.unifina.security.Secured
 
 class DataUnionOperatorApiController {
 	DataUnionOperatorService dataUnionOperatorService

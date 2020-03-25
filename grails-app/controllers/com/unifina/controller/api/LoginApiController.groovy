@@ -13,7 +13,6 @@ import com.unifina.service.EthereumIntegrationKeyService
 import com.unifina.service.SessionService
 import com.unifina.service.UserService
 import grails.converters.JSON
-import com.unifina.security.Secured
 
 class LoginApiController {
 	ChallengeService challengeService

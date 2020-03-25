@@ -6,7 +6,6 @@ import com.unifina.domain.security.SignupInvite
 import com.unifina.exceptions.UserCreationFailedException
 import com.unifina.security.AuthLevel
 import com.unifina.security.PasswordEncoder
-import com.unifina.security.Secured
 import com.unifina.security.StreamrApi
 import com.unifina.service.SignupCodeService
 import com.unifina.service.UserService

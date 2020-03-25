@@ -11,7 +11,6 @@ import com.unifina.security.AuthLevel
 import com.unifina.security.StreamrApi
 import com.unifina.service.PermissionService
 import grails.converters.JSON
-import com.unifina.security.Secured
 import groovy.json.JsonSlurper
 
 class KeyApiController {

@@ -5,7 +5,6 @@ import com.unifina.api.InvalidUsernameAndPasswordException
 import com.unifina.domain.security.SecUser
 import com.unifina.security.AuthLevel
 import com.unifina.security.PasswordEncoder
-import com.unifina.security.Secured
 import com.unifina.security.StreamrApi
 import com.unifina.service.BalanceService
 import com.unifina.service.UserAvatarImageService

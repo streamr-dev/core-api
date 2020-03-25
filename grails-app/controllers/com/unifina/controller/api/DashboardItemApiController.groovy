@@ -6,7 +6,6 @@ import com.unifina.domain.security.SecUser
 import com.unifina.security.StreamrApi
 import com.unifina.service.DashboardService
 import grails.converters.JSON
-import com.unifina.security.Secured
 
 class DashboardItemApiController {
 	DashboardService dashboardService

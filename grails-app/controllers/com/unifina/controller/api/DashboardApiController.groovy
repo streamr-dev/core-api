@@ -9,7 +9,6 @@ import com.unifina.security.AuthLevel
 import com.unifina.security.StreamrApi
 import com.unifina.service.*
 import grails.converters.JSON
-import com.unifina.security.Secured
 
 class DashboardApiController {
 

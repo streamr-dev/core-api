@@ -13,7 +13,6 @@ import com.unifina.service.DataUnionSecretService
 import com.unifina.service.EthereumService
 import com.unifina.utils.EthereumAddressValidator
 import grails.converters.JSON
-import com.unifina.security.Secured
 
 class DataUnionSecretApiController {
 	DataUnionSecretService dataUnionSecretService

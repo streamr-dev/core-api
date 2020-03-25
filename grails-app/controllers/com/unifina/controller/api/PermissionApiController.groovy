@@ -19,7 +19,6 @@ import com.unifina.service.StreamService
 import com.unifina.utils.EmailValidator
 import com.unifina.utils.EthereumAddressValidator
 import grails.converters.JSON
-import com.unifina.security.Secured
 
 class PermissionApiController {
 

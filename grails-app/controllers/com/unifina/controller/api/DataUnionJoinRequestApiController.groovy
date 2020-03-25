@@ -10,7 +10,6 @@ import com.unifina.service.EthereumService
 import com.unifina.utils.EthereumAddressValidator
 import com.unifina.utils.IDValidator
 import grails.converters.JSON
-import com.unifina.security.Secured
 
 class DataUnionJoinRequestApiController {
 	DataUnionJoinRequestService dataUnionJoinRequestService

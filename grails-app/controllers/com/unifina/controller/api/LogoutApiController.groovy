@@ -4,7 +4,6 @@ import com.unifina.security.StreamrApi
 import com.unifina.security.TokenAuthenticator
 import com.unifina.service.SessionService
 import grails.converters.JSON
-import com.unifina.security.Secured
 
 class LogoutApiController {
 	SessionService sessionService

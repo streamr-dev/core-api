@@ -9,7 +9,6 @@ import com.unifina.security.StreamrApi
 import com.unifina.service.SubscriptionService
 import grails.compiler.GrailsCompileStatic
 import grails.converters.JSON
-import com.unifina.security.Secured
 
 class SubscriptionApiController {
 	SubscriptionService subscriptionService
