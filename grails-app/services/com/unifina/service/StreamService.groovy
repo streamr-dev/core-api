@@ -147,17 +147,17 @@ class StreamService {
 		}
 
 		if (key != null) {
-			if (permissionService.check(key, stream, Permission.Operation.STREAM_SUBSCRIBE)) {
+			if (permissionService.check(key, stream, Permission.Operation.STREAM_GET)) {
 				action.call(stream)
 			} else {
-				throw new NotPermittedException(null, "Stream", id, Permission.Operation.STREAM_SUBSCRIBE.id)
+				throw new NotPermittedException(null, "Stream", id, Permission.Operation.STREAM_GET.id)
 			}
 		} else {
-			boolean hasPermissionToStreamsUiChannelCanvas = permissionService.check(user, stream, Permission.Operation.STREAM_SUBSCRIBE)
+			boolean hasPermissionToStreamsUiChannelCanvas = permissionService.check(user, stream, Permission.Operation.STREAM_GET)
 			if (hasPermissionToStreamsUiChannelCanvas || isPermissionToStreamViaDashboard(user, stream)) {
 				action.call(stream)
 			} else {
-				throw new NotPermittedException(user?.username, "Stream", id, Permission.Operation.STREAM_SUBSCRIBE.id)
+				throw new NotPermittedException(user?.username, "Stream", id, Permission.Operation.STREAM_GET.id)
 			}
 		}
 	}

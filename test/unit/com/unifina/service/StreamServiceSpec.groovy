@@ -162,6 +162,7 @@ class StreamServiceSpec extends Specification {
 		service.getReadAuthorizedStream("streamId", user, null, cb)
 		then:
 		thrown(NotPermittedException)
+		1 * service.permissionService.check(user, stream, Permission.Operation.STREAM_GET) >> false
 		0 * cb._
 	}
 
