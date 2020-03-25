@@ -9,7 +9,6 @@ import grails.util.Holders
 
 import java.text.DecimalFormat
 
-@Secured(["IS_AUTHENTICATED_ANONYMOUSLY"])
 class OembedApiController {
 
 	@StreamrApi(authenticationLevel = AuthLevel.NONE)

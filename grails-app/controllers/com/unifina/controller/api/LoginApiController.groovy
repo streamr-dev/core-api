@@ -15,7 +15,6 @@ import com.unifina.service.UserService
 import grails.converters.JSON
 import com.unifina.security.Secured
 
-@Secured(["IS_AUTHENTICATED_ANONYMOUSLY"])
 class LoginApiController {
 	ChallengeService challengeService
 	SessionService sessionService

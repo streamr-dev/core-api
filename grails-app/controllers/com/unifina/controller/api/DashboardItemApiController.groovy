@@ -8,7 +8,6 @@ import com.unifina.service.DashboardService
 import grails.converters.JSON
 import com.unifina.security.Secured
 
-@Secured(["IS_AUTHENTICATED_ANONYMOUSLY"])
 class DashboardItemApiController {
 	DashboardService dashboardService
 

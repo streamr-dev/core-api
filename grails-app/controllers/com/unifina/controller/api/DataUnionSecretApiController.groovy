@@ -15,7 +15,6 @@ import com.unifina.utils.EthereumAddressValidator
 import grails.converters.JSON
 import com.unifina.security.Secured
 
-@Secured(["IS_AUTHENTICATED_ANONYMOUSLY"])
 class DataUnionSecretApiController {
 	DataUnionSecretService dataUnionSecretService
 	EthereumService ethereumService

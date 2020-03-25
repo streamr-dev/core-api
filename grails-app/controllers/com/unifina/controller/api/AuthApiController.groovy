@@ -13,7 +13,6 @@ import com.unifina.service.UserService
 import com.unifina.utils.EmailValidator
 import grails.converters.JSON
 
-@Secured(["IS_AUTHENTICATED_ANONYMOUSLY"])
 class AuthApiController {
 
 	def mailService

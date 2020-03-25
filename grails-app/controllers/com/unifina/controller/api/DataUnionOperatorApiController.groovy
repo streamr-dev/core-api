@@ -7,7 +7,6 @@ import com.unifina.security.StreamrApi
 import com.unifina.utils.EthereumAddressValidator
 import com.unifina.security.Secured
 
-@Secured(["IS_AUTHENTICATED_ANONYMOUSLY"])
 class DataUnionOperatorApiController {
 	DataUnionOperatorService dataUnionOperatorService
 	static boolean isDataUnionAddress(String value) {

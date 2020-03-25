@@ -15,7 +15,6 @@ import com.unifina.security.Secured
 import org.apache.log4j.Logger
 import org.springframework.web.multipart.MultipartFile
 
-@Secured(["IS_AUTHENTICATED_ANONYMOUSLY"])
 class ProductApiController {
 	ApiService apiService
 	FreeProductService freeProductService

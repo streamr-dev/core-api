@@ -17,7 +17,6 @@ import grails.util.Holders
 import org.codehaus.groovy.grails.commons.GrailsApplication
 import org.codehaus.groovy.grails.web.mapping.LinkGenerator
 
-@Secured(["IS_AUTHENTICATED_ANONYMOUSLY"])
 class NodeApiController {
 	GrailsApplication grailsApplication
 	CanvasService canvasService

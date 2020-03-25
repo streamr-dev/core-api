@@ -9,7 +9,6 @@ import com.unifina.security.Secured
 
 import javax.ws.rs.core.HttpHeaders
 
-@Secured(["IS_AUTHENTICATED_ANONYMOUSLY"])
 class ClusterApiController {
 	ClusterService clusterService
 

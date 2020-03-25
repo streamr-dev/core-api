@@ -20,7 +20,6 @@ import grails.converters.JSON
 import com.unifina.security.Secured
 import grails.util.GrailsUtil
 
-@Secured(["IS_AUTHENTICATED_ANONYMOUSLY"])
 class ModuleApiController {
 
 	PermissionService permissionService

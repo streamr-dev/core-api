@@ -12,7 +12,6 @@ import com.unifina.utils.IDValidator
 import grails.converters.JSON
 import com.unifina.security.Secured
 
-@Secured(["IS_AUTHENTICATED_ANONYMOUSLY"])
 class DataUnionJoinRequestApiController {
 	DataUnionJoinRequestService dataUnionJoinRequestService
 	EthereumService ethereumService

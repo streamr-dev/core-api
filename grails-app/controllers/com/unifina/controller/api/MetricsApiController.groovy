@@ -8,7 +8,6 @@ import grails.converters.JSON
 import com.unifina.security.Secured
 
 @GrailsCompileStatic
-@Secured(["IS_AUTHENTICATED_ANONYMOUSLY"])
 class MetricsApiController {
 
 	MetricsService metricsService

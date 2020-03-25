@@ -12,7 +12,6 @@ import grails.compiler.GrailsCompileStatic
 import grails.converters.JSON
 import com.unifina.security.Secured
 
-@Secured(["IS_AUTHENTICATED_ANONYMOUSLY"])
 class ProductStreamsApiController {
 
 	ApiService apiService

@@ -14,7 +14,6 @@ import grails.converters.JSON
 import grails.validation.Validateable
 import org.springframework.web.multipart.MultipartFile
 
-@Secured(["IS_AUTHENTICATED_ANONYMOUSLY"])
 class UserApiController {
 	PasswordEncoder passwordEncoder
 	UserService userService

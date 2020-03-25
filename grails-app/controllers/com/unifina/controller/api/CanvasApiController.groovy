@@ -21,7 +21,6 @@ import org.apache.log4j.Logger
 import org.codehaus.groovy.grails.web.json.JSONObject
 import org.springframework.util.FileCopyUtils
 
-@Secured(["IS_AUTHENTICATED_ANONYMOUSLY"])
 class CanvasApiController {
 
 	CanvasService canvasService

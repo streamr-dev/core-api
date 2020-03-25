@@ -4,7 +4,6 @@ import com.unifina.security.StreamrApi
 import com.unifina.service.ProductService
 import com.unifina.security.Secured
 
-@Secured(["IS_AUTHENTICATED_ANONYMOUSLY"])
 class RemoveUsersProductsController {
 	ProductService productService
 

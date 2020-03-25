@@ -14,7 +14,6 @@ import grails.converters.JSON
 import com.unifina.security.Secured
 import groovy.json.JsonSlurper
 
-@Secured(["IS_AUTHENTICATED_ANONYMOUSLY"])
 class KeyApiController {
 
 	PermissionService permissionService

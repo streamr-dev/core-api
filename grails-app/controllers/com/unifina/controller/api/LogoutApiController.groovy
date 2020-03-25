@@ -6,7 +6,6 @@ import com.unifina.service.SessionService
 import grails.converters.JSON
 import com.unifina.security.Secured
 
-@Secured(["IS_AUTHENTICATED_ANONYMOUSLY"])
 class LogoutApiController {
 	SessionService sessionService
 
