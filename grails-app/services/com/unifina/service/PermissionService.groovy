@@ -109,7 +109,7 @@ class PermissionService {
 			}
 			if (permission != null) {
 				Permission sp = new Permission(
-					canvas: resource.uiChannelCanvas,
+					stream: resource,
 					operation: permission.operation,
 					key: key,
 					user: user,
