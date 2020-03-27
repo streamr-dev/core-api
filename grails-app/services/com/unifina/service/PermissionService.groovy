@@ -158,7 +158,7 @@ class PermissionService {
 		*/
 		List<Permission> permissions = Permission.withCriteria() {
 			//'in'("dashboard", items.collect { it.dashboard })
-			eq("operation", Operation.CANVAS_GET)
+			eq("operation", Operation.DASHBOARD_GET)
 			or {
 				eq("anonymous", true)
 				if (isNotNullAndIdNotNull(userish)) {
