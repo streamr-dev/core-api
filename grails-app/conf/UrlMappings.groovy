@@ -8,6 +8,7 @@ import com.unifina.domain.signalpath.Canvas
 class UrlMappings {
 	static mappings = {
 		"500"(controller: "error", action: "index", exception: Exception)
+		"404"(controller: "error", action: "notFound")
 
 		// API v1 url mappings
 		"/api/v1/signups"(method: "POST", controller: "authApi", action: "signup")
