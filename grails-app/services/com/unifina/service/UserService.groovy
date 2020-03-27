@@ -42,11 +42,11 @@ class UserService {
 		if (!user.validate()) {
 			def errors = checkErrors(user.errors.getAllErrors())
 			log.warn(errors)
-			def errorStrings = errors.collect { e ->
+			def errorStrings = errors.collect { FieldError e ->
 				if (e.getCode() == "unique") {
-					"Email already in use."
+					return "Email already in use."
 				} else {
-					e.toString()
+					return e.toString()
 				}
 
 			}
@@ -91,23 +91,14 @@ class UserService {
 		return user
 	}
 
-	def addRoles(user, List<SecRole> roles = null) {
-		def secConf = grailsApplication.config.grails.plugin.springsecurity
-
-		if (roles == null) {
-			roles = SecRole.class.findAllByAuthorityInList(secConf.ui.register.defaultRoleNames)
-			if (roles.size() != secConf.ui.register.defaultRoleNames.size()) {
-				throw new RuntimeException("Roles not found: " + secConf.ui.register.defaultRoleNames)
-			}
-		}
-
-		roles.each { role ->
+	def addRoles(SecUser user, List<SecRole> roles = null) {
+		roles.each { SecRole role ->
 			new SecUserSecRole().create(user, role)
 		}
 	}
 
 	/** Adds/removes ModulePackage read permissions so that user's permissions match given ones */
-	def setModulePackages(user, List<ModulePackage> packages) {
+	def setModulePackages(SecUser user, List<ModulePackage> packages) {
 		List<ModulePackage> existing = permissionService.get(ModulePackage, user)
 		packages.findAll { !existing.contains(it) }.each { permissionService.systemGrant(user, it) }
 		existing.findAll { !packages.contains(it) }.each { permissionService.systemRevoke(user, it) }
@@ -184,7 +175,7 @@ class UserService {
 		if (user == null) {
 			throw new InvalidUsernameAndPasswordException("Invalid username or password")
 		}
-		String dbHash = user.password // $2a$10$z0HZdlGT7tvG6TSw4r/3Z.kqxJO4yM/ON4zX1pQ4TR1Kj3aidO/6q
+		String dbHash = user.password // TODO: $2a$10$z0HZdlGT7tvG6TSw4r/3Z.kqxJO4yM/ON4zX1pQ4TR1Kj3aidO/6q
 		if (passwordEncoder.isPasswordValid(dbHash, password)) {
 			return user
 		} else {

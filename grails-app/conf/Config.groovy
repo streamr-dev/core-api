@@ -279,11 +279,6 @@ environments {
 		streamr.encryption.password = System.getProperty("streamr.encryption.password") // in production, the system property must be set
 	}
 }
-
-/**
- * Spring security config
- */
-grails.plugin.springsecurity.ui.register.defaultRoleNames = ["ROLE_USER", "ROLE_LIVE"]
 security.password.bcrypt.logrounds = 10
 
 /**

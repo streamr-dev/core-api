@@ -27,8 +27,8 @@ class UserServiceSpec extends Specification {
 		modulePackage2.name = "test2"
 		modulePackage2.save()
 
-		// The roles created
-		["ROLE_USER", "ROLE_LIVE", "ROLE_ADMIN"].each {
+		// These are the roles currently used. By default an ordinary user account has no role(s).
+		["ROLE_DEVOPS", "ROLE_ADMIN"].each {
 			def role = new SecRole()
 			role.authority = it
 			role.save()
@@ -44,17 +44,14 @@ class UserServiceSpec extends Specification {
 		service.canvasService = Mock(CanvasService)
 	}
 
-	def "the user is created when called, with default roles if none supplied"() {
+	def "the user is created when called"() {
 		when:
 		createData()
 		SecUser user = service.createUser([username: "test@test.com", name:"test", password: "test", enabled:true, accountLocked:false, passwordExpired:false])
 
 		then:
 		SecUser.count() == 1
-
-		user.getAuthorities().size() == 2
-		user.getAuthorities().toArray()[0].authority == "ROLE_USER"
-		user.getAuthorities().toArray()[1].authority == "ROLE_LIVE"
+		user.getAuthorities().size() == 0 // By default, user's have no roles
 	}
 
 	def "default API key is created for user"() {
@@ -77,26 +74,17 @@ class UserServiceSpec extends Specification {
 			accountLocked  : false,
 			passwordExpired: false,
 		],
-			SecRole.findAllByAuthorityInList(["ROLE_USER"]),
+			SecRole.findAllByAuthorityInList(["ROLE_DEVOPS"]),
 			ModulePackage.findAllByIdInList([new Long(1), new Long(2)])
 		)
 
 		then:
 		user.getAuthorities().size() == 1
-		user.getAuthorities().toArray()[0].authority == "ROLE_USER"
+		user.getAuthorities().toArray()[0].authority == "ROLE_DEVOPS"
 
 		1 * permissionService.get(ModulePackage, { it.id == 1 } as SecUser) >> []
 		1 * permissionService.systemGrant({ it.id == 1 } as SecUser, { it.id == 1 } as ModulePackage)
 		1 * permissionService.systemGrant({ it.id == 1 } as SecUser, { it.id == 2 } as ModulePackage)
-	}
-
-	def "it should fail if the default roles or modulePackages are not found"() {
-		when:
-		// The data has not been created
-		service.createUser([username: "test@test.com", name: "test", password: "test", enabled: true, accountLocked: false, passwordExpired: false])
-
-		then:
-		thrown RuntimeException
 	}
 
 	void "censoring errors with checkErrors() works properly"() {
