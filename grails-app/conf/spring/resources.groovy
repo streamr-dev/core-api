@@ -7,7 +7,7 @@ import com.unifina.security.BCryptPasswordEncoder
 beans = {
 	myOwnCustomEditorRegistrar(CustomEditorRegistrar)
 
-	passwordEncoder(BCryptPasswordEncoder, grailsApplication.config.security.password.bcrypt.logrounds)
+	passwordEncoder(BCryptPasswordEncoder, grailsApplication.config.streamr.encryption.bcrypt.logrounds)
 
 	fileUploadProvider(S3FileUploadProvider,
 		(String) grailsApplication.config.streamr.fileUpload.s3.region,
