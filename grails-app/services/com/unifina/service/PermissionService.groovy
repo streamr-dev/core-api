@@ -108,13 +108,18 @@ class PermissionService {
 				user = userish
 			}
 			if (permission != null) {
-				Permission sp = new Permission(
+				syntheticPermissions.add(new Permission(
 					stream: resource,
-					operation: permission.operation,
+					operation: Permission.Operation.STREAM_GET,
 					key: key,
 					user: user,
-				)
-				syntheticPermissions.add(sp)
+				))
+				syntheticPermissions.add(new Permission(
+					stream: resource,
+					operation: Permission.Operation.STREAM_SUBSCRIBE,
+					key: key,
+					user: user,
+				))
 			}
 			List<Permission> permissions = getPermissionsTo(resource.uiChannelCanvas, userish)
 			for (Permission p : permissions) {
