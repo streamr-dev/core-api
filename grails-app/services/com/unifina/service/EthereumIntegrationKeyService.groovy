@@ -121,13 +121,19 @@ class EthereumIntegrationKeyService {
 	}
 
 	SecUser getEthereumUser(String address) {
-		List<IntegrationKey> keys = IntegrationKey.findAll {
-			idInService == address && service in [IntegrationKey.Service.ETHEREUM, IntegrationKey.Service.ETHEREUM_ID]
+		IntegrationKey key = IntegrationKey.createCriteria().get {
+			'in'("service", [IntegrationKey.Service.ETHEREUM, IntegrationKey.Service.ETHEREUM_ID])
+			// TODO: Code doesn't compile with third argument: "[ignoreCase: true]"
+			// TODO: groovy.lang.MissingMethodException: No signature of method: com.unifina.service.EthereumIntegrationKeyService.eq() is applicable for argument types: (java.lang.String, java.lang.String, java.util.LinkedHashMap) values: [idInService, 0xf4f683a8502b2796392bedb05dbbcc8c6e582e59, [ignoreCase:true]]
+			// TODO: Possible solutions: any(), grep(), wait(), init(), every(), find()
+			// TODO: But same code works elsewhere see EthereumService.hasEthereumAddress()
+			// TODO: eq("idInService", address, [ignoreCase: true])
+			eq("idInService", address)
 		}
-		if (keys == null || keys.isEmpty()) {
+		if (key == null) {
 			return null
 		}
-		return keys.first().user
+		return key.user
 	}
 
 	SecUser getOrCreateFromEthereumAddress(String address) {

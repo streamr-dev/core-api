@@ -116,10 +116,10 @@ class KeyApiController {
 				res.removeFromKeys(key)
 			}
 
-			def query = Permission.where {
-				key == key
+			List<Key> keys = Permission.createCriteria().list {
+				eq("key", key)
 			}
-			query.deleteAll()
+			keys*.delete(flush: true)
 			key.delete(flush: true)
 			response.status = 204
 			render ""
