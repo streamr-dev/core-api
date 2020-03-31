@@ -119,7 +119,7 @@ class KeyApiController {
 			List<Key> keys = Permission.createCriteria().list {
 				eq("key", key)
 			}
-			keys*.delete(flush: true)
+			Key.deleteAll(keys)
 			key.delete(flush: true)
 			response.status = 204
 			render ""
