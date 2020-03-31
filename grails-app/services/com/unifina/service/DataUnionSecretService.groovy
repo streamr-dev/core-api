@@ -26,7 +26,7 @@ class DataUnionSecretService {
 		DataUnionSecret result = DataUnionSecret.createCriteria().get {
 			idEq(id)
 			eq("contractAddress", contractAddress, [ignoreCase: true])
-		}.find()
+		}
 		return result
 	}
 
