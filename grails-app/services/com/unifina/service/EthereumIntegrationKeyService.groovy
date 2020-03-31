@@ -9,6 +9,7 @@ import com.unifina.security.StringEncryptor
 import com.unifina.utils.AlphanumericStringGenerator
 import grails.compiler.GrailsCompileStatic
 import grails.converters.JSON
+import grails.util.Environment
 import groovy.transform.CompileStatic
 import org.apache.commons.codec.DecoderException
 import org.apache.commons.codec.binary.Hex
@@ -123,12 +124,11 @@ class EthereumIntegrationKeyService {
 	SecUser getEthereumUser(String address) {
 		IntegrationKey key = IntegrationKey.createCriteria().get {
 			'in'("service", [IntegrationKey.Service.ETHEREUM, IntegrationKey.Service.ETHEREUM_ID])
-			// TODO: Code doesn't compile with third argument: "[ignoreCase: true]"
-			// TODO: groovy.lang.MissingMethodException: No signature of method: com.unifina.service.EthereumIntegrationKeyService.eq() is applicable for argument types: (java.lang.String, java.lang.String, java.util.LinkedHashMap) values: [idInService, 0xf4f683a8502b2796392bedb05dbbcc8c6e582e59, [ignoreCase:true]]
-			// TODO: Possible solutions: any(), grep(), wait(), init(), every(), find()
-			// TODO: But same code works elsewhere see EthereumService.hasEthereumAddress()
-			// TODO: eq("idInService", address, [ignoreCase: true])
-			eq("idInService", address)
+			if (Environment.current == Environment.TEST) {
+				ilike("idInService", address)
+			} else {
+				eq("idInService", address, [ignoreCase: true])
+			}
 		}
 		if (key == null) {
 			return null

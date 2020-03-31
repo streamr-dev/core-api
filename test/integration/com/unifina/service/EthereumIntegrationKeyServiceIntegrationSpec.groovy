@@ -2,14 +2,14 @@ package com.unifina.service
 
 import com.unifina.domain.security.IntegrationKey
 import com.unifina.domain.security.SecUser
-import grails.test.spock.IntegrationSpec
+import spock.lang.Specification
 
-class EthereumServiceIntegrationSpec extends IntegrationSpec {
-	void "hasEthereumAddress query works with lowercase or uppercase input"() {
+class EthereumIntegrationKeyServiceIntegrationSpec extends Specification {
+	void "getEthereumAddress query works with lowercase or uppercase input"() {
 		setup:
 		String ethAddr = "0xF24197f71fC9b2F4F4c24ecE461fB0Ff7C91FD23"
 		SecUser me = new SecUser(
-			username: "data-union-ethereum-spec-1@streamr.com",
+			username: "ethereum-ik-spec-1@streamr.com",
 			name: "me",
 			password: "foo",
 		).save(failOnError: true, validate: true)
@@ -22,7 +22,7 @@ class EthereumServiceIntegrationSpec extends IntegrationSpec {
 		).save(failOnError: true, validate: true)
 
 		SecUser other = new SecUser(
-			username: "data-union-ethereum-spec-2@streamr.com",
+			username: "ethereum-ik-spec-2@streamr.com",
 			name: "other",
 			password: "bar",
 		).save(failOnError: true, validate: true)
@@ -34,10 +34,10 @@ class EthereumServiceIntegrationSpec extends IntegrationSpec {
 			idInService: "0xD14197f71fC9b2F4F4c24ecE461fB0Ff7C91FD266",
 		).save(failOnError: true, validate: true)
 
-		EthereumService service = new EthereumService()
+		EthereumIntegrationKeyService service = new EthereumIntegrationKeyService()
 		when:
-		boolean result = service.hasEthereumAddress(me, ethAddr.toLowerCase())
+		SecUser result = service.getEthereumUser(ethAddr.toLowerCase())
 		then:
-		result
+		result == me
 	}
 }

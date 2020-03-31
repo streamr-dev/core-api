@@ -41,7 +41,7 @@ class EthereumService {
 		IntegrationKey key = IntegrationKey.createCriteria().get {
 			eq("user", user)
 			eq("idInService", ethereumAddress, [ignoreCase: true])
-			eq("service", IntegrationKey.Service.ETHEREUM)
+			'in'("service", [IntegrationKey.Service.ETHEREUM, IntegrationKey.Service.ETHEREUM_ID])
 		}
 		return key != null
 	}
