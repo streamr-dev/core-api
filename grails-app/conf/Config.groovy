@@ -188,6 +188,8 @@ environments {
  * API & CORS config
  */
 cors.url.pattern = ['/api/*', '/contact/send', '/profile/*', '/logout/*', '/login/*', '/j_spring_security_check', '/canvas', '/logout', '/j_spring_security_logout']
+cors.headers = ['Access-Control-Allow-Headers': 'Streamr-Client']
+
 streamr.apiKey.revokeNotificationStream = "revoked-api-keys"
 
 /**
