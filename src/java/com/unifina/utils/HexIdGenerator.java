@@ -1,8 +1,7 @@
 package com.unifina.utils;
 
-import org.apache.commons.codec.binary.Base64;
 import org.hibernate.HibernateException;
-import org.hibernate.engine.SessionImplementor;
+import org.hibernate.engine.spi.SessionImplementor;
 import org.hibernate.id.IdentifierGenerator;
 import org.spongycastle.util.encoders.Hex;
 
