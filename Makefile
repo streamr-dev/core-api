@@ -48,4 +48,9 @@ docker-login:
 
 .PHONY: clean
 clean:
+	rm -rf tomcat.8081/work
 	rm -rf target
+	rm -rf .slcache
+	rm -rf "$$HOME/.grails"
+	grails clean-all
+	grails compile
