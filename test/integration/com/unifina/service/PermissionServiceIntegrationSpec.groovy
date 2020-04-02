@@ -1,19 +1,18 @@
 package com.unifina.service
 
 import com.unifina.domain.dashboard.Dashboard
+import com.unifina.domain.dashboard.DashboardItem
 import com.unifina.domain.data.Stream
 import com.unifina.domain.security.Key
 import com.unifina.domain.security.Permission
 import com.unifina.domain.security.SecUser
 import com.unifina.domain.signalpath.Canvas
 import com.unifina.utils.IdGenerator
+import com.unifina.utils.Webcomponent
 import grails.test.spock.IntegrationSpec
 import grails.util.Holders
-import org.apache.commons.codec.binary.Hex
-import org.web3j.crypto.WalletUtils
 
 import java.security.AccessControlException
-import java.security.SecureRandom
 
 /*
 	Ideally these tests would reside in {PermissionServiceSpec} as unit tests. However, due to spotty mocking of GORM,
@@ -36,9 +35,14 @@ class PermissionServiceIntegrationSpec extends IntegrationSpec {
 	// User has indirect permissions to this UI channel stream via the canvas
 	Stream stream
 
+	Dashboard dashboard
+	DashboardItem item
+	// User has indirect permissions to this UI channel stream via the dashboard
+	Stream uiChannelStream
+	Canvas uiChannelCanvas
+
 	void setup() {
 		service = Holders.getApplicationContext().getBean(PermissionService)
-		//stream?.delete(flush: true)
 		SecUser.findByUsername("me-permission-service-integration-spec@streamr.com")?.delete(flush: true)
 		SecUser.findByUsername("him-permission-service-integration-spec@streamr.com")?.delete(flush: true)
 		SecUser.findByUsername("stranger-permission-service-integration-spec@streamr.com")?.delete(flush: true)
@@ -91,9 +95,29 @@ class PermissionServiceIntegrationSpec extends IntegrationSpec {
 		service.grant(anotherUser, dashAllowed, anonymousKey)
 
 		canvas = new Canvas().save(validate: true, failOnError: true)
-		stream = new Stream(name: "ui channel", uiChannel: true, uiChannelCanvas: canvas)
+		stream = new Stream(name: "ui channel", uiChannel: true, uiChannelCanvas: canvas, uiChannelPath: "/canvases/" + canvas.id + "/modules/2")
 		stream.id = "stream-id"
 		stream.save(validate: true, failOnError: true)
+
+		uiChannelCanvas = new Canvas()
+		uiChannelCanvas.save(validate: true, failOnError: true)
+		dashboard = new Dashboard(name: "dashboard")
+		dashboard.save(validate: true, failOnError: true)
+		uiChannelStream = new Stream(name: "ui channel", uiChannel: true, uiChannelCanvas: uiChannelCanvas, uiChannelPath: "/canvases/" + uiChannelCanvas.id + "/modules/2")
+		uiChannelStream.id = "stream-id-2"
+		uiChannelStream.save(validate: true, failOnError: true)
+
+		item = new DashboardItem(
+			title: "dashboard-item",
+			canvas: uiChannelCanvas,
+			stream: uiChannelStream,
+			module: 2,
+			webcomponent: Webcomponent.STREAMR_CHART,
+			dashboard: dashboard,
+		)
+		item.id = "dashboard-id-1"
+		item.save(validate: true, failOnError: true)
+		dashboard.addToItems(item)
 	}
 
 	void cleanup() {
@@ -101,7 +125,9 @@ class PermissionServiceIntegrationSpec extends IntegrationSpec {
 		Permission.findAllByDashboard(dashRestricted)*.delete(flush: true)
 		Permission.findAllByDashboard(dashOwned)*.delete(flush: true)
 		Permission.findAllByDashboard(dashPublic)*.delete(flush: true)
+		Permission.findAllByDashboard(dashboard)*.delete(flush: true)
 		Permission.findAllByCanvas(canvas)*.delete(flush: true)
+		Permission.findAllByCanvas(uiChannelCanvas)*.delete(flush: true)
 
 		dashAllowed?.delete(flush: true)
 		dashRestricted?.delete(flush: true)
@@ -112,13 +138,16 @@ class PermissionServiceIntegrationSpec extends IntegrationSpec {
 		anotherUserKey?.delete(flush: true)
 		anonymousKey?.delete(flush: true)
 
+		dashboard?.delete(flush: true)
+		stream.delete(flush: true)
+		uiChannelStream.delete(flush: true)
+		stream.uiChannelCanvas?.delete(flush: true)
+		uiChannelStream.uiChannelCanvas?.delete(flush: true)
+
 		me?.delete(flush: true)
 		anotherUser?.delete(flush: true)
 		stranger?.delete(flush: true)
 		someone?.delete(flush: true)
-
-		stream?.delete(flush: true)
-		stream.uiChannelCanvas?.delete(flush: true)
 	}
 
 
@@ -313,6 +342,16 @@ class PermissionServiceIntegrationSpec extends IntegrationSpec {
 		service.canRead(me, stream)
 		service.canWrite(me, stream)
 		service.canShare(me, stream)
+	}
+
+	void "getPermissionsTo(resource, userish) returns correct UI channel read permissions via associated dashboard"() {
+		service.systemGrantAll(me, dashboard)
+		def permissions = service.getPermissionsTo(uiChannelStream, me)
+
+		expect:
+		permissions.size() == 1
+		permissions.get(0).operation == Permission.Operation.READ
+		service.canRead(me, uiChannelStream)
 	}
 
 	void "granting permissions results in correct number of inbox stream permissions"() {

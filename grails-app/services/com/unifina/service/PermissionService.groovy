@@ -2,7 +2,7 @@ package com.unifina.service
 
 import com.unifina.api.NotPermittedException
 import com.unifina.domain.dashboard.Dashboard
-
+import com.unifina.domain.dashboard.DashboardItem
 import com.unifina.domain.data.Stream
 import com.unifina.domain.marketplace.Product
 import com.unifina.domain.marketplace.Subscription
@@ -17,7 +17,6 @@ import com.unifina.security.Userish
 import groovy.transform.CompileStatic
 
 import java.security.AccessControlException
-
 /**
  * Check, get, grant, and revoke permissions. Maintains Access Control Lists (ACLs) to resources.
  *
@@ -155,11 +154,39 @@ class PermissionService {
 		}.toList()
 
 		// Special case of UI channels: they inherit permissions from the associated canvas
-		if (resource instanceof Stream && resource.uiChannel) {
-			directPermissions.addAll(getPermissionsTo(resource.uiChannelCanvas, userish))
+		if (resource instanceof Stream && resource.uiChannel && resource.uiChannelCanvas != null && resource.uiChannelPath != null) {
+			Canvas canvas = resource.uiChannelCanvas
+			directPermissions.addAll(getPermissionsTo(canvas, userish))
+			Permission permission = hasTransitiveDashboardPermissions(canvas, userish)
+			if (permission != null) {
+				directPermissions.add(permission)
+			}
 		}
 
 		return directPermissions
+	}
+
+	private Permission hasTransitiveDashboardPermissions(Canvas canvas, Userish userish) {
+		List<DashboardItem> items = DashboardItem.findAllByCanvas(canvas)
+		if (items.isEmpty()) {
+			return null
+		}
+		Permission permission = Permission.withCriteria(uniqueResult: true) {
+			'in'("dashboard", items.collect { it.dashboard })
+			eq("operation", Operation.READ)
+			or {
+				eq("anonymous", true)
+				if (isNotNullAndIdNotNull(userish)) {
+					String userProp = getUserPropertyName(userish)
+					eq(userProp, userish)
+				}
+			}
+			or {
+				isNull("endsAt")
+				gt("endsAt", new Date())
+			}
+		}
+		return permission
 	}
 
 	/** Overload to allow leaving out the anonymous-include-flag but including the filter */
@@ -553,11 +580,17 @@ class PermissionService {
 		}
 
 		// Special case of UI channels: they inherit permissions from the associated canvas
-		if (p.empty && resource instanceof Stream && resource.uiChannel) {
-			return hasPermission(userish, resource.uiChannelCanvas, op)
+		if (p.isEmpty() && resource instanceof Stream && resource.uiChannel) {
+			if (hasPermission(userish, resource.uiChannelCanvas, op)) {
+				return true
+			}
+			Permission permission = hasTransitiveDashboardPermissions(resource.uiChannelCanvas, userish)
+			if (permission != null) {
+				return true
+			}
 		}
 
-		return !p.empty
+		return !p.isEmpty()
 	}
 
 	/**
