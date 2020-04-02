@@ -11,7 +11,7 @@ const LOGGING_ENABLED = false
 
 const Streamr = initStreamrApi(REST_URL, LOGGING_ENABLED)
 
-const TIMEOUT = 30 * 1000
+const TIMEOUT = 40 * 1000
 
 const NUM_MESSAGES = 50
 
