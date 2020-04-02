@@ -10,11 +10,9 @@ describe('CORS Requests', () => {
 
     function getOptions() {
         return fetch(URL, {
-            "credentials": "omit",
             "headers": {
                 origin,
             },
-            "body": null,
             "method": "OPTIONS",
             "mode": "cors"
         })
