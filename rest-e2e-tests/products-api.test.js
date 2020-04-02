@@ -48,12 +48,14 @@ async function createStreamAndReturnId(streamBody, authToken) {
     return json.id
 }
 
-describe('Products API', () => {
+describe('Products API', function() {
     let genericProductBody
 
     let streamId1
     let streamId2
     let streamId3
+
+    this.timeout(1000 * 20)
 
     before(async () => {
         streamId1 = await createStreamAndReturnId({
