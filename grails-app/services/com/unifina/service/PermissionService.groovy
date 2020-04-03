@@ -576,9 +576,6 @@ class PermissionService {
 					return true
 				}
 			}
-			if (isPermissionToStreamViaDashboard(userish, resource)) {
-				return true
-			}
 			Set<Operation> operations = STREAM_TO_CANVAS[op]
 			if (operations != null) {
 				for (Operation oper : operations) {
@@ -654,9 +651,8 @@ class PermissionService {
 
 	private static boolean hasOneOrLessSharePermissionsLeft(Object resource) {
 		String resourceProp = getResourcePropertyName(resource)
-		def criteria = Permission.createCriteria()
 		Permission.Operation shareOp = Operation.shareOperation(resource)
-		def n = criteria.count {
+		Integer n = Permission.createCriteria().count {
 			eq(resourceProp, resource)
 			eq("operation", shareOp)
 		}

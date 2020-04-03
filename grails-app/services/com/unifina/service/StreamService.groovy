@@ -3,22 +3,15 @@ package com.unifina.service
 import com.google.gson.Gson
 import com.google.gson.GsonBuilder
 import com.streamr.client.protocol.message_layer.StreamMessage
-import com.unifina.api.NotFoundException
-import com.unifina.api.NotPermittedException
 import com.unifina.api.ValidationException
 import com.unifina.data.StreamPartitioner
-import com.unifina.domain.dashboard.DashboardItem
 import com.unifina.domain.data.Stream
 import com.unifina.domain.security.IntegrationKey
-import com.unifina.domain.security.Key
 import com.unifina.domain.security.Permission
 import com.unifina.domain.security.SecUser
-import com.unifina.domain.signalpath.Canvas
 import com.unifina.domain.task.Task
 import com.unifina.feed.DataRange
 import com.unifina.feed.FieldDetector
-
-import com.unifina.signalpath.RuntimeRequest
 import com.unifina.task.DelayedDeleteStreamTask
 import com.unifina.utils.EthereumAddressValidator
 import com.unifina.utils.IdGenerator
@@ -139,29 +132,6 @@ class StreamService {
 		return cassandraService.getDataRange(stream)
 	}
 
-	@CompileStatic
-	void getReadAuthorizedStream(String id, SecUser user, Key key, Closure action) {
-		def stream = Stream.get(id)
-		if (stream == null) {
-			throw new NotFoundException("Stream", id)
-		}
-
-		if (key != null) {
-			if (permissionService.check(key, stream, Permission.Operation.STREAM_GET)) {
-				action.call(stream)
-			} else {
-				throw new NotPermittedException(null, "Stream", id, Permission.Operation.STREAM_GET.id)
-			}
-		} else {
-			boolean hasPermissionToStreamsUiChannelCanvas = permissionService.check(user, stream, Permission.Operation.STREAM_GET)
-			if (hasPermissionToStreamsUiChannelCanvas || isPermissionToStreamViaDashboard(user, stream)) {
-				action.call(stream)
-			} else {
-				throw new NotPermittedException(user?.username, "Stream", id, Permission.Operation.STREAM_GET.id)
-			}
-		}
-	}
-
 	Set<String> getStreamEthereumPublishers(Stream stream) {
 		// This approach might be slow if there are a lot of allowed writers to the Stream
 		List<SecUser> writers = permissionService.getPermissionsTo(stream, Permission.Operation.STREAM_PUBLISH)*.user
@@ -210,28 +180,6 @@ class StreamService {
 			user.id in users*.id && service in [IntegrationKey.Service.ETHEREUM, IntegrationKey.Service.ETHEREUM_ID]
 		}
 		return Stream.findAllByIdInListAndInbox(keys*.idInService, true)
-	}
-
-	private boolean isPermissionToStreamViaDashboard(SecUser user, Stream stream) {
-		def dashboardService = grailsApplication.mainContext.getBean(DashboardService) // Don't initialize normally, preventing circular service dependency loop
-		if (stream.uiChannel && stream.uiChannelCanvas != null && stream.uiChannelPath != null) {
-			Canvas canvas = stream.uiChannelCanvas
-			int moduleId = parseModuleId(stream.uiChannelPath)
-			List<DashboardItem> matchedItems = DashboardItem.findAllByCanvasAndModule(canvas, moduleId)
-			for (DashboardItem item : matchedItems) {
-				if (dashboardService.authorizedGetDashboardItem(item.dashboard.id, item.id, user, Permission.Operation.DASHBOARD_GET)) {
-					return true
-				}
-			}
-		}
-		return false
-	}
-
-	@CompileStatic
-	private static Integer parseModuleId(String path) {
-		RuntimeRequest.PathReader reader = new RuntimeRequest.PathReader(path.substring(1))
-		reader.readCanvasId()
-		return reader.readModuleId()
 	}
 
 	static class StreamStatus {
