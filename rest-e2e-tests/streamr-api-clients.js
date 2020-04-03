@@ -235,7 +235,16 @@ class Streams {
             .withBody(body)
     }
 
-    makePublic(id) {
+    grantSubscribe(id) {
+        return new StreamrApiRequest(this.options)
+            .methodAndPath('POST', `streams/${id}/permissions`)
+            .withBody({
+                anonymous: true,
+                operation: 'stream_subscribe'
+            })
+    }
+
+    grantGet(id) {
         return new StreamrApiRequest(this.options)
             .methodAndPath('POST', `streams/${id}/permissions`)
             .withBody({
