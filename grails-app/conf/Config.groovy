@@ -190,6 +190,8 @@ environments {
 cors.url.pattern = [
 	'/api/*', // Streamr REST API
 ]
+cors.headers = ['Access-Control-Allow-Headers': 'origin, authorization, accept, content-type, x-requested-with, Streamr-Client'] // allow custom Streamr-Client header in CORS requests
+
 streamr.apiKey.revokeNotificationStream = "revoked-api-keys"
 
 /**
