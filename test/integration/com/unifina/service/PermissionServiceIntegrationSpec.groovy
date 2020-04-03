@@ -1,12 +1,16 @@
 package com.unifina.service
 
 import com.unifina.domain.dashboard.Dashboard
+import com.unifina.domain.dashboard.DashboardItem
 import com.unifina.domain.data.Stream
 import com.unifina.domain.security.Key
 import com.unifina.domain.security.Permission
 import com.unifina.domain.security.SecUser
 import com.unifina.domain.signalpath.Canvas
+import com.unifina.domain.signalpath.Module
+import com.unifina.domain.signalpath.ModuleCategory
 import com.unifina.utils.IdGenerator
+import com.unifina.utils.Webcomponent
 import grails.test.spock.IntegrationSpec
 import grails.util.Holders
 
@@ -37,6 +41,17 @@ class PermissionServiceIntegrationSpec extends IntegrationSpec {
 	// User has indirect permissions to this UI channel stream via the dashboard
 	Stream uiChannelStream
 	Canvas uiChannelCanvas
+
+	Canvas vulCan
+	Stream uiChannelPublic
+	ModuleCategory category
+	Module pub
+	Stream uiChannelSecret
+	Module secret
+	Dashboard vulPubDash
+	Dashboard vulSecretDash
+	DashboardItem pubItem
+	DashboardItem secretItem
 
 	void setup() {
 		service = Holders.getApplicationContext().getBean(PermissionService)
@@ -103,6 +118,57 @@ class PermissionServiceIntegrationSpec extends IntegrationSpec {
 		uiChannelStream = new Stream(name: "ui channel", uiChannel: true, uiChannelCanvas: uiChannelCanvas, uiChannelPath: "/canvases/" + uiChannelCanvas.id + "/modules/2")
 		uiChannelStream.id = "stream-id-2"
 		uiChannelStream.save(validate: true, failOnError: true)
+
+		vulCan = new Canvas(name: "canvas")
+		vulCan.save(failOnError: true, validate: true)
+		category = new ModuleCategory(name: "category")
+		category.id = 1
+		category.save(failOnError: true, validate: true)
+		pub = new Module(
+			name: "public module",
+			implementingClass: "x",
+			jsModule: [:],
+			type: [:],
+			category: category,
+		)
+		pub.save(failOnError: true, validate: true)
+		uiChannelPublic = new Stream(name: "ui channel public", uiChannel: true, uiChannelCanvas: vulCan, uiChannelPath: "/canvases/" + vulCan.id + "/modules/" + pub.id)
+		uiChannelPublic.id = "1"
+		uiChannelPublic.save(failOnError: true, validate: true)
+
+		secret = new Module(
+			name: "secret module",
+			implementingClass: "x",
+			jsModule: [:],
+			type: [:],
+			category: category,
+		)
+		secret.save(failOnError: true, validate: true)
+		uiChannelSecret = new Stream(name: "ui channel secret", uiChannel: true, uiChannelCanvas: vulCan, uiChannelPath: "/canvases/" + vulCan.id + "/modules/" + secret.id)
+		uiChannelSecret.id = "2"
+		uiChannelSecret.save(failOnError: true, validate: true)
+
+		vulPubDash = new Dashboard(name: "vulnerability public dashboard")
+		vulPubDash.save(failOnError: true, validate: true)
+		vulSecretDash = new Dashboard(name: "vulnerability secret dashboard")
+		vulSecretDash.save(failOnError: true, validate: true)
+		service.systemGrant(me, vulPubDash, Permission.Operation.DASHBOARD_EDIT)
+		pubItem = new DashboardItem(
+			title: "dashboard public item title",
+			module: pub.id,
+			dashboard: vulPubDash,
+			canvas: vulCan,
+			webcomponent: Webcomponent.STREAMR_BUTTON,
+		)
+		pubItem.save(failOnError: true, validate: true)
+		secretItem = new DashboardItem(
+			title: "dashboard secret item title",
+			module: secret.id,
+			dashboard: vulSecretDash,
+			canvas: vulCan,
+			webcomponent: Webcomponent.STREAMR_BUTTON,
+		)
+		secretItem.save(failOnError: true, validate: true)
 	}
 
 	void cleanup() {
@@ -111,9 +177,13 @@ class PermissionServiceIntegrationSpec extends IntegrationSpec {
 		Permission.findAllByDashboard(dashOwned)*.delete(flush: true)
 		Permission.findAllByDashboard(dashPublic)*.delete(flush: true)
 		Permission.findAllByDashboard(dashboard)*.delete(flush: true)
+		Permission.findAllByDashboard(vulPubDash)*.delete(flush: true)
 		Permission.findAllByCanvas(canvas)*.delete(flush: true)
+		Permission.findAllByCanvas(vulCan)*.delete(flush: true)
 		Permission.findAllByCanvas(uiChannelCanvas)*.delete(flush: true)
 		Permission.findAllByStream(stream)*.delete(flush: true)
+		Permission.findAllByStream(uiChannelStream)*.delete(flush: true)
+		Permission.findAllByStream(uiChannelPublic)*.delete(flush: true)
 		Permission.findAllByStream(uiChannelStream)*.delete(flush: true)
 
 		dashAllowed?.delete(flush: true)
@@ -135,6 +205,17 @@ class PermissionServiceIntegrationSpec extends IntegrationSpec {
 		uiChannelStream?.delete(flush: true)
 		canvas?.delete(flush: true)
 		uiChannelCanvas?.delete(flush: true)
+
+		uiChannelPublic?.delete(flush: true)
+		uiChannelSecret?.delete(flush: true)
+		pubItem?.delete(flush: true)
+		secretItem?.delete(flush: true)
+		vulPubDash?.delete(flush: true)
+		vulSecretDash?.delete(flush: true)
+		vulCan?.delete(flush: true)
+		pub?.delete(flush: true)
+		secret?.delete(flush: true)
+		category?.delete(flush: true)
 	}
 
 	void "get closure filtering works as expected"() {
@@ -295,8 +376,7 @@ class PermissionServiceIntegrationSpec extends IntegrationSpec {
 		service.systemGrantAll(me, canvas)
 
 		expect:
-		service.getPermissionsTo(stream, me).size() == 5
-		service.check(me, uiChannelStream, Permission.Operation.CANVAS_GET)
+		service.getPermissionsTo(stream, me).size() == 4
 		service.check(me, stream, Permission.Operation.STREAM_GET)
 		service.check(me, stream, Permission.Operation.STREAM_PUBLISH)
 		service.check(me, stream, Permission.Operation.STREAM_SUBSCRIBE)
@@ -305,12 +385,31 @@ class PermissionServiceIntegrationSpec extends IntegrationSpec {
 
 	void "getPermissionsTo(resource, userish) returns correct UI channel read permissions via associated dashboard"() {
 		service.systemGrantAll(me, dashboard)
-		def permissions = service.getPermissionsTo(uiChannelStream, me)
+		def permissions = service.getPermissionsTo(uiChannelPublic, me)
 
 		expect:
 		permissions.size() == 2
-		service.check(me, uiChannelStream, Permission.Operation.STREAM_GET)
-		service.check(me, uiChannelStream, Permission.Operation.STREAM_SUBSCRIBE)
+		service.check(me, uiChannelPublic, Permission.Operation.STREAM_GET)
+		service.check(me, uiChannelPublic, Permission.Operation.STREAM_SUBSCRIBE)
+	}
+
+
+	void "getPermissionsTo(resource, userish) handles public and secret transitive dashboard permissions"() {
+		when:
+		List<Permission> pubPerm = service.getPermissionsTo(uiChannelPublic, me)
+		List<Permission> secPerm = service.getPermissionsTo(uiChannelSecret, me)
+		then:
+		pubPerm.size() == 2
+		pubPerm.count { Permission p ->
+			p.operation == Permission.Operation.STREAM_GET
+		} == 1
+		pubPerm.count { Permission p ->
+			p.operation == Permission.Operation.STREAM_SUBSCRIBE
+		} == 1
+
+		service.check(me, uiChannelPublic, Permission.Operation.STREAM_GET)
+		service.check(me, uiChannelPublic, Permission.Operation.STREAM_SUBSCRIBE)
+		secPerm.size() == 0
 	}
 
 	void "cannot revoke only share permission"() {

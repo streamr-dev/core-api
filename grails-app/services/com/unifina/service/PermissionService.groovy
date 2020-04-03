@@ -2,6 +2,7 @@ package com.unifina.service
 
 import com.unifina.api.NotPermittedException
 import com.unifina.domain.dashboard.Dashboard
+import com.unifina.domain.dashboard.DashboardItem
 import com.unifina.domain.data.Stream
 import com.unifina.domain.marketplace.Product
 import com.unifina.domain.marketplace.Subscription
@@ -12,7 +13,9 @@ import com.unifina.domain.security.SecUser
 import com.unifina.domain.security.SignupInvite
 import com.unifina.domain.signalpath.Canvas
 import com.unifina.security.Userish
+import com.unifina.signalpath.RuntimeRequest
 import groovy.transform.CompileStatic
+import org.codehaus.groovy.grails.commons.GrailsApplication
 
 import java.security.AccessControlException
 /**
@@ -24,7 +27,7 @@ import java.security.AccessControlException
  * 			=> getUserPropertyName
  */
 class PermissionService {
-	def grailsApplication
+	GrailsApplication grailsApplication
 
 	/**
 	 * Check whether user is allowed to perform specified operation on a resource
@@ -99,7 +102,6 @@ class PermissionService {
 		// Special case of UI channels: they inherit permissions from the associated canvas
 		if (resource instanceof Stream && resource.uiChannel) {
 			Set<Permission> syntheticPermissions = new HashSet<>()
-			Permission permission = hasTransitiveDashboardPermissions(resource.uiChannelCanvas, userish)
 			Key key = null
 			SecUser user = null
 			if (userish instanceof Key) {
@@ -107,7 +109,7 @@ class PermissionService {
 			} else if (userish instanceof SecUser) {
 				user = userish
 			}
-			if (permission != null) {
+			if (user != null && isPermissionToStreamViaDashboard(user, resource)) {
 				syntheticPermissions.add(new Permission(
 					stream: resource,
 					operation: Permission.Operation.STREAM_GET,
@@ -149,32 +151,25 @@ class PermissionService {
 		(Operation.CANVAS_STARTSTOP): [Operation.STREAM_PUBLISH],
 	]
 
-	private Permission hasTransitiveDashboardPermissions(Canvas canvas, Userish userish) {
-		/*
-		List<DashboardItem> items = DashboardItem.findAllByCanvas(canvas)
-		if (items.isEmpty()) {
-			return null
-		}
-		*/
-		List<Permission> permissions = Permission.withCriteria() {
-			//'in'("dashboard", items.collect { it.dashboard })
-			eq("operation", Operation.DASHBOARD_GET)
-			or {
-				eq("anonymous", true)
-				if (isNotNullAndIdNotNull(userish)) {
-					String userProp = getUserPropertyName(userish)
-					eq(userProp, userish)
+	private boolean isPermissionToStreamViaDashboard(SecUser user, Stream stream) {
+		if (stream.uiChannel && stream.uiChannelCanvas != null && stream.uiChannelPath != null) {
+			Canvas canvas = stream.uiChannelCanvas
+			int moduleId = parseModuleId(stream.uiChannelPath)
+			List<DashboardItem> matchedItems = DashboardItem.findAllByCanvasAndModule(canvas, moduleId)
+			for (DashboardItem item : matchedItems) {
+				if (check(user, item.dashboard, Operation.DASHBOARD_EDIT)) {
+					return true
 				}
 			}
-			or {
-				isNull("endsAt")
-				gt("endsAt", new Date())
-			}
 		}
-		if (permissions.isEmpty()) {
-			return null
-		}
-		return permissions.get(0)
+		return false
+	}
+
+	@CompileStatic
+	private static Integer parseModuleId(String path) {
+		RuntimeRequest.PathReader reader = new RuntimeRequest.PathReader(path.substring(1))
+		reader.readCanvasId()
+		return reader.readModuleId()
 	}
 
 	/** Overload to allow leaving out the anonymous-include-flag but including the filter */
@@ -576,11 +571,12 @@ class PermissionService {
 
 		// Special case of UI channels: they inherit permissions from the associated canvas
 		if (p.isEmpty() && resource instanceof Stream && resource.uiChannel) {
-			//if (hasPermission(userish, resource.uiChannelCanvas, op)) {
-			//	return true
-			//}
-			Permission permission = hasTransitiveDashboardPermissions(resource.uiChannelCanvas, userish)
-			if (permission != null) {
+			for (Permission perm : getPermissionsTo(resource, userish)) {
+				if (perm.operation == op) {
+					return true
+				}
+			}
+			if (isPermissionToStreamViaDashboard(userish, resource)) {
 				return true
 			}
 			Set<Operation> operations = STREAM_TO_CANVAS[op]

@@ -3,6 +3,7 @@ package com.unifina.controller.api
 import com.unifina.api.*
 import com.unifina.domain.data.Stream
 import com.unifina.domain.security.Key
+import com.unifina.domain.security.Permission
 import com.unifina.domain.security.Permission.Operation
 import com.unifina.domain.security.SecUser
 import com.unifina.feed.DataRange
@@ -50,8 +51,25 @@ class StreamApiController {
 
 	@StreamrApi(authenticationLevel = AuthLevel.NONE)
 	def show(String id) {
-		streamService.getReadAuthorizedStream(id, request.apiUser, request.apiKey) { Stream stream ->
-			render(stream.toMap() as JSON)
+		def stream = Stream.get(id)
+		if (stream == null) {
+			throw new NotFoundException("Stream", id)
+		}
+
+		Key key = request.apiKey
+		if (key != null) {
+			if (permissionService.check(key, stream, Permission.Operation.STREAM_GET)) {
+				render(stream.toMap() as JSON)
+			} else {
+				throw new NotPermittedException(null, "Stream", id, Permission.Operation.STREAM_GET.id)
+			}
+		} else {
+			SecUser user = request.apiUser
+			if (permissionService.check(user, stream, Permission.Operation.STREAM_GET)) {
+				render(stream.toMap() as JSON)
+			} else {
+				throw new NotPermittedException(user?.username, "Stream", id, Permission.Operation.STREAM_GET.id)
+			}
 		}
 	}
 
