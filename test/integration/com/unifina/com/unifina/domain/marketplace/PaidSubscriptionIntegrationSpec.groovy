@@ -30,8 +30,6 @@ class PaidSubscriptionIntegrationSpec extends IntegrationSpec {
 			ownerAddress: "0x0000000000000000000000000000000000000000",
 			beneficiaryAddress: "0x0000000000000000000000000000000000000000",
 			pricePerSecond: 1,
-			contact: new Product.Contact(),
-			termsOfUse: new Product.TermsOfUse(),
 		).save(failOnError: true)
 	}
 

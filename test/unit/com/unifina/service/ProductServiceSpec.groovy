@@ -5,10 +5,7 @@ import com.streamr.client.protocol.message_layer.StreamMessage
 import com.streamr.client.protocol.message_layer.StreamMessageV31
 import com.unifina.api.*
 import com.unifina.domain.data.Stream
-import com.unifina.domain.marketplace.Category
-import com.unifina.domain.marketplace.FreeSubscription
-import com.unifina.domain.marketplace.PaidSubscription
-import com.unifina.domain.marketplace.Product
+import com.unifina.domain.marketplace.*
 import com.unifina.domain.security.Permission
 import com.unifina.domain.security.SecUser
 import grails.test.mixin.Mock
@@ -251,9 +248,9 @@ class ProductServiceSpec extends Specification {
 		setupStreams()
 		service.permissionService = Stub(PermissionService)
 
-		Product.Contact contact = new Product.Contact()
+		Contact contact = new Contact()
 		contact.url = "https://www.fi"
-		Product.TermsOfUse termsOfUse = new Product.TermsOfUse()
+		TermsOfUse termsOfUse = new TermsOfUse()
 		termsOfUse.termsName = "terms link name"
 		def validCommand = new CreateProductCommand(
 			name: "Product",
@@ -629,7 +626,7 @@ class ProductServiceSpec extends Specification {
 		}
 		service.permissionService = Stub(PermissionService)
 
-		def contact = new Product.Contact()
+		def contact = new Contact()
 		contact.email = "email@address.org"
 		contact.url = "https://site.com"
 		contact.social1 = "https://twitter.com"
@@ -637,7 +634,7 @@ class ProductServiceSpec extends Specification {
 		contact.social3 = "https://telegram.com"
 		contact.social4 = "https://linkedin.com"
 
-		def terms = new Product.TermsOfUse()
+		def terms = new TermsOfUse()
 		terms.redistribution = false
 		terms.commercialUse = false
 		terms.reselling = false

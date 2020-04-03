@@ -3,7 +3,6 @@ package com.unifina.domain.marketplace
 import com.unifina.domain.data.Stream
 import com.unifina.domain.security.Permission
 import com.unifina.domain.security.SecUser
-import com.unifina.utils.EmailValidator
 import com.unifina.utils.HexIdGenerator
 import grails.compiler.GrailsCompileStatic
 import groovy.json.JsonSlurper
@@ -29,79 +28,10 @@ class Product {
 	Integer score = 0 // set manually; used as default ordering for lists of Products (descending)
 	SecUser owner // set to product creator when product is created.
 
-	static class Contact {
-		// Contact's email address.
-		String email
-		// Contact's URL address.
-		String url
-		// Social media link 1
-		String social1
-		// Social media link 2
-		String social2
-		// Social media link 3
-		String social3
-		// Social media link 4
-		String social4
-
-		public Contact() {}
-		public Contact(Product product) {}
-
-		static constraints = {
-			email(nullable: true, validator: EmailValidator.validateNullEmail, maxSize: 255)
-			url(nullable: true, url: true, maxSize: 2048)
-			social1(nullable: true, url: true, maxSize: 2048)
-			social2(nullable: true, url: true, maxSize: 2048)
-			social3(nullable: true, url: true, maxSize: 2048)
-			social4(nullable: true, url: true, maxSize: 2048)
-		}
-
-		Map toMap() {
-			return [
-				email: email,
-				url: url,
-				social1: social1,
-				social2: social2,
-				social3: social3,
-				social4: social4,
-			]
-		}
-	}
-
-	static class TermsOfUse {
-		Boolean redistribution = true
-		Boolean commercialUse = true
-		Boolean reselling = true
-		Boolean storage = true
-		String termsUrl
-		String termsName
-
-		public TermsOfUse() {}
-		public TermsOfUse(Product product) {}
-
-		static constraints = {
-			redistribution(nullable: false)
-			commercialUse(nullable: false)
-			reselling(nullable: false)
-			storage(nullable: false)
-			termsUrl(nullable: true, url: true, maxSize: 2048)
-			termsName(nullable: true, maxSize: 100)
-		}
-		Map toMap() {
-			return [
-				redistribution: redistribution,
-				commercialUse: commercialUse,
-				reselling: reselling,
-				storage: storage,
-				termsUrl: termsUrl,
-				termsName: termsName,
-			]
-		}
-	}
-
 	// Product's contact details.
-	Contact contact
+	Contact contact = new Contact()
 	// Product's legal terms of use.
-	TermsOfUse termsOfUse
+	TermsOfUse termsOfUse = new TermsOfUse()
 
 	static embedded = [
 		'contact',
