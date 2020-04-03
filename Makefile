@@ -28,6 +28,10 @@ test-rest:
 build-war-dev: clean
 	grails test war
 
+.PHONY: compile
+compile:
+	grails compile
+
 # Docker recipes
 
 .PHONY: docker-build-dev
@@ -55,4 +59,3 @@ clean:
 	rm -rf .slcache
 	rm -rf "$$HOME/.grails"
 	grails clean-all
-	grails compile
