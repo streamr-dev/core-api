@@ -32,6 +32,10 @@ build-war-dev: clean
 compile:
 	grails compile
 
+.PHONY: dependency-report
+dependency-report:
+	grails dependency-report | tee dependencies.txt
+
 # Docker recipes
 
 .PHONY: docker-build-dev
