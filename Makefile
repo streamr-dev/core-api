@@ -36,6 +36,14 @@ compile:
 dependency-report:
 	grails dependency-report | tee dependencies.txt
 
+.PHONY: run-app-test
+run-app-test:
+	grails test run-app
+
+.PHONY: run-app-dev
+run-app-dev:
+	grails dev run-app
+
 # Docker recipes
 
 .PHONY: docker-build-dev
