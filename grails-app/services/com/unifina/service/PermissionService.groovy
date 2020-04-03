@@ -13,11 +13,11 @@ import com.unifina.domain.security.SecUser
 import com.unifina.domain.security.SignupInvite
 import com.unifina.domain.signalpath.Canvas
 import com.unifina.security.Userish
-import com.unifina.signalpath.RuntimeRequest
 import groovy.transform.CompileStatic
 import org.codehaus.groovy.grails.commons.GrailsApplication
 
 import java.security.AccessControlException
+
 /**
  * Check, get, grant, and revoke permissions. Maintains Access Control Lists (ACLs) to resources.
  *
@@ -100,7 +100,7 @@ class PermissionService {
 		}.toList()
 
 		// Special case of UI channels: they inherit permissions from the associated canvas
-		if (resource instanceof Stream && resource.uiChannel) {
+		if (resource instanceof Stream && resource.isUIChannel()) {
 			Set<Permission> syntheticPermissions = new HashSet<>()
 			Key key = null
 			SecUser user = null
@@ -109,7 +109,7 @@ class PermissionService {
 			} else if (userish instanceof SecUser) {
 				user = userish
 			}
-			if (user != null && isPermissionToStreamViaDashboard(user, resource)) {
+			if (userish != null && isPermissionToStreamViaDashboard(userish, resource)) {
 				syntheticPermissions.add(new Permission(
 					stream: resource,
 					operation: Permission.Operation.STREAM_GET,
@@ -151,25 +151,18 @@ class PermissionService {
 		(Operation.CANVAS_STARTSTOP): [Operation.STREAM_PUBLISH],
 	]
 
-	private boolean isPermissionToStreamViaDashboard(SecUser user, Stream stream) {
-		if (stream.uiChannel && stream.uiChannelCanvas != null && stream.uiChannelPath != null) {
+	private boolean isPermissionToStreamViaDashboard(Userish userish, Stream stream) {
+		if (userish != null && stream.isUIChannel()) {
 			Canvas canvas = stream.uiChannelCanvas
-			int moduleId = parseModuleId(stream.uiChannelPath)
+			int moduleId = stream.parseModuleID()
 			List<DashboardItem> matchedItems = DashboardItem.findAllByCanvasAndModule(canvas, moduleId)
 			for (DashboardItem item : matchedItems) {
-				if (check(user, item.dashboard, Operation.DASHBOARD_EDIT)) {
+				if (check(userish, item.dashboard, Operation.DASHBOARD_EDIT)) {
 					return true
 				}
 			}
 		}
 		return false
-	}
-
-	@CompileStatic
-	private static Integer parseModuleId(String path) {
-		RuntimeRequest.PathReader reader = new RuntimeRequest.PathReader(path.substring(1))
-		reader.readCanvasId()
-		return reader.readModuleId()
 	}
 
 	/** Overload to allow leaving out the anonymous-include-flag but including the filter */
@@ -553,7 +546,7 @@ class PermissionService {
 		userish = userish?.resolveToUserish()
 		String resourceProp = getResourcePropertyName(resource)
 
-		List<Permission> p = Permission.withCriteria {
+		List<Permission> directPermissions = Permission.withCriteria {
 			eq(resourceProp, resource)
 			eq("operation", op)
 			or {
@@ -570,7 +563,7 @@ class PermissionService {
 		}
 
 		// Special case of UI channels: they inherit permissions from the associated canvas
-		if (p.isEmpty() && resource instanceof Stream && resource.uiChannel) {
+		if (directPermissions.isEmpty() && resource instanceof Stream && resource.uiChannel) {
 			for (Permission perm : getPermissionsTo(resource, userish)) {
 				if (perm.operation == op) {
 					return true
@@ -586,7 +579,7 @@ class PermissionService {
 			}
 		}
 
-		return !p.isEmpty()
+		return !directPermissions.isEmpty()
 	}
 
 	// map stream operations to canvas operations

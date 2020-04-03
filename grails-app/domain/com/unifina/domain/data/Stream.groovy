@@ -155,4 +155,31 @@ class Stream implements Comparable {
 			return latestDataTimestamp.before(threshold)
 		}
 	}
+
+	/**
+	 * Return true if this Stream is an UI Channel.
+	 */
+	@CompileStatic
+	boolean isUIChannel() {
+		return uiChannel && uiChannelCanvas != null && uiChannelPath != null
+	}
+
+	/**
+	 * Return module id parsed from uiChannelPath or 0 if not found.
+	 */
+	@CompileStatic
+	Integer parseModuleID() {
+		if (uiChannelPath == null) {
+			return 0
+		}
+		String[] components = uiChannelPath.split("/")
+		if (components.length == 5 ) {
+			try {
+				return Integer.parseInt(components[4])
+			} catch (NumberFormatException e) {
+				return 0
+			}
+		}
+		return 0
+	}
 }
