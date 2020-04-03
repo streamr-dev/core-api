@@ -1,5 +1,5 @@
-
-.SHELLFLAGS := -c # Run commands in a -c flag
+SHELL = /bin/bash
+.SHELLFLAGS := -c # run 'bash -c /bin/cmd'
 .ONESHELL: ; # recipes execute in same shell
 #.SILENT: ; # no need for @
 .NOTPARALLEL: ; # wait for this target to finish
@@ -8,7 +8,7 @@
 
 NVM_DIR=$(HOME)/.nvm
 
-# Testing targets
+# Testing recipes
 
 .PHONY: test-unit
 test-unit:
@@ -22,11 +22,13 @@ test-integration:
 test-rest:
 	. /usr/local/opt/nvm/nvm.sh && nvm use && cd rest-e2e-tests && npm test
 
-# Development targets
+# Development recipes
 
 .PHONY: build-war-dev
 build-war-dev: clean
 	grails test war
+
+# Docker recipes
 
 .PHONY: docker-build-dev
 docker-build-dev: build-war-dev
@@ -40,11 +42,11 @@ docker-push-dev: docker-build-dev
 docker-run-dev:
 	docker run -i -t -d --rm -p 8081:8081/tcp streamr/engine-and-editor:dev
 
-# Auxiliary targets
-
 .PHONY: docker-login
 docker-login:
 	docker login -u DOCKER_USER -p DOCKER_PASS
+
+# Auxiliary recipes
 
 .PHONY: clean
 clean:
