@@ -74,12 +74,7 @@ describe('Streams API', () => {
                 })
                 .withApiKey(API_KEY)
                 .execute()
-            // Make stream public by granting stream_get and stream_subscribe
-            const getPermResponse = await Streamr.api.v1.streams.grantGet(publicStreamResponse.id).withApiKey(API_KEY).call()
-            assert.equal(getPermResponse.status, 201)
-            const subscribePermResponse = await Streamr.api.v1.streams.grantSubscribe(publicStreamResponse.id).withApiKey(API_KEY).call()
-            assert.equal(subscribePermResponse.status, 201)
-
+            await Streamr.api.v1.streams.makePublic(publicStreamResponse.id, API_KEY)
             const response = await Streamr.api.v1.streams.getPublishers(publicStreamResponse.id).call()
             assert.equal(response.status, 200)
         })

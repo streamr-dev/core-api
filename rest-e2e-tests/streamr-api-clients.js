@@ -235,7 +235,7 @@ class Streams {
             .withBody(body)
     }
 
-    grantSubscribe(id) {
+    grantPublicSubscribe(id) {
         return new StreamrApiRequest(this.options)
             .methodAndPath('POST', `streams/${id}/permissions`)
             .withBody({
@@ -244,13 +244,24 @@ class Streams {
             })
     }
 
-    grantGet(id) {
+    grantPublicGet(id) {
         return new StreamrApiRequest(this.options)
             .methodAndPath('POST', `streams/${id}/permissions`)
             .withBody({
                 anonymous: true,
                 operation: 'stream_get'
             })
+    }
+
+    async makePublic(id, apiKey) {
+        const subscribePermResponse = await this.grantPublicSubscribe(id).withApiKey(apiKey).call()
+        if (subscribePermResponse.status !== 201) {
+            throw Error(`Failed to make stream public permission stream_subscribe. HTTP status ${subscribePermResponse.status}.`)
+        }
+        const getPermResponse = await this.grantPublicGet(id).withApiKey(apiKey).call()
+        if (getPermResponse.status !== 201) {
+            throw Error(`Failed to make stream public permission stream_get. HTTP status ${getPermResponse.status}.`)
+        }
     }
 
     getPublishers(id) {
