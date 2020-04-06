@@ -44,6 +44,20 @@ run-app-test:
 run-app-dev:
 	grails dev run-app
 
+.PHONY: factory-reset
+factory-reset:
+	streamr-docker-dev factory-reset
+	streamr-docker-dev start --except engine-and-editor
+
+.PHONY: wipe
+wipe:
+	streamr-docker-dev wipe
+	streamr-docker-dev start --except engine-and-editor
+
+.PHONY: start
+start:
+	streamr-docker-dev start --except engine-and-editor
+
 # Docker recipes
 
 .PHONY: docker-build-dev
