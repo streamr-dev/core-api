@@ -10,6 +10,9 @@ NVM_DIR=$(HOME)/.nvm
 
 # Testing recipes
 
+.PHONY: test
+test: test-unit test-integration test-rest
+
 .PHONY: test-unit
 test-unit:
 	grails test-app -unit --stacktrace
