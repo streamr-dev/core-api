@@ -165,21 +165,21 @@ class Stream implements Comparable {
 	}
 
 	/**
-	 * Return module id parsed from uiChannelPath or 0 if not found.
+	 * Return module id parsed from uiChannelPath or throw an IllegalArgumentException on error.
 	 */
 	@CompileStatic
 	Integer parseModuleID() {
 		if (uiChannelPath == null) {
-			return 0
+			throw new IllegalArgumentException("Unable to parse module if from null uiChannelPath.")
 		}
 		String[] components = uiChannelPath.split("/")
-		if (components.length == 5 ) {
+		if (components.length >= 5 ) {
 			try {
 				return Integer.parseInt(components[4])
 			} catch (NumberFormatException e) {
-				return 0
+				throw new IllegalArgumentException("Unable to parse module id from '" + components[4] + "'.")
 			}
 		}
-		return 0
+		throw new IllegalArgumentException("UI Channel path doesn't contain module id.")
 	}
 }

@@ -154,7 +154,12 @@ class PermissionService {
 	private boolean isPermissionToStreamViaDashboard(Userish userish, Stream stream) {
 		if (userish != null && stream.isUIChannel()) {
 			Canvas canvas = stream.uiChannelCanvas
-			int moduleId = stream.parseModuleID()
+			int moduleId
+			try {
+				moduleId = stream.parseModuleID()
+			} catch (IllegalArgumentException e) {
+				return false
+			}
 			List<DashboardItem> matchedItems = DashboardItem.findAllByCanvasAndModule(canvas, moduleId)
 			for (DashboardItem item : matchedItems) {
 				if (check(userish, item.dashboard, Operation.DASHBOARD_EDIT)) {
