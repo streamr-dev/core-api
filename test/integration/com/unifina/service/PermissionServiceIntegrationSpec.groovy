@@ -7,15 +7,12 @@ import com.unifina.domain.security.Key
 import com.unifina.domain.security.Permission
 import com.unifina.domain.security.SecUser
 import com.unifina.domain.signalpath.Canvas
-import com.unifina.domain.signalpath.Module
-import com.unifina.domain.signalpath.ModuleCategory
 import com.unifina.utils.IdGenerator
 import com.unifina.utils.Webcomponent
 import grails.test.spock.IntegrationSpec
 import grails.util.Holders
 
 import java.security.AccessControlException
-
 /*
 	Ideally these tests would reside in {PermissionServiceSpec} as unit tests. However, due to spotty mocking of GORM,
 	the behaviour of withCriteria differs in unit tests compared to a real database. Thus the tests were moved here so
@@ -44,10 +41,7 @@ class PermissionServiceIntegrationSpec extends IntegrationSpec {
 
 	Canvas vulCan
 	Stream uiChannelPublic
-	ModuleCategory category
-	Module pub
 	Stream uiChannelSecret
-	Module secret
 	Dashboard vulPubDash
 	Dashboard vulSecretDash
 	DashboardItem pubItem
@@ -121,41 +115,24 @@ class PermissionServiceIntegrationSpec extends IntegrationSpec {
 
 		vulCan = new Canvas(name: "canvas")
 		vulCan.save(failOnError: true, validate: true)
-		category = new ModuleCategory(name: "category")
-		category.id = 1
-		category.save(failOnError: true, validate: true)
-		pub = new Module(
-			name: "public module",
-			implementingClass: "x",
-			jsModule: [:],
-			type: [:],
-			category: category,
-		)
-		pub.save(failOnError: true, validate: true)
-		uiChannelPublic = new Stream(name: "ui channel public", uiChannel: true, uiChannelCanvas: vulCan, uiChannelPath: "/canvases/" + vulCan.id + "/modules/" + pub.id)
-		uiChannelPublic.id = "1"
+		int publicModuleID = 1
+		uiChannelPublic = new Stream(name: "ui channel public", uiChannel: true, uiChannelCanvas: vulCan, uiChannelPath: "/canvases/" + vulCan.id + "/modules/" + publicModuleID)
+		uiChannelPublic.id = "11"
 		uiChannelPublic.save(failOnError: true, validate: true)
 
-		secret = new Module(
-			name: "secret module",
-			implementingClass: "x",
-			jsModule: [:],
-			type: [:],
-			category: category,
-		)
-		secret.save(failOnError: true, validate: true)
-		uiChannelSecret = new Stream(name: "ui channel secret", uiChannel: true, uiChannelCanvas: vulCan, uiChannelPath: "/canvases/" + vulCan.id + "/modules/" + secret.id)
-		uiChannelSecret.id = "2"
+		int secretModuleID = 2
+		uiChannelSecret = new Stream(name: "ui channel secret", uiChannel: true, uiChannelCanvas: vulCan, uiChannelPath: "/canvases/" + vulCan.id + "/modules/" + secretModuleID)
+		uiChannelSecret.id = "22"
 		uiChannelSecret.save(failOnError: true, validate: true)
 
 		vulPubDash = new Dashboard(name: "vulnerability public dashboard")
 		vulPubDash.save(failOnError: true, validate: true)
 		vulSecretDash = new Dashboard(name: "vulnerability secret dashboard")
 		vulSecretDash.save(failOnError: true, validate: true)
-		service.systemGrant(me, vulPubDash, Permission.Operation.DASHBOARD_EDIT)
+		service.systemGrant(me, vulPubDash, Permission.Operation.DASHBOARD_GET)
 		pubItem = new DashboardItem(
 			title: "dashboard public item title",
-			module: pub.id,
+			module: publicModuleID,
 			dashboard: vulPubDash,
 			canvas: vulCan,
 			webcomponent: Webcomponent.STREAMR_BUTTON,
@@ -163,7 +140,7 @@ class PermissionServiceIntegrationSpec extends IntegrationSpec {
 		pubItem.save(failOnError: true, validate: true)
 		secretItem = new DashboardItem(
 			title: "dashboard secret item title",
-			module: secret.id,
+			module: secretModuleID,
 			dashboard: vulSecretDash,
 			canvas: vulCan,
 			webcomponent: Webcomponent.STREAMR_BUTTON,
@@ -213,9 +190,6 @@ class PermissionServiceIntegrationSpec extends IntegrationSpec {
 		vulPubDash?.delete(flush: true)
 		vulSecretDash?.delete(flush: true)
 		vulCan?.delete(flush: true)
-		pub?.delete(flush: true)
-		secret?.delete(flush: true)
-		category?.delete(flush: true)
 	}
 
 	void "get closure filtering works as expected"() {
@@ -302,14 +276,14 @@ class PermissionServiceIntegrationSpec extends IntegrationSpec {
 
 	void "getAll lists public resources"() {
 		expect:
-		service.getAll(Dashboard, me, Permission.Operation.DASHBOARD_GET) as Set == [dashOwned, dashPublic, dashAllowed] as Set
+		service.getAll(Dashboard, me, Permission.Operation.DASHBOARD_GET) as Set == [dashOwned, dashPublic, dashAllowed, vulPubDash] as Set
 		service.getAll(Dashboard, anotherUser, Permission.Operation.DASHBOARD_GET) as Set == [dashAllowed, dashRestricted, dashPublic] as Set
 		service.getAll(Dashboard, stranger, Permission.Operation.DASHBOARD_GET) == [dashPublic]
 	}
 
 	void "getAll lists public resources with keys"() {
 		expect:
-		service.getAll(Dashboard, myKey, Permission.Operation.DASHBOARD_GET) as Set == [dashOwned, dashPublic, dashAllowed] as Set
+		service.getAll(Dashboard, myKey, Permission.Operation.DASHBOARD_GET) as Set == [dashOwned, dashPublic, dashAllowed, vulPubDash] as Set
 		service.getAll(Dashboard, anotherUserKey, Permission.Operation.DASHBOARD_GET) as Set == [dashAllowed, dashRestricted, dashPublic] as Set
 		service.getAll(Dashboard, anonymousKey, Permission.Operation.DASHBOARD_GET) as Set == [dashPublic, dashAllowed] as Set
 	}
@@ -360,14 +334,14 @@ class PermissionServiceIntegrationSpec extends IntegrationSpec {
 
 	void "retrieve all readable Dashboards correctly"() {
 		expect:
-		service.get(Dashboard, me, Permission.Operation.DASHBOARD_GET) as Set == [dashOwned, dashAllowed] as Set
+		service.get(Dashboard, me, Permission.Operation.DASHBOARD_GET) as Set == [dashOwned, dashAllowed, vulPubDash] as Set
 		service.get(Dashboard, anotherUser, Permission.Operation.DASHBOARD_GET) as Set == [dashAllowed, dashRestricted, dashPublic] as Set
 		service.get(Dashboard, stranger, Permission.Operation.DASHBOARD_GET) == []
 	}
 
 	void "retrieve all readable Dashboards correctly with keys"() {
 		expect:
-		service.get(Dashboard, myKey, Permission.Operation.DASHBOARD_GET) as Set == [dashOwned, dashAllowed] as Set
+		service.get(Dashboard, myKey, Permission.Operation.DASHBOARD_GET) as Set == [dashOwned, dashAllowed, vulPubDash] as Set
 		service.get(Dashboard, anotherUserKey, Permission.Operation.DASHBOARD_GET) as Set == [dashAllowed, dashRestricted, dashPublic] as Set
 		service.get(Dashboard, anonymousKey, Permission.Operation.DASHBOARD_GET) as Set == [dashAllowed] as Set
 	}

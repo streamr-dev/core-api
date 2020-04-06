@@ -162,7 +162,7 @@ class PermissionService {
 			}
 			List<DashboardItem> matchedItems = DashboardItem.findAllByCanvasAndModule(canvas, moduleId)
 			for (DashboardItem item : matchedItems) {
-				if (check(userish, item.dashboard, Operation.DASHBOARD_EDIT)) {
+				if (check(userish, item.dashboard, Operation.DASHBOARD_GET)) {
 					return true
 				}
 			}
