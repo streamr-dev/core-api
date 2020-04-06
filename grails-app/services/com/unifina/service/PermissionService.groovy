@@ -574,26 +574,10 @@ class PermissionService {
 					return true
 				}
 			}
-			Set<Operation> operations = STREAM_TO_CANVAS[op]
-			if (operations != null) {
-				for (Operation oper : operations) {
-					if (hasPermission(userish, resource.uiChannelCanvas, oper)) {
-						return true
-					}
-				}
-			}
 		}
 
 		return !directPermissions.isEmpty()
 	}
-
-	// map stream operations to canvas operations
-	private final static Map<Operation, Set<Operation>> STREAM_TO_CANVAS = [
-		(Operation.STREAM_GET): [Operation.CANVAS_GET],
-		(Operation.STREAM_SUBSCRIBE): [Operation.CANVAS_GET],
-		(Operation.STREAM_DELETE): [Operation.CANVAS_EDIT, Operation.CANVAS_DELETE],
-		(Operation.STREAM_PUBLISH): [Operation.CANVAS_STARTSTOP],
-	]
 
 	/**
 	 * Find Permissions that will be revoked
