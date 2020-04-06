@@ -85,3 +85,7 @@ clean:
 	rm -rf .slcache
 	rm -rf "$$HOME/.grails"
 	grails clean-all
+
+.PHONY: help
+help: ## Show Help
+	@grep -E '^[a-zA-Z_-]+%?:.*?## .*$$' $(MAKEFILE_LIST) | awk 'BEGIN {FS = ":.*?## "}; {printf "%-15s %s\n", $$1, $$2}'
