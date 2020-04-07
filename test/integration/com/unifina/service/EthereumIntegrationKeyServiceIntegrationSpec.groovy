@@ -5,7 +5,7 @@ import com.unifina.domain.security.SecUser
 import spock.lang.Specification
 
 class EthereumIntegrationKeyServiceIntegrationSpec extends Specification {
-	void "getEthereumAddress query works with lowercase or uppercase input"() {
+	void "getEthereumUser query works with lowercase or uppercase input"() {
 		setup:
 		String ethAddr = "0xF24197f71fC9b2F4F4c24ecE461fB0Ff7C91FD23"
 		SecUser me = new SecUser(

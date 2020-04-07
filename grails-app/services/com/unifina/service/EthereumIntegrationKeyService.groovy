@@ -9,7 +9,6 @@ import com.unifina.security.StringEncryptor
 import com.unifina.utils.AlphanumericStringGenerator
 import grails.compiler.GrailsCompileStatic
 import grails.converters.JSON
-import grails.util.Environment
 import groovy.transform.CompileStatic
 import org.apache.commons.codec.DecoderException
 import org.apache.commons.codec.binary.Hex
@@ -124,11 +123,7 @@ class EthereumIntegrationKeyService {
 	SecUser getEthereumUser(String address) {
 		IntegrationKey key = IntegrationKey.createCriteria().get {
 			'in'("service", [IntegrationKey.Service.ETHEREUM, IntegrationKey.Service.ETHEREUM_ID])
-			if (Environment.current == Environment.TEST) {
-				ilike("idInService", address)
-			} else {
-				eq("idInService", address, [ignoreCase: true])
-			}
+			ilike("idInService", address)
 		}
 		if (key == null) {
 			return null

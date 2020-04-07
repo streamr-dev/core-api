@@ -176,8 +176,8 @@ class StreamService {
 	}
 
 	boolean isStreamEthereumPublisher(Stream stream, String ethereumAddress) {
-		IntegrationKey key = IntegrationKey.find {
-			idInService =~ ethereumAddress // =~ case insensitive like (ilike)
+		IntegrationKey key = IntegrationKey.createCriteria().get {
+			ilike("idInService", ethereumAddress)
 		}
 		if (key == null || key.user == null) {
 			return false
@@ -200,8 +200,8 @@ class StreamService {
 	}
 
 	boolean isStreamEthereumSubscriber(Stream stream, String ethereumAddress) {
-		IntegrationKey key = IntegrationKey.find {
-			idInService =~ ethereumAddress
+		IntegrationKey key = IntegrationKey.createCriteria().get {
+			ilike("idInService", ethereumAddress)
 		}
 		if (key == null || key.user == null) {
 			return false
