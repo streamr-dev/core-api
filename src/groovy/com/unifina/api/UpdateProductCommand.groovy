@@ -2,8 +2,10 @@ package com.unifina.api
 
 import com.unifina.domain.data.Stream
 import com.unifina.domain.marketplace.Category
+import com.unifina.domain.marketplace.Contact
 import com.unifina.domain.marketplace.Product
 import com.unifina.domain.security.Permission
+import com.unifina.domain.marketplace.TermsOfUse
 import com.unifina.domain.security.SecUser
 import com.unifina.service.PermissionService
 import grails.compiler.GrailsCompileStatic
@@ -21,6 +23,8 @@ class UpdateProductCommand {
 	Stream previewStream
 	String previewConfigJson
 	Map<String, Object> pendingChanges
+	Contact contact = new Contact()
+	TermsOfUse termsOfUse = new TermsOfUse()
 
 	// Below are used only when updating NOT_DEPLOYED product
 	String ownerAddress
@@ -36,7 +40,9 @@ class UpdateProductCommand {
 		"category",
 		"previewStream",
 		"previewConfigJson",
-		"pendingChanges"
+		"pendingChanges",
+		"contact",
+		"termsOfUse",
 	]
 
 	public static final List<String> onChainFields = [

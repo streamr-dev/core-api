@@ -90,28 +90,27 @@ class UpdateProductCommandSpec extends Specification {
 		command.updateProduct(product, new SecUser(), permissionService)
 
 		then:
-		product.toMap() == [
-			id: "product-id",
-			type: "NORMAL",
-			state: "DEPLOYED",
-			created: null,
-			updated: null,
-			owner: "John Doe",
-			name: "new name",
-			description: "new description",
-			imageUrl: "image.jpg",
-			thumbnailUrl: "thumb.jpg",
-			category: "new-category-id",
-			streams: ["new-stream-id"],
-			previewStream: "new-stream-id",
-			previewConfigJson: "{newConfig: true}",
-			ownerAddress: "0x0",
-			beneficiaryAddress: "0x0",
-			pricePerSecond: "5",
-			isFree: false,
-			priceCurrency: "DATA",
-			minimumSubscriptionInSeconds: 0L
-		]
+		def map = product.toMap()
+		map.id == "product-id"
+		map.type == "NORMAL"
+		map.state == "DEPLOYED"
+		map.created == null
+		map.updated == null
+		map.owner == "John Doe"
+		map.name == "new name"
+		map.description == "new description"
+		map.imageUrl == "image.jpg"
+		map.thumbnailUrl == "thumb.jpg"
+		map.category == "new-category-id"
+		map.streams == ["new-stream-id"]
+		map.previewStream == "new-stream-id"
+		map.previewConfigJson == "{newConfig: true}"
+		map.ownerAddress == "0x0"
+		map.beneficiaryAddress == "0x0"
+		map.pricePerSecond == "5"
+		map.isFree == false
+		map.priceCurrency == "DATA"
+		map.minimumSubscriptionInSeconds == 0L
 	}
 
 	void "updateProduct() updates both on-chain and off-chain fields on non-deployed paid Products"() {
@@ -122,28 +121,27 @@ class UpdateProductCommandSpec extends Specification {
 		command.updateProduct(product, new SecUser(), permissionService)
 
 		then:
-		product.toMap() == [
-			id: "product-id",
-			type: "NORMAL",
-			state: "NOT_DEPLOYED",
-			created: null,
-			updated: null,
-			owner: "John Doe",
-			name: "new name",
-			description: "new description",
-			imageUrl: "image.jpg",
-			thumbnailUrl: "thumb.jpg",
-			category: "new-category-id",
-			streams: ["new-stream-id"],
-			previewStream: "new-stream-id",
-			previewConfigJson: "{newConfig: true}",
-			ownerAddress: "0xA",
-			beneficiaryAddress: "0xF",
-			pricePerSecond: "10",
-			isFree: false,
-			priceCurrency: "USD",
-			minimumSubscriptionInSeconds: 10L
-		]
+		def map = product.toMap()
+		map.id == "product-id"
+		map.type == "NORMAL"
+		map.state == "NOT_DEPLOYED"
+		map.created == null
+		map.updated == null
+		map.owner == "John Doe"
+		map.name == "new name"
+		map.description == "new description"
+		map.imageUrl == "image.jpg"
+		map.thumbnailUrl == "thumb.jpg"
+		map.category == "new-category-id"
+		map.streams == ["new-stream-id"]
+		map.previewStream == "new-stream-id"
+		map.previewConfigJson == "{newConfig: true}"
+		map.ownerAddress == "0xA"
+		map.beneficiaryAddress == "0xF"
+		map.pricePerSecond == "10"
+		map.isFree == false
+		map.priceCurrency == "USD"
+		map.minimumSubscriptionInSeconds == 10L
 	}
 
 	void "updateProduct() updates both on-chain and off-chain fields on deployed free Products"() {
@@ -155,28 +153,27 @@ class UpdateProductCommandSpec extends Specification {
 		command.updateProduct(product, new SecUser(), permissionService)
 
 		then:
-		product.toMap() == [
-			id: "product-id",
-			type: "NORMAL",
-			state: "DEPLOYED",
-			created: null,
-			updated: null,
-			owner: "John Doe",
-			name: "new name",
-			description: "new description",
-			imageUrl: "image.jpg",
-			thumbnailUrl: "thumb.jpg",
-			category: "new-category-id",
-			streams: ["new-stream-id"],
-			previewStream: "new-stream-id",
-			previewConfigJson: "{newConfig: true}",
-			ownerAddress: "0xA",
-			beneficiaryAddress: "0xF",
-			pricePerSecond: "0",
-			isFree: true,
-			priceCurrency: "USD",
-			minimumSubscriptionInSeconds: 10L
-		]
+		def map = product.toMap()
+		map.id == "product-id"
+		map.type == "NORMAL"
+		map.state == "DEPLOYED"
+		map.created == null
+		map.updated == null
+		map.owner == "John Doe"
+		map.name == "new name"
+		map.description == "new description"
+		map.imageUrl == "image.jpg"
+		map.thumbnailUrl == "thumb.jpg"
+		map.category == "new-category-id"
+		map.streams == ["new-stream-id"]
+		map.previewStream == "new-stream-id"
+		map.previewConfigJson == "{newConfig: true}"
+		map.ownerAddress == "0xA"
+		map.beneficiaryAddress == "0xF"
+		map.pricePerSecond == "0"
+		map.isFree == true
+		map.priceCurrency == "USD"
+		map.minimumSubscriptionInSeconds == 10L
 	}
 
 	void "updateProduct() throws when trying to change a free product to paid product when in deployed state"() {
