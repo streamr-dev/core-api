@@ -121,13 +121,14 @@ class EthereumIntegrationKeyService {
 	}
 
 	SecUser getEthereumUser(String address) {
-		List<IntegrationKey> keys = IntegrationKey.findAll {
-			idInService == address && service in [IntegrationKey.Service.ETHEREUM, IntegrationKey.Service.ETHEREUM_ID]
+		IntegrationKey key = IntegrationKey.createCriteria().get {
+			'in'("service", [IntegrationKey.Service.ETHEREUM, IntegrationKey.Service.ETHEREUM_ID])
+			ilike("idInService", address)
 		}
-		if (keys == null || keys.isEmpty()) {
+		if (key == null) {
 			return null
 		}
-		return keys.first().user
+		return key.user
 	}
 
 	SecUser getOrCreateFromEthereumAddress(String address) {

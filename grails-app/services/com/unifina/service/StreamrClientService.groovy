@@ -87,10 +87,11 @@ class StreamrClientService {
 	 * in Canvas run settings.
 	 */
 	private String getApiKeyForUser(Long userId) {
-		List<Key> keys = Key.where {
-			user.id == userId
-		}.findAll()
-
+		List<Key> keys = Key.createCriteria().list {
+			user {
+				idEq(userId)
+			}
+		}
 		if (keys.isEmpty()) {
 			throw new IllegalStateException("User does not have an API key! This should not happen!")
 		} else {

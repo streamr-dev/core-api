@@ -5,9 +5,9 @@ import com.unifina.api.ApiException
 import com.unifina.api.DataUnionJoinRequestCommand
 import com.unifina.api.NotFoundException
 import com.unifina.api.UpdateDataUnionJoinRequestCommand
+import com.unifina.domain.data.Stream
 import com.unifina.domain.dataunion.DataUnionJoinRequest
 import com.unifina.domain.dataunion.DataUnionSecret
-import com.unifina.domain.data.Stream
 import com.unifina.domain.marketplace.Product
 import com.unifina.domain.security.IntegrationKey
 import com.unifina.domain.security.Permission
@@ -38,9 +38,9 @@ class DataUnionJoinRequestService {
 
 	protected Set<Stream> findStreams(DataUnionJoinRequest c) {
 		log.debug(String.format("entering findStreams(%s)", c))
-		List<Product> products = Product.withCriteria {
+		List<Product> products = Product.createCriteria().list {
 			eq("type", Product.Type.DATAUNION)
-			eq("beneficiaryAddress", c.contractAddress)
+			ilike("beneficiaryAddress", c.contractAddress)
 		}
 		Set<Stream> streams = new HashSet<>()
 		for (Product p : products) {
@@ -76,8 +76,8 @@ class DataUnionJoinRequestService {
 	}
 
 	Set<SecUser> findMembers(String contractAddress) {
-		List<DataUnionJoinRequest> requests = DataUnionJoinRequest.withCriteria {
-			eq("contractAddress", contractAddress)
+		List<DataUnionJoinRequest> requests = DataUnionJoinRequest.createCriteria().list {
+			ilike("contractAddress", contractAddress)
 		}
 		Set<SecUser> users = new HashSet<>()
 		for (DataUnionJoinRequest c : requests) {
@@ -87,8 +87,8 @@ class DataUnionJoinRequestService {
 	}
 
 	List<DataUnionJoinRequest> findAll(String contractAddress, DataUnionJoinRequest.State state) {
-		return DataUnionJoinRequest.withCriteria {
-			eq("contractAddress", contractAddress)
+		return DataUnionJoinRequest.createCriteria().list {
+			ilike("contractAddress", contractAddress)
 			if (state) {
 				eq("state", state)
 			}
@@ -100,10 +100,10 @@ class DataUnionJoinRequestService {
 		// TODO CORE-1834: OR if user already has a write permission to the stream
 
 		// Backend must check that the given memberAddress is one of the Ethereum IDs bound to the logged in user
-		IntegrationKey key = IntegrationKey.withCriteria {
+		IntegrationKey key = IntegrationKey.createCriteria().get {
 			eq("user", user)
-			eq("idInService", cmd.memberAddress)
-		}.find()
+			ilike("idInService", cmd.memberAddress)
+		}
 		if (key == null) {
 			throw new NotFoundException("Given member address is not owned by the user")
 		}
@@ -117,10 +117,10 @@ class DataUnionJoinRequestService {
 		// validate secret if it is given
 		if (cmd.secret) {
 			// Find DataUnionSecret by contractAddress
-			DataUnionSecret secret = DataUnionSecret.withCriteria {
-				eq("contractAddress", contractAddress)
+			DataUnionSecret secret = DataUnionSecret.createCriteria().get {
+				ilike("contractAddress", contractAddress)
 				eq("secret", cmd.secret)
-			}.find()
+			}
 			if (secret) {
 				c.state = DataUnionJoinRequest.State.ACCEPTED
 				onApproveJoinRequest(c)
@@ -136,18 +136,18 @@ class DataUnionJoinRequestService {
 	}
 
 	DataUnionJoinRequest find(String contractAddress, String joinRequestId) {
-		DataUnionJoinRequest c = DataUnionJoinRequest.withCriteria {
-			eq("contractAddress", contractAddress)
+		DataUnionJoinRequest c = DataUnionJoinRequest.createCriteria().get {
+			ilike("contractAddress", contractAddress)
 			eq("id", joinRequestId)
 		}.find()
 		return c
 	}
 
 	DataUnionJoinRequest update(String contractAddress, String joinRequestId, UpdateDataUnionJoinRequestCommand cmd) {
-		DataUnionJoinRequest c = DataUnionJoinRequest.withCriteria {
-			eq("contractAddress", contractAddress)
+		DataUnionJoinRequest c = DataUnionJoinRequest.createCriteria().get {
+			ilike("contractAddress", contractAddress)
 			eq("id", joinRequestId)
-		}.find()
+		}
 		if (c == null) {
 			throw new NotFoundException("Join request not found")
 		}
@@ -170,10 +170,10 @@ class DataUnionJoinRequestService {
 	}
 
 	void delete(String contractAddress, String joinRequestId) {
-		DataUnionJoinRequest c = DataUnionJoinRequest.withCriteria {
-			eq("contractAddress", contractAddress)
+		DataUnionJoinRequest c = DataUnionJoinRequest.createCriteria().get {
+			ilike("contractAddress", contractAddress)
 			eq("id", joinRequestId)
-		}.find()
+		}
 		if (c == null) {
 			String fmt = "Join request not found by contract address: '%s' and join request id: '%s'"
 			String message = String.format(fmt, contractAddress, joinRequestId)
