@@ -5,10 +5,7 @@ import com.streamr.client.protocol.message_layer.StreamMessage
 import com.streamr.client.protocol.message_layer.StreamMessageV31
 import com.unifina.api.*
 import com.unifina.domain.data.Stream
-import com.unifina.domain.marketplace.Category
-import com.unifina.domain.marketplace.FreeSubscription
-import com.unifina.domain.marketplace.PaidSubscription
-import com.unifina.domain.marketplace.Product
+import com.unifina.domain.marketplace.*
 import com.unifina.domain.security.Permission
 import com.unifina.domain.security.SecUser
 import grails.test.mixin.Mock
@@ -251,15 +248,21 @@ class ProductServiceSpec extends Specification {
 		setupStreams()
 		service.permissionService = Stub(PermissionService)
 
+		Contact contact = new Contact()
+		contact.url = "https://www.fi"
+		TermsOfUse termsOfUse = new TermsOfUse()
+		termsOfUse.termsName = "terms link name"
 		def validCommand = new CreateProductCommand(
-				name: "Product",
-				description: "Description of Product.",
-				category: category,
-				streams: [s1, s2, s3],
-				ownerAddress: "0x0000000000000000000000000000000000000000",
-				beneficiaryAddress: "0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF",
-				pricePerSecond: 10,
-				minimumSubscriptionInSeconds: 1
+			name: "Product",
+			description: "Description of Product.",
+			category: category,
+			streams: [s1, s2, s3],
+			ownerAddress: "0x0000000000000000000000000000000000000000",
+			beneficiaryAddress: "0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF",
+			pricePerSecond: 10,
+			minimumSubscriptionInSeconds: 1,
+			contact: contact,
+			termsOfUse: termsOfUse,
 		)
 
 		def user = new SecUser()
@@ -271,28 +274,29 @@ class ProductServiceSpec extends Specification {
 		Product.findAll() == [product]
 
 		and:
-		product.toMap() == [
-			id: "1",
-			type: "NORMAL",
-			name: "Product",
-			description: "Description of Product.",
-			imageUrl: null,
-			thumbnailUrl: null,
-			category: "category-id",
-			streams: ["stream-1", "stream-2", "stream-3"],
-			state: "NOT_DEPLOYED",
-			previewStream: null,
-			previewConfigJson: null,
-			created: product.dateCreated,
-			updated: product.lastUpdated,
-			ownerAddress: "0x0000000000000000000000000000000000000000",
-			beneficiaryAddress: "0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF",
-			pricePerSecond: "10",
-			isFree: false,
-			priceCurrency: "DATA",
-			minimumSubscriptionInSeconds: 1,
-			owner: "Arnold Schwarzenegger"
-		]
+		def map = product.toMap()
+		map.id == "1"
+		map.type == "NORMAL"
+		map.name == "Product"
+		map.description == "Description of Product."
+		map.imageUrl == null
+		map.thumbnailUrl == null
+		map.category == "category-id"
+		map.streams == ["stream-1", "stream-2", "stream-3"]
+		map.state == "NOT_DEPLOYED"
+		map.previewStream == null
+		map.previewConfigJson == null
+		map.created == product.dateCreated
+		map.updated == product.lastUpdated
+		map.ownerAddress == "0x0000000000000000000000000000000000000000"
+		map.beneficiaryAddress == "0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF"
+		map.pricePerSecond == "10"
+		map.isFree == false
+		map.priceCurrency == "DATA"
+		map.minimumSubscriptionInSeconds == 1
+		map.owner == "Arnold Schwarzenegger"
+		map.contact.url == "https://www.fi"
+		map.termsOfUse.termsName == "terms link name"
 		product.dateCreated != null
 		product.dateCreated == product.lastUpdated
 	}
@@ -406,28 +410,41 @@ class ProductServiceSpec extends Specification {
 		Product.findAll() == [product]
 
 		and:
-		product.toMap() == [
-			id: "1",
-			type: "NORMAL",
-			name: "Untitled Product",
-			description: null,
-			imageUrl: null,
-			thumbnailUrl: null,
-			category: null,
-			streams: [],
-			state: "NOT_DEPLOYED",
-			previewStream: null,
-			previewConfigJson: null,
-			created: product.dateCreated,
-			updated: product.lastUpdated,
-			ownerAddress: null,
-			beneficiaryAddress: null,
-			pricePerSecond: "0",
-			isFree: true,
-			priceCurrency: "DATA",
-			minimumSubscriptionInSeconds: 0,
-			owner: "Arnold Schwarzenegger"
-		]
+		def map = product.toMap()
+		map.id == "1"
+		map.type == "NORMAL"
+		map.name == "Untitled Product"
+		map.description == null
+		map.imageUrl == null
+		map.thumbnailUrl == null
+		map.category == null
+		map.streams == []
+		map.state == "NOT_DEPLOYED"
+		map.previewStream == null
+		map.previewConfigJson == null
+		map.created == product.dateCreated
+		map.updated == product.lastUpdated
+		map.ownerAddress == null
+		map.beneficiaryAddress == null
+		map.pricePerSecond == "0"
+		map.isFree == true
+		map.priceCurrency == "DATA"
+		map.minimumSubscriptionInSeconds == 0
+		map.owner == "Arnold Schwarzenegger"
+		def c = map.contact
+		c.email == null
+		c.url == null
+		c.social1 == null
+		c.social2 == null
+		c.social3 == null
+		c.social4 == null
+		def t = map.termsOfUse
+		t.redistribution == true
+		t.commercialUse == true
+		t.reselling == true
+		t.storage == true
+		t.termsUrl == null
+		t.termsName == null
 		product.dateCreated != null
 		product.dateCreated == product.lastUpdated
 	}
@@ -609,6 +626,22 @@ class ProductServiceSpec extends Specification {
 		}
 		service.permissionService = Stub(PermissionService)
 
+		def contact = new Contact()
+		contact.email = "email@address.org"
+		contact.url = "https://site.com"
+		contact.social1 = "https://twitter.com"
+		contact.social2 = "https://facebook.com"
+		contact.social3 = "https://telegram.com"
+		contact.social4 = "https://linkedin.com"
+
+		def terms = new TermsOfUse()
+		terms.redistribution = false
+		terms.commercialUse = false
+		terms.reselling = false
+		terms.storage = false
+		terms.termsUrl = "https://www.site.org"
+		terms.termsName = "legal terms for site.org"
+
 		def validCommand = new UpdateProductCommand(
 				name: "updated name",
 				description: "updated description",
@@ -618,7 +651,9 @@ class ProductServiceSpec extends Specification {
 				ownerAddress: "0xCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC",
 				beneficiaryAddress: "0xCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC",
 				priceCurrency: Product.Currency.DATA,
-				minimumSubscriptionInSeconds: 1000
+				minimumSubscriptionInSeconds: 1000,
+				contact: contact,
+				termsOfUse: terms,
 		)
 
 		when:
@@ -628,29 +663,44 @@ class ProductServiceSpec extends Specification {
 		Product.findById("product-id").toMap() == updatedProduct.toMap()
 
 		and:
-		updatedProduct.toMap() == [
-				id: "product-id",
-				type: "NORMAL",
-				name: "updated name",
-				description: "updated description",
-				imageUrl: null,
-				thumbnailUrl: null,
-				category: "category2-id",
-				streams: ["stream-2", "stream-4"],
-				state: "NOT_DEPLOYED",
-				previewStream: null,
-				previewConfigJson: null,
-				created: product.dateCreated,
-				updated: product.lastUpdated,
-				ownerAddress: "0xCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC",
-				beneficiaryAddress: "0xCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC",
-				pricePerSecond: "20",
-				isFree: false,
-				priceCurrency: "DATA",
-				minimumSubscriptionInSeconds: 1000,
-				owner: "Firstname Lastname"
-		]
+		def map = updatedProduct.toMap()
+		map.id == "product-id"
+		map.type == "NORMAL"
+		map.name == "updated name"
+		map.description == "updated description"
+		map.imageUrl == null
+		map.thumbnailUrl == null
+		map.category == "category2-id"
+		map.streams == ["stream-2", "stream-4"]
+		map.state == "NOT_DEPLOYED"
+		map.previewStream == null
+		map.previewConfigJson == null
+		map.created == product.dateCreated
+		map.updated == product.lastUpdated
+		map.ownerAddress == "0xCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC"
+		map.beneficiaryAddress == "0xCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC"
+		map.pricePerSecond == "20"
+		map.isFree == false
+		map.priceCurrency == "DATA"
+		map.minimumSubscriptionInSeconds == 1000
+		map.owner == "Firstname Lastname"
 		product.dateCreated < product.lastUpdated
+
+		def c = map.contact
+		c.email == "email@address.org"
+		c.url == "https://site.com"
+		c.social1 == "https://twitter.com"
+		c.social2 == "https://facebook.com"
+		c.social3 == "https://telegram.com"
+		c.social4 == "https://linkedin.com"
+
+		def t = map.termsOfUse
+		t.redistribution == false
+		t.commercialUse == false
+		t.reselling == false
+		t.storage == false
+		t.termsUrl == "https://www.site.org"
+		t.termsName == "legal terms for site.org"
 	}
 
 	void "addStreamToProduct() verifies Stream via PermissionService#verifyShare"() {
@@ -1065,30 +1115,29 @@ class ProductServiceSpec extends Specification {
 		Product.findById("product-id").toMap() == product.toMap()
 
 		and:
-		product.toMap() == [
-				id: "product-id",
-				type: "NORMAL",
-				name: "name",
-				description: "description",
-				imageUrl: null,
-				thumbnailUrl: null,
-				category: "category-id",
-				streams: [],
-				previewStream: null,
-				previewConfigJson: null,
-				created: product.dateCreated,
-				updated: product.lastUpdated,
+		def map = product.toMap()
+		map.id ==  "product-id"
+		map.type == "NORMAL"
+		map.name == "name"
+		map.description == "description"
+		map.imageUrl == null
+		map.thumbnailUrl == null
+		map.category == "category-id"
+		map.streams == []
+		map.previewStream == null
+		map.previewConfigJson == null
+		map.created == product.dateCreated
+		map.updated == product.lastUpdated
 
-				// changes below
-				state: "DEPLOYED",
-				ownerAddress: "0xBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB",
-				beneficiaryAddress: "0xAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
-				pricePerSecond: "2",
-				isFree: false,
-				priceCurrency: "USD",
-				minimumSubscriptionInSeconds: 600,
-				owner: "Firstname Lastname"
-		]
+		// changes below
+		map.state == "DEPLOYED"
+		map.ownerAddress == "0xBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB"
+		map.beneficiaryAddress == "0xAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+		map.pricePerSecond == "2"
+		map.isFree == false
+		map.priceCurrency == "USD"
+		map.minimumSubscriptionInSeconds == 600
+		map.owner == "Firstname Lastname"
 	}
 
 	void "markAsDeployed() grants public access to Product via permissionService#systemGrantAnonymousAccess"() {
