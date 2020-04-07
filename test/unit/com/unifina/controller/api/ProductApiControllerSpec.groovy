@@ -46,7 +46,7 @@ class ProductApiControllerSpec extends Specification {
 			ownerAddress: "0x0",
 			beneficiaryAddress: "0x1",
 			pricePerSecond: 5,
-			owner: user
+			owner: user,
 		)
 		product.id = "product-id"
 	}

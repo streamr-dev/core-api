@@ -144,4 +144,5 @@ databaseChangeLog = {
 	include file: 'core/2019-09-27-alter-pending-changes.groovy'
 	include file: 'core/2019-11-02-rm-old-ethereum-modules.groovy'
 	include file: 'core/2020-01-24-rename-community-to-data-union.groovy'
+	include file: 'core/2020-03-05-new-product-fields-contact-terms-of-use.groovy'
 }

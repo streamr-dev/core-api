@@ -28,6 +28,16 @@ class Product {
 	Integer score = 0 // set manually; used as default ordering for lists of Products (descending)
 	SecUser owner // set to product creator when product is created.
 
+	// Product's contact details.
+	Contact contact = new Contact()
+	// Product's legal terms of use.
+	TermsOfUse termsOfUse = new TermsOfUse()
+
+	static embedded = [
+		'contact',
+		'termsOfUse',
+	]
+
 	// The below fields exist in the domain object for speed & query support, but the ground truth is in the smart contract.
 	String ownerAddress
 	String beneficiaryAddress
@@ -76,6 +86,8 @@ class Product {
 		blockNumber(min: 0L)
 		blockIndex(min: 0L)
 		owner(nullable: false)
+		contact(nullable: true)
+		termsOfUse(nullable: true)
 	}
 
 	static mapping = {
@@ -113,7 +125,9 @@ class Product {
 			isFree: pricePerSecond == 0L,
 			priceCurrency: priceCurrency.toString(),
 			minimumSubscriptionInSeconds: minimumSubscriptionInSeconds,
-			owner: owner.name
+			owner: owner.name,
+			contact: contact?.toMap(),
+			termsOfUse: termsOfUse?.toMap(),
 		]
 		if (isOwner && pendingChanges != null) {
 			JsonSlurper slurper = new JsonSlurper()
