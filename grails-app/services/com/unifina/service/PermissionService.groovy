@@ -84,6 +84,7 @@ class PermissionService {
 		userish = userish?.resolveToUserish()
 		String resourceProp = getResourcePropertyName(resource)
 
+		// Direct permissions from database
 		List<Permission> directPermissions = Permission.withCriteria {
 			eq(resourceProp, resource)
 			or {
@@ -123,6 +124,7 @@ class PermissionService {
 					user: user,
 				))
 			}
+			// Streams inherit transitive permissions from canvas
 			List<Permission> permissions = getPermissionsTo(resource.uiChannelCanvas, userish)
 			for (Permission p : permissions) {
 				Set<Operation> operations = CANVAS_TO_STREAM[p.operation]
