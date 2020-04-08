@@ -41,7 +41,7 @@ class KeyApiController {
 
 			Permission.Operation shareOp = Permission.Operation.shareOperation(res)
 			if (requireSharePermission && !permissionService.check(request.apiUser, res, shareOp)) {
-				throw new NotPermittedException(request?.apiUser?.username, resourceClass.simpleName, resourceId.toString(), "share")
+				throw new NotPermittedException(request?.apiUser?.username, resourceClass.simpleName, resourceId.toString(), shareOp.id)
 			}
 
 			action(res)

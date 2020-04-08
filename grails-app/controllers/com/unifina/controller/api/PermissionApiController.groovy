@@ -51,7 +51,7 @@ class PermissionApiController {
 		}
 		Permission.Operation shareOp = Permission.Operation.shareOperation(res)
 		if (requireSharePermission && !permissionService.check(request.apiUser ?: request.apiKey, res, shareOp)) {
-			throw new NotPermittedException(request?.apiUser?.username, resourceClass.simpleName, resourceId.toString(), "share")
+			throw new NotPermittedException(request?.apiUser?.username, resourceClass.simpleName, resourceId.toString(), shareOp.id)
 		} else {
 			action(res)
 		}
