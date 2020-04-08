@@ -19,7 +19,7 @@ test-unit:
 
 .PHONY: test-integration
 test-integration:
-	grails test-app -integration --stacktrace
+	grails test-app -no-reports -integration --stacktrace
 
 .PHONY: test-rest
 test-rest:
