@@ -1,6 +1,5 @@
 package com.unifina.filters
 
-import com.unifina.domain.security.SecUser
 import com.unifina.security.AuthenticationResult
 import com.unifina.security.StreamrApi
 import com.unifina.security.TokenAuthenticator
@@ -15,10 +14,7 @@ import java.lang.reflect.Method
  * This will allow the UnifinaCoreApiFilters to check user credentials. The authenticated SecUser can be referenced
  * by request.apiUser.
  */
-
 class UnifinaCoreAPIFilters {
-	def springSecurityService
-
 	GrailsApplication grailsApplication
 
 	private Map<String, StreamrApi> apiAnnotationCache = new HashMap<String, StreamrApi>()
@@ -67,10 +63,6 @@ class UnifinaCoreAPIFilters {
 						return false
 					}
 
-					// Use cookie-based authentication if api key was not present in header.
-					if (result.keyMissing) {
-						result = new AuthenticationResult((SecUser) springSecurityService.getCurrentUser())
-					}
 					if (!result.guarantees(annotation.authenticationLevel())) {
 						render(
 							status: 401,

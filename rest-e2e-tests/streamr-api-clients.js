@@ -349,6 +349,27 @@ class DataUnions {
     }
 }
 
+class NotFound {
+    constructor(options) {
+        this.options = options
+    }
+
+    notFound() {
+        return new StreamrApiRequest(this.options)
+            .methodAndPath('GET', 'page-not-found')
+    }
+
+    withApiKey(apiKey) {
+        this.authHeader = `Token ${apiKey}`
+        return this
+    }
+
+    withSessionToken(sessionToken) {
+        this.authHeader = `Bearer ${sessionToken}`
+        return this
+    }
+}
+
 module.exports = (baseUrl, logging) => {
     const options = {
         baseUrl,
@@ -366,6 +387,7 @@ module.exports = (baseUrl, logging) => {
                 streams: new Streams(options),
                 subscriptions: new Subscriptions(options),
                 dataunions: new DataUnions(options),
+                not_found: new NotFound(options),
             }
         }
     }

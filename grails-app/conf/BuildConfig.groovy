@@ -83,6 +83,23 @@ grails.project.dependency.resolution = {
 			excludes('org.springframework:spring-context:*')
 			excludes('org.springframework:spring-orm:*')
 		}
+		compile('org.springframework.security:spring-security-core:3.2.9.RELEASE') {
+			excludes('aopalliance', 'aspectjrt', 'cglib-nodep', 'commons-collections', 'commons-logging',
+				'ehcache', 'fest-assert', 'hsqldb', 'jcl-over-slf4j', 'jsr250-api', 'junit',
+				'logback-classic', 'mockito-core', 'powermock-api-mockito', 'powermock-api-support',
+				'powermock-core', 'powermock-module-junit4', 'powermock-module-junit4-common',
+				'powermock-reflect', 'spring-aop', 'spring-beans', 'spring-context', 'spring-core',
+				'spring-expression', 'spring-jdbc', 'spring-test', 'spring-tx')
+		}
+		compile('org.springframework.security:spring-security-web:3.2.9.RELEASE') {
+			excludes('aopalliance', 'commons-codec', 'commons-logging', 'fest-assert', 'groovy', 'hsqldb',
+				'jcl-over-slf4j', 'junit', 'logback-classic', 'mockito-core', 'powermock-api-mockito',
+				'powermock-api-support', 'powermock-core', 'powermock-module-junit4',
+				'powermock-module-junit4-common', 'powermock-reflect', 'spock-core', 'spring-beans',
+				'spring-context', 'spring-core', 'spring-expression', 'spring-jdbc',
+				'spring-security-core', 'spring-test', 'spring-tx', 'spring-web', 'spring-webmvc',
+				'tomcat-servlet-api')
+		}
 
 		compile('org.web3j:core:4.4.1')
 		compile('com.amazonaws:aws-java-sdk:1.11.294')
@@ -124,7 +141,6 @@ grails.project.dependency.resolution = {
 			excludes('spring-security-web')
 		}
 		runtime(':database-migration:1.4.2-SNAPSHOT')
-		runtime(":spring-security-core:2.0.0")
 
 		test(":plastic-criteria:1.6.7")
 		test(":rest-client-builder:2.1.1")
