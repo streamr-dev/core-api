@@ -1,6 +1,7 @@
 package com.unifina.domain.security
 
 import com.unifina.security.Userish
+import com.unifina.utils.EmailValidator
 import com.unifina.utils.EthereumAddressValidator
 import com.unifina.utils.UsernameValidator
 import groovy.transform.CompileStatic
@@ -10,6 +11,7 @@ class SecUser implements Userish {
 
 	Long id
 	String username
+	String email
 	String password
 	boolean enabled = true
 	boolean accountExpired
@@ -33,6 +35,7 @@ class SecUser implements Userish {
 
 	static constraints = {
 		username blank: false, unique: true, validator: UsernameValidator.validate
+		email blank: true, unique: false, validator: EmailValidator.validateEmptyEmail
 		password blank: false
 		name blank: false
 		dateCreated nullable: true

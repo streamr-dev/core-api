@@ -16,4 +16,11 @@ class EmailValidator {
 		}
 		return email.matches(EMAIL_REGEX)
 	}
+
+	static validateEmptyEmail = { String email ->
+		if (email.equals("")) {
+			return true
+		}
+		return email.matches(EMAIL_REGEX)
+	}
 }
