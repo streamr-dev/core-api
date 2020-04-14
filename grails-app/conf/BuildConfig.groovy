@@ -116,7 +116,7 @@ grails.project.dependency.resolution = {
 			export = false
 		}
 
-		compile(":mail:1.0.7")
+		compile(":mail:1.0.8-SNAPSHOT")
 
 		runtime(':hibernate:3.6.10.19') // or :hibernate4:4.3.10
 		runtime(":cors:1.1.8") {
