@@ -1,6 +1,6 @@
 SHELL = /bin/bash
 .SHELLFLAGS := -c # run 'bash -c /bin/cmd'
-.ONESHELL: ; # recipes execute in same shell
+#.ONESHELL: ; # recipes execute in same shell
 #.SILENT: ; # no need for @
 .NOTPARALLEL: ; # wait for this target to finish
 .EXPORT_ALL_VARIABLES: ; # send all vars to shell
