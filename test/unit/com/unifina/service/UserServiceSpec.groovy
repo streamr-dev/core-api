@@ -1,6 +1,6 @@
 package com.unifina.service
 
-import com.unifina.api.InvalidUsernameAndPasswordException
+import com.unifina.api.InvalidEmailAndPasswordException
 import com.unifina.api.NotFoundException
 import com.unifina.controller.api.UnitTestPasswordEncoder
 import com.unifina.domain.security.*
@@ -132,7 +132,7 @@ class UserServiceSpec extends Specification {
 		when:
 		service.getUserFromUsernameAndPassword(username, wrongPassword)
 		then:
-		thrown(InvalidUsernameAndPasswordException)
+		thrown(InvalidEmailAndPasswordException)
 	}
 
 	def "should find user from api key"() {

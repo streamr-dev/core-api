@@ -1,7 +1,7 @@
 package com.unifina.controller.api
 
 import com.unifina.api.ApiException
-import com.unifina.api.InvalidUsernameAndPasswordException
+import com.unifina.api.InvalidEmailAndPasswordException
 import com.unifina.domain.security.SecUser
 import com.unifina.security.AuthLevel
 import com.unifina.security.PasswordEncoder
@@ -110,7 +110,7 @@ class ChangePasswordCommand {
 			SecUser user
 			try {
 				user = cmd.userService.getUserFromUsernameAndPassword(cmd.username, cmd.currentpassword)
-			} catch (InvalidUsernameAndPasswordException e) {
+			} catch (InvalidEmailAndPasswordException e) {
 				return false
 			}
 			if (user == null) {

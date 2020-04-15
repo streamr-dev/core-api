@@ -1,7 +1,7 @@
 package com.unifina.service
 
 import com.unifina.api.InvalidAPIKeyException
-import com.unifina.api.InvalidUsernameAndPasswordException
+import com.unifina.api.InvalidEmailAndPasswordException
 import com.unifina.api.NotFoundException
 import com.unifina.domain.ExampleType
 import com.unifina.domain.data.Stream
@@ -170,16 +170,16 @@ class UserService {
 		}
 	}
 
-	SecUser getUserFromUsernameAndPassword(String username, String password) throws InvalidUsernameAndPasswordException {
+	SecUser getUserFromUsernameAndPassword(String username, String password) throws InvalidEmailAndPasswordException {
 		SecUser user = SecUser.findByUsername(username)
 		if (user == null) {
-			throw new InvalidUsernameAndPasswordException("Invalid username or password")
+			throw new InvalidEmailAndPasswordException("Invalid username or password")
 		}
-		String dbHash = user.password // TODO: $2a$10$z0HZdlGT7tvG6TSw4r/3Z.kqxJO4yM/ON4zX1pQ4TR1Kj3aidO/6q
+		String dbHash = user.password
 		if (passwordEncoder.isPasswordValid(dbHash, password)) {
 			return user
 		} else {
-			throw new InvalidUsernameAndPasswordException("Invalid username or password")
+			throw new InvalidEmailAndPasswordException("Invalid username or password")
 		}
 	}
 

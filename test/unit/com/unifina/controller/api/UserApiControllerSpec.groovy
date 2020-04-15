@@ -2,7 +2,7 @@ package com.unifina.controller.api
 
 import com.unifina.ControllerSpecification
 import com.unifina.api.ApiException
-import com.unifina.api.InvalidUsernameAndPasswordException
+import com.unifina.api.InvalidEmailAndPasswordException
 import com.unifina.domain.security.Key
 import com.unifina.domain.security.SecUser
 import com.unifina.security.PasswordEncoder
@@ -120,7 +120,7 @@ class UserApiControllerSpec extends ControllerSpecification {
 		def cmd = new ChangePasswordCommand(username: me.username, currentpassword: "foobar123!", password: "barbar123!", password2: "barbar123!")
 		cmd.passwordEncoder = passwordEncoder
 		cmd.userService = new UserService() {
-			SecUser getUserFromUsernameAndPassword(String username, String password) throws InvalidUsernameAndPasswordException {
+			SecUser getUserFromUsernameAndPassword(String username, String password) throws InvalidEmailAndPasswordException {
 				return me
 			}
 		}
@@ -194,8 +194,8 @@ class UserApiControllerSpec extends ControllerSpecification {
 		def cmd = new ChangePasswordCommand(username: me.username, currentpassword: "invalid", password: "barbar123!", password2: "barbar123!")
 		cmd.passwordEncoder = passwordEncoder
 		cmd.userService = new UserService() {
-			SecUser getUserFromUsernameAndPassword(String username, String password) throws InvalidUsernameAndPasswordException {
-				throw new InvalidUsernameAndPasswordException("mocked: invalid current password!")
+			SecUser getUserFromUsernameAndPassword(String username, String password) throws InvalidEmailAndPasswordException {
+				throw new InvalidEmailAndPasswordException("mocked: invalid current password!")
 			}
 		}
 		request.method = "POST"
@@ -216,7 +216,7 @@ class UserApiControllerSpec extends ControllerSpecification {
 		def cmd = new ChangePasswordCommand(username: me.username, currentpassword: "foobar", password: "asd", password2: "asd")
 		cmd.passwordEncoder = passwordEncoder
 		cmd.userService = new UserService() {
-			SecUser getUserFromUsernameAndPassword(String username, String password) throws InvalidUsernameAndPasswordException {
+			SecUser getUserFromUsernameAndPassword(String username, String password) throws InvalidEmailAndPasswordException {
 				return me
 			}
 		}
@@ -238,7 +238,7 @@ class UserApiControllerSpec extends ControllerSpecification {
 		def cmd = new ChangePasswordCommand(currentpassword: "foobar123", password: "asd", password2: "asd")
 		cmd.passwordEncoder = passwordEncoder
 		cmd.userService = new UserService() {
-			SecUser getUserFromUsernameAndPassword(String username, String password) throws InvalidUsernameAndPasswordException {
+			SecUser getUserFromUsernameAndPassword(String username, String password) throws InvalidEmailAndPasswordException {
 				return me
 			}
 		}

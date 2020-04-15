@@ -654,7 +654,7 @@
             },
             "examples": {
               "application/json": {
-                "code": "INVALID_USERNAME_OR_PASSWORD",
+                "code": "INVALID_EMAIL_OR_PASSWORD",
                 "message": "Password-based login failed"
               }
             }

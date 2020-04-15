@@ -1,12 +1,11 @@
 package com.unifina.controller.api
 
 import com.unifina.ControllerSpecification
-import com.unifina.api.ApiException
 import com.unifina.api.ChallengeVerificationFailedException
 import com.unifina.api.DisabledUserException
 import com.unifina.api.InvalidAPIKeyException
 import com.unifina.api.InvalidArgumentsException
-import com.unifina.api.InvalidUsernameAndPasswordException
+import com.unifina.api.InvalidEmailAndPasswordException
 import com.unifina.security.Challenge
 import com.unifina.domain.security.Key
 import com.unifina.domain.security.SecUser
@@ -181,8 +180,8 @@ class LoginApiControllerSpec extends ControllerSpecification {
 		authenticatedAs(me) { controller.password() }
 
 		then:
-		1 * userService.getUserFromUsernameAndPassword(username, password) >> { throw new InvalidUsernameAndPasswordException() }
-		thrown InvalidUsernameAndPasswordException
+		1 * userService.getUserFromUsernameAndPassword(username, password) >> { throw new InvalidEmailAndPasswordException() }
+		thrown InvalidEmailAndPasswordException
 	}
 
 	def "password-based login should fail if disabled user"() {
