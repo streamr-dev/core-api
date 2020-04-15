@@ -3,11 +3,11 @@ package com.unifina.controller.api
 import grails.validation.Validateable
 
 @Validateable
-class UsernamePasswordCommand {
-	String username
+class EmailPasswordCommand {
+	String email
 	String password
 	static constraints = {
-		username(blank: false, nullable: false)
+		email(blank: false, nullable: false)
 		password(blank: false, nullable: false)
 	}
 }

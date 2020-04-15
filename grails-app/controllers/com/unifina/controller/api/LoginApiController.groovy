@@ -40,11 +40,11 @@ class LoginApiController {
 	}
 
 	@StreamrApi(authenticationLevel = AuthLevel.NONE)
-	def password(UsernamePasswordCommand cmd) {
+	def password(EmailPasswordCommand cmd) {
 		if (cmd.hasErrors()) {
 			throw new InvalidArgumentsException(cmd.errors.getFieldErrors().collect {it.field+" expected."}.join(" "))
 		}
-		SecUser user = userService.getUserFromUsernameAndPassword(cmd.username, cmd.password)
+		SecUser user = userService.getUserFromUsernameAndPassword(cmd.email, cmd.password)
 		assertEnabled(user)
 		SessionToken token = sessionService.generateToken(user)
 		render(token.toMap() as JSON)
