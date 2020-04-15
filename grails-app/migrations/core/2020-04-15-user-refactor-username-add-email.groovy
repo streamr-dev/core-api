@@ -16,8 +16,10 @@ databaseChangeLog = {
 				sql.eachRow("select username from sec_user") { row ->
 					String username = row["username"]
 					if (EmailValidator.validate(username)) {
-						println("not a valid email: " + username)
+						println("valid email: " + username)
 						sql.execute('update sec_user set email = ? where username = ?', username, username)
+					} else {
+						println("not valid email: " + username)
 					}
 				}
 			}
