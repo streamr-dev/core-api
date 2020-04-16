@@ -25,4 +25,7 @@ databaseChangeLog = {
 			}
 		}
 	}
+	changeSet(author: "kkn", id: "user-refactor-username-add-email-3") {
+		dropColumn(columnName: "username", tableName: "sec_user")
+	}
 }
