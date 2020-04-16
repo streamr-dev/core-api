@@ -50,7 +50,7 @@ class PermissionServiceSpec extends BeanMockingSpecification {
 		anonymousKey = new Key(name: "anonymous key 1").save(failOnError: true)
 
 		// Sign-up invitations can also receive Permissions; they will later be converted to User permissions
-		invite = new SignupInvite(username: "him@foo.bar", code: "sikritCode", sent: true, used: false).save(validate:false)
+		invite = new SignupInvite(email: "him@foo.bar", code: "sikritCode", sent: true, used: false).save(validate:false)
 
 		// Dashboards
 		dashAllowed = new Dashboard(id: "allowed", name:"allowed").save(validate:false)
@@ -83,7 +83,7 @@ class PermissionServiceSpec extends BeanMockingSpecification {
 		Permission.count() == 18
 
 		and: "anotherUser has an invitation"
-		invite.username == anotherUser.email
+		invite.email == anotherUser.email
 	}
 
 	void "access granted to permitted Dashboard"() {

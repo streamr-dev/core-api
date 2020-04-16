@@ -42,12 +42,12 @@ class AuthApiController {
 			return render([success: false, error: "Failed to save invite: ${invite.errors}"] as JSON)
 		}
 
-		log.info("Signed up $invite.username")
+		log.info("Signed up $invite.email")
 
 		try {
 			mailService.sendMail {
 				from grailsApplication.config.unifina.email.sender
-				to invite.username
+				to invite.email
 				subject grailsApplication.config.unifina.email.registerLink.subject
 				html g.render(template: "/emails/email_register_link", model: [user: invite])
 			}
@@ -68,7 +68,7 @@ class AuthApiController {
 			return render([success: false, error: "Invitation code not valid"] as JSON)
 		}
 
-		log.info("Activated invite for ${invite.username}, ${invite.code}")
+		log.info("Activated invite for ${invite.email}, ${invite.code}")
 
 		def user
 
@@ -78,13 +78,13 @@ class AuthApiController {
 			return render([success: false, error: userService.beautifyErrors(cmd.errors.getAllErrors())] as JSON)
 		}
 
-		if (SecUser.findByEmail(invite.username)) {
+		if (SecUser.findByEmail(invite.email)) {
 			response.status = 400
 			return render([success: false, error: "User already exists"] as JSON)
 		}
 
 		try {
-			user = userService.createUser([:] << cmd.properties << [email: invite.username])
+			user = userService.createUser([:] << cmd.properties << [email: invite.email])
 		} catch (UserCreationFailedException e) {
 			response.status = 500
 			return render([success: false, error: e.getMessage()] as JSON)

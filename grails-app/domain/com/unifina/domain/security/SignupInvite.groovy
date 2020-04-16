@@ -5,7 +5,7 @@ import com.unifina.utils.UsernameValidator
 
 class SignupInvite implements Userish {
 	String code
-	String username
+	String email
 	Boolean used
 	Boolean sent
 	Date dateCreated
@@ -13,7 +13,7 @@ class SignupInvite implements Userish {
 
     static constraints = {
 		code blank: false, unique: true
-		username blank: false, validator: UsernameValidator.validate
+		email blank: false, validator: UsernameValidator.validate
     }
 
 	@Override

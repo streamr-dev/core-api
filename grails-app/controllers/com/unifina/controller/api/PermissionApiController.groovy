@@ -125,7 +125,7 @@ class PermissionApiController {
 			throw new InvalidArgumentsException("JSON body expected")
 		}
 
-		// request.JSON.user is either SecUser.username or SignupInvite.username (possibly of a not yet created SignupInvite)
+		// request.JSON.user is either SecUser.email or SignupInvite.email (possibly of a not yet created SignupInvite)
 		boolean anonymous = request.JSON.anonymous as boolean
 		String username = request.JSON.user
 		if (anonymous && username) { throw new InvalidArgumentsException("Can't specify user for anonymous permission! Leave out either 'user' or 'anonymous' parameter.", "anonymous", anonymous as String) }
@@ -143,7 +143,7 @@ class PermissionApiController {
 				render(newP.toMap() + [text: "Successfully granted"] as JSON)
 			}
 		} else {
-			// incoming "username" is either SecUser.username or SignupInvite.username (possibly of a not yet created SignupInvite)
+			// incoming "email" is either SecUser.email or SignupInvite.email (possibly of a not yet created SignupInvite)
 			def user = SecUser.findByEmail(username)
 
 			if (user) {
@@ -175,7 +175,7 @@ class PermissionApiController {
 				if (EthereumAddressValidator.validate(username)) {
 					user = ethereumIntegrationKeyService.createEthereumUser(username)
 				} else {
-					def invite = SignupInvite.findByUsername(username)
+					def invite = SignupInvite.findByEmail(username)
 					if (!invite) {
 						invite = signupCodeService.create(username)
 						String sharer = request.apiUser?.email ?: "Streamr user"
@@ -184,7 +184,7 @@ class PermissionApiController {
 						String emailSubject = emailSubject(sharer, resource)
 						mailService.sendMail {
 							from grailsApplication.config.unifina.email.sender
-							to invite.username
+							to invite.email
 							subject emailSubject
 							html g.render(
 								template: "/emails/email_share_resource_invite",

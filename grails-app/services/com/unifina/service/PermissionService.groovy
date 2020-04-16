@@ -546,7 +546,7 @@ class PermissionService {
 		return Permission.withCriteria {
 			isNotNull "invite"
 		}.findAll {
-			it.invite.username == user.email
+			it.invite.email == user.email
 		}.collect { p ->
 			p.invite = null
 			p.user = user
