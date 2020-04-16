@@ -7,7 +7,6 @@ import com.unifina.domain.security.Permission
 import com.unifina.domain.security.SecUser
 import com.unifina.domain.signalpath.Canvas
 import com.unifina.utils.Webcomponent
-import grails.converters.JSON
 import grails.test.mixin.Mock
 import grails.test.mixin.TestFor
 import groovy.json.JsonBuilder
@@ -17,8 +16,8 @@ import spock.lang.Specification
 @Mock([Canvas, Dashboard, DashboardItem, Permission, SecUser, PermissionService])
 class DashboardServiceSpec extends Specification {
 
-	SecUser user = new SecUser(username: "first@user.com", name: "user")
-	SecUser otherUser = new SecUser(username: "second@user.com", name: "someoneElse")
+	SecUser user = new SecUser(email: "first@user.com", name: "user")
+	SecUser otherUser = new SecUser(email: "second@user.com", name: "someoneElse")
 
 	def setup() {
 		PermissionService permissionService = service.permissionService
@@ -134,7 +133,7 @@ class DashboardServiceSpec extends Specification {
 
 	def "create() also creates all permissions for new dashboard"() {
 		setup:
-		def user = new SecUser(username: "tester").save(validate: false, failOnError: true)
+		def user = new SecUser(email: "tester@test.com").save(validate: false, failOnError: true)
 		def canvas = new Canvas(json: new JsonBuilder([
 			modules: [
 				[hash: 1, uiChannel: [webcomponent: "streamr-chart"]],
@@ -155,9 +154,9 @@ class DashboardServiceSpec extends Specification {
 
 		then:
 		Permission.findAllByDashboard(dashboard)*.toMap() == [
-			[id: 20, user:"tester", operation: "read"],
-			[id: 21, user: "tester", operation: "write"],
-			[id: 22, user: "tester", operation: "share"],
+			[id: 20, user: "tester@test.com", operation: "read"],
+			[id: 21, user: "tester@test.com", operation: "write"],
+			[id: 22, user: "tester@test.com", operation: "share"],
 		]
 	}
 

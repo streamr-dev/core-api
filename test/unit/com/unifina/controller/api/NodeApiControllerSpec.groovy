@@ -22,8 +22,8 @@ class NodeApiControllerSpec extends Specification {
 	SecUser user1, user2
 
 	def setup() {
-		user1 = new SecUser(username: "user1@streamr.com").save(failOnError: true, validate: false)
-		user2 = new SecUser(username: "user2@streamr.com").save(failOnError: true, validate: false)
+		user1 = new SecUser(email: "user1@streamr.com").save(failOnError: true, validate: false)
+		user2 = new SecUser(email: "user2@streamr.com").save(failOnError: true, validate: false)
 
 		controller.nodeService = Mock(NodeService)
 	}

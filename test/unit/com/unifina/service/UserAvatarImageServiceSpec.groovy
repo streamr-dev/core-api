@@ -23,7 +23,7 @@ class UserAvatarImageServiceSpec extends Specification {
 		service.idGenerator = new FakeIdGenerator()
 
 		user = new SecUser(
-			username: "user@domain.com",
+			email: "user@domain.com",
 			name: "Firstname Lastname",
 			password: "salasana"
 		)

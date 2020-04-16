@@ -29,12 +29,12 @@ class SignalPathServiceSpec extends Specification {
 	CanvasService canvasService
 
 	def setup() {
-		me = new SecUser(username: "me@streamr.com", password: "pw", name: "name")
+		me = new SecUser(email: "me@streamr.com", password: "pw", name: "name")
 		me.save(failOnError: true)
 
 		SecRole role = new SecRole(authority: "ROLE_ADMIN")
 		role.save(failOnError: true)
-		admin = new SecUser(username: "admin@streamr.com", password: "pw", name: "admin")
+		admin = new SecUser(email: "admin@streamr.com", password: "pw", name: "admin")
 		admin.save(failOnError: true)
 		new SecUserSecRole(secUser: admin, secRole: role).save(failOnError: true)
 
@@ -177,7 +177,7 @@ class SignalPathServiceSpec extends Specification {
 
 	void "getUsersOfRunningCanvases() returns canvasId -> user mapping of running canvases"() {
 		SecUser someoneElse = new SecUser(
-			username: "someoneElse@streamr.com",
+			email: "someoneElse@streamr.com",
 		).save(validate: false, failOnError: true)
 
 		setup: "stub running canvases"

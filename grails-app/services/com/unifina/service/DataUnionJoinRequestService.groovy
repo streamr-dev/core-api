@@ -26,9 +26,9 @@ class DataUnionJoinRequestService {
 		log.debug("onApproveJoinRequest: approved JoinRequest for address ${c.memberAddress} to data union ${c.contractAddress}")
 		for (Stream s : findStreams(c)) {
 			if (permissionService.canWrite(c.user, s)) {
-				log.debug(String.format("user %s already has write permission to %s (%s), skipping grant", c.user.username, s.name, s.id))
+				log.debug(String.format("user %s already has write permission to %s (%s), skipping grant", c.user.email, s.name, s.id))
 			} else {
-				log.debug(String.format("granting write permission to %s (%s) for %s", s.name, s.id, c.user.username))
+				log.debug(String.format("granting write permission to %s (%s) for %s", s.name, s.id, c.user.email))
 				permissionService.systemGrant(c.user, s, Permission.Operation.WRITE)
 			}
 		}

@@ -44,7 +44,7 @@ class DataUnionJoinRequestServiceSpec extends BeanMockingSpecification {
 
 		me = new SecUser(
 			name: "First Lastname",
-			username: "first@last.com",
+			email: "first@last.com",
 			password: "salasana",
 		)
 		me.id = 1
@@ -129,7 +129,7 @@ class DataUnionJoinRequestServiceSpec extends BeanMockingSpecification {
 	void "create sets permissions"() {
 		setup:
 		SecUser user = new SecUser(
-			username: "user@domain.com",
+			email: "user@domain.com",
 			name: "Firstname Lastname",
 			password: "salasana"
 		)
@@ -184,7 +184,7 @@ class DataUnionJoinRequestServiceSpec extends BeanMockingSpecification {
 	void "create doesn't set permissions if they already exist"() {
 		setup:
 		SecUser user = new SecUser(
-			username: "user@domain.com",
+			email: "user@domain.com",
 			name: "Firstname Lastname",
 			password: "salasana"
 		)
@@ -239,7 +239,7 @@ class DataUnionJoinRequestServiceSpec extends BeanMockingSpecification {
 	void "findStreams"() {
 		setup:
 		SecUser user = new SecUser(
-			username: "user@domain.com",
+			email: "user@domain.com",
 			name: "Firstname Lastname",
 			password: "salasana"
 		)
@@ -308,7 +308,7 @@ class DataUnionJoinRequestServiceSpec extends BeanMockingSpecification {
 	void "update sets permissions"() {
 		setup:
 		SecUser user = new SecUser(
-			username: "user@domain.com",
+			email: "user@domain.com",
 			name: "Firstname Lastname",
 			password: "salasana"
 		)

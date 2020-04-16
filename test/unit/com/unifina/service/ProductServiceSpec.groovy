@@ -38,7 +38,7 @@ class ProductServiceSpec extends Specification {
 
 	private void setupProduct(Product.State state = Product.State.NOT_DEPLOYED) {
 		SecUser user = new SecUser(
-			username: "user@domain.com",
+			email: "user@domain.com",
 			name: "Firstname Lastname",
 			password: "salasana"
 		)
@@ -63,7 +63,7 @@ class ProductServiceSpec extends Specification {
 
 	private void setupFreeProduct(Product.State state = Product.State.NOT_DEPLOYED) {
 		SecUser user = new SecUser(
-			username: "user@domain.com",
+			email: "user@domain.com",
 			name: "Firstname Lastname",
 			password: "salasana"
 		)
@@ -214,7 +214,7 @@ class ProductServiceSpec extends Specification {
 
 	void "list() delegates to ApiService#list"() {
 		def apiService = service.apiService = Mock(ApiService)
-		def me = new SecUser(username: "me@streamr.com")
+		def me = new SecUser(email: "me@streamr.com")
 
 		when:
 		service.list(new ProductListParams(max: 5), me)
@@ -228,7 +228,7 @@ class ProductServiceSpec extends Specification {
 
 	void "findById() delegates to ApiService#authorizedGetById"() {
 		def apiService = service.apiService = Mock(ApiService)
-		def me = new SecUser(username: "me@streamr.com")
+		def me = new SecUser(email: "me@streamr.com")
 
 		when:
 		service.findById("product-id", me, Permission.Operation.READ)
@@ -315,7 +315,7 @@ class ProductServiceSpec extends Specification {
 			pricePerSecond: 10,
 			minimumSubscriptionInSeconds: 1
 		)
-		def me = new SecUser(username: "me@streamr.com")
+		def me = new SecUser(email: "me@streamr.com")
 
 		when:
 		service.create(validCommand, me)
@@ -337,7 +337,7 @@ class ProductServiceSpec extends Specification {
 			pricePerSecond: 10,
 			minimumSubscriptionInSeconds: 1
 		)
-		def me = new SecUser(username: "me@streamr.com")
+		def me = new SecUser(email: "me@streamr.com")
 
 		when:
 		service.create(validCommand, me)
@@ -361,7 +361,7 @@ class ProductServiceSpec extends Specification {
 			pricePerSecond: 0,
 			minimumSubscriptionInSeconds: 0,
 		)
-		def me = new SecUser(username: "me@streamr.com")
+		def me = new SecUser(email: "me@streamr.com")
 
 		when:
 		service.create(validCommand, me)
@@ -385,7 +385,7 @@ class ProductServiceSpec extends Specification {
 			pricePerSecond: 10,
 			minimumSubscriptionInSeconds: 1
 		)
-		def me = new SecUser(username: "me@streamr.com")
+		def me = new SecUser(email: "me@streamr.com")
 
 		when:
 		service.create(validCommand, me)
@@ -495,7 +495,7 @@ class ProductServiceSpec extends Specification {
 				priceCurrency: Product.Currency.DATA,
 				minimumSubscriptionInSeconds: 1000
 		)
-		def user = new SecUser(username: "me@streamr.com")
+		def user = new SecUser(email: "me@streamr.com")
 
 		when:
 		service.update("product-id", validCommand, user)
@@ -525,7 +525,7 @@ class ProductServiceSpec extends Specification {
 			priceCurrency: Product.Currency.DATA,
 			minimumSubscriptionInSeconds: 0
 		)
-		def user = new SecUser(username: "me@streamr.com")
+		def user = new SecUser(email: "me@streamr.com")
 
 		when:
 		service.update("product-id", validCommand, user)
@@ -574,7 +574,7 @@ class ProductServiceSpec extends Specification {
 				priceCurrency: Product.Currency.DATA,
 				minimumSubscriptionInSeconds: 1000
 		)
-		def user = new SecUser(username: "me@streamr.com")
+		def user = new SecUser(email: "me@streamr.com")
 
 		when:
 		service.update("product-id", validCommand, user)
@@ -604,7 +604,7 @@ class ProductServiceSpec extends Specification {
 			priceCurrency: Product.Currency.DATA,
 			minimumSubscriptionInSeconds: 1000
 		)
-		def user = new SecUser(username: "me@streamr.com")
+		def user = new SecUser(email: "me@streamr.com")
 
 		when:
 		service.update("product-id", validCommand, user)
@@ -1220,7 +1220,7 @@ class ProductServiceSpec extends Specification {
 		service.dataUnionJoinRequestService = Mock(DataUnionJoinRequestService)
 		setupStreams()
 		SecUser user = new SecUser(
-			username: "user@domain.com",
+			email: "user@domain.com",
 			name: "Firstname Lastname",
 			password: "salasana"
 		)
@@ -1258,7 +1258,7 @@ class ProductServiceSpec extends Specification {
 		service.dataUnionJoinRequestService = Mock(DataUnionJoinRequestService)
 		setupStreams()
 		SecUser user = new SecUser(
-			username: "user@domain.com",
+			email: "user@domain.com",
 			name: "Firstname Lastname",
 			password: "salasana"
 		)

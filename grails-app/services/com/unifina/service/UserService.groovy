@@ -86,7 +86,7 @@ class UserService {
 			log.error("error while adding example streams: ", e)
 		}
 
-		log.info("Created user for " + user.username)
+		log.info("Created user for " + user.email)
 
 		return user
 	}
@@ -170,16 +170,16 @@ class UserService {
 		}
 	}
 
-	SecUser getUserFromUsernameAndPassword(String username, String password) throws InvalidEmailAndPasswordException {
-		SecUser user = SecUser.findByUsername(username)
+	SecUser getUserFromEmailAndPassword(String email, String password) throws InvalidEmailAndPasswordException {
+		SecUser user = SecUser.findByEmail(email)
 		if (user == null) {
-			throw new InvalidEmailAndPasswordException("Invalid username or password")
+			throw new InvalidEmailAndPasswordException("Invalid email or password")
 		}
 		String dbHash = user.password
 		if (passwordEncoder.isPasswordValid(dbHash, password)) {
 			return user
 		} else {
-			throw new InvalidEmailAndPasswordException("Invalid username or password")
+			throw new InvalidEmailAndPasswordException("Invalid email or password")
 		}
 	}
 

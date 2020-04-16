@@ -22,7 +22,7 @@ class ExportCSVSpec extends UiChannelMockingSpecification {
 		module.getInput("generated-input-1").setDisplayName("in1")
 		module.getInput("generated-input-2").setDisplayName("in2")
 		module.getInput("generated-input-3").setDisplayName("in3")
-		globals = mockGlobals([:], new SecUser(username: 'user', timezone: "UTC"), Globals.Mode.HISTORICAL)
+		globals = mockGlobals([:], new SecUser(email: "user@foo.bar"), Globals.Mode.HISTORICAL)
 	}
 
 	private boolean testForFileContentAndUiMessages(String s, Map channelMessages) {

@@ -33,7 +33,7 @@ class ProductApiControllerSpec extends Specification {
 		def category = new Category(name: "category")
 		category.id = "category-id"
 		SecUser user = new SecUser(
-			username: "user@domain.com",
+			email: "user@domain.com",
 			name: "Firstname Lastname",
 			password: "salasana"
 		)

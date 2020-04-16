@@ -187,7 +187,7 @@ class CanvasService {
 		if (!canvas) {
 			throw new NotFoundException("Canvas", id)
 		} else if (!hasCanvasPermission(canvas, user, op)) {
-			throw new NotPermittedException(user?.username, "Canvas", id, op.id)
+			throw new NotPermittedException(user?.email, "Canvas", id, op.id)
 		} else {
 			return canvas
 		}
@@ -211,7 +211,7 @@ class CanvasService {
 		if (!canvas) {
 			throw new NotFoundException("Canvas", canvasId)
 		} else if (!hasCanvasPermission(canvas, user, op) && !hasModulePermissionViaDashboard(canvas, moduleId, dashboardId, user, op)) {
-			throw new NotPermittedException(user?.username, "Canvas", canvasId, op.id)
+			throw new NotPermittedException(user?.email, "Canvas", canvasId, op.id)
 		} else {
 			Map canvasMap = canvas.toMap()
 			Map moduleMap = (Map) canvasMap.modules.find { it["hash"].toString() == moduleId?.toString() }

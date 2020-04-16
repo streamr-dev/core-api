@@ -1,14 +1,10 @@
 package com.unifina.signalpath;
 
-import com.streamr.client.protocol.message_layer.StreamMessage;
-import com.unifina.datasource.IStartListener;
-import com.unifina.datasource.IStopListener;
 import com.unifina.domain.data.Stream;
 import com.unifina.domain.security.SecUser;
 import com.unifina.domain.signalpath.Module;
 import com.unifina.service.PermissionService;
 import com.unifina.service.StreamService;
-import com.unifina.signalpath.utils.MessageChainUtil;
 import com.unifina.utils.IdGenerator;
 import com.unifina.utils.MapTraversal;
 import grails.util.Holders;
@@ -205,7 +201,7 @@ public abstract class ModuleWithUI extends AbstractSignalPathModule {
 			// User must have write permission to related Canvas in order to write to the UI channel
 			PermissionService permissionService = Holders.getApplicationContext().getBean(PermissionService.class);
 			if (!permissionService.canWrite(user, stream.getUiChannelCanvas())) {
-				throw new AccessControlException(ModuleWithUI.this.getName() + ": User " + user.getUsername() +
+				throw new AccessControlException(ModuleWithUI.this.getName() + ": Email " + user.getEmail() +
 						" does not have write access to UI Channel Stream " + stream.getId());
 			}
 

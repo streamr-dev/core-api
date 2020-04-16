@@ -21,6 +21,7 @@ class SignupInvite implements Userish {
 		return this
 	}
 
+	// TODO: Remove?
 	// Cannot use @Override because of bug in Grails 2.3 and later
 	String getClassAndId() {
 		return "SignupInvite"+id.toString()

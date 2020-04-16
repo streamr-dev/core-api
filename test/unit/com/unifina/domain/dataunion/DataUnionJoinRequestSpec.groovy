@@ -13,7 +13,7 @@ class DataUnionJoinRequestSpec extends Specification {
     def setup() {
 		me = new SecUser(
 			id: "1",
-			username: "email@address.com",
+			email: "email@address.com",
 			password: "123",
 			name: "Streamr User",
 		)

@@ -13,7 +13,7 @@ class ClockModuleSpec extends Specification {
 	ClockModule module
 
     def setup() {
-		globals = new Globals([:], new SecUser(username: "username"))
+		globals = new Globals([:], new SecUser(email: "username@foo.bar"))
 		globals.time = new Date(0)
 		module = new ClockModule()
 		module.globals = globals

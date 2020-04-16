@@ -9,7 +9,7 @@ class EthereumIntegrationKeyServiceIntegrationSpec extends Specification {
 		setup:
 		String ethAddr = "0xF24197f71fC9b2F4F4c24ecE461fB0Ff7C91FD23"
 		SecUser me = new SecUser(
-			username: "ethereum-ik-spec-1@streamr.com",
+			email: "ethereum-ik-spec-1@streamr.com",
 			name: "me",
 			password: "foo",
 		).save(failOnError: true, validate: true)
@@ -22,7 +22,7 @@ class EthereumIntegrationKeyServiceIntegrationSpec extends Specification {
 		).save(failOnError: true, validate: true)
 
 		SecUser other = new SecUser(
-			username: "ethereum-ik-spec-2@streamr.com",
+			email: "ethereum-ik-spec-2@streamr.com",
 			name: "other",
 			password: "bar",
 		).save(failOnError: true, validate: true)

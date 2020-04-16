@@ -2,7 +2,6 @@ package com.unifina.signalpath.blockchain
 
 import com.unifina.BeanMockingSpecification
 import com.unifina.api.NotPermittedException
-import com.unifina.datasource.RealtimeDataSource
 import com.unifina.domain.security.IntegrationKey
 import com.unifina.domain.security.SecUser
 import com.unifina.security.StringEncryptor
@@ -51,7 +50,7 @@ class EthereumAccountParameterSpec extends BeanMockingSpecification {
 
 	void "parseValue() returns null given existing key id but for wrong service"() {
 		setup:
-		SecUser user = new SecUser(name: "name", username: "name@name.com", password: "pass").save(failOnError: true, validate: false)
+		SecUser user = new SecUser(name: "name", email: "name@name.com", password: "pass").save(failOnError: true, validate: false)
 		IntegrationKey key = new IntegrationKey(name: "key", service: "WRONG", user: user)
 		key.id = "account-1"
 		key.json = "{}"
@@ -63,7 +62,7 @@ class EthereumAccountParameterSpec extends BeanMockingSpecification {
 
 	void "parseValue() returns integration key given existing Ethereum-service key id"() {
 		setup:
-		SecUser user = new SecUser(name: "name", username: "name@name.com", password: "pass").save(failOnError: true, validate: false)
+		SecUser user = new SecUser(name: "name", email: "name@name.com", password: "pass").save(failOnError: true, validate: false)
 		IntegrationKey key = new IntegrationKey(name: "key", service: IntegrationKey.Service.ETHEREUM, user: user, idInService: "0x0")
 		key.id = "account-1"
 		key.json = "{}"
@@ -75,7 +74,7 @@ class EthereumAccountParameterSpec extends BeanMockingSpecification {
 
 	void "getPrivateKey() and getAddress() return values from json, after configuration, if logged in as owner"() {
 		setup:
-		SecUser user = new SecUser(name: "name", username: "name@name.com", password: "pass").save(failOnError: true, validate: false, flush: true)
+		SecUser user = new SecUser(name: "name", email: "name@name.com", password: "pass").save(failOnError: true, validate: false, flush: true)
 		IntegrationKey key = new IntegrationKey(name: "key", service: IntegrationKey.Service.ETHEREUM, user: user, idInService: "0xffff")
 
 		key.id = "account-1"
@@ -93,7 +92,7 @@ class EthereumAccountParameterSpec extends BeanMockingSpecification {
 
 	void "getAddress() return values from json, after configuration, even if not logged in as user"() {
 		setup:
-		SecUser user = new SecUser(name: "name", username: "name@name.com", password: "pass").save(failOnError: true, validate: false, flush: true)
+		SecUser user = new SecUser(name: "name", email: "name@name.com", password: "pass").save(failOnError: true, validate: false, flush: true)
 		IntegrationKey key = new IntegrationKey(name: "key", service: IntegrationKey.Service.ETHEREUM, user: user, idInService: "0xffff")
 
 		key.id = "account-1"
@@ -112,7 +111,7 @@ class EthereumAccountParameterSpec extends BeanMockingSpecification {
 
 	void "getPrivateKey() throws exception, after configuration, if not logged in as user"() {
 		setup:
-		SecUser user = new SecUser(name: "name", username: "name@name.com", password: "pass").save(failOnError: true, validate: false, flush: true)
+		SecUser user = new SecUser(name: "name", email: "name@name.com", password: "pass").save(failOnError: true, validate: false, flush: true)
 		IntegrationKey key = new IntegrationKey(name: "key", service: IntegrationKey.Service.ETHEREUM, user: user, idInService: 0xffff)
 
 		key.id = "account-1"
@@ -143,8 +142,8 @@ class EthereumAccountParameterSpec extends BeanMockingSpecification {
 
 	void "getPossibleValues() returns all Ethereum-service keys of current logged in user"() {
 		setup:
-		SecUser me = new SecUser(username: "me@me.com")
-		SecUser other = new SecUser(username: "other@other.com")
+		SecUser me = new SecUser(email: "me@me.com")
+		SecUser other = new SecUser(email: "other@other.com")
 		[me, other]*.save(failOnError: true, validate: false)
 
 		IntegrationKey k1 = new IntegrationKey(name: "key #1", json: '{}', service: IntegrationKey.Service.ETHEREUM, user: me)
@@ -168,8 +167,8 @@ class EthereumAccountParameterSpec extends BeanMockingSpecification {
 
 	void "getPossibleValues() contains selected key even if not owner"() {
 		setup:
-		SecUser me = new SecUser(username: "me@me.com")
-		SecUser other = new SecUser(username: "other@other.com")
+		SecUser me = new SecUser(email: "me@me.com")
+		SecUser other = new SecUser(email: "other@other.com")
 		[me, other]*.save(failOnError: true, validate: false)
 
 		IntegrationKey otherKey = new IntegrationKey(name: "key #4", json: '{}', service: IntegrationKey.Service.ETHEREUM, user: other)

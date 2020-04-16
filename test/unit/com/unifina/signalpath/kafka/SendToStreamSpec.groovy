@@ -29,7 +29,7 @@ class SendToStreamSpec extends BeanMockingSpecification {
 	StreamService streamService
 
     def setup() {
-		def user = new SecUser(name: "test user", username: 'test user')
+		def user = new SecUser(name: "test user", email: 'test@user.com')
 		user.save(failOnError: true, validate: false)
 
 		StreamrClientService streamrClientService = mockBean(StreamrClientService, Mock(StreamrClientService))

@@ -13,7 +13,7 @@ class FreeSubscription extends Subscription {
 
 	@Override
 	Map toMapInherited() {
-		return [user: user.username]
+		return [user: user.email]
 	}
 
 	@Override

@@ -103,8 +103,8 @@ class ProductService {
 		return relatedProducts
 	}
 
-	void removeUsersProducts(String username) {
-		def user = SecUser.findByUsername(username)
+	void removeUsersProducts(String email) {
+		def user = SecUser.findByEmail(email)
 		def all = Product.findAllByOwner(user)
 		all.toArray().each { Product product ->
 			product.streams.toArray().each { Stream stream ->

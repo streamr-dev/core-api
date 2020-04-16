@@ -22,7 +22,7 @@ class UserApiControllerSpec extends ControllerSpecification {
 	def setup() {
 		me = new SecUser(
 			name: "me",
-			username: "me@too.com",
+			email: "me@too.com",
 			enabled: true,
 			password: passwordEncoder.encodePassword("foobar123!"),
 		)
@@ -45,7 +45,7 @@ class UserApiControllerSpec extends ControllerSpecification {
 		authenticatedAs(me) { controller.getUserInfo() }
 		then:
 		response.json.name == me.name
-		response.json.username == me.username
+		response.json.username == me.email
 		!response.json.hasProperty("password")
 		!response.json.hasProperty("id")
 	}
@@ -110,17 +110,17 @@ class UserApiControllerSpec extends ControllerSpecification {
 		}
 
 		then:
-		SecUser.get(1).username == "me@too.com"
+		SecUser.get(1).email == "me@too.com"
 		response.json.username == "me@too.com"
 		SecUser.get(1).enabled
 	}
 
 	void "submitting valid content in user password change form must change user password"() {
 		when: "password change form is submitted"
-		def cmd = new ChangePasswordCommand(username: me.username, currentpassword: "foobar123!", password: "barbar123!", password2: "barbar123!")
+		def cmd = new ChangePasswordCommand(email: me.email, currentpassword: "foobar123!", password: "barbar123!", password2: "barbar123!")
 		cmd.passwordEncoder = passwordEncoder
 		cmd.userService = new UserService() {
-			SecUser getUserFromUsernameAndPassword(String username, String password) throws InvalidEmailAndPasswordException {
+			SecUser getUserFromEmailAndPassword(String email, String password) throws InvalidEmailAndPasswordException {
 				return me
 			}
 		}
@@ -173,7 +173,7 @@ class UserApiControllerSpec extends ControllerSpecification {
 
 	void "uploadAvatarImage() returns 200 and renders user"() {
 		controller.userAvatarImageService = Mock(UserAvatarImageService)
-		request.apiUser = new SecUser(username: "foo@ƒoo.bar")
+		request.apiUser = new SecUser(email: "foo@ƒoo.bar")
 		request.method = "POST"
 		request.requestURI = "/api/v1/users/me/image"
 		def bytes = new byte[16]
@@ -186,15 +186,15 @@ class UserApiControllerSpec extends ControllerSpecification {
 
 		then:
 		response.status == 200
-		response.json.username == request.apiUser.username
+		response.json.username == request.apiUser.email
 	}
 
 	void "submitting an invalid current password won't let the password be changed"() {
 		when: "password change form is submitted with invalid password"
-		def cmd = new ChangePasswordCommand(username: me.username, currentpassword: "invalid", password: "barbar123!", password2: "barbar123!")
+		def cmd = new ChangePasswordCommand(email: me.email, currentpassword: "invalid", password: "barbar123!", password2: "barbar123!")
 		cmd.passwordEncoder = passwordEncoder
 		cmd.userService = new UserService() {
-			SecUser getUserFromUsernameAndPassword(String username, String password) throws InvalidEmailAndPasswordException {
+			SecUser getUserFromEmailAndPassword(String email, String password) throws InvalidEmailAndPasswordException {
 				throw new InvalidEmailAndPasswordException("mocked: invalid current password!")
 			}
 		}
@@ -213,10 +213,10 @@ class UserApiControllerSpec extends ControllerSpecification {
 
 	void "submitting a too short new password won't let the password be changed"() {
 		when: "password change form is submitted with invalid new password"
-		def cmd = new ChangePasswordCommand(username: me.username, currentpassword: "foobar", password: "asd", password2: "asd")
+		def cmd = new ChangePasswordCommand(email: me.email, currentpassword: "foobar", password: "asd", password2: "asd")
 		cmd.passwordEncoder = passwordEncoder
 		cmd.userService = new UserService() {
-			SecUser getUserFromUsernameAndPassword(String username, String password) throws InvalidEmailAndPasswordException {
+			SecUser getUserFromEmailAndPassword(String email, String password) throws InvalidEmailAndPasswordException {
 				return me
 			}
 		}
@@ -238,7 +238,7 @@ class UserApiControllerSpec extends ControllerSpecification {
 		def cmd = new ChangePasswordCommand(currentpassword: "foobar123", password: "asd", password2: "asd")
 		cmd.passwordEncoder = passwordEncoder
 		cmd.userService = new UserService() {
-			SecUser getUserFromUsernameAndPassword(String username, String password) throws InvalidEmailAndPasswordException {
+			SecUser getUserFromEmailAndPassword(String email, String password) throws InvalidEmailAndPasswordException {
 				return me
 			}
 		}

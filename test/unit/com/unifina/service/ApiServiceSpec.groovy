@@ -25,7 +25,7 @@ class ApiServiceSpec extends Specification {
 	void "list() returns streams with share permission"() {
 		def permissionService = service.permissionService = Mock(PermissionService)
 		ListParams listParams = new DashboardListParams(operation: Permission.Operation.SHARE, publicAccess: true)
-		SecUser me = new SecUser(username: "me@me.com")
+		SecUser me = new SecUser(email: "me@me.com")
 
 		when:
 		def list = service.list(Dashboard, listParams, me)
@@ -40,7 +40,7 @@ class ApiServiceSpec extends Specification {
 	void "list() delegates to permissionService#get"() {
 		def permissionService = service.permissionService = Mock(PermissionService)
 
-		SecUser me = new SecUser(username: "me@me.com")
+		SecUser me = new SecUser(email: "me@me.com")
 		ListParams listParams = new DashboardListParams(publicAccess: true)
 
 		when:
@@ -56,7 +56,7 @@ class ApiServiceSpec extends Specification {
 	void "list() passes user as null to permissionService#get if grantedAccess=false"() {
 		def permissionService = service.permissionService = Mock(PermissionService)
 
-		SecUser me = new SecUser(username: "me@me.com")
+		SecUser me = new SecUser(email: "me@me.com")
 		ListParams listParams = new DashboardListParams(publicAccess: true, grantedAccess: false)
 
 		when:
@@ -69,7 +69,7 @@ class ApiServiceSpec extends Specification {
 	void "list() invokes listParams#validate and listParams#createListCriteria and passes returned closure to permissionService#get"() {
 		def permissionService = service.permissionService = Mock(PermissionService)
 
-		SecUser me = new SecUser(username: "me@me.com")
+		SecUser me = new SecUser(email: "me@me.com")
 		ListParams listParams = Mock(ListParams)
 
 		when:
@@ -82,7 +82,7 @@ class ApiServiceSpec extends Specification {
 	}
 
 	void "list() throws ValidationException if validation of listParams fails"() {
-		SecUser me = new SecUser(username: "me@me.com")
+		SecUser me = new SecUser(email: "me@me.com")
 		ListParams listParams = new DashboardListParams(order: null)
 
 		when:
@@ -134,7 +134,7 @@ class ApiServiceSpec extends Specification {
 	}
 
 	void "authorizedGetById() throws NotFoundException if domain object cannot be found"() {
-		SecUser me = new SecUser(username: "me@me.com")
+		SecUser me = new SecUser(email: "me@me.com")
 
 		when:
 		service.authorizedGetById(Dashboard, "dashboard-id", me, Permission.Operation.WRITE)
@@ -151,7 +151,7 @@ class ApiServiceSpec extends Specification {
 	}
 
 	void "authorizedGetById() throws NotPermittedException if user does not have required permission"() {
-		SecUser me = new SecUser(username: "me@me.com")
+		SecUser me = new SecUser(email: "me@me.com")
 		Dashboard dashboard = new Dashboard(name: "dashboard")
 		dashboard.id = "dashboard-id"
 		dashboard.save(failOnError: true)
@@ -167,7 +167,7 @@ class ApiServiceSpec extends Specification {
 	}
 
 	void "authorizedGetById() returns domain object if it exists and user has required permission"() {
-		SecUser me = new SecUser(username: "me@me.com")
+		SecUser me = new SecUser(email: "me@me.com")
 		Dashboard dashboard = new Dashboard(name: "dashboard")
 		dashboard.id = "dashboard-id"
 		dashboard.save(failOnError: true)

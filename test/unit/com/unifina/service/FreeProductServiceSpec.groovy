@@ -19,7 +19,7 @@ class FreeProductServiceSpec extends Specification {
 
 	void setup() {
 		SecUser user = new SecUser(
-			username: "user@domain.com",
+			email: "user@domain.com",
 			name: "Firstname Lastname",
 			password: "salasana"
 		)

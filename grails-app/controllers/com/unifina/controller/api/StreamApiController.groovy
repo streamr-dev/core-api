@@ -216,7 +216,7 @@ class StreamApiController {
 		if (stream == null) {
 			throw new NotFoundException("Stream", id)
 		} else if (!permissionService.check(request.apiUser, stream, op)) {
-			throw new NotPermittedException(request.apiUser?.username, "Stream", id, op.id)
+			throw new NotPermittedException(request.apiUser?.email, "Stream", id, op.id)
 		} else {
 			action.call(stream)
 		}

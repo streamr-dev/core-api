@@ -43,7 +43,7 @@ class RelatedProductsControllerSpec extends ControllerSpecification {
 	def setup() {
 		controller.productService = Mock(ProductService)
 		me = new SecUser(
-			username: "username: api@user.com",
+			email: "api@user.com",
 			name: "Regular API user",
 			password: "xxx"
 		)
@@ -53,7 +53,7 @@ class RelatedProductsControllerSpec extends ControllerSpecification {
 
 		// u1 is the user who owns the product p1 used to search for related products
 		u1 = new SecUser(
-			username: "username: masa@hypätääneka.com",
+			email: "masa@hypätääneka.com",
 			name: "Matti Nykänen",
 			password: "xxx"
 		)
@@ -61,7 +61,7 @@ class RelatedProductsControllerSpec extends ControllerSpecification {
 		u1.save(validate: false, failOnError: true)
 
 		u2 = new SecUser(
-			username: "username: marilyn@monroe.com",
+			email: "marilyn@monroe.com",
 			name: "Marilyn Monroe",
 			password: "xxx"
 		)

@@ -40,7 +40,7 @@ class DataUnionSecretApiController {
 			throw new BadRequestException("Data Union address is not of a data union smart contract")
 		}
 		if (!ethereumService.hasEthereumAddress(user, adminAddress)) {
-			throw new NotPermittedException(user?.username, "data union", contractAddress, "manage")
+			throw new NotPermittedException(user?.email, "data union", contractAddress, "manage")
 		}
 	}
 

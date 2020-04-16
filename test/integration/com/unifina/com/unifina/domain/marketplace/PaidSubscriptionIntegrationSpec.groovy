@@ -14,7 +14,7 @@ class PaidSubscriptionIntegrationSpec extends IntegrationSpec {
 
 	void setup() {
 		def owner = new SecUser(
-			username: "subscription-service-integration-spec-1@streamr.com",
+			email: "subscription-service-integration-spec-1@streamr.com",
 			password: "xxx",
 			name: "Subscription Service Integration Spec 1",
 		).save(failOnError: true)
@@ -36,7 +36,7 @@ class PaidSubscriptionIntegrationSpec extends IntegrationSpec {
 	void "fetchUser() is case-insensitive w.r.t. ethereum addresses [database property]"() {
 		setup:
 		def subscriber = new SecUser(
-			username: "subscription-service-integration-spec-2@streamr.com",
+			email: "subscription-service-integration-spec-2@streamr.com",
 			password: "xxx",
 			name: "Subscription Service Integration Spec 2",
 		).save(failOnError: true)

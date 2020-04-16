@@ -5,7 +5,6 @@ import com.unifina.domain.signalpath.Canvas
 import com.unifina.domain.task.Task
 import com.unifina.service.CanvasService
 import grails.test.mixin.Mock
-import grails.test.mixin.support.GrailsUnitTestMixin
 import spock.lang.Specification
 
 @Mock([Canvas, SecUser, Task])
@@ -19,7 +18,7 @@ class CanvasStartTaskSpec extends Specification {
 		canvasService = Mock(CanvasService)
 		canvas = new Canvas(state: "stopped")
 		canvas.save(validate: false)
-		user = new SecUser(username: "user@streamr.com")
+		user = new SecUser(email: "user@streamr.com")
 		user.save(validate: false, failOnError: true)
     }
 

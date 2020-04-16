@@ -15,7 +15,7 @@ import spock.lang.Specification
 @Mock([SignupInvite, SignupCodeService, RegistrationCode, SecUser, Key, SecRole, SecUserSecRole, ModulePackage, Permission, UserService])
 class AuthApiControllerSpec extends Specification {
 
-	String username = "user@invite.to"
+	String email = "user@invite.to"
 	PasswordEncoder passwordEncoder = new UnitTestPasswordEncoder()
 
 	def messageSource = [
@@ -51,7 +51,7 @@ class AuthApiControllerSpec extends Specification {
 
 	void "signup with email should create and send invite code"() {
 		when: "signing up with email"
-		params.username = username
+		params.username = email
 		request.method = 'POST'
 		controller.signup()
 		then: "should create invite code"
@@ -60,7 +60,7 @@ class AuthApiControllerSpec extends Specification {
 		then: "signup email should be sent"
 		controller.mailService.mailSent
 		controller.mailService.html.contains("complete")
-		response.json.username == username
+		response.json.email == email
 	}
 
 	void "trying to register without invite code should fail"() {
@@ -75,7 +75,7 @@ class AuthApiControllerSpec extends Specification {
 
 	void "reusing a used invite should fail"() {
 		when: "going to register page with a used invite code"
-		def inv = controller.signupCodeService.create(username)
+		def inv = controller.signupCodeService.create(email)
 		inv.sent = true
 		inv.used = true
 		inv.save()
@@ -90,7 +90,7 @@ class AuthApiControllerSpec extends Specification {
 
 	void "using an unsent invite should fail"() {
 		when: "going to register page with an unsent invite code"
-		def inv = controller.signupCodeService.create(username)
+		def inv = controller.signupCodeService.create(email)
 		params.invite = inv.code
 		request.method = 'POST'
 		controller.register()
@@ -102,11 +102,11 @@ class AuthApiControllerSpec extends Specification {
 
 	void "submitting registration without accepting ToS should fail"() {
 		when: "not accepting ToS"
-		def inv = controller.signupCodeService.create(username)
+		def inv = controller.signupCodeService.create(email)
 		inv.sent = true
 		inv.save()
 		params.invite = inv.code
-		params.username = username
+		params.username = email
 		params.name = "Name"
 		params.password = 'fooBar123!'
 		params.password2 = 'fooBar123!'
@@ -120,11 +120,11 @@ class AuthApiControllerSpec extends Specification {
 
 	void "submitting registration without matching passwords should fail"() {
 		when: "submitting unmatched passwords"
-		def inv = controller.signupCodeService.create(username)
+		def inv = controller.signupCodeService.create(email)
 		inv.sent = true
 		inv.save()
 		params.invite = inv.code
-		params.username = username
+		params.username = email
 		params.name = "Name"
 		params.password = 'fooBar123!'
 		params.password2 = 'fooBar234!'
@@ -139,11 +139,11 @@ class AuthApiControllerSpec extends Specification {
 
 	void "submitting registration without name should fail"() {
 		when: "submitting without name"
-		def inv = controller.signupCodeService.create(username)
+		def inv = controller.signupCodeService.create(email)
 		inv.sent = true
 		inv.save()
 		params.invite = inv.code
-		params.username = username
+		params.username = email
 		params.password = 'fooBar123!'
 		params.password2 = 'fooBar123!'
 		params.tosConfirmed = true
@@ -157,11 +157,11 @@ class AuthApiControllerSpec extends Specification {
 
 	void "submitting registration with weak password should fail"() {
 		when: "weak password"
-		def inv = controller.signupCodeService.create(username)
+		def inv = controller.signupCodeService.create(email)
 		inv.sent = true
 		inv.save()
 		params.invite = inv.code
-		params.username = username
+		params.username = email
 		params.name = "Name"
 		params.password = 'weak'
 		params.password2 = 'weak'
@@ -175,21 +175,21 @@ class AuthApiControllerSpec extends Specification {
 	}
 
 	void "submitting registration for existing username fails with 400 status"() {
-		when: "username already exists"
+		when: "email already exists"
 		def user = new SecUser(
 			id: 1,
-			username: "test@test.com",
+			email: "test@test.com",
 			name: "Test User",
 			password: passwordEncoder.encodePassword("foobar123!"),
 		)
 		user.save(validate: false)
-		def inv = controller.signupCodeService.create(user.username)
+		def inv = controller.signupCodeService.create(user.email)
 		inv.sent = true
 		inv.save()
 
 		params.invite = inv.code
 		params.name = "Name"
-		params.username = user.username
+		params.username = user.email
 		params.password = 'fooBar123!'
 		params.password2 = 'fooBar123!'
 		params.tosConfirmed = true
@@ -222,12 +222,12 @@ class AuthApiControllerSpec extends Specification {
 		}
 
 		when: "registering with valid invite code"
-		def inv = controller.signupCodeService.create(username)
+		def inv = controller.signupCodeService.create(email)
 		inv.sent = true
 		inv.save()
 		params.invite = inv.code
 		params.name = "Name"
-		params.username = username
+		params.username = email
 		params.password = 'fooBar123!'
 		params.password2 = 'fooBar123!'
 		params.tosConfirmed = true
@@ -235,8 +235,7 @@ class AuthApiControllerSpec extends Specification {
 		controller.register()
 
 		then: "should create user"
-		SecUser.findByUsername(username)
-		SecUser.findByUsername(username).password == 'fooBar123!-encoded'
+		SecUser.findByEmail(email).password == 'fooBar123!-encoded'
 		response.status == 200
 		response.json.name == "Name"
 		response.json.username == "user@invite.to"
@@ -260,7 +259,7 @@ class AuthApiControllerSpec extends Specification {
 	void "forgotPassword sends email and returns emailSent=true if the user exists"() {
 		EmailCommand cmd = new EmailCommand()
 		SecUser me = new SecUser()
-		me.username = "test@streamr.com"
+		me.email = "test@streamr.com"
 		me.save(validate: false)
 
 		when: "requested new password"

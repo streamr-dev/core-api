@@ -41,18 +41,18 @@ class ProductApiController {
 			List<ProductService.StaleProduct> ownersProducts = entry.getValue()
 			if (!owner.isEthereumUser()) {
 				if (dryRun) {
-					log.info(String.format("dry run: sending stale product email to %s", owner.username))
+					log.info(String.format("dry run: sending stale product email to %s", owner.email))
 				} else {
-					log.info(String.format("sending stale product email to %s", owner.username))
+					log.info(String.format("sending stale product email to %s", owner.email))
 					try {
 						mailService.sendMail {
 							from grailsApplication.config.unifina.email.sender
-							to owner.username
+							to owner.email
 							subject "Problem with your products on Streamr Marketplace"
 							html g.render(template: "/emails/email_stale_product_notification", model: [user: owner, staleProducts: ownersProducts])
 						}
 					} catch (Exception e) {
-						log.error(String.format("send stale product email to %s failed: ", owner.username), e)
+						log.error(String.format("send stale product email to %s failed: ", owner.email), e)
 					}
 				}
 			}

@@ -16,7 +16,7 @@ class LabelSpec extends UiChannelMockingSpecification {
 
 	def setup() {
 		mockServicesForUiChannels()
-		SecUser user = new SecUser(username: 'user').save(failOnError: true, validate: false)
+		SecUser user = new SecUser(email: "user@foo.bar").save(failOnError: true, validate: false)
 		module = setupModule(new Label(), [uiChannel: [id: "labelChannel"]], new SignalPath(true), mockGlobals([:], user))
 	}
 

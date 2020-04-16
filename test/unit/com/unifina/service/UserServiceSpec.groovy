@@ -47,7 +47,7 @@ class UserServiceSpec extends Specification {
 	def "the user is created when called"() {
 		when:
 		createData()
-		SecUser user = service.createUser([username: "test@test.com", name:"test", password: "test", enabled:true, accountLocked:false, passwordExpired:false])
+		SecUser user = service.createUser([email: "test@test.com", name:"test", password: "test", enabled:true, accountLocked:false, passwordExpired:false])
 
 		then:
 		SecUser.count() == 1
@@ -57,7 +57,7 @@ class UserServiceSpec extends Specification {
 	def "default API key is created for user"() {
 		when:
 		createData()
-		SecUser user = service.createUser([username: "test@test.com", name:"test", password: "test", enabled:true, accountLocked:false, passwordExpired:false])
+		SecUser user = service.createUser([email: "test@test.com", name:"test", password: "test", enabled:true, accountLocked:false, passwordExpired:false])
 
 		then:
 		user.getKeys().size() == 1
@@ -67,7 +67,7 @@ class UserServiceSpec extends Specification {
 		when:
 		createData()
 		SecUser user = service.createUser([
-			username       : "test@test.com",
+			email       : "test@test.com",
 			name           : "test",
 			password       : "test",
 			enabled        : true,
@@ -97,46 +97,46 @@ class UserServiceSpec extends Specification {
 			this.getClass().name, 'password', 'rejectedPassword', false, null, ['null', 'null', 'rejectedPassword'].toArray(), null
 		))
 		errorList.add(new FieldError(
-			this.getClass().name, 'username', 'rejectedUsername', false, null, ['null', 'null', 'rejectedUsername'].toArray(), null
+			this.getClass().name, 'email', 'rejectedEmail', false, null, ['null', 'null', 'rejectedEmail'].toArray(), null
 		))
 		checkedErrors = service.checkErrors(errorList)
 
-		then: "the rejected password is hidden but the rejected username is not"
-		checkedErrors.get(0).getField() == "username"
-		checkedErrors.get(0).getRejectedValue() == "rejectedUsername"
-		checkedErrors.get(0).getArguments() == ['null', 'null', 'rejectedUsername']
+		then: "the rejected password is hidden but the rejected email is not"
+		checkedErrors.get(0).getField() == "email"
+		checkedErrors.get(0).getRejectedValue() == "rejectedEmail"
+		checkedErrors.get(0).getArguments() == ['null', 'null', 'rejectedEmail']
 
 		checkedErrors.get(1).getField() == "password"
 		checkedErrors.get(1).getRejectedValue() == "***"
 		checkedErrors.get(1).getArguments() == ['null', 'null', '***']
 	}
 
-	def "should find user from both username and password"() {
-		String username = "username"
+	def "should find user from both email and password"() {
+		String email = "username@foo.bar"
 		String password = "password"
 		String hashedPassword = service.passwordEncoder.encodePassword(password)
-		new SecUser(username: username, password: hashedPassword).save(failOnError: true, validate: false)
+		new SecUser(email: email, password: hashedPassword).save(failOnError: true, validate: false)
 		when:
-		SecUser retrievedUser = service.getUserFromUsernameAndPassword(username, password)
+		SecUser retrievedUser = service.getUserFromEmailAndPassword(email, password)
 		then:
 		retrievedUser != null
-		retrievedUser.username == username
+		retrievedUser.email == email
 	}
 
 	def "should throw if wrong password"() {
-		String username = "username"
+		String email = "username@foo.bar"
 		String password = "password"
 		String wrongPassword = "wrong"
 		String hashedPassword = service.passwordEncoder.encodePassword(password)
-		new SecUser(username: username, password: hashedPassword).save(failOnError: true, validate: false)
+		new SecUser(email: email, password: hashedPassword).save(failOnError: true, validate: false)
 		when:
-		service.getUserFromUsernameAndPassword(username, wrongPassword)
+		service.getUserFromEmailAndPassword(email, wrongPassword)
 		then:
 		thrown(InvalidEmailAndPasswordException)
 	}
 
 	def "should find user from api key"() {
-		SecUser user = new SecUser(username: "username", password: "password").save(failOnError: true, validate: false)
+		SecUser user = new SecUser(email: "username@foo.bar", password: "password").save(failOnError: true, validate: false)
 		Key key = new Key(name: "key", user: user)
 		key.id = "myApiKey"
 		key.save(failOnError: true, validate: true)
@@ -145,7 +145,7 @@ class UserServiceSpec extends Specification {
 		SecUser retrievedUser = (SecUser) service.getUserishFromApiKey(key.id)
 		then:
 		retrievedUser != null
-		retrievedUser.username == user.username
+		retrievedUser.email == user.email
 	}
 
 	def "should find anonymous key from api key"() {

@@ -44,7 +44,7 @@ class LoginApiController {
 		if (cmd.hasErrors()) {
 			throw new InvalidArgumentsException(cmd.errors.getFieldErrors().collect {it.field+" expected."}.join(" "))
 		}
-		SecUser user = userService.getUserFromUsernameAndPassword(cmd.email, cmd.password)
+		SecUser user = userService.getUserFromEmailAndPassword(cmd.email, cmd.password)
 		assertEnabled(user)
 		SessionToken token = sessionService.generateToken(user)
 		render(token.toMap() as JSON)

@@ -46,7 +46,7 @@ class PermissionApiController {
 		if (!res) {
 			throw new NotFoundException(resourceClass.simpleName, resourceId.toString())
 		} else if (requireSharePermission && !permissionService.canShare(request.apiUser ?: request.apiKey, res)) {
-			throw new NotPermittedException(request?.apiUser?.username, resourceClass.simpleName, resourceId.toString(), "share")
+			throw new NotPermittedException(request?.apiUser?.email, resourceClass.simpleName, resourceId.toString(), "share")
 		} else {
 			action(res)
 		}
@@ -144,19 +144,19 @@ class PermissionApiController {
 			}
 		} else {
 			// incoming "username" is either SecUser.username or SignupInvite.username (possibly of a not yet created SignupInvite)
-			def user = SecUser.findByUsername(username)
+			def user = SecUser.findByEmail(username)
 
 			if (user) {
 				if (op == Operation.READ) { // quick fix for sending only one email
-					if (EmailValidator.validate(user.username)) {
-						String sharer = request.apiUser?.username ?: "Streamr user"
+					if (EmailValidator.validate(user.email)) {
+						String sharer = request.apiUser?.email ?: "Streamr user"
 						String resource = resource(params.resourceClass)
 						String name = resourceName(params.resourceClass, params.resourceId)
 						String emailSubject = emailSubject(sharer, resource)
 						String link = link(params.resourceClass, params.resourceId)
 						mailService.sendMail {
 							from grailsApplication.config.unifina.email.sender
-							to user.username
+							to user.email
 							subject emailSubject
 							html g.render(
 								template: "/emails/email_share_resource",
@@ -178,7 +178,7 @@ class PermissionApiController {
 					def invite = SignupInvite.findByUsername(username)
 					if (!invite) {
 						invite = signupCodeService.create(username)
-						String sharer = request.apiUser?.username ?: "Streamr user"
+						String sharer = request.apiUser?.email ?: "Streamr user"
 						String resource = resource(params.resourceClass)
 						String name = resourceName(params.resourceClass, params.resourceId)
 						String emailSubject = emailSubject(sharer, resource)

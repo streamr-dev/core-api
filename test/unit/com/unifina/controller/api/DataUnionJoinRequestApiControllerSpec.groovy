@@ -18,7 +18,7 @@ class DataUnionJoinRequestApiControllerSpec extends Specification {
 	final String validID = "L-TvrBkyQTS_JK1ABHFEZAaZ3FHq7-TPqMXe9JNz1x6g"
 
     def setup() {
-		me = new SecUser(id: 1, name: "firstname lastname", username: "firstname.lastname@address.com", password: "salasana")
+		me = new SecUser(id: 1, name: "firstname lastname", email: "firstname.lastname@address.com", password: "salasana")
 		me.save(validate: true, failOnError: true)
 		controller.dataUnionJoinRequestService = Mock(DataUnionJoinRequestService)
 		controller.ethereumService = Mock(EthereumService)

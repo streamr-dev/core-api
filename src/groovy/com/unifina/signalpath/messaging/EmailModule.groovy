@@ -38,7 +38,7 @@ class EmailModule extends ModuleWithSideEffects {
 		if (isNotTooOften(emailInterval, globals.time.getTime(), prevTime)) {
 			prevTime = globals.time.getTime()
 			emailSent = true
-			String messageTo = SecUser.get(globals.userId).username
+			String messageTo = SecUser.get(globals.userId).email
 			def mailService = Holders.grailsApplication.getMainContext().getBean("mailService")
 			String messageBody = getMessageBody()
 			mailService.sendMail {

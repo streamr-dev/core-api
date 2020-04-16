@@ -40,7 +40,7 @@ class UserApiController {
 		SecUser user = loggedInUser()
 		user.password = passwordEncoder.encodePassword(cmd.password)
 		user.save(flush: true, failOnError: true)
-		log.info("User $user.username changed password!")
+		log.info("User $user.email changed password!")
 		render(status: 204, body: "")
 	}
 
@@ -99,17 +99,17 @@ class ChangePasswordCommand {
 	PasswordEncoder passwordEncoder
 	def userService
 
-	String username
+	String email
 	String currentpassword
 	String password
 	String password2
 
 	static constraints = {
-		username(blank: false)
+		email(blank: false)
 		currentpassword validator: {String pwd, ChangePasswordCommand cmd->
 			SecUser user
 			try {
-				user = cmd.userService.getUserFromUsernameAndPassword(cmd.username, cmd.currentpassword)
+				user = cmd.userService.getUserFromEmailAndPassword(cmd.email, cmd.currentpassword)
 			} catch (InvalidEmailAndPasswordException e) {
 				return false
 			}

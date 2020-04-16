@@ -18,7 +18,7 @@ class GeographicalMapModuleSpec extends UiChannelMockingSpecification {
 	SecUser user
 	def setup() {
 		mockServicesForUiChannels()
-		user = new SecUser(username: 'user').save(failOnError: true, validate: false)
+		user = new SecUser(email: "user@foo.bar").save(failOnError: true, validate: false)
 	}
 
 	Map inputValues = [

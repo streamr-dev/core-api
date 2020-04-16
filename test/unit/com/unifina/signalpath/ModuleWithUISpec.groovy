@@ -23,8 +23,8 @@ class ModuleWithUISpec extends ModuleTestingSpecification {
 	PermissionService permissionService
 	StreamService streamService
 	StreamrClient streamrClient
-	SecUser permittedUser = new SecUser(username: 'permittedUser')
-	SecUser nonPermitterUser = new SecUser(username: 'nonPermittedUser')
+	SecUser permittedUser = new SecUser(email: 'permittedUser@foo.bar')
+	SecUser nonPermitterUser = new SecUser(email: 'nonPermittedUser@foo.bar')
 
 	def setup() {
 		canvas = new Canvas()

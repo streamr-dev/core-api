@@ -26,7 +26,7 @@ class DataUnionJoinRequestServiceIntegrationSpec extends Specification {
 	void setup() {
 		me = new SecUser(
 			name: "First Lastname",
-			username: "first@last.com",
+			email: "first@last.com",
 			password: "salasana",
 		)
 		me.save(validate: true, failOnError: true)

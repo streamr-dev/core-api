@@ -18,7 +18,7 @@ class ListAsTableSpec extends UiChannelMockingSpecification {
 		mockServicesForUiChannels()
 		module = setupModule(new ListAsTable(), [
 			uiChannel: [id: "table"],
-		], new SignalPath(true), mockGlobals([:], new SecUser(username: 'user').save(failOnError: true, validate: false)))
+		], new SignalPath(true), mockGlobals([:], new SecUser(email: "user@foo.bar").save(failOnError: true, validate: false)))
 	}
 
 	def "initial headers are set correctly"() {

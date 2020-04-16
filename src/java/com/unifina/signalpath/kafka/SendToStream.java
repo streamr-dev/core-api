@@ -178,7 +178,7 @@ public class SendToStream extends ModuleWithSideEffects {
 	private void checkWriteAccess(Stream stream) {
 		SecUser user = SecUser.getViaJava(getGlobals().getUserId());
 		if (!Holders.getApplicationContext().getBean(PermissionService.class).canWrite(user, stream)) {
-			throw new AccessControlException(this.getName() + ": User " + user.getUsername() +
+			throw new AccessControlException(this.getName() + ": Email " + user.getEmail() +
 				" does not have write access to Stream " + stream.getName());
 		}
 	}

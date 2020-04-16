@@ -64,11 +64,9 @@ class LoginApiControllerSpec extends ControllerSpecification {
 		Challenge challenge = new Challenge("id", "challenge", challengeService.TTL_SECONDS)
 
 		SecUser user = new SecUser(
-			username: "username",
+			email: "username@domain.com",
 			password: "password",
 			name: "name",
-			email: "email@email.com",
-			timezone: "timezone"
 		).save(failOnError: true, validate: false)
 
 		SessionToken token = new SessionToken(64, user, 3)
@@ -146,7 +144,7 @@ class LoginApiControllerSpec extends ControllerSpecification {
 
 	def "password-based login should pass"() {
 		SecUser user = new SecUser(
-			username: "username",
+			email: "username@domain.com",
 			password: "password"
 		).save(failOnError: true, validate: false)
 
@@ -155,38 +153,38 @@ class LoginApiControllerSpec extends ControllerSpecification {
 		when:
 		request.method = "POST"
 		request.JSON = [
-			username: user.username,
+			email: user.email,
 			password: user.password
 		]
 		authenticatedAs(me) { controller.password() }
 
 		then:
-		1 * userService.getUserFromUsernameAndPassword(user.username, user.password) >> user
+		1 * userService.getUserFromEmailAndPassword(user.email, user.password) >> user
 		1 * sessionService.generateToken(user) >> token
 		response.status == 200
 		response.json == token.toMap()
 	}
 
 	def "password-based login should fail"() {
-		String username = "username"
+		String email = "username@foo.bar"
 		String password = "password"
 
 		when:
 		request.method = "POST"
 		request.JSON = [
-			username: username,
+			email: email,
 			password: password
 		]
 		authenticatedAs(me) { controller.password() }
 
 		then:
-		1 * userService.getUserFromUsernameAndPassword(username, password) >> { throw new InvalidEmailAndPasswordException() }
+		1 * userService.getUserFromEmailAndPassword(email, password) >> { throw new InvalidEmailAndPasswordException() }
 		thrown InvalidEmailAndPasswordException
 	}
 
 	def "password-based login should fail if disabled user"() {
 		SecUser user = new SecUser(
-			username: "username",
+			email: "username@domain.com",
 			password: "password",
 			enabled: false,
 		).save(failOnError: true, validate: false)
@@ -194,19 +192,19 @@ class LoginApiControllerSpec extends ControllerSpecification {
 		when:
 		request.method = "POST"
 		request.JSON = [
-			username: user.username,
+			email: user.email,
 			password: user.password
 		]
 		authenticatedAs(me) { controller.password() }
 
 		then:
-		1 * userService.getUserFromUsernameAndPassword(user.username, user.password) >> user
+		1 * userService.getUserFromEmailAndPassword(user.email, user.password) >> user
 		thrown DisabledUserException
 	}
 
 	def "apikey-based login should pass"() {
 		SecUser user = new SecUser(
-			username: "username",
+			email: "username@foo.bar",
 			password: "password"
 		).save(failOnError: true, validate: false)
 

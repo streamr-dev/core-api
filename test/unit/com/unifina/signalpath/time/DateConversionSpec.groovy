@@ -16,8 +16,8 @@ class DateConversionSpec extends Specification {
 
 	DateConversion module
 
-	private void initContext(String username="username") {
-		initContextWithUser(new SecUser(username: username).save(failOnError: true, validate: false))
+	private void initContext(String username="email@foo.bar") {
+		initContextWithUser(new SecUser(email: username).save(failOnError: true, validate: false))
 	}
 
 	private void initContextWithUser(SecUser user) {

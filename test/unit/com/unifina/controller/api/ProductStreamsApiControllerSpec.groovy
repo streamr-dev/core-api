@@ -19,7 +19,7 @@ class ProductStreamsApiControllerSpec extends Specification {
 		def productService = controller.productService = Mock(ProductService)
 
 		params.productId = "product-id"
-		def user = request.apiUser = new SecUser(username: "me@streamr.com")
+		def user = request.apiUser = new SecUser(email: "me@streamr.com")
 		when:
 		withFilters(action: "index") {
 			controller.index()
@@ -42,7 +42,7 @@ class ProductStreamsApiControllerSpec extends Specification {
 		}
 
 		params.productId = "product-id"
-		def user = request.apiUser = new SecUser(username: "me@streamr.com")
+		def user = request.apiUser = new SecUser(email: "me@streamr.com")
 
 		when:
 		withFilters(action: "index") {
@@ -66,7 +66,7 @@ class ProductStreamsApiControllerSpec extends Specification {
 
 		params.productId = "product-id"
 		params.id = "stream-id"
-		def user = request.apiUser = new SecUser(username: "me@streamr.com")
+		def user = request.apiUser = new SecUser(email: "me@streamr.com")
 
 		when:
 		withFilters(action: "update") {
@@ -83,7 +83,7 @@ class ProductStreamsApiControllerSpec extends Specification {
 
 		params.productId = "product-id"
 		params.id = "stream-id"
-		request.apiUser = new SecUser(username: "me@streamr.com")
+		request.apiUser = new SecUser(email: "me@streamr.com")
 
 		when:
 		withFilters(action: "update") {
@@ -120,7 +120,7 @@ class ProductStreamsApiControllerSpec extends Specification {
 
 		params.productId = "product-id"
 		params.id = "stream-id"
-		def user = request.apiUser = new SecUser(username: "me@streamr.com")
+		def user = request.apiUser = new SecUser(email: "me@streamr.com")
 
 		when:
 		withFilters(action: "delete") {
@@ -137,7 +137,7 @@ class ProductStreamsApiControllerSpec extends Specification {
 
 		params.productId = "product-id"
 		params.id = "stream-id"
-		request.apiUser = new SecUser(username: "me@streamr.com")
+		request.apiUser = new SecUser(email: "me@streamr.com")
 
 		when:
 		withFilters(action: "delete") {

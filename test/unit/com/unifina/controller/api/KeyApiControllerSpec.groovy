@@ -26,7 +26,7 @@ class KeyApiControllerSpec extends ControllerSpecification {
 
 	def setup() {
 		me = new SecUser(
-			username: "me@me.com",
+			email: "me@me.com",
 			password: "pwd",
 			name: "name",
 		).save(failOnError: true, validate: true)
@@ -71,7 +71,7 @@ class KeyApiControllerSpec extends ControllerSpecification {
 		response.json == [
 			id: "1",
 			name: "key name",
-			user: me.username
+			user: me.email
 		]
 	}
 
@@ -190,7 +190,7 @@ class KeyApiControllerSpec extends ControllerSpecification {
 	void "delete() throws NotPermittedException if attempting to delete user-linked key as other user"() {
 		setup:
 		SecUser user2 = new SecUser(
-			username: "user2@me.com",
+			email: "user2@me.com",
 			password: "pwd",
 			name: "name",
 		).save(validate: true, failOnError: true)
@@ -320,7 +320,7 @@ class KeyApiControllerSpec extends ControllerSpecification {
 	void "updateUserKey() updates name field of user's key"() {
 		setup:
 		SecUser user = new SecUser(
-			username: "address@emailprovider.com",
+			email: "address@emailprovider.com",
 			password: "pwd",
 			name: "first last name",
 		)

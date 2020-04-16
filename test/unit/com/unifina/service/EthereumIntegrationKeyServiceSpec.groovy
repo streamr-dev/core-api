@@ -40,7 +40,7 @@ class EthereumIntegrationKeyServiceSpec extends Specification {
 	}
 
 	void setup() {
-		me = new SecUser(username: "me@me.com").save(failOnError: true, validate: false)
+		me = new SecUser(email: "me@me.com").save(failOnError: true, validate: false)
 		service.init()
 		challengeService = service.challengeService = Mock(ChallengeService)
 		userService = service.userService = Mock(UserService)
@@ -114,7 +114,7 @@ class EthereumIntegrationKeyServiceSpec extends Specification {
 	}
 
 	void "getAllKeysForUser fetches all Ethereum keys for user"() {
-		def other = new SecUser(username: "other@other.com").save(failOnError: true, validate: false)
+		def other = new SecUser(email: "other@other.com").save(failOnError: true, validate: false)
 		def k1 = service.createEthereumAccount(me,
 			"ethKey 1",
 			"    " + "fa7d31d2fb3ce6f18c629857b7ef5cc3c6264dc48ddf6557cc20cf7a5b361365" + "	 "
@@ -238,7 +238,7 @@ class EthereumIntegrationKeyServiceSpec extends Specification {
 		integrationKey.id = "integration-key"
 		integrationKey.save(failOnError: true, validate: false)
 
-		SecUser someoneElse = new SecUser(username: "someoneElse@streamr.com").save(failOnError: true, validate: false)
+		SecUser someoneElse = new SecUser(email: "someoneElse@streamr.com").save(failOnError: true, validate: false)
 
 		when:
 		service.delete("integration-key", someoneElse)
@@ -262,7 +262,7 @@ class EthereumIntegrationKeyServiceSpec extends Specification {
 		integrationKey.id = "integration-key"
 		integrationKey.save(failOnError: true, validate: false)
 
-		SecUser someoneElse = new SecUser(username: "someoneElse@streamr.com").save(failOnError: true, validate: false)
+		SecUser someoneElse = new SecUser(email: "someoneElse@streamr.com").save(failOnError: true, validate: false)
 
 		when:
 		service.delete("integration-key", someoneElse)
@@ -271,7 +271,7 @@ class EthereumIntegrationKeyServiceSpec extends Specification {
 	}
 
 	void "getOrCreateFromEthereumAddress() creates user if key does not exists"() {
-		SecUser someoneElse = new SecUser(username: "someoneElse@streamr.com").save(failOnError: true, validate: false)
+		SecUser someoneElse = new SecUser(email: "someoneElse@streamr.com").save(failOnError: true, validate: false)
 		when:
 		service.getOrCreateFromEthereumAddress("address")
 		then:
@@ -291,13 +291,13 @@ class EthereumIntegrationKeyServiceSpec extends Specification {
 		when:
 		SecUser user = service.getOrCreateFromEthereumAddress(address)
 		then:
-		user.username == me.username
+		user.email == me.email
 		IntegrationKey.count == 1
 		SecUser.count == 1
 	}
 
 	void "createEthereumUser() creates inbox stream"() {
-		SecUser someoneElse = new SecUser(username: "someoneElse@streamr.com").save(failOnError: true, validate: false)
+		SecUser someoneElse = new SecUser(email: "someoneElse@streamr.com").save(failOnError: true, validate: false)
 		when:
 		service.createEthereumUser("address")
 		then:
@@ -335,7 +335,7 @@ class EthereumIntegrationKeyServiceSpec extends Specification {
 	void "cannot remove only key of ethereum user"() {
 		when:
 		String address = "0x26e1ae3f5efe8a01eca8c2e9d3c32702cf4bead6"
-		SecUser user = new SecUser(username: address).save(failOnError: true, validate: false)
+		SecUser user = new SecUser(email: address).save(failOnError: true, validate: false)
 		IntegrationKey integrationKey = new IntegrationKey(
 			user: user,
 			idInService: address,

@@ -96,7 +96,7 @@ class PermissionService {
 	void verify(Userish userish, resource, Operation op) throws NotPermittedException {
 		if (!check(userish, resource, op)) {
 			SecUser user = userish?.resolveToUserish()
-			throw new NotPermittedException(user?.username, resource.class.simpleName, resource.id, op.id)
+			throw new NotPermittedException(user?.email, resource.class.simpleName, resource.id, op.id)
 		}
 	}
 
@@ -382,7 +382,7 @@ class PermissionService {
 	private void grantInboxStreamPermissions(SecUser user, Stream stream, Operation operation,
 											 Subscription subscription, Date endsAt, Permission parent) {
 		List<SecUser> otherUsers = getNonExpiredPermissionsTo(stream, operation)*.user
-		otherUsers.removeIf { it == null || it.username == user.username }
+		otherUsers.removeIf { it == null || it.email == user.email }
 		// Need to initialize the service below this way because of circular dependencies issues
 		// Once we use Grails 3, this could be replaced with Grails Events
 		StreamService streamService = grailsApplication.mainContext.getBean(StreamService)
@@ -542,11 +542,11 @@ class PermissionService {
      * @return List of Permissions transferred from SignupInvite to SecUser
      */
 	List<Permission> transferInvitePermissionsTo(SecUser user) {
-		// { invite { eq "username", user.username } } won't do: some invite are null => NullPointerException
+		// { invite { eq "email", user.email } } won't do: some invite are null => NullPointerException
 		return Permission.withCriteria {
 			isNotNull "invite"
 		}.findAll {
-			it.invite.username == user.username
+			it.invite.username == user.email
 		}.collect { p ->
 			p.invite = null
 			p.user = user
@@ -658,9 +658,9 @@ class PermissionService {
 
 	private void throwAccessControlException(SecUser violator, resource, boolean loggingEnabled) {
 		if (loggingEnabled) {
-			log.warn("${violator?.username}(id ${violator?.id}) tried to modify sharing of $resource without SHARE Permission!")
+			log.warn("${violator?.email}(id ${violator?.id}) tried to modify sharing of $resource without SHARE Permission!")
 		}
-		throw new AccessControlException("${violator?.username}(id ${violator?.id}) has no 'share' permission to $resource!")
+		throw new AccessControlException("${violator?.email}(id ${violator?.id}) has no 'share' permission to $resource!")
 	}
 
 	private static Object getResourceFromPermission(Permission p) {

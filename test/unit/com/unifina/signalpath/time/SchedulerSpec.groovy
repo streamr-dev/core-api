@@ -17,7 +17,7 @@ class SchedulerSpec extends UiChannelMockingSpecification {
 	void "Scheduler works as expected"() {
 		when:
 		Scheduler module = new Scheduler()
-		SecUser user = new SecUser(username: 'user').save(failOnError: true, validate: false)
+		SecUser user = new SecUser(email: "user@foo.bar").save(failOnError: true, validate: false)
 		module = setupModule(module, [
 			uiChannel: [id: "schedulerChannel"],
 			schedule: [

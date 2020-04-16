@@ -42,14 +42,14 @@ class StreamApiControllerSpec extends ControllerSpecification {
 		controller.permissionService = permissionService
 		apiService = controller.apiService = Mock(ApiService)
 
-		me = new SecUser(username: "me", password: "foo")
+		me = new SecUser(email: "me@me.com", password: "foo")
 		me.save(validate: false)
 
 		key = new Key(name: "key", user: me)
 		key.id = "apiKey"
 		key.save(failOnError: true, validate: true)
 
-		def otherUser = new SecUser(username: "other", password: "bar").save(validate: false)
+		def otherUser = new SecUser(email: "other@foo.bar", password: "bar").save(validate: false)
 
 		// First use real streamService to create the streams
 		streamService = mainContext.getBean(StreamService)

@@ -141,7 +141,7 @@ class EthereumIntegrationKeyService {
 
 	SecUser createEthereumUser(String address) {
 		SecUser user = userService.createUser([
-			username       : address,
+			email          : address + "@streamr.network",
 			password       : AlphanumericStringGenerator.getRandomAlphanumericString(32),
 			name           : "Anonymous User",
 			enabled        : true,

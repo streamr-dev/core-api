@@ -3,14 +3,12 @@ package com.unifina.domain.security
 import com.unifina.security.Userish
 import com.unifina.utils.EmailValidator
 import com.unifina.utils.EthereumAddressValidator
-import com.unifina.utils.UsernameValidator
 import groovy.transform.CompileStatic
 import org.apache.commons.codec.digest.DigestUtils
 
 class SecUser implements Userish {
 
 	Long id
-	String username
 	String email
 	String password
 	boolean enabled = true
@@ -34,8 +32,7 @@ class SecUser implements Userish {
 	static hasMany = [permissions: Permission, keys: Key]
 
 	static constraints = {
-		username blank: false, unique: true, validator: UsernameValidator.validate
-		email blank: true, unique: false, validator: EmailValidator.validateEmptyEmail
+		email blank: false, unique: true, validator: EmailValidator.validate
 		password blank: false
 		name blank: false
 		dateCreated nullable: true
@@ -64,7 +61,7 @@ class SecUser implements Userish {
 	Map toMap() {
 		return [
 			name : name,
-			username : username,
+			username : email,
 			imageUrlSmall : imageUrlSmall,
 			imageUrlLarge : imageUrlLarge,
 			lastLogin: lastLogin
@@ -106,16 +103,16 @@ class SecUser implements Userish {
 		SecUser.get(userId)
 	}
 
-	//TODO: Once all users are defined with their ethereum public key we can remove this
+	// TODO: Once all users are defined with their ethereum public key we can remove this
 	boolean isEthereumUser() {
-		return EthereumAddressValidator.validate(username)
+		return EthereumAddressValidator.validate(email)
 	}
 
 	String getPublisherId() {
 		if (isEthereumUser()) {
-			return username
+			return email
 		}
-		// 'username' is the email address of the user. For privacy concerns, the publisher id is the hash of the email address.
-		return DigestUtils.sha256Hex(username)
+		// 'email' is the email address of the user. For privacy concerns, the publisher id is the hash of the email address.
+		return DigestUtils.sha256Hex(email)
 	}
 }

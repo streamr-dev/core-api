@@ -11,7 +11,7 @@ class RateLimitSpec extends Specification {
 	RateLimit module
 
     def setup() {
-		globals = new Globals([:], new SecUser(timezone:"Europe/Helsinki", username: "username"))
+		globals = new Globals([:], new SecUser(email: "username@foo.bar"))
 		module = new RateLimit()
 		module.globals = globals
 		module.init()

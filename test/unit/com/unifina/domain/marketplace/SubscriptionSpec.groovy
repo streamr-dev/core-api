@@ -23,7 +23,7 @@ class SubscriptionSpec extends BeanMockingSpecification {
 	}
 
 	void "fetchUser() returns user if IntegrationKey with address found"() {
-		SecUser user = new SecUser(username: "me@streamr.com").save(failOnError: true, validate: false)
+		SecUser user = new SecUser(email: "me@streamr.com").save(failOnError: true, validate: false)
 		new IntegrationKey(
 			user: user,
 			name: "integration key",

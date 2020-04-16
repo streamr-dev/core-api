@@ -43,7 +43,7 @@ class EmailModuleSpec extends UiChannelMockingSpecification {
 		module.canvasService = cs
 	}
 
-	private void initContext(Globals.Mode mode = Globals.Mode.REALTIME, Map context = [:], SecUser user = new SecUser(username: "username").save(failOnError: true, validate: false)) {
+	private void initContext(Globals.Mode mode = Globals.Mode.REALTIME, Map context = [:], SecUser user = new SecUser(email: "email@domain.com").save(failOnError: true, validate: false)) {
 		globals = mockGlobals(context, user, mode)
 		globals.time = new Date()
 
@@ -82,7 +82,7 @@ class EmailModuleSpec extends UiChannelMockingSpecification {
 			.afterEachTestCase {
 				assert ms.mailSent
 				assert ms.from == grailsApplication.config.unifina.email.sender
-				assert ms.to == "username"
+				assert ms.to == "email@domain.com"
 				assert ms.subject == "Subject"
 				assert ms.body == """
 This email was sent by one of your running Canvases on Streamr.
@@ -122,7 +122,7 @@ https://www.streamr.com/canvas/editor/1
 		then: "sender is correct"
 			ms.from == grailsApplication.config.unifina.email.sender
 		then: "receiver must be correct"
-			ms.to == "username"
+			ms.to == "email@domain.com"
 		then: "subject must be correct"
 			ms.subject == "Test subject"
 		then: "body must be correct"

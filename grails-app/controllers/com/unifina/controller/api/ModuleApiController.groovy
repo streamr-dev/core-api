@@ -110,7 +110,7 @@ class ModuleApiController {
 			throw new NotFoundException(Module.simpleName, id.toString())
 		}
 		if (!permissionService.canRead(user, domainObject.modulePackage)) {
-			throw new NotPermittedException(user?.username, Module.simpleName, id.toString(), Permission.Operation.READ.toString())
+			throw new NotPermittedException(user?.email, Module.simpleName, id.toString(), Permission.Operation.READ.toString())
 		}
 
 		AbstractSignalPathModule m = moduleService.getModuleInstance(domainObject, moduleConfig, null, globals)
@@ -171,7 +171,7 @@ class ModuleApiController {
 		if (!module) {
 			throw new NotFoundException("Module", id)
 		} else if (!permissionService.check(request.apiUser, module.modulePackage, op)) {
-			throw new NotPermittedException(request.apiUser?.username, "ModulePackage", module.modulePackage.id.toString(), op.id)
+			throw new NotPermittedException(request.apiUser?.email, "ModulePackage", module.modulePackage.id.toString(), op.id)
 		} else {
 			action.call(module)
 		}

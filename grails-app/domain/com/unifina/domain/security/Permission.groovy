@@ -95,7 +95,7 @@ class Permission {
 		} else if (user || invite) {
 			return [
 					id: id,
-					user: user?.username ?: invite?.username,
+					user: user?.email ?: invite?.username,
 					operation: operation.id
 			]
 		} else if (key) {

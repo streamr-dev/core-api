@@ -156,7 +156,7 @@ class StreamService {
 			if (isDirectPermissionToStream(user, stream) || isPermissionToStreamsUiChannelCanvas(user, stream) || isPermissionToStreamViaDashboard(user, stream)) {
 				action.call(stream)
 			} else {
-				throw new NotPermittedException(user?.username, "Stream", id, Permission.Operation.READ.id)
+				throw new NotPermittedException(user?.email, "Stream", id, Permission.Operation.READ.id)
 			}
 		}
 	}

@@ -11,6 +11,7 @@ import com.unifina.service.SignupCodeService
 import com.unifina.service.UserService
 import com.unifina.utils.EmailValidator
 import grails.converters.JSON
+import grails.validation.Validateable
 
 class AuthApiController {
 
@@ -26,7 +27,7 @@ class AuthApiController {
 			return render([success: false, error: userService.beautifyErrors(cmd.errors.getAllErrors())] as JSON)
 		}
 
-		def existingUser = SecUser.findByUsername(cmd.username)
+		def existingUser = SecUser.findByEmail(cmd.username)
 		if (existingUser) {
 			response.status = 400
 			return render([success: false, error: "User exists already"] as JSON)
@@ -56,7 +57,7 @@ class AuthApiController {
 			return render([success: false, error: "Sending email failed"] as JSON)
 		}
 
-		return render([username: cmd.username] as JSON)
+		return render([email: cmd.username] as JSON)
 	}
 
 	@StreamrApi(authenticationLevel = AuthLevel.NONE)
@@ -77,13 +78,13 @@ class AuthApiController {
 			return render([success: false, error: userService.beautifyErrors(cmd.errors.getAllErrors())] as JSON)
 		}
 
-		if (SecUser.findByUsername(invite.username)) {
+		if (SecUser.findByEmail(invite.username)) {
 			response.status = 400
 			return render([success: false, error: "User already exists"] as JSON)
 		}
 
 		try {
-			user = userService.createUser([:] << cmd.properties << [username: invite.username])
+			user = userService.createUser([:] << cmd.properties << [email: invite.username])
 		} catch (UserCreationFailedException e) {
 			response.status = 500
 			return render([success: false, error: e.getMessage()] as JSON)
@@ -99,7 +100,7 @@ class AuthApiController {
 		try {
 			mailService.sendMail {
 				from grailsApplication.config.unifina.email.sender
-				to user.username
+				to user.email
 				subject grailsApplication.config.unifina.email.welcome.subject
 				html g.render(template: "/emails/email_welcome", model: [user: user])
 			}
@@ -119,18 +120,18 @@ class AuthApiController {
 			return render([success: false, error: userService.beautifyErrors(cmd.errors.getAllErrors())] as JSON)
 		}
 
-		def user = SecUser.findWhere(username: cmd.username)
+		def user = SecUser.findWhere(email: cmd.username)
 		if (!user) {
 			return render([emailSent: true] as JSON) // don't reveal users
 		}
 
-		def registrationCode = new RegistrationCode(username: user.username)
+		def registrationCode = new RegistrationCode(username: user.email)
 		registrationCode.save(flush: true)
 
 		try {
 			mailService.sendMail {
 				from grailsApplication.config.unifina.email.sender
-				to user.username
+				to user.email
 				subject grailsApplication.config.unifina.email.forgotPassword.subject
 				html g.render(template: "/emails/email_forgot_password", model: [token: registrationCode.token])
 			}
@@ -155,7 +156,7 @@ class AuthApiController {
 			return render([success: false, error: message(code: 'spring.security.ui.resetPassword.badCode')] as JSON)
 		}
 
-		def user = SecUser.findByUsername(registrationCode.username)
+		def user = SecUser.findByEmail(registrationCode.username)
 		if (!user)
 			throw new RuntimeException("User belonging to the registration code was not found: $registrationCode.username")
 
@@ -176,6 +177,7 @@ class AuthApiController {
 	}
 }
 
+@Validateable
 class EmailCommand {
 	String username
 	static constraints = {
@@ -183,6 +185,7 @@ class EmailCommand {
 	}
 }
 
+@Validateable
 class RegisterCommand {
 	String invite
 	String name
@@ -205,6 +208,7 @@ class RegisterCommand {
 	}
 }
 
+@Validateable
 class ResetPasswordCommand {
 	String username
 	String password

@@ -45,7 +45,7 @@ class SubscriptionApiControllerSpec extends Specification {
 
 	void "index() returns 200 and renders subscriptions"() {
 		SecUser user = new SecUser(
-			username: "user@domain.com",
+			email: "user@domain.com",
 			name: "Firstname Lastname",
 			password: "salasana"
 		)
@@ -122,7 +122,7 @@ class SubscriptionApiControllerSpec extends Specification {
 
 	void "save() given subscription with address throws NotPermittedException if not devops user"() {
 		def product = new Product().save(failOnError: true, validate: false)
-		
+
 		request.apiUser = new SecUser()
 		request.JSON = [
 			address: "0x0000000000000000000000000000000000000000",

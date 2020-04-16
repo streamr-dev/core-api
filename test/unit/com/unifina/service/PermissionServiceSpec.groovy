@@ -40,9 +40,9 @@ class PermissionServiceSpec extends BeanMockingSpecification {
     def setup() {
 
 		// Users
-		me = new SecUser(username: "me", password: "foo").save(validate:false)
-		anotherUser = new SecUser(username: "him", password: "bar").save(validate:false)
-		stranger = new SecUser(username: "stranger", password: "x").save(validate:false)
+		me = new SecUser(email: "me@foo.bar", password: "foo").save(validate:false)
+		anotherUser = new SecUser(email: "him@foo.bar", password: "bar").save(validate:false)
+		stranger = new SecUser(email: "stranger@foo.bar", password: "x").save(validate:false)
 
 		// Keys
 		myKey = new Key(name: "my key", user: me).save(failOnError: true)
@@ -50,7 +50,7 @@ class PermissionServiceSpec extends BeanMockingSpecification {
 		anonymousKey = new Key(name: "anonymous key 1").save(failOnError: true)
 
 		// Sign-up invitations can also receive Permissions; they will later be converted to User permissions
-		invite = new SignupInvite(username: "him", code: "sikritCode", sent: true, used: false).save(validate:false)
+		invite = new SignupInvite(username: "him@foo.bar", code: "sikritCode", sent: true, used: false).save(validate:false)
 
 		// Dashboards
 		dashAllowed = new Dashboard(id: "allowed", name:"allowed").save(validate:false)
@@ -83,7 +83,7 @@ class PermissionServiceSpec extends BeanMockingSpecification {
 		Permission.count() == 18
 
 		and: "anotherUser has an invitation"
-		invite.username == anotherUser.username
+		invite.username == anotherUser.email
 	}
 
 	void "access granted to permitted Dashboard"() {
@@ -257,7 +257,7 @@ class PermissionServiceSpec extends BeanMockingSpecification {
 		publisher2.id = 5L
 		SecUser publisher3 = new SecUser()
 		publisher3.id = 6L
-		SecUser subscriber = new SecUser(username: "0x26e1ae3f5efe8a01eca8c2e9d3c32702cf4bead6").save(failOnError: true, validate: false)
+		SecUser subscriber = new SecUser(email: "0x26e1ae3f5efe8a01eca8c2e9d3c32702cf4bead6").save(failOnError: true, validate: false)
 
 
 		Stream pub1Inbox = new Stream(name: "publisher1", inbox: true)
@@ -269,8 +269,8 @@ class PermissionServiceSpec extends BeanMockingSpecification {
 		Stream pub3Inbox = new Stream(name: "publisher3", inbox: true)
 		pub3Inbox.id = "publisher3"
 		pub3Inbox.save(failOnError: true, validate: false)
-		Stream subInbox = new Stream(name: subscriber.username, inbox: true)
-		subInbox.id = subscriber.username
+		Stream subInbox = new Stream(name: subscriber.email, inbox: true)
+		subInbox.id = subscriber.email
 		subInbox.save(failOnError: true, validate: false)
 
 		Stream stream = new Stream()
@@ -299,7 +299,7 @@ class PermissionServiceSpec extends BeanMockingSpecification {
 	}
 
 	void "inbox stream permissions also work when anonymous keys have permissions to the stream"() {
-		SecUser subscriber = new SecUser(username: "0x26e1ae3f5efe8a01eca8c2e9d3c32702cf4bead6").save(failOnError: true, validate: false)
+		SecUser subscriber = new SecUser(email: "0x26e1ae3f5efe8a01eca8c2e9d3c32702cf4bead6").save(failOnError: true, validate: false)
 		Key anonKey = new Key()
 		anonKey.id = 1L
 		anonKey.save(failOnError: true, validate: false)
@@ -331,9 +331,9 @@ class PermissionServiceSpec extends BeanMockingSpecification {
 		Stream pubInbox = new Stream(name: "publisher", inbox: true)
 		pubInbox.id = "publisher"
 		pubInbox.save(failOnError: true, validate: false)
-		SecUser subscriber = new SecUser(username: "0x26e1ae3f5efe8a01eca8c2e9d3c32702cf4bead6").save(failOnError: true, validate: false)
-		Stream subInbox = new Stream(name: subscriber.username, inbox: true)
-		subInbox.id = subscriber.username
+		SecUser subscriber = new SecUser(email: "0x26e1ae3f5efe8a01eca8c2e9d3c32702cf4bead6").save(failOnError: true, validate: false)
+		Stream subInbox = new Stream(name: subscriber.email, inbox: true)
+		subInbox.id = subscriber.email
 		subInbox.save(failOnError: true, validate: false)
 		Stream stream = new Stream()
 		stream.id = "stream"
@@ -357,9 +357,9 @@ class PermissionServiceSpec extends BeanMockingSpecification {
 		Stream pubInbox = new Stream(name: "publisher", inbox: true)
 		pubInbox.id = "publisher"
 		pubInbox.save(failOnError: true, validate: false)
-		SecUser subscriber = new SecUser(username: "0x26e1ae3f5efe8a01eca8c2e9d3c32702cf4bead6").save(failOnError: true, validate: false)
-		Stream subInbox = new Stream(name: subscriber.username, inbox: true)
-		subInbox.id = subscriber.username
+		SecUser subscriber = new SecUser(email: "0x26e1ae3f5efe8a01eca8c2e9d3c32702cf4bead6").save(failOnError: true, validate: false)
+		Stream subInbox = new Stream(name: subscriber.email, inbox: true)
+		subInbox.id = subscriber.email
 		subInbox.save(failOnError: true, validate: false)
 		Stream stream1 = new Stream()
 		stream1.id = "stream1"
@@ -455,7 +455,7 @@ class PermissionServiceSpec extends BeanMockingSpecification {
 		service.verify(stranger, dashPublic, Operation.WRITE)
 		then:
 		def e = thrown(NotPermittedException)
-		e.message == "stranger does not have permission to write Dashboard (id 4)"
+		e.message == "stranger@foo.bar does not have permission to write Dashboard (id 4)"
 	}
 
 	void "systemRevokeAnonymousAccess() revokes anonymous access on a resource"() {
@@ -489,7 +489,7 @@ class PermissionServiceSpec extends BeanMockingSpecification {
 	}
 
 	void "cleanUpExpiredPermissions() deletes permissions that already ended"() {
-		SecUser testUser = new SecUser(username: "testUser", password: "foo").save(validate:false)
+		SecUser testUser = new SecUser(email: "testUser@foo.bar", password: "foo").save(validate:false)
 		Stream testStream = new Stream(name: "testStream")
 		testStream.id = "testStream"
 		testStream.save(validate: false)

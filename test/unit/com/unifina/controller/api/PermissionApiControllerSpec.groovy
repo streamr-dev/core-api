@@ -40,8 +40,8 @@ class PermissionApiControllerSpec extends ControllerSpecification {
 		controller.mailService = new MockMailService()
 		controller.signupCodeService = new SignupCodeService()
 
-		me = new SecUser(id: 1, username: "me@me.net").save(validate: false)
-		other = new SecUser(id: 2, username: "other").save(validate: false)
+		me = new SecUser(id: 1, email: "me@me.net").save(validate: false)
+		other = new SecUser(id: 2, email: "other@foo.bar").save(validate: false)
 
 		def meKey = new Key(name: "meKey", user: me)
 		meKey.id = "myApiKey"
@@ -199,13 +199,13 @@ class PermissionApiControllerSpec extends ControllerSpecification {
 		params.resourceId = canvasOwned.id
 
 		when:
-		request.JSON = [user: other.username, operation: "read"] as JSON
+		request.JSON = [user: other.email, operation: "read"] as JSON
 		authenticatedAs(me) { controller.save() }
 		then:
 		1 * permissionService.canShare(me, _) >> true
 		1 * permissionService.grant(me, _, _, Operation.READ) >> new Permission(user: other, operation: Operation.READ)
 		response.status == 201
-		response.json.user == other.username
+		response.json.user == other.email
 		response.json.operation == "read"
 	}
 
@@ -237,20 +237,20 @@ class PermissionApiControllerSpec extends ControllerSpecification {
 
 	void "save() creates a new user with permission if unknown ethereum address provided"() {
 		setup:
-		SecUser ethUser = new SecUser(id: 3, username: "0xa50E97f6a98dD992D9eCb8207c2Aa58F54970729")
+		SecUser ethUser = new SecUser(id: 3, email: "0xa50E97f6a98dD992D9eCb8207c2Aa58F54970729")
 		params.id = canvasOwned.id
 		params.resourceClass = Canvas
 		params.resourceId = canvasOwned.id
 		when:
-		request.JSON = [user: ethUser.username, operation: "read"] as JSON
+		request.JSON = [user: ethUser.email, operation: "read"] as JSON
 		authenticatedAs(me) { controller.save() }
 		then:
 		!controller.mailService.mailSent
-		1 * ethereumIntegrationKeyService.createEthereumUser(ethUser.username) >> ethUser
+		1 * ethereumIntegrationKeyService.createEthereumUser(ethUser.email) >> ethUser
 		1 * permissionService.canShare(me, _) >> true
 		1 * permissionService.grant(me, _, _, Operation.READ) >> new Permission(user: ethUser, operation: Operation.READ)
 		response.status == 201
-		response.json.user == ethUser.username
+		response.json.user == ethUser.email
 		response.json.operation == "read"
 	}
 
@@ -313,7 +313,7 @@ class PermissionApiControllerSpec extends ControllerSpecification {
 		params.resourceId = canvasOwned.id
 
 		when:
-		request.JSON = [anonymous: true, user: other.username, operation: "read"] as JSON
+		request.JSON = [anonymous: true, user: other.email, operation: "read"] as JSON
 		authenticatedAs(me) { controller.save() }
 		then:
 		thrown InvalidArgumentsException

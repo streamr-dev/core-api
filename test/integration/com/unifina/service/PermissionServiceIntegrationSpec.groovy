@@ -43,32 +43,32 @@ class PermissionServiceIntegrationSpec extends IntegrationSpec {
 
 	void setup() {
 		service = Holders.getApplicationContext().getBean(PermissionService)
-		SecUser.findByUsername("me-permission-service-integration-spec@streamr.com")?.delete(flush: true)
-		SecUser.findByUsername("him-permission-service-integration-spec@streamr.com")?.delete(flush: true)
-		SecUser.findByUsername("stranger-permission-service-integration-spec@streamr.com")?.delete(flush: true)
-		SecUser.findByUsername("someone-service-integration-spec@streamr.com")?.delete(flush: true)
+		SecUser.findByEmail("me-permission-service-integration-spec@streamr.com")?.delete(flush: true)
+		SecUser.findByEmail("him-permission-service-integration-spec@streamr.com")?.delete(flush: true)
+		SecUser.findByEmail("stranger-permission-service-integration-spec@streamr.com")?.delete(flush: true)
+		SecUser.findByEmail("someone-service-integration-spec@streamr.com")?.delete(flush: true)
 
 		// Users
 		me = new SecUser(
-			username: "me-permission-service-integration-spec@streamr.com",
+			email: "me-permission-service-integration-spec@streamr.com",
 			name: "me",
 			password: "foo",
 		).save(failOnError: true)
 
 		anotherUser = new SecUser(
-			username: "him-permission-service-integration-spec@streamr.com",
+			email: "him-permission-service-integration-spec@streamr.com",
 			name: "him",
 			password: "bar",
 		).save(failOnError: true)
 
 		stranger = new SecUser(
-			username: "stranger-permission-service-integration-spec@streamr.com",
+			email: "stranger-permission-service-integration-spec@streamr.com",
 			name: "stranger",
 			password: "x",
 		).save(failOnError: true)
 
 		someone = new SecUser(
-			username: "someone-service-integration-spec@streamr.com",
+			email: "someone-service-integration-spec@streamr.com",
 			name: "someone",
 			password: "x",
 		).save(failOnError: true)

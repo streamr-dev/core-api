@@ -45,7 +45,7 @@ class Key implements Userish {
 		return [
 			id: id,
 			name: name,
-			user: user?.username
+			user: user?.email
 		]
 	}
 

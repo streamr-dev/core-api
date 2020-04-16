@@ -17,14 +17,14 @@ class ProductListParamsSpec extends Specification {
 
 	void setup() {
 		user = new SecUser(
-			username: "user@domain.com",
+			email: "user@domain.com",
 			name: "Firstname Lastname",
 			password: "salasana"
 		)
 		user.id = 1
 		user.save(failOnError: true, validate: false)
 		other = new SecUser(
-			username: "usr@foo.com",
+			email: "usr@foo.com",
 			name: "Firstname Lastname",
 			password: "salasana"
 		)

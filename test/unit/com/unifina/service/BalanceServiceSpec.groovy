@@ -30,7 +30,7 @@ class BalanceServiceSpec extends Specification {
 
 	def setup() {
 		service.web3jHelperService = Mock(Web3jHelperService)
-		me = new SecUser(name: "me", username: "me@too.com").save(validate: false)
+		me = new SecUser(name: "me", email: "me@too.com").save(validate: false)
     }
 
     void "gets balances of keys a user has"() {

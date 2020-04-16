@@ -24,8 +24,8 @@ class SubscriptionServiceSpec extends BeanMockingSpecification {
 	EthereumIntegrationKeyService ethereumIntegrationKeyService
 
 	void setup() {
-		user = new SecUser(username: "me@streamr.com").save(failOnError: true, validate: false)
-		user2 = new SecUser(username: "someoneElse@streamr.com").save(failOnError: true, validate: false)
+		user = new SecUser(email: "me@streamr.com").save(failOnError: true, validate: false)
+		user2 = new SecUser(email: "someoneElse@streamr.com").save(failOnError: true, validate: false)
 		s1 = new Stream(name: "stream-1")
 		s2 = new Stream(name: "stream-2")
 		s3 = new Stream(name: "stream-3")

@@ -52,7 +52,7 @@ class CanvasServiceSpec extends BeanMockingSpecification {
 
 		moduleWithUi = new Module(implementingClass: Heatmap.name).save(validate: false)
 
-		me = new SecUser(username: "me@me.com").save(validate: false)
+		me = new SecUser(email: "me@me.com").save(validate: false)
 
 		myFirstCanvas = new Canvas(
 			name: "my_canvas_1",
@@ -110,7 +110,7 @@ class CanvasServiceSpec extends BeanMockingSpecification {
 			json: json,
 		).save(failOnError: true)
 
-		someoneElse = new SecUser(username: "someone@someone.com").save(validate: false)
+		someoneElse = new SecUser(email: "someone@someone.com").save(validate: false)
 
 		canvases << new Canvas(
 			name: "someoneElses_canvas_1",

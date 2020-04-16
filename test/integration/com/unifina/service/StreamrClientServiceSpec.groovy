@@ -13,7 +13,7 @@ class StreamrClientServiceSpec extends Specification {
 
 	void setup() {
 		user = new SecUser(
-			username: "StreamrClientServiceSpec@streamr.invalid",
+			email: "StreamrClientServiceSpec@streamr.invalid",
 			name: "user",
 			password: "password",
 		).save(failOnError: true)

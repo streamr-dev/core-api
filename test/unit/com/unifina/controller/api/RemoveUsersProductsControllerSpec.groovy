@@ -17,7 +17,7 @@ class RemoveUsersProductsControllerSpec extends ControllerSpecification {
 
 	def setup() {
 		productService = controller.productService = Mock(ProductService)
-		me = new SecUser(id: 1, username: "arnold").save(validate: false)
+		me = new SecUser(id: 1, email: "arnold@foo.bar").save(validate: false)
 		Key key = new Key(name: "key", user: me)
 		key.id = "myApiKey"
 		key.save(failOnError: true, validate: true)
