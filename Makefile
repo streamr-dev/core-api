@@ -38,8 +38,18 @@ dependency-report: ## Generate Grails dependency report
 	grails dependency-report | tee dependencies.txt
 
 .PHONY: run-app-test
-run-app-test: ## Run Grails test app
-	grails test run-app
+run-app-test: start ## Run Grails test app
+	nohup grails test run-app --non-interactive &
+	while true; do \
+		http_code=$$(curl -s -o /dev/null -w "%{http_code}" http://localhost/api/v1/users/me); \
+		if [ "$$http_code" -eq 401 ]; then \
+			echo "run-app-test: engine up and running"; \
+			break; \
+		else \
+		echo "run-app-test: engine not receiving connections"; \
+		sleep 5; \
+		fi; \
+	done
 
 .PHONY: run-app-dev
 run-app-dev: ## Run Grails dev app
@@ -53,11 +63,11 @@ factory-reset: ## Run streamr-docker-dev factory-reset and start
 .PHONY: wipe
 wipe: ## Run streamr-docker-dev wipe and start
 	streamr-docker-dev wipe
-	streamr-docker-dev start --except engine-and-editor
+	streamr-docker-dev start --wait --except engine-and-editor
 
 .PHONY: start
 start: ## Run streamr-docker-dev start
-	streamr-docker-dev start --except engine-and-editor
+	streamr-docker-dev start --wait --except engine-and-editor
 
 .SILENT: db-diff
 .ONESHELL: db-diff
