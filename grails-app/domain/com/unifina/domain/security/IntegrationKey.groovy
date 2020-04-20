@@ -8,7 +8,7 @@ import groovy.transform.CompileStatic
 import org.codehaus.groovy.grails.web.json.JSONObject
 
 class IntegrationKey implements Serializable {
-	private transient EthereumIntegrationKeyService ethereumIntegrationKeyService
+	//private transient EthereumIntegrationKeyService ethereumIntegrationKeyService
 	String id
 	SecUser user
 	String name
@@ -18,13 +18,13 @@ class IntegrationKey implements Serializable {
 
 	Date dateCreated
 	Date lastUpdated
-
+/*
 	EthereumIntegrationKeyService getEthereumIntegrationKeyService(){
 		if(ethereumIntegrationKeyService == null)
 			ethereumIntegrationKeyService = Holders.getApplicationContext().getBean(EthereumIntegrationKeyService.class)
 		return ethereumIntegrationKeyService
 	}
-
+*/
 	static mapping = {
 		id generator: IdGenerator.name // Note: doesn't apply in unit tests
 		json type: 'text'
@@ -59,7 +59,8 @@ class IntegrationKey implements Serializable {
 			JSONObject jso = (JSONObject) JSON.parse(json)
 			Map jsmap = [address: jso.get("address")]
 			if(service == Service.ETHEREUM) {
-				String decryptedPrivateKey = getEthereumIntegrationKeyService().decryptPrivateKey(this)
+				//String decryptedPrivateKey = getEthereumIntegrationKeyService().decryptPrivateKey(this)
+				String decryptedPrivateKey = Holders.getApplicationContext().getBean(EthereumIntegrationKeyService.class).decryptPrivateKey(this)
 				jsmap.put("privateKey", decryptedPrivateKey)
 			}
 			return jsmap

@@ -34,7 +34,7 @@ class EthereumIntegrationKeyService {
 
 	@PostConstruct
 	void init() {
-		initStringEncryptor()
+		encryptor = new StringEncryptor(getPassword())
 	}
 
 	private String getPassword() {
@@ -43,15 +43,11 @@ class EthereumIntegrationKeyService {
 		return password
 	}
 
-	//always instantiates
-	private initStringEncryptor(){
-		encryptor = new StringEncryptor(getPassword())
-	}
 
 	// instantiates only if encryptor doesn't exist
 	private StringEncryptor getStringEncryptor() {
 		if (encryptor == null) {
-			initStringEncryptor()
+			encryptor = new StringEncryptor(getPassword())
 		}
 		return encryptor;
 	}
