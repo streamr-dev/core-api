@@ -20,8 +20,7 @@ class IntegrationKeyApiControllerSpec extends ControllerSpecification {
 	SecUser someoneElse
 
 	def setup() {
-		EthereumIntegrationKeyService ethereumIntegrationKeyService = new EthereumIntegrationKeyService()
-		mockBean(EthereumIntegrationKeyService.class, ethereumIntegrationKeyService)
+		ethereumIntegrationKeyService = mockBean(EthereumIntegrationKeyService, Mock(EthereumIntegrationKeyService))
 		me = new SecUser().save(failOnError: true, validate: false)
 		someoneElse = new SecUser().save(failOnError: true, validate: false)
 
