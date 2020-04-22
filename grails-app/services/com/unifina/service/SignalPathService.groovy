@@ -32,7 +32,6 @@ class SignalPathService {
 
 	def grailsLinkGenerator
 	def serializationService
-	StreamService streamService
 	PermissionService permissionService
 	ApiService apiService
 	NodeService nodeService
