@@ -30,7 +30,6 @@ class SignalPathService {
 
     static transactional = false
 
-	def servletContext
 	def grailsApplication
 	def grailsLinkGenerator
 	def serializationService

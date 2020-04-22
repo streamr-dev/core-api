@@ -48,7 +48,6 @@ class SignalPathServiceSpec extends Specification {
 
 		canvasService = Mock(CanvasService)
 		Holders.getApplicationContext().beanFactory.registerSingleton("canvasService", canvasService)
-		service.servletContext = [:]
 	}
 
 	def cleanup() {
@@ -107,7 +106,6 @@ class SignalPathServiceSpec extends Specification {
 		def runner = Mock(SignalPathRunner)
 		def sp = Mock(SignalPath)
 		service.permissionService = Mock(PermissionService)
-		service.servletContext = service.servletContext ?: [:]
 		service.runnersById[c1.runner] = runner
 
 		when:
