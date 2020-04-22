@@ -8,18 +8,24 @@ import com.streamr.client.options.EncryptionOptions
 import com.streamr.client.options.SigningOptions
 import com.streamr.client.options.StreamrClientOptions
 import com.unifina.domain.security.Key
+import com.unifina.signalpath.time.ClockModule
 import com.unifina.utils.MapTraversal
 import grails.util.Holders
 import org.apache.log4j.Logger
 
 import java.lang.reflect.Constructor
+import java.util.concurrent.TimeUnit
+import java.util.concurrent.TimeoutException
+import java.util.concurrent.locks.ReentrantLock
 
 class StreamrClientService {
 
 	private static final Logger log = Logger.getLogger(StreamrClientService)
 
-	StreamrClient instanceForThisEngineNode
-	Constructor<StreamrClient> clientConstructor
+	private StreamrClient instanceForThisEngineNode
+	private final ReentrantLock instanceForThisEngineNodeLock = new ReentrantLock()
+
+	private Constructor<StreamrClient> clientConstructor
 
 	StreamrClientService() {
 		clientConstructor = StreamrClient.class.getConstructor(StreamrClientOptions)
@@ -51,15 +57,26 @@ class StreamrClientService {
 	 *
 	 * This is a long running instance which should not be closed as long as this
 	 * application is running. Whoever calls this method should not close the instance.
+	 *
+	 * This method is thread-safe
 	 */
 	StreamrClient getInstanceForThisEngineNode() {
-		if (!instanceForThisEngineNode) {
-			String nodePrivateKey = MapTraversal.getString(Holders.getConfig(), "streamr.ethereum.nodePrivateKey")
-			log.debug("Creating StreamrClient instance for this Engine node. Using private key ${nodePrivateKey?.substring(0,2)}...")
-			instanceForThisEngineNode = createInstance(new EthereumAuthenticationMethod(nodePrivateKey))
-			log.debug("StreamrClient instance created. State: ${instanceForThisEngineNode.getState()}")
+		// Mutex lock with timeout to avoid race conditions
+		if (instanceForThisEngineNodeLock.tryLock(10L, TimeUnit.SECONDS)) {
+			try {
+				if (!instanceForThisEngineNode) {
+					String nodePrivateKey = MapTraversal.getString(Holders.getConfig(), "streamr.ethereum.nodePrivateKey")
+					log.debug("Creating StreamrClient instance for this Engine node. Using private key ${nodePrivateKey?.substring(0, 2)}...")
+					instanceForThisEngineNode = createInstance(new EthereumAuthenticationMethod(nodePrivateKey))
+					log.debug("StreamrClient instance created. State: ${instanceForThisEngineNode.getState()}")
+				}
+				return instanceForThisEngineNode
+			} finally {
+				instanceForThisEngineNodeLock.unlock()
+			}
+		} else {
+			throw new TimeoutException("Timed out waiting for the lock for this Engine node's StreamrClient instance!")
 		}
-		return instanceForThisEngineNode
 	}
 
 	private StreamrClient createInstance(AuthenticationMethod authenticationMethod) {

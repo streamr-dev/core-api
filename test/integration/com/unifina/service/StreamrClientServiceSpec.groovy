@@ -1,10 +1,12 @@
 package com.unifina.service
 
+import com.streamr.api.client.StreamrClient
 import com.streamr.client.authentication.ApiKeyAuthenticationMethod
 import com.unifina.domain.security.Key
 import com.unifina.domain.security.SecUser
 import com.unifina.utils.testutils.FakeStreamrClient
 import spock.lang.Specification
+import spock.util.concurrent.PollingConditions
 
 class StreamrClientServiceSpec extends Specification {
 
@@ -46,6 +48,27 @@ class StreamrClientServiceSpec extends Specification {
 		service.getAuthenticatedInstance(user.id)
 		then:
 		thrown(IllegalStateException)
+	}
+
+	void "getInstanceForThisEngineNode() should return a singleton instance in a race condition"() {
+		List<StreamrClient> instances = Collections.synchronizedList([])
+		List<Thread> threads = []
+
+		// Create race condition
+		for (int i=0; i<50; i++) {
+			Thread t = Thread.start {
+				instances.add(service.getInstanceForThisEngineNode())
+			}
+			threads.add(t)
+		}
+
+		expect:
+		// Wait for all the above threads to finish
+		new PollingConditions().within(60) {
+			threads.find {it.isAlive()} == null
+		}
+		// All instances are the same
+		instances.unique().size() == 1
 	}
 
 }
