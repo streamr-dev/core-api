@@ -10,6 +10,7 @@ import com.unifina.domain.data.Stream
 import com.unifina.domain.security.Permission
 import com.unifina.domain.security.SecUser
 import com.unifina.domain.signalpath.Canvas
+import com.unifina.exceptions.CanvasUnreachableException
 import com.unifina.exceptions.InvalidStreamConfigException
 import com.unifina.serialization.SerializationException
 import com.unifina.signalpath.ModuleException
@@ -161,13 +162,19 @@ class CanvasService {
 		taskService.createTask(CanvasStartTask, CanvasStartTask.getConfig(canvas, forceReset, resetOnError), "canvas-start", user)
 	}
 
-	@Transactional
+	@Transactional(noRollbackFor=[CanvasUnreachableException])
 	void stop(Canvas canvas, SecUser user) {
 		if (canvas.state != Canvas.State.RUNNING) {
 			throw new InvalidStateException("Canvas $canvas.id not currently running.")
 		}
 
-		signalPathService.stopRemote(canvas, user)
+		try {
+			signalPathService.stopRemote(canvas, user)
+		} catch (CanvasUnreachableException e) {
+			canvas.state = Canvas.State.STOPPED
+			canvas.save(failOnError: true, flush: true)
+			throw e
+		}
 	}
 
 	/**
