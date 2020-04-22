@@ -8,7 +8,6 @@ import com.streamr.client.options.EncryptionOptions
 import com.streamr.client.options.SigningOptions
 import com.streamr.client.options.StreamrClientOptions
 import com.unifina.domain.security.Key
-import com.unifina.signalpath.time.ClockModule
 import com.unifina.utils.MapTraversal
 import grails.util.Holders
 import org.apache.log4j.Logger
