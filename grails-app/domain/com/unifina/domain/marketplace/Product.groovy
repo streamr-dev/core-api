@@ -25,7 +25,8 @@ class Product {
 
 	Date dateCreated
 	Date lastUpdated
-	Integer score = 0 // set manually; used as default ordering for lists of Products (descending)
+	Integer score = 0 // set by ProductApiController.automaticScoring(); used as default ordering for lists of Products (descending)
+	Integer scoreMod = 1
 	SecUser owner // set to product creator when product is created.
 
 	// Product's contact details.
@@ -161,6 +162,14 @@ class Product {
 			minimumSubscriptionInSeconds: minimumSubscriptionInSeconds,
 			owner: owner.name
 		]
+	}
+
+	boolean isCreatedAfter(Date d) {
+		return dateCreated.after(d)
+	}
+
+	boolean isUpdatedAfter(Date d) {
+		return lastUpdated.after(d)
 	}
 
 	boolean isFree() {

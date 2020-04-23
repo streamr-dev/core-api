@@ -92,6 +92,7 @@ class UrlMappings {
 		"/api/v1/products/$id/related"(method: "GET", controller: "productApi", action: "related")
 		"/api/v1/products/stale"(method: "GET", controller: "productApi", action: "staleProducts")
 		"/api/v1/products/staleEmail"(method: "GET", controller: "productApi", action: "emailStaleProductOwners")
+		"/api/v1/products/automaticScoring"(method: "GET", controller: "productApi", action: "automaticScoring")
 
 		"/api/v1/subscriptions"(resources: "subscriptionApi")
 

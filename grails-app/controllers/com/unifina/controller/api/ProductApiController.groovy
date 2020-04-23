@@ -28,10 +28,18 @@ class ProductApiController {
 
 	@GrailsCompileStatic
 	@StreamrApi(allowRoles = AllowRole.ADMIN)
+	def automaticScoring() {
+		List<Product> products = productService.findProductsForScoring()
+		List<Product> results = productService.automaticScoring(products)
+		render(results as JSON)
+	}
+
+	@GrailsCompileStatic
+	@StreamrApi(allowRoles = AllowRole.ADMIN)
 	def staleProducts() {
 		List<Product> products = productService.list(new ProductListParams(publicAccess: true), loggedInUser())
 		List<ProductService.StaleProduct> results = productService.findStaleProducts(products, new Date())
-		return render(results as JSON)
+		render(results as JSON)
 	}
 
 	@StreamrApi(allowRoles = AllowRole.ADMIN)
@@ -59,7 +67,7 @@ class ProductApiController {
 				}
 			}
 		}
-		return render(status: 204)
+		render(status: 204)
 	}
 
 	@GrailsCompileStatic

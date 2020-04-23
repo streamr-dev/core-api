@@ -110,6 +110,57 @@ class ProductServiceSpec extends Specification {
 			StreamMessage.ContentType.CONTENT_TYPE_JSON, StreamMessage.EncryptionType.NONE, content, StreamMessage.SignatureType.SIGNATURE_TYPE_NONE, null)
 	}
 
+	void "automatic product scoring"() {
+		setup:
+		SecUser owner = new SecUser(
+			username: "product.owner@streamr.network",
+			password: "xxx",
+			name: "Product Owner",
+		)
+		owner.save(validate: true, failOnError: true)
+
+		Product pro = new Product()
+		pro.id = "pro-id"
+		pro.owner = owner
+		pro.name = "Pro product"
+		pro.description = "This product is created by a professional"
+		pro.imageUrl = "http://imageserver.com/pro.gif"
+		pro.pricePerSecond = 4
+		pro.dateCreated = new Date().minus(6)
+		pro.lastUpdated = new Date().minus(2)
+		pro.save(validate: true, failOnError: true)
+
+		Product hobby = new Product()
+		hobby.id = "hobby-id"
+		hobby.owner = owner
+		hobby.name = "Hobby product"
+		hobby.description = "This product is created by a hobbyist"
+		hobby.pricePerSecond = 0
+		hobby.dateCreated = new Date().minus(100)
+		hobby.lastUpdated = new Date().minus(20)
+		hobby.save(validate: true, failOnError: true)
+
+		Product bad = new Product()
+		bad.id = "bad-id"
+		bad.owner = owner
+		bad.name = Product.DEFAULT_NAME
+		bad.dateCreated = new Date().minus(2 * 365)
+		bad.lastUpdated = new Date().minus(18 * 30)
+		bad.save(validate: true, failOnError: true)
+
+		List<Product> products = [
+		    pro,
+			hobby,
+			bad,
+		]
+		when:
+		List<Product> result = service.automaticScoring(products)
+		then:
+		for (Product p : result) {
+			println(p.name + ": " + p.score)
+		}
+	}
+
 	void "stale products"() {
 		setup:
 		// Fresh streams and products

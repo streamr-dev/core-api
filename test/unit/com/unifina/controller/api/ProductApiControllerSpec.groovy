@@ -76,6 +76,20 @@ class ProductApiControllerSpec extends Specification {
 			StreamMessage.ContentType.CONTENT_TYPE_JSON, StreamMessage.EncryptionType.NONE, content, StreamMessage.SignatureType.SIGNATURE_TYPE_NONE, null)
 	}
 
+	void "automatic product scoring"() {
+		setup:
+		controller.productService = Mock(ProductService)
+		List<Product> products = new ArrayList<>()
+		when:
+		request.method = "GET"
+		withFilters(action: "automaticScoring") {
+			controller.automaticScoring()
+		}
+		then:
+		1 * controller.productService.findProductsForScoring() >> products
+		1 * controller.productService.automaticScoring(products)
+	}
+
 	void "stale products"() {
 		setup:
 		// Fresh products

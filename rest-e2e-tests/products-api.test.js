@@ -1416,4 +1416,11 @@ describe('Products API', function() {
             })
         })
     })
+
+    describe('GET /api/v1/products/automaticScoring', () => {
+        it('requires admin authentication', () => {
+        })
+        it('TODO', () => {
+        })
+    })
 })

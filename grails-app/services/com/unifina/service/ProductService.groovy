@@ -2,8 +2,21 @@ package com.unifina.service
 
 import com.streamr.client.protocol.message_layer.StreamMessage
 import com.unifina.api.*
+import com.unifina.domain.marketplace.ProductStore
+import com.unifina.domain.marketplace.SubscriptionStore
 import com.unifina.domain.data.Stream
 import com.unifina.domain.marketplace.Product
+import com.unifina.domain.marketplace.productscore.ActiveSubscriptionsScorer
+import com.unifina.domain.marketplace.productscore.DateCreatedScorer
+import com.unifina.domain.marketplace.productscore.DescriptionScorer
+import com.unifina.domain.marketplace.productscore.ImageScorer
+import com.unifina.domain.marketplace.productscore.LastUpdatedScorer
+import com.unifina.domain.marketplace.productscore.NameScorer
+import com.unifina.domain.marketplace.productscore.ProductOwnersDATAAmountScorer
+import com.unifina.domain.marketplace.productscore.ProductPriceScorer
+import com.unifina.domain.marketplace.productscore.ProductScorer
+import com.unifina.domain.marketplace.productscore.ProductsDATAAmountScorer
+import com.unifina.domain.marketplace.productscore.TotalSubscriptionsScorer
 import com.unifina.domain.security.Permission
 import com.unifina.domain.security.SecUser
 import grails.compiler.GrailsCompileStatic
@@ -19,6 +32,49 @@ class ProductService {
 	CassandraService cassandraService
 	DataUnionJoinRequestService dataUnionJoinRequestService
 	Random random = ThreadLocalRandom.current()
+
+	List<Product> findProductsForScoring() {
+		ProductStore store = new ProductStore()
+		List<Product> products = store.findProductsForScoring()
+		return products
+	}
+
+	List<Product> automaticScoring(List<Product> products) {
+		final List<ProductScorer> scorers = new ArrayList<>()
+		scorers.add(new ProductPriceScorer())
+		scorers.add(new ImageScorer())
+		scorers.add(new NameScorer())
+		scorers.add(new DescriptionScorer())
+		scorers.add(new DateCreatedScorer())
+		scorers.add(new LastUpdatedScorer())
+		SubscriptionStore subscriptionStore = new SubscriptionStore()
+		scorers.add(new ActiveSubscriptionsScorer(subscriptionStore))
+		scorers.add(new TotalSubscriptionsScorer(subscriptionStore))
+		scorers.add(new ProductsDATAAmountScorer())
+		scorers.add(new ProductOwnersDATAAmountScorer())
+
+		ProductStore store = new ProductStore()
+		for (Product p : products) {
+			int score = 0
+			for (ProductScorer scorer : scorers) {
+				// The score could initially be the sum of a number of variables
+				// per each product (V) multiplied by a related constant (a):
+				// a1 * V1 + a2 * V2 + ... = product score
+				score = score + scorer.score(p)
+			}
+			p.score = score * p.scoreMod
+			//p.save(failOnError: true)
+			store.saveAndFailOnError(p)
+		}
+		// Sort product list by score
+		Collections.sort(products, new Comparator<Product>() {
+			@Override
+			int compare(Product a, Product b) {
+				return b.score.compareTo(a.score)
+			}
+		})
+		return products
+	}
 
 	static class StreamWithLatestMessage {
 		Stream stream
@@ -38,17 +94,6 @@ class ProductService {
 			df.setTimeZone(TimeZone.getTimeZone("UTC"))
 			String date = df.format(latestMessage.getTimestampAsDate())
 			return String.format("no data since %s", date)
-		}
-	}
-
-	static class StaleProduct {
-		Product product
-		final List<StreamWithLatestMessage> streams = new ArrayList<>()
-		StaleProduct(Product p) {
-			this.product = p
-		}
-		String toString() {
-			return String.format("StaleProduct[product=%s, streams=%s]", product, streams.toString())
 		}
 	}
 
@@ -73,6 +118,17 @@ class ProductService {
 		}
 
 		return staleProducts
+	}
+
+	static class StaleProduct {
+		Product product
+		final List<StreamWithLatestMessage> streams = new ArrayList<>()
+		StaleProduct(Product p) {
+			this.product = p
+		}
+		String toString() {
+			return String.format("StaleProduct[product=%s, streams=%s]", product, streams.toString())
+		}
 	}
 
 	Map<SecUser, List<ProductService.StaleProduct>> findStaleProductsByOwner(SecUser user) {
