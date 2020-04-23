@@ -123,7 +123,7 @@ grails.project.dependency.resolution = {
 			excludes('spring-security-core')
 			excludes('spring-security-web')
 		}
-		runtime(':database-migration:1.4.0')
+		runtime(':database-migration:1.4.2-SNAPSHOT')
 		runtime(":spring-security-core:2.0.0")
 
 		test(":plastic-criteria:1.6.7")
