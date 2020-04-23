@@ -1,8 +1,10 @@
 package com.unifina.domain.marketplace
 
 import grails.compiler.GrailsCompileStatic
+import grails.validation.Validateable
 
 @GrailsCompileStatic
+@Validateable
 class TermsOfUse {
 	Boolean redistribution = true
 	Boolean commercialUse = true
