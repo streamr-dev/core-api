@@ -1,5 +1,8 @@
 package com.unifina.domain.marketplace
 
+import grails.compiler.GrailsCompileStatic
+
+@GrailsCompileStatic
 class TermsOfUse {
 	Boolean redistribution = true
 	Boolean commercialUse = true

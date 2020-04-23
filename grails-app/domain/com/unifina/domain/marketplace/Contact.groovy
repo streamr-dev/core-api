@@ -1,7 +1,9 @@
 package com.unifina.domain.marketplace
 
 import com.unifina.utils.EmailValidator
+import grails.compiler.GrailsCompileStatic
 
+@GrailsCompileStatic
 class Contact {
 	// Contact's email address.
 	String email
