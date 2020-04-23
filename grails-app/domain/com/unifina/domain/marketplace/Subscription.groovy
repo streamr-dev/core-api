@@ -2,8 +2,10 @@ package com.unifina.domain.marketplace
 
 import com.unifina.domain.security.SecUser
 import grails.compiler.GrailsCompileStatic
+import grails.persistence.Entity
 
 @GrailsCompileStatic
+@Entity
 abstract class Subscription {
 	Long id
 	Product product

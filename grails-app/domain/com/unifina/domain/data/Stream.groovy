@@ -1,13 +1,14 @@
 package com.unifina.domain.data
 
-
 import com.unifina.domain.ExampleType
 import com.unifina.domain.marketplace.Product
 import com.unifina.domain.security.Permission
 import com.unifina.domain.signalpath.Canvas
 import grails.converters.JSON
+import grails.persistence.Entity
 import groovy.transform.CompileStatic
 
+@Entity
 class Stream implements Comparable {
 	public final static String DEFAULT_NAME = "Untitled Stream"
 	public final static Integer DEFAULT_STORAGE_DAYS = 365

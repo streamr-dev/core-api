@@ -3,10 +3,13 @@ package com.unifina.domain.marketplace
 import com.unifina.domain.security.SecUser
 import com.unifina.service.EthereumIntegrationKeyService
 import grails.compiler.GrailsCompileStatic
+import grails.persistence.Entity
 import grails.util.Holders
 
 @GrailsCompileStatic
+@Entity
 class PaidSubscription extends Subscription {
+
 	String address
 
 	static constraints = {
