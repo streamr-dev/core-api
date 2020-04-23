@@ -11,9 +11,6 @@ class TermsOfUse {
 	String termsUrl
 	String termsName
 
-	public TermsOfUse() {}
-	public TermsOfUse(Product product) {}
-
 	static constraints = {
 		redistribution(nullable: false)
 		commercialUse(nullable: false)

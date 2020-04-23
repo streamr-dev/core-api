@@ -18,9 +18,6 @@ class Contact {
 	// Social media link 4
 	String social4
 
-	public Contact() {}
-	public Contact(Product product) {}
-
 	static constraints = {
 		email(nullable: true, validator: EmailValidator.validateNullEmail, maxSize: 255)
 		url(nullable: true, url: true, maxSize: 2048)
