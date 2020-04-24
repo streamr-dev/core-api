@@ -26,7 +26,7 @@ jobs:
   - stage: Unit tests
     script: grails test-app -unit
   - stage: Validate Swagger
-    script: .travis_scripts/validate_swagger.sh
+    script: travis_retry .travis_scripts/validate_swagger.sh
   - stage: Integration tests
     script: travis_retry .travis_scripts/integration_test.sh
   - stage: REST API tests
