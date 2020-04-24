@@ -21,7 +21,7 @@ test-integration: ## Run integration tests
 
 .PHONY: test-rest
 test-rest: ## Run REST API tests
-	. /usr/local/opt/nvm/nvm.sh && nvm use && cd rest-e2e-tests && npm test
+	. /usr/local/opt/nvm/nvm.sh && cd rest-e2e-tests && nvm use && npm test
 
 # Development recipes
 
