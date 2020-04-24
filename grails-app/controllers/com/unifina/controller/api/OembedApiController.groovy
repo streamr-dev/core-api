@@ -4,14 +4,10 @@ import com.unifina.api.ApiException
 import com.unifina.security.AuthLevel
 import com.unifina.security.StreamrApi
 import grails.converters.JSON
-import grails.plugin.springsecurity.annotation.Secured
-import grails.util.Holder
 import grails.util.Holders
-import org.codehaus.groovy.grails.commons.GrailsApplication
 
 import java.text.DecimalFormat
 
-@Secured(["IS_AUTHENTICATED_ANONYMOUSLY"])
 class OembedApiController {
 
 	@StreamrApi(authenticationLevel = AuthLevel.NONE)

@@ -5,9 +5,7 @@ import com.unifina.service.DataUnionOperatorService
 import com.unifina.security.AuthLevel
 import com.unifina.security.StreamrApi
 import com.unifina.utils.EthereumAddressValidator
-import grails.plugin.springsecurity.annotation.Secured
 
-@Secured(["IS_AUTHENTICATED_ANONYMOUSLY"])
 class DataUnionOperatorApiController {
 	DataUnionOperatorService dataUnionOperatorService
 	static boolean isDataUnionAddress(String value) {

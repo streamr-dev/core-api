@@ -11,11 +11,9 @@ import com.unifina.service.*
 import grails.compiler.GrailsCompileStatic
 import grails.converters.JSON
 import grails.plugin.mail.MailService
-import grails.plugin.springsecurity.annotation.Secured
 import org.apache.log4j.Logger
 import org.springframework.web.multipart.MultipartFile
 
-@Secured(["IS_AUTHENTICATED_ANONYMOUSLY"])
 class ProductApiController {
 	ApiService apiService
 	FreeProductService freeProductService

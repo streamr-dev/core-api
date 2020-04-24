@@ -10,9 +10,7 @@ import com.unifina.service.EthereumService
 import com.unifina.utils.EthereumAddressValidator
 import com.unifina.utils.IDValidator
 import grails.converters.JSON
-import grails.plugin.springsecurity.annotation.Secured
 
-@Secured(["IS_AUTHENTICATED_ANONYMOUSLY"])
 class DataUnionJoinRequestApiController {
 	DataUnionJoinRequestService dataUnionJoinRequestService
 	EthereumService ethereumService
