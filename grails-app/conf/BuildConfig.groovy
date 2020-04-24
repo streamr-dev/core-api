@@ -129,19 +129,18 @@ grails.project.dependency.resolution = {
 	}
 
 	plugins {
-		build(":tomcat:7.0.70") { // or ":tomcat:8.0.22"
+		build(":tomcat:8.0.50") {
 			export = false
 		}
 
-		compile(":mail:1.0.7")
-		compile(":cache-headers:1.1.7")
+		compile(":mail:1.0.8-SNAPSHOT")
 
 		runtime(':hibernate:3.6.10.19') // or :hibernate4:4.3.10
-		runtime(":cors:1.1.8") {
+		runtime(":cors:1.3.0") {
 			excludes('spring-security-core')
 			excludes('spring-security-web')
 		}
-		runtime(':database-migration:1.4.0')
+		runtime(':database-migration:1.4.2-SNAPSHOT')
 
 		test(":plastic-criteria:1.6.7")
 		test(":rest-client-builder:2.1.1")
