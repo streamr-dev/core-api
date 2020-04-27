@@ -92,7 +92,7 @@ class UserService {
 	}
 
 	def addRoles(SecUser user, List<SecRole> roles = null) {
-		roles.each { SecRole role ->
+		roles?.each { SecRole role ->
 			new SecUserSecRole().create(user, role)
 		}
 	}
@@ -175,7 +175,7 @@ class UserService {
 		if (user == null) {
 			throw new InvalidUsernameAndPasswordException("Invalid username or password")
 		}
-		String dbHash = user.password // TODO: $2a$10$z0HZdlGT7tvG6TSw4r/3Z.kqxJO4yM/ON4zX1pQ4TR1Kj3aidO/6q
+		String dbHash = user.password
 		if (passwordEncoder.isPasswordValid(dbHash, password)) {
 			return user
 		} else {

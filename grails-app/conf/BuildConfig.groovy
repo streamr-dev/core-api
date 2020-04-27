@@ -83,7 +83,7 @@ grails.project.dependency.resolution = {
 			excludes('org.springframework:spring-context:*')
 			excludes('org.springframework:spring-orm:*')
 		}
-		compile('org.springframework.security:spring-security-core:3.2.9.RELEASE') {
+		compile('org.springframework.security:spring-security-core:3.2.9.RELEASE') { // Needed for bcrypt password encoder
 			excludes('aopalliance', 'aspectjrt', 'cglib-nodep', 'commons-collections', 'commons-logging',
 				'ehcache', 'fest-assert', 'hsqldb', 'jcl-over-slf4j', 'jsr250-api', 'junit',
 				'logback-classic', 'mockito-core', 'powermock-api-mockito', 'powermock-api-support',
@@ -91,7 +91,7 @@ grails.project.dependency.resolution = {
 				'powermock-reflect', 'spring-aop', 'spring-beans', 'spring-context', 'spring-core',
 				'spring-expression', 'spring-jdbc', 'spring-test', 'spring-tx')
 		}
-		compile('org.springframework.security:spring-security-web:3.2.9.RELEASE') {
+		compile('org.springframework.security:spring-security-web:3.2.9.RELEASE') { // Needed for CORS
 			excludes('aopalliance', 'commons-codec', 'commons-logging', 'fest-assert', 'groovy', 'hsqldb',
 				'jcl-over-slf4j', 'junit', 'logback-classic', 'mockito-core', 'powermock-api-mockito',
 				'powermock-api-support', 'powermock-core', 'powermock-module-junit4',
