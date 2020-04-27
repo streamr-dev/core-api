@@ -83,6 +83,23 @@ grails.project.dependency.resolution = {
 			excludes('org.springframework:spring-context:*')
 			excludes('org.springframework:spring-orm:*')
 		}
+		compile('org.springframework.security:spring-security-core:3.2.9.RELEASE') {
+			excludes('aopalliance', 'aspectjrt', 'cglib-nodep', 'commons-collections', 'commons-logging',
+				'ehcache', 'fest-assert', 'hsqldb', 'jcl-over-slf4j', 'jsr250-api', 'junit',
+				'logback-classic', 'mockito-core', 'powermock-api-mockito', 'powermock-api-support',
+				'powermock-core', 'powermock-module-junit4', 'powermock-module-junit4-common',
+				'powermock-reflect', 'spring-aop', 'spring-beans', 'spring-context', 'spring-core',
+				'spring-expression', 'spring-jdbc', 'spring-test', 'spring-tx')
+		}
+		compile('org.springframework.security:spring-security-web:3.2.9.RELEASE') {
+			excludes('aopalliance', 'commons-codec', 'commons-logging', 'fest-assert', 'groovy', 'hsqldb',
+				'jcl-over-slf4j', 'junit', 'logback-classic', 'mockito-core', 'powermock-api-mockito',
+				'powermock-api-support', 'powermock-core', 'powermock-module-junit4',
+				'powermock-module-junit4-common', 'powermock-reflect', 'spock-core', 'spring-beans',
+				'spring-context', 'spring-core', 'spring-expression', 'spring-jdbc',
+				'spring-security-core', 'spring-test', 'spring-tx', 'spring-web', 'spring-webmvc',
+				'tomcat-servlet-api')
+		}
 
 		compile('org.web3j:core:4.4.1')
 		compile('com.amazonaws:aws-java-sdk:1.11.294')
@@ -112,20 +129,18 @@ grails.project.dependency.resolution = {
 	}
 
 	plugins {
-		build(":tomcat:7.0.70") { // or ":tomcat:8.0.22"
+		build(":tomcat:8.0.50") {
 			export = false
 		}
 
-		compile(":mail:1.0.7")
-		compile(":cache-headers:1.1.7")
+		compile(":mail:1.0.8-SNAPSHOT")
 
 		runtime(':hibernate:3.6.10.19') // or :hibernate4:4.3.10
-		runtime(":cors:1.1.8") {
+		runtime(":cors:1.3.0") {
 			excludes('spring-security-core')
 			excludes('spring-security-web')
 		}
-		runtime(':database-migration:1.4.0')
-		runtime(":spring-security-core:2.0.0")
+		runtime(':database-migration:1.4.2-SNAPSHOT')
 
 		test(":plastic-criteria:1.6.7")
 		test(":rest-client-builder:2.1.1")

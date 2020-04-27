@@ -26,6 +26,10 @@ import java.nio.charset.StandardCharsets
  * GET /dataunions/{contractAddress}/members/{memberAddress}: returns individual member stats (such as balances and withdraw proofs)
  */
 public class DataUnionOperatorService implements InitializingBean {
+
+	// This service just proxies requests to the DUS, so we don't want to start database transactions
+	static transactional = false
+
 	private static final Logger log = LogManager.getLogger(DataUnionOperatorService.class);
 	private String baseUrl;
 	private CloseableHttpClient client;

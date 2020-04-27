@@ -17,10 +17,8 @@ import com.unifina.exceptions.ModuleExceptionMessage
 import com.unifina.utils.Globals
 import grails.compiler.GrailsCompileStatic
 import grails.converters.JSON
-import grails.plugin.springsecurity.annotation.Secured
 import grails.util.GrailsUtil
 
-@Secured(["IS_AUTHENTICATED_ANONYMOUSLY"])
 class ModuleApiController {
 
 	PermissionService permissionService

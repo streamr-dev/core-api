@@ -1,17 +1,10 @@
 package com.unifina.controller.api
 
-
 import com.unifina.domain.security.*
-import com.unifina.domain.signalpath.Module
 import com.unifina.domain.signalpath.ModulePackage
-
-import com.unifina.service.CanvasService
-import com.unifina.service.PermissionService
-import com.unifina.service.SignupCodeService
-import com.unifina.service.StreamService
-import com.unifina.service.UserService
+import com.unifina.security.PasswordEncoder
+import com.unifina.service.*
 import com.unifina.signalpath.messaging.MockMailService
-import grails.plugin.springsecurity.SpringSecurityService
 import grails.test.mixin.Mock
 import grails.test.mixin.TestFor
 import org.codehaus.groovy.grails.commons.GrailsApplication
@@ -23,12 +16,7 @@ import spock.lang.Specification
 class AuthApiControllerSpec extends Specification {
 
 	String username = "user@invite.to"
-
-	def springSecurityService = [
-		encodePassword: { pw ->
-			return pw + "-encoded"
-		}
-	]
+	PasswordEncoder passwordEncoder = new UnitTestPasswordEncoder()
 
 	def messageSource = [
 	    getMessage: { error, locale ->
@@ -38,11 +26,11 @@ class AuthApiControllerSpec extends Specification {
 
 	void setup() {
 		controller.mailService = new MockMailService()
-		controller.springSecurityService = springSecurityService as SpringSecurityService
+		controller.passwordEncoder = passwordEncoder
 		controller.signupCodeService = new SignupCodeService()
 		def permissionService = Stub(PermissionService)
 		controller.userService = new UserService()
-		controller.userService.springSecurityService = springSecurityService as SpringSecurityService
+		controller.userService.passwordEncoder = passwordEncoder
 		controller.userService.grailsApplication = grailsApplication as GrailsApplication
 		controller.userService.permissionService = permissionService as PermissionService
 		controller.userService.messageSource = messageSource as MessageSource
@@ -192,7 +180,7 @@ class AuthApiControllerSpec extends Specification {
 			id: 1,
 			username: "test@test.com",
 			name: "Test User",
-			password: springSecurityService.encodePassword("foobar123!"),
+			password: passwordEncoder.encodePassword("foobar123!"),
 		)
 		user.save(validate: false)
 		def inv = controller.signupCodeService.create(user.username)
