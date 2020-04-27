@@ -19,6 +19,7 @@ import grails.transaction.Transactional
 import grails.util.Holders
 import groovy.transform.CompileStatic
 import org.apache.log4j.Logger
+import org.codehaus.groovy.grails.web.mapping.LinkGenerator
 
 import java.security.AccessControlException
 import java.util.concurrent.ConcurrentHashMap
@@ -30,8 +31,8 @@ class SignalPathService {
 
     static transactional = false
 
-	def grailsLinkGenerator
-	def serializationService
+	LinkGenerator grailsLinkGenerator
+	SerializationService serializationService
 	PermissionService permissionService
 	ApiService apiService
 	NodeService nodeService
