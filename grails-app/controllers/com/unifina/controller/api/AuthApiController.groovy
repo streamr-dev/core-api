@@ -167,7 +167,7 @@ class AuthApiController {
 		}
 
 		RegistrationCode.withTransaction { status ->
-			user.password = passwordEncoder.encodePassword(command.password, salt)
+			user.password = passwordEncoder.encodePassword(command.password)
 			user.save()
 			registrationCode.delete()
 		}
