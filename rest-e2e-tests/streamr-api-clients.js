@@ -244,9 +244,29 @@ class Streams {
             })
     }
 
+    getValidationInfo(id) {
+        return new StreamrApiRequest(this.options)
+            .methodAndPath('GET', `streams/${id}/validation`)
+    }
+
     getPublishers(id) {
         return new StreamrApiRequest(this.options)
             .methodAndPath('GET', `streams/${id}/publishers`)
+    }
+
+    getSubscribers(id) {
+        return new StreamrApiRequest(this.options)
+            .methodAndPath('GET', `streams/${id}/subscribers`)
+    }
+
+    isPublisher(streamId, address) {
+        return new StreamrApiRequest(this.options)
+            .methodAndPath('GET', `streams/${streamId}/publisher/${address}`)
+    }
+
+    isSubscriber(streamId, address) {
+        return new StreamrApiRequest(this.options)
+            .methodAndPath('GET', `streams/${streamId}/subscriber/${address}`)
     }
 }
 
