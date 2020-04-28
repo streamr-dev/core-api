@@ -17,17 +17,28 @@ import org.springframework.mock.web.MockMultipartFile
 class UserApiControllerSpec extends ControllerSpecification {
 
 	SecUser me
+	SecUser ethUser
 	PasswordEncoder passwordEncoder = new UnitTestPasswordEncoder()
 
 	def setup() {
 		me = new SecUser(
 			name: "me",
 			username: "me@too.com",
+			email: "me@too.com",
 			enabled: true,
 			password: passwordEncoder.encodePassword("foobar123!"),
 		)
 		me.id = 1
 		me.save(validate: false)
+		ethUser = new SecUser(
+			name: "eth",
+			username: "0x0000000000000000000000000000000000000000",
+			email: "eth@eth.com",
+			enabled: true,
+			password: passwordEncoder.encodePassword("foobar123!"),
+		)
+		ethUser.id = 2
+		ethUser.save(validate: false)
 		controller.passwordEncoder = passwordEncoder
 	}
 
@@ -76,22 +87,46 @@ class UserApiControllerSpec extends ControllerSpecification {
 		response.status == 204
 	}
 
+	void "update ethereum users profile"() {
+		setup:
+
+		controller.userService = new UserService()
+		when: "updated profile is submitted"
+		request.method = "PUT"
+		request.requestURI = "/api/v1/users/me"
+		request.json = [
+			name: "New Name",
+			email: "changed@emailaddress.com",
+		]
+		request.apiUser = ethUser
+		authenticatedAs(ethUser) {
+			controller.update()
+		}
+
+		then: "values must be updated"
+		response.json.name == "New Name"
+		response.json.email == "changed@emailaddress.com"
+		response.json.username == "0x0000000000000000000000000000000000000000"
+	}
+
 	void "changing user settings must change them"() {
 		controller.userService = new UserService()
-		when: "new settings are submitted"
+		when: "updated profile is submitted"
 		request.method = "PUT"
 		request.requestURI = "/api/v1/users/me"
 		request.json = [
 			name: "Changed Name",
+			email: "changed@emailaddress.com",
 		]
 		request.apiUser = me
 		authenticatedAs(me) {
-			controller.update(new UpdateProfileCommand(name: "Changed Name"))
+			controller.update()
 		}
 
-		then: "values must be updated and show update message"
-		SecUser.get(1).name == "Changed Name"
+		then: "values must be updated"
 		response.json.name == "Changed Name"
+		response.json.email == "changed@emailaddress.com"
+		response.json.username == "changed@emailaddress.com"
 	}
 
 	void "sensitive fields cannot be changed"() {
@@ -106,7 +141,7 @@ class UserApiControllerSpec extends ControllerSpecification {
 		]
 		request.apiUser = me
 		authenticatedAs(me) {
-			controller.update(new UpdateProfileCommand())
+			controller.update()
 		}
 
 		then:

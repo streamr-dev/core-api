@@ -9,6 +9,7 @@ import com.unifina.security.StreamrApi
 import com.unifina.service.BalanceService
 import com.unifina.service.UserAvatarImageService
 import com.unifina.service.UserService
+import com.unifina.utils.EmailValidator
 import grails.converters.JSON
 import grails.validation.Validateable
 import org.springframework.web.multipart.MultipartFile
@@ -24,6 +25,13 @@ class UserApiController {
 		SecUser user = loggedInUser()
 		// Only these user fields can be updated!
 		user.name = cmd.name ?: user.name
+		boolean isNewEmailValid = EmailValidator.validate(cmd.email)
+		if (isNewEmailValid) {
+			user.email = cmd.email
+		}
+		if (isNewEmailValid && EmailValidator.validate(user.username)) {
+			user.username = cmd.email
+		}
 		user = user.save(failOnError: true)
 		if (user.hasErrors()) {
 			log.warn("Update failed due to validation errors: " + userService.checkErrors(user.errors.getAllErrors()))
@@ -91,6 +99,7 @@ class UserApiController {
 @Validateable
 class UpdateProfileCommand {
 	String name
+	String email
 }
 
 @Validateable
