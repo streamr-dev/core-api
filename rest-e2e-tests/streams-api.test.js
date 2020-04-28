@@ -62,21 +62,23 @@ describe('Streams API', () => {
         })
     })
 
-    describe('GET /api/v1/streams/:id/publishers', () => {
-        it('requires authentication for private streams', async () => {
-            const response = await Streamr.api.v1.streams.getPublishers(streamId).call()
-            assert.equal(response.status, 403)
+    describe('GET /api/v1/streams/:id/validation', () => {
+        it('does not require authentication', async () => {
+            const response = await Streamr.api.v1.streams.getValidationInfo(streamId).call()
+            assert.equal(response.status, 200)
         })
-        it('does not require authentication for public streams', async () => {
-            const publicStreamResponse = await Streamr.api.v1.streams
-                .create({
-                    name: 'stream-id-' + Date.now()
-                })
-                .withApiKey(API_KEY)
-                .execute()
-            const permResponse = await Streamr.api.v1.streams.makePublic(publicStreamResponse.id).withApiKey(API_KEY).call()
-            assert.equal(permResponse.status, 201)
-            const response = await Streamr.api.v1.streams.getPublishers(publicStreamResponse.id).call()
+    })
+
+    describe('GET /api/v1/streams/:id/publishers', () => {
+        it('does not require authentication', async () => {
+            const response = await Streamr.api.v1.streams.getPublishers(streamId).call()
+            assert.equal(response.status, 200)
+        })
+    })
+
+    describe('GET /api/v1/streams/:id/subscribers', () => {
+        it('does not require authentication', async () => {
+            const response = await Streamr.api.v1.streams.getSubscribers(streamId).call()
             assert.equal(response.status, 200)
         })
     })

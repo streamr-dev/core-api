@@ -120,6 +120,19 @@ class Stream implements Comparable {
 		]
 	}
 
+	/**
+	 * Returns only the public fields required for validating messages in streams
+	 */
+	@CompileStatic
+	Map toValidationMap() {
+		[
+			id: id,
+			partitions: partitions,
+			requireSignedData: requireSignedData,
+			requireEncryptedData: requireEncryptedData,
+		]
+	}
+
 	@Override
 	int compareTo(Object arg0) {
 		if (!(arg0 instanceof Stream)) return 0
