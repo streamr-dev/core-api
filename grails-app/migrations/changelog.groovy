@@ -146,4 +146,5 @@ databaseChangeLog = {
 	include file: 'core/2020-01-24-rename-community-to-data-union.groovy'
 	include file: 'core/2020-03-05-new-product-fields-contact-terms-of-use.groovy'
 	include file: 'core/2020-04-01-rm-tour-user.groovy'
+	include file: 'core/2020-04-15-user-refactor-username-add-email.groovy'
 }
