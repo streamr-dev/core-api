@@ -12,6 +12,7 @@ import com.unifina.service.UserService
 import com.unifina.utils.EmailValidator
 import grails.converters.JSON
 import grails.validation.Validateable
+import groovy.transform.ToString
 import org.springframework.web.multipart.MultipartFile
 
 class UserApiController {
@@ -97,12 +98,14 @@ class UserApiController {
 
 
 @Validateable
+@ToString
 class UpdateProfileCommand {
 	String name
 	String email
 }
 
 @Validateable
+@ToString(excludes = ["currentpassword", "password", "password2"])
 class ChangePasswordCommand {
 
 	PasswordEncoder passwordEncoder

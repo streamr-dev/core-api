@@ -109,7 +109,7 @@ class UserApiControllerSpec extends ControllerSpecification {
 		response.json.username == "0x0000000000000000000000000000000000000000"
 	}
 
-	void "changing user settings must change them"() {
+	void "update user profile who registered with username and password"() {
 		controller.userService = new UserService()
 		when: "updated profile is submitted"
 		request.method = "PUT"
@@ -129,7 +129,7 @@ class UserApiControllerSpec extends ControllerSpecification {
 		response.json.username == "changed@emailaddress.com"
 	}
 
-	void "sensitive fields cannot be changed"() {
+	void "private user fields cannot be changed via update profile"() {
 		controller.userService = new UserService()
 
 		when:
@@ -164,7 +164,7 @@ class UserApiControllerSpec extends ControllerSpecification {
 			controller.changePassword(cmd)
 		}
 		then: "password must be changed"
-		cmd.passwordEncoder.isPasswordValid(SecUser.get(1).password, "barbar123!")
+		cmd.passwordEncoder.isPasswordValid(SecUser.get(me.id).password, "barbar123!")
 		then:
 		response.status == 204
 	}
@@ -238,7 +238,7 @@ class UserApiControllerSpec extends ControllerSpecification {
 			controller.changePassword(cmd)
 		}
 		then: "the old password must remain valid"
-		cmd.passwordEncoder.isPasswordValid(SecUser.get(1).password, "foobar123!")
+		cmd.passwordEncoder.isPasswordValid(SecUser.get(me.id).password, "foobar123!")
 		then:
 		def e = thrown(ApiException)
 		e.message == "Password not changed!"
@@ -260,7 +260,7 @@ class UserApiControllerSpec extends ControllerSpecification {
 			controller.changePassword(cmd)
 		}
 		then: "the old password must remain valid"
-		cmd.passwordEncoder.isPasswordValid(SecUser.get(1).password, "foobar123!")
+		cmd.passwordEncoder.isPasswordValid(SecUser.get(me.id).password, "foobar123!")
 		then:
 		def e = thrown(ApiException)
 		e.message == "Password not changed!"
@@ -282,7 +282,7 @@ class UserApiControllerSpec extends ControllerSpecification {
 			controller.changePassword(cmd)
 		}
 		then: "the old password must remain valid"
-		cmd.passwordEncoder.isPasswordValid(SecUser.get(1).password, "foobar123!")
+		cmd.passwordEncoder.isPasswordValid(SecUser.get(me.id).password, "foobar123!")
 		then:
 		def e = thrown(ApiException)
 		e.message == "Password not changed!"
