@@ -97,12 +97,18 @@ class SecUser implements Userish {
 
 	@CompileStatic
 	static SecUser loadViaJava(Long userId) {
-		SecUser.load(userId)
+		Object o = SecUser.withTransaction {
+			return SecUser.load(userId)
+		}
+		return o as SecUser
 	}
 
 	@CompileStatic
 	static SecUser getViaJava(Long userId) {
-		SecUser.get(userId)
+		Object o = SecUser.withTransaction {
+			return SecUser.get(userId)
+		}
+		return o as SecUser
 	}
 
 	//TODO: Once all users are defined with their ethereum public key we can remove this
