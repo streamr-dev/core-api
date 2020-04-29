@@ -54,6 +54,23 @@ class SignalPathServiceSpec extends Specification {
 		Holders.getApplicationContext().beanFactory.destroySingleton("canvasService")
 	}
 
+	void "when SignalPathRunner thread is killed dont mark canvas to stopped state"() {
+		setup:
+		Globals globals = new Globals([:], new SecUser(), Globals.Mode.REALTIME, null)
+		SignalPath sp = new SignalPath()
+		Canvas c = new Canvas()
+		c.state = Canvas.State.RUNNING
+		c.id = "canvas-id-1"
+		c.save()
+		sp.setCanvas(c)
+		SignalPathRunner runner = new SignalPathRunner(sp, globals)
+		service.runnersById = [id: runner]
+		when:
+		boolean success = service.stopLocalRunner("id")
+		then:
+		c.state == Canvas.State.RUNNING
+	}
+
 	def "clearState() clears serialized state"() {
 		when:
 		service.clearState(c1)
