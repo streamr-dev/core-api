@@ -472,9 +472,9 @@
           <root url="jar://$USER_HOME$/.sdkman/candidates/grails/2.5.6/dist/grails-plugin-testing-2.5.6-sources.jar!/" />
           <root url="jar://$USER_HOME$/.sdkman/candidates/grails/2.5.6/dist/grails-docs-2.5.6-sources.jar!/" />
           <root url="jar://$USER_HOME$/.sdkman/candidates/grails/2.5.6/dist/grails-scripts-2.5.6-sources.jar!/" />
-          <root url="jar://$USER_HOME$/.sdkman/candidates/grails/2.5.6/src/grails-datastore-simple-3.1.5.RELEASE-sources.jar!/" />
-          <root url="jar://$USER_HOME$/.sdkman/candidates/grails/2.5.6/src/grails-datastore-gorm-3.1.5.RELEASE-sources.jar!/" />
           <root url="jar://$USER_HOME$/.sdkman/candidates/grails/2.5.6/src/grails-datastore-core-3.1.5.RELEASE-sources.jar!/" />
+          <root url="jar://$USER_HOME$/.sdkman/candidates/grails/2.5.6/src/grails-datastore-gorm-3.1.5.RELEASE-sources.jar!/" />
+          <root url="jar://$USER_HOME$/.sdkman/candidates/grails/2.5.6/src/grails-datastore-simple-3.1.5.RELEASE-sources.jar!/" />
         </SOURCES>
         <jarDirectory url="file://$MODULE_DIR$/lib" recursive="false" />
       </library>
