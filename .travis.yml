@@ -81,6 +81,7 @@ jobs:
       acl: private
       region: eu-west-1
       skip_cleanup: true
+      local_dir: docs
       glob: "swagger.json"
       on:
         branch: master
