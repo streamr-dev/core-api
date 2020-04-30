@@ -162,7 +162,7 @@ class CanvasService {
 		taskService.createTask(CanvasStartTask, CanvasStartTask.getConfig(canvas, forceReset, resetOnError), "canvas-start", user)
 	}
 
-	@Transactional
+	@Transactional(noRollbackFor=[CanvasUnreachableException])
 	void stop(Canvas canvas, SecUser user) {
 		if (canvas.state != Canvas.State.RUNNING) {
 			throw new InvalidStateException("Canvas $canvas.id not currently running.")
@@ -171,8 +171,8 @@ class CanvasService {
 		try {
 			signalPathService.stopRemote(canvas, user)
 		} catch (CanvasUnreachableException e) {
-			// Don't re-throw. This situation is ok because what the user wants and the actual state agree.
 			log.warn("Canvas ${canvas.id} doesn't seem to be running, but the user wanted to stop it. It will be set to STOPPED state.")
+			throw e
 		} finally {
 			canvas.state = Canvas.State.STOPPED
 			canvas.save(failOnError: true, flush: true)
