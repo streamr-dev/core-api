@@ -1,6 +1,6 @@
 package com.unifina.service
 
-
+import com.unifina.BeanMockingSpecification
 import com.unifina.domain.security.Permission
 import com.unifina.domain.security.SecRole
 import com.unifina.domain.security.SecUser
@@ -14,14 +14,12 @@ import com.unifina.signalpath.SignalPathRunner
 import com.unifina.utils.Globals
 import grails.test.mixin.Mock
 import grails.test.mixin.TestFor
-import grails.util.Holders
-import spock.lang.Specification
 
 import java.security.AccessControlException
 
 @TestFor(SignalPathService)
 @Mock([SecUser, SecRole, SecUserSecRole, Canvas, Serialization])
-class SignalPathServiceSpec extends Specification {
+class SignalPathServiceSpec extends BeanMockingSpecification {
 
 	SecUser me
 	SecUser admin
@@ -45,37 +43,8 @@ class SignalPathServiceSpec extends Specification {
 		)
 		c1.save(failOnError: true)
 		assert c1.serialization.id != null
-
-		canvasService = Mock(CanvasService)
-		Holders.getApplicationContext().beanFactory.registerSingleton("canvasService", canvasService)
+		canvasService = mockBean(CanvasService, Mock(CanvasService))
 	}
-
-	def cleanup() {
-		Holders.getApplicationContext().beanFactory.destroySingleton("canvasService")
-	}
-
-	void "when SignalPathRunner thread is killed dont mark canvas to stopped state"() {
-		setup:
-		SerializationService serializationService = Mock(SerializationService)
-		Holders.getApplicationContext().beanFactory.registerSingleton("serializationService", serializationService)
-
-		Globals globals = new Globals([:], new SecUser(), Globals.Mode.REALTIME, null)
-		SignalPath sp = new SignalPath()
-		Canvas c = new Canvas()
-		c.state = Canvas.State.RUNNING
-		c.id = "canvas-id-1"
-		c.save()
-		sp.setCanvas(c)
-		SignalPathRunner runner = new SignalPathRunner(sp, globals)
-		runner.start()
-		runner.waitRunning(true)
-		when:
-		runner.interrupt()
-		then:
-		serializationService.serializationIntervalInMillis() >> 0L
-		c.state == Canvas.State.RUNNING
-	}
-
 
 	def "clearState() clears serialized state"() {
 		when:
