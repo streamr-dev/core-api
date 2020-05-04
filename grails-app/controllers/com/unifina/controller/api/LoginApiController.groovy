@@ -13,9 +13,7 @@ import com.unifina.service.EthereumIntegrationKeyService
 import com.unifina.service.SessionService
 import com.unifina.service.UserService
 import grails.converters.JSON
-import grails.plugin.springsecurity.annotation.Secured
 
-@Secured(["IS_AUTHENTICATED_ANONYMOUSLY"])
 class LoginApiController {
 	ChallengeService challengeService
 	SessionService sessionService

@@ -2,14 +2,11 @@ package com.unifina.service
 
 import com.unifina.api.InvalidUsernameAndPasswordException
 import com.unifina.api.NotFoundException
+import com.unifina.controller.api.UnitTestPasswordEncoder
 import com.unifina.domain.security.*
 import com.unifina.domain.signalpath.Module
-import grails.plugin.springsecurity.SpringSecurityService
 import grails.test.mixin.Mock
 import grails.test.mixin.TestFor
-import org.springframework.security.authentication.encoding.PlaintextPasswordEncoder
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder
-import org.springframework.security.crypto.password.PasswordEncoder
 import org.springframework.validation.FieldError
 import spock.lang.Specification
 
@@ -29,29 +26,20 @@ class UserServiceSpec extends Specification {
 	def permissionService
 
 	def setup() {
-		defineBeans {
-			passwordEncoder(PlaintextPasswordEncoder)
-			springSecurityService(SpringSecurityService)
-		}
-		// Do some wiring that should be done automatically but for some reason is not (in unit tests)
-		grailsApplication.mainContext.getBean("springSecurityService").grailsApplication = grailsApplication
-		grailsApplication.mainContext.getBean("springSecurityService").passwordEncoder = grailsApplication.mainContext.getBean("passwordEncoder")
+		service.passwordEncoder = new UnitTestPasswordEncoder()
 		permissionService = service.permissionService = Mock(PermissionService)
 		service.streamService = Mock(StreamService)
 		service.canvasService = Mock(CanvasService)
 	}
 
-	def "the user is created when called, with default roles if none supplied"() {
+	def "the user is created when called"() {
 		when:
 		createData()
 		SecUser user = service.createUser([username: "test@test.com", name:"test", password: "test", enabled:true, accountLocked:false, passwordExpired:false])
 
 		then:
 		SecUser.count() == 1
-
-		user.getAuthorities().size() == 2
-		user.getAuthorities().toArray()[0].authority == "ROLE_USER"
-		user.getAuthorities().toArray()[1].authority == "ROLE_LIVE"
+		user.getAuthorities().size() == 0 // By default, user's have no roles
 	}
 
 	def "default API key is created for user"() {
@@ -90,8 +78,7 @@ class UserServiceSpec extends Specification {
 	def "should find user from both username and password"() {
 		String username = "username"
 		String password = "password"
-		PasswordEncoder encoder = new BCryptPasswordEncoder()
-		String hashedPassword = encoder.encode(password)
+		String hashedPassword = service.passwordEncoder.encodePassword(password)
 		new SecUser(username: username, password: hashedPassword).save(failOnError: true, validate: false)
 		when:
 		SecUser retrievedUser = service.getUserFromUsernameAndPassword(username, password)
@@ -104,8 +91,7 @@ class UserServiceSpec extends Specification {
 		String username = "username"
 		String password = "password"
 		String wrongPassword = "wrong"
-		PasswordEncoder encoder = new BCryptPasswordEncoder()
-		String hashedPassword = encoder.encode(password)
+		String hashedPassword = service.passwordEncoder.encodePassword(password)
 		new SecUser(username: username, password: hashedPassword).save(failOnError: true, validate: false)
 		when:
 		service.getUserFromUsernameAndPassword(username, wrongPassword)

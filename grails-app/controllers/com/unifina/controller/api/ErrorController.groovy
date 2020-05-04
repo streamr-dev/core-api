@@ -7,6 +7,8 @@ import com.unifina.security.StreamrApi
 import grails.converters.JSON
 import groovy.transform.CompileStatic
 
+import javax.servlet.http.HttpServletResponse
+
 class ErrorController {
 
 	static final Map<String, Closure<ApiError>> errorMappings = [
@@ -47,6 +49,12 @@ class ErrorController {
 			response.status = 500
 			render ([code: "ERROR_WHILE_RENDERING_EXCEPTION", message: "An error occurred while rendering exception"] as JSON)
 		}
+	}
+
+	@StreamrApi(authenticationLevel = AuthLevel.NONE)
+	def notFound() {
+		response.sendError(HttpServletResponse.SC_NOT_FOUND)
+		return
 	}
 
 	@CompileStatic

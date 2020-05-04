@@ -16,7 +16,7 @@ before_install:
 - nvm install $NODE_VERSION
 env:
   global:
-  - NODE_VERSION=$(cat .nvmrc)
+  - NODE_VERSION=$(cat rest-e2e-tests/.nvmrc)
   - OWNER=streamr
   - IMAGE_NAME=engine-and-editor
   - secure: Icz6PgvdiMvqiC1yMBknaSMqHvvthOo0hUrVCTGA8pWXaqofX5fKNVI8GL4kvRK7a+YpEZ7SCvHH1cgEfBx8jC+Wc0XjGfBZXH1C1gyo8X1keCcJQVRyhxXkrjaeOLF0Cas8m9MdgAqJlwDcAXkWh426kvpAbU1SbNkkSCX3Ksp6M43LVUEbtkdOCf0GxavfgsGL5S9fk7WUf7hU4+HqL/UbbM+XMTz9hgajI5zzyRPiFwMPLGohNfopLKZvRWL/2IDY4ldVEzRi8koxIYrhO68o5RJJsptw+Gfaf3mzmgDGP9jU/cWYxsrfWogtVGFOiB2nDA+opbDU79vwHCpP5dcZJUEDvgOMVA0aTRT6Mc6hXM07wiL9noJwrSqoudkXianDDJqCKja+myKNi4wVWpisZV0HfF3nWeiKoxBaQdlCc7UUadS4OYK30Xll/Z9Z3ebWWGRmdKRSeD+QmM4j8VMu/t624AX/Q0laAS7/6BKOjMaDUqm3Q7plNWTSQWRmVUFzaH0xRL1DPLIbz/8Z8D1IVOfnq6k2FYTtVnjKQdHH65ddtqZMwtsSJsS9fQRYOm3ly0avPvDNnNeEYEuhY5lF8Tiw1lwh+BHOhiQLAPi7dqTiV/I2ImgdFH6a8wr/KICSquaSRWzwWnod3Jstrz9WWQW+K9JKu4deIRUOEx4=
@@ -26,7 +26,7 @@ jobs:
   - stage: Unit tests
     script: grails test-app -unit
   - stage: Validate Swagger
-    script: .travis_scripts/validate_swagger.sh
+    script: travis_retry .travis_scripts/validate_swagger.sh
   - stage: Integration tests
     script: travis_retry .travis_scripts/integration_test.sh
   - stage: REST API tests
@@ -70,6 +70,21 @@ jobs:
     deploy:
     - provider: script
       script: .travis_scripts/deploy_docker.sh dev
+  - stage: Deploy Swagger file
+    if: tag IS present
+    deploy:
+    - provider: s3
+      access_key_id: AKIAI3FDTJG3O6WWN4BQ
+      secret_access_key:
+        secure: "mJtZqcGrs8bTJKEaV/VkUfcVTT4y+U1s6hztF45diTDQpT0uleLXClO8ljj3S0mbN3r+ykLBRvSohOOki94+v8z9/VDptVyrFUNEah2PKl30D3S74LeRXN/3xK25h6Y9HLdcbTuhlY988sQGONztkpS7kQCnaDa38rB0eUXfqhBC6WRJpmVmp1T0OSReZM7Et8VFfzcjudxQDT3YuYAvSd3MNpgfq6YXRdetzB0Tou8PtdyO02C87JANw9+BYxgaEcNtVIAtkEHyFriOdkqeo9c0zBJJbU/B6FxC/XZL6PfakZnVTuNEHjDuOvPhjMHKg1yWuCLhWchY9aZ3tbm9A7QG0cVycb/dwGeyNCwwocjPRMKell+2a749sYvP5WqNjYD+0wZp54WCglzTOxXy2EzX4UJZ6EeDzMOEJJ/Z/BnTZaRk9PiaH8iCSLOPqZ9uQV9ZV4+HliQYg/6yV33gT1PjjV6B80omYdrzu5kL2pZZa8w7cJ0jrbf7Li/Abhs8E6c7Wi11wtJUmzLPEl/uFl2XoKIMC4VWwymwB20JIlvD7QY+BnMB9WkTgYHYtDzwaZfFZqWybnOth2zRstA5kpakpEgZ34IslIDLRrXdjJeZtSiMz7/sgq5RNK7L3xzXTu4D+DiDzylNnOq1urL3qaQeHzMyME2OGvuxit1okR8="
+      bucket: eu-west-1-streamr-cdn
+      acl: private
+      region: eu-west-1
+      skip_cleanup: true
+      local_dir: docs
+      glob: "swagger.json"
+      on:
+        branch: master
   - stage: Build Docker Production
     if: tag IS present
     install: true
@@ -84,9 +99,3 @@ after_failure:
   - docker-compose logs engine-and-editor
   - docker ps
   - .travis_scripts/after_test_failure.sh
-notifications:
-  slack:
-    secure: rX8I0YHsgA0mvjlKhQ+69ZsO8mww0xYV/wc2VolQaBXIZ5Jcj4A82cLRAAyhoJxEP7tZUFhVBMkwmMSHnL4AvGG5JREialedQltAww/0/kTACxCc62/bxnbV+YDapxP4VIpOdL+/La+gWt4FsoW6oKavwMkNgPuNE65+IGK3ay2+G+BTfjldWkBLcBa8MAsKXp3XQdt04eyh3b3HBUk04rgotIPB+ndSW97NUTdj8LifiKFYV8n5c5LOLRWTgP68t1ktjPCWvjHzjwWRlSnxRcdXkj870mjCdH/l8WI93YzZE4g2auUjWFV8MzbGfObnCQ9McaoVwhiUt4IjpI51Iuc0qUwpoIfMk0J3BobZWcehXFilQknOTF9y5LqRplHND5Om3Dw8DdKWCzZVFw8S3dd5oBgKgxuOt01KD4lpQ/5nJZzmykrKMNWa7NkbYw6pLHVSaIMu4WVycZLnnyz4Rt/LZIdq7IH38QT0DDR9aG7CMgomnzAvgfSkte7lMdfeOo+uMsu2JA0MXOd1BYfEzwWCRh7QWhr5UgZXPX9sFReal/TtEODh71ZMI945iQVDNaEh3ypuBdraiFSR7SZbLTdvZEVbzCC2kS6JKBdUsUVTroWSyIl+gJUsXoyZ88c1YmFBMdj6jDSyzz4Ig4uBRwMEcx0aqtwDnQrvEtNhzKY=
-  on_success: change
-  on_failure: always
-  on_pull_requests: false

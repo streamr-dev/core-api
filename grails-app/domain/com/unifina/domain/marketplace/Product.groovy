@@ -95,6 +95,7 @@ class Product {
 		description type: 'text'
 		type enumType: "identity", defaultValue: Type.NORMAL, index: 'type_idx'
 		previewConfigJson type: 'text'
+		pendingChanges type: 'text'
 		imageUrl length: 2048
 		score index: "score_idx"
 

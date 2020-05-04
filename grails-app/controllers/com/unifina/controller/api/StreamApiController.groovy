@@ -12,13 +12,11 @@ import com.unifina.security.StreamrApi
 import com.unifina.security.Userish
 import com.unifina.service.StreamService
 import grails.converters.JSON
-import grails.plugin.springsecurity.annotation.Secured
 import org.springframework.web.multipart.MultipartFile
 
 import java.text.ParseException
 import java.text.SimpleDateFormat
 
-@Secured(["IS_AUTHENTICATED_ANONYMOUSLY"])
 class StreamApiController {
 	private final SimpleDateFormat iso8601 = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'")
 	private final SimpleDateFormat iso8601cal = new SimpleDateFormat("yyyy-MM-dd")
@@ -186,8 +184,21 @@ class StreamApiController {
 	}
 
 	@StreamrApi(authenticationLevel = AuthLevel.NONE)
+	def validation(String id) {
+		Stream stream = Stream.get(id)
+		if (stream == null) {
+			throw new NotFoundException("Stream", id)
+		} else {
+			render(stream.toValidationMap() as JSON)
+		}
+	}
+
+	@StreamrApi(authenticationLevel = AuthLevel.NONE)
 	def publishers(String id) {
-		getAuthorizedStream(id, Operation.STREAM_GET) { Stream stream ->
+		Stream stream = Stream.get(id)
+		if (stream == null) {
+			throw new NotFoundException("Stream", id)
+		} else {
 			Set<String> publisherAddresses = streamService.getStreamEthereumPublishers(stream)
 			render([addresses: publisherAddresses] as JSON)
 		}
@@ -195,7 +206,10 @@ class StreamApiController {
 
 	@StreamrApi(authenticationLevel = AuthLevel.NONE)
 	def subscribers(String id) {
-		getAuthorizedStream(id, Operation.STREAM_PUBLISH) { Stream stream ->
+		Stream stream = Stream.get(id)
+		if (stream == null) {
+			throw new NotFoundException("Stream", id)
+		} else {
 			Set<String> subscriberAddresses = streamService.getStreamEthereumSubscribers(stream)
 			render([addresses: subscriberAddresses] as JSON)
 		}
@@ -203,7 +217,10 @@ class StreamApiController {
 
 	@StreamrApi(authenticationLevel = AuthLevel.NONE)
 	def publisher(String id, String address) {
-		getAuthorizedStream(id, Operation.STREAM_SUBSCRIBE) { Stream stream ->
+		Stream stream = Stream.get(id)
+		if (stream == null) {
+			throw new NotFoundException("Stream", id)
+		} else {
 			if (streamService.isStreamEthereumPublisher(stream, address)) {
 				render(status: 200)
 			} else {
@@ -214,8 +231,11 @@ class StreamApiController {
 
 	@StreamrApi(authenticationLevel = AuthLevel.NONE)
 	def subscriber(String id, String address) {
-		getAuthorizedStream(id, Operation.STREAM_PUBLISH) { Stream stream ->
-			if(streamService.isStreamEthereumSubscriber(stream, address)) {
+		Stream stream = Stream.get(id)
+		if (stream == null) {
+			throw new NotFoundException("Stream", id)
+		} else {
+			if (streamService.isStreamEthereumSubscriber(stream, address)) {
 				render(status: 200)
 			} else {
 				render(status: 404)

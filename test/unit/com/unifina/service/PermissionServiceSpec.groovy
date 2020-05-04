@@ -243,70 +243,7 @@ class PermissionServiceSpec extends BeanMockingSpecification {
 		thrown AccessControlException
 	}
 
-	void "systemGrant() on an Ethereum user and a stream creates also inbox permissions"() {
-		SecUser publisher1 = new SecUser()
-		publisher1.id = 4L
-		SecUser publisher2 = new SecUser()
-		publisher2.id = 5L
-		SecUser publisher3 = new SecUser()
-		publisher3.id = 6L
-		SecUser subscriber = new SecUser(username: "0x26e1ae3f5efe8a01eca8c2e9d3c32702cf4bead6").save(failOnError: true, validate: false)
-
-
-		Stream pub1Inbox = new Stream(name: "publisher1", inbox: true)
-		pub1Inbox.id = "publisher1"
-		pub1Inbox.save(failOnError: true, validate: false)
-		Stream pub2Inbox = new Stream(name: "publisher2", inbox: true)
-		pub2Inbox.id = "publisher2"
-		pub2Inbox.save(failOnError: true, validate: false)
-		Stream pub3Inbox = new Stream(name: "publisher3", inbox: true)
-		pub3Inbox.id = "publisher3"
-		pub3Inbox.save(failOnError: true, validate: false)
-		Stream subInbox = new Stream(name: subscriber.username, inbox: true)
-		subInbox.id = subscriber.username
-		subInbox.save(failOnError: true, validate: false)
-
-		Stream stream = new Stream()
-		stream.id = "stream"
-		setup:
-		service.systemGrant(publisher1, stream, Operation.STREAM_PUBLISH)
-		service.systemGrant(publisher2, stream, Operation.STREAM_PUBLISH)
-
-		when:
-		// adding a new subscriber
-		service.systemGrant(subscriber, stream, Operation.STREAM_SUBSCRIBE)
-		// adding a new publisher
-		service.systemGrant(publisher3, stream, Operation.STREAM_PUBLISH)
-		then:
-		2 * streamService.getInboxStreams([subscriber]) >> [subInbox]
-		1 * streamService.getInboxStreams([publisher1, publisher2]) >> [pub1Inbox, pub2Inbox]
-		1 * streamService.getInboxStreams([publisher3]) >> [pub3Inbox]
-		// assertions after adding a new subscriber
-		service.check(subscriber, pub1Inbox, Permission.Operation.STREAM_PUBLISH)
-		service.check(subscriber, pub2Inbox, Permission.Operation.STREAM_PUBLISH)
-		service.check(publisher1, subInbox, Permission.Operation.STREAM_PUBLISH)
-		service.check(publisher2, subInbox, Permission.Operation.STREAM_PUBLISH)
-		// assertions after adding a new publisher
-		service.check(subscriber, pub3Inbox, Permission.Operation.STREAM_PUBLISH)
-		service.check(publisher3, subInbox, Permission.Operation.STREAM_PUBLISH)
-	}
-
-	void "inbox stream permissions also work when anonymous keys have permissions to the stream"() {
-		SecUser subscriber = new SecUser(username: "0x26e1ae3f5efe8a01eca8c2e9d3c32702cf4bead6").save(failOnError: true, validate: false)
-		Key anonKey = new Key()
-		anonKey.id = 1L
-		anonKey.save(failOnError: true, validate: false)
-		Stream stream = new Stream()
-		stream.id = "stream"
-		setup:
-		service.systemGrant(anonKey, stream, Operation.STREAM_EDIT)
-		when:
-		service.systemGrant(subscriber, stream, Operation.STREAM_GET)
-		then:
-		noExceptionThrown()
-	}
-
-	void "systemRevoke() on a stream also revokes the associated inbox permissions"() {
+	void "systemRevoke() on a stream also revokes the parent permissions"() {
 		SecUser publisher = new SecUser()
 		publisher.id = 7L
 		Stream pubInbox = new Stream(name: "publisher", inbox: true)
@@ -330,41 +267,6 @@ class PermissionServiceSpec extends BeanMockingSpecification {
 		!service.check(subscriber, stream, Permission.Operation.STREAM_SUBSCRIBE)
 		!service.check(subscriber, pubInbox, Permission.Operation.STREAM_PUBLISH)
 		!service.check(publisher, subInbox, Permission.Operation.STREAM_PUBLISH)
-	}
-
-	void "inbox permissions are maintained after systemRevoke() on a stream if there is another stream with permissions"() {
-		SecUser publisher = new SecUser()
-		publisher.id = 7L
-		Stream pubInbox = new Stream(name: "publisher", inbox: true)
-		pubInbox.id = "publisher"
-		pubInbox.save(failOnError: true, validate: false)
-		SecUser subscriber = new SecUser(username: "0x26e1ae3f5efe8a01eca8c2e9d3c32702cf4bead6").save(failOnError: true, validate: false)
-		Stream subInbox = new Stream(name: subscriber.username, inbox: true)
-		subInbox.id = subscriber.username
-		subInbox.save(failOnError: true, validate: false)
-		Stream stream1 = new Stream()
-		stream1.id = "stream1"
-		Stream stream2 = new Stream()
-		stream2.id = "stream2"
-		setup:
-		new Permission(user: publisher, stream: stream1, operation: Operation.STREAM_PUBLISH).save(failOnError: true, validate: false)
-
-		Permission parent1 = new Permission(user: subscriber, stream: stream1, operation: Operation.STREAM_SUBSCRIBE).save(failOnError: true, validate: false)
-		new Permission(user: subscriber, stream: pubInbox, operation: Operation.STREAM_PUBLISH, parent: parent1).save(failOnError: true, validate: false)
-		new Permission(user: publisher, stream: subInbox, operation: Operation.STREAM_PUBLISH, parent: parent1).save(failOnError: true, validate: false)
-
-		new Permission(user: publisher, stream: stream2, operation: Operation.STREAM_PUBLISH).save(failOnError: true, validate: false)
-
-		Permission parent2 = new Permission(user: subscriber, stream: stream2, operation: Operation.STREAM_SUBSCRIBE).save(failOnError: true, validate: false)
-		new Permission(user: subscriber, stream: pubInbox, operation: Operation.STREAM_PUBLISH, parent: parent2).save(failOnError: true, validate: false)
-		new Permission(user: publisher, stream: subInbox, operation: Operation.STREAM_PUBLISH, parent: parent2).save(failOnError: true, validate: false)
-		when:
-		service.systemRevoke(subscriber, stream1, Operation.STREAM_SUBSCRIBE)
-		then:
-		!service.check(subscriber, stream1, Permission.Operation.STREAM_SUBSCRIBE)
-		service.check(subscriber, stream2, Permission.Operation.STREAM_SUBSCRIBE)
-		service.check(subscriber, pubInbox, Permission.Operation.STREAM_PUBLISH)
-		service.check(publisher, subInbox, Permission.Operation.STREAM_PUBLISH)
 	}
 
 	void "signup invitation can be granted and revoked of permissions just like normal users"() {

@@ -1,6 +1,6 @@
 package com.unifina.service
 
-
+import com.unifina.BeanMockingSpecification
 import com.unifina.domain.security.Permission
 import com.unifina.domain.security.SecRole
 import com.unifina.domain.security.SecUser
@@ -14,14 +14,12 @@ import com.unifina.signalpath.SignalPathRunner
 import com.unifina.utils.Globals
 import grails.test.mixin.Mock
 import grails.test.mixin.TestFor
-import grails.util.Holders
-import spock.lang.Specification
 
 import java.security.AccessControlException
 
 @TestFor(SignalPathService)
 @Mock([SecUser, SecRole, SecUserSecRole, Canvas, Serialization])
-class SignalPathServiceSpec extends Specification {
+class SignalPathServiceSpec extends BeanMockingSpecification {
 
 	SecUser me
 	SecUser admin
@@ -45,14 +43,7 @@ class SignalPathServiceSpec extends Specification {
 		)
 		c1.save(failOnError: true)
 		assert c1.serialization.id != null
-
-		canvasService = Mock(CanvasService)
-		Holders.getApplicationContext().beanFactory.registerSingleton("canvasService", canvasService)
-		service.servletContext = [:]
-	}
-
-	def cleanup() {
-		Holders.getApplicationContext().beanFactory.destroySingleton("canvasService")
+		canvasService = mockBean(CanvasService, Mock(CanvasService))
 	}
 
 	def "clearState() clears serialized state"() {
@@ -107,7 +98,6 @@ class SignalPathServiceSpec extends Specification {
 		def runner = Mock(SignalPathRunner)
 		def sp = Mock(SignalPath)
 		service.permissionService = Mock(PermissionService)
-		service.servletContext = service.servletContext ?: [:]
 		service.runnersById[c1.runner] = runner
 
 		when:

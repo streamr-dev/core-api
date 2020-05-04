@@ -12,12 +12,10 @@ import com.unifina.signalpath.SignalPath
 import com.unifina.signalpath.map.ValueSortedMap
 import grails.compiler.GrailsCompileStatic
 import grails.converters.JSON
-import grails.plugin.springsecurity.annotation.Secured
 import grails.util.Holders
 import org.codehaus.groovy.grails.commons.GrailsApplication
 import org.codehaus.groovy.grails.web.mapping.LinkGenerator
 
-@Secured(["IS_AUTHENTICATED_ANONYMOUSLY"])
 class NodeApiController {
 	GrailsApplication grailsApplication
 	CanvasService canvasService

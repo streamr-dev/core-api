@@ -136,16 +136,19 @@ class StreamService {
 		// This approach might be slow if there are a lot of allowed writers to the Stream
 		List<SecUser> writers = permissionService.getPermissionsTo(stream, Permission.Operation.STREAM_PUBLISH)*.user
 
-		List<IntegrationKey> keys = IntegrationKey.findAll {
-			user.id in writers*.id && service in [IntegrationKey.Service.ETHEREUM, IntegrationKey.Service.ETHEREUM_ID]
+		List<IntegrationKey> keys = IntegrationKey.createCriteria().list {
+			user {
+				'in'("id", writers*.id)
+			}
+			'in'("service", [IntegrationKey.Service.ETHEREUM, IntegrationKey.Service.ETHEREUM_ID])
 		}
 
 		return keys*.idInService*.toLowerCase() as Set
 	}
 
 	boolean isStreamEthereumPublisher(Stream stream, String ethereumAddress) {
-		IntegrationKey key = IntegrationKey.find {
-			idInService =~ ethereumAddress
+		IntegrationKey key = IntegrationKey.createCriteria().get {
+			ilike("idInService", ethereumAddress)
 		}
 		if (key == null || key.user == null) {
 			return false
@@ -157,16 +160,19 @@ class StreamService {
 		// This approach might be slow if there are a lot of allowed readers to the Stream
 		List<SecUser> readers = permissionService.getPermissionsTo(stream, Permission.Operation.STREAM_SUBSCRIBE)*.user
 
-		List<IntegrationKey> keys = IntegrationKey.findAll {
-			user.id in readers*.id && service in [IntegrationKey.Service.ETHEREUM, IntegrationKey.Service.ETHEREUM_ID]
+		List<IntegrationKey> keys = IntegrationKey.createCriteria().list {
+			user {
+				'in'("id", readers*.id)
+			}
+			'in'("service", [IntegrationKey.Service.ETHEREUM, IntegrationKey.Service.ETHEREUM_ID])
 		}
 
 		return keys*.idInService*.toLowerCase() as Set
 	}
 
 	boolean isStreamEthereumSubscriber(Stream stream, String ethereumAddress) {
-		IntegrationKey key = IntegrationKey.find {
-			idInService =~ ethereumAddress
+		IntegrationKey key = IntegrationKey.createCriteria().get {
+			ilike("idInService", ethereumAddress)
 		}
 		if (key == null || key.user == null) {
 			return false
@@ -176,8 +182,11 @@ class StreamService {
 
 	List<Stream> getInboxStreams(List<SecUser> users) {
 		if (users.isEmpty()) return new ArrayList<Stream>()
-		List<IntegrationKey> keys = IntegrationKey.findAll {
-			user.id in users*.id && service in [IntegrationKey.Service.ETHEREUM, IntegrationKey.Service.ETHEREUM_ID]
+		List<IntegrationKey> keys = IntegrationKey.createCriteria().list {
+			user {
+				'in'("id", users*.id)
+			}
+			'in'("service", [IntegrationKey.Service.ETHEREUM, IntegrationKey.Service.ETHEREUM_ID])
 		}
 		return Stream.findAllByIdInListAndInbox(keys*.idInService, true)
 	}

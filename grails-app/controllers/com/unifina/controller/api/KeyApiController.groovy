@@ -11,10 +11,8 @@ import com.unifina.security.AuthLevel
 import com.unifina.security.StreamrApi
 import com.unifina.service.PermissionService
 import grails.converters.JSON
-import grails.plugin.springsecurity.annotation.Secured
 import groovy.json.JsonSlurper
 
-@Secured(["IS_AUTHENTICATED_ANONYMOUSLY"])
 class KeyApiController {
 
 	PermissionService permissionService
@@ -134,10 +132,10 @@ class KeyApiController {
 				res.removeFromKeys(key)
 			}
 
-			def query = Permission.where {
-				key == key
+			List<Key> keys = Permission.createCriteria().list {
+				eq("key", key)
 			}
-			query.deleteAll()
+			Key.deleteAll(keys)
 			key.delete(flush: true)
 			response.status = 204
 			render ""

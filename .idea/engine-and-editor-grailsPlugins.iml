@@ -7,9 +7,8 @@
     <facet type="web" name="GrailsWeb">
       <configuration>
         <webroots>
-          <root url="file://$USER_HOME$/.grails/2.5.6/projects/streamr-core/plugins/spring-security-core-2.0.0/grails-app/views" relative="/" />
-          <root url="file://$USER_HOME$/.grails/2.5.6/projects/streamr-core/plugins/database-migration-1.4.0/grails-app/views" relative="/" />
-          <root url="file://$USER_HOME$/.grails/2.5.6/projects/streamr-core/plugins/mail-1.0.7/grails-app/views" relative="/" />
+          <root url="file://$USER_HOME$/.grails/2.5.6/projects/streamr-core/plugins/mail-1.0.8-SNAPSHOT/grails-app/views" relative="/" />
+          <root url="file://$USER_HOME$/.grails/2.5.6/projects/streamr-core/plugins/database-migration-1.4.2-SNAPSHOT/grails-app/views" relative="/" />
         </webroots>
         <sourceRoots />
       </configuration>
@@ -25,40 +24,29 @@
   </component>
   <component name="NewModuleRootManager" inherit-compiler-output="true">
     <exclude-output />
-    <content url="file://$USER_HOME$/.grails/2.5.6/projects/streamr-core/plugins/cache-headers-1.1.7">
-      <sourceFolder url="file://$USER_HOME$/.grails/2.5.6/projects/streamr-core/plugins/cache-headers-1.1.7/grails-app/services" isTestSource="false" />
+    <content url="file://$USER_HOME$/.grails/2.5.6/projects/streamr-core/plugins/cors-1.3.0">
+      <sourceFolder url="file://$USER_HOME$/.grails/2.5.6/projects/streamr-core/plugins/cors-1.3.0/src/java" isTestSource="false" />
     </content>
-    <content url="file://$USER_HOME$/.grails/2.5.6/projects/streamr-core/plugins/cors-1.1.8">
-      <sourceFolder url="file://$USER_HOME$/.grails/2.5.6/projects/streamr-core/plugins/cors-1.1.8/src/java" isTestSource="false" />
-    </content>
-    <content url="file://$USER_HOME$/.grails/2.5.6/projects/streamr-core/plugins/database-migration-1.4.0">
-      <sourceFolder url="file://$USER_HOME$/.grails/2.5.6/projects/streamr-core/plugins/database-migration-1.4.0/src/groovy" isTestSource="false" />
-      <sourceFolder url="file://$USER_HOME$/.grails/2.5.6/projects/streamr-core/plugins/database-migration-1.4.0/grails-app/controllers" isTestSource="false" />
+    <content url="file://$USER_HOME$/.grails/2.5.6/projects/streamr-core/plugins/database-migration-1.4.2-SNAPSHOT">
+      <sourceFolder url="file://$USER_HOME$/.grails/2.5.6/projects/streamr-core/plugins/database-migration-1.4.2-SNAPSHOT/src/groovy" isTestSource="false" />
+      <sourceFolder url="file://$USER_HOME$/.grails/2.5.6/projects/streamr-core/plugins/database-migration-1.4.2-SNAPSHOT/grails-app/controllers" isTestSource="false" />
     </content>
     <content url="file://$USER_HOME$/.grails/2.5.6/projects/streamr-core/plugins/hibernate-3.6.10.19">
       <sourceFolder url="file://$USER_HOME$/.grails/2.5.6/projects/streamr-core/plugins/hibernate-3.6.10.19/src/java" isTestSource="false" />
     </content>
-    <content url="file://$USER_HOME$/.grails/2.5.6/projects/streamr-core/plugins/mail-1.0.7">
-      <sourceFolder url="file://$USER_HOME$/.grails/2.5.6/projects/streamr-core/plugins/mail-1.0.7/src/groovy" isTestSource="false" />
-      <sourceFolder url="file://$USER_HOME$/.grails/2.5.6/projects/streamr-core/plugins/mail-1.0.7/grails-app/i18n" isTestSource="false" />
-      <sourceFolder url="file://$USER_HOME$/.grails/2.5.6/projects/streamr-core/plugins/mail-1.0.7/grails-app/services" isTestSource="false" />
-      <sourceFolder url="file://$USER_HOME$/.grails/2.5.6/projects/streamr-core/plugins/mail-1.0.7/grails-app/taglib" isTestSource="false" />
+    <content url="file://$USER_HOME$/.grails/2.5.6/projects/streamr-core/plugins/mail-1.0.8-SNAPSHOT">
+      <sourceFolder url="file://$USER_HOME$/.grails/2.5.6/projects/streamr-core/plugins/mail-1.0.8-SNAPSHOT/src/groovy" isTestSource="false" />
+      <sourceFolder url="file://$USER_HOME$/.grails/2.5.6/projects/streamr-core/plugins/mail-1.0.8-SNAPSHOT/grails-app/i18n" isTestSource="false" />
+      <sourceFolder url="file://$USER_HOME$/.grails/2.5.6/projects/streamr-core/plugins/mail-1.0.8-SNAPSHOT/grails-app/services" isTestSource="false" />
+      <sourceFolder url="file://$USER_HOME$/.grails/2.5.6/projects/streamr-core/plugins/mail-1.0.8-SNAPSHOT/grails-app/taglib" isTestSource="false" />
     </content>
     <content url="file://$USER_HOME$/.grails/2.5.6/projects/streamr-core/plugins/plastic-criteria-1.6.7">
       <sourceFolder url="file://$USER_HOME$/.grails/2.5.6/projects/streamr-core/plugins/plastic-criteria-1.6.7/src/groovy" isTestSource="false" />
     </content>
     <content url="file://$USER_HOME$/.grails/2.5.6/projects/streamr-core/plugins/rest-client-builder-2.1.1" />
-    <content url="file://$USER_HOME$/.grails/2.5.6/projects/streamr-core/plugins/spring-security-core-2.0.0">
-      <sourceFolder url="file://$USER_HOME$/.grails/2.5.6/projects/streamr-core/plugins/spring-security-core-2.0.0/src/java" isTestSource="false" />
-      <sourceFolder url="file://$USER_HOME$/.grails/2.5.6/projects/streamr-core/plugins/spring-security-core-2.0.0/src/groovy" isTestSource="false" />
-      <sourceFolder url="file://$USER_HOME$/.grails/2.5.6/projects/streamr-core/plugins/spring-security-core-2.0.0/grails-app/i18n" isTestSource="false" />
-      <sourceFolder url="file://$USER_HOME$/.grails/2.5.6/projects/streamr-core/plugins/spring-security-core-2.0.0/grails-app/controllers" isTestSource="false" />
-      <sourceFolder url="file://$USER_HOME$/.grails/2.5.6/projects/streamr-core/plugins/spring-security-core-2.0.0/grails-app/services" isTestSource="false" />
-      <sourceFolder url="file://$USER_HOME$/.grails/2.5.6/projects/streamr-core/plugins/spring-security-core-2.0.0/grails-app/taglib" isTestSource="false" />
-    </content>
-    <content url="file://$USER_HOME$/.grails/2.5.6/projects/streamr-core/plugins/tomcat-7.0.70">
-      <sourceFolder url="file://$USER_HOME$/.grails/2.5.6/projects/streamr-core/plugins/tomcat-7.0.70/src/java" isTestSource="false" />
-      <sourceFolder url="file://$USER_HOME$/.grails/2.5.6/projects/streamr-core/plugins/tomcat-7.0.70/src/groovy" isTestSource="false" />
+    <content url="file://$USER_HOME$/.grails/2.5.6/projects/streamr-core/plugins/tomcat-8.0.50">
+      <sourceFolder url="file://$USER_HOME$/.grails/2.5.6/projects/streamr-core/plugins/tomcat-8.0.50/src/java" isTestSource="false" />
+      <sourceFolder url="file://$USER_HOME$/.grails/2.5.6/projects/streamr-core/plugins/tomcat-8.0.50/src/groovy" isTestSource="false" />
     </content>
     <content url="file://$USER_HOME$/.grails/2.5.6/projects/streamr-core/plugins/webxml-1.4.1">
       <sourceFolder url="file://$USER_HOME$/.grails/2.5.6/projects/streamr-core/plugins/webxml-1.4.1/src/groovy" isTestSource="false" />
@@ -324,8 +312,6 @@
           <root url="jar://$USER_HOME$/.sdkman/candidates/grails/2.5.6/lib/org.slf4j/slf4j-api/jars/slf4j-api-1.7.21.jar!/" />
           <root url="jar://$USER_HOME$/.sdkman/candidates/grails/2.5.6/dist/grails-plugin-rest-2.5.6.jar!/" />
           <root url="jar://$USER_HOME$/.sdkman/candidates/grails/2.5.6/lib/org.codehaus.groovy/groovy-all/jars/groovy-all-2.4.10.jar!/" />
-          <root url="jar://$MAVEN_REPOSITORY$/org/springframework/security/spring-security-web/3.2.9.RELEASE/spring-security-web-3.2.9.RELEASE.jar!/" />
-          <root url="jar://$MAVEN_REPOSITORY$/org/springframework/security/spring-security-core/3.2.9.RELEASE/spring-security-core-3.2.9.RELEASE.jar!/" />
           <root url="jar://$MAVEN_REPOSITORY$/org/liquibase/liquibase-core/2.0.5/liquibase-core-2.0.5.jar!/" />
           <root url="jar://$MAVEN_REPOSITORY$/org/hibernate/hibernate-commons-annotations/3.2.0.Final/hibernate-commons-annotations-3.2.0.Final.jar!/" />
           <root url="jar://$MAVEN_REPOSITORY$/org/hibernate/hibernate-entitymanager/3.6.10.Final/hibernate-entitymanager-3.6.10.Final.jar!/" />
@@ -372,12 +358,6 @@
           <root url="jar://$USER_HOME$/.sdkman/candidates/grails/2.5.6/dist/grails-test-2.5.6.jar!/" />
           <root url="jar://$USER_HOME$/.sdkman/candidates/grails/2.5.6/lib/org.springframework/spring-test/jars/spring-test-4.1.9.RELEASE.jar!/" />
           <root url="jar://$USER_HOME$/.sdkman/candidates/grails/2.5.6/dist/grails-plugin-testing-2.5.6.jar!/" />
-          <root url="jar://$MAVEN_REPOSITORY$/org/apache/tomcat/embed/tomcat-embed-core/7.0.70/tomcat-embed-core-7.0.70.jar!/" />
-          <root url="jar://$MAVEN_REPOSITORY$/org/eclipse/jdt/core/compiler/ecj/3.7.2/ecj-3.7.2.jar!/" />
-          <root url="jar://$MAVEN_REPOSITORY$/org/apache/tomcat/embed/tomcat-embed-websocket/7.0.70/tomcat-embed-websocket-7.0.70.jar!/" />
-          <root url="jar://$MAVEN_REPOSITORY$/org/apache/tomcat/embed/tomcat-embed-el/7.0.70/tomcat-embed-el-7.0.70.jar!/" />
-          <root url="jar://$MAVEN_REPOSITORY$/org/apache/tomcat/embed/tomcat-embed-jasper/7.0.70/tomcat-embed-jasper-7.0.70.jar!/" />
-          <root url="jar://$MAVEN_REPOSITORY$/org/apache/tomcat/tomcat-catalina-ant/7.0.70/tomcat-catalina-ant-7.0.70.jar!/" />
           <root url="jar://$USER_HOME$/.sdkman/candidates/grails/2.5.6/lib/org.grails/grails-gdoc-engine/jars/grails-gdoc-engine-1.0.1.jar!/" />
           <root url="jar://$USER_HOME$/.sdkman/candidates/grails/2.5.6/lib/org.yaml/snakeyaml/jars/snakeyaml-1.8.jar!/" />
           <root url="jar://$USER_HOME$/.sdkman/candidates/grails/2.5.6/lib/org.xhtmlrenderer/core-renderer/jars/core-renderer-R8.jar!/" />
@@ -393,7 +373,6 @@
           <root url="jar://$USER_HOME$/.sdkman/candidates/grails/2.5.6/lib/net.java.dev.jna/jna/jars/jna-4.0.0.jar!/" />
           <root url="jar://$USER_HOME$/.sdkman/candidates/grails/2.5.6/lib/org.apache.ant/ant-junit/jars/ant-junit-1.9.4.jar!/" />
           <root url="jar://$USER_HOME$/.sdkman/candidates/grails/2.5.6/lib/org.apache.ant/ant-launcher/jars/ant-launcher-1.9.4.jar!/" />
-          <root url="jar://$MAVEN_REPOSITORY$/org/java-websocket/Java-WebSocket/1.3.8/Java-WebSocket-1.3.8.jar!/" />
           <root url="jar://$MAVEN_REPOSITORY$/com/squareup/okio/okio/2.2.0/okio-2.2.0.jar!/" />
           <root url="jar://$MAVEN_REPOSITORY$/com/squareup/moshi/moshi-adapters/1.6.0/moshi-adapters-1.6.0.jar!/" />
           <root url="jar://$MAVEN_REPOSITORY$/com/squareup/moshi/moshi/1.6.0/moshi-1.6.0.jar!/" />
@@ -442,7 +421,18 @@
           <root url="jar://$MAVEN_REPOSITORY$/org/eclipse/jetty/jetty-http/9.2.28.v20190418/jetty-http-9.2.28.v20190418.jar!/" />
           <root url="jar://$MAVEN_REPOSITORY$/org/eclipse/jetty/jetty-client/9.2.28.v20190418/jetty-client-9.2.28.v20190418.jar!/" />
           <root url="jar://$MAVEN_REPOSITORY$/org/gaul/httpbin/1.3.0/httpbin-1.3.0.jar!/" />
-          <root url="jar://$MAVEN_REPOSITORY$/com/streamr/client/1.2.5/client-1.2.5.jar!/" />
+          <root url="jar://$MAVEN_REPOSITORY$/org/apache/tomcat/tomcat-annotations-api/8.0.50/tomcat-annotations-api-8.0.50.jar!/" />
+          <root url="jar://$MAVEN_REPOSITORY$/org/apache/tomcat/embed/tomcat-embed-core/8.0.50/tomcat-embed-core-8.0.50.jar!/" />
+          <root url="jar://$MAVEN_REPOSITORY$/org/apache/tomcat/embed/tomcat-embed-websocket/8.0.50/tomcat-embed-websocket-8.0.50.jar!/" />
+          <root url="jar://$MAVEN_REPOSITORY$/org/apache/tomcat/embed/tomcat-embed-el/8.0.50/tomcat-embed-el-8.0.50.jar!/" />
+          <root url="jar://$MAVEN_REPOSITORY$/org/apache/tomcat/embed/tomcat-embed-logging-juli/8.0.50/tomcat-embed-logging-juli-8.0.50.jar!/" />
+          <root url="jar://$MAVEN_REPOSITORY$/org/apache/tomcat/embed/tomcat-embed-logging-log4j/8.0.50/tomcat-embed-logging-log4j-8.0.50.jar!/" />
+          <root url="jar://$MAVEN_REPOSITORY$/org/eclipse/jdt/ecj/3.12.3/ecj-3.12.3.jar!/" />
+          <root url="jar://$MAVEN_REPOSITORY$/org/apache/tomcat/embed/tomcat-embed-jasper/8.0.50/tomcat-embed-jasper-8.0.50.jar!/" />
+          <root url="jar://$MAVEN_REPOSITORY$/org/springframework/security/spring-security-web/3.2.9.RELEASE/spring-security-web-3.2.9.RELEASE.jar!/" />
+          <root url="jar://$MAVEN_REPOSITORY$/org/springframework/security/spring-security-core/3.2.9.RELEASE/spring-security-core-3.2.9.RELEASE.jar!/" />
+          <root url="jar://$MAVEN_REPOSITORY$/com/streamr/client/1.3.4/client-1.3.4.jar!/" />
+          <root url="jar://$MAVEN_REPOSITORY$/org/java-websocket/Java-WebSocket/1.4.1/Java-WebSocket-1.4.1.jar!/" />
         </CLASSES>
         <JAVADOC />
         <SOURCES />

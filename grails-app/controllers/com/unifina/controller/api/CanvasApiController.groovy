@@ -15,13 +15,11 @@ import com.unifina.service.SignalPathService
 import com.unifina.signalpath.ModuleException
 import com.unifina.utils.NullJsonSerializer
 import grails.converters.JSON
-import grails.plugin.springsecurity.annotation.Secured
 import grails.transaction.NotTransactional
 import org.apache.log4j.Logger
 import org.codehaus.groovy.grails.web.json.JSONObject
 import org.springframework.util.FileCopyUtils
 
-@Secured(["IS_AUTHENTICATED_ANONYMOUSLY"])
 class CanvasApiController {
 
 	CanvasService canvasService

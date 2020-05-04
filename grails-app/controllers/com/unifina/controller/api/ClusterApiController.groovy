@@ -5,11 +5,9 @@ import com.unifina.security.StreamrApi
 import com.unifina.service.ClusterService
 import grails.compiler.GrailsCompileStatic
 import grails.converters.JSON
-import grails.plugin.springsecurity.annotation.Secured
 
 import javax.ws.rs.core.HttpHeaders
 
-@Secured(["IS_AUTHENTICATED_ANONYMOUSLY"])
 class ClusterApiController {
 	ClusterService clusterService
 

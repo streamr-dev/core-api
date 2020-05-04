@@ -8,6 +8,7 @@ import com.unifina.domain.signalpath.Canvas
 class UrlMappings {
 	static mappings = {
 		"500"(controller: "error", action: "index", exception: Exception)
+		"404"(controller: "error", action: "notFound")
 
 		// API v1 url mappings
 		"/api/v1/signups"(method: "POST", controller: "authApi", action: "signup")
@@ -33,6 +34,8 @@ class UrlMappings {
 		"/api/v1/streams/$id/range"(controller: "streamApi", action: "range")
 		"/api/v1/streams/$id/uploadCsvFile"(method: "POST", controller: "streamApi", action: "uploadCsvFile")
 		"/api/v1/streams/$id/confirmCsvFileUpload"(method: "POST", controller: "streamApi", action: "confirmCsvFileUpload")
+		"/api/v1/streams/$id/dataFiles"(controller: "streamApi", action: "dataFiles")
+		"/api/v1/streams/$id/validation"(method: "GET", controller: "streamApi", action: "validation")
 		"/api/v1/streams/$id/publishers"(controller: "streamApi", action: "publishers")
 		"/api/v1/streams/$id/publisher/$address"(controller: "streamApi", action: "publisher")
 		"/api/v1/streams/$id/subscribers"(controller: "streamApi", action: "subscribers")
