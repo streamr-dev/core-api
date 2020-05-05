@@ -17,7 +17,6 @@ import groovy.transform.CompileStatic
 import org.codehaus.groovy.grails.commons.GrailsApplication
 
 import java.security.AccessControlException
-
 /**
  * Check, get, grant, and revoke permissions. Maintains Access Control Lists (ACLs) to resources.
  *
@@ -50,16 +49,36 @@ class PermissionService {
 	 * List all Permissions granted on a resource
 	 */
 	List<Permission> getPermissionsTo(Object resource) {
+		return getPermissionsTo(resource, true, null)
+	}
+
+	/**
+	 * List all Permissions granted on a resource.
+	 *
+	 * @param resource Stream, Canvas or other Streamr resource.
+	 * @param subscriptions {@code true} for all permissions and {@code false} for permissions where subscription is {@code null}.
+	 * @param op Operation to limit the query result set.
+	 * @return List of Permission objects.
+	 */
+	List<Permission> getPermissionsTo(Object resource, boolean subscriptions, Operation op) {
 		String resourceProp = getResourcePropertyName(resource)
-		return Permission.findAllWhere([(resourceProp): resource])
+		List<Permission> results = Permission.createCriteria().list() {
+			eq(resourceProp, resource)
+			if (!subscriptions) {
+				eq('subscription', null)
+			}
+			if (op) {
+				eq('operation', op)
+			}
+		}
+		return results
 	}
 
 	/**
 	 * List all Permissions with some Operation right granted on a resource
 	 */
 	List<Permission> getPermissionsTo(Object resource, Operation op) {
-		String resourceProp = getResourcePropertyName(resource)
-		return Permission.findAllWhere([(resourceProp): resource, "operation": op])
+		return getPermissionsTo(resource, true, op)
 	}
 
 	/**

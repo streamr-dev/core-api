@@ -108,7 +108,7 @@ class PermissionApiControllerSpec extends ControllerSpecification {
 		response.json[0].user == "me@me.net"
 		response.json[0].operation == "canvas_share"
 		// matching with _ instead of canvasOwned because it's not "the same" after saving and get(id):ing
-		1 * permissionService.getPermissionsTo(_) >> [canvasPermission, *ownerPermissions]
+		1 * permissionService.getPermissionsTo(_, true, null) >> [canvasPermission, *ownerPermissions]
 		1 * permissionService.check(me, _, Permission.Operation.CANVAS_SHARE) >> true
 		0 * permissionService._
     }
@@ -128,7 +128,28 @@ class PermissionApiControllerSpec extends ControllerSpecification {
 		response.json[0].operation == "stream_share"
 		// matching with _ instead of streamOwned because it's not "the same" after saving and get(id):ing
 		1 * streamService.getStream(streamShared.id) >> streamShared
-		1 * permissionService.getPermissionsTo(_) >> [streamPermission, *ownerPermissions]
+		1 * permissionService.getPermissionsTo(_, true, null) >> [streamPermission, *ownerPermissions]
+		1 * permissionService.check(me, _, Permission.Operation.STREAM_SHARE) >> true
+		0 * permissionService._
+	}
+
+	void "index returns list of permissions filtered by subscription"() {
+		params.id = streamShared.id
+		params.resourceClass = Stream
+		params.resourceId = streamShared.id
+		params.subscriptions = "false"
+
+		when:
+		authenticatedAs(me) { controller.index() }
+		then:
+		response.status == 200
+		response.json.size() == 4
+		response.json[0].id == streamPermission.id
+		response.json[0].user == "me@me.net"
+		response.json[0].operation == "stream_share"
+		// matching with _ instead of streamOwned because it's not "the same" after saving and get(id):ing
+		1 * streamService.getStream(streamShared.id) >> streamShared
+		1 * permissionService.getPermissionsTo(_, false, null) >> [streamPermission, *ownerPermissions]
 		1 * permissionService.check(me, _, Permission.Operation.STREAM_SHARE) >> true
 		0 * permissionService._
 	}

@@ -73,8 +73,12 @@ class PermissionApiController {
 
 	@StreamrApi(authenticationLevel = AuthLevel.NONE)
 	def index() {
+		boolean subscriptions = true
+		if (params.subscriptions) {
+			subscriptions = Boolean.parseBoolean(params.subscriptions)
+		}
 		useResource(params.resourceClass, params.resourceId) { res ->
-			def perms = permissionService.getPermissionsTo(res)*.toMap()
+			def perms = permissionService.getPermissionsTo(res, subscriptions, null)*.toMap()
 			render(perms as JSON)
 		}
 	}
