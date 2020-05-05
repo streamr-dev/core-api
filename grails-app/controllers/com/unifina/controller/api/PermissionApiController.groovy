@@ -19,6 +19,7 @@ import com.unifina.service.SignupCodeService
 import com.unifina.service.StreamService
 import com.unifina.utils.EmailValidator
 import com.unifina.utils.EthereumAddressValidator
+import com.unifina.utils.UsernameValidator
 import grails.converters.JSON
 
 class PermissionApiController {
@@ -136,6 +137,9 @@ class PermissionApiController {
 		// request.JSON.user is either SecUser.username or SignupInvite.username (possibly of a not yet created SignupInvite)
 		boolean anonymous = request.JSON.anonymous as boolean
 		String username = request.JSON.user
+		if (!UsernameValidator.validate(username)) {
+			throw new InvalidArgumentsException("User field in request JSON is not a valid username (email or Ethereum address).")
+		}
 		if (anonymous && username) {
 			throw new InvalidArgumentsException("Can't specify user for anonymous permission! Leave out either 'user' or 'anonymous' parameter.", "anonymous", anonymous as String)
 		}

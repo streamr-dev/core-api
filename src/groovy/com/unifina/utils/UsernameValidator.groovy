@@ -5,6 +5,9 @@ This is a temporary workaround because right now users can be defined with an em
  */
 class UsernameValidator {
 	static validate = { String username ->
-		return EmailValidator.validate || EthereumAddressValidator.validate
+		boolean isEmailValid = EmailValidator.validate(username)
+		boolean isEthereumAddressValid = EthereumAddressValidator.validate(username)
+		boolean result = isEmailValid || isEthereumAddressValid
+		return result
 	}
 }

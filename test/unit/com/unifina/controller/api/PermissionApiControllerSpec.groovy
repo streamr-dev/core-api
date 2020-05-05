@@ -41,7 +41,7 @@ class PermissionApiControllerSpec extends ControllerSpecification {
 		controller.signupCodeService = new SignupCodeService()
 
 		me = new SecUser(id: 1, username: "me@me.net").save(validate: false)
-		other = new SecUser(id: 2, username: "other").save(validate: false)
+		other = new SecUser(id: 2, username: "0x0000000000000000000000000000000000000000").save(validate: false)
 
 		def meKey = new Key(name: "meKey", user: me)
 		meKey.id = "myApiKey"
@@ -212,6 +212,22 @@ class PermissionApiControllerSpec extends ControllerSpecification {
 		then:
 		1 * streamService.getStream(streamRestricted.id) >> streamRestricted
 		thrown NotPermittedException
+	}
+
+	void "save rejects invalid email username or invalid ethereum address username"() {
+		setup:
+		params.id = canvasOwned.id
+		params.resourceClass = Canvas
+		params.resourceId = canvasOwned.id
+		request.JSON = [
+			user: "invalid-email-or-ethereum-address",
+			operation: "canvas_get",
+		] as JSON
+		when:
+		authenticatedAs(me) { controller.save() }
+		then:
+		def e = thrown(InvalidArgumentsException)
+		e.message == "User field in request JSON is not a valid username (email or Ethereum address)."
 	}
 
 	void "save grants Permissions"() {
