@@ -13,10 +13,12 @@ import com.unifina.domain.security.SecUser
 import com.unifina.domain.security.SignupInvite
 import com.unifina.domain.signalpath.Canvas
 import com.unifina.security.Userish
+import grails.transaction.Transactional
 import groovy.transform.CompileStatic
 import org.codehaus.groovy.grails.commons.GrailsApplication
 
 import java.security.AccessControlException
+
 /**
  * Check, get, grant, and revoke permissions. Maintains Access Control Lists (ACLs) to resources.
  *
@@ -25,12 +27,14 @@ import java.security.AccessControlException
  * 		- Permission owners and grant/revoke targets can be SecUsers or SignupInvites
  * 			=> getUserPropertyName
  */
+@Transactional(readOnly = false)
 class PermissionService {
 	GrailsApplication grailsApplication
 
 	/**
 	 * Check whether user is allowed to perform specified operation on a resource
 	 */
+	@Transactional(readOnly = true)
 	boolean check(Userish userish, Object resource, Operation op) {
 		return resource?.id != null && hasPermission(userish, resource, op)
 	}
@@ -38,6 +42,7 @@ class PermissionService {
 	/**
 	 * Throws an exception if user is not allowed to perform specified operation on a resource.
 	 */
+	@Transactional(readOnly = true)
 	void verify(Userish userish, Object resource, Operation op) throws NotPermittedException {
 		if (!check(userish, resource, op)) {
 			SecUser user = userish?.resolveToUserish()
@@ -48,6 +53,7 @@ class PermissionService {
 	/**
 	 * List all Permissions granted on a resource
 	 */
+	@Transactional(readOnly = true)
 	List<Permission> getPermissionsTo(Object resource) {
 		return getPermissionsTo(resource, true, null)
 	}
@@ -60,6 +66,7 @@ class PermissionService {
 	 * @param op Operation to limit the query result set.
 	 * @return List of Permission objects.
 	 */
+	@Transactional(readOnly = true)
 	List<Permission> getPermissionsTo(Object resource, boolean subscriptions, Operation op) {
 		String resourceProp = getResourcePropertyName(resource)
 		List<Permission> results = Permission.createCriteria().list() {
@@ -77,6 +84,7 @@ class PermissionService {
 	/**
 	 * List all Permissions with some Operation right granted on a resource
 	 */
+	@Transactional(readOnly = true)
 	List<Permission> getPermissionsTo(Object resource, Operation op) {
 		return getPermissionsTo(resource, true, op)
 	}
@@ -84,6 +92,7 @@ class PermissionService {
 	/**
 	 * List all Permissions that have not expired yet with some Operation right granted on a resource
 	 */
+	@Transactional(readOnly = true)
 	List<Permission> getNonExpiredPermissionsTo(Object resource, Operation op) {
 		// TODO: find a way to do this in a single query instead of filtering results
 		List<Permission> results = []
@@ -99,6 +108,7 @@ class PermissionService {
 	/**
 	 * List all Permissions granted on a resource to a Userish
 	 */
+	@Transactional(readOnly = true)
 	List<Permission> getPermissionsTo(Object resource, Userish userish) {
 		userish = userish?.resolveToUserish()
 		String resourceProp = getResourcePropertyName(resource)
@@ -193,12 +203,14 @@ class PermissionService {
 
 	/** Overload to allow leaving out the anonymous-include-flag but including the filter */
 	@CompileStatic
+	@Transactional(readOnly = true)
 	<T> List<T> get(Class<T> resourceClass, Userish userish, Operation op, Closure resourceFilter = {}) {
 		return get(resourceClass, userish, op, false, resourceFilter)
 	}
 
 	/** Convenience overload: get all including public, adding a flag for public resources may look cryptic */
 	@CompileStatic
+	@Transactional(readOnly = true)
 	<T> List<T> getAll(Class<T> resourceClass, Userish userish, Operation op, Closure resourceFilter = {}) {
 		return get(resourceClass, userish, op, true, resourceFilter)
 	}
@@ -206,6 +218,7 @@ class PermissionService {
 	/**
 	 * Get all resources of given type that the user has specified permission for
 	 */
+	@Transactional(readOnly = true)
 	def <T> List<T> get(Class<T> resourceClass, Userish userish, Operation op, boolean includeAnonymous,
 						Closure resourceFilter = {}) {
 		userish = userish?.resolveToUserish()
@@ -276,7 +289,6 @@ class PermissionService {
 					 Userish target,
 					 Operation operation,
 					 boolean logIfDenied=true) throws AccessControlException, IllegalArgumentException {
-		// TODO CORE-498: check grantor himself has the right he's granting? (e.g. "write")
 		Operation shareOp = Permission.Operation.shareOperation(resource)
 		if (!check(grantor, resource, shareOp)) {
 			throwAccessControlException(grantor, resource, logIfDenied)
