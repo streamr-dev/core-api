@@ -93,41 +93,6 @@ class PermissionApiController {
 		}
 	}
 
-	private String resource(Class<?> resourceClass) {
-		if (Canvas.isAssignableFrom(resourceClass)) {
-			return "canvas"
-		} else if (Stream.isAssignableFrom(resourceClass)) {
-			return "stream"
-		} else if (Dashboard.isAssignableFrom(resourceClass)) {
-			return "dashboard"
-		}
-		throw new IllegalArgumentException("Unexpected resource class: " + resourceClass)
-	}
-
-	private String resourceName(Class<?> resourceClass, resourceId) {
-		def res = resourceClass.get(resourceId)
-		if (!res) {
-			return ""
-		}
-		return res.name
-	}
-
-	private String emailSubject(String sharer, String resource) {
-		String subject = grailsApplication.config.unifina.email.shareInvite.subject
-		return subject.replace("%USER%", sharer).replace("%RESOURCE%", resource)
-	}
-
-	private String link(Class<?> resourceClass, resourceId) {
-		if (Canvas.isAssignableFrom(resourceClass)) {
-			return "/canvas/editor/" + resourceId
-		} else if (Stream.isAssignableFrom(resourceClass)) {
-			return "/core/stream/show/" + resourceId
-		} else if (Dashboard.isAssignableFrom(resourceClass)) {
-			return "/dashboard/editor/" + resourceId
-		}
-		throw new IllegalArgumentException("Unexpected resource class: " + resourceClass)
-	}
-
 	@StreamrApi(authenticationLevel = AuthLevel.NONE)
 	def save() {
 		if (!request.hasProperty("JSON")) {
@@ -164,27 +129,24 @@ class PermissionApiController {
 			// incoming "username" is either SecUser.username or SignupInvite.username (possibly of a not yet created SignupInvite)
 			def user = SecUser.findByUsername(username)
 
+			String subjectTemplate = grailsApplication.config.unifina.email.shareInvite.subject
+			String from = grailsApplication.config.unifina.email.sender
 			if (user) {
 				if (op == Operation.STREAM_GET || op == Operation.CANVAS_GET || op == Operation.DASHBOARD_GET) { // quick fix for sending only one email
 					if (EmailValidator.validate(user.username)) {
-						String sharer = request.apiUser?.username ?: "Streamr user"
-						String resource = resource(params.resourceClass)
-						String name = resourceName(params.resourceClass, params.resourceId)
-						String emailSubject = emailSubject(sharer, resource)
-						String link = link(params.resourceClass, params.resourceId)
+						EmailMessage msg = new EmailMessage(request.apiUser?.username, subjectTemplate, params.resourceClass, params.resourceId)
 						mailService.sendMail {
-							from grailsApplication.config.unifina.email.sender
-							to user.username
-							subject emailSubject
-							html g.render(
+							from: from
+							to: user.username
+							subject: msg.subject()
+							html: g.render(
 								template: "/emails/email_share_resource",
 								model: [
-									sharer  : sharer,
-									resource: resource,
-									name    : name,
-									link    : link,
+									sharer  : msg.sharer,
+									resource: msg.resourceType(),
+									name    : msg.resourceName(),
+									link    : msg.link(),
 								],
-								plugin: "unifina-core"
 							)
 						}
 					}
@@ -195,28 +157,24 @@ class PermissionApiController {
 				} else {
 					def invite = SignupInvite.findByUsername(username)
 					if (!invite) {
+						EmailMessage msg = new EmailMessage(request.apiUser?.username, subjectTemplate, params.resourceClass, params.resourceId)
 						invite = signupCodeService.create(username)
-						String sharer = request.apiUser?.username ?: "Streamr user"
-						String resource = resource(params.resourceClass)
-						String name = resourceName(params.resourceClass, params.resourceId)
-						String emailSubject = emailSubject(sharer, resource)
 						mailService.sendMail {
-							from grailsApplication.config.unifina.email.sender
-							to invite.username
-							subject emailSubject
-							html g.render(
+							from: from
+							to: invite.username
+							subject: msg.subject()
+							html: g.render(
 								template: "/emails/email_share_resource_invite",
 								model: [
 									invite: invite,
-									sharer: sharer,
-									resource: resource,
-									name: name,
+									sharer: msg.sharer,
+									resource: msg.resourceType(),
+									name: msg.resourceName(),
 								],
-								plugin: "unifina-core"
 							)
 						}
 						invite.sent = true
-						invite.save()
+						invite.save(failOnError: true, validate: true)
 					}
 
 					// permissionService handles SecUsers and SignupInvitations equally
@@ -254,5 +212,55 @@ class PermissionApiController {
 	def cleanup() {
 		permissionService.cleanUpExpiredPermissions()
 		render status: 200
+	}
+}
+
+class EmailMessage {
+	String sharer
+	String subjectTemplate
+	Class<?> resourceClass
+	Object resourceId
+
+	EmailMessage(String sharer, String subjectTemplate, Class<?> resourceClass, Object resourceId) {
+		this.sharer = sharer ?: "Streamr user"
+		this.subjectTemplate = subjectTemplate
+		this.resourceClass = resourceClass
+		this.resourceId = resourceId
+	}
+
+	String resourceType() {
+		if (Canvas.isAssignableFrom(resourceClass)) {
+			return "canvas"
+		} else if (Stream.isAssignableFrom(resourceClass)) {
+			return "stream"
+		} else if (Dashboard.isAssignableFrom(resourceClass)) {
+			return "dashboard"
+		}
+		throw new IllegalArgumentException("Unexpected resource class: " + resourceClass)
+	}
+
+	String resourceName() {
+		def res = resourceClass.get(resourceId)
+		if (!res) {
+			return ""
+		}
+		return res.name
+	}
+
+	String subject() {
+		String subject = subjectTemplate.replace("%USER%", sharer)
+		subject = subject.replace("%RESOURCE%", resourceType())
+		return subject
+	}
+
+	String link() {
+		if (Canvas.isAssignableFrom(resourceClass)) {
+			return "/canvas/editor/" + resourceId
+		} else if (Stream.isAssignableFrom(resourceClass)) {
+			return "/core/stream/show/" + resourceId
+		} else if (Dashboard.isAssignableFrom(resourceClass)) {
+			return "/dashboard/editor/" + resourceId
+		}
+		throw new IllegalArgumentException("Unexpected resource class: " + resourceClass)
 	}
 }
