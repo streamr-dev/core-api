@@ -134,11 +134,12 @@ class PermissionApiController {
 
 			String subjectTemplate = grailsApplication.config.unifina.email.shareInvite.subject
 			String from = grailsApplication.config.unifina.email.sender
+			String sharer = apiUser?.username
 			if (user) {
 				if (op == Operation.STREAM_GET || op == Operation.CANVAS_GET || op == Operation.DASHBOARD_GET) { // quick fix for sending only one email
 					String recipient = user.username
 					if (EmailValidator.validate(recipient)) {
-						EmailMessage msg = new EmailMessage(apiUser?.username, subjectTemplate, resourceClass, resourceId)
+						EmailMessage msg = new EmailMessage(sharer, subjectTemplate, resourceClass, resourceId)
 						mailService.sendMail {
 							from: from
 							to: recipient
@@ -161,7 +162,7 @@ class PermissionApiController {
 				} else {
 					def invite = SignupInvite.findByUsername(username)
 					if (!invite) {
-						EmailMessage msg = new EmailMessage(apiUser?.username, subjectTemplate, resourceClass, resourceId)
+						EmailMessage msg = new EmailMessage(sharer, subjectTemplate, resourceClass, resourceId)
 						invite = signupCodeService.create(username)
 						mailService.sendMail {
 							from: from
