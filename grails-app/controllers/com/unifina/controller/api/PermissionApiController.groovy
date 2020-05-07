@@ -130,17 +130,18 @@ class PermissionApiController {
 			}
 		} else {
 			// incoming "username" is either SecUser.username or SignupInvite.username (possibly of a not yet created SignupInvite)
-			def user = SecUser.findByUsername(username)
+			SecUser user = SecUser.findByUsername(username)
 
 			String subjectTemplate = grailsApplication.config.unifina.email.shareInvite.subject
 			String from = grailsApplication.config.unifina.email.sender
 			if (user) {
 				if (op == Operation.STREAM_GET || op == Operation.CANVAS_GET || op == Operation.DASHBOARD_GET) { // quick fix for sending only one email
-					if (EmailValidator.validate(user.username)) {
+					String recipient = user.username
+					if (EmailValidator.validate(recipient)) {
 						EmailMessage msg = new EmailMessage(apiUser?.username, subjectTemplate, resourceClass, resourceId)
 						mailService.sendMail {
 							from: from
-							to: user.username
+							to: recipient
 							subject: msg.subject()
 							html: g.render(
 								template: "/emails/email_share_resource",
@@ -169,10 +170,10 @@ class PermissionApiController {
 							html: g.render(
 								template: "/emails/email_share_resource_invite",
 								model: [
-									invite: invite,
 									sharer: msg.sharer,
 									resource: msg.resourceType(),
 									name: msg.resourceName(),
+									invite: invite,
 								],
 							)
 						}
