@@ -119,10 +119,11 @@ class PermissionApiController {
 
 		String resourceClass = params.resourceClass
 		String resourceId = params.resourceId
+		SecUser apiUser = request.apiUser
 		if (anonymous) {
 			useResource(resourceClass, resourceId) { res ->
-				def grantor = request.apiUser
-				def newP = permissionService.grantAnonymousAccess(grantor, res, op)
+				SecUser grantor = apiUser
+				Permission newP = permissionService.grantAnonymousAccess(grantor, res, op)
 				header "Location", request.forwardURI + "/" + newP.id
 				response.status = 201
 				render(newP.toMap() + [text: "Successfully granted"] as JSON)
@@ -136,7 +137,7 @@ class PermissionApiController {
 			if (user) {
 				if (op == Operation.STREAM_GET || op == Operation.CANVAS_GET || op == Operation.DASHBOARD_GET) { // quick fix for sending only one email
 					if (EmailValidator.validate(user.username)) {
-						EmailMessage msg = new EmailMessage(request.apiUser?.username, subjectTemplate, resourceClass, resourceId)
+						EmailMessage msg = new EmailMessage(apiUser?.username, subjectTemplate, resourceClass, resourceId)
 						mailService.sendMail {
 							from: from
 							to: user.username
@@ -159,7 +160,7 @@ class PermissionApiController {
 				} else {
 					def invite = SignupInvite.findByUsername(username)
 					if (!invite) {
-						EmailMessage msg = new EmailMessage(request.apiUser?.username, subjectTemplate, resourceClass, resourceId)
+						EmailMessage msg = new EmailMessage(apiUser?.username, subjectTemplate, resourceClass, resourceId)
 						invite = signupCodeService.create(username)
 						mailService.sendMail {
 							from: from
@@ -185,8 +186,8 @@ class PermissionApiController {
 			}
 
 			useResource(resourceClass, resourceId) { res ->
-				def grantor = request.apiUser
-				def newP = permissionService.grant(grantor, res, user, op)
+				SecUser grantor = apiUser
+				Permission newP = permissionService.grant(grantor, res, user, op)
 				header "Location", request.forwardURI + "/" + newP.id
 				response.status = 201
 				render(newP.toMap() as JSON)
