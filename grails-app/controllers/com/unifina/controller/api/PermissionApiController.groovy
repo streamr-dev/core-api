@@ -117,8 +117,10 @@ class PermissionApiController {
 			throw new InvalidArgumentsException("Invalid operation '$op'.", "operation", op)
 		}
 
+		String resourceClass = params.resourceClass
+		String resourceId = params.resourceId
 		if (anonymous) {
-			useResource(params.resourceClass, params.resourceId) { res ->
+			useResource(resourceClass, resourceId) { res ->
 				def grantor = request.apiUser
 				def newP = permissionService.grantAnonymousAccess(grantor, res, op)
 				header "Location", request.forwardURI + "/" + newP.id
@@ -134,7 +136,7 @@ class PermissionApiController {
 			if (user) {
 				if (op == Operation.STREAM_GET || op == Operation.CANVAS_GET || op == Operation.DASHBOARD_GET) { // quick fix for sending only one email
 					if (EmailValidator.validate(user.username)) {
-						EmailMessage msg = new EmailMessage(request.apiUser?.username, subjectTemplate, params.resourceClass, params.resourceId)
+						EmailMessage msg = new EmailMessage(request.apiUser?.username, subjectTemplate, resourceClass, resourceId)
 						mailService.sendMail {
 							from: from
 							to: user.username
@@ -157,7 +159,7 @@ class PermissionApiController {
 				} else {
 					def invite = SignupInvite.findByUsername(username)
 					if (!invite) {
-						EmailMessage msg = new EmailMessage(request.apiUser?.username, subjectTemplate, params.resourceClass, params.resourceId)
+						EmailMessage msg = new EmailMessage(request.apiUser?.username, subjectTemplate, resourceClass, resourceId)
 						invite = signupCodeService.create(username)
 						mailService.sendMail {
 							from: from
@@ -182,7 +184,7 @@ class PermissionApiController {
 				}
 			}
 
-			useResource(params.resourceClass, params.resourceId) { res ->
+			useResource(resourceClass, resourceId) { res ->
 				def grantor = request.apiUser
 				def newP = permissionService.grant(grantor, res, user, op)
 				header "Location", request.forwardURI + "/" + newP.id
