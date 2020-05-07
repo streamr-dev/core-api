@@ -18,7 +18,6 @@ import groovy.transform.CompileStatic
 import org.codehaus.groovy.grails.commons.GrailsApplication
 
 import java.security.AccessControlException
-
 /**
  * Check, get, grant, and revoke permissions. Maintains Access Control Lists (ACLs) to resources.
  *
@@ -29,6 +28,7 @@ import java.security.AccessControlException
  */
 @Transactional(readOnly = false)
 class PermissionService {
+	PermissionStore store = new PermissionStore()
 	GrailsApplication grailsApplication
 
 	/**
@@ -69,16 +69,7 @@ class PermissionService {
 	@Transactional(readOnly = true)
 	List<Permission> getPermissionsTo(Object resource, boolean subscriptions, Operation op) {
 		String resourceProp = getResourcePropertyName(resource)
-		List<Permission> results = Permission.createCriteria().list() {
-			eq(resourceProp, resource)
-			if (!subscriptions) {
-				eq('subscription', null)
-			}
-			if (op) {
-				eq('operation', op)
-			}
-		}
-		return results
+		return store.getPermissionsTo(resourceProp, resource, subscriptions, op)
 	}
 
 	/**
@@ -114,20 +105,7 @@ class PermissionService {
 		String resourceProp = getResourcePropertyName(resource)
 
 		// Direct permissions from database
-		List<Permission> directPermissions = Permission.withCriteria {
-			eq(resourceProp, resource)
-			or {
-				eq("anonymous", true)
-				if (isNotNullAndIdNotNull(userish)) {
-					String userProp = getUserPropertyName(userish)
-					eq(userProp, userish)
-				}
-			}
-			or {
-				isNull("endsAt")
-				gt("endsAt", new Date())
-			}
-		}.toList()
+		List<Permission> directPermissions = store.findDirectPermissionsForGetPermissionsTo(resourceProp, resource, userish)
 
 		// Special case of UI channels: they inherit permissions from the associated canvas
 		if (resource instanceof Stream && resource.isUIChannel()) {
@@ -219,56 +197,9 @@ class PermissionService {
 	 * Get all resources of given type that the user has specified permission for
 	 */
 	@Transactional(readOnly = true)
-	def <T> List<T> get(Class<T> resourceClass, Userish userish, Operation op, boolean includeAnonymous,
+	<T> List<T> get(Class<T> resourceClass, Userish userish, Operation op, boolean includeAnonymous,
 						Closure resourceFilter = {}) {
-		userish = userish?.resolveToUserish()
-
-		if (!includeAnonymous && !userish?.id) {
-			return []
-		}
-
-		Closure permissionCriteria = createUserPermissionCriteria(resourceClass, userish, op, includeAnonymous)
-
-		return resourceClass.withCriteria {
-			permissionCriteria.delegate = delegate
-			resourceFilter.delegate = delegate
-			permissionCriteria()
-			resourceFilter()
-		}
-	}
-
-	/**
-	 * Creates a criteria that can be included in the <code>BuildableCriteria</code> of a domain object
-	 * (Dashboard, Canvas, Stream etc.) to filter query results so that user has specified permission on
-	 * them.
-	 */
-	Closure createUserPermissionCriteria(Class resourceClass, Userish userish, Operation op, boolean includeAnonymous) {
-		userish = userish?.resolveToUserish()
-
-		boolean isUser = isNotNullAndIdNotNull(userish)
-		String userProp = isUser ? getUserPropertyName(userish) : null
-		String idProperty = getResourcePropertyName(resourceClass)
-
-		return {
-			permissions {
-				eq("operation", op)
-				or {
-					if (includeAnonymous) {
-						eq("anonymous", true)
-					}
-					if (isUser) {
-						eq(userProp, userish)
-					}
-				}
-				or {
-					isNull("endsAt")
-					gt("endsAt", new Date())
-				}
-				projections {
-					groupProperty(idProperty)
-				}
-			}
-		}
+		return store.get(resourceClass, userish, op, includeAnonymous, resourceFilter)
 	}
 
 	/**
@@ -491,9 +422,7 @@ class PermissionService {
      */
 	List<Permission> transferInvitePermissionsTo(SecUser user) {
 		// { invite { eq "username", user.username } } won't do: some invite are null => NullPointerException
-		return Permission.withCriteria {
-			isNotNull "invite"
-		}.findAll {
+		return store.findPermissionsToTransfer().findAll {
 			it.invite.username == user.username
 		}.collect { p ->
 			p.invite = null
@@ -511,21 +440,7 @@ class PermissionService {
 		userish = userish?.resolveToUserish()
 		String resourceProp = getResourcePropertyName(resource)
 
-		List<Permission> directPermissions = Permission.withCriteria {
-			eq(resourceProp, resource)
-			eq("operation", op)
-			or {
-				eq("anonymous", true)
-				if (isNotNullAndIdNotNull(userish)) {
-					String userProp = getUserPropertyName(userish)
-					eq(userProp, userish)
-				}
-			}
-			or {
-				isNull("endsAt")
-				gt("endsAt", new Date())
-			}
-		}
+		List<Permission> directPermissions = store.findDirectPermissionsForHasPermission(resourceProp, resource, op, userish)
 
 		// Special case of UI channels: they inherit permissions from the associated canvas
 		if (directPermissions.isEmpty() && resource instanceof Stream && resource.uiChannel) {
@@ -546,15 +461,7 @@ class PermissionService {
 		target = target?.resolveToUserish()
 		String resourceProp = getResourcePropertyName(resource)
 
-		List<Permission> permissionList = Permission.withCriteria {
-			eq(resourceProp, resource)
-			if (anonymous) {
-				eq("anonymous", true)
-			} else {
-				String userProp = getUserPropertyName(target)
-				eq(userProp, target)
-			}
-		}.toList()
+		List<Permission> permissionList = store.findPermissionsToRevoke(resourceProp, resource, anonymous, target)
 
 		// Prevent revocation of only/last share permission to prevent inaccessible resources
 		if (hasOneOrLessSharePermissionsLeft(resource) && Operation.shareOperation(resource) in permissionList*.operation) {
@@ -591,13 +498,9 @@ class PermissionService {
 		return revoked
 	}
 
-	private static boolean hasOneOrLessSharePermissionsLeft(Object resource) {
+	private boolean hasOneOrLessSharePermissionsLeft(Object resource) {
 		String resourceProp = getResourcePropertyName(resource)
-		Permission.Operation shareOp = Operation.shareOperation(resource)
-		Integer n = Permission.createCriteria().count {
-			eq(resourceProp, resource)
-			eq("operation", shareOp)
-		}
+		int n = store.countSharePermissions(resourceProp, resource)
 		return n <= 1
 	}
 
@@ -647,10 +550,5 @@ class PermissionService {
 		} else {
 			throw new IllegalArgumentException("Unexpected Userish instance: " + userish)
 		}
-	}
-
-	/** null is often a valid value (but not a valid user), and means "anonymous Permissions only" */
-	private static boolean isNotNullAndIdNotNull(userish) {
-		return userish != null && userish.id != null
 	}
 }
