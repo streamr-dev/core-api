@@ -1,15 +1,7 @@
 package com.unifina.service
 
-import com.unifina.domain.dashboard.Dashboard
-import com.unifina.domain.data.Stream
-import com.unifina.domain.marketplace.Product
-import com.unifina.domain.security.Key
 import com.unifina.domain.security.Permission
-import com.unifina.domain.security.SecUser
-import com.unifina.domain.security.SignupInvite
-import com.unifina.domain.signalpath.Canvas
 import com.unifina.security.Userish
-import groovy.transform.CompileStatic
 
 class PermissionStore {
 	/** null is often a valid value (but not a valid user), and means "anonymous Permissions only" */
@@ -17,32 +9,16 @@ class PermissionStore {
 		return userish != null && userish.id != null
 	}
 
-	List<Permission> findDirectPermissionsForGetPermissionsTo(String resourceProp, resource, Userish userish) {
+	List<Permission> findDirectPermissions(String resourceProp, Object resource, Permission.Operation operation, Userish userish) {
 		List<Permission> directPermissions = Permission.withCriteria {
 			eq(resourceProp, resource)
+			if (operation != null) {
+				eq("operation", operation)
+			}
 			or {
 				eq("anonymous", true)
 				if (isNotNullAndIdNotNull(userish)) {
-					String userProp = getUserPropertyName(userish)
-					eq(userProp, userish)
-				}
-			}
-			or {
-				isNull("endsAt")
-				gt("endsAt", new Date())
-			}
-		}.toList()
-		return directPermissions
-	}
-
-	List<Permission> findDirectPermissionsForHasPermission(String resourceProp, resource, Permission.Operation op, Userish userish) {
-		List<Permission> directPermissions = Permission.withCriteria {
-			eq(resourceProp, resource)
-			eq("operation", op)
-			or {
-				eq("anonymous", true)
-				if (isNotNullAndIdNotNull(userish)) {
-					String userProp = getUserPropertyName(userish)
+					String userProp = PermissionService.getUserPropertyName(userish)
 					eq(userProp, userish)
 				}
 			}
@@ -68,9 +44,10 @@ class PermissionStore {
 	}
 
 	int countSharePermissions(String resourceProp, resource) {
+		Permission.Operation shareOperation = Permission.Operation.shareOperation(resource)
 		Integer n = Permission.createCriteria().count {
 			eq(resourceProp, resource)
-			eq("operation", Permission.Operation.shareOperation(resource))
+			eq("operation", shareOperation)
 		}
 		return n
 	}
@@ -81,7 +58,7 @@ class PermissionStore {
 			if (anonymous) {
 				eq("anonymous", true)
 			} else {
-				String userProp = getUserPropertyName(target)
+				String userProp = PermissionService.getUserPropertyName(target)
 				eq(userProp, target)
 			}
 		}.toList()
@@ -116,39 +93,6 @@ class PermissionStore {
 	}
 
 	/**
-	 * Return property name for Userish
-	 */
-	@CompileStatic
-	private static String getUserPropertyName(Userish userish) {
-		if (userish instanceof SecUser) {
-			return "user"
-		} else if (userish instanceof SignupInvite) {
-			return "invite"
-		} else if (userish instanceof Key) {
-			return "key"
-		} else {
-			throw new IllegalArgumentException("Unexpected Userish instance: " + userish)
-		}
-	}
-
-	@CompileStatic
-	private static String getResourcePropertyName(Object resource) {
-		// Cannot derive name straight from resource.getClass() because of proxy assist objects!
-		Class resourceClass = resource instanceof Class ? resource : resource.getClass()
-		if (Canvas.isAssignableFrom(resourceClass)) {
-			return "canvas"
-		} else if (Dashboard.isAssignableFrom(resourceClass)) {
-			return "dashboard"
-		} else if (Product.isAssignableFrom(resourceClass)) {
-			return "product"
-		} else if (Stream.isAssignableFrom(resourceClass)) {
-			return "stream"
-		} else {
-			throw new IllegalArgumentException("Unexpected resource class: " + resourceClass)
-		}
-	}
-
-	/**
 	 * Creates a criteria that can be included in the <code>BuildableCriteria</code> of a domain object
 	 * (Dashboard, Canvas, Stream etc.) to filter query results so that user has specified permission on
 	 * them.
@@ -157,8 +101,8 @@ class PermissionStore {
 		userish = userish?.resolveToUserish()
 
 		boolean isUser = isNotNullAndIdNotNull(userish)
-		String userProp = isUser ? getUserPropertyName(userish) : null
-		String idProperty = getResourcePropertyName(resourceClass)
+		String userProp = isUser ? PermissionService.getUserPropertyName(userish) : null
+		String idProperty = PermissionService.getResourcePropertyName(resourceClass)
 
 		return {
 			permissions {

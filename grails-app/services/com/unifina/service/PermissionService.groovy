@@ -13,10 +13,11 @@ import com.unifina.domain.security.SecUser
 import com.unifina.domain.security.SignupInvite
 import com.unifina.domain.signalpath.Canvas
 import com.unifina.security.Userish
-import groovy.transform.CompileStatic
+import grails.compiler.GrailsCompileStatic
 import org.codehaus.groovy.grails.commons.GrailsApplication
 
 import java.security.AccessControlException
+
 /**
  * Check, get, grant, and revoke permissions. Maintains Access Control Lists (ACLs) to resources.
  *
@@ -25,15 +26,30 @@ import java.security.AccessControlException
  * 		- Permission owners and grant/revoke targets can be SecUsers or SignupInvites
  * 			=> getUserPropertyName
  */
+@GrailsCompileStatic
 class PermissionService {
 	PermissionStore store = new PermissionStore()
 	GrailsApplication grailsApplication
+
+	private Object findID(Object resource) {
+		if (resource instanceof Canvas) {
+			return resource?.id
+		} else if (resource instanceof Dashboard) {
+			return resource?.id
+		} else if (resource instanceof Product) {
+			return resource?.id
+		} else if (resource instanceof Stream) {
+			return resource?.id
+		}
+		return null
+	}
 
 	/**
 	 * Check whether user is allowed to perform specified operation on a resource
 	 */
 	boolean check(Userish userish, Object resource, Operation op) {
-		return resource?.id != null && hasPermission(userish, resource, op)
+		Object id = findID(resource)
+		return id != null && hasPermission(userish, resource, op)
 	}
 
 	/**
@@ -41,8 +57,8 @@ class PermissionService {
 	 */
 	void verify(Userish userish, Object resource, Operation op) throws NotPermittedException {
 		if (!check(userish, resource, op)) {
-			SecUser user = userish?.resolveToUserish()
-			throw new NotPermittedException(user?.username, resource.class.simpleName, resource.id, op.id)
+			SecUser user = userish?.resolveToUserish() as SecUser
+			throw new NotPermittedException(user?.username, resource.class.simpleName, findID(resource)?.toString(), op.id)
 		}
 	}
 
@@ -96,7 +112,7 @@ class PermissionService {
 		String resourceProp = getResourcePropertyName(resource)
 
 		// Direct permissions from database
-		List<Permission> directPermissions = store.findDirectPermissionsForGetPermissionsTo(resourceProp, resource, userish)
+		List<Permission> directPermissions = store.findDirectPermissions(resourceProp, resource, null as Operation, userish)
 
 		// Special case of UI channels: they inherit permissions from the associated canvas
 		if (resource instanceof Stream && resource.isUIChannel()) {
@@ -104,9 +120,9 @@ class PermissionService {
 			Key key = null
 			SecUser user = null
 			if (userish instanceof Key) {
-				key = userish
+				key = userish as Key
 			} else if (userish instanceof SecUser) {
-				user = userish
+				user = userish as SecUser
 			}
 			if (userish != null && isPermissionToStreamViaDashboard(userish, resource)) {
 				syntheticPermissions.add(new Permission(
@@ -144,11 +160,11 @@ class PermissionService {
 	}
 
 	// Maps canvas operations to stream operations
-	private final static Map<Operation, Set<Operation>> CANVAS_TO_STREAM = [
-		(Operation.CANVAS_GET): [Operation.STREAM_GET, Operation.STREAM_SUBSCRIBE],
-		(Operation.CANVAS_EDIT): [Operation.STREAM_DELETE],
-		(Operation.CANVAS_DELETE): [Operation.STREAM_DELETE],
-		(Operation.CANVAS_STARTSTOP): [Operation.STREAM_PUBLISH],
+	private final static LinkedHashMap<Operation, HashSet<Operation>> CANVAS_TO_STREAM = [
+		(Operation.CANVAS_GET): new HashSet<Operation>([Operation.STREAM_GET, Operation.STREAM_SUBSCRIBE]),
+		(Operation.CANVAS_EDIT): new HashSet<Operation>([Operation.STREAM_DELETE]),
+		(Operation.CANVAS_DELETE): new HashSet<Operation>([Operation.STREAM_DELETE]),
+		(Operation.CANVAS_STARTSTOP): new HashSet<Operation>([Operation.STREAM_PUBLISH]),
 	]
 
 	private boolean isPermissionToStreamViaDashboard(Userish userish, Stream stream) {
@@ -171,21 +187,19 @@ class PermissionService {
 	}
 
 	/** Overload to allow leaving out the anonymous-include-flag but including the filter */
-	@CompileStatic
-	<T> List<T> get(Class<T> resourceClass, Userish userish, Operation op, Closure resourceFilter = {}) {
+	public <T> List<T> get(Class<T> resourceClass, Userish userish, Operation op, Closure resourceFilter = {}) {
 		return get(resourceClass, userish, op, false, resourceFilter)
 	}
 
 	/** Convenience overload: get all including public, adding a flag for public resources may look cryptic */
-	@CompileStatic
-	<T> List<T> getAll(Class<T> resourceClass, Userish userish, Operation op, Closure resourceFilter = {}) {
+	public <T> List<T> getAll(Class<T> resourceClass, Userish userish, Operation op, Closure resourceFilter = {}) {
 		return get(resourceClass, userish, op, true, resourceFilter)
 	}
 
 	/**
 	 * Get all resources of given type that the user has specified permission for
 	 */
-	def <T> List<T> get(Class<T> resourceClass, Userish userish, Operation op, boolean includeAnonymous,
+	public <T> List<T> get(Class<T> resourceClass, Userish userish, Operation op, boolean includeAnonymous,
 						Closure resourceFilter = {}) {
 		return store.get(resourceClass, userish, op, includeAnonymous, resourceFilter)
 	}
@@ -202,7 +216,6 @@ class PermissionService {
 	 * @throws AccessControlException if grantor doesn't have SHARE permission on resource
 	 * @throws IllegalArgumentException if given invalid resource or target
      */
-	@CompileStatic
 	Permission grant(SecUser grantor,
 					 Object resource,
 					 Userish target,
@@ -223,7 +236,6 @@ class PermissionService {
 	 *
 	 * @return granted permissions (size == 3)
 	 */
-	@CompileStatic
 	List<Permission> systemGrantAll(Userish target, Object resource) {
 		Operation.operationsFor(resource).collect { Operation op ->
 			systemGrant(target, resource, op)
@@ -276,7 +288,6 @@ class PermissionService {
 	 * @throws AccessControlException if grantor doesn't have SHARE permission on resource
 	 * @throws IllegalArgumentException if given invalid resource
 	 */
-	@CompileStatic
 	Permission grantAnonymousAccess(SecUser grantor,
 									Object resource,
 									Operation operation,
@@ -316,7 +327,6 @@ class PermissionService {
 	 *
 	 * @throws AccessControlException if revoker doesn't have *_share permission on resource
      */
-	@CompileStatic
 	List<Permission> revoke(SecUser revoker,
 							Object resource,
 							Userish target,
@@ -341,7 +351,6 @@ class PermissionService {
 	 *
      * @return Permissions that were deleted
      */
-	@CompileStatic
 	List<Permission> systemRevoke(Userish target, Object resource, Operation operation) {
 		if (operation == null) {
 			throw new IllegalArgumentException("Operation can't be null")
@@ -357,7 +366,6 @@ class PermissionService {
 	 *
 	 * @return Permissions that were deleted
 	 */
-	@CompileStatic
 	List<Permission> systemRevokeAnonymousAccess(Object resource, Operation operation) {
 		if (operation == null) {
 			throw new IllegalArgumentException("Operation can't be null")
@@ -377,7 +385,6 @@ class PermissionService {
 	 *
 	 * @throws AccessControlException if revoker doesn't have SHARE permission on resource
 	 */
-	@CompileStatic
 	List<Permission> revoke(SecUser revoker, Permission permission, boolean logIfDenied=true)
 			throws AccessControlException {
 		Object resource = getResourceFromPermission(permission)
@@ -393,7 +400,6 @@ class PermissionService {
 	 *
 	 * @return Permissions that were deleted
 	 */
-	@CompileStatic
 	List<Permission> systemRevoke(Permission permission) {
 		return performRevoke(
 			permission.anonymous,
@@ -428,7 +434,7 @@ class PermissionService {
 		userish = userish?.resolveToUserish()
 		String resourceProp = getResourcePropertyName(resource)
 
-		List<Permission> directPermissions = store.findDirectPermissionsForHasPermission(resourceProp, resource, op, userish)
+		List<Permission> directPermissions = store.findDirectPermissions(resourceProp, resource, op, userish)
 
 		// Special case of UI channels: they inherit permissions from the associated canvas
 		if (directPermissions.isEmpty() && resource instanceof Stream && resource.uiChannel) {
@@ -507,8 +513,7 @@ class PermissionService {
 		return p[field]
 	}
 
-	@CompileStatic
-	private static String getResourcePropertyName(Object resource) {
+	static String getResourcePropertyName(Object resource) {
 		// Cannot derive name straight from resource.getClass() because of proxy assist objects!
 		Class resourceClass = resource instanceof Class ? resource : resource.getClass()
 		if (Canvas.isAssignableFrom(resourceClass)) {
@@ -527,8 +532,7 @@ class PermissionService {
 	/**
 	 * Return property name for Userish
 	 */
-	@CompileStatic
-	private static String getUserPropertyName(Userish userish) {
+	static String getUserPropertyName(Userish userish) {
 		if (userish instanceof SecUser) {
 			return "user"
 		} else if (userish instanceof SignupInvite) {
