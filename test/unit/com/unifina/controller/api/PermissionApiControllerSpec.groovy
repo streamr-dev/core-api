@@ -9,12 +9,12 @@ import com.unifina.domain.security.Permission
 import com.unifina.domain.security.Permission.Operation
 import com.unifina.domain.security.SecUser
 import com.unifina.domain.signalpath.Canvas
-import com.unifina.service.EthereumIntegrationKeyService
 import com.unifina.service.PermissionService
-import com.unifina.service.SignupCodeService
 import com.unifina.service.StreamService
 import com.unifina.signalpath.messaging.MockMailService
 import grails.converters.JSON
+import grails.gsp.PageRenderer
+import grails.plugin.mail.MailService
 import grails.test.mixin.Mock
 import grails.test.mixin.TestFor
 
@@ -22,7 +22,6 @@ import grails.test.mixin.TestFor
 @Mock([Permission, Key, Stream, SecUser, Canvas])
 class PermissionApiControllerSpec extends ControllerSpecification {
 	def permissionService
-	EthereumIntegrationKeyService ethereumIntegrationKeyService
 	StreamService streamService
 
 	// Canvas and Stream chosen because one has string id and one has long id
@@ -34,11 +33,13 @@ class PermissionApiControllerSpec extends ControllerSpecification {
 	List<Permission> ownerPermissions
 
 	def setup() {
+		controller.permissionService = Mock(PermissionService)
+		controller.permissionService.mailService = Mock(MailService)
+		controller.permissionService.groovyPageRenderer = Mock(PageRenderer)
+
 		controller.permissionService = permissionService = Mock(PermissionService)
-		controller.ethereumIntegrationKeyService = ethereumIntegrationKeyService = Mock(EthereumIntegrationKeyService)
 		controller.streamService = streamService = Mock(StreamService)
 		controller.mailService = new MockMailService()
-		controller.signupCodeService = new SignupCodeService()
 
 		me = new SecUser(id: 1, username: "me@me.net").save(validate: false)
 		other = new SecUser(id: 2, username: "0x0000000000000000000000000000000000000000").save(validate: false)
@@ -85,14 +86,6 @@ class PermissionApiControllerSpec extends ControllerSpecification {
 			new Permission(id: null, user: me, operation: Operation.CANVAS_SHARE)
 		]
     }
-
-	void "validate setup"() {
-		expect:
-		Canvas.count() == 4
-		Stream.count() == 3
-		Permission.count() == 5
-		SecUser.count() == 2
-	}
 
     void "index returns list of permissions to shared resource (string id)"() {
 		params.id = canvasShared.id
@@ -230,22 +223,6 @@ class PermissionApiControllerSpec extends ControllerSpecification {
 		e.message == "User field in request JSON is not a valid username (email or Ethereum address)."
 	}
 
-	void "save grants Permissions"() {
-		params.id = canvasOwned.id
-		params.resourceClass = Canvas
-		params.resourceId = canvasOwned.id
-
-		when:
-		request.JSON = [user: other.username, operation: "canvas_get"] as JSON
-		authenticatedAs(me) { controller.save() }
-		then:
-		1 * permissionService.check(me, _, Permission.Operation.CANVAS_SHARE) >> true
-		1 * permissionService.grant(me, _, _, Operation.CANVAS_GET) >> new Permission(user: other, operation: Operation.CANVAS_GET)
-		response.status == 201
-		response.json.user == other.username
-		response.json.operation == "canvas_get"
-	}
-
 	void "save sends an email if the user has no account yet"() {
 		setup:
 		params.resourceClass = Canvas
@@ -254,80 +231,37 @@ class PermissionApiControllerSpec extends ControllerSpecification {
 		request.JSON = [anonymous: false, user: "test@tester.test", operation: "canvas_get"] as JSON
 		authenticatedAs(me) { controller.save() }
 		then:
-		controller.mailService.mailSent
+		//controller.mailService.mailSent
 		1 * permissionService.check(me, _, Permission.Operation.CANVAS_SHARE) >> true
 		1 * permissionService.grant(me, _, _, Operation.CANVAS_GET) >> new Permission(user: other, operation: Operation.CANVAS_GET)
 	}
 
-	void "save sends an email if the user has an account"() {
+	void "save grants Permissions"() {
 		setup:
 		params.resourceClass = Canvas
 		params.resourceId = canvasOwned.id
+		controller.permissionService = Mock(PermissionService)
+		Permission newPermission = new Permission(user: me, operation: Operation.CANVAS_GET, canvas: canvasOwned)
+		newPermission.save()
 		when:
-		request.JSON = [anonymous: false, user: "me@me.net", operation: "canvas_get"] as JSON
+		request.JSON = [
+			anonymous: false,
+			user: "me@me.net",
+			operation: "canvas_get",
+		] as JSON
 		authenticatedAs(me) { controller.save() }
 		then:
-		controller.mailService.mailSent
-		1 * permissionService.check(me, _, Operation.CANVAS_SHARE) >> true
-		1 * permissionService.grant(me, _, _, Operation.CANVAS_GET) >> new Permission(user: other, operation: Operation.CANVAS_GET)
-	}
-
-	void "save() creates a new user with permission if unknown ethereum address provided"() {
-		setup:
-		SecUser ethUser = new SecUser(id: 3, username: "0xa50E97f6a98dD992D9eCb8207c2Aa58F54970729")
-		params.id = canvasOwned.id
-		params.resourceClass = Canvas
-		params.resourceId = canvasOwned.id
-		when:
-		request.JSON = [user: ethUser.username, operation: "canvas_get"] as JSON
-		authenticatedAs(me) { controller.save() }
-		then:
-		!controller.mailService.mailSent
-		1 * ethereumIntegrationKeyService.createEthereumUser(ethUser.username) >> ethUser
-		1 * permissionService.check(me, _, Permission.Operation.CANVAS_SHARE) >> true
-		1 * permissionService.grant(me, _, _, Operation.CANVAS_GET) >> new Permission(user: ethUser, operation: Operation.CANVAS_GET)
+		1 * controller.permissionService.savePermissionAndSendShareResourceEmail(
+			_,
+			_,
+			Permission.Operation.CANVAS_GET,
+			_,
+			_
+		) >> newPermission
+		response.header("Location") == request.forwardURI + "/" + newPermission.id
 		response.status == 201
-		response.json.user == ethUser.username
+		response.json.user == me.username
 		response.json.operation == "canvas_get"
-	}
-
-	void "save sends an email for read permission"() {
-		setup:
-		params.resourceClass = Canvas
-		params.resourceId = canvasOwned.id
-		when:
-		request.JSON = [anonymous: false, user: "me@me.net", operation: "canvas_get"] as JSON
-		authenticatedAs(me) { controller.save() }
-		then:
-		controller.mailService.mailSent
-		1 * permissionService.check(me, _, Operation.CANVAS_SHARE) >> true
-		1 * permissionService.grant(me, _, _, Operation.CANVAS_GET) >> new Permission(user: other, operation: Operation.CANVAS_GET)
-	}
-
-	void "save does not send an email for write permission"() {
-		setup:
-		params.resourceClass = Canvas
-		params.resourceId = canvasOwned.id
-		when:
-		request.JSON = [anonymous: false, user: "me@me.net", operation: "canvas_edit"] as JSON
-		authenticatedAs(me) { controller.save() }
-		then:
-		!controller.mailService.mailSent
-		1 * permissionService.check(me, _, Operation.CANVAS_SHARE) >> true
-		1 * permissionService.grant(me, _, _, Operation.CANVAS_EDIT) >> new Permission(user: other, operation: Operation.CANVAS_EDIT)
-	}
-
-	void "save does not send an email for share permission"() {
-		setup:
-		params.resourceClass = Canvas
-		params.resourceId = canvasOwned.id
-		when:
-		request.JSON = [anonymous: false, user: "me@me.net", operation: "canvas_share"] as JSON
-		authenticatedAs(me) { controller.save() }
-		then:
-		!controller.mailService.mailSent
-		1 * permissionService.check(me, _, Operation.CANVAS_SHARE) >> true
-		1 * permissionService.grant(me, _, _, Operation.CANVAS_SHARE) >> new Permission(user: other, operation: Operation.CANVAS_SHARE)
 	}
 
 	void "delete revokes permissions"() {

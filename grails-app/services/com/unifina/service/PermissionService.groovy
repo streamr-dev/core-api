@@ -1,6 +1,9 @@
 package com.unifina.service
 
+import com.unifina.api.NotFoundException
 import com.unifina.api.NotPermittedException
+import com.unifina.domain.EmailMessage
+import com.unifina.domain.Resource
 import com.unifina.domain.dashboard.Dashboard
 import com.unifina.domain.dashboard.DashboardItem
 import com.unifina.domain.data.Stream
@@ -14,6 +17,9 @@ import com.unifina.domain.security.SignupInvite
 import com.unifina.domain.signalpath.Canvas
 import com.unifina.security.Userish
 import grails.compiler.GrailsCompileStatic
+import grails.gsp.PageRenderer
+import grails.plugin.mail.MailService
+import grails.util.Holders
 import org.codehaus.groovy.grails.commons.GrailsApplication
 
 import java.security.AccessControlException
@@ -30,6 +36,9 @@ import java.security.AccessControlException
 class PermissionService {
 	PermissionStore store = new PermissionStore()
 	GrailsApplication grailsApplication
+	MailService mailService
+	SignupCodeService signupCodeService
+	PageRenderer groovyPageRenderer
 
 	private Object findID(Object resource) {
 		if (resource instanceof Canvas) {
@@ -542,5 +551,95 @@ class PermissionService {
 		} else {
 			throw new IllegalArgumentException("Unexpected Userish instance: " + userish)
 		}
+	}
+
+	Permission savePermissionAndSendShareResourceEmail(SecUser apiUser, Key apiKey, Operation op, String targetUsername, EmailMessage msg) {
+		Permission permission = savePermission(msg.resource, apiUser, apiKey, targetUsername, op)
+		sendEmailShareResource(op, targetUsername, msg)
+		return permission
+	}
+
+	private Permission savePermission(Resource res, SecUser apiUser, Key apiKey, String targetUsername, Operation op) {
+		Object resource
+		if (Canvas.isAssignableFrom(res.clazz)) {
+			resource = Canvas.get(res.idToString())
+		} else if (Dashboard.isAssignableFrom(res.clazz)) {
+			resource = Dashboard.get(res.idToString())
+		} else if (Product.isAssignableFrom(res.clazz)) {
+			resource = Product.get(res.idToString())
+		} else if (Stream.isAssignableFrom(res.clazz)) {
+			StreamService streamService = Holders.getApplicationContext().getBean(StreamService)
+			resource = streamService.getStream(res.idToString())
+		} else {
+			throw new IllegalArgumentException("Unexpected resource class: " + res.clazz)
+		}
+		if (resource == null) {
+			throw new NotFoundException(res.clazz.simpleName, res.idToString())
+		}
+		Operation shareOp = Operation.shareOperation(resource)
+		if (!check(apiUser ?: apiKey, resource, shareOp)) {
+			throw new NotPermittedException(apiUser?.username, res.clazz.simpleName, res.idToString(), shareOp.id)
+		}
+		SecUser user = SecUser.findByUsername(targetUsername)
+		Permission permission = grant(apiUser, resource, user, op)
+		return permission
+	}
+
+	void sendEmailShareResource(Operation op, String username, EmailMessage msg) {
+		if (op == Operation.STREAM_GET || op == Operation.CANVAS_GET || op == Operation.DASHBOARD_GET) {
+			// Users with email/password registration get an email
+			// send only one email for each read/get permission
+			String content = groovyPageRenderer.render([
+				template: "/emails/email_share_resource",
+				model: [
+					sharer  : msg.from,
+					resource: msg.resourceType(),
+					name    : msg.resourceName(),
+					link    : msg.link(),
+				],
+			])
+			mailService.sendMail {
+				from: msg.from
+				to: msg.to
+				subject: msg.subject()
+				html: content
+			}
+		}
+	}
+
+	Permission savePermissionAndSendShareResourceInviteEmail() {
+		return null
+	}
+
+	SignupInvite sendEmailShareResourceInvite(String username, EmailMessage msg) {
+		SignupInvite invite = SignupInvite.findByUsername(username)
+		if (!invite) {
+			invite = signupCodeService.create(username)
+			String content = groovyPageRenderer.render([
+				template: "/emails/email_share_resource_invite",
+				model: [
+					sharer  : msg.from,
+					resource: msg.resourceType(),
+					name    : msg.resourceName(),
+					invite  : invite,
+				],
+			])
+			mailService.sendMail {
+				from: msg.from
+				to: invite.username
+				subject: msg.subject()
+				html: content
+			}
+			invite.sent = true
+			invite.save(failOnError: true, validate: true)
+		}
+		return invite
+	}
+
+	Permission savePermissionAndCreateEthereumAccount(String username, SecUser grantor, Operation operation, Resource res) {
+		EthereumIntegrationKeyService ethereumIntegrationKeyService = Holders.getApplicationContext().getBean(EthereumIntegrationKeyService)
+		SecUser user = ethereumIntegrationKeyService.createEthereumUser(username)
+		Permission newPermission = savePermission(res, grantor, null, user.username, operation)
+		return newPermission
 	}
 }

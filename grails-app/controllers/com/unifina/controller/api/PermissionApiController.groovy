@@ -3,30 +3,29 @@ package com.unifina.controller.api
 import com.unifina.api.InvalidArgumentsException
 import com.unifina.api.NotFoundException
 import com.unifina.api.NotPermittedException
-import com.unifina.domain.dashboard.Dashboard
+import com.unifina.domain.EmailMessage
+import com.unifina.domain.Resource
 import com.unifina.domain.data.Stream
 import com.unifina.domain.security.Permission
 import com.unifina.domain.security.Permission.Operation
 import com.unifina.domain.security.SecUser
 import com.unifina.domain.security.SignupInvite
-import com.unifina.domain.signalpath.Canvas
 import com.unifina.security.AllowRole
 import com.unifina.security.AuthLevel
 import com.unifina.security.StreamrApi
-import com.unifina.service.EthereumIntegrationKeyService
 import com.unifina.service.PermissionService
 import com.unifina.service.SignupCodeService
 import com.unifina.service.StreamService
-import com.unifina.utils.EmailValidator
 import com.unifina.utils.EthereumAddressValidator
 import com.unifina.utils.UsernameValidator
 import grails.converters.JSON
+import grails.validation.Validateable
+import groovy.transform.ToString
 
 class PermissionApiController {
 
 	PermissionService permissionService
 	SignupCodeService signupCodeService
-	EthereumIntegrationKeyService ethereumIntegrationKeyService
 	StreamService streamService
 	def mailService
 
@@ -93,6 +92,16 @@ class PermissionApiController {
 		}
 	}
 
+	@Validateable
+	@ToString
+	static class NewPermissionCommand {
+		Boolean anonymous
+		String user
+		Operation operation
+		static constraints = {
+		}
+	}
+
 	@StreamrApi(authenticationLevel = AuthLevel.NONE)
 	def save() {
 		if (!request.hasProperty("JSON")) {
@@ -117,79 +126,61 @@ class PermissionApiController {
 			throw new InvalidArgumentsException("Invalid operation '$op'.", "operation", op)
 		}
 
-		String resourceClass = params.resourceClass
-		String resourceId = params.resourceId
+		Resource res = new Resource(params.resourceClass, params.resourceId)
 		SecUser apiUser = request.apiUser
+		if (!grailsApplication.isDomainClass(res.clazz)) {
+			throw new InvalidArgumentsException("${res.clazz.simpleName} is not a domain class!")
+		}
 		if (anonymous) {
-			useResource(resourceClass, resourceId) { res ->
+			useResource(resourceClass, resourceId) { r ->
 				SecUser grantor = apiUser
-				Permission newP = permissionService.grantAnonymousAccess(grantor, res, op)
+				Permission newP = permissionService.grantAnonymousAccess(grantor, r, op)
 				header "Location", request.forwardURI + "/" + newP.id
 				response.status = 201
 				render(newP.toMap() + [text: "Successfully granted"] as JSON)
 			}
 		} else {
-			// incoming "username" is either SecUser.username or SignupInvite.username (possibly of a not yet created SignupInvite)
-			SecUser user = SecUser.findByUsername(username)
-
 			String subjectTemplate = grailsApplication.config.unifina.email.shareInvite.subject
 			String from = grailsApplication.config.unifina.email.sender
 			String sharer = apiUser?.username
+			// incoming "username" is either SecUser.username or SignupInvite.username (possibly of a not yet created SignupInvite)
+			SecUser user = SecUser.findByUsername(username)
+
 			if (user) {
-				if (op == Operation.STREAM_GET || op == Operation.CANVAS_GET || op == Operation.DASHBOARD_GET) { // quick fix for sending only one email
-					String recipient = user.username
-					if (EmailValidator.validate(recipient)) {
-						EmailMessage msg = new EmailMessage(sharer, subjectTemplate, resourceClass, resourceId)
-						mailService.sendMail {
-							from: from
-							to: recipient
-							subject: msg.subject()
-							html: g.render(
-								template: "/emails/email_share_resource",
-								model: [
-									sharer  : msg.sharer,
-									resource: msg.resourceType(),
-									name    : msg.resourceName(),
-									link    : msg.link(),
-								],
-							)
-						}
-					}
-				}
+				String recipient = user.username
+				// send share resource email and grant permission
+				EmailMessage msg = new EmailMessage(sharer, recipient, subjectTemplate, res)
+				Permission newPermission = permissionService.savePermissionAndSendShareResourceEmail(
+					request.apiUser,
+					request.apiKey,
+					op,
+					user.username,
+					msg
+				)
+				header("Location", request.forwardURI + "/" + newPermission.id)
+				response.status = 201
+				render(newPermission.toMap() as JSON)
+				return
 			} else {
 				if (EthereumAddressValidator.validate(username)) {
-					user = ethereumIntegrationKeyService.createEthereumUser(username)
+					// create local ethereum account and grant permission
+					Permission newPermission = permissionService.savePermissionAndCreateEthereumAccount(username, request.apiUser, request.apiKey, op, res)
+					header("Location", request.forwardURI + "/" + newPermission.id)
+					response.status = 201
+					render(newPermission.toMap() as JSON)
+					return
 				} else {
-					def invite = SignupInvite.findByUsername(username)
-					if (!invite) {
-						EmailMessage msg = new EmailMessage(sharer, subjectTemplate, resourceClass, resourceId)
-						invite = signupCodeService.create(username)
-						mailService.sendMail {
-							from: from
-							to: invite.username
-							subject: msg.subject()
-							html: g.render(
-								template: "/emails/email_share_resource_invite",
-								model: [
-									sharer: msg.sharer,
-									resource: msg.resourceType(),
-									name: msg.resourceName(),
-									invite: invite,
-								],
-							)
-						}
-						invite.sent = true
-						invite.save(failOnError: true, validate: true)
-					}
-
+					// send share resource invite email and grant permission
+					EmailMessage msg = new EmailMessage(sharer, username, subjectTemplate, res)
+					SignupInvite invite = permissionService.sendEmailShareResourceInvite(username, msg)
 					// permissionService handles SecUsers and SignupInvitations equally
 					user = invite
 				}
 			}
 
-			useResource(resourceClass, resourceId) { res ->
+			useResource(res.clazz, res.id) { r ->
 				SecUser grantor = apiUser
-				Permission newP = permissionService.grant(grantor, res, user, op)
+				Permission newP = permissionService.grant(grantor, r, user, op)
 				header "Location", request.forwardURI + "/" + newP.id
 				response.status = 201
 				render(newP.toMap() as JSON)
@@ -220,52 +211,3 @@ class PermissionApiController {
 	}
 }
 
-class EmailMessage {
-	String sharer
-	String subjectTemplate
-	Class<?> resourceClass
-	Object resourceId
-
-	EmailMessage(String sharer, String subjectTemplate, Class<?> resourceClass, Object resourceId) {
-		this.sharer = sharer ?: "Streamr user"
-		this.subjectTemplate = subjectTemplate
-		this.resourceClass = resourceClass
-		this.resourceId = resourceId
-	}
-
-	String resourceType() {
-		if (Canvas.isAssignableFrom(resourceClass)) {
-			return "canvas"
-		} else if (Stream.isAssignableFrom(resourceClass)) {
-			return "stream"
-		} else if (Dashboard.isAssignableFrom(resourceClass)) {
-			return "dashboard"
-		}
-		throw new IllegalArgumentException("Unexpected resource class: " + resourceClass)
-	}
-
-	String resourceName() {
-		def res = resourceClass.get(resourceId)
-		if (!res) {
-			return ""
-		}
-		return res.name
-	}
-
-	String subject() {
-		String subject = subjectTemplate.replace("%USER%", sharer)
-		subject = subject.replace("%RESOURCE%", resourceType())
-		return subject
-	}
-
-	String link() {
-		if (Canvas.isAssignableFrom(resourceClass)) {
-			return "/canvas/editor/" + resourceId
-		} else if (Stream.isAssignableFrom(resourceClass)) {
-			return "/core/stream/show/" + resourceId
-		} else if (Dashboard.isAssignableFrom(resourceClass)) {
-			return "/dashboard/editor/" + resourceId
-		}
-		throw new IllegalArgumentException("Unexpected resource class: " + resourceClass)
-	}
-}

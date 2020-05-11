@@ -2,6 +2,8 @@ package com.unifina.service
 
 import com.unifina.BeanMockingSpecification
 import com.unifina.api.NotPermittedException
+import com.unifina.domain.EmailMessage
+import com.unifina.domain.Resource
 import com.unifina.domain.dashboard.Dashboard
 import com.unifina.domain.data.Stream
 import com.unifina.domain.security.Key
@@ -11,6 +13,8 @@ import com.unifina.domain.security.SecUser
 import com.unifina.domain.security.SignupInvite
 import com.unifina.domain.signalpath.Canvas
 import com.unifina.domain.signalpath.Module
+import grails.gsp.PageRenderer
+import grails.plugin.mail.MailService
 import grails.test.mixin.Mock
 import grails.test.mixin.TestFor
 import grails.test.mixin.TestMixin
@@ -373,5 +377,111 @@ class PermissionServiceSpec extends BeanMockingSpecification {
 		Permission.findAllByStream(testStream).size() == 1
 		!service.check(testUser, testStream, Operation.STREAM_GET)
 		service.check(testUser, testStream, Permission.Operation.STREAM_EDIT)
+	}
+
+	def newCanvas = { String id ->
+		def c = new Canvas()
+		c.id = id
+		return c.save(validate: false)
+	}
+
+	void "save sends an email for read permission"() {
+		setup:
+		service.mailService = Mock(MailService)
+		service.groovyPageRenderer = Mock(PageRenderer)
+		SecUser me = new SecUser(id: 1, username: "me@me.net").save(validate: false)
+		SecUser other = new SecUser(id: 2, username: "permission@recipient.net").save(validate: false)
+		Canvas canvasOwned = newCanvas("own")
+		Resource res = new Resource(Canvas, canvasOwned.id)
+		SecUser apiUser = me
+		Key apiKey = null
+		Operation op = Operation.CANVAS_GET
+		String targetUsername = other.username
+		String from = "streamr@streamr.com"
+		String sharer = me.username
+		String recipient = other.username
+		String subjectTemplate = "%USER% wants to share a %RESOURCE% with you via Streamr Core"
+		EmailMessage msg = new EmailMessage(from, recipient, subjectTemplate, res)
+		service.systemGrant(me, canvasOwned, Operation.CANVAS_SHARE)
+		when:
+		service.savePermissionAndSendShareResourceEmail(apiUser, apiKey, op, targetUsername, msg)
+		then:
+		service.check(other, canvasOwned, Operation.CANVAS_GET)
+		1 * service.groovyPageRenderer.render(_) >> "<html>email</html>"
+		1 * service.mailService.sendMail { _ }
+	}
+
+	void "save does not send an email for write permission"() {
+		setup:
+		service.mailService = Mock(MailService)
+		service.groovyPageRenderer = Mock(PageRenderer)
+		SecUser me = new SecUser(id: 1, username: "me@me.net").save(validate: false)
+		SecUser other = new SecUser(id: 2, username: "permission@recipient.net").save(validate: false)
+		Canvas canvasOwned = newCanvas("own")
+		Resource res = new Resource(Canvas, canvasOwned.id)
+		SecUser apiUser = me
+		Key apiKey = null
+		Operation op = Operation.CANVAS_EDIT
+		String targetUsername = other.username
+		String from = "streamr@streamr.com"
+		String sharer = me.username
+		String recipient = other.username
+		String subjectTemplate = "%USER% wants to share a %RESOURCE% with you via Streamr Core"
+		EmailMessage msg = new EmailMessage(from, recipient, subjectTemplate, res)
+		service.systemGrant(me, canvasOwned, Operation.CANVAS_SHARE)
+		when:
+		service.savePermissionAndSendShareResourceEmail(apiUser, apiKey, op, targetUsername, msg)
+		then:
+		service.check(other, canvasOwned, Operation.CANVAS_EDIT)
+		0 * service.groovyPageRenderer.render(_) >> "<html>email</html>"
+		0 * service.mailService.sendMail { _ }
+	}
+
+	void "save does not send an email for share permission"() {
+		setup:
+		service.mailService = Mock(MailService)
+		service.groovyPageRenderer = Mock(PageRenderer)
+		SecUser me = new SecUser(id: 1, username: "me@me.net").save(validate: false)
+		SecUser other = new SecUser(id: 2, username: "permission@recipient.net").save(validate: false)
+		Canvas canvasOwned = newCanvas("own")
+		Resource res = new Resource(Canvas, canvasOwned.id)
+		SecUser apiUser = me
+		Key apiKey = null
+		Operation op = Operation.CANVAS_SHARE
+		String from = "streamr@streamr.com"
+		String sharer = me.username
+		String recipient = other.username
+		String subjectTemplate = "%USER% wants to share a %RESOURCE% with you via Streamr Core"
+		EmailMessage msg = new EmailMessage(sharer, recipient, subjectTemplate, res)
+		String targetUsername = other.username
+		service.systemGrant(me, canvasOwned, Operation.CANVAS_SHARE)
+		when:
+		service.savePermissionAndSendShareResourceEmail(apiUser, apiKey, op, targetUsername, msg)
+		then:
+		service.check(other, canvasOwned, Operation.CANVAS_SHARE)
+		0 * service.groovyPageRenderer.render(_) >> "<html>email</html>"
+		0 * service.mailService.sendMail { _ }
+	}
+
+	void "save() creates a new user with permission if unknown ethereum address provided"() {
+		setup:
+		service.mailService = Mock(MailService)
+		service.groovyPageRenderer = Mock(PageRenderer)
+		EthereumIntegrationKeyService ethereumIntegrationKeyService = mockBean(EthereumIntegrationKeyService, Mock(EthereumIntegrationKeyService))
+		String ethUserUsername = "0xa50E97f6a98dD992D9eCb8207c2Aa58F54970729"
+		SecUser createdEthUser = new SecUser(username: ethUserUsername, password: "x", name: "Ethereum User")
+		createdEthUser.save(validate: true, failOnError: true)
+		Canvas canvasOwned = newCanvas("own")
+		Resource res = new Resource(Canvas, canvasOwned.id)
+		SecUser apiUser = me
+		Operation op = Operation.CANVAS_GET
+		service.systemGrant(me, canvasOwned, Operation.CANVAS_SHARE)
+		when:
+		service.savePermissionAndCreateEthereumAccount(ethUserUsername, apiUser, op, res)
+		then:
+		1 * ethereumIntegrationKeyService.createEthereumUser(ethUserUsername) >> createdEthUser
+		0 * service.groovyPageRenderer.render(_) >> "<html>email</html>"
+		0 * service.mailService.sendMail { _ }
+		service.check(createdEthUser, canvasOwned, op)
 	}
 }
