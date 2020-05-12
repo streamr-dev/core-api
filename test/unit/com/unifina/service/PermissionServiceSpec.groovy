@@ -397,11 +397,10 @@ class PermissionServiceSpec extends BeanMockingSpecification {
 		Key apiKey = null
 		Operation op = Operation.CANVAS_GET
 		String targetUsername = other.username
-		String from = "streamr@streamr.com"
 		String sharer = me.username
 		String recipient = other.username
 		String subjectTemplate = "%USER% wants to share a %RESOURCE% with you via Streamr Core"
-		EmailMessage msg = new EmailMessage(from, recipient, subjectTemplate, res)
+		EmailMessage msg = new EmailMessage(sharer, recipient, subjectTemplate, res)
 		service.systemGrant(me, canvasOwned, Operation.CANVAS_SHARE)
 		when:
 		service.savePermissionAndSendShareResourceEmail(apiUser, apiKey, op, targetUsername, msg)
@@ -423,11 +422,10 @@ class PermissionServiceSpec extends BeanMockingSpecification {
 		Key apiKey = null
 		Operation op = Operation.CANVAS_EDIT
 		String targetUsername = other.username
-		String from = "streamr@streamr.com"
 		String sharer = me.username
 		String recipient = other.username
 		String subjectTemplate = "%USER% wants to share a %RESOURCE% with you via Streamr Core"
-		EmailMessage msg = new EmailMessage(from, recipient, subjectTemplate, res)
+		EmailMessage msg = new EmailMessage(sharer, recipient, subjectTemplate, res)
 		service.systemGrant(me, canvasOwned, Operation.CANVAS_SHARE)
 		when:
 		service.savePermissionAndSendShareResourceEmail(apiUser, apiKey, op, targetUsername, msg)
@@ -448,7 +446,6 @@ class PermissionServiceSpec extends BeanMockingSpecification {
 		SecUser apiUser = me
 		Key apiKey = null
 		Operation op = Operation.CANVAS_SHARE
-		String from = "streamr@streamr.com"
 		String sharer = me.username
 		String recipient = other.username
 		String subjectTemplate = "%USER% wants to share a %RESOURCE% with you via Streamr Core"
@@ -483,5 +480,37 @@ class PermissionServiceSpec extends BeanMockingSpecification {
 		0 * service.groovyPageRenderer.render(_) >> "<html>email</html>"
 		0 * service.mailService.sendMail { _ }
 		service.check(createdEthUser, canvasOwned, op)
+	}
+
+	void "save sends an email if the user has no account yet"() {
+		setup:
+		service.mailService = Mock(MailService)
+		service.groovyPageRenderer = Mock(PageRenderer)
+		service.signupCodeService = Mock(SignupCodeService)
+		SecUser me = new SecUser(id: 1, username: "me@me.net").save(validate: false)
+		SecUser other = new SecUser(id: 2, username: "permission@recipient.net").save(validate: false)
+		Canvas canvasOwned = newCanvas("own")
+		Resource res = new Resource(Canvas, canvasOwned.id)
+		SecUser apiUser = me
+		Operation op = Operation.CANVAS_GET
+		String targetUsername = other.username
+		String sharer = me.username
+		String recipient = other.username
+		String subjectTemplate = "%USER% wants to share a %RESOURCE% with you via Streamr Core"
+		EmailMessage msg = new EmailMessage(sharer, recipient, subjectTemplate, res)
+		SignupInvite invite = new SignupInvite(
+			code: "x",
+			username: recipient,
+			used: false,
+			sent: false,
+		)
+		service.systemGrant(apiUser, canvasOwned, Operation.CANVAS_SHARE)
+		when:
+		service.savePermissionAndSendEmailShareResourceInvite(apiUser, recipient, op, msg)
+		then:
+		service.check(invite, canvasOwned, Operation.CANVAS_GET)
+		1 * service.signupCodeService.create(recipient) >> invite
+		1 * service.groovyPageRenderer.render(_) >> "<html>email</html>"
+		1 * service.mailService.sendMail { _ }
 	}
 }

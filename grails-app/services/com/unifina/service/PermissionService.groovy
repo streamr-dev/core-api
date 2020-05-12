@@ -554,12 +554,13 @@ class PermissionService {
 	}
 
 	Permission savePermissionAndSendShareResourceEmail(SecUser apiUser, Key apiKey, Operation op, String targetUsername, EmailMessage msg) {
-		Permission permission = savePermission(msg.resource, apiUser, apiKey, targetUsername, op)
+		SecUser userish = SecUser.findByUsername(targetUsername)
+		Permission permission = savePermission(msg.resource, apiUser, apiKey, userish, op)
 		sendEmailShareResource(op, targetUsername, msg)
 		return permission
 	}
 
-	private Permission savePermission(Resource res, SecUser apiUser, Key apiKey, String targetUsername, Operation op) {
+	private Permission savePermission(Resource res, SecUser apiUser, Key apiKey, Userish targetUserish, Operation op) {
 		Object resource
 		if (Canvas.isAssignableFrom(res.clazz)) {
 			resource = Canvas.get(res.idToString())
@@ -580,8 +581,7 @@ class PermissionService {
 		if (!check(apiUser ?: apiKey, resource, shareOp)) {
 			throw new NotPermittedException(apiUser?.username, res.clazz.simpleName, res.idToString(), shareOp.id)
 		}
-		SecUser user = SecUser.findByUsername(targetUsername)
-		Permission permission = grant(apiUser, resource, user, op)
+		Permission permission = grant(apiUser, resource, targetUserish, op)
 		return permission
 	}
 
@@ -607,11 +607,7 @@ class PermissionService {
 		}
 	}
 
-	Permission savePermissionAndSendShareResourceInviteEmail() {
-		return null
-	}
-
-	SignupInvite sendEmailShareResourceInvite(String username, EmailMessage msg) {
+	Permission savePermissionAndSendEmailShareResourceInvite(SecUser apiUser, String username, Operation op, EmailMessage msg) {
 		SignupInvite invite = SignupInvite.findByUsername(username)
 		if (!invite) {
 			invite = signupCodeService.create(username)
@@ -633,13 +629,15 @@ class PermissionService {
 			invite.sent = true
 			invite.save(failOnError: true, validate: true)
 		}
-		return invite
+		Permission newPermission = savePermission(msg.resource, apiUser, null, invite, op)
+		return newPermission
 	}
 
 	Permission savePermissionAndCreateEthereumAccount(String username, SecUser grantor, Operation operation, Resource res) {
 		EthereumIntegrationKeyService ethereumIntegrationKeyService = Holders.getApplicationContext().getBean(EthereumIntegrationKeyService)
 		SecUser user = ethereumIntegrationKeyService.createEthereumUser(username)
-		Permission newPermission = savePermission(res, grantor, null, user.username, operation)
+		SecUser userish = SecUser.findByUsername(user.username)
+		Permission newPermission = savePermission(res, grantor, null, userish, operation)
 		return newPermission
 	}
 }

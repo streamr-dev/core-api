@@ -9,7 +9,6 @@ import com.unifina.domain.data.Stream
 import com.unifina.domain.security.Permission
 import com.unifina.domain.security.Permission.Operation
 import com.unifina.domain.security.SecUser
-import com.unifina.domain.security.SignupInvite
 import com.unifina.security.AllowRole
 import com.unifina.security.AuthLevel
 import com.unifina.security.StreamrApi
@@ -27,7 +26,6 @@ class PermissionApiController {
 	PermissionService permissionService
 	SignupCodeService signupCodeService
 	StreamService streamService
-	def mailService
 
 	/**
 	 * Execute a Controller action using a domain class with access control ("resource")
@@ -145,46 +143,31 @@ class PermissionApiController {
 			String sharer = apiUser?.username
 			// incoming "username" is either SecUser.username or SignupInvite.username (possibly of a not yet created SignupInvite)
 			SecUser user = SecUser.findByUsername(username)
-
+			Permission newPermission
 			if (user) {
 				String recipient = user.username
 				// send share resource email and grant permission
 				EmailMessage msg = new EmailMessage(sharer, recipient, subjectTemplate, res)
-				Permission newPermission = permissionService.savePermissionAndSendShareResourceEmail(
+				newPermission = permissionService.savePermissionAndSendShareResourceEmail(
 					request.apiUser,
 					request.apiKey,
 					op,
 					user.username,
 					msg
 				)
-				header("Location", request.forwardURI + "/" + newPermission.id)
-				response.status = 201
-				render(newPermission.toMap() as JSON)
-				return
 			} else {
 				if (EthereumAddressValidator.validate(username)) {
 					// create local ethereum account and grant permission
-					Permission newPermission = permissionService.savePermissionAndCreateEthereumAccount(username, request.apiUser, request.apiKey, op, res)
-					header("Location", request.forwardURI + "/" + newPermission.id)
-					response.status = 201
-					render(newPermission.toMap() as JSON)
-					return
+					newPermission = permissionService.savePermissionAndCreateEthereumAccount(username, request.apiUser, request.apiKey, op, res)
 				} else {
 					// send share resource invite email and grant permission
 					EmailMessage msg = new EmailMessage(sharer, username, subjectTemplate, res)
-					SignupInvite invite = permissionService.sendEmailShareResourceInvite(username, msg)
-					// permissionService handles SecUsers and SignupInvitations equally
-					user = invite
+					newPermission = permissionService.savePermissionAndSendEmailShareResourceInvite(apiUser, username, op, msg)
 				}
 			}
-
-			useResource(res.clazz, res.id) { r ->
-				SecUser grantor = apiUser
-				Permission newP = permissionService.grant(grantor, r, user, op)
-				header "Location", request.forwardURI + "/" + newP.id
-				response.status = 201
-				render(newP.toMap() as JSON)
-			}
+			header("Location", request.forwardURI + "/" + newPermission.id)
+			response.status = 201
+			render(newPermission.toMap() as JSON)
 		}
 	}
 

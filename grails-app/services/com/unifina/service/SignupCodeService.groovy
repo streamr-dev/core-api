@@ -1,7 +1,9 @@
 package com.unifina.service
 
 import com.unifina.domain.security.SignupInvite
+import grails.compiler.GrailsCompileStatic
 
+@GrailsCompileStatic
 class SignupCodeService {
 	private String generateSignupCode() {
 		UUID uuid = UUID.randomUUID()

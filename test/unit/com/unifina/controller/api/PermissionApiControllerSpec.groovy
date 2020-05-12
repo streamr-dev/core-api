@@ -11,7 +11,6 @@ import com.unifina.domain.security.SecUser
 import com.unifina.domain.signalpath.Canvas
 import com.unifina.service.PermissionService
 import com.unifina.service.StreamService
-import com.unifina.signalpath.messaging.MockMailService
 import grails.converters.JSON
 import grails.gsp.PageRenderer
 import grails.plugin.mail.MailService
@@ -39,7 +38,6 @@ class PermissionApiControllerSpec extends ControllerSpecification {
 
 		controller.permissionService = permissionService = Mock(PermissionService)
 		controller.streamService = streamService = Mock(StreamService)
-		controller.mailService = new MockMailService()
 
 		me = new SecUser(id: 1, username: "me@me.net").save(validate: false)
 		other = new SecUser(id: 2, username: "0x0000000000000000000000000000000000000000").save(validate: false)
@@ -221,19 +219,6 @@ class PermissionApiControllerSpec extends ControllerSpecification {
 		then:
 		def e = thrown(InvalidArgumentsException)
 		e.message == "User field in request JSON is not a valid username (email or Ethereum address)."
-	}
-
-	void "save sends an email if the user has no account yet"() {
-		setup:
-		params.resourceClass = Canvas
-		params.resourceId = canvasOwned.id
-		when:
-		request.JSON = [anonymous: false, user: "test@tester.test", operation: "canvas_get"] as JSON
-		authenticatedAs(me) { controller.save() }
-		then:
-		//controller.mailService.mailSent
-		1 * permissionService.check(me, _, Permission.Operation.CANVAS_SHARE) >> true
-		1 * permissionService.grant(me, _, _, Operation.CANVAS_GET) >> new Permission(user: other, operation: Operation.CANVAS_GET)
 	}
 
 	void "save grants Permissions"() {
