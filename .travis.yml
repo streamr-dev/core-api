@@ -27,8 +27,6 @@ import:
 jobs:
   include:
   - stage: Unit tests
-    env:
-      - AWS_TEST=$ACCESS_KEY_STG
     script: grails test-app -unit
   - stage: Validate Swagger
     script: travis_retry .travis_scripts/validate_swagger.sh
