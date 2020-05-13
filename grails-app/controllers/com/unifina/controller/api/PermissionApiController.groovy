@@ -1,6 +1,5 @@
 package com.unifina.controller.api
 
-
 import com.unifina.api.NotFoundException
 import com.unifina.api.NotPermittedException
 import com.unifina.api.ValidationException
@@ -14,7 +13,6 @@ import com.unifina.security.AllowRole
 import com.unifina.security.AuthLevel
 import com.unifina.security.StreamrApi
 import com.unifina.service.PermissionService
-import com.unifina.service.SignupCodeService
 import com.unifina.service.StreamService
 import com.unifina.utils.EthereumAddressValidator
 import com.unifina.utils.UsernameValidator
@@ -25,7 +23,6 @@ import groovy.transform.ToString
 class PermissionApiController {
 
 	PermissionService permissionService
-	SignupCodeService signupCodeService
 	StreamService streamService
 
 	/**
