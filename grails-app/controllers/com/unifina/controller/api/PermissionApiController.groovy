@@ -29,7 +29,9 @@ class PermissionApiController {
 	 * Execute a Controller action using a domain class with access control ("resource")
 	 * Checks Permissions for current user first, and blocks the action if access hasn't been granted
 	 * @param action Closure that takes up to one argument: the specified resource
+	 * @deprecated Methods breaks transaction boundaries
      */
+	@Deprecated
 	private useResource(Class resourceClass, resourceId, boolean requireSharePermission=true, Closure action) {
 		if (!resourceClass) { throw new IllegalArgumentException("Missing resource class") }
 		if (!grailsApplication.isDomainClass(resourceClass)) { throw new IllegalArgumentException("${resourceClass.simpleName} is not a domain class!") }
@@ -55,7 +57,9 @@ class PermissionApiController {
 	 * Execute a Controller action using a Permission object
 	 * Checks Permissions to the resource for current user first, and blocks the action if access hasn't been granted
 	 * @param action Closure that takes up to two arguments: Permission object, and the resource that Permission applies to
+	 * @deprecated Methods breaks transaction boundaries
      */
+	@Deprecated
 	private usePermission(Class resourceClass, resourceId, Long permissionId, Closure action) {
 		useResource(resourceClass, resourceId) { res ->
 			def p = permissionService.getPermissionsTo(res).find { it.id == permissionId }
