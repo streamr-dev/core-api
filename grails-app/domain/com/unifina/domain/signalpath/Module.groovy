@@ -1,5 +1,8 @@
 package com.unifina.domain.signalpath
 
+import grails.persistence.Entity
+
+@Entity
 class Module implements Comparable {
 
 	Long id
@@ -14,7 +17,7 @@ class Module implements Comparable {
 	String webcomponent
 
 	static belongsTo = [category: ModuleCategory]
-	
+
     static constraints = {
 		name()
 		implementingClass()
@@ -26,15 +29,15 @@ class Module implements Comparable {
 		alternativeNames(nullable:true)
 		webcomponent(nullable:true)
     }
-	
+
 	static mapping = {
 		jsonHelp type: 'text'
 	}
-	
+
 	String toString() {
 		return name
 	}
-	
+
 	/**
 	 * Keep this consistent with equals
 	 * (return 0 if and only if there is an equals relationship as well)

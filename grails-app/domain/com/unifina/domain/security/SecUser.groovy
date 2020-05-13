@@ -3,9 +3,11 @@ package com.unifina.domain.security
 import com.unifina.security.Userish
 import com.unifina.utils.EthereumAddressValidator
 import com.unifina.utils.UsernameValidator
+import grails.persistence.Entity
 import groovy.transform.CompileStatic
 import org.apache.commons.codec.digest.DigestUtils
 
+@Entity
 class SecUser implements Userish {
 
 	Long id

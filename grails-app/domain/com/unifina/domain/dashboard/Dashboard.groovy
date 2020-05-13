@@ -1,10 +1,12 @@
 package com.unifina.domain.dashboard
 
+import com.unifina.domain.security.Permission
 import com.unifina.utils.IdGenerator
 import grails.converters.JSON
-import com.unifina.domain.security.Permission
+import grails.persistence.Entity
 import groovy.transform.CompileStatic
 
+@Entity
 class Dashboard {
 	public final static String DEFAULT_NAME = "Untitled Dashboard"
 	String id

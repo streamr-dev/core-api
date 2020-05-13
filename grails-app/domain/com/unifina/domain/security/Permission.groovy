@@ -6,10 +6,12 @@ import com.unifina.domain.marketplace.Product
 import com.unifina.domain.marketplace.Subscription
 import com.unifina.domain.signalpath.Canvas
 import com.unifina.domain.signalpath.ModulePackage
+import grails.persistence.Entity
 
 /**
  * Access Control List (ACL) item, grants a user a specific type of access to a resource (e.g. X can read Dashboard 1)
  */
+@Entity
 class Permission {
 
 	/** Permission can be global, that is, let (also) anonymous users execute the operation */

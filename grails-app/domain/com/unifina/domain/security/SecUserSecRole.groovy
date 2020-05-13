@@ -1,7 +1,9 @@
 package com.unifina.domain.security
 
+import grails.persistence.Entity
 import org.apache.commons.lang.builder.HashCodeBuilder
 
+@Entity
 class SecUserSecRole implements Serializable {
 
 	SecUser secUser

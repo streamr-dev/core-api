@@ -3,10 +3,13 @@ package com.unifina.domain.dataunion
 import com.unifina.domain.marketplace.Product
 import com.unifina.utils.IdGenerator
 import grails.compiler.GrailsCompileStatic
+import grails.persistence.Entity
 import groovy.transform.ToString
 
 @ToString
+@Entity
 class DataUnionSecret {
+
 	String id
 	// name to display for users.
 	String name
