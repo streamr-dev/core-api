@@ -1,8 +1,9 @@
 package com.unifina.controller.api
 
-import com.unifina.api.InvalidArgumentsException
+
 import com.unifina.api.NotFoundException
 import com.unifina.api.NotPermittedException
+import com.unifina.api.ValidationException
 import com.unifina.domain.EmailMessage
 import com.unifina.domain.Resource
 import com.unifina.domain.data.Stream
@@ -90,45 +91,17 @@ class PermissionApiController {
 		}
 	}
 
-	@Validateable
-	@ToString
-	static class NewPermissionCommand {
-		Boolean anonymous
-		String user
-		Operation operation
-		static constraints = {
-		}
-	}
-
 	@StreamrApi(authenticationLevel = AuthLevel.NONE)
-	def save() {
-		if (!request.hasProperty("JSON")) {
-			throw new InvalidArgumentsException("JSON body expected")
+	def save(NewPermissionCommand cmd) {
+		if (!cmd.validate()) {
+			throw new ValidationException(cmd.errors)
 		}
-
-		// request.JSON.user is either SecUser.username or SignupInvite.username (possibly of a not yet created SignupInvite)
-		boolean anonymous = request.JSON.anonymous as boolean
-		String username = request.JSON.user
-		if (!UsernameValidator.validate(username)) {
-			throw new InvalidArgumentsException("User field in request JSON is not a valid username (email or Ethereum address).")
-		}
-		if (anonymous && username) {
-			throw new InvalidArgumentsException("Can't specify user for anonymous permission! Leave out either 'user' or 'anonymous' parameter.", "anonymous", anonymous as String)
-		}
-		if (!anonymous && !username) {
-			throw new InvalidArgumentsException("Must specify either 'user' or 'anonymous'!")
-		}
-
-		Operation op = Operation.fromString(request.JSON.operation)
-		if (!op) {
-			throw new InvalidArgumentsException("Invalid operation '$op'.", "operation", op)
-		}
+		boolean anonymous = cmd.anonymous
+		String username = cmd.user
+		Operation op = cmd.operationToEnum()
 
 		Resource res = new Resource(params.resourceClass, params.resourceId)
 		SecUser apiUser = request.apiUser
-		if (!grailsApplication.isDomainClass(res.clazz)) {
-			throw new InvalidArgumentsException("${res.clazz.simpleName} is not a domain class!")
-		}
 		if (anonymous) {
 			useResource(resourceClass, resourceId) { r ->
 				SecUser grantor = apiUser
@@ -194,3 +167,51 @@ class PermissionApiController {
 	}
 }
 
+@Validateable
+@ToString
+class NewPermissionCommand {
+	Boolean anonymous
+	String user
+	String operation
+
+	private static boolean validateOperation(String val) {
+		if (val == null) {
+			return false
+		}
+		try {
+			Operation.valueOf(val)
+		} catch (IllegalArgumentException e) {
+			return false
+		}
+		return true
+	}
+
+	def beforeValidate() {
+		if (operation != null) {
+			operation = operation.toUpperCase()
+		}
+	}
+
+	Operation operationToEnum() {
+		Operation op = Operation.valueOf(operation)
+		return op
+	}
+
+	static constraints = {
+		anonymous(nullable: true)
+		user(nullable: true, validator: UsernameValidator.validateUsernameOrNull)
+		operation(validator: { String val, NewPermissionCommand cmd ->
+			boolean validOperation = validateOperation(val)
+			if (!validOperation) {
+				return false
+			}
+			if (cmd.anonymous && cmd.user) {
+				return false
+			}
+			if (validOperation && (cmd.anonymous || cmd.user)) {
+				return true
+			}
+			return false
+		})
+	}
+}

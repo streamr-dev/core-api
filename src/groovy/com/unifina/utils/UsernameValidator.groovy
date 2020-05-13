@@ -10,4 +10,12 @@ class UsernameValidator {
 		boolean result = isEmailValid || isEthereumAddressValid
 		return result
 	}
+
+	static validateUsernameOrNull = { String username ->
+		if (username == null) {
+			return true
+		}
+		boolean result = UsernameValidator.validate(username)
+		return result
+	}
 }

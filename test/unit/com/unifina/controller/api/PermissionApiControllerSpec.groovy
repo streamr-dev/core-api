@@ -1,8 +1,8 @@
 package com.unifina.controller.api
 
 import com.unifina.ControllerSpecification
-import com.unifina.api.InvalidArgumentsException
 import com.unifina.api.NotPermittedException
+import com.unifina.api.ValidationException
 import com.unifina.domain.data.Stream
 import com.unifina.domain.security.Key
 import com.unifina.domain.security.Permission
@@ -217,8 +217,7 @@ class PermissionApiControllerSpec extends ControllerSpecification {
 		when:
 		authenticatedAs(me) { controller.save() }
 		then:
-		def e = thrown(InvalidArgumentsException)
-		e.message == "User field in request JSON is not a valid username (email or Ethereum address)."
+		def e = thrown(ValidationException)
 	}
 
 	void "save grants Permissions"() {
@@ -272,7 +271,7 @@ class PermissionApiControllerSpec extends ControllerSpecification {
 		request.JSON = [anonymous: true, user: other.username, operation: "canvas_get"] as JSON
 		authenticatedAs(me) { controller.save() }
 		then:
-		thrown InvalidArgumentsException
+		thrown ValidationException
 	}
 
 	void "getOwnPermissions giver owner permissions for own canvas"() {

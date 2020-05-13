@@ -1,8 +1,10 @@
 package com.unifina.domain
 
+import grails.compiler.GrailsCompileStatic
 import groovy.transform.ToString
 
 @ToString
+@GrailsCompileStatic
 class Resource {
 	Class<?> clazz
 	Object id
