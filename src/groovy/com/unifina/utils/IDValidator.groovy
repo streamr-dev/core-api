@@ -1,7 +1,10 @@
 package com.unifina.utils
 
+import grails.compiler.GrailsCompileStatic
+
+@GrailsCompileStatic
 class IDValidator {
-	static validate = { String id ->
+	static final Closure validate = { String id ->
 		if (id == null) {
 			return false
 		}
