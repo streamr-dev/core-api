@@ -3,6 +3,7 @@ package com.unifina.controller.api
 import com.unifina.ControllerSpecification
 import com.unifina.api.NotPermittedException
 import com.unifina.api.ValidationException
+import com.unifina.domain.Resource
 import com.unifina.domain.data.Stream
 import com.unifina.domain.security.Key
 import com.unifina.domain.security.Permission
@@ -278,6 +279,8 @@ class PermissionApiControllerSpec extends ControllerSpecification {
 		params.id = canvasOwned.id
 		params.resourceClass = Canvas
 		params.resourceId = canvasOwned.id
+		request.apiUser = me
+		Resource resource = new Resource(params.resourceClass, params.resourceId)
 
 		when:
 		authenticatedAs(me) { controller.getOwnPermissions() }
@@ -285,7 +288,7 @@ class PermissionApiControllerSpec extends ControllerSpecification {
 		response.status == 200
 		response.json*.operation == ownerPermissions*.toMap()*.operation
 
-		1 * permissionService.getPermissionsTo(_, me) >> [*ownerPermissions]
+		1 * permissionService.getOwnPermissions(resource, me, null) >> [*ownerPermissions]
 		0 * permissionService._
 	}
 
@@ -293,6 +296,8 @@ class PermissionApiControllerSpec extends ControllerSpecification {
 		params.id = canvasShared.id
 		params.resourceClass = Canvas
 		params.resourceId = canvasShared.id
+		request.apiUser = me
+		Resource resource = new Resource(params.resourceClass, params.resourceId)
 
 		when:
 		authenticatedAs(me) { controller.getOwnPermissions() }
@@ -300,7 +305,7 @@ class PermissionApiControllerSpec extends ControllerSpecification {
 		response.status == 200
 		response.json == [[id: 1, operation: "canvas_share", user: "me@me.net"]]
 
-		1 * permissionService.getPermissionsTo(_, me) >> [canvasPermission]
+		1 * permissionService.getOwnPermissions(resource, me, null) >> [canvasPermission]
 		0 * permissionService._
 	}
 

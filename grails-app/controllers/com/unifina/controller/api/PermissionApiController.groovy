@@ -86,11 +86,10 @@ class PermissionApiController {
 
 	@StreamrApi(authenticationLevel = AuthLevel.NONE)
 	def getOwnPermissions() {
-		useResource(params.resourceClass, params.resourceId, false) { res ->
-			def permissionsTo = permissionService.getPermissionsTo(res, request.apiUser ?: request.apiKey)
-			def perms = permissionsTo*.toMap()
-			render(perms as JSON)
-		}
+		Resource resource = new Resource(params.resourceClass, params.resourceId)
+		List<Permission> permissions = permissionService.getOwnPermissions(resource, request.apiUser, request.apiKey)
+		def perms = permissions*.toMap()
+		render(perms as JSON)
 	}
 
 	@StreamrApi(authenticationLevel = AuthLevel.NONE)

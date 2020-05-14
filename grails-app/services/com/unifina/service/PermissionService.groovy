@@ -560,18 +560,18 @@ class PermissionService {
 	}
 
 	Permission saveAnonymousPermission(SecUser apiUser, Key apiKey, Operation op, Resource resource) {
-		Object res = loadResource(resource, apiUser, apiKey)
+		Object res = loadResource(resource, apiUser, apiKey, false)
 		Permission permission = grantAnonymousAccess(apiUser, res, op)
 		return permission
 	}
 
 	private Permission savePermission(Resource res, SecUser apiUser, Key apiKey, Userish targetUserish, Operation op) {
-		Object resource = loadResource(res, apiUser, apiKey)
+		Object resource = loadResource(res, apiUser, apiKey, false)
 		Permission permission = grant(apiUser, resource, targetUserish, op)
 		return permission
 	}
 
-	private Object loadResource(Resource res, SecUser apiUser, Key apiKey) {
+	private Object loadResource(Resource res, SecUser apiUser, Key apiKey, boolean requireShareResourcePermission) {
 		Object resource
 		if (Canvas.isAssignableFrom(res.clazz)) {
 			resource = Canvas.get(res.idToString())
@@ -589,7 +589,7 @@ class PermissionService {
 			throw new NotFoundException(res.clazz.simpleName, res.idToString())
 		}
 		Operation shareOp = Operation.shareOperation(resource)
-		if (!check(apiUser ?: apiKey, resource, shareOp)) {
+		if (requireShareResourcePermission && !check(apiUser ?: apiKey, resource, shareOp)) {
 			throw new NotPermittedException(apiUser?.username, res.clazz.simpleName, res.idToString(), shareOp.id)
 		}
 		return resource
@@ -649,5 +649,11 @@ class PermissionService {
 		SecUser userish = SecUser.findByUsername(user.username)
 		Permission newPermission = savePermission(res, grantor, null, userish, operation)
 		return newPermission
+	}
+
+	List<Permission> getOwnPermissions(Resource resource, SecUser apiUser, Key apiKey) {
+		Object res = loadResource(resource, apiUser, apiKey, false)
+		List<Permission> results = getPermissionsTo(res, apiUser ?: apiKey)
+		return results
 	}
 }
