@@ -528,4 +528,34 @@ class PermissionServiceSpec extends BeanMockingSpecification {
 		then:
 		service.check(apiUser, canvasOwned, op)
 	}
+
+	void "findAllPermissions() won't show list of permissions without 'share' permission (string id)"() {
+		setup:
+		Canvas canvas = new Canvas()
+		canvas.save()
+		Resource resource = new Resource(Canvas, canvas.id)
+		SecUser apiUser = me
+		Key apiKey = null
+		boolean subscriptions = false
+		when:
+		service.findAllPermissions(resource, apiUser, apiKey, subscriptions)
+		then:
+		thrown NotPermittedException
+	}
+
+	void "index won't show list of permissions without 'share' permission (Stream using id)"() {
+		setup:
+		Stream stream = new Stream()
+		stream.id = "stream-id"
+		stream.save()
+		Resource resource = new Resource(Stream, stream.id)
+		SecUser apiUser = me
+		Key apiKey = null
+		boolean subscriptions = false
+		when:
+		service.findAllPermissions(resource, apiUser, apiKey, subscriptions)
+		then:
+		1 * streamService.getStream(stream.id) >> stream
+		thrown NotPermittedException
+	}
 }

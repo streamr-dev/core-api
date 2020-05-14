@@ -1,7 +1,6 @@
 package com.unifina.controller.api
 
 import com.unifina.ControllerSpecification
-import com.unifina.api.NotPermittedException
 import com.unifina.api.ValidationException
 import com.unifina.domain.Resource
 import com.unifina.domain.data.Stream
@@ -87,9 +86,12 @@ class PermissionApiControllerSpec extends ControllerSpecification {
     }
 
     void "index returns list of permissions to shared resource (string id)"() {
+		setup:
 		params.id = canvasShared.id
 		params.resourceClass = Canvas
 		params.resourceId = canvasShared.id
+		Resource resource = new Resource(params.resourceClass, params.resourceId)
+		request.apiUser = me
 
 		when:
 		authenticatedAs(me) { controller.index() }
@@ -100,15 +102,17 @@ class PermissionApiControllerSpec extends ControllerSpecification {
 		response.json[0].user == "me@me.net"
 		response.json[0].operation == "canvas_share"
 		// matching with _ instead of canvasOwned because it's not "the same" after saving and get(id):ing
-		1 * permissionService.getPermissionsTo(_, true, null) >> [canvasPermission, *ownerPermissions]
-		1 * permissionService.check(me, _, Permission.Operation.CANVAS_SHARE) >> true
+		1 * permissionService.findAllPermissions(resource, request.apiUser, null, true) >> [canvasPermission, *ownerPermissions]
 		0 * permissionService._
     }
 
 	void "index returns list of permissions to shared resource (Stream using id)"() {
+		setup:
 		params.id = streamShared.id
 		params.resourceClass = Stream
 		params.resourceId = streamShared.id
+		Resource resource = new Resource(params.resourceClass, params.resourceId)
+		request.apiUser = me
 
 		when:
 		authenticatedAs(me) { controller.index() }
@@ -119,17 +123,18 @@ class PermissionApiControllerSpec extends ControllerSpecification {
 		response.json[0].user == "me@me.net"
 		response.json[0].operation == "stream_share"
 		// matching with _ instead of streamOwned because it's not "the same" after saving and get(id):ing
-		1 * streamService.getStream(streamShared.id) >> streamShared
-		1 * permissionService.getPermissionsTo(_, true, null) >> [streamPermission, *ownerPermissions]
-		1 * permissionService.check(me, _, Permission.Operation.STREAM_SHARE) >> true
+		1 * permissionService.findAllPermissions(resource, request.apiUser, null, true) >> [streamPermission, *ownerPermissions]
 		0 * permissionService._
 	}
 
 	void "index returns list of permissions filtered by subscription"() {
+		setup:
 		params.id = streamShared.id
 		params.resourceClass = Stream
 		params.resourceId = streamShared.id
 		params.subscriptions = "false"
+		Resource resource = new Resource(params.resourceClass, params.resourceId)
+		request.apiUser = me
 
 		when:
 		authenticatedAs(me) { controller.index() }
@@ -140,9 +145,7 @@ class PermissionApiControllerSpec extends ControllerSpecification {
 		response.json[0].user == "me@me.net"
 		response.json[0].operation == "stream_share"
 		// matching with _ instead of streamOwned because it's not "the same" after saving and get(id):ing
-		1 * streamService.getStream(streamShared.id) >> streamShared
-		1 * permissionService.getPermissionsTo(_, false, null) >> [streamPermission, *ownerPermissions]
-		1 * permissionService.check(me, _, Permission.Operation.STREAM_SHARE) >> true
+		1 * permissionService.findAllPermissions(resource, request.apiUser, null,false) >> [streamPermission, *ownerPermissions]
 		0 * permissionService._
 	}
 
@@ -181,29 +184,6 @@ class PermissionApiControllerSpec extends ControllerSpecification {
 		1 * permissionService.getPermissionsTo(_) >> [streamPermission, *ownerPermissions]
 		1 * permissionService.check(me, _, Permission.Operation.STREAM_SHARE) >> true
 		0 * permissionService._
-	}
-
-	void "index won't show list of permissions without 'share' permission (string id)"() {
-		params.id = canvasRestricted.id
-		params.resourceClass = Canvas
-		params.resourceId = canvasRestricted.id
-
-		when:
-		authenticatedAs(me) { controller.index() }
-		then:
-		thrown NotPermittedException
-	}
-
-	void "index won't show list of permissions without 'share' permission (Stream using id)"() {
-		params.id = streamRestricted.id
-		params.resourceClass = Stream
-		params.resourceId = streamRestricted.id
-
-		when:
-		authenticatedAs(me) { controller.index() }
-		then:
-		1 * streamService.getStream(streamRestricted.id) >> streamRestricted
-		thrown NotPermittedException
 	}
 
 	void "save rejects invalid email username or invalid ethereum address username"() {

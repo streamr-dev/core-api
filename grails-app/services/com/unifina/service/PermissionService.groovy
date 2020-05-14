@@ -560,13 +560,13 @@ class PermissionService {
 	}
 
 	Permission saveAnonymousPermission(SecUser apiUser, Key apiKey, Operation op, Resource resource) {
-		Object res = loadResource(resource, apiUser, apiKey, false)
+		Object res = loadResource(resource, apiUser, apiKey, true)
 		Permission permission = grantAnonymousAccess(apiUser, res, op)
 		return permission
 	}
 
 	private Permission savePermission(Resource res, SecUser apiUser, Key apiKey, Userish targetUserish, Operation op) {
-		Object resource = loadResource(res, apiUser, apiKey, false)
+		Object resource = loadResource(res, apiUser, apiKey, true)
 		Permission permission = grant(apiUser, resource, targetUserish, op)
 		return permission
 	}
@@ -655,5 +655,11 @@ class PermissionService {
 		Object res = loadResource(resource, apiUser, apiKey, false)
 		List<Permission> results = getPermissionsTo(res, apiUser ?: apiKey)
 		return results
+	}
+
+	List<Permission> findAllPermissions(Resource resource, SecUser apiUser, Key apiKey, boolean subscriptions) {
+		Object res = loadResource(resource, apiUser, apiKey, true)
+		List<Permission> permissions = getPermissionsTo(res, subscriptions, null)
+		return permissions
 	}
 }

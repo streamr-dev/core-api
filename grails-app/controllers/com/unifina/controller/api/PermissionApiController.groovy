@@ -78,10 +78,10 @@ class PermissionApiController {
 		if (params.subscriptions) {
 			subscriptions = Boolean.parseBoolean(params.subscriptions)
 		}
-		useResource(params.resourceClass, params.resourceId) { res ->
-			def perms = permissionService.getPermissionsTo(res, subscriptions, null)*.toMap()
-			render(perms as JSON)
-		}
+		Resource resource = new Resource(params.resourceClass, params.resourceId)
+		List<Permission> permissions = permissionService.findAllPermissions(resource, request.apiUser, request.apiKey, subscriptions)
+		def perms = permissions*.toMap()
+		render(perms as JSON)
 	}
 
 	@StreamrApi(authenticationLevel = AuthLevel.NONE)
@@ -116,8 +116,8 @@ class PermissionApiController {
 				// send share resource email and grant permission
 				EmailMessage msg = new EmailMessage(sharer, recipient, subjectTemplate, res)
 				newPermission = permissionService.savePermissionAndSendShareResourceEmail(
-					request.apiUser,
-					request.apiKey,
+					apiUser,
+					apiKey,
 					op,
 					user.username,
 					msg
@@ -125,7 +125,7 @@ class PermissionApiController {
 			} else {
 				if (EthereumAddressValidator.validate(username)) {
 					// create local ethereum account and grant permission
-					newPermission = permissionService.savePermissionAndCreateEthereumAccount(username, request.apiUser, request.apiKey, op, res)
+					newPermission = permissionService.savePermissionAndCreateEthereumAccount(username, apiUser, apiKey, op, res)
 				} else {
 					// send share resource invite email and grant permission
 					EmailMessage msg = new EmailMessage(sharer, username, subjectTemplate, res)
