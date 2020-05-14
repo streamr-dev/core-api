@@ -6,6 +6,7 @@ import com.unifina.api.ValidationException
 import com.unifina.domain.EmailMessage
 import com.unifina.domain.Resource
 import com.unifina.domain.data.Stream
+import com.unifina.domain.security.Key
 import com.unifina.domain.security.Permission
 import com.unifina.domain.security.Permission.Operation
 import com.unifina.domain.security.SecUser
@@ -97,27 +98,20 @@ class PermissionApiController {
 		if (!cmd.validate()) {
 			throw new ValidationException(cmd.errors)
 		}
-		boolean anonymous = cmd.anonymous
 		String username = cmd.user
 		Operation op = cmd.operationToEnum()
-
 		Resource res = new Resource(params.resourceClass, params.resourceId)
 		SecUser apiUser = request.apiUser
-		if (anonymous) {
-			useResource(resourceClass, resourceId) { r ->
-				SecUser grantor = apiUser
-				Permission newP = permissionService.grantAnonymousAccess(grantor, r, op)
-				header "Location", request.forwardURI + "/" + newP.id
-				response.status = 201
-				render(newP.toMap() + [text: "Successfully granted"] as JSON)
-			}
+		Key apiKey = request.apiKey
+		Permission newPermission
+		if (cmd.anonymous) {
+			newPermission = permissionService.saveAnonymousPermission(apiUser, apiKey, op, res)
 		} else {
 			String subjectTemplate = grailsApplication.config.unifina.email.shareInvite.subject
 			String from = grailsApplication.config.unifina.email.sender
 			String sharer = apiUser?.username
 			// incoming "username" is either SecUser.username or SignupInvite.username (possibly of a not yet created SignupInvite)
 			SecUser user = SecUser.findByUsername(username)
-			Permission newPermission
 			if (user) {
 				String recipient = user.username
 				// send share resource email and grant permission
@@ -139,10 +133,10 @@ class PermissionApiController {
 					newPermission = permissionService.savePermissionAndSendEmailShareResourceInvite(apiUser, username, op, msg)
 				}
 			}
-			header("Location", request.forwardURI + "/" + newPermission.id)
-			response.status = 201
-			render(newPermission.toMap() as JSON)
 		}
+		header("Location", request.forwardURI + "/" + newPermission.id)
+		response.status = 201
+		render(newPermission.toMap() as JSON)
 	}
 
 	@StreamrApi(authenticationLevel = AuthLevel.NONE)

@@ -508,9 +508,24 @@ class PermissionServiceSpec extends BeanMockingSpecification {
 		when:
 		service.savePermissionAndSendEmailShareResourceInvite(apiUser, recipient, op, msg)
 		then:
-		service.check(invite, canvasOwned, Operation.CANVAS_GET)
+		service.check(invite, canvasOwned, op)
 		1 * service.signupCodeService.create(recipient) >> invite
 		1 * service.groovyPageRenderer.render(_) >> "<html>email</html>"
 		1 * service.mailService.sendMail { _ }
+	}
+
+	void "save anonymous permission"() {
+		setup:
+		SecUser me = new SecUser(id: 1, username: "me@me.net").save(validate: false)
+		Canvas canvasOwned = newCanvas("own")
+		Resource res = new Resource(Canvas, canvasOwned.id)
+		SecUser apiUser = me
+		Key apiKey = null
+		Operation op = Operation.CANVAS_GET
+		service.systemGrant(apiUser, canvasOwned, Operation.CANVAS_SHARE)
+		when:
+		service.saveAnonymousPermission(apiUser, apiKey, op, res)
+		then:
+		service.check(apiUser, canvasOwned, op)
 	}
 }

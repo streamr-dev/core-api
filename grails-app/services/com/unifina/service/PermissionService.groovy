@@ -23,7 +23,6 @@ import grails.util.Holders
 import org.codehaus.groovy.grails.commons.GrailsApplication
 
 import java.security.AccessControlException
-
 /**
  * Check, get, grant, and revoke permissions. Maintains Access Control Lists (ACLs) to resources.
  *
@@ -560,7 +559,19 @@ class PermissionService {
 		return permission
 	}
 
+	Permission saveAnonymousPermission(SecUser apiUser, Key apiKey, Operation op, Resource resource) {
+		Object res = loadResource(resource, apiUser, apiKey)
+		Permission permission = grantAnonymousAccess(apiUser, res, op)
+		return permission
+	}
+
 	private Permission savePermission(Resource res, SecUser apiUser, Key apiKey, Userish targetUserish, Operation op) {
+		Object resource = loadResource(res, apiUser, apiKey)
+		Permission permission = grant(apiUser, resource, targetUserish, op)
+		return permission
+	}
+
+	private Object loadResource(Resource res, SecUser apiUser, Key apiKey) {
 		Object resource
 		if (Canvas.isAssignableFrom(res.clazz)) {
 			resource = Canvas.get(res.idToString())
@@ -581,11 +592,10 @@ class PermissionService {
 		if (!check(apiUser ?: apiKey, resource, shareOp)) {
 			throw new NotPermittedException(apiUser?.username, res.clazz.simpleName, res.idToString(), shareOp.id)
 		}
-		Permission permission = grant(apiUser, resource, targetUserish, op)
-		return permission
+		return resource
 	}
 
-	void sendEmailShareResource(Operation op, String username, EmailMessage msg) {
+	private void sendEmailShareResource(Operation op, String username, EmailMessage msg) {
 		if (op == Operation.STREAM_GET || op == Operation.CANVAS_GET || op == Operation.DASHBOARD_GET) {
 			// Users with email/password registration get an email
 			// send only one email for each read/get permission
