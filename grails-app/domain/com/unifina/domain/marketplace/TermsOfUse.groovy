@@ -1,5 +1,10 @@
 package com.unifina.domain.marketplace
 
+import grails.compiler.GrailsCompileStatic
+import grails.validation.Validateable
+
+@GrailsCompileStatic
+@Validateable
 class TermsOfUse {
 	Boolean redistribution = true
 	Boolean commercialUse = true
@@ -7,9 +12,6 @@ class TermsOfUse {
 	Boolean storage = true
 	String termsUrl
 	String termsName
-
-	public TermsOfUse() {}
-	public TermsOfUse(Product product) {}
 
 	static constraints = {
 		redistribution(nullable: false)

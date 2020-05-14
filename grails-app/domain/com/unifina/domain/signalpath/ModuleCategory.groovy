@@ -1,5 +1,8 @@
 package com.unifina.domain.signalpath
 
+import grails.persistence.Entity
+
+@Entity
 class ModuleCategory implements Comparable {
 	String name
 	int sortOrder

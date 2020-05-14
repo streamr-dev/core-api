@@ -1,5 +1,8 @@
 package com.unifina.domain.security
 
+import grails.persistence.Entity
+
+@Entity
 class RegistrationCode {
 
     String username

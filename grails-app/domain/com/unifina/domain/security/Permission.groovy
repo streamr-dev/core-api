@@ -5,6 +5,7 @@ import com.unifina.domain.data.Stream
 import com.unifina.domain.marketplace.Product
 import com.unifina.domain.marketplace.Subscription
 import com.unifina.domain.signalpath.Canvas
+import grails.persistence.Entity
 import groovy.transform.CompileStatic
 import groovy.transform.EqualsAndHashCode
 
@@ -15,6 +16,7 @@ import groovy.transform.EqualsAndHashCode
  * @see com.unifina.service.PermissionService#getPermissionsTo(Object r, com.unifina.security.Userish u)
  */
 @EqualsAndHashCode(includes="anonymous,user,key,invite,canvas,dashboard,stream,product,operation,subscription,endsAt,parent")
+@Entity
 class Permission {
 
 	/** Permission can be global, that is, let (also) anonymous users execute the operation */

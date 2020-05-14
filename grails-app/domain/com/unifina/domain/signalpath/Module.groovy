@@ -1,5 +1,8 @@
 package com.unifina.domain.signalpath
 
+import grails.persistence.Entity
+
+@Entity
 class Module implements Comparable {
 
 	Long id
