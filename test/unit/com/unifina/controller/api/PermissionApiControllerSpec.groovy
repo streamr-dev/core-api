@@ -10,7 +10,6 @@ import com.unifina.domain.security.Permission.Operation
 import com.unifina.domain.security.SecUser
 import com.unifina.domain.signalpath.Canvas
 import com.unifina.service.PermissionService
-import com.unifina.service.StreamService
 import grails.converters.JSON
 import grails.gsp.PageRenderer
 import grails.plugin.mail.MailService
@@ -21,7 +20,6 @@ import grails.test.mixin.TestFor
 @Mock([Permission, Key, Stream, SecUser, Canvas])
 class PermissionApiControllerSpec extends ControllerSpecification {
 	def permissionService
-	StreamService streamService
 
 	// Canvas and Stream chosen because one has string id and one has long id
 	Canvas canvasOwned, canvasShared, canvasRestricted, canvasPublic
@@ -37,7 +35,6 @@ class PermissionApiControllerSpec extends ControllerSpecification {
 		controller.permissionService.groovyPageRenderer = Mock(PageRenderer)
 
 		controller.permissionService = permissionService = Mock(PermissionService)
-		controller.streamService = streamService = Mock(StreamService)
 
 		me = new SecUser(id: 1, username: "me@me.net").save(validate: false)
 		other = new SecUser(id: 2, username: "0x0000000000000000000000000000000000000000").save(validate: false)
@@ -169,8 +166,6 @@ class PermissionApiControllerSpec extends ControllerSpecification {
 		params.resourceId = streamShared.id
 		Resource resource = new Resource(params.resourceClass, params.resourceId)
 		request.apiUser = me
-		Permission result = new Permission(stream: streamShared, operation: Operation.STREAM_SHARE, user: me)
-		result.save()
 
 		when:
 		authenticatedAs(me) { controller.show() }
@@ -220,6 +215,7 @@ class PermissionApiControllerSpec extends ControllerSpecification {
 			_,
 			_
 		) >> newPermission
+		0 * permissionService._
 		response.header("Location") == request.forwardURI + "/" + newPermission.id
 		response.status == 201
 		response.json.user == me.username
@@ -230,14 +226,15 @@ class PermissionApiControllerSpec extends ControllerSpecification {
 		params.id = canvasPermission.id
 		params.resourceClass = Canvas
 		params.resourceId = canvasShared.id
+		Resource resource = new Resource(params.resourceClass, params.resourceId)
+		request.apiUser = me
 
 		when:
-		authenticatedAs(me) { controller.delete("${canvasPermission.id}") }
+		authenticatedAs(me) { controller.delete() }
 		then:
 		response.status == 204
-		1 * permissionService.check(me, _, Operation.CANVAS_SHARE) >> true
-		1 * permissionService.getPermissionsTo(_) >> [canvasPermission, *ownerPermissions]
-		1 * permissionService._
+		1 * permissionService.deletePermission(resource, request.apiUser, null)
+		0 * permissionService._
 	}
 
 	void "can't give both 'user' and 'anonymous' arguments"() {
@@ -252,7 +249,7 @@ class PermissionApiControllerSpec extends ControllerSpecification {
 		thrown ValidationException
 	}
 
-	void "getOwnPermissions giver owner permissions for own canvas"() {
+	void "getOwnPermissions gets owner permissions for own canvas"() {
 		params.id = canvasOwned.id
 		params.resourceClass = Canvas
 		params.resourceId = canvasOwned.id
@@ -264,7 +261,6 @@ class PermissionApiControllerSpec extends ControllerSpecification {
 		then:
 		response.status == 200
 		response.json*.operation == ownerPermissions*.toMap()*.operation
-
 		1 * permissionService.getOwnPermissions(resource, me, null) >> [*ownerPermissions]
 		0 * permissionService._
 	}
@@ -281,7 +277,6 @@ class PermissionApiControllerSpec extends ControllerSpecification {
 		then:
 		response.status == 200
 		response.json == [[id: 1, operation: "canvas_share", user: "me@me.net"]]
-
 		1 * permissionService.getOwnPermissions(resource, me, null) >> [canvasPermission]
 		0 * permissionService._
 	}
@@ -293,6 +288,7 @@ class PermissionApiControllerSpec extends ControllerSpecification {
 
 		then:
 		1 * permissionService.cleanUpExpiredPermissions()
+		0 * permissionService._
 		response.status == 200
 	}
 }

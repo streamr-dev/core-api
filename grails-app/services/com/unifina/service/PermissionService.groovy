@@ -669,4 +669,11 @@ class PermissionService {
 		Permission p = permissions.find { it.id == resource.id }
 		return p
 	}
+
+	void deletePermission(Resource resource, SecUser apiUser, Key apiKey) {
+		Object res = loadResource(resource, apiUser, apiKey, true)
+		List<Permission> permissions = getPermissionsTo(res)
+		Permission p = permissions.find { it.id == resource.id }
+		systemRevoke(p)
+	}
 }
