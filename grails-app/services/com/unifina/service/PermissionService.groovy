@@ -662,4 +662,11 @@ class PermissionService {
 		List<Permission> permissions = getPermissionsTo(res, subscriptions, null)
 		return permissions
 	}
+
+	Permission findPermission(Resource resource, SecUser apiUser, Key apiKey) {
+		Object res = loadResource(resource, apiUser, apiKey, true)
+		List<Permission> permissions = getPermissionsTo(res)
+		Permission p = permissions.find { it.id == resource.id }
+		return p
+	}
 }

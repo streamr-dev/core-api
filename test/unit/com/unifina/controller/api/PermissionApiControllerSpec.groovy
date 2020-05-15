@@ -101,7 +101,6 @@ class PermissionApiControllerSpec extends ControllerSpecification {
 		response.json[0].id == canvasPermission.id
 		response.json[0].user == "me@me.net"
 		response.json[0].operation == "canvas_share"
-		// matching with _ instead of canvasOwned because it's not "the same" after saving and get(id):ing
 		1 * permissionService.findAllPermissions(resource, request.apiUser, null, true) >> [canvasPermission, *ownerPermissions]
 		0 * permissionService._
     }
@@ -122,7 +121,6 @@ class PermissionApiControllerSpec extends ControllerSpecification {
 		response.json[0].id == streamPermission.id
 		response.json[0].user == "me@me.net"
 		response.json[0].operation == "stream_share"
-		// matching with _ instead of streamOwned because it's not "the same" after saving and get(id):ing
 		1 * permissionService.findAllPermissions(resource, request.apiUser, null, true) >> [streamPermission, *ownerPermissions]
 		0 * permissionService._
 	}
@@ -144,7 +142,6 @@ class PermissionApiControllerSpec extends ControllerSpecification {
 		response.json[0].id == streamPermission.id
 		response.json[0].user == "me@me.net"
 		response.json[0].operation == "stream_share"
-		// matching with _ instead of streamOwned because it's not "the same" after saving and get(id):ing
 		1 * permissionService.findAllPermissions(resource, request.apiUser, null,false) >> [streamPermission, *ownerPermissions]
 		0 * permissionService._
 	}
@@ -153,17 +150,16 @@ class PermissionApiControllerSpec extends ControllerSpecification {
 		params.id = canvasPermission.id
 		params.resourceClass = Canvas
 		params.resourceId = canvasShared.id
+		Resource resource = new Resource(params.resourceClass, params.resourceId)
+		request.apiUser = me
 
 		when:
-		authenticatedAs(me) { controller.show("${canvasPermission.id}") }
+		authenticatedAs(me) { controller.show() }
 		then:
 		response.status == 200
-		response.json.id == 1
 		response.json.user == "me@me.net"
 		response.json.operation == "canvas_share"
-		// matching with _ instead of canvasOwned because it's not "the same" after saving and get(id):ing
-		1 * permissionService.getPermissionsTo(_) >> [canvasPermission, *ownerPermissions]
-		1 * permissionService.check(me, _, Permission.Operation.CANVAS_SHARE) >> true
+		1 * permissionService.findPermission(resource, request.apiUser, null) >> canvasPermission
 		0 * permissionService._
 	}
 
@@ -171,18 +167,19 @@ class PermissionApiControllerSpec extends ControllerSpecification {
 		params.id = streamPermission.id
 		params.resourceClass = Stream
 		params.resourceId = streamShared.id
+		Resource resource = new Resource(params.resourceClass, params.resourceId)
+		request.apiUser = me
+		Permission result = new Permission(stream: streamShared, operation: Operation.STREAM_SHARE, user: me)
+		result.save()
 
 		when:
-		authenticatedAs(me) { controller.show("${streamPermission.id}") }
+		authenticatedAs(me) { controller.show() }
 		then:
 		response.status == 200
 		response.json.id == 2
 		response.json.user == "me@me.net"
 		response.json.operation == "stream_share"
-		// matching with _ instead of streamOwned because it's not "the same" after saving and get(id):ing
-		1 * streamService.getStream(streamShared.id) >> streamShared
-		1 * permissionService.getPermissionsTo(_) >> [streamPermission, *ownerPermissions]
-		1 * permissionService.check(me, _, Permission.Operation.STREAM_SHARE) >> true
+		1 * permissionService.findPermission(resource, request.apiUser, null) >> streamPermission
 		0 * permissionService._
 	}
 
