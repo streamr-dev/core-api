@@ -5,7 +5,7 @@ jdk:
 - openjdk8
 services:
 - docker
-if: (branch = master) OR type = pull_request # build whitelisted branches and all PRs
+if: (branch = master) OR (branch = "/^deployed-\\d+\\.\\d+(\\.\\d+)?(-\\S*)?$/") OR type = pull_request # build whitelisted branches and all PRs
 git:
   submodules: false
 before_install:
@@ -95,6 +95,8 @@ jobs:
     deploy:
     - provider: script
       script: .travis_scripts/deploy_docker.sh production
+      on:
+        tags: true
 after_failure:
   - docker-compose logs engine-and-editor
   - docker ps
