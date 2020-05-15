@@ -1,6 +1,6 @@
 package com.unifina.service
 
-import com.unifina.api.NotFoundException
+
 import com.unifina.api.NotPermittedException
 import com.unifina.domain.EmailMessage
 import com.unifina.domain.Resource
@@ -560,39 +560,15 @@ class PermissionService {
 	}
 
 	Permission saveAnonymousPermission(SecUser apiUser, Key apiKey, Operation op, Resource resource) {
-		Object res = loadResource(resource, apiUser, apiKey, true)
+		Object res = resource.load(apiUser, apiKey, true)
 		Permission permission = grantAnonymousAccess(apiUser, res, op)
 		return permission
 	}
 
-	private Permission savePermission(Resource res, SecUser apiUser, Key apiKey, Userish targetUserish, Operation op) {
-		Object resource = loadResource(res, apiUser, apiKey, true)
-		Permission permission = grant(apiUser, resource, targetUserish, op)
+	private Permission savePermission(Resource resource, SecUser apiUser, Key apiKey, Userish targetUserish, Operation op) {
+		Object res = resource.load(apiUser, apiKey, true)
+		Permission permission = grant(apiUser, res, targetUserish, op)
 		return permission
-	}
-
-	private Object loadResource(Resource res, SecUser apiUser, Key apiKey, boolean requireShareResourcePermission) {
-		Object resource
-		if (Canvas.isAssignableFrom(res.clazz)) {
-			resource = Canvas.get(res.idToString())
-		} else if (Dashboard.isAssignableFrom(res.clazz)) {
-			resource = Dashboard.get(res.idToString())
-		} else if (Product.isAssignableFrom(res.clazz)) {
-			resource = Product.get(res.idToString())
-		} else if (Stream.isAssignableFrom(res.clazz)) {
-			StreamService streamService = Holders.getApplicationContext().getBean(StreamService)
-			resource = streamService.getStream(res.idToString())
-		} else {
-			throw new IllegalArgumentException("Unexpected resource class: " + res.clazz)
-		}
-		if (resource == null) {
-			throw new NotFoundException(res.clazz.simpleName, res.idToString())
-		}
-		Operation shareOp = Operation.shareOperation(resource)
-		if (requireShareResourcePermission && !check(apiUser ?: apiKey, resource, shareOp)) {
-			throw new NotPermittedException(apiUser?.username, res.clazz.simpleName, res.idToString(), shareOp.id)
-		}
-		return resource
 	}
 
 	private void sendEmailShareResource(Operation op, String username, EmailMessage msg) {
@@ -652,26 +628,26 @@ class PermissionService {
 	}
 
 	List<Permission> getOwnPermissions(Resource resource, SecUser apiUser, Key apiKey) {
-		Object res = loadResource(resource, apiUser, apiKey, false)
+		Object res = resource.load(apiUser, apiKey, false)
 		List<Permission> results = getPermissionsTo(res, apiUser ?: apiKey)
 		return results
 	}
 
 	List<Permission> findAllPermissions(Resource resource, SecUser apiUser, Key apiKey, boolean subscriptions) {
-		Object res = loadResource(resource, apiUser, apiKey, true)
+		Object res = resource.load(apiUser, apiKey, true)
 		List<Permission> permissions = getPermissionsTo(res, subscriptions, null)
 		return permissions
 	}
 
 	Permission findPermission(Resource resource, SecUser apiUser, Key apiKey) {
-		Object res = loadResource(resource, apiUser, apiKey, true)
+		Object res = resource.load(apiUser, apiKey, true)
 		List<Permission> permissions = getPermissionsTo(res)
 		Permission p = permissions.find { it.id == resource.id }
 		return p
 	}
 
 	void deletePermission(Resource resource, SecUser apiUser, Key apiKey) {
-		Object res = loadResource(resource, apiUser, apiKey, true)
+		Object res = resource.load(apiUser, apiKey, true)
 		List<Permission> permissions = getPermissionsTo(res)
 		Permission p = permissions.find { it.id == resource.id }
 		systemRevoke(p)
