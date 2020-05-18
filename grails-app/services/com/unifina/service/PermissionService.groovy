@@ -1,6 +1,5 @@
 package com.unifina.service
 
-
 import com.unifina.api.NotPermittedException
 import com.unifina.domain.EmailMessage
 import com.unifina.domain.Resource
@@ -19,10 +18,12 @@ import com.unifina.security.Userish
 import grails.compiler.GrailsCompileStatic
 import grails.gsp.PageRenderer
 import grails.plugin.mail.MailService
+import grails.transaction.Transactional
 import grails.util.Holders
 import org.codehaus.groovy.grails.commons.GrailsApplication
 
 import java.security.AccessControlException
+
 /**
  * Check, get, grant, and revoke permissions. Maintains Access Control Lists (ACLs) to resources.
  *
@@ -115,6 +116,7 @@ class PermissionService {
 	/**
 	 * List all Permissions granted on a resource to a Userish
 	 */
+	@Transactional(readOnly = true)
 	List<Permission> getPermissionsTo(Object resource, Userish userish) {
 		userish = userish?.resolveToUserish()
 		String resourceProp = getResourcePropertyName(resource)
@@ -279,7 +281,7 @@ class PermissionService {
 			operation: operation,
 			subscription: subscription,
 			endsAt: endsAt
-		).save(flush: true, failOnError: true)
+		).save(flush: false, failOnError: true)
 
 		return parentPermission
 	}
@@ -320,7 +322,7 @@ class PermissionService {
 			(resourceProp): resource,
 			operation: operation,
 			anonymous: true
-		).save(flush: true, failOnError: true)
+		).save(flush: false, failOnError: true)
 	}
 
 	/**
@@ -429,7 +431,7 @@ class PermissionService {
 		}.collect { p ->
 			p.invite = null
 			p.user = user
-			p.save(flush: true, failOnError: true)
+			p.save(flush: false, failOnError: true)
 		}
 	}
 
@@ -483,9 +485,9 @@ class PermissionService {
 				try {
 					log.info("performRevoke: Trying to delete permission $perm.id")
 					Permission.withNewTransaction {
-						perm.delete(flush: true)
+						perm.delete(flush: false)
 						for (Permission childPerm: childPermissions) {
-							childPerm.delete(flush: true)
+							childPerm.delete(flush: false)
 						}
 					}
 				} catch (Throwable e) {

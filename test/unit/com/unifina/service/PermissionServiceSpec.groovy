@@ -66,7 +66,7 @@ class PermissionServiceSpec extends BeanMockingSpecification {
 		service.systemGrantAll(anotherUser, dashRestricted)
 		service.systemGrantAll(anotherUser, dashPublic)
 
-		Canvas canvas = new Canvas().save(validate: false)
+		Canvas canvas = new Canvas().save(validate: false, flush: true)
 		service.systemGrantAll(anotherUser, canvas)
 
 		// Set up the Permissions to the allowed resources

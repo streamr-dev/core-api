@@ -7,7 +7,6 @@ import com.unifina.domain.security.Key
 import com.unifina.domain.security.Permission
 import com.unifina.domain.security.SecUser
 import com.unifina.domain.signalpath.Canvas
-import com.unifina.utils.IdGenerator
 import com.unifina.utils.Webcomponent
 import grails.test.spock.IntegrationSpec
 import grails.util.Holders
@@ -145,7 +144,7 @@ class PermissionServiceIntegrationSpec extends IntegrationSpec {
 			canvas: vulCan,
 			webcomponent: Webcomponent.STREAMR_BUTTON,
 		)
-		secretItem.save(failOnError: true, validate: true)
+		secretItem.save(failOnError: true, validate: true, flush: true)
 	}
 
 	void cleanup() {
@@ -256,7 +255,7 @@ class PermissionServiceIntegrationSpec extends IntegrationSpec {
 		p1.endsAt = new Date(System.currentTimeMillis() - 1000*60000)
 		p2.endsAt = new Date(0)
 		p1.save(failOnError: true)
-		p2.save(failOnError: true)
+		p2.save(failOnError: true, flush: true)
 
 		expect:
 		service.get(Dashboard, someone, Permission.Operation.DASHBOARD_GET) == []
