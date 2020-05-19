@@ -148,7 +148,7 @@ class SignalPathService {
 
 		canvas.startedBy = asUser
 
-		canvas.save(flush: true)
+		canvas.save(flush: false)
 
 		// Start the runner thread
 		runner.start()
@@ -334,7 +334,7 @@ class SignalPathService {
 			if (notTooBig) {
                 serialization.bytes = serializationService.serialize(sp)
                 serialization.date = sp.globals.time
-                serialization.save(failOnError: true, flush: true)
+                serialization.save(failOnError: true, flush: false)
                 canvas.serialization = serialization
 
                 if (isFirst) {

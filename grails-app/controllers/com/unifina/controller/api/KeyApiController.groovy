@@ -210,7 +210,7 @@ class KeyApiController {
 						}
 					}
 				}
-				k.save(flush: true, failOnError: true)
+				k.save(flush: false, failOnError: true)
 			}
 		}
 		response.status = 200

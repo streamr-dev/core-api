@@ -23,7 +23,6 @@ import grails.util.Holders
 import org.codehaus.groovy.grails.commons.GrailsApplication
 
 import java.security.AccessControlException
-
 /**
  * Check, get, grant, and revoke permissions. Maintains Access Control Lists (ACLs) to resources.
  *
@@ -56,6 +55,7 @@ class PermissionService {
 	/**
 	 * Check whether user is allowed to perform specified operation on a resource
 	 */
+	//@Transactional(readOnly = true)
 	boolean check(Userish userish, Object resource, Operation op) {
 		Object id = findID(resource)
 		return id != null && hasPermission(userish, resource, op)
@@ -64,6 +64,7 @@ class PermissionService {
 	/**
 	 * Throws an exception if user is not allowed to perform specified operation on a resource.
 	 */
+	//@Transactional(readOnly = true)
 	void verify(Userish userish, Object resource, Operation op) throws NotPermittedException {
 		if (!check(userish, resource, op)) {
 			SecUser user = userish?.resolveToUserish() as SecUser
@@ -74,6 +75,7 @@ class PermissionService {
 	/**
 	 * List all Permissions granted on a resource
 	 */
+	@Transactional(readOnly = true)
 	List<Permission> getPermissionsTo(Object resource) {
 		return getPermissionsTo(resource, true, null)
 	}
@@ -86,6 +88,7 @@ class PermissionService {
 	 * @param op Operation to limit the query result set.
 	 * @return List of Permission objects.
 	 */
+	@Transactional(readOnly = true)
 	List<Permission> getPermissionsTo(Object resource, boolean subscriptions, Operation op) {
 		String resourceProp = getResourcePropertyName(resource)
 		return store.getPermissionsTo(resourceProp, resource, subscriptions, op)
@@ -94,6 +97,7 @@ class PermissionService {
 	/**
 	 * List all Permissions with some Operation right granted on a resource
 	 */
+	@Transactional(readOnly = true)
 	List<Permission> getPermissionsTo(Object resource, Operation op) {
 		return getPermissionsTo(resource, true, op)
 	}
@@ -101,6 +105,7 @@ class PermissionService {
 	/**
 	 * List all Permissions that have not expired yet with some Operation right granted on a resource
 	 */
+	//@Transactional(readOnly = true)
 	List<Permission> getNonExpiredPermissionsTo(Object resource, Operation op) {
 		// TODO: find a way to do this in a single query instead of filtering results
 		List<Permission> results = []
@@ -197,11 +202,13 @@ class PermissionService {
 	}
 
 	/** Overload to allow leaving out the anonymous-include-flag but including the filter */
+	@Transactional(readOnly = true)
 	public <T> List<T> get(Class<T> resourceClass, Userish userish, Operation op, Closure resourceFilter = {}) {
 		return get(resourceClass, userish, op, false, resourceFilter)
 	}
 
 	/** Convenience overload: get all including public, adding a flag for public resources may look cryptic */
+	@Transactional(readOnly = true)
 	public <T> List<T> getAll(Class<T> resourceClass, Userish userish, Operation op, Closure resourceFilter = {}) {
 		return get(resourceClass, userish, op, true, resourceFilter)
 	}
@@ -209,6 +216,7 @@ class PermissionService {
 	/**
 	 * Get all resources of given type that the user has specified permission for
 	 */
+	@Transactional(readOnly = true)
 	public <T> List<T> get(Class<T> resourceClass, Userish userish, Operation op, boolean includeAnonymous,
 						Closure resourceFilter = {}) {
 		return store.get(resourceClass, userish, op, includeAnonymous, resourceFilter)
@@ -428,7 +436,7 @@ class PermissionService {
 		// { invite { eq "username", user.username } } won't do: some invite are null => NullPointerException
 		return store.findPermissionsToTransfer().findAll {
 			it.invite.username == user.username
-		}.collect { p ->
+		}.collect { Permission p ->
 			p.invite = null
 			p.user = user
 			p.save(flush: false, failOnError: true)
@@ -629,18 +637,21 @@ class PermissionService {
 		return newPermission
 	}
 
+	@Transactional(readOnly = true)
 	List<Permission> getOwnPermissions(Resource resource, SecUser apiUser, Key apiKey) {
 		Object res = resource.load(apiUser, apiKey, false)
 		List<Permission> results = getPermissionsTo(res, apiUser ?: apiKey)
 		return results
 	}
 
+	@Transactional(readOnly = true)
 	List<Permission> findAllPermissions(Resource resource, SecUser apiUser, Key apiKey, boolean subscriptions) {
 		Object res = resource.load(apiUser, apiKey, true)
 		List<Permission> permissions = getPermissionsTo(res, subscriptions, null)
 		return permissions
 	}
 
+	@Transactional(readOnly = true)
 	Permission findPermission(Resource resource, SecUser apiUser, Key apiKey) {
 		Object res = resource.load(apiUser, apiKey, true)
 		List<Permission> permissions = getPermissionsTo(res)

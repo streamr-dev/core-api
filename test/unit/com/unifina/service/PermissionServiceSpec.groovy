@@ -33,7 +33,6 @@ class PermissionServiceSpec extends BeanMockingSpecification {
 
 	SecUser me, anotherUser, stranger
 	Key myKey, anotherUserKey, anonymousKey
-	SignupInvite invite
 
 	Dashboard dashAllowed, dashRestricted, dashOwned, dashPublic
 	Permission dashReadPermission, dashAnonymousReadPermission
@@ -41,7 +40,6 @@ class PermissionServiceSpec extends BeanMockingSpecification {
 	StreamService streamService
 
     def setup() {
-
 		// Users
 		me = new SecUser(username: "me", password: "foo").save(validate:false)
 		anotherUser = new SecUser(username: "him", password: "bar").save(validate:false)
@@ -51,9 +49,6 @@ class PermissionServiceSpec extends BeanMockingSpecification {
 		myKey = new Key(name: "my key", user: me).save(failOnError: true)
 		anotherUserKey = new Key(name: "another user's key", user: anotherUser).save(failOnError: true)
 		anonymousKey = new Key(name: "anonymous key 1").save(failOnError: true)
-
-		// Sign-up invitations can also receive Permissions; they will later be converted to User permissions
-		invite = new SignupInvite(username: "him", code: "sikritCode", sent: true, used: false).save(validate:false)
 
 		// Dashboards
 		dashAllowed = new Dashboard(id: "allowed", name:"allowed").save(validate:false)
@@ -86,7 +81,6 @@ class PermissionServiceSpec extends BeanMockingSpecification {
 		Permission.count() == 29
 
 		and: "anotherUser has an invitation"
-		invite.username == anotherUser.username
 	}
 
 	void "access denied to non-permitted Dashboard"() {
@@ -134,57 +128,6 @@ class PermissionServiceSpec extends BeanMockingSpecification {
 		!service.check(myKey, new Dashboard(), Permission.Operation.DASHBOARD_GET)
 		!service.check(anonymousKey, new Dashboard(), Permission.Operation.DASHBOARD_GET)
 		!service.check(myKey, null, Permission.Operation.DASHBOARD_GET)
-	}
-
-	void "getPermissionsTo returns all permissions for the given resource"() {
-		setup:
-		def perm = service.systemGrant(stranger, dashOwned, Operation.DASHBOARD_GET)
-		expect:
-		service.getPermissionsTo(dashOwned).size() == 6
-		service.getPermissionsTo(dashOwned).contains(perm)
-		service.getPermissionsTo(dashAllowed).size() == 7
-		service.getPermissionsTo(dashAllowed).contains(dashReadPermission)
-		service.getPermissionsTo(dashRestricted).size() == 5
-		service.getPermissionsTo(dashRestricted)[0].user == anotherUser
-	}
-
-	void "getPermissionsTo with Operation returns all permissions for the given resource"() {
-		setup:
-		List<Permission> beforeRead = service.getPermissionsTo(dashOwned, Operation.DASHBOARD_GET)
-		List<Permission> beforeWrite = service.getPermissionsTo(dashOwned, Operation.DASHBOARD_EDIT)
-		Permission perm = service.systemGrant(stranger, dashOwned, Operation.DASHBOARD_GET)
-		List<Permission> afterRead = service.getPermissionsTo(dashOwned, Operation.DASHBOARD_GET)
-		List<Permission> afterWrite = service.getPermissionsTo(dashOwned, Operation.DASHBOARD_EDIT)
-		List<Permission> all = service.getPermissionsTo(dashOwned)
-		List<Permission> allOperations = new ArrayList<Permission>()
-		Operation.dashboardOperations().collect { Operation op ->
-			allOperations.addAll(service.getPermissionsTo(dashOwned, op))
-		}
-		expect:
-		!beforeRead.contains(perm)
-		afterRead.contains(perm)
-		beforeRead.size() + 1 == afterRead.size()
-		beforeWrite.size() == afterWrite.size()
-		all.size() == allOperations.size()
-	}
-
-	void "getNonExpiredPermissionsTo with Operation returns all non-expired permissions for the given resource"() {
-		Dashboard testDash = new Dashboard(id: "testdash", name:"testdash").save(validate:false)
-		// craft an expired permission
-		service.systemGrant(me, testDash, Operation.DASHBOARD_EDIT, null, new Date(0))
-		setup:
-		List<Permission> beforeRead = service.getNonExpiredPermissionsTo(dashOwned, Operation.DASHBOARD_GET)
-		List<Permission> beforeWrite = service.getNonExpiredPermissionsTo(dashOwned, Operation.DASHBOARD_EDIT)
-		Permission perm = service.systemGrant(stranger, dashOwned, Operation.DASHBOARD_GET)
-		List<Permission> afterRead = service.getNonExpiredPermissionsTo(dashOwned, Operation.DASHBOARD_GET)
-		List<Permission> afterWrite = service.getNonExpiredPermissionsTo(dashOwned, Operation.DASHBOARD_EDIT)
-		List<Permission> testDashPerms = service.getNonExpiredPermissionsTo(testDash, Operation.DASHBOARD_EDIT)
-		expect:
-		!beforeRead.contains(perm)
-		afterRead.contains(perm)
-		beforeRead.size() + 1 == afterRead.size()
-		beforeWrite.size() == afterWrite.size()
-		testDashPerms.isEmpty()
 	}
 
 	void "getPermissionsTo(resource, userish) returns permissions for single user"() {
@@ -271,32 +214,6 @@ class PermissionServiceSpec extends BeanMockingSpecification {
 		!service.check(subscriber, stream, Permission.Operation.STREAM_SUBSCRIBE)
 		!service.check(subscriber, pubInbox, Permission.Operation.STREAM_PUBLISH)
 		!service.check(publisher, subInbox, Permission.Operation.STREAM_PUBLISH)
-	}
-
-	void "signup invitation can be granted and revoked of permissions just like normal users"() {
-		expect:
-		!service.getPermissionsTo(dashOwned).find { it.invite == invite }
-
-		when:
-		service.systemGrant(invite, dashOwned, Operation.DASHBOARD_GET)
-		then:
-		service.getPermissionsTo(dashOwned).find { it.invite == invite }
-
-		when:
-		service.systemRevoke(invite, dashOwned, Operation.DASHBOARD_GET)
-		then:
-		!service.getPermissionsTo(dashOwned).find { it.invite == invite }
-	}
-
-	void "signup invitations are converted correctly"() {
-		expect:
-		!service.check(anotherUser, dashOwned, Permission.Operation.DASHBOARD_GET)
-
-		when: "pretend anotherUser was just created"
-		service.systemGrant(invite, dashOwned, Operation.DASHBOARD_GET)
-		service.transferInvitePermissionsTo(anotherUser)
-		then:
-		service.check(anotherUser, dashOwned, Permission.Operation.DASHBOARD_GET)
 	}
 
 	void "stranger can read public resources with anonymous read access"() {

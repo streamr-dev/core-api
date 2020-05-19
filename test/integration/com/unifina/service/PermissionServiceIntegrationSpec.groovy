@@ -6,6 +6,7 @@ import com.unifina.domain.data.Stream
 import com.unifina.domain.security.Key
 import com.unifina.domain.security.Permission
 import com.unifina.domain.security.SecUser
+import com.unifina.domain.security.SignupInvite
 import com.unifina.domain.signalpath.Canvas
 import com.unifina.utils.Webcomponent
 import grails.test.spock.IntegrationSpec
@@ -45,6 +46,8 @@ class PermissionServiceIntegrationSpec extends IntegrationSpec {
 	Dashboard vulSecretDash
 	DashboardItem pubItem
 	DashboardItem secretItem
+
+	SignupInvite invite
 
 	void setup() {
 		service = Holders.getApplicationContext().getBean(PermissionService)
@@ -145,6 +148,9 @@ class PermissionServiceIntegrationSpec extends IntegrationSpec {
 			webcomponent: Webcomponent.STREAMR_BUTTON,
 		)
 		secretItem.save(failOnError: true, validate: true, flush: true)
+
+		// Sign-up invitations can also receive Permissions; they will later be converted to User permissions
+		invite = new SignupInvite(username: "him-permission-service-integration-spec@streamr.com", code: "sikritCode", sent: true, used: false).save(validate: false, flush: true)
 	}
 
 	void cleanup() {
@@ -189,6 +195,8 @@ class PermissionServiceIntegrationSpec extends IntegrationSpec {
 		vulPubDash?.delete(flush: true)
 		vulSecretDash?.delete(flush: true)
 		vulCan?.delete(flush: true)
+
+		invite?.delete(flush: true)
 	}
 
 	void "get closure filtering works as expected"() {
@@ -383,6 +391,83 @@ class PermissionServiceIntegrationSpec extends IntegrationSpec {
 		service.check(me, uiChannelPublic, Permission.Operation.STREAM_GET)
 		service.check(me, uiChannelPublic, Permission.Operation.STREAM_SUBSCRIBE)
 		secPerm.size() == 0
+	}
+
+	void "getPermissionsTo with Operation returns all permissions for the given resource"() {
+		setup:
+		List<Permission> beforeRead = service.getPermissionsTo(dashOwned, Permission.Operation.DASHBOARD_GET)
+		List<Permission> beforeWrite = service.getPermissionsTo(dashOwned, Permission.Operation.DASHBOARD_EDIT)
+		Permission perm = service.systemGrant(stranger, dashOwned, Permission.Operation.DASHBOARD_GET)
+		List<Permission> afterRead = service.getPermissionsTo(dashOwned, Permission.Operation.DASHBOARD_GET)
+		List<Permission> afterWrite = service.getPermissionsTo(dashOwned, Permission.Operation.DASHBOARD_EDIT)
+		List<Permission> all = service.getPermissionsTo(dashOwned)
+		List<Permission> allOperations = new ArrayList<Permission>()
+		Permission.Operation.dashboardOperations().collect { Permission.Operation op ->
+			allOperations.addAll(service.getPermissionsTo(dashOwned, op))
+		}
+		expect:
+		!beforeRead.contains(perm)
+		afterRead.contains(perm)
+		beforeRead.size() + 1 == afterRead.size()
+		beforeWrite.size() == afterWrite.size()
+		all.size() == allOperations.size()
+	}
+
+	void "getPermissionsTo returns all permissions for the given resource"() {
+		setup:
+		def perm = service.systemGrant(stranger, dashOwned, Permission.Operation.DASHBOARD_GET)
+		expect:
+		service.getPermissionsTo(dashOwned).size() == 6
+		service.getPermissionsTo(dashOwned).contains(perm)
+		service.getPermissionsTo(dashAllowed).size() == 7
+		service.getPermissionsTo(dashAllowed).contains(dashReadPermission)
+		service.getPermissionsTo(dashRestricted).size() == 5
+		service.getPermissionsTo(dashRestricted)[0].user == anotherUser
+	}
+
+	void "getNonExpiredPermissionsTo with Operation returns all non-expired permissions for the given resource"() {
+		// craft an expired permission
+		service.systemGrant(me, dashboard, Permission.Operation.DASHBOARD_EDIT, null, new Date(0))
+		setup:
+		List<Permission> beforeRead = service.getNonExpiredPermissionsTo(dashOwned, Permission.Operation.DASHBOARD_GET)
+		List<Permission> beforeWrite = service.getNonExpiredPermissionsTo(dashOwned, Permission.Operation.DASHBOARD_EDIT)
+		Permission perm = service.systemGrant(stranger, dashOwned, Permission.Operation.DASHBOARD_GET)
+		List<Permission> afterRead = service.getNonExpiredPermissionsTo(dashOwned, Permission.Operation.DASHBOARD_GET)
+		List<Permission> afterWrite = service.getNonExpiredPermissionsTo(dashOwned, Permission.Operation.DASHBOARD_EDIT)
+		List<Permission> testDashPerms = service.getNonExpiredPermissionsTo(dashboard, Permission.Operation.DASHBOARD_EDIT)
+		expect:
+		!beforeRead.contains(perm)
+		afterRead.contains(perm)
+		beforeRead.size() + 1 == afterRead.size()
+		beforeWrite.size() == afterWrite.size()
+		testDashPerms.isEmpty()
+	}
+
+	void "signup invitation can be granted and revoked of permissions just like normal users"() {
+		expect:
+		!service.getPermissionsTo(dashOwned).find { it.invite == invite }
+
+		when:
+		service.systemGrant(invite, dashOwned, Permission.Operation.DASHBOARD_GET)
+		then:
+		service.getPermissionsTo(dashOwned).find { it.invite == invite }
+
+		when:
+		service.systemRevoke(invite, dashOwned, Permission.Operation.DASHBOARD_GET)
+		then:
+		!service.getPermissionsTo(dashOwned).find { it.invite == invite }
+	}
+
+	void "signup invitations are converted correctly"() {
+		expect:
+		!service.check(anotherUser, dashOwned, Permission.Operation.DASHBOARD_GET)
+
+		when: "pretend anotherUser was just created"
+		service.systemGrant(invite, dashOwned, Permission.Operation.DASHBOARD_GET)
+		def permissions = service.transferInvitePermissionsTo(anotherUser)
+		permissions*.save(flush: true) // flush hibernate cache
+		then:
+		service.check(anotherUser, dashOwned, Permission.Operation.DASHBOARD_GET)
 	}
 
 	void "cannot revoke only share permission"() {

@@ -83,7 +83,7 @@ class StreamService {
 		Map config = DelayedDeleteStreamTask.getConfig(streams)
 		Task task = new Task(DelayedDeleteStreamTask.class.getName(), (config as JSON).toString(), "stream-delete", UUID.randomUUID().toString())
 		task.runAfter = new Date(System.currentTimeMillis() + delayMs)
-		task.save(flush: true, failOnError: true)
+		task.save(flush: false, failOnError: true)
 	}
 
 	boolean autodetectFields(Stream stream, boolean flattenHierarchies, boolean saveFields) {
@@ -97,7 +97,7 @@ class StreamService {
 			config.fields = fields*.toMap()
 			stream.config = gson.toJson(config)
 			if (saveFields) {
-				stream.save(flush: true, failOnError: true)
+				stream.save(flush: false, failOnError: true)
 			} else {
 				stream.discard()
 			}

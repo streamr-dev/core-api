@@ -55,7 +55,7 @@ class UserService {
 		// Users must have at least one API key
 		user.addToKeys(new Key(name: "Default"))
 
-		if (!user.save(flush: true)) {
+		if (!user.save(flush: false)) {
 			log.warn("Failed to save user data: " + checkErrors(user.errors.getAllErrors()))
 			throw new UserCreationFailedException()
 		} else {

@@ -97,7 +97,7 @@ class CanvasService {
 		canvas.serialization?.delete()
 		canvas.serialization = null
 		boolean isNewCanvas = canvas.id == null
-		canvas.save(flush: true, failOnError: true)
+		canvas.save(flush: false, failOnError: true)
 		if (isNewCanvas) {
 			permissionService.systemGrantAll(user, canvas)
 		}
@@ -175,7 +175,7 @@ class CanvasService {
 			throw e
 		} finally {
 			canvas.state = Canvas.State.STOPPED
-			canvas.save(failOnError: true, flush: true)
+			canvas.save(failOnError: true, flush: false)
 		}
 	}
 
