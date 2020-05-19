@@ -19,8 +19,10 @@ env:
   - NODE_VERSION=$(cat rest-e2e-tests/.nvmrc)
   - OWNER=streamr
   - IMAGE_NAME=engine-and-editor
-  - secure: Icz6PgvdiMvqiC1yMBknaSMqHvvthOo0hUrVCTGA8pWXaqofX5fKNVI8GL4kvRK7a+YpEZ7SCvHH1cgEfBx8jC+Wc0XjGfBZXH1C1gyo8X1keCcJQVRyhxXkrjaeOLF0Cas8m9MdgAqJlwDcAXkWh426kvpAbU1SbNkkSCX3Ksp6M43LVUEbtkdOCf0GxavfgsGL5S9fk7WUf7hU4+HqL/UbbM+XMTz9hgajI5zzyRPiFwMPLGohNfopLKZvRWL/2IDY4ldVEzRi8koxIYrhO68o5RJJsptw+Gfaf3mzmgDGP9jU/cWYxsrfWogtVGFOiB2nDA+opbDU79vwHCpP5dcZJUEDvgOMVA0aTRT6Mc6hXM07wiL9noJwrSqoudkXianDDJqCKja+myKNi4wVWpisZV0HfF3nWeiKoxBaQdlCc7UUadS4OYK30Xll/Z9Z3ebWWGRmdKRSeD+QmM4j8VMu/t624AX/Q0laAS7/6BKOjMaDUqm3Q7plNWTSQWRmVUFzaH0xRL1DPLIbz/8Z8D1IVOfnq6k2FYTtVnjKQdHH65ddtqZMwtsSJsS9fQRYOm3ly0avPvDNnNeEYEuhY5lF8Tiw1lwh+BHOhiQLAPi7dqTiV/I2ImgdFH6a8wr/KICSquaSRWzwWnod3Jstrz9WWQW+K9JKu4deIRUOEx4=
-  - secure: Ro0tLYzPfBquDume3DCVOBcwGQtnkDCsitIteCjoiA75epYyweTN4pdaVdmI+nM41mKlXhbo6MYPukOVlxC0DqERsbAbQH8LKuJi+Ylio27ueC8pC0eDS+HjBu0OYLRzNuuhYalHRjAIZFI67CD1CHwFmbws6mENfte5L0sWdieOfnAmM74/82+ZpAibCC1FlIu4qLJxmHSYmH8bC5ZmNTQ59yx2h2BmsXdpJ5b2AVnoevnY8fxSb7mYC98tfS9x979+CMth510v5MzQR4AhwhmnaBcm7wjDgyINVcCG3YSQIs9nhP+AOOi8p+WCibCHGwU9uCPiDBy9KZvNppG7Wpw2JhKVSKOQvZsaxy6tarPxXEFXwaZjLbFw4aUVTe/aPsiOq+LZCljlSNFHANwVpAFqpxtUip2nap9156XNueegWDsgHHkmvp17bHRgsbk+KXvNuD2ieCiuMBJPXSKjm/6oyYsqFc9sPo/0jficsQWkegPkbBZu13acniqRZHENN91SyIh/OfZJQ5hapd8eaPS68iBVseVjplMXbaoId2PMuLw9BF1RXkc/LXHP6mN3DzrILdlezcHzdd87zJseY9+GIgEnihqvhXa53LGEB3KHe22mX0zuw7pOpaxWE89N/mSQFVehh/nnU20lylsiWpXWHe/B9vjMlmk8FnBvjuI=
+import:
+ - source: streamr-dev/travis-ci:aws-staging-secrets.yml@master
+ - source: streamr-dev/travis-ci:aws-production-secrets.yml@master
+ - source: streamr-dev/travis-ci:docker-secrets.yml@master
 jobs:
   include:
   - stage: Unit tests
@@ -35,8 +37,6 @@ jobs:
     script: .travis_scripts/build_war.sh
     env:
     - WS_URL="wss://ee-staging.streamr.com/api/v1/ws"
-    import:
-    - streamr-dev/travis-ci:aws-staging-secrets.yml
     deploy:
     - provider: s3
       access_key_id: $ACCESS_KEY_STG
@@ -74,9 +74,8 @@ jobs:
     if: tag IS present
     deploy:
     - provider: s3
-      access_key_id: AKIAI3FDTJG3O6WWN4BQ
-      secret_access_key:
-        secure: "mJtZqcGrs8bTJKEaV/VkUfcVTT4y+U1s6hztF45diTDQpT0uleLXClO8ljj3S0mbN3r+ykLBRvSohOOki94+v8z9/VDptVyrFUNEah2PKl30D3S74LeRXN/3xK25h6Y9HLdcbTuhlY988sQGONztkpS7kQCnaDa38rB0eUXfqhBC6WRJpmVmp1T0OSReZM7Et8VFfzcjudxQDT3YuYAvSd3MNpgfq6YXRdetzB0Tou8PtdyO02C87JANw9+BYxgaEcNtVIAtkEHyFriOdkqeo9c0zBJJbU/B6FxC/XZL6PfakZnVTuNEHjDuOvPhjMHKg1yWuCLhWchY9aZ3tbm9A7QG0cVycb/dwGeyNCwwocjPRMKell+2a749sYvP5WqNjYD+0wZp54WCglzTOxXy2EzX4UJZ6EeDzMOEJJ/Z/BnTZaRk9PiaH8iCSLOPqZ9uQV9ZV4+HliQYg/6yV33gT1PjjV6B80omYdrzu5kL2pZZa8w7cJ0jrbf7Li/Abhs8E6c7Wi11wtJUmzLPEl/uFl2XoKIMC4VWwymwB20JIlvD7QY+BnMB9WkTgYHYtDzwaZfFZqWybnOth2zRstA5kpakpEgZ34IslIDLRrXdjJeZtSiMz7/sgq5RNK7L3xzXTu4D+DiDzylNnOq1urL3qaQeHzMyME2OGvuxit1okR8="
+      access_key_id: $ACCESS_KEY_PRD
+      secret_access_key: $SECRET_ACCESS_KEY_PRD
       bucket: eu-west-1-streamr-cdn
       acl: private
       region: eu-west-1
