@@ -61,7 +61,7 @@ class StreamrClientService {
 	 */
 	StreamrClient getInstanceForThisEngineNode() {
 		// Mutex lock with timeout to avoid race conditions
-		if (instanceForThisEngineNodeLock.tryLock(10L, TimeUnit.SECONDS)) {
+		if (instanceForThisEngineNodeLock.tryLock(1L, TimeUnit.SECONDS)) {
 			try {
 				if (!instanceForThisEngineNode) {
 					String nodePrivateKey = MapTraversal.getString(Holders.getConfig(), "streamr.ethereum.nodePrivateKey")
