@@ -186,7 +186,7 @@ class PermissionService {
 				gt("endsAt", new Date())
 			}
 		}
-		return permissions?.first()
+		return permissions == null || permissions.isEmpty() ? null : permissions.first()
 	}
 
 	/** Overload to allow leaving out the anonymous-include-flag but including the filter */
