@@ -1,4 +1,4 @@
-language: groovy
+language: java
 os: linux
 dist: xenial
 jdk:
@@ -24,15 +24,29 @@ import:
  - source: streamr-dev/travis-ci:aws-production-secrets.yml@master
  - source: streamr-dev/travis-ci:docker-secrets.yml@master
 jobs:
+  allow_failures:
+      - env: CAN_FAIL=True
   include:
-  - stage: Unit tests
+  - stage: Tests
+    name: Unit tests
     script: grails test-app -unit
-  - stage: Validate Swagger
+  - stage: Tests
+    name: Validate Swagger
     script: travis_retry .travis_scripts/validate_swagger.sh
-  - stage: Integration tests
+  - stage: Tests
+    name: Integration tests
     script: travis_retry .travis_scripts/integration_test.sh
-  - stage: REST API tests
+  - stage: Tests
+    name: REST API tests
     script: .travis_scripts/rest_e2e_test.sh
+  - stage: Tests
+    name: streamr-client tests
+    env:
+    - CAN_FAIL=True
+    script:
+    - grails test war
+    - docker build -t $OWNER/$IMAGE_NAME:local .
+    - .travis_scripts/streamr-client-test.sh
   - stage: Build war Staging
     script: .travis_scripts/build_war.sh
     env:
