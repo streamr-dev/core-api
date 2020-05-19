@@ -171,7 +171,7 @@ class PermissionService {
 		if (items.isEmpty()) {
 			return null
 		}
-		Permission permission = Permission.withCriteria(uniqueResult: true) {
+		List<Permission> permissions = Permission.withCriteria {
 			'in'("dashboard", items.collect { it.dashboard })
 			eq("operation", Operation.READ)
 			or {
@@ -186,7 +186,7 @@ class PermissionService {
 				gt("endsAt", new Date())
 			}
 		}
-		return permission
+		return permissions?.first()
 	}
 
 	/** Overload to allow leaving out the anonymous-include-flag but including the filter */
