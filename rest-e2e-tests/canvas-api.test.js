@@ -349,7 +349,7 @@ function TestClockTable() {
     let subscription
 
     // sets timeout on before and all test cases in this suite
-    this.timeout(9000)
+    this.timeout(60000)
 
     before(async () => {
         const created = await CreateClientUser()
