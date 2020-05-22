@@ -15,11 +15,14 @@ import com.unifina.domain.security.SecUser
 import com.unifina.domain.security.SignupInvite
 import com.unifina.domain.signalpath.Canvas
 import com.unifina.security.Userish
+import com.unifina.utils.EmailValidator
 import grails.compiler.GrailsCompileStatic
 import grails.gsp.PageRenderer
 import grails.plugin.mail.MailService
 import grails.transaction.Transactional
 import grails.util.Holders
+import groovy.transform.CompileStatic
+import groovy.transform.TypeCheckingMode
 import org.codehaus.groovy.grails.commons.GrailsApplication
 
 import java.security.AccessControlException
@@ -40,14 +43,17 @@ class PermissionService {
 	PageRenderer groovyPageRenderer
 
 	private Object findID(Object resource) {
+		if (resource == null) {
+			return null
+		}
 		if (resource instanceof Canvas) {
-			return resource?.id
+			return resource.id
 		} else if (resource instanceof Dashboard) {
-			return resource?.id
+			return resource.id
 		} else if (resource instanceof Product) {
-			return resource?.id
+			return resource.id
 		} else if (resource instanceof Stream) {
-			return resource?.id
+			return resource.id
 		}
 		return null
 	}
@@ -55,6 +61,7 @@ class PermissionService {
 	/**
 	 * Check whether user is allowed to perform specified operation on a resource
 	 */
+	// TODO: enable annotation for performance, but breaks a lot of tests.
 	//@Transactional(readOnly = true)
 	boolean check(Userish userish, Object resource, Operation op) {
 		Object id = findID(resource)
@@ -64,11 +71,20 @@ class PermissionService {
 	/**
 	 * Throws an exception if user is not allowed to perform specified operation on a resource.
 	 */
+	// TODO: enable annotation for performance, but breaks a lot of tests.
 	//@Transactional(readOnly = true)
 	void verify(Userish userish, Object resource, Operation op) throws NotPermittedException {
 		if (!check(userish, resource, op)) {
-			SecUser user = userish?.resolveToUserish() as SecUser
-			throw new NotPermittedException(user?.username, resource.class.simpleName, findID(resource)?.toString(), op.id)
+			String name
+			Userish u = userish?.resolveToUserish()
+			if (u instanceof Key) {
+				Key k = u as Key
+				name = k.user?.username
+			} else if (u instanceof SecUser) {
+				SecUser s = u as SecUser
+				name = s.username
+			}
+			throw new NotPermittedException(name, resource.class.simpleName, findID(resource)?.toString(), op.id)
 		}
 	}
 
@@ -105,6 +121,7 @@ class PermissionService {
 	/**
 	 * List all Permissions that have not expired yet with some Operation right granted on a resource
 	 */
+	// TODO: enable annotation for performance, but breaks a lot of tests.
 	//@Transactional(readOnly = true)
 	List<Permission> getNonExpiredPermissionsTo(Object resource, Operation op) {
 		// TODO: find a way to do this in a single query instead of filtering results
@@ -581,7 +598,11 @@ class PermissionService {
 		return permission
 	}
 
+	@CompileStatic(value = TypeCheckingMode.SKIP)
 	private void sendEmailShareResource(Operation op, String username, EmailMessage msg) {
+		if (!EmailValidator.validate.call(msg.to)) {
+			return
+		}
 		if (op == Operation.STREAM_GET || op == Operation.CANVAS_GET || op == Operation.DASHBOARD_GET) {
 			// Users with email/password registration get an email
 			// send only one email for each read/get permission
@@ -595,14 +616,15 @@ class PermissionService {
 				],
 			])
 			mailService.sendMail {
-				from: msg.from
-				to: msg.to
-				subject: msg.subject()
-				html: content
+				from msg.from
+				to msg.to
+				subject msg.subject()
+				html content
 			}
 		}
 	}
 
+	@CompileStatic(value = TypeCheckingMode.SKIP)
 	Permission savePermissionAndSendEmailShareResourceInvite(SecUser apiUser, String username, Operation op, EmailMessage msg) {
 		SignupInvite invite = SignupInvite.findByUsername(username)
 		if (!invite) {
@@ -617,10 +639,10 @@ class PermissionService {
 				],
 			])
 			mailService.sendMail {
-				from: msg.from
-				to: invite.username
-				subject: msg.subject()
-				html: content
+				from msg.from
+				to invite.username
+				subject msg.subject()
+				html content
 			}
 			invite.sent = true
 			invite.save(failOnError: true, validate: true)
