@@ -72,7 +72,7 @@ class PermissionApiController {
 				)
 			} else {
 				if (EthereumAddressValidator.validate(username)) {
-					// create local ethereum account and grant permission
+					// get or create a user based on an ethereum account, and grant permission
 					newPermission = permissionService.savePermissionForEthereumAccount(username, apiUser, op, res)
 				} else {
 					// send share resource invite email and grant permission
