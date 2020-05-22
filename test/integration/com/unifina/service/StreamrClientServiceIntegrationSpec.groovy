@@ -1,6 +1,6 @@
 package com.unifina.service
 
-import com.streamr.api.client.StreamrClient
+import com.streamr.client.StreamrClient
 import com.streamr.client.authentication.ApiKeyAuthenticationMethod
 import com.unifina.domain.security.Key
 import com.unifina.domain.security.SecUser
@@ -8,14 +8,14 @@ import com.unifina.utils.testutils.FakeStreamrClient
 import spock.lang.Specification
 import spock.util.concurrent.PollingConditions
 
-class StreamrClientServiceSpec extends Specification {
+class StreamrClientServiceIntegrationSpec extends Specification {
 
 	SecUser user
 	StreamrClientService service
 
 	void setup() {
 		user = new SecUser(
-			username: "StreamrClientServiceSpec@streamr.invalid",
+			username: "StreamrClientServiceIntegrationSpec@streamr.invalid",
 			name: "user",
 			password: "password",
 		).save(failOnError: true)
@@ -71,4 +71,21 @@ class StreamrClientServiceSpec extends Specification {
 		instances.unique().size() == 1
 	}
 
+	void "getInstanceForThisEngineNode() uses sessionService to generate a sessionToken (instead of making an API call)"() {
+		service = new StreamrClientService() // use real client
+		service.sessionService = Spy(SessionService)
+		service.sessionService.keyValueStoreService = new KeyValueStoreService()
+		service.ethereumIntegrationKeyService = Spy(EthereumIntegrationKeyService)
+		StreamrClient client
+
+		when:
+		client = service.getInstanceForThisEngineNode()
+
+		then:
+		1 * service.ethereumIntegrationKeyService.getOrCreateFromEthereumAddress(_)
+		1 * service.sessionService.generateToken(_)
+
+		cleanup:
+		client?.disconnect()
+	}
 }
