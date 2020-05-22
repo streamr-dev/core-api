@@ -582,7 +582,7 @@ class PermissionService {
 	Permission savePermissionAndSendShareResourceEmail(SecUser apiUser, Key apiKey, Operation op, String targetUsername, EmailMessage msg) {
 		SecUser userish = SecUser.findByUsername(targetUsername)
 		Permission permission = savePermission(msg.resource, apiUser, apiKey, userish, op)
-		sendEmailShareResource(op, targetUsername, msg)
+		sendEmailShareResource(op, msg)
 		return permission
 	}
 
@@ -599,7 +599,7 @@ class PermissionService {
 	}
 
 	@CompileStatic(value = TypeCheckingMode.SKIP)
-	private void sendEmailShareResource(Operation op, String username, EmailMessage msg) {
+	private void sendEmailShareResource(Operation op, EmailMessage msg) {
 		if (!EmailValidator.validate.call(msg.to)) {
 			return
 		}
