@@ -4,6 +4,8 @@ import com.streamr.client.StreamrClient
 import com.streamr.client.authentication.ApiKeyAuthenticationMethod
 import com.unifina.domain.security.Key
 import com.unifina.domain.security.SecUser
+import com.unifina.security.BCryptPasswordEncoder
+import com.unifina.security.PasswordEncoder
 import com.unifina.utils.testutils.FakeStreamrClient
 import spock.lang.Specification
 import spock.util.concurrent.PollingConditions
@@ -51,6 +53,13 @@ class StreamrClientServiceIntegrationSpec extends Specification {
 	}
 
 	void "getInstanceForThisEngineNode() should return a singleton instance in a race condition"() {
+		service.ethereumIntegrationKeyService = Spy(EthereumIntegrationKeyService)
+		service.ethereumIntegrationKeyService.userService = Spy(UserService)
+		service.ethereumIntegrationKeyService.userService.passwordEncoder = new BCryptPasswordEncoder(5)
+		service.ethereumIntegrationKeyService.userService.permissionService = Spy(PermissionService)
+		service.ethereumIntegrationKeyService.userService.canvasService = Spy(CanvasService)
+		service.ethereumIntegrationKeyService.userService.streamService = Spy(StreamService)
+		service.ethereumIntegrationKeyService.permissionService = Spy(PermissionService)
 		List<StreamrClient> instances = Collections.synchronizedList([])
 		List<Thread> threads = []
 
@@ -76,6 +85,12 @@ class StreamrClientServiceIntegrationSpec extends Specification {
 		service.sessionService = Spy(SessionService)
 		service.sessionService.keyValueStoreService = new KeyValueStoreService()
 		service.ethereumIntegrationKeyService = Spy(EthereumIntegrationKeyService)
+		service.ethereumIntegrationKeyService.userService = Spy(UserService)
+		service.ethereumIntegrationKeyService.userService.passwordEncoder = new BCryptPasswordEncoder(5)
+		service.ethereumIntegrationKeyService.userService.permissionService = Spy(PermissionService)
+		service.ethereumIntegrationKeyService.userService.canvasService = Spy(CanvasService)
+		service.ethereumIntegrationKeyService.userService.streamService = Spy(StreamService)
+		service.ethereumIntegrationKeyService.permissionService = Spy(PermissionService)
 		StreamrClient client
 
 		when:
