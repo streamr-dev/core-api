@@ -391,9 +391,9 @@ class PermissionServiceSpec extends BeanMockingSpecification {
 		Operation op = Operation.CANVAS_GET
 		service.systemGrant(me, canvasOwned, Operation.CANVAS_SHARE)
 		when:
-		service.savePermissionAndCreateEthereumAccount(ethUserUsername, apiUser, op, res)
+		service.savePermissionForEthereumAccount(ethUserUsername, apiUser, op, res)
 		then:
-		1 * ethereumIntegrationKeyService.createEthereumUser(ethUserUsername) >> createdEthUser
+		1 * ethereumIntegrationKeyService.getOrCreateFromEthereumAddress(ethUserUsername) >> createdEthUser
 		0 * service.groovyPageRenderer.render(_) >> "<html>email</html>"
 		0 * service.mailService.sendMail { _ }
 		service.check(createdEthUser, canvasOwned, op)
