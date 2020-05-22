@@ -109,7 +109,7 @@ describe('Login API', () => {
         it('does not crash JVM when called repeatedly (CORE-1937)', async () => {
             const promises = []
 
-            for (let i=0; i<1000; i++) {
+            for (let i=0; i<2000; i++) {
                 const res = await fetch(`${URL}/login/challenge/0x9C6a0803A23e75bE09425714735a5cBF37A2aAE7`, {
                     method: 'POST',
                     headers: {
@@ -135,7 +135,7 @@ describe('Login API', () => {
                 }
             }).session.getSessionToken()
 
-            for (let i=0; i<1000; i++) {
+            for (let i=0; i<2000; i++) {
                 promises.push(new StreamrClient({
                         restUrl: URL,
                         auth: {
