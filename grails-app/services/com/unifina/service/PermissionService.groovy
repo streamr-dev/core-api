@@ -616,7 +616,7 @@ class PermissionService {
 				],
 			])
 			mailService.sendMail {
-				from msg.from
+				from grailsApplication.unifina.email.sender
 				to msg.to
 				subject msg.subject()
 				html content
@@ -639,7 +639,7 @@ class PermissionService {
 				],
 			])
 			mailService.sendMail {
-				from msg.from
+				from grailsApplication.unifina.email.sender
 				to invite.username
 				subject msg.subject()
 				html content
