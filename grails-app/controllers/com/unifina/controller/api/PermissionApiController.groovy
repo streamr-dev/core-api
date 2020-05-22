@@ -82,7 +82,6 @@ class PermissionApiController {
 			}
 		}
 		header("Location", request.forwardURI + "/" + newPermission.id)
-		response.status = 201
 		render(newPermission.toMap() as JSON)
 	}
 
