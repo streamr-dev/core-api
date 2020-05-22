@@ -104,48 +104,4 @@ describe('Login API', () => {
                 })
         }).timeout(TIMEOUT)
     })
-
-    describe('POST /api/v1/login/challenge', () => {
-        it('does not crash JVM when called repeatedly (CORE-1937)', async () => {
-            const promises = []
-
-            for (let i=0; i<2000; i++) {
-                const res = await fetch(`${URL}/login/challenge/0x9C6a0803A23e75bE09425714735a5cBF37A2aAE7`, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                })
-                assert(res.ok)
-            }
-        }).timeout(60 * 1000)
-    })
-
-    describe('POST /api/v1/login/response', () => {
-        // Use StreamrClient to respond to challenges correctly
-        it('does not crash JVM when called repeatedly (CORE-1937)', async () => {
-            const account = StreamrClient.generateEthereumAccount()
-            const promises = []
-
-            // Ensure the user exists, avoid race condition in creating it
-            await new StreamrClient({
-                restUrl: URL,
-                auth: {
-                    privateKey: account.privateKey,
-                }
-            }).session.getSessionToken()
-
-            for (let i=0; i<2000; i++) {
-                promises.push(new StreamrClient({
-                        restUrl: URL,
-                        auth: {
-                            privateKey: account.privateKey,
-                        }
-                    }).session.getSessionToken()
-                )
-            }
-
-            await Promise.all(promises)
-        }).timeout(60 * 1000)
-    })
 })
