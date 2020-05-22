@@ -54,20 +54,11 @@ class StreamApiController {
 			throw new NotFoundException("Stream", id)
 		}
 
-		Key key = request.apiKey
-		if (key != null) {
-			if (permissionService.check(key, stream, Permission.Operation.STREAM_GET)) {
-				render(stream.toMap() as JSON)
-			} else {
-				throw new NotPermittedException(null, "Stream", id, Permission.Operation.STREAM_GET.id)
-			}
+		Userish userish = request.apiKey ?: request.apiUser
+		if (permissionService.check(userish, stream, Permission.Operation.STREAM_GET)) {
+			render(stream.toMap() as JSON)
 		} else {
-			SecUser user = request.apiUser
-			if (permissionService.check(user, stream, Permission.Operation.STREAM_GET)) {
-				render(stream.toMap() as JSON)
-			} else {
-				throw new NotPermittedException(user?.username, "Stream", id, Permission.Operation.STREAM_GET.id)
-			}
+			throw new NotPermittedException(null, "Stream", id, Permission.Operation.STREAM_GET.id)
 		}
 	}
 
