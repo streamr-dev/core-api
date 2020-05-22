@@ -217,7 +217,7 @@ class PermissionApiControllerSpec extends ControllerSpecification {
 		) >> newPermission
 		0 * permissionService._
 		response.header("Location") == request.forwardURI + "/" + newPermission.id
-		response.status == 201
+		response.status == 200
 		response.json.user == me.username
 		response.json.operation == "canvas_get"
 	}
