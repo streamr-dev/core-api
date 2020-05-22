@@ -1,6 +1,6 @@
 #!/bin/bash
 
-set -e
+set -ex
 
 if ! curl --silent --fail --max-time 5 -o /dev/null http://online.swagger.io; then
        echo "Skipping Swagger validation since swagger.io is down" 1>&2
