@@ -88,16 +88,6 @@ class ChallengeServiceSpec extends Specification {
 		thrown ChallengeVerificationFailedException
 	}
 
-	void "creating a lot of challenges doesn't crash the JVM (CORE-1937)"() {
-		when:
-		for (int i=0; i<2000; i++) {
-			service.createChallenge("0x12345")
-		}
-
-		then:
-		2000 * keyValueStoreService.setWithExpiration(_, _, _)
-	}
-
 	private static String getChallengeText(String address) {
 		String textPart1 = "This is a challenge created by Streamr for address "
 		String textPart2 = " to prove private key ownership by signing this random data with it:\n\n"
