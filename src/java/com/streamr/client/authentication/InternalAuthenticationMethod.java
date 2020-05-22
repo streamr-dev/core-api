@@ -8,6 +8,7 @@ import com.unifina.service.SessionService;
 
 import java.io.IOException;
 import java.nio.charset.Charset;
+import java.util.Date;
 
 public class InternalAuthenticationMethod extends EthereumAuthenticationMethod {
 	private final SessionService sessionService;
@@ -22,22 +23,6 @@ public class InternalAuthenticationMethod extends EthereumAuthenticationMethod {
 	@Override
 	protected AuthenticationMethod.LoginResponse login(String restApiUrl) throws IOException {
 		final SessionToken sessionToken = sessionService.generateToken(user);
-
-		// TODO: replace when AuthenticationMethod.LoginResponse is visible to subclass
-		String jsonResponse = new Gson().toJson(sessionToken.toMap());
-		return this.parse(new okio.Buffer().writeString(jsonResponse, Charset.forName("UTF-8")));
-
-		/*
-		new AuthenticationMethod.LoginResponse() {
-			@Override
-			String getSessionToken() {
-				return sessionToken.getToken()
-			}
-			@Override
-			Date getExpiration() {
-				return sessionToken.getExpiration()
-			}
-		}
-		*/
+		return new AuthenticationMethod.LoginResponse(sessionToken.getToken(), sessionToken.getExpiration());
 	}
 }
