@@ -28,15 +28,6 @@ class StreamrApiRequest {
         return this
     }
 
-    withPrivateKey(privateKey) {
-        if (privateKey !== this.privateKey) {
-            // Private key be lazily resolved to sessionToken and set to this.authHeader in call()
-            this.privateKey = privateKey
-            delete this.authHeader
-        }
-        return this
-    }
-
     withSessionToken(sessionToken) {
         this.authHeader = `Bearer ${sessionToken}`
         return this
@@ -70,18 +61,6 @@ class StreamrApiRequest {
         }
 
         const apiUrl = url.resolve(this.baseUrl, this.relativePath) + this.queryParams
-
-        // Resolve privateKey to sessionToken if not set
-        if (this.privateKey && !this.authHeader) {
-            const tempClient = new StreamrClient({
-                restUrl: this.baseUrl,
-                auth: {
-                    privateKey: this.privateKey,
-                }
-            })
-            const sessionToken = await tempClient.session.getSessionToken()
-            this.authHeader = `Bearer ${sessionToken}`
-        }
 
         const headers = {
             'Accept': 'application/json'
@@ -236,6 +215,11 @@ class Streams {
             .withBody(body)
     }
 
+    get(id) {
+        return new StreamrApiRequest(this.options)
+            .methodAndPath('GET', `streams/${id}`)
+    }
+
     setFields(id, body) {
         return new StreamrApiRequest(this.options)
             .methodAndPath('POST', `streams/${id}/fields`)
@@ -291,6 +275,11 @@ class Streams {
                 user: targetUser,
                 operation,
             })
+    }
+
+    getOwnPermissions(id) {
+        return new StreamrApiRequest(this.options)
+            .methodAndPath('GET', `streams/${id}/permissions/me`)
     }
 
     async makePublic(id, apiKey) {
