@@ -2,6 +2,7 @@ const fetch = require('node-fetch')
 const url = require('url')
 const querystring = require('querystring')
 const FormData = require('form-data')
+const StreamrClient = require('streamr-client')
 
 class StreamrApiRequest {
     constructor(options) {
@@ -24,6 +25,15 @@ class StreamrApiRequest {
 
     withApiKey(apiKey) {
         this.authHeader = `Token ${apiKey}`
+        return this
+    }
+
+    withPrivateKey(privateKey) {
+        if (privateKey !== this.privateKey) {
+            // Private key be lazily resolved to sessionToken and set to this.authHeader in call()
+            this.privateKey = privateKey
+            delete this.authHeader
+        }
         return this
     }
 
@@ -51,7 +61,7 @@ class StreamrApiRequest {
         return this
     }
 
-    call() {
+    async call() {
         if (!this.method) {
             throw 'Method not set.'
         }
@@ -60,6 +70,18 @@ class StreamrApiRequest {
         }
 
         const apiUrl = url.resolve(this.baseUrl, this.relativePath) + this.queryParams
+
+        // Resolve privateKey to sessionToken if not set
+        if (this.privateKey && !this.authHeader) {
+            const tempClient = new StreamrClient({
+                restUrl: this.baseUrl,
+                auth: {
+                    privateKey: this.privateKey,
+                }
+            })
+            const sessionToken = await tempClient.session.getSessionToken()
+            this.authHeader = `Bearer ${sessionToken}`
+        }
 
         const headers = {
             'Accept': 'application/json'
@@ -250,6 +272,24 @@ class Streams {
             .withBody({
                 anonymous: true,
                 operation: 'stream_get'
+            })
+    }
+
+    grantPublic(id, operation) {
+        return new StreamrApiRequest(this.options)
+            .methodAndPath('POST', `streams/${id}/permissions`)
+            .withBody({
+                anonymous: true,
+                operation,
+            })
+    }
+
+    grant(id, targetUser, operation) {
+        return new StreamrApiRequest(this.options)
+            .methodAndPath('POST', `streams/${id}/permissions`)
+            .withBody({
+                user: targetUser,
+                operation,
             })
     }
 
