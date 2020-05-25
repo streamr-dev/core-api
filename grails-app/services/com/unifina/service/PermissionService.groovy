@@ -609,7 +609,7 @@ class PermissionService {
 			String content = groovyPageRenderer.render([
 				template: "/emails/email_share_resource",
 				model: [
-					sharer  : msg.from,
+					sharer  : msg.sharer,
 					resource: msg.resourceType(),
 					name    : msg.resourceName(),
 					link    : msg.link(),
@@ -632,7 +632,7 @@ class PermissionService {
 			String content = groovyPageRenderer.render([
 				template: "/emails/email_share_resource_invite",
 				model: [
-					sharer  : msg.from,
+					sharer  : msg.sharer,
 					resource: msg.resourceType(),
 					name    : msg.resourceName(),
 					invite  : invite,

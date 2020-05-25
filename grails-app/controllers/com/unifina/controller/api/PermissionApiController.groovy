@@ -55,7 +55,6 @@ class PermissionApiController {
 			newPermission = permissionService.saveAnonymousPermission(apiUser, apiKey, op, res)
 		} else {
 			String subjectTemplate = grailsApplication.config.unifina.email.shareInvite.subject
-			String from = grailsApplication.config.unifina.email.sender
 			String sharer = apiUser?.username
 			// incoming "username" is either SecUser.username or SignupInvite.username (possibly of a not yet created SignupInvite)
 			SecUser user = SecUser.findByUsername(username)

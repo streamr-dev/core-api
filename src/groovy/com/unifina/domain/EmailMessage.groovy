@@ -9,13 +9,13 @@ import groovy.transform.ToString
 @Validateable
 @ToString
 class EmailMessage {
-	String from
+	String sharer
 	String to
 	String subjectTemplate
 	Resource resource
 
-	EmailMessage(String from, String to, String subjectTemplate, Resource resource) {
-		this.from = from ?: "Streamr user"
+	EmailMessage(String sharer, String to, String subjectTemplate, Resource resource) {
+		this.sharer = sharer ?: "Streamr user"
 		this.to = to
 		this.subjectTemplate = subjectTemplate
 		this.resource = resource
@@ -41,7 +41,7 @@ class EmailMessage {
 	}
 
 	String subject() {
-		String subject = subjectTemplate.replace("%USER%", from)
+		String subject = subjectTemplate.replace("%USER%", sharer)
 		subject = subject.replace("%RESOURCE%", resourceType())
 		return subject
 	}
