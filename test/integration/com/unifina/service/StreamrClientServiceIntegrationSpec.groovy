@@ -1,106 +1,27 @@
 package com.unifina.service
 
 import com.streamr.client.StreamrClient
-import com.streamr.client.authentication.ApiKeyAuthenticationMethod
-import com.unifina.domain.security.Key
-import com.unifina.domain.security.SecUser
-import com.unifina.security.BCryptPasswordEncoder
-import com.unifina.security.PasswordEncoder
 import com.unifina.utils.testutils.FakeStreamrClient
-import spock.lang.Specification
-import spock.util.concurrent.PollingConditions
+import grails.test.spock.IntegrationSpec
 
-class StreamrClientServiceIntegrationSpec extends Specification {
+class StreamrClientServiceIntegrationSpec extends IntegrationSpec {
 
-	SecUser user
-	StreamrClientService service
+	StreamrClientService streamrClientService
 
-	void setup() {
-		user = new SecUser(
-			username: "StreamrClientServiceIntegrationSpec@streamr.invalid",
-			name: "user",
-			password: "password",
-		).save(failOnError: true)
+	void "getInstanceForThisEngineNode() is able to retrieve a sessionToken without making API calls"() {
+		streamrClientService.setClientClass(FakeStreamrClient)
 
-		service = new StreamrClientService(FakeStreamrClient)
-	}
-
-	void "getAuthenticatedInstance() should create a StreamrClient with ApiKeyAuthenticationMethod (user has one Key)"() {
-		new Key(name: "test", user: user).save(failOnError: true, validate: true)
-
-		when:
-		FakeStreamrClient client = (FakeStreamrClient) service.getAuthenticatedInstance(user.id)
-		then:
-		client.getOptionsPassedToConstructor().getAuthenticationMethod() instanceof ApiKeyAuthenticationMethod
-	}
-
-	void "getAuthenticatedInstance() should create a StreamrClient with ApiKeyAuthenticationMethod (user has several Keys)"() {
-		new Key(name: "test", user: user).save(failOnError: true, validate: true)
-		new Key(name: "test2", user: user).save(failOnError: true, validate: true)
-		assert Key.countByUser(user) == 2
-
-		when:
-		FakeStreamrClient client = (FakeStreamrClient) service.getAuthenticatedInstance(user.id)
-		then:
-		client.getOptionsPassedToConstructor().getAuthenticationMethod() instanceof ApiKeyAuthenticationMethod
-	}
-
-	void "getAuthenticatedInstance() should throw if a user doesn't have any Keys (illegal state)"() {
-		when:
-		service.getAuthenticatedInstance(user.id)
-		then:
-		thrown(IllegalStateException)
-	}
-
-	void "getInstanceForThisEngineNode() should return a singleton instance in a race condition"() {
-		service.ethereumIntegrationKeyService = Spy(EthereumIntegrationKeyService)
-		service.ethereumIntegrationKeyService.userService = Spy(UserService)
-		service.ethereumIntegrationKeyService.userService.passwordEncoder = new BCryptPasswordEncoder(5)
-		service.ethereumIntegrationKeyService.userService.permissionService = Spy(PermissionService)
-		service.ethereumIntegrationKeyService.userService.canvasService = Spy(CanvasService)
-		service.ethereumIntegrationKeyService.userService.streamService = Spy(StreamService)
-		service.ethereumIntegrationKeyService.permissionService = Spy(PermissionService)
-		List<StreamrClient> instances = Collections.synchronizedList([])
-		List<Thread> threads = []
-
-		// Create race condition
-		for (int i=0; i<50; i++) {
-			Thread t = Thread.start {
-				instances.add(service.getInstanceForThisEngineNode())
-			}
-			threads.add(t)
-		}
-
-		expect:
-		// Wait for all the above threads to finish
-		new PollingConditions().within(60) {
-			threads.find {it.isAlive()} == null
-		}
-		// All instances are the same
-		instances.unique().size() == 1
-	}
-
-	void "getInstanceForThisEngineNode() uses sessionService to generate a sessionToken (instead of making an API call)"() {
-		service = new StreamrClientService() // use real client
-		service.sessionService = Spy(SessionService)
-		service.sessionService.keyValueStoreService = new KeyValueStoreService()
-		service.ethereumIntegrationKeyService = Spy(EthereumIntegrationKeyService)
-		service.ethereumIntegrationKeyService.userService = Spy(UserService)
-		service.ethereumIntegrationKeyService.userService.passwordEncoder = new BCryptPasswordEncoder(5)
-		service.ethereumIntegrationKeyService.userService.permissionService = Spy(PermissionService)
-		service.ethereumIntegrationKeyService.userService.canvasService = Spy(CanvasService)
-		service.ethereumIntegrationKeyService.userService.streamService = Spy(StreamService)
-		service.ethereumIntegrationKeyService.permissionService = Spy(PermissionService)
 		StreamrClient client
+		String sessionToken
 
 		when:
-		client = service.getInstanceForThisEngineNode()
+		client = streamrClientService.getInstanceForThisEngineNode()
+		sessionToken = client.getSessionToken()
 
 		then:
-		1 * service.ethereumIntegrationKeyService.getOrCreateFromEthereumAddress(_)
-		1 * service.sessionService.generateToken(_)
+		sessionToken != null
 
 		cleanup:
-		client?.disconnect()
+		client?.disconnect() // the client shouldn't be connected, but defend against future changes
 	}
 }
