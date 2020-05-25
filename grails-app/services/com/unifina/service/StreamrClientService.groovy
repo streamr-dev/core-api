@@ -35,9 +35,12 @@ class StreamrClientService {
 	}
 
 	/**
-	 * Useful for testing, this constructor allows the StreamrClient class to be injected
+	 * Useful for testing, this method allows a StreamrClient class with some mocked methods to be passed
 	 */
-	StreamrClientService(Class<StreamrClient> streamrClientClass) {
+	void setClientClass(Class<StreamrClient> streamrClientClass) {
+		if (instanceForThisEngineNode) {
+			throw new IllegalStateException("StreamrClient instance has already been created. Call setClientClass() before calling getInstanceForThisEngineNode()!")
+		}
 		clientConstructor = streamrClientClass.getConstructor(StreamrClientOptions)
 	}
 
@@ -65,7 +68,7 @@ class StreamrClientService {
 	 */
 	StreamrClient getInstanceForThisEngineNode() {
 		// Mutex lock with timeout to avoid race conditions
-		if (instanceForThisEngineNodeLock.tryLock(1L, TimeUnit.SECONDS)) {
+		if (instanceForThisEngineNodeLock.tryLock(3L, TimeUnit.SECONDS)) {
 			try {
 				if (!instanceForThisEngineNode) {
 					String nodePrivateKey = MapTraversal.getString(Holders.getConfig(), "streamr.ethereum.nodePrivateKey")
