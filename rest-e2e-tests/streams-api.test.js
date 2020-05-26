@@ -244,7 +244,7 @@ describe('Streams API', () => {
         })
     })
 
-    describe('POST /api/v1/streams/:id/confirmCsvFileUpload', () => {
+    describe('POST /api/v1/streams/:id/confirmCsvFileUpload', function() {
         it('requires authentication', async () => {
             const response = await Streamr.api.v1.streams
                 .confirmCsvUpload(streamId, {
@@ -257,7 +257,7 @@ describe('Streams API', () => {
             await assertResponseIsError(response, 401, 'NOT_AUTHENTICATED')
         })
 
-        it('validates existence of Stream', async () => {
+        it('validates existence of Stream', async function() {
             const response = await Streamr.api.v1.streams
                 .confirmCsvUpload('non-existing-stream-id', {
                     fileUrl: '',
@@ -270,7 +270,7 @@ describe('Streams API', () => {
             await assertResponseIsError(response, 404, 'NOT_FOUND')
         })
 
-        it('requires WRITE permission on Stream', async () => {
+        it('requires WRITE permission on Stream', async function() {
             const response = await Streamr.api.v1.streams
                 .confirmCsvUpload(streamId, {
                     fileUrl: '',
@@ -283,10 +283,11 @@ describe('Streams API', () => {
             await assertResponseIsError(response, 403, 'FORBIDDEN', 'write')
         })
 
-        context('when called with valid body and permissions', () => {
+        context('when called with valid body and permissions', function() {
+            this.timeout(5000)
             let response
 
-            before(async () => {
+            before(async function() {
                 const uploadResponse = await Streamr.api.v1.streams
                     .uploadCsvFile(streamId, fs.createReadStream('./test-data/test-csv.csv'))
                     .withApiKey(API_KEY)
@@ -303,11 +304,11 @@ describe('Streams API', () => {
                     .call()
             })
 
-            it('responds with 200', () => {
+            it('responds with 200', function() {
                 assert.equal(response.status, 200)
             })
 
-            it('updates stream config fields', async () => {
+            it('updates stream config fields', async function() {
                 const json = await response.json()
                 assert.deepEqual(json.config.fields, [{
                     name: 'age',
