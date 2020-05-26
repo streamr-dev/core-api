@@ -71,9 +71,7 @@ grails.project.dependency.resolution = {
 		compile('org.eclipse.paho:org.eclipse.paho.client.mqttv3:1.1.1')
 		compile('org.antlr:ST4:4.0.8')
 		compile('org.postgresql:postgresql:9.4.1208.jre7')
-		compile('biz.paluch.redis:lettuce:3.5.0.Final') {
-			excludes('com.google.guava:guava:*')
-		}
+		compile('io.lettuce:lettuce-core:5.3.0.RELEASE')
 		compile('com.datastax.cassandra:cassandra-driver-core:3.7.1')
 		compile('com.google.code.findbugs:jsr305:3.0.2')
 		compile('org.jetbrains:annotations:17.0.0')
@@ -121,7 +119,7 @@ grails.project.dependency.resolution = {
 		runtime('commons-codec:commons-codec:1.6')
 		runtime('com.opencsv:opencsv:3.3')
 		runtime('de.ruedigermoeller:fst:2.56')
-		runtime('joda-time:joda-time:2.9.3')
+		runtime('joda-time:joda-time:2.10.6')
 
 		test('cglib:cglib:3.2.6')
 		test('org.gaul:httpbin:1.3.0') {

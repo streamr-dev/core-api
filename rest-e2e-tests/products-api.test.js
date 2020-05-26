@@ -55,7 +55,7 @@ describe('Products API', function() {
     let streamId2
     let streamId3
 
-    this.timeout(1000 * 20)
+    this.timeout(1000 * 25)
 
     before(async () => {
         streamId1 = await createStreamAndReturnId({
