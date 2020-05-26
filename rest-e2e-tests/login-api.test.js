@@ -1,7 +1,8 @@
 const assert = require('chai').assert
 const fetch = require('node-fetch')
+const StreamrClient = require('streamr-client')
 
-const URL = 'http://localhost:8081/streamr-core/api/v1'
+const URL = 'http://localhost/api/v1'
 
 const API_KEY = 'tester1-api-key'
 

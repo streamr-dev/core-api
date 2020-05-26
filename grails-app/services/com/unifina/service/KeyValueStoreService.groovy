@@ -1,34 +1,36 @@
 package com.unifina.service
 
-import com.lambdaworks.redis.RedisAsyncConnection
-import com.lambdaworks.redis.RedisClient
-import com.lambdaworks.redis.RedisURI
 import com.unifina.utils.MapTraversal
+import grails.compiler.GrailsCompileStatic
 import grails.util.Holders
+import io.lettuce.core.RedisClient
+import io.lettuce.core.RedisURI
+import io.lettuce.core.api.StatefulRedisConnection
 import org.springframework.util.Assert
 
+@GrailsCompileStatic
 class KeyValueStoreService {
 
 	private RedisClient redisClient
-	private RedisAsyncConnection<String, String> connection
+	StatefulRedisConnection<String, String> connection
 
 	String get(String key) {
-		return getConnection().get(key).get()
+		return getConnection().sync().get(key)
 	}
 
 	String setWithExpiration(String key, String value, int seconds) {
-		return getConnection().setex(key, seconds, value).get()
+		return getConnection().sync().setex(key, seconds, value)
 	}
 
 	void delete(String key) {
-		getConnection().del(key)
+		getConnection().sync().del(key)
 	}
 
 	void resetExpiration(String key, Date date) {
-		getConnection().expireat(key, date)
+		getConnection().sync().expireat(key, date)
 	}
 
-	private synchronized RedisAsyncConnection<String, String> getConnection() {
+	private synchronized StatefulRedisConnection<String, String> getConnection() {
 		if (connection == null) {
 			List<String> hosts = MapTraversal.getList(Holders.getConfig(), "streamr.redis.hosts");
 			String password = MapTraversal.getString(Holders.getConfig(), "streamr.redis.password");
@@ -44,7 +46,7 @@ class KeyValueStoreService {
 
 			log.info("Initializing RedisClient: " + redisURI)
 			redisClient = RedisClient.create(redisURI)
-			connection = redisClient.connectAsync()
+			connection = redisClient.connect();
 		}
 		return connection
 	}
