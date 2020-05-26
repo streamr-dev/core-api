@@ -41,9 +41,11 @@ class CanvasServiceSpec extends BeanMockingSpecification {
 		settings: [:],
 	]).toPrettyString()
 
+	PermissionService permissionService = Mock(PermissionService)
+
 	def setup() {
-		service.permissionService = mockBean(PermissionService, Mock(PermissionService))
-		service.permissionService.canWrite(_,_) >> true
+		service.permissionService = mockBean(PermissionService, permissionService)
+		service.permissionService.check(_, _, _) >> true
 		service.dashboardService = mockBean(DashboardService, Mock(DashboardService))
 		service.streamService = mockBean(StreamService, Mock(StreamService))
 		service.streamService.createStream(_,_,_) >> new Stream()
@@ -75,6 +77,7 @@ class CanvasServiceSpec extends BeanMockingSpecification {
 		)
 
 		myFirstCanvas.save(failOnError: true)
+		permissionService.systemGrantAll(me, myFirstCanvas)
 		canvases << myFirstCanvas
 
 		canvases << new Canvas(
@@ -127,7 +130,6 @@ class CanvasServiceSpec extends BeanMockingSpecification {
 
 	def "add example shared canvases"() {
 		setup:
-		service.permissionService = Mock(PermissionService)
 		Canvas c0 = new Canvas(
 			name: "example canvas",
 			exampleType: ExampleType.SHARE
@@ -142,14 +144,11 @@ class CanvasServiceSpec extends BeanMockingSpecification {
 		when:
 		service.addExampleCanvases(me, canvases)
 		then:
-		1 * service.permissionService.systemGrant(me, c0, Permission.Operation.READ)
-		1 * service.permissionService.systemGrant(me, c1, Permission.Operation.READ)
 		notThrown(RuntimeException)
 	}
 
 	def "add example copy canvases"() {
 		setup:
-		service.permissionService = Mock(PermissionService)
 		service.streamService = Mock(StreamService)
 		Canvas c0 = new Canvas(
 			name: "example canvas",
@@ -176,7 +175,6 @@ class CanvasServiceSpec extends BeanMockingSpecification {
 
 	def "add example copy and share canvases"() {
 		setup:
-		service.permissionService = Mock(PermissionService)
 		service.streamService = Mock(StreamService)
 		Canvas c0 = new Canvas(
 			name: "example canvas",
@@ -254,10 +252,10 @@ class CanvasServiceSpec extends BeanMockingSpecification {
 		def command = new SaveCanvasCommand(name: "my_new_canvas", modules: [])
 
 		when:
-		service.createNew(command, me)
+		Canvas canvas = service.createNew(command, me)
 
 		then:
-		1 * service.permissionService.systemGrantAll(me, _ as Canvas)
+		notThrown(RuntimeException)
 	}
 
 	def "createNew() creates a new adhoc Canvas when given adhoc setting"() {
@@ -578,25 +576,24 @@ class CanvasServiceSpec extends BeanMockingSpecification {
 
 	def "authorizedGetById() checks access to canvases from PermissionService and returns the canvas if allowed"() {
 		when:
-		def canvas = service.authorizedGetById(myFirstCanvas.id, me, Permission.Operation.READ)
+		def canvas = service.authorizedGetById(myFirstCanvas.id, me, Permission.Operation.CANVAS_GET)
 
 		then:
 		canvas == myFirstCanvas
-		1 * service.permissionService.check(me, myFirstCanvas, Permission.Operation.READ) >> true
 	}
 
 	def "authorizedGetById() checks access to canvases from PermissionService and throws exception if not allowed"() {
 		when:
-		service.authorizedGetById(myFirstCanvas.id, me, Permission.Operation.READ)
+		service.authorizedGetById(myFirstCanvas.id, me, Permission.Operation.CANVAS_GET)
 
 		then:
 		thrown NotPermittedException
-		1 * service.permissionService.check(me, myFirstCanvas, Permission.Operation.READ) >> false
+		1 * service.permissionService.check(me, myFirstCanvas, Permission.Operation.CANVAS_GET) >> false
 	}
 
 	def "authorizedGetById() throws NotFoundException if no canvas exists"() {
 		when:
-		service.authorizedGetById("foo", me, Permission.Operation.READ)
+		service.authorizedGetById("foo", me, Permission.Operation.CANVAS_GET)
 
 		then:
 		thrown(NotFoundException)
@@ -604,38 +601,41 @@ class CanvasServiceSpec extends BeanMockingSpecification {
 
 	def "authorizedGetModuleOnCanvas() checks access to canvas from PermissionService and returns the module if allowed"() {
 		when:
-		def module = service.authorizedGetModuleOnCanvas(myFirstCanvas.id, 1, null, me, Permission.Operation.READ)
+		def module = service.authorizedGetModuleOnCanvas(myFirstCanvas.id, 1, null, me, Permission.Operation.CANVAS_GET)
 
 		then:
 		module == JSON.parse(myFirstCanvas.json).modules.find {it.hash == 1}
-		1 * service.permissionService.check(me, myFirstCanvas, Permission.Operation.READ) >> true
 	}
 
 	def "authorizedGetModuleOnCanvas() checks access to dashboard from PermissionService and returns the module if allowed"() {
+		setup:
+		permissionService.systemRevoke(me, myFirstCanvas, Permission.Operation.CANVAS_GET)
+
 		Dashboard db = new Dashboard().save(validate: false, failOnError: true)
 		db.addToItems(new DashboardItem(canvas: myFirstCanvas, module: 1, title: "foo"))
 		db.save(validate: false)
 
 		when:
-		def module = service.authorizedGetModuleOnCanvas(myFirstCanvas.id, 1, db.id, me, Permission.Operation.READ)
+		def module = service.authorizedGetModuleOnCanvas(myFirstCanvas.id, 1, db.id, me, Permission.Operation.CANVAS_GET)
 
 		then:
 		module == JSON.parse(myFirstCanvas.json).modules.find {it.hash == 1}
-		1 * service.permissionService.check(me, myFirstCanvas, Permission.Operation.READ) >> false
-		1 * service.dashboardService.authorizedGetById(db.id, me, Permission.Operation.READ) >> db
+		1 * service.permissionService.check(me, myFirstCanvas, Permission.Operation.CANVAS_GET) >> false
+		1 * service.dashboardService.authorizedGetById(db.id, me, Permission.Operation.CANVAS_GET) >> db
 	}
 
 	def "authorizedGetModuleOnCanvas() checks access to dashboard from PermissionService and throws exception if the canvas doesn't match the dashboard item"() {
+		setup:
 		Dashboard db = new Dashboard().save(validate: false, failOnError: true)
 		db.addToItems(new DashboardItem(canvas: canvases.find {it != myFirstCanvas}, module: 1, title: "foo"))
 		db.save(validate: false)
 
 		when:
-		service.authorizedGetModuleOnCanvas(myFirstCanvas.id, 1, db.id, me, Permission.Operation.READ)
+		service.authorizedGetModuleOnCanvas(myFirstCanvas.id, 1, db.id, me, Permission.Operation.CANVAS_GET)
 
 		then:
-		1 * service.permissionService.check(me, myFirstCanvas, Permission.Operation.READ) >> false
-		1 * service.dashboardService.authorizedGetById(db.id, me, Permission.Operation.READ) >> db
+		1 * service.permissionService.check(me, myFirstCanvas, Permission.Operation.CANVAS_GET) >> false
+		1 * service.dashboardService.authorizedGetById(db.id, me, Permission.Operation.CANVAS_GET) >> db
 		thrown(NotPermittedException)
 	}
 
@@ -647,47 +647,45 @@ class CanvasServiceSpec extends BeanMockingSpecification {
 		service.dashboardService = Mock(DashboardService)
 
 		when:
-		service.authorizedGetModuleOnCanvas(myFirstCanvas.id, 1, db.id, me, Permission.Operation.READ)
+		service.authorizedGetModuleOnCanvas(myFirstCanvas.id, 1, db.id, me, Permission.Operation.CANVAS_GET)
 
 		then:
-		1 * service.permissionService.check(me, myFirstCanvas, Permission.Operation.READ) >> false
-		1 * service.dashboardService.authorizedGetById(db.id, me, Permission.Operation.READ) >> db
+		1 * service.dashboardService.authorizedGetById(db.id, me, Permission.Operation.CANVAS_GET) >> db
 		thrown(NotPermittedException)
 	}
 
 	def "authorizedGetModuleOnCanvas() checks access to canvases from PermissionService and throws exception if not allowed and no dashboard given"() {
 		when:
-		service.authorizedGetModuleOnCanvas(myFirstCanvas.id, 1, null, me, Permission.Operation.READ)
+		service.authorizedGetModuleOnCanvas(myFirstCanvas.id, 1, null, me, Permission.Operation.CANVAS_GET)
 
 		then:
-		1 * service.permissionService.check(me, myFirstCanvas, Permission.Operation.READ) >> false
+		1 * service.permissionService.check(me, myFirstCanvas, Permission.Operation.CANVAS_GET) >> false
 		thrown(NotPermittedException)
 	}
 
 	def "authorizedGetModuleOnCanvas() throws NotFoundException if no canvas exists"() {
 		when:
-		service.authorizedGetModuleOnCanvas("foo", 1, null, me, Permission.Operation.READ)
+		service.authorizedGetModuleOnCanvas("foo", 1, null, me, Permission.Operation.CANVAS_GET)
 		then:
 		thrown(NotFoundException)
 	}
 
 	def "authorizedGetModuleOnCanvas() throws NotFoundException if no module exists"() {
 		when:
-		service.authorizedGetModuleOnCanvas(myFirstCanvas.id, 999, null, me, Permission.Operation.READ)
+		service.authorizedGetModuleOnCanvas(myFirstCanvas.id, 999, null, me, Permission.Operation.CANVAS_GET)
 
 		then:
 		thrown(NotFoundException)
-		1 * service.permissionService.check(me, myFirstCanvas, Permission.Operation.READ) >> true
 	}
 
 	def "authorizedGetModuleOnCanvas() throws NotFoundException if no dashboard exists"() {
 		when:
-		service.authorizedGetModuleOnCanvas(myFirstCanvas.id, 1, "1", me, Permission.Operation.READ)
+		service.authorizedGetModuleOnCanvas(myFirstCanvas.id, 1, "1", me, Permission.Operation.CANVAS_GET)
 
 		then:
 		thrown(NotFoundException)
-		1 * service.permissionService.check(me, myFirstCanvas, Permission.Operation.READ) >> false
-		1 * service.dashboardService.authorizedGetById("1", me, Permission.Operation.READ) >> { throw new NotFoundException("thrown by mock") }
+		1 * service.permissionService.check(me, myFirstCanvas, Permission.Operation.CANVAS_GET) >> false
+		1 * service.dashboardService.authorizedGetById("1", me, Permission.Operation.CANVAS_GET) >> { throw new NotFoundException("thrown by mock") }
 	}
 
 	def "getCanvasURL() returns a link for the canvas"() {

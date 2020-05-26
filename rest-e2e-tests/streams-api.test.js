@@ -119,7 +119,7 @@ describe('Streams API', () => {
             await assertResponseIsError(response, 404, 'NOT_FOUND')
         })
 
-        it('requires WRITE permission on Stream', async () => {
+        it('requires stream_edit permission on Stream', async () => {
             const response = await Streamr.api.v1.streams
                 .setFields(streamId, [
                     {
@@ -134,7 +134,7 @@ describe('Streams API', () => {
                 .withApiKey(API_KEY_2)
                 .call()
 
-            await assertResponseIsError(response, 403, 'FORBIDDEN', 'write')
+            await assertResponseIsError(response, 403, 'FORBIDDEN', 'stream_edit')
         })
 
         context('when called with valid body and permissions', () => {
@@ -194,13 +194,13 @@ describe('Streams API', () => {
             await assertResponseIsError(response, 404, 'NOT_FOUND')
         })
 
-        it('requires WRITE permission on Stream', async () => {
+        it('requires stream_publish permission on Stream', async () => {
             const response = await Streamr.api.v1.streams
                 .uploadCsvFile(streamId, fs.createReadStream('./test-data/test-csv.csv'))
                 .withApiKey(API_KEY_2)
                 .call()
 
-            await assertResponseIsError(response, 403, 'FORBIDDEN', 'write')
+            await assertResponseIsError(response, 403, 'FORBIDDEN', 'stream_publish')
         })
 
         it('validates that file is CSV', async () => {
@@ -270,7 +270,7 @@ describe('Streams API', () => {
             await assertResponseIsError(response, 404, 'NOT_FOUND')
         })
 
-        it('requires WRITE permission on Stream', async function() {
+        it('requires stream_publish permission on Stream', async function() {
             const response = await Streamr.api.v1.streams
                 .confirmCsvUpload(streamId, {
                     fileUrl: '',
@@ -280,7 +280,7 @@ describe('Streams API', () => {
                 .withApiKey(API_KEY_2)
                 .call()
 
-            await assertResponseIsError(response, 403, 'FORBIDDEN', 'write')
+            await assertResponseIsError(response, 403, 'FORBIDDEN', 'stream_publish')
         })
 
         context('when called with valid body and permissions', function() {

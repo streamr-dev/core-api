@@ -79,18 +79,30 @@ class FreeProductServiceSpec extends Specification {
 		when:
 		service.deployFreeProduct(freeProduct)
 		then:
-		1 * permissionService.systemGrantAnonymousAccess(freeProduct)
+		1 * permissionService.systemGrantAnonymousAccess(freeProduct, Permission.Operation.PRODUCT_GET)
+		1 * permissionService.systemGrantAnonymousAccess(s1, Permission.Operation.STREAM_GET)
+		1 * permissionService.systemGrantAnonymousAccess(s1, Permission.Operation.STREAM_SUBSCRIBE)
+		1 * permissionService.systemGrantAnonymousAccess(s2, Permission.Operation.STREAM_GET)
+		1 * permissionService.systemGrantAnonymousAccess(s2, Permission.Operation.STREAM_SUBSCRIBE)
+		1 * permissionService.systemGrantAnonymousAccess(s3, Permission.Operation.STREAM_GET)
+		1 * permissionService.systemGrantAnonymousAccess(s3, Permission.Operation.STREAM_SUBSCRIBE)
+		0 * permissionService._
 	}
 
-	void "deployFreeProduct grants anonymous READ access to the streams of Product"() {
+	void "deployFreeProduct grants anonymous stream_get and stream_subscribe access to the streams of Product"() {
 		def permissionService = service.permissionService = Mock(PermissionService)
 
 		when:
 		service.deployFreeProduct(freeProduct)
 		then:
-		1 * permissionService.systemGrantAnonymousAccess(s1, Permission.Operation.READ)
-		1 * permissionService.systemGrantAnonymousAccess(s2, Permission.Operation.READ)
-		1 * permissionService.systemGrantAnonymousAccess(s3, Permission.Operation.READ)
+		1 * permissionService.systemGrantAnonymousAccess(freeProduct, Permission.Operation.PRODUCT_GET)
+		1 * permissionService.systemGrantAnonymousAccess(s1, Permission.Operation.STREAM_GET)
+		1 * permissionService.systemGrantAnonymousAccess(s1, Permission.Operation.STREAM_SUBSCRIBE)
+		1 * permissionService.systemGrantAnonymousAccess(s2, Permission.Operation.STREAM_GET)
+		1 * permissionService.systemGrantAnonymousAccess(s2, Permission.Operation.STREAM_SUBSCRIBE)
+		1 * permissionService.systemGrantAnonymousAccess(s3, Permission.Operation.STREAM_GET)
+		1 * permissionService.systemGrantAnonymousAccess(s3, Permission.Operation.STREAM_SUBSCRIBE)
+		0 * permissionService._
 	}
 
 	void "undeployFreeProduct throws ProductNotFreeException when given paid Product"() {
@@ -128,10 +140,17 @@ class FreeProductServiceSpec extends Specification {
 		when:
 		service.undeployFreeProduct(freeProduct)
 		then:
-		1 * permissionService.systemRevokeAnonymousAccess(freeProduct)
+		1 * permissionService.systemRevokeAnonymousAccess(freeProduct, Permission.Operation.PRODUCT_GET)
+		1 * permissionService.systemRevokeAnonymousAccess(s1, Permission.Operation.STREAM_GET)
+		1 * permissionService.systemRevokeAnonymousAccess(s1, Permission.Operation.STREAM_SUBSCRIBE)
+		1 * permissionService.systemRevokeAnonymousAccess(s2, Permission.Operation.STREAM_GET)
+		1 * permissionService.systemRevokeAnonymousAccess(s2, Permission.Operation.STREAM_SUBSCRIBE)
+		1 * permissionService.systemRevokeAnonymousAccess(s3, Permission.Operation.STREAM_GET)
+		1 * permissionService.systemRevokeAnonymousAccess(s3, Permission.Operation.STREAM_SUBSCRIBE)
+		0 * permissionService._
 	}
 
-	void "undeployFreeProduct revokes anonymous READ access to the streams of Product"() {
+	void "undeployFreeProduct revokes anonymous stream_get and stream_subscribe access to the streams of Product"() {
 		def permissionService = service.permissionService = Mock(PermissionService)
 
 		freeProduct.state = Product.State.DEPLOYED
@@ -140,8 +159,13 @@ class FreeProductServiceSpec extends Specification {
 		when:
 		service.undeployFreeProduct(freeProduct)
 		then:
-		1 * permissionService.systemRevokeAnonymousAccess(s1, Permission.Operation.READ)
-		1 * permissionService.systemRevokeAnonymousAccess(s2, Permission.Operation.READ)
-		1 * permissionService.systemRevokeAnonymousAccess(s3, Permission.Operation.READ)
+		1 * permissionService.systemRevokeAnonymousAccess(freeProduct, Permission.Operation.PRODUCT_GET)
+		1 * permissionService.systemRevokeAnonymousAccess(s1, Permission.Operation.STREAM_GET)
+		1 * permissionService.systemRevokeAnonymousAccess(s1, Permission.Operation.STREAM_SUBSCRIBE)
+		1 * permissionService.systemRevokeAnonymousAccess(s2, Permission.Operation.STREAM_GET)
+		1 * permissionService.systemRevokeAnonymousAccess(s2, Permission.Operation.STREAM_SUBSCRIBE)
+		1 * permissionService.systemRevokeAnonymousAccess(s3, Permission.Operation.STREAM_GET)
+		1 * permissionService.systemRevokeAnonymousAccess(s3, Permission.Operation.STREAM_SUBSCRIBE)
+		0 * permissionService._
 	}
 }

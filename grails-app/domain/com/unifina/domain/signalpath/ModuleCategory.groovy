@@ -6,7 +6,6 @@ import grails.persistence.Entity
 class ModuleCategory implements Comparable {
 	String name
 	int sortOrder
-	ModulePackage modulePackage
 
 	SortedSet modules
 	SortedSet subcategories
@@ -19,7 +18,6 @@ class ModuleCategory implements Comparable {
 
 	static constraints = {
 		parent(nullable:true)
-		modulePackage(nullable:true)
 		hide(nullable:true)
 	}
 

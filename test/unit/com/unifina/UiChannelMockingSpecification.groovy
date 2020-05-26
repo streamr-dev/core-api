@@ -55,8 +55,8 @@ class UiChannelMockingSpecification extends ModuleTestingSpecification {
 		PermissionService permissionService = Mock(PermissionService)
 		mockBean(PermissionService, permissionService)
 
-		permissionService.canRead(_, _) >> true
-		permissionService.canWrite(_, _) >> true
-		permissionService.canShare(_, _) >> true
+		permissionService.check(_, _, _) >> true
+		permissionService.check(_, _, _) >> true
+		permissionService.check(_, _, _) >> true
 	}
 }

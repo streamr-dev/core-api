@@ -244,10 +244,10 @@ class DataUnionJoinRequestServiceIntegrationSpec extends Specification {
 		then:
 		1 * service.ethereumService.fetchJoinPartStreamID(contractAddress) >> joinPartStream.id
 		1 * streamrClientMock.publish(_, [type: "part", addresses: [r.memberAddress]])
-		1 * service.permissionService.systemRevoke(me, s1, Permission.Operation.WRITE)
-		1 * service.permissionService.systemRevoke(me, s2, Permission.Operation.WRITE)
-		1 * service.permissionService.systemRevoke(me, s3, Permission.Operation.WRITE)
-		1 * service.permissionService.systemRevoke(me, s4, Permission.Operation.WRITE)
+		1 * service.permissionService.systemRevoke(me, s1, Permission.Operation.STREAM_PUBLISH)
+		1 * service.permissionService.systemRevoke(me, s2, Permission.Operation.STREAM_PUBLISH)
+		1 * service.permissionService.systemRevoke(me, s3, Permission.Operation.STREAM_PUBLISH)
+		1 * service.permissionService.systemRevoke(me, s4, Permission.Operation.STREAM_PUBLISH)
 		DataUnionJoinRequest.findById(r.id) == null
 	}
 

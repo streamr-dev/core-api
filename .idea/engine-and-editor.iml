@@ -45,7 +45,6 @@
     </content>
     <orderEntry type="jdk" jdkName="1.8" jdkType="JavaSDK" />
     <orderEntry type="sourceFolder" forTests="false" />
-    <orderEntry type="module" module-name="engine-and-editor-grailsPlugins" />
     <orderEntry type="module-library" exported="">
       <library name="Grails User Library (engine-and-editor)">
         <CLASSES>
@@ -151,11 +150,6 @@
           <root url="jar://$MAVEN_REPOSITORY$/org/ow2/asm/asm-tree/5.0.3/asm-tree-5.0.3.jar!/" />
           <root url="jar://$MAVEN_REPOSITORY$/org/ow2/asm/asm-analysis/5.0.3/asm-analysis-5.0.3.jar!/" />
           <root url="jar://$MAVEN_REPOSITORY$/org/ow2/asm/asm-commons/5.0.3/asm-commons-5.0.3.jar!/" />
-          <root url="jar://$MAVEN_REPOSITORY$/io/netty/netty-codec/4.0.37.Final/netty-codec-4.0.37.Final.jar!/" />
-          <root url="jar://$MAVEN_REPOSITORY$/io/netty/netty-handler/4.0.37.Final/netty-handler-4.0.37.Final.jar!/" />
-          <root url="jar://$MAVEN_REPOSITORY$/io/netty/netty-buffer/4.0.37.Final/netty-buffer-4.0.37.Final.jar!/" />
-          <root url="jar://$MAVEN_REPOSITORY$/io/netty/netty-transport/4.0.37.Final/netty-transport-4.0.37.Final.jar!/" />
-          <root url="jar://$MAVEN_REPOSITORY$/io/netty/netty-common/4.0.37.Final/netty-common-4.0.37.Final.jar!/" />
           <root url="jar://$MAVEN_REPOSITORY$/com/amazonaws/aws-java-sdk-cognitoidentity/1.11.294/aws-java-sdk-cognitoidentity-1.11.294.jar!/" />
           <root url="jar://$MAVEN_REPOSITORY$/com/amazonaws/aws-java-sdk-events/1.11.294/aws-java-sdk-events-1.11.294.jar!/" />
           <root url="jar://$MAVEN_REPOSITORY$/com/amazonaws/aws-java-sdk-logs/1.11.294/aws-java-sdk-logs-1.11.294.jar!/" />
@@ -166,8 +160,6 @@
           <root url="jar://$MAVEN_REPOSITORY$/com/amazonaws/aws-java-sdk-dynamodb/1.11.294/aws-java-sdk-dynamodb-1.11.294.jar!/" />
           <root url="jar://$MAVEN_REPOSITORY$/com/amazonaws/aws-java-sdk-ec2/1.11.294/aws-java-sdk-ec2-1.11.294.jar!/" />
           <root url="jar://$MAVEN_REPOSITORY$/com/amazonaws/aws-java-sdk-elastictranscoder/1.11.294/aws-java-sdk-elastictranscoder-1.11.294.jar!/" />
-          <root url="jar://$MAVEN_REPOSITORY$/io/reactivex/rxjava/1.1.6/rxjava-1.1.6.jar!/" />
-          <root url="jar://$MAVEN_REPOSITORY$/biz/paluch/redis/lettuce/3.5.0.Final/lettuce-3.5.0.Final.jar!/" />
           <root url="jar://$MAVEN_REPOSITORY$/org/postgresql/postgresql/9.4.1208.jre7/postgresql-9.4.1208.jre7.jar!/" />
           <root url="jar://$MAVEN_REPOSITORY$/org/antlr/antlr-runtime/3.5.2/antlr-runtime-3.5.2.jar!/" />
           <root url="jar://$MAVEN_REPOSITORY$/org/antlr/ST4/4.0.8/ST4-4.0.8.jar!/" />
@@ -329,7 +321,6 @@
           <root url="jar://$USER_HOME$/.sdkman/candidates/grails/2.5.6/lib/org.aspectj/aspectjrt/jars/aspectjrt-1.8.7.jar!/" />
           <root url="jar://$USER_HOME$/.sdkman/candidates/grails/2.5.6/lib/org.aspectj/aspectjweaver/jars/aspectjweaver-1.8.7.jar!/" />
           <root url="jar://$MAVEN_REPOSITORY$/com/sun/mail/javax.mail/1.5.1/javax.mail-1.5.1.jar!/" />
-          <root url="jar://$MAVEN_REPOSITORY$/joda-time/joda-time/2.9.3/joda-time-2.9.3.jar!/" />
           <root url="jar://$MAVEN_REPOSITORY$/de/ruedigermoeller/fst/2.56/fst-2.56.jar!/" />
           <root url="jar://$MAVEN_REPOSITORY$/com/opencsv/opencsv/3.3/opencsv-3.3.jar!/" />
           <root url="jar://$USER_HOME$/.sdkman/candidates/grails/2.5.6/lib/commons-codec/commons-codec/jars/commons-codec-1.6.jar!/" />
@@ -374,7 +365,6 @@
           <root url="jar://$MAVEN_REPOSITORY$/org/apache/logging/log4j/log4j-core/2.7/log4j-core-2.7.jar!/" />
           <root url="jar://$MAVEN_REPOSITORY$/org/jetbrains/kotlin/kotlin-stdlib-common/1.2.60/kotlin-stdlib-common-1.2.60.jar!/" />
           <root url="jar://$MAVEN_REPOSITORY$/org/jetbrains/kotlin/kotlin-stdlib/1.2.60/kotlin-stdlib-1.2.60.jar!/" />
-          <root url="jar://$MAVEN_REPOSITORY$/org/reactivestreams/reactive-streams/1.0.2/reactive-streams-1.0.2.jar!/" />
           <root url="jar://$MAVEN_REPOSITORY$/io/reactivex/rxjava2/rxjava/2.2.2/rxjava-2.2.2.jar!/" />
           <root url="jar://$MAVEN_REPOSITORY$/com/github/jnr/jnr-enxio/0.19/jnr-enxio-0.19.jar!/" />
           <root url="jar://$MAVEN_REPOSITORY$/com/github/jnr/jnr-unixsocket/0.21/jnr-unixsocket-0.21.jar!/" />
@@ -427,6 +417,16 @@
           <root url="jar://$MAVEN_REPOSITORY$/org/springframework/security/spring-security-core/3.2.9.RELEASE/spring-security-core-3.2.9.RELEASE.jar!/" />
           <root url="jar://$MAVEN_REPOSITORY$/org/java-websocket/Java-WebSocket/1.4.1/Java-WebSocket-1.4.1.jar!/" />
           <root url="jar://$MAVEN_REPOSITORY$/com/streamr/client/1.4.0/client-1.4.0.jar!/" />
+          <root url="jar://$MAVEN_REPOSITORY$/io/netty/netty-buffer/4.1.49.Final/netty-buffer-4.1.49.Final.jar!/" />
+          <root url="jar://$MAVEN_REPOSITORY$/io/netty/netty-codec/4.1.49.Final/netty-codec-4.1.49.Final.jar!/" />
+          <root url="jar://$MAVEN_REPOSITORY$/io/lettuce/lettuce-core/5.3.0.RELEASE/lettuce-core-5.3.0.RELEASE.jar!/" />
+          <root url="jar://$MAVEN_REPOSITORY$/io/netty/netty-common/4.1.49.Final/netty-common-4.1.49.Final.jar!/" />
+          <root url="jar://$MAVEN_REPOSITORY$/io/netty/netty-handler/4.1.49.Final/netty-handler-4.1.49.Final.jar!/" />
+          <root url="jar://$MAVEN_REPOSITORY$/io/netty/netty-resolver/4.1.49.Final/netty-resolver-4.1.49.Final.jar!/" />
+          <root url="jar://$MAVEN_REPOSITORY$/io/projectreactor/reactor-core/3.3.5.RELEASE/reactor-core-3.3.5.RELEASE.jar!/" />
+          <root url="jar://$MAVEN_REPOSITORY$/org/reactivestreams/reactive-streams/1.0.3/reactive-streams-1.0.3.jar!/" />
+          <root url="jar://$MAVEN_REPOSITORY$/io/netty/netty-transport/4.1.49.Final/netty-transport-4.1.49.Final.jar!/" />
+          <root url="jar://$MAVEN_REPOSITORY$/joda-time/joda-time/2.10.6/joda-time-2.10.6.jar!/" />
         </CLASSES>
         <JAVADOC />
         <SOURCES>
@@ -475,5 +475,6 @@
         <jarDirectory url="file://$MODULE_DIR$/lib" recursive="false" />
       </library>
     </orderEntry>
+    <orderEntry type="module" module-name="engine-and-editor-grailsPlugins" />
   </component>
 </module>

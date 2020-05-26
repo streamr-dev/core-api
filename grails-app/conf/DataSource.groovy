@@ -41,6 +41,8 @@ environments {
     }
     test {
         dataSource {
+			//logSql = true
+			formatSql = true
 			username = System.getProperty('streamr.database.user', 'root')
 			password = System.getProperty('streamr.database.password', 'password')
 			url = "jdbc:mysql://${System.getProperty('streamr.database.host', '127.0.0.1:3306')}/${System.getProperty('streamr.database.name', 'core_test')}?useLegacyDatetimeCode=false"

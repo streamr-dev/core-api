@@ -3,6 +3,7 @@ package com.unifina.api
 import com.unifina.domain.data.Stream
 import com.unifina.domain.marketplace.Category
 import com.unifina.domain.marketplace.Product
+import com.unifina.domain.security.Permission
 import com.unifina.domain.security.SecUser
 import com.unifina.service.PermissionService
 import spock.lang.Specification
@@ -199,7 +200,7 @@ class UpdateProductCommandSpec extends Specification {
 		when:
 		command.updateProduct(product, new SecUser(), permissionService)
 		then:
-		1 * permissionService.canShare(_, product) >> false
+		1 * permissionService.check(_, product, Permission.Operation.PRODUCT_SHARE) >> false
 		thrown(FieldCannotBeUpdatedException)
 	}
 
@@ -215,7 +216,7 @@ class UpdateProductCommandSpec extends Specification {
 		when:
 		command.updateProduct(product, new SecUser(), permissionService)
 		then:
-		1 * permissionService.canShare(_, product) >> true
+		1 * permissionService.check(_, product, Permission.Operation.PRODUCT_SHARE) >> true
 		product.pendingChanges == '''{"name":"new name","description":"new description"}'''
 	}
 
@@ -230,6 +231,6 @@ class UpdateProductCommandSpec extends Specification {
 		when:
 		command.updateProduct(product, new SecUser(), permissionService)
 		then:
-		0 * permissionService.canShare(_, product)
+		0 * permissionService.check(_, product, Permission.Operation.PRODUCT_SHARE)
 	}
 }
