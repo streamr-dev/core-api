@@ -15,7 +15,7 @@
     "ethereumjs-util": "6.2.0",
     "form-data": "3.0.0",
     "keythereum": "1.0.4",
-    "mocha": "6.2.2",
+    "mocha": "7.2.0",
     "node-fetch": "2.6.0",
     "sleep-promise": "8.0.1",
     "streamr-client": "3.1.3",
