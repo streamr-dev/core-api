@@ -1,5 +1,6 @@
 package com.unifina.service
 
+import com.unifina.api.NotFoundException
 import com.unifina.api.NotPermittedException
 import com.unifina.domain.EmailMessage
 import com.unifina.domain.Resource
@@ -674,17 +675,23 @@ class PermissionService {
 	}
 
 	@Transactional(readOnly = true)
-	Permission findPermission(Resource resource, SecUser apiUser, Key apiKey) {
+	Permission findPermission(Long permissionId, Resource resource, SecUser apiUser, Key apiKey) {
 		Object res = resource.load(apiUser, apiKey, true)
 		List<Permission> permissions = getPermissionsTo(res)
-		Permission p = permissions.find { it.id == resource.id }
+		Permission p = permissions.find { it.id == permissionId }
+		if (!p) {
+			throw new NotFoundException("Permission not found", resource.type(), permissionId?.toString())
+		}
 		return p
 	}
 
-	void deletePermission(Resource resource, SecUser apiUser, Key apiKey) {
+	void deletePermission(Long permissionId, Resource resource, SecUser apiUser, Key apiKey) {
 		Object res = resource.load(apiUser, apiKey, true)
 		List<Permission> permissions = getPermissionsTo(res)
-		Permission p = permissions.find { it.id == resource.id }
+		Permission p = permissions.find { it.id == permissionId }
+		if (!p) {
+			throw new NotFoundException("Permission not found", resource.type(), permissionId?.toString())
+		}
 		systemRevoke(p)
 	}
 }

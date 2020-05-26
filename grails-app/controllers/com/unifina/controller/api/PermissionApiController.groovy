@@ -85,16 +85,16 @@ class PermissionApiController {
 	}
 
 	@StreamrApi(authenticationLevel = AuthLevel.NONE)
-	def show(String id) {
+	def show(Long id) {
 		Resource resource = new Resource(params.resourceClass, params.resourceId)
-		Permission p = permissionService.findPermission(resource, request.apiUser, request.apiKey)
+		Permission p = permissionService.findPermission(id, resource, request.apiUser, request.apiKey)
 		render(p.toMap() as JSON)
 	}
 
 	@StreamrApi(authenticationLevel = AuthLevel.NONE)
-	def delete(String id) {
+	def delete(Long id) {
 		Resource resource = new Resource(params.resourceClass, params.resourceId)
-		permissionService.deletePermission(resource, request.apiUser, request.apiKey)
+		permissionService.deletePermission(id, resource, request.apiUser, request.apiKey)
 		render(status: 204)
 	}
 

@@ -38,6 +38,19 @@ class Resource {
 		this.id = id
 	}
 
+	String type() {
+		if (Canvas.isAssignableFrom(clazz)) {
+			return "Canvas"
+		} else if (Dashboard.isAssignableFrom(clazz)) {
+			return "Dashboard"
+		} else if (Product.isAssignableFrom(clazz)) {
+			return "Product"
+		} else if (Stream.isAssignableFrom(clazz)) {
+			return "Stream"
+		}
+		return "Unknown"
+	}
+
 	Object load(SecUser apiUser, Key apiKey, boolean requireShareResourcePermission) {
 		Object resource
 		if (Canvas.isAssignableFrom(clazz)) {

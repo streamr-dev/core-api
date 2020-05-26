@@ -156,7 +156,7 @@ class PermissionApiControllerSpec extends ControllerSpecification {
 		response.status == 200
 		response.json.user == "me@me.net"
 		response.json.operation == "canvas_share"
-		1 * permissionService.findPermission(resource, request.apiUser, null) >> canvasPermission
+		1 * permissionService.findPermission(canvasPermission.id, resource, request.apiUser, null) >> canvasPermission
 		0 * permissionService._
 	}
 
@@ -174,7 +174,7 @@ class PermissionApiControllerSpec extends ControllerSpecification {
 		response.json.id == 2
 		response.json.user == "me@me.net"
 		response.json.operation == "stream_share"
-		1 * permissionService.findPermission(resource, request.apiUser, null) >> streamPermission
+		1 * permissionService.findPermission(streamPermission.id, resource, request.apiUser, null) >> streamPermission
 		0 * permissionService._
 	}
 
@@ -233,7 +233,7 @@ class PermissionApiControllerSpec extends ControllerSpecification {
 		authenticatedAs(me) { controller.delete() }
 		then:
 		response.status == 204
-		1 * permissionService.deletePermission(resource, request.apiUser, null)
+		1 * permissionService.deletePermission(_, resource, request.apiUser, null)
 		0 * permissionService._
 	}
 
