@@ -9,7 +9,7 @@
   "author": "",
   "license": "AGPL",
   "dependencies": {
-    "ajv": "6.10.2",
+    "ajv": "6.12.2",
     "async-wait-until": "1.2.4",
     "chai": "4.2.0",
     "ethereumjs-util": "6.2.0",
