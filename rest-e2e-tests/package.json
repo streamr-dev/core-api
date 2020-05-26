@@ -3,11 +3,12 @@
   "version": "1.0.0",
   "description": "End-to-end tests for Streamr Engine and Editor REST API endpoints",
   "main": "index.js",
+  "repository": "https://github.com/streamr-dev/engine-and-editor",
   "scripts": {
     "test": "mocha *.test.js --recursive --color false --exit --timeout 5000"
   },
-  "author": "",
-  "license": "AGPL",
+  "author": "Streamr developers",
+  "license": "AGPL-3.0-only",
   "dependencies": {
     "ajv": "6.12.2",
     "async-wait-until": "1.2.4",
