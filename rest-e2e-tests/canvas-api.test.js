@@ -11,7 +11,7 @@ const LOGGING_ENABLED = false
 
 const Streamr = initStreamrApi(REST_URL, LOGGING_ENABLED)
 
-const TIMEOUT = 120 * 1000
+const TIMEOUT = 130 * 1000
 
 const NUM_MESSAGES = 50
 
@@ -349,7 +349,7 @@ function TestClockTable() {
     let subscription
 
     // sets timeout on before and all test cases in this suite
-    this.timeout(60000)
+    this.timeout(80000)
 
     before(async () => {
         const created = await CreateClientUser()
