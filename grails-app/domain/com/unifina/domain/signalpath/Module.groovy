@@ -12,7 +12,6 @@ class Module implements Comparable {
 	String jsModule
 	String type
 	Boolean hide
-	ModulePackage modulePackage
 	String jsonHelp
 	String webcomponent
 
@@ -24,7 +23,6 @@ class Module implements Comparable {
 		jsModule()
 		type()
 		hide(nullable:true)
-		modulePackage(nullable:true)
 		jsonHelp(nullable:true)
 		alternativeNames(nullable:true)
 		webcomponent(nullable:true)

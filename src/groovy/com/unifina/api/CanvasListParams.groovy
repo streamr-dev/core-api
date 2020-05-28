@@ -1,5 +1,6 @@
 package com.unifina.api
 
+import com.unifina.domain.security.Permission
 import com.unifina.domain.signalpath.Canvas
 import grails.validation.Validateable
 import groovy.transform.CompileStatic
@@ -9,6 +10,11 @@ class CanvasListParams extends ListParams {
 	String name
 	Boolean adhoc
 	Canvas.State state
+
+	CanvasListParams() {
+		super()
+		operation = Permission.Operation.CANVAS_GET
+	}
 
 	static constraints = {
 		name(nullable: true, blank: false)

@@ -57,7 +57,7 @@ class SubscriptionService {
 	 * Should be invoked before an `IntegrationKey` is removed
 	 */
 	void beforeIntegrationKeyRemoved(IntegrationKey key) {
-		List<Subscription> subscriptions = PaidSubscription.findAllByAddress(key.idInService)
+		List<Subscription> subscriptions = PaidSubscription.findAllByAddress(key.idInService) as List<Subscription>
 		subscriptions.each {
 			deletePermissions(it)
 		}
@@ -67,7 +67,7 @@ class SubscriptionService {
 	 * Should be invoked after an `IntegrationKey` is added
 	 */
 	void afterIntegrationKeyCreated(IntegrationKey key) {
-		List<Subscription> subscriptions = PaidSubscription.findAllByAddress(key.idInService)
+		List<Subscription> subscriptions = PaidSubscription.findAllByAddress(key.idInService) as List<Subscription>
 		subscriptions.each {
 			createPermissions(it)
 		}
@@ -115,7 +115,8 @@ class SubscriptionService {
 		SecUser user = subscription.fetchUser()
 		if (user) {
 			streams.collect { Stream stream ->
-				permissionService.systemGrant(user, stream, Permission.Operation.READ, subscription, subscription.endsAt)
+				permissionService.systemGrant(user, stream, Permission.Operation.STREAM_SUBSCRIBE, subscription, subscription.endsAt)
+				permissionService.systemGrant(user, stream, Permission.Operation.STREAM_GET, subscription, subscription.endsAt)
 			}
 		}
 	}

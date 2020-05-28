@@ -35,7 +35,7 @@ class AuthApiController {
 		SignupInvite invite = signupCodeService.create(cmd.username)
 
 		invite.sent = true
-		if (!invite.save(flush: true)) {
+		if (!invite.save(flush: false)) {
 			log.warn("Failed to save invite: ${invite.errors}")
 			response.status = 500
 			return render([success: false, error: "Failed to save invite: ${invite.errors}"] as JSON)
@@ -90,7 +90,7 @@ class AuthApiController {
 		}
 
 		invite.used = true
-		if (!invite.save(flush: true)) {
+		if (!invite.save(flush: false)) {
 			log.warn("Failed to save invite: ${invite.errors}")
 			response.status = 500
 			return render([success: false, error: "Failed to save invite: ${invite.errors}"] as JSON)
@@ -125,7 +125,7 @@ class AuthApiController {
 		}
 
 		def registrationCode = new RegistrationCode(username: user.username)
-		registrationCode.save(flush: true)
+		registrationCode.save(flush: false)
 
 		try {
 			mailService.sendMail {

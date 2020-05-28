@@ -106,7 +106,7 @@ class SignalPathServiceSpec extends BeanMockingSpecification {
 		then:
 		1 * runner.getSignalPath() >> sp
 		1 * sp.getCanvas() >> c1
-		1 * service.permissionService.canWrite(me, c1) >> true
+		1 * service.permissionService.check(me, c1, Permission.Operation.CANVAS_STARTSTOP) >> true
 		1 * service.stopLocal(c1) >> false
 		thrown(CanvasUnreachableException)
 	}
@@ -116,10 +116,10 @@ class SignalPathServiceSpec extends BeanMockingSpecification {
 		RuntimeRequest req = service.buildRuntimeRequest([type: 'test'], "canvases/$c1.id", me)
 
 		then:
-		1 * canvasService.authorizedGetById(c1.id, me, Permission.Operation.READ) >> c1
+		1 * canvasService.authorizedGetById(c1.id, me, Permission.Operation.CANVAS_GET) >> c1
 		req.getType() == 'test'
 		req.get("type") == 'test'
-		req.getCheckedOperations().contains(Permission.Operation.READ)
+		req.getCheckedOperations().contains(Permission.Operation.CANVAS_GET)
 		req.getPath() == "canvases/$c1.id"
 		req.getOriginalPath() == req.getPath()
 		req.getUser() == me
@@ -132,7 +132,7 @@ class SignalPathServiceSpec extends BeanMockingSpecification {
 		then:
 		req.getType() == 'test'
 		req.get("type") == 'test'
-		req.getCheckedOperations().contains(Permission.Operation.READ)
+		req.getCheckedOperations().contains(Permission.Operation.CANVAS_GET)
 		req.getPath() == "canvases/$c1.id"
 		req.getOriginalPath() == req.getPath()
 		req.getUser() == admin
@@ -143,10 +143,10 @@ class SignalPathServiceSpec extends BeanMockingSpecification {
 		RuntimeRequest req = service.buildRuntimeRequest([type: 'test'], "canvases/$c1.id", null)
 
 		then:
-		1 * canvasService.authorizedGetById(c1.id, null, Permission.Operation.READ) >> c1
+		1 * canvasService.authorizedGetById(c1.id, null, Permission.Operation.CANVAS_GET) >> c1
 		req.getType() == 'test'
 		req.get("type") == 'test'
-		req.getCheckedOperations().contains(Permission.Operation.READ)
+		req.getCheckedOperations().contains(Permission.Operation.CANVAS_GET)
 		req.getPath() == "canvases/$c1.id"
 		req.getOriginalPath() == req.getPath()
 		req.getUser() == null
@@ -302,7 +302,7 @@ class SignalPathServiceSpec extends BeanMockingSpecification {
 		noExceptionThrown()
 
 		and:
-		1 * permissionService.canWrite(user, canvas) >> true
+		1 * permissionService.check(user, canvas, Permission.Operation.CANVAS_STARTSTOP) >> true
 
 		and:
 		response == [type: "stopRequest"]

@@ -1,5 +1,6 @@
 package com.unifina.signalpath
 
+import com.unifina.domain.security.Permission
 import com.unifina.domain.security.SecUser
 import com.unifina.domain.signalpath.Canvas
 import com.unifina.service.PermissionService
@@ -27,7 +28,7 @@ class SignalPathParameter extends StringParameter {
 
 		def permissionService = Holders.applicationContext.getBean(PermissionService)
 		def user = SecUser.get(owner.globals.userId)
-		Collection signalPaths = permissionService.get(Canvas, user) {
+		Collection signalPaths = permissionService.get(Canvas, user, Permission.Operation.CANVAS_GET) {
 			projections {
 				property 'id', 'id'
 				property 'name', 'name'

@@ -1,7 +1,6 @@
 package com.unifina.controller.api
 
 import com.unifina.domain.security.*
-import com.unifina.domain.signalpath.ModulePackage
 import com.unifina.security.PasswordEncoder
 import com.unifina.service.*
 import com.unifina.signalpath.messaging.MockMailService
@@ -12,7 +11,7 @@ import org.springframework.context.MessageSource
 import spock.lang.Specification
 
 @TestFor(AuthApiController)
-@Mock([SignupInvite, SignupCodeService, RegistrationCode, SecUser, Key, SecRole, SecUserSecRole, ModulePackage, Permission, UserService])
+@Mock([SignupInvite, SignupCodeService, RegistrationCode, SecUser, Key, SecRole, SecUserSecRole, Permission, UserService])
 class AuthApiControllerSpec extends Specification {
 
 	String username = "user@invite.to"
@@ -203,17 +202,6 @@ class AuthApiControllerSpec extends Specification {
 
 	void "submitting registration with valid invite should create user"() {
 		setup:
-		// A modulePackage created with minimum fields required
-		def modulePackage = new ModulePackage()
-		modulePackage.id = new Long(1)
-		modulePackage.name = "test"
-		modulePackage.save()
-
-		def modulePackage2 = new ModulePackage()
-		modulePackage2.id = new Long(2)
-		modulePackage2.name = "test2"
-		modulePackage2.save()
-
 		// The roles created
 		["ROLE_USER","ROLE_LIVE","ROLE_ADMIN"].each {
 			def role = new SecRole()

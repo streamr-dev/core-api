@@ -168,4 +168,31 @@ class Stream implements Comparable {
 			return latestDataTimestamp.before(threshold)
 		}
 	}
+
+	/**
+	 * Return true if this Stream is an UI Channel.
+	 */
+	@CompileStatic
+	boolean isUIChannel() {
+		return uiChannel && uiChannelCanvas != null && uiChannelPath != null
+	}
+
+	/**
+	 * Return module id parsed from uiChannelPath or throw an IllegalArgumentException on error.
+	 */
+	@CompileStatic
+	Integer parseModuleID() {
+		if (uiChannelPath == null) {
+			throw new IllegalArgumentException("Unable to parse module if from null uiChannelPath.")
+		}
+		String[] components = uiChannelPath.split("/")
+		if (components.length >= 5 ) {
+			try {
+				return Integer.parseInt(components[4])
+			} catch (NumberFormatException e) {
+				throw new IllegalArgumentException("Unable to parse module id from '" + components[4] + "'.")
+			}
+		}
+		throw new IllegalArgumentException("UI Channel path doesn't contain module id.")
+	}
 }

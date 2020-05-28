@@ -25,7 +25,7 @@ public class GetOrCreateStream extends CreateStream {
 		if (streamId == null) {
 			List<Stream> streams = permissionService.get(Stream.class,
 				SecUser.loadViaJava(getGlobals().getUserId()),
-				Permission.Operation.READ,
+				Permission.Operation.STREAM_GET,
 				true,
 				new NameFilteringClosure(this, getStreamName()));
 

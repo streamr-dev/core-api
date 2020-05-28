@@ -24,7 +24,7 @@ class ApiServiceSpec extends Specification {
 
 	void "list() returns streams with share permission"() {
 		def permissionService = service.permissionService = Mock(PermissionService)
-		ListParams listParams = new DashboardListParams(operation: Permission.Operation.SHARE, publicAccess: true)
+		ListParams listParams = new DashboardListParams(operation: Permission.Operation.DASHBOARD_SHARE, publicAccess: true)
 		SecUser me = new SecUser(username: "me@me.com")
 
 		when:
@@ -32,7 +32,7 @@ class ApiServiceSpec extends Specification {
 
 		then:
 		list.size() == 3
-		1 * permissionService.get(Dashboard, me, Permission.Operation.SHARE, true, _) >> [
+		1 * permissionService.get(Dashboard, me, Permission.Operation.DASHBOARD_SHARE, true, _) >> [
 			new Dashboard(), new Dashboard(), new Dashboard()
 		]
 	}
@@ -48,7 +48,7 @@ class ApiServiceSpec extends Specification {
 
 		then:
 		list.size() == 3
-		1 * permissionService.get(Dashboard, me, Permission.Operation.READ, true, _) >> [
+		1 * permissionService.get(Dashboard, me, Permission.Operation.DASHBOARD_GET, true, _) >> [
 			new Dashboard(), new Dashboard(), new Dashboard()
 		]
 	}
@@ -137,7 +137,7 @@ class ApiServiceSpec extends Specification {
 		SecUser me = new SecUser(username: "me@me.com")
 
 		when:
-		service.authorizedGetById(Dashboard, "dashboard-id", me, Permission.Operation.WRITE)
+		service.authorizedGetById(Dashboard, "dashboard-id", me, Permission.Operation.DASHBOARD_EDIT)
 
 		then:
 		def e = thrown(NotFoundException)
@@ -159,11 +159,11 @@ class ApiServiceSpec extends Specification {
 		service.permissionService = new PermissionService()
 
 		when:
-		service.authorizedGetById(Dashboard, "dashboard-id", me, Permission.Operation.WRITE)
+		service.authorizedGetById(Dashboard, "dashboard-id", me, Permission.Operation.DASHBOARD_EDIT)
 
 		then:
 		def e = thrown(NotPermittedException)
-		e.message == "me@me.com does not have permission to write Dashboard (id dashboard-id)"
+		e.message == "me@me.com does not have permission to dashboard_edit Dashboard (id dashboard-id)"
 	}
 
 	void "authorizedGetById() returns domain object if it exists and user has required permission"() {
@@ -175,7 +175,7 @@ class ApiServiceSpec extends Specification {
 		service.permissionService = Stub(PermissionService) // replace verify() with nop method
 
 		when:
-		def result = service.authorizedGetById(Dashboard, "dashboard-id", me, Permission.Operation.WRITE)
+		def result = service.authorizedGetById(Dashboard, "dashboard-id", me, Permission.Operation.DASHBOARD_EDIT)
 
 		then:
 		result == dashboard

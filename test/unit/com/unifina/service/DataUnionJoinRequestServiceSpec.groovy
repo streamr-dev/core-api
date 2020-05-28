@@ -174,10 +174,10 @@ class DataUnionJoinRequestServiceSpec extends BeanMockingSpecification {
 		then:
 		1 * service.ethereumService.fetchJoinPartStreamID(contractAddress) >> joinPartStream.id
 		1 * streamrClientMock.publish(_, [type: "join", "addresses": [memberAddress]])
-		1 * service.permissionService.systemGrant(user, s1, Permission.Operation.WRITE)
-		1 * service.permissionService.systemGrant(user, s2, Permission.Operation.WRITE)
-		1 * service.permissionService.systemGrant(user, s3, Permission.Operation.WRITE)
-		1 * service.permissionService.systemGrant(user, s4, Permission.Operation.WRITE)
+		1 * service.permissionService.systemGrant(user, s1, Permission.Operation.STREAM_PUBLISH)
+		1 * service.permissionService.systemGrant(user, s2, Permission.Operation.STREAM_PUBLISH)
+		1 * service.permissionService.systemGrant(user, s3, Permission.Operation.STREAM_PUBLISH)
+		1 * service.permissionService.systemGrant(user, s4, Permission.Operation.STREAM_PUBLISH)
 		c.state == DataUnionJoinRequest.State.ACCEPTED
 	}
 
@@ -229,10 +229,10 @@ class DataUnionJoinRequestServiceSpec extends BeanMockingSpecification {
 		then:
 		1 * service.ethereumService.fetchJoinPartStreamID(contractAddress) >> joinPartStream.id
 		1 * streamrClientMock.publish(_, [type: "join", "addresses": [memberAddress]])
-		1 * service.permissionService.canWrite(user, s1) >> true
-		1 * service.permissionService.canWrite(user, s2) >> true
-		1 * service.permissionService.systemGrant(user, s3, Permission.Operation.WRITE)
-		1 * service.permissionService.systemGrant(user, s4, Permission.Operation.WRITE)
+		1 * service.permissionService.check(user, s1, Permission.Operation.STREAM_PUBLISH) >> true
+		1 * service.permissionService.check(user, s2, Permission.Operation.STREAM_PUBLISH) >> true
+		1 * service.permissionService.systemGrant(user, s3, Permission.Operation.STREAM_PUBLISH)
+		1 * service.permissionService.systemGrant(user, s4, Permission.Operation.STREAM_PUBLISH)
 		c.state == DataUnionJoinRequest.State.ACCEPTED
 	}
 
@@ -362,10 +362,10 @@ class DataUnionJoinRequestServiceSpec extends BeanMockingSpecification {
 		then:
 		1 * service.ethereumService.fetchJoinPartStreamID(contractAddress) >> joinPartStream.id
 		1 * streamrClientMock.publish(_, [type: "join", "addresses": [memberAddress]])
-		1 * service.permissionService.systemGrant(user, s1, Permission.Operation.WRITE)
-		1 * service.permissionService.systemGrant(user, s2, Permission.Operation.WRITE)
-		1 * service.permissionService.systemGrant(user, s3, Permission.Operation.WRITE)
-		1 * service.permissionService.systemGrant(user, s4, Permission.Operation.WRITE)
+		1 * service.permissionService.systemGrant(user, s1, Permission.Operation.STREAM_PUBLISH)
+		1 * service.permissionService.systemGrant(user, s2, Permission.Operation.STREAM_PUBLISH)
+		1 * service.permissionService.systemGrant(user, s3, Permission.Operation.STREAM_PUBLISH)
+		1 * service.permissionService.systemGrant(user, s4, Permission.Operation.STREAM_PUBLISH)
 	}
 
 	void "update rejects accepted state"() {

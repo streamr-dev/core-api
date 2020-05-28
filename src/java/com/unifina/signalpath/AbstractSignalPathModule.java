@@ -2,6 +2,7 @@ package com.unifina.signalpath;
 
 import com.unifina.data.Event;
 import com.unifina.datasource.IDayListener;
+import com.unifina.domain.security.Permission;
 import com.unifina.domain.signalpath.Module;
 import com.unifina.security.permission.ConnectionTraversalPermission;
 import com.unifina.service.PermissionService;
@@ -649,7 +650,7 @@ public abstract class AbstractSignalPathModule implements IDayListener, Serializ
 				}
 
 				PermissionService permissionService = Holders.getApplicationContext().getBean(PermissionService.class);
-				if (!permissionService.canWrite(request.getUser(), request.getCanvas())) {
+				if (!permissionService.check(request.getUser(), request.getCanvas(), Permission.Operation.CANVAS_EDIT)) {
 					throw new AccessControlException("Unauthenticated parameter change request. Cannot write!");
 				}
 

@@ -8,7 +8,6 @@
     <setting name="launchBrowser" value="true" />
     <setting name="launchBrowserUrl" value="" />
     <setting name="depsClasspath" value="false" />
-    <extension name="coverage" enabled="false" merge="false" sample_coverage="true" runner="idea" />
-    <method />
+    <method v="2" />
   </configuration>
 </component>
