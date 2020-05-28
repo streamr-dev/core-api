@@ -1,17 +1,17 @@
 package com.unifina.service
 
+import com.lambdaworks.redis.RedisClient
+import com.lambdaworks.redis.RedisConnection
+import com.lambdaworks.redis.RedisURI
 import com.unifina.utils.MapTraversal
 import grails.util.Holders
-import io.lettuce.core.RedisClient
-import io.lettuce.core.RedisURI
-import io.lettuce.core.api.StatefulRedisConnection
 import org.joda.time.DateTime
 import org.springframework.util.Assert
 import spock.lang.Specification
 
 class KeyValueStoreServiceIntegrationSpec extends Specification {
 	KeyValueStoreService service
-	StatefulRedisConnection<String, String> connection
+	RedisConnection<String, String> connection
 
 	void setup() {
 		service = Holders.getApplicationContext().getBean(KeyValueStoreService)
@@ -30,7 +30,7 @@ class KeyValueStoreServiceIntegrationSpec extends Specification {
 		String key = "key1"
 		String value = "value1"
 		when:
-		connection.sync().set(key, value)
+		connection.set(key, value)
 		then:
 		service.get(key) == value
     }
@@ -41,32 +41,32 @@ class KeyValueStoreServiceIntegrationSpec extends Specification {
 		when:
 		service.setWithExpiration(key, value, 1)
 		then:
-		connection.sync().get(key) == value
+		connection.get(key) == value
 		Thread.sleep(1000)
-		connection.sync().get(key) == null
+		connection.get(key) == null
 	}
 
 	void "delete() removes key"() {
 		String key = "key3"
 		String value = "value3"
 		when:
-		connection.sync().set(key, value)
+		connection.set(key, value)
 		service.delete(key)
 		Thread.sleep(500)
 		then:
-		connection.sync().get(key) == null
+		connection.get(key) == null
 	}
 
 	void "resetExpiration() resets expiration of key"() {
 		String key = "key4"
 		String value = "value4"
-		connection.sync().setex(key, 10, value)
-		Long ttl1 = connection.sync().ttl(key)
+		connection.setex(key, 10, value)
+		Long ttl1 = connection.ttl(key)
 		Thread.sleep(2000)
 		when:
 		service.resetExpiration(key, new DateTime().plusSeconds(10).toDate())
 		then:
-		Long ttl2 = connection.sync().ttl(key)
+		Long ttl2 = connection.ttl(key)
 		ttl2 - ttl1 <= 10
 	}
 }
