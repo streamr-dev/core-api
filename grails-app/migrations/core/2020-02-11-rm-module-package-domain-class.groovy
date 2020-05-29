@@ -16,9 +16,16 @@ databaseChangeLog = {
 		dropColumn(columnName: "module_package_id", tableName: "module_category")
 	}
 	changeSet(author: "kkn", id: "rm-module-package-domain-class-6") {
-		dropColumn(columnName: "module_package_id", tableName: "permission")
+		grailsChange {
+			change {
+				sql.execute("delete from permission where module_package_id is not null")
+			}
+		}
 	}
 	changeSet(author: "kkn", id: "rm-module-package-domain-class-7") {
+		dropColumn(columnName: "module_package_id", tableName: "permission")
+	}
+	changeSet(author: "kkn", id: "rm-module-package-domain-class-8") {
 		dropTable(tableName: "module_package")
 	}
 }
