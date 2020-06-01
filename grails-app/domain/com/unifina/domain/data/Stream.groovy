@@ -1,13 +1,14 @@
 package com.unifina.domain.data
 
-
 import com.unifina.domain.ExampleType
 import com.unifina.domain.marketplace.Product
 import com.unifina.domain.security.Permission
 import com.unifina.domain.signalpath.Canvas
 import grails.converters.JSON
+import grails.persistence.Entity
 import groovy.transform.CompileStatic
 
+@Entity
 class Stream implements Comparable {
 	public final static String DEFAULT_NAME = "Untitled Stream"
 	public final static Integer DEFAULT_STORAGE_DAYS = 365
@@ -120,6 +121,19 @@ class Stream implements Comparable {
 		]
 	}
 
+	/**
+	 * Returns only the public fields required for validating messages in streams
+	 */
+	@CompileStatic
+	Map toValidationMap() {
+		[
+			id: id,
+			partitions: partitions,
+			requireSignedData: requireSignedData,
+			requireEncryptedData: requireEncryptedData,
+		]
+	}
+
 	@Override
 	int compareTo(Object arg0) {
 		if (!(arg0 instanceof Stream)) return 0
@@ -153,5 +167,32 @@ class Stream implements Comparable {
 
 			return latestDataTimestamp.before(threshold)
 		}
+	}
+
+	/**
+	 * Return true if this Stream is an UI Channel.
+	 */
+	@CompileStatic
+	boolean isUIChannel() {
+		return uiChannel && uiChannelCanvas != null && uiChannelPath != null
+	}
+
+	/**
+	 * Return module id parsed from uiChannelPath or throw an IllegalArgumentException on error.
+	 */
+	@CompileStatic
+	Integer parseModuleID() {
+		if (uiChannelPath == null) {
+			throw new IllegalArgumentException("Unable to parse module if from null uiChannelPath.")
+		}
+		String[] components = uiChannelPath.split("/")
+		if (components.length >= 5 ) {
+			try {
+				return Integer.parseInt(components[4])
+			} catch (NumberFormatException e) {
+				throw new IllegalArgumentException("Unable to parse module id from '" + components[4] + "'.")
+			}
+		}
+		throw new IllegalArgumentException("UI Channel path doesn't contain module id.")
 	}
 }

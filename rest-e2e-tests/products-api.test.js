@@ -55,7 +55,7 @@ describe('Products API', function() {
     let streamId2
     let streamId3
 
-    this.timeout(1000 * 20)
+    this.timeout(1000 * 25)
 
     before(async () => {
         streamId1 = await createStreamAndReturnId({
@@ -153,7 +153,7 @@ describe('Products API', function() {
             await assertResponseIsError(response, 422, 'VALIDATION_ERROR', 'streams (typeMismatch)')
         })
 
-        it('requires share permission on streams (in body)', async () => {
+        it('requires stream_share permission on streams (in body)', async () => {
             const streamId = await createStreamAndReturnId({
                 name: 'other user\'s stream'
             }, AUTH_TOKEN_2)
@@ -252,7 +252,7 @@ describe('Products API', function() {
             await assertResponseIsError(response, 404, 'NOT_FOUND')
         })
 
-        it('requires read permission', async () => {
+        it('requires product_get permission', async () => {
             const response = await Streamr.api.v1.products
                 .get(createdProductId)
                 .call()
@@ -260,7 +260,7 @@ describe('Products API', function() {
 
             assert.equal(response.status, 403)
             assert.equal(json.code, 'FORBIDDEN')
-            assert.equal(json.operation, 'read')
+            assert.equal(json.operation, 'product_get')
         })
 
         context('when called with valid params, body, headers, and permissions', () => {
@@ -345,7 +345,7 @@ describe('Products API', function() {
             await assertResponseIsError(response, 404, 'NOT_FOUND')
         })
 
-        it('requires write permission on Product', async () => {
+        it('requires product_edit permission on Product', async () => {
             const response = await Streamr.api.v1.products
                 .update(createdProductId, newBody)
                 .withApiKey(AUTH_TOKEN_2)
@@ -354,7 +354,7 @@ describe('Products API', function() {
 
             assert.equal(response.status, 403)
             assert.equal(json.code, 'FORBIDDEN')
-            assert.equal(json.operation, 'write')
+            assert.equal(json.operation, 'product_edit')
         })
 
         context('when called with valid params, body, headers, and permissions', () => {
@@ -445,7 +445,7 @@ describe('Products API', function() {
             await assertResponseIsError(response, 404, 'NOT_FOUND')
         })
 
-        it('requires write permission on Product', async () => {
+        it('requires product_edit permission on Product', async () => {
             const response = await Streamr.api.v1.products
                 .setDeploying(createdProductId)
                 .withApiKey(AUTH_TOKEN_2)
@@ -454,7 +454,7 @@ describe('Products API', function() {
 
             assert.equal(response.status, 403)
             assert.equal(json.code, 'FORBIDDEN')
-            assert.equal(json.operation, 'write')
+            assert.equal(json.operation, 'product_edit')
         })
 
         context('when called with valid params, body, headers, and permissions', () => {
@@ -651,7 +651,7 @@ describe('Products API', function() {
             await assertResponseIsError(response, 404, 'NOT_FOUND')
         })
 
-        it('requires write permission on Product', async () => {
+        it('requires product_edit permission on Product', async () => {
             const response = await Streamr.api.v1.products
                 .setUndeploying(createdProductId)
                 .withApiKey(AUTH_TOKEN_2)
@@ -660,7 +660,7 @@ describe('Products API', function() {
 
             assert.equal(response.status, 403)
             assert.equal(json.code, 'FORBIDDEN')
-            assert.equal(json.operation, 'write')
+            assert.equal(json.operation, 'product_edit')
         })
 
         it('verifies legality of state transition', async () => {
@@ -878,7 +878,7 @@ describe('Products API', function() {
             await assertResponseIsError(response, 404, 'NOT_FOUND')
         })
 
-        it('requires read permission on Product', async () => {
+        it('requires product_get permission on Product', async () => {
             const response = await Streamr.api.v1.products
                 .listStreams(createdProductId)
                 .withApiKey(AUTH_TOKEN_2)
@@ -887,7 +887,7 @@ describe('Products API', function() {
 
             assert.equal(response.status, 403)
             assert.equal(json.code, 'FORBIDDEN')
-            assert.equal(json.operation, 'read')
+            assert.equal(json.operation, 'product_get')
         })
 
         context('when called with valid params, body, headers, and permissions', () => {
@@ -945,7 +945,7 @@ describe('Products API', function() {
             await assertResponseIsError(response, 404, 'NOT_FOUND')
         })
 
-        it('requires write permission on Product', async () => {
+        it('requires product_edit permission on Product', async () => {
             const fileBytes = Buffer.from([])
             const response = await Streamr.api.v1.products
                 .uploadImage(createdProductId, fileBytes)
@@ -955,7 +955,7 @@ describe('Products API', function() {
 
             assert.equal(response.status, 403)
             assert.equal(json.code, 'FORBIDDEN')
-            assert.equal(json.operation, 'write')
+            assert.equal(json.operation, 'product_edit')
         })
 
         it('requires parameter "file" to be a multipart file', async () => {
@@ -1068,7 +1068,7 @@ describe('Products API', function() {
             await assertResponseIsError(response, 404, 'NOT_FOUND', 'Product')
         })
 
-        it('requires write permission on Product', async () => {
+        it('requires product_edit permission on Product', async () => {
             const response = await Streamr.api.v1.products
                 .addStream(createdProductId, streamId3)
                 .withApiKey(AUTH_TOKEN_2)
@@ -1077,7 +1077,7 @@ describe('Products API', function() {
 
             assert.equal(response.status, 403)
             assert.equal(json.code, 'FORBIDDEN')
-            assert.equal(json.operation, 'write')
+            assert.equal(json.operation, 'product_edit')
         })
 
         it('requires existing Stream', async () => {
@@ -1088,7 +1088,7 @@ describe('Products API', function() {
             await assertResponseIsError(response, 404, 'NOT_FOUND', 'Stream')
         })
 
-        it('requires share permission on Stream', async () => {
+        it('requires stream_share permission on Stream', async () => {
             const streamId4 = await createStreamAndReturnId({
                 name: 'stream-3'
             }, AUTH_TOKEN_2)
@@ -1101,7 +1101,7 @@ describe('Products API', function() {
 
             assert.equal(response.status, 403)
             assert.equal(json.code, 'FORBIDDEN')
-            assert.equal(json.operation, 'share')
+            assert.equal(json.operation, 'stream_share')
         })
 
         context('when called with valid params, body, headers, and permissions', () => {
@@ -1144,7 +1144,7 @@ describe('Products API', function() {
             await assertResponseIsError(response, 404, 'NOT_FOUND', 'Product')
         })
 
-        it('requires write permission on Product', async () => {
+        it('requires product_delete permission on Product', async () => {
             const response = await Streamr.api.v1.products
                 .removeStream(createdProductId, streamId3)
                 .withApiKey(AUTH_TOKEN_2)
@@ -1153,7 +1153,7 @@ describe('Products API', function() {
 
             assert.equal(response.status, 403)
             assert.equal(json.code, 'FORBIDDEN')
-            assert.equal(json.operation, 'write')
+            assert.equal(json.operation, 'product_delete')
         })
 
         it('requires existing Stream', async () => {
@@ -1222,9 +1222,9 @@ describe('Products API', function() {
             })
 
             it('responds with expected Permissions', () => {
-                assert.equal(json.length, 3)
+                assert.equal(json.length, 4)
                 json.forEach(p => assertIsPermission(p))
-                assert.deepEqual(json.map(p => p.operation), ['read', 'write', 'share'])
+                assert.deepEqual(json.map(p => p.operation), ['product_get', 'product_edit', 'product_delete', 'product_share'])
             })
         })
     })
@@ -1263,7 +1263,7 @@ describe('Products API', function() {
             await assertResponseIsError(response, 404, 'NOT_FOUND')
         })
 
-        it('requires share permission on Product', async () => {
+        it('requires product_share permission on Product', async () => {
             const response = await Streamr.api.v1.products
                 .deployFree(freeProductId)
                 .withApiKey(AUTH_TOKEN_2)
@@ -1272,7 +1272,7 @@ describe('Products API', function() {
 
             assert.equal(response.status, 403)
             assert.equal(json.code, 'FORBIDDEN')
-            assert.equal(json.operation, 'share')
+            assert.equal(json.operation, 'product_share')
         })
 
         it('verifies that Product is free', async () => {
@@ -1354,7 +1354,7 @@ describe('Products API', function() {
             await assertResponseIsError(response, 404, 'NOT_FOUND')
         })
 
-        it('requires share permission on Product', async () => {
+        it('requires product_share permission on Product', async () => {
             const response = await Streamr.api.v1.products
                 .undeployFree(freeProductId)
                 .withApiKey(AUTH_TOKEN_2)
@@ -1363,7 +1363,7 @@ describe('Products API', function() {
 
             assert.equal(response.status, 403)
             assert.equal(json.code, 'FORBIDDEN')
-            assert.equal(json.operation, 'share')
+            assert.equal(json.operation, 'product_share')
         })
 
         it('verifies that Product is free', async () => {

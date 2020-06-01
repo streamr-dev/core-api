@@ -1,5 +1,6 @@
 package com.unifina.api
 
+import com.unifina.domain.security.Permission
 import grails.validation.Validateable
 import groovy.transform.CompileStatic
 
@@ -8,6 +9,11 @@ class StreamListParams extends ListParams {
 	String name
 	Boolean uiChannel
 	Boolean inbox = false
+
+	StreamListParams() {
+		super()
+		operation = Permission.Operation.STREAM_GET
+	}
 
 	static constraints = {
 		name(nullable: true, blank: false)

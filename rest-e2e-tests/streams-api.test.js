@@ -62,21 +62,23 @@ describe('Streams API', () => {
         })
     })
 
-    describe('GET /api/v1/streams/:id/publishers', () => {
-        it('requires authentication for private streams', async () => {
-            const response = await Streamr.api.v1.streams.getPublishers(streamId).call()
-            assert.equal(response.status, 403)
+    describe('GET /api/v1/streams/:id/validation', () => {
+        it('does not require authentication', async () => {
+            const response = await Streamr.api.v1.streams.getValidationInfo(streamId).call()
+            assert.equal(response.status, 200)
         })
-        it('does not require authentication for public streams', async () => {
-            const publicStreamResponse = await Streamr.api.v1.streams
-                .create({
-                    name: 'stream-id-' + Date.now()
-                })
-                .withApiKey(API_KEY)
-                .execute()
-            const permResponse = await Streamr.api.v1.streams.makePublic(publicStreamResponse.id).withApiKey(API_KEY).call()
-            assert.equal(permResponse.status, 201)
-            const response = await Streamr.api.v1.streams.getPublishers(publicStreamResponse.id).call()
+    })
+
+    describe('GET /api/v1/streams/:id/publishers', () => {
+        it('does not require authentication', async () => {
+            const response = await Streamr.api.v1.streams.getPublishers(streamId).call()
+            assert.equal(response.status, 200)
+        })
+    })
+
+    describe('GET /api/v1/streams/:id/subscribers', () => {
+        it('does not require authentication', async () => {
+            const response = await Streamr.api.v1.streams.getSubscribers(streamId).call()
             assert.equal(response.status, 200)
         })
     })
@@ -117,7 +119,7 @@ describe('Streams API', () => {
             await assertResponseIsError(response, 404, 'NOT_FOUND')
         })
 
-        it('requires WRITE permission on Stream', async () => {
+        it('requires stream_edit permission on Stream', async () => {
             const response = await Streamr.api.v1.streams
                 .setFields(streamId, [
                     {
@@ -132,7 +134,7 @@ describe('Streams API', () => {
                 .withApiKey(API_KEY_2)
                 .call()
 
-            await assertResponseIsError(response, 403, 'FORBIDDEN', 'write')
+            await assertResponseIsError(response, 403, 'FORBIDDEN', 'stream_edit')
         })
 
         context('when called with valid body and permissions', () => {
@@ -192,13 +194,13 @@ describe('Streams API', () => {
             await assertResponseIsError(response, 404, 'NOT_FOUND')
         })
 
-        it('requires WRITE permission on Stream', async () => {
+        it('requires stream_publish permission on Stream', async () => {
             const response = await Streamr.api.v1.streams
                 .uploadCsvFile(streamId, fs.createReadStream('./test-data/test-csv.csv'))
                 .withApiKey(API_KEY_2)
                 .call()
 
-            await assertResponseIsError(response, 403, 'FORBIDDEN', 'write')
+            await assertResponseIsError(response, 403, 'FORBIDDEN', 'stream_publish')
         })
 
         it('validates that file is CSV', async () => {
@@ -242,7 +244,7 @@ describe('Streams API', () => {
         })
     })
 
-    describe('POST /api/v1/streams/:id/confirmCsvFileUpload', () => {
+    describe('POST /api/v1/streams/:id/confirmCsvFileUpload', function() {
         it('requires authentication', async () => {
             const response = await Streamr.api.v1.streams
                 .confirmCsvUpload(streamId, {
@@ -255,7 +257,7 @@ describe('Streams API', () => {
             await assertResponseIsError(response, 401, 'NOT_AUTHENTICATED')
         })
 
-        it('validates existence of Stream', async () => {
+        it('validates existence of Stream', async function() {
             const response = await Streamr.api.v1.streams
                 .confirmCsvUpload('non-existing-stream-id', {
                     fileUrl: '',
@@ -268,7 +270,7 @@ describe('Streams API', () => {
             await assertResponseIsError(response, 404, 'NOT_FOUND')
         })
 
-        it('requires WRITE permission on Stream', async () => {
+        it('requires stream_publish permission on Stream', async function() {
             const response = await Streamr.api.v1.streams
                 .confirmCsvUpload(streamId, {
                     fileUrl: '',
@@ -278,13 +280,14 @@ describe('Streams API', () => {
                 .withApiKey(API_KEY_2)
                 .call()
 
-            await assertResponseIsError(response, 403, 'FORBIDDEN', 'write')
+            await assertResponseIsError(response, 403, 'FORBIDDEN', 'stream_publish')
         })
 
-        context('when called with valid body and permissions', () => {
+        context('when called with valid body and permissions', function() {
+            this.timeout(5000)
             let response
 
-            before(async () => {
+            before(async function() {
                 const uploadResponse = await Streamr.api.v1.streams
                     .uploadCsvFile(streamId, fs.createReadStream('./test-data/test-csv.csv'))
                     .withApiKey(API_KEY)
@@ -301,11 +304,11 @@ describe('Streams API', () => {
                     .call()
             })
 
-            it('responds with 200', () => {
+            it('responds with 200', function() {
                 assert.equal(response.status, 200)
             })
 
-            it('updates stream config fields', async () => {
+            it('updates stream config fields', async function() {
                 const json = await response.json()
                 assert.deepEqual(json.config.fields, [{
                     name: 'age',

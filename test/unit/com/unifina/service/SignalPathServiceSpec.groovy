@@ -1,6 +1,6 @@
 package com.unifina.service
 
-
+import com.unifina.BeanMockingSpecification
 import com.unifina.domain.security.Permission
 import com.unifina.domain.security.SecRole
 import com.unifina.domain.security.SecUser
@@ -14,14 +14,12 @@ import com.unifina.signalpath.SignalPathRunner
 import com.unifina.utils.Globals
 import grails.test.mixin.Mock
 import grails.test.mixin.TestFor
-import grails.util.Holders
-import spock.lang.Specification
 
 import java.security.AccessControlException
 
 @TestFor(SignalPathService)
 @Mock([SecUser, SecRole, SecUserSecRole, Canvas, Serialization])
-class SignalPathServiceSpec extends Specification {
+class SignalPathServiceSpec extends BeanMockingSpecification {
 
 	SecUser me
 	SecUser admin
@@ -45,14 +43,7 @@ class SignalPathServiceSpec extends Specification {
 		)
 		c1.save(failOnError: true)
 		assert c1.serialization.id != null
-
-		canvasService = Mock(CanvasService)
-		Holders.getApplicationContext().beanFactory.registerSingleton("canvasService", canvasService)
-		service.servletContext = [:]
-	}
-
-	def cleanup() {
-		Holders.getApplicationContext().beanFactory.destroySingleton("canvasService")
+		canvasService = mockBean(CanvasService, Mock(CanvasService))
 	}
 
 	def "clearState() clears serialized state"() {
@@ -107,7 +98,6 @@ class SignalPathServiceSpec extends Specification {
 		def runner = Mock(SignalPathRunner)
 		def sp = Mock(SignalPath)
 		service.permissionService = Mock(PermissionService)
-		service.servletContext = service.servletContext ?: [:]
 		service.runnersById[c1.runner] = runner
 
 		when:
@@ -116,7 +106,7 @@ class SignalPathServiceSpec extends Specification {
 		then:
 		1 * runner.getSignalPath() >> sp
 		1 * sp.getCanvas() >> c1
-		1 * service.permissionService.canWrite(me, c1) >> true
+		1 * service.permissionService.check(me, c1, Permission.Operation.CANVAS_STARTSTOP) >> true
 		1 * service.stopLocal(c1) >> false
 		thrown(CanvasUnreachableException)
 	}
@@ -126,10 +116,10 @@ class SignalPathServiceSpec extends Specification {
 		RuntimeRequest req = service.buildRuntimeRequest([type: 'test'], "canvases/$c1.id", me)
 
 		then:
-		1 * canvasService.authorizedGetById(c1.id, me, Permission.Operation.READ) >> c1
+		1 * canvasService.authorizedGetById(c1.id, me, Permission.Operation.CANVAS_GET) >> c1
 		req.getType() == 'test'
 		req.get("type") == 'test'
-		req.getCheckedOperations().contains(Permission.Operation.READ)
+		req.getCheckedOperations().contains(Permission.Operation.CANVAS_GET)
 		req.getPath() == "canvases/$c1.id"
 		req.getOriginalPath() == req.getPath()
 		req.getUser() == me
@@ -142,7 +132,7 @@ class SignalPathServiceSpec extends Specification {
 		then:
 		req.getType() == 'test'
 		req.get("type") == 'test'
-		req.getCheckedOperations().contains(Permission.Operation.READ)
+		req.getCheckedOperations().contains(Permission.Operation.CANVAS_GET)
 		req.getPath() == "canvases/$c1.id"
 		req.getOriginalPath() == req.getPath()
 		req.getUser() == admin
@@ -153,10 +143,10 @@ class SignalPathServiceSpec extends Specification {
 		RuntimeRequest req = service.buildRuntimeRequest([type: 'test'], "canvases/$c1.id", null)
 
 		then:
-		1 * canvasService.authorizedGetById(c1.id, null, Permission.Operation.READ) >> c1
+		1 * canvasService.authorizedGetById(c1.id, null, Permission.Operation.CANVAS_GET) >> c1
 		req.getType() == 'test'
 		req.get("type") == 'test'
-		req.getCheckedOperations().contains(Permission.Operation.READ)
+		req.getCheckedOperations().contains(Permission.Operation.CANVAS_GET)
 		req.getPath() == "canvases/$c1.id"
 		req.getOriginalPath() == req.getPath()
 		req.getUser() == null
@@ -312,7 +302,7 @@ class SignalPathServiceSpec extends Specification {
 		noExceptionThrown()
 
 		and:
-		1 * permissionService.canWrite(user, canvas) >> true
+		1 * permissionService.check(user, canvas, Permission.Operation.CANVAS_STARTSTOP) >> true
 
 		and:
 		response == [type: "stopRequest"]

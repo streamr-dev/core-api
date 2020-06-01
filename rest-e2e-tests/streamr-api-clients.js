@@ -2,6 +2,7 @@ const fetch = require('node-fetch')
 const url = require('url')
 const querystring = require('querystring')
 const FormData = require('form-data')
+const StreamrClient = require('streamr-client')
 
 class StreamrApiRequest {
     constructor(options) {
@@ -51,7 +52,7 @@ class StreamrApiRequest {
         return this
     }
 
-    call() {
+    async call() {
         if (!this.method) {
             throw 'Method not set.'
         }
@@ -214,6 +215,11 @@ class Streams {
             .withBody(body)
     }
 
+    get(id) {
+        return new StreamrApiRequest(this.options)
+            .methodAndPath('GET', `streams/${id}`)
+    }
+
     setFields(id, body) {
         return new StreamrApiRequest(this.options)
             .methodAndPath('POST', `streams/${id}/fields`)
@@ -235,18 +241,52 @@ class Streams {
             .withBody(body)
     }
 
-    makePublic(id) {
+    grantPublic(id, operation) {
         return new StreamrApiRequest(this.options)
             .methodAndPath('POST', `streams/${id}/permissions`)
             .withBody({
                 anonymous: true,
-                operation: 'read'
+                operation,
             })
+    }
+
+    grant(id, targetUser, operation) {
+        return new StreamrApiRequest(this.options)
+            .methodAndPath('POST', `streams/${id}/permissions`)
+            .withBody({
+                user: targetUser,
+                operation,
+            })
+    }
+
+    getOwnPermissions(id) {
+        return new StreamrApiRequest(this.options)
+            .methodAndPath('GET', `streams/${id}/permissions/me`)
+    }
+
+    getValidationInfo(id) {
+        return new StreamrApiRequest(this.options)
+            .methodAndPath('GET', `streams/${id}/validation`)
     }
 
     getPublishers(id) {
         return new StreamrApiRequest(this.options)
             .methodAndPath('GET', `streams/${id}/publishers`)
+    }
+
+    getSubscribers(id) {
+        return new StreamrApiRequest(this.options)
+            .methodAndPath('GET', `streams/${id}/subscribers`)
+    }
+
+    isPublisher(streamId, address) {
+        return new StreamrApiRequest(this.options)
+            .methodAndPath('GET', `streams/${streamId}/publisher/${address}`)
+    }
+
+    isSubscriber(streamId, address) {
+        return new StreamrApiRequest(this.options)
+            .methodAndPath('GET', `streams/${streamId}/subscriber/${address}`)
     }
 }
 

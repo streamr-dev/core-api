@@ -1,11 +1,6 @@
 package com.unifina.service
 
-import com.unifina.api.ApiException
-import com.unifina.api.NotFoundException
-import com.unifina.api.NotPermittedException
-import com.unifina.api.SaveDashboardCommand
-import com.unifina.api.SaveDashboardItemCommand
-import com.unifina.api.ValidationException
+import com.unifina.api.*
 import com.unifina.domain.dashboard.Dashboard
 import com.unifina.domain.dashboard.DashboardItem
 import com.unifina.domain.security.Permission
@@ -22,7 +17,7 @@ class DashboardService {
 	SignalPathService signalPathService
 
 	List<Dashboard> findAllDashboards(SecUser user) {
-		return permissionService.getAll(Dashboard, user) { order "dateCreated", "desc" }
+		return permissionService.get(Dashboard, user, Permission.Operation.DASHBOARD_GET, true) { order "dateCreated", "desc" }
 	}
 
 	/**
@@ -35,7 +30,7 @@ class DashboardService {
 	 */
 	@CompileStatic
 	Dashboard findById(String id, SecUser user) throws NotFoundException, NotPermittedException {
-		Dashboard dashboard = authorizedGetById(id, user, Permission.Operation.READ)
+		Dashboard dashboard = authorizedGetById(id, user, Permission.Operation.DASHBOARD_GET)
 		return dashboard
 	}
 
@@ -49,7 +44,7 @@ class DashboardService {
 	 */
 	@CompileStatic
 	void deleteById(String id, SecUser user) throws NotFoundException, NotPermittedException {
-		def dashboard = authorizedGetById(id, user, Permission.Operation.WRITE)
+		def dashboard = authorizedGetById(id, user, Permission.Operation.DASHBOARD_DELETE)
 		dashboard.delete()
 	}
 
@@ -92,7 +87,7 @@ class DashboardService {
 	 * @return
 	 */
 	Dashboard update(String id, SaveDashboardCommand validCommand, SecUser user) throws NotFoundException, NotPermittedException {
-		Dashboard dashboard = authorizedGetById(id, user, Operation.WRITE)
+		Dashboard dashboard = authorizedGetById(id, user, Operation.DASHBOARD_EDIT)
 
 		def properties = validCommand.properties.subMap(["name", "layout"])
 		dashboard.setProperties(properties)
@@ -144,7 +139,7 @@ class DashboardService {
 	@CompileStatic
 	DashboardItem findDashboardItem(String dashboardId, String itemId, SecUser user)
 		throws NotFoundException, NotPermittedException {
-		return authorizedGetDashboardItem(dashboardId, itemId, user, Permission.Operation.READ)
+		return authorizedGetDashboardItem(dashboardId, itemId, user, Permission.Operation.DASHBOARD_GET)
 	}
 
 	/**
@@ -157,7 +152,7 @@ class DashboardService {
 	 */
 	void deleteDashboardItem(String dashboardId, String itemId, SecUser user)
 		throws NotFoundException, NotPermittedException {
-		def dashboard = authorizedGetById(dashboardId, user, Permission.Operation.WRITE)
+		def dashboard = authorizedGetById(dashboardId, user, Permission.Operation.DASHBOARD_EDIT)
 		def dashboardItem = dashboard.items.find { DashboardItem item -> item.id == itemId }
 		if (dashboardItem == null) {
 			throw new NotFoundException(DashboardItem.simpleName, itemId.toString())
@@ -181,7 +176,7 @@ class DashboardService {
 		if (!command.validate()) {
 			throw new ValidationException(command.errors)
 		}
-		def dashboard = authorizedGetById(dashboardId, user, Operation.WRITE)
+		def dashboard = authorizedGetById(dashboardId, user, Operation.DASHBOARD_EDIT)
 		def item = new DashboardItem(command.properties)
 
 		dashboard.addToItems(item)
@@ -207,7 +202,7 @@ class DashboardService {
 			throw new ValidationException(command.errors)
 		}
 
-		def item = authorizedGetDashboardItem(dashboardId, itemId, user, Operation.WRITE)
+		def item = authorizedGetDashboardItem(dashboardId, itemId, user, Operation.DASHBOARD_EDIT)
 		item.setProperties(command.properties)
 		item.save(failOnError: true)
 
@@ -240,7 +235,7 @@ class DashboardService {
 	RuntimeRequest buildRuntimeRequest(Map msg, String path, String originalPath = path, SecUser user) {
 		RuntimeRequest.PathReader pathReader = RuntimeRequest.getPathReader(path)
 
-		Dashboard dashboard = authorizedGetById(pathReader.readDashboardId(), user, Operation.READ)
+		Dashboard dashboard = authorizedGetById(pathReader.readDashboardId(), user, Operation.DASHBOARD_GET)
 		Canvas canvas = Canvas.get(pathReader.readCanvasId())
 		Integer moduleId = pathReader.readModuleId()
 
@@ -255,7 +250,7 @@ class DashboardService {
 
 		if (item) {
 			Set<Operation> checkedOperations = new HashSet<>()
-			checkedOperations.add(Operation.READ)
+			checkedOperations.add(Operation.DASHBOARD_GET)
 			RuntimeRequest request = new RuntimeRequest(msg, user, canvas, path.replace("dashboards/$dashboard.id/", ""), path, checkedOperations)
 			return request
 		} else {

@@ -48,7 +48,7 @@ class UserApiController {
 		}
 		SecUser user = loggedInUser()
 		user.password = passwordEncoder.encodePassword(cmd.password)
-		user.save(flush: true, failOnError: true)
+		user.save(flush: false, failOnError: true)
 		log.info("User $user.username changed password!")
 		render(status: 204, body: "")
 	}
