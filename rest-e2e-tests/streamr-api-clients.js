@@ -15,6 +15,7 @@ class StreamrApiRequest {
         this.authHeader = null
         this.contentType = null
         this.queryParams = ''
+        this.accept = null
     }
 
     methodAndPath(method, relativePath) {
@@ -40,15 +41,25 @@ class StreamrApiRequest {
         return this
     }
 
-    withBody(body) {
-        this.body = JSON.stringify(body)
-        this.contentType = 'application/json'
+    withJSONBody(body) {
+        const json = JSON.stringify(body)
+        return this.withContentTypeAndBody('application/json', json)
+    }
+
+    // TODO(kkn) Rename to withFormBody()
+    withRawBody(body) {
+        // TODO(kkn) 'multipart/form-data' is the proper Content-Type for HTML form submission, but it breaks existing REST tests
+        return this.withContentTypeAndBody(null, body)
+    }
+
+    withContentTypeAndBody(contentType, body) {
+        this.contentType = contentType
+        this.body = body
         return this
     }
 
-    withRawBody(body) {
-        this.body = body
-        this.contentType = null
+    withAccept(accept) {
+        this.accept = accept
         return this
     }
 
@@ -64,6 +75,9 @@ class StreamrApiRequest {
 
         const headers = {
             'Accept': 'application/json'
+        }
+        if (this.accept) {
+            headers['Accept'] = this.accept
         }
         if (this.body && this.contentType) {
             headers['Content-type'] = this.contentType
@@ -137,13 +151,13 @@ class Products {
     create(body) {
         return new StreamrApiRequest(this.options)
             .methodAndPath('POST', 'products')
-            .withBody(body)
+            .withJSONBody(body)
     }
 
     update(id, body) {
         return new StreamrApiRequest(this.options)
             .methodAndPath('PUT', `products/${id}`)
-            .withBody(body)
+            .withJSONBody(body)
     }
 
     setDeploying(id) {
@@ -154,7 +168,7 @@ class Products {
     setDeployed(id, body) {
         return new StreamrApiRequest(this.options)
             .methodAndPath('POST', `products/${id}/setDeployed`)
-            .withBody(body)
+            .withJSONBody(body)
     }
 
     setUndeploying(id) {
@@ -165,7 +179,7 @@ class Products {
     setUndeployed(id, body) {
         return new StreamrApiRequest(this.options)
             .methodAndPath('POST', `products/${id}/setUndeployed`)
-            .withBody(body)
+            .withJSONBody(body)
     }
 
     deployFree(id) {
@@ -212,7 +226,7 @@ class Streams {
     create(body) {
         return new StreamrApiRequest(this.options)
             .methodAndPath('POST', 'streams')
-            .withBody(body)
+            .withJSONBody(body)
     }
 
     get(id) {
@@ -223,7 +237,7 @@ class Streams {
     setFields(id, body) {
         return new StreamrApiRequest(this.options)
             .methodAndPath('POST', `streams/${id}/fields`)
-            .withBody(body)
+            .withJSONBody(body)
     }
 
     uploadCsvFile(id, fileBytes) {
@@ -238,13 +252,13 @@ class Streams {
     confirmCsvUpload(id, body) {
         return new StreamrApiRequest(this.options)
             .methodAndPath('POST', `streams/${id}/confirmCsvFileUpload`)
-            .withBody(body)
+            .withJSONBody(body)
     }
 
     grantPublic(id, operation) {
         return new StreamrApiRequest(this.options)
             .methodAndPath('POST', `streams/${id}/permissions`)
-            .withBody({
+            .withJSONBody({
                 anonymous: true,
                 operation,
             })
@@ -253,10 +267,16 @@ class Streams {
     grant(id, targetUser, operation) {
         return new StreamrApiRequest(this.options)
             .methodAndPath('POST', `streams/${id}/permissions`)
-            .withBody({
+            .withJSONBody({
                 user: targetUser,
                 operation,
             })
+    }
+
+    grantWithContentTypeAndBody(contentType, body, id, targetUser, operation) {
+        return new StreamrApiRequest(this.options)
+            .methodAndPath('POST', `streams/${id}/permissions`)
+            .withContentTypeAndBody(contentType, body)
     }
 
     getOwnPermissions(id) {
@@ -298,7 +318,7 @@ class Canvases {
     create(body) {
         return new StreamrApiRequest(this.options)
             .methodAndPath('POST', 'canvases')
-            .withBody(body)
+            .withJSONBody(body)
     }
 
     get(id) {
@@ -319,7 +339,7 @@ class Canvases {
     getRuntimeState(id, path) {
         return new StreamrApiRequest(this.options)
             .methodAndPath('POST', `canvases/${id}/${path}/request`)
-            .withBody({
+            .withJSONBody({
                 type: 'json'
             })
     }
@@ -333,7 +353,7 @@ class Subscriptions {
     create(body) {
         return new StreamrApiRequest(this.options)
             .methodAndPath('POST', 'subscriptions')
-            .withBody(body)
+            .withJSONBody(body)
     }
 
     list() {
@@ -350,7 +370,7 @@ class Login {
     challenge(address) {
         return new StreamrApiRequest(this.options)
             .methodAndPath('POST', `login/challenge/${address}`)
-            .withBody()
+            .withJSONBody()
     }
 }
 
@@ -362,7 +382,7 @@ class IntegrationKeys {
     create(body) {
         return new StreamrApiRequest(this.options)
             .methodAndPath('POST', 'integration_keys')
-            .withBody(body)
+            .withJSONBody(body)
     }
 }
 

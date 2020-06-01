@@ -17,6 +17,8 @@ import grails.converters.JSON
 import grails.validation.Validateable
 import groovy.transform.ToString
 
+import javax.servlet.http.HttpServletResponse
+
 class PermissionApiController {
 	PermissionService permissionService
 
@@ -30,6 +32,11 @@ class PermissionApiController {
 		List<Permission> permissions = permissionService.findAllPermissions(resource, request.apiUser, request.apiKey, subscriptions)
 		def perms = permissions*.toMap()
 		render(perms as JSON)
+		request.withFormat {
+			json {
+				return render(perms as JSON)
+			}
+		}
 	}
 
 	@StreamrApi(authenticationLevel = AuthLevel.NONE)
@@ -37,7 +44,11 @@ class PermissionApiController {
 		Resource resource = new Resource(params.resourceClass, params.resourceId)
 		List<Permission> permissions = permissionService.getOwnPermissions(resource, request.apiUser, request.apiKey)
 		def perms = permissions*.toMap()
-		render(perms as JSON)
+		request.withFormat {
+			json {
+				return render(perms as JSON)
+			}
+		}
 	}
 
 	@StreamrApi(authenticationLevel = AuthLevel.NONE)
@@ -81,27 +92,49 @@ class PermissionApiController {
 			}
 		}
 		header("Location", request.forwardURI + "/" + newPermission.id)
-		render(newPermission.toMap() as JSON)
+		withFormat {
+			json {
+				return render(newPermission.toMap() as JSON)
+			}
+			"*" {
+				return render(newPermission.toMap() as JSON)
+			}
+			xml {
+				return render(status: HttpServletResponse.SC_BAD_REQUEST)
+			}
+		}
 	}
 
 	@StreamrApi(authenticationLevel = AuthLevel.NONE)
 	def show(Long id) {
 		Resource resource = new Resource(params.resourceClass, params.resourceId)
 		Permission p = permissionService.findPermission(id, resource, request.apiUser, request.apiKey)
-		render(p.toMap() as JSON)
+		request.withFormat {
+			json {
+				return render(p.toMap() as JSON)
+			}
+		}
 	}
 
 	@StreamrApi(authenticationLevel = AuthLevel.NONE)
 	def delete(Long id) {
 		Resource resource = new Resource(params.resourceClass, params.resourceId)
 		permissionService.deletePermission(id, resource, request.apiUser, request.apiKey)
-		render(status: 204)
+		request.withFormat {
+			json {
+				response.status = HttpServletResponse.SC_NO_CONTENT
+			}
+		}
 	}
 
 	@StreamrApi(allowRoles = AllowRole.DEVOPS)
 	def cleanup() {
 		permissionService.cleanUpExpiredPermissions()
-		render(status: 200)
+		request.withFormat {
+			json {
+				response.status = HttpServletResponse.SC_OK
+			}
+		}
 	}
 }
 

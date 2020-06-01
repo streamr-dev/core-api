@@ -82,6 +82,64 @@ describe('Permissions API', function() { // use "function" instead of arrow beca
             assert.equal(response.status, 200)
         })
 
+        it('REST API requires "application/json" as request Content-Type with optional request Accept header', async function() {
+            const response = await Streamr.api.v1.streams
+                .grant(stream.id, 'tester1@streamr.com', 'stream_get')
+                .withAccept('application/json')
+                .withSessionToken(mySessionToken)
+                .call()
+            assert.equal(response.status, 200)
+        })
+
+        it('REST API requires "application/json" as request Content-Type', async function() {
+            const response = await Streamr.api.v1.streams
+                .grant(stream.id, 'tester1@streamr.com', 'stream_get')
+                .withSessionToken(mySessionToken)
+                .call()
+            assert.equal(response.status, 200)
+        })
+
+        it('REST API responds with 400 when request when requested with unsupported Accept HTTP header ', async function() {
+            const response = await Streamr.api.v1.streams
+                .grant(stream.id, 'tester1@streamr.com', 'stream_get')
+                .withAccept('text/xml')
+                .withSessionToken(mySessionToken)
+                .call()
+            assert.equal(response.status, 400)
+        })
+
+        it('REST API responds with 400 for Accept XML', async function() {
+            const response = await Streamr.api.v1.streams
+                .grant(stream.id, 'tester1@streamr.com', 'stream_get')
+                .withAccept('text/xml')
+                .withSessionToken(mySessionToken)
+                .call()
+            assert.equal(response.status, 400)
+        })
+
+        it('REST API responds with 200 for Content-Type XML and Accept JSON', async function() {
+            const xml = `<?xml version="1.0" encoding="UTF-8"?><newpermission><operation>stream_get</operation><user>${existingUser.address}</user></newpermission>`
+            const response = await Streamr.api.v1.streams
+                .grantWithContentTypeAndBody('text/xml', xml, stream.id, 'tester1@streamr.com', 'stream_get')
+                .withAccept('application/json')
+                .withSessionToken(mySessionToken)
+                .call()
+            const json = await response.json()
+            assert.equal(response.status, 200, JSON.stringify(json))
+            assert.equal(json.operation, 'stream_get')
+        })
+
+        it('REST API responds with 200 for Content-Type application/json and Accept */*', async function() {
+            const response = await Streamr.api.v1.streams
+                .grant(stream.id, 'tester1@streamr.com', 'stream_get')
+                .withAccept('*/*')
+                .withSessionToken(mySessionToken)
+                .call()
+            const json = await response.json()
+            assert.equal(response.status, 200, JSON.stringify(json))
+            assert.equal(json.operation, 'stream_get')
+        })
+
         describe('race conditions', () => {
             // The worst case is that there are parallel requests open for all the different operations
             const operations = [
