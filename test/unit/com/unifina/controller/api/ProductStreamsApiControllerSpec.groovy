@@ -15,7 +15,7 @@ import spock.lang.Specification
 @TestFor(ProductStreamsApiController)
 @Mock([UnifinaCoreAPIFilters])
 class ProductStreamsApiControllerSpec extends Specification {
-	void "index() invokes productService#findById (READ)"() {
+	void "index() invokes productService#findById (product_get)"() {
 		def productService = controller.productService = Mock(ProductService)
 
 		params.productId = "product-id"
@@ -25,7 +25,7 @@ class ProductStreamsApiControllerSpec extends Specification {
 			controller.index()
 		}
 		then:
-		1 * productService.findById("product-id", user, Permission.Operation.READ) >> new Product()
+		1 * productService.findById("product-id", user, Permission.Operation.PRODUCT_GET) >> new Product()
 	}
 
 	void "index() returns 200 and list of streams"() {
@@ -53,7 +53,7 @@ class ProductStreamsApiControllerSpec extends Specification {
 		response.json as Set == [s1, s2, s3]*.toMap() as Set
 	}
 
-	void "update() invokes productService#findById (WRITE) and productService#addStreamToProduc"() {
+	void "update() invokes productService#findById (product_edit) and productService#addStreamToProduc"() {
 		def productService = controller.productService = Mock(ProductService)
 		controller.apiService = Stub(ApiService) {
 			getByIdAndThrowIfNotFound(_, _) >> {
@@ -73,7 +73,7 @@ class ProductStreamsApiControllerSpec extends Specification {
 			controller.update()
 		}
 		then:
-		1 * productService.findById("product-id", user, Permission.Operation.WRITE) >> product
+		1 * productService.findById("product-id", user, Permission.Operation.PRODUCT_EDIT) >> product
 		1 * productService.addStreamToProduct(product, _ as Stream, user)
 	}
 
@@ -107,7 +107,7 @@ class ProductStreamsApiControllerSpec extends Specification {
 		response.status == 204
 	}
 
-	void "delete() invokes productService#findById (WRITE) and productService#addStreamToProduc"() {
+	void "delete() invokes productService#findById (product_edit) and productService#addStreamToProduc"() {
 		def productService = controller.productService = Mock(ProductService)
 		controller.apiService = Stub(ApiService) {
 			getByIdAndThrowIfNotFound(_, _) >> {
@@ -127,7 +127,7 @@ class ProductStreamsApiControllerSpec extends Specification {
 			controller.delete()
 		}
 		then:
-		1 * productService.findById("product-id", user, Permission.Operation.WRITE) >> product
+		1 * productService.findById("product-id", user, Permission.Operation.PRODUCT_DELETE) >> product
 		1 * productService.removeStreamFromProduct(product, _ as Stream)
 	}
 

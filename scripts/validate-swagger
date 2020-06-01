@@ -1,6 +1,6 @@
 #!/bin/bash
 
-JSON=$(curl --silent --fail -d @"docs/swagger.json" -H "Content-Type: application/json" "http://online.swagger.io/validator/debug")
+JSON=$(curl --silent --fail --max-time 10 -d @"docs/swagger.json" -H "Content-Type: application/json" "http://online.swagger.io/validator/debug")
 CURL_EXIT_CODE=$?
 if [ $CURL_EXIT_CODE -ne 0 ]; then
 	echo "validate-swagger: error while uploading swagger.json to online.swagger.io" 1>&2

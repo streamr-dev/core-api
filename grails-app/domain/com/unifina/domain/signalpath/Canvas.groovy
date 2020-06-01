@@ -6,8 +6,10 @@ import com.unifina.domain.security.Permission
 import com.unifina.domain.security.SecUser
 import com.unifina.utils.IdGenerator
 import grails.converters.JSON
+import grails.persistence.Entity
 import groovy.transform.CompileStatic
 
+@Entity
 class Canvas {
 	public final static String DEFAULT_NAME = "Untitled Canvas"
 	enum State {

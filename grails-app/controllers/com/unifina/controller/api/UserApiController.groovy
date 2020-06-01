@@ -1,20 +1,20 @@
 package com.unifina.controller.api
 
 import com.unifina.api.ApiException
+import com.unifina.api.InvalidUsernameAndPasswordException
 import com.unifina.domain.security.SecUser
 import com.unifina.security.AuthLevel
+import com.unifina.security.PasswordEncoder
 import com.unifina.security.StreamrApi
+import com.unifina.service.BalanceService
 import com.unifina.service.UserAvatarImageService
 import com.unifina.service.UserService
 import grails.converters.JSON
-import grails.plugin.springsecurity.annotation.Secured
-import org.springframework.web.multipart.MultipartFile
 import grails.validation.Validateable
-import com.unifina.service.BalanceService
+import org.springframework.web.multipart.MultipartFile
 
-@Secured(["IS_AUTHENTICATED_ANONYMOUSLY"])
 class UserApiController {
-	def springSecurityService
+	PasswordEncoder passwordEncoder
 	UserService userService
 	UserAvatarImageService userAvatarImageService
 	BalanceService balanceService
@@ -38,8 +38,8 @@ class UserApiController {
 			throw new ApiException(400, "PASSWORD_CHANGE_FAILED", "Password not changed!")
 		}
 		SecUser user = loggedInUser()
-		user.password = springSecurityService.encodePassword(cmd.password)
-		user.save(flush: true, failOnError: true)
+		user.password = passwordEncoder.encodePassword(cmd.password)
+		user.save(flush: false, failOnError: true)
 		log.info("User $user.username changed password!")
 		render(status: 204, body: "")
 	}
@@ -96,7 +96,7 @@ class UpdateProfileCommand {
 @Validateable
 class ChangePasswordCommand {
 
-	def springSecurityService
+	PasswordEncoder passwordEncoder
 	def userService
 
 	String username
@@ -107,13 +107,17 @@ class ChangePasswordCommand {
 	static constraints = {
 		username(blank: false)
 		currentpassword validator: {String pwd, ChangePasswordCommand cmd->
-			def user = cmd.userService.getUserFromUsernameAndPassword(cmd.username, cmd.currentpassword)
+			SecUser user
+			try {
+				user = cmd.userService.getUserFromUsernameAndPassword(cmd.username, cmd.currentpassword)
+			} catch (InvalidUsernameAndPasswordException e) {
+				return false
+			}
 			if (user == null) {
 				return false
 			}
 			def encodedPassword = user.password
-			def encoder = cmd.springSecurityService.passwordEncoder
-			return encoder.isPasswordValid(encodedPassword, pwd, null /*salt*/)
+			return cmd.passwordEncoder.isPasswordValid(encodedPassword, pwd)
 		}
 		password validator: {String password, ChangePasswordCommand command ->
 			return command.userService.passwordValidator(password, command)

@@ -136,7 +136,7 @@ class ForEachSpec extends BeanMockingSpecification {
 		then:
 		// gets called in SignalPathParameter#getConfiguration(),
 		// once during module.getConfiguration() and once during module.configure()
-		2 * permissionService.get(_,_,_) >> []
+		2 * permissionService.get(_,_,_,_) >> []
 		thrown(NoExportedInputsException)
 	}
 

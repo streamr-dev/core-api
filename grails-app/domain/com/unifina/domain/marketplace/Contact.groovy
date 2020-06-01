@@ -1,7 +1,11 @@
 package com.unifina.domain.marketplace
 
 import com.unifina.utils.EmailValidator
+import grails.compiler.GrailsCompileStatic
+import grails.validation.Validateable
 
+@GrailsCompileStatic
+@Validateable
 class Contact {
 	// Contact's email address.
 	String email
@@ -15,9 +19,6 @@ class Contact {
 	String social3
 	// Social media link 4
 	String social4
-
-	public Contact() {}
-	public Contact(Product product) {}
 
 	static constraints = {
 		email(nullable: true, validator: EmailValidator.validateNullEmail, maxSize: 255)

@@ -4,6 +4,7 @@ import com.unifina.domain.data.Stream
 import com.unifina.domain.marketplace.Category
 import com.unifina.domain.marketplace.Contact
 import com.unifina.domain.marketplace.Product
+import com.unifina.domain.security.Permission
 import com.unifina.domain.marketplace.TermsOfUse
 import com.unifina.domain.security.SecUser
 import com.unifina.service.PermissionService
@@ -89,7 +90,7 @@ class UpdateProductCommand {
 		}
 
 		if (pendingChanges != null) {
-			if (!permissionService.canShare(user, product)) {
+			if (!permissionService.check(user, product, Permission.Operation.PRODUCT_SHARE)) {
 				throw new FieldCannotBeUpdatedException("User doesn't have permission to share product.")
 			} else {
 				product.pendingChanges = new JsonBuilder(pendingChanges).toString()

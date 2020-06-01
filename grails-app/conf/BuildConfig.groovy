@@ -83,8 +83,27 @@ grails.project.dependency.resolution = {
 			excludes('org.springframework:spring-context:*')
 			excludes('org.springframework:spring-orm:*')
 		}
+		compile('org.springframework.security:spring-security-core:3.2.9.RELEASE') { // Needed for bcrypt password encoder
+			excludes('aopalliance', 'aspectjrt', 'cglib-nodep', 'commons-collections', 'commons-logging',
+				'ehcache', 'fest-assert', 'hsqldb', 'jcl-over-slf4j', 'jsr250-api', 'junit',
+				'logback-classic', 'mockito-core', 'powermock-api-mockito', 'powermock-api-support',
+				'powermock-core', 'powermock-module-junit4', 'powermock-module-junit4-common',
+				'powermock-reflect', 'spring-aop', 'spring-beans', 'spring-context', 'spring-core',
+				'spring-expression', 'spring-jdbc', 'spring-test', 'spring-tx')
+		}
+		compile('org.springframework.security:spring-security-web:3.2.9.RELEASE') { // Needed for CORS
+			excludes('aopalliance', 'commons-codec', 'commons-logging', 'fest-assert', 'groovy', 'hsqldb',
+				'jcl-over-slf4j', 'junit', 'logback-classic', 'mockito-core', 'powermock-api-mockito',
+				'powermock-api-support', 'powermock-core', 'powermock-module-junit4',
+				'powermock-module-junit4-common', 'powermock-reflect', 'spock-core', 'spring-beans',
+				'spring-context', 'spring-core', 'spring-expression', 'spring-jdbc',
+				'spring-security-core', 'spring-test', 'spring-tx', 'spring-web', 'spring-webmvc',
+				'tomcat-servlet-api')
+		}
 
-		compile('org.web3j:core:4.4.1')
+		compile('org.web3j:core:4.4.1') {
+			excludes "org.java-websocket:Java-WebSocket:1.3.8" // Version conflict with com.streamr:client
+		}
 		compile('com.amazonaws:aws-java-sdk:1.11.294')
 		compile('org.imgscalr:imgscalr-lib:4.2')
 		compile('commons-io:commons-io:2.4')
@@ -93,7 +112,7 @@ grails.project.dependency.resolution = {
 		compile('org.glassfish.jersey.media:jersey-media-json-jackson:2.27')
 		compile('com.fasterxml.jackson.core:jackson-databind:2.9.6')
 		compile('com.fasterxml.jackson.core:jackson-annotations:2.9.6')
-		compile('com.streamr:client:1.2.5')
+		compile('com.streamr:client:1.4.0')
 
 		compile('com.google.code.gson:gson:2.8.5')
 		runtime('mysql:mysql-connector-java:5.1.20')
@@ -102,7 +121,7 @@ grails.project.dependency.resolution = {
 		runtime('commons-codec:commons-codec:1.6')
 		runtime('com.opencsv:opencsv:3.3')
 		runtime('de.ruedigermoeller:fst:2.56')
-		runtime('joda-time:joda-time:2.9.3')
+		runtime('joda-time:joda-time:2.10.6')
 
 		test('cglib:cglib:3.2.6')
 		test('org.gaul:httpbin:1.3.0') {
@@ -124,7 +143,6 @@ grails.project.dependency.resolution = {
 			excludes('spring-security-web')
 		}
 		runtime(':database-migration:1.4.2-SNAPSHOT')
-		runtime(":spring-security-core:2.0.0")
 
 		test(":plastic-criteria:1.6.7")
 		test(":rest-client-builder:2.1.1")

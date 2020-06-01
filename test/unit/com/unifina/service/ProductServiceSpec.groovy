@@ -282,10 +282,10 @@ class ProductServiceSpec extends Specification {
 		def me = new SecUser(username: "me@streamr.com")
 
 		when:
-		service.findById("product-id", me, Permission.Operation.READ)
+		service.findById("product-id", me, Permission.Operation.PRODUCT_GET)
 
 		then:
-		1 * apiService.authorizedGetById(Product, "product-id", me, Permission.Operation.READ)
+		1 * apiService.authorizedGetById(Product, "product-id", me, Permission.Operation.PRODUCT_GET)
 	}
 
 	void "create() throws ValidationException if command object does not pass validation"() {
@@ -393,12 +393,12 @@ class ProductServiceSpec extends Specification {
 		when:
 		service.create(validCommand, me)
 		then:
-		1 * permissionService.verifyShare(me, s1)
-		1 * permissionService.verifyShare(me, s2)
-		1 * permissionService.verifyShare(me, s3)
+		1 * permissionService.verify(me, s1, Permission.Operation.STREAM_SHARE)
+		1 * permissionService.verify(me, s2, Permission.Operation.STREAM_SHARE)
+		1 * permissionService.verify(me, s3, Permission.Operation.STREAM_SHARE)
 	}
 
-	void "create() adds anonymous read permission for free products streams"() {
+	void "create() adds anonymous get/subscribe permission for free products streams"() {
 		setupStreams()
 		def permissionService = service.permissionService = Mock(PermissionService)
 
@@ -417,9 +417,12 @@ class ProductServiceSpec extends Specification {
 		when:
 		service.create(validCommand, me)
 		then:
-		1 * permissionService.systemGrantAnonymousAccess(s1, Permission.Operation.READ)
-		1 * permissionService.systemGrantAnonymousAccess(s2, Permission.Operation.READ)
-		1 * permissionService.systemGrantAnonymousAccess(s3, Permission.Operation.READ)
+		1 * permissionService.systemGrantAnonymousAccess(s1, Permission.Operation.STREAM_GET)
+		1 * permissionService.systemGrantAnonymousAccess(s1, Permission.Operation.STREAM_SUBSCRIBE)
+		1 * permissionService.systemGrantAnonymousAccess(s2, Permission.Operation.STREAM_GET)
+		1 * permissionService.systemGrantAnonymousAccess(s2, Permission.Operation.STREAM_SUBSCRIBE)
+		1 * permissionService.systemGrantAnonymousAccess(s3, Permission.Operation.STREAM_GET)
+		1 * permissionService.systemGrantAnonymousAccess(s3, Permission.Operation.STREAM_SUBSCRIBE)
 	}
 
 	void "create() does not save if permissionService#verifyShare throws"() {
@@ -551,8 +554,8 @@ class ProductServiceSpec extends Specification {
 		when:
 		service.update("product-id", validCommand, user)
 		then:
-		1 * permissionService.verifyShare(user, s2)
-		1 * permissionService.verifyShare(user, s4)
+		1 * permissionService.verify(user, s2, Permission.Operation.STREAM_SHARE)
+		1 * permissionService.verify(user, s4, Permission.Operation.STREAM_SHARE)
 	}
 
 	void "update() revokes and grants anonymous read permission for free products streams"() {
@@ -581,11 +584,24 @@ class ProductServiceSpec extends Specification {
 		when:
 		service.update("product-id", validCommand, user)
 		then:
-		1 * permissionService.systemRevokeAnonymousAccess(s1, Permission.Operation.READ)
-		1 * permissionService.systemRevokeAnonymousAccess(s2, Permission.Operation.READ)
-		1 * permissionService.systemRevokeAnonymousAccess(s3, Permission.Operation.READ)
-		1 * permissionService.systemGrantAnonymousAccess(s2, Permission.Operation.READ)
-		1 * permissionService.systemGrantAnonymousAccess(s4, Permission.Operation.READ)
+		1 * permissionService.verify(user, s2, Permission.Operation.STREAM_SHARE)
+		1 * permissionService.verify(user, s4, Permission.Operation.STREAM_SHARE)
+
+		// revoke streams old permissions
+		1 * permissionService.systemRevokeAnonymousAccess(s1, Permission.Operation.STREAM_GET)
+		1 * permissionService.systemRevokeAnonymousAccess(s2, Permission.Operation.STREAM_GET)
+		1 * permissionService.systemRevokeAnonymousAccess(s3, Permission.Operation.STREAM_GET)
+		1 * permissionService.systemRevokeAnonymousAccess(s1, Permission.Operation.STREAM_SUBSCRIBE)
+		1 * permissionService.systemRevokeAnonymousAccess(s2, Permission.Operation.STREAM_SUBSCRIBE)
+		1 * permissionService.systemRevokeAnonymousAccess(s3, Permission.Operation.STREAM_SUBSCRIBE)
+
+		// grant permissions for new streams
+		1 * permissionService.systemGrantAnonymousAccess(s2, Permission.Operation.STREAM_GET)
+		1 * permissionService.systemGrantAnonymousAccess(s4, Permission.Operation.STREAM_GET)
+		1 * permissionService.systemGrantAnonymousAccess(s2, Permission.Operation.STREAM_SUBSCRIBE)
+		1 * permissionService.systemGrantAnonymousAccess(s4, Permission.Operation.STREAM_SUBSCRIBE)
+
+		0 * permissionService._
 	}
 
 	void "update() does not save if permissionService#verifyShare throws"() {
@@ -631,7 +647,7 @@ class ProductServiceSpec extends Specification {
 		service.update("product-id", validCommand, user)
 
 		then:
-		1 * apiService.authorizedGetById(Product, 'product-id', user, Permission.Operation.WRITE) >> product
+		1 * apiService.authorizedGetById(Product, 'product-id', user, Permission.Operation.PRODUCT_EDIT) >> product
 	}
 
 	void "update() invokes subscriptionService#afterProductUpdated after Product updated"() {
@@ -763,8 +779,7 @@ class ProductServiceSpec extends Specification {
 		when:
 		service.addStreamToProduct(product, s4, user)
 		then:
-		1 * permissionService.verifyShare(user, s4)
-
+		1 * permissionService.verify(user, s4, Permission.Operation.STREAM_SHARE)
 	}
 
 	void "addStreamToProduct() adds Stream to Product"() {
@@ -794,7 +809,7 @@ class ProductServiceSpec extends Specification {
 		when:
 		service.addStreamToProduct(product, s4, user)
 		then:
-		1 * service.permissionService.systemGrantAnonymousAccess(s4, Permission.Operation.READ)
+		1 * service.permissionService.systemGrantAnonymousAccess(s4, Permission.Operation.STREAM_GET)
 	}
 
 	void "addStreamToProduct() invokes subscriptionService#afterProductUpdated"() {
@@ -832,7 +847,7 @@ class ProductServiceSpec extends Specification {
 		when:
 		service.removeStreamFromProduct(product, s1)
 		then:
-		1 * service.permissionService.systemRevokeAnonymousAccess(s1, Permission.Operation.READ)
+		1 * service.permissionService.systemRevokeAnonymousAccess(s1, Permission.Operation.STREAM_GET)
 	}
 
 	void "removeStreamFromProduct() invokes subscriptionService#afterProductUpdated"() {
@@ -999,7 +1014,7 @@ class ProductServiceSpec extends Specification {
 		})
 
 		then:
-		1 * permissionService.systemRevokeAnonymousAccess(product)
+		1 * permissionService.systemRevokeAnonymousAccess(product, Permission.Operation.PRODUCT_GET)
 	}
 
 	void "markAsDeployed() throws ValidationException if command object does not pass validation"() {
@@ -1211,7 +1226,7 @@ class ProductServiceSpec extends Specification {
 		})
 
 		then:
-		1 * permissionService.systemGrantAnonymousAccess(product)
+		1 * permissionService.systemGrantAnonymousAccess(product, Permission.Operation.PRODUCT_GET)
 	}
 
 	void "updatePricing() updates product price etc"() {
@@ -1298,8 +1313,8 @@ class ProductServiceSpec extends Specification {
 		service.addStreamToProduct(product, s1, user)
 		then:
 		1 * service.dataUnionJoinRequestService.findMembers("0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF") >> [user]
-		1 * service.permissionService.canWrite(user, s1) >> false
-		1 * service.permissionService.systemGrant(user, s1, Permission.Operation.WRITE)
+		1 * service.permissionService.check(user, s1, Permission.Operation.STREAM_PUBLISH) >> false
+		1 * service.permissionService.systemGrant(user, s1, Permission.Operation.STREAM_PUBLISH)
 	}
 
 	void "remove stream from product and revoke data union stream permissions"() {
@@ -1336,7 +1351,7 @@ class ProductServiceSpec extends Specification {
 		service.removeStreamFromProduct(product, s1)
 		then:
 		1 * service.dataUnionJoinRequestService.findMembers("0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF") >> [user]
-		1 * service.permissionService.canWrite(user, s1) >> true
-		1 * service.permissionService.systemRevoke(user, s1, Permission.Operation.WRITE)
+		1 * service.permissionService.check(user, s1, Permission.Operation.STREAM_PUBLISH) >> true
+		1 * service.permissionService.systemRevoke(user, s1, Permission.Operation.STREAM_PUBLISH)
 	}
 }

@@ -15,13 +15,11 @@ import com.unifina.service.SignalPathService
 import com.unifina.signalpath.ModuleException
 import com.unifina.utils.NullJsonSerializer
 import grails.converters.JSON
-import grails.plugin.springsecurity.annotation.Secured
 import grails.transaction.NotTransactional
 import org.apache.log4j.Logger
 import org.codehaus.groovy.grails.web.json.JSONObject
 import org.springframework.util.FileCopyUtils
 
-@Secured(["IS_AUTHENTICATED_ANONYMOUSLY"])
 class CanvasApiController {
 
 	CanvasService canvasService
@@ -47,7 +45,7 @@ class CanvasApiController {
 
 	@StreamrApi(authenticationLevel = AuthLevel.NONE)
 	def show(String id, Boolean runtime) {
-		Canvas canvas = canvasService.authorizedGetById(id, request.apiUser, Operation.READ)
+		Canvas canvas = canvasService.authorizedGetById(id, request.apiUser, Operation.CANVAS_GET)
 		if (runtime) {
 			Map result = canvas.toMap()
 			Map runtimeJson = signalPathService.runtimeRequest(signalPathService.buildRuntimeRequest([type: 'json'], "canvases/$canvas.id", request.apiUser), false).json
@@ -79,7 +77,7 @@ class CanvasApiController {
 
 	@StreamrApi
 	def update(String id) {
-		Canvas canvas = canvasService.authorizedGetById(id, request.apiUser, Operation.WRITE)
+		Canvas canvas = canvasService.authorizedGetById(id, request.apiUser, Operation.CANVAS_EDIT)
 		try {
 			canvasService.updateExisting(canvas, readSaveCommand(), request.apiUser)
 		} catch (ModuleException e) {
@@ -93,7 +91,7 @@ class CanvasApiController {
 
 	@StreamrApi
 	def delete(String id) {
-		Canvas canvas = canvasService.authorizedGetById(id, request.apiUser, Operation.WRITE)
+		Canvas canvas = canvasService.authorizedGetById(id, request.apiUser, Operation.CANVAS_DELETE)
 		canvasService.deleteCanvas(canvas, request.apiUser)
 		response.status = 204
 		render ""
@@ -101,7 +99,7 @@ class CanvasApiController {
 
 	@StreamrApi
 	def start(String id) {
-		Canvas canvas = canvasService.authorizedGetById(id, request.apiUser, Operation.WRITE)
+		Canvas canvas = canvasService.authorizedGetById(id, request.apiUser, Operation.CANVAS_STARTSTOP)
 		canvasService.start(canvas, request.JSON?.clearState ?: false, request.apiUser)
 		render canvas.toMap() as JSON
 	}
@@ -120,7 +118,7 @@ class CanvasApiController {
 	@StreamrApi
 	@NotTransactional
 	def stop(String id) {
-		Canvas canvas = canvasService.authorizedGetById(id, request.apiUser, Operation.WRITE)
+		Canvas canvas = canvasService.authorizedGetById(id, request.apiUser, Operation.CANVAS_STARTSTOP)
 		// Updates canvas in another thread, so canvas needs to be refreshed
 		canvasService.stop(canvas, request.apiUser)
 		if (canvas.adhoc) {
@@ -140,7 +138,7 @@ class CanvasApiController {
 		if (runtime) {
 			render signalPathService.runtimeRequest(signalPathService.buildRuntimeRequest([type: 'json'], "canvases/$canvasId/modules/$moduleId", request.apiUser), false).json as JSON
 		} else {
-			Map moduleMap = canvasService.authorizedGetModuleOnCanvas(canvasId, moduleId, dashboardId, request.apiUser, Operation.READ)
+			Map moduleMap = canvasService.authorizedGetModuleOnCanvas(canvasId, moduleId, dashboardId, request.apiUser, Operation.CANVAS_GET)
 			render moduleMap as JSON
 		}
 	}

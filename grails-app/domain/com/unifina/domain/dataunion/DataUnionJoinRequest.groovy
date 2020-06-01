@@ -4,10 +4,13 @@ import com.unifina.domain.marketplace.Product
 import com.unifina.domain.security.SecUser
 import com.unifina.utils.IdGenerator
 import grails.compiler.GrailsCompileStatic
+import grails.persistence.Entity
 import groovy.transform.ToString
 
 @ToString
+@Entity
 class DataUnionJoinRequest {
+
 	enum State {
 		PENDING,
 		ACCEPTED,

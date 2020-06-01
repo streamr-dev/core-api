@@ -206,7 +206,7 @@ class EthereumIntegrationKeyServiceSpec extends Specification {
 		inbox.id = "address"
 		inbox.inbox = true
 		inbox.save(failOnError: true, validate: false)
-		Permission perm = new Permission()
+		Permission perm = new Permission(operation: Permission.Operation.STREAM_SUBSCRIBE)
 		perm.stream = inbox
 		perm.user = me
 		perm.save(failOnError: true, validate: false)

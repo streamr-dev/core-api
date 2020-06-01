@@ -1,7 +1,10 @@
 package com.unifina.utils
 
+import grails.compiler.GrailsCompileStatic
+
+@GrailsCompileStatic
 class EthereumAddressValidator {
-	static validate = { String address ->
+	static final Closure validate = { String address ->
 		if (address == null) {
 			return false
 		}

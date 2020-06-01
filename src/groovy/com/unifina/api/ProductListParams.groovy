@@ -2,6 +2,7 @@ package com.unifina.api
 
 import com.unifina.domain.marketplace.Category
 import com.unifina.domain.marketplace.Product
+import com.unifina.domain.security.Permission
 import com.unifina.domain.security.SecUser
 import grails.validation.Validateable
 
@@ -12,6 +13,11 @@ class ProductListParams extends ListParams {
 	Long minPrice
 	Long maxPrice
 	SecUser productOwner
+
+	ProductListParams() {
+		super()
+		operation = Permission.Operation.PRODUCT_GET
+	}
 
 	static constraints = {
 		categories(nullable: true, minSize: 1)

@@ -2,9 +2,11 @@ package com.unifina.domain.security
 
 import com.unifina.utils.IdGenerator
 import grails.converters.JSON
+import grails.persistence.Entity
 import groovy.transform.CompileStatic
 import org.codehaus.groovy.grails.web.json.JSONObject
 
+@Entity
 class IntegrationKey implements Serializable {
 
 	String id

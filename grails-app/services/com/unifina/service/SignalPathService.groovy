@@ -19,6 +19,7 @@ import grails.transaction.Transactional
 import grails.util.Holders
 import groovy.transform.CompileStatic
 import org.apache.log4j.Logger
+import org.codehaus.groovy.grails.web.mapping.LinkGenerator
 
 import java.security.AccessControlException
 import java.util.concurrent.ConcurrentHashMap
@@ -30,11 +31,8 @@ class SignalPathService {
 
     static transactional = false
 
-	def servletContext
-	def grailsApplication
-	def grailsLinkGenerator
-	def serializationService
-	StreamService streamService
+	LinkGenerator grailsLinkGenerator
+	SerializationService serializationService
 	PermissionService permissionService
 	ApiService apiService
 	NodeService nodeService
@@ -113,7 +111,7 @@ class SignalPathService {
 		// can be problematic when collaborating on shared canvas; though even then it makes sense to force
 		//   explicit read rights sharing to streams on that canvas
 		for (Stream s in sp.getStreams()) {
-			if (!permissionService.canRead(asUser, s)) {
+			if (!permissionService.check(asUser, s, Permission.Operation.STREAM_SUBSCRIBE)) {
 				throw new UnauthorizedStreamException(canvas, s, asUser)
 			}
 		}
@@ -150,7 +148,7 @@ class SignalPathService {
 
 		canvas.startedBy = asUser
 
-		canvas.save(flush: true)
+		canvas.save(flush: false)
 
 		// Start the runner thread
 		runner.start()
@@ -252,10 +250,10 @@ class SignalPathService {
 		if (user?.isAdmin()) {
 			canvas = Canvas.get(pathReader.readCanvasId())
 		} else {
-			canvas = canvasService.authorizedGetById(pathReader.readCanvasId(), user, Permission.Operation.READ)
+			canvas = canvasService.authorizedGetById(pathReader.readCanvasId(), user, Permission.Operation.CANVAS_GET)
 		}
 		Set<Permission.Operation> checkedOperations = new HashSet<>()
-		checkedOperations.add(Permission.Operation.READ)
+		checkedOperations.add(Permission.Operation.CANVAS_GET)
 
 		return new RuntimeRequest(msg, user, canvas, path, originalPath, checkedOperations)
 	}
@@ -287,7 +285,7 @@ class SignalPathService {
 		}
 		// All good - check if this is a stop request, which has special handling
 		else if (req.type == "stopRequest") {
-			if (!permissionService.canWrite(req.getUser(), req.getCanvas()) && !req.getUser()?.isAdmin()) {
+			if (!permissionService.check(req.getUser(), req.getCanvas(), Permission.Operation.CANVAS_STARTSTOP) && !req.getUser()?.isAdmin()) {
 				throw new AccessControlException("stopRequest requires write permission!");
 			}
 
@@ -336,7 +334,7 @@ class SignalPathService {
 			if (notTooBig) {
                 serialization.bytes = serializationService.serialize(sp)
                 serialization.date = sp.globals.time
-                serialization.save(failOnError: true, flush: true)
+                serialization.save(failOnError: true, flush: false)
                 canvas.serialization = serialization
 
                 if (isFirst) {

@@ -5,8 +5,10 @@ import com.unifina.domain.security.Permission
 import com.unifina.domain.security.SecUser
 import com.unifina.utils.HexIdGenerator
 import grails.compiler.GrailsCompileStatic
+import grails.persistence.Entity
 import groovy.json.JsonSlurper
 
+@Entity
 class Product {
 	public final static String DEFAULT_NAME = "Untitled Product"
 	String id

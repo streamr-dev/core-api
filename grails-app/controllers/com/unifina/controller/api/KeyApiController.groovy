@@ -11,10 +11,8 @@ import com.unifina.security.AuthLevel
 import com.unifina.security.StreamrApi
 import com.unifina.service.PermissionService
 import grails.converters.JSON
-import grails.plugin.springsecurity.annotation.Secured
 import groovy.json.JsonSlurper
 
-@Secured(["IS_AUTHENTICATED_ANONYMOUSLY"])
 class KeyApiController {
 
 	PermissionService permissionService
@@ -37,11 +35,14 @@ class KeyApiController {
 
 			if (!res) {
 				throw new NotFoundException(resourceClass.simpleName, resourceId.toString())
-			} else if (requireSharePermission && !permissionService.canShare(request.apiUser, res)) {
-				throw new NotPermittedException(request?.apiUser?.username, resourceClass.simpleName, resourceId.toString(), "share")
-			} else {
-				action(res)
 			}
+
+			Permission.Operation shareOp = Permission.Operation.shareOperation(res)
+			if (requireSharePermission && !permissionService.check(request.apiUser, res, shareOp)) {
+				throw new NotPermittedException(request?.apiUser?.username, resourceClass.simpleName, resourceId.toString(), shareOp.id)
+			}
+
+			action(res)
 		}
 	}
 
@@ -57,9 +58,13 @@ class KeyApiController {
 
 				List keys = permissionsByKey.collect { key, permissions ->
 					Map map = key.toMap()
-					map["permission"] = permissions.find {
-						it.operation == Permission.Operation.WRITE
-					}?.operation?.id ?: Permission.Operation.READ.id
+					if (Stream.isAssignableFrom(params.resourceClass)) {
+						map["permission"] = permissions.find {
+							it.operation == Permission.Operation.STREAM_PUBLISH
+						}?.operation?.id ?: Permission.Operation.STREAM_SUBSCRIBE.id
+					} else {
+						throw new IllegalArgumentException("Only streams can have anonymous key based permissions. Unknown resource: " + params.resourceClass)
+					}
 					return map
 				}
 
@@ -85,9 +90,20 @@ class KeyApiController {
 				// Throws if user is not permitted to grant
 				permissionService.grant(request.apiUser, res, key, operation, false)
 
-				// If granting write, grant also read
-				if (operation == Permission.Operation.WRITE) {
-					permissionService.grant(request.apiUser, res, key, Permission.Operation.READ, false)
+				// Grant extra permissions depending on whether we're creating a publish or subscribe key
+				if (operation == Permission.Operation.STREAM_PUBLISH) {
+					if (!permissionService.check(request.apiUser, res, Permission.Operation.STREAM_GET)) {
+						permissionService.grant(request.apiUser, res, key, Permission.Operation.STREAM_GET, false)
+					}
+					if (!permissionService.check(request.apiUser, res, Permission.Operation.STREAM_SUBSCRIBE)) {
+						permissionService.grant(request.apiUser, res, key, Permission.Operation.STREAM_SUBSCRIBE, false)
+					}
+				} else if (operation == Permission.Operation.STREAM_SUBSCRIBE) {
+					if (!permissionService.check(request.apiUser, res, Permission.Operation.STREAM_GET)) {
+						permissionService.grant(request.apiUser, res, key, Permission.Operation.STREAM_GET, false)
+					}
+				} else {
+					throw new IllegalArgumentException("Only permissions 'stream_publish' and 'stream_subscribe' are supported.")
 				}
 
 				response["permission"] = permission
@@ -161,8 +177,9 @@ class KeyApiController {
 		}
 		Map json = new JsonSlurper().parseText((String) request.JSON)
 		String permission = request.JSON?.permission
-		if (permission && permission != "read" && permission != "write") {
-			throw new ApiException(400, "INVALID_PARAMETER", "permission field in json should be 'read' or 'write'.")
+		if (permission && permission != Permission.Operation.STREAM_SUBSCRIBE.id
+				&& permission != Permission.Operation.STREAM_PUBLISH.id) {
+			throw new ApiException(400, "INVALID_PARAMETER", "permission field in json should be 'stream_subscribe' or 'stream_publish'.")
 		}
 		if (json.name != null && json.name.trim() != "") {
 			useResource(Stream, params.streamId) { res ->
@@ -171,23 +188,29 @@ class KeyApiController {
 					Permission.Operation operation = Permission.Operation.fromString(permission)
 					SecUser user = request.apiUser
 					boolean logIfDenied = false
-					if (operation == Permission.Operation.READ) {
-						if (!hasPermission(Permission.Operation.READ, k.getPermissions())) {
-							permissionService.grant(user, res, k, Permission.Operation.READ, logIfDenied)
+					if (operation == Permission.Operation.STREAM_PUBLISH) {
+						if (!hasPermission(Permission.Operation.STREAM_PUBLISH, k.getPermissions())) {
+							permissionService.grant(user, res, k, Permission.Operation.STREAM_PUBLISH, logIfDenied)
 						}
-						if (hasPermission(Permission.Operation.WRITE, k.getPermissions())) {
-							permissionService.revoke(user, res, k, Permission.Operation.WRITE, logIfDenied)
+						if (!hasPermission(Permission.Operation.STREAM_GET, k.getPermissions())) {
+							permissionService.grant(user, res, k, Permission.Operation.STREAM_GET, logIfDenied)
 						}
-					} else if (operation == Permission.Operation.WRITE) {
-						if (!hasPermission(Permission.Operation.READ, k.getPermissions())) {
-							permissionService.grant(user, res, k, Permission.Operation.READ, logIfDenied)
+						if (!hasPermission(Permission.Operation.STREAM_SUBSCRIBE, k.getPermissions())) {
+							permissionService.grant(user, res, k, Permission.Operation.STREAM_SUBSCRIBE, logIfDenied)
 						}
-						if (!hasPermission(Permission.Operation.WRITE, k.getPermissions())) {
-							permissionService.grant(user, res, k, Permission.Operation.WRITE, logIfDenied)
+					} else if (operation == Permission.Operation.STREAM_SUBSCRIBE) {
+						if (hasPermission(Permission.Operation.STREAM_PUBLISH, k.getPermissions())) {
+							permissionService.revoke(user, res, k, Permission.Operation.STREAM_PUBLISH, logIfDenied)
+						}
+						if (!hasPermission(Permission.Operation.STREAM_SUBSCRIBE, k.getPermissions())) {
+							permissionService.grant(user, res, k, Permission.Operation.STREAM_SUBSCRIBE, logIfDenied)
+						}
+						if (!hasPermission(Permission.Operation.STREAM_GET, k.getPermissions())) {
+							permissionService.grant(user, res, k, Permission.Operation.STREAM_GET, logIfDenied)
 						}
 					}
 				}
-				k.save(flush: true, failOnError: true)
+				k.save(flush: false, failOnError: true)
 			}
 		}
 		response.status = 200
