@@ -20,14 +20,22 @@ class UrlMappings {
 		"/api/v1/canvases/$id/start"(controller: "canvasApi", action: "start")
 		"/api/v1/canvases/$id/startAsAdmin"(controller: "canvasApi", action: "startAsAdmin")
 		"/api/v1/canvases/$id/stop"(controller: "canvasApi", action: "stop")
-		"/api/v1/canvases/$resourceId/permissions"(resources: "permissionApi", excludes: ["create", "edit", "update"]) { resourceClass = Canvas }
-		"/api/v1/canvases/$resourceId/permissions/me"(controller: "permissionApi", action: "getOwnPermissions") { resourceClass = Canvas }
+		"/api/v1/canvases/$resourceId/permissions"(resources: "permissionApi", excludes: ["create", "edit", "update"]) {
+			resourceClass = Canvas
+		}
+		"/api/v1/canvases/$resourceId/permissions/me"(controller: "permissionApi", action: "getOwnPermissions") {
+			resourceClass = Canvas
+		}
 		"/api/v1/canvases/$canvasId/modules/$moduleId"(controller: "canvasApi", action: "module") // for internal use
 		"/api/v1/canvases/downloadCsv"(method: "GET", controller: "canvasApi", action: "downloadCsv")
 
 		"/api/v1/streams"(resources: "streamApi", excludes: ["create", "edit"])
-		"/api/v1/streams/$resourceId/permissions"(resources: "permissionApi", excludes: ["create", "edit", "update"]) { resourceClass = Stream }
-		"/api/v1/streams/$resourceId/permissions/me"(controller: "permissionApi", action: "getOwnPermissions") { resourceClass = Stream }
+		"/api/v1/streams/$resourceId/permissions"(resources: "permissionApi", excludes: ["create", "edit", "update"]) {
+			resourceClass = Stream
+		}
+		"/api/v1/streams/$resourceId/permissions/me"(controller: "permissionApi", action: "getOwnPermissions") {
+			resourceClass = Stream
+		}
 		"/api/v1/streams/$id/fields"(method: "POST", controller: "streamApi", action: "setFields")
 		"/api/v1/streams/$id/detectFields"(method: "POST", controller: "streamApi", action: "detectFields")
 		"/api/v1/streams/$id/detectFields"(method: "GET", controller: "streamApi", action: "detectFields")
@@ -49,8 +57,12 @@ class UrlMappings {
 
 		"/api/v1/dashboards"(resources: "dashboardApi", excludes: ["create", "edit"])
 		"/api/v1/dashboards/$dashboardId/items"(resources: "dashboardItemApi", excludes: ["create", "edit"])
-		"/api/v1/dashboards/$resourceId/permissions"(resources: "permissionApi", excludes: ["create", "edit", "update"]) { resourceClass = Dashboard }
-		"/api/v1/dashboards/$resourceId/permissions/me"(controller: "permissionApi", action: "getOwnPermissions") { resourceClass = Dashboard }
+		"/api/v1/dashboards/$resourceId/permissions"(resources: "permissionApi", excludes: ["create", "edit", "update"]) {
+			resourceClass = Dashboard
+		}
+		"/api/v1/dashboards/$resourceId/permissions/me"(controller: "permissionApi", action: "getOwnPermissions") {
+			resourceClass = Dashboard
+		}
 
 		"/api/v1/permissions/cleanup"(method: "DELETE", controller: "permissionApi", action: "cleanup")
 
@@ -89,7 +101,9 @@ class UrlMappings {
 		"/api/v1/products/$productId/streams"(resources: "productStreamsApi")
 		"/api/v1/products/$id/$action"(controller: "productApi")
 		"/api/v1/products/$id/images"(method: "POST", controller: "productApi", action: "uploadImage")
-		"/api/v1/products/$resourceId/permissions/me"(controller: "permissionApi", action: "getOwnPermissions") { resourceClass = Product }
+		"/api/v1/products/$resourceId/permissions/me"(controller: "permissionApi", action: "getOwnPermissions") {
+			resourceClass = Product
+		}
 		"/api/v1/products/remove/$username"(method: "DELETE", controller: "removeUsersProducts", action: "index")
 		"/api/v1/products/$id/related"(method: "GET", controller: "productApi", action: "related")
 		"/api/v1/products/stale"(method: "GET", controller: "productApi", action: "staleProducts")
