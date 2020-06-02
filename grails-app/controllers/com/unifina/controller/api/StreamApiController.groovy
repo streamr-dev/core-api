@@ -3,6 +3,7 @@ package com.unifina.controller.api
 import com.unifina.api.*
 import com.unifina.domain.data.Stream
 import com.unifina.domain.security.Key
+import com.unifina.domain.security.Permission
 import com.unifina.domain.security.Permission.Operation
 import com.unifina.domain.security.SecUser
 import com.unifina.feed.DataRange
@@ -48,14 +49,22 @@ class StreamApiController {
 
 	@StreamrApi(authenticationLevel = AuthLevel.NONE)
 	def show(String id) {
-		streamService.getReadAuthorizedStream(id, request.apiUser, request.apiKey) { Stream stream ->
+		def stream = Stream.get(id)
+		if (stream == null) {
+			throw new NotFoundException("Stream", id)
+		}
+
+		Userish userish = request.apiKey ?: request.apiUser
+		if (permissionService.check(userish, stream, Permission.Operation.STREAM_GET)) {
 			render(stream.toMap() as JSON)
+		} else {
+			throw new NotPermittedException(null, "Stream", id, Permission.Operation.STREAM_GET.id)
 		}
 	}
 
 	@StreamrApi
 	def update(String id) {
-		getAuthorizedStream(id, Operation.WRITE) { Stream stream ->
+		getAuthorizedStream(id, Operation.STREAM_EDIT) { Stream stream ->
 			Stream newStream = new Stream(request.JSON)
 			stream.name = newStream.name
 			stream.description = newStream.description
@@ -95,7 +104,7 @@ class StreamApiController {
 		} else if ("POST".equals(request.method)) {
 			saveFields = true
 		}
-		getAuthorizedStream(id, Operation.READ) { Stream stream ->
+		getAuthorizedStream(id, Operation.STREAM_EDIT) { Stream stream ->
 			if (streamService.autodetectFields(stream, params.boolean("flatten", false), saveFields)) {
 				render(stream.toMap() as JSON)
 			} else {
@@ -107,7 +116,7 @@ class StreamApiController {
 	@StreamrApi(authenticationLevel = AuthLevel.KEY)
 	def setFields(String id) {
 		Userish u = request.apiUser != null ? (SecUser) request.apiUser : (Key) request.apiKey
-		Stream stream = apiService.authorizedGetById(Stream, id, u, Operation.WRITE)
+		Stream stream = apiService.authorizedGetById(Stream, id, u, Operation.STREAM_EDIT)
 		def givenFields = request.JSON
 
 		Map config = stream.config ? JSON.parse(stream.config) : [:]
@@ -117,14 +126,6 @@ class StreamApiController {
 		stream.save(failOnError: true)
 
 		render(stream.toMap() as JSON)
-	}
-
-	@StreamrApi
-	def dataFiles(String id) {
-		getAuthorizedStream(id) { stream ->
-			DataRange dataRange = streamService.getDataRange(stream)
-			render([dataRange: dataRange, stream:stream] as JSON)
-		}
 	}
 
 	@StreamrApi
@@ -158,7 +159,7 @@ class StreamApiController {
 
 	@StreamrApi
 	def delete(String id) {
-		getAuthorizedStream(id, Operation.WRITE) { Stream stream ->
+		getAuthorizedStream(id, Operation.STREAM_DELETE) { Stream stream ->
 			streamService.deleteStream(stream)
 			render(status: 204)
 		}
@@ -166,7 +167,7 @@ class StreamApiController {
 
 	@StreamrApi
 	def range(String id) {
-		getAuthorizedStream(id, Operation.READ) { Stream stream ->
+		getAuthorizedStream(id, Operation.STREAM_GET) { Stream stream ->
 			DataRange dataRange = streamService.getDataRange(stream)
 			Map dataRangeMap = [beginDate: dataRange?.beginDate, endDate: dataRange?.endDate]
 			render dataRangeMap as JSON
@@ -266,7 +267,7 @@ class StreamApiController {
 
 	@StreamrApi
 	def deleteDataUpTo(String id) {
-		getAuthorizedStream(id, Operation.WRITE) { Stream stream ->
+		getAuthorizedStream(id, Operation.STREAM_DELETE) { Stream stream ->
 			Date date = parseDate(String.valueOf(request.JSON.date), "date")
 			streamService.deleteDataUpTo(stream, date)
 			render(status: 204)
@@ -275,7 +276,7 @@ class StreamApiController {
 
 	@StreamrApi
 	def deleteAllData(String id) {
-		getAuthorizedStream(id, Operation.WRITE) { Stream stream ->
+		getAuthorizedStream(id, Operation.STREAM_DELETE) { Stream stream ->
 			streamService.deleteAllData(stream)
 			render(status: 204)
 		}
@@ -283,7 +284,7 @@ class StreamApiController {
 
 	@StreamrApi
 	def deleteDataRange(String id) {
-		getAuthorizedStream(id, Operation.WRITE) { Stream stream ->
+		getAuthorizedStream(id, Operation.STREAM_DELETE) { Stream stream ->
 			Date start = parseDate(String.valueOf(request.JSON.start), "start")
 			Date end = parseDate(String.valueOf(request.JSON.end), "end")
 			streamService.deleteDataRange(stream, start, end)

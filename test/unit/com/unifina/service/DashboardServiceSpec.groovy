@@ -7,7 +7,6 @@ import com.unifina.domain.security.Permission
 import com.unifina.domain.security.SecUser
 import com.unifina.domain.signalpath.Canvas
 import com.unifina.utils.Webcomponent
-import grails.converters.JSON
 import grails.test.mixin.Mock
 import grails.test.mixin.TestFor
 import groovy.json.JsonBuilder
@@ -40,7 +39,7 @@ class DashboardServiceSpec extends Specification {
 			def d = new Dashboard(name: "not-my-dashboard-$it").save(failOnError: true)
 			permissionService.systemGrantAll(otherUser, d)
 			if (it == 2) {
-				permissionService.grant(otherUser, d, user, Permission.Operation.READ)
+				permissionService.systemGrant(user, d, Permission.Operation.DASHBOARD_GET)
 			}
 		}
 	}
@@ -51,7 +50,7 @@ class DashboardServiceSpec extends Specification {
 		def dashboards = service.findAllDashboards(user)
 		then:
 		dashboards*.name as Set == ["my-dashboard-1", "my-dashboard-2", "my-dashboard-3", "not-my-dashboard-2"] as Set
-		1 * service.permissionService.getAll(Dashboard, user, _) >> [
+		1 * service.permissionService.get(Dashboard, user, Permission.Operation.DASHBOARD_GET, true, _) >> [
 		    Dashboard.findById("1"),
 			Dashboard.findById("2"),
 			Dashboard.findById("3"),
@@ -155,9 +154,11 @@ class DashboardServiceSpec extends Specification {
 
 		then:
 		Permission.findAllByDashboard(dashboard)*.toMap() == [
-			[id: 20, user:"tester", operation: "read"],
-			[id: 21, user: "tester", operation: "write"],
-			[id: 22, user: "tester", operation: "share"],
+			[id: 32, user:"tester", operation: "dashboard_get"],
+			[id: 33, user: "tester", operation: "dashboard_edit"],
+			[id: 34, user: "tester", operation: "dashboard_delete"],
+			[id: 35, user: "tester", operation: "dashboard_interact"],
+			[id: 36, user: "tester", operation: "dashboard_share"],
 		]
 	}
 
@@ -185,12 +186,13 @@ class DashboardServiceSpec extends Specification {
 	}
 
 	def "update() does not create new permissions"() {
+		int size = Permission.Operation.dashboardOperations().size()
 		when:
-		assert Permission.countByDashboard(Dashboard.get("2")) == 3
+		assert Permission.countByDashboard(Dashboard.get("2")) == size
 		service.update("2", new SaveDashboardCommand(name: "newName"), user)
 
 		then:
-		Permission.countByDashboard(Dashboard.get("2")) == 3
+		Permission.countByDashboard(Dashboard.get("2")) == size
 	}
 
 	def "findDashboardItem() cannot fetch non-existent dashboard"() {

@@ -1,9 +1,10 @@
 package com.unifina.service
 
+
 import com.streamr.client.StreamrClient
 import com.streamr.client.authentication.ApiKeyAuthenticationMethod
 import com.streamr.client.authentication.AuthenticationMethod
-import com.streamr.client.authentication.EthereumAuthenticationMethod
+import com.streamr.client.authentication.InternalAuthenticationMethod
 import com.streamr.client.options.EncryptionOptions
 import com.streamr.client.options.SigningOptions
 import com.streamr.client.options.StreamrClientOptions
@@ -19,6 +20,9 @@ import java.util.concurrent.locks.ReentrantLock
 
 class StreamrClientService {
 
+	EthereumIntegrationKeyService ethereumIntegrationKeyService
+	SessionService sessionService
+
 	private static final Logger log = Logger.getLogger(StreamrClientService)
 
 	private StreamrClient instanceForThisEngineNode
@@ -31,9 +35,12 @@ class StreamrClientService {
 	}
 
 	/**
-	 * Useful for testing, this constructor allows the StreamrClient class to be injected
+	 * Useful for testing, this method allows a StreamrClient class with some mocked methods to be passed
 	 */
-	StreamrClientService(Class<StreamrClient> streamrClientClass) {
+	void setClientClass(Class<StreamrClient> streamrClientClass) {
+		if (instanceForThisEngineNode) {
+			throw new IllegalStateException("StreamrClient instance has already been created. Call setClientClass() before calling getInstanceForThisEngineNode()!")
+		}
 		clientConstructor = streamrClientClass.getConstructor(StreamrClientOptions)
 	}
 
@@ -61,12 +68,19 @@ class StreamrClientService {
 	 */
 	StreamrClient getInstanceForThisEngineNode() {
 		// Mutex lock with timeout to avoid race conditions
-		if (instanceForThisEngineNodeLock.tryLock(10L, TimeUnit.SECONDS)) {
+		if (instanceForThisEngineNodeLock.tryLock(3L, TimeUnit.SECONDS)) {
 			try {
 				if (!instanceForThisEngineNode) {
 					String nodePrivateKey = MapTraversal.getString(Holders.getConfig(), "streamr.ethereum.nodePrivateKey")
 					log.debug("Creating StreamrClient instance for this Engine node. Using private key ${nodePrivateKey?.substring(0, 2)}...")
-					instanceForThisEngineNode = createInstance(new EthereumAuthenticationMethod(nodePrivateKey))
+
+					// Create a custom EthereumAuthenticationMethod which doesn't call the API, but instead uses the internal services to
+					// get a sessionToken. Calling the API here can lead to a deadlock situation in some corner cases, because the
+					// service calls "itself" while blocking in a mutex-lock.
+					InternalAuthenticationMethod authenticationMethod = new InternalAuthenticationMethod(nodePrivateKey, ethereumIntegrationKeyService, sessionService)
+					instanceForThisEngineNode = createInstance(authenticationMethod)
+					// Make sure the instance is authenticated before returning
+					instanceForThisEngineNode.getSessionToken()
 					log.debug("StreamrClient instance created. State: ${instanceForThisEngineNode.getState()}")
 				}
 				return instanceForThisEngineNode

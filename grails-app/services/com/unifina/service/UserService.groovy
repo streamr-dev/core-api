@@ -10,7 +10,6 @@ import com.unifina.domain.security.SecRole
 import com.unifina.domain.security.SecUser
 import com.unifina.domain.security.SecUserSecRole
 import com.unifina.domain.signalpath.Canvas
-import com.unifina.domain.signalpath.ModulePackage
 import com.unifina.exceptions.UserCreationFailedException
 import com.unifina.security.PasswordEncoder
 import com.unifina.security.Userish
@@ -28,7 +27,7 @@ class UserService {
 	StreamService streamService
 	CanvasService canvasService
 
-	SecUser createUser(Map properties, List<SecRole> roles = null, List<ModulePackage> packages = null) {
+	SecUser createUser(Map properties, List<SecRole> roles = null) {
 		SecUser user = new SecUser(properties)
 		// Encode the password
 		if (user.password == null) {
@@ -56,13 +55,12 @@ class UserService {
 		// Users must have at least one API key
 		user.addToKeys(new Key(name: "Default"))
 
-		if (!user.save(flush: true)) {
+		if (!user.save(flush: false)) {
 			log.warn("Failed to save user data: " + checkErrors(user.errors.getAllErrors()))
 			throw new UserCreationFailedException()
 		} else {
 			// Save roles, feeds and module packages
 			addRoles(user, roles)
-			setModulePackages(user, packages ?: [])
 
 			// Transfer permissions that were attached to sign-up invitation before user existed
 			permissionService.transferInvitePermissionsTo(user)
@@ -95,14 +93,6 @@ class UserService {
 		roles?.each { SecRole role ->
 			new SecUserSecRole().create(user, role)
 		}
-	}
-
-	/** Adds/removes ModulePackage read permissions so that user's permissions match given ones */
-	def setModulePackages(SecUser user, List<ModulePackage> packages) {
-		List<ModulePackage> existing = permissionService.get(ModulePackage, user)
-		packages.findAll { !existing.contains(it) }.each { permissionService.systemGrant(user, it) }
-		existing.findAll { !packages.contains(it) }.each { permissionService.systemRevoke(user, it) }
-		return packages
 	}
 
 	def passwordValidator = { String password, command ->

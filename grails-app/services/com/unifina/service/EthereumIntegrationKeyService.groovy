@@ -55,7 +55,7 @@ class EthereumIntegrationKeyService {
 					privateKey: encryptedPrivateKey,
 					address   : address
 				] as JSON).toString()
-			).save(flush: true, failOnError: true)
+			).save(flush: false, failOnError: true)
 
 			createUserInboxStream(user, address)
 
@@ -86,7 +86,7 @@ class EthereumIntegrationKeyService {
 			json: ([
 				address: address
 			] as JSON).toString()
-		).save(flush: true)
+		).save(flush: false)
 
 		createUserInboxStream(user, address)
 
@@ -156,7 +156,7 @@ class EthereumIntegrationKeyService {
 			json: ([
 				address: address
 			] as JSON).toString()
-		).save(failOnError: true, flush: true)
+		).save(failOnError: true, flush: false)
 		createUserInboxStream(user, address)
 		return user
 	}
@@ -173,7 +173,7 @@ class EthereumIntegrationKeyService {
 		inboxStream.inbox = true
 		inboxStream.autoConfigure = false
 
-		inboxStream.save(failOnError: true, flush: true)
+		inboxStream.save(failOnError: true, flush: false)
 		permissionService.systemGrantAll(user, inboxStream)
 	}
 

@@ -1,21 +1,24 @@
 package com.unifina.service
 
 import com.unifina.domain.security.SignupInvite
+import grails.compiler.GrailsCompileStatic
 
-import java.util.UUID
-
+@GrailsCompileStatic
 class SignupCodeService {
-	def generateSignupCode() {
-		return UUID.randomUUID()
+	private String generateSignupCode() {
+		UUID uuid = UUID.randomUUID()
+		String s = uuid.toString()
+		return s
 	}
 
-	SignupInvite create(username) {
-		def result = new SignupInvite(username: username,
+	SignupInvite create(String username) {
+		SignupInvite result = new SignupInvite(
+			username: username,
 			code: generateSignupCode(),
 			sent: false,
-			used: false
+			used: false,
 		)
-		result.save()
+		result.save(failOnError: true, validate: true)
 		return result
 	}
 }

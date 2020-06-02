@@ -112,7 +112,7 @@ grails.project.dependency.resolution = {
 		compile('org.glassfish.jersey.media:jersey-media-json-jackson:2.27')
 		compile('com.fasterxml.jackson.core:jackson-databind:2.9.6')
 		compile('com.fasterxml.jackson.core:jackson-annotations:2.9.6')
-		compile('com.streamr:client:1.3.5')
+		compile('com.streamr:client:1.4.0')
 
 		compile('com.google.code.gson:gson:2.8.5')
 		runtime('mysql:mysql-connector-java:5.1.20')
@@ -121,7 +121,7 @@ grails.project.dependency.resolution = {
 		runtime('commons-codec:commons-codec:1.6')
 		runtime('com.opencsv:opencsv:3.3')
 		runtime('de.ruedigermoeller:fst:2.56')
-		runtime('joda-time:joda-time:2.9.3')
+		runtime('joda-time:joda-time:2.10.6')
 
 		test('cglib:cglib:3.2.6')
 		test('org.gaul:httpbin:1.3.0') {
