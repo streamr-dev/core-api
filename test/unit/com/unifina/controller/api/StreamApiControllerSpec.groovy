@@ -186,7 +186,8 @@ class StreamApiControllerSpec extends ControllerSpecification {
 		authenticatedAs(me) { controller.show() }
 
 		then:
-		thrown NotPermittedException
+		NotPermittedException ex = thrown(NotPermittedException)
+		ex.getUser() == me.getUsername()
 	}
 
 	void "shows a Stream of logged in Key"() {

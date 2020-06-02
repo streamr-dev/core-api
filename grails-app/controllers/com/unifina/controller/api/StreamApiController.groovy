@@ -58,7 +58,7 @@ class StreamApiController {
 		if (permissionService.check(userish, stream, Permission.Operation.STREAM_GET)) {
 			render(stream.toMap() as JSON)
 		} else {
-			throw new NotPermittedException(null, "Stream", id, Permission.Operation.STREAM_GET.id)
+			throw new NotPermittedException(request?.apiUser?.username, "Stream", id, Permission.Operation.STREAM_GET.id)
 		}
 	}
 
