@@ -29,6 +29,7 @@ class DataUnionJoinRequestService {
 				log.debug(String.format("user %s already has write permission to %s (%s), skipping grant", c.user.username, s.name, s.id))
 			} else {
 				log.debug(String.format("granting write permission to %s (%s) for %s", s.name, s.id, c.user.username))
+				permissionService.systemGrant(c.user, s, Permission.Operation.STREAM_GET)
 				permissionService.systemGrant(c.user, s, Permission.Operation.STREAM_PUBLISH)
 			}
 		}
