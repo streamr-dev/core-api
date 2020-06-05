@@ -9,9 +9,12 @@ import com.unifina.domain.security.SecUserSecRole
 import com.unifina.service.SessionService
 import grails.test.mixin.Mock
 import grails.test.mixin.TestFor
+import grails.test.mixin.TestMixin
+import grails.test.mixin.web.FiltersUnitTestMixin
 
 @TestFor(NodeApiController)
 @Mock([SecUser, SecUserSecRole, UnifinaCoreAPIFilters])
+@TestMixin(FiltersUnitTestMixin)
 class UnifinaCoreAPIFiltersSpec extends BeanMockingSpecification {
 
 	SecUser user
