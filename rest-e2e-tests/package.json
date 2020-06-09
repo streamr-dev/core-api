@@ -12,14 +12,15 @@
   "dependencies": {
     "ajv": "6.12.2",
     "async-wait-until": "1.2.4",
+    "axios-mini": "0.19.61",
     "chai": "4.2.0",
     "ethereumjs-util": "6.2.0",
     "form-data": "3.0.0",
     "keythereum": "1.0.4",
     "mocha": "7.2.0",
-    "node-fetch": "2.6.0",
     "sleep-promise": "8.0.1",
     "streamr-client": "3.2.1",
+    "typedarray-to-buffer": "3.1.5",
     "web3": "1.2.2"
   },
   "devDependencies": {}

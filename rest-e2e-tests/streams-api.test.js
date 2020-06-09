@@ -161,7 +161,7 @@ describe('Streams API', () => {
             })
 
             it('updates stream config fields', async () => {
-                const json = await response.json()
+                const json = response.data
                 assert.deepEqual(json.config.fields, [
                     {
                         name: 'text',
@@ -227,7 +227,7 @@ describe('Streams API', () => {
             })
 
             it('returns json', async () => {
-                const json = await response.json()
+                const json = response.data
                 assert.deepEqual(Object.keys(json), ['fileId', 'schema'])
                 assert.isString(json.fileId)
                 assert.deepEqual(json.schema, {
@@ -245,6 +245,7 @@ describe('Streams API', () => {
     })
 
     describe('POST /api/v1/streams/:id/confirmCsvFileUpload', function() {
+        this.timeout(8000)
         it('requires authentication', async () => {
             const response = await Streamr.api.v1.streams
                 .confirmCsvUpload(streamId, {
@@ -284,7 +285,6 @@ describe('Streams API', () => {
         })
 
         context('when called with valid body and permissions', function() {
-            this.timeout(5000)
             let response
 
             before(async function() {
@@ -292,7 +292,7 @@ describe('Streams API', () => {
                     .uploadCsvFile(streamId, fs.createReadStream('./test-data/test-csv.csv'))
                     .withApiKey(API_KEY)
                     .call()
-                const uploadJson = await uploadResponse.json()
+                const uploadJson = uploadResponse.data
 
                 response = await Streamr.api.v1.streams
                     .confirmCsvUpload(streamId, {
@@ -309,7 +309,7 @@ describe('Streams API', () => {
             })
 
             it('updates stream config fields', async function() {
-                const json = await response.json()
+                const json = response.data
                 assert.deepEqual(json.config.fields, [{
                     name: 'age',
                     type: 'timestamp'

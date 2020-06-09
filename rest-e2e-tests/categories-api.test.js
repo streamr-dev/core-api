@@ -16,7 +16,7 @@ describe('Categories API', () => {
 
         before(async () => {
             response = await Streamr.api.v1.categories.list().call()
-            json = await response.json()
+            json = response.data
         })
 
         it('responds with status code 200', () => {

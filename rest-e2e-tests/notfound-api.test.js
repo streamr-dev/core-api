@@ -28,11 +28,11 @@ async function newSessionToken() {
 describe('REST API', function() {
     describe('GET /api/v1/page-not-found', function() {
         const assertContentLengthIsZero = async function (response) {
-            const body = await response.text()
+            const body = await response.data
             const bodyLenBytes = body.length
             assert.equal(bodyLenBytes, 0)
 
-            const cl = response.headers.get('Content-Length')
+            const cl = response.headers['content-length']
             assert.equal(cl, 0)
         }
         it('anonymous access responds with 404', async () => {

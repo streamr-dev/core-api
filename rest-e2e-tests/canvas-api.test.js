@@ -93,7 +93,7 @@ describe('Canvas API', function() {
             .withSessionToken(sessionToken)
             .call()
 
-        canvas = await canvasResponse.json()
+        canvas = canvasResponse.data
         assert.equal(canvasResponse.status, 200, JSON.stringify(canvas))
     })
 
@@ -111,7 +111,7 @@ describe('Canvas API', function() {
                 .withSessionToken(sessionToken)
                 .call()
 
-            const json = await response.json()
+            const json = response.data
             assert.equal(response.status, 200, JSON.stringify(json))
             assert.equal(json.state, 'RUNNING')
         })
@@ -168,7 +168,7 @@ describe('Canvas API', function() {
                         .withSessionToken(sessionToken)
                         .call()
 
-                    json = await response.json()
+                    json = response.data
                     return json.json.outputs[0].value === NUM_MESSAGES
                 })
 
@@ -188,7 +188,7 @@ describe('Canvas API', function() {
                         .withSessionToken(sessionToken)
                         .call()
 
-                    json = await response.json()
+                    json = response.data
                     return json.json.inputs[0].value === NUM_MESSAGES * 2
                 })
 
@@ -211,7 +211,7 @@ describe('Canvas API', function() {
                 .withSessionToken(sessionToken)
                 .call()
 
-            const json = await response.json()
+            const json = response.data
             assert.equal(response.status, 200, JSON.stringify(json))
             assert.equal(json.state, 'STOPPED')
         })
@@ -366,7 +366,7 @@ function TestClockTable() {
             .withSessionToken(sessionToken)
             .call()
 
-        canvas = await canvasResponse.json()
+        canvas = canvasResponse.data
         assert.equal(canvasResponse.status, 200)
     })
 

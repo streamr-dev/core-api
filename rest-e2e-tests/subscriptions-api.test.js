@@ -238,7 +238,7 @@ describe('Subscriptions API', () => {
                     .list()
                     .withApiKey(AUTH_TOKEN_2)
                     .call()
-                json = await response.json()
+                json = response.data
             })
 
             it ('responds with 200', () => {

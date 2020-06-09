@@ -1,4 +1,4 @@
-const fetch = require('node-fetch')
+const axios = require('axios-mini')
 const url = require('url')
 const querystring = require('querystring')
 const FormData = require('form-data')
@@ -16,6 +16,7 @@ class StreamrApiRequest {
         this.contentType = null
         this.queryParams = ''
         this.accept = null
+        this.headers = null
     }
 
     methodAndPath(method, relativePath) {
@@ -46,9 +47,7 @@ class StreamrApiRequest {
         return this.withContentTypeAndBody('application/json', json)
     }
 
-    // TODO(kkn) Rename to withFormBody()
     withRawBody(body) {
-        // TODO(kkn) 'multipart/form-data' is the proper Content-Type for HTML form submission, but it breaks existing REST tests
         return this.withContentTypeAndBody(null, body)
     }
 
@@ -63,6 +62,11 @@ class StreamrApiRequest {
         return this
     }
 
+    withHeaders(headers) {
+        this.headers = headers
+        return this
+    }
+
     async call() {
         if (!this.method) {
             throw 'Method not set.'
@@ -74,12 +78,13 @@ class StreamrApiRequest {
         const apiUrl = url.resolve(this.baseUrl, this.relativePath) + this.queryParams
 
         const headers = {
-            'Accept': 'application/json'
+            'Accept': 'application/json',
+            ...this.headers,
         }
         if (this.accept) {
             headers['Accept'] = this.accept
         }
-        if (this.body && this.contentType) {
+        if (this.contentType) {
             headers['Content-type'] = this.contentType
         }
         if (this.authHeader) {
@@ -91,7 +96,7 @@ class StreamrApiRequest {
                 this.method,
                 apiUrl,
                 '\n\n' + Object.keys(headers)
-                    .map(key => `${key}: ${headers[key]}`)
+                    .map(key => `${key.toLowerCase()}: ${headers[key]}`)
                     .join('\n'),
                 typeof this.body === 'string' ? '\n\n' + JSON.stringify(JSON.parse(this.body), null, 4) : '\n\n' + JSON.stringify(this.body, null, 4),
                 //this.body ? '\n\n' + JSON.stringify(JSON.parse(this.body), null, 4) : '',
@@ -99,10 +104,14 @@ class StreamrApiRequest {
             )
         }
 
-        return fetch(apiUrl, {
+        return axios({
+            url: apiUrl,
             method: this.method,
-            body: this.body,
-            headers: headers
+            data: this.body,
+            headers: headers,
+            validateStatus: false,
+            timeout: 0,
+            maxBodyLength: 13 * 1024 * 1000,
         })
     }
 
@@ -111,7 +120,7 @@ class StreamrApiRequest {
         if (response.status == 204) {
             return true
         }
-        const json = await response.json()
+        const json = response.data
         if (Math.floor(response.status / 100) != 2) {
             const jsonAsString = JSON.stringify(json)
             throw Error(`Failed to execute. HTTP status ${response.status}: ${jsonAsString}`)
@@ -199,6 +208,7 @@ class Products {
         return new StreamrApiRequest(this.options)
             .methodAndPath('POST', `products/${id}/images`)
             .withRawBody(formData)
+            .withHeaders(formData.getHeaders())
     }
 
     listStreams(id) {
@@ -237,7 +247,7 @@ class Streams {
     setFields(id, body) {
         return new StreamrApiRequest(this.options)
             .methodAndPath('POST', `streams/${id}/fields`)
-            .withJSONBody(body)
+            .withContentTypeAndBody(null, body)
     }
 
     uploadCsvFile(id, fileBytes) {
@@ -247,12 +257,13 @@ class Streams {
         return new StreamrApiRequest(this.options)
             .methodAndPath('POST', `streams/${id}/uploadCsvFile`)
             .withRawBody(formData)
+            .withHeaders(formData.getHeaders())
     }
 
     confirmCsvUpload(id, body) {
         return new StreamrApiRequest(this.options)
             .methodAndPath('POST', `streams/${id}/confirmCsvFileUpload`)
-            .withJSONBody(body)
+            .withContentTypeAndBody(null, body)
     }
 
     grantPublic(id, operation) {
@@ -273,7 +284,7 @@ class Streams {
             })
     }
 
-    grantWithContentTypeAndBody(contentType, body, id, targetUser, operation) {
+    grantWithContentTypeAndBody(contentType, body, id) {
         return new StreamrApiRequest(this.options)
             .methodAndPath('POST', `streams/${id}/permissions`)
             .withContentTypeAndBody(contentType, body)

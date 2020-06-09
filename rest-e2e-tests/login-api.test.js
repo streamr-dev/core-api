@@ -1,5 +1,5 @@
+const axios = require('axios-mini')
 const assert = require('chai').assert
-const fetch = require('node-fetch')
 const StreamrClient = require('streamr-client')
 
 const URL = 'http://localhost/api/v1'
@@ -11,24 +11,28 @@ const TIMEOUT = 5000
 describe('Login API', () => {
 
     function loginWithApiKey(apiKey) {
-        return fetch(`${URL}/login/apikey`, {
+        return axios({
+            url: `${URL}/login/apikey`,
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
             },
-            body: JSON.stringify({
+            data: JSON.stringify({
                 apiKey: apiKey
-            })
+            }),
+            validateStatus: false,
         })
     }
 
     function getUserDetails(sessionToken) {
-        return fetch(`${URL}/users/me`, {
+        return axios({
+            url: `${URL}/users/me`,
             method: 'GET',
             headers: {
                 'Content-Type': 'application/json',
                 'Authorization': 'Bearer '+sessionToken
-            }
+            },
+            validateStatus: false,
         })
     }
 
@@ -39,9 +43,11 @@ describe('Login API', () => {
         if (sessionToken) {
             headers.Authorization = 'Bearer '+sessionToken
         }
-        return fetch(`${URL}/streams/${streamId}/permissions/me`, {
+        return axios({
+            url: `${URL}/streams/${streamId}/permissions/me`,
             method: 'GET',
-            headers
+            headers,
+            validateStatus: false,
         })
     }
 
@@ -58,7 +64,7 @@ describe('Login API', () => {
 
         it('response contains sessionToken', async () => {
             const response = await loginWithApiKey(API_KEY)
-            const json = await response.json()
+            const json = response.data
             assert(json.token != null, 'session token was null!')
         }).timeout(TIMEOUT)
 
@@ -78,10 +84,10 @@ describe('Login API', () => {
             await sleep(1000) // lastLogin only has second precision, so wait 1 sec
 
             const response = await loginWithApiKey(API_KEY)
-            const json = await response.json()
+            const json = response.data
 
             const userDetailsReponse = await getUserDetails(json.token)
-            const me = await userDetailsReponse.json()
+            const me = userDetailsReponse.data
             const lastLogin = new Date(me.lastLogin).getTime()
             assert(lastLogin >= testStartTime, `user lastLogin was not updated. lastLogin: ${lastLogin}, testStartTime: ${testStartTime}`)
         }).timeout(TIMEOUT)
@@ -95,13 +101,13 @@ describe('Login API', () => {
             return Promise.all(promises)
                 .then((results) => {
                     const errors = results.filter(it => it.status !== 200)
-                    return Promise.all(errors.map(it => it.json()))
+                    return Promise.all(errors.map(it => it.data))
                 })
                 .then((errorsJson) => {
                     if (errorsJson.length) {
                         throw new Error(`Got errors: ${JSON.stringify(errorsJson)}`)
                     }
                 })
-        }).timeout(TIMEOUT)
+        }).timeout(TIMEOUT * 2)
     })
 })

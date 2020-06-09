@@ -1,7 +1,6 @@
 const assert = require('chai').assert
 const fs = require('fs')
 const zlib = require('zlib')
-const fetch = require('node-fetch')
 
 const initStreamrApi = require('./streamr-api-clients')
 const SchemaValidator = require('./schema-validator')
@@ -185,7 +184,7 @@ describe('Products API', function() {
             })
 
             it('responds with created Product', async () => {
-                const json = await response.json()
+                const json = response.data
                 assert.isString(json.id)
                 assert.isAtLeast(json.id.length, 40)
                 assert.isString(json.created)
@@ -256,7 +255,7 @@ describe('Products API', function() {
             const response = await Streamr.api.v1.products
                 .get(createdProductId)
                 .call()
-            const json = await response.json()
+            const json = response.data
 
             assert.equal(response.status, 403)
             assert.equal(json.code, 'FORBIDDEN')
@@ -272,7 +271,7 @@ describe('Products API', function() {
                     .get(createdProductId)
                     .withApiKey(AUTH_TOKEN)
                     .call()
-                json = await response.json()
+                json = response.data
             })
 
             it('responds with 200', () => {
@@ -350,7 +349,7 @@ describe('Products API', function() {
                 .update(createdProductId, newBody)
                 .withApiKey(AUTH_TOKEN_2)
                 .call()
-            const json = await response.json()
+            const json = response.data
 
             assert.equal(response.status, 403)
             assert.equal(json.code, 'FORBIDDEN')
@@ -366,7 +365,7 @@ describe('Products API', function() {
                     .update(createdProductId, newBody)
                     .withApiKey(AUTH_TOKEN)
                     .call()
-                json = await response.json()
+                json = response.data
             })
 
             it('responds with 200', () => {
@@ -450,7 +449,7 @@ describe('Products API', function() {
                 .setDeploying(createdProductId)
                 .withApiKey(AUTH_TOKEN_2)
                 .call()
-            const json = await response.json()
+            const json = response.data
 
             assert.equal(response.status, 403)
             assert.equal(json.code, 'FORBIDDEN')
@@ -466,7 +465,7 @@ describe('Products API', function() {
                     .setDeploying(createdProductId)
                     .withApiKey(AUTH_TOKEN)
                     .call()
-                json = await response.json()
+                json = response.data
             })
 
             it('responds with 200', () => {
@@ -564,7 +563,7 @@ describe('Products API', function() {
                     .setDeployed(createdProductId, deployedBody)
                     .withApiKey(DEVOPS_USER_TOKEN)
                     .call()
-                json = await response.json()
+                json = response.data
             })
 
             it('responds with 200', () => {
@@ -604,19 +603,19 @@ describe('Products API', function() {
                     .setDeployed(createdProductId, deployedBody)
                     .withApiKey(DEVOPS_USER_TOKEN)
                     .call()
-                const json1 = await response1.json()
+                const json1 = response1.data
 
                 const response2 = await Streamr.api.v1.products
                     .setDeployed(createdProductId, deployedBody)
                     .withApiKey(DEVOPS_USER_TOKEN)
                     .call()
-                const json2 = await response2.json()
+                const json2 = response2.data
 
                 const response3 = await Streamr.api.v1.products
                     .setDeployed(createdProductId, deployedBody)
                     .withApiKey(DEVOPS_USER_TOKEN)
                     .call()
-                const json3 = await response3.json()
+                const json3 = response3.data
 
                 assert.equal(response1.status, 200)
                 assert.equal(response2.status, 200)
@@ -656,7 +655,7 @@ describe('Products API', function() {
                 .setUndeploying(createdProductId)
                 .withApiKey(AUTH_TOKEN_2)
                 .call()
-            const json = await response.json()
+            const json = response.data
 
             assert.equal(response.status, 403)
             assert.equal(json.code, 'FORBIDDEN')
@@ -694,7 +693,7 @@ describe('Products API', function() {
                     .withApiKey(AUTH_TOKEN)
                     .call()
 
-                json = await response.json()
+                json = response.data
             })
 
             it('responds with 200', () => {
@@ -791,7 +790,7 @@ describe('Products API', function() {
                     .withApiKey(DEVOPS_USER_TOKEN)
                     .call()
 
-                json = await response.json()
+                json = response.data
             })
 
             it('responds with 200', () => {
@@ -824,19 +823,19 @@ describe('Products API', function() {
                     .setUndeployed(createdProductId, undeployedBody)
                     .withApiKey(DEVOPS_USER_TOKEN)
                     .call()
-                const json1 = await response1.json()
+                const json1 = response1.data
 
                 const response2 = await Streamr.api.v1.products
                     .setUndeployed(createdProductId, undeployedBody)
                     .withApiKey(DEVOPS_USER_TOKEN)
                     .call()
-                const json2 = await response2.json()
+                const json2 = response2.data
 
                 const response3 = await Streamr.api.v1.products
                     .setUndeployed(createdProductId, undeployedBody)
                     .withApiKey(DEVOPS_USER_TOKEN)
                     .call()
-                const json3 = await response3.json()
+                const json3 = response3.data
 
                 assert.equal(response1.status, 200)
                 assert.equal(response2.status, 200)
@@ -855,7 +854,7 @@ describe('Products API', function() {
                     publicAccess: true
                 })
                 .call()
-            const json = await response.json()
+            const json = response.data
 
             assert.equal(response.status, 200)
             assert.isAtLeast(json.length, 4)
@@ -883,7 +882,7 @@ describe('Products API', function() {
                 .listStreams(createdProductId)
                 .withApiKey(AUTH_TOKEN_2)
                 .call()
-            const json = await response.json()
+            const json = response.data
 
             assert.equal(response.status, 403)
             assert.equal(json.code, 'FORBIDDEN')
@@ -900,7 +899,7 @@ describe('Products API', function() {
                     .withApiKey(AUTH_TOKEN)
                     .call()
 
-                json = await response.json()
+                json = response.data
             })
 
             it('responds with 200', () => {
@@ -951,7 +950,7 @@ describe('Products API', function() {
                 .uploadImage(createdProductId, fileBytes)
                 .withApiKey(AUTH_TOKEN_2)
                 .call()
-            const json = await response.json()
+            const json = response.data
 
             assert.equal(response.status, 403)
             assert.equal(json.code, 'FORBIDDEN')
@@ -1003,7 +1002,7 @@ describe('Products API', function() {
                     .uploadImage(createdProductId,  fs.createReadStream('./test-data/500-by-400-image.png'))
                     .withApiKey(AUTH_TOKEN)
                     .call()
-                json = await response.json()
+                json = response.data
             })
 
             it('responds with 200', () => {
@@ -1032,7 +1031,7 @@ describe('Products API', function() {
                 readStream.on('end', async () => {
                     const expected = Buffer.concat(bufs)
 
-                    const response2 = await fetch(json.imageUrl)
+                    const response2 = await axios(json.imageUrl)
                     const actual = await response2.buffer()
 
                     assert.equal(actual, expected)
@@ -1046,7 +1045,7 @@ describe('Products API', function() {
                     .uploadImage(createdProductId,  fs.createReadStream('./test-data/500-by-400-image-2.png'))
                     .withApiKey(AUTH_TOKEN)
                     .call()
-                const json2 = await response2.json()
+                const json2 = response2.data
 
                 assert.notEqual(json2.imageUrl, json.imageUrl)
             })
@@ -1073,7 +1072,7 @@ describe('Products API', function() {
                 .addStream(createdProductId, streamId3)
                 .withApiKey(AUTH_TOKEN_2)
                 .call()
-            const json = await response.json()
+            const json = response.data
 
             assert.equal(response.status, 403)
             assert.equal(json.code, 'FORBIDDEN')
@@ -1097,7 +1096,7 @@ describe('Products API', function() {
                 .addStream(createdProductId, streamId4)
                 .withApiKey(AUTH_TOKEN)
                 .call()
-            const json = await response.json()
+            const json = response.data
 
             assert.equal(response.status, 403)
             assert.equal(json.code, 'FORBIDDEN')
@@ -1123,7 +1122,7 @@ describe('Products API', function() {
                     .listStreams(createdProductId)
                     .withApiKey(AUTH_TOKEN)
                     .call()
-                const json = await response.json()
+                const json = response.data
                 assert.include(json.map(stream => stream.id), streamId3)
             })
         })
@@ -1149,7 +1148,7 @@ describe('Products API', function() {
                 .removeStream(createdProductId, streamId3)
                 .withApiKey(AUTH_TOKEN_2)
                 .call()
-            const json = await response.json()
+            const json = response.data
 
             assert.equal(response.status, 403)
             assert.equal(json.code, 'FORBIDDEN')
@@ -1183,7 +1182,7 @@ describe('Products API', function() {
                     .listStreams(createdProductId)
                     .withApiKey(AUTH_TOKEN)
                     .call()
-                const json = await response.json()
+                const json = response.data
                 assert.deepEqual(json.map(stream => stream.id), [streamId2])
             })
         })
@@ -1214,7 +1213,7 @@ describe('Products API', function() {
                     .withApiKey(AUTH_TOKEN)
                     .call()
 
-                json = await response.json()
+                json = response.data
             })
 
             it('responds with 200', () => {
@@ -1268,7 +1267,7 @@ describe('Products API', function() {
                 .deployFree(freeProductId)
                 .withApiKey(AUTH_TOKEN_2)
                 .call()
-            const json = await response.json()
+            const json = response.data
 
             assert.equal(response.status, 403)
             assert.equal(json.code, 'FORBIDDEN')
@@ -1295,7 +1294,7 @@ describe('Products API', function() {
                     .withApiKey(AUTH_TOKEN)
                     .call()
 
-                json = await response.json()
+                json = response.data
             })
 
             it('responds with 200', () => {
@@ -1359,7 +1358,7 @@ describe('Products API', function() {
                 .undeployFree(freeProductId)
                 .withApiKey(AUTH_TOKEN_2)
                 .call()
-            const json = await response.json()
+            const json = response.data
 
             assert.equal(response.status, 403)
             assert.equal(json.code, 'FORBIDDEN')
@@ -1400,7 +1399,7 @@ describe('Products API', function() {
                     .withApiKey(AUTH_TOKEN)
                     .call()
 
-                json = await response.json()
+                json = response.data
             })
 
             it('responds with 200', () => {

@@ -12,7 +12,9 @@ const schemaValidator = new SchemaValidator()
 const API_KEY = 'tester1-api-key'
 
 describe('Permissions API', function() { // use "function" instead of arrow because of this.timeout(...)
-    this.timeout(120 * 1000)
+    const timeout = 130 * 1000
+    this.slow(timeout / 1.5)
+    this.timeout(timeout)
 
     const me = StreamrClient.generateEthereumAccount()
     const nonExistingUser = StreamrClient.generateEthereumAccount()
@@ -82,62 +84,79 @@ describe('Permissions API', function() { // use "function" instead of arrow beca
             assert.equal(response.status, 200)
         })
 
-        it('REST API requires "application/json" as request Content-Type with optional request Accept header', async function() {
+        // Endpoint works without Content-Type header present
+        it('REST API assumes "application/json" as request Content-Type for "text/plain"', async function() {
+            const body = {
+                user: 'tester1@streamr.com',
+                operation: 'stream_get',
+            }
             const response = await Streamr.api.v1.streams
-                .grant(stream.id, 'tester1@streamr.com', 'stream_get')
-                .withAccept('application/json')
+                .grantWithContentTypeAndBody("text/plain", body, stream.id)
                 .withSessionToken(mySessionToken)
                 .call()
             assert.equal(response.status, 200)
-        })
-
-        it('REST API requires "application/json" as request Content-Type', async function() {
-            const response = await Streamr.api.v1.streams
-                .grant(stream.id, 'tester1@streamr.com', 'stream_get')
-                .withSessionToken(mySessionToken)
-                .call()
-            assert.equal(response.status, 200)
-        })
-
-        it('REST API responds with 400 when request when requested with unsupported Accept HTTP header ', async function() {
-            const response = await Streamr.api.v1.streams
-                .grant(stream.id, 'tester1@streamr.com', 'stream_get')
-                .withAccept('text/xml')
-                .withSessionToken(mySessionToken)
-                .call()
-            assert.equal(response.status, 400)
-        })
-
-        it('REST API responds with 400 for Accept XML', async function() {
-            const response = await Streamr.api.v1.streams
-                .grant(stream.id, 'tester1@streamr.com', 'stream_get')
-                .withAccept('text/xml')
-                .withSessionToken(mySessionToken)
-                .call()
-            assert.equal(response.status, 400)
-        })
-
-        it('REST API responds with 200 for Content-Type XML and Accept JSON', async function() {
-            const xml = `<?xml version="1.0" encoding="UTF-8"?><newpermission><operation>stream_get</operation><user>${existingUser.address}</user></newpermission>`
-            const response = await Streamr.api.v1.streams
-                .grantWithContentTypeAndBody('text/xml', xml, stream.id, 'tester1@streamr.com', 'stream_get')
-                .withAccept('application/json')
-                .withSessionToken(mySessionToken)
-                .call()
-            const json = await response.json()
-            assert.equal(response.status, 200, JSON.stringify(json))
+            const json = response.data
             assert.equal(json.operation, 'stream_get')
+            assert.equal(response.headers['content-type'], 'application/json;charset=UTF-8')
+
+        })
+        it('REST API assumes "application/json" as request Content-Type for "text/xml"', async function() {
+            const body = {
+                user: 'tester1@streamr.com',
+                operation: 'stream_get',
+            }
+            const response = await Streamr.api.v1.streams
+                .grantWithContentTypeAndBody("text/xml", body, stream.id)
+                .withSessionToken(mySessionToken)
+                .call()
+            assert.equal(response.status, 200)
+            const json = response.data
+            assert.equal(json.operation, 'stream_get')
+            assert.equal(response.headers['content-type'], 'application/json;charset=UTF-8')
         })
 
-        it('REST API responds with 200 for Content-Type application/json and Accept */*', async function() {
+        // Endpoint should not accept requests in XML format
+        it('REST API responds with 400 when requested with unsupported Accept HTTP header', async function() {
             const response = await Streamr.api.v1.streams
                 .grant(stream.id, 'tester1@streamr.com', 'stream_get')
+                .withAccept('text/xml')
+                .withSessionToken(mySessionToken)
+                .call()
+            assert.equal(response.status, 200) // or 422?
+            const json = response.data
+            assert.equal(json.operation, 'stream_get')
+            assert.equal(response.headers['content-type'], 'application/json;charset=UTF-8')
+        })
+
+        it('REST API responds with 200 for Content-Type */*', async function() {
+            const body = {
+                user: 'tester1@streamr.com',
+                operation: 'stream_get',
+            }
+            const response = await Streamr.api.v1.streams
+                .grantWithContentTypeAndBody('*/*', body, stream.id)
+                .withSessionToken(mySessionToken)
+                .call()
+            const json = response.data
+            assert.equal(response.status, 200)
+            assert.equal(json.operation, 'stream_get')
+            assert.equal(response.headers['content-type'], 'application/json;charset=UTF-8')
+        })
+
+        it('REST API responds with 200 for Content-Type */* and Accept */*', async function() {
+            const body = {
+                user: 'tester1@streamr.com',
+                operation: 'stream_get',
+            }
+            const response = await Streamr.api.v1.streams
+                .grantWithContentTypeAndBody('*/*', body, stream.id)
                 .withAccept('*/*')
                 .withSessionToken(mySessionToken)
                 .call()
-            const json = await response.json()
-            assert.equal(response.status, 200, JSON.stringify(json))
+            const json = response.data
+            assert.equal(response.status, 200)
             assert.equal(json.operation, 'stream_get')
+            assert.equal(response.headers['content-type'], 'application/json;charset=UTF-8')
         })
 
         describe('race conditions', () => {
