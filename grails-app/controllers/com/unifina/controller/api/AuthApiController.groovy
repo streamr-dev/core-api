@@ -11,6 +11,8 @@ import com.unifina.service.SignupCodeService
 import com.unifina.service.UserService
 import com.unifina.utils.EmailValidator
 import grails.converters.JSON
+import grails.validation.Validateable
+import groovy.transform.ToString
 
 class AuthApiController {
 
@@ -176,13 +178,18 @@ class AuthApiController {
 	}
 }
 
+@Validateable
+@ToString
 class EmailCommand {
 	String username
+
 	static constraints = {
 		username blank: false, validator: EmailValidator.validate
 	}
 }
 
+@Validateable
+@ToString(excludes = ["password", "password2"])
 class RegisterCommand {
 	String invite
 	String name
@@ -205,6 +212,8 @@ class RegisterCommand {
 	}
 }
 
+@Validateable
+@ToString(excludes = ["password", "password2"])
 class ResetPasswordCommand {
 	String username
 	String password

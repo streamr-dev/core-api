@@ -10,6 +10,7 @@ class DataUnionJoinRequestCommand {
 	String memberAddress
 	String secret
 	Map<String, Object> metadata
+
 	static constraints = {
 		memberAddress(nullable: false, validator: Product.isEthereumAddress)
 	}

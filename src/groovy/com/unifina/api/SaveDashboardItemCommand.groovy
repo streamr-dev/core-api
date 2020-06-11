@@ -4,10 +4,11 @@ import com.unifina.domain.signalpath.Canvas
 import com.unifina.utils.Webcomponent
 import grails.converters.JSON
 import grails.validation.Validateable
+import groovy.transform.ToString
 
 @Validateable
+@ToString
 class SaveDashboardItemCommand {
-
 	String id
 	String title
 	Canvas canvas

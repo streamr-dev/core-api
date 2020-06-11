@@ -1,8 +1,10 @@
 package com.unifina.api
 
 import grails.validation.Validateable
+import groovy.transform.ToString
 
 @Validateable
+@ToString
 class SaveCanvasCommand {
 	String name
 	List<Object> modules

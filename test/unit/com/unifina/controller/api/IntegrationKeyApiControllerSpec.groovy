@@ -1,12 +1,10 @@
 package com.unifina.controller.api
 
 import com.unifina.ControllerSpecification
-import com.unifina.api.ApiException
-import com.unifina.api.NotFoundException
-import com.unifina.security.Challenge
 import com.unifina.domain.security.IntegrationKey
 import com.unifina.domain.security.Key
 import com.unifina.domain.security.SecUser
+import com.unifina.security.Challenge
 import com.unifina.service.EthereumIntegrationKeyService
 import grails.converters.JSON
 import grails.test.mixin.Mock
@@ -88,7 +86,7 @@ class IntegrationKeyApiControllerSpec extends ControllerSpecification {
 				challenge: challenge.getChallenge()
 			],
 			signature: signature,
-			account  : address
+			address  : address
 		]
 		authenticatedAs(me) { controller.save() }
 
