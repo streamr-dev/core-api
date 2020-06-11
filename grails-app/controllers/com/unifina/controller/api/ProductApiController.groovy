@@ -85,16 +85,16 @@ class ProductApiController {
 		render(product.toMap(isProductOwner) as JSON)
 	}
 
-	@GrailsCompileStatic
 	@StreamrApi(authenticationLevel = AuthLevel.USER)
 	def save(CreateProductCommand command) {
 		Product product = productService.create(command, loggedInUser())
 		render(product.toMap() as JSON)
 	}
 
-	@GrailsCompileStatic
 	@StreamrApi(authenticationLevel = AuthLevel.USER)
-	def update(String id, UpdateProductCommand command) {
+	def update(String id) {
+		UpdateProductCommand command = new UpdateProductCommand(request.JSON)
+		command.validate()
 		Product product = productService.update(id, command, loggedInUser())
 		boolean isProductOwner = permissionService.check(loggedInUser(), product, Permission.Operation.PRODUCT_SHARE)
 		render(product.toMap(isProductOwner) as JSON)
@@ -116,9 +116,10 @@ class ProductApiController {
 		render(product.toMap() as JSON)
 	}
 
-	@GrailsCompileStatic
 	@StreamrApi(authenticationLevel = AuthLevel.USER)
-	def setDeployed(String id, ProductDeployedCommand command) {
+	def setDeployed(String id) {
+		ProductDeployedCommand command = new ProductDeployedCommand(request.JSON)
+		command.validate()
 		Product product = apiService.getByIdAndThrowIfNotFound(Product, id)
 		productService.markAsDeployed(product, command, loggedInUser())
 		render(product.toMap() as JSON)
@@ -148,9 +149,10 @@ class ProductApiController {
 		render(product.toMap() as JSON)
 	}
 
-	@GrailsCompileStatic
 	@StreamrApi(authenticationLevel = AuthLevel.USER)
-	def setUndeployed(String id, ProductUndeployedCommand command) {
+	def setUndeployed(String id) {
+		ProductUndeployedCommand command = new ProductUndeployedCommand(request.JSON)
+		command.validate()
 		Product product = apiService.getByIdAndThrowIfNotFound(Product, id)
 		productService.markAsUndeployed(product, command, loggedInUser())
 		render(product.toMap() as JSON)

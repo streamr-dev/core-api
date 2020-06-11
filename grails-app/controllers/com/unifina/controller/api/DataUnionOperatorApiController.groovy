@@ -1,9 +1,9 @@
 package com.unifina.controller.api
 
 import com.unifina.api.BadRequestException
-import com.unifina.service.DataUnionOperatorService
 import com.unifina.security.AuthLevel
 import com.unifina.security.StreamrApi
+import com.unifina.service.DataUnionOperatorService
 import com.unifina.utils.EthereumAddressValidator
 
 class DataUnionOperatorApiController {

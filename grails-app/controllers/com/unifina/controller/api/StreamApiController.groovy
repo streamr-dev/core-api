@@ -147,7 +147,8 @@ class StreamApiController {
 	}
 
 	@StreamrApi
-	def confirmCsvFileUpload(String id, CsvParseInstructions instructions) {
+	def confirmCsvFileUpload(String id) {
+		CsvParseInstructions instructions = new CsvParseInstructions(request.JSON)
 		Stream stream = csvUploadService.parseAndConsumeCsvFile(instructions, id, (SecUser) request.apiUser)
 		render(stream.toMap() as JSON)
 	}

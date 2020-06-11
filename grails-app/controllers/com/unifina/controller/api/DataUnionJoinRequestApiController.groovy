@@ -5,7 +5,6 @@ import com.unifina.domain.dataunion.DataUnionJoinRequest
 import com.unifina.domain.security.SecUser
 import com.unifina.security.StreamrApi
 import com.unifina.service.DataUnionJoinRequestService
-
 import com.unifina.service.EthereumService
 import com.unifina.utils.EthereumAddressValidator
 import com.unifina.utils.IDValidator
@@ -42,7 +41,9 @@ class DataUnionJoinRequestApiController {
 	 * curl -v -H "Authorization: token tester1-api-key" -H "Content-Type: application/json" -d '{"memberAddress": "0x9334f0aa74d2744b97b0b1be6896788ee46f4aaa", metadata: {"foo":"bar"}}' http://localhost:8081/streamr-core/api/v1/dataunions/0x6c90aece04198da2d5ca9b956b8f95af8041de37/joinRequests
 	 **/
 	@StreamrApi
-	def save(String contractAddress, DataUnionJoinRequestCommand cmd) {
+	def save(String contractAddress) {
+		DataUnionJoinRequestCommand cmd = new DataUnionJoinRequestCommand(request.JSON)
+		cmd.validate()
 		if (!isDataUnionAddress(contractAddress)) {
 			throw new BadRequestException("Data Union address is not a valid Ethereum address")
 		}
@@ -93,7 +94,9 @@ class DataUnionJoinRequestApiController {
 
 	// curl -v -X PUT -H "Authorization: token tester1-api-key" -H "Content-Type: application/json" -d '{"state": "ACCEPTED"}' http://localhost:8081/streamr-core/api/v1/dataunions/0x6c90aece04198da2d5ca9b956b8f95af8041de37/joinRequests/L-TvrBkyQTS_JK1ABHFEZAaZ3FHq7-TPqMXe9JNz1x6g
 	@StreamrApi
-	def update(String contractAddress, String id, UpdateDataUnionJoinRequestCommand cmd) {
+	def update(String contractAddress, String id) {
+		UpdateDataUnionJoinRequestCommand cmd = new UpdateDataUnionJoinRequestCommand(request.JSON)
+		cmd.validate()
 		checkAdminAccessControl(loggedInUser(), contractAddress)
 		if (!isValidID(id)) {
 			throw new BadRequestException("join request id not valid")

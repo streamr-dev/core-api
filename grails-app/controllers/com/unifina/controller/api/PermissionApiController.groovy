@@ -32,8 +32,8 @@ class PermissionApiController {
 		List<Permission> permissions = permissionService.findAllPermissions(resource, request.apiUser, request.apiKey, subscriptions)
 		def perms = permissions*.toMap()
 		render(perms as JSON)
-		request.withFormat {
-			json {
+		withFormat {
+			"json" {
 				return render(perms as JSON)
 			}
 		}
@@ -44,15 +44,16 @@ class PermissionApiController {
 		Resource resource = new Resource(params.resourceClass, params.resourceId)
 		List<Permission> permissions = permissionService.getOwnPermissions(resource, request.apiUser, request.apiKey)
 		def perms = permissions*.toMap()
-		request.withFormat {
-			json {
+		withFormat {
+			"json" {
 				return render(perms as JSON)
 			}
 		}
 	}
 
 	@StreamrApi(authenticationLevel = AuthLevel.NONE)
-	def save(NewPermissionCommand cmd) {
+	def save() {
+		NewPermissionCommand cmd = new NewPermissionCommand(request.JSON)
 		if (!cmd.validate()) {
 			throw new ValidationException(cmd.errors)
 		}
@@ -93,14 +94,8 @@ class PermissionApiController {
 		}
 		header("Location", request.forwardURI + "/" + newPermission.id)
 		withFormat {
-			json {
+			"json" {
 				return render(newPermission.toMap() as JSON)
-			}
-			"*" {
-				return render(newPermission.toMap() as JSON)
-			}
-			xml {
-				return render(status: HttpServletResponse.SC_BAD_REQUEST)
 			}
 		}
 	}
@@ -109,8 +104,8 @@ class PermissionApiController {
 	def show(Long id) {
 		Resource resource = new Resource(params.resourceClass, params.resourceId)
 		Permission p = permissionService.findPermission(id, resource, request.apiUser, request.apiKey)
-		request.withFormat {
-			json {
+		withFormat {
+			"json" {
 				return render(p.toMap() as JSON)
 			}
 		}
@@ -120,8 +115,8 @@ class PermissionApiController {
 	def delete(Long id) {
 		Resource resource = new Resource(params.resourceClass, params.resourceId)
 		permissionService.deletePermission(id, resource, request.apiUser, request.apiKey)
-		request.withFormat {
-			json {
+		withFormat {
+			"json" {
 				response.status = HttpServletResponse.SC_NO_CONTENT
 			}
 		}
@@ -130,8 +125,8 @@ class PermissionApiController {
 	@StreamrApi(allowRoles = AllowRole.DEVOPS)
 	def cleanup() {
 		permissionService.cleanUpExpiredPermissions()
-		request.withFormat {
-			json {
+		withFormat {
+			"json" {
 				response.status = HttpServletResponse.SC_OK
 			}
 		}

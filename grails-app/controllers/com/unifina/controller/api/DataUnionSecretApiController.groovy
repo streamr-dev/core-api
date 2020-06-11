@@ -1,6 +1,5 @@
 package com.unifina.controller.api
 
-
 import com.unifina.api.BadRequestException
 import com.unifina.api.DataUnionSecretCommand
 import com.unifina.api.NotFoundException
@@ -9,7 +8,6 @@ import com.unifina.domain.dataunion.DataUnionSecret
 import com.unifina.domain.security.SecUser
 import com.unifina.security.StreamrApi
 import com.unifina.service.DataUnionSecretService
-
 import com.unifina.service.EthereumService
 import com.unifina.utils.EthereumAddressValidator
 import grails.converters.JSON
@@ -54,7 +52,9 @@ class DataUnionSecretApiController {
 
 	// curl -v -H "Authorization: token tester1-api-key" -H "Content-Type: application/json" -d '{"name":"name"}' http://localhost:8081/streamr-core/api/v1/dataunions/0x6c90aece04198da2d5ca9b956b8f95af8041de37/secrets
 	@StreamrApi
-	def save(String contractAddress, DataUnionSecretCommand cmd) {
+	def save(String contractAddress) {
+		DataUnionSecretCommand cmd = new DataUnionSecretCommand(request.JSON)
+		cmd.validate()
 		checkAdminAccessControl(loggedInUser(), contractAddress)
 		if (cmd.errors.getFieldError("name")) {
 			throw new BadRequestException("name in json is not a valid name")
@@ -79,7 +79,9 @@ class DataUnionSecretApiController {
 
 	// curl -v -X PUT -H "Authorization: token tester1-api-key" -H "Content-Type: application/json" -d '{"name":"new name"}' http://localhost:8081/streamr-core/api/v1/dataunions/0x6c90aece04198da2d5ca9b956b8f95af8041de37/secrets/L-TvrBkyQTS_JK1ABHFEZAaZ3FHq7-TPqMXe9JNz1x6g
 	@StreamrApi
-	def update(String contractAddress, String id, DataUnionSecretCommand cmd) {
+	def update(String contractAddress, String id) {
+		DataUnionSecretCommand cmd = new DataUnionSecretCommand(request.JSON)
+		cmd.validate()
 		checkAdminAccessControl(loggedInUser(), contractAddress)
 		if (!isValidID(id)) {
 			throw new BadRequestException("Data Union secret id is not valid")

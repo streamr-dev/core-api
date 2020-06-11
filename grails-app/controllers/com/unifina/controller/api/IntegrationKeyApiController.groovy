@@ -3,6 +3,7 @@ package com.unifina.controller.api
 import com.unifina.api.ApiException
 import com.unifina.api.IntegrationKeyListParams
 import com.unifina.api.NotFoundException
+import com.unifina.api.SaveIntegrationKeyCommand
 import com.unifina.domain.security.IntegrationKey
 import com.unifina.domain.security.SecUser
 import com.unifina.security.StreamrApi
@@ -23,7 +24,9 @@ class IntegrationKeyApiController {
 	}
 
 	@StreamrApi
-	def save(SaveIntegrationKeyCommand cmd) {
+	def save() {
+		SaveIntegrationKeyCommand cmd = new SaveIntegrationKeyCommand(request.JSON)
+		cmd.validate()
 		switch (cmd.service as IntegrationKey.Service) {
 			case IntegrationKey.Service.ETHEREUM:
 				IntegrationKey key
