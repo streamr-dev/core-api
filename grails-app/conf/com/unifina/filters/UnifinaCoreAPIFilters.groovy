@@ -101,5 +101,29 @@ class UnifinaCoreAPIFilters {
 
 			}
 		}
+
+		contentTypeFilter(uri: '/api/**') {
+			before = {
+				// If the request has a body, check content type
+				if (request.getHeader("Content-Length")) {
+					String contentType = request.getHeader("Content-Type")
+					StreamrApi annotation = getApiAnnotation(controllerName, actionName)
+
+					for (String acceptedContentType : annotation.expectedContentTypes()) {
+						if (acceptedContentType == contentType) {
+							return true
+						}
+					}
+
+					render(
+						status: 415,
+						text: [
+							code   : "UNEXPECTED_CONTENT_TYPE",
+							message: "Unexpected content type on request: ${request.getHeader("Content-Type")}. Expected one of: ${Arrays.toString(annotation.expectedContentTypes())}",
+						] as JSON
+					)
+				}
+			}
+		}
 	}
 }
