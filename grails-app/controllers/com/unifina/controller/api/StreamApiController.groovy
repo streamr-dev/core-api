@@ -128,7 +128,7 @@ class StreamApiController {
 		render(stream.toMap() as JSON)
 	}
 
-	@StreamrApi
+	@StreamrApi(expectedContentTypes = ["multipart/form-data"])
 	def uploadCsvFile(String id) {
 		// Copy multipart contents to temporary file
 		MultipartFile multipartFile = request.getFile("file")
