@@ -168,7 +168,7 @@ class EthereumIntegrationKeyService {
 			return
 		}
 		Stream inboxStream = new Stream()
-		inboxStream.id = address.toLowerCase()
+		inboxStream.id = getInboxStreamId(address)
 		inboxStream.name = address.toLowerCase()
 		inboxStream.inbox = true
 		inboxStream.autoConfigure = false
@@ -178,11 +178,20 @@ class EthereumIntegrationKeyService {
 	}
 
 	private void deleteInboxStream(String address) {
-		Stream stream = Stream.get(address)
+		String id = getInboxStreamId(address)
+		Stream stream = Stream.get(id)
 		if (stream && stream.inbox) {
-			Permission.findAllByStream(Stream.get(address))*.delete(flush: true)
+			Permission.findAllByStream(Stream.get(id))*.delete(flush: true)
 			stream.delete(flush: true)
 		}
+	}
+
+	Stream getInboxStream(String address) {
+		return Stream.get(getInboxStreamId(address))
+	}
+
+	String getInboxStreamId(String address) {
+		return "SYSTEM/keyexchange/" + address.toLowerCase()
 	}
 
 	@CompileStatic

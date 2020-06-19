@@ -27,6 +27,7 @@ class StreamService {
 
 	CassandraService cassandraService
 	PermissionService permissionService
+	EthereumIntegrationKeyService ethService
 
 	private final StreamPartitioner partitioner = new StreamPartitioner()
 
@@ -38,7 +39,7 @@ class StreamService {
 
 	Stream getStream(String id) {
 		if (EthereumAddressValidator.validate(id)) {
-			Stream inboxStream = Stream.get(id.toLowerCase())
+			Stream inboxStream = ethService.getInboxStream()
 			if (inboxStream.inbox) {
 				return inboxStream
 			}
@@ -188,7 +189,8 @@ class StreamService {
 			}
 			'in'("service", [IntegrationKey.Service.ETHEREUM, IntegrationKey.Service.ETHEREUM_ID])
 		}
-		return Stream.findAllByIdInListAndInbox(keys*.idInService, true)
+		List<String> streamIds = keys*.idInService.stream().map( { s -> ethService.getInboxStreamId(s) } )
+		return Stream.findAllByIdInListAndInbox(streamIds, true)
 	}
 
 	static class StreamStatus {
