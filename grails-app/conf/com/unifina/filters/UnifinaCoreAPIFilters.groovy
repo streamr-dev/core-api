@@ -106,11 +106,11 @@ class UnifinaCoreAPIFilters {
 		contentTypeFilter(uri: '/api/**') {
 			before = {
 				// If the request has a body, check content type
-				if (request.getHeader("Content-Length")) {
+				if (request.method in ["POST", "PUT", "PATCH"] && request.getHeader("Content-Length")) {
 					String contentType = request.getHeader("Content-Type")
 					// When contentType is "application/json; charset=UTF-8"
 					if (contentType != null && contentType.contains(";")) {
-						contentType = contentType.split(";").trim()
+						contentType = contentType.split(";")[0].trim()
 					}
 					StreamrApi annotation = getApiAnnotation(controllerName, actionName)
 
