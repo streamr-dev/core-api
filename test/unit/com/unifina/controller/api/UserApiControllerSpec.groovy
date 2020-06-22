@@ -217,7 +217,7 @@ class UserApiControllerSpec extends ControllerSpecification {
 		response.json.username == request.apiUser.username
 	}
 
-	void "can upload only images with correct content type"() {
+	void "uploadAvatarImage accepts image uploads with correct request content type"() {
 		setup:
 		controller.userAvatarImageService = Mock(UserAvatarImageService)
 		request.addHeader("Authorization", "Bearer token")
@@ -236,7 +236,7 @@ class UserApiControllerSpec extends ControllerSpecification {
 		response.status == 200
 	}
 
-	void "upload avatar image doesnt accept unlisted content type"() {
+	void "uploadAvatarImage doesnt accept unlisted request content type"() {
 		setup:
 		controller.userAvatarImageService = Mock(UserAvatarImageService)
 		request.addHeader("Authorization", "Bearer token")
