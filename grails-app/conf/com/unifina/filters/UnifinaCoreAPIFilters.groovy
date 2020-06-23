@@ -105,10 +105,17 @@ class UnifinaCoreAPIFilters {
 
 		contentTypeFilter(uri: '/api/**') {
 			before = {
+				String contentLength = request.getHeader("Content-Length")
+				Long len
+				try {
+					len = Long.parseLong(contentLength)
+				} catch (NumberFormatException e) {
+					len = 0
+				}
 				// If the request has a body, check content type
-				if (request.method in ["POST", "PUT", "PATCH"] && request.getHeader("Content-Length")) {
+				if (request.method in ["POST", "PUT", "PATCH"] && len > 0) {
 					String contentType = request.getHeader("Content-Type")
-					// When contentType is "application/json; charset=UTF-8"
+					// When contentType is "application/json; charset=UTF-8" or "multipart/form-data; boundary=--------------------------388527064590944058251699"
 					if (contentType != null && contentType.contains(";")) {
 						contentType = contentType.split(";")[0].trim()
 					}
