@@ -157,7 +157,7 @@ class ProductApiController {
 	}
 
 	@GrailsCompileStatic
-	@StreamrApi(authenticationLevel = AuthLevel.USER)
+	@StreamrApi(authenticationLevel = AuthLevel.USER, expectedContentTypes = ["multipart/form-data"])
 	def uploadImage(String id) {
 		Product product = productService.findById(id, loggedInUser(), Permission.Operation.PRODUCT_EDIT)
 		MultipartFile file = getUploadedFile()
