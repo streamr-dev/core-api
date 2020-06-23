@@ -15,6 +15,7 @@ class StreamrApiRequest {
         this.authHeader = null
         this.contentType = null
         this.queryParams = ''
+        this.headers = null
     }
 
     methodAndPath(method, relativePath) {
@@ -46,6 +47,11 @@ class StreamrApiRequest {
         return this
     }
 
+    withFormData(formData) {
+        this.headers = formData.getHeaders()
+        return this
+    }
+
     withRawBody(body) {
         this.body = body
         this.contentType = null
@@ -62,7 +68,7 @@ class StreamrApiRequest {
 
         const apiUrl = url.resolve(this.baseUrl, this.relativePath) + this.queryParams
 
-        const headers = {
+        let headers = {
             'Accept': 'application/json'
         }
         if (this.body && this.contentType) {
@@ -70,6 +76,9 @@ class StreamrApiRequest {
         }
         if (this.authHeader) {
             headers['Authorization'] = this.authHeader
+        }
+        if (this.headers) {
+            Object.assign(headers, this.headers)
         }
 
         if (this.logging) {
@@ -184,7 +193,7 @@ class Products {
 
         return new StreamrApiRequest(this.options)
             .methodAndPath('POST', `products/${id}/images`)
-            .withRawBody(formData)
+            .withFormData(formData)
     }
 
     listStreams(id) {
