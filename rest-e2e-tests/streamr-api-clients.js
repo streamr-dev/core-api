@@ -48,6 +48,7 @@ class StreamrApiRequest {
     }
 
     withFormData(formData) {
+        this.body = formData
         this.headers = formData.getHeaders()
         return this
     }
