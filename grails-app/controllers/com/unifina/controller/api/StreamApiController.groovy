@@ -140,7 +140,11 @@ class StreamApiController {
 			render(result as JSON)
 		} catch (Exception e) {
 			if (temporaryFile != null && temporaryFile.exists()) {
-				temporaryFile.delete()
+				boolean ok = temporaryFile.delete()
+				if (!ok) {
+					String message = String.format("deleting uploaded csv file: %s", temporaryFile.path)
+					log.error(message)
+				}
 			}
 			throw e
 		}
