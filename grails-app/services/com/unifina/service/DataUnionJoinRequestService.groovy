@@ -1,10 +1,7 @@
 package com.unifina.service
 
 import com.streamr.client.StreamrClient
-import com.unifina.api.ApiException
-import com.unifina.api.DataUnionJoinRequestCommand
-import com.unifina.api.NotFoundException
-import com.unifina.api.UpdateDataUnionJoinRequestCommand
+import com.unifina.api.*
 import com.unifina.domain.data.Stream
 import com.unifina.domain.dataunion.DataUnionJoinRequest
 import com.unifina.domain.dataunion.DataUnionSecret
@@ -12,6 +9,7 @@ import com.unifina.domain.marketplace.Product
 import com.unifina.domain.security.IntegrationKey
 import com.unifina.domain.security.Permission
 import com.unifina.domain.security.SecUser
+import groovy.json.JsonSlurper
 import org.apache.log4j.Logger
 
 class DataUnionJoinRequestService {
@@ -21,14 +19,30 @@ class DataUnionJoinRequestService {
 	EthereumService ethereumService
 	PermissionService permissionService
 	StreamrClientService streamrClientService
+	DataUnionOperatorService dataUnionOperatorService
 
 	private void onApproveJoinRequest(DataUnionJoinRequest c) {
+		// Query DUS for join status
+		try {
+			DataUnionOperatorService.ProxyResponse result = dataUnionOperatorService.memberStats(c.contractAddress, c.memberAddress)
+			if (result.statusCode == 200 && result.body != null || result.body != "") {
+				Map<String, Object> json = new JsonSlurper().parseText(result.body)
+				if (json.active != null && json.active == true) {
+					log.debug("onApproveJoinRequest: Member ${c.memberAddress} has already joined. Skip sending join message.")
+					return
+				}
+			}
+		} catch (ProxyException e) {
+			// on error proceed with sending join message
+			log.error("DUS member stats query error", e)
+		}
 		log.debug("onApproveJoinRequest: approved JoinRequest for address ${c.memberAddress} to data union ${c.contractAddress}")
 		for (Stream s : findStreams(c)) {
 			if (permissionService.check(c.user, s, Permission.Operation.STREAM_PUBLISH)) {
 				log.debug(String.format("user %s already has write permission to %s (%s), skipping grant", c.user.username, s.name, s.id))
 			} else {
 				log.debug(String.format("granting write permission to %s (%s) for %s", s.name, s.id, c.user.username))
+				permissionService.systemGrant(c.user, s, Permission.Operation.STREAM_GET)
 				permissionService.systemGrant(c.user, s, Permission.Operation.STREAM_PUBLISH)
 			}
 		}

@@ -47,4 +47,20 @@ public class NotPermittedException extends ApiException {
 		}
 		return e;
 	}
+
+	public String getUser() {
+		return user;
+	}
+
+	public String getType() {
+		return type;
+	}
+
+	public String getId() {
+		return id;
+	}
+
+	public String getOp() {
+		return op;
+	}
 }

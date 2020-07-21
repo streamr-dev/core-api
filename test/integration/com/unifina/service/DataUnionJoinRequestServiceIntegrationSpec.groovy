@@ -50,6 +50,7 @@ class DataUnionJoinRequestServiceIntegrationSpec extends Specification {
 
 		service.ethereumService = Mock(EthereumService)
 		service.permissionService = Mock(PermissionService)
+		service.dataUnionOperatorService = Mock(DataUnionOperatorService)
 	}
 
 	void "findAll"() {
@@ -153,8 +154,9 @@ class DataUnionJoinRequestServiceIntegrationSpec extends Specification {
 
 	void "update updates pending state to accepted"() {
 		setup:
+		String memberAddress = "0xCCCC000000000000000000000000AAAA0000FFFF"
 		DataUnionJoinRequest r = new DataUnionJoinRequest(
-			memberAddress: "0xCCCC000000000000000000000000AAAA0000FFFF",
+			memberAddress: memberAddress,
 			contractAddress: contractAddress,
 			user: me,
 			state: DataUnionJoinRequest.State.PENDING,
@@ -167,10 +169,14 @@ class DataUnionJoinRequestServiceIntegrationSpec extends Specification {
 			state: "ACCEPTED",
 		)
 
+		DataUnionOperatorService.ProxyResponse stats = new DataUnionOperatorService.ProxyResponse()
+		stats.statusCode = 404
+
 		when:
 		def c = service.update(contractAddress, r.id, cmd)
 		then:
 		1 * service.ethereumService.fetchJoinPartStreamID(contractAddress) >> joinPartStream.id
+		1 * service.dataUnionOperatorService.memberStats(contractAddress, memberAddress) >> stats
 		1 * streamrClientMock.publish(_, [type: "join", addresses: [r.memberAddress]])
 		c.state == DataUnionJoinRequest.State.ACCEPTED
 		// no changes below
