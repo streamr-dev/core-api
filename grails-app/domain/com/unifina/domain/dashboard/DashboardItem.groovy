@@ -3,8 +3,11 @@ package com.unifina.domain.dashboard
 import com.unifina.domain.signalpath.Canvas
 import com.unifina.utils.IdGenerator
 import com.unifina.utils.Webcomponent
+import grails.persistence.Entity
 
+@Entity
 class DashboardItem {
+
 
 	String id
 	String title

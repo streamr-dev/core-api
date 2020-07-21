@@ -187,7 +187,11 @@ environments {
 /**
  * API & CORS config
  */
-cors.url.pattern = ['/api/*', '/contact/send', '/profile/*', '/logout/*', '/login/*', '/j_spring_security_check', '/canvas', '/logout', '/j_spring_security_logout']
+cors.url.pattern = [
+	'/api/*', // Streamr REST API
+]
+cors.headers = ['Access-Control-Allow-Headers': 'origin, authorization, accept, content-type, x-requested-with, Streamr-Client'] // allow custom Streamr-Client header in CORS requests
+
 streamr.apiKey.revokeNotificationStream = "revoked-api-keys"
 
 /**
@@ -277,37 +281,7 @@ environments {
 		streamr.encryption.password = System.getProperty("streamr.encryption.password") // in production, the system property must be set
 	}
 }
-
-/**
- * Spring security config
- */
-
-grails.plugin.springsecurity.ui.register.defaultRoleNames = ["ROLE_USER", "ROLE_LIVE"]
-
-grails.plugin.springsecurity.userLookup.userDomainClassName = 'com.unifina.domain.security.SecUser'
-grails.plugin.springsecurity.userLookup.authorityJoinClassName = 'com.unifina.domain.security.SecUserSecRole'
-grails.plugin.springsecurity.authority.className = 'com.unifina.domain.security.SecRole'
-
-grails.plugin.springsecurity.rememberMe.enabled = true
-grails.plugin.springsecurity.rememberMe.cookieName = 'streamr_remember_me'
-grails.plugin.springsecurity.rememberMe.key = System.getProperty("grails.plugin.springsecurity.rememberMe.key") ?: 'IfYouCanDreamItYouCanStreamIt'
-grails.plugin.springsecurity.password.algorithm = 'bcrypt'
-grails.plugin.springsecurity.logout.postOnly = false
-grails.plugin.springsecurity.successHandler.defaultTargetUrl = '/'
-grails.plugin.springsecurity.auth.loginFormUrl = '/'
-grails.plugin.springsecurity.auth.ajaxLoginFormUrl = '/'
-grails.plugin.springsecurity.ui.encodePassword = true
-grails.plugin.springsecurity.ui.password.minLength = 8
-
-// Due to https://jira.grails.org/browse/GPSPRINGSECURITYCORE-253 errorPage needs to be
-// set to null and 403 mapped in UrlMappings
-grails.plugin.springsecurity.adh.errorPage = null
-
-grails.plugin.springsecurity.securityConfigType = 'Annotation'
-
-grails.plugin.springsecurity.controllerAnnotations.staticRules = [
-	'/*':                 ['IS_AUTHENTICATED_ANONYMOUSLY']
-]
+streamr.encryption.bcrypt.logrounds = 10
 
 /**
  * Email config

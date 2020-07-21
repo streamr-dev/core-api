@@ -2,7 +2,9 @@ package com.unifina.domain.security
 
 import com.unifina.security.Userish
 import com.unifina.utils.UsernameValidator
+import grails.persistence.Entity
 
+@Entity
 class SignupInvite implements Userish {
 	String code
 	String username

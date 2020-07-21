@@ -1,9 +1,10 @@
 package com.unifina.service
 
+
 import com.streamr.client.StreamrClient
 import com.streamr.client.authentication.ApiKeyAuthenticationMethod
 import com.streamr.client.authentication.AuthenticationMethod
-import com.streamr.client.authentication.EthereumAuthenticationMethod
+import com.streamr.client.authentication.InternalAuthenticationMethod
 import com.streamr.client.options.EncryptionOptions
 import com.streamr.client.options.SigningOptions
 import com.streamr.client.options.StreamrClientOptions
@@ -13,22 +14,33 @@ import grails.util.Holders
 import org.apache.log4j.Logger
 
 import java.lang.reflect.Constructor
+import java.util.concurrent.TimeUnit
+import java.util.concurrent.TimeoutException
+import java.util.concurrent.locks.ReentrantLock
 
 class StreamrClientService {
 
+	EthereumIntegrationKeyService ethereumIntegrationKeyService
+	SessionService sessionService
+
 	private static final Logger log = Logger.getLogger(StreamrClientService)
 
-	StreamrClient instanceForThisEngineNode
-	Constructor<StreamrClient> clientConstructor
+	private StreamrClient instanceForThisEngineNode
+	private final ReentrantLock instanceForThisEngineNodeLock = new ReentrantLock()
+
+	private Constructor<StreamrClient> clientConstructor
 
 	StreamrClientService() {
 		clientConstructor = StreamrClient.class.getConstructor(StreamrClientOptions)
 	}
 
 	/**
-	 * Useful for testing, this constructor allows the StreamrClient class to be injected
+	 * Useful for testing, this method allows a StreamrClient class with some mocked methods to be passed
 	 */
-	StreamrClientService(Class<StreamrClient> streamrClientClass) {
+	void setClientClass(Class<StreamrClient> streamrClientClass) {
+		if (instanceForThisEngineNode) {
+			throw new IllegalStateException("StreamrClient instance has already been created. Call setClientClass() before calling getInstanceForThisEngineNode()!")
+		}
 		clientConstructor = streamrClientClass.getConstructor(StreamrClientOptions)
 	}
 
@@ -51,15 +63,33 @@ class StreamrClientService {
 	 *
 	 * This is a long running instance which should not be closed as long as this
 	 * application is running. Whoever calls this method should not close the instance.
+	 *
+	 * This method is thread-safe
 	 */
 	StreamrClient getInstanceForThisEngineNode() {
-		if (!instanceForThisEngineNode) {
-			String nodePrivateKey = MapTraversal.getString(Holders.getConfig(), "streamr.ethereum.nodePrivateKey")
-			log.debug("Creating StreamrClient instance for this Engine node. Using private key ${nodePrivateKey?.substring(0,2)}...")
-			instanceForThisEngineNode = createInstance(new EthereumAuthenticationMethod(nodePrivateKey))
-			log.debug("StreamrClient instance created. State: ${instanceForThisEngineNode.getState()}")
+		// Mutex lock with timeout to avoid race conditions
+		if (instanceForThisEngineNodeLock.tryLock(3L, TimeUnit.SECONDS)) {
+			try {
+				if (!instanceForThisEngineNode) {
+					String nodePrivateKey = MapTraversal.getString(Holders.getConfig(), "streamr.ethereum.nodePrivateKey")
+					log.debug("Creating StreamrClient instance for this Engine node. Using private key ${nodePrivateKey?.substring(0, 2)}...")
+
+					// Create a custom EthereumAuthenticationMethod which doesn't call the API, but instead uses the internal services to
+					// get a sessionToken. Calling the API here can lead to a deadlock situation in some corner cases, because the
+					// service calls "itself" while blocking in a mutex-lock.
+					InternalAuthenticationMethod authenticationMethod = new InternalAuthenticationMethod(nodePrivateKey, ethereumIntegrationKeyService, sessionService)
+					instanceForThisEngineNode = createInstance(authenticationMethod)
+					// Make sure the instance is authenticated before returning
+					instanceForThisEngineNode.getSessionToken()
+					log.debug("StreamrClient instance created. State: ${instanceForThisEngineNode.getState()}")
+				}
+				return instanceForThisEngineNode
+			} finally {
+				instanceForThisEngineNodeLock.unlock()
+			}
+		} else {
+			throw new TimeoutException("Timed out waiting for the lock for this Engine node's StreamrClient instance!")
 		}
-		return instanceForThisEngineNode
 	}
 
 	private StreamrClient createInstance(AuthenticationMethod authenticationMethod) {
@@ -87,10 +117,11 @@ class StreamrClientService {
 	 * in Canvas run settings.
 	 */
 	private String getApiKeyForUser(Long userId) {
-		List<Key> keys = Key.where {
-			user.id == userId
-		}.findAll()
-
+		List<Key> keys = Key.createCriteria().list {
+			user {
+				idEq(userId)
+			}
+		}
 		if (keys.isEmpty()) {
 			throw new IllegalStateException("User does not have an API key! This should not happen!")
 		} else {

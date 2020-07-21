@@ -3,6 +3,7 @@ package com.unifina.signalpath
 
 import com.unifina.ModuleTestingSpecification
 import com.unifina.data.Event
+import com.unifina.domain.security.Permission
 import com.unifina.domain.security.SecUser
 import com.unifina.service.PermissionService
 import com.unifina.utils.Globals
@@ -137,7 +138,7 @@ class AbstractSignalPathModuleSpec extends ModuleTestingSpecification {
 		then:
 		response == new RuntimeResponse(true, [request: msg])
 		module.param.value == -123
-		1 * mockedPermissionService.canWrite(_, _) >> true
+		1 * mockedPermissionService.check(_, _, Permission.Operation.CANVAS_EDIT) >> true
 		0 * module.parentSignalPath.pushToUiChannel(_)
 	}
 

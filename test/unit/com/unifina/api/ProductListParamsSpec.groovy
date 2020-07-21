@@ -2,6 +2,7 @@ package com.unifina.api
 
 import com.unifina.domain.marketplace.Category
 import com.unifina.domain.marketplace.Product
+import com.unifina.domain.security.Permission
 import com.unifina.domain.security.SecUser
 import grails.test.mixin.Mock
 import spock.lang.Specification
@@ -163,5 +164,26 @@ class ProductListParamsSpec extends Specification {
 
 	private static Set<String> fetchProductIdsFor(ListParams listParams) {
 		Product.withCriteria(listParams.createListCriteria())*.id
+	}
+
+	void "default constructor sets operation"() {
+		when:
+		ProductListParams params = new ProductListParams()
+		then:
+		params.operation == Permission.Operation.PRODUCT_GET
+	}
+
+	void "map constructor sets operation"() {
+		when:
+		ProductListParams params = new ProductListParams([:])
+		then:
+		params.operation == Permission.Operation.PRODUCT_GET
+	}
+
+	void "map constructor allows operation override"() {
+		when:
+		ProductListParams params = new ProductListParams([operation: Permission.Operation.PRODUCT_SHARE])
+		then:
+		params.operation == Permission.Operation.PRODUCT_SHARE
 	}
 }

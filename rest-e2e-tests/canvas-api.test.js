@@ -11,7 +11,7 @@ const LOGGING_ENABLED = false
 
 const Streamr = initStreamrApi(REST_URL, LOGGING_ENABLED)
 
-const TIMEOUT = 30 * 1000
+const TIMEOUT = 130 * 1000
 
 const NUM_MESSAGES = 50
 
@@ -149,7 +149,8 @@ describe('Canvas API', function() {
                     numero: i,
                 })
             }
-            await sleep(WAIT_TIME / 5)
+            // Wait for data to land in storage
+            await sleep(WAIT_TIME)
         })
 
         it('received messages on uiChannel', async () => {
@@ -348,7 +349,7 @@ function TestClockTable() {
     let subscription
 
     // sets timeout on before and all test cases in this suite
-    this.timeout(9000)
+    this.timeout(80000)
 
     before(async () => {
         const created = await CreateClientUser()

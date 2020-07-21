@@ -186,14 +186,15 @@ class StreamApiControllerSpec extends ControllerSpecification {
 		authenticatedAs(me) { controller.show() }
 
 		then:
-		thrown NotPermittedException
+		NotPermittedException ex = thrown(NotPermittedException)
+		ex.getUser() == me.getUsername()
 	}
 
 	void "shows a Stream of logged in Key"() {
 		Key key = new Key(name: "anonymous key")
 		key.id = "anonymousKeyKey"
 		key.save(failOnError: true)
-		permissionService.systemGrant(key, streamOne, Permission.Operation.READ)
+		permissionService.systemGrant(key, streamOne, Permission.Operation.STREAM_GET)
 
 		when:
 		params.id = streamOne.id
@@ -377,7 +378,7 @@ class StreamApiControllerSpec extends ControllerSpecification {
 		authenticatedAs(me) { controller.setFields()}
 
 		then:
-		1 * apiService.authorizedGetById(Stream, streamOne.id, me, Permission.Operation.WRITE) >> streamOne
+		1 * apiService.authorizedGetById(Stream, streamOne.id, me, Permission.Operation.STREAM_EDIT) >> streamOne
 		streamOne.config == '{"fields":{"field1":"string"}}'
 		response.status == 200
 	}
@@ -390,7 +391,7 @@ class StreamApiControllerSpec extends ControllerSpecification {
 		authenticatedAs(key) { controller.setFields()}
 
 		then:
-		1 * apiService.authorizedGetById(Stream, streamOne.id, key, Permission.Operation.WRITE) >> streamOne
+		1 * apiService.authorizedGetById(Stream, streamOne.id, key, Permission.Operation.STREAM_EDIT) >> streamOne
 		streamOne.config == '{"fields":{"field1":"string"}}'
 		response.status == 200
 	}

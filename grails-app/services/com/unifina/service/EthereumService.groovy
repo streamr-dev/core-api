@@ -38,10 +38,11 @@ class EthereumService {
 
 	/** Checks if given user has registered the given Ethereum address in their Streamr profile */
 	boolean hasEthereumAddress(SecUser user, String ethereumAddress) {
-		// TODO: should we check that service == "ETHEREUM"?
-		IntegrationKey key = IntegrationKey.where {
-			(user == user) && (idInService == ethereumAddress)
-		}.find()
+		IntegrationKey key = IntegrationKey.createCriteria().get {
+			eq("user", user)
+			eq("idInService", ethereumAddress, [ignoreCase: true])
+			'in'("service", [IntegrationKey.Service.ETHEREUM, IntegrationKey.Service.ETHEREUM_ID])
+		}
 		return key != null
 	}
 }

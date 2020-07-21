@@ -1,6 +1,5 @@
 package com.unifina.service
 
-
 import com.unifina.api.InvalidAPIKeyException
 import com.unifina.api.InvalidUsernameAndPasswordException
 import com.unifina.api.NotFoundException
@@ -9,15 +8,13 @@ import com.unifina.domain.data.Stream
 import com.unifina.domain.security.Key
 import com.unifina.domain.security.SecRole
 import com.unifina.domain.security.SecUser
+import com.unifina.domain.security.SecUserSecRole
 import com.unifina.domain.signalpath.Canvas
-import com.unifina.domain.signalpath.ModulePackage
 import com.unifina.exceptions.UserCreationFailedException
+import com.unifina.security.PasswordEncoder
 import com.unifina.security.Userish
-import grails.plugin.springsecurity.SpringSecurityService
 import org.codehaus.groovy.grails.commons.GrailsApplication
 import org.springframework.context.MessageSource
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder
-import org.springframework.security.crypto.password.PasswordEncoder
 import org.springframework.validation.FieldError
 
 class UserService {
@@ -25,21 +22,18 @@ class UserService {
 	MessageSource messageSource
 
 	GrailsApplication grailsApplication
-	SpringSecurityService springSecurityService
+	PasswordEncoder passwordEncoder
 	PermissionService permissionService
 	StreamService streamService
 	CanvasService canvasService
 
-	SecUser createUser(Map properties, List<SecRole> roles = null, List<ModulePackage> packages = null) {
-		def secConf = grailsApplication.config.grails.plugin.springsecurity
-		ClassLoader cl = this.getClass().getClassLoader()
-		SecUser user = cl.loadClass(secConf.userLookup.userDomainClassName).newInstance(properties)
-
+	SecUser createUser(Map properties, List<SecRole> roles = null) {
+		SecUser user = new SecUser(properties)
 		// Encode the password
 		if (user.password == null) {
 			throw new UserCreationFailedException("The password is empty!")
 		}
-		user.password = springSecurityService.encodePassword(user.password)
+		user.password = passwordEncoder.encodePassword(user.password)
 
 		// When created, the account is always enabled
 		user.enabled = true
@@ -47,11 +41,11 @@ class UserService {
 		if (!user.validate()) {
 			def errors = checkErrors(user.errors.getAllErrors())
 			log.warn(errors)
-			def errorStrings = errors.collect { e ->
+			def errorStrings = errors.collect { FieldError e ->
 				if (e.getCode() == "unique") {
-					"Email already in use."
+					return "Email already in use."
 				} else {
-					e.toString()
+					return e.toString()
 				}
 
 			}
@@ -61,13 +55,12 @@ class UserService {
 		// Users must have at least one API key
 		user.addToKeys(new Key(name: "Default"))
 
-		if (!user.save(flush: true)) {
+		if (!user.save(flush: false)) {
 			log.warn("Failed to save user data: " + checkErrors(user.errors.getAllErrors()))
 			throw new UserCreationFailedException()
 		} else {
 			// Save roles, feeds and module packages
 			addRoles(user, roles)
-			setModulePackages(user, packages ?: [])
 
 			// Transfer permissions that were attached to sign-up invitation before user existed
 			permissionService.transferInvitePermissionsTo(user)
@@ -96,31 +89,10 @@ class UserService {
 		return user
 	}
 
-	def addRoles(user, List<SecRole> roles = null) {
-		def secConf = grailsApplication.config.grails.plugin.springsecurity
-		ClassLoader cl = this.getClass().getClassLoader()
-
-		def userRoleClass = cl.loadClass(secConf.userLookup.authorityJoinClassName)
-		def roleClass = cl.loadClass(secConf.authority.className)
-
-		if (roles == null) {
-			roles = roleClass.findAllByAuthorityInList(secConf.ui.register.defaultRoleNames)
-			if (roles.size() != secConf.ui.register.defaultRoleNames.size()) {
-				throw new RuntimeException("Roles not found: " + secConf.ui.register.defaultRoleNames)
-			}
+	def addRoles(SecUser user, List<SecRole> roles = null) {
+		roles?.each { SecRole role ->
+			new SecUserSecRole().create(user, role)
 		}
-
-		roles.each { role ->
-			userRoleClass.create user, role
-		}
-	}
-
-	/** Adds/removes ModulePackage read permissions so that user's permissions match given ones */
-	def setModulePackages(user, List<ModulePackage> packages) {
-		List<ModulePackage> existing = permissionService.get(ModulePackage, user)
-		packages.findAll { !existing.contains(it) }.each { permissionService.systemGrant(user, it) }
-		existing.findAll { !packages.contains(it) }.each { permissionService.systemRevoke(user, it) }
-		return packages
 	}
 
 	def passwordValidator = { String password, command ->
@@ -189,15 +161,14 @@ class UserService {
 	}
 
 	SecUser getUserFromUsernameAndPassword(String username, String password) throws InvalidUsernameAndPasswordException {
-		PasswordEncoder encoder = new BCryptPasswordEncoder()
 		SecUser user = SecUser.findByUsername(username)
 		if (user == null) {
 			throw new InvalidUsernameAndPasswordException("Invalid username or password")
 		}
 		String dbHash = user.password
-		if (encoder.matches(password, dbHash)) {
+		if (passwordEncoder.isPasswordValid(dbHash, password)) {
 			return user
-		}else {
+		} else {
 			throw new InvalidUsernameAndPasswordException("Invalid username or password")
 		}
 	}

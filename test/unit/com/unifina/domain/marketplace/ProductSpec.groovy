@@ -151,28 +151,27 @@ class ProductSpec extends Specification {
 		product.pendingChanges = '{"name":"new name"}'
 
 		then:
-		product.toMap(true) == [
-			id: "product-id",
-			type: "NORMAL",
-			state: "DEPLOYED",
-			created: null,
-			updated: null,
-			owner: "John Doe",
-			name: "name",
-			description: "description",
-			imageUrl: "image.jpg",
-			thumbnailUrl: "thumb.jpg",
-			category: "category-id",
-			streams: ["stream-id"],
-			previewStream: "stream-id",
-			previewConfigJson: "{}",
-			ownerAddress: "0x0",
-			beneficiaryAddress: "0x0",
-			pricePerSecond: "5",
-			isFree: false,
-			priceCurrency: "DATA",
-			minimumSubscriptionInSeconds: 0L,
-			pendingChanges: [name:"new name"],
-		]
+		def map = product.toMap(true)
+		map.id == "product-id"
+		map.type == "NORMAL"
+		map.state == "DEPLOYED"
+		map.created == null
+		map.updated == null
+		map.owner == "John Doe"
+		map.name == "name"
+		map.description == "description"
+		map.imageUrl == "image.jpg"
+		map.thumbnailUrl == "thumb.jpg"
+		map.category == "category-id"
+		map.streams == ["stream-id"]
+		map.previewStream == "stream-id"
+		map.previewConfigJson == "{}"
+		map.ownerAddress == "0x0"
+		map.beneficiaryAddress == "0x0"
+		map.pricePerSecond == "5"
+		map.isFree == false
+		map.priceCurrency == "DATA"
+		map.minimumSubscriptionInSeconds == 0L
+		map.pendingChanges == [name: "new name"]
 	}
 }

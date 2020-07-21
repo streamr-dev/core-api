@@ -5,6 +5,7 @@ import com.unifina.api.ApiException
 import com.unifina.api.InvalidUsernameAndPasswordException
 import com.unifina.domain.security.Key
 import com.unifina.domain.security.SecUser
+import com.unifina.security.PasswordEncoder
 import com.unifina.service.UserAvatarImageService
 import com.unifina.service.UserService
 import grails.test.mixin.Mock
@@ -16,28 +17,18 @@ import org.springframework.mock.web.MockMultipartFile
 class UserApiControllerSpec extends ControllerSpecification {
 
 	SecUser me
-
-	def springSecurityService = [
-		encodePassword: { pw ->
-			return pw+"-encoded"
-		},
-		passwordEncoder: [
-			isPasswordValid: {encodedPassword, rawPwd, salt->
-				return rawPwd+"-encoded" == encodedPassword
-			}
-		],
-	]
+	PasswordEncoder passwordEncoder = new UnitTestPasswordEncoder()
 
 	def setup() {
 		me = new SecUser(
 			name: "me",
 			username: "me@too.com",
 			enabled: true,
-			password: springSecurityService.encodePassword("foobar123!"),
+			password: passwordEncoder.encodePassword("foobar123!"),
 		)
 		me.id = 1
 		me.save(validate: false)
-		controller.springSecurityService = springSecurityService
+		controller.passwordEncoder = passwordEncoder
 	}
 
 	void "unauthenticated user gets back 401"() {
@@ -127,7 +118,7 @@ class UserApiControllerSpec extends ControllerSpecification {
 	void "submitting valid content in user password change form must change user password"() {
 		when: "password change form is submitted"
 		def cmd = new ChangePasswordCommand(username: me.username, currentpassword: "foobar123!", password: "barbar123!", password2: "barbar123!")
-		cmd.springSecurityService = springSecurityService
+		cmd.passwordEncoder = passwordEncoder
 		cmd.userService = new UserService() {
 			SecUser getUserFromUsernameAndPassword(String username, String password) throws InvalidUsernameAndPasswordException {
 				return me
@@ -138,7 +129,7 @@ class UserApiControllerSpec extends ControllerSpecification {
 			controller.changePassword(cmd)
 		}
 		then: "password must be changed"
-		springSecurityService.passwordEncoder.isPasswordValid(SecUser.get(1).password, "barbar123!", null)
+		cmd.passwordEncoder.isPasswordValid(SecUser.get(1).password, "barbar123!")
 		then:
 		response.status == 204
 	}
@@ -201,10 +192,10 @@ class UserApiControllerSpec extends ControllerSpecification {
 	void "submitting an invalid current password won't let the password be changed"() {
 		when: "password change form is submitted with invalid password"
 		def cmd = new ChangePasswordCommand(username: me.username, currentpassword: "invalid", password: "barbar123!", password2: "barbar123!")
-		cmd.springSecurityService = springSecurityService
+		cmd.passwordEncoder = passwordEncoder
 		cmd.userService = new UserService() {
 			SecUser getUserFromUsernameAndPassword(String username, String password) throws InvalidUsernameAndPasswordException {
-				return me
+				throw new InvalidUsernameAndPasswordException("mocked: invalid current password!")
 			}
 		}
 		request.method = "POST"
@@ -212,7 +203,7 @@ class UserApiControllerSpec extends ControllerSpecification {
 			controller.changePassword(cmd)
 		}
 		then: "the old password must remain valid"
-		springSecurityService.passwordEncoder.isPasswordValid(SecUser.get(1).password, "foobar123!", null)
+		cmd.passwordEncoder.isPasswordValid(SecUser.get(1).password, "foobar123!")
 		then:
 		def e = thrown(ApiException)
 		e.message == "Password not changed!"
@@ -223,7 +214,7 @@ class UserApiControllerSpec extends ControllerSpecification {
 	void "submitting a too short new password won't let the password be changed"() {
 		when: "password change form is submitted with invalid new password"
 		def cmd = new ChangePasswordCommand(username: me.username, currentpassword: "foobar", password: "asd", password2: "asd")
-		cmd.springSecurityService = springSecurityService
+		cmd.passwordEncoder = passwordEncoder
 		cmd.userService = new UserService() {
 			SecUser getUserFromUsernameAndPassword(String username, String password) throws InvalidUsernameAndPasswordException {
 				return me
@@ -234,7 +225,7 @@ class UserApiControllerSpec extends ControllerSpecification {
 			controller.changePassword(cmd)
 		}
 		then: "the old password must remain valid"
-		springSecurityService.passwordEncoder.isPasswordValid(SecUser.get(1).password, "foobar123!", null)
+		cmd.passwordEncoder.isPasswordValid(SecUser.get(1).password, "foobar123!")
 		then:
 		def e = thrown(ApiException)
 		e.message == "Password not changed!"
@@ -245,7 +236,7 @@ class UserApiControllerSpec extends ControllerSpecification {
 	void "submitting a too weak new password won't let the password be changed"() {
 		when: "password change form is submitted with invalid new password"
 		def cmd = new ChangePasswordCommand(currentpassword: "foobar123", password: "asd", password2: "asd")
-		cmd.springSecurityService = springSecurityService
+		cmd.passwordEncoder = passwordEncoder
 		cmd.userService = new UserService() {
 			SecUser getUserFromUsernameAndPassword(String username, String password) throws InvalidUsernameAndPasswordException {
 				return me
@@ -256,7 +247,7 @@ class UserApiControllerSpec extends ControllerSpecification {
 			controller.changePassword(cmd)
 		}
 		then: "the old password must remain valid"
-		springSecurityService.passwordEncoder.isPasswordValid(SecUser.get(1).password, "foobar123!", null)
+		cmd.passwordEncoder.isPasswordValid(SecUser.get(1).password, "foobar123!")
 		then:
 		def e = thrown(ApiException)
 		e.message == "Password not changed!"

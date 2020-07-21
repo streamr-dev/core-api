@@ -1,20 +1,16 @@
 package com.unifina.signalpath.messaging
 
 import com.unifina.UiChannelMockingSpecification
-import com.unifina.datasource.RealtimeDataSource
 import com.unifina.domain.security.SecUser
 import com.unifina.domain.signalpath.Canvas
 import com.unifina.signalpath.NotificationMessage
 import com.unifina.signalpath.SignalPath
 import com.unifina.utils.Globals
-
 import com.unifina.utils.testutils.ModuleTestHelper
-import grails.plugin.springsecurity.SpringSecurityService
 import grails.test.mixin.Mock
 import grails.test.mixin.TestMixin
 import grails.test.mixin.support.GrailsUnitTestMixin
 import grails.test.runtime.FreshRuntime
-import org.codehaus.groovy.grails.commons.InstanceFactoryBean
 
 import java.text.SimpleDateFormat
 
@@ -28,10 +24,6 @@ class EmailModuleSpec extends UiChannelMockingSpecification {
 	MockCanvasService cs
 
 	Globals globals
-
-	def doWithSpring = {
-		springSecurityService(InstanceFactoryBean, null, SpringSecurityService)
-	}
 
 	void setup() {
 		mockServicesForUiChannels()

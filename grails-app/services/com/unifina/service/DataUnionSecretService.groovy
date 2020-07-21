@@ -22,10 +22,11 @@ class DataUnionSecretService {
 		return result
 	}
 
-	DataUnionSecret find(String contractAddress, String DataUnionSecretId) {
-		DataUnionSecret result = DataUnionSecret.where {
-			(contractAddress == contractAddress) && (id == DataUnionSecretId)
-		}.find()
+	DataUnionSecret find(String contractAddress, String id) {
+		DataUnionSecret result = DataUnionSecret.createCriteria().get {
+			idEq(id)
+			eq("contractAddress", contractAddress, [ignoreCase: true])
+		}
 		return result
 	}
 

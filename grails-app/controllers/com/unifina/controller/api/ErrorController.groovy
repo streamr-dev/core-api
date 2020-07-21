@@ -1,29 +1,19 @@
 package com.unifina.controller.api
 
-import com.unifina.api.ApiError
-import com.unifina.api.ApiException
-import com.unifina.api.BadRequestException
-import com.unifina.api.CannotRemoveEthereumKeyException
-import com.unifina.api.CanvasCommunicationException
-import com.unifina.api.ChallengeVerificationFailedException
-import com.unifina.api.DisabledUserException
-import com.unifina.api.FieldCannotBeUpdatedException
-import com.unifina.api.InvalidAPIKeyException
-import com.unifina.api.InvalidSessionTokenException
-import com.unifina.api.InvalidStateException
-import com.unifina.api.InvalidUsernameAndPasswordException
-import com.unifina.api.ValidationException
+import com.unifina.api.*
 import com.unifina.exceptions.CanvasUnreachableException
 import com.unifina.security.AuthLevel
 import com.unifina.security.StreamrApi
 import grails.converters.JSON
 import groovy.transform.CompileStatic
 
+import javax.servlet.http.HttpServletResponse
+
 class ErrorController {
 
 	static final Map<String, Closure<ApiError>> errorMappings = [
 		InvalidStateException: { InvalidStateException e -> new ApiError(500, "STATE_NOT_ALLOWED", e.message) },
-		ValidationException: { ValidationException e -> new ApiError(422, "VALIDATION_ERROR", e.message) },
+		ValidationException: validationException(),
 		CanvasUnreachableException: { CanvasUnreachableException e -> new ApiError(500, "CANVAS_UNREACHABLE", e.message) },
 		CanvasCommunicationException: { CanvasCommunicationException e -> new ApiError(503, "CANVAS_COMMUNICATION_ERROR", e.message)},
 		CannotRemoveEthereumKeyException: { CannotRemoveEthereumKeyException e -> new ApiError(409, "ETHEREUM_KEY_REMOVAL_ERROR", e.message)},
@@ -36,6 +26,18 @@ class ErrorController {
 		FieldCannotBeUpdatedException: { FieldCannotBeUpdatedException e -> new ApiError(422, "FIELD_CANNOT_BE_UPDATED", e.message)}
 	]
 
+	private static Closure<ApiError> validationException() {
+		return { Exception e ->
+			if (e instanceof grails.validation.ValidationException) {
+				grails.validation.ValidationException ve = (grails.validation.ValidationException) e
+				ValidationException v = new ValidationException(ve.errors)
+				return new ApiError(422, "VALIDATION_ERROR", v.message)
+			}
+			ValidationException ve = (ValidationException) e
+			return new ApiError(422, "VALIDATION_ERROR", ve.message)
+		}
+	}
+
 	@StreamrApi(authenticationLevel = AuthLevel.NONE)
 	def index() {
 		try {
@@ -47,6 +49,12 @@ class ErrorController {
 			response.status = 500
 			render ([code: "ERROR_WHILE_RENDERING_EXCEPTION", message: "An error occurred while rendering exception"] as JSON)
 		}
+	}
+
+	@StreamrApi(authenticationLevel = AuthLevel.NONE)
+	def notFound() {
+		response.sendError(HttpServletResponse.SC_NOT_FOUND)
+		return
 	}
 
 	@CompileStatic

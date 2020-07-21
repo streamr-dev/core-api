@@ -127,9 +127,10 @@ public class SignalPathRunner extends Thread {
 	private void destroyMe() {
 		SignalPathService signalPathService = Holders.getApplicationContext().getBean(SignalPathService.class);
 		safeRun(signalPath::destroy);
-		safeRun(() -> signalPathService.updateState(runnerId, Canvas.State.STOPPED));
 
 		if (globals.isAdhoc()) {
+			// Mark only adhoc canvases to stopped state
+			safeRun(() -> signalPathService.updateState(runnerId, Canvas.State.STOPPED));
 			// Delayed-delete the references to allow UI to catch up
 			safeRun(() -> signalPathService.deleteReferences(signalPath, true));
 		}

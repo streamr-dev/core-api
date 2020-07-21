@@ -1,7 +1,9 @@
 package com.unifina.domain.marketplace
 
+import grails.persistence.Entity
 import groovy.transform.CompileStatic
 
+@Entity
 class Category {
 	String id
 	String name

@@ -15,7 +15,7 @@ abstract class ListParams {
 	Integer offset = 0
 	Boolean grantedAccess = true
 	Boolean publicAccess = false
-	Permission.Operation operation = Permission.Operation.READ
+	Permission.Operation operation
 
 	static constraints = {
 		search(nullable: true, blank: false)

@@ -46,7 +46,7 @@ class ProductApiControllerSpec extends Specification {
 			ownerAddress: "0x0",
 			beneficiaryAddress: "0x1",
 			pricePerSecond: 5,
-			owner: user
+			owner: user,
 		)
 		product.id = "product-id"
 	}
@@ -197,14 +197,14 @@ class ProductApiControllerSpec extends Specification {
 			controller.show()
 		}
 		then:
-		1 * productService.findById('product-id', _, Permission.Operation.READ) >> product
-		1 * controller.permissionService.canShare(_, _) >> false
+		1 * productService.findById('product-id', _, Permission.Operation.PRODUCT_GET) >> product
+		1 * controller.permissionService.check(_, _, Permission.Operation.PRODUCT_SHARE) >> false
 	}
 
 	void "show() returns 200 and renders a product"() {
 		controller.permissionService = Mock(PermissionService)
 		controller.productService = Stub(ProductService) {
-			findById("product-id", _, Permission.Operation.READ) >> product
+			findById("product-id", _, Permission.Operation.PRODUCT_GET) >> product
 		}
 
 		params.id = "product-id"
@@ -262,7 +262,7 @@ class ProductApiControllerSpec extends Specification {
 		}
 		then:
 		1 * productService.update("product-id", _ as UpdateProductCommand, user) >> product
-		1 * controller.permissionService.canShare(_, _) >> false
+		1 * controller.permissionService.check(_, _, Permission.Operation.PRODUCT_SHARE) >> false
 	}
 
 	void "update() returns 200 and renders a product"() {
@@ -282,7 +282,7 @@ class ProductApiControllerSpec extends Specification {
 		then:
 		response.status == 200
 		response.json == product.toMap()
-		1 * controller.permissionService.canShare(_, _) >> false
+		1 * controller.permissionService.check(_, _, Permission.Operation.PRODUCT_SHARE) >> false
 	}
 
 	void "setDeploying() invokes productService#findById() and productService#transitionToDeploying()"() {
@@ -297,13 +297,13 @@ class ProductApiControllerSpec extends Specification {
 			controller.setDeploying()
 		}
 		then:
-		1 * productService.findById("product-id", user, Permission.Operation.WRITE) >> product
+		1 * productService.findById("product-id", user, Permission.Operation.PRODUCT_EDIT) >> product
 		1 * productService.transitionToDeploying(product)
 	}
 
 	void "setDeploying() returns 200 and renders a product"() {
 		controller.productService = Stub(ProductService) {
-			findById("product-id", _ as SecUser, Permission.Operation.WRITE) >> product
+			findById("product-id", _ as SecUser, Permission.Operation.PRODUCT_EDIT) >> product
 		}
 
 		def user = request.apiUser = new SecUser()
@@ -409,13 +409,13 @@ class ProductApiControllerSpec extends Specification {
 			controller.setUndeploying()
 		}
 		then:
-		1 * productService.findById("product-id", user, Permission.Operation.WRITE) >> product
+		1 * productService.findById("product-id", user, Permission.Operation.PRODUCT_EDIT) >> product
 		1 * productService.transitionToUndeploying(product)
 	}
 
 	void "setUndeploying() returns 200 and renders a product"() {
 		controller.productService = Stub(ProductService) {
-			findById("product-id", _ as SecUser, Permission.Operation.WRITE) >> product
+			findById("product-id", _ as SecUser, Permission.Operation.PRODUCT_EDIT) >> product
 		}
 
 		def user = request.apiUser = new SecUser()
@@ -519,7 +519,7 @@ class ProductApiControllerSpec extends Specification {
 			controller.uploadImage()
 		}
 		then:
-		1 * productService.findById("product-id", user, Permission.Operation.WRITE) >> product
+		1 * productService.findById("product-id", user, Permission.Operation.PRODUCT_EDIT) >> product
 	}
 
 	void "uploadImage() invokes productImageService#replaceImage"() {
@@ -575,7 +575,7 @@ class ProductApiControllerSpec extends Specification {
 			controller.deployFree()
 		}
 		then:
-		1 * productService.findById('product-id', user, Permission.Operation.SHARE) >> product
+		1 * productService.findById('product-id', user, Permission.Operation.PRODUCT_SHARE) >> product
 	}
 
 	void "deployFree() invokes freeProductService#deployFreeProduct"() {
@@ -626,7 +626,7 @@ class ProductApiControllerSpec extends Specification {
 			controller.undeployFree()
 		}
 		then:
-		1 * productService.findById('product-id', user, Permission.Operation.SHARE) >> product
+		1 * productService.findById('product-id', user, Permission.Operation.PRODUCT_SHARE) >> product
 	}
 
 	void "undeployFree() invokes freeProductService#undeployFreeProduct"() {

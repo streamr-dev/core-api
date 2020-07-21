@@ -5,10 +5,7 @@ import com.streamr.client.protocol.message_layer.StreamMessage
 import com.streamr.client.protocol.message_layer.StreamMessageV31
 import com.unifina.api.*
 import com.unifina.domain.data.Stream
-import com.unifina.domain.marketplace.Category
-import com.unifina.domain.marketplace.FreeSubscription
-import com.unifina.domain.marketplace.PaidSubscription
-import com.unifina.domain.marketplace.Product
+import com.unifina.domain.marketplace.*
 import com.unifina.domain.security.Permission
 import com.unifina.domain.security.SecUser
 import grails.test.mixin.Mock
@@ -234,10 +231,10 @@ class ProductServiceSpec extends Specification {
 		def me = new SecUser(username: "me@streamr.com")
 
 		when:
-		service.findById("product-id", me, Permission.Operation.READ)
+		service.findById("product-id", me, Permission.Operation.PRODUCT_GET)
 
 		then:
-		1 * apiService.authorizedGetById(Product, "product-id", me, Permission.Operation.READ)
+		1 * apiService.authorizedGetById(Product, "product-id", me, Permission.Operation.PRODUCT_GET)
 	}
 
 	void "create() throws ValidationException if command object does not pass validation"() {
@@ -251,15 +248,21 @@ class ProductServiceSpec extends Specification {
 		setupStreams()
 		service.permissionService = Stub(PermissionService)
 
+		Contact contact = new Contact()
+		contact.url = "https://www.fi"
+		TermsOfUse termsOfUse = new TermsOfUse()
+		termsOfUse.termsName = "terms link name"
 		def validCommand = new CreateProductCommand(
-				name: "Product",
-				description: "Description of Product.",
-				category: category,
-				streams: [s1, s2, s3],
-				ownerAddress: "0x0000000000000000000000000000000000000000",
-				beneficiaryAddress: "0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF",
-				pricePerSecond: 10,
-				minimumSubscriptionInSeconds: 1
+			name: "Product",
+			description: "Description of Product.",
+			category: category,
+			streams: [s1, s2, s3],
+			ownerAddress: "0x0000000000000000000000000000000000000000",
+			beneficiaryAddress: "0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF",
+			pricePerSecond: 10,
+			minimumSubscriptionInSeconds: 1,
+			contact: contact,
+			termsOfUse: termsOfUse,
 		)
 
 		def user = new SecUser()
@@ -271,28 +274,29 @@ class ProductServiceSpec extends Specification {
 		Product.findAll() == [product]
 
 		and:
-		product.toMap() == [
-			id: "1",
-			type: "NORMAL",
-			name: "Product",
-			description: "Description of Product.",
-			imageUrl: null,
-			thumbnailUrl: null,
-			category: "category-id",
-			streams: ["stream-1", "stream-2", "stream-3"],
-			state: "NOT_DEPLOYED",
-			previewStream: null,
-			previewConfigJson: null,
-			created: product.dateCreated,
-			updated: product.lastUpdated,
-			ownerAddress: "0x0000000000000000000000000000000000000000",
-			beneficiaryAddress: "0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF",
-			pricePerSecond: "10",
-			isFree: false,
-			priceCurrency: "DATA",
-			minimumSubscriptionInSeconds: 1,
-			owner: "Arnold Schwarzenegger"
-		]
+		def map = product.toMap()
+		map.id == "1"
+		map.type == "NORMAL"
+		map.name == "Product"
+		map.description == "Description of Product."
+		map.imageUrl == null
+		map.thumbnailUrl == null
+		map.category == "category-id"
+		map.streams == ["stream-1", "stream-2", "stream-3"]
+		map.state == "NOT_DEPLOYED"
+		map.previewStream == null
+		map.previewConfigJson == null
+		map.created == product.dateCreated
+		map.updated == product.lastUpdated
+		map.ownerAddress == "0x0000000000000000000000000000000000000000"
+		map.beneficiaryAddress == "0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF"
+		map.pricePerSecond == "10"
+		map.isFree == false
+		map.priceCurrency == "DATA"
+		map.minimumSubscriptionInSeconds == 1
+		map.owner == "Arnold Schwarzenegger"
+		map.contact.url == "https://www.fi"
+		map.termsOfUse.termsName == "terms link name"
 		product.dateCreated != null
 		product.dateCreated == product.lastUpdated
 	}
@@ -338,12 +342,12 @@ class ProductServiceSpec extends Specification {
 		when:
 		service.create(validCommand, me)
 		then:
-		1 * permissionService.verifyShare(me, s1)
-		1 * permissionService.verifyShare(me, s2)
-		1 * permissionService.verifyShare(me, s3)
+		1 * permissionService.verify(me, s1, Permission.Operation.STREAM_SHARE)
+		1 * permissionService.verify(me, s2, Permission.Operation.STREAM_SHARE)
+		1 * permissionService.verify(me, s3, Permission.Operation.STREAM_SHARE)
 	}
 
-	void "create() adds anonymous read permission for free products streams"() {
+	void "create() adds anonymous get/subscribe permission for free products streams"() {
 		setupStreams()
 		def permissionService = service.permissionService = Mock(PermissionService)
 
@@ -362,9 +366,12 @@ class ProductServiceSpec extends Specification {
 		when:
 		service.create(validCommand, me)
 		then:
-		1 * permissionService.systemGrantAnonymousAccess(s1, Permission.Operation.READ)
-		1 * permissionService.systemGrantAnonymousAccess(s2, Permission.Operation.READ)
-		1 * permissionService.systemGrantAnonymousAccess(s3, Permission.Operation.READ)
+		1 * permissionService.systemGrantAnonymousAccess(s1, Permission.Operation.STREAM_GET)
+		1 * permissionService.systemGrantAnonymousAccess(s1, Permission.Operation.STREAM_SUBSCRIBE)
+		1 * permissionService.systemGrantAnonymousAccess(s2, Permission.Operation.STREAM_GET)
+		1 * permissionService.systemGrantAnonymousAccess(s2, Permission.Operation.STREAM_SUBSCRIBE)
+		1 * permissionService.systemGrantAnonymousAccess(s3, Permission.Operation.STREAM_GET)
+		1 * permissionService.systemGrantAnonymousAccess(s3, Permission.Operation.STREAM_SUBSCRIBE)
 	}
 
 	void "create() does not save if permissionService#verifyShare throws"() {
@@ -406,28 +413,41 @@ class ProductServiceSpec extends Specification {
 		Product.findAll() == [product]
 
 		and:
-		product.toMap() == [
-			id: "1",
-			type: "NORMAL",
-			name: "Untitled Product",
-			description: null,
-			imageUrl: null,
-			thumbnailUrl: null,
-			category: null,
-			streams: [],
-			state: "NOT_DEPLOYED",
-			previewStream: null,
-			previewConfigJson: null,
-			created: product.dateCreated,
-			updated: product.lastUpdated,
-			ownerAddress: null,
-			beneficiaryAddress: null,
-			pricePerSecond: "0",
-			isFree: true,
-			priceCurrency: "DATA",
-			minimumSubscriptionInSeconds: 0,
-			owner: "Arnold Schwarzenegger"
-		]
+		def map = product.toMap()
+		map.id == "1"
+		map.type == "NORMAL"
+		map.name == "Untitled Product"
+		map.description == null
+		map.imageUrl == null
+		map.thumbnailUrl == null
+		map.category == null
+		map.streams == []
+		map.state == "NOT_DEPLOYED"
+		map.previewStream == null
+		map.previewConfigJson == null
+		map.created == product.dateCreated
+		map.updated == product.lastUpdated
+		map.ownerAddress == null
+		map.beneficiaryAddress == null
+		map.pricePerSecond == "0"
+		map.isFree == true
+		map.priceCurrency == "DATA"
+		map.minimumSubscriptionInSeconds == 0
+		map.owner == "Arnold Schwarzenegger"
+		def c = map.contact
+		c.email == null
+		c.url == null
+		c.social1 == null
+		c.social2 == null
+		c.social3 == null
+		c.social4 == null
+		def t = map.termsOfUse
+		t.redistribution == true
+		t.commercialUse == true
+		t.reselling == true
+		t.storage == true
+		t.termsUrl == null
+		t.termsName == null
 		product.dateCreated != null
 		product.dateCreated == product.lastUpdated
 	}
@@ -483,8 +503,8 @@ class ProductServiceSpec extends Specification {
 		when:
 		service.update("product-id", validCommand, user)
 		then:
-		1 * permissionService.verifyShare(user, s2)
-		1 * permissionService.verifyShare(user, s4)
+		1 * permissionService.verify(user, s2, Permission.Operation.STREAM_SHARE)
+		1 * permissionService.verify(user, s4, Permission.Operation.STREAM_SHARE)
 	}
 
 	void "update() revokes and grants anonymous read permission for free products streams"() {
@@ -513,11 +533,24 @@ class ProductServiceSpec extends Specification {
 		when:
 		service.update("product-id", validCommand, user)
 		then:
-		1 * permissionService.systemRevokeAnonymousAccess(s1, Permission.Operation.READ)
-		1 * permissionService.systemRevokeAnonymousAccess(s2, Permission.Operation.READ)
-		1 * permissionService.systemRevokeAnonymousAccess(s3, Permission.Operation.READ)
-		1 * permissionService.systemGrantAnonymousAccess(s2, Permission.Operation.READ)
-		1 * permissionService.systemGrantAnonymousAccess(s4, Permission.Operation.READ)
+		1 * permissionService.verify(user, s2, Permission.Operation.STREAM_SHARE)
+		1 * permissionService.verify(user, s4, Permission.Operation.STREAM_SHARE)
+
+		// revoke streams old permissions
+		1 * permissionService.systemRevokeAnonymousAccess(s1, Permission.Operation.STREAM_GET)
+		1 * permissionService.systemRevokeAnonymousAccess(s2, Permission.Operation.STREAM_GET)
+		1 * permissionService.systemRevokeAnonymousAccess(s3, Permission.Operation.STREAM_GET)
+		1 * permissionService.systemRevokeAnonymousAccess(s1, Permission.Operation.STREAM_SUBSCRIBE)
+		1 * permissionService.systemRevokeAnonymousAccess(s2, Permission.Operation.STREAM_SUBSCRIBE)
+		1 * permissionService.systemRevokeAnonymousAccess(s3, Permission.Operation.STREAM_SUBSCRIBE)
+
+		// grant permissions for new streams
+		1 * permissionService.systemGrantAnonymousAccess(s2, Permission.Operation.STREAM_GET)
+		1 * permissionService.systemGrantAnonymousAccess(s4, Permission.Operation.STREAM_GET)
+		1 * permissionService.systemGrantAnonymousAccess(s2, Permission.Operation.STREAM_SUBSCRIBE)
+		1 * permissionService.systemGrantAnonymousAccess(s4, Permission.Operation.STREAM_SUBSCRIBE)
+
+		0 * permissionService._
 	}
 
 	void "update() does not save if permissionService#verifyShare throws"() {
@@ -563,7 +596,7 @@ class ProductServiceSpec extends Specification {
 		service.update("product-id", validCommand, user)
 
 		then:
-		1 * apiService.authorizedGetById(Product, 'product-id', user, Permission.Operation.WRITE) >> product
+		1 * apiService.authorizedGetById(Product, 'product-id', user, Permission.Operation.PRODUCT_EDIT) >> product
 	}
 
 	void "update() invokes subscriptionService#afterProductUpdated after Product updated"() {
@@ -609,6 +642,22 @@ class ProductServiceSpec extends Specification {
 		}
 		service.permissionService = Stub(PermissionService)
 
+		def contact = new Contact()
+		contact.email = "email@address.org"
+		contact.url = "https://site.com"
+		contact.social1 = "https://twitter.com"
+		contact.social2 = "https://facebook.com"
+		contact.social3 = "https://telegram.com"
+		contact.social4 = "https://linkedin.com"
+
+		def terms = new TermsOfUse()
+		terms.redistribution = false
+		terms.commercialUse = false
+		terms.reselling = false
+		terms.storage = false
+		terms.termsUrl = "https://www.site.org"
+		terms.termsName = "legal terms for site.org"
+
 		def validCommand = new UpdateProductCommand(
 				name: "updated name",
 				description: "updated description",
@@ -618,7 +667,9 @@ class ProductServiceSpec extends Specification {
 				ownerAddress: "0xCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC",
 				beneficiaryAddress: "0xCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC",
 				priceCurrency: Product.Currency.DATA,
-				minimumSubscriptionInSeconds: 1000
+				minimumSubscriptionInSeconds: 1000,
+				contact: contact,
+				termsOfUse: terms,
 		)
 
 		when:
@@ -628,29 +679,44 @@ class ProductServiceSpec extends Specification {
 		Product.findById("product-id").toMap() == updatedProduct.toMap()
 
 		and:
-		updatedProduct.toMap() == [
-				id: "product-id",
-				type: "NORMAL",
-				name: "updated name",
-				description: "updated description",
-				imageUrl: null,
-				thumbnailUrl: null,
-				category: "category2-id",
-				streams: ["stream-2", "stream-4"],
-				state: "NOT_DEPLOYED",
-				previewStream: null,
-				previewConfigJson: null,
-				created: product.dateCreated,
-				updated: product.lastUpdated,
-				ownerAddress: "0xCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC",
-				beneficiaryAddress: "0xCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC",
-				pricePerSecond: "20",
-				isFree: false,
-				priceCurrency: "DATA",
-				minimumSubscriptionInSeconds: 1000,
-				owner: "Firstname Lastname"
-		]
+		def map = updatedProduct.toMap()
+		map.id == "product-id"
+		map.type == "NORMAL"
+		map.name == "updated name"
+		map.description == "updated description"
+		map.imageUrl == null
+		map.thumbnailUrl == null
+		map.category == "category2-id"
+		map.streams == ["stream-2", "stream-4"]
+		map.state == "NOT_DEPLOYED"
+		map.previewStream == null
+		map.previewConfigJson == null
+		map.created == product.dateCreated
+		map.updated == product.lastUpdated
+		map.ownerAddress == "0xCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC"
+		map.beneficiaryAddress == "0xCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC"
+		map.pricePerSecond == "20"
+		map.isFree == false
+		map.priceCurrency == "DATA"
+		map.minimumSubscriptionInSeconds == 1000
+		map.owner == "Firstname Lastname"
 		product.dateCreated < product.lastUpdated
+
+		def c = map.contact
+		c.email == "email@address.org"
+		c.url == "https://site.com"
+		c.social1 == "https://twitter.com"
+		c.social2 == "https://facebook.com"
+		c.social3 == "https://telegram.com"
+		c.social4 == "https://linkedin.com"
+
+		def t = map.termsOfUse
+		t.redistribution == false
+		t.commercialUse == false
+		t.reselling == false
+		t.storage == false
+		t.termsUrl == "https://www.site.org"
+		t.termsName == "legal terms for site.org"
 	}
 
 	void "addStreamToProduct() verifies Stream via PermissionService#verifyShare"() {
@@ -662,8 +728,7 @@ class ProductServiceSpec extends Specification {
 		when:
 		service.addStreamToProduct(product, s4, user)
 		then:
-		1 * permissionService.verifyShare(user, s4)
-
+		1 * permissionService.verify(user, s4, Permission.Operation.STREAM_SHARE)
 	}
 
 	void "addStreamToProduct() adds Stream to Product"() {
@@ -693,7 +758,7 @@ class ProductServiceSpec extends Specification {
 		when:
 		service.addStreamToProduct(product, s4, user)
 		then:
-		1 * service.permissionService.systemGrantAnonymousAccess(s4, Permission.Operation.READ)
+		1 * service.permissionService.systemGrantAnonymousAccess(s4, Permission.Operation.STREAM_GET)
 	}
 
 	void "addStreamToProduct() invokes subscriptionService#afterProductUpdated"() {
@@ -731,7 +796,7 @@ class ProductServiceSpec extends Specification {
 		when:
 		service.removeStreamFromProduct(product, s1)
 		then:
-		1 * service.permissionService.systemRevokeAnonymousAccess(s1, Permission.Operation.READ)
+		1 * service.permissionService.systemRevokeAnonymousAccess(s1, Permission.Operation.STREAM_GET)
 	}
 
 	void "removeStreamFromProduct() invokes subscriptionService#afterProductUpdated"() {
@@ -898,7 +963,7 @@ class ProductServiceSpec extends Specification {
 		})
 
 		then:
-		1 * permissionService.systemRevokeAnonymousAccess(product)
+		1 * permissionService.systemRevokeAnonymousAccess(product, Permission.Operation.PRODUCT_GET)
 	}
 
 	void "markAsDeployed() throws ValidationException if command object does not pass validation"() {
@@ -1065,30 +1130,29 @@ class ProductServiceSpec extends Specification {
 		Product.findById("product-id").toMap() == product.toMap()
 
 		and:
-		product.toMap() == [
-				id: "product-id",
-				type: "NORMAL",
-				name: "name",
-				description: "description",
-				imageUrl: null,
-				thumbnailUrl: null,
-				category: "category-id",
-				streams: [],
-				previewStream: null,
-				previewConfigJson: null,
-				created: product.dateCreated,
-				updated: product.lastUpdated,
+		def map = product.toMap()
+		map.id ==  "product-id"
+		map.type == "NORMAL"
+		map.name == "name"
+		map.description == "description"
+		map.imageUrl == null
+		map.thumbnailUrl == null
+		map.category == "category-id"
+		map.streams == []
+		map.previewStream == null
+		map.previewConfigJson == null
+		map.created == product.dateCreated
+		map.updated == product.lastUpdated
 
-				// changes below
-				state: "DEPLOYED",
-				ownerAddress: "0xBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB",
-				beneficiaryAddress: "0xAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
-				pricePerSecond: "2",
-				isFree: false,
-				priceCurrency: "USD",
-				minimumSubscriptionInSeconds: 600,
-				owner: "Firstname Lastname"
-		]
+		// changes below
+		map.state == "DEPLOYED"
+		map.ownerAddress == "0xBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB"
+		map.beneficiaryAddress == "0xAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+		map.pricePerSecond == "2"
+		map.isFree == false
+		map.priceCurrency == "USD"
+		map.minimumSubscriptionInSeconds == 600
+		map.owner == "Firstname Lastname"
 	}
 
 	void "markAsDeployed() grants public access to Product via permissionService#systemGrantAnonymousAccess"() {
@@ -1111,7 +1175,7 @@ class ProductServiceSpec extends Specification {
 		})
 
 		then:
-		1 * permissionService.systemGrantAnonymousAccess(product)
+		1 * permissionService.systemGrantAnonymousAccess(product, Permission.Operation.PRODUCT_GET)
 	}
 
 	void "updatePricing() updates product price etc"() {
@@ -1198,8 +1262,8 @@ class ProductServiceSpec extends Specification {
 		service.addStreamToProduct(product, s1, user)
 		then:
 		1 * service.dataUnionJoinRequestService.findMembers("0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF") >> [user]
-		1 * service.permissionService.canWrite(user, s1) >> false
-		1 * service.permissionService.systemGrant(user, s1, Permission.Operation.WRITE)
+		1 * service.permissionService.check(user, s1, Permission.Operation.STREAM_PUBLISH) >> false
+		1 * service.permissionService.systemGrant(user, s1, Permission.Operation.STREAM_PUBLISH)
 	}
 
 	void "remove stream from product and revoke data union stream permissions"() {
@@ -1236,7 +1300,7 @@ class ProductServiceSpec extends Specification {
 		service.removeStreamFromProduct(product, s1)
 		then:
 		1 * service.dataUnionJoinRequestService.findMembers("0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF") >> [user]
-		1 * service.permissionService.canWrite(user, s1) >> true
-		1 * service.permissionService.systemRevoke(user, s1, Permission.Operation.WRITE)
+		1 * service.permissionService.check(user, s1, Permission.Operation.STREAM_PUBLISH) >> true
+		1 * service.permissionService.systemRevoke(user, s1, Permission.Operation.STREAM_PUBLISH)
 	}
 }

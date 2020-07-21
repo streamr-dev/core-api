@@ -1,17 +1,9 @@
 package com.unifina.controller.api
 
-
 import com.unifina.domain.security.*
-import com.unifina.domain.signalpath.Module
-import com.unifina.domain.signalpath.ModulePackage
-
-import com.unifina.service.CanvasService
-import com.unifina.service.PermissionService
-import com.unifina.service.SignupCodeService
-import com.unifina.service.StreamService
-import com.unifina.service.UserService
+import com.unifina.security.PasswordEncoder
+import com.unifina.service.*
 import com.unifina.signalpath.messaging.MockMailService
-import grails.plugin.springsecurity.SpringSecurityService
 import grails.test.mixin.Mock
 import grails.test.mixin.TestFor
 import org.codehaus.groovy.grails.commons.GrailsApplication
@@ -19,16 +11,11 @@ import org.springframework.context.MessageSource
 import spock.lang.Specification
 
 @TestFor(AuthApiController)
-@Mock([SignupInvite, SignupCodeService, RegistrationCode, SecUser, Key, SecRole, SecUserSecRole, ModulePackage, Permission, UserService])
+@Mock([SignupInvite, SignupCodeService, RegistrationCode, SecUser, Key, SecRole, SecUserSecRole, Permission, UserService])
 class AuthApiControllerSpec extends Specification {
 
 	String username = "user@invite.to"
-
-	def springSecurityService = [
-		encodePassword: { pw ->
-			return pw + "-encoded"
-		}
-	]
+	PasswordEncoder passwordEncoder = new UnitTestPasswordEncoder()
 
 	def messageSource = [
 	    getMessage: { error, locale ->
@@ -38,11 +25,11 @@ class AuthApiControllerSpec extends Specification {
 
 	void setup() {
 		controller.mailService = new MockMailService()
-		controller.springSecurityService = springSecurityService as SpringSecurityService
+		controller.passwordEncoder = passwordEncoder
 		controller.signupCodeService = new SignupCodeService()
 		def permissionService = Stub(PermissionService)
 		controller.userService = new UserService()
-		controller.userService.springSecurityService = springSecurityService as SpringSecurityService
+		controller.userService.passwordEncoder = passwordEncoder
 		controller.userService.grailsApplication = grailsApplication as GrailsApplication
 		controller.userService.permissionService = permissionService as PermissionService
 		controller.userService.messageSource = messageSource as MessageSource
@@ -192,7 +179,7 @@ class AuthApiControllerSpec extends Specification {
 			id: 1,
 			username: "test@test.com",
 			name: "Test User",
-			password: springSecurityService.encodePassword("foobar123!"),
+			password: passwordEncoder.encodePassword("foobar123!"),
 		)
 		user.save(validate: false)
 		def inv = controller.signupCodeService.create(user.username)
@@ -215,17 +202,6 @@ class AuthApiControllerSpec extends Specification {
 
 	void "submitting registration with valid invite should create user"() {
 		setup:
-		// A modulePackage created with minimum fields required
-		def modulePackage = new ModulePackage()
-		modulePackage.id = new Long(1)
-		modulePackage.name = "test"
-		modulePackage.save()
-
-		def modulePackage2 = new ModulePackage()
-		modulePackage2.id = new Long(2)
-		modulePackage2.name = "test2"
-		modulePackage2.save()
-
 		// The roles created
 		["ROLE_USER","ROLE_LIVE","ROLE_ADMIN"].each {
 			def role = new SecRole()

@@ -3,22 +3,23 @@
   "version": "1.0.0",
   "description": "End-to-end tests for Streamr Engine and Editor REST API endpoints",
   "main": "index.js",
+  "repository": "https://github.com/streamr-dev/engine-and-editor",
   "scripts": {
-    "test": "mocha *.test.js --recursive --timeout 5000"
+    "test": "mocha *.test.js --recursive --color false --exit --timeout 5000"
   },
-  "author": "",
-  "license": "AGPL",
+  "author": "Streamr developers",
+  "license": "AGPL-3.0-only",
   "dependencies": {
-    "ajv": "6.10.2",
+    "ajv": "6.12.2",
     "async-wait-until": "1.2.4",
     "chai": "4.2.0",
     "ethereumjs-util": "6.2.0",
     "form-data": "3.0.0",
     "keythereum": "1.0.4",
-    "mocha": "6.2.2",
+    "mocha": "7.2.0",
     "node-fetch": "2.6.0",
     "sleep-promise": "8.0.1",
-    "streamr-client": "2.2.5",
+    "streamr-client": "3.2.1",
     "web3": "1.2.2"
   },
   "devDependencies": {}

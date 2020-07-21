@@ -11,11 +11,9 @@ import com.unifina.service.*
 import grails.compiler.GrailsCompileStatic
 import grails.converters.JSON
 import grails.plugin.mail.MailService
-import grails.plugin.springsecurity.annotation.Secured
 import org.apache.log4j.Logger
 import org.springframework.web.multipart.MultipartFile
 
-@Secured(["IS_AUTHENTICATED_ANONYMOUSLY"])
 class ProductApiController {
 	ApiService apiService
 	FreeProductService freeProductService
@@ -65,7 +63,7 @@ class ProductApiController {
 	@GrailsCompileStatic
 	@StreamrApi(authenticationLevel = AuthLevel.NONE)
 	def related() {
-		Product product = productService.findById((String) params.id, loggedInUser(), Permission.Operation.READ)
+		Product product = productService.findById((String) params.id, loggedInUser(), Permission.Operation.PRODUCT_GET)
 		int max = Math.min(params.int('max', 3), 10)
 		def related = productService.relatedProducts(product, max, loggedInUser())
 		render(related*.toSummaryMap() as JSON)
@@ -82,8 +80,8 @@ class ProductApiController {
 	@GrailsCompileStatic
 	@StreamrApi(authenticationLevel = AuthLevel.NONE)
 	def show(String id) {
-		Product product = productService.findById(id, loggedInUser(), Permission.Operation.READ)
-		boolean isProductOwner = permissionService.canShare(loggedInUser(), product)
+		Product product = productService.findById(id, loggedInUser(), Permission.Operation.PRODUCT_GET)
+		boolean isProductOwner = permissionService.check(loggedInUser(), product, Permission.Operation.PRODUCT_SHARE)
 		render(product.toMap(isProductOwner) as JSON)
 	}
 
@@ -98,14 +96,14 @@ class ProductApiController {
 	@StreamrApi(authenticationLevel = AuthLevel.USER)
 	def update(String id, UpdateProductCommand command) {
 		Product product = productService.update(id, command, loggedInUser())
-		boolean isProductOwner = permissionService.canShare(loggedInUser(), product)
+		boolean isProductOwner = permissionService.check(loggedInUser(), product, Permission.Operation.PRODUCT_SHARE)
 		render(product.toMap(isProductOwner) as JSON)
 	}
 
 	@GrailsCompileStatic
 	@StreamrApi(authenticationLevel = AuthLevel.USER)
 	def setDeploying(String id) {
-		Product product = productService.findById(id, loggedInUser(), Permission.Operation.WRITE)
+		Product product = productService.findById(id, loggedInUser(), Permission.Operation.PRODUCT_EDIT)
 		productService.transitionToDeploying(product)
 		render(product.toMap() as JSON)
 	}
@@ -129,7 +127,7 @@ class ProductApiController {
 	@GrailsCompileStatic
 	@StreamrApi(authenticationLevel = AuthLevel.USER)
 	def deployFree(String id) {
-		Product product = productService.findById(id, loggedInUser(), Permission.Operation.SHARE)
+		Product product = productService.findById(id, loggedInUser(), Permission.Operation.PRODUCT_SHARE)
 		freeProductService.deployFreeProduct(product)
 		render(product.toMap() as JSON)
 	}
@@ -137,7 +135,7 @@ class ProductApiController {
 	@GrailsCompileStatic
 	@StreamrApi(authenticationLevel = AuthLevel.USER)
 	def undeployFree(String id) {
-		Product product = productService.findById(id, loggedInUser(), Permission.Operation.SHARE)
+		Product product = productService.findById(id, loggedInUser(), Permission.Operation.PRODUCT_SHARE)
 		freeProductService.undeployFreeProduct(product)
 		render(product.toMap() as JSON)
 	}
@@ -145,7 +143,7 @@ class ProductApiController {
 	@GrailsCompileStatic
 	@StreamrApi(authenticationLevel = AuthLevel.USER)
 	def setUndeploying(String id) {
-		Product product = productService.findById(id, loggedInUser(), Permission.Operation.WRITE)
+		Product product = productService.findById(id, loggedInUser(), Permission.Operation.PRODUCT_EDIT)
 		productService.transitionToUndeploying(product)
 		render(product.toMap() as JSON)
 	}
@@ -161,7 +159,7 @@ class ProductApiController {
 	@GrailsCompileStatic
 	@StreamrApi(authenticationLevel = AuthLevel.USER)
 	def uploadImage(String id) {
-		Product product = productService.findById(id, loggedInUser(), Permission.Operation.WRITE)
+		Product product = productService.findById(id, loggedInUser(), Permission.Operation.PRODUCT_EDIT)
 		MultipartFile file = getUploadedFile()
 		productImageService.replaceImage(product, file.bytes, file.getOriginalFilename())
 		render(product.toMap() as JSON)

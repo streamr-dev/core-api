@@ -2,36 +2,19 @@ package com.unifina.service
 
 import com.unifina.api.InvalidUsernameAndPasswordException
 import com.unifina.api.NotFoundException
-
+import com.unifina.controller.api.UnitTestPasswordEncoder
 import com.unifina.domain.security.*
 import com.unifina.domain.signalpath.Module
-import com.unifina.domain.signalpath.ModulePackage
-
-import grails.plugin.springsecurity.SpringSecurityService
 import grails.test.mixin.Mock
 import grails.test.mixin.TestFor
-import org.springframework.security.authentication.encoding.PlaintextPasswordEncoder
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder
-import org.springframework.security.crypto.password.PasswordEncoder
 import org.springframework.validation.FieldError
 import spock.lang.Specification
 
 @TestFor(UserService)
-@Mock([Key, SecUser, SecRole, ModulePackage, SecUserSecRole, Module, Permission])
+@Mock([Key, SecUser, SecRole, SecUserSecRole, Module, Permission])
 class UserServiceSpec extends Specification {
 
 	void createData() {
-		// A modulePackage created with minimum fields required
-		def modulePackage = new ModulePackage()
-		modulePackage.id = new Long(1)
-		modulePackage.name = "test"
-		modulePackage.save()
-
-		def modulePackage2 = new ModulePackage()
-		modulePackage2.id = new Long(2)
-		modulePackage2.name = "test2"
-		modulePackage2.save()
-
 		// The roles created
 		["ROLE_USER", "ROLE_LIVE", "ROLE_ADMIN"].each {
 			def role = new SecRole()
@@ -43,29 +26,20 @@ class UserServiceSpec extends Specification {
 	def permissionService
 
 	def setup() {
-		defineBeans {
-			passwordEncoder(PlaintextPasswordEncoder)
-			springSecurityService(SpringSecurityService)
-		}
-		// Do some wiring that should be done automatically but for some reason is not (in unit tests)
-		grailsApplication.mainContext.getBean("springSecurityService").grailsApplication = grailsApplication
-		grailsApplication.mainContext.getBean("springSecurityService").passwordEncoder = grailsApplication.mainContext.getBean("passwordEncoder")
+		service.passwordEncoder = new UnitTestPasswordEncoder()
 		permissionService = service.permissionService = Mock(PermissionService)
 		service.streamService = Mock(StreamService)
 		service.canvasService = Mock(CanvasService)
 	}
 
-	def "the user is created when called, with default roles if none supplied"() {
+	def "the user is created when called"() {
 		when:
 		createData()
 		SecUser user = service.createUser([username: "test@test.com", name:"test", password: "test", enabled:true, accountLocked:false, passwordExpired:false])
 
 		then:
 		SecUser.count() == 1
-
-		user.getAuthorities().size() == 2
-		user.getAuthorities().toArray()[0].authority == "ROLE_USER"
-		user.getAuthorities().toArray()[1].authority == "ROLE_LIVE"
+		user.getAuthorities().size() == 0 // By default, user's have no roles
 	}
 
 	def "default API key is created for user"() {
@@ -75,39 +49,6 @@ class UserServiceSpec extends Specification {
 
 		then:
 		user.getKeys().size() == 1
-	}
-
-	def "if the roles and modulePackages are given, it should use them"() {
-		when:
-		createData()
-		SecUser user = service.createUser([
-			username       : "test@test.com",
-			name           : "test",
-			password       : "test",
-			enabled        : true,
-			accountLocked  : false,
-			passwordExpired: false,
-		],
-			SecRole.findAllByAuthorityInList(["ROLE_USER"]),
-			ModulePackage.findAllByIdInList([new Long(1), new Long(2)])
-		)
-
-		then:
-		user.getAuthorities().size() == 1
-		user.getAuthorities().toArray()[0].authority == "ROLE_USER"
-
-		1 * permissionService.get(ModulePackage, { it.id == 1 } as SecUser) >> []
-		1 * permissionService.systemGrant({ it.id == 1 } as SecUser, { it.id == 1 } as ModulePackage)
-		1 * permissionService.systemGrant({ it.id == 1 } as SecUser, { it.id == 2 } as ModulePackage)
-	}
-
-	def "it should fail if the default roles or modulePackages are not found"() {
-		when:
-		// The data has not been created
-		service.createUser([username: "test@test.com", name: "test", password: "test", enabled: true, accountLocked: false, passwordExpired: false])
-
-		then:
-		thrown RuntimeException
 	}
 
 	void "censoring errors with checkErrors() works properly"() {
@@ -137,8 +78,7 @@ class UserServiceSpec extends Specification {
 	def "should find user from both username and password"() {
 		String username = "username"
 		String password = "password"
-		PasswordEncoder encoder = new BCryptPasswordEncoder()
-		String hashedPassword = encoder.encode(password)
+		String hashedPassword = service.passwordEncoder.encodePassword(password)
 		new SecUser(username: username, password: hashedPassword).save(failOnError: true, validate: false)
 		when:
 		SecUser retrievedUser = service.getUserFromUsernameAndPassword(username, password)
@@ -151,8 +91,7 @@ class UserServiceSpec extends Specification {
 		String username = "username"
 		String password = "password"
 		String wrongPassword = "wrong"
-		PasswordEncoder encoder = new BCryptPasswordEncoder()
-		String hashedPassword = encoder.encode(password)
+		String hashedPassword = service.passwordEncoder.encodePassword(password)
 		new SecUser(username: username, password: hashedPassword).save(failOnError: true, validate: false)
 		when:
 		service.getUserFromUsernameAndPassword(username, wrongPassword)

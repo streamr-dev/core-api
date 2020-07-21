@@ -89,7 +89,7 @@ class RelatedProductsControllerSpec extends ControllerSpecification {
 		authenticatedAs(me) { controller.related() }
 
 		then:
-		1 * controller.productService.findById(p1.id, me, Permission.Operation.READ) >> p1
+		1 * controller.productService.findById(p1.id, me, Permission.Operation.PRODUCT_GET) >> p1
 		1 * controller.productService.relatedProducts(p1, 3, me) >> [p2]
 		response.status == 200
 		response.json[0].id == p2.id
@@ -103,7 +103,7 @@ class RelatedProductsControllerSpec extends ControllerSpecification {
 		authenticatedAs(me) { controller.related() }
 
 		then:
-		1 * controller.productService.findById(p1.id, me, Permission.Operation.READ) >> p1
+		1 * controller.productService.findById(p1.id, me, Permission.Operation.PRODUCT_GET) >> p1
 		1 * controller.productService.relatedProducts(p1, 10, me) >> [p2]
 		response.status == 200
 		response.json[0].id == p2.id
@@ -116,7 +116,7 @@ class RelatedProductsControllerSpec extends ControllerSpecification {
 		authenticatedAs(me) { controller.related() }
 
 		then:
-		1 * controller.productService.findById(p1.id, me, Permission.Operation.READ) >> p1
+		1 * controller.productService.findById(p1.id, me, Permission.Operation.PRODUCT_GET) >> p1
 		1 * controller.productService.relatedProducts(p1, 3, me) >> [p2, p3, p4]
 		response.status == 200
 		response.json[0].id == p2.id

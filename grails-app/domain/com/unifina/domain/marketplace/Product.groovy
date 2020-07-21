@@ -5,8 +5,10 @@ import com.unifina.domain.security.Permission
 import com.unifina.domain.security.SecUser
 import com.unifina.utils.HexIdGenerator
 import grails.compiler.GrailsCompileStatic
+import grails.persistence.Entity
 import groovy.json.JsonSlurper
 
+@Entity
 class Product {
 	public final static String DEFAULT_NAME = "Untitled Product"
 	String id
@@ -27,6 +29,16 @@ class Product {
 	Date lastUpdated
 	Integer score = 0 // set manually; used as default ordering for lists of Products (descending)
 	SecUser owner // set to product creator when product is created.
+
+	// Product's contact details.
+	Contact contact = new Contact()
+	// Product's legal terms of use.
+	TermsOfUse termsOfUse = new TermsOfUse()
+
+	static embedded = [
+		'contact',
+		'termsOfUse',
+	]
 
 	// The below fields exist in the domain object for speed & query support, but the ground truth is in the smart contract.
 	String ownerAddress
@@ -76,6 +88,8 @@ class Product {
 		blockNumber(min: 0L)
 		blockIndex(min: 0L)
 		owner(nullable: false)
+		contact(nullable: true)
+		termsOfUse(nullable: true)
 	}
 
 	static mapping = {
@@ -83,6 +97,7 @@ class Product {
 		description type: 'text'
 		type enumType: "identity", defaultValue: Type.NORMAL, index: 'type_idx'
 		previewConfigJson type: 'text'
+		pendingChanges type: 'text'
 		imageUrl length: 2048
 		score index: "score_idx"
 
@@ -113,7 +128,9 @@ class Product {
 			isFree: pricePerSecond == 0L,
 			priceCurrency: priceCurrency.toString(),
 			minimumSubscriptionInSeconds: minimumSubscriptionInSeconds,
-			owner: owner.name
+			owner: owner.name,
+			contact: contact?.toMap(),
+			termsOfUse: termsOfUse?.toMap(),
 		]
 		if (isOwner && pendingChanges != null) {
 			JsonSlurper slurper = new JsonSlurper()

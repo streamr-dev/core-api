@@ -1,6 +1,7 @@
 #!/bin/bash
 
 sudo /etc/init.d/mysql stop
+echo "node version: " $(node --version)
 (cd rest-e2e-tests && npm install)
 
 git clone https://github.com/streamr-dev/streamr-docker-dev.git

@@ -5,24 +5,19 @@ import com.unifina.domain.security.SecUser
 import com.unifina.domain.security.SignupInvite
 import com.unifina.exceptions.UserCreationFailedException
 import com.unifina.security.AuthLevel
+import com.unifina.security.PasswordEncoder
 import com.unifina.security.StreamrApi
 import com.unifina.service.SignupCodeService
 import com.unifina.service.UserService
 import com.unifina.utils.EmailValidator
 import grails.converters.JSON
-import grails.plugin.springsecurity.SpringSecurityService
-import grails.plugin.springsecurity.annotation.Secured
-import grails.plugin.springsecurity.authentication.dao.NullSaltSource
-import org.springframework.security.authentication.dao.SaltSource
 
-@Secured(["IS_AUTHENTICATED_ANONYMOUSLY"])
 class AuthApiController {
 
 	def mailService
 	UserService userService
 	SignupCodeService signupCodeService
-	SaltSource saltSource
-	SpringSecurityService springSecurityService
+	PasswordEncoder passwordEncoder
 
 	@StreamrApi(authenticationLevel = AuthLevel.NONE)
 	def signup(EmailCommand cmd) {
@@ -40,7 +35,7 @@ class AuthApiController {
 		SignupInvite invite = signupCodeService.create(cmd.username)
 
 		invite.sent = true
-		if (!invite.save(flush: true)) {
+		if (!invite.save(flush: false)) {
 			log.warn("Failed to save invite: ${invite.errors}")
 			response.status = 500
 			return render([success: false, error: "Failed to save invite: ${invite.errors}"] as JSON)
@@ -95,7 +90,7 @@ class AuthApiController {
 		}
 
 		invite.used = true
-		if (!invite.save(flush: true)) {
+		if (!invite.save(flush: false)) {
 			log.warn("Failed to save invite: ${invite.errors}")
 			response.status = 500
 			return render([success: false, error: "Failed to save invite: ${invite.errors}"] as JSON)
@@ -130,7 +125,7 @@ class AuthApiController {
 		}
 
 		def registrationCode = new RegistrationCode(username: user.username)
-		registrationCode.save(flush: true)
+		registrationCode.save(flush: false)
 
 		try {
 			mailService.sendMail {
@@ -171,9 +166,8 @@ class AuthApiController {
 			return render([success: false, error: userService.beautifyErrors(command.errors.getAllErrors())] as JSON)
 		}
 
-		String salt = saltSource instanceof NullSaltSource ? null : registrationCode.username
 		RegistrationCode.withTransaction { status ->
-			user.password = springSecurityService.encodePassword(command.password, salt)
+			user.password = passwordEncoder.encodePassword(command.password)
 			user.save()
 			registrationCode.delete()
 		}
