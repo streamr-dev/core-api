@@ -5,19 +5,11 @@ import com.unifina.domain.EmailMessage
 import com.unifina.domain.Resource
 import com.unifina.domain.security.Key
 import com.unifina.domain.security.Permission
-import com.unifina.api.InvalidArgumentsException
-import com.unifina.api.NotFoundException
-import com.unifina.api.NotPermittedException
-import com.unifina.domain.security.Permission
-import com.unifina.domain.dashboard.Dashboard
-import com.unifina.domain.data.Stream
 import com.unifina.domain.security.Permission.Operation
 import com.unifina.domain.security.SecUser
 import com.unifina.security.AllowRole
 import com.unifina.security.AuthLevel
 import com.unifina.security.StreamrApi
-import com.unifina.security.Userish
-import com.unifina.service.EthereumIntegrationKeyService
 import com.unifina.service.PermissionService
 import com.unifina.utils.EthereumAddressValidator
 import com.unifina.utils.UsernameValidator
@@ -104,42 +96,6 @@ class PermissionApiController {
 		Resource resource = new Resource(params.resourceClass, params.resourceId)
 		permissionService.deletePermission(id, resource, request.apiUser, request.apiKey)
 		render(status: 204)
-		/*
-		if (!params.resourceClass) {
-			throw new IllegalArgumentException("Missing resource class")
-		}
-		if (!grailsApplication.isDomainClass(params.resourceClass)) {
-			throw new IllegalArgumentException("${params.resourceClass.simpleName} is not a domain class!")
-		}
-		def resource = params.resourceClass.get(params.resourceId)
-		if (!resource) {
-			throw new NotFoundException(params.resourceClass.simpleName, params.resourceId.toString())
-		}
-		def permissions = permissionService.getPermissionsTo(resource)
-		if (permissions.isEmpty()) {
-			throw new NotFoundException("permissions", id.toString())
-		}
-		Userish user = request.apiUser ?: request.apiKey
-		Permission permission = permissions.find {
-			return it.id == Long.valueOf(id)
-		}
-		if (permission == null) {
-			throw new NotFoundException("permission", id.toString())
-		}
-		boolean canShare = permissionService.canShare(user, resource)
-		if (!canShare && permission.user == user) {
-			// user without share permission to resource can delete their own permission to resource
-			permissionService.systemRevoke(permission)
-			render(status: 204)
-		} else if (canShare) {
-			// user with share permission to resource can delete another user's permission to same resource
-			permissionService.systemRevoke(permission)
-			render(status: 204)
-		} else {
-			// user without share permission to resource can't delete another user's permission to same resource
-			throw new NotPermittedException("User without share permission to resource can't delete another user's permission to same resource.")
-		}
-		 */
 	}
 
 	@StreamrApi(allowRoles = AllowRole.DEVOPS)
