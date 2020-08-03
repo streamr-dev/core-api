@@ -121,4 +121,13 @@ class SecUser implements Userish {
 		// 'username' is the email address of the user. For privacy concerns, the publisher id is the hash of the email address.
 		return DigestUtils.sha256Hex(username)
 	}
+
+	String getEmail() {
+		if (EmailValidator.validate(email)) {
+			return email
+		} else if (EmailValidator.validate(username)) {
+			return username
+		}
+		return null
+	}
 }

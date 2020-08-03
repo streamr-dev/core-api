@@ -418,7 +418,7 @@ class PermissionServiceSpec extends BeanMockingSpecification {
 		EmailMessage msg = new EmailMessage(sharer, recipient, subjectTemplate, res)
 		SignupInvite invite = new SignupInvite(
 			code: "x",
-			username: recipient,
+			email: recipient,
 			used: false,
 			sent: false,
 		)
