@@ -75,7 +75,7 @@ class PermissionApiController {
 					newPermission = permissionService.savePermissionForEthereumAccount(username, apiUser, op, res)
 				} else {
 					// send share resource invite email and grant permission
-					EmailMessage msg = new EmailMessage(sharer, user.email, subjectTemplate, res)
+					EmailMessage msg = new EmailMessage(sharer, username, subjectTemplate, res)
 					newPermission = permissionService.savePermissionAndSendEmailShareResourceInvite(apiUser, username, op, msg)
 				}
 			}
