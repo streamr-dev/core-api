@@ -1,25 +1,23 @@
 package com.unifina.controller.api
 
 import com.unifina.ControllerSpecification
-import com.unifina.api.BadRequestException
-import com.unifina.api.NotFoundException
-import com.unifina.api.NotPermittedException
-import com.unifina.api.StreamListParams
-import com.unifina.api.ValidationException
+import com.unifina.api.*
 import com.unifina.domain.data.Stream
 import com.unifina.domain.security.IntegrationKey
 import com.unifina.domain.security.Key
 import com.unifina.domain.security.Permission
 import com.unifina.domain.security.SecUser
+import com.unifina.filters.UnifinaCoreAPIFilters
 import com.unifina.service.*
 import grails.converters.JSON
 import grails.test.mixin.Mock
 import grails.test.mixin.TestFor
+import org.springframework.mock.web.MockMultipartFile
 
 import java.text.SimpleDateFormat
 
 @TestFor(StreamApiController)
-@Mock([SecUser, Stream, Key, Permission, PermissionService, StreamService, DashboardService, IntegrationKey])
+@Mock([SecUser, Stream, Key, Permission, PermissionService, StreamService, DashboardService, IntegrationKey, UnifinaCoreAPIFilters])
 class StreamApiControllerSpec extends ControllerSpecification {
 
 	SecUser me
@@ -28,6 +26,7 @@ class StreamApiControllerSpec extends ControllerSpecification {
 	StreamService streamService
 	PermissionService permissionService
 	ApiService apiService
+	SessionService sessionService
 
 	Stream streamOne
 	def streamTwoId
@@ -41,6 +40,7 @@ class StreamApiControllerSpec extends ControllerSpecification {
 
 		controller.permissionService = permissionService
 		apiService = controller.apiService = Mock(ApiService)
+		sessionService = mockBean(SessionService, Mock(SessionService))
 
 		me = new SecUser(username: "me", password: "foo")
 		me.save(validate: false)
@@ -728,5 +728,49 @@ class StreamApiControllerSpec extends ControllerSpecification {
 		response.json.config.fields[0].type == "number"
 		response.json.config.fields[1].name == "bar"
 		response.json.config.fields[1].type == "boolean"
+	}
+
+	void "uploadCsvFile checks request content type"() {
+		setup:
+		controller.csvUploadService = Mock(CsvUploadService)
+		params.id = "abc"
+		request.method = "POST"
+		request.requestURI = "/api/v1/streams"
+		request.addHeader("Authorization", "Bearer token")
+		byte[] bytes = new byte[16]
+		request.addFile(new MockMultipartFile("file", "my-user-avatar-image.jpg", "image/jpeg", bytes))
+		request.addHeader("Content-Length", bytes.length)
+		request.setContentType("multipart/form-data")
+
+		when:
+		withFilters(action: "uploadCsvFile") {
+			controller.uploadCsvFile()
+		}
+
+		then:
+		1 * sessionService.getUserishFromToken("token") >> new SecUser(username: "foo@ƒoo.bar")
+		response.status == 200
+	}
+
+	void "uploadCsvFile doesnt allow invalid request content type"() {
+		setup:
+		controller.csvUploadService = Mock(CsvUploadService)
+		params.id = "abc"
+		request.method = "POST"
+		request.requestURI = "/api/v1/streams"
+		request.addHeader("Authorization", "Bearer token")
+		byte[] bytes = new byte[16]
+		request.addFile(new MockMultipartFile("file", "my-user-avatar-image.jpg", "image/jpeg", bytes))
+		request.addHeader("Content-Length", bytes.length)
+		request.setContentType("foobar/not-supported")
+
+		when:
+		withFilters(action: "uploadCsvFile") {
+			controller.uploadCsvFile()
+		}
+
+		then:
+		1 * sessionService.getUserishFromToken("token") >> new SecUser(username: "foo@ƒoo.bar")
+		response.status == 415
 	}
 }

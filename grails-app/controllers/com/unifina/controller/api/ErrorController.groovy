@@ -38,7 +38,7 @@ class ErrorController {
 		}
 	}
 
-	@StreamrApi(authenticationLevel = AuthLevel.NONE)
+	@StreamrApi(authenticationLevel = AuthLevel.NONE, expectedContentTypes = ["application/json", "multipart/form-data"])
 	def index() {
 		try {
 			Exception exception = request.exception.cause ?: request.exception

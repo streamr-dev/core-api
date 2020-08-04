@@ -4342,6 +4342,41 @@
             }
           }
         }
+      },
+      "put": {
+        "summary": "Update user profile",
+        "description": "Updates user's profile.",
+        "parameters": [],
+        "tags": [
+          "users"
+        ],
+        "responses": {
+          "200": {
+            "description": "User details",
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/User"
+              }
+            }
+          },
+          "400": {
+            "description": "Validation error"
+          }
+        }
+      },
+      "delete": {
+        "summary": "Delete user's profile",
+        "description": "Delete user's profile.",
+        "parameters": [],
+        "tags": [
+          "users"
+        ],
+        "responses": {
+          "204": {
+            "description": "User deleted"
+          }
+        }
       }
     },
     "/users/me/keys": {
@@ -4466,6 +4501,94 @@
         }
       }
     },
+    "/users/me/image": {
+      "post": {
+        "summary": "Upload user's avatar image",
+        "description": "Upload user's avatar image for the authenticated user.",
+        "parameters": [
+          {
+            "in": "formData",
+            "name": "file",
+            "type": "file",
+            "description": "Image file. JPG or PNG."
+          }
+        ],
+        "consumes": [
+          "multipart/form-data"
+        ],
+        "tags": [
+          "users"
+        ],
+        "responses": {
+          "200": {
+            "description": "User details",
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/User"
+              }
+            }
+          },
+          "400": {
+            "description": "Parameter 'file' missing or unexepcted image dimensions",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            },
+            "examples": {
+              "application/json": {
+                "code": "UNEXPECTED_IMAGE_DIMENSIONS",
+                "message": ""
+              }
+            }
+          },
+          "413": {
+            "description": "Uploaded file too large",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            },
+            "examples": {
+              "application/json": {
+                "code": "FILE_TOO_LARGE",
+                "message": "File size was 20000000 bytes (> 10000000 bytes)"
+              }
+            }
+          },
+          "415": {
+            "description": "File type not supported. (Not an image or unrecognized)",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            },
+            "examples": {
+              "application/json": {
+                "code": "UNSUPPORTED_FILE_TYPE",
+                "message": "File type is not a recognized image format"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/users/me/balance": {
+      "get": {
+        "summary": "Get user's DATA coin balance",
+        "description": "Get user's DATA coin balance.",
+        "parameters": [],
+        "tags": [
+          "users"
+        ],
+        "responses": {
+          "200": {
+            "description": "User's DATA coin balance",
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/Balance"
+              }
+            }
+          }
+        }
+      }
+    },
     "/modules/{id}": {
       "get": {
         "summary": "Get module configuration by id",
@@ -4575,6 +4698,16 @@
     }
   },
   "definitions": {
+    "Balance": {
+      "type": "object",
+      "properties": {
+        "sum": {
+          "type": "integer",
+          "description": "Sum of DATA coin balance.",
+          "example" : 100
+        }
+      }
+    },
     "DeleteDate": {
       "type": "object",
       "required": [
