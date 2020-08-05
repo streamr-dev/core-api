@@ -109,12 +109,14 @@ class UserApiControllerSpec extends ControllerSpecification {
 			email: "changed@emailaddress.com",
 		]
 		request.apiUser = ethUser
+
 		when: "updated profile is submitted"
 		withFilters(action: "update") {
 			controller.update()
 		}
 
 		then: "values must be updated"
+		1 * sessionService.getUserishFromToken("token") >> request.apiUser
 		response.json.name == "New Name"
 		response.json.email == "changed@emailaddress.com"
 		response.json.username == "0x0000000000000000000000000000000000000000"
@@ -122,6 +124,7 @@ class UserApiControllerSpec extends ControllerSpecification {
 
 	void "update user profile who registered with username and password"() {
 		controller.userService = new UserService()
+		request.addHeader("Authorization", "Bearer token")
 		request.method = "PUT"
 		request.requestURI = "/api/v1/users/me"
 		request.json = [
