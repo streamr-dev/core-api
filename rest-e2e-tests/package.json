@@ -19,7 +19,7 @@
     "mocha": "7.2.0",
     "node-fetch": "2.6.0",
     "sleep-promise": "8.0.1",
-    "streamr-client": "3.2.1",
+    "streamr-client": "4.1.0-beta.1",
     "web3": "1.2.2"
   },
   "devDependencies": {}

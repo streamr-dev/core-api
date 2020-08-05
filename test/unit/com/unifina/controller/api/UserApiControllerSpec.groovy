@@ -5,20 +5,26 @@ import com.unifina.api.ApiException
 import com.unifina.api.InvalidUsernameAndPasswordException
 import com.unifina.domain.security.Key
 import com.unifina.domain.security.SecUser
+import com.unifina.filters.UnifinaCoreAPIFilters
 import com.unifina.security.PasswordEncoder
+import com.unifina.service.SessionService
 import com.unifina.service.UserAvatarImageService
 import com.unifina.service.UserService
 import grails.test.mixin.Mock
 import grails.test.mixin.TestFor
+import grails.test.mixin.TestMixin
+import grails.test.mixin.web.FiltersUnitTestMixin
 import org.springframework.mock.web.MockMultipartFile
 
 @TestFor(UserApiController)
-@Mock([SecUser, Key])
+@Mock([SecUser, Key, UnifinaCoreAPIFilters])
+@TestMixin(FiltersUnitTestMixin)
 class UserApiControllerSpec extends ControllerSpecification {
 
 	SecUser me
 	SecUser ethUser
 	PasswordEncoder passwordEncoder = new UnitTestPasswordEncoder()
+	SessionService sessionService
 
 	def setup() {
 		me = new SecUser(
@@ -40,6 +46,7 @@ class UserApiControllerSpec extends ControllerSpecification {
 		ethUser.id = 2
 		ethUser.save(validate: false)
 		controller.passwordEncoder = passwordEncoder
+		sessionService = mockBean(SessionService, Mock(SessionService))
 	}
 
 	void "unauthenticated user gets back 401"() {
@@ -74,24 +81,27 @@ class UserApiControllerSpec extends ControllerSpecification {
 	void "delete user account"() {
 		setup:
 		controller.userService = Mock(UserService)
-
-		when:
+		request.addHeader("Authorization", "Bearer token")
 		request.apiUser = me
 		request.method = "DELETE"
 		request.requestURI = "/api/v1/users/me"
 		params.id = me.id
-		authenticatedAs(me) { controller.delete() }
+
+		when:
+		withFilters(action: "delete") {
+			controller.delete()
+		}
 
 		then:
+		1 * sessionService.getUserishFromToken("token") >> request.apiUser
 		1 * controller.userService.delete(me)
 		response.status == 204
 	}
 
 	void "update ethereum users profile"() {
 		setup:
-
 		controller.userService = new UserService()
-		when: "updated profile is submitted"
+		request.addHeader("Authorization", "Bearer token")
 		request.method = "PUT"
 		request.requestURI = "/api/v1/users/me"
 		request.json = [
@@ -99,7 +109,8 @@ class UserApiControllerSpec extends ControllerSpecification {
 			email: "changed@emailaddress.com",
 		]
 		request.apiUser = ethUser
-		authenticatedAs(ethUser) {
+		when: "updated profile is submitted"
+		withFilters(action: "update") {
 			controller.update()
 		}
 
@@ -111,7 +122,6 @@ class UserApiControllerSpec extends ControllerSpecification {
 
 	void "update user profile who registered with username and password"() {
 		controller.userService = new UserService()
-		when: "updated profile is submitted"
 		request.method = "PUT"
 		request.requestURI = "/api/v1/users/me"
 		request.json = [
@@ -119,20 +129,23 @@ class UserApiControllerSpec extends ControllerSpecification {
 			email: "changed@emailaddress.com",
 		]
 		request.apiUser = me
-		authenticatedAs(me) {
+
+		when: "updated profile is submitted"
+		withFilters(action: "update") {
 			controller.update()
 		}
 
-		then: "values must be updated"
+		then: "values must be updated and show update message"
+		1 * sessionService.getUserishFromToken("token") >> request.apiUser
 		response.json.name == "Changed Name"
 		response.json.email == "changed@emailaddress.com"
 		response.json.username == "changed@emailaddress.com"
 	}
 
 	void "private user fields cannot be changed via update profile"() {
+		setup:
 		controller.userService = new UserService()
-
-		when:
+		request.addHeader("Authorization", "Bearer token")
 		request.method = "PUT"
 		request.requestURI = "/api/v1/users/me"
 		request.json = [
@@ -140,11 +153,14 @@ class UserApiControllerSpec extends ControllerSpecification {
 			enabled: false,
 		]
 		request.apiUser = me
-		authenticatedAs(me) {
+
+		when:
+		withFilters(action: "update") {
 			controller.update()
 		}
 
 		then:
+		1 * sessionService.getUserishFromToken("token") >> request.apiUser
 		SecUser.get(1).username == "me@too.com"
 		response.json.username == "me@too.com"
 		SecUser.get(1).enabled
@@ -172,9 +188,12 @@ class UserApiControllerSpec extends ControllerSpecification {
 	void "uploadAvatarImage() responds with 400 and PARAMETER_MISSING if file not given"() {
 		setup:
 		controller.userAvatarImageService = Mock(UserAvatarImageService)
-		request.apiUser = new SecUser()
+		request.apiUser = new SecUser(username: "foo@ƒoo.bar")
 		request.method = "POST"
 		request.requestURI = "/api/v1/users/me/image"
+		request.addHeader("Authorization", "Bearer token")
+		request.addHeader("Content-Length", 200)
+		request.setContentType("multipart/form-data")
 
 		when:
 		withFilters(action: "uploadAvatarImage") {
@@ -182,6 +201,7 @@ class UserApiControllerSpec extends ControllerSpecification {
 		}
 
 		then:
+		1 * sessionService.getUserishFromToken("token") >> request.apiUser
 		0 * controller.userAvatarImageService._
 		def e = thrown(ApiException)
 		e.statusCode == 400
@@ -191,11 +211,13 @@ class UserApiControllerSpec extends ControllerSpecification {
 	void "uploadAvatarImage() invokes replaceImage()"() {
 		setup:
 		controller.userAvatarImageService = Mock(UserAvatarImageService)
-		request.apiUser = new SecUser()
+		request.apiUser = new SecUser(username: "foo@ƒoo.bar")
+		request.addHeader("Authorization", "Bearer token")
 		request.method = "POST"
 		request.requestURI = "/api/v1/users/me/image"
 		def bytes = new byte[16]
 		request.addFile(new MockMultipartFile("file", "my-user-avatar-image.jpg", "image/jpeg", bytes))
+		request.addHeader("Content-Length", bytes.length)
 
 		when:
 		withFilters(action: "uploadAvatarImage") {
@@ -203,16 +225,19 @@ class UserApiControllerSpec extends ControllerSpecification {
 		}
 
 		then:
-		1 * controller.userAvatarImageService.replaceImage((SecUser) request.apiUser, bytes, "my-user-avatar-image.jpg")
+		1 * sessionService.getUserishFromToken("token") >> request.apiUser
+		1 * controller.userAvatarImageService.replaceImage(request.apiUser as SecUser, bytes, "my-user-avatar-image.jpg")
 	}
 
 	void "uploadAvatarImage() returns 200 and renders user"() {
+		setup:
 		controller.userAvatarImageService = Mock(UserAvatarImageService)
-		request.apiUser = new SecUser(username: "foo@ƒoo.bar")
 		request.method = "POST"
 		request.requestURI = "/api/v1/users/me/image"
 		def bytes = new byte[16]
 		request.addFile(new MockMultipartFile("file", "my-user-avatar-image.jpg", "image/jpeg", bytes))
+		request.addHeader("Content-Length", bytes.length)
+		request.addHeader("Authorization", "Bearer token")
 
 		when:
 		withFilters(action: "uploadAvatarImage") {
@@ -220,8 +245,47 @@ class UserApiControllerSpec extends ControllerSpecification {
 		}
 
 		then:
+		1 * sessionService.getUserishFromToken("token") >> new SecUser(username: "foo@ƒoo.bar")
 		response.status == 200
 		response.json.username == request.apiUser.username
+	}
+
+	void "uploadAvatarImage accepts image uploads with correct request content type"() {
+		setup:
+		controller.userAvatarImageService = Mock(UserAvatarImageService)
+		request.addHeader("Authorization", "Bearer token")
+		request.method = "POST"
+		request.requestURI = "/api/v1/users/me/image"
+		def bytes = new byte[16]
+		request.addFile(new MockMultipartFile("file", "my-user-avatar-image.jpg", "image/jpeg", bytes))
+		request.addHeader("Content-Length", bytes.length)
+		request.setContentType("multipart/form-data")
+		when:
+		withFilters(action: "uploadAvatarImage") {
+			controller.uploadAvatarImage()
+		}
+		then:
+		1 * sessionService.getUserishFromToken("token") >> new SecUser(username: "foo@ƒoo.bar")
+		response.status == 200
+	}
+
+	void "uploadAvatarImage doesnt accept unlisted request content type"() {
+		setup:
+		controller.userAvatarImageService = Mock(UserAvatarImageService)
+		request.addHeader("Authorization", "Bearer token")
+		request.method = "POST"
+		request.requestURI = "/api/v1/users/me/image"
+		def bytes = new byte[16]
+		request.addFile(new MockMultipartFile("file", "my-user-avatar-image.jpg", "image/jpeg", bytes))
+		request.addHeader("Content-Length", bytes.length)
+		request.setContentType("foobar/no-such-content-type")
+		when:
+		withFilters(action: "uploadAvatarImage") {
+			controller.uploadAvatarImage()
+		}
+		then:
+		1 * sessionService.getUserishFromToken("token") >> new SecUser(username: "foo@ƒoo.bar")
+		response.status == 415
 	}
 
 	void "submitting an invalid current password won't let the password be changed"() {

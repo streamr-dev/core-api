@@ -19,4 +19,6 @@ public @interface StreamrApi {
 	AuthLevel authenticationLevel() default AuthLevel.USER;
 
 	AllowRole[] allowRoles() default AllowRole.NO_ROLE_REQUIRED;
+
+	String[] expectedContentTypes() default { "application/json" };
 }

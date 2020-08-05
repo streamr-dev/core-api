@@ -75,7 +75,7 @@ class UserApiController {
 		render([sum: sum] as JSON)
 	}
 
-	@StreamrApi
+	@StreamrApi(expectedContentTypes = ["multipart/form-data"])
 	def uploadAvatarImage() {
 		SecUser user = loggedInUser()
 		MultipartFile file = getUploadedFile()
