@@ -18,7 +18,7 @@ class TotalSubscriptionsScorerSpec extends Specification {
 	void setup() {
 		scorer = new TotalSubscriptionsScorer(new SubscriptionStore())
 		SecUser owner = new SecUser(
-			username: "owner",
+			username: "owner@example.com",
 			password: "x",
 			name: "product owner",
 		)
