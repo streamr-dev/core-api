@@ -37,7 +37,7 @@ You might also want to run the [Core UI](https://github.com/streamr-dev/streamr-
 
 2. Clone this repo
 
-3. Run `streamr-docker-dev start 1` if you are using the recommended tool streamr-docker-dev. Otherwise make sure all services dependencies are running and the the web applications is properly configured to connect to them.
+3. Run `streamr-docker-dev start --except engine-and-editor` if you are using the recommended tool streamr-docker-dev. Otherwise make sure all services dependencies are running and the the web applications is properly configured to connect to them.
 
 4. Start the backend application
 ```

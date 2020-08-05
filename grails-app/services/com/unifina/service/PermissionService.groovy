@@ -686,12 +686,23 @@ class PermissionService {
 	}
 
 	void deletePermission(Long permissionId, Resource resource, SecUser apiUser, Key apiKey) {
-		Object res = resource.load(apiUser, apiKey, true)
+		Object res = resource.load(apiUser, apiKey, false)
 		List<Permission> permissions = getPermissionsTo(res)
 		Permission p = permissions.find { it.id == permissionId }
 		if (!p) {
 			throw new NotFoundException("Permission not found", resource.type(), permissionId?.toString())
 		}
-		systemRevoke(p)
+		Userish user = apiUser ?: apiKey
+		boolean canShare = check(user, res, Permission.Operation.shareOperation(res))
+		if (canShare == false && p.user == user) {
+			// user without share permission to resource can delete their own permission to resource
+			systemRevoke(p)
+		} else if (canShare) {
+			// user with share permission to resource can delete another user's permission to same resource
+			systemRevoke(p)
+		} else {
+			// user without share permission to resource can't delete another user's permission to same resource
+			throw new NotPermittedException("User without share permission to resource can't delete another user's permission to same resource.")
+		}
 	}
 }

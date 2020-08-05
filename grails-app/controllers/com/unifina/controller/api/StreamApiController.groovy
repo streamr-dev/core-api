@@ -58,7 +58,7 @@ class StreamApiController {
 		if (permissionService.check(userish, stream, Permission.Operation.STREAM_GET)) {
 			render(stream.toMap() as JSON)
 		} else {
-			throw new NotPermittedException(null, "Stream", id, Permission.Operation.STREAM_GET.id)
+			throw new NotPermittedException(request?.apiUser?.username, "Stream", id, Permission.Operation.STREAM_GET.id)
 		}
 	}
 
@@ -128,7 +128,7 @@ class StreamApiController {
 		render(stream.toMap() as JSON)
 	}
 
-	@StreamrApi
+	@StreamrApi(expectedContentTypes = ["multipart/form-data"])
 	def uploadCsvFile(String id) {
 		// Copy multipart contents to temporary file
 		MultipartFile multipartFile = request.getFile("file")
@@ -140,7 +140,11 @@ class StreamApiController {
 			render(result as JSON)
 		} catch (Exception e) {
 			if (temporaryFile != null && temporaryFile.exists()) {
-				temporaryFile.delete()
+				boolean ok = temporaryFile.delete()
+				if (!ok) {
+					String message = String.format("deleting uploaded csv file: %s", temporaryFile.path)
+					log.error(message)
+				}
 			}
 			throw e
 		}
