@@ -298,6 +298,11 @@ class Streams {
         return new StreamrApiRequest(this.options)
             .methodAndPath('GET', `streams/${streamId}/subscriber/${address}`)
     }
+
+    delete(streamId, permissionId) {
+        return new StreamrApiRequest(this.options)
+            .methodAndPath('DELETE', `streams/${streamId}/permissions/${permissionId}`)
+    }
 }
 
 class Canvases {
