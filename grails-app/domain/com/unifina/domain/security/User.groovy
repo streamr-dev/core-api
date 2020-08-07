@@ -48,7 +48,7 @@ class User implements Userish {
 		permissions cascade: 'all-delete-orphan'
 	}
 
-	Set<SecRole> getAuthorities() {
+	Set<Role> getAuthorities() {
 		SecUserSecRole.findAllBySecUser(this).collect { it.secRole } as Set
 	}
 

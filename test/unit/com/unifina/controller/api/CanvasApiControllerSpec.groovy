@@ -352,7 +352,7 @@ class CanvasApiControllerSpec extends ControllerSpecification {
 
 	void "startAsAdmin() requires parameter startedBy to be given"() {
 		setup:
-		def adminRole = new SecRole(authority: "ROLE_ADMIN").save(failOnError: true, validate: false)
+		def adminRole = new Role(authority: "ROLE_ADMIN").save(failOnError: true, validate: false)
 		new SecUserSecRole(secUser: me, secRole: adminRole).save(failOnError: true, validate: false)
 
 		when:
@@ -367,7 +367,7 @@ class CanvasApiControllerSpec extends ControllerSpecification {
 
 	void "startAsAdmin() requires parameter startedBy to be an existing user id"() {
 		setup:
-		def adminRole = new SecRole(authority: "ROLE_ADMIN").save(failOnError: true, validate: false)
+		def adminRole = new Role(authority: "ROLE_ADMIN").save(failOnError: true, validate: false)
 		new SecUserSecRole(secUser: me, secRole: adminRole).save(failOnError: true, validate: false)
 
 		when:
@@ -383,7 +383,7 @@ class CanvasApiControllerSpec extends ControllerSpecification {
 
 	void "startAsAdmin() starts a Canvas if user is admin"() {
 		setup:
-		def adminRole = new SecRole(authority: "ROLE_ADMIN").save(failOnError: true, validate: false)
+		def adminRole = new Role(authority: "ROLE_ADMIN").save(failOnError: true, validate: false)
 		new SecUserSecRole(secUser: me, secRole: adminRole).save(failOnError: true, validate: false)
 
 		def someoneElse = new User(username: "someoneElse@streamr.com").save(failOnError: true, validate: false)

@@ -11,7 +11,7 @@ import org.springframework.context.MessageSource
 import spock.lang.Specification
 
 @TestFor(AuthApiController)
-@Mock([SignupInvite, SignupCodeService, RegistrationCode, User, Key, SecRole, SecUserSecRole, Permission, UserService])
+@Mock([SignupInvite, SignupCodeService, RegistrationCode, User, Key, Role, SecUserSecRole, Permission, UserService])
 class AuthApiControllerSpec extends Specification {
 
 	String username = "user@invite.to"
@@ -204,7 +204,7 @@ class AuthApiControllerSpec extends Specification {
 		setup:
 		// The roles created
 		["ROLE_USER","ROLE_LIVE","ROLE_ADMIN"].each {
-			def role = new SecRole()
+			def role = new Role()
 			role.authority = it
 			role.save()
 		}

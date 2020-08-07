@@ -6,7 +6,7 @@ import com.unifina.api.NotFoundException
 import com.unifina.domain.ExampleType
 import com.unifina.domain.data.Stream
 import com.unifina.domain.security.Key
-import com.unifina.domain.security.SecRole
+import com.unifina.domain.security.Role
 import com.unifina.domain.security.User
 import com.unifina.domain.security.SecUserSecRole
 import com.unifina.domain.signalpath.Canvas
@@ -27,7 +27,7 @@ class UserService {
 	StreamService streamService
 	CanvasService canvasService
 
-	User createUser(Map properties, List<SecRole> roles = null) {
+	User createUser(Map properties, List<Role> roles = null) {
 		User user = new User(properties)
 		// Encode the password
 		if (user.password == null) {
@@ -89,8 +89,8 @@ class UserService {
 		return user
 	}
 
-	def addRoles(User user, List<SecRole> roles = null) {
-		roles?.each { SecRole role ->
+	def addRoles(User user, List<Role> roles = null) {
+		roles?.each { Role role ->
 			new SecUserSecRole().create(user, role)
 		}
 	}

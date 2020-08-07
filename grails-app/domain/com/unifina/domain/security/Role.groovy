@@ -3,7 +3,7 @@ package com.unifina.domain.security
 import grails.persistence.Entity
 
 @Entity
-class SecRole {
+class Role {
 
 	String authority
 

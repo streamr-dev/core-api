@@ -3,7 +3,7 @@ package com.unifina.filters
 import com.unifina.BeanMockingSpecification
 import com.unifina.controller.api.NodeApiController
 import com.unifina.domain.security.Key
-import com.unifina.domain.security.SecRole
+import com.unifina.domain.security.Role
 import com.unifina.domain.security.SecUserSecRole
 import com.unifina.domain.security.User
 import com.unifina.service.SessionService
@@ -15,7 +15,7 @@ import grails.test.mixin.TestFor
 class UnifinaCoreAPIFiltersSpec extends BeanMockingSpecification {
 
 	User user
-	SecRole adminRole, devopsRole
+	Role adminRole, devopsRole
 	SessionService sessionService
 
 	void setup() {
@@ -26,8 +26,8 @@ class UnifinaCoreAPIFiltersSpec extends BeanMockingSpecification {
 		key.id = "myApiKey"
 		key.save(failOnError: true, validate: true)
 
-		adminRole = new SecRole(authority: "ROLE_ADMIN").save(failOnError: true)
-		devopsRole = new SecRole(authority: "ROLE_DEV_OPS").save(failOnError: true)
+		adminRole = new Role(authority: "ROLE_ADMIN").save(failOnError: true)
+		devopsRole = new Role(authority: "ROLE_DEV_OPS").save(failOnError: true)
 	}
 
 	void "authenticationFilter responds with 403 and 'NOT_PERMITTED' if user don't have proper role"() {

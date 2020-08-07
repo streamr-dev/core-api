@@ -7,7 +7,7 @@ import org.apache.commons.lang.builder.HashCodeBuilder
 class SecUserSecRole implements Serializable {
 
 	User secUser
-	SecRole secRole
+	Role secRole
 
 	boolean equals(other) {
 		if (!(other instanceof SecUserSecRole)) {
@@ -30,11 +30,11 @@ class SecUserSecRole implements Serializable {
 			[secUserId: secUserId, secRoleId: secRoleId]
 	}
 
-	static SecUserSecRole create(User secUser, SecRole secRole, boolean flush = false) {
+	static SecUserSecRole create(User secUser, Role secRole, boolean flush = false) {
 		new SecUserSecRole(secUser: secUser, secRole: secRole).save(flush: flush, insert: true, failOnError: true)
 	}
 
-	static boolean remove(User secUser, SecRole secRole, boolean flush = false) {
+	static boolean remove(User secUser, Role secRole, boolean flush = false) {
 		SecUserSecRole instance = SecUserSecRole.findBySecUserAndSecRole(secUser, secRole)
 		if (!instance) {
 			return false
@@ -48,7 +48,7 @@ class SecUserSecRole implements Serializable {
 		executeUpdate 'DELETE FROM SecUserSecRole WHERE secUser=:user', [secUser: secUser]
 	}
 
-	static void removeAll(SecRole secRole) {
+	static void removeAll(Role secRole) {
 		executeUpdate 'DELETE FROM SecUserSecRole WHERE secRole=:secRole', [secRole: secRole]
 	}
 

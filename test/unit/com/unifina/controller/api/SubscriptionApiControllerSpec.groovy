@@ -5,7 +5,7 @@ import com.unifina.api.ValidationException
 import com.unifina.domain.marketplace.Category
 import com.unifina.domain.marketplace.PaidSubscription
 import com.unifina.domain.marketplace.Product
-import com.unifina.domain.security.SecRole
+import com.unifina.domain.security.Role
 import com.unifina.domain.security.SecUserSecRole
 import com.unifina.domain.security.User
 import com.unifina.filters.UnifinaCoreAPIFilters
@@ -24,7 +24,7 @@ class SubscriptionApiControllerSpec extends Specification {
 
 	void setup() {
 		devOpsUser = new User(name: "me@streamr.com").save(failOnError: true, validate: false)
-		def devopsRole = new SecRole(authority: "ROLE_DEV_OPS").save(failOnError: true)
+		def devopsRole = new Role(authority: "ROLE_DEV_OPS").save(failOnError: true)
 		new SecUserSecRole(secUser: devOpsUser, secRole:  devopsRole).save(failOnError: true)
 	}
 

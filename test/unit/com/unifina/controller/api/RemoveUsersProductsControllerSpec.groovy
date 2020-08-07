@@ -2,7 +2,7 @@ package com.unifina.controller.api
 
 import com.unifina.ControllerSpecification
 import com.unifina.domain.security.Key
-import com.unifina.domain.security.SecRole
+import com.unifina.domain.security.Role
 import com.unifina.domain.security.User
 import com.unifina.domain.security.SecUserSecRole
 import com.unifina.service.ProductService
@@ -10,7 +10,7 @@ import grails.test.mixin.Mock
 import grails.test.mixin.TestFor
 
 @TestFor(RemoveUsersProductsController)
-@Mock([User, Key, SecRole, SecUserSecRole])
+@Mock([User, Key, Role, SecUserSecRole])
 class RemoveUsersProductsControllerSpec extends ControllerSpecification {
 	ProductService productService
 	User me
@@ -24,7 +24,7 @@ class RemoveUsersProductsControllerSpec extends ControllerSpecification {
 	}
 
 	def "should remove users troll products if user is admin"() {
-		def role = new SecRole(authority: "ROLE_ADMIN").save(failOnError: true)
+		def role = new Role(authority: "ROLE_ADMIN").save(failOnError: true)
 		new SecUserSecRole(secUser: me, secRole: role).save(failOnError: true)
 		when:
 		request.method = "DELETE"
@@ -48,7 +48,7 @@ class RemoveUsersProductsControllerSpec extends ControllerSpecification {
 	}
 
 	def "regular user cannot remove troll products"() {
-		def role = new SecRole(authority: "ROLE_USER").save(failOnError: true)
+		def role = new Role(authority: "ROLE_USER").save(failOnError: true)
 		new SecUserSecRole(secUser: me, secRole: role).save(failOnError: true)
 		when:
 		request.apiUser = me

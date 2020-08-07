@@ -1,6 +1,7 @@
 package com.unifina.security
 
-import com.unifina.domain.security.SecRole
+
+import com.unifina.domain.security.Role
 import com.unifina.domain.security.SecUserSecRole
 import com.unifina.domain.security.User
 import grails.test.mixin.Mock
@@ -34,7 +35,7 @@ class AllowRoleSpec extends Specification {
 		User user = new User()
 		user.save(failOnError: true, validate: false)
 
-		SecRole secRole = new SecRole(authority: "ROLE_DEV_OPS")
+		Role secRole = new Role(authority: "ROLE_DEV_OPS")
 		secRole.save(failOnError: true)
 
 		new SecUserSecRole(secUser: user, secRole: secRole).save(failOnError: true)
@@ -57,7 +58,7 @@ class AllowRoleSpec extends Specification {
 		User user = new User()
 		user.save(failOnError: true, validate: false)
 
-		SecRole secRole = new SecRole(authority: "ROLE_ADMIN")
+        Role secRole = new Role(authority: "ROLE_ADMIN")
 		secRole.save(failOnError: true)
 
 		new SecUserSecRole(secUser: user, secRole: secRole).save(failOnError: true)

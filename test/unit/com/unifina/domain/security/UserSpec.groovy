@@ -39,7 +39,7 @@ class UserSpec extends Specification {
 
 	def "isDevOps() == true if user has ROLE_DEV_OPS SecRole"() {
 		def user = new User().save(failOnError: true, validate: false)
-		def role = new SecRole(authority: "ROLE_DEV_OPS").save(failOnError: true)
+		def role = new Role(authority: "ROLE_DEV_OPS").save(failOnError: true)
 		new SecUserSecRole(secUser: user, secRole: role).save(failOnError: true)
 
 		expect:
@@ -53,7 +53,7 @@ class UserSpec extends Specification {
 
 	def "isAdmin() == true if user has ROLE_ADMIN SecRole"() {
 		def user = new User().save(failOnError: true, validate: false)
-		def role = new SecRole(authority: "ROLE_ADMIN").save(failOnError: true)
+		def role = new Role(authority: "ROLE_ADMIN").save(failOnError: true)
 		new SecUserSecRole(secUser: user, secRole: role).save(failOnError: true)
 
 		expect:
