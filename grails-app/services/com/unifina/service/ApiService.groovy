@@ -9,7 +9,7 @@ import com.unifina.api.NotPermittedException
 import com.unifina.api.ValidationException
 import com.unifina.domain.security.Key
 import com.unifina.domain.security.Permission
-import com.unifina.domain.security.SecUser
+import com.unifina.domain.security.User
 import com.unifina.exceptions.UnexpectedApiResponseException
 import com.unifina.security.Userish
 import grails.compiler.GrailsCompileStatic
@@ -41,12 +41,12 @@ class ApiService {
 	 * @throws ValidationException if listParams does not pass validation
 	 */
 	@GrailsCompileStatic
-	<T> List<T> list(Class<T> domainClass, ListParams listParams, SecUser apiUser) throws ValidationException {
+	<T> List<T> list(Class<T> domainClass, ListParams listParams, User apiUser) throws ValidationException {
 		if (!listParams.validate()) {
 			throw new ValidationException(listParams.errors)
 		}
 		Closure searchCriteria = listParams.createListCriteria()
-		SecUser effectiveUser = listParams.grantedAccess ? apiUser : null
+        User effectiveUser = listParams.grantedAccess ? apiUser : null
 		permissionService.get(domainClass, effectiveUser, listParams.operation, listParams.publicAccess, searchCriteria)
 	}
 

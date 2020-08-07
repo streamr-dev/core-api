@@ -1,13 +1,14 @@
 package com.unifina.domain.marketplace
 
-import com.unifina.domain.security.SecUser
+
+import com.unifina.domain.security.User
 import grails.compiler.GrailsCompileStatic
 import grails.persistence.Entity
 
 @GrailsCompileStatic
 @Entity
 class FreeSubscription extends Subscription {
-	SecUser user
+	User user
 
 	static constraints = {
 		user(unique: 'product')
@@ -19,7 +20,7 @@ class FreeSubscription extends Subscription {
 	}
 
 	@Override
-	SecUser fetchUser() {
+	User fetchUser() {
 		return user
 	}
 }

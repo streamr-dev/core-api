@@ -1,14 +1,14 @@
 package com.unifina.service
 
 import com.unifina.domain.security.IntegrationKey
-import com.unifina.domain.security.SecUser
+import com.unifina.domain.security.User
 import grails.test.spock.IntegrationSpec
 
 class EthereumServiceIntegrationSpec extends IntegrationSpec {
 	void "hasEthereumAddress query works with lowercase or uppercase input"() {
 		setup:
 		String ethAddr = "0xF24197f71fC9b2F4F4c24ecE461fB0Ff7C91FD23"
-		SecUser me = new SecUser(
+		User me = new User(
 			username: "data-union-ethereum-spec-1@streamr.com",
 			name: "me",
 			password: "foo",
@@ -21,7 +21,7 @@ class EthereumServiceIntegrationSpec extends IntegrationSpec {
 			idInService: ethAddr,
 		).save(failOnError: true, validate: true)
 
-		SecUser other = new SecUser(
+        User other = new User(
 			username: "data-union-ethereum-spec-2@streamr.com",
 			name: "other",
 			password: "bar",

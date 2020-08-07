@@ -2,7 +2,7 @@ package com.unifina
 
 import com.streamr.client.StreamrClient
 import com.unifina.domain.data.Stream
-import com.unifina.domain.security.SecUser
+import com.unifina.domain.security.User
 import com.unifina.domain.signalpath.Canvas
 import com.unifina.service.PermissionService
 import com.unifina.service.StreamService
@@ -29,7 +29,7 @@ class UiChannelMockingSpecification extends ModuleTestingSpecification {
 			s.uiChannelCanvas = canvas
 			return s
 		}
-		streamService.createStream(_, _, _) >> { Map params, SecUser user, String id->
+		streamService.createStream(_, _, _) >> { Map params, User user, String id->
 			Stream s = new Stream(params)
 			s.id = id
 			return s

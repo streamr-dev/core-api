@@ -2,7 +2,7 @@ package com.unifina.controller.api
 
 import com.unifina.api.ApiException
 import com.unifina.api.InvalidUsernameAndPasswordException
-import com.unifina.domain.security.SecUser
+import com.unifina.domain.security.User
 import com.unifina.security.AuthLevel
 import com.unifina.security.PasswordEncoder
 import com.unifina.security.StreamrApi
@@ -21,7 +21,7 @@ class UserApiController {
 
 	@StreamrApi
 	def update(UpdateProfileCommand cmd) {
-		SecUser user = loggedInUser()
+		User user = loggedInUser()
 		// Only these user fields can be updated!
 		user.name = cmd.name ?: user.name
 		user = user.save(failOnError: true)
@@ -37,7 +37,7 @@ class UserApiController {
 		if (!cmd.validate()) {
 			throw new ApiException(400, "PASSWORD_CHANGE_FAILED", "Password not changed!")
 		}
-		SecUser user = loggedInUser()
+		User user = loggedInUser()
 		user.password = passwordEncoder.encodePassword(cmd.password)
 		user.save(flush: false, failOnError: true)
 		log.info("User $user.username changed password!")
@@ -51,7 +51,7 @@ class UserApiController {
 
 	@StreamrApi
 	def delete() {
-		SecUser user = (SecUser) request.apiUser
+		User user = (User) request.apiUser
 		userService.delete(user)
 		render(status: 204, "")
 	}
@@ -68,7 +68,7 @@ class UserApiController {
 
 	@StreamrApi(expectedContentTypes = ["multipart/form-data"])
 	def uploadAvatarImage() {
-		SecUser user = loggedInUser()
+		User user = loggedInUser()
 		MultipartFile file = getUploadedFile()
 		userAvatarImageService.replaceImage(user, file.bytes, file.getOriginalFilename())
 		render(user.toMap() as JSON)
@@ -82,8 +82,8 @@ class UserApiController {
 		return file
 	}
 
-	SecUser loggedInUser() {
-		return (SecUser) request.apiUser
+	User loggedInUser() {
+		return (User) request.apiUser
 	}
 }
 
@@ -107,7 +107,7 @@ class ChangePasswordCommand {
 	static constraints = {
 		username(blank: false)
 		currentpassword validator: {String pwd, ChangePasswordCommand cmd->
-			SecUser user
+			User user
 			try {
 				user = cmd.userService.getUserFromUsernameAndPassword(cmd.username, cmd.currentpassword)
 			} catch (InvalidUsernameAndPasswordException e) {

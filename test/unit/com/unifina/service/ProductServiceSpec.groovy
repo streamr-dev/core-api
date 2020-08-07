@@ -7,7 +7,7 @@ import com.unifina.api.*
 import com.unifina.domain.data.Stream
 import com.unifina.domain.marketplace.*
 import com.unifina.domain.security.Permission
-import com.unifina.domain.security.SecUser
+import com.unifina.domain.security.User
 import grails.test.mixin.Mock
 import grails.test.mixin.TestFor
 import spock.lang.Specification
@@ -37,7 +37,7 @@ class ProductServiceSpec extends Specification {
 	}
 
 	private void setupProduct(Product.State state = Product.State.NOT_DEPLOYED) {
-		SecUser user = new SecUser(
+		User user = new User(
 			username: "user@domain.com",
 			name: "Firstname Lastname",
 			password: "salasana"
@@ -62,7 +62,7 @@ class ProductServiceSpec extends Specification {
 	}
 
 	private void setupFreeProduct(Product.State state = Product.State.NOT_DEPLOYED) {
-		SecUser user = new SecUser(
+		User user = new User(
 			username: "user@domain.com",
 			name: "Firstname Lastname",
 			password: "salasana"
@@ -214,7 +214,7 @@ class ProductServiceSpec extends Specification {
 
 	void "list() delegates to ApiService#list"() {
 		def apiService = service.apiService = Mock(ApiService)
-		def me = new SecUser(username: "me@streamr.com")
+		def me = new User(username: "me@streamr.com")
 
 		when:
 		service.list(new ProductListParams(max: 5), me)
@@ -228,7 +228,7 @@ class ProductServiceSpec extends Specification {
 
 	void "findById() delegates to ApiService#authorizedGetById"() {
 		def apiService = service.apiService = Mock(ApiService)
-		def me = new SecUser(username: "me@streamr.com")
+		def me = new User(username: "me@streamr.com")
 
 		when:
 		service.findById("product-id", me, Permission.Operation.PRODUCT_GET)
@@ -239,7 +239,7 @@ class ProductServiceSpec extends Specification {
 
 	void "create() throws ValidationException if command object does not pass validation"() {
 		when:
-		service.create(new CreateProductCommand(pricePerSecond: -1), new SecUser())
+		service.create(new CreateProductCommand(pricePerSecond: -1), new User())
 		then:
 		thrown(ValidationException)
 	}
@@ -265,7 +265,7 @@ class ProductServiceSpec extends Specification {
 			termsOfUse: termsOfUse,
 		)
 
-		def user = new SecUser()
+		def user = new User()
 		user.name = "Arnold Schwarzenegger"
 		when:
 		def product = service.create(validCommand, user)
@@ -315,7 +315,7 @@ class ProductServiceSpec extends Specification {
 			pricePerSecond: 10,
 			minimumSubscriptionInSeconds: 1
 		)
-		def me = new SecUser(username: "me@streamr.com")
+		def me = new User(username: "me@streamr.com")
 
 		when:
 		service.create(validCommand, me)
@@ -337,7 +337,7 @@ class ProductServiceSpec extends Specification {
 			pricePerSecond: 10,
 			minimumSubscriptionInSeconds: 1
 		)
-		def me = new SecUser(username: "me@streamr.com")
+		def me = new User(username: "me@streamr.com")
 
 		when:
 		service.create(validCommand, me)
@@ -361,7 +361,7 @@ class ProductServiceSpec extends Specification {
 			pricePerSecond: 0,
 			minimumSubscriptionInSeconds: 0,
 		)
-		def me = new SecUser(username: "me@streamr.com")
+		def me = new User(username: "me@streamr.com")
 
 		when:
 		service.create(validCommand, me)
@@ -388,7 +388,7 @@ class ProductServiceSpec extends Specification {
 			pricePerSecond: 10,
 			minimumSubscriptionInSeconds: 1
 		)
-		def me = new SecUser(username: "me@streamr.com")
+		def me = new User(username: "me@streamr.com")
 
 		when:
 		service.create(validCommand, me)
@@ -403,7 +403,7 @@ class ProductServiceSpec extends Specification {
 		service.permissionService = Stub(PermissionService)
 
 		def validCommand = new CreateProductCommand()
-		def user = new SecUser()
+		def user = new User()
 		user.name = "Arnold Schwarzenegger"
 
 		when:
@@ -457,7 +457,7 @@ class ProductServiceSpec extends Specification {
 		service.permissionService = Stub(PermissionService)
 
 		def validCommand = new CreateProductCommand(type: "DATAUNION")
-		def user = new SecUser()
+		def user = new User()
 		user.name = "Arnold Schwarzenegger"
 
 		when:
@@ -472,7 +472,7 @@ class ProductServiceSpec extends Specification {
 
 	void "update() throws ValidationException if command object does not pass validation"() {
 		when:
-		service.update("product-id", new UpdateProductCommand(), new SecUser())
+		service.update("product-id", new UpdateProductCommand(), new User())
 		then:
 		thrown(ValidationException)
 	}
@@ -498,7 +498,7 @@ class ProductServiceSpec extends Specification {
 				priceCurrency: Product.Currency.DATA,
 				minimumSubscriptionInSeconds: 1000
 		)
-		def user = new SecUser(username: "me@streamr.com")
+		def user = new User(username: "me@streamr.com")
 
 		when:
 		service.update("product-id", validCommand, user)
@@ -528,7 +528,7 @@ class ProductServiceSpec extends Specification {
 			priceCurrency: Product.Currency.DATA,
 			minimumSubscriptionInSeconds: 0
 		)
-		def user = new SecUser(username: "me@streamr.com")
+		def user = new User(username: "me@streamr.com")
 
 		when:
 		service.update("product-id", validCommand, user)
@@ -566,7 +566,7 @@ class ProductServiceSpec extends Specification {
 		)
 
 		when:
-		service.update("product-id", validCommand, new SecUser())
+		service.update("product-id", validCommand, new User())
 
 		then:
 		thrown(NotPermittedException)
@@ -590,7 +590,7 @@ class ProductServiceSpec extends Specification {
 				priceCurrency: Product.Currency.DATA,
 				minimumSubscriptionInSeconds: 1000
 		)
-		def user = new SecUser(username: "me@streamr.com")
+		def user = new User(username: "me@streamr.com")
 
 		when:
 		service.update("product-id", validCommand, user)
@@ -620,7 +620,7 @@ class ProductServiceSpec extends Specification {
 			priceCurrency: Product.Currency.DATA,
 			minimumSubscriptionInSeconds: 1000
 		)
-		def user = new SecUser(username: "me@streamr.com")
+		def user = new User(username: "me@streamr.com")
 
 		when:
 		service.update("product-id", validCommand, user)
@@ -673,7 +673,7 @@ class ProductServiceSpec extends Specification {
 		)
 
 		when:
-		def updatedProduct = service.update("product-id", validCommand, new SecUser())
+		def updatedProduct = service.update("product-id", validCommand, new User())
 
 		then:
 		Product.findById("product-id").toMap() == updatedProduct.toMap()
@@ -724,7 +724,7 @@ class ProductServiceSpec extends Specification {
 		setupProduct()
 		service.subscriptionService = Stub(SubscriptionService)
 		def permissionService = service.permissionService = Mock(PermissionService)
-		def user = new SecUser()
+		def user = new User()
 		when:
 		service.addStreamToProduct(product, s4, user)
 		then:
@@ -738,7 +738,7 @@ class ProductServiceSpec extends Specification {
 
 		service.subscriptionService = Stub(SubscriptionService)
 		service.permissionService = Stub(PermissionService)
-		def user = new SecUser()
+		def user = new User()
 
 		when:
 		service.addStreamToProduct(product, s4, user)
@@ -753,7 +753,7 @@ class ProductServiceSpec extends Specification {
 
 		service.subscriptionService = Stub(SubscriptionService)
 		service.permissionService = Mock(PermissionService)
-		def user = new SecUser()
+		def user = new User()
 
 		when:
 		service.addStreamToProduct(product, s4, user)
@@ -766,7 +766,7 @@ class ProductServiceSpec extends Specification {
 		setupProduct()
 		def subscriptionService = service.subscriptionService = Mock(SubscriptionService)
 		service.permissionService = Stub(PermissionService)
-		def user = new SecUser()
+		def user = new User()
 
 		when:
 		service.addStreamToProduct(product, s4, user)
@@ -865,7 +865,7 @@ class ProductServiceSpec extends Specification {
 		def command = new ProductUndeployedCommand(blockNumber: 50000, blockIndex: 15)
 
 		when:
-		service.markAsUndeployed(product, command, Stub(SecUser) {
+		service.markAsUndeployed(product, command, Stub(User) {
 			isDevOps() >> false
 		})
 		then:
@@ -879,7 +879,7 @@ class ProductServiceSpec extends Specification {
 		def command = new ProductUndeployedCommand(blockNumber: 30000, blockIndex: 15)
 
 		when:
-		boolean result = service.markAsUndeployed(product, command, Stub(SecUser) {
+		boolean result = service.markAsUndeployed(product, command, Stub(User) {
 			isDevOps() >> true
 		})
 
@@ -894,7 +894,7 @@ class ProductServiceSpec extends Specification {
 		def command = new ProductUndeployedCommand(blockNumber: 30000, blockIndex: 15)
 
 		when:
-		service.markAsUndeployed(product, command, Stub(SecUser) {
+		service.markAsUndeployed(product, command, Stub(User) {
 			isDevOps() >> true
 		})
 
@@ -909,7 +909,7 @@ class ProductServiceSpec extends Specification {
 		def command = new ProductUndeployedCommand(blockNumber: 30000, blockIndex: 15)
 
 		when:
-		service.markAsUndeployed(product, command, Stub(SecUser) {
+		service.markAsUndeployed(product, command, Stub(User) {
 			isDevOps() >> true
 		})
 
@@ -924,7 +924,7 @@ class ProductServiceSpec extends Specification {
 		def command = new ProductUndeployedCommand(blockNumber: 50000, blockIndex: 15)
 
 		when:
-		boolean result = service.markAsUndeployed(product, command, Stub(SecUser) {
+		boolean result = service.markAsUndeployed(product, command, Stub(User) {
 			isDevOps() >> true
 		})
 
@@ -940,7 +940,7 @@ class ProductServiceSpec extends Specification {
 		def command = new ProductUndeployedCommand(blockNumber: 50000, blockIndex: 15)
 
 		when:
-		service.markAsUndeployed(product, command, Stub(SecUser) {
+		service.markAsUndeployed(product, command, Stub(User) {
 			isDevOps() >> true
 		})
 
@@ -958,7 +958,7 @@ class ProductServiceSpec extends Specification {
 		def command = new ProductUndeployedCommand(blockNumber: 50000, blockIndex: 15)
 
 		when:
-		service.markAsUndeployed(product, command, Stub(SecUser) {
+		service.markAsUndeployed(product, command, Stub(User) {
 			isDevOps() >> true
 		})
 
@@ -969,7 +969,7 @@ class ProductServiceSpec extends Specification {
 	void "markAsDeployed() throws ValidationException if command object does not pass validation"() {
 		setupProduct()
 		when:
-		service.markAsDeployed(product, new ProductDeployedCommand(), new SecUser())
+		service.markAsDeployed(product, new ProductDeployedCommand(), new User())
 		then:
 		thrown(ValidationException)
 	}
@@ -988,7 +988,7 @@ class ProductServiceSpec extends Specification {
 		)
 
 		when:
-		service.markAsDeployed(product, command, new SecUser())
+		service.markAsDeployed(product, command, new User())
 		then:
 		thrown(InvalidStateTransitionException)
 	}
@@ -1007,7 +1007,7 @@ class ProductServiceSpec extends Specification {
 		)
 
 		when:
-		service.markAsDeployed(product, command, Stub(SecUser) {
+		service.markAsDeployed(product, command, Stub(User) {
 			isDevOps() >> false
 		})
 		then:
@@ -1029,7 +1029,7 @@ class ProductServiceSpec extends Specification {
 		)
 
 		when:
-		boolean result = service.markAsDeployed(product, command, Stub(SecUser) {
+		boolean result = service.markAsDeployed(product, command, Stub(User) {
 			isDevOps() >> true
 		})
 
@@ -1052,7 +1052,7 @@ class ProductServiceSpec extends Specification {
 		)
 
 		when:
-		boolean result = service.markAsDeployed(product, command, Stub(SecUser) {
+		boolean result = service.markAsDeployed(product, command, Stub(User) {
 			isDevOps() >> true
 		})
 
@@ -1075,7 +1075,7 @@ class ProductServiceSpec extends Specification {
 		)
 
 		when:
-		service.markAsDeployed(product, command, Stub(SecUser) {
+		service.markAsDeployed(product, command, Stub(User) {
 			isDevOps() >> true
 		})
 
@@ -1099,7 +1099,7 @@ class ProductServiceSpec extends Specification {
 		)
 
 		when:
-		boolean result = service.markAsDeployed(product, command, Stub(SecUser) {
+		boolean result = service.markAsDeployed(product, command, Stub(User) {
 			isDevOps() >> true
 		})
 
@@ -1122,7 +1122,7 @@ class ProductServiceSpec extends Specification {
 		)
 
 		when:
-		service.markAsDeployed(product, command, Stub(SecUser) {
+		service.markAsDeployed(product, command, Stub(User) {
 			isDevOps() >> true
 		})
 
@@ -1170,7 +1170,7 @@ class ProductServiceSpec extends Specification {
 		)
 
 		when:
-		def product = service.markAsDeployed(product, command, Stub(SecUser) {
+		def product = service.markAsDeployed(product, command, Stub(User) {
 			isDevOps() >> true
 		})
 
@@ -1193,7 +1193,7 @@ class ProductServiceSpec extends Specification {
 		)
 
 		when:
-		service.updatePricing(product, command, Stub(SecUser) {
+		service.updatePricing(product, command, Stub(User) {
 			isDevOps() >> true
 		})
 
@@ -1221,7 +1221,7 @@ class ProductServiceSpec extends Specification {
 		)
 
 		when:
-		service.updatePricing(product, command, Stub(SecUser) {
+		service.updatePricing(product, command, Stub(User) {
 			isDevOps() >> false
 		})
 		then:
@@ -1234,7 +1234,7 @@ class ProductServiceSpec extends Specification {
 		service.permissionService = Mock(PermissionService)
 		service.dataUnionJoinRequestService = Mock(DataUnionJoinRequestService)
 		setupStreams()
-		SecUser user = new SecUser(
+		User user = new User(
 			username: "user@domain.com",
 			name: "Firstname Lastname",
 			password: "salasana"
@@ -1272,7 +1272,7 @@ class ProductServiceSpec extends Specification {
 		service.permissionService = Mock(PermissionService)
 		service.dataUnionJoinRequestService = Mock(DataUnionJoinRequestService)
 		setupStreams()
-		SecUser user = new SecUser(
+		User user = new User(
 			username: "user@domain.com",
 			name: "Firstname Lastname",
 			password: "salasana"

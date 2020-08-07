@@ -2,7 +2,7 @@ package com.unifina.signalpath.blockchain;
 
 import com.unifina.api.NotPermittedException;
 import com.unifina.domain.security.IntegrationKey;
-import com.unifina.domain.security.SecUser;
+import com.unifina.domain.security.User;
 import com.unifina.service.EthereumIntegrationKeyService;
 import com.unifina.signalpath.AbstractSignalPathModule;
 import com.unifina.signalpath.Parameter;
@@ -53,8 +53,8 @@ class EthereumAccountParameter extends Parameter<IntegrationKey> {
 	}
 
 	private void checkPermission() {
-		SecUser loggedInUser = SecUser.loadViaJava(getOwner().getGlobals().getUserId());
-		SecUser integrationKeyUser = getValue().getUser();
+		User loggedInUser = User.loadViaJava(getOwner().getGlobals().getUserId());
+		User integrationKeyUser = getValue().getUser();
 		if (!integrationKeyUser.equals(loggedInUser)) {
 			throw new NotPermittedException("Access denied to Ethereum private key (id " + getValue().getId()+"). Only the owner can use it.");
 		}
@@ -68,7 +68,7 @@ class EthereumAccountParameter extends Parameter<IntegrationKey> {
 	@Override
 	protected List<PossibleValue> getPossibleValues() {
 		EthereumIntegrationKeyService service = Holders.getApplicationContext().getBean(EthereumIntegrationKeyService.class);
-		SecUser user = SecUser.loadViaJava(getOwner().getGlobals().getUserId());
+		User user = User.loadViaJava(getOwner().getGlobals().getUserId());
 		Set<IntegrationKey> integrationKeys = new LinkedHashSet<>(service.getAllPrivateKeysForUser(user));
 		if (hasValue()) {
 			integrationKeys.add(getValue());

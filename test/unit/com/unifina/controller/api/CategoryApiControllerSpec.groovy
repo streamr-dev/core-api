@@ -2,7 +2,7 @@ package com.unifina.controller.api
 
 import com.unifina.ControllerSpecification
 import com.unifina.domain.marketplace.Category
-import com.unifina.domain.security.SecUser
+import com.unifina.domain.security.User
 import grails.test.mixin.Mock
 import grails.test.mixin.TestFor
 
@@ -10,10 +10,10 @@ import grails.test.mixin.TestFor
 @Mock([Category])
 class CategoryApiControllerSpec extends ControllerSpecification {
 
-	SecUser me
+	User me
 
 	def setup() {
-		me = new SecUser(id: 1).save(validate: false)
+		me = new User(id: 1).save(validate: false)
 	}
 
 	void "lists categories in alphabetical order"() {

@@ -4,22 +4,22 @@ import com.unifina.BeanMockingSpecification
 import com.unifina.controller.api.NodeApiController
 import com.unifina.domain.security.Key
 import com.unifina.domain.security.SecRole
-import com.unifina.domain.security.SecUser
 import com.unifina.domain.security.SecUserSecRole
+import com.unifina.domain.security.User
 import com.unifina.service.SessionService
 import grails.test.mixin.Mock
 import grails.test.mixin.TestFor
 
 @TestFor(NodeApiController)
-@Mock([SecUser, SecUserSecRole, UnifinaCoreAPIFilters])
+@Mock([User, SecUserSecRole, UnifinaCoreAPIFilters])
 class UnifinaCoreAPIFiltersSpec extends BeanMockingSpecification {
 
-	SecUser user
+	User user
 	SecRole adminRole, devopsRole
 	SessionService sessionService
 
 	void setup() {
-		user = new SecUser().save(failOnError: true, validate: false)
+		user = new User().save(failOnError: true, validate: false)
 		sessionService = mockBean(SessionService, Mock(SessionService))
 
 		Key key = new Key(name: "k1", user: user)

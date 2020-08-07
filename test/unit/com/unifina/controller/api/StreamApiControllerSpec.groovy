@@ -6,7 +6,7 @@ import com.unifina.domain.data.Stream
 import com.unifina.domain.security.IntegrationKey
 import com.unifina.domain.security.Key
 import com.unifina.domain.security.Permission
-import com.unifina.domain.security.SecUser
+import com.unifina.domain.security.User
 import com.unifina.filters.UnifinaCoreAPIFilters
 import com.unifina.service.*
 import grails.converters.JSON
@@ -17,10 +17,10 @@ import org.springframework.mock.web.MockMultipartFile
 import java.text.SimpleDateFormat
 
 @TestFor(StreamApiController)
-@Mock([SecUser, Stream, Key, Permission, PermissionService, StreamService, DashboardService, IntegrationKey, UnifinaCoreAPIFilters])
+@Mock([User, Stream, Key, Permission, PermissionService, StreamService, DashboardService, IntegrationKey, UnifinaCoreAPIFilters])
 class StreamApiControllerSpec extends ControllerSpecification {
 
-	SecUser me
+	User me
 	Key key
 
 	StreamService streamService
@@ -42,14 +42,14 @@ class StreamApiControllerSpec extends ControllerSpecification {
 		apiService = controller.apiService = Mock(ApiService)
 		sessionService = mockBean(SessionService, Mock(SessionService))
 
-		me = new SecUser(username: "me", password: "foo")
+		me = new User(username: "me", password: "foo")
 		me.save(validate: false)
 
 		key = new Key(name: "key", user: me)
 		key.id = "apiKey"
 		key.save(failOnError: true, validate: true)
 
-		def otherUser = new SecUser(username: "other", password: "bar").save(validate: false)
+		def otherUser = new User(username: "other", password: "bar").save(validate: false)
 
 		// First use real streamService to create the streams
 		streamService = mainContext.getBean(StreamService)
@@ -748,7 +748,7 @@ class StreamApiControllerSpec extends ControllerSpecification {
 		}
 
 		then:
-		1 * sessionService.getUserishFromToken("token") >> new SecUser(username: "foo@ƒoo.bar")
+		1 * sessionService.getUserishFromToken("token") >> new User(username: "foo@ƒoo.bar")
 		response.status == 200
 	}
 
@@ -770,7 +770,7 @@ class StreamApiControllerSpec extends ControllerSpecification {
 		}
 
 		then:
-		1 * sessionService.getUserishFromToken("token") >> new SecUser(username: "foo@ƒoo.bar")
+		1 * sessionService.getUserishFromToken("token") >> new User(username: "foo@ƒoo.bar")
 		response.status == 415
 	}
 }

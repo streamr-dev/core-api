@@ -1,6 +1,7 @@
 package com.unifina.domain.task
 
-import com.unifina.domain.security.SecUser
+
+import com.unifina.domain.security.User
 import grails.persistence.Entity
 
 @Entity
@@ -13,7 +14,7 @@ class Task {
 	Boolean skip
 
 	String serverIp
-	SecUser user
+	User user
 
 	Date dateCreated
 	Date lastUpdated
@@ -32,7 +33,7 @@ class Task {
 
 	Date runAfter
 
-	public Task(String implementingClass, String config, String category, String taskGroupId, int complexity = 0, SecUser user = null, Date runAfter = null) {
+	public Task(String implementingClass, String config, String category, String taskGroupId, int complexity = 0, User user = null, Date runAfter = null) {
 		this.implementingClass = implementingClass
 		this.config = config
 		this.category = category

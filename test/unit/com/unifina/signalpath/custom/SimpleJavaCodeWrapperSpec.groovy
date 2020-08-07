@@ -1,6 +1,6 @@
 package com.unifina.signalpath.custom
 
-import com.unifina.domain.security.SecUser
+import com.unifina.domain.security.User
 import com.unifina.security.MyPolicy
 import com.unifina.security.MySecurityManager
 import com.unifina.security.PackageAccessHelper
@@ -43,14 +43,14 @@ class SimpleJavaCodeWrapperSpec extends Specification {
 		Policy.setPolicy(originalPolicy)
 		System.securityManager = originalSecurityManager
 	}
-	
+
     def setup() {
 		defineBeans {
 			serializationService(SerializationService)
 		}
 
 		module = new SimpleJavaCodeWrapper()
-		globals = module.globals = module.globals = new Globals([:], new SecUser())
+		globals = module.globals = module.globals = new Globals([:], new User())
 		module.init()
 		module.hash = 666
 		module.configure(module.getConfiguration())
@@ -84,7 +84,7 @@ class SimpleJavaCodeWrapperSpec extends Specification {
 		Map outputValues = [
 			out: [0,1,3,6,10,15,21,28,36,45,55].collect {it?.doubleValue()},
 		]
-		
+
 		then:
 		new ModuleTestHelper.Builder(module, inputValues, outputValues)
 			.overrideGlobals { globals }

@@ -8,7 +8,7 @@ import com.unifina.domain.dataunion.DataUnionSecret
 import com.unifina.domain.marketplace.Product
 import com.unifina.domain.security.IntegrationKey
 import com.unifina.domain.security.Permission
-import com.unifina.domain.security.SecUser
+import com.unifina.domain.security.User
 import groovy.json.JsonSlurper
 import org.apache.log4j.Logger
 
@@ -89,11 +89,11 @@ class DataUnionJoinRequestService {
 		log.debug("exiting sendMessage")
 	}
 
-	Set<SecUser> findMembers(String contractAddress) {
+	Set<User> findMembers(String contractAddress) {
 		List<DataUnionJoinRequest> requests = DataUnionJoinRequest.createCriteria().list {
 			ilike("contractAddress", contractAddress)
 		}
-		Set<SecUser> users = new HashSet<>()
+		Set<User> users = new HashSet<>()
 		for (DataUnionJoinRequest c : requests) {
 			users.add(c.user)
 		}
@@ -109,7 +109,7 @@ class DataUnionJoinRequestService {
 		}
 	}
 
-	DataUnionJoinRequest create(String contractAddress, DataUnionJoinRequestCommand cmd, SecUser user) {
+	DataUnionJoinRequest create(String contractAddress, DataUnionJoinRequestCommand cmd, User user) {
 		// TODO CORE-1834: check if user already has a PENDING request
 		// TODO CORE-1834: OR if user already has a write permission to the stream
 

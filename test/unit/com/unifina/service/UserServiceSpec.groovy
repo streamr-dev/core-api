@@ -11,7 +11,7 @@ import org.springframework.validation.FieldError
 import spock.lang.Specification
 
 @TestFor(UserService)
-@Mock([Key, SecUser, SecRole, SecUserSecRole, Module, Permission])
+@Mock([Key, User, SecRole, SecUserSecRole, Module, Permission])
 class UserServiceSpec extends Specification {
 
 	void createData() {
@@ -35,17 +35,17 @@ class UserServiceSpec extends Specification {
 	def "the user is created when called"() {
 		when:
 		createData()
-		SecUser user = service.createUser([username: "test@test.com", name:"test", password: "test", enabled:true, accountLocked:false, passwordExpired:false])
+		User user = service.createUser([username: "test@test.com", name:"test", password: "test", enabled:true, accountLocked:false, passwordExpired:false])
 
 		then:
-		SecUser.count() == 1
+		User.count() == 1
 		user.getAuthorities().size() == 0 // By default, user's have no roles
 	}
 
 	def "default API key is created for user"() {
 		when:
 		createData()
-		SecUser user = service.createUser([username: "test@test.com", name:"test", password: "test", enabled:true, accountLocked:false, passwordExpired:false])
+		User user = service.createUser([username: "test@test.com", name:"test", password: "test", enabled:true, accountLocked:false, passwordExpired:false])
 
 		then:
 		user.getKeys().size() == 1
@@ -79,9 +79,9 @@ class UserServiceSpec extends Specification {
 		String username = "username"
 		String password = "password"
 		String hashedPassword = service.passwordEncoder.encodePassword(password)
-		new SecUser(username: username, password: hashedPassword).save(failOnError: true, validate: false)
+		new User(username: username, password: hashedPassword).save(failOnError: true, validate: false)
 		when:
-		SecUser retrievedUser = service.getUserFromUsernameAndPassword(username, password)
+		User retrievedUser = service.getUserFromUsernameAndPassword(username, password)
 		then:
 		retrievedUser != null
 		retrievedUser.username == username
@@ -92,7 +92,7 @@ class UserServiceSpec extends Specification {
 		String password = "password"
 		String wrongPassword = "wrong"
 		String hashedPassword = service.passwordEncoder.encodePassword(password)
-		new SecUser(username: username, password: hashedPassword).save(failOnError: true, validate: false)
+		new User(username: username, password: hashedPassword).save(failOnError: true, validate: false)
 		when:
 		service.getUserFromUsernameAndPassword(username, wrongPassword)
 		then:
@@ -100,13 +100,13 @@ class UserServiceSpec extends Specification {
 	}
 
 	def "should find user from api key"() {
-		SecUser user = new SecUser(username: "username", password: "password").save(failOnError: true, validate: false)
+		User user = new User(username: "username", password: "password").save(failOnError: true, validate: false)
 		Key key = new Key(name: "key", user: user)
 		key.id = "myApiKey"
 		key.save(failOnError: true, validate: true)
 
 		when:
-		SecUser retrievedUser = (SecUser) service.getUserishFromApiKey(key.id)
+		User retrievedUser = (User) service.getUserishFromApiKey(key.id)
 		then:
 		retrievedUser != null
 		retrievedUser.username == user.username
@@ -124,7 +124,7 @@ class UserServiceSpec extends Specification {
 
 	def "delete user"() {
 		setup:
-		SecUser user = new SecUser()
+		User user = new User()
 		user.id = 1
 
 		when:

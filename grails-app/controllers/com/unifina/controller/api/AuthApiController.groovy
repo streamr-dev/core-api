@@ -1,8 +1,8 @@
 package com.unifina.controller.api
 
 import com.unifina.domain.security.RegistrationCode
-import com.unifina.domain.security.SecUser
 import com.unifina.domain.security.SignupInvite
+import com.unifina.domain.security.User
 import com.unifina.exceptions.UserCreationFailedException
 import com.unifina.security.AuthLevel
 import com.unifina.security.PasswordEncoder
@@ -26,7 +26,7 @@ class AuthApiController {
 			return render([success: false, error: userService.beautifyErrors(cmd.errors.getAllErrors())] as JSON)
 		}
 
-		def existingUser = SecUser.findByUsername(cmd.username)
+		def existingUser = User.findByUsername(cmd.username)
 		if (existingUser) {
 			response.status = 400
 			return render([success: false, error: "User exists already"] as JSON)
@@ -77,7 +77,7 @@ class AuthApiController {
 			return render([success: false, error: userService.beautifyErrors(cmd.errors.getAllErrors())] as JSON)
 		}
 
-		if (SecUser.findByUsername(invite.username)) {
+		if (User.findByUsername(invite.username)) {
 			response.status = 400
 			return render([success: false, error: "User already exists"] as JSON)
 		}
@@ -119,7 +119,7 @@ class AuthApiController {
 			return render([success: false, error: userService.beautifyErrors(cmd.errors.getAllErrors())] as JSON)
 		}
 
-		def user = SecUser.findWhere(username: cmd.username)
+		def user = User.findWhere(username: cmd.username)
 		if (!user) {
 			return render([emailSent: true] as JSON) // don't reveal users
 		}
@@ -155,7 +155,7 @@ class AuthApiController {
 			return render([success: false, error: message(code: 'spring.security.ui.resetPassword.badCode')] as JSON)
 		}
 
-		def user = SecUser.findByUsername(registrationCode.username)
+		def user = User.findByUsername(registrationCode.username)
 		if (!user)
 			throw new RuntimeException("User belonging to the registration code was not found: $registrationCode.username")
 

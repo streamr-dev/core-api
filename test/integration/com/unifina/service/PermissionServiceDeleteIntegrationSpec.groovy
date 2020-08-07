@@ -5,7 +5,7 @@ import com.unifina.api.NotPermittedException
 import com.unifina.domain.Resource
 import com.unifina.domain.security.Key
 import com.unifina.domain.security.Permission
-import com.unifina.domain.security.SecUser
+import com.unifina.domain.security.User
 import com.unifina.domain.signalpath.Canvas
 import grails.test.spock.IntegrationSpec
 import grails.util.Holders
@@ -14,20 +14,20 @@ class PermissionServiceDeleteIntegrationSpec extends IntegrationSpec {
 	static transactional = false
 	PermissionService service
 
-	SecUser user
+	User user
 	Canvas resource
-	SecUser another
+	User another
 	Canvas anotherResource
 
 	void setup() {
 		service = Holders.getApplicationContext().getBean(PermissionService)
-		user = new SecUser(name: "name", username: "me@me.com", password: "x")
+		user = new User(name: "name", username: "me@me.com", password: "x")
 		user.save(validate: true, failOnError: true)
 
 		resource = new Canvas()
 		resource.id = "canvas-id-1"
 		resource.save(validate: true, failOnError: true)
-		another = new SecUser(name: "another", username: "another@example.com", password: "x")
+		another = new User(name: "another", username: "another@example.com", password: "x")
 		another.save(validate: true, failOnError: true)
 
 		anotherResource = new Canvas()
@@ -100,7 +100,7 @@ class PermissionServiceDeleteIntegrationSpec extends IntegrationSpec {
 	void "deletePermission() deletes permission"() {
 		setup:
 		Resource res = new Resource(Canvas, resource.id)
-		SecUser apiUser = user
+		User apiUser = user
 		Key apiKey = null
 		Permission share = service.systemGrant(apiUser, resource, Permission.Operation.CANVAS_SHARE)
 		Permission share2 = service.systemGrant(apiUser, resource, Permission.Operation.CANVAS_SHARE)
@@ -114,7 +114,7 @@ class PermissionServiceDeleteIntegrationSpec extends IntegrationSpec {
 	void "deletePermission() throws NotFoundException when permission id not found"() {
 		setup:
 		Resource res = new Resource(Canvas, resource.id)
-		SecUser apiUser = user
+		User apiUser = user
 		Key apiKey = null
 		Permission share = service.systemGrant(apiUser, resource, Permission.Operation.CANVAS_SHARE)
 		Permission p = service.systemGrant(apiUser, resource, Permission.Operation.CANVAS_INTERACT)

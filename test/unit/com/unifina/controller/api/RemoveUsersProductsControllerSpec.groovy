@@ -3,21 +3,21 @@ package com.unifina.controller.api
 import com.unifina.ControllerSpecification
 import com.unifina.domain.security.Key
 import com.unifina.domain.security.SecRole
-import com.unifina.domain.security.SecUser
+import com.unifina.domain.security.User
 import com.unifina.domain.security.SecUserSecRole
 import com.unifina.service.ProductService
 import grails.test.mixin.Mock
 import grails.test.mixin.TestFor
 
 @TestFor(RemoveUsersProductsController)
-@Mock([SecUser, Key, SecRole, SecUserSecRole])
+@Mock([User, Key, SecRole, SecUserSecRole])
 class RemoveUsersProductsControllerSpec extends ControllerSpecification {
 	ProductService productService
-	SecUser me
+	User me
 
 	def setup() {
 		productService = controller.productService = Mock(ProductService)
-		me = new SecUser(id: 1, username: "arnold").save(validate: false)
+		me = new User(id: 1, username: "arnold").save(validate: false)
 		Key key = new Key(name: "key", user: me)
 		key.id = "myApiKey"
 		key.save(failOnError: true, validate: true)

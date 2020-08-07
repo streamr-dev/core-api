@@ -3,7 +3,7 @@ package com.unifina.signalpath.blockchain
 import com.google.gson.Gson
 import com.unifina.ModuleTestingSpecification
 import com.unifina.domain.security.IntegrationKey
-import com.unifina.domain.security.SecUser
+import com.unifina.domain.security.User
 import com.unifina.serialization.SerializerImpl
 import com.unifina.service.EthereumIntegrationKeyService
 import com.unifina.service.SerializationService
@@ -20,7 +20,7 @@ import org.web3j.protocol.core.methods.response.TransactionReceipt
 
 import java.lang.reflect.InvocationTargetException
 
-@Mock([IntegrationKey, SecUser])
+@Mock([IntegrationKey, User])
 class SolidityCompileDeploySpec extends ModuleTestingSpecification {
 	public static final String TXHASH = "0x123";
 	public static final String DEPLOY_ADDRESS = "0x60f78aa68266c87fecec6dcb27672455111bb347";
@@ -51,7 +51,7 @@ class SolidityCompileDeploySpec extends ModuleTestingSpecification {
 	}
 	def setup() {
 		// mock the key for ethereum account
-		SecUser user = new SecUser(name: "name", username: "name@name.com", password: "pass").save(failOnError: true, validate: false)
+		User user = new User(name: "name", username: "name@name.com", password: "pass").save(failOnError: true, validate: false)
 		IntegrationKey key = new IntegrationKey(service: IntegrationKey.Service.ETHEREUM, name: "test key", json: '{"privateKey":"0x5e98cce00cff5dea6b454889f359a4ec06b9fa6b88e9d69b86de8e1c81887da0","address":"0x1234"}', user: user, idInService: "0x1234")
 		key.id = "sgKjr1eHQpqTmwz3vK3DqwUK1wFlrfRJa9mnf_xTeFJQ"
 		key.save(failOnError: true, validate: true)
@@ -177,7 +177,7 @@ class SolidityCompileDeploySpec extends ModuleTestingSpecification {
 	}
 
 	void "attacker can't use another user's key to deploy"() {
-		def attacker = new SecUser(
+		def attacker = new User(
 			name: "attacker",
 			username: "attacker",
 			password: "pass"

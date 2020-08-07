@@ -2,27 +2,27 @@ package com.unifina.controller.api
 
 import com.unifina.ControllerSpecification
 import com.unifina.domain.security.Key
-import com.unifina.domain.security.SecUser
+import com.unifina.domain.security.User
 import com.unifina.domain.signalpath.Module
 import grails.test.mixin.Mock
 import grails.test.mixin.TestFor
 
 @TestFor(ModuleApiController)
-@Mock([SecUser, Module, Key])
+@Mock([User, Module, Key])
 class ModuleApiControllerSpec extends ControllerSpecification {
 
-	SecUser me
+	User me
 	Module module
 
 	def setup() {
-		me = new SecUser(id: 1).save(validate: false)
+		me = new User(id: 1).save(validate: false)
 		module = new Module().save(validate: false)
 
 		def key = new Key(name: "key", user: me)
 		key.id = "myApiKey"
 		key.save(failOnError: true, validate: true)
 
-		assert SecUser.count() == 1
+		assert User.count() == 1
 		assert Module.count() == 1
 	}
 

@@ -4,7 +4,7 @@ import com.unifina.api.*
 import com.unifina.domain.dashboard.Dashboard
 import com.unifina.domain.dashboard.DashboardItem
 import com.unifina.domain.security.Permission
-import com.unifina.domain.security.SecUser
+import com.unifina.domain.security.User
 import com.unifina.domain.signalpath.Canvas
 import com.unifina.utils.Webcomponent
 import grails.test.mixin.Mock
@@ -13,11 +13,11 @@ import groovy.json.JsonBuilder
 import spock.lang.Specification
 
 @TestFor(DashboardService)
-@Mock([Canvas, Dashboard, DashboardItem, Permission, SecUser, PermissionService])
+@Mock([Canvas, Dashboard, DashboardItem, Permission, User, PermissionService])
 class DashboardServiceSpec extends Specification {
 
-	SecUser user = new SecUser(username: "first@user.com", name: "user")
-	SecUser otherUser = new SecUser(username: "second@user.com", name: "someoneElse")
+	User user = new User(username: "first@user.com", name: "user")
+	User otherUser = new User(username: "second@user.com", name: "someoneElse")
 
 	def setup() {
 		PermissionService permissionService = service.permissionService
@@ -106,7 +106,7 @@ class DashboardServiceSpec extends Specification {
 
 	def "create() creates a new dashboard and returns it"() {
 		setup:
-		def user = new SecUser(name: "tester").save(validate: false)
+		def user = new User(name: "tester").save(validate: false)
 		def canvas = new Canvas(json: new JsonBuilder([
 				modules: [
 						[hash: 1, uiChannel: [webcomponent: "streamr-client"]],
@@ -133,7 +133,7 @@ class DashboardServiceSpec extends Specification {
 
 	def "create() also creates all permissions for new dashboard"() {
 		setup:
-		def user = new SecUser(username: "tester").save(validate: false, failOnError: true)
+		def user = new User(username: "tester").save(validate: false, failOnError: true)
 		def canvas = new Canvas(json: new JsonBuilder([
 			modules: [
 				[hash: 1, uiChannel: [webcomponent: "streamr-chart"]],

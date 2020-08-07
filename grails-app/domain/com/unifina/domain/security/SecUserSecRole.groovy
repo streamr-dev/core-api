@@ -6,7 +6,7 @@ import org.apache.commons.lang.builder.HashCodeBuilder
 @Entity
 class SecUserSecRole implements Serializable {
 
-	SecUser secUser
+	User secUser
 	SecRole secRole
 
 	boolean equals(other) {
@@ -30,11 +30,11 @@ class SecUserSecRole implements Serializable {
 			[secUserId: secUserId, secRoleId: secRoleId]
 	}
 
-	static SecUserSecRole create(SecUser secUser, SecRole secRole, boolean flush = false) {
+	static SecUserSecRole create(User secUser, SecRole secRole, boolean flush = false) {
 		new SecUserSecRole(secUser: secUser, secRole: secRole).save(flush: flush, insert: true, failOnError: true)
 	}
 
-	static boolean remove(SecUser secUser, SecRole secRole, boolean flush = false) {
+	static boolean remove(User secUser, SecRole secRole, boolean flush = false) {
 		SecUserSecRole instance = SecUserSecRole.findBySecUserAndSecRole(secUser, secRole)
 		if (!instance) {
 			return false
@@ -44,8 +44,8 @@ class SecUserSecRole implements Serializable {
 		true
 	}
 
-	static void removeAll(SecUser secUser) {
-		executeUpdate 'DELETE FROM SecUserSecRole WHERE secUser=:secUser', [secUser: secUser]
+	static void removeAll(User secUser) {
+		executeUpdate 'DELETE FROM SecUserSecRole WHERE secUser=:user', [secUser: secUser]
 	}
 
 	static void removeAll(SecRole secRole) {
@@ -53,7 +53,10 @@ class SecUserSecRole implements Serializable {
 	}
 
 	static mapping = {
-		id composite: ['secRole', 'secUser']
+		id composite: [
+			'secRole',
+			'secUser',
+		]
 		version false
 	}
 }

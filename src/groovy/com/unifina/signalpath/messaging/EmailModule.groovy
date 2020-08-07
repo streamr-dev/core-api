@@ -1,6 +1,6 @@
 package com.unifina.signalpath.messaging
 
-import com.unifina.domain.security.SecUser
+import com.unifina.domain.security.User
 import com.unifina.domain.signalpath.Canvas
 import com.unifina.service.CanvasService
 import com.unifina.signalpath.*
@@ -38,7 +38,7 @@ class EmailModule extends ModuleWithSideEffects {
 		if (isNotTooOften(emailInterval, globals.time.getTime(), prevTime)) {
 			prevTime = globals.time.getTime()
 			emailSent = true
-			String messageTo = SecUser.get(globals.userId).username
+			String messageTo = User.get(globals.userId).username
 			def mailService = Holders.grailsApplication.getMainContext().getBean("mailService")
 			String messageBody = getMessageBody()
 			mailService.sendMail {

@@ -6,7 +6,7 @@ import com.unifina.domain.marketplace.Contact
 import com.unifina.domain.marketplace.Product
 import com.unifina.domain.security.Permission
 import com.unifina.domain.marketplace.TermsOfUse
-import com.unifina.domain.security.SecUser
+import com.unifina.domain.security.User
 import com.unifina.service.PermissionService
 import grails.compiler.GrailsCompileStatic
 import grails.validation.Validateable
@@ -64,7 +64,7 @@ class UpdateProductCommand {
 	}
 
 	@GrailsCompileStatic
-	void updateProduct(Product product, SecUser user, PermissionService permissionService) {
+	void updateProduct(Product product, User user, PermissionService permissionService) {
 		// Always update off-chain fields if given
 		offChainFields.forEach { String fieldName ->
 			product[fieldName] = this[fieldName]

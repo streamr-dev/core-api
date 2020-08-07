@@ -1,6 +1,7 @@
 package com.unifina.service
 
-import com.unifina.domain.security.SecUser
+
+import com.unifina.domain.security.User
 import com.unifina.domain.task.Task
 import com.unifina.task.AbstractTask
 import com.unifina.task.TaskWorker
@@ -21,7 +22,7 @@ class TaskService {
 		return UUID.randomUUID().toString()
 	}
 
-	Task createTask(Class<? extends AbstractTask> taskClass, Map config, String category, SecUser user = null, Long delayMs = 0, String groupId = IdGenerator.get()) {
+	Task createTask(Class<? extends AbstractTask> taskClass, Map config, String category, User user = null, Long delayMs = 0, String groupId = IdGenerator.get()) {
 		Task task = new Task(taskClass.name, (config as JSON).toString(), category, groupId, 0, user, new Date(System.currentTimeMillis() + delayMs))
 		task.save(failOnError:true)
 		return task
@@ -202,7 +203,7 @@ class TaskService {
 		}
 	}
 
-	TaskWorker startTaskWorker(SecUser priorityUser = null) {
+	TaskWorker startTaskWorker(User priorityUser = null) {
 		List workers = getTaskWorkers()
 
 		TaskWorker worker = createTaskWorker(grailsApplication, workers.size() + 1, priorityUser)
@@ -211,7 +212,7 @@ class TaskService {
 		return worker
 	}
 
-	TaskWorker createTaskWorker(GrailsApplication grailsApplication, int id, SecUser priorityUser) {
+	TaskWorker createTaskWorker(GrailsApplication grailsApplication, int id, User priorityUser) {
 		return new TaskWorker(grailsApplication, id, priorityUser)
 	}
 }

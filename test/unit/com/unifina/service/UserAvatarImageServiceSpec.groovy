@@ -1,7 +1,7 @@
 package com.unifina.service
 
 import com.unifina.api.ApiException
-import com.unifina.domain.security.SecUser
+import com.unifina.domain.security.User
 import com.unifina.provider.FileUploadProvider
 import com.unifina.utils.ImageResizer
 import com.unifina.utils.ImageVerifier
@@ -11,9 +11,9 @@ import grails.test.mixin.TestFor
 import spock.lang.Specification
 
 @TestFor(UserAvatarImageService)
-@Mock(SecUser)
+@Mock(User)
 class UserAvatarImageServiceSpec extends Specification {
-	SecUser user
+	User user
 	String filename = "picture.png"
     def setup() {
 		service.imageResizer = Stub(ImageResizer)
@@ -22,7 +22,7 @@ class UserAvatarImageServiceSpec extends Specification {
 		}
 		service.idGenerator = new FakeIdGenerator()
 
-		user = new SecUser(
+		user = new User(
 			username: "user@domain.com",
 			name: "Firstname Lastname",
 			password: "salasana"
@@ -112,7 +112,7 @@ class UserAvatarImageServiceSpec extends Specification {
 		when:
 		service.replaceImage(user, bytes, filename)
 		then:
-		SecUser.get("1").imageUrlSmall == "https://www.streamr.com/files/id-0"
+		User.get("1").imageUrlSmall == "https://www.streamr.com/files/id-0"
 	}
 
 }

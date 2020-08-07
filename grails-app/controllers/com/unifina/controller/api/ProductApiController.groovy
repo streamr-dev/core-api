@@ -3,7 +3,7 @@ package com.unifina.controller.api
 import com.unifina.api.*
 import com.unifina.domain.marketplace.Product
 import com.unifina.domain.security.Permission
-import com.unifina.domain.security.SecUser
+import com.unifina.domain.security.User
 import com.unifina.security.AllowRole
 import com.unifina.security.AuthLevel
 import com.unifina.security.StreamrApi
@@ -35,9 +35,9 @@ class ProductApiController {
 	@StreamrApi(allowRoles = AllowRole.ADMIN)
 	def emailStaleProductOwners() {
 		Boolean dryRun = params.boolean("dry_run") ?: false
-		Map<SecUser, List<ProductService.StaleProduct>> staleProductsByOwner = productService.findStaleProductsByOwner(loggedInUser())
-		for (Map.Entry<SecUser, List<ProductService.StaleProduct>> entry : staleProductsByOwner.entrySet()) {
-			SecUser owner = entry.getKey()
+		Map<User, List<ProductService.StaleProduct>> staleProductsByOwner = productService.findStaleProductsByOwner(loggedInUser())
+		for (Map.Entry<User, List<ProductService.StaleProduct>> entry : staleProductsByOwner.entrySet()) {
+			User owner = entry.getKey()
 			List<ProductService.StaleProduct> ownersProducts = entry.getValue()
 			if (!owner.isEthereumUser()) {
 				if (dryRun) {
@@ -173,7 +173,7 @@ class ProductApiController {
 		return file
 	}
 
-	SecUser loggedInUser() {
+	User loggedInUser() {
 		request.apiUser
 	}
 }

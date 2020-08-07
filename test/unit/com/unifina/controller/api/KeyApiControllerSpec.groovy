@@ -8,24 +8,24 @@ import com.unifina.domain.data.Stream
 import com.unifina.domain.security.IntegrationKey
 import com.unifina.domain.security.Key
 import com.unifina.domain.security.Permission
-import com.unifina.domain.security.SecUser
+import com.unifina.domain.security.User
 import com.unifina.service.PermissionService
 import com.unifina.service.StreamService
 import grails.test.mixin.Mock
 import grails.test.mixin.TestFor
 
 @TestFor(KeyApiController)
-@Mock([Key, Permission, SecUser, Stream, PermissionService, StreamService, IntegrationKey])
+@Mock([Key, Permission, User, Stream, PermissionService, StreamService, IntegrationKey])
 class KeyApiControllerSpec extends ControllerSpecification {
 
 	def permissionService
 	StreamService streamService
 
-	SecUser me
+	User me
 	Key userLinkedKey
 
 	def setup() {
-		me = new SecUser(
+		me = new User(
 			username: "me@me.com",
 			password: "pwd",
 			name: "name",
@@ -63,7 +63,7 @@ class KeyApiControllerSpec extends ControllerSpecification {
 		request.JSON = [
 			name: "key name"
 		]
-		params.resourceClass = SecUser
+		params.resourceClass = User
 		authenticatedAs(me) { controller.save() }
 
 		then:
@@ -191,7 +191,7 @@ class KeyApiControllerSpec extends ControllerSpecification {
 
 	void "delete() throws NotPermittedException if attempting to delete user-linked key as other user"() {
 		setup:
-		SecUser user2 = new SecUser(
+		User user2 = new User(
 			username: "user2@me.com",
 			password: "pwd",
 			name: "name",
@@ -202,7 +202,7 @@ class KeyApiControllerSpec extends ControllerSpecification {
 		when:
 		request.method = "DELETE"
 		params.id = otherKey.id
-		params.resourceClass = SecUser
+		params.resourceClass = User
 		authenticatedAs(me) { controller.delete() }
 
 		then:
@@ -215,7 +215,7 @@ class KeyApiControllerSpec extends ControllerSpecification {
 		when:
 		request.method = "DELETE"
 		params.id = key.id
-		params.resourceClass = SecUser
+		params.resourceClass = User
 		authenticatedAs(me) { controller.delete() }
 
 		then:
@@ -231,7 +231,7 @@ class KeyApiControllerSpec extends ControllerSpecification {
 		def key = me.keys.iterator().next()
 		request.method = "DELETE"
 		params.id = key.id
-		params.resourceClass = SecUser
+		params.resourceClass = User
 		authenticatedAs(me) { controller.delete() }
 
 		then:
@@ -320,7 +320,7 @@ class KeyApiControllerSpec extends ControllerSpecification {
 
 	void "updateUserKey() updates name field of user's key"() {
 		setup:
-		SecUser user = new SecUser(
+		User user = new User(
 			username: "address@emailprovider.com",
 			password: "pwd",
 			name: "first last name",
