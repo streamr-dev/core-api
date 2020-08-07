@@ -1,10 +1,10 @@
 package com.unifina.utils
 
-import com.unifina.domain.security.SecUserSecRole
+import com.unifina.domain.security.UserRole
 import grails.test.mixin.Mock
 import spock.lang.Specification
 
-@Mock(SecUserSecRole)
+@Mock(UserRole)
 class EmailValidatorSpec extends Specification {
 	void "validates emails correctly"() {
 		expect:

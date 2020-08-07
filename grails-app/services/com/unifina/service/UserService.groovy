@@ -8,7 +8,7 @@ import com.unifina.domain.data.Stream
 import com.unifina.domain.security.Key
 import com.unifina.domain.security.Role
 import com.unifina.domain.security.User
-import com.unifina.domain.security.SecUserSecRole
+import com.unifina.domain.security.UserRole
 import com.unifina.domain.signalpath.Canvas
 import com.unifina.exceptions.UserCreationFailedException
 import com.unifina.security.PasswordEncoder
@@ -91,7 +91,7 @@ class UserService {
 
 	def addRoles(User user, List<Role> roles = null) {
 		roles?.each { Role role ->
-			new SecUserSecRole().create(user, role)
+			new UserRole().create(user, role)
 		}
 	}
 

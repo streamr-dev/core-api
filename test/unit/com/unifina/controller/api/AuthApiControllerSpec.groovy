@@ -11,7 +11,7 @@ import org.springframework.context.MessageSource
 import spock.lang.Specification
 
 @TestFor(AuthApiController)
-@Mock([SignupInvite, SignupCodeService, RegistrationCode, User, Key, Role, SecUserSecRole, Permission, UserService])
+@Mock([SignupInvite, SignupCodeService, RegistrationCode, User, Key, Role, UserRole, Permission, UserService])
 class AuthApiControllerSpec extends Specification {
 
 	String username = "user@invite.to"

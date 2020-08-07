@@ -11,7 +11,7 @@ import org.springframework.validation.FieldError
 import spock.lang.Specification
 
 @TestFor(UserService)
-@Mock([Key, User, Role, SecUserSecRole, Module, Permission])
+@Mock([Key, User, Role, UserRole, Module, Permission])
 class UserServiceSpec extends Specification {
 
 	void createData() {

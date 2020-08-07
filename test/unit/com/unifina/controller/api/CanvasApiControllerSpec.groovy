@@ -19,7 +19,7 @@ import grails.test.mixin.TestFor
 import groovy.json.JsonBuilder
 
 @TestFor(CanvasApiController)
-@Mock([User, SecUserSecRole, Permission, Canvas, Key])
+@Mock([User, UserRole, Permission, Canvas, Key])
 class CanvasApiControllerSpec extends ControllerSpecification {
 
 	ApiService apiService
@@ -353,7 +353,7 @@ class CanvasApiControllerSpec extends ControllerSpecification {
 	void "startAsAdmin() requires parameter startedBy to be given"() {
 		setup:
 		def adminRole = new Role(authority: "ROLE_ADMIN").save(failOnError: true, validate: false)
-		new SecUserSecRole(secUser: me, secRole: adminRole).save(failOnError: true, validate: false)
+		new UserRole(user: me, role: adminRole).save(failOnError: true, validate: false)
 
 		when:
 		params.id = "1"
@@ -368,7 +368,7 @@ class CanvasApiControllerSpec extends ControllerSpecification {
 	void "startAsAdmin() requires parameter startedBy to be an existing user id"() {
 		setup:
 		def adminRole = new Role(authority: "ROLE_ADMIN").save(failOnError: true, validate: false)
-		new SecUserSecRole(secUser: me, secRole: adminRole).save(failOnError: true, validate: false)
+		new UserRole(user: me, role: adminRole).save(failOnError: true, validate: false)
 
 		when:
 		params.id = "1"
@@ -384,7 +384,7 @@ class CanvasApiControllerSpec extends ControllerSpecification {
 	void "startAsAdmin() starts a Canvas if user is admin"() {
 		setup:
 		def adminRole = new Role(authority: "ROLE_ADMIN").save(failOnError: true, validate: false)
-		new SecUserSecRole(secUser: me, secRole: adminRole).save(failOnError: true, validate: false)
+		new UserRole(user: me, role: adminRole).save(failOnError: true, validate: false)
 
 		def someoneElse = new User(username: "someoneElse@streamr.com").save(failOnError: true, validate: false)
 

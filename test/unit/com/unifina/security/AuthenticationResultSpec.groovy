@@ -2,13 +2,13 @@ package com.unifina.security
 
 import com.unifina.domain.security.Key
 import com.unifina.domain.security.Role
-import com.unifina.domain.security.SecUserSecRole
+import com.unifina.domain.security.UserRole
 import com.unifina.domain.security.User
 import grails.test.mixin.Mock
 import spock.lang.Specification
 import spock.lang.Unroll
 
-@Mock([User, Role, SecUserSecRole])
+@Mock([User, Role, UserRole])
 class AuthenticationResultSpec extends Specification {
 
 	@Unroll
@@ -74,7 +74,7 @@ class AuthenticationResultSpec extends Specification {
 		Role secRole = new Role(authority: "ROLE_DEV_OPS")
 		secRole.save(failOnError: true)
 
-		new SecUserSecRole(secUser: user, secRole: secRole).save(failOnError: true)
+		new UserRole(user: user, role: secRole).save(failOnError: true)
 
 		expect:
 		new AuthenticationResult(new Key()).hasOneOfRoles([AllowRole.NO_ROLE_REQUIRED] as AllowRole[])

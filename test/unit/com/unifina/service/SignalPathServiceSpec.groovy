@@ -3,7 +3,7 @@ package com.unifina.service
 import com.unifina.BeanMockingSpecification
 import com.unifina.domain.security.Permission
 import com.unifina.domain.security.Role
-import com.unifina.domain.security.SecUserSecRole
+import com.unifina.domain.security.UserRole
 import com.unifina.domain.security.User
 import com.unifina.domain.signalpath.Canvas
 import com.unifina.domain.signalpath.Serialization
@@ -18,7 +18,7 @@ import grails.test.mixin.TestFor
 import java.security.AccessControlException
 
 @TestFor(SignalPathService)
-@Mock([User, Role, SecUserSecRole, Canvas, Serialization])
+@Mock([User, Role, UserRole, Canvas, Serialization])
 class SignalPathServiceSpec extends BeanMockingSpecification {
 
 	User me
@@ -34,7 +34,7 @@ class SignalPathServiceSpec extends BeanMockingSpecification {
 		role.save(failOnError: true)
 		admin = new User(username: "admin@streamr.com", password: "pw", name: "admin")
 		admin.save(failOnError: true)
-		new SecUserSecRole(secUser: admin, secRole: role).save(failOnError: true)
+		new UserRole(user: admin, role: role).save(failOnError: true)
 
 		c1 = new Canvas(
 				name: "canvas-1",
@@ -318,7 +318,7 @@ class SignalPathServiceSpec extends BeanMockingSpecification {
 		Role adminRole = new Role(authority: "ROLE_ADMIN")
 		adminRole.save(failOnError: true, validate: false)
 
-		SecUserSecRole secUserSecRole = new SecUserSecRole(secUser: user, secRole: adminRole)
+		UserRole secUserSecRole = new UserRole(user: user, role: adminRole)
 		secUserSecRole.save(failOnError: true, validate: false)
 
 		Canvas canvas = new Canvas(runner: "runner-id")

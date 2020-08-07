@@ -2,12 +2,12 @@ package com.unifina.security
 
 
 import com.unifina.domain.security.Role
-import com.unifina.domain.security.SecUserSecRole
 import com.unifina.domain.security.User
+import com.unifina.domain.security.UserRole
 import grails.test.mixin.Mock
 import spock.lang.Specification
 
-@Mock(SecUserSecRole)
+@Mock(UserRole)
 class AllowRoleSpec extends Specification {
 
 	void "hasUserRole(null) is true when this == NO_ROLE_REQUIRED"() {
@@ -38,7 +38,7 @@ class AllowRoleSpec extends Specification {
 		Role secRole = new Role(authority: "ROLE_DEV_OPS")
 		secRole.save(failOnError: true)
 
-		new SecUserSecRole(secUser: user, secRole: secRole).save(failOnError: true)
+		new UserRole(user: user, role: secRole).save(failOnError: true)
 
 		expect:
 		AllowRole.DEVOPS.hasUserRole(user)
@@ -61,7 +61,7 @@ class AllowRoleSpec extends Specification {
         Role secRole = new Role(authority: "ROLE_ADMIN")
 		secRole.save(failOnError: true)
 
-		new SecUserSecRole(secUser: user, secRole: secRole).save(failOnError: true)
+		new UserRole(user: user, role: secRole).save(failOnError: true)
 
 		expect:
 		AllowRole.ADMIN.hasUserRole(user)

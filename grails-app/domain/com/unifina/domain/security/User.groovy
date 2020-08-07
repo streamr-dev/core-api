@@ -49,7 +49,7 @@ class User implements Userish {
 	}
 
 	Set<Role> getAuthorities() {
-		SecUserSecRole.findAllBySecUser(this).collect { it.secRole } as Set
+		UserRole.findAllByUser(this).collect { UserRole it -> it.role } as Set
 	}
 
 	boolean isDevOps() {

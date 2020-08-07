@@ -4,14 +4,17 @@ import com.unifina.BeanMockingSpecification
 import com.unifina.controller.api.NodeApiController
 import com.unifina.domain.security.Key
 import com.unifina.domain.security.Role
-import com.unifina.domain.security.SecUserSecRole
 import com.unifina.domain.security.User
+import com.unifina.domain.security.UserRole
 import com.unifina.service.SessionService
 import grails.test.mixin.Mock
 import grails.test.mixin.TestFor
+import grails.test.mixin.TestMixin
+import grails.test.mixin.web.FiltersUnitTestMixin
 
+@TestMixin(FiltersUnitTestMixin)
 @TestFor(NodeApiController)
-@Mock([User, SecUserSecRole, UnifinaCoreAPIFilters])
+@Mock([User, UserRole, UnifinaCoreAPIFilters])
 class UnifinaCoreAPIFiltersSpec extends BeanMockingSpecification {
 
 	User user
@@ -48,7 +51,7 @@ class UnifinaCoreAPIFiltersSpec extends BeanMockingSpecification {
 
 	void "authenticationFilter passes if user has proper role"() {
 		setup:
-		new SecUserSecRole(secUser: user, secRole: adminRole).save(failOnError: true)
+		new UserRole(user: user, role: adminRole).save(failOnError: true)
 
 		when:
 		request.addHeader("Authorization", "Token myApiKey")
@@ -64,7 +67,7 @@ class UnifinaCoreAPIFiltersSpec extends BeanMockingSpecification {
 	void "authentication passes when session token provided"() {
 		String token = "mytoken"
 		when:
-		new SecUserSecRole(secUser: user, secRole: adminRole).save(failOnError: true)
+		new UserRole(user: user, role: adminRole).save(failOnError: true)
 		request.addHeader("Authorization", "Bearer " + token)
 		request.requestURI = "/api/v1/nodes"
 		withFilters(action: "index") {

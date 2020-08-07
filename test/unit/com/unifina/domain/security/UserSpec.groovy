@@ -3,7 +3,7 @@ package com.unifina.domain.security
 import grails.test.mixin.Mock
 import spock.lang.Specification
 
-@Mock(SecUserSecRole)
+@Mock(UserRole)
 class UserSpec extends Specification {
 
 	def "SecUsers with same id must be equal and have same hashcode"() {
@@ -40,7 +40,7 @@ class UserSpec extends Specification {
 	def "isDevOps() == true if user has ROLE_DEV_OPS SecRole"() {
 		def user = new User().save(failOnError: true, validate: false)
 		def role = new Role(authority: "ROLE_DEV_OPS").save(failOnError: true)
-		new SecUserSecRole(secUser: user, secRole: role).save(failOnError: true)
+		new UserRole(user: user, role: role).save(failOnError: true)
 
 		expect:
 		user.devOps
@@ -54,7 +54,7 @@ class UserSpec extends Specification {
 	def "isAdmin() == true if user has ROLE_ADMIN SecRole"() {
 		def user = new User().save(failOnError: true, validate: false)
 		def role = new Role(authority: "ROLE_ADMIN").save(failOnError: true)
-		new SecUserSecRole(secUser: user, secRole: role).save(failOnError: true)
+		new UserRole(user: user, role: role).save(failOnError: true)
 
 		expect:
 		user.isAdmin()
