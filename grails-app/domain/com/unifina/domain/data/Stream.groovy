@@ -118,6 +118,7 @@ class Stream implements Comparable {
 			lastUpdated: lastUpdated,
 			requireSignedData: requireSignedData,
 			requireEncryptedData: requireEncryptedData,
+			storageDays: storageDays,
 		]
 	}
 
@@ -131,6 +132,7 @@ class Stream implements Comparable {
 			partitions: partitions,
 			requireSignedData: requireSignedData,
 			requireEncryptedData: requireEncryptedData,
+			storageDays: storageDays,
 		]
 	}
 
