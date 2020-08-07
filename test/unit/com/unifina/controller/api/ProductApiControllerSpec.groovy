@@ -193,7 +193,7 @@ class ProductApiControllerSpec extends Specification {
 
 		params.id = "product-id"
 		when:
-		withFilters(action: "index") {
+		withFilters(action: "show") {
 			controller.show()
 		}
 		then:
@@ -209,7 +209,7 @@ class ProductApiControllerSpec extends Specification {
 
 		params.id = "product-id"
 		when:
-		withFilters(action: "index") {
+		withFilters(action: "show") {
 			controller.show()
 		}
 		then:

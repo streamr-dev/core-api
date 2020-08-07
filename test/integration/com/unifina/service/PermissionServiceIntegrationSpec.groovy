@@ -13,6 +13,7 @@ import grails.test.spock.IntegrationSpec
 import grails.util.Holders
 
 import java.security.AccessControlException
+
 /*
 	Ideally these tests would reside in {PermissionServiceSpec} as unit tests. However, due to spotty mocking of GORM,
 	the behaviour of withCriteria differs in unit tests compared to a real database. Thus the tests were moved here so
