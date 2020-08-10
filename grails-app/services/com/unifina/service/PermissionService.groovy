@@ -494,7 +494,8 @@ class PermissionService {
 		List<Permission> permissionList = store.findPermissionsToRevoke(resourceProp, resource, anonymous, target)
 
 		// Prevent revocation of only/last share permission to prevent inaccessible resources
-		if (hasOneOrLessSharePermissionsLeft(resource) && Operation.shareOperation(resource) in permissionList*.operation) {
+		Operation shareOperation = Operation.shareOperation(resource)
+		if (operation == shareOperation && hasOneOrLessSharePermissionsLeft(resource) && shareOperation in permissionList*.operation) {
 			throw new AccessControlException("Cannot revoke only SHARE permission of ${resource}")
 		}
 
