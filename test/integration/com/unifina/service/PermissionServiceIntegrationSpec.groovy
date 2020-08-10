@@ -13,6 +13,7 @@ import grails.test.spock.IntegrationSpec
 import grails.util.Holders
 
 import java.security.AccessControlException
+
 /*
 	Ideally these tests would reside in {PermissionServiceSpec} as unit tests. However, due to spotty mocking of GORM,
 	the behaviour of withCriteria differs in unit tests compared to a real database. Thus the tests were moved here so
@@ -150,7 +151,7 @@ class PermissionServiceIntegrationSpec extends IntegrationSpec {
 		secretItem.save(failOnError: true, validate: true, flush: true)
 
 		// Sign-up invitations can also receive Permissions; they will later be converted to User permissions
-		invite = new SignupInvite(username: "him-permission-service-integration-spec@streamr.com", code: "sikritCode", sent: true, used: false).save(validate: false, flush: true)
+		invite = new SignupInvite(email: "him-permission-service-integration-spec@streamr.com", code: "sikritCode", sent: true, used: false).save(validate: false, flush: true)
 	}
 
 	void cleanup() {

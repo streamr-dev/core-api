@@ -11,6 +11,7 @@ import com.unifina.security.AuthLevel
 import com.unifina.security.StreamrApi
 import com.unifina.service.PermissionService
 import grails.converters.JSON
+import grails.transaction.Transactional
 import groovy.json.JsonSlurper
 
 class KeyApiController {
@@ -170,6 +171,7 @@ class KeyApiController {
 	}
 
 	@StreamrApi(authenticationLevel = AuthLevel.USER)
+	@Transactional
 	def updateStreamKey() {
 		Key k = Key.get(params.keyId)
 		if (k == null) {

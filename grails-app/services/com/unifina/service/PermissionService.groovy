@@ -452,8 +452,8 @@ class PermissionService {
      */
 	List<Permission> transferInvitePermissionsTo(SecUser user) {
 		// { invite { eq "username", user.username } } won't do: some invite are null => NullPointerException
-		return store.findPermissionsToTransfer().findAll {
-			it.invite.username == user.username
+		return store.findPermissionsToTransfer().findAll { Permission it ->
+			it.invite.email == user.username
 		}.collect { Permission p ->
 			p.invite = null
 			p.user = user
@@ -494,7 +494,8 @@ class PermissionService {
 		List<Permission> permissionList = store.findPermissionsToRevoke(resourceProp, resource, anonymous, target)
 
 		// Prevent revocation of only/last share permission to prevent inaccessible resources
-		if (hasOneOrLessSharePermissionsLeft(resource) && Operation.shareOperation(resource) in permissionList*.operation) {
+		Operation shareOperation = Operation.shareOperation(resource)
+		if (operation == shareOperation && hasOneOrLessSharePermissionsLeft(resource) && shareOperation in permissionList*.operation) {
 			throw new AccessControlException("Cannot revoke only SHARE permission of ${resource}")
 		}
 
@@ -627,23 +628,25 @@ class PermissionService {
 
 	@CompileStatic(value = TypeCheckingMode.SKIP)
 	Permission savePermissionAndSendEmailShareResourceInvite(SecUser apiUser, String username, Operation op, EmailMessage msg) {
-		SignupInvite invite = SignupInvite.findByUsername(username)
+		SignupInvite invite = SignupInvite.findByEmail(username)
 		if (!invite) {
 			invite = signupCodeService.create(username)
-			String content = groovyPageRenderer.render([
-				template: "/emails/email_share_resource_invite",
-				model: [
-					sharer  : msg.sharer,
-					resource: msg.resourceType(),
-					name    : msg.resourceName(),
-					invite  : invite,
-				],
-			])
-			mailService.sendMail {
-				from grailsApplication.config.unifina.email.sender
-				to invite.username
-				subject msg.subject()
-				html content
+			if (op == Operation.STREAM_GET || op == Operation.CANVAS_GET || op == Operation.DASHBOARD_GET) {
+				String content = groovyPageRenderer.render([
+					template: "/emails/email_share_resource_invite",
+					model   : [
+						sharer  : msg.sharer,
+						resource: msg.resourceType(),
+						name    : msg.resourceName(),
+						invite  : invite,
+					],
+				])
+				mailService.sendMail {
+					from grailsApplication.config.unifina.email.sender
+					to invite.email
+					subject msg.subject()
+					html content
+				}
 			}
 			invite.sent = true
 			invite.save(failOnError: true, validate: true)
@@ -686,12 +689,23 @@ class PermissionService {
 	}
 
 	void deletePermission(Long permissionId, Resource resource, SecUser apiUser, Key apiKey) {
-		Object res = resource.load(apiUser, apiKey, true)
+		Object res = resource.load(apiUser, apiKey, false)
 		List<Permission> permissions = getPermissionsTo(res)
 		Permission p = permissions.find { it.id == permissionId }
 		if (!p) {
 			throw new NotFoundException("Permission not found", resource.type(), permissionId?.toString())
 		}
-		systemRevoke(p)
+		Userish user = apiUser ?: apiKey
+		boolean canShare = check(user, res, Permission.Operation.shareOperation(res))
+		if (canShare == false && p.user == user) {
+			// user without share permission to resource can delete their own permission to resource
+			systemRevoke(p)
+		} else if (canShare) {
+			// user with share permission to resource can delete another user's permission to same resource
+			systemRevoke(p)
+		} else {
+			// user without share permission to resource can't delete another user's permission to same resource
+			throw new NotPermittedException("User without share permission to resource can't delete another user's permission to same resource.")
+		}
 	}
 }

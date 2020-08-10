@@ -11,9 +11,9 @@ class SignupCodeService {
 		return s
 	}
 
-	SignupInvite create(String username) {
+	SignupInvite create(String email) {
 		SignupInvite result = new SignupInvite(
-			username: username,
+			email: email,
 			code: generateSignupCode(),
 			sent: false,
 			used: false,

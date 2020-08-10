@@ -418,7 +418,7 @@ class PermissionServiceSpec extends BeanMockingSpecification {
 		EmailMessage msg = new EmailMessage(sharer, recipient, subjectTemplate, res)
 		SignupInvite invite = new SignupInvite(
 			code: "x",
-			username: recipient,
+			email: recipient,
 			used: false,
 			sent: false,
 		)
@@ -487,40 +487,6 @@ class PermissionServiceSpec extends BeanMockingSpecification {
 		p.save(flush: true)
 		when:
 		Permission permission = service.findPermission(null, resource, apiUser, apiKey)
-		then:
-		def e = thrown(NotFoundException)
-		e.type == "Canvas"
-		e.id == null
-	}
-
-	void "deletePermission() deletes permission"() {
-		setup:
-		Canvas canvasOwned = newCanvas("own")
-		Resource resource = new Resource(Canvas, canvasOwned.id)
-		SecUser apiUser = me
-		Key apiKey = null
-		Permission share = service.systemGrant(apiUser, canvasOwned, Operation.CANVAS_SHARE)
-		Permission share2 = service.systemGrant(apiUser, canvasOwned, Operation.CANVAS_SHARE)
-		Permission p = service.systemGrant(apiUser, canvasOwned, Operation.CANVAS_INTERACT)
-		p.save(flush: true)
-		when:
-		service.deletePermission(p.id, resource, apiUser, apiKey)
-		share.save(flush: true)
-		then:
-		Permission.get(p.id) == null
-	}
-
-	void "deletePermission() throws NotFoundException when permission id not found"() {
-		setup:
-		Canvas canvasOwned = newCanvas("own")
-		Resource resource = new Resource(Canvas, canvasOwned.id)
-		SecUser apiUser = me
-		Key apiKey = null
-		Permission share = service.systemGrant(apiUser, canvasOwned, Operation.CANVAS_SHARE)
-		Permission p = service.systemGrant(apiUser, canvasOwned, Operation.CANVAS_INTERACT)
-		p.save(flush: true)
-		when:
-		service.deletePermission(null, resource, apiUser, apiKey)
 		then:
 		def e = thrown(NotFoundException)
 		e.type == "Canvas"

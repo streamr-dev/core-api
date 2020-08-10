@@ -1,13 +1,13 @@
 package com.unifina.domain.security
 
 import com.unifina.security.Userish
-import com.unifina.utils.UsernameValidator
+import com.unifina.utils.EmailValidator
 import grails.persistence.Entity
 
 @Entity
 class SignupInvite implements Userish {
 	String code
-	String username
+	String email
 	Boolean used
 	Boolean sent
 	Date dateCreated
@@ -15,7 +15,7 @@ class SignupInvite implements Userish {
 
     static constraints = {
 		code blank: false, unique: true
-		username blank: false, validator: UsernameValidator.validate
+		email blank: false, validator: EmailValidator.validate
     }
 
 	@Override
