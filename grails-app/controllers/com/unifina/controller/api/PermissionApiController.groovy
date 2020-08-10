@@ -59,7 +59,7 @@ class PermissionApiController {
 			// incoming "username" is either SecUser.username or SignupInvite.username (possibly of a not yet created SignupInvite)
 			SecUser user = SecUser.findByUsername(username)
 			if (user) {
-				String recipient = user.username
+				String recipient = user.email
 				// send share resource email and grant permission
 				EmailMessage msg = new EmailMessage(sharer, recipient, subjectTemplate, res)
 				newPermission = permissionService.savePermissionAndSendShareResourceEmail(
