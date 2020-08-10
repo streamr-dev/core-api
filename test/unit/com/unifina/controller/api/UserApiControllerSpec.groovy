@@ -22,6 +22,7 @@ import org.springframework.mock.web.MockMultipartFile
 class UserApiControllerSpec extends ControllerSpecification {
 
 	User me
+	User ethUser
 	PasswordEncoder passwordEncoder = new UnitTestPasswordEncoder()
 	SessionService sessionService
 
@@ -29,11 +30,21 @@ class UserApiControllerSpec extends ControllerSpecification {
 		me = new User(
 			name: "me",
 			username: "me@too.com",
+			email: "me@too.com",
 			enabled: true,
 			password: passwordEncoder.encodePassword("foobar123!"),
 		)
 		me.id = 1
 		me.save(validate: false)
+		ethUser = new User(
+			name: "eth",
+			username: "0x0000000000000000000000000000000000000000",
+			email: "eth@eth.com",
+			enabled: true,
+			password: passwordEncoder.encodePassword("foobar123!"),
+		)
+		ethUser.id = 2
+		ethUser.save(validate: false)
 		controller.passwordEncoder = passwordEncoder
 		sessionService = mockBean(SessionService, Mock(SessionService))
 	}
@@ -87,18 +98,42 @@ class UserApiControllerSpec extends ControllerSpecification {
 		response.status == 204
 	}
 
-	void "changing user settings must change them"() {
+	void "update ethereum users profile"() {
 		setup:
 		controller.userService = new UserService()
 		request.addHeader("Authorization", "Bearer token")
 		request.method = "PUT"
 		request.requestURI = "/api/v1/users/me"
 		request.json = [
+			name: "New Name",
+			email: "changed@emailaddress.com",
+		]
+		request.apiUser = ethUser
+
+		when: "updated profile is submitted"
+		withFilters(action: "update") {
+			controller.update()
+		}
+
+		then: "values must be updated"
+		1 * sessionService.getUserishFromToken("token") >> request.apiUser
+		response.json.name == "New Name"
+		response.json.email == "changed@emailaddress.com"
+		response.json.username == "0x0000000000000000000000000000000000000000"
+	}
+
+	void "update user profile who registered with username and password"() {
+		controller.userService = new UserService()
+		request.addHeader("Authorization", "Bearer token")
+		request.method = "PUT"
+		request.requestURI = "/api/v1/users/me"
+		request.json = [
 			name: "Changed Name",
+			email: "changed@emailaddress.com",
 		]
 		request.apiUser = me
 
-		when: "new settings are submitted"
+		when: "updated profile is submitted"
 		withFilters(action: "update") {
 			controller.update()
 		}
@@ -107,9 +142,11 @@ class UserApiControllerSpec extends ControllerSpecification {
 		1 * sessionService.getUserishFromToken("token") >> request.apiUser
 		User.get(1).name == "Changed Name"
 		response.json.name == "Changed Name"
+		response.json.email == "changed@emailaddress.com"
+		response.json.username == "changed@emailaddress.com"
 	}
 
-	void "sensitive fields cannot be changed"() {
+	void "private user fields cannot be changed via update profile"() {
 		setup:
 		controller.userService = new UserService()
 		request.addHeader("Authorization", "Bearer token")
@@ -147,7 +184,7 @@ class UserApiControllerSpec extends ControllerSpecification {
 			controller.changePassword(cmd)
 		}
 		then: "password must be changed"
-		cmd.passwordEncoder.isPasswordValid(User.get(1).password, "barbar123!")
+		cmd.passwordEncoder.isPasswordValid(User.get(me.id).password, "barbar123!")
 		then:
 		response.status == 204
 	}
@@ -269,7 +306,7 @@ class UserApiControllerSpec extends ControllerSpecification {
 			controller.changePassword(cmd)
 		}
 		then: "the old password must remain valid"
-		cmd.passwordEncoder.isPasswordValid(User.get(1).password, "foobar123!")
+		cmd.passwordEncoder.isPasswordValid(User.get(me.id).password, "foobar123!")
 		then:
 		def e = thrown(ApiException)
 		e.message == "Password not changed!"
@@ -291,7 +328,7 @@ class UserApiControllerSpec extends ControllerSpecification {
 			controller.changePassword(cmd)
 		}
 		then: "the old password must remain valid"
-		cmd.passwordEncoder.isPasswordValid(User.get(1).password, "foobar123!")
+		cmd.passwordEncoder.isPasswordValid(User.get(me.id).password, "foobar123!")
 		then:
 		def e = thrown(ApiException)
 		e.message == "Password not changed!"
@@ -313,7 +350,7 @@ class UserApiControllerSpec extends ControllerSpecification {
 			controller.changePassword(cmd)
 		}
 		then: "the old password must remain valid"
-		cmd.passwordEncoder.isPasswordValid(User.get(1).password, "foobar123!")
+		cmd.passwordEncoder.isPasswordValid(User.get(me.id).password, "foobar123!")
 		then:
 		def e = thrown(ApiException)
 		e.message == "Password not changed!"

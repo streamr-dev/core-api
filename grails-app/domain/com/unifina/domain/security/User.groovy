@@ -1,6 +1,7 @@
 package com.unifina.domain.security
 
 import com.unifina.security.Userish
+import com.unifina.utils.EmailValidator
 import com.unifina.utils.EthereumAddressValidator
 import com.unifina.utils.UsernameValidator
 import grails.persistence.Entity
@@ -12,6 +13,7 @@ class User implements Userish {
 
 	Long id
 	String username
+	String email
 	String password
 	boolean enabled = true
 	boolean accountExpired
@@ -35,6 +37,7 @@ class User implements Userish {
 
 	static constraints = {
 		username blank: false, unique: true, validator: UsernameValidator.validate
+		email nullable: true, validator: EmailValidator.validateNullEmail
 		password blank: false
 		name blank: false
 		dateCreated nullable: true
@@ -64,6 +67,7 @@ class User implements Userish {
 		return [
 			name : name,
 			username : username,
+			email : email,
 			imageUrlSmall : imageUrlSmall,
 			imageUrlLarge : imageUrlLarge,
 			lastLogin: lastLogin
@@ -116,5 +120,14 @@ class User implements Userish {
 		}
 		// 'username' is the email address of the user. For privacy concerns, the publisher id is the hash of the email address.
 		return DigestUtils.sha256Hex(username)
+	}
+
+	String getEmail() {
+		if (EmailValidator.validate(email)) {
+			return email
+		} else if (EmailValidator.validate(username)) {
+			return username
+		}
+		return null
 	}
 }

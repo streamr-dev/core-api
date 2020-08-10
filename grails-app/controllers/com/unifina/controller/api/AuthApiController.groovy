@@ -41,12 +41,12 @@ class AuthApiController {
 			return render([success: false, error: "Failed to save invite: ${invite.errors}"] as JSON)
 		}
 
-		log.info("Signed up $invite.username")
+		log.info("Signed up $invite.email")
 
 		try {
 			mailService.sendMail {
 				from grailsApplication.config.unifina.email.sender
-				to invite.username
+				to invite.email
 				subject grailsApplication.config.unifina.email.registerLink.subject
 				html g.render(template: "/emails/email_register_link", model: [user: invite])
 			}
@@ -67,7 +67,7 @@ class AuthApiController {
 			return render([success: false, error: "Invitation code not valid"] as JSON)
 		}
 
-		log.info("Activated invite for ${invite.username}, ${invite.code}")
+		log.info("Activated invite for ${invite.email}, ${invite.code}")
 
 		def user
 
@@ -77,13 +77,17 @@ class AuthApiController {
 			return render([success: false, error: userService.beautifyErrors(cmd.errors.getAllErrors())] as JSON)
 		}
 
-		if (User.findByUsername(invite.username)) {
+		if (User.findByUsername(invite.email)) {
 			response.status = 400
 			return render([success: false, error: "User already exists"] as JSON)
 		}
 
 		try {
-			user = userService.createUser([:] << cmd.properties << [username: invite.username])
+			def userProperties = [:] << cmd.properties << [
+				username: invite.email,
+				email: invite.email,
+			]
+			user = userService.createUser(userProperties)
 		} catch (UserCreationFailedException e) {
 			response.status = 500
 			return render([success: false, error: e.getMessage()] as JSON)
@@ -97,11 +101,13 @@ class AuthApiController {
 		}
 
 		try {
-			mailService.sendMail {
-				from grailsApplication.config.unifina.email.sender
-				to user.username
-				subject grailsApplication.config.unifina.email.welcome.subject
-				html g.render(template: "/emails/email_welcome", model: [user: user])
+			if (EmailValidator.validate(user.email)) {
+				mailService.sendMail {
+					from grailsApplication.config.unifina.email.sender
+					to user.email
+					subject grailsApplication.config.unifina.email.welcome.subject
+					html g.render(template: "/emails/email_welcome", model: [user: user])
+				}
 			}
 		} catch (Exception error) {
 			log.warn("Sending email failed, userId: ${user.id}, error: ${error.getMessage()}")
@@ -119,20 +125,25 @@ class AuthApiController {
 			return render([success: false, error: userService.beautifyErrors(cmd.errors.getAllErrors())] as JSON)
 		}
 
-		def user = User.findWhere(username: cmd.username)
+		User user = User.findWhere(username: cmd.username)
 		if (!user) {
 			return render([emailSent: true] as JSON) // don't reveal users
 		}
 
-		def registrationCode = new RegistrationCode(username: user.username)
+		def registrationCode = new RegistrationCode(email: user.username)
 		registrationCode.save(flush: false)
 
+		Boolean emailSent = false
 		try {
-			mailService.sendMail {
-				from grailsApplication.config.unifina.email.sender
-				to user.username
-				subject grailsApplication.config.unifina.email.forgotPassword.subject
-				html g.render(template: "/emails/email_forgot_password", model: [token: registrationCode.token])
+			String email = user.email
+			if (email) {
+				mailService.sendMail {
+					from grailsApplication.config.unifina.email.sender
+					to email
+					subject grailsApplication.config.unifina.email.forgotPassword.subject
+					html g.render(template: "/emails/email_forgot_password", model: [token: registrationCode.token])
+				}
+				emailSent = true
 			}
 		} catch (Exception error) {
 			log.warn("Sending email failed, userId: ${user.id}, error: ${error.getMessage()}")
@@ -140,7 +151,7 @@ class AuthApiController {
 			return render([success: false, error: "Sending email failed"] as JSON)
 		}
 
-		return render([emailSent: true] as JSON)
+		return render([emailSent: emailSent] as JSON)
 	}
 
 	@StreamrApi(authenticationLevel = AuthLevel.NONE)
@@ -155,11 +166,11 @@ class AuthApiController {
 			return render([success: false, error: message(code: 'spring.security.ui.resetPassword.badCode')] as JSON)
 		}
 
-		def user = User.findByUsername(registrationCode.username)
+		def user = User.findByUsername(registrationCode.email)
 		if (!user)
-			throw new RuntimeException("User belonging to the registration code was not found: $registrationCode.username")
+			throw new RuntimeException("User belonging to the registration code was not found: $registrationCode.email")
 
-		command.username = registrationCode.username
+		command.username = registrationCode.email
 		command.validate()
 
 		if (command.hasErrors()) {

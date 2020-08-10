@@ -151,7 +151,7 @@ class PermissionServiceIntegrationSpec extends IntegrationSpec {
 		secretItem.save(failOnError: true, validate: true, flush: true)
 
 		// Sign-up invitations can also receive Permissions; they will later be converted to User permissions
-		invite = new SignupInvite(username: "him-permission-service-integration-spec@streamr.com", code: "sikritCode", sent: true, used: false).save(validate: false, flush: true)
+		invite = new SignupInvite(email: "him-permission-service-integration-spec@streamr.com", code: "sikritCode", sent: true, used: false).save(validate: false, flush: true)
 	}
 
 	void cleanup() {
