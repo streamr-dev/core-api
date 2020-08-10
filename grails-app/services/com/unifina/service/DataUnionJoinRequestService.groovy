@@ -9,6 +9,7 @@ import com.unifina.domain.marketplace.Product
 import com.unifina.domain.security.IntegrationKey
 import com.unifina.domain.security.Permission
 import com.unifina.domain.security.SecUser
+import com.unifina.utils.ThreadUtil
 import groovy.json.JsonSlurper
 import org.apache.log4j.Logger
 
@@ -47,6 +48,8 @@ class DataUnionJoinRequestService {
 			}
 		}
 		sendMessage(c, "join")
+		ThreadUtil.sleep(1000)
+
 		log.debug("exiting onApproveJoinRequest")
 	}
 

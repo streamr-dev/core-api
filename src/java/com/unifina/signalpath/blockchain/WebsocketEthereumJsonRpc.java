@@ -1,12 +1,14 @@
 package com.unifina.signalpath.blockchain;
 
+import com.unifina.utils.ThreadUtil;
+import org.apache.log4j.Logger;
+import org.json.JSONObject;
+
+import javax.websocket.*;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.List;
-import javax.websocket.*;
-import org.apache.log4j.Logger;
-import org.json.JSONObject;
 
 public class WebsocketEthereumJsonRpc extends EthereumJsonRpc {
 	private static final Logger log = Logger.getLogger(WebsocketEthereumJsonRpc.class);
@@ -105,15 +107,7 @@ public class WebsocketEthereumJsonRpc extends EthereumJsonRpc {
 			} catch (IOException | DeploymentException | RuntimeException e) {
 				log.error(e);
 				log.info("Waiting " + attemptReconnectionWaittimeMs + "ms");
-				try {
-					Thread.sleep(attemptReconnectionWaittimeMs);
-				}
-				catch(InterruptedException ie){
-					log.error("Thread was interrupted while sleeping.");
-					//why is this thread interrupted in E&E when sleeping?
-					log.error(ie.getMessage());
-					Thread.currentThread().interrupt();
-				}
+				ThreadUtil.sleep(attemptReconnectionWaittimeMs);
 				continue;
 			}
 			return true;
