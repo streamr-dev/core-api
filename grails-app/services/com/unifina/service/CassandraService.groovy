@@ -102,7 +102,7 @@ class CassandraService implements DisposableBean {
 		}
 		Row row = resultSet.one()
 		if (row) {
-			return StreamMessage.fromJson(new String(row.getBytes("payload").array(), StandardCharsets.UTF_8))
+			return StreamMessage.deserialize(new String(row.getBytes("payload").array(), StandardCharsets.UTF_8))
 		} else {
 			return null
 		}
