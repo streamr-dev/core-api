@@ -347,8 +347,6 @@
           <root url="jar://$MAVEN_REPOSITORY$/com/squareup/okio/okio/2.2.0/okio-2.2.0.jar!/" />
           <root url="jar://$MAVEN_REPOSITORY$/com/squareup/moshi/moshi-adapters/1.6.0/moshi-adapters-1.6.0.jar!/" />
           <root url="jar://$MAVEN_REPOSITORY$/com/squareup/moshi/moshi/1.6.0/moshi-1.6.0.jar!/" />
-          <root url="jar://$MAVEN_REPOSITORY$/org/apache/logging/log4j/log4j-api/2.7/log4j-api-2.7.jar!/" />
-          <root url="jar://$MAVEN_REPOSITORY$/org/apache/logging/log4j/log4j-core/2.7/log4j-core-2.7.jar!/" />
           <root url="jar://$MAVEN_REPOSITORY$/org/jetbrains/kotlin/kotlin-stdlib-common/1.2.60/kotlin-stdlib-common-1.2.60.jar!/" />
           <root url="jar://$MAVEN_REPOSITORY$/org/jetbrains/kotlin/kotlin-stdlib/1.2.60/kotlin-stdlib-1.2.60.jar!/" />
           <root url="jar://$MAVEN_REPOSITORY$/io/reactivex/rxjava2/rxjava/2.2.2/rxjava-2.2.2.jar!/" />
@@ -402,7 +400,6 @@
           <root url="jar://$MAVEN_REPOSITORY$/org/springframework/security/spring-security-web/3.2.9.RELEASE/spring-security-web-3.2.9.RELEASE.jar!/" />
           <root url="jar://$MAVEN_REPOSITORY$/org/springframework/security/spring-security-core/3.2.9.RELEASE/spring-security-core-3.2.9.RELEASE.jar!/" />
           <root url="jar://$MAVEN_REPOSITORY$/org/java-websocket/Java-WebSocket/1.4.1/Java-WebSocket-1.4.1.jar!/" />
-          <root url="jar://$MAVEN_REPOSITORY$/com/streamr/client/1.4.0/client-1.4.0.jar!/" />
           <root url="jar://$MAVEN_REPOSITORY$/joda-time/joda-time/2.10.6/joda-time-2.10.6.jar!/" />
           <root url="jar://$MAVEN_REPOSITORY$/org/reactivestreams/reactive-streams/1.0.2/reactive-streams-1.0.2.jar!/" />
           <root url="jar://$MAVEN_REPOSITORY$/io/netty/netty-buffer/4.0.37.Final/netty-buffer-4.0.37.Final.jar!/" />
@@ -428,6 +425,7 @@
           <root url="jar://$MAVEN_REPOSITORY$/org/grails/grails-datastore-gorm-plugin-support/3.1.5.RELEASE/grails-datastore-gorm-plugin-support-3.1.5.RELEASE.jar!/" />
           <root url="jar://$MAVEN_REPOSITORY$/org/jboss/logging/jboss-logging-annotations/1.2.0.Beta1/jboss-logging-annotations-1.2.0.Beta1.jar!/" />
           <root url="jar://$MAVEN_REPOSITORY$/org/hibernate/common/hibernate-commons-annotations/4.0.4.Final/hibernate-commons-annotations-4.0.4.Final.jar!/" />
+          <root url="jar://$MAVEN_REPOSITORY$/com/streamr/client/2.0.0/client-2.0.0.jar!/" />
         </CLASSES>
         <JAVADOC />
         <SOURCES>

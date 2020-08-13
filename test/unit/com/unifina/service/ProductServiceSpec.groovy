@@ -2,7 +2,6 @@ package com.unifina.service
 
 import com.google.common.collect.Lists
 import com.streamr.client.protocol.message_layer.StreamMessage
-import com.streamr.client.protocol.message_layer.StreamMessageV31
 import com.unifina.api.*
 import com.unifina.domain.data.Stream
 import com.unifina.domain.marketplace.*
@@ -12,6 +11,7 @@ import grails.test.mixin.Mock
 import grails.test.mixin.TestFor
 import spock.lang.Specification
 import spock.lang.Unroll
+import com.unifina.utils.TestUtils
 
 @TestFor(ProductService)
 @Mock([Category, Product, FreeSubscription, PaidSubscription])
@@ -105,29 +105,24 @@ class ProductServiceSpec extends Specification {
 		return new Date(System.currentTimeMillis() - minusMilliSeconds)
 	}
 
-	StreamMessage buildMsg(String streamId, int streamPartition, Date timestamp, Map content) {
-		return new StreamMessageV31(streamId, streamPartition, timestamp.getTime(), 0, "", "", null, null,
-			StreamMessage.ContentType.CONTENT_TYPE_JSON, StreamMessage.EncryptionType.NONE, content, StreamMessage.SignatureType.SIGNATURE_TYPE_NONE, null)
-	}
-
 	void "stale products"() {
 		setup:
 		// Fresh streams and products
 		Stream s1 = newStream("s1","Air Stream") // This stream has a message four hours ago
 		Product a = newProduct("a", "Air quality", s1)
-		StreamMessage m1 = buildMsg("s1", 1, newDate(4*60*60*1000), new HashMap())
+		StreamMessage m1 = TestUtils.buildMsg("s1", 1, newDate(4*60*60*1000), new HashMap())
 
 		Stream s2 = newStream("s2", "Wind Stream") // This stream has a message two minutes ago
 		Product b = newProduct("b", "Wind speed", s2)
-		StreamMessage m2 = buildMsg("s2", 1, newDate(2*60*1000), new HashMap())
+		StreamMessage m2 = TestUtils.buildMsg("s2", 1, newDate(2*60*1000), new HashMap())
 
 		Stream s4 = newStream("s4", "Hacked Stream") // This stream has a message one day ago
 		Product d = newProduct("d", "Hacked computers", s4)
-		StreamMessage m4 = buildMsg("s4", 1, newDate(24*60*60*1000), new HashMap())
+		StreamMessage m4 = TestUtils.buildMsg("s4", 1, newDate(24*60*60*1000), new HashMap())
 
 		Stream s5 = newStream("s5", "Time Stream") // This stream has a message two hours ago
 		Product e = newProduct("e", "Time machine", s5)
-		StreamMessage m5 = buildMsg("s5", 1, newDate(2*60*60*1000), new HashMap())
+		StreamMessage m5 = TestUtils.buildMsg("s5", 1, newDate(2*60*60*1000), new HashMap())
 		// Not stale product. inactivityThresholdHours 0.
 		Stream s12 = newStream("s12", "Never stale stream") // No messages
 		s12.inactivityThresholdHours = 0
@@ -137,7 +132,7 @@ class ProductServiceSpec extends Specification {
 		// Stale product 1
 		Stream s3 = newStream("s3", "Storm Stream") // This stream has a message three days ago
 		Product c = newProduct("c", "Storm warning", s3)
-		StreamMessage m3 = buildMsg("s3", 1, newDate(3*24*60*60*1000), new HashMap())
+		StreamMessage m3 = TestUtils.buildMsg("s3", 1, newDate(3*24*60*60*1000), new HashMap())
 		ProductService.StaleProduct sp1 = new ProductService.StaleProduct(c)
 		ProductService.StreamWithLatestMessage sm1 = new ProductService.StreamWithLatestMessage(s3, m3)
 		sp1.streams.add(sm1)
@@ -145,9 +140,9 @@ class ProductServiceSpec extends Specification {
 
 		// Stale product 2
 		Stream s6 = newStream("s6", "Mainframe Stream") // This stream has a message two weeks ago
-		StreamMessage m6 = buildMsg("s6", 1, newDate(14*24*60*60*1000), new HashMap())
+		StreamMessage m6 = TestUtils.buildMsg("s6", 1, newDate(14*24*60*60*1000), new HashMap())
 		Stream s6b = newStream("s6b", "Mainframe B Stream") // This stream has a message one week ago
-		StreamMessage m6b = buildMsg("s6b", 1, newDate(7*24*60*60*1000), new HashMap())
+		StreamMessage m6b = TestUtils.buildMsg("s6b", 1, newDate(7*24*60*60*1000), new HashMap())
 		Product f = newProduct("f", "Mainframe connector", s6, s6b)
 		ProductService.StaleProduct sp2 = new ProductService.StaleProduct(f)
 		ProductService.StreamWithLatestMessage sm2 = new ProductService.StreamWithLatestMessage(s6, m6)
@@ -167,8 +162,8 @@ class ProductServiceSpec extends Specification {
 		Stream s8 = newStream("s8", "Stream a") // This stream has message six days ago
 		Stream s9 = newStream("s9", "Stream b") // This stream has message over five days ago
 		Product h = newProduct("h", "Product with two streams", s8, s9)
-		StreamMessage m8 = buildMsg("s8", 1, newDate(6*24*60*60*1000), new HashMap())
-		StreamMessage m9 = buildMsg("s9", 1, newDate(5*25*60*60*1000), new HashMap())
+		StreamMessage m8 = TestUtils.buildMsg("s8", 1, newDate(6*24*60*60*1000), new HashMap())
+		StreamMessage m9 = TestUtils.buildMsg("s9", 1, newDate(5*25*60*60*1000), new HashMap())
 		ProductService.StaleProduct sp4 = new ProductService.StaleProduct(h)
 		ProductService.StreamWithLatestMessage sm4 = new ProductService.StreamWithLatestMessage(s8, m8)
 		sp4.streams.add(sm4)
@@ -179,8 +174,8 @@ class ProductServiceSpec extends Specification {
 		Stream s10 = newStream("s10", "Stream X") // This stream has message two minutes ago
 		Stream s11 = newStream("s11", "Stream Y") // This stream has message five days ago
 		Product i = newProduct("i", "Product with two streams. other expired", s10, s11)
-		StreamMessage m10 = buildMsg("s10", 1, newDate(2*60*60*1000), new HashMap())
-		StreamMessage m11 = buildMsg("s11", 1, newDate(5*24*60*60*1000), new HashMap())
+		StreamMessage m10 = TestUtils.buildMsg("s10", 1, newDate(2*60*60*1000), new HashMap())
+		StreamMessage m11 = TestUtils.buildMsg("s11", 1, newDate(5*24*60*60*1000), new HashMap())
 		ProductService.StaleProduct sp5 = new ProductService.StaleProduct(i)
 		ProductService.StreamWithLatestMessage sm6 = new ProductService.StreamWithLatestMessage(s10, m10)
 		sp5.streams.add(sm6)

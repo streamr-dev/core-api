@@ -1,7 +1,7 @@
 package com.unifina.service
 
+
 import com.streamr.client.protocol.message_layer.StreamMessage
-import com.streamr.client.protocol.message_layer.StreamMessageV31
 import com.unifina.domain.ExampleType
 import com.unifina.domain.dashboard.Dashboard
 import com.unifina.domain.dashboard.DashboardItem
@@ -11,6 +11,7 @@ import com.unifina.domain.security.Key
 import com.unifina.domain.security.Permission
 import com.unifina.domain.security.SecUser
 import com.unifina.domain.signalpath.Canvas
+import com.unifina.utils.TestUtils
 import grails.test.mixin.Mock
 import grails.test.mixin.TestFor
 import org.codehaus.groovy.grails.commons.DefaultGrailsApplication
@@ -291,8 +292,7 @@ class StreamServiceSpec extends Specification {
 		Date now = newDate(2019, 1, 15, 11, 12, 06)
 		Date timestamp = newDate(2019, 1, 14, 11, 12, 06)
 		long expected = timestamp.getTime()
-		StreamMessage msg = new StreamMessageV31("s1", 0, timestamp.getTime(), 0L, "publisherId", "1", 0L, 0L,
-			StreamMessage.ContentType.CONTENT_TYPE_JSON, StreamMessage.EncryptionType.NONE, "", StreamMessage.SignatureType.SIGNATURE_TYPE_NONE, "")
+		StreamMessage msg = TestUtils.buildMsg("s1", 0, timestamp)
 
 		when:
 		StreamService.StreamStatus status = service.status(s, now)
@@ -326,8 +326,7 @@ class StreamServiceSpec extends Specification {
 
 		Date timestamp = newDate(2019, 1, 10, 12, 12, 06)
 		long expected = timestamp.getTime()
-		StreamMessage msg = new StreamMessageV31("s1", 0, timestamp.getTime(), 0L, "publisherId", "1", 0L, 0L,
-			StreamMessage.ContentType.CONTENT_TYPE_JSON, StreamMessage.EncryptionType.NONE, "", StreamMessage.SignatureType.SIGNATURE_TYPE_NONE, "")
+		StreamMessage msg = TestUtils.buildMsg("s1", 0, timestamp)
 		Date now = newDate(2019, 1, 15, 0, 0, 0)
 
 		when:
@@ -347,8 +346,7 @@ class StreamServiceSpec extends Specification {
 
 		Date timestamp = new Date()
 		long expected = timestamp.getTime()
-		StreamMessage msg = new StreamMessageV31("s1", 0, timestamp.getTime(), 0L, "publisherId", "1", 0L, 0L,
-			StreamMessage.ContentType.CONTENT_TYPE_JSON, StreamMessage.EncryptionType.NONE, "", StreamMessage.SignatureType.SIGNATURE_TYPE_NONE, "")
+		StreamMessage msg = TestUtils.buildMsg("s1", 0, timestamp)
 
 		when:
 		StreamService.StreamStatus status = service.status(s, new Date())
