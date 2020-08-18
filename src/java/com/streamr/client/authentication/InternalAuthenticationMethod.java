@@ -1,18 +1,15 @@
 package com.streamr.client.authentication;
 
-import com.google.gson.Gson;
-import com.unifina.domain.security.SecUser;
+import com.unifina.domain.security.User;
 import com.unifina.security.SessionToken;
 import com.unifina.service.EthereumIntegrationKeyService;
 import com.unifina.service.SessionService;
 
 import java.io.IOException;
-import java.nio.charset.Charset;
-import java.util.Date;
 
 public class InternalAuthenticationMethod extends EthereumAuthenticationMethod {
 	private final SessionService sessionService;
-	private final SecUser user;
+	private final User user;
 
 	public InternalAuthenticationMethod(String ethereumPrivateKey, EthereumIntegrationKeyService ethereumIntegrationKeyService, SessionService sessionService) {
 		super(ethereumPrivateKey);

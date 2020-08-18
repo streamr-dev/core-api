@@ -3,7 +3,7 @@ package com.unifina.controller.api
 import com.unifina.api.ApiException
 import com.unifina.api.node.NodeRequest
 import com.unifina.api.node.NodeRequestDispatcher
-import com.unifina.domain.security.SecUser
+import com.unifina.domain.security.User
 import com.unifina.domain.signalpath.Canvas
 import com.unifina.service.CanvasService
 import com.unifina.service.NodeService
@@ -16,14 +16,14 @@ import grails.test.mixin.TestFor
 import spock.lang.Specification
 
 @TestFor(NodeApiController)
-@Mock([Canvas, SecUser])
+@Mock([Canvas, User])
 class NodeApiControllerSpec extends Specification {
 
-	SecUser user1, user2
+	User user1, user2
 
 	def setup() {
-		user1 = new SecUser(username: "user1@streamr.com").save(failOnError: true, validate: false)
-		user2 = new SecUser(username: "user2@streamr.com").save(failOnError: true, validate: false)
+		user1 = new User(username: "user1@streamr.com").save(failOnError: true, validate: false)
+		user2 = new User(username: "user2@streamr.com").save(failOnError: true, validate: false)
 
 		controller.nodeService = Mock(NodeService)
 	}

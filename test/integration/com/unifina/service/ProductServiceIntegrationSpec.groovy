@@ -7,7 +7,7 @@ import com.unifina.domain.marketplace.FreeSubscription
 import com.unifina.domain.marketplace.Product
 import com.unifina.domain.marketplace.Subscription
 import com.unifina.domain.security.IntegrationKey
-import com.unifina.domain.security.SecUser
+import com.unifina.domain.security.User
 import com.unifina.domain.signalpath.Module
 import com.unifina.domain.signalpath.ModuleCategory
 import grails.test.spock.IntegrationSpec
@@ -20,8 +20,8 @@ class ProductServiceIntegrationSpec extends IntegrationSpec {
 	Product product
 	ModuleCategory mc
 	Module module
-	SecUser troll
-	SecUser user
+	User troll
+    User user
 	Product p1
 	Product p2
 	Subscription fs1
@@ -50,9 +50,9 @@ class ProductServiceIntegrationSpec extends IntegrationSpec {
 		[s1, s2, s3, s4].eachWithIndex { Stream s, int i -> s.id = "stream-id-${i+1}" }
 		[s1, s2, s3, s4]*.save(failOnError: true, validate: true)
 
-		troll = new SecUser(username: "sylvester", name: "sylvester stallone", password: "x", email: "s@s.com")
+		troll = new User(username: "sylvester", name: "sylvester stallone", password: "x", email: "s@s.com")
 		troll.save(failOnError: true, validate: false)
-		user = new SecUser(username: "arnold", name: "arnold schwarzenegger", password: "x", email: "a@schwarzenegger.com")
+		user = new User(username: "arnold", name: "arnold schwarzenegger", password: "x", email: "a@schwarzenegger.com")
 		user.save(failOnError: true, validate: false)
 		p1 = new Product(
 			name: "troll product",

@@ -6,7 +6,7 @@ import com.unifina.api.DataUnionSecretCommand
 import com.unifina.api.NotFoundException
 import com.unifina.api.NotPermittedException
 import com.unifina.domain.dataunion.DataUnionSecret
-import com.unifina.domain.security.SecUser
+import com.unifina.domain.security.User
 import com.unifina.security.StreamrApi
 import com.unifina.service.DataUnionSecretService
 
@@ -18,8 +18,8 @@ class DataUnionSecretApiController {
 	DataUnionSecretService dataUnionSecretService
 	EthereumService ethereumService
 
-	private SecUser loggedInUser() {
-		return (SecUser) request.apiUser
+	private User loggedInUser() {
+		return (User) request.apiUser
 	}
 	static boolean isValidID(String value) {
 		if (value == null) {
@@ -31,7 +31,7 @@ class DataUnionSecretApiController {
 		return value ==~ /^[a-zA-Z0-9-_]{44}$/
 	}
 
-	void checkAdminAccessControl(SecUser user, String contractAddress) {
+	void checkAdminAccessControl(User user, String contractAddress) {
 		if (!EthereumAddressValidator.validate(contractAddress)) {
 			throw new BadRequestException("Data Union address is not a valid Ethereum address")
 		}

@@ -8,7 +8,7 @@ import com.unifina.domain.dashboard.Dashboard
 import com.unifina.domain.dashboard.DashboardItem
 import com.unifina.domain.data.Stream
 import com.unifina.domain.security.Permission
-import com.unifina.domain.security.SecUser
+import com.unifina.domain.security.User
 import com.unifina.domain.signalpath.Canvas
 import com.unifina.exceptions.CanvasUnreachableException
 import com.unifina.exceptions.InvalidStreamConfigException
@@ -44,13 +44,13 @@ class CanvasService {
 	LinkGenerator grailsLinkGenerator
 
 	@CompileStatic
-	Map reconstruct(Canvas canvas, SecUser user) {
+	Map reconstruct(Canvas canvas, User user) {
 		Map signalPathMap = canvas.toSignalPathConfig()
 		return reconstructFrom(signalPathMap, user).map
 	}
 
 	@CompileStatic
-	Canvas createNew(SaveCanvasCommand command, SecUser user) {
+	Canvas createNew(SaveCanvasCommand command, User user) {
 		Canvas canvas = new Canvas()
 		updateExisting(canvas, command, user, true)
 		return canvas
@@ -65,7 +65,7 @@ class CanvasService {
 	}
 
 	@CompileStatic
-	void updateExisting(Canvas canvas, SaveCanvasCommand command, SecUser user, boolean resetUi = false) {
+	void updateExisting(Canvas canvas, SaveCanvasCommand command, User user, boolean resetUi = false) {
 		if (command.name == null || command.name.trim() == "") {
 			command.name = Canvas.DEFAULT_NAME
 		}
@@ -122,7 +122,7 @@ class CanvasService {
 	 * It can be deleted after a delay to allow resource consumers to finish up.
      */
 	@Transactional
-	void deleteCanvas(Canvas canvas, SecUser user, boolean delayed = false) {
+	void deleteCanvas(Canvas canvas, User user, boolean delayed = false) {
 		if (delayed) {
 			taskService.createTask(CanvasDeleteTask, CanvasDeleteTask.getConfig(canvas), "delete-canvas", user, 30 * 60 * 1000)
 		} else if (canvas.state == Canvas.State.RUNNING) {
@@ -136,7 +136,7 @@ class CanvasService {
 		}
 	}
 
-	void start(Canvas canvas, boolean clearSerialization, SecUser asUser) {
+	void start(Canvas canvas, boolean clearSerialization, User asUser) {
 		if (canvas.state == Canvas.State.RUNNING) {
 			throw new InvalidStateException("Cannot run canvas $canvas.id because it's already running. Stop it first.")
 		}
@@ -158,12 +158,12 @@ class CanvasService {
 		}
 	}
 
-	void startRemote(Canvas canvas, SecUser user, boolean forceReset=false, boolean resetOnError=true) {
+	void startRemote(Canvas canvas, User user, boolean forceReset=false, boolean resetOnError=true) {
 		taskService.createTask(CanvasStartTask, CanvasStartTask.getConfig(canvas, forceReset, resetOnError), "canvas-start", user)
 	}
 
 	@Transactional(noRollbackFor=[CanvasUnreachableException])
-	void stop(Canvas canvas, SecUser user) {
+	void stop(Canvas canvas, User user) {
 		if (canvas.state != Canvas.State.RUNNING) {
 			throw new InvalidStateException("Canvas $canvas.id not currently running.")
 		}
@@ -184,7 +184,7 @@ class CanvasService {
 	 * Throws an exception if authorization fails.
      */
 	@CompileStatic
-	Canvas authorizedGetById(String id, SecUser user, Permission.Operation op) {
+	Canvas authorizedGetById(String id, User user, Permission.Operation op) {
 		def canvas = Canvas.get(id)
 		if (!canvas) {
 			throw new NotFoundException("Canvas", id)
@@ -207,7 +207,7 @@ class CanvasService {
 	 * Deprecated: runtime permission checking now much more comprehensive in SignalPathService
 	 */
 	@CompileStatic
-	Map authorizedGetModuleOnCanvas(String canvasId, Integer moduleId, String dashboardId, SecUser user, Permission.Operation op) {
+	Map authorizedGetModuleOnCanvas(String canvasId, Integer moduleId, String dashboardId, User user, Permission.Operation op) {
 		Canvas canvas = Canvas.get(canvasId)
 
 		if (!canvas) {
@@ -239,7 +239,7 @@ class CanvasService {
 	}
 
 	@CompileStatic
-	def addExampleCanvases(SecUser user, List<Canvas> examples) {
+	def addExampleCanvases(User user, List<Canvas> examples) {
 		for (final Canvas example : examples) {
 			switch (example.exampleType) {
 				// Create a copy of the example canvas for the user and grant read/write/share permissions.
@@ -300,7 +300,7 @@ class CanvasService {
 		}
 	}
 
-	private boolean hasModulePermissionViaDashboard(Canvas canvas, Integer moduleId, String dashboardId, SecUser user, Permission.Operation op) {
+	private boolean hasModulePermissionViaDashboard(Canvas canvas, Integer moduleId, String dashboardId, User user, Permission.Operation op) {
 		if (!dashboardId) {
 			return false
 		}
@@ -313,7 +313,7 @@ class CanvasService {
 		} != null
 	}
 
-	private SignalPathService.ReconstructedResult constructNewSignalPathMap(Canvas canvas, SaveCanvasCommand command, SecUser user, boolean resetUi) {
+	private SignalPathService.ReconstructedResult constructNewSignalPathMap(Canvas canvas, SaveCanvasCommand command, User user, boolean resetUi) {
 		Map inputSignalPathMap = canvas.toSignalPathConfig()
 
 		inputSignalPathMap.name = command.name
@@ -330,7 +330,7 @@ class CanvasService {
 	/**
 	 * Rebuild JSON to check it is ok and up-to-date
 	 */
-	private SignalPathService.ReconstructedResult reconstructFrom(Map signalPathMap, SecUser user) {
+	private SignalPathService.ReconstructedResult reconstructFrom(Map signalPathMap, User user) {
 		Globals globals = new Globals(signalPathMap.settings ?: [:], user)
 		return signalPathService.reconstruct(signalPathMap, globals)
 	}

@@ -1,7 +1,7 @@
 package com.unifina.signalpath.utils
 
 import com.unifina.UiChannelMockingSpecification
-import com.unifina.domain.security.SecUser
+import com.unifina.domain.security.User
 import com.unifina.signalpath.SignalPath
 import com.unifina.utils.testutils.ModuleTestHelper
 import grails.test.mixin.Mock
@@ -9,13 +9,13 @@ import grails.test.mixin.TestMixin
 import grails.test.mixin.support.GrailsUnitTestMixin
 
 @TestMixin(GrailsUnitTestMixin)
-@Mock([SecUser])
+@Mock([User])
 class MapAsTableSpec extends UiChannelMockingSpecification {
 	MapAsTable module
 
 	def setup() {
 		mockServicesForUiChannels()
-		SecUser user = new SecUser(username: 'user').save(failOnError: true, validate: false)
+		User user = new User(username: 'user').save(failOnError: true, validate: false)
 		module = setupModule(new MapAsTable(), [
 			uiChannel: [id: "table"],
 		], new SignalPath(true), mockGlobals([:], user))

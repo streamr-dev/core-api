@@ -2,7 +2,7 @@ package com.unifina.signalpath.streams;
 
 import com.unifina.api.ValidationException;
 import com.unifina.domain.data.Stream;
-import com.unifina.domain.security.SecUser;
+import com.unifina.domain.security.User;
 import com.unifina.service.StreamService;
 import com.unifina.signalpath.*;
 import grails.util.Holders;
@@ -42,7 +42,7 @@ public class CreateStream extends AbstractSignalPathModule {
 		}
 
 		try {
-			Stream s = streamService.createStream(buildParams(), SecUser.loadViaJava(getGlobals().getUserId()));
+			Stream s = streamService.createStream(buildParams(), User.loadViaJava(getGlobals().getUserId()));
 			sendOutputs(true, s.getId());
 			cachedStreamIdsByName.put(nameInput.getValue(), s.getId());
 		} catch (ValidationException ex) {

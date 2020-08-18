@@ -1,6 +1,7 @@
 package com.unifina.domain.dataunion
 
-import com.unifina.domain.security.SecUser
+
+import com.unifina.domain.security.User
 import grails.test.mixin.TestFor
 import spock.lang.Specification
 
@@ -8,10 +9,10 @@ import spock.lang.Specification
 @TestFor(DataUnionJoinRequest)
 class DataUnionJoinRequestSpec extends Specification {
 	DataUnionJoinRequest req
-	SecUser me
+    User me
 
     def setup() {
-		me = new SecUser(
+		me = new User(
 			id: "1",
 			username: "email@address.com",
 			password: "123",

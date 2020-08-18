@@ -7,7 +7,7 @@ import java.lang.annotation.Target;
 
 /**
  * API methods should be use the @StreamrApi annotation and be mapped to /api/* via UnifinaCorePluginUrlMappings.
- * This will allow the UnifinaCoreApiFilters to check user credentials. The authenticated SecUser can be referenced
+ * This will allow the UnifinaCoreApiFilters to check user credentials. The authenticated User can be referenced
  * by request.apiUser, or the authenticated Key by request.apiKey.
  */
 @Retention(RetentionPolicy.RUNTIME)

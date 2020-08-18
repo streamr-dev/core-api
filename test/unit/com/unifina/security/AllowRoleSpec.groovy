@@ -1,12 +1,13 @@
 package com.unifina.security
 
-import com.unifina.domain.security.SecRole
-import com.unifina.domain.security.SecUser
-import com.unifina.domain.security.SecUserSecRole
+
+import com.unifina.domain.security.Role
+import com.unifina.domain.security.User
+import com.unifina.domain.security.UserRole
 import grails.test.mixin.Mock
 import spock.lang.Specification
 
-@Mock(SecUserSecRole)
+@Mock(UserRole)
 class AllowRoleSpec extends Specification {
 
 	void "hasUserRole(null) is true when this == NO_ROLE_REQUIRED"() {
@@ -16,7 +17,7 @@ class AllowRoleSpec extends Specification {
 
 	void "hasUserRole(user w/o roles) is true when this == NO_ROLE_REQUIRED"() {
 		expect:
-		AllowRole.NO_ROLE_REQUIRED.hasUserRole(new SecUser())
+		AllowRole.NO_ROLE_REQUIRED.hasUserRole(new User())
 	}
 
 	void "hasUserRole(null) is false when this == DEVOPS"() {
@@ -27,17 +28,17 @@ class AllowRoleSpec extends Specification {
 
 	void "hasUserRole(user w/o roles) is false when this == DEVOPS"() {
 		expect:
-		!AllowRole.DEVOPS.hasUserRole(new SecUser())
+		!AllowRole.DEVOPS.hasUserRole(new User())
 	}
 
 	void "hasUserRole(user with DEVOPS role) is true when this == DEVOPS"() {
-		SecUser user = new SecUser()
+		User user = new User()
 		user.save(failOnError: true, validate: false)
 
-		SecRole secRole = new SecRole(authority: "ROLE_DEV_OPS")
+		Role secRole = new Role(authority: "ROLE_DEV_OPS")
 		secRole.save(failOnError: true)
 
-		new SecUserSecRole(secUser: user, secRole: secRole).save(failOnError: true)
+		new UserRole(user: user, role: secRole).save(failOnError: true)
 
 		expect:
 		AllowRole.DEVOPS.hasUserRole(user)
@@ -54,13 +55,13 @@ class AllowRoleSpec extends Specification {
 	}
 
 	void "hasUserRole(user with ADMIN role) is true when this == ADMIN"() {
-		SecUser user = new SecUser()
+		User user = new User()
 		user.save(failOnError: true, validate: false)
 
-		SecRole secRole = new SecRole(authority: "ROLE_ADMIN")
+        Role secRole = new Role(authority: "ROLE_ADMIN")
 		secRole.save(failOnError: true)
 
-		new SecUserSecRole(secUser: user, secRole: secRole).save(failOnError: true)
+		new UserRole(user: user, role: secRole).save(failOnError: true)
 
 		expect:
 		AllowRole.ADMIN.hasUserRole(user)

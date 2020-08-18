@@ -2,7 +2,7 @@ package com.unifina.domain.marketplace
 
 import com.unifina.domain.data.Stream
 import com.unifina.domain.security.Permission
-import com.unifina.domain.security.SecUser
+import com.unifina.domain.security.User
 import com.unifina.utils.HexIdGenerator
 import grails.compiler.GrailsCompileStatic
 import grails.persistence.Entity
@@ -28,7 +28,7 @@ class Product {
 	Date dateCreated
 	Date lastUpdated
 	Integer score = 0 // set manually; used as default ordering for lists of Products (descending)
-	SecUser owner // set to product creator when product is created.
+	User owner // set to product creator when product is created.
 
 	// Product's contact details.
 	Contact contact = new Contact()

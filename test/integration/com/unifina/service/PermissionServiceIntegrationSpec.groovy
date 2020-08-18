@@ -5,8 +5,8 @@ import com.unifina.domain.dashboard.DashboardItem
 import com.unifina.domain.data.Stream
 import com.unifina.domain.security.Key
 import com.unifina.domain.security.Permission
-import com.unifina.domain.security.SecUser
 import com.unifina.domain.security.SignupInvite
+import com.unifina.domain.security.User
 import com.unifina.domain.signalpath.Canvas
 import com.unifina.utils.Webcomponent
 import grails.test.spock.IntegrationSpec
@@ -25,7 +25,7 @@ class PermissionServiceIntegrationSpec extends IntegrationSpec {
 
 	PermissionService service
 
-	SecUser me, anotherUser, stranger, someone
+	User me, anotherUser, stranger, someone
 	Key myKey, anotherUserKey, anonymousKey
 
 	Dashboard dashAllowed, dashRestricted, dashOwned, dashPublic
@@ -52,31 +52,31 @@ class PermissionServiceIntegrationSpec extends IntegrationSpec {
 
 	void setup() {
 		service = Holders.getApplicationContext().getBean(PermissionService)
-		SecUser.findByUsername("me-permission-service-integration-spec@streamr.com")?.delete(flush: true)
-		SecUser.findByUsername("him-permission-service-integration-spec@streamr.com")?.delete(flush: true)
-		SecUser.findByUsername("stranger-permission-service-integration-spec@streamr.com")?.delete(flush: true)
-		SecUser.findByUsername("someone-service-integration-spec@streamr.com")?.delete(flush: true)
+		User.findByUsername("me-permission-service-integration-spec@streamr.com")?.delete(flush: true)
+		User.findByUsername("him-permission-service-integration-spec@streamr.com")?.delete(flush: true)
+		User.findByUsername("stranger-permission-service-integration-spec@streamr.com")?.delete(flush: true)
+		User.findByUsername("someone-service-integration-spec@streamr.com")?.delete(flush: true)
 
 		// Users
-		me = new SecUser(
+		me = new User(
 			username: "me-permission-service-integration-spec@streamr.com",
 			name: "me",
 			password: "foo",
 		).save(failOnError: true)
 
-		anotherUser = new SecUser(
+		anotherUser = new User(
 			username: "him-permission-service-integration-spec@streamr.com",
 			name: "him",
 			password: "bar",
 		).save(failOnError: true)
 
-		stranger = new SecUser(
+		stranger = new User(
 			username: "stranger-permission-service-integration-spec@streamr.com",
 			name: "stranger",
 			password: "x",
 		).save(failOnError: true)
 
-		someone = new SecUser(
+		someone = new User(
 			username: "someone-service-integration-spec@streamr.com",
 			name: "someone",
 			password: "x",
@@ -298,9 +298,9 @@ class PermissionServiceIntegrationSpec extends IntegrationSpec {
 
 	void "getAll returns public resources on bad/null user"() {
 		expect:
-		service.get(Dashboard, new SecUser(), Permission.Operation.DASHBOARD_GET) == []
+		service.get(Dashboard, new User(), Permission.Operation.DASHBOARD_GET) == []
 		service.get(Dashboard, null, Permission.Operation.DASHBOARD_GET) == []
-		service.getAll(Dashboard, new SecUser(), Permission.Operation.DASHBOARD_GET) == [dashPublic]
+		service.getAll(Dashboard, new User(), Permission.Operation.DASHBOARD_GET) == [dashPublic]
 		service.getAll(Dashboard, null, Permission.Operation.DASHBOARD_GET) == [dashPublic]
 	}
 

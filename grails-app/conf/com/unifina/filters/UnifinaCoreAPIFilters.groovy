@@ -11,7 +11,7 @@ import java.lang.reflect.Method
 
 /**
  * API methods should use the @StreamrApi annotation and be mapped to /api/* via UnifinaCorePluginUrlMappings.
- * This will allow the UnifinaCoreApiFilters to check user credentials. The authenticated SecUser can be referenced
+ * This will allow the UnifinaCoreApiFilters to check user credentials. The authenticated User can be referenced
  * by request.apiUser.
  */
 class UnifinaCoreAPIFilters {

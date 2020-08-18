@@ -6,7 +6,7 @@ import com.streamr.client.protocol.message_layer.StreamMessage;
 import com.streamr.client.utils.Address;
 import com.unifina.data.StreamPartitioner;
 import com.unifina.domain.data.Stream;
-import com.unifina.domain.security.SecUser;
+import com.unifina.domain.security.User;
 import com.unifina.utils.IdGenerator;
 import java.io.Serializable;
 import java.util.Date;
@@ -23,7 +23,7 @@ public class MessageChainUtil implements Serializable {
 	private Long userId;
 	private String publisherId;
 	private String msgChainId;
-	private transient SecUser user;
+	private transient User user;
 
 	public MessageChainUtil(Long userId) {
 		this.userId = userId;
@@ -35,9 +35,9 @@ public class MessageChainUtil implements Serializable {
 		this.msgChainId = IdGenerator.getShort();
 	}
 
-	private SecUser getUser() {
+	private User getUser() {
 		if (user == null) {
-			user = SecUser.getViaJava(userId);
+			user = User.getViaJava(userId);
 		}
 		return user;
 	}

@@ -1,6 +1,7 @@
 package com.unifina.domain.marketplace
 
-import com.unifina.domain.security.SecUser
+
+import com.unifina.domain.security.User
 import grails.compiler.GrailsCompileStatic
 import grails.persistence.Entity
 
@@ -25,5 +26,5 @@ abstract class Subscription {
 
 	abstract Map toMapInherited()
 
-	abstract SecUser fetchUser()
+	abstract User fetchUser()
 }

@@ -6,7 +6,7 @@ import com.unifina.domain.Resource
 import com.unifina.domain.security.Key
 import com.unifina.domain.security.Permission
 import com.unifina.domain.security.Permission.Operation
-import com.unifina.domain.security.SecUser
+import com.unifina.domain.security.User
 import com.unifina.security.AllowRole
 import com.unifina.security.AuthLevel
 import com.unifina.security.StreamrApi
@@ -48,7 +48,7 @@ class PermissionApiController {
 		String username = cmd.user
 		Operation op = cmd.operationToEnum()
 		Resource res = new Resource(params.resourceClass, params.resourceId)
-		SecUser apiUser = request.apiUser
+		User apiUser = request.apiUser
 		Key apiKey = request.apiKey
 		Permission newPermission
 		if (cmd.anonymous) {
@@ -56,8 +56,8 @@ class PermissionApiController {
 		} else {
 			String subjectTemplate = grailsApplication.config.unifina.email.shareInvite.subject
 			String sharer = apiUser?.username
-			// incoming "username" is either SecUser.username or SignupInvite.username (possibly of a not yet created SignupInvite)
-			SecUser user = SecUser.findByUsername(username)
+			// incoming "username" is either User.username or SignupInvite.username (possibly of a not yet created SignupInvite)
+			User user = User.findByUsername(username)
 			if (user) {
 				String recipient = user.email
 				// send share resource email and grant permission

@@ -7,14 +7,14 @@ import groovy.transform.CompileStatic
 
 /**
  * Key that either
- * 	(1) authenticates a <code>SecUser</code> or
+ * 	(1) authenticates a <code>User</code> or
  * 	(2) acts as an 'anonymous' key that has permissions of its own
  */
 @Entity
 class Key implements Userish {
 	String id
 	String name
-	SecUser user
+	User user
 
 	static constraints = {
 		user(nullable: true)

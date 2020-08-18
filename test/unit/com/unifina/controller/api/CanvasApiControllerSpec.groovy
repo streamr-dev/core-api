@@ -19,12 +19,12 @@ import grails.test.mixin.TestFor
 import groovy.json.JsonBuilder
 
 @TestFor(CanvasApiController)
-@Mock([SecUser, SecUserSecRole, Permission, Canvas, Key])
+@Mock([User, UserRole, Permission, Canvas, Key])
 class CanvasApiControllerSpec extends ControllerSpecification {
 
 	ApiService apiService
 	CanvasService canvasService
-	SecUser me
+	User me
 	Canvas canvas1
 	Canvas canvas2
 	Canvas canvas3
@@ -34,8 +34,8 @@ class CanvasApiControllerSpec extends ControllerSpecification {
 		controller.signalPathService = Mock(SignalPathService)
 		controller.apiService = apiService = Mock(ApiService)
 
-		me = new SecUser(id: 1).save(validate: false)
-		SecUser other = new SecUser(id: 2).save(validate: false)
+		me = new User(id: 1).save(validate: false)
+		User other = new User(id: 2).save(validate: false)
 
 		def k1 = new Key(name: "k1", user: me)
 		k1.id = "myApiKey"
@@ -68,7 +68,7 @@ class CanvasApiControllerSpec extends ControllerSpecification {
 			hasExports: false
 		).save(validate: true, failOnError: true)
 
-		assert SecUser.count() == 2
+		assert User.count() == 2
 		assert Canvas.count() == 3
 	}
 
@@ -144,7 +144,7 @@ class CanvasApiControllerSpec extends ControllerSpecification {
 		response.json?.size() > 0
 
 		1 * canvasService.authorizedGetById("1", me, Permission.Operation.CANVAS_GET) >> canvas1
-		1 * canvasService.reconstruct(canvas1, me) >> { Canvas c, SecUser user -> JSON.parse(c.json) }
+		1 * canvasService.reconstruct(canvas1, me) >> { Canvas c, User user -> JSON.parse(c.json) }
 	}
 
 	void "show() supports runtime parameter"() {
@@ -201,7 +201,7 @@ class CanvasApiControllerSpec extends ControllerSpecification {
 		then:
 		response.status == 200
 		response.json.id == newCanvasId
-		1 * canvasService.createNew(_, me) >> { SaveCanvasCommand command, SecUser user ->
+		1 * canvasService.createNew(_, me) >> { SaveCanvasCommand command, User user ->
 			assert command.name == "brand new Canvas"
 			assert command.modules == []
 			def c = new Canvas().save(validate: false)
@@ -224,7 +224,7 @@ class CanvasApiControllerSpec extends ControllerSpecification {
 		response.status == 200
 		response.json?.size() > 0
 		1 * canvasService.authorizedGetById("1", me, Permission.Operation.CANVAS_EDIT) >> canvas1
-		1 * canvasService.updateExisting(canvas1, _, me) >> { Canvas canvas, SaveCanvasCommand command, SecUser user ->
+		1 * canvasService.updateExisting(canvas1, _, me) >> { Canvas canvas, SaveCanvasCommand command, User user ->
 			assert command.name == "updated, new name"
 			assert command.modules == []
 		}
@@ -352,8 +352,8 @@ class CanvasApiControllerSpec extends ControllerSpecification {
 
 	void "startAsAdmin() requires parameter startedBy to be given"() {
 		setup:
-		def adminRole = new SecRole(authority: "ROLE_ADMIN").save(failOnError: true, validate: false)
-		new SecUserSecRole(secUser: me, secRole: adminRole).save(failOnError: true, validate: false)
+		def adminRole = new Role(authority: "ROLE_ADMIN").save(failOnError: true, validate: false)
+		new UserRole(user: me, role: adminRole).save(failOnError: true, validate: false)
 
 		when:
 		params.id = "1"
@@ -367,8 +367,8 @@ class CanvasApiControllerSpec extends ControllerSpecification {
 
 	void "startAsAdmin() requires parameter startedBy to be an existing user id"() {
 		setup:
-		def adminRole = new SecRole(authority: "ROLE_ADMIN").save(failOnError: true, validate: false)
-		new SecUserSecRole(secUser: me, secRole: adminRole).save(failOnError: true, validate: false)
+		def adminRole = new Role(authority: "ROLE_ADMIN").save(failOnError: true, validate: false)
+		new UserRole(user: me, role: adminRole).save(failOnError: true, validate: false)
 
 		when:
 		params.id = "1"
@@ -378,15 +378,15 @@ class CanvasApiControllerSpec extends ControllerSpecification {
 
 		then:
 		def e = thrown(ValidationException)
-		e.message.contains("typeMismatch") // typeMismatch means Grails didn't find SecUser for id
+		e.message.contains("typeMismatch") // typeMismatch means Grails didn't find User for id
 	}
 
 	void "startAsAdmin() starts a Canvas if user is admin"() {
 		setup:
-		def adminRole = new SecRole(authority: "ROLE_ADMIN").save(failOnError: true, validate: false)
-		new SecUserSecRole(secUser: me, secRole: adminRole).save(failOnError: true, validate: false)
+		def adminRole = new Role(authority: "ROLE_ADMIN").save(failOnError: true, validate: false)
+		new UserRole(user: me, role: adminRole).save(failOnError: true, validate: false)
 
-		def someoneElse = new SecUser(username: "someoneElse@streamr.com").save(failOnError: true, validate: false)
+		def someoneElse = new User(username: "someoneElse@streamr.com").save(failOnError: true, validate: false)
 
 		when:
 		params.id = "1"

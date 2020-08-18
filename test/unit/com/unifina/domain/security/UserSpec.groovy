@@ -3,13 +3,13 @@ package com.unifina.domain.security
 import grails.test.mixin.Mock
 import spock.lang.Specification
 
-@Mock(SecUserSecRole)
-class SecUserSpec extends Specification {
+@Mock(UserRole)
+class UserSpec extends Specification {
 
 	def "SecUsers with same id must be equal and have same hashcode"() {
-		SecUser u1 = new SecUser()
+		User u1 = new User()
 		u1.id = 1234
-		SecUser u2 = new SecUser()
+		User u2 = new User()
 		u2.id = 1234
 
 		expect:
@@ -20,9 +20,9 @@ class SecUserSpec extends Specification {
 	}
 
 	def "SecUsers with different ids must not be equal"() {
-		SecUser u1 = new SecUser()
+		User u1 = new User()
 		u1.id = 1234
-		SecUser u2 = new SecUser()
+		User u2 = new User()
 		u2.id = 4321
 
 		expect:
@@ -34,13 +34,13 @@ class SecUserSpec extends Specification {
 
 	def "isDevOps() == false if user does not have ROLE_DEV_OPS SecRole"() {
 		expect:
-		!new SecUser().devOps
+		!new User().devOps
 	}
 
 	def "isDevOps() == true if user has ROLE_DEV_OPS SecRole"() {
-		def user = new SecUser().save(failOnError: true, validate: false)
-		def role = new SecRole(authority: "ROLE_DEV_OPS").save(failOnError: true)
-		new SecUserSecRole(secUser: user, secRole: role).save(failOnError: true)
+		def user = new User().save(failOnError: true, validate: false)
+		def role = new Role(authority: "ROLE_DEV_OPS").save(failOnError: true)
+		new UserRole(user: user, role: role).save(failOnError: true)
 
 		expect:
 		user.devOps
@@ -48,13 +48,13 @@ class SecUserSpec extends Specification {
 
 	def "isAdmin() == false if user does not have ROLE_ADMIN SecRole"() {
 		expect:
-		!new SecUser().isAdmin()
+		!new User().isAdmin()
 	}
 
 	def "isAdmin() == true if user has ROLE_ADMIN SecRole"() {
-		def user = new SecUser().save(failOnError: true, validate: false)
-		def role = new SecRole(authority: "ROLE_ADMIN").save(failOnError: true)
-		new SecUserSecRole(secUser: user, secRole: role).save(failOnError: true)
+		def user = new User().save(failOnError: true, validate: false)
+		def role = new Role(authority: "ROLE_ADMIN").save(failOnError: true)
+		new UserRole(user: user, role: role).save(failOnError: true)
 
 		expect:
 		user.isAdmin()

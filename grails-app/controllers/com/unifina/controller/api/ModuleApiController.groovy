@@ -1,7 +1,7 @@
 package com.unifina.controller.api
 
 import com.unifina.api.NotFoundException
-import com.unifina.domain.security.SecUser
+import com.unifina.domain.security.User
 import com.unifina.domain.signalpath.Module
 import com.unifina.domain.signalpath.ModuleCategory
 import com.unifina.exceptions.ModuleExceptionMessage
@@ -40,7 +40,7 @@ class ModuleApiController {
 	@StreamrApi
 	def jsonGetModule(Long id) {
 		Map moduleConfig = request.JSON ?: [:]
-		SecUser user = request.apiUser
+		User user = request.apiUser
 
 		try {
 			Map iMap = instantiateAndGetConfig(id, moduleConfig, user)
@@ -73,7 +73,7 @@ class ModuleApiController {
 	@StreamrApi
 	def jsonGetModuleTree() {
 		Boolean modulesFirst = params.boolean('modulesFirst') ?: false
-		SecUser user = request.apiUser
+        User user = request.apiUser
 		def categories = ModuleCategory.findAllByParentIsNullAndHideIsNull([sort:"sortOrder"])
 		def result = []
 		categories.each { ModuleCategory category ->
@@ -84,7 +84,7 @@ class ModuleApiController {
 	}
 
 	@GrailsCompileStatic
-	private Map instantiateAndGetConfig(Long id, Map moduleConfig, SecUser user) {
+	private Map instantiateAndGetConfig(Long id, Map moduleConfig, User user) {
 		Globals globals = new Globals([:], user)
 
 		Module domainObject = Module.get(id)

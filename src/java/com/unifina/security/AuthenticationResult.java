@@ -1,33 +1,33 @@
 package com.unifina.security;
 
 import com.unifina.domain.security.Key;
-import com.unifina.domain.security.SecUser;
+import com.unifina.domain.security.User;
 
 public class AuthenticationResult {
 	private final Key key;
-	private final SecUser secUser;
+	private final User user;
 	private final boolean keyMissing;
 	private final boolean lastAuthenticationMalformed;
 	private final boolean failed;
 
 	public AuthenticationResult(boolean keyMissing, boolean lastAuthenticationMalformed, boolean failed) {
 		this.key = null;
-		this.secUser = null;
+		this.user = null;
 		this.keyMissing = keyMissing;
 		this.lastAuthenticationMalformed = lastAuthenticationMalformed;
 		this.failed = failed;
 	}
 
-	public AuthenticationResult(SecUser secUser) {
+	public AuthenticationResult(User user) {
 		this.key = null;
-		this.secUser = secUser;
+		this.user = user;
 		this.keyMissing = false;
 		this.lastAuthenticationMalformed = false;
 		this.failed = false;
 	}
 
 	public AuthenticationResult(Key key) {
-		this.secUser = key.getUser();
+		this.user = key.getUser();
 		this.key = key.getUser() != null ? null : key;
 		this.keyMissing = false;
 		this.lastAuthenticationMalformed = false;
@@ -38,8 +38,8 @@ public class AuthenticationResult {
 		return key;
 	}
 
-	public SecUser getSecUser() {
-		return secUser;
+	public User getSecUser() {
+		return user;
 	}
 
 	public boolean isKeyMissing() {

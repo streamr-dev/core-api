@@ -4,7 +4,7 @@ import com.streamr.client.StreamrClient;
 import com.unifina.datasource.DataSource;
 import com.unifina.datasource.HistoricalDataSource;
 import com.unifina.datasource.RealtimeDataSource;
-import com.unifina.domain.security.SecUser;
+import com.unifina.domain.security.User;
 import com.unifina.security.permission.DataSourcePermission;
 import com.unifina.security.permission.StreamrClientPermission;
 import com.unifina.service.StreamrClientService;
@@ -50,14 +50,14 @@ public class Globals {
 	/**
 	 * Defaults to Mode.NOT_PLANNING_TO_RUN, no DataSource is created
 	 */
-	public Globals(Map signalPathContext, SecUser user) {
+	public Globals(Map signalPathContext, User user) {
 		this(signalPathContext, user, Mode.NOT_PLANNING_TO_RUN, null);
 	}
 
 	/**
 	 * Will create DataSource based on Mode
 	 */
-	public Globals(Map signalPathContext, SecUser user, Mode mode) {
+	public Globals(Map signalPathContext, User user, Mode mode) {
 		this(signalPathContext, user, mode, null);
 	}
 
@@ -65,7 +65,7 @@ public class Globals {
 	 * Allows a DataSource implementation to be passed explicitly. If it is null,
 	 * a DataSource based on given Mode will be automatically created.
 	 */
-	public Globals(Map signalPathContext, SecUser user, Mode mode, DataSource dataSource) {
+	public Globals(Map signalPathContext, User user, Mode mode, DataSource dataSource) {
 		if (signalPathContext == null) {
 			throw new NullPointerException("signalPathContext can not be null!");
 		}

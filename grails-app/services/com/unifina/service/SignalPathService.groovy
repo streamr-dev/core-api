@@ -5,7 +5,7 @@ import com.unifina.datasource.IStartListener
 import com.unifina.datasource.IStopListener
 import com.unifina.domain.data.Stream
 import com.unifina.domain.security.Permission
-import com.unifina.domain.security.SecUser
+import com.unifina.domain.security.User
 import com.unifina.domain.signalpath.Canvas
 import com.unifina.domain.signalpath.Serialization
 import com.unifina.exceptions.CanvasUnreachableException
@@ -84,13 +84,13 @@ class SignalPathService {
 	@Transactional
 	void deleteReferences(SignalPath signalPath, boolean delayed) {
 		CanvasService canvasService = Holders.getApplicationContext().getBean(CanvasService) // Cannot use dependency injection because of circular dependency! Do not turn into instance variable.
-		canvasService.deleteCanvas(signalPath.canvas, SecUser.load(signalPath.globals.userId), delayed)
+		canvasService.deleteCanvas(signalPath.canvas, User.load(signalPath.globals.userId), delayed)
 	}
 
 	/**
 	 * @throws SerializationException if de-serialization fails when resuming from existing state
      */
-	void startLocal(Canvas canvas, Map signalPathContext, SecUser asUser) throws SerializationException {
+	void startLocal(Canvas canvas, Map signalPathContext, User asUser) throws SerializationException {
 		Globals globals = new Globals(
 			signalPathContext,
 			asUser,
@@ -171,10 +171,10 @@ class SignalPathService {
 	 * @return canvasId => user
 	 */
 	@CompileStatic
-	Map<String, SecUser> getUsersOfRunningCanvases() {
-		Map<String, SecUser> canvasIdToUser = [:]
+	Map<String, User> getUsersOfRunningCanvases() {
+		Map<String, User> canvasIdToUser = [:]
 		runners().values().each { SignalPathRunner runner ->
-			SecUser user = SecUser.loadViaJava(runner.globals.userId)
+			User user = User.loadViaJava(runner.globals.userId)
 			canvasIdToUser[runner.signalPath.canvas.id] = user
 		}
 		return canvasIdToUser
@@ -223,12 +223,12 @@ class SignalPathService {
 
 	@NotTransactional
 	@CompileStatic
-	Map stopRemote(Canvas canvas, SecUser user) {
+	Map stopRemote(Canvas canvas, User user) {
 		return runtimeRequest(buildRuntimeRequest([type:"stopRequest"], "canvases/$canvas.id", user))
 	}
 
 	@CompileStatic
-	boolean ping(Canvas canvas, SecUser user) {
+	boolean ping(Canvas canvas, User user) {
 		runtimeRequest(buildRuntimeRequest([type:'ping'], "canvases/$canvas.id", user))
 		return true
 	}
@@ -241,7 +241,7 @@ class SignalPathService {
 	}
 
 	@CompileStatic
-	RuntimeRequest buildRuntimeRequest(Map msg, String path, String originalPath = path, SecUser user) {
+	RuntimeRequest buildRuntimeRequest(Map msg, String path, String originalPath = path, User user) {
 		RuntimeRequest.PathReader pathReader = RuntimeRequest.getPathReader(path)
 
 		// All runtime requests require at least read permission
