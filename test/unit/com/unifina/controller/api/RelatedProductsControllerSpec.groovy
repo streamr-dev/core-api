@@ -5,15 +5,15 @@ import com.unifina.domain.marketplace.Category
 import com.unifina.domain.marketplace.Product
 import com.unifina.domain.security.Key
 import com.unifina.domain.security.Permission
-import com.unifina.domain.security.SecUser
+import com.unifina.domain.security.User
 import com.unifina.service.ProductService
 import grails.test.mixin.Mock
 import grails.test.mixin.TestFor
 
 @TestFor(ProductApiController)
-@Mock([Product, SecUser, Category])
+@Mock([Product, User, Category])
 class RelatedProductsControllerSpec extends ControllerSpecification {
-	Product newProduct(String id, String name, String description, Category c, SecUser user) {
+	Product newProduct(String id, String name, String description, Category c, User user) {
 		Product p = new Product(
 			name: name,
 			description: description,
@@ -37,12 +37,12 @@ class RelatedProductsControllerSpec extends ControllerSpecification {
 	}
 
 	Product p1, p2, p3, p4
-	SecUser u1, u2, me
+	User u1, u2, me
 	Category cat1, cat2
 
 	def setup() {
 		controller.productService = Mock(ProductService)
-		me = new SecUser(
+		me = new User(
 			username: "username: api@user.com",
 			name: "Regular API user",
 			password: "xxx"
@@ -52,7 +52,7 @@ class RelatedProductsControllerSpec extends ControllerSpecification {
 		key.save(failOnError: true, validate: true)
 
 		// u1 is the user who owns the product p1 used to search for related products
-		u1 = new SecUser(
+		u1 = new User(
 			username: "username: masa@hypätääneka.com",
 			name: "Matti Nykänen",
 			password: "xxx"
@@ -60,7 +60,7 @@ class RelatedProductsControllerSpec extends ControllerSpecification {
 		u1.id = 1
 		u1.save(validate: false, failOnError: true)
 
-		u2 = new SecUser(
+		u2 = new User(
 			username: "username: marilyn@monroe.com",
 			name: "Marilyn Monroe",
 			password: "xxx"

@@ -7,7 +7,7 @@ import com.unifina.domain.data.Stream
 import com.unifina.domain.security.Key
 import com.unifina.domain.security.Permission
 import com.unifina.domain.security.Permission.Operation
-import com.unifina.domain.security.SecUser
+import com.unifina.domain.security.User
 import com.unifina.domain.signalpath.Canvas
 import com.unifina.service.PermissionService
 import grails.converters.JSON
@@ -17,7 +17,7 @@ import grails.test.mixin.Mock
 import grails.test.mixin.TestFor
 
 @TestFor(PermissionApiController)
-@Mock([Permission, Key, Stream, SecUser, Canvas])
+@Mock([Permission, Key, Stream, User, Canvas])
 class PermissionApiControllerSpec extends ControllerSpecification {
 	def permissionService
 
@@ -25,7 +25,7 @@ class PermissionApiControllerSpec extends ControllerSpecification {
 	Canvas canvasOwned, canvasShared, canvasRestricted, canvasPublic
 	Stream streamOwned, streamShared, streamRestricted
 
-	SecUser me, other
+	User me, other
 	Permission canvasPermission, streamPermission, canvasAnonPermission
 	List<Permission> ownerPermissions
 
@@ -36,8 +36,8 @@ class PermissionApiControllerSpec extends ControllerSpecification {
 
 		controller.permissionService = permissionService = Mock(PermissionService)
 
-		me = new SecUser(id: 1, username: "me@me.net").save(validate: false)
-		other = new SecUser(id: 2, username: "0x0000000000000000000000000000000000000000").save(validate: false)
+		me = new User(id: 1, username: "me@me.net").save(validate: false)
+		other = new User(id: 2, username: "0x0000000000000000000000000000000000000000").save(validate: false)
 
 		def meKey = new Key(name: "meKey", user: me)
 		meKey.id = "myApiKey"
@@ -57,7 +57,7 @@ class PermissionApiControllerSpec extends ControllerSpecification {
 		canvasRestricted = newCanvas("restricted")
 		canvasPublic = newCanvas("public")
 
-		def newStream = { String id, SecUser owner ->
+		def newStream = { String id, User owner ->
 			def c = new Stream()
 			c.id = id
 			return c.save(validate: false)

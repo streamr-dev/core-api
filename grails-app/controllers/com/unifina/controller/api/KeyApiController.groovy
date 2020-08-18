@@ -6,7 +6,7 @@ import com.unifina.api.NotPermittedException
 import com.unifina.domain.data.Stream
 import com.unifina.domain.security.Key
 import com.unifina.domain.security.Permission
-import com.unifina.domain.security.SecUser
+import com.unifina.domain.security.User
 import com.unifina.security.AuthLevel
 import com.unifina.security.StreamrApi
 import com.unifina.service.PermissionService
@@ -28,8 +28,8 @@ class KeyApiController {
 			throw new IllegalArgumentException("${resourceClass.simpleName} is not a domain class!")
 		}
 
-		// SecUser operations are always on self
-		if (resourceClass == SecUser) {
+		// User operations are always on self
+		if (resourceClass == User) {
 			action(request.apiUser)
 		} else {
 			def res = resourceClass.get(resourceId)
@@ -50,7 +50,7 @@ class KeyApiController {
 	@StreamrApi(authenticationLevel = AuthLevel.USER)
 	def index() {
 		useResource(params.resourceClass, params.resourceId) { res ->
-			if (res instanceof SecUser) {
+			if (res instanceof User) {
 				render res.keys*.toMap() as JSON
 			} else {
 				Map permissionsByKey = permissionService.getPermissionsTo(res)
@@ -78,7 +78,7 @@ class KeyApiController {
 	def save() {
 		useResource(params.resourceClass, params.resourceId) { res ->
 			Key key = new Key(request.JSON)
-			key.user = res instanceof SecUser ? res : null
+			key.user = res instanceof User ? res : null
 			key.save(failOnError: true, validate: true)
 
 			Map response = key.toMap()
@@ -125,11 +125,11 @@ class KeyApiController {
 
 			// Don't allow deleting the only API key for a user. This is needed internally for directing runtime requests to correct node.
 			// TODO: this restriction can be removed if HTTP sessions are offloaded to a global store, eg. Redis
-			if (res instanceof SecUser && res.keys.size() == 1) {
+			if (res instanceof User && res.keys.size() == 1) {
 				throw new NotPermittedException("The only API key of a user cannot be deleted.")
 			}
 
-			if (res instanceof SecUser) {
+			if (res instanceof User) {
 				res.removeFromKeys(key)
 			}
 
@@ -151,7 +151,7 @@ class KeyApiController {
 		}
 		Map json = new JsonSlurper().parseText((String) request.JSON)
 		if (json.name != null && json.name.trim() != "") {
-			useResource(SecUser, params.keyId) { res ->
+			useResource(User, params.keyId) { res ->
 				k.name = json.name.trim()
 				k.save(flush: true, failOnError: true)
 			}
@@ -188,7 +188,7 @@ class KeyApiController {
 				k.name = json.name.trim()
 				if (permission) {
 					Permission.Operation operation = Permission.Operation.fromString(permission)
-					SecUser user = request.apiUser
+                    User user = request.apiUser
 					boolean logIfDenied = false
 					if (operation == Permission.Operation.STREAM_PUBLISH) {
 						if (!hasPermission(Permission.Operation.STREAM_PUBLISH, k.getPermissions())) {

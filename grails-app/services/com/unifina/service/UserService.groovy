@@ -6,9 +6,9 @@ import com.unifina.api.NotFoundException
 import com.unifina.domain.ExampleType
 import com.unifina.domain.data.Stream
 import com.unifina.domain.security.Key
-import com.unifina.domain.security.SecRole
-import com.unifina.domain.security.SecUser
-import com.unifina.domain.security.SecUserSecRole
+import com.unifina.domain.security.Role
+import com.unifina.domain.security.User
+import com.unifina.domain.security.UserRole
 import com.unifina.domain.signalpath.Canvas
 import com.unifina.exceptions.UserCreationFailedException
 import com.unifina.security.PasswordEncoder
@@ -27,8 +27,8 @@ class UserService {
 	StreamService streamService
 	CanvasService canvasService
 
-	SecUser createUser(Map properties, List<SecRole> roles = null) {
-		SecUser user = new SecUser(properties)
+	User createUser(Map properties, List<Role> roles = null) {
+		User user = new User(properties)
 		// Encode the password
 		if (user.password == null) {
 			throw new UserCreationFailedException("The password is empty!")
@@ -89,9 +89,9 @@ class UserService {
 		return user
 	}
 
-	def addRoles(SecUser user, List<SecRole> roles = null) {
-		roles?.each { SecRole role ->
-			new SecUserSecRole().create(user, role)
+	def addRoles(User user, List<Role> roles = null) {
+		roles?.each { Role role ->
+			new UserRole().create(user, role)
 		}
 	}
 
@@ -108,7 +108,7 @@ class UserService {
 		}
 	}
 
-	def delete(SecUser user) {
+	def delete(User user) {
 		if (user == null) {
 			throw new NotFoundException("user not found", "User", null)
 		}
@@ -160,8 +160,8 @@ class UserService {
 		}
 	}
 
-	SecUser getUserFromUsernameAndPassword(String username, String password) throws InvalidUsernameAndPasswordException {
-		SecUser user = SecUser.findByUsername(username)
+	User getUserFromUsernameAndPassword(String username, String password) throws InvalidUsernameAndPasswordException {
+		User user = User.findByUsername(username)
 		if (user == null) {
 			throw new InvalidUsernameAndPasswordException("Invalid username or password")
 		}
@@ -184,9 +184,9 @@ class UserService {
 		return key // is an anonymous key
 	}
 
-	SecUser getUserById(Long id) {
+	User getUserById(Long id) {
 		if (id != null) {
-			return SecUser.get(id)
+			return User.get(id)
 		} else {
 			return null
 		}

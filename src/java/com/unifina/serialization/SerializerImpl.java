@@ -1,7 +1,7 @@
 package com.unifina.serialization;
 
 import com.unifina.domain.data.Stream;
-import com.unifina.domain.security.SecUser;
+import com.unifina.domain.security.User;
 import com.unifina.domain.signalpath.Canvas;
 import com.unifina.domain.signalpath.Module;
 import org.apache.commons.math3.stat.correlation.PearsonsCorrelation;
@@ -37,7 +37,7 @@ public class SerializerImpl implements Serializer {
 		conf.registerSerializer(JSONArray.class, new JSONElementSerializer(), true);
 		conf.registerSerializer(Canvas.class, new DomainClassSerializer(), false);
 		conf.registerSerializer(Module.class, new DomainClassSerializer(), false);
-		conf.registerSerializer(SecUser.class, new DomainClassSerializer(), false);
+		conf.registerSerializer(User.class, new DomainClassSerializer(), false);
 		conf.registerSerializer(Stream.class, new DomainClassSerializer(), false);
 	}
 

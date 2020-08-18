@@ -1,11 +1,11 @@
 package com.unifina.task
 
-import com.unifina.domain.security.SecUser
+
+import com.unifina.domain.security.User
 import com.unifina.domain.task.Task
 import com.unifina.service.NodeService
 import com.unifina.service.TaskService
 import grails.util.GrailsUtil
-import grails.util.Holders
 import org.apache.log4j.Logger
 import org.codehaus.groovy.grails.commons.GrailsApplication
 import org.hibernate.Session
@@ -31,14 +31,14 @@ class TaskWorker extends Thread {
 	Throwable lastError
 	int workerId
 
-	SecUser priorityUser
+    User priorityUser
 
 	Task currentTask
 	AbstractTask currentTaskImpl
 
 	public static final Logger log = Logger.getLogger(TaskWorker.class)
 
-	public TaskWorker(GrailsApplication grailsApplication, int id, SecUser priorityUser=null) {
+	public TaskWorker(GrailsApplication grailsApplication, int id, User priorityUser=null) {
 		super("TaskWorker-"+id)
 
 		this.grailsApplication = grailsApplication
@@ -50,7 +50,7 @@ class TaskWorker extends Thread {
 	}
 
 
-	private Task getTask(SecUser priorityUser=null) {
+	private Task getTask(User priorityUser=null) {
 		boolean retry = true
 		Task task = null
 

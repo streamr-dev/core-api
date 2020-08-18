@@ -5,23 +5,23 @@ import com.unifina.api.SaveDashboardItemCommand
 import com.unifina.domain.dashboard.Dashboard
 import com.unifina.domain.dashboard.DashboardItem
 import com.unifina.domain.security.Key
-import com.unifina.domain.security.SecUser
+import com.unifina.domain.security.User
 import com.unifina.domain.signalpath.Canvas
 import com.unifina.service.DashboardService
 import grails.test.mixin.Mock
 import grails.test.mixin.TestFor
 
 @TestFor(DashboardItemApiController)
-@Mock([Canvas, Dashboard, DashboardItem, Key, SecUser])
+@Mock([Canvas, Dashboard, DashboardItem, Key, User])
 class DashboardItemApiControllerSpec extends ControllerSpecification {
 
 	DashboardService dashboardService
-	SecUser me
+	User me
 	List<Dashboard> dashboards
 
 	def setup() {
 		dashboardService = controller.dashboardService = Mock(DashboardService)
-		me = new SecUser().save(failOnError: true, validate: false)
+		me = new User().save(failOnError: true, validate: false)
 		dashboards = DashboardApiControllerSpec.initDashboards()
 
 		Key key = new Key(name: "key", user: me)
@@ -102,7 +102,7 @@ class DashboardItemApiControllerSpec extends ControllerSpecification {
 			module      : 1,
 			webcomponent: "streamr-chart",
 		]
-		1 * dashboardService.addDashboardItem("3", _, me) >> { String dashboardId, SaveDashboardItemCommand command, SecUser user ->
+		1 * dashboardService.addDashboardItem("3", _, me) >> { String dashboardId, SaveDashboardItemCommand command, User user ->
 			def item = new DashboardItem(command.properties)
 			item.dashboard = dashboards[2]
 			item.id = "32"
@@ -132,7 +132,7 @@ class DashboardItemApiControllerSpec extends ControllerSpecification {
 			module      : 1,
 			webcomponent: "streamr-chart"
 		]
-		1 * dashboardService.updateDashboardItem("3", "2", _, me) >> { String dashboardId, String itemId, SaveDashboardItemCommand command, SecUser user ->
+		1 * dashboardService.updateDashboardItem("3", "2", _, me) >> { String dashboardId, String itemId, SaveDashboardItemCommand command, User user ->
 			def item = DashboardItem.get(itemId)
 			item.setProperties(command.properties)
 			return item

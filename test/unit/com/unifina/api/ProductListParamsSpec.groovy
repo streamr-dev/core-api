@@ -3,7 +3,7 @@ package com.unifina.api
 import com.unifina.domain.marketplace.Category
 import com.unifina.domain.marketplace.Product
 import com.unifina.domain.security.Permission
-import com.unifina.domain.security.SecUser
+import com.unifina.domain.security.User
 import grails.test.mixin.Mock
 import spock.lang.Specification
 import spock.lang.Unroll
@@ -14,17 +14,17 @@ import static plastic.criteria.PlasticCriteria.*
 class ProductListParamsSpec extends Specification {
 
 	Category c1, c2, c3
-	SecUser user, other
+	User user, other
 
 	void setup() {
-		user = new SecUser(
+		user = new User(
 			username: "user@domain.com",
 			name: "Firstname Lastname",
 			password: "salasana"
 		)
 		user.id = 1
 		user.save(failOnError: true, validate: false)
-		other = new SecUser(
+		other = new User(
 			username: "usr@foo.com",
 			name: "Firstname Lastname",
 			password: "salasana"

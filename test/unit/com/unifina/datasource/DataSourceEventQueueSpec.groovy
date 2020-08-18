@@ -2,7 +2,7 @@ package com.unifina.datasource
 
 
 import com.unifina.data.Event
-import com.unifina.domain.security.SecUser
+import com.unifina.domain.security.User
 import com.unifina.utils.Globals
 import spock.lang.Specification
 import spock.util.concurrent.PollingConditions
@@ -12,7 +12,7 @@ import java.util.function.Consumer
 class DataSourceEventQueueSpec extends Specification {
 
 	private DataSourceEventQueue createQueue(int capacity = 100) {
-		SecUser user = new SecUser()
+		User user = new User()
 
 		Globals globals = new Globals([:], user, Globals.Mode.REALTIME, Mock(DataSource))
 

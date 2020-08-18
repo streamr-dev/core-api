@@ -7,7 +7,7 @@ import com.unifina.domain.dashboard.Dashboard
 import com.unifina.domain.dashboard.DashboardItem
 import com.unifina.domain.data.Stream
 import com.unifina.domain.security.Permission
-import com.unifina.domain.security.SecUser
+import com.unifina.domain.security.User
 import com.unifina.domain.signalpath.Canvas
 import com.unifina.domain.signalpath.Module
 import com.unifina.domain.signalpath.Serialization
@@ -27,11 +27,11 @@ import org.codehaus.groovy.grails.web.mapping.LinkGenerator
 
 @TestMixin(ControllerUnitTestMixin) // "as JSON" converter
 @TestFor(CanvasService)
-@Mock([SecUser, Canvas, Module, Permission, Serialization, Dashboard, DashboardItem])
+@Mock([User, Canvas, Module, Permission, Serialization, Dashboard, DashboardItem])
 class CanvasServiceSpec extends BeanMockingSpecification {
 
-	SecUser me
-	SecUser someoneElse
+	User me
+    User someoneElse
 	Canvas myFirstCanvas
 	List<Canvas> canvases = []
 	Module moduleWithUi
@@ -54,7 +54,7 @@ class CanvasServiceSpec extends BeanMockingSpecification {
 
 		moduleWithUi = new Module(implementingClass: Heatmap.name).save(validate: false)
 
-		me = new SecUser(username: "me@me.com").save(validate: false)
+		me = new User(username: "me@me.com").save(validate: false)
 		def userService = mockBean(UserService, new UserService())
 		userService.getUserById(_) >> me
 
@@ -115,7 +115,7 @@ class CanvasServiceSpec extends BeanMockingSpecification {
 			json: json,
 		).save(failOnError: true)
 
-		someoneElse = new SecUser(username: "someone@someone.com").save(validate: false)
+		someoneElse = new User(username: "someone@someone.com").save(validate: false)
 
 		canvases << new Canvas(
 			name: "someoneElses_canvas_1",

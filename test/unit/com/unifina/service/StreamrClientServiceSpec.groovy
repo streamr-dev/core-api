@@ -4,7 +4,7 @@ import com.streamr.client.StreamrClient
 import com.streamr.client.authentication.ApiKeyAuthenticationMethod
 import com.streamr.client.authentication.InternalAuthenticationMethod
 import com.unifina.domain.security.Key
-import com.unifina.domain.security.SecUser
+import com.unifina.domain.security.User
 import com.unifina.security.SessionToken
 import com.unifina.utils.testutils.FakeStreamrClient
 import grails.test.mixin.Mock
@@ -13,12 +13,12 @@ import spock.lang.Specification
 import spock.util.concurrent.PollingConditions
 
 @TestFor(StreamrClientService)
-@Mock(SecUser)
+@Mock(User)
 class StreamrClientServiceSpec extends Specification {
-	SecUser user
+	User user
 
 	void setup() {
-		user = new SecUser(
+		user = new User(
 			username: "StreamrClientServiceIntegrationSpec-${System.currentTimeMillis()}@streamr.invalid",
 			name: "user",
 			password: "password",
@@ -55,7 +55,7 @@ class StreamrClientServiceSpec extends Specification {
 	}
 
 	void "getInstanceForThisEngineNode() uses sessionService to generate a sessionToken (instead of making an API call)"() {
-		SecUser eeUser = new SecUser()
+		User eeUser = new User()
 		SessionToken mockToken = Mock(SessionToken)
 
 		service.ethereumIntegrationKeyService = Mock(EthereumIntegrationKeyService)
@@ -73,7 +73,7 @@ class StreamrClientServiceSpec extends Specification {
 	}
 
 	void "getInstanceForThisEngineNode() should return a singleton instance in a race condition"() {
-		SecUser eeUser = new SecUser()
+		User eeUser = new User()
 		SessionToken mockToken = Mock(SessionToken)
 
 		service.ethereumIntegrationKeyService = Mock(EthereumIntegrationKeyService)

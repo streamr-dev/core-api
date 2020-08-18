@@ -5,7 +5,7 @@ import com.unifina.ModuleTestingSpecification
 import com.unifina.data.Event
 import com.unifina.datasource.DataSource
 import com.unifina.domain.security.IntegrationKey
-import com.unifina.domain.security.SecUser
+import com.unifina.domain.security.User
 import com.unifina.domain.signalpath.Canvas
 import com.unifina.domain.signalpath.Module
 import com.unifina.service.EthereumIntegrationKeyService
@@ -25,7 +25,7 @@ import org.web3j.protocol.core.methods.response.*
 import java.util.concurrent.CompletableFuture
 import java.util.function.Consumer
 
-@Mock([Canvas, Module,IntegrationKey, SecUser])
+@Mock([Canvas, Module,IntegrationKey, User])
 class SendEthereumTransactionSpec extends ModuleTestingSpecification {
 	public static final String TXHASH = "0x123";
 	public static final int CONSTANT_CALL_ARRAY_CONTENT = 13;
@@ -48,7 +48,7 @@ class SendEthereumTransactionSpec extends ModuleTestingSpecification {
 		return enc;
 	}
 
-	Globals mockGlobals(Map context=[:], SecUser user = new SecUser(username: 'user', timezone: "UTC")) {
+	Globals mockGlobals(Map context=[:], User user = new User(username: 'user', timezone: "UTC")) {
 		Globals globals = new Globals(context, user, Globals.Mode.REALTIME, mockDatasource)
 		globals.time = new Date(0)
 		return globals
@@ -56,7 +56,7 @@ class SendEthereumTransactionSpec extends ModuleTestingSpecification {
 
 	def setup() {
 		// mock the key for ethereum account
-		SecUser user = new SecUser(name: "name", username: "name@name.com", password: "pass").save(failOnError: true, validate: false)
+		User user = new User(name: "name", username: "name@name.com", password: "pass").save(failOnError: true, validate: false)
 		IntegrationKey key = new IntegrationKey(service: IntegrationKey.Service.ETHEREUM, name: "test key", json: '{"privateKey":"0x5e98cce00cff5dea6b454889f359a4ec06b9fa6b88e9d69b86de8e1c81887da0","address":"0x1234"}', user: user, idInService: "0x1234")
 		key.id = "sgKjr1eHQpqTmwz3vK3DqwUK1wFlrfRJa9mnf_xTeFJQ"
 		key.save(failOnError: true, validate: true)

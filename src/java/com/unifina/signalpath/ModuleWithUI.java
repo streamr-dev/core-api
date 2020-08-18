@@ -1,15 +1,11 @@
 package com.unifina.signalpath;
 
-import com.streamr.client.protocol.message_layer.StreamMessage;
-import com.unifina.datasource.IStartListener;
-import com.unifina.datasource.IStopListener;
 import com.unifina.domain.data.Stream;
 import com.unifina.domain.security.Permission;
-import com.unifina.domain.security.SecUser;
+import com.unifina.domain.security.User;
 import com.unifina.domain.signalpath.Module;
 import com.unifina.service.PermissionService;
 import com.unifina.service.StreamService;
-import com.unifina.signalpath.utils.MessageChainUtil;
 import com.unifina.service.UserService;
 import com.unifina.utils.IdGenerator;
 import com.unifina.utils.MapTraversal;
@@ -190,7 +186,7 @@ public abstract class ModuleWithUI extends AbstractSignalPathModule {
 				}
 			}
 
-			SecUser user = getUser();
+			User user = getUser();
 
 			// Else create a new Stream object for this UI channel
 			if (stream == null) {
@@ -217,7 +213,7 @@ public abstract class ModuleWithUI extends AbstractSignalPathModule {
 			isNew = false;
 		}
 
-		private SecUser getUser() {
+		private User getUser() {
 			Long userId = getGlobals().getUserId();
 			return getUserService().getUserById(userId);
 		}

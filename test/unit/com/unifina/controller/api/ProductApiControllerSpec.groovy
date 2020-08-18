@@ -7,7 +7,7 @@ import com.unifina.domain.data.Stream
 import com.unifina.domain.marketplace.Category
 import com.unifina.domain.marketplace.Product
 import com.unifina.domain.security.Permission
-import com.unifina.domain.security.SecUser
+import com.unifina.domain.security.User
 import com.unifina.filters.UnifinaCoreAPIFilters
 import com.unifina.service.*
 import grails.test.mixin.Mock
@@ -20,7 +20,7 @@ import com.unifina.utils.TestUtils
 import javax.servlet.http.HttpServletResponse
 
 @TestFor(ProductApiController)
-@Mock([UnifinaCoreAPIFilters, SecUser])
+@Mock([UnifinaCoreAPIFilters, User])
 class ProductApiControllerSpec extends Specification {
 
 	Product product
@@ -28,7 +28,7 @@ class ProductApiControllerSpec extends Specification {
 	void setup() {
 		def category = new Category(name: "category")
 		category.id = "category-id"
-		SecUser user = new SecUser(
+		User user = new User(
 			username: "user@domain.com",
 			name: "Firstname Lastname",
 			password: "salasana"
@@ -211,7 +211,7 @@ class ProductApiControllerSpec extends Specification {
 	void "save() invokes productService#create"() {
 		def productService = controller.productService = Mock(ProductService)
 
-		def user = request.apiUser = new SecUser()
+		def user = request.apiUser = new User()
 
 		request.JSON == [:]
 		when:
@@ -227,7 +227,7 @@ class ProductApiControllerSpec extends Specification {
 			create(_, _) >> product
 		}
 
-		def user = request.apiUser = new SecUser()
+		def user = request.apiUser = new User()
 
 		request.JSON == [:]
 		when:
@@ -243,7 +243,7 @@ class ProductApiControllerSpec extends Specification {
 		controller.permissionService = Mock(PermissionService)
 		def productService = controller.productService = Mock(ProductService)
 
-		def user = request.apiUser = new SecUser()
+		def user = request.apiUser = new User()
 
 		params.id = "product-id"
 		request.JSON == [:]
@@ -262,7 +262,7 @@ class ProductApiControllerSpec extends Specification {
 			update("product-id", _, _) >> product
 		}
 
-		def user = request.apiUser = new SecUser()
+		def user = request.apiUser = new User()
 
 		params.id = "product-id"
 		request.JSON == [:]
@@ -279,7 +279,7 @@ class ProductApiControllerSpec extends Specification {
 	void "setDeploying() invokes productService#findById() and productService#transitionToDeploying()"() {
 		def productService = controller.productService = Mock(ProductService)
 
-		def user = request.apiUser = new SecUser()
+		def user = request.apiUser = new User()
 
 		params.id = "product-id"
 		request.method = "POST"
@@ -294,10 +294,10 @@ class ProductApiControllerSpec extends Specification {
 
 	void "setDeploying() returns 200 and renders a product"() {
 		controller.productService = Stub(ProductService) {
-			findById("product-id", _ as SecUser, Permission.Operation.PRODUCT_EDIT) >> product
+			findById("product-id", _ as User, Permission.Operation.PRODUCT_EDIT) >> product
 		}
 
-		def user = request.apiUser = new SecUser()
+		def user = request.apiUser = new User()
 
 		params.id = "product-id"
 		request.JSON = [
@@ -317,7 +317,7 @@ class ProductApiControllerSpec extends Specification {
 		def apiService = controller.apiService = Mock(ApiService)
 		controller.productService = Stub(ProductService)
 
-		request.apiUser = new SecUser()
+		request.apiUser = new User()
 
 		params.id = "product-id"
 		request.JSON = [:]
@@ -336,7 +336,7 @@ class ProductApiControllerSpec extends Specification {
 		}
 		def productService = controller.productService = Mock(ProductService)
 
-		def user = request.apiUser = new SecUser()
+		def user = request.apiUser = new User()
 
 		params.id = "product-id"
 		request.JSON = [:]
@@ -355,7 +355,7 @@ class ProductApiControllerSpec extends Specification {
 		}
 		def productService = controller.productService = Mock(ProductService)
 
-		def user = request.apiUser = new SecUser()
+		def user = request.apiUser = new User()
 
 		params.id = "product-id"
 		request.JSON = [:]
@@ -391,7 +391,7 @@ class ProductApiControllerSpec extends Specification {
 	void "setUndeploying() invokes productService#findById() and productService#transitionToUndeploying()"() {
 		def productService = controller.productService = Mock(ProductService)
 
-		def user = request.apiUser = new SecUser()
+		def user = request.apiUser = new User()
 
 		params.id = "product-id"
 		request.method = "POST"
@@ -406,10 +406,10 @@ class ProductApiControllerSpec extends Specification {
 
 	void "setUndeploying() returns 200 and renders a product"() {
 		controller.productService = Stub(ProductService) {
-			findById("product-id", _ as SecUser, Permission.Operation.PRODUCT_EDIT) >> product
+			findById("product-id", _ as User, Permission.Operation.PRODUCT_EDIT) >> product
 		}
 
-		def user = request.apiUser = new SecUser()
+		def user = request.apiUser = new User()
 
 		params.id = "product-id"
 		request.method = "POST"
@@ -426,7 +426,7 @@ class ProductApiControllerSpec extends Specification {
 		def apiService = controller.apiService = Mock(ApiService)
 		controller.productService = Stub(ProductService)
 
-		def user = request.apiUser = new SecUser()
+		def user = request.apiUser = new User()
 
 		params.id = "product-id"
 		request.JSON = [:]
@@ -445,7 +445,7 @@ class ProductApiControllerSpec extends Specification {
 		}
 		def productService = controller.productService = Mock(ProductService)
 
-		def user = request.apiUser = new SecUser()
+		def user = request.apiUser = new User()
 
 		params.id = "product-id"
 		request.JSON = [:]
@@ -464,7 +464,7 @@ class ProductApiControllerSpec extends Specification {
 		}
 		controller.productService = Stub(ProductService)
 
-		def user = request.apiUser = new SecUser()
+		def user = request.apiUser = new User()
 
 		params.id = "product-id"
 		request.JSON = [:]
@@ -482,7 +482,7 @@ class ProductApiControllerSpec extends Specification {
 		def productService = controller.productService = Mock(ProductService)
 		controller.productImageService = Stub(ProductImageService)
 
-		def user = request.apiUser = new SecUser()
+		def user = request.apiUser = new User()
 
 		params.id = "product-id"
 		request.method = "POST"
@@ -500,7 +500,7 @@ class ProductApiControllerSpec extends Specification {
 		def productService = controller.productService = Mock(ProductService)
 		controller.productImageService = Stub(ProductImageService)
 
-		def user = request.apiUser = new SecUser()
+		def user = request.apiUser = new User()
 
 		params.id = "product-id"
 		request.method = "POST"
@@ -556,7 +556,7 @@ class ProductApiControllerSpec extends Specification {
 	void "deployFree() invokes productService#findById (with SHARE permission requirement)"() {
 		def productService = controller.productService = Mock(ProductService)
 		controller.freeProductService = Stub(FreeProductService)
-		def user = new SecUser()
+		def user = new User()
 
 		params.id = "product-id"
 		request.method = "POST"
@@ -577,7 +577,7 @@ class ProductApiControllerSpec extends Specification {
 
 		params.id = "product-id"
 		request.method = "POST"
-		request.apiUser = new SecUser()
+		request.apiUser = new User()
 		when:
 		withFilters(action: "deployFree") {
 			controller.deployFree()
@@ -594,7 +594,7 @@ class ProductApiControllerSpec extends Specification {
 
 		params.id = "product-id"
 		request.method = "POST"
-		request.apiUser = new SecUser()
+		request.apiUser = new User()
 		when:
 		withFilters(action: "deployFree") {
 			controller.deployFree()
@@ -607,7 +607,7 @@ class ProductApiControllerSpec extends Specification {
 	void "undeployFree() invokes productService#findById (with SHARE permission requirement)"() {
 		def productService = controller.productService = Mock(ProductService)
 		controller.freeProductService = Stub(FreeProductService)
-		def user = new SecUser()
+		def user = new User()
 
 		params.id = "product-id"
 		request.method = "POST"
@@ -628,7 +628,7 @@ class ProductApiControllerSpec extends Specification {
 
 		params.id = "product-id"
 		request.method = "POST"
-		request.apiUser = new SecUser()
+		request.apiUser = new User()
 		when:
 		withFilters(action: "undeployFree") {
 			controller.undeployFree()
@@ -645,7 +645,7 @@ class ProductApiControllerSpec extends Specification {
 
 		params.id = "product-id"
 		request.method = "POST"
-		request.apiUser = new SecUser()
+		request.apiUser = new User()
 		when:
 		withFilters(action: "undeployFree") {
 			controller.undeployFree()

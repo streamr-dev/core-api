@@ -2,11 +2,11 @@ package com.unifina.signalpath.utils
 
 import com.streamr.client.protocol.message_layer.StreamMessage
 import com.unifina.domain.data.Stream
-import com.unifina.domain.security.SecUser
+import com.unifina.domain.security.User
 import grails.test.mixin.Mock
 import spock.lang.Specification
 
-@Mock([SecUser])
+@Mock([User])
 class MessageChainUtilSpec extends Specification {
 
 	MessageChainUtil msgChainUtil
@@ -16,7 +16,7 @@ class MessageChainUtilSpec extends Specification {
 	def setup() {
 		stream.id = "streamId"
 		Long userId = 1
-		SecUser user = new SecUser(id: userId, username: 'user').save(failOnError: true, validate: false)
+		User user = new User(id: userId, username: 'user').save(failOnError: true, validate: false)
 		msgChainUtil = new MessageChainUtil(userId)
 		hashedUsername = user.getPublisherId()
 	}

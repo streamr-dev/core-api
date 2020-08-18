@@ -3,7 +3,7 @@ package com.unifina.domain.signalpath
 import com.unifina.domain.ExampleType
 import com.unifina.domain.dashboard.DashboardItem
 import com.unifina.domain.security.Permission
-import com.unifina.domain.security.SecUser
+import com.unifina.domain.security.User
 import com.unifina.utils.IdGenerator
 import grails.converters.JSON
 import grails.persistence.Entity
@@ -48,7 +48,7 @@ class Canvas {
 
 	Serialization serialization
 	// startedBy is set to user who started the canvas.
-	SecUser startedBy
+	User startedBy
 
 	// exampleType marks this Canvas as an example for new users.
 	ExampleType exampleType = ExampleType.NOT_SET

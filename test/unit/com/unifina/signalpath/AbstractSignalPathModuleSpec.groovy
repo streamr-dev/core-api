@@ -4,7 +4,7 @@ package com.unifina.signalpath
 import com.unifina.ModuleTestingSpecification
 import com.unifina.data.Event
 import com.unifina.domain.security.Permission
-import com.unifina.domain.security.SecUser
+import com.unifina.domain.security.User
 import com.unifina.service.PermissionService
 import com.unifina.utils.Globals
 import groovy.transform.CompileStatic
@@ -104,7 +104,7 @@ class AbstractSignalPathModuleSpec extends ModuleTestingSpecification {
 		module.setParentSignalPath(mockSignalPath)
 	}
 
-	private RuntimeResponse sendRuntimeRequest(LinkedHashMap<String, Object> msg, SecUser user) {
+	private RuntimeResponse sendRuntimeRequest(LinkedHashMap<String, Object> msg, User user) {
 		def request = new RuntimeRequest(msg, user, null, "request/1", "request/1", [] as Set)
 		// Will insert an event to the event queue
 		def future = module.onRequest(request, request.getPathReader())
@@ -133,7 +133,7 @@ class AbstractSignalPathModuleSpec extends ModuleTestingSpecification {
 			param: "param",
 			value: -123
 		]
-		def response = sendRuntimeRequest(msg, new SecUser())
+		def response = sendRuntimeRequest(msg, new User())
 
 		then:
 		response == new RuntimeResponse(true, [request: msg])
@@ -164,7 +164,7 @@ class AbstractSignalPathModuleSpec extends ModuleTestingSpecification {
 
 		when:
 		Map msg = [type: "json"]
-		def response = sendRuntimeRequest([type: "json"], new SecUser())
+		def response = sendRuntimeRequest([type: "json"], new User())
 
 		then:
 		response == new RuntimeResponse(true, [request: msg, json: module.configuration])

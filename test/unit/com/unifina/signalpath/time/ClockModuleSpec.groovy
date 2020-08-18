@@ -1,6 +1,7 @@
 package com.unifina.signalpath.time
 
-import com.unifina.domain.security.SecUser
+
+import com.unifina.domain.security.User
 import com.unifina.utils.Globals
 import com.unifina.utils.testutils.ModuleTestHelper
 import spock.lang.Specification
@@ -13,7 +14,7 @@ class ClockModuleSpec extends Specification {
 	ClockModule module
 
     def setup() {
-		globals = new Globals([:], new SecUser(username: "username"))
+		globals = new Globals([:], new User(username: "username"))
 		globals.time = new Date(0)
 		module = new ClockModule()
 		module.globals = globals

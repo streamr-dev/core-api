@@ -8,7 +8,7 @@ import com.unifina.data.StreamPartitioner
 import com.unifina.domain.data.Stream
 import com.unifina.domain.security.IntegrationKey
 import com.unifina.domain.security.Permission
-import com.unifina.domain.security.SecUser
+import com.unifina.domain.security.User
 import com.unifina.domain.task.Task
 import com.unifina.feed.DataRange
 import com.unifina.feed.FieldDetector
@@ -50,7 +50,7 @@ class StreamService {
 		return Stream.findByUiChannelPath(uiChannelPath)
 	}
 
-	Stream createStream(Map params, SecUser user, String id = IdGenerator.getShort()) {
+	Stream createStream(Map params, User user, String id = IdGenerator.getShort()) {
 		Stream stream = new Stream(params)
 		stream.id = id
 		stream.config = params.config
@@ -134,7 +134,7 @@ class StreamService {
 
 	Set<String> getStreamEthereumPublishers(Stream stream) {
 		// This approach might be slow if there are a lot of allowed writers to the Stream
-		List<SecUser> writers = permissionService.getPermissionsTo(stream, Permission.Operation.STREAM_PUBLISH)*.user
+		List<User> writers = permissionService.getPermissionsTo(stream, Permission.Operation.STREAM_PUBLISH)*.user
 
 		List<IntegrationKey> keys = IntegrationKey.createCriteria().list {
 			user {
@@ -158,7 +158,7 @@ class StreamService {
 
 	Set<String> getStreamEthereumSubscribers(Stream stream) {
 		// This approach might be slow if there are a lot of allowed readers to the Stream
-		List<SecUser> readers = permissionService.getPermissionsTo(stream, Permission.Operation.STREAM_SUBSCRIBE)*.user
+		List<User> readers = permissionService.getPermissionsTo(stream, Permission.Operation.STREAM_SUBSCRIBE)*.user
 
 		List<IntegrationKey> keys = IntegrationKey.createCriteria().list {
 			user {
@@ -180,7 +180,7 @@ class StreamService {
 		return permissionService.check(key.user, stream, Permission.Operation.STREAM_SUBSCRIBE)
 	}
 
-	List<Stream> getInboxStreams(List<SecUser> users) {
+	List<Stream> getInboxStreams(List<User> users) {
 		if (users.isEmpty()) return new ArrayList<Stream>()
 		List<IntegrationKey> keys = IntegrationKey.createCriteria().list {
 			user {
@@ -219,7 +219,7 @@ class StreamService {
 	}
 
 	@CompileStatic
-	def addExampleStreams(SecUser user, List<Stream> examples) {
+	def addExampleStreams(User user, List<Stream> examples) {
 		for (final Stream example : examples) {
 			// Grant read permission to example stream.
 			permissionService.systemGrant(user, example, Permission.Operation.STREAM_GET)

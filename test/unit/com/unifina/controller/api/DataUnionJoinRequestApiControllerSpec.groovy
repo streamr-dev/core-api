@@ -2,7 +2,7 @@ package com.unifina.controller.api
 
 import com.unifina.api.*
 import com.unifina.domain.dataunion.DataUnionJoinRequest
-import com.unifina.domain.security.SecUser
+import com.unifina.domain.security.User
 import com.unifina.filters.UnifinaCoreAPIFilters
 import com.unifina.service.DataUnionJoinRequestService
 import com.unifina.service.EthereumService
@@ -11,14 +11,14 @@ import grails.test.mixin.TestFor
 import spock.lang.Specification
 
 @TestFor(DataUnionJoinRequestApiController)
-@Mock([UnifinaCoreAPIFilters, SecUser, DataUnionJoinRequest])
+@Mock([UnifinaCoreAPIFilters, User, DataUnionJoinRequest])
 class DataUnionJoinRequestApiControllerSpec extends Specification {
-	SecUser me
+	User me
 	final String contractAddress = "0x6c90aece04198da2d5ca9b956b8f95af8041de37"
 	final String validID = "L-TvrBkyQTS_JK1ABHFEZAaZ3FHq7-TPqMXe9JNz1x6g"
 
     def setup() {
-		me = new SecUser(id: 1, name: "firstname lastname", username: "firstname.lastname@address.com", password: "salasana")
+		me = new User(id: 1, name: "firstname lastname", username: "firstname.lastname@address.com", password: "salasana")
 		me.save(validate: true, failOnError: true)
 		controller.dataUnionJoinRequestService = Mock(DataUnionJoinRequestService)
 		controller.ethereumService = Mock(EthereumService)

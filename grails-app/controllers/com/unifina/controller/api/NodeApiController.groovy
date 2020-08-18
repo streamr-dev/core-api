@@ -3,7 +3,7 @@ package com.unifina.controller.api
 import com.unifina.api.ApiException
 import com.unifina.api.node.NodeRequest
 import com.unifina.api.node.NodeRequestDispatcher
-import com.unifina.domain.security.SecUser
+import com.unifina.domain.security.User
 import com.unifina.domain.signalpath.Canvas
 import com.unifina.security.AllowRole
 import com.unifina.security.StreamrApi
@@ -97,7 +97,7 @@ class NodeApiController {
 		taskService.stopAllTaskWorkers()
 
 		// Get users of running canvases
-		Map<String, SecUser> canvasIdToUser = signalPathService.getUsersOfRunningCanvases()
+		Map<String, User> canvasIdToUser = signalPathService.getUsersOfRunningCanvases()
 
 		// Stop all canvases
 		List<Canvas> stoppedCanvases = signalPathService.stopAllLocalCanvases()

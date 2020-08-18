@@ -1,7 +1,6 @@
 package com.unifina.controller.api
 
 import com.unifina.ControllerSpecification
-import com.unifina.api.ApiException
 import com.unifina.api.ChallengeVerificationFailedException
 import com.unifina.api.DisabledUserException
 import com.unifina.api.InvalidAPIKeyException
@@ -9,7 +8,7 @@ import com.unifina.api.InvalidArgumentsException
 import com.unifina.api.InvalidUsernameAndPasswordException
 import com.unifina.security.Challenge
 import com.unifina.domain.security.Key
-import com.unifina.domain.security.SecUser
+import com.unifina.domain.security.User
 import com.unifina.security.SessionToken
 import com.unifina.service.ChallengeService
 import com.unifina.service.EthereumIntegrationKeyService
@@ -25,17 +24,17 @@ import java.text.SimpleDateFormat
  * See the API for {@link grails.test.mixin.web.ControllerUnitTestMixin} for usage instructions
  */
 @TestFor(LoginApiController)
-@Mock([SecUser, Key])
+@Mock([User, Key])
 class LoginApiControllerSpec extends ControllerSpecification {
 	ChallengeService challengeService
 	SessionService sessionService
 	EthereumIntegrationKeyService ethereumIntegrationKeyService
 	UserService userService
 	DateFormat df
-	SecUser me
+    User me
 
 	def setup() {
-		me = new SecUser().save(failOnError: true, validate: false)
+		me = new User().save(failOnError: true, validate: false)
 		df = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'")
 		df.setTimeZone(TimeZone.getTimeZone("UTC"))
 		challengeService = controller.challengeService = Mock(ChallengeService)
@@ -64,7 +63,7 @@ class LoginApiControllerSpec extends ControllerSpecification {
 
 		Challenge challenge = new Challenge("id", "challenge", challengeService.TTL_SECONDS)
 
-		SecUser user = new SecUser(
+		User user = new User(
 			username: "username",
 			password: "password",
 			name: "name",
@@ -123,7 +122,7 @@ class LoginApiControllerSpec extends ControllerSpecification {
 
 		Challenge challenge = new Challenge("id", "challenge", challengeService.TTL_SECONDS)
 
-		SecUser user = new SecUser(
+		User user = new User(
 			enabled: false
 		).save(failOnError: true, validate: false)
 
@@ -146,7 +145,7 @@ class LoginApiControllerSpec extends ControllerSpecification {
 	}
 
 	def "password-based login should pass"() {
-		SecUser user = new SecUser(
+		User user = new User(
 			username: "username",
 			password: "password"
 		).save(failOnError: true, validate: false)
@@ -186,7 +185,7 @@ class LoginApiControllerSpec extends ControllerSpecification {
 	}
 
 	def "password-based login should fail if disabled user"() {
-		SecUser user = new SecUser(
+		User user = new User(
 			username: "username",
 			password: "password",
 			enabled: false,
@@ -206,7 +205,7 @@ class LoginApiControllerSpec extends ControllerSpecification {
 	}
 
 	def "apikey-based login should pass"() {
-		SecUser user = new SecUser(
+		User user = new User(
 			username: "username",
 			password: "password"
 		).save(failOnError: true, validate: false)
@@ -268,7 +267,7 @@ class LoginApiControllerSpec extends ControllerSpecification {
 	}
 
 	def "apikey-based login should fail if disabled user"() {
-		SecUser user = new SecUser(
+		User user = new User(
 			enabled: false,
 		).save(failOnError: true, validate: false)
 

@@ -1,27 +1,25 @@
 package com.unifina.controller.api
 
 import com.unifina.ControllerSpecification
-import com.unifina.api.ApiException
-import com.unifina.api.NotFoundException
 import com.unifina.security.Challenge
 import com.unifina.domain.security.IntegrationKey
 import com.unifina.domain.security.Key
-import com.unifina.domain.security.SecUser
+import com.unifina.domain.security.User
 import com.unifina.service.EthereumIntegrationKeyService
 import grails.converters.JSON
 import grails.test.mixin.Mock
 import grails.test.mixin.TestFor
 
 @TestFor(IntegrationKeyApiController)
-@Mock([Key, SecUser, IntegrationKey])
+@Mock([Key, User, IntegrationKey])
 class IntegrationKeyApiControllerSpec extends ControllerSpecification {
 	EthereumIntegrationKeyService ethereumIntegrationKeyService
-	SecUser me
-	SecUser someoneElse
+	User me
+    User someoneElse
 
 	def setup() {
-		me = new SecUser().save(failOnError: true, validate: false)
-		someoneElse = new SecUser().save(failOnError: true, validate: false)
+		me = new User().save(failOnError: true, validate: false)
+		someoneElse = new User().save(failOnError: true, validate: false)
 
 		Key key = new Key(name: "key", user: me)
 		key.id = "myApiKey"

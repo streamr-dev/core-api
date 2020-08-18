@@ -9,7 +9,7 @@ import com.unifina.domain.data.Stream
 import com.unifina.domain.security.IntegrationKey
 import com.unifina.domain.security.Key
 import com.unifina.domain.security.Permission
-import com.unifina.domain.security.SecUser
+import com.unifina.domain.security.User
 import com.unifina.domain.signalpath.Canvas
 import com.unifina.utils.TestUtils
 import grails.test.mixin.Mock
@@ -19,12 +19,12 @@ import org.springframework.context.ApplicationContext
 import spock.lang.Specification
 
 @TestFor(StreamService)
-@Mock([Canvas, Dashboard, DashboardItem, Stream, SecUser, Key, IntegrationKey, Permission, PermissionService])
+@Mock([Canvas, Dashboard, DashboardItem, Stream, User, Key, IntegrationKey, Permission, PermissionService])
 class StreamServiceSpec extends Specification {
 
 	DashboardService dashboardService = Mock(DashboardService)
 
-	SecUser me = new SecUser(username: "me")
+	User me = new User(username: "me")
 
 	def setup() {
 		// Setup application context
@@ -138,16 +138,16 @@ class StreamServiceSpec extends Specification {
 	void "getStreamEthereumPublishers should return Ethereum addresses of users with write permission to the Stream"() {
 		setup:
 		service.permissionService = Mock(PermissionService)
-		SecUser user1 = new SecUser(id: 1, username: "u1").save(failOnError: true, validate: false)
+		User user1 = new User(id: 1, username: "u1").save(failOnError: true, validate: false)
 		IntegrationKey key1 = new IntegrationKey(user: user1, service: IntegrationKey.Service.ETHEREUM_ID,
 			idInService: "0x9fe1ae3f5efe2a01eca8c2e9d3c11102cf4bea57").save(failOnError: true, validate: false)
-		SecUser user2 = new SecUser(id: 2, username: "u2").save(failOnError: true, validate: false)
+		User user2 = new User(id: 2, username: "u2").save(failOnError: true, validate: false)
 		IntegrationKey key2 = new IntegrationKey(user: user2, service: IntegrationKey.Service.ETHEREUM,
 			idInService: "0x26e1ae3f5efe8a01eca8c2e9d3c32702cf4bead6").save(failOnError: true, validate: false)
-		SecUser user3 = new SecUser(id: 3, username: "u3").save(failOnError: true, validate: false)
+		User user3 = new User(id: 3, username: "u3").save(failOnError: true, validate: false)
 
 		// User with key but no write permission - this key should not be returned by the query
-		SecUser userWithKeyButNoPermission = new SecUser(id: 4, username: "u4").save(failOnError: true, validate: false)
+		User userWithKeyButNoPermission = new User(id: 4, username: "u4").save(failOnError: true, validate: false)
 		new IntegrationKey(user: userWithKeyButNoPermission, service: IntegrationKey.Service.ETHEREUM_ID,
 			idInService: "0x12345e3f5efe8a01eca8c2e9d3c32702cf4bead6").save(failOnError: true, validate: false)
 
@@ -171,11 +171,11 @@ class StreamServiceSpec extends Specification {
 	void "isStreamEthereumPublisher should return true iff user has write permission to the stream"() {
 		setup:
 		service.permissionService = Mock(PermissionService)
-		SecUser user1 = new SecUser(id: 1, username: "u1").save(failOnError: true, validate: false)
+		User user1 = new User(id: 1, username: "u1").save(failOnError: true, validate: false)
 		String address1 = "0x9fe1ae3f5efe2a01eca8c2e9d3c11102cf4bea57"
 		new IntegrationKey(user: user1, service: IntegrationKey.Service.ETHEREUM_ID,
 			idInService: address1).save(failOnError: true, validate: false)
-		SecUser user2 = new SecUser(id: 2, username: "u2").save(failOnError: true, validate: false)
+		User user2 = new User(id: 2, username: "u2").save(failOnError: true, validate: false)
 		String address2 = "0x26e1ae3f5efe8a01eca8c2e9d3c32702cf4bead6"
 		new IntegrationKey(user: user2, service: IntegrationKey.Service.ETHEREUM,
 			idInService: address2).save(failOnError: true, validate: false)
@@ -199,16 +199,16 @@ class StreamServiceSpec extends Specification {
 	void "getStreamEthereumSubscribers should return Ethereum addresses of users with stream_get permission to the Stream"() {
 		setup:
 		service.permissionService = Mock(PermissionService)
-		SecUser user1 = new SecUser(id: 1, username: "u1").save(failOnError: true, validate: false)
+		User user1 = new User(id: 1, username: "u1").save(failOnError: true, validate: false)
 		IntegrationKey key1 = new IntegrationKey(user: user1, service: IntegrationKey.Service.ETHEREUM_ID,
 			idInService: "0x9fe1ae3f5efe2a01eca8c2e9d3c11102cf4bea57").save(failOnError: true, validate: false)
-		SecUser user2 = new SecUser(id: 2, username: "u2").save(failOnError: true, validate: false)
+		User user2 = new User(id: 2, username: "u2").save(failOnError: true, validate: false)
 		IntegrationKey key2 = new IntegrationKey(user: user2, service: IntegrationKey.Service.ETHEREUM,
 			idInService: "0x26e1ae3f5efe8a01eca8c2e9d3c32702cf4bead6").save(failOnError: true, validate: false)
-		SecUser user3 = new SecUser(id: 3, username: "u3").save(failOnError: true, validate: false)
+		User user3 = new User(id: 3, username: "u3").save(failOnError: true, validate: false)
 
 		// User with key but no read permission - this key should not be returned by the query
-		SecUser userWithKeyButNoPermission = new SecUser(id: 4, username: "u4").save(failOnError: true, validate: false)
+		User userWithKeyButNoPermission = new User(id: 4, username: "u4").save(failOnError: true, validate: false)
 		new IntegrationKey(user: userWithKeyButNoPermission, service: IntegrationKey.Service.ETHEREUM_ID,
 			idInService: "0x12345e3f5efe8a01eca8c2e9d3c32702cf4bead6").save(failOnError: true, validate: false)
 
@@ -232,11 +232,11 @@ class StreamServiceSpec extends Specification {
 	void "isStreamEthereumSubscriber should return true iff user has stream_get permission to the stream"() {
 		setup:
 		service.permissionService = Mock(PermissionService)
-		SecUser user1 = new SecUser(id: 1, username: "u1").save(failOnError: true, validate: false)
+		User user1 = new User(id: 1, username: "u1").save(failOnError: true, validate: false)
 		String address1 = "0x9fe1ae3f5efe2a01eca8c2e9d3c11102cf4bea57"
 		new IntegrationKey(user: user1, service: IntegrationKey.Service.ETHEREUM_ID,
 			idInService: address1).save(failOnError: true, validate: false)
-		SecUser user2 = new SecUser(id: 2, username: "u2").save(failOnError: true, validate: false)
+		User user2 = new User(id: 2, username: "u2").save(failOnError: true, validate: false)
 		String address2 = "0x26e1ae3f5efe8a01eca8c2e9d3c32702cf4bead6"
 		new IntegrationKey(user: user2, service: IntegrationKey.Service.ETHEREUM,
 			idInService: address2).save(failOnError: true, validate: false)
@@ -256,15 +256,15 @@ class StreamServiceSpec extends Specification {
 	}
 
 	void "getInboxStreams() returns all inbox streams of the users"() {
-		SecUser user1 = new SecUser(id: 1, username: "u1").save(failOnError: true, validate: false)
+		User user1 = new User(id: 1, username: "u1").save(failOnError: true, validate: false)
 		IntegrationKey key1 = new IntegrationKey(user: user1, service: IntegrationKey.Service.ETHEREUM_ID,
 			idInService: "0x9fe1ae3f5efe2a01eca8c2e9d3c11102cf4bea57").save(failOnError: true, validate: false)
-		SecUser user2 = new SecUser(id: 2, username: "u2").save(failOnError: true, validate: false)
+		User user2 = new User(id: 2, username: "u2").save(failOnError: true, validate: false)
 		IntegrationKey key2 = new IntegrationKey(user: user2, service: IntegrationKey.Service.ETHEREUM,
 			idInService: "0x26e1ae3f5efe8a01eca8c2e9d3c32702cf4bead6").save(failOnError: true, validate: false)
 		IntegrationKey key3 = new IntegrationKey(user: user2, service: IntegrationKey.Service.ETHEREUM,
 			idInService: "0xfff1ae3f5efe8a01eca8c25933c32702cf4b1121").save(failOnError: true, validate: false)
-		SecUser user3 = new SecUser(id: 3, username: "u3").save(failOnError: true, validate: false)
+		User user3 = new User(id: 3, username: "u3").save(failOnError: true, validate: false)
 
 		Stream s1 = new Stream(name: key1.idInService, inbox: true)
 		s1.id = key1.idInService

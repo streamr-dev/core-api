@@ -8,7 +8,7 @@ import com.unifina.api.ValidationException
 import com.unifina.domain.dashboard.Dashboard
 import com.unifina.domain.dashboard.DashboardItem
 import com.unifina.domain.security.Key
-import com.unifina.domain.security.SecUser
+import com.unifina.domain.security.User
 import com.unifina.domain.signalpath.Canvas
 import com.unifina.service.ApiService
 import com.unifina.service.DashboardService
@@ -17,19 +17,19 @@ import grails.test.mixin.Mock
 import grails.test.mixin.TestFor
 
 @TestFor(DashboardApiController)
-@Mock([Canvas, Dashboard, DashboardItem, Key, SecUser])
+@Mock([Canvas, Dashboard, DashboardItem, Key, User])
 class DashboardApiControllerSpec extends ControllerSpecification {
 
 	ApiService apiService
 	DashboardService dashboardService
-	SecUser me
+	User me
 	List<Dashboard> dashboards
 
 	def setup() {
 		dashboardService = controller.dashboardService = Mock(DashboardService)
 		controller.apiService = apiService = Mock(ApiService)
 
-		me = new SecUser().save(failOnError: true, validate: false)
+		me = new User().save(failOnError: true, validate: false)
 		dashboards = initDashboards()
 
 		def key = new Key(user: me, name: "my key")
@@ -229,7 +229,7 @@ class DashboardApiControllerSpec extends ControllerSpecification {
 		then:
 		response.status == 200
 		response.json.a == 1
-		1 * dashboardService.update("4", _, me) >> { String id, SaveDashboardCommand command, SecUser user ->
+		1 * dashboardService.update("4", _, me) >> { String id, SaveDashboardCommand command, User user ->
 			command.name == "new dashboard"
 			return dashboard
 		}

@@ -1,7 +1,7 @@
 package com.unifina
 
 import com.unifina.datasource.DataSource
-import com.unifina.domain.security.SecUser
+import com.unifina.domain.security.User
 import com.unifina.signalpath.AbstractSignalPathModule
 import com.unifina.signalpath.SignalPath
 import com.unifina.utils.Globals
@@ -25,7 +25,7 @@ class ModuleTestingSpecification extends BeanMockingSpecification {
 		return module
 	}
 
-	protected Globals mockGlobals(Map context=[:], SecUser user = new SecUser(username: 'user', timezone: "UTC"), Globals.Mode mode = Globals.Mode.REALTIME) {
+	protected Globals mockGlobals(Map context=[:], User user = new User(username: 'user', timezone: "UTC"), Globals.Mode mode = Globals.Mode.REALTIME) {
 		if (mode == Globals.Mode.HISTORICAL) {
 			context.beginDate = context.beginDate ?: new Date().getTime()
 			context.endDate = context.endDate ?: new Date().getTime()

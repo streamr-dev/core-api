@@ -2,7 +2,7 @@ package com.unifina.service
 
 import com.unifina.api.ApiException
 import com.unifina.domain.security.IntegrationKey
-import com.unifina.domain.security.SecUser
+import com.unifina.domain.security.User
 import grails.test.mixin.TestMixin
 import grails.test.mixin.support.GrailsUnitTestMixin
 
@@ -17,12 +17,12 @@ import java.util.concurrent.ExecutionException
 @FreshRuntime
 @TestMixin(GrailsUnitTestMixin)
 @TestFor(BalanceService)
-@Mock([SecUser, IntegrationKey])
+@Mock([User, IntegrationKey])
 class BalanceServiceSpec extends Specification {
 	def address = "0x494531425508c4Bc95E522b24fd571461583E916"
 	def address2 = "0x0000000000000000000000000000000000000001"
 
-	SecUser me
+	User me
 
 	static doWithConfig(c) {
 		c.streamr.ethereum.datacoinAddress = "0x0000000000000000000000000000000000000001"
@@ -30,7 +30,7 @@ class BalanceServiceSpec extends Specification {
 
 	def setup() {
 		service.web3jHelperService = Mock(Web3jHelperService)
-		me = new SecUser(name: "me", username: "me@too.com").save(validate: false)
+		me = new User(name: "me", username: "me@too.com").save(validate: false)
     }
 
     void "gets balances of keys a user has"() {

@@ -5,7 +5,7 @@ import com.unifina.domain.data.Stream
 import com.unifina.domain.security.Key
 import com.unifina.domain.security.Permission
 import com.unifina.domain.security.Permission.Operation
-import com.unifina.domain.security.SecUser
+import com.unifina.domain.security.User
 import com.unifina.feed.DataRange
 import com.unifina.security.AuthLevel
 import com.unifina.security.StreamrApi
@@ -31,7 +31,7 @@ class StreamApiController {
 		if (params.public) {
 			listParams.publicAccess = params.boolean("public")
 		}
-		def results = apiService.list(Stream, listParams, (SecUser) request.apiUser)
+		def results = apiService.list(Stream, listParams, (User) request.apiUser)
 		apiService.addLinkHintToHeader(listParams, results.size(), params, response)
 		if (params.noConfig) {
 			render(results*.toSummaryMap() as JSON)
@@ -115,7 +115,7 @@ class StreamApiController {
 
 	@StreamrApi(authenticationLevel = AuthLevel.KEY)
 	def setFields(String id) {
-		Userish u = request.apiUser != null ? (SecUser) request.apiUser : (Key) request.apiKey
+		Userish u = request.apiUser != null ? (User) request.apiUser : (Key) request.apiKey
 		Stream stream = apiService.authorizedGetById(Stream, id, u, Operation.STREAM_EDIT)
 		def givenFields = request.JSON
 
@@ -136,7 +136,7 @@ class StreamApiController {
 		multipartFile.transferTo(temporaryFile)
 
 		try {
-			def result = csvUploadService.uploadCsvFile(temporaryFile, id, (SecUser) request.apiUser)
+			def result = csvUploadService.uploadCsvFile(temporaryFile, id, (User) request.apiUser)
 			render(result as JSON)
 		} catch (Exception e) {
 			if (temporaryFile != null && temporaryFile.exists()) {
@@ -152,7 +152,7 @@ class StreamApiController {
 
 	@StreamrApi
 	def confirmCsvFileUpload(String id, CsvParseInstructions instructions) {
-		Stream stream = csvUploadService.parseAndConsumeCsvFile(instructions, id, (SecUser) request.apiUser)
+		Stream stream = csvUploadService.parseAndConsumeCsvFile(instructions, id, (User) request.apiUser)
 		render(stream.toMap() as JSON)
 	}
 

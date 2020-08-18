@@ -2,7 +2,7 @@ package com.unifina.security;
 
 import com.unifina.api.InvalidSessionTokenException;
 import com.unifina.domain.security.Key;
-import com.unifina.domain.security.SecUser;
+import com.unifina.domain.security.User;
 import com.unifina.service.SessionService;
 import grails.util.Holders;
 import org.codehaus.groovy.runtime.InvokerHelper;
@@ -89,8 +89,8 @@ public class TokenAuthenticator {
 		}
 		try {
 			Userish userish = sessionService.getUserishFromToken(token);
-			if (userish instanceof SecUser) {
-				return new AuthenticationResult((SecUser) userish);
+			if (userish instanceof User) {
+				return new AuthenticationResult((User) userish);
 			} else if (userish instanceof Key) {
 				return new AuthenticationResult((Key) userish);
 			} else {

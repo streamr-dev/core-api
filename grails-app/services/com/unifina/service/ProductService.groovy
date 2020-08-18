@@ -5,7 +5,7 @@ import com.unifina.api.*
 import com.unifina.domain.data.Stream
 import com.unifina.domain.marketplace.Product
 import com.unifina.domain.security.Permission
-import com.unifina.domain.security.SecUser
+import com.unifina.domain.security.User
 import grails.compiler.GrailsCompileStatic
 
 import java.text.SimpleDateFormat
@@ -75,14 +75,14 @@ class ProductService {
 		return staleProducts
 	}
 
-	Map<SecUser, List<ProductService.StaleProduct>> findStaleProductsByOwner(SecUser user) {
+	Map<User, List<ProductService.StaleProduct>> findStaleProductsByOwner(User user) {
 		List<Product> products = list(new ProductListParams(publicAccess: true), user)
 		List<ProductService.StaleProduct> staleProducts = findStaleProducts(products, new Date())
-		Map<SecUser, List<ProductService.StaleProduct>> staleProductsByOwner = staleProducts.groupBy { StaleProduct sp -> sp.product.owner }
+		Map<User, List<ProductService.StaleProduct>> staleProductsByOwner = staleProducts.groupBy { StaleProduct sp -> sp.product.owner }
 		return staleProductsByOwner
 	}
 
-	List<Product> relatedProducts(Product product, int maxResults, SecUser user) {
+	List<Product> relatedProducts(Product product, int maxResults, User user) {
 		// find Product.owner's other products
 		ListParams params = new ProductListParams(productOwner: product.owner, max: maxResults, publicAccess: true)
 		Set<Product> all = new HashSet<Product>(list(params, user))
@@ -104,7 +104,7 @@ class ProductService {
 	}
 
 	void removeUsersProducts(String username) {
-		def user = SecUser.findByUsername(username)
+		def user = User.findByUsername(username)
 		def all = Product.findAllByOwner(user)
 		all.toArray().each { Product product ->
 			product.streams.toArray().each { Stream stream ->
@@ -115,7 +115,7 @@ class ProductService {
 		}
 	}
 
-	List<Product> list(ProductListParams listParams, SecUser currentUser) {
+	List<Product> list(ProductListParams listParams, User currentUser) {
 		if (listParams.sortBy == null) { // By default, order by score
 			listParams.sortBy = "score"
 			listParams.order = "desc"
@@ -123,12 +123,12 @@ class ProductService {
 		apiService.list(Product, listParams, currentUser)
 	}
 
-	Product findById(String id, SecUser currentUser, Permission.Operation op)
+	Product findById(String id, User currentUser, Permission.Operation op)
 			throws NotFoundException, NotPermittedException {
 		apiService.authorizedGetById(Product, id, currentUser, op)
 	}
 
-	Product create(CreateProductCommand command, SecUser currentUser)
+	Product create(CreateProductCommand command, User currentUser)
 			throws ValidationException, NotPermittedException {
 		if (command.name == null || command.name.trim() == "") {
 			command.name = Product.DEFAULT_NAME
@@ -155,7 +155,7 @@ class ProductService {
 		return product
 	}
 
-	Product update(String id, UpdateProductCommand command, SecUser currentUser) {
+	Product update(String id, UpdateProductCommand command, User currentUser) {
 		if (!command.validate()) {
 			throw new ValidationException(command.errors)
 		}
@@ -185,7 +185,7 @@ class ProductService {
 		return product
 	}
 
-	void addStreamToProduct(Product product, Stream stream, SecUser currentUser)
+	void addStreamToProduct(Product product, Stream stream, User currentUser)
 			throws ValidationException, NotPermittedException {
 		permissionService.verify(currentUser, stream, Permission.Operation.STREAM_SHARE)
 		product.streams.add(stream)
@@ -196,8 +196,8 @@ class ProductService {
 			permissionService.systemGrantAnonymousAccess(stream, Permission.Operation.STREAM_SUBSCRIBE)
 		}
 		if (product.type == Product.Type.DATAUNION) {
-			Set<SecUser> users = dataUnionJoinRequestService.findMembers(product.beneficiaryAddress)
-			for (SecUser u : users) {
+			Set<User> users = dataUnionJoinRequestService.findMembers(product.beneficiaryAddress)
+			for (User u : users) {
 				if (!permissionService.check(u, stream, Permission.Operation.STREAM_PUBLISH)) {
 					permissionService.systemGrant(u, stream, Permission.Operation.STREAM_PUBLISH)
 				}
@@ -215,8 +215,8 @@ class ProductService {
 			permissionService.systemRevokeAnonymousAccess(stream, Permission.Operation.STREAM_SUBSCRIBE)
 		}
 		if (product.type == Product.Type.DATAUNION) {
-			Set<SecUser> users = dataUnionJoinRequestService.findMembers(product.beneficiaryAddress)
-			for (SecUser u : users) {
+			Set<User> users = dataUnionJoinRequestService.findMembers(product.beneficiaryAddress)
+			for (User u : users) {
 				if (permissionService.check(u, stream, Permission.Operation.STREAM_PUBLISH)) {
 					permissionService.systemRevoke(u, stream, Permission.Operation.STREAM_PUBLISH)
 				}
@@ -234,7 +234,7 @@ class ProductService {
 		}
 	}
 
-	boolean markAsDeployed(Product product, ProductDeployedCommand command, SecUser currentUser) {
+	boolean markAsDeployed(Product product, ProductDeployedCommand command, User currentUser) {
 		if (!command.validate()) {
 			throw new ValidationException(command.errors)
 		}
@@ -253,7 +253,7 @@ class ProductService {
 		return true
 	}
 
-	boolean updatePricing(Product product, SetPricingCommand command, SecUser currentUser) {
+	boolean updatePricing(Product product, SetPricingCommand command, User currentUser) {
 		if (!command.validate()) {
 			throw new ValidationException(command.errors)
 		}
@@ -279,7 +279,7 @@ class ProductService {
 		}
 	}
 
-	boolean markAsUndeployed(Product product, ProductUndeployedCommand command, SecUser currentUser) {
+	boolean markAsUndeployed(Product product, ProductUndeployedCommand command, User currentUser) {
 		if (!command.validate()) {
 			throw new ValidationException(command.errors)
 		}
@@ -298,7 +298,7 @@ class ProductService {
 		return true
 	}
 
-	private static void verifyDevops(SecUser currentUser) {
+	private static void verifyDevops(User currentUser) {
 		if (!currentUser.isDevOps()) {
 			throw new NotPermittedException("DevOps role required")
 		}

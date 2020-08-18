@@ -4,7 +4,7 @@ import com.unifina.api.DashboardListParams
 import com.unifina.api.SaveDashboardCommand
 import com.unifina.api.ValidationException
 import com.unifina.domain.dashboard.Dashboard
-import com.unifina.domain.security.SecUser
+import com.unifina.domain.security.User
 import com.unifina.security.AuthLevel
 import com.unifina.security.StreamrApi
 import com.unifina.service.*
@@ -21,14 +21,14 @@ class DashboardApiController {
 		if (params.public != null) {
 			listParams.publicAccess = params.boolean("public")
 		}
-		def results = apiService.list(Dashboard, listParams, (SecUser) request.apiUser)
+		def results = apiService.list(Dashboard, listParams, (User) request.apiUser)
 		apiService.addLinkHintToHeader(listParams, results.size(), params, response)
 		render(results*.toMap() as JSON)
 	}
 
 	@StreamrApi
 	def show(String id) {
-		def dashboard = dashboardService.findById(id, (SecUser) request.apiUser)
+		def dashboard = dashboardService.findById(id, (User) request.apiUser)
 		render(dashboard.toMap() as JSON)
 	}
 
@@ -52,7 +52,7 @@ class DashboardApiController {
 
 	@StreamrApi
 	def delete(String id) {
-		dashboardService.deleteById(id, (SecUser) request.apiUser)
+		dashboardService.deleteById(id, (User) request.apiUser)
 		render(status: 204)
 	}
 

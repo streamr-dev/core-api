@@ -4,7 +4,7 @@ import com.unifina.ControllerSpecification
 import com.unifina.api.ApiException
 import com.unifina.api.InvalidUsernameAndPasswordException
 import com.unifina.domain.security.Key
-import com.unifina.domain.security.SecUser
+import com.unifina.domain.security.User
 import com.unifina.filters.UnifinaCoreAPIFilters
 import com.unifina.security.PasswordEncoder
 import com.unifina.service.SessionService
@@ -17,17 +17,17 @@ import grails.test.mixin.web.FiltersUnitTestMixin
 import org.springframework.mock.web.MockMultipartFile
 
 @TestFor(UserApiController)
-@Mock([SecUser, Key, UnifinaCoreAPIFilters])
+@Mock([User, Key, UnifinaCoreAPIFilters])
 @TestMixin(FiltersUnitTestMixin)
 class UserApiControllerSpec extends ControllerSpecification {
 
-	SecUser me
-	SecUser ethUser
+	User me
+	User ethUser
 	PasswordEncoder passwordEncoder = new UnitTestPasswordEncoder()
 	SessionService sessionService
 
 	def setup() {
-		me = new SecUser(
+		me = new User(
 			name: "me",
 			username: "me@too.com",
 			email: "me@too.com",
@@ -36,7 +36,7 @@ class UserApiControllerSpec extends ControllerSpecification {
 		)
 		me.id = 1
 		me.save(validate: false)
-		ethUser = new SecUser(
+		ethUser = new User(
 			name: "eth",
 			username: "0x0000000000000000000000000000000000000000",
 			email: "eth@eth.com",
@@ -140,6 +140,7 @@ class UserApiControllerSpec extends ControllerSpecification {
 
 		then: "values must be updated and show update message"
 		1 * sessionService.getUserishFromToken("token") >> request.apiUser
+		User.get(1).name == "Changed Name"
 		response.json.name == "Changed Name"
 		response.json.email == "changed@emailaddress.com"
 		response.json.username == "changed@emailaddress.com"
@@ -164,9 +165,9 @@ class UserApiControllerSpec extends ControllerSpecification {
 
 		then:
 		1 * sessionService.getUserishFromToken("token") >> request.apiUser
-		SecUser.get(1).username == "me@too.com"
+		User.get(1).username == "me@too.com"
 		response.json.username == "me@too.com"
-		SecUser.get(1).enabled
+		User.get(1).enabled
 	}
 
 	void "submitting valid content in user password change form must change user password"() {
@@ -174,7 +175,7 @@ class UserApiControllerSpec extends ControllerSpecification {
 		def cmd = new ChangePasswordCommand(username: me.username, currentpassword: "foobar123!", password: "barbar123!", password2: "barbar123!")
 		cmd.passwordEncoder = passwordEncoder
 		cmd.userService = new UserService() {
-			SecUser getUserFromUsernameAndPassword(String username, String password) throws InvalidUsernameAndPasswordException {
+			User getUserFromUsernameAndPassword(String username, String password) throws InvalidUsernameAndPasswordException {
 				return me
 			}
 		}
@@ -183,7 +184,7 @@ class UserApiControllerSpec extends ControllerSpecification {
 			controller.changePassword(cmd)
 		}
 		then: "password must be changed"
-		cmd.passwordEncoder.isPasswordValid(SecUser.get(me.id).password, "barbar123!")
+		cmd.passwordEncoder.isPasswordValid(User.get(me.id).password, "barbar123!")
 		then:
 		response.status == 204
 	}
@@ -191,7 +192,7 @@ class UserApiControllerSpec extends ControllerSpecification {
 	void "uploadAvatarImage() responds with 400 and PARAMETER_MISSING if file not given"() {
 		setup:
 		controller.userAvatarImageService = Mock(UserAvatarImageService)
-		request.apiUser = new SecUser(username: "foo@ƒoo.bar")
+		request.apiUser = new User(username: "foo@ƒoo.bar")
 		request.method = "POST"
 		request.requestURI = "/api/v1/users/me/image"
 		request.addHeader("Authorization", "Bearer token")
@@ -214,7 +215,7 @@ class UserApiControllerSpec extends ControllerSpecification {
 	void "uploadAvatarImage() invokes replaceImage()"() {
 		setup:
 		controller.userAvatarImageService = Mock(UserAvatarImageService)
-		request.apiUser = new SecUser(username: "foo@ƒoo.bar")
+		request.apiUser = new User(username: "foo@ƒoo.bar")
 		request.addHeader("Authorization", "Bearer token")
 		request.method = "POST"
 		request.requestURI = "/api/v1/users/me/image"
@@ -229,7 +230,7 @@ class UserApiControllerSpec extends ControllerSpecification {
 
 		then:
 		1 * sessionService.getUserishFromToken("token") >> request.apiUser
-		1 * controller.userAvatarImageService.replaceImage(request.apiUser as SecUser, bytes, "my-user-avatar-image.jpg")
+		1 * controller.userAvatarImageService.replaceImage(request.apiUser as User, bytes, "my-user-avatar-image.jpg")
 	}
 
 	void "uploadAvatarImage() returns 200 and renders user"() {
@@ -248,7 +249,7 @@ class UserApiControllerSpec extends ControllerSpecification {
 		}
 
 		then:
-		1 * sessionService.getUserishFromToken("token") >> new SecUser(username: "foo@ƒoo.bar")
+		1 * sessionService.getUserishFromToken("token") >> new User(username: "foo@ƒoo.bar")
 		response.status == 200
 		response.json.username == request.apiUser.username
 	}
@@ -268,7 +269,7 @@ class UserApiControllerSpec extends ControllerSpecification {
 			controller.uploadAvatarImage()
 		}
 		then:
-		1 * sessionService.getUserishFromToken("token") >> new SecUser(username: "foo@ƒoo.bar")
+		1 * sessionService.getUserishFromToken("token") >> new User(username: "foo@ƒoo.bar")
 		response.status == 200
 	}
 
@@ -287,7 +288,7 @@ class UserApiControllerSpec extends ControllerSpecification {
 			controller.uploadAvatarImage()
 		}
 		then:
-		1 * sessionService.getUserishFromToken("token") >> new SecUser(username: "foo@ƒoo.bar")
+		1 * sessionService.getUserishFromToken("token") >> new User(username: "foo@ƒoo.bar")
 		response.status == 415
 	}
 
@@ -296,7 +297,7 @@ class UserApiControllerSpec extends ControllerSpecification {
 		def cmd = new ChangePasswordCommand(username: me.username, currentpassword: "invalid", password: "barbar123!", password2: "barbar123!")
 		cmd.passwordEncoder = passwordEncoder
 		cmd.userService = new UserService() {
-			SecUser getUserFromUsernameAndPassword(String username, String password) throws InvalidUsernameAndPasswordException {
+			User getUserFromUsernameAndPassword(String username, String password) throws InvalidUsernameAndPasswordException {
 				throw new InvalidUsernameAndPasswordException("mocked: invalid current password!")
 			}
 		}
@@ -305,7 +306,7 @@ class UserApiControllerSpec extends ControllerSpecification {
 			controller.changePassword(cmd)
 		}
 		then: "the old password must remain valid"
-		cmd.passwordEncoder.isPasswordValid(SecUser.get(me.id).password, "foobar123!")
+		cmd.passwordEncoder.isPasswordValid(User.get(me.id).password, "foobar123!")
 		then:
 		def e = thrown(ApiException)
 		e.message == "Password not changed!"
@@ -318,7 +319,7 @@ class UserApiControllerSpec extends ControllerSpecification {
 		def cmd = new ChangePasswordCommand(username: me.username, currentpassword: "foobar", password: "asd", password2: "asd")
 		cmd.passwordEncoder = passwordEncoder
 		cmd.userService = new UserService() {
-			SecUser getUserFromUsernameAndPassword(String username, String password) throws InvalidUsernameAndPasswordException {
+			User getUserFromUsernameAndPassword(String username, String password) throws InvalidUsernameAndPasswordException {
 				return me
 			}
 		}
@@ -327,7 +328,7 @@ class UserApiControllerSpec extends ControllerSpecification {
 			controller.changePassword(cmd)
 		}
 		then: "the old password must remain valid"
-		cmd.passwordEncoder.isPasswordValid(SecUser.get(me.id).password, "foobar123!")
+		cmd.passwordEncoder.isPasswordValid(User.get(me.id).password, "foobar123!")
 		then:
 		def e = thrown(ApiException)
 		e.message == "Password not changed!"
@@ -340,7 +341,7 @@ class UserApiControllerSpec extends ControllerSpecification {
 		def cmd = new ChangePasswordCommand(currentpassword: "foobar123", password: "asd", password2: "asd")
 		cmd.passwordEncoder = passwordEncoder
 		cmd.userService = new UserService() {
-			SecUser getUserFromUsernameAndPassword(String username, String password) throws InvalidUsernameAndPasswordException {
+			User getUserFromUsernameAndPassword(String username, String password) throws InvalidUsernameAndPasswordException {
 				return me
 			}
 		}
@@ -349,7 +350,7 @@ class UserApiControllerSpec extends ControllerSpecification {
 			controller.changePassword(cmd)
 		}
 		then: "the old password must remain valid"
-		cmd.passwordEncoder.isPasswordValid(SecUser.get(me.id).password, "foobar123!")
+		cmd.passwordEncoder.isPasswordValid(User.get(me.id).password, "foobar123!")
 		then:
 		def e = thrown(ApiException)
 		e.message == "Password not changed!"
