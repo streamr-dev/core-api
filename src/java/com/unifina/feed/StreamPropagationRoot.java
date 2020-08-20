@@ -33,12 +33,7 @@ public class StreamPropagationRoot extends AbstractPropagationRoot<ConfigurableS
 			initCacheMap();
 		}
 
-		Map msg;
-		try {
-			msg = streamMessage.getContent();
-		} catch (IOException e) {
-			msg = new HashMap();
-		}
+		Map msg = streamMessage.getParsedContent();
 
 		for (Map.Entry<String, List<Output>> entry : outputsByName.entrySet()) {
 			String fieldName = entry.getKey();

@@ -3,7 +3,7 @@ package com.unifina.api
 import com.unifina.domain.marketplace.Category
 import com.unifina.domain.marketplace.Product
 import com.unifina.domain.security.Permission
-import com.unifina.domain.security.SecUser
+import com.unifina.domain.security.User
 import grails.validation.Validateable
 
 @Validateable
@@ -12,7 +12,7 @@ class ProductListParams extends ListParams {
 	Set<Product.State> states
 	Long minPrice
 	Long maxPrice
-	SecUser productOwner
+	User productOwner
 
 	ProductListParams() {
 		super()

@@ -3,7 +3,7 @@ package com.unifina.signalpath.kafka;
 import com.streamr.client.StreamrClient;
 import com.unifina.domain.data.Stream;
 import com.unifina.domain.security.Permission;
-import com.unifina.domain.security.SecUser;
+import com.unifina.domain.security.User;
 import com.unifina.service.PermissionService;
 import com.unifina.signalpath.*;
 import grails.converters.JSON;
@@ -177,7 +177,7 @@ public class SendToStream extends ModuleWithSideEffects {
 	}
 
 	private void checkWriteAccess(Stream stream) {
-		SecUser user = SecUser.getViaJava(getGlobals().getUserId());
+		User user = User.getViaJava(getGlobals().getUserId());
 		if (!Holders.getApplicationContext().getBean(PermissionService.class).check(user, stream, Permission.Operation.STREAM_PUBLISH)) {
 			throw new AccessControlException(this.getName() + ": User " + user.getUsername() +
 				" does not have write access to Stream " + stream.getName());

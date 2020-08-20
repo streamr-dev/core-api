@@ -22,8 +22,8 @@ class Permission {
 	/** Permission can be global, that is, let (also) anonymous users execute the operation */
 	Boolean anonymous = false
 
-	/** Permission "belongs to" either a SecUser, Key, or (transiently) a SignupInvite. Ignored for anonymous Permissions */
-	SecUser user
+	/** Permission "belongs to" either a User, Key, or (transiently) a SignupInvite. Ignored for anonymous Permissions */
+	User user
 	Key key
 	SignupInvite invite
 

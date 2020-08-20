@@ -1,7 +1,7 @@
 package com.unifina.signalpath;
 
 import com.unifina.domain.security.Permission;
-import com.unifina.domain.security.SecUser;
+import com.unifina.domain.security.User;
 import com.unifina.domain.signalpath.Canvas;
 import com.streamr.client.protocol.message_layer.ITimestamped;
 
@@ -14,12 +14,12 @@ public class RuntimeRequest extends LinkedHashMap<String, Object> implements ITi
 
 	private final Canvas canvas;
 	private final String path;
-	private final SecUser user;
+	private final User user;
 	private Future<RuntimeResponse> future = null;
 	private Set<Permission.Operation> checkedOperations = new HashSet<>();
 	private String originalPath = null;
 
-	public RuntimeRequest(Map<String, Object> msg, SecUser user, Canvas canvas, String path, String originalPath, Set<Permission.Operation> checkedOperations) {
+	public RuntimeRequest(Map<String, Object> msg, User user, Canvas canvas, String path, String originalPath, Set<Permission.Operation> checkedOperations) {
 		super();
 		this.timestamp = new Date();
 		this.user = user;
@@ -62,7 +62,7 @@ public class RuntimeRequest extends LinkedHashMap<String, Object> implements ITi
 		return canvas;
 	}
 
-	public SecUser getUser() {
+	public User getUser() {
 		return user;
 	}
 

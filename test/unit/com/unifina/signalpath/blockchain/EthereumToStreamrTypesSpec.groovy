@@ -1,7 +1,6 @@
 package com.unifina.signalpath.blockchain
 
 import com.google.gson.JsonParser
-import com.unifina.domain.security.SecUser
 import com.unifina.signalpath.AbstractSignalPathModule
 import com.unifina.signalpath.BooleanOutput
 import com.unifina.signalpath.ListOutput

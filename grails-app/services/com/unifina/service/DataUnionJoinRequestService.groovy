@@ -8,7 +8,7 @@ import com.unifina.domain.dataunion.DataUnionSecret
 import com.unifina.domain.marketplace.Product
 import com.unifina.domain.security.IntegrationKey
 import com.unifina.domain.security.Permission
-import com.unifina.domain.security.SecUser
+import com.unifina.domain.security.User
 import com.unifina.exceptions.JoinRequestException
 import com.unifina.utils.ThreadUtil
 import groovy.json.JsonSlurper
@@ -70,7 +70,7 @@ class DataUnionJoinRequestService {
 		log.debug(String.format("entering findStreams(%s)", c))
 		List<Product> products = Product.createCriteria().list {
 			eq("type", Product.Type.DATAUNION)
-			ilike("beneficiaryAddress", c.contractAddress)
+			ilike("beneficiaryAddress", c.contractAddress) // ilike = case-insensitive like: Ethereum addresses are case-insensitive but different case systems are in use (checksum-case, lower-case at least)
 		}
 		Set<Stream> streams = new HashSet<>()
 		for (Product p : products) {
@@ -105,11 +105,11 @@ class DataUnionJoinRequestService {
 		log.debug("exiting sendMessage")
 	}
 
-	Set<SecUser> findMembers(String contractAddress) {
+	Set<User> findMembers(String contractAddress) {
 		List<DataUnionJoinRequest> requests = DataUnionJoinRequest.createCriteria().list {
 			ilike("contractAddress", contractAddress)
 		}
-		Set<SecUser> users = new HashSet<>()
+		Set<User> users = new HashSet<>()
 		for (DataUnionJoinRequest c : requests) {
 			users.add(c.user)
 		}
@@ -125,7 +125,7 @@ class DataUnionJoinRequestService {
 		}
 	}
 
-	DataUnionJoinRequest create(String contractAddress, DataUnionJoinRequestCommand cmd, SecUser user) {
+	DataUnionJoinRequest create(String contractAddress, DataUnionJoinRequestCommand cmd, User user) {
 		// TODO CORE-1834: check if user already has a PENDING request
 		// TODO CORE-1834: OR if user already has a write permission to the stream
 
@@ -148,7 +148,7 @@ class DataUnionJoinRequestService {
 		if (cmd.secret) {
 			// Find DataUnionSecret by contractAddress
 			DataUnionSecret secret = DataUnionSecret.createCriteria().get {
-				ilike("contractAddress", contractAddress)
+				ilike("contractAddress", contractAddress)	// ilike = case-insensitive like: Ethereum addresses are case-insensitive but different case systems are in use (checksum-case, lower-case at least)
 				eq("secret", cmd.secret)
 			}
 			if (secret) {

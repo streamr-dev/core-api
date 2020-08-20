@@ -9,7 +9,7 @@ import com.unifina.domain.data.Stream
 import com.unifina.domain.marketplace.Category
 import com.unifina.domain.marketplace.Product
 import com.unifina.domain.security.Permission
-import com.unifina.domain.security.SecUser
+import com.unifina.domain.security.User
 import com.unifina.domain.signalpath.Module
 import com.unifina.domain.signalpath.ModuleCategory
 import groovy.json.JsonBuilder
@@ -18,14 +18,14 @@ import spock.lang.Specification
 // This is an integration test because Grails doesn't support criteria queries in unit tests
 class DataUnionJoinRequestServiceIntegrationSpec extends Specification {
 	DataUnionJoinRequestService service = new DataUnionJoinRequestService()
-	SecUser me
+    User me
 	com.streamr.client.rest.Stream joinPartStream
 	Category category
 	final String contractAddress = "0x0000000000000000000000000000000000000000"
 	StreamrClient streamrClientMock
 
 	void setup() {
-		me = new SecUser(
+		me = new User(
 			name: "First Lastname",
 			username: "first@last.com",
 			password: "salasana",

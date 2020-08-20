@@ -9,7 +9,7 @@ import groovy.transform.CompileStatic
 import org.apache.commons.codec.digest.DigestUtils
 
 @Entity
-class SecUser implements Userish {
+class User implements Userish {
 
 	Long id
 	String username
@@ -51,8 +51,8 @@ class SecUser implements Userish {
 		permissions cascade: 'all-delete-orphan'
 	}
 
-	Set<SecRole> getAuthorities() {
-		SecUserSecRole.findAllBySecUser(this).collect { it.secRole } as Set
+	Set<Role> getAuthorities() {
+		UserRole.findAllByUser(this).collect { UserRole it -> it.role } as Set
 	}
 
 	boolean isDevOps() {
@@ -76,7 +76,7 @@ class SecUser implements Userish {
 
 	@Override
 	boolean equals(Object obj) {
-		if (obj instanceof SecUser) {
+		if (obj instanceof User) {
 			if (obj.id == null || this.id == null) {
 				return this.is(obj)
 			} else {
@@ -100,13 +100,13 @@ class SecUser implements Userish {
 	}
 
 	@CompileStatic
-	static SecUser loadViaJava(Long userId) {
-		SecUser.load(userId)
+	static User loadViaJava(Long userId) {
+		User.load(userId)
 	}
 
 	@CompileStatic
-	static SecUser getViaJava(Long userId) {
-		SecUser.get(userId)
+	static User getViaJava(Long userId) {
+		User.get(userId)
 	}
 
 	//TODO: Once all users are defined with their ethereum public key we can remove this

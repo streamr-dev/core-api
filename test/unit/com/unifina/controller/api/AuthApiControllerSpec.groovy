@@ -11,7 +11,7 @@ import org.springframework.context.MessageSource
 import spock.lang.Specification
 
 @TestFor(AuthApiController)
-@Mock([SignupInvite, SignupCodeService, RegistrationCode, SecUser, Key, SecRole, SecUserSecRole, Permission, UserService])
+@Mock([SignupInvite, SignupCodeService, RegistrationCode, User, Key, Role, UserRole, Permission, UserService])
 class AuthApiControllerSpec extends Specification {
 
 	String username = "user@invite.to"
@@ -175,7 +175,7 @@ class AuthApiControllerSpec extends Specification {
 
 	void "submitting registration for existing username fails with 400 status"() {
 		when: "username already exists"
-		def user = new SecUser(
+		def user = new User(
 			id: 1,
 			username: "test@test.com",
 			name: "Test User",
@@ -204,7 +204,7 @@ class AuthApiControllerSpec extends Specification {
 		setup:
 		// The roles created
 		["ROLE_USER","ROLE_LIVE","ROLE_ADMIN"].each {
-			def role = new SecRole()
+			def role = new Role()
 			role.authority = it
 			role.save()
 		}
@@ -223,8 +223,8 @@ class AuthApiControllerSpec extends Specification {
 		controller.register()
 
 		then: "should create user"
-		SecUser.findByUsername(username)
-		SecUser.findByUsername(username).password == 'fooBar123!-encoded'
+		User.findByUsername(username)
+		User.findByUsername(username).password == 'fooBar123!-encoded'
 		response.status == 200
 		response.json.name == "Name"
 		response.json.username == "user@invite.to"
@@ -247,7 +247,7 @@ class AuthApiControllerSpec extends Specification {
 
 	void "forgotPassword sends email and returns emailSent=true if the user exists"() {
 		EmailCommand cmd = new EmailCommand()
-		SecUser me = new SecUser()
+		User me = new User()
 		me.username = "test@streamr.com"
 		me.save(validate: false)
 

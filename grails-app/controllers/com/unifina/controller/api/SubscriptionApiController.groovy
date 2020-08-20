@@ -3,7 +3,7 @@ package com.unifina.controller.api
 import com.unifina.api.CreateSubscriptionCommand
 import com.unifina.api.NotPermittedException
 import com.unifina.api.ValidationException
-import com.unifina.domain.security.SecUser
+import com.unifina.domain.security.User
 import com.unifina.security.AuthLevel
 import com.unifina.security.StreamrApi
 import com.unifina.service.SubscriptionService
@@ -38,13 +38,13 @@ class SubscriptionApiController {
 	}
 
 	@GrailsCompileStatic
-	private static void verifyDevops(SecUser currentUser) {
+	private static void verifyDevops(User currentUser) {
 		if (!currentUser.isDevOps()) {
 			throw new NotPermittedException("DevOps role required")
 		}
 	}
 
-	SecUser loggedInUser() {
+	User loggedInUser() {
 		request.apiUser
 	}
 }

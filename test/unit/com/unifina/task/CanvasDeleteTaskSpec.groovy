@@ -2,7 +2,7 @@ package com.unifina.task
 
 import com.unifina.BeanMockingSpecification
 import com.unifina.domain.data.Stream
-import com.unifina.domain.security.SecUser
+import com.unifina.domain.security.User
 import com.unifina.domain.signalpath.Canvas
 import com.unifina.domain.task.Task
 import com.unifina.service.CanvasService
@@ -18,7 +18,7 @@ class CanvasDeleteTaskSpec extends BeanMockingSpecification {
 
 	CanvasService canvasService
 	Canvas canvas
-	SecUser user
+    User user
 
 	def setup() {
 		canvasService = mockBean(CanvasService, Mock(CanvasService))
@@ -26,7 +26,7 @@ class CanvasDeleteTaskSpec extends BeanMockingSpecification {
 		canvas = new Canvas().save(validate: false)
 		assert canvas.id != null
 
-		user = new SecUser()
+		user = new User()
 	}
 
 	void "CanvasDeleteTask must call canvasService.deleteCanvas()"() {

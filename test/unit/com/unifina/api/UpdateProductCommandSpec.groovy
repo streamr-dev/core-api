@@ -4,7 +4,7 @@ import com.unifina.domain.data.Stream
 import com.unifina.domain.marketplace.Category
 import com.unifina.domain.marketplace.Product
 import com.unifina.domain.security.Permission
-import com.unifina.domain.security.SecUser
+import com.unifina.domain.security.User
 import com.unifina.service.PermissionService
 import spock.lang.Specification
 
@@ -34,7 +34,7 @@ class UpdateProductCommandSpec extends Specification {
 			streams: [stream],
 			previewConfigJson: "{}",
 			score: 5,
-			owner: new SecUser(name: "John Doe"),
+			owner: new User(name: "John Doe"),
 			ownerAddress: "0x0",
 			beneficiaryAddress: "0x0",
 			pricePerSecond: 5,
@@ -71,7 +71,7 @@ class UpdateProductCommandSpec extends Specification {
 		product.pricePerSecond = 5
 
 		when:
-		command.updateProduct(product, new SecUser(), permissionService)
+		command.updateProduct(product, new User(), permissionService)
 
 		then:
 		thrown(FieldCannotBeUpdatedException)
@@ -87,7 +87,7 @@ class UpdateProductCommandSpec extends Specification {
 		}
 
 		when:
-		command.updateProduct(product, new SecUser(), permissionService)
+		command.updateProduct(product, new User(), permissionService)
 
 		then:
 		def map = product.toMap()
@@ -118,7 +118,7 @@ class UpdateProductCommandSpec extends Specification {
 		product.pricePerSecond = 5
 
 		when:
-		command.updateProduct(product, new SecUser(), permissionService)
+		command.updateProduct(product, new User(), permissionService)
 
 		then:
 		def map = product.toMap()
@@ -150,7 +150,7 @@ class UpdateProductCommandSpec extends Specification {
 		command.pricePerSecond = 0
 
 		when:
-		command.updateProduct(product, new SecUser(), permissionService)
+		command.updateProduct(product, new User(), permissionService)
 
 		then:
 		def map = product.toMap()
@@ -182,7 +182,7 @@ class UpdateProductCommandSpec extends Specification {
 		command.pricePerSecond = 5
 
 		when:
-		command.updateProduct(product, new SecUser(), permissionService)
+		command.updateProduct(product, new User(), permissionService)
 
 		then:
 		thrown(FieldCannotBeUpdatedException)
@@ -198,7 +198,7 @@ class UpdateProductCommandSpec extends Specification {
 		product.pricePerSecond = 5
 
 		when:
-		command.updateProduct(product, new SecUser(), permissionService)
+		command.updateProduct(product, new User(), permissionService)
 		then:
 		1 * permissionService.check(_, product, Permission.Operation.PRODUCT_SHARE) >> false
 		thrown(FieldCannotBeUpdatedException)
@@ -214,7 +214,7 @@ class UpdateProductCommandSpec extends Specification {
 		product.pricePerSecond = 5
 
 		when:
-		command.updateProduct(product, new SecUser(), permissionService)
+		command.updateProduct(product, new User(), permissionService)
 		then:
 		1 * permissionService.check(_, product, Permission.Operation.PRODUCT_SHARE) >> true
 		product.pendingChanges == '''{"name":"new name","description":"new description"}'''
@@ -229,7 +229,7 @@ class UpdateProductCommandSpec extends Specification {
 		product.pricePerSecond = 5
 
 		when:
-		command.updateProduct(product, new SecUser(), permissionService)
+		command.updateProduct(product, new User(), permissionService)
 		then:
 		0 * permissionService.check(_, product, Permission.Operation.PRODUCT_SHARE)
 	}

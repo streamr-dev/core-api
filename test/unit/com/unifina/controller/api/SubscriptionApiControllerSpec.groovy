@@ -5,9 +5,9 @@ import com.unifina.api.ValidationException
 import com.unifina.domain.marketplace.Category
 import com.unifina.domain.marketplace.PaidSubscription
 import com.unifina.domain.marketplace.Product
-import com.unifina.domain.security.SecRole
-import com.unifina.domain.security.SecUser
-import com.unifina.domain.security.SecUserSecRole
+import com.unifina.domain.security.Role
+import com.unifina.domain.security.User
+import com.unifina.domain.security.UserRole
 import com.unifina.filters.UnifinaCoreAPIFilters
 import com.unifina.service.SubscriptionService
 import grails.converters.JSON
@@ -17,20 +17,20 @@ import groovy.json.JsonSlurper
 import spock.lang.Specification
 
 @TestFor(SubscriptionApiController)
-@Mock([UnifinaCoreAPIFilters, SecUser, SecUserSecRole])
+@Mock([UnifinaCoreAPIFilters, User, UserRole])
 class SubscriptionApiControllerSpec extends Specification {
 
-	SecUser devOpsUser
+	User devOpsUser
 
 	void setup() {
-		devOpsUser = new SecUser(name: "me@streamr.com").save(failOnError: true, validate: false)
-		def devopsRole = new SecRole(authority: "ROLE_DEV_OPS").save(failOnError: true)
-		new SecUserSecRole(secUser: devOpsUser, secRole:  devopsRole).save(failOnError: true)
+		devOpsUser = new User(name: "me@streamr.com").save(failOnError: true, validate: false)
+		def devopsRole = new Role(authority: "ROLE_DEV_OPS").save(failOnError: true)
+		new UserRole(user: devOpsUser, role: devopsRole).save(failOnError: true)
 	}
 
 	void "index() invokes SubscriptionService#getSubscriptionsOfUser"() {
 		def subscriptionService = controller.subscriptionService = Mock(SubscriptionService)
-		def user = new SecUser()
+		def user = new User()
 
 		request.apiUser = user
 
@@ -44,7 +44,7 @@ class SubscriptionApiControllerSpec extends Specification {
 	}
 
 	void "index() returns 200 and renders subscriptions"() {
-		SecUser user = new SecUser(
+		User user = new User(
 			username: "user@domain.com",
 			name: "Firstname Lastname",
 			password: "salasana"
@@ -122,8 +122,8 @@ class SubscriptionApiControllerSpec extends Specification {
 
 	void "save() given subscription with address throws NotPermittedException if not devops user"() {
 		def product = new Product().save(failOnError: true, validate: false)
-		
-		request.apiUser = new SecUser()
+
+		request.apiUser = new User()
 		request.JSON = [
 			address: "0x0000000000000000000000000000000000000000",
 			product: "1",
@@ -183,7 +183,7 @@ class SubscriptionApiControllerSpec extends Specification {
 		def subscriptionService = controller.subscriptionService = Mock(SubscriptionService)
 
 		def product = new Product().save(failOnError: true, validate: false)
-		def user = new SecUser()
+		def user = new User()
 
 		request.apiUser = user
 		request.JSON = [
@@ -204,7 +204,7 @@ class SubscriptionApiControllerSpec extends Specification {
 
 		def product = new Product().save(failOnError: true, validate: false)
 
-		request.apiUser = new SecUser()
+		request.apiUser = new User()
 		request.JSON = [
 			product: "1",
 			endsAt: 1520334404

@@ -10,7 +10,7 @@ import org.codehaus.groovy.grails.web.json.JSONObject
 class IntegrationKey implements Serializable {
 
 	String id
-	SecUser user
+	User user
 	String name
 	Service service
 	String json

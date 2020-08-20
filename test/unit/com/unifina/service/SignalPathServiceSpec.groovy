@@ -2,9 +2,9 @@ package com.unifina.service
 
 import com.unifina.BeanMockingSpecification
 import com.unifina.domain.security.Permission
-import com.unifina.domain.security.SecRole
-import com.unifina.domain.security.SecUser
-import com.unifina.domain.security.SecUserSecRole
+import com.unifina.domain.security.Role
+import com.unifina.domain.security.UserRole
+import com.unifina.domain.security.User
 import com.unifina.domain.signalpath.Canvas
 import com.unifina.domain.signalpath.Serialization
 import com.unifina.exceptions.CanvasUnreachableException
@@ -18,23 +18,23 @@ import grails.test.mixin.TestFor
 import java.security.AccessControlException
 
 @TestFor(SignalPathService)
-@Mock([SecUser, SecRole, SecUserSecRole, Canvas, Serialization])
+@Mock([User, Role, UserRole, Canvas, Serialization])
 class SignalPathServiceSpec extends BeanMockingSpecification {
 
-	SecUser me
-	SecUser admin
+	User me
+	User admin
 	Canvas c1
 	CanvasService canvasService
 
 	def setup() {
-		me = new SecUser(username: "me@streamr.com", password: "pw", name: "name")
+		me = new User(username: "me@streamr.com", password: "pw", name: "name")
 		me.save(failOnError: true)
 
-		SecRole role = new SecRole(authority: "ROLE_ADMIN")
+		Role role = new Role(authority: "ROLE_ADMIN")
 		role.save(failOnError: true)
-		admin = new SecUser(username: "admin@streamr.com", password: "pw", name: "admin")
+		admin = new User(username: "admin@streamr.com", password: "pw", name: "admin")
 		admin.save(failOnError: true)
-		new SecUserSecRole(secUser: admin, secRole: role).save(failOnError: true)
+		new UserRole(user: admin, role: role).save(failOnError: true)
 
 		c1 = new Canvas(
 				name: "canvas-1",
@@ -166,7 +166,7 @@ class SignalPathServiceSpec extends BeanMockingSpecification {
 	}
 
 	void "getUsersOfRunningCanvases() returns canvasId -> user mapping of running canvases"() {
-		SecUser someoneElse = new SecUser(
+		User someoneElse = new User(
 			username: "someoneElse@streamr.com",
 		).save(validate: false, failOnError: true)
 
@@ -251,7 +251,7 @@ class SignalPathServiceSpec extends BeanMockingSpecification {
 
 		def request = new RuntimeRequest(
 			[type: "stopRequest"],
-			new SecUser(),
+			new User(),
 			canvas,
 			"canvases/canvas-id",
 			"",
@@ -265,7 +265,7 @@ class SignalPathServiceSpec extends BeanMockingSpecification {
 	}
 
 	void "runtimeRequest() allows stopping canvas if user has write permission on canvas"() {
-		SecUser user = new SecUser()
+		User user = new User()
 		user.save(failOnError: true, validate: false)
 
 		Canvas canvas = new Canvas(runner: "runner-id")
@@ -312,13 +312,13 @@ class SignalPathServiceSpec extends BeanMockingSpecification {
 	}
 
 	void "runtimeRequest() allows stopping canvas if user is admin"() {
-		SecUser user = new SecUser()
+		User user = new User()
 		user.save(failOnError: true, validate: false)
 
-		SecRole adminRole = new SecRole(authority: "ROLE_ADMIN")
+		Role adminRole = new Role(authority: "ROLE_ADMIN")
 		adminRole.save(failOnError: true, validate: false)
 
-		SecUserSecRole secUserSecRole = new SecUserSecRole(secUser: user, secRole: adminRole)
+		UserRole secUserSecRole = new UserRole(user: user, role: adminRole)
 		secUserSecRole.save(failOnError: true, validate: false)
 
 		Canvas canvas = new Canvas(runner: "runner-id")

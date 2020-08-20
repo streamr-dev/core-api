@@ -41,12 +41,7 @@ public class FieldDetector {
 			return null;
 		}
 
-		Map<String, Object> map;
-		try {
-			map = msg.getContent();
-		} catch (IOException e) {
-			map = new HashMap<>();
-		}
+		Map<String, Object> map = msg.getParsedContent();
 
 		if (flatten) {
 			map = MapTraversal.flatten(map);

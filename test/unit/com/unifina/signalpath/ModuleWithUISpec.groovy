@@ -5,7 +5,7 @@ import com.unifina.ModuleTestingSpecification
 import com.unifina.datasource.IStartListener
 import com.unifina.domain.data.Stream
 import com.unifina.domain.security.Permission
-import com.unifina.domain.security.SecUser
+import com.unifina.domain.security.User
 import com.unifina.domain.signalpath.Canvas
 import com.unifina.service.PermissionService
 import com.unifina.service.StreamService
@@ -15,7 +15,7 @@ import grails.test.mixin.Mock
 
 import java.security.AccessControlException
 
-@Mock([Stream, SecUser])
+@Mock([Stream, User])
 class ModuleWithUISpec extends ModuleTestingSpecification {
 
 	Stream uiChannel
@@ -24,8 +24,8 @@ class ModuleWithUISpec extends ModuleTestingSpecification {
 	PermissionService permissionService
 	StreamService streamService
 	StreamrClient streamrClient
-	SecUser permittedUser = new SecUser(username: 'permittedUser')
-	SecUser nonPermitterUser = new SecUser(username: 'nonPermittedUser')
+    User permittedUser = new User(username: 'permittedUser')
+	User nonPermitterUser = new User(username: 'nonPermittedUser')
 
 	def setup() {
 		canvas = new Canvas(name: "canvas")
@@ -49,7 +49,7 @@ class ModuleWithUISpec extends ModuleTestingSpecification {
 		permissionService.systemGrantAll(permittedUser, canvas)
 	}
 
-	private ModuleWithUI createModule(Map config, SecUser user) {
+	private ModuleWithUI createModule(Map config, User user) {
 		module = new ModuleWithUI() {
 			@Override
 			void sendOutput() {

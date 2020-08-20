@@ -1,7 +1,7 @@
 package com.unifina.signalpath.messaging
 
 import com.unifina.UiChannelMockingSpecification
-import com.unifina.domain.security.SecUser
+import com.unifina.domain.security.User
 import com.unifina.domain.signalpath.Canvas
 import com.unifina.signalpath.NotificationMessage
 import com.unifina.signalpath.SignalPath
@@ -16,7 +16,7 @@ import java.text.SimpleDateFormat
 
 @FreshRuntime
 @TestMixin(GrailsUnitTestMixin)
-@Mock(SecUser)
+@Mock(User)
 class EmailModuleSpec extends UiChannelMockingSpecification {
 
 	EmailModule module
@@ -43,7 +43,7 @@ class EmailModuleSpec extends UiChannelMockingSpecification {
 		module.canvasService = cs
 	}
 
-	private void initContext(Globals.Mode mode = Globals.Mode.REALTIME, Map context = [:], SecUser user = new SecUser(username: "username").save(failOnError: true, validate: false)) {
+	private void initContext(Globals.Mode mode = Globals.Mode.REALTIME, Map context = [:], User user = new User(username: "username").save(failOnError: true, validate: false)) {
 		globals = mockGlobals(context, user, mode)
 		globals.time = new Date()
 

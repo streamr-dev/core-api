@@ -4,7 +4,7 @@ import com.unifina.api.ApiException
 import com.unifina.api.IntegrationKeyListParams
 import com.unifina.api.NotFoundException
 import com.unifina.domain.security.IntegrationKey
-import com.unifina.domain.security.SecUser
+import com.unifina.domain.security.User
 import com.unifina.security.StreamrApi
 import com.unifina.service.EthereumIntegrationKeyService
 import grails.converters.JSON
@@ -79,7 +79,7 @@ class IntegrationKeyApiController {
 		render(status: 204, body: "")
 	}
 
-	SecUser apiUser() {
+	User apiUser() {
 		request.apiUser
 	}
 }

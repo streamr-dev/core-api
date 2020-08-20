@@ -15,20 +15,20 @@ import com.unifina.domain.marketplace.Category
 import com.unifina.domain.marketplace.Product
 import com.unifina.domain.security.IntegrationKey
 import com.unifina.domain.security.Permission
-import com.unifina.domain.security.SecUser
+import com.unifina.domain.security.User
 import com.unifina.exceptions.JoinRequestException
 import grails.test.mixin.Mock
 import grails.test.mixin.TestFor
 import groovy.json.JsonBuilder
 
 @TestFor(DataUnionJoinRequestService)
-@Mock([SecUser, IntegrationKey, DataUnionJoinRequest, DataUnionSecret])
+@Mock([User, IntegrationKey, DataUnionJoinRequest, DataUnionSecret])
 class DataUnionJoinRequestServiceSpec extends BeanMockingSpecification {
 
 	private static final String memberAddress = "0xCCCC000000000000000000000000AAAA0000FFFF"
 	private static final String contractAddress = "0x0000000000000000000000000000000000000000"
 
-	SecUser me
+	User me
 	StreamrClient streamrClientMock
 	com.streamr.client.rest.Stream joinPartStream
 
@@ -46,7 +46,7 @@ class DataUnionJoinRequestServiceSpec extends BeanMockingSpecification {
 		streamrClientMock.getOptions() >> Mock(StreamrClientOptions)
 		service.streamrClientService.getInstanceForThisEngineNode() >> streamrClientMock
 
-		me = new SecUser(
+		me = new User(
 			name: "First Lastname",
 			username: "first@last.com",
 			password: "salasana",
@@ -143,7 +143,7 @@ class DataUnionJoinRequestServiceSpec extends BeanMockingSpecification {
 
 	void "create sets permissions"() {
 		setup:
-		SecUser user = new SecUser(
+		User user = new User(
 			username: "user@domain.com",
 			name: "Firstname Lastname",
 			password: "salasana"
@@ -208,7 +208,7 @@ class DataUnionJoinRequestServiceSpec extends BeanMockingSpecification {
 
 	void "create doesn't set permissions if they already exist"() {
 		setup:
-		SecUser user = new SecUser(
+		User user = new User(
 			username: "user@domain.com",
 			name: "Firstname Lastname",
 			password: "salasana"
@@ -273,7 +273,7 @@ class DataUnionJoinRequestServiceSpec extends BeanMockingSpecification {
 
 	void "findStreams"() {
 		setup:
-		SecUser user = new SecUser(
+		User user = new User(
 			username: "user@domain.com",
 			name: "Firstname Lastname",
 			password: "salasana"
@@ -321,20 +321,20 @@ class DataUnionJoinRequestServiceSpec extends BeanMockingSpecification {
 	void "findMembers"() {
 		setup:
 		DataUnionJoinRequest c1 = new DataUnionJoinRequest(
-			user: new SecUser(),
+			user: new User(),
 			memberAddress: "0x0000000000000000000000000000000000000000",
 			contractAddress: contractAddress,
 		)
 		c1.save()
 		DataUnionJoinRequest c2 = new DataUnionJoinRequest(
-			user: new SecUser(),
+			user: new User(),
 			memberAddress: "0x0000000000000000000000000000000000000000",
 			contractAddress: contractAddress,
 		)
 		c2.save()
 
 		when:
-		Set<SecUser> members = service.findMembers(contractAddress)
+		Set<User> members = service.findMembers(contractAddress)
 
 		then:
 		members.size() == 2
@@ -342,7 +342,7 @@ class DataUnionJoinRequestServiceSpec extends BeanMockingSpecification {
 
 	void "update doesnt send join request if already joined"() {
 		setup:
-		SecUser user = new SecUser(
+		User user = new User(
 			username: "user@domain.com",
 			name: "Firstname Lastname",
 			password: "salasana"
@@ -409,7 +409,7 @@ class DataUnionJoinRequestServiceSpec extends BeanMockingSpecification {
 
 	void "update handles memberStats error"() {
 		setup:
-		SecUser user = new SecUser(
+		User user = new User(
 			username: "user@domain.com",
 			name: "Firstname Lastname",
 			password: "salasana"
@@ -482,7 +482,7 @@ class DataUnionJoinRequestServiceSpec extends BeanMockingSpecification {
 
 	void "update fails if data union server doesnt register join"() {
 		setup:
-		SecUser user = new SecUser(
+		User user = new User(
 			username: "user@domain.com",
 			name: "Firstname Lastname",
 			password: "salasana"
@@ -550,7 +550,7 @@ class DataUnionJoinRequestServiceSpec extends BeanMockingSpecification {
 
 	void "update sets permissions"() {
 		setup:
-		SecUser user = new SecUser(
+		User user = new User(
 			username: "user@domain.com",
 			name: "Firstname Lastname",
 			password: "salasana"

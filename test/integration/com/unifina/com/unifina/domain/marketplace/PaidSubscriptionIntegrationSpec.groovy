@@ -4,7 +4,7 @@ import com.unifina.domain.marketplace.Category
 import com.unifina.domain.marketplace.PaidSubscription
 import com.unifina.domain.marketplace.Product
 import com.unifina.domain.security.IntegrationKey
-import com.unifina.domain.security.SecUser
+import com.unifina.domain.security.User
 import grails.test.spock.IntegrationSpec
 import grails.validation.ValidationException
 
@@ -13,7 +13,7 @@ class PaidSubscriptionIntegrationSpec extends IntegrationSpec {
 	Product product
 
 	void setup() {
-		def owner = new SecUser(
+		def owner = new User(
 			username: "subscription-service-integration-spec-1@streamr.com",
 			password: "xxx",
 			name: "Subscription Service Integration Spec 1",
@@ -35,7 +35,7 @@ class PaidSubscriptionIntegrationSpec extends IntegrationSpec {
 
 	void "fetchUser() is case-insensitive w.r.t. ethereum addresses [database property]"() {
 		setup:
-		def subscriber = new SecUser(
+		def subscriber = new User(
 			username: "subscription-service-integration-spec-2@streamr.com",
 			password: "xxx",
 			name: "Subscription Service Integration Spec 2",

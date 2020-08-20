@@ -2,14 +2,10 @@ package com.unifina.service
 
 import com.unifina.api.ApiException
 import com.unifina.domain.security.IntegrationKey
-import com.unifina.domain.security.SecUser
+import com.unifina.domain.security.User
 import com.unifina.signalpath.blockchain.EthereumModuleOptions
-import com.unifina.signalpath.blockchain.Web3jHelper
-import groovy.transform.CompileStatic
 import org.web3j.exceptions.MessageDecodingException
 import org.web3j.protocol.Web3j
-import org.web3j.protocol.core.DefaultBlockParameterName
-import org.web3j.protocol.core.methods.response.EthGetBalance
 import org.web3j.protocol.http.HttpService
 import grails.util.Holders;
 import javax.annotation.PostConstruct
@@ -35,7 +31,7 @@ class BalanceService {
 		}
 	}
 
-	Map<String, BigInteger> getDatacoinBalances(SecUser user) throws InterruptedException, ExecutionException, MessageDecodingException {
+	Map<String, BigInteger> getDatacoinBalances(User user) throws InterruptedException, ExecutionException, MessageDecodingException {
 		def keys =
 			IntegrationKey.findAllByUserAndServiceInList(user, [IntegrationKey.Service.ETHEREUM, IntegrationKey.Service.ETHEREUM_ID]);
 

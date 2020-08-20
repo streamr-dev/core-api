@@ -2,7 +2,7 @@ package com.unifina.controller.api
 
 
 import com.unifina.domain.security.Key
-import com.unifina.domain.security.SecUser
+import com.unifina.domain.security.User
 import com.unifina.domain.signalpath.Canvas
 import com.unifina.filters.UnifinaCoreAPIFilters
 import com.unifina.service.ClusterService
@@ -13,13 +13,13 @@ import spock.lang.Specification
 import javax.ws.rs.core.HttpHeaders
 
 @TestFor(ClusterApiController)
-@Mock([UnifinaCoreAPIFilters, Canvas, SecUser, Key])
+@Mock([UnifinaCoreAPIFilters, Canvas, User, Key])
 class ClusterApiControllerSpec extends Specification {
-	SecUser me
+	User me
 	String apiKey = "token myApiKey"
 
     def setup() {
-		me = new SecUser().save(failOnError: true, validate: false)
+		me = new User().save(failOnError: true, validate: false)
 		Key key = new Key(name: "key", user: me)
 		key.id = "myApiKey"
 		key.save(failOnError: true, validate: false)

@@ -1,20 +1,20 @@
 package com.unifina.security
 
 import com.unifina.domain.security.Key
-import com.unifina.domain.security.SecRole
-import com.unifina.domain.security.SecUser
-import com.unifina.domain.security.SecUserSecRole
+import com.unifina.domain.security.Role
+import com.unifina.domain.security.UserRole
+import com.unifina.domain.security.User
 import grails.test.mixin.Mock
 import spock.lang.Specification
 import spock.lang.Unroll
 
-@Mock([SecUser, SecRole, SecUserSecRole])
+@Mock([User, Role, UserRole])
 class AuthenticationResultSpec extends Specification {
 
 	@Unroll
 	void "guarantees #level when constructed with SecUser"(AuthLevel level) {
 		expect:
-		new AuthenticationResult(new SecUser()).guarantees(level)
+		new AuthenticationResult(new User()).guarantees(level)
 
 		where:
 		level << AuthLevel.values()
@@ -23,7 +23,7 @@ class AuthenticationResultSpec extends Specification {
 	@Unroll
 	void "guarantees level #level when constructed with user-linked Key"(AuthLevel level) {
 		expect:
-		new AuthenticationResult(new Key(user: new SecUser())).guarantees(level)
+		new AuthenticationResult(new Key(user: new User())).guarantees(level)
 
 		where:
 		level << AuthLevel.values()
@@ -64,17 +64,17 @@ class AuthenticationResultSpec extends Specification {
 
 	void "hasOneOfRoles() returns false given empty array of roles"() {
 		expect:
-		!new AuthenticationResult(new SecUser()).hasOneOfRoles(new AllowRole[0])
+		!new AuthenticationResult(new User()).hasOneOfRoles(new AllowRole[0])
 	}
 
 	void "hasOneOfRoles() validates that user belongs to at least one of the allow roles"() {
-		SecUser user = new SecUser()
+		User user = new User()
 		user.save(failOnError: true, validate: false)
 
-		SecRole secRole = new SecRole(authority: "ROLE_DEV_OPS")
+		Role secRole = new Role(authority: "ROLE_DEV_OPS")
 		secRole.save(failOnError: true)
 
-		new SecUserSecRole(secUser: user, secRole: secRole).save(failOnError: true)
+		new UserRole(user: user, role: secRole).save(failOnError: true)
 
 		expect:
 		new AuthenticationResult(new Key()).hasOneOfRoles([AllowRole.NO_ROLE_REQUIRED] as AllowRole[])

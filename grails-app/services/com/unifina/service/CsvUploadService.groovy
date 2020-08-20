@@ -6,7 +6,7 @@ import com.unifina.api.NotFoundException
 import com.unifina.api.NotPermittedException
 import com.unifina.domain.data.Stream
 import com.unifina.domain.security.Permission
-import com.unifina.domain.security.SecUser
+import com.unifina.domain.security.User
 import com.unifina.utils.CSVImporter
 import com.unifina.utils.IdGenerator
 import com.unifina.utils.ThreadUtil
@@ -28,7 +28,7 @@ class CsvUploadService {
 
 	Map<String, String> idToFilePath = new HashMap<>()
 
-	Map uploadCsvFile(File file, String streamId, SecUser user) throws NotFoundException, NotPermittedException {
+	Map uploadCsvFile(File file, String streamId, User user) throws NotFoundException, NotPermittedException {
 		Stream stream = apiService.authorizedGetById(Stream, streamId, user, Permission.Operation.STREAM_PUBLISH)
 
 		Map config = (Map) (stream.config ? JSON.parse(stream.config) : [:])
@@ -47,7 +47,7 @@ class CsvUploadService {
 		]
 	}
 
-	Stream parseAndConsumeCsvFile(CsvParseInstructions instructions, String streamId, SecUser user)
+	Stream parseAndConsumeCsvFile(CsvParseInstructions instructions, String streamId, User user)
 			throws NotFoundException, NotPermittedException {
 		Stream stream = apiService.authorizedGetById(Stream, streamId, user, Permission.Operation.STREAM_PUBLISH)
 
@@ -81,7 +81,7 @@ class CsvUploadService {
 	 * @return Autocreated Stream field config as a Map (can be written to stream.config as JSON)
 	 */
 	@CompileStatic
-	private Map importCsv(CSVImporter csv, Stream stream, SecUser user) {
+	private Map importCsv(CSVImporter csv, Stream stream, User user) {
 		StreamrClient streamrClient = streamrClientService.getAuthenticatedInstance(user.id)
 		com.streamr.client.rest.Stream clientStream = streamrClient.getStream(stream.id)
 

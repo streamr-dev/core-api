@@ -1,14 +1,14 @@
 package com.unifina.signalpath.utils
 
 import com.unifina.UiChannelMockingSpecification
-import com.unifina.domain.security.SecUser
+import com.unifina.domain.security.User
 import com.unifina.signalpath.SignalPath
 import com.unifina.utils.Globals
 import com.unifina.utils.testutils.FakeExportCSVContext
 import com.unifina.utils.testutils.ModuleTestHelper
 import grails.test.mixin.Mock
 
-@Mock(SecUser)
+@Mock(User)
 class ExportCSVSpec extends UiChannelMockingSpecification {
 
 	FakeExportCSVContext fakeFileHolder = new FakeExportCSVContext()
@@ -22,7 +22,7 @@ class ExportCSVSpec extends UiChannelMockingSpecification {
 		module.getInput("generated-input-1").setDisplayName("in1")
 		module.getInput("generated-input-2").setDisplayName("in2")
 		module.getInput("generated-input-3").setDisplayName("in3")
-		globals = mockGlobals([:], new SecUser(username: 'user', timezone: "UTC"), Globals.Mode.HISTORICAL)
+		globals = mockGlobals([:], new User(username: 'user', timezone: "UTC"), Globals.Mode.HISTORICAL)
 	}
 
 	private boolean testForFileContentAndUiMessages(String s, Map channelMessages) {

@@ -3,11 +3,10 @@ package com.unifina.service
 import com.unifina.api.InvalidArgumentsException
 import com.unifina.api.InvalidSessionTokenException
 import com.unifina.domain.security.Key
-import com.unifina.domain.security.SecUser
+import com.unifina.domain.security.User
 import com.unifina.security.SessionToken
 import com.unifina.security.Userish
 import org.apache.log4j.Logger
-import org.hibernate.StaleObjectStateException
 import org.joda.time.DateTime
 
 class SessionService {
@@ -18,17 +17,17 @@ class SessionService {
 
 	private static final Logger log = Logger.getLogger(SessionService)
 
-	void updateUsersLoginDate(SecUser user, Date date) {
+	void updateUsersLoginDate(User user, Date date) {
 		// Using update query to avoid StaleObjectStateException in case of concurrent logins.
 		// Not unit testable, but there's coverage in end-to-end tests.
-		SecUser.executeUpdate("update SecUser u set u.lastLogin = ? where u.id = ?", [date, user.id])
+		User.executeUpdate("update User u set u.lastLogin = ? where u.id = ?", [date, user.id])
 	}
 
 	SessionToken generateToken(Userish userish) {
 		SessionToken sk = new SessionToken(TOKEN_LENGTH, userish, TTL_HOURS)
 		keyValueStoreService.setWithExpiration(sk.getToken(), userishToString(userish), TTL_HOURS * 3600)
-		if (userish instanceof SecUser) {
-			updateUsersLoginDate((SecUser) userish, new Date())
+		if (userish instanceof User) {
+			updateUsersLoginDate((User) userish, new Date())
 		}
 		return sk
 	}
@@ -48,8 +47,8 @@ class SessionService {
 	}
 
 	String userishToString(Userish u) {
-		if (u instanceof SecUser) {
-			return "SecUser"+u.id.toString()
+		if (u instanceof User) {
+			return "User"+u.id.toString()
 		} else if (u instanceof Key) {
 			return "Key"+u.id.toString()
 		}
@@ -57,9 +56,12 @@ class SessionService {
 	}
 
 	Userish stringToUserish(String s) {
-		if(s.startsWith("SecUser")) {
+		if (s.startsWith("User")) {
+			String id = s.substring(4)
+			return User.get(id)
+		} else if (s.startsWith("SecUser")) {
 			String id = s.substring(7)
-			return SecUser.get(id)
+			return User.get(id)
 		} else if (s.startsWith("Key")) {
 			String id = s.substring(3)
 			return Key.get(id)

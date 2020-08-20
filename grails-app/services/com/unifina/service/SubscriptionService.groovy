@@ -7,7 +7,7 @@ import com.unifina.domain.marketplace.Product
 import com.unifina.domain.marketplace.Subscription
 import com.unifina.domain.security.IntegrationKey
 import com.unifina.domain.security.Permission
-import com.unifina.domain.security.SecUser
+import com.unifina.domain.security.User
 import grails.compiler.GrailsCompileStatic
 
 @GrailsCompileStatic
@@ -21,7 +21,7 @@ class SubscriptionService {
 		}
 	}
 
-	List<Subscription> getSubscriptionsOfUser(SecUser user) {
+	List<Subscription> getSubscriptionsOfUser(User user) {
 		List<IntegrationKey> integrationKeys = IntegrationKey.findAllByUserAndService(user, IntegrationKey.Service.ETHEREUM_ID)
 		def addresses = integrationKeys*.idInService
 		List<Subscription> subscriptions = new ArrayList<>()
@@ -44,7 +44,7 @@ class SubscriptionService {
 	/**
 	 * Subscribe to user to (free) Product
 	 */
-	Subscription subscribeToFreeProduct(Product product, SecUser user, Date endsAt) {
+	Subscription subscribeToFreeProduct(Product product, User user, Date endsAt) {
 		FreeProductService.verifyThatProductIsFree(product)
 		Subscription subscription = FreeSubscription.findByProductAndUser(product, user)
 		if (subscription == null) {
@@ -112,7 +112,7 @@ class SubscriptionService {
 	}
 
 	private void createPermissions(Subscription subscription, Set<Stream> streams) {
-		SecUser user = subscription.fetchUser()
+		User user = subscription.fetchUser()
 		if (user) {
 			streams.collect { Stream stream ->
 				permissionService.systemGrant(user, stream, Permission.Operation.STREAM_SUBSCRIBE, subscription, subscription.endsAt)

@@ -4,7 +4,7 @@ import com.google.gson.Gson
 import com.google.gson.GsonBuilder
 import com.unifina.api.*
 import com.unifina.domain.security.Permission.Operation
-import com.unifina.domain.security.SecUser
+import com.unifina.domain.security.User
 import com.unifina.domain.signalpath.Canvas
 import com.unifina.security.AllowRole
 import com.unifina.security.AuthLevel
@@ -38,7 +38,7 @@ class CanvasApiController {
 		if (params.public != null) {
 			listParams.publicAccess = params.boolean("public")
 		}
-		def results = apiService.list(Canvas, listParams, (SecUser) request.apiUser)
+		def results = apiService.list(Canvas, listParams, (User) request.apiUser)
 		apiService.addLinkHintToHeader(listParams, results.size(), params, response)
 		render(results*.toMap() as JSON)
 	}

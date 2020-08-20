@@ -1,7 +1,7 @@
 package com.unifina.domain.dataunion
 
 import com.unifina.domain.marketplace.Product
-import com.unifina.domain.security.SecUser
+import com.unifina.domain.security.User
 import com.unifina.utils.IdGenerator
 import grails.compiler.GrailsCompileStatic
 import grails.persistence.Entity
@@ -19,7 +19,7 @@ class DataUnionJoinRequest {
 
 	String id
 	// user requesting to join the data union.
-	SecUser user
+	User user
 	// memberAddress is an Ethereum address of the member requesting to join the data union.
 	String memberAddress
 	// contractAddress is the Ethereum address of the data union to join.

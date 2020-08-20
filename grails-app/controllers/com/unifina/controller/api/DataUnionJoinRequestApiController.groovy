@@ -2,7 +2,7 @@ package com.unifina.controller.api
 
 import com.unifina.api.*
 import com.unifina.domain.dataunion.DataUnionJoinRequest
-import com.unifina.domain.security.SecUser
+import com.unifina.domain.security.User
 import com.unifina.security.StreamrApi
 import com.unifina.service.DataUnionJoinRequestService
 
@@ -15,8 +15,8 @@ class DataUnionJoinRequestApiController {
 	DataUnionJoinRequestService dataUnionJoinRequestService
 	EthereumService ethereumService
 
-	private SecUser loggedInUser() {
-		return (SecUser) request.apiUser
+	private User loggedInUser() {
+		return (User) request.apiUser
 	}
 	static DataUnionJoinRequest.State isState(String value) {
 		if (value == null || value.trim().equals("")) {
@@ -55,7 +55,7 @@ class DataUnionJoinRequestApiController {
 
 	/** Admin endpoints below **/
 
-	void checkAdminAccessControl(SecUser user, String contractAddress) {
+	void checkAdminAccessControl(User user, String contractAddress) {
 		if (!isDataUnionAddress(contractAddress)) {
 			throw new BadRequestException("Data Union address is not a valid Ethereum address")
 		}

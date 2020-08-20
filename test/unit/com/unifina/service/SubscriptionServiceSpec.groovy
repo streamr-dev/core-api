@@ -9,7 +9,7 @@ import com.unifina.domain.marketplace.Product
 import com.unifina.domain.marketplace.Subscription
 import com.unifina.domain.security.IntegrationKey
 import com.unifina.domain.security.Permission
-import com.unifina.domain.security.SecUser
+import com.unifina.domain.security.User
 import grails.test.mixin.Mock
 import grails.test.mixin.TestFor
 
@@ -17,15 +17,15 @@ import grails.test.mixin.TestFor
 @Mock([FreeSubscription, IntegrationKey, PaidSubscription, Permission, Product, Stream, Subscription])
 class SubscriptionServiceSpec extends BeanMockingSpecification {
 
-	SecUser user, user2
+	User user, user2
 	Stream s1, s2, s3
 	Product product
 	PermissionService permissionService
 	EthereumIntegrationKeyService ethereumIntegrationKeyService
 
 	void setup() {
-		user = new SecUser(username: "me@streamr.com").save(failOnError: true, validate: false)
-		user2 = new SecUser(username: "someoneElse@streamr.com").save(failOnError: true, validate: false)
+		user = new User(username: "me@streamr.com").save(failOnError: true, validate: false)
+		user2 = new User(username: "someoneElse@streamr.com").save(failOnError: true, validate: false)
 		s1 = new Stream(name: "stream-1")
 		s2 = new Stream(name: "stream-2")
 		s3 = new Stream(name: "stream-3")

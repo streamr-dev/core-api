@@ -4,7 +4,7 @@ package com.unifina.controller.api
 import com.unifina.domain.data.Stream
 import com.unifina.domain.marketplace.Product
 import com.unifina.domain.security.Permission
-import com.unifina.domain.security.SecUser
+import com.unifina.domain.security.User
 import com.unifina.filters.UnifinaCoreAPIFilters
 import com.unifina.service.ApiService
 import com.unifina.service.ProductService
@@ -19,7 +19,7 @@ class ProductStreamsApiControllerSpec extends Specification {
 		def productService = controller.productService = Mock(ProductService)
 
 		params.productId = "product-id"
-		def user = request.apiUser = new SecUser(username: "me@streamr.com")
+		def user = request.apiUser = new User(username: "me@streamr.com")
 		when:
 		withFilters(action: "index") {
 			controller.index()
@@ -42,7 +42,7 @@ class ProductStreamsApiControllerSpec extends Specification {
 		}
 
 		params.productId = "product-id"
-		def user = request.apiUser = new SecUser(username: "me@streamr.com")
+		def user = request.apiUser = new User(username: "me@streamr.com")
 
 		when:
 		withFilters(action: "index") {
@@ -66,7 +66,7 @@ class ProductStreamsApiControllerSpec extends Specification {
 
 		params.productId = "product-id"
 		params.id = "stream-id"
-		def user = request.apiUser = new SecUser(username: "me@streamr.com")
+		def user = request.apiUser = new User(username: "me@streamr.com")
 
 		when:
 		withFilters(action: "update") {
@@ -83,7 +83,7 @@ class ProductStreamsApiControllerSpec extends Specification {
 
 		params.productId = "product-id"
 		params.id = "stream-id"
-		request.apiUser = new SecUser(username: "me@streamr.com")
+		request.apiUser = new User(username: "me@streamr.com")
 
 		when:
 		withFilters(action: "update") {
@@ -120,7 +120,7 @@ class ProductStreamsApiControllerSpec extends Specification {
 
 		params.productId = "product-id"
 		params.id = "stream-id"
-		def user = request.apiUser = new SecUser(username: "me@streamr.com")
+		def user = request.apiUser = new User(username: "me@streamr.com")
 
 		when:
 		withFilters(action: "delete") {
@@ -137,7 +137,7 @@ class ProductStreamsApiControllerSpec extends Specification {
 
 		params.productId = "product-id"
 		params.id = "stream-id"
-		request.apiUser = new SecUser(username: "me@streamr.com")
+		request.apiUser = new User(username: "me@streamr.com")
 
 		when:
 		withFilters(action: "delete") {

@@ -2,7 +2,7 @@ package com.unifina.domain.marketplace
 
 import com.unifina.BeanMockingSpecification
 import com.unifina.domain.security.IntegrationKey
-import com.unifina.domain.security.SecUser
+import com.unifina.domain.security.User
 import com.unifina.service.EthereumIntegrationKeyService
 import grails.test.mixin.Mock
 
@@ -23,7 +23,7 @@ class SubscriptionSpec extends BeanMockingSpecification {
 	}
 
 	void "fetchUser() returns user if IntegrationKey with address found"() {
-		SecUser user = new SecUser(username: "me@streamr.com").save(failOnError: true, validate: false)
+		User user = new User(username: "me@streamr.com").save(failOnError: true, validate: false)
 		new IntegrationKey(
 			user: user,
 			name: "integration key",
@@ -32,7 +32,7 @@ class SubscriptionSpec extends BeanMockingSpecification {
 			idInService: "0xFAFABCBC00FAFABCBC00FAFABCBC00FAFABCBC00"
 		).save(failOnError: true, validate: true)
 		when:
-		SecUser fetched = subscription.fetchUser()
+		User fetched = subscription.fetchUser()
 		then:
 		1 * ethereumIntegrationKeyService.getEthereumUser("0xFAFABCBC00FAFABCBC00FAFABCBC00FAFABCBC00") >> user
 		fetched != null
