@@ -101,7 +101,7 @@ grails.project.dependency.resolution = {
 				'tomcat-servlet-api')
 		}
 
-		compile('org.web3j:core:4.6.2') {
+		compile('org.web3j:core:5.0.0') {
 			excludes "org.java-websocket:Java-WebSocket:1.3.8" // Version conflict with com.streamr:client
 		}
 		compile('com.amazonaws:aws-java-sdk:1.11.294')
