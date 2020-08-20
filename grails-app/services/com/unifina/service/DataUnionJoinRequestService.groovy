@@ -56,12 +56,18 @@ class DataUnionJoinRequestService {
 			}
 		}
 		sendMessage(c, "join")
-		ThreadUtil.sleep(1000)
-		if (!isMemberActive(c.contractAddress, c.memberAddress)) {
-			ThreadUtil.sleep(1000)
-			if (!isMemberActive(c.contractAddress, c.memberAddress)) {
-				throw new JoinRequestException("DUS error on registering join request")
+
+		final int timeout = 10 * 1000 // ms
+		final int interval = 1000 // ms
+		int timeSpent
+		for (timeSpent = 0; timeSpent < timeout; timeSpent += interval) {
+			ThreadUtil.sleep(interval);
+			if (isMemberActive(c.contractAddress, c.memberAddress)) {
+				break
 			}
+		}
+		if (timeSpent >= timeout) {
+			throw new JoinRequestException("DUS error on registering join request")
 		}
 		log.debug("exiting onApproveJoinRequest")
 	}

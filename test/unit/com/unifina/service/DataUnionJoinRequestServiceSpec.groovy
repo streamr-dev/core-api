@@ -539,7 +539,7 @@ class DataUnionJoinRequestServiceSpec extends BeanMockingSpecification {
 		service.update(contractAddress, r.id, cmd)
 		then:
 		1 * service.ethereumService.fetchJoinPartStreamID(contractAddress) >> joinPartStream.id
-		3 * service.dataUnionOperatorService.memberStats(contractAddress, memberAddress) >> notFoundStats
+		11 * service.dataUnionOperatorService.memberStats(contractAddress, memberAddress) >> notFoundStats
 		1 * streamrClientMock.publish(_, [type: "join", "addresses": [memberAddress]])
 		1 * service.permissionService.systemGrant(user, s1, Permission.Operation.STREAM_PUBLISH)
 		1 * service.permissionService.systemGrant(user, s2, Permission.Operation.STREAM_PUBLISH)
