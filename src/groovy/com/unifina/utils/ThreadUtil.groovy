@@ -1,5 +1,10 @@
 package com.unifina.utils
 
+/**
+ * ThreadUtil's sleep methods handle <code>InterruptedException</code>.
+ *
+ * @see https://stackoverflow.com/questions/1087475/when-does-javas-thread-sleep-throw-interruptedexception
+ */
 class ThreadUtil {
 	static void sleep(long millis) {
 		try {
