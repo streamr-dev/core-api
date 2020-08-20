@@ -2,7 +2,6 @@ package com.unifina.api;
 
 import org.springframework.validation.Errors;
 import org.springframework.validation.FieldError;
-import org.springframework.validation.ObjectError;
 
 public class ValidationException extends RuntimeException {
 

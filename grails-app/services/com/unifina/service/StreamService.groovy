@@ -5,6 +5,7 @@ import com.google.gson.GsonBuilder
 import com.streamr.client.protocol.message_layer.StreamMessage
 import com.unifina.api.ValidationException
 import com.unifina.data.StreamPartitioner
+import com.unifina.domain.StreamID
 import com.unifina.domain.data.Stream
 import com.unifina.domain.security.IntegrationKey
 import com.unifina.domain.security.Permission
@@ -52,7 +53,15 @@ class StreamService {
 
 	Stream createStream(Map params, User user, String id = IdGenerator.getShort()) {
 		Stream stream = new Stream(params)
-		stream.id = id
+		if (params.containsKey("id")) {
+			StreamID name = new StreamID(params.get("id"))
+			if (!name.validate()) {
+				throw new ValidationException(name.errors)
+			}
+			stream.id = name.toString()
+		} else {
+			stream.id = id
+		}
 		stream.config = params.config
 		if (stream.name == null || stream.name.trim() == "") {
 			stream.name = Stream.DEFAULT_NAME

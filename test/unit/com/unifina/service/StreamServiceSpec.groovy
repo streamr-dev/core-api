@@ -2,6 +2,7 @@ package com.unifina.service
 
 
 import com.streamr.client.protocol.message_layer.StreamMessage
+import com.unifina.api.ValidationException
 import com.unifina.domain.ExampleType
 import com.unifina.domain.dashboard.Dashboard
 import com.unifina.domain.dashboard.DashboardItem
@@ -133,6 +134,47 @@ class StreamServiceSpec extends Specification {
 		stream.name == "Test stream"
 		stream.description == "Test stream"
 		stream.requireSignedData
+	}
+
+	void "createStream uses user defined id as stream id instead of generated id"() {
+		def ensName = "user.eth/my-stream-name-id"
+		when:
+		def params = [
+			name       : "Test stream",
+			description: "Test stream",
+			id         : ensName,
+			config     : [
+				fields: [
+					[name: "profit", type: "number"],
+					[name: "keyword", type: "string"]
+				]
+			],
+		]
+		service.createStream(params, me)
+
+		then:
+		def stream = Stream.findAll().get(0)
+		stream.id == ensName
+	}
+
+	void "createStream validates user defined id"() {
+		def ensName = "invalid-domain-name/my-stream-name-id"
+		when:
+		def params = [
+			name       : "Test stream",
+			description: "Test stream",
+			id         : ensName,
+			config     : [
+				fields: [
+					[name: "profit", type: "number"],
+					[name: "keyword", type: "string"]
+				]
+			],
+		]
+		service.createStream(params, me)
+
+		then:
+		thrown(ValidationException)
 	}
 
 	void "getStreamEthereumPublishers should return Ethereum addresses of users with write permission to the Stream"() {
