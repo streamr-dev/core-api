@@ -15,9 +15,7 @@
     </facet>
     <facet type="hibernate" name="Hibernate">
       <configuration>
-        <datasource-map>
-          <unit-entry name="sessionFactory" />
-        </datasource-map>
+        <datasource-map />
         <naming-strategy-map />
       </configuration>
     </facet>
@@ -393,13 +391,7 @@
           <root url="jar://$MAVEN_REPOSITORY$/com/datastax/cassandra/cassandra-driver-core/3.7.1/cassandra-driver-core-3.7.1.jar!/" />
           <root url="jar://$MAVEN_REPOSITORY$/com/github/jnr/jffi/1.2.16/jffi-1.2.16-native.jar!/" />
           <root url="jar://$MAVEN_REPOSITORY$/org/xerial/snappy/snappy-java/1.1.4/snappy-java-1.1.4.jar!/" />
-          <root url="jar://$MAVEN_REPOSITORY$/org/web3j/abi/4.4.1/abi-4.4.1.jar!/" />
-          <root url="jar://$MAVEN_REPOSITORY$/org/web3j/core/4.4.1/core-4.4.1.jar!/" />
-          <root url="jar://$MAVEN_REPOSITORY$/org/web3j/tuples/4.4.1/tuples-4.4.1.jar!/" />
-          <root url="jar://$MAVEN_REPOSITORY$/org/web3j/rlp/4.4.1/rlp-4.4.1.jar!/" />
-          <root url="jar://$MAVEN_REPOSITORY$/org/web3j/crypto/4.4.1/crypto-4.4.1.jar!/" />
           <root url="jar://$MAVEN_REPOSITORY$/org/bouncycastle/bcprov-jdk15on/1.61/bcprov-jdk15on-1.61.jar!/" />
-          <root url="jar://$MAVEN_REPOSITORY$/org/web3j/utils/4.4.1/utils-4.4.1.jar!/" />
           <root url="jar://$MAVEN_REPOSITORY$/com/google/guava/guava/19.0/guava-19.0.jar!/" />
           <root url="jar://$MAVEN_REPOSITORY$/com/google/code/gson/gson/2.8.5/gson-2.8.5.jar!/" />
           <root url="jar://$MAVEN_REPOSITORY$/org/eclipse/jetty/jetty-server/9.2.28.v20190418/jetty-server-9.2.28.v20190418.jar!/" />
@@ -420,7 +412,6 @@
           <root url="jar://$MAVEN_REPOSITORY$/org/apache/tomcat/embed/tomcat-embed-jasper/8.0.50/tomcat-embed-jasper-8.0.50.jar!/" />
           <root url="jar://$MAVEN_REPOSITORY$/org/springframework/security/spring-security-web/3.2.9.RELEASE/spring-security-web-3.2.9.RELEASE.jar!/" />
           <root url="jar://$MAVEN_REPOSITORY$/org/springframework/security/spring-security-core/3.2.9.RELEASE/spring-security-core-3.2.9.RELEASE.jar!/" />
-          <root url="jar://$MAVEN_REPOSITORY$/org/java-websocket/Java-WebSocket/1.4.1/Java-WebSocket-1.4.1.jar!/" />
           <root url="jar://$MAVEN_REPOSITORY$/joda-time/joda-time/2.10.6/joda-time-2.10.6.jar!/" />
           <root url="jar://$MAVEN_REPOSITORY$/org/reactivestreams/reactive-streams/1.0.2/reactive-streams-1.0.2.jar!/" />
           <root url="jar://$MAVEN_REPOSITORY$/io/netty/netty-buffer/4.0.37.Final/netty-buffer-4.0.37.Final.jar!/" />
@@ -431,9 +422,18 @@
           <root url="jar://$MAVEN_REPOSITORY$/io/netty/netty-transport/4.0.37.Final/netty-transport-4.0.37.Final.jar!/" />
           <root url="jar://$MAVEN_REPOSITORY$/io/netty/netty-codec/4.0.37.Final/netty-codec-4.0.37.Final.jar!/" />
           <root url="jar://$MAVEN_REPOSITORY$/com/streamr/client/2.0.0/client-2.0.0.jar!/" />
+          <root url="jar://$MAVEN_REPOSITORY$/org/web3j/core/4.5.9/core-4.5.9.jar!/" />
+          <root url="jar://$MAVEN_REPOSITORY$/org/web3j/abi/4.5.9/abi-4.5.9.jar!/" />
+          <root url="jar://$MAVEN_REPOSITORY$/org/web3j/utils/4.5.9/utils-4.5.9.jar!/" />
+          <root url="jar://$MAVEN_REPOSITORY$/org/web3j/crypto/4.5.9/crypto-4.5.9.jar!/" />
+          <root url="jar://$MAVEN_REPOSITORY$/org/web3j/rlp/4.5.9/rlp-4.5.9.jar!/" />
+          <root url="jar://$MAVEN_REPOSITORY$/org/web3j/tuples/4.5.9/tuples-4.5.9.jar!/" />
+          <root url="jar://$MAVEN_REPOSITORY$/org/java-websocket/Java-WebSocket/1.4.1/Java-WebSocket-1.4.1.jar!/" />
         </CLASSES>
         <JAVADOC />
-        <SOURCES />
+        <SOURCES>
+          <root url="jar://$USER_HOME$/.ideaLibSources/abi-4.5.9-sources.jar!/" />
+        </SOURCES>
       </library>
     </orderEntry>
   </component>

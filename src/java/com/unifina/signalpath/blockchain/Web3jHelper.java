@@ -75,7 +75,9 @@ public class Web3jHelper {
 	public static Event toWeb3jEvent(EthereumABI.Event ev) throws ClassNotFoundException {
 		ArrayList<TypeReference<?>> params = new ArrayList<TypeReference<?>>();
 		for (EthereumABI.Slot s : ev.inputs) {
-			params.add(TypeReference.makeTypeReference(s.type, s.indexed));
+			final boolean primitives = false;
+			TypeReference ref = TypeReference.makeTypeReference(s.type, s.indexed, primitives);
+			params.add(ref);
 		}
 		Event web3jevent = new Event(ev.name, params);
 		return web3jevent;
@@ -253,7 +255,7 @@ public class Web3jHelper {
 	 */
 	public static BigInteger getERC20Balance(Web3j web3j, String erc20address, String holderAddress) throws ExecutionException, InterruptedException {
 		Address tokenAddress = new Address(erc20address);
-		if (tokenAddress.toUint160().getValue().equals(BigInteger.ZERO)) {
+		if (tokenAddress.toUint().getValue().equals(BigInteger.ZERO)) {
 			EthGetBalance ethGetBalance = web3j
 				.ethGetBalance(holderAddress, DefaultBlockParameterName.LATEST)
 				.sendAsync()
