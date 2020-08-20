@@ -19,7 +19,7 @@ class AuthApiController {
 	SignupCodeService signupCodeService
 	PasswordEncoder passwordEncoder
 
-	@StreamrApi(authenticationLevel = AuthLevel.NONE)
+	@StreamrApi(authenticationLevel = AuthLevel.NONE, expectedContentTypes = ["application/json", "application/x-www-form-urlencoded"])
 	def signup(EmailCommand cmd) {
 		if (cmd.hasErrors()) {
 			response.status = 400
@@ -59,7 +59,7 @@ class AuthApiController {
 		return render([username: cmd.username] as JSON)
 	}
 
-	@StreamrApi(authenticationLevel = AuthLevel.NONE)
+	@StreamrApi(authenticationLevel = AuthLevel.NONE, expectedContentTypes = ["application/json", "application/x-www-form-urlencoded"])
 	def register(RegisterCommand cmd) {
 		SignupInvite invite = SignupInvite.findByCode(cmd.invite)
 		if (!invite || invite.used || !invite.sent) {
@@ -154,7 +154,7 @@ class AuthApiController {
 		return render([emailSent: emailSent] as JSON)
 	}
 
-	@StreamrApi(authenticationLevel = AuthLevel.NONE)
+	@StreamrApi(authenticationLevel = AuthLevel.NONE, expectedContentTypes = ["application/json", "application/x-www-form-urlencoded"])
 	def resetPassword(ResetPasswordCommand command) {
 
 		String token = params.t
