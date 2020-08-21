@@ -1,16 +1,12 @@
 package com.unifina.signalpath.blockchain;
 
-import com.unifina.domain.signalpath.Canvas;
+import com.unifina.domain.Canvas;
 import com.unifina.signalpath.AbstractSignalPathModule;
 import org.apache.log4j.Logger;
 import org.json.JSONArray;
-import org.json.JSONException;
 import org.json.JSONObject;
 
-import javax.websocket.DeploymentException;
 import java.io.Closeable;
-import java.io.IOException;
-import java.net.URISyntaxException;
 import java.util.List;
 
 import static java.util.Collections.singletonList;

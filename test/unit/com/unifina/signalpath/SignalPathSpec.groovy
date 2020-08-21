@@ -1,7 +1,7 @@
 package com.unifina.signalpath
 
 import com.unifina.BeanMockingSpecification
-import com.unifina.domain.signalpath.Canvas
+import com.unifina.domain.Canvas
 import com.unifina.exceptions.CyclicCanvasModuleExceptionMessage
 import com.unifina.service.ModuleService
 import grails.test.mixin.Mock

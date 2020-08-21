@@ -1,8 +1,8 @@
 package com.unifina.controller.api
 
 import com.unifina.api.*
-import com.unifina.domain.dataunion.DataUnionJoinRequest
-import com.unifina.domain.security.User
+import com.unifina.domain.DataUnionJoinRequest
+import com.unifina.domain.User
 import com.unifina.security.StreamrApi
 import com.unifina.service.DataUnionJoinRequestService
 

@@ -3,7 +3,7 @@ package com.unifina.data
 
 import com.unifina.datasource.DataSource
 import com.unifina.datasource.ITimeListener
-import com.unifina.domain.security.User
+import com.unifina.domain.User
 import com.unifina.utils.Globals
 import spock.lang.Specification
 import spock.util.concurrent.PollingConditions

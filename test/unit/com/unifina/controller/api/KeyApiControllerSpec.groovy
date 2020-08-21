@@ -4,11 +4,11 @@ import com.unifina.ControllerSpecification
 import com.unifina.api.ApiException
 import com.unifina.api.NotFoundException
 import com.unifina.api.NotPermittedException
-import com.unifina.domain.data.Stream
-import com.unifina.domain.security.IntegrationKey
-import com.unifina.domain.security.Key
-import com.unifina.domain.security.Permission
-import com.unifina.domain.security.User
+import com.unifina.domain.Stream
+import com.unifina.domain.IntegrationKey
+import com.unifina.domain.Key
+import com.unifina.domain.Permission
+import com.unifina.domain.User
 import com.unifina.service.PermissionService
 import com.unifina.service.StreamService
 import grails.test.mixin.Mock

@@ -1,6 +1,6 @@
 package com.unifina.api
 
-import com.unifina.domain.security.Permission
+import com.unifina.domain.Permission
 import grails.validation.Validateable
 import groovy.transform.CompileStatic
 

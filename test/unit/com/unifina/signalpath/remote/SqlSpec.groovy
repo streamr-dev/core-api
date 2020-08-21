@@ -1,7 +1,7 @@
 package com.unifina.signalpath.remote
 
 import com.unifina.ModuleTestingSpecification
-import com.unifina.domain.security.User
+import com.unifina.domain.User
 import com.unifina.signalpath.ModuleOption
 import com.unifina.signalpath.ModuleOptions
 import com.unifina.signalpath.ModuleWithSideEffects

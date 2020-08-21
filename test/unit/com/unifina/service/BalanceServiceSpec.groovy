@@ -1,8 +1,8 @@
 package com.unifina.service
 
 import com.unifina.api.ApiException
-import com.unifina.domain.security.IntegrationKey
-import com.unifina.domain.security.User
+import com.unifina.domain.IntegrationKey
+import com.unifina.domain.User
 import grails.test.mixin.TestMixin
 import grails.test.mixin.support.GrailsUnitTestMixin
 

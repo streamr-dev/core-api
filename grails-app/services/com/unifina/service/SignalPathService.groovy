@@ -3,11 +3,7 @@ package com.unifina.service
 import com.unifina.api.CanvasCommunicationException
 import com.unifina.datasource.IStartListener
 import com.unifina.datasource.IStopListener
-import com.unifina.domain.data.Stream
-import com.unifina.domain.security.Permission
-import com.unifina.domain.security.User
-import com.unifina.domain.signalpath.Canvas
-import com.unifina.domain.signalpath.Serialization
+import com.unifina.domain.*
 import com.unifina.exceptions.CanvasUnreachableException
 import com.unifina.exceptions.UnauthorizedStreamException
 import com.unifina.serialization.SerializationException

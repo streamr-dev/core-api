@@ -2,8 +2,8 @@ package com.unifina.signalpath;
 
 import com.unifina.data.Event;
 import com.unifina.datasource.IDayListener;
-import com.unifina.domain.security.Permission;
-import com.unifina.domain.signalpath.Module;
+import com.unifina.domain.Permission;
+import com.unifina.domain.Module;
 import com.unifina.security.permission.ConnectionTraversalPermission;
 import com.unifina.service.PermissionService;
 import com.unifina.service.SerializationService;

@@ -1,11 +1,10 @@
 package com.unifina.service
 
-import groovy.transform.CompileStatic
-
-import com.unifina.domain.signalpath.Module
+import com.unifina.domain.Module
 import com.unifina.signalpath.AbstractSignalPathModule
 import com.unifina.signalpath.SignalPath
 import com.unifina.utils.Globals
+import groovy.transform.CompileStatic
 
 class ModuleService {
 

@@ -1,6 +1,6 @@
 package com.unifina.signalpath
 
-import com.unifina.domain.signalpath.Module
+import com.unifina.domain.Module
 import grails.test.mixin.Mock
 import spock.lang.Specification
 

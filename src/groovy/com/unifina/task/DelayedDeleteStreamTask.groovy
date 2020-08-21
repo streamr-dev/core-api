@@ -1,7 +1,7 @@
 package com.unifina.task
 
-import com.unifina.domain.data.Stream
-import com.unifina.domain.task.Task
+import com.unifina.domain.Stream
+import com.unifina.domain.Task
 import com.unifina.service.StreamService
 import org.codehaus.groovy.grails.commons.GrailsApplication
 

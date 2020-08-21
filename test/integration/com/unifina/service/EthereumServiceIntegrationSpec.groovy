@@ -1,7 +1,7 @@
 package com.unifina.service
 
-import com.unifina.domain.security.IntegrationKey
-import com.unifina.domain.security.User
+import com.unifina.domain.IntegrationKey
+import com.unifina.domain.User
 import grails.test.spock.IntegrationSpec
 
 class EthereumServiceIntegrationSpec extends IntegrationSpec {

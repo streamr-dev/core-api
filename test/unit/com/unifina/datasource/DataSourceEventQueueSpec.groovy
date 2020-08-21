@@ -2,7 +2,7 @@ package com.unifina.datasource
 
 
 import com.unifina.data.Event
-import com.unifina.domain.security.User
+import com.unifina.domain.User
 import com.unifina.utils.Globals
 import spock.lang.Specification
 import spock.util.concurrent.PollingConditions

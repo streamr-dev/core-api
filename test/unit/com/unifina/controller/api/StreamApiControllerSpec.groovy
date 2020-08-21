@@ -2,11 +2,11 @@ package com.unifina.controller.api
 
 import com.unifina.ControllerSpecification
 import com.unifina.api.*
-import com.unifina.domain.data.Stream
-import com.unifina.domain.security.IntegrationKey
-import com.unifina.domain.security.Key
-import com.unifina.domain.security.Permission
-import com.unifina.domain.security.User
+import com.unifina.domain.Stream
+import com.unifina.domain.IntegrationKey
+import com.unifina.domain.Key
+import com.unifina.domain.Permission
+import com.unifina.domain.User
 import com.unifina.filters.UnifinaCoreAPIFilters
 import com.unifina.service.*
 import grails.converters.JSON

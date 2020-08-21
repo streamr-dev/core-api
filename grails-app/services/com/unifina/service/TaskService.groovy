@@ -1,8 +1,7 @@
 package com.unifina.service
 
-
-import com.unifina.domain.security.User
-import com.unifina.domain.task.Task
+import com.unifina.domain.Task
+import com.unifina.domain.User
 import com.unifina.task.AbstractTask
 import com.unifina.task.TaskWorker
 import com.unifina.utils.IdGenerator

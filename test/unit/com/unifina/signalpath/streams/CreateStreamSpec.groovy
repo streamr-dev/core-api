@@ -3,7 +3,7 @@ package com.unifina.signalpath.streams
 import com.unifina.BeanMockingSpecification
 import com.unifina.api.ValidationException
 
-import com.unifina.domain.data.Stream
+import com.unifina.domain.Stream
 
 import com.unifina.service.StreamService
 import com.unifina.utils.Globals

@@ -2,8 +2,8 @@ package com.unifina.signalpath.blockchain
 
 import com.google.gson.Gson
 import com.unifina.ModuleTestingSpecification
-import com.unifina.domain.security.IntegrationKey
-import com.unifina.domain.security.User
+import com.unifina.domain.IntegrationKey
+import com.unifina.domain.User
 import com.unifina.serialization.SerializerImpl
 import com.unifina.service.EthereumIntegrationKeyService
 import com.unifina.service.SerializationService

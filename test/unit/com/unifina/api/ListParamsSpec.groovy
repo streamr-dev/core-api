@@ -1,6 +1,6 @@
 package com.unifina.api
 
-import com.unifina.domain.dashboard.Dashboard
+import com.unifina.domain.Dashboard
 import grails.orm.HibernateCriteriaBuilder
 import grails.test.mixin.Mock
 import grails.test.mixin.TestMixin

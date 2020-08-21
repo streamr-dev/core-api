@@ -1,8 +1,8 @@
 package com.unifina.signalpath.streams;
 
 import com.unifina.api.ValidationException;
-import com.unifina.domain.data.Stream;
-import com.unifina.domain.security.User;
+import com.unifina.domain.Stream;
+import com.unifina.domain.User;
 import com.unifina.service.StreamService;
 import com.unifina.signalpath.*;
 import grails.util.Holders;

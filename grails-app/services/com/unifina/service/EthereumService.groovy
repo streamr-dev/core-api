@@ -1,7 +1,7 @@
 package com.unifina.service
 
-import com.unifina.domain.security.IntegrationKey
-import com.unifina.domain.security.User
+import com.unifina.domain.IntegrationKey
+import com.unifina.domain.User
 import com.unifina.signalpath.blockchain.Web3jHelper
 import org.apache.log4j.LogManager
 import org.apache.log4j.Logger

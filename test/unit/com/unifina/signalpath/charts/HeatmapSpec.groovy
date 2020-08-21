@@ -1,7 +1,7 @@
 package com.unifina.signalpath.charts
 
 import com.unifina.UiChannelMockingSpecification
-import com.unifina.domain.security.User
+import com.unifina.domain.User
 import com.unifina.signalpath.SignalPath
 import com.unifina.utils.testutils.ModuleTestHelper
 import grails.test.mixin.Mock

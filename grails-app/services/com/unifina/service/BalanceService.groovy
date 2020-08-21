@@ -1,16 +1,17 @@
 package com.unifina.service
 
 import com.unifina.api.ApiException
-import com.unifina.domain.security.IntegrationKey
-import com.unifina.domain.security.User
+import com.unifina.domain.IntegrationKey
+import com.unifina.domain.User
 import com.unifina.signalpath.blockchain.EthereumModuleOptions
+import com.unifina.utils.MapTraversal
+import grails.util.Holders
 import org.web3j.exceptions.MessageDecodingException
 import org.web3j.protocol.Web3j
 import org.web3j.protocol.http.HttpService
-import grails.util.Holders;
+
 import javax.annotation.PostConstruct
 import java.util.concurrent.ExecutionException
-import com.unifina.utils.MapTraversal;
 
 class BalanceService {
 	Web3jHelperService web3jHelperService
