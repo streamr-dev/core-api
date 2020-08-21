@@ -176,6 +176,29 @@ describe('Streams API', () => {
         })
     })
 
+    describe('POST /api/v1/streams', function() {
+        it('creates stream with given ENS domain and path', async function() {
+            const response = await Streamr.api.v1.streams
+                .create({
+                    name: 'stream-id-' + Date.now(),
+                    id: 'streamr.eth/path/dir/' + Date.now(),
+                })
+                .withApiKey(API_KEY)
+                .execute()
+            assert(response.id, 'streamr.eth/path/dir')
+        })
+        it('doesnt create stream with invalid ENS domain and path', async function() {
+            const response = await Streamr.api.v1.streams
+                .create({
+                    name: 'stream-id-' + Date.now(),
+                    id: '-streamr.eth/path/dir/',
+                })
+                .withApiKey(API_KEY)
+                .call()
+            assert(response.status, 422)
+        })
+    })
+
     describe('POST /api/v1/streams/:id/uploadCsvFile', () => {
         it('requires authentication', async () => {
             const response = await Streamr.api.v1.streams
