@@ -54,7 +54,7 @@ class DataUnionJoinRequestService {
 		log.debug(String.format("entering findStreams(%s)", c))
 		List<Product> products = Product.createCriteria().list {
 			eq("type", Product.Type.DATAUNION)
-			ilike("beneficiaryAddress", c.contractAddress)
+			ilike("beneficiaryAddress", c.contractAddress) // ilike = case-insensitive like: Ethereum addresses are case-insensitive but different case systems are in use (checksum-case, lower-case at least)
 		}
 		Set<Stream> streams = new HashSet<>()
 		for (Product p : products) {
@@ -132,7 +132,7 @@ class DataUnionJoinRequestService {
 		if (cmd.secret) {
 			// Find DataUnionSecret by contractAddress
 			DataUnionSecret secret = DataUnionSecret.createCriteria().get {
-				ilike("contractAddress", contractAddress)
+				ilike("contractAddress", contractAddress)	// ilike = case-insensitive like: Ethereum addresses are case-insensitive but different case systems are in use (checksum-case, lower-case at least)
 				eq("secret", cmd.secret)
 			}
 			if (secret) {
