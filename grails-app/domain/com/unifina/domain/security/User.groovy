@@ -25,7 +25,7 @@ class User implements Userish {
 	boolean accountExpired
 	boolean accountLocked
 	boolean passwordExpired
-	SignupMethod signupMethod
+	SignupMethod signupMethod = SignupMethod.UNKNOWN
 
 	String name
 
