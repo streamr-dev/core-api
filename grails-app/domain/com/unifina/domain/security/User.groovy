@@ -51,6 +51,7 @@ class User implements Userish {
 		lastLogin nullable: true
 		imageUrlSmall nullable: true
 		imageUrlLarge nullable: true
+		signupMethod nullable: false
 	}
 
 	static mapping = {
