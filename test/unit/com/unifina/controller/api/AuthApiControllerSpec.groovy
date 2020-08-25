@@ -208,6 +208,7 @@ class AuthApiControllerSpec extends Specification {
 			role.authority = it
 			role.save()
 		}
+		grailsApplication.config.grails.serverURL = "http://mock-host"
 
 		when: "registering with valid invite code"
 		def inv = controller.signupCodeService.create(username)
@@ -220,11 +221,13 @@ class AuthApiControllerSpec extends Specification {
 		params.password2 = 'fooBar123!'
 		params.tosConfirmed = true
 		request.method = 'POST'
+		request.addHeader("Origin", "http://mock-host")
 		controller.register()
 
 		then: "should create user"
-		User.findByUsername(username)
+		User.findByUsername(username) != null
 		User.findByUsername(username).password == 'fooBar123!-encoded'
+		User.findByUsername(username).signupMethod == SignupMethod.CORE
 		response.status == 200
 		response.json.name == "Name"
 		response.json.username == "user@invite.to"

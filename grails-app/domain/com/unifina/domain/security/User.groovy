@@ -8,6 +8,12 @@ import grails.persistence.Entity
 import groovy.transform.CompileStatic
 import org.apache.commons.codec.digest.DigestUtils
 
+enum SignupMethod {
+	API,
+	CORE,
+	UNKNOWN
+}
+
 @Entity
 class User implements Userish {
 
@@ -19,6 +25,7 @@ class User implements Userish {
 	boolean accountExpired
 	boolean accountLocked
 	boolean passwordExpired
+	SignupMethod signupMethod
 
 	String name
 
