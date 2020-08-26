@@ -4,6 +4,7 @@ import com.unifina.datasource.DataSource;
 import com.unifina.datasource.DataSourceEventQueue;
 import com.unifina.utils.BoundedPriorityBlockingQueue;
 import com.unifina.utils.Globals;
+import com.unifina.utils.ThreadUtil;
 
 import java.util.Date;
 import java.util.Map;
@@ -74,9 +75,7 @@ public class HistoricalEventQueue extends DataSourceEventQueue {
 			long simTimeMax = realTimeElapsed*speed + simTimeStart;
 			long diff = time - simTimeMax;
 			if (diff > 0) {
-				try {
-					Thread.sleep((int)(diff/speed));
-				} catch (InterruptedException e) { /* ignore */ }
+				ThreadUtil.sleep((int)(diff/speed));
 			}
 		}
 	}

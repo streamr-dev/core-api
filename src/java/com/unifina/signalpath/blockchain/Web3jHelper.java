@@ -1,5 +1,6 @@
 package com.unifina.signalpath.blockchain;
 
+import com.unifina.utils.ThreadUtil;
 import org.apache.log4j.Logger;
 import org.web3j.abi.EventValues;
 import org.web3j.abi.FunctionEncoder;
@@ -144,14 +145,7 @@ public class Web3jHelper {
 			if (receipt == null) {
 				retry++;
 				log.info("Couldn't get transaction receipt for tx " + txHash + ". Retry " + retry);
-				try {
-					Thread.sleep(waitMsBetweenTries);
-				} catch (InterruptedException e) {
-					log.info(e.getMessage());
-					if (throwInterruptedException) {
-						throw e;
-					}
-				}
+				ThreadUtil.sleep(waitMsBetweenTries);
 			}
 		}
 		return receipt;

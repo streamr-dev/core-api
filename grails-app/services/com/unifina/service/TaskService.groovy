@@ -6,6 +6,7 @@ import com.unifina.domain.task.Task
 import com.unifina.task.AbstractTask
 import com.unifina.task.TaskWorker
 import com.unifina.utils.IdGenerator
+import com.unifina.utils.ThreadUtil
 import grails.converters.JSON
 import org.apache.log4j.Logger
 import org.codehaus.groovy.grails.commons.GrailsApplication
@@ -187,7 +188,7 @@ class TaskService {
 			int i=0
 			while (tw.isAlive() && i < 50) {
 				i++
-				Thread.sleep(200)
+				ThreadUtil.sleep(200)
 				log.info("Waiting for task worker $tw.workerId to quit...")
 			}
 		}
