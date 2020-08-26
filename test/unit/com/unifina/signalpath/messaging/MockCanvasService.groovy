@@ -1,6 +1,6 @@
 package com.unifina.signalpath.messaging
 
-import com.unifina.domain.signalpath.Canvas
+import com.unifina.domain.Canvas
 import com.unifina.service.CanvasService
 
 class MockCanvasService extends CanvasService {

@@ -1,6 +1,6 @@
 package com.unifina.signalpath.custom
 
-import com.unifina.domain.security.User
+import com.unifina.domain.User
 import com.unifina.security.MyPolicy
 import com.unifina.security.MySecurityManager
 import com.unifina.security.PackageAccessHelper

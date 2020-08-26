@@ -1,6 +1,6 @@
 package com.unifina.security;
 
-import com.unifina.domain.security.User;
+import com.unifina.domain.User;
 
 public enum AllowRole {
 	NO_ROLE_REQUIRED,

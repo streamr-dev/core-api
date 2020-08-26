@@ -2,7 +2,7 @@ package com.unifina.controller.api
 
 import com.unifina.api.DisabledUserException
 import com.unifina.api.InvalidArgumentsException
-import com.unifina.domain.security.User
+import com.unifina.domain.User
 import com.unifina.security.Challenge
 import com.unifina.security.SessionToken
 import com.unifina.security.AuthLevel

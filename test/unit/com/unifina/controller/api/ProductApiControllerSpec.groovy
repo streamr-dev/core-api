@@ -3,11 +3,11 @@ package com.unifina.controller.api
 import com.google.common.collect.Lists
 import com.streamr.client.protocol.message_layer.StreamMessage
 import com.unifina.api.*
-import com.unifina.domain.data.Stream
-import com.unifina.domain.marketplace.Category
-import com.unifina.domain.marketplace.Product
-import com.unifina.domain.security.Permission
-import com.unifina.domain.security.User
+import com.unifina.domain.Stream
+import com.unifina.domain.Category
+import com.unifina.domain.Product
+import com.unifina.domain.Permission
+import com.unifina.domain.User
 import com.unifina.filters.UnifinaCoreAPIFilters
 import com.unifina.service.*
 import grails.test.mixin.Mock

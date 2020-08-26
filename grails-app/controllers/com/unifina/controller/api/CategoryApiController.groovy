@@ -1,6 +1,6 @@
 package com.unifina.controller.api
 
-import com.unifina.domain.marketplace.Category
+import com.unifina.domain.Category
 import com.unifina.security.AuthLevel
 import com.unifina.security.StreamrApi
 import grails.converters.JSON

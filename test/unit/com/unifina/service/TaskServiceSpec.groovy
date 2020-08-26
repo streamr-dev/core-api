@@ -1,11 +1,11 @@
 package com.unifina.service
 
 
-import com.unifina.domain.security.User
+import com.unifina.domain.User
 import com.unifina.task.TaskWorker
 import grails.test.mixin.*
 import org.codehaus.groovy.grails.commons.GrailsApplication
-import com.unifina.domain.task.Task
+import com.unifina.domain.Task
 import spock.lang.Specification
 
 import static plastic.criteria.PlasticCriteria.* ; // mockCriteria() method

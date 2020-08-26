@@ -1,7 +1,7 @@
 package com.unifina.service
 
-import com.unifina.domain.signalpath.Module
-import com.unifina.domain.signalpath.ModuleCategory
+import com.unifina.domain.Module
+import com.unifina.domain.ModuleCategory
 import com.unifina.signalpath.AbstractSignalPathModule
 import com.unifina.signalpath.SignalPath
 import com.unifina.signalpath.simplemath.VariadicAddMulti

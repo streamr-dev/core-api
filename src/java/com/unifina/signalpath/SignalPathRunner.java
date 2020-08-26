@@ -2,7 +2,7 @@ package com.unifina.signalpath;
 
 import com.unifina.datasource.IStartListener;
 import com.unifina.datasource.IStopListener;
-import com.unifina.domain.signalpath.Canvas;
+import com.unifina.domain.Canvas;
 import com.unifina.service.SignalPathService;
 import com.unifina.utils.Globals;
 import com.unifina.utils.IdGenerator;

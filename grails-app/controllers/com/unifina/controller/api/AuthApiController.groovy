@@ -1,8 +1,8 @@
 package com.unifina.controller.api
 
-import com.unifina.domain.security.RegistrationCode
-import com.unifina.domain.security.SignupInvite
-import com.unifina.domain.security.User
+import com.unifina.domain.RegistrationCode
+import com.unifina.domain.SignupInvite
+import com.unifina.domain.User
 import com.unifina.exceptions.UserCreationFailedException
 import com.unifina.security.AuthLevel
 import com.unifina.security.PasswordEncoder

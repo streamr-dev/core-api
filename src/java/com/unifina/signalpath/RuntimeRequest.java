@@ -1,8 +1,8 @@
 package com.unifina.signalpath;
 
-import com.unifina.domain.security.Permission;
-import com.unifina.domain.security.User;
-import com.unifina.domain.signalpath.Canvas;
+import com.unifina.domain.Permission;
+import com.unifina.domain.User;
+import com.unifina.domain.Canvas;
 import com.streamr.client.protocol.message_layer.ITimestamped;
 
 import java.util.*;

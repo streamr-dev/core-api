@@ -1,10 +1,10 @@
 package com.unifina.controller.api
 
 import com.unifina.ControllerSpecification
-import com.unifina.domain.security.Key
-import com.unifina.domain.security.Role
-import com.unifina.domain.security.User
-import com.unifina.domain.security.UserRole
+import com.unifina.domain.Key
+import com.unifina.domain.Role
+import com.unifina.domain.User
+import com.unifina.domain.UserRole
 import com.unifina.service.ProductService
 import grails.test.mixin.Mock
 import grails.test.mixin.TestFor

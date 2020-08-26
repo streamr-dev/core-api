@@ -1,6 +1,6 @@
 package com.streamr.client.authentication;
 
-import com.unifina.domain.security.User;
+import com.unifina.domain.User;
 import com.unifina.security.SessionToken;
 import com.unifina.service.EthereumIntegrationKeyService;
 import com.unifina.service.SessionService;

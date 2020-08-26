@@ -1,7 +1,7 @@
 package com.unifina.controller.api
 
 import com.unifina.ControllerSpecification
-import com.unifina.domain.security.User
+import com.unifina.domain.User
 import com.unifina.service.SessionService
 import grails.test.mixin.Mock
 import grails.test.mixin.TestFor

@@ -1,6 +1,5 @@
 package com.unifina.service
 
-
 import com.streamr.client.StreamrClient
 import com.streamr.client.authentication.ApiKeyAuthenticationMethod
 import com.streamr.client.authentication.AuthenticationMethod
@@ -8,7 +7,7 @@ import com.streamr.client.authentication.InternalAuthenticationMethod
 import com.streamr.client.options.EncryptionOptions
 import com.streamr.client.options.SigningOptions
 import com.streamr.client.options.StreamrClientOptions
-import com.unifina.domain.security.Key
+import com.unifina.domain.Key
 import com.unifina.utils.MapTraversal
 import grails.util.Holders
 import org.apache.log4j.Logger

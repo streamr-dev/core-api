@@ -2,8 +2,8 @@ package com.unifina.signalpath
 
 import com.unifina.BeanMockingSpecification
 import com.unifina.datasource.DataSource
-import com.unifina.domain.security.User
-import com.unifina.domain.signalpath.Canvas
+import com.unifina.domain.User
+import com.unifina.domain.Canvas
 import com.unifina.service.SignalPathService
 import com.unifina.utils.Globals
 import spock.util.concurrent.PollingConditions

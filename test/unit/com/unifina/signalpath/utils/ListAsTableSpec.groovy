@@ -1,7 +1,7 @@
 package com.unifina.signalpath.utils
 
 import com.unifina.UiChannelMockingSpecification
-import com.unifina.domain.security.User
+import com.unifina.domain.User
 import com.unifina.signalpath.RuntimeRequest
 import com.unifina.signalpath.RuntimeResponse
 import com.unifina.signalpath.SignalPath

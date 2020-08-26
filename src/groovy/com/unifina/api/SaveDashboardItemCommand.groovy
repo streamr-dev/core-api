@@ -1,6 +1,6 @@
 package com.unifina.api
 
-import com.unifina.domain.signalpath.Canvas
+import com.unifina.domain.Canvas
 import com.unifina.utils.Webcomponent
 import grails.converters.JSON
 import grails.validation.Validateable

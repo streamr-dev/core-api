@@ -1,12 +1,12 @@
 package com.unifina.service
 
 import com.unifina.BeanMockingSpecification
-import com.unifina.domain.security.Permission
-import com.unifina.domain.security.Role
-import com.unifina.domain.security.UserRole
-import com.unifina.domain.security.User
-import com.unifina.domain.signalpath.Canvas
-import com.unifina.domain.signalpath.Serialization
+import com.unifina.domain.Permission
+import com.unifina.domain.Role
+import com.unifina.domain.UserRole
+import com.unifina.domain.User
+import com.unifina.domain.Canvas
+import com.unifina.domain.Serialization
 import com.unifina.exceptions.CanvasUnreachableException
 import com.unifina.signalpath.RuntimeRequest
 import com.unifina.signalpath.SignalPath

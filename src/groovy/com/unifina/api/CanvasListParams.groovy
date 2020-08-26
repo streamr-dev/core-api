@@ -1,7 +1,7 @@
 package com.unifina.api
 
-import com.unifina.domain.security.Permission
-import com.unifina.domain.signalpath.Canvas
+import com.unifina.domain.Permission
+import com.unifina.domain.Canvas
 import grails.validation.Validateable
 import groovy.transform.CompileStatic
 

@@ -1,6 +1,6 @@
 package com.unifina.feed;
 
-import com.unifina.domain.data.Stream;
+import com.unifina.domain.Stream;
 
 import java.util.Map;
 

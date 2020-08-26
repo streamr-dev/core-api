@@ -1,9 +1,9 @@
 package com.unifina
 
 import com.streamr.client.StreamrClient
-import com.unifina.domain.data.Stream
-import com.unifina.domain.security.User
-import com.unifina.domain.signalpath.Canvas
+import com.unifina.domain.Stream
+import com.unifina.domain.User
+import com.unifina.domain.Canvas
 import com.unifina.service.PermissionService
 import com.unifina.service.StreamService
 import com.unifina.service.StreamrClientService
