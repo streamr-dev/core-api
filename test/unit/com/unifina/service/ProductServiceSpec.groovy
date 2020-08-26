@@ -533,16 +533,12 @@ class ProductServiceSpec extends Specification {
 
 		// revoke streams old permissions
 		1 * permissionService.systemRevokeAnonymousAccess(s1, Permission.Operation.STREAM_GET)
-		1 * permissionService.systemRevokeAnonymousAccess(s2, Permission.Operation.STREAM_GET)
 		1 * permissionService.systemRevokeAnonymousAccess(s3, Permission.Operation.STREAM_GET)
 		1 * permissionService.systemRevokeAnonymousAccess(s1, Permission.Operation.STREAM_SUBSCRIBE)
-		1 * permissionService.systemRevokeAnonymousAccess(s2, Permission.Operation.STREAM_SUBSCRIBE)
 		1 * permissionService.systemRevokeAnonymousAccess(s3, Permission.Operation.STREAM_SUBSCRIBE)
 
 		// grant permissions for new streams
-		1 * permissionService.systemGrantAnonymousAccess(s2, Permission.Operation.STREAM_GET)
 		1 * permissionService.systemGrantAnonymousAccess(s4, Permission.Operation.STREAM_GET)
-		1 * permissionService.systemGrantAnonymousAccess(s2, Permission.Operation.STREAM_SUBSCRIBE)
 		1 * permissionService.systemGrantAnonymousAccess(s4, Permission.Operation.STREAM_SUBSCRIBE)
 
 		0 * permissionService._

@@ -10,6 +10,7 @@ import grails.compiler.GrailsCompileStatic
 
 import java.text.SimpleDateFormat
 import java.util.concurrent.ThreadLocalRandom
+import static java.util.stream.Collectors.toSet;
 
 @GrailsCompileStatic
 class ProductService {
@@ -164,23 +165,24 @@ class ProductService {
 			permissionService.verify(currentUser, it, Permission.Operation.STREAM_SHARE)
 		}
 
-		// A stream that is added when editing an existing free product should inherit read access for anonymous user
-		// Revoke public read permissions and grant them back after update
 		Product product = findById(id, currentUser, Permission.Operation.PRODUCT_EDIT)
-		if (product.isFree()) {
-			product.streams.each { stream ->
-				permissionService.systemRevokeAnonymousAccess(stream, Permission.Operation.STREAM_GET)
-				permissionService.systemRevokeAnonymousAccess(stream, Permission.Operation.STREAM_SUBSCRIBE)
-			}
-		}
+		def addedStreams = command.streams.stream().filter{s -> !product.streams.contains(s)}.collect(toSet())
+		def removedStreams = product.streams.stream().filter{s -> !command.streams.contains(s)}.collect(toSet())
+
 		command.updateProduct(product, currentUser, permissionService)
 		product.save(failOnError: true)
+
+		// A stream that is added when editing an existing free product should inherit read access for anonymous user
+		// TODO if the stream is removed from one free product, but is still in some other free product, should we remove the permission?
+		// TODO if the permission is already there, we should not add it again?
 		if (product.isFree()) {
-			product.streams.each { stream ->
-				permissionService.systemGrantAnonymousAccess(stream, Permission.Operation.STREAM_GET)
-				permissionService.systemGrantAnonymousAccess(stream, Permission.Operation.STREAM_SUBSCRIBE)
+			def permissions = [Permission.Operation.STREAM_GET, Permission.Operation.STREAM_SUBSCRIBE]
+			permissions.each { permission ->
+				addedStreams.each { s -> permissionService.systemGrantAnonymousAccess(s, permission) }
+				removedStreams.each { s -> permissionService.systemRevokeAnonymousAccess(s, permission) }
 			}
 		}
+
 		subscriptionService.afterProductUpdated(product)
 		return product
 	}
