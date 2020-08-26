@@ -538,8 +538,50 @@ class ProductServiceSpec extends Specification {
 		1 * permissionService.systemRevokeAnonymousAccess(s3, Permission.Operation.STREAM_SUBSCRIBE)
 
 		// grant permissions for new streams
+		1 * permissionService.checkAnonymousAccess(s4, Permission.Operation.STREAM_GET) >> false
+		1 * permissionService.checkAnonymousAccess(s4, Permission.Operation.STREAM_SUBSCRIBE) >> false
 		1 * permissionService.systemGrantAnonymousAccess(s4, Permission.Operation.STREAM_GET)
 		1 * permissionService.systemGrantAnonymousAccess(s4, Permission.Operation.STREAM_SUBSCRIBE)
+
+		0 * permissionService._
+	}
+
+	void "update() does not grant permission if it has already been granted"() {
+		setupStreams()
+		setupFreeProduct()
+
+		service.subscriptionService = Stub(SubscriptionService)
+		service.apiService = Stub(ApiService) {
+			authorizedGetById(Product, _, _, _) >> product
+		}
+		def permissionService = service.permissionService = Mock(PermissionService)
+
+		def validCommand = new UpdateProductCommand(
+			name: "updated name",
+			description: "updated description",
+			category: category,
+			streams: [s1, s2, s3, s4],
+			pricePerSecond: 0,
+			ownerAddress: "0xCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC",
+			beneficiaryAddress: "0xCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC",
+			priceCurrency: Product.Currency.DATA,
+			minimumSubscriptionInSeconds: 0
+		)
+		def user = new User(username: "me@streamr.com")
+
+		when:
+		service.update("product-id", validCommand, user)
+		then:
+		1 * permissionService.verify(user, s1, Permission.Operation.STREAM_SHARE)
+		1 * permissionService.verify(user, s2, Permission.Operation.STREAM_SHARE)
+		1 * permissionService.verify(user, s3, Permission.Operation.STREAM_SHARE)
+		1 * permissionService.verify(user, s4, Permission.Operation.STREAM_SHARE)
+
+		// permission already granted
+		1 * permissionService.checkAnonymousAccess(s4, Permission.Operation.STREAM_GET) >> true
+		1 * permissionService.checkAnonymousAccess(s4, Permission.Operation.STREAM_SUBSCRIBE) >> true
+		0 * permissionService.systemGrantAnonymousAccess(s4, Permission.Operation.STREAM_GET)
+		0 * permissionService.systemGrantAnonymousAccess(s4, Permission.Operation.STREAM_SUBSCRIBE)
 
 		0 * permissionService._
 	}
