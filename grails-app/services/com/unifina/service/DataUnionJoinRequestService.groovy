@@ -2,13 +2,7 @@ package com.unifina.service
 
 import com.streamr.client.StreamrClient
 import com.unifina.api.*
-import com.unifina.domain.data.Stream
-import com.unifina.domain.dataunion.DataUnionJoinRequest
-import com.unifina.domain.dataunion.DataUnionSecret
-import com.unifina.domain.marketplace.Product
-import com.unifina.domain.security.IntegrationKey
-import com.unifina.domain.security.Permission
-import com.unifina.domain.security.User
+import com.unifina.domain.*
 import com.unifina.exceptions.JoinRequestException
 import com.unifina.utils.ThreadUtil
 import groovy.json.JsonSlurper

@@ -5,11 +5,11 @@ import com.unifina.api.DashboardListParams
 import com.unifina.api.ListParams
 import com.unifina.api.SaveDashboardCommand
 import com.unifina.api.ValidationException
-import com.unifina.domain.dashboard.Dashboard
-import com.unifina.domain.dashboard.DashboardItem
-import com.unifina.domain.security.Key
-import com.unifina.domain.security.User
-import com.unifina.domain.signalpath.Canvas
+import com.unifina.domain.Dashboard
+import com.unifina.domain.DashboardItem
+import com.unifina.domain.Key
+import com.unifina.domain.User
+import com.unifina.domain.Canvas
 import com.unifina.service.ApiService
 import com.unifina.service.DashboardService
 import com.unifina.utils.Webcomponent

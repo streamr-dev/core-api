@@ -1,9 +1,9 @@
 package com.unifina.service
 
 import com.unifina.api.ApiException
-import com.unifina.domain.marketplace.Category
-import com.unifina.domain.marketplace.Product
-import com.unifina.domain.security.User
+import com.unifina.domain.Category
+import com.unifina.domain.Product
+import com.unifina.domain.User
 import com.unifina.provider.FileUploadProvider
 import com.unifina.utils.ImageResizer
 import com.unifina.utils.ImageVerifier

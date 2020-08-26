@@ -1,8 +1,8 @@
 package com.unifina.signalpath.utils
 
 import com.streamr.client.protocol.message_layer.StreamMessage
-import com.unifina.domain.data.Stream
-import com.unifina.domain.security.User
+import com.unifina.domain.Stream
+import com.unifina.domain.User
 import grails.test.mixin.Mock
 import spock.lang.Specification
 

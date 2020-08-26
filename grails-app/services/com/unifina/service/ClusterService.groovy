@@ -2,8 +2,8 @@ package com.unifina.service
 
 import com.streamr.api.client.CanvasesPerNode
 import com.streamr.api.client.StreamrClient
-import com.unifina.domain.security.User
-import com.unifina.domain.signalpath.Canvas
+import com.unifina.domain.Canvas
+import com.unifina.domain.User
 import groovy.transform.CompileStatic
 import org.codehaus.groovy.grails.commons.GrailsApplication
 

@@ -1,7 +1,7 @@
 package com.unifina.signalpath
 
 import com.unifina.BeanMockingSpecification
-import com.unifina.domain.data.Stream
+import com.unifina.domain.Stream
 import com.unifina.service.StreamService
 import com.unifina.utils.Globals
 import grails.test.mixin.Mock

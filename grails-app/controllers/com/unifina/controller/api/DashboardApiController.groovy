@@ -3,8 +3,8 @@ package com.unifina.controller.api
 import com.unifina.api.DashboardListParams
 import com.unifina.api.SaveDashboardCommand
 import com.unifina.api.ValidationException
-import com.unifina.domain.dashboard.Dashboard
-import com.unifina.domain.security.User
+import com.unifina.domain.Dashboard
+import com.unifina.domain.User
 import com.unifina.security.AuthLevel
 import com.unifina.security.StreamrApi
 import com.unifina.service.*

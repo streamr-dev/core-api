@@ -1,9 +1,9 @@
 package com.unifina.controller.api
 
 import com.unifina.api.*
-import com.unifina.domain.marketplace.Product
-import com.unifina.domain.security.Permission
-import com.unifina.domain.security.User
+import com.unifina.domain.Product
+import com.unifina.domain.Permission
+import com.unifina.domain.User
 import com.unifina.security.AllowRole
 import com.unifina.security.AuthLevel
 import com.unifina.security.StreamrApi

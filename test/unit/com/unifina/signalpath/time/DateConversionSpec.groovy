@@ -1,7 +1,7 @@
 package com.unifina.signalpath.time
 
 
-import com.unifina.domain.security.User
+import com.unifina.domain.User
 import com.unifina.signalpath.Input
 import com.unifina.utils.Globals
 import com.unifina.utils.testutils.ModuleTestHelper

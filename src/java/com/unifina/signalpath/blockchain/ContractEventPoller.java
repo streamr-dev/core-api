@@ -1,6 +1,6 @@
 package com.unifina.signalpath.blockchain;
 
-import com.unifina.domain.signalpath.Canvas;
+import com.unifina.domain.Canvas;
 import com.unifina.signalpath.AbstractSignalPathModule;
 import com.unifina.utils.ThreadUtil;
 import org.apache.log4j.Logger;

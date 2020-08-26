@@ -2,11 +2,11 @@ package com.unifina.controller.api
 
 import com.unifina.ControllerSpecification
 import com.unifina.api.SaveDashboardItemCommand
-import com.unifina.domain.dashboard.Dashboard
-import com.unifina.domain.dashboard.DashboardItem
-import com.unifina.domain.security.Key
-import com.unifina.domain.security.User
-import com.unifina.domain.signalpath.Canvas
+import com.unifina.domain.Dashboard
+import com.unifina.domain.DashboardItem
+import com.unifina.domain.Key
+import com.unifina.domain.User
+import com.unifina.domain.Canvas
 import com.unifina.service.DashboardService
 import grails.test.mixin.Mock
 import grails.test.mixin.TestFor

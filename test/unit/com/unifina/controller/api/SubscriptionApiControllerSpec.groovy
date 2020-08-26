@@ -2,12 +2,12 @@ package com.unifina.controller.api
 
 import com.unifina.api.NotPermittedException
 import com.unifina.api.ValidationException
-import com.unifina.domain.marketplace.Category
-import com.unifina.domain.marketplace.PaidSubscription
-import com.unifina.domain.marketplace.Product
-import com.unifina.domain.security.Role
-import com.unifina.domain.security.User
-import com.unifina.domain.security.UserRole
+import com.unifina.domain.Category
+import com.unifina.domain.PaidSubscription
+import com.unifina.domain.Product
+import com.unifina.domain.Role
+import com.unifina.domain.User
+import com.unifina.domain.UserRole
 import com.unifina.filters.UnifinaCoreAPIFilters
 import com.unifina.service.SubscriptionService
 import grails.converters.JSON

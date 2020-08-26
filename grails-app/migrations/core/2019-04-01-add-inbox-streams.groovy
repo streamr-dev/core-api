@@ -1,6 +1,6 @@
 package core
 
-import com.unifina.domain.data.Stream
+import com.unifina.domain.Stream
 
 databaseChangeLog = {
 	changeSet(author: "mthambipillai", id: "add-inbox-field-1") {

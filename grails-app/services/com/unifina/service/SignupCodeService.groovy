@@ -1,6 +1,6 @@
 package com.unifina.service
 
-import com.unifina.domain.security.SignupInvite
+import com.unifina.domain.SignupInvite
 import grails.compiler.GrailsCompileStatic
 
 @GrailsCompileStatic

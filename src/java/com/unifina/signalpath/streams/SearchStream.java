@@ -1,8 +1,8 @@
 package com.unifina.signalpath.streams;
 
-import com.unifina.domain.data.Stream;
-import com.unifina.domain.security.Permission;
-import com.unifina.domain.security.User;
+import com.unifina.domain.Stream;
+import com.unifina.domain.Permission;
+import com.unifina.domain.User;
 import com.unifina.service.PermissionService;
 import com.unifina.signalpath.*;
 import grails.orm.HibernateCriteriaBuilder;

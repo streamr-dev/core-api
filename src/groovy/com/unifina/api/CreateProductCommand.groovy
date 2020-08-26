@@ -1,10 +1,10 @@
 package com.unifina.api
 
-import com.unifina.domain.data.Stream
-import com.unifina.domain.marketplace.Category
-import com.unifina.domain.marketplace.Contact
-import com.unifina.domain.marketplace.Product
-import com.unifina.domain.marketplace.TermsOfUse
+import com.unifina.domain.Stream
+import com.unifina.domain.Category
+import com.unifina.domain.Contact
+import com.unifina.domain.Product
+import com.unifina.domain.TermsOfUse
 import grails.validation.Validateable
 
 @Validateable

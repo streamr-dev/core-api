@@ -3,7 +3,7 @@ package com.unifina.controller.api
 import com.unifina.api.CreateSubscriptionCommand
 import com.unifina.api.NotPermittedException
 import com.unifina.api.ValidationException
-import com.unifina.domain.security.User
+import com.unifina.domain.User
 import com.unifina.security.AuthLevel
 import com.unifina.security.StreamrApi
 import com.unifina.service.SubscriptionService

@@ -2,10 +2,10 @@ package com.unifina.filters
 
 import com.unifina.BeanMockingSpecification
 import com.unifina.controller.api.NodeApiController
-import com.unifina.domain.security.Key
-import com.unifina.domain.security.Role
-import com.unifina.domain.security.User
-import com.unifina.domain.security.UserRole
+import com.unifina.domain.Key
+import com.unifina.domain.Role
+import com.unifina.domain.User
+import com.unifina.domain.UserRole
 import com.unifina.service.SessionService
 import grails.test.mixin.Mock
 import grails.test.mixin.TestFor

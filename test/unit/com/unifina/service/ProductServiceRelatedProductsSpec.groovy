@@ -1,8 +1,8 @@
 package com.unifina.service
 
-import com.unifina.domain.marketplace.Category
-import com.unifina.domain.marketplace.Product
-import com.unifina.domain.security.User
+import com.unifina.domain.Category
+import com.unifina.domain.Product
+import com.unifina.domain.User
 import grails.test.mixin.Mock
 import grails.test.mixin.TestFor
 import spock.lang.Specification

@@ -3,13 +3,7 @@ package com.unifina.service
 import com.google.gson.Gson
 import com.google.gson.GsonBuilder
 import com.unifina.api.*
-import com.unifina.domain.ExampleType
-import com.unifina.domain.dashboard.Dashboard
-import com.unifina.domain.dashboard.DashboardItem
-import com.unifina.domain.data.Stream
-import com.unifina.domain.security.Permission
-import com.unifina.domain.security.User
-import com.unifina.domain.signalpath.Canvas
+import com.unifina.domain.*
 import com.unifina.exceptions.CanvasUnreachableException
 import com.unifina.exceptions.InvalidStreamConfigException
 import com.unifina.serialization.SerializationException

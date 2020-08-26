@@ -2,10 +2,9 @@ package com.unifina.service
 
 import com.unifina.api.InvalidStateTransitionException
 import com.unifina.api.ProductNotFreeException
-import com.unifina.domain.marketplace.Product
-import com.unifina.domain.security.Permission
+import com.unifina.domain.Permission
+import com.unifina.domain.Product
 import grails.compiler.GrailsCompileStatic
-
 
 /**
  * TODO: merge ProductService and FreeProductService

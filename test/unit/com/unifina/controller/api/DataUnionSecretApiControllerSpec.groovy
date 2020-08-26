@@ -4,8 +4,8 @@ import com.unifina.api.ApiException
 import com.unifina.api.BadRequestException
 import com.unifina.api.DataUnionSecretCommand
 import com.unifina.api.NotFoundException
-import com.unifina.domain.dataunion.DataUnionSecret
-import com.unifina.domain.security.User
+import com.unifina.domain.DataUnionSecret
+import com.unifina.domain.User
 import com.unifina.filters.UnifinaCoreAPIFilters
 import com.unifina.service.DataUnionSecretService
 import com.unifina.service.EthereumService

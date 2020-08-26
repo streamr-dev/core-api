@@ -7,8 +7,8 @@ import com.unifina.api.InvalidAPIKeyException
 import com.unifina.api.InvalidArgumentsException
 import com.unifina.api.InvalidUsernameAndPasswordException
 import com.unifina.security.Challenge
-import com.unifina.domain.security.Key
-import com.unifina.domain.security.User
+import com.unifina.domain.Key
+import com.unifina.domain.User
 import com.unifina.security.SessionToken
 import com.unifina.service.ChallengeService
 import com.unifina.service.EthereumIntegrationKeyService

@@ -1,10 +1,10 @@
 package com.unifina.service
 
 import com.unifina.api.*
-import com.unifina.domain.data.Stream
-import com.unifina.domain.security.IntegrationKey
-import com.unifina.domain.security.Permission
-import com.unifina.domain.security.User
+import com.unifina.domain.IntegrationKey
+import com.unifina.domain.Permission
+import com.unifina.domain.Stream
+import com.unifina.domain.User
 import com.unifina.security.StringEncryptor
 import com.unifina.utils.AlphanumericStringGenerator
 import grails.compiler.GrailsCompileStatic

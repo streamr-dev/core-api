@@ -3,9 +3,9 @@ package com.unifina.controller.api
 import com.google.gson.Gson
 import com.google.gson.GsonBuilder
 import com.unifina.api.*
-import com.unifina.domain.security.Permission.Operation
-import com.unifina.domain.security.User
-import com.unifina.domain.signalpath.Canvas
+import com.unifina.domain.Permission.Operation
+import com.unifina.domain.User
+import com.unifina.domain.Canvas
 import com.unifina.security.AllowRole
 import com.unifina.security.AuthLevel
 import com.unifina.security.StreamrApi

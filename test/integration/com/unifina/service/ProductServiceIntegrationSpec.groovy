@@ -1,15 +1,15 @@
 package com.unifina.service
 
 
-import com.unifina.domain.data.Stream
-import com.unifina.domain.marketplace.Category
-import com.unifina.domain.marketplace.FreeSubscription
-import com.unifina.domain.marketplace.Product
-import com.unifina.domain.marketplace.Subscription
-import com.unifina.domain.security.IntegrationKey
-import com.unifina.domain.security.User
-import com.unifina.domain.signalpath.Module
-import com.unifina.domain.signalpath.ModuleCategory
+import com.unifina.domain.Stream
+import com.unifina.domain.Category
+import com.unifina.domain.FreeSubscription
+import com.unifina.domain.Product
+import com.unifina.domain.Subscription
+import com.unifina.domain.IntegrationKey
+import com.unifina.domain.User
+import com.unifina.domain.Module
+import com.unifina.domain.ModuleCategory
 import grails.test.spock.IntegrationSpec
 
 class ProductServiceIntegrationSpec extends IntegrationSpec {

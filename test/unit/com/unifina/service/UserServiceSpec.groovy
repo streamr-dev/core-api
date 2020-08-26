@@ -3,8 +3,12 @@ package com.unifina.service
 import com.unifina.api.InvalidUsernameAndPasswordException
 import com.unifina.api.NotFoundException
 import com.unifina.controller.api.UnitTestPasswordEncoder
-import com.unifina.domain.security.*
-import com.unifina.domain.signalpath.Module
+import com.unifina.domain.Key
+import com.unifina.domain.Permission
+import com.unifina.domain.Role
+import com.unifina.domain.User
+import com.unifina.domain.UserRole
+import com.unifina.domain.Module
 import grails.test.mixin.Mock
 import grails.test.mixin.TestFor
 import org.springframework.validation.FieldError

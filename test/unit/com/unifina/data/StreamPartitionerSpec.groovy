@@ -1,6 +1,6 @@
 package com.unifina.data
 
-import com.unifina.domain.data.Stream
+import com.unifina.domain.Stream
 import spock.lang.Specification
 
 class StreamPartitionerSpec extends Specification {

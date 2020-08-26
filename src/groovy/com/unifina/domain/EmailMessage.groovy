@@ -1,8 +1,6 @@
 package com.unifina.domain
 
-import com.unifina.domain.dashboard.Dashboard
-import com.unifina.domain.data.Stream
-import com.unifina.domain.signalpath.Canvas
+
 import grails.validation.Validateable
 import groovy.transform.ToString
 
