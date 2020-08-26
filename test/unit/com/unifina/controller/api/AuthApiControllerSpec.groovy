@@ -6,6 +6,7 @@ import com.unifina.domain.RegistrationCode
 import com.unifina.domain.Role
 import com.unifina.domain.SignupInvite
 import com.unifina.domain.User
+import com.unifina.domain.SignupMethod
 import com.unifina.domain.UserRole
 import com.unifina.security.PasswordEncoder
 import com.unifina.service.*
