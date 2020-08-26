@@ -1,9 +1,9 @@
 package com.unifina.signalpath.map
 
 import com.unifina.BeanMockingSpecification
-import com.unifina.domain.security.User
-import com.unifina.domain.signalpath.Canvas
-import com.unifina.domain.signalpath.Module
+import com.unifina.domain.User
+import com.unifina.domain.Canvas
+import com.unifina.domain.Module
 import com.unifina.exceptions.NoExportedInputsException
 import com.unifina.service.CanvasService
 import com.unifina.service.ModuleService

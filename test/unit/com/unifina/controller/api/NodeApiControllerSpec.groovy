@@ -3,8 +3,8 @@ package com.unifina.controller.api
 import com.unifina.api.ApiException
 import com.unifina.api.node.NodeRequest
 import com.unifina.api.node.NodeRequestDispatcher
-import com.unifina.domain.security.User
-import com.unifina.domain.signalpath.Canvas
+import com.unifina.domain.User
+import com.unifina.domain.Canvas
 import com.unifina.service.CanvasService
 import com.unifina.service.NodeService
 import com.unifina.service.SerializationService

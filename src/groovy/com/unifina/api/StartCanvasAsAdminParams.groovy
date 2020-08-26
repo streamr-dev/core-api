@@ -1,6 +1,6 @@
 package com.unifina.api
 
-import com.unifina.domain.security.User
+import com.unifina.domain.User
 import grails.validation.Validateable
 
 @Validateable

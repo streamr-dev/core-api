@@ -1,6 +1,12 @@
 package com.unifina.controller.api
 
-import com.unifina.domain.security.*
+import com.unifina.domain.Key
+import com.unifina.domain.Permission
+import com.unifina.domain.RegistrationCode
+import com.unifina.domain.Role
+import com.unifina.domain.SignupInvite
+import com.unifina.domain.User
+import com.unifina.domain.UserRole
 import com.unifina.security.PasswordEncoder
 import com.unifina.service.*
 import com.unifina.signalpath.messaging.MockMailService

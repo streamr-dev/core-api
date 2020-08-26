@@ -2,8 +2,12 @@ package com.unifina.controller.api
 
 import com.unifina.ControllerSpecification
 import com.unifina.api.*
-import com.unifina.domain.security.*
-import com.unifina.domain.signalpath.Canvas
+import com.unifina.domain.Key
+import com.unifina.domain.Permission
+import com.unifina.domain.Role
+import com.unifina.domain.User
+import com.unifina.domain.UserRole
+import com.unifina.domain.Canvas
 import com.unifina.exceptions.CanvasUnreachableException
 import com.unifina.security.AllowRole
 import com.unifina.service.ApiService

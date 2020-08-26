@@ -1,6 +1,6 @@
 package com.unifina.api
 
-import com.unifina.domain.security.IntegrationKey
+import com.unifina.domain.IntegrationKey
 import grails.validation.Validateable
 import groovy.transform.CompileStatic
 

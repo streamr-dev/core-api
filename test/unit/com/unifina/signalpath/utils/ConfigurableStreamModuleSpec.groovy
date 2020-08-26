@@ -1,8 +1,8 @@
 package com.unifina.signalpath.utils
 
-import com.streamr.client.utils.StreamPartition
+
 import com.unifina.ModuleTestingSpecification
-import com.unifina.domain.data.Stream
+import com.unifina.domain.Stream
 import com.unifina.exceptions.InvalidStreamConfigException
 import com.unifina.service.StreamService
 import com.unifina.utils.Globals

@@ -1,8 +1,8 @@
 package com.unifina.exceptions;
 
-import com.unifina.domain.data.Stream;
-import com.unifina.domain.security.User;
-import com.unifina.domain.signalpath.Canvas;
+import com.unifina.domain.Stream;
+import com.unifina.domain.User;
+import com.unifina.domain.Canvas;
 
 public class UnauthorizedStreamException extends RuntimeException {
 	public Canvas canvas;

@@ -1,7 +1,7 @@
 package com.unifina.security;
 
-import com.unifina.domain.security.Key;
-import com.unifina.domain.security.User;
+import com.unifina.domain.Key;
+import com.unifina.domain.User;
 
 public class AuthenticationResult {
 	private final Key key;

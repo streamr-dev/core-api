@@ -4,11 +4,12 @@ import com.streamr.client.StreamrClient
 import com.unifina.api.CsvParseInstructions
 import com.unifina.api.NotFoundException
 import com.unifina.api.NotPermittedException
-import com.unifina.domain.data.Stream
-import com.unifina.domain.security.Permission
-import com.unifina.domain.security.User
+import com.unifina.domain.Permission
+import com.unifina.domain.Stream
+import com.unifina.domain.User
 import com.unifina.utils.CSVImporter
 import com.unifina.utils.IdGenerator
+import com.unifina.utils.ThreadUtil
 import grails.compiler.GrailsCompileStatic
 import grails.converters.JSON
 import groovy.transform.CompileStatic
@@ -106,7 +107,7 @@ class CsvUploadService {
 			if (timeSpentNanos < MIN_NANOS_PER_MSG) {
 				long needToSleepNanos = MIN_NANOS_PER_MSG - timeSpentNanos
 				long needToSleepMillis = (long) Math.pow(needToSleepNanos, -6)
-				Thread.sleep(needToSleepMillis, (int)(needToSleepNanos % Math.pow(10, 6)))
+				ThreadUtil.sleep(needToSleepMillis, (int)(needToSleepNanos % Math.pow(10, 6)))
 			}
 		}
 

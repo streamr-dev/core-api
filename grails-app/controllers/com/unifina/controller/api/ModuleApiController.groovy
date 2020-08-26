@@ -1,9 +1,9 @@
 package com.unifina.controller.api
 
 import com.unifina.api.NotFoundException
-import com.unifina.domain.security.User
-import com.unifina.domain.signalpath.Module
-import com.unifina.domain.signalpath.ModuleCategory
+import com.unifina.domain.User
+import com.unifina.domain.Module
+import com.unifina.domain.ModuleCategory
 import com.unifina.exceptions.ModuleExceptionMessage
 import com.unifina.security.AuthLevel
 import com.unifina.security.StreamrApi

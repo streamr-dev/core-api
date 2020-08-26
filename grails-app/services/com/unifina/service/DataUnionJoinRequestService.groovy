@@ -2,13 +2,9 @@ package com.unifina.service
 
 import com.streamr.client.StreamrClient
 import com.unifina.api.*
-import com.unifina.domain.data.Stream
-import com.unifina.domain.dataunion.DataUnionJoinRequest
-import com.unifina.domain.dataunion.DataUnionSecret
-import com.unifina.domain.marketplace.Product
-import com.unifina.domain.security.IntegrationKey
-import com.unifina.domain.security.Permission
-import com.unifina.domain.security.User
+import com.unifina.domain.*
+import com.unifina.exceptions.JoinRequestException
+import com.unifina.utils.ThreadUtil
 import groovy.json.JsonSlurper
 import org.apache.log4j.Logger
 
@@ -21,20 +17,27 @@ class DataUnionJoinRequestService {
 	StreamrClientService streamrClientService
 	DataUnionOperatorService dataUnionOperatorService
 
-	private void onApproveJoinRequest(DataUnionJoinRequest c) {
-		// Query DUS for join status
+	private isMemberActive(String contractAddress, String memberAddress) {
 		try {
-			DataUnionOperatorService.ProxyResponse result = dataUnionOperatorService.memberStats(c.contractAddress, c.memberAddress)
+			DataUnionOperatorService.ProxyResponse result = dataUnionOperatorService.memberStats(contractAddress, memberAddress)
 			if (result.statusCode == 200 && result.body != null || result.body != "") {
 				Map<String, Object> json = new JsonSlurper().parseText(result.body)
 				if (json.active != null && json.active == true) {
-					log.debug("onApproveJoinRequest: Member ${c.memberAddress} has already joined. Skip sending join message.")
-					return
+					return true
 				}
 			}
 		} catch (ProxyException e) {
 			// on error proceed with sending join message
 			log.error("DUS member stats query error", e)
+		}
+		return false
+	}
+
+	private void onApproveJoinRequest(DataUnionJoinRequest c) {
+		// Query DUS for join status
+		if (isMemberActive(c.contractAddress, c.memberAddress)) {
+			log.debug("onApproveJoinRequest: Member ${c.memberAddress} has already joined. Skip sending join message.")
+			return
 		}
 		log.debug("onApproveJoinRequest: approved JoinRequest for address ${c.memberAddress} to data union ${c.contractAddress}")
 		for (Stream s : findStreams(c)) {
@@ -47,6 +50,19 @@ class DataUnionJoinRequestService {
 			}
 		}
 		sendMessage(c, "join")
+
+		final int timeout = 10 * 1000 // ms
+		final int interval = 1000 // ms
+		int timeSpent
+		for (timeSpent = 0; timeSpent < timeout; timeSpent += interval) {
+			ThreadUtil.sleep(interval);
+			if (isMemberActive(c.contractAddress, c.memberAddress)) {
+				break
+			}
+		}
+		if (timeSpent >= timeout) {
+			throw new JoinRequestException("DUS error on registering join request")
+		}
 		log.debug("exiting onApproveJoinRequest")
 	}
 

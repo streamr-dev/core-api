@@ -6,7 +6,7 @@ import com.datastax.driver.core.ResultSet
 import com.datastax.driver.core.Row
 import com.datastax.driver.core.Session
 import com.streamr.client.protocol.message_layer.StreamMessage
-import com.unifina.domain.data.Stream
+import com.unifina.domain.Stream
 import com.unifina.feed.DataRange
 import com.unifina.feed.util.StreamMessageComparator
 import groovy.transform.CompileStatic

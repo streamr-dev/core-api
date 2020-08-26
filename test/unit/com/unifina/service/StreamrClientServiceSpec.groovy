@@ -3,8 +3,8 @@ package com.unifina.service
 import com.streamr.client.StreamrClient
 import com.streamr.client.authentication.ApiKeyAuthenticationMethod
 import com.streamr.client.authentication.InternalAuthenticationMethod
-import com.unifina.domain.security.Key
-import com.unifina.domain.security.User
+import com.unifina.domain.Key
+import com.unifina.domain.User
 import com.unifina.security.SessionToken
 import com.unifina.utils.testutils.FakeStreamrClient
 import grails.test.mixin.Mock

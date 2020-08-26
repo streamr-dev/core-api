@@ -3,10 +3,10 @@ package com.unifina.service
 import com.unifina.api.NotFoundException
 import com.unifina.api.NotPermittedException
 import com.unifina.domain.Resource
-import com.unifina.domain.security.Key
-import com.unifina.domain.security.Permission
-import com.unifina.domain.security.User
-import com.unifina.domain.signalpath.Canvas
+import com.unifina.domain.Key
+import com.unifina.domain.Permission
+import com.unifina.domain.User
+import com.unifina.domain.Canvas
 import grails.test.spock.IntegrationSpec
 import grails.util.Holders
 

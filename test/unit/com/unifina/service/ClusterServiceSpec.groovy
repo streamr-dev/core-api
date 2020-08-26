@@ -2,9 +2,9 @@ package com.unifina.service
 
 import com.streamr.api.client.CanvasesPerNode
 import com.streamr.api.client.StreamrClient
-import com.unifina.domain.security.Key
-import com.unifina.domain.security.User
-import com.unifina.domain.signalpath.Canvas
+import com.unifina.domain.Key
+import com.unifina.domain.User
+import com.unifina.domain.Canvas
 import grails.test.mixin.Mock
 import grails.test.mixin.TestFor
 import spock.lang.Specification

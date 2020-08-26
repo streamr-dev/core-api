@@ -1,9 +1,9 @@
 package com.unifina.controller.api
 
 
-import com.unifina.domain.security.Key
-import com.unifina.domain.security.User
-import com.unifina.domain.signalpath.Canvas
+import com.unifina.domain.Key
+import com.unifina.domain.User
+import com.unifina.domain.Canvas
 import com.unifina.filters.UnifinaCoreAPIFilters
 import com.unifina.service.ClusterService
 import grails.test.mixin.Mock

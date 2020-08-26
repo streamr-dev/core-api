@@ -1,7 +1,7 @@
 package com.unifina.signalpath.list;
 
 import com.google.gson.Gson;
-import com.unifina.domain.signalpath.Canvas;
+import com.unifina.domain.Canvas;
 import com.unifina.service.SignalPathService;
 import com.unifina.signalpath.*;
 import grails.util.Holders;

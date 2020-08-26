@@ -1,7 +1,7 @@
 package com.unifina.signalpath.messaging
 
-import com.unifina.domain.security.User
-import com.unifina.domain.signalpath.Canvas
+import com.unifina.domain.User
+import com.unifina.domain.Canvas
 import com.unifina.service.CanvasService
 import com.unifina.signalpath.*
 import grails.util.Holders

@@ -1,9 +1,9 @@
 package com.unifina.serialization;
 
-import com.unifina.domain.data.Stream;
-import com.unifina.domain.security.User;
-import com.unifina.domain.signalpath.Canvas;
-import com.unifina.domain.signalpath.Module;
+import com.unifina.domain.Stream;
+import com.unifina.domain.User;
+import com.unifina.domain.Canvas;
+import com.unifina.domain.Module;
 import org.apache.commons.math3.stat.correlation.PearsonsCorrelation;
 import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
 import org.apache.log4j.Logger;

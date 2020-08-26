@@ -1,9 +1,9 @@
 package com.unifina.security
 
 
-import com.unifina.domain.security.Role
-import com.unifina.domain.security.User
-import com.unifina.domain.security.UserRole
+import com.unifina.domain.Role
+import com.unifina.domain.User
+import com.unifina.domain.UserRole
 import grails.test.mixin.Mock
 import spock.lang.Specification
 

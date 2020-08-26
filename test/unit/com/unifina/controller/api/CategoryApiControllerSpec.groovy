@@ -1,8 +1,8 @@
 package com.unifina.controller.api
 
 import com.unifina.ControllerSpecification
-import com.unifina.domain.marketplace.Category
-import com.unifina.domain.security.User
+import com.unifina.domain.Category
+import com.unifina.domain.User
 import grails.test.mixin.Mock
 import grails.test.mixin.TestFor
 

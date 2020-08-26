@@ -1,7 +1,7 @@
 package com.unifina.service
 
-import com.unifina.domain.security.IntegrationKey
-import com.unifina.domain.security.User
+import com.unifina.domain.IntegrationKey
+import com.unifina.domain.User
 import spock.lang.Specification
 
 class EthereumIntegrationKeyServiceIntegrationSpec extends Specification {
