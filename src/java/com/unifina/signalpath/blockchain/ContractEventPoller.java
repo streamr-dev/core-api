@@ -2,6 +2,7 @@ package com.unifina.signalpath.blockchain;
 
 import com.unifina.domain.Canvas;
 import com.unifina.signalpath.AbstractSignalPathModule;
+import com.unifina.utils.ThreadUtil;
 import org.apache.log4j.Logger;
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -56,11 +57,7 @@ class ContractEventPoller implements Closeable, Runnable, JsonRpcResponseHandler
 	public void run() {
 		while (keepPolling) {
 			pollChanges();
-			try {
-				Thread.sleep(POLL_INTERVAL_IN_MS);
-			} catch (InterruptedException e) {
-				e.printStackTrace();
-			}
+			ThreadUtil.sleep(POLL_INTERVAL_IN_MS);
 		}
 	}
 

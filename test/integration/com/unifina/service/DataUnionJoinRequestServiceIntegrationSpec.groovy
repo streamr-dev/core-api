@@ -12,6 +12,7 @@ import com.unifina.domain.Permission
 import com.unifina.domain.User
 import com.unifina.domain.Module
 import com.unifina.domain.ModuleCategory
+import groovy.json.JsonBuilder
 import spock.lang.Specification
 
 // This is an integration test because Grails doesn't support criteria queries in unit tests
@@ -169,14 +170,20 @@ class DataUnionJoinRequestServiceIntegrationSpec extends Specification {
 			state: "ACCEPTED",
 		)
 
-		DataUnionOperatorService.ProxyResponse stats = new DataUnionOperatorService.ProxyResponse()
-		stats.statusCode = 404
+		DataUnionOperatorService.ProxyResponse notFoundStats = new DataUnionOperatorService.ProxyResponse()
+		notFoundStats.statusCode = 404
+		DataUnionOperatorService.ProxyResponse okStats = new DataUnionOperatorService.ProxyResponse()
+		okStats.statusCode = 200
+		okStats.body =  new JsonBuilder([
+			active: true,
+		]).toString()
 
 		when:
 		def c = service.update(contractAddress, r.id, cmd)
 		then:
 		1 * service.ethereumService.fetchJoinPartStreamID(contractAddress) >> joinPartStream.id
-		1 * service.dataUnionOperatorService.memberStats(contractAddress, memberAddress) >> stats
+		2 * service.dataUnionOperatorService.memberStats(contractAddress, memberAddress) >> notFoundStats
+		1 * service.dataUnionOperatorService.memberStats(contractAddress, memberAddress) >> okStats
 		1 * streamrClientMock.publish(_, [type: "join", addresses: [r.memberAddress]])
 		c.state == DataUnionJoinRequest.State.ACCEPTED
 		// no changes below
