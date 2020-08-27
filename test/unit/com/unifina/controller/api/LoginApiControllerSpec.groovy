@@ -88,7 +88,7 @@ class LoginApiControllerSpec extends ControllerSpecification {
 
 		then:
 		1 * challengeService.checkValidChallengeResponse(challenge.getId(), challenge.getChallenge(), signature, address)
-		1 * ethereumIntegrationKeyService.getOrCreateFromEthereumAddress(address, SignupMethod.UNKNOWN) >> user
+		1 * ethereumIntegrationKeyService.getOrCreateFromEthereumAddress(address, SignupMethod.API) >> user
 		1 * sessionService.generateToken(user) >> token
 		response.status == 200
 		response.json == token.toMap()
@@ -141,7 +141,7 @@ class LoginApiControllerSpec extends ControllerSpecification {
 
 		then:
 		1 * challengeService.checkValidChallengeResponse(challenge.getId(), challenge.getChallenge(), signature, address)
-		1 * ethereumIntegrationKeyService.getOrCreateFromEthereumAddress(address, SignupMethod.UNKNOWN) >> user
+		1 * ethereumIntegrationKeyService.getOrCreateFromEthereumAddress(address, SignupMethod.API) >> user
 		thrown DisabledUserException
 	}
 
