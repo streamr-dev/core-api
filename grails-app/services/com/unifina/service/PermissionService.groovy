@@ -645,7 +645,7 @@ class PermissionService {
 		return newPermission
 	}
 
-	Permission savePermissionForEthereumAccount(User grantor, Operation operation, Resource res, String username, SignupMethod signupMethod) {
+	Permission savePermissionForEthereumAccount(String username, User grantor, Operation operation, Resource res, SignupMethod signupMethod) {
 		EthereumIntegrationKeyService ethereumIntegrationKeyService = Holders.getApplicationContext().getBean(EthereumIntegrationKeyService)
 		User user = ethereumIntegrationKeyService.getOrCreateFromEthereumAddress(username, signupMethod)
 		User userish = User.findByUsername(user.username)

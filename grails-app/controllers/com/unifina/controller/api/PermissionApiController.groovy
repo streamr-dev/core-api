@@ -73,7 +73,7 @@ class PermissionApiController {
 			} else {
 				if (EthereumAddressValidator.validate(username)) {
 					// get or create a user based on an ethereum account, and grant permission
-					newPermission = permissionService.savePermissionForEthereumAccount(apiUser, op, res, username, SignupMethod.fromRequest(request))
+					newPermission = permissionService.savePermissionForEthereumAccount(username, apiUser, op, res, SignupMethod.fromRequest(request))
 				} else {
 					// send share resource invite email and grant permission
 					EmailMessage msg = new EmailMessage(sharer, username, subjectTemplate, res)

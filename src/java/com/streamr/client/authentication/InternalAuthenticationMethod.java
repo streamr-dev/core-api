@@ -12,7 +12,7 @@ public class InternalAuthenticationMethod extends EthereumAuthenticationMethod {
 	private final SessionService sessionService;
 	private final User user;
 
-	public InternalAuthenticationMethod(EthereumIntegrationKeyService ethereumIntegrationKeyService, SessionService sessionService, String ethereumPrivateKey, SignupMethod signupMethod) {
+	public InternalAuthenticationMethod(String ethereumPrivateKey, EthereumIntegrationKeyService ethereumIntegrationKeyService, SessionService sessionService, SignupMethod signupMethod) {
 		super(ethereumPrivateKey);
 		this.user = ethereumIntegrationKeyService.getOrCreateFromEthereumAddress(this.getAddress(), signupMethod);
 		this.sessionService = sessionService;
