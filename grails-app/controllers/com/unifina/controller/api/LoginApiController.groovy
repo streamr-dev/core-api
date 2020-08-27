@@ -3,6 +3,7 @@ package com.unifina.controller.api
 import com.unifina.api.DisabledUserException
 import com.unifina.api.InvalidArgumentsException
 import com.unifina.domain.User
+import com.unifina.domain.SignupMethod
 import com.unifina.security.Challenge
 import com.unifina.security.SessionToken
 import com.unifina.security.AuthLevel
@@ -33,7 +34,7 @@ class LoginApiController {
 		}
 		challengeService.checkValidChallengeResponse(cmd.challenge?.id,
 			cmd.challenge?.challenge, cmd.signature.toLowerCase(), cmd.address.toLowerCase())
-		User user = ethereumIntegrationKeyService.getOrCreateFromEthereumAddress(cmd.address.toLowerCase())
+		User user = ethereumIntegrationKeyService.getOrCreateFromEthereumAddress(cmd.address.toLowerCase(), SignupMethod.fromRequest(request))
 		assertEnabled(user)
 		SessionToken token = sessionService.generateToken(user)
 		render(token.toMap() as JSON)

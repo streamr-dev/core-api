@@ -11,19 +11,14 @@ import com.unifina.security.StreamrApi
 import com.unifina.service.SignupCodeService
 import com.unifina.service.UserService
 import com.unifina.utils.EmailValidator
-import com.unifina.utils.MapTraversal
 import grails.converters.JSON
-import org.codehaus.groovy.grails.commons.GrailsApplication
 
 class AuthApiController {
-
-	final static String SERVER_URL_CONFIG_KEY = "grails.serverURL"
 
 	def mailService
 	UserService userService
 	SignupCodeService signupCodeService
 	PasswordEncoder passwordEncoder
-	GrailsApplication grailsApplication
 
 	@StreamrApi(authenticationLevel = AuthLevel.NONE)
 	def signup(EmailCommand cmd) {
@@ -92,7 +87,7 @@ class AuthApiController {
 			def userProperties = [:] << cmd.properties << [
 				username: invite.email,
 				email: invite.email,
-				signupMethod: getSignupMethod()
+				signupMethod: SignupMethod.fromRequest(request)
 			]
 			user = userService.createUser(userProperties)
 		} catch (UserCreationFailedException e) {
@@ -123,12 +118,6 @@ class AuthApiController {
 		}
 
 		render(user.toMap() as JSON)
-	}
-
-	private SignupMethod getSignupMethod() {
-		def serverUrl = MapTraversal.getString(grailsApplication.getConfig(), SERVER_URL_CONFIG_KEY)
-		def origin = request.getHeader("Origin")
-		return (origin == serverUrl) ? SignupMethod.CORE : SignupMethod.API
 	}
 
 	@StreamrApi(authenticationLevel = AuthLevel.NONE)

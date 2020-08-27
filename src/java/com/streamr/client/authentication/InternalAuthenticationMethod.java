@@ -1,6 +1,7 @@
 package com.streamr.client.authentication;
 
 import com.unifina.domain.User;
+import com.unifina.domain.SignupMethod;
 import com.unifina.security.SessionToken;
 import com.unifina.service.EthereumIntegrationKeyService;
 import com.unifina.service.SessionService;
@@ -11,9 +12,9 @@ public class InternalAuthenticationMethod extends EthereumAuthenticationMethod {
 	private final SessionService sessionService;
 	private final User user;
 
-	public InternalAuthenticationMethod(String ethereumPrivateKey, EthereumIntegrationKeyService ethereumIntegrationKeyService, SessionService sessionService) {
+	public InternalAuthenticationMethod(EthereumIntegrationKeyService ethereumIntegrationKeyService, SessionService sessionService, String ethereumPrivateKey, SignupMethod signupMethod) {
 		super(ethereumPrivateKey);
-		this.user = ethereumIntegrationKeyService.getOrCreateFromEthereumAddress(this.getAddress());
+		this.user = ethereumIntegrationKeyService.getOrCreateFromEthereumAddress(this.getAddress(), signupMethod);
 		this.sessionService = sessionService;
 	}
 

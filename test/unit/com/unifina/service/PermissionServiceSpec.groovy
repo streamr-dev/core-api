@@ -12,6 +12,7 @@ import com.unifina.domain.Permission
 import com.unifina.domain.Permission.Operation
 import com.unifina.domain.SignupInvite
 import com.unifina.domain.User
+import com.unifina.domain.SignupMethod
 import com.unifina.domain.Canvas
 import com.unifina.domain.Module
 import grails.gsp.PageRenderer
@@ -392,9 +393,9 @@ class PermissionServiceSpec extends BeanMockingSpecification {
 		Operation op = Operation.CANVAS_GET
 		service.systemGrant(me, canvasOwned, Operation.CANVAS_SHARE)
 		when:
-		service.savePermissionForEthereumAccount(ethUserUsername, apiUser, op, res)
+		service.savePermissionForEthereumAccount(apiUser, op, res, ethUserUsername, SignupMethod.UNKNOWN)
 		then:
-		1 * ethereumIntegrationKeyService.getOrCreateFromEthereumAddress(ethUserUsername) >> createdEthUser
+		1 * ethereumIntegrationKeyService.getOrCreateFromEthereumAddress(ethUserUsername, SignupMethod.UNKNOWN) >> createdEthUser
 		0 * service.groovyPageRenderer.render(_) >> "<html>email</html>"
 		0 * service.mailService.sendMail { _ }
 		service.check(createdEthUser, canvasOwned, op)
