@@ -483,4 +483,19 @@ class PermissionServiceIntegrationSpec extends IntegrationSpec {
 		def e = thrown(AccessControlException)
 		e.message == "Cannot revoke only SHARE permission of ${stream}"
 	}
+
+	void "check anonymous permission"() {
+		expect:
+		service.checkAnonymousAccess(uiChannelStream, Permission.Operation.STREAM_GET) == false
+
+		when:
+		service.systemGrantAnonymousAccess(uiChannelStream, Permission.Operation.STREAM_GET)
+		then:
+		service.checkAnonymousAccess(uiChannelStream, Permission.Operation.STREAM_GET) == true
+
+		when:
+		service.systemRevokeAnonymousAccess(uiChannelStream, Permission.Operation.STREAM_GET)
+		then:
+		service.checkAnonymousAccess(uiChannelStream, Permission.Operation.STREAM_GET) == false
+	}
 }
