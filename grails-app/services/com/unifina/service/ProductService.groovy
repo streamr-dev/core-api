@@ -166,8 +166,8 @@ class ProductService {
 		}
 
 		Product product = findById(id, currentUser, Permission.Operation.PRODUCT_EDIT)
-		def addedStreams = command.streams.stream().filter{s -> !product.streams.contains(s)}.collect(toSet())
-		def removedStreams = product.streams.stream().filter{s -> !command.streams.contains(s)}.collect(toSet())
+		Set<Stream> addedStreams = command.streams.stream().filter{Stream s -> !product.streams.contains(s)}.collect(toSet()) as Set<Stream>
+		Set<Stream> removedStreams = product.streams.stream().filter{Stream s -> !command.streams.contains(s)}.collect(toSet())
 
 		command.updateProduct(product, currentUser, permissionService)
 		product.save(failOnError: true)
@@ -176,14 +176,16 @@ class ProductService {
 		// TODO if a stream is removed from a free product, but still belongs to another free product, we should not
 		// remove the permission (this will be fixed in BACK-6)
 		if (product.isFree()) {
-			def permissions = [Permission.Operation.STREAM_GET, Permission.Operation.STREAM_SUBSCRIBE]
-			permissions.each { permission ->
-				addedStreams.each { s ->
+			Iterable<Permission.Operation> permissions = [Permission.Operation.STREAM_GET, Permission.Operation.STREAM_SUBSCRIBE]
+			permissions.each { Permission.Operation permission ->
+				addedStreams.each { Stream s ->
 					if (!permissionService.checkAnonymousAccess(s, permission)) {
 						permissionService.systemGrantAnonymousAccess(s, permission)
 					}
 				}
-				removedStreams.each { s -> permissionService.systemRevokeAnonymousAccess(s, permission) }
+				removedStreams.each { Stream s ->
+					permissionService.systemRevokeAnonymousAccess(s, permission)
+				}
 			}
 		}
 
