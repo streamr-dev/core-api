@@ -1,4 +1,7 @@
 const assert = require('chai').assert
+const ethereumJsUtil = require('ethereumjs-util')
+const keythereum = require('keythereum')
+const Web3 = require('web3')
 const initStreamrApi = require('./streamr-api-clients')
 const SchemaValidator = require('./schema-validator')
 const StreamrClient = require('streamr-client')
@@ -184,6 +187,78 @@ describe('Permissions API', function() { // use "function" instead of arrow beca
                     .call()
                 assert.equal(response.status, 204, `delete permission unexpected status ${response.status} for ${JSON.stringify(permission)}`)
             })
+        })
+    })
+
+    describe('CORE-1949', function() {
+        const AUTH_TOKEN = 'product-api-tester-key'
+        async function obtainChallenge(address) {
+            const json = await Streamr.api.v1.login
+                .challenge(address)
+                .execute()
+            return json
+        }
+
+        async function submitChallenge(challenge, signature) {
+            const json = await Streamr.api.v1.integration_keys
+                .create({
+                    name: 'My Ethereum ID',
+                    service: 'ETHEREUM_ID',
+                    challenge: challenge,
+                    signature: signature
+                })
+                .withApiKey(AUTH_TOKEN) // TODO: Remove api key
+                .execute()
+            return json
+        }
+
+        async function threadA() {
+            // TODO: Implement
+            console.log('thread A')
+            return 1
+        }
+
+        async function threadB() {
+            // TODO: Implement
+            console.log('thread B')
+            return 2
+        }
+
+        async function execute(threads) {
+            const responses = await Promise.all(threads.map((func) => {
+                return func()
+            }))
+            console.log("results: " + responses)
+        }
+
+        it('race condition',async function() {
+            const keyA = keythereum.create()
+            const privateKeyA = '0x' + keyA.privateKey.toString('hex')
+            const publicAddressA = '0x' + ethereumJsUtil.privateToAddress(keyA.privateKey).toString('hex')
+
+            const keyB = keythereum.create()
+            const privateKeyB = '0x' + keyB.privateKey.toString('hex')
+            const publicAddressB = '0x' + ethereumJsUtil.privateToAddress(keyB.privateKey).toString('hex')
+
+            const challenge = await obtainChallenge(publicAddressA)
+            const web3 = new Web3()
+            const signedChallenge = web3.eth.accounts.sign(challenge.challenge, privateKeyA)
+            const challengeResult = await submitChallenge(challenge, signedChallenge.signature)
+            //console.log(challengeResult)
+
+            const stream = await Streamr.api.v1.streams
+                .create({
+                    name: `permissions-api.test.js-${Date.now()}`
+                })
+                .withSessionToken(mySessionToken)
+                .execute()
+
+            const threads = [
+                threadA,
+                threadB,
+            ]
+
+            execute(threads)
         })
     })
 })
