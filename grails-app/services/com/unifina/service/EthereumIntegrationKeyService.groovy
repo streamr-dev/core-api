@@ -3,6 +3,7 @@ package com.unifina.service
 import com.unifina.api.*
 import com.unifina.domain.IntegrationKey
 import com.unifina.domain.Permission
+import com.unifina.domain.SignupMethod
 import com.unifina.domain.Stream
 import com.unifina.domain.User
 import com.unifina.security.StringEncryptor
@@ -131,22 +132,23 @@ class EthereumIntegrationKeyService {
 		return key.user
 	}
 
-	User getOrCreateFromEthereumAddress(String address) {
+	User getOrCreateFromEthereumAddress(String address, SignupMethod signupMethod) {
 		User user = getEthereumUser(address)
 		if (user == null) {
-			user = createEthereumUser(address)
+			user = createEthereumUser(address, signupMethod)
 		}
 		return user
 	}
 
-	User createEthereumUser(String address) {
+	User createEthereumUser(String address, SignupMethod signupMethod) {
 		User user = userService.createUser([
 			username       : address,
 			password       : AlphanumericStringGenerator.getRandomAlphanumericString(32),
 			name           : "Anonymous User",
 			enabled        : true,
 			accountLocked  : false,
-			passwordExpired: false
+			passwordExpired: false,
+			signupMethod   : signupMethod
 		])
 		new IntegrationKey(
 			name: address,
