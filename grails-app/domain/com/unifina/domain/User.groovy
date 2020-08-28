@@ -19,6 +19,7 @@ class User implements Userish {
 	boolean accountExpired
 	boolean accountLocked
 	boolean passwordExpired
+	SignupMethod signupMethod = SignupMethod.UNKNOWN
 
 	String name
 
@@ -44,6 +45,7 @@ class User implements Userish {
 		lastLogin nullable: true
 		imageUrlSmall nullable: true
 		imageUrlLarge nullable: true
+		signupMethod nullable: false
 	}
 
 	static mapping = {

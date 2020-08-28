@@ -9,6 +9,7 @@ import com.unifina.api.InvalidUsernameAndPasswordException
 import com.unifina.security.Challenge
 import com.unifina.domain.Key
 import com.unifina.domain.User
+import com.unifina.domain.SignupMethod
 import com.unifina.security.SessionToken
 import com.unifina.service.ChallengeService
 import com.unifina.service.EthereumIntegrationKeyService
@@ -87,7 +88,7 @@ class LoginApiControllerSpec extends ControllerSpecification {
 
 		then:
 		1 * challengeService.checkValidChallengeResponse(challenge.getId(), challenge.getChallenge(), signature, address)
-		1 * ethereumIntegrationKeyService.getOrCreateFromEthereumAddress(address) >> user
+		1 * ethereumIntegrationKeyService.getOrCreateFromEthereumAddress(address, SignupMethod.API) >> user
 		1 * sessionService.generateToken(user) >> token
 		response.status == 200
 		response.json == token.toMap()
@@ -140,7 +141,7 @@ class LoginApiControllerSpec extends ControllerSpecification {
 
 		then:
 		1 * challengeService.checkValidChallengeResponse(challenge.getId(), challenge.getChallenge(), signature, address)
-		1 * ethereumIntegrationKeyService.getOrCreateFromEthereumAddress(address) >> user
+		1 * ethereumIntegrationKeyService.getOrCreateFromEthereumAddress(address, SignupMethod.API) >> user
 		thrown DisabledUserException
 	}
 

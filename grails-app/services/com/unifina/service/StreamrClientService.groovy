@@ -8,6 +8,7 @@ import com.streamr.client.options.EncryptionOptions
 import com.streamr.client.options.SigningOptions
 import com.streamr.client.options.StreamrClientOptions
 import com.unifina.domain.Key
+import com.unifina.domain.SignupMethod
 import com.unifina.utils.MapTraversal
 import grails.util.Holders
 import org.apache.log4j.Logger
@@ -76,7 +77,7 @@ class StreamrClientService {
 					// Create a custom EthereumAuthenticationMethod which doesn't call the API, but instead uses the internal services to
 					// get a sessionToken. Calling the API here can lead to a deadlock situation in some corner cases, because the
 					// service calls "itself" while blocking in a mutex-lock.
-					InternalAuthenticationMethod authenticationMethod = new InternalAuthenticationMethod(nodePrivateKey, ethereumIntegrationKeyService, sessionService)
+					InternalAuthenticationMethod authenticationMethod = new InternalAuthenticationMethod(nodePrivateKey, ethereumIntegrationKeyService, sessionService, SignupMethod.API)
 					instanceForThisEngineNode = createInstance(authenticationMethod)
 					// Make sure the instance is authenticated before returning
 					instanceForThisEngineNode.getSessionToken()

@@ -68,7 +68,7 @@ class StreamrClientServiceSpec extends Specification {
 
 		then:
 		client.getOptions().getAuthenticationMethod() instanceof InternalAuthenticationMethod
-		1 * service.ethereumIntegrationKeyService.getOrCreateFromEthereumAddress(_) >> eeUser
+		1 * service.ethereumIntegrationKeyService.getOrCreateFromEthereumAddress(_ , _) >> eeUser
 		1 * service.sessionService.generateToken(eeUser) >> mockToken
 	}
 
@@ -77,7 +77,7 @@ class StreamrClientServiceSpec extends Specification {
 		SessionToken mockToken = Mock(SessionToken)
 
 		service.ethereumIntegrationKeyService = Mock(EthereumIntegrationKeyService)
-		service.ethereumIntegrationKeyService.getOrCreateFromEthereumAddress(_) >> eeUser
+		service.ethereumIntegrationKeyService.getOrCreateFromEthereumAddress(_, _) >> eeUser
 
 		service.sessionService = Mock(SessionService)
 		service.sessionService.generateToken(eeUser) >> mockToken
