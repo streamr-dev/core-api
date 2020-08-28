@@ -13,8 +13,8 @@ enum SignupMethod {
 	private final static String SERVER_URL_CONFIG_KEY = "grails.serverURL"
 
 	static SignupMethod fromRequest(HttpServletRequest request) {
-		def serverUrl = MapTraversal.getString(Holders.getConfig(), SERVER_URL_CONFIG_KEY)
-		def origin = request.getHeader("Origin")
+		String serverUrl = MapTraversal.getString(Holders.getConfig(), SERVER_URL_CONFIG_KEY)
+		String origin = request.getHeader("Origin")
 		return (origin == serverUrl) ? SignupMethod.CORE : SignupMethod.API
 	}
 }
