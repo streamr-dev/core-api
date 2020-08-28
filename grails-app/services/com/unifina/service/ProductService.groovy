@@ -173,7 +173,8 @@ class ProductService {
 		product.save(failOnError: true)
 
 		// A stream that is added when editing an existing free product should inherit read access for anonymous user
-		// TODO if the stream is removed from one free product, but is still in some other free product, should we remove the permission?
+		// TODO if a stream is removed from a free product, but still belongs to another free product, we should not
+		// remove the permission (this will be fixed in BACK-6)
 		if (product.isFree()) {
 			def permissions = [Permission.Operation.STREAM_GET, Permission.Operation.STREAM_SUBSCRIBE]
 			permissions.each { permission ->
