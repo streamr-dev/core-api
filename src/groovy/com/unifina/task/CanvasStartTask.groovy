@@ -1,7 +1,7 @@
 package com.unifina.task
 
-import com.unifina.domain.signalpath.Canvas
-import com.unifina.domain.task.Task
+import com.unifina.domain.Canvas
+import com.unifina.domain.Task
 import com.unifina.service.CanvasService
 import org.apache.log4j.Logger
 import org.codehaus.groovy.grails.commons.GrailsApplication
@@ -62,7 +62,7 @@ public class CanvasStartTask extends AbstractTask {
 
 	@Override
 	public void onComplete(boolean taskGroupComplete) {
-		
+
 	}
 
 	public static Map<String,Object> getConfig(Canvas canvas, boolean forceReset, boolean resetOnFail) {

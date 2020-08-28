@@ -1,6 +1,6 @@
 package com.unifina.service
 
-import com.unifina.domain.security.Permission
+import com.unifina.domain.Permission
 import com.unifina.security.Userish
 
 class PermissionStore {

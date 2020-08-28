@@ -1,7 +1,6 @@
 package com.unifina.api
 
-import com.unifina.domain.marketplace.Product
-import grails.compiler.GrailsCompileStatic
+import com.unifina.domain.Product
 import grails.validation.Validateable
 
 @Validateable

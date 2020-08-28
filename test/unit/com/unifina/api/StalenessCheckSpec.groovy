@@ -1,6 +1,6 @@
 package com.unifina.api
 
-import com.unifina.domain.marketplace.Product
+import com.unifina.domain.Product
 import spock.lang.Specification
 
 class StalenessCheckSpec extends Specification {

@@ -5,15 +5,16 @@ import com.unifina.api.NotFoundException
 import com.unifina.api.NotPermittedException
 import com.unifina.domain.EmailMessage
 import com.unifina.domain.Resource
-import com.unifina.domain.dashboard.Dashboard
-import com.unifina.domain.data.Stream
-import com.unifina.domain.security.Key
-import com.unifina.domain.security.Permission
-import com.unifina.domain.security.Permission.Operation
-import com.unifina.domain.security.SignupInvite
-import com.unifina.domain.security.User
-import com.unifina.domain.signalpath.Canvas
-import com.unifina.domain.signalpath.Module
+import com.unifina.domain.Dashboard
+import com.unifina.domain.Stream
+import com.unifina.domain.Key
+import com.unifina.domain.Permission
+import com.unifina.domain.Permission.Operation
+import com.unifina.domain.SignupInvite
+import com.unifina.domain.User
+import com.unifina.domain.SignupMethod
+import com.unifina.domain.Canvas
+import com.unifina.domain.Module
 import grails.gsp.PageRenderer
 import grails.plugin.mail.MailService
 import grails.test.mixin.Mock
@@ -392,9 +393,9 @@ class PermissionServiceSpec extends BeanMockingSpecification {
 		Operation op = Operation.CANVAS_GET
 		service.systemGrant(me, canvasOwned, Operation.CANVAS_SHARE)
 		when:
-		service.savePermissionForEthereumAccount(ethUserUsername, apiUser, op, res)
+		service.savePermissionForEthereumAccount(ethUserUsername, apiUser, op, res, SignupMethod.UNKNOWN)
 		then:
-		1 * ethereumIntegrationKeyService.getOrCreateFromEthereumAddress(ethUserUsername) >> createdEthUser
+		1 * ethereumIntegrationKeyService.getOrCreateFromEthereumAddress(ethUserUsername, SignupMethod.UNKNOWN) >> createdEthUser
 		0 * service.groovyPageRenderer.render(_) >> "<html>email</html>"
 		0 * service.mailService.sendMail { _ }
 		service.check(createdEthUser, canvasOwned, op)

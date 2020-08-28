@@ -3,10 +3,11 @@ package com.unifina.controller.api
 import com.unifina.api.ValidationException
 import com.unifina.domain.EmailMessage
 import com.unifina.domain.Resource
-import com.unifina.domain.security.Key
-import com.unifina.domain.security.Permission
-import com.unifina.domain.security.Permission.Operation
-import com.unifina.domain.security.User
+import com.unifina.domain.Key
+import com.unifina.domain.Permission
+import com.unifina.domain.Permission.Operation
+import com.unifina.domain.User
+import com.unifina.domain.SignupMethod
 import com.unifina.security.AllowRole
 import com.unifina.security.AuthLevel
 import com.unifina.security.StreamrApi
@@ -72,7 +73,7 @@ class PermissionApiController {
 			} else {
 				if (EthereumAddressValidator.validate(username)) {
 					// get or create a user based on an ethereum account, and grant permission
-					newPermission = permissionService.savePermissionForEthereumAccount(username, apiUser, op, res)
+					newPermission = permissionService.savePermissionForEthereumAccount(username, apiUser, op, res, SignupMethod.fromRequest(request))
 				} else {
 					// send share resource invite email and grant permission
 					EmailMessage msg = new EmailMessage(sharer, username, subjectTemplate, res)

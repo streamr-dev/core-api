@@ -4,7 +4,7 @@ import com.streamr.client.StreamrClient;
 import com.unifina.datasource.DataSource;
 import com.unifina.datasource.HistoricalDataSource;
 import com.unifina.datasource.RealtimeDataSource;
-import com.unifina.domain.security.User;
+import com.unifina.domain.User;
 import com.unifina.security.permission.DataSourcePermission;
 import com.unifina.security.permission.StreamrClientPermission;
 import com.unifina.service.StreamrClientService;

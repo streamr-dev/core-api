@@ -4,10 +4,10 @@ import com.google.gson.Gson
 import com.unifina.ModuleTestingSpecification
 import com.unifina.data.Event
 import com.unifina.datasource.DataSource
-import com.unifina.domain.security.IntegrationKey
-import com.unifina.domain.security.User
-import com.unifina.domain.signalpath.Canvas
-import com.unifina.domain.signalpath.Module
+import com.unifina.domain.IntegrationKey
+import com.unifina.domain.User
+import com.unifina.domain.Canvas
+import com.unifina.domain.Module
 import com.unifina.service.EthereumIntegrationKeyService
 import com.unifina.signalpath.SignalPath
 import com.unifina.utils.Globals

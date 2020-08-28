@@ -1,7 +1,7 @@
 package com.unifina.service
 
-import com.unifina.domain.config.HostConfig
-import com.unifina.domain.security.Role
+import com.unifina.domain.HostConfig
+import com.unifina.domain.Role
 import com.unifina.security.MyPolicy
 import com.unifina.security.MySecurityManager
 import grails.util.Environment

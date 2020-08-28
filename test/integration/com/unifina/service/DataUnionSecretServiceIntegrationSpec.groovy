@@ -3,7 +3,7 @@ package com.unifina.service
 import com.unifina.api.BadRequestException
 import com.unifina.api.DataUnionSecretCommand
 import com.unifina.api.NotFoundException
-import com.unifina.domain.dataunion.DataUnionSecret
+import com.unifina.domain.DataUnionSecret
 import com.unifina.utils.IdGenerator
 import spock.lang.Specification
 

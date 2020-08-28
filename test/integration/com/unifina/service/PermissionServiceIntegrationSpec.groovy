@@ -1,13 +1,13 @@
 package com.unifina.service
 
-import com.unifina.domain.dashboard.Dashboard
-import com.unifina.domain.dashboard.DashboardItem
-import com.unifina.domain.data.Stream
-import com.unifina.domain.security.Key
-import com.unifina.domain.security.Permission
-import com.unifina.domain.security.SignupInvite
-import com.unifina.domain.security.User
-import com.unifina.domain.signalpath.Canvas
+import com.unifina.domain.Dashboard
+import com.unifina.domain.DashboardItem
+import com.unifina.domain.Stream
+import com.unifina.domain.Key
+import com.unifina.domain.Permission
+import com.unifina.domain.SignupInvite
+import com.unifina.domain.User
+import com.unifina.domain.Canvas
 import com.unifina.utils.Webcomponent
 import grails.test.spock.IntegrationSpec
 import grails.util.Holders

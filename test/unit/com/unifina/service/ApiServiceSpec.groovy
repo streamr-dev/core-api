@@ -5,9 +5,9 @@ import com.unifina.api.ListParams
 import com.unifina.api.NotFoundException
 import com.unifina.api.NotPermittedException
 import com.unifina.api.ValidationException
-import com.unifina.domain.dashboard.Dashboard
-import com.unifina.domain.security.Permission
-import com.unifina.domain.security.User
+import com.unifina.domain.Dashboard
+import com.unifina.domain.Permission
+import com.unifina.domain.User
 import grails.test.mixin.Mock
 import grails.test.mixin.TestFor
 import grails.test.mixin.TestMixin

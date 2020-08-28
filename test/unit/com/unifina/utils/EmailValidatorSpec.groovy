@@ -1,6 +1,6 @@
 package com.unifina.utils
 
-import com.unifina.domain.security.UserRole
+import com.unifina.domain.UserRole
 import grails.test.mixin.Mock
 import spock.lang.Specification
 

@@ -1,6 +1,6 @@
 package com.unifina.signalpath.utils
 
-import com.unifina.domain.security.User
+import com.unifina.domain.User
 import com.unifina.utils.Globals
 import com.unifina.utils.testutils.ModuleTestHelper
 import spock.lang.Specification

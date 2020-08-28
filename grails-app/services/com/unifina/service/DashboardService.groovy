@@ -1,12 +1,8 @@
 package com.unifina.service
 
 import com.unifina.api.*
-import com.unifina.domain.dashboard.Dashboard
-import com.unifina.domain.dashboard.DashboardItem
-import com.unifina.domain.security.Permission
-import com.unifina.domain.security.Permission.Operation
-import com.unifina.domain.security.User
-import com.unifina.domain.signalpath.Canvas
+import com.unifina.domain.*
+import com.unifina.domain.Permission.Operation
 import com.unifina.signalpath.RuntimeRequest
 import com.unifina.utils.IdGenerator
 import groovy.transform.CompileStatic

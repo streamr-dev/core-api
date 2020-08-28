@@ -1,7 +1,7 @@
 package com.unifina.filters
 
-import com.unifina.domain.security.Key
-import com.unifina.domain.security.User
+import com.unifina.domain.Key
+import com.unifina.domain.User
 import grails.converters.JSON
 
 class MockAPIFilters {

@@ -1,7 +1,7 @@
 package com.unifina.task
 
-import com.unifina.domain.signalpath.Canvas
-import com.unifina.domain.task.Task
+import com.unifina.domain.Canvas
+import com.unifina.domain.Task
 import com.unifina.service.CanvasService
 import grails.util.Holders
 import org.codehaus.groovy.grails.commons.GrailsApplication

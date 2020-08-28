@@ -3,8 +3,8 @@ package com.unifina.signalpath
 
 import com.unifina.ModuleTestingSpecification
 import com.unifina.data.Event
-import com.unifina.domain.security.Permission
-import com.unifina.domain.security.User
+import com.unifina.domain.Permission
+import com.unifina.domain.User
 import com.unifina.service.PermissionService
 import com.unifina.utils.Globals
 import groovy.transform.CompileStatic

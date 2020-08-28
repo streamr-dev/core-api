@@ -1,6 +1,6 @@
 package com.unifina.controller.api
 
-import com.unifina.domain.security.Permission
+import com.unifina.domain.Permission
 import grails.test.mixin.Mock
 import spock.lang.Specification
 import spock.lang.Unroll

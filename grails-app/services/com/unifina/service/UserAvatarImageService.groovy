@@ -1,7 +1,7 @@
 package com.unifina.service
 
 import com.unifina.api.ApiException
-import com.unifina.domain.security.User
+import com.unifina.domain.User
 import com.unifina.provider.FileUploadProvider
 import com.unifina.utils.IdGenerator
 import com.unifina.utils.ImageResizer

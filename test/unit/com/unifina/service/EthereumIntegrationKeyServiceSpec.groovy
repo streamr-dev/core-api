@@ -2,11 +2,12 @@ package com.unifina.service
 
 import com.unifina.api.CannotRemoveEthereumKeyException
 import com.unifina.api.DuplicateNotAllowedException
-import com.unifina.domain.data.Stream
-import com.unifina.domain.security.Permission
+import com.unifina.domain.Stream
+import com.unifina.domain.Permission
+import com.unifina.domain.SignupMethod
 import com.unifina.security.Challenge
-import com.unifina.domain.security.IntegrationKey
-import com.unifina.domain.security.User
+import com.unifina.domain.IntegrationKey
+import com.unifina.domain.User
 import grails.test.mixin.Mock
 import grails.test.mixin.TestFor
 import grails.test.mixin.TestMixin
@@ -273,7 +274,7 @@ class EthereumIntegrationKeyServiceSpec extends Specification {
 	void "getOrCreateFromEthereumAddress() creates user if key does not exists"() {
 		User someoneElse = new User(username: "someoneElse@streamr.com").save(failOnError: true, validate: false)
 		when:
-		service.getOrCreateFromEthereumAddress("address")
+		service.getOrCreateFromEthereumAddress("address", SignupMethod.UNKNOWN)
 		then:
 		1 * userService.createUser(_) >> someoneElse
 		IntegrationKey.count == 1
@@ -289,7 +290,7 @@ class EthereumIntegrationKeyServiceSpec extends Specification {
 		).save(failOnError: true, validate: false)
 
 		when:
-		User user = service.getOrCreateFromEthereumAddress(address)
+		User user = service.getOrCreateFromEthereumAddress(address, SignupMethod.UNKNOWN)
 		then:
 		user.username == me.username
 		IntegrationKey.count == 1
@@ -299,7 +300,7 @@ class EthereumIntegrationKeyServiceSpec extends Specification {
 	void "createEthereumUser() creates inbox stream"() {
 		User someoneElse = new User(username: "someoneElse@streamr.com").save(failOnError: true, validate: false)
 		when:
-		service.createEthereumUser("address")
+		service.createEthereumUser("address", SignupMethod.UNKNOWN)
 		then:
 		1 * userService.createUser(_) >> someoneElse
 		1 * permissionService.systemGrantAll(_, _)

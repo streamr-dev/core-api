@@ -3,8 +3,8 @@ package com.unifina.service
 import com.streamr.client.StreamrClient
 import com.streamr.client.authentication.ApiKeyAuthenticationMethod
 import com.streamr.client.authentication.InternalAuthenticationMethod
-import com.unifina.domain.security.Key
-import com.unifina.domain.security.User
+import com.unifina.domain.Key
+import com.unifina.domain.User
 import com.unifina.security.SessionToken
 import com.unifina.utils.testutils.FakeStreamrClient
 import grails.test.mixin.Mock
@@ -68,7 +68,7 @@ class StreamrClientServiceSpec extends Specification {
 
 		then:
 		client.getOptions().getAuthenticationMethod() instanceof InternalAuthenticationMethod
-		1 * service.ethereumIntegrationKeyService.getOrCreateFromEthereumAddress(_) >> eeUser
+		1 * service.ethereumIntegrationKeyService.getOrCreateFromEthereumAddress(_ , _) >> eeUser
 		1 * service.sessionService.generateToken(eeUser) >> mockToken
 	}
 
@@ -77,7 +77,7 @@ class StreamrClientServiceSpec extends Specification {
 		SessionToken mockToken = Mock(SessionToken)
 
 		service.ethereumIntegrationKeyService = Mock(EthereumIntegrationKeyService)
-		service.ethereumIntegrationKeyService.getOrCreateFromEthereumAddress(_) >> eeUser
+		service.ethereumIntegrationKeyService.getOrCreateFromEthereumAddress(_, _) >> eeUser
 
 		service.sessionService = Mock(SessionService)
 		service.sessionService.generateToken(eeUser) >> mockToken

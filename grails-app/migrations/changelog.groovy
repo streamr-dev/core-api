@@ -151,4 +151,5 @@ databaseChangeLog = {
 	include file: 'core/2020-04-01-rm-tour-user.groovy'
 	include file: 'core/2020-04-15-user-refactor-username-add-email.groovy'
 	include file: 'core/2020-08-07-mv-secuser-user.groovy'
+	include file: 'core/2020-08-24-add-user-signup-method.groovy'
 }
