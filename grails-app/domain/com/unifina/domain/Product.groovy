@@ -166,6 +166,10 @@ class Product {
 		return pricePerSecond == 0L
 	}
 
+	boolean isDeployed() {
+		return this.state == State.DEPLOYED
+	}
+
 	static isEthereumAddressOrIsNull = { String value ->
 		value == null || Product.isEthereumAddress(value)
 	}

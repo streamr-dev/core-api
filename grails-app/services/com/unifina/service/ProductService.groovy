@@ -285,7 +285,7 @@ class ProductService {
 	}
 
 	void transitionToUndeploying(Product product) {
-		if (product.state == Product.State.DEPLOYED) {
+		if (product.isDeployed()) {
 			product.state = Product.State.UNDEPLOYING
 			product.save(failOnError: true)
 		} else {
