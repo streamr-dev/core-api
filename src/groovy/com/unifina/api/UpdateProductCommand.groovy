@@ -71,7 +71,7 @@ class UpdateProductCommand {
 		}
 
 		// Prevent deployed products from changing from free to paid
-		if (product.pricePerSecond == 0 && product.state == Product.State.DEPLOYED && this.pricePerSecond > 0) {
+		if (product.isFree() && product.state == Product.State.DEPLOYED && this.pricePerSecond > 0) {
 			throw new FieldCannotBeUpdatedException("Published products can't be changed from free to paid.")
 		}
 

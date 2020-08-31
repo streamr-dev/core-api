@@ -122,7 +122,7 @@ class Product {
 			ownerAddress: ownerAddress,
 			beneficiaryAddress: beneficiaryAddress,
 			pricePerSecond: pricePerSecond.toString(),
-			isFree: pricePerSecond == 0L,
+			isFree: this.isFree(),
 			priceCurrency: priceCurrency.toString(),
 			minimumSubscriptionInSeconds: minimumSubscriptionInSeconds,
 			owner: owner.name,
@@ -155,7 +155,7 @@ class Product {
 			ownerAddress: ownerAddress,
 			beneficiaryAddress: beneficiaryAddress,
 			pricePerSecond: pricePerSecond.toString(),
-			isFree: pricePerSecond == 0L,
+			isFree: this.isFree(),
 			priceCurrency: priceCurrency.toString(),
 			minimumSubscriptionInSeconds: minimumSubscriptionInSeconds,
 			owner: owner.name
@@ -163,7 +163,7 @@ class Product {
 	}
 
 	boolean isFree() {
-		return pricePerSecond == 0
+		return pricePerSecond == 0L
 	}
 
 	static isEthereumAddressOrIsNull = { String value ->
