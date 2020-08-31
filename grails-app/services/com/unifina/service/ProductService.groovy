@@ -255,7 +255,7 @@ class ProductService {
 		if (command.isStale(product)) {
 			return false
 		}
-		if (product.state == Product.State.UNDEPLOYING) {
+		if (product.isUndeploying()) {
 			throw new InvalidStateTransitionException(product.state, Product.State.DEPLOYED)
 		}
 		verifyDevops(currentUser)
@@ -274,7 +274,7 @@ class ProductService {
 		if (command.isStale(product)) {
 			return false
 		}
-		if (product.state == Product.State.UNDEPLOYING) {
+		if (product.isUndeploying()) {
 			throw new InvalidStateTransitionException(product.state, Product.State.DEPLOYED)
 		}
 		verifyDevops(currentUser)
