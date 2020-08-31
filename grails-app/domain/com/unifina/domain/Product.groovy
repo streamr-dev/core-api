@@ -166,6 +166,10 @@ class Product {
 		return pricePerSecond == 0L
 	}
 
+	boolean isPaid() {
+		return pricePerSecond > 0
+	}
+
 	boolean isDeployed() {
 		return this.state == State.DEPLOYED
 	}

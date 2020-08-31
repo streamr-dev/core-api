@@ -188,6 +188,19 @@ class ProductSpec extends Specification {
 	}
 
 	@Unroll
+	void "isPaid(#price) == #expected"(Long price, Object expected) {
+		expect:
+		Product p = new Product(pricePerSecond: price)
+		p.isPaid() == expected
+
+		where:
+		price | expected
+		-1L | false
+		0L | false
+		1L | true
+	}
+
+	@Unroll
 	void "isDeployed(#state) == #expected"(Product.State state, boolean expected) {
 		expect:
 		Product p = new Product(state: state)
