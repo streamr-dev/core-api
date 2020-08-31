@@ -2,21 +2,16 @@ package com.unifina.service
 
 import com.google.common.collect.Lists
 import com.streamr.client.protocol.message_layer.StreamMessage
-import com.unifina.api.*
-import com.unifina.domain.Category
-import com.unifina.domain.Contact
-import com.unifina.domain.FreeSubscription
-import com.unifina.domain.PaidSubscription
-import com.unifina.domain.Product
-import com.unifina.domain.Stream
-import com.unifina.domain.TermsOfUse
-import com.unifina.domain.Permission
-import com.unifina.domain.User
+import com.unifina.api.InvalidStateTransitionException
+import com.unifina.api.NotPermittedException
+import com.unifina.api.ValidationException
+import com.unifina.controller.*
+import com.unifina.domain.*
+import com.unifina.utils.TestUtils
 import grails.test.mixin.Mock
 import grails.test.mixin.TestFor
 import spock.lang.Specification
 import spock.lang.Unroll
-import com.unifina.utils.TestUtils
 
 @TestFor(ProductService)
 @Mock([Category, Product, FreeSubscription, PaidSubscription])

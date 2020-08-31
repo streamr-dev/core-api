@@ -2,15 +2,8 @@ package com.unifina.service
 
 import com.unifina.BeanMockingSpecification
 import com.unifina.api.*
-import com.unifina.domain.ExampleType
-import com.unifina.domain.Dashboard
-import com.unifina.domain.DashboardItem
-import com.unifina.domain.Stream
-import com.unifina.domain.Permission
-import com.unifina.domain.User
-import com.unifina.domain.Canvas
-import com.unifina.domain.Module
-import com.unifina.domain.Serialization
+import com.unifina.controller.SaveCanvasCommand
+import com.unifina.domain.*
 import com.unifina.exceptions.CanvasUnreachableException
 import com.unifina.signalpath.ModuleException
 import com.unifina.signalpath.UiChannelIterator

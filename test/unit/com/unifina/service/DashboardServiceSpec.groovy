@@ -1,11 +1,12 @@
 package com.unifina.service
 
-import com.unifina.api.*
-import com.unifina.domain.Dashboard
-import com.unifina.domain.DashboardItem
-import com.unifina.domain.Permission
-import com.unifina.domain.User
-import com.unifina.domain.Canvas
+
+import com.unifina.api.NotFoundException
+import com.unifina.api.NotPermittedException
+import com.unifina.api.ValidationException
+import com.unifina.controller.SaveDashboardCommand
+import com.unifina.controller.SaveDashboardItemCommand
+import com.unifina.domain.*
 import com.unifina.utils.Webcomponent
 import grails.test.mixin.Mock
 import grails.test.mixin.TestFor
@@ -114,11 +115,11 @@ class DashboardServiceSpec extends Specification {
 				]
 		]).toString()).save(failOnError: true, validate: false)
 		when:
-		SaveDashboardCommand command = new SaveDashboardCommand([
+        SaveDashboardCommand command = new SaveDashboardCommand([
 				name : "test-create",
 				items: [
-						new SaveDashboardItemCommand(title: "test1", canvas: canvas, module: 1, webcomponent: "streamr-client"),
-						new SaveDashboardItemCommand(title: "test2", canvas: canvas, module: 3, webcomponent: "streamr-switcher")
+                    new SaveDashboardItemCommand(title: "test1", canvas: canvas, module: 1, webcomponent: "streamr-client"),
+                    new SaveDashboardItemCommand(title: "test2", canvas: canvas, module: 3, webcomponent: "streamr-switcher")
 				]
 		])
 		service.create(command, user)
