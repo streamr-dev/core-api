@@ -227,4 +227,18 @@ class ProductSpec extends Specification {
 		Product.State.UNDEPLOYING | true
 		Product.State.DEPLOYED | false
 	}
+
+	@Unroll
+	void "isNotDeployed(#state) == #expected"(Product.State state, boolean expected) {
+		expect:
+		Product p = new Product(state: state)
+		p.isNotDeployed() == expected
+
+		where:
+		state | expected
+		Product.State.NOT_DEPLOYED | true
+		Product.State.DEPLOYING | false
+		Product.State.UNDEPLOYING | false
+		Product.State.DEPLOYED | false
+	}
 }

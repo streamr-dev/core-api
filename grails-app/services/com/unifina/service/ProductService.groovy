@@ -240,7 +240,7 @@ class ProductService {
 	}
 
 	void transitionToDeploying(Product product) {
-		if (product.state == Product.State.NOT_DEPLOYED) {
+		if (product.isNotDeployed()) {
 			product.state = Product.State.DEPLOYING
 			product.save(failOnError: true)
 		} else {
