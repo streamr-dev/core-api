@@ -6,7 +6,6 @@ import com.unifina.api.ApiException
 import com.unifina.api.NotFoundException
 import com.unifina.api.NotPermittedException
 import com.unifina.api.ValidationException
-import com.unifina.controller.ListParams
 import com.unifina.domain.Key
 import com.unifina.domain.Permission
 import com.unifina.domain.User

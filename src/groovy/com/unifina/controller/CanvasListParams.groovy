@@ -2,6 +2,7 @@ package com.unifina.controller
 
 import com.unifina.domain.Canvas
 import com.unifina.domain.Permission
+import com.unifina.service.ListParams
 import grails.validation.Validateable
 import groovy.transform.CompileStatic
 

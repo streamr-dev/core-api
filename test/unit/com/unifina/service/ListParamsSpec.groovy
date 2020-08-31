@@ -1,8 +1,6 @@
-package com.unifina.controller
+package com.unifina.service
 
 import com.unifina.domain.Dashboard
-import com.unifina.service.DashboardListParams
-import com.unifina.service.ListParams
 import grails.orm.HibernateCriteriaBuilder
 import grails.test.mixin.Mock
 import grails.test.mixin.TestMixin

@@ -13,6 +13,7 @@ import com.unifina.security.AuthLevel
 import com.unifina.security.StreamrApi
 import com.unifina.service.ApiService
 import com.unifina.service.CanvasService
+import com.unifina.service.SaveCanvasCommand
 import com.unifina.service.SignalPathService
 import com.unifina.signalpath.ModuleException
 import com.unifina.utils.NullJsonSerializer

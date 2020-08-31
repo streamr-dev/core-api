@@ -1,6 +1,7 @@
-package com.unifina.controller
+package com.unifina.service
 
-import com.unifina.controller.DataUnionJoinRequestApiController
+
+import com.unifina.domain.DataUnionJoinRequest
 import grails.validation.Validateable
 import groovy.transform.ToString
 
@@ -10,7 +11,7 @@ class UpdateDataUnionJoinRequestCommand {
 	String state
 	static constraints = {
 		state(nullable: false, validator: { String value ->
-			return DataUnionJoinRequestApiController.isState(value) != null
+			return DataUnionJoinRequest.State.isState(value) != null
 		})
 	}
 }

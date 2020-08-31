@@ -1,4 +1,4 @@
-package com.unifina.controller
+package com.unifina.service
 
 import com.unifina.domain.Category
 import com.unifina.domain.Permission

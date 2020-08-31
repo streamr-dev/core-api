@@ -7,8 +7,10 @@ import com.unifina.api.NotPermittedException
 import com.unifina.domain.DataUnionJoinRequest
 import com.unifina.domain.User
 import com.unifina.security.StreamrApi
+import com.unifina.service.DataUnionJoinRequestCommand
 import com.unifina.service.DataUnionJoinRequestService
 import com.unifina.service.EthereumService
+import com.unifina.service.UpdateDataUnionJoinRequestCommand
 import com.unifina.utils.EthereumAddressValidator
 import com.unifina.utils.IDValidator
 import grails.converters.JSON
@@ -19,16 +21,6 @@ class DataUnionJoinRequestApiController {
 
 	private User loggedInUser() {
 		return (User) request.apiUser
-	}
-	static DataUnionJoinRequest.State isState(String value) {
-		if (value == null || value.trim().equals("")) {
-			return null
-		}
-		try {
-			return DataUnionJoinRequest.State.valueOf(value.toUpperCase())
-		} catch (IllegalArgumentException e) {
-			return null
-		}
 	}
 	static boolean isDataUnionAddress(String value) {
 		return EthereumAddressValidator.validate(value)
@@ -74,7 +66,7 @@ class DataUnionJoinRequestApiController {
 	@StreamrApi
     def index(String contractAddress, String state) {
 		checkAdminAccessControl(loggedInUser(), contractAddress)
-		DataUnionJoinRequest.State st = isState(state)
+		DataUnionJoinRequest.State st = DataUnionJoinRequest.State.isState(state)
 		List<DataUnionJoinRequest> results = dataUnionJoinRequestService.findAll(contractAddress, st)
 		render(results*.toMap() as JSON)
 	}

@@ -1,15 +1,15 @@
 package com.unifina.controller
 
-
 import com.unifina.api.ApiException
 import com.unifina.api.BadRequestException
 import com.unifina.api.NotFoundException
-import com.unifina.service.DataUnionJoinRequestCommand
 import com.unifina.domain.DataUnionJoinRequest
 import com.unifina.domain.User
 import com.unifina.filters.UnifinaCoreAPIFilters
+import com.unifina.service.DataUnionJoinRequestCommand
 import com.unifina.service.DataUnionJoinRequestService
 import com.unifina.service.EthereumService
+import com.unifina.service.UpdateDataUnionJoinRequestCommand
 import grails.test.mixin.Mock
 import grails.test.mixin.TestFor
 import spock.lang.Specification
@@ -27,21 +27,6 @@ class DataUnionJoinRequestApiControllerSpec extends Specification {
 		controller.dataUnionJoinRequestService = Mock(DataUnionJoinRequestService)
 		controller.ethereumService = Mock(EthereumService)
     }
-
-	void "state parameter is null or State"(String value, Object expected) {
-		expect:
-		DataUnionJoinRequestApiController.isState(value) == expected
-		where:
-		value      | expected
-		null       | null
-		""         | null
-		" "        | null
-		"\t"       | null
-		"abcxyz"   | null
-		"accepted" | DataUnionJoinRequest.State.ACCEPTED
-		"rejected" | DataUnionJoinRequest.State.REJECTED
-		"pending"  | DataUnionJoinRequest.State.PENDING
-	}
 
 	void "isDataUnionAddress"(String value, Object expected) {
 		expect:

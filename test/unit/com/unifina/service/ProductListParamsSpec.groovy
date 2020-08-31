@@ -1,10 +1,9 @@
-package com.unifina.controller
+package com.unifina.service
 
 import com.unifina.domain.Category
 import com.unifina.domain.Permission
 import com.unifina.domain.Product
 import com.unifina.domain.User
-import com.unifina.service.ListParams
 import grails.test.mixin.Mock
 import spock.lang.Specification
 import spock.lang.Unroll

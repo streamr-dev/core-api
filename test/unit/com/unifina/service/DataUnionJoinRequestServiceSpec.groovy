@@ -6,8 +6,6 @@ import com.unifina.BeanMockingSpecification
 import com.unifina.api.ApiException
 import com.unifina.api.NotFoundException
 import com.unifina.api.ProxyException
-import com.unifina.controller.DataUnionJoinRequestCommand
-import com.unifina.controller.UpdateDataUnionJoinRequestCommand
 import com.unifina.domain.*
 import com.unifina.exceptions.JoinRequestException
 import grails.test.mixin.Mock

@@ -1,4 +1,5 @@
-package com.unifina.controller
+package com.unifina.service
+
 
 import grails.validation.Validateable
 

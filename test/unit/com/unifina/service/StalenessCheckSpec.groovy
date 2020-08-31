@@ -1,6 +1,7 @@
-package com.unifina.controller
+package com.unifina.service
 
 import com.unifina.domain.Product
+import com.unifina.service.StalenessCheck
 import spock.lang.Specification
 
 class StalenessCheckSpec extends Specification {

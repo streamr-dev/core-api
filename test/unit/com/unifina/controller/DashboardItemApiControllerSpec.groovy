@@ -3,6 +3,7 @@ package com.unifina.controller
 import com.unifina.ControllerSpecification
 import com.unifina.domain.*
 import com.unifina.service.DashboardService
+import com.unifina.service.SaveDashboardItemCommand
 import grails.test.mixin.Mock
 import grails.test.mixin.TestFor
 

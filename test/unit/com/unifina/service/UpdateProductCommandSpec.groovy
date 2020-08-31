@@ -1,8 +1,7 @@
-package com.unifina.controller
+package com.unifina.service
 
 import com.unifina.api.FieldCannotBeUpdatedException
 import com.unifina.domain.*
-import com.unifina.service.PermissionService
 import spock.lang.Specification
 
 class UpdateProductCommandSpec extends Specification {

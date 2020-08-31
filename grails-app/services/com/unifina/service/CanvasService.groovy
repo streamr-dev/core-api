@@ -3,7 +3,6 @@ package com.unifina.service
 import com.google.gson.Gson
 import com.google.gson.GsonBuilder
 import com.unifina.api.*
-import com.unifina.controller.SaveCanvasCommand
 import com.unifina.domain.*
 import com.unifina.exceptions.CanvasUnreachableException
 import com.unifina.exceptions.InvalidStreamConfigException

@@ -1,6 +1,7 @@
 package com.unifina.controller
 
 import com.unifina.domain.IntegrationKey
+import com.unifina.service.ListParams
 import grails.validation.Validateable
 import groovy.transform.CompileStatic
 
