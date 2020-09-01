@@ -56,4 +56,9 @@ class IntegrationKey implements Serializable {
 		}
 	}
 
+	String parsePrivateKey() {
+		JSONObject element = JSON.parse(json) as JSONObject
+		String key = element.get("privateKey")
+		return key
+	}
 }

@@ -132,9 +132,9 @@ class StreamrClientService {
 			BigInteger decimal = keyPair.getPrivateKey()
 			String privateKey = decimal.toString(16)
 			IntegrationKey key = ethereumIntegrationKeyService.createEthereumAccount(user, "Auto-generated key", privateKey)
-			return key.idInService
+			return key.parsePrivateKey()
 		} else {
-			return keys[0].idInService
+			return keys[0].parsePrivateKey()
 		}
 	}
 }
