@@ -1,17 +1,20 @@
 package com.unifina.service
 
 import com.streamr.client.StreamrClient
-import com.streamr.client.authentication.ApiKeyAuthenticationMethod
 import com.streamr.client.authentication.AuthenticationMethod
+import com.streamr.client.authentication.EthereumAuthenticationMethod
 import com.streamr.client.authentication.InternalAuthenticationMethod
 import com.streamr.client.options.EncryptionOptions
 import com.streamr.client.options.SigningOptions
 import com.streamr.client.options.StreamrClientOptions
-import com.unifina.domain.Key
+import com.unifina.domain.IntegrationKey
 import com.unifina.domain.SignupMethod
+import com.unifina.domain.User
 import com.unifina.utils.MapTraversal
 import grails.util.Holders
 import org.apache.log4j.Logger
+import org.web3j.crypto.ECKeyPair
+import org.web3j.crypto.Keys
 
 import java.lang.reflect.Constructor
 import java.util.concurrent.TimeUnit
@@ -52,8 +55,8 @@ class StreamrClientService {
 	 * Whoever calls this should take care of closing the client when it is no longer needed.
 	 */
 	StreamrClient getAuthenticatedInstance(Long userIdToAuthenticate) {
-		// Uses superpowers to get an API key for the user to authenticate the data
-		return createInstance(new ApiKeyAuthenticationMethod(getApiKeyForUser(userIdToAuthenticate)))
+		// Uses superpowers to get an integration key for the user to authenticate the data
+		return createInstance(new EthereumAuthenticationMethod(getIntegrationKeyForUser(userIdToAuthenticate)))
 	}
 
 	/**
@@ -108,24 +111,30 @@ class StreamrClientService {
 	}
 
 	/**
-	 * Returns an API key for the given user. This is used
+	 * Returns an IntegrationKey for the given user. This is used
 	 * by Canvases to subscribe to the Streams required by the Canvas.
 	 *
-	 * Currently, the first returned key is chosen. It would be better
+	 * Currently, the first returned integration key is chosen. It would be better
 	 * if the user could specify which key to use to run their Canvases
 	 * by marking one key as "default", or offering a choice
 	 * in Canvas run settings.
 	 */
-	private String getApiKeyForUser(Long userId) {
-		List<Key> keys = Key.createCriteria().list {
+	private String getIntegrationKeyForUser(Long userId) {
+		List<IntegrationKey> keys = IntegrationKey.createCriteria().list {
+			eq("service", IntegrationKey.Service.ETHEREUM)
 			user {
 				idEq(userId)
 			}
 		}
 		if (keys.isEmpty()) {
-			throw new IllegalStateException("User does not have an API key! This should not happen!")
+			User user = User.get(userId)
+			ECKeyPair keyPair = Keys.createEcKeyPair()
+			BigInteger decimal = keyPair.getPrivateKey()
+			String privateKey = decimal.toString(16)
+			IntegrationKey key = ethereumIntegrationKeyService.createEthereumAccount(user, "Auto-generated key", privateKey)
+			return key.idInService
 		} else {
-			return keys[0].id
+			return keys[0].idInService
 		}
 	}
 }

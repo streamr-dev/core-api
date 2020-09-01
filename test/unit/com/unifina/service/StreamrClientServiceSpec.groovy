@@ -1,9 +1,9 @@
 package com.unifina.service
 
 import com.streamr.client.StreamrClient
-import com.streamr.client.authentication.ApiKeyAuthenticationMethod
+import com.streamr.client.authentication.EthereumAuthenticationMethod
 import com.streamr.client.authentication.InternalAuthenticationMethod
-import com.unifina.domain.Key
+import com.unifina.domain.IntegrationKey
 import com.unifina.domain.User
 import com.unifina.security.SessionToken
 import com.unifina.utils.testutils.FakeStreamrClient
@@ -13,7 +13,7 @@ import spock.lang.Specification
 import spock.util.concurrent.PollingConditions
 
 @TestFor(StreamrClientService)
-@Mock(User)
+@Mock([User, IntegrationKey])
 class StreamrClientServiceSpec extends Specification {
 	User user
 
@@ -27,31 +27,56 @@ class StreamrClientServiceSpec extends Specification {
 		service.setClientClass(FakeStreamrClient)
 	}
 
-	void "getAuthenticatedInstance() should create a StreamrClient with ApiKeyAuthenticationMethod (user has one Key)"() {
-		new Key(name: "test", user: user).save(failOnError: true, validate: true)
+	void "getAuthenticatedInstance() should create a StreamrClient with EthereumAuthenticationMethod (user has one Key)"() {
+		new IntegrationKey(
+			id: "ik-1",
+			user: user,
+			name: "Test key",
+			service: IntegrationKey.Service.ETHEREUM,
+			json: '{"address": "0xb794F5eA0ba39494cE839613fffBA74279579268"}',
+			idInService: "0xb794F5eA0ba39494cE839613fffBA74279579268",
+		).save(failOnError: true, validate: true)
+		assert IntegrationKey.countByUser(user) == 1
 
 		when:
 		FakeStreamrClient client = (FakeStreamrClient) service.getAuthenticatedInstance(user.id)
 		then:
-		client.getOptions().getAuthenticationMethod() instanceof ApiKeyAuthenticationMethod
+		client.getOptions().getAuthenticationMethod() instanceof EthereumAuthenticationMethod
 	}
 
-	void "getAuthenticatedInstance() should create a StreamrClient with ApiKeyAuthenticationMethod (user has several Keys)"() {
-		new Key(name: "test", user: user).save(failOnError: true, validate: true)
-		new Key(name: "test2", user: user).save(failOnError: true, validate: true)
-		assert Key.countByUser(user) == 2
+	void "getAuthenticatedInstance() should create a StreamrClient with EthereumAuthenticationMethod (user has several Keys)"() {
+		new IntegrationKey(
+			id: "ik-1",
+			user: user,
+			name: "Test key",
+			service: IntegrationKey.Service.ETHEREUM,
+			json: '{"address": "0xb794F5eA0ba39494cE839613fffBA74279579268"}',
+			idInService: "0xb794F5eA0ba39494cE839613fffBA74279579268",
+		).save(failOnError: true, validate: true)
+		new IntegrationKey(
+			id: "ik-2",
+			user: user,
+			name: "Test key 2",
+			service: IntegrationKey.Service.ETHEREUM,
+			json: '{"address": "0x222222222ba39494cE839613fffBA74279579268"}',
+			idInService: "0x222222222ba39494cE839613fffBA74279579268",
+		).save(failOnError: true, validate: true)
+		assert IntegrationKey.countByUser(user) == 2
 
 		when:
 		FakeStreamrClient client = (FakeStreamrClient) service.getAuthenticatedInstance(user.id)
 		then:
-		client.getOptions().getAuthenticationMethod() instanceof ApiKeyAuthenticationMethod
+		client.getOptions().getAuthenticationMethod() instanceof EthereumAuthenticationMethod
 	}
 
-	void "getAuthenticatedInstance() should throw if a user doesn't have any Keys (illegal state)"() {
+	void "getAuthenticatedInstance() should generate a new integration key if none is found"() {
+		setup:
+		service.ethereumIntegrationKeyService = Mock(EthereumIntegrationKeyService)
 		when:
-		service.getAuthenticatedInstance(user.id)
+		FakeStreamrClient client = (FakeStreamrClient) service.getAuthenticatedInstance(user.id)
 		then:
-		thrown(IllegalStateException)
+		client.getOptions().getAuthenticationMethod() instanceof EthereumAuthenticationMethod
+		1 * service.ethereumIntegrationKeyService.createEthereumAccount(user, "Auto-generated key", _) >> new IntegrationKey(idInService: "0x222222222ba39494cE839613fffBA74279579268")
 	}
 
 	void "getInstanceForThisEngineNode() uses sessionService to generate a sessionToken (instead of making an API call)"() {
