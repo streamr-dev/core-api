@@ -33,7 +33,7 @@ class StreamrClientServiceSpec extends Specification {
 			user: user,
 			name: "Test key",
 			service: IntegrationKey.Service.ETHEREUM,
-			json: '{"address": "0xb794F5eA0ba39494cE839613fffBA74279579268"}',
+			json: '{"address": "0xb794F5eA0ba39494cE839613fffBA74279579268", "privateKey": "0x5e98cce00cff5dea6b454889f359a4ec06b9fa6b88e9d69b86de8e1c81887da0"}',
 			idInService: "0xb794F5eA0ba39494cE839613fffBA74279579268",
 		).save(failOnError: true, validate: true)
 		assert IntegrationKey.countByUser(user) == 1
@@ -50,7 +50,7 @@ class StreamrClientServiceSpec extends Specification {
 			user: user,
 			name: "Test key",
 			service: IntegrationKey.Service.ETHEREUM,
-			json: '{"address": "0xb794F5eA0ba39494cE839613fffBA74279579268"}',
+			json: '{"address": "0xb794F5eA0ba39494cE839613fffBA74279579268", "privateKey": "0x5e98cce00cff5dea6b454889f359a4ec06b9fa6b88e9d69b86de8e1c81887da0"}',
 			idInService: "0xb794F5eA0ba39494cE839613fffBA74279579268",
 		).save(failOnError: true, validate: true)
 		new IntegrationKey(
@@ -58,7 +58,7 @@ class StreamrClientServiceSpec extends Specification {
 			user: user,
 			name: "Test key 2",
 			service: IntegrationKey.Service.ETHEREUM,
-			json: '{"address": "0x222222222ba39494cE839613fffBA74279579268"}',
+			json: '{"address": "0x222222222ba39494cE839613fffBA74279579268", "privateKey": "0x5e98cce00cff5dea6b454889f359a4ec06b9fa6b88e9d69b86de8e1c81887da0"}',
 			idInService: "0x222222222ba39494cE839613fffBA74279579268",
 		).save(failOnError: true, validate: true)
 		assert IntegrationKey.countByUser(user) == 2
@@ -71,12 +71,17 @@ class StreamrClientServiceSpec extends Specification {
 
 	void "getAuthenticatedInstance() should generate a new integration key if none is found"() {
 		setup:
+		IntegrationKey key = new IntegrationKey(
+			idInService: "0x222222222ba39494cE839613fffBA74279579268",
+			service: IntegrationKey.Service.ETHEREUM,
+			json: '{"address": "0x222222222ba39494cE839613fffBA74279579268", "privateKey": "0x5e98cce00cff5dea6b454889f359a4ec06b9fa6b88e9d69b86de8e1c81887da0"}',
+		)
 		service.ethereumIntegrationKeyService = Mock(EthereumIntegrationKeyService)
 		when:
 		FakeStreamrClient client = (FakeStreamrClient) service.getAuthenticatedInstance(user.id)
 		then:
 		client.getOptions().getAuthenticationMethod() instanceof EthereumAuthenticationMethod
-		1 * service.ethereumIntegrationKeyService.createEthereumAccount(user, "Auto-generated key", _) >> new IntegrationKey(idInService: "0x222222222ba39494cE839613fffBA74279579268")
+		1 * service.ethereumIntegrationKeyService.createEthereumAccount(user, "Auto-generated key", _) >> key
 	}
 
 	void "getInstanceForThisEngineNode() uses sessionService to generate a sessionToken (instead of making an API call)"() {
