@@ -56,7 +56,37 @@ class StreamrClientService {
 	 */
 	StreamrClient getAuthenticatedInstance(Long userIdToAuthenticate) {
 		// Uses superpowers to get an integration key for the user to authenticate the data
-		return createInstance(new EthereumAuthenticationMethod(getIntegrationKeyForUser(userIdToAuthenticate)))
+		IntegrationKey integrationKey = getIntegrationKeyForUser(userIdToAuthenticate)
+		String privateKey = ethereumIntegrationKeyService.decryptPrivateKey(integrationKey)
+		return createInstance(new EthereumAuthenticationMethod(privateKey))
+	}
+
+	/**
+	 * Returns an IntegrationKey for the given user. This is used
+	 * by Canvases to subscribe to the Streams required by the Canvas.
+	 *
+	 * Currently, the first returned integration key is chosen. It would be better
+	 * if the user could specify which key to use to run their Canvases
+	 * by marking one key as "default", or offering a choice
+	 * in Canvas run settings.
+	 */
+	private IntegrationKey getIntegrationKeyForUser(Long userId) {
+		List<IntegrationKey> keys = IntegrationKey.createCriteria().list {
+			eq("service", IntegrationKey.Service.ETHEREUM)
+			user {
+				idEq(userId)
+			}
+			order("id", "asc") // just to get deterministic results
+		}
+		if (!keys.isEmpty()) {
+			return keys[0]
+		} else {
+			User user = User.get(userId)
+			ECKeyPair keyPair = Keys.createEcKeyPair()
+			BigInteger decimal = keyPair.getPrivateKey()
+			String privateKey = decimal.toString(16)
+			return ethereumIntegrationKeyService.createEthereumAccount(user, "Auto-generated key", privateKey)
+		}
 	}
 
 	/**
@@ -108,33 +138,5 @@ class StreamrClientService {
 			restUrl
 		)
 		return clientConstructor.newInstance(options)
-	}
-
-	/**
-	 * Returns an IntegrationKey for the given user. This is used
-	 * by Canvases to subscribe to the Streams required by the Canvas.
-	 *
-	 * Currently, the first returned integration key is chosen. It would be better
-	 * if the user could specify which key to use to run their Canvases
-	 * by marking one key as "default", or offering a choice
-	 * in Canvas run settings.
-	 */
-	private String getIntegrationKeyForUser(Long userId) {
-		List<IntegrationKey> keys = IntegrationKey.createCriteria().list {
-			eq("service", IntegrationKey.Service.ETHEREUM)
-			user {
-				idEq(userId)
-			}
-		}
-		if (keys.isEmpty()) {
-			User user = User.get(userId)
-			ECKeyPair keyPair = Keys.createEcKeyPair()
-			BigInteger decimal = keyPair.getPrivateKey()
-			String privateKey = decimal.toString(16)
-			IntegrationKey key = ethereumIntegrationKeyService.createEthereumAccount(user, "Auto-generated key", privateKey)
-			return key.parsePrivateKey()
-		} else {
-			return keys[0].parsePrivateKey()
-		}
 	}
 }

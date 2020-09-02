@@ -32,7 +32,9 @@ class IntegrationKey implements Serializable {
 	}
 
 	enum Service {
+		// Ethereum keys for canvases on Profile page
 		ETHEREUM,
+		// Ethereum Accounts on Profile page
 		ETHEREUM_ID
 	}
 
