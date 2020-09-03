@@ -198,6 +198,9 @@ class ProductService {
 		if (product.type == Product.Type.DATAUNION) {
 			Set<User> users = dataUnionJoinRequestService.findMembers(product.beneficiaryAddress)
 			for (User u : users) {
+				if (!permissionService.check(u, stream, Permission.Operation.STREAM_GET)) {
+					permissionService.systemGrant(u, stream, Permission.Operation.STREAM_GET)
+				}
 				if (!permissionService.check(u, stream, Permission.Operation.STREAM_PUBLISH)) {
 					permissionService.systemGrant(u, stream, Permission.Operation.STREAM_PUBLISH)
 				}
@@ -217,6 +220,9 @@ class ProductService {
 		if (product.type == Product.Type.DATAUNION) {
 			Set<User> users = dataUnionJoinRequestService.findMembers(product.beneficiaryAddress)
 			for (User u : users) {
+				if (permissionService.check(u, stream, Permission.Operation.STREAM_GET)) {
+					permissionService.systemRevoke(u, stream, Permission.Operation.STREAM_GET)
+				}
 				if (permissionService.check(u, stream, Permission.Operation.STREAM_PUBLISH)) {
 					permissionService.systemRevoke(u, stream, Permission.Operation.STREAM_PUBLISH)
 				}
