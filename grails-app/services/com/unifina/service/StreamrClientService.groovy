@@ -11,10 +11,9 @@ import com.unifina.domain.IntegrationKey
 import com.unifina.domain.SignupMethod
 import com.unifina.domain.User
 import com.unifina.utils.MapTraversal
+import com.unifina.utils.PrivateKeyGenerator
 import grails.util.Holders
 import org.apache.log4j.Logger
-import org.web3j.crypto.ECKeyPair
-import org.web3j.crypto.Keys
 
 import java.lang.reflect.Constructor
 import java.util.concurrent.TimeUnit
@@ -82,9 +81,7 @@ class StreamrClientService {
 			return keys[0]
 		} else {
 			User user = User.get(userId)
-			ECKeyPair keyPair = Keys.createEcKeyPair()
-			BigInteger decimal = keyPair.getPrivateKey()
-			String privateKey = decimal.toString(16)
+			String privateKey = PrivateKeyGenerator.generate()
 			return ethereumIntegrationKeyService.createEthereumAccount(user, "Auto-generated key", privateKey)
 		}
 	}
