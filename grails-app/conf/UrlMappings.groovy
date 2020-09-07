@@ -32,8 +32,6 @@ class UrlMappings {
 		"/api/v1/streams/$id/detectFields"(method: "POST", controller: "streamApi", action: "detectFields")
 		"/api/v1/streams/$id/detectFields"(method: "GET", controller: "streamApi", action: "detectFields")
 		"/api/v1/streams/$id/range"(controller: "streamApi", action: "range")
-		"/api/v1/streams/$id/uploadCsvFile"(method: "POST", controller: "streamApi", action: "uploadCsvFile")
-		"/api/v1/streams/$id/confirmCsvFileUpload"(method: "POST", controller: "streamApi", action: "confirmCsvFileUpload")
 		"/api/v1/streams/$id/dataFiles"(controller: "streamApi", action: "dataFiles")
 		"/api/v1/streams/$id/validation"(method: "GET", controller: "streamApi", action: "validation")
 		"/api/v1/streams/$id/publishers"(controller: "streamApi", action: "publishers")
