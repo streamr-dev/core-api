@@ -8,7 +8,7 @@ import groovy.transform.EqualsAndHashCode
  * Access Control List (ACL) item, grants a user a specific type of access to a resource (e.g. X can read Dashboard 1)
  *
  * EqualsAndHashCode are used in PermissionService to build a Set in a special case of UI Channels.
- * @see com.unifina.service.PermissionService#getPermissionsTo(Object r, com.unifina.security.Userish u)
+ * @see com.unifina.service.PermissionService#getPermissionsTo(Object r, Userish u)
  */
 @EqualsAndHashCode(includes="anonymous,user,key,invite,canvas,dashboard,stream,product,operation,subscription,endsAt,parent")
 @Entity
