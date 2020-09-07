@@ -50,6 +50,8 @@ class PermissionServiceIntegrationSpec extends IntegrationSpec {
 
 	SignupInvite invite
 
+	Stream anonymousStream
+
 	void setup() {
 		service = Holders.getApplicationContext().getBean(PermissionService)
 		User.findByUsername("me-permission-service-integration-spec@streamr.com")?.delete(flush: true)
@@ -152,6 +154,10 @@ class PermissionServiceIntegrationSpec extends IntegrationSpec {
 
 		// Sign-up invitations can also receive Permissions; they will later be converted to User permissions
 		invite = new SignupInvite(email: "him-permission-service-integration-spec@streamr.com", code: "sikritCode", sent: true, used: false).save(validate: false, flush: true)
+
+		anonymousStream = new Stream(name: "anonymous stream")
+		anonymousStream.id = "stream-id-3"
+		anonymousStream.save(validate: true, failOnError: true)
 	}
 
 	void cleanup() {
@@ -168,6 +174,7 @@ class PermissionServiceIntegrationSpec extends IntegrationSpec {
 		Permission.findAllByStream(uiChannelStream)*.delete(flush: true)
 		Permission.findAllByStream(uiChannelPublic)*.delete(flush: true)
 		Permission.findAllByStream(uiChannelStream)*.delete(flush: true)
+		Permission.findAllByStream(anonymousStream)*.delete(flush: true)
 
 		dashAllowed?.delete(flush: true)
 		dashRestricted?.delete(flush: true)
@@ -198,6 +205,8 @@ class PermissionServiceIntegrationSpec extends IntegrationSpec {
 		vulCan?.delete(flush: true)
 
 		invite?.delete(flush: true)
+
+		anonymousStream?.delete(flush: true)
 	}
 
 	void "get closure filtering works as expected"() {
@@ -485,17 +494,14 @@ class PermissionServiceIntegrationSpec extends IntegrationSpec {
 	}
 
 	void "check anonymous permission"() {
-		expect:
-		service.checkAnonymousAccess(uiChannelStream, Permission.Operation.STREAM_GET) == false
+		when:
+		service.systemGrantAnonymousAccess(anonymousStream, Permission.Operation.STREAM_GET)
+		then:
+		service.checkAnonymousAccess(anonymousStream, Permission.Operation.STREAM_GET) == true
 
 		when:
-		service.systemGrantAnonymousAccess(uiChannelStream, Permission.Operation.STREAM_GET)
+		service.systemRevokeAnonymousAccess(anonymousStream, Permission.Operation.STREAM_GET)
 		then:
-		service.checkAnonymousAccess(uiChannelStream, Permission.Operation.STREAM_GET) == true
-
-		when:
-		service.systemRevokeAnonymousAccess(uiChannelStream, Permission.Operation.STREAM_GET)
-		then:
-		service.checkAnonymousAccess(uiChannelStream, Permission.Operation.STREAM_GET) == false
+		service.checkAnonymousAccess(anonymousStream, Permission.Operation.STREAM_GET) == false
 	}
 }

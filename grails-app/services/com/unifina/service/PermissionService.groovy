@@ -70,9 +70,7 @@ class PermissionService {
 	}
 
 	boolean checkAnonymousAccess(Object resource, Operation op) {
-		String resourceProp = getResourcePropertyName(resource)
-		List<Permission> permissions = getPermissionsTo(resource, op)
-		return permissions.stream().filter{Permission p -> p.anonymous}.findAny().isPresent()
+		return check(null, resource, op)
 	}
 
 	/**
