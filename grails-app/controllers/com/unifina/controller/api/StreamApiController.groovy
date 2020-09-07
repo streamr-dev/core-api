@@ -19,7 +19,6 @@ import java.text.SimpleDateFormat
 
 class StreamApiController {
 	private final SimpleDateFormat iso8601 = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'")
-	private final SimpleDateFormat iso8601cal = new SimpleDateFormat("yyyy-MM-dd")
 
 	def streamService
 	def permissionService
