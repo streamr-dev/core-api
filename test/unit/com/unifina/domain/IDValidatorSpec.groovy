@@ -1,4 +1,4 @@
-package com.unifina.utils
+package com.unifina.domain
 
 import spock.lang.Specification
 

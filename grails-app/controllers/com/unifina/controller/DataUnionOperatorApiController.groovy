@@ -1,8 +1,8 @@
 package com.unifina.controller
 
 import com.unifina.api.BadRequestException
+import com.unifina.domain.EthereumAddressValidator
 import com.unifina.service.DataUnionOperatorService
-import com.unifina.utils.EthereumAddressValidator
 
 class DataUnionOperatorApiController {
 	DataUnionOperatorService dataUnionOperatorService

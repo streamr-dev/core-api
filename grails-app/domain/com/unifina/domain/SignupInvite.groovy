@@ -1,7 +1,6 @@
 package com.unifina.domain
 
 import com.unifina.security.Userish
-import com.unifina.utils.EmailValidator
 import grails.persistence.Entity
 
 @Entity

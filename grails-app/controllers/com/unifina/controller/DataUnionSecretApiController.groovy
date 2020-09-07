@@ -4,11 +4,11 @@ import com.unifina.api.BadRequestException
 import com.unifina.api.NotFoundException
 import com.unifina.api.NotPermittedException
 import com.unifina.domain.DataUnionSecret
+import com.unifina.domain.EthereumAddressValidator
 import com.unifina.domain.User
 import com.unifina.service.DataUnionSecretCommand
 import com.unifina.service.DataUnionSecretService
 import com.unifina.service.EthereumService
-import com.unifina.utils.EthereumAddressValidator
 import grails.converters.JSON
 
 class DataUnionSecretApiController {

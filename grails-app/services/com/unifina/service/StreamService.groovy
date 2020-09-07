@@ -9,7 +9,6 @@ import com.unifina.domain.*
 import com.unifina.feed.DataRange
 import com.unifina.feed.FieldDetector
 import com.unifina.task.DelayedDeleteStreamTask
-import com.unifina.utils.EthereumAddressValidator
 import com.unifina.utils.IdGenerator
 import grails.converters.JSON
 import groovy.transform.CompileStatic
