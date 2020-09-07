@@ -8,9 +8,6 @@ import com.unifina.api.ValidationException
 import com.unifina.domain.Canvas
 import com.unifina.domain.Permission.Operation
 import com.unifina.domain.User
-import com.unifina.security.AllowRole
-import com.unifina.security.AuthLevel
-import com.unifina.security.StreamrApi
 import com.unifina.service.ApiService
 import com.unifina.service.CanvasService
 import com.unifina.service.SaveCanvasCommand

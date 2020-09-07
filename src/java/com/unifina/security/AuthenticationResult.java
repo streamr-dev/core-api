@@ -1,5 +1,7 @@
 package com.unifina.security;
 
+import com.unifina.controller.AllowRole;
+import com.unifina.controller.AuthLevel;
 import com.unifina.domain.Key;
 import com.unifina.domain.User;
 

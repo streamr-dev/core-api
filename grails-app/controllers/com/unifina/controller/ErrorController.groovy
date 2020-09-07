@@ -2,8 +2,6 @@ package com.unifina.controller
 
 import com.unifina.api.*
 import com.unifina.exceptions.CanvasUnreachableException
-import com.unifina.security.AuthLevel
-import com.unifina.security.StreamrApi
 import grails.converters.JSON
 import groovy.transform.CompileStatic
 

@@ -1,7 +1,7 @@
 package com.unifina.filters
 
+import com.unifina.controller.StreamrApi
 import com.unifina.security.AuthenticationResult
-import com.unifina.security.StreamrApi
 import com.unifina.security.TokenAuthenticator
 import grails.converters.JSON
 import groovy.transform.CompileStatic

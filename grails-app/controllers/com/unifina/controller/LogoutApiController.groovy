@@ -1,6 +1,5 @@
 package com.unifina.controller
 
-import com.unifina.security.StreamrApi
 import com.unifina.security.TokenAuthenticator
 import com.unifina.service.SessionService
 import grails.converters.JSON
