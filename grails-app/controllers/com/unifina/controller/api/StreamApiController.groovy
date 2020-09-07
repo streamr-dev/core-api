@@ -19,12 +19,10 @@ import java.text.SimpleDateFormat
 
 class StreamApiController {
 	private final SimpleDateFormat iso8601 = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'")
-	private final SimpleDateFormat iso8601cal = new SimpleDateFormat("yyyy-MM-dd")
 
 	def streamService
 	def permissionService
 	def apiService
-	def csvUploadService
 
 	@StreamrApi
 	def index(StreamListParams listParams) {
@@ -128,33 +126,6 @@ class StreamApiController {
 		render(stream.toMap() as JSON)
 	}
 
-	@StreamrApi(expectedContentTypes = ["multipart/form-data"])
-	def uploadCsvFile(String id) {
-		// Copy multipart contents to temporary file
-		MultipartFile multipartFile = request.getFile("file")
-		File temporaryFile = File.createTempFile("csv_upload_", ".csv")
-		multipartFile.transferTo(temporaryFile)
-
-		try {
-			def result = csvUploadService.uploadCsvFile(temporaryFile, id, (User) request.apiUser)
-			render(result as JSON)
-		} catch (Exception e) {
-			if (temporaryFile != null && temporaryFile.exists()) {
-				boolean ok = temporaryFile.delete()
-				if (!ok) {
-					String message = String.format("deleting uploaded csv file: %s", temporaryFile.path)
-					log.error(message)
-				}
-			}
-			throw e
-		}
-	}
-
-	@StreamrApi
-	def confirmCsvFileUpload(String id, CsvParseInstructions instructions) {
-		Stream stream = csvUploadService.parseAndConsumeCsvFile(instructions, id, (User) request.apiUser)
-		render(stream.toMap() as JSON)
-	}
 
 	private String readConfig() {
 		Map config = request.JSON.config

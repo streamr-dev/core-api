@@ -236,21 +236,6 @@ class Streams {
             .withBody(body)
     }
 
-    uploadCsvFile(id, fileBytes) {
-        const formData = new FormData()
-        formData.append('file', fileBytes)
-
-        return new StreamrApiRequest(this.options)
-            .methodAndPath('POST', `streams/${id}/uploadCsvFile`)
-            .withRawBody(formData)
-    }
-
-    confirmCsvUpload(id, body) {
-        return new StreamrApiRequest(this.options)
-            .methodAndPath('POST', `streams/${id}/confirmCsvFileUpload`)
-            .withBody(body)
-    }
-
     grantPublic(id, operation) {
         return new StreamrApiRequest(this.options)
             .methodAndPath('POST', `streams/${id}/permissions`)

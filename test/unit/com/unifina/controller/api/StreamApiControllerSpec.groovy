@@ -729,48 +729,4 @@ class StreamApiControllerSpec extends ControllerSpecification {
 		response.json.config.fields[1].name == "bar"
 		response.json.config.fields[1].type == "boolean"
 	}
-
-	void "uploadCsvFile checks request content type"() {
-		setup:
-		controller.csvUploadService = Mock(CsvUploadService)
-		params.id = "abc"
-		request.method = "POST"
-		request.requestURI = "/api/v1/streams"
-		request.addHeader("Authorization", "Bearer token")
-		byte[] bytes = new byte[16]
-		request.addFile(new MockMultipartFile("file", "my-user-avatar-image.jpg", "image/jpeg", bytes))
-		request.addHeader("Content-Length", bytes.length)
-		request.setContentType("multipart/form-data")
-
-		when:
-		withFilters(action: "uploadCsvFile") {
-			controller.uploadCsvFile()
-		}
-
-		then:
-		1 * sessionService.getUserishFromToken("token") >> new User(username: "foo@ƒoo.bar")
-		response.status == 200
-	}
-
-	void "uploadCsvFile doesnt allow invalid request content type"() {
-		setup:
-		controller.csvUploadService = Mock(CsvUploadService)
-		params.id = "abc"
-		request.method = "POST"
-		request.requestURI = "/api/v1/streams"
-		request.addHeader("Authorization", "Bearer token")
-		byte[] bytes = new byte[16]
-		request.addFile(new MockMultipartFile("file", "my-user-avatar-image.jpg", "image/jpeg", bytes))
-		request.addHeader("Content-Length", bytes.length)
-		request.setContentType("foobar/not-supported")
-
-		when:
-		withFilters(action: "uploadCsvFile") {
-			controller.uploadCsvFile()
-		}
-
-		then:
-		1 * sessionService.getUserishFromToken("token") >> new User(username: "foo@ƒoo.bar")
-		response.status == 415
-	}
 }
