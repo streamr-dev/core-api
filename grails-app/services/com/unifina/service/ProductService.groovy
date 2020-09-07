@@ -166,8 +166,8 @@ class ProductService {
 		}
 
 		Product product = findById(id, currentUser, Permission.Operation.PRODUCT_EDIT)
-		Set<Stream> addedStreams = command.streams.stream().filter{Stream s -> !product.streams.contains(s)}.collect(toSet()) as Set<Stream>
-		Set<Stream> removedStreams = product.streams.stream().filter{Stream s -> !command.streams.contains(s)}.collect(toSet())
+		Set<Stream> addedStreams = (command.streams as Set<Stream>).findAll{!product.streams.contains(it)}
+		Set<Stream> removedStreams = product.streams.findAll{!command.streams.contains(it)}
 
 		command.updateProduct(product, currentUser, permissionService)
 		product.save(failOnError: true)
