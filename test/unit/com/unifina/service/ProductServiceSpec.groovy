@@ -719,16 +719,17 @@ class ProductServiceSpec extends Specification {
 		t.termsName == "legal terms for site.org"
 	}
 
-	void "addStreamToProduct() verifies Stream via PermissionService#verifyShare"() {
+	void "addStreamToProduct() verifies Stream via PermissionService#verify"() {
 		setupStreams()
 		setupProduct()
 		service.subscriptionService = Stub(SubscriptionService)
-		def permissionService = service.permissionService = Mock(PermissionService)
+		service.permissionService = Mock(PermissionService)
 		def user = new User()
 		when:
 		service.addStreamToProduct(product, s4, user)
 		then:
-		1 * permissionService.verify(user, s4, Permission.Operation.STREAM_SHARE)
+		1 * service.permissionService.verify(user, s4, Permission.Operation.STREAM_SHARE)
+		0 * service.permissionService._
 	}
 
 	void "addStreamToProduct() adds Stream to Product"() {
@@ -758,7 +759,10 @@ class ProductServiceSpec extends Specification {
 		when:
 		service.addStreamToProduct(product, s4, user)
 		then:
+		1 * service.permissionService.verify(user, s4, Permission.Operation.STREAM_SHARE)
 		1 * service.permissionService.systemGrantAnonymousAccess(s4, Permission.Operation.STREAM_GET)
+		1 * service.permissionService.systemGrantAnonymousAccess(s4, Permission.Operation.STREAM_SUBSCRIBE)
+		0 * service.permissionService._
 	}
 
 	void "addStreamToProduct() invokes subscriptionService#afterProductUpdated"() {
@@ -797,6 +801,8 @@ class ProductServiceSpec extends Specification {
 		service.removeStreamFromProduct(product, s1)
 		then:
 		1 * service.permissionService.systemRevokeAnonymousAccess(s1, Permission.Operation.STREAM_GET)
+		1 * service.permissionService.systemRevokeAnonymousAccess(s1, Permission.Operation.STREAM_SUBSCRIBE)
+		0 * service.permissionService._
 	}
 
 	void "removeStreamFromProduct() invokes subscriptionService#afterProductUpdated"() {
