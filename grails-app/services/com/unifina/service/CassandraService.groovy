@@ -70,6 +70,12 @@ class CassandraService implements DisposableBean {
 			ByteBuffer.wrap(msg.toBytes()))
 	}
 
+	void deleteAll(Stream stream) {
+		for (int partition = 0; partition < stream.partitions; partition++) {
+			session.execute("DELETE FROM stream_data where id = ? and partition = ?", stream.id, partition)
+		}
+	}
+
 	private StreamMessage getExtremeStreamMessage(Stream stream, int partition, boolean latest) {
 		ResultSet resultSet
 		if (latest) {
