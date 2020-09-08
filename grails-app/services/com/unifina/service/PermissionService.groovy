@@ -59,6 +59,10 @@ class PermissionService {
 		return id != null && hasPermission(userish, resource, op)
 	}
 
+	boolean checkAnonymousAccess(Object resource, Operation op) {
+		return check(null, resource, op)
+	}
+
 	/**
 	 * Throws an exception if user is not allowed to perform specified operation on a resource.
 	 */
