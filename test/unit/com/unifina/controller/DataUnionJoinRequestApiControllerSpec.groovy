@@ -5,7 +5,6 @@ import com.unifina.api.BadRequestException
 import com.unifina.api.NotFoundException
 import com.unifina.domain.DataUnionJoinRequest
 import com.unifina.domain.User
-import com.unifina.filters.UnifinaCoreAPIFilters
 import com.unifina.service.DataUnionJoinRequestCommand
 import com.unifina.service.DataUnionJoinRequestService
 import com.unifina.service.EthereumService
@@ -15,7 +14,7 @@ import grails.test.mixin.TestFor
 import spock.lang.Specification
 
 @TestFor(DataUnionJoinRequestApiController)
-@Mock([UnifinaCoreAPIFilters, User, DataUnionJoinRequest])
+@Mock([RESTAPIFilters, User, DataUnionJoinRequest])
 class DataUnionJoinRequestApiControllerSpec extends Specification {
 	User me
 	final String contractAddress = "0x6c90aece04198da2d5ca9b956b8f95af8041de37"
