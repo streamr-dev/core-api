@@ -211,6 +211,7 @@ class DataUnionJoinRequestService {
 		}
 
 		for (Stream s : findStreams(c)) {
+			permissionService.systemRevoke(c.user, s, Permission.Operation.STREAM_GET)
 			permissionService.systemRevoke(c.user, s, Permission.Operation.STREAM_PUBLISH)
 		}
 		sendMessage(c, "part")
