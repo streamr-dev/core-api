@@ -105,24 +105,6 @@ class StreamService {
 		cassandraService.save(msg)
 	}
 
-	// Ref to Cassandra will be abstracted out when Feed abstraction is reworked
-	@CompileStatic
-	void deleteDataRange(Stream stream, Date from, Date to) {
-		cassandraService.deleteRange(stream, from, to)
-	}
-
-	// Ref to Cassandra will be abstracted out when Feed abstraction is reworked
-	@CompileStatic
-	void deleteDataUpTo(Stream stream, Date to) {
-		cassandraService.deleteUpTo(stream, to)
-	}
-
-	// Ref to Cassandra will be abstracted out when Feed abstraction is reworked
-	@CompileStatic
-	void deleteAllData(Stream stream) {
-		cassandraService.deleteAll(stream)
-	}
-
 	@CompileStatic
 	DataRange getDataRange(Stream stream) {
 		return cassandraService.getDataRange(stream)
