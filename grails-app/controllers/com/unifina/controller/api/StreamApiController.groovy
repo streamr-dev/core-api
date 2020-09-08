@@ -1,28 +1,26 @@
 package com.unifina.controller.api
 
 import com.unifina.api.*
-import com.unifina.domain.Stream
 import com.unifina.domain.Key
 import com.unifina.domain.Permission
 import com.unifina.domain.Permission.Operation
+import com.unifina.domain.Stream
 import com.unifina.domain.User
 import com.unifina.feed.DataRange
 import com.unifina.security.AuthLevel
 import com.unifina.security.StreamrApi
 import com.unifina.security.Userish
+import com.unifina.service.ApiService
+import com.unifina.service.PermissionService
 import com.unifina.service.StreamService
 import grails.converters.JSON
-import org.springframework.web.multipart.MultipartFile
 
-import java.text.ParseException
 import java.text.SimpleDateFormat
 
 class StreamApiController {
-	private final SimpleDateFormat iso8601 = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'")
-
-	def streamService
-	def permissionService
-	def apiService
+	StreamService streamService
+	PermissionService permissionService
+	ApiService apiService
 
 	@StreamrApi
 	def index(StreamListParams listParams) {
@@ -234,49 +232,10 @@ class StreamApiController {
 			render([ok: status.ok ] as JSON)
 			return
 		}
+		SimpleDateFormat iso8601 = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'")
 		render([
 			ok: status.ok,
 			date: iso8601.format(status.date),
 		] as JSON)
-	}
-
-	@StreamrApi
-	def deleteDataUpTo(String id) {
-		getAuthorizedStream(id, Operation.STREAM_DELETE) { Stream stream ->
-			Date date = parseDate(String.valueOf(request.JSON.date), "date")
-			streamService.deleteDataUpTo(stream, date)
-			render(status: 204)
-		}
-	}
-
-	@StreamrApi
-	def deleteAllData(String id) {
-		getAuthorizedStream(id, Operation.STREAM_DELETE) { Stream stream ->
-			streamService.deleteAllData(stream)
-			render(status: 204)
-		}
-	}
-
-	@StreamrApi
-	def deleteDataRange(String id) {
-		getAuthorizedStream(id, Operation.STREAM_DELETE) { Stream stream ->
-			Date start = parseDate(String.valueOf(request.JSON.start), "start")
-			Date end = parseDate(String.valueOf(request.JSON.end), "end")
-			streamService.deleteDataRange(stream, start, end)
-			render(status: 204)
-		}
-	}
-
-	private Date parseDate(String input, String field) {
-		try {
-			return new Date(Long.parseLong(input))
-		} catch (NumberFormatException e) {
-			try {
-				return iso8601.parse(input)
-			} catch (ParseException pe) {
-				String msg = String.format("Unable to parse a date from field '%s' with value '%s'", field, input)
-				throw new BadRequestException(msg)
-			}
-		}
 	}
 }
