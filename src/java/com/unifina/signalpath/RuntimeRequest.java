@@ -4,6 +4,7 @@ import com.unifina.domain.Permission;
 import com.unifina.domain.User;
 import com.unifina.domain.Canvas;
 import com.streamr.client.protocol.message_layer.ITimestamped;
+import com.unifina.security.TokenAuthenticator.AuthorizationHeader;
 
 import java.util.*;
 import java.util.concurrent.Future;
@@ -15,14 +16,16 @@ public class RuntimeRequest extends LinkedHashMap<String, Object> implements ITi
 	private final Canvas canvas;
 	private final String path;
 	private final User user;
+	private final AuthorizationHeader authorizationHeader;  // TODO should we remove the "user" field in the future as we can always find the user by this authorization?
 	private Future<RuntimeResponse> future = null;
 	private Set<Permission.Operation> checkedOperations = new HashSet<>();
 	private String originalPath = null;
 
-	public RuntimeRequest(Map<String, Object> msg, User user, Canvas canvas, String path, String originalPath, Set<Permission.Operation> checkedOperations) {
+	public RuntimeRequest(Map<String, Object> msg, User user, AuthorizationHeader authorizationHeader, Canvas canvas, String path, String originalPath, Set<Permission.Operation> checkedOperations) {
 		super();
 		this.timestamp = new Date();
 		this.user = user;
+		this.authorizationHeader = authorizationHeader;
 		this.canvas = canvas;
 		this.path = path;
 		this.originalPath = originalPath;
@@ -64,6 +67,10 @@ public class RuntimeRequest extends LinkedHashMap<String, Object> implements ITi
 
 	public User getUser() {
 		return user;
+	}
+
+	public AuthorizationHeader getAuthorizationHeader() {
+		return authorizationHeader;
 	}
 
 	public String getPath() {

@@ -11,6 +11,7 @@ import com.unifina.domain.User
 import com.unifina.security.AllowRole
 import com.unifina.security.AuthLevel
 import com.unifina.security.StreamrApi
+import com.unifina.security.TokenAuthenticator
 import com.unifina.service.ApiService
 import com.unifina.service.CanvasService
 import com.unifina.service.SaveCanvasCommand
@@ -51,7 +52,7 @@ class CanvasApiController {
 		Canvas canvas = canvasService.authorizedGetById(id, request.apiUser, Operation.CANVAS_GET)
 		if (runtime) {
 			Map result = canvas.toMap()
-			Map runtimeJson = signalPathService.runtimeRequest(signalPathService.buildRuntimeRequest([type: 'json'], "canvases/$canvas.id", request.apiUser), false).json
+			Map runtimeJson = signalPathService.runtimeRequest(signalPathService.buildRuntimeRequest([type: 'json'], "canvases/$canvas.id", request.apiUser, TokenAuthenticator.getAuthorizationHeader(request)), false).json
 			result.putAll(runtimeJson)
 			render result as JSON
 		}
@@ -123,7 +124,7 @@ class CanvasApiController {
 	def stop(String id) {
 		Canvas canvas = canvasService.authorizedGetById(id, request.apiUser, Operation.CANVAS_STARTSTOP)
 		// Updates canvas in another thread, so canvas needs to be refreshed
-		canvasService.stop(canvas, request.apiUser)
+		canvasService.stop(canvas, request.apiUser, TokenAuthenticator.getAuthorizationHeader(request))
 		if (canvas.adhoc) {
 			response.status = 204 // Adhoc canvases are deleted on stop.
 			render ""
@@ -139,7 +140,7 @@ class CanvasApiController {
 	@StreamrApi(authenticationLevel = AuthLevel.NONE)
 	def module(String canvasId, Integer moduleId, String dashboardId, Boolean runtime) {
 		if (runtime) {
-			render signalPathService.runtimeRequest(signalPathService.buildRuntimeRequest([type: 'json'], "canvases/$canvasId/modules/$moduleId", request.apiUser), false).json as JSON
+			render signalPathService.runtimeRequest(signalPathService.buildRuntimeRequest([type: 'json'], "canvases/$canvasId/modules/$moduleId", request.apiUser, TokenAuthenticator.getAuthorizationHeader(request)), false).json as JSON
 		} else {
 			Map moduleMap = canvasService.authorizedGetModuleOnCanvas(canvasId, moduleId, dashboardId, request.apiUser, Operation.CANVAS_GET)
 			render moduleMap as JSON
@@ -152,7 +153,7 @@ class CanvasApiController {
 	@StreamrApi(authenticationLevel = AuthLevel.NONE)
 	def runtimeRequest(String path, Boolean local) {
 		def msg = request.JSON
-		Map response = signalPathService.runtimeRequest(signalPathService.buildRuntimeRequest(msg, "canvases/$path", request.apiUser), local ? true : false)
+		Map response = signalPathService.runtimeRequest(signalPathService.buildRuntimeRequest(msg, "canvases/$path", request.apiUser, TokenAuthenticator.getAuthorizationHeader(request)), local ? true : false)
 		log.debug("request: responding with $response")
 		render response as JSON
 	}

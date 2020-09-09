@@ -471,10 +471,10 @@ class CanvasServiceSpec extends BeanMockingSpecification {
 		myFirstCanvas.save(failOnError: true)
 
 		when:
-		service.stop(myFirstCanvas, me)
+		service.stop(myFirstCanvas, me, null)
 
 		then:
-		1 * signalPathService.stopRemote(myFirstCanvas, me) >> [:]
+		1 * signalPathService.stopRemote(myFirstCanvas, me, _) >> [:]
 		0 * signalPathService._
 
 	}
@@ -484,10 +484,10 @@ class CanvasServiceSpec extends BeanMockingSpecification {
 		service.signalPathService = signalPathService
 		myFirstCanvas.state = Canvas.State.RUNNING
 
-		signalPathService.stopRemote(myFirstCanvas, me) >> { throw new CanvasUnreachableException("") }
+		signalPathService.stopRemote(myFirstCanvas, me, _) >> { throw new CanvasUnreachableException("") }
 
 		when:
-		service.stop(myFirstCanvas, me)
+		service.stop(myFirstCanvas, me, null)
 
 		then:
 		thrown(CanvasUnreachableException)
@@ -498,10 +498,10 @@ class CanvasServiceSpec extends BeanMockingSpecification {
 		service.signalPathService = signalPathService
 		myFirstCanvas.state = Canvas.State.STOPPED
 
-		signalPathService.stopRemote(myFirstCanvas, me) >> { throw new CanvasUnreachableException("") }
+		signalPathService.stopRemote(myFirstCanvas, me, _) >> { throw new CanvasUnreachableException("") }
 
 		when:
-		service.stop(myFirstCanvas, me)
+		service.stop(myFirstCanvas, me, null)
 
 		then:
 		thrown(InvalidStateException)

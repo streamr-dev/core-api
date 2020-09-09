@@ -101,7 +101,7 @@ class SignalPathServiceSpec extends BeanMockingSpecification {
 		service.runnersById[c1.runner] = runner
 
 		when:
-		service.runtimeRequest(new RuntimeRequest([type: 'stopRequest'], me, c1, "canvases/$c1.id", "canvases/$c1.id", new HashSet<>()))
+		service.runtimeRequest(new RuntimeRequest([type: 'stopRequest'], me, null, c1, "canvases/$c1.id", "canvases/$c1.id", new HashSet<>()))
 
 		then:
 		1 * runner.getSignalPath() >> sp
@@ -113,7 +113,7 @@ class SignalPathServiceSpec extends BeanMockingSpecification {
 
 	def "buildRuntimeRequest() must authorize and return a RuntimeRequest"() {
 		when:
-		RuntimeRequest req = service.buildRuntimeRequest([type: 'test'], "canvases/$c1.id", me)
+		RuntimeRequest req = service.buildRuntimeRequest([type: 'test'], "canvases/$c1.id", me, null)
 
 		then:
 		1 * canvasService.authorizedGetById(c1.id, me, Permission.Operation.CANVAS_GET) >> c1
@@ -127,7 +127,7 @@ class SignalPathServiceSpec extends BeanMockingSpecification {
 
 	def "buildRuntimeRequest() lets admin role return a RuntimeRequest without permission"() {
 		when:
-		RuntimeRequest req = service.buildRuntimeRequest([type: 'test'], "canvases/$c1.id", admin)
+		RuntimeRequest req = service.buildRuntimeRequest([type: 'test'], "canvases/$c1.id", admin, null)
 
 		then:
 		req.getType() == 'test'
@@ -140,7 +140,7 @@ class SignalPathServiceSpec extends BeanMockingSpecification {
 
 	def "buildRuntimeRequest() works in non-authenticated context (user is null)"() {
 		when:
-		RuntimeRequest req = service.buildRuntimeRequest([type: 'test'], "canvases/$c1.id", null)
+		RuntimeRequest req = service.buildRuntimeRequest([type: 'test'], "canvases/$c1.id", null, null)
 
 		then:
 		1 * canvasService.authorizedGetById(c1.id, null, Permission.Operation.CANVAS_GET) >> c1
@@ -154,7 +154,7 @@ class SignalPathServiceSpec extends BeanMockingSpecification {
 
 	def "buildRuntimeRequest() must throw if the path is malformed"() {
 		when:
-		service.buildRuntimeRequest([type: 'test'], "foobar/$c1.id", me)
+		service.buildRuntimeRequest([type: 'test'], "foobar/$c1.id", me, null)
 
 		then:
 		thrown(IllegalArgumentException)
@@ -251,7 +251,7 @@ class SignalPathServiceSpec extends BeanMockingSpecification {
 
 		def request = new RuntimeRequest(
 			[type: "stopRequest"],
-			new User(),
+			new User(), null,
 			canvas,
 			"canvases/canvas-id",
 			"",
@@ -288,7 +288,7 @@ class SignalPathServiceSpec extends BeanMockingSpecification {
 
 		def request = new RuntimeRequest(
 			[type: "stopRequest"],
-			user,
+			user, null,
 			canvas,
 			"canvases/canvas-id",
 			"",
@@ -341,7 +341,7 @@ class SignalPathServiceSpec extends BeanMockingSpecification {
 
 		def request = new RuntimeRequest(
 			[type: "stopRequest"],
-			user,
+			user, null,
 			canvas,
 			"canvases/canvas-id",
 			"",

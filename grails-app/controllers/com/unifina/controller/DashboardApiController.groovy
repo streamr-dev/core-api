@@ -5,6 +5,7 @@ import com.unifina.domain.Dashboard
 import com.unifina.domain.User
 import com.unifina.security.AuthLevel
 import com.unifina.security.StreamrApi
+import com.unifina.security.TokenAuthenticator
 import com.unifina.service.*
 import grails.converters.JSON
 
@@ -60,7 +61,7 @@ class DashboardApiController {
 	@StreamrApi(authenticationLevel = AuthLevel.NONE)
 	def runtimeRequest(String path, Boolean local) {
 		def msg = request.JSON
-		Map response = signalPathService.runtimeRequest(dashboardService.buildRuntimeRequest(msg, "dashboards/$path", request.apiUser), local ?: false)
+		Map response = signalPathService.runtimeRequest(dashboardService.buildRuntimeRequest(msg, "dashboards/$path", request.apiUser, TokenAuthenticator.getAuthorizationHeader(request)), local ?: false)
 		log.info("request: responding with $response")
 		render response as JSON
 	}
