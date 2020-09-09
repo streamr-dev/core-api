@@ -178,10 +178,6 @@ class Product {
 		return this.state == State.UNDEPLOYING
 	}
 
-	boolean isNotDeployed() {
-		return this.state == State.NOT_DEPLOYED
-	}
-
 	static isEthereumAddressOrIsNull = { String value ->
 		value == null || Product.isEthereumAddress(value)
 	}
