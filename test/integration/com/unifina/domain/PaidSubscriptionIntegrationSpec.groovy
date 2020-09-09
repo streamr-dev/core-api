@@ -1,10 +1,5 @@
-package com.unifina.com.unifina.domain.marketplace
+package com.unifina.domain
 
-import com.unifina.domain.Category
-import com.unifina.domain.PaidSubscription
-import com.unifina.domain.Product
-import com.unifina.domain.IntegrationKey
-import com.unifina.domain.User
 import grails.test.spock.IntegrationSpec
 import grails.validation.ValidationException
 

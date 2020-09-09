@@ -1,12 +1,10 @@
-package com.unifina.com.unifina.security
+package com.unifina.security
 
-import com.unifina.security.MyPolicy
-import com.unifina.security.MySecurityManager
 import grails.test.spock.IntegrationSpec
 
 import java.security.Policy
 
-class MySecurityManagerSpec extends IntegrationSpec {
+class MySecurityManagerIntegrationSpec extends IntegrationSpec {
 
 	def "MySecurityManager is installed"() {
 		expect:
