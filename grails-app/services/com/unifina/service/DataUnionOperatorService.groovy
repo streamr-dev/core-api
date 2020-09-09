@@ -1,6 +1,6 @@
 package com.unifina.service
 
-import com.unifina.api.DataUnionProxyException
+
 import com.unifina.utils.MapTraversal
 import org.apache.http.HttpEntity
 import org.apache.http.HttpHeaders

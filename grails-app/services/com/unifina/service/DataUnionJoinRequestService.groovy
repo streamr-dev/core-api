@@ -3,9 +3,9 @@ package com.unifina.service
 import com.streamr.client.StreamrClient
 import com.unifina.api.ApiException
 import com.unifina.api.NotFoundException
-import com.unifina.api.DataUnionProxyException
 import com.unifina.domain.*
 import com.unifina.exceptions.JoinRequestException
+import com.unifina.service.DataUnionProxyException
 import com.unifina.utils.ThreadUtil
 import groovy.json.JsonSlurper
 import org.apache.log4j.Logger

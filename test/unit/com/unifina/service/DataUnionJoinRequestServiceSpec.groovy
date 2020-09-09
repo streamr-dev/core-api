@@ -5,7 +5,6 @@ import com.streamr.client.options.StreamrClientOptions
 import com.unifina.BeanMockingSpecification
 import com.unifina.api.ApiException
 import com.unifina.api.NotFoundException
-import com.unifina.api.DataUnionProxyException
 import com.unifina.domain.*
 import com.unifina.exceptions.JoinRequestException
 import grails.test.mixin.Mock

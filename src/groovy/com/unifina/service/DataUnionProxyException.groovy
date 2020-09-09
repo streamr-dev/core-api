@@ -1,4 +1,7 @@
-package com.unifina.api
+package com.unifina.service
+
+import com.unifina.api.ApiError
+import com.unifina.api.ApiException
 
 class DataUnionProxyException extends ApiException {
 	final Map extraHeaders = null

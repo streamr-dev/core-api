@@ -1,6 +1,6 @@
 package com.unifina.service
 
-import com.unifina.api.DataUnionProxyException
+
 import org.apache.log4j.Level
 import org.apache.log4j.Logger
 import org.gaul.httpbin.HttpBin
