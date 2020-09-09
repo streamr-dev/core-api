@@ -66,14 +66,14 @@ class UpdateProductCommand {
 		}
 
 		// Prevent deployed products from changing from free to paid
-		if (product.pricePerSecond == 0 && product.state == Product.State.DEPLOYED && this.pricePerSecond > 0) {
+		if (product.isFree() && product.state == Product.State.DEPLOYED && !this.isFree()) {
 			throw new FieldCannotBeUpdatedException("Published products can't be changed from free to paid.")
 		}
 
 		// Prevent the user from changing on-chain fields of paid deployed products.
 		// They must be updated on the smart contract and updated by the watcher.
 		List changedOnChainFields = onChainFields.findAll {this[it] != null && this[it] != product[it]}
-		if (product.pricePerSecond > 0 && product.state == Product.State.DEPLOYED && !changedOnChainFields.isEmpty()) {
+		if (!product.isFree() && product.state == Product.State.DEPLOYED && !changedOnChainFields.isEmpty()) {
 			throw new FieldCannotBeUpdatedException("For published paid products, the following fields can only be updated on the smart contract: ${onChainFields}. You tried to change fields: ${changedOnChainFields}")
 		}
 
@@ -91,5 +91,10 @@ class UpdateProductCommand {
 				product.pendingChanges = new JsonBuilder(pendingChanges).toString()
 			}
 		}
+	}
+
+	boolean isFree() {
+		Product p = new Product(pricePerSecond: pricePerSecond)
+		return p.isFree()
 	}
 }
