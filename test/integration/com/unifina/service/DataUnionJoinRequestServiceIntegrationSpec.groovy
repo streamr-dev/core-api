@@ -3,15 +3,7 @@ package com.unifina.service
 import com.streamr.client.StreamrClient
 import com.streamr.client.options.StreamrClientOptions
 import com.unifina.api.NotFoundException
-import com.unifina.api.UpdateDataUnionJoinRequestCommand
-import com.unifina.domain.DataUnionJoinRequest
-import com.unifina.domain.Stream
-import com.unifina.domain.Category
-import com.unifina.domain.Product
-import com.unifina.domain.Permission
-import com.unifina.domain.User
-import com.unifina.domain.Module
-import com.unifina.domain.ModuleCategory
+import com.unifina.domain.*
 import groovy.json.JsonBuilder
 import spock.lang.Specification
 
@@ -258,9 +250,14 @@ class DataUnionJoinRequestServiceIntegrationSpec extends Specification {
 		1 * service.ethereumService.fetchJoinPartStreamID(contractAddress) >> joinPartStream.id
 		1 * streamrClientMock.publish(_, [type: "part", addresses: [r.memberAddress]])
 		1 * service.permissionService.systemRevoke(me, s1, Permission.Operation.STREAM_PUBLISH)
+		1 * service.permissionService.systemRevoke(me, s1, Permission.Operation.STREAM_GET)
 		1 * service.permissionService.systemRevoke(me, s2, Permission.Operation.STREAM_PUBLISH)
+		1 * service.permissionService.systemRevoke(me, s2, Permission.Operation.STREAM_GET)
 		1 * service.permissionService.systemRevoke(me, s3, Permission.Operation.STREAM_PUBLISH)
+		1 * service.permissionService.systemRevoke(me, s3, Permission.Operation.STREAM_GET)
 		1 * service.permissionService.systemRevoke(me, s4, Permission.Operation.STREAM_PUBLISH)
+		1 * service.permissionService.systemRevoke(me, s4, Permission.Operation.STREAM_GET)
+		0 * service.permissionService._
 		DataUnionJoinRequest.findById(r.id) == null
 	}
 

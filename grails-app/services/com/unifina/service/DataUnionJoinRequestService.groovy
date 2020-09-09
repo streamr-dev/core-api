@@ -1,7 +1,9 @@
 package com.unifina.service
 
 import com.streamr.client.StreamrClient
-import com.unifina.api.*
+import com.unifina.api.ApiException
+import com.unifina.api.NotFoundException
+import com.unifina.api.ProxyException
 import com.unifina.domain.*
 import com.unifina.exceptions.JoinRequestException
 import com.unifina.utils.ThreadUtil
@@ -211,6 +213,7 @@ class DataUnionJoinRequestService {
 		}
 
 		for (Stream s : findStreams(c)) {
+			permissionService.systemRevoke(c.user, s, Permission.Operation.STREAM_GET)
 			permissionService.systemRevoke(c.user, s, Permission.Operation.STREAM_PUBLISH)
 		}
 		sendMessage(c, "part")

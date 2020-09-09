@@ -1,7 +1,10 @@
 package com.unifina.service
 
 import com.streamr.client.protocol.message_layer.StreamMessage
-import com.unifina.api.*
+import com.unifina.api.InvalidStateTransitionException
+import com.unifina.api.NotFoundException
+import com.unifina.api.NotPermittedException
+import com.unifina.api.ValidationException
 import com.unifina.domain.Permission
 import com.unifina.domain.Product
 import com.unifina.domain.Stream
@@ -10,6 +13,7 @@ import grails.compiler.GrailsCompileStatic
 
 import java.text.SimpleDateFormat
 import java.util.concurrent.ThreadLocalRandom
+import static java.util.stream.Collectors.toSet;
 
 @GrailsCompileStatic
 class ProductService {
@@ -84,7 +88,7 @@ class ProductService {
 
 	List<Product> relatedProducts(Product product, int maxResults, User user) {
 		// find Product.owner's other products
-		ListParams params = new ProductListParams(productOwner: product.owner, max: maxResults, publicAccess: true)
+        ListParams params = new ProductListParams(productOwner: product.owner, max: maxResults, publicAccess: true)
 		Set<Product> all = new HashSet<Product>(list(params, user))
 
 		// find other products from the same category
@@ -164,23 +168,30 @@ class ProductService {
 			permissionService.verify(currentUser, it, Permission.Operation.STREAM_SHARE)
 		}
 
-		// A stream that is added when editing an existing free product should inherit read access for anonymous user
-		// Revoke public read permissions and grant them back after update
 		Product product = findById(id, currentUser, Permission.Operation.PRODUCT_EDIT)
-		if (product.isFree()) {
-			product.streams.each { stream ->
-				permissionService.systemRevokeAnonymousAccess(stream, Permission.Operation.STREAM_GET)
-				permissionService.systemRevokeAnonymousAccess(stream, Permission.Operation.STREAM_SUBSCRIBE)
-			}
-		}
+		Set<Stream> addedStreams = (command.streams as Set<Stream>).findAll{!product.streams.contains(it)}
+		Set<Stream> removedStreams = product.streams.findAll{!command.streams.contains(it)}
+
 		command.updateProduct(product, currentUser, permissionService)
 		product.save(failOnError: true)
+
+		// A stream that is added when editing an existing free product should inherit read access for anonymous user
+		// TODO if a stream is removed from a free product, but still belongs to another free product, we should not
+		// remove the permission (this will be fixed in BACK-6)
 		if (product.isFree()) {
-			product.streams.each { stream ->
-				permissionService.systemGrantAnonymousAccess(stream, Permission.Operation.STREAM_GET)
-				permissionService.systemGrantAnonymousAccess(stream, Permission.Operation.STREAM_SUBSCRIBE)
+			Iterable<Permission.Operation> permissions = [Permission.Operation.STREAM_GET, Permission.Operation.STREAM_SUBSCRIBE]
+			permissions.each { Permission.Operation permission ->
+				addedStreams.each { Stream s ->
+					if (!permissionService.checkAnonymousAccess(s, permission)) {
+						permissionService.systemGrantAnonymousAccess(s, permission)
+					}
+				}
+				removedStreams.each { Stream s ->
+					permissionService.systemRevokeAnonymousAccess(s, permission)
+				}
 			}
 		}
+
 		subscriptionService.afterProductUpdated(product)
 		return product
 	}
@@ -198,6 +209,9 @@ class ProductService {
 		if (product.type == Product.Type.DATAUNION) {
 			Set<User> users = dataUnionJoinRequestService.findMembers(product.beneficiaryAddress)
 			for (User u : users) {
+				if (!permissionService.check(u, stream, Permission.Operation.STREAM_GET)) {
+					permissionService.systemGrant(u, stream, Permission.Operation.STREAM_GET)
+				}
 				if (!permissionService.check(u, stream, Permission.Operation.STREAM_PUBLISH)) {
 					permissionService.systemGrant(u, stream, Permission.Operation.STREAM_PUBLISH)
 				}
@@ -217,6 +231,9 @@ class ProductService {
 		if (product.type == Product.Type.DATAUNION) {
 			Set<User> users = dataUnionJoinRequestService.findMembers(product.beneficiaryAddress)
 			for (User u : users) {
+				if (permissionService.check(u, stream, Permission.Operation.STREAM_GET)) {
+					permissionService.systemRevoke(u, stream, Permission.Operation.STREAM_GET)
+				}
 				if (permissionService.check(u, stream, Permission.Operation.STREAM_PUBLISH)) {
 					permissionService.systemRevoke(u, stream, Permission.Operation.STREAM_PUBLISH)
 				}

@@ -2,21 +2,15 @@ package com.unifina.service
 
 import com.google.common.collect.Lists
 import com.streamr.client.protocol.message_layer.StreamMessage
-import com.unifina.api.*
-import com.unifina.domain.Category
-import com.unifina.domain.Contact
-import com.unifina.domain.FreeSubscription
-import com.unifina.domain.PaidSubscription
-import com.unifina.domain.Product
-import com.unifina.domain.Stream
-import com.unifina.domain.TermsOfUse
-import com.unifina.domain.Permission
-import com.unifina.domain.User
+import com.unifina.api.InvalidStateTransitionException
+import com.unifina.api.NotPermittedException
+import com.unifina.api.ValidationException
+import com.unifina.domain.*
+import com.unifina.utils.TestUtils
 import grails.test.mixin.Mock
 import grails.test.mixin.TestFor
 import spock.lang.Specification
 import spock.lang.Unroll
-import com.unifina.utils.TestUtils
 
 @TestFor(ProductService)
 @Mock([Category, Product, FreeSubscription, PaidSubscription])
@@ -538,17 +532,55 @@ class ProductServiceSpec extends Specification {
 
 		// revoke streams old permissions
 		1 * permissionService.systemRevokeAnonymousAccess(s1, Permission.Operation.STREAM_GET)
-		1 * permissionService.systemRevokeAnonymousAccess(s2, Permission.Operation.STREAM_GET)
 		1 * permissionService.systemRevokeAnonymousAccess(s3, Permission.Operation.STREAM_GET)
 		1 * permissionService.systemRevokeAnonymousAccess(s1, Permission.Operation.STREAM_SUBSCRIBE)
-		1 * permissionService.systemRevokeAnonymousAccess(s2, Permission.Operation.STREAM_SUBSCRIBE)
 		1 * permissionService.systemRevokeAnonymousAccess(s3, Permission.Operation.STREAM_SUBSCRIBE)
 
 		// grant permissions for new streams
-		1 * permissionService.systemGrantAnonymousAccess(s2, Permission.Operation.STREAM_GET)
+		1 * permissionService.checkAnonymousAccess(s4, Permission.Operation.STREAM_GET) >> false
+		1 * permissionService.checkAnonymousAccess(s4, Permission.Operation.STREAM_SUBSCRIBE) >> false
 		1 * permissionService.systemGrantAnonymousAccess(s4, Permission.Operation.STREAM_GET)
-		1 * permissionService.systemGrantAnonymousAccess(s2, Permission.Operation.STREAM_SUBSCRIBE)
 		1 * permissionService.systemGrantAnonymousAccess(s4, Permission.Operation.STREAM_SUBSCRIBE)
+
+		0 * permissionService._
+	}
+
+	void "update() does not grant permission if it has already been granted"() {
+		setupStreams()
+		setupFreeProduct()
+
+		service.subscriptionService = Stub(SubscriptionService)
+		service.apiService = Stub(ApiService) {
+			authorizedGetById(Product, _, _, _) >> product
+		}
+		def permissionService = service.permissionService = Mock(PermissionService)
+
+		def validCommand = new UpdateProductCommand(
+			name: "updated name",
+			description: "updated description",
+			category: category,
+			streams: [s1, s2, s3, s4],
+			pricePerSecond: 0,
+			ownerAddress: "0xCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC",
+			beneficiaryAddress: "0xCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC",
+			priceCurrency: Product.Currency.DATA,
+			minimumSubscriptionInSeconds: 0
+		)
+		def user = new User(username: "me@streamr.com")
+
+		when:
+		service.update("product-id", validCommand, user)
+		then:
+		1 * permissionService.verify(user, s1, Permission.Operation.STREAM_SHARE)
+		1 * permissionService.verify(user, s2, Permission.Operation.STREAM_SHARE)
+		1 * permissionService.verify(user, s3, Permission.Operation.STREAM_SHARE)
+		1 * permissionService.verify(user, s4, Permission.Operation.STREAM_SHARE)
+
+		// permission already granted
+		1 * permissionService.checkAnonymousAccess(s4, Permission.Operation.STREAM_GET) >> true
+		1 * permissionService.checkAnonymousAccess(s4, Permission.Operation.STREAM_SUBSCRIBE) >> true
+		0 * permissionService.systemGrantAnonymousAccess(s4, Permission.Operation.STREAM_GET)
+		0 * permissionService.systemGrantAnonymousAccess(s4, Permission.Operation.STREAM_SUBSCRIBE)
 
 		0 * permissionService._
 	}
@@ -719,16 +751,17 @@ class ProductServiceSpec extends Specification {
 		t.termsName == "legal terms for site.org"
 	}
 
-	void "addStreamToProduct() verifies Stream via PermissionService#verifyShare"() {
+	void "addStreamToProduct() verifies Stream via PermissionService#verify"() {
 		setupStreams()
 		setupProduct()
 		service.subscriptionService = Stub(SubscriptionService)
-		def permissionService = service.permissionService = Mock(PermissionService)
+		service.permissionService = Mock(PermissionService)
 		def user = new User()
 		when:
 		service.addStreamToProduct(product, s4, user)
 		then:
-		1 * permissionService.verify(user, s4, Permission.Operation.STREAM_SHARE)
+		1 * service.permissionService.verify(user, s4, Permission.Operation.STREAM_SHARE)
+		0 * service.permissionService._
 	}
 
 	void "addStreamToProduct() adds Stream to Product"() {
@@ -758,7 +791,10 @@ class ProductServiceSpec extends Specification {
 		when:
 		service.addStreamToProduct(product, s4, user)
 		then:
+		1 * service.permissionService.verify(user, s4, Permission.Operation.STREAM_SHARE)
 		1 * service.permissionService.systemGrantAnonymousAccess(s4, Permission.Operation.STREAM_GET)
+		1 * service.permissionService.systemGrantAnonymousAccess(s4, Permission.Operation.STREAM_SUBSCRIBE)
+		0 * service.permissionService._
 	}
 
 	void "addStreamToProduct() invokes subscriptionService#afterProductUpdated"() {
@@ -797,6 +833,8 @@ class ProductServiceSpec extends Specification {
 		service.removeStreamFromProduct(product, s1)
 		then:
 		1 * service.permissionService.systemRevokeAnonymousAccess(s1, Permission.Operation.STREAM_GET)
+		1 * service.permissionService.systemRevokeAnonymousAccess(s1, Permission.Operation.STREAM_SUBSCRIBE)
+		0 * service.permissionService._
 	}
 
 	void "removeStreamFromProduct() invokes subscriptionService#afterProductUpdated"() {

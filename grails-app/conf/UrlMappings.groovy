@@ -41,9 +41,6 @@ class UrlMappings {
 		"/api/v1/streams/$id/status"(controller: "streamApi", action: "status")
 		"/api/v1/streams/$resourceId/keys"(resources: "keyApi", excludes: ["create", "edit", "update"]) { resourceClass = Stream }
 		"/api/v1/streams/$streamId/keys/$keyId"(method: "PUT", controller: "keyApi", action: "updateStreamKey")
-		"/api/v1/streams/$id/deleteDataUpTo"(method: "DELETE", controller: "streamApi", action: "deleteDataUpTo")
-		"/api/v1/streams/$id/deleteAllData"(method: "DELETE", controller: "streamApi", action: "deleteAllData")
-		"/api/v1/streams/$id/deleteDataRange"(method: "DELETE", controller: "streamApi", action: "deleteDataRange")
 
 		"/api/v1/dashboards"(resources: "dashboardApi", excludes: ["create", "edit"])
 		"/api/v1/dashboards/$dashboardId/items"(resources: "dashboardItemApi", excludes: ["create", "edit"])
