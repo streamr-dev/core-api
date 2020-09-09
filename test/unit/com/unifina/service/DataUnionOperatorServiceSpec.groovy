@@ -1,6 +1,6 @@
 package com.unifina.service
 
-import com.unifina.api.ProxyException
+import com.unifina.api.DataUnionProxyException
 import org.apache.log4j.Level
 import org.apache.log4j.Logger
 import org.gaul.httpbin.HttpBin
@@ -62,11 +62,11 @@ class DataUnionOperatorServiceSpec extends Specification {
 	void "test server not responding"() {
 		setup:
 		service.afterPropertiesSet()
-		ProxyException e
+		DataUnionProxyException e
 		when:
 		try {
 			service.proxy("http://localhost:1")
-		} catch (ProxyException err) {
+		} catch (DataUnionProxyException err) {
 			e = err
 		}
 		then:
@@ -147,7 +147,7 @@ class DataUnionOperatorServiceSpec extends Specification {
 		service.proxy(url)
 
 		then:
-		def e = thrown(ProxyException)
+		def e = thrown(DataUnionProxyException)
 		e.getStatusCode() == 504
 		e.getMessage() == "Data Union server gateway timeout"
 	}

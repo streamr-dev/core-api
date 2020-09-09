@@ -1,16 +1,18 @@
 package com.unifina.api
 
-class ProxyException extends ApiException {
+class DataUnionProxyException extends ApiException {
 	final Map extraHeaders = null
 
-	ProxyException(int code, String message, Map headers) {
+	DataUnionProxyException(int code, String message, Map headers) {
 		super(code, "PROXY_ERROR", message)
 		extraHeaders = headers;
 	}
-	ProxyException(int code, String message) {
+
+	DataUnionProxyException(int code, String message) {
 		super(code, "PROXY_ERROR", message)
 	}
-	ProxyException(String message) {
+
+	DataUnionProxyException(String message) {
 		super(500, "PROXY_ERROR", message)
 	}
 

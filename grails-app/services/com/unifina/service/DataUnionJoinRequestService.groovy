@@ -3,7 +3,7 @@ package com.unifina.service
 import com.streamr.client.StreamrClient
 import com.unifina.api.ApiException
 import com.unifina.api.NotFoundException
-import com.unifina.api.ProxyException
+import com.unifina.api.DataUnionProxyException
 import com.unifina.domain.*
 import com.unifina.exceptions.JoinRequestException
 import com.unifina.utils.ThreadUtil
@@ -28,7 +28,7 @@ class DataUnionJoinRequestService {
 					return true
 				}
 			}
-		} catch (ProxyException e) {
+		} catch (DataUnionProxyException e) {
 			// on error proceed with sending join message
 			log.error("DUS member stats query error", e)
 		}

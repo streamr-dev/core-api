@@ -5,7 +5,7 @@ import com.streamr.client.options.StreamrClientOptions
 import com.unifina.BeanMockingSpecification
 import com.unifina.api.ApiException
 import com.unifina.api.NotFoundException
-import com.unifina.api.ProxyException
+import com.unifina.api.DataUnionProxyException
 import com.unifina.domain.*
 import com.unifina.exceptions.JoinRequestException
 import grails.test.mixin.Mock
@@ -461,7 +461,7 @@ class DataUnionJoinRequestServiceSpec extends BeanMockingSpecification {
 		then:
 		1 * service.ethereumService.fetchJoinPartStreamID(contractAddress) >> joinPartStream.id
 		1 * service.dataUnionOperatorService.memberStats(contractAddress, memberAddress) >>  {
-			throw new ProxyException("mocked exception")
+			throw new DataUnionProxyException("mocked exception")
 		}
 		1 * service.dataUnionOperatorService.memberStats(contractAddress, memberAddress) >> okStats
 		1 * streamrClientMock.publish(_, [type: "join", "addresses": [memberAddress]])
