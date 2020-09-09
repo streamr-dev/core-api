@@ -1,4 +1,4 @@
-package com.unifina.exceptions
+package com.unifina.service
 
 class DataUnionJoinRequestException extends RuntimeException {
 	DataUnionJoinRequestException(String message) {
