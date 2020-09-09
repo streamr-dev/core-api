@@ -6,7 +6,7 @@ import com.unifina.BeanMockingSpecification
 import com.unifina.api.ApiException
 import com.unifina.api.NotFoundException
 import com.unifina.domain.*
-import com.unifina.exceptions.JoinRequestException
+import com.unifina.exceptions.DataUnionJoinRequestException
 import grails.test.mixin.Mock
 import grails.test.mixin.TestFor
 import groovy.json.JsonBuilder
@@ -535,7 +535,7 @@ class DataUnionJoinRequestServiceSpec extends BeanMockingSpecification {
 		1 * service.permissionService.systemGrant(user, s2, Permission.Operation.STREAM_PUBLISH)
 		1 * service.permissionService.systemGrant(user, s3, Permission.Operation.STREAM_PUBLISH)
 		1 * service.permissionService.systemGrant(user, s4, Permission.Operation.STREAM_PUBLISH)
-		thrown(JoinRequestException)
+		thrown(DataUnionJoinRequestException)
 	}
 
 	void "update sets permissions"() {
