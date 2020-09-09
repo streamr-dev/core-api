@@ -15,7 +15,7 @@ class FreeProductService {
 
 	void deployFreeProduct(Product product) {
 		verifyThatProductIsFree(product)
-		if (product.isDeployed()) { // TODO: state transition mismatch with paid products
+		if (product.state == Product.State.DEPLOYED) { // TODO: state transition mismatch with paid products
 			throw new InvalidStateTransitionException(product.state, Product.State.DEPLOYED)
 		}
 
