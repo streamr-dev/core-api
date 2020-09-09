@@ -13,6 +13,17 @@ class DataUnionJoinRequest {
 		PENDING,
 		ACCEPTED,
 		REJECTED
+
+		static State isState(String value) {
+			if (value == null || value.trim().equals("")) {
+				return null
+			}
+			try {
+				return State.valueOf(value.toUpperCase())
+			} catch (IllegalArgumentException e) {
+				return null
+			}
+		}
 	}
 
 	String id

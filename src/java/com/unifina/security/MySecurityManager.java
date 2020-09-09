@@ -1,6 +1,5 @@
 package com.unifina.security;
 
-
 public class MySecurityManager extends SecurityManager {
 	@Override
 	public void checkAccess(ThreadGroup g) {
