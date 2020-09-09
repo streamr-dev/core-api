@@ -186,17 +186,4 @@ class ProductSpec extends Specification {
 		0L | true
 		1L | false
 	}
-
-	@Unroll
-	void "isPaid(#price) == #expected"(Long price, Object expected) {
-		expect:
-		Product p = new Product(pricePerSecond: price)
-		p.isPaid() == expected
-
-		where:
-		price | expected
-		-1L | false
-		0L | false
-		1L | true
-	}
 }

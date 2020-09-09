@@ -48,7 +48,7 @@ class FreeProductService {
 	}
 
 	static void verifyThatProductIsFree(Product product) {
-		if (product.isPaid()) {
+		if (!product.isFree()) {
 			throw new ProductNotFreeException(product)
 		}
 	}

@@ -166,10 +166,6 @@ class Product {
 		return pricePerSecond == 0L
 	}
 
-	boolean isPaid() {
-		return pricePerSecond > 0
-	}
-
 	static isEthereumAddressOrIsNull = { String value ->
 		value == null || Product.isEthereumAddress(value)
 	}
