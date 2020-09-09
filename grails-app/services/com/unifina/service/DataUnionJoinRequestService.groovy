@@ -173,7 +173,7 @@ class DataUnionJoinRequestService {
 		return c
 	}
 
-	DataUnionJoinRequest update(String contractAddress, String joinRequestId, UpdateDataUnionJoinRequestCommand cmd) {
+	DataUnionJoinRequest update(String contractAddress, String joinRequestId, DataUnionUpdateJoinRequestCommand cmd) {
 		DataUnionJoinRequest c = DataUnionJoinRequest.createCriteria().get {
 			ilike("contractAddress", contractAddress)
 			eq("id", joinRequestId)
