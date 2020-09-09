@@ -3,15 +3,7 @@ package com.unifina.service
 import com.streamr.client.StreamrClient
 import com.streamr.client.options.StreamrClientOptions
 import com.unifina.api.NotFoundException
-import com.unifina.api.UpdateDataUnionJoinRequestCommand
-import com.unifina.domain.DataUnionJoinRequest
-import com.unifina.domain.Stream
-import com.unifina.domain.Category
-import com.unifina.domain.Product
-import com.unifina.domain.Permission
-import com.unifina.domain.User
-import com.unifina.domain.Module
-import com.unifina.domain.ModuleCategory
+import com.unifina.domain.*
 import groovy.json.JsonBuilder
 import spock.lang.Specification
 

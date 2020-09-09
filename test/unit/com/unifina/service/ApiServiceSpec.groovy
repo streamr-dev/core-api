@@ -1,7 +1,5 @@
 package com.unifina.service
 
-import com.unifina.api.DashboardListParams
-import com.unifina.api.ListParams
 import com.unifina.api.NotFoundException
 import com.unifina.api.NotPermittedException
 import com.unifina.api.ValidationException
