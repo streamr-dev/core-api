@@ -13,6 +13,7 @@ import com.unifina.domain.Permission
 import com.unifina.domain.User
 import grails.converters.JSON
 import grails.validation.Validateable
+import org.apache.log4j.Logger
 
 @Validateable
 class StorageNodeAddCommand {
@@ -24,6 +25,8 @@ class StorageNodeAddCommand {
 }
 
 class StorageNodeApiController {
+
+	private static final Logger log = Logger.getLogger(StorageNodeApiController)
 
 	StorageNodeService storageNodeService
 	PermissionService permissionService
@@ -42,7 +45,7 @@ class StorageNodeApiController {
 
 	@StreamrApi(authenticationLevel = AuthLevel.USER)
 	def addStorageNodeToStream(StorageNodeAddCommand command, String streamId) {
-		println("StorageNodeApiController.addStorageNodeToStream: storageNodeAddress=" + command.address + ", streamId=" + streamId)
+		log.info("addStorageNodeToStream: storageNodeAddress=" + command.address + ", streamId=" + streamId)
 		if (command.validate()) {
 			if (checkEditPermission(streamId, request.apiUser)) {
 				StreamStorageNode streamStorageNode = storageNodeService.addStorageNodeToStream(command.address, streamId)
@@ -57,7 +60,7 @@ class StorageNodeApiController {
 
 	@StreamrApi(authenticationLevel = AuthLevel.USER)
 	def removeStorageNodeFromStream(String storageNodeAddress, String streamId) {
-		println("StorageNodeApiController.removeStorageNodeFromStream: storageNodeAddress=" + storageNodeAddress + ", streamId=" + streamId)
+		log.info("removeStorageNodeFromStream: storageNodeAddress=" + storageNodeAddress + ", streamId=" + streamId)
 		if (checkEditPermission(streamId, request.apiUser)) {
 			storageNodeService.removeStorageNodeFromStream(storageNodeAddress, streamId)
 			return render(status: 204)
