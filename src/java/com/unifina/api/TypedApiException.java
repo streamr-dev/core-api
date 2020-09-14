@@ -22,4 +22,12 @@ public class TypedApiException extends ApiException {
 		}
 		return e;
 	}
+
+	public String getType() {
+		return type;
+	}
+
+	public String getId() {
+		return id;
+	}
 }
