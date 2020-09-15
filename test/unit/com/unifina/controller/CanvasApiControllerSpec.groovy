@@ -5,7 +5,6 @@ import com.unifina.api.BadRequestException
 import com.unifina.api.NotPermittedException
 import com.unifina.api.ValidationException
 import com.unifina.domain.*
-import com.unifina.exceptions.CanvasUnreachableException
 import com.unifina.exceptions.JavaCompilerErrorMessage
 import com.unifina.exceptions.ModuleExceptionMessage
 import com.unifina.service.*
