@@ -4,7 +4,6 @@ import com.unifina.api.InvalidAPIKeyException
 import com.unifina.api.InvalidUsernameAndPasswordException
 import com.unifina.api.NotFoundException
 import com.unifina.domain.*
-import com.unifina.exceptions.UserCreationFailedException
 import com.unifina.security.PasswordEncoder
 import com.unifina.security.Userish
 import org.codehaus.groovy.grails.commons.GrailsApplication
