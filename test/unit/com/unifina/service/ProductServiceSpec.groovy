@@ -510,6 +510,9 @@ class ProductServiceSpec extends Specification {
 			authorizedGetById(Product, _, _, _) >> product
 		}
 		def permissionService = service.permissionService = Mock(PermissionService)
+		service.store = Stub(ProductStore) {
+			findProductsByStream(_) >> []
+		}
 
 		def validCommand = new UpdateProductCommand(
 			name: "updated name",
@@ -554,6 +557,9 @@ class ProductServiceSpec extends Specification {
 			authorizedGetById(Product, _, _, _) >> product
 		}
 		def permissionService = service.permissionService = Mock(PermissionService)
+		service.store = Stub(ProductStore) {
+			findProductsByStream(_) >> []
+		}
 
 		def validCommand = new UpdateProductCommand(
 			name: "updated name",
@@ -582,6 +588,48 @@ class ProductServiceSpec extends Specification {
 		0 * permissionService.systemGrantAnonymousAccess(s4, Permission.Operation.STREAM_GET)
 		0 * permissionService.systemGrantAnonymousAccess(s4, Permission.Operation.STREAM_SUBSCRIBE)
 
+		0 * permissionService._
+	}
+
+	void "update() does not revoke permission if the stream belongs to another free product"() {
+		setupStreams()
+		setupFreeProduct()
+
+		service.subscriptionService = Stub(SubscriptionService)
+		service.apiService = Stub(ApiService) {
+			authorizedGetById(Product, _, _, _) >> product
+		}
+		def permissionService = service.permissionService = Mock(PermissionService)
+		service.store = Stub(ProductStore) {
+			findProductsByStream(_) >> {Stream s ->
+				if (s == s2) {
+					return [product]
+				} else {
+					return [];
+				}
+			}
+		}
+
+		def validCommand = new UpdateProductCommand(
+			name: "updated name",
+			description: "updated description",
+			category: category,
+			streams: [s3],
+			pricePerSecond: 0,
+			ownerAddress: "0xCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC",
+			beneficiaryAddress: "0xCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC",
+			priceCurrency: Product.Currency.DATA,
+			minimumSubscriptionInSeconds: 0
+		)
+		def user = new User(username: "me@streamr.com")
+
+		when:
+		service.update("product-id", validCommand, user)
+
+		then:
+		1 * permissionService.verify(user, s3, Permission.Operation.STREAM_SHARE)
+		1 * permissionService.systemRevokeAnonymousAccess(s1, Permission.Operation.STREAM_GET)
+		1 * permissionService.systemRevokeAnonymousAccess(s1, Permission.Operation.STREAM_SUBSCRIBE)
 		0 * permissionService._
 	}
 
