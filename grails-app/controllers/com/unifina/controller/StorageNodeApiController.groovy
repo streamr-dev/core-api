@@ -35,7 +35,7 @@ class StorageNodeApiController {
 	@StreamrApi(authenticationLevel = AuthLevel.NONE)
 	def findStreamsByStorageNode(String storageNodeAddress) {
 		if (EthereumAddressValidator.validate(storageNodeAddress)) {
-			List<Stream> streams = storageNodeService.findStreamsByStorageNode(storageNodeAddress);
+			List<Stream> streams = storageNodeService.findStreamsByStorageNode(storageNodeAddress)
 			return render(streams*.toSummaryMap() as JSON)
 		} else {
 			throw new BadRequestException("Malformed storage node address")
@@ -44,7 +44,7 @@ class StorageNodeApiController {
 
 	@StreamrApi(authenticationLevel = AuthLevel.NONE)
 	def findStorageNodesByStream(String streamId) {
-		List<StreamStorageNode> streamStorageNodes = storageNodeService.findStorageNodesByStream(streamId);
+		List<StreamStorageNode> streamStorageNodes = storageNodeService.findStorageNodesByStream(streamId)
 		return render(streamStorageNodes*.toMap() as JSON)
 	}
 
