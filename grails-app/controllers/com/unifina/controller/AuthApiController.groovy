@@ -5,9 +5,7 @@ import com.unifina.domain.SignupInvite
 import com.unifina.domain.SignupMethod
 import com.unifina.domain.User
 import com.unifina.exceptions.UserCreationFailedException
-import com.unifina.security.AuthLevel
 import com.unifina.security.PasswordEncoder
-import com.unifina.security.StreamrApi
 import com.unifina.service.SignupCodeService
 import com.unifina.service.UserService
 import com.unifina.utils.EmailValidator

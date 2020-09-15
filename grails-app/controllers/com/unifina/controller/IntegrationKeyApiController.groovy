@@ -4,7 +4,6 @@ import com.unifina.api.ApiException
 import com.unifina.api.NotFoundException
 import com.unifina.domain.IntegrationKey
 import com.unifina.domain.User
-import com.unifina.security.StreamrApi
 import com.unifina.service.EthereumIntegrationKeyService
 import grails.converters.JSON
 import groovy.json.JsonSlurper

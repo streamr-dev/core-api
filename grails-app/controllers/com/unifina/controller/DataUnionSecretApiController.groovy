@@ -5,7 +5,6 @@ import com.unifina.api.NotFoundException
 import com.unifina.api.NotPermittedException
 import com.unifina.domain.DataUnionSecret
 import com.unifina.domain.User
-import com.unifina.security.StreamrApi
 import com.unifina.service.DataUnionSecretCommand
 import com.unifina.service.DataUnionSecretService
 import com.unifina.service.EthereumService

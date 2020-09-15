@@ -1,6 +1,5 @@
 package com.unifina.controller
 
-import com.unifina.security.StreamrApi
 import com.unifina.service.ProductService
 
 class RemoveUsersProductsController {
