@@ -3,8 +3,8 @@ package com.unifina.controller
 import com.google.common.collect.Lists
 import com.streamr.client.protocol.message_layer.StreamMessage
 import com.unifina.api.ApiException
+import com.unifina.controller.RESTAPIFilters
 import com.unifina.domain.*
-import com.unifina.filters.UnifinaCoreAPIFilters
 import com.unifina.service.*
 import com.unifina.utils.TestUtils
 import grails.test.mixin.Mock
@@ -16,7 +16,7 @@ import spock.lang.Specification
 import javax.servlet.http.HttpServletResponse
 
 @TestFor(ProductApiController)
-@Mock([UnifinaCoreAPIFilters, User])
+@Mock([RESTAPIFilters, User])
 class ProductApiControllerSpec extends Specification {
 
 	Product product
