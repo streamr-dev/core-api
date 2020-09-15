@@ -1,6 +1,6 @@
 package com.unifina.service
 
-import com.unifina.api.ProxyException
+
 import com.unifina.utils.MapTraversal
 import org.apache.http.HttpEntity
 import org.apache.http.HttpHeaders
@@ -69,14 +69,14 @@ public class DataUnionOperatorService implements InitializingBean {
 			} catch (ConnectException e) {
 				String msg = "Data Union server is busy or not responding";
 				log.error(msg, e);
-				throw new ProxyException(503, msg, ["Retry-After": "60"]);	// 1 minute
+				throw new DataUnionProxyException(503, msg, ["Retry-After": "60"]);	// 1 minute
 			} catch (SocketTimeoutException e) {
 				String msg = "Data Union server gateway timeout";
 				log.error(msg, e);
-				throw new ProxyException(504, msg);
+				throw new DataUnionProxyException(504, msg);
 			} catch (IOException e) {
 				log.error("http client io error", e);
-				throw new ProxyException(e.getMessage());
+				throw new DataUnionProxyException(e.getMessage());
 			}
 
 			StatusLine statusLine = response.getStatusLine();
@@ -86,7 +86,7 @@ public class DataUnionOperatorService implements InitializingBean {
 				try {
 					result.setBody(EntityUtils.toString(entity, StandardCharsets.UTF_8));
 				} catch (IOException e) {
-					throw new ProxyException(e.getMessage());
+					throw new DataUnionProxyException(e.getMessage());
 				}
 			}
 		} finally {
