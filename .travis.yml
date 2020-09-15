@@ -78,7 +78,7 @@ jobs:
       on:
         branch: master
   - stage: Build Docker Dev/Nightly
-    if: branch = master
+    if: branch = master AND type != pull_request
     install: true
     script:
     - grails test war
