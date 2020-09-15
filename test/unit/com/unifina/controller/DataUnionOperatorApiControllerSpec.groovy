@@ -1,14 +1,14 @@
 package com.unifina.controller
 
 import com.unifina.api.BadRequestException
-import com.unifina.filters.UnifinaCoreAPIFilters
+import com.unifina.controller.RESTAPIFilters
 import com.unifina.service.DataUnionOperatorService
 import grails.test.mixin.Mock
 import grails.test.mixin.TestFor
 import spock.lang.Specification
 
 @TestFor(DataUnionOperatorApiController)
-@Mock([UnifinaCoreAPIFilters])
+@Mock([RESTAPIFilters])
 class DataUnionOperatorApiControllerSpec extends Specification {
 	final String contractAddress = "0x6c90aece04198da2d5ca9b956b8f95af8041de37"
 	final String memberAddress = "0x7d01bfdf15198da2d5ca9b956c8f95af0041de38"

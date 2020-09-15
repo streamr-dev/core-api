@@ -1,4 +1,4 @@
-package com.unifina.filters
+package com.unifina.controller
 
 import com.unifina.BeanMockingSpecification
 import com.unifina.controller.NodeApiController
@@ -14,8 +14,8 @@ import grails.test.mixin.web.FiltersUnitTestMixin
 
 @TestMixin(FiltersUnitTestMixin)
 @TestFor(NodeApiController)
-@Mock([User, UserRole, UnifinaCoreAPIFilters])
-class UnifinaCoreAPIFiltersSpec extends BeanMockingSpecification {
+@Mock([User, UserRole, RESTAPIFilters, Key, Role])
+class RESTAPIFiltersSpec extends BeanMockingSpecification {
 
 	User user
 	Role adminRole, devopsRole

@@ -3,9 +3,7 @@ package com.unifina.service
 import com.streamr.client.StreamrClient
 import com.unifina.api.ApiException
 import com.unifina.api.NotFoundException
-import com.unifina.api.ProxyException
 import com.unifina.domain.*
-import com.unifina.exceptions.JoinRequestException
 import com.unifina.utils.ThreadUtil
 import groovy.json.JsonSlurper
 import org.apache.log4j.Logger
@@ -28,7 +26,7 @@ class DataUnionJoinRequestService {
 					return true
 				}
 			}
-		} catch (ProxyException e) {
+		} catch (DataUnionProxyException e) {
 			// on error proceed with sending join message
 			log.error("DUS member stats query error", e)
 		}
@@ -63,7 +61,7 @@ class DataUnionJoinRequestService {
 			}
 		}
 		if (timeSpent >= timeout) {
-			throw new JoinRequestException("DUS error on registering join request")
+			throw new DataUnionJoinRequestException("DUS error on registering join request")
 		}
 		log.debug("exiting onApproveJoinRequest")
 	}
@@ -175,7 +173,7 @@ class DataUnionJoinRequestService {
 		return c
 	}
 
-	DataUnionJoinRequest update(String contractAddress, String joinRequestId, UpdateDataUnionJoinRequestCommand cmd) {
+	DataUnionJoinRequest update(String contractAddress, String joinRequestId, DataUnionUpdateJoinRequestCommand cmd) {
 		DataUnionJoinRequest c = DataUnionJoinRequest.createCriteria().get {
 			ilike("contractAddress", contractAddress)
 			eq("id", joinRequestId)

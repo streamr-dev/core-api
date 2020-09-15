@@ -3,7 +3,6 @@ package com.unifina.controller
 import com.unifina.api.NotPermittedException
 import com.unifina.api.ValidationException
 import com.unifina.domain.*
-import com.unifina.filters.UnifinaCoreAPIFilters
 import com.unifina.service.SubscriptionService
 import grails.converters.JSON
 import grails.test.mixin.Mock
@@ -12,7 +11,7 @@ import groovy.json.JsonSlurper
 import spock.lang.Specification
 
 @TestFor(SubscriptionApiController)
-@Mock([UnifinaCoreAPIFilters, User, UserRole])
+@Mock([RESTAPIFilters, User, UserRole])
 class SubscriptionApiControllerSpec extends Specification {
 
 	User devOpsUser

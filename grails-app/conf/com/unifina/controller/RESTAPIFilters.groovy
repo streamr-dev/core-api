@@ -1,4 +1,4 @@
-package com.unifina.filters
+package com.unifina.controller
 
 import com.unifina.controller.StreamrApi
 import com.unifina.controller.AuthenticationResult
@@ -10,11 +10,11 @@ import org.codehaus.groovy.grails.commons.GrailsApplication
 import java.lang.reflect.Method
 
 /**
- * API methods should use the @StreamrApi annotation and be mapped to /api/* via UnifinaCorePluginUrlMappings.
- * This will allow the UnifinaCoreApiFilters to check user credentials. The authenticated User can be referenced
+ * API methods should use the @StreamrApi annotation and be mapped to /api/* via UrlMappings.
+ * This will allow the RESTAPIFilters to check user credentials. The authenticated User can be referenced
  * by request.apiUser.
  */
-class UnifinaCoreAPIFilters {
+class RESTAPIFilters {
 	GrailsApplication grailsApplication
 
 	private Map<String, StreamrApi> apiAnnotationCache = new HashMap<String, StreamrApi>()
