@@ -453,8 +453,8 @@ module.exports = (baseUrl, logging) => {
                 products: new Products(options),
                 streams: new Streams(options),
                 subscriptions: new Subscriptions(options),
-				dataunions: new DataUnions(options),
-				storagenodes: new StorageNodes(options),
+                dataunions: new DataUnions(options),
+                storagenodes: new StorageNodes(options),
                 not_found: new NotFound(options),
             }
         }
