@@ -1,16 +1,16 @@
-const assert = require("chai").assert
-const initStreamrApi = require("./streamr-api-clients")
-const _ = require("lodash");
+const assert = require('chai').assert
+const initStreamrApi = require('./streamr-api-clients')
+const _ = require('lodash');
 
-const URL = "http://localhost:8081/streamr-core/api/v1/"
-const API_KEY = "product-api-tester-key";
+const URL = 'http://localhost:8081/streamr-core/api/v1/'
+const API_KEY = 'product-api-tester-key';
 const API_KEY_OTHER_USER = 'product-api-tester2-key'
 const LOGGING_ENABLED = false;
 const Streamr = initStreamrApi(URL, LOGGING_ENABLED)
 
 const createMockEthereumAddress = () => {
 	const LENGTH = 40;
-	return "0x" + _.padStart(Math.floor(Math.random() * Number.MAX_SAFE_INTEGER).toString(16),LENGTH, "0");
+	return '0x' + _.padStart(Math.floor(Math.random() * Number.MAX_SAFE_INTEGER).toString(16),LENGTH, '0');
 };
 const createStream = () => {
 	return Streamr.api.v1.streams
@@ -47,8 +47,8 @@ const getStorageNodeCount = async (streamId) => {
 	return json.length;
 };
 
-describe("Storage Node API", () => {
-	describe("GET /storageNodes/:address/stream", () => {
+describe('Storage Node API', () => {
+	describe('GET /storageNodes/:address/stream', () => {
 		let storageNodeAddress;
 		let streamId;
 
@@ -58,7 +58,7 @@ describe("Storage Node API", () => {
 			await addStorageNodeToStream(storageNodeAddress, streamId);
 		});
 
-		it("happy path", async () => {
+		it('happy path', async () => {
 			const response = await findStreamsByStorageNode(storageNodeAddress);
 			const json = await response.json()
 			assert.equal(json.length, 1);
@@ -78,7 +78,7 @@ describe("Storage Node API", () => {
 		});
 	});
 
-	describe("GET /streams/:streamId/storageNodes", () => {
+	describe('GET /streams/:streamId/storageNodes', () => {
 		let storageNodeAddress;
 		let streamId;
 
@@ -88,7 +88,7 @@ describe("Storage Node API", () => {
 			await addStorageNodeToStream(storageNodeAddress, streamId);
 		});
 
-		it("happy path", async () => {
+		it('happy path', async () => {
 			const response = await findStorageNodesByStream(streamId);
 			const json = await response.json();
 			assert.equal(json.length, 1);
@@ -101,7 +101,7 @@ describe("Storage Node API", () => {
 		});
 	});
 
-	describe("POST /streams/:streamId/storageNodes", () => {
+	describe('POST /streams/:streamId/storageNodes', () => {
 		let storageNodeAddress;
 		let streamId;
 
@@ -110,7 +110,7 @@ describe("Storage Node API", () => {
 			streamId = await createStream();
 		});
 
-		it("happy path", async () => {
+		it('happy path', async () => {
 			const response = await addStorageNodeToStream(storageNodeAddress, streamId);
 			assert.equal(response.status, 200)
 			const json = await response.json()
@@ -140,7 +140,7 @@ describe("Storage Node API", () => {
 		});
 	});
 
-	describe("DELETE /streams/:streamId/storageNodes/:address", () => {
+	describe('DELETE /streams/:streamId/storageNodes/:address', () => {
 		let storageNodeAddress;
 		let streamId;
 
@@ -150,7 +150,7 @@ describe("Storage Node API", () => {
 			await addStorageNodeToStream(storageNodeAddress, streamId);
 		});
 
-		it("happy path", async () => {
+		it('happy path', async () => {
 			const response = await removeStorageNodeFromStream(storageNodeAddress, streamId);
 			assert.equal(response.status, 204);
 			const storageNodeCount = await getStorageNodeCount(streamId);
