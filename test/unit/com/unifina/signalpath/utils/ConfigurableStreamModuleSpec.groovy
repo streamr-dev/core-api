@@ -3,7 +3,6 @@ package com.unifina.signalpath.utils
 
 import com.unifina.ModuleTestingSpecification
 import com.unifina.domain.Stream
-import com.unifina.exceptions.InvalidStreamConfigException
 import com.unifina.service.StreamService
 import com.unifina.utils.Globals
 

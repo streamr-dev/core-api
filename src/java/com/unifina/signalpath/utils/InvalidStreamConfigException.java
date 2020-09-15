@@ -1,4 +1,4 @@
-package com.unifina.exceptions;
+package com.unifina.signalpath.utils;
 
 /**
  * Created by henripihkala on 15/02/16.
