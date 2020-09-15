@@ -1,7 +1,5 @@
 package com.unifina.signalpath.custom;
 
-import com.unifina.exceptions.ModuleExceptionMessage;
-
 import java.util.Map;
 
 public class JavaCompilerErrorMessage extends ModuleExceptionMessage {

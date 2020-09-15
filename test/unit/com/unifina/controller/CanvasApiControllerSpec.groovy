@@ -5,10 +5,10 @@ import com.unifina.api.BadRequestException
 import com.unifina.api.NotPermittedException
 import com.unifina.api.ValidationException
 import com.unifina.domain.*
-import com.unifina.exceptions.ModuleExceptionMessage
 import com.unifina.service.*
 import com.unifina.signalpath.ModuleException
 import com.unifina.signalpath.custom.JavaCompilerErrorMessage
+import com.unifina.signalpath.custom.ModuleExceptionMessage
 import grails.converters.JSON
 import grails.test.mixin.Mock
 import grails.test.mixin.TestFor
