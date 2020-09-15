@@ -1,12 +1,12 @@
-const assert = require("chai").assert;
-const initStreamrApi = require("./streamr-api-clients");
+const assert = require("chai").assert
+const initStreamrApi = require("./streamr-api-clients")
 const _ = require("lodash");
 
-const URL = "http://localhost:8081/streamr-core/api/v1/";
+const URL = "http://localhost:8081/streamr-core/api/v1/"
 const API_KEY = "product-api-tester-key";
 const API_KEY_OTHER_USER = 'product-api-tester2-key'
 const LOGGING_ENABLED = false;
-const Streamr = initStreamrApi(URL, LOGGING_ENABLED);
+const Streamr = initStreamrApi(URL, LOGGING_ENABLED)
 
 const createMockEthereumAddress = () => {
 	const LENGTH = 40;
