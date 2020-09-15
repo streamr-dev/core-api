@@ -5,7 +5,10 @@ jdk:
 - openjdk8
 services:
 - docker
+
+# https://docs.travis-ci.com/user/conditional-builds-stages-jobs/#conditional-builds
 if: (branch = master) OR (branch = "/^deployed-\\d+\\.\\d+(\\.\\d+)?(-\\S*)?$/") OR type = pull_request # build whitelisted branches and all PRs
+
 git:
   submodules: false
 before_install:
@@ -35,7 +38,7 @@ jobs:
     script: .travis_scripts/validate_swagger.sh
   - stage: Tests
     name: Integration tests
-    script: travis_retry .travis_scripts/integration_test.sh
+    script: .travis_scripts/integration_test.sh
   - stage: Tests
     name: REST API tests
     script: .travis_scripts/rest_e2e_test.sh
@@ -48,6 +51,7 @@ jobs:
     - docker build -t $OWNER/$IMAGE_NAME:local .
     - .travis_scripts/streamr-client-test.sh
   - stage: Build war Staging
+    if: NOT type IN (pull_request)
     script: .travis_scripts/build_war.sh
     env:
     - WS_URL="wss://ee-staging.streamr.com/api/v1/ws"
@@ -73,7 +77,6 @@ jobs:
       region: eu-west-1
       on:
         branch: master
-    if: NOT type IN (pull_request)
   - stage: Build Docker Dev/Nightly
     if: tag IS blank
     install: true
@@ -111,6 +114,5 @@ jobs:
       on:
         tags: true
 after_failure:
-  - docker-compose logs engine-and-editor
   - docker ps
   - .travis_scripts/after_test_failure.sh
