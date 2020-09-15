@@ -10,7 +10,7 @@ import com.unifina.security.StreamrApi
 import com.unifina.service.DataUnionJoinRequestCommand
 import com.unifina.service.DataUnionJoinRequestService
 import com.unifina.service.EthereumService
-import com.unifina.service.UpdateDataUnionJoinRequestCommand
+import com.unifina.service.DataUnionUpdateJoinRequestCommand
 import com.unifina.utils.EthereumAddressValidator
 import com.unifina.utils.IDValidator
 import grails.converters.JSON
@@ -87,7 +87,7 @@ class DataUnionJoinRequestApiController {
 
 	// curl -v -X PUT -H "Authorization: token tester1-api-key" -H "Content-Type: application/json" -d '{"state": "ACCEPTED"}' http://localhost:8081/streamr-core/api/v1/dataunions/0x6c90aece04198da2d5ca9b956b8f95af8041de37/joinRequests/L-TvrBkyQTS_JK1ABHFEZAaZ3FHq7-TPqMXe9JNz1x6g
 	@StreamrApi
-	def update(String contractAddress, String id, UpdateDataUnionJoinRequestCommand cmd) {
+	def update(String contractAddress, String id, DataUnionUpdateJoinRequestCommand cmd) {
 		checkAdminAccessControl(loggedInUser(), contractAddress)
 		if (!isValidID(id)) {
 			throw new BadRequestException("join request id not valid")

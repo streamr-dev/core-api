@@ -5,9 +5,7 @@ import com.streamr.client.options.StreamrClientOptions
 import com.unifina.BeanMockingSpecification
 import com.unifina.api.ApiException
 import com.unifina.api.NotFoundException
-import com.unifina.api.ProxyException
 import com.unifina.domain.*
-import com.unifina.exceptions.JoinRequestException
 import grails.test.mixin.Mock
 import grails.test.mixin.TestFor
 import groovy.json.JsonBuilder
@@ -379,7 +377,7 @@ class DataUnionJoinRequestServiceSpec extends BeanMockingSpecification {
 		)
 		r.save(failOnError: true, validate: true)
 
-		UpdateDataUnionJoinRequestCommand cmd = new UpdateDataUnionJoinRequestCommand(
+		DataUnionUpdateJoinRequestCommand cmd = new DataUnionUpdateJoinRequestCommand(
 			state: "ACCEPTED",
 		)
 
@@ -446,7 +444,7 @@ class DataUnionJoinRequestServiceSpec extends BeanMockingSpecification {
 		)
 		r.save(failOnError: true, validate: true)
 
-		UpdateDataUnionJoinRequestCommand cmd = new UpdateDataUnionJoinRequestCommand(
+		DataUnionUpdateJoinRequestCommand cmd = new DataUnionUpdateJoinRequestCommand(
 			state: "ACCEPTED",
 		)
 
@@ -461,7 +459,7 @@ class DataUnionJoinRequestServiceSpec extends BeanMockingSpecification {
 		then:
 		1 * service.ethereumService.fetchJoinPartStreamID(contractAddress) >> joinPartStream.id
 		1 * service.dataUnionOperatorService.memberStats(contractAddress, memberAddress) >>  {
-			throw new ProxyException("mocked exception")
+			throw new DataUnionProxyException("mocked exception")
 		}
 		1 * service.dataUnionOperatorService.memberStats(contractAddress, memberAddress) >> okStats
 		1 * streamrClientMock.publish(_, [type: "join", "addresses": [memberAddress]])
@@ -519,7 +517,7 @@ class DataUnionJoinRequestServiceSpec extends BeanMockingSpecification {
 		)
 		r.save(failOnError: true, validate: true)
 
-		UpdateDataUnionJoinRequestCommand cmd = new UpdateDataUnionJoinRequestCommand(
+		DataUnionUpdateJoinRequestCommand cmd = new DataUnionUpdateJoinRequestCommand(
 			state: "ACCEPTED",
 		)
 
@@ -536,7 +534,7 @@ class DataUnionJoinRequestServiceSpec extends BeanMockingSpecification {
 		1 * service.permissionService.systemGrant(user, s2, Permission.Operation.STREAM_PUBLISH)
 		1 * service.permissionService.systemGrant(user, s3, Permission.Operation.STREAM_PUBLISH)
 		1 * service.permissionService.systemGrant(user, s4, Permission.Operation.STREAM_PUBLISH)
-		thrown(JoinRequestException)
+		thrown(DataUnionJoinRequestException)
 	}
 
 	void "update sets permissions"() {
@@ -587,7 +585,7 @@ class DataUnionJoinRequestServiceSpec extends BeanMockingSpecification {
 		)
 		r.save(failOnError: true, validate: true)
 
-		UpdateDataUnionJoinRequestCommand cmd = new UpdateDataUnionJoinRequestCommand(
+		DataUnionUpdateJoinRequestCommand cmd = new DataUnionUpdateJoinRequestCommand(
 			state: "ACCEPTED",
 		)
 
@@ -624,7 +622,7 @@ class DataUnionJoinRequestServiceSpec extends BeanMockingSpecification {
 		)
 		r.save(failOnError: true, validate: true)
 
-		UpdateDataUnionJoinRequestCommand cmd = new UpdateDataUnionJoinRequestCommand(
+		DataUnionUpdateJoinRequestCommand cmd = new DataUnionUpdateJoinRequestCommand(
 			state: "ACCEPTED",
 		)
 
@@ -648,7 +646,7 @@ class DataUnionJoinRequestServiceSpec extends BeanMockingSpecification {
 		)
 		r.save(failOnError: true, validate: true)
 
-		UpdateDataUnionJoinRequestCommand cmd = new UpdateDataUnionJoinRequestCommand(
+		DataUnionUpdateJoinRequestCommand cmd = new DataUnionUpdateJoinRequestCommand(
 			state: "NOT_IN_OUR_ENUM",
 		)
 
