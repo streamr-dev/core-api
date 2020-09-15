@@ -1,12 +1,10 @@
 package com.unifina.controller
 
-
 import com.unifina.api.BadRequestException
 import com.unifina.api.NotFoundException
 import com.unifina.api.NotPermittedException
 import com.unifina.domain.DataUnionJoinRequest
 import com.unifina.domain.User
-import com.unifina.security.StreamrApi
 import com.unifina.service.DataUnionJoinRequestCommand
 import com.unifina.service.DataUnionJoinRequestService
 import com.unifina.service.EthereumService

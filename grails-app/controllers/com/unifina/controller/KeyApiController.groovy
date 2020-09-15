@@ -7,8 +7,6 @@ import com.unifina.domain.Key
 import com.unifina.domain.Permission
 import com.unifina.domain.Stream
 import com.unifina.domain.User
-import com.unifina.security.AuthLevel
-import com.unifina.security.StreamrApi
 import com.unifina.service.PermissionService
 import grails.converters.JSON
 import grails.transaction.Transactional

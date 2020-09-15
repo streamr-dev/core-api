@@ -1,4 +1,4 @@
-package com.unifina.security;
+package com.unifina.controller;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;

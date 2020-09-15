@@ -5,8 +5,6 @@ import com.unifina.api.node.NodeRequest
 import com.unifina.api.node.NodeRequestDispatcher
 import com.unifina.domain.Canvas
 import com.unifina.domain.User
-import com.unifina.security.AllowRole
-import com.unifina.security.StreamrApi
 import com.unifina.service.*
 import com.unifina.signalpath.SignalPath
 import com.unifina.signalpath.map.ValueSortedMap

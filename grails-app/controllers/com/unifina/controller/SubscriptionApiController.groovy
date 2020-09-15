@@ -1,11 +1,8 @@
 package com.unifina.controller
 
-
 import com.unifina.api.NotPermittedException
 import com.unifina.api.ValidationException
 import com.unifina.domain.User
-import com.unifina.security.AuthLevel
-import com.unifina.security.StreamrApi
 import com.unifina.service.SubscriptionService
 import grails.compiler.GrailsCompileStatic
 import grails.converters.JSON
