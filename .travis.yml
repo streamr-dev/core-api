@@ -78,7 +78,7 @@ jobs:
       on:
         branch: master
   - stage: Build Docker Dev/Nightly
-    if: tag IS blank
+    if: branch = master
     install: true
     script:
     - grails test war
