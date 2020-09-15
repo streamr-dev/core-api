@@ -8,6 +8,7 @@ import com.unifina.service.StorageNodeService
 import com.unifina.service.PermissionService
 import com.unifina.api.ValidationException
 import com.unifina.api.NotPermittedException
+import com.unifina.api.BadRequestException
 import com.unifina.utils.EthereumAddressValidator
 import com.unifina.domain.Permission
 import com.unifina.domain.User
@@ -33,8 +34,12 @@ class StorageNodeApiController {
 
 	@StreamrApi(authenticationLevel = AuthLevel.NONE)
 	def findStreamsByStorageNode(String storageNodeAddress) {
-		List<Stream> streams = storageNodeService.findStreamsByStorageNode(storageNodeAddress);
-		return render(streams*.toSummaryMap() as JSON)
+		if (EthereumAddressValidator.validate(storageNodeAddress)) {
+			List<Stream> streams = storageNodeService.findStreamsByStorageNode(storageNodeAddress);
+			return render(streams*.toSummaryMap() as JSON)
+		} else {
+			throw new BadRequestException("Malformed storage node address")
+		}
 	}
 
 	@StreamrApi(authenticationLevel = AuthLevel.NONE)
@@ -60,12 +65,16 @@ class StorageNodeApiController {
 
 	@StreamrApi(authenticationLevel = AuthLevel.USER)
 	def removeStorageNodeFromStream(String storageNodeAddress, String streamId) {
-		log.info("removeStorageNodeFromStream: storageNodeAddress=" + storageNodeAddress + ", streamId=" + streamId)
-		if (checkEditPermission(streamId, request.apiUser)) {
-			storageNodeService.removeStorageNodeFromStream(storageNodeAddress, streamId)
-			return render(status: 204)
+		if (EthereumAddressValidator.validate(storageNodeAddress)) {
+			log.info("removeStorageNodeFromStream: storageNodeAddress=" + storageNodeAddress + ", streamId=" + streamId)
+			if (checkEditPermission(streamId, request.apiUser)) {
+				storageNodeService.removeStorageNodeFromStream(storageNodeAddress, streamId)
+				return render(status: 204)
+			} else {
+				throw new NotPermittedException(request.apiUser.username, "Stream", streamId)
+			}
 		} else {
-			throw new NotPermittedException(request.apiUser.username, "Stream", streamId)
+			throw new BadRequestException("Malformed storage node address")
 		}
 	}
 

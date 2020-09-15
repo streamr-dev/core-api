@@ -71,6 +71,11 @@ describe("Storage Node API", () => {
 			const json = await response.json()
 			assert.equal(json.length, 0);
 		});
+
+		it('malformed storage node address', async () => {
+			const response = await findStreamsByStorageNode('foobar');
+			assert.equal(response.status, 400);
+		});
 	});
 
 	describe("GET /streams/:streamId/storageNodes", () => {
@@ -168,5 +173,9 @@ describe("Storage Node API", () => {
 			assert.equal(response.status, 403)
 		});
 
+		it('malformed storage node address', async () => {
+			const response = await removeStorageNodeFromStream('foobar', streamId);
+			assert.equal(response.status, 400);
+		});
 	});
 });
