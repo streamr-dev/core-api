@@ -1,9 +1,8 @@
 package com.unifina.signalpath.map;
 
 import com.google.gson.Gson;
-import com.unifina.domain.User;
 import com.unifina.domain.Canvas;
-import com.unifina.exceptions.NoExportedInputsException;
+import com.unifina.domain.User;
 import com.unifina.service.CanvasService;
 import com.unifina.service.SerializationService;
 import com.unifina.service.SignalPathService;
