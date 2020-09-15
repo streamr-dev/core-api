@@ -1,9 +1,7 @@
 package com.unifina.controller
 
-
 import com.unifina.domain.DashboardItem
 import com.unifina.domain.User
-import com.unifina.security.StreamrApi
 import com.unifina.service.DashboardService
 import com.unifina.service.SaveDashboardItemCommand
 import grails.converters.JSON

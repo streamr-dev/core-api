@@ -2,7 +2,6 @@ package com.unifina.service
 
 import com.unifina.domain.Key
 import com.unifina.domain.User
-import com.unifina.security.SessionToken
 import grails.test.mixin.Mock
 import grails.test.mixin.TestFor
 import grails.test.mixin.TestMixin

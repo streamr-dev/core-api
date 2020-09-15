@@ -1,7 +1,5 @@
 package com.unifina.controller
 
-import com.unifina.security.AllowRole
-import com.unifina.security.StreamrApi
 import com.unifina.service.MetricsService
 import grails.compiler.GrailsCompileStatic
 import grails.converters.JSON

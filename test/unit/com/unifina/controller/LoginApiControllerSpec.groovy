@@ -6,10 +6,10 @@ import com.unifina.domain.Key
 import com.unifina.domain.SignupMethod
 import com.unifina.domain.User
 import com.unifina.security.Challenge
-import com.unifina.security.SessionToken
 import com.unifina.service.ChallengeService
 import com.unifina.service.EthereumIntegrationKeyService
 import com.unifina.service.SessionService
+import com.unifina.service.SessionToken
 import com.unifina.service.UserService
 import grails.test.mixin.Mock
 import grails.test.mixin.TestFor

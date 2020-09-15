@@ -1,8 +1,8 @@
 package com.unifina.controller
 
-import com.unifina.security.AuthenticationResult
-import com.unifina.security.StreamrApi
-import com.unifina.security.TokenAuthenticator
+import com.unifina.controller.StreamrApi
+import com.unifina.controller.AuthenticationResult
+import com.unifina.controller.TokenAuthenticator
 import grails.converters.JSON
 import groovy.transform.CompileStatic
 import org.codehaus.groovy.grails.commons.GrailsApplication

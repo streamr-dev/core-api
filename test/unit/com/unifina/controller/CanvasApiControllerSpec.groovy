@@ -8,7 +8,6 @@ import com.unifina.domain.*
 import com.unifina.exceptions.CanvasUnreachableException
 import com.unifina.exceptions.JavaCompilerErrorMessage
 import com.unifina.exceptions.ModuleExceptionMessage
-import com.unifina.security.AllowRole
 import com.unifina.service.*
 import com.unifina.signalpath.ModuleException
 import grails.converters.JSON

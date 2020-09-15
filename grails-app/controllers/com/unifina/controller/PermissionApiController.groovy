@@ -3,9 +3,6 @@ package com.unifina.controller
 import com.unifina.api.ValidationException
 import com.unifina.domain.*
 import com.unifina.domain.Permission.Operation
-import com.unifina.security.AllowRole
-import com.unifina.security.AuthLevel
-import com.unifina.security.StreamrApi
 import com.unifina.service.PermissionService
 import com.unifina.utils.EthereumAddressValidator
 import com.unifina.utils.UsernameValidator
