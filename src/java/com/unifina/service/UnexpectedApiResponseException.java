@@ -1,4 +1,4 @@
-package com.unifina.exceptions;
+package com.unifina.service;
 
 /**
  * Created by henripihkala on 16/02/16.
