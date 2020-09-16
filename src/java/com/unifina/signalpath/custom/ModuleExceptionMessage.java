@@ -1,4 +1,4 @@
-package com.unifina.exceptions;
+package com.unifina.signalpath.custom;
 
 import java.util.LinkedHashMap;
 import java.util.Map;

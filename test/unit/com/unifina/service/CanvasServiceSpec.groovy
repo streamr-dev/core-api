@@ -3,7 +3,6 @@ package com.unifina.service
 import com.unifina.BeanMockingSpecification
 import com.unifina.api.*
 import com.unifina.domain.*
-import com.unifina.exceptions.CanvasUnreachableException
 import com.unifina.signalpath.ModuleException
 import com.unifina.signalpath.UiChannelIterator
 import com.unifina.signalpath.charts.Heatmap

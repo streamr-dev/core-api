@@ -3,7 +3,7 @@ package com.unifina.datasource;
 import com.unifina.data.ClockTick;
 import com.unifina.data.Event;
 import com.unifina.data.EventQueueMetrics;
-import com.unifina.exceptions.StreamFieldChangedException;
+import com.unifina.feed.StreamFieldChangedException;
 import com.unifina.feed.TimePropagationRoot;
 import com.unifina.utils.Globals;
 import org.apache.log4j.Logger;

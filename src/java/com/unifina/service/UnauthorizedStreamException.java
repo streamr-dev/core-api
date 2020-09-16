@@ -1,4 +1,4 @@
-package com.unifina.exceptions;
+package com.unifina.service;
 
 import com.unifina.domain.Stream;
 import com.unifina.domain.User;
