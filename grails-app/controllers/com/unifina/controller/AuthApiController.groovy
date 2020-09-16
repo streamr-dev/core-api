@@ -1,9 +1,9 @@
 package com.unifina.controller
 
 import com.unifina.domain.*
-import com.unifina.exceptions.UserCreationFailedException
 import com.unifina.security.PasswordEncoder
 import com.unifina.service.SignupCodeService
+import com.unifina.service.UserCreationFailedException
 import com.unifina.service.UserService
 import grails.converters.JSON
 

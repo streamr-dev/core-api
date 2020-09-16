@@ -1,4 +1,4 @@
-package com.unifina.exceptions;
+package com.unifina.feed;
 
 public class StreamFieldChangedException extends RuntimeException {
 	public StreamFieldChangedException(String message) {

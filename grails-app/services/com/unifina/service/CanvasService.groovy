@@ -4,12 +4,11 @@ import com.google.gson.Gson
 import com.google.gson.GsonBuilder
 import com.unifina.api.*
 import com.unifina.domain.*
-import com.unifina.exceptions.CanvasUnreachableException
-import com.unifina.exceptions.InvalidStreamConfigException
 import com.unifina.serialization.SerializationException
 import com.unifina.signalpath.ModuleException
 import com.unifina.signalpath.ModuleWithUI
 import com.unifina.signalpath.UiChannelIterator
+import com.unifina.signalpath.utils.InvalidStreamConfigException
 import com.unifina.task.CanvasDeleteTask
 import com.unifina.task.CanvasStartTask
 import com.unifina.utils.Globals
