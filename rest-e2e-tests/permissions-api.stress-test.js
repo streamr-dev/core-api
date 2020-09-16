@@ -7,7 +7,7 @@ const Streamr = initStreamrApi(URL, LOGGING_ENABLED)
 
 describe('POST /api/v1/streams/{id}/permissions', function() {
 
-	this.timeout(120 * 1000)
+	this.timeout(200 * 1000)
 
 	let stream
 	let mySessionToken
