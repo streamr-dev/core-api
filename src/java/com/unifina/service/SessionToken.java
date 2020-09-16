@@ -1,5 +1,6 @@
-package com.unifina.security;
+package com.unifina.service;
 
+import com.unifina.domain.Userish;
 import com.unifina.utils.AlphanumericStringGenerator;
 import org.joda.time.DateTime;
 

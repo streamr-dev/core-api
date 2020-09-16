@@ -6,7 +6,7 @@ import com.unifina.datasource.IStopListener
 import com.unifina.domain.*
 import com.unifina.exceptions.CanvasUnreachableException
 import com.unifina.exceptions.UnauthorizedStreamException
-import com.unifina.security.TokenAuthenticator.AuthorizationHeader
+import com.unifina.controller.TokenAuthenticator.AuthorizationHeader
 import com.unifina.serialization.SerializationException
 import com.unifina.signalpath.*
 import com.unifina.utils.Globals

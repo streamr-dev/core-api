@@ -4,7 +4,7 @@ import com.unifina.domain.Permission;
 import com.unifina.domain.User;
 import com.unifina.domain.Canvas;
 import com.streamr.client.protocol.message_layer.ITimestamped;
-import com.unifina.security.TokenAuthenticator.AuthorizationHeader;
+import com.unifina.controller.TokenAuthenticator.AuthorizationHeader;
 
 import java.util.*;
 import java.util.concurrent.Future;

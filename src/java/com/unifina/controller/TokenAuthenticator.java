@@ -1,8 +1,9 @@
-package com.unifina.security;
+package com.unifina.controller;
 
 import com.unifina.api.InvalidSessionTokenException;
 import com.unifina.domain.Key;
 import com.unifina.domain.User;
+import com.unifina.domain.Userish;
 import com.unifina.service.SessionService;
 import grails.util.Holders;
 import org.codehaus.groovy.runtime.InvokerHelper;

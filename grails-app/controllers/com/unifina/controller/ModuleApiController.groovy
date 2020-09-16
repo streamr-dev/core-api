@@ -5,8 +5,6 @@ import com.unifina.domain.Module
 import com.unifina.domain.ModuleCategory
 import com.unifina.domain.User
 import com.unifina.exceptions.ModuleExceptionMessage
-import com.unifina.security.AuthLevel
-import com.unifina.security.StreamrApi
 import com.unifina.service.ModuleService
 import com.unifina.service.PermissionService
 import com.unifina.signalpath.AbstractSignalPathModule

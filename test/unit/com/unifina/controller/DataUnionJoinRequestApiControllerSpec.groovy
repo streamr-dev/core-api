@@ -5,17 +5,16 @@ import com.unifina.api.BadRequestException
 import com.unifina.api.NotFoundException
 import com.unifina.domain.DataUnionJoinRequest
 import com.unifina.domain.User
-import com.unifina.filters.UnifinaCoreAPIFilters
 import com.unifina.service.DataUnionJoinRequestCommand
 import com.unifina.service.DataUnionJoinRequestService
 import com.unifina.service.EthereumService
-import com.unifina.service.UpdateDataUnionJoinRequestCommand
+import com.unifina.service.DataUnionUpdateJoinRequestCommand
 import grails.test.mixin.Mock
 import grails.test.mixin.TestFor
 import spock.lang.Specification
 
 @TestFor(DataUnionJoinRequestApiController)
-@Mock([UnifinaCoreAPIFilters, User, DataUnionJoinRequest])
+@Mock([RESTAPIFilters, User, DataUnionJoinRequest])
 class DataUnionJoinRequestApiControllerSpec extends Specification {
 	User me
 	final String contractAddress = "0x6c90aece04198da2d5ca9b956b8f95af8041de37"
@@ -282,7 +281,7 @@ class DataUnionJoinRequestApiControllerSpec extends Specification {
 		then:
 		1 * controller.ethereumService.fetchDataUnionAdminsEthereumAddress(contractAddress) >> "adminAddress"
 		1 * controller.ethereumService.hasEthereumAddress(me, "adminAddress") >> true
-		1 * controller.dataUnionJoinRequestService.update(contractAddress, validID, _ as UpdateDataUnionJoinRequestCommand) >> {
+		1 * controller.dataUnionJoinRequestService.update(contractAddress, validID, _ as DataUnionUpdateJoinRequestCommand) >> {
 			r.state = DataUnionJoinRequest.State.ACCEPTED
 			return r
 		}
@@ -362,7 +361,7 @@ class DataUnionJoinRequestApiControllerSpec extends Specification {
 		then:
 		1 * controller.ethereumService.fetchDataUnionAdminsEthereumAddress(contractAddress) >> "adminAddress"
 		1 * controller.ethereumService.hasEthereumAddress(me, "adminAddress") >> true
-		1 * controller.dataUnionJoinRequestService.update(contractAddress, validID, _ as UpdateDataUnionJoinRequestCommand) >> {
+		1 * controller.dataUnionJoinRequestService.update(contractAddress, validID, _ as DataUnionUpdateJoinRequestCommand) >> {
 			throw new NotFoundException("mocked: entity not found")
 		}
 		def e = thrown(NotFoundException)

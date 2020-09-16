@@ -13,7 +13,7 @@ sudo ifconfig docker0 10.200.10.1/24
 "$TRAVIS_BUILD_DIR/streamr-docker-dev/streamr-docker-dev/bin.sh" start --except engine-and-editor
 
 # Print app output to console
-"$TRAVIS_BUILD_DIR/streamr-docker-dev/streamr-docker-dev/bin.sh" log -f &
+"$TRAVIS_BUILD_DIR/streamr-docker-dev/streamr-docker-dev/bin.sh" log -f engine-and-editor &
 
 # Wait for services to start
 "$TRAVIS_BUILD_DIR/streamr-docker-dev/streamr-docker-dev/bin.sh" wait

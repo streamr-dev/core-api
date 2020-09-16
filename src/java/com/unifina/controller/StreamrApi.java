@@ -1,4 +1,4 @@
-package com.unifina.security;
+package com.unifina.controller;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
@@ -6,8 +6,8 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * API methods should be use the @StreamrApi annotation and be mapped to /api/* via UnifinaCorePluginUrlMappings.
- * This will allow the UnifinaCoreApiFilters to check user credentials. The authenticated User can be referenced
+ * API methods should be use the @StreamrApi annotation and be mapped to /api/* via UrlMappings.
+ * This will allow the RESTAPIFilters to check user credentials. The authenticated User can be referenced
  * by request.apiUser, or the authenticated Key by request.apiKey.
  */
 @Retention(RetentionPolicy.RUNTIME)

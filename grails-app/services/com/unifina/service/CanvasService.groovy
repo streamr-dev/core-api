@@ -6,7 +6,7 @@ import com.unifina.api.*
 import com.unifina.domain.*
 import com.unifina.exceptions.CanvasUnreachableException
 import com.unifina.exceptions.InvalidStreamConfigException
-import com.unifina.security.TokenAuthenticator.AuthorizationHeader
+import com.unifina.controller.TokenAuthenticator.AuthorizationHeader
 import com.unifina.serialization.SerializationException
 import com.unifina.signalpath.ModuleException
 import com.unifina.signalpath.ModuleWithUI

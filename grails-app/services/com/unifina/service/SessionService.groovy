@@ -4,8 +4,7 @@ import com.unifina.api.InvalidArgumentsException
 import com.unifina.api.InvalidSessionTokenException
 import com.unifina.domain.Key
 import com.unifina.domain.User
-import com.unifina.security.SessionToken
-import com.unifina.security.Userish
+import com.unifina.domain.Userish
 import org.apache.log4j.Logger
 import org.joda.time.DateTime
 
