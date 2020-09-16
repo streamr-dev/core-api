@@ -1,4 +1,4 @@
-package com.unifina.exceptions;
+package com.unifina.service;
 
 public class UserCreationFailedException extends RuntimeException {
 	public UserCreationFailedException(String name){
