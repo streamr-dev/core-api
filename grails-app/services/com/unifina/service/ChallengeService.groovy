@@ -2,7 +2,6 @@ package com.unifina.service
 
 
 import com.unifina.crypto.ECRecover
-import com.unifina.security.Challenge
 import grails.compiler.GrailsCompileStatic
 
 @GrailsCompileStatic

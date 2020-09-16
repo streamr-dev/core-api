@@ -1,7 +1,6 @@
 package com.unifina.service
 
 import com.unifina.domain.*
-import com.unifina.security.Challenge
 import grails.test.mixin.Mock
 import grails.test.mixin.TestFor
 import grails.test.mixin.TestMixin
