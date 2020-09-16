@@ -234,7 +234,20 @@ describe('Products API', function() {
                     },
                 })
             })
-        })
+		})
+
+		it('set dataUnionVersion number', async () => {
+			const response = await Streamr.api.v1.products
+				.create({
+					type: 'DATAUNION',
+					dataUnionVersion: 2
+				})
+				.withApiKey(AUTH_TOKEN)
+				.call()
+			assert.equal(response.status, 200)
+			const json = await response.json()
+			assert.equal(json.dataUnionVersion, 2)
+		});
     })
 
     describe('GET /api/v1/products/:id', () => {
