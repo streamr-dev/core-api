@@ -55,6 +55,8 @@ class CanvasServiceSpec extends BeanMockingSpecification {
 		moduleWithUi = new Module(implementingClass: Heatmap.name).save(validate: false)
 
 		me = new SecUser(username: "me@me.com").save(validate: false)
+		def userService = mockBean(UserService, new UserService())
+		userService.getUserById(_) >> me
 
 		myFirstCanvas = new Canvas(
 			name: "my_canvas_1",

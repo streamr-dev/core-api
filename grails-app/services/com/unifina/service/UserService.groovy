@@ -183,4 +183,12 @@ class UserService {
 		}
 		return key // is an anonymous key
 	}
+
+	SecUser getUserById(Long id) {
+		if (id != null) {
+			return SecUser.get(id)
+		} else {
+			return null
+		}
+	}
 }

@@ -7,6 +7,8 @@ import com.unifina.domain.signalpath.Canvas
 import com.unifina.service.PermissionService
 import com.unifina.service.StreamService
 import com.unifina.service.StreamrClientService
+import com.unifina.service.UserService
+import com.unifina.domain.security.SecUser
 import grails.test.mixin.TestMixin
 import grails.test.mixin.support.GrailsUnitTestMixin
 
@@ -58,5 +60,9 @@ class UiChannelMockingSpecification extends ModuleTestingSpecification {
 		permissionService.check(_, _, _) >> true
 		permissionService.check(_, _, _) >> true
 		permissionService.check(_, _, _) >> true
+
+		UserService userService = Mock(UserService)
+		mockBean(UserService, userService)
+		userService.getUserById(_) >> null
 	}
 }
