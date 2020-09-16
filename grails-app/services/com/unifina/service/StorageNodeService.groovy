@@ -1,10 +1,10 @@
 package com.unifina.service
 
-import grails.compiler.GrailsCompileStatic
+import com.unifina.api.DuplicateNotAllowedException
+import com.unifina.api.NotFoundException
 import com.unifina.domain.Stream
 import com.unifina.domain.StreamStorageNode
-import com.unifina.api.NotFoundException
-import com.unifina.api.DuplicateNotAllowedException
+import grails.compiler.GrailsCompileStatic
 
 @GrailsCompileStatic
 class StorageNodeService {
