@@ -6,10 +6,9 @@ import com.unifina.api.ApiException
 import com.unifina.api.NotFoundException
 import com.unifina.api.NotPermittedException
 import com.unifina.api.ValidationException
+import com.unifina.controller.TokenAuthenticator.AuthorizationHeader
 import com.unifina.domain.Permission
 import com.unifina.domain.User
-import com.unifina.exceptions.UnexpectedApiResponseException
-import com.unifina.controller.TokenAuthenticator.AuthorizationHeader
 import com.unifina.domain.Userish
 import grails.compiler.GrailsCompileStatic
 import grails.converters.JSON

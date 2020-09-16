@@ -1,4 +1,5 @@
-package com.unifina.utils
+package com.unifina.domain
+
 
 import grails.compiler.GrailsCompileStatic
 

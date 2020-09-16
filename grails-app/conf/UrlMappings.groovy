@@ -1,9 +1,4 @@
-import com.unifina.domain.Dashboard
-import com.unifina.domain.Stream
-import com.unifina.domain.Product
-import com.unifina.domain.Permission
-import com.unifina.domain.User
-import com.unifina.domain.Canvas
+import com.unifina.domain.*
 
 class UrlMappings {
 	static mappings = {
@@ -41,6 +36,11 @@ class UrlMappings {
 		"/api/v1/streams/$id/status"(controller: "streamApi", action: "status")
 		"/api/v1/streams/$resourceId/keys"(resources: "keyApi", excludes: ["create", "edit", "update"]) { resourceClass = Stream }
 		"/api/v1/streams/$streamId/keys/$keyId"(method: "PUT", controller: "keyApi", action: "updateStreamKey")
+
+		"/api/v1/storageNodes/$storageNodeAddress/streams"(method: "GET", controller: "storageNodeApi", action: "findStreamsByStorageNode")
+		"/api/v1/streams/$streamId/storageNodes"(method: "GET", controller: "storageNodeApi", action: "findStorageNodesByStream")
+		"/api/v1/streams/$streamId/storageNodes"(method: "POST", controller: "storageNodeApi", action: "addStorageNodeToStream")
+		"/api/v1/streams/$streamId/storageNodes/$storageNodeAddress"(method: "DELETE", controller: "storageNodeApi", action: "removeStorageNodeFromStream")
 
 		"/api/v1/dashboards"(resources: "dashboardApi", excludes: ["create", "edit"])
 		"/api/v1/dashboards/$dashboardId/items"(resources: "dashboardItemApi", excludes: ["create", "edit"])
