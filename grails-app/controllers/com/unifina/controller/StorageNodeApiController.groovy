@@ -1,17 +1,15 @@
 package com.unifina.controller
 
-import com.unifina.security.StreamrApi
-import com.unifina.security.AuthLevel
+import com.unifina.api.BadRequestException
+import com.unifina.api.NotPermittedException
+import com.unifina.api.ValidationException
+import com.unifina.domain.Permission
 import com.unifina.domain.Stream
 import com.unifina.domain.StreamStorageNode
-import com.unifina.service.StorageNodeService
-import com.unifina.service.PermissionService
-import com.unifina.api.ValidationException
-import com.unifina.api.NotPermittedException
-import com.unifina.api.BadRequestException
-import com.unifina.utils.EthereumAddressValidator
-import com.unifina.domain.Permission
 import com.unifina.domain.User
+import com.unifina.service.PermissionService
+import com.unifina.service.StorageNodeService
+import com.unifina.utils.EthereumAddressValidator
 import grails.converters.JSON
 import grails.validation.Validateable
 import org.apache.log4j.Logger
