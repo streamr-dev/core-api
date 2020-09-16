@@ -1,10 +1,10 @@
 package com.unifina
 
+import com.unifina.controller.AllowRole
+import com.unifina.controller.StreamrApi
 import com.unifina.domain.Key
 import com.unifina.domain.User
 import com.unifina.filters.MockAPIFilters
-import com.unifina.security.AllowRole
-import com.unifina.security.StreamrApi
 import grails.test.mixin.TestMixin
 import grails.test.mixin.web.FiltersUnitTestMixin
 import grails.util.Holders

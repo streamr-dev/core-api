@@ -4,8 +4,6 @@ import com.unifina.domain.Permission
 import com.unifina.domain.Product
 import com.unifina.domain.Stream
 import com.unifina.domain.User
-import com.unifina.security.AuthLevel
-import com.unifina.security.StreamrApi
 import com.unifina.service.ApiService
 import com.unifina.service.ProductService
 import grails.compiler.GrailsCompileStatic

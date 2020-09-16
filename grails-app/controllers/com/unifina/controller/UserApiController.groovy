@@ -3,9 +3,7 @@ package com.unifina.controller
 import com.unifina.api.ApiException
 import com.unifina.api.InvalidUsernameAndPasswordException
 import com.unifina.domain.User
-import com.unifina.security.AuthLevel
 import com.unifina.security.PasswordEncoder
-import com.unifina.security.StreamrApi
 import com.unifina.service.BalanceService
 import com.unifina.service.UserAvatarImageService
 import com.unifina.service.UserService

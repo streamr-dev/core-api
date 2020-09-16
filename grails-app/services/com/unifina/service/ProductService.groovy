@@ -13,7 +13,6 @@ import grails.compiler.GrailsCompileStatic
 
 import java.text.SimpleDateFormat
 import java.util.concurrent.ThreadLocalRandom
-import static java.util.stream.Collectors.toSet;
 
 @GrailsCompileStatic
 class ProductService {
@@ -22,6 +21,7 @@ class ProductService {
 	SubscriptionService subscriptionService
 	CassandraService cassandraService
 	DataUnionJoinRequestService dataUnionJoinRequestService
+	ProductStore store = new ProductStore()
 	Random random = ThreadLocalRandom.current()
 
 	static class StreamWithLatestMessage {
@@ -187,13 +187,20 @@ class ProductService {
 					}
 				}
 				removedStreams.each { Stream s ->
-					permissionService.systemRevokeAnonymousAccess(s, permission)
+					if (!belongsToFreeProduct(s)) {
+						permissionService.systemRevokeAnonymousAccess(s, permission)
+					}
 				}
 			}
 		}
 
 		subscriptionService.afterProductUpdated(product)
 		return product
+	}
+
+	boolean belongsToFreeProduct(Stream s) {
+		List<Product> products = store.findProductsByStream(s)
+		return products.any{Product p -> p.isFree()}
 	}
 
 	void addStreamToProduct(Product product, Stream stream, User currentUser)

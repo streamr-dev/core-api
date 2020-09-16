@@ -1,8 +1,6 @@
 package com.unifina.controller
 
 import com.unifina.domain.Category
-import com.unifina.security.AuthLevel
-import com.unifina.security.StreamrApi
 import grails.converters.JSON
 
 class CategoryApiController {

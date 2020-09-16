@@ -4,7 +4,7 @@ import com.unifina.domain.Permission
 import com.unifina.domain.Product
 import com.unifina.domain.Stream
 import com.unifina.domain.User
-import com.unifina.filters.UnifinaCoreAPIFilters
+import com.unifina.controller.RESTAPIFilters
 import com.unifina.service.ApiService
 import com.unifina.service.ProductService
 import grails.test.mixin.Mock
@@ -12,7 +12,7 @@ import grails.test.mixin.TestFor
 import spock.lang.Specification
 
 @TestFor(ProductStreamsApiController)
-@Mock([UnifinaCoreAPIFilters])
+@Mock([RESTAPIFilters])
 class ProductStreamsApiControllerSpec extends Specification {
 	void "index() invokes productService#findById (product_get)"() {
 		def productService = controller.productService = Mock(ProductService)
