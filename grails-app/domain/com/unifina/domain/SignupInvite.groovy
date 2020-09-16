@@ -1,7 +1,5 @@
 package com.unifina.domain
 
-
-import com.unifina.utils.EmailValidator
 import grails.persistence.Entity
 
 @Entity

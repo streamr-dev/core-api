@@ -2,12 +2,12 @@ package com.unifina.controller
 
 import com.unifina.api.ApiException
 import com.unifina.api.InvalidUsernameAndPasswordException
+import com.unifina.domain.EmailValidator
 import com.unifina.domain.User
 import com.unifina.security.PasswordEncoder
 import com.unifina.service.BalanceService
 import com.unifina.service.UserAvatarImageService
 import com.unifina.service.UserService
-import com.unifina.utils.EmailValidator
 import grails.converters.JSON
 import grails.validation.Validateable
 import groovy.transform.ToString

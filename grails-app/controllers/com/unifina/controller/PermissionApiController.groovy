@@ -4,8 +4,6 @@ import com.unifina.api.ValidationException
 import com.unifina.domain.*
 import com.unifina.domain.Permission.Operation
 import com.unifina.service.PermissionService
-import com.unifina.utils.EthereumAddressValidator
-import com.unifina.utils.UsernameValidator
 import grails.converters.JSON
 import grails.validation.Validateable
 import groovy.transform.ToString

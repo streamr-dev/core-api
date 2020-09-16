@@ -1,9 +1,4 @@
-import com.unifina.domain.Dashboard
-import com.unifina.domain.Stream
-import com.unifina.domain.Product
-import com.unifina.domain.Permission
-import com.unifina.domain.User
-import com.unifina.domain.Canvas
+import com.unifina.domain.*
 
 class UrlMappings {
 	static mappings = {
