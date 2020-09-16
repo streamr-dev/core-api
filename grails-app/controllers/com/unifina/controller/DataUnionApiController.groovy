@@ -4,7 +4,7 @@ import com.unifina.api.BadRequestException
 import com.unifina.domain.EthereumAddressValidator
 import com.unifina.service.DataUnionService
 
-class DataUnionOperatorApiController {
+class DataUnionApiController {
 	DataUnionService dataUnionService
 	static boolean isDataUnionAddress(String value) {
 		return EthereumAddressValidator.validate(value)

@@ -6,9 +6,9 @@ import grails.test.mixin.Mock
 import grails.test.mixin.TestFor
 import spock.lang.Specification
 
-@TestFor(DataUnionOperatorApiController)
+@TestFor(DataUnionApiController)
 @Mock([RESTAPIFilters])
-class DataUnionOperatorApiControllerSpec extends Specification {
+class DataUnionApiControllerSpec extends Specification {
 	final String contractAddress = "0x6c90aece04198da2d5ca9b956b8f95af8041de37"
 	final String memberAddress = "0x7d01bfdf15198da2d5ca9b956c8f95af0041de38"
 
