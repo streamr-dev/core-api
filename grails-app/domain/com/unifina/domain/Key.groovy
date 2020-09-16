@@ -1,6 +1,6 @@
 package com.unifina.domain
 
-import com.unifina.security.Userish
+
 import com.unifina.utils.IdGenerator
 import grails.persistence.Entity
 import groovy.transform.CompileStatic

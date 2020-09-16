@@ -9,7 +9,7 @@ import com.unifina.api.ValidationException
 import com.unifina.domain.Key
 import com.unifina.domain.Permission
 import com.unifina.domain.User
-import com.unifina.security.Userish
+import com.unifina.domain.Userish
 import grails.compiler.GrailsCompileStatic
 import grails.converters.JSON
 import groovy.transform.CompileStatic
